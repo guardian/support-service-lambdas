@@ -3,15 +3,15 @@ stacks:
 regions:
 - eu-west-1
 deployments:
-  auto-cancel-handler:
+  zuora-auto-cancel:
     type: aws-lambda
     parameters:
-      fileName: auto-cancel-handler.zip
+      fileName: zuora-auto-cancel.zip
       bucket: MemSub::Membership Admin::Auto-Cancel Handler-dist
       functions:
         CODE:
-          name: auto-cancel-handler-CODE
-          filename: auto-cancel-handler.zip
+          name: zuora-auto-cancel-CODE
+          filename: zuora-auto-cancel.zip
         PROD:
-          name: auto-cancel-handler-PROD
-          filename: auto-cancel-handler.zip
+          name: zuora-auto-cancel-PROD
+          filename: zuora-auto-cancel.zip

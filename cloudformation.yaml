@@ -4,11 +4,11 @@ Parameters:
     Stack:
         Description: Stack name
         Type: String
-        Default: MemSub::Membership Admin::Auto-Cancel Handler-auto-cancel-handler
+        Default: MemSub::Membership Admin::Auto-Cancel Handler-zuora-auto-cancel
     App:
         Description: Application name
         Type: String
-        Default: auto-cancel-handler
+        Default: zuora-auto-cancel
     Stage:
         Description: Stage name
         Type: String
@@ -18,7 +18,7 @@ Parameters:
         Default: CODE
 
 Resources:
-    Auto-cancel-handlerRole:
+    zuora-auto-cancelRole:
         Type: AWS::IAM::Role
         Properties:
             AssumeRolePolicyDocument:
@@ -46,7 +46,7 @@ Resources:
         Type: AWS::Lambda::Function
         Properties:
             FunctionName:
-                !Sub auto-cancel-handler-${Stage}
+                !Sub zuora-auto-cancel-${Stage}
             Environment:
                 Variables:
                 # Add your config/environment variables here.
@@ -54,13 +54,13 @@ Resources:
             Code:
                 S3Bucket: MemSub::Membership Admin::Auto-Cancel Handler-dist
                 S3Key:
-                    !Sub ${Stack}/${Stage}/auto-cancel-handler/auto-cancel-handler.zip
+                    !Sub ${Stack}/${Stage}/zuora-auto-cancel/zuora-auto-cancel.zip
             Description: Handles auto-cancellations for membership and subscriptions
-            Handler: com.gu.auto-cancel-handler.Lambda::handleRequest
+            Handler: com.gu.zuora-auto-cancel.Lambda::handleRequest
             MemorySize: 256
             Role:
                 Fn::GetAtt:
-                - Auto-cancel-handlerRole
+                - zuora-auto-cancelRole
                 - Arn
             Runtime: java8
             Timeout: 300

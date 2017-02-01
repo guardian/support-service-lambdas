@@ -1,4 +1,4 @@
-name := "auto-cancel-handler"
+name := "zuora-auto-cancel"
 description:= "Handles auto-cancellations for membership and subscriptions"
 
 scalaVersion := "2.11.8"
