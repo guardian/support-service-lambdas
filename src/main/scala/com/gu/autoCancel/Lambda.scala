@@ -18,7 +18,7 @@ object Lambda extends App with Logging {
   extracts out the XML body and then hands over to cancellationAttemptForPayload for the 'real work'.
   */
   def handleRequest(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
-    logger.info(s"Auto-cancel-handler lambda is starting up...")
+    logger.info(s"Auto-cancel Lambda is starting up...")
     val inputEvent = Json.parse(inputStream)
     logger.info(s"Received input event as JsValue: \n $inputEvent")
     val xmlBody = extractXmlBodyFromJson(inputEvent)
