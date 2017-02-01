@@ -1,0 +1,17 @@
+stacks:
+- MemSub::Membership Admin::Auto-Cancel Handler
+regions:
+- eu-west-1
+deployments:
+  auto-cancel-handler:
+    type: aws-lambda
+    parameters:
+      fileName: auto-cancel-handler.zip
+      bucket: MemSub::Membership Admin::Auto-Cancel Handler-dist
+      functions:
+        CODE:
+          name: auto-cancel-handler-CODE
+          filename: auto-cancel-handler.zip
+        PROD:
+          name: auto-cancel-handler-PROD
+          filename: auto-cancel-handler.zip
