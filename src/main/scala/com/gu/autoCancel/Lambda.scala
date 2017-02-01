@@ -1,11 +1,17 @@
 package com.gu.autoCancel
 
 import com.amazonaws.services.lambda.runtime.Context
+import com.amazonaws.services.kms.AWSKMS
+import com.amazonaws.services.kms.AWSKMSClientBuilder
+import com.amazonaws.services.kms.model.DecryptRequest
+import com.amazonaws.util.Base64
 import com.gu.autoCancel.ZuoraModels._
 import com.gu.autoCancel.APIGatewayResponse._
 import org.joda.time.LocalDate
 import java.lang.System.getenv
 import java.io._
+import java.nio.ByteBuffer
+import java.nio.charset.Charset
 import play.api.libs.json.{ JsValue, Json }
 import scala.xml.Elem
 import scala.xml.XML._
@@ -30,6 +36,16 @@ object Lambda extends App with Logging {
     loadString(body.as[String])
   }
 
+  def decryptEnvironmentVariable(variableName: String): String = {
+    logger.info(s"Decrypting environment variable for $variableName")
+    val encryptedKey = Base64.decode(System.getenv(variableName))
+    val awsKmsClient = AWSKMSClientBuilder.defaultClient
+    val decryptRequest = new DecryptRequest().withCiphertextBlob(ByteBuffer.wrap(encryptedKey))
+    val plainTextKey = awsKmsClient.decrypt(decryptRequest).getPlaintext
+    val decryptedKey = new String(plainTextKey.array(), Charset.forName("UTF-8"))
+    decryptedKey
+  }
+
   /* When developing, it's best to bypass handleRequest (since this requires actually invoking the Lambda)
   and directly call cancellationAttemptForPayload.
 
@@ -43,7 +59,8 @@ object Lambda extends App with Logging {
   */
   def cancellationAttemptForPayload(xmlBody: Elem, outputStream: OutputStream): Unit = {
 
-    val restConfig = ZuoraRestConfig(getenv("DEV_ZuoraRestUrl"), getenv("DEV_ZuoraUsername"), getenv("DEV_ZuoraPassword"))
+    val restPassword = decryptEnvironmentVariable("DEV_ZuoraPassword")
+    val restConfig = ZuoraRestConfig(getenv("DEV_ZuoraRestUrl"), getenv("DEV_ZuoraUsername"), restPassword)
     val restService = new ZuoraRestService(restConfig)
 
     parseXML(xmlBody) match {
