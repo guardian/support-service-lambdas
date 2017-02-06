@@ -1,17 +1,11 @@
 package com.gu.autoCancel
 
 import com.amazonaws.services.lambda.runtime.Context
-import com.amazonaws.services.kms.AWSKMS
-import com.amazonaws.services.kms.AWSKMSClientBuilder
-import com.amazonaws.services.kms.model.DecryptRequest
-import com.amazonaws.util.Base64
+import com.gu.autoCancel.Config._
 import com.gu.autoCancel.ZuoraModels._
 import com.gu.autoCancel.APIGatewayResponse._
 import org.joda.time.LocalDate
-import java.lang.System.getenv
 import java.io._
-import java.nio.ByteBuffer
-import java.nio.charset.Charset
 import play.api.libs.json.{ JsValue, Json }
 import scala.xml.Elem
 import scala.xml.XML._
@@ -36,32 +30,23 @@ object Lambda extends App with Logging {
     loadString(body.as[String])
   }
 
-  def decryptEnvironmentVariable(variableName: String): String = {
-    logger.info(s"Decrypting environment variable for $variableName")
-    val encryptedKey = Base64.decode(System.getenv(variableName))
-    val awsKmsClient = AWSKMSClientBuilder.defaultClient
-    val decryptRequest = new DecryptRequest().withCiphertextBlob(ByteBuffer.wrap(encryptedKey))
-    val plainTextKey = awsKmsClient.decrypt(decryptRequest).getPlaintext
-    val decryptedKey = new String(plainTextKey.array(), Charset.forName("UTF-8"))
-    decryptedKey
-  }
-
   /* When developing, it's best to bypass handleRequest (since this requires actually invoking the Lambda)
   and directly call cancellationAttemptForPayload.
 
   To do this, prepare an account in Zuora and use some test XML with a dummy output stream e.g.
+
   import org.apache.commons.io.output.NullOutputStream
   val testXML = <callout>
                   <parameter name="AccountID">12345</parameter>
                 </callout>
   val nullOutputStream = new NullOutputStream
   cancellationAttemptForPayload(testXML, nullOutputStream)
+
+  The Response gets logged before we send it back to API Gateway
   */
   def cancellationAttemptForPayload(xmlBody: Elem, outputStream: OutputStream): Unit = {
 
-    val restPassword = decryptEnvironmentVariable("DEV_ZuoraPassword")
-    val restConfig = ZuoraRestConfig(getenv("DEV_ZuoraRestUrl"), getenv("DEV_ZuoraUsername"), restPassword)
-    val restService = new ZuoraRestService(restConfig)
+    val restService = new ZuoraRestService(setConfig)
 
     parseXML(xmlBody) match {
       case -\/(e) => outputForAPIGateway(outputStream, apiGatewayFailureResponse(e))
@@ -150,9 +135,9 @@ object Lambda extends App with Logging {
     activeSubs.flatMap { subs =>
       {
         if (subs.size > 1) {
-          // This should be a pretty rare scenario, because the Billing Account > Sub relationship is (supposed to be) 1-to-1
+          // This should be a pretty rare scenario, because the Billing Account to Sub relationship is (supposed to be) 1-to-1
           logger.error(s"More than one subscription is Active on account: ${accountSummary.basicInfo.id}. Subscription ids are: ${subs.map(_.id)}")
-          "More than one active sub found!".left
+          "More than one active sub found!".left // Don't continue because we don't know which active sub to cancel
         } else {
           val subToCancel = subs.head
           logger.info(s"Determined that we should cancel SubscriptionId: ${subToCancel.id} (for AccountId: ${accountSummary.basicInfo.id})")
