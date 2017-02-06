@@ -13,7 +13,7 @@ object Config extends Logging {
     logger.info(s"Attempting to set config...")
     val restUrl = getenv("ZuoraRestUrl")
     val restUserName = getenv("ZuoraUsername")
-    val restPassword = if (getenv("SkipZuoraSecretDecryption") == true) {
+    val restPassword = if (getenv("ZuoraSecretDecryption") == "skip") {
       getenv("ZuoraPassword")
     } else { decryptEnvironmentVariable("ZuoraPassword") }
     ZuoraRestConfig(restUrl, restUserName, restPassword)

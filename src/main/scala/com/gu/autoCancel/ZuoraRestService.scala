@@ -27,9 +27,13 @@ class ZuoraRestService(config: ZuoraRestConfig) extends Logging {
 
   def convertResponseToCaseClass[T](response: Response)(implicit r: Reads[T]): String \/ T = {
     if (response.isSuccessful) {
-      Json.parse(response.body.string).validate[T] match {
+      val bodyAsJson = Json.parse(response.body.string)
+      bodyAsJson.validate[T] match {
         case success: JsSuccess[T] => success.get.right
-        case error: JsError => "Error when converting Zuora response to case class".left
+        case error: JsError => {
+          logger.info(s"Failed to convert Zuora response to case case. Response body was: \n ${bodyAsJson}")
+          "Error when converting Zuora response to case class".left
+        }
       }
     } else {
       logger.error(s"Request to Zuora was unsuccessful, the response was: \n $response")
