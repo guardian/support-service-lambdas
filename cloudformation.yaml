@@ -15,7 +15,7 @@ Parameters:
         Default: UAT
 
 Resources:
-    zuora-auto-cancel-role:
+    ZuoraAutoCancelRole:
         Type: AWS::IAM::Role
         Properties:
             AssumeRolePolicyDocument:
@@ -39,7 +39,7 @@ Resources:
                                 - lambda:InvokeFunction
                             Resource: "*"
 
-    zuora-auto-cancel-kms-key:
+    ZuoraAutoCancelKMS:
         Type: AWS::KMS::Key
         Properties:
             Description: !Sub Used by the ${App} lambda to encrypt and decrypt environment variables
@@ -75,7 +75,7 @@ Resources:
                 Principal:
                   AWS:
                     Fn::GetAtt:
-                    - zuora-auto-cancel-role
+                    - ZuoraAutoCancelRole
                     - Arn
                 Action:
                 - kms:Encrypt
@@ -85,7 +85,7 @@ Resources:
                 - kms:DescribeKey
                 Resource: "*"
 
-    zuora-auto-cancel-lambda:
+    ZuoraAutoCancelLambda:
         Type: AWS::Lambda::Function
         Properties:
             Description: Handles auto-cancellations for membership and subscriptions
@@ -103,7 +103,7 @@ Resources:
             Handler: com.gu.zuora-auto-cancel.Lambda::handleRequest
             Role:
                 Fn::GetAtt:
-                - zuora-auto-cancel-role
+                - ZuoraAutoCancelRole
                 - Arn
             KmsKeyArn:
                 Fn::GetAtt:
@@ -113,54 +113,54 @@ Resources:
             Runtime: java8
             Timeout: 300
 
-    zuora-auto-cancel-api-lambda-permission:
+    ZuoraAutoCancelAPIPermission:
         Type: AWS::Lambda::Permission
         Properties:
             Action: lambda:invokeFunction
             FunctionName: !Sub ${App}-${Stage}
             Principal: apigateway.amazonaws.com
 
-    zuora-auto-cancel-api:
+    ZuoraAutoCancelAPI:
         Type: "AWS::ApiGateway::RestApi"
         Properties:
             Description: Rest Api to trigger zuora-auto-cancel-api
             Name: zuora-auto-cancel-api
 
-    zuora-auto-cancel-proxy-resource:
+    ZuoraAutoCancelProxyResource:
         Type: AWS::ApiGateway::Resource
         Properties:
             Description: Proxy resource for zuora-auto-cancel-api
-            RestApiId: !Ref zuora-auto-cancel-api
-            ParentId: !GetAtt [zuora-auto-cancel-api, RootResourceId]
+            RestApiId: !Ref ZuoraAutoCancelAPI
+            ParentId: !GetAtt [ZuoraAutoCancelAPI, RootResourceId]
             PathPart: '{proxy+}'
 
-    zuora-auto-cancel-method:
+    ZuoraAutoCancelMethod:
         Type: AWS::ApiGateway::Method
         Properties:
             AuthorizationType: NONE
             Description: Method for zuora-auto-cancel-api
-            RestApiId: !Ref zuora-auto-cancel-api
-            ResourceId: !Ref zuora-auto-cancel-resource
+            RestApiId: !Ref ZuoraAutoCancelAPI
+            ResourceId: !Ref ZuoraAutoCancelProxyResource
             HttpMethod: ANY
             AuthorizationType: NONE
             Integration:
               Type: AWS_PROXY
               IntegrationHttpMethod: POST
-              Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${zuora-auto-cancel-lambda.Arn}/invocations
+              Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ZuoraAutoCancelLambda.Arn}/invocations
 
-    zuora-auto-cancel-stage:
+    ZuoraAutoCancelAPIStage:
         Type: AWS::ApiGateway::Stage
         Properties:
             Description: Stage for zuora-auto-cancel-api
-            RestApiId: Ref! zuora-auto-cancel-api
-            DeploymentId: Ref! zuora-auto-cancel-api-deployment
+            RestApiId: Ref! ZuoraAutoCancelAPI
+            DeploymentId: Ref! ZuoraAutoCancelAPIDeployment
             StageName: !Sub ${Stage}
 
-    zuora-auto-cancel-api-deployment:
+    ZuoraAutoCancelAPIDeployment:
         Type: AWS::ApiGateway::Deployment
         Properties:
             Description: Deploys zuora-auto-cancel-api into an environment/stage
-            RestApiId: !Ref zuora-auto-cancel-api
+            RestApiId: !Ref ZuoraAutoCancelAPI
             StageDescription:
               LoggingLevel: INFO
               MetricsEnabled: true
