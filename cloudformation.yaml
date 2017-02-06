@@ -1,10 +1,7 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: AWS Lambda - Handles auto-cancellations for membership and subscriptions
+
 Parameters:
-    Stack:
-        Description: Stack name
-        Type: String
-        Default: MemSub::Membership Admin::Auto-Cancel Handler-zuora-auto-cancel
     App:
         Description: Application name
         Type: String
@@ -14,11 +11,11 @@ Parameters:
         Type: String
         AllowedValues:
             - PROD
-            - CODE
-        Default: CODE
+            - UAT
+        Default: UAT
 
 Resources:
-    zuora-auto-cancelRole:
+    zuora-auto-cancel-role:
         Type: AWS::IAM::Role
         Properties:
             AssumeRolePolicyDocument:
@@ -42,31 +39,81 @@ Resources:
                                 - lambda:InvokeFunction
                             Resource: "*"
 
-    Lambda:
+    zuora-auto-cancel-kms-key:
+        Type: AWS::KMS::Key
+            Properties:
+              Description: !Sub Used by the ${App} lambda to encrypt and decrypt environment variables
+              KeyPolicy:
+                Version: '2012-10-17'
+                Id: key-policy-zuora-auto-cancel
+                Statement:
+                - Sid: Enable IAM User Permissions
+                  Effect: Allow
+                  Principal:
+                    AWS:
+                      !Sub arn:aws:iam::${AWS::AccountId}:root
+                  Action: kms:*
+                  Resource: "*"
+                - Sid: Allow access for Key Administrators
+                  Effect: Allow
+                  Action:
+                  - kms:Create*
+                  - kms:Describe*
+                  - kms:Enable*
+                  - kms:List*
+                  - kms:Put*
+                  - kms:Update*
+                  - kms:Revoke*
+                  - kms:Disable*
+                  - kms:Get*
+                  - kms:Delete*
+                  - kms:ScheduleKeyDeletion
+                  - kms:CancelKeyDeletion
+                  Resource: "*"
+                - Sid: Allow use of the key
+                  Effect: Allow
+                  Principal:
+                    AWS:
+                      Fn::GetAtt:
+                      - zuora-auto-cancel-role
+                      - Arn
+                  Action:
+                  - kms:Encrypt
+                  - kms:Decrypt
+                  - kms:ReEncrypt*
+                  - kms:GenerateDataKey*
+                  - kms:DescribeKey
+                  Resource: "*"
+
+    zuora-auto-cancel-lambda:
         Type: AWS::Lambda::Function
         Properties:
+            Description: Handles auto-cancellations for membership and subscriptions
             FunctionName:
-                !Sub zuora-auto-cancel-${Stage}
+                !Sub ${App}-${Stage}
             Environment:
                 Variables:
-                # Add your config/environment variables here.
-
+                  ZuoraRestUrl: ""
+                  ZuoraUsername: ""
+                  ZuoraPassword: ""
             Code:
-                S3Bucket: MemSub::Membership Admin::Auto-Cancel Handler-dist
+                S3Bucket: zuora-auto-cancel-dist
                 S3Key:
-                    !Sub ${Stack}/${Stage}/zuora-auto-cancel/zuora-auto-cancel.zip
-            Description: Handles auto-cancellations for membership and subscriptions
+                    !Sub ${Stage}/${App}.zip
             Handler: com.gu.zuora-auto-cancel.Lambda::handleRequest
-            MemorySize: 256
             Role:
                 Fn::GetAtt:
-                - zuora-auto-cancelRole
+                - zuora-auto-cancel-role
                 - Arn
+            KmsKeyArn:
+                Fn::GetAtt:
+                - zuora-auto-cancel-kms
+                - Arn
+            MemorySize: 512
             Runtime: java8
             Timeout: 300
 
-    #
-    # Add your Lambda trigger rule and permissions here.
-    #
-    #
-    #
+# API Gateway config here
+
+
+

@@ -29,7 +29,7 @@ packageName in Universal := normalizedName.value
 riffRaffPackageType := (packageZipTarball in config("universal")).value
 riffRaffUploadArtifactBucket := Option("riffraff-artifact")
 riffRaffUploadManifestBucket := Option("riffraff-builds")
-riffRaffManifestProjectName := "MemSub::Membership Admin::Auto-Cancel Handler"
+riffRaffManifestProjectName := "MemSub::Membership Admin::Zuora Auto Cancel"
 
 addCommandAlias("dist", ";riffRaffArtifact")
 
