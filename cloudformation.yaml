@@ -107,7 +107,7 @@ Resources:
                 - Arn
             KmsKeyArn:
                 Fn::GetAtt:
-                - zuora-auto-cancel-kms
+                - ZuoraAutoCancelKMS
                 - Arn
             MemorySize: 512
             Runtime: java8
