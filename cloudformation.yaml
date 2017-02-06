@@ -86,6 +86,12 @@ Resources:
                 Resource: "*"
         DependsOn: ZuoraAutoCancelRole
 
+    ZuoraAutoCancelKMSAlias:
+        Type: AWS::KMS::Alias
+        Properties:
+          AliasName: alias/zuora-auto-cancel-kms
+          TargetKeyId: !Ref ZuoraAutoCancelKMS
+        DependsOn: ZuoraAutoCancelKMS
 
     ZuoraAutoCancelLambda:
         Type: AWS::Lambda::Function
