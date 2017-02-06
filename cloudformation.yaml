@@ -128,7 +128,7 @@ Resources:
     ZuoraAutoCancelAPI:
         Type: "AWS::ApiGateway::RestApi"
         Properties:
-            Description: Rest Api to trigger zuora-auto-cancel-api
+            Description: Zuora sends a callout to this endpoint to initiate an auto-cancellation on an overdue subscription
             Name: zuora-auto-cancel-api
 
     ZuoraAutoCancelProxyResource:
