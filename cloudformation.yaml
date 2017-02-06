@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: AWS Lambda - Handles auto-cancellations for membership and subscriptions
+Description: Handles auto-cancellations for membership and subscriptions, using API Gateway and Lambda
 
 Parameters:
     App:
@@ -33,10 +33,10 @@ Resources:
                       Statement:
                           - Effect: Allow
                             Action:
-                                - logs:CreateLogGroup
-                                - logs:CreateLogStream
-                                - logs:PutLogEvents
-                                - lambda:InvokeFunction
+                            - logs:CreateLogGroup
+                            - logs:CreateLogStream
+                            - logs:PutLogEvents
+                            - lambda:InvokeFunction
                             Resource: "*"
 
     ZuoraAutoCancelKMS:
@@ -84,6 +84,8 @@ Resources:
                 - kms:GenerateDataKey*
                 - kms:DescribeKey
                 Resource: "*"
+        DependsOn: ZuoraAutoCancelRole
+
 
     ZuoraAutoCancelLambda:
         Type: AWS::Lambda::Function
@@ -98,8 +100,7 @@ Resources:
                   ZuoraPassword: ""
             Code:
                 S3Bucket: zuora-auto-cancel-dist
-                S3Key:
-                    !Sub ${Stage}/${App}.zip
+                S3Key: !Sub ${Stage}/${App}.zip
             Handler: com.gu.zuora-auto-cancel.Lambda::handleRequest
             Role:
                 Fn::GetAtt:
@@ -112,6 +113,9 @@ Resources:
             MemorySize: 512
             Runtime: java8
             Timeout: 300
+        DependsOn:
+        - ZuoraAutoCancelRole
+        - ZuoraAutoCancelKMS
 
     ZuoraAutoCancelAPIPermission:
         Type: AWS::Lambda::Permission
@@ -119,6 +123,7 @@ Resources:
             Action: lambda:invokeFunction
             FunctionName: !Sub ${App}-${Stage}
             Principal: apigateway.amazonaws.com
+        DependsOn: ZuoraAutoCancelLambda
 
     ZuoraAutoCancelAPI:
         Type: "AWS::ApiGateway::RestApi"
@@ -129,16 +134,15 @@ Resources:
     ZuoraAutoCancelProxyResource:
         Type: AWS::ApiGateway::Resource
         Properties:
-            Description: Proxy resource for zuora-auto-cancel-api
             RestApiId: !Ref ZuoraAutoCancelAPI
             ParentId: !GetAtt [ZuoraAutoCancelAPI, RootResourceId]
             PathPart: '{proxy+}'
+        DependsOn: ZuoraAutoCancelAPI
 
     ZuoraAutoCancelMethod:
         Type: AWS::ApiGateway::Method
         Properties:
             AuthorizationType: NONE
-            Description: Method for zuora-auto-cancel-api
             RestApiId: !Ref ZuoraAutoCancelAPI
             ResourceId: !Ref ZuoraAutoCancelProxyResource
             HttpMethod: ANY
@@ -147,24 +151,26 @@ Resources:
               Type: AWS_PROXY
               IntegrationHttpMethod: POST
               Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ZuoraAutoCancelLambda.Arn}/invocations
+        DependsOn:
+        - ZuoraAutoCancelAPI
+        - ZuoraAutoCancelLambda
+        - ZuoraAutoCancelProxyResource
 
     ZuoraAutoCancelAPIStage:
         Type: AWS::ApiGateway::Stage
         Properties:
             Description: Stage for zuora-auto-cancel-api
-            RestApiId: Ref! ZuoraAutoCancelAPI
-            DeploymentId: Ref! ZuoraAutoCancelAPIDeployment
+            RestApiId: !Ref ZuoraAutoCancelAPI
+            DeploymentId: !Ref ZuoraAutoCancelAPIDeployment
             StageName: !Sub ${Stage}
+        DependsOn: ZuoraAutoCancelMethod
 
     ZuoraAutoCancelAPIDeployment:
         Type: AWS::ApiGateway::Deployment
         Properties:
             Description: Deploys zuora-auto-cancel-api into an environment/stage
             RestApiId: !Ref ZuoraAutoCancelAPI
-            StageDescription:
-              LoggingLevel: INFO
-              MetricsEnabled: true
-
+        DependsOn: ZuoraAutoCancelMethod
 
 
 
