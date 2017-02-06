@@ -113,7 +113,58 @@ Resources:
             Runtime: java8
             Timeout: 300
 
-# API Gateway config here
+    zuora-auto-cancel-api-lambda-permission:
+        Type: AWS::Lambda::Permission
+        Properties:
+            Action: lambda:invokeFunction
+            FunctionName: !Sub ${App}-${Stage}
+            Principal: apigateway.amazonaws.com
+
+    zuora-auto-cancel-api:
+        Type: "AWS::ApiGateway::RestApi"
+        Properties:
+            Description: Rest Api to trigger zuora-auto-cancel-api
+            Name: zuora-auto-cancel-api
+
+    zuora-auto-cancel-proxy-resource:
+        Type: AWS::ApiGateway::Resource
+        Properties:
+            Description: Proxy resource for zuora-auto-cancel-api
+            RestApiId: !Ref zuora-auto-cancel-api
+            ParentId: !GetAtt [zuora-auto-cancel-api, RootResourceId]
+            PathPart: '{proxy+}'
+
+    zuora-auto-cancel-method:
+        Type: AWS::ApiGateway::Method
+        Properties:
+            AuthorizationType: NONE
+            Description: Method for zuora-auto-cancel-api
+            RestApiId: !Ref zuora-auto-cancel-api
+            ResourceId: !Ref zuora-auto-cancel-resource
+            HttpMethod: ANY
+            AuthorizationType: NONE
+            Integration:
+              Type: AWS_PROXY
+              IntegrationHttpMethod: POST
+              Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${zuora-auto-cancel-lambda.Arn}/invocations
+
+    zuora-auto-cancel-stage:
+        Type: AWS::ApiGateway::Stage
+        Properties:
+            Description: Stage for zuora-auto-cancel-api
+            RestApiId: Ref! zuora-auto-cancel-api
+            DeploymentId: Ref! zuora-auto-cancel-api-deployment
+            StageName: !Sub ${Stage}
+
+    zuora-auto-cancel-api-deployment:
+        Type: AWS::ApiGateway::Deployment
+        Properties:
+            Description: Deploys zuora-auto-cancel-api into an environment/stage
+            RestApiId: !Ref zuora-auto-cancel-api
+            StageDescription:
+              LoggingLevel: INFO
+              MetricsEnabled: true
+
 
 
 
