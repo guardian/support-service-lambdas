@@ -142,7 +142,7 @@ Resources:
         Properties:
             RestApiId: !Ref ZuoraAutoCancelAPI
             ParentId: !GetAtt [ZuoraAutoCancelAPI, RootResourceId]
-            PathPart: '{proxy+}'
+            PathPart: auto-cancel
         DependsOn: ZuoraAutoCancelAPI
 
     ZuoraAutoCancelMethod:
