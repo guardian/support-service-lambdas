@@ -99,11 +99,6 @@ Resources:
             Description: Handles auto-cancellations for membership and subscriptions
             FunctionName:
                 !Sub ${App}-${Stage}
-            Environment:
-                Variables:
-                  ZuoraRestUrl: ""
-                  ZuoraUsername: ""
-                  ZuoraPassword: ""
             Code:
                 S3Bucket: zuora-auto-cancel-dist
                 S3Key: !Sub ${Stage}/${App}.zip
