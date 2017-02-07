@@ -21,12 +21,10 @@ scalacOptions ++= Seq(
   "-Ywarn-value-discard"
 )
 
-lazy val root = (project in file(".")).enablePlugins(RiffRaffArtifact, JavaAppPackaging)
+lazy val root = (project in file(".")).enablePlugins(RiffRaffArtifact)
 
-topLevelDirectory in Universal := None
-packageName in Universal := normalizedName.value
-
-riffRaffPackageType := (packageZipTarball in config("universal")).value
+assemblyJarName := "zuora-auto-cancel.jar"
+riffRaffPackageType := assembly.value
 riffRaffUploadArtifactBucket := Option("riffraff-artifact")
 riffRaffUploadManifestBucket := Option("riffraff-builds")
 riffRaffManifestProjectName := "MemSub::Membership Admin::Zuora Auto Cancel"

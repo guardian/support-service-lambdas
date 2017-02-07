@@ -6,12 +6,7 @@ deployments:
   zuora-auto-cancel:
     type: aws-lambda
     parameters:
-      fileName: zuora-auto-cancel.zip
+      fileName: zuora-auto-cancel.jar
       bucket: zuora-auto-cancel-dist
-      functions:
-        UAT:
-          name: zuora-auto-cancel-UAT
-          filename: zuora-auto-cancel.zip
-        PROD:
-          name: zuora-auto-cancel-PROD
-          filename: zuora-auto-cancel.zip
+      functionNames:
+      - zuora-auto-cancel-
