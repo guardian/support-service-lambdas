@@ -86,6 +86,12 @@ Resources:
                 Resource: "*"
         DependsOn: ZuoraAutoCancelRole
 
+    ZuoraAutoCancelKMSAlias:
+        Type: AWS::KMS::Alias
+        Properties:
+          AliasName: alias/zuora-auto-cancel-kms
+          TargetKeyId: !Ref ZuoraAutoCancelKMS
+        DependsOn: ZuoraAutoCancelKMS
 
     ZuoraAutoCancelLambda:
         Type: AWS::Lambda::Function
@@ -93,15 +99,10 @@ Resources:
             Description: Handles auto-cancellations for membership and subscriptions
             FunctionName:
                 !Sub ${App}-${Stage}
-            Environment:
-                Variables:
-                  ZuoraRestUrl: ""
-                  ZuoraUsername: ""
-                  ZuoraPassword: ""
             Code:
                 S3Bucket: zuora-auto-cancel-dist
                 S3Key: !Sub ${Stage}/${App}.zip
-            Handler: com.gu.zuora-auto-cancel.Lambda::handleRequest
+            Handler: com.gu.autoCancel.Lambda::handleRequest
             Role:
                 Fn::GetAtt:
                 - ZuoraAutoCancelRole
@@ -136,7 +137,7 @@ Resources:
         Properties:
             RestApiId: !Ref ZuoraAutoCancelAPI
             ParentId: !GetAtt [ZuoraAutoCancelAPI, RootResourceId]
-            PathPart: '{proxy+}'
+            PathPart: auto-cancel
         DependsOn: ZuoraAutoCancelAPI
 
     ZuoraAutoCancelMethod:
