@@ -8,5 +8,6 @@ deployments:
     parameters:
       fileName: zuora-auto-cancel.jar
       bucket: zuora-auto-cancel-dist
+      prefixStack: false
       functionNames:
       - zuora-auto-cancel-
