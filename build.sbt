@@ -2,6 +2,7 @@ name := "zuora-auto-cancel"
 description:= "Handles auto-cancellations for membership and subscriptions"
 
 scalaVersion := "2.11.8"
+version      := "0.0.1"
 organization := "com.gu"
 
 scalacOptions ++= Seq(
