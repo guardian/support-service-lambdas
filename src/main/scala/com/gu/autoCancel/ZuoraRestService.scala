@@ -15,7 +15,7 @@ case class ZuoraRestConfig(baseUrl: String, username: String, password: String)
 class ZuoraRestService(config: ZuoraRestConfig) extends Logging {
 
   val restClient = new OkHttpClient().newBuilder()
-    .readTimeout(30, TimeUnit.SECONDS) // Not customer-facing so being generous with the http timeout
+    .readTimeout(15, TimeUnit.SECONDS)
     .build()
 
   def buildRequest(config: ZuoraRestConfig, route: String): Request.Builder = {
