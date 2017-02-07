@@ -101,7 +101,7 @@ Resources:
                 !Sub zuora-auto-cancel-${Stage}
             Code:
                 S3Bucket: zuora-auto-cancel-dist
-                S3Key: !Sub ${Stage}/zuora-auto-cancel/zuora-auto-cancel.jar
+                S3Key: !Sub membership/${Stage}/zuora-auto-cancel/zuora-auto-cancel.jar
             Handler: com.gu.autoCancel.Lambda::handleRequest
             Role:
                 Fn::GetAtt:
