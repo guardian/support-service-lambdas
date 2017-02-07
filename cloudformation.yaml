@@ -42,7 +42,7 @@ Resources:
     ZuoraAutoCancelKMS:
         Type: AWS::KMS::Key
         Properties:
-            Description: !Sub Used by the ${App} lambda to encrypt and decrypt environment variables
+            Description: !Sub Used by the zuora-auto-cancel lambda to encrypt and decrypt environment variables
             KeyPolicy:
               Version: '2012-10-17'
               Id: key-policy-zuora-auto-cancel
@@ -98,10 +98,10 @@ Resources:
         Properties:
             Description: Handles auto-cancellations for membership and subscriptions
             FunctionName:
-                !Sub ${App}-${Stage}
+                !Sub zuora-auto-cancel-${Stage}
             Code:
                 S3Bucket: zuora-auto-cancel-dist
-                S3Key: !Sub ${Stage}/${App}.jar
+                S3Key: !Sub ${Stage}/zuora-auto-cancel/zuora-auto-cancel.jar
             Handler: com.gu.autoCancel.Lambda::handleRequest
             Role:
                 Fn::GetAtt:
@@ -122,7 +122,7 @@ Resources:
         Type: AWS::Lambda::Permission
         Properties:
             Action: lambda:invokeFunction
-            FunctionName: !Sub ${App}-${Stage}
+            FunctionName: !Sub zuora-auto-cancel-${Stage}
             Principal: apigateway.amazonaws.com
         DependsOn: ZuoraAutoCancelLambda
 
