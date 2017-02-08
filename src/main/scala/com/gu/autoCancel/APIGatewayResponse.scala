@@ -41,8 +41,10 @@ object APIGatewayResponse extends Logging {
     writer.close()
   }
 
-  val apiGatewaySuccessResponse = Response("200", new Headers, "Success")
+  val successResponse = Response("200", new Headers, "Success")
 
-  def apiGatewayFailureResponse(e: String) = Response("500", new Headers, s"Failed to process auto-cancellation with the following error: $e")
+  val forbiddenResponse = Response("401", new Headers, "Credentials are missing or invalid")
+
+  def failureResponse(e: String) = Response("500", new Headers, s"Failed to process auto-cancellation with the following error: $e")
 
 }
