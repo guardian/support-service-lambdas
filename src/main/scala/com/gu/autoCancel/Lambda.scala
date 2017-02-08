@@ -1,11 +1,13 @@
 package com.gu.autoCancel
 
 import com.amazonaws.services.lambda.runtime.Context
+import com.gu.autoCancel.APIGatewayResponse._
+import com.gu.autoCancel.Auth._
 import com.gu.autoCancel.Config._
 import com.gu.autoCancel.ZuoraModels._
-import com.gu.autoCancel.APIGatewayResponse._
 import org.joda.time.LocalDate
 import java.io._
+import java.lang.System._
 import play.api.libs.json.{ JsValue, Json }
 import scala.xml.Elem
 import scala.xml.XML._
@@ -21,8 +23,14 @@ object Lambda extends App with Logging {
     logger.info(s"Auto-cancel Lambda is starting up...")
     val inputEvent = Json.parse(inputStream)
     logger.info(s"Received input event as JsValue: \n $inputEvent")
-    val xmlBody = extractXmlBodyFromJson(inputEvent)
-    cancellationAttemptForPayload(xmlBody, outputStream)
+    if (credentialsAreValid(inputEvent, getenv("ApiUsername"), getenv("ApiPassword"))) {
+      logger.info("Authenticated request successfully...")
+      val xmlBody = extractXmlBodyFromJson(inputEvent)
+      cancellationAttemptForPayload(xmlBody, outputStream)
+    } else {
+      logger.info("Request from Zuora could not be authenticated")
+      outputForAPIGateway(outputStream, forbiddenResponse)
+    }
   }
 
   def extractXmlBodyFromJson(inputEvent: JsValue): Elem = {
@@ -49,15 +57,15 @@ object Lambda extends App with Logging {
     val restService = new ZuoraRestService(setConfig)
 
     parseXML(xmlBody) match {
-      case -\/(e) => outputForAPIGateway(outputStream, apiGatewayFailureResponse(e))
+      case -\/(e) => outputForAPIGateway(outputStream, failureResponse(e))
       case \/-(accountId) => autoCancellation(restService, LocalDate.now, accountId) match {
         case \/-(_) => {
           logger.info(s"Successfully processed auto-cancellation for $accountId")
-          outputForAPIGateway(outputStream, apiGatewaySuccessResponse)
+          outputForAPIGateway(outputStream, successResponse)
         }
         case -\/(e: String) => {
           logger.error(s"Failed to process auto-cancellation for $accountId: $e.")
-          outputForAPIGateway(outputStream, apiGatewayFailureResponse(e))
+          outputForAPIGateway(outputStream, failureResponse(e))
         }
       }
     }
@@ -80,8 +88,8 @@ object Lambda extends App with Logging {
       accountSummary <- restService.getAccountSummary(accountId)
       subToCancel <- getSubscriptionToCancel(accountSummary)
       invoiceToUnpost <- getInvoiceToRollBack(accountSummary, date)
-      updateSubscription <- restService.updateCancellationReason(subToCancel)
       cancelSubscription <- restService.cancelSubscription(subToCancel, invoiceToUnpost.dueDate)
+      updateSubscription <- restService.updateCancellationReason(subToCancel)
       unpostInvoice <- restService.unpostInvoice(invoiceToUnpost)
       result <- handleZuoraResults(updateSubscription, cancelSubscription, unpostInvoice)
     } yield result
