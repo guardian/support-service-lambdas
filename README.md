@@ -3,7 +3,7 @@
 This Scala Lambda is used to cancel subscriptions and memberships with overdue invoices, based on an event trigger within Zuora.
 
 The full workflow is currently:
-Zuora Callout > AWS CloudFront > AWS API Gateway > AWS Lambda (zuora-auto-cancel-STAGE)
+Zuora Callout > AWS CloudFront > AWS API Gateway (Lambda Proxy Integration) > AWS Lambda
 
 # Running locally
 
@@ -12,11 +12,12 @@ When the Lambda is triggered, AWS uses the handleRequest method as the entry poi
 All of the 'real work' is handled by cancellationAttemptForPayload, so to get fast feedback when developing simply call this method with a sample payload and execute `sbt run`.
 
 Note: to make REST API calls to Zuora, you will need to set the following environment variables when running locally:
+
 - ZuoraRestUrl - for testing purposes this is: https://rest.apisandbox.zuora.com/v1
 - ZuoraUsername
 - ZuoraPassword
 
-(For Lambda execution, these are set as encrypted environment variables within AWS).
+Always use DEV or UAT credentials when running locally. (For Lambda execution, the PROD values are set as encrypted environment variables within AWS).
 
 # Testing
 
