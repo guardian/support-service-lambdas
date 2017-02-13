@@ -88,8 +88,8 @@ object Lambda extends App with Logging {
       accountSummary <- restService.getAccountSummary(accountId)
       subToCancel <- getSubscriptionToCancel(accountSummary)
       invoice <- getOverdueUnpaidInvoice(accountSummary, date)
-      cancelSubscription <- restService.cancelSubscription(subToCancel, invoice.dueDate)
       updateSubscription <- restService.updateCancellationReason(subToCancel)
+      cancelSubscription <- restService.cancelSubscription(subToCancel, invoice.dueDate)
       result <- handleZuoraResults(updateSubscription, cancelSubscription)
     } yield result
   }
