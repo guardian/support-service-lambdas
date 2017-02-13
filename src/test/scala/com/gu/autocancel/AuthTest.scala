@@ -6,11 +6,11 @@ import play.api.libs.json.{ JsValue, Json }
 
 class AuthTest extends FlatSpec {
 
-  def generateInputEvent(user: String, password: String): JsValue = {
+  def generateInputEvent(apiuser: String, apipass: String): JsValue = {
 
     def constructQueryStrings(user: String, pass: String) = Json.obj(
-      "username" -> user,
-      "password" -> pass
+      "apiuser" -> user,
+      "apipass" -> pass
     )
     val headers = Json.obj(
       "Content-Type" -> "text/xml"
@@ -20,7 +20,7 @@ class AuthTest extends FlatSpec {
       "path" -> "/test-path",
       "httpMethod" -> "POST",
       "headers" -> headers,
-      "queryStringParameters" -> constructQueryStrings(user, password)
+      "queryStringParameters" -> constructQueryStrings(apiuser, apipass)
     )
     sampleJson
   }

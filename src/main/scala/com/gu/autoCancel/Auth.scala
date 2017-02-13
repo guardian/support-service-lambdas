@@ -9,13 +9,13 @@ object Auth extends Logging {
     /* Using query strings because for Basic Auth to work Zuora requires us to return a WWW-Authenticate
     header, and API Gateway does not support this header (returns x-amzn-Remapped-WWW-Authenticate instead)
     */
-    val maybeUsernameValue = (inputEvent \ "queryStringParameters" \ "username").asOpt[String]
-    val maybePasswordValue = (inputEvent \ "queryStringParameters" \ "password").asOpt[String]
+    val maybeUsernameValue = (inputEvent \ "queryStringParameters" \ "apiuser").asOpt[String]
+    val maybePasswordValue = (inputEvent \ "queryStringParameters" \ "apipass").asOpt[String]
     val maybeCredentials = (maybeUsernameValue, maybePasswordValue)
 
     maybeCredentials match {
-      case (Some(user), Some(pass)) => {
-        (user == username && pass == password)
+      case (Some(apiuser), Some(apipass)) => {
+        (apiuser == username && apipass == password)
       }
       case _ => {
         logger.info(s"Could not find credentials in request")
