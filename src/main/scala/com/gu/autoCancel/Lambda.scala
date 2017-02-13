@@ -23,7 +23,7 @@ object Lambda extends App with Logging {
     logger.info(s"Auto-cancel Lambda is starting up...")
     val inputEvent = Json.parse(inputStream)
     logger.info(s"Received input event as JsValue: \n $inputEvent")
-    if (credentialsAreValid(inputEvent, getenv("ApiUser"), getenv("ApiPass"))) {
+    if (credentialsAreValid(inputEvent, getenv("ApiClientId"), getenv("ApiToken"))) {
       logger.info("Authenticated request successfully...")
       val xmlBody = extractXmlBodyFromJson(inputEvent)
       cancellationAttemptForPayload(xmlBody, outputStream)

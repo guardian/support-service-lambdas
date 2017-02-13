@@ -149,8 +149,8 @@ Resources:
             HttpMethod: POST
             AuthorizationType: NONE
             RequestParameters:
-              method.request.querystring.apiuser: true
-              method.request.querystring.apipass: true
+              method.request.querystring.apiClientId: true
+              method.request.querystring.apiToken: true
             Integration:
               Type: AWS_PROXY
               IntegrationHttpMethod: POST
