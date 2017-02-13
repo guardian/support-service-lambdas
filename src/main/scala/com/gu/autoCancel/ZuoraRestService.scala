@@ -59,16 +59,6 @@ class ZuoraRestService(config: ZuoraRestConfig) extends Logging {
     convertResponseToCaseClass[CancelSubscriptionResult](response)
   }
 
-  def unpostInvoice(invoice: Invoice): String \/ UpdateInvoiceResult = {
-    val invoiceUpdate = InvoiceUpdate(invoice.id, "Draft")
-    val body = RequestBody.create(MediaType.parse("application/json"), Json.toJson(invoiceUpdate).toString)
-    val request = buildRequest(config, s"object/invoice/${invoice.id}").put(body).build()
-    val call = restClient.newCall(request)
-    logger.info(s"Attempting to Unpost an invoice with the following command: $invoiceUpdate")
-    val response = call.execute
-    convertResponseToCaseClass[UpdateInvoiceResult](response)
-  }
-
   def updateCancellationReason(subscription: Subscription): String \/ UpdateSubscriptionResult = {
     val subscriptionUpdate = SubscriptionUpdate("System AutoCancel")
     val body = RequestBody.create(MediaType.parse("application/json"), Json.toJson(subscriptionUpdate).toString)
