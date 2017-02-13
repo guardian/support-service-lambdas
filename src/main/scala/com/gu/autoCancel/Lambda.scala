@@ -96,20 +96,18 @@ object Lambda extends App with Logging {
 
   def getOverdueUnpaidInvoice(accountSummary: AccountSummary, dateToday: LocalDate): String \/ Invoice = {
     val unpaidAndOverdueInvoices = accountSummary.invoices.filter { invoice => invoiceOverdue(invoice, dateToday) }
-    if (unpaidAndOverdueInvoices.size > 1) {
-      logger.error(s"Found more unpaid invoices than expected for account: ${accountSummary.basicInfo.id}. The invoices we got were: ${unpaidAndOverdueInvoices.map(_.id)}")
-      "Multiple unpaid invoices".left
-    } else {
-      val maybeOverdueInvoice = unpaidAndOverdueInvoices.headOption
-      maybeOverdueInvoice match {
-        case Some(overdueInvoice) => {
-          logger.info(s"Determined that InvoiceId: ${overdueInvoice.id} is the overdue unpaid invoice for Account Id: ${accountSummary.basicInfo.id}")
-          overdueInvoice.right
-        }
-        case None => {
-          logger.error(s"Failed to find an unpaid invoice that was overdue. The invoices we got were: ${accountSummary.invoices}")
-          "No unpaid and overdue invoices found!".left
-        }
+    unpaidAndOverdueInvoices match {
+      case invoice :: Nil => {
+        logger.info(s"Determined that InvoiceId: ${invoice.id} is the overdue unpaid invoice for Account Id: ${accountSummary.basicInfo.id}")
+        invoice.right
+      }
+      case Nil => {
+        logger.error(s"Failed to find an unpaid invoice that was overdue. The invoices we got were: ${accountSummary.invoices}")
+        "No unpaid and overdue invoices found!".left
+      }
+      case invoices => {
+        logger.error(s"Found more unpaid invoices than expected for account: ${accountSummary.basicInfo.id}. The invoices we got were: ${unpaidAndOverdueInvoices.map(_.id)}")
+        "Multiple unpaid invoices".left
       }
     }
   }
@@ -125,20 +123,19 @@ object Lambda extends App with Logging {
 
   def getSubscriptionToCancel(accountSummary: AccountSummary): String \/ Subscription = {
     val activeSubs = accountSummary.subscriptions.filter(_.status == "Active")
-    if (activeSubs.size > 1) {
-      // This should be a pretty rare scenario, because the Billing Account to Sub relationship is (supposed to be) 1-to-1
-      logger.error(s"More than one subscription is Active on account: ${accountSummary.basicInfo.id}. Subscription ids are: ${activeSubs.map(_.id)}")
-      "More than one active sub found!".left // Don't continue because we don't know which active sub to cancel
-    } else {
-      val maybeSubToCancel = activeSubs.headOption
-      maybeSubToCancel match {
-        case Some(subToCancel) => {
-          logger.info(s"Determined that we should cancel SubscriptionId: ${subToCancel.id} (for AccountId: ${accountSummary.basicInfo.id})")
-          subToCancel.right
-        }
-        case None => {
-          "No Active subscriptions to cancel!".left
-        }
+    activeSubs match {
+      case sub :: Nil => {
+        logger.info(s"Determined that we should cancel SubscriptionId: ${sub.id} (for AccountId: ${accountSummary.basicInfo.id})")
+        sub.right
+      }
+      case Nil => {
+        logger.error(s"Didn't find any active subscriptions. The full list of subs for this account was: ${accountSummary.subscriptions}")
+        "No Active subscriptions to cancel!".left
+      }
+      case subs => {
+        // This should be a pretty rare scenario, because the Billing Account to Sub relationship is (supposed to be) 1-to-1
+        logger.error(s"More than one subscription is Active on account: ${accountSummary.basicInfo.id}. Subscription ids are: ${activeSubs.map(_.id)}")
+        "More than one active sub found!".left // Don't continue because we don't know which active sub to cancel
       }
     }
   }
