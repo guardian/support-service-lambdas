@@ -38,10 +38,10 @@ class ZuoraRestServiceTest extends AsyncFlatSpec {
       |}""".stripMargin
   )
 
-  val validUpdateInvoiceResult = Json.parse(
+  val validUpdateSubscriptionResult = Json.parse(
     """{
-      |  "Success": true,
-      |  "Id": "id123"
+      |  "success": true,
+      |  "subscriptionId": "id123"
       |}""".stripMargin
   )
 
@@ -66,20 +66,20 @@ class ZuoraRestServiceTest extends AsyncFlatSpec {
 
   "convertResponseToCaseClass" should "return a left[String] for an unsuccessful response code" in {
     val response = constructTestResponse(500)
-    val either = fakeRestService.convertResponseToCaseClass[UpdateInvoiceResult](response)
+    val either = fakeRestService.convertResponseToCaseClass[UpdateSubscriptionResult](response)
     assert(either == -\/("Request to Zuora was unsuccessful"))
   }
 
   it should "return a left[String] if the body of a successful response cannot be de-serialized" in {
     val response = constructTestResponse(200)
-    val either = fakeRestService.convertResponseToCaseClass[UpdateInvoiceResult](response)
+    val either = fakeRestService.convertResponseToCaseClass[UpdateSubscriptionResult](response)
     assert(either == -\/("Error when converting Zuora response to case class"))
   }
 
   it should "return a right[T] if the body of a successful response deserializes to T" in {
-    val response = constructTestResponse(200, validUpdateInvoiceResult)
-    val either = fakeRestService.convertResponseToCaseClass[UpdateInvoiceResult](response)
-    assert(either == \/-(UpdateInvoiceResult(true, "id123")))
+    val response = constructTestResponse(200, validUpdateSubscriptionResult)
+    val either = fakeRestService.convertResponseToCaseClass[UpdateSubscriptionResult](response)
+    assert(either == \/-(UpdateSubscriptionResult(true, "id123")))
   }
 
 }

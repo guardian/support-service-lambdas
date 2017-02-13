@@ -35,16 +35,6 @@ class LambdaTest extends FlatSpec {
     assert(parseXML(body) == -\/("Failure to parse XML successfully"))
   }
 
-  "getOverdueUnpaidInvoices" should "return a left[String] if no overdue invoices are found" in {
-    val either = getOverdueUnpaidInvoices(AccountSummary(basicInfo, List(subscription), List(invoiceZeroBalance, invoiceNotDue, invoiceNotPosted)), LocalDate.now)
-    assert(either == -\/("No unpaid and overdue invoices found!"))
-  }
-
-  "getOverdueUnpaidInvoices" should "return a right[List[Invoices]] if overdue invoices are found" in {
-    val either = getOverdueUnpaidInvoices(AccountSummary(basicInfo, List(subscription), List(singleOverdueInvoice)), LocalDate.now)
-    assert(either == \/-(List(singleOverdueInvoice)))
-  }
-
   "invoiceOverdue" should "return false if the invoice is not in a 'Posted' state" in {
     assert(invoiceOverdue(invoiceNotPosted, LocalDate.now) == false)
   }
@@ -61,40 +51,38 @@ class LambdaTest extends FlatSpec {
     assert(invoiceOverdue(singleOverdueInvoice, LocalDate.now) == true)
   }
 
-  "getInvoiceToRollBack" should "return a left[String] if there is more than one overdue invoice on the account" in {
+  "getOverdueUnpaidInvoice" should "return a left[String] if there is more than one overdue invoice on the account" in {
     val accountSummaryUnpaidInvs = AccountSummary(basicInfo, List(subscription), twoOverdueInvoices)
-    val either = getInvoiceToRollBack(accountSummaryUnpaidInvs, LocalDate.now)
+    val either = getOverdueUnpaidInvoice(accountSummaryUnpaidInvs, LocalDate.now)
     assert(either == -\/("Multiple unpaid invoices"))
   }
 
-  "getInvoiceToRollBack" should "return a right[Invoice] if there exactly one overdue invoice on the account" in {
-    val accountSummaryUnpaidInvs = AccountSummary(basicInfo, List(subscription), List(singleOverdueInvoice))
-    val either = getInvoiceToRollBack(accountSummaryUnpaidInvs, LocalDate.now)
+  "getOverdueUnpaidInvoices" should "return a left[String] if no overdue invoices are found" in {
+    val either = getOverdueUnpaidInvoice(AccountSummary(basicInfo, List(subscription), List(invoiceZeroBalance, invoiceNotDue, invoiceNotPosted)), LocalDate.now)
+    assert(either == -\/("No unpaid and overdue invoices found!"))
+  }
+
+  "getOverdueUnpaidInvoices" should "return a right[Invoice] if exactly one overdue invoice is found on the account" in {
+    val either = getOverdueUnpaidInvoice(AccountSummary(basicInfo, List(subscription), List(singleOverdueInvoice)), LocalDate.now)
     assert(either == \/-(singleOverdueInvoice))
-  }
-
-  "getActiveSubscriptions" should "return a left[String] if there are no subs on the account summary" in {
-    val accountSummaryWithCancelledSub = AccountSummary(basicInfo, List(), List(invoiceNotDue))
-    val either = getActiveSubscriptions(accountSummaryWithCancelledSub)
-    assert(either == -\/("No Active subscriptions to cancel!"))
-  }
-
-  "getActiveSubscriptions" should "return a left[String] if the account summary only contains cancelled and expired subs" in {
-    val accountSummaryCancelledSub = AccountSummary(basicInfo, inactiveSubscriptions, List(singleOverdueInvoice))
-    val either = getActiveSubscriptions(accountSummaryCancelledSub)
-    assert(either == -\/("No Active subscriptions to cancel!"))
-  }
-
-  "getActiveSubscriptions" should "return a right[List[Subscriptions]] if there is at least one active sub on the account summary" in {
-    val accountSummaryCancelledSub = AccountSummary(basicInfo, inactiveSubscriptions :+ subscription, List(singleOverdueInvoice))
-    val either = getActiveSubscriptions(accountSummaryCancelledSub)
-    assert(either == \/-(List(subscription)))
   }
 
   "getSubscriptionToCancel" should "return a left[String] if there is more than one active sub on the account summary" in {
     val accountSummaryWithTwoSubs = AccountSummary(basicInfo, twoSubscriptions, twoOverdueInvoices)
     val either = getSubscriptionToCancel(accountSummaryWithTwoSubs)
     assert(either == -\/("More than one active sub found!"))
+  }
+
+  "getSubscriptionToCancel" should "return a left[String] if there are no subs on the account summary" in {
+    val accountSummaryWithCancelledSub = AccountSummary(basicInfo, List(), List(invoiceNotDue))
+    val either = getSubscriptionToCancel(accountSummaryWithCancelledSub)
+    assert(either == -\/("No Active subscriptions to cancel!"))
+  }
+
+  "getSubscriptionToCancel" should "return a left[String] if the account summary only contains cancelled and expired subs" in {
+    val accountSummaryCancelledSub = AccountSummary(basicInfo, inactiveSubscriptions, List(singleOverdueInvoice))
+    val either = getSubscriptionToCancel(accountSummaryCancelledSub)
+    assert(either == -\/("No Active subscriptions to cancel!"))
   }
 
   "getSubscriptionToCancel" should "return a right[Subscription] if there is exactly one active sub on the account summary" in {
@@ -104,22 +92,17 @@ class LambdaTest extends FlatSpec {
   }
 
   "handleZuoraResults" should "return a left if the CancelSubscriptionResult indicates failure" in {
-    val either = handleZuoraResults(UpdateSubscriptionResult(true, "id321"), CancelSubscriptionResult(false, LocalDate.now()), UpdateInvoiceResult(true, "id123"))
-    assert(either == -\/("Received at least one failure result during autoCancellation"))
-  }
-
-  "handleZuoraResults" should "return a left if the UpdateInvoiceResult indicates failure" in {
-    val either = handleZuoraResults(UpdateSubscriptionResult(true, "id321"), CancelSubscriptionResult(true, LocalDate.now()), UpdateInvoiceResult(false, "id123"))
+    val either = handleZuoraResults(UpdateSubscriptionResult(true, "id321"), CancelSubscriptionResult(false, LocalDate.now()))
     assert(either == -\/("Received at least one failure result during autoCancellation"))
   }
 
   "handleZuoraResults" should "return a left if the UpdateSubscriptionResult indicates failure" in {
-    val either = handleZuoraResults(UpdateSubscriptionResult(false, "id321"), CancelSubscriptionResult(true, LocalDate.now()), UpdateInvoiceResult(true, "id123"))
+    val either = handleZuoraResults(UpdateSubscriptionResult(false, "id321"), CancelSubscriptionResult(true, LocalDate.now()))
     assert(either == -\/("Received at least one failure result during autoCancellation"))
   }
 
-  "handleZuoraResults" should "return a right[Unit] if CancelSubscriptionResult, UpdateInvoiceResult and UpdateSubscriptionResult indicate success" in {
-    val either = handleZuoraResults(UpdateSubscriptionResult(true, "id321"), CancelSubscriptionResult(true, LocalDate.now()), UpdateInvoiceResult(true, "id123"))
+  "handleZuoraResults" should "return a right[Unit] if both CancelSubscriptionResult and UpdateSubscriptionResult indicate success" in {
+    val either = handleZuoraResults(UpdateSubscriptionResult(true, "id321"), CancelSubscriptionResult(true, LocalDate.now()))
     assert(either == \/-(()))
   }
 

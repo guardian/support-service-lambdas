@@ -15,13 +15,9 @@ object ZuoraModels {
 
   case class AccountSummary(basicInfo: BasicAccountInfo, subscriptions: List[Subscription], invoices: List[Invoice])
 
-  case class UpdateInvoiceResult(success: Boolean, id: String)
-
   case class CancelSubscriptionResult(success: Boolean, cancelledDate: LocalDate)
 
   case class UpdateSubscriptionResult(success: Boolean, subscriptionId: String)
-
-  case class InvoiceUpdate(id: String, Status: String)
 
   case class SubscriptionCancellation(cancellationEffectiveDate: LocalDate)
 
@@ -54,11 +50,6 @@ object ZuoraReaders {
     (JsPath \ "invoices").read[List[Invoice]]
   )(AccountSummary.apply _)
 
-  implicit val updateInvoiceResultReads: Reads[UpdateInvoiceResult] = (
-    (JsPath \ "Success").read[Boolean] and
-    (JsPath \ "Id").read[String]
-  )(UpdateInvoiceResult.apply _)
-
   implicit val cancelSubscriptionResultReads: Reads[CancelSubscriptionResult] = (
     (JsPath \ "success").read[Boolean] and
     (JsPath \ "cancelledDate").read[LocalDate]
@@ -72,13 +63,6 @@ object ZuoraReaders {
 }
 
 object ZuoraWriters {
-
-  implicit val invoiceUpdateWrites = new Writes[InvoiceUpdate] {
-    def writes(invoiceUpdate: InvoiceUpdate) = Json.obj(
-      "Id" -> invoiceUpdate.id,
-      "Status" -> invoiceUpdate.Status.toString
-    )
-  }
 
   implicit val subscriptionCancellationWrites = new Writes[SubscriptionCancellation] {
     def writes(subscriptionCancellation: SubscriptionCancellation) = Json.obj(

@@ -87,22 +87,30 @@ object Lambda extends App with Logging {
     for {
       accountSummary <- restService.getAccountSummary(accountId)
       subToCancel <- getSubscriptionToCancel(accountSummary)
-      invoiceToUnpost <- getInvoiceToRollBack(accountSummary, date)
-      cancelSubscription <- restService.cancelSubscription(subToCancel, invoiceToUnpost.dueDate)
+      invoice <- getOverdueUnpaidInvoice(accountSummary, date)
+      cancelSubscription <- restService.cancelSubscription(subToCancel, invoice.dueDate)
       updateSubscription <- restService.updateCancellationReason(subToCancel)
-      unpostInvoice <- restService.unpostInvoice(invoiceToUnpost)
-      result <- handleZuoraResults(updateSubscription, cancelSubscription, unpostInvoice)
+      result <- handleZuoraResults(updateSubscription, cancelSubscription)
     } yield result
   }
 
-  def getOverdueUnpaidInvoices(accountSummary: AccountSummary, dateToday: LocalDate): String \/ List[Invoice] = {
-    val overdueUnpaidInvoices = accountSummary.invoices.filter { invoice => invoiceOverdue(invoice, dateToday) }
-    if (overdueUnpaidInvoices.isEmpty) {
-      logger.error(s"Failed to find an unpaid invoice that was overdue. The invoices we got were: ${accountSummary.invoices}")
-      "No unpaid and overdue invoices found!".left
+  def getOverdueUnpaidInvoice(accountSummary: AccountSummary, dateToday: LocalDate): String \/ Invoice = {
+    val unpaidAndOverdueInvoices = accountSummary.invoices.filter { invoice => invoiceOverdue(invoice, dateToday) }
+    if (unpaidAndOverdueInvoices.size > 1) {
+      logger.error(s"Found more unpaid invoices than expected for account: ${accountSummary.basicInfo.id}. The invoices we got were: ${unpaidAndOverdueInvoices.map(_.id)}")
+      "Multiple unpaid invoices".left
     } else {
-      logger.info(s"Found the following unpaid invoices: ${overdueUnpaidInvoices.map(_.id)}")
-      overdueUnpaidInvoices.right
+      val maybeOverdueInvoice = unpaidAndOverdueInvoices.headOption
+      maybeOverdueInvoice match {
+        case Some(overdueInvoice) => {
+          logger.info(s"Determined that InvoiceId: ${overdueInvoice.id} is the overdue unpaid invoice for Account Id: ${accountSummary.basicInfo.id}")
+          overdueInvoice.right
+        }
+        case None => {
+          logger.error(s"Failed to find an unpaid invoice that was overdue. The invoices we got were: ${accountSummary.invoices}")
+          "No unpaid and overdue invoices found!".left
+        }
+      }
     }
   }
 
@@ -115,52 +123,28 @@ object Lambda extends App with Logging {
     } else false
   }
 
-  def getInvoiceToRollBack(accountSummary: AccountSummary, dateToday: LocalDate): String \/ Invoice = {
-    val unpaidInvoices = getOverdueUnpaidInvoices(accountSummary, dateToday)
-    unpaidInvoices.flatMap { invoices =>
-      if (invoices.size > 1) {
-        logger.error(s"Found more unpaid invoices than expected for account: ${accountSummary.basicInfo.id}")
-        "Multiple unpaid invoices".left
-      } else {
-        val invoiceToRollback = invoices.head
-        logger.info(s"Determined that we should unpost InvoiceId: ${invoiceToRollback.id} (for Account Id: ${accountSummary.basicInfo.id})")
-        invoiceToRollback.right
-      }
-    }
-  }
-
-  def getActiveSubscriptions(accountSummary: AccountSummary): String \/ List[Subscription] = {
-    val activeSubs = accountSummary.subscriptions.filter(_.status == "Active")
-    if (activeSubs.isEmpty) { "No Active subscriptions to cancel!".left }
-    else {
-      logger.info(s"Found the following active subscriptions: ${activeSubs.map(_.id)}")
-      activeSubs.right
-    }
-  }
-
   def getSubscriptionToCancel(accountSummary: AccountSummary): String \/ Subscription = {
-    val activeSubs = getActiveSubscriptions(accountSummary)
-    activeSubs.flatMap { subs =>
-      {
-        if (subs.size > 1) {
-          // This should be a pretty rare scenario, because the Billing Account to Sub relationship is (supposed to be) 1-to-1
-          logger.error(s"More than one subscription is Active on account: ${accountSummary.basicInfo.id}. Subscription ids are: ${subs.map(_.id)}")
-          "More than one active sub found!".left // Don't continue because we don't know which active sub to cancel
-        } else {
-          val subToCancel = subs.head
+    val activeSubs = accountSummary.subscriptions.filter(_.status == "Active")
+    if (activeSubs.size > 1) {
+      // This should be a pretty rare scenario, because the Billing Account to Sub relationship is (supposed to be) 1-to-1
+      logger.error(s"More than one subscription is Active on account: ${accountSummary.basicInfo.id}. Subscription ids are: ${activeSubs.map(_.id)}")
+      "More than one active sub found!".left // Don't continue because we don't know which active sub to cancel
+    } else {
+      val maybeSubToCancel = activeSubs.headOption
+      maybeSubToCancel match {
+        case Some(subToCancel) => {
           logger.info(s"Determined that we should cancel SubscriptionId: ${subToCancel.id} (for AccountId: ${accountSummary.basicInfo.id})")
           subToCancel.right
+        }
+        case None => {
+          "No Active subscriptions to cancel!".left
         }
       }
     }
   }
 
-  def handleZuoraResults(
-    updateSubscriptionResult: UpdateSubscriptionResult,
-    cancelSubscriptionResult: CancelSubscriptionResult,
-    updateInvoiceResult: UpdateInvoiceResult
-  ): String \/ Unit = {
-    if (!cancelSubscriptionResult.success || !updateInvoiceResult.success || !updateSubscriptionResult.success) {
+  def handleZuoraResults(updateSubscriptionResult: UpdateSubscriptionResult, cancelSubscriptionResult: CancelSubscriptionResult): String \/ Unit = {
+    if (!cancelSubscriptionResult.success || !updateSubscriptionResult.success) {
       logger.error(s"Zuora rejected one (or more) of our calls during autoCancellation")
       "Received at least one failure result during autoCancellation".left
     } else {
