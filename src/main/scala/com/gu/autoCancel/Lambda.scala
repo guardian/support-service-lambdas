@@ -114,7 +114,7 @@ object Lambda extends App with Logging {
 
   def invoiceOverdue(invoice: Invoice, dateToday: LocalDate): Boolean = {
     if (invoice.balance > 0 && invoice.status == "Posted") {
-      val zuoraGracePeriod = 21 // This needs to match with the timeframe for the 3rd payment retry attempt in Zuora
+      val zuoraGracePeriod = 14 // This needs to match with the timeframe for the 3rd payment retry attempt in Zuora
       val invoiceOverdueDate = invoice.dueDate.plusDays(zuoraGracePeriod)
       logger.info(s"Zuora grace period is: $zuoraGracePeriod days. Invoice due date is ${invoice.dueDate}, so it will be considered overdue on: $invoiceOverdueDate.")
       dateToday.isEqual(invoiceOverdueDate) || dateToday.isAfter(invoiceOverdueDate)
