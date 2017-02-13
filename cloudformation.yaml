@@ -18,6 +18,7 @@ Resources:
     ZuoraAutoCancelRole:
         Type: AWS::IAM::Role
         Properties:
+            RoleName: !Sub ZuoraAutoCancel-${Stage}
             AssumeRolePolicyDocument:
                 Statement:
                     - Effect: Allow
@@ -42,7 +43,7 @@ Resources:
     ZuoraAutoCancelKMS:
         Type: AWS::KMS::Key
         Properties:
-            Description: !Sub Used by the zuora-auto-cancel lambda to encrypt and decrypt environment variables
+            Description: !Sub Used by the zuora-auto-cancel ${Stage} lambda to encrypt and decrypt environment variables
             KeyPolicy:
               Version: '2012-10-17'
               Id: key-policy-zuora-auto-cancel
@@ -89,7 +90,7 @@ Resources:
     ZuoraAutoCancelKMSAlias:
         Type: AWS::KMS::Alias
         Properties:
-          AliasName: alias/zuora-auto-cancel-kms
+          AliasName: !Sub alias/zuora-auto-cancel-kms-${Stage}
           TargetKeyId: !Ref ZuoraAutoCancelKMS
         DependsOn: ZuoraAutoCancelKMS
 
@@ -130,7 +131,7 @@ Resources:
         Type: "AWS::ApiGateway::RestApi"
         Properties:
             Description: Zuora sends a callout to this endpoint to initiate an auto-cancellation on an overdue subscription
-            Name: zuora-auto-cancel-api
+            Name: !Sub zuora-auto-cancel-api-${Stage}
 
     ZuoraAutoCancelProxyResource:
         Type: AWS::ApiGateway::Resource
