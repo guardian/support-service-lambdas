@@ -5,9 +5,11 @@ This Scala Lambda is used to cancel subscriptions and memberships with overdue i
 The full workflow is currently:
 Zuora Callout > AWS CloudFront > AWS API Gateway (Lambda Proxy Integration) > AWS Lambda
 
+An additional CloudFront distribution is currently required because callouts do not support SNI, and the default CloudFront distribution (which gets set up in front of API Gateway) seems to require it.
+
 # Running locally
 
-When the Lambda is triggered, AWS uses the handleRequest method as the entry point. However, uploading new Lambda code to test every change during development would be a laborious process.
+AWS has been configured to use the handleRequest method as the entry point for this Lambda. However, uploading new Lambda code to test every change during development would be a laborious process.
 
 All of the 'real work' is handled by cancellationAttemptForPayload, so to get fast feedback when developing simply call this method with a sample payload and execute `sbt run`.
 
@@ -17,7 +19,7 @@ Note: to make REST API calls to Zuora, you will need to set the following enviro
 - ZuoraUsername
 - ZuoraPassword
 
-Always use DEV or UAT credentials when running locally. (For Lambda execution, the PROD values are set as encrypted environment variables within AWS).
+Always use DEV or UAT credentials when running locally. (For Lambda execution, the PROD values are set as encrypted environment variables within AWS, using the KMS key defined in CloudFormation).
 
 # Testing
 
