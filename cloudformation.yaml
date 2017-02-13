@@ -146,8 +146,11 @@ Resources:
             AuthorizationType: NONE
             RestApiId: !Ref ZuoraAutoCancelAPI
             ResourceId: !Ref ZuoraAutoCancelProxyResource
-            HttpMethod: ANY
+            HttpMethod: POST
             AuthorizationType: NONE
+            RequestParameters:
+              method.request.querystring.apiClientId: true
+              method.request.querystring.apiToken: true
             Integration:
               Type: AWS_PROXY
               IntegrationHttpMethod: POST
