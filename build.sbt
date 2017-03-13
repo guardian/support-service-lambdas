@@ -41,6 +41,7 @@ libraryDependencies ++= Seq(
   "org.scalaz" %% "scalaz-core" % "7.1.3",
   "com.typesafe.play" %% "play-json" % "2.4.6",
   "org.scalatest" %% "scalatest" % "3.0.1" % "test",
+  "com.github.nscala-time" % "nscala-time_2.12" % "2.16.0",
   "org.apache.commons" % "commons-io" % "1.3.2"
 )
 
