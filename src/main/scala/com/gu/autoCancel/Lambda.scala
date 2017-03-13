@@ -97,17 +97,14 @@ object Lambda extends App with Logging {
 
   def getCancellationDateFromInvoices(accountSummary: AccountSummary, dateToday: LocalDate): String \/ LocalDate = {
     val unpaidAndOverdueInvoices = accountSummary.invoices.filter { invoice => invoiceOverdue(invoice, dateToday) }
-    unpaidAndOverdueInvoices match {
-      case invoices @ (invoice :: _) => {
-        logger.info(s"Found at least one unpaid invoices for account: ${accountSummary.basicInfo.id}. Invoice id(s): ${unpaidAndOverdueInvoices.map(_.id)}")
-        val earliestDueDate = invoices.map(_.dueDate).min
-        logger.info(s"Earliest overdue invoice for account ${accountSummary.basicInfo.id} has due date: $earliestDueDate. Setting this as the cancellation date.")
-        earliestDueDate.right
-      }
-      case Nil => {
-        logger.error(s"Failed to find an unpaid invoice that was overdue. The invoices we got were: ${accountSummary.invoices}")
-        "No unpaid and overdue invoices found!".left
-      }
+    if (unpaidAndOverdueInvoices.isEmpty) {
+      logger.error(s"Failed to find an unpaid invoice that was overdue. The invoices we got were: ${accountSummary.invoices}")
+      "No unpaid and overdue invoices found!".left
+    } else {
+      logger.info(s"Found at least one unpaid invoices for account: ${accountSummary.basicInfo.id}. Invoice id(s): ${unpaidAndOverdueInvoices.map(_.id)}")
+      val earliestDueDate = unpaidAndOverdueInvoices.map(_.dueDate).min
+      logger.info(s"Earliest overdue invoice for account ${accountSummary.basicInfo.id} has due date: $earliestDueDate. Setting this as the cancellation date.")
+      earliestDueDate.right
     }
   }
 
