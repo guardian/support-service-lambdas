@@ -45,7 +45,8 @@ object Lambda extends App with Logging {
 
   import org.apache.commons.io.output.NullOutputStream
   val testXML = <callout>
-                  <parameter name="AccountID">12345</parameter>
+                  <parameter name="AccountId">12345</parameter>
+                  <parameter name="AutoPay">true</parameter>
                 </callout>
   val nullOutputStream = new NullOutputStream
   cancellationAttemptForPayload(testXML, nullOutputStream)
@@ -71,11 +72,19 @@ object Lambda extends App with Logging {
     }
   }
 
+  //  FIXME - we should use JSON instead of XML now that Zuora support it
   def parseXML(xmlBody: Elem): String \/ String = {
-    val accountId = (xmlBody \ "parameter")
-    if (accountId.nonEmpty) {
-      logger.info(s"AccountId parsed from Zuora callout is: $accountId")
-      (accountId.text).right
+
+    val accountId = (xmlBody \ "parameter").filter { node => (node \ "@name").text == "AccountId" } // See fix me above
+    val autoPay = (xmlBody \ "parameter").filter { node => (node \ "@name").text == "AutoPay" }
+
+    if (accountId.nonEmpty && autoPay.nonEmpty) {
+      logger.info(s"AccountId parsed from Zuora callout is: $accountId, AutoPay = $autoPay")
+      if (autoPay.text == "true") {
+        (accountId.text).right
+      } else {
+        "AutoRenew is not = true, we should not process a cancellation for this account".left
+      }
     } else {
       logger.info(s"Failed to parse XML successfully, full payload was: \n $xmlBody")
       "Failure to parse XML successfully".left

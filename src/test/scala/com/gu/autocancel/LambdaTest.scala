@@ -22,9 +22,19 @@ class LambdaTest extends FlatSpec {
   "parseXML" should "successfully parse a 'good' XML sample" in {
     val body =
       <callout>
-        <parameter name="AccountID">acc123</parameter>
+        <parameter name="AccountId">acc123</parameter>
+        <parameter name="AutoPay">true</parameter>
       </callout>
     assert(parseXML(body) == \/-("acc123"))
+  }
+
+  "parseXML" should "reject an account if auto-pay is not true" in {
+    val body =
+      <callout>
+        <parameter name="AccountId">acc123</parameter>
+        <parameter name="AutoPay">false</parameter>
+      </callout>
+    assert(parseXML(body) == -\/("AutoRenew is not = true, we should not process a cancellation for this account"))
   }
 
   "parseXML" should "fail to parse a 'bad' XML sample" in {
