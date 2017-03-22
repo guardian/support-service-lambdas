@@ -1,6 +1,7 @@
 package com.gu.autoCancel
 
 import com.amazonaws.services.lambda.runtime.Context
+import com.github.nscala_time.time.OrderingImplicits._
 import com.gu.autoCancel.APIGatewayResponse._
 import com.gu.autoCancel.Auth._
 import com.gu.autoCancel.Config._
@@ -96,28 +97,23 @@ object Lambda extends App with Logging {
     for {
       accountSummary <- restService.getAccountSummary(accountId)
       subToCancel <- getSubscriptionToCancel(accountSummary)
-      invoice <- getOverdueUnpaidInvoice(accountSummary, date)
+      cancellationDate <- getCancellationDateFromInvoices(accountSummary, date)
       updateSubscription <- restService.updateCancellationReason(subToCancel)
-      cancelSubscription <- restService.cancelSubscription(subToCancel, invoice.dueDate)
+      cancelSubscription <- restService.cancelSubscription(subToCancel, cancellationDate)
       result <- handleZuoraResults(updateSubscription, cancelSubscription)
     } yield result
   }
 
-  def getOverdueUnpaidInvoice(accountSummary: AccountSummary, dateToday: LocalDate): String \/ Invoice = {
+  def getCancellationDateFromInvoices(accountSummary: AccountSummary, dateToday: LocalDate): String \/ LocalDate = {
     val unpaidAndOverdueInvoices = accountSummary.invoices.filter { invoice => invoiceOverdue(invoice, dateToday) }
-    unpaidAndOverdueInvoices match {
-      case invoice :: Nil => {
-        logger.info(s"Determined that InvoiceId: ${invoice.id} is the overdue unpaid invoice for Account Id: ${accountSummary.basicInfo.id}")
-        invoice.right
-      }
-      case Nil => {
-        logger.error(s"Failed to find an unpaid invoice that was overdue. The invoices we got were: ${accountSummary.invoices}")
-        "No unpaid and overdue invoices found!".left
-      }
-      case invoices => {
-        logger.error(s"Found more unpaid invoices than expected for account: ${accountSummary.basicInfo.id}. The invoices we got were: ${unpaidAndOverdueInvoices.map(_.id)}")
-        "Multiple unpaid invoices".left
-      }
+    if (unpaidAndOverdueInvoices.isEmpty) {
+      logger.error(s"Failed to find an unpaid invoice that was overdue. The invoices we got were: ${accountSummary.invoices}")
+      "No unpaid and overdue invoices found!".left
+    } else {
+      logger.info(s"Found at least one unpaid invoices for account: ${accountSummary.basicInfo.id}. Invoice id(s): ${unpaidAndOverdueInvoices.map(_.id)}")
+      val earliestDueDate = unpaidAndOverdueInvoices.map(_.dueDate).min
+      logger.info(s"Earliest overdue invoice for account ${accountSummary.basicInfo.id} has due date: $earliestDueDate. Setting this as the cancellation date.")
+      earliestDueDate.right
     }
   }
 
@@ -125,7 +121,7 @@ object Lambda extends App with Logging {
     if (invoice.balance > 0 && invoice.status == "Posted") {
       val zuoraGracePeriod = 14 // This needs to match with the timeframe for the 3rd payment retry attempt in Zuora
       val invoiceOverdueDate = invoice.dueDate.plusDays(zuoraGracePeriod)
-      logger.info(s"Zuora grace period is: $zuoraGracePeriod days. Invoice due date is ${invoice.dueDate}, so it will be considered overdue on: $invoiceOverdueDate.")
+      logger.info(s"Zuora grace period is: $zuoraGracePeriod days. Due date for Invoice id ${invoice.id} is ${invoice.dueDate}, so it will be considered overdue on: $invoiceOverdueDate.")
       dateToday.isEqual(invoiceOverdueDate) || dateToday.isAfter(invoiceOverdueDate)
     } else false
   }
