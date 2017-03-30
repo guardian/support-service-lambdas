@@ -148,7 +148,6 @@ Resources:
             RestApiId: !Ref ZuoraAutoCancelAPI
             ResourceId: !Ref ZuoraAutoCancelProxyResource
             HttpMethod: POST
-            AuthorizationType: NONE
             RequestParameters:
               method.request.querystring.apiClientId: true
               method.request.querystring.apiToken: true
