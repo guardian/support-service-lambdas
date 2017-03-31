@@ -69,5 +69,15 @@ class ZuoraRestService(config: ZuoraRestConfig) extends Logging {
     convertResponseToCaseClass[UpdateSubscriptionResult](response)
   }
 
+  def disableAutoPay(accountId: String): String \/ UpdateAccountResult = {
+    val accountUpdate = AccountUpdate(autoPay = false)
+    val body = RequestBody.create(MediaType.parse("application/json"), Json.toJson(accountUpdate).toString)
+    val request = buildRequest(config, s"accounts/${accountId}").put(body).build()
+    val call = restClient.newCall(request)
+    logger.info(s"Attempting to disable autoPay with the following command: $accountUpdate")
+    val response = call.execute
+    convertResponseToCaseClass[UpdateAccountResult](response)
+  }
+
 }
 

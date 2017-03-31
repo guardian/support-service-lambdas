@@ -19,9 +19,13 @@ object ZuoraModels {
 
   case class UpdateSubscriptionResult(success: Boolean, subscriptionId: String)
 
+  case class UpdateAccountResult(success: Boolean)
+
   case class SubscriptionCancellation(cancellationEffectiveDate: LocalDate)
 
   case class SubscriptionUpdate(cancellationReason: String)
+
+  case class AccountUpdate(autoPay: Boolean)
 
 }
 
@@ -60,6 +64,10 @@ object ZuoraReaders {
     (JsPath \ "subscriptionId").read[String]
   )(UpdateSubscriptionResult.apply _)
 
+  implicit val updateAccountResultReads: Reads[UpdateAccountResult] = (JsPath \ "success").read[Boolean].map {
+    success => UpdateAccountResult(success)
+  }
+
 }
 
 object ZuoraWriters {
@@ -72,9 +80,15 @@ object ZuoraWriters {
     )
   }
 
-  implicit val subscriptionUpdateResult = new Writes[SubscriptionUpdate] {
+  implicit val subscriptionUpdateWrites = new Writes[SubscriptionUpdate] {
     def writes(subscriptionUpdate: SubscriptionUpdate) = Json.obj(
       "CancellationReason__c" -> subscriptionUpdate.cancellationReason
+    )
+  }
+
+  implicit val accountUpdateWrites = new Writes[AccountUpdate] {
+    def writes(accountUpdate: AccountUpdate) = Json.obj(
+      "autoPay" -> accountUpdate.autoPay
     )
   }
 

@@ -100,7 +100,8 @@ object Lambda extends App with Logging {
       cancellationDate <- getCancellationDateFromInvoices(accountSummary, date)
       updateSubscription <- restService.updateCancellationReason(subToCancel)
       cancelSubscription <- restService.cancelSubscription(subToCancel, cancellationDate)
-      result <- handleZuoraResults(updateSubscription, cancelSubscription)
+      disableAutoPay <- restService.disableAutoPay(accountId)
+      result <- handleZuoraResults(updateSubscription, cancelSubscription, disableAutoPay)
     } yield result
   }
 
@@ -145,8 +146,12 @@ object Lambda extends App with Logging {
     }
   }
 
-  def handleZuoraResults(updateSubscriptionResult: UpdateSubscriptionResult, cancelSubscriptionResult: CancelSubscriptionResult): String \/ Unit = {
-    if (!cancelSubscriptionResult.success || !updateSubscriptionResult.success) {
+  def handleZuoraResults(
+    updateSubscriptionResult: UpdateSubscriptionResult,
+    cancelSubscriptionResult: CancelSubscriptionResult,
+    updateAccountResult: UpdateAccountResult
+  ): String \/ Unit = {
+    if (!updateSubscriptionResult.success || !cancelSubscriptionResult.success || !updateAccountResult.success) {
       logger.error(s"Zuora rejected one (or more) of our calls during autoCancellation")
       "Received at least one failure result during autoCancellation".left
     } else {
