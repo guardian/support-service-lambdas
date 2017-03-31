@@ -101,18 +101,23 @@ class LambdaTest extends FlatSpec {
     assert(either == \/-(subscription))
   }
 
-  "handleZuoraResults" should "return a left if the CancelSubscriptionResult indicates failure" in {
-    val either = handleZuoraResults(UpdateSubscriptionResult(true, "id321"), CancelSubscriptionResult(false, LocalDate.now()))
-    assert(either == -\/("Received at least one failure result during autoCancellation"))
-  }
-
   "handleZuoraResults" should "return a left if the UpdateSubscriptionResult indicates failure" in {
-    val either = handleZuoraResults(UpdateSubscriptionResult(false, "id321"), CancelSubscriptionResult(true, LocalDate.now()))
+    val either = handleZuoraResults(UpdateSubscriptionResult(false, "id321"), CancelSubscriptionResult(true, LocalDate.now()), UpdateAccountResult(true))
     assert(either == -\/("Received at least one failure result during autoCancellation"))
   }
 
-  "handleZuoraResults" should "return a right[Unit] if both CancelSubscriptionResult and UpdateSubscriptionResult indicate success" in {
-    val either = handleZuoraResults(UpdateSubscriptionResult(true, "id321"), CancelSubscriptionResult(true, LocalDate.now()))
+  "handleZuoraResults" should "return a left if the CancelSubscriptionResult indicates failure" in {
+    val either = handleZuoraResults(UpdateSubscriptionResult(true, "id321"), CancelSubscriptionResult(false, LocalDate.now()), UpdateAccountResult(true))
+    assert(either == -\/("Received at least one failure result during autoCancellation"))
+  }
+
+  "handleZuoraResults" should "return a left if the UpdateAccountResult indicates failure" in {
+    val either = handleZuoraResults(UpdateSubscriptionResult(true, "id321"), CancelSubscriptionResult(true, LocalDate.now()), UpdateAccountResult(false))
+    assert(either == -\/("Received at least one failure result during autoCancellation"))
+  }
+
+  "handleZuoraResults" should "return a right[Unit] if all Zuora results indicate success" in {
+    val either = handleZuoraResults(UpdateSubscriptionResult(true, "id321"), CancelSubscriptionResult(true, LocalDate.now()), UpdateAccountResult(true))
     assert(either == \/-(()))
   }
 
