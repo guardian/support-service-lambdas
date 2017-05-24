@@ -1,5 +1,6 @@
 package com.gu.autocancel
 
+import com.gu.autoCancel.APIGatewayResponse._
 import com.gu.autoCancel.Lambda._
 import com.gu.autoCancel.ZuoraModels.{ UpdateSubscriptionResult, _ }
 import org.joda.time.LocalDate
@@ -34,7 +35,7 @@ class LambdaTest extends FlatSpec {
         <parameter name="AccountId">acc123</parameter>
         <parameter name="AutoPay">false</parameter>
       </callout>
-    assert(parseXML(body) == -\/("AutoRenew is not = true, we should not process a cancellation for this account"))
+    assert(parseXML(body) == -\/(forbidden("AutoRenew is not = true, we should not process a cancellation for this account")))
   }
 
   "parseXML" should "fail to parse a 'bad' XML sample" in {
@@ -42,7 +43,7 @@ class LambdaTest extends FlatSpec {
       <callout>
         <fakeTag>badData</fakeTag>
       </callout>
-    assert(parseXML(body) == -\/("Failure to parse XML successfully"))
+    assert(parseXML(body) == -\/(badRequest))
   }
 
   "invoiceOverdue" should "return false if the invoice is not in a 'Posted' state" in {
@@ -61,9 +62,9 @@ class LambdaTest extends FlatSpec {
     assert(invoiceOverdue(singleOverdueInvoice, LocalDate.now) == true)
   }
 
-  "getCancellationDateFromInvoices" should "return a left[String] if no overdue invoices are found" in {
+  "getCancellationDateFromInvoices" should "return a left if no overdue invoices are found" in {
     val either = getCancellationDateFromInvoices(AccountSummary(basicInfo, List(subscription), List(invoiceZeroBalance, invoiceNotDue, invoiceNotPosted)), LocalDate.now)
-    assert(either == -\/("No unpaid and overdue invoices found!"))
+    assert(either == -\/(forbidden("No unpaid and overdue invoices found!")))
   }
 
   "getCancellationDateFromInvoices" should "return the due date of an invoice, if exactly one overdue invoice is found on the account" in {
@@ -77,22 +78,22 @@ class LambdaTest extends FlatSpec {
     assert(either == \/-(LocalDate.now.minusDays(35)))
   }
 
-  "getSubscriptionToCancel" should "return a left[String] if there is more than one active sub on the account summary" in {
+  "getSubscriptionToCancel" should "return a left if there is more than one active sub on the account summary" in {
     val accountSummaryWithTwoSubs = AccountSummary(basicInfo, twoSubscriptions, twoOverdueInvoices)
     val either = getSubscriptionToCancel(accountSummaryWithTwoSubs)
-    assert(either == -\/("More than one active sub found!"))
+    assert(either == -\/(forbidden("More than one active sub found!")))
   }
 
-  "getSubscriptionToCancel" should "return a left[String] if there are no subs on the account summary" in {
+  "getSubscriptionToCancel" should "return a left if there are no subs on the account summary" in {
     val accountSummaryWithCancelledSub = AccountSummary(basicInfo, List(), List(invoiceNotDue))
     val either = getSubscriptionToCancel(accountSummaryWithCancelledSub)
-    assert(either == -\/("No Active subscriptions to cancel!"))
+    assert(either == -\/(forbidden("No Active subscriptions to cancel!")))
   }
 
-  "getSubscriptionToCancel" should "return a left[String] if the account summary only contains cancelled and expired subs" in {
+  "getSubscriptionToCancel" should "return a left if the account summary only contains cancelled and expired subs" in {
     val accountSummaryCancelledSub = AccountSummary(basicInfo, inactiveSubscriptions, List(singleOverdueInvoice))
     val either = getSubscriptionToCancel(accountSummaryCancelledSub)
-    assert(either == -\/("No Active subscriptions to cancel!"))
+    assert(either == -\/(forbidden("No Active subscriptions to cancel!")))
   }
 
   "getSubscriptionToCancel" should "return a right[Subscription] if there is exactly one active sub on the account summary" in {
@@ -103,17 +104,17 @@ class LambdaTest extends FlatSpec {
 
   "handleZuoraResults" should "return a left if the UpdateSubscriptionResult indicates failure" in {
     val either = handleZuoraResults(UpdateSubscriptionResult(false, "id321"), CancelSubscriptionResult(true, LocalDate.now()), UpdateAccountResult(true))
-    assert(either == -\/("Received at least one failure result during autoCancellation"))
+    assert(either == -\/(internalServerError("Received at least one failure result from Zuora during autoCancellation")))
   }
 
   "handleZuoraResults" should "return a left if the CancelSubscriptionResult indicates failure" in {
     val either = handleZuoraResults(UpdateSubscriptionResult(true, "id321"), CancelSubscriptionResult(false, LocalDate.now()), UpdateAccountResult(true))
-    assert(either == -\/("Received at least one failure result during autoCancellation"))
+    assert(either == -\/(internalServerError("Received at least one failure result from Zuora during autoCancellation")))
   }
 
   "handleZuoraResults" should "return a left if the UpdateAccountResult indicates failure" in {
     val either = handleZuoraResults(UpdateSubscriptionResult(true, "id321"), CancelSubscriptionResult(true, LocalDate.now()), UpdateAccountResult(false))
-    assert(either == -\/("Received at least one failure result during autoCancellation"))
+    assert(either == -\/(internalServerError("Received at least one failure result from Zuora during autoCancellation")))
   }
 
   "handleZuoraResults" should "return a right[Unit] if all Zuora results indicate success" in {
