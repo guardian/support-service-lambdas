@@ -9,6 +9,7 @@ import com.gu.autoCancel.ZuoraModels._
 import org.joda.time.LocalDate
 import java.io._
 import java.lang.System._
+import com.gu.autoCancel.ResponseModels.AutoCancelResponse
 import play.api.libs.json.{ JsValue, Json }
 import scala.xml.Elem
 import scala.xml.XML._
@@ -30,7 +31,7 @@ object Lambda extends App with Logging {
       cancellationAttemptForPayload(xmlBody, outputStream)
     } else {
       logger.info("Request from Zuora could not be authenticated")
-      outputForAPIGateway(outputStream, forbiddenResponse)
+      outputForAPIGateway(outputStream, unauthorized)
     }
   }
 
@@ -59,22 +60,22 @@ object Lambda extends App with Logging {
     val restService = new ZuoraRestService(setConfig)
 
     parseXML(xmlBody) match {
-      case -\/(e) => outputForAPIGateway(outputStream, failureResponse(e))
+      case -\/(response) => outputForAPIGateway(outputStream, response)
       case \/-(accountId) => autoCancellation(restService, LocalDate.now, accountId) match {
         case \/-(_) => {
           logger.info(s"Successfully processed auto-cancellation for $accountId")
-          outputForAPIGateway(outputStream, successResponse)
+          outputForAPIGateway(outputStream, success)
         }
-        case -\/(e: String) => {
-          logger.error(s"Failed to process auto-cancellation for $accountId: $e.")
-          outputForAPIGateway(outputStream, failureResponse(e))
+        case -\/(response) => {
+          logger.error(s"Failed to process auto-cancellation for $accountId: ${response.body}.")
+          outputForAPIGateway(outputStream, response)
         }
       }
     }
   }
 
   //  FIXME - we should use JSON instead of XML now that Zuora support it
-  def parseXML(xmlBody: Elem): String \/ String = {
+  def parseXML(xmlBody: Elem): AutoCancelResponse \/ String = {
 
     val accountId = (xmlBody \ "parameter").filter { node => (node \ "@name").text == "AccountId" } // See fix me above
     val autoPay = (xmlBody \ "parameter").filter { node => (node \ "@name").text == "AutoPay" }
@@ -84,15 +85,15 @@ object Lambda extends App with Logging {
       if (autoPay.text == "true") {
         (accountId.text).right
       } else {
-        "AutoRenew is not = true, we should not process a cancellation for this account".left
+        forbidden("AutoRenew is not = true, we should not process a cancellation for this account").left
       }
     } else {
       logger.info(s"Failed to parse XML successfully, full payload was: \n $xmlBody")
-      "Failure to parse XML successfully".left
+      badRequest.left
     }
   }
 
-  def autoCancellation(restService: ZuoraRestService, date: LocalDate, accountId: String): String \/ Unit = {
+  def autoCancellation(restService: ZuoraRestService, date: LocalDate, accountId: String): AutoCancelResponse \/ Unit = {
     logger.info(s"Attempting to perform auto-cancellation on account: ${accountId}")
     for {
       accountSummary <- restService.getAccountSummary(accountId)
@@ -105,11 +106,11 @@ object Lambda extends App with Logging {
     } yield result
   }
 
-  def getCancellationDateFromInvoices(accountSummary: AccountSummary, dateToday: LocalDate): String \/ LocalDate = {
+  def getCancellationDateFromInvoices(accountSummary: AccountSummary, dateToday: LocalDate): AutoCancelResponse \/ LocalDate = {
     val unpaidAndOverdueInvoices = accountSummary.invoices.filter { invoice => invoiceOverdue(invoice, dateToday) }
     if (unpaidAndOverdueInvoices.isEmpty) {
       logger.error(s"Failed to find an unpaid invoice that was overdue. The invoices we got were: ${accountSummary.invoices}")
-      "No unpaid and overdue invoices found!".left
+      forbidden("No unpaid and overdue invoices found!").left
     } else {
       logger.info(s"Found at least one unpaid invoices for account: ${accountSummary.basicInfo.id}. Invoice id(s): ${unpaidAndOverdueInvoices.map(_.id)}")
       val earliestDueDate = unpaidAndOverdueInvoices.map(_.dueDate).min
@@ -127,7 +128,7 @@ object Lambda extends App with Logging {
     } else false
   }
 
-  def getSubscriptionToCancel(accountSummary: AccountSummary): String \/ Subscription = {
+  def getSubscriptionToCancel(accountSummary: AccountSummary): AutoCancelResponse \/ Subscription = {
     val activeSubs = accountSummary.subscriptions.filter(_.status == "Active")
     activeSubs match {
       case sub :: Nil => {
@@ -136,12 +137,12 @@ object Lambda extends App with Logging {
       }
       case Nil => {
         logger.error(s"Didn't find any active subscriptions. The full list of subs for this account was: ${accountSummary.subscriptions}")
-        "No Active subscriptions to cancel!".left
+        forbidden("No Active subscriptions to cancel!").left
       }
       case subs => {
         // This should be a pretty rare scenario, because the Billing Account to Sub relationship is (supposed to be) 1-to-1
         logger.error(s"More than one subscription is Active on account: ${accountSummary.basicInfo.id}. Subscription ids are: ${activeSubs.map(_.id)}")
-        "More than one active sub found!".left // Don't continue because we don't know which active sub to cancel
+        forbidden("More than one active sub found!").left // Don't continue because we don't know which active sub to cancel
       }
     }
   }
@@ -150,10 +151,10 @@ object Lambda extends App with Logging {
     updateSubscriptionResult: UpdateSubscriptionResult,
     cancelSubscriptionResult: CancelSubscriptionResult,
     updateAccountResult: UpdateAccountResult
-  ): String \/ Unit = {
+  ): AutoCancelResponse \/ Unit = {
     if (!updateSubscriptionResult.success || !cancelSubscriptionResult.success || !updateAccountResult.success) {
       logger.error(s"Zuora rejected one (or more) of our calls during autoCancellation")
-      "Received at least one failure result during autoCancellation".left
+      internalServerError("Received at least one failure result from Zuora during autoCancellation").left
     } else {
       logger.info("All Zuora calls completed successfully")
         .right

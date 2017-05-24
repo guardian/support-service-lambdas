@@ -6,9 +6,8 @@ import com.gu.autoCancel.{ ZuoraRestConfig, ZuoraRestService }
 import okhttp3._
 import org.scalatest._
 import Matchers._
+import com.gu.autoCancel.APIGatewayResponse._
 import play.api.libs.json.{ JsValue, Json }
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 import scalaz.{ -\/, \/- }
 
 class ZuoraRestServiceTest extends AsyncFlatSpec {
@@ -67,13 +66,13 @@ class ZuoraRestServiceTest extends AsyncFlatSpec {
   "convertResponseToCaseClass" should "return a left[String] for an unsuccessful response code" in {
     val response = constructTestResponse(500)
     val either = fakeRestService.convertResponseToCaseClass[UpdateSubscriptionResult](response)
-    assert(either == -\/("Request to Zuora was unsuccessful"))
+    assert(either == -\/(internalServerError("Request to Zuora was unsuccessful")))
   }
 
   it should "return a left[String] if the body of a successful response cannot be de-serialized" in {
     val response = constructTestResponse(200)
     val either = fakeRestService.convertResponseToCaseClass[UpdateSubscriptionResult](response)
-    assert(either == -\/("Error when converting Zuora response to case class"))
+    assert(either == -\/(internalServerError("Error when converting Zuora response to case class")))
   }
 
   it should "return a right[T] if the body of a successful response deserializes to T" in {
