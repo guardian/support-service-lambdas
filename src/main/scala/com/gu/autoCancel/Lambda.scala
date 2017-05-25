@@ -64,7 +64,7 @@ object Lambda extends App with Logging {
       case \/-(accountId) => autoCancellation(restService, LocalDate.now, accountId) match {
         case \/-(_) => {
           logger.info(s"Successfully processed auto-cancellation for $accountId")
-          outputForAPIGateway(outputStream, success)
+          outputForAPIGateway(outputStream, successfulCancellation)
         }
         case -\/(response) => {
           logger.error(s"Failed to process auto-cancellation for $accountId: ${response.body}.")
@@ -85,7 +85,7 @@ object Lambda extends App with Logging {
       if (autoPay.text == "true") {
         (accountId.text).right
       } else {
-        forbidden("AutoRenew is not = true, we should not process a cancellation for this account").left
+        noActionRequired("AutoRenew is not = true, we should not process a cancellation for this account").left
       }
     } else {
       logger.info(s"Failed to parse XML successfully, full payload was: \n $xmlBody")
@@ -110,7 +110,7 @@ object Lambda extends App with Logging {
     val unpaidAndOverdueInvoices = accountSummary.invoices.filter { invoice => invoiceOverdue(invoice, dateToday) }
     if (unpaidAndOverdueInvoices.isEmpty) {
       logger.error(s"Failed to find an unpaid invoice that was overdue. The invoices we got were: ${accountSummary.invoices}")
-      forbidden("No unpaid and overdue invoices found!").left
+      noActionRequired("No unpaid and overdue invoices found!").left
     } else {
       logger.info(s"Found at least one unpaid invoices for account: ${accountSummary.basicInfo.id}. Invoice id(s): ${unpaidAndOverdueInvoices.map(_.id)}")
       val earliestDueDate = unpaidAndOverdueInvoices.map(_.dueDate).min
@@ -137,12 +137,12 @@ object Lambda extends App with Logging {
       }
       case Nil => {
         logger.error(s"Didn't find any active subscriptions. The full list of subs for this account was: ${accountSummary.subscriptions}")
-        forbidden("No Active subscriptions to cancel!").left
+        noActionRequired("No Active subscriptions to cancel!").left
       }
       case subs => {
         // This should be a pretty rare scenario, because the Billing Account to Sub relationship is (supposed to be) 1-to-1
         logger.error(s"More than one subscription is Active on account: ${accountSummary.basicInfo.id}. Subscription ids are: ${activeSubs.map(_.id)}")
-        forbidden("More than one active sub found!").left // Don't continue because we don't know which active sub to cancel
+        noActionRequired("More than one active sub found!").left // Don't continue because we don't know which active sub to cancel
       }
     }
   }

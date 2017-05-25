@@ -41,10 +41,11 @@ object APIGatewayResponse extends Logging {
     writer.close()
   }
 
-  val success = AutoCancelResponse("200", new Headers, "Success")
+  val successfulCancellation = AutoCancelResponse("200", new Headers, "Success")
+  def noActionRequired(reason: String) = AutoCancelResponse("200", new Headers, s"Auto-cancellation is not required: $reason")
+
   val unauthorized = AutoCancelResponse("401", new Headers, "Credentials are missing or invalid")
   val badRequest = AutoCancelResponse("400", new Headers, "Failure to parse XML successfully")
-  def forbidden(reason: String) = AutoCancelResponse("403", new Headers, s"Refused to process auto-cancellation: $reason")
   def internalServerError(error: String) = AutoCancelResponse("500", new Headers, s"Failed to process auto-cancellation with the following error: $error")
 
 }
