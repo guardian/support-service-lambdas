@@ -30,7 +30,6 @@ object Lambda extends App with Logging {
     logger.info(s"Received input event as JsValue: \n $inputEvent")
     if (credentialsAreValid(inputEvent, getenv("ApiClientId"), getenv("ApiToken"))) {
       logger.info("Authenticated request successfully...")
-      val xmlBody = extractBody(inputEvent)
       logger.info("it worked")
       outputForAPIGateway(outputStream, successfulCancellation)
 
@@ -39,10 +38,4 @@ object Lambda extends App with Logging {
       outputForAPIGateway(outputStream, unauthorized)
     }
   }
-
-  def extractBody(inputEvent: JsValue): Elem = {
-    val body = (inputEvent \ "body")
-    loadString(body.as[String])
-  }
-
 }
