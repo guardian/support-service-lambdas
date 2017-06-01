@@ -119,7 +119,7 @@ Resources:
         - ZuoraAutoCancelRole
         - ZuoraAutoCancelKMS
 
-   PaymentFailureLambda:
+    PaymentFailureLambda:
         Type: AWS::Lambda::Function
         Properties:
             Description: handles zuora payment failure callouts
@@ -149,6 +149,13 @@ Resources:
         Properties:
             Action: lambda:invokeFunction
             FunctionName: !Sub zuora-auto-cancel-${Stage}
+            Principal: apigateway.amazonaws.com
+        DependsOn: ZuoraAutoCancelLambda
+    PaymentFailureAPIPermission:
+        Type: AWS::Lambda::Permission
+        Properties:
+            Action: lambda:invokeFunction
+            FunctionName: !Sub payment-failure-${Stage}
             Principal: apigateway.amazonaws.com
         DependsOn: ZuoraAutoCancelLambda
 
