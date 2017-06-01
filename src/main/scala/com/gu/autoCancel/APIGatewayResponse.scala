@@ -40,7 +40,7 @@ object APIGatewayResponse extends Logging {
     writer.write(Json.stringify(jsonResponse))
     writer.close()
   }
-
+  //TODO IF WE KEEP THE FAILURE EMAIL LAMBDAS HERE WE SHOULD RENAME THESE TO SOMETHING MORE GENERIC
   val successfulCancellation = AutoCancelResponse("200", new Headers, "Success")
   def noActionRequired(reason: String) = AutoCancelResponse("200", new Headers, s"Auto-cancellation is not required: $reason")
 
