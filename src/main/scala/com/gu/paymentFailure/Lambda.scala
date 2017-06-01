@@ -21,18 +21,14 @@ import scalaz.{ -\/, \/, \/- }
 
 object Lambda extends App with Logging {
 
-  /* Entry point for our Lambda - this takes the input event from API Gateway,
-  extracts out the XML body and then hands over to cancellationAttemptForPayload for the 'real work'.
-  */
   def handleRequest(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
-    logger.info(s"paymentFailure Lambda is starting up...")
+    logger.info(s"Payment Failure Lambda is starting up...")
     val inputEvent = Json.parse(inputStream)
     logger.info(s"Received input event as JsValue: \n $inputEvent")
     if (credentialsAreValid(inputEvent, getenv("ApiClientId"), getenv("ApiToken"))) {
       logger.info("Authenticated request successfully...")
       logger.info("it worked")
       outputForAPIGateway(outputStream, successfulCancellation)
-
     } else {
       logger.info("Request from Zuora could not be authenticated")
       outputForAPIGateway(outputStream, unauthorized)
