@@ -9,11 +9,11 @@ object ZuoraModels {
 
   case class BasicAccountInfo(id: String, balance: Double)
 
-  case class Subscription(id: String, status: String)
+  case class SubscriptionSummary(id: String, name: String, status: String)
 
   case class Invoice(id: String, dueDate: LocalDate, balance: Double, status: String)
 
-  case class AccountSummary(basicInfo: BasicAccountInfo, subscriptions: List[Subscription], invoices: List[Invoice])
+  case class AccountSummary(basicInfo: BasicAccountInfo, subscriptions: List[SubscriptionSummary], invoices: List[Invoice])
 
   case class CancelSubscriptionResult(success: Boolean, cancelledDate: LocalDate)
 
@@ -36,10 +36,11 @@ object ZuoraReaders {
     (JsPath \ "balance").read[Double]
   )(BasicAccountInfo.apply _)
 
-  implicit val subscriptionReads: Reads[Subscription] = (
+  implicit val subscriptionSummaryReads: Reads[SubscriptionSummary] = (
     (JsPath \ "id").read[String] and
+    (JsPath \ "subscriptionNumber").read[String] and
     (JsPath \ "status").read[String]
-  )(Subscription.apply _)
+  )(SubscriptionSummary.apply _)
 
   implicit val invoiceReads: Reads[Invoice] = (
     (JsPath \ "id").read[String] and
@@ -50,7 +51,7 @@ object ZuoraReaders {
 
   implicit val accountSummaryReads: Reads[AccountSummary] = (
     (JsPath \ "basicInfo").read[BasicAccountInfo] and
-    (JsPath \ "subscriptions").read[List[Subscription]] and
+    (JsPath \ "subscriptions").read[List[SubscriptionSummary]] and
     (JsPath \ "invoices").read[List[Invoice]]
   )(AccountSummary.apply _)
 

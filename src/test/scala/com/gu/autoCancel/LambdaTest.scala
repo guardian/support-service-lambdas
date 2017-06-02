@@ -1,4 +1,4 @@
-package com.gu.autocancel
+package com.gu.autoCancel
 
 import com.gu.autoCancel.APIGatewayResponse._
 import com.gu.autoCancel.Lambda._
@@ -11,9 +11,9 @@ import scalaz.{ -\/, \/- }
 class LambdaTest extends FlatSpec {
 
   val basicInfo = BasicAccountInfo("id123", 11.99)
-  val subscription = Subscription("A-S123", "Active")
-  val twoSubscriptions = List(Subscription("A-S123", "Active"), Subscription("A-S321", "Active"))
-  val inactiveSubscriptions = List(Subscription("A-S123", "Cancelled"), Subscription("A-S321", "Expired"))
+  val subscription = SubscriptionSummary("id123", "A-S123", "Active")
+  val twoSubscriptions = List(SubscriptionSummary("id123", "A-S123", "Active"), SubscriptionSummary("id321", "A-S321", "Active"))
+  val inactiveSubscriptions = List(SubscriptionSummary("id456", "A-S123", "Cancelled"), SubscriptionSummary("id789", "A-S321", "Expired"))
   val invoiceNotPosted = Invoice("inv123", LocalDate.now.minusDays(5), 11.99, "Cancelled")
   val invoiceZeroBalance = Invoice("inv123", LocalDate.now.minusDays(1), 0.00, "Posted")
   val invoiceNotDue = Invoice("inv123", LocalDate.now.minusDays(3), 11.99, "Posted")

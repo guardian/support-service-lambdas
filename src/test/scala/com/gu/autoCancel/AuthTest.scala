@@ -1,4 +1,4 @@
-package com.gu.autocancel
+package com.gu.autoCancel
 
 import com.gu.autoCancel.Auth._
 import org.scalatest.FlatSpec

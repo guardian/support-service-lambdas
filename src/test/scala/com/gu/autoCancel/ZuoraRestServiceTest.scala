@@ -1,8 +1,7 @@
-package com.gu.autocancel
+package com.gu.autoCancel
 
 import com.gu.autoCancel.ZuoraModels._
 import com.gu.autoCancel.ZuoraReaders._
-import com.gu.autoCancel.{ ZuoraRestConfig, ZuoraRestService }
 import okhttp3._
 import org.scalatest._
 import Matchers._

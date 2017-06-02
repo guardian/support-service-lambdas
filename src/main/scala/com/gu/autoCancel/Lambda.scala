@@ -128,7 +128,7 @@ object Lambda extends App with Logging {
     } else false
   }
 
-  def getSubscriptionToCancel(accountSummary: AccountSummary): AutoCancelResponse \/ Subscription = {
+  def getSubscriptionToCancel(accountSummary: AccountSummary): AutoCancelResponse \/ SubscriptionSummary = {
     val activeSubs = accountSummary.subscriptions.filter(_.status == "Active")
     activeSubs match {
       case sub :: Nil => {
