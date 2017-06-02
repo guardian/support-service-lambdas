@@ -1,13 +1,13 @@
 package com.gu.paymentFailure
 
 import com.amazonaws.services.lambda.runtime.Context
-import com.gu.autoCancel.APIGatewayResponse.{ outputForAPIGateway, _ }
+import com.gu.autoCancel.APIGatewayResponse.{outputForAPIGateway, _}
 import com.gu.autoCancel.Auth._
 import java.io._
 import java.lang.System._
 
 import com.gu.autoCancel.Logging
-import play.api.libs.json.{ JsValue, Json }
+import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 
 object Lambda extends App with Logging {
 
@@ -20,9 +20,15 @@ object Lambda extends App with Logging {
 
       val maybeBody = inputEvent \ "body"
       maybeBody.toOption.map { body =>
-        val callout = Json.fromJson[PaymentFailureCallout](body)
-        logger.info(s"it worked: $callout")
-        outputForAPIGateway(outputStream, successfulCancellation)
+        Json.fromJson[PaymentFailureCallout](Json.parse(body.as[String])) match {
+          case callout: JsSuccess[PaymentFailureCallout] =>
+            logger.info(s"it worked: $callout")
+            outputForAPIGateway(outputStream, successfulCancellation)
+          case e: JsError =>
+            logger.error(s"error parsing callout body: $e")
+            outputForAPIGateway(outputStream, badRequest)
+        }
+
       }.getOrElse(
         outputForAPIGateway(outputStream, badRequest)
       )
