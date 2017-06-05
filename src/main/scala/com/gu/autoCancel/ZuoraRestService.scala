@@ -51,6 +51,14 @@ class ZuoraRestService(config: ZuoraRestConfig) extends Logging {
     convertResponseToCaseClass[AccountSummary](response)
   }
 
+  def getSubscription(subscriptionNumber: String): AutoCancelResponse \/ Subscription = {
+    logger.info(s"Getting subscription $subscriptionNumber from Zuora")
+    val request = buildRequest(config, s"subscriptions/$subscriptionNumber").get().build()
+    val call = restClient.newCall(request)
+    val response = call.execute()
+    convertResponseToCaseClass[Subscription](response)
+  }
+
   def cancelSubscription(subscription: SubscriptionSummary, cancellationDate: LocalDate): AutoCancelResponse \/ CancelSubscriptionResult = {
     val subscriptionCancellation = SubscriptionCancellation(cancellationDate)
     val body = RequestBody.create(MediaType.parse("application/json"), Json.toJson(subscriptionCancellation).toString)

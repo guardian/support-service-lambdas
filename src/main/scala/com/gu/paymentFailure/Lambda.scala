@@ -6,8 +6,14 @@ import com.gu.autoCancel.Auth._
 import java.io._
 import java.lang.System._
 import com.gu.autoCancel.Config.setConfig
+import com.gu.autoCancel.ResponseModels.AutoCancelResponse
+import com.gu.autoCancel.ZuoraModels.{ RatePlan, RatePlanCharge, Subscription }
 import com.gu.autoCancel.{ Logging, ZuoraRestService }
+import org.joda.time.LocalDate
 import play.api.libs.json.{ JsError, JsSuccess, Json }
+
+import scalaz.Scalaz._
+import scalaz.\/
 
 object Lambda extends App with Logging {
 
@@ -47,28 +53,56 @@ object Lambda extends App with Logging {
           if (activeSubsForAccount.size != 1) {
             logger.error("Unable to precisely identify unpaid subscription")
           } else {
-            val subName = accountSummary.subscriptions.head.name
+            val subName = accountSummary.subscriptions.head.subscriptionNumber
             logger.info(s"Subscription name for email is: $subName")
+            val productsForEmail = for {
+              sub <- restService.getSubscription(subName)
+              activePlans <- currentPlansForSubscription(sub)
+            } yield activePlans
+            logger.info(s"Products are: $productsForEmail")
           }
         }
     }
     outputForAPIGateway(outputStream, successfulCancellation)
   }
 
-  //  import org.apache.commons.io.output.NullOutputStream
-  //  val testPaymentFailureCallout = PaymentFailureCallout(
-  //    accountId = "id123",
-  //    email = "test.user123@guardian.co.uk",
-  //    failureNumber = "1",
-  //    firstName = "Test",
-  //    lastName = "User",
-  //    paymentMethodType = "CreditCard",
-  //    creditCardType = "Visa",
-  //    creditCardExpirationMonth = "12",
-  //    creditCardExpirationYear = "2017"
-  //  )
-  //  val nullOutputStream = new NullOutputStream
-  //  dataCollection(testPaymentFailureCallout, nullOutputStream)
+  def currentPlansForSubscription(subscription: Subscription): AutoCancelResponse \/ List[RatePlan] = {
+    val activePlans = subscription.ratePlans.filter { plan =>
+      currentlyActive(plan)
+    }
+    if (activePlans.isEmpty) {
+      val failureReason = s"Failed to find any active charges for ${subscription.subscriptionNumber}"
+      logger.error(failureReason)
+      noActionRequired(failureReason).left
+    } else activePlans.right
+  }
+
+  def currentlyActive(ratePlan: RatePlan): Boolean = {
+    val today = LocalDate.now()
+    def datesInRange(ratePlanCharge: RatePlanCharge): Boolean = {
+      val startDate = ratePlanCharge.effectiveStartDate
+      (startDate.equals(today) || startDate.isBefore(today)) && ratePlanCharge.effectiveEndDate.isAfter(today)
+    }
+    val activeCharges = ratePlan.ratePlanCharges.filter {
+      ratePlanCharge => datesInRange(ratePlanCharge)
+    }
+    activeCharges.nonEmpty
+  }
+
+//  import org.apache.commons.io.output.NullOutputStream
+//  val testPaymentFailureCallout = PaymentFailureCallout(
+//    accountId = "id123",
+//    email = "test.user123@guardian.co.uk",
+//    failureNumber = "1",
+//    firstName = "Test",
+//    lastName = "User",
+//    paymentMethodType = "CreditCard",
+//    creditCardType = "Visa",
+//    creditCardExpirationMonth = "12",
+//    creditCardExpirationYear = "2017"
+//  )
+//  val nullOutputStream = new NullOutputStream
+//  dataCollection(testPaymentFailureCallout, nullOutputStream)
 
 }
 
