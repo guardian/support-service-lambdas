@@ -14,7 +14,12 @@ import scalaz.\/
 
 case class ZuoraRestConfig(baseUrl: String, username: String, password: String)
 
-class ZuoraRestService(config: ZuoraRestConfig) extends Logging {
+trait ZuoraService {
+  def getAccountSummary(accountId: String): AutoCancelResponse \/ AccountSummary
+  def getSubscription(subscriptionNumber: String): AutoCancelResponse \/ Subscription
+}
+
+class ZuoraRestService(config: ZuoraRestConfig) extends ZuoraService with Logging {
 
   val restClient = new OkHttpClient().newBuilder()
     .readTimeout(15, TimeUnit.SECONDS)
@@ -43,7 +48,7 @@ class ZuoraRestService(config: ZuoraRestConfig) extends Logging {
     }
   }
 
-  def getAccountSummary(accountId: String): AutoCancelResponse \/ AccountSummary = {
+  override def getAccountSummary(accountId: String): AutoCancelResponse \/ AccountSummary = {
     logger.info(s"Getting account summary from Zuora for Account Id: $accountId")
     val request = buildRequest(config, s"accounts/$accountId/summary").get().build()
     val call = restClient.newCall(request)
@@ -51,7 +56,7 @@ class ZuoraRestService(config: ZuoraRestConfig) extends Logging {
     convertResponseToCaseClass[AccountSummary](response)
   }
 
-  def getSubscription(subscriptionNumber: String): AutoCancelResponse \/ Subscription = {
+  override def getSubscription(subscriptionNumber: String): AutoCancelResponse \/ Subscription = {
     logger.info(s"Getting subscription $subscriptionNumber from Zuora")
     val request = buildRequest(config, s"subscriptions/$subscriptionNumber").get().build()
     val call = restClient.newCall(request)
