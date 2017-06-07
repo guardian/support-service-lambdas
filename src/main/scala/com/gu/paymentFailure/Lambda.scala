@@ -19,7 +19,7 @@ import scala.util.{ Failure, Success }
 import scalaz.Scalaz._
 import scalaz.{ -\/, \/ }
 
-trait PaymentFailureLambda extends App with Logging {
+trait PaymentFailureLambda extends Logging {
   def config: Config
   def zuoraService: ZuoraService
   def queueClient: QueueClient

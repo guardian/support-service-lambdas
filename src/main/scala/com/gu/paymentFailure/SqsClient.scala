@@ -1,12 +1,13 @@
 package com.gu.paymentFailure
 
 import com.amazonaws.auth.profile.ProfileCredentialsProvider
-import com.amazonaws.auth.{ AWSCredentialsProviderChain, InstanceProfileCredentialsProvider }
+import com.amazonaws.auth.{ AWSCredentialsProviderChain, EnvironmentVariableCredentialsProvider, InstanceProfileCredentialsProvider }
 import com.amazonaws.regions.Regions.EU_WEST_1
 import com.amazonaws.services.sqs.AmazonSQSClient
 import com.amazonaws.services.sqs.model._
 import com.gu.autoCancel.Logging
 import play.api.libs.json.Json
+
 import scala.util.Try
 
 case class ContactAttributesDef(SubscriberAttributes: SubscriberAttributesDef)
@@ -52,7 +53,8 @@ object SqsClient extends QueueClient with Logging {
 
   lazy val CredentialsProvider = new AWSCredentialsProviderChain(
     new ProfileCredentialsProvider("membership"),
-    new InstanceProfileCredentialsProvider(false)
+    new InstanceProfileCredentialsProvider(false),
+    new EnvironmentVariableCredentialsProvider()
   )
 
   private val sqsClient = AmazonSQSClient.builder

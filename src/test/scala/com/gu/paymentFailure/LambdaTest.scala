@@ -39,21 +39,20 @@ class LambdaTest extends FlatSpec with MockitoSugar {
     override def queueClient: QueueClient = fakeQueueClient
     override def currentDate = new DateTime(2005, 6, 23, 12, 0, 0, 0)
   }
-
   "currentlyActive" should "identify an active plan" in {
-    assert(currentlyActive(activeSupporter) == true)
+    lambda.currentlyActive(activeSupporter) shouldBe true
   }
 
   "currentlyActive" should "discard a plan which hasn't started yet" in {
-    assert(currentlyActive(cancelledFriend) == false)
+    lambda.currentlyActive(cancelledFriend) shouldBe false
   }
 
   "currentlyActive" should "discard a plan which has ended" in {
-    assert(currentlyActive(unstartedPartner) == false)
+    lambda.currentlyActive(unstartedPartner) shouldBe false
   }
 
   "currentPlansForSubscription" should "discard an old Friend plan on a Supporter sub" in {
-    assert(currentPlansForSubscription(upgradedSub) == \/-(List(activeSupporter)))
+    lambda.currentPlansForSubscription(upgradedSub) shouldBe \/-(List(activeSupporter))
   }
 
   val missingCredentialsResponse = """{"statusCode":"401","headers":{"Content-Type":"application/json"},"body":"Credentials are missing or invalid"}"""
@@ -80,6 +79,7 @@ class LambdaTest extends FlatSpec with MockitoSugar {
   }
 
   "lambda" should "return enqueue email and return success for a valid request" in {
+    //set up
     val stream = getClass.getResourceAsStream("/paymentFailure/validRequest.json")
     val output = new ByteArrayOutputStream
 
@@ -96,7 +96,11 @@ class LambdaTest extends FlatSpec with MockitoSugar {
     when(fakeQueueClient.sendDataExtensionToQueue(any[Message])).thenReturn(Success(mock[SendMessageResult]))
 
     val os = new ByteArrayOutputStream()
+
+    //execute
     lambda.handleRequest(stream, os, null)
+
+    //verify
     val responseString = new String(os.toByteArray(), "UTF-8")
 
     val expectedMessage = Message(
