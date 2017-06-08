@@ -32,8 +32,8 @@ class LambdaTest extends FlatSpec with MockitoSugar {
   val lambda = new PaymentFailureLambda {
 
     override def config: Config = new Config {
-      override val apiToken = "validApiToken"
-      override val apiClientId = "validApiClientId"
+      override val user = "validUser"
+      override val pass = "validPass"
     }
     override def zuoraService = fakeZuoraService
     override def queueClient: QueueClient = fakeQueueClient
