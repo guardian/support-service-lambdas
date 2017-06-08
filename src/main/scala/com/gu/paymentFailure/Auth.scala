@@ -9,7 +9,7 @@ import play.api.libs.json.JsValue
 object Auth extends Logging {
 
   def credentialsAreValid(inputEvent: JsValue, trustedUserName: String, trustedPassword: String): Boolean = {
-    val AuthorizationHeader = (inputEvent \ "headers" \ "Authentication").asOpt[String]
+    val AuthorizationHeader = (inputEvent \ "headers" \ "Authorization").asOpt[String]
     val result = AuthorizationHeader.filter(_.startsWith("Basic")).map { headerValue =>
       val encodedData = headerValue.drop(6)
       val credentials = new String(Base64.getDecoder.decode(encodedData), Charset.forName("UTF-8"))

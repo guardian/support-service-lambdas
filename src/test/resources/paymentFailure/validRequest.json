@@ -21,7 +21,7 @@
     "X-Forwarded-For": "222.222.222",
     "X-Forwarded-Port": "443",
     "X-Forwarded-Proto": "https",
-    "Authentication": "Basic dmFsaWRVc2VyOnZhbGlkUGFzcw=="
+    "Authorization": "Basic dmFsaWRVc2VyOnZhbGlkUGFzcw=="
 
   },
   "queryStringParameters": {
