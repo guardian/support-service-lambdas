@@ -16,7 +16,7 @@ case class ZuoraRestConfig(baseUrl: String, username: String, password: String)
 
 trait ZuoraService {
   def getAccountSummary(accountId: String): AutoCancelResponse \/ AccountSummary
-  def getSubscription(subscriptionNumber: String): AutoCancelResponse \/ Subscription
+  def getInvoiceTransactions(accountId: String): AutoCancelResponse \/ InvoiceTransactionSummary
 }
 
 class ZuoraRestService(config: ZuoraRestConfig) extends ZuoraService with Logging {
@@ -56,12 +56,12 @@ class ZuoraRestService(config: ZuoraRestConfig) extends ZuoraService with Loggin
     convertResponseToCaseClass[AccountSummary](response)
   }
 
-  override def getSubscription(subscriptionNumber: String): AutoCancelResponse \/ Subscription = {
-    logger.info(s"Getting subscription $subscriptionNumber from Zuora")
-    val request = buildRequest(config, s"subscriptions/$subscriptionNumber").get().build()
+  override def getInvoiceTransactions(accountId: String): AutoCancelResponse \/ InvoiceTransactionSummary = {
+    logger.info(s"Getting itemised invoices from Zuora for Account Id: $accountId")
+    val request = buildRequest(config, s"transactions/invoices/accounts/$accountId").get().build()
     val call = restClient.newCall(request)
-    val response = call.execute()
-    convertResponseToCaseClass[Subscription](response)
+    val response = call.execute
+    convertResponseToCaseClass[InvoiceTransactionSummary](response)
   }
 
   def cancelSubscription(subscription: SubscriptionSummary, cancellationDate: LocalDate): AutoCancelResponse \/ CancelSubscriptionResult = {

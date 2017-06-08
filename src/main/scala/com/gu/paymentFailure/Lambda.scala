@@ -6,10 +6,9 @@ import com.gu.autoCancel.Auth._
 import java.io._
 import java.lang.System._
 import java.text.SimpleDateFormat
-
 import com.gu.autoCancel.Config.setConfig
 import com.gu.autoCancel.ResponseModels.AutoCancelResponse
-import com.gu.autoCancel.ZuoraModels.{ RatePlan, RatePlanCharge, Subscription }
+import com.gu.autoCancel.ZuoraModels._
 import com.gu.autoCancel.{ Logging, ZuoraRestService, ZuoraService }
 import org.joda.time.{ DateTime, LocalDate }
 import org.joda.time.format.DateTimeFormat
@@ -40,7 +39,6 @@ trait PaymentFailureLambda extends Logging {
             enqueueEmail(callout.value)
             //todo see if we need error handling instead of always return success here
             outputForAPIGateway(outputStream, successfulCancellation)
-
           case e: JsError =>
             logger.error(s"error parsing callout body: $e")
             outputForAPIGateway(outputStream, badRequest)
@@ -56,12 +54,13 @@ trait PaymentFailureLambda extends Logging {
   }
 
   def enqueueEmail(paymentFailureCallout: PaymentFailureCallout) = {
+    val accountId = paymentFailureCallout.accountId
     logger.info(s"Received $paymentFailureCallout")
-    dataCollection(paymentFailureCallout.accountId).map { paymentInformation =>
+    dataCollection(accountId).map { paymentInformation =>
       val message = toMessage(paymentFailureCallout, paymentInformation)
       queueClient.sendDataExtensionToQueue(message) match {
-        case Success(messageResult) => logger.info("message queued successfully")
-        case Failure(error) => logger.error("could not enqueue message ", error)
+        case Success(messageResult) => logger.info(s"Message queued successfully for account: $accountId")
+        case Failure(error) => logger.error(s"Could not enqueue message for account: $accountId", error)
       }
     }
   }
@@ -76,8 +75,8 @@ trait PaymentFailureLambda extends Logging {
           SubscriberKey = paymentFailureCallout.email,
           EmailAddress = paymentFailureCallout.email,
           DateField = currentDateStr,
-          subscriber_id = paymentFailureInformation.subscription.subscriptionNumber,
-          product = paymentFailureInformation.ratePlans.map(_.productName).mkString(","), // todo just for now
+          subscriber_id = paymentFailureInformation.subscriptionName,
+          product = paymentFailureInformation.product,
           payment_method = paymentFailureCallout.paymentMethodType,
           card_type = paymentFailureCallout.creditCardType,
           card_expiry_date = paymentFailureCallout.creditCardExpirationMonth + "/" + paymentFailureCallout.creditCardExpirationYear,
@@ -91,70 +90,39 @@ trait PaymentFailureLambda extends Logging {
   //todo see if we need to parse the payment number as an int
   def dataExtensionNameForAttempt: Map[String, String] = Map("1" -> "first-failed-payment-email", "2" -> "second-failed-payment-email", "3" -> "third-failed-payment-email")
 
-  case class PaymentFailureInformation(subscription: Subscription, ratePlans: List[RatePlan])
+  case class PaymentFailureInformation(subscriptionName: String, product: String)
 
   //todo for now just return an option here but the error handling has to be refactored a little bit
   def dataCollection(accountId: String): Option[PaymentFailureInformation] = {
     logger.info("attempting to get further details from account")
-    zuoraService.getAccountSummary(accountId).toOption.flatMap {
-      accountSummary =>
-        {
-          logger.info(s"Got: $accountSummary")
-          val activeSubsForAccount = accountSummary.subscriptions.filter(_.status == "Active")
-          if (activeSubsForAccount.size != 1) {
-            logger.error("Unable to precisely identify unpaid subscription")
+    val unpaidInvoices = zuoraService.getInvoiceTransactions(accountId).map {
+      invoiceTransactionSummary =>
+        invoiceTransactionSummary.invoices.filter {
+          invoice => unpaid(invoice)
+        }
+    }
+    unpaidInvoices.toOption.flatMap {
+      unpaid =>
+        unpaid.headOption match {
+          case Some(invoice) => {
+            logger.info(s"Found the following unpaid invoice: $invoice")
+            invoice.invoiceItems.headOption.map { item =>
+              val paymentFailureInfo = PaymentFailureInformation(item.subscriptionName, item.productName)
+              logger.info(s"Payment failure information for account: $accountId is: $paymentFailureInfo")
+              paymentFailureInfo
+            } //todo make this safe
+          }
+          case None => {
+            logger.error(s"No unpaid invoice found - nothing to do")
             None
-          } else {
-            val subName = accountSummary.subscriptions.head.subscriptionNumber
-            logger.info(s"Subscription name for email is: $subName")
-            val productsForEmail = for {
-              sub <- zuoraService.getSubscription(subName)
-              activePlans <- currentPlansForSubscription(sub)
-            } yield PaymentFailureInformation(sub, activePlans)
-            logger.info(s"Products are: $productsForEmail")
-            productsForEmail.toOption
           }
         }
     }
   }
 
-  def currentPlansForSubscription(subscription: Subscription): String \/ List[RatePlan] = {
-    val activePlans = subscription.ratePlans.filter { plan =>
-      currentlyActive(plan)
-    }
-    if (activePlans.isEmpty) {
-      val failureReason = s"Failed to find any active charges for ${subscription.subscriptionNumber}"
-      logger.error(failureReason)
-      -\/(failureReason)
-    } else activePlans.right
+  def unpaid(itemisedInvoice: ItemisedInvoice): Boolean = {
+    itemisedInvoice.balance > 0 && itemisedInvoice.status == "Posted"
   }
-
-  def currentlyActive(ratePlan: RatePlan): Boolean = {
-    val today = LocalDate.now()
-    def datesInRange(ratePlanCharge: RatePlanCharge): Boolean = {
-      val startDate = ratePlanCharge.effectiveStartDate
-      (startDate.equals(today) || startDate.isBefore(today)) && ratePlanCharge.effectiveEndDate.isAfter(today)
-    }
-    val activeCharges = ratePlan.ratePlanCharges.filter {
-      ratePlanCharge => datesInRange(ratePlanCharge)
-    }
-    activeCharges.nonEmpty
-  }
-
-  //  import org.apache.commons.io.output.NullOutputStream
-  //  val testPaymentFailureCallout = PaymentFailureCallout(
-  //    accountId = "id123",
-  //    email = "test.user123@guardian.co.uk",
-  //    failureNumber = "1",
-  //    firstName = "Test",
-  //    lastName = "User",
-  //    paymentMethodType = "CreditCard",
-  //    creditCardType = "Visa",
-  //    creditCardExpirationMonth = "12",
-  //    creditCardExpirationYear = "2017"
-  //  )
-  //  val nullOutputStream = new NullOutputStream
-  //  dataCollection(testPaymentFailureCallout, nullOutputStream)
 
 }
 

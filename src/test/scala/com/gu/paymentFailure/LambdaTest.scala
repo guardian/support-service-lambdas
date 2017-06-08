@@ -24,10 +24,6 @@ class LambdaTest extends FlatSpec with MockitoSugar {
   val fakeZuoraService = mock[ZuoraService]
   val fakeQueueClient = mock[QueueClient]
   val today = LocalDate.now()
-  val activeSupporter = RatePlan("id123", "Supporter", "Annual", List(RatePlanCharge(effectiveStartDate = today, effectiveEndDate = today.plusDays(364))))
-  val cancelledFriend = RatePlan("id123", "Friend", "Annual", List(RatePlanCharge(effectiveStartDate = today.minusDays(365), effectiveEndDate = today.minusDays(200))))
-  val unstartedPartner = RatePlan("id123", "Partner", "Annual", List(RatePlanCharge(effectiveStartDate = today.plusDays(10), effectiveEndDate = today.plusDays(375))))
-  val upgradedSub = Subscription("id123", "A-S123", List(cancelledFriend, activeSupporter))
 
   val lambda = new PaymentFailureLambda {
 
@@ -38,21 +34,6 @@ class LambdaTest extends FlatSpec with MockitoSugar {
     override def zuoraService = fakeZuoraService
     override def queueClient: QueueClient = fakeQueueClient
     override def currentDate = new DateTime(2005, 6, 23, 12, 0, 0, 0)
-  }
-  "currentlyActive" should "identify an active plan" in {
-    lambda.currentlyActive(activeSupporter) shouldBe true
-  }
-
-  "currentlyActive" should "discard a plan which hasn't started yet" in {
-    lambda.currentlyActive(cancelledFriend) shouldBe false
-  }
-
-  "currentlyActive" should "discard a plan which has ended" in {
-    lambda.currentlyActive(unstartedPartner) shouldBe false
-  }
-
-  "currentPlansForSubscription" should "discard an old Friend plan on a Supporter sub" in {
-    lambda.currentPlansForSubscription(upgradedSub) shouldBe \/-(List(activeSupporter))
   }
 
   val missingCredentialsResponse = """{"statusCode":"401","headers":{"Content-Type":"application/json"},"body":"Credentials are missing or invalid"}"""
@@ -82,16 +63,10 @@ class LambdaTest extends FlatSpec with MockitoSugar {
     //set up
     val stream = getClass.getResourceAsStream("/paymentFailure/validRequest.json")
     val output = new ByteArrayOutputStream
+    val invoiceItem = InvoiceItem("invitem123", "A-S123", today, today.plusMonths(1), "Non founder - annual", "Supporter")
+    val invoiceTransSummary = InvoiceTransactionSummary(List(ItemisedInvoice("invoice123", today, 49, 49, "Posted", List(invoiceItem))))
 
-    val basicInfo = BasicAccountInfo("accountId", 1)
-    val subSum = SubscriptionSummary("subId", "subNumber", "Active")
-    val accountSummary = AccountSummary(basicInfo, List(subSum), Nil)
-    case class RatePlan(id: String, productName: String, ratePlanName: String, ratePlanCharges: List[RatePlanCharge])
-
-    val subscription = Subscription("subId", "subNumber", List(activeSupporter))
-
-    when(fakeZuoraService.getAccountSummary("accountId")).thenReturn(\/-(accountSummary))
-    when(fakeZuoraService.getSubscription("subNumber")).thenReturn(\/-(subscription))
+    when(fakeZuoraService.getInvoiceTransactions("accountId")).thenReturn(\/-(invoiceTransSummary))
 
     when(fakeQueueClient.sendDataExtensionToQueue(any[Message])).thenReturn(Success(mock[SendMessageResult]))
 
@@ -113,7 +88,7 @@ class LambdaTest extends FlatSpec with MockitoSugar {
             SubscriberKey = "test.user123@guardian.co.uk",
             EmailAddress = "test.user123@guardian.co.uk",
             DateField = "23/06/2005",
-            subscriber_id = "subNumber",
+            subscriber_id = "A-S123",
             product = "Supporter",
             payment_method = "CreditCard",
             card_type = "Visa",

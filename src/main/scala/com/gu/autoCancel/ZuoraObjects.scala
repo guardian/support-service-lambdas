@@ -15,11 +15,11 @@ object ZuoraModels {
 
   case class AccountSummary(basicInfo: BasicAccountInfo, subscriptions: List[SubscriptionSummary], invoices: List[Invoice])
 
-  case class Subscription(id: String, subscriptionNumber: String, ratePlans: List[RatePlan])
+  case class InvoiceItem(id: String, subscriptionName: String, serviceStartDate: LocalDate, serviceEndDate: LocalDate, chargeName: String, productName: String)
 
-  case class RatePlan(id: String, productName: String, ratePlanName: String, ratePlanCharges: List[RatePlanCharge])
+  case class ItemisedInvoice(id: String, invoiceDate: LocalDate, amount: Int, balance: Int, status: String, invoiceItems: List[InvoiceItem])
 
-  case class RatePlanCharge(effectiveStartDate: LocalDate, effectiveEndDate: LocalDate)
+  case class InvoiceTransactionSummary(invoices: List[ItemisedInvoice])
 
   case class CancelSubscriptionResult(success: Boolean, cancelledDate: LocalDate)
 
@@ -61,23 +61,28 @@ object ZuoraReaders {
     (JsPath \ "invoices").read[List[Invoice]]
   )(AccountSummary.apply _)
 
-  implicit val ratePlanChargeReads: Reads[RatePlanCharge] = (
-    (JsPath \ "effectiveStartDate").read[LocalDate] and
-    (JsPath \ "effectiveEndDate").read[LocalDate]
-  )(RatePlanCharge.apply _)
-
-  implicit val ratePlanReads: Reads[RatePlan] = (
+  implicit val invoiceItemReads: Reads[InvoiceItem] = (
     (JsPath \ "id").read[String] and
-    (JsPath \ "productName").read[String] and
-    (JsPath \ "ratePlanName").read[String] and
-    (JsPath \ "ratePlanCharges").read[List[RatePlanCharge]]
-  )(RatePlan.apply _)
+    (JsPath \ "subscriptionName").read[String] and
+    (JsPath \ "serviceStartDate").read[LocalDate] and
+    (JsPath \ "serviceEndDate").read[LocalDate] and
+    (JsPath \ "chargeName").read[String] and
+    (JsPath \ "productName").read[String]
+  )(InvoiceItem.apply _)
 
-  implicit val subscriptionReads: Reads[Subscription] = (
+  implicit val itemisedInvoiceReads: Reads[ItemisedInvoice] = (
     (JsPath \ "id").read[String] and
-    (JsPath \ "subscriptionNumber").read[String] and
-    (JsPath \ "ratePlans").read[List[RatePlan]]
-  )(Subscription.apply _)
+    (JsPath \ "invoiceDate").read[LocalDate] and
+    (JsPath \ "amount").read[Int] and
+    (JsPath \ "balance").read[Int] and
+    (JsPath \ "status").read[String] and
+    (JsPath \ "invoiceItems").read[List[InvoiceItem]]
+  )(ItemisedInvoice.apply _)
+
+  implicit val invoiceTransactionSummaryReads: Reads[InvoiceTransactionSummary] =
+    (JsPath \ "invoices").read[List[ItemisedInvoice]].map {
+      invoices => InvoiceTransactionSummary(invoices)
+    }
 
   implicit val cancelSubscriptionResultReads: Reads[CancelSubscriptionResult] = (
     (JsPath \ "success").read[Boolean] and
