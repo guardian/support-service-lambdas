@@ -20,11 +20,11 @@
     "X-Amzn-Trace-Id": "3213",
     "X-Forwarded-For": "222.222.222",
     "X-Forwarded-Port": "443",
-    "X-Forwarded-Proto": "https"
+    "X-Forwarded-Proto": "https",
+    "Authentication": "Basic dmFsaWRVc2VyOnZhbGlkUGFzcw=="
+
   },
   "queryStringParameters": {
-    "apiClientId": "validApiClientId",
-    "apiToken": "validApiToken"
   },
   "pathParameters": null,
   "stageVariables": null,

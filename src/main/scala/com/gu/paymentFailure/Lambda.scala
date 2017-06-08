@@ -2,7 +2,7 @@ package com.gu.paymentFailure
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.autoCancel.APIGatewayResponse.{ outputForAPIGateway, _ }
-import com.gu.autoCancel.Auth._
+import com.gu.paymentFailure.Auth._
 import java.io._
 import java.lang.System._
 import java.text.SimpleDateFormat
@@ -31,7 +31,7 @@ trait PaymentFailureLambda extends Logging {
     logger.info(s"Payment Failure Lambda is starting up...")
     val inputEvent = Json.parse(inputStream)
     logger.info(s"Received input event as JsValue: \n $inputEvent")
-    if (credentialsAreValid(inputEvent, config.apiClientId, config.apiToken)) {
+    if (credentialsAreValid(inputEvent, config.user, config.pass)) {
       logger.info("Authenticated request successfully...")
       val maybeBody = (inputEvent \ "body").toOption
       maybeBody.map { body =>

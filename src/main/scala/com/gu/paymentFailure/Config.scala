@@ -3,12 +3,11 @@ package com.gu.paymentFailure
 import java.lang.System.getenv
 
 trait Config {
-  def apiClientId: String
-  def apiToken: String
+  def user: String
+  def pass: String
 }
 
 object EnvConfig extends Config {
-  override def apiClientId: String = getenv("ApiClientId")
-
-  override def apiToken: String = getenv("ApiToken")
+  override def user: String = getenv("User")
+  override def pass: String = getenv("Pass")
 }
