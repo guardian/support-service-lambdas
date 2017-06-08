@@ -59,7 +59,7 @@ class LambdaTest extends FlatSpec with MockitoSugar {
     responseString jsonMatches missingCredentialsResponse
   }
 
-  "lambda" should "return enqueue email and return success for a valid request" in {
+  "lambda" should "enqueue email and return success for a valid request" in {
     //set up
     val stream = getClass.getResourceAsStream("/paymentFailure/validRequest.json")
     val output = new ByteArrayOutputStream
@@ -87,7 +87,7 @@ class LambdaTest extends FlatSpec with MockitoSugar {
           SubscriberAttributes = SubscriberAttributesDef(
             SubscriberKey = "test.user123@guardian.co.uk",
             EmailAddress = "test.user123@guardian.co.uk",
-            DateField = "23/06/2005",
+            DateField = "06/23/2005",
             subscriber_id = "A-S123",
             product = "Supporter",
             payment_method = "CreditCard",

@@ -22,8 +22,8 @@ trait PaymentFailureLambda extends Logging {
   def config: Config
   def zuoraService: ZuoraService
   def queueClient: QueueClient
-  val dateFormatter = DateTimeFormat.forPattern("dd/MM/yyyy")
-  val currentDateStr = dateFormatter.print(currentDate)
+  val exactTargetDateFormatter = DateTimeFormat.forPattern("MM/dd/yyyy")
+  val currentDateStr = exactTargetDateFormatter.print(currentDate)
   def currentDate: DateTime
 
   def handleRequest(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
