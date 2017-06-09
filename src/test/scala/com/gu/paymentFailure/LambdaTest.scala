@@ -40,7 +40,6 @@ class LambdaTest extends FlatSpec with MockitoSugar {
     }
     override def zuoraService = fakeZuoraService
     override def queueClient: QueueClient = fakeQueueClient
-    override def currentDate = new DateTime(2005, 6, 23, 12, 0, 0, 0)
 
   }
 
@@ -95,14 +94,14 @@ class LambdaTest extends FlatSpec with MockitoSugar {
           SubscriberAttributes = SubscriberAttributesDef(
             SubscriberKey = "test.user123@guardian.co.uk",
             EmailAddress = "test.user123@guardian.co.uk",
-            DateField = "06/23/2005",
             subscriber_id = "A-S123",
             product = "Supporter",
             payment_method = "CreditCard",
             card_type = "Visa",
             card_expiry_date = "12/2017",
             first_name = "Test",
-            last_name = "User"
+            last_name = "User",
+            payment_id = "somePaymentId"
           )
         )
       )

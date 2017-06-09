@@ -15,14 +15,14 @@ case class ContactAttributesDef(SubscriberAttributes: SubscriberAttributesDef)
 case class SubscriberAttributesDef(
   SubscriberKey: String,
   EmailAddress: String,
-  DateField: String,
   subscriber_id: String,
   product: String,
   payment_method: String,
   card_type: String,
   card_expiry_date: String,
   first_name: String,
-  last_name: String
+  last_name: String,
+  payment_id: String
 )
 
 case class ToDef(Address: String, SubscriberKey: String, ContactAttributes: ContactAttributesDef)

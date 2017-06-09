@@ -17,9 +17,6 @@ trait PaymentFailureLambda extends Logging {
   def config: Config
   def zuoraService: ZuoraService
   def queueClient: QueueClient
-  val exactTargetDateFormatter = DateTimeFormat.forPattern("MM/dd/yyyy")
-  val currentDateStr = exactTargetDateFormatter.print(currentDate)
-  def currentDate: DateTime
 
   def handleRequest(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
     logger.info(s"Payment Failure Lambda is starting up...")
@@ -75,14 +72,14 @@ trait PaymentFailureLambda extends Logging {
         SubscriberAttributes = SubscriberAttributesDef(
           SubscriberKey = paymentFailureCallout.email,
           EmailAddress = paymentFailureCallout.email,
-          DateField = currentDateStr,
           subscriber_id = paymentFailureInformation.subscriptionName,
           product = paymentFailureInformation.product,
           payment_method = paymentFailureCallout.paymentMethodType,
           card_type = paymentFailureCallout.creditCardType,
           card_expiry_date = paymentFailureCallout.creditCardExpirationMonth + "/" + paymentFailureCallout.creditCardExpirationYear,
           first_name = paymentFailureCallout.firstName,
-          last_name = paymentFailureCallout.lastName
+          last_name = paymentFailureCallout.lastName,
+          payment_id = paymentFailureCallout.paymentId
         )
       )
     )
@@ -138,6 +135,5 @@ object Lambda extends PaymentFailureLambda {
   override val config = EnvConfig
   override val zuoraService = new ZuoraRestService(setConfig)
   override val queueClient = SqsClient
-  override val currentDate = DateTime.now();
 }
 
