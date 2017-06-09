@@ -4,10 +4,7 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.gu.autoCancel.APIGatewayResponse.{ outputForAPIGateway, _ }
 import com.gu.autoCancel.Auth._
 import java.io._
-import java.lang.System._
-import java.text.SimpleDateFormat
 import com.gu.autoCancel.Config.setConfig
-import com.gu.autoCancel.ResponseModels.AutoCancelResponse
 import com.gu.autoCancel.ZuoraModels._
 import com.gu.autoCancel.{ Logging, ZuoraRestService, ZuoraService }
 import org.joda.time.{ DateTime, LocalDate }
@@ -15,8 +12,7 @@ import org.joda.time.format.DateTimeFormat
 import play.api.libs.json.{ JsError, JsSuccess, Json }
 
 import scala.util.{ Failure, Success }
-import scalaz.Scalaz._
-import scalaz.{ -\/, \/ }
+import scalaz.{ -\/, \/, \/- }
 
 trait PaymentFailureLambda extends Logging {
   def config: Config
@@ -36,9 +32,10 @@ trait PaymentFailureLambda extends Logging {
       maybeBody.map { body =>
         Json.fromJson[PaymentFailureCallout](Json.parse(body.as[String])) match {
           case callout: JsSuccess[PaymentFailureCallout] =>
-            enqueueEmail(callout.value)
-            //todo see if we need error handling instead of always return success here
-            outputForAPIGateway(outputStream, successfulCancellation)
+            enqueueEmail(callout.value) match {
+              case -\/(error) => outputForAPIGateway(outputStream, internalServerError(error))
+              case \/-(_) => outputForAPIGateway(outputStream, successfulCancellation)
+            }
           case e: JsError =>
             logger.error(s"error parsing callout body: $e")
             outputForAPIGateway(outputStream, badRequest)
@@ -53,16 +50,22 @@ trait PaymentFailureLambda extends Logging {
     }
   }
 
-  def enqueueEmail(paymentFailureCallout: PaymentFailureCallout) = {
+  def enqueueEmail(paymentFailureCallout: PaymentFailureCallout): \/[String, Unit] = {
     val accountId = paymentFailureCallout.accountId
     logger.info(s"Received $paymentFailureCallout")
-    dataCollection(accountId).map { paymentInformation =>
+    val queueSendResponse = dataCollection(accountId).map { paymentInformation =>
       val message = toMessage(paymentFailureCallout, paymentInformation)
       queueClient.sendDataExtensionToQueue(message) match {
-        case Success(messageResult) => logger.info(s"Message queued successfully for account: $accountId")
-        case Failure(error) => logger.error(s"Could not enqueue message for account: $accountId", error)
+        case Success(messageResult) =>
+          logger.info(s"Message queued successfully for account: $accountId")
+          \/-(())
+        case Failure(error) =>
+          logger.error(s"Could not enqueue message for account: $accountId", error)
+          -\/(s"Could not enqueue message for account")
       }
     }
+
+    queueSendResponse.getOrElse(-\/("could not retrieve additional data for account"))
   }
 
   def toMessage(paymentFailureCallout: PaymentFailureCallout, paymentFailureInformation: PaymentFailureInformation) = Message(
