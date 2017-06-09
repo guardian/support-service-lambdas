@@ -7,10 +7,9 @@ import java.io._
 import com.gu.autoCancel.Config.setConfig
 import com.gu.autoCancel.ZuoraModels._
 import com.gu.autoCancel.{ Logging, ZuoraRestService, ZuoraService }
-import org.joda.time.{ DateTime, LocalDate }
+import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import play.api.libs.json.{ JsError, JsSuccess, Json }
-
 import scala.util.{ Failure, Success }
 import scalaz.{ -\/, \/, \/- }
 
@@ -61,11 +60,10 @@ trait PaymentFailureLambda extends Logging {
           \/-(())
         case Failure(error) =>
           logger.error(s"Could not enqueue message for account: $accountId", error)
-          -\/(s"Could not enqueue message for account")
+          -\/(s"Could not enqueue message for account $accountId")
       }
     }
-
-    queueSendResponse.getOrElse(-\/("could not retrieve additional data for account"))
+    queueSendResponse.getOrElse(-\/(s"Could not retrieve additional data for account $accountId"))
   }
 
   def toMessage(paymentFailureCallout: PaymentFailureCallout, paymentFailureInformation: PaymentFailureInformation) = Message(
@@ -97,34 +95,41 @@ trait PaymentFailureLambda extends Logging {
 
   //todo for now just return an option here but the error handling has to be refactored a little bit
   def dataCollection(accountId: String): Option[PaymentFailureInformation] = {
-    logger.info("attempting to get further details from account")
+    logger.info(s"Attempting to get further details from account $accountId")
     val unpaidInvoices = zuoraService.getInvoiceTransactions(accountId).map {
       invoiceTransactionSummary =>
         invoiceTransactionSummary.invoices.filter {
           invoice => unpaid(invoice)
         }
     }
-    unpaidInvoices.toOption.flatMap {
-      unpaid =>
-        unpaid.headOption match {
-          case Some(invoice) => {
-            logger.info(s"Found the following unpaid invoice: $invoice")
-            invoice.invoiceItems.headOption.map { item =>
-              val paymentFailureInfo = PaymentFailureInformation(item.subscriptionName, item.productName)
-              logger.info(s"Payment failure information for account: $accountId is: $paymentFailureInfo")
-              paymentFailureInfo
-            } //todo make this safe
-          }
-          case None => {
-            logger.error(s"No unpaid invoice found - nothing to do")
-            None
+    unpaidInvoices.toOption.flatMap { unpaid =>
+      unpaid.headOption match {
+        case Some(invoice) => {
+          logger.info(s"Found the following unpaid invoice: $invoice")
+          val positiveInvoiceItems = invoice.invoiceItems.filter(item => invoiceItemFilter(item))
+          positiveInvoiceItems.headOption.map {
+            item =>
+              {
+                val paymentFailureInfo = PaymentFailureInformation(item.subscriptionName, item.productName)
+                logger.info(s"Payment failure information for account: $accountId is: $paymentFailureInfo")
+                paymentFailureInfo
+              }
           }
         }
+        case None => {
+          logger.error(s"No unpaid invoice found - nothing to do")
+          None
+        }
+      }
     }
   }
 
   def unpaid(itemisedInvoice: ItemisedInvoice): Boolean = {
     itemisedInvoice.balance > 0 && itemisedInvoice.status == "Posted"
+  }
+
+  def invoiceItemFilter(item: InvoiceItem): Boolean = {
+    item.chargeAmount > 0 // remove discounts, holiday credits and free products
   }
 
 }

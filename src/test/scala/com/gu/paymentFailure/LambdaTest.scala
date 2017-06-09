@@ -24,9 +24,13 @@ class LambdaTest extends FlatSpec with MockitoSugar {
   val fakeZuoraService = mock[ZuoraService]
   val fakeQueueClient = mock[QueueClient]
   val today = LocalDate.now()
-
-  val invoiceItem = InvoiceItem("invitem123", "A-S123", today, today.plusMonths(1), "Non founder - annual", "Supporter")
-  val invoiceTransSummary = InvoiceTransactionSummary(List(ItemisedInvoice("invoice123", today, 49, 49, "Posted", List(invoiceItem))))
+  val accountId = "accountId"
+  val invoiceItemA = InvoiceItem("invitem123", "A-S123", today, today.plusMonths(1), 49, "Non founder - annual", "Supporter")
+  val invoiceItemB = InvoiceItem("invitem122", "A-S123", today, today.plusMonths(1), 0, "Friends", "Friend")
+  val invoiceItemC = InvoiceItem("invitem121", "A-S123", today, today.plusMonths(1), -4.90, "Percentage", "Discount")
+  def itemisedInvoice(balance: Double, invoiceItems: List[InvoiceItem]) = ItemisedInvoice("invoice123", today, 49, balance, "Posted", List(invoiceItemA))
+  val basicInvoiceTransactionSummary = InvoiceTransactionSummary(List(itemisedInvoice(49, List(invoiceItemA))))
+  val weirdInvoiceTransactionSummary = InvoiceTransactionSummary(List(itemisedInvoice(0, List(invoiceItemA)), itemisedInvoice(49, List(invoiceItemB, invoiceItemA, invoiceItemC))))
 
   val lambda = new PaymentFailureLambda {
 
@@ -42,6 +46,11 @@ class LambdaTest extends FlatSpec with MockitoSugar {
 
   val missingCredentialsResponse = """{"statusCode":"401","headers":{"Content-Type":"application/json"},"body":"Credentials are missing or invalid"}"""
   val successfulResponse = """{"statusCode":"200","headers":{"Content-Type":"application/json"},"body":"Success"}"""
+
+  "dataCollection" should "identify the correct product information" in {
+    when(fakeZuoraService.getInvoiceTransactions("accountId")).thenReturn(\/-(weirdInvoiceTransactionSummary))
+    assert(lambda.dataCollection(accountId).get.product == "Supporter")
+  }
 
   "lambda" should "return error if credentials are missing" in {
     val stream = getClass.getResourceAsStream("/paymentFailure/missingCredentials.json")
@@ -69,7 +78,7 @@ class LambdaTest extends FlatSpec with MockitoSugar {
     val output = new ByteArrayOutputStream
 
     val os = new ByteArrayOutputStream()
-    when(fakeZuoraService.getInvoiceTransactions("accountId")).thenReturn(\/-(invoiceTransSummary))
+    when(fakeZuoraService.getInvoiceTransactions("accountId")).thenReturn(\/-(basicInvoiceTransactionSummary))
     when(fakeQueueClient.sendDataExtensionToQueue(any[Message])).thenReturn(Success(mock[SendMessageResult]))
     //execute
     lambda.handleRequest(stream, os, null)
@@ -107,10 +116,9 @@ class LambdaTest extends FlatSpec with MockitoSugar {
     //set up
     val stream = getClass.getResourceAsStream("/paymentFailure/validRequest.json")
     val output = new ByteArrayOutputStream
+    val invoiceTransactionSummary = InvoiceTransactionSummary(List())
 
-    val invoiceTransSummary = InvoiceTransactionSummary(List())
-
-    when(fakeZuoraService.getInvoiceTransactions("accountId")).thenReturn(\/-(invoiceTransSummary))
+    when(fakeZuoraService.getInvoiceTransactions(accountId)).thenReturn(\/-(invoiceTransactionSummary))
 
     when(fakeQueueClient.sendDataExtensionToQueue(any[Message])).thenReturn(Success(mock[SendMessageResult]))
 
@@ -122,7 +130,7 @@ class LambdaTest extends FlatSpec with MockitoSugar {
     //verify
     val responseString = new String(os.toByteArray(), "UTF-8")
 
-    val expectedResponse = """{"statusCode":"500","headers":{"Content-Type":"application/json"},"body":"Failed to process auto-cancellation with the following error: could not retrieve additional data for account"} """
+    val expectedResponse = s"""{"statusCode":"500","headers":{"Content-Type":"application/json"},"body":"Failed to process auto-cancellation with the following error: Could not retrieve additional data for account $accountId"} """
     responseString jsonMatches expectedResponse
   }
 
@@ -130,7 +138,7 @@ class LambdaTest extends FlatSpec with MockitoSugar {
     //set up
     val stream = getClass.getResourceAsStream("/paymentFailure/validRequest.json")
     val output = new ByteArrayOutputStream
-    when(fakeZuoraService.getInvoiceTransactions("accountId")).thenReturn(\/-(invoiceTransSummary))
+    when(fakeZuoraService.getInvoiceTransactions("accountId")).thenReturn(\/-(basicInvoiceTransactionSummary))
 
     when(fakeQueueClient.sendDataExtensionToQueue(any[Message])).thenReturn(Success(mock[SendMessageResult]))
     when(fakeQueueClient.sendDataExtensionToQueue(any[Message])).thenReturn(Failure(new Exception("something failed!")))
@@ -143,7 +151,7 @@ class LambdaTest extends FlatSpec with MockitoSugar {
     //verify
     val responseString = new String(os.toByteArray(), "UTF-8")
 
-    val expectedResponse = """{"statusCode":"500","headers":{"Content-Type":"application/json"},"body":"Failed to process auto-cancellation with the following error: Could not enqueue message for account"} """
+    val expectedResponse = s"""{"statusCode":"500","headers":{"Content-Type":"application/json"},"body":"Failed to process auto-cancellation with the following error: Could not enqueue message for account $accountId"} """
     responseString jsonMatches expectedResponse
   }
 
