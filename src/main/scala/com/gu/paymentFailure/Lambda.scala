@@ -7,8 +7,6 @@ import java.io._
 import com.gu.autoCancel.Config.setConfig
 import com.gu.autoCancel.ZuoraModels._
 import com.gu.autoCancel.{ Logging, ZuoraRestService, ZuoraService }
-import org.joda.time.DateTime
-import org.joda.time.format.DateTimeFormat
 import play.api.libs.json.{ JsError, JsSuccess, Json }
 import scala.util.{ Failure, Success }
 import scalaz.{ -\/, \/, \/- }
@@ -79,16 +77,21 @@ trait PaymentFailureLambda extends Logging {
           card_expiry_date = paymentFailureCallout.creditCardExpirationMonth + "/" + paymentFailureCallout.creditCardExpirationYear,
           first_name = paymentFailureCallout.firstName,
           last_name = paymentFailureCallout.lastName,
-          payment_id = paymentFailureCallout.paymentId
+          payment_id = paymentFailureCallout.paymentId,
+          price = price(paymentFailureInformation.amount, paymentFailureCallout.currency)
         )
       )
     )
   )
 
+  def price(amount: Double, currency: String): String = {
+    s"${amount.toString} $currency" //todo pretty price function
+  }
+
   //todo see if we need to parse the payment number as an int
   def dataExtensionNameForAttempt: Map[String, String] = Map("1" -> "first-failed-payment-email", "2" -> "second-failed-payment-email", "3" -> "third-failed-payment-email")
 
-  case class PaymentFailureInformation(subscriptionName: String, product: String)
+  case class PaymentFailureInformation(subscriptionName: String, product: String, amount: Double)
 
   //todo for now just return an option here but the error handling has to be refactored a little bit
   def dataCollection(accountId: String): Option[PaymentFailureInformation] = {
@@ -107,7 +110,7 @@ trait PaymentFailureLambda extends Logging {
           positiveInvoiceItems.headOption.map {
             item =>
               {
-                val paymentFailureInfo = PaymentFailureInformation(item.subscriptionName, item.productName)
+                val paymentFailureInfo = PaymentFailureInformation(item.subscriptionName, item.productName, invoice.amount)
                 logger.info(s"Payment failure information for account: $accountId is: $paymentFailureInfo")
                 paymentFailureInfo
               }

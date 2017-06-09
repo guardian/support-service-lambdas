@@ -24,7 +24,8 @@ class SqsMessageSerializationTest extends FlatSpec with MockitoSugar {
             card_expiry_date = "cardExpiryValue",
             first_name = "firstNameValue",
             last_name = "lastNameValue",
-            payment_id = "paymentId"
+            payment_id = "paymentId",
+            price = "49.0 GBP"
           )
         )
       )
@@ -47,7 +48,8 @@ class SqsMessageSerializationTest extends FlatSpec with MockitoSugar {
         |        "card_expiry_date":"cardExpiryValue",
         |        "first_name":"firstNameValue",
         |        "last_name":"lastNameValue",
-        |        "payment_id":"paymentId"
+        |        "payment_id":"paymentId",
+        |        "price":"49.0 GBP"
         |      }
         |    }
         |  },

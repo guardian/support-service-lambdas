@@ -52,6 +52,6 @@
     "httpMethod": "POST",
     "apiId": "someApiId"
   },
-  "body": "{\n \"paymentId\":\"somePaymentId\",\n    \"accountId\": \"accountId\",\n    \"email\": \"test.user123@guardian.co.uk\",\n    \"failureNumber\": \"1\",\n    \"firstName\": \"Test\",\n    \"lastName\": \"User\",\n    \"paymentMethodType\": \"CreditCard\",\n    \"creditCardType\": \"Visa\",\n    \"creditCardExpirationMonth\": \"12\",\n    \"creditCardExpirationYear\": \"2017\"\n}",
+  "body": "{\n \"paymentId\":\"somePaymentId\",\n    \"accountId\": \"accountId\",\n    \"email\": \"test.user123@guardian.co.uk\",\n    \"failureNumber\": \"1\",\n    \"firstName\": \"Test\",\n    \"lastName\": \"User\",\n    \"paymentMethodType\": \"CreditCard\",\n    \"creditCardType\": \"Visa\",\n    \"creditCardExpirationMonth\": \"12\",\n    \"creditCardExpirationYear\": \"2017\",\n \"currency\": \"GBP\"\n}",
   "isBase64Encoded": false
 }

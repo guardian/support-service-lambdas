@@ -3,8 +3,7 @@ package com.gu.paymentFailure
 import java.io.ByteArrayOutputStream
 
 import com.gu.autoCancel.ZuoraModels._
-import com.gu.paymentFailure.Lambda._
-import org.joda.time.{ DateTime, LocalDate }
+import org.joda.time.LocalDate
 import org.scalatest.FlatSpec
 import org.scalatest._
 import Matchers._
@@ -101,7 +100,8 @@ class LambdaTest extends FlatSpec with MockitoSugar {
             card_expiry_date = "12/2017",
             first_name = "Test",
             last_name = "User",
-            payment_id = "somePaymentId"
+            payment_id = "somePaymentId",
+            price = "49.0 GBP"
           )
         )
       )
