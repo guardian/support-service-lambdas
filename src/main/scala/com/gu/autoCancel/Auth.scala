@@ -1,5 +1,6 @@
 package com.gu.autoCancel
 
+import com.gu.paymentFailure.PaymentFailureCallout
 import play.api.libs.json.JsValue
 
 object Auth extends Logging {
@@ -22,6 +23,11 @@ object Auth extends Logging {
         false
       }
     }
+  }
+
+  // Ensure that the correct Zuora environment is hitting the API
+  def validTenant(trustedTenantId: String, paymentFailureCallout: PaymentFailureCallout): Boolean = {
+    paymentFailureCallout.tenantId == trustedTenantId
   }
 
 }

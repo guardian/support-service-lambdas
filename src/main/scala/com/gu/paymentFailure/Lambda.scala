@@ -30,9 +30,14 @@ trait PaymentFailureLambda extends Logging {
       maybeBody.map { body =>
         Json.fromJson[PaymentFailureCallout](Json.parse(body.as[String])) match {
           case callout: JsSuccess[PaymentFailureCallout] =>
-            enqueueEmail(callout.value) match {
-              case -\/(error) => outputForAPIGateway(outputStream, internalServerError(error))
-              case \/-(_) => outputForAPIGateway(outputStream, successfulCancellation)
+            if (validTenant(config.tenantId, callout.value)) {
+              enqueueEmail(callout.value) match {
+                case -\/(error) => outputForAPIGateway(outputStream, internalServerError(error))
+                case \/-(_) => outputForAPIGateway(outputStream, successfulCancellation)
+              }
+            } else {
+              logger.info(s"Incorrect Tenant Id was provided")
+              outputForAPIGateway(outputStream, unauthorized)
             }
           case e: JsError =>
             logger.error(s"error parsing callout body: $e")

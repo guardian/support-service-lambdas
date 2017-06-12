@@ -13,7 +13,8 @@ case class PaymentFailureCallout(
   creditCardExpirationMonth: String,
   creditCardExpirationYear: String,
   paymentId: String,
-  currency: String
+  currency: String,
+  tenantId: String
 )
 
 object PaymentFailureCallout {

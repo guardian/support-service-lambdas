@@ -36,6 +36,7 @@ class LambdaTest extends FlatSpec with MockitoSugar {
     override def config: Config = new Config {
       override val apiToken = "validApiToken"
       override val apiClientId = "validApiClientId"
+      override val tenantId = "testEnvTenantId"
     }
     override def zuoraService = fakeZuoraService
     override def queueClient: QueueClient = fakeQueueClient
@@ -52,8 +53,6 @@ class LambdaTest extends FlatSpec with MockitoSugar {
 
   "lambda" should "return error if credentials are missing" in {
     val stream = getClass.getResourceAsStream("/paymentFailure/missingCredentials.json")
-    val output = new ByteArrayOutputStream
-
     val os = new ByteArrayOutputStream()
     lambda.handleRequest(stream, os, null)
     val responseString = new String(os.toByteArray(), "UTF-8");
@@ -62,8 +61,14 @@ class LambdaTest extends FlatSpec with MockitoSugar {
 
   "lambda" should "return error if credentials don't match" in {
     val stream = getClass.getResourceAsStream("/paymentFailure/invalidCredentials.json")
-    val output = new ByteArrayOutputStream
+    val os = new ByteArrayOutputStream()
+    lambda.handleRequest(stream, os, null)
+    val responseString = new String(os.toByteArray(), "UTF-8");
+    responseString jsonMatches missingCredentialsResponse
+  }
 
+  "lambda" should "return an error if tenant id doesn't match" in {
+    val stream = getClass.getResourceAsStream("/paymentFailure/invalidTenant.json")
     val os = new ByteArrayOutputStream()
     lambda.handleRequest(stream, os, null)
     val responseString = new String(os.toByteArray(), "UTF-8");
