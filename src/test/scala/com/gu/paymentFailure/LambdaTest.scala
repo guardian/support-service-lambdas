@@ -22,9 +22,9 @@ class LambdaTest extends FlatSpec with MockitoSugar {
 
   val fakeZuoraService = mock[ZuoraService]
   val fakeQueueClient = mock[QueueClient]
-  val today = LocalDate.now()
+  val today = new LocalDate(2016, 11, 21)
   val accountId = "accountId"
-  val invoiceItemA = InvoiceItem("invitem123", "A-S123", today, today.plusMonths(1), 49, "Non founder - annual", "Supporter")
+  val invoiceItemA = InvoiceItem("invitem123", "A-S123", today, today.plusMonths(1), 49.21, "Non founder - annual", "Supporter")
   val invoiceItemB = InvoiceItem("invitem122", "A-S123", today, today.plusMonths(1), 0, "Friends", "Friend")
   val invoiceItemC = InvoiceItem("invitem121", "A-S123", today, today.plusMonths(1), -4.90, "Percentage", "Discount")
   def itemisedInvoice(balance: Double, invoiceItems: List[InvoiceItem]) = ItemisedInvoice("invoice123", today, 49, balance, "Posted", List(invoiceItemA))
@@ -101,7 +101,9 @@ class LambdaTest extends FlatSpec with MockitoSugar {
             first_name = "Test",
             last_name = "User",
             paymentId = "somePaymentId",
-            price = "49.0 GBP"
+            price = "£49",
+            serviceStartDate = "21 November 2016",
+            serviceEndDate = "21 December 2016"
           )
         )
       )

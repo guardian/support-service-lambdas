@@ -25,7 +25,9 @@ class SqsMessageSerializationTest extends FlatSpec with MockitoSugar {
             first_name = "firstNameValue",
             last_name = "lastNameValue",
             paymentId = "paymentId",
-            price = "49.0 GBP"
+            price = "49.0 GBP",
+            serviceStartDate = "31 January 2016",
+            serviceEndDate = "31 January 2017"
           )
         )
       )
@@ -49,7 +51,9 @@ class SqsMessageSerializationTest extends FlatSpec with MockitoSugar {
         |        "first_name":"firstNameValue",
         |        "last_name":"lastNameValue",
         |        "paymentId":"paymentId",
-        |        "price":"49.0 GBP"
+        |        "price":"49.0 GBP",
+        |        "serviceStartDate" : "31 January 2016",
+        |        "serviceEndDate" : "31 January 2017"
         |      }
         |    }
         |  },

@@ -4,10 +4,14 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.gu.autoCancel.APIGatewayResponse.{ outputForAPIGateway, _ }
 import com.gu.autoCancel.Auth._
 import java.io._
+
 import com.gu.autoCancel.Config.setConfig
 import com.gu.autoCancel.ZuoraModels._
 import com.gu.autoCancel.{ Logging, ZuoraRestService, ZuoraService }
+import org.joda.time.LocalDate
 import play.api.libs.json.{ JsError, JsSuccess, Json }
+
+import scala.math.BigDecimal.decimal
 import scala.util.{ Failure, Success }
 import scalaz.{ -\/, \/, \/- }
 
@@ -78,20 +82,29 @@ trait PaymentFailureLambda extends Logging {
           first_name = paymentFailureCallout.firstName,
           last_name = paymentFailureCallout.lastName,
           paymentId = paymentFailureCallout.paymentId,
-          price = price(paymentFailureInformation.amount, paymentFailureCallout.currency)
+          price = price(paymentFailureInformation.amount, paymentFailureCallout.currency),
+          serviceStartDate = serviceDateFormat(paymentFailureInformation.serviceStartDate),
+          serviceEndDate = serviceDateFormat(paymentFailureInformation.serviceEndDate)
         )
       )
     )
   )
 
+  val currencySymbol = Map("GBP" -> "£", "AUD" -> "AU$", "EUR" -> "€", "USD" -> "US$", "CAD" -> "CA$", "NZD" -> "NZ$")
+
   def price(amount: Double, currency: String): String = {
-    s"${amount.toString} $currency" //todo pretty price function
+    val formattedAmount: String = decimal(amount).bigDecimal.stripTrailingZeros.toPlainString
+    val upperCaseCurrency = currency.toUpperCase
+    val symbol: String = currencySymbol.get(upperCaseCurrency).getOrElse(upperCaseCurrency)
+    symbol + formattedAmount
   }
+
+  def serviceDateFormat(d: LocalDate) = d.toString("dd MMMM yyyy")
 
   //todo see if we need to parse the payment number as an int
   def dataExtensionNameForAttempt: Map[String, String] = Map("1" -> "first-failed-payment-email", "2" -> "second-failed-payment-email", "3" -> "third-failed-payment-email")
 
-  case class PaymentFailureInformation(subscriptionName: String, product: String, amount: Double)
+  case class PaymentFailureInformation(subscriptionName: String, product: String, amount: Double, serviceStartDate: LocalDate, serviceEndDate: LocalDate)
 
   //todo for now just return an option here but the error handling has to be refactored a little bit
   def dataCollection(accountId: String): Option[PaymentFailureInformation] = {
@@ -110,7 +123,7 @@ trait PaymentFailureLambda extends Logging {
           positiveInvoiceItems.headOption.map {
             item =>
               {
-                val paymentFailureInfo = PaymentFailureInformation(item.subscriptionName, item.productName, invoice.amount)
+                val paymentFailureInfo = PaymentFailureInformation(item.subscriptionName, item.productName, invoice.amount, item.serviceStartDate, item.serviceEndDate)
                 logger.info(s"Payment failure information for account: $accountId is: $paymentFailureInfo")
                 paymentFailureInfo
               }

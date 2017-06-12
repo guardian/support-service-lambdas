@@ -23,7 +23,10 @@ case class SubscriberAttributesDef(
   first_name: String,
   last_name: String,
   paymentId: String,
-  price: String
+  price: String,
+  serviceStartDate: String,
+  serviceEndDate: String
+
 )
 
 case class ToDef(Address: String, SubscriberKey: String, ContactAttributes: ContactAttributesDef)
