@@ -100,7 +100,7 @@ class LambdaTest extends FlatSpec with MockitoSugar {
             card_expiry_date = "12/2017",
             first_name = "Test",
             last_name = "User",
-            payment_id = "somePaymentId",
+            paymentId = "somePaymentId",
             price = "49.0 GBP"
           )
         )

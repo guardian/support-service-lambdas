@@ -77,7 +77,7 @@ trait PaymentFailureLambda extends Logging {
           card_expiry_date = paymentFailureCallout.creditCardExpirationMonth + "/" + paymentFailureCallout.creditCardExpirationYear,
           first_name = paymentFailureCallout.firstName,
           last_name = paymentFailureCallout.lastName,
-          payment_id = paymentFailureCallout.paymentId,
+          paymentId = paymentFailureCallout.paymentId,
           price = price(paymentFailureInformation.amount, paymentFailureCallout.currency)
         )
       )
