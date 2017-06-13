@@ -163,7 +163,7 @@ Resources:
             Action: lambda:invokeFunction
             FunctionName: !Sub payment-failure-${Stage}
             Principal: apigateway.amazonaws.com
-        DependsOn: ZuoraAutoCancelLambda
+        DependsOn: PaymentFailureLambda
 
     ZuoraAutoCancelAPI:
         Type: "AWS::ApiGateway::RestApi"
