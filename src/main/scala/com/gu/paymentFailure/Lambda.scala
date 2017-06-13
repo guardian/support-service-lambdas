@@ -4,6 +4,7 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.gu.autoCancel.APIGatewayResponse.{ outputForAPIGateway, _ }
 import com.gu.autoCancel.Auth._
 import java.io._
+import java.text.DecimalFormat
 
 import com.gu.autoCancel.Config.setConfig
 import com.gu.autoCancel.ZuoraModels._
@@ -97,8 +98,9 @@ trait PaymentFailureLambda extends Logging {
 
   val currencySymbol = Map("GBP" -> "£", "AUD" -> "$", "EUR" -> "€", "USD" -> "$", "CAD" -> "$", "NZD" -> "$")
 
+  val decimalFormat = new DecimalFormat("###,###.00")
   def price(amount: Double, currency: String): String = {
-    val formattedAmount: String = decimal(amount).bigDecimal.stripTrailingZeros.toPlainString
+    val formattedAmount: String = decimalFormat.format(decimal(amount))
     val upperCaseCurrency = currency.toUpperCase
     val symbol: String = currencySymbol.get(upperCaseCurrency).getOrElse(upperCaseCurrency)
     symbol + formattedAmount
