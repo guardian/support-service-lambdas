@@ -95,7 +95,7 @@ trait PaymentFailureLambda extends Logging {
     )
   )
 
-  val currencySymbol = Map("GBP" -> "£", "AUD" -> "AU$", "EUR" -> "€", "USD" -> "US$", "CAD" -> "CA$", "NZD" -> "NZ$")
+  val currencySymbol = Map("GBP" -> "£", "AUD" -> "$", "EUR" -> "€", "USD" -> "$", "CAD" -> "$", "NZD" -> "$")
 
   def price(amount: Double, currency: String): String = {
     val formattedAmount: String = decimal(amount).bigDecimal.stripTrailingZeros.toPlainString
