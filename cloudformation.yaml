@@ -44,7 +44,7 @@ Resources:
                       Statement:
                           - Effect: Allow
                             Action: sqs:*
-                            Resource: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:subs-welcome-email-dev
+                            Resource: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:subs-welcome-email
 
     ZuoraAutoCancelKMS:
         Type: AWS::KMS::Key
