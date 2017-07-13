@@ -21,10 +21,13 @@ trait PaymentFailureLambda extends Logging {
   def zuoraService: ZuoraService
   def queueClient: QueueClient
 
+  def loggableData(callout: PaymentFailureCallout) = {
+    s"accountId: ${callout.accountId}, paymentId: ${callout.paymentId}, failureNumber: ${callout.failureNumber}, paymentMethodType: ${callout.paymentMethodType}, currency: ${callout.currency}"
+  }
+
   def handleRequest(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
     logger.info(s"Payment Failure Lambda is starting up...")
     val inputEvent = Json.parse(inputStream)
-    logger.info(s"Received input event as JsValue: \n $inputEvent")
     if (credentialsAreValid(inputEvent, config.apiClientId, config.apiToken)) {
       logger.info("Authenticated request successfully...")
       val maybeBody = (inputEvent \ "body").toOption
@@ -32,6 +35,7 @@ trait PaymentFailureLambda extends Logging {
         Json.fromJson[PaymentFailureCallout](Json.parse(body.as[String])) match {
           case callout: JsSuccess[PaymentFailureCallout] =>
             if (validTenant(config.tenantId, callout.value)) {
+              logger.info(s"received ${loggableData(callout.value)}")
               enqueueEmail(callout.value) match {
                 case -\/(error) => outputForAPIGateway(outputStream, internalServerError(error))
                 case \/-(_) => outputForAPIGateway(outputStream, successfulCancellation)
@@ -56,7 +60,6 @@ trait PaymentFailureLambda extends Logging {
 
   def enqueueEmail(paymentFailureCallout: PaymentFailureCallout): \/[String, Unit] = {
     val accountId = paymentFailureCallout.accountId
-    logger.info(s"Received $paymentFailureCallout")
     val queueSendResponse = dataCollection(accountId).map { paymentInformation =>
       val message = toMessage(paymentFailureCallout, paymentInformation)
       queueClient.sendDataExtensionToQueue(message) match {
