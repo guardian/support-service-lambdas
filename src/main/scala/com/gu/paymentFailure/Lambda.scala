@@ -60,7 +60,6 @@ trait PaymentFailureLambda extends Logging {
 
   def enqueueEmail(paymentFailureCallout: PaymentFailureCallout): \/[String, Unit] = {
     val accountId = paymentFailureCallout.accountId
-    logger.info(s"Received $paymentFailureCallout")
     val queueSendResponse = dataCollection(accountId).map { paymentInformation =>
       val message = toMessage(paymentFailureCallout, paymentInformation)
       queueClient.sendDataExtensionToQueue(message) match {
