@@ -74,8 +74,6 @@ object SqsClient extends QueueClient with Logging {
 
     def sendToQueue(msg: String): SendMessageResult = {
       logger.info(s"sending to queue $queueUrl")
-      logger.info("message :")
-      logger.info(msg)
       sqsClient.sendMessage(new SendMessageRequest(queueUrl, msg))
     }
 
