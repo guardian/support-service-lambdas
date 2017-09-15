@@ -17,6 +17,7 @@ case class ZuoraRestConfig(baseUrl: String, username: String, password: String)
 trait ZuoraService {
   def getAccountSummary(accountId: String): AutoCancelResponse \/ AccountSummary
   def getInvoiceTransactions(accountId: String): AutoCancelResponse \/ InvoiceTransactionSummary
+  def disableAutoPay(accountId: String): AutoCancelResponse \/ UpdateAccountResult
 }
 
 class ZuoraRestService(config: ZuoraRestConfig) extends ZuoraService with Logging {

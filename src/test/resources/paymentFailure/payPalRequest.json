@@ -1,0 +1,57 @@
+{
+  "resource": "/payment-failure",
+  "path": "/payment-failure",
+  "httpMethod": "POST",
+  "headers": {
+    "Accept-Encoding": "gzip, deflate",
+    "cache-control": "no-cache",
+    "CloudFront-Forwarded-Proto": "https",
+    "CloudFront-Is-Desktop-Viewer": "true",
+    "CloudFront-Is-Mobile-Viewer": "false",
+    "CloudFront-Is-SmartTV-Viewer": "false",
+    "CloudFront-Is-Tablet-Viewer": "false",
+    "CloudFront-Viewer-Country": "US",
+    "Content-Type": "application/json",
+    "Host": "321",
+    "Postman-Token": "123",
+    "User-Agent": "some user agent",
+    "Via": "test",
+    "X-Amz-Cf-Id": "test2",
+    "X-Amzn-Trace-Id": "3213",
+    "X-Forwarded-For": "222.222.222",
+    "X-Forwarded-Port": "443",
+    "X-Forwarded-Proto": "https"
+  },
+  "queryStringParameters": {
+    "apiClientId": "validApiClientId",
+    "apiToken": "validApiToken"
+  },
+  "pathParameters": null,
+  "stageVariables": null,
+  "requestContext": {
+    "path": "/CODE/payment-failure",
+    "accountId": "someAccountId",
+    "resourceId": "someResourceId",
+    "stage": "CODE",
+    "requestId": "someRequestId",
+    "identity": {
+      "cognitoIdentityPoolId": null,
+      "accountId": null,
+      "cognitoIdentityId": null,
+      "caller": null,
+      "apiKey": "",
+      "sourceIp": "12.34.56.78",
+      "accessKey": null,
+      "cognitoAuthenticationType": null,
+      "cognitoAuthenticationProvider": null,
+      "userArn": null,
+      "userAgent": "some agent",
+      "user": null
+    },
+    "resourcePath": "/payment-failure",
+    "httpMethod": "POST",
+    "apiId": "someApiId"
+  },
+  "body": "{\n \"paymentId\":\"somePaymentId\",\n    \"accountId\": \"accountId\",\n    \"email\": \"test.user123@guardian.co.uk\",\n    \"failureNumber\": \"1\",\n    \"firstName\": \"Test\",\n    \"lastName\": \"User\",\n    \"paymentMethodType\": \"PayPal\",\n    \"creditCardType\": \"Visa\",\n    \"creditCardExpirationMonth\": \"12\",\n    \"creditCardExpirationYear\": \"2017\",\n \"currency\": \"GBP\"\n,  \"tenantId\": \"testEnvTenantId\"\n}",
+  "isBase64Encoded": false
+}
