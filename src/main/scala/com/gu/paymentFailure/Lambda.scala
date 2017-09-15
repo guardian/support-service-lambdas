@@ -43,7 +43,7 @@ trait PaymentFailureLambda extends Logging {
                   case -\/(errorResponse) => outputForAPIGateway(outputStream, errorResponse)
                   case \/-(updateAccountResult) if (!updateAccountResult.success) => outputForAPIGateway(outputStream, internalServerError("Failed to switch off AutoPay"))
                   case \/-(updateAccountResult) if (updateAccountResult.success) => {
-                    logger.info(s"$accountId | AutoPay disabled due to ongoing PayPal incident. Don't forget to turn me back on")
+                    logger.info(s"$accountId | AutoPay disabled due to ongoing PayPal incident. Don't forget to turn this setting back on")
                     outputForAPIGateway(outputStream, noActionRequired("payment failure process is currently suspended for PayPal"))
                   }
                 }
