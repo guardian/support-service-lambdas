@@ -1,14 +1,14 @@
 package com.gu.autoCancel
 
-import com.gu.autoCancel.APIGatewayResponse._
-import com.gu.autoCancel.Lambda._
-import com.gu.autoCancel.ZuoraModels.{ UpdateSubscriptionResult, _ }
+import com.gu.autoCancel.AutoCancelHandler._
+import com.gu.util.APIGatewayResponse._
+import com.gu.util.ZuoraModels._
 import org.joda.time.LocalDate
 import org.scalatest._
 
 import scalaz.{ -\/, \/- }
 
-class LambdaTest extends FlatSpec {
+class AutoCancelHandlerTest extends FlatSpec {
 
   val basicInfo = BasicAccountInfo("id123", 11.99)
   val subscription = SubscriptionSummary("id123", "A-S123", "Active")

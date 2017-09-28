@@ -1,11 +1,11 @@
-package com.gu.autoCancel
+package com.gu.util
 
-import java.lang.System._
-import java.nio.ByteBuffer
-import java.nio.charset.Charset
 import com.amazonaws.services.kms.AWSKMSClientBuilder
 import com.amazonaws.services.kms.model.DecryptRequest
 import com.amazonaws.util.Base64
+import java.lang.System._
+import java.nio.ByteBuffer
+import java.nio.charset.Charset
 
 object Config extends Logging {
 

@@ -1,24 +1,22 @@
 package com.gu.paymentFailure
 
 import java.io.ByteArrayOutputStream
-
-import com.gu.autoCancel.ZuoraModels._
 import org.joda.time.LocalDate
 import org.scalatest.FlatSpec
 import org.scalatest._
 import Matchers._
 import com.amazonaws.services.sqs.model.SendMessageResult
-import com.gu.autoCancel.ZuoraService
+import com.gu.util.ZuoraModels._
+import com.gu.util.ZuoraService
 import org.scalatest.mockito.MockitoSugar
 import play.api.libs.json.Json
-
 import scalaz.\/-
 import org.mockito.Mockito._
 import org.mockito.Matchers.any
 
 import scala.util.{ Failure, Success }
 
-class LambdaTest extends FlatSpec with MockitoSugar {
+class PaymentFailureHandlerTest extends FlatSpec with MockitoSugar {
 
   val fakeZuoraService = mock[ZuoraService]
   val fakeQueueClient = mock[QueueClient]

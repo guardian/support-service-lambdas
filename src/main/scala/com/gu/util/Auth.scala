@@ -1,4 +1,4 @@
-package com.gu.autoCancel
+package com.gu.util
 
 import com.gu.paymentFailure.PaymentFailureCallout
 import play.api.libs.json.JsValue

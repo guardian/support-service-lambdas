@@ -1,4 +1,4 @@
-package com.gu.autoCancel
+package com.gu.util
 
 import org.apache.log4j.Logger
 
