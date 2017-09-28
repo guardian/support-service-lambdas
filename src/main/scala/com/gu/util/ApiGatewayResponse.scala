@@ -31,7 +31,7 @@ object ResponseWriters {
 
 }
 
-object APIGatewayResponse extends Logging {
+object ApiGatewayResponse extends Logging {
 
   def outputForAPIGateway(outputStream: OutputStream, response: ApiResponse): Unit = {
     val writer = new OutputStreamWriter(outputStream, "UTF-8")

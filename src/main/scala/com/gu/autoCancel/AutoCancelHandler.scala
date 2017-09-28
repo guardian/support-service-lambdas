@@ -3,7 +3,7 @@ package com.gu.autoCancel
 import com.amazonaws.services.lambda.runtime.Context
 import com.github.nscala_time.time.OrderingImplicits._
 import com.gu.util.Config._
-import com.gu.util.APIGatewayResponse._
+import com.gu.util.ApiGatewayResponse._
 import com.gu.util.Auth._
 import com.gu.util.Logging
 import com.gu.util.ResponseModels.ApiResponse

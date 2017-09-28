@@ -1,6 +1,6 @@
 package com.gu.util
 
-import com.gu.util.APIGatewayResponse._
+import com.gu.util.ApiGatewayResponse._
 import com.gu.util.ZuoraModels._
 import com.gu.util.ZuoraReaders._
 import okhttp3._

@@ -2,7 +2,7 @@ package com.gu.paymentFailure
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.util.Config.setConfig
-import com.gu.util.APIGatewayResponse._
+import com.gu.util.ApiGatewayResponse._
 import com.gu.util.Auth._
 import com.gu.util.{ Logging, ZuoraRestService, ZuoraService }
 import com.gu.util.ZuoraModels._

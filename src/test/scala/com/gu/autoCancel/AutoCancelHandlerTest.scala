@@ -1,7 +1,7 @@
 package com.gu.autoCancel
 
 import com.gu.autoCancel.AutoCancelHandler._
-import com.gu.util.APIGatewayResponse._
+import com.gu.util.ApiGatewayResponse._
 import com.gu.util.ZuoraModels._
 import org.joda.time.LocalDate
 import org.scalatest._

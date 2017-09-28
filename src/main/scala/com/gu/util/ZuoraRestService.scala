@@ -5,7 +5,7 @@ import com.gu.util.ZuoraReaders._
 import com.gu.util.ZuoraWriters._
 import java.util.concurrent.TimeUnit
 import com.gu.util.ResponseModels.ApiResponse
-import com.gu.util.APIGatewayResponse._
+import com.gu.util.ApiGatewayResponse._
 import okhttp3._
 import org.joda.time.LocalDate
 import play.api.libs.json._
