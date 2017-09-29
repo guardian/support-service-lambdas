@@ -1,11 +1,11 @@
-package com.gu.autoCancel
+package com.gu.util
 
-import com.gu.autoCancel.ZuoraModels._
-import com.gu.autoCancel.ZuoraReaders._
-import com.gu.autoCancel.ZuoraWriters._
+import com.gu.util.ZuoraModels._
+import com.gu.util.ZuoraReaders._
+import com.gu.util.ZuoraWriters._
 import java.util.concurrent.TimeUnit
-import com.gu.autoCancel.ResponseModels.AutoCancelResponse
-import com.gu.autoCancel.APIGatewayResponse._
+import com.gu.util.ResponseModels.ApiResponse
+import com.gu.util.ApiGatewayResponse._
 import okhttp3._
 import org.joda.time.LocalDate
 import play.api.libs.json._
@@ -15,9 +15,9 @@ import scalaz.\/
 case class ZuoraRestConfig(baseUrl: String, username: String, password: String)
 
 trait ZuoraService {
-  def getAccountSummary(accountId: String): AutoCancelResponse \/ AccountSummary
-  def getInvoiceTransactions(accountId: String): AutoCancelResponse \/ InvoiceTransactionSummary
-  def disableAutoPay(accountId: String): AutoCancelResponse \/ UpdateAccountResult
+  def getAccountSummary(accountId: String): ApiResponse \/ AccountSummary
+  def getInvoiceTransactions(accountId: String): ApiResponse \/ InvoiceTransactionSummary
+  def disableAutoPay(accountId: String): ApiResponse \/ UpdateAccountResult
 }
 
 class ZuoraRestService(config: ZuoraRestConfig) extends ZuoraService with Logging {
@@ -33,7 +33,7 @@ class ZuoraRestService(config: ZuoraRestConfig) extends ZuoraService with Loggin
       .url(s"${config.baseUrl}/$route")
   }
 
-  def convertResponseToCaseClass[T](response: Response)(implicit r: Reads[T]): AutoCancelResponse \/ T = {
+  def convertResponseToCaseClass[T](response: Response)(implicit r: Reads[T]): ApiResponse \/ T = {
     if (response.isSuccessful) {
       val bodyAsJson = Json.parse(response.body.string)
       bodyAsJson.validate[T] match {
@@ -49,7 +49,7 @@ class ZuoraRestService(config: ZuoraRestConfig) extends ZuoraService with Loggin
     }
   }
 
-  override def getAccountSummary(accountId: String): AutoCancelResponse \/ AccountSummary = {
+  override def getAccountSummary(accountId: String): ApiResponse \/ AccountSummary = {
     logger.info(s"Getting account summary from Zuora for Account Id: $accountId")
     val request = buildRequest(config, s"accounts/$accountId/summary").get().build()
     val call = restClient.newCall(request)
@@ -57,7 +57,7 @@ class ZuoraRestService(config: ZuoraRestConfig) extends ZuoraService with Loggin
     convertResponseToCaseClass[AccountSummary](response)
   }
 
-  override def getInvoiceTransactions(accountId: String): AutoCancelResponse \/ InvoiceTransactionSummary = {
+  override def getInvoiceTransactions(accountId: String): ApiResponse \/ InvoiceTransactionSummary = {
     logger.info(s"Getting itemised invoices from Zuora for Account Id: $accountId")
     val request = buildRequest(config, s"transactions/invoices/accounts/$accountId").get().build()
     val call = restClient.newCall(request)
@@ -65,7 +65,7 @@ class ZuoraRestService(config: ZuoraRestConfig) extends ZuoraService with Loggin
     convertResponseToCaseClass[InvoiceTransactionSummary](response)
   }
 
-  def cancelSubscription(subscription: SubscriptionSummary, cancellationDate: LocalDate): AutoCancelResponse \/ CancelSubscriptionResult = {
+  def cancelSubscription(subscription: SubscriptionSummary, cancellationDate: LocalDate): ApiResponse \/ CancelSubscriptionResult = {
     val subscriptionCancellation = SubscriptionCancellation(cancellationDate)
     val body = RequestBody.create(MediaType.parse("application/json"), Json.toJson(subscriptionCancellation).toString)
     val request = buildRequest(config, s"subscriptions/${subscription.id}/cancel").put(body).build()
@@ -75,7 +75,7 @@ class ZuoraRestService(config: ZuoraRestConfig) extends ZuoraService with Loggin
     convertResponseToCaseClass[CancelSubscriptionResult](response)
   }
 
-  def updateCancellationReason(subscription: SubscriptionSummary): AutoCancelResponse \/ UpdateSubscriptionResult = {
+  def updateCancellationReason(subscription: SubscriptionSummary): ApiResponse \/ UpdateSubscriptionResult = {
     val subscriptionUpdate = SubscriptionUpdate("System AutoCancel")
     val body = RequestBody.create(MediaType.parse("application/json"), Json.toJson(subscriptionUpdate).toString)
     val request = buildRequest(config, s"subscriptions/${subscription.id}").put(body).build()
@@ -85,7 +85,7 @@ class ZuoraRestService(config: ZuoraRestConfig) extends ZuoraService with Loggin
     convertResponseToCaseClass[UpdateSubscriptionResult](response)
   }
 
-  def disableAutoPay(accountId: String): AutoCancelResponse \/ UpdateAccountResult = {
+  def disableAutoPay(accountId: String): ApiResponse \/ UpdateAccountResult = {
     val accountUpdate = AccountUpdate(autoPay = false)
     val body = RequestBody.create(MediaType.parse("application/json"), Json.toJson(accountUpdate).toString)
     val request = buildRequest(config, s"accounts/${accountId}").put(body).build()

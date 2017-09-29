@@ -1,6 +1,6 @@
-package com.gu.autoCancel
+package com.gu.util
 
-import com.gu.autoCancel.Auth._
+import com.gu.util.Auth._
 import org.scalatest.FlatSpec
 import play.api.libs.json.{ JsValue, Json }
 

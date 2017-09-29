@@ -2,21 +2,23 @@ package com.gu.autoCancel
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.github.nscala_time.time.OrderingImplicits._
-import com.gu.autoCancel.APIGatewayResponse._
-import com.gu.autoCancel.Auth._
-import com.gu.autoCancel.Config._
-import com.gu.autoCancel.ZuoraModels._
-import org.joda.time.LocalDate
+import com.gu.util.Config._
+import com.gu.util.ApiGatewayResponse._
+import com.gu.util.Auth._
+import com.gu.util.Logging
+import com.gu.util.ResponseModels.ApiResponse
+import com.gu.util.ZuoraModels._
+import com.gu.util.ZuoraRestService
 import java.io._
 import java.lang.System._
-import com.gu.autoCancel.ResponseModels.AutoCancelResponse
+import org.joda.time.LocalDate
 import play.api.libs.json.{ JsValue, Json }
 import scala.xml.Elem
 import scala.xml.XML._
 import scalaz.Scalaz._
 import scalaz.{ -\/, \/, \/- }
 
-object Lambda extends App with Logging {
+object AutoCancelHandler extends App with Logging {
 
   /* Entry point for our Lambda - this takes the input event from API Gateway,
   extracts out the XML body and then hands over to cancellationAttemptForPayload for the 'real work'.
@@ -63,7 +65,7 @@ object Lambda extends App with Logging {
       case \/-(accountId) => autoCancellation(restService, LocalDate.now, accountId) match {
         case \/-(_) => {
           logger.info(s"Successfully processed auto-cancellation for $accountId")
-          outputForAPIGateway(outputStream, successfulCancellation)
+          outputForAPIGateway(outputStream, successfulExecution)
         }
         case -\/(response) => {
           logger.error(s"Failed to process auto-cancellation for $accountId: ${response.body}.")
@@ -73,8 +75,8 @@ object Lambda extends App with Logging {
     }
   }
 
-  //  FIXME - we should use JSON instead of XML now that Zuora support it
-  def parseXML(xmlBody: Elem): AutoCancelResponse \/ String = {
+  //  TODO - use JSON instead of XML now that Zuora support it
+  def parseXML(xmlBody: Elem): ApiResponse \/ String = {
 
     val accountId = (xmlBody \ "parameter").filter { node => (node \ "@name").text == "AccountId" } // See fix me above
     val autoPay = (xmlBody \ "parameter").filter { node => (node \ "@name").text == "AutoPay" }
@@ -92,7 +94,7 @@ object Lambda extends App with Logging {
     }
   }
 
-  def autoCancellation(restService: ZuoraRestService, date: LocalDate, accountId: String): AutoCancelResponse \/ Unit = {
+  def autoCancellation(restService: ZuoraRestService, date: LocalDate, accountId: String): ApiResponse \/ Unit = {
     logger.info(s"Attempting to perform auto-cancellation on account: ${accountId}")
     for {
       accountSummary <- restService.getAccountSummary(accountId)
@@ -105,7 +107,7 @@ object Lambda extends App with Logging {
     } yield result
   }
 
-  def getCancellationDateFromInvoices(accountSummary: AccountSummary, dateToday: LocalDate): AutoCancelResponse \/ LocalDate = {
+  def getCancellationDateFromInvoices(accountSummary: AccountSummary, dateToday: LocalDate): ApiResponse \/ LocalDate = {
     val unpaidAndOverdueInvoices = accountSummary.invoices.filter { invoice => invoiceOverdue(invoice, dateToday) }
     if (unpaidAndOverdueInvoices.isEmpty) {
       logger.error(s"Failed to find an unpaid invoice that was overdue. The invoices we got were: ${accountSummary.invoices}")
@@ -127,7 +129,7 @@ object Lambda extends App with Logging {
     } else false
   }
 
-  def getSubscriptionToCancel(accountSummary: AccountSummary): AutoCancelResponse \/ SubscriptionSummary = {
+  def getSubscriptionToCancel(accountSummary: AccountSummary): ApiResponse \/ SubscriptionSummary = {
     val activeSubs = accountSummary.subscriptions.filter(_.status == "Active")
     activeSubs match {
       case sub :: Nil => {
@@ -150,7 +152,7 @@ object Lambda extends App with Logging {
     updateSubscriptionResult: UpdateSubscriptionResult,
     cancelSubscriptionResult: CancelSubscriptionResult,
     updateAccountResult: UpdateAccountResult
-  ): AutoCancelResponse \/ Unit = {
+  ): ApiResponse \/ Unit = {
     if (!updateSubscriptionResult.success || !cancelSubscriptionResult.success || !updateAccountResult.success) {
       logger.error(s"Zuora rejected one (or more) of our calls during autoCancellation")
       internalServerError("Received at least one failure result from Zuora during autoCancellation").left

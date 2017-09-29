@@ -1,6 +1,6 @@
-package com.gu.autoCancel
+package com.gu.util
 
-import com.gu.autoCancel.ZuoraModels._
+import com.gu.util.ZuoraModels._
 import org.joda.time.LocalDate
 import play.api.libs.functional.syntax._
 import play.api.libs.json.{ JsPath, Json, Reads, Writes }

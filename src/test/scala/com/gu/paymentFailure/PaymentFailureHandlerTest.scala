@@ -1,24 +1,22 @@
 package com.gu.paymentFailure
 
 import java.io.ByteArrayOutputStream
-
-import com.gu.autoCancel.ZuoraModels._
 import org.joda.time.LocalDate
 import org.scalatest.FlatSpec
 import org.scalatest._
 import Matchers._
 import com.amazonaws.services.sqs.model.SendMessageResult
-import com.gu.autoCancel.ZuoraService
+import com.gu.util.ZuoraModels._
+import com.gu.util.ZuoraService
 import org.scalatest.mockito.MockitoSugar
 import play.api.libs.json.Json
-
 import scalaz.\/-
 import org.mockito.Mockito._
 import org.mockito.Matchers.any
 
 import scala.util.{ Failure, Success }
 
-class LambdaTest extends FlatSpec with MockitoSugar {
+class PaymentFailureHandlerTest extends FlatSpec with MockitoSugar {
 
   val fakeZuoraService = mock[ZuoraService]
   val fakeQueueClient = mock[QueueClient]
@@ -46,7 +44,7 @@ class LambdaTest extends FlatSpec with MockitoSugar {
 
   val missingCredentialsResponse = """{"statusCode":"401","headers":{"Content-Type":"application/json"},"body":"Credentials are missing or invalid"}"""
   val successfulResponse = """{"statusCode":"200","headers":{"Content-Type":"application/json"},"body":"Success"}"""
-  val payPalSuspensionResponse = """{"statusCode":"200","headers":{"Content-Type":"application/json"},"body":"Auto-cancellation is not required: payment failure process is currently suspended for PayPal"}"""
+  val payPalSuspensionResponse = """{"statusCode":"200","headers":{"Content-Type":"application/json"},"body":"Processing is not required: payment failure process is currently suspended for PayPal"}"""
 
   "dataCollection" should "identify the correct product information" in {
     when(fakeZuoraService.getInvoiceTransactions("accountId")).thenReturn(\/-(weirdInvoiceTransactionSummary))
@@ -147,7 +145,7 @@ class LambdaTest extends FlatSpec with MockitoSugar {
     //verify
     val responseString = new String(os.toByteArray(), "UTF-8")
 
-    val expectedResponse = s"""{"statusCode":"500","headers":{"Content-Type":"application/json"},"body":"Failed to process auto-cancellation with the following error: Could not retrieve additional data for account $accountId"} """
+    val expectedResponse = s"""{"statusCode":"500","headers":{"Content-Type":"application/json"},"body":"Failed to process event due to the following error: Could not retrieve additional data for account $accountId"} """
     responseString jsonMatches expectedResponse
   }
 
@@ -168,7 +166,7 @@ class LambdaTest extends FlatSpec with MockitoSugar {
     //verify
     val responseString = new String(os.toByteArray(), "UTF-8")
 
-    val expectedResponse = s"""{"statusCode":"500","headers":{"Content-Type":"application/json"},"body":"Failed to process auto-cancellation with the following error: Could not enqueue message for account $accountId"} """
+    val expectedResponse = s"""{"statusCode":"500","headers":{"Content-Type":"application/json"},"body":"Failed to process event due to the following error: Could not enqueue message for account $accountId"} """
     responseString jsonMatches expectedResponse
   }
 

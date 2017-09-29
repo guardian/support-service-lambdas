@@ -1,17 +1,15 @@
 package com.gu.paymentFailure
 
 import com.amazonaws.services.lambda.runtime.Context
-import com.gu.autoCancel.APIGatewayResponse.{ outputForAPIGateway, _ }
-import com.gu.autoCancel.Auth._
+import com.gu.util.Config.setConfig
+import com.gu.util.ApiGatewayResponse._
+import com.gu.util.Auth._
+import com.gu.util.{ Logging, ZuoraRestService, ZuoraService }
+import com.gu.util.ZuoraModels._
 import java.io._
 import java.text.DecimalFormat
-
-import com.gu.autoCancel.Config.setConfig
-import com.gu.autoCancel.ZuoraModels._
-import com.gu.autoCancel.{ Logging, ZuoraRestService, ZuoraService }
 import org.joda.time.LocalDate
 import play.api.libs.json.{ JsError, JsSuccess, Json }
-
 import scala.math.BigDecimal.decimal
 import scala.util.{ Failure, Success }
 import scalaz.{ -\/, \/, \/- }
@@ -50,7 +48,7 @@ trait PaymentFailureLambda extends Logging {
               } else {
                 enqueueEmail(callout.value) match {
                   case -\/(error) => outputForAPIGateway(outputStream, internalServerError(error))
-                  case \/-(_) => outputForAPIGateway(outputStream, successfulCancellation)
+                  case \/-(_) => outputForAPIGateway(outputStream, successfulExecution)
                 }
               }
             } else {
