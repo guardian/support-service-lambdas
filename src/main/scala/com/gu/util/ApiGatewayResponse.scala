@@ -42,10 +42,10 @@ object ApiGatewayResponse extends Logging {
   }
 
   val successfulExecution = ApiResponse("200", new Headers, "Success")
-  def noActionRequired(reason: String) = ApiResponse("200", new Headers, s"Auto-cancellation is not required: $reason")
+  def noActionRequired(reason: String) = ApiResponse("200", new Headers, s"Processing is not required: $reason")
 
   val unauthorized = ApiResponse("401", new Headers, "Credentials are missing or invalid")
   val badRequest = ApiResponse("400", new Headers, "Failure to parse XML successfully")
-  def internalServerError(error: String) = ApiResponse("500", new Headers, s"Failed to process auto-cancellation with the following error: $error")
+  def internalServerError(error: String) = ApiResponse("500", new Headers, s"Failed to process event due to the following error: $error")
 
 }

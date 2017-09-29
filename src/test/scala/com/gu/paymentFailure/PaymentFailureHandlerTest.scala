@@ -44,7 +44,7 @@ class PaymentFailureHandlerTest extends FlatSpec with MockitoSugar {
 
   val missingCredentialsResponse = """{"statusCode":"401","headers":{"Content-Type":"application/json"},"body":"Credentials are missing or invalid"}"""
   val successfulResponse = """{"statusCode":"200","headers":{"Content-Type":"application/json"},"body":"Success"}"""
-  val payPalSuspensionResponse = """{"statusCode":"200","headers":{"Content-Type":"application/json"},"body":"Auto-cancellation is not required: payment failure process is currently suspended for PayPal"}"""
+  val payPalSuspensionResponse = """{"statusCode":"200","headers":{"Content-Type":"application/json"},"body":"Processing is not required: payment failure process is currently suspended for PayPal"}"""
 
   "dataCollection" should "identify the correct product information" in {
     when(fakeZuoraService.getInvoiceTransactions("accountId")).thenReturn(\/-(weirdInvoiceTransactionSummary))
@@ -145,7 +145,7 @@ class PaymentFailureHandlerTest extends FlatSpec with MockitoSugar {
     //verify
     val responseString = new String(os.toByteArray(), "UTF-8")
 
-    val expectedResponse = s"""{"statusCode":"500","headers":{"Content-Type":"application/json"},"body":"Failed to process auto-cancellation with the following error: Could not retrieve additional data for account $accountId"} """
+    val expectedResponse = s"""{"statusCode":"500","headers":{"Content-Type":"application/json"},"body":"Failed to process event due to the following error: Could not retrieve additional data for account $accountId"} """
     responseString jsonMatches expectedResponse
   }
 
@@ -166,7 +166,7 @@ class PaymentFailureHandlerTest extends FlatSpec with MockitoSugar {
     //verify
     val responseString = new String(os.toByteArray(), "UTF-8")
 
-    val expectedResponse = s"""{"statusCode":"500","headers":{"Content-Type":"application/json"},"body":"Failed to process auto-cancellation with the following error: Could not enqueue message for account $accountId"} """
+    val expectedResponse = s"""{"statusCode":"500","headers":{"Content-Type":"application/json"},"body":"Failed to process event due to the following error: Could not enqueue message for account $accountId"} """
     responseString jsonMatches expectedResponse
   }
 
