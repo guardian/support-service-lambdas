@@ -7,10 +7,8 @@ import com.gu.util.{ Config, Logging, ZuoraRestService, ZuoraService }
 import com.gu.util.ZuoraModels._
 import java.io._
 import java.text.DecimalFormat
-
 import org.joda.time.LocalDate
 import play.api.libs.json.{ JsError, JsSuccess, Json }
-
 import scala.math.BigDecimal.decimal
 import scala.util.{ Failure, Success, Try }
 import scalaz.{ -\/, \/, \/- }
