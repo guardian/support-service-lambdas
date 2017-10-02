@@ -5,7 +5,7 @@ import play.api.libs.json.JsValue
 
 object Auth extends Logging {
 
-  def credentialsAreValid(inputEvent: JsValue, trustedApiClientId: String, trustedApiToken: String): Boolean = {
+  def credentialsAreValid(inputEvent: JsValue, trustedApiConfig: TrustedApiConfig): Boolean = {
 
     /* Using query strings because for Basic Auth to work Zuora requires us to return a WWW-Authenticate
     header, and API Gateway does not support this header (returns x-amzn-Remapped-WWW-Authenticate instead)
@@ -16,7 +16,7 @@ object Auth extends Logging {
 
     maybeCredentials match {
       case (Some(apiClientId), Some(apiToken)) => {
-        (apiClientId == trustedApiClientId && apiToken == trustedApiToken)
+        (apiClientId == trustedApiConfig.apiClientId && apiToken == trustedApiConfig.apiToken)
       }
       case _ => {
         logger.info(s"Could not find credentials in request")
@@ -26,8 +26,8 @@ object Auth extends Logging {
   }
 
   // Ensure that the correct Zuora environment is hitting the API
-  def validTenant(trustedTenantId: String, paymentFailureCallout: PaymentFailureCallout): Boolean = {
-    paymentFailureCallout.tenantId == trustedTenantId
+  def validTenant(trustedApiConfig: TrustedApiConfig, paymentFailureCallout: PaymentFailureCallout): Boolean = {
+    paymentFailureCallout.tenantId == trustedApiConfig.tenantId
   }
 
 }

@@ -1,22 +1,24 @@
 package com.gu.paymentFailure
 
 import com.amazonaws.services.lambda.runtime.Context
-import com.gu.util.Config.setConfig
 import com.gu.util.ApiGatewayResponse._
 import com.gu.util.Auth._
-import com.gu.util.{ Logging, ZuoraRestService, ZuoraService }
+import com.gu.util.{ Config, Logging, ZuoraRestService, ZuoraService }
 import com.gu.util.ZuoraModels._
 import java.io._
 import java.text.DecimalFormat
+
 import org.joda.time.LocalDate
 import play.api.libs.json.{ JsError, JsSuccess, Json }
+
 import scala.math.BigDecimal.decimal
-import scala.util.{ Failure, Success }
+import scala.util.{ Failure, Success, Try }
 import scalaz.{ -\/, \/, \/- }
 
 trait PaymentFailureLambda extends Logging {
-  def config: Config
-  def zuoraService: ZuoraService
+  def stage: String
+  def configAttempt: Try[Config]
+  def getZuoraRestService: Try[ZuoraService]
   def queueClient: QueueClient
 
   def loggableData(callout: PaymentFailureCallout) = {
@@ -24,52 +26,62 @@ trait PaymentFailureLambda extends Logging {
   }
 
   def handleRequest(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
-    logger.info(s"Payment Failure Lambda is starting up...")
+    logger.info(s"Payment Failure Lambda is starting up in $stage")
     val inputEvent = Json.parse(inputStream)
-    if (credentialsAreValid(inputEvent, config.apiClientId, config.apiToken)) {
-      logger.info("Authenticated request successfully...")
-      val maybeBody = (inputEvent \ "body").toOption
-      maybeBody.map { body =>
-        Json.fromJson[PaymentFailureCallout](Json.parse(body.as[String])) match {
-          case callout: JsSuccess[PaymentFailureCallout] =>
-            if (validTenant(config.tenantId, callout.value)) {
-              logger.info(s"received ${loggableData(callout.value)}")
-              if (callout.value.paymentMethodType == "PayPal") {
-                val accountId = callout.value.accountId
-                logger.info(s"${accountId} | user pays by PayPal, will not send email due to PayPal/Zuora integration issues")
-                zuoraService.disableAutoPay(accountId) match {
-                  case -\/(errorResponse) => outputForAPIGateway(outputStream, errorResponse)
-                  case \/-(updateAccountResult) if (!updateAccountResult.success) => outputForAPIGateway(outputStream, internalServerError("Failed to switch off AutoPay"))
-                  case \/-(updateAccountResult) if (updateAccountResult.success) => {
-                    logger.info(s"$accountId | AutoPay disabled due to ongoing PayPal incident. Don't forget to turn this setting back on")
-                    outputForAPIGateway(outputStream, noActionRequired("payment failure process is currently suspended for PayPal"))
+    configAttempt match {
+      case Success(config) => {
+        getZuoraRestService.foreach { zuoraRestService =>
+          implicit val zuoraService = zuoraRestService
+          if (credentialsAreValid(inputEvent, config.trustedApiConfig)) {
+            logger.info(s"Authenticated request successfully in $stage")
+            val maybeBody = (inputEvent \ "body").toOption
+            maybeBody.map { body =>
+              Json.fromJson[PaymentFailureCallout](Json.parse(body.as[String])) match {
+                case callout: JsSuccess[PaymentFailureCallout] =>
+                  if (validTenant(config.trustedApiConfig, callout.value)) {
+                    logger.info(s"received ${loggableData(callout.value)}")
+                    if (callout.value.paymentMethodType == "PayPal") {
+                      val accountId = callout.value.accountId
+                      logger.info(s"${accountId} | user pays by PayPal, will not send email due to PayPal/Zuora integration issues")
+                      zuoraService.disableAutoPay(accountId) match {
+                        case -\/(errorResponse) => outputForAPIGateway(outputStream, errorResponse)
+                        case \/-(updateAccountResult) if (!updateAccountResult.success) => outputForAPIGateway(outputStream, internalServerError("Failed to switch off AutoPay"))
+                        case \/-(updateAccountResult) if (updateAccountResult.success) => {
+                          logger.info(s"$accountId | AutoPay disabled due to ongoing PayPal incident. Don't forget to turn this setting back on")
+                          outputForAPIGateway(outputStream, noActionRequired("payment failure process is currently suspended for PayPal"))
+                        }
+                      }
+                    } else {
+                      enqueueEmail(callout.value) match {
+                        case -\/(error) => outputForAPIGateway(outputStream, internalServerError(error))
+                        case \/-(_) => outputForAPIGateway(outputStream, successfulExecution)
+                      }
+                    }
+                  } else {
+                    logger.info(s"Incorrect Tenant Id was provided")
+                    outputForAPIGateway(outputStream, unauthorized)
                   }
-                }
-              } else {
-                enqueueEmail(callout.value) match {
-                  case -\/(error) => outputForAPIGateway(outputStream, internalServerError(error))
-                  case \/-(_) => outputForAPIGateway(outputStream, successfulExecution)
-                }
+                case e: JsError =>
+                  logger.error(s"error parsing callout body: $e")
+                  outputForAPIGateway(outputStream, badRequest)
               }
-            } else {
-              logger.info(s"Incorrect Tenant Id was provided")
-              outputForAPIGateway(outputStream, unauthorized)
-            }
-          case e: JsError =>
-            logger.error(s"error parsing callout body: $e")
-            outputForAPIGateway(outputStream, badRequest)
-        }
-      }.getOrElse(
-        outputForAPIGateway(outputStream, badRequest)
-      )
+            }.getOrElse(
+              outputForAPIGateway(outputStream, badRequest)
+            )
 
-    } else {
-      logger.info("Request from Zuora could not be authenticated")
-      outputForAPIGateway(outputStream, unauthorized)
+          } else {
+            logger.info("Request from Zuora could not be authenticated")
+            outputForAPIGateway(outputStream, unauthorized)
+          }
+        }
+      }
+      case Failure(configLoadError) => {
+        outputForAPIGateway(outputStream, internalServerError(s"Failed to execute PaymentFailure lambda due to $configLoadError"))
+      }
     }
   }
 
-  def enqueueEmail(paymentFailureCallout: PaymentFailureCallout): \/[String, Unit] = {
+  def enqueueEmail(paymentFailureCallout: PaymentFailureCallout)(implicit zuoraService: ZuoraService): \/[String, Unit] = {
     val accountId = paymentFailureCallout.accountId
     val queueSendResponse = dataCollection(accountId).map { paymentInformation =>
       val message = toMessage(paymentFailureCallout, paymentInformation)
@@ -128,7 +140,7 @@ trait PaymentFailureLambda extends Logging {
   case class PaymentFailureInformation(subscriptionName: String, product: String, amount: Double, serviceStartDate: LocalDate, serviceEndDate: LocalDate)
 
   //todo for now just return an option here but the error handling has to be refactored a little bit
-  def dataCollection(accountId: String): Option[PaymentFailureInformation] = {
+  def dataCollection(accountId: String)(implicit zuoraService: ZuoraService): Option[PaymentFailureInformation] = {
     logger.info(s"Attempting to get further details from account $accountId")
     val unpaidInvoices = zuoraService.getInvoiceTransactions(accountId).map {
       invoiceTransactionSummary =>
@@ -169,8 +181,11 @@ trait PaymentFailureLambda extends Logging {
 }
 
 object Lambda extends PaymentFailureLambda {
-  override val config = EnvConfig
-  override val zuoraService = new ZuoraRestService(setConfig)
+  override val stage = System.getenv("Stage")
+  override val configAttempt = Config.load(stage)
+  override val getZuoraRestService = configAttempt.map {
+    config => new ZuoraRestService(config.zuoraRestConfig)
+  }
   override val queueClient = SqsClient
 }
 
