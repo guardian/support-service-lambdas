@@ -8,7 +8,6 @@ import com.gu.util.{ Config, Logging, ZuoraRestConfig, ZuoraRestService }
 import com.gu.util.ResponseModels.ApiResponse
 import com.gu.util.ZuoraModels._
 import java.io._
-import java.lang.System._
 import org.joda.time.LocalDate
 import play.api.libs.json.{ JsValue, Json }
 import scala.util.{ Failure, Success }
