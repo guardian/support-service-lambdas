@@ -123,16 +123,11 @@ Resources:
                 Fn::GetAtt:
                 - ZuoraAutoCancelRole
                 - Arn
-            KmsKeyArn:
-                Fn::GetAtt:
-                - ZuoraAutoCancelKMS
-                - Arn
             MemorySize: 512
             Runtime: java8
             Timeout: 300
         DependsOn:
         - ZuoraAutoCancelRole
-        - ZuoraAutoCancelKMS
 
     PaymentFailureLambda:
         Type: AWS::Lambda::Function
@@ -151,16 +146,11 @@ Resources:
                 Fn::GetAtt:
                 - ZuoraAutoCancelRole
                 - Arn
-            KmsKeyArn:
-                Fn::GetAtt:
-                - ZuoraAutoCancelKMS
-                - Arn
             MemorySize: 512
             Runtime: java8
             Timeout: 300
         DependsOn:
         - ZuoraAutoCancelRole
-        - ZuoraAutoCancelKMS
 
     ZuoraAutoCancelAPIPermission:
         Type: AWS::Lambda::Permission
