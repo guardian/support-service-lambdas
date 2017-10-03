@@ -31,7 +31,7 @@ trait PaymentFailureLambda extends Logging {
     configAttempt match {
       case Success(config) => {
         getZuoraRestService.foreach { zuoraRestService =>
-          processCallout(inputEvent, outputStream, config, zuoraRestService)
+          processCallout(inputEvent, outputStream, config)(zuoraRestService)
         }
       }
       case Failure(_) => {
@@ -40,8 +40,7 @@ trait PaymentFailureLambda extends Logging {
     }
   }
 
-  def processCallout(inputEvent: JsValue, outputStream: OutputStream, config: Config, zuoraRestService: ZuoraService): Unit = {
-    implicit val zuoraService = zuoraRestService
+  def processCallout(inputEvent: JsValue, outputStream: OutputStream, config: Config)(implicit zuoraService: ZuoraService): Unit = {
     if (credentialsAreValid(inputEvent, config.trustedApiConfig)) {
       logger.info(s"Authenticated request successfully in $stage")
       val maybeBody = (inputEvent \ "body").toOption
