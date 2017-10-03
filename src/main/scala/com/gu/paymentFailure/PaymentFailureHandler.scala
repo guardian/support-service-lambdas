@@ -73,8 +73,8 @@ trait PaymentFailureLambda extends Logging {
           }
         }
       }
-      case Failure(configLoadError) => {
-        outputForAPIGateway(outputStream, internalServerError(s"Failed to execute PaymentFailure lambda due to $configLoadError"))
+      case Failure(_) => {
+        outputForAPIGateway(outputStream, internalServerError(s"Failed to execute lambda - unable to load configuration from S3"))
       }
     }
   }
