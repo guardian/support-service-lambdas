@@ -52,6 +52,60 @@ Resources:
                             Action: s3:GetObject
                             Resource: !Sub arn:aws:s3:::payment-failure-lambdas-private/${Stage}/*
 
+    ZuoraAutoCancelKMS:
+        Type: AWS::KMS::Key
+        Properties:
+            Description: !Sub Used by the zuora-auto-cancel ${Stage} lambda to encrypt and decrypt environment variables
+            KeyPolicy:
+              Version: '2012-10-17'
+              Id: key-policy-zuora-auto-cancel
+              Statement:
+              - Sid: Enable IAM User Permissions
+                Effect: Allow
+                Principal:
+                  AWS:
+                    !Sub arn:aws:iam::${AWS::AccountId}:root
+                Action: kms:*
+                Resource: "*"
+              - Sid: Allow access for Key Administrators
+                Effect: Allow
+                Action:
+                - kms:Create*
+                - kms:Describe*
+                - kms:Enable*
+                - kms:List*
+                - kms:Put*
+                - kms:Update*
+                - kms:Revoke*
+                - kms:Disable*
+                - kms:Get*
+                - kms:Delete*
+                - kms:ScheduleKeyDeletion
+                - kms:CancelKeyDeletion
+                Resource: "*"
+              - Sid: Allow use of the key
+                Effect: Allow
+                Principal:
+                  AWS:
+                    Fn::GetAtt:
+                    - ZuoraAutoCancelRole
+                    - Arn
+                Action:
+                - kms:Encrypt
+                - kms:Decrypt
+                - kms:ReEncrypt*
+                - kms:GenerateDataKey*
+                - kms:DescribeKey
+                Resource: "*"
+        DependsOn: ZuoraAutoCancelRole
+
+    ZuoraAutoCancelKMSAlias:
+        Type: AWS::KMS::Alias
+        Properties:
+          AliasName: !Sub alias/zuora-auto-cancel-kms-${Stage}
+          TargetKeyId: !Ref ZuoraAutoCancelKMS
+        DependsOn: ZuoraAutoCancelKMS
+
     ZuoraAutoCancelLambda:
         Type: AWS::Lambda::Function
         Properties:
@@ -69,11 +123,16 @@ Resources:
                 Fn::GetAtt:
                 - ZuoraAutoCancelRole
                 - Arn
+            KmsKeyArn:
+                Fn::GetAtt:
+                - ZuoraAutoCancelKMS
+                - Arn
             MemorySize: 512
             Runtime: java8
             Timeout: 300
         DependsOn:
         - ZuoraAutoCancelRole
+        - ZuoraAutoCancelKMS
 
     PaymentFailureLambda:
         Type: AWS::Lambda::Function
@@ -92,11 +151,16 @@ Resources:
                 Fn::GetAtt:
                 - ZuoraAutoCancelRole
                 - Arn
+            KmsKeyArn:
+                Fn::GetAtt:
+                - ZuoraAutoCancelKMS
+                - Arn
             MemorySize: 512
             Runtime: java8
             Timeout: 300
         DependsOn:
         - ZuoraAutoCancelRole
+        - ZuoraAutoCancelKMS
 
     ZuoraAutoCancelAPIPermission:
         Type: AWS::Lambda::Permission
@@ -105,7 +169,6 @@ Resources:
             FunctionName: !Sub zuora-auto-cancel-${Stage}
             Principal: apigateway.amazonaws.com
         DependsOn: ZuoraAutoCancelLambda
-
     PaymentFailureAPIPermission:
         Type: AWS::Lambda::Permission
         Properties:
@@ -173,7 +236,6 @@ Resources:
         - ZuoraAutoCancelAPI
         - ZuoraAutoCancelLambda
         - ZuoraAutoCancelProxyResource
-
     ZuoraAutoCancelAPIStage:
         Type: AWS::ApiGateway::Stage
         Properties:
