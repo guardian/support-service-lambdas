@@ -1,11 +1,11 @@
-package com.gu.autoCancel
+package com.gu.util
 
-import com.gu.autoCancel.ZuoraModels._
-import com.gu.autoCancel.ZuoraReaders._
+import com.gu.util.ApiGatewayResponse._
+import com.gu.util.ZuoraModels._
+import com.gu.util.ZuoraReaders._
 import okhttp3._
+import org.scalatest.Matchers._
 import org.scalatest._
-import Matchers._
-import com.gu.autoCancel.APIGatewayResponse._
 import play.api.libs.json.{ JsValue, Json }
 import scalaz.{ -\/, \/- }
 

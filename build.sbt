@@ -35,6 +35,7 @@ addCommandAlias("dist", ";riffRaffArtifact")
 libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-lambda-java-log4j" % "1.0.0",
   "com.amazonaws" % "aws-lambda-java-core" % "1.1.0",
+  "com.amazonaws" % "aws-java-sdk-s3" % "1.11.163",
   "com.amazonaws" % "aws-java-sdk-kms" % "1.11.86",
   "com.amazonaws" % "aws-java-sdk-sqs" % "1.11.95",
   "log4j" % "log4j" % "1.2.17",

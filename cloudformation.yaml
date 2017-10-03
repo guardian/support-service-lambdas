@@ -45,6 +45,12 @@ Resources:
                           - Effect: Allow
                             Action: sqs:*
                             Resource: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:subs-welcome-email
+                - PolicyName: ReadPrivateCredentials
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action: s3:GetObject
+                            Resource: !Sub arn:aws:s3:::payment-failure-lambdas-private/${Stage}/*
 
     ZuoraAutoCancelKMS:
         Type: AWS::KMS::Key
@@ -109,7 +115,10 @@ Resources:
             Code:
                 S3Bucket: zuora-auto-cancel-dist
                 S3Key: !Sub membership/${Stage}/zuora-auto-cancel/zuora-auto-cancel.jar
-            Handler: com.gu.autoCancel.Lambda::handleRequest
+            Handler: com.gu.autoCancel.AutoCancelHandler::handleRequest
+            Environment:
+                Variables:
+                  Stage: !Ref Stage
             Role:
                 Fn::GetAtt:
                 - ZuoraAutoCancelRole
@@ -134,6 +143,9 @@ Resources:
             Code:
                 S3Bucket: zuora-auto-cancel-dist
                 S3Key: !Sub membership/${Stage}/zuora-auto-cancel/zuora-auto-cancel.jar
+            Environment:
+                Variables:
+                  Stage: !Ref Stage
             Handler: com.gu.paymentFailure.Lambda::handleRequest
             Role:
                 Fn::GetAtt:

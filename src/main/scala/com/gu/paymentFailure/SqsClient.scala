@@ -5,7 +5,7 @@ import com.amazonaws.auth.{ AWSCredentialsProviderChain, EnvironmentVariableCred
 import com.amazonaws.regions.Regions.EU_WEST_1
 import com.amazonaws.services.sqs.AmazonSQSClient
 import com.amazonaws.services.sqs.model._
-import com.gu.autoCancel.Logging
+import com.gu.util.Logging
 import play.api.libs.json.Json
 
 import scala.util.Try

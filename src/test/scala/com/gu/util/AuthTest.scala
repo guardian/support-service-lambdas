@@ -1,10 +1,12 @@
-package com.gu.autoCancel
+package com.gu.util
 
-import com.gu.autoCancel.Auth._
+import com.gu.util.Auth._
 import org.scalatest.FlatSpec
 import play.api.libs.json.{ JsValue, Json }
 
 class AuthTest extends FlatSpec {
+
+  val trustedApiConfig = TrustedApiConfig("validUser", "correctPassword", "tenant123")
 
   def generateInputEvent(apiClientId: String, apiToken: String): JsValue = {
 
@@ -31,22 +33,22 @@ class AuthTest extends FlatSpec {
       "path" -> "/test-path",
       "httpMethod" -> "POST"
     )
-    assert(credentialsAreValid(sampleJson, "validUser", "correctPassword") == false)
+    assert(credentialsAreValid(sampleJson, trustedApiConfig) == false)
   }
 
   "credentialsAreValid" should "return false for an incorrect password" in {
     val inputEvent = generateInputEvent("validUser", "incorrectPassword")
-    assert(credentialsAreValid(inputEvent, "validUser", "correctPassword") == false)
+    assert(credentialsAreValid(inputEvent, trustedApiConfig) == false)
   }
 
   "credentialsAreValid" should "return false for an incorrect username" in {
     val inputEvent = generateInputEvent("invalidUser", "correctPassword")
-    assert(credentialsAreValid(inputEvent, "validUser", "correctPassword") == false)
+    assert(credentialsAreValid(inputEvent, trustedApiConfig) == false)
   }
 
   "credentialsAreValid" should "return true for correct credentials" in {
     val inputEvent = generateInputEvent("validUser", "correctPassword")
-    assert(credentialsAreValid(inputEvent, "validUser", "correctPassword") == true)
+    assert(credentialsAreValid(inputEvent, trustedApiConfig) == true)
   }
 
 }
