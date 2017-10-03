@@ -15,7 +15,6 @@ import scalaz.\/
 trait ZuoraService {
   def getAccountSummary(accountId: String): ApiResponse \/ AccountSummary
   def getInvoiceTransactions(accountId: String): ApiResponse \/ InvoiceTransactionSummary
-  def disableAutoPay(accountId: String): ApiResponse \/ UpdateAccountResult
 }
 
 class ZuoraRestService(config: ZuoraRestConfig) extends ZuoraService with Logging {

@@ -13,7 +13,6 @@ import play.api.libs.json.Json
 import scalaz.\/-
 import org.mockito.Mockito._
 import org.mockito.Matchers.any
-
 import scala.util.{ Failure, Success, Try }
 
 class PaymentFailureHandlerTest extends FlatSpec with MockitoSugar {
@@ -29,7 +28,6 @@ class PaymentFailureHandlerTest extends FlatSpec with MockitoSugar {
   def itemisedInvoice(balance: Double, invoiceItems: List[InvoiceItem]) = ItemisedInvoice("invoice123", today, 49, balance, "Posted", List(invoiceItemA))
   val basicInvoiceTransactionSummary = InvoiceTransactionSummary(List(itemisedInvoice(49, List(invoiceItemA))))
   val weirdInvoiceTransactionSummary = InvoiceTransactionSummary(List(itemisedInvoice(0, List(invoiceItemA)), itemisedInvoice(49, List(invoiceItemB, invoiceItemA, invoiceItemC))))
-  val updateAccountSuccess = UpdateAccountResult(true)
 
   val fakeApiConfig = TrustedApiConfig("validApiClientId", "validApiToken", "testEnvTenantId")
   val fakeZuoraConfig = ZuoraRestConfig("fakeUrl", "fakeUser", "fakePass")
@@ -43,7 +41,6 @@ class PaymentFailureHandlerTest extends FlatSpec with MockitoSugar {
 
   val missingCredentialsResponse = """{"statusCode":"401","headers":{"Content-Type":"application/json"},"body":"Credentials are missing or invalid"}"""
   val successfulResponse = """{"statusCode":"200","headers":{"Content-Type":"application/json"},"body":"Success"}"""
-  val payPalSuspensionResponse = """{"statusCode":"200","headers":{"Content-Type":"application/json"},"body":"Processing is not required: payment failure process is currently suspended for PayPal"}"""
 
   "dataCollection" should "identify the correct product information" in {
     implicit val zuoraRest = fakeZuoraRest
@@ -73,15 +70,6 @@ class PaymentFailureHandlerTest extends FlatSpec with MockitoSugar {
     lambda.handleRequest(stream, os, null)
     val responseString = new String(os.toByteArray(), "UTF-8");
     responseString jsonMatches missingCredentialsResponse
-  }
-
-  "lambda" should "return noActionRequired if the user pays by PayPal" in {
-    val stream = getClass.getResourceAsStream("/paymentFailure/payPalRequest.json")
-    val os = new ByteArrayOutputStream()
-    when(fakeZuoraRest.disableAutoPay(accountId)).thenReturn(\/-(updateAccountSuccess))
-    lambda.handleRequest(stream, os, null)
-    val responseString = new String(os.toByteArray(), "UTF-8");
-    responseString jsonMatches payPalSuspensionResponse
   }
 
   "lambda" should "enqueue email and return success for a valid request" in {

@@ -49,22 +49,9 @@ trait PaymentFailureLambda extends Logging {
           case callout: JsSuccess[PaymentFailureCallout] =>
             if (validTenant(config.trustedApiConfig, callout.value)) {
               logger.info(s"received ${loggableData(callout.value)}")
-              if (callout.value.paymentMethodType == "PayPal") {
-                val accountId = callout.value.accountId
-                logger.info(s"${accountId} | user pays by PayPal, will not send email due to PayPal/Zuora integration issues")
-                zuoraService.disableAutoPay(accountId) match {
-                  case -\/(errorResponse) => outputForAPIGateway(outputStream, errorResponse)
-                  case \/-(updateAccountResult) if (!updateAccountResult.success) => outputForAPIGateway(outputStream, internalServerError("Failed to switch off AutoPay"))
-                  case \/-(updateAccountResult) if (updateAccountResult.success) => {
-                    logger.info(s"$accountId | AutoPay disabled due to ongoing PayPal incident. Don't forget to turn this setting back on")
-                    outputForAPIGateway(outputStream, noActionRequired("payment failure process is currently suspended for PayPal"))
-                  }
-                }
-              } else {
-                enqueueEmail(callout.value) match {
-                  case -\/(error) => outputForAPIGateway(outputStream, internalServerError(error))
-                  case \/-(_) => outputForAPIGateway(outputStream, successfulExecution)
-                }
+              enqueueEmail(callout.value) match {
+                case -\/(error) => outputForAPIGateway(outputStream, internalServerError(error))
+                case \/-(_) => outputForAPIGateway(outputStream, successfulExecution)
               }
             } else {
               logger.info(s"Incorrect Tenant Id was provided")
