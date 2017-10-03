@@ -47,8 +47,14 @@ object Config extends Logging {
 
   def parseConfig(jsonConfig: String): Try[Config] = {
     Json.fromJson[Config](Json.parse(jsonConfig)) match {
-      case validConfig: JsSuccess[Config] => Success(validConfig.value)
-      case error: JsError => Failure(new ConfigFailure(error))
+      case validConfig: JsSuccess[Config] => {
+        logger.info(s"Successfully parsed JSON config")
+        Success(validConfig.value)
+      }
+      case error: JsError => {
+        logger.error("Failed to parse JSON config")
+        Failure(new ConfigFailure(error))
+      }
     }
   }
 
