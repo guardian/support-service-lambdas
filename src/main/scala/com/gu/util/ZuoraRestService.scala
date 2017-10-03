@@ -12,8 +12,6 @@ import play.api.libs.json._
 import scalaz.Scalaz._
 import scalaz.\/
 
-case class ZuoraRestConfig(baseUrl: String, username: String, password: String)
-
 trait ZuoraService {
   def getAccountSummary(accountId: String): ApiResponse \/ AccountSummary
   def getInvoiceTransactions(accountId: String): ApiResponse \/ InvoiceTransactionSummary

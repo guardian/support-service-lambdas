@@ -1,22 +1,24 @@
 package com.gu.paymentFailure
 
 import com.amazonaws.services.lambda.runtime.Context
-import com.gu.util.Config.setConfig
 import com.gu.util.ApiGatewayResponse._
 import com.gu.util.Auth._
-import com.gu.util.{ Logging, ZuoraRestService, ZuoraService }
+import com.gu.util.{ Config, Logging, ZuoraRestService, ZuoraService }
 import com.gu.util.ZuoraModels._
 import java.io._
 import java.text.DecimalFormat
+
 import org.joda.time.LocalDate
-import play.api.libs.json.{ JsError, JsSuccess, Json }
+import play.api.libs.json.{ JsError, JsSuccess, JsValue, Json }
+
 import scala.math.BigDecimal.decimal
-import scala.util.{ Failure, Success }
+import scala.util.{ Failure, Success, Try }
 import scalaz.{ -\/, \/, \/- }
 
 trait PaymentFailureLambda extends Logging {
-  def config: Config
-  def zuoraService: ZuoraService
+  def stage: String
+  def configAttempt: Try[Config]
+  def getZuoraRestService: Try[ZuoraService]
   def queueClient: QueueClient
 
   def loggableData(callout: PaymentFailureCallout) = {
@@ -24,15 +26,28 @@ trait PaymentFailureLambda extends Logging {
   }
 
   def handleRequest(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
-    logger.info(s"Payment Failure Lambda is starting up...")
+    logger.info(s"Payment Failure Lambda is starting up in $stage")
     val inputEvent = Json.parse(inputStream)
-    if (credentialsAreValid(inputEvent, config.apiClientId, config.apiToken)) {
-      logger.info("Authenticated request successfully...")
+    configAttempt match {
+      case Success(config) => {
+        getZuoraRestService.foreach { zuoraRestService =>
+          processCallout(inputEvent, outputStream, config)(zuoraRestService)
+        }
+      }
+      case Failure(_) => {
+        outputForAPIGateway(outputStream, internalServerError(s"Failed to execute lambda - unable to load configuration from S3"))
+      }
+    }
+  }
+
+  def processCallout(inputEvent: JsValue, outputStream: OutputStream, config: Config)(implicit zuoraService: ZuoraService): Unit = {
+    if (credentialsAreValid(inputEvent, config.trustedApiConfig)) {
+      logger.info(s"Authenticated request successfully in $stage")
       val maybeBody = (inputEvent \ "body").toOption
       maybeBody.map { body =>
         Json.fromJson[PaymentFailureCallout](Json.parse(body.as[String])) match {
           case callout: JsSuccess[PaymentFailureCallout] =>
-            if (validTenant(config.tenantId, callout.value)) {
+            if (validTenant(config.trustedApiConfig, callout.value)) {
               logger.info(s"received ${loggableData(callout.value)}")
               if (callout.value.paymentMethodType == "PayPal") {
                 val accountId = callout.value.accountId
@@ -62,14 +77,13 @@ trait PaymentFailureLambda extends Logging {
       }.getOrElse(
         outputForAPIGateway(outputStream, badRequest)
       )
-
     } else {
       logger.info("Request from Zuora could not be authenticated")
       outputForAPIGateway(outputStream, unauthorized)
     }
   }
 
-  def enqueueEmail(paymentFailureCallout: PaymentFailureCallout): \/[String, Unit] = {
+  def enqueueEmail(paymentFailureCallout: PaymentFailureCallout)(implicit zuoraService: ZuoraService): \/[String, Unit] = {
     val accountId = paymentFailureCallout.accountId
     val queueSendResponse = dataCollection(accountId).map { paymentInformation =>
       val message = toMessage(paymentFailureCallout, paymentInformation)
@@ -128,7 +142,7 @@ trait PaymentFailureLambda extends Logging {
   case class PaymentFailureInformation(subscriptionName: String, product: String, amount: Double, serviceStartDate: LocalDate, serviceEndDate: LocalDate)
 
   //todo for now just return an option here but the error handling has to be refactored a little bit
-  def dataCollection(accountId: String): Option[PaymentFailureInformation] = {
+  def dataCollection(accountId: String)(implicit zuoraService: ZuoraService): Option[PaymentFailureInformation] = {
     logger.info(s"Attempting to get further details from account $accountId")
     val unpaidInvoices = zuoraService.getInvoiceTransactions(accountId).map {
       invoiceTransactionSummary =>
@@ -169,8 +183,11 @@ trait PaymentFailureLambda extends Logging {
 }
 
 object Lambda extends PaymentFailureLambda {
-  override val config = EnvConfig
-  override val zuoraService = new ZuoraRestService(setConfig)
+  override val stage = System.getenv("Stage")
+  override val configAttempt = Config.load(stage)
+  override val getZuoraRestService = configAttempt.map {
+    config => new ZuoraRestService(config.zuoraRestConfig)
+  }
   override val queueClient = SqsClient
 }
 

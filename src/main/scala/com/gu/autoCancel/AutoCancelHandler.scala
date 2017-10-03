@@ -2,17 +2,15 @@ package com.gu.autoCancel
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.github.nscala_time.time.OrderingImplicits._
-import com.gu.util.Config._
 import com.gu.util.ApiGatewayResponse._
 import com.gu.util.Auth._
-import com.gu.util.Logging
+import com.gu.util.{ Config, Logging, ZuoraRestConfig, ZuoraRestService }
 import com.gu.util.ResponseModels.ApiResponse
 import com.gu.util.ZuoraModels._
-import com.gu.util.ZuoraRestService
 import java.io._
-import java.lang.System._
 import org.joda.time.LocalDate
 import play.api.libs.json.{ JsValue, Json }
+import scala.util.{ Failure, Success }
 import scala.xml.Elem
 import scala.xml.XML._
 import scalaz.Scalaz._
@@ -24,16 +22,26 @@ object AutoCancelHandler extends App with Logging {
   extracts out the XML body and then hands over to cancellationAttemptForPayload for the 'real work'.
   */
   def handleRequest(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
-    logger.info(s"Auto-cancel Lambda is starting up...")
-    val inputEvent = Json.parse(inputStream)
-    if (credentialsAreValid(inputEvent, getenv("ApiClientId"), getenv("ApiToken"))) {
-      logger.info("Authenticated request successfully...")
-      val xmlBody = extractXmlBodyFromJson(inputEvent)
-      cancellationAttemptForPayload(xmlBody, outputStream)
-    } else {
-      logger.info("Request from Zuora could not be authenticated")
-      outputForAPIGateway(outputStream, unauthorized)
+    val stage = System.getenv("Stage")
+    logger.info(s"Auto-cancel Lambda is starting up in $stage")
+    val configAttempt = Config.load(stage)
+    configAttempt match {
+      case Success(config) => {
+        val inputEvent = Json.parse(inputStream)
+        if (credentialsAreValid(inputEvent, config.trustedApiConfig)) {
+          logger.info("Authenticated request successfully...")
+          val xmlBody = extractXmlBodyFromJson(inputEvent)
+          cancellationAttemptForPayload(config.zuoraRestConfig, xmlBody, outputStream)
+        } else {
+          logger.info("Request from Zuora could not be authenticated")
+          outputForAPIGateway(outputStream, unauthorized)
+        }
+      }
+      case Failure(_) => {
+        outputForAPIGateway(outputStream, internalServerError(s"Failed to execute lambda - unable to load configuration from S3"))
+      }
     }
+
   }
 
   def extractXmlBodyFromJson(inputEvent: JsValue): Elem = {
@@ -56,9 +64,9 @@ object AutoCancelHandler extends App with Logging {
 
   The Response gets logged before we send it back to API Gateway
   */
-  def cancellationAttemptForPayload(xmlBody: Elem, outputStream: OutputStream): Unit = {
+  def cancellationAttemptForPayload(zuoraConfig: ZuoraRestConfig, xmlBody: Elem, outputStream: OutputStream): Unit = {
 
-    val restService = new ZuoraRestService(setConfig)
+    val restService = new ZuoraRestService(zuoraConfig)
 
     parseXML(xmlBody) match {
       case -\/(response) => outputForAPIGateway(outputStream, response)
