@@ -1,12 +1,15 @@
 package com.gu.util
 
+import com.gu.autoCancel.AutoCancelHandler.RequestAuth
 import com.gu.paymentFailure.PaymentFailureCallout
 import play.api.libs.json.JsValue
 
 object Auth extends Logging {
 
-  def credentialsAreValid(inputEvent: JsValue, trustedApiConfig: TrustedApiConfig): Boolean = {
+  def credentialsAreValid(requestAuth: RequestAuth, trustedApiConfig: TrustedApiConfig): Boolean =
+    (requestAuth.apiClientId == trustedApiConfig.apiClientId && requestAuth.apiClientToken == trustedApiConfig.apiToken)
 
+  def deprecatedCredentialsAreValid(inputEvent: JsValue, trustedApiConfig: TrustedApiConfig): Boolean = {
     /* Using query strings because for Basic Auth to work Zuora requires us to return a WWW-Authenticate
     header, and API Gateway does not support this header (returns x-amzn-Remapped-WWW-Authenticate instead)
     */

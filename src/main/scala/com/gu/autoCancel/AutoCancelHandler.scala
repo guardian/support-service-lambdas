@@ -4,49 +4,93 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.github.nscala_time.time.OrderingImplicits._
 import com.gu.util.ApiGatewayResponse._
 import com.gu.util.Auth._
-import com.gu.util.{ Config, Logging, ZuoraRestConfig, ZuoraRestService }
+import com.gu.util._
 import com.gu.util.ResponseModels.ApiResponse
 import com.gu.util.ZuoraModels._
 import java.io._
 import org.joda.time.LocalDate
-import play.api.libs.json.{ JsValue, Json }
+import play.api.libs.json._
 import scala.util.{ Failure, Success }
-import scala.xml.Elem
-import scala.xml.XML._
 import scalaz.Scalaz._
 import scalaz.{ -\/, \/, \/- }
 
 object AutoCancelHandler extends App with Logging {
 
   /* Entry point for our Lambda - this takes the input event from API Gateway,
-  extracts out the XML body and then hands over to cancellationAttemptForPayload for the 'real work'.
+  extracts the JSON body and then hands over to cancellationAttemptForPayload for the 'real work'.
   */
   def handleRequest(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
     val stage = System.getenv("Stage")
     logger.info(s"Auto-cancel Lambda is starting up in $stage")
-    val configAttempt = Config.load(stage)
-    configAttempt match {
-      case Success(config) => {
-        val inputEvent = Json.parse(inputStream)
-        if (credentialsAreValid(inputEvent, config.trustedApiConfig)) {
-          logger.info("Authenticated request successfully...")
-          val xmlBody = extractXmlBodyFromJson(inputEvent)
-          cancellationAttemptForPayload(config.zuoraRestConfig, xmlBody, outputStream)
-        } else {
-          logger.info("Request from Zuora could not be authenticated")
-          outputForAPIGateway(outputStream, unauthorized)
-        }
-      }
-      case Failure(_) => {
-        outputForAPIGateway(outputStream, internalServerError(s"Failed to execute lambda - unable to load configuration from S3"))
-      }
-    }
-
+    val response = for {
+      config <- loadConfig(stage)
+      apiGatewayRequest <- parseApiGatewayInput(inputStream)
+      auth <- authenticateCallout(apiGatewayRequest.queryStringParameters, config.trustedApiConfig)
+      _ = logger.info("Authenticated request successfully...")
+      autoCancelCallout <- parseBody(apiGatewayRequest)
+    } yield cancelIfNecessary(autoCancelCallout, config.zuoraRestConfig)
+    outputForAPIGateway(outputStream, response.fold(identity, identity))
   }
 
-  def extractXmlBodyFromJson(inputEvent: JsValue): Elem = {
-    val body = (inputEvent \ "body")
-    loadString(body.as[String])
+  def cancelIfNecessary(autoCancelCallout: AutoCancelCallout, zuoraRestConfig: ZuoraRestConfig): ApiResponse = {
+    filterInvalidAccount(autoCancelCallout).map {
+      _ => cancellationAttemptForPayload(zuoraRestConfig, autoCancelCallout)
+    }.fold(identity, identity)
+  }
+
+  case class RequestAuth(apiClientId: String, apiClientToken: String)
+
+  /* Using query strings because for Basic Auth to work Zuora requires us to return a WWW-Authenticate
+    header, and API Gateway does not support this header (returns x-amzn-Remapped-WWW-Authenticate instead)
+    */
+  case class ApiGatewayRequest(queryStringParameters: RequestAuth, body: String) {
+    def parsedBody: JsResult[AutoCancelCallout] = Json.fromJson[AutoCancelCallout](Json.parse(body))
+  }
+
+  object RequestAuth {
+    implicit val jf = Json.reads[RequestAuth]
+  }
+
+  object ApiGatewayRequest {
+    implicit val jf = Json.reads[ApiGatewayRequest]
+  }
+
+  def parseApiGatewayInput(inputStream: InputStream): ApiResponse \/ ApiGatewayRequest = {
+    Json.parse(inputStream).validate[ApiGatewayRequest] match {
+      case JsSuccess(apiGatewayCallout, _) => \/-(apiGatewayCallout)
+      case JsError(error) => {
+        logger.error(s"Error when parsing JSON from API Gateway: $error")
+        -\/(badRequest)
+      }
+    }
+  }
+
+  def parseBody(apiGatewayRequest: ApiGatewayRequest): ApiResponse \/ AutoCancelCallout = {
+    apiGatewayRequest.parsedBody match {
+      case JsSuccess(autoCancelCallout, _) => \/-(autoCancelCallout)
+      case JsError(error) => {
+        logger.error(s"Error when parsing JSON from API Gateway: $error")
+        -\/(badRequest)
+      }
+    }
+  }
+
+  def loadConfig(stage: String): ApiResponse \/ Config = {
+    Config.load(stage) match {
+      case Success(config) => \/-(config)
+      case Failure(error) => {
+        logger.error(s"Failed to load config: $error")
+        -\/(internalServerError("Failed to execute lambda - unable to load configuration from S3"))
+      }
+    }
+  }
+
+  def authenticateCallout(requestAuth: RequestAuth, trustedApiConfig: TrustedApiConfig): ApiResponse \/ Unit = {
+    if (credentialsAreValid(requestAuth, trustedApiConfig)) \/-(()) else -\/(unauthorized)
+  }
+
+  def filterInvalidAccount(callout: AutoCancelCallout): ApiResponse \/ Unit = {
+    if (callout.autoPay) \/-(()) else -\/(noActionRequired("AutoPay is false"))
   }
 
   /* When developing, it's best to bypass handleRequest (since this requires actually invoking the Lambda)
@@ -58,51 +102,29 @@ object AutoCancelHandler extends App with Logging {
   val testXML = <callout>
                   <parameter name="AccountId">12345</parameter>
                   <parameter name="AutoPay">true</parameter>
+                  <parameter name="PaymentMethodType">CreditCard</parameter>
                 </callout>
   val nullOutputStream = new NullOutputStream
   cancellationAttemptForPayload(testXML, nullOutputStream)
 
   The Response gets logged before we send it back to API Gateway
   */
-  def cancellationAttemptForPayload(zuoraConfig: ZuoraRestConfig, xmlBody: Elem, outputStream: OutputStream): Unit = {
-
+  def cancellationAttemptForPayload(zuoraConfig: ZuoraRestConfig, autoCancelCallout: AutoCancelCallout): ApiResponse = {
     val restService = new ZuoraRestService(zuoraConfig)
-
-    parseXML(xmlBody) match {
-      case -\/(response) => outputForAPIGateway(outputStream, response)
-      case \/-(accountId) => autoCancellation(restService, LocalDate.now, accountId) match {
-        case \/-(_) => {
-          logger.info(s"Successfully processed auto-cancellation for $accountId")
-          outputForAPIGateway(outputStream, successfulExecution)
-        }
-        case -\/(response) => {
-          logger.error(s"Failed to process auto-cancellation for $accountId: ${response.body}.")
-          outputForAPIGateway(outputStream, response)
-        }
+    autoCancellation(restService, LocalDate.now, autoCancelCallout) match {
+      case \/-(_) => {
+        logger.info(s"Successfully processed auto-cancellation for ${autoCancelCallout.accountId}")
+        successfulExecution
+      }
+      case -\/(response) => {
+        logger.error(s"Failed to process auto-cancellation for ${autoCancelCallout.accountId}: ${response.body}.")
+        response
       }
     }
   }
 
-  //  TODO - use JSON instead of XML now that Zuora support it
-  def parseXML(xmlBody: Elem): ApiResponse \/ String = {
-
-    val accountId = (xmlBody \ "parameter").filter { node => (node \ "@name").text == "AccountId" } // See fix me above
-    val autoPay = (xmlBody \ "parameter").filter { node => (node \ "@name").text == "AutoPay" }
-
-    if (accountId.nonEmpty && autoPay.nonEmpty) {
-      logger.info(s"AccountId parsed from Zuora callout is: $accountId, AutoPay = $autoPay")
-      if (autoPay.text == "true") {
-        (accountId.text).right
-      } else {
-        noActionRequired("AutoRenew is not = true, we should not process a cancellation for this account").left
-      }
-    } else {
-      logger.info(s"Failed to parse XML successfully, full payload was: \n $xmlBody")
-      badRequest.left
-    }
-  }
-
-  def autoCancellation(restService: ZuoraRestService, date: LocalDate, accountId: String): ApiResponse \/ Unit = {
+  def autoCancellation(restService: ZuoraRestService, date: LocalDate, autoCancelCallout: AutoCancelCallout): ApiResponse \/ Unit = {
+    val accountId = autoCancelCallout.accountId
     logger.info(s"Attempting to perform auto-cancellation on account: ${accountId}")
     for {
       accountSummary <- restService.getAccountSummary(accountId)

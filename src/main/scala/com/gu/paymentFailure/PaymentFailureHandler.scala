@@ -7,10 +7,8 @@ import com.gu.util.{ Config, Logging, ZuoraRestService, ZuoraService }
 import com.gu.util.ZuoraModels._
 import java.io._
 import java.text.DecimalFormat
-
 import org.joda.time.LocalDate
 import play.api.libs.json.{ JsError, JsSuccess, JsValue, Json }
-
 import scala.math.BigDecimal.decimal
 import scala.util.{ Failure, Success, Try }
 import scalaz.{ -\/, \/, \/- }
@@ -41,7 +39,7 @@ trait PaymentFailureLambda extends Logging {
   }
 
   def processCallout(inputEvent: JsValue, outputStream: OutputStream, config: Config)(implicit zuoraService: ZuoraService): Unit = {
-    if (credentialsAreValid(inputEvent, config.trustedApiConfig)) {
+    if (deprecatedCredentialsAreValid(inputEvent, config.trustedApiConfig)) {
       logger.info(s"Authenticated request successfully in $stage")
       val maybeBody = (inputEvent \ "body").toOption
       maybeBody.map { body =>
