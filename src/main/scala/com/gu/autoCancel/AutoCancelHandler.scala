@@ -38,7 +38,7 @@ object AutoCancelHandler extends App with Logging {
     }.fold(identity, identity)
   }
 
-  case class RequestAuth(apiClientId: String, apiClientToken: String)
+  case class RequestAuth(apiClientId: String, apiToken: String)
 
   /* Using query strings because for Basic Auth to work Zuora requires us to return a WWW-Authenticate
     header, and API Gateway does not support this header (returns x-amzn-Remapped-WWW-Authenticate instead)

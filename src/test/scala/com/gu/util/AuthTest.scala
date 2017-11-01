@@ -53,17 +53,17 @@ class AuthTest extends FlatSpec {
   }
 
   "credentialsAreValid" should "return true for correct credentials" in {
-    val requestAuth = RequestAuth(apiClientId = "validUser", apiClientToken = "correctPassword")
+    val requestAuth = RequestAuth(apiClientId = "validUser", apiToken = "correctPassword")
     assert(credentialsAreValid(requestAuth, trustedApiConfig) == true)
   }
 
   "credentialsAreValid" should "return false for an incorrect user" in {
-    val requestAuth = RequestAuth(apiClientId = "invalidUser", apiClientToken = "correctPassword")
+    val requestAuth = RequestAuth(apiClientId = "invalidUser", apiToken = "correctPassword")
     assert(credentialsAreValid(requestAuth, trustedApiConfig) == false)
   }
 
   "credentialsAreValid" should "return false for an incorrect password" in {
-    val requestAuth = RequestAuth(apiClientId = "validUser", apiClientToken = "ndjashjkhajshs")
+    val requestAuth = RequestAuth(apiClientId = "validUser", apiToken = "ndjashjkhajshs")
     assert(credentialsAreValid(requestAuth, trustedApiConfig) == false)
   }
 

@@ -7,7 +7,7 @@ import play.api.libs.json.JsValue
 object Auth extends Logging {
 
   def credentialsAreValid(requestAuth: RequestAuth, trustedApiConfig: TrustedApiConfig): Boolean =
-    (requestAuth.apiClientId == trustedApiConfig.apiClientId && requestAuth.apiClientToken == trustedApiConfig.apiToken)
+    (requestAuth.apiClientId == trustedApiConfig.apiClientId && requestAuth.apiToken == trustedApiConfig.apiToken)
 
   def deprecatedCredentialsAreValid(inputEvent: JsValue, trustedApiConfig: TrustedApiConfig): Boolean = {
     /* Using query strings because for Basic Auth to work Zuora requires us to return a WWW-Authenticate
