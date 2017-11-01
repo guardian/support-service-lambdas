@@ -27,6 +27,7 @@ object AutoCancelHandler extends App with Logging {
       apiGatewayRequest <- parseApiGatewayInput(inputStream)
       auth <- authenticateCallout(apiGatewayRequest.queryStringParameters, config.trustedApiConfig)
       _ = logger.info("Authenticated request successfully...")
+      _ = logger.info(s"body from Zuora was: ${apiGatewayRequest.body}")
       autoCancelCallout <- parseBody(apiGatewayRequest)
     } yield cancelIfNecessary(autoCancelCallout, config.zuoraRestConfig)
     outputForAPIGateway(outputStream, response.fold(identity, identity))
@@ -90,7 +91,7 @@ object AutoCancelHandler extends App with Logging {
   }
 
   def filterInvalidAccount(callout: AutoCancelCallout): ApiResponse \/ Unit = {
-    if (callout.autoPay) \/-(()) else -\/(noActionRequired("AutoPay is false"))
+    if (callout.isAutoPay) \/-(()) else -\/(noActionRequired("AutoPay is false"))
   }
 
   /* When developing, it's best to bypass handleRequest (since this requires actually invoking the Lambda)

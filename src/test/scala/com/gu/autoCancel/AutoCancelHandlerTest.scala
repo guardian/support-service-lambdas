@@ -98,7 +98,7 @@ class AutoCancelHandlerTest extends FlatSpec {
   }
 
   "filterInvalidAccount" should "return a left if AutoPay = false" in {
-    val autoCancelCallout = AutoCancelCallout(accountId = "id123", autoPay = false)
+    val autoCancelCallout = AutoCancelCallout(accountId = "id123", autoPay = "false")
     val either = filterInvalidAccount(autoCancelCallout)
     assert(either match {
       case -\/(_) => true
@@ -107,7 +107,7 @@ class AutoCancelHandlerTest extends FlatSpec {
   }
 
   "filterInvalidAccount" should "return a left if AutoPay = true" in {
-    val autoCancelCallout = AutoCancelCallout(accountId = "id123", autoPay = true)
+    val autoCancelCallout = AutoCancelCallout(accountId = "id123", autoPay = "true")
     val either = filterInvalidAccount(autoCancelCallout)
     assert(either match {
       case \/-(_) => true
