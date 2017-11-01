@@ -94,22 +94,6 @@ object AutoCancelHandler extends App with Logging {
     if (callout.isAutoPay) \/-(()) else -\/(noActionRequired("AutoPay is false"))
   }
 
-  /* When developing, it's best to bypass handleRequest (since this requires actually invoking the Lambda)
-  and directly call cancellationAttemptForPayload.
-
-  To do this, prepare an account in Zuora and use some test XML with a dummy output stream e.g.
-
-  import org.apache.commons.io.output.NullOutputStream
-  val testXML = <callout>
-                  <parameter name="AccountId">12345</parameter>
-                  <parameter name="AutoPay">true</parameter>
-                  <parameter name="PaymentMethodType">CreditCard</parameter>
-                </callout>
-  val nullOutputStream = new NullOutputStream
-  cancellationAttemptForPayload(testXML, nullOutputStream)
-
-  The Response gets logged before we send it back to API Gateway
-  */
   def cancellationAttemptForPayload(zuoraConfig: ZuoraRestConfig, autoCancelCallout: AutoCancelCallout): ApiResponse = {
     val restService = new ZuoraRestService(zuoraConfig)
     autoCancellation(restService, LocalDate.now, autoCancelCallout) match {
