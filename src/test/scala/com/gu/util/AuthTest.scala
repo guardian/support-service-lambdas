@@ -1,5 +1,6 @@
 package com.gu.util
 
+import com.gu.autoCancel.AutoCancelHandler.RequestAuth
 import com.gu.util.Auth._
 import org.scalatest.FlatSpec
 import play.api.libs.json.{ JsValue, Json }
@@ -27,28 +28,43 @@ class AuthTest extends FlatSpec {
     sampleJson
   }
 
-  "credentialsAreValid" should "return false if the username query string is missing" in {
+  "deprecatedCredentialsAreValid" should "return false if the username query string is missing" in {
     val sampleJson = Json.obj(
       "resource" -> "test-resource",
       "path" -> "/test-path",
       "httpMethod" -> "POST"
     )
-    assert(credentialsAreValid(sampleJson, trustedApiConfig) == false)
+    assert(deprecatedCredentialsAreValid(sampleJson, trustedApiConfig) == false)
   }
 
-  "credentialsAreValid" should "return false for an incorrect password" in {
+  "deprecatedCredentialsAreValid" should "return false for an incorrect password" in {
     val inputEvent = generateInputEvent("validUser", "incorrectPassword")
-    assert(credentialsAreValid(inputEvent, trustedApiConfig) == false)
+    assert(deprecatedCredentialsAreValid(inputEvent, trustedApiConfig) == false)
   }
 
-  "credentialsAreValid" should "return false for an incorrect username" in {
+  "deprecatedCredentialsAreValid" should "return false for an incorrect username" in {
     val inputEvent = generateInputEvent("invalidUser", "correctPassword")
-    assert(credentialsAreValid(inputEvent, trustedApiConfig) == false)
+    assert(deprecatedCredentialsAreValid(inputEvent, trustedApiConfig) == false)
+  }
+
+  "deprecatedCredentialsAreValid" should "return true for correct credentials" in {
+    val inputEvent = generateInputEvent("validUser", "correctPassword")
+    assert(deprecatedCredentialsAreValid(inputEvent, trustedApiConfig) == true)
   }
 
   "credentialsAreValid" should "return true for correct credentials" in {
-    val inputEvent = generateInputEvent("validUser", "correctPassword")
-    assert(credentialsAreValid(inputEvent, trustedApiConfig) == true)
+    val requestAuth = RequestAuth(apiClientId = "validUser", apiToken = "correctPassword")
+    assert(credentialsAreValid(requestAuth, trustedApiConfig) == true)
+  }
+
+  "credentialsAreValid" should "return false for an incorrect user" in {
+    val requestAuth = RequestAuth(apiClientId = "invalidUser", apiToken = "correctPassword")
+    assert(credentialsAreValid(requestAuth, trustedApiConfig) == false)
+  }
+
+  "credentialsAreValid" should "return false for an incorrect password" in {
+    val requestAuth = RequestAuth(apiClientId = "validUser", apiToken = "ndjashjkhajshs")
+    assert(credentialsAreValid(requestAuth, trustedApiConfig) == false)
   }
 
 }

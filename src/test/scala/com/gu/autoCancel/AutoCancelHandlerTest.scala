@@ -2,6 +2,7 @@ package com.gu.autoCancel
 
 import com.gu.autoCancel.AutoCancelHandler._
 import com.gu.util.ApiGatewayResponse._
+import com.gu.util.TrustedApiConfig
 import com.gu.util.ZuoraModels._
 import org.joda.time.LocalDate
 import org.scalatest._
@@ -19,32 +20,6 @@ class AutoCancelHandlerTest extends FlatSpec {
   val invoiceNotDue = Invoice("inv123", LocalDate.now.minusDays(3), 11.99, "Posted")
   val singleOverdueInvoice = Invoice("inv123", LocalDate.now.minusDays(14), 11.99, "Posted")
   val twoOverdueInvoices = List(Invoice("inv123", LocalDate.now.minusDays(21), 11.99, "Posted"), Invoice("inv321", LocalDate.now.minusDays(35), 11.99, "Posted"))
-
-  "parseXML" should "successfully parse a 'good' XML sample" in {
-    val body =
-      <callout>
-        <parameter name="AccountId">acc123</parameter>
-        <parameter name="AutoPay">true</parameter>
-      </callout>
-    assert(parseXML(body) == \/-("acc123"))
-  }
-
-  "parseXML" should "reject an account if auto-pay is not true" in {
-    val body =
-      <callout>
-        <parameter name="AccountId">acc123</parameter>
-        <parameter name="AutoPay">false</parameter>
-      </callout>
-    assert(parseXML(body) == -\/(noActionRequired("AutoRenew is not = true, we should not process a cancellation for this account")))
-  }
-
-  "parseXML" should "fail to parse a 'bad' XML sample" in {
-    val body =
-      <callout>
-        <fakeTag>badData</fakeTag>
-      </callout>
-    assert(parseXML(body) == -\/(badRequest))
-  }
 
   "invoiceOverdue" should "return false if the invoice is not in a 'Posted' state" in {
     assert(invoiceOverdue(invoiceNotPosted, LocalDate.now) == false)
@@ -120,6 +95,36 @@ class AutoCancelHandlerTest extends FlatSpec {
   "handleZuoraResults" should "return a right[Unit] if all Zuora results indicate success" in {
     val either = handleZuoraResults(UpdateSubscriptionResult(true, "id321"), CancelSubscriptionResult(true, LocalDate.now()), UpdateAccountResult(true))
     assert(either == \/-(()))
+  }
+
+  "filterInvalidAccount" should "return a left if AutoPay = false" in {
+    val autoCancelCallout = AutoCancelCallout(accountId = "id123", autoPay = "false")
+    val either = filterInvalidAccount(autoCancelCallout)
+    assert(either match {
+      case -\/(_) => true
+      case _ => false
+    }, s"We got: $either")
+  }
+
+  "filterInvalidAccount" should "return a left if AutoPay = true" in {
+    val autoCancelCallout = AutoCancelCallout(accountId = "id123", autoPay = "true")
+    val either = filterInvalidAccount(autoCancelCallout)
+    assert(either match {
+      case \/-(_) => true
+      case _ => false
+    }, s"We got: $either")
+  }
+
+  "authenticateCallout" should "return a left if the credentials are invalid" in {
+    val requestAuth = RequestAuth(apiClientId = "correctId", apiToken = "token")
+    val trustedApiConfig = TrustedApiConfig(apiClientId = "wrongId", apiToken = "token", tenantId = "tenant")
+    assert(authenticateCallout(requestAuth, trustedApiConfig) == -\/(unauthorized))
+  }
+
+  "authenticateCallout" should "return a right if the credentials are valid" in {
+    val requestAuth = RequestAuth(apiClientId = "correctId", apiToken = "token")
+    val trustedApiConfig = TrustedApiConfig(apiClientId = "correctId", apiToken = "token", tenantId = "tenant")
+    assert(authenticateCallout(requestAuth, trustedApiConfig) == \/-(()))
   }
 
 }
