@@ -35,14 +35,14 @@ object AutoCancelHandler extends App with Logging {
   }
 
   case class RequestAuth(apiClientId: String, apiToken: String)
-  case class URLParams(apiClientId: String, apiToken: String, onlyCancelDirectDebit: Option[String])
+  case class URLParams(apiClientId: String, apiToken: String, onlyCancelDirectDebit: Option[Boolean])
 
   /* Using query strings because for Basic Auth to work Zuora requires us to return a WWW-Authenticate
     header, and API Gateway does not support this header (returns x-amzn-Remapped-WWW-Authenticate instead)
     */
   case class ApiGatewayRequest(queryStringParameters: URLParams, body: String) {
     def parsedBody: JsResult[AutoCancelCallout] = Json.fromJson[AutoCancelCallout](Json.parse(body))
-    def onlyCancelDirectDebit: Boolean = queryStringParameters.onlyCancelDirectDebit.contains("true")
+    def onlyCancelDirectDebit: Boolean = queryStringParameters.onlyCancelDirectDebit.contains(true)
     def requestAuth: RequestAuth = RequestAuth(queryStringParameters.apiClientId, queryStringParameters.apiToken)
   }
 
