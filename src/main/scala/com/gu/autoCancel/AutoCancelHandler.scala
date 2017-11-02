@@ -27,7 +27,7 @@ object AutoCancelHandler extends App with Logging {
       apiGatewayRequest <- parseApiGatewayInput(inputStream)
       auth <- authenticateCallout(apiGatewayRequest.requestAuth, config.trustedApiConfig)
       _ = logger.info("Authenticated request successfully...")
-      _ = logger.info(s"body from Zuora was: ${apiGatewayRequest.body}")
+      _ = logger.info(s"Body from Zuora was: ${apiGatewayRequest.body}, onlyDirectDebit queryString was: ${apiGatewayRequest.queryStringParameters.onlyCancelDirectDebit}")
       autoCancelCallout <- parseBody(apiGatewayRequest)
       _ <- filterInvalidAccount(autoCancelCallout, onlyCancelDirectDebit = apiGatewayRequest.onlyCancelDirectDebit)
     } yield cancellationAttemptForPayload(config.zuoraRestConfig, autoCancelCallout)
