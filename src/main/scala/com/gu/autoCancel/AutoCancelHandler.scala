@@ -25,31 +25,29 @@ object AutoCancelHandler extends App with Logging {
     val response = for {
       config <- loadConfig(stage)
       apiGatewayRequest <- parseApiGatewayInput(inputStream)
-      auth <- authenticateCallout(apiGatewayRequest.queryStringParameters, config.trustedApiConfig)
+      auth <- authenticateCallout(apiGatewayRequest.requestAuth, config.trustedApiConfig)
       _ = logger.info("Authenticated request successfully...")
-      _ = logger.info(s"body from Zuora was: ${apiGatewayRequest.body}")
+      _ = logger.info(s"Body from Zuora was: ${apiGatewayRequest.body}, onlyDirectDebit queryString was: ${apiGatewayRequest.queryStringParameters.onlyCancelDirectDebit}")
       autoCancelCallout <- parseBody(apiGatewayRequest)
-    } yield cancelIfNecessary(autoCancelCallout, config.zuoraRestConfig)
+      _ <- filterInvalidAccount(autoCancelCallout, onlyCancelDirectDebit = apiGatewayRequest.onlyCancelDirectDebit)
+    } yield cancellationAttemptForPayload(config.zuoraRestConfig, autoCancelCallout)
     outputForAPIGateway(outputStream, response.fold(identity, identity))
   }
 
-  def cancelIfNecessary(autoCancelCallout: AutoCancelCallout, zuoraRestConfig: ZuoraRestConfig): ApiResponse = {
-    filterInvalidAccount(autoCancelCallout).map {
-      _ => cancellationAttemptForPayload(zuoraRestConfig, autoCancelCallout)
-    }.fold(identity, identity)
-  }
-
   case class RequestAuth(apiClientId: String, apiToken: String)
+  case class URLParams(apiClientId: String, apiToken: String, onlyCancelDirectDebit: Option[String])
 
   /* Using query strings because for Basic Auth to work Zuora requires us to return a WWW-Authenticate
     header, and API Gateway does not support this header (returns x-amzn-Remapped-WWW-Authenticate instead)
     */
-  case class ApiGatewayRequest(queryStringParameters: RequestAuth, body: String) {
+  case class ApiGatewayRequest(queryStringParameters: URLParams, body: String) {
     def parsedBody: JsResult[AutoCancelCallout] = Json.fromJson[AutoCancelCallout](Json.parse(body))
+    def onlyCancelDirectDebit: Boolean = queryStringParameters.onlyCancelDirectDebit.contains("true")
+    def requestAuth: RequestAuth = RequestAuth(queryStringParameters.apiClientId, queryStringParameters.apiToken)
   }
 
-  object RequestAuth {
-    implicit val jf = Json.reads[RequestAuth]
+  object URLParams {
+    implicit val jf = Json.reads[URLParams]
   }
 
   object ApiGatewayRequest {
@@ -90,8 +88,22 @@ object AutoCancelHandler extends App with Logging {
     if (credentialsAreValid(requestAuth, trustedApiConfig)) \/-(()) else -\/(unauthorized)
   }
 
-  def filterInvalidAccount(callout: AutoCancelCallout): ApiResponse \/ Unit = {
+  def filterInvalidAccount(callout: AutoCancelCallout, onlyCancelDirectDebit: Boolean): ApiResponse \/ Unit = {
+    for {
+      _ <- filterAutoPay(callout)
+      _ <- filterDirectDebit(onlyCancelDirectDebit = onlyCancelDirectDebit, nonDirectDebit = callout.nonDirectDebit)
+    } yield ()
+  }
+
+  def filterAutoPay(callout: AutoCancelCallout): ApiResponse \/ Unit = {
     if (callout.isAutoPay) \/-(()) else -\/(noActionRequired("AutoPay is false"))
+  }
+
+  def filterDirectDebit(onlyCancelDirectDebit: Boolean, nonDirectDebit: Boolean) = {
+    if (onlyCancelDirectDebit && nonDirectDebit)
+      -\/(noActionRequired("it's not direct debit so we will wait longer"))
+    else
+      \/-(())
   }
 
   def cancellationAttemptForPayload(zuoraConfig: ZuoraRestConfig, autoCancelCallout: AutoCancelCallout): ApiResponse = {

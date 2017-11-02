@@ -4,9 +4,11 @@ import play.api.libs.json.Json
 
 case class AutoCancelCallout(
     accountId: String,
-    autoPay: String
+    autoPay: String,
+    paymentMethodType: String
 ) {
   def isAutoPay = autoPay == "true"
+  def nonDirectDebit = paymentMethodType != "BankTransfer"
 }
 
 object AutoCancelCallout {

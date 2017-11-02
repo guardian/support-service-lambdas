@@ -6,6 +6,7 @@ import com.gu.util.TrustedApiConfig
 import com.gu.util.ZuoraModels._
 import org.joda.time.LocalDate
 import org.scalatest._
+import play.api.libs.json.{ JsSuccess, Json }
 
 import scalaz.{ -\/, \/- }
 
@@ -98,17 +99,41 @@ class AutoCancelHandlerTest extends FlatSpec {
   }
 
   "filterInvalidAccount" should "return a left if AutoPay = false" in {
-    val autoCancelCallout = AutoCancelCallout(accountId = "id123", autoPay = "false")
-    val either = filterInvalidAccount(autoCancelCallout)
+    val autoCancelCallout = AutoCancelCallout(accountId = "id123", autoPay = "false", "PayPal")
+    val either = filterInvalidAccount(autoCancelCallout, false)
     assert(either match {
       case -\/(_) => true
       case _ => false
     }, s"We got: $either")
   }
 
-  "filterInvalidAccount" should "return a left if AutoPay = true" in {
-    val autoCancelCallout = AutoCancelCallout(accountId = "id123", autoPay = "true")
-    val either = filterInvalidAccount(autoCancelCallout)
+  "filterInvalidAccount" should "return a right if AutoPay = true" in {
+    val autoCancelCallout = AutoCancelCallout(accountId = "id123", autoPay = "true", "PayPal")
+    val either = filterInvalidAccount(autoCancelCallout, false)
+    assert(either match {
+      case \/-(_) => true
+      case _ => false
+    }, s"We got: $either")
+  }
+
+  "filterDirectDebit" should "return a left if we're only cancelling direct debits, but the sub isn't paid that way" in {
+    val either = filterDirectDebit(onlyCancelDirectDebit = true, nonDirectDebit = true)
+    assert(either match {
+      case -\/(_) => true
+      case _ => false
+    }, s"We got: $either")
+  }
+
+  "filterDirectDebit" should "return a right if we're not just cancelling direct debits even if it's not paid by DD" in {
+    val either = filterDirectDebit(onlyCancelDirectDebit = false, nonDirectDebit = true)
+    assert(either match {
+      case \/-(_) => true
+      case _ => false
+    }, s"We got: $either")
+  }
+
+  "filterDirectDebit" should "return a right if we're only cancelling DDs and it is a direct debit" in {
+    val either = filterDirectDebit(onlyCancelDirectDebit = true, nonDirectDebit = false)
     assert(either match {
       case \/-(_) => true
       case _ => false
@@ -125,6 +150,34 @@ class AutoCancelHandlerTest extends FlatSpec {
     val requestAuth = RequestAuth(apiClientId = "correctId", apiToken = "token")
     val trustedApiConfig = TrustedApiConfig(apiClientId = "correctId", apiToken = "token", tenantId = "tenant")
     assert(authenticateCallout(requestAuth, trustedApiConfig) == \/-(()))
+  }
+
+}
+
+class DeserialiserTest extends FlatSpec with Matchers {
+
+  "deserialise APIGatewayRequest" should "manage without the only direct debit param" in {
+    val json = """{"queryStringParameters": {"apiToken": "a", "apiClientId": "b"}, "body": "haha"}"""
+    val actualRequest = Json.parse(json).validate[ApiGatewayRequest]
+
+    actualRequest.map(_.queryStringParameters.onlyCancelDirectDebit) should be(JsSuccess(None))
+
+  }
+
+  it should "manage with the only direct debit param being false" in {
+    val json = """{"queryStringParameters": {"apiToken": "a", "apiClientId": "b", "onlyCancelDirectDebit": "false"}, "body": "haha"}"""
+    val actualRequest = Json.parse(json).validate[ApiGatewayRequest]
+
+    actualRequest.map(_.onlyCancelDirectDebit) should be(JsSuccess(false))
+
+  }
+
+  it should "manage with the only direct debit param being true" in {
+    val json = """{"queryStringParameters": {"apiToken": "a", "apiClientId": "b", "onlyCancelDirectDebit": "true"}, "body": "haha"}"""
+    val actualRequest = Json.parse(json).validate[ApiGatewayRequest]
+
+    actualRequest.map(_.onlyCancelDirectDebit) should be(JsSuccess(true))
+
   }
 
 }
