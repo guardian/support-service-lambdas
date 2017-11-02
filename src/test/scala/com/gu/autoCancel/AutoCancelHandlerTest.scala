@@ -165,7 +165,7 @@ class DeserialiserTest extends FlatSpec with Matchers {
   }
 
   it should "manage with the only direct debit param being false" in {
-    val json = """{"queryStringParameters": {"apiToken": "a", "apiClientId": "b", "onlyCancelDirectDebit": false}, "body": "haha"}"""
+    val json = """{"queryStringParameters": {"apiToken": "a", "apiClientId": "b", "onlyCancelDirectDebit": "false"}, "body": "haha"}"""
     val actualRequest = Json.parse(json).validate[ApiGatewayRequest]
 
     actualRequest.map(_.onlyCancelDirectDebit) should be(JsSuccess(false))
@@ -173,7 +173,7 @@ class DeserialiserTest extends FlatSpec with Matchers {
   }
 
   it should "manage with the only direct debit param being true" in {
-    val json = """{"queryStringParameters": {"apiToken": "a", "apiClientId": "b", "onlyCancelDirectDebit": true}, "body": "haha"}"""
+    val json = """{"queryStringParameters": {"apiToken": "a", "apiClientId": "b", "onlyCancelDirectDebit": "true"}, "body": "haha"}"""
     val actualRequest = Json.parse(json).validate[ApiGatewayRequest]
 
     actualRequest.map(_.onlyCancelDirectDebit) should be(JsSuccess(true))
