@@ -1,14 +1,10 @@
 package com.gu.util.exacttarget
 
-import java.util.concurrent.TimeUnit
-
-import com.gu.effects.{ SalesforceRequestWiring, StateHttpWithEffects }
-import com.gu.util.{ Config, ETConfig, TrustedApiConfig, ZuoraRestConfig }
-import com.gu.util.zuora.Types.StateHttp
+import com.gu.util.exacttarget.EmailClient.HUDeps
+import com.gu.util.zuora.Types.{StateHttp, ZuoraOp}
+import com.gu.util.{Config, ETConfig, TrustedApiConfig, ZuoraRestConfig}
 import okhttp3._
-import org.scalatest.{ FlatSpec, Matchers }
-
-import scalaz.{ \/, \/- }
+import org.scalatest.{FlatSpec, Matchers}
 
 class EmailSendTest extends FlatSpec with Matchers {
 
@@ -43,11 +39,15 @@ class EmailSendTest extends FlatSpec with Matchers {
   private val public = "john.duffell@gutools.co.uk" // non gu
 
   def tryEmail(isProd: Boolean, email: String, expectedEmail: Boolean) = {
+    def requestBuilder(attempt: Int) = new Request.Builder()
+      .url(s"http://$attempt")
+      .post(RequestBody.create(MediaType.parse("text/plain"), s"$attempt"))
+
     val req = EmailRequest(1, makeMessage(email))
     var env = new TestingStateHttp(isProd)
-    EmailClient.sendEmail(req).run.run(env.stateHttp)
+    EmailClient.sendEmail(HUDeps(attempt => ZuoraOp.lift(requestBuilder(attempt))))(req).run.run(env.stateHttp)
 
-    env.result should be(if (expectedEmail) Some(1) else None)
+    env.result.map(_.url.host) should be(if (expectedEmail) Some("1") else None)
   }
 
   "emailer" should "send an email to any address in prod" in {
@@ -61,28 +61,17 @@ class EmailSendTest extends FlatSpec with Matchers {
 
 class TestingStateHttp(val isProd: Boolean, config: Option[TrustedApiConfig] = None) {
 
-  var result: Option[Int] = None // !
+  var result: Option[Request] = None // !
 
   val stateHttp = {
 
-    def buildRequestET(attempt: Int): \/[String, Request.Builder] = {
-
-      result = Some(attempt)
-
-      \/-(new Request.Builder()
-        .url(s"https://www.theguardian.com/"))
-
-    }
-
     def response: Request => Response = {
-      req => new Response.Builder().request(req).protocol(Protocol.HTTP_1_1).code(1).body(ResponseBody.create(MediaType.parse("text/plain"), "body result test")).build()
+      req =>
+        result = Some(req)
+        new Response.Builder().request(req).protocol(Protocol.HTTP_1_1).code(1).body(ResponseBody.create(MediaType.parse("text/plain"), "body result test")).build()
     }
 
-    def buildRequest(route: String): Request.Builder =
-      new Request.Builder()
-        .url(s"https://www.theguardian.com/")
-
-    StateHttp(buildRequestET, response, buildRequest, isProd, Config(config.getOrElse(TrustedApiConfig("a", "b", "c")), zuoraRestConfig = ZuoraRestConfig("https://ddd", "e@f.com", "ggg"),
+    StateHttp(response, isProd, Config(config.getOrElse(TrustedApiConfig("a", "b", "c")), zuoraRestConfig = ZuoraRestConfig("https://ddd", "e@f.com", "ggg"),
       etConfig = ETConfig(stageETIDForAttempt = Map(0 -> "h"), clientId = "jjj", clientSecret = "kkk")))
   }
 

@@ -1,6 +1,6 @@
 package com.gu.util
 
-import com.gu.effects.{ StateHttpWithEffects }
+import com.gu.effects.{HTTPUtil, StateHttpWithEffects}
 import com.gu.util.apigateway.ApiGatewayResponse._
 import com.gu.util.zuora.ZuoraModels._
 import com.gu.util.zuora.ZuoraReaders._
@@ -8,9 +8,9 @@ import com.gu.util.zuora.ZuoraRestRequestMaker
 import okhttp3._
 import org.scalatest.Matchers._
 import org.scalatest._
-import play.api.libs.json.{ JsValue, Json }
+import play.api.libs.json.{JsValue, Json}
 
-import scalaz.{ -\/, \/- }
+import scalaz.{-\/, \/-}
 
 class ZuoraRestServiceTest extends AsyncFlatSpec {
 
@@ -21,17 +21,17 @@ class ZuoraRestServiceTest extends AsyncFlatSpec {
   val fakeRestService = StateHttpWithEffects(fakeConfig)
 
   "buildRequest" should "set the apiSecretAccessKey header correctly" in {
-    val request = fakeRestService.buildRequest("route-test").get.build()
+    val request = HTTPUtil.buildRequest(fakeZConfig)("route-test").get.build()
     assert(request.header("apiSecretAccessKey") == "fakePassword")
   }
 
   "buildRequest" should "set the apiAccessKeyId header correctly" in {
-    val request = fakeRestService.buildRequest("route-test").get.build()
+    val request = HTTPUtil.buildRequest(fakeZConfig)("route-test").get.build()
     assert(request.header("apiAccessKeyId") == "fakeUser")
   }
 
   "buildRequest" should "construct an appropriate url" in {
-    val request = fakeRestService.buildRequest("route-test").get.build()
+    val request = HTTPUtil.buildRequest(fakeZConfig)("route-test").get.build()
     assert(request.url.toString == "https://www.test.com/route-test")
   }
 

@@ -2,30 +2,23 @@ package com.gu.paymentFailure
 
 import java.io.ByteArrayOutputStream
 
-import com.amazonaws.services.sqs.model.SendMessageResult
-import com.gu.autoCancel.AutoCancelHandler
-import com.gu.effects.StateHttpWithEffects
 import com.gu.paymentFailure.PaymentFailureSteps.PFDeps
-import com.gu.util.exacttarget.EmailClient.SendEmail
-import com.gu.util.apigateway.ApiGatewayResponse.unauthorized
-import com.gu.util.apigateway.ResponseModels.ApiResponse
-import com.gu.util.zuora.Types.{ FailableOp, StateHttp, ZuoraOp, ZuoraReader }
-import com.gu.util.zuora.ZuoraModels._
-import com.gu.util.zuora.Zuora.GetInvoiceTransactions
 import com.gu.util._
 import com.gu.util.apigateway.ApiGatewayHandler.HandlerDeps
-import com.gu.util.apigateway.{ ApiGatewayHandler, ApiGatewayResponse }
+import com.gu.util.apigateway.ApiGatewayResponse.unauthorized
+import com.gu.util.apigateway.ResponseModels.ApiResponse
+import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayResponse}
 import com.gu.util.exacttarget._
+import com.gu.util.zuora.Types.{ZuoraOp, ZuoraReader}
+import com.gu.util.zuora.ZuoraModels._
 import org.joda.time.LocalDate
-import org.mockito.Matchers.any
-import org.mockito.Mockito._
 import org.scalatest.FlatSpec
 import org.scalatest.Matchers._
 import org.scalatest.mockito.MockitoSugar
 import play.api.libs.json.Json
 
-import scala.util.{ Failure, Success, Try }
-import scalaz.{ -\/, EitherT, Reader, \/, \/- }
+import scala.util.Success
+import scalaz.{-\/, EitherT, Reader, \/, \/-}
 
 class PaymentFailureHandlerTest extends FlatSpec with MockitoSugar {
 

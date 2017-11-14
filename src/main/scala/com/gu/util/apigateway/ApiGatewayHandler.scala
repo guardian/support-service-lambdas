@@ -1,19 +1,19 @@
 package com.gu.util.apigateway
 
-import java.io.{ InputStream, OutputStream }
+import java.io.{InputStream, OutputStream}
 
 import com.amazonaws.services.lambda.runtime.Context
-import com.gu.effects.{ ConfigLoad, Logging, StateHttpWithEffects }
-import com.gu.util.Auth.{ credentialsAreValid, validTenant }
+import com.gu.effects.{ConfigLoad, Logging, StateHttpWithEffects}
+import com.gu.util.Auth.{credentialsAreValid, validTenant}
 import com.gu.util._
-import com.gu.util.apigateway.ApiGatewayResponse.{ outputForAPIGateway, successfulExecution, unauthorized }
+import com.gu.util.apigateway.ApiGatewayResponse.{outputForAPIGateway, successfulExecution, unauthorized}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.zuora.Types._
 import play.api.libs.json.Json
 
 import scala.io.Source
 import scala.util.Try
-import scalaz.{ -\/, Reader, \/, \/- }
+import scalaz.{-\/, Reader, \/, \/-}
 
 object ApiGatewayHandler extends Logging {
 

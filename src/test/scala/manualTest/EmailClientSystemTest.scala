@@ -49,7 +49,7 @@ object EmailClientSystemTest extends App {
     config => StateHttpWithEffects(config)
   }.map {
     service =>
-      EmailClient.sendEmail(EmailRequest(1, message = message)).run.run(service)
+      EmailClient.sendEmail()(EmailRequest(1, message = message)).run.run(service)
   }
 
   println(s"result was:::::: $emailResult")

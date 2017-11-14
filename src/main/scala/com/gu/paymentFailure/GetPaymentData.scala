@@ -3,7 +3,7 @@ package com.gu.paymentFailure
 import com.gu.effects.Logging
 import com.gu.util.apigateway.ApiGatewayResponse.internalServerError
 import com.gu.util.zuora.Types.FailableOp
-import com.gu.util.zuora.ZuoraModels.{ InvoiceItem, InvoiceTransactionSummary, ItemisedInvoice }
+import com.gu.util.zuora.ZuoraModels.{InvoiceItem, InvoiceTransactionSummary, ItemisedInvoice}
 import org.joda.time.LocalDate
 
 import scalaz.\/

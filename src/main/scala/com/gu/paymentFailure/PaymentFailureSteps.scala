@@ -1,13 +1,10 @@
 package com.gu.paymentFailure
 
 import com.gu.effects.Logging
-import com.gu.util.Config
-import com.gu.util.apigateway.{ ApiGatewayHandler, ApiGatewayRequest }
+import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest}
 import com.gu.util.exacttarget.EmailClient
-import com.gu.util.exacttarget.EmailClient.SendEmail
-import com.gu.util.zuora.Types.{ ZuoraOp, _ }
+import com.gu.util.zuora.Types.{ZuoraOp, _}
 import com.gu.util.zuora.Zuora
-import com.gu.util.zuora.Zuora.GetInvoiceTransactions
 import play.api.libs.json.Json
 
 object PaymentFailureSteps extends Logging {
@@ -31,7 +28,7 @@ object PaymentFailureSteps extends Logging {
   case class PFDeps(sendEmail: EmailClient.SendEmail, getInvoiceTransactions: Zuora.GetInvoiceTransactions)
 
   val defaultPFDeps = PFDeps(
-    sendEmail = EmailClient.sendEmail,
+    sendEmail = EmailClient.sendEmail(),
     getInvoiceTransactions = Zuora.getInvoiceTransactions
   )
 

@@ -1,11 +1,11 @@
 package com.gu.util.apigateway
 
-import java.io.{ OutputStream, OutputStreamWriter }
+import java.io.{OutputStream, OutputStreamWriter}
 
 import com.gu.effects.Logging
-import com.gu.util.apigateway.ResponseModels.{ ApiResponse, Headers }
+import com.gu.util.apigateway.ResponseModels.{ApiResponse, Headers}
 import com.gu.util.apigateway.ResponseWriters._
-import play.api.libs.json.{ Json, Writes }
+import play.api.libs.json.{Json, Writes}
 
 object ResponseModels {
 

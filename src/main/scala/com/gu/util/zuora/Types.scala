@@ -1,23 +1,20 @@
 package com.gu.util.zuora
 
-import com.gu.effects.StateHttpWithEffects
 import com.gu.util.Config
-import com.gu.util.apigateway.ApiGatewayResponse.{ badRequest, internalServerError, logger }
+import com.gu.util.apigateway.ApiGatewayResponse.{badRequest, internalServerError, logger}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
-import okhttp3.{ Request, Response }
-import play.api.libs.json.{ JsError, JsResult, JsSuccess }
+import okhttp3.{Request, Response}
+import play.api.libs.json.{JsError, JsResult, JsSuccess}
 
-import scala.util.{ Failure, Success, Try }
+import scala.util.{Failure, Success, Try}
 import scalaz.Scalaz._
-import scalaz.{ -\/, EitherT, Reader, \/, \/- }
+import scalaz.{-\/, EitherT, Reader, \/, \/-}
 
 object Types {
 
   // this is useful for cross cutting state that applies everywhere
   case class StateHttp(
-    buildRequestET: Int => \/[String, Request.Builder], //FIXME remove
     response: Request => Response,
-    buildRequest: String => Request.Builder, //FIXME remove
     isProd: Boolean,
     config: Config
   )
@@ -68,23 +65,6 @@ object Types {
           -\/(internalServerError(s"Failed to execute lambda - unable to $action"))
         }
       }
-    }
-
-  }
-
-  implicit class LogImplicit[A](zuoraOp: ZuoraOp[A]) {
-
-    def withLogging(message: String): ZuoraOp[A] = {
-
-      ZuoraOp(zuoraOp.run map {
-        case \/-(success) =>
-          logger.info(s"$message: Successfully with value: $success")
-          \/-(success)
-        case -\/(failure) =>
-          logger.error(s"$message: Failed with value: $failure")
-          -\/(failure) // todo some day make an error object with a backtrace...
-      })
-
     }
 
   }

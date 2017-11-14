@@ -1,13 +1,12 @@
 package com.gu.util.exacttarget
 
-import com.gu.effects.Logging
+import com.gu.effects.{Logging, SalesforceRequestWiring}
 import com.gu.util.apigateway.ApiGatewayResponse
-import com.gu.util.apigateway.ResponseModels.ApiResponse
-import com.gu.util.zuora.Types.{ ZuoraOp, ZuoraReader }
-import okhttp3.{ MediaType, RequestBody }
+import com.gu.util.zuora.Types.{ZuoraOp, _}
+import okhttp3.{MediaType, Request, RequestBody, Response}
 import play.api.libs.json.Json
 
-import scalaz.{ -\/, EitherT, Reader, \/- }
+import scalaz.{-\/, Reader, \/, \/-}
 
 case class ContactAttributesDef(SubscriberAttributes: SubscriberAttributesDef)
 
@@ -52,26 +51,28 @@ object Message {
 
 object EmailClient extends Logging {
 
+  case class HUDeps(buildRequestET: Int => ZuoraOp[Request.Builder])
+  val defaultDeps = HUDeps(SalesforceRequestWiring.buildRequestET)
+
   type SendEmail = EmailRequest => ZuoraOp[Unit] // zuoraop is really an okhttp client plus config
 
-  def sendEmail: SendEmail = { request =>
-    EitherT[ZuoraReader, ApiResponse, Unit](Reader { zhttp =>
-      val message = request.message
-      // convert message to json and then use it somehow
+  def sendEmail(deps: HUDeps = defaultDeps): SendEmail = { request =>
+    val message = request.message
+    // convert message to json and then use it somehow
 
-      val prod = zhttp.isProd
+    ZuoraOp(Reader { zhttp => \/.right(zhttp.isProd): FailableOp[Boolean] }).flatMap { prod =>
       val guardianEmail = request.message.To.Address.endsWith("@guardian.co.uk") || request.message.To.Address.endsWith("@theguardian.com")
       if (!prod && !guardianEmail) {
         logger.warn("not sending email in non prod as it's not a guardian address")
-        \/-(())
+        \/-(()).toZuoraOp
       } else {
 
         val jsonMT = MediaType.parse("application/json; charset=utf-8")
         val body = RequestBody.create(jsonMT, Json.stringify(Json.toJson(message)))
         for {
-          req <- zhttp.buildRequestET(request.attempt).leftMap(err => ApiGatewayResponse.internalServerError(s"oops todo because: $err"))
-          response = zhttp.response(req.post(body).build())
-          result <- response.code() match {
+          req <- deps.buildRequestET(request.attempt).leftMap(err => ApiGatewayResponse.internalServerError(s"oops todo because: $err"))
+          response <- ZuoraOp(Reader { zhttp => \/.right(zhttp.response(req.post(body).build())): FailableOp[Response] })
+          result <- (response.code() match {
 
             case 202 =>
               logger.info(s"send email result ${response.body().string()}")
@@ -79,43 +80,10 @@ object EmailClient extends Logging {
             case statusCode =>
               logger.warn(s"email not sent due to $statusCode - ${response.body().string()}")
               -\/(ApiGatewayResponse.internalServerError(s"email not sent due to $statusCode"))
-          }
+          }).toZuoraOp
         } yield result
       }
-    })
+    }
   }
 
 }
-
-//trait QueueClient {
-//  def sendDataExtensionToQueue(message: Message): Try[SendMessageResult]
-//}
-//
-//object SqsClient extends QueueClient with Logging {
-//
-//  lazy val CredentialsProvider = new AWSCredentialsProviderChain(
-//    new ProfileCredentialsProvider("membership"),
-//    new InstanceProfileCredentialsProvider(false),
-//    new EnvironmentVariableCredentialsProvider()
-//  )
-//
-//  private val sqsClient = AmazonSQSClient.builder
-//    .withCredentials(CredentialsProvider)
-//    .withRegion(EU_WEST_1)
-//    .build()
-//
-//  val queueUrl = sqsClient.createQueue(new CreateQueueRequest("subs-welcome-email")).getQueueUrl
-//
-//  override def sendDataExtensionToQueue(message: Message): Try[SendMessageResult] = {
-//
-//    val payload = Json.toJson(message).toString()
-//
-//    def sendToQueue(msg: String): SendMessageResult = {
-//      logger.info(s"sending to queue $queueUrl")
-//      sqsClient.sendMessage(new SendMessageRequest(queueUrl, msg))
-//    }
-//
-//    Try(sendToQueue(payload))
-//  }
-//
-//}

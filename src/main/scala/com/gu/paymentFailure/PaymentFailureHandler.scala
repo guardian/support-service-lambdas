@@ -1,6 +1,6 @@
 package com.gu.paymentFailure
 
-import java.io.{ InputStream, OutputStream }
+import java.io.{InputStream, OutputStream}
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.util.apigateway.ApiGatewayHandler
