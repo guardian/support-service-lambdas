@@ -1,13 +1,13 @@
-package com.gu.util
+package manualTest
 
-import com.gu.util.Auth._
-import org.scalatest.{ FlatSpec, Matchers }
-import play.api.libs.json.{ JsError, JsSuccess, JsValue, Json }
+import com.gu.util.{ Config, ETConfig, TrustedApiConfig, ZuoraRestConfig }
+import org.scalatest.{ FlatSpec, Ignore, Matchers }
 
-import scala.util.{ Success, Try }
+import scala.util.Success
 
 // this test checks the actual config in S3 so it needs credentials.  this means you can only run it manually
 // however it does stop you deploying a new version without updating the config first
+@Ignore
 class ConfigLoaderSystemTest extends FlatSpec with Matchers {
 
   "loader" should "be able to load the prod config successfully" in {

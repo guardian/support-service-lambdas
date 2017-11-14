@@ -51,10 +51,12 @@ object ToMessage {
 
   def serviceDateFormat(d: LocalDate) = d.toString("dd MMMM yyyy")
 
-  //  //todo see if we need to parse the payment number as an int
+  //  maybe this isn't the best data structure
   def dataExtensionNameForAttempt: Map[Int, String] = Map(
     1 -> "first-failed-payment-email",
     2 -> "second-failed-payment-email",
-    3 -> "third-failed-payment-email"
+    3 -> "third-failed-payment-email",
+    4 -> "fourth-failed-payment-email",
+    5 -> "fifth-failed-payment-email"
   )
 }

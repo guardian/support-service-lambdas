@@ -1,8 +1,8 @@
-package com.gu.util
+package com.gu.effects
 
 import com.amazonaws.auth._
 import com.amazonaws.auth.profile.ProfileCredentialsProvider
-import com.amazonaws.services.s3.{ AmazonS3Client, AmazonS3ClientBuilder }
+import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.s3.model.{ GetObjectRequest, S3ObjectInputStream }
 
 import scala.io.Source

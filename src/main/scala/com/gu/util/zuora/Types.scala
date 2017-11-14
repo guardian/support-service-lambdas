@@ -1,5 +1,6 @@
 package com.gu.util.zuora
 
+import com.gu.effects.StateHttp
 import com.gu.util.apigateway.ApiGatewayResponse.{ badRequest, internalServerError, logger }
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import play.api.libs.json.{ JsError, JsResult, JsSuccess }
@@ -11,7 +12,7 @@ import scalaz.{ -\/, EitherT, Reader, \/, \/- }
 object Types {
 
   type FailableOp[A] = ApiResponse \/ A
-  type ZuoraReader[A] = Reader[ZuoraRestRequestMaker, A] // needed becuase EitherT first type param is a single arity
+  type ZuoraReader[A] = Reader[StateHttp, A] // needed becuase EitherT first type param is a single arity
   type ZuoraOp[A] = EitherT[ZuoraReader, ApiResponse, A]
 
   object ZuoraOp {

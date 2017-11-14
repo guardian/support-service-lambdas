@@ -1,4 +1,4 @@
-package com.gu.util
+package com.gu.effects
 
 import org.apache.log4j.Logger
 

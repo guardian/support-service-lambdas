@@ -1,8 +1,10 @@
 package com.gu.util
 
 import com.amazonaws.services.s3.model.GetObjectRequest
+import com.gu.effects.{ AwsS3, Logging }
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
+
 import scala.util.{ Failure, Success, Try }
 
 case class ZuoraRestConfig(

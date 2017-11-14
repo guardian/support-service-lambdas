@@ -1,6 +1,6 @@
 package com.gu.util.exacttarget
 
-import com.gu.util.Logging
+import com.gu.effects.Logging
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.zuora.Types.{ ZuoraOp, ZuoraReader }
@@ -52,9 +52,9 @@ object Message {
 
 object EmailClient extends Logging {
 
-  type SendDataExtensionToQueue = EmailRequest => ZuoraOp[Unit] // zuoraop is really an okhttp client plus config
+  type SendEmail = EmailRequest => ZuoraOp[Unit] // zuoraop is really an okhttp client plus config
 
-  def sendDataExtensionToQueue: SendDataExtensionToQueue = { request =>
+  def sendEmail: SendEmail = { request =>
     EitherT[ZuoraReader, ApiResponse, Unit](Reader { zhttp =>
       val message = request.message
       // convert message to json and then use it somehow

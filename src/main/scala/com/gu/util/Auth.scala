@@ -1,5 +1,6 @@
 package com.gu.util
 
+import com.gu.effects.Logging
 import com.gu.paymentFailure.PaymentFailureCallout
 import com.gu.util.apigateway.RequestAuth
 import play.api.libs.json.JsValue
