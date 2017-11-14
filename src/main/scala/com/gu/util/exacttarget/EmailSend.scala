@@ -59,21 +59,29 @@ object EmailClient extends Logging {
       val message = request.message
       // convert message to json and then use it somehow
 
-      val jsonMT = MediaType.parse("application/json; charset=utf-8")
-      val body = RequestBody.create(jsonMT, Json.stringify(Json.toJson(message)))
-      for {
-        req <- zhttp.buildRequestET(request.attempt).leftMap(err => ApiGatewayResponse.internalServerError(s"oops todo because: $err"))
-        response = zhttp.response(req.post(body).build())
-        result <- response.code() match {
+      val prod = zhttp.isProd
+      val guardianEmail = request.message.To.Address.endsWith("@guardian.co.uk") || request.message.To.Address.endsWith("@theguardian.com")
+      if (!prod && !guardianEmail) {
+        logger.warn("not sending email in non prod as it's not a guardian address")
+        \/-(())
+      } else {
 
-          case 202 =>
-            logger.info(s"send email result ${response.body().string()}")
-            \/-(())
-          case statusCode =>
-            logger.warn(s"email not sent due to $statusCode - ${response.body().string()}")
-            -\/(ApiGatewayResponse.internalServerError(s"email not sent due to $statusCode"))
-        }
-      } yield result
+        val jsonMT = MediaType.parse("application/json; charset=utf-8")
+        val body = RequestBody.create(jsonMT, Json.stringify(Json.toJson(message)))
+        for {
+          req <- zhttp.buildRequestET(request.attempt).leftMap(err => ApiGatewayResponse.internalServerError(s"oops todo because: $err"))
+          response = zhttp.response(req.post(body).build())
+          result <- response.code() match {
+
+            case 202 =>
+              logger.info(s"send email result ${response.body().string()}")
+              \/-(())
+            case statusCode =>
+              logger.warn(s"email not sent due to $statusCode - ${response.body().string()}")
+              -\/(ApiGatewayResponse.internalServerError(s"email not sent due to $statusCode"))
+          }
+        } yield result
+      }
     })
   }
 

@@ -3,7 +3,7 @@ package manualTest
 import java.io.{ InputStream, OutputStream }
 
 import com.amazonaws.services.lambda.runtime.Context
-import com.gu.effects.StateHttp
+import com.gu.effects.{ StateHttp, StateHttpImpl }
 import com.gu.paymentFailure._
 import com.gu.util.zuora.Zuora
 import com.gu.util.zuora.Zuora.GetInvoiceTransactions
@@ -46,7 +46,7 @@ object EmailClientSystemTest extends App {
 
   val configAttempt = Config.parseConfig(Source.fromFile("/etc/gu/payment-failure-lambdas.private.json").mkString)
   val emailResult = configAttempt.map {
-    config => new StateHttp(config.zuoraRestConfig, config.etConfig)
+    config => new StateHttpImpl(config.zuoraRestConfig, config.etConfig)
   }.map {
     service =>
       EmailClient.sendEmail(EmailRequest(1, message = message)).run.run(service)
@@ -69,7 +69,7 @@ object Lambda {
     val stage = System.getenv("Stage")
     val configAttempt = Config.load(stage)
     val getZuoraRestService = configAttempt.map {
-      config => new StateHttp(config.zuoraRestConfig, config.etConfig)
+      config => new StateHttpImpl(config.zuoraRestConfig, config.etConfig)
     }
 
     val lambdaConfig = LambdaConfig(configAttempt, stage, getZuoraRestService, PaymentFailureSteps.performZuoraAction(queueClient, getInvoiceTransactions))

@@ -1,6 +1,6 @@
 package com.gu.util
 
-import com.gu.effects.StateHttp
+import com.gu.effects.{ StateHttp, StateHttpImpl }
 import com.gu.util.apigateway.ApiGatewayResponse._
 import com.gu.util.zuora.ZuoraModels._
 import com.gu.util.zuora.ZuoraReaders._
@@ -16,7 +16,7 @@ class ZuoraRestServiceTest extends AsyncFlatSpec {
 
   val fakeConfig = ZuoraRestConfig("https://www.test.com", "fakeUser", "fakePassword")
   val fakeETConfig = ETConfig(Map(99 -> "fakeETid"), "fakeClientId", "fakeClientSecret")
-  val fakeRestService = new StateHttp(fakeConfig, fakeETConfig)
+  val fakeRestService = new StateHttpImpl(fakeConfig, fakeETConfig)
 
   "buildRequest" should "set the apiSecretAccessKey header correctly" in {
     val request = fakeRestService.buildRequest("route-test").get.build()

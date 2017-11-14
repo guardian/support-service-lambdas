@@ -3,7 +3,7 @@ package com.gu.paymentFailure
 import java.io.{ InputStream, OutputStream }
 
 import com.amazonaws.services.lambda.runtime.Context
-import com.gu.effects.StateHttp
+import com.gu.effects.{ StateHttp, StateHttpImpl }
 import com.gu.util._
 import com.gu.util.apigateway.ApiGatewayHandler
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaConfig
@@ -24,7 +24,7 @@ object Lambda {
     val stage = System.getenv("Stage")
     val configAttempt = Config.load(stage)
     val getZuoraRestService = configAttempt.map {
-      config => new StateHttp(config.zuoraRestConfig, config.etConfig)
+      config => new StateHttpImpl(config.zuoraRestConfig, config.etConfig)
     }
 
     val lambdaConfig = LambdaConfig(configAttempt, stage, getZuoraRestService, PaymentFailureSteps.performZuoraAction(queueClient, getInvoiceTransactions))

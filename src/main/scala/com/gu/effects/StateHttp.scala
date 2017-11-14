@@ -59,8 +59,18 @@ object SalesforceRequestWiring extends Logging {
 
 }
 
+trait StateHttp {
+
+  def buildRequestET(attempt: Int): \/[String, Request.Builder]
+  val response: Request => Response
+  def buildRequest(route: String): Request.Builder
+  def isProd: Boolean
+
+}
+
 // this could be split out a bit in future
-class StateHttp(config: ZuoraRestConfig, etConfig: ETConfig) {
+class StateHttpImpl(config: ZuoraRestConfig, etConfig: ETConfig) extends StateHttp {
+
   def buildRequestET(attempt: Int): \/[String, Request.Builder] = {
 
     //    val endpoint = s"${zhttp.restEndpoint}/messageDefinitionSends/${zhttp.stageETIDForAttempt(message.attempt)}/send"
@@ -91,5 +101,7 @@ class StateHttp(config: ZuoraRestConfig, etConfig: ETConfig) {
       .addHeader("apiSecretAccessKey", config.password)
       .addHeader("apiAccessKeyId", config.username)
       .url(s"${config.baseUrl}/$route")
+
+  override def isProd: Boolean = System.getenv("Stage") == "PROD"
 
 }

@@ -3,7 +3,7 @@ package com.gu.autoCancel
 import java.io.{ InputStream, OutputStream }
 
 import com.amazonaws.services.lambda.runtime.Context
-import com.gu.effects.{ Logging, StateHttp }
+import com.gu.effects.{ Logging, StateHttp, StateHttpImpl }
 import com.gu.util._
 import com.gu.util.apigateway.ApiGatewayHandler
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaConfig
@@ -15,7 +15,7 @@ object AutoCancelHandler extends App with Logging {
     val stage = System.getenv("Stage")
     val configAttempt = Config.load(stage)
     val getZuoraRestService = configAttempt.map {
-      config => new StateHttp(config.zuoraRestConfig, config.etConfig)
+      config => new StateHttpImpl(config.zuoraRestConfig, config.etConfig)
     }
 
     val lambdaConfig = LambdaConfig(configAttempt, stage, getZuoraRestService, AutoCancelSteps.performZuoraAction)
