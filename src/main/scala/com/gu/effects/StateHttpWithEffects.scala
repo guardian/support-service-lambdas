@@ -2,7 +2,8 @@ package com.gu.effects
 
 import java.util.concurrent.TimeUnit
 
-import com.gu.util.{ ETConfig, ZuoraRestConfig }
+import com.gu.util.zuora.Types.StateHttp
+import com.gu.util.{ Config, ETConfig, ZuoraRestConfig }
 import okhttp3.{ FormBody, OkHttpClient, Request, Response }
 import play.api.libs.functional.syntax._
 import play.api.libs.json.{ JsPath, JsSuccess, Json, Reads }
@@ -59,19 +60,13 @@ object SalesforceRequestWiring extends Logging {
 
 }
 
-trait StateHttp {
+object StateHttpWithEffects {
 
-  def buildRequestET(attempt: Int): \/[String, Request.Builder]
-  val response: Request => Response
-  def buildRequest(route: String): Request.Builder
-  def isProd: Boolean
+  def apply(config: Config): StateHttp = {
+    new StateHttp(buildRequestET(config.etConfig), response, buildRequest(config.zuoraRestConfig), isProd, config)
+  }
 
-}
-
-// this could be split out a bit in future
-class StateHttpImpl(config: ZuoraRestConfig, etConfig: ETConfig) extends StateHttp {
-
-  def buildRequestET(attempt: Int): \/[String, Request.Builder] = {
+  def buildRequestET(etConfig: ETConfig)(attempt: Int): \/[String, Request.Builder] = {
 
     //    val endpoint = s"${zhttp.restEndpoint}/messageDefinitionSends/${zhttp.stageETIDForAttempt(message.attempt)}/send"
     //      .header("Authorization", s"Bearer ${task.get().getOrElse("")}")
@@ -96,12 +91,12 @@ class StateHttpImpl(config: ZuoraRestConfig, etConfig: ETConfig) extends StateHt
     }
   }
 
-  def buildRequest(route: String): Request.Builder =
+  def buildRequest(config: ZuoraRestConfig)(route: String): Request.Builder =
     new Request.Builder()
       .addHeader("apiSecretAccessKey", config.password)
       .addHeader("apiAccessKeyId", config.username)
       .url(s"${config.baseUrl}/$route")
 
-  override def isProd: Boolean = System.getenv("Stage") == "PROD"
+  def isProd: Boolean = System.getenv("Stage") == "PROD" // should come from the config
 
 }

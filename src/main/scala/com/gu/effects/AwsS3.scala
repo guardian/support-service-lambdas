@@ -8,6 +8,18 @@ import com.amazonaws.services.s3.model.{ GetObjectRequest, S3ObjectInputStream }
 import scala.io.Source
 import scala.util.{ Failure, Try }
 
+object ConfigLoad extends Logging {
+
+  def load(stage: String): Try[String] = {
+    logger.info(s"Attempting to load config in $stage")
+    val bucket = s"payment-failure-lambdas-private/$stage"
+    val key = "payment-failure-lambdas.private.json"
+    val request = new GetObjectRequest(bucket, key)
+    AwsS3.fetchString(request)
+  }
+
+}
+
 object AwsS3 extends Logging {
 
   val client = AmazonS3Client.builder.withCredentials(aws.CredentialsProvider).build()

@@ -86,17 +86,6 @@ object Config extends Logging {
     (JsPath \ "etConfig").read[ETConfig]
   )(Config.apply _)
 
-  def load(stage: String): Try[Config] = {
-    logger.info(s"Attempting to load config in $stage")
-    val bucket = s"payment-failure-lambdas-private/$stage"
-    val key = "payment-failure-lambdas.private.json"
-    val request = new GetObjectRequest(bucket, key)
-    for {
-      string <- AwsS3.fetchString(request)
-      config <- parseConfig(string)
-    } yield config
-  }
-
   def parseConfig(jsonConfig: String): Try[Config] = {
     Json.fromJson[Config](Json.parse(jsonConfig)) match {
       case validConfig: JsSuccess[Config] => {

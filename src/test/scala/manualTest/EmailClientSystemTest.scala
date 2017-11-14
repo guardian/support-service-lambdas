@@ -3,13 +3,13 @@ package manualTest
 import java.io.{ InputStream, OutputStream }
 
 import com.amazonaws.services.lambda.runtime.Context
-import com.gu.effects.{ StateHttp, StateHttpImpl }
+import com.gu.effects.{ ConfigLoad, StateHttpWithEffects }
 import com.gu.paymentFailure._
 import com.gu.util.zuora.Zuora
 import com.gu.util.zuora.Zuora.GetInvoiceTransactions
 import com.gu.util.Config
 import com.gu.util.apigateway.ApiGatewayHandler
-import com.gu.util.apigateway.ApiGatewayHandler.LambdaConfig
+import com.gu.util.apigateway.ApiGatewayHandler.HandlerDeps
 import com.gu.util.exacttarget._
 
 import scala.io.Source
@@ -46,34 +46,12 @@ object EmailClientSystemTest extends App {
 
   val configAttempt = Config.parseConfig(Source.fromFile("/etc/gu/payment-failure-lambdas.private.json").mkString)
   val emailResult = configAttempt.map {
-    config => new StateHttpImpl(config.zuoraRestConfig, config.etConfig)
+    config => StateHttpWithEffects(config)
   }.map {
     service =>
       EmailClient.sendEmail(EmailRequest(1, message = message)).run.run(service)
   }
 
   println(s"result was:::::: $emailResult")
-
-}
-
-object Lambda {
-
-  def handleRequest(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
-
-    // just wire up our dependencies
-
-    val queueClient = EmailClient.sendEmail
-
-    def getInvoiceTransactions: GetInvoiceTransactions = Zuora.getInvoiceTransactions
-
-    val stage = System.getenv("Stage")
-    val configAttempt = Config.load(stage)
-    val getZuoraRestService = configAttempt.map {
-      config => new StateHttpImpl(config.zuoraRestConfig, config.etConfig)
-    }
-
-    val lambdaConfig = LambdaConfig(configAttempt, stage, getZuoraRestService, PaymentFailureSteps.performZuoraAction(queueClient, getInvoiceTransactions))
-    ApiGatewayHandler.handleRequest(inputStream, outputStream, context)(lambdaConfig)
-  }
 
 }

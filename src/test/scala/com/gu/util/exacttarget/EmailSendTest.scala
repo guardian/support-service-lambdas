@@ -2,7 +2,9 @@ package com.gu.util.exacttarget
 
 import java.util.concurrent.TimeUnit
 
-import com.gu.effects.{ SalesforceRequestWiring, StateHttp }
+import com.gu.effects.{ SalesforceRequestWiring, StateHttpWithEffects }
+import com.gu.util.{ Config, ETConfig, TrustedApiConfig, ZuoraRestConfig }
+import com.gu.util.zuora.Types.StateHttp
 import okhttp3._
 import org.scalatest.{ FlatSpec, Matchers }
 
@@ -37,7 +39,31 @@ class EmailSendTest extends FlatSpec with Matchers {
     )
   }
 
-  class TestingStateHttp(val isProd: Boolean, var result: Option[Int] = None) extends StateHttp {
+  private val guardian = "john.duffell@guardian.co.uk"
+  private val public = "john.duffell@gutools.co.uk" // non gu
+
+  def tryEmail(isProd: Boolean, email: String, expectedEmail: Boolean) = {
+    val req = EmailRequest(1, makeMessage(email))
+    var env = new TestingStateHttp(isProd)
+    EmailClient.sendEmail(req).run.run(env.stateHttp)
+
+    env.result should be(if (expectedEmail) Some(1) else None)
+  }
+
+  "emailer" should "send an email to any address in prod" in {
+
+    tryEmail(isProd = true, email = public, expectedEmail = true)
+    tryEmail(isProd = false, email = public, expectedEmail = false)
+    tryEmail(isProd = false, email = guardian, expectedEmail = true)
+  }
+
+}
+
+class TestingStateHttp(val isProd: Boolean, config: Option[TrustedApiConfig] = None) {
+
+  var result: Option[Int] = None // !
+
+  val stateHttp = {
 
     def buildRequestET(attempt: Int): \/[String, Request.Builder] = {
 
@@ -48,7 +74,7 @@ class EmailSendTest extends FlatSpec with Matchers {
 
     }
 
-    val response: Request => Response = {
+    def response: Request => Response = {
       req => new Response.Builder().request(req).protocol(Protocol.HTTP_1_1).code(1).body(ResponseBody.create(MediaType.parse("text/plain"), "body result test")).build()
     }
 
@@ -56,24 +82,8 @@ class EmailSendTest extends FlatSpec with Matchers {
       new Request.Builder()
         .url(s"https://www.theguardian.com/")
 
-  }
-
-  private val guardian = "john.duffell@guardian.co.uk"
-  private val public = "john.duffell@gutools.co.uk" // non gu
-
-  def tryEmail(isProd: Boolean, email: String, expectedEmail: Boolean) = {
-    val req = EmailRequest(1, makeMessage(email))
-    var env = new TestingStateHttp(isProd)
-    EmailClient.sendEmail(req).run.run(env)
-
-    env.result should be(if (expectedEmail) Some(1) else None)
-  }
-
-  "emailer" should "send an email to any address in prod" in {
-
-    tryEmail(isProd = true, email = public, expectedEmail = true)
-    tryEmail(isProd = false, email = public, expectedEmail = false)
-    tryEmail(isProd = false, email = guardian, expectedEmail = true)
+    StateHttp(buildRequestET, response, buildRequest, isProd, Config(config.getOrElse(TrustedApiConfig("a", "b", "c")), zuoraRestConfig = ZuoraRestConfig("https://ddd", "e@f.com", "ggg"),
+      etConfig = ETConfig(stageETIDForAttempt = Map(0 -> "h"), clientId = "jjj", clientSecret = "kkk")))
   }
 
 }
