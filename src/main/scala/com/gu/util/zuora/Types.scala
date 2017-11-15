@@ -1,23 +1,25 @@
 package com.gu.util.zuora
 
 import com.gu.util.Config
-import com.gu.util.apigateway.ApiGatewayResponse.{badRequest, internalServerError, logger}
+import com.gu.util.apigateway.ApiGatewayResponse.{ badRequest, internalServerError, logger }
 import com.gu.util.apigateway.ResponseModels.ApiResponse
-import okhttp3.{Request, Response}
-import play.api.libs.json.{JsError, JsResult, JsSuccess}
+import okhttp3.{ Request, Response }
+import play.api.libs.json.{ JsError, JsResult, JsSuccess }
 
-import scala.util.{Failure, Success, Try}
+import scala.util.{ Failure, Success, Try }
 import scalaz.Scalaz._
-import scalaz.{-\/, EitherT, Reader, \/, \/-}
+import scalaz.{ -\/, EitherT, Reader, \/, \/- }
 
 object Types {
 
   // this is useful for cross cutting state that applies everywhere
   case class StateHttp(
-    response: Request => Response,
-    isProd: Boolean,
-    config: Config
-  )
+      response: Request => Response,
+      stage: String,
+      config: Config
+  ) {
+    def isProd: Boolean = stage == "PROD" // should come from the config
+  }
 
   type FailableOp[A] = ApiResponse \/ A
   type ZuoraReader[A] = Reader[StateHttp, A] // needed becuase EitherT first type param is a single arity

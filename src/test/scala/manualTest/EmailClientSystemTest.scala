@@ -1,18 +1,13 @@
 package manualTest
 
-import java.io.{ InputStream, OutputStream }
-
-import com.amazonaws.services.lambda.runtime.Context
-import com.gu.effects.{ ConfigLoad, StateHttpWithEffects }
-import com.gu.paymentFailure._
-import com.gu.util.zuora.Zuora
-import com.gu.util.zuora.Zuora.GetInvoiceTransactions
+import com.gu.effects.StateHttpWithEffects
+import com.gu.effects.StateHttpWithEffects.HandlerDeps
 import com.gu.util.Config
-import com.gu.util.apigateway.ApiGatewayHandler
-import com.gu.util.apigateway.ApiGatewayHandler.HandlerDeps
 import com.gu.util.exacttarget._
 
 import scala.io.Source
+import scala.util.Try
+import com.gu.util.zuora.Types._
 
 // run this to send a one off email to yourself.  the email will take a few mins to arrive, but it proves the ET logic works
 object EmailClientSystemTest extends App {
@@ -44,9 +39,9 @@ object EmailClientSystemTest extends App {
     )
   )
 
-  val configAttempt = Config.parseConfig(Source.fromFile("/etc/gu/payment-failure-lambdas.private.json").mkString)
-  val emailResult = configAttempt.map {
-    config => StateHttpWithEffects(config)
+  val configAttempt = Try { Source.fromFile("/etc/gu/payment-failure-lambdas.private.json").mkString }
+  val emailResult = configAttempt.toFailableOp("config failed").flatMap {
+    config => StateHttpWithEffects(HandlerDeps(_ => configAttempt, Config.parseConfig))
   }.map {
     service =>
       EmailClient.sendEmail()(EmailRequest(1, message = message)).run.run(service)

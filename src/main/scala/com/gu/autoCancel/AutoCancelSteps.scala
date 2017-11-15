@@ -4,14 +4,14 @@ import com.github.nscala_time.time.OrderingImplicits._
 import com.gu.effects.Logging
 import com.gu.util.apigateway.ApiGatewayRequest
 import com.gu.util.apigateway.ApiGatewayResponse.noActionRequired
-import com.gu.util.zuora.Types.{FailableOp, ZuoraOp, _}
+import com.gu.util.zuora.Types.{ FailableOp, ZuoraOp, _ }
 import com.gu.util.zuora.Zuora
-import com.gu.util.zuora.ZuoraModels.{AccountSummary, Invoice, SubscriptionSummary}
+import com.gu.util.zuora.ZuoraModels.{ AccountSummary, Invoice, SubscriptionSummary }
 import org.joda.time.LocalDate
 import play.api.libs.json.Json
 
 import scalaz.Scalaz._
-import scalaz.{-\/, \/-}
+import scalaz.{ -\/, \/- }
 
 object AutoCancelSteps extends Logging {
   def performZuoraAction(apiGatewayRequest: ApiGatewayRequest) = {

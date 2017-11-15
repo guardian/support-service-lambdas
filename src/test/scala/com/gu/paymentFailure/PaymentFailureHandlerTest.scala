@@ -4,12 +4,11 @@ import java.io.ByteArrayOutputStream
 
 import com.gu.paymentFailure.PaymentFailureSteps.PFDeps
 import com.gu.util._
-import com.gu.util.apigateway.ApiGatewayHandler.HandlerDeps
 import com.gu.util.apigateway.ApiGatewayResponse.unauthorized
 import com.gu.util.apigateway.ResponseModels.ApiResponse
-import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayResponse}
+import com.gu.util.apigateway.{ ApiGatewayHandler, ApiGatewayResponse }
 import com.gu.util.exacttarget._
-import com.gu.util.zuora.Types.{ZuoraOp, ZuoraReader}
+import com.gu.util.zuora.Types.{ FailableOp, StateHttp, ZuoraOp, ZuoraReader }
 import com.gu.util.zuora.ZuoraModels._
 import org.joda.time.LocalDate
 import org.scalatest.FlatSpec
@@ -18,7 +17,7 @@ import org.scalatest.mockito.MockitoSugar
 import play.api.libs.json.Json
 
 import scala.util.Success
-import scalaz.{-\/, EitherT, Reader, \/, \/-}
+import scalaz.{ -\/, EitherT, Reader, \/, \/- }
 
 class PaymentFailureHandlerTest extends FlatSpec with MockitoSugar {
 
@@ -70,7 +69,7 @@ class PaymentFailureHandlerTest extends FlatSpec with MockitoSugar {
   "lambda" should "return error if credentials are missing" in {
     val stream = getClass.getResourceAsStream("/paymentFailure/missingCredentials.json")
     val os = new ByteArrayOutputStream()
-    ApiGatewayHandler.handleRequest(stream, os, null, "CODE", lambdaConfig)(basicOp())
+    ApiGatewayHandler(lambdaConfig)(basicOp())(stream, os, null)
     val responseString = new String(os.toByteArray(), "UTF-8");
     responseString jsonMatches missingCredentialsResponse
   }
@@ -78,7 +77,7 @@ class PaymentFailureHandlerTest extends FlatSpec with MockitoSugar {
   "lambda" should "return error if credentials don't match" in {
     val stream = getClass.getResourceAsStream("/paymentFailure/invalidCredentials.json")
     val os = new ByteArrayOutputStream()
-    ApiGatewayHandler.handleRequest(stream, os, null, "CODE", lambdaConfig)(basicOp())
+    ApiGatewayHandler(lambdaConfig)(basicOp())(stream, os, null)
     val responseString = new String(os.toByteArray(), "UTF-8");
     responseString jsonMatches missingCredentialsResponse
   }
@@ -86,7 +85,7 @@ class PaymentFailureHandlerTest extends FlatSpec with MockitoSugar {
   "lambda" should "return an error if tenant id doesn't match" in {
     val stream = getClass.getResourceAsStream("/paymentFailure/invalidTenant.json")
     val os = new ByteArrayOutputStream()
-    ApiGatewayHandler.handleRequest(stream, os, null, "CODE", lambdaConfig)(basicOp())
+    ApiGatewayHandler(lambdaConfig)(basicOp())(stream, os, null)
     val responseString = new String(os.toByteArray(), "UTF-8");
     responseString jsonMatches missingCredentialsResponse
   }
@@ -99,12 +98,12 @@ class PaymentFailureHandlerTest extends FlatSpec with MockitoSugar {
 
     val os = new ByteArrayOutputStream()
     //execute
-    ApiGatewayHandler.handleRequest(stream, os, null, "CODE", lambdaConfig) {
+    ApiGatewayHandler(lambdaConfig)({
       PaymentFailureSteps.performZuoraAction(PFDeps(req => {
         storedReq = Some(req)
         EitherT[ZuoraReader, ApiResponse, Unit](Reader { zhttp => \/-(()) })
       }, _ => ZuoraOp.lift(basicInvoiceTransactionSummary)))
-    }
+    })(stream, os, null)
 
     //verify
     val responseString = new String(os.toByteArray, "UTF-8")
@@ -150,9 +149,9 @@ class PaymentFailureHandlerTest extends FlatSpec with MockitoSugar {
     val os = new ByteArrayOutputStream()
 
     //execute
-    ApiGatewayHandler.handleRequest(stream, os, null, "CODE", lambdaConfig) {
+    ApiGatewayHandler(lambdaConfig) {
       basicOp(invoiceTransactionSummary)
-    }
+    }(stream, os, null)
 
     //verify
     val responseString = new String(os.toByteArray(), "UTF-8")
@@ -161,7 +160,7 @@ class PaymentFailureHandlerTest extends FlatSpec with MockitoSugar {
     responseString jsonMatches expectedResponse
   }
 
-  val lambdaConfig = HandlerDeps(_ => Success(""), _ => Success(Config(fakeApiConfig, fakeZuoraConfig, fakeETConfig)), _ => new TestingStateHttp(false, Some(fakeApiConfig)).stateHttp)
+  val lambdaConfig: FailableOp[StateHttp] = \/-(new TestingStateHttp(false, Some(fakeApiConfig)).stateHttp)
   def basicOp(fakeInvoiceTransactionSummary: InvoiceTransactionSummary = basicInvoiceTransactionSummary) = PaymentFailureSteps.performZuoraAction(PFDeps(req =>
     EitherT[ZuoraReader, ApiResponse, Unit](Reader { zhttp => -\/(ApiGatewayResponse.internalServerError("something failed!")) }), _ => ZuoraOp.lift(fakeInvoiceTransactionSummary)))_
 
@@ -174,12 +173,12 @@ class PaymentFailureHandlerTest extends FlatSpec with MockitoSugar {
     val os = new ByteArrayOutputStream()
 
     //execute
-    ApiGatewayHandler.handleRequest(stream, os, null, "CODE", lambdaConfig) {
+    ApiGatewayHandler(lambdaConfig) {
       PaymentFailureSteps.performZuoraAction(PFDeps(req => {
         storedReq = Some(req)
         EitherT[ZuoraReader, ApiResponse, Unit](Reader { zhttp => -\/(ApiGatewayResponse.internalServerError("something failed!")) })
       }, _ => ZuoraOp.lift(basicInvoiceTransactionSummary)))
-    }
+    }(stream, os, null)
 
     //verify
 

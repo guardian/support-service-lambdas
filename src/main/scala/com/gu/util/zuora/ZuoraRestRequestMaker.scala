@@ -1,16 +1,17 @@
 package com.gu.util.zuora
 
-import com.gu.effects.{HTTPUtil, Logging}
+import com.gu.effects.{ Logging }
+import com.gu.util.ZuoraRestConfig
 import com.gu.util.apigateway.ApiGatewayResponse._
 import com.gu.util.apigateway.ResponseModels.ApiResponse
-import com.gu.util.zuora.Types.{ZuoraOp, ZuoraReader}
+import com.gu.util.zuora.Types.{ ZuoraOp, ZuoraReader }
 import com.gu.util.zuora.ZuoraModels._
 import com.gu.util.zuora.ZuoraReaders._
 import okhttp3._
 import play.api.libs.json._
 
 import scalaz.Scalaz._
-import scalaz.{EitherT, Reader, \/}
+import scalaz.{ EitherT, Reader, \/ }
 
 object ZuoraRestRequestMaker extends Logging {
 
@@ -42,7 +43,7 @@ object ZuoraRestRequestMaker extends Logging {
   }
 
   def get[RESP](path: String)(implicit r: Reads[RESP]): ZuoraOp[RESP] = EitherT[ZuoraReader, ApiResponse, RESP](Reader { zhttp =>
-    val request = HTTPUtil.buildRequest(zhttp.config.zuoraRestConfig)(path).get().build()
+    val request = buildRequest(zhttp.config.zuoraRestConfig)(path).get().build()
     logger.info(s"Getting $path from Zuora")
     val response = zhttp.response(request)
     convertResponseToCaseClass[RESP](response)
@@ -50,10 +51,16 @@ object ZuoraRestRequestMaker extends Logging {
 
   def put[REQ, RESP](req: REQ, path: String)(implicit tjs: Writes[REQ], r: Reads[RESP]): ZuoraOp[RESP] = EitherT[ZuoraReader, ApiResponse, RESP](Reader { zhttp =>
     val body = RequestBody.create(MediaType.parse("application/json"), Json.toJson(req).toString)
-    val request = HTTPUtil.buildRequest(zhttp.config.zuoraRestConfig)(path).put(body).build()
+    val request = buildRequest(zhttp.config.zuoraRestConfig)(path).put(body).build()
     logger.info(s"Attempting to $path with the following command: $req")
     val response = zhttp.response(request)
     convertResponseToCaseClass[RESP](response)
   })
+
+  def buildRequest(config: ZuoraRestConfig)(route: String): Request.Builder =
+    new Request.Builder()
+      .addHeader("apiSecretAccessKey", config.password)
+      .addHeader("apiAccessKeyId", config.username)
+      .url(s"${config.baseUrl}/$route")
 
 }

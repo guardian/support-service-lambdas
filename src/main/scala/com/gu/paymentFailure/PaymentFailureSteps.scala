@@ -1,9 +1,9 @@
 package com.gu.paymentFailure
 
 import com.gu.effects.Logging
-import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest}
+import com.gu.util.apigateway.{ ApiGatewayHandler, ApiGatewayRequest }
 import com.gu.util.exacttarget.EmailClient
-import com.gu.util.zuora.Types.{ZuoraOp, _}
+import com.gu.util.zuora.Types.{ ZuoraOp, _ }
 import com.gu.util.zuora.Zuora
 import play.api.libs.json.Json
 

@@ -2,98 +2,35 @@ package com.gu.effects
 
 import java.util.concurrent.TimeUnit
 
-import com.gu.util.apigateway.ApiGatewayResponse
-import com.gu.util.zuora.Types.{FailableOp, StateHttp, ZuoraOp}
-import com.gu.util.{Config, ZuoraRestConfig}
-import okhttp3.{FormBody, OkHttpClient, Request, Response}
-import play.api.libs.functional.syntax._
-import play.api.libs.json.{JsPath, JsSuccess, Json, Reads}
+import com.gu.util.Config
+import com.gu.util.zuora.Types.{ FailableOp, StateHttp }
+import okhttp3.{ OkHttpClient, Request, Response }
+import com.gu.util.zuora.Types._
 
-import scalaz.{-\/, Reader, \/, \/-}
+import scala.util.Try
 
-object SalesforceRequestWiring extends Logging {
+object StateHttpWithEffects extends Logging {
 
-  private val authEndpoint = "https://auth.exacttargetapis.com/v1/requestToken"
-  val restEndpoint = "https://www.exacttargetapis.com/messaging/v1"
+  //  code dependencies
+  case class HandlerDeps(
+    configAttempt: String => Try[String],
+    parseConfig: String => Try[Config]
 
-  case class SalesforceAuth(accessToken: String, expiresIn: Int)
+  )
 
-  object SalesforceAuth {
+  val defaultHandlerDeps = HandlerDeps(
+    configAttempt = ConfigLoad.load,
+    parseConfig = Config.parseConfig
+  )
 
-    implicit val salesforceAuthReads: Reads[SalesforceAuth] = (
-      (JsPath \ "accessToken").read[String] and
-      (JsPath \ "expiresIn").read[Int]
-    )(SalesforceAuth.apply _)
-
-  }
-
-  //  val restClient = new OkHttpClient().newBuilder()
-  //    .readTimeout(15, TimeUnit.SECONDS)
-  //    .build()
-
-  def requestBuilder(): Request.Builder = {
-    new Request.Builder()
-      .url(authEndpoint)
-  }
-
-  def withSfAuth(requestBuilder: Request.Builder, salesforceAuth: SalesforceAuth): Request.Builder = {
-    requestBuilder.addHeader("Authorization", s"Bearer ${salesforceAuth.accessToken}")
-  }
-
-  def authenticate: ZuoraOp[SalesforceAuth] = ZuoraOp(Reader { zhttp =>
-    val builder = requestBuilder()
-    val formBody = new FormBody.Builder()
-      .add("clientId", zhttp.config.etConfig.clientId)
-      .add("clientSecret", zhttp.config.etConfig.clientSecret)
-      .build()
-    val request = builder.post(formBody).build()
-    logger.info(s"Attempting to perform Salesforce Authentication")
-    val response = zhttp.response(request)
-    val responseBody = Json.parse(response.body().string())
-    responseBody.validate[SalesforceAuth] match {
-      case JsSuccess(result, _) =>
-        logger.info(s"Successful Salesforce authentication.")
-        \/-(result)
-      case _ =>
-        logger.error(s"Failed to authenticate with Salesforce | body was: ${responseBody.toString}")
-        -\/(ApiGatewayResponse.internalServerError(s"Failed to authenticate with Salesforce"))
-    }
-  })
-
-  def buildRequestET(attempt: Int): ZuoraOp[Request.Builder] = {
-
-    //    val endpoint = s"${zhttp.restEndpoint}/messageDefinitionSends/${zhttp.stageETIDForAttempt(message.attempt)}/send"
-    //      .header("Authorization", s"Bearer ${task.get().getOrElse("")}")
+  def apply(deps: HandlerDeps = defaultHandlerDeps): FailableOp[StateHttp] = {
+    val stage = System.getenv("Stage")
+    logger.info(s"${this.getClass} Lambda is starting up in ${stage}")
 
     for {
-      bbb <- authenticate
-      ccc <- ZuoraOp(Reader { zhttp =>
-        val builder = new Request.Builder()
-          .header("Authorization", s"Bearer ${ /*task.get().getOrElse("")*/ bbb.accessToken}") //TODO
-          //      .addHeader("apiSecretAccessKey", config.password)
-          //      .addHeader("apiAccessKeyId", config.username)
-          .url(s"${SalesforceRequestWiring.restEndpoint}/messageDefinitionSends/${zhttp.config.etConfig.stageETIDForAttempt(attempt)}/send")
-        \/.right(builder): FailableOp[Request.Builder]
-      })
-    } yield ccc
-  }
+      config <- deps.configAttempt(stage).flatMap(deps.parseConfig).toFailableOp("load config")
+    } yield new StateHttp(response, stage, config)
 
-}
-
-object HTTPUtil {
-
-  def buildRequest(config: ZuoraRestConfig)(route: String): Request.Builder =
-    new Request.Builder()
-      .addHeader("apiSecretAccessKey", config.password)
-      .addHeader("apiAccessKeyId", config.username)
-      .url(s"${config.baseUrl}/$route")
-
-}
-
-object StateHttpWithEffects {
-
-  def apply(config: Config): StateHttp = {
-    new StateHttp(response, isProd, config)
   }
 
   val response: Request => Response = {
@@ -105,7 +42,5 @@ object StateHttpWithEffects {
       restClient.newCall(request).execute
     }
   }
-
-  def isProd: Boolean = System.getenv("Stage") == "PROD" // should come from the config
 
 }

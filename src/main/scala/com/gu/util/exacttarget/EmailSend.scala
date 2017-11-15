@@ -1,12 +1,12 @@
 package com.gu.util.exacttarget
 
-import com.gu.effects.{Logging, SalesforceRequestWiring}
+import com.gu.effects.Logging
 import com.gu.util.apigateway.ApiGatewayResponse
-import com.gu.util.zuora.Types.{ZuoraOp, _}
-import okhttp3.{MediaType, Request, RequestBody, Response}
+import com.gu.util.zuora.Types.{ ZuoraOp, _ }
+import okhttp3.{ MediaType, Request, RequestBody, Response }
 import play.api.libs.json.Json
 
-import scalaz.{-\/, Reader, \/, \/-}
+import scalaz.{ -\/, Reader, \/, \/- }
 
 case class ContactAttributesDef(SubscriberAttributes: SubscriberAttributesDef)
 

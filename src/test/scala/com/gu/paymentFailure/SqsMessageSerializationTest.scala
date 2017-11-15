@@ -1,6 +1,6 @@
 package com.gu.paymentFailure
 
-import com.gu.util.exacttarget.{ContactAttributesDef, Message, SubscriberAttributesDef, ToDef}
+import com.gu.util.exacttarget.{ ContactAttributesDef, Message, SubscriberAttributesDef, ToDef }
 import org.scalatest.FlatSpec
 import org.scalatest.Matchers._
 import org.scalatest.mockito.MockitoSugar

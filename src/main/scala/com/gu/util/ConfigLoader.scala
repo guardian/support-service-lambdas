@@ -4,7 +4,7 @@ import com.gu.effects.Logging
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
-import scala.util.{Failure, Success, Try}
+import scala.util.{ Failure, Success, Try }
 
 case class ZuoraRestConfig(
   baseUrl: String,

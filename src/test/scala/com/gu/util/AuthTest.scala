@@ -1,9 +1,9 @@
 package com.gu.util
 
 import com.gu.util.Auth._
-import com.gu.util.apigateway.{ApiGatewayRequest, RequestAuth}
+import com.gu.util.apigateway.{ ApiGatewayRequest, RequestAuth }
 import org.scalatest.FlatSpec
-import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
+import play.api.libs.json.{ JsError, JsSuccess, JsValue, Json }
 
 class AuthTest extends FlatSpec {
 

@@ -1,6 +1,6 @@
 package com.gu.util
 
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.{ FlatSpec, Matchers }
 
 import scala.util.Success
 

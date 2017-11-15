@@ -1,10 +1,10 @@
 package com.gu.util.exacttarget
 
 import com.gu.util.exacttarget.EmailClient.HUDeps
-import com.gu.util.zuora.Types.{StateHttp, ZuoraOp}
-import com.gu.util.{Config, ETConfig, TrustedApiConfig, ZuoraRestConfig}
+import com.gu.util.zuora.Types.{ StateHttp, ZuoraOp }
+import com.gu.util.{ Config, ETConfig, TrustedApiConfig, ZuoraRestConfig }
 import okhttp3._
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.{ FlatSpec, Matchers }
 
 class EmailSendTest extends FlatSpec with Matchers {
 
@@ -71,7 +71,7 @@ class TestingStateHttp(val isProd: Boolean, config: Option[TrustedApiConfig] = N
         new Response.Builder().request(req).protocol(Protocol.HTTP_1_1).code(1).body(ResponseBody.create(MediaType.parse("text/plain"), "body result test")).build()
     }
 
-    StateHttp(response, isProd, Config(config.getOrElse(TrustedApiConfig("a", "b", "c")), zuoraRestConfig = ZuoraRestConfig("https://ddd", "e@f.com", "ggg"),
+    StateHttp(response, if (isProd) "PROD" else "CODE", Config(config.getOrElse(TrustedApiConfig("a", "b", "c")), zuoraRestConfig = ZuoraRestConfig("https://ddd", "e@f.com", "ggg"),
       etConfig = ETConfig(stageETIDForAttempt = Map(0 -> "h"), clientId = "jjj", clientSecret = "kkk")))
   }
 

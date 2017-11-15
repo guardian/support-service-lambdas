@@ -2,13 +2,13 @@ package com.gu.autoCancel
 
 import com.gu.util.TrustedApiConfig
 import com.gu.util.apigateway.ApiGatewayResponse._
-import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, RequestAuth}
+import com.gu.util.apigateway.{ ApiGatewayHandler, ApiGatewayRequest, RequestAuth }
 import com.gu.util.zuora.ZuoraModels._
 import org.joda.time.LocalDate
 import org.scalatest._
-import play.api.libs.json.{JsSuccess, Json}
+import play.api.libs.json.{ JsSuccess, Json }
 
-import scalaz.{-\/, \/-}
+import scalaz.{ -\/, \/- }
 
 class AutoCancelHandlerTest extends FlatSpec {
 

@@ -3,7 +3,7 @@ package com.gu.effects
 import com.gu.util.zuora.Types.ZuoraOp
 import org.apache.log4j.Logger
 
-import scalaz.{-\/, \/-}
+import scalaz.{ -\/, \/- }
 
 trait Logging {
 
