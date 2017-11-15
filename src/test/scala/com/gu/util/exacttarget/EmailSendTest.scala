@@ -1,10 +1,13 @@
 package com.gu.util.exacttarget
 
-import com.gu.util.exacttarget.EmailClient.HUDeps
-import com.gu.util.zuora.Types.{ StateHttp, ZuoraOp }
+import com.gu.util.ETConfig.ETSendKeysForAttempt
+import com.gu.util.exacttarget.EmailSend.HUDeps
+import com.gu.util.reader.Types.{ ConfigHttpFailableOp, ConfigHttpGen }
 import com.gu.util.{ Config, ETConfig, TrustedApiConfig, ZuoraRestConfig }
 import okhttp3._
 import org.scalatest.{ FlatSpec, Matchers }
+
+import scala.util.Success
 
 class EmailSendTest extends FlatSpec with Matchers {
 
@@ -44,8 +47,8 @@ class EmailSendTest extends FlatSpec with Matchers {
       .post(RequestBody.create(MediaType.parse("text/plain"), s"$attempt"))
 
     val req = EmailRequest(1, makeMessage(email))
-    var env = new TestingStateHttp(isProd)
-    EmailClient.sendEmail(HUDeps(attempt => ZuoraOp.lift(requestBuilder(attempt))))(req).run.run(env.stateHttp)
+    var env = new TestingRawEffects(isProd)
+    EmailSend(HUDeps(attempt => ConfigHttpFailableOp.lift(requestBuilder(attempt))))(req).run.run(env.configHttp)
 
     env.result.map(_.url.host) should be(if (expectedEmail) Some("1") else None)
   }
@@ -59,20 +62,24 @@ class EmailSendTest extends FlatSpec with Matchers {
 
 }
 
-class TestingStateHttp(val isProd: Boolean, config: Option[TrustedApiConfig] = None) {
+class TestingRawEffects(val isProd: Boolean) {
 
   var result: Option[Request] = None // !
 
-  val stateHttp = {
+  val stage = if (isProd) "PROD" else "CODE"
 
-    def response: Request => Response = {
-      req =>
-        result = Some(req)
-        new Response.Builder().request(req).protocol(Protocol.HTTP_1_1).code(1).body(ResponseBody.create(MediaType.parse("text/plain"), "body result test")).build()
-    }
-
-    StateHttp(response, if (isProd) "PROD" else "CODE", Config(config.getOrElse(TrustedApiConfig("a", "b", "c")), zuoraRestConfig = ZuoraRestConfig("https://ddd", "e@f.com", "ggg"),
-      etConfig = ETConfig(stageETIDForAttempt = Map(0 -> "h"), clientId = "jjj", clientSecret = "kkk")))
+  def response: Request => Response = {
+    req =>
+      result = Some(req)
+      new Response.Builder().request(req).protocol(Protocol.HTTP_1_1).code(1).body(ResponseBody.create(MediaType.parse("text/plain"), "body result test")).build()
   }
+
+  val rawEffects =
+    Success(ConfigHttpGen(response, stage, ""))
+
+  val fakeConfig = Config(TrustedApiConfig("a", "b", "c"), zuoraRestConfig = ZuoraRestConfig("https://ddd", "e@f.com", "ggg"),
+    etConfig = ETConfig(stageETIDForAttempt = ETSendKeysForAttempt(Map(0 -> "h")), clientId = "jjj", clientSecret = "kkk"))
+
+  val configHttp = ConfigHttpGen(response, stage, fakeConfig)
 
 }

@@ -1,8 +1,8 @@
 package com.gu.util.exacttarget
 
-import com.gu.effects.Logging
+import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayResponse
-import com.gu.util.zuora.Types.{ FailableOp, ZuoraOp }
+import com.gu.util.reader.Types.{ ConfigHttpFailableOp, FailableOp }
 import okhttp3.{ FormBody, Request }
 import play.api.libs.functional.syntax._
 import play.api.libs.json.{ JsPath, JsSuccess, Json, Reads }
@@ -25,10 +25,6 @@ object SalesforceRequestWiring extends Logging {
 
   }
 
-  //  val restClient = new OkHttpClient().newBuilder()
-  //    .readTimeout(15, TimeUnit.SECONDS)
-  //    .build()
-
   def requestBuilder(): Request.Builder = {
     new Request.Builder()
       .url(authEndpoint)
@@ -38,15 +34,15 @@ object SalesforceRequestWiring extends Logging {
     requestBuilder.addHeader("Authorization", s"Bearer ${salesforceAuth.accessToken}")
   }
 
-  def authenticate: ZuoraOp[SalesforceAuth] = ZuoraOp(Reader { zhttp =>
+  def authenticate: ConfigHttpFailableOp[SalesforceAuth] = ConfigHttpFailableOp(Reader { configHttp =>
     val builder = requestBuilder()
     val formBody = new FormBody.Builder()
-      .add("clientId", zhttp.config.etConfig.clientId)
-      .add("clientSecret", zhttp.config.etConfig.clientSecret)
+      .add("clientId", configHttp.config.etConfig.clientId)
+      .add("clientSecret", configHttp.config.etConfig.clientSecret)
       .build()
     val request = builder.post(formBody).build()
     logger.info(s"Attempting to perform Salesforce Authentication")
-    val response = zhttp.response(request)
+    val response = configHttp.response(request)
     val responseBody = Json.parse(response.body().string())
     responseBody.validate[SalesforceAuth] match {
       case JsSuccess(result, _) =>
@@ -58,22 +54,17 @@ object SalesforceRequestWiring extends Logging {
     }
   })
 
-  def buildRequestET(attempt: Int): ZuoraOp[Request.Builder] = {
-
-    //    val endpoint = s"${zhttp.restEndpoint}/messageDefinitionSends/${zhttp.stageETIDForAttempt(message.attempt)}/send"
-    //      .header("Authorization", s"Bearer ${task.get().getOrElse("")}")
+  def buildRequestET(attempt: Int): ConfigHttpFailableOp[Request.Builder] = {
 
     for {
-      bbb <- authenticate
-      ccc <- ZuoraOp(Reader { zhttp =>
+      salesforceAuth <- authenticate
+      etRequestBuilder <- ConfigHttpFailableOp(Reader { configHttp =>
         val builder = new Request.Builder()
-          .header("Authorization", s"Bearer ${ /*task.get().getOrElse("")*/ bbb.accessToken}") //TODO
-          //      .addHeader("apiSecretAccessKey", config.password)
-          //      .addHeader("apiAccessKeyId", config.username)
-          .url(s"${SalesforceRequestWiring.restEndpoint}/messageDefinitionSends/${zhttp.config.etConfig.stageETIDForAttempt(attempt)}/send")
+          .header("Authorization", s"Bearer ${salesforceAuth.accessToken}")
+          .url(s"${SalesforceRequestWiring.restEndpoint}/messageDefinitionSends/${configHttp.config.etConfig.stageETIDForAttempt.etSendKeysForAttempt(attempt)}/send")
         \/.right(builder): FailableOp[Request.Builder]
       })
-    } yield ccc
+    } yield etRequestBuilder
   }
 
 }

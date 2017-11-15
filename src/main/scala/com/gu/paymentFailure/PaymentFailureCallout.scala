@@ -22,7 +22,7 @@ case class PaymentFailureCallout(
 )
 
 object PaymentFailureCallout {
-  //  implicit val jf = Json.reads[PaymentFailureCallout]
+
   implicit val jf: Reads[PaymentFailureCallout] = {
     (
       (JsPath \ "accountId").read[String] and

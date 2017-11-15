@@ -1,8 +1,8 @@
 package com.gu.util.exacttarget
 
-import com.gu.effects.Logging
+import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayResponse
-import com.gu.util.zuora.Types.{ ZuoraOp, _ }
+import com.gu.util.reader.Types.{ ConfigHttpFailableOp, _ }
 import okhttp3.{ MediaType, Request, RequestBody, Response }
 import play.api.libs.json.Json
 
@@ -49,29 +49,29 @@ object Message {
   implicit val jf = Json.writes[Message]
 }
 
-object EmailClient extends Logging {
+object EmailSend extends Logging {
 
-  case class HUDeps(buildRequestET: Int => ZuoraOp[Request.Builder])
-  val defaultDeps = HUDeps(SalesforceRequestWiring.buildRequestET)
+  // don't really need a full ConfigHttp, maybe we can reduce the deps?
+  case class HUDeps(buildRequestET: Int => ConfigHttpFailableOp[Request.Builder] = SalesforceRequestWiring.buildRequestET)
 
-  type SendEmail = EmailRequest => ZuoraOp[Unit] // zuoraop is really an okhttp client plus config
+  type SendEmail = EmailRequest => ConfigHttpFailableOp[Unit] // zuoraop is really an okhttp client plus config
 
-  def sendEmail(deps: HUDeps = defaultDeps): SendEmail = { request =>
+  def apply(deps: HUDeps = HUDeps()): SendEmail = { request =>
     val message = request.message
     // convert message to json and then use it somehow
 
-    ZuoraOp(Reader { zhttp => \/.right(zhttp.isProd): FailableOp[Boolean] }).flatMap { prod =>
+    ConfigHttpFailableOp(Reader { configHttp => \/.right(configHttp.isProd): FailableOp[Boolean] }).flatMap { prod =>
       val guardianEmail = request.message.To.Address.endsWith("@guardian.co.uk") || request.message.To.Address.endsWith("@theguardian.com")
       if (!prod && !guardianEmail) {
         logger.warn("not sending email in non prod as it's not a guardian address")
-        \/-(()).toZuoraOp
+        \/-(()).toConfigHttpFailableOp
       } else {
 
         val jsonMT = MediaType.parse("application/json; charset=utf-8")
         val body = RequestBody.create(jsonMT, Json.stringify(Json.toJson(message)))
         for {
           req <- deps.buildRequestET(request.attempt).leftMap(err => ApiGatewayResponse.internalServerError(s"oops todo because: $err"))
-          response <- ZuoraOp(Reader { zhttp => \/.right(zhttp.response(req.post(body).build())): FailableOp[Response] })
+          response <- ConfigHttpFailableOp(Reader { configHttp => \/.right(configHttp.response(req.post(body).build())): FailableOp[Response] })
           result <- (response.code() match {
 
             case 202 =>
@@ -80,7 +80,7 @@ object EmailClient extends Logging {
             case statusCode =>
               logger.warn(s"email not sent due to $statusCode - ${response.body().string()}")
               -\/(ApiGatewayResponse.internalServerError(s"email not sent due to $statusCode"))
-          }).toZuoraOp
+          }).toConfigHttpFailableOp
         } yield result
       }
     }

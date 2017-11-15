@@ -4,6 +4,7 @@ import com.amazonaws.auth._
 import com.amazonaws.auth.profile.ProfileCredentialsProvider
 import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.s3.model.{ GetObjectRequest, S3ObjectInputStream }
+import com.gu.util.Logging
 
 import scala.io.Source
 import scala.util.{ Failure, Try }

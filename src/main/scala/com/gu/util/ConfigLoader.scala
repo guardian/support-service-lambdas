@@ -1,6 +1,6 @@
 package com.gu.util
 
-import com.gu.effects.Logging
+import com.gu.util.ETConfig.ETSendKeysForAttempt
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
@@ -13,7 +13,7 @@ case class ZuoraRestConfig(
 )
 
 case class ETConfig(
-  stageETIDForAttempt: Map[Int, String],
+  stageETIDForAttempt: ETSendKeysForAttempt,
   clientId: String,
   clientSecret: String
 )
@@ -28,19 +28,19 @@ object ZuoraRestConfig {
 
 object ETConfig {
 
-  implicit val mapReads: Reads[Map[Int, String]] = new Reads[Map[Int, String]] {
+  implicit val etSendKeysForAttemptReads: Reads[ETSendKeysForAttempt] = new Reads[ETSendKeysForAttempt] {
 
-    override def reads(json: JsValue) = {
-      json match {
-        case JsObject(map) =>
-          val jsResults = map.map({
-            case (num: String, JsString(key)) =>
-              val aaa = Try { Integer.parseInt(num) }
-              aaa match {
-                case Success(num) => JsSuccess((num, key))
-                case Failure(f) => JsError(s"num parse error in config: ${f}")
+    override def reads(jsValue: JsValue): JsResult[ETSendKeysForAttempt] = {
+      jsValue match {
+        case JsObject(stringToJsValue) =>
+          val jsResults = stringToJsValue.map({
+            case (attemptText: String, JsString(exactTargetTriggeredSendKey)) =>
+              val triedInt = Try { Integer.parseInt(attemptText) }
+              triedInt match {
+                case Success(attempt) => JsSuccess((attempt, exactTargetTriggeredSendKey))
+                case Failure(f) => JsError(s"num parse error in config map for $attemptText: $f")
               }
-            case other => JsError(s"value of TS key wasn't a string: $other")
+            case other => JsError(s"value of exactTargetTriggeredSendKey wasn't a string: $other")
           })
           val allErrors = jsResults.collect {
             case JsError(errors) => errors
@@ -48,9 +48,9 @@ object ETConfig {
           if (allErrors.nonEmpty) {
             JsError(allErrors.toList)
           } else {
-            JsSuccess(jsResults.collect {
-              case JsSuccess(a, _) => a
-            }.toMap)
+            JsSuccess(ETSendKeysForAttempt(jsResults.collect {
+              case JsSuccess(attemptTSKey, _) => attemptTSKey
+            }.toMap))
           }
         case other => JsError(s"wrong type: $other")
       }
@@ -58,8 +58,10 @@ object ETConfig {
 
   }
 
+  case class ETSendKeysForAttempt(etSendKeysForAttempt: Map[Int, String])
+
   implicit val zuoraConfigReads: Reads[ETConfig] = (
-    (JsPath \ "stageETIDForAttempt").read[Map[Int, String]] and
+    (JsPath \ "stageETIDForAttempt").read[ETSendKeysForAttempt] and
     (JsPath \ "clientId").read[String] and
     (JsPath \ "clientSecret").read[String]
   )(ETConfig.apply _)
@@ -87,14 +89,13 @@ object Config extends Logging {
 
   def parseConfig(jsonConfig: String): Try[Config] = {
     Json.fromJson[Config](Json.parse(jsonConfig)) match {
-      case validConfig: JsSuccess[Config] => {
+      case validConfig: JsSuccess[Config] =>
         logger.info(s"Successfully parsed JSON config")
         Success(validConfig.value)
-      }
-      case error: JsError => {
-        logger.error(s"Failed to parse JSON config: $error")
-        Failure(new ConfigFailure(error))
-      }
+      case error: JsError =>
+        logger.error(s"Failed to parse JSON config")
+        logger.warn(s"Failed to parse JSON config: $error")
+        Failure(ConfigFailure(error))
     }
   }
 

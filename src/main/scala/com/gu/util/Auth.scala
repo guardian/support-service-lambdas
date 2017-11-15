@@ -1,6 +1,5 @@
 package com.gu.util
 
-import com.gu.effects.Logging
 import com.gu.util.apigateway.RequestAuth
 
 object Auth extends Logging {

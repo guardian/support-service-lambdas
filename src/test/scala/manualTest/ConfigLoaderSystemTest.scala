@@ -1,7 +1,7 @@
 package manualTest
 
 import com.gu.effects.ConfigLoad
-import com.gu.util.{ Config, ETConfig, TrustedApiConfig, ZuoraRestConfig }
+import com.gu.util.Config
 import org.scalatest.{ FlatSpec, Ignore, Matchers }
 
 import scala.io.Source
@@ -32,7 +32,7 @@ class ConfigLoaderSystemTest extends FlatSpec with Matchers {
       a <- configAttemp
       b <- Config.parseConfig(a)
     } yield b
-    val hasAllEmails = con.map(config => (Set(1, 2, 3, 4, 5).diff(config.etConfig.stageETIDForAttempt.keySet)).isEmpty)
+    val hasAllEmails = con.map(config => (Set(1, 2, 3, 4, 5).diff(config.etConfig.stageETIDForAttempt.etSendKeysForAttempt.keySet)).isEmpty)
     withClue(configAttemp) {
       hasAllEmails should be(Success(true))
     }

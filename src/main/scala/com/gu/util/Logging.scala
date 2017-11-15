@@ -1,6 +1,6 @@
-package com.gu.effects
+package com.gu.util
 
-import com.gu.util.zuora.Types.ZuoraOp
+import com.gu.util.reader.Types.ConfigHttpFailableOp
 import org.apache.log4j.Logger
 
 import scalaz.{ -\/, \/- }
@@ -9,11 +9,11 @@ trait Logging {
 
   val logger = Logger.getLogger(getClass.getName)
 
-  implicit class LogImplicit[A](zuoraOp: ZuoraOp[A]) {
+  implicit class LogImplicit[A](configHttpFailableOp: ConfigHttpFailableOp[A]) {
 
-    def withLogging(message: String): ZuoraOp[A] = {
+    def withLogging(message: String): ConfigHttpFailableOp[A] = {
 
-      ZuoraOp(zuoraOp.run map {
+      ConfigHttpFailableOp(configHttpFailableOp.run map {
         case \/-(success) =>
           logger.info(s"$message: Successfully with value: $success")
           \/-(success)

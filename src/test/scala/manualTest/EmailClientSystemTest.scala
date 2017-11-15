@@ -1,13 +1,12 @@
 package manualTest
 
-import com.gu.effects.StateHttpWithEffects
-import com.gu.effects.StateHttpWithEffects.HandlerDeps
-import com.gu.util.Config
+import com.gu.effects.RawEffects
+import com.gu.util.apigateway.ApiGatewayHandler.HandlerDeps
 import com.gu.util.exacttarget._
+import com.gu.util.reader.Types._
 
 import scala.io.Source
 import scala.util.Try
-import com.gu.util.zuora.Types._
 
 // run this to send a one off email to yourself.  the email will take a few mins to arrive, but it proves the ET logic works
 object EmailClientSystemTest extends App {
@@ -40,11 +39,14 @@ object EmailClientSystemTest extends App {
   )
 
   val configAttempt = Try { Source.fromFile("/etc/gu/payment-failure-lambdas.private.json").mkString }
-  val emailResult = configAttempt.toFailableOp("config failed").flatMap {
-    config => StateHttpWithEffects(HandlerDeps(_ => configAttempt, Config.parseConfig))
+  val emailResult = configAttempt.flatMap {
+    config =>
+      HandlerDeps().parseConfig(config).map { config =>
+        ConfigHttpGen(RawEffects.response, "CODE", config)
+      }
   }.map {
     service =>
-      EmailClient.sendEmail()(EmailRequest(1, message = message)).run.run(service)
+      EmailSend()(EmailRequest(1, message = message)).run.run(service)
   }
 
   println(s"result was:::::: $emailResult")

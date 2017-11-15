@@ -1,6 +1,5 @@
 package com.gu.util
 
-import com.gu.effects.{ StateHttpWithEffects }
 import com.gu.util.apigateway.ApiGatewayResponse._
 import com.gu.util.zuora.ZuoraModels._
 import com.gu.util.zuora.ZuoraReaders._
