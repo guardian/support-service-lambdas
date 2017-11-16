@@ -77,11 +77,12 @@ object TrustedApiConfig {
   )(TrustedApiConfig.apply _)
 }
 
-case class Config(trustedApiConfig: TrustedApiConfig, zuoraRestConfig: ZuoraRestConfig, etConfig: ETConfig)
+case class Config(stage: String, trustedApiConfig: TrustedApiConfig, zuoraRestConfig: ZuoraRestConfig, etConfig: ETConfig)
 
 object Config extends Logging {
 
   implicit val configReads: Reads[Config] = (
+    (JsPath \ "stage").read[String] and
     (JsPath \ "trustedApiConfig").read[TrustedApiConfig] and
     (JsPath \ "zuoraRestConfig").read[ZuoraRestConfig] and
     (JsPath \ "etConfig").read[ETConfig]

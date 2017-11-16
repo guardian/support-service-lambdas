@@ -2,6 +2,7 @@ package com.gu.autoCancel
 
 import com.github.nscala_time.time.OrderingImplicits._
 import com.gu.util.Logging
+import com.gu.util.apigateway.ApiGatewayHandler.StageAndConfigHttp
 import com.gu.util.apigateway.ApiGatewayResponse.noActionRequired
 import com.gu.util.reader.Types.{ FailableOp, _ }
 import com.gu.util.zuora.Zuora
@@ -20,13 +21,13 @@ object AutoCancel extends Logging {
     disableAutoPay: DisableAutoPay = Zuora.disableAutoPay
   )
 
-  def apply(date: LocalDate, autoCancelCallout: AutoCancelCallout, deps: ACDeps = ACDeps()): all#ImpureFunctionsFailableOp[Unit] = {
+  def apply(date: LocalDate, autoCancelCallout: AutoCancelCallout, deps: ACDeps = ACDeps()): WithDeps[StageAndConfigHttp]#FailableOp[Unit] = {
     val accountId = autoCancelCallout.accountId
     logger.info(s"Attempting to perform auto-cancellation on account: $accountId")
     for {
       accountSummary <- deps.getAccountSummary(accountId).withLogging("getAccountSummary")
-      subToCancel <- getSubscriptionToCancel(accountSummary).toConfigHttpFailableOp.withLogging("getSubscriptionToCancel")
-      cancellationDate <- getCancellationDateFromInvoices(accountSummary, date).toConfigHttpFailableOp.withLogging("getCancellationDateFromInvoices")
+      subToCancel <- getSubscriptionToCancel(accountSummary).toReader.withLogging("getSubscriptionToCancel")
+      cancellationDate <- getCancellationDateFromInvoices(accountSummary, date).toReader.withLogging("getCancellationDateFromInvoices")
       updateSubscription <- deps.updateCancellationReason(subToCancel).withLogging("updateCancellationReason")
       cancelSubscription <- deps.cancelSubscription(subToCancel, cancellationDate).withLogging("cancelSubscription")
       disableAutoPay <- deps.disableAutoPay(accountId).withLogging("disableAutoPay")

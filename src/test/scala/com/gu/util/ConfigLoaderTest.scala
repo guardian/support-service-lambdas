@@ -9,7 +9,7 @@ class ConfigLoaderTest extends FlatSpec with Matchers {
 
   val codeConfig =
     """
-      |{
+      |{ "stage": "DEV",
       |  "trustedApiConfig": {
       |    "apiClientId": "a",
       |    "apiToken": "b",
@@ -29,11 +29,11 @@ class ConfigLoaderTest extends FlatSpec with Matchers {
       |}
     """.stripMargin
 
-  "loader" should "be able to load the prod config successfully" in {
+  "loader" should "be able to load config successfully" in {
     //    val requestAuth = Some(RequestAuth(apiClientId = "validUser", apiToken = "ndjashjkhajshs"))
     //    assert(credentialsAreValid(requestAuth, trustedApiConfig) == false)
     val prod = Config.parseConfig(codeConfig)
-    prod should be(Success(Config(TrustedApiConfig("a", "b", "c"), zuoraRestConfig = ZuoraRestConfig("https://ddd", "e@f.com", "ggg"),
+    prod should be(Success(Config("DEV", TrustedApiConfig("a", "b", "c"), zuoraRestConfig = ZuoraRestConfig("https://ddd", "e@f.com", "ggg"),
       etConfig = ETConfig(ETSendKeysForAttempt(Map(0 -> "h")), clientId = "jjj", clientSecret = "kkk"))))
   }
 

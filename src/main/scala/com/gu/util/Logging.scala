@@ -1,6 +1,6 @@
 package com.gu.util
 
-import com.gu.util.reader.Types.{ ExternalEffects, ImpureFunctionsFailableOp }
+import com.gu.util.reader.Types.{ WithDeps, _ }
 import org.apache.log4j.Logger
 
 import scalaz.{ -\/, \/- }
@@ -9,18 +9,32 @@ trait Logging {
 
   val logger = Logger.getLogger(getClass.getName)
 
-  implicit class LogImplicit[A, D](configHttpFailableOp: ExternalEffects[D]#ImpureFunctionsFailableOp[A]) {
+  implicit class LogImplicit[A, D](configHttpFailableOp: WithDeps[D]#FailableOp[A]) {
 
-    def withLogging(message: String): ExternalEffects[D]#ImpureFunctionsFailableOp[A] = {
+    // this is just a handy method to add logging to the end of any for comprehension
+    def withLogging(message: String): WithDeps[D]#FailableOp[A] = {
 
-      ImpureFunctionsFailableOp(configHttpFailableOp.run map {
-        case \/-(success) =>
-          logger.info(s"$message: Successfully with value: $success")
-          \/-(success)
-        case -\/(failure) =>
-          logger.error(s"$message: Failed with value: $failure")
-          -\/(failure) // todo some day make an error object with a backtrace...
-      })
+      (configHttpFailableOp.run map {
+        _.withLogging(message)
+      }).toDepsFailableOp
+
+    }
+
+  }
+
+  implicit class LogImplicit2[A](failableOp: FailableOp[A]) {
+
+    // this is just a handy method to add logging to the end of any for comprehension
+    def withLogging(message: String): FailableOp[A] = {
+
+      failableOp match {
+        case \/-(continuation) =>
+          logger.info(s"$message: continued processing with value: $continuation")
+          \/-(continuation)
+        case -\/(response) =>
+          logger.error(s"$message: returned here with value: $response")
+          -\/(response) // todo some day make an error object with a backtrace...
+      }
 
     }
 

@@ -2,16 +2,15 @@ package com.gu.paymentFailure
 
 import java.io.ByteArrayOutputStream
 
-import com.gu.autoCancel.TestingRawEffects
+import com.gu.autoCancel.{ TestingRawEffects, WithDependenciesFailableOp }
 import com.gu.paymentFailure.PaymentFailureSteps.PFDeps
 import com.gu.util.ETConfig.ETSendKeysForAttempt
 import com.gu.util._
 import com.gu.util.apigateway.ApiGatewayHandler.HandlerDeps
 import com.gu.util.apigateway.ApiGatewayResponse.unauthorized
-import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.apigateway.{ ApiGatewayHandler, ApiGatewayResponse }
+import com.gu.util.exacttarget.EmailSend.ETS
 import com.gu.util.exacttarget._
-import com.gu.util.reader.Types
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.ZuoraModels._
 import org.joda.time.LocalDate
@@ -20,7 +19,7 @@ import org.scalatest.Matchers._
 import play.api.libs.json.Json
 
 import scala.util.Success
-import scalaz.{ -\/, EitherT, Reader, \/, \/- }
+import scalaz.{ -\/, \/ }
 
 class PaymentFailureHandlerTest extends FlatSpec {
 
@@ -50,7 +49,7 @@ class PaymentFailureHandlerTest extends FlatSpec {
     val actualWrongTenantId = "wrong"
 
     val expected = \/.left(unauthorized)
-    val result = ApiGatewayHandler.validateTenantCallout(actualWrongTenantId).run.run(new TestingRawEffects(false).configHttp)
+    val result = PaymentFailureSteps.validateTenantCallout(actualWrongTenantId).run(fakeApiConfig)
 
     result should be(expected)
   }
@@ -90,8 +89,8 @@ class PaymentFailureHandlerTest extends FlatSpec {
     ApiGatewayHandler(lambdaConfig, HandlerDeps(_ => Success(fakeConfig)))({
       PaymentFailureSteps.apply(PFDeps(req => {
         storedReq = Some(req)
-        EitherT[et#ImpureFunctionsReader, ApiResponse, Unit](Reader { configHttp => \/-(()) })
-      }, _ => ImpureFunctionsFailableOp.lift(basicInvoiceTransactionSummary)))
+        WithDependenciesFailableOp.liftT(())
+      }, _ => WithDependenciesFailableOp.liftT(basicInvoiceTransactionSummary)))
     })(stream, os, null)
 
     //verify
@@ -150,12 +149,12 @@ class PaymentFailureHandlerTest extends FlatSpec {
   }
 
   //  val lambdaConfig: FailableOp[ConfigHttp] = \/-(new TestingStateHttp(false, Some(fakeApiConfig)).stateHttp)
-  val fakeConfig = Config(fakeApiConfig, zuoraRestConfig = ZuoraRestConfig("https://ddd", "e@f.com", "ggg"),
+  val fakeConfig = Config("DEV", fakeApiConfig, zuoraRestConfig = ZuoraRestConfig("https://ddd", "e@f.com", "ggg"),
     etConfig = ETConfig(stageETIDForAttempt = ETSendKeysForAttempt(Map(0 -> "h")), clientId = "jjj", clientSecret = "kkk"))
 
   val lambdaConfig = new TestingRawEffects(false).rawEffects
   def basicOp(fakeInvoiceTransactionSummary: InvoiceTransactionSummary = basicInvoiceTransactionSummary) = PaymentFailureSteps.apply(PFDeps(req =>
-    EitherT[et#ImpureFunctionsReader, ApiResponse, Unit](Reader { configHttp => -\/(ApiGatewayResponse.internalServerError("something failed!")) }), _ => ImpureFunctionsFailableOp.lift(fakeInvoiceTransactionSummary)))_
+    (-\/(ApiGatewayResponse.internalServerError("something failed!")): FailableOp[Unit]).toReader[ETS], _ => WithDependenciesFailableOp.liftT(fakeInvoiceTransactionSummary)))_
 
   "lambda" should "return error if message can't be queued" in {
     //set up
@@ -169,8 +168,8 @@ class PaymentFailureHandlerTest extends FlatSpec {
     ApiGatewayHandler(lambdaConfig, HandlerDeps(_ => Success(fakeConfig))) {
       PaymentFailureSteps.apply(PFDeps(req => {
         storedReq = Some(req)
-        EitherT[et#ImpureFunctionsReader, ApiResponse, Unit](Reader { configHttp => -\/(ApiGatewayResponse.internalServerError("something failed!")) })
-      }, _ => ImpureFunctionsFailableOp.lift(basicInvoiceTransactionSummary)))
+        (-\/(ApiGatewayResponse.internalServerError("something failed!")): FailableOp[Unit]).toReader[ETS]
+      }, _ => WithDependenciesFailableOp.liftT(basicInvoiceTransactionSummary)))
     }(stream, os, null)
 
     //verify

@@ -1,9 +1,9 @@
 package manualTest
 
-import com.gu.effects.RawEffects
+import com.gu.effects.{ Http, RawEffects }
 import com.gu.util.apigateway.ApiGatewayHandler.HandlerDeps
+import com.gu.util.exacttarget.EmailSend.ETS
 import com.gu.util.exacttarget._
-import com.gu.util.reader.Types._
 
 import scala.io.Source
 import scala.util.Try
@@ -13,7 +13,7 @@ object EmailClientSystemTest extends App {
 
   private val recipient = "john.duffell@guardian.co.uk"
 
-  val message = Message(
+  def message(number: Int) = Message(
     DataExtensionName = "first-failed-payment-email",
     To = ToDef(
       Address = recipient,
@@ -27,7 +27,7 @@ object EmailClientSystemTest extends App {
           payment_method = "paymentMethodValue",
           card_type = "cardTypeValue",
           card_expiry_date = "cardExpiryValue",
-          first_name = "firstNameValue",
+          first_name = s"firstNameValue message $number",
           last_name = "lastNameValue",
           paymentId = "paymentId",
           price = "49.0 GBP",
@@ -39,16 +39,17 @@ object EmailClientSystemTest extends App {
   )
 
   val configAttempt = Try { Source.fromFile("/etc/gu/payment-failure-lambdas.private.json").mkString }
-  val emailResult = configAttempt.flatMap {
+  configAttempt.flatMap {
     config =>
       HandlerDeps().parseConfig(config).map { config =>
-        HttpAndConfig(RawEffects.response, "CODE", config.etConfig)
+        ETS(Http.response, "CODE", config.etConfig)
       }
   }.map {
     service =>
-      EmailSend()(EmailRequest(1, message = message)).run.run(service)
+      Seq(1 /*, 2, 3, 4, 5*/ ).map { num =>
+        val emailResult = EmailSend()(EmailRequest(num, message = message(num))).run.run(service)
+        println(s"result for $num:::::: $emailResult")
+      }
   }
-
-  println(s"result was:::::: $emailResult")
 
 }

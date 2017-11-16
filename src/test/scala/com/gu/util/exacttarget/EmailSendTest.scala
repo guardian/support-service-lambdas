@@ -1,13 +1,17 @@
 package com.gu.util.exacttarget
 
+import com.gu.autoCancel.WithDependenciesFailableOp
+import com.gu.effects.RawEffects
 import com.gu.util.ETConfig
 import com.gu.util.ETConfig.ETSendKeysForAttempt
-import com.gu.util.exacttarget.EmailSend.HUDeps
+import com.gu.util.exacttarget.EmailSend.{ ETS, HUDeps }
+import com.gu.util.exacttarget.SalesforceAuthenticate.SalesforceAuth
 import com.gu.util.reader.Types._
 import okhttp3._
 import org.scalatest.{ FlatSpec, Matchers }
 
 import scala.util.Success
+import scalaz.{ Reader, \/- }
 
 class EmailSendTest extends FlatSpec with Matchers {
 
@@ -47,10 +51,16 @@ class EmailSendTest extends FlatSpec with Matchers {
       .post(RequestBody.create(MediaType.parse("text/plain"), s"$attempt"))
 
     val req = EmailRequest(1, makeMessage(email))
-    var env = new TestingRawEffectsET(isProd)
-    EmailSend(HUDeps(attempt => ImpureFunctionsFailableOp.lift(requestBuilder(attempt))))(req).run.run(env.configHttp)
+    val env = new TestingRawEffectsET(isProd)
+    var varAttempt: Option[Int] = None
+    EmailSend(HUDeps(
+      sendEmail = (attempt, message) => {
+      varAttempt = Some(attempt)
+      WithDependenciesFailableOp.liftT(())
+    }
+    ))(req).run.run(env.configHttp)
 
-    env.result.map(_.url.host) should be(if (expectedEmail) Some("1") else None)
+    varAttempt should be(if (expectedEmail) Some(1) else None)
   }
 
   "emailer" should "send an email to any address in prod" in {
@@ -74,11 +84,10 @@ class TestingRawEffectsET(val isProd: Boolean) {
       new Response.Builder().request(req).protocol(Protocol.HTTP_1_1).code(1).body(ResponseBody.create(MediaType.parse("text/plain"), "body result test")).build()
   }
 
-  val rawEffects =
-    Success(HttpAndConfig(response, stage, ""))
+  val rawEffects = RawEffects(response, () => stage, _ => Success(""))
 
   val fakeETConfig = ETConfig(stageETIDForAttempt = ETSendKeysForAttempt(Map(0 -> "h")), clientId = "jjj", clientSecret = "kkk")
 
-  val configHttp = HttpAndConfig(response, stage, fakeETConfig)
+  val configHttp = ETS(response, stage, fakeETConfig)
 
 }

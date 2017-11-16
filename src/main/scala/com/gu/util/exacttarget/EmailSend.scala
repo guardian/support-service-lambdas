@@ -1,8 +1,9 @@
 package com.gu.util.exacttarget
 
 import com.gu.util.apigateway.ApiGatewayResponse
+import com.gu.util.exacttarget.SalesforceAuthenticate.{ ETImpure, SalesforceAuth }
 import com.gu.util.reader.Types._
-import com.gu.util.{ Config, ETConfig, Logging }
+import com.gu.util.{ ETConfig, Logging }
 import okhttp3.{ MediaType, Request, RequestBody, Response }
 import play.api.libs.json.Json
 
@@ -51,18 +52,20 @@ object Message {
 
 object EmailSend extends Logging {
 
-  case class HUDeps(buildRequestET: Int => et#ImpureFunctionsFailableOp[Request.Builder] = SalesforceRequestWiring.buildRequestET)
+  case class ETS(response: (Request => Response), stage: String, etConfig: ETConfig)
 
-  type SendEmail = EmailRequest => et#ImpureFunctionsFailableOp[Unit] // zuoraop is really an okhttp client plus config
+  case class HUDeps(
+    sendEmail: (Int, Message) => WithDeps[ETS]#FailableOp[Unit] = sendEmail
+  )
+
+  type SendEmail = EmailRequest => WithDeps[ETS]#FailableOp[Unit]
 
   def apply(deps: HUDeps = HUDeps()): SendEmail = { request =>
     for {
-      prod <- ImpureFunctionsFailableOp(Reader { configHttp: HttpAndConfig[ETConfig] => \/.right(configHttp.isProd): FailableOp[Boolean] })
-      _ <- filterTestEmail(request.message.To.Address, prod).toConfigHttpFailableOp
-      req <- deps.buildRequestET(request.attempt).leftMap(err => ApiGatewayResponse.internalServerError(s"oops todo because: $err"))
-      response <- sendEmailOp(req, request.message).local[HttpAndConfig[ETConfig]](_.response)
-      result <- processResponse(response).toConfigHttpFailableOp
-    } yield result
+      prod <- Reader { stage: String => \/.right(stage == "PROD"): FailableOp[Boolean] }.toDepsFailableOp.local[ETS](_.stage)
+      _ <- filterTestEmail(request.message.To.Address, prod).toReader
+      _ <- deps.sendEmail(request.attempt, request.message)
+    } yield ()
 
   }
 
@@ -77,14 +80,34 @@ object EmailSend extends Logging {
     }
   }
 
-  private def sendEmailOp(req: Request.Builder, message: Message): http#ImpureFunctionsFailableOp[Response] = {
-    ImpureFunctionsFailableOp(Reader { response: (Request => Response) =>
+  def sendEmail(attempt: Int, message: Message): WithDeps[ETS]#FailableOp[Unit] = {
+    for {
+      auth <- SalesforceAuthenticate().toDepsFailableOp.local[ETS](ets => ETImpure(ets.response, ets.etConfig))
+      req <- buildRequestET(attempt).toDepsFailableOp.leftMap(err => ApiGatewayResponse.internalServerError(s"oops todo because: $err")).local[ETS](e => ETReq(e.etConfig, auth))
+      response <- sendEmailOp(req, message).toDepsFailableOp.local[ETS](_.response)
+      result <- processResponse(response).toReader
+    } yield result
+  }
+
+  private def sendEmailOp(req: Request.Builder, message: Message): Reader[Request => Response, FailableOp[Response]] = {
+    Reader { response: (Request => Response) =>
       val jsonMT = MediaType.parse("application/json; charset=utf-8")
       val body = RequestBody.create(jsonMT, Json.stringify(Json.toJson(message)))
       \/.right(response(req.post(body).build())): FailableOp[Response]
-    })
+    }
 
   }
+
+  case class ETReq(config: ETConfig, salesforceAuth: SalesforceAuth)
+
+  def buildRequestET(attempt: Int): Reader[ETReq, FailableOp[Request.Builder]] =
+    Reader {
+      et: ETReq =>
+        val builder = new Request.Builder()
+          .header("Authorization", s"Bearer ${et.salesforceAuth.accessToken}")
+          .url(s"${SalesforceAuthenticate.restEndpoint}/messageDefinitionSends/${et.config.stageETIDForAttempt.etSendKeysForAttempt(attempt)}/send")
+        \/.right(builder): FailableOp[Request.Builder]
+    }
 
   private def filterTestEmail(email: String, prod: Boolean): FailableOp[Unit] = {
     val guardianEmail = email.endsWith("@guardian.co.uk") || email.endsWith("@theguardian.com")

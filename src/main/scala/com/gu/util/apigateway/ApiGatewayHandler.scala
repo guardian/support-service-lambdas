@@ -3,16 +3,18 @@ package com.gu.util.apigateway
 import java.io.{ InputStream, OutputStream }
 
 import com.amazonaws.services.lambda.runtime.Context
-import com.gu.util.Auth.{ credentialsAreValid, validTenant }
+import com.gu.effects.RawEffects
+import com.gu.util.Auth.credentialsAreValid
 import com.gu.util._
 import com.gu.util.apigateway.ApiGatewayResponse.{ outputForAPIGateway, successfulExecution, unauthorized }
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.reader.Types._
+import okhttp3.{ Request, Response }
 import play.api.libs.json.Json
 
 import scala.io.Source
 import scala.util.Try
-import scalaz.{ -\/, Reader, \/, \/- }
+import scalaz.{ -\/, \/, \/- }
 
 object ApiGatewayHandler extends Logging {
 
@@ -21,33 +23,53 @@ object ApiGatewayHandler extends Logging {
     parseConfig: String => Try[Config] = Config.parseConfig
   )
 
-  def apply(rawEffects: Try[HttpAndConfig[String]], deps: HandlerDeps = HandlerDeps())(operation: ApiGatewayRequest => all#ImpureFunctionsFailableOp[Unit])(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
-    val failableZhttp: FailableOp[HttpAndConfig[Config]] =
-      for {
-        rawEffects <- rawEffects.toFailableOp("load config from s3")
-        _ = logger.info(s"${this.getClass} Lambda is starting up in ${rawEffects.stage}")
-        config <- deps.parseConfig(rawEffects.config).toFailableOp("load config")
-      } yield HttpAndConfig(rawEffects.response, rawEffects.stage, config)
-    val jsonString = Source.fromInputStream(inputStream).mkString
-    logger.info(s"payload from api gateway is: $jsonString")
+  case class StageAndConfigHttp(response: Request => Response, config: Config)
+
+  def apply(rawEffects: RawEffects, deps: HandlerDeps = HandlerDeps())(operation: ApiGatewayRequest => WithDeps[StageAndConfigHttp]#FailableOp[Unit])(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
+
     val response = for {
-      stateHttp <- failableZhttp
-      apiGatewayRequest <- Json.parse(jsonString).validate[ApiGatewayRequest].toFailableOp
-      auth <- authenticateCallout(apiGatewayRequest.requestAuth, stateHttp.config.trustedApiConfig)
-      _ = logger.info("Authenticated request successfully...")
-      _ = logger.info(s"Body from Zuora was: ${apiGatewayRequest.body}")
-      _ <- operation(apiGatewayRequest).run.run(stateHttp)
+      config <- loadConfig(rawEffects, deps)
+      apiGatewayRequest <- parseApiGatewayRequest(inputStream)
+      _ <- authenticateCallout(apiGatewayRequest.requestAuth, config.trustedApiConfig).withLogging("authentication")
+      _ <- operation(apiGatewayRequest).run.run(StageAndConfigHttp(rawEffects.response, config))
     } yield ()
+
     outputForAPIGateway(outputStream, response.fold(identity, _ => successfulExecution))
+
+  }
+
+  def loadConfig(rawEffects: RawEffects, deps: HandlerDeps = HandlerDeps()) = {
+    val stage = rawEffects.stage()
+    logger.info(s"${this.getClass} Lambda is starting up in $stage")
+
+    for {
+
+      textConfig <- rawEffects.s3Load(stage).toFailableOp("load config from s3")
+      config <- deps.parseConfig(textConfig).toFailableOp("parse config file")
+      _ <- if (stage == config.stage) { \/-(()) } else { -\/(ApiGatewayResponse.internalServerError(s"running in $stage with config from ${config.stage}")) }
+
+    } yield config
+  }
+
+  def parseApiGatewayRequest(inputStream: InputStream) = {
+    for {
+
+      jsonString <- inputFromApiGateway(inputStream).toFailableOp("get json data from API gateway")
+      _ = logger.info(s"payload from api gateway is: $jsonString")
+      apiGatewayRequest <- Json.parse(jsonString).validate[ApiGatewayRequest].toFailableOp
+      _ = logger.info(s"Body from Zuora was: ${apiGatewayRequest.body}")
+
+    } yield apiGatewayRequest
+  }
+
+  private def inputFromApiGateway(inputStream: InputStream) = {
+    Try {
+      Source.fromInputStream(inputStream).mkString
+    }
   }
 
   def authenticateCallout(requestAuth: Option[RequestAuth], trustedApiConfig: TrustedApiConfig): ApiResponse \/ Unit = {
     if (credentialsAreValid(requestAuth, trustedApiConfig)) \/-(()) else -\/(unauthorized)
   }
-
-  def validateTenantCallout(calloutTenantId: String): all#ImpureFunctionsFailableOp[Unit] = ImpureFunctionsFailableOp(Reader({ configHttp =>
-    val trustedApiConfig: TrustedApiConfig = configHttp.config.trustedApiConfig
-    if (validTenant(trustedApiConfig, calloutTenantId)) \/-(()) else -\/(unauthorized)
-  }))
 
 }
