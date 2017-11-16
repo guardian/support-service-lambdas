@@ -40,7 +40,7 @@ class ZuoraRestServiceTest extends AsyncFlatSpec {
   val validUpdateSubscriptionResult = Json.parse(
     """{
       |  "success": true,
-      |  "subscriptionId": "id123"
+      |  "id": "id123", "balance": 1.2
       |}""".stripMargin
   )
 
@@ -72,25 +72,31 @@ class ZuoraRestServiceTest extends AsyncFlatSpec {
 
   "convertResponseToCaseClass" should "return a left[String] for an unsuccessful response code" in {
     val response = constructTestResponse(500)
-    val either = ZuoraRestRequestMaker.convertResponseToCaseClass[UpdateSubscriptionResult](response)
+    val either = ZuoraRestRequestMaker.convertResponseToCaseClass[Unit](response)
     assert(either == -\/(internalServerError("Request to Zuora was unsuccessful")))
   }
 
   it should "return a left[String] if the body of a successful response cannot be de-serialized" in {
     val response = constructTestResponse(200)
-    val either = ZuoraRestRequestMaker.convertResponseToCaseClass[UpdateSubscriptionResult](response)
+    val either = ZuoraRestRequestMaker.convertResponseToCaseClass[Unit](response)
     assert(either == -\/(internalServerError("Error when converting Zuora response to case class")))
   }
 
   it should "return a right[T] if the body of a successful response deserializes to T" in {
     val response = constructTestResponse(200, validUpdateSubscriptionResult)
-    val either = ZuoraRestRequestMaker.convertResponseToCaseClass[UpdateSubscriptionResult](response)
-    assert(either == \/-(UpdateSubscriptionResult("id123")))
+    val either = ZuoraRestRequestMaker.convertResponseToCaseClass[BasicAccountInfo](response)
+    assert(either == \/-(BasicAccountInfo(id = "id123", balance = 1.2)))
+  }
+
+  it should "return a right[Unit] if the body of a successful response deserializes to Unit" in {
+    val response = constructTestResponse(200, validUpdateSubscriptionResult)
+    val either = ZuoraRestRequestMaker.convertResponseToCaseClass[Unit](response)
+    assert(either == \/-(()))
   }
 
   it should "return a left[String] if the body of a successful http response has a zuora failed in it" in {
     val response = constructTestResponse(200, validFailedUpdateSubscriptionResult)
-    val either = ZuoraRestRequestMaker.convertResponseToCaseClass[UpdateSubscriptionResult](response)
+    val either = ZuoraRestRequestMaker.convertResponseToCaseClass[Unit](response)
     assert(either == -\/(internalServerError("Received failure result from Zuora during autoCancellation")))
   }
 

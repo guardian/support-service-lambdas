@@ -23,12 +23,6 @@ object ZuoraModels {
 
   case class InvoiceTransactionSummary(invoices: List[ItemisedInvoice])
 
-  case class CancelSubscriptionResult(cancelledDate: LocalDate)
-
-  case class UpdateSubscriptionResult(subscriptionId: String)
-
-  case class UpdateAccountResult()
-
   case class SubscriptionCancellation(cancellationEffectiveDate: LocalDate)
 
   case class SubscriptionUpdate(cancellationReason: String)
@@ -89,13 +83,8 @@ object ZuoraReaders {
       invoices => InvoiceTransactionSummary(invoices)
     }
 
-  implicit val cancelSubscriptionResultReads: Reads[CancelSubscriptionResult] =
-    (JsPath \ "cancelledDate").read[LocalDate].map(CancelSubscriptionResult.apply)
-
-  implicit val updateSubscriptionResultReads: Reads[UpdateSubscriptionResult] =
-    (JsPath \ "subscriptionId").read[String].map(UpdateSubscriptionResult.apply)
-
-  implicit val updateAccountResultReads: Reads[UpdateAccountResult] = Reads(_ => JsSuccess(UpdateAccountResult()))
+  implicit val unitReads: Reads[Unit] =
+    Reads(_ => JsSuccess(()))
 
   implicit val zuoraCommonFieldsReads: Reads[ZuoraCommonFields] = (JsPath \ "success").read[Boolean].map {
     success => ZuoraCommonFields(success)

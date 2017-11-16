@@ -23,7 +23,7 @@ object ZuoraRestRequestMaker extends Logging {
           bodyAsJson.validate[T] match {
             case success: JsSuccess[T] => success.get.right
             case error: JsError => {
-              logger.info(s"Failed to convert Zuora response to case case. Response body was: \n ${bodyAsJson}")
+              logger.info(s"Failed to convert Zuora response to case case 1 $error. Response body was: \n ${bodyAsJson}")
               internalServerError("Error when converting Zuora response to case class").left
             }
           }
@@ -31,7 +31,7 @@ object ZuoraRestRequestMaker extends Logging {
           logger.error(s"Zuora rejected our call $bodyAsJson")
           internalServerError("Received failure result from Zuora during autoCancellation").left
         case error: JsError => {
-          logger.info(s"Failed to convert Zuora response to case case. Response body was: \n ${bodyAsJson}")
+          logger.info(s"Failed to convert Zuora response to case case 2 $error. Response body was: \n ${bodyAsJson}")
           internalServerError("Error when converting Zuora response to case class").left
         }
       }

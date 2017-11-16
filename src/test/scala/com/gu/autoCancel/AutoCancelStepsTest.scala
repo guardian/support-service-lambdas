@@ -1,16 +1,16 @@
 package com.gu.autoCancel
 
-import com.gu.autoCancel.AutoCancel.ACDeps
 import com.gu.autoCancel.AutoCancelFilter2.ACFilterDeps
 import com.gu.effects.RawEffects
 import com.gu.util.ETConfig.ETSendKeysForAttempt
 import com.gu.util.apigateway.ApiGatewayHandler.StageAndConfigHttp
 import com.gu.util.apigateway.{ ApiGatewayRequest, URLParams }
 import com.gu.util.reader.Types._
-import com.gu.util.zuora.Zuora.DisableAutoPay
 import com.gu.util.zuora.ZuoraModels._
 import com.gu.util.{ Config, ETConfig, TrustedApiConfig, ZuoraRestConfig }
 import okhttp3._
+import okhttp3.internal.Util.UTF_8
+import okio.Buffer
 import org.joda.time.LocalDate
 import org.scalatest._
 
@@ -38,44 +38,41 @@ class AutoCancelStepsTest extends FlatSpec with Matchers {
       doAutoCancel = doAutoCancel,
       getAccountSummary = _ => WithDependenciesFailableOp.liftT(AccountSummary(basicInfo, List(subscription), List(singleOverdueInvoice)))
     )
-    AutoCancelSteps(aCDeps)(fakeRequest).run.run(new TestingRawEffects(false).configHttp)
+    AutoCancelSteps(aCDeps)(fakeRequest).run.run(new TestingRawEffects(false, 1).configHttp)
 
     doAutoCancelAccountId should be(Some("AID"))
   }
 
   "auto cancel" should "turn off auto pay" in {
-    var disableAutoPayAccountId: Option[String] = None
-    def disableAutoPay: DisableAutoPay = { accountId =>
-      disableAutoPayAccountId = Some(accountId)
-      WithDependenciesFailableOp.liftT(UpdateAccountResult())
-    }
+    val effects = new TestingRawEffects(false, 200)
     val autoCancelJson =
       """
         |{"accountId": "AID", "autoPay": "true", "paymentMethodType": "GoldBars"}
       """.stripMargin // should probaly base on a real payload
     val fakeRequest = ApiGatewayRequest(Some(URLParams(None, None, Some("false"))), autoCancelJson)
-    val aCDeps = ACDeps(
-      disableAutoPay = disableAutoPay,
-      updateCancellationReason = _ => WithDependenciesFailableOp.liftT(UpdateSubscriptionResult("subid")),
-      cancelSubscription = (_, _) => WithDependenciesFailableOp.liftT(CancelSubscriptionResult(LocalDate.now))
-    )
-    AutoCancel(aCDeps)("AID", SubscriptionId("subid"), LocalDate.now).run.run(new TestingRawEffects(false).configHttp)
+    AutoCancel("AID", SubscriptionId("subid"), LocalDate.now).run.run(effects.configHttp)
 
-    disableAutoPayAccountId should be(Some("AID"))
+    effects.result.map { request =>
+      val buffer = new Buffer()
+      request.body().writeTo(buffer)
+      val body = buffer.readString(UTF_8)
+      val url = request.url
+      (request.method(), url.encodedPath(), body)
+    } should contain(("PUT", "/accounts/AID", "{\"autoPay\":false}"))
   }
 
 }
 
-class TestingRawEffects(val isProd: Boolean) {
+class TestingRawEffects(val isProd: Boolean, val code: Int) {
 
-  var result: Option[Request] = None // !
+  var result: List[Request] = Nil // !
 
   val stage = if (isProd) "PROD" else "DEV"
 
   def response: Request => Response = {
     req =>
-      result = Some(req)
-      new Response.Builder().request(req).protocol(Protocol.HTTP_1_1).code(1).body(ResponseBody.create(MediaType.parse("text/plain"), "body result test")).build()
+      result = req :: result
+      new Response.Builder().request(req).protocol(Protocol.HTTP_1_1).code(code).body(ResponseBody.create(MediaType.parse("text/plain"), """{"success": true}""")).build()
   }
 
   val rawEffects = RawEffects(response, () => stage, _ => Success(""))

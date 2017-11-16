@@ -152,7 +152,7 @@ class PaymentFailureHandlerTest extends FlatSpec {
   val fakeConfig = Config("DEV", fakeApiConfig, zuoraRestConfig = ZuoraRestConfig("https://ddd", "e@f.com", "ggg"),
     etConfig = ETConfig(stageETIDForAttempt = ETSendKeysForAttempt(Map(0 -> "h")), clientId = "jjj", clientSecret = "kkk"))
 
-  val lambdaConfig = new TestingRawEffects(false).rawEffects
+  val lambdaConfig = new TestingRawEffects(false, 1).rawEffects
   def basicOp(fakeInvoiceTransactionSummary: InvoiceTransactionSummary = basicInvoiceTransactionSummary) = PaymentFailureSteps.apply(PFDeps(req =>
     (-\/(ApiGatewayResponse.internalServerError("something failed!")): FailableOp[Unit]).toReader[ETS], _ => WithDependenciesFailableOp.liftT(fakeInvoiceTransactionSummary)))_
 

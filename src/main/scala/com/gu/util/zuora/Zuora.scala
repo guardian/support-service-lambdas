@@ -20,19 +20,17 @@ object Zuora {
   def getInvoiceTransactions: GetInvoiceTransactions = (accountId: String) =>
     get[InvoiceTransactionSummary](s"transactions/invoices/accounts/$accountId")
 
-  type CancelSubscription = (SubscriptionId, LocalDate) => WithDepsFailableOp[StageAndConfigHttp, CancelSubscriptionResult]
+  type CancelSubscription = (SubscriptionId, LocalDate) => WithDepsFailableOp[StageAndConfigHttp, Unit]
 
-  def cancelSubscription(subscription: SubscriptionId, cancellationDate: LocalDate): WithDepsFailableOp[StageAndConfigHttp, CancelSubscriptionResult] =
+  def cancelSubscription(subscription: SubscriptionId, cancellationDate: LocalDate): WithDepsFailableOp[StageAndConfigHttp, Unit] =
     put(SubscriptionCancellation(cancellationDate), s"subscriptions/${subscription.id}/cancel")
 
-  type UpdateCancellationReason = SubscriptionId => WithDepsFailableOp[StageAndConfigHttp, UpdateSubscriptionResult]
+  type UpdateCancellationReason = SubscriptionId => WithDepsFailableOp[StageAndConfigHttp, Unit]
 
-  def updateCancellationReason(subscription: SubscriptionId): WithDepsFailableOp[StageAndConfigHttp, UpdateSubscriptionResult] =
+  def updateCancellationReason(subscription: SubscriptionId): WithDepsFailableOp[StageAndConfigHttp, Unit] =
     put(SubscriptionUpdate("System AutoCancel"), s"subscriptions/${subscription.id}")
 
-  type DisableAutoPay = String => WithDepsFailableOp[StageAndConfigHttp, UpdateAccountResult]
-
-  def disableAutoPay(accountId: String): WithDepsFailableOp[StageAndConfigHttp, UpdateAccountResult] =
+  def disableAutoPay(accountId: String): WithDepsFailableOp[StageAndConfigHttp, Unit] =
     put(AccountUpdate(autoPay = false), s"accounts/$accountId")
 
 }
