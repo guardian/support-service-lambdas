@@ -38,7 +38,7 @@ object ApiGatewayHandler extends Logging {
 
   }
 
-  def loadConfig(rawEffects: RawEffects, deps: HandlerDeps = HandlerDeps()) = {
+  def loadConfig(rawEffects: RawEffects, deps: HandlerDeps = HandlerDeps()): FailableOp[Config] = {
     val stage = rawEffects.stage()
     logger.info(s"${this.getClass} Lambda is starting up in $stage")
 
@@ -51,13 +51,11 @@ object ApiGatewayHandler extends Logging {
     } yield config
   }
 
-  def parseApiGatewayRequest(inputStream: InputStream) = {
+  def parseApiGatewayRequest(inputStream: InputStream): FailableOp[ApiGatewayRequest] = {
     for {
 
-      jsonString <- inputFromApiGateway(inputStream).toFailableOp("get json data from API gateway")
-      _ = logger.info(s"payload from api gateway is: $jsonString")
-      apiGatewayRequest <- Json.parse(jsonString).validate[ApiGatewayRequest].toFailableOp
-      _ = logger.info(s"Body from Zuora was: ${apiGatewayRequest.body}")
+      jsonString <- inputFromApiGateway(inputStream).toFailableOp("get json data from API gateway").withLogging("payload from api gateway")
+      apiGatewayRequest <- Json.parse(jsonString).validate[ApiGatewayRequest].toFailableOp.withLogging("parsed api gateway object")
 
     } yield apiGatewayRequest
   }

@@ -7,14 +7,14 @@ import org.scalatest._
 
 import scalaz.{ -\/, \/- }
 
-class AutoCancelTest extends FlatSpec {
+class AutoCancelFilter2Test extends FlatSpec {
 
-  import AutoCancel._
+  import AutoCancelFilter2._
 
   val basicInfo = BasicAccountInfo("id123", 11.99)
-  val subscription = SubscriptionSummary("id123", "A-S123", "Active")
-  val twoSubscriptions = List(SubscriptionSummary("id123", "A-S123", "Active"), SubscriptionSummary("id321", "A-S321", "Active"))
-  val inactiveSubscriptions = List(SubscriptionSummary("id456", "A-S123", "Cancelled"), SubscriptionSummary("id789", "A-S321", "Expired"))
+  val subscription = SubscriptionSummary(SubscriptionId("id123"), "A-S123", "Active")
+  val twoSubscriptions = List(SubscriptionSummary(SubscriptionId("id123"), "A-S123", "Active"), SubscriptionSummary(SubscriptionId("id321"), "A-S321", "Active"))
+  val inactiveSubscriptions = List(SubscriptionSummary(SubscriptionId("id456"), "A-S123", "Cancelled"), SubscriptionSummary(SubscriptionId("id789"), "A-S321", "Expired"))
   val invoiceNotPosted = Invoice("inv123", LocalDate.now.minusDays(5), 11.99, "Cancelled")
   val invoiceZeroBalance = Invoice("inv123", LocalDate.now.minusDays(1), 0.00, "Posted")
   val invoiceNotDue = Invoice("inv123", LocalDate.now.minusDays(3), 11.99, "Posted")
@@ -74,7 +74,7 @@ class AutoCancelTest extends FlatSpec {
   "getSubscriptionToCancel" should "return a right[Subscription] if there is exactly one active sub on the account summary" in {
     val accountSummaryWithSingleSub = AccountSummary(basicInfo, List(subscription), List(invoiceNotDue))
     val either = getSubscriptionToCancel(accountSummaryWithSingleSub)
-    assert(either == \/-(subscription))
+    assert(either == \/-(subscription.id))
   }
 
 }

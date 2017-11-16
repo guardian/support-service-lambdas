@@ -9,7 +9,9 @@ object ZuoraModels {
 
   case class BasicAccountInfo(id: String, balance: Double)
 
-  case class SubscriptionSummary(id: String, subscriptionNumber: String, status: String)
+  case class SubscriptionSummary(id: SubscriptionId, subscriptionNumber: String, status: String)
+
+  case class SubscriptionId(id: String) extends AnyVal
 
   case class Invoice(id: String, dueDate: LocalDate, balance: Double, status: String)
 
@@ -45,7 +47,7 @@ object ZuoraReaders {
   )(BasicAccountInfo.apply _)
 
   implicit val subscriptionSummaryReads: Reads[SubscriptionSummary] = (
-    (JsPath \ "id").read[String] and
+    (JsPath \ "id").read[String].map(SubscriptionId.apply) and
     (JsPath \ "subscriptionNumber").read[String] and
     (JsPath \ "status").read[String]
   )(SubscriptionSummary.apply _)

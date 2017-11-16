@@ -1,15 +1,16 @@
 package com.gu.autoCancel
 
+import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayResponse.noActionRequired
 import com.gu.util.reader.Types.FailableOp
 
 import scalaz.{ -\/, \/- }
 
-object AutoCancelFilter {
+object AutoCancelFilter extends Logging {
   def apply(callout: AutoCancelCallout, onlyCancelDirectDebit: Boolean): FailableOp[Unit] = {
     for {
-      _ <- filterAutoPay(callout)
-      _ <- filterDirectDebit(onlyCancelDirectDebit = onlyCancelDirectDebit, nonDirectDebit = callout.nonDirectDebit)
+      _ <- filterAutoPay(callout).withLogging("filter on auto pay")
+      _ <- filterDirectDebit(onlyCancelDirectDebit = onlyCancelDirectDebit, nonDirectDebit = callout.nonDirectDebit).withLogging("filter on direct debit")
     } yield ()
   }
 
