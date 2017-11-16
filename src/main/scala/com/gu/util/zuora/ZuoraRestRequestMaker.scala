@@ -2,7 +2,7 @@ package com.gu.util.zuora
 
 import com.gu.util.apigateway.ApiGatewayResponse._
 import com.gu.util.apigateway.ResponseModels.ApiResponse
-import com.gu.util.reader.Types.{ ConfigHttpFailableOp, ConfigHttpReader }
+import com.gu.util.reader.Types.all
 import com.gu.util.zuora.ZuoraModels._
 import com.gu.util.zuora.ZuoraReaders._
 import com.gu.util.{ Logging, ZuoraRestConfig }
@@ -41,14 +41,14 @@ object ZuoraRestRequestMaker extends Logging {
     }
   }
 
-  def get[RESP](path: String)(implicit r: Reads[RESP]): ConfigHttpFailableOp[RESP] = EitherT[ConfigHttpReader, ApiResponse, RESP](Reader { configHttp =>
+  def get[RESP](path: String)(implicit r: Reads[RESP]): all#ImpureFunctionsFailableOp[RESP] = EitherT[all#ImpureFunctionsReader, ApiResponse, RESP](Reader { configHttp =>
     val request = buildRequest(configHttp.config.zuoraRestConfig)(path).get().build()
     logger.info(s"Getting $path from Zuora")
     val response = configHttp.response(request)
     convertResponseToCaseClass[RESP](response)
   })
 
-  def put[REQ, RESP](req: REQ, path: String)(implicit tjs: Writes[REQ], r: Reads[RESP]): ConfigHttpFailableOp[RESP] = EitherT[ConfigHttpReader, ApiResponse, RESP](Reader { configHttp =>
+  def put[REQ, RESP](req: REQ, path: String)(implicit tjs: Writes[REQ], r: Reads[RESP]): all#ImpureFunctionsFailableOp[RESP] = EitherT[all#ImpureFunctionsReader, ApiResponse, RESP](Reader { configHttp =>
     val body = RequestBody.create(MediaType.parse("application/json"), Json.toJson(req).toString)
     val request = buildRequest(configHttp.config.zuoraRestConfig)(path).put(body).build()
     logger.info(s"Attempting to $path with the following command: $req")

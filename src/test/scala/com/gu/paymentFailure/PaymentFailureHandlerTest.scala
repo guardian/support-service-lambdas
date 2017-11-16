@@ -2,6 +2,7 @@ package com.gu.paymentFailure
 
 import java.io.ByteArrayOutputStream
 
+import com.gu.autoCancel.TestingRawEffects
 import com.gu.paymentFailure.PaymentFailureSteps.PFDeps
 import com.gu.util.ETConfig.ETSendKeysForAttempt
 import com.gu.util._
@@ -10,7 +11,8 @@ import com.gu.util.apigateway.ApiGatewayResponse.unauthorized
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.apigateway.{ ApiGatewayHandler, ApiGatewayResponse }
 import com.gu.util.exacttarget._
-import com.gu.util.reader.Types.{ ConfigHttpFailableOp, ConfigHttpReader }
+import com.gu.util.reader.Types
+import com.gu.util.reader.Types._
 import com.gu.util.zuora.ZuoraModels._
 import org.joda.time.LocalDate
 import org.scalatest.FlatSpec
@@ -88,8 +90,8 @@ class PaymentFailureHandlerTest extends FlatSpec {
     ApiGatewayHandler(lambdaConfig, HandlerDeps(_ => Success(fakeConfig)))({
       PaymentFailureSteps.apply(PFDeps(req => {
         storedReq = Some(req)
-        EitherT[ConfigHttpReader, ApiResponse, Unit](Reader { configHttp => \/-(()) })
-      }, _ => ConfigHttpFailableOp.lift(basicInvoiceTransactionSummary)))
+        EitherT[et#ImpureFunctionsReader, ApiResponse, Unit](Reader { configHttp => \/-(()) })
+      }, _ => ImpureFunctionsFailableOp.lift(basicInvoiceTransactionSummary)))
     })(stream, os, null)
 
     //verify
@@ -153,7 +155,7 @@ class PaymentFailureHandlerTest extends FlatSpec {
 
   val lambdaConfig = new TestingRawEffects(false).rawEffects
   def basicOp(fakeInvoiceTransactionSummary: InvoiceTransactionSummary = basicInvoiceTransactionSummary) = PaymentFailureSteps.apply(PFDeps(req =>
-    EitherT[ConfigHttpReader, ApiResponse, Unit](Reader { configHttp => -\/(ApiGatewayResponse.internalServerError("something failed!")) }), _ => ConfigHttpFailableOp.lift(fakeInvoiceTransactionSummary)))_
+    EitherT[et#ImpureFunctionsReader, ApiResponse, Unit](Reader { configHttp => -\/(ApiGatewayResponse.internalServerError("something failed!")) }), _ => ImpureFunctionsFailableOp.lift(fakeInvoiceTransactionSummary)))_
 
   "lambda" should "return error if message can't be queued" in {
     //set up
@@ -167,8 +169,8 @@ class PaymentFailureHandlerTest extends FlatSpec {
     ApiGatewayHandler(lambdaConfig, HandlerDeps(_ => Success(fakeConfig))) {
       PaymentFailureSteps.apply(PFDeps(req => {
         storedReq = Some(req)
-        EitherT[ConfigHttpReader, ApiResponse, Unit](Reader { configHttp => -\/(ApiGatewayResponse.internalServerError("something failed!")) })
-      }, _ => ConfigHttpFailableOp.lift(basicInvoiceTransactionSummary)))
+        EitherT[et#ImpureFunctionsReader, ApiResponse, Unit](Reader { configHttp => -\/(ApiGatewayResponse.internalServerError("something failed!")) })
+      }, _ => ImpureFunctionsFailableOp.lift(basicInvoiceTransactionSummary)))
     }(stream, os, null)
 
     //verify
@@ -177,7 +179,7 @@ class PaymentFailureHandlerTest extends FlatSpec {
 
     val responseString = new String(os.toByteArray(), "UTF-8")
 
-    val expectedResponse = s"""{"statusCode":"500","headers":{"Content-Type":"application/json"},"body":"failed to enqueue message for account $accountId"} """
+    val expectedResponse = s"""{"statusCode":"500","headers":{"Content-Type":"application/json"},"body":"email not sent for account $accountId"} """
     responseString jsonMatches expectedResponse
   }
 

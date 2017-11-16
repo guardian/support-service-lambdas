@@ -2,7 +2,7 @@ package com.gu.effects
 
 import java.util.concurrent.TimeUnit
 
-import com.gu.util.reader.Types.ConfigHttpGen
+import com.gu.util.reader.Types.HttpAndConfig
 import okhttp3.{ OkHttpClient, Request, Response }
 
 object RawEffects {
@@ -20,7 +20,7 @@ object RawEffects {
   def default = {
     val stage = System.getenv("Stage")
     ConfigLoad.load(stage) map { config =>
-      ConfigHttpGen[String](response, stage, config)
+      HttpAndConfig[String](response, stage, config)
     }
   }
 

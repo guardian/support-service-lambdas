@@ -42,7 +42,7 @@ object EmailClientSystemTest extends App {
   val emailResult = configAttempt.flatMap {
     config =>
       HandlerDeps().parseConfig(config).map { config =>
-        ConfigHttpGen(RawEffects.response, "CODE", config)
+        HttpAndConfig(RawEffects.response, "CODE", config.etConfig)
       }
   }.map {
     service =>

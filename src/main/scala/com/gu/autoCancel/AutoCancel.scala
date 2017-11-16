@@ -3,7 +3,7 @@ package com.gu.autoCancel
 import com.github.nscala_time.time.OrderingImplicits._
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayResponse.noActionRequired
-import com.gu.util.reader.Types.{ ConfigHttpFailableOp, FailableOp, _ }
+import com.gu.util.reader.Types.{ FailableOp, _ }
 import com.gu.util.zuora.Zuora
 import com.gu.util.zuora.Zuora.{ CancelSubscription, DisableAutoPay, GetAccountSummary, UpdateCancellationReason }
 import com.gu.util.zuora.ZuoraModels.{ AccountSummary, Invoice, SubscriptionSummary }
@@ -20,7 +20,7 @@ object AutoCancel extends Logging {
     disableAutoPay: DisableAutoPay = Zuora.disableAutoPay
   )
 
-  def apply(date: LocalDate, autoCancelCallout: AutoCancelCallout, deps: ACDeps = ACDeps()): ConfigHttpFailableOp[Unit] = {
+  def apply(date: LocalDate, autoCancelCallout: AutoCancelCallout, deps: ACDeps = ACDeps()): all#ImpureFunctionsFailableOp[Unit] = {
     val accountId = autoCancelCallout.accountId
     logger.info(s"Attempting to perform auto-cancellation on account: $accountId")
     for {

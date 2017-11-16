@@ -1,6 +1,6 @@
 package com.gu.util
 
-import com.gu.util.reader.Types.ConfigHttpFailableOp
+import com.gu.util.reader.Types.{ ExternalEffects, ImpureFunctionsFailableOp }
 import org.apache.log4j.Logger
 
 import scalaz.{ -\/, \/- }
@@ -9,11 +9,11 @@ trait Logging {
 
   val logger = Logger.getLogger(getClass.getName)
 
-  implicit class LogImplicit[A](configHttpFailableOp: ConfigHttpFailableOp[A]) {
+  implicit class LogImplicit[A, D](configHttpFailableOp: ExternalEffects[D]#ImpureFunctionsFailableOp[A]) {
 
-    def withLogging(message: String): ConfigHttpFailableOp[A] = {
+    def withLogging(message: String): ExternalEffects[D]#ImpureFunctionsFailableOp[A] = {
 
-      ConfigHttpFailableOp(configHttpFailableOp.run map {
+      ImpureFunctionsFailableOp(configHttpFailableOp.run map {
         case \/-(success) =>
           logger.info(s"$message: Successfully with value: $success")
           \/-(success)

@@ -21,13 +21,13 @@ object ApiGatewayHandler extends Logging {
     parseConfig: String => Try[Config] = Config.parseConfig
   )
 
-  def apply(rawEffects: Try[RawEffects], deps: HandlerDeps = HandlerDeps())(operation: ApiGatewayRequest => ConfigHttpFailableOp[Unit])(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
-    val failableZhttp: FailableOp[ConfigHttp] =
+  def apply(rawEffects: Try[HttpAndConfig[String]], deps: HandlerDeps = HandlerDeps())(operation: ApiGatewayRequest => all#ImpureFunctionsFailableOp[Unit])(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
+    val failableZhttp: FailableOp[HttpAndConfig[Config]] =
       for {
         rawEffects <- rawEffects.toFailableOp("load config from s3")
         _ = logger.info(s"${this.getClass} Lambda is starting up in ${rawEffects.stage}")
         config <- deps.parseConfig(rawEffects.config).toFailableOp("load config")
-      } yield ConfigHttpGen(rawEffects.response, rawEffects.stage, config)
+      } yield HttpAndConfig(rawEffects.response, rawEffects.stage, config)
     val jsonString = Source.fromInputStream(inputStream).mkString
     logger.info(s"payload from api gateway is: $jsonString")
     val response = for {
@@ -36,7 +36,7 @@ object ApiGatewayHandler extends Logging {
       auth <- authenticateCallout(apiGatewayRequest.requestAuth, stateHttp.config.trustedApiConfig)
       _ = logger.info("Authenticated request successfully...")
       _ = logger.info(s"Body from Zuora was: ${apiGatewayRequest.body}")
-      _ <- operation(apiGatewayRequest).run(stateHttp)
+      _ <- operation(apiGatewayRequest).run.run(stateHttp)
     } yield ()
     outputForAPIGateway(outputStream, response.fold(identity, _ => successfulExecution))
   }
@@ -45,7 +45,7 @@ object ApiGatewayHandler extends Logging {
     if (credentialsAreValid(requestAuth, trustedApiConfig)) \/-(()) else -\/(unauthorized)
   }
 
-  def validateTenantCallout(calloutTenantId: String): ConfigHttpFailableOp[Unit] = ConfigHttpFailableOp(Reader({ configHttp: ConfigHttp =>
+  def validateTenantCallout(calloutTenantId: String): all#ImpureFunctionsFailableOp[Unit] = ImpureFunctionsFailableOp(Reader({ configHttp =>
     val trustedApiConfig: TrustedApiConfig = configHttp.config.trustedApiConfig
     if (validTenant(trustedApiConfig, calloutTenantId)) \/-(()) else -\/(unauthorized)
   }))

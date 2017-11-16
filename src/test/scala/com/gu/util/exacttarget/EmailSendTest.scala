@@ -1,9 +1,9 @@
 package com.gu.util.exacttarget
 
+import com.gu.util.ETConfig
 import com.gu.util.ETConfig.ETSendKeysForAttempt
 import com.gu.util.exacttarget.EmailSend.HUDeps
-import com.gu.util.reader.Types.{ ConfigHttpFailableOp, ConfigHttpGen }
-import com.gu.util.{ Config, ETConfig, TrustedApiConfig, ZuoraRestConfig }
+import com.gu.util.reader.Types._
 import okhttp3._
 import org.scalatest.{ FlatSpec, Matchers }
 
@@ -47,8 +47,8 @@ class EmailSendTest extends FlatSpec with Matchers {
       .post(RequestBody.create(MediaType.parse("text/plain"), s"$attempt"))
 
     val req = EmailRequest(1, makeMessage(email))
-    var env = new TestingRawEffects(isProd)
-    EmailSend(HUDeps(attempt => ConfigHttpFailableOp.lift(requestBuilder(attempt))))(req).run.run(env.configHttp)
+    var env = new TestingRawEffectsET(isProd)
+    EmailSend(HUDeps(attempt => ImpureFunctionsFailableOp.lift(requestBuilder(attempt))))(req).run.run(env.configHttp)
 
     env.result.map(_.url.host) should be(if (expectedEmail) Some("1") else None)
   }
@@ -62,7 +62,7 @@ class EmailSendTest extends FlatSpec with Matchers {
 
 }
 
-class TestingRawEffects(val isProd: Boolean) {
+class TestingRawEffectsET(val isProd: Boolean) {
 
   var result: Option[Request] = None // !
 
@@ -75,11 +75,10 @@ class TestingRawEffects(val isProd: Boolean) {
   }
 
   val rawEffects =
-    Success(ConfigHttpGen(response, stage, ""))
+    Success(HttpAndConfig(response, stage, ""))
 
-  val fakeConfig = Config(TrustedApiConfig("a", "b", "c"), zuoraRestConfig = ZuoraRestConfig("https://ddd", "e@f.com", "ggg"),
-    etConfig = ETConfig(stageETIDForAttempt = ETSendKeysForAttempt(Map(0 -> "h")), clientId = "jjj", clientSecret = "kkk"))
+  val fakeETConfig = ETConfig(stageETIDForAttempt = ETSendKeysForAttempt(Map(0 -> "h")), clientId = "jjj", clientSecret = "kkk")
 
-  val configHttp = ConfigHttpGen(response, stage, fakeConfig)
+  val configHttp = HttpAndConfig(response, stage, fakeETConfig)
 
 }
