@@ -42,7 +42,7 @@ object ZuoraRestRequestMaker extends Logging {
     }
   }
 
-  def get[RESP](path: String)(implicit r: Reads[RESP]): WithDeps[StageAndConfigHttp]#FailableOp[RESP] =
+  def get[RESP](path: String)(implicit r: Reads[RESP]): WithDepsFailableOp[StageAndConfigHttp, RESP] =
     Reader { stageAndConfigHttp: StageAndConfigHttp =>
       val request = buildRequest(stageAndConfigHttp.config.zuoraRestConfig)(path).get().build()
       logger.info(s"Getting $path from Zuora")
@@ -50,7 +50,7 @@ object ZuoraRestRequestMaker extends Logging {
       convertResponseToCaseClass[RESP](response)
     }.toDepsFailableOp
 
-  def put[REQ, RESP](req: REQ, path: String)(implicit tjs: Writes[REQ], r: Reads[RESP]): WithDeps[StageAndConfigHttp]#FailableOp[RESP] =
+  def put[REQ, RESP](req: REQ, path: String)(implicit tjs: Writes[REQ], r: Reads[RESP]): WithDepsFailableOp[StageAndConfigHttp, RESP] =
     Reader { stageAndConfigHttp: StageAndConfigHttp =>
       val body = RequestBody.create(MediaType.parse("application/json"), Json.toJson(req).toString)
       val request = buildRequest(stageAndConfigHttp.config.zuoraRestConfig)(path).put(body).build()

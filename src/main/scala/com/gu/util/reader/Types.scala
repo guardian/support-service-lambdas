@@ -10,22 +10,19 @@ import scalaz.{ -\/, EitherT, Reader, \/, \/- }
 object Types {
 
   type FailableOp[A] = ApiResponse \/ A
-
-  // unfortunately the trait is needed for the monad transformer to provide a context for the state type I
-  // since the EitherT type constructor first argument is specifically a higher kinded type with arity one but Reader has arity two
-  // see pages such as https://meta.plasm.us/posts/2015/07/11/roll-your-own-scala/
-  // this leaves us with a kind of curried type constructor
-  trait WithDeps[I] {
-    type XReader[A] = Reader[I, A] // needed becuase EitherT first type param is a single arity
-    type FailableOp[A] = EitherT[XReader, ApiResponse, A]
-  }
+  // EitherT's first type parameter is a higher kinded type with single arity
+  // unfortunately we want to stack a reader into it, which takes two type parameters
+  // we can get around this by using a type lambda to define a new anonymous type constructor with 1 arity (the other parameter comes from outside)
+  // it looks messy, but if you squint it works
+  // for more reading see https://underscore.io/blog/posts/2016/12/05/type-lambdas.html
+  type WithDepsFailableOp[I, A] = EitherT[({ type XReader[AA] = Reader[I, AA] })#XReader, ApiResponse, A]
 
   // lets us use the Reader .local function through the EitherT
   // this is important to let us have different dependencies for different functions
-  implicit class WithDepsFailableOpOps[A, F](httpFailable: WithDeps[F]#FailableOp[A]) {
+  implicit class WithDepsFailableOpOps[A, F](httpFailable: WithDepsFailableOp[F, A]) {
 
-    def local[I](func: I => F): WithDeps[I]#FailableOp[A] = {
-      EitherT[WithDeps[I]#XReader, ApiResponse, A](httpFailable.run.local[I](func))
+    def local[I](func: I => F): WithDepsFailableOp[I, A] = {
+      httpFailable.run.local[I](func).toDepsFailableOp
     }
 
   }
@@ -33,16 +30,16 @@ object Types {
   // if we use a reader in our code, this lets us put the type massaging for the for comprehension right to the end of the line
   implicit class WithDepsReaderFailableOpOps[R, T](r: Reader[T, FailableOp[R]]) {
 
-    def toDepsFailableOp: WithDeps[T]#FailableOp[R] =
-      EitherT[WithDeps[T]#XReader, ApiResponse, R](r)
+    def toDepsFailableOp: WithDepsFailableOp[T, R] =
+      EitherT.apply[({ type XReader[AA] = Reader[T, AA] })#XReader, ApiResponse, R](r)
 
   }
 
   // if we have a failable op in a for comprehension, this call sits at the end of the line to massage the type
   implicit class FailableOpOps[A](failableOp: FailableOp[A]) {
 
-    def toReader[T]: WithDeps[T]#FailableOp[A] =
-      EitherT[WithDeps[T]#XReader, ApiResponse, A](Reader[T, FailableOp[A]]((_: T) => failableOp))
+    def toReader[T]: WithDepsFailableOp[T, A] =
+      Reader[T, FailableOp[A]]((_: T) => failableOp).toDepsFailableOp
 
   }
 

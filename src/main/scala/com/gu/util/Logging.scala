@@ -1,6 +1,6 @@
 package com.gu.util
 
-import com.gu.util.reader.Types.{ WithDeps, _ }
+import com.gu.util.reader.Types.{ _ }
 import org.apache.log4j.Logger
 
 import scalaz.{ -\/, \/- }
@@ -9,10 +9,10 @@ trait Logging {
 
   val logger = Logger.getLogger(getClass.getName)
 
-  implicit class LogImplicit[A, D](configHttpFailableOp: WithDeps[D]#FailableOp[A]) {
+  implicit class LogImplicit[A, D](configHttpFailableOp: WithDepsFailableOp[D, A]) {
 
     // this is just a handy method to add logging to the end of any for comprehension
-    def withLogging(message: String): WithDeps[D]#FailableOp[A] = {
+    def withLogging(message: String): WithDepsFailableOp[D, A] = {
 
       (configHttpFailableOp.run map {
         _.withLogging(message)

@@ -55,10 +55,10 @@ object EmailSend extends Logging {
   case class ETS(response: (Request => Response), stage: String, etConfig: ETConfig)
 
   case class HUDeps(
-    sendEmail: (Int, Message) => WithDeps[ETS]#FailableOp[Unit] = sendEmail
+    sendEmail: (Int, Message) => WithDepsFailableOp[ETS, Unit] = sendEmail
   )
 
-  type SendEmail = EmailRequest => WithDeps[ETS]#FailableOp[Unit]
+  type SendEmail = EmailRequest => WithDepsFailableOp[ETS, Unit]
 
   def apply(deps: HUDeps = HUDeps()): SendEmail = { request =>
     for {
@@ -80,7 +80,7 @@ object EmailSend extends Logging {
     }
   }
 
-  def sendEmail(attempt: Int, message: Message): WithDeps[ETS]#FailableOp[Unit] = {
+  def sendEmail(attempt: Int, message: Message): WithDepsFailableOp[ETS, Unit] = {
     for {
       auth <- SalesforceAuthenticate().toDepsFailableOp.local[ETS](ets => ETImpure(ets.response, ets.etConfig))
       req <- buildRequestET(attempt).toDepsFailableOp.leftMap(err => ApiGatewayResponse.internalServerError(s"oops todo because: $err")).local[ETS](e => ETReq(e.etConfig, auth))

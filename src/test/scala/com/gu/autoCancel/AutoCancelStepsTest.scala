@@ -70,7 +70,7 @@ class TestingRawEffects(val isProd: Boolean) {
 object WithDependenciesFailableOp {
 
   // lifts any plain value all the way in, usually useful in tests
-  def liftT[R, T](value: R): WithDeps[T]#FailableOp[R] =
+  def liftT[R, T](value: R): WithDepsFailableOp[T, R] =
     \/.right(value).toReader[T]
 
   // lifts any plain value all the way in, usually useful in tests

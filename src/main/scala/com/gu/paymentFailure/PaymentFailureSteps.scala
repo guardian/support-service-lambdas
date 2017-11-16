@@ -19,7 +19,7 @@ object PaymentFailureSteps extends Logging {
     s"accountId: ${callout.accountId}, paymentId: ${callout.paymentId}, failureNumber: ${callout.failureNumber}, paymentMethodType: ${callout.paymentMethodType}, currency: ${callout.currency}"
   }
 
-  def apply(deps: PFDeps = PFDeps())(apiGatewayRequest: ApiGatewayRequest): WithDeps[StageAndConfigHttp]#FailableOp[Unit] = {
+  def apply(deps: PFDeps = PFDeps())(apiGatewayRequest: ApiGatewayRequest): WithDepsFailableOp[StageAndConfigHttp, Unit] = {
     for {
       paymentFailureCallout <- Json.fromJson[PaymentFailureCallout](Json.parse(apiGatewayRequest.body)).toFailableOp.toReader[StageAndConfigHttp]
       _ = logger.info(s"received ${loggableData(paymentFailureCallout)}")

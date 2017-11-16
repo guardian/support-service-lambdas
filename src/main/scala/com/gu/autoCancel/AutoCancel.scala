@@ -21,7 +21,7 @@ object AutoCancel extends Logging {
     disableAutoPay: DisableAutoPay = Zuora.disableAutoPay
   )
 
-  def apply(date: LocalDate, autoCancelCallout: AutoCancelCallout, deps: ACDeps = ACDeps()): WithDeps[StageAndConfigHttp]#FailableOp[Unit] = {
+  def apply(date: LocalDate, autoCancelCallout: AutoCancelCallout, deps: ACDeps = ACDeps()): WithDepsFailableOp[StageAndConfigHttp, Unit] = {
     val accountId = autoCancelCallout.accountId
     logger.info(s"Attempting to perform auto-cancellation on account: $accountId")
     for {

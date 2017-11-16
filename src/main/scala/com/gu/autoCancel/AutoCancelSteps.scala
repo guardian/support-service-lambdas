@@ -10,7 +10,7 @@ import play.api.libs.json.Json
 
 object AutoCancelSteps extends Logging {
 
-  def apply(acDeps: ACDeps = ACDeps())(apiGatewayRequest: ApiGatewayRequest): WithDeps[StageAndConfigHttp]#FailableOp[Unit] = {
+  def apply(acDeps: ACDeps = ACDeps())(apiGatewayRequest: ApiGatewayRequest): WithDepsFailableOp[StageAndConfigHttp, Unit] = {
     for {
       autoCancelCallout <- Json.fromJson[AutoCancelCallout](Json.parse(apiGatewayRequest.body)).toFailableOp.toReader
       _ <- AutoCancelFilter(autoCancelCallout, onlyCancelDirectDebit = apiGatewayRequest.onlyCancelDirectDebit).toReader
