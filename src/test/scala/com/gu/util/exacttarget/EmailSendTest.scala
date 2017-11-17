@@ -1,17 +1,14 @@
 package com.gu.util.exacttarget
 
-import com.gu.autoCancel.WithDependenciesFailableOp
+import com.gu.WithDependenciesFailableOp
 import com.gu.effects.RawEffects
 import com.gu.util.ETConfig
 import com.gu.util.ETConfig.{ ETSendId, ETSendIds }
 import com.gu.util.exacttarget.EmailSend.{ ETS, HUDeps }
-import com.gu.util.exacttarget.SalesforceAuthenticate.SalesforceAuth
-import com.gu.util.reader.Types._
 import okhttp3._
 import org.scalatest.{ FlatSpec, Matchers }
 
 import scala.util.Success
-import scalaz.{ Reader, \/- }
 
 class EmailSendTest extends FlatSpec with Matchers {
 

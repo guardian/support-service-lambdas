@@ -1,5 +1,6 @@
 package com.gu.autoCancel
 
+import com.gu.{ TestingRawEffects, WithDependenciesFailableOp }
 import com.gu.autoCancel.AutoCancel.AutoCancelRequest
 import com.gu.autoCancel.AutoCancelFilter2.ACFilterDeps
 import com.gu.effects.RawEffects
@@ -72,37 +73,4 @@ class AutoCancelStepsTest extends FlatSpec with Matchers {
   //    requests should contain(("POST", "/EMAILSEND/AID", "{\"autoPay\":false}"))
   //  }
 
-}
-
-class TestingRawEffects(val isProd: Boolean, val code: Int) {
-
-  var result: List[Request] = Nil // !
-
-  val stage = if (isProd) "PROD" else "DEV"
-
-  def response: Request => Response = {
-    req =>
-      result = req :: result
-      new Response.Builder().request(req).protocol(Protocol.HTTP_1_1).code(code).body(ResponseBody.create(MediaType.parse("text/plain"), """{"success": true}""")).build()
-  }
-
-  val rawEffects = RawEffects(response, () => stage, _ => Success(""))
-
-  val fakeConfig = Config(stage, TrustedApiConfig("a", "b", "c"), zuoraRestConfig = ZuoraRestConfig("https://ddd", "e@f.com", "ggg"),
-    etConfig = ETConfig(etSendIDs = ETSendIds(ETSendId("11"), ETSendId("22"), ETSendId("33"), ETSendId("44"), ETSendId("can")), clientId = "jjj", clientSecret = "kkk"))
-
-  val configHttp = StageAndConfigHttp(response, fakeConfig)
-
-}
-
-object WithDependenciesFailableOp {
-
-  // lifts any plain value all the way in, usually useful in tests
-  def liftT[R, T](value: R): WithDepsFailableOp[T, R] =
-    \/.right(value).toReader[T]
-
-  // lifts any plain value all the way in, usually useful in tests
-  def liftR[R, T](value: R): Reader[T, FailableOp[R]] =
-    //\/.right(value).toReader[T]
-    Reader[T, FailableOp[R]]((_: T) => \/.right(value))
 }
