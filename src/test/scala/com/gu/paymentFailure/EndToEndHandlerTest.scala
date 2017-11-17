@@ -5,6 +5,9 @@ import java.io.{ ByteArrayInputStream, ByteArrayOutputStream }
 import com.gu.TestData._
 import com.gu.TestingRawEffects
 import com.gu.util.apigateway.ApiGatewayHandler
+import okhttp3.RequestBody
+import okhttp3.internal.Util.UTF_8
+import okio.Buffer
 import org.scalatest.{ FlatSpec, Matchers }
 
 class EndToEndHandlerTest extends FlatSpec with Matchers {
@@ -20,10 +23,16 @@ class EndToEndHandlerTest extends FlatSpec with Matchers {
     }
 
     //verify
+    def body(b: RequestBody): String = {
+      val buffer = new Buffer()
+      b.writeTo(buffer)
+      buffer.readString(UTF_8)
+    }
 
-    config.result.map(req => (req.method, req.url.encodedPath)) should contain(
-      ("POST", "/messaging/v1/messageDefinitionSends/111/send") // TODO check the body too
-    )
+    config.result.map(req => (req.method, req.url.encodedPath) -> Option(req.body).map(body)).toMap
+      .get(("POST", "/messaging/v1/messageDefinitionSends/111/send")) should be(
+        Some(Some(EndToEndData.expectedEmailSend))
+      ) // TODO check the body too
 
     val responseString = new String(os.toByteArray(), "UTF-8")
 
@@ -43,6 +52,9 @@ object EndToEndData {
     ("/v1/requestToken", (200, """{"accessToken":"", "expiresIn":1}""")),
     ("/messaging/v1/messageDefinitionSends/111/send", (202, ""))
   )
+
+  val expectedEmailSend =
+    """{"To":{"Address":"john.duffell@guardian.co.uk","SubscriberKey":"john.duffell@guardian.co.uk","ContactAttributes":{"SubscriberAttributes":{"SubscriberKey":"john.duffell@guardian.co.uk","EmailAddress":"john.duffell@guardian.co.uk","subscriber_id":"A-S00071536","product":"Supporter","payment_method":"CreditCardReferenceTransaction","card_type":"Visa","card_expiry_date":"12/2019","first_name":"eSAFaBwm4WJZNg5xhIc","last_name":"eSAFaBwm4WJZNg5xhIc","paymentId":"2c92c0f95fc912eb015fcb2a481720e6","price":"$49.00","serviceStartDate":"17 November 2017","serviceEndDate":"16 November 2018"}}}}"""
 
   val invoices =
     """
