@@ -9,7 +9,7 @@ import scala.util.{ Success, Try }
 
 // this test checks the actual config in S3 so it needs credentials.  this means you can only run it manually
 // however it does stop you deploying a new version without updating the config first
-//@Ignore
+@Ignore
 class ConfigLoaderSystemTest extends FlatSpec with Matchers {
 
   "loader" should "be able to load the prod config successfully" in {

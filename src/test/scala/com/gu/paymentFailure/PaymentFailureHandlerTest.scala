@@ -57,7 +57,7 @@ class PaymentFailureHandlerTest extends FlatSpec {
   "lambda" should "return error if credentials are missing" in {
     val stream = getClass.getResourceAsStream("/paymentFailure/missingCredentials.json")
     val os = new ByteArrayOutputStream()
-    ApiGatewayHandler(lambdaConfig, HandlerDeps(_ => Success(fakeConfig)))(basicOp())(stream, os, null)
+    ApiGatewayHandler(lambdaConfig, stream, os, null, HandlerDeps(_ => Success(fakeConfig)))(basicOp())
     val responseString = new String(os.toByteArray(), "UTF-8");
     responseString jsonMatches missingCredentialsResponse
   }
@@ -65,7 +65,7 @@ class PaymentFailureHandlerTest extends FlatSpec {
   "lambda" should "return error if credentials don't match" in {
     val stream = getClass.getResourceAsStream("/paymentFailure/invalidCredentials.json")
     val os = new ByteArrayOutputStream()
-    ApiGatewayHandler(lambdaConfig, HandlerDeps(_ => Success(fakeConfig)))(basicOp())(stream, os, null)
+    ApiGatewayHandler(lambdaConfig, stream, os, null, HandlerDeps(_ => Success(fakeConfig)))(basicOp())
     val responseString = new String(os.toByteArray(), "UTF-8");
     responseString jsonMatches missingCredentialsResponse
   }
@@ -73,7 +73,7 @@ class PaymentFailureHandlerTest extends FlatSpec {
   "lambda" should "return an error if tenant id doesn't match" in {
     val stream = getClass.getResourceAsStream("/paymentFailure/invalidTenant.json")
     val os = new ByteArrayOutputStream()
-    ApiGatewayHandler(lambdaConfig, HandlerDeps(_ => Success(fakeConfig)))(basicOp())(stream, os, null)
+    ApiGatewayHandler(lambdaConfig, stream, os, null, HandlerDeps(_ => Success(fakeConfig)))(basicOp())
     val responseString = new String(os.toByteArray(), "UTF-8");
     responseString jsonMatches missingCredentialsResponse
   }
@@ -86,12 +86,12 @@ class PaymentFailureHandlerTest extends FlatSpec {
 
     val os = new ByteArrayOutputStream()
     //execute
-    ApiGatewayHandler(lambdaConfig, HandlerDeps(_ => Success(fakeConfig)))({
+    ApiGatewayHandler(lambdaConfig, stream, os, null, HandlerDeps(_ => Success(fakeConfig)))({
       PaymentFailureSteps.apply(PFDeps(req => {
         storedReq = Some(req)
         WithDependenciesFailableOp.liftT(())
       }, _ => WithDependenciesFailableOp.liftT(basicInvoiceTransactionSummary)))
-    })(stream, os, null)
+    })
 
     //verify
     val responseString = new String(os.toByteArray, "UTF-8")
@@ -136,9 +136,9 @@ class PaymentFailureHandlerTest extends FlatSpec {
     val os = new ByteArrayOutputStream()
 
     //execute
-    ApiGatewayHandler(lambdaConfig, HandlerDeps(_ => Success(fakeConfig))) {
+    ApiGatewayHandler(lambdaConfig, stream, os, null, HandlerDeps(_ => Success(fakeConfig))) {
       basicOp(invoiceTransactionSummary)
-    }(stream, os, null)
+    }
 
     //verify
     val responseString = new String(os.toByteArray(), "UTF-8")
@@ -164,12 +164,12 @@ class PaymentFailureHandlerTest extends FlatSpec {
     val os = new ByteArrayOutputStream()
 
     //execute
-    ApiGatewayHandler(lambdaConfig, HandlerDeps(_ => Success(fakeConfig))) {
+    ApiGatewayHandler(lambdaConfig, stream, os, null, HandlerDeps(_ => Success(fakeConfig))) {
       PaymentFailureSteps.apply(PFDeps(req => {
         storedReq = Some(req)
         (-\/(ApiGatewayResponse.internalServerError("something failed!")): FailableOp[Unit]).toReader[ETS]
       }, _ => WithDependenciesFailableOp.liftT(basicInvoiceTransactionSummary)))
-    }(stream, os, null)
+    }
 
     //verify
 
