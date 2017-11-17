@@ -25,7 +25,7 @@ object ApiGatewayHandler extends Logging {
 
   case class StageAndConfigHttp(response: Request => Response, config: Config)
 
-  def apply(rawEffects: RawEffects, deps: HandlerDeps = HandlerDeps())(operation: ApiGatewayRequest => WithDepsFailableOp[StageAndConfigHttp, Unit])(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
+  def apply(rawEffects: RawEffects, inputStream: InputStream, outputStream: OutputStream, context: Context, deps: HandlerDeps = HandlerDeps())(operation: ApiGatewayRequest => WithDepsFailableOp[StageAndConfigHttp, Unit]): Unit = {
 
     val response = for {
       config <- loadConfig(rawEffects, deps)
