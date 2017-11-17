@@ -3,7 +3,7 @@ package com.gu.util.exacttarget
 import com.gu.autoCancel.WithDependenciesFailableOp
 import com.gu.effects.RawEffects
 import com.gu.util.ETConfig
-import com.gu.util.ETConfig.ETSendKeysForAttempt
+import com.gu.util.ETConfig.{ ETSendId, ETSendIds }
 import com.gu.util.exacttarget.EmailSend.{ ETS, HUDeps }
 import com.gu.util.exacttarget.SalesforceAuthenticate.SalesforceAuth
 import com.gu.util.reader.Types._
@@ -17,7 +17,6 @@ class EmailSendTest extends FlatSpec with Matchers {
 
   def makeMessage(recipient: String): Message = {
     Message(
-      DataExtensionName = "first-failed-payment-email",
       To = ToDef(
         Address = recipient,
         SubscriberKey = recipient,
@@ -50,17 +49,20 @@ class EmailSendTest extends FlatSpec with Matchers {
       .url(s"http://$attempt")
       .post(RequestBody.create(MediaType.parse("text/plain"), s"$attempt"))
 
-    val req = EmailRequest(1, makeMessage(email))
+    val req = EmailRequest(
+      etSendId = ETSendId("etSendId"),
+      makeMessage(email)
+    )
     val env = new TestingRawEffectsET(isProd)
-    var varAttempt: Option[Int] = None
+    var varAttempted: Boolean = false
     EmailSend(HUDeps(
       sendEmail = (attempt, message) => {
-      varAttempt = Some(attempt)
+      varAttempted = true
       WithDependenciesFailableOp.liftT(())
     }
     ))(req).run.run(env.configHttp)
 
-    varAttempt should be(if (expectedEmail) Some(1) else None)
+    varAttempted should be(expectedEmail)
   }
 
   "emailer" should "send an email to any address in prod" in {
@@ -86,7 +88,7 @@ class TestingRawEffectsET(val isProd: Boolean) {
 
   val rawEffects = RawEffects(response, () => stage, _ => Success(""))
 
-  val fakeETConfig = ETConfig(stageETIDForAttempt = ETSendKeysForAttempt(Map(0 -> "h")), clientId = "jjj", clientSecret = "kkk")
+  val fakeETConfig = ETConfig(etSendIDs = ETSendIds(ETSendId("11"), ETSendId("22"), ETSendId("33"), ETSendId("44"), ETSendId("can")), clientId = "jjj", clientSecret = "kkk")
 
   val configHttp = ETS(response, stage, fakeETConfig)
 

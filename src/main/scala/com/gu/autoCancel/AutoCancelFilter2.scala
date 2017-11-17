@@ -1,6 +1,7 @@
 package com.gu.autoCancel
 
 import com.github.nscala_time.time.OrderingImplicits._
+import com.gu.autoCancel.AutoCancel.AutoCancelRequest
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.StageAndConfigHttp
 import com.gu.util.apigateway.ApiGatewayResponse.noActionRequired
@@ -14,18 +15,16 @@ import scalaz.Scalaz._
 object AutoCancelFilter2 extends Logging {
 
   case class ACFilterDeps(
-    getAccountSummary: String => WithDepsFailableOp[StageAndConfigHttp, AccountSummary] = Zuora.getAccountSummary,
-    doAutoCancel: (String, SubscriptionId, LocalDate) => WithDepsFailableOp[StageAndConfigHttp, Unit] = AutoCancel.apply
+    getAccountSummary: String => WithDepsFailableOp[StageAndConfigHttp, AccountSummary] = Zuora.getAccountSummary
   )
 
-  def apply(date: LocalDate, autoCancelCallout: AutoCancelCallout, deps: ACFilterDeps = ACFilterDeps()): WithDepsFailableOp[StageAndConfigHttp, Unit] = {
+  def apply(date: LocalDate, autoCancelCallout: AutoCancelCallout, deps: ACFilterDeps = ACFilterDeps()): WithDepsFailableOp[StageAndConfigHttp, AutoCancelRequest] = {
     val accountId = autoCancelCallout.accountId
     for {
       accountSummary <- deps.getAccountSummary(accountId).withLogging("getAccountSummary")
       subToCancel <- getSubscriptionToCancel(accountSummary).toReader.withLogging("getSubscriptionToCancel")
       cancellationDate <- getCancellationDateFromInvoices(accountSummary, date).toReader.withLogging("getCancellationDateFromInvoices")
-      _ <- deps.doAutoCancel(accountId, subToCancel, cancellationDate)
-    } yield ()
+    } yield AutoCancelRequest(accountId, subToCancel, cancellationDate)
   }
 
   def getCancellationDateFromInvoices(accountSummary: AccountSummary, dateToday: LocalDate): FailableOp[LocalDate] = {

@@ -7,13 +7,22 @@ import org.scalatest._
 import play.api.libs.json.{ JsSuccess, Json }
 
 import scalaz.{ -\/, \/- }
+object AutoCancelHandlerTest {
 
+  def fakeCallout(autoPay: Boolean) = {
+    AutoCancelCallout(accountId = "id123", autoPay = s"$autoPay", paymentMethodType = "PayPal", email = "hi@hi.com", firstName = "john", lastName = "bloggs", creditCardType = "",
+      creditCardExpirationMonth = "", creditCardExpirationYear = "", paymentId = "idid",
+      currency = "GBP")
+  }
+
+}
 class AutoCancelHandlerTest extends FlatSpec {
 
   import AutoCancelFilter._
+  import AutoCancelHandlerTest._
 
   "filterInvalidAccount" should "return a left if AutoPay = false" in {
-    val autoCancelCallout = AutoCancelCallout(accountId = "id123", autoPay = "false", "PayPal")
+    val autoCancelCallout = fakeCallout(false)
     val either = apply(autoCancelCallout, false)
     assert(either match {
       case -\/(_) => true
@@ -22,7 +31,7 @@ class AutoCancelHandlerTest extends FlatSpec {
   }
 
   "filterInvalidAccount" should "return a right if AutoPay = true" in {
-    val autoCancelCallout = AutoCancelCallout(accountId = "id123", autoPay = "true", "PayPal")
+    val autoCancelCallout = fakeCallout(true)
     val either = apply(autoCancelCallout, false)
     assert(either match {
       case \/-(_) => true

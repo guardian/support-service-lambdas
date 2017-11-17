@@ -1,6 +1,7 @@
 package manualTest
 
 import com.gu.effects.{ Http, RawEffects }
+import com.gu.util.ETConfig.ETSendId
 import com.gu.util.apigateway.ApiGatewayHandler.HandlerDeps
 import com.gu.util.exacttarget.EmailSend.ETS
 import com.gu.util.exacttarget._
@@ -13,8 +14,7 @@ object EmailClientSystemTest extends App {
 
   private val recipient = "john.duffell@guardian.co.uk"
 
-  def message(number: Int) = Message(
-    DataExtensionName = "first-failed-payment-email",
+  def message(number: ETSendId) = Message(
     To = ToDef(
       Address = recipient,
       SubscriberKey = recipient,
@@ -46,8 +46,12 @@ object EmailClientSystemTest extends App {
       }
   }.map {
     service =>
-      Seq(1 /*, 2, 3, 4, 5*/ ).map { num =>
-        val emailResult = EmailSend()(EmailRequest(num, message = message(num))).run.run(service)
+      val a = service.etConfig.etSendIDs
+      Seq( /*a.pf1, a.pf2, a.pf3,*/ a.pf4 /*, a.cancelled*/ ).map { num =>
+        val emailResult = EmailSend()(EmailRequest(
+          etSendId = num,
+          message = message(num)
+        )).run.run(service)
         println(s"result for $num:::::: $emailResult")
       }
   }

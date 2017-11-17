@@ -10,7 +10,6 @@ class SqsMessageSerializationTest extends FlatSpec with MockitoSugar {
 
   "Message" should "serialize to the correct json format" in {
     val message = Message(
-      DataExtensionName = "dataExtensionNameValue",
       To = ToDef(
         Address = "fake@email.com",
         SubscriberKey = "subkeyValue",
@@ -57,8 +56,7 @@ class SqsMessageSerializationTest extends FlatSpec with MockitoSugar {
         |        "serviceEndDate" : "31 January 2017"
         |      }
         |    }
-        |  },
-        |  "DataExtensionName": "dataExtensionNameValue"
+        |  }
         |}
       """.stripMargin
 

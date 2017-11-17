@@ -1,5 +1,6 @@
 package com.gu.util.exacttarget
 
+import com.gu.util.ETConfig.ETSendId
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.exacttarget.SalesforceAuthenticate.{ ETImpure, SalesforceAuth }
 import com.gu.util.reader.Types._
@@ -8,6 +9,7 @@ import okhttp3.{ MediaType, Request, RequestBody, Response }
 import play.api.libs.json.Json
 
 import scalaz.{ -\/, Reader, \/, \/- }
+import scalaz.syntax.std.option._
 
 case class ContactAttributesDef(SubscriberAttributes: SubscriberAttributesDef)
 
@@ -30,9 +32,9 @@ case class SubscriberAttributesDef(
 
 case class ToDef(Address: String, SubscriberKey: String, ContactAttributes: ContactAttributesDef)
 
-case class Message(To: ToDef, DataExtensionName: String)
+case class Message(To: ToDef)
 
-case class EmailRequest(attempt: Int, message: Message)
+case class EmailRequest(etSendId: ETSendId, message: Message)
 
 object SubscriberAttributesDef {
   implicit val jf = Json.writes[SubscriberAttributesDef]
@@ -55,7 +57,7 @@ object EmailSend extends Logging {
   case class ETS(response: (Request => Response), stage: String, etConfig: ETConfig)
 
   case class HUDeps(
-    sendEmail: (Int, Message) => WithDepsFailableOp[ETS, Unit] = sendEmail
+    sendEmail: (ETSendId, Message) => WithDepsFailableOp[ETS, Unit] = sendEmail
   )
 
   type SendEmail = EmailRequest => WithDepsFailableOp[ETS, Unit]
@@ -64,7 +66,7 @@ object EmailSend extends Logging {
     for {
       prod <- Reader { stage: String => \/.right(stage == "PROD"): FailableOp[Boolean] }.toDepsFailableOp.local[ETS](_.stage)
       _ <- filterTestEmail(request.message.To.Address, prod).toReader
-      _ <- deps.sendEmail(request.attempt, request.message)
+      _ <- deps.sendEmail(request.etSendId, request.message)
     } yield ()
 
   }
@@ -80,10 +82,10 @@ object EmailSend extends Logging {
     }
   }
 
-  def sendEmail(attempt: Int, message: Message): WithDepsFailableOp[ETS, Unit] = {
+  def sendEmail(etSendId: ETSendId, message: Message): WithDepsFailableOp[ETS, Unit] = {
     for {
       auth <- SalesforceAuthenticate().toDepsFailableOp.local[ETS](ets => ETImpure(ets.response, ets.etConfig))
-      req <- buildRequestET(attempt).toDepsFailableOp.leftMap(err => ApiGatewayResponse.internalServerError(s"oops todo because: $err")).local[ETS](e => ETReq(e.etConfig, auth))
+      req <- buildRequestET(etSendId).toDepsFailableOp.leftMap(err => ApiGatewayResponse.internalServerError(s"oops todo because: $err")).local[ETS](e => ETReq(e.etConfig, auth))
       response <- sendEmailOp(req, message).toDepsFailableOp.local[ETS](_.response)
       result <- processResponse(response).toReader
     } yield result
@@ -100,12 +102,12 @@ object EmailSend extends Logging {
 
   case class ETReq(config: ETConfig, salesforceAuth: SalesforceAuth)
 
-  def buildRequestET(attempt: Int): Reader[ETReq, FailableOp[Request.Builder]] =
+  def buildRequestET(eTSendId: ETSendId): Reader[ETReq, FailableOp[Request.Builder]] =
     Reader {
       et: ETReq =>
         val builder = new Request.Builder()
           .header("Authorization", s"Bearer ${et.salesforceAuth.accessToken}")
-          .url(s"${SalesforceAuthenticate.restEndpoint}/messageDefinitionSends/${et.config.stageETIDForAttempt.etSendKeysForAttempt(attempt)}/send")
+          .url(s"${SalesforceAuthenticate.restEndpoint}/messageDefinitionSends/${eTSendId.id}/send")
         \/.right(builder): FailableOp[Request.Builder]
     }
 

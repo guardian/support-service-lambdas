@@ -1,6 +1,6 @@
 package com.gu.util
 
-import com.gu.util.ETConfig.ETSendKeysForAttempt
+import com.gu.util.ETConfig.{ ETSendId, ETSendIds }
 import org.scalatest.{ FlatSpec, Matchers }
 
 import scala.util.Success
@@ -21,8 +21,14 @@ class ConfigLoaderTest extends FlatSpec with Matchers {
       |    "password": "ggg"
       |  },
       |  "etConfig": {
-      |    "stageETIDForAttempt":
-      |    {"0": "h"},
+      |    "etSendIDs":
+      |    {
+      |      "pf1": "111",
+      |      "pf2": "222",
+      |      "pf3": "333",
+      |      "pf4": "444",
+      |      "cancelled": "ccc"
+      |    },
       |    "clientId": "jjj",
       |    "clientSecret": "kkk"
       |  }
@@ -34,7 +40,7 @@ class ConfigLoaderTest extends FlatSpec with Matchers {
     //    assert(credentialsAreValid(requestAuth, trustedApiConfig) == false)
     val prod = Config.parseConfig(codeConfig)
     prod should be(Success(Config("DEV", TrustedApiConfig("a", "b", "c"), zuoraRestConfig = ZuoraRestConfig("https://ddd", "e@f.com", "ggg"),
-      etConfig = ETConfig(ETSendKeysForAttempt(Map(0 -> "h")), clientId = "jjj", clientSecret = "kkk"))))
+      etConfig = ETConfig(etSendIDs = ETSendIds(ETSendId("111"), ETSendId("222"), ETSendId("333"), ETSendId("444"), ETSendId("ccc")), clientId = "jjj", clientSecret = "kkk"))))
   }
 
 }

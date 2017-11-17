@@ -32,16 +32,16 @@ class ConfigLoaderSystemTest extends FlatSpec with Matchers {
       a <- configAttemp
       b <- Config.parseConfig(a)
     } yield b
-    val hasAllEmails = con.map(config => (Set(1, 2, 3, 4, 5).diff(config.etConfig.stageETIDForAttempt.etSendKeysForAttempt.keySet)).isEmpty)
+    val loadedOK = con.map(config => ())
     withClue(configAttemp) {
-      hasAllEmails should be(Success(true))
+      loadedOK should be(Success(()))
     }
   }
 
   it should "be able to load the local test config successfully" in {
     //    val requestAuth = Some(RequestAuth(apiClientId = "validUser", apiToken = "ndjashjkhajshs"))
     //    assert(credentialsAreValid(requestAuth, trustedApiConfig) == false)
-    val configAttempt = Try { Source.fromFile("/Users/jduffell/Downloads/CODE/payment-failure-lambdas.private.json").mkString }
+    val configAttempt = Try { Source.fromFile("/etc/gu/payment-failure-lambdas.private.json").mkString }
 
     validate(configAttempt)
   }

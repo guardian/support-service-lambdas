@@ -4,7 +4,7 @@ import java.io.ByteArrayOutputStream
 
 import com.gu.autoCancel.{ TestingRawEffects, WithDependenciesFailableOp }
 import com.gu.paymentFailure.PaymentFailureSteps.PFDeps
-import com.gu.util.ETConfig.ETSendKeysForAttempt
+import com.gu.util.ETConfig.{ ETSendId, ETSendIds }
 import com.gu.util._
 import com.gu.util.apigateway.ApiGatewayHandler.HandlerDeps
 import com.gu.util.apigateway.ApiGatewayResponse.unauthorized
@@ -34,7 +34,7 @@ class PaymentFailureHandlerTest extends FlatSpec {
 
   val fakeApiConfig = TrustedApiConfig("validApiClientId", "validApiToken", "testEnvTenantId")
   val fakeZuoraConfig = ZuoraRestConfig("fakeUrl", "fakeUser", "fakePass")
-  val fakeETConfig = ETConfig(ETSendKeysForAttempt(Map(99 -> "fakeETid")), "fakeClientId", "fakeClientSecret")
+  val fakeETConfig = ETConfig(etSendIDs = ETSendIds(ETSendId("11"), ETSendId("22"), ETSendId("33"), ETSendId("44"), ETSendId("can")), "fakeClientId", "fakeClientSecret")
 
   val missingCredentialsResponse = """{"statusCode":"401","headers":{"Content-Type":"application/json"},"body":"Credentials are missing or invalid"}"""
   val successfulResponse = """{"statusCode":"200","headers":{"Content-Type":"application/json"},"body":"Success"}"""
@@ -97,9 +97,8 @@ class PaymentFailureHandlerTest extends FlatSpec {
     val responseString = new String(os.toByteArray, "UTF-8")
 
     val expectedMessage = EmailRequest(
-      attempt = 1,
+      etSendId = ETSendId("11"),
       Message(
-        DataExtensionName = "first-failed-payment-email",
         To = ToDef(
           Address = "test.user123@guardian.co.uk",
           SubscriberKey = "test.user123@guardian.co.uk",
@@ -150,7 +149,7 @@ class PaymentFailureHandlerTest extends FlatSpec {
 
   //  val lambdaConfig: FailableOp[ConfigHttp] = \/-(new TestingStateHttp(false, Some(fakeApiConfig)).stateHttp)
   val fakeConfig = Config("DEV", fakeApiConfig, zuoraRestConfig = ZuoraRestConfig("https://ddd", "e@f.com", "ggg"),
-    etConfig = ETConfig(stageETIDForAttempt = ETSendKeysForAttempt(Map(0 -> "h")), clientId = "jjj", clientSecret = "kkk"))
+    etConfig = ETConfig(etSendIDs = ETSendIds(ETSendId("11"), ETSendId("22"), ETSendId("33"), ETSendId("44"), ETSendId("can")), clientId = "jjj", clientSecret = "kkk"))
 
   val lambdaConfig = new TestingRawEffects(false, 1).rawEffects
   def basicOp(fakeInvoiceTransactionSummary: InvoiceTransactionSummary = basicInvoiceTransactionSummary) = PaymentFailureSteps.apply(PFDeps(req =>

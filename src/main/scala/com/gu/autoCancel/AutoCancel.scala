@@ -9,7 +9,10 @@ import org.joda.time.LocalDate
 
 object AutoCancel extends Logging {
 
-  def apply(accountId: String, subToCancel: SubscriptionId, cancellationDate: LocalDate): WithDepsFailableOp[StageAndConfigHttp, Unit] = {
+  case class AutoCancelRequest(accountId: String, subToCancel: SubscriptionId, cancellationDate: LocalDate)
+
+  def apply(acRequest: AutoCancelRequest): WithDepsFailableOp[StageAndConfigHttp, Unit] = {
+    val AutoCancelRequest(accountId, subToCancel, cancellationDate) = acRequest
     logger.info(s"Attempting to perform auto-cancellation on account: $accountId")
     for {
       _ <- Zuora.updateCancellationReason(subToCancel).withLogging("updateCancellationReason")

@@ -1,6 +1,8 @@
 package com.gu.util
 
-import com.gu.util.ETConfig.ETSendKeysForAttempt
+import java.io
+
+import com.gu.util.ETConfig.ETSendIds
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
@@ -13,7 +15,7 @@ case class ZuoraRestConfig(
 )
 
 case class ETConfig(
-  stageETIDForAttempt: ETSendKeysForAttempt,
+  etSendIDs: ETSendIds,
   clientId: String,
   clientSecret: String
 )
@@ -28,40 +30,30 @@ object ZuoraRestConfig {
 
 object ETConfig {
 
-  implicit val etSendKeysForAttemptReads: Reads[ETSendKeysForAttempt] = new Reads[ETSendKeysForAttempt] {
+  implicit val idReads: Reads[ETSendId] = JsPath.read[String].map(ETSendId.apply)
 
-    override def reads(jsValue: JsValue): JsResult[ETSendKeysForAttempt] = {
-      jsValue match {
-        case JsObject(stringToJsValue) =>
-          val jsResults = stringToJsValue.map({
-            case (attemptText: String, JsString(exactTargetTriggeredSendKey)) =>
-              val triedInt = Try { Integer.parseInt(attemptText) }
-              triedInt match {
-                case Success(attempt) => JsSuccess((attempt, exactTargetTriggeredSendKey))
-                case Failure(f) => JsError(s"num parse error in config map for $attemptText: $f")
-              }
-            case other => JsError(s"value of exactTargetTriggeredSendKey wasn't a string: $other")
-          })
-          val allErrors = jsResults.collect {
-            case JsError(errors) => errors
-          }.flatten
-          if (allErrors.nonEmpty) {
-            JsError(allErrors.toList)
-          } else {
-            JsSuccess(ETSendKeysForAttempt(jsResults.collect {
-              case JsSuccess(attemptTSKey, _) => attemptTSKey
-            }.toMap))
-          }
-        case other => JsError(s"wrong type: $other")
-      }
-    }
+  implicit val idsReads: Reads[ETSendIds] = Json.reads[ETSendIds]
+
+  case class ETSendId(id: String) extends AnyVal
+  case class ETSendIds(
+      pf1: ETSendId,
+      pf2: ETSendId,
+      pf3: ETSendId,
+      pf4: ETSendId,
+      cancelled: ETSendId
+  ) {
+    def find(attempt: Int): Option[ETSendId] = Some(attempt match {
+      case 1 => pf1
+      case 2 => pf2
+      case 3 => pf3
+      case 4 => pf4
+      case _ => ETSendId("")
+    }).filter(_.id != "")
 
   }
 
-  case class ETSendKeysForAttempt(etSendKeysForAttempt: Map[Int, String])
-
   implicit val zuoraConfigReads: Reads[ETConfig] = (
-    (JsPath \ "stageETIDForAttempt").read[ETSendKeysForAttempt] and
+    (JsPath \ "etSendIDs").read[ETSendIds] and
     (JsPath \ "clientId").read[String] and
     (JsPath \ "clientSecret").read[String]
   )(ETConfig.apply _)
