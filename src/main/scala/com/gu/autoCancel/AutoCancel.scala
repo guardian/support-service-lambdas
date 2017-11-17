@@ -4,7 +4,6 @@ import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.StageAndConfigHttp
 import com.gu.util.reader.Types.WithDepsFailableOp
 import com.gu.util.zuora.Zuora
-import com.gu.util.zuora.Zuora.{ CancelSubscription, UpdateCancellationReason }
 import com.gu.util.zuora.ZuoraModels.{ SubscriptionId }
 import org.joda.time.LocalDate
 

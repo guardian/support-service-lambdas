@@ -8,6 +8,7 @@ import com.gu.util.exacttarget.EmailSend
 import com.gu.util.exacttarget.EmailSend.ETS
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.Zuora
+import com.gu.util.zuora.ZuoraModels.InvoiceTransactionSummary
 import com.gu.util.{ Logging, TrustedApiConfig }
 import play.api.libs.json.Json
 
@@ -37,7 +38,7 @@ object PaymentFailureSteps extends Logging {
 
   case class PFDeps(
     sendEmail: EmailSend.SendEmail = EmailSend(),
-    getInvoiceTransactions: Zuora.GetInvoiceTransactions = Zuora.getInvoiceTransactions
+    getInvoiceTransactions: String => WithDepsFailableOp[StageAndConfigHttp, InvoiceTransactionSummary] = Zuora.getInvoiceTransactions
   )
 
 }

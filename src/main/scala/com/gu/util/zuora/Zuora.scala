@@ -10,22 +10,14 @@ object Zuora {
 
   import ZuoraRestRequestMaker._
 
-  type GetAccountSummary = String => WithDepsFailableOp[StageAndConfigHttp, AccountSummary]
-
-  def getAccountSummary: GetAccountSummary = (accountId: String) =>
+  def getAccountSummary(accountId: String): WithDepsFailableOp[StageAndConfigHttp, AccountSummary] =
     get[AccountSummary](s"accounts/$accountId/summary")
 
-  type GetInvoiceTransactions = String => WithDepsFailableOp[StageAndConfigHttp, InvoiceTransactionSummary]
-
-  def getInvoiceTransactions: GetInvoiceTransactions = (accountId: String) =>
+  def getInvoiceTransactions(accountId: String): WithDepsFailableOp[StageAndConfigHttp, InvoiceTransactionSummary] =
     get[InvoiceTransactionSummary](s"transactions/invoices/accounts/$accountId")
-
-  type CancelSubscription = (SubscriptionId, LocalDate) => WithDepsFailableOp[StageAndConfigHttp, Unit]
 
   def cancelSubscription(subscription: SubscriptionId, cancellationDate: LocalDate): WithDepsFailableOp[StageAndConfigHttp, Unit] =
     put(SubscriptionCancellation(cancellationDate), s"subscriptions/${subscription.id}/cancel")
-
-  type UpdateCancellationReason = SubscriptionId => WithDepsFailableOp[StageAndConfigHttp, Unit]
 
   def updateCancellationReason(subscription: SubscriptionId): WithDepsFailableOp[StageAndConfigHttp, Unit] =
     put(SubscriptionUpdate("System AutoCancel"), s"subscriptions/${subscription.id}")

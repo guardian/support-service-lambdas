@@ -6,7 +6,6 @@ import com.gu.util.apigateway.ApiGatewayHandler.StageAndConfigHttp
 import com.gu.util.apigateway.ApiGatewayResponse.noActionRequired
 import com.gu.util.reader.Types.{ FailableOp, _ }
 import com.gu.util.zuora.Zuora
-import com.gu.util.zuora.Zuora.{ CancelSubscription, GetAccountSummary, UpdateCancellationReason }
 import com.gu.util.zuora.ZuoraModels.{ AccountSummary, Invoice, SubscriptionId, SubscriptionSummary }
 import org.joda.time.LocalDate
 
@@ -15,7 +14,7 @@ import scalaz.Scalaz._
 object AutoCancelFilter2 extends Logging {
 
   case class ACFilterDeps(
-    getAccountSummary: GetAccountSummary = Zuora.getAccountSummary,
+    getAccountSummary: String => WithDepsFailableOp[StageAndConfigHttp, AccountSummary] = Zuora.getAccountSummary,
     doAutoCancel: (String, SubscriptionId, LocalDate) => WithDepsFailableOp[StageAndConfigHttp, Unit] = AutoCancel.apply
   )
 
