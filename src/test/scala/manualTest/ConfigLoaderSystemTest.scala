@@ -1,7 +1,7 @@
 package manualTest
 
 import com.gu.effects.ConfigLoad
-import com.gu.util.Config
+import com.gu.util.{ Config, Stage }
 import org.scalatest.{ FlatSpec, Ignore, Matchers }
 
 import scala.io.Source
@@ -15,14 +15,14 @@ class ConfigLoaderSystemTest extends FlatSpec with Matchers {
   "loader" should "be able to load the prod config successfully" in {
     //    val requestAuth = Some(RequestAuth(apiClientId = "validUser", apiToken = "ndjashjkhajshs"))
     //    assert(credentialsAreValid(requestAuth, trustedApiConfig) == false)
-    val prod = ConfigLoad.load("PROD")
+    val prod = ConfigLoad.load(Stage("PROD"))
     validate(prod)
   }
 
   it should "be able to load the code config successfully" in {
     //    val requestAuth = Some(RequestAuth(apiClientId = "validUser", apiToken = "ndjashjkhajshs"))
     //    assert(credentialsAreValid(requestAuth, trustedApiConfig) == false)
-    val code: Try[String] = ConfigLoad.load("CODE")
+    val code: Try[String] = ConfigLoad.load(Stage("CODE"))
     validate(code)
     //code should be(Success(Config(TrustedApiConfig("a", "b", "c"), zuoraRestConfig = ZuoraRestConfig("d", "e", "f"), etConfig = ETConfig(Map(0 -> "h"), "i", "j"))))
   }

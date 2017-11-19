@@ -4,7 +4,6 @@ import java.io.{ ByteArrayInputStream, ByteArrayOutputStream }
 
 import com.gu.TestData._
 import com.gu.TestingRawEffects
-import com.gu.util.apigateway.ApiGatewayHandler
 import okhttp3.RequestBody
 import okhttp3.internal.Util.UTF_8
 import okio.Buffer
@@ -17,10 +16,10 @@ class EndToEndHandlerTest extends FlatSpec with Matchers {
     val stream = new ByteArrayInputStream(EndToEndData.zuoraCalloutJson.getBytes(java.nio.charset.StandardCharsets.UTF_8))
     val os = new ByteArrayOutputStream()
     val config = new TestingRawEffects(false, 200, EndToEndData.responses)
+    val effects = config.rawEffects
+    val deps = Lambda.default(effects)
     //execute
-    ApiGatewayHandler(config.rawEffects, stream, os, null) {
-      PaymentFailureSteps()
-    }
+    deps.agh(stream, os, null)
 
     //verify
     def body(b: RequestBody): String = {

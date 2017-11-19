@@ -3,26 +3,26 @@ package com.gu.paymentFailure
 import java.io.ByteArrayOutputStream
 
 import com.gu.TestData._
+import com.gu.TestingRawEffects
 import com.gu.paymentFailure.PaymentFailureSteps.PFDeps
+import com.gu.paymentFailure.ZuoraEmailSteps.ZuoraEmailStepsDeps
 import com.gu.util.ETConfig.ETSendId
-import com.gu.util.apigateway.ApiGatewayHandler.HandlerDeps
-import com.gu.util.apigateway.{ ApiGatewayHandler, ApiGatewayResponse }
-import com.gu.util.exacttarget.EmailSend.ETS
+import com.gu.util.apigateway.{ ApiGatewayHandler, ApiGatewayRequest, ApiGatewayResponse }
+import com.gu.util.exacttarget.EmailSendSteps.EmailSendStepsDeps
 import com.gu.util.exacttarget._
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.ZuoraModels._
-import com.gu.{ TestingRawEffects, WithDependenciesFailableOp }
+import com.gu.util.{ Config, Stage }
 import org.scalatest.{ FlatSpec, Matchers }
 
-import scala.util.Success
-import scalaz.-\/
+import scalaz.{ -\/, \/- }
 
 class PaymentFailureHandlerTest extends FlatSpec with Matchers {
 
   "lambda" should "return error if credentials are missing" in {
     val stream = getClass.getResourceAsStream("/paymentFailure/missingCredentials.json")
     val os = new ByteArrayOutputStream()
-    ApiGatewayHandler(lambdaConfig, stream, os, null, HandlerDeps(_ => Success(fakeConfig)))(basicOp())
+    ApiGatewayHandler(lambdaConfig(basicOp()))(stream, os, null)
     val responseString = new String(os.toByteArray(), "UTF-8");
     responseString jsonMatches missingCredentialsResponse
   }
@@ -30,7 +30,7 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
   "lambda" should "return error if credentials don't match" in {
     val stream = getClass.getResourceAsStream("/paymentFailure/invalidCredentials.json")
     val os = new ByteArrayOutputStream()
-    ApiGatewayHandler(lambdaConfig, stream, os, null, HandlerDeps(_ => Success(fakeConfig)))(basicOp())
+    ApiGatewayHandler(lambdaConfig(basicOp()))(stream, os, null)
     val responseString = new String(os.toByteArray(), "UTF-8");
     responseString jsonMatches missingCredentialsResponse
   }
@@ -38,7 +38,7 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
   "lambda" should "return an error if tenant id doesn't match" in {
     val stream = getClass.getResourceAsStream("/paymentFailure/invalidTenant.json")
     val os = new ByteArrayOutputStream()
-    ApiGatewayHandler(lambdaConfig, stream, os, null, HandlerDeps(_ => Success(fakeConfig)))(basicOp())
+    ApiGatewayHandler(lambdaConfig(basicOp()))(stream, os, null)
     val responseString = new String(os.toByteArray(), "UTF-8");
     responseString jsonMatches missingCredentialsResponse
   }
@@ -51,12 +51,26 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
 
     val os = new ByteArrayOutputStream()
     //execute
-    ApiGatewayHandler(lambdaConfig, stream, os, null, HandlerDeps(_ => Success(fakeConfig)))({
-      PaymentFailureSteps.apply(PFDeps(req => {
-        storedReq = Some(req)
-        WithDependenciesFailableOp.liftT(())
-      }, _ => WithDependenciesFailableOp.liftT(basicInvoiceTransactionSummary)))
-    })
+    def configToFunction(config: Config): ApiGatewayRequest => FailableOp[Unit] = {
+      PaymentFailureSteps.apply(PFDeps(
+        ZuoraEmailSteps.sendEmailRegardingAccount(
+          ZuoraEmailStepsDeps(
+            EmailSendSteps.apply(
+              EmailSendStepsDeps(
+                req => {
+                  storedReq = Some(req)
+                  \/-(()): FailableOp[Unit]
+                }, FilterEmail(Stage("PROD"))
+              )
+            ),
+            a => \/-(basicInvoiceTransactionSummary)
+          )
+        ),
+        config.etConfig.etSendIDs,
+        config.trustedApiConfig
+      ))
+    }
+    ApiGatewayHandler(lambdaConfig(configToFunction))(stream, os, null)
 
     //verify
     val responseString = new String(os.toByteArray, "UTF-8")
@@ -101,9 +115,7 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
     val os = new ByteArrayOutputStream()
 
     //execute
-    ApiGatewayHandler(lambdaConfig, stream, os, null, HandlerDeps(_ => Success(fakeConfig))) {
-      basicOp(invoiceTransactionSummary)
-    }
+    ApiGatewayHandler(lambdaConfig(basicOp(invoiceTransactionSummary)))(stream, os, null)
 
     //verify
     val responseString = new String(os.toByteArray(), "UTF-8")
@@ -112,9 +124,17 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
     responseString jsonMatches expectedResponse
   }
 
-  val lambdaConfig = new TestingRawEffects(false, 1).rawEffects
-  def basicOp(fakeInvoiceTransactionSummary: InvoiceTransactionSummary = basicInvoiceTransactionSummary) = PaymentFailureSteps.apply(PFDeps(req =>
-    (-\/(ApiGatewayResponse.internalServerError("something failed!")): FailableOp[Unit]).toReader[ETS], _ => WithDependenciesFailableOp.liftT(fakeInvoiceTransactionSummary)))_
+  def lambdaConfig(operation: Config => ApiGatewayRequest => FailableOp[Unit]) = new TestingRawEffects().handlerDeps(operation)
+  def basicOp(fakeInvoiceTransactionSummary: InvoiceTransactionSummary = basicInvoiceTransactionSummary) = { config: Config =>
+    PaymentFailureSteps.apply(PFDeps(
+      ZuoraEmailSteps.sendEmailRegardingAccount(ZuoraEmailStepsDeps(
+        sendEmail = _ => -\/(ApiGatewayResponse.internalServerError("something failed!")),
+        getInvoiceTransactions = _ => \/-(fakeInvoiceTransactionSummary)
+      )),
+      config.etConfig.etSendIDs,
+      config.trustedApiConfig
+    )) _
+  }
 
   "lambda" should "return error if message can't be queued" in {
     //set up
@@ -125,12 +145,28 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
     val os = new ByteArrayOutputStream()
 
     //execute
-    ApiGatewayHandler(lambdaConfig, stream, os, null, HandlerDeps(_ => Success(fakeConfig))) {
-      PaymentFailureSteps.apply(PFDeps(req => {
-        storedReq = Some(req)
-        (-\/(ApiGatewayResponse.internalServerError("something failed!")): FailableOp[Unit]).toReader[ETS]
-      }, _ => WithDependenciesFailableOp.liftT(basicInvoiceTransactionSummary)))
+    def configToFunction(config: Config): ApiGatewayRequest => FailableOp[Unit] = {
+      PaymentFailureSteps.apply(
+        PFDeps(
+          ZuoraEmailSteps.sendEmailRegardingAccount(
+            ZuoraEmailStepsDeps(
+              EmailSendSteps.apply(
+                EmailSendStepsDeps(
+                  req => {
+                    storedReq = Some(req)
+                    -\/(ApiGatewayResponse.internalServerError("something failed!")): FailableOp[Unit]
+                  }, FilterEmail(Stage("PROD"))
+                )
+              ),
+              a => \/-(basicInvoiceTransactionSummary)
+            )
+          ),
+          config.etConfig.etSendIDs,
+          config.trustedApiConfig
+        )
+      )
     }
+    ApiGatewayHandler(lambdaConfig(configToFunction))(stream, os, null)
 
     //verify
 

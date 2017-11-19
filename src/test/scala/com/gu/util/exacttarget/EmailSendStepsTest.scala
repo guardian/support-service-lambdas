@@ -1,16 +1,13 @@
 package com.gu.util.exacttarget
 
-import com.gu.WithDependenciesFailableOp
-import com.gu.effects.RawEffects
-import com.gu.util.ETConfig
-import com.gu.util.ETConfig.{ ETSendId, ETSendIds }
-import com.gu.util.exacttarget.EmailSend.{ ETS, HUDeps }
-import okhttp3._
+import com.gu.util.ETConfig.ETSendId
+import com.gu.util.Stage
+import com.gu.util.exacttarget.EmailSendSteps.EmailSendStepsDeps
 import org.scalatest.{ FlatSpec, Matchers }
 
-import scala.util.Success
+import scalaz.\/-
 
-class EmailSendTest extends FlatSpec with Matchers {
+class EmailSendStepsTest extends FlatSpec with Matchers {
 
   def makeMessage(recipient: String): Message = {
     Message(
@@ -42,22 +39,25 @@ class EmailSendTest extends FlatSpec with Matchers {
   private val public = "john.duffell@gutools.co.uk" // non gu
 
   def tryEmail(isProd: Boolean, email: String, expectedEmail: Boolean) = {
-    def requestBuilder(attempt: Int) = new Request.Builder()
-      .url(s"http://$attempt")
-      .post(RequestBody.create(MediaType.parse("text/plain"), s"$attempt"))
 
     val req = EmailRequest(
       etSendId = ETSendId("etSendId"),
       makeMessage(email)
     )
-    val env = new TestingRawEffectsET(isProd)
+
+    val stage = Stage(if (isProd) "PROD" else "CODE")
+
     var varAttempted: Boolean = false
-    EmailSend(HUDeps(
-      sendEmail = (attempt, message) => {
+
+    val deps = EmailSendStepsDeps(
+      sendEmail = req => {
       varAttempted = true
-      WithDependenciesFailableOp.liftT(())
-    }
-    ))(req).run.run(env.configHttp)
+      \/-(()) // always success
+    },
+      filterEmail = FilterEmail.apply(stage) _
+    )
+
+    EmailSendSteps(deps)(req)
 
     varAttempted should be(expectedEmail)
   }
@@ -68,25 +68,5 @@ class EmailSendTest extends FlatSpec with Matchers {
     tryEmail(isProd = false, email = public, expectedEmail = false)
     tryEmail(isProd = false, email = guardian, expectedEmail = true)
   }
-
-}
-
-class TestingRawEffectsET(val isProd: Boolean) {
-
-  var result: Option[Request] = None // !
-
-  val stage = if (isProd) "PROD" else "CODE"
-
-  def response: Request => Response = {
-    req =>
-      result = Some(req)
-      new Response.Builder().request(req).protocol(Protocol.HTTP_1_1).code(1).body(ResponseBody.create(MediaType.parse("text/plain"), "body result test")).build()
-  }
-
-  val rawEffects = RawEffects(response, () => stage, _ => Success(""))
-
-  val fakeETConfig = ETConfig(etSendIDs = ETSendIds(ETSendId("11"), ETSendId("22"), ETSendId("33"), ETSendId("44"), ETSendId("can")), clientId = "jjj", clientSecret = "kkk")
-
-  val configHttp = ETS(response, stage, fakeETConfig)
 
 }

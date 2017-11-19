@@ -2,12 +2,13 @@ package com.gu.autoCancel
 
 import com.github.nscala_time.time.OrderingImplicits._
 import com.gu.autoCancel.AutoCancel.AutoCancelRequest
-import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.StageAndConfigHttp
 import com.gu.util.apigateway.ApiGatewayResponse.noActionRequired
 import com.gu.util.reader.Types.{ FailableOp, _ }
 import com.gu.util.zuora.Zuora
-import com.gu.util.zuora.ZuoraModels.{ AccountSummary, Invoice, SubscriptionId, SubscriptionSummary }
+import com.gu.util.zuora.ZuoraModels.{ AccountSummary, Invoice, SubscriptionId }
+import com.gu.util.{ Logging, ZuoraRestConfig }
+import okhttp3.{ Request, Response }
 import org.joda.time.LocalDate
 
 import scalaz.Scalaz._
@@ -15,15 +16,29 @@ import scalaz.Scalaz._
 object AutoCancelFilter2 extends Logging {
 
   case class ACFilterDeps(
-    getAccountSummary: String => WithDepsFailableOp[StageAndConfigHttp, AccountSummary] = Zuora.getAccountSummary
+    now: LocalDate,
+    getAccountSummary: String => WithDepsFailableOp[StageAndConfigHttp, AccountSummary],
+    response: Request => Response,
+    config: ZuoraRestConfig
   )
 
-  def apply(date: LocalDate, autoCancelCallout: AutoCancelCallout, deps: ACFilterDeps = ACFilterDeps()): WithDepsFailableOp[StageAndConfigHttp, AutoCancelRequest] = {
+  object ACFilterDeps {
+    def default(now: LocalDate, response: Request => Response, config: ZuoraRestConfig): ACFilterDeps = {
+      ACFilterDeps(
+        now,
+        Zuora.getAccountSummary,
+        response,
+        config
+      )
+    }
+  }
+
+  def apply(deps: ACFilterDeps)(autoCancelCallout: AutoCancelCallout): FailableOp[AutoCancelRequest] = {
     val accountId = autoCancelCallout.accountId
     for {
-      accountSummary <- deps.getAccountSummary(accountId).withLogging("getAccountSummary")
-      subToCancel <- getSubscriptionToCancel(accountSummary).toReader.withLogging("getSubscriptionToCancel")
-      cancellationDate <- getCancellationDateFromInvoices(accountSummary, date).toReader.withLogging("getCancellationDateFromInvoices")
+      accountSummary <- deps.getAccountSummary(accountId).run.run(StageAndConfigHttp(deps.response, deps.config)).withLogging("getAccountSummary")
+      subToCancel <- getSubscriptionToCancel(accountSummary).withLogging("getSubscriptionToCancel")
+      cancellationDate <- getCancellationDateFromInvoices(accountSummary, deps.now).withLogging("getCancellationDateFromInvoices")
     } yield AutoCancelRequest(accountId, subToCancel, cancellationDate)
   }
 

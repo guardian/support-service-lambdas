@@ -22,7 +22,7 @@ object Types {
   implicit class WithDepsFailableOpOps[A, F](httpFailable: WithDepsFailableOp[F, A]) {
 
     def local[I](func: I => F): WithDepsFailableOp[I, A] = {
-      httpFailable.run.local[I](func).toDepsFailableOp
+      httpFailable.run.local[I](func).toEitherT
     }
 
   }
@@ -30,16 +30,24 @@ object Types {
   // if we use a reader in our code, this lets us put the type massaging for the for comprehension right to the end of the line
   implicit class WithDepsReaderFailableOpOps[R, T](r: Reader[T, FailableOp[R]]) {
 
-    def toDepsFailableOp: WithDepsFailableOp[T, R] =
+    def toEitherT: WithDepsFailableOp[T, R] =
       EitherT.apply[({ type XReader[AA] = Reader[T, AA] })#XReader, ApiResponse, R](r)
+
+  }
+
+  // if we use a reader in our code, this lets us put the type massaging for the for comprehension right to the end of the line
+  implicit class WithDepsReaderOps[R, T](r: Reader[T, R]) {
+
+    def toEitherTPureEither: WithDepsFailableOp[T, R] =
+      EitherT.apply[({ type XReader[AA] = Reader[T, AA] })#XReader, ApiResponse, R](r.map(\/-.apply))
 
   }
 
   // if we have a failable op in a for comprehension, this call sits at the end of the line to massage the type
   implicit class FailableOpOps[A](failableOp: FailableOp[A]) {
 
-    def toReader[T]: WithDepsFailableOp[T, A] =
-      Reader[T, FailableOp[A]]((_: T) => failableOp).toDepsFailableOp
+    def toEitherTPureReader[T]: WithDepsFailableOp[T, A] =
+      Reader[T, FailableOp[A]]((_: T) => failableOp).toEitherT
 
   }
 

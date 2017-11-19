@@ -1,7 +1,5 @@
 package com.gu.util
 
-import java.io
-
 import com.gu.util.ETConfig.ETSendIds
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
@@ -69,12 +67,16 @@ object TrustedApiConfig {
   )(TrustedApiConfig.apply _)
 }
 
-case class Config(stage: String, trustedApiConfig: TrustedApiConfig, zuoraRestConfig: ZuoraRestConfig, etConfig: ETConfig)
+case class Config(stage: Stage, trustedApiConfig: TrustedApiConfig, zuoraRestConfig: ZuoraRestConfig, etConfig: ETConfig)
+
+case class Stage(value: String) extends AnyVal {
+  def isProd: Boolean = value == "PROD"
+}
 
 object Config extends Logging {
 
   implicit val configReads: Reads[Config] = (
-    (JsPath \ "stage").read[String] and
+    (JsPath \ "stage").read[String].map(Stage.apply) and
     (JsPath \ "trustedApiConfig").read[TrustedApiConfig] and
     (JsPath \ "zuoraRestConfig").read[ZuoraRestConfig] and
     (JsPath \ "etConfig").read[ETConfig]

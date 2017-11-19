@@ -1,35 +1,55 @@
 package com.gu.autoCancel
 
-import com.gu.autoCancel.AutoCancelFilter2.ACFilterDeps
+import com.gu.autoCancel.AutoCancel.AutoCancelRequest
 import com.gu.paymentFailure.GetPaymentData.PaymentFailureInformation
-import com.gu.paymentFailure.{ PaymentFailureCallout, PaymentFailureSteps, ToMessage }
-import com.gu.util.{ ETConfig, Logging }
+import com.gu.paymentFailure.ZuoraEmailSteps.ZuoraEmailStepsDeps
+import com.gu.paymentFailure.{ ToMessage, ZuoraEmailSteps }
+import com.gu.util.ETConfig.ETSendIds
 import com.gu.util.apigateway.ApiGatewayHandler.StageAndConfigHttp
-import com.gu.util.apigateway.{ ApiGatewayRequest, ApiGatewayResponse }
+import com.gu.util.apigateway.ApiGatewayRequest
 import com.gu.util.exacttarget.EmailRequest
 import com.gu.util.reader.Types._
-import com.gu.util.zuora.ZuoraModels.SubscriptionId
+import com.gu.util.{ Config, Logging }
+import okhttp3.{ Request, Response }
 import org.joda.time.LocalDate
 import play.api.libs.json.Json
 
-import scalaz.{ Reader, \/- }
+import scalaz.\/-
 
 object AutoCancelSteps extends Logging {
 
-  def apply(acDeps: ACFilterDeps = ACFilterDeps())(apiGatewayRequest: ApiGatewayRequest): WithDepsFailableOp[StageAndConfigHttp, Unit] = {
+  object AutoCancelStepsDeps {
+    def default(now: LocalDate, response: Request => Response, config: Config): AutoCancelStepsDeps = {
+      AutoCancelStepsDeps(
+        AutoCancel.apply(StageAndConfigHttp(response, config.zuoraRestConfig)),
+        AutoCancelFilter2.apply(AutoCancelFilter2.ACFilterDeps.default(now, response, config.zuoraRestConfig)),
+        config.etConfig.etSendIDs,
+        ZuoraEmailSteps.sendEmailRegardingAccount(ZuoraEmailStepsDeps.default(response, config))
+      )
+    }
+  }
+
+  case class AutoCancelStepsDeps(
+    autoCancel: AutoCancelRequest => FailableOp[Unit],
+    autoCancelFilter2: AutoCancelCallout => FailableOp[AutoCancelRequest],
+    etSendIds: ETSendIds,
+    sendEmailRegardingAccount: (String, PaymentFailureInformation => EmailRequest) => FailableOp[Unit]
+  )
+
+  def apply(deps: AutoCancelStepsDeps)(apiGatewayRequest: ApiGatewayRequest): FailableOp[Unit] = {
     for {
-      autoCancelCallout <- Json.fromJson[AutoCancelCallout](Json.parse(apiGatewayRequest.body)).toFailableOp.withLogging("zuora callout").toReader
-      _ <- AutoCancelFilter(autoCancelCallout, onlyCancelDirectDebit = apiGatewayRequest.onlyCancelDirectDebit).toReader
-      acRequest <- AutoCancelFilter2(LocalDate.now /*should be in effects package */ , autoCancelCallout, acDeps).withLogging(s"auto-cancellation filter for ${autoCancelCallout.accountId}")
-      _ <- AutoCancel(acRequest).withLogging(s"auto-cancellation for ${autoCancelCallout.accountId}")
+      autoCancelCallout <- Json.fromJson[AutoCancelCallout](Json.parse(apiGatewayRequest.body)).toFailableOp.withLogging("zuora callout")
+      _ <- AutoCancelFilter(autoCancelCallout, onlyCancelDirectDebit = apiGatewayRequest.onlyCancelDirectDebit)
+      acRequest <- deps.autoCancelFilter2(autoCancelCallout).withLogging(s"auto-cancellation filter for ${autoCancelCallout.accountId}")
+      _ <- deps.autoCancel(acRequest).withLogging(s"auto-cancellation for ${autoCancelCallout.accountId}")
       //      _ <- PaymentFailureSteps.sendEmailSteps()(paymentFailureCallout(autoCancelCallout))
-      request <- makeRequest(autoCancelCallout).local[StageAndConfigHttp](_.config.etConfig).toDepsFailableOp
-      _ <- PaymentFailureSteps.sendEmailSteps()(autoCancelCallout.accountId, request)
+      request <- makeRequest(deps.etSendIds, autoCancelCallout)
+      _ <- deps.sendEmailRegardingAccount(autoCancelCallout.accountId, request)
     } yield ()
   }
 
-  def makeRequest(autoCancelCallout: AutoCancelCallout): Reader[ETConfig, FailableOp[PaymentFailureInformation => EmailRequest]] = Reader { config =>
-    \/-({ pFI: PaymentFailureInformation => EmailRequest(config.etSendIDs.cancelled, ToMessage(autoCancelCallout, pFI)) })
+  def makeRequest(etSendIds: ETSendIds, autoCancelCallout: AutoCancelCallout): FailableOp[PaymentFailureInformation => EmailRequest] = {
+    \/-({ pFI: PaymentFailureInformation => EmailRequest(etSendIds.cancelled, ToMessage(autoCancelCallout, pFI)) })
 
   }
 

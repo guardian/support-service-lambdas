@@ -1,23 +1,16 @@
 package com.gu.autoCancel
 
-import com.gu.{ TestingRawEffects, WithDependenciesFailableOp }
 import com.gu.autoCancel.AutoCancel.AutoCancelRequest
 import com.gu.autoCancel.AutoCancelFilter2.ACFilterDeps
-import com.gu.effects.RawEffects
-import com.gu.util.ETConfig.{ ETSendId, ETSendIds }
-import com.gu.util.apigateway.ApiGatewayHandler.StageAndConfigHttp
-import com.gu.util.apigateway.{ ApiGatewayRequest, ResponseModels, URLParams }
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.ZuoraModels._
-import com.gu.util.{ Config, ETConfig, TrustedApiConfig, ZuoraRestConfig }
-import okhttp3._
+import com.gu.{ TestData, TestingRawEffects, WithDependenciesFailableOp }
 import okhttp3.internal.Util.UTF_8
 import okio.Buffer
 import org.joda.time.LocalDate
 import org.scalatest._
 
-import scala.util.Success
-import scalaz.{ Id, Reader, \/, \/- }
+import scalaz.\/-
 
 class AutoCancelStepsTest extends FlatSpec with Matchers {
 
@@ -26,18 +19,22 @@ class AutoCancelStepsTest extends FlatSpec with Matchers {
   val singleOverdueInvoice = Invoice("inv123", LocalDate.now.minusDays(14), 11.99, "Posted")
 
   "auto cancel filter 2" should "cancel attempt" in {
+    val a = new TestingRawEffects(false, 1)
     val aCDeps = ACFilterDeps(
-      getAccountSummary = _ => WithDependenciesFailableOp.liftT(AccountSummary(basicInfo, List(subscription), List(singleOverdueInvoice)))
+      now = LocalDate.now,
+      getAccountSummary = _ => WithDependenciesFailableOp.liftT(AccountSummary(basicInfo, List(subscription), List(singleOverdueInvoice))),
+      a.response,
+      TestData.fakeZuoraConfig
     )
     val autoCancelCallout = AutoCancelHandlerTest.fakeCallout(true)
-    val cancel: FailableOp[AutoCancelRequest] = AutoCancelFilter2(LocalDate.now, autoCancelCallout, aCDeps).run.run(new TestingRawEffects(false, 1).configHttp)
+    val cancel: FailableOp[AutoCancelRequest] = AutoCancelFilter2(aCDeps)(autoCancelCallout)
 
     cancel should be(\/-(AutoCancelRequest("id123", SubscriptionId("sub123"), LocalDate.now.minusDays(14))))
   }
 
   "auto cancel" should "turn off auto pay" in {
     val effects = new TestingRawEffects(false, 200)
-    AutoCancel(AutoCancelRequest("AID", SubscriptionId("subid"), LocalDate.now)).run.run(effects.configHttp)
+    AutoCancel(effects.configHttp)(AutoCancelRequest("AID", SubscriptionId("subid"), LocalDate.now))
 
     val requests = effects.result.map { request =>
       val buffer = new Buffer()

@@ -1,11 +1,11 @@
 package com.gu.util
 
-import com.gu.util.reader.Types.{ _ }
+import com.gu.util.reader.Types._
 import org.apache.log4j.Logger
 
 import scalaz.{ -\/, \/- }
 
-trait Logging {
+trait Logging { // in future maybe put logging into a context so the messages stack together like a stack trace
 
   val logger = Logger.getLogger(getClass.getName)
 
@@ -16,7 +16,7 @@ trait Logging {
 
       (configHttpFailableOp.run map {
         _.withLogging(message)
-      }).toDepsFailableOp
+      }).toEitherT
 
     }
 

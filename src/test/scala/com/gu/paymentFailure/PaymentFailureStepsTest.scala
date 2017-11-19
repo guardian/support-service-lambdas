@@ -1,6 +1,6 @@
 package com.gu.paymentFailure
 
-import com.gu.TestData.{ be, fakeApiConfig }
+import com.gu.TestData.fakeApiConfig
 import com.gu.util.apigateway.ApiGatewayResponse.unauthorized
 import org.scalatest.{ FlatSpec, Matchers }
 
@@ -13,7 +13,7 @@ class PaymentFailureStepsTest extends FlatSpec with Matchers {
     val actualWrongTenantId = "wrong"
 
     val expected = \/.left(unauthorized)
-    val result = PaymentFailureSteps.validateTenantCallout(actualWrongTenantId).run(fakeApiConfig)
+    val result = PaymentFailureSteps.validateTenantCallout(fakeApiConfig)(actualWrongTenantId)
 
     result should be(expected)
   }

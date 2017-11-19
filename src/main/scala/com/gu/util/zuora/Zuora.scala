@@ -1,7 +1,7 @@
 package com.gu.util.zuora
 
 import com.gu.util.apigateway.ApiGatewayHandler.StageAndConfigHttp
-import com.gu.util.reader.Types.{ WithDepsFailableOp }
+import com.gu.util.reader.Types.WithDepsFailableOp
 import com.gu.util.zuora.ZuoraModels._
 import com.gu.util.zuora.ZuoraReaders._
 import com.gu.util.zuora.ZuoraWriters._

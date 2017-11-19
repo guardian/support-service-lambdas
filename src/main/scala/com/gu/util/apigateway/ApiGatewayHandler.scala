@@ -3,7 +3,6 @@ package com.gu.util.apigateway
 import java.io.{ InputStream, OutputStream }
 
 import com.amazonaws.services.lambda.runtime.Context
-import com.gu.effects.RawEffects
 import com.gu.util.Auth.credentialsAreValid
 import com.gu.util._
 import com.gu.util.apigateway.ApiGatewayResponse.{ outputForAPIGateway, successfulExecution, unauthorized }
@@ -20,31 +19,44 @@ object ApiGatewayHandler extends Logging {
 
   //  code dependencies
   case class HandlerDeps(
-    parseConfig: String => Try[Config] = Config.parseConfig
+    s3Load: () => Try[String],
+    stage: Stage,
+    parseConfig: String => Try[Config],
+    operation: Config => ApiGatewayRequest => FailableOp[Unit]
   )
 
-  case class StageAndConfigHttp(response: Request => Response, config: Config)
+  object HandlerDeps {
+    def default(stage: Stage, s3Load: Stage => Try[String], operation: Config => ApiGatewayRequest => FailableOp[Unit]): HandlerDeps =
+      HandlerDeps(
+        () => s3Load(stage),
+        stage,
+        Config.parseConfig,
+        operation
+      )
+  }
 
-  def apply(rawEffects: RawEffects, inputStream: InputStream, outputStream: OutputStream, context: Context, deps: HandlerDeps = HandlerDeps())(operation: ApiGatewayRequest => WithDepsFailableOp[StageAndConfigHttp, Unit]): Unit = {
+  case class StageAndConfigHttp(response: Request => Response, config: ZuoraRestConfig)
+
+  def apply(deps: HandlerDeps)(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
 
     val response = for {
-      config <- loadConfig(rawEffects, deps)
+      config <- loadConfig(deps)
       apiGatewayRequest <- parseApiGatewayRequest(inputStream)
       _ <- authenticateCallout(apiGatewayRequest.requestAuth, config.trustedApiConfig).withLogging("authentication")
-      _ <- operation(apiGatewayRequest).run.run(StageAndConfigHttp(rawEffects.response, config))
+      _ <- deps.operation(config)(apiGatewayRequest)
     } yield ()
 
     outputForAPIGateway(outputStream, response.fold(identity, _ => successfulExecution))
 
   }
 
-  def loadConfig(rawEffects: RawEffects, deps: HandlerDeps = HandlerDeps()): FailableOp[Config] = {
-    val stage = rawEffects.stage()
+  def loadConfig(deps: HandlerDeps): FailableOp[Config] = {
+    val stage = deps.stage
     logger.info(s"${this.getClass} Lambda is starting up in $stage")
 
     for {
 
-      textConfig <- rawEffects.s3Load(stage).toFailableOp("load config from s3")
+      textConfig <- deps.s3Load().toFailableOp("load config from s3")
       config <- deps.parseConfig(textConfig).toFailableOp("parse config file")
       _ <- if (stage == config.stage) { \/-(()) } else { -\/(ApiGatewayResponse.internalServerError(s"running in $stage with config from ${config.stage}")) }
 

@@ -2,8 +2,10 @@ package manualTest
 
 import com.gu.effects.{ Http, RawEffects }
 import com.gu.util.ETConfig.ETSendId
+import com.gu.util.{ Config, Stage }
 import com.gu.util.apigateway.ApiGatewayHandler.HandlerDeps
-import com.gu.util.exacttarget.EmailSend.ETS
+import com.gu.util.exacttarget.ETClient.ETClientDeps
+import com.gu.util.exacttarget.EmailSendSteps.EmailSendStepsDeps
 import com.gu.util.exacttarget._
 
 import scala.io.Source
@@ -38,22 +40,21 @@ object EmailClientSystemTest extends App {
     )
   )
 
-  val configAttempt = Try { Source.fromFile("/etc/gu/payment-failure-lambdas.private.json").mkString }
-  configAttempt.flatMap {
-    config =>
-      HandlerDeps().parseConfig(config).map { config =>
-        ETS(Http.response, "CODE", config.etConfig)
-      }
-  }.map {
-    service =>
-      val a = service.etConfig.etSendIDs
-      Seq( /*a.pf1, a.pf2, a.pf3,*/ a.pf4 /*, a.cancelled*/ ).map { num =>
-        val emailResult = EmailSend()(EmailRequest(
-          etSendId = num,
-          message = message(num)
-        )).run.run(service)
-        println(s"result for $num:::::: $emailResult")
-      }
+  for {
+    configAttempt <- Try {
+      Source.fromFile("/etc/gu/payment-failure-lambdas.private.json").mkString
+    }
+    config <- Config.parseConfig(configAttempt)
+    deps = EmailSendStepsDeps.default(Stage("CODE"), RawEffects.createDefault.response, config.etConfig)
+    a = config.etConfig.etSendIDs
+  } yield Seq( /*a.pf1, a.pf2, a.pf3,*/ a.pf4 /*, a.cancelled*/ ).map { etSendId =>
+    val emailResult = EmailSendSteps(
+      deps
+    )(EmailRequest(
+      etSendId = etSendId,
+      message = message(etSendId)
+    ))
+    println(s"result for $etSendId:::::: $emailResult")
   }
 
 }

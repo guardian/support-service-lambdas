@@ -7,7 +7,7 @@ import okhttp3.{ FormBody, Request, Response }
 import play.api.libs.functional.syntax._
 import play.api.libs.json.{ JsPath, JsSuccess, Json, Reads }
 
-import scalaz.{ -\/, Reader, \/- }
+import scalaz.{ -\/, \/- }
 
 object SalesforceAuthenticate extends Logging {
 
@@ -32,24 +32,23 @@ object SalesforceAuthenticate extends Logging {
 
   case class ETImpure(response: (Request => Response), config: ETConfig)
 
-  def apply(): Reader[ETImpure, FailableOp[SalesforceAuth]] = Reader {
-    et: ETImpure =>
-      val builder = requestBuilder()
-      val formBody = new FormBody.Builder()
-        .add("clientId", et.config.clientId)
-        .add("clientSecret", et.config.clientSecret)
-        .build()
-      val request = builder.post(formBody).build()
-      logger.info(s"Attempting to perform Salesforce Authentication")
-      val response = et.response(request)
-      val responseBody = Json.parse(response.body().string())
-      responseBody.validate[SalesforceAuth] match {
-        case JsSuccess(result, _) =>
-          logger.info(s"Successful Salesforce authentication.")
-          \/-(result)
-        case _ =>
-          logger.error(s"Failed to authenticate with Salesforce | body was: ${responseBody.toString}")
-          -\/(ApiGatewayResponse.internalServerError(s"Failed to authenticate with Salesforce"))
-      }
+  def apply(et: ETImpure): FailableOp[SalesforceAuth] = {
+    val builder = requestBuilder()
+    val formBody = new FormBody.Builder()
+      .add("clientId", et.config.clientId)
+      .add("clientSecret", et.config.clientSecret)
+      .build()
+    val request = builder.post(formBody).build()
+    logger.info(s"Attempting to perform Salesforce Authentication")
+    val response = et.response(request)
+    val responseBody = Json.parse(response.body().string())
+    responseBody.validate[SalesforceAuth] match {
+      case JsSuccess(result, _) =>
+        logger.info(s"Successful Salesforce authentication.")
+        \/-(result)
+      case _ =>
+        logger.error(s"Failed to authenticate with Salesforce | body was: ${responseBody.toString}")
+        -\/(ApiGatewayResponse.internalServerError(s"Failed to authenticate with Salesforce"))
+    }
   }
 }

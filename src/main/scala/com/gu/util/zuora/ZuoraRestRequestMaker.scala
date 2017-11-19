@@ -1,8 +1,9 @@
 package com.gu.util.zuora
 
-import com.gu.util.apigateway.ApiGatewayHandler.{ StageAndConfigHttp }
+import com.gu.util.apigateway.ApiGatewayHandler.StageAndConfigHttp
 import com.gu.util.apigateway.ApiGatewayResponse._
 import com.gu.util.apigateway.ResponseModels.ApiResponse
+import com.gu.util.reader.Types._
 import com.gu.util.zuora.ZuoraModels._
 import com.gu.util.zuora.ZuoraReaders._
 import com.gu.util.{ Logging, ZuoraRestConfig }
@@ -10,8 +11,7 @@ import okhttp3._
 import play.api.libs.json._
 
 import scalaz.Scalaz._
-import scalaz.{ EitherT, Reader, \/ }
-import com.gu.util.reader.Types._
+import scalaz.{ Reader, \/ }
 
 object ZuoraRestRequestMaker extends Logging {
 
@@ -44,20 +44,20 @@ object ZuoraRestRequestMaker extends Logging {
 
   def get[RESP](path: String)(implicit r: Reads[RESP]): WithDepsFailableOp[StageAndConfigHttp, RESP] =
     Reader { stageAndConfigHttp: StageAndConfigHttp =>
-      val request = buildRequest(stageAndConfigHttp.config.zuoraRestConfig)(path).get().build()
+      val request = buildRequest(stageAndConfigHttp.config)(path).get().build()
       logger.info(s"Getting $path from Zuora")
       val response = stageAndConfigHttp.response(request)
       convertResponseToCaseClass[RESP](response)
-    }.toDepsFailableOp
+    }.toEitherT
 
   def put[REQ, RESP](req: REQ, path: String)(implicit tjs: Writes[REQ], r: Reads[RESP]): WithDepsFailableOp[StageAndConfigHttp, RESP] =
     Reader { stageAndConfigHttp: StageAndConfigHttp =>
       val body = RequestBody.create(MediaType.parse("application/json"), Json.toJson(req).toString)
-      val request = buildRequest(stageAndConfigHttp.config.zuoraRestConfig)(path).put(body).build()
+      val request = buildRequest(stageAndConfigHttp.config)(path).put(body).build()
       logger.info(s"Attempting to $path with the following command: $req")
       val response = stageAndConfigHttp.response(request)
       convertResponseToCaseClass[RESP](response)
-    }.toDepsFailableOp
+    }.toEitherT
 
   def buildRequest(config: ZuoraRestConfig)(route: String): Request.Builder =
     new Request.Builder()

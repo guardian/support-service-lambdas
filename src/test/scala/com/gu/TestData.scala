@@ -2,15 +2,15 @@ package com.gu
 
 import com.gu.effects.RawEffects
 import com.gu.util.ETConfig.{ ETSendId, ETSendIds }
-import com.gu.util.apigateway.ApiGatewayHandler.StageAndConfigHttp
-import com.gu.util.reader.Types.{ FailableOp, WithDepsFailableOp }
-import com.gu.util.{ Config, ETConfig, TrustedApiConfig, ZuoraRestConfig }
+import com.gu.util._
+import com.gu.util.apigateway.ApiGatewayHandler.{ HandlerDeps, StageAndConfigHttp }
+import com.gu.util.apigateway.ApiGatewayRequest
+import com.gu.util.reader.Types.{ FailableOp, WithDepsFailableOp, _ }
 import com.gu.util.zuora.ZuoraModels.{ InvoiceItem, InvoiceTransactionSummary, ItemisedInvoice }
 import okhttp3._
 import org.joda.time.LocalDate
 import org.scalatest.Matchers
 import play.api.libs.json.Json
-import com.gu.util.reader.Types._
 
 import scala.util.Success
 import scalaz.{ Reader, \/ }
@@ -29,10 +29,11 @@ object TestData extends Matchers {
   val weirdInvoiceTransactionSummary = InvoiceTransactionSummary(List(itemisedInvoice(0, List(invoiceItemA)), itemisedInvoice(49, List(invoiceItemB, invoiceItemA, invoiceItemC))))
 
   val fakeApiConfig = TrustedApiConfig("validApiClientId", "validApiToken", "testEnvTenantId")
-  val fakeZuoraConfig = ZuoraRestConfig("fakeUrl", "fakeUser", "fakePass")
-  val fakeETConfig = ETConfig(etSendIDs = ETSendIds(ETSendId("11"), ETSendId("22"), ETSendId("33"), ETSendId("44"), ETSendId("can")), "fakeClientId", "fakeClientSecret")
+  val fakeZuoraConfig = ZuoraRestConfig("https://ddd", "fakeUser", "fakePass")
+  val fakeETSendIds = ETSendIds(ETSendId("11"), ETSendId("22"), ETSendId("33"), ETSendId("44"), ETSendId("can"))
+  val fakeETConfig = ETConfig(etSendIDs = fakeETSendIds, "fakeClientId", "fakeClientSecret")
 
-  val fakeConfig = Config("DEV", fakeApiConfig, zuoraRestConfig = ZuoraRestConfig("https://ddd", "e@f.com", "ggg"),
+  val fakeConfig = Config(Stage("DEV"), fakeApiConfig, zuoraRestConfig = ZuoraRestConfig("https://ddd", "e@f.com", "ggg"),
     etConfig = ETConfig(etSendIDs = ETSendIds(ETSendId("11"), ETSendId("22"), ETSendId("33"), ETSendId("44"), ETSendId("can")), clientId = "jjj", clientSecret = "kkk"))
 
   val missingCredentialsResponse = """{"statusCode":"401","headers":{"Content-Type":"application/json"},"body":"Credentials are missing or invalid"}"""
@@ -76,13 +77,13 @@ object TestData extends Matchers {
 
 }
 
-class TestingRawEffects(val isProd: Boolean, val defaultCode: Int, responses: Map[String, (Int, String)] = Map()) {
+class TestingRawEffects(val isProd: Boolean = false, val defaultCode: Int = 1, responses: Map[String, (Int, String)] = Map()) {
 
   var result: List[Request] = Nil // !
 
-  val stage = if (isProd) "PROD" else "DEV"
+  val stage = Stage(if (isProd) "PROD" else "DEV")
 
-  def response: Request => Response = {
+  val response: Request => Response = {
     req =>
       result = req :: result
       val (code, response) = responses.getOrElse(req.url().encodedPath(), (defaultCode, """{"success": true}"""))
@@ -90,12 +91,13 @@ class TestingRawEffects(val isProd: Boolean, val defaultCode: Int, responses: Ma
       new Response.Builder().request(req).protocol(Protocol.HTTP_1_1).code(code).body(ResponseBody.create(MediaType.parse("text/plain"), response)).build()
   }
 
-  val rawEffects = RawEffects(response, () => stage, _ => Success(TestData.codeConfig))
+  val rawEffects = RawEffects(response, stage, _ => Success(TestData.codeConfig), () => new LocalDate(2017, 11, 19))
 
-  val fakeConfig = Config(stage, TrustedApiConfig("a", "b", "c"), zuoraRestConfig = ZuoraRestConfig("https://ddd", "e@f.com", "ggg"),
-    etConfig = ETConfig(etSendIDs = ETSendIds(ETSendId("11"), ETSendId("22"), ETSendId("33"), ETSendId("44"), ETSendId("can")), clientId = "jjj", clientSecret = "kkk"))
+  //  val fakeConfig = Config(stage, TrustedApiConfig("a", "b", "c"), zuoraRestConfig = ZuoraRestConfig("https://ddd", "e@f.com", "ggg"),
+  //    etConfig = ETConfig(etSendIDs = ETSendIds(ETSendId("11"), ETSendId("22"), ETSendId("33"), ETSendId("44"), ETSendId("can")), clientId = "jjj", clientSecret = "kkk"))
 
-  val configHttp = StageAndConfigHttp(response, fakeConfig)
+  def handlerDeps(operation: Config => ApiGatewayRequest => FailableOp[Unit]) = HandlerDeps(() => Success(""), Stage("DEV"), _ => Success(TestData.fakeConfig), operation)
+  val configHttp = StageAndConfigHttp(response, TestData.fakeZuoraConfig)
 
 }
 
@@ -103,7 +105,7 @@ object WithDependenciesFailableOp {
 
   // lifts any plain value all the way in, usually useful in tests
   def liftT[R, T](value: R): WithDepsFailableOp[T, R] =
-    \/.right(value).toReader[T]
+    \/.right(value).toEitherTPureReader[T]
 
   // lifts any plain value all the way in, usually useful in tests
   def liftR[R, T](value: R): Reader[T, FailableOp[R]] =
