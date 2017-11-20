@@ -13,18 +13,13 @@ import scala.util.{ Success, Try }
 class ConfigLoaderSystemTest extends FlatSpec with Matchers {
 
   "loader" should "be able to load the prod config successfully" in {
-    //    val requestAuth = Some(RequestAuth(apiClientId = "validUser", apiToken = "ndjashjkhajshs"))
-    //    assert(credentialsAreValid(requestAuth, trustedApiConfig) == false)
     val prod = ConfigLoad.load(Stage("PROD"))
     validate(prod)
   }
 
   it should "be able to load the code config successfully" in {
-    //    val requestAuth = Some(RequestAuth(apiClientId = "validUser", apiToken = "ndjashjkhajshs"))
-    //    assert(credentialsAreValid(requestAuth, trustedApiConfig) == false)
     val code: Try[String] = ConfigLoad.load(Stage("CODE"))
     validate(code)
-    //code should be(Success(Config(TrustedApiConfig("a", "b", "c"), zuoraRestConfig = ZuoraRestConfig("d", "e", "f"), etConfig = ETConfig(Map(0 -> "h"), "i", "j"))))
   }
 
   def validate(configAttemp: Try[String]) = {
@@ -39,8 +34,6 @@ class ConfigLoaderSystemTest extends FlatSpec with Matchers {
   }
 
   it should "be able to load the local test config successfully" in {
-    //    val requestAuth = Some(RequestAuth(apiClientId = "validUser", apiToken = "ndjashjkhajshs"))
-    //    assert(credentialsAreValid(requestAuth, trustedApiConfig) == false)
     val configAttempt = Try { Source.fromFile("/etc/gu/payment-failure-lambdas.private.json").mkString }
 
     validate(configAttempt)
