@@ -85,10 +85,10 @@ object ETClient {
   def sendEmail(eTClientDeps: ETClientDeps)(emailRequest: EmailRequest): FailableOp[Unit] = {
     for {
       auth <- SalesforceAuthenticate(ETImpure(eTClientDeps.response, eTClientDeps.etConfig))
-      req <- buildRequestET(ETReq(eTClientDeps.etConfig, auth))(emailRequest.etSendId) //.toEitherT.leftMap(err => ApiGatewayResponse.internalServerError(s"oops todo because: $err")).local[ETClientDeps]
-      response <- sendEmailOp(eTClientDeps.response)(req, emailRequest.message) //.toEitherT.local[ETClientDeps](_.response)
-      result <- processResponse(response)
-    } yield result
+      req <- buildRequestET(ETReq(eTClientDeps.etConfig, auth))(emailRequest.etSendId)
+      response <- sendEmailOp(eTClientDeps.response)(req, emailRequest.message)
+      _ <- processResponse(response)
+    } yield ()
   }
 
   private def sendEmailOp(response: Request => Response)(req: Request.Builder, message: Message): FailableOp[Response] = {

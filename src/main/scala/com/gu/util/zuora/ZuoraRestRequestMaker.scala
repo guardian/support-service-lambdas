@@ -12,37 +12,54 @@ import play.api.libs.json._
 
 import scalaz.Scalaz._
 import scalaz.{ Reader, \/ }
+import scalaz.syntax.std.boolean._
 
 object ZuoraRestRequestMaker extends Logging {
 
-  def convertResponseToCaseClass[T](response: Response)(implicit r: Reads[T]): ApiResponse \/ T = {
-    if (response.isSuccessful) {
-      val bodyAsJson = Json.parse(response.body.string)
-      bodyAsJson.validate[ZuoraCommonFields] match {
-        case JsSuccess(ZuoraCommonFields(true), _) =>
-          bodyAsJson.validate[T] match {
-            case success: JsSuccess[T] => success.get.right
-            case error: JsError => {
-              logger.info(s"Failed to convert Zuora response to case case 1 $error. Response body was: \n ${bodyAsJson}")
-              internalServerError("Error when converting Zuora response to case class").left
-            }
-          }
-        case JsSuccess(zuoraFailure, _) =>
-          logger.error(s"Zuora rejected our call $bodyAsJson")
-          internalServerError("Received failure result from Zuora during autoCancellation").left
-        case error: JsError => {
-          logger.info(s"Failed to convert Zuora response to case case 2 $error. Response body was: \n ${bodyAsJson}")
-          internalServerError("Error when converting Zuora response to case class").left
-        }
-      }
+  def convertResponseToCaseClass[T: Reads](response: Response): ApiResponse \/ T = {
+    for {
+      _ <- httpIsSuccessful(response)
+      bodyAsJson = Json.parse(response.body.string)
+      _ <- zuoraIsSuccessful(bodyAsJson)
+      result <- toResult[T](bodyAsJson)
+    } yield result
 
+  }
+
+  def httpIsSuccessful(response: Response): FailableOp[Unit] = {
+    if (response.isSuccessful) {
+      ().right
     } else {
       logger.error(s"Request to Zuora was unsuccessful, the response was: \n $response")
       internalServerError("Request to Zuora was unsuccessful").left
     }
   }
+  def zuoraIsSuccessful(bodyAsJson: JsValue): FailableOp[Unit] = {
 
-  def get[RESP](path: String)(implicit r: Reads[RESP]): WithDepsFailableOp[ZuoraDeps, RESP] =
+    bodyAsJson.validate[ZuoraCommonFields] match {
+      case JsSuccess(ZuoraCommonFields(true), _) =>
+        ().right
+      case JsSuccess(zuoraFailure, _) =>
+        logger.error(s"Zuora rejected our call $bodyAsJson")
+        internalServerError("Received failure result from Zuora during autoCancellation").left
+      case error: JsError => {
+        logger.error(s"Failed to read common fields from zuora response: $error. Response body was: \n $bodyAsJson")
+        internalServerError("Error when reading common fields from zuora").left
+      }
+    }
+  }
+  def toResult[T: Reads](bodyAsJson: JsValue): FailableOp[T] = {
+    bodyAsJson.validate[T] match {
+      case success: JsSuccess[T] =>
+        success.get.right
+      case error: JsError => {
+        logger.error(s"Failed to convert Zuora response to case case $error. Response body was: \n $bodyAsJson")
+        internalServerError("Error when converting Zuora response to case class").left
+      }
+    }
+  }
+
+  def get[RESP: Reads](path: String): WithDepsFailableOp[ZuoraDeps, RESP] =
     Reader { zuoraDeps: ZuoraDeps =>
       val request = buildRequest(zuoraDeps.config)(path).get().build()
       logger.info(s"Getting $path from Zuora")
@@ -50,7 +67,7 @@ object ZuoraRestRequestMaker extends Logging {
       convertResponseToCaseClass[RESP](response)
     }.toEitherT
 
-  def put[REQ, RESP](req: REQ, path: String)(implicit tjs: Writes[REQ], r: Reads[RESP]): WithDepsFailableOp[ZuoraDeps, RESP] =
+  def put[REQ: Writes, RESP: Reads](req: REQ, path: String): WithDepsFailableOp[ZuoraDeps, RESP] =
     Reader { zuoraDeps: ZuoraDeps =>
       val body = RequestBody.create(MediaType.parse("application/json"), Json.toJson(req).toString)
       val request = buildRequest(zuoraDeps.config)(path).put(body).build()

@@ -51,6 +51,12 @@ class ZuoraRestServiceTest extends AsyncFlatSpec {
       |}""".stripMargin
   )
 
+  val validZuoraNoOtherFields = Json.parse(
+    """{
+      |  "success": true
+      |}""".stripMargin
+  )
+
   def constructTestRequest(json: JsValue = dummyJson): Request = {
     val body = RequestBody.create(MediaType.parse("application/json"), json.toString)
     val request = new Request.Builder()
@@ -76,9 +82,15 @@ class ZuoraRestServiceTest extends AsyncFlatSpec {
     assert(either == -\/(internalServerError("Request to Zuora was unsuccessful")))
   }
 
-  it should "return a left[String] if the body of a successful response cannot be de-serialized" in {
+  it should "return a left[String] if the body of a successful response cannot be de-serialized with a zuora success response" in {
     val response = constructTestResponse(200)
     val either = ZuoraRestRequestMaker.convertResponseToCaseClass[Unit](response)
+    assert(either == -\/(internalServerError("Error when reading common fields from zuora")))
+  }
+
+  it should "return a left[String] if the body of a successful response cannot be de-serialized to that case class" in {
+    val response = constructTestResponse(200, validZuoraNoOtherFields)
+    val either = ZuoraRestRequestMaker.convertResponseToCaseClass[BasicAccountInfo](response)
     assert(either == -\/(internalServerError("Error when converting Zuora response to case class")))
   }
 
