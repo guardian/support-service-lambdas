@@ -13,9 +13,9 @@ import scala.util.{ Random, Try }
 object EmailClientSystemTest extends App {
 
   private val recipient = "john.duffell@guardian.co.uk"
-  private val unique = "pi123" + Random.nextInt
+  private def unique = "pi123" + Random.nextInt
 
-  def message(number: ETSendId) = Message(
+  def message(number: Int) = Message(
     To = ToDef(
       Address = recipient,
       SubscriberKey = recipient,
@@ -28,7 +28,7 @@ object EmailClientSystemTest extends App {
           payment_method = "paymentMethodValue",
           card_type = "cardTypeValue",
           card_expiry_date = "cardExpiryValue",
-          first_name = s"firstNameValue",
+          first_name = s"firstNameValue$number",
           last_name = "lastNameValue",
           paymentId = s"paymentId$unique", // must be unique otherwise the email won't arrive
           price = "49.0 GBP",
@@ -46,14 +46,15 @@ object EmailClientSystemTest extends App {
     config <- Config.parseConfig(configAttempt)
     deps = EmailSendStepsDeps.default(Stage("CODE"), RawEffects.createDefault.response, config.etConfig)
     a = config.etConfig.etSendIDs
-  } yield Seq(a.pf1, a.pf2, a.pf3, a.pf4, a.cancelled).map { etSendId =>
-    val emailResult = EmailSendSteps(
-      deps
-    )(EmailRequest(
-      etSendId = etSendId,
-      message = message(etSendId)
-    ))
-    println(s"result for $etSendId:::::: $emailResult")
+  } yield Seq(a.pf1, a.pf2, a.pf3, a.pf4, a.cancelled).zipWithIndex.map {
+    case (etSendId, index) =>
+      val emailResult = EmailSendSteps(
+        deps
+      )(EmailRequest(
+        etSendId = etSendId,
+        message = message(index + 1)
+      ))
+      println(s"result for $etSendId:::::: $emailResult")
   }
 
 }
