@@ -13,7 +13,7 @@ object ConfigLoad extends Logging {
 
   def load(stage: Stage): Try[String] = {
     logger.info(s"Attempting to load config in $stage")
-    val bucket = s"payment-failure-lambdas-private/$stage"
+    val bucket = s"payment-failure-lambdas-private/${stage.value}"
     val key = "payment-failure-lambdas.private.json"
     val request = new GetObjectRequest(bucket, key)
     AwsS3.fetchString(request)

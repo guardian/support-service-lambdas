@@ -24,7 +24,7 @@ case class SubscriberAttributesDef(
   card_expiry_date: String,
   first_name: String,
   last_name: String,
-  paymentId: String,
+  paymentId: String, // ET will filter out multiple emails with the same payment id
   price: String,
   serviceStartDate: String,
   serviceEndDate: String

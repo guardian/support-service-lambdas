@@ -1,20 +1,19 @@
 package manualTest
 
-import com.gu.effects.{ Http, RawEffects }
+import com.gu.effects.RawEffects
 import com.gu.util.ETConfig.ETSendId
-import com.gu.util.{ Config, Stage }
-import com.gu.util.apigateway.ApiGatewayHandler.HandlerDeps
-import com.gu.util.exacttarget.ETClient.ETClientDeps
 import com.gu.util.exacttarget.EmailSendSteps.EmailSendStepsDeps
 import com.gu.util.exacttarget._
+import com.gu.util.{ Config, Stage }
 
 import scala.io.Source
-import scala.util.Try
+import scala.util.{ Random, Try }
 
 // run this to send a one off email to yourself.  the email will take a few mins to arrive, but it proves the ET logic works
 object EmailClientSystemTest extends App {
 
-  private val recipient = "john.duffell+test@guardian.co.uk"
+  private val recipient = "john.duffell@guardian.co.uk"
+  private val unique = "pi123" + Random.nextInt
 
   def message(number: ETSendId) = Message(
     To = ToDef(
@@ -29,9 +28,9 @@ object EmailClientSystemTest extends App {
           payment_method = "paymentMethodValue",
           card_type = "cardTypeValue",
           card_expiry_date = "cardExpiryValue",
-          first_name = s"firstNameValue message $number",
+          first_name = s"firstNameValue",
           last_name = "lastNameValue",
-          paymentId = "paymentId",
+          paymentId = s"paymentId$unique", // must be unique otherwise the email won't arrive
           price = "49.0 GBP",
           serviceStartDate = "31 January 2016",
           serviceEndDate = "31 January 2017"
