@@ -35,8 +35,6 @@ object ApiGatewayHandler extends Logging {
       )
   }
 
-  case class StageAndConfigHttp(response: Request => Response, config: ZuoraRestConfig)
-
   def apply(deps: HandlerDeps)(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
 
     val response = for {

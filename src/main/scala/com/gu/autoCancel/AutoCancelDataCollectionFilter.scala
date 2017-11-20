@@ -2,10 +2,10 @@ package com.gu.autoCancel
 
 import com.github.nscala_time.time.OrderingImplicits._
 import com.gu.autoCancel.AutoCancel.AutoCancelRequest
-import com.gu.util.apigateway.ApiGatewayHandler.StageAndConfigHttp
 import com.gu.util.apigateway.ApiGatewayResponse.noActionRequired
 import com.gu.util.reader.Types.{ FailableOp, _ }
 import com.gu.util.zuora.Zuora
+import com.gu.util.zuora.Zuora.ZuoraDeps
 import com.gu.util.zuora.ZuoraModels.{ AccountSummary, Invoice, SubscriptionId }
 import com.gu.util.{ Logging, ZuoraRestConfig }
 import okhttp3.{ Request, Response }
@@ -17,7 +17,7 @@ object AutoCancelDataCollectionFilter extends Logging {
 
   case class ACFilterDeps(
     now: LocalDate,
-    getAccountSummary: String => WithDepsFailableOp[StageAndConfigHttp, AccountSummary],
+    getAccountSummary: String => WithDepsFailableOp[ZuoraDeps, AccountSummary],
     response: Request => Response,
     config: ZuoraRestConfig
   )
@@ -36,7 +36,7 @@ object AutoCancelDataCollectionFilter extends Logging {
   def apply(deps: ACFilterDeps)(autoCancelCallout: AutoCancelCallout): FailableOp[AutoCancelRequest] = {
     val accountId = autoCancelCallout.accountId
     for {
-      accountSummary <- deps.getAccountSummary(accountId).run.run(StageAndConfigHttp(deps.response, deps.config)).withLogging("getAccountSummary")
+      accountSummary <- deps.getAccountSummary(accountId).run.run(ZuoraDeps(deps.response, deps.config)).withLogging("getAccountSummary")
       subToCancel <- getSubscriptionToCancel(accountSummary).withLogging("getSubscriptionToCancel")
       cancellationDate <- getCancellationDateFromInvoices(accountSummary, deps.now).withLogging("getCancellationDateFromInvoices")
     } yield AutoCancelRequest(accountId, subToCancel, cancellationDate)

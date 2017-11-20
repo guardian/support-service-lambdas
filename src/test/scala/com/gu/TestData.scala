@@ -3,9 +3,10 @@ package com.gu
 import com.gu.effects.RawEffects
 import com.gu.util.ETConfig.{ ETSendId, ETSendIds }
 import com.gu.util._
-import com.gu.util.apigateway.ApiGatewayHandler.{ HandlerDeps, StageAndConfigHttp }
+import com.gu.util.apigateway.ApiGatewayHandler.HandlerDeps
 import com.gu.util.apigateway.ApiGatewayRequest
 import com.gu.util.reader.Types.{ FailableOp, WithDepsFailableOp, _ }
+import com.gu.util.zuora.Zuora.ZuoraDeps
 import com.gu.util.zuora.ZuoraModels.{ InvoiceItem, InvoiceTransactionSummary, ItemisedInvoice }
 import okhttp3._
 import org.joda.time.LocalDate
@@ -97,7 +98,7 @@ class TestingRawEffects(val isProd: Boolean = false, val defaultCode: Int = 1, r
   //    etConfig = ETConfig(etSendIDs = ETSendIds(ETSendId("11"), ETSendId("22"), ETSendId("33"), ETSendId("44"), ETSendId("can")), clientId = "jjj", clientSecret = "kkk"))
 
   def handlerDeps(operation: Config => ApiGatewayRequest => FailableOp[Unit]) = HandlerDeps(() => Success(""), Stage("DEV"), _ => Success(TestData.fakeConfig), operation)
-  val configHttp = StageAndConfigHttp(response, TestData.fakeZuoraConfig)
+  val zuoraDeps = ZuoraDeps(response, TestData.fakeZuoraConfig)
 
 }
 

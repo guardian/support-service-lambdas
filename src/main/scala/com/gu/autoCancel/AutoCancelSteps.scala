@@ -5,10 +5,10 @@ import com.gu.paymentFailure.GetPaymentData.PaymentFailureInformation
 import com.gu.paymentFailure.ZuoraEmailSteps.ZuoraEmailStepsDeps
 import com.gu.paymentFailure.{ ToMessage, ZuoraEmailSteps }
 import com.gu.util.ETConfig.ETSendIds
-import com.gu.util.apigateway.ApiGatewayHandler.StageAndConfigHttp
 import com.gu.util.apigateway.ApiGatewayRequest
 import com.gu.util.exacttarget.EmailRequest
 import com.gu.util.reader.Types._
+import com.gu.util.zuora.Zuora.ZuoraDeps
 import com.gu.util.{ Config, Logging }
 import okhttp3.{ Request, Response }
 import org.joda.time.LocalDate
@@ -21,7 +21,7 @@ object AutoCancelSteps extends Logging {
   object AutoCancelStepsDeps {
     def default(now: LocalDate, response: Request => Response, config: Config): AutoCancelStepsDeps = {
       AutoCancelStepsDeps(
-        AutoCancel.apply(StageAndConfigHttp(response, config.zuoraRestConfig)),
+        AutoCancel.apply(ZuoraDeps(response, config.zuoraRestConfig)),
         AutoCancelDataCollectionFilter.apply(AutoCancelDataCollectionFilter.ACFilterDeps.default(now, response, config.zuoraRestConfig)),
         config.etConfig.etSendIDs,
         ZuoraEmailSteps.sendEmailRegardingAccount(ZuoraEmailStepsDeps.default(response, config))

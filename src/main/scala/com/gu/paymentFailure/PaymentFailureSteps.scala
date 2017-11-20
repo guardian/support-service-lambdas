@@ -5,13 +5,13 @@ import com.gu.paymentFailure.ZuoraEmailSteps.ZuoraEmailStepsDeps
 import com.gu.util.Auth.validTenant
 import com.gu.util.ETConfig.ETSendIds
 import com.gu.util._
-import com.gu.util.apigateway.ApiGatewayHandler.StageAndConfigHttp
 import com.gu.util.apigateway.ApiGatewayResponse.unauthorized
 import com.gu.util.apigateway.{ ApiGatewayRequest, ApiGatewayResponse }
 import com.gu.util.exacttarget.EmailSendSteps.EmailSendStepsDeps
 import com.gu.util.exacttarget.{ EmailRequest, EmailSendSteps }
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.Zuora
+import com.gu.util.zuora.Zuora.ZuoraDeps
 import com.gu.util.zuora.ZuoraModels.InvoiceTransactionSummary
 import okhttp3.{ Request, Response }
 import play.api.libs.json.Json
@@ -77,7 +77,7 @@ object ZuoraEmailSteps {
     def default(response: Request => Response, config: Config): ZuoraEmailStepsDeps = {
       ZuoraEmailStepsDeps(
         EmailSendSteps.apply(EmailSendStepsDeps.default(config.stage, response, config.etConfig)),
-        a => Zuora.getInvoiceTransactions(a).run.run(StageAndConfigHttp(response, config.zuoraRestConfig))
+        a => Zuora.getInvoiceTransactions(a).run.run(ZuoraDeps(response, config.zuoraRestConfig))
       )
     }
   }
