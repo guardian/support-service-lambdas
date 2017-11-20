@@ -14,7 +14,7 @@ import scala.util.Try
 // run this to send a one off email to yourself.  the email will take a few mins to arrive, but it proves the ET logic works
 object EmailClientSystemTest extends App {
 
-  private val recipient = "john.duffell@guardian.co.uk"
+  private val recipient = "john.duffell+test@guardian.co.uk"
 
   def message(number: ETSendId) = Message(
     To = ToDef(
@@ -47,7 +47,7 @@ object EmailClientSystemTest extends App {
     config <- Config.parseConfig(configAttempt)
     deps = EmailSendStepsDeps.default(Stage("CODE"), RawEffects.createDefault.response, config.etConfig)
     a = config.etConfig.etSendIDs
-  } yield Seq( /*a.pf1, a.pf2, a.pf3,*/ a.pf4 /*, a.cancelled*/ ).map { etSendId =>
+  } yield Seq(a.pf1, a.pf2, a.pf3, a.pf4, a.cancelled).map { etSendId =>
     val emailResult = EmailSendSteps(
       deps
     )(EmailRequest(

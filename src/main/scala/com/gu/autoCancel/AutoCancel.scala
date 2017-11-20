@@ -11,7 +11,7 @@ object AutoCancel extends Logging {
 
   case class AutoCancelRequest(accountId: String, subToCancel: SubscriptionId, cancellationDate: LocalDate)
 
-  def apply(sc: ZuoraDeps)(acRequest: AutoCancelRequest): FailableOp[Unit] = {
+  def apply(zuoraDeps: ZuoraDeps)(acRequest: AutoCancelRequest): FailableOp[Unit] = {
     val AutoCancelRequest(accountId, subToCancel, cancellationDate) = acRequest
     logger.info(s"Attempting to perform auto-cancellation on account: $accountId")
     val zuoraOp = for {
@@ -19,6 +19,6 @@ object AutoCancel extends Logging {
       _ <- Zuora.cancelSubscription(subToCancel, cancellationDate).withLogging("cancelSubscription")
       _ <- Zuora.disableAutoPay(accountId).withLogging("disableAutoPay")
     } yield ()
-    zuoraOp.run.run(sc)
+    zuoraOp.run.run(zuoraDeps)
   }
 }
