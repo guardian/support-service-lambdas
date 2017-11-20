@@ -13,7 +13,7 @@ import org.joda.time.LocalDate
 
 import scalaz.Scalaz._
 
-object AutoCancelFilter2 extends Logging {
+object AutoCancelDataCollectionFilter extends Logging {
 
   case class ACFilterDeps(
     now: LocalDate,

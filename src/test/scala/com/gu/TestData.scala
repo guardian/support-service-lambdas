@@ -103,6 +103,14 @@ class TestingRawEffects(val isProd: Boolean = false, val defaultCode: Int = 1, r
 
 object WithDependenciesFailableOp {
 
+  // if we have a failable op in a for comprehension, this call sits at the end of the line to massage the type
+  implicit class FailableOpOps[A](failableOp: FailableOp[A]) {
+
+    def toEitherTPureReader[T]: WithDepsFailableOp[T, A] =
+      Reader[T, FailableOp[A]]((_: T) => failableOp).toEitherT
+
+  }
+
   // lifts any plain value all the way in, usually useful in tests
   def liftT[R, T](value: R): WithDepsFailableOp[T, R] =
     \/.right(value).toEitherTPureReader[T]

@@ -11,7 +11,7 @@ import com.gu.util.apigateway.ApiGatewayHandler.HandlerDeps
 
 object Lambda {
 
-  case class LambdaDeps(agh: (InputStream, OutputStream, Context) => Unit)
+  case class LambdaDeps(handler: (InputStream, OutputStream, Context) => Unit)
 
   def default(rawEffects: RawEffects) =
     LambdaDeps(
@@ -25,7 +25,7 @@ object Lambda {
   // it's the only part you can't test of the handler
   def handleRequest(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
     val deps = default(RawEffects.createDefault)
-    deps.agh(inputStream, outputStream, context)
+    deps.handler(inputStream, outputStream, context)
   }
 
 }

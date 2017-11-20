@@ -11,7 +11,7 @@ import com.gu.util.{ Config, Logging }
 
 object AutoCancelHandler extends App with Logging {
 
-  case class ACDeps(agh: (InputStream, OutputStream, Context) => Unit)
+  case class ACDeps(handler: (InputStream, OutputStream, Context) => Unit)
 
   def default(rawEffects: RawEffects) =
     ACDeps(
@@ -25,7 +25,7 @@ object AutoCancelHandler extends App with Logging {
   // it's the only part you can't test of the handler
   def handleRequest(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
     val deps = default(RawEffects.createDefault)
-    deps.agh(inputStream, outputStream, context)
+    deps.handler(inputStream, outputStream, context)
   }
 
 }

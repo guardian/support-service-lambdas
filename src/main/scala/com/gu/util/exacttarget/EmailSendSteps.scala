@@ -56,64 +56,22 @@ object Message {
 object EmailSendSteps extends Logging {
 
   case class EmailSendStepsDeps(
-    //    stage: Stage,
     sendEmail: EmailRequest => FailableOp[Unit],
     filterEmail: EmailRequest => FailableOp[Unit]
   )
 
-  // you can make a default ETS from a stage and an ET
-  // TODO choose the best implementation for default?
   object EmailSendStepsDeps {
     def default(stage: Stage, response: Request => Response, etConfig: ETConfig): EmailSendStepsDeps = {
       EmailSendStepsDeps(ETClient.sendEmail(ETClientDeps(response, etConfig)), FilterEmail(stage))
     }
 
-    //    def default(stage: Stage, et: ETClientDeps): EmailSendStepsDeps = {
-    //      def sendEmailD: (ETSendId, Message) => FailableOp[Unit] = {
-    //        Function.untupled((ETClient.sendEmail _).tupled.andThen(_.run.run(et)))
-    //      }
-    //
-    //      val filterEmailD = FilterEmail.apply _
-    //      EmailSendStepsDeps(stage, sendEmailD, filterEmailD)
-    //    }
   }
-
-  ///todo choose the best implementation for apply/2
-  //  def extract[D]: WithDepsFailableOp[D, D] = Reader(identity[D]).toEitherTPureEither
-  //
-  //  def apply(request: EmailRequest): WithDepsFailableOp[EmailSendStepsDeps, Unit] =
-  //    for {
-  //      ets <- extract[EmailSendStepsDeps]
-  //      _ <- ets.filterEmail(request).local[EmailSendStepsDeps](_.stage)
-  //      _ <- ets.sendEmail(request.etSendId, request.message).toEitherTPureReader[EmailSendStepsDeps]
-  //    } yield ()
-
-  ///
 
   def apply(ets: EmailSendStepsDeps)(request: EmailRequest): FailableOp[Unit] =
     for {
       _ <- ets.filterEmail(request)
       _ <- ets.sendEmail(request)
     } yield ()
-
-  ///
-  //  def run[D, R](function: D => WithDepsFailableOp[D, R]): WithDepsFailableOp[D, R] =
-  //    Reader {
-  //      function
-  //    }.toEitherTPureEither.flatMap(identity)
-  //
-  //  def apply2(request: EmailRequest): WithDepsFailableOp[EmailSendStepsDeps, Unit] = {
-  //    for {
-  //      _ <- run[EmailSendStepsDeps, Unit] {
-  //        _.filterEmail(request).local[EmailSendStepsDeps](_.stage)
-  //      }
-  //      _ <- run[EmailSendStepsDeps, Unit] {
-  //        _.sendEmail(request.etSendId, request.message).toEitherTPureReader[EmailSendStepsDeps]
-  //      }
-  //    } yield ()
-  //  }
-
-  ///
 
 }
 

@@ -19,7 +19,7 @@ class EndToEndHandlerTest extends FlatSpec with Matchers {
     val effects = config.rawEffects
     val deps = Lambda.default(effects)
     //execute
-    deps.agh(stream, os, null)
+    deps.handler(stream, os, null)
 
     //verify
     def body(b: RequestBody): String = {

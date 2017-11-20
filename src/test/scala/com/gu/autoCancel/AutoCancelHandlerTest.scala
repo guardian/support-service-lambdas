@@ -18,7 +18,7 @@ object AutoCancelHandlerTest {
 }
 class AutoCancelHandlerTest extends FlatSpec {
 
-  import AutoCancelFilter._
+  import AutoCancelInputFilter._
   import AutoCancelHandlerTest._
 
   "filterInvalidAccount" should "return a left if AutoPay = false" in {

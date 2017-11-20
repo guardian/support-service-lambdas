@@ -7,9 +7,9 @@ import org.scalatest._
 
 import scalaz.{ -\/, \/- }
 
-class AutoCancelFilter2Test extends FlatSpec {
+class AutoCancelDataCollectionFilterTest extends FlatSpec {
 
-  import AutoCancelFilter2._
+  import AutoCancelDataCollectionFilter._
 
   val basicInfo = BasicAccountInfo("id123", 11.99)
   val subscription = SubscriptionSummary(SubscriptionId("id123"), "A-S123", "Active")

@@ -6,7 +6,7 @@ import com.gu.util.reader.Types.FailableOp
 
 import scalaz.{ -\/, \/- }
 
-object AutoCancelFilter extends Logging {
+object AutoCancelInputFilter extends Logging {
   def apply(callout: AutoCancelCallout, onlyCancelDirectDebit: Boolean): FailableOp[Unit] = {
     for {
       _ <- filterAutoPay(callout).withLogging("filter on auto pay")

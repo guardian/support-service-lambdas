@@ -1,7 +1,7 @@
 package com.gu.autoCancel
 
 import com.gu.autoCancel.AutoCancel.AutoCancelRequest
-import com.gu.autoCancel.AutoCancelFilter2.ACFilterDeps
+import com.gu.autoCancel.AutoCancelDataCollectionFilter.ACFilterDeps
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.ZuoraModels._
 import com.gu.{ TestData, TestingRawEffects, WithDependenciesFailableOp }
@@ -27,7 +27,7 @@ class AutoCancelStepsTest extends FlatSpec with Matchers {
       TestData.fakeZuoraConfig
     )
     val autoCancelCallout = AutoCancelHandlerTest.fakeCallout(true)
-    val cancel: FailableOp[AutoCancelRequest] = AutoCancelFilter2(aCDeps)(autoCancelCallout)
+    val cancel: FailableOp[AutoCancelRequest] = AutoCancelDataCollectionFilter(aCDeps)(autoCancelCallout)
 
     cancel should be(\/-(AutoCancelRequest("id123", SubscriptionId("sub123"), LocalDate.now.minusDays(14))))
   }

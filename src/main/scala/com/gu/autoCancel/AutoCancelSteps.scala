@@ -22,7 +22,7 @@ object AutoCancelSteps extends Logging {
     def default(now: LocalDate, response: Request => Response, config: Config): AutoCancelStepsDeps = {
       AutoCancelStepsDeps(
         AutoCancel.apply(StageAndConfigHttp(response, config.zuoraRestConfig)),
-        AutoCancelFilter2.apply(AutoCancelFilter2.ACFilterDeps.default(now, response, config.zuoraRestConfig)),
+        AutoCancelDataCollectionFilter.apply(AutoCancelDataCollectionFilter.ACFilterDeps.default(now, response, config.zuoraRestConfig)),
         config.etConfig.etSendIDs,
         ZuoraEmailSteps.sendEmailRegardingAccount(ZuoraEmailStepsDeps.default(response, config))
       )
@@ -39,10 +39,9 @@ object AutoCancelSteps extends Logging {
   def apply(deps: AutoCancelStepsDeps)(apiGatewayRequest: ApiGatewayRequest): FailableOp[Unit] = {
     for {
       autoCancelCallout <- Json.fromJson[AutoCancelCallout](Json.parse(apiGatewayRequest.body)).toFailableOp.withLogging("zuora callout")
-      _ <- AutoCancelFilter(autoCancelCallout, onlyCancelDirectDebit = apiGatewayRequest.onlyCancelDirectDebit)
+      _ <- AutoCancelInputFilter(autoCancelCallout, onlyCancelDirectDebit = apiGatewayRequest.onlyCancelDirectDebit)
       acRequest <- deps.autoCancelFilter2(autoCancelCallout).withLogging(s"auto-cancellation filter for ${autoCancelCallout.accountId}")
       _ <- deps.autoCancel(acRequest).withLogging(s"auto-cancellation for ${autoCancelCallout.accountId}")
-      //      _ <- PaymentFailureSteps.sendEmailSteps()(paymentFailureCallout(autoCancelCallout))
       request <- makeRequest(deps.etSendIds, autoCancelCallout)
       _ <- deps.sendEmailRegardingAccount(autoCancelCallout.accountId, request)
     } yield ()
