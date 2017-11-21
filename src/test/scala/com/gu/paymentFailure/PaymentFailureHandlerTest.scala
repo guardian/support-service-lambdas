@@ -1,57 +1,28 @@
 package com.gu.paymentFailure
 
 import java.io.ByteArrayOutputStream
-import org.joda.time.LocalDate
-import org.scalatest.FlatSpec
-import org.scalatest._
-import Matchers._
-import com.amazonaws.services.sqs.model.SendMessageResult
-import com.gu.util.ZuoraModels._
-import com.gu.util._
-import org.scalatest.mockito.MockitoSugar
-import play.api.libs.json.Json
-import scalaz.\/-
-import org.mockito.Mockito._
-import org.mockito.Matchers.any
-import scala.util.{ Failure, Success, Try }
 
-class PaymentFailureHandlerTest extends FlatSpec with MockitoSugar {
+import com.gu.TestData._
+import com.gu.TestingRawEffects
+import com.gu.paymentFailure.PaymentFailureSteps.PFDeps
+import com.gu.paymentFailure.ZuoraEmailSteps.ZuoraEmailStepsDeps
+import com.gu.util.ETConfig.ETSendId
+import com.gu.util.apigateway.{ ApiGatewayHandler, ApiGatewayRequest, ApiGatewayResponse }
+import com.gu.util.exacttarget.EmailSendSteps.EmailSendStepsDeps
+import com.gu.util.exacttarget._
+import com.gu.util.reader.Types._
+import com.gu.util.zuora.ZuoraModels._
+import com.gu.util.{ Config, Stage }
+import org.scalatest.{ FlatSpec, Matchers }
 
-  val fakeZuoraRest = mock[ZuoraService]
-  val fakeQueueClient = mock[QueueClient]
+import scalaz.{ -\/, \/- }
 
-  val today = new LocalDate(2016, 11, 21)
-  val accountId = "accountId"
-  val invoiceItemA = InvoiceItem("invitem123", "A-S123", today, today.plusMonths(1), 49.21, "Non founder - annual", "Supporter")
-  val invoiceItemB = InvoiceItem("invitem122", "A-S123", today, today.plusMonths(1), 0, "Friends", "Friend")
-  val invoiceItemC = InvoiceItem("invitem121", "A-S123", today, today.plusMonths(1), -4.90, "Percentage", "Discount")
-  def itemisedInvoice(balance: Double, invoiceItems: List[InvoiceItem]) = ItemisedInvoice("invoice123", today, 49, balance, "Posted", List(invoiceItemA))
-  val basicInvoiceTransactionSummary = InvoiceTransactionSummary(List(itemisedInvoice(49, List(invoiceItemA))))
-  val weirdInvoiceTransactionSummary = InvoiceTransactionSummary(List(itemisedInvoice(0, List(invoiceItemA)), itemisedInvoice(49, List(invoiceItemB, invoiceItemA, invoiceItemC))))
-
-  val fakeApiConfig = TrustedApiConfig("validApiClientId", "validApiToken", "testEnvTenantId")
-  val fakeZuoraConfig = ZuoraRestConfig("fakeUrl", "fakeUser", "fakePass")
-
-  val lambda = new PaymentFailureLambda {
-    override def stage: String = "DEV"
-    override def configAttempt: Try[Config] = Success(Config(fakeApiConfig, fakeZuoraConfig))
-    override def queueClient: QueueClient = fakeQueueClient
-    override def getZuoraRestService: Try[ZuoraService] = Success(fakeZuoraRest)
-  }
-
-  val missingCredentialsResponse = """{"statusCode":"401","headers":{"Content-Type":"application/json"},"body":"Credentials are missing or invalid"}"""
-  val successfulResponse = """{"statusCode":"200","headers":{"Content-Type":"application/json"},"body":"Success"}"""
-
-  "dataCollection" should "identify the correct product information" in {
-    implicit val zuoraRest = fakeZuoraRest
-    when(fakeZuoraRest.getInvoiceTransactions("accountId")).thenReturn(\/-(weirdInvoiceTransactionSummary))
-    assert(lambda.dataCollection(accountId).get.product == "Supporter")
-  }
+class PaymentFailureHandlerTest extends FlatSpec with Matchers {
 
   "lambda" should "return error if credentials are missing" in {
     val stream = getClass.getResourceAsStream("/paymentFailure/missingCredentials.json")
     val os = new ByteArrayOutputStream()
-    lambda.handleRequest(stream, os, null)
+    ApiGatewayHandler(lambdaConfig(basicOp()))(stream, os, null)
     val responseString = new String(os.toByteArray(), "UTF-8");
     responseString jsonMatches missingCredentialsResponse
   }
@@ -59,7 +30,7 @@ class PaymentFailureHandlerTest extends FlatSpec with MockitoSugar {
   "lambda" should "return error if credentials don't match" in {
     val stream = getClass.getResourceAsStream("/paymentFailure/invalidCredentials.json")
     val os = new ByteArrayOutputStream()
-    lambda.handleRequest(stream, os, null)
+    ApiGatewayHandler(lambdaConfig(basicOp()))(stream, os, null)
     val responseString = new String(os.toByteArray(), "UTF-8");
     responseString jsonMatches missingCredentialsResponse
   }
@@ -67,7 +38,7 @@ class PaymentFailureHandlerTest extends FlatSpec with MockitoSugar {
   "lambda" should "return an error if tenant id doesn't match" in {
     val stream = getClass.getResourceAsStream("/paymentFailure/invalidTenant.json")
     val os = new ByteArrayOutputStream()
-    lambda.handleRequest(stream, os, null)
+    ApiGatewayHandler(lambdaConfig(basicOp()))(stream, os, null)
     val responseString = new String(os.toByteArray(), "UTF-8");
     responseString jsonMatches missingCredentialsResponse
   }
@@ -76,42 +47,60 @@ class PaymentFailureHandlerTest extends FlatSpec with MockitoSugar {
     //set up
     val stream = getClass.getResourceAsStream("/paymentFailure/validRequest.json")
     val output = new ByteArrayOutputStream
+    var storedReq: Option[EmailRequest] = None
 
     val os = new ByteArrayOutputStream()
-    when(fakeZuoraRest.getInvoiceTransactions("accountId")).thenReturn(\/-(basicInvoiceTransactionSummary))
-    when(fakeQueueClient.sendDataExtensionToQueue(any[Message])).thenReturn(Success(mock[SendMessageResult]))
     //execute
-    lambda.handleRequest(stream, os, null)
+    def configToFunction(config: Config): ApiGatewayRequest => FailableOp[Unit] = {
+      PaymentFailureSteps.apply(PFDeps(
+        ZuoraEmailSteps.sendEmailRegardingAccount(
+          ZuoraEmailStepsDeps(
+            EmailSendSteps.apply(
+              EmailSendStepsDeps(
+                req => {
+                  storedReq = Some(req)
+                  \/-(()): FailableOp[Unit]
+                }, FilterEmail(Stage("PROD"))
+              )
+            ),
+            a => \/-(basicInvoiceTransactionSummary)
+          )
+        ),
+        config.etConfig.etSendIDs,
+        config.trustedApiConfig
+      ))
+    }
+    ApiGatewayHandler(lambdaConfig(configToFunction))(stream, os, null)
 
     //verify
-    val responseString = new String(os.toByteArray(), "UTF-8")
+    val responseString = new String(os.toByteArray, "UTF-8")
 
-    val expectedMessage = Message(
-      DataExtensionName = "first-failed-payment-email",
-      To = ToDef(
-        Address = "test.user123@guardian.co.uk",
-        SubscriberKey = "test.user123@guardian.co.uk",
-        ContactAttributes = ContactAttributesDef(
-          SubscriberAttributes = SubscriberAttributesDef(
-            SubscriberKey = "test.user123@guardian.co.uk",
-            EmailAddress = "test.user123@guardian.co.uk",
-            subscriber_id = "A-S123",
-            product = "Supporter",
-            payment_method = "CreditCard",
-            card_type = "Visa",
-            card_expiry_date = "12/2017",
-            first_name = "Test",
-            last_name = "User",
-            paymentId = "somePaymentId",
-            price = "£49.00",
-            serviceStartDate = "21 November 2016",
-            serviceEndDate = "21 December 2016"
+    val expectedMessage = EmailRequest(
+      etSendId = ETSendId("11"),
+      Message(
+        To = ToDef(
+          Address = "test.user123@guardian.co.uk",
+          SubscriberKey = "test.user123@guardian.co.uk",
+          ContactAttributes = ContactAttributesDef(
+            SubscriberAttributes = SubscriberAttributesDef(
+              subscriber_id = "A-S123",
+              product = "Supporter",
+              payment_method = "CreditCard",
+              card_type = "Visa",
+              card_expiry_date = "12/2017",
+              first_name = "Test",
+              last_name = "User",
+              primaryKey = PaymentId("somePaymentId"),
+              price = "£49.00",
+              serviceStartDate = "21 November 2016",
+              serviceEndDate = "21 December 2016"
+            )
           )
         )
       )
     )
 
-    verify(fakeQueueClient).sendDataExtensionToQueue(expectedMessage)
+    storedReq should be(Some(expectedMessage))
     responseString jsonMatches successfulResponse
   }
 
@@ -121,14 +110,10 @@ class PaymentFailureHandlerTest extends FlatSpec with MockitoSugar {
     val output = new ByteArrayOutputStream
     val invoiceTransactionSummary = InvoiceTransactionSummary(List())
 
-    when(fakeZuoraRest.getInvoiceTransactions(accountId)).thenReturn(\/-(invoiceTransactionSummary))
-
-    when(fakeQueueClient.sendDataExtensionToQueue(any[Message])).thenReturn(Success(mock[SendMessageResult]))
-
     val os = new ByteArrayOutputStream()
 
     //execute
-    lambda.handleRequest(stream, os, null)
+    ApiGatewayHandler(lambdaConfig(basicOp(invoiceTransactionSummary)))(stream, os, null)
 
     //verify
     val responseString = new String(os.toByteArray(), "UTF-8")
@@ -137,33 +122,58 @@ class PaymentFailureHandlerTest extends FlatSpec with MockitoSugar {
     responseString jsonMatches expectedResponse
   }
 
+  def lambdaConfig(operation: Config => ApiGatewayRequest => FailableOp[Unit]) = new TestingRawEffects().handlerDeps(operation)
+  def basicOp(fakeInvoiceTransactionSummary: InvoiceTransactionSummary = basicInvoiceTransactionSummary) = { config: Config =>
+    PaymentFailureSteps.apply(PFDeps(
+      ZuoraEmailSteps.sendEmailRegardingAccount(ZuoraEmailStepsDeps(
+        sendEmail = _ => -\/(ApiGatewayResponse.internalServerError("something failed!")),
+        getInvoiceTransactions = _ => \/-(fakeInvoiceTransactionSummary)
+      )),
+      config.etConfig.etSendIDs,
+      config.trustedApiConfig
+    )) _
+  }
+
   "lambda" should "return error if message can't be queued" in {
     //set up
     val stream = getClass.getResourceAsStream("/paymentFailure/validRequest.json")
     val output = new ByteArrayOutputStream
-    when(fakeZuoraRest.getInvoiceTransactions("accountId")).thenReturn(\/-(basicInvoiceTransactionSummary))
 
-    when(fakeQueueClient.sendDataExtensionToQueue(any[Message])).thenReturn(Success(mock[SendMessageResult]))
-    when(fakeQueueClient.sendDataExtensionToQueue(any[Message])).thenReturn(Failure(new Exception("something failed!")))
-
+    var storedReq: Option[EmailRequest] = None
     val os = new ByteArrayOutputStream()
 
     //execute
-    lambda.handleRequest(stream, os, null)
+    def configToFunction(config: Config): ApiGatewayRequest => FailableOp[Unit] = {
+      PaymentFailureSteps.apply(
+        PFDeps(
+          ZuoraEmailSteps.sendEmailRegardingAccount(
+            ZuoraEmailStepsDeps(
+              EmailSendSteps.apply(
+                EmailSendStepsDeps(
+                  req => {
+                    storedReq = Some(req)
+                    -\/(ApiGatewayResponse.internalServerError("something failed!")): FailableOp[Unit]
+                  }, FilterEmail(Stage("PROD"))
+                )
+              ),
+              a => \/-(basicInvoiceTransactionSummary)
+            )
+          ),
+          config.etConfig.etSendIDs,
+          config.trustedApiConfig
+        )
+      )
+    }
+    ApiGatewayHandler(lambdaConfig(configToFunction))(stream, os, null)
 
     //verify
+
+    storedReq.isDefined should be(true)
+
     val responseString = new String(os.toByteArray(), "UTF-8")
 
-    val expectedResponse = s"""{"statusCode":"500","headers":{"Content-Type":"application/json"},"body":"Failed to process event due to the following error: Could not enqueue message for account $accountId"} """
+    val expectedResponse = s"""{"statusCode":"500","headers":{"Content-Type":"application/json"},"body":"email not sent for account $accountId"} """
     responseString jsonMatches expectedResponse
-  }
-
-  implicit class JsonMatcher(private val actual: String) {
-    def jsonMatches(expected: String) = {
-      val expectedJson = Json.parse(expected)
-      val actualJson = Json.parse(actual)
-      expectedJson should be(actualJson)
-    }
   }
 
 }

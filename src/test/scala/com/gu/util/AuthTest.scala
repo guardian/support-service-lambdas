@@ -1,9 +1,9 @@
 package com.gu.util
 
-import com.gu.autoCancel.AutoCancelHandler.RequestAuth
 import com.gu.util.Auth._
+import com.gu.util.apigateway.{ ApiGatewayRequest, RequestAuth }
 import org.scalatest.FlatSpec
-import play.api.libs.json.{ JsValue, Json }
+import play.api.libs.json.{ JsError, JsSuccess, JsValue, Json }
 
 class AuthTest extends FlatSpec {
 
@@ -32,38 +32,28 @@ class AuthTest extends FlatSpec {
     val sampleJson = Json.obj(
       "resource" -> "test-resource",
       "path" -> "/test-path",
-      "httpMethod" -> "POST"
+      "httpMethod" -> "POST",
+      "body" -> ""
     )
-    assert(deprecatedCredentialsAreValid(sampleJson, trustedApiConfig) == false)
-  }
-
-  "deprecatedCredentialsAreValid" should "return false for an incorrect password" in {
-    val inputEvent = generateInputEvent("validUser", "incorrectPassword")
-    assert(deprecatedCredentialsAreValid(inputEvent, trustedApiConfig) == false)
-  }
-
-  "deprecatedCredentialsAreValid" should "return false for an incorrect username" in {
-    val inputEvent = generateInputEvent("invalidUser", "correctPassword")
-    assert(deprecatedCredentialsAreValid(inputEvent, trustedApiConfig) == false)
-  }
-
-  "deprecatedCredentialsAreValid" should "return true for correct credentials" in {
-    val inputEvent = generateInputEvent("validUser", "correctPassword")
-    assert(deprecatedCredentialsAreValid(inputEvent, trustedApiConfig) == true)
+    sampleJson.validate[ApiGatewayRequest] match {
+      case JsError(e) => fail(s"couldn't parse with $e")
+      case JsSuccess(req, _) =>
+        assert(credentialsAreValid(req.requestAuth, trustedApiConfig) == false)
+    }
   }
 
   "credentialsAreValid" should "return true for correct credentials" in {
-    val requestAuth = RequestAuth(apiClientId = "validUser", apiToken = "correctPassword")
+    val requestAuth = Some(RequestAuth(apiClientId = "validUser", apiToken = "correctPassword"))
     assert(credentialsAreValid(requestAuth, trustedApiConfig) == true)
   }
 
   "credentialsAreValid" should "return false for an incorrect user" in {
-    val requestAuth = RequestAuth(apiClientId = "invalidUser", apiToken = "correctPassword")
+    val requestAuth = Some(RequestAuth(apiClientId = "invalidUser", apiToken = "correctPassword"))
     assert(credentialsAreValid(requestAuth, trustedApiConfig) == false)
   }
 
   "credentialsAreValid" should "return false for an incorrect password" in {
-    val requestAuth = RequestAuth(apiClientId = "validUser", apiToken = "ndjashjkhajshs")
+    val requestAuth = Some(RequestAuth(apiClientId = "validUser", apiToken = "ndjashjkhajshs"))
     assert(credentialsAreValid(requestAuth, trustedApiConfig) == false)
   }
 

@@ -1,15 +1,17 @@
-package com.gu.util
+package com.gu.util.zuora
 
-import com.gu.util.ZuoraModels._
+import com.gu.util.zuora.ZuoraModels._
 import org.joda.time.LocalDate
 import play.api.libs.functional.syntax._
-import play.api.libs.json.{ JsPath, Json, Reads, Writes }
+import play.api.libs.json._
 
 object ZuoraModels {
 
   case class BasicAccountInfo(id: String, balance: Double)
 
-  case class SubscriptionSummary(id: String, subscriptionNumber: String, status: String)
+  case class SubscriptionSummary(id: SubscriptionId, subscriptionNumber: String, status: String)
+
+  case class SubscriptionId(id: String) extends AnyVal
 
   case class Invoice(id: String, dueDate: LocalDate, balance: Double, status: String)
 
@@ -21,17 +23,13 @@ object ZuoraModels {
 
   case class InvoiceTransactionSummary(invoices: List[ItemisedInvoice])
 
-  case class CancelSubscriptionResult(success: Boolean, cancelledDate: LocalDate)
-
-  case class UpdateSubscriptionResult(success: Boolean, subscriptionId: String)
-
-  case class UpdateAccountResult(success: Boolean)
-
   case class SubscriptionCancellation(cancellationEffectiveDate: LocalDate)
 
   case class SubscriptionUpdate(cancellationReason: String)
 
   case class AccountUpdate(autoPay: Boolean)
+
+  case class ZuoraCommonFields(success: Boolean)
 
 }
 
@@ -43,7 +41,7 @@ object ZuoraReaders {
   )(BasicAccountInfo.apply _)
 
   implicit val subscriptionSummaryReads: Reads[SubscriptionSummary] = (
-    (JsPath \ "id").read[String] and
+    (JsPath \ "id").read[String].map(SubscriptionId.apply) and
     (JsPath \ "subscriptionNumber").read[String] and
     (JsPath \ "status").read[String]
   )(SubscriptionSummary.apply _)
@@ -85,18 +83,11 @@ object ZuoraReaders {
       invoices => InvoiceTransactionSummary(invoices)
     }
 
-  implicit val cancelSubscriptionResultReads: Reads[CancelSubscriptionResult] = (
-    (JsPath \ "success").read[Boolean] and
-    (JsPath \ "cancelledDate").read[LocalDate]
-  )(CancelSubscriptionResult.apply _)
+  implicit val unitReads: Reads[Unit] =
+    Reads(_ => JsSuccess(()))
 
-  implicit val updateSubscriptionResultReads: Reads[UpdateSubscriptionResult] = (
-    (JsPath \ "success").read[Boolean] and
-    (JsPath \ "subscriptionId").read[String]
-  )(UpdateSubscriptionResult.apply _)
-
-  implicit val updateAccountResultReads: Reads[UpdateAccountResult] = (JsPath \ "success").read[Boolean].map {
-    success => UpdateAccountResult(success)
+  implicit val zuoraCommonFieldsReads: Reads[ZuoraCommonFields] = (JsPath \ "success").read[Boolean].map {
+    success => ZuoraCommonFields(success)
   }
 
 }
