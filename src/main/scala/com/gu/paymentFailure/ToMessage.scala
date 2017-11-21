@@ -26,7 +26,7 @@ object ToMessage {
           card_expiry_date = paymentFailureCallout.creditCardExpirationMonth + "/" + paymentFailureCallout.creditCardExpirationYear,
           first_name = paymentFailureCallout.firstName,
           last_name = paymentFailureCallout.lastName,
-          paymentId = paymentFailureCallout.paymentId,
+          primaryKey = PaymentId(paymentFailureCallout.paymentId),
           price = price(paymentFailureInformation.amount, paymentFailureCallout.currency),
           serviceStartDate = serviceDateFormat(paymentFailureInformation.serviceStartDate),
           serviceEndDate = serviceDateFormat(paymentFailureInformation.serviceEndDate)
@@ -50,7 +50,7 @@ object ToMessage {
           card_expiry_date = callout.creditCardExpirationMonth + "/" + callout.creditCardExpirationYear,
           first_name = callout.firstName,
           last_name = callout.lastName,
-          paymentId = callout.paymentId,
+          primaryKey = InvoiceId(callout.invoiceId),
           price = price(paymentFailureInformation.amount, callout.currency),
           serviceStartDate = serviceDateFormat(paymentFailureInformation.serviceStartDate),
           serviceEndDate = serviceDateFormat(paymentFailureInformation.serviceEndDate)

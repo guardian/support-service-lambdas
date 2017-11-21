@@ -8,9 +8,12 @@ import com.gu.util.exacttarget.SalesforceAuthenticate.{ ETImpure, SalesforceAuth
 import com.gu.util.reader.Types._
 import com.gu.util.{ ETConfig, Logging, Stage }
 import okhttp3.{ MediaType, Request, RequestBody, Response }
-import play.api.libs.json.Json
+import play.api.libs.json.{ JsPath, Json, Writes }
 
 import scalaz.{ -\/, \/, \/- }
+
+import play.api.libs.json._
+import play.api.libs.functional.syntax._
 
 case class ContactAttributesDef(SubscriberAttributes: SubscriberAttributesDef)
 
@@ -24,12 +27,18 @@ case class SubscriberAttributesDef(
   card_expiry_date: String,
   first_name: String,
   last_name: String,
-  paymentId: String, // ET will filter out multiple emails with the same payment id
+  primaryKey: PrimaryKey,
   price: String,
   serviceStartDate: String,
   serviceEndDate: String
-
 )
+
+sealed trait PrimaryKey {
+  // ET will filter out multiple emails with the same payment id for PF1,2,3,4
+  // ET will filter out multiple emails with the same invoice id for overdue 29
+}
+case class PaymentId(id: String) extends PrimaryKey
+case class InvoiceId(id: String) extends PrimaryKey
 
 case class ToDef(Address: String, SubscriberKey: String, ContactAttributes: ContactAttributesDef)
 
@@ -38,7 +47,32 @@ case class Message(To: ToDef)
 case class EmailRequest(etSendId: ETSendId, message: Message)
 
 object SubscriberAttributesDef {
-  implicit val jf = Json.writes[SubscriberAttributesDef]
+  implicit val jf2 = new Writes[SubscriberAttributesDef] {
+
+    override def writes(o: SubscriberAttributesDef): JsValue =
+      JsObject(
+        fields = Seq[(String, JsValue)](
+          "SubscriberKey" -> JsString(o.SubscriberKey),
+          "EmailAddress" -> JsString(o.EmailAddress),
+          "subscriber_id" -> JsString(o.subscriber_id),
+          "product" -> JsString(o.product),
+          "payment_method" -> JsString(o.payment_method),
+          "card_type" -> JsString(o.card_type),
+          "card_expiry_date" -> JsString(o.card_expiry_date),
+          "first_name" -> JsString(o.first_name),
+          "last_name" -> JsString(o.last_name),
+          o.primaryKey match {
+            case PaymentId(id) => "paymentId" -> JsString(id)
+            case InvoiceId(id) => "invoiceId" -> JsString(id)
+          },
+          "price" -> JsString(o.price),
+          "serviceStartDate" -> JsString(o.serviceStartDate),
+          "serviceEndDate" -> JsString(o.serviceEndDate)
+        )
+      )
+
+  }
+
 }
 
 object ContactAttributesDef {

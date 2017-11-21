@@ -11,7 +11,7 @@ object AutoCancelHandlerTest {
 
   def fakeCallout(autoPay: Boolean) = {
     AutoCancelCallout(accountId = "id123", autoPay = s"$autoPay", paymentMethodType = "PayPal", email = "hi@hi.com", firstName = "john", lastName = "bloggs", creditCardType = "",
-      creditCardExpirationMonth = "", creditCardExpirationYear = "", paymentId = "idid",
+      creditCardExpirationMonth = "", creditCardExpirationYear = "", invoiceId = "idid",
       currency = "GBP")
   }
 

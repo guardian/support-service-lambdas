@@ -92,7 +92,7 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
               card_expiry_date = "12/2017",
               first_name = "Test",
               last_name = "User",
-              paymentId = "somePaymentId",
+              primaryKey = PaymentId("somePaymentId"),
               price = "£49.00",
               serviceStartDate = "21 November 2016",
               serviceEndDate = "21 December 2016"

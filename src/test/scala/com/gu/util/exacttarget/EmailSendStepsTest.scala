@@ -25,7 +25,7 @@ class EmailSendStepsTest extends FlatSpec with Matchers {
             card_expiry_date = "cardExpiryValue",
             first_name = "firstNameValue",
             last_name = "lastNameValue",
-            paymentId = "paymentId",
+            primaryKey = PaymentId("paymentId"),
             price = "49.0 GBP",
             serviceStartDate = "31 January 2016",
             serviceEndDate = "31 January 2017"

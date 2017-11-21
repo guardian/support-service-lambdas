@@ -30,7 +30,31 @@ object EmailClientSystemTest extends App {
           card_expiry_date = "cardExpiryValue",
           first_name = s"firstNameValue$number",
           last_name = "lastNameValue",
-          paymentId = s"paymentId$unique", // must be unique otherwise the email won't arrive
+          primaryKey = PaymentId(s"paymentId$unique"), // must be unique otherwise the email won't arrive
+          price = "49.0 GBP",
+          serviceStartDate = "31 January 2016",
+          serviceEndDate = "31 January 2017"
+        )
+      )
+    )
+  )
+
+  def overdueMessage = Message(
+    To = ToDef(
+      Address = recipient,
+      SubscriberKey = recipient,
+      ContactAttributes = ContactAttributesDef(
+        SubscriberAttributes = SubscriberAttributesDef(
+          SubscriberKey = recipient,
+          EmailAddress = recipient,
+          subscriber_id = "subIdValue",
+          product = "productValue",
+          payment_method = "paymentMethodValue",
+          card_type = "cardTypeValue",
+          card_expiry_date = "cardExpiryValue",
+          first_name = s"firstNameValue overdue",
+          last_name = "lastNameValue",
+          primaryKey = InvoiceId(s"invoiceId$unique"), // must be unique otherwise the email won't arrive
           price = "49.0 GBP",
           serviceStartDate = "31 January 2016",
           serviceEndDate = "31 January 2017"
@@ -46,13 +70,13 @@ object EmailClientSystemTest extends App {
     config <- Config.parseConfig(configAttempt)
     deps = EmailSendStepsDeps.default(Stage("CODE"), RawEffects.createDefault.response, config.etConfig)
     a = config.etConfig.etSendIDs
-  } yield Seq(a.pf1, a.pf2, a.pf3, a.pf4, a.cancelled).zipWithIndex.map {
+  } yield Seq(a.pf1 -> message(1), a.pf2 -> message(2), a.pf3 -> message(3), a.pf4 -> message(4), a.cancelled -> overdueMessage).map {
     case (etSendId, index) =>
       val emailResult = EmailSendSteps(
         deps
       )(EmailRequest(
         etSendId = etSendId,
-        message = message(index + 1)
+        message = index
       ))
       println(s"result for $etSendId:::::: $emailResult")
   }
