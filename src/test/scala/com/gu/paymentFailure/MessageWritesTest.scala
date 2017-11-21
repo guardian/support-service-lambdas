@@ -3,20 +3,17 @@ package com.gu.paymentFailure
 import com.gu.util.exacttarget._
 import org.scalatest.FlatSpec
 import org.scalatest.Matchers._
-import org.scalatest.mockito.MockitoSugar
 import play.api.libs.json.Json
 
-class SqsMessageSerializationTest extends FlatSpec with MockitoSugar {
+class MessageWritesTest extends FlatSpec {
 
-  "Message" should "serialize to the correct json format with payemnt id" in {
+  "Message" should "serialize to the correct json format with payment id" in {
     val message = Message(
       To = ToDef(
         Address = "fake@email.com",
         SubscriberKey = "subkeyValue",
         ContactAttributes = ContactAttributesDef(
           SubscriberAttributes = SubscriberAttributesDef(
-            SubscriberKey = "subKeyValue",
-            EmailAddress = "fake@email.com",
             subscriber_id = "subIdValue",
             product = "productValue",
             payment_method = "paymentMethodValue",
@@ -41,8 +38,6 @@ class SqsMessageSerializationTest extends FlatSpec with MockitoSugar {
         |    "SubscriberKey": "subkeyValue",
         |    "ContactAttributes": {
         |      "SubscriberAttributes": {
-        |        "SubscriberKey":"subKeyValue",
-        |        "EmailAddress":"fake@email.com",
         |        "subscriber_id":"subIdValue",
         |        "product":"productValue",
         |        "payment_method":"paymentMethodValue",
@@ -70,8 +65,6 @@ class SqsMessageSerializationTest extends FlatSpec with MockitoSugar {
         SubscriberKey = "subkeyValue",
         ContactAttributes = ContactAttributesDef(
           SubscriberAttributes = SubscriberAttributesDef(
-            SubscriberKey = "subKeyValue",
-            EmailAddress = "fake@email.com",
             subscriber_id = "subIdValue",
             product = "productValue",
             payment_method = "paymentMethodValue",
@@ -96,8 +89,6 @@ class SqsMessageSerializationTest extends FlatSpec with MockitoSugar {
         |    "SubscriberKey": "subkeyValue",
         |    "ContactAttributes": {
         |      "SubscriberAttributes": {
-        |        "SubscriberKey":"subKeyValue",
-        |        "EmailAddress":"fake@email.com",
         |        "subscriber_id":"subIdValue",
         |        "product":"productValue",
         |        "payment_method":"paymentMethodValue",

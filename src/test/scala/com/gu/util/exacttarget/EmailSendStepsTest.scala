@@ -16,8 +16,6 @@ class EmailSendStepsTest extends FlatSpec with Matchers {
         SubscriberKey = recipient,
         ContactAttributes = ContactAttributesDef(
           SubscriberAttributes = SubscriberAttributesDef(
-            SubscriberKey = recipient,
-            EmailAddress = recipient,
             subscriber_id = "subIdValue",
             product = "productValue",
             payment_method = "paymentMethodValue",

@@ -83,8 +83,6 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
           SubscriberKey = "test.user123@guardian.co.uk",
           ContactAttributes = ContactAttributesDef(
             SubscriberAttributes = SubscriberAttributesDef(
-              SubscriberKey = "test.user123@guardian.co.uk",
-              EmailAddress = "test.user123@guardian.co.uk",
               subscriber_id = "A-S123",
               product = "Supporter",
               payment_method = "CreditCard",

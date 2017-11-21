@@ -8,18 +8,13 @@ import com.gu.util.exacttarget.SalesforceAuthenticate.{ ETImpure, SalesforceAuth
 import com.gu.util.reader.Types._
 import com.gu.util.{ ETConfig, Logging, Stage }
 import okhttp3.{ MediaType, Request, RequestBody, Response }
-import play.api.libs.json.{ JsPath, Json, Writes }
+import play.api.libs.json.{ Json, Writes, _ }
 
 import scalaz.{ -\/, \/, \/- }
-
-import play.api.libs.json._
-import play.api.libs.functional.syntax._
 
 case class ContactAttributesDef(SubscriberAttributes: SubscriberAttributesDef)
 
 case class SubscriberAttributesDef(
-  SubscriberKey: String,
-  EmailAddress: String,
   subscriber_id: String,
   product: String,
   payment_method: String,
@@ -52,8 +47,6 @@ object SubscriberAttributesDef {
     override def writes(o: SubscriberAttributesDef): JsValue =
       JsObject(
         fields = Seq[(String, JsValue)](
-          "SubscriberKey" -> JsString(o.SubscriberKey),
-          "EmailAddress" -> JsString(o.EmailAddress),
           "subscriber_id" -> JsString(o.subscriber_id),
           "product" -> JsString(o.product),
           "payment_method" -> JsString(o.payment_method),

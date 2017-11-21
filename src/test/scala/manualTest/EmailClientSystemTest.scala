@@ -21,10 +21,8 @@ object EmailClientSystemTest extends App {
       SubscriberKey = recipient,
       ContactAttributes = ContactAttributesDef(
         SubscriberAttributes = SubscriberAttributesDef(
-          SubscriberKey = recipient,
-          EmailAddress = recipient,
           subscriber_id = "subIdValue",
-          product = "productValue",
+          product = "Supporter",
           payment_method = "paymentMethodValue",
           card_type = "cardTypeValue",
           card_expiry_date = "cardExpiryValue",
@@ -45,10 +43,8 @@ object EmailClientSystemTest extends App {
       SubscriberKey = recipient,
       ContactAttributes = ContactAttributesDef(
         SubscriberAttributes = SubscriberAttributesDef(
-          SubscriberKey = recipient,
-          EmailAddress = recipient,
           subscriber_id = "subIdValue",
-          product = "productValue",
+          product = "Supporter",
           payment_method = "paymentMethodValue",
           card_type = "cardTypeValue",
           card_expiry_date = "cardExpiryValue",

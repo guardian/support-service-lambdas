@@ -53,7 +53,7 @@ object EndToEndData {
   )
 
   val expectedEmailSend =
-    """{"To":{"Address":"john.duffell@guardian.co.uk","SubscriberKey":"john.duffell@guardian.co.uk","ContactAttributes":{"SubscriberAttributes":{"SubscriberKey":"john.duffell@guardian.co.uk","EmailAddress":"john.duffell@guardian.co.uk","subscriber_id":"A-S00071536","product":"Supporter","payment_method":"CreditCardReferenceTransaction","card_type":"Visa","card_expiry_date":"12/2019","first_name":"eSAFaBwm4WJZNg5xhIc","last_name":"eSAFaBwm4WJZNg5xhIc","paymentId":"2c92c0f95fc912eb015fcb2a481720e6","price":"$49.00","serviceStartDate":"17 November 2017","serviceEndDate":"16 November 2018"}}}}"""
+    """{"To":{"Address":"john.duffell@guardian.co.uk","SubscriberKey":"john.duffell@guardian.co.uk","ContactAttributes":{"SubscriberAttributes":{"subscriber_id":"A-S00071536","product":"Supporter","payment_method":"CreditCardReferenceTransaction","card_type":"Visa","card_expiry_date":"12/2019","first_name":"eSAFaBwm4WJZNg5xhIc","last_name":"eSAFaBwm4WJZNg5xhIc","paymentId":"2c92c0f95fc912eb015fcb2a481720e6","price":"$49.00","serviceStartDate":"17 November 2017","serviceEndDate":"16 November 2018"}}}}"""
 
   val invoices =
     """

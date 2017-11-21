@@ -17,8 +17,6 @@ object ToMessage {
       SubscriberKey = paymentFailureCallout.email,
       ContactAttributes = ContactAttributesDef(
         SubscriberAttributes = SubscriberAttributesDef(
-          SubscriberKey = paymentFailureCallout.email,
-          EmailAddress = paymentFailureCallout.email,
           subscriber_id = paymentFailureInformation.subscriptionName,
           product = paymentFailureInformation.product,
           payment_method = paymentFailureCallout.paymentMethodType,
@@ -41,8 +39,6 @@ object ToMessage {
       SubscriberKey = callout.email,
       ContactAttributes = ContactAttributesDef(
         SubscriberAttributes = SubscriberAttributesDef(
-          SubscriberKey = callout.email,
-          EmailAddress = callout.email,
           subscriber_id = paymentFailureInformation.subscriptionName,
           product = paymentFailureInformation.product,
           payment_method = callout.paymentMethodType,
