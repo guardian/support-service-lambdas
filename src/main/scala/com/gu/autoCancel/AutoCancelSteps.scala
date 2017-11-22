@@ -43,7 +43,7 @@ object AutoCancelSteps extends Logging {
       acRequest <- deps.autoCancelFilter2(autoCancelCallout).withLogging(s"auto-cancellation filter for ${autoCancelCallout.accountId}")
       _ <- deps.autoCancel(acRequest).withLogging(s"auto-cancellation for ${autoCancelCallout.accountId}")
       request <- makeRequest(deps.etSendIds, autoCancelCallout)
-      _ <- deps.sendEmailRegardingAccount(autoCancelCallout.accountId, request) TODO add this back once the ET setup is done
+      _ <- deps.sendEmailRegardingAccount(autoCancelCallout.accountId, request)
     } yield ()
   }
 
