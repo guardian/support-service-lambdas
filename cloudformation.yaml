@@ -74,7 +74,7 @@ Resources:
                 Fn::GetAtt:
                 - ZuoraAutoCancelRole
                 - Arn
-            MemorySize: 512
+            MemorySize: 1536
             Runtime: java8
             Timeout: 300
         DependsOn:
@@ -97,7 +97,7 @@ Resources:
                 Fn::GetAtt:
                 - ZuoraAutoCancelRole
                 - Arn
-            MemorySize: 512
+            MemorySize: 1536
             Runtime: java8
             Timeout: 300
         DependsOn:
