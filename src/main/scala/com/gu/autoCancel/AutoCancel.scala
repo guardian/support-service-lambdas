@@ -16,8 +16,8 @@ object AutoCancel extends Logging {
     logger.info(s"Attempting to perform auto-cancellation on account: $accountId")
     val zuoraOp = for {
       _ <- Zuora.updateCancellationReason(subToCancel).withLogging("updateCancellationReason")
-      _ <- Zuora.cancelSubscription(subToCancel, cancellationDate).withLogging("cancelSubscription")
       _ <- Zuora.disableAutoPay(accountId).withLogging("disableAutoPay")
+      _ <- Zuora.cancelSubscription(subToCancel, cancellationDate).withLogging("cancelSubscription")
     } yield ()
     zuoraOp.run.run(zuoraDeps)
   }
