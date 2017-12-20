@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: Handles auto-cancellations for membership and subscriptions, using API Gateway and Lambda
+Description: Handles auto-cancellations for membership and subscriptions, using API Gateway and Lambda, plus stripe PM updates
 
 Parameters:
     Stage:
@@ -119,12 +119,6 @@ Resources:
             Principal: apigateway.amazonaws.com
         DependsOn: PaymentFailureLambda
 
-    ZuoraAutoCancelAPI:
-        Type: "AWS::ApiGateway::RestApi"
-        Properties:
-            Description: Zuora sends a callout to this endpoint to initiate an auto-cancellation on an overdue subscription
-            Name: !Sub ${ApiName}
-
     ZuoraAutoCancelProxyResource:
         Type: AWS::ApiGateway::Resource
         Properties:
@@ -178,6 +172,71 @@ Resources:
         - ZuoraAutoCancelAPI
         - ZuoraAutoCancelLambda
         - ZuoraAutoCancelProxyResource
+
+
+    StripeCustomerUpdatedLambda:
+        Type: AWS::Lambda::Function
+        Properties:
+            Description: Handles auto-cancellations for membership and subscriptions
+            FunctionName:
+                !Sub stripe-customer-updated-${Stage}
+            Code:
+                S3Bucket: zuora-auto-cancel-dist
+                S3Key: !Sub membership/${Stage}/zuora-auto-cancel/zuora-auto-cancel.jar
+            Handler: com.gu.stripeCustomerUpdated.Lambda::apply
+            Environment:
+                Variables:
+                  Stage: !Ref Stage
+            Role:
+                Fn::GetAtt:
+                - ZuoraAutoCancelRole
+                - Arn
+            MemorySize: 1536
+            Runtime: java8
+            Timeout: 300
+        DependsOn:
+        - ZuoraAutoCancelRole
+
+    StripeCustomerUpdatedAPIPermission:
+        Type: AWS::Lambda::Permission
+        Properties:
+            Action: lambda:invokeFunction
+            FunctionName: !Sub stripe-customer-updated-${Stage}
+            Principal: apigateway.amazonaws.com
+        DependsOn: StripeCustomerUpdatedLambda
+
+    StripeCustomerUpdatedProxyResource:
+        Type: AWS::ApiGateway::Resource
+        Properties:
+            RestApiId: !Ref ZuoraAutoCancelAPI
+            ParentId: !GetAtt [ZuoraAutoCancelAPI, RootResourceId]
+            PathPart: stripe-customer-updated
+        DependsOn: ZuoraAutoCancelAPI
+
+    StripeCustomerUpdatedMethod:
+        Type: AWS::ApiGateway::Method
+        Properties:
+            AuthorizationType: NONE
+            RestApiId: !Ref ZuoraAutoCancelAPI
+            ResourceId: !Ref StripeCustomerUpdatedProxyResource
+            HttpMethod: POST
+            RequestParameters:
+              method.request.header.stripe-signature: true
+            Integration:
+              Type: AWS_PROXY
+              IntegrationHttpMethod: POST
+              Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${StripeCustomerUpdatedLambda.Arn}/invocations
+        DependsOn:
+        - ZuoraAutoCancelAPI
+        - StripeCustomerUpdatedLambda
+        - StripeCustomerUpdatedProxyResource
+
+
+    ZuoraAutoCancelAPI:
+        Type: "AWS::ApiGateway::RestApi"
+        Properties:
+            Description: Zuora sends a callout to this endpoint to initiate an auto-cancellation on an overdue subscription
+            Name: !Sub ${ApiName}
 
     ZuoraAutoCancelAPIStage:
         Type: AWS::ApiGateway::Stage
