@@ -57,11 +57,10 @@ object ETConfig {
   )(ETConfig.apply _)
 }
 
-case class TrustedApiConfig(apiClientId: String, apiToken: String, tenantId: String)
+case class TrustedApiConfig(apiToken: String, tenantId: String)
 
 object TrustedApiConfig {
   implicit val apiConfigReads: Reads[TrustedApiConfig] = (
-    (JsPath \ "apiClientId").read[String] and
     (JsPath \ "apiToken").read[String] and
     (JsPath \ "tenantId").read[String]
   )(TrustedApiConfig.apply _)

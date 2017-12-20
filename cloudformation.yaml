@@ -221,7 +221,7 @@ Resources:
             ResourceId: !Ref StripeCustomerSourceUpdatedProxyResource
             HttpMethod: POST
             RequestParameters:
-              method.request.header.stripe-signature: true
+              method.request.querystring.apiToken: true
             Integration:
               Type: AWS_PROXY
               IntegrationHttpMethod: POST
