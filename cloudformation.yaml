@@ -174,16 +174,16 @@ Resources:
         - ZuoraAutoCancelProxyResource
 
 
-    StripeCustomerUpdatedLambda:
+    StripeCustomerSourceUpdatedLambda:
         Type: AWS::Lambda::Function
         Properties:
             Description: Handles auto-cancellations for membership and subscriptions
             FunctionName:
-                !Sub stripe-customer-updated-${Stage}
+                !Sub stripe-customer-source-updated-${Stage}
             Code:
                 S3Bucket: zuora-auto-cancel-dist
                 S3Key: !Sub membership/${Stage}/zuora-auto-cancel/zuora-auto-cancel.jar
-            Handler: com.gu.stripeCustomerUpdated.Lambda::apply
+            Handler: com.gu.stripeCustomerSourceUpdated.Lambda::apply
             Environment:
                 Variables:
                   Stage: !Ref Stage
@@ -197,39 +197,39 @@ Resources:
         DependsOn:
         - ZuoraAutoCancelRole
 
-    StripeCustomerUpdatedAPIPermission:
+    StripeCustomerSourceUpdatedAPIPermission:
         Type: AWS::Lambda::Permission
         Properties:
             Action: lambda:invokeFunction
-            FunctionName: !Sub stripe-customer-updated-${Stage}
+            FunctionName: !Sub stripe-customer-source-updated-${Stage}
             Principal: apigateway.amazonaws.com
-        DependsOn: StripeCustomerUpdatedLambda
+        DependsOn: StripeCustomerSourceUpdatedLambda
 
-    StripeCustomerUpdatedProxyResource:
+    StripeCustomerSourceUpdatedProxyResource:
         Type: AWS::ApiGateway::Resource
         Properties:
             RestApiId: !Ref ZuoraAutoCancelAPI
             ParentId: !GetAtt [ZuoraAutoCancelAPI, RootResourceId]
-            PathPart: stripe-customer-updated
+            PathPart: stripe-customer-source-updated
         DependsOn: ZuoraAutoCancelAPI
 
-    StripeCustomerUpdatedMethod:
+    StripeCustomerSourceUpdatedMethod:
         Type: AWS::ApiGateway::Method
         Properties:
             AuthorizationType: NONE
             RestApiId: !Ref ZuoraAutoCancelAPI
-            ResourceId: !Ref StripeCustomerUpdatedProxyResource
+            ResourceId: !Ref StripeCustomerSourceUpdatedProxyResource
             HttpMethod: POST
             RequestParameters:
               method.request.header.stripe-signature: true
             Integration:
               Type: AWS_PROXY
               IntegrationHttpMethod: POST
-              Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${StripeCustomerUpdatedLambda.Arn}/invocations
+              Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${StripeCustomerSourceUpdatedLambda.Arn}/invocations
         DependsOn:
         - ZuoraAutoCancelAPI
-        - StripeCustomerUpdatedLambda
-        - StripeCustomerUpdatedProxyResource
+        - StripeCustomerSourceUpdatedLambda
+        - StripeCustomerSourceUpdatedProxyResource
 
 
     ZuoraAutoCancelAPI:
