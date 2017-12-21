@@ -26,6 +26,15 @@ object ZuoraRestRequestMaker extends Logging {
 
   }
 
+  def convertResponseToCaseClassNoSuccessField[T: Reads](response: Response): ApiResponse \/ T = {
+    for {
+      _ <- httpIsSuccessful(response)
+      bodyAsJson = Json.parse(response.body.string)
+      result <- toResult[T](bodyAsJson)
+    } yield result
+
+  }
+
   def httpIsSuccessful(response: Response): FailableOp[Unit] = {
     if (response.isSuccessful) {
       ().right
@@ -71,9 +80,18 @@ object ZuoraRestRequestMaker extends Logging {
     Reader { zuoraDeps: ZuoraDeps =>
       val body = RequestBody.create(MediaType.parse("application/json"), Json.toJson(req).toString)
       val request = buildRequest(zuoraDeps.config)(path).put(body).build()
-      logger.info(s"Attempting to $path with the following command: $req")
+      logger.info(s"Attempting to PUT $path with the following command: $req")
       val response = zuoraDeps.response(request)
       convertResponseToCaseClass[RESP](response)
+    }.toEitherT
+
+  def post[REQ: Writes, RESP: Reads](req: REQ, path: String): WithDepsFailableOp[ZuoraDeps, RESP] =
+    Reader { zuoraDeps: ZuoraDeps =>
+      val body = RequestBody.create(MediaType.parse("application/json"), Json.toJson(req).toString)
+      val request = buildRequest(zuoraDeps.config)(path).post(body).build()
+      logger.info(s"Attempting to POST $path with the following command: $req")
+      val response = zuoraDeps.response(request)
+      convertResponseToCaseClassNoSuccessField[RESP](response)
     }.toEitherT
 
   def buildRequest(config: ZuoraRestConfig)(route: String): Request.Builder =
