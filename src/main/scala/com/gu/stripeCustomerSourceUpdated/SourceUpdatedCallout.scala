@@ -4,7 +4,7 @@ import play.api.libs.json.{ JsPath, Json, Reads, Writes }
 import play.api.libs.functional.syntax._
 
 case class EventData(`object`: EventDataObject)
-case class EventDataObject(id: StripeSourceId, customer: StripeCustomerId, exp_month: Int, exp_year: Int, last4: String)
+case class EventDataObject(id: StripeSourceId, brand: String, country: String, customer: StripeCustomerId, exp_month: Int, exp_year: Int, last4: String)
 case class SourceUpdatedCallout(id: StripeEventId, data: EventData)
 
 case class StripeEventId(value: String) extends AnyVal
@@ -31,6 +31,8 @@ object SourceUpdatedCallout {
 
   implicit val eventDataObjectReads: Reads[EventDataObject] = (
     (JsPath \ "id").read[String].map(StripeSourceId.apply) and
+    (JsPath \ "brand").read[String] and
+    (JsPath \ "country").read[String] and
     (JsPath \ "customer").read[String].map(StripeCustomerId.apply) and
     (JsPath \ "exp_month").read[Int] and
     (JsPath \ "exp_year").read[Int] and
