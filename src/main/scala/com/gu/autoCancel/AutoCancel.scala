@@ -2,9 +2,8 @@ package com.gu.autoCancel
 
 import com.gu.util.Logging
 import com.gu.util.reader.Types.FailableOp
-import com.gu.util.zuora.Zuora
-import com.gu.util.zuora.Zuora.ZuoraDeps
 import com.gu.util.zuora.ZuoraModels.SubscriptionId
+import com.gu.util.zuora.{ Zuora, ZuoraDeps }
 import org.joda.time.LocalDate
 
 object AutoCancel extends Logging {

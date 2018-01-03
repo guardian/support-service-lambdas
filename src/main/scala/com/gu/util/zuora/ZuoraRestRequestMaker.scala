@@ -3,7 +3,6 @@ package com.gu.util.zuora
 import com.gu.util.apigateway.ApiGatewayResponse._
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.reader.Types._
-import com.gu.util.zuora.Zuora.ZuoraDeps
 import com.gu.util.zuora.ZuoraModels._
 import com.gu.util.zuora.ZuoraReaders._
 import com.gu.util.{ Logging, ZuoraRestConfig }
@@ -12,7 +11,6 @@ import play.api.libs.json._
 
 import scalaz.Scalaz._
 import scalaz.{ Reader, \/ }
-import scalaz.syntax.std.boolean._
 
 object ZuoraRestRequestMaker extends Logging {
 

@@ -10,9 +10,8 @@ import com.gu.util.apigateway.{ ApiGatewayRequest, ApiGatewayResponse }
 import com.gu.util.exacttarget.EmailSendSteps.EmailSendStepsDeps
 import com.gu.util.exacttarget.{ EmailRequest, EmailSendSteps }
 import com.gu.util.reader.Types._
-import com.gu.util.zuora.Zuora
-import com.gu.util.zuora.Zuora.ZuoraDeps
 import com.gu.util.zuora.ZuoraModels.InvoiceTransactionSummary
+import com.gu.util.zuora.{ Zuora, ZuoraDeps }
 import okhttp3.{ Request, Response }
 import play.api.libs.json.Json
 

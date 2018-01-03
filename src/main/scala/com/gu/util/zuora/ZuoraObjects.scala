@@ -1,16 +1,14 @@
 package com.gu.util.zuora
 
 import com.gu.util.zuora.ZuoraModels._
-import com.gu.util.zuora.ZuoraQueryPaymentMethod.PaymentMethodId
+import com.gu.util.zuora.ZuoraQueryPaymentMethod.{ AccountId, PaymentMethodId }
 import org.joda.time.LocalDate
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
 object ZuoraModels {
 
-  case class BasicAccountInfo(id: String, balance: Double, defaultPaymentMethod: PaymentMethod)
-
-  case class PaymentMethod(id: PaymentMethodId)
+  case class BasicAccountInfo(id: AccountId, balance: Double, defaultPaymentMethod: PaymentMethodId)
 
   case class SubscriptionSummary(id: SubscriptionId, subscriptionNumber: String, status: String)
 
@@ -38,10 +36,13 @@ object ZuoraModels {
 
 object ZuoraReaders {
 
+  implicit val paymentMethodIdReads: Reads[PaymentMethodId] =
+    (JsPath \ "id").read[String].map(PaymentMethodId.apply)
+
   implicit val basicAccountInfoReads: Reads[BasicAccountInfo] = (
-    (JsPath \ "id").read[String] and
+    (JsPath \ "id").read[String].map(AccountId.apply) and
     (JsPath \ "balance").read[Double] and
-      (JsPath \ "defaultPaymentMethod").read[PaymentMethod]
+    (JsPath \ "defaultPaymentMethod").read[PaymentMethodId]
   )(BasicAccountInfo.apply _)
 
   implicit val subscriptionSummaryReads: Reads[SubscriptionSummary] = (
@@ -86,9 +87,6 @@ object ZuoraReaders {
     (JsPath \ "invoices").read[List[ItemisedInvoice]].map {
       invoices => InvoiceTransactionSummary(invoices)
     }
-
-  implicit val paymentMethodIdReads: Reads[PaymentMethodId] =
-    (JsPath \ "id").read[String].map(PaymentMethodId.apply)
 
   implicit val unitReads: Reads[Unit] =
     Reads(_ => JsSuccess(()))

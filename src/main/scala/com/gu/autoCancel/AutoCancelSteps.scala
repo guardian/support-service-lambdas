@@ -8,7 +8,7 @@ import com.gu.util.ETConfig.ETSendIds
 import com.gu.util.apigateway.ApiGatewayRequest
 import com.gu.util.exacttarget.EmailRequest
 import com.gu.util.reader.Types._
-import com.gu.util.zuora.Zuora.ZuoraDeps
+import com.gu.util.zuora.ZuoraDeps
 import com.gu.util.{ Config, Logging }
 import okhttp3.{ Request, Response }
 import org.joda.time.LocalDate

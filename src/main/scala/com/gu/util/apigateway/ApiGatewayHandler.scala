@@ -8,7 +8,6 @@ import com.gu.util._
 import com.gu.util.apigateway.ApiGatewayResponse.{ outputForAPIGateway, successfulExecution, unauthorized }
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.reader.Types._
-import okhttp3.{ Request, Response }
 import play.api.libs.json.Json
 
 import scala.io.Source

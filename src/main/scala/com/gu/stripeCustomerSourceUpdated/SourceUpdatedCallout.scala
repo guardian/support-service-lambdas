@@ -1,15 +1,49 @@
 package com.gu.stripeCustomerSourceUpdated
 
-import play.api.libs.json.{ JsPath, Json, Reads, Writes }
 import play.api.libs.functional.syntax._
+import play.api.libs.json._
 
 case class EventData(`object`: EventDataObject)
-case class EventDataObject(id: StripeSourceId, brand: String, country: String, customer: StripeCustomerId, exp_month: Int, exp_year: Int, last4: String)
+case class EventDataObject(
+  id: StripeSourceId,
+  brand: StripeBrand,
+  country: StripeCountry,
+  customer: StripeCustomerId,
+  expiry: StripeExpiry,
+  last4: StripeLast4
+)
 case class SourceUpdatedCallout(id: StripeEventId, data: EventData)
 
 case class StripeEventId(value: String) extends AnyVal
 case class StripeCustomerId(value: String) extends AnyVal
 case class StripeSourceId(value: String) extends AnyVal
+case class StripeLast4(value: String) extends AnyVal
+case class StripeExpiry(exp_month: Int, exp_year: Int)
+
+sealed trait StripeBrand
+object StripeBrand {
+
+  case object Visa extends StripeBrand
+  case object AmericanExpress extends StripeBrand
+  case object MasterCard extends StripeBrand
+  case object Discover extends StripeBrand
+  case object JCB extends StripeBrand
+  case object DinersClub extends StripeBrand
+  case object Unknown extends StripeBrand
+
+  def fromString(value: String): Option[StripeBrand] =
+    Some(value).collect {
+      case "Visa" => Visa
+      case "American Express" => AmericanExpress
+      case "MasterCard" => MasterCard
+      case "Discover" => Discover
+      case "JCB" => JCB
+      case "Diners Club" => DinersClub
+      case "Unknown" => Unknown
+    }
+}
+
+case class StripeCountry(value: String) extends AnyVal
 
 object SourceUpdatedCallout {
 
@@ -29,14 +63,25 @@ object SourceUpdatedCallout {
     def writes(sc: StripeSourceId) = Json.toJson(sc.value)
   }
 
+  implicit val stripeBrandReads: Reads[StripeBrand] = (JsPath).read[String].flatMap { brandString =>
+    Reads[StripeBrand] { json =>
+      StripeBrand.fromString(brandString) match {
+        case None => JsError(s"invalid brand: $brandString")
+        case Some(value) => JsSuccess(value)
+      }
+    }
+  }
+
   implicit val eventDataObjectReads: Reads[EventDataObject] = (
     (JsPath \ "id").read[String].map(StripeSourceId.apply) and
-    (JsPath \ "brand").read[String] and
-    (JsPath \ "country").read[String] and
+    (JsPath \ "brand").read[StripeBrand] and
+    (JsPath \ "country").read[String].map(StripeCountry.apply) and
     (JsPath \ "customer").read[String].map(StripeCustomerId.apply) and
-    (JsPath \ "exp_month").read[Int] and
-    (JsPath \ "exp_year").read[Int] and
-    (JsPath \ "last4").read[String]
+    (
+      (JsPath \ "exp_month").read[Int] and
+      (JsPath \ "exp_year").read[Int]
+    )(StripeExpiry.apply _) and
+      (JsPath \ "last4").read[String].map(StripeLast4.apply)
   )(EventDataObject.apply _)
 
   implicit val eventDataReads: Reads[EventData] = (JsPath \ "object").read[EventDataObject].map(EventData.apply _)
@@ -46,7 +91,4 @@ object SourceUpdatedCallout {
     (JsPath \ "data").read[EventData]
   )(SourceUpdatedCallout.apply _)
 
-  implicit val eventDataObjectWrites: Writes[EventDataObject] = Json.writes[EventDataObject]
-  implicit val eventDataWrites: Writes[EventData] = Json.writes[EventData]
-  implicit val jfWrites: Writes[SourceUpdatedCallout] = Json.writes[SourceUpdatedCallout]
 }
