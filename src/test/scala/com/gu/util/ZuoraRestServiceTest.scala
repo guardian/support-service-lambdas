@@ -41,7 +41,7 @@ class ZuoraRestServiceTest extends AsyncFlatSpec {
   val validUpdateSubscriptionResult = Json.parse(
     """{
       |  "success": true,
-      |  "id": "id123", "balance": 1.2, "defaultPaymentMethod": "pmid"
+      |  "id": "id123", "balance": 1.2, "defaultPaymentMethod": {"id": "pmid"}
       |}""".stripMargin
   )
 
