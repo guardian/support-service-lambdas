@@ -66,16 +66,16 @@ object Zuora {
 
 object SetDefaultPaymentMethod {
 
-  case class SetDefaultPaymentMethod(accountId: AccountId, paymentMethodId: PaymentMethodId)
+  case class SetDefaultPaymentMethod(paymentMethodId: PaymentMethodId)
 
   implicit val writes = new Writes[SetDefaultPaymentMethod] {
     def writes(subscriptionUpdate: SetDefaultPaymentMethod) = Json.obj(
-      "SetDefaultPaymentMethod" -> subscriptionUpdate.paymentMethodId
+      "DefaultPaymentMethodId" -> subscriptionUpdate.paymentMethodId
     )
   }
 
   def setDefaultPaymentMethod(accountId: AccountId, paymentMethodId: PaymentMethodId): WithDepsFailableOp[ZuoraDeps, Unit] =
-    put(SetDefaultPaymentMethod(accountId, paymentMethodId), s"object/account/${accountId.value}")
+    put(SetDefaultPaymentMethod(paymentMethodId), s"object/account/${accountId.value}")
 
 }
 
@@ -115,7 +115,7 @@ object CreatePaymentMethod {
   }
 
   implicit val reads: Reads[CreatePaymentMethodResult] =
-    (JsPath \ "id").read[PaymentMethodId].map(CreatePaymentMethodResult.apply _)
+    (JsPath \ "Id").read[PaymentMethodId].map(CreatePaymentMethodResult.apply _)
 
   case class CreatePaymentMethodResult(id: PaymentMethodId)
 
@@ -146,12 +146,12 @@ object ZuoraQueryPaymentMethod {
 
   case class AccountPaymentMethodIds(accountId: AccountId, paymentMethodIds: NonEmptyList[PaymentMethodId])
 
-  def getPaymentMethodForStripeCustomer(customerId: StripeCustomerId): WithDepsFailableOp[ZuoraDeps, AccountPaymentMethodIds] = {
+  def getPaymentMethodForStripeCustomer(customerId: StripeCustomerId, sourceId: StripeSourceId): WithDepsFailableOp[ZuoraDeps, AccountPaymentMethodIds] = {
     import com.gu.util.reader.Types._
     val query =
       s"""SELECT Id, AccountId
          | FROM PaymentMethod
-         |  where Type='CreditCardReferenceTransaction' AND PaymentMethodStatus = 'Active' AND TokenId = 'TokenId' AND SecondTokenId = '${customerId.value}'""".stripMargin
+         |  where Type='CreditCardReferenceTransaction' AND PaymentMethodStatus = 'Active' AND TokenId = '${sourceId.value}' AND SecondTokenId = '${customerId.value}'""".stripMargin
 
     Zuora.query[PaymentMethodFields](Query(query)).run.map(_.flatMap { result =>
       result.records.groupBy(_.AccountId).toList match {

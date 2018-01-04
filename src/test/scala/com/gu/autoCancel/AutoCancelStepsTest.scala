@@ -1,13 +1,12 @@
 package com.gu.autoCancel
 
+import com.gu.TestingRawEffects.BasicResult
 import com.gu.autoCancel.AutoCancel.AutoCancelRequest
 import com.gu.autoCancel.AutoCancelDataCollectionFilter.ACFilterDeps
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.ZuoraModels._
 import com.gu.util.zuora.ZuoraQueryPaymentMethod.{ AccountId, PaymentMethodId }
 import com.gu.{ TestData, TestingRawEffects, WithDependenciesFailableOp }
-import okhttp3.internal.Util.UTF_8
-import okio.Buffer
 import org.joda.time.LocalDate
 import org.scalatest._
 
@@ -37,15 +36,7 @@ class AutoCancelStepsTest extends FlatSpec with Matchers {
     val effects = new TestingRawEffects(false, 200)
     AutoCancel(effects.zuoraDeps)(AutoCancelRequest("AID", SubscriptionId("subid"), LocalDate.now))
 
-    val requests = effects.result.map { request =>
-      val buffer = new Buffer()
-      request.body().writeTo(buffer)
-      val body = buffer.readString(UTF_8)
-      val url = request.url
-      (request.method(), url.encodedPath(), body)
-    }
-
-    requests should contain(("PUT", "/accounts/AID", "{\"autoPay\":false}"))
+    effects.basicResults should contain(BasicResult("PUT", "/accounts/AID", "{\"autoPay\":false}"))
   }
 
   //  // todo need an ACSDeps so we don't need so many mock requests

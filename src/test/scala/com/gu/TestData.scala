@@ -1,5 +1,6 @@
 package com.gu
 
+import com.gu.TestingRawEffects.BasicResult
 import com.gu.effects.RawEffects
 import com.gu.util.ETConfig.{ ETSendId, ETSendIds }
 import com.gu.util._
@@ -9,6 +10,8 @@ import com.gu.util.reader.Types.{ FailableOp, WithDepsFailableOp, _ }
 import com.gu.util.zuora.ZuoraDeps
 import com.gu.util.zuora.ZuoraModels.{ InvoiceItem, InvoiceTransactionSummary, ItemisedInvoice }
 import okhttp3._
+import okhttp3.internal.Util.UTF_8
+import okio.Buffer
 import org.joda.time.LocalDate
 import org.scalatest.Matchers
 import play.api.libs.json.Json
@@ -78,11 +81,25 @@ object TestData extends Matchers {
 
 }
 
+object TestingRawEffects {
+
+  case class BasicResult(method: String, path: String, body: String)
+
+}
+
 class TestingRawEffects(val isProd: Boolean = false, val defaultCode: Int = 1, responses: Map[String, (Int, String)] = Map()) {
 
   var result: List[Request] = Nil // !
 
   val stage = Stage(if (isProd) "PROD" else "DEV")
+
+  def basicResults = result.map { request =>
+    val buffer = new Buffer()
+    Option(request.body()).foreach(_.writeTo(buffer))
+    val body = buffer.readString(UTF_8)
+    val url = request.url
+    BasicResult(request.method(), url.encodedPath(), body)
+  }
 
   val response: Request => Response = {
     req =>
