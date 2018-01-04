@@ -64,12 +64,11 @@ class StripeCustomerUpdatedReadsTest extends FlatSpec {
         data = EventData(
           `object` = EventDataObject(
             id = StripeSourceId("card_def456"),
-            brand = "Visa",
-            country = "US",
+            brand = StripeBrand.Visa,
+            country = StripeCountry("US"),
             customer = StripeCustomerId("cus_ghi789"),
-            exp_month = 7,
-            exp_year = 2020,
-            last4 = "1234"
+            expiry = StripeExpiry(exp_month = 7, exp_year = 2020),
+            last4 = StripeLast4("1234")
           )
         )
       )

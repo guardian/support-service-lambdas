@@ -36,9 +36,6 @@ object ZuoraModels {
 
 object ZuoraReaders {
 
-  implicit val paymentMethodIdReads: Reads[PaymentMethodId] =
-    (JsPath \ "id").read[String].map(PaymentMethodId.apply)
-
   implicit val basicAccountInfoReads: Reads[BasicAccountInfo] = (
     (JsPath \ "id").read[String].map(AccountId.apply) and
     (JsPath \ "balance").read[Double] and

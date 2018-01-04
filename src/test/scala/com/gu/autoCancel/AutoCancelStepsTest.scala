@@ -4,6 +4,7 @@ import com.gu.autoCancel.AutoCancel.AutoCancelRequest
 import com.gu.autoCancel.AutoCancelDataCollectionFilter.ACFilterDeps
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.ZuoraModels._
+import com.gu.util.zuora.ZuoraQueryPaymentMethod.{ AccountId, PaymentMethodId }
 import com.gu.{ TestData, TestingRawEffects, WithDependenciesFailableOp }
 import okhttp3.internal.Util.UTF_8
 import okio.Buffer
@@ -14,7 +15,7 @@ import scalaz.\/-
 
 class AutoCancelStepsTest extends FlatSpec with Matchers {
 
-  val basicInfo = BasicAccountInfo("id123", 11.99)
+  val basicInfo = BasicAccountInfo(AccountId("id123"), 11.99, PaymentMethodId("pmid"))
   val subscription = SubscriptionSummary(SubscriptionId("sub123"), "A-S123", "Active")
   val singleOverdueInvoice = Invoice("inv123", LocalDate.now.minusDays(14), 11.99, "Posted")
 

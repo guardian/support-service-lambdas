@@ -6,7 +6,7 @@ import com.gu.util._
 import com.gu.util.apigateway.ApiGatewayHandler.HandlerDeps
 import com.gu.util.apigateway.ApiGatewayRequest
 import com.gu.util.reader.Types.{ FailableOp, WithDepsFailableOp, _ }
-import com.gu.util.zuora.Zuora.ZuoraDeps
+import com.gu.util.zuora.ZuoraDeps
 import com.gu.util.zuora.ZuoraModels.{ InvoiceItem, InvoiceTransactionSummary, ItemisedInvoice }
 import okhttp3._
 import org.joda.time.LocalDate
