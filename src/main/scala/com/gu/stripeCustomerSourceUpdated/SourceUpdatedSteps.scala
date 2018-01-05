@@ -18,10 +18,10 @@ object SourceUpdatedSteps extends Logging {
 
   def apply(deps: Deps)(apiGatewayRequest: ApiGatewayRequest): FailableOp[Unit] = {
     (for {
-      paymentFailureCallout <- Json.fromJson[SourceUpdatedCallout](Json.parse(apiGatewayRequest.body)).toFailableOp.pure[WithDeps].toEitherT
-      _ = logger.info(s"received $paymentFailureCallout")
-      accountId <- getAccountToUpdate(paymentFailureCallout.data.`object`.customer, paymentFailureCallout.data.`object`.id)
-      _ <- updatePaymentMethod(accountId, paymentFailureCallout.data.`object`)
+      sourceUpdatedCallout <- Json.fromJson[SourceUpdatedCallout](Json.parse(apiGatewayRequest.body)).toFailableOp.pure[WithDeps].toEitherT
+      _ = logger.info(s"received source updated: $sourceUpdatedCallout")
+      accountId <- getAccountToUpdate(sourceUpdatedCallout.data.`object`.customer, sourceUpdatedCallout.data.`object`.id)
+      _ <- updatePaymentMethod(accountId, sourceUpdatedCallout.data.`object`)
     } yield ()).run.run(deps.zuoraDeps)
   }
 
