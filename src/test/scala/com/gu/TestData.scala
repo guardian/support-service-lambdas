@@ -37,8 +37,13 @@ object TestData extends Matchers {
   val fakeETSendIds = ETSendIds(ETSendId("11"), ETSendId("22"), ETSendId("33"), ETSendId("44"), ETSendId("can"))
   val fakeETConfig = ETConfig(etSendIDs = fakeETSendIds, "fakeClientId", "fakeClientSecret")
 
-  val fakeConfig = Config(Stage("DEV"), fakeApiConfig, zuoraRestConfig = ZuoraRestConfig("https://ddd", "e@f.com", "ggg"),
-    etConfig = ETConfig(etSendIDs = ETSendIds(ETSendId("11"), ETSendId("22"), ETSendId("33"), ETSendId("44"), ETSendId("can")), clientId = "jjj", clientSecret = "kkk"))
+  val fakeConfig = Config(
+    stage = Stage("DEV"),
+    trustedApiConfig = fakeApiConfig,
+    zuoraRestConfig = ZuoraRestConfig("https://ddd", "e@f.com", "ggg"),
+    etConfig = ETConfig(etSendIDs = ETSendIds(ETSendId("11"), ETSendId("22"), ETSendId("33"), ETSendId("44"), ETSendId("can")), clientId = "jjj", clientSecret = "kkk"),
+    stripeConfig = StripeConfig(ukStripeSecretKey = StripeSecretKey("abc"), auStripeSecretKey = StripeSecretKey("def"))
+  )
 
   val missingCredentialsResponse = """{"statusCode":"401","headers":{"Content-Type":"application/json"},"body":"Credentials are missing or invalid"}"""
   val successfulResponse = """{"statusCode":"200","headers":{"Content-Type":"application/json"},"body":"Success"}"""
@@ -67,6 +72,10 @@ object TestData extends Matchers {
       |    },
       |    "clientId": "jjj",
       |    "clientSecret": "kkk"
+      |  },
+      |  "stripe": {
+      |     "api.key.secret": "abc",
+      |     "au-membership.key.secret": "def"
       |  }
       |}
     """.stripMargin

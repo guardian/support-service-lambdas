@@ -13,7 +13,7 @@ object ConfigLoad extends Logging {
 
   // if you are updating the config, it's hard to test it in advance of deployment
   // with this, you can upload the new config with a new name
-  val version = "2"
+  val version = "3"
 
   def load(stage: Stage): Try[String] = {
     logger.info(s"Attempting to load config in $stage")
