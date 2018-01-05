@@ -18,7 +18,7 @@ object Http extends Logging {
       val buffer = new Buffer()
       requestBody.writeTo(buffer)
       val body = buffer.readString(UTF_8)
-      body.length
+      (body.length, body.take(500) + (if (body.length > 500) "..." else ""))
     }
 
     { request: Request =>

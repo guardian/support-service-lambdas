@@ -37,7 +37,9 @@ object ZuoraRestRequestMaker extends Logging {
     if (response.isSuccessful) {
       ().right
     } else {
-      logger.error(s"Request to Zuora was unsuccessful, the response was: \n $response")
+      val body = response.body.string
+      val truncated = body.take(500) + (if (body.length > 500) "..." else "")
+      logger.error(s"Request to Zuora was unsuccessful, the response was: \n $response\n$truncated")
       internalServerError("Request to Zuora was unsuccessful").left
     }
   }

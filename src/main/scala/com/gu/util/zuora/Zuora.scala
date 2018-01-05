@@ -110,7 +110,8 @@ object CreatePaymentMethod {
       "CreditCardNumber" -> command.last4.value,
       "CreditCardExpirationYear" -> command.expiration.exp_month,
       "CreditCardExpirationYear" -> command.expiration.exp_year,
-      "CreditCardType" -> command.creditCardType.value
+      "CreditCardType" -> command.creditCardType.value,
+      "Type" -> "CreditCardReferenceTransaction"
     )
   }
 

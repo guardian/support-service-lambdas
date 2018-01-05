@@ -80,8 +80,8 @@ class SourceUpdatedStepsTest extends FlatSpec with Matchers {
   "SourceUpdatedSteps" should "updatePaymentMethod" in {
 
     val effects = new TestingRawEffects(false, 500, Map(
-      ("/object/payment-method", (200, """{"success": true,"Id": "newPMID"}""")),
-      ("/object/account/fake", (200, """{"success": true,"Id": "fakeaccountid"}"""))
+      ("/object/payment-method", (200, """{"Success": true,"Id": "newPMID"}""")),
+      ("/object/account/fake", (200, """{"Success": true,"Id": "fakeaccountid"}"""))
     ))
     val sourceUpdatedSteps = SourceUpdatedSteps.Deps(effects.zuoraDeps)
 
@@ -99,7 +99,7 @@ class SourceUpdatedStepsTest extends FlatSpec with Matchers {
     val expectedPOST = BasicResult(
       "POST",
       "/object/payment-method",
-      """{"AccountId":"fake","TokenId":"card_def456","SecondTokenId":"cus_ghi789","CreditCardCountry":"US","CreditCardNumber":"1234","CreditCardExpirationYear":2020,"CreditCardType":"Visa"}"""
+      """{"AccountId":"fake","TokenId":"card_def456","SecondTokenId":"cus_ghi789","CreditCardCountry":"US","CreditCardNumber":"1234","CreditCardExpirationYear":2020,"CreditCardType":"Visa","Type":"CreditCardReferenceTransaction"}"""
     )
     val expectedPUT = BasicResult(
       "PUT",

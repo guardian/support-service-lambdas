@@ -88,9 +88,12 @@ object ZuoraReaders {
   implicit val unitReads: Reads[Unit] =
     Reads(_ => JsSuccess(()))
 
-  implicit val zuoraCommonFieldsReads: Reads[ZuoraCommonFields] = (JsPath \ "success").read[Boolean].map {
-    success => ZuoraCommonFields(success)
-  }
+  implicit val zuoraCommonFieldsReads: Reads[ZuoraCommonFields] =
+    (JsPath \ "success").read[Boolean]
+      .orElse((JsPath \ "Success").read[Boolean]) // rest object api seems to use title case....!!
+      .map {
+        success => ZuoraCommonFields(success)
+      }
 
 }
 
