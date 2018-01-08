@@ -22,7 +22,7 @@ case class URLParams(apiToken: Option[String], onlyCancelDirectDebit: Boolean, s
 /* Using query strings because for Basic Auth to work Zuora requires us to return a WWW-Authenticate
   header, and API Gateway does not support this header (returns x-amzn-Remapped-WWW-Authenticate instead)
   */
-case class ApiGatewayRequest(queryStringParameters: Option[URLParams], body: String) {
+case class ApiGatewayRequest(queryStringParameters: Option[URLParams], body: String, headers: Option[Map[String, String]]) {
   def onlyCancelDirectDebit: Boolean = queryStringParameters.exists(_.onlyCancelDirectDebit)
   def requestAuth: Option[RequestAuth] =
     for {
@@ -34,8 +34,8 @@ case class ApiGatewayRequest(queryStringParameters: Option[URLParams], body: Str
 object URLParams {
   implicit val jf = (
     (JsPath \ "apiToken").readNullable[String] and
-      (JsPath \ "onlyCancelDirectDebit").readNullable[String].map(_.contains("true")) and
-      (JsPath \ "stripeAccount").readNullable[String].map(_.flatMap(StripeAccount.fromString))
+    (JsPath \ "onlyCancelDirectDebit").readNullable[String].map(_.contains("true")) and
+    (JsPath \ "stripeAccount").readNullable[String].map(_.flatMap(StripeAccount.fromString))
   )(URLParams.apply _)
 }
 
