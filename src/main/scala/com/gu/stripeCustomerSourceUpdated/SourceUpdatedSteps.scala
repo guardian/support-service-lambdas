@@ -1,12 +1,12 @@
 package com.gu.stripeCustomerSourceUpdated
 
 import com.gu.util._
-import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
+import com.gu.util.apigateway.{ ApiGatewayRequest, ApiGatewayResponse }
 import com.gu.util.reader.Types._
-import com.gu.util.zuora.CreatePaymentMethod.{CreateStripePaymentMethod, CreditCardType}
-import com.gu.util.zuora.ZuoraQueryPaymentMethod.{AccountId, PaymentMethodId}
+import com.gu.util.zuora.CreatePaymentMethod.{ CreateStripePaymentMethod, CreditCardType }
+import com.gu.util.zuora.ZuoraQueryPaymentMethod.{ AccountId, PaymentMethodId }
 import com.gu.util.zuora._
-import okhttp3.{Request, Response}
+import okhttp3.{ Request, Response }
 import play.api.libs.json.Json
 
 import scalaz._
@@ -18,6 +18,7 @@ object SourceUpdatedSteps extends Logging {
   def apply(deps: Deps)(apiGatewayRequest: ApiGatewayRequest): FailableOp[Unit] = {
     (for {
       sourceUpdatedCallout <- Json.fromJson[SourceUpdatedCallout](Json.parse(apiGatewayRequest.body)).toFailableOp.withLogging("fromJson SourceUpdatedCallout").pure[WithDeps].toEitherT
+      _ = logger.info(s"from: ${apiGatewayRequest.queryStringParameters.map(_.stripeAccount)}")
       accountId <- getAccountToUpdate(sourceUpdatedCallout.data.`object`.customer, sourceUpdatedCallout.data.`object`.id)
       _ <- updatePaymentMethod(accountId, sourceUpdatedCallout.data.`object`)
     } yield ()).run.run(deps.zuoraDeps)
