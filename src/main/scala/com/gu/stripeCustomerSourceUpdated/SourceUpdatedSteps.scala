@@ -41,7 +41,7 @@ object SourceUpdatedSteps extends Logging {
     for { // similar to AccountController.updateCard in members-data-api
       // query zuora for account and payment method given the token id
       paymentMethods <- ZuoraQueryPaymentMethod.getPaymentMethodForStripeCustomer(customer, source).withLogging("getPaymentMethodForStripeCustomer")
-      account <- Zuora.getAccountSummary(paymentMethods.accountId.value).withLogging("getAccountSummary")
+      account <- ZuoraGetAccountSummary(paymentMethods.accountId.value).withLogging("getAccountSummary")
       // make sure the tokens relate to the default payment method
       _ <- skipIfNotDefault(account.basicInfo.defaultPaymentMethod, paymentMethods.paymentMethodIds).withLogging("skipIfNotDefault").pure[WithDeps].toEitherT
       // check that the account payment gateway matches (which?) stripe payment gateway (do we even need to do this? if it's the default, it must be right)

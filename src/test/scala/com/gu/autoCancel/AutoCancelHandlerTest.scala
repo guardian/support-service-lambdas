@@ -2,11 +2,11 @@ package com.gu.autoCancel
 
 import com.gu.util.TrustedApiConfig
 import com.gu.util.apigateway.ApiGatewayResponse._
-import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, RequestAuth, StripeAccount}
+import com.gu.util.apigateway.{ ApiGatewayHandler, ApiGatewayRequest, RequestAuth, StripeAccount }
 import org.scalatest._
-import play.api.libs.json.{JsSuccess, Json}
+import play.api.libs.json.{ JsSuccess, Json }
 
-import scalaz.{-\/, \/-}
+import scalaz.{ -\/, \/- }
 object AutoCancelHandlerTest {
 
   def fakeCallout(autoPay: Boolean) = {
@@ -102,7 +102,6 @@ class DeserialiserTest extends FlatSpec with Matchers {
     actualRequest.map(_.onlyCancelDirectDebit) should be(JsSuccess(true))
 
   }
-
 
   "deserialise APIGatewayRequest" should "manage without the stripe param" in {
     val json = """{"queryStringParameters": {"apiToken": "a", "apiClientId": "b"}, "body": "haha"}"""

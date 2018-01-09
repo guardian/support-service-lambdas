@@ -8,7 +8,7 @@ import com.gu.util.apigateway.ApiGatewayHandler.HandlerDeps
 import com.gu.util.apigateway.ApiGatewayRequest
 import com.gu.util.reader.Types.{ FailableOp, WithDepsFailableOp, _ }
 import com.gu.util.zuora.ZuoraDeps
-import com.gu.util.zuora.ZuoraModels.{ InvoiceItem, InvoiceTransactionSummary, ItemisedInvoice }
+import com.gu.util.zuora.ZuoraGetInvoiceTransactions.{ InvoiceItem, InvoiceTransactionSummary, ItemisedInvoice }
 import okhttp3._
 import okhttp3.internal.Util.UTF_8
 import okio.Buffer

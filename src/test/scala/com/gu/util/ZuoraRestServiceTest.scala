@@ -1,6 +1,7 @@
 package com.gu.util
 
 import com.gu.util.apigateway.ApiGatewayResponse._
+import com.gu.util.zuora.ZuoraGetAccountSummary.BasicAccountInfo
 import com.gu.util.zuora.ZuoraModels._
 import com.gu.util.zuora.ZuoraQueryPaymentMethod.{ AccountId, PaymentMethodId }
 import com.gu.util.zuora.ZuoraReaders._

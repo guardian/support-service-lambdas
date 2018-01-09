@@ -1,6 +1,7 @@
 package com.gu.autoCancel
 
 import com.gu.util.apigateway.ApiGatewayResponse._
+import com.gu.util.zuora.ZuoraGetAccountSummary.{ AccountSummary, BasicAccountInfo, Invoice, SubscriptionSummary }
 import com.gu.util.zuora.ZuoraModels._
 import com.gu.util.zuora.ZuoraQueryPaymentMethod.{ AccountId, PaymentMethodId }
 import org.joda.time.LocalDate

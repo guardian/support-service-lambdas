@@ -141,7 +141,7 @@ class SourceUpdatedStepsTest extends FlatSpec with Matchers {
       "/action/query",
       "{\"queryString\":\"SELECT Id, AccountId\\n FROM PaymentMethod\\n  where Type='CreditCardReferenceTransaction' AND PaymentMethodStatus = 'Active' AND TokenId = 'fakecardid' AND SecondTokenId = 'fakecustid'\"}"
     )
-    effects.basicResults should be(List( expectedPOST))
+    effects.basicResults should be(List(expectedPOST))
     actual should be(-\/(ApiGatewayResponse.internalServerError("could not find correct account for stripe details")))
   }
 
@@ -164,7 +164,7 @@ class SourceUpdatedStepsTest extends FlatSpec with Matchers {
       "/action/query",
       "{\"queryString\":\"SELECT Id, AccountId\\n FROM PaymentMethod\\n  where Type='CreditCardReferenceTransaction' AND PaymentMethodStatus = 'Active' AND TokenId = 'fakecardid' AND SecondTokenId = 'fakecustid'\"}"
     )
-    effects.basicResults should be(List( expectedPOST))
+    effects.basicResults should be(List(expectedPOST))
     actual should be(-\/(ApiGatewayResponse.internalServerError("could not find correct account for stripe details")))
   }
 

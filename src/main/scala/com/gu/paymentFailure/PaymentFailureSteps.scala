@@ -10,8 +10,8 @@ import com.gu.util.apigateway.{ ApiGatewayRequest, ApiGatewayResponse }
 import com.gu.util.exacttarget.EmailSendSteps.EmailSendStepsDeps
 import com.gu.util.exacttarget.{ EmailRequest, EmailSendSteps }
 import com.gu.util.reader.Types._
-import com.gu.util.zuora.ZuoraModels.InvoiceTransactionSummary
-import com.gu.util.zuora.{ Zuora, ZuoraDeps }
+import com.gu.util.zuora.ZuoraGetInvoiceTransactions.InvoiceTransactionSummary
+import com.gu.util.zuora.{ ZuoraDeps, ZuoraGetInvoiceTransactions }
 import okhttp3.{ Request, Response }
 import play.api.libs.json.Json
 
@@ -76,7 +76,7 @@ object ZuoraEmailSteps {
     def default(response: Request => Response, config: Config): ZuoraEmailStepsDeps = {
       ZuoraEmailStepsDeps(
         EmailSendSteps.apply(EmailSendStepsDeps.default(config.stage, response, config.etConfig)),
-        a => Zuora.getInvoiceTransactions(a).run.run(ZuoraDeps(response, config.zuoraRestConfig))
+        a => ZuoraGetInvoiceTransactions(a).run.run(ZuoraDeps(response, config.zuoraRestConfig))
       )
     }
   }

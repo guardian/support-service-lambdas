@@ -4,6 +4,7 @@ import com.gu.TestingRawEffects.BasicResult
 import com.gu.autoCancel.AutoCancel.AutoCancelRequest
 import com.gu.autoCancel.AutoCancelDataCollectionFilter.ACFilterDeps
 import com.gu.util.reader.Types._
+import com.gu.util.zuora.ZuoraGetAccountSummary.{ AccountSummary, BasicAccountInfo, Invoice, SubscriptionSummary }
 import com.gu.util.zuora.ZuoraModels._
 import com.gu.util.zuora.ZuoraQueryPaymentMethod.{ AccountId, PaymentMethodId }
 import com.gu.{ TestData, TestingRawEffects, WithDependenciesFailableOp }
