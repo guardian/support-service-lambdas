@@ -159,7 +159,8 @@ object ZuoraQueryPaymentMethod {
         case (account, first :: rest) :: Nil =>
           \/-(AccountPaymentMethodIds(account, NonEmptyList(first, rest: _*).map(_.Id)))
         case _ =>
-          -\/(ApiGatewayResponse.internalServerError(s"no results for the customer token: $result"))
+          logger.warn(s"wrong number of accounts using the customer token: $result")
+          -\/(ApiGatewayResponse.internalServerError("could not find correct account for stripe details"))
       }
     }).toEitherT
 

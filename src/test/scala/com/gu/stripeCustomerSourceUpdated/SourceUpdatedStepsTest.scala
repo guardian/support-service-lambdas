@@ -77,6 +77,99 @@ class SourceUpdatedStepsTest extends FlatSpec with Matchers {
     actual should be(\/-(AccountId("accountidfake")))
   }
 
+  "SourceUpdatedSteps" should "getAccountToUpdate default pm with multiple on the same account" in {
+    val effects = new TestingRawEffects(false, 500, Map(
+      ("/action/query", (200, """{
+                                |  "records": [
+                                |    {
+                                |      "Id": "defaultPMID",
+                                |      "AccountId": "accountidfake"
+                                |    },
+                                |    {
+                                |      "Id": "anotherPM",
+                                |      "AccountId": "accountidfake"
+                                |    }
+                                |  ],
+                                |  "size": 2,
+                                |  "done": true
+                                |}""".stripMargin)), //defaultPMID
+      ("/accounts/accountidfake/summary", (200, accountSummaryJson))
+    ))
+    val sourceUpdatedSteps = SourceUpdatedSteps.Deps(effects.zuoraDeps)
+
+    val actual = SourceUpdatedSteps.getAccountToUpdate(StripeCustomerId("fakecustid"), StripeSourceId("fakecardid")).run.run(effects.zuoraDeps)
+
+    val expectedPOST = BasicResult(
+      "POST",
+      "/action/query",
+      "{\"queryString\":\"SELECT Id, AccountId\\n FROM PaymentMethod\\n  where Type='CreditCardReferenceTransaction' AND PaymentMethodStatus = 'Active' AND TokenId = 'fakecardid' AND SecondTokenId = 'fakecustid'\"}"
+    )
+    val expectedGET = BasicResult(
+      "GET",
+      "/accounts/accountidfake/summary",
+      ""
+    )
+
+    effects.basicResults should be(List(expectedGET, expectedPOST))
+    actual should be(\/-(AccountId("accountidfake")))
+  }
+
+  "SourceUpdatedSteps" should "getAccountToUpdate multiple on different account" in {
+    val effects = new TestingRawEffects(false, 500, Map(
+      ("/action/query", (200, """{
+                                |  "records": [
+                                |    {
+                                |      "Id": "defaultPMID",
+                                |      "AccountId": "accountidfake"
+                                |    },
+                                |    {
+                                |      "Id": "anotherPM",
+                                |      "AccountId": "accountidANOTHER"
+                                |    }
+                                |  ],
+                                |  "size": 2,
+                                |  "done": true
+                                |}""".stripMargin)), //defaultPMID
+      ("/accounts/accountidfake/summary", (200, accountSummaryJson))
+    ))
+    val sourceUpdatedSteps = SourceUpdatedSteps.Deps(effects.zuoraDeps)
+
+    val actual = SourceUpdatedSteps.getAccountToUpdate(StripeCustomerId("fakecustid"), StripeSourceId("fakecardid")).run.run(effects.zuoraDeps)
+
+    val expectedPOST = BasicResult(
+      "POST",
+      "/action/query",
+      "{\"queryString\":\"SELECT Id, AccountId\\n FROM PaymentMethod\\n  where Type='CreditCardReferenceTransaction' AND PaymentMethodStatus = 'Active' AND TokenId = 'fakecardid' AND SecondTokenId = 'fakecustid'\"}"
+    )
+    effects.basicResults should be(List( expectedPOST))
+    actual should be(-\/(ApiGatewayResponse.internalServerError("could not find correct account for stripe details")))
+  }
+
+  "SourceUpdatedSteps" should "getAccountToUpdate no payment methods at all" in {
+    val effects = new TestingRawEffects(false, 500, Map(
+      ("/action/query", (200, """{
+                                |  "records": [
+                                |  ],
+                                |  "size": 0,
+                                |  "done": true
+                                |}""".stripMargin)), //defaultPMID
+      ("/accounts/accountidfake/summary", (200, accountSummaryJson))
+    ))
+    val sourceUpdatedSteps = SourceUpdatedSteps.Deps(effects.zuoraDeps)
+
+    val actual = SourceUpdatedSteps.getAccountToUpdate(StripeCustomerId("fakecustid"), StripeSourceId("fakecardid")).run.run(effects.zuoraDeps)
+
+    val expectedPOST = BasicResult(
+      "POST",
+      "/action/query",
+      "{\"queryString\":\"SELECT Id, AccountId\\n FROM PaymentMethod\\n  where Type='CreditCardReferenceTransaction' AND PaymentMethodStatus = 'Active' AND TokenId = 'fakecardid' AND SecondTokenId = 'fakecustid'\"}"
+    )
+    effects.basicResults should be(List( expectedPOST))
+    actual should be(-\/(ApiGatewayResponse.internalServerError("could not find correct account for stripe details")))
+  }
+
+  /**/
+
   "SourceUpdatedSteps" should "updatePaymentMethod" in {
 
     val effects = new TestingRawEffects(false, 500, Map(
