@@ -35,7 +35,7 @@ object CreatePaymentMethod {
       "SecondTokenId" -> command.customerId.value,
       "CreditCardCountry" -> command.cardCountry.value,
       "CreditCardNumber" -> command.last4.value,
-      "CreditCardExpirationYear" -> command.expiration.exp_month,
+      "CreditCardExpirationMonth" -> command.expiration.exp_month,
       "CreditCardExpirationYear" -> command.expiration.exp_year,
       "CreditCardType" -> command.creditCardType.value,
       "Type" -> "CreditCardReferenceTransaction"
