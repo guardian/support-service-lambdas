@@ -6,8 +6,7 @@ object Auth extends Logging {
 
   def credentialsAreValid(requestAuth: Option[RequestAuth], trustedApiConfig: TrustedApiConfig): Boolean =
     requestAuth.exists { requestAuth =>
-      requestAuth.apiClientId == trustedApiConfig.apiClientId &&
-        requestAuth.apiToken == trustedApiConfig.apiToken
+      requestAuth.apiToken == trustedApiConfig.apiToken
     }
 
   // Ensure that the correct Zuora environment is hitting the API

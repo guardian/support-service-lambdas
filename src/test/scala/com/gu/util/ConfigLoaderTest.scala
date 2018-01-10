@@ -12,8 +12,15 @@ class ConfigLoaderTest extends FlatSpec with Matchers {
     //    val requestAuth = Some(RequestAuth(apiClientId = "validUser", apiToken = "ndjashjkhajshs"))
     //    assert(credentialsAreValid(requestAuth, trustedApiConfig) == false)
     val prod = Config.parseConfig(TestData.codeConfig)
-    prod should be(Success(Config(Stage("DEV"), TrustedApiConfig("a", "b", "c"), zuoraRestConfig = ZuoraRestConfig("https://ddd", "e@f.com", "ggg"),
-      etConfig = ETConfig(etSendIDs = ETSendIds(ETSendId("111"), ETSendId("222"), ETSendId("333"), ETSendId("444"), ETSendId("ccc")), clientId = "jjj", clientSecret = "kkk"))))
+    prod should be(Success(
+      Config(
+        Stage("DEV"),
+        TrustedApiConfig("b", "c"),
+        zuoraRestConfig = ZuoraRestConfig("https://ddd", "e@f.com", "ggg"),
+        etConfig = ETConfig(etSendIDs = ETSendIds(ETSendId("111"), ETSendId("222"), ETSendId("333"), ETSendId("444"), ETSendId("ccc")), clientId = "jjj", clientSecret = "kkk"),
+        stripeConfig = StripeConfig(StripeSecretKey("abc"), StripeSecretKey("def"))
+      )
+    ))
   }
 
 }

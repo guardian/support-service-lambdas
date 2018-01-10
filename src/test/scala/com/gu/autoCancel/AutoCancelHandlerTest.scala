@@ -2,7 +2,7 @@ package com.gu.autoCancel
 
 import com.gu.util.TrustedApiConfig
 import com.gu.util.apigateway.ApiGatewayResponse._
-import com.gu.util.apigateway.{ ApiGatewayHandler, ApiGatewayRequest, RequestAuth }
+import com.gu.util.apigateway.{ ApiGatewayHandler, ApiGatewayRequest, RequestAuth, StripeAccount }
 import org.scalatest._
 import play.api.libs.json.{ JsSuccess, Json }
 
@@ -64,14 +64,14 @@ class AutoCancelHandlerTest extends FlatSpec {
   }
 
   "authenticateCallout" should "return a left if the credentials are invalid" in {
-    val requestAuth = RequestAuth(apiClientId = "correctId", apiToken = "token")
-    val trustedApiConfig = TrustedApiConfig(apiClientId = "wrongId", apiToken = "token", tenantId = "tenant")
+    val requestAuth = RequestAuth(apiToken = "incorrectRequestToken")
+    val trustedApiConfig = TrustedApiConfig(apiToken = "token", tenantId = "tenant")
     assert(ApiGatewayHandler.authenticateCallout(Some(requestAuth), trustedApiConfig) == -\/(unauthorized))
   }
 
   "authenticateCallout" should "return a right if the credentials are valid" in {
-    val requestAuth = RequestAuth(apiClientId = "correctId", apiToken = "token")
-    val trustedApiConfig = TrustedApiConfig(apiClientId = "correctId", apiToken = "token", tenantId = "tenant")
+    val requestAuth = RequestAuth(apiToken = "token")
+    val trustedApiConfig = TrustedApiConfig(apiToken = "token", tenantId = "tenant")
     assert(ApiGatewayHandler.authenticateCallout(Some(requestAuth), trustedApiConfig) == \/-(()))
   }
 
@@ -83,7 +83,7 @@ class DeserialiserTest extends FlatSpec with Matchers {
     val json = """{"queryStringParameters": {"apiToken": "a", "apiClientId": "b"}, "body": "haha"}"""
     val actualRequest = Json.parse(json).validate[ApiGatewayRequest]
 
-    actualRequest.map(_.queryStringParameters.flatMap(_.onlyCancelDirectDebit)) should be(JsSuccess(None))
+    actualRequest.map(_.queryStringParameters.map(_.onlyCancelDirectDebit)) should be(JsSuccess(Some(false)))
 
   }
 
@@ -100,6 +100,30 @@ class DeserialiserTest extends FlatSpec with Matchers {
     val actualRequest = Json.parse(json).validate[ApiGatewayRequest]
 
     actualRequest.map(_.onlyCancelDirectDebit) should be(JsSuccess(true))
+
+  }
+
+  "deserialise APIGatewayRequest" should "manage without the stripe param" in {
+    val json = """{"queryStringParameters": {"apiToken": "a", "apiClientId": "b"}, "body": "haha"}"""
+    val actualRequest = Json.parse(json).validate[ApiGatewayRequest]
+
+    actualRequest.map(_.queryStringParameters.flatMap(_.stripeAccount)) should be(JsSuccess(None))
+
+  }
+
+  "deserialise APIGatewayRequest" should "manage without a valid stripe param" in {
+    val json = """{"queryStringParameters": {"apiToken": "a", "apiClientId": "b", "stripeAccount": "HAHAHAHAHAHA"}, "body": "haha"}"""
+    val actualRequest = Json.parse(json).validate[ApiGatewayRequest]
+
+    actualRequest.map(_.queryStringParameters.flatMap(_.stripeAccount)) should be(JsSuccess(None))
+
+  }
+
+  it should "manage with the only stripe param set" in {
+    val json = """{"queryStringParameters": {"apiToken": "a", "apiClientId": "b", "stripeAccount": "GNM_Membership_AUS"}, "body": "haha"}"""
+    val actualRequest = Json.parse(json).validate[ApiGatewayRequest]
+
+    actualRequest.map(_.queryStringParameters.flatMap(_.stripeAccount)) should be(JsSuccess(Some(StripeAccount.GNM_Membership_AUS)))
 
   }
 

@@ -1,14 +1,17 @@
 package com.gu
 
+import com.gu.TestingRawEffects.BasicResult
 import com.gu.effects.RawEffects
 import com.gu.util.ETConfig.{ ETSendId, ETSendIds }
 import com.gu.util._
 import com.gu.util.apigateway.ApiGatewayHandler.HandlerDeps
 import com.gu.util.apigateway.ApiGatewayRequest
 import com.gu.util.reader.Types.{ FailableOp, WithDepsFailableOp, _ }
-import com.gu.util.zuora.Zuora.ZuoraDeps
-import com.gu.util.zuora.ZuoraModels.{ InvoiceItem, InvoiceTransactionSummary, ItemisedInvoice }
+import com.gu.util.zuora.ZuoraDeps
+import com.gu.util.zuora.ZuoraGetInvoiceTransactions.{ InvoiceItem, InvoiceTransactionSummary, ItemisedInvoice }
 import okhttp3._
+import okhttp3.internal.Util.UTF_8
+import okio.Buffer
 import org.joda.time.LocalDate
 import org.scalatest.Matchers
 import play.api.libs.json.Json
@@ -29,13 +32,18 @@ object TestData extends Matchers {
   val basicInvoiceTransactionSummary = InvoiceTransactionSummary(List(itemisedInvoice(49, List(invoiceItemA))))
   val weirdInvoiceTransactionSummary = InvoiceTransactionSummary(List(itemisedInvoice(0, List(invoiceItemA)), itemisedInvoice(49, List(invoiceItemB, invoiceItemA, invoiceItemC))))
 
-  val fakeApiConfig = TrustedApiConfig("validApiClientId", "validApiToken", "testEnvTenantId")
+  val fakeApiConfig = TrustedApiConfig("validApiToken", "testEnvTenantId")
   val fakeZuoraConfig = ZuoraRestConfig("https://ddd", "fakeUser", "fakePass")
   val fakeETSendIds = ETSendIds(ETSendId("11"), ETSendId("22"), ETSendId("33"), ETSendId("44"), ETSendId("can"))
   val fakeETConfig = ETConfig(etSendIDs = fakeETSendIds, "fakeClientId", "fakeClientSecret")
 
-  val fakeConfig = Config(Stage("DEV"), fakeApiConfig, zuoraRestConfig = ZuoraRestConfig("https://ddd", "e@f.com", "ggg"),
-    etConfig = ETConfig(etSendIDs = ETSendIds(ETSendId("11"), ETSendId("22"), ETSendId("33"), ETSendId("44"), ETSendId("can")), clientId = "jjj", clientSecret = "kkk"))
+  val fakeConfig = Config(
+    stage = Stage("DEV"),
+    trustedApiConfig = fakeApiConfig,
+    zuoraRestConfig = ZuoraRestConfig("https://ddd", "e@f.com", "ggg"),
+    etConfig = ETConfig(etSendIDs = ETSendIds(ETSendId("11"), ETSendId("22"), ETSendId("33"), ETSendId("44"), ETSendId("can")), clientId = "jjj", clientSecret = "kkk"),
+    stripeConfig = StripeConfig(ukStripeSecretKey = StripeSecretKey("abc"), auStripeSecretKey = StripeSecretKey("def"))
+  )
 
   val missingCredentialsResponse = """{"statusCode":"401","headers":{"Content-Type":"application/json"},"body":"Credentials are missing or invalid"}"""
   val successfulResponse = """{"statusCode":"200","headers":{"Content-Type":"application/json"},"body":"Success"}"""
@@ -64,6 +72,10 @@ object TestData extends Matchers {
       |    },
       |    "clientId": "jjj",
       |    "clientSecret": "kkk"
+      |  },
+      |  "stripe": {
+      |     "api.key.secret": "abc",
+      |     "au-membership.key.secret": "def"
       |  }
       |}
     """.stripMargin
@@ -78,11 +90,25 @@ object TestData extends Matchers {
 
 }
 
+object TestingRawEffects {
+
+  case class BasicResult(method: String, path: String, body: String)
+
+}
+
 class TestingRawEffects(val isProd: Boolean = false, val defaultCode: Int = 1, responses: Map[String, (Int, String)] = Map()) {
 
   var result: List[Request] = Nil // !
 
   val stage = Stage(if (isProd) "PROD" else "DEV")
+
+  def basicResults = result.map { request =>
+    val buffer = new Buffer()
+    Option(request.body()).foreach(_.writeTo(buffer))
+    val body = buffer.readString(UTF_8)
+    val url = request.url
+    BasicResult(request.method(), url.encodedPath(), body)
+  }
 
   val response: Request => Response = {
     req =>

@@ -57,17 +57,36 @@ object ETConfig {
   )(ETConfig.apply _)
 }
 
-case class TrustedApiConfig(apiClientId: String, apiToken: String, tenantId: String)
+case class TrustedApiConfig(apiToken: String, tenantId: String)
 
 object TrustedApiConfig {
   implicit val apiConfigReads: Reads[TrustedApiConfig] = (
-    (JsPath \ "apiClientId").read[String] and
     (JsPath \ "apiToken").read[String] and
     (JsPath \ "tenantId").read[String]
   )(TrustedApiConfig.apply _)
 }
 
-case class Config(stage: Stage, trustedApiConfig: TrustedApiConfig, zuoraRestConfig: ZuoraRestConfig, etConfig: ETConfig)
+case class StripeSecretKey(key: String) extends AnyVal
+
+object StripeSecretKey {
+  implicit val stripeSecretKeyReads = Json.reads[StripeSecretKey]
+}
+
+case class StripeConfig(ukStripeSecretKey: StripeSecretKey, auStripeSecretKey: StripeSecretKey)
+object StripeConfig {
+  implicit val apiConfigReads: Reads[StripeConfig] = (
+    (JsPath \ "api.key.secret").read[String].map(StripeSecretKey.apply) and
+    (JsPath \ "au-membership.key.secret").read[String].map(StripeSecretKey.apply)
+  )(StripeConfig.apply _)
+}
+
+case class Config(
+  stage: Stage,
+  trustedApiConfig: TrustedApiConfig,
+  zuoraRestConfig: ZuoraRestConfig,
+  etConfig: ETConfig,
+  stripeConfig: StripeConfig
+)
 
 case class Stage(value: String) extends AnyVal {
   def isProd: Boolean = value == "PROD"
@@ -79,7 +98,8 @@ object Config extends Logging {
     (JsPath \ "stage").read[String].map(Stage.apply) and
     (JsPath \ "trustedApiConfig").read[TrustedApiConfig] and
     (JsPath \ "zuoraRestConfig").read[ZuoraRestConfig] and
-    (JsPath \ "etConfig").read[ETConfig]
+    (JsPath \ "etConfig").read[ETConfig] and
+    (JsPath \ "stripe").read[StripeConfig]
   )(Config.apply _)
 
   def parseConfig(jsonConfig: String): Try[Config] = {

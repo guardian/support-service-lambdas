@@ -11,6 +11,7 @@ import com.gu.util.apigateway.{ ApiGatewayHandler, ApiGatewayRequest, ApiGateway
 import com.gu.util.exacttarget.EmailSendSteps.EmailSendStepsDeps
 import com.gu.util.exacttarget._
 import com.gu.util.reader.Types._
+import com.gu.util.zuora.ZuoraGetInvoiceTransactions.InvoiceTransactionSummary
 import com.gu.util.zuora.ZuoraModels._
 import com.gu.util.{ Config, Stage }
 import org.scalatest.{ FlatSpec, Matchers }
