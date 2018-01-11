@@ -1,6 +1,8 @@
 package com.gu.stripeCustomerSourceUpdated
 
+import com.gu.stripeCustomerSourceUpdated.StripeSignatureChecker._
 import com.gu.util._
+import com.gu.util.apigateway.ApiGatewayResponse.unauthorized
 import com.gu.util.apigateway.{ ApiGatewayRequest, ApiGatewayResponse }
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.CreatePaymentMethod.{ CreateStripePaymentMethod, CreditCardType }
@@ -16,14 +18,26 @@ import scalaz.syntax.std.option._
 object SourceUpdatedSteps extends Logging {
 
   def apply(deps: Deps)(apiGatewayRequest: ApiGatewayRequest): FailableOp[Unit] = {
-    (for {
-      sourceUpdatedCallout <- Json.fromJson[SourceUpdatedCallout](Json.parse(apiGatewayRequest.body)).toFailableOp.withLogging("fromJson SourceUpdatedCallout").pure[WithDeps].toEitherT
-      _ = logger.info(s"from: ${apiGatewayRequest.queryStringParameters.map(_.stripeAccount)}")
-      accountId <- getAccountToUpdate(sourceUpdatedCallout.data.`object`.customer, sourceUpdatedCallout.data.`object`.id)
-      _ <- updatePaymentMethod(accountId, sourceUpdatedCallout.data.`object`)
-    } yield ()).run.run(deps.zuoraDeps)
+    (
+
+      for {
+        body <- bodyIfSignatureVerified(deps, apiGatewayRequest).pure[WithDeps].toEitherT
+        sourceUpdatedCallout <- Json.fromJson[SourceUpdatedCallout](Json.parse(body)).toFailableOp.withLogging("fromJson SourceUpdatedCallout").pure[WithDeps].toEitherT
+        _ = logger.info(s"from: ${apiGatewayRequest.queryStringParameters.map(_.stripeAccount)}")
+        accountId <- getAccountToUpdate(sourceUpdatedCallout.data.`object`.customer, sourceUpdatedCallout.data.`object`.id)
+        _ <- updatePaymentMethod(accountId, sourceUpdatedCallout.data.`object`)
+      } yield ()
+    ).run.run(deps.zuoraDeps)
+
   }
 
+  def bodyIfSignatureVerified(deps: Deps, apiGatewayRequest: ApiGatewayRequest): FailableOp[String] = {
+    val signatureVerified = verifyStripeSignature(stripeConfig = deps.stripeDeps.config, apiGatewayRequest.headers.get, apiGatewayRequest.body)
+    signatureVerified match {
+      case true => \/-(apiGatewayRequest.body)
+      case false => -\/(unauthorized)
+    }
+  }
   def updatePaymentMethod(accountId: AccountId, eventDataObject: EventDataObject): WithDepsFailableOp[ZuoraDeps, Unit] = {
     for {
       // (clear default payment method and autopay off not needed because we are not changing the payment gateway)
@@ -85,11 +99,11 @@ object SourceUpdatedSteps extends Logging {
 
   object Deps {
     def default(response: Request => Response, config: Config): Deps = {
-      Deps(ZuoraDeps(response, config.zuoraRestConfig))
+      Deps(ZuoraDeps(response, config.zuoraRestConfig), StripeDeps(config.stripeConfig))
     }
   }
 
-  case class Deps(zuoraDeps: ZuoraDeps)
+  case class Deps(zuoraDeps: ZuoraDeps, stripeDeps: StripeDeps)
 
 }
 

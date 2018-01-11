@@ -1,7 +1,10 @@
 package com.gu.stripeCustomerSourceUpdated
 
+import com.gu.util.StripeConfig
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
+
+case class StripeDeps(config: StripeConfig)
 
 case class EventData(`object`: EventDataObject)
 case class EventDataObject(

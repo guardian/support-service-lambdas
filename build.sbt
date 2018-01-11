@@ -45,7 +45,8 @@ libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % "3.0.1" % "test",
   "org.mockito" % "mockito-core" % "1.9.5" % "test",
   "com.github.nscala-time" % "nscala-time_2.12" % "2.16.0",
-  "org.apache.commons" % "commons-io" % "1.3.2"
+  "org.apache.commons" % "commons-io" % "1.3.2",
+  "com.stripe" % "stripe-java" % "5.28.0"
 )
 
 initialize := {
