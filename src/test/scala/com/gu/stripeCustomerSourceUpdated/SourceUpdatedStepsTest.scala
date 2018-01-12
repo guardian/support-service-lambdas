@@ -28,7 +28,7 @@ class SourceUpdatedStepsTest extends FlatSpec with Matchers {
     ))
     val sourceUpdatedSteps = SourceUpdatedSteps.Deps(effects.zuoraDeps)
 
-    val actual = SourceUpdatedSteps.getAccountToUpdate(StripeCustomerId("fakecustid"), StripeSourceId("fakecardid")).run.run(effects.zuoraDeps)
+    val actual = SourceUpdatedSteps.getPaymentMethodToUpdate(StripeCustomerId("fakecustid"), StripeSourceId("fakecardid")).run.run(effects.zuoraDeps)
 
     val expectedPOST = BasicResult(
       "POST",
@@ -62,7 +62,7 @@ class SourceUpdatedStepsTest extends FlatSpec with Matchers {
     ))
     val sourceUpdatedSteps = SourceUpdatedSteps.Deps(effects.zuoraDeps)
 
-    val actual = SourceUpdatedSteps.getAccountToUpdate(StripeCustomerId("fakecustid"), StripeSourceId("fakecardid")).run.run(effects.zuoraDeps)
+    val actual = SourceUpdatedSteps.getPaymentMethodToUpdate(StripeCustomerId("fakecustid"), StripeSourceId("fakecardid")).run.run(effects.zuoraDeps)
 
     val expectedPOST = BasicResult(
       "POST",
@@ -101,7 +101,7 @@ class SourceUpdatedStepsTest extends FlatSpec with Matchers {
     ))
     val sourceUpdatedSteps = SourceUpdatedSteps.Deps(effects.zuoraDeps)
 
-    val actual = SourceUpdatedSteps.getAccountToUpdate(StripeCustomerId("fakecustid"), StripeSourceId("fakecardid")).run.run(effects.zuoraDeps)
+    val actual = SourceUpdatedSteps.getPaymentMethodToUpdate(StripeCustomerId("fakecustid"), StripeSourceId("fakecardid")).run.run(effects.zuoraDeps)
 
     val expectedPOST = BasicResult(
       "POST",
@@ -140,7 +140,7 @@ class SourceUpdatedStepsTest extends FlatSpec with Matchers {
     ))
     val sourceUpdatedSteps = SourceUpdatedSteps.Deps(effects.zuoraDeps)
 
-    val actual = SourceUpdatedSteps.getAccountToUpdate(StripeCustomerId("fakecustid"), StripeSourceId("fakecardid")).run.run(effects.zuoraDeps)
+    val actual = SourceUpdatedSteps.getPaymentMethodToUpdate(StripeCustomerId("fakecustid"), StripeSourceId("fakecardid")).run.run(effects.zuoraDeps)
 
     val expectedPOST = BasicResult(
       "POST",
@@ -163,7 +163,7 @@ class SourceUpdatedStepsTest extends FlatSpec with Matchers {
     ))
     val sourceUpdatedSteps = SourceUpdatedSteps.Deps(effects.zuoraDeps)
 
-    val actual = SourceUpdatedSteps.getAccountToUpdate(StripeCustomerId("fakecustid"), StripeSourceId("fakecardid")).run.run(effects.zuoraDeps)
+    val actual = SourceUpdatedSteps.getPaymentMethodToUpdate(StripeCustomerId("fakecustid"), StripeSourceId("fakecardid")).run.run(effects.zuoraDeps)
 
     val expectedPOST = BasicResult(
       "POST",
@@ -193,7 +193,7 @@ class SourceUpdatedStepsTest extends FlatSpec with Matchers {
       last4 = StripeLast4("1234")
     )
 
-    val actual = SourceUpdatedSteps.updatePaymentMethod(PaymentMethodFields(PaymentMethodId("PMID"), AccountId("fake"), NumConsecutiveFailures(1)), eventData).run.run(effects.zuoraDeps)
+    val actual = SourceUpdatedSteps.createUpdatedDefaultPaymentMethod(PaymentMethodFields(PaymentMethodId("PMID"), AccountId("fake"), NumConsecutiveFailures(1)), eventData).run.run(effects.zuoraDeps)
 
     val expectedPOST = BasicResult(
       "POST",
