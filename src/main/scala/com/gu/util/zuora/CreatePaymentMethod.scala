@@ -2,7 +2,7 @@ package com.gu.util.zuora
 
 import com.gu.stripeCustomerSourceUpdated._
 import com.gu.util.reader.Types.WithDepsFailableOp
-import com.gu.util.zuora.ZuoraQueryPaymentMethod.{ AccountId, PaymentMethodId }
+import com.gu.util.zuora.ZuoraQueryPaymentMethod.{ AccountId, NumConsecutiveFailures, PaymentMethodId }
 import com.gu.util.zuora.ZuoraRestRequestMaker.post
 import play.api.libs.json.{ JsPath, Json, Reads, Writes }
 
@@ -15,7 +15,8 @@ object CreatePaymentMethod {
     cardCountry: StripeCountry,
     last4: StripeLast4,
     expiration: StripeExpiry,
-    creditCardType: CreditCardType
+    creditCardType: CreditCardType,
+    numConsecutiveFailures: NumConsecutiveFailures
   )
 
   sealed abstract class CreditCardType(val value: String)
@@ -38,7 +39,8 @@ object CreatePaymentMethod {
       "CreditCardExpirationMonth" -> command.expiration.exp_month,
       "CreditCardExpirationYear" -> command.expiration.exp_year,
       "CreditCardType" -> command.creditCardType.value,
-      "Type" -> "CreditCardReferenceTransaction"
+      "Type" -> "CreditCardReferenceTransaction",
+      "NumConsecutiveFailures" -> command.numConsecutiveFailures
     )
   }
 
