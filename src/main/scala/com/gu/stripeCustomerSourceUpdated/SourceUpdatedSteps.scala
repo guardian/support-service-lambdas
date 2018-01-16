@@ -1,9 +1,8 @@
 package com.gu.stripeCustomerSourceUpdated
 
-import com.gu.stripeCustomerSourceUpdated.StripeSignatureChecker._
 import com.gu.util._
 import com.gu.util.apigateway.ApiGatewayResponse.unauthorized
-import com.gu.util.apigateway.{ ApiGatewayRequest, ApiGatewayResponse }
+import com.gu.util.apigateway.{ ApiGatewayRequest, ApiGatewayResponse, StripeAccount }
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.CreatePaymentMethod.{ CreateStripePaymentMethod, CreditCardType }
 import com.gu.util.zuora.ZuoraQueryPaymentMethod.{ AccountId, PaymentMethodId }
@@ -14,14 +13,14 @@ import play.api.libs.json.Json
 import scalaz._
 import scalaz.syntax.applicative._
 import scalaz.syntax.std.option._
+import com.gu.stripeCustomerSourceUpdated.StripeRequestSignatureChecker._
 
 object SourceUpdatedSteps extends Logging {
 
   def apply(deps: Deps)(apiGatewayRequest: ApiGatewayRequest): FailableOp[Unit] = {
     (
-
       for {
-        body <- bodyIfSignatureVerified(deps, apiGatewayRequest).pure[WithDeps].toEitherT
+        body <- bodyIfSignatureVerified(deps.stripeDeps, apiGatewayRequest).pure[WithDeps].toEitherT
         sourceUpdatedCallout <- Json.fromJson[SourceUpdatedCallout](Json.parse(body)).toFailableOp.withLogging("fromJson SourceUpdatedCallout").pure[WithDeps].toEitherT
         _ = logger.info(s"from: ${apiGatewayRequest.queryStringParameters.map(_.stripeAccount)}")
         accountId <- getAccountToUpdate(sourceUpdatedCallout.data.`object`.customer, sourceUpdatedCallout.data.`object`.id)
@@ -31,12 +30,15 @@ object SourceUpdatedSteps extends Logging {
 
   }
 
-  def bodyIfSignatureVerified(deps: Deps, apiGatewayRequest: ApiGatewayRequest): FailableOp[String] = {
-    val signatureVerified = verifyStripeSignature(stripeConfig = deps.stripeDeps.config, apiGatewayRequest.headers.get, apiGatewayRequest.body)
+  def bodyIfSignatureVerified(stripeDeps: StripeDeps, apiGatewayRequest: ApiGatewayRequest): FailableOp[String] = {
+    val maybeStripeAccount: Option[StripeAccount] = apiGatewayRequest.queryStringParameters.flatMap { params => params.stripeAccount }
+    val signatureVerified: Boolean = verifyRequest(stripeDeps, apiGatewayRequest.headers.getOrElse(Map()), apiGatewayRequest.body, maybeStripeAccount)
+
     signatureVerified match {
       case true => \/-(apiGatewayRequest.body)
       case false => -\/(unauthorized)
     }
+
   }
   def updatePaymentMethod(accountId: AccountId, eventDataObject: EventDataObject): WithDepsFailableOp[ZuoraDeps, Unit] = {
     for {
@@ -99,7 +101,7 @@ object SourceUpdatedSteps extends Logging {
 
   object Deps {
     def default(response: Request => Response, config: Config): Deps = {
-      Deps(ZuoraDeps(response, config.zuoraRestConfig), StripeDeps(config.stripeConfig))
+      Deps(ZuoraDeps(response, config.zuoraRestConfig), StripeDeps(config.stripeConfig, new StripeSignatureChecker))
     }
   }
 

@@ -2,7 +2,7 @@ package com.gu
 
 import com.gu.TestingRawEffects.BasicResult
 import com.gu.effects.RawEffects
-import com.gu.stripeCustomerSourceUpdated.StripeDeps
+import com.gu.stripeCustomerSourceUpdated.{ StripeDeps, StripeSignatureChecker }
 import com.gu.util.ETConfig.{ ETSendId, ETSendIds }
 import com.gu.util._
 import com.gu.util.apigateway.ApiGatewayHandler.HandlerDeps
@@ -127,7 +127,7 @@ class TestingRawEffects(val isProd: Boolean = false, val defaultCode: Int = 1, r
 
   def handlerDeps(operation: Config => ApiGatewayRequest => FailableOp[Unit]) = HandlerDeps(() => Success(""), Stage("DEV"), _ => Success(TestData.fakeConfig), operation)
   val zuoraDeps = ZuoraDeps(response, TestData.fakeZuoraConfig)
-  val stripeDeps = StripeDeps(TestData.fakeStripeConfig)
+  val stripeDeps = StripeDeps(TestData.fakeStripeConfig, new StripeSignatureChecker)
 
 }
 

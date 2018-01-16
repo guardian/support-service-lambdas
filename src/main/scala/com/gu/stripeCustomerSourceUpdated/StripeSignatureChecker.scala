@@ -1,31 +1,50 @@
 package com.gu.stripeCustomerSourceUpdated
 
 import com.gu.stripeCustomerSourceUpdated.SourceUpdatedSteps.logger
-import com.gu.util.StripeConfig
+import com.gu.util.apigateway.StripeAccount
+import com.gu.util.{ StripeConfig, StripeSecretKey }
 import com.stripe.exception.SignatureVerificationException
 import com.stripe.net.Webhook.Signature
 
-import scala.util.Try
+import scala.util.{ Failure, Success, Try }
 
-object StripeSignatureChecker {
+case class StripeDeps(config: StripeConfig, signatureChecker: SignatureChecker)
 
-  def verifyStripeSignature(stripeConfig: StripeConfig, headers: Map[String, String], payload: String) =
-    verifyStripeSignatureForAccount(stripeConfig.ukStripeSecretKey.key, headers, payload) || verifyStripeSignatureForAccount(stripeConfig.auStripeSecretKey.key, headers, payload)
-
-  private def verifyStripeSignatureForAccount(secretKey: String, headers: Map[String, String], payload: String) = {
+object StripeRequestSignatureChecker {
+  def verifyRequest(stripeDeps: StripeDeps, headers: Map[String, String], payload: String, stripeAccount: Option[StripeAccount]): Boolean = {
     val signatureHeader: Option[String] = headers.get("Stripe-Signature")
-    val headerVerified: Try[Boolean] = Try(Signature.verifyHeader(payload, signatureHeader.get, secretKey, 1000l))
 
-    val falseIfNotSigned = headerVerified recover {
-      case e: SignatureVerificationException => {
-        logger.error(s"something went wrong with sig header: ${e.getSigHeader} D:< with message ${e.getMessage}")
-        false
+    stripeAccount match {
+      case Some(account) => {
+        val secretKey = if (account == StripeAccount.GNM_Membership_AUS) stripeDeps.config.auStripeSecretKey else stripeDeps.config.ukStripeSecretKey
+        val headerVerified: Try[Boolean] = Try(stripeDeps.signatureChecker.verifySignature(secretKey, payload, signatureHeader, 10000l))
+
+        headerVerified match {
+          case Success(verified) => verified
+          case Failure(e: SignatureVerificationException) => {
+            logger.error(s"Signature header was not validated ${e.getSigHeader} with message ${e.getMessage}")
+            false
+          }
+          case Failure(e: Throwable) => {
+            logger.error(s"something went wrong with verifying the signature header with message ${e.getMessage}")
+            false
+          }
+        }
       }
-      case e: Throwable => {
-        logger.error(s"something went wrong with verifying the signature header D:< with message ${e.getMessage}")
-        false
-      }
+      case None => false
     }
-    falseIfNotSigned.get //because false if any throwable
+  }
+}
+
+trait SignatureChecker {
+  def verifySignature(secretKey: StripeSecretKey, payload: String, signatureHeader: Option[String], tolerance: Long): Boolean
+}
+
+class StripeSignatureChecker extends SignatureChecker {
+  def verifySignature(secretKey: StripeSecretKey, payload: String, signatureHeader: Option[String], tolerance: Long): Boolean = {
+    signatureHeader match {
+      case Some(header) => Signature.verifyHeader(payload, header, secretKey.key, tolerance)
+      case None => false
+    }
   }
 }

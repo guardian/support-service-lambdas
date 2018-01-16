@@ -1,45 +1,47 @@
 package com.gu.stripeCustomerSourceUpdated
 
-import javax.crypto.Mac
-import javax.crypto.spec.SecretKeySpec
-
 import org.scalatest.FlatSpec
 import org.scalatest.Matchers._
-import StripeSignatureChecker._
 import com.gu.TestData
+import com.gu.util.apigateway.StripeAccount
+import com.gu.util.{ StripeConfig, StripeSecretKey }
 import org.joda.time.DateTime
+import com.gu.stripeCustomerSourceUpdated.StripeRequestSignatureChecker._
 
-class StripeSignatureCheckerTest extends FlatSpec {
+class StripeRequestSignatureCheckerTest extends FlatSpec {
+
+  val testSignatureHelper = new FakeStripeSignatureChecker(TestData.fakeStripeConfig)
+  val testStripeDeps = StripeDeps(TestData.fakeStripeConfig, testSignatureHelper)
 
   "verifySignature" should "fail if the signature is nonsense" in {
-    val badHeaders = headersWithStripeSignature("1513759648", "longAlphanumericString")
+    val nonsense = "longAlphanumericString"
+    val badHeaders = headersWithStripeSignature("1513759648", nonsense)
 
-    //when
-    val signatureCheckPassed = verifyStripeSignature(stripeConfig = TestData.fakeStripeConfig, headers = badHeaders, payload = someBody)
+    val signatureCheckPassed = verifyRequest(headers = badHeaders, payload = someBody, stripeDeps = testStripeDeps, stripeAccount = Some(StripeAccount.GNM_Membership_AUS))
 
     signatureCheckPassed shouldBe (false)
   }
 
-  it should "succeed if the secret key is correct" in {
+  it should "fail if there are no headers" in {
+    val signatureCheckPassed = verifyRequest(headers = Map(), payload = someBody, stripeDeps = testStripeDeps, stripeAccount = Some(StripeAccount.GNM_Membership_AUS))
+
+    signatureCheckPassed shouldBe (false)
+  }
+
+  it should "call verify with a valid secret key" in {
     val nowInSeconds = (DateTime.now().getMillis / 1000).toString
+    val headers = headersWithStripeSignature(nowInSeconds, "test signature")
 
-    val sigJava = makeExpectedSignature(nowInSeconds, someBody, TestData.fakeStripeConfig.ukStripeSecretKey.key)
-    val headers = headersWithStripeSignature(nowInSeconds, sigJava)
-
-    //when
-    val signatureCheckPassed = verifyStripeSignature(stripeConfig = TestData.fakeStripeConfig, headers = headers, payload = someBody)
+    val signatureCheckPassed = verifyRequest(headers = headers, payload = someBody, stripeDeps = testStripeDeps, stripeAccount = Some(StripeAccount.GNM_Membership))
 
     signatureCheckPassed shouldBe (true)
   }
 
-  it should "still work if signature made using AU secret key" in {
+  it should "still work with the AU secret key" in {
     val nowInSeconds = (DateTime.now().getMillis / 1000).toString
+    val headers = headersWithStripeSignature(nowInSeconds, "test signature")
 
-    val sigJava = makeExpectedSignature(nowInSeconds, someBody, TestData.fakeStripeConfig.auStripeSecretKey.key)
-    val headers = headersWithStripeSignature(nowInSeconds, sigJava)
-
-    //when
-    val signatureCheckPassed = verifyStripeSignature(stripeConfig = TestData.fakeStripeConfig, headers = headers, payload = someBody)
+    val signatureCheckPassed = verifyRequest(headers = headers, payload = someBody, stripeDeps = testStripeDeps, stripeAccount = Some(StripeAccount.GNM_Membership_AUS))
 
     signatureCheckPassed shouldBe (true)
   }
@@ -75,22 +77,19 @@ class StripeSignatureCheckerTest extends FlatSpec {
     """.stripMargin
 
   def headersWithStripeSignature(timestamp: String, signature: String) = Map(
-    "SomeHeader1" -> "testvalue",
-    "Content-Type" -> "application/json",
     "Stripe-Signature" -> s"t=$timestamp,v1=$signature"
   )
 
-  def makeExpectedSignature(timestamp: String, payload: String, secretKey: String) = {
-    val signedPayload = s"$timestamp.$payload"
-
-    val hasher = Mac.getInstance("HmacSHA256")
-    hasher.init(new SecretKeySpec(secretKey.getBytes("UTF8"), "HmacSHA256"))
-    val hash: Array[Byte] = hasher.doFinal(signedPayload.getBytes("UTF8"))
-
-    var result = ""
-    for (b <- hash) {
-      result += Integer.toString((b & 0xff) + 0x100, 16).substring(1)
+  class FakeStripeSignatureChecker(stripeConfig: StripeConfig) extends SignatureChecker {
+    override def verifySignature(secretKey: StripeSecretKey, payload: String, signatureHeader: Option[String], tolerance: Long): Boolean = {
+      val signatureHeaderWithoutTimestamp = signatureHeader map { header => header.split("v1=")(1) }
+      (secretKey, payload, signatureHeaderWithoutTimestamp, tolerance) match {
+        case (TestData.fakeStripeConfig.auStripeSecretKey, _, Some("longAlphanumericString"), _) => false
+        case (TestData.fakeStripeConfig.ukStripeSecretKey, _, Some("test signature"), _) => true
+        case (TestData.fakeStripeConfig.auStripeSecretKey, _, Some("test signature"), _) => true
+        case (_, _, _, _) => false
+      }
     }
-    result
   }
+
 }
