@@ -1,11 +1,12 @@
 package com.gu.stripeCustomerSourceUpdated
 
+import com.gu.stripeCustomerSourceUpdated.StripeRequestSignatureChecker.verifyRequest
 import com.gu.util._
 import com.gu.util.apigateway.ApiGatewayResponse.unauthorized
 import com.gu.util.apigateway.{ ApiGatewayRequest, ApiGatewayResponse, StripeAccount }
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.CreatePaymentMethod.{ CreateStripePaymentMethod, CreditCardType }
-import com.gu.util.zuora.ZuoraQueryPaymentMethod.{ AccountId, PaymentMethodId }
+import com.gu.util.zuora.ZuoraQueryPaymentMethod.{ PaymentMethodFields, PaymentMethodId }
 import com.gu.util.zuora._
 import okhttp3.{ Request, Response }
 import play.api.libs.json.Json
@@ -13,63 +14,51 @@ import play.api.libs.json.Json
 import scalaz._
 import scalaz.syntax.applicative._
 import scalaz.syntax.std.option._
-import com.gu.stripeCustomerSourceUpdated.StripeRequestSignatureChecker._
 
 object SourceUpdatedSteps extends Logging {
 
   def apply(deps: Deps)(apiGatewayRequest: ApiGatewayRequest): FailableOp[Unit] = {
-    (
-      for {
-        body <- bodyIfSignatureVerified(deps.stripeDeps, apiGatewayRequest).pure[WithDeps].toEitherT
-        sourceUpdatedCallout <- Json.fromJson[SourceUpdatedCallout](Json.parse(body)).toFailableOp.withLogging("fromJson SourceUpdatedCallout").pure[WithDeps].toEitherT
-        _ = logger.info(s"from: ${apiGatewayRequest.queryStringParameters.map(_.stripeAccount)}")
-        accountId <- getAccountToUpdate(sourceUpdatedCallout.data.`object`.customer, sourceUpdatedCallout.data.`object`.id)
-        _ <- updatePaymentMethod(accountId, sourceUpdatedCallout.data.`object`)
-      } yield ()
-    ).run.run(deps.zuoraDeps)
-
+    (for {
+      body <- bodyIfSignatureVerified(deps.stripeDeps, apiGatewayRequest).pure[WithDeps].toEitherT
+      sourceUpdatedCallout <- Json.fromJson[SourceUpdatedCallout](Json.parse(body)).toFailableOp.withLogging("fromJson SourceUpdatedCallout").pure[WithDeps].toEitherT
+      _ = logger.info(s"from: ${apiGatewayRequest.queryStringParameters.map(_.stripeAccount)}")
+      defaultPaymentMethod <- getPaymentMethodToUpdate(sourceUpdatedCallout.data.`object`.customer, sourceUpdatedCallout.data.`object`.id)
+      _ <- createUpdatedDefaultPaymentMethod(defaultPaymentMethod, sourceUpdatedCallout.data.`object`)
+    } yield ()).run.run(deps.zuoraDeps)
   }
 
   def bodyIfSignatureVerified(stripeDeps: StripeDeps, apiGatewayRequest: ApiGatewayRequest): FailableOp[String] = {
     val maybeStripeAccount: Option[StripeAccount] = apiGatewayRequest.queryStringParameters.flatMap { params => params.stripeAccount }
     val signatureVerified: Boolean = verifyRequest(stripeDeps, apiGatewayRequest.headers.getOrElse(Map()), apiGatewayRequest.body, maybeStripeAccount)
 
-    signatureVerified match {
-      case true => \/-(apiGatewayRequest.body)
-      case false => -\/(unauthorized)
-    }
-
+    if (signatureVerified)
+      \/-(apiGatewayRequest.body)
+    else
+      -\/(unauthorized)
   }
-  def updatePaymentMethod(accountId: AccountId, eventDataObject: EventDataObject): WithDepsFailableOp[ZuoraDeps, Unit] = {
+
+  def createUpdatedDefaultPaymentMethod(paymentMethodFields: PaymentMethodFields, eventDataObject: EventDataObject): WithDepsFailableOp[ZuoraDeps, Unit] = {
     for {
-      // (clear default payment method and autopay off not needed because we are not changing the payment gateway)
-      // would be nice to have to know which stripe called us, and check the gateway matches
-      //...
-      // create payment method with accountid, cardid, customerid, last4, cardcountry, expiry, cardtype
       // similar to ZuoraService.createPaymentMethod only in REST api
-      paymentMethod <- createPaymentMethod(eventDataObject, accountId).withLogging("createPaymentMethod")
-      // set payment method as the default - update account defaultpaymentmethodid
-      _ <- SetDefaultPaymentMethod.setDefaultPaymentMethod(accountId, paymentMethod.id).withLogging("setDefaultPaymentMethod")
+      paymentMethod <- createPaymentMethod(eventDataObject, paymentMethodFields).withLogging("createPaymentMethod")
+      _ <- SetDefaultPaymentMethod.setDefaultPaymentMethod(paymentMethodFields.AccountId, paymentMethod.id).withLogging("setDefaultPaymentMethod")
     } yield ()
   }
 
-  def getAccountToUpdate(customer: StripeCustomerId, source: StripeSourceId): WithDepsFailableOp[ZuoraDeps, AccountId] = {
-    for { // similar to AccountController.updateCard in members-data-api
-      // query zuora for account and payment method given the token id
+  def getPaymentMethodToUpdate(customer: StripeCustomerId, source: StripeSourceId): WithDepsFailableOp[ZuoraDeps, PaymentMethodFields] = {
+    for {
+      // similar to AccountController.updateCard in members-data-api
       paymentMethods <- ZuoraQueryPaymentMethod.getPaymentMethodForStripeCustomer(customer, source).withLogging("getPaymentMethodForStripeCustomer")
       account <- ZuoraGetAccountSummary(paymentMethods.accountId.value).withLogging("getAccountSummary")
-      // make sure the tokens relate to the default payment method
-      _ <- skipIfNotDefault(account.basicInfo.defaultPaymentMethod, paymentMethods.paymentMethodIds).withLogging("skipIfNotDefault").pure[WithDeps].toEitherT
-      // check that the account payment gateway matches (which?) stripe payment gateway (do we even need to do this? if it's the default, it must be right)
-      //...
-    } yield account.basicInfo.id
+      defaultPaymentMethod <- findDefaultOrSkip(account.basicInfo.defaultPaymentMethod, paymentMethods.paymentMethods).withLogging("skipIfNotDefault").pure[WithDeps].toEitherT
+    } yield defaultPaymentMethod
   }
 
   import com.gu.util.reader.Types._
 
   type WithDeps[A] = Reader[ZuoraDeps, A]
 
-  def createPaymentMethod(eventDataObject: EventDataObject, accountId: AccountId): WithDepsFailableOp[ZuoraDeps, CreatePaymentMethod.CreatePaymentMethodResult] = {
+  def createPaymentMethod(eventDataObject: EventDataObject, paymentMethodFields: PaymentMethodFields): WithDepsFailableOp[ZuoraDeps, CreatePaymentMethod.CreatePaymentMethodResult] = {
     for {
       creditCardType <- Some(eventDataObject.brand).collect {
         case StripeBrand.Visa => CreditCardType.Visa
@@ -78,25 +67,20 @@ object SourceUpdatedSteps extends Logging {
         case StripeBrand.AmericanExpress => CreditCardType.AmericanExpress
       }.toRightDisjunction(ApiGatewayResponse.internalServerError(s"not valid card type for zuora: ${eventDataObject.brand}")).pure[WithDeps].toEitherT
       result <- CreatePaymentMethod.createPaymentMethod(CreateStripePaymentMethod(
-        accountId,
+        paymentMethodFields.AccountId,
         eventDataObject.id,
         eventDataObject.customer,
         eventDataObject.country,
         eventDataObject.last4,
         eventDataObject.expiry,
-        creditCardType
+        creditCardType,
+        paymentMethodFields.NumConsecutiveFailures
       ))
     } yield result
   }
 
-  def skipIfNotDefault(defaultPaymentMethod: PaymentMethodId, paymentMethodIds: NonEmptyList[PaymentMethodId]): FailableOp[Unit] = {
-    if (paymentMethodIds.list.contains(defaultPaymentMethod)) {
-      // this card update event relates to a the default payment method - continue
-      \/-(())
-    } else {
-      // the card is updating some NON default payment method - ignore (or should we update anyway but keep it in the background?)
-      -\/(ApiGatewayResponse.successfulExecution)
-    }
+  def findDefaultOrSkip(defaultPaymentMethod: PaymentMethodId, paymentMethods: NonEmptyList[PaymentMethodFields]): FailableOp[PaymentMethodFields] = {
+    paymentMethods.list.find(_.Id == defaultPaymentMethod).toRightDisjunction(ApiGatewayResponse.successfulExecution)
   }
 
   object Deps {
