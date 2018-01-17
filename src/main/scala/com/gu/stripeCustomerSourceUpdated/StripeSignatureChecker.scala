@@ -14,24 +14,21 @@ object StripeRequestSignatureChecker {
   def verifyRequest(stripeDeps: StripeDeps, headers: Map[String, String], payload: String, stripeAccount: Option[StripeAccount]): Boolean = {
     val signatureHeader: Option[String] = headers.get("Stripe-Signature")
 
-    stripeAccount match {
-      case Some(account) => {
-        val secretKey = if (account == StripeAccount.GNM_Membership_AUS) stripeDeps.config.auStripeSecretKey else stripeDeps.config.ukStripeSecretKey
-        val headerVerified: Try[Boolean] = Try(stripeDeps.signatureChecker.verifySignature(secretKey, payload, signatureHeader, 10000l))
+    stripeAccount.exists { account =>
+      val secretKey = if (account == StripeAccount.GNM_Membership_AUS) stripeDeps.config.auStripeSecretKey else stripeDeps.config.ukStripeSecretKey
+      val headerVerified: Try[Boolean] = Try(stripeDeps.signatureChecker.verifySignature(secretKey, payload, signatureHeader, 10000l))
 
-        headerVerified match {
-          case Success(verified) => verified
-          case Failure(e: SignatureVerificationException) => {
-            logger.error(s"Signature header was not validated ${e.getSigHeader} with message ${e.getMessage}")
-            false
-          }
-          case Failure(e: Throwable) => {
-            logger.error(s"something went wrong with verifying the signature header with message ${e.getMessage}")
-            false
-          }
+      headerVerified match {
+        case Success(verified) => verified
+        case Failure(e: SignatureVerificationException) => {
+          logger.error(s"Signature header was not validated ${e.getSigHeader}", e)
+          false
+        }
+        case Failure(e: Throwable) => {
+          logger.error(s"something went wrong with verifying the signature header", e)
+          false
         }
       }
-      case None => false
     }
   }
 }
@@ -41,10 +38,7 @@ trait SignatureChecker {
 }
 
 class StripeSignatureChecker extends SignatureChecker {
-  def verifySignature(secretKey: StripeSecretKey, payload: String, signatureHeader: Option[String], tolerance: Long): Boolean = {
-    signatureHeader match {
-      case Some(header) => Signature.verifyHeader(payload, header, secretKey.key, tolerance)
-      case None => false
-    }
-  }
+  def verifySignature(secretKey: StripeSecretKey, payload: String, signatureHeader: Option[String], tolerance: Long): Boolean =
+    signatureHeader.exists(header => Signature.verifyHeader(payload, header, secretKey.key, tolerance))
+
 }
