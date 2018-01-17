@@ -28,8 +28,8 @@ object SourceUpdatedSteps extends Logging {
       _ = logger.info(s"from: ${apiGatewayRequest.queryStringParameters.map(_.stripeAccount)}")
       _ <- (for {
         defaultPaymentMethod <- ListT(getPaymentMethodsToUpdate(sourceUpdatedCallout.data.`object`.customer, sourceUpdatedCallout.data.`object`.id))
-        _ <- ListT.apply[WithZuoraDepsFailableOp, Unit](createUpdatedDefaultPaymentMethod(defaultPaymentMethod, sourceUpdatedCallout.data.`object`).map(_.pure[List]))
-      } yield ()).run.map({ a: List[Unit] /*prove we're mapping the functor containing the list of units*/ => () })
+        _ <- ListT[WithZuoraDepsFailableOp, Unit](createUpdatedDefaultPaymentMethod(defaultPaymentMethod, sourceUpdatedCallout.data.`object`).map(_.pure[List]))
+      } yield ()).run.map({ list: List[Unit] /*prove we're mapping the functor containing the list of units*/ => () })
     } yield ()).run.run(deps.zuoraDeps)
   }
 
