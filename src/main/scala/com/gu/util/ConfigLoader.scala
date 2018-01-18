@@ -72,12 +72,17 @@ object StripeSecretKey {
   implicit val stripeSecretKeyReads = Json.reads[StripeSecretKey]
 }
 
-case class StripeConfig(ukStripeSecretKey: StripeSecretKey, auStripeSecretKey: StripeSecretKey)
-object StripeConfig {
-  implicit val apiConfigReads: Reads[StripeConfig] = (
+case class StripeWebhook(ukStripeSecretKey: StripeSecretKey, auStripeSecretKey: StripeSecretKey)
+object StripeWebhook {
+  implicit val stripeWebhookConfigReads: Reads[StripeWebhook] = (
     (JsPath \ "api.key.secret").read[String].map(StripeSecretKey.apply) and
     (JsPath \ "au-membership.key.secret").read[String].map(StripeSecretKey.apply)
-  )(StripeConfig.apply _)
+  )(StripeWebhook.apply _)
+}
+
+case class StripeConfig(customerSourceUpdatedWebhook: StripeWebhook)
+object StripeConfig {
+  implicit val stripeConfigReads = Json.reads[StripeConfig]
 }
 
 case class Config(

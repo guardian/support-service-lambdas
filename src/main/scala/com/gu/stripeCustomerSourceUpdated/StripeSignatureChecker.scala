@@ -15,7 +15,7 @@ object StripeRequestSignatureChecker {
     val signatureHeader: Option[String] = headers.get("Stripe-Signature")
 
     stripeAccount.exists { account =>
-      val secretKey = if (account == StripeAccount.GNM_Membership_AUS) stripeDeps.config.auStripeSecretKey else stripeDeps.config.ukStripeSecretKey
+      val secretKey = if (account == StripeAccount.GNM_Membership_AUS) stripeDeps.config.customerSourceUpdatedWebhook.auStripeSecretKey else stripeDeps.config.customerSourceUpdatedWebhook.ukStripeSecretKey
       val headerVerified: Try[Boolean] = Try(stripeDeps.signatureChecker.verifySignature(secretKey, payload, signatureHeader, 10000l))
 
       headerVerified match {

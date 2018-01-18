@@ -84,9 +84,9 @@ class StripeRequestSignatureCheckerTest extends FlatSpec {
     override def verifySignature(secretKey: StripeSecretKey, payload: String, signatureHeader: Option[String], tolerance: Long): Boolean = {
       val signatureHeaderWithoutTimestamp = signatureHeader map { header => header.split("v1=")(1) }
       (secretKey, payload, signatureHeaderWithoutTimestamp, tolerance) match {
-        case (TestData.fakeStripeConfig.auStripeSecretKey, _, Some("longAlphanumericString"), _) => false
-        case (TestData.fakeStripeConfig.ukStripeSecretKey, _, Some("test signature"), _) => true
-        case (TestData.fakeStripeConfig.auStripeSecretKey, _, Some("test signature"), _) => true
+        case (TestData.fakeStripeConfig.customerSourceUpdatedWebhook.auStripeSecretKey, _, Some("longAlphanumericString"), _) => false
+        case (TestData.fakeStripeConfig.customerSourceUpdatedWebhook.ukStripeSecretKey, _, Some("test signature"), _) => true
+        case (TestData.fakeStripeConfig.customerSourceUpdatedWebhook.auStripeSecretKey, _, Some("test signature"), _) => true
         case (_, _, _, _) => false
       }
     }
