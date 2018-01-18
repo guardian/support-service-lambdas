@@ -36,7 +36,7 @@ object ZuoraQueryPaymentMethod {
 
   case class AccountPaymentMethodIds(accountId: AccountId, paymentMethods: NonEmptyList[PaymentMethodFields])
 
-  def getPaymentMethodForStripeCustomer(customerId: StripeCustomerId, sourceId: StripeSourceId): WithDepsFailableOp[ZuoraDeps, AccountPaymentMethodIds] = {
+  def getPaymentMethodForStripeCustomer(customerId: StripeCustomerId, sourceId: StripeSourceId): WithDepsFailableOp[ZuoraDeps, List[AccountPaymentMethodIds]] = {
     import com.gu.util.reader.Types._
     val query =
       s"""SELECT Id, AccountId, NumConsecutiveFailures
@@ -44,12 +44,20 @@ object ZuoraQueryPaymentMethod {
          |  where Type='CreditCardReferenceTransaction' AND PaymentMethodStatus = 'Active' AND TokenId = '${sourceId.value}' AND SecondTokenId = '${customerId.value}'""".stripMargin
 
     ZuoraQuery.query[PaymentMethodFields](Query(query)).run.map(_.flatMap { result =>
-      result.records.groupBy(_.AccountId).toList match {
-        case (account, first :: rest) :: Nil =>
-          \/-(AccountPaymentMethodIds(account, NonEmptyList(first, rest: _*)))
-        case _ =>
-          logger.warn(s"wrong number of accounts using the customer token: $result")
-          -\/(ApiGatewayResponse.internalServerError("could not find correct account for stripe details"))
+
+      def groupedList(records: List[PaymentMethodFields]): List[(AccountId, NonEmptyList[PaymentMethodFields])] = {
+        records.groupBy(_.AccountId).toList.collect {
+          case (accountId, head :: tail) =>
+            (accountId, NonEmptyList(head, tail: _*))
+        }
+      }
+
+      val accountPaymentMethodIds = groupedList(result.records)
+      if (accountPaymentMethodIds.length > 3) {
+        logger.warn(s"too many accounts using the customer token, could indicate a fault in the logic: $result")
+        -\/(ApiGatewayResponse.internalServerError("could not find correct account for stripe details"))
+      } else {
+        \/-(accountPaymentMethodIds.map((AccountPaymentMethodIds.apply _).tupled))
       }
     }).toEitherT
 
