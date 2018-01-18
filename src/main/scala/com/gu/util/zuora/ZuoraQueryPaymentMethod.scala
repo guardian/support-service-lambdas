@@ -21,8 +21,7 @@ object ZuoraQueryPaymentMethod {
   case class PaymentMethodFields(
     Id: PaymentMethodId,
     AccountId: AccountId,
-    NumConsecutiveFailures: NumConsecutiveFailures
-  )
+    NumConsecutiveFailures: NumConsecutiveFailures)
   implicit val fPaymentMethodId: Format[PaymentMethodId] =
     Format[PaymentMethodId](JsPath.read[String].map(PaymentMethodId.apply), Writes { (o: PaymentMethodId) => JsString(o.value) })
 

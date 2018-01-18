@@ -12,7 +12,7 @@ import com.gu.util.zuora.ZuoraGetInvoiceTransactions.{ InvoiceItem, InvoiceTrans
 import okhttp3._
 import okhttp3.internal.Util.UTF_8
 import okio.Buffer
-import org.joda.time.LocalDate
+import java.time.LocalDate
 import org.scalatest.Matchers
 import play.api.libs.json.Json
 
@@ -21,7 +21,7 @@ import scalaz.{ Reader, \/ }
 
 object TestData extends Matchers {
 
-  val today = new LocalDate(2016, 11, 21)
+  val today = LocalDate.of(2016, 11, 21)
   val accountId = "accountId"
   val invoiceItemA = InvoiceItem("invitem123", "A-S123", today, today.plusMonths(1), 49.21, "Non founder - annual", "Supporter")
   val invoiceItemB = InvoiceItem("invitem122", "A-S123", today, today.plusMonths(1), 0, "Friends", "Friend")
@@ -42,8 +42,7 @@ object TestData extends Matchers {
     trustedApiConfig = fakeApiConfig,
     zuoraRestConfig = ZuoraRestConfig("https://ddd", "e@f.com", "ggg"),
     etConfig = ETConfig(etSendIDs = ETSendIds(ETSendId("11"), ETSendId("22"), ETSendId("33"), ETSendId("44"), ETSendId("can")), clientId = "jjj", clientSecret = "kkk"),
-    stripeConfig = StripeConfig(ukStripeSecretKey = StripeSecretKey("abc"), auStripeSecretKey = StripeSecretKey("def"))
-  )
+    stripeConfig = StripeConfig(ukStripeSecretKey = StripeSecretKey("abc"), auStripeSecretKey = StripeSecretKey("def")))
 
   val missingCredentialsResponse = """{"statusCode":"401","headers":{"Content-Type":"application/json"},"body":"Credentials are missing or invalid"}"""
   val successfulResponse = """{"statusCode":"200","headers":{"Content-Type":"application/json"},"body":"Success"}"""
@@ -115,10 +114,16 @@ class TestingRawEffects(val isProd: Boolean = false, val defaultCode: Int = 1, r
       result = req :: result
       val (code, response) = responses.getOrElse(req.url().encodedPath(), (defaultCode, """{"success": true}"""))
       println(s"request for: ${req.url().encodedPath()} so returning $response")
-      new Response.Builder().request(req).protocol(Protocol.HTTP_1_1).code(code).body(ResponseBody.create(MediaType.parse("text/plain"), response)).build()
+      new Response.Builder()
+        .request(req)
+        .protocol(Protocol.HTTP_1_1)
+        .code(code)
+        .body(ResponseBody.create(MediaType.parse("text/plain"), response))
+        .message("message??")
+        .build()
   }
 
-  val rawEffects = RawEffects(response, stage, _ => Success(TestData.codeConfig), () => new LocalDate(2017, 11, 19))
+  val rawEffects = RawEffects(response, stage, _ => Success(TestData.codeConfig), () => LocalDate.of(2017, 11, 19))
 
   //  val fakeConfig = Config(stage, TrustedApiConfig("a", "b", "c"), zuoraRestConfig = ZuoraRestConfig("https://ddd", "e@f.com", "ggg"),
   //    etConfig = ETConfig(etSendIDs = ETSendIds(ETSendId("11"), ETSendId("22"), ETSendId("33"), ETSendId("44"), ETSendId("can")), clientId = "jjj", clientSecret = "kkk"))

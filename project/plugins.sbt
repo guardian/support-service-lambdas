@@ -1,4 +1,4 @@
-addSbtPlugin("com.gu" % "sbt-riffraff-artifact" % "0.9.7")
+addSbtPlugin("com.gu" % "sbt-riffraff-artifact" % "1.1.4")
 
 resolvers += Resolver.typesafeRepo("releases")
-addSbtPlugin("org.scalariform" % "sbt-scalariform" % "1.6.0")
+addSbtPlugin("org.scalariform" % "sbt-scalariform" % "1.8.2")

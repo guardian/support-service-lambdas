@@ -30,8 +30,7 @@ class EndToEndHandlerTest extends FlatSpec with Matchers {
 
     config.result.map(req => (req.method, req.url.encodedPath) -> Option(req.body).map(body)).toMap
       .get(("POST", "/messaging/v1/messageDefinitionSends/111/send")) should be(
-        Some(Some(EndToEndData.expectedEmailSend))
-      ) // TODO check the body too
+        Some(Some(EndToEndData.expectedEmailSend))) // TODO check the body too
 
     val responseString = new String(os.toByteArray(), "UTF-8")
 
@@ -49,8 +48,7 @@ object EndToEndData {
   def responses: Map[String, (Int, String)] = Map(
     ("/transactions/invoices/accounts/2c92c0f85fc90734015fca884c3f04cf", (200, invoices)),
     ("/v1/requestToken", (200, """{"accessToken":"", "expiresIn":1}""")),
-    ("/messaging/v1/messageDefinitionSends/111/send", (202, ""))
-  )
+    ("/messaging/v1/messageDefinitionSends/111/send", (202, "")))
 
   val expectedEmailSend =
     """{"To":{"Address":"john.duffell@guardian.co.uk","SubscriberKey":"john.duffell@guardian.co.uk","ContactAttributes":{"SubscriberAttributes":{"subscriber_id":"A-S00071536","product":"Supporter","payment_method":"CreditCardReferenceTransaction","card_type":"Visa","card_expiry_date":"12/2019","first_name":"eSAFaBwm4WJZNg5xhIc","last_name":"eSAFaBwm4WJZNg5xhIc","paymentId":"2c92c0f95fc912eb015fcb2a481720e6","price":"$49.00","serviceStartDate":"17 November 2017","serviceEndDate":"16 November 2018"}}}}"""

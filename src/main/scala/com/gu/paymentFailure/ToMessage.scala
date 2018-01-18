@@ -5,7 +5,8 @@ import java.text.DecimalFormat
 import com.gu.autoCancel.AutoCancelCallout
 import com.gu.paymentFailure.GetPaymentData.PaymentFailureInformation
 import com.gu.util.exacttarget._
-import org.joda.time.LocalDate
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 import scala.math.BigDecimal.decimal
 
@@ -27,11 +28,7 @@ object ToMessage {
           primaryKey = PaymentId(paymentFailureCallout.paymentId),
           price = price(paymentFailureInformation.amount, paymentFailureCallout.currency),
           serviceStartDate = serviceDateFormat(paymentFailureInformation.serviceStartDate),
-          serviceEndDate = serviceDateFormat(paymentFailureInformation.serviceEndDate)
-        )
-      )
-    )
-  )
+          serviceEndDate = serviceDateFormat(paymentFailureInformation.serviceEndDate)))))
 
   def apply(callout: AutoCancelCallout, paymentFailureInformation: PaymentFailureInformation) = Message(
     To = ToDef(
@@ -49,11 +46,7 @@ object ToMessage {
           primaryKey = InvoiceId(callout.invoiceId),
           price = price(paymentFailureInformation.amount, callout.currency),
           serviceStartDate = serviceDateFormat(paymentFailureInformation.serviceStartDate),
-          serviceEndDate = serviceDateFormat(paymentFailureInformation.serviceEndDate)
-        )
-      )
-    )
-  )
+          serviceEndDate = serviceDateFormat(paymentFailureInformation.serviceEndDate)))))
 
   val currencySymbol = Map("GBP" -> "£", "AUD" -> "$", "EUR" -> "€", "USD" -> "$", "CAD" -> "$", "NZD" -> "$")
 
@@ -66,6 +59,6 @@ object ToMessage {
     symbol + formattedAmount
   }
 
-  def serviceDateFormat(d: LocalDate) = d.toString("dd MMMM yyyy")
+  def serviceDateFormat(d: LocalDate) = d.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"))
 
 }

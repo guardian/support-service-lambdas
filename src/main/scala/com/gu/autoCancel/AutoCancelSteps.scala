@@ -11,7 +11,7 @@ import com.gu.util.reader.Types._
 import com.gu.util.zuora.ZuoraDeps
 import com.gu.util.{ Config, Logging }
 import okhttp3.{ Request, Response }
-import org.joda.time.LocalDate
+import java.time.LocalDate
 import play.api.libs.json.Json
 
 import scalaz.\/-
@@ -20,12 +20,12 @@ object AutoCancelSteps extends Logging {
 
   object AutoCancelStepsDeps {
     def default(now: LocalDate, response: Request => Response, config: Config): AutoCancelStepsDeps = {
+      val zuoraDeps = ZuoraDeps(response, config.zuoraRestConfig)
       AutoCancelStepsDeps(
-        AutoCancel.apply(ZuoraDeps(response, config.zuoraRestConfig)),
-        AutoCancelDataCollectionFilter.apply(AutoCancelDataCollectionFilter.ACFilterDeps.default(now, response, config.zuoraRestConfig)),
+        AutoCancel.apply(zuoraDeps),
+        AutoCancelDataCollectionFilter.apply(AutoCancelDataCollectionFilter.ACFilterDeps.default(now, zuoraDeps)),
         config.etConfig.etSendIDs,
-        ZuoraEmailSteps.sendEmailRegardingAccount(ZuoraEmailStepsDeps.default(response, config))
-      )
+        ZuoraEmailSteps.sendEmailRegardingAccount(ZuoraEmailStepsDeps.default(response, config)))
     }
   }
 
@@ -33,8 +33,7 @@ object AutoCancelSteps extends Logging {
     autoCancel: AutoCancelRequest => FailableOp[Unit],
     autoCancelFilter2: AutoCancelCallout => FailableOp[AutoCancelRequest],
     etSendIds: ETSendIds,
-    sendEmailRegardingAccount: (String, PaymentFailureInformation => EmailRequest) => FailableOp[Unit]
-  )
+    sendEmailRegardingAccount: (String, PaymentFailureInformation => EmailRequest) => FailableOp[Unit])
 
   def apply(deps: AutoCancelStepsDeps)(apiGatewayRequest: ApiGatewayRequest): FailableOp[Unit] = {
     for {

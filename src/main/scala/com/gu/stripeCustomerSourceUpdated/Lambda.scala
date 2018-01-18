@@ -17,8 +17,7 @@ object Lambda {
     LambdaDeps(
       ApiGatewayHandler(HandlerDeps.default(rawEffects.stage, rawEffects.s3Load, { config: Config =>
         SourceUpdatedSteps(Deps.default(rawEffects.response, config))
-      }))
-    )
+      })))
 
   // this is the entry point
   // it's referenced by the cloudformation so make sure you keep it in step

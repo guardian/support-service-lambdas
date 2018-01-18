@@ -4,7 +4,7 @@ import com.gu.util.Logging
 import com.gu.util.reader.Types.FailableOp
 import com.gu.util.zuora.ZuoraModels.SubscriptionId
 import com.gu.util.zuora._
-import org.joda.time.LocalDate
+import java.time.LocalDate
 
 object AutoCancel extends Logging {
 

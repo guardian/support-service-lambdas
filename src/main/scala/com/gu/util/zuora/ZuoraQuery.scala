@@ -22,8 +22,7 @@ object ZuoraQuery {
     (JsPath \ "records").read[List[QUERYRECORD]] and
     (JsPath \ "size").read[Int] and
     (JsPath \ "done").read[Boolean] and
-    (JsPath \ "queryLocator").readNullable[QueryLocator]
-  ).apply(QueryResult.apply[QUERYRECORD] _)
+    (JsPath \ "queryLocator").readNullable[QueryLocator]).apply(QueryResult.apply[QUERYRECORD] _)
 
   case class QueryMoreReq(queryLocator: QueryLocator)
 

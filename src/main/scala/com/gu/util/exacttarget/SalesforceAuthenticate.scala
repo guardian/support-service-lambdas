@@ -20,8 +20,7 @@ object SalesforceAuthenticate extends Logging {
 
     implicit val salesforceAuthReads: Reads[SalesforceAuth] = (
       (JsPath \ "accessToken").read[String] and
-      (JsPath \ "expiresIn").read[Int]
-    )(SalesforceAuth.apply _)
+      (JsPath \ "expiresIn").read[Int])(SalesforceAuth.apply _)
 
   }
 

@@ -16,8 +16,7 @@ object CreatePaymentMethod {
     last4: StripeLast4,
     expiration: StripeExpiry,
     creditCardType: CreditCardType,
-    numConsecutiveFailures: NumConsecutiveFailures
-  )
+    numConsecutiveFailures: NumConsecutiveFailures)
 
   sealed abstract class CreditCardType(val value: String)
   object CreditCardType {
@@ -40,8 +39,7 @@ object CreatePaymentMethod {
       "CreditCardExpirationYear" -> command.expiration.exp_year,
       "CreditCardType" -> command.creditCardType.value,
       "Type" -> "CreditCardReferenceTransaction",
-      "NumConsecutiveFailures" -> command.numConsecutiveFailures
-    )
+      "NumConsecutiveFailures" -> command.numConsecutiveFailures)
   }
 
   implicit val reads: Reads[CreatePaymentMethodResult] =

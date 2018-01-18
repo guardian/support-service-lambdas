@@ -58,7 +58,6 @@ object aws {
     new SystemPropertiesCredentialsProvider,
     new ProfileCredentialsProvider(ProfileName),
     new InstanceProfileCredentialsProvider(false),
-    new EC2ContainerCredentialsProviderWrapper
-  )
+    new EC2ContainerCredentialsProviderWrapper)
 
 }

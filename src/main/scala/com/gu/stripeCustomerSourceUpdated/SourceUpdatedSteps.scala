@@ -70,8 +70,7 @@ object SourceUpdatedSteps extends Logging {
         eventDataObject.last4,
         eventDataObject.expiry,
         creditCardType,
-        paymentMethodFields.NumConsecutiveFailures
-      ))
+        paymentMethodFields.NumConsecutiveFailures))
     } yield result
   }
 
