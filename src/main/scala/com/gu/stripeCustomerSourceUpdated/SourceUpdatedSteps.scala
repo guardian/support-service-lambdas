@@ -29,7 +29,7 @@ object SourceUpdatedSteps extends Logging {
       _ <- (for {
         defaultPaymentMethod <- ListT(getPaymentMethodsToUpdate(sourceUpdatedCallout.data.`object`.customer, sourceUpdatedCallout.data.`object`.id))
         _ <- ListT[WithZuoraDepsFailableOp, Unit](createUpdatedDefaultPaymentMethod(defaultPaymentMethod, sourceUpdatedCallout.data.`object`).map(_.pure[List]))
-      } yield ()).run.map({ list: List[Unit] /*prove we're mapping the functor containing the list of units*/ => () })
+      } yield ()).run
     } yield ()).run.run(deps.zuoraDeps)
   }
 
