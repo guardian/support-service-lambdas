@@ -2,6 +2,7 @@ package com.gu
 
 import com.gu.TestingRawEffects.BasicResult
 import com.gu.effects.RawEffects
+import com.gu.stripeCustomerSourceUpdated.{ StripeDeps, StripeSignatureChecker }
 import com.gu.util.ETConfig.{ ETSendId, ETSendIds }
 import com.gu.util._
 import com.gu.util.apigateway.ApiGatewayHandler.HandlerDeps
@@ -36,13 +37,14 @@ object TestData extends Matchers {
   val fakeZuoraConfig = ZuoraRestConfig("https://ddd", "fakeUser", "fakePass")
   val fakeETSendIds = ETSendIds(ETSendId("11"), ETSendId("22"), ETSendId("33"), ETSendId("44"), ETSendId("can"))
   val fakeETConfig = ETConfig(etSendIDs = fakeETSendIds, "fakeClientId", "fakeClientSecret")
+  val fakeStripeConfig = StripeConfig(customerSourceUpdatedWebhook = StripeWebhook(StripeSecretKey("ukCustomerSourceUpdatedSecretKey"), StripeSecretKey("auCustomerSourceUpdatedStripeSecretKey")))
 
   val fakeConfig = Config(
     stage = Stage("DEV"),
     trustedApiConfig = fakeApiConfig,
     zuoraRestConfig = ZuoraRestConfig("https://ddd", "e@f.com", "ggg"),
     etConfig = ETConfig(etSendIDs = ETSendIds(ETSendId("11"), ETSendId("22"), ETSendId("33"), ETSendId("44"), ETSendId("can")), clientId = "jjj", clientSecret = "kkk"),
-    stripeConfig = StripeConfig(ukStripeSecretKey = StripeSecretKey("abc"), auStripeSecretKey = StripeSecretKey("def"))
+    stripeConfig = StripeConfig(customerSourceUpdatedWebhook = StripeWebhook(ukStripeSecretKey = StripeSecretKey("abc"), auStripeSecretKey = StripeSecretKey("def")))
   )
 
   val missingCredentialsResponse = """{"statusCode":"401","headers":{"Content-Type":"application/json"},"body":"Credentials are missing or invalid"}"""
@@ -74,8 +76,10 @@ object TestData extends Matchers {
       |    "clientSecret": "kkk"
       |  },
       |  "stripe": {
-      |     "api.key.secret": "abc",
-      |     "au-membership.key.secret": "def"
+      |     "customerSourceUpdatedWebhook": {
+      |       "api.key.secret": "abc",
+      |       "au-membership.key.secret": "def"
+      |     }
       |  }
       |}
     """.stripMargin
@@ -102,7 +106,7 @@ class TestingRawEffects(val isProd: Boolean = false, val defaultCode: Int = 1, r
 
   val stage = Stage(if (isProd) "PROD" else "DEV")
 
-  def basicResults = result.map { request =>
+  def requestsAttempted = result.map { request =>
     val buffer = new Buffer()
     Option(request.body()).foreach(_.writeTo(buffer))
     val body = buffer.readString(UTF_8)
@@ -125,6 +129,7 @@ class TestingRawEffects(val isProd: Boolean = false, val defaultCode: Int = 1, r
 
   def handlerDeps(operation: Config => ApiGatewayRequest => FailableOp[Unit]) = HandlerDeps(() => Success(""), Stage("DEV"), _ => Success(TestData.fakeConfig), operation)
   val zuoraDeps = ZuoraDeps(response, TestData.fakeZuoraConfig)
+  val stripeDeps = StripeDeps(TestData.fakeStripeConfig, new StripeSignatureChecker)
 
 }
 

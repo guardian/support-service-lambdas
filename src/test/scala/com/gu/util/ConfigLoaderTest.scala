@@ -18,7 +18,7 @@ class ConfigLoaderTest extends FlatSpec with Matchers {
         TrustedApiConfig("b", "c"),
         zuoraRestConfig = ZuoraRestConfig("https://ddd", "e@f.com", "ggg"),
         etConfig = ETConfig(etSendIDs = ETSendIds(ETSendId("111"), ETSendId("222"), ETSendId("333"), ETSendId("444"), ETSendId("ccc")), clientId = "jjj", clientSecret = "kkk"),
-        stripeConfig = StripeConfig(StripeSecretKey("abc"), StripeSecretKey("def"))
+        stripeConfig = StripeConfig(StripeWebhook(StripeSecretKey("abc"), StripeSecretKey("def")))
       )
     ))
   }
