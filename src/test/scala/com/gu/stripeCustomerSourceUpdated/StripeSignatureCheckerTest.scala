@@ -77,8 +77,7 @@ class StripeRequestSignatureCheckerTest extends FlatSpec {
     """.stripMargin
 
   def headersWithStripeSignature(timestamp: String, signature: String) = Map(
-    "Stripe-Signature" -> s"t=$timestamp,v1=$signature"
-  )
+    "Stripe-Signature" -> s"t=$timestamp,v1=$signature")
 
   class FakeStripeSignatureChecker(stripeConfig: StripeConfig) extends SignatureChecker {
     override def verifySignature(secretKey: StripeSecretKey, payload: String, signatureHeader: Option[String], tolerance: Long): Boolean = {

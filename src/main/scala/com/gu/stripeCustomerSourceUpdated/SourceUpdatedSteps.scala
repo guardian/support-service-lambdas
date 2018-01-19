@@ -26,8 +26,8 @@ object SourceUpdatedSteps extends Logging {
 
   def apply(deps: Deps)(apiGatewayRequest: ApiGatewayRequest): FailableOp[Unit] = {
     (for {
-      body <- bodyIfSignatureVerified(deps.stripeDeps, apiGatewayRequest).pure[WithDeps].toEitherT
-      sourceUpdatedCallout <- Json.fromJson[SourceUpdatedCallout](Json.parse(body)).toFailableOp.withLogging("fromJson SourceUpdatedCallout").pure[WithDeps].toEitherT
+      _ <- (if (deps.stripeDeps.config.signatureChecking) bodyIfSignatureVerified(deps.stripeDeps, apiGatewayRequest) else \/-(())).pure[WithDeps].toEitherT
+      sourceUpdatedCallout <- Json.fromJson[SourceUpdatedCallout](Json.parse(apiGatewayRequest.body)).toFailableOp.withLogging("fromJson SourceUpdatedCallout").pure[WithDeps].toEitherT
       _ = logger.info(s"from: ${apiGatewayRequest.queryStringParameters.map(_.stripeAccount)}")
       _ <- (for {
         defaultPaymentMethod <- ListT(getPaymentMethodsToUpdate(sourceUpdatedCallout.data.`object`.customer, sourceUpdatedCallout.data.`object`.id))

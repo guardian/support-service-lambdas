@@ -37,20 +37,19 @@ object TestData extends Matchers {
   val fakeZuoraConfig = ZuoraRestConfig("https://ddd", "fakeUser", "fakePass")
   val fakeETSendIds = ETSendIds(ETSendId("11"), ETSendId("22"), ETSendId("33"), ETSendId("44"), ETSendId("can"))
   val fakeETConfig = ETConfig(etSendIDs = fakeETSendIds, "fakeClientId", "fakeClientSecret")
-  val fakeStripeConfig = StripeConfig(customerSourceUpdatedWebhook = StripeWebhook(StripeSecretKey("ukCustomerSourceUpdatedSecretKey"), StripeSecretKey("auCustomerSourceUpdatedStripeSecretKey")))
+  val fakeStripeConfig = StripeConfig(customerSourceUpdatedWebhook = StripeWebhook(StripeSecretKey("ukCustomerSourceUpdatedSecretKey"), StripeSecretKey("auCustomerSourceUpdatedStripeSecretKey")), true)
 
   val fakeConfig = Config(
     stage = Stage("DEV"),
     trustedApiConfig = fakeApiConfig,
     zuoraRestConfig = ZuoraRestConfig("https://ddd", "e@f.com", "ggg"),
     etConfig = ETConfig(etSendIDs = ETSendIds(ETSendId("11"), ETSendId("22"), ETSendId("33"), ETSendId("44"), ETSendId("can")), clientId = "jjj", clientSecret = "kkk"),
-    stripeConfig = StripeConfig(customerSourceUpdatedWebhook = StripeWebhook(ukStripeSecretKey = StripeSecretKey("abc"), auStripeSecretKey = StripeSecretKey("def")))
-  )
+    stripeConfig = StripeConfig(customerSourceUpdatedWebhook = StripeWebhook(ukStripeSecretKey = StripeSecretKey("abc"), auStripeSecretKey = StripeSecretKey("def")), true))
 
   val missingCredentialsResponse = """{"statusCode":"401","headers":{"Content-Type":"application/json"},"body":"Credentials are missing or invalid"}"""
   val successfulResponse = """{"statusCode":"200","headers":{"Content-Type":"application/json"},"body":"Success"}"""
 
-  val codeConfig =
+  val codeConfig: String =
     """
       |{ "stage": "DEV",
       |  "trustedApiConfig": {

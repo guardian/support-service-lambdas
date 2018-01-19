@@ -53,8 +53,7 @@ class SourceUpdatedStepsTest extends FlatSpec with Matchers {
                                 |  "size": 1,
                                 |  "done": true
                                 |}""".stripMargin)), //defaultPMID
-      ("/accounts/accid/summary", (200, defaultAccountSummaryJson))
-    ))
+      ("/accounts/accid/summary", (200, defaultAccountSummaryJson))))
 
     val actual = SourceUpdatedSteps.getPaymentMethodsToUpdate(StripeCustomerId("fakecustid"), StripeSourceId("fakecardid")).run.run(effects.zuoraDeps)
 
@@ -150,8 +149,7 @@ class SourceUpdatedStepsTest extends FlatSpec with Matchers {
     val expectedGET3 = BasicResult(
       "GET",
       "/accounts/accountidANOTHERONE/summary",
-      ""
-    )
+      "")
     effects.requestsAttempted.toSet should be(Set(expectedGET1, expectedGET2, expectedGET3, expectedPOST))
     actual.map(_.toSet) should be(\/-(Set(
       PaymentMethodFields(PaymentMethodId("defaultPMID"), AccountId("accountidfake"), NumConsecutiveFailures(2)),
@@ -178,8 +176,7 @@ class SourceUpdatedStepsTest extends FlatSpec with Matchers {
                                 |  "done": true
                                 |}""".stripMargin)),
       ("/accounts/accountidfake/summary", (200, defaultAccountSummaryJson)),
-      ("/accounts/accountidANOTHER/summary", (200, accountSummaryJson("anotherPM")))
-    ))
+      ("/accounts/accountidANOTHER/summary", (200, accountSummaryJson("anotherPM")))))
 
     val actual = SourceUpdatedSteps.getPaymentMethodsToUpdate(StripeCustomerId("fakecustid"), StripeSourceId("fakecardid")).run.run(effects.zuoraDeps)
 
@@ -194,8 +191,7 @@ class SourceUpdatedStepsTest extends FlatSpec with Matchers {
     val expectedGET2 = BasicResult(
       "GET",
       "/accounts/accountidANOTHER/summary",
-      ""
-    )
+      "")
     effects.requestsAttempted.toSet should be(Set(expectedGET1, expectedGET2, expectedPOST))
     actual.map(_.toSet) should be(\/-(Set(
       PaymentMethodFields(PaymentMethodId("defaultPMID"), AccountId("accountidfake"), NumConsecutiveFailures(2)))))
@@ -229,16 +225,14 @@ class SourceUpdatedStepsTest extends FlatSpec with Matchers {
                                 |  "size": 4,
                                 |  "done": true
                                 |}""".stripMargin)), //defaultPMID
-      ("/accounts/accountidfake/summary", (200, defaultAccountSummaryJson))
-    ))
+      ("/accounts/accountidfake/summary", (200, defaultAccountSummaryJson))))
 
     val actual = SourceUpdatedSteps.getPaymentMethodsToUpdate(StripeCustomerId("fakecustid"), StripeSourceId("fakecardid")).run.run(effects.zuoraDeps)
 
     val expectedPOST = BasicResult(
       "POST",
       "/action/query",
-      "{\"queryString\":\"SELECT Id, AccountId, NumConsecutiveFailures\\n FROM PaymentMethod\\n  where Type='CreditCardReferenceTransaction' AND PaymentMethodStatus = 'Active' AND TokenId = 'fakecardid' AND SecondTokenId = 'fakecustid'\"}"
-    )
+      "{\"queryString\":\"SELECT Id, AccountId, NumConsecutiveFailures\\n FROM PaymentMethod\\n  where Type='CreditCardReferenceTransaction' AND PaymentMethodStatus = 'Active' AND TokenId = 'fakecardid' AND SecondTokenId = 'fakecustid'\"}")
     effects.requestsAttempted should be(List(expectedPOST))
     actual should be(-\/(ApiGatewayResponse.internalServerError("could not find correct account for stripe details")))
   }
@@ -251,16 +245,14 @@ class SourceUpdatedStepsTest extends FlatSpec with Matchers {
                                 |  "size": 0,
                                 |  "done": true
                                 |}""".stripMargin)), //defaultPMID
-      ("/accounts/accountidfake/summary", (200, defaultAccountSummaryJson))
-    ))
+      ("/accounts/accountidfake/summary", (200, defaultAccountSummaryJson))))
 
     val actual = SourceUpdatedSteps.getPaymentMethodsToUpdate(StripeCustomerId("fakecustid"), StripeSourceId("fakecardid")).run.run(effects.zuoraDeps)
 
     val expectedPOST = BasicResult(
       "POST",
       "/action/query",
-      "{\"queryString\":\"SELECT Id, AccountId, NumConsecutiveFailures\\n FROM PaymentMethod\\n  where Type='CreditCardReferenceTransaction' AND PaymentMethodStatus = 'Active' AND TokenId = 'fakecardid' AND SecondTokenId = 'fakecustid'\"}"
-    )
+      "{\"queryString\":\"SELECT Id, AccountId, NumConsecutiveFailures\\n FROM PaymentMethod\\n  where Type='CreditCardReferenceTransaction' AND PaymentMethodStatus = 'Active' AND TokenId = 'fakecardid' AND SecondTokenId = 'fakecustid'\"}")
     effects.requestsAttempted should be(List(expectedPOST))
     actual should be(\/-(List()))
   }
@@ -271,8 +263,7 @@ class SourceUpdatedStepsTest extends FlatSpec with Matchers {
 
     val effects = new TestingRawEffects(false, 500, Map(
       ("/object/payment-method", (200, """{"Success": true,"Id": "newPMID"}""")),
-      ("/object/account/fake", (200, """{"Success": true,"Id": "fakeaccountid"}"""))
-    ))
+      ("/object/account/fake", (200, """{"Success": true,"Id": "fakeaccountid"}"""))))
 
     val eventData = EventDataObject(
       id = StripeSourceId("card_def456"),
@@ -304,8 +295,7 @@ class SourceUpdatedStepsTest extends FlatSpec with Matchers {
     val badHeaders = Map(
       "SomeHeader1" -> "testvalue",
       "Content-Type" -> "application/json",
-      "Stripe-Signature" -> "t=1513759648,v1=longAlphanumericString"
-    )
+      "Stripe-Signature" -> "t=1513759648,v1=longAlphanumericString")
 
     val someBody =
       """
