@@ -37,7 +37,7 @@ object TestData extends Matchers {
   val fakeZuoraConfig = ZuoraRestConfig("https://ddd", "fakeUser", "fakePass")
   val fakeETSendIds = ETSendIds(ETSendId("11"), ETSendId("22"), ETSendId("33"), ETSendId("44"), ETSendId("can"))
   val fakeETConfig = ETConfig(etSendIDs = fakeETSendIds, "fakeClientId", "fakeClientSecret")
-  val fakeStripeConfig = StripeConfig(customerSourceUpdatedWebhook = StripeWebhook(StripeSecretKey("ukcustomerSourceUpdatedSecretKey"), StripeSecretKey("aucustomerSourceUpdatedStripeSecretKey")))
+  val fakeStripeConfig = StripeConfig(customerSourceUpdatedWebhook = StripeWebhook(StripeSecretKey("ukCustomerSourceUpdatedSecretKey"), StripeSecretKey("auCustomerSourceUpdatedStripeSecretKey")))
 
   val fakeConfig = Config(
     stage = Stage("DEV"),
