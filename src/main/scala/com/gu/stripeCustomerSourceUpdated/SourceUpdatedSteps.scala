@@ -1,8 +1,10 @@
 package com.gu.stripeCustomerSourceUpdated
 
+import com.gu.stripeCustomerSourceUpdated.StripeRequestSignatureChecker.verifyRequest
 import com.gu.util._
+import com.gu.util.apigateway.ApiGatewayResponse.unauthorized
 import com.gu.util.apigateway.ResponseModels.ApiResponse
-import com.gu.util.apigateway.{ ApiGatewayRequest, ApiGatewayResponse }
+import com.gu.util.apigateway.{ ApiGatewayRequest, ApiGatewayResponse, StripeAccount }
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.CreatePaymentMethod.{ CreateStripePaymentMethod, CreditCardType }
 import com.gu.util.zuora.ZuoraGetAccountSummary.AccountSummary
@@ -24,7 +26,8 @@ object SourceUpdatedSteps extends Logging {
 
   def apply(deps: Deps)(apiGatewayRequest: ApiGatewayRequest): FailableOp[Unit] = {
     (for {
-      sourceUpdatedCallout <- Json.fromJson[SourceUpdatedCallout](Json.parse(apiGatewayRequest.body)).toFailableOp.withLogging("fromJson SourceUpdatedCallout").pure[WithDeps].toEitherT
+      body <- bodyIfSignatureVerified(deps.stripeDeps, apiGatewayRequest).pure[WithDeps].toEitherT
+      sourceUpdatedCallout <- Json.fromJson[SourceUpdatedCallout](Json.parse(body)).toFailableOp.withLogging("fromJson SourceUpdatedCallout").pure[WithDeps].toEitherT
       _ = logger.info(s"from: ${apiGatewayRequest.queryStringParameters.map(_.stripeAccount)}")
       _ <- (for {
         defaultPaymentMethod <- ListT(getPaymentMethodsToUpdate(sourceUpdatedCallout.data.`object`.customer, sourceUpdatedCallout.data.`object`.id))
@@ -39,6 +42,16 @@ object SourceUpdatedSteps extends Logging {
       paymentMethod <- createPaymentMethod(eventDataObject, paymentMethodFields).withLogging("createPaymentMethod")
       _ <- SetDefaultPaymentMethod.setDefaultPaymentMethod(paymentMethodFields.AccountId, paymentMethod.id).withLogging("setDefaultPaymentMethod")
     } yield ()
+  }
+
+  def bodyIfSignatureVerified(stripeDeps: StripeDeps, apiGatewayRequest: ApiGatewayRequest): FailableOp[String] = {
+    val maybeStripeAccount: Option[StripeAccount] = apiGatewayRequest.queryStringParameters.flatMap { params => params.stripeAccount }
+    val signatureVerified: Boolean = verifyRequest(stripeDeps, apiGatewayRequest.headers.getOrElse(Map()), apiGatewayRequest.body, maybeStripeAccount)
+
+    if (signatureVerified)
+      \/-(apiGatewayRequest.body)
+    else
+      -\/(unauthorized)
   }
 
   def getPaymentMethodsToUpdate(customer: StripeCustomerId, source: StripeSourceId): WithZuoraDepsFailableOp[List[PaymentMethodFields]] = {
@@ -80,11 +93,11 @@ object SourceUpdatedSteps extends Logging {
 
   object Deps {
     def default(response: Request => Response, config: Config): Deps = {
-      Deps(ZuoraDeps(response, config.zuoraRestConfig))
+      Deps(ZuoraDeps(response, config.zuoraRestConfig), StripeDeps(config.stripeConfig, new StripeSignatureChecker))
     }
   }
 
-  case class Deps(zuoraDeps: ZuoraDeps)
+  case class Deps(zuoraDeps: ZuoraDeps, stripeDeps: StripeDeps)
 
 }
 

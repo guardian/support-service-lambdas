@@ -39,7 +39,7 @@ class AutoCancelStepsTest extends FlatSpec with Matchers {
     val effects = new TestingRawEffects(false, 200)
     AutoCancel(effects.zuoraDeps)(AutoCancelRequest("AID", SubscriptionId("subid"), LocalDate.now))
 
-    effects.basicResults should contain(BasicResult("PUT", "/accounts/AID", "{\"autoPay\":false}"))
+    effects.requestsAttempted should contain(BasicResult("PUT", "/accounts/AID", "{\"autoPay\":false}"))
   }
 
   //  // todo need an ACSDeps so we don't need so many mock requests

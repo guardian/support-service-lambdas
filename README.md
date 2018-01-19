@@ -1,11 +1,17 @@
 # zuora-auto-cancel
+Contains three Scala lambdas behind the same API gateway:
 
-This Scala Lambda is used to cancel subscriptions and memberships with overdue invoices, based on an event trigger within Zuora.
+**autoCancel**: This Scala Lambda is used to cancel subscriptions and memberships with overdue invoices, based on an event trigger within Zuora.
 
 The full workflow is currently:
 Zuora Callout > AWS CloudFront > AWS API Gateway (Lambda Proxy Integration) > AWS Lambda
 
 An additional CloudFront distribution is currently required because callouts do not support SNI, and the default CloudFront distribution (which gets set up in front of API Gateway) seems to require it.
+
+**paymentFailure**:
+
+**stripeCustomerSourceUpdated**: Stripe works with card networks so that when a customer's card details are updated, this fires an event and we can provide an endpoint for Stripe to call.
+So, this Scala lambda updates a customer's payment method in Zuora so that the customer doesn't have to update their card details manually. 
 
 # Running locally
 
