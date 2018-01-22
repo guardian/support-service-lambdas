@@ -41,7 +41,6 @@ libraryDependencies ++= Seq(
   "org.scalaz" %% "scalaz-core" % "7.2.18",
   "com.typesafe.play" %% "play-json" % "2.6.8",
   "org.scalatest" %% "scalatest" % "3.0.1" % "test",
-  "org.apache.commons" % "commons-io" % "1.3.2",
   "com.stripe" % "stripe-java" % "5.28.0"
 )
 
