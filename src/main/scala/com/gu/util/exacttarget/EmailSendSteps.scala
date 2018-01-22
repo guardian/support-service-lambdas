@@ -25,8 +25,7 @@ case class SubscriberAttributesDef(
   primaryKey: PrimaryKey,
   price: String,
   serviceStartDate: String,
-  serviceEndDate: String
-)
+  serviceEndDate: String)
 
 sealed trait PrimaryKey {
   // ET will filter out multiple emails with the same payment id for PF1,2,3,4
@@ -60,9 +59,7 @@ object SubscriberAttributesDef {
           },
           "price" -> JsString(o.price),
           "serviceStartDate" -> JsString(o.serviceStartDate),
-          "serviceEndDate" -> JsString(o.serviceEndDate)
-        )
-      )
+          "serviceEndDate" -> JsString(o.serviceEndDate)))
 
   }
 
@@ -84,8 +81,7 @@ object EmailSendSteps extends Logging {
 
   case class EmailSendStepsDeps(
     sendEmail: EmailRequest => FailableOp[Unit],
-    filterEmail: EmailRequest => FailableOp[Unit]
-  )
+    filterEmail: EmailRequest => FailableOp[Unit])
 
   object EmailSendStepsDeps {
     def default(stage: Stage, response: Request => Response, etConfig: ETConfig): EmailSendStepsDeps = {
@@ -106,8 +102,7 @@ object ETClient {
 
   case class ETClientDeps(
     response: (Request => Response),
-    etConfig: ETConfig
-  )
+    etConfig: ETConfig)
 
   def sendEmail(eTClientDeps: ETClientDeps)(emailRequest: EmailRequest): FailableOp[Unit] = {
     for {

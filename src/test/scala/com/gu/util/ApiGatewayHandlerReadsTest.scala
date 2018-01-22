@@ -14,8 +14,7 @@ class ApiGatewayHandlerReadsTest extends FlatSpec {
     val eventHeaders = Map(
       "SomeHeader1" -> "testvalue",
       "Content-Type" -> "application/json",
-      "Stripe-Signature" -> "t=1513759648,v1=longAlphanumericString"
-    )
+      "Stripe-Signature" -> "t=1513759648,v1=longAlphanumericString")
     val validApiGatewayEventJson =
       s"""
         |{
@@ -65,9 +64,7 @@ class ApiGatewayHandlerReadsTest extends FlatSpec {
       ApiGatewayRequest(
         queryStringParameters = None,
         body = eventBodySimple,
-        headers = Some(eventHeaders)
-      )
-    )
+        headers = Some(eventHeaders)))
 
     val event: JsResult[ApiGatewayRequest] = Json.parse(validApiGatewayEventJson).validate[ApiGatewayRequest]
 

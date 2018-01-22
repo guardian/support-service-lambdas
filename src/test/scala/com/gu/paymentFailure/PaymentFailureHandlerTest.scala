@@ -12,7 +12,6 @@ import com.gu.util.exacttarget.EmailSendSteps.EmailSendStepsDeps
 import com.gu.util.exacttarget._
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.ZuoraGetInvoiceTransactions.InvoiceTransactionSummary
-import com.gu.util.zuora.ZuoraModels._
 import com.gu.util.{ Config, Stage }
 import org.scalatest.{ FlatSpec, Matchers }
 
@@ -47,7 +46,6 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
   "lambda" should "enqueue email and return success for a valid request" in {
     //set up
     val stream = getClass.getResourceAsStream("/paymentFailure/validRequest.json")
-    val output = new ByteArrayOutputStream
     var storedReq: Option[EmailRequest] = None
 
     val os = new ByteArrayOutputStream()
@@ -61,15 +59,10 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
                 req => {
                   storedReq = Some(req)
                   \/-(()): FailableOp[Unit]
-                }, FilterEmail(Stage("PROD"))
-              )
-            ),
-            a => \/-(basicInvoiceTransactionSummary)
-          )
-        ),
+                }, FilterEmail(Stage("PROD")))),
+            a => \/-(basicInvoiceTransactionSummary))),
         config.etConfig.etSendIDs,
-        config.trustedApiConfig
-      ))
+        config.trustedApiConfig))
     }
     ApiGatewayHandler(lambdaConfig(configToFunction))(stream, os, null)
 
@@ -94,12 +87,7 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
               primaryKey = PaymentId("somePaymentId"),
               price = "£49.00",
               serviceStartDate = "21 November 2016",
-              serviceEndDate = "21 December 2016"
-            )
-          )
-        )
-      )
-    )
+              serviceEndDate = "21 December 2016")))))
 
     storedReq should be(Some(expectedMessage))
     responseString jsonMatches successfulResponse
@@ -108,7 +96,6 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
   "lambda" should "return error if no additional data is found in zuora" in {
     //set up
     val stream = getClass.getResourceAsStream("/paymentFailure/validRequest.json")
-    val output = new ByteArrayOutputStream
     val invoiceTransactionSummary = InvoiceTransactionSummary(List())
 
     val os = new ByteArrayOutputStream()
@@ -128,17 +115,14 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
     PaymentFailureSteps.apply(PFDeps(
       ZuoraEmailSteps.sendEmailRegardingAccount(ZuoraEmailStepsDeps(
         sendEmail = _ => -\/(ApiGatewayResponse.internalServerError("something failed!")),
-        getInvoiceTransactions = _ => \/-(fakeInvoiceTransactionSummary)
-      )),
+        getInvoiceTransactions = _ => \/-(fakeInvoiceTransactionSummary))),
       config.etConfig.etSendIDs,
-      config.trustedApiConfig
-    )) _
+      config.trustedApiConfig)) _
   }
 
   "lambda" should "return error if message can't be queued" in {
     //set up
     val stream = getClass.getResourceAsStream("/paymentFailure/validRequest.json")
-    val output = new ByteArrayOutputStream
 
     var storedReq: Option[EmailRequest] = None
     val os = new ByteArrayOutputStream()
@@ -154,16 +138,10 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
                   req => {
                     storedReq = Some(req)
                     -\/(ApiGatewayResponse.internalServerError("something failed!")): FailableOp[Unit]
-                  }, FilterEmail(Stage("PROD"))
-                )
-              ),
-              a => \/-(basicInvoiceTransactionSummary)
-            )
-          ),
+                  }, FilterEmail(Stage("PROD")))),
+              a => \/-(basicInvoiceTransactionSummary))),
           config.etConfig.etSendIDs,
-          config.trustedApiConfig
-        )
-      )
+          config.trustedApiConfig))
     }
     ApiGatewayHandler(lambdaConfig(configToFunction))(stream, os, null)
 

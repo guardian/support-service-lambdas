@@ -1,14 +1,16 @@
 package com.gu.autoCancel
 
+import java.time.LocalDate
+
 import com.gu.TestingRawEffects.BasicResult
 import com.gu.autoCancel.AutoCancel.AutoCancelRequest
 import com.gu.autoCancel.AutoCancelDataCollectionFilter.ACFilterDeps
 import com.gu.util.reader.Types._
+import com.gu.util.zuora.ZuoraDeps
 import com.gu.util.zuora.ZuoraGetAccountSummary.{ AccountSummary, BasicAccountInfo, Invoice, SubscriptionSummary }
 import com.gu.util.zuora.ZuoraModels._
 import com.gu.util.zuora.ZuoraQueryPaymentMethod.{ AccountId, PaymentMethodId }
 import com.gu.{ TestData, TestingRawEffects, WithDependenciesFailableOp }
-import org.joda.time.LocalDate
 import org.scalatest._
 
 import scalaz.\/-
@@ -24,9 +26,9 @@ class AutoCancelStepsTest extends FlatSpec with Matchers {
     val aCDeps = ACFilterDeps(
       now = LocalDate.now,
       getAccountSummary = _ => WithDependenciesFailableOp.liftT(AccountSummary(basicInfo, List(subscription), List(singleOverdueInvoice))),
-      a.response,
-      TestData.fakeZuoraConfig
-    )
+      ZuoraDeps(
+        a.response,
+        TestData.fakeZuoraConfig))
     val autoCancelCallout = AutoCancelHandlerTest.fakeCallout(true)
     val cancel: FailableOp[AutoCancelRequest] = AutoCancelDataCollectionFilter(aCDeps)(autoCancelCallout)
 

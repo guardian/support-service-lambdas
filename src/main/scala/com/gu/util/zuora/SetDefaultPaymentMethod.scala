@@ -12,8 +12,7 @@ object SetDefaultPaymentMethod {
 
   implicit val writes = new Writes[SetDefaultPaymentMethod] {
     def writes(subscriptionUpdate: SetDefaultPaymentMethod) = Json.obj(
-      "DefaultPaymentMethodId" -> subscriptionUpdate.paymentMethodId
-    )
+      "DefaultPaymentMethodId" -> subscriptionUpdate.paymentMethodId)
   }
 
   def setDefaultPaymentMethod(accountId: AccountId, paymentMethodId: PaymentMethodId): WithDepsFailableOp[ZuoraDeps, Unit] =

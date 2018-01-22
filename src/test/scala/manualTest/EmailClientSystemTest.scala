@@ -1,7 +1,6 @@
 package manualTest
 
 import com.gu.effects.RawEffects
-import com.gu.util.ETConfig.ETSendId
 import com.gu.util.exacttarget.EmailSendSteps.EmailSendStepsDeps
 import com.gu.util.exacttarget._
 import com.gu.util.{ Config, Stage }
@@ -31,11 +30,7 @@ object EmailClientSystemTest extends App {
           primaryKey = PaymentId(s"paymentId$unique"), // must be unique otherwise the email won't arrive
           price = "49.0 GBP",
           serviceStartDate = "31 January 2016",
-          serviceEndDate = "31 January 2017"
-        )
-      )
-    )
-  )
+          serviceEndDate = "31 January 2017"))))
 
   def overdueMessage = Message(
     To = ToDef(
@@ -53,11 +48,7 @@ object EmailClientSystemTest extends App {
           primaryKey = InvoiceId(s"invoiceId$unique"), // must be unique otherwise the email won't arrive
           price = "49.0 GBP",
           serviceStartDate = "31 January 2016",
-          serviceEndDate = "31 January 2017"
-        )
-      )
-    )
-  )
+          serviceEndDate = "31 January 2017"))))
 
   for {
     configAttempt <- Try {
@@ -69,11 +60,9 @@ object EmailClientSystemTest extends App {
   } yield Seq(a.pf1 -> message(1), a.pf2 -> message(2), a.pf3 -> message(3), a.pf4 -> message(4), a.cancelled -> overdueMessage).map {
     case (etSendId, index) =>
       val emailResult = EmailSendSteps(
-        deps
-      )(EmailRequest(
+        deps)(EmailRequest(
         etSendId = etSendId,
-        message = index
-      ))
+        message = index))
       println(s"result for $etSendId:::::: $emailResult")
   }
 

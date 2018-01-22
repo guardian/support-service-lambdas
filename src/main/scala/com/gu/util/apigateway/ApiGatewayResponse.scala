@@ -19,16 +19,14 @@ object ResponseWriters {
 
   implicit val headersWrites = new Writes[Headers] {
     def writes(headers: Headers) = Json.obj(
-      "Content-Type" -> headers.contentType
-    )
+      "Content-Type" -> headers.contentType)
   }
 
   implicit val responseWrites = new Writes[ApiResponse] {
     def writes(response: ApiResponse) = Json.obj(
       "statusCode" -> response.statusCode,
       "headers" -> response.headers,
-      "body" -> response.body
-    )
+      "body" -> response.body)
   }
 
 }

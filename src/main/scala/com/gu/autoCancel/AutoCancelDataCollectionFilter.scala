@@ -1,15 +1,13 @@
 package com.gu.autoCancel
 
-import com.github.nscala_time.time.OrderingImplicits._
 import com.gu.autoCancel.AutoCancel.AutoCancelRequest
+import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayResponse.noActionRequired
 import com.gu.util.reader.Types.{ FailableOp, _ }
 import com.gu.util.zuora.ZuoraGetAccountSummary.{ AccountSummary, Invoice }
 import com.gu.util.zuora.ZuoraModels.SubscriptionId
 import com.gu.util.zuora.{ ZuoraDeps, ZuoraGetAccountSummary }
-import com.gu.util.{ Logging, ZuoraRestConfig }
-import okhttp3.{ Request, Response }
-import org.joda.time.LocalDate
+import java.time.LocalDate
 
 import scalaz.Scalaz._
 
@@ -18,25 +16,21 @@ object AutoCancelDataCollectionFilter extends Logging {
   case class ACFilterDeps(
     now: LocalDate,
     getAccountSummary: String => WithDepsFailableOp[ZuoraDeps, AccountSummary],
-    response: Request => Response,
-    config: ZuoraRestConfig
-  )
+    zuoraDeps: ZuoraDeps)
 
   object ACFilterDeps {
-    def default(now: LocalDate, response: Request => Response, config: ZuoraRestConfig): ACFilterDeps = {
+    def default(now: LocalDate, zuoraDeps: ZuoraDeps): ACFilterDeps = {
       ACFilterDeps(
         now,
         ZuoraGetAccountSummary.apply,
-        response,
-        config
-      )
+        zuoraDeps)
     }
   }
 
   def apply(deps: ACFilterDeps)(autoCancelCallout: AutoCancelCallout): FailableOp[AutoCancelRequest] = {
     val accountId = autoCancelCallout.accountId
     for {
-      accountSummary <- deps.getAccountSummary(accountId).run.run(ZuoraDeps(deps.response, deps.config)).withLogging("getAccountSummary")
+      accountSummary <- deps.getAccountSummary(accountId).run.run(deps.zuoraDeps).withLogging("getAccountSummary")
       subToCancel <- getSubscriptionToCancel(accountSummary).withLogging("getSubscriptionToCancel")
       cancellationDate <- getCancellationDateFromInvoices(accountSummary, deps.now).withLogging("getCancellationDateFromInvoices")
     } yield AutoCancelRequest(accountId, subToCancel, cancellationDate)
@@ -49,6 +43,7 @@ object AutoCancelDataCollectionFilter extends Logging {
       noActionRequired("No unpaid and overdue invoices found!").left
     } else {
       logger.info(s"Found at least one unpaid invoices for account: ${accountSummary.basicInfo.id}. Invoice id(s): ${unpaidAndOverdueInvoices.map(_.id)}")
+      implicit val localDateOrdering: Ordering[LocalDate] = Ordering.by(_.toEpochDay)
       val earliestDueDate = unpaidAndOverdueInvoices.map(_.dueDate).min
       logger.info(s"Earliest overdue invoice for account ${accountSummary.basicInfo.id} has due date: $earliestDueDate. Setting this as the cancellation date.")
       earliestDueDate.right
@@ -57,7 +52,7 @@ object AutoCancelDataCollectionFilter extends Logging {
 
   def invoiceOverdue(invoice: Invoice, dateToday: LocalDate): Boolean = {
     if (invoice.balance > 0 && invoice.status == "Posted") {
-      val zuoraGracePeriod = 14 // This needs to match with the timeframe for the 3rd payment retry attempt in Zuora
+      val zuoraGracePeriod = 14L // This needs to match with the timeframe for the 3rd payment retry attempt in Zuora
       val invoiceOverdueDate = invoice.dueDate.plusDays(zuoraGracePeriod)
       logger.info(s"Zuora grace period is: $zuoraGracePeriod days. Due date for Invoice id ${invoice.id} is ${invoice.dueDate}, so it will be considered overdue on: $invoiceOverdueDate.")
       dateToday.isEqual(invoiceOverdueDate) || dateToday.isAfter(invoiceOverdueDate)

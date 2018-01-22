@@ -48,16 +48,14 @@ object PaymentFailureSteps extends Logging {
       PFDeps(
         ZuoraEmailSteps.sendEmailRegardingAccount(ZuoraEmailStepsDeps.default(response, config)),
         config.etConfig.etSendIDs,
-        config.trustedApiConfig
-      )
+        config.trustedApiConfig)
     }
   }
 
   case class PFDeps(
     sendEmailRegardingAccount: (String, PaymentFailureInformation => EmailRequest) => FailableOp[Unit],
     etSendIDs: ETSendIds,
-    trustedApiConfig: TrustedApiConfig
-  )
+    trustedApiConfig: TrustedApiConfig)
 
 }
 
@@ -76,14 +74,12 @@ object ZuoraEmailSteps {
     def default(response: Request => Response, config: Config): ZuoraEmailStepsDeps = {
       ZuoraEmailStepsDeps(
         EmailSendSteps.apply(EmailSendStepsDeps.default(config.stage, response, config.etConfig)),
-        a => ZuoraGetInvoiceTransactions(a).run.run(ZuoraDeps(response, config.zuoraRestConfig))
-      )
+        a => ZuoraGetInvoiceTransactions(a).run.run(ZuoraDeps(response, config.zuoraRestConfig)))
     }
   }
 
   case class ZuoraEmailStepsDeps(
     sendEmail: EmailRequest => FailableOp[Unit],
-    getInvoiceTransactions: String => FailableOp[InvoiceTransactionSummary]
-  )
+    getInvoiceTransactions: String => FailableOp[InvoiceTransactionSummary])
 
 }

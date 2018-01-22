@@ -21,8 +21,7 @@ object ApiGatewayHandler extends Logging {
     s3Load: () => Try[String],
     stage: Stage,
     parseConfig: String => Try[Config],
-    operation: Config => ApiGatewayRequest => FailableOp[Unit]
-  )
+    operation: Config => ApiGatewayRequest => FailableOp[Unit])
 
   object HandlerDeps {
     def default(stage: Stage, s3Load: Stage => Try[String], operation: Config => ApiGatewayRequest => FailableOp[Unit]): HandlerDeps =
@@ -30,8 +29,7 @@ object ApiGatewayHandler extends Logging {
         () => s3Load(stage),
         stage,
         Config.parseConfig,
-        operation
-      )
+        operation)
   }
 
   def apply(deps: HandlerDeps)(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {

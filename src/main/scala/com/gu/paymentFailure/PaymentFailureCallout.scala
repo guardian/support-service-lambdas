@@ -1,6 +1,5 @@
 package com.gu.paymentFailure
 
-import play.api.data.validation.ValidationError
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
@@ -18,8 +17,7 @@ case class PaymentFailureCallout(
   creditCardExpirationYear: String,
   paymentId: String,
   currency: String,
-  tenantId: String
-)
+  tenantId: String)
 
 object PaymentFailureCallout {
 
@@ -27,7 +25,7 @@ object PaymentFailureCallout {
     (
       (JsPath \ "accountId").read[String] and
       (JsPath \ "email").read[String] and
-      (JsPath \ "failureNumber").read[String].map(str => Try { Integer.parseInt(str) }).collect(ValidationError("int wasn't parsable"))({ case scala.util.Success(num) => num }) and
+      (JsPath \ "failureNumber").read[String].map(str => Try { Integer.parseInt(str) }).collect(JsonValidationError("int wasn't parsable"))({ case scala.util.Success(num) => num }) and
       (JsPath \ "firstName").read[String] and
       (JsPath \ "lastName").read[String] and
       (JsPath \ "paymentMethodType").read[String] and
@@ -36,7 +34,6 @@ object PaymentFailureCallout {
       (JsPath \ "creditCardExpirationYear").read[String] and
       (JsPath \ "paymentId").read[String] and
       (JsPath \ "currency").read[String] and
-      (JsPath \ "tenantId").read[String]
-    ).apply(PaymentFailureCallout.apply _)
+      (JsPath \ "tenantId").read[String]).apply(PaymentFailureCallout.apply _)
   }
 }

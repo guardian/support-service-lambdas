@@ -13,18 +13,15 @@ class AuthTest extends FlatSpec {
 
     def constructQueryStrings(apiClientId: String, apiToken: String) = Json.obj(
       "apiClientId" -> apiClientId,
-      "apiToken" -> apiToken
-    )
+      "apiToken" -> apiToken)
     val headers = Json.obj(
-      "Content-Type" -> "text/xml"
-    )
+      "Content-Type" -> "text/xml")
     val sampleJson = Json.obj(
       "resource" -> "test-resource",
       "path" -> "/test-path",
       "httpMethod" -> "POST",
       "headers" -> headers,
-      "queryStringParameters" -> constructQueryStrings(apiClientId, apiToken)
-    )
+      "queryStringParameters" -> constructQueryStrings(apiClientId, apiToken))
     sampleJson
   }
 
@@ -33,8 +30,7 @@ class AuthTest extends FlatSpec {
       "resource" -> "test-resource",
       "path" -> "/test-path",
       "httpMethod" -> "POST",
-      "body" -> ""
-    )
+      "body" -> "")
     sampleJson.validate[ApiGatewayRequest] match {
       case JsError(e) => fail(s"couldn't parse with $e")
       case JsSuccess(req, _) =>
