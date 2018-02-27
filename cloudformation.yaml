@@ -50,12 +50,18 @@ Resources:
                           - Effect: Allow
                             Action: sqs:*
                             Resource: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:subs-welcome-email
-                - PolicyName: ReadPrivateCredentials
+                - PolicyName: ReadOldPrivateCredentials
                   PolicyDocument:
                       Statement:
                           - Effect: Allow
                             Action: s3:GetObject
                             Resource: !Sub arn:aws:s3:::payment-failure-lambdas-private/${Stage}/*
+                - PolicyName: ReadPrivateCredentials
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action: s3:GetObject
+                            Resource: !Sub arn:aws:s3:::gu-reader-revenue-private/membership/payment-failure-lambdas/${Stage}/*
 
     ZuoraAutoCancelLambda:
         Type: AWS::Lambda::Function
