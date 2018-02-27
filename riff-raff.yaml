@@ -23,7 +23,7 @@ deployments:
   identity-backfill:
     type: aws-lambda
     parameters:
-      fileName: identity-backfill.jar
+      fileName: identityBackfill.jar
       bucket: zuora-auto-cancel-dist
       prefixStack: false
       functionNames:
