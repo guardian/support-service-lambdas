@@ -1,0 +1,169 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Handles backfilling identity ids
+
+Parameters:
+    Stage:
+        Description: Stage name
+        Type: String
+        AllowedValues:
+            - PROD
+            - CODE
+        Default: CODE
+    ApiName:
+        Type: String
+        AllowedValues:
+            - identity-backfill-api-CODE
+            - identity-backfill-api-PROD
+        Default: identity-backfill-api-CODE
+
+Conditions:
+  CreateProdMonitoring: !Equals [ !Ref Stage, PROD ]
+
+Resources:
+    ZuoraAutoCancelRole:
+        Type: AWS::IAM::Role
+        Properties:
+            RoleName: !Sub ZuoraAutoCancel-${Stage}
+            AssumeRolePolicyDocument:
+                Statement:
+                    - Effect: Allow
+                      Principal:
+                          Service:
+                             - lambda.amazonaws.com
+                      Action:
+                          - sts:AssumeRole
+            Path: /
+            Policies:
+                - PolicyName: LambdaPolicy
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                            - logs:CreateLogGroup
+                            - logs:CreateLogStream
+                            - logs:PutLogEvents
+                            - lambda:InvokeFunction
+                            Resource: "*"
+
+    IdentityBackfillLambda:
+        Type: AWS::Lambda::Function
+        Properties:
+            Description: backfill identity into zuora
+            FunctionName:
+                !Sub identity-backfill-${Stage}
+            Code:
+                S3Bucket: zuora-auto-cancel-dist
+                S3Key: !Sub membership/${Stage}/zuora-auto-cancel/identityBackfill.jar
+            Handler: com.gu.identity_backfill.Handler::apply
+            Environment:
+                Variables:
+                  Stage: !Ref Stage
+            Role:
+                Fn::GetAtt:
+                - ZuoraAutoCancelRole
+                - Arn
+            MemorySize: 1536
+            Runtime: java8
+            Timeout: 300
+        DependsOn:
+        - ZuoraAutoCancelRole
+
+    IdentityBackfillAPIPermission:
+        Type: AWS::Lambda::Permission
+        Properties:
+            Action: lambda:invokeFunction
+            FunctionName: !Sub identity-backfill-${Stage}
+            Principal: apigateway.amazonaws.com
+        DependsOn: IdentityBackfillLambda
+
+    IdentityBackfillProxyResource:
+        Type: AWS::ApiGateway::Resource
+        Properties:
+            RestApiId: !Ref IdentityBackfillAPI
+            ParentId: !GetAtt [IdentityBackfillAPI, RootResourceId]
+            PathPart: auto-cancel
+        DependsOn: IdentityBackfillAPI
+
+    IdentityBackfillMethod:
+        Type: AWS::ApiGateway::Method
+        Properties:
+            AuthorizationType: NONE
+            RestApiId: !Ref IdentityBackfillAPI
+            ResourceId: !Ref IdentityBackfillProxyResource
+            HttpMethod: POST
+            RequestParameters:
+              method.request.querystring.apiClientId: true
+              method.request.querystring.apiToken: true
+            Integration:
+              Type: AWS_PROXY
+              IntegrationHttpMethod: POST
+              Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${IdentityBackfillLambda.Arn}/invocations
+        DependsOn:
+        - IdentityBackfillAPI
+        - IdentityBackfillLambda
+        - IdentityBackfillProxyResource
+
+
+
+    IdentityBackfillAPI:
+        Type: "AWS::ApiGateway::RestApi"
+        Properties:
+            Description: we call this ourselves to trigger zuora backfill of identity
+            Name: !Sub ${ApiName}
+
+    IdentityBackfillAPIStage:
+        Type: AWS::ApiGateway::Stage
+        Properties:
+            Description: Stage for zuora-auto-cancel-api
+            RestApiId: !Ref IdentityBackfillAPI
+            DeploymentId: !Ref ZuoraAutoCancelAPIDeployment
+            StageName: !Sub ${Stage}
+        DependsOn: IdentityBackfillMethod
+
+    ZuoraAutoCancelAPIDeployment:
+        Type: AWS::ApiGateway::Deployment
+        Properties:
+            Description: Deploys zuora-auto-cancel-api into an environment/stage
+            RestApiId: !Ref IdentityBackfillAPI
+        DependsOn: IdentityBackfillMethod
+
+    5xxApiAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Condition: CreateProdMonitoring
+      Properties:
+        AlarmActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:subscriptions_dev
+        AlarmName: !Sub 5XX rate from ${ApiName}
+        ComparisonOperator: GreaterThanThreshold
+        Dimensions:
+          - Name: ApiName
+            Value: !Sub ${ApiName}
+          - Name: Stage
+            Value: !Sub ${Stage}
+        EvaluationPeriods: 1
+        MetricName: 5XXError
+        Namespace: AWS/ApiGateway
+        Period: 3600
+        Statistic: Sum
+        Threshold: 5
+
+    4xxApiAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Condition: CreateProdMonitoring
+      Properties:
+        AlarmActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:subscriptions_dev
+        AlarmName: !Sub 4XX rate from ${ApiName}
+        ComparisonOperator: GreaterThanThreshold
+        Dimensions:
+          - Name: ApiName
+            Value: !Sub ${ApiName}
+          - Name: Stage
+            Value: !Sub ${Stage}
+        EvaluationPeriods: 1
+        MetricName: 4XXError
+        Namespace: AWS/ApiGateway
+        Period: 3600
+        Statistic: Sum
+        Threshold: 5
+

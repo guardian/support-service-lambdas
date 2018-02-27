@@ -22,7 +22,13 @@ scalacOptions ++= Seq(
   "-Ywarn-value-discard"
 )
 
-lazy val root = (project in file(".")).enablePlugins(RiffRaffArtifact)
+// currently the original code is lying in the root, in due course we need to make three separate sub projects for these original lambdas
+// they should produce their own self contained jar to reduce the artifact size and startup time.  Any shared code can be
+// a set of projects that is "dependsOn(..)" by the sharing projects.  Don't be afraid to restructure things to keep the code nice!
+lazy val root = (project in file(".")).enablePlugins(RiffRaffArtifact).aggregate(identityBackfill)
+
+lazy val identityBackfill = project // when using the "project identityBackfill" command it uses the lazy val name so standardising on camel case for base dir too
+  .enablePlugins(RiffRaffArtifact)
 
 assemblyJarName := "zuora-auto-cancel.jar"
 riffRaffPackageType := assembly.value

@@ -13,3 +13,19 @@ deployments:
       - zuora-auto-cancel-
       - payment-failure-
       - stripe-customer-source-updated-
+
+  identity-backfill-stack:
+    type: cloud-formation
+    parameters:
+      templatePath: identityBackfill/cloudformation.yaml
+
+
+  identity-backfill:
+    type: aws-lambda
+    parameters:
+      fileName: identity-backfill.jar
+      bucket: zuora-auto-cancel-dist
+      prefixStack: false
+      functionNames:
+      - identity-backfill-
+    dependencies: [identity-backfill-stack]
