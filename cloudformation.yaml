@@ -50,6 +50,12 @@ Resources:
                           - Effect: Allow
                             Action: sqs:*
                             Resource: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:subs-welcome-email
+                - PolicyName: ReadOldPrivateCredentials
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action: s3:GetObject
+                            Resource: !Sub arn:aws:s3:::payment-failure-lambdas-private/${Stage}/*
                 - PolicyName: ReadPrivateCredentials
                   PolicyDocument:
                       Statement:
