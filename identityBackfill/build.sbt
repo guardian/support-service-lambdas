@@ -31,7 +31,6 @@ riffRaffPackageType := assembly.value
 riffRaffUploadArtifactBucket := Option("riffraff-artifact")
 riffRaffUploadManifestBucket := Option("riffraff-builds")
 riffRaffManifestProjectName := "MemSub::Membership Admin::Identity Backfill"
-riffRaffUseYamlConfig := true
 
 addCommandAlias("dist", ";riffRaffArtifact")
 
