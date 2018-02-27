@@ -7,7 +7,7 @@ deployments:
   identity-backfill-stack:
     type: cloud-formation
     parameters:
-      templatePath: identityBackfill/cloudformation.yaml
+      templatePath: identityBackfill/identity-backfill.yaml
 
 
   identity-backfill:
