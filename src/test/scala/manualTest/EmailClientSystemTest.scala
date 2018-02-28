@@ -63,14 +63,14 @@ object EmailClientSystemTest extends App {
     "Newspaper Voucher",
     "Newspaper Delivery"
   ).flatMap(product => five(etSendIds, product)).foreach {
-      case (etSendId, index) =>
-        val emailResult = EmailSendSteps(
-          deps
-        )(EmailRequest(
-          etSendId = etSendId,
-          message = index
-        ))
-        println(s"result for $etSendId:::::: $emailResult")
-    }
+    case (etSendId, index) =>
+      val emailResult = EmailSendSteps(
+        deps
+      )(EmailRequest(
+        etSendId = etSendId,
+        message = index
+      ))
+      println(s"result for $etSendId:::::: $emailResult")
+  }
 
 }
