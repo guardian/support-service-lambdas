@@ -53,7 +53,7 @@ Resources:
                 !Sub identity-backfill-${Stage}
             Code:
                 S3Bucket: zuora-auto-cancel-dist
-                S3Key: !Sub membership/${Stage}/zuora-auto-cancel/identity-backfill.jar
+                S3Key: !Sub membership/${Stage}/identity-backfill/identity-backfill.jar
             Handler: com.gu.identity_backfill.Handler::apply
             Environment:
                 Variables:
@@ -81,7 +81,7 @@ Resources:
         Properties:
             RestApiId: !Ref IdentityBackfillAPI
             ParentId: !GetAtt [IdentityBackfillAPI, RootResourceId]
-            PathPart: auto-cancel
+            PathPart: identity-backfill
         DependsOn: IdentityBackfillAPI
 
     IdentityBackfillMethod:
@@ -114,7 +114,7 @@ Resources:
     IdentityBackfillAPIStage:
         Type: AWS::ApiGateway::Stage
         Properties:
-            Description: Stage for zuora-auto-cancel-api
+            Description: Stage for identity-backfill-api
             RestApiId: !Ref IdentityBackfillAPI
             DeploymentId: !Ref IdentityBackfillAPIDeployment
             StageName: !Sub ${Stage}
@@ -123,7 +123,7 @@ Resources:
     IdentityBackfillAPIDeployment:
         Type: AWS::ApiGateway::Deployment
         Properties:
-            Description: Deploys zuora-auto-cancel-api into an environment/stage
+            Description: Deploys identity-backfill-api into an environment/stage
             RestApiId: !Ref IdentityBackfillAPI
         DependsOn: IdentityBackfillMethod
 
