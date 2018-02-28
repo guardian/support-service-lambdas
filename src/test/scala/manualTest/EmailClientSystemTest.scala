@@ -26,7 +26,7 @@ object EmailClientSystemTest extends App {
           payment_method = "paymentMethodValue",
           card_type = "cardTypeValue",
           card_expiry_date = "cardExpiryValue",
-          first_name = s"$hint-firstNameValue",
+          first_name = s"${hint.replaceAll(" ", "-")}-firstNameValue",
           last_name = "lastNameValue",
           primaryKey = key, // must be unique otherwise the email won't arrive
           price = "49.0 GBP",
@@ -37,16 +37,14 @@ object EmailClientSystemTest extends App {
     )
   )
 
-  def five(a: ETSendIds, product: String) = {
-    val p = product.replaceAll(" ", "-")
+  def five(etSendIds: ETSendIds, product: String) =
     Seq(
-      a.pf1 -> message(s"${p}-pf1", PaymentId(s"paymentId$unique"), product),
-      a.pf2 -> message(s"${p}-pf2", PaymentId(s"paymentId$unique"), product),
-      a.pf3 -> message(s"${p}-pf3", PaymentId(s"paymentId$unique"), product),
-      a.pf4 -> message(s"${p}-pf4", PaymentId(s"paymentId$unique"), product),
-      a.cancelled -> message(s"${p}-overdue", InvoiceId(s"invoiceId$unique"), product)
+      etSendIds.pf1 -> message(s"$product-pf1", PaymentId(s"paymentId$unique"), product),
+      etSendIds.pf2 -> message(s"$product-pf2", PaymentId(s"paymentId$unique"), product),
+      etSendIds.pf3 -> message(s"$product-pf3", PaymentId(s"paymentId$unique"), product),
+      etSendIds.pf4 -> message(s"$product-pf4", PaymentId(s"paymentId$unique"), product),
+      etSendIds.cancelled -> message(s"$product-overdue", InvoiceId(s"invoiceId$unique"), product)
     )
-  }
 
   for {
     configAttempt <- Try {
@@ -54,7 +52,7 @@ object EmailClientSystemTest extends App {
     }
     config <- Config.parseConfig(configAttempt)
     deps = EmailSendStepsDeps.default(Stage("CODE"), RawEffects.createDefault.response, config.etConfig)
-    a = config.etConfig.etSendIDs
+    etSendIds = config.etConfig.etSendIDs
   } yield Seq(
     "Supporter",
     "Digital Pack",
@@ -64,7 +62,7 @@ object EmailClientSystemTest extends App {
     "Contributor",
     "Newspaper Voucher",
     "Newspaper Delivery"
-  ).flatMap(xxx => five(a, xxx)).foreach {
+  ).flatMap(product => five(etSendIds, product)).foreach {
       case (etSendId, index) =>
         val emailResult = EmailSendSteps(
           deps
