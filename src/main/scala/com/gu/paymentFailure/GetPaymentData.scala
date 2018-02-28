@@ -3,8 +3,8 @@ package com.gu.paymentFailure
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayResponse.internalServerError
 import com.gu.util.reader.Types.FailableOp
-import com.gu.util.zuora.ZuoraModels.{ InvoiceItem, InvoiceTransactionSummary, ItemisedInvoice }
-import org.joda.time.LocalDate
+import com.gu.util.zuora.ZuoraGetInvoiceTransactions.{ InvoiceItem, InvoiceTransactionSummary, ItemisedInvoice }
+import java.time.LocalDate
 
 import scalaz.\/
 import scalaz.syntax.std.option._

@@ -1,7 +1,8 @@
 package com.gu.util
 
 import com.gu.util.apigateway.ApiGatewayResponse._
-import com.gu.util.zuora.ZuoraModels._
+import com.gu.util.zuora.ZuoraGetAccountSummary.BasicAccountInfo
+import com.gu.util.zuora.ZuoraQueryPaymentMethod.{ AccountId, PaymentMethodId }
 import com.gu.util.zuora.ZuoraReaders._
 import com.gu.util.zuora.ZuoraRestRequestMaker
 import okhttp3._
@@ -34,28 +35,24 @@ class ZuoraRestServiceTest extends AsyncFlatSpec {
   val dummyJson = Json.parse(
     """{
       |  "body": "test"
-      |}""".stripMargin
-  )
+      |}""".stripMargin)
 
   val validUpdateSubscriptionResult = Json.parse(
     """{
       |  "success": true,
-      |  "id": "id123", "balance": 1.2
-      |}""".stripMargin
-  )
+      |  "id": "id123", "balance": 1.2, "defaultPaymentMethod": {"id": "pmid"}
+      |}""".stripMargin)
 
   val validFailedUpdateSubscriptionResult = Json.parse(
     """{
       |  "success": false,
       |  "subscriptionId": "id123"
-      |}""".stripMargin
-  )
+      |}""".stripMargin)
 
   val validZuoraNoOtherFields = Json.parse(
     """{
       |  "success": true
-      |}""".stripMargin
-  )
+      |}""".stripMargin)
 
   def constructTestRequest(json: JsValue = dummyJson): Request = {
     val body = RequestBody.create(MediaType.parse("application/json"), json.toString)
@@ -72,6 +69,7 @@ class ZuoraRestServiceTest extends AsyncFlatSpec {
       .request(constructTestRequest())
       .protocol(Protocol.HTTP_1_1)
       .body(ResponseBody.create(MediaType.parse("application/json"), json.toString))
+      .message("message?")
       .build()
     response
   }
@@ -97,13 +95,14 @@ class ZuoraRestServiceTest extends AsyncFlatSpec {
   it should "return a right[T] if the body of a successful response deserializes to T" in {
     val response = constructTestResponse(200, validUpdateSubscriptionResult)
     val either = ZuoraRestRequestMaker.convertResponseToCaseClass[BasicAccountInfo](response)
-    assert(either == \/-(BasicAccountInfo(id = "id123", balance = 1.2)))
+    val basicInfo = BasicAccountInfo(AccountId("id123"), 1.2, PaymentMethodId("pmid"))
+    either should be(\/-(basicInfo))
   }
 
   it should "return a right[Unit] if the body of a successful response deserializes to Unit" in {
     val response = constructTestResponse(200, validUpdateSubscriptionResult)
     val either = ZuoraRestRequestMaker.convertResponseToCaseClass[Unit](response)
-    assert(either == \/-(()))
+    either should be(\/-(()))
   }
 
   it should "return a left[String] if the body of a successful http response has a zuora failed in it" in {

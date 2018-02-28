@@ -13,11 +13,11 @@ object ConfigLoad extends Logging {
 
   // if you are updating the config, it's hard to test it in advance of deployment
   // with this, you can upload the new config with a new name
-  val version = "2"
+  val version = "3"
 
   def load(stage: Stage): Try[String] = {
     logger.info(s"Attempting to load config in $stage")
-    val bucket = s"payment-failure-lambdas-private/${stage.value}"
+    val bucket = s"gu-reader-revenue-private/membership/payment-failure-lambdas/${stage.value}"
     val key = s"payment-failure-lambdas.private.v$version.json"
     val request = new GetObjectRequest(bucket, key)
     AwsS3.fetchString(request)
@@ -58,7 +58,6 @@ object aws {
     new SystemPropertiesCredentialsProvider,
     new ProfileCredentialsProvider(ProfileName),
     new InstanceProfileCredentialsProvider(false),
-    new EC2ContainerCredentialsProviderWrapper
-  )
+    new EC2ContainerCredentialsProviderWrapper)
 
 }

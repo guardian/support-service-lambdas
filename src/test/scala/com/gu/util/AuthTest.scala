@@ -7,24 +7,21 @@ import play.api.libs.json.{ JsError, JsSuccess, JsValue, Json }
 
 class AuthTest extends FlatSpec {
 
-  val trustedApiConfig = TrustedApiConfig("validUser", "correctPassword", "tenant123")
+  val trustedApiConfig = TrustedApiConfig("correctPassword", "tenant123")
 
   def generateInputEvent(apiClientId: String, apiToken: String): JsValue = {
 
     def constructQueryStrings(apiClientId: String, apiToken: String) = Json.obj(
       "apiClientId" -> apiClientId,
-      "apiToken" -> apiToken
-    )
+      "apiToken" -> apiToken)
     val headers = Json.obj(
-      "Content-Type" -> "text/xml"
-    )
+      "Content-Type" -> "text/xml")
     val sampleJson = Json.obj(
       "resource" -> "test-resource",
       "path" -> "/test-path",
       "httpMethod" -> "POST",
       "headers" -> headers,
-      "queryStringParameters" -> constructQueryStrings(apiClientId, apiToken)
-    )
+      "queryStringParameters" -> constructQueryStrings(apiClientId, apiToken))
     sampleJson
   }
 
@@ -33,8 +30,7 @@ class AuthTest extends FlatSpec {
       "resource" -> "test-resource",
       "path" -> "/test-path",
       "httpMethod" -> "POST",
-      "body" -> ""
-    )
+      "body" -> "")
     sampleJson.validate[ApiGatewayRequest] match {
       case JsError(e) => fail(s"couldn't parse with $e")
       case JsSuccess(req, _) =>
@@ -43,17 +39,12 @@ class AuthTest extends FlatSpec {
   }
 
   "credentialsAreValid" should "return true for correct credentials" in {
-    val requestAuth = Some(RequestAuth(apiClientId = "validUser", apiToken = "correctPassword"))
+    val requestAuth = Some(RequestAuth(apiToken = "correctPassword"))
     assert(credentialsAreValid(requestAuth, trustedApiConfig) == true)
   }
 
-  "credentialsAreValid" should "return false for an incorrect user" in {
-    val requestAuth = Some(RequestAuth(apiClientId = "invalidUser", apiToken = "correctPassword"))
-    assert(credentialsAreValid(requestAuth, trustedApiConfig) == false)
-  }
-
   "credentialsAreValid" should "return false for an incorrect password" in {
-    val requestAuth = Some(RequestAuth(apiClientId = "validUser", apiToken = "ndjashjkhajshs"))
+    val requestAuth = Some(RequestAuth(apiToken = "ndjashjkhajshs"))
     assert(credentialsAreValid(requestAuth, trustedApiConfig) == false)
   }
 

@@ -2,11 +2,15 @@ package com.gu.effects
 
 import com.gu.util.Stage
 import okhttp3.{ Request, Response }
-import org.joda.time.LocalDate
+import java.time.LocalDate
 
 import scala.util.Try
 
-case class RawEffects(response: Request => Response, stage: Stage, s3Load: Stage => Try[String], now: () => LocalDate)
+case class RawEffects(
+  response: Request => Response,
+  stage: Stage,
+  s3Load: Stage => Try[String],
+  now: () => LocalDate)
 
 object RawEffects {
 

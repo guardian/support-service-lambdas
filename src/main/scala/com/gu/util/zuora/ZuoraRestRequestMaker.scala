@@ -3,7 +3,6 @@ package com.gu.util.zuora
 import com.gu.util.apigateway.ApiGatewayResponse._
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.reader.Types._
-import com.gu.util.zuora.Zuora.ZuoraDeps
 import com.gu.util.zuora.ZuoraModels._
 import com.gu.util.zuora.ZuoraReaders._
 import com.gu.util.{ Logging, ZuoraRestConfig }
@@ -12,7 +11,6 @@ import play.api.libs.json._
 
 import scalaz.Scalaz._
 import scalaz.{ Reader, \/ }
-import scalaz.syntax.std.boolean._
 
 object ZuoraRestRequestMaker extends Logging {
 
@@ -26,11 +24,22 @@ object ZuoraRestRequestMaker extends Logging {
 
   }
 
+  def convertResponseToCaseClassNoSuccessField[T: Reads](response: Response): ApiResponse \/ T = {
+    for {
+      _ <- httpIsSuccessful(response)
+      bodyAsJson = Json.parse(response.body.string)
+      result <- toResult[T](bodyAsJson)
+    } yield result
+
+  }
+
   def httpIsSuccessful(response: Response): FailableOp[Unit] = {
     if (response.isSuccessful) {
       ().right
     } else {
-      logger.error(s"Request to Zuora was unsuccessful, the response was: \n $response")
+      val body = response.body.string
+      val truncated = body.take(500) + (if (body.length > 500) "..." else "")
+      logger.error(s"Request to Zuora was unsuccessful, the response was: \n $response\n$truncated")
       internalServerError("Request to Zuora was unsuccessful").left
     }
   }
@@ -71,9 +80,18 @@ object ZuoraRestRequestMaker extends Logging {
     Reader { zuoraDeps: ZuoraDeps =>
       val body = RequestBody.create(MediaType.parse("application/json"), Json.toJson(req).toString)
       val request = buildRequest(zuoraDeps.config)(path).put(body).build()
-      logger.info(s"Attempting to $path with the following command: $req")
+      logger.info(s"Attempting to PUT $path with the following command: $req")
       val response = zuoraDeps.response(request)
       convertResponseToCaseClass[RESP](response)
+    }.toEitherT
+
+  def post[REQ: Writes, RESP: Reads](req: REQ, path: String): WithDepsFailableOp[ZuoraDeps, RESP] =
+    Reader { zuoraDeps: ZuoraDeps =>
+      val body = RequestBody.create(MediaType.parse("application/json"), Json.toJson(req).toString)
+      val request = buildRequest(zuoraDeps.config)(path).post(body).build()
+      logger.info(s"Attempting to POST $path with the following command: $req")
+      val response = zuoraDeps.response(request)
+      convertResponseToCaseClassNoSuccessField[RESP](response)
     }.toEitherT
 
   def buildRequest(config: ZuoraRestConfig)(route: String): Request.Builder =

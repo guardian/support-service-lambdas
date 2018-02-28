@@ -1,15 +1,19 @@
 package com.gu
 
+import com.gu.TestingRawEffects.BasicResult
 import com.gu.effects.RawEffects
+import com.gu.stripeCustomerSourceUpdated.{ StripeDeps, StripeSignatureChecker }
 import com.gu.util.ETConfig.{ ETSendId, ETSendIds }
 import com.gu.util._
 import com.gu.util.apigateway.ApiGatewayHandler.HandlerDeps
 import com.gu.util.apigateway.ApiGatewayRequest
 import com.gu.util.reader.Types.{ FailableOp, WithDepsFailableOp, _ }
-import com.gu.util.zuora.Zuora.ZuoraDeps
-import com.gu.util.zuora.ZuoraModels.{ InvoiceItem, InvoiceTransactionSummary, ItemisedInvoice }
+import com.gu.util.zuora.ZuoraDeps
+import com.gu.util.zuora.ZuoraGetInvoiceTransactions.{ InvoiceItem, InvoiceTransactionSummary, ItemisedInvoice }
 import okhttp3._
-import org.joda.time.LocalDate
+import okhttp3.internal.Util.UTF_8
+import okio.Buffer
+import java.time.LocalDate
 import org.scalatest.Matchers
 import play.api.libs.json.Json
 
@@ -18,7 +22,7 @@ import scalaz.{ Reader, \/ }
 
 object TestData extends Matchers {
 
-  val today = new LocalDate(2016, 11, 21)
+  val today = LocalDate.of(2016, 11, 21)
   val accountId = "accountId"
   val invoiceItemA = InvoiceItem("invitem123", "A-S123", today, today.plusMonths(1), 49.21, "Non founder - annual", "Supporter")
   val invoiceItemB = InvoiceItem("invitem122", "A-S123", today, today.plusMonths(1), 0, "Friends", "Friend")
@@ -29,18 +33,23 @@ object TestData extends Matchers {
   val basicInvoiceTransactionSummary = InvoiceTransactionSummary(List(itemisedInvoice(49, List(invoiceItemA))))
   val weirdInvoiceTransactionSummary = InvoiceTransactionSummary(List(itemisedInvoice(0, List(invoiceItemA)), itemisedInvoice(49, List(invoiceItemB, invoiceItemA, invoiceItemC))))
 
-  val fakeApiConfig = TrustedApiConfig("validApiClientId", "validApiToken", "testEnvTenantId")
+  val fakeApiConfig = TrustedApiConfig("validApiToken", "testEnvTenantId")
   val fakeZuoraConfig = ZuoraRestConfig("https://ddd", "fakeUser", "fakePass")
   val fakeETSendIds = ETSendIds(ETSendId("11"), ETSendId("22"), ETSendId("33"), ETSendId("44"), ETSendId("can"))
   val fakeETConfig = ETConfig(etSendIDs = fakeETSendIds, "fakeClientId", "fakeClientSecret")
+  val fakeStripeConfig = StripeConfig(customerSourceUpdatedWebhook = StripeWebhook(StripeSecretKey("ukCustomerSourceUpdatedSecretKey"), StripeSecretKey("auCustomerSourceUpdatedStripeSecretKey")), true)
 
-  val fakeConfig = Config(Stage("DEV"), fakeApiConfig, zuoraRestConfig = ZuoraRestConfig("https://ddd", "e@f.com", "ggg"),
-    etConfig = ETConfig(etSendIDs = ETSendIds(ETSendId("11"), ETSendId("22"), ETSendId("33"), ETSendId("44"), ETSendId("can")), clientId = "jjj", clientSecret = "kkk"))
+  val fakeConfig = Config(
+    stage = Stage("DEV"),
+    trustedApiConfig = fakeApiConfig,
+    zuoraRestConfig = ZuoraRestConfig("https://ddd", "e@f.com", "ggg"),
+    etConfig = ETConfig(etSendIDs = ETSendIds(ETSendId("11"), ETSendId("22"), ETSendId("33"), ETSendId("44"), ETSendId("can")), clientId = "jjj", clientSecret = "kkk"),
+    stripeConfig = StripeConfig(customerSourceUpdatedWebhook = StripeWebhook(ukStripeSecretKey = StripeSecretKey("abc"), auStripeSecretKey = StripeSecretKey("def")), true))
 
   val missingCredentialsResponse = """{"statusCode":"401","headers":{"Content-Type":"application/json"},"body":"Credentials are missing or invalid"}"""
   val successfulResponse = """{"statusCode":"200","headers":{"Content-Type":"application/json"},"body":"Success"}"""
 
-  val codeConfig =
+  val codeConfig: String =
     """
       |{ "stage": "DEV",
       |  "trustedApiConfig": {
@@ -64,6 +73,12 @@ object TestData extends Matchers {
       |    },
       |    "clientId": "jjj",
       |    "clientSecret": "kkk"
+      |  },
+      |  "stripe": {
+      |     "customerSourceUpdatedWebhook": {
+      |       "api.key.secret": "abc",
+      |       "au-membership.key.secret": "def"
+      |     }
       |  }
       |}
     """.stripMargin
@@ -78,27 +93,48 @@ object TestData extends Matchers {
 
 }
 
+object TestingRawEffects {
+
+  case class BasicResult(method: String, path: String, body: String)
+
+}
+
 class TestingRawEffects(val isProd: Boolean = false, val defaultCode: Int = 1, responses: Map[String, (Int, String)] = Map()) {
 
   var result: List[Request] = Nil // !
 
   val stage = Stage(if (isProd) "PROD" else "DEV")
 
+  def requestsAttempted = result.map { request =>
+    val buffer = new Buffer()
+    Option(request.body()).foreach(_.writeTo(buffer))
+    val body = buffer.readString(UTF_8)
+    val url = request.url
+    BasicResult(request.method(), url.encodedPath(), body)
+  }
+
   val response: Request => Response = {
     req =>
       result = req :: result
       val (code, response) = responses.getOrElse(req.url().encodedPath(), (defaultCode, """{"success": true}"""))
       println(s"request for: ${req.url().encodedPath()} so returning $response")
-      new Response.Builder().request(req).protocol(Protocol.HTTP_1_1).code(code).body(ResponseBody.create(MediaType.parse("text/plain"), response)).build()
+      new Response.Builder()
+        .request(req)
+        .protocol(Protocol.HTTP_1_1)
+        .code(code)
+        .body(ResponseBody.create(MediaType.parse("text/plain"), response))
+        .message("message??")
+        .build()
   }
 
-  val rawEffects = RawEffects(response, stage, _ => Success(TestData.codeConfig), () => new LocalDate(2017, 11, 19))
+  val rawEffects = RawEffects(response, stage, _ => Success(TestData.codeConfig), () => LocalDate.of(2017, 11, 19))
 
   //  val fakeConfig = Config(stage, TrustedApiConfig("a", "b", "c"), zuoraRestConfig = ZuoraRestConfig("https://ddd", "e@f.com", "ggg"),
   //    etConfig = ETConfig(etSendIDs = ETSendIds(ETSendId("11"), ETSendId("22"), ETSendId("33"), ETSendId("44"), ETSendId("can")), clientId = "jjj", clientSecret = "kkk"))
 
   def handlerDeps(operation: Config => ApiGatewayRequest => FailableOp[Unit]) = HandlerDeps(() => Success(""), Stage("DEV"), _ => Success(TestData.fakeConfig), operation)
   val zuoraDeps = ZuoraDeps(response, TestData.fakeZuoraConfig)
+  val stripeDeps = StripeDeps(TestData.fakeStripeConfig, new StripeSignatureChecker)
 
 }
 

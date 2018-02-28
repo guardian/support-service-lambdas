@@ -1,8 +1,10 @@
 package com.gu.autoCancel
 
 import com.gu.util.apigateway.ApiGatewayResponse._
+import com.gu.util.zuora.ZuoraGetAccountSummary.{ AccountSummary, BasicAccountInfo, Invoice, SubscriptionSummary }
 import com.gu.util.zuora.ZuoraModels._
-import org.joda.time.LocalDate
+import com.gu.util.zuora.ZuoraQueryPaymentMethod.{ AccountId, PaymentMethodId }
+import java.time.LocalDate
 import org.scalatest._
 
 import scalaz.{ -\/, \/- }
@@ -11,7 +13,7 @@ class AutoCancelDataCollectionFilterTest extends FlatSpec {
 
   import AutoCancelDataCollectionFilter._
 
-  val basicInfo = BasicAccountInfo("id123", 11.99)
+  val basicInfo = BasicAccountInfo(AccountId("id123"), 11.99, PaymentMethodId("pmid"))
   val subscription = SubscriptionSummary(SubscriptionId("id123"), "A-S123", "Active")
   val twoSubscriptions = List(SubscriptionSummary(SubscriptionId("id123"), "A-S123", "Active"), SubscriptionSummary(SubscriptionId("id321"), "A-S321", "Active"))
   val inactiveSubscriptions = List(SubscriptionSummary(SubscriptionId("id456"), "A-S123", "Cancelled"), SubscriptionSummary(SubscriptionId("id789"), "A-S321", "Expired"))
