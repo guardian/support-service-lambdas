@@ -1,7 +1,7 @@
 package manualTest
 
 import com.gu.effects.RawEffects
-import com.gu.util.ETConfig.{ ETSendId, ETSendIds }
+import com.gu.util.ETConfig.ETSendIds
 import com.gu.util.exacttarget.EmailSendSteps.EmailSendStepsDeps
 import com.gu.util.exacttarget._
 import com.gu.util.{ Config, Stage }
@@ -31,11 +31,7 @@ object EmailClientSystemTest extends App {
           primaryKey = key, // must be unique otherwise the email won't arrive
           price = "49.0 GBP",
           serviceStartDate = "31 January 2016",
-          serviceEndDate = "31 January 2017"
-        )
-      )
-    )
-  )
+          serviceEndDate = "31 January 2017"))))
 
   def five(etSendIds: ETSendIds, product: String) =
     Seq(
@@ -43,8 +39,7 @@ object EmailClientSystemTest extends App {
       etSendIds.pf2 -> message(s"$product-pf2", PaymentId(s"paymentId$unique"), product),
       etSendIds.pf3 -> message(s"$product-pf3", PaymentId(s"paymentId$unique"), product),
       etSendIds.pf4 -> message(s"$product-pf4", PaymentId(s"paymentId$unique"), product),
-      etSendIds.cancelled -> message(s"$product-overdue", InvoiceId(s"invoiceId$unique"), product)
-    )
+      etSendIds.cancelled -> message(s"$product-overdue", InvoiceId(s"invoiceId$unique"), product))
 
   for {
     configAttempt <- Try {
@@ -61,16 +56,13 @@ object EmailClientSystemTest extends App {
     "Guardian Weekly Zone C",
     "Contributor",
     "Newspaper Voucher",
-    "Newspaper Delivery"
-  ).flatMap(product => five(etSendIds, product)).foreach {
-    case (etSendId, index) =>
-      val emailResult = EmailSendSteps(
-        deps
-      )(EmailRequest(
-        etSendId = etSendId,
-        message = index
-      ))
-      println(s"result for $etSendId:::::: $emailResult")
-  }
+    "Newspaper Delivery").flatMap(product => five(etSendIds, product)).foreach {
+      case (etSendId, index) =>
+        val emailResult = EmailSendSteps(
+          deps)(EmailRequest(
+          etSendId = etSendId,
+          message = index))
+        println(s"result for $etSendId:::::: $emailResult")
+    }
 
 }
