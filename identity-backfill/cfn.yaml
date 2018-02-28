@@ -20,10 +20,10 @@ Conditions:
   CreateProdMonitoring: !Equals [ !Ref Stage, PROD ]
 
 Resources:
-    ZuoraAutoCancelRole:
+    IdentityBackfillRole:
         Type: AWS::IAM::Role
         Properties:
-            RoleName: !Sub ZuoraAutoCancel-${Stage}
+            RoleName: !Sub IdentityBackfill-${Stage}
             AssumeRolePolicyDocument:
                 Statement:
                     - Effect: Allow
@@ -60,13 +60,13 @@ Resources:
                   Stage: !Ref Stage
             Role:
                 Fn::GetAtt:
-                - ZuoraAutoCancelRole
+                - "IdentityBackfillRole"
                 - Arn
             MemorySize: 1536
             Runtime: java8
             Timeout: 300
         DependsOn:
-        - ZuoraAutoCancelRole
+        - "IdentityBackfillRole"
 
     IdentityBackfillAPIPermission:
         Type: AWS::Lambda::Permission
@@ -116,11 +116,11 @@ Resources:
         Properties:
             Description: Stage for zuora-auto-cancel-api
             RestApiId: !Ref IdentityBackfillAPI
-            DeploymentId: !Ref ZuoraAutoCancelAPIDeployment
+            DeploymentId: !Ref IdentityBackfillAPIDeployment
             StageName: !Sub ${Stage}
         DependsOn: IdentityBackfillMethod
 
-    ZuoraAutoCancelAPIDeployment:
+    IdentityBackfillAPIDeployment:
         Type: AWS::ApiGateway::Deployment
         Properties:
             Description: Deploys zuora-auto-cancel-api into an environment/stage
