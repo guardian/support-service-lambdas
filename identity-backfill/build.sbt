@@ -1,6 +1,6 @@
 // "Any .sbt files in foo, say foo/build.sbt, will be merged with the build definition for the entire build, but scoped to the hello-foo project."
 // https://www.scala-sbt.org/0.13/docs/Multi-Project.html
-name := "identityBackfill"
+name := "identity-backfill"
 description:= "links subscriptions with identity accounts"
 
 scalaVersion := "2.12.4"
@@ -26,12 +26,12 @@ scalacOptions ++= Seq(
 
 scalacOptions += "-Ypartial-unification"
 
-assemblyJarName := "identityBackfill.jar"
+assemblyJarName := "identity-backfill.jar"
 riffRaffPackageType := assembly.value
 riffRaffUploadArtifactBucket := Option("riffraff-artifact")
 riffRaffUploadManifestBucket := Option("riffraff-builds")
 riffRaffManifestProjectName := "MemSub::Membership Admin::Identity Backfill"
-riffRaffArtifactResources += (file("identityBackfill/cfn.yaml"), "cfn.yaml")
+riffRaffArtifactResources += (file("identity-backfill/cfn.yaml"), "cfn.yaml")
 
 addCommandAlias("dist", ";riffRaffArtifact")
 

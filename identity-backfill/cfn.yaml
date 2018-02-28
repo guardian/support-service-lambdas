@@ -53,7 +53,7 @@ Resources:
                 !Sub identity-backfill-${Stage}
             Code:
                 S3Bucket: zuora-auto-cancel-dist
-                S3Key: !Sub membership/${Stage}/zuora-auto-cancel/identityBackfill.jar
+                S3Key: !Sub membership/${Stage}/zuora-auto-cancel/identity-backfill.jar
             Handler: com.gu.identity_backfill.Handler::apply
             Environment:
                 Variables:

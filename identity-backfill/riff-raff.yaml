@@ -6,14 +6,15 @@ deployments:
 
   identity-backfill-stack:
     type: cloud-formation
+    app: identity-backfill
     parameters:
-      templatePath: identityBackfill/identity-backfill.yaml
+      templatePath: identity-backfill/identity-backfill.yaml
 
 
   identity-backfill:
     type: aws-lambda
     parameters:
-      fileName: identityBackfill.jar
+      fileName: identity-backfill.jar
       bucket: zuora-auto-cancel-dist
       prefixStack: false
       functionNames:
