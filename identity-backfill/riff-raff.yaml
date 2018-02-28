@@ -8,7 +8,7 @@ deployments:
     type: cloud-formation
     app: identity-backfill
     parameters:
-      templatePath: identity-backfill/identity-backfill.yaml
+      templatePath: identity-backfill/cfn.yaml
 
 
   identity-backfill:
