@@ -4,11 +4,11 @@ regions:
 - eu-west-1
 deployments:
 
-  identity-backfill-stack:
+  cfn:
     type: cloud-formation
     app: identity-backfill
     parameters:
-      templatePath: identity-backfill/cfn.yaml
+      templatePath: cfn.yaml
 
 
   identity-backfill:
@@ -19,4 +19,4 @@ deployments:
       prefixStack: false
       functionNames:
       - identity-backfill-
-    dependencies: [identity-backfill-stack]
+    dependencies: [cfn]
