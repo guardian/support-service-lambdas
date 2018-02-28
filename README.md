@@ -11,7 +11,7 @@ Zuora Callout > AWS CloudFront* > AWS API Gateway (Lambda Proxy Integration) > A
 Used to trigger emails due to failed payment events in Zuora.
 
 The full workflow is currently:
-Zuora Callout > AWS CloudFront*> AWS API Gateway (Lambda Proxy Integration) > AWS Lambda > Exact Target / Marketing Cloud (which actually sends the emails).
+Zuora Callout > AWS CloudFront* > AWS API Gateway (Lambda Proxy Integration) > AWS Lambda > Exact Target / Marketing Cloud (which actually sends the emails).
 
 **stripeCustomerSourceUpdated**: 
 Used to automatically update a customer's payment method in Zuora so that the customer doesn't have to update their card details manually. 
