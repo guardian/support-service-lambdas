@@ -4,13 +4,11 @@ regions:
 - eu-west-1
 deployments:
 
-# can't deploy at present due to Requires capabilities : [CAPABILITY_NAMED_IAM] but it seems it only gets
-# normal IAM capability https://github.com/guardian/riff-raff/blob/8af9b5c2e2052146c16922d0b2bfceff10c7c90c/magenta-lib/src/main/scala/magenta/tasks/AWS.scala#L314
-#  cfn:
-#    type: cloud-formation
-#    app: identity-backfill
-#    parameters:
-#      templatePath: cfn.yaml
+  cfn:
+    type: cloud-formation
+    app: identity-backfill
+    parameters:
+      templatePath: cfn.yaml
 
 
   identity-backfill:
@@ -21,4 +19,4 @@ deployments:
       prefixStack: false
       functionNames:
       - identity-backfill-
-#    dependencies: [cfn]
+    dependencies: [cfn]

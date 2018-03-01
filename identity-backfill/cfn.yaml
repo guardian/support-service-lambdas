@@ -9,21 +9,21 @@ Parameters:
             - PROD
             - CODE
         Default: CODE
-    ApiName:
-        Type: String
-        AllowedValues:
-            - identity-backfill-api-CODE
-            - identity-backfill-api-PROD
-        Default: identity-backfill-api-CODE
 
 Conditions:
   CreateProdMonitoring: !Equals [ !Ref Stage, PROD ]
+
+Mappings:
+    StageMap:
+        CODE:
+            ApiName: identity-backfill-api-CODE
+        PROD:
+            ApiName: identity-backfill-api-PROD
 
 Resources:
     IdentityBackfillRole:
         Type: AWS::IAM::Role
         Properties:
-            RoleName: !Sub IdentityBackfill-${Stage}
             AssumeRolePolicyDocument:
                 Statement:
                     - Effect: Allow
@@ -43,7 +43,7 @@ Resources:
                             - logs:CreateLogStream
                             - logs:PutLogEvents
                             - lambda:InvokeFunction
-                            Resource: "*"
+                            Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/identity-backfill-${Stage}:log-stream:*"
 
     IdentityBackfillLambda:
         Type: AWS::Lambda::Function
@@ -88,6 +88,7 @@ Resources:
         Type: AWS::ApiGateway::Method
         Properties:
             AuthorizationType: NONE
+            ApiKeyRequired: true
             RestApiId: !Ref IdentityBackfillAPI
             ResourceId: !Ref IdentityBackfillProxyResource
             HttpMethod: POST
@@ -109,7 +110,7 @@ Resources:
         Type: "AWS::ApiGateway::RestApi"
         Properties:
             Description: we call this ourselves to trigger zuora backfill of identity
-            Name: !Sub ${ApiName}
+            Name: !FindInMap [StageMap, !Ref Stage, ApiName]
 
     IdentityBackfillAPIStage:
         Type: AWS::ApiGateway::Stage
@@ -127,17 +128,54 @@ Resources:
             RestApiId: !Ref IdentityBackfillAPI
         DependsOn: IdentityBackfillMethod
 
+    IdentityBackfillAPIKey:
+      Type: AWS::ApiGateway::ApiKey
+      Properties:
+        Description: Key required to call identity backfill API
+        Enabled: true
+        Name: !Sub identity-backfill-api-key-${Stage}
+        StageKeys:
+          - RestApiId: !Ref IdentityBackfillAPI
+            StageName: !Sub ${Stage}
+      DependsOn:
+      - IdentityBackfillAPI
+      - IdentityBackfillAPIStage
+
+    IdentityBackfillUsagePlan:
+      Type: "AWS::ApiGateway::UsagePlan"
+      Properties:
+        UsagePlanName: !Sub identity-backfill-api-usage-plan-${Stage}
+        ApiStages:
+        - ApiId: !Ref IdentityBackfillAPI
+          Stage: !Ref IdentityBackfillAPIStage
+      DependsOn:
+      - IdentityBackfillAPI
+      - IdentityBackfillAPIStage
+
+    IdentityBackfillUsagePlanKey:
+      Type: "AWS::ApiGateway::UsagePlanKey"
+      Properties:
+        KeyId: !Ref IdentityBackfillAPIKey
+        KeyType: API_KEY
+        UsagePlanId: !Ref IdentityBackfillUsagePlan
+      DependsOn:
+      - IdentityBackfillAPIKey
+      - IdentityBackfillUsagePlan
+
     5xxApiAlarm:
       Type: AWS::CloudWatch::Alarm
       Condition: CreateProdMonitoring
       Properties:
         AlarmActions:
         - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:subscriptions_dev
-        AlarmName: !Sub 5XX rate from ${ApiName}
+        AlarmName:
+          !Sub
+            - 5XX rate from ${ApiName}
+            - { ApiName: !FindInMap [StageMap, !Ref Stage, ApiName] }
         ComparisonOperator: GreaterThanThreshold
         Dimensions:
           - Name: ApiName
-            Value: !Sub ${ApiName}
+            Value: !FindInMap [StageMap, !Ref Stage, ApiName]
           - Name: Stage
             Value: !Sub ${Stage}
         EvaluationPeriods: 1
@@ -153,11 +191,14 @@ Resources:
       Properties:
         AlarmActions:
         - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:subscriptions_dev
-        AlarmName: !Sub 4XX rate from ${ApiName}
+        AlarmName:
+          !Sub
+           - 4XX rate from ${ApiName}
+           - { ApiName: !FindInMap [StageMap, !Ref Stage, ApiName] }
         ComparisonOperator: GreaterThanThreshold
         Dimensions:
           - Name: ApiName
-            Value: !Sub ${ApiName}
+            Value: !FindInMap [StageMap, !Ref Stage, ApiName]
           - Name: Stage
             Value: !Sub ${Stage}
         EvaluationPeriods: 1
