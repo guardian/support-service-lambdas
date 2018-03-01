@@ -1,0 +1,22 @@
+stacks:
+- membership
+regions:
+- eu-west-1
+deployments:
+
+  cfn:
+    type: cloud-formation
+    app: identity-backfill
+    parameters:
+      templatePath: cfn.yaml
+
+
+  identity-backfill:
+    type: aws-lambda
+    parameters:
+      fileName: identity-backfill.jar
+      bucket: zuora-auto-cancel-dist
+      prefixStack: false
+      functionNames:
+      - identity-backfill-
+    dependencies: [cfn]
