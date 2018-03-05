@@ -1,8 +1,10 @@
-package com.gu.util.zuora
+package com.gu.stripeCustomerSourceUpdated.zuora
 
 import com.gu.stripeCustomerSourceUpdated._
+import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types.WithDepsFailableOp
-import com.gu.util.zuora.ZuoraQueryPaymentMethod.{ AccountId, NumConsecutiveFailures, PaymentMethodId }
+import com.gu.util.zuora.ZuoraAccount.{ AccountId, NumConsecutiveFailures, PaymentMethodId }
+import com.gu.util.zuora.ZuoraDeps
 import com.gu.util.zuora.ZuoraRestRequestMaker.post
 import play.api.libs.json.{ JsPath, Json, Reads, Writes }
 
@@ -48,6 +50,6 @@ object CreatePaymentMethod {
   case class CreatePaymentMethodResult(id: PaymentMethodId)
 
   def createPaymentMethod(request: CreateStripePaymentMethod): WithDepsFailableOp[ZuoraDeps, CreatePaymentMethodResult] =
-    post[CreateStripePaymentMethod, CreatePaymentMethodResult](request, s"object/payment-method")
+    post[CreateStripePaymentMethod, CreatePaymentMethodResult](request, s"object/payment-method").leftMap(ApiGatewayResponse.fromClientFail)
 
 }

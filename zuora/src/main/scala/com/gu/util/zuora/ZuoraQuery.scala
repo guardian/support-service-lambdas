@@ -1,6 +1,6 @@
 package com.gu.util.zuora
 
-import com.gu.util.reader.Types.WithDepsFailableOp
+import com.gu.util.zuora.internal.Types.WithDepsClientFailableOp
 import com.gu.util.zuora.ZuoraRestRequestMaker.post
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
@@ -29,7 +29,7 @@ object ZuoraQuery {
   implicit val wQueryMoreReq: Writes[QueryMoreReq] = Json.writes[QueryMoreReq]
 
   // https://www.zuora.com/developer/api-reference/#operation/Action_POSTquery
-  def query[QUERYRECORD: Reads](query: Query): WithDepsFailableOp[ZuoraDeps, QueryResult[QUERYRECORD]] =
+  def query[QUERYRECORD: Reads](query: Query): WithDepsClientFailableOp[ZuoraDeps, QueryResult[QUERYRECORD]] =
     post(query, s"action/query")
 
 }

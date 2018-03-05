@@ -11,6 +11,7 @@ import com.gu.util.exacttarget.EmailSendSteps.EmailSendStepsDeps
 import com.gu.util.exacttarget.{ EmailRequest, EmailSendSteps }
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.ZuoraGetInvoiceTransactions.InvoiceTransactionSummary
+import com.gu.util.zuora.internal.Types.ClientFailableOp
 import com.gu.util.zuora.{ ZuoraDeps, ZuoraGetInvoiceTransactions }
 import okhttp3.{ Request, Response }
 import play.api.libs.json.Json
@@ -63,7 +64,7 @@ object ZuoraEmailSteps {
 
   def sendEmailRegardingAccount(deps: ZuoraEmailStepsDeps)(accountId: String, toMessage: PaymentFailureInformation => EmailRequest): FailableOp[Unit] = {
     for {
-      invoiceTransactionSummary <- deps.getInvoiceTransactions(accountId)
+      invoiceTransactionSummary <- deps.getInvoiceTransactions(accountId).leftMap(ApiGatewayResponse.fromClientFail)
       paymentInformation <- GetPaymentData(accountId)(invoiceTransactionSummary)
       message = toMessage(paymentInformation)
       _ <- deps.sendEmail(message).leftMap(resp => resp.copy(body = s"email not sent for account ${accountId}"))
@@ -80,6 +81,6 @@ object ZuoraEmailSteps {
 
   case class ZuoraEmailStepsDeps(
     sendEmail: EmailRequest => FailableOp[Unit],
-    getInvoiceTransactions: String => FailableOp[InvoiceTransactionSummary])
+    getInvoiceTransactions: String => ClientFailableOp[InvoiceTransactionSummary])
 
 }

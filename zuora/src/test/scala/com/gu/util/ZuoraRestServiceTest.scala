@@ -1,10 +1,10 @@
 package com.gu.util
 
-import com.gu.util.apigateway.ApiGatewayResponse._
+import com.gu.util.zuora.ZuoraAccount.{ AccountId, PaymentMethodId }
 import com.gu.util.zuora.ZuoraGetAccountSummary.BasicAccountInfo
-import com.gu.util.zuora.ZuoraQueryPaymentMethod.{ AccountId, PaymentMethodId }
 import com.gu.util.zuora.ZuoraReaders._
-import com.gu.util.zuora.ZuoraRestRequestMaker
+import com.gu.util.zuora.internal.ClientFail
+import com.gu.util.zuora.{ ZuoraRestConfig, ZuoraRestRequestMaker }
 import okhttp3._
 import org.scalatest.Matchers._
 import org.scalatest._
@@ -73,6 +73,8 @@ class ZuoraRestServiceTest extends AsyncFlatSpec {
       .build()
     response
   }
+
+  def internalServerError(message: String) = ClientFail("500", message)
 
   "convertResponseToCaseClass" should "return a left[String] for an unsuccessful response code" in {
     val response = constructTestResponse(500)

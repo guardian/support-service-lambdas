@@ -5,6 +5,7 @@ import java.io.{ OutputStream, OutputStreamWriter }
 import com.gu.util.Logging
 import com.gu.util.apigateway.ResponseModels.{ ApiResponse, Headers }
 import com.gu.util.apigateway.ResponseWriters._
+import com.gu.util.zuora.internal.ClientFail
 import play.api.libs.json.{ Json, Writes }
 
 object ResponseModels {
@@ -40,6 +41,9 @@ object ApiGatewayResponse extends Logging {
     writer.write(Json.stringify(jsonResponse))
     writer.close()
   }
+
+  def fromClientFail(clientFail: ClientFail): ApiResponse =
+    ApiResponse(clientFail.statusCode, new Headers, s"zuora client fail: ${clientFail.message}")
 
   val successfulExecution = ApiResponse("200", new Headers, "Success")
   def noActionRequired(reason: String) = ApiResponse("200", new Headers, s"Processing is not required: $reason")

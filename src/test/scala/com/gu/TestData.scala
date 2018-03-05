@@ -1,5 +1,7 @@
 package com.gu
 
+import java.time.LocalDate
+
 import com.gu.TestingRawEffects.BasicResult
 import com.gu.effects.RawEffects
 import com.gu.stripeCustomerSourceUpdated.{ StripeDeps, StripeSignatureChecker }
@@ -7,15 +9,17 @@ import com.gu.util.ETConfig.{ ETSendId, ETSendIds }
 import com.gu.util._
 import com.gu.util.apigateway.ApiGatewayHandler.HandlerDeps
 import com.gu.util.apigateway.ApiGatewayRequest
-import com.gu.util.reader.Types.{ FailableOp, WithDepsFailableOp, _ }
-import com.gu.util.zuora.ZuoraDeps
+import com.gu.util.reader.Types.FailableOp
 import com.gu.util.zuora.ZuoraGetInvoiceTransactions.{ InvoiceItem, InvoiceTransactionSummary, ItemisedInvoice }
+import com.gu.util.zuora.internal.Types.{ ClientFailableOp, WithDepsClientFailableOp }
+import com.gu.util.zuora.{ ZuoraDeps, ZuoraRestConfig }
 import okhttp3._
 import okhttp3.internal.Util.UTF_8
 import okio.Buffer
-import java.time.LocalDate
 import org.scalatest.Matchers
 import play.api.libs.json.Json
+
+import com.gu.util.zuora.internal.Types._
 
 import scala.util.Success
 import scalaz.{ Reader, \/ }
@@ -141,19 +145,15 @@ class TestingRawEffects(val isProd: Boolean = false, val defaultCode: Int = 1, r
 object WithDependenciesFailableOp {
 
   // if we have a failable op in a for comprehension, this call sits at the end of the line to massage the type
-  implicit class FailableOpOps[A](failableOp: FailableOp[A]) {
+  implicit class FailableOpOps[A](failableOp: ClientFailableOp[A]) {
 
-    def toEitherTPureReader[T]: WithDepsFailableOp[T, A] =
-      Reader[T, FailableOp[A]]((_: T) => failableOp).toEitherT
+    def toEitherTPureReader[T]: WithDepsClientFailableOp[T, A] =
+      Reader[T, ClientFailableOp[A]]((_: T) => failableOp).toEitherT
 
   }
 
   // lifts any plain value all the way in, usually useful in tests
-  def liftT[R, T](value: R): WithDepsFailableOp[T, R] =
+  def liftT[R, T](value: R): WithDepsClientFailableOp[T, R] =
     \/.right(value).toEitherTPureReader[T]
 
-  // lifts any plain value all the way in, usually useful in tests
-  def liftR[R, T](value: R): Reader[T, FailableOp[R]] =
-    //\/.right(value).toReader[T]
-    Reader[T, FailableOp[R]]((_: T) => \/.right(value))
 }

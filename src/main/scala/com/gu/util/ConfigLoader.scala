@@ -1,27 +1,16 @@
 package com.gu.util
 
 import com.gu.util.ETConfig.ETSendIds
+import com.gu.util.zuora.ZuoraRestConfig
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
 import scala.util.{ Failure, Success, Try }
 
-case class ZuoraRestConfig(
-  baseUrl: String,
-  username: String,
-  password: String)
-
 case class ETConfig(
   etSendIDs: ETSendIds,
   clientId: String,
   clientSecret: String)
-
-object ZuoraRestConfig {
-  implicit val zuoraConfigReads: Reads[ZuoraRestConfig] = (
-    (JsPath \ "baseUrl").read[String] and
-    (JsPath \ "username").read[String] and
-    (JsPath \ "password").read[String])(ZuoraRestConfig.apply _)
-}
 
 object ETConfig {
 
@@ -94,6 +83,11 @@ case class Stage(value: String) extends AnyVal {
 }
 
 object Config extends Logging {
+
+  implicit val zuoraConfigReads: Reads[ZuoraRestConfig] = (
+    (JsPath \ "baseUrl").read[String] and
+    (JsPath \ "username").read[String] and
+    (JsPath \ "password").read[String])(ZuoraRestConfig.apply _)
 
   implicit val configReads: Reads[Config] = (
     (JsPath \ "stage").read[String].map(Stage.apply) and
