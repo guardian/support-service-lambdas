@@ -5,6 +5,26 @@ import play.api.libs.json._
 
 import scala.util.Try
 
+case class BillingDetails(
+  address1: Option[String],
+  address2: Option[String],
+  postCode: Option[String],
+  city: Option[String],
+  state: Option[String],
+  Country: Option[String])
+
+object BillingDetails {
+
+  implicit val jf: Reads[BillingDetails] = {
+    (
+      (JsPath \ "address1").readNullable[String] and
+      (JsPath \ "address2").readNullable[String] and
+      (JsPath \ "postalCode").readNullable[String] and
+      (JsPath \ "city").readNullable[String] and
+      (JsPath \ "state").readNullable[String] and
+      (JsPath \ "country").readNullable[String]).apply(BillingDetails.apply _)
+  }
+}
 case class PaymentFailureCallout(
   accountId: String,
   email: String,
@@ -17,7 +37,8 @@ case class PaymentFailureCallout(
   creditCardExpirationYear: String,
   paymentId: String,
   currency: String,
-  tenantId: String)
+  tenantId: String,
+  billingDetails: BillingDetails)
 
 object PaymentFailureCallout {
 
@@ -34,6 +55,7 @@ object PaymentFailureCallout {
       (JsPath \ "creditCardExpirationYear").read[String] and
       (JsPath \ "paymentId").read[String] and
       (JsPath \ "currency").read[String] and
-      (JsPath \ "tenantId").read[String]).apply(PaymentFailureCallout.apply _)
+      (JsPath \ "tenantId").read[String] and
+      (JsPath).read[BillingDetails]).apply(PaymentFailureCallout.apply _)
   }
 }

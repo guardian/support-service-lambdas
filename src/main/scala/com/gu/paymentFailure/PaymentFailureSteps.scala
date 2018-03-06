@@ -22,7 +22,7 @@ import scalaz.{ -\/, \/- }
 object PaymentFailureSteps extends Logging {
 
   def loggableData(callout: PaymentFailureCallout) = {
-    s"accountId: ${callout.accountId}, paymentId: ${callout.paymentId}, failureNumber: ${callout.failureNumber}, paymentMethodType: ${callout.paymentMethodType}, currency: ${callout.currency}"
+    s"accountId: ${callout.accountId}, paymentId: ${callout.paymentId}, failureNumber: ${callout.failureNumber}, paymentMethodType: ${callout.paymentMethodType}, currency: ${callout.currency}, billingDetails: ${callout.billingDetails}"
   }
 
   def apply(deps: PFDeps)(apiGatewayRequest: ApiGatewayRequest): FailableOp[Unit] = {
