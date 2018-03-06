@@ -2,8 +2,9 @@ package com.gu.stripeCustomerSourceUpdated
 
 import com.gu.TestingRawEffects
 import com.gu.TestingRawEffects.BasicResult
+import com.gu.stripeCustomerSourceUpdated.zuora.ZuoraQueryPaymentMethod.PaymentMethodFields
 import com.gu.util.apigateway.{ ApiGatewayRequest, ApiGatewayResponse }
-import com.gu.util.zuora.ZuoraQueryPaymentMethod.{ AccountId, NumConsecutiveFailures, PaymentMethodFields, PaymentMethodId }
+import com.gu.util.zuora.ZuoraAccount.{ AccountId, NumConsecutiveFailures, PaymentMethodId }
 import org.scalatest.{ FlatSpec, Matchers }
 
 import scalaz.{ -\/, \/- }

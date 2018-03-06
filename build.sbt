@@ -1,34 +1,48 @@
 name := "zuora-auto-cancel"
 description:= "Handles auto-cancellations for membership and subscriptions"
 
-scalaVersion := "2.12.4"
-version      := "0.0.1"
-organization := "com.gu"
+val scalaSettings = Seq(
+  scalaVersion := "2.12.4",
+  version      := "0.0.1",
+  organization := "com.gu",
+  scalacOptions ++= Seq(
+    "-deprecation",
+    "-encoding", "UTF-8",
+    "-feature",
+    "-target:jvm-1.8",
+    "-language:existentials",
+    "-language:higherKinds",
+    "-language:implicitConversions",
+    "-unchecked",
+    "-Xfatal-warnings",
+    "-Xlint",
+    "-Yno-adapted-args",
+    "-Ywarn-dead-code",
+    "-Ywarn-numeric-widen",
+    "-Ywarn-value-discard"
+  )
+)
 
-scalacOptions ++= Seq(
-  "-deprecation",
-  "-encoding", "UTF-8",
-  "-feature",
-  "-target:jvm-1.8",
-  "-language:existentials",
-  "-language:higherKinds",
-  "-language:implicitConversions",
-  "-unchecked",
-  "-Xfatal-warnings",
-  "-Xlint",
-  "-Yno-adapted-args",
-  "-Ywarn-dead-code",
-  "-Ywarn-numeric-widen",
-  "-Ywarn-value-discard"
+lazy val zuora = project.settings(scalaSettings).settings(
+  libraryDependencies ++= Seq(
+    "com.squareup.okhttp3" % "okhttp" % "3.9.1",
+    "com.amazonaws" % "aws-lambda-java-log4j" % "1.0.0",
+    "org.scalaz" %% "scalaz-core" % "7.2.18",
+    "com.typesafe.play" %% "play-json" % "2.6.8",
+    "org.scalatest" %% "scalatest" % "3.0.1" % "test"
+  )
 )
 
 // currently the original code is lying in the root, in due course we need to make three separate sub projects for these original lambdas
 // they should produce their own self contained jar to reduce the artifact size and startup time.  Any shared code can be
 // a set of projects that is "dependsOn(..)" by the sharing projects.  Don't be afraid to restructure things to keep the code nice!
-lazy val root = (project in file(".")).enablePlugins(RiffRaffArtifact).aggregate(`identity-backfill`)
+lazy val root = (project in file(".")).settings(scalaSettings).enablePlugins(RiffRaffArtifact).aggregate(
+  `identity-backfill`,
+  zuora
+).dependsOn(zuora)
 
-lazy val `identity-backfill` = project // when using the "project identity-backfill" command it uses the lazy val name
-  .enablePlugins(RiffRaffArtifact)
+lazy val `identity-backfill` = project.settings(scalaSettings) // when using the "project identity-backfill" command it uses the lazy val name
+  .enablePlugins(RiffRaffArtifact).dependsOn(zuora)
 
 assemblyJarName := "zuora-auto-cancel.jar"
 riffRaffPackageType := assembly.value

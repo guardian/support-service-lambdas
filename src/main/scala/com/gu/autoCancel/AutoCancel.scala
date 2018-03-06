@@ -6,6 +6,8 @@ import com.gu.util.zuora.ZuoraModels.SubscriptionId
 import com.gu.util.zuora._
 import java.time.LocalDate
 
+import com.gu.util.apigateway.ApiGatewayResponse
+
 object AutoCancel extends Logging {
 
   case class AutoCancelRequest(accountId: String, subToCancel: SubscriptionId, cancellationDate: LocalDate)
@@ -18,6 +20,6 @@ object AutoCancel extends Logging {
       _ <- ZuoraCancelSubscription(subToCancel, cancellationDate).withLogging("cancelSubscription")
       _ <- ZuoraDisableAutoPay(accountId).withLogging("disableAutoPay")
     } yield ()
-    zuoraOp.run.run(zuoraDeps)
+    zuoraOp.leftMap(ApiGatewayResponse.fromClientFail).run.run(zuoraDeps)
   }
 }

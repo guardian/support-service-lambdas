@@ -1,9 +1,10 @@
 package com.gu.util
 
 import com.gu.TestData
-import com.gu.util.ETConfig.{ETSendId, ETSendIds}
-import org.scalatest.{FlatSpec, Matchers}
-import play.api.libs.json.{JsSuccess, Json}
+import com.gu.util.ETConfig.{ ETSendId, ETSendIds }
+import com.gu.util.zuora.ZuoraRestConfig
+import org.scalatest.{ FlatSpec, Matchers }
+import play.api.libs.json.{ JsSuccess, Json }
 
 import scala.util.Success
 

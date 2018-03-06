@@ -1,15 +1,20 @@
 package com.gu.util.zuora
 
-import com.gu.util.ZuoraRestConfig
-import com.gu.util.reader.Types.WithDepsFailableOp
+import com.gu.util.zuora.internal.Types._
 import com.gu.util.zuora.ZuoraModels._
-import com.gu.util.zuora.ZuoraQueryPaymentMethod.{ AccountId, PaymentMethodId }
+import com.gu.util.zuora.ZuoraAccount.{ AccountId, PaymentMethodId }
 import com.gu.util.zuora.ZuoraReaders._
 import com.gu.util.zuora.ZuoraRestRequestMaker._
 import okhttp3.{ Request, Response }
 import java.time.LocalDate
+
 import play.api.libs.functional.syntax._
 import play.api.libs.json.{ JsPath, Json, Reads, Writes }
+
+case class ZuoraRestConfig(
+  baseUrl: String,
+  username: String,
+  password: String)
 
 case class ZuoraDeps(response: Request => Response, config: ZuoraRestConfig)
 
@@ -44,7 +49,7 @@ object ZuoraGetAccountSummary {
     (JsPath \ "subscriptions").read[List[SubscriptionSummary]] and
     (JsPath \ "invoices").read[List[Invoice]])(AccountSummary.apply _)
 
-  def apply(accountId: String): WithDepsFailableOp[ZuoraDeps, AccountSummary] =
+  def apply(accountId: String): WithDepsClientFailableOp[ZuoraDeps, AccountSummary] =
     get[AccountSummary](s"accounts/$accountId/summary")
 
 }
@@ -78,7 +83,7 @@ object ZuoraGetInvoiceTransactions {
       invoices => InvoiceTransactionSummary(invoices)
     }
 
-  def apply(accountId: String): WithDepsFailableOp[ZuoraDeps, InvoiceTransactionSummary] =
+  def apply(accountId: String): WithDepsClientFailableOp[ZuoraDeps, InvoiceTransactionSummary] =
     get[InvoiceTransactionSummary](s"transactions/invoices/accounts/$accountId")
 
 }
@@ -94,7 +99,7 @@ object ZuoraCancelSubscription {
       "invoiceCollect" -> false)
   }
 
-  def apply(subscription: SubscriptionId, cancellationDate: LocalDate): WithDepsFailableOp[ZuoraDeps, Unit] =
+  def apply(subscription: SubscriptionId, cancellationDate: LocalDate): WithDepsClientFailableOp[ZuoraDeps, Unit] =
     put(SubscriptionCancellation(cancellationDate), s"subscriptions/${subscription.id}/cancel")
 
 }
@@ -108,7 +113,7 @@ object ZuoraUpdateCancellationReason {
       "CancellationReason__c" -> subscriptionUpdate.cancellationReason)
   }
 
-  def apply(subscription: SubscriptionId): WithDepsFailableOp[ZuoraDeps, Unit] =
+  def apply(subscription: SubscriptionId): WithDepsClientFailableOp[ZuoraDeps, Unit] =
     put(SubscriptionUpdate("System AutoCancel"), s"subscriptions/${subscription.id}")
 
 }
@@ -122,7 +127,7 @@ object ZuoraDisableAutoPay {
       "autoPay" -> accountUpdate.autoPay)
   }
 
-  def apply(accountId: String): WithDepsFailableOp[ZuoraDeps, Unit] =
+  def apply(accountId: String): WithDepsClientFailableOp[ZuoraDeps, Unit] =
     put(AccountUpdate(autoPay = false), s"accounts/$accountId")
 
 }
