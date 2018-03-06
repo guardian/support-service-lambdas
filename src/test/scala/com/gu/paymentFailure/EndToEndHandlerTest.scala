@@ -28,9 +28,39 @@ class EndToEndHandlerTest extends FlatSpec with Matchers {
       buffer.readString(UTF_8)
     }
 
-    config.result.map(req => (req.method, req.url.encodedPath) -> Option(req.body).map(body)).toMap
-      .get(("POST", "/messaging/v1/messageDefinitionSends/111/send")) should be(
-        Some(Some(EndToEndData.expectedEmailSend))) // TODO check the body too
+    val actualResult = config.result.map(req => (req.method, req.url.encodedPath) -> Option(req.body).map(body)).toMap.get(("POST", "/messaging/v1/messageDefinitionSends/111/send")).get.get
+
+    actualResult jsonMatches EndToEndData.expectedEmailSend // TODO check the body too
+
+    val responseString = new String(os.toByteArray(), "UTF-8")
+
+    val expectedResponse =
+      s"""
+         |{"statusCode":"200","headers":{"Content-Type":"application/json"},"body":"Success"}
+         |""".stripMargin
+    responseString jsonMatches expectedResponse
+  }
+
+  it should "manage an end to end call with billing details" in {
+
+    val stream = new ByteArrayInputStream(EndToEndData.zuoraCalloutJsonWithBillingDetails.getBytes(java.nio.charset.StandardCharsets.UTF_8))
+    val os = new ByteArrayOutputStream()
+    val config = new TestingRawEffects(false, 200, EndToEndData.responses)
+    val effects = config.rawEffects
+    val deps = Lambda.default(effects)
+    //execute
+    deps.handler(stream, os, null)
+
+    //verify
+    def body(b: RequestBody): String = {
+      val buffer = new Buffer()
+      b.writeTo(buffer)
+      buffer.readString(UTF_8)
+    }
+
+    val actualResult = config.result.map(req => (req.method, req.url.encodedPath) -> Option(req.body).map(body)).toMap.get(("POST", "/messaging/v1/messageDefinitionSends/111/send")).get.get
+
+    actualResult jsonMatches EndToEndData.expectedEmailSendWithBillingDetails
 
     val responseString = new String(os.toByteArray(), "UTF-8")
 
@@ -52,6 +82,8 @@ object EndToEndData {
 
   val expectedEmailSend =
     """{"To":{"Address":"john.duffell@guardian.co.uk","SubscriberKey":"john.duffell@guardian.co.uk","ContactAttributes":{"SubscriberAttributes":{"subscriber_id":"A-S00071536","product":"Supporter","payment_method":"CreditCardReferenceTransaction","card_type":"Visa","card_expiry_date":"12/2019","first_name":"eSAFaBwm4WJZNg5xhIc","last_name":"eSAFaBwm4WJZNg5xhIc","paymentId":"2c92c0f95fc912eb015fcb2a481720e6","price":"$49.00","serviceStartDate":"17 November 2017","serviceEndDate":"16 November 2018"}}}}"""
+  val expectedEmailSendWithBillingDetails =
+    """{"To":{"Address":"john.duffell@guardian.co.uk","SubscriberKey":"john.duffell@guardian.co.uk","ContactAttributes":{"SubscriberAttributes":{"subscriber_id":"A-S00071536","product":"Supporter","payment_method":"CreditCardReferenceTransaction","card_type":"Visa","card_expiry_date":"12/2019","first_name":"eSAFaBwm4WJZNg5xhIc","last_name":"eSAFaBwm4WJZNg5xhIc","paymentId":"2c92c0f95fc912eb015fcb2a481720e6","price":"$49.00","serviceStartDate":"17 November 2017","serviceEndDate":"16 November 2018", "billingAddress1": "billingAddress1Value", "billingAddress2": "billingAddress2Value", "billingPostcode": "billingPostcodeValue", "billingCity": "billingCityValue", "billingState": "billingStateValue", "billingCountry" : "billingCountryValue"}}}}"""
 
   val invoices =
     """
@@ -189,6 +221,64 @@ object EndToEndData {
       |        "apiId": "11111"
       |    },
       |    "body": "{\"accountId\":\"2c92c0f85fc90734015fca884c3f04cf\",\"firstName\":\"eSAFaBwm4WJZNg5xhIc\",\"lastName\":\"eSAFaBwm4WJZNg5xhIc\",\"creditCardExpirationMonth\":\"12\",\"creditCardExpirationYear\":\"2019\",\"paymentId\":\"2c92c0f95fc912eb015fcb2a481720e6\",\"tenantId\":\"c\",\"currency\":\"USD\",\"creditCardType\":\"Visa\",\"paymentMethodType\":\"CreditCardReferenceTransaction\",\"email\":\"john.duffell@guardian.co.uk\",\"failureNumber\":\"1\"}",
+      |    "isBase64Encoded": false
+      |}
+    """.stripMargin
+
+  val zuoraCalloutJsonWithBillingDetails =
+    """
+      |{
+      |    "resource": "/payment-failure",
+      |    "path": "/payment-failure",
+      |    "httpMethod": "POST",
+      |    "headers": {
+      |        "CloudFront-Forwarded-Proto": "https",
+      |        "CloudFront-Is-Desktop-Viewer": "true",
+      |        "CloudFront-Is-Mobile-Viewer": "false",
+      |        "CloudFront-Is-SmartTV-Viewer": "false",
+      |        "CloudFront-Is-Tablet-Viewer": "false",
+      |        "CloudFront-Viewer-Country": "US",
+      |        "Content-Type": "application/json; charset=utf-8",
+      |        "Host": "hosthosthost",
+      |        "User-Agent": "Amazon CloudFront",
+      |        "Via": "1.1 c154e1d9f76106d9025a8ffb4f4831ae.cloudfront.net (CloudFront), 1.1 11b20299329437ea4e28ea2b556ea990.cloudfront.net (CloudFront)",
+      |        "X-Amz-Cf-Id": "hihi",
+      |        "X-Amzn-Trace-Id": "Root=1-5a0f2574-4cb4d1534b9f321a3b777624",
+      |        "X-Forwarded-For": "1.1.1.1, 1.1.1.1",
+      |        "X-Forwarded-Port": "443",
+      |        "X-Forwarded-Proto": "https"
+      |    },
+      |    "queryStringParameters": {
+      |        "apiClientId": "a",
+      |        "apiToken": "b"
+      |    },
+      |    "pathParameters": null,
+      |    "stageVariables": null,
+      |    "requestContext": {
+      |        "path": "/CODE/payment-failure",
+      |        "accountId": "865473395570",
+      |        "resourceId": "ls9b61",
+      |        "stage": "CODE",
+      |        "requestId": "11111111-cbc2-11e7-a389-b7e6e2ab8316",
+      |        "identity": {
+      |            "cognitoIdentityPoolId": null,
+      |            "accountId": null,
+      |            "cognitoIdentityId": null,
+      |            "caller": null,
+      |            "apiKey": "",
+      |            "sourceIp": "1.1.1.1",
+      |            "accessKey": null,
+      |            "cognitoAuthenticationType": null,
+      |            "cognitoAuthenticationProvider": null,
+      |            "userArn": null,
+      |            "userAgent": "Amazon CloudFront",
+      |            "user": null
+      |        },
+      |        "resourcePath": "/payment-failure",
+      |        "httpMethod": "POST",
+      |        "apiId": "11111"
+      |    },
+      |    "body": "{\"accountId\":\"2c92c0f85fc90734015fca884c3f04cf\",\"firstName\":\"eSAFaBwm4WJZNg5xhIc\",\"lastName\":\"eSAFaBwm4WJZNg5xhIc\",\"creditCardExpirationMonth\":\"12\",\"creditCardExpirationYear\":\"2019\",\"paymentId\":\"2c92c0f95fc912eb015fcb2a481720e6\",\"tenantId\":\"c\",\"currency\":\"USD\",\"creditCardType\":\"Visa\",\"paymentMethodType\":\"CreditCardReferenceTransaction\",\"email\":\"john.duffell@guardian.co.uk\",\"failureNumber\":\"1\",\"billToContactAddress2\":\"billingAddress2Value\",\"billToContactCity\":\"billingCityValue\",\"billToContactAddress1\":\"billingAddress1Value\",\"billToContactState\":\"billingStateValue\",\"billToContactCountry\":\"billingCountryValue\",\"billToContactPostalCode\":\"billingPostcodeValue\"}",
       |    "isBase64Encoded": false
       |}
     """.stripMargin

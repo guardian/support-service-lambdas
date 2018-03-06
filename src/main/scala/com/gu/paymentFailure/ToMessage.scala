@@ -28,7 +28,13 @@ object ToMessage {
           primaryKey = PaymentId(paymentFailureCallout.paymentId),
           price = price(paymentFailureInformation.amount, paymentFailureCallout.currency),
           serviceStartDate = serviceDateFormat(paymentFailureInformation.serviceStartDate),
-          serviceEndDate = serviceDateFormat(paymentFailureInformation.serviceEndDate)))))
+          serviceEndDate = serviceDateFormat(paymentFailureInformation.serviceEndDate),
+          billing_address1 = paymentFailureCallout.billingDetails.address1,
+          billing_address2 = paymentFailureCallout.billingDetails.address2,
+          billing_postcode = paymentFailureCallout.billingDetails.postCode,
+          billing_city = paymentFailureCallout.billingDetails.city,
+          billing_state = paymentFailureCallout.billingDetails.state,
+          billing_country = paymentFailureCallout.billingDetails.country))))
 
   def apply(callout: AutoCancelCallout, paymentFailureInformation: PaymentFailureInformation) = Message(
     To = ToDef(

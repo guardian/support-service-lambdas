@@ -11,7 +11,7 @@ case class BillingDetails(
   postCode: Option[String],
   city: Option[String],
   state: Option[String],
-  Country: Option[String])
+  country: Option[String])
 
 object BillingDetails {
 

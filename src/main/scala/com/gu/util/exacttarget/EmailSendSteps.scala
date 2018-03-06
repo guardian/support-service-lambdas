@@ -25,7 +25,13 @@ case class SubscriberAttributesDef(
   primaryKey: PrimaryKey,
   price: String,
   serviceStartDate: String,
-  serviceEndDate: String)
+  serviceEndDate: String,
+  billing_address1: Option[String] = None,
+  billing_address2: Option[String] = None,
+  billing_postcode: Option[String] = None,
+  billing_city: Option[String] = None,
+  billing_state: Option[String] = None,
+  billing_country: Option[String] = None)
 
 sealed trait PrimaryKey {
   // ET will filter out multiple emails with the same payment id for PF1,2,3,4
@@ -41,28 +47,40 @@ case class Message(To: ToDef)
 case class EmailRequest(etSendId: ETSendId, message: Message)
 
 object SubscriberAttributesDef {
+
+  def jsStringOption(stringOption: Option[String]) = stringOption.map(JsString)
   implicit val jf2 = new Writes[SubscriberAttributesDef] {
 
-    override def writes(o: SubscriberAttributesDef): JsValue =
-      JsObject(
-        fields = Seq[(String, JsValue)](
-          "subscriber_id" -> JsString(o.subscriber_id),
-          "product" -> JsString(o.product),
-          "payment_method" -> JsString(o.payment_method),
-          "card_type" -> JsString(o.card_type),
-          "card_expiry_date" -> JsString(o.card_expiry_date),
-          "first_name" -> JsString(o.first_name),
-          "last_name" -> JsString(o.last_name),
-          o.primaryKey match {
-            case PaymentId(id) => "paymentId" -> JsString(id)
-            case InvoiceId(id) => "invoiceId" -> JsString(id)
-          },
-          "price" -> JsString(o.price),
-          "serviceStartDate" -> JsString(o.serviceStartDate),
-          "serviceEndDate" -> JsString(o.serviceEndDate)))
+    override def writes(o: SubscriberAttributesDef): JsValue = {
 
+      val fields = Map(
+        "subscriber_id" -> JsString(o.subscriber_id),
+        "product" -> JsString(o.product),
+        "payment_method" -> JsString(o.payment_method),
+        "card_type" -> JsString(o.card_type),
+        "card_expiry_date" -> JsString(o.card_expiry_date),
+        "first_name" -> JsString(o.first_name),
+        "last_name" -> JsString(o.last_name),
+        o.primaryKey match {
+          case PaymentId(id) => "paymentId" -> JsString(id)
+          case InvoiceId(id) => "invoiceId" -> JsString(id)
+        },
+        "price" -> JsString(o.price),
+        "serviceStartDate" -> JsString(o.serviceStartDate),
+        "serviceEndDate" -> JsString(o.serviceEndDate))
+
+      val optionalFields = Map(
+        "billingAddress1" -> jsStringOption(o.billing_address1),
+        "billingAddress2" -> jsStringOption(o.billing_address2),
+        "billingPostcode" -> jsStringOption(o.billing_postcode),
+        "billingCity" -> jsStringOption(o.billing_city),
+        "billingState" -> jsStringOption(o.billing_state),
+        "billingCountry" -> jsStringOption(o.billing_country)).collect { case (key, Some(value)) => key -> value }
+
+      val allFields = fields ++ optionalFields
+      JsObject(allFields)
+    }
   }
-
 }
 
 object ContactAttributesDef {
