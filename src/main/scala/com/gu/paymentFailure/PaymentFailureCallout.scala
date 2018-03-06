@@ -17,12 +17,12 @@ object BillingDetails {
 
   implicit val jf: Reads[BillingDetails] = {
     (
-      (JsPath \ "address1").readNullable[String] and
-      (JsPath \ "address2").readNullable[String] and
-      (JsPath \ "postalCode").readNullable[String] and
-      (JsPath \ "city").readNullable[String] and
-      (JsPath \ "state").readNullable[String] and
-      (JsPath \ "country").readNullable[String]).apply(BillingDetails.apply _)
+      (JsPath \ "billToAddress1").readNullable[String] and
+      (JsPath \ "billToAddress2").readNullable[String] and
+      (JsPath \ "billToPostalCode").readNullable[String] and
+      (JsPath \ "billToCity").readNullable[String] and
+      (JsPath \ "billToState").readNullable[String] and
+      (JsPath \ "billToCountry").readNullable[String]).apply(BillingDetails.apply _)
   }
 }
 case class PaymentFailureCallout(
