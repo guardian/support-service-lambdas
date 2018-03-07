@@ -70,12 +70,12 @@ object SubscriberAttributesDef {
         "serviceEndDate" -> JsString(o.serviceEndDate))
 
       val optionalFields = Map(
-        "billingAddress1" -> jsStringOption(o.billing_address1),
-        "billingAddress2" -> jsStringOption(o.billing_address2),
-        "billingPostcode" -> jsStringOption(o.billing_postcode),
-        "billingCity" -> jsStringOption(o.billing_city),
-        "billingState" -> jsStringOption(o.billing_state),
-        "billingCountry" -> jsStringOption(o.billing_country)).collect { case (key, Some(value)) => key -> value }
+        "billing_address1" -> jsStringOption(o.billing_address1),
+        "billing_address2" -> jsStringOption(o.billing_address2),
+        "billing_postcode" -> jsStringOption(o.billing_postcode),
+        "billing_city" -> jsStringOption(o.billing_city),
+        "billing_state" -> jsStringOption(o.billing_state),
+        "billing_country" -> jsStringOption(o.billing_country)).collect { case (key, Some(value)) => key -> value }
 
       val allFields = fields ++ optionalFields
       JsObject(allFields)
