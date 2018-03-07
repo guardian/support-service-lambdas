@@ -24,7 +24,6 @@ object Http extends Logging {
     { request: Request =>
       val length = Option(request.body).map(bodyLength)
       logger.info(s"HTTP request: ${request.method} ${request.url} ${request.headers.toMultimap.size} headers" + length.map(length => s", body size $length bytes").getOrElse(""))
-      logger.info(request.body().toString)//todo remove this later
       val response = restClient.newCall(request).execute
       logger.info(s"HTTP response: ${response.code}")
       response
