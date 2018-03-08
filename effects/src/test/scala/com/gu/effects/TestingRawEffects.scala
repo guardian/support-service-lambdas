@@ -51,10 +51,6 @@ class TestingRawEffects(val isProd: Boolean = false, val defaultCode: Int = 1, r
   }
   val rawEffects = RawEffects(response, stage, _ => Success(codeConfig), () => LocalDate.of(2017, 11, 19))
 
-  //  def handlerDeps(operation: Config[ZuoraRestConfig] => ApiGatewayRequest => FailableOp[Unit]) = new ApiGatewayHandler(() => Success(""), Stage("DEV"), _ => Success(TestData.fakeConfig), operation)
-  //  val zuoraDeps = ZuoraDeps(response, TestData.fakeZuoraConfig)
-  //  val stripeDeps = StripeDeps(TestData.fakeStripeConfig, new StripeSignatureChecker)
-
 }
 
 object TestingRawEffects {
