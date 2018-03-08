@@ -1,8 +1,6 @@
 package com.gu.util
 
-import com.gu.TestData
 import com.gu.util.ETConfig.{ ETSendId, ETSendIds }
-import com.gu.util.zuora.ZuoraRestConfig
 import org.scalatest.{ FlatSpec, Matchers }
 import play.api.libs.json.{ JsSuccess, Json }
 
@@ -11,12 +9,12 @@ import scala.util.Success
 class ConfigLoaderTest extends FlatSpec with Matchers {
 
   "loader" should "be able to load config successfully" in {
-    val actualConfigObject = Config.parseConfig(TestData.codeConfig)
+    val actualConfigObject = Config.parseConfig[String](codeConfig)
     actualConfigObject should be(Success(
       Config(
         Stage("DEV"),
         TrustedApiConfig("b", "c"),
-        zuoraRestConfig = ZuoraRestConfig("https://ddd", "e@f.com", "ggg"),
+        zuoraRestConfig = "hi",
         etConfig = ETConfig(etSendIDs = ETSendIds(ETSendId("111"), ETSendId("222"), ETSendId("333"), ETSendId("444"), ETSendId("ccc")), clientId = "jjj", clientSecret = "kkk"),
         stripeConfig = StripeConfig(StripeWebhook(StripeSecretKey("abc"), StripeSecretKey("def")), true))))
   }
@@ -71,5 +69,35 @@ class ConfigLoaderTest extends FlatSpec with Matchers {
     actualConfigObject should be(JsSuccess(
       StripeConfig(StripeWebhook(StripeSecretKey("abc"), StripeSecretKey("def")), false)))
   }
+
+  val codeConfig: String =
+    """
+      |{ "stage": "DEV",
+      |  "trustedApiConfig": {
+      |    "apiClientId": "a",
+      |    "apiToken": "b",
+      |    "tenantId": "c"
+      |  },
+      |  "zuoraRestConfig": "hi",
+      |  "etConfig": {
+      |    "etSendIDs":
+      |    {
+      |      "pf1": "111",
+      |      "pf2": "222",
+      |      "pf3": "333",
+      |      "pf4": "444",
+      |      "cancelled": "ccc"
+      |    },
+      |    "clientId": "jjj",
+      |    "clientSecret": "kkk"
+      |  },
+      |  "stripe": {
+      |     "customerSourceUpdatedWebhook": {
+      |       "api.key.secret": "abc",
+      |       "au-membership.key.secret": "def"
+      |     }
+      |  }
+      |}
+    """.stripMargin
 
 }

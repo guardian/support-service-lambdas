@@ -54,7 +54,7 @@ Resources:
             Code:
                 S3Bucket: zuora-auto-cancel-dist
                 S3Key: !Sub membership/${Stage}/identity-backfill/identity-backfill.jar
-            Handler: com.gu.identity_backfill.Handler::apply
+            Handler: com.gu.identityBackfill.Handler::apply
             Environment:
                 Variables:
                   Stage: !Ref Stage

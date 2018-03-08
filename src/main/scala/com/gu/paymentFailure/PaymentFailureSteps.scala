@@ -12,7 +12,7 @@ import com.gu.util.exacttarget.{ EmailRequest, EmailSendSteps }
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.ZuoraGetInvoiceTransactions.InvoiceTransactionSummary
 import com.gu.util.zuora.internal.Types.ClientFailableOp
-import com.gu.util.zuora.{ ZuoraDeps, ZuoraGetInvoiceTransactions }
+import com.gu.util.zuora.{ ZuoraDeps, ZuoraGetInvoiceTransactions, ZuoraRestConfig }
 import okhttp3.{ Request, Response }
 import play.api.libs.json.Json
 
@@ -45,7 +45,7 @@ object PaymentFailureSteps extends Logging {
   }
 
   object PFDeps {
-    def default(response: Request => Response, config: Config): PFDeps = {
+    def default(response: Request => Response, config: Config[ZuoraRestConfig]): PFDeps = {
       PFDeps(
         ZuoraEmailSteps.sendEmailRegardingAccount(ZuoraEmailStepsDeps.default(response, config)),
         config.etConfig.etSendIDs,
@@ -64,7 +64,7 @@ object ZuoraEmailSteps {
 
   def sendEmailRegardingAccount(deps: ZuoraEmailStepsDeps)(accountId: String, toMessage: PaymentFailureInformation => EmailRequest): FailableOp[Unit] = {
     for {
-      invoiceTransactionSummary <- deps.getInvoiceTransactions(accountId).leftMap(ApiGatewayResponse.fromClientFail)
+      invoiceTransactionSummary <- deps.getInvoiceTransactions(accountId).leftMap(ZuoraToApiGateway.fromClientFail)
       paymentInformation <- GetPaymentData(accountId)(invoiceTransactionSummary)
       message = toMessage(paymentInformation)
       _ <- deps.sendEmail(message).leftMap(resp => resp.copy(body = s"email not sent for account ${accountId}"))
@@ -72,7 +72,7 @@ object ZuoraEmailSteps {
   }
 
   object ZuoraEmailStepsDeps {
-    def default(response: Request => Response, config: Config): ZuoraEmailStepsDeps = {
+    def default(response: Request => Response, config: Config[ZuoraRestConfig]): ZuoraEmailStepsDeps = {
       ZuoraEmailStepsDeps(
         EmailSendSteps.apply(EmailSendStepsDeps.default(config.stage, response, config.etConfig)),
         a => ZuoraGetInvoiceTransactions(a).run.run(ZuoraDeps(response, config.zuoraRestConfig)))

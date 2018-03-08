@@ -20,7 +20,9 @@ val scalaSettings = Seq(
     "-Ywarn-dead-code",
     "-Ywarn-numeric-widen",
     "-Ywarn-value-discard"
-  )
+  ),
+  javaOptions in Test += s"""-Dlog4j.configuration=file:${new File(".").getCanonicalPath}/test_log4j.properties""",
+  fork in Test := true
 )
 
 lazy val zuora = project.settings(scalaSettings).settings(
@@ -33,16 +35,39 @@ lazy val zuora = project.settings(scalaSettings).settings(
   )
 )
 
+lazy val `api-gateway` = project.settings(scalaSettings).settings(
+  libraryDependencies ++= Seq(
+    "com.squareup.okhttp3" % "okhttp" % "3.9.1",
+    "com.amazonaws" % "aws-lambda-java-log4j" % "1.0.0",
+    "org.scalaz" %% "scalaz-core" % "7.2.18",
+    "com.typesafe.play" %% "play-json" % "2.6.8",
+    "org.scalatest" %% "scalatest" % "3.0.1" % "test"
+  )
+)
+
+// to aid testability, only the actual handlers called as a lambda can depend on this
+lazy val effects = project.settings(scalaSettings).dependsOn(`api-gateway`).settings(
+  libraryDependencies ++= Seq(
+    "com.squareup.okhttp3" % "okhttp" % "3.9.1",
+    "com.amazonaws" % "aws-lambda-java-log4j" % "1.0.0",
+    "com.amazonaws" % "aws-java-sdk-s3" % "1.11.265",
+    "org.scalaz" %% "scalaz-core" % "7.2.18",
+    "com.typesafe.play" %% "play-json" % "2.6.8",
+    "org.scalatest" %% "scalatest" % "3.0.1" % "test"
+  )
+)
+
 // currently the original code is lying in the root, in due course we need to make three separate sub projects for these original lambdas
 // they should produce their own self contained jar to reduce the artifact size and startup time.  Any shared code can be
 // a set of projects that is "dependsOn(..)" by the sharing projects.  Don't be afraid to restructure things to keep the code nice!
 lazy val root = (project in file(".")).settings(scalaSettings).enablePlugins(RiffRaffArtifact).aggregate(
   `identity-backfill`,
-  zuora
-).dependsOn(zuora)
+  zuora,
+  effects
+).dependsOn(zuora, `api-gateway`, effects % "compile->compile;test->test")
 
 lazy val `identity-backfill` = project.settings(scalaSettings) // when using the "project identity-backfill" command it uses the lazy val name
-  .enablePlugins(RiffRaffArtifact).dependsOn(zuora)
+  .enablePlugins(RiffRaffArtifact).dependsOn(zuora, `api-gateway`, effects % "compile->compile;test->test")
 
 assemblyJarName := "zuora-auto-cancel.jar"
 riffRaffPackageType := assembly.value
@@ -55,7 +80,6 @@ addCommandAlias("dist", ";riffRaffArtifact")
 libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-lambda-java-log4j" % "1.0.0",
   "com.amazonaws" % "aws-lambda-java-core" % "1.2.0",
-  "com.amazonaws" % "aws-java-sdk-s3" % "1.11.265",
   "log4j" % "log4j" % "1.2.17",
   "com.squareup.okhttp3" % "okhttp" % "3.9.1",
   "org.scalaz" %% "scalaz-core" % "7.2.18",
