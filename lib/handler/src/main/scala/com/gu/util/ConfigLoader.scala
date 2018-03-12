@@ -70,10 +70,10 @@ object StripeConfig {
     (JsPath \ "signatureChecking").readNullable[String].map(!_.contains("false")))(StripeConfig.apply _)
 }
 
-case class Config[ZuoraRestConfig](
+case class Config[StepsConfig](
   stage: Stage,
   trustedApiConfig: TrustedApiConfig,
-  zuoraRestConfig: ZuoraRestConfig,
+  zuoraRestConfig: StepsConfig,
   etConfig: ETConfig,
   stripeConfig: StripeConfig)
 
@@ -83,16 +83,16 @@ case class Stage(value: String) extends AnyVal {
 
 object Config extends Logging {
 
-  implicit def configReads[ZuoraRestConfig: Reads]: Reads[Config[ZuoraRestConfig]] = (
+  implicit def configReads[StepsConfig: Reads]: Reads[Config[StepsConfig]] = (
     (JsPath \ "stage").read[String].map(Stage.apply) and
     (JsPath \ "trustedApiConfig").read[TrustedApiConfig] and
-    (JsPath \ "zuoraRestConfig").read[ZuoraRestConfig] and
+    (JsPath \ "zuoraRestConfig").read[StepsConfig] and
     (JsPath \ "etConfig").read[ETConfig] and
-    (JsPath \ "stripe").read[StripeConfig])(Config.apply[ZuoraRestConfig] _)
+    (JsPath \ "stripe").read[StripeConfig])(Config.apply[StepsConfig] _)
 
-  def parseConfig[ZuoraRestConfig: Reads](jsonConfig: String): Try[Config[ZuoraRestConfig]] = {
-    Json.fromJson[Config[ZuoraRestConfig]](Json.parse(jsonConfig)) match {
-      case validConfig: JsSuccess[Config[ZuoraRestConfig]] =>
+  def parseConfig[StepsConfig: Reads](jsonConfig: String): Try[Config[StepsConfig]] = {
+    Json.fromJson[Config[StepsConfig]](Json.parse(jsonConfig)) match {
+      case validConfig: JsSuccess[Config[StepsConfig]] =>
         logger.info(s"Successfully parsed JSON config")
         Success(validConfig.value)
       case error: JsError =>

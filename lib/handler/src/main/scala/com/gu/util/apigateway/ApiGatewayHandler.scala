@@ -16,8 +16,8 @@ import scalaz.{ -\/, \/, \/- }
 
 object ApiGatewayHandler extends Logging {
 
-  def apply[ZuoraRestConfig: Reads](stage: Stage, s3Load: Stage => Try[String], operation: Config[ZuoraRestConfig] => ApiGatewayRequest => FailableOp[Unit]): ApiGatewayHandler[ZuoraRestConfig] =
-    new ApiGatewayHandler[ZuoraRestConfig](
+  def apply[StepsConfig: Reads](stage: Stage, s3Load: Stage => Try[String], operation: Config[StepsConfig] => ApiGatewayRequest => FailableOp[Unit]): ApiGatewayHandler[StepsConfig] =
+    new ApiGatewayHandler[StepsConfig](
       () => s3Load(stage),
       stage,
       Config.parseConfig,
@@ -44,11 +44,11 @@ object ApiGatewayHandler extends Logging {
 
 }
 
-class ApiGatewayHandler[ZuoraRestConfig](
+class ApiGatewayHandler[StepsConfig](
   s3Load: () => Try[String],
   stage: Stage,
-  parseConfig: String => Try[Config[ZuoraRestConfig]],
-  operation: Config[ZuoraRestConfig] => ApiGatewayRequest => FailableOp[Unit]) extends Logging {
+  parseConfig: String => Try[Config[StepsConfig]],
+  operation: Config[StepsConfig] => ApiGatewayRequest => FailableOp[Unit]) extends Logging {
 
   import ApiGatewayHandler._
 
@@ -65,7 +65,7 @@ class ApiGatewayHandler[ZuoraRestConfig](
 
   }
 
-  def loadConfig(): FailableOp[Config[ZuoraRestConfig]] = {
+  def loadConfig(): FailableOp[Config[StepsConfig]] = {
     logger.info(s"${this.getClass} Lambda is starting up in $stage")
 
     for {

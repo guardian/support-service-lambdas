@@ -3,14 +3,14 @@ package com.gu.effects
 import java.time.LocalDate
 
 import com.gu.effects.TestingRawEffects._
-import com.gu.util.Stage
+import com.gu.util.{ Logging, Stage }
 import okhttp3._
 import okhttp3.internal.Util.UTF_8
 import okio.Buffer
 
 import scala.util.Success
 
-class TestingRawEffects(val isProd: Boolean = false, val defaultCode: Int = 1, responses: Map[String, (Int, String)] = Map()) {
+class TestingRawEffects(val isProd: Boolean = false, val defaultCode: Int = 1, responses: Map[String, (Int, String)] = Map()) extends Logging {
 
   var result: List[Request] = Nil // !
 
@@ -28,7 +28,7 @@ class TestingRawEffects(val isProd: Boolean = false, val defaultCode: Int = 1, r
     req =>
       result = req :: result
       val (code, response) = responses.getOrElse(req.url().encodedPath(), (defaultCode, """{"success": true}"""))
-      println(s"request for: ${req.url().encodedPath()} so returning $response")
+      logger.info(s"request for: ${req.url().encodedPath()} so returning $response")
       new Response.Builder()
         .request(req)
         .protocol(Protocol.HTTP_1_1)

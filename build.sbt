@@ -25,7 +25,7 @@ val scalaSettings = Seq(
   fork in Test := true
 )
 
-lazy val zuora = project.settings(scalaSettings).settings(
+lazy val zuora = (project in file("lib/zuora")).settings(scalaSettings).settings(
   libraryDependencies ++= Seq(
     "com.squareup.okhttp3" % "okhttp" % "3.9.1",
     "com.amazonaws" % "aws-lambda-java-log4j" % "1.0.0",
@@ -35,7 +35,7 @@ lazy val zuora = project.settings(scalaSettings).settings(
   )
 )
 
-lazy val `api-gateway` = project.settings(scalaSettings).settings(
+lazy val handler = (project in file("lib/handler")).settings(scalaSettings).settings(
   libraryDependencies ++= Seq(
     "com.squareup.okhttp3" % "okhttp" % "3.9.1",
     "com.amazonaws" % "aws-lambda-java-log4j" % "1.0.0",
@@ -46,7 +46,7 @@ lazy val `api-gateway` = project.settings(scalaSettings).settings(
 )
 
 // to aid testability, only the actual handlers called as a lambda can depend on this
-lazy val effects = project.settings(scalaSettings).dependsOn(`api-gateway`).settings(
+lazy val effects = (project in file("lib/effects")).settings(scalaSettings).dependsOn(handler).settings(
   libraryDependencies ++= Seq(
     "com.squareup.okhttp3" % "okhttp" % "3.9.1",
     "com.amazonaws" % "aws-lambda-java-log4j" % "1.0.0",
@@ -57,6 +57,8 @@ lazy val effects = project.settings(scalaSettings).dependsOn(`api-gateway`).sett
   )
 )
 
+val effectsDepIncludingTestFolder: ClasspathDependency = effects % "compile->compile;test->test"
+
 // currently the original code is lying in the root, in due course we need to make three separate sub projects for these original lambdas
 // they should produce their own self contained jar to reduce the artifact size and startup time.  Any shared code can be
 // a set of projects that is "dependsOn(..)" by the sharing projects.  Don't be afraid to restructure things to keep the code nice!
@@ -64,10 +66,10 @@ lazy val root = (project in file(".")).settings(scalaSettings).enablePlugins(Rif
   `identity-backfill`,
   zuora,
   effects
-).dependsOn(zuora, `api-gateway`, effects % "compile->compile;test->test")
+).dependsOn(zuora, handler, effectsDepIncludingTestFolder)
 
-lazy val `identity-backfill` = project.settings(scalaSettings) // when using the "project identity-backfill" command it uses the lazy val name
-  .enablePlugins(RiffRaffArtifact).dependsOn(zuora, `api-gateway`, effects % "compile->compile;test->test")
+lazy val `identity-backfill` = (project in file("handlers/identity-backfill")).settings(scalaSettings) // when using the "project identity-backfill" command it uses the lazy val name
+  .enablePlugins(RiffRaffArtifact).dependsOn(zuora, handler, effectsDepIncludingTestFolder)
 
 assemblyJarName := "zuora-auto-cancel.jar"
 riffRaffPackageType := assembly.value
