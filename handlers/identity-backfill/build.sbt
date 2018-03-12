@@ -10,7 +10,7 @@ riffRaffPackageType := assembly.value
 riffRaffUploadArtifactBucket := Option("riffraff-artifact")
 riffRaffUploadManifestBucket := Option("riffraff-builds")
 riffRaffManifestProjectName := "MemSub::Membership Admin::Identity Backfill"
-riffRaffArtifactResources += (file("identity-backfill/cfn.yaml"), "cfn/cfn.yaml")
+riffRaffArtifactResources += (file("lib/identity-backfill/cfn.yaml"), "cfn/cfn.yaml")
 
 libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-lambda-java-log4j" % "1.0.0",
