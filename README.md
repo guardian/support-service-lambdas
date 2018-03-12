@@ -1,5 +1,11 @@
 # zuora-auto-cancel
-Contains three Scala lambdas behind the same API gateway:
+
+Please keep all the README in this project up to date, and improve them!  There should be one in each project.
+
+The main project aggregates all the sub projects from handlers and lib, so we can build and test them in one go.
+
+## root
+Contains three Scala lambdas behind the same API gateway.  TODO These should be moved into a new set of 3 projects in the handlers folder.
 
 **autoCancel**: 
 Used to cancel subscriptions with overdue invoices, based on an event trigger within Zuora.
