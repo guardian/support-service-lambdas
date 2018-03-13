@@ -60,7 +60,7 @@ object SourceUpdatedSteps extends Logging {
     (for {
       // similar to AccountController.updateCard in members-data-api
       paymentMethods <- ListT.apply[WithZuoraDepsFailableOp, AccountPaymentMethodIds](ZuoraQueryPaymentMethod.getPaymentMethodForStripeCustomer(customer, source).withLogging("getPaymentMethodForStripeCustomer"))
-      account <- ListT[WithZuoraDepsFailableOp, AccountSummary](ZuoraGetAccountSummary(paymentMethods.accountId.value).leftMap(ApiGatewayResponse.fromClientFail).withLogging("getAccountSummary").map(_.pure[List]))
+      account <- ListT[WithZuoraDepsFailableOp, AccountSummary](ZuoraGetAccountSummary(paymentMethods.accountId.value).leftMap(ZuoraToApiGateway.fromClientFail).withLogging("getAccountSummary").map(_.pure[List]))
       defaultPaymentMethods <- ListT[WithZuoraDepsFailableOp, PaymentMethodFields](findDefaultOrSkip(account.basicInfo.defaultPaymentMethod, paymentMethods.paymentMethods).toList.pure[FailableOp].withLogging("skipIfNotDefault").pure[WithDeps].toEitherT)
     } yield defaultPaymentMethods).run
   }
@@ -94,7 +94,7 @@ object SourceUpdatedSteps extends Logging {
   }
 
   object Deps {
-    def default(response: Request => Response, config: Config): Deps = {
+    def default(response: Request => Response, config: Config[ZuoraRestConfig]): Deps = {
       Deps(ZuoraDeps(response, config.zuoraRestConfig), StripeDeps(config.stripeConfig, new StripeSignatureChecker))
     }
   }

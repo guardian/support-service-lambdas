@@ -4,6 +4,7 @@ import com.gu.effects.RawEffects
 import com.gu.util.ETConfig.ETSendIds
 import com.gu.util.exacttarget.EmailSendSteps.EmailSendStepsDeps
 import com.gu.util.exacttarget._
+import com.gu.util.zuora.ZuoraRestConfig
 import com.gu.util.{ Config, Stage }
 
 import scala.io.Source
@@ -45,7 +46,7 @@ object EmailClientSystemTest extends App {
     configAttempt <- Try {
       Source.fromFile("/etc/gu/payment-failure-lambdas.private.json").mkString
     }
-    config <- Config.parseConfig(configAttempt)
+    config <- Config.parseConfig[ZuoraRestConfig](configAttempt)
     deps = EmailSendStepsDeps.default(Stage("CODE"), RawEffects.createDefault.response, config.etConfig)
     etSendIds = config.etConfig.etSendIDs
   } yield Seq(

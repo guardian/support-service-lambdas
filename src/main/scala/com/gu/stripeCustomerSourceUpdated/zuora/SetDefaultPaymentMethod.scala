@@ -1,6 +1,6 @@
 package com.gu.stripeCustomerSourceUpdated.zuora
 
-import com.gu.util.apigateway.ApiGatewayResponse
+import com.gu.util.ZuoraToApiGateway
 import com.gu.util.reader.Types.WithDepsFailableOp
 import com.gu.util.zuora.ZuoraAccount.{ AccountId, PaymentMethodId }
 import com.gu.util.zuora.ZuoraDeps
@@ -18,6 +18,6 @@ object SetDefaultPaymentMethod {
   }
 
   def setDefaultPaymentMethod(accountId: AccountId, paymentMethodId: PaymentMethodId): WithDepsFailableOp[ZuoraDeps, Unit] =
-    put(SetDefaultPaymentMethod(paymentMethodId), s"object/account/${accountId.value}").leftMap(ApiGatewayResponse.fromClientFail)
+    put(SetDefaultPaymentMethod(paymentMethodId), s"object/account/${accountId.value}").leftMap(ZuoraToApiGateway.fromClientFail)
 
 }

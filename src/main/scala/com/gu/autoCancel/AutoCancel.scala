@@ -1,12 +1,10 @@
 package com.gu.autoCancel
 
-import com.gu.util.Logging
+import com.gu.util.{ Logging, ZuoraToApiGateway }
 import com.gu.util.reader.Types.FailableOp
 import com.gu.util.zuora.ZuoraModels.SubscriptionId
 import com.gu.util.zuora._
 import java.time.LocalDate
-
-import com.gu.util.apigateway.ApiGatewayResponse
 
 object AutoCancel extends Logging {
 
@@ -20,6 +18,6 @@ object AutoCancel extends Logging {
       _ <- ZuoraCancelSubscription(subToCancel, cancellationDate).withLogging("cancelSubscription")
       _ <- ZuoraDisableAutoPay(accountId).withLogging("disableAutoPay")
     } yield ()
-    zuoraOp.leftMap(ApiGatewayResponse.fromClientFail).run.run(zuoraDeps)
+    zuoraOp.leftMap(ZuoraToApiGateway.fromClientFail).run.run(zuoraDeps)
   }
 }

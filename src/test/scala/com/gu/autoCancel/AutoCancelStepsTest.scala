@@ -2,15 +2,16 @@ package com.gu.autoCancel
 
 import java.time.LocalDate
 
-import com.gu.TestingRawEffects.BasicResult
+import com.gu.effects.TestingRawEffects.BasicResult
 import com.gu.autoCancel.AutoCancel.AutoCancelRequest
 import com.gu.autoCancel.AutoCancelDataCollectionFilter.ACFilterDeps
+import com.gu.effects.TestingRawEffects
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.ZuoraAccount.{ AccountId, PaymentMethodId }
 import com.gu.util.zuora.ZuoraDeps
 import com.gu.util.zuora.ZuoraGetAccountSummary.{ AccountSummary, BasicAccountInfo, Invoice, SubscriptionSummary }
 import com.gu.util.zuora.ZuoraModels._
-import com.gu.{ TestData, TestingRawEffects, WithDependenciesFailableOp }
+import com.gu.{ TestData, WithDependenciesFailableOp }
 import org.scalatest._
 
 import scalaz.\/-
@@ -37,7 +38,7 @@ class AutoCancelStepsTest extends FlatSpec with Matchers {
 
   "auto cancel" should "turn off auto pay" in {
     val effects = new TestingRawEffects(false, 200)
-    AutoCancel(effects.zuoraDeps)(AutoCancelRequest("AID", SubscriptionId("subid"), LocalDate.now))
+    AutoCancel(TestData.zuoraDeps(effects))(AutoCancelRequest("AID", SubscriptionId("subid"), LocalDate.now))
 
     effects.requestsAttempted should contain(BasicResult("PUT", "/accounts/AID", "{\"autoPay\":false}"))
   }
