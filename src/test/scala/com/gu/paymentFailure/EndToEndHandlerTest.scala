@@ -8,17 +8,22 @@ import org.scalatest.{ FlatSpec, Matchers }
 
 class EndToEndHandlerTest extends FlatSpec with Matchers {
 
-  it should "manage an end to end call" in {
+  case class testData(zuoraCalloutInput: String, expectedEmailSend: String)
 
-    val stream = new ByteArrayInputStream(EndToEndData.zuoraCalloutJson.getBytes(java.nio.charset.StandardCharsets.UTF_8))
+  it should "manage an end to end call" in endToEndTest(EndToEndData)
+
+  it should "manage an end to end call with billing details" in endToEndTest(EndToEndDataWithBillingDetails)
+
+  def endToEndTest(endToEndData: EndtoEndBaseData) = {
+
+    val stream = new ByteArrayInputStream(endToEndData.zuoraCalloutJson.getBytes(java.nio.charset.StandardCharsets.UTF_8))
     val os = new ByteArrayOutputStream()
     val config = new TestingRawEffects(false, 200, EndToEndData.responses)
     //execute
     Lambda.default(config.rawEffects)(stream, os, null)
 
     config.resultMap
-      .get(("POST", "/messaging/v1/messageDefinitionSends/111/send")).get.get jsonMatches (
-        EndToEndData.expectedEmailSend) // TODO check the body too
+      .get(("POST", "/messaging/v1/messageDefinitionSends/111/send")).get.get jsonMatches endToEndData.expectedEmailSend // TODO check the body too
 
     val responseString = new String(os.toByteArray(), "UTF-8")
 
@@ -28,41 +33,17 @@ class EndToEndHandlerTest extends FlatSpec with Matchers {
          |""".stripMargin
     responseString jsonMatches expectedResponse
   }
-
-  it should "manage an end to end call with billing details" in {
-
-    val stream = new ByteArrayInputStream(EndToEndData.zuoraCalloutJsonWithBillingDetails.getBytes(java.nio.charset.StandardCharsets.UTF_8))
-    val os = new ByteArrayOutputStream()
-    val config = new TestingRawEffects(false, 200, EndToEndData.responses)
-    //execute
-    Lambda.default(config.rawEffects)(stream, os, null)
-
-    config.resultMap
-      .get(("POST", "/messaging/v1/messageDefinitionSends/111/send")).get.get jsonMatches (
-        EndToEndData.expectedEmailSendWithBillingDetails) // TODO check the body too
-
-    val responseString = new String(os.toByteArray(), "UTF-8")
-
-    val expectedResponse =
-      s"""
-         |{"statusCode":"200","headers":{"Content-Type":"application/json"},"body":"Success"}
-         |""".stripMargin
-    responseString jsonMatches expectedResponse
-  }
-
 }
 
-object EndToEndData {
+trait EndtoEndBaseData {
+
+  def zuoraCalloutJson: String
+  def expectedEmailSend: String
 
   def responses: Map[String, (Int, String)] = Map(
     ("/transactions/invoices/accounts/2c92c0f85fc90734015fca884c3f04cf", (200, invoices)),
     ("/v1/requestToken", (200, """{"accessToken":"", "expiresIn":1}""")),
     ("/messaging/v1/messageDefinitionSends/111/send", (202, "")))
-
-  val expectedEmailSend =
-    """{"To":{"Address":"john.duffell@guardian.co.uk","SubscriberKey":"john.duffell@guardian.co.uk","ContactAttributes":{"SubscriberAttributes":{"subscriber_id":"A-S00071536","product":"Supporter","payment_method":"CreditCardReferenceTransaction","card_type":"Visa","card_expiry_date":"12/2019","first_name":"eSAFaBwm4WJZNg5xhIc","last_name":"eSAFaBwm4WJZNg5xhIc","paymentId":"2c92c0f95fc912eb015fcb2a481720e6","price":"$49.00","serviceStartDate":"17 November 2017","serviceEndDate":"16 November 2018"}}}}"""
-  val expectedEmailSendWithBillingDetails =
-    """{"To":{"Address":"john.duffell@guardian.co.uk","SubscriberKey":"john.duffell@guardian.co.uk","ContactAttributes":{"SubscriberAttributes":{"subscriber_id":"A-S00071536","product":"Supporter","payment_method":"CreditCardReferenceTransaction","card_type":"Visa","card_expiry_date":"12/2019","first_name":"eSAFaBwm4WJZNg5xhIc","last_name":"eSAFaBwm4WJZNg5xhIc","paymentId":"2c92c0f95fc912eb015fcb2a481720e6","price":"$49.00","serviceStartDate":"17 November 2017","serviceEndDate":"16 November 2018", "billing_address1": "billingAddress1Value", "billing_address2": "billingAddress2Value", "billing_postcode": "billingPostcodeValue", "billing_city": "billingCityValue", "billing_state": "billingStateValue", "billing_country" : "billingCountryValue"}}}}"""
 
   val invoices =
     """
@@ -146,65 +127,11 @@ object EndToEndData {
       |}
     """.stripMargin
 
-  val zuoraCalloutJson =
-    """
-      |{
-      |    "resource": "/payment-failure",
-      |    "path": "/payment-failure",
-      |    "httpMethod": "POST",
-      |    "headers": {
-      |        "CloudFront-Forwarded-Proto": "https",
-      |        "CloudFront-Is-Desktop-Viewer": "true",
-      |        "CloudFront-Is-Mobile-Viewer": "false",
-      |        "CloudFront-Is-SmartTV-Viewer": "false",
-      |        "CloudFront-Is-Tablet-Viewer": "false",
-      |        "CloudFront-Viewer-Country": "US",
-      |        "Content-Type": "application/json; charset=utf-8",
-      |        "Host": "hosthosthost",
-      |        "User-Agent": "Amazon CloudFront",
-      |        "Via": "1.1 c154e1d9f76106d9025a8ffb4f4831ae.cloudfront.net (CloudFront), 1.1 11b20299329437ea4e28ea2b556ea990.cloudfront.net (CloudFront)",
-      |        "X-Amz-Cf-Id": "hihi",
-      |        "X-Amzn-Trace-Id": "Root=1-5a0f2574-4cb4d1534b9f321a3b777624",
-      |        "X-Forwarded-For": "1.1.1.1, 1.1.1.1",
-      |        "X-Forwarded-Port": "443",
-      |        "X-Forwarded-Proto": "https"
-      |    },
-      |    "queryStringParameters": {
-      |        "apiClientId": "a",
-      |        "apiToken": "b"
-      |    },
-      |    "pathParameters": null,
-      |    "stageVariables": null,
-      |    "requestContext": {
-      |        "path": "/CODE/payment-failure",
-      |        "accountId": "865473395570",
-      |        "resourceId": "ls9b61",
-      |        "stage": "CODE",
-      |        "requestId": "11111111-cbc2-11e7-a389-b7e6e2ab8316",
-      |        "identity": {
-      |            "cognitoIdentityPoolId": null,
-      |            "accountId": null,
-      |            "cognitoIdentityId": null,
-      |            "caller": null,
-      |            "apiKey": "",
-      |            "sourceIp": "1.1.1.1",
-      |            "accessKey": null,
-      |            "cognitoAuthenticationType": null,
-      |            "cognitoAuthenticationProvider": null,
-      |            "userArn": null,
-      |            "userAgent": "Amazon CloudFront",
-      |            "user": null
-      |        },
-      |        "resourcePath": "/payment-failure",
-      |        "httpMethod": "POST",
-      |        "apiId": "11111"
-      |    },
-      |    "body": "{\"accountId\":\"2c92c0f85fc90734015fca884c3f04cf\",\"firstName\":\"eSAFaBwm4WJZNg5xhIc\",\"lastName\":\"eSAFaBwm4WJZNg5xhIc\",\"creditCardExpirationMonth\":\"12\",\"creditCardExpirationYear\":\"2019\",\"paymentId\":\"2c92c0f95fc912eb015fcb2a481720e6\",\"tenantId\":\"c\",\"currency\":\"USD\",\"creditCardType\":\"Visa\",\"paymentMethodType\":\"CreditCardReferenceTransaction\",\"email\":\"john.duffell@guardian.co.uk\",\"failureNumber\":\"1\"}",
-      |    "isBase64Encoded": false
-      |}
-    """.stripMargin
+}
 
-  val zuoraCalloutJsonWithBillingDetails =
+object EndToEndDataWithBillingDetails extends EndtoEndBaseData {
+  override val expectedEmailSend = """{"To":{"Address":"john.duffell@guardian.co.uk","SubscriberKey":"john.duffell@guardian.co.uk","ContactAttributes":{"SubscriberAttributes":{"subscriber_id":"A-S00071536","product":"Supporter","payment_method":"CreditCardReferenceTransaction","card_type":"Visa","card_expiry_date":"12/2019","first_name":"eSAFaBwm4WJZNg5xhIc","last_name":"eSAFaBwm4WJZNg5xhIc","paymentId":"2c92c0f95fc912eb015fcb2a481720e6","price":"$49.00","serviceStartDate":"17 November 2017","serviceEndDate":"16 November 2018", "billing_address1": "billingAddress1Value", "billing_address2": "billingAddress2Value", "billing_postcode": "billingPostcodeValue", "billing_city": "billingCityValue", "billing_state": "billingStateValue", "billing_country" : "billingCountryValue"}}}}"""
+  override val zuoraCalloutJson =
     """
       |{
       |    "resource": "/payment-failure",
@@ -258,6 +185,69 @@ object EndToEndData {
       |        "apiId": "11111"
       |    },
       |    "body": "{\"accountId\":\"2c92c0f85fc90734015fca884c3f04cf\",\"firstName\":\"eSAFaBwm4WJZNg5xhIc\",\"lastName\":\"eSAFaBwm4WJZNg5xhIc\",\"creditCardExpirationMonth\":\"12\",\"creditCardExpirationYear\":\"2019\",\"paymentId\":\"2c92c0f95fc912eb015fcb2a481720e6\",\"tenantId\":\"c\",\"currency\":\"USD\",\"creditCardType\":\"Visa\",\"paymentMethodType\":\"CreditCardReferenceTransaction\",\"email\":\"john.duffell@guardian.co.uk\",\"failureNumber\":\"1\",\"billToContactAddress2\":\"billingAddress2Value\",\"billToContactCity\":\"billingCityValue\",\"billToContactAddress1\":\"billingAddress1Value\",\"billToContactState\":\"billingStateValue\",\"billToContactCountry\":\"billingCountryValue\",\"billToContactPostalCode\":\"billingPostcodeValue\"}",
+      |    "isBase64Encoded": false
+      |}
+    """.stripMargin
+}
+object EndToEndData extends EndtoEndBaseData {
+
+  override val expectedEmailSend =
+    """{"To":{"Address":"john.duffell@guardian.co.uk","SubscriberKey":"john.duffell@guardian.co.uk","ContactAttributes":{"SubscriberAttributes":{"subscriber_id":"A-S00071536","product":"Supporter","payment_method":"CreditCardReferenceTransaction","card_type":"Visa","card_expiry_date":"12/2019","first_name":"eSAFaBwm4WJZNg5xhIc","last_name":"eSAFaBwm4WJZNg5xhIc","paymentId":"2c92c0f95fc912eb015fcb2a481720e6","price":"$49.00","serviceStartDate":"17 November 2017","serviceEndDate":"16 November 2018"}}}}"""
+
+  override val zuoraCalloutJson =
+    """
+      |{
+      |    "resource": "/payment-failure",
+      |    "path": "/payment-failure",
+      |    "httpMethod": "POST",
+      |    "headers": {
+      |        "CloudFront-Forwarded-Proto": "https",
+      |        "CloudFront-Is-Desktop-Viewer": "true",
+      |        "CloudFront-Is-Mobile-Viewer": "false",
+      |        "CloudFront-Is-SmartTV-Viewer": "false",
+      |        "CloudFront-Is-Tablet-Viewer": "false",
+      |        "CloudFront-Viewer-Country": "US",
+      |        "Content-Type": "application/json; charset=utf-8",
+      |        "Host": "hosthosthost",
+      |        "User-Agent": "Amazon CloudFront",
+      |        "Via": "1.1 c154e1d9f76106d9025a8ffb4f4831ae.cloudfront.net (CloudFront), 1.1 11b20299329437ea4e28ea2b556ea990.cloudfront.net (CloudFront)",
+      |        "X-Amz-Cf-Id": "hihi",
+      |        "X-Amzn-Trace-Id": "Root=1-5a0f2574-4cb4d1534b9f321a3b777624",
+      |        "X-Forwarded-For": "1.1.1.1, 1.1.1.1",
+      |        "X-Forwarded-Port": "443",
+      |        "X-Forwarded-Proto": "https"
+      |    },
+      |    "queryStringParameters": {
+      |        "apiClientId": "a",
+      |        "apiToken": "b"
+      |    },
+      |    "pathParameters": null,
+      |    "stageVariables": null,
+      |    "requestContext": {
+      |        "path": "/CODE/payment-failure",
+      |        "accountId": "865473395570",
+      |        "resourceId": "ls9b61",
+      |        "stage": "CODE",
+      |        "requestId": "11111111-cbc2-11e7-a389-b7e6e2ab8316",
+      |        "identity": {
+      |            "cognitoIdentityPoolId": null,
+      |            "accountId": null,
+      |            "cognitoIdentityId": null,
+      |            "caller": null,
+      |            "apiKey": "",
+      |            "sourceIp": "1.1.1.1",
+      |            "accessKey": null,
+      |            "cognitoAuthenticationType": null,
+      |            "cognitoAuthenticationProvider": null,
+      |            "userArn": null,
+      |            "userAgent": "Amazon CloudFront",
+      |            "user": null
+      |        },
+      |        "resourcePath": "/payment-failure",
+      |        "httpMethod": "POST",
+      |        "apiId": "11111"
+      |    },
+      |    "body": "{\"accountId\":\"2c92c0f85fc90734015fca884c3f04cf\",\"firstName\":\"eSAFaBwm4WJZNg5xhIc\",\"lastName\":\"eSAFaBwm4WJZNg5xhIc\",\"creditCardExpirationMonth\":\"12\",\"creditCardExpirationYear\":\"2019\",\"paymentId\":\"2c92c0f95fc912eb015fcb2a481720e6\",\"tenantId\":\"c\",\"currency\":\"USD\",\"creditCardType\":\"Visa\",\"paymentMethodType\":\"CreditCardReferenceTransaction\",\"email\":\"john.duffell@guardian.co.uk\",\"failureNumber\":\"1\"}",
       |    "isBase64Encoded": false
       |}
     """.stripMargin
