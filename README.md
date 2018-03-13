@@ -1,6 +1,6 @@
 # zuora-auto-cancel
 
-This is the reader rev lambda API/orchestration layer.  But it has a bad name so far - TODO fix this. 
+This is the reader revenue lambda API/orchestration layer.  But it has a bad name so far - TODO fix this. 
 
 Please keep all the various README in this project up to date, and improve them!
 There should be one in each project and anywhere else you think it's would help.
