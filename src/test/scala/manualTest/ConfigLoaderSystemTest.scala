@@ -1,6 +1,7 @@
 package manualTest
 
 import com.gu.effects.ConfigLoad
+import com.gu.util.zuora.ZuoraRestConfig
 import com.gu.util.{ Config, Stage }
 import org.scalatest.{ FlatSpec, Ignore, Matchers }
 
@@ -25,7 +26,7 @@ class ConfigLoaderSystemTest extends FlatSpec with Matchers {
   def validate(configAttemp: Try[String], verificationStatus: Option[Boolean]) = {
     val con = for {
       a <- configAttemp
-      b <- Config.parseConfig(a)
+      b <- Config.parseConfig[ZuoraRestConfig](a)
     } yield b
     val loadedOK = con.map(config => ())
     withClue(configAttemp) {

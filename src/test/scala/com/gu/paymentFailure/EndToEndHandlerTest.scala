@@ -3,10 +3,7 @@ package com.gu.paymentFailure
 import java.io.{ ByteArrayInputStream, ByteArrayOutputStream }
 
 import com.gu.TestData._
-import com.gu.TestingRawEffects
-import okhttp3.RequestBody
-import okhttp3.internal.Util.UTF_8
-import okio.Buffer
+import com.gu.effects.TestingRawEffects
 import org.scalatest.{ FlatSpec, Matchers }
 
 class EndToEndHandlerTest extends FlatSpec with Matchers {
@@ -16,19 +13,10 @@ class EndToEndHandlerTest extends FlatSpec with Matchers {
     val stream = new ByteArrayInputStream(EndToEndData.zuoraCalloutJson.getBytes(java.nio.charset.StandardCharsets.UTF_8))
     val os = new ByteArrayOutputStream()
     val config = new TestingRawEffects(false, 200, EndToEndData.responses)
-    val effects = config.rawEffects
-    val deps = Lambda.default(effects)
     //execute
-    deps.handler(stream, os, null)
+    Lambda.default(config.rawEffects)(stream, os, null)
 
-    //verify
-    def body(b: RequestBody): String = {
-      val buffer = new Buffer()
-      b.writeTo(buffer)
-      buffer.readString(UTF_8)
-    }
-
-    config.result.map(req => (req.method, req.url.encodedPath) -> Option(req.body).map(body)).toMap
+    config.resultMap
       .get(("POST", "/messaging/v1/messageDefinitionSends/111/send")) should be(
         Some(Some(EndToEndData.expectedEmailSend))) // TODO check the body too
 

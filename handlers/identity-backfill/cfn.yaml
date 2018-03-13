@@ -1,0 +1,215 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Handles backfilling identity ids
+
+Parameters:
+    Stage:
+        Description: Stage name
+        Type: String
+        AllowedValues:
+            - PROD
+            - CODE
+        Default: CODE
+
+Conditions:
+  CreateProdMonitoring: !Equals [ !Ref Stage, PROD ]
+
+Mappings:
+    StageMap:
+        CODE:
+            ApiName: identity-backfill-api-CODE
+        PROD:
+            ApiName: identity-backfill-api-PROD
+
+Resources:
+    IdentityBackfillRole:
+        Type: AWS::IAM::Role
+        Properties:
+            AssumeRolePolicyDocument:
+                Statement:
+                    - Effect: Allow
+                      Principal:
+                          Service:
+                             - lambda.amazonaws.com
+                      Action:
+                          - sts:AssumeRole
+            Path: /
+            Policies:
+                - PolicyName: LambdaPolicy
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                            - logs:CreateLogGroup
+                            - logs:CreateLogStream
+                            - logs:PutLogEvents
+                            - lambda:InvokeFunction
+                            Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/identity-backfill-${Stage}:log-stream:*"
+                - PolicyName: ReadPrivateCredentials
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action: s3:GetObject
+                            Resource: !Sub arn:aws:s3:::gu-reader-revenue-private/membership/payment-failure-lambdas/${Stage}/*
+    IdentityBackfillLambda:
+        Type: AWS::Lambda::Function
+        Properties:
+            Description: backfill identity into zuora
+            FunctionName:
+                !Sub identity-backfill-${Stage}
+            Code:
+                S3Bucket: zuora-auto-cancel-dist
+                S3Key: !Sub membership/${Stage}/identity-backfill/identity-backfill.jar
+            Handler: com.gu.identityBackfill.Handler::apply
+            Environment:
+                Variables:
+                  Stage: !Ref Stage
+            Role:
+                Fn::GetAtt:
+                - "IdentityBackfillRole"
+                - Arn
+            MemorySize: 1536
+            Runtime: java8
+            Timeout: 300
+        DependsOn:
+        - "IdentityBackfillRole"
+
+    IdentityBackfillAPIPermission:
+        Type: AWS::Lambda::Permission
+        Properties:
+            Action: lambda:invokeFunction
+            FunctionName: !Sub identity-backfill-${Stage}
+            Principal: apigateway.amazonaws.com
+        DependsOn: IdentityBackfillLambda
+
+    IdentityBackfillProxyResource:
+        Type: AWS::ApiGateway::Resource
+        Properties:
+            RestApiId: !Ref IdentityBackfillAPI
+            ParentId: !GetAtt [IdentityBackfillAPI, RootResourceId]
+            PathPart: identity-backfill
+        DependsOn: IdentityBackfillAPI
+
+    IdentityBackfillMethod:
+        Type: AWS::ApiGateway::Method
+        Properties:
+            AuthorizationType: NONE
+            ApiKeyRequired: true
+            RestApiId: !Ref IdentityBackfillAPI
+            ResourceId: !Ref IdentityBackfillProxyResource
+            HttpMethod: POST
+            RequestParameters:
+              method.request.querystring.apiClientId: true
+              method.request.querystring.apiToken: true
+            Integration:
+              Type: AWS_PROXY
+              IntegrationHttpMethod: POST
+              Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${IdentityBackfillLambda.Arn}/invocations
+        DependsOn:
+        - IdentityBackfillAPI
+        - IdentityBackfillLambda
+        - IdentityBackfillProxyResource
+
+
+
+    IdentityBackfillAPI:
+        Type: "AWS::ApiGateway::RestApi"
+        Properties:
+            Description: we call this ourselves to trigger zuora backfill of identity
+            Name: !FindInMap [StageMap, !Ref Stage, ApiName]
+
+    IdentityBackfillAPIStage:
+        Type: AWS::ApiGateway::Stage
+        Properties:
+            Description: Stage for identity-backfill-api
+            RestApiId: !Ref IdentityBackfillAPI
+            DeploymentId: !Ref IdentityBackfillAPIDeployment
+            StageName: !Sub ${Stage}
+        DependsOn: IdentityBackfillMethod
+
+    IdentityBackfillAPIDeployment:
+        Type: AWS::ApiGateway::Deployment
+        Properties:
+            Description: Deploys identity-backfill-api into an environment/stage
+            RestApiId: !Ref IdentityBackfillAPI
+        DependsOn: IdentityBackfillMethod
+
+    IdentityBackfillAPIKey:
+      Type: AWS::ApiGateway::ApiKey
+      Properties:
+        Description: Key required to call identity backfill API
+        Enabled: true
+        Name: !Sub identity-backfill-api-key-${Stage}
+        StageKeys:
+          - RestApiId: !Ref IdentityBackfillAPI
+            StageName: !Sub ${Stage}
+      DependsOn:
+      - IdentityBackfillAPI
+      - IdentityBackfillAPIStage
+
+    IdentityBackfillUsagePlan:
+      Type: "AWS::ApiGateway::UsagePlan"
+      Properties:
+        UsagePlanName: !Sub identity-backfill-api-usage-plan-${Stage}
+        ApiStages:
+        - ApiId: !Ref IdentityBackfillAPI
+          Stage: !Ref IdentityBackfillAPIStage
+      DependsOn:
+      - IdentityBackfillAPI
+      - IdentityBackfillAPIStage
+
+    IdentityBackfillUsagePlanKey:
+      Type: "AWS::ApiGateway::UsagePlanKey"
+      Properties:
+        KeyId: !Ref IdentityBackfillAPIKey
+        KeyType: API_KEY
+        UsagePlanId: !Ref IdentityBackfillUsagePlan
+      DependsOn:
+      - IdentityBackfillAPIKey
+      - IdentityBackfillUsagePlan
+
+    5xxApiAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Condition: CreateProdMonitoring
+      Properties:
+        AlarmActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:subscriptions_dev
+        AlarmName:
+          !Sub
+            - 5XX rate from ${ApiName}
+            - { ApiName: !FindInMap [StageMap, !Ref Stage, ApiName] }
+        ComparisonOperator: GreaterThanThreshold
+        Dimensions:
+          - Name: ApiName
+            Value: !FindInMap [StageMap, !Ref Stage, ApiName]
+          - Name: Stage
+            Value: !Sub ${Stage}
+        EvaluationPeriods: 1
+        MetricName: 5XXError
+        Namespace: AWS/ApiGateway
+        Period: 3600
+        Statistic: Sum
+        Threshold: 5
+
+    4xxApiAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Condition: CreateProdMonitoring
+      Properties:
+        AlarmActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:subscriptions_dev
+        AlarmName:
+          !Sub
+           - 4XX rate from ${ApiName}
+           - { ApiName: !FindInMap [StageMap, !Ref Stage, ApiName] }
+        ComparisonOperator: GreaterThanThreshold
+        Dimensions:
+          - Name: ApiName
+            Value: !FindInMap [StageMap, !Ref Stage, ApiName]
+          - Name: Stage
+            Value: !Sub ${Stage}
+        EvaluationPeriods: 1
+        MetricName: 4XXError
+        Namespace: AWS/ApiGateway
+        Period: 3600
+        Statistic: Sum
+        Threshold: 5
+
