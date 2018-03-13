@@ -17,8 +17,29 @@ class EndToEndHandlerTest extends FlatSpec with Matchers {
     Lambda.default(config.rawEffects)(stream, os, null)
 
     config.resultMap
-      .get(("POST", "/messaging/v1/messageDefinitionSends/111/send")) should be(
-        Some(Some(EndToEndData.expectedEmailSend))) // TODO check the body too
+      .get(("POST", "/messaging/v1/messageDefinitionSends/111/send")).get.get jsonMatches (
+        EndToEndData.expectedEmailSend) // TODO check the body too
+
+    val responseString = new String(os.toByteArray(), "UTF-8")
+
+    val expectedResponse =
+      s"""
+         |{"statusCode":"200","headers":{"Content-Type":"application/json"},"body":"Success"}
+         |""".stripMargin
+    responseString jsonMatches expectedResponse
+  }
+
+  it should "manage an end to end call with billing details" in {
+
+    val stream = new ByteArrayInputStream(EndToEndData.zuoraCalloutJsonWithBillingDetails.getBytes(java.nio.charset.StandardCharsets.UTF_8))
+    val os = new ByteArrayOutputStream()
+    val config = new TestingRawEffects(false, 200, EndToEndData.responses)
+    //execute
+    Lambda.default(config.rawEffects)(stream, os, null)
+
+    config.resultMap
+      .get(("POST", "/messaging/v1/messageDefinitionSends/111/send")).get.get jsonMatches (
+        EndToEndData.expectedEmailSendWithBillingDetails) // TODO check the body too
 
     val responseString = new String(os.toByteArray(), "UTF-8")
 
