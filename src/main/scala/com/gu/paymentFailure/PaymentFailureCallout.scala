@@ -11,7 +11,8 @@ case class BillingDetails(
   postCode: Option[String],
   city: Option[String],
   state: Option[String],
-  country: Option[String])
+  country: Option[String],
+  title: Option[String])
 
 object BillingDetails {
 
@@ -22,7 +23,8 @@ object BillingDetails {
       (JsPath \ "billToContactPostalCode").readNullable[String] and
       (JsPath \ "billToContactCity").readNullable[String] and
       (JsPath \ "billToContactState").readNullable[String] and
-      (JsPath \ "billToContactCountry").readNullable[String]).apply(BillingDetails.apply _)
+      (JsPath \ "billToContactCountry").readNullable[String] and
+      (JsPath \ "billToContactTitle").readNullable[String]).apply(BillingDetails.apply _)
   }
 }
 case class PaymentFailureCallout(
