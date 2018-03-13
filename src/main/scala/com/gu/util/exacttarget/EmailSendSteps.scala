@@ -32,7 +32,7 @@ case class SubscriberAttributesDef(
   billing_city: Option[String] = None,
   billing_state: Option[String] = None,
   billing_country: Option[String] = None,
-  billing_title: Option[String] = None)
+  title: Option[String] = None)
 
 sealed trait PrimaryKey {
   // ET will filter out multiple emails with the same payment id for PF1,2,3,4
@@ -76,7 +76,7 @@ object SubscriberAttributesDef {
         "billing_city" -> o.billing_city.map(JsString),
         "billing_state" -> o.billing_state.map(JsString),
         "billing_country" -> o.billing_country.map(JsString),
-        "billing_title" -> o.billing_title.map(JsString)).collect { case (key, Some(value)) => key -> value }
+        "title" -> o.title.map(JsString)).collect { case (key, Some(value)) => key -> value }
 
       val allFields = fields ++ optionalFields
       JsObject(allFields)
