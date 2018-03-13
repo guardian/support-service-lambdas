@@ -35,7 +35,7 @@ object ToMessage {
           billing_city = paymentFailureCallout.billingDetails.city,
           billing_state = paymentFailureCallout.billingDetails.state,
           billing_country = paymentFailureCallout.billingDetails.country,
-          title = paymentFailureCallout.billingDetails.title))))
+          title = paymentFailureCallout.title))))
 
   def apply(callout: AutoCancelCallout, paymentFailureInformation: PaymentFailureInformation) = Message(
     To = ToDef(
