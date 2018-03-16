@@ -2,25 +2,30 @@ package com.gu.identityBackfill
 
 import java.time.LocalDate
 
+import com.gu.identity.IdentityConfig
 import com.gu.util.apigateway.ApiGatewayRequest
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.ZuoraRestConfig
 import com.gu.util.{ Config, Logging }
 import okhttp3.{ Request, Response }
-import play.api.libs.json.Json
+import play.api.libs.json.{ Json, Reads }
 
 object IdentityBackfillSteps extends Logging {
 
-  def default(now: LocalDate, response: Request => Response, config: Config[ZuoraRestConfig]): ApiGatewayRequest => FailableOp[Unit] = {
-    //val zuoraDeps = ZuoraDeps(response, config.zuoraRestConfig)
-    new IdentityBackfillSteps().apply
+  case class IdentityBackfillDeps()
+
+  object IdentityBackfillDeps extends Logging {
+
+    case class StepsConfig(identityConfig: IdentityConfig, zuoraRestConfig: ZuoraRestConfig)
+    implicit val stepsConfigReads: Reads[StepsConfig] = Json.reads[StepsConfig]
+
+    def default(now: LocalDate, response: Request => Response, config: Config[StepsConfig]): IdentityBackfillDeps = {
+      new IdentityBackfillDeps()
+    }
+
   }
 
-}
-
-class IdentityBackfillSteps() extends Logging {
-
-  def apply(apiGatewayRequest: ApiGatewayRequest): FailableOp[Unit] = {
+  def apply(identityBackfillDeps: IdentityBackfillDeps)(apiGatewayRequest: ApiGatewayRequest): FailableOp[Unit] = {
     println("ap")
     for {
       autoCancelCallout <- Json.fromJson[Seq[String]](Json.parse(apiGatewayRequest.body)).toFailableOp.withLogging("zuora callout")

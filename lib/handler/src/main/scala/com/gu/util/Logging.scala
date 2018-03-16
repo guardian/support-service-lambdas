@@ -1,11 +1,9 @@
 package com.gu.util
 
-import com.gu.util.reader.Types.{ FailableOp, WithDepsFailableOp }
+import com.gu.util.reader.Types.{ WithDepsFailableOp, _ }
 import org.apache.log4j.Logger
 
-import com.gu.util.reader.Types._
-
-import scalaz.{ -\/, \/- }
+import scalaz.{ -\/, \/, \/- }
 
 trait Logging {
 
@@ -24,10 +22,10 @@ trait Logging {
 
   }
 
-  implicit class LogImplicit2[A](failableOp: FailableOp[A]) {
+  implicit class LogImplicit2[E, A](failableOp: E \/ A) {
 
     // this is just a handy method to add logging to the end of any for comprehension
-    def withLogging(message: String): FailableOp[A] = {
+    def withLogging(message: String): E \/ A = {
 
       failableOp match {
         case \/-(continuation) =>

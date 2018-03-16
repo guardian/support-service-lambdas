@@ -4,7 +4,7 @@ import com.gu.util.ETConfig.ETSendIds
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
-import scala.util.{ Failure, Success, Try }
+import scalaz.{ -\/, \/, \/- }
 
 case class ETConfig(
   etSendIDs: ETSendIds,
@@ -73,7 +73,7 @@ object StripeConfig {
 case class Config[StepsConfig](
   stage: Stage,
   trustedApiConfig: TrustedApiConfig,
-  zuoraRestConfig: StepsConfig,
+  stepsConfig: StepsConfig,
   etConfig: ETConfig,
   stripeConfig: StripeConfig)
 
@@ -86,22 +86,22 @@ object Config extends Logging {
   implicit def configReads[StepsConfig: Reads]: Reads[Config[StepsConfig]] = (
     (JsPath \ "stage").read[String].map(Stage.apply) and
     (JsPath \ "trustedApiConfig").read[TrustedApiConfig] and
-    (JsPath \ "zuoraRestConfig").read[StepsConfig] and
+    (JsPath \ "stepsConfig").read[StepsConfig] and
     (JsPath \ "etConfig").read[ETConfig] and
     (JsPath \ "stripe").read[StripeConfig])(Config.apply[StepsConfig] _)
 
-  def parseConfig[StepsConfig: Reads](jsonConfig: String): Try[Config[StepsConfig]] = {
+  def parseConfig[StepsConfig: Reads](jsonConfig: String): \/[ConfigFailure, Config[StepsConfig]] = {
     Json.fromJson[Config[StepsConfig]](Json.parse(jsonConfig)) match {
       case validConfig: JsSuccess[Config[StepsConfig]] =>
         logger.info(s"Successfully parsed JSON config")
-        Success(validConfig.value)
+        \/-(validConfig.value)
       case error: JsError =>
         logger.error(s"Failed to parse JSON config")
         logger.warn(s"Failed to parse JSON config: $error")
-        Failure(ConfigFailure(error))
+        -\/(ConfigFailure(error))
     }
   }
 
-  case class ConfigFailure(error: JsError) extends Throwable
+  case class ConfigFailure(error: JsError)
 
 }

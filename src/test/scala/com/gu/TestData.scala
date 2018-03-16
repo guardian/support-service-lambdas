@@ -3,14 +3,13 @@ package com.gu
 import java.time.LocalDate
 
 import com.gu.effects.TestingRawEffects
+import com.gu.stripeCustomerSourceUpdated.SourceUpdatedSteps.StepsConfig
 import com.gu.stripeCustomerSourceUpdated.{ StripeDeps, StripeSignatureChecker }
 import com.gu.util.ETConfig.{ ETSendId, ETSendIds }
 import com.gu.util._
-import com.gu.util.apigateway.{ ApiGatewayHandler, ApiGatewayRequest }
-import com.gu.util.reader.Types.FailableOp
 import com.gu.util.zuora.ZuoraGetInvoiceTransactions.{ InvoiceItem, InvoiceTransactionSummary, ItemisedInvoice }
-import com.gu.util.zuora.{ ZuoraDeps, ZuoraRestConfig }
 import com.gu.util.zuora.internal.Types.{ ClientFailableOp, WithDepsClientFailableOp, _ }
+import com.gu.util.zuora.{ ZuoraDeps, ZuoraRestConfig }
 import org.scalatest.Matchers
 import play.api.libs.json.Json
 
@@ -39,7 +38,7 @@ object TestData extends Matchers {
   val fakeConfig = Config(
     stage = Stage("DEV"),
     trustedApiConfig = fakeApiConfig,
-    zuoraRestConfig = ZuoraRestConfig("https://ddd", "e@f.com", "ggg"),
+    stepsConfig = StepsConfig(zuoraRestConfig = ZuoraRestConfig("https://ddd", "e@f.com", "ggg")),
     etConfig = ETConfig(etSendIDs = ETSendIds(ETSendId("11"), ETSendId("22"), ETSendId("33"), ETSendId("44"), ETSendId("can")), clientId = "jjj", clientSecret = "kkk"),
     stripeConfig = StripeConfig(customerSourceUpdatedWebhook = StripeWebhook(ukStripeSecretKey = StripeSecretKey("abc"), auStripeSecretKey = StripeSecretKey("def")), true))
 
@@ -54,7 +53,8 @@ object TestData extends Matchers {
     }
   }
 
-  def handlerDeps(operation: Config[ZuoraRestConfig] => ApiGatewayRequest => FailableOp[Unit]) = new ApiGatewayHandler(() => Success(""), Stage("DEV"), _ => Success(TestData.fakeConfig), operation)
+  val handlerDeps =
+    (Stage("DEV"), Success(""))
   def zuoraDeps(effects: TestingRawEffects) = ZuoraDeps(effects.response, TestData.fakeZuoraConfig)
   val stripeDeps = StripeDeps(TestData.fakeStripeConfig, new StripeSignatureChecker)
 

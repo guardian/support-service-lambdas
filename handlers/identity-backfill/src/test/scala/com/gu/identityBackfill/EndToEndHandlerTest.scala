@@ -4,6 +4,7 @@ import java.io.{ ByteArrayInputStream, ByteArrayOutputStream }
 
 import com.gu.effects.TestingRawEffects
 import com.gu.identityBackfill.EndToEndData._
+import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import org.scalatest.{ FlatSpec, Matchers }
 import play.api.libs.json.Json
 
@@ -16,7 +17,7 @@ class EndToEndHandlerTest extends FlatSpec with Matchers {
     val config = new TestingRawEffects(false, 200, responses)
 
     //execute
-    Handler.default(config.rawEffects)(stream, os, null)
+    Handler.runWithEffects(config.rawEffects, LambdaIO(stream, os, null))
 
     val responseString = new String(os.toByteArray(), "UTF-8")
 

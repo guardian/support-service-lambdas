@@ -7,6 +7,7 @@ import org.scalatest.{ FlatSpec, Ignore, Matchers }
 
 import scala.io.Source
 import scala.util.{ Success, Try }
+import scalaz.syntax.std.either._
 
 // this test checks the actual config in S3 so it needs credentials.  this means you can only run it manually
 // however it does stop you deploying a new version without updating the config first
@@ -25,14 +26,14 @@ class ConfigLoaderSystemTest extends FlatSpec with Matchers {
 
   def validate(configAttemp: Try[String], verificationStatus: Option[Boolean]) = {
     val con = for {
-      a <- configAttemp
+      a <- configAttemp.toEither.disjunction
       b <- Config.parseConfig[ZuoraRestConfig](a)
     } yield b
     val loadedOK = con.map(config => ())
     withClue(configAttemp) {
       loadedOK should be(Success(()))
       verificationStatus.foreach {
-        expected => con.get.stripeConfig.signatureChecking should be(expected)
+        expected => con.toOption.get.stripeConfig.signatureChecking should be(expected)
       }
     }
   }

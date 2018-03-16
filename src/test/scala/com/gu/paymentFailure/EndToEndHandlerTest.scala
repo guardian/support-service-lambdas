@@ -4,6 +4,7 @@ import java.io.{ ByteArrayInputStream, ByteArrayOutputStream }
 
 import com.gu.TestData._
 import com.gu.effects.TestingRawEffects
+import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import org.scalatest.{ FlatSpec, Matchers }
 
 class EndToEndHandlerTest extends FlatSpec with Matchers {
@@ -20,7 +21,7 @@ class EndToEndHandlerTest extends FlatSpec with Matchers {
     val os = new ByteArrayOutputStream()
     val config = new TestingRawEffects(false, 200, EndToEndData.responses)
     //execute
-    Lambda.default(config.rawEffects)(stream, os, null)
+    Lambda.runWithEffects(config.rawEffects, LambdaIO(stream, os, null))
 
     config.resultMap
       .get(("POST", "/messaging/v1/messageDefinitionSends/111/send")).get.get jsonMatches endToEndData.expectedEmailSend // TODO check the body too

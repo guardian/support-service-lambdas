@@ -1,18 +1,19 @@
 package com.gu.autoCancel
 
+import java.time.LocalDate
+
 import com.gu.autoCancel.AutoCancel.AutoCancelRequest
 import com.gu.paymentFailure.GetPaymentData.PaymentFailureInformation
 import com.gu.paymentFailure.ZuoraEmailSteps.ZuoraEmailStepsDeps
 import com.gu.paymentFailure.{ ToMessage, ZuoraEmailSteps }
+import com.gu.stripeCustomerSourceUpdated.SourceUpdatedSteps.StepsConfig
 import com.gu.util.ETConfig.ETSendIds
 import com.gu.util.apigateway.ApiGatewayRequest
 import com.gu.util.exacttarget.EmailRequest
 import com.gu.util.reader.Types._
-import com.gu.util.zuora.{ ZuoraDeps, ZuoraRestConfig }
+import com.gu.util.zuora.ZuoraDeps
 import com.gu.util.{ Config, Logging }
 import okhttp3.{ Request, Response }
-import java.time.LocalDate
-
 import play.api.libs.json.Json
 
 import scalaz.\/-
@@ -20,8 +21,8 @@ import scalaz.\/-
 object AutoCancelSteps extends Logging {
 
   object AutoCancelStepsDeps {
-    def default(now: LocalDate, response: Request => Response, config: Config[ZuoraRestConfig]): AutoCancelStepsDeps = {
-      val zuoraDeps = ZuoraDeps(response, config.zuoraRestConfig)
+    def default(now: LocalDate, response: Request => Response, config: Config[StepsConfig]): AutoCancelStepsDeps = {
+      val zuoraDeps = ZuoraDeps(response, config.stepsConfig.zuoraRestConfig)
       AutoCancelStepsDeps(
         AutoCancel.apply(zuoraDeps),
         AutoCancelDataCollectionFilter.apply(AutoCancelDataCollectionFilter.ACFilterDeps.default(now, zuoraDeps)),
