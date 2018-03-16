@@ -11,7 +11,7 @@ class GetByEmailTest extends FlatSpec with Matchers {
   it should "get successful ok" in {
     val testingRawEffects = new TestingRawEffects(responses = Map("/user?emailAddress=email@address" -> ((200, TestData.dummyIdentityResponse))))
 
-    val actual: \/[GetByEmail.ApiError, GetByEmail.IdentityId] = GetByEmail(IdentityClientDeps(testingRawEffects.rawEffects.response, IdentityConfig("http://baseurl", "apitoken")))(EmailAddress("email@address"))
+    val actual: \/[GetByEmail.ApiError, GetByEmail.IdentityId] = GetByEmail(EmailAddress("email@address"))(testingRawEffects.rawEffects.response, IdentityConfig("http://baseurl", "apitoken"))
 
     actual should be(\/-(IdentityId("1234")))
   }

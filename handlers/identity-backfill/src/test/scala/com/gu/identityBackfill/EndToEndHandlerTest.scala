@@ -3,6 +3,7 @@ package com.gu.identityBackfill
 import java.io.{ ByteArrayInputStream, ByteArrayOutputStream }
 
 import com.gu.effects.TestingRawEffects
+import com.gu.identity.TestData
 import com.gu.identityBackfill.EndToEndData._
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import org.scalatest.{ FlatSpec, Matchers }
@@ -41,7 +42,7 @@ object EndToEndData {
     }
   }
 
-  def responses: Map[String, (Int, String)] = Map()
+  def responses: Map[String, (Int, String)] = Map("/user?emailAddress=email@address" -> ((200, TestData.dummyIdentityResponse)))
 
   val identityBackfillRequest: String =
     """
@@ -96,7 +97,7 @@ object EndToEndData {
       |        "httpMethod": "POST",
       |        "apiId": "11111"
       |    },
-      |    "body": "[\"hello!!!!\"]",
+      |    "body": "{\"emailAddress\": \"email@address\"}",
       |    "isBase64Encoded": false
       |}
     """.stripMargin

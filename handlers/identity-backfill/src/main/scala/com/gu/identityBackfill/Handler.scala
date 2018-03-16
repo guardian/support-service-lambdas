@@ -19,8 +19,8 @@ object Handler {
     runWithEffects(RawEffects.createDefault, LambdaIO(inputStream, outputStream, context))
 
   def runWithEffects(rawEffects: RawEffects, lambdaIO: LambdaIO): Unit = {
-    def operation(config: Config[StepsConfig]): ApiGatewayRequest => FailableOp[Unit] =
-      IdentityBackfillSteps.apply
+    def operation: Config[StepsConfig] => ApiGatewayRequest => FailableOp[Unit] =
+      config => IdentityBackfillSteps.apply(config.stepsConfig, rawEffects.response)
     ApiGatewayHandler.default[StepsConfig](implicitly)(operation, lambdaIO).run((rawEffects.stage, rawEffects.s3Load(rawEffects.stage)))
   }
 

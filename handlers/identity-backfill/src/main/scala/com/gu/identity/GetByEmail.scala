@@ -35,8 +35,7 @@ object GetByEmail {
       case _ => -\/(ApiError("not an OK response from api"))
     }
 
-  def apply(deps: IdentityClientDeps)(email: EmailAddress): ApiError \/ IdentityId = {
-    import deps._
+  def apply(email: EmailAddress)(getResponse: Request => Response, identityConfig: IdentityConfig): ApiError \/ IdentityId = {
 
     val url = HttpUrl.parse(identityConfig.baseUrl + "/user").newBuilder().addQueryParameter("emailAddress", email.value).build()
     val response = getResponse(new Request.Builder().url(url).addHeader("X-GU-ID-Client-Access-Token", "Bearer " + identityConfig.apiToken).build())
@@ -60,7 +59,3 @@ case class IdentityConfig(
 object IdentityConfig {
   implicit val reads: Reads[IdentityConfig] = Json.reads[IdentityConfig]
 }
-
-case class IdentityClientDeps(
-  getResponse: Request => Response,
-  identityConfig: IdentityConfig)
