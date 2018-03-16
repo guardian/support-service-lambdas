@@ -3,7 +3,7 @@ package manualTest
 import com.gu.effects.RawEffects
 import com.gu.identity.GetByEmail.EmailAddress
 import com.gu.identity.{ GetByEmail, IdentityClientDeps }
-import com.gu.identityBackfill.IdentityBackfillSteps.IdentityBackfillDeps.StepsConfig
+import com.gu.identityBackfill.IdentityBackfillSteps.StepsConfig
 import com.gu.util.{ Config, Logging }
 
 import scala.io.Source
