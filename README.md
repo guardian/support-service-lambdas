@@ -28,6 +28,26 @@ If there's any code in either that you feel could be unit tested, it should prob
 - **one jar per lambda** - minimise the size of the deployment artifact
 - **minimise dependencies (aka liabilities)** on external libraries as we have to keep them up to date, also they increase the size of the artifact
 
+# Howto update config
+At the moment we just use S3 for config.
+
+If you're making an addition, you can just copy the file from S3 for PROD and CODE, then update and upload.
+Check the version in the AwsS3.scala ConfigLoad object.
+`aws s3 cp s3://gu-reader-revenue-private/membership/payment-failure-lambdas/CODE/payment-failure-lambdas.private.v<VERSION>.json /etc/gu/CODE/ --profile membership`
+Then do the reverse to upload again.
+
+If you're making a change that you only want to go live on deployment (and have the ability to roll back
+with riffraff) then you can increment the version.  Make sure you upload the file with the new version,
+otherwise it will break the existing lambda immediately.
+
+Follow the same process to update the prod config.
+
+To check that you have done it correctly, run the ConfigLoaderSystemTest.
+You will have to remove the @Ignore from it before you can run it.  Remember to replace afterwards.
+That will check the latest version can be understood by the current version of the code.
+
+Ideally this test should be automated and your PR shouldn't be mergable until the config is readable.
+
 ## structure
 The main project aggregates all the sub projects from handlers and lib, so we can build and test them in one go.
 
