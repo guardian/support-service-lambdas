@@ -1,6 +1,7 @@
 package com.gu.identity
 
 import com.gu.identity.GetByEmail.RawWireModel.{ User, UserResponse }
+import com.gu.identityBackfill.Types.{ EmailAddress, IdentityId }
 import okhttp3.{ HttpUrl, Request, Response }
 import play.api.libs.json.{ Json, Reads }
 
@@ -8,9 +9,6 @@ import scalaz.{ -\/, \/, \/- }
 import scalaz.syntax.std.either._
 
 object GetByEmail {
-
-  case class EmailAddress(value: String)
-  case class IdentityId(value: String)
 
   case class ApiError(message: String)
 
@@ -24,10 +22,8 @@ object GetByEmail {
 
   }
 
-  object IdentityId {
-    def fromUser(user: User) =
-      IdentityId(user.id)
-  }
+  def identityIdFromUser(user: User) =
+    IdentityId(user.id)
 
   def userFromResponse(userResponse: UserResponse): ApiError \/ User =
     userResponse match {
@@ -35,7 +31,7 @@ object GetByEmail {
       case _ => -\/(ApiError("not an OK response from api"))
     }
 
-  def apply(email: EmailAddress)(getResponse: Request => Response, identityConfig: IdentityConfig): ApiError \/ IdentityId = {
+  def apply(getResponse: Request => Response, identityConfig: IdentityConfig)(email: EmailAddress): ApiError \/ IdentityId = {
 
     val url = HttpUrl.parse(identityConfig.baseUrl + "/user").newBuilder().addQueryParameter("emailAddress", email.value).build()
     val response = getResponse(new Request.Builder().url(url).addHeader("X-GU-ID-Client-Access-Token", "Bearer " + identityConfig.apiToken).build())
@@ -45,7 +41,7 @@ object GetByEmail {
       body = response.body.byteStream
       userResponse <- Json.parse(body).validate[UserResponse].asEither.disjunction.leftMap(err => ApiError(err.mkString(", ")))
       user <- userFromResponse(userResponse)
-      identityId = IdentityId.fromUser(user)
+      identityId = identityIdFromUser(user)
     } yield identityId
 
   }

@@ -3,49 +3,74 @@ package com.gu.identityBackfill
 import java.io.{ ByteArrayInputStream, ByteArrayOutputStream }
 
 import com.gu.effects.TestingRawEffects
+import com.gu.effects.TestingRawEffects.BasicRequest
 import com.gu.identity.TestData
 import com.gu.identityBackfill.EndToEndData._
+import Runner._
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
-import org.scalatest.{ FlatSpec, Matchers }
+import org.scalatest.{ Assertion, FlatSpec, Matchers }
 import play.api.libs.json.Json
 
 class EndToEndHandlerTest extends FlatSpec with Matchers {
 
+  it should "manage an end to end call in dry run mode" in {
+
+    val (responseString, requests): (String, List[TestingRawEffects.BasicRequest]) = getResultAndRequests(identityBackfillRequest(true))
+
+    val expectedResponse =
+      s"""
+         |{"statusCode":"200","headers":{"Content-Type":"application/json"},"body":"Processing is not required: DRY RUN requested! skipping to the end"}
+         |""".stripMargin
+    responseString jsonMatches expectedResponse
+    requests should be(List(BasicRequest("GET", "/user?emailAddress=email@address", "")))
+  }
+
   it should "manage an end to end call" in {
 
-    val stream = new ByteArrayInputStream(identityBackfillRequest.getBytes(java.nio.charset.StandardCharsets.UTF_8))
+    val (responseString, requests): (String, List[TestingRawEffects.BasicRequest]) = getResultAndRequests(identityBackfillRequest(false))
+
+    val expectedResponse =
+      s"""
+         |{"statusCode":"500","headers":{"Content-Type":"application/json"},"body":"Failed to process event due to the following error: todo"}
+         |""".stripMargin
+    responseString jsonMatches expectedResponse
+    requests should be(List(BasicRequest("GET", "/user?emailAddress=email@address", "")))
+  }
+
+}
+
+object Runner {
+
+  def getResultAndRequests(input: String): (String, List[TestingRawEffects.BasicRequest]) = {
+    val stream = new ByteArrayInputStream(input.getBytes(java.nio.charset.StandardCharsets.UTF_8))
     val os = new ByteArrayOutputStream()
     val config = new TestingRawEffects(false, 200, responses)
 
     //execute
     Handler.runWithEffects(config.rawEffects, LambdaIO(stream, os, null))
 
-    val responseString = new String(os.toByteArray(), "UTF-8")
+    val responseString = new String(os.toByteArray, "UTF-8")
 
-    val expectedResponse =
-      s"""
-         |{"statusCode":"200","headers":{"Content-Type":"application/json"},"body":"Success"}
-         |""".stripMargin
-    responseString jsonMatches expectedResponse
+    (responseString, config.requestsAttempted)
   }
-
-}
-
-object EndToEndData {
 
   implicit class JsonMatcher(private val actual: String) {
     import Matchers._
-    def jsonMatches(expected: String) = {
+    def jsonMatches(expected: String): Assertion = {
       val expectedJson = Json.parse(expected)
       val actualJson = Json.parse(actual)
       actualJson should be(expectedJson)
     }
   }
 
+}
+
+object EndToEndData {
+
   def responses: Map[String, (Int, String)] = Map("/user?emailAddress=email@address" -> ((200, TestData.dummyIdentityResponse)))
 
-  val identityBackfillRequest: String =
-    """
+  def identityBackfillRequest(dryRun: Boolean): String =
+    s"""
       |{
       |    "resource": "/payment-failure",
       |    "path": "/payment-failure",
@@ -97,7 +122,7 @@ object EndToEndData {
       |        "httpMethod": "POST",
       |        "apiId": "11111"
       |    },
-      |    "body": "{\"emailAddress\": \"email@address\"}",
+      |    "body": "{\\"emailAddress\\": \\"email@address\\", \\"dryRun\\": $dryRun}",
       |    "isBase64Encoded": false
       |}
     """.stripMargin

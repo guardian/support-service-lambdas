@@ -2,7 +2,7 @@ package com.gu.autoCancel
 
 import java.time.LocalDate
 
-import com.gu.effects.TestingRawEffects.BasicResult
+import com.gu.effects.TestingRawEffects.BasicRequest
 import com.gu.autoCancel.AutoCancel.AutoCancelRequest
 import com.gu.autoCancel.AutoCancelDataCollectionFilter.ACFilterDeps
 import com.gu.effects.TestingRawEffects
@@ -40,7 +40,7 @@ class AutoCancelStepsTest extends FlatSpec with Matchers {
     val effects = new TestingRawEffects(false, 200)
     AutoCancel(TestData.zuoraDeps(effects))(AutoCancelRequest("AID", SubscriptionId("subid"), LocalDate.now))
 
-    effects.requestsAttempted should contain(BasicResult("PUT", "/accounts/AID", "{\"autoPay\":false}"))
+    effects.requestsAttempted should contain(BasicRequest("PUT", "/accounts/AID", "{\"autoPay\":false}"))
   }
 
   //  // todo need an ACSDeps so we don't need so many mock requests
