@@ -35,7 +35,7 @@ object IdentityBackfillSteps extends Logging {
       request <- Json.fromJson[IdentityBackfillRequest](Json.parse(apiGatewayRequest.body)).toFailableOp.withLogging("zuora callout")
       emailAddress = fromRequest(request)
       identityId <- getByEmail(emailAddress).leftMap(a => ApiGatewayResponse.internalServerError(a.toString)).withLogging("GetByEmail")
-      _ <- if (request.dryRun) -\/(ApiGatewayResponse.noActionRequired("DRY RUN requested! skipping to the end")) else \/-(()) // FIXME remove this like
+      _ <- if (request.dryRun) -\/(ApiGatewayResponse.noActionRequired("DRY RUN requested! skipping to the end")) else \/-(()) // FIXME this will be removed once the later steps actually do something. it was just needed for testing
       zuoraAccountsForEmail <- getZuoraAccountsForEmail(emailAddress)
       zuoraAccountForEmail <- zuoraAccountsForEmail match { case one :: Nil => \/-(one); case _ => -\/(ApiGatewayResponse.internalServerError("should have exactly one zuora account per email at this stage")) }
       zuoraAccountsForIdentityId <- countZuoraAccountsForIdentityId(identityId)

@@ -2,8 +2,8 @@ package manualTest
 
 import com.gu.effects.ConfigLoad
 import com.gu.stripeCustomerSourceUpdated.SourceUpdatedSteps.StepsConfig
-import com.gu.util.{Config, Stage}
-import org.scalatest.{FlatSpec, Ignore, Matchers}
+import com.gu.util.{ Config, Stage }
+import org.scalatest.{ FlatSpec, Ignore, Matchers }
 
 import scala.io.Source
 import scala.util.Try
