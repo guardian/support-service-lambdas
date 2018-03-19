@@ -1,13 +1,14 @@
 package com.gu.identityBackfill
 
-import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
+import java.io.{ ByteArrayInputStream, ByteArrayOutputStream }
 
 import com.gu.effects.TestingRawEffects
 import com.gu.effects.TestingRawEffects.BasicRequest
 import com.gu.identity.TestData
 import com.gu.identityBackfill.EndToEndData._
+import Runner._
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
-import org.scalatest.{Assertion, FlatSpec, Matchers}
+import org.scalatest.{ Assertion, FlatSpec, Matchers }
 import play.api.libs.json.Json
 
 class EndToEndHandlerTest extends FlatSpec with Matchers {
@@ -36,6 +37,10 @@ class EndToEndHandlerTest extends FlatSpec with Matchers {
     requests should be(List(BasicRequest("GET", "/user?emailAddress=email@address", "")))
   }
 
+}
+
+object Runner {
+
   def getResultAndRequests(input: String): (String, List[TestingRawEffects.BasicRequest]) = {
     val stream = new ByteArrayInputStream(input.getBytes(java.nio.charset.StandardCharsets.UTF_8))
     val os = new ByteArrayOutputStream()
@@ -49,14 +54,6 @@ class EndToEndHandlerTest extends FlatSpec with Matchers {
     (responseString, config.requestsAttempted)
   }
 
-}
-
-object Runner {
-
-}
-
-object EndToEndData {
-
   implicit class JsonMatcher(private val actual: String) {
     import Matchers._
     def jsonMatches(expected: String): Assertion = {
@@ -65,6 +62,10 @@ object EndToEndData {
       actualJson should be(expectedJson)
     }
   }
+
+}
+
+object EndToEndData {
 
   def responses: Map[String, (Int, String)] = Map("/user?emailAddress=email@address" -> ((200, TestData.dummyIdentityResponse)))
 
