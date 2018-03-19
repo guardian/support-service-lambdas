@@ -55,4 +55,19 @@ object Types {
 
   }
 
+  // handy class for converting things
+  implicit class EitherOps[L, A](theEither: L \/ A) {
+
+    def toFailableOp(action: String): FailableOp[A] = {
+      theEither match {
+        case \/-(success) => \/-(success)
+        case -\/(error) => {
+          logger.error(s"Failed to $action: $error")
+          -\/(internalServerError(s"Failed to execute lambda - unable to $action"))
+        }
+      }
+    }
+
+  }
+
 }

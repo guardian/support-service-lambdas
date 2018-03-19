@@ -4,17 +4,17 @@ import com.gu.util.ETConfig.{ ETSendId, ETSendIds }
 import org.scalatest.{ FlatSpec, Matchers }
 import play.api.libs.json.{ JsSuccess, Json }
 
-import scala.util.Success
+import scalaz.\/-
 
 class ConfigLoaderTest extends FlatSpec with Matchers {
 
   "loader" should "be able to load config successfully" in {
     val actualConfigObject = Config.parseConfig[String](codeConfig)
-    actualConfigObject should be(Success(
+    actualConfigObject should be(\/-(
       Config(
         Stage("DEV"),
         TrustedApiConfig("b", "c"),
-        zuoraRestConfig = "hi",
+        stepsConfig = "hi",
         etConfig = ETConfig(etSendIDs = ETSendIds(ETSendId("111"), ETSendId("222"), ETSendId("333"), ETSendId("444"), ETSendId("ccc")), clientId = "jjj", clientSecret = "kkk"),
         stripeConfig = StripeConfig(StripeWebhook(StripeSecretKey("abc"), StripeSecretKey("def")), true))))
   }
@@ -78,7 +78,7 @@ class ConfigLoaderTest extends FlatSpec with Matchers {
       |    "apiToken": "b",
       |    "tenantId": "c"
       |  },
-      |  "zuoraRestConfig": "hi",
+      |  "stepsConfig": "hi",
       |  "etConfig": {
       |    "etSendIDs":
       |    {

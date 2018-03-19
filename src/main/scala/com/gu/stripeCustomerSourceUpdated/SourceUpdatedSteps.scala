@@ -13,7 +13,7 @@ import com.gu.stripeCustomerSourceUpdated.zuora.ZuoraQueryPaymentMethod.{ Accoun
 import com.gu.util.zuora.ZuoraAccount.PaymentMethodId
 import com.gu.util.zuora._
 import okhttp3.{ Request, Response }
-import play.api.libs.json.Json
+import play.api.libs.json.{ Json, Reads }
 
 import scalaz._
 import scalaz.syntax.applicative._
@@ -22,6 +22,9 @@ import scalaz.std.list._
 import scalaz.EitherT._
 
 object SourceUpdatedSteps extends Logging {
+
+  case class StepsConfig(zuoraRestConfig: ZuoraRestConfig)
+  implicit val stepsConfigReads: Reads[StepsConfig] = Json.reads[StepsConfig]
 
   type WithZuoraDepsFailableOp[A] = WithDepsFailableOp[ZuoraDeps, A]
   implicit val mWithZuoraDepsFailableOp: Monad[WithZuoraDepsFailableOp] = eitherTMonad[({ type XReader[AA] = Reader[ZuoraDeps, AA] })#XReader, ApiResponse]
@@ -94,8 +97,8 @@ object SourceUpdatedSteps extends Logging {
   }
 
   object Deps {
-    def default(response: Request => Response, config: Config[ZuoraRestConfig]): Deps = {
-      Deps(ZuoraDeps(response, config.zuoraRestConfig), StripeDeps(config.stripeConfig, new StripeSignatureChecker))
+    def default(response: Request => Response, config: Config[StepsConfig]): Deps = {
+      Deps(ZuoraDeps(response, config.stepsConfig.zuoraRestConfig), StripeDeps(config.stripeConfig, new StripeSignatureChecker))
     }
   }
 

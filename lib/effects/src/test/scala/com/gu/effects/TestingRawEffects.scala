@@ -27,8 +27,9 @@ class TestingRawEffects(val isProd: Boolean = false, val defaultCode: Int = 1, r
   val response: Request => Response = {
     req =>
       result = req :: result
-      val (code, response) = responses.getOrElse(req.url().encodedPath(), (defaultCode, """{"success": true}"""))
-      logger.info(s"request for: ${req.url().encodedPath()} so returning $response")
+      val path = req.url().encodedPath() + Option( /*could be null*/ req.url().encodedQuery()).filter(_ != "").map(query => s"?$query").getOrElse("")
+      val (code, response) = responses.getOrElse(path, (defaultCode, """{"success": true}"""))
+      logger.info(s"request for: $path so returning $response")
       new Response.Builder()
         .request(req)
         .protocol(Protocol.HTTP_1_1)
@@ -65,10 +66,16 @@ object TestingRawEffects {
       |    "apiToken": "b",
       |    "tenantId": "c"
       |  },
-      |  "zuoraRestConfig": {
-      |    "baseUrl": "https://ddd",
-      |    "username": "e@f.com",
-      |    "password": "ggg"
+      |  "stepsConfig": {
+      |    "zuoraRestConfig": {
+      |      "baseUrl": "https://ddd",
+      |      "username": "e@f.com",
+      |      "password": "ggg"
+      |    },
+      |    "identityConfig": {
+      |      "baseUrl": "https://ididbaseurl",
+      |      "apiToken": "tokentokentokenidentity"
+      |    }
       |  },
       |  "etConfig": {
       |    "etSendIDs":

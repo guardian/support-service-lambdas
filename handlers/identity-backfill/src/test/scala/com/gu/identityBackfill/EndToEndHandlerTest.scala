@@ -3,7 +3,9 @@ package com.gu.identityBackfill
 import java.io.{ ByteArrayInputStream, ByteArrayOutputStream }
 
 import com.gu.effects.TestingRawEffects
+import com.gu.identity.TestData
 import com.gu.identityBackfill.EndToEndData._
+import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import org.scalatest.{ FlatSpec, Matchers }
 import play.api.libs.json.Json
 
@@ -16,7 +18,7 @@ class EndToEndHandlerTest extends FlatSpec with Matchers {
     val config = new TestingRawEffects(false, 200, responses)
 
     //execute
-    Handler.default(config.rawEffects)(stream, os, null)
+    Handler.runWithEffects(config.rawEffects, LambdaIO(stream, os, null))
 
     val responseString = new String(os.toByteArray(), "UTF-8")
 
@@ -40,7 +42,7 @@ object EndToEndData {
     }
   }
 
-  def responses: Map[String, (Int, String)] = Map()
+  def responses: Map[String, (Int, String)] = Map("/user?emailAddress=email@address" -> ((200, TestData.dummyIdentityResponse)))
 
   val identityBackfillRequest: String =
     """
@@ -95,7 +97,7 @@ object EndToEndData {
       |        "httpMethod": "POST",
       |        "apiId": "11111"
       |    },
-      |    "body": "[\"hello!!!!\"]",
+      |    "body": "{\"emailAddress\": \"email@address\"}",
       |    "isBase64Encoded": false
       |}
     """.stripMargin

@@ -4,24 +4,20 @@ import java.io.{ InputStream, OutputStream }
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.util.Auth.credentialsAreValid
+import com.gu.util.Config.ConfigFailure
 import com.gu.util._
 import com.gu.util.apigateway.ApiGatewayResponse.{ outputForAPIGateway, successfulExecution, unauthorized }
 import com.gu.util.apigateway.ResponseModels.ApiResponse
-import com.gu.util.reader.Types._
+import com.gu.util.reader.Types.{ FailableOp, _ }
 import play.api.libs.json.{ Json, Reads }
 
 import scala.io.Source
 import scala.util.Try
-import scalaz.{ -\/, \/, \/- }
+import scalaz.{ -\/, Reader, \/, \/- }
 
 object ApiGatewayHandler extends Logging {
 
-  def apply[StepsConfig: Reads](stage: Stage, s3Load: Stage => Try[String], operation: Config[StepsConfig] => ApiGatewayRequest => FailableOp[Unit]): ApiGatewayHandler[StepsConfig] =
-    new ApiGatewayHandler[StepsConfig](
-      () => s3Load(stage),
-      stage,
-      Config.parseConfig,
-      operation)
+  case class LambdaIO(inputStream: InputStream, outputStream: OutputStream, context: Context)
 
   def parseApiGatewayRequest(inputStream: InputStream): FailableOp[ApiGatewayRequest] = {
     for {
@@ -42,39 +38,47 @@ object ApiGatewayHandler extends Logging {
     if (credentialsAreValid(requestAuth, trustedApiConfig)) \/-(()) else -\/(unauthorized)
   }
 
-}
+  def default[StepsConfig: Reads]: (Config[StepsConfig] => ApiGatewayRequest => FailableOp[Unit], LambdaIO) => Reader[(Stage, Try[String]), Unit] =
+    apply(LoadConfig.default[StepsConfig], _, _)
 
-class ApiGatewayHandler[StepsConfig](
-  s3Load: () => Try[String],
-  stage: Stage,
-  parseConfig: String => Try[Config[StepsConfig]],
-  operation: Config[StepsConfig] => ApiGatewayRequest => FailableOp[Unit]) extends Logging {
+  def apply[StepsConfig](
+    loadConfig: Reader[(Stage, Try[String]), FailableOp[Config[StepsConfig]]],
+    operation: Config[StepsConfig] => ApiGatewayRequest => FailableOp[Unit],
+    lambdaIO: LambdaIO): Reader[(Stage, Try[String]), Unit] = {
 
-  import ApiGatewayHandler._
+    import lambdaIO._
 
-  def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
+    loadConfig.map { failableConfig =>
+      val response = for {
+        config <- failableConfig
+        apiGatewayRequest <- parseApiGatewayRequest(inputStream)
+        _ <- authenticateCallout(apiGatewayRequest.requestAuth, config.trustedApiConfig).withLogging("authentication")
+        _ <- operation(config)(apiGatewayRequest)
+      } yield ()
 
-    val response = for {
-      config <- loadConfig()
-      apiGatewayRequest <- parseApiGatewayRequest(inputStream)
-      _ <- authenticateCallout(apiGatewayRequest.requestAuth, config.trustedApiConfig).withLogging("authentication")
-      _ <- operation(config)(apiGatewayRequest)
-    } yield ()
-
-    outputForAPIGateway(outputStream, response.fold(identity, _ => successfulExecution))
+      outputForAPIGateway(outputStream, response.fold(identity, _ => successfulExecution))
+    }
 
   }
 
-  def loadConfig(): FailableOp[Config[StepsConfig]] = {
-    logger.info(s"${this.getClass} Lambda is starting up in $stage")
+}
 
-    for {
+object LoadConfig extends Logging {
 
-      textConfig <- s3Load().toFailableOp("load config from s3")
-      config <- parseConfig(textConfig).toFailableOp("parse config file")
-      _ <- if (stage == config.stage) { \/-(()) } else { -\/(ApiGatewayResponse.internalServerError(s"running in $stage with config from ${config.stage}")) }
+  def default[StepsConfig: Reads]: Reader[(Stage, Try[String]), FailableOp[Config[StepsConfig]]] = loadConfig(Config.parseConfig[StepsConfig] _)
 
-    } yield config
+  def loadConfig[StepsConfig](parseConfig: String => \/[ConfigFailure, Config[StepsConfig]]): Reader[(Stage, Try[String]), FailableOp[Config[StepsConfig]]] = Reader {
+    case (stage, s3Load) =>
+
+      logger.info(s"${this.getClass} Lambda is starting up in $stage")
+
+      for {
+
+        textConfig <- s3Load.toFailableOp("load config from s3")
+        config <- parseConfig(textConfig).toFailableOp("parse config file")
+        _ <- if (stage == config.stage) { \/-(()) } else { -\/(ApiGatewayResponse.internalServerError(s"running in $stage with config from ${config.stage}")) }
+
+      } yield config
   }
 
 }

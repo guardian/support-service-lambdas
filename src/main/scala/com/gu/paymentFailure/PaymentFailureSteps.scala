@@ -2,6 +2,7 @@ package com.gu.paymentFailure
 
 import com.gu.paymentFailure.GetPaymentData.PaymentFailureInformation
 import com.gu.paymentFailure.ZuoraEmailSteps.ZuoraEmailStepsDeps
+import com.gu.stripeCustomerSourceUpdated.SourceUpdatedSteps.StepsConfig
 import com.gu.util.Auth.validTenant
 import com.gu.util.ETConfig.ETSendIds
 import com.gu.util._
@@ -12,7 +13,7 @@ import com.gu.util.exacttarget.{ EmailRequest, EmailSendSteps }
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.ZuoraGetInvoiceTransactions.InvoiceTransactionSummary
 import com.gu.util.zuora.internal.Types.ClientFailableOp
-import com.gu.util.zuora.{ ZuoraDeps, ZuoraGetInvoiceTransactions, ZuoraRestConfig }
+import com.gu.util.zuora.{ ZuoraDeps, ZuoraGetInvoiceTransactions }
 import okhttp3.{ Request, Response }
 import play.api.libs.json.Json
 
@@ -45,7 +46,7 @@ object PaymentFailureSteps extends Logging {
   }
 
   object PFDeps {
-    def default(response: Request => Response, config: Config[ZuoraRestConfig]): PFDeps = {
+    def default(response: Request => Response, config: Config[StepsConfig]): PFDeps = {
       PFDeps(
         ZuoraEmailSteps.sendEmailRegardingAccount(ZuoraEmailStepsDeps.default(response, config)),
         config.etConfig.etSendIDs,
@@ -72,10 +73,10 @@ object ZuoraEmailSteps {
   }
 
   object ZuoraEmailStepsDeps {
-    def default(response: Request => Response, config: Config[ZuoraRestConfig]): ZuoraEmailStepsDeps = {
+    def default(response: Request => Response, config: Config[StepsConfig]): ZuoraEmailStepsDeps = {
       ZuoraEmailStepsDeps(
         EmailSendSteps.apply(EmailSendStepsDeps.default(config.stage, response, config.etConfig)),
-        a => ZuoraGetInvoiceTransactions(a).run.run(ZuoraDeps(response, config.zuoraRestConfig)))
+        a => ZuoraGetInvoiceTransactions(a).run.run(ZuoraDeps(response, config.stepsConfig.zuoraRestConfig)))
     }
   }
 
