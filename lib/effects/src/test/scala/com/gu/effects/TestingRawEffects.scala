@@ -12,22 +12,21 @@ import scala.util.Success
 
 class TestingRawEffects(val isProd: Boolean = false, val defaultCode: Int = 1, responses: Map[String, (Int, String)] = Map()) extends Logging {
 
-  var result: List[Request] = Nil // !
+  var requests: List[Request] = Nil // !
 
   val stage = Stage(if (isProd) "PROD" else "DEV")
 
-  def requestsAttempted = result.map { request =>
+  def requestsAttempted: List[BasicRequest] = requests.map { request =>
     val buffer = new Buffer()
     Option(request.body()).foreach(_.writeTo(buffer))
     val body = buffer.readString(UTF_8)
-    val url = request.url
-    BasicResult(request.method(), url.encodedPath(), body)
+    BasicRequest(request.method(), getPathWithQueryString(request), body)
   }
 
   val response: Request => Response = {
     req =>
-      result = req :: result
-      val path = req.url().encodedPath() + Option( /*could be null*/ req.url().encodedQuery()).filter(_ != "").map(query => s"?$query").getOrElse("")
+      requests = req :: requests
+      val path = getPathWithQueryString(req)
       val (code, response) = responses.getOrElse(path, (defaultCode, """{"success": true}"""))
       logger.info(s"request for: $path so returning $response")
       new Response.Builder()
@@ -39,6 +38,10 @@ class TestingRawEffects(val isProd: Boolean = false, val defaultCode: Int = 1, r
         .build()
   }
 
+  private def getPathWithQueryString(req: Request) = {
+    req.url().encodedPath() + Option( /*could be null*/ req.url().encodedQuery()).filter(_ != "").map(query => s"?$query").getOrElse("")
+  }
+
   // TODO nicer type than tuple
   def resultMap: Map[(String, String), Option[String]] = {
     //verify
@@ -48,7 +51,7 @@ class TestingRawEffects(val isProd: Boolean = false, val defaultCode: Int = 1, r
       buffer.readString(UTF_8)
     }
 
-    result.map(req => (req.method, req.url.encodedPath) -> Option(req.body).map(body)).toMap
+    requests.map(req => (req.method, req.url.encodedPath) -> Option(req.body).map(body)).toMap
   }
   val rawEffects = RawEffects(response, stage, _ => Success(codeConfig), () => LocalDate.of(2017, 11, 19))
 
@@ -56,7 +59,7 @@ class TestingRawEffects(val isProd: Boolean = false, val defaultCode: Int = 1, r
 
 object TestingRawEffects {
 
-  case class BasicResult(method: String, path: String, body: String)
+  case class BasicRequest(method: String, path: String, body: String)
 
   val codeConfig: String =
     """

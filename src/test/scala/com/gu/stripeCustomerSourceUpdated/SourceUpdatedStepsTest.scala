@@ -2,7 +2,7 @@ package com.gu.stripeCustomerSourceUpdated
 
 import com.gu.TestData
 import com.gu.effects.TestingRawEffects
-import com.gu.effects.TestingRawEffects.BasicResult
+import com.gu.effects.TestingRawEffects.BasicRequest
 import com.gu.stripeCustomerSourceUpdated.SourceUpdatedStepsTestData._
 import com.gu.stripeCustomerSourceUpdated.zuora.ZuoraQueryPaymentMethod.PaymentMethodFields
 import com.gu.util.apigateway.{ ApiGatewayRequest, ApiGatewayResponse }
@@ -31,11 +31,11 @@ class SourceUpdatedStepsGetPaymentMethodsToUpdateTest extends FlatSpec with Matc
 
     val actual = SourceUpdatedSteps.getPaymentMethodsToUpdate(StripeCustomerId("fakecustid"), StripeSourceId("fakecardid")).run.run(TestData.zuoraDeps(effects))
 
-    val expectedPOST = BasicResult(
+    val expectedPOST = BasicRequest(
       "POST",
       "/action/query",
       "{\"queryString\":\"SELECT Id, AccountId, NumConsecutiveFailures\\n FROM PaymentMethod\\n  where Type='CreditCardReferenceTransaction' AND PaymentMethodStatus = 'Active' AND TokenId = 'fakecardid' AND SecondTokenId = 'fakecustid'\"}")
-    val expectedGET = BasicResult(
+    val expectedGET = BasicRequest(
       "GET",
       "/accounts/accid/summary",
       "")
@@ -62,11 +62,11 @@ class SourceUpdatedStepsGetPaymentMethodsToUpdateTest extends FlatSpec with Matc
 
     val actual = SourceUpdatedSteps.getPaymentMethodsToUpdate(StripeCustomerId("fakecustid"), StripeSourceId("fakecardid")).run.run(TestData.zuoraDeps(effects))
 
-    val expectedPOST = BasicResult(
+    val expectedPOST = BasicRequest(
       "POST",
       "/action/query",
       "{\"queryString\":\"SELECT Id, AccountId, NumConsecutiveFailures\\n FROM PaymentMethod\\n  where Type='CreditCardReferenceTransaction' AND PaymentMethodStatus = 'Active' AND TokenId = 'fakecardid' AND SecondTokenId = 'fakecustid'\"}")
-    val expectedGET = BasicResult(
+    val expectedGET = BasicRequest(
       "GET",
       "/accounts/accid/summary",
       "")
@@ -98,11 +98,11 @@ class SourceUpdatedStepsGetPaymentMethodsToUpdateTest extends FlatSpec with Matc
 
     val actual = SourceUpdatedSteps.getPaymentMethodsToUpdate(StripeCustomerId("fakecustid"), StripeSourceId("fakecardid")).run.run(TestData.zuoraDeps(effects))
 
-    val expectedPOST = BasicResult(
+    val expectedPOST = BasicRequest(
       "POST",
       "/action/query",
       "{\"queryString\":\"SELECT Id, AccountId, NumConsecutiveFailures\\n FROM PaymentMethod\\n  where Type='CreditCardReferenceTransaction' AND PaymentMethodStatus = 'Active' AND TokenId = 'fakecardid' AND SecondTokenId = 'fakecustid'\"}")
-    val expectedGET = BasicResult(
+    val expectedGET = BasicRequest(
       "GET",
       "/accounts/accountidfake/summary",
       "")
@@ -141,19 +141,19 @@ class SourceUpdatedStepsGetPaymentMethodsToUpdateTest extends FlatSpec with Matc
 
     val actual = SourceUpdatedSteps.getPaymentMethodsToUpdate(StripeCustomerId("fakecustid"), StripeSourceId("fakecardid")).run.run(TestData.zuoraDeps(effects))
 
-    val expectedPOST = BasicResult(
+    val expectedPOST = BasicRequest(
       "POST",
       "/action/query",
       "{\"queryString\":\"SELECT Id, AccountId, NumConsecutiveFailures\\n FROM PaymentMethod\\n  where Type='CreditCardReferenceTransaction' AND PaymentMethodStatus = 'Active' AND TokenId = 'fakecardid' AND SecondTokenId = 'fakecustid'\"}")
-    val expectedGET1 = BasicResult(
+    val expectedGET1 = BasicRequest(
       "GET",
       "/accounts/accountidfake/summary",
       "")
-    val expectedGET2 = BasicResult(
+    val expectedGET2 = BasicRequest(
       "GET",
       "/accounts/accountidANOTHER/summary",
       "")
-    val expectedGET3 = BasicResult(
+    val expectedGET3 = BasicRequest(
       "GET",
       "/accounts/accountidANOTHERONE/summary",
       "")
@@ -188,15 +188,15 @@ class SourceUpdatedStepsGetPaymentMethodsToUpdateTest extends FlatSpec with Matc
 
     val actual = SourceUpdatedSteps.getPaymentMethodsToUpdate(StripeCustomerId("fakecustid"), StripeSourceId("fakecardid")).run.run(TestData.zuoraDeps(effects))
 
-    val expectedPOST = BasicResult(
+    val expectedPOST = BasicRequest(
       "POST",
       "/action/query",
       "{\"queryString\":\"SELECT Id, AccountId, NumConsecutiveFailures\\n FROM PaymentMethod\\n  where Type='CreditCardReferenceTransaction' AND PaymentMethodStatus = 'Active' AND TokenId = 'fakecardid' AND SecondTokenId = 'fakecustid'\"}")
-    val expectedGET1 = BasicResult(
+    val expectedGET1 = BasicRequest(
       "GET",
       "/accounts/accountidfake/summary",
       "")
-    val expectedGET2 = BasicResult(
+    val expectedGET2 = BasicRequest(
       "GET",
       "/accounts/accountidANOTHER/summary",
       "")
@@ -238,7 +238,7 @@ class SourceUpdatedStepsGetPaymentMethodsToUpdateTest extends FlatSpec with Matc
 
     val actual = SourceUpdatedSteps.getPaymentMethodsToUpdate(StripeCustomerId("fakecustid"), StripeSourceId("fakecardid")).run.run(TestData.zuoraDeps(effects))
 
-    val expectedPOST = BasicResult(
+    val expectedPOST = BasicRequest(
       "POST",
       "/action/query",
       "{\"queryString\":\"SELECT Id, AccountId, NumConsecutiveFailures\\n FROM PaymentMethod\\n  where Type='CreditCardReferenceTransaction' AND PaymentMethodStatus = 'Active' AND TokenId = 'fakecardid' AND SecondTokenId = 'fakecustid'\"}")
@@ -259,7 +259,7 @@ class SourceUpdatedStepsGetPaymentMethodsToUpdateTest extends FlatSpec with Matc
 
     val actual = SourceUpdatedSteps.getPaymentMethodsToUpdate(StripeCustomerId("fakecustid"), StripeSourceId("fakecardid")).run.run(TestData.zuoraDeps(effects))
 
-    val expectedPOST = BasicResult(
+    val expectedPOST = BasicRequest(
       "POST",
       "/action/query",
       "{\"queryString\":\"SELECT Id, AccountId, NumConsecutiveFailures\\n FROM PaymentMethod\\n  where Type='CreditCardReferenceTransaction' AND PaymentMethodStatus = 'Active' AND TokenId = 'fakecardid' AND SecondTokenId = 'fakecustid'\"}")
@@ -287,11 +287,11 @@ class SourceUpdatedStepsUpdatePaymentMethodTest extends FlatSpec with Matchers {
 
     val actual = SourceUpdatedSteps.createUpdatedDefaultPaymentMethod(PaymentMethodFields(PaymentMethodId("PMID"), AccountId("fake"), NumConsecutiveFailures(1)), eventData).run.run(TestData.zuoraDeps(effects))
 
-    val expectedPOST = BasicResult(
+    val expectedPOST = BasicRequest(
       "POST",
       "/object/payment-method",
       """{"AccountId":"fake","TokenId":"card_def456","SecondTokenId":"cus_ghi789","CreditCardCountry":"US","CreditCardNumber":"1234","CreditCardExpirationMonth":7,"CreditCardExpirationYear":2020,"CreditCardType":"Visa","Type":"CreditCardReferenceTransaction","NumConsecutiveFailures":1}""")
-    val expectedPUT = BasicResult(
+    val expectedPUT = BasicRequest(
       "PUT",
       "/object/account/fake",
       """{"DefaultPaymentMethodId":"newPMID"}""")
