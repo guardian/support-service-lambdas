@@ -1,13 +1,13 @@
 package com.gu.stripeCustomerSourceUpdated.zuora
 
-import com.gu.stripeCustomerSourceUpdated.{ StripeCustomerId, StripeSourceId }
-import com.gu.util.{ Logging, ZuoraToApiGateway }
+import com.gu.stripeCustomerSourceUpdated.{StripeCustomerId, StripeSourceId}
+import com.gu.util.{Logging, ZuoraToApiGateway}
 import com.gu.util.apigateway.ApiGatewayResponse
 import play.api.libs.json._
 
-import scalaz.{ -\/, NonEmptyList, \/- }
+import scalaz.{-\/, NonEmptyList, \/-}
 import com.gu.util.zuora.ZuoraAccount._
-import com.gu.util.zuora.{ ZuoraDeps, ZuoraQuery }
+import com.gu.util.zuora.{ZuoraDeps, ZuoraQuery}
 import com.gu.util.zuora.ZuoraQuery.Query
 import com.gu.util.reader.Types._
 
@@ -16,7 +16,8 @@ object ZuoraQueryPaymentMethod extends Logging {
   case class PaymentMethodFields(
     Id: PaymentMethodId,
     AccountId: AccountId,
-    NumConsecutiveFailures: NumConsecutiveFailures)
+    NumConsecutiveFailures: NumConsecutiveFailures
+  )
   implicit val QueryRecordR: Format[PaymentMethodFields] = Json.format[PaymentMethodFields]
 
   case class AccountPaymentMethodIds(accountId: AccountId, paymentMethods: NonEmptyList[PaymentMethodFields])

@@ -10,7 +10,8 @@ case class EventDataObject(
   country: StripeCountry,
   customer: StripeCustomerId,
   expiry: StripeExpiry,
-  last4: StripeLast4)
+  last4: StripeLast4
+)
 case class SourceUpdatedCallout(id: StripeEventId, data: EventData)
 
 case class StripeEventId(value: String) extends AnyVal
@@ -78,13 +79,16 @@ object SourceUpdatedCallout {
     (JsPath \ "customer").read[String].map(StripeCustomerId.apply) and
     (
       (JsPath \ "exp_month").read[Int] and
-      (JsPath \ "exp_year").read[Int])(StripeExpiry.apply _) and
-      (JsPath \ "last4").read[String].map(StripeLast4.apply))(EventDataObject.apply _)
+      (JsPath \ "exp_year").read[Int]
+    )(StripeExpiry.apply _) and
+      (JsPath \ "last4").read[String].map(StripeLast4.apply)
+  )(EventDataObject.apply _)
 
   implicit val eventDataReads: Reads[EventData] = (JsPath \ "object").read[EventDataObject].map(EventData.apply _)
 
   implicit val jf: Reads[SourceUpdatedCallout] = (
     (JsPath \ "id").read[String].map(StripeEventId.apply) and
-    (JsPath \ "data").read[EventData])(SourceUpdatedCallout.apply _)
+    (JsPath \ "data").read[EventData]
+  )(SourceUpdatedCallout.apply _)
 
 }

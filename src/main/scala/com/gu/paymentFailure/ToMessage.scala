@@ -35,7 +35,11 @@ object ToMessage {
           billing_city = paymentFailureCallout.billingDetails.city,
           billing_state = paymentFailureCallout.billingDetails.state,
           billing_country = paymentFailureCallout.billingDetails.country,
-          title = paymentFailureCallout.title))))
+          title = paymentFailureCallout.title
+        )
+      )
+    )
+  )
 
   def apply(callout: AutoCancelCallout, paymentFailureInformation: PaymentFailureInformation) = Message(
     To = ToDef(
@@ -53,7 +57,11 @@ object ToMessage {
           primaryKey = InvoiceId(callout.invoiceId),
           price = price(paymentFailureInformation.amount, callout.currency),
           serviceStartDate = serviceDateFormat(paymentFailureInformation.serviceStartDate),
-          serviceEndDate = serviceDateFormat(paymentFailureInformation.serviceEndDate)))))
+          serviceEndDate = serviceDateFormat(paymentFailureInformation.serviceEndDate)
+        )
+      )
+    )
+  )
 
   val currencySymbol = Map("GBP" -> "£", "AUD" -> "$", "EUR" -> "€", "USD" -> "$", "CAD" -> "$", "NZD" -> "$")
 

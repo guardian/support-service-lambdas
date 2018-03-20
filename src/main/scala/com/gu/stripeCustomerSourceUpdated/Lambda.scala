@@ -1,13 +1,13 @@
 package com.gu.stripeCustomerSourceUpdated
 
-import java.io.{ InputStream, OutputStream }
+import java.io.{InputStream, OutputStream}
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.RawEffects
-import com.gu.stripeCustomerSourceUpdated.SourceUpdatedSteps.{ Deps, StepsConfig }
+import com.gu.stripeCustomerSourceUpdated.SourceUpdatedSteps.{Deps, StepsConfig}
 import com.gu.util.Config
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
-import com.gu.util.apigateway.{ ApiGatewayHandler, ApiGatewayRequest }
+import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest}
 import com.gu.util.reader.Types.FailableOp
 
 object Lambda {

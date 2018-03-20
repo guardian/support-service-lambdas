@@ -4,7 +4,7 @@ import org.scalatest.FlatSpec
 import org.scalatest.Matchers._
 import com.gu.TestData
 import com.gu.util.apigateway.StripeAccount
-import com.gu.util.{ StripeConfig, StripeSecretKey }
+import com.gu.util.{StripeConfig, StripeSecretKey}
 import org.joda.time.DateTime
 import com.gu.stripeCustomerSourceUpdated.StripeRequestSignatureChecker._
 
@@ -77,7 +77,8 @@ class StripeRequestSignatureCheckerTest extends FlatSpec {
     """.stripMargin
 
   def headersWithStripeSignature(timestamp: String, signature: String) = Map(
-    "Stripe-Signature" -> s"t=$timestamp,v1=$signature")
+    "Stripe-Signature" -> s"t=$timestamp,v1=$signature"
+  )
 
   class FakeStripeSignatureChecker(stripeConfig: StripeConfig) extends SignatureChecker {
     override def verifySignature(secretKey: StripeSecretKey, payload: String, signatureHeader: Option[String], tolerance: Long): Boolean = {

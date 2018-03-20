@@ -1,15 +1,18 @@
 package com.gu.identity
 
 import com.gu.effects.TestingRawEffects
-import com.gu.identityBackfill.Types.{ EmailAddress, IdentityId }
-import org.scalatest.{ FlatSpec, Matchers }
+import com.gu.effects.TestingRawEffects.HTTPResponse
+import com.gu.identityBackfill.Types.{EmailAddress, IdentityId}
+import org.scalatest.{FlatSpec, Matchers}
 
-import scalaz.{ \/, \/- }
+import scalaz.{\/, \/-}
 
 class GetByEmailTest extends FlatSpec with Matchers {
 
   it should "get successful ok" in {
-    val testingRawEffects = new TestingRawEffects(responses = Map("/user?emailAddress=email@address" -> ((200, TestData.dummyIdentityResponse))))
+    val testingRawEffects = new TestingRawEffects(
+      responses = TestData.responses
+    )
 
     val actual: \/[GetByEmail.ApiError, IdentityId] = GetByEmail(testingRawEffects.rawEffects.response, IdentityConfig("http://baseurl", "apitoken"))(EmailAddress("email@address"))
 
@@ -20,6 +23,9 @@ class GetByEmailTest extends FlatSpec with Matchers {
 
 object TestData {
 
+  def responses: Map[String, HTTPResponse] = Map(
+    "/user?emailAddress=email@address" -> HTTPResponse(200, TestData.dummyIdentityResponse)
+  )
   val dummyIdentityResponse: String =
     """
       |{

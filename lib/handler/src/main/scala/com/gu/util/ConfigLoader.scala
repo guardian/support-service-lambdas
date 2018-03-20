@@ -4,12 +4,13 @@ import com.gu.util.ETConfig.ETSendIds
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
-import scalaz.{ -\/, \/, \/- }
+import scalaz.{-\/, \/, \/-}
 
 case class ETConfig(
   etSendIDs: ETSendIds,
   clientId: String,
-  clientSecret: String)
+  clientSecret: String
+)
 
 object ETConfig {
 
@@ -23,7 +24,8 @@ object ETConfig {
     pf2: ETSendId,
     pf3: ETSendId,
     pf4: ETSendId,
-    cancelled: ETSendId) {
+    cancelled: ETSendId
+  ) {
     def find(attempt: Int): Option[ETSendId] = Some(attempt match {
       case 1 => pf1
       case 2 => pf2
@@ -37,7 +39,8 @@ object ETConfig {
   implicit val zuoraConfigReads: Reads[ETConfig] = (
     (JsPath \ "etSendIDs").read[ETSendIds] and
     (JsPath \ "clientId").read[String] and
-    (JsPath \ "clientSecret").read[String])(ETConfig.apply _)
+    (JsPath \ "clientSecret").read[String]
+  )(ETConfig.apply _)
 }
 
 case class TrustedApiConfig(apiToken: String, tenantId: String)
@@ -45,7 +48,8 @@ case class TrustedApiConfig(apiToken: String, tenantId: String)
 object TrustedApiConfig {
   implicit val apiConfigReads: Reads[TrustedApiConfig] = (
     (JsPath \ "apiToken").read[String] and
-    (JsPath \ "tenantId").read[String])(TrustedApiConfig.apply _)
+    (JsPath \ "tenantId").read[String]
+  )(TrustedApiConfig.apply _)
 }
 
 case class StripeSecretKey(key: String) extends AnyVal
@@ -58,16 +62,19 @@ case class StripeWebhook(ukStripeSecretKey: StripeSecretKey, auStripeSecretKey: 
 object StripeWebhook {
   implicit val stripeWebhookConfigReads: Reads[StripeWebhook] = (
     (JsPath \ "api.key.secret").read[String].map(StripeSecretKey.apply) and
-    (JsPath \ "au-membership.key.secret").read[String].map(StripeSecretKey.apply))(StripeWebhook.apply _)
+    (JsPath \ "au-membership.key.secret").read[String].map(StripeSecretKey.apply)
+  )(StripeWebhook.apply _)
 }
 
 case class StripeConfig(
   customerSourceUpdatedWebhook: StripeWebhook,
-  signatureChecking: Boolean)
+  signatureChecking: Boolean
+)
 object StripeConfig {
   implicit val stripeConfigReads: Reads[StripeConfig] = (
     (JsPath \ "customerSourceUpdatedWebhook").read[StripeWebhook] and
-    (JsPath \ "signatureChecking").readNullable[String].map(!_.contains("false")))(StripeConfig.apply _)
+    (JsPath \ "signatureChecking").readNullable[String].map(!_.contains("false"))
+  )(StripeConfig.apply _)
 }
 
 case class Config[StepsConfig](
@@ -75,7 +82,8 @@ case class Config[StepsConfig](
   trustedApiConfig: TrustedApiConfig,
   stepsConfig: StepsConfig,
   etConfig: ETConfig,
-  stripeConfig: StripeConfig)
+  stripeConfig: StripeConfig
+)
 
 case class Stage(value: String) extends AnyVal {
   def isProd: Boolean = value == "PROD"
@@ -88,7 +96,8 @@ object Config extends Logging {
     (JsPath \ "trustedApiConfig").read[TrustedApiConfig] and
     (JsPath \ "stepsConfig").read[StepsConfig] and
     (JsPath \ "etConfig").read[ETConfig] and
-    (JsPath \ "stripe").read[StripeConfig])(Config.apply[StepsConfig] _)
+    (JsPath \ "stripe").read[StripeConfig]
+  )(Config.apply[StepsConfig] _)
 
   def parseConfig[StepsConfig: Reads](jsonConfig: String): \/[ConfigFailure, Config[StepsConfig]] = {
     Json.fromJson[Config[StepsConfig]](Json.parse(jsonConfig)) match {

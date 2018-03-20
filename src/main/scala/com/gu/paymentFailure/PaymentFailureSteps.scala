@@ -7,18 +7,18 @@ import com.gu.util.Auth.validTenant
 import com.gu.util.ETConfig.ETSendIds
 import com.gu.util._
 import com.gu.util.apigateway.ApiGatewayResponse.unauthorized
-import com.gu.util.apigateway.{ ApiGatewayRequest, ApiGatewayResponse }
+import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.exacttarget.EmailSendSteps.EmailSendStepsDeps
-import com.gu.util.exacttarget.{ EmailRequest, EmailSendSteps }
+import com.gu.util.exacttarget.{EmailRequest, EmailSendSteps}
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.ZuoraGetInvoiceTransactions.InvoiceTransactionSummary
 import com.gu.util.zuora.internal.Types.ClientFailableOp
-import com.gu.util.zuora.{ ZuoraDeps, ZuoraGetInvoiceTransactions }
-import okhttp3.{ Request, Response }
+import com.gu.util.zuora.{ZuoraDeps, ZuoraGetInvoiceTransactions}
+import okhttp3.{Request, Response}
 import play.api.libs.json.Json
 
 import scalaz.syntax.std.option._
-import scalaz.{ -\/, \/- }
+import scalaz.{-\/, \/-}
 
 object PaymentFailureSteps extends Logging {
 
@@ -50,14 +50,16 @@ object PaymentFailureSteps extends Logging {
       PFDeps(
         ZuoraEmailSteps.sendEmailRegardingAccount(ZuoraEmailStepsDeps.default(response, config)),
         config.etConfig.etSendIDs,
-        config.trustedApiConfig)
+        config.trustedApiConfig
+      )
     }
   }
 
   case class PFDeps(
     sendEmailRegardingAccount: (String, PaymentFailureInformation => EmailRequest) => FailableOp[Unit],
     etSendIDs: ETSendIds,
-    trustedApiConfig: TrustedApiConfig)
+    trustedApiConfig: TrustedApiConfig
+  )
 
 }
 
@@ -76,12 +78,14 @@ object ZuoraEmailSteps {
     def default(response: Request => Response, config: Config[StepsConfig]): ZuoraEmailStepsDeps = {
       ZuoraEmailStepsDeps(
         EmailSendSteps.apply(EmailSendStepsDeps.default(config.stage, response, config.etConfig)),
-        a => ZuoraGetInvoiceTransactions(a).run.run(ZuoraDeps(response, config.stepsConfig.zuoraRestConfig)))
+        a => ZuoraGetInvoiceTransactions(a).run.run(ZuoraDeps(response, config.stepsConfig.zuoraRestConfig))
+      )
     }
   }
 
   case class ZuoraEmailStepsDeps(
     sendEmail: EmailRequest => FailableOp[Unit],
-    getInvoiceTransactions: String => ClientFailableOp[InvoiceTransactionSummary])
+    getInvoiceTransactions: String => ClientFailableOp[InvoiceTransactionSummary]
+  )
 
 }

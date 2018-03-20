@@ -1,17 +1,19 @@
 package com.gu.identityBackfill
 
-import java.io.{ InputStream, OutputStream }
+import java.io.{InputStream, OutputStream}
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.RawEffects
-import com.gu.identity.{ GetByEmail, IdentityConfig }
+import com.gu.identity.{GetByEmail, IdentityConfig}
 import com.gu.identityBackfill.Types._
+import com.gu.identityBackfill.zuora.{CountZuoraAccountsForIdentityId, GetZuoraAccountsForEmail}
 import com.gu.util.Config
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
-import com.gu.util.apigateway.{ ApiGatewayHandler, ApiGatewayRequest, ApiGatewayResponse }
+import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.reader.Types.FailableOp
-import com.gu.util.zuora.ZuoraRestConfig
-import play.api.libs.json.{ Json, Reads }
+import com.gu.util.zuora.{ZuoraDeps, ZuoraRestConfig}
+import play.api.libs.json.{Json, Reads}
+
 import scalaz.syntax.either._
 
 object Handler {
@@ -29,25 +31,14 @@ object Handler {
     def operation: Config[StepsConfig] => ApiGatewayRequest => FailableOp[Unit] =
       config => IdentityBackfillSteps(
         GetByEmail(rawEffects.response, config.stepsConfig.identityConfig),
-        GetZuoraAccountsForEmail.apply,
-        CountZuoraAccountsForIdentityId.apply,
+        GetZuoraAccountsForEmail.apply(ZuoraDeps(rawEffects.response, config.stepsConfig.zuoraRestConfig)),
+        CountZuoraAccountsForIdentityId.apply(ZuoraDeps(rawEffects.response, config.stepsConfig.zuoraRestConfig)),
         UpdateZuoraIdentityId.apply,
-        UpdateSalesforceIdentityId.apply)
+        UpdateSalesforceIdentityId.apply
+      )
     ApiGatewayHandler.default[StepsConfig](implicitly)(operation, lambdaIO).run((rawEffects.stage, rawEffects.s3Load(rawEffects.stage)))
   }
 
-}
-
-object GetZuoraAccountsForEmail {
-  def apply(emailAddress: EmailAddress): FailableOp[List[ZuoraAccountIdentitySFContact]] = {
-    ApiGatewayResponse.internalServerError("todo").left
-  }
-}
-
-object CountZuoraAccountsForIdentityId {
-  def apply(identityId: IdentityId): FailableOp[Int] = {
-    ApiGatewayResponse.internalServerError("todo").left
-  }
 }
 
 object UpdateZuoraIdentityId {

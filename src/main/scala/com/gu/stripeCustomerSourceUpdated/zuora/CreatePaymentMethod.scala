@@ -3,10 +3,10 @@ package com.gu.stripeCustomerSourceUpdated.zuora
 import com.gu.stripeCustomerSourceUpdated._
 import com.gu.util.ZuoraToApiGateway
 import com.gu.util.reader.Types.WithDepsFailableOp
-import com.gu.util.zuora.ZuoraAccount.{ AccountId, NumConsecutiveFailures, PaymentMethodId }
+import com.gu.util.zuora.ZuoraAccount.{AccountId, NumConsecutiveFailures, PaymentMethodId}
 import com.gu.util.zuora.ZuoraDeps
 import com.gu.util.zuora.ZuoraRestRequestMaker.post
-import play.api.libs.json.{ JsPath, Json, Reads, Writes }
+import play.api.libs.json.{JsPath, Json, Reads, Writes}
 
 object CreatePaymentMethod {
 
@@ -18,7 +18,8 @@ object CreatePaymentMethod {
     last4: StripeLast4,
     expiration: StripeExpiry,
     creditCardType: CreditCardType,
-    numConsecutiveFailures: NumConsecutiveFailures)
+    numConsecutiveFailures: NumConsecutiveFailures
+  )
 
   sealed abstract class CreditCardType(val value: String)
   object CreditCardType {
@@ -41,7 +42,8 @@ object CreatePaymentMethod {
       "CreditCardExpirationYear" -> command.expiration.exp_year,
       "CreditCardType" -> command.creditCardType.value,
       "Type" -> "CreditCardReferenceTransaction",
-      "NumConsecutiveFailures" -> command.numConsecutiveFailures)
+      "NumConsecutiveFailures" -> command.numConsecutiveFailures
+    )
   }
 
   implicit val reads: Reads[CreatePaymentMethodResult] =

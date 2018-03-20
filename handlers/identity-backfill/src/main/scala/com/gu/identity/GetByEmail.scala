@@ -1,11 +1,11 @@
 package com.gu.identity
 
-import com.gu.identity.GetByEmail.RawWireModel.{ User, UserResponse }
-import com.gu.identityBackfill.Types.{ EmailAddress, IdentityId }
-import okhttp3.{ HttpUrl, Request, Response }
-import play.api.libs.json.{ Json, Reads }
+import com.gu.identity.GetByEmail.RawWireModel.{User, UserResponse}
+import com.gu.identityBackfill.Types.{EmailAddress, IdentityId}
+import okhttp3.{HttpUrl, Request, Response}
+import play.api.libs.json.{Json, Reads}
 
-import scalaz.{ -\/, \/, \/- }
+import scalaz.{-\/, \/, \/-}
 import scalaz.syntax.std.either._
 
 object GetByEmail {
@@ -50,7 +50,8 @@ object GetByEmail {
 
 case class IdentityConfig(
   baseUrl: String,
-  apiToken: String)
+  apiToken: String
+)
 
 object IdentityConfig {
   implicit val reads: Reads[IdentityConfig] = Json.reads[IdentityConfig]

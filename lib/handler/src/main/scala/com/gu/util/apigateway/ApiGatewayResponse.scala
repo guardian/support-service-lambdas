@@ -1,11 +1,11 @@
 package com.gu.util.apigateway
 
-import java.io.{ OutputStream, OutputStreamWriter }
+import java.io.{OutputStream, OutputStreamWriter}
 
 import com.gu.util.Logging
-import com.gu.util.apigateway.ResponseModels.{ ApiResponse, Headers }
+import com.gu.util.apigateway.ResponseModels.{ApiResponse, Headers}
 import com.gu.util.apigateway.ResponseWriters._
-import play.api.libs.json.{ Json, Writes }
+import play.api.libs.json.{Json, Writes}
 
 object ResponseModels {
 
@@ -19,14 +19,16 @@ object ResponseWriters {
 
   implicit val headersWrites = new Writes[Headers] {
     def writes(headers: Headers) = Json.obj(
-      "Content-Type" -> headers.contentType)
+      "Content-Type" -> headers.contentType
+    )
   }
 
   implicit val responseWrites = new Writes[ApiResponse] {
     def writes(response: ApiResponse) = Json.obj(
       "statusCode" -> response.statusCode,
       "headers" -> response.headers,
-      "body" -> response.body)
+      "body" -> response.body
+    )
   }
 
 }
@@ -45,6 +47,7 @@ object ApiGatewayResponse extends Logging {
   def noActionRequired(reason: String) = ApiResponse("200", new Headers, s"Processing is not required: $reason")
 
   val unauthorized = ApiResponse("401", new Headers, "Credentials are missing or invalid")
+  def notFound(message: String) = ApiResponse("404", new Headers, s"not found: $message")
   val badRequest = ApiResponse("400", new Headers, "Failure to parse JSON successfully")
   def internalServerError(error: String) = ApiResponse("500", new Headers, s"Failed to process event due to the following error: $error")
 

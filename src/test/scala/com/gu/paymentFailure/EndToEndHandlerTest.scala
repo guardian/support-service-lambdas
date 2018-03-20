@@ -1,11 +1,12 @@
 package com.gu.paymentFailure
 
-import java.io.{ ByteArrayInputStream, ByteArrayOutputStream }
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
 import com.gu.TestData._
 import com.gu.effects.TestingRawEffects
+import com.gu.effects.TestingRawEffects.HTTPResponse
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
-import org.scalatest.{ FlatSpec, Matchers }
+import org.scalatest.{FlatSpec, Matchers}
 
 class EndToEndHandlerTest extends FlatSpec with Matchers {
 
@@ -41,10 +42,11 @@ trait EndtoEndBaseData {
   def zuoraCalloutJson: String
   def expectedEmailSend: String
 
-  def responses: Map[String, (Int, String)] = Map(
-    ("/transactions/invoices/accounts/2c92c0f85fc90734015fca884c3f04cf", (200, invoices)),
-    ("/v1/requestToken", (200, """{"accessToken":"", "expiresIn":1}""")),
-    ("/messaging/v1/messageDefinitionSends/111/send", (202, "")))
+  def responses: Map[String, HTTPResponse] = Map(
+    ("/transactions/invoices/accounts/2c92c0f85fc90734015fca884c3f04cf", HTTPResponse(200, invoices)),
+    ("/v1/requestToken", HTTPResponse(200, """{"accessToken":"", "expiresIn":1}""")),
+    ("/messaging/v1/messageDefinitionSends/111/send", HTTPResponse(202, ""))
+  )
 
   val invoices =
     """

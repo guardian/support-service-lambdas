@@ -1,16 +1,16 @@
 package com.gu.util
 
-import com.gu.util.zuora.ZuoraAccount.{ AccountId, PaymentMethodId }
+import com.gu.util.zuora.ZuoraAccount.{AccountId, PaymentMethodId}
 import com.gu.util.zuora.ZuoraGetAccountSummary.BasicAccountInfo
 import com.gu.util.zuora.ZuoraReaders._
 import com.gu.util.zuora.internal.ClientFail
-import com.gu.util.zuora.{ ZuoraRestConfig, ZuoraRestRequestMaker }
+import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
 import okhttp3._
 import org.scalatest.Matchers._
 import org.scalatest._
-import play.api.libs.json.{ JsValue, Json }
+import play.api.libs.json.{JsValue, Json}
 
-import scalaz.{ -\/, \/- }
+import scalaz.{-\/, \/-}
 
 class ZuoraRestServiceTest extends AsyncFlatSpec {
 
@@ -35,24 +35,28 @@ class ZuoraRestServiceTest extends AsyncFlatSpec {
   val dummyJson = Json.parse(
     """{
       |  "body": "test"
-      |}""".stripMargin)
+      |}""".stripMargin
+  )
 
   val validUpdateSubscriptionResult = Json.parse(
     """{
       |  "success": true,
       |  "id": "id123", "balance": 1.2, "defaultPaymentMethod": {"id": "pmid"}
-      |}""".stripMargin)
+      |}""".stripMargin
+  )
 
   val validFailedUpdateSubscriptionResult = Json.parse(
     """{
       |  "success": false,
       |  "subscriptionId": "id123"
-      |}""".stripMargin)
+      |}""".stripMargin
+  )
 
   val validZuoraNoOtherFields = Json.parse(
     """{
       |  "success": true
-      |}""".stripMargin)
+      |}""".stripMargin
+  )
 
   def constructTestRequest(json: JsValue = dummyJson): Request = {
     val body = RequestBody.create(MediaType.parse("application/json"), json.toString)
@@ -74,7 +78,7 @@ class ZuoraRestServiceTest extends AsyncFlatSpec {
     response
   }
 
-  def internalServerError(message: String) = ClientFail("500", message)
+  def internalServerError(message: String) = ClientFail(message)
 
   "convertResponseToCaseClass" should "return a left[String] for an unsuccessful response code" in {
     val response = constructTestResponse(500)

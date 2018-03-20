@@ -1,12 +1,12 @@
 package com.gu.autoCancel
 
 import com.gu.autoCancel.AutoCancel.AutoCancelRequest
-import com.gu.util.{ Logging, ZuoraToApiGateway }
+import com.gu.util.{Logging, ZuoraToApiGateway}
 import com.gu.util.apigateway.ApiGatewayResponse.noActionRequired
 import com.gu.util.reader.Types._
-import com.gu.util.zuora.ZuoraGetAccountSummary.{ AccountSummary, Invoice }
+import com.gu.util.zuora.ZuoraGetAccountSummary.{AccountSummary, Invoice}
 import com.gu.util.zuora.ZuoraModels.SubscriptionId
-import com.gu.util.zuora.{ ZuoraDeps, ZuoraGetAccountSummary }
+import com.gu.util.zuora.{ZuoraDeps, ZuoraGetAccountSummary}
 import java.time.LocalDate
 
 import com.gu.util.zuora.internal.Types.WithDepsClientFailableOp
@@ -18,14 +18,16 @@ object AutoCancelDataCollectionFilter extends Logging {
   case class ACFilterDeps(
     now: LocalDate,
     getAccountSummary: String => WithDepsClientFailableOp[ZuoraDeps, AccountSummary],
-    zuoraDeps: ZuoraDeps)
+    zuoraDeps: ZuoraDeps
+  )
 
   object ACFilterDeps {
     def default(now: LocalDate, zuoraDeps: ZuoraDeps): ACFilterDeps = {
       ACFilterDeps(
         now,
         ZuoraGetAccountSummary.apply,
-        zuoraDeps)
+        zuoraDeps
+      )
     }
   }
 

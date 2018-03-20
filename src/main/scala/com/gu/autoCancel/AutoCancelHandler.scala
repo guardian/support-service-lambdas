@@ -1,15 +1,15 @@
 package com.gu.autoCancel
 
-import java.io.{ InputStream, OutputStream }
+import java.io.{InputStream, OutputStream}
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.autoCancel.AutoCancelSteps.AutoCancelStepsDeps
 import com.gu.effects.RawEffects
 import com.gu.stripeCustomerSourceUpdated.SourceUpdatedSteps.StepsConfig
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
-import com.gu.util.apigateway.{ ApiGatewayHandler, ApiGatewayRequest }
+import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest}
 import com.gu.util.reader.Types.FailableOp
-import com.gu.util.{ Config, Logging }
+import com.gu.util.{Config, Logging}
 
 object AutoCancelHandler extends App with Logging {
 

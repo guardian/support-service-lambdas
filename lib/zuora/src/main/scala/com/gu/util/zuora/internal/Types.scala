@@ -1,6 +1,6 @@
 package com.gu.util.zuora.internal
 
-import scalaz.{ EitherT, Reader, \/ }
+import scalaz.{EitherT, Reader, \/}
 
 object Types {
 
@@ -22,14 +22,4 @@ object Types {
 
 }
 
-case class ClientFail(statusCode: String, message: String)
-object ClientFail extends Logging {
-
-  //  val successfulExecution = ApiResponse("200", new Headers, "Success")
-  //  def noActionRequired(reason: String) = ApiResponse("200", new Headers, s"Processing is not required: $reason")
-  //
-  //  val unauthorized = ApiResponse("401", new Headers, "Credentials are missing or invalid")
-  //  val badRequest = ApiResponse("400", new Headers, "Failure to parse JSON successfully")
-  def internalServerError(error: String) = ClientFail("500", error)
-
-}
+case class ClientFail(message: String)

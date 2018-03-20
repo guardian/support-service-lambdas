@@ -2,12 +2,12 @@ package com.gu.util.exacttarget
 
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types.FailableOp
-import com.gu.util.{ ETConfig, Logging }
-import okhttp3.{ FormBody, Request, Response }
+import com.gu.util.{ETConfig, Logging}
+import okhttp3.{FormBody, Request, Response}
 import play.api.libs.functional.syntax._
-import play.api.libs.json.{ JsPath, JsSuccess, Json, Reads }
+import play.api.libs.json.{JsPath, JsSuccess, Json, Reads}
 
-import scalaz.{ -\/, \/- }
+import scalaz.{-\/, \/-}
 
 object SalesforceAuthenticate extends Logging {
 
@@ -20,7 +20,8 @@ object SalesforceAuthenticate extends Logging {
 
     implicit val salesforceAuthReads: Reads[SalesforceAuth] = (
       (JsPath \ "accessToken").read[String] and
-      (JsPath \ "expiresIn").read[Int])(SalesforceAuth.apply _)
+      (JsPath \ "expiresIn").read[Int]
+    )(SalesforceAuth.apply _)
 
   }
 

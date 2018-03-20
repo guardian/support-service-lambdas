@@ -1,19 +1,19 @@
 package com.gu.util.apigateway
 
-import java.io.{ InputStream, OutputStream }
+import java.io.{InputStream, OutputStream}
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.util.Auth.credentialsAreValid
 import com.gu.util.Config.ConfigFailure
 import com.gu.util._
-import com.gu.util.apigateway.ApiGatewayResponse.{ outputForAPIGateway, successfulExecution, unauthorized }
+import com.gu.util.apigateway.ApiGatewayResponse.{outputForAPIGateway, successfulExecution, unauthorized}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
-import com.gu.util.reader.Types.{ FailableOp, _ }
-import play.api.libs.json.{ Json, Reads }
+import com.gu.util.reader.Types.{FailableOp, _}
+import play.api.libs.json.{Json, Reads}
 
 import scala.io.Source
 import scala.util.Try
-import scalaz.{ -\/, Reader, \/, \/- }
+import scalaz.{-\/, Reader, \/, \/-}
 
 object ApiGatewayHandler extends Logging {
 
@@ -44,7 +44,8 @@ object ApiGatewayHandler extends Logging {
   def apply[StepsConfig](
     loadConfig: Reader[(Stage, Try[String]), FailableOp[Config[StepsConfig]]],
     operation: Config[StepsConfig] => ApiGatewayRequest => FailableOp[Unit],
-    lambdaIO: LambdaIO): Reader[(Stage, Try[String]), Unit] = {
+    lambdaIO: LambdaIO
+  ): Reader[(Stage, Try[String]), Unit] = {
 
     import lambdaIO._
 

@@ -1,6 +1,6 @@
 package com.gu.paymentFailure
 
-import com.gu.TestData.{ accountId, weirdInvoiceTransactionSummary }
+import com.gu.TestData.{accountId, weirdInvoiceTransactionSummary}
 import org.scalatest.FlatSpec
 
 import scalaz.\/

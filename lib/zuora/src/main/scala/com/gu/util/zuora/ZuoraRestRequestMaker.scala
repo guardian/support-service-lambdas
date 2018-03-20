@@ -4,13 +4,12 @@ import com.gu.util.zuora.internal.Types._
 import com.gu.util.zuora.internal.Types.ClientFailableOp
 import com.gu.util.zuora.ZuoraModels._
 import com.gu.util.zuora.ZuoraReaders._
-import com.gu.util.zuora.internal.{ ClientFail, Logging }
+import com.gu.util.zuora.internal.{ClientFail, Logging}
 import okhttp3._
 import play.api.libs.json._
 
 import scalaz.Scalaz._
-import scalaz.{ Reader, \/ }
-import com.gu.util.zuora.internal.ClientFail.internalServerError
+import scalaz.{Reader, \/}
 
 object ZuoraRestRequestMaker extends Logging {
 
@@ -40,7 +39,7 @@ object ZuoraRestRequestMaker extends Logging {
       val body = response.body.string
       val truncated = body.take(500) + (if (body.length > 500) "..." else "")
       logger.error(s"Request to Zuora was unsuccessful, the response was: \n $response\n$truncated")
-      internalServerError("Request to Zuora was unsuccessful").left
+      ClientFail("Request to Zuora was unsuccessful").left
     }
   }
   def zuoraIsSuccessful(bodyAsJson: JsValue): ClientFailableOp[Unit] = {
@@ -50,10 +49,10 @@ object ZuoraRestRequestMaker extends Logging {
         ().right
       case JsSuccess(zuoraFailure, _) =>
         logger.error(s"Zuora rejected our call $bodyAsJson")
-        internalServerError("Received failure result from Zuora during autoCancellation").left
+        ClientFail("Received failure result from Zuora during autoCancellation").left
       case error: JsError => {
         logger.error(s"Failed to read common fields from zuora response: $error. Response body was: \n $bodyAsJson")
-        internalServerError("Error when reading common fields from zuora").left
+        ClientFail("Error when reading common fields from zuora").left
       }
     }
   }
@@ -63,7 +62,7 @@ object ZuoraRestRequestMaker extends Logging {
         success.get.right
       case error: JsError => {
         logger.error(s"Failed to convert Zuora response to case case $error. Response body was: \n $bodyAsJson")
-        internalServerError("Error when converting Zuora response to case class").left
+        ClientFail("Error when converting Zuora response to case class").left
       }
     }
   }

@@ -35,7 +35,8 @@ object URLParams {
   implicit val jf = (
     (JsPath \ "apiToken").readNullable[String] and
     (JsPath \ "onlyCancelDirectDebit").readNullable[String].map(_.contains("true")) and
-    (JsPath \ "stripeAccount").readNullable[String].map(_.flatMap(StripeAccount.fromString)))(URLParams.apply _)
+    (JsPath \ "stripeAccount").readNullable[String].map(_.flatMap(StripeAccount.fromString))
+  )(URLParams.apply _)
 }
 
 object ApiGatewayRequest {

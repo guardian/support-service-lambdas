@@ -2,11 +2,11 @@ package com.gu.autoCancel
 
 import com.gu.util.TrustedApiConfig
 import com.gu.util.apigateway.ApiGatewayResponse._
-import com.gu.util.apigateway.{ ApiGatewayHandler, ApiGatewayRequest, RequestAuth, StripeAccount }
+import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, RequestAuth, StripeAccount}
 import org.scalatest._
-import play.api.libs.json.{ JsSuccess, Json }
+import play.api.libs.json.{JsSuccess, Json}
 
-import scalaz.{ -\/, \/- }
+import scalaz.{-\/, \/-}
 object AutoCancelHandlerTest {
 
   def fakeCallout(autoPay: Boolean) = {

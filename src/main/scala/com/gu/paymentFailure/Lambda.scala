@@ -1,6 +1,6 @@
 package com.gu.paymentFailure
 
-import java.io.{ InputStream, OutputStream }
+import java.io.{InputStream, OutputStream}
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.RawEffects
@@ -8,7 +8,7 @@ import com.gu.paymentFailure.PaymentFailureSteps.PFDeps
 import com.gu.stripeCustomerSourceUpdated.SourceUpdatedSteps.StepsConfig
 import com.gu.util.Config
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
-import com.gu.util.apigateway.{ ApiGatewayHandler, ApiGatewayRequest }
+import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest}
 import com.gu.util.reader.Types.FailableOp
 
 object Lambda {
