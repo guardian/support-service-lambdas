@@ -1,8 +1,8 @@
 package manualTest
 
 import com.gu.effects.Http
-import okhttp3.{Request, Response}
-import org.scalatest.{Assertion, FlatSpec, Ignore, Matchers}
+import okhttp3._
+import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
 
 import scala.io.Source
@@ -10,7 +10,7 @@ import scala.util.Try
 
 // this test runs the health check from locally. this means you can only run it manually
 // you should run the healthcheck in code and in prod after deployments
-@Ignore
+@org.scalatest.Ignore
 class CODEPRODHealthCheck extends FlatSpec with Matchers {
 
   import com.gu.util.reader.Types._
@@ -36,32 +36,21 @@ class CODEPRODHealthCheck extends FlatSpec with Matchers {
 
     } yield env(healthcheck)
 
-    val expectedResponse =
-      s"""
-         |{"statusCode":"200","headers":{"Content-Type":"application/json"},"body":"Success"}
-         |""".stripMargin
+    val expectedResponse = "Success"
 
     healthchecks.fold(err => fail(s"couldn't load config: $err"), identity).foreach { healthcheck =>
-      val responseString = get(healthcheck, Http.response)
-      responseString jsonMatches expectedResponse
+      val responseString = post(healthcheck, Http.response)
+      responseString should be(expectedResponse)
     }
   }
 
-  def get(healthcheck: HealthCheckConfig, response: Request => Response): String = {
-    val request = new Request.Builder().url(healthcheck.url).header("x-api-key", healthcheck.apiKey).get().build()
+  def post(healthcheck: HealthCheckConfig, response: Request => Response): String = {
+    val request = new Request.Builder().url(healthcheck.url).header("x-api-key", healthcheck.apiKey).post(RequestBody.create(MediaType.parse("application/json"), "{}")).build()
     val responseO = response(request)
     if (responseO.isSuccessful) {
       responseO.body().string()
     } else {
-      s"RESPONSE CODE: ${responseO.code()}"
-    }
-  }
-
-  implicit class JsonMatcher(private val actual: String) {
-    def jsonMatches(expected: String): Assertion = {
-      val expectedJson = Json.parse(expected)
-      val actualJson = Json.parse(actual)
-      actualJson should be(expectedJson)
+      s"RESPONSE CODE: ${responseO.code()}: ${responseO.body().string()}"
     }
   }
 
