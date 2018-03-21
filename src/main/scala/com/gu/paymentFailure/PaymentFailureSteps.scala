@@ -6,6 +6,7 @@ import com.gu.stripeCustomerSourceUpdated.SourceUpdatedSteps.StepsConfig
 import com.gu.util.Auth.validTenant
 import com.gu.util.ETConfig.ETSendIds
 import com.gu.util._
+import com.gu.util.apigateway.ApiGatewayHandler.Operation
 import com.gu.util.apigateway.ApiGatewayResponse.unauthorized
 import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.exacttarget.EmailSendSteps.EmailSendStepsDeps
@@ -26,7 +27,7 @@ object PaymentFailureSteps extends Logging {
     s"accountId: ${callout.accountId}, paymentId: ${callout.paymentId}, failureNumber: ${callout.failureNumber}, paymentMethodType: ${callout.paymentMethodType}, currency: ${callout.currency}, billingDetails: ${callout.billingDetails}"
   }
 
-  def apply(deps: PFDeps)(apiGatewayRequest: ApiGatewayRequest): FailableOp[Unit] = {
+  def apply(deps: PFDeps): Operation = Operation.noHealthcheck({ apiGatewayRequest: ApiGatewayRequest =>
     for {
       paymentFailureCallout <- Json.fromJson[PaymentFailureCallout](Json.parse(apiGatewayRequest.body)).toFailableOp
       _ = logger.info(s"received ${loggableData(paymentFailureCallout)}")
@@ -34,7 +35,7 @@ object PaymentFailureSteps extends Logging {
       request <- makeRequest(deps.etSendIDs, paymentFailureCallout)
       _ <- deps.sendEmailRegardingAccount(paymentFailureCallout.accountId, request)
     } yield ()
-  }
+  })
 
   def makeRequest(etSendIds: ETSendIds, paymentFailureCallout: PaymentFailureCallout): FailableOp[PaymentFailureInformation => EmailRequest] = {
     etSendIds.find(paymentFailureCallout.failureNumber).map { etId => pFI: PaymentFailureInformation => EmailRequest(etId, ToMessage(paymentFailureCallout, pFI))

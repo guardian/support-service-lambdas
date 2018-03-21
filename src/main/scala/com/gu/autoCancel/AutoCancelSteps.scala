@@ -8,6 +8,7 @@ import com.gu.paymentFailure.ZuoraEmailSteps.ZuoraEmailStepsDeps
 import com.gu.paymentFailure.{ToMessage, ZuoraEmailSteps}
 import com.gu.stripeCustomerSourceUpdated.SourceUpdatedSteps.StepsConfig
 import com.gu.util.ETConfig.ETSendIds
+import com.gu.util.apigateway.ApiGatewayHandler.Operation
 import com.gu.util.apigateway.ApiGatewayRequest
 import com.gu.util.exacttarget.EmailRequest
 import com.gu.util.reader.Types._
@@ -39,7 +40,7 @@ object AutoCancelSteps extends Logging {
     sendEmailRegardingAccount: (String, PaymentFailureInformation => EmailRequest) => FailableOp[Unit]
   )
 
-  def apply(deps: AutoCancelStepsDeps)(apiGatewayRequest: ApiGatewayRequest): FailableOp[Unit] = {
+  def apply(deps: AutoCancelStepsDeps): Operation = Operation.noHealthcheck({ apiGatewayRequest: ApiGatewayRequest =>
     for {
       autoCancelCallout <- Json.fromJson[AutoCancelCallout](Json.parse(apiGatewayRequest.body)).toFailableOp.withLogging("zuora callout")
       _ <- AutoCancelInputFilter(autoCancelCallout, onlyCancelDirectDebit = apiGatewayRequest.onlyCancelDirectDebit)
@@ -48,7 +49,7 @@ object AutoCancelSteps extends Logging {
       request <- makeRequest(deps.etSendIds, autoCancelCallout)
       _ <- deps.sendEmailRegardingAccount(autoCancelCallout.accountId, request)
     } yield ()
-  }
+  })
 
   def makeRequest(etSendIds: ETSendIds, autoCancelCallout: AutoCancelCallout): FailableOp[PaymentFailureInformation => EmailRequest] = {
     \/-({ pFI: PaymentFailureInformation => EmailRequest(etSendIds.cancelled, ToMessage(autoCancelCallout, pFI)) })

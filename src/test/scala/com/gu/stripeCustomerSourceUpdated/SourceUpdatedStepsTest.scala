@@ -388,7 +388,7 @@ class SourceUpdatedStepsApplyTest extends FlatSpec with Matchers {
 
     val testGatewayRequest = ApiGatewayRequest(None, someBody.toString, Some(badHeaders))
 
-    val actual = SourceUpdatedSteps.apply(sourceUpdatedSteps)(testGatewayRequest)
+    val actual = SourceUpdatedSteps.apply(sourceUpdatedSteps).steps(testGatewayRequest)
 
     effects.requestsAttempted should be(Nil)
     actual.leftMap(_.statusCode) should be(-\/("401"))
