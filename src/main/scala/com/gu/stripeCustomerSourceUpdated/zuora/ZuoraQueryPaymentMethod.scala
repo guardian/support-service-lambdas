@@ -28,7 +28,7 @@ object ZuoraQueryPaymentMethod extends Logging {
          | FROM PaymentMethod
          |  where Type='CreditCardReferenceTransaction' AND PaymentMethodStatus = 'Active' AND TokenId = '${sourceId.value}' AND SecondTokenId = '${customerId.value}'""".stripMargin
 
-    ZuoraQuery.query[PaymentMethodFields](Query(query)).leftMap(ZuoraToApiGateway.fromClientFail).run.map(_.flatMap { result =>
+    ZuoraQuery.getResults[PaymentMethodFields](Query(query)).leftMap(ZuoraToApiGateway.fromClientFail).run.map(_.flatMap { result =>
 
       def groupedList(records: List[PaymentMethodFields]): List[(AccountId, NonEmptyList[PaymentMethodFields])] = {
         records.groupBy(_.AccountId).toList.collect {

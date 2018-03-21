@@ -33,7 +33,7 @@ class TestingRawEffects(
       requests = req :: requests
       val path = getPathWithQueryString(req)
       logger.info(s"HTTP ${req.method} request for: $path")
-      val aaa =
+      val presetResponse =
         if (req.method() == "GET") {
           responses.get(path) // todo should change to have GETs and POSTs in one list using a Sum type, and have a getUnusedRequests or something at the end to assert they were "used" by the code
         } else if (req.method() == "POST") {
@@ -41,7 +41,7 @@ class TestingRawEffects(
           logger.info(s"HTTP POST body is $reqBody")
           postResponses.get(POSTRequest(path, reqBody)).orElse(responses.get(path)) // use get response
         } else responses.get(path)
-      val HTTPResponse(code, response) = aaa.getOrElse(
+      val HTTPResponse(code, response) = presetResponse.getOrElse(
         HTTPResponse(defaultCode, """{"success": true}""")
       )
       logger.info(s"HTTP precanned response is: $code - $response")

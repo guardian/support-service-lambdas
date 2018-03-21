@@ -30,7 +30,7 @@ object ZuoraQuery {
   implicit val wQueryMoreReq: Writes[QueryMoreReq] = Json.writes[QueryMoreReq]
 
   // https://www.zuora.com/developer/api-reference/#operation/Action_POSTquery
-  def query[QUERYRECORD: Reads](query: Query): WithDepsClientFailableOp[ZuoraDeps, QueryResult[QUERYRECORD]] =
+  def getResults[QUERYRECORD: Reads](query: Query): WithDepsClientFailableOp[ZuoraDeps, QueryResult[QUERYRECORD]] =
     post(query, s"action/query")
 
 }

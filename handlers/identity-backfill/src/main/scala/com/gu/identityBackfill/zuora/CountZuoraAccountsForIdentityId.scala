@@ -21,7 +21,7 @@ object CountZuoraAccountsForIdentityId {
 
   def apply(zuoraDeps: ZuoraDeps)(identityId: IdentityId): FailableOp[Int] = {
     val accounts = for {
-      accountsWithEmail <- ListT(ZuoraQuery.query[ZuoraAccount](ZuoraQuery.Query(s"SELECT Id FROM Account where IdentityId__c='${identityId.value}'")).map(_.records))
+      accountsWithEmail <- ListT(ZuoraQuery.getResults[ZuoraAccount](ZuoraQuery.Query(s"SELECT Id FROM Account where IdentityId__c='${identityId.value}'")).map(_.records))
     } yield AccountId(accountsWithEmail.Id)
 
     accounts.run.run.run(zuoraDeps).bimap(e => ApiGatewayResponse.internalServerError(e.message), l => l.size)
