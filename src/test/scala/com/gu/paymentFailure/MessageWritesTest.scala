@@ -24,7 +24,11 @@ class MessageWritesTest extends FlatSpec {
             primaryKey = PaymentId("paymentId"),
             price = "49.0 GBP",
             serviceStartDate = "31 January 2016",
-            serviceEndDate = "31 January 2017"))))
+            serviceEndDate = "31 January 2017"
+          )
+        )
+      )
+    )
 
     val expectedJson =
       """
@@ -71,7 +75,11 @@ class MessageWritesTest extends FlatSpec {
             primaryKey = InvoiceId("paymentId"),
             price = "49.0 GBP",
             serviceStartDate = "31 January 2016",
-            serviceEndDate = "31 January 2017"))))
+            serviceEndDate = "31 January 2017"
+          )
+        )
+      )
+    )
 
     val expectedJson =
       """

@@ -1,11 +1,11 @@
 package com.gu.util.reader
 
-import com.gu.util.apigateway.ApiGatewayResponse.{ badRequest, internalServerError, logger }
+import com.gu.util.apigateway.ApiGatewayResponse.{badRequest, internalServerError, logger}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
-import play.api.libs.json.{ JsError, JsResult, JsSuccess }
+import play.api.libs.json.{JsError, JsResult, JsSuccess}
 
-import scala.util.{ Failure, Success, Try }
-import scalaz.{ -\/, EitherT, Reader, \/, \/- }
+import scala.util.{Failure, Success, Try}
+import scalaz.{-\/, EitherT, Reader, \/, \/-}
 
 object Types {
 

@@ -2,11 +2,11 @@ package com.gu.stripeCustomerSourceUpdated
 
 import com.gu.stripeCustomerSourceUpdated.SourceUpdatedSteps.logger
 import com.gu.util.apigateway.StripeAccount
-import com.gu.util.{ StripeConfig, StripeSecretKey }
+import com.gu.util.{StripeConfig, StripeSecretKey}
 import com.stripe.exception.SignatureVerificationException
 import com.stripe.net.Webhook.Signature
 
-import scala.util.{ Failure, Success, Try }
+import scala.util.{Failure, Success, Try}
 
 case class StripeDeps(config: StripeConfig, signatureChecker: SignatureChecker)
 

@@ -22,7 +22,14 @@ val scalaSettings = Seq(
     "-Ywarn-value-discard"
   ),
   javaOptions in Test += s"""-Dlog4j.configuration=file:${new File(".").getCanonicalPath}/test_log4j.properties""",
-  fork in Test := true
+  fork in Test := true,
+  {
+    import scalariform.formatter.preferences._
+    scalariformPreferences := scalariformPreferences.value
+      .setPreference(DanglingCloseParenthesis, Force)
+      .setPreference(SpacesAroundMultiImports, false)
+      .setPreference(NewlineAtEndOfFile, true)
+  }
 )
 
 lazy val zuora = (project in file("lib/zuora")).settings(scalaSettings).settings(

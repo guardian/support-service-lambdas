@@ -3,14 +3,19 @@ package com.gu.effects
 import java.time.LocalDate
 
 import com.gu.effects.TestingRawEffects._
-import com.gu.util.{ Logging, Stage }
+import com.gu.util.{Logging, Stage}
 import okhttp3._
 import okhttp3.internal.Util.UTF_8
 import okio.Buffer
 
 import scala.util.Success
 
-class TestingRawEffects(val isProd: Boolean = false, val defaultCode: Int = 1, responses: Map[String, (Int, String)] = Map()) extends Logging {
+class TestingRawEffects(
+  val isProd: Boolean = false,
+  val defaultCode: Int = 1,
+  responses: Map[String, HTTPResponse] = Map(),
+  postResponses: Map[POSTRequest, HTTPResponse] = Map()
+) extends Logging {
 
   var requests: List[Request] = Nil // !
 
@@ -27,8 +32,19 @@ class TestingRawEffects(val isProd: Boolean = false, val defaultCode: Int = 1, r
     req =>
       requests = req :: requests
       val path = getPathWithQueryString(req)
-      val (code, response) = responses.getOrElse(path, (defaultCode, """{"success": true}"""))
-      logger.info(s"request for: $path so returning $response")
+      logger.info(s"HTTP ${req.method} request for: $path")
+      val presetResponse =
+        if (req.method() == "GET") {
+          responses.get(path) // todo should change to have GETs and POSTs in one list using a Sum type, and have a getUnusedRequests or something at the end to assert they were "used" by the code
+        } else if (req.method() == "POST") {
+          val reqBody = body(req.body)
+          logger.info(s"HTTP POST body is $reqBody")
+          postResponses.get(POSTRequest(path, reqBody)).orElse(responses.get(path)) // use get response
+        } else responses.get(path)
+      val HTTPResponse(code, response) = presetResponse.getOrElse(
+        HTTPResponse(defaultCode, """{"success": true}""")
+      )
+      logger.info(s"HTTP precanned response is: $code - $response")
       new Response.Builder()
         .request(req)
         .protocol(Protocol.HTTP_1_1)
@@ -42,15 +58,15 @@ class TestingRawEffects(val isProd: Boolean = false, val defaultCode: Int = 1, r
     req.url().encodedPath() + Option( /*could be null*/ req.url().encodedQuery()).filter(_ != "").map(query => s"?$query").getOrElse("")
   }
 
+  def body(b: RequestBody): String = {
+    val buffer = new Buffer()
+    b.writeTo(buffer)
+    buffer.readString(UTF_8)
+  }
+
   // TODO nicer type than tuple
   def resultMap: Map[(String, String), Option[String]] = {
     //verify
-    def body(b: RequestBody): String = {
-      val buffer = new Buffer()
-      b.writeTo(buffer)
-      buffer.readString(UTF_8)
-    }
-
     requests.map(req => (req.method, req.url.encodedPath) -> Option(req.body).map(body)).toMap
   }
   val rawEffects = RawEffects(response, stage, _ => Success(codeConfig), () => LocalDate.of(2017, 11, 19))
@@ -58,6 +74,9 @@ class TestingRawEffects(val isProd: Boolean = false, val defaultCode: Int = 1, r
 }
 
 object TestingRawEffects {
+
+  case class POSTRequest(urlPathAndQuery: String, postBody: String)
+  case class HTTPResponse(code: Int, body: String)
 
   case class BasicRequest(method: String, path: String, body: String)
 

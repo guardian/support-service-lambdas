@@ -1,14 +1,15 @@
 package com.gu.identityBackfill
 
-import java.io.{ ByteArrayInputStream, ByteArrayOutputStream }
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
 import com.gu.effects.TestingRawEffects
-import com.gu.effects.TestingRawEffects.BasicRequest
+import com.gu.effects.TestingRawEffects.{BasicRequest, HTTPResponse, POSTRequest}
 import com.gu.identity.TestData
 import com.gu.identityBackfill.EndToEndData._
 import Runner._
+import com.gu.identityBackfill.zuora.{CountZuoraAccountsForIdentityIdData, GetZuoraAccountsForEmailData}
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
-import org.scalatest.{ Assertion, FlatSpec, Matchers }
+import org.scalatest.{Assertion, FlatSpec, Matchers}
 import play.api.libs.json.Json
 
 class EndToEndHandlerTest extends FlatSpec with Matchers {
@@ -22,7 +23,12 @@ class EndToEndHandlerTest extends FlatSpec with Matchers {
          |{"statusCode":"200","headers":{"Content-Type":"application/json"},"body":"Processing is not required: DRY RUN requested! skipping to the end"}
          |""".stripMargin
     responseString jsonMatches expectedResponse
-    requests should be(List(BasicRequest("GET", "/user?emailAddress=email@address", "")))
+    requests should be(List(
+      BasicRequest("POST", "/action/query", """{"queryString":"SELECT Id FROM Account where IdentityId__c='1234'"}"""),
+      BasicRequest("POST", "/action/query", """{"queryString":"SELECT Id, IdentityId__c, sfContactId__c FROM Account where BillToId='2c92a0fb4a38064e014a3f48f1713ada'"}"""),
+      BasicRequest("POST", "/action/query", """{"queryString":"SELECT Id FROM Contact where WorkEmail='email@address'"}"""),
+      BasicRequest("GET", "/user?emailAddress=email@address", "")
+    ))
   }
 
   it should "manage an end to end call" in {
@@ -34,7 +40,12 @@ class EndToEndHandlerTest extends FlatSpec with Matchers {
          |{"statusCode":"500","headers":{"Content-Type":"application/json"},"body":"Failed to process event due to the following error: todo"}
          |""".stripMargin
     responseString jsonMatches expectedResponse
-    requests should be(List(BasicRequest("GET", "/user?emailAddress=email@address", "")))
+    requests should be(List(
+      BasicRequest("POST", "/action/query", """{"queryString":"SELECT Id FROM Account where IdentityId__c='1234'"}"""),
+      BasicRequest("POST", "/action/query", """{"queryString":"SELECT Id, IdentityId__c, sfContactId__c FROM Account where BillToId='2c92a0fb4a38064e014a3f48f1713ada'"}"""),
+      BasicRequest("POST", "/action/query", """{"queryString":"SELECT Id FROM Contact where WorkEmail='email@address'"}"""),
+      BasicRequest("GET", "/user?emailAddress=email@address", "")
+    ))
   }
 
 }
@@ -44,7 +55,7 @@ object Runner {
   def getResultAndRequests(input: String): (String, List[TestingRawEffects.BasicRequest]) = {
     val stream = new ByteArrayInputStream(input.getBytes(java.nio.charset.StandardCharsets.UTF_8))
     val os = new ByteArrayOutputStream()
-    val config = new TestingRawEffects(false, 200, responses)
+    val config = new TestingRawEffects(false, 200, responses, postResponses)
 
     //execute
     Handler.runWithEffects(config.rawEffects, LambdaIO(stream, os, null))
@@ -67,7 +78,11 @@ object Runner {
 
 object EndToEndData {
 
-  def responses: Map[String, (Int, String)] = Map("/user?emailAddress=email@address" -> ((200, TestData.dummyIdentityResponse)))
+  def responses: Map[String, HTTPResponse] =
+    TestData.responses
+  def postResponses: Map[POSTRequest, HTTPResponse] =
+    GetZuoraAccountsForEmailData.postResponses ++
+      CountZuoraAccountsForIdentityIdData.postResponses(false)
 
   def identityBackfillRequest(dryRun: Boolean): String =
     s"""

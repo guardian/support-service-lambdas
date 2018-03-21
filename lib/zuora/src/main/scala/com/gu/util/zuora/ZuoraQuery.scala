@@ -22,14 +22,15 @@ object ZuoraQuery {
     (JsPath \ "records").read[List[QUERYRECORD]] and
     (JsPath \ "size").read[Int] and
     (JsPath \ "done").read[Boolean] and
-    (JsPath \ "queryLocator").readNullable[QueryLocator]).apply(QueryResult.apply[QUERYRECORD] _)
+    (JsPath \ "queryLocator").readNullable[QueryLocator]
+  ).apply(QueryResult.apply[QUERYRECORD] _)
 
   case class QueryMoreReq(queryLocator: QueryLocator)
 
   implicit val wQueryMoreReq: Writes[QueryMoreReq] = Json.writes[QueryMoreReq]
 
   // https://www.zuora.com/developer/api-reference/#operation/Action_POSTquery
-  def query[QUERYRECORD: Reads](query: Query): WithDepsClientFailableOp[ZuoraDeps, QueryResult[QUERYRECORD]] =
+  def getResults[QUERYRECORD: Reads](query: Query): WithDepsClientFailableOp[ZuoraDeps, QueryResult[QUERYRECORD]] =
     post(query, s"action/query")
 
 }

@@ -4,7 +4,7 @@ import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayResponse.noActionRequired
 import com.gu.util.reader.Types.FailableOp
 
-import scalaz.{ -\/, \/- }
+import scalaz.{-\/, \/-}
 
 object AutoCancelInputFilter extends Logging {
   def apply(callout: AutoCancelCallout, onlyCancelDirectDebit: Boolean): FailableOp[Unit] = {

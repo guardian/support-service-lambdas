@@ -2,26 +2,28 @@ package com.gu.util.zuora
 
 import com.gu.util.zuora.internal.Types._
 import com.gu.util.zuora.ZuoraModels._
-import com.gu.util.zuora.ZuoraAccount.{ AccountId, PaymentMethodId }
+import com.gu.util.zuora.ZuoraAccount.{AccountId, PaymentMethodId}
 import com.gu.util.zuora.ZuoraReaders._
 import com.gu.util.zuora.ZuoraRestRequestMaker._
-import okhttp3.{ Request, Response }
+import okhttp3.{Request, Response}
 import java.time.LocalDate
 
 import play.api.libs.functional.syntax._
-import play.api.libs.json.{ JsPath, Json, Reads, Writes }
+import play.api.libs.json.{JsPath, Json, Reads, Writes}
 
 case class ZuoraRestConfig(
   baseUrl: String,
   username: String,
-  password: String)
+  password: String
+)
 
 object ZuoraRestConfig {
 
   implicit val zuoraConfigReads: Reads[ZuoraRestConfig] = (
     (JsPath \ "baseUrl").read[String] and
     (JsPath \ "username").read[String] and
-    (JsPath \ "password").read[String])(ZuoraRestConfig.apply _)
+    (JsPath \ "password").read[String]
+  )(ZuoraRestConfig.apply _)
 
 }
 
@@ -40,23 +42,27 @@ object ZuoraGetAccountSummary {
   implicit val basicAccountInfoReads: Reads[BasicAccountInfo] = (
     (JsPath \ "id").read[String].map(AccountId.apply) and
     (JsPath \ "balance").read[Double] and
-    (JsPath \ "defaultPaymentMethod" \ "id").read[PaymentMethodId])(BasicAccountInfo.apply _)
+    (JsPath \ "defaultPaymentMethod" \ "id").read[PaymentMethodId]
+  )(BasicAccountInfo.apply _)
 
   implicit val invoiceReads: Reads[Invoice] = (
     (JsPath \ "id").read[String] and
     (JsPath \ "dueDate").read[LocalDate] and
     (JsPath \ "balance").read[Double] and
-    (JsPath \ "status").read[String])(Invoice.apply _)
+    (JsPath \ "status").read[String]
+  )(Invoice.apply _)
 
   implicit val subscriptionSummaryReads: Reads[SubscriptionSummary] = (
     (JsPath \ "id").read[String].map(SubscriptionId.apply) and
     (JsPath \ "subscriptionNumber").read[String] and
-    (JsPath \ "status").read[String])(SubscriptionSummary.apply _)
+    (JsPath \ "status").read[String]
+  )(SubscriptionSummary.apply _)
 
   implicit val accountSummaryReads: Reads[AccountSummary] = (
     (JsPath \ "basicInfo").read[BasicAccountInfo] and
     (JsPath \ "subscriptions").read[List[SubscriptionSummary]] and
-    (JsPath \ "invoices").read[List[Invoice]])(AccountSummary.apply _)
+    (JsPath \ "invoices").read[List[Invoice]]
+  )(AccountSummary.apply _)
 
   def apply(accountId: String): WithDepsClientFailableOp[ZuoraDeps, AccountSummary] =
     get[AccountSummary](s"accounts/$accountId/summary")
@@ -77,7 +83,8 @@ object ZuoraGetInvoiceTransactions {
     (JsPath \ "serviceEndDate").read[LocalDate] and
     (JsPath \ "chargeAmount").read[Double] and
     (JsPath \ "chargeName").read[String] and
-    (JsPath \ "productName").read[String])(InvoiceItem.apply _)
+    (JsPath \ "productName").read[String]
+  )(InvoiceItem.apply _)
 
   implicit val itemisedInvoiceReads: Reads[ItemisedInvoice] = (
     (JsPath \ "id").read[String] and
@@ -85,7 +92,8 @@ object ZuoraGetInvoiceTransactions {
     (JsPath \ "amount").read[Double] and
     (JsPath \ "balance").read[Double] and
     (JsPath \ "status").read[String] and
-    (JsPath \ "invoiceItems").read[List[InvoiceItem]])(ItemisedInvoice.apply _)
+    (JsPath \ "invoiceItems").read[List[InvoiceItem]]
+  )(ItemisedInvoice.apply _)
 
   implicit val invoiceTransactionSummaryReads: Reads[InvoiceTransactionSummary] =
     (JsPath \ "invoices").read[List[ItemisedInvoice]].map {
@@ -105,7 +113,8 @@ object ZuoraCancelSubscription {
     def writes(subscriptionCancellation: SubscriptionCancellation) = Json.obj(
       "cancellationEffectiveDate" -> subscriptionCancellation.cancellationEffectiveDate,
       "cancellationPolicy" -> "SpecificDate",
-      "invoiceCollect" -> false)
+      "invoiceCollect" -> false
+    )
   }
 
   def apply(subscription: SubscriptionId, cancellationDate: LocalDate): WithDepsClientFailableOp[ZuoraDeps, Unit] =
@@ -119,7 +128,8 @@ object ZuoraUpdateCancellationReason {
 
   implicit val subscriptionUpdateWrites = new Writes[SubscriptionUpdate] {
     def writes(subscriptionUpdate: SubscriptionUpdate) = Json.obj(
-      "CancellationReason__c" -> subscriptionUpdate.cancellationReason)
+      "CancellationReason__c" -> subscriptionUpdate.cancellationReason
+    )
   }
 
   def apply(subscription: SubscriptionId): WithDepsClientFailableOp[ZuoraDeps, Unit] =
@@ -133,7 +143,8 @@ object ZuoraDisableAutoPay {
 
   implicit val accountUpdateWrites = new Writes[AccountUpdate] {
     def writes(accountUpdate: AccountUpdate) = Json.obj(
-      "autoPay" -> accountUpdate.autoPay)
+      "autoPay" -> accountUpdate.autoPay
+    )
   }
 
   def apply(accountId: String): WithDepsClientFailableOp[ZuoraDeps, Unit] =

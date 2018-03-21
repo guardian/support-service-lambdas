@@ -4,13 +4,13 @@ import com.gu.util.ETConfig.ETSendId
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.exacttarget.ETClient.ETClientDeps
 import com.gu.util.exacttarget.EmailSendSteps.logger
-import com.gu.util.exacttarget.SalesforceAuthenticate.{ ETImpure, SalesforceAuth }
+import com.gu.util.exacttarget.SalesforceAuthenticate.{ETImpure, SalesforceAuth}
 import com.gu.util.reader.Types._
-import com.gu.util.{ ETConfig, Logging, Stage }
-import okhttp3.{ MediaType, Request, RequestBody, Response }
-import play.api.libs.json.{ Json, Writes, _ }
+import com.gu.util.{ETConfig, Logging, Stage}
+import okhttp3.{MediaType, Request, RequestBody, Response}
+import play.api.libs.json.{Json, Writes, _}
 
-import scalaz.{ -\/, \/, \/- }
+import scalaz.{-\/, \/, \/-}
 
 case class ContactAttributesDef(SubscriberAttributes: SubscriberAttributesDef)
 
@@ -32,7 +32,8 @@ case class SubscriberAttributesDef(
   billing_city: Option[String] = None,
   billing_state: Option[String] = None,
   billing_country: Option[String] = None,
-  title: Option[String] = None)
+  title: Option[String] = None
+)
 
 sealed trait PrimaryKey {
   // ET will filter out multiple emails with the same payment id for PF1,2,3,4
@@ -67,7 +68,8 @@ object SubscriberAttributesDef {
         },
         "price" -> JsString(o.price),
         "serviceStartDate" -> JsString(o.serviceStartDate),
-        "serviceEndDate" -> JsString(o.serviceEndDate))
+        "serviceEndDate" -> JsString(o.serviceEndDate)
+      )
 
       val optionalFields = Map(
         "billing_address1" -> o.billing_address1.map(JsString),
@@ -76,7 +78,8 @@ object SubscriberAttributesDef {
         "billing_city" -> o.billing_city.map(JsString),
         "billing_state" -> o.billing_state.map(JsString),
         "billing_country" -> o.billing_country.map(JsString),
-        "title" -> o.title.map(JsString)).collect { case (key, Some(value)) => key -> value }
+        "title" -> o.title.map(JsString)
+      ).collect { case (key, Some(value)) => key -> value }
 
       val allFields = fields ++ optionalFields
       JsObject(allFields)
@@ -100,7 +103,8 @@ object EmailSendSteps extends Logging {
 
   case class EmailSendStepsDeps(
     sendEmail: EmailRequest => FailableOp[Unit],
-    filterEmail: EmailRequest => FailableOp[Unit])
+    filterEmail: EmailRequest => FailableOp[Unit]
+  )
 
   object EmailSendStepsDeps {
     def default(stage: Stage, response: Request => Response, etConfig: ETConfig): EmailSendStepsDeps = {
@@ -121,7 +125,8 @@ object ETClient {
 
   case class ETClientDeps(
     response: (Request => Response),
-    etConfig: ETConfig)
+    etConfig: ETConfig
+  )
 
   def sendEmail(eTClientDeps: ETClientDeps)(emailRequest: EmailRequest): FailableOp[Unit] = {
     for {

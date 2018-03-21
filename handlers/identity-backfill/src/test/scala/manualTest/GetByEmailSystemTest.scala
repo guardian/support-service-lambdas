@@ -4,7 +4,7 @@ import com.gu.effects.RawEffects
 import com.gu.identity.GetByEmail
 import com.gu.identityBackfill.Handler.StepsConfig
 import com.gu.identityBackfill.Types.EmailAddress
-import com.gu.util.{ Config, Logging }
+import com.gu.util.{Config, Logging}
 
 import scala.io.Source
 import scala.util.Try

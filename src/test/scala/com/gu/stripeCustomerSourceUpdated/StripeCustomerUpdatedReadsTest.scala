@@ -2,7 +2,7 @@ package com.gu.stripeCustomerSourceUpdated
 
 import org.scalatest.FlatSpec
 import org.scalatest.Matchers._
-import play.api.libs.json.{ JsResult, JsSuccess, Json }
+import play.api.libs.json.{JsResult, JsSuccess, Json}
 import SourceUpdatedCallout._
 
 class StripeCustomerUpdatedReadsTest extends FlatSpec {
@@ -68,7 +68,11 @@ class StripeCustomerUpdatedReadsTest extends FlatSpec {
             country = StripeCountry("US"),
             customer = StripeCustomerId("cus_ghi789"),
             expiry = StripeExpiry(exp_month = 7, exp_year = 2020),
-            last4 = StripeLast4("1234")))))
+            last4 = StripeLast4("1234")
+          )
+        )
+      )
+    )
 
     val event: JsResult[SourceUpdatedCallout] = Json.parse(validEventJson).validate[SourceUpdatedCallout]
 

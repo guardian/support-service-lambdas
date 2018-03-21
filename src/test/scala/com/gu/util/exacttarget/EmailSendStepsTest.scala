@@ -3,7 +3,7 @@ package com.gu.util.exacttarget
 import com.gu.util.ETConfig.ETSendId
 import com.gu.util.Stage
 import com.gu.util.exacttarget.EmailSendSteps.EmailSendStepsDeps
-import org.scalatest.{ FlatSpec, Matchers }
+import org.scalatest.{FlatSpec, Matchers}
 
 import scalaz.\/-
 
@@ -26,7 +26,11 @@ class EmailSendStepsTest extends FlatSpec with Matchers {
             primaryKey = PaymentId("paymentId"),
             price = "49.0 GBP",
             serviceStartDate = "31 January 2016",
-            serviceEndDate = "31 January 2017"))))
+            serviceEndDate = "31 January 2017"
+          )
+        )
+      )
+    )
   }
 
   private val guardian = "john.duffell@guardian.co.uk"
@@ -36,7 +40,8 @@ class EmailSendStepsTest extends FlatSpec with Matchers {
 
     val req = EmailRequest(
       etSendId = ETSendId("etSendId"),
-      makeMessage(email))
+      makeMessage(email)
+    )
 
     val stage = Stage(if (isProd) "PROD" else "CODE")
 
@@ -47,7 +52,8 @@ class EmailSendStepsTest extends FlatSpec with Matchers {
         varAttempted = true
         \/-(()) // always success
       },
-      filterEmail = FilterEmail.apply(stage) _)
+      filterEmail = FilterEmail.apply(stage) _
+    )
 
     EmailSendSteps(deps)(req)
 

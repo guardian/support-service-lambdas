@@ -1,19 +1,19 @@
 package com.gu.stripeCustomerSourceUpdated
 
 import com.gu.stripeCustomerSourceUpdated.StripeRequestSignatureChecker.verifyRequest
-import com.gu.stripeCustomerSourceUpdated.zuora.{ CreatePaymentMethod, SetDefaultPaymentMethod, ZuoraQueryPaymentMethod }
+import com.gu.stripeCustomerSourceUpdated.zuora.{CreatePaymentMethod, SetDefaultPaymentMethod, ZuoraQueryPaymentMethod}
 import com.gu.util._
 import com.gu.util.apigateway.ApiGatewayResponse.unauthorized
 import com.gu.util.apigateway.ResponseModels.ApiResponse
-import com.gu.util.apigateway.{ ApiGatewayRequest, ApiGatewayResponse, StripeAccount }
+import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse, StripeAccount}
 import com.gu.util.reader.Types._
-import com.gu.stripeCustomerSourceUpdated.zuora.CreatePaymentMethod.{ CreateStripePaymentMethod, CreditCardType }
+import com.gu.stripeCustomerSourceUpdated.zuora.CreatePaymentMethod.{CreateStripePaymentMethod, CreditCardType}
 import com.gu.util.zuora.ZuoraGetAccountSummary.AccountSummary
-import com.gu.stripeCustomerSourceUpdated.zuora.ZuoraQueryPaymentMethod.{ AccountPaymentMethodIds, PaymentMethodFields }
+import com.gu.stripeCustomerSourceUpdated.zuora.ZuoraQueryPaymentMethod.{AccountPaymentMethodIds, PaymentMethodFields}
 import com.gu.util.zuora.ZuoraAccount.PaymentMethodId
 import com.gu.util.zuora._
-import okhttp3.{ Request, Response }
-import play.api.libs.json.{ Json, Reads }
+import okhttp3.{Request, Response}
+import play.api.libs.json.{Json, Reads}
 
 import scalaz._
 import scalaz.syntax.applicative._
@@ -88,7 +88,8 @@ object SourceUpdatedSteps extends Logging {
         eventDataObject.last4,
         eventDataObject.expiry,
         creditCardType,
-        paymentMethodFields.NumConsecutiveFailures))
+        paymentMethodFields.NumConsecutiveFailures
+      ))
     } yield result
   }
 
