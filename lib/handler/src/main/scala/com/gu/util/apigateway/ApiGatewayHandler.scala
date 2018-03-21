@@ -38,8 +38,8 @@ object ApiGatewayHandler extends Logging {
     if (credentialsAreValid(requestAuth, trustedApiConfig)) \/-(()) else -\/(unauthorized)
   }
 
-  def default[StepsConfig: Reads]: (Config[StepsConfig] => ApiGatewayRequest => FailableOp[Unit], LambdaIO) => Reader[(Stage, Try[String]), Unit] =
-    apply(LoadConfig.default[StepsConfig], _, _)
+  def default[StepsConfig: Reads](operation: Config[StepsConfig] => ApiGatewayRequest => FailableOp[Unit], io: LambdaIO): Reader[(Stage, Try[String]), Unit] =
+    apply(LoadConfig.default[StepsConfig], operation, io)
 
   def apply[StepsConfig](
     loadConfig: Reader[(Stage, Try[String]), FailableOp[Config[StepsConfig]]],

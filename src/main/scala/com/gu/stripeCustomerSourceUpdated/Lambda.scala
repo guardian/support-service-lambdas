@@ -15,7 +15,7 @@ object Lambda {
   def runWithEffects(rawEffects: RawEffects, lambdaIO: LambdaIO): Unit = {
     def operation(config: Config[StepsConfig]): ApiGatewayRequest => FailableOp[Unit] =
       SourceUpdatedSteps(Deps.default(rawEffects.response, config))
-    ApiGatewayHandler.default[StepsConfig](implicitly)(operation, lambdaIO).run((rawEffects.stage, rawEffects.s3Load(rawEffects.stage)))
+    ApiGatewayHandler.default[StepsConfig](operation, lambdaIO).run((rawEffects.stage, rawEffects.s3Load(rawEffects.stage)))
   }
 
   // this is the entry point

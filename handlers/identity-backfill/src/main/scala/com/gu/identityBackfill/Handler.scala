@@ -31,12 +31,12 @@ object Handler {
     def operation: Config[StepsConfig] => ApiGatewayRequest => FailableOp[Unit] =
       config => IdentityBackfillSteps(
         GetByEmail(rawEffects.response, config.stepsConfig.identityConfig),
-        GetZuoraAccountsForEmail.apply(ZuoraDeps(rawEffects.response, config.stepsConfig.zuoraRestConfig)),
-        CountZuoraAccountsForIdentityId.apply(ZuoraDeps(rawEffects.response, config.stepsConfig.zuoraRestConfig)),
+        GetZuoraAccountsForEmail(ZuoraDeps(rawEffects.response, config.stepsConfig.zuoraRestConfig)),
+        CountZuoraAccountsForIdentityId(ZuoraDeps(rawEffects.response, config.stepsConfig.zuoraRestConfig)),
         UpdateZuoraIdentityId.apply,
         UpdateSalesforceIdentityId.apply
       )
-    ApiGatewayHandler.default[StepsConfig](implicitly)(operation, lambdaIO).run((rawEffects.stage, rawEffects.s3Load(rawEffects.stage)))
+    ApiGatewayHandler.default[StepsConfig](operation, lambdaIO).run((rawEffects.stage, rawEffects.s3Load(rawEffects.stage)))
   }
 
 }
