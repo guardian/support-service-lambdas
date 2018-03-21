@@ -109,7 +109,7 @@ Stripe Webhook > AWS Cloudfront > AWS API Gateway > AWS Lambda
 
 **Identity backfill**
 
-[identity-backfill](handlers/)
+[identity-backfill](handlers/identity-backfill/)
 
 **Libraries**
 
