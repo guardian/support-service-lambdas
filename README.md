@@ -42,7 +42,7 @@ You can be confident when making code only changes.  Run `sbt test`. They will r
 Traiditonal health checking doesn't happen.  After deploy you can't relax until you know an HTTP request will hit your lambda, and that your lambda can access any external services.
 You can run the health check as a local test by downloading the DEV config, and running HealthCheckSystemTest.
 You can run it in CODE and PROD by downloading the health check config from DEV and running CODEPRODHealthCheck.
-The PROD health checks are called by RunScope every 5 minutes.
+The PROD health checks are [called by RunScope](https://www.runscope.com/radar/wrb0ytfjy4a4) every 5 minutes.
 
 To download the dev config use the following command:
 `aws s3 cp s3://gu-reader-revenue-private/membership/payment-failure-lambdas/DEV/ /etc/gu/ --exclude "*" --include "payment-failure-*" --profile membership --recursive`
