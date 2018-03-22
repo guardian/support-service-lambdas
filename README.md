@@ -5,6 +5,8 @@ This is the reader revenue lambda API/orchestration layer.  But it has a bad nam
 Please keep all the various README in this project up to date, and improve them!
 There should be one in each project and anywhere else you think it's would help.
 
+---
+
 ## philosophy
 The general philosophy of this project is to keep things under review and don't be afraid to refactor things
 especially the hard parts of the structure when you think they are wrong.
@@ -28,7 +30,29 @@ If there's any code in either that you feel could be unit tested, it should prob
 - **one jar per lambda** - minimise the size of the deployment artifact
 - **minimise dependencies (aka liabilities)** on external libraries as we have to keep them up to date, also they increase the size of the artifact
 
-# Howto update config
+---
+
+## Quality matters
+The testing story is not perfect at the moment!  You are responsible for getting your own changes into production safely.  However there are a few common situations you will encounter:
+
+### code only changes
+You can be confident when making code only changes.  Run `sbt test`. They will run on your build of your branch and when you merge to master.  Don't forget to "Run with Coverage" in IntelliJ.
+
+### system integration points
+Traiditonal health checking doesn't happen.  After deploy you can't relax until you know an HTTP request will hit your lambda, and that your lambda can access any external services.
+You can run the health check as a local test by downloading the DEV config, and running HealthCheckSystemTest.
+You can run it in CODE and PROD by downloading the health check config from DEV and running CODEPRODHealthCheck.
+The PROD health checks are [called by RunScope](https://www.runscope.com/radar/wrb0ytfjy4a4) every 5 minutes.
+
+To download the dev config use the following command:
+`aws s3 cp s3://gu-reader-revenue-private/membership/payment-failure-lambdas/DEV/ /etc/gu/ --exclude "*" --include "payment-failure-*" --profile membership --recursive`
+
+### changes to config
+The system won't save you for free here.  Once you changed your config (see the howto below), you should run ConfigLoaderSystemTest.  This test does not (YET!) run automatically, so if you deploy to PROD without checking this, the lambdas will deploy but not actually work.
+
+---
+
+## Howto update config
 At the moment we just use S3 for config.
 
 If you're making an addition, you can just copy the file from S3 for PROD and CODE, then update and upload.
@@ -48,36 +72,19 @@ That will check the latest version can be understood by the current version of t
 
 Ideally this test should be automated and your PR shouldn't be mergable until the config is readable.
 
+---
+
 ## structure
 The main project aggregates all the sub projects from handlers and lib, so we can build and test them in one go.
 
-## root
-Contains three Scala lambdas behind the same API gateway.  TODO These should be moved into a new set of 3 projects in the handlers folder.
+**root** (auto cancel, payment failure and stripe hook)
 
-**autoCancel**: 
-Used to cancel subscriptions with overdue invoices, based on an event trigger within Zuora.
+[root handlers readme](handlers/root.md)
 
-The full workflow is currently:
-Zuora Callout > AWS CloudFront* > AWS API Gateway (Lambda Proxy Integration) > AWS Lambda
+**Identity backfill**
 
-**paymentFailure**:
-Used to trigger emails due to failed payment events in Zuora.
+[identity-backfill](handlers/identity-backfill/)
 
-The full workflow is currently:
-Zuora Callout > AWS CloudFront* > AWS API Gateway (Lambda Proxy Integration) > AWS Lambda > Exact Target / Marketing Cloud (which actually sends the emails).
+**Libraries**
 
-**stripeCustomerSourceUpdated**: 
-Used to automatically update a customer's payment method in Zuora so that the customer doesn't have to update their card details manually. 
-
-Stripe works with card networks so that when a customer's card details are updated, this fires an event and we can provide an endpoint for Stripe to call.
-
-The full workflow is currently:
-Stripe Webhook > AWS Cloudfront > AWS API Gateway > AWS Lambda
-
-*An additional CloudFront distribution is currently required because callouts do not support SNI, and the default CloudFront distribution (which gets set up in front of API Gateway) seems to require it.
-
-# Testing
-
-- Run `sbt test` to execute the unit tests
-- If you need to validate that API Gateway can trigger Lambda execution successfully, deploy your changes to CODE and use Postman (or equivalent) to hit the API Gateway url with a valid payload.
-- For a full integration test of the autoCancel or paymentFailure lambdas, you can trigger the callout from our UAT Zuora environment.
+[shared code](lib/)

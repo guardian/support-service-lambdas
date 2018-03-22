@@ -8,8 +8,8 @@ import com.gu.paymentFailure.PaymentFailureSteps.PFDeps
 import com.gu.paymentFailure.ZuoraEmailSteps.ZuoraEmailStepsDeps
 import com.gu.stripeCustomerSourceUpdated.SourceUpdatedSteps.StepsConfig
 import com.gu.util.ETConfig.ETSendId
-import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
-import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, ApiGatewayResponse}
+import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
+import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayResponse}
 import com.gu.util.exacttarget.EmailSendSteps.EmailSendStepsDeps
 import com.gu.util.exacttarget._
 import com.gu.util.reader.Types._
@@ -53,7 +53,7 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
 
     val os = new ByteArrayOutputStream()
     //execute
-    def configToFunction(config: Config[StepsConfig]): ApiGatewayRequest => FailableOp[Unit] = {
+    def configToFunction(config: Config[StepsConfig]): Operation = {
       PaymentFailureSteps.apply(PFDeps(
         ZuoraEmailSteps.sendEmailRegardingAccount(
           ZuoraEmailStepsDeps(
@@ -123,7 +123,7 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
     responseString jsonMatches expectedResponse
   }
 
-  def apiGatewayHandler: (Config[StepsConfig] => ApiGatewayRequest => FailableOp[Unit], LambdaIO) => Reader[(Stage, Try[String]), Unit] = {
+  def apiGatewayHandler: (Config[StepsConfig] => Operation, LambdaIO) => Reader[(Stage, Try[String]), Unit] = {
     ApiGatewayHandler[StepsConfig](Reader { _ => \/-(TestData.fakeConfig) }, _, _)
   }
   def basicOp(fakeInvoiceTransactionSummary: InvoiceTransactionSummary = basicInvoiceTransactionSummary) = { config: Config[StepsConfig] =>
@@ -134,7 +134,7 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
       )),
       config.etConfig.etSendIDs,
       config.trustedApiConfig
-    )) _
+    ))
   }
 
   "lambda" should "return error if message can't be queued" in {
@@ -145,7 +145,7 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
     val os = new ByteArrayOutputStream()
 
     //execute
-    def configToFunction(config: Config[StepsConfig]): ApiGatewayRequest => FailableOp[Unit] = {
+    def configToFunction(config: Config[StepsConfig]): Operation = {
       PaymentFailureSteps.apply(
         PFDeps(
           ZuoraEmailSteps.sendEmailRegardingAccount(

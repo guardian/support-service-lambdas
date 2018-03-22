@@ -6,15 +6,14 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.gu.autoCancel.AutoCancelSteps.AutoCancelStepsDeps
 import com.gu.effects.RawEffects
 import com.gu.stripeCustomerSourceUpdated.SourceUpdatedSteps.StepsConfig
+import com.gu.util.apigateway.ApiGatewayHandler
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
-import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest}
-import com.gu.util.reader.Types.FailableOp
 import com.gu.util.{Config, Logging}
 
 object AutoCancelHandler extends App with Logging {
 
   def runWithEffects(rawEffects: RawEffects, lambdaIO: LambdaIO): Unit = {
-    def operation(config: Config[StepsConfig]): ApiGatewayRequest => FailableOp[Unit] =
+    def operation(config: Config[StepsConfig]): ApiGatewayHandler.Operation =
       AutoCancelSteps(AutoCancelStepsDeps.default(rawEffects.now(), rawEffects.response, config))
     ApiGatewayHandler.default[StepsConfig](operation, lambdaIO).run((rawEffects.stage, rawEffects.s3Load(rawEffects.stage)))
   }

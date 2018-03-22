@@ -10,6 +10,7 @@ import com.gu.util.reader.Types._
 import com.gu.stripeCustomerSourceUpdated.zuora.CreatePaymentMethod.{CreateStripePaymentMethod, CreditCardType}
 import com.gu.util.zuora.ZuoraGetAccountSummary.AccountSummary
 import com.gu.stripeCustomerSourceUpdated.zuora.ZuoraQueryPaymentMethod.{AccountPaymentMethodIds, PaymentMethodFields}
+import com.gu.util.apigateway.ApiGatewayHandler.Operation
 import com.gu.util.zuora.ZuoraAccount.PaymentMethodId
 import com.gu.util.zuora._
 import okhttp3.{Request, Response}
@@ -29,7 +30,7 @@ object SourceUpdatedSteps extends Logging {
   type WithZuoraDepsFailableOp[A] = WithDepsFailableOp[ZuoraDeps, A]
   implicit val mWithZuoraDepsFailableOp: Monad[WithZuoraDepsFailableOp] = eitherTMonad[({ type XReader[AA] = Reader[ZuoraDeps, AA] })#XReader, ApiResponse]
 
-  def apply(deps: Deps)(apiGatewayRequest: ApiGatewayRequest): FailableOp[Unit] = {
+  def apply(deps: Deps): Operation = Operation.noHealthcheck({ apiGatewayRequest: ApiGatewayRequest =>
     (for {
       _ <- (if (deps.stripeDeps.config.signatureChecking) bodyIfSignatureVerified(deps.stripeDeps, apiGatewayRequest) else \/-(())).pure[WithDeps].toEitherT
       sourceUpdatedCallout <- Json.fromJson[SourceUpdatedCallout](Json.parse(apiGatewayRequest.body)).toFailableOp.withLogging("fromJson SourceUpdatedCallout").pure[WithDeps].toEitherT
@@ -39,7 +40,7 @@ object SourceUpdatedSteps extends Logging {
         _ <- ListT[WithZuoraDepsFailableOp, Unit](createUpdatedDefaultPaymentMethod(defaultPaymentMethod, sourceUpdatedCallout.data.`object`).map(_.pure[List]))
       } yield ()).run
     } yield ()).run.run(deps.zuoraDeps)
-  }
+  })
 
   def createUpdatedDefaultPaymentMethod(paymentMethodFields: PaymentMethodFields, eventDataObject: EventDataObject): WithZuoraDepsFailableOp[Unit] = {
     for {

@@ -17,7 +17,7 @@ object RawEffects {
 
   // This is the effects that actually does stuff in side effects
   def createDefault = {
-    val stage = Stage(System.getenv("Stage"))
+    val stage = Stage(Option(System.getenv("Stage")).filter(_ != "").getOrElse("DEV"))
     RawEffects(Http.response, stage, ConfigLoad.load, () => LocalDate.now)
   }
 

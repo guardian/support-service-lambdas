@@ -30,7 +30,7 @@ class StepsTest extends FlatSpec with Matchers {
         salesforceUpdate = Some((sFContactId, identityId))
         \/-(())
       }
-    )
+    ).steps
 
   }
 

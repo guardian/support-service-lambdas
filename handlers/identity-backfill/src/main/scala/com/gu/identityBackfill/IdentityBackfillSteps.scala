@@ -4,6 +4,7 @@ import com.gu.identity.GetByEmail
 import com.gu.identityBackfill.IdentityBackfillSteps.WireModel.IdentityBackfillRequest
 import com.gu.identityBackfill.Types._
 import com.gu.util.Logging
+import com.gu.util.apigateway.ApiGatewayHandler.Operation
 import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.reader.Types._
 import play.api.libs.json.{Json, Reads}
@@ -32,20 +33,33 @@ object IdentityBackfillSteps extends Logging {
     countZuoraAccountsForIdentityId: IdentityId => FailableOp[Int],
     updateZuoraIdentityId: (AccountId, IdentityId) => FailableOp[Unit],
     updateSalesforceIdentityId: (SFContactId, IdentityId) => FailableOp[Unit]
-  )(apiGatewayRequest: ApiGatewayRequest): FailableOp[Unit] = {
-    for {
-      request <- Json.fromJson[IdentityBackfillRequest](Json.parse(apiGatewayRequest.body)).toFailableOp.withLogging("zuora callout")
-      emailAddress = fromRequest(request)
-      identityId <- getByEmail(emailAddress).leftMap(a => ApiGatewayResponse.internalServerError(a.toString)).withLogging("GetByEmail")
-      zuoraAccountsForEmail <- getZuoraAccountsForEmail(emailAddress)
-      zuoraAccountForEmail <- zuoraAccountsForEmail match { case one :: Nil => \/-(one); case _ => -\/(ApiGatewayResponse.notFound("should have exactly one zuora account per email at this stage")) }
-      zuoraAccountsForIdentityId <- countZuoraAccountsForIdentityId(identityId)
-      _ <- if (zuoraAccountsForIdentityId == 0) \/-(()) else -\/(ApiGatewayResponse.notFound("already used that identity id"))
-      _ <- if (request.dryRun) -\/(ApiGatewayResponse.noActionRequired("DRY RUN requested! skipping to the end")) else \/-(())
-      _ <- updateZuoraIdentityId(zuoraAccountForEmail.accountId, identityId)
-      _ <- updateSalesforceIdentityId(zuoraAccountForEmail.sfContactId, identityId)
-      // need to remember which ones we updated?
-    } yield ()
+  ): Operation = {
+
+    def steps(apiGatewayRequest: ApiGatewayRequest) =
+      for {
+        request <- Json.fromJson[IdentityBackfillRequest](Json.parse(apiGatewayRequest.body)).toFailableOp.withLogging("zuora callout")
+        emailAddress = fromRequest(request)
+        identityId <- getByEmail(emailAddress).leftMap(a => ApiGatewayResponse.internalServerError(a.toString)).withLogging("GetByEmail")
+        zuoraAccountsForEmail <- getZuoraAccountsForEmail(emailAddress)
+        zuoraAccountForEmail <- zuoraAccountsForEmail match {
+          case one :: Nil => \/-(one);
+          case _ => -\/(ApiGatewayResponse.notFound("should have exactly one zuora account per email at this stage"))
+        }
+        zuoraAccountsForIdentityId <- countZuoraAccountsForIdentityId(identityId)
+        _ <- if (zuoraAccountsForIdentityId == 0) \/-(()) else -\/(ApiGatewayResponse.notFound("already used that identity id"))
+        _ <- (if (request.dryRun) -\/(ApiGatewayResponse.noActionRequired("DRY RUN requested! skipping to the end")) else \/-(())).withLogging("dryrun aborter")
+        _ <- updateZuoraIdentityId(zuoraAccountForEmail.accountId, identityId)
+        _ <- updateSalesforceIdentityId(zuoraAccountForEmail.sfContactId, identityId)
+        // need to remember which ones we updated?
+      } yield ()
+
+    def healthcheck() =
+      for {
+        identityId <- getByEmail(EmailAddress("john.duffell@guardian.co.uk")).leftMap(a => ApiGatewayResponse.internalServerError(a.toString)).withLogging("healthcheck getByEmail")
+        _ <- countZuoraAccountsForIdentityId(identityId)
+      } yield ()
+
+    Operation(steps = steps, healthcheck = () => healthcheck())
   }
 
 }

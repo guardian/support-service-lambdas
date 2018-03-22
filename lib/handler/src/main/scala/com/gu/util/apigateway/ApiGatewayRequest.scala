@@ -17,7 +17,12 @@ object StripeAccount {
 
   implicit val reads: Reads[StripeAccount] = JsPath.read[String].map(fromString(_).get)
 }
-case class URLParams(apiToken: Option[String], onlyCancelDirectDebit: Boolean, stripeAccount: Option[StripeAccount])
+case class URLParams(
+  apiToken: Option[String],
+  onlyCancelDirectDebit: Boolean,
+  stripeAccount: Option[StripeAccount],
+  isHealthcheck: Boolean
+)
 
 /* Using query strings because for Basic Auth to work Zuora requires us to return a WWW-Authenticate
   header, and API Gateway does not support this header (returns x-amzn-Remapped-WWW-Authenticate instead)
@@ -35,7 +40,8 @@ object URLParams {
   implicit val jf = (
     (JsPath \ "apiToken").readNullable[String] and
     (JsPath \ "onlyCancelDirectDebit").readNullable[String].map(_.contains("true")) and
-    (JsPath \ "stripeAccount").readNullable[String].map(_.flatMap(StripeAccount.fromString))
+    (JsPath \ "stripeAccount").readNullable[String].map(_.flatMap(StripeAccount.fromString)) and
+    (JsPath \ "isHealthcheck").readNullable[String].map(_.contains("true"))
   )(URLParams.apply _)
 }
 

@@ -8,8 +8,8 @@ import com.gu.identity.{GetByEmail, IdentityConfig}
 import com.gu.identityBackfill.Types._
 import com.gu.identityBackfill.zuora.{CountZuoraAccountsForIdentityId, GetZuoraAccountsForEmail}
 import com.gu.util.Config
-import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
-import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, ApiGatewayResponse}
+import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
+import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayResponse}
 import com.gu.util.reader.Types.FailableOp
 import com.gu.util.zuora.{ZuoraDeps, ZuoraRestConfig}
 import play.api.libs.json.{Json, Reads}
@@ -28,7 +28,7 @@ object Handler {
   implicit val stepsConfigReads: Reads[StepsConfig] = Json.reads[StepsConfig]
 
   def runWithEffects(rawEffects: RawEffects, lambdaIO: LambdaIO): Unit = {
-    def operation: Config[StepsConfig] => ApiGatewayRequest => FailableOp[Unit] =
+    def operation: Config[StepsConfig] => Operation =
       config => IdentityBackfillSteps(
         GetByEmail(rawEffects.response, config.stepsConfig.identityConfig),
         GetZuoraAccountsForEmail(ZuoraDeps(rawEffects.response, config.stepsConfig.zuoraRestConfig)),

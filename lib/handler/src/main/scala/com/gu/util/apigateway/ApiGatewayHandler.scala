@@ -38,12 +38,18 @@ object ApiGatewayHandler extends Logging {
     if (credentialsAreValid(requestAuth, trustedApiConfig)) \/-(()) else -\/(unauthorized)
   }
 
-  def default[StepsConfig: Reads](operation: Config[StepsConfig] => ApiGatewayRequest => FailableOp[Unit], io: LambdaIO): Reader[(Stage, Try[String]), Unit] =
+  case class Operation(steps: ApiGatewayRequest => FailableOp[Unit], healthcheck: () => FailableOp[Unit])
+  object Operation {
+    def noHealthcheck(steps: ApiGatewayRequest => FailableOp[Unit]) =
+      Operation(steps, () => \/-(()))
+  }
+
+  def default[StepsConfig: Reads](operation: Config[StepsConfig] => Operation, io: LambdaIO): Reader[(Stage, Try[String]), Unit] =
     apply(LoadConfig.default[StepsConfig], operation, io)
 
   def apply[StepsConfig](
     loadConfig: Reader[(Stage, Try[String]), FailableOp[Config[StepsConfig]]],
-    operation: Config[StepsConfig] => ApiGatewayRequest => FailableOp[Unit],
+    operation: Config[StepsConfig] => Operation,
     lambdaIO: LambdaIO
   ): Reader[(Stage, Try[String]), Unit] = {
 
@@ -53,8 +59,11 @@ object ApiGatewayHandler extends Logging {
       val response = for {
         config <- failableConfig
         apiGatewayRequest <- parseApiGatewayRequest(inputStream)
-        _ <- authenticateCallout(apiGatewayRequest.requestAuth, config.trustedApiConfig).withLogging("authentication")
-        _ <- operation(config)(apiGatewayRequest)
+        configuredOperation = operation(config)
+        _ <- if (apiGatewayRequest.queryStringParameters.exists(_.isHealthcheck)) configuredOperation.healthcheck().withLogging("healthcheck") else for {
+          _ <- authenticateCallout(apiGatewayRequest.requestAuth, config.trustedApiConfig).withLogging("authentication")
+          _ <- configuredOperation.steps(apiGatewayRequest).withLogging("steps")
+        } yield ()
       } yield ()
 
       outputForAPIGateway(outputStream, response.fold(identity, _ => successfulExecution))
