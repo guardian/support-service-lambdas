@@ -189,6 +189,7 @@ Resources:
         Period: 3600
         Statistic: Sum
         Threshold: 5
+        TreatMissingData: notBreaching
 
     4xxApiAlarm:
       Type: AWS::CloudWatch::Alarm
@@ -212,4 +213,5 @@ Resources:
         Period: 3600
         Statistic: Sum
         Threshold: 5
+        TreatMissingData: notBreaching
 
