@@ -4,28 +4,21 @@ import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
 import com.gu.effects.RawEffects
 import com.gu.identityBackfill.Handler
+import com.gu.test.EffectsTest
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import manualTest.HealthCheckData._
-import org.scalatest.{Assertion, FlatSpec, Ignore, Matchers}
+import org.scalatest.{Assertion, FlatSpec, Matchers}
 import play.api.libs.json.Json
-
-import scala.io.Source
-import scala.util.Try
 
 // this test runs the health check from locally. this means you can only run it manually
 // you should also run the healthcheck in code after deploy
-@Ignore
 class HealthCheckSystemTest extends FlatSpec with Matchers {
 
-  it should "successfull run the health check using the local code against real backend" in {
+  it should "successfull run the health check using the local code against real backend" taggedAs EffectsTest in {
 
     val stream = new ByteArrayInputStream(healthcheckRequest.getBytes(java.nio.charset.StandardCharsets.UTF_8))
     val os = new ByteArrayOutputStream()
-    val rawEffects = RawEffects.createDefault.copy(s3Load = { stage =>
-      Try {
-        Source.fromFile("/etc/gu/payment-failure-lambdas.private.json").mkString
-      }
-    })
+    val rawEffects = RawEffects.createDefault
 
     //execute
     Handler.runWithEffects(rawEffects, LambdaIO(stream, os, null))

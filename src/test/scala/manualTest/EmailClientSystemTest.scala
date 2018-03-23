@@ -1,15 +1,14 @@
 package manualTest
 
-import com.gu.effects.RawEffects
+import com.gu.effects.{ConfigLoad, RawEffects}
 import com.gu.util.ETConfig.ETSendIds
 import com.gu.util.exacttarget.EmailSendSteps.EmailSendStepsDeps
 import com.gu.util.exacttarget._
 import com.gu.util.zuora.ZuoraRestConfig
 import com.gu.util.{Config, Logging, Stage}
-
-import scala.io.Source
-import scala.util.{Random, Try}
 import scalaz.syntax.std.either._
+
+import scala.util.Random
 
 // run this to send a one off email to yourself.  the email will take a few mins to arrive, but it proves the ET logic works
 object EmailClientSystemTest extends App with Logging {
@@ -49,9 +48,7 @@ object EmailClientSystemTest extends App with Logging {
     )
 
   for {
-    configAttempt <- Try {
-      Source.fromFile("/etc/gu/payment-failure-lambdas.private.json").mkString
-    }.toEither.disjunction.withLogging("fromFile")
+    configAttempt <- ConfigLoad.load(Stage("DEV")).toEither.disjunction.withLogging("fromFile")
     config <- Config.parseConfig[ZuoraRestConfig](configAttempt)
     deps = EmailSendStepsDeps.default(Stage("CODE"), RawEffects.createDefault.response, config.etConfig)
     etSendIds = config.etConfig.etSendIDs

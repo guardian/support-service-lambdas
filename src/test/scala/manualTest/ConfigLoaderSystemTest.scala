@@ -2,25 +2,24 @@ package manualTest
 
 import com.gu.effects.ConfigLoad
 import com.gu.stripeCustomerSourceUpdated.SourceUpdatedSteps.StepsConfig
+import com.gu.test.EffectsTest
 import com.gu.util.{Config, Stage}
-import org.scalatest.{FlatSpec, Ignore, Matchers}
-
-import scala.io.Source
-import scala.util.Try
+import org.scalatest.{FlatSpec, Matchers}
 import scalaz.\/-
 import scalaz.syntax.std.either._
 
+import scala.util.Try
+
 // this test checks the actual config in S3 so it needs credentials.  this means you can only run it manually
 // however it does stop you deploying a new version without updating the config first
-@Ignore
 class ConfigLoaderSystemTest extends FlatSpec with Matchers {
 
-  "loader" should "be able to load the prod config successfully" in {
+  "loader" should "be able to load the prod config successfully" taggedAs EffectsTest in {
     val prod = ConfigLoad.load(Stage("PROD"))
     validate(prod, Stage("PROD"))
   }
 
-  it should "be able to load the code config successfully" in {
+  it should "be able to load the code config successfully" taggedAs EffectsTest in {
     val code: Try[String] = ConfigLoad.load(Stage("CODE"))
     validate(code, Stage("CODE"))
   }
@@ -37,8 +36,8 @@ class ConfigLoaderSystemTest extends FlatSpec with Matchers {
     }
   }
 
-  it should "be able to load the local test config successfully" in {
-    val configAttempt = Try { Source.fromFile("/etc/gu/payment-failure-lambdas.private.json").mkString }
+  it should "be able to load the local test config successfully" taggedAs EffectsTest in {
+    val configAttempt = ConfigLoad.load(Stage("DEV"))
 
     validate(configAttempt, Stage("DEV"))
   }
