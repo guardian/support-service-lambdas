@@ -73,16 +73,12 @@ If you're making a change that you only want to go live on deployment (and have 
 with riffraff) then you can increment the version.  Make sure you upload the file with the new version,
 otherwise it will break the existing lambda immediately.
 
-Follow the same process to update the prod config.
+Follow the same process to update the prod config, and for DEV there is no version number.
 
 To check that you have done it correctly, run the ConfigLoaderSystemTest.
-You will have to remove the @Ignore from it before you can run it.  Remember to replace afterwards.
-That will check the latest version can be understood by the current version of the code.
+That will check the relevant version can be understood by the local version of the code.
 
 Ideally this test should be automated and your PR shouldn't be mergable until the config is readable.
-
-To download the dev config use the following command:
-`aws s3 cp s3://gu-reader-revenue-private/membership/payment-failure-lambdas/DEV/ /etc/gu/ --exclude "*" --include "payment-failure-*" --profile membership --recursive`
 
 ---
 
