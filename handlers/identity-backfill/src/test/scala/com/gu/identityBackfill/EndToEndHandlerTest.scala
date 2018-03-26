@@ -41,6 +41,7 @@ class EndToEndHandlerTest extends FlatSpec with Matchers {
          |""".stripMargin
     responseString jsonMatches expectedResponse
     requests should be(List(
+      BasicRequest("PUT", "/accounts/2c92a0fb4a38064e014a3f48f1663ad8", """{"IdentityId__c":"1234"}"""),
       BasicRequest("POST", "/action/query", """{"queryString":"SELECT Id FROM Account where IdentityId__c='1234'"}"""),
       BasicRequest("POST", "/action/query", """{"queryString":"SELECT Id, IdentityId__c, sfContactId__c FROM Account where BillToId='2c92a0fb4a38064e014a3f48f1713ada'"}"""),
       BasicRequest("POST", "/action/query", """{"queryString":"SELECT Id FROM Contact where WorkEmail='email@address'"}"""),
