@@ -1,10 +1,10 @@
-package com.gu.identityBackfill.zuora
+package manualTest.addIdentityId
 
 import com.gu.identityBackfill.Types.{AccountId, IdentityId}
-import com.gu.identityBackfill.zuora.GetIdentityIdForAccount.WireModel.ZuoraAccount
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types.FailableOp
 import com.gu.util.zuora.{ZuoraDeps, ZuoraRestRequestMaker}
+import manualTest.addIdentityId.GetIdentityIdForAccount.WireModel.ZuoraAccount
 import play.api.libs.json.Json
 
 object GetIdentityIdForAccount {

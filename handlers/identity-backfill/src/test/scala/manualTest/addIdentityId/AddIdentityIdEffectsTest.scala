@@ -1,10 +1,10 @@
-package manualTest
+package manualTest.addIdentityId
 
 import com.gu.effects.{ConfigLoad, RawEffects}
 import com.gu.identityBackfill.Handler.StepsConfig
 import com.gu.identityBackfill.Types
 import com.gu.identityBackfill.Types.IdentityId
-import com.gu.identityBackfill.zuora.{AddIdentityIdToAccount, GetIdentityIdForAccount}
+import com.gu.identityBackfill.zuora.AddIdentityIdToAccount
 import com.gu.test.EffectsTest
 import com.gu.util.zuora.ZuoraDeps
 import com.gu.util.{Config, Stage}
@@ -17,7 +17,7 @@ import scala.util.Random
 // run this manually
 class AddIdentityIdEffectsTest extends FlatSpec with Matchers {
 
-  it should "successfu update the identity id against dev" taggedAs EffectsTest in {
+  it should "successfully update the identity id against dev" taggedAs EffectsTest in {
 
     val unique = s"${Random.nextInt(10000)}"
     val testAccount = Types.AccountId("2c92c0f9624bbc5f016253e573970b16")

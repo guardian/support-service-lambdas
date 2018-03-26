@@ -32,8 +32,10 @@ val scalaSettings = Seq(
   }
 )
 
-lazy val EffectsTest = config("effectsTest") extend(Test) describedAs("run the egde tests")
-lazy val HealthCheckTest = config("healthCheck") extend(Test) describedAs("run the health checks agains prod/code")
+// fixme this whole file needs splitting down appropriately
+
+lazy val EffectsTest = config("effectsTest") extend(Test) describedAs("run the edge tests")
+lazy val HealthCheckTest = config("healthCheck") extend(Test) describedAs("run the health checks against prod/code")
 val testSettings = inConfig(EffectsTest)(Defaults.testTasks) ++ inConfig(HealthCheckTest)(Defaults.testTasks) ++ Seq(
   testOptions in Test += Tests.Argument("-l", "com.gu.test.EffectsTest"),
   testOptions in Test += Tests.Argument("-l", "com.gu.test.HealthCheck"),
