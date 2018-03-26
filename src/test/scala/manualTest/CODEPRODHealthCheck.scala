@@ -1,27 +1,25 @@
 package manualTest
 
-import com.gu.effects.Http
+import com.gu.effects.{ConfigLoad, Http}
+import com.gu.test.HealthCheck
+import com.gu.util.Stage
 import okhttp3._
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
 
-import scala.io.Source
-import scala.util.Try
-
 // this test runs the health check from locally. this means you can only run it manually
 // you should run the healthcheck in code and in prod after deployments
-@org.scalatest.Ignore
 class CODEPRODHealthCheck extends FlatSpec with Matchers {
 
   import com.gu.util.reader.Types._
 
-  it should "successfull run the health checks against CODE" in {
+  it should "successfull run the health checks against CODE" taggedAs HealthCheck in {
 
     healthcheckForEnv(_.CODE)
 
   }
 
-  it should "successfull run the health checks against PROD" in {
+  it should "successfull run the health checks against PROD" taggedAs HealthCheck in {
 
     healthcheckForEnv(_.PROD)
 
@@ -29,9 +27,7 @@ class CODEPRODHealthCheck extends FlatSpec with Matchers {
 
   private def healthcheckForEnv(env: HealthChecks => List[HealthCheckConfig]) = {
     val healthchecks = for {
-      jsonString <- Try {
-        Source.fromFile("/etc/gu/payment-failure-healthcheck.private.json").mkString
-      }.toFailableOp("read local config")
+      jsonString <- ConfigLoad.load(Stage("DEV"), "payment-failure-healthcheck.private.json").toFailableOp("read local config")
       healthcheck <- Json.parse(jsonString).validate[HealthChecks](HealthChecks.reads).toFailableOp
 
     } yield env(healthcheck)

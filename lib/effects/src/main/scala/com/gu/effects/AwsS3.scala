@@ -16,9 +16,17 @@ object ConfigLoad extends Logging {
   val version = "4"
 
   def load(stage: Stage): Try[String] = {
+    val key =
+      if (stage.value == "DEV")
+        s"payment-failure-lambdas.private.json"
+      else
+        s"payment-failure-lambdas.private.v$version.json"
+    load(stage, key)
+  }
+
+  def load(stage: Stage, key: String): Try[String] = {
     logger.info(s"Attempting to load config in $stage")
     val bucket = s"gu-reader-revenue-private/membership/payment-failure-lambdas/${stage.value}"
-    val key = s"payment-failure-lambdas.private.v$version.json"
     val request = new GetObjectRequest(bucket, key)
     AwsS3.fetchString(request)
   }

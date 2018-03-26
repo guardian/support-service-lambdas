@@ -1,26 +1,29 @@
 package manualTest
 
-import com.gu.effects.RawEffects
+import com.gu.effects.{ConfigLoad, RawEffects}
 import com.gu.identity.GetByEmail
 import com.gu.identityBackfill.Handler.StepsConfig
-import com.gu.identityBackfill.Types.EmailAddress
-import com.gu.util.{Config, Logging}
-
-import scala.io.Source
-import scala.util.Try
+import com.gu.identityBackfill.Types.{EmailAddress, IdentityId}
+import com.gu.test.EffectsTest
+import com.gu.util.{Config, Stage}
+import org.scalatest.{FlatSpec, Matchers}
+import scalaz.\/-
 import scalaz.syntax.std.either._
 
 // run this manually
-object GetByEmailSystemTest extends App with Logging {
+class GetByEmailSystemTest extends FlatSpec with Matchers {
 
-  for {
-    configAttempt <- Try {
-      Source.fromFile("/etc/gu/payment-failure-lambdas.private.json").mkString
-    }.toEither.disjunction.withLogging("fromFile")
-    config <- Config.parseConfig[StepsConfig](configAttempt).withLogging("parseConfig")
-    identityId <- GetByEmail(RawEffects.createDefault.response, config.stepsConfig.identityConfig)(EmailAddress("john.duffell@guardian.co.uk")).withLogging("GetByEmail")
-  } yield {
-    println(s"result for getbyemail:::::: $identityId")
+  it should "successfull run the health check using the local code against real backend" taggedAs EffectsTest in {
+
+    val actual = for {
+      configAttempt <- ConfigLoad.load(Stage("DEV")).toEither.disjunction
+      config <- Config.parseConfig[StepsConfig](configAttempt)
+      identityId <- GetByEmail(RawEffects.createDefault.response, config.stepsConfig.identityConfig)(EmailAddress("john.duffell@guardian.co.uk"))
+    } yield {
+      identityId
+    }
+    actual should be(\/-(IdentityId("21814163")))
+
   }
 
 }

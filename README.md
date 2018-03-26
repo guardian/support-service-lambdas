@@ -13,7 +13,7 @@ especially the hard parts of the structure when you think they are wrong.
 The PR review at the end will always let you know when people don't like the idea
 but if you miss an opportunity to improve the structure, this hurts more in the long term than a good
 change with poor naming.
-Yes, small PRs are good, but that means small in terms of explanation, rather than small in terms
+Yes, small PRs are good, but that means small in terms of the meaning of the change, rather than small in terms
 of lines touched.  If you split out some code into a separate subproject and rename an existing one,
 that is a small change because I can explain it in one sentence.  Github's failings in terms
 of displaying it concisely are not your failings in making it small!
@@ -36,19 +36,28 @@ If there's any code in either that you feel could be unit tested, it should prob
 The testing story is not perfect at the moment!  You are responsible for getting your own changes into production safely.  However there are a few common situations you will encounter:
 
 ### code only changes
-You can be confident when making code only changes.  Run `sbt test`. They will run on your build of your branch and when you merge to master.  Don't forget to "Run with Coverage" in IntelliJ.
+You can be confident when making code only changes.  Run `sbt test` to run code only tests (ignores other tests).
+They will automatically run on your build of your branch and when you merge to master.
 
-### system integration points
-Traiditonal health checking doesn't happen.  After deploy you can't relax until you know an HTTP request will hit your lambda, and that your lambda can access any external services.
-You can run the health check as a local test by downloading the DEV config, and running HealthCheckSystemTest.
-You can run it in CODE and PROD by downloading the health check config from DEV and running CODEPRODHealthCheck.
+Add your new tests in the normal way, and don't forget to "Run with Coverage" in IntelliJ.
+
+### system integration points including Config loading
+These tests do not (YET!) run automatically.
+If you deploy to PROD without checking this, the lambdas will deploy but not actually work.
+
+You can run the tests that hit external services by running `sbt effectsTest:test`.
+This would need suitable AWS credentials to get hold of the config.
+
+You can tag your integration new tests with `taggedAs EffectsTest`.  This ignores them from the standard `sbt test`.
+
+### Testing post deployment to CODE/PROD
+After deploy you can't relax until you know an HTTP request will hit your lambda, and that your lambda can access any external services.
+Traiditonal health checking doesn't happen.  You can run it in CODE and PROD by running `sbt healthCheck:test` which should run the CODEPRODHealthCheck.
 The PROD health checks are [called by RunScope](https://www.runscope.com/radar/wrb0ytfjy4a4) every 5 minutes.
 
-To download the dev config use the following command:
-`aws s3 cp s3://gu-reader-revenue-private/membership/payment-failure-lambdas/DEV/ /etc/gu/ --exclude "*" --include "payment-failure-*" --profile membership --recursive`
 
-### changes to config
-The system won't save you for free here.  Once you changed your config (see the howto below), you should run ConfigLoaderSystemTest.  This test does not (YET!) run automatically, so if you deploy to PROD without checking this, the lambdas will deploy but not actually work.
+### Testing things with side effects
+If you are changing the ET emails, it is worth running EmailClientSystemTest with your own email address.
 
 ---
 
@@ -64,11 +73,10 @@ If you're making a change that you only want to go live on deployment (and have 
 with riffraff) then you can increment the version.  Make sure you upload the file with the new version,
 otherwise it will break the existing lambda immediately.
 
-Follow the same process to update the prod config.
+Follow the same process to update the prod config, and for DEV there is no version number.
 
 To check that you have done it correctly, run the ConfigLoaderSystemTest.
-You will have to remove the @Ignore from it before you can run it.  Remember to replace afterwards.
-That will check the latest version can be understood by the current version of the code.
+That will check the relevant version can be understood by the local version of the code.
 
 Ideally this test should be automated and your PR shouldn't be mergable until the config is readable.
 
