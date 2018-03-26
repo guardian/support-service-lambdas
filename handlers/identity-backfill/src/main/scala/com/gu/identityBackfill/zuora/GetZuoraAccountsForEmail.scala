@@ -18,7 +18,7 @@ object GetZuoraAccountsForEmail {
     implicit val zcReads = Json.reads[ZuoraContact]
     case class ZuoraAccount(
       Id: String,
-      IdentityId__c: String,
+      IdentityId__c: Option[String],
       sfContactId__c: String
     )
     implicit val zaReads = Json.reads[ZuoraAccount]
@@ -37,7 +37,7 @@ object GetZuoraAccountsForEmail {
       }
     } yield ZuoraAccountIdentitySFContact(
       AccountId(accountsWithEmail.Id),
-      IdentityId(accountsWithEmail.IdentityId__c),
+      accountsWithEmail.IdentityId__c.map(IdentityId.apply),
       SFContactId(accountsWithEmail.sfContactId__c)
     )
 

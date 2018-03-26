@@ -45,6 +45,10 @@ object IdentityBackfillSteps extends Logging {
           case one :: Nil => \/-(one);
           case _ => -\/(ApiGatewayResponse.notFound("should have exactly one zuora account per email at this stage"))
         }
+        _ <- zuoraAccountForEmail match {
+          case zuoraAccount if zuoraAccount.identityId.isEmpty => \/-(());
+          case _ => -\/(ApiGatewayResponse.notFound("the account we found was already populated with an identity id"))
+        }
         zuoraAccountsForIdentityId <- countZuoraAccountsForIdentityId(identityId)
         _ <- if (zuoraAccountsForIdentityId == 0) \/-(()) else -\/(ApiGatewayResponse.notFound("already used that identity id"))
         _ <- (if (request.dryRun) -\/(ApiGatewayResponse.noActionRequired("DRY RUN requested! skipping to the end")) else \/-(())).withLogging("dryrun aborter")
@@ -73,7 +77,7 @@ object Types {
 
   case class ZuoraAccountIdentitySFContact(
     accountId: AccountId,
-    identityId: IdentityId,
+    identityId: Option[IdentityId],
     sfContactId: SFContactId
   )
 

@@ -17,10 +17,14 @@ class StepsTest extends FlatSpec with Matchers {
 
     def getSteps(
       noOfAccountWithSameId: Int = 0,
-      numberOfZuoraAccountsForEmail: Int = 1
+      numberOfZuoraAccountsForEmail: Int = 1,
+      accountFoundHasIdentityId: Boolean = false
     ): ApiGatewayRequest => FailableOp[Unit] = IdentityBackfillSteps(
       getByEmail = _ => \/-(IdentityId("asdf")),
-      getZuoraAccountsForEmail = _ => \/-(List.fill(numberOfZuoraAccountsForEmail)(ZuoraAccountIdentitySFContact(AccountId("acc"), IdentityId(""), SFContactId("sf")))),
+      getZuoraAccountsForEmail = _ => {
+        val dummyContact = ZuoraAccountIdentitySFContact(AccountId("acc"), if (accountFoundHasIdentityId) Some(IdentityId("haha")) else None, SFContactId("sf"))
+        \/-(List.fill(numberOfZuoraAccountsForEmail)(dummyContact))
+      },
       countZuoraAccountsForIdentityId = _ => \/-(noOfAccountWithSameId),
       updateZuoraIdentityId = (accountId, identityId) => {
         zuoraUpdate = Some((accountId, identityId))
@@ -62,7 +66,7 @@ class StepsTest extends FlatSpec with Matchers {
     salesforceUpdate should be(None)
   }
 
-  it should "go through a already got identity case without calling update even not in dry run mode" in {
+  it should "go through a already got identity (according to the zuora query bu identity id) case without calling update even not in dry run mode" in {
 
     val stepsWithMocks = new StepsWithMocks
     import stepsWithMocks._
@@ -71,6 +75,20 @@ class StepsTest extends FlatSpec with Matchers {
       getSteps(noOfAccountWithSameId = 1)(ApiGatewayRequest(None, identityBackfillRequest(false), None))
 
     val expectedResult = -\/(ApiGatewayResponse.notFound("already used that identity id"))
+    result should be(expectedResult)
+    zuoraUpdate should be(None)
+    salesforceUpdate should be(None)
+  }
+
+  it should "go through a already got identity (according to the zuora account query by email) case without calling update even not in dry run mode" in {
+
+    val stepsWithMocks = new StepsWithMocks
+    import stepsWithMocks._
+
+    val result =
+      getSteps(accountFoundHasIdentityId = true)(ApiGatewayRequest(None, identityBackfillRequest(false), None))
+
+    val expectedResult = -\/(ApiGatewayResponse.notFound("the account we found was already populated with an identity id"))
     result should be(expectedResult)
     zuoraUpdate should be(None)
     salesforceUpdate should be(None)

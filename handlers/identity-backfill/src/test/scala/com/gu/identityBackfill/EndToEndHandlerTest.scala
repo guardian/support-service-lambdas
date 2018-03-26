@@ -82,7 +82,7 @@ object EndToEndData {
   def responses: Map[String, HTTPResponse] =
     TestData.responses
   def postResponses: Map[POSTRequest, HTTPResponse] =
-    GetZuoraAccountsForEmailData.postResponses ++
+    GetZuoraAccountsForEmailData.postResponses(false) ++
       CountZuoraAccountsForIdentityIdData.postResponses(false)
 
   def identityBackfillRequest(dryRun: Boolean): String =
