@@ -34,36 +34,25 @@ object GetZuoraAccountsForEmailData {
     POSTRequest("/action/query", """{"queryString":"SELECT Id FROM Contact where WorkEmail='email@address'"}""")
       -> HTTPResponse(200, contactQueryResponse),
     POSTRequest("/action/query", """{"queryString":"SELECT Id, IdentityId__c, sfContactId__c FROM Account where BillToId='2c92a0fb4a38064e014a3f48f1713ada'"}""")
-      -> HTTPResponse(200, if (withIdentity) accountQueryResponseWithIdentity else accountQueryResponseWithoutIdentity)
+      -> HTTPResponse(200, accountQueryResponse(withIdentity))
   )
 
-  val accountQueryResponseWithIdentity: String =
-    """
-      |{
-      |    "records": [
-      |        {
-      |            "IdentityId__c": "10101010",
-      |            "sfContactId__c": "00110000011AABBAAB",
-      |            "Id": "2c92a0fb4a38064e014a3f48f1663ad8"
-      |        }
-      |    ],
-      |    "size": 1,
-      |    "done": true
-      |}
-    """.stripMargin
-
-  val accountQueryResponseWithoutIdentity: String =
-    """
-      |{
-      |    "records": [
-      |        {
-      |            "sfContactId__c": "00110000011AABBAAB",
-      |            "Id": "2c92a0fb4a38064e014a3f48f1663ad8"
-      |        }
-      |    ],
-      |    "size": 1,
-      |    "done": true
-      |}
+  def accountQueryResponse(withIdentity: Boolean): String =
+    s"""
+       |{
+       |    "records": [
+       |        {${
+      if (withIdentity) """
+       |            "IdentityId__c": "10101010","""
+      else ""
+    }
+       |            "sfContactId__c": "00110000011AABBAAB",
+       |            "Id": "2c92a0fb4a38064e014a3f48f1663ad8"
+       |        }
+       |    ],
+       |    "size": 1,
+       |    "done": true
+       |}
     """.stripMargin
 
   val contactQueryResponse: String =
