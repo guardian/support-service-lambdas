@@ -6,14 +6,13 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.RawEffects
 import com.gu.identity.{GetByEmail, IdentityConfig}
 import com.gu.identityBackfill.Types._
-import com.gu.identityBackfill.zuora.{CountZuoraAccountsForIdentityId, GetZuoraAccountsForEmail}
+import com.gu.identityBackfill.zuora.{AddIdentityIdToAccount, CountZuoraAccountsForIdentityId, GetZuoraAccountsForEmail}
 import com.gu.util.Config
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayResponse}
 import com.gu.util.reader.Types.FailableOp
 import com.gu.util.zuora.{ZuoraDeps, ZuoraRestConfig}
 import play.api.libs.json.{Json, Reads}
-
 import scalaz.syntax.either._
 
 object Handler {
@@ -29,22 +28,19 @@ object Handler {
 
   def runWithEffects(rawEffects: RawEffects, lambdaIO: LambdaIO): Unit = {
     def operation: Config[StepsConfig] => Operation =
-      config => IdentityBackfillSteps(
-        GetByEmail(rawEffects.response, config.stepsConfig.identityConfig),
-        GetZuoraAccountsForEmail(ZuoraDeps(rawEffects.response, config.stepsConfig.zuoraRestConfig)),
-        CountZuoraAccountsForIdentityId(ZuoraDeps(rawEffects.response, config.stepsConfig.zuoraRestConfig)),
-        UpdateZuoraIdentityId.apply,
-        UpdateSalesforceIdentityId.apply
-      )
+      config => {
+        val zuoraDeps = ZuoraDeps(rawEffects.response, config.stepsConfig.zuoraRestConfig)
+        IdentityBackfillSteps(
+          GetByEmail(rawEffects.response, config.stepsConfig.identityConfig),
+          GetZuoraAccountsForEmail(zuoraDeps),
+          CountZuoraAccountsForIdentityId(zuoraDeps),
+          AddIdentityIdToAccount(zuoraDeps),
+          UpdateSalesforceIdentityId.apply
+        )
+      }
     ApiGatewayHandler.default[StepsConfig](operation, lambdaIO).run((rawEffects.stage, rawEffects.s3Load(rawEffects.stage)))
   }
 
-}
-
-object UpdateZuoraIdentityId {
-  def apply(accountId: AccountId, identityId: IdentityId): FailableOp[Unit] = {
-    ApiGatewayResponse.internalServerError("todo").left
-  }
 }
 
 object UpdateSalesforceIdentityId {
