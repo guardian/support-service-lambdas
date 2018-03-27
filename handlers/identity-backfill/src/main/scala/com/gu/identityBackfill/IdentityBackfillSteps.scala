@@ -3,7 +3,6 @@ package com.gu.identityBackfill
 import com.gu.identity.GetByEmail
 import com.gu.identityBackfill.IdentityBackfillSteps.WireModel.IdentityBackfillRequest
 import com.gu.identityBackfill.Types._
-import com.gu.identityBackfill.salesforce.SalesforceAuthenticate.SalesforceAuth
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.Operation
 import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
@@ -32,8 +31,8 @@ object IdentityBackfillSteps extends Logging {
     getZuoraAccountsForEmail: EmailAddress => FailableOp[List[ZuoraAccountIdentitySFContact]],
     countZuoraAccountsForIdentityId: IdentityId => FailableOp[Int],
     updateZuoraIdentityId: (AccountId, IdentityId) => FailableOp[Unit],
-    sfAuth: () => FailableOp[SalesforceAuth], // we need to do this and we need it for the health check but it's not really a business step, TODO think about this more
-    updateSalesforceIdentityId: SalesforceAuth => (SFContactId, IdentityId) => FailableOp[Unit]
+    sfHealthcheck: FailableOp[Unit], // we need to do this and we need it for the health check but it's not really a business step, TODO think about this more
+    updateSalesforceIdentityId: (SFContactId, IdentityId) => FailableOp[Unit]
   ): Operation = {
 
     def steps(apiGatewayRequest: ApiGatewayRequest) =
@@ -54,8 +53,7 @@ object IdentityBackfillSteps extends Logging {
         _ <- if (zuoraAccountsForIdentityId == 0) \/-(()) else -\/(ApiGatewayResponse.notFound("already used that identity id"))
         _ <- (if (request.dryRun) -\/(ApiGatewayResponse.noActionRequired("DRY RUN requested! skipping to the end")) else \/-(())).withLogging("dryrun aborter")
         _ <- updateZuoraIdentityId(zuoraAccountForEmail.accountId, identityId)
-        sfAuth <- sfAuth()
-        _ <- updateSalesforceIdentityId(sfAuth)(zuoraAccountForEmail.sfContactId, identityId)
+        _ <- updateSalesforceIdentityId(zuoraAccountForEmail.sfContactId, identityId)
         // need to remember which ones we updated?
       } yield ()
 
@@ -63,7 +61,7 @@ object IdentityBackfillSteps extends Logging {
       for {
         identityId <- getByEmail(EmailAddress("john.duffell@guardian.co.uk")).leftMap(a => ApiGatewayResponse.internalServerError(a.toString)).withLogging("healthcheck getByEmail")
         _ <- countZuoraAccountsForIdentityId(identityId)
-        _ <- sfAuth()
+        _ <- sfHealthcheck
       } yield ()
 
     Operation(steps = steps, healthcheck = () => healthcheck())

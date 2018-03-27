@@ -2,7 +2,6 @@ package com.gu.identityBackfill
 
 import com.gu.identityBackfill.StepsData._
 import com.gu.identityBackfill.Types.{IdentityId, _}
-import com.gu.identityBackfill.salesforce.SalesforceAuthenticate.SalesforceAuth
 import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.reader.Types.FailableOp
 import org.scalatest.{FlatSpec, Matchers}
@@ -30,8 +29,8 @@ class StepsTest extends FlatSpec with Matchers {
         zuoraUpdate = Some((accountId, identityId))
         \/-(())
       },
-      sfAuth = () => \/-(SalesforceAuth("token", "url")),
-      updateSalesforceIdentityId = auth => (sFContactId, identityId) => {
+      sfHealthcheck = \/-(()),
+      updateSalesforceIdentityId = (sFContactId, identityId) => {
         salesforceUpdate = Some((sFContactId, identityId))
         \/-(())
       }
