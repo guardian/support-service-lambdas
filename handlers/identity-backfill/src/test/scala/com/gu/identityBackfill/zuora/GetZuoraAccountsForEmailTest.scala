@@ -10,11 +10,19 @@ import scalaz.\/-
 
 class GetZuoraAccountsForEmailTest extends FlatSpec with Matchers {
 
-  it should "get the accounts for an email" in {
-    val effects = new TestingRawEffects(postResponses = GetZuoraAccountsForEmailData.postResponses)
+  it should "get the accounts for an email with identity" in {
+    val effects = new TestingRawEffects(postResponses = GetZuoraAccountsForEmailData.postResponses(true))
     val get = GetZuoraAccountsForEmail(ZuoraDeps(effects.response, ZuoraRestConfig("https://zuora", "user", "pass"))) _
     val contacts = get(EmailAddress("email@address"))
-    val expected = \/-(List(ZuoraAccountIdentitySFContact(AccountId("2c92a0fb4a38064e014a3f48f1663ad8"), IdentityId("10101010"), SFContactId("00110000011AABBAAB"))))
+    val expected = \/-(List(ZuoraAccountIdentitySFContact(AccountId("2c92a0fb4a38064e014a3f48f1663ad8"), Some(IdentityId("10101010")), SFContactId("00110000011AABBAAB"))))
+    contacts should be(expected)
+  }
+
+  it should "get the accounts for an email without identity" in {
+    val effects = new TestingRawEffects(postResponses = GetZuoraAccountsForEmailData.postResponses(false))
+    val get = GetZuoraAccountsForEmail(ZuoraDeps(effects.response, ZuoraRestConfig("https://zuora", "user", "pass"))) _
+    val contacts = get(EmailAddress("email@address"))
+    val expected = \/-(List(ZuoraAccountIdentitySFContact(AccountId("2c92a0fb4a38064e014a3f48f1663ad8"), None, SFContactId("00110000011AABBAAB"))))
     contacts should be(expected)
   }
 
@@ -22,26 +30,29 @@ class GetZuoraAccountsForEmailTest extends FlatSpec with Matchers {
 
 object GetZuoraAccountsForEmailData {
 
-  def postResponses: Map[POSTRequest, HTTPResponse] = Map(
+  def postResponses(withIdentity: Boolean): Map[POSTRequest, HTTPResponse] = Map(
     POSTRequest("/action/query", """{"queryString":"SELECT Id FROM Contact where WorkEmail='email@address'"}""")
       -> HTTPResponse(200, contactQueryResponse),
     POSTRequest("/action/query", """{"queryString":"SELECT Id, IdentityId__c, sfContactId__c FROM Account where BillToId='2c92a0fb4a38064e014a3f48f1713ada'"}""")
-      -> HTTPResponse(200, accountQueryResponse)
+      -> HTTPResponse(200, accountQueryResponse(withIdentity))
   )
 
-  val accountQueryResponse: String =
-    """
-      |{
-      |    "records": [
-      |        {
-      |            "IdentityId__c": "10101010",
-      |            "sfContactId__c": "00110000011AABBAAB",
-      |            "Id": "2c92a0fb4a38064e014a3f48f1663ad8"
-      |        }
-      |    ],
-      |    "size": 1,
-      |    "done": true
-      |}
+  def accountQueryResponse(withIdentity: Boolean): String =
+    s"""
+       |{
+       |    "records": [
+       |        {${
+      if (withIdentity) """
+       |            "IdentityId__c": "10101010","""
+      else ""
+    }
+       |            "sfContactId__c": "00110000011AABBAAB",
+       |            "Id": "2c92a0fb4a38064e014a3f48f1663ad8"
+       |        }
+       |    ],
+       |    "size": 1,
+       |    "done": true
+       |}
     """.stripMargin
 
   val contactQueryResponse: String =
