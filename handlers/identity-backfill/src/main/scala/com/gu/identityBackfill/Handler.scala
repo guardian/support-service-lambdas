@@ -14,7 +14,6 @@ import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayResponse}
 import com.gu.util.reader.Types.FailableOp
 import com.gu.util.zuora.{ZuoraDeps, ZuoraRestConfig}
-import okhttp3.{Request, Response}
 import play.api.libs.json.{Json, Reads}
 import scalaz.syntax.either._
 
@@ -43,7 +42,7 @@ object Handler {
           CountZuoraAccountsForIdentityId(zuoraDeps),
           AddIdentityIdToAccount(zuoraDeps),
           () => SalesforceAuthenticate(rawEffects.response, config.stepsConfig.sfConfig),
-          UpdateSalesforceIdentityId(rawEffects.response, config.stepsConfig.sfConfig)
+          UpdateSalesforceIdentityId.apply
         )
       }
     ApiGatewayHandler.default[StepsConfig](operation, lambdaIO).run((rawEffects.stage, rawEffects.s3Load(rawEffects.stage)))
@@ -52,7 +51,7 @@ object Handler {
 }
 
 object UpdateSalesforceIdentityId {
-  def apply(getResponse: Request => Response, sFConfig: SFConfig)(salesforceAuth: SalesforceAuth)(sFContactId: SFContactId, identityId: IdentityId): FailableOp[Unit] = {
+  def apply(salesforceAuth: SalesforceAuth)(sFContactId: SFContactId, identityId: IdentityId): FailableOp[Unit] = {
     ApiGatewayResponse.internalServerError("todo").left
   }
 }
