@@ -9,7 +9,7 @@ import play.api.libs.json.{JsPath, JsSuccess, Json, Reads}
 
 import scalaz.{-\/, \/-}
 
-object SalesforceAuthenticate extends Logging {
+object ExactTargetAuthenticate extends Logging {
 
   private val authEndpoint = "https://auth.exacttargetapis.com/v1/requestToken"
   val restEndpoint = "https://www.exacttargetapis.com/messaging/v1"

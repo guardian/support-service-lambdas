@@ -97,6 +97,14 @@ object TestingRawEffects {
       |    "identityConfig": {
       |      "baseUrl": "https://ididbaseurl",
       |      "apiToken": "tokentokentokenidentity"
+      |    },
+      |    "sfConfig": {
+      |      "url": "https://sfurl.haha",
+      |      "client_id": "clientsfclient",
+      |      "client_secret": "clientsecretsfsecret",
+      |      "username": "usernamesf",
+      |      "password": "passSFpassword",
+      |      "token": "tokentokenSFtoken"
       |    }
       |  },
       |  "etConfig": {

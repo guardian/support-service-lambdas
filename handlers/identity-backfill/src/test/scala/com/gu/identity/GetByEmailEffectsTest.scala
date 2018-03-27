@@ -1,7 +1,6 @@
-package manualTest
+package com.gu.identity
 
 import com.gu.effects.{ConfigLoad, RawEffects}
-import com.gu.identity.GetByEmail
 import com.gu.identityBackfill.Handler.StepsConfig
 import com.gu.identityBackfill.Types.{EmailAddress, IdentityId}
 import com.gu.test.EffectsTest
@@ -11,7 +10,7 @@ import scalaz.\/-
 import scalaz.syntax.std.either._
 
 // run this manually
-class GetByEmailSystemTest extends FlatSpec with Matchers {
+class GetByEmailEffectsTest extends FlatSpec with Matchers {
 
   it should "successfull run the health check using the local code against real backend" taggedAs EffectsTest in {
 

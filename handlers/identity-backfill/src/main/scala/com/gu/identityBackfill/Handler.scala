@@ -6,12 +6,15 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.RawEffects
 import com.gu.identity.{GetByEmail, IdentityConfig}
 import com.gu.identityBackfill.Types._
+import com.gu.identityBackfill.salesforce.SalesforceAuthenticate
+import com.gu.identityBackfill.salesforce.SalesforceAuthenticate.{SFConfig, SalesforceAuth}
 import com.gu.identityBackfill.zuora.{AddIdentityIdToAccount, CountZuoraAccountsForIdentityId, GetZuoraAccountsForEmail}
 import com.gu.util.Config
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayResponse}
 import com.gu.util.reader.Types.FailableOp
 import com.gu.util.zuora.{ZuoraDeps, ZuoraRestConfig}
+import okhttp3.{Request, Response}
 import play.api.libs.json.{Json, Reads}
 import scalaz.syntax.either._
 
@@ -23,7 +26,11 @@ object Handler {
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
     runWithEffects(RawEffects.createDefault, LambdaIO(inputStream, outputStream, context))
 
-  case class StepsConfig(identityConfig: IdentityConfig, zuoraRestConfig: ZuoraRestConfig)
+  case class StepsConfig(
+    identityConfig: IdentityConfig,
+    zuoraRestConfig: ZuoraRestConfig,
+    sfConfig: SFConfig
+  )
   implicit val stepsConfigReads: Reads[StepsConfig] = Json.reads[StepsConfig]
 
   def runWithEffects(rawEffects: RawEffects, lambdaIO: LambdaIO): Unit = {
@@ -35,7 +42,8 @@ object Handler {
           GetZuoraAccountsForEmail(zuoraDeps),
           CountZuoraAccountsForIdentityId(zuoraDeps),
           AddIdentityIdToAccount(zuoraDeps),
-          UpdateSalesforceIdentityId.apply
+          () => SalesforceAuthenticate(rawEffects.response, config.stepsConfig.sfConfig),
+          UpdateSalesforceIdentityId(rawEffects.response, config.stepsConfig.sfConfig)
         )
       }
     ApiGatewayHandler.default[StepsConfig](operation, lambdaIO).run((rawEffects.stage, rawEffects.s3Load(rawEffects.stage)))
@@ -44,7 +52,7 @@ object Handler {
 }
 
 object UpdateSalesforceIdentityId {
-  def apply(sFContactId: SFContactId, identityId: IdentityId): FailableOp[Unit] = {
+  def apply(getResponse: Request => Response, sFConfig: SFConfig)(salesforceAuth: SalesforceAuth)(sFContactId: SFContactId, identityId: IdentityId): FailableOp[Unit] = {
     ApiGatewayResponse.internalServerError("todo").left
   }
 }

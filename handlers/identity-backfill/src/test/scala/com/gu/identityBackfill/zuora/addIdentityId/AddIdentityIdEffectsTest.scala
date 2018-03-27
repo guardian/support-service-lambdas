@@ -1,4 +1,4 @@
-package manualTest.addIdentityId
+package com.gu.identityBackfill.zuora.addIdentityId
 
 import com.gu.effects.{ConfigLoad, RawEffects}
 import com.gu.identityBackfill.Handler.StepsConfig

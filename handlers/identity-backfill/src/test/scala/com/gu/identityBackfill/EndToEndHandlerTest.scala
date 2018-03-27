@@ -6,7 +6,8 @@ import com.gu.effects.TestingRawEffects
 import com.gu.effects.TestingRawEffects.{BasicRequest, HTTPResponse, POSTRequest}
 import com.gu.identity.TestData
 import com.gu.identityBackfill.EndToEndData._
-import Runner._
+import com.gu.identityBackfill.Runner._
+import com.gu.identityBackfill.salesforce.SalesforceAuthenticateData
 import com.gu.identityBackfill.zuora.{CountZuoraAccountsForIdentityIdData, GetZuoraAccountsForEmailData}
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import org.scalatest.{Assertion, FlatSpec, Matchers}
@@ -41,6 +42,7 @@ class EndToEndHandlerTest extends FlatSpec with Matchers {
          |""".stripMargin
     responseString jsonMatches expectedResponse
     requests should be(List(
+      BasicRequest("POST", "/services/oauth2/token", """client_id=clientsfclient&client_secret=clientsecretsfsecret&username=usernamesf&password=passSFpasswordtokentokenSFtoken&grant_type=password"""),
       BasicRequest("PUT", "/accounts/2c92a0fb4a38064e014a3f48f1663ad8", """{"IdentityId__c":"1234"}"""),
       BasicRequest("POST", "/action/query", """{"queryString":"SELECT Id FROM Account where IdentityId__c='1234'"}"""),
       BasicRequest("POST", "/action/query", """{"queryString":"SELECT Id, IdentityId__c, sfContactId__c FROM Account where BillToId='2c92a0fb4a38064e014a3f48f1713ada'"}"""),
@@ -83,7 +85,8 @@ object EndToEndData {
     TestData.responses
   def postResponses: Map[POSTRequest, HTTPResponse] =
     GetZuoraAccountsForEmailData.postResponses(false) ++
-      CountZuoraAccountsForIdentityIdData.postResponses(false)
+      CountZuoraAccountsForIdentityIdData.postResponses(false) ++
+      SalesforceAuthenticateData.postResponses
 
   def identityBackfillRequest(dryRun: Boolean): String =
     s"""
