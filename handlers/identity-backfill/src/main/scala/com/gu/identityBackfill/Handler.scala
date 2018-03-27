@@ -36,14 +36,13 @@ object Handler {
     def operation: Config[StepsConfig] => Operation =
       config => {
         val zuoraDeps = ZuoraDeps(rawEffects.response, config.stepsConfig.zuoraRestConfig)
-        val sfAuth = SalesforceAuthenticate(rawEffects.response, config.stepsConfig.sfConfig)
         IdentityBackfillSteps(
           GetByEmail(rawEffects.response, config.stepsConfig.identityConfig),
           GetZuoraAccountsForEmail(zuoraDeps),
           CountZuoraAccountsForIdentityId(zuoraDeps),
           AddIdentityIdToAccount(zuoraDeps),
-          sfAuth.map(_ => ()),
-          Function.untupled(args => sfAuth.flatMap(auth => (UpdateSalesforceIdentityId.apply(auth)_).tupled(args)))
+          () => SalesforceAuthenticate(rawEffects.response, config.stepsConfig.sfConfig),
+          UpdateSalesforceIdentityId.apply
         )
       }
     ApiGatewayHandler.default[StepsConfig](operation, lambdaIO).run((rawEffects.stage, rawEffects.s3Load(rawEffects.stage)))
