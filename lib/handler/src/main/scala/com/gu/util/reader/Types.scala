@@ -1,5 +1,6 @@
 package com.gu.util.reader
 
+import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.apigateway.ApiGatewayResponse.{badRequest, internalServerError, logger}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import play.api.libs.json.{JsError, JsResult, JsSuccess}
@@ -34,6 +35,16 @@ object Types {
         case JsError(error) => {
           logger.error(s"Error when parsing JSON from API Gateway: $error")
           -\/(badRequest)
+        }
+      }
+    }
+
+    def toFailableOp(error5xx: String): FailableOp[A] = {
+      jsResult match {
+        case JsSuccess(apiGatewayCallout, _) => \/-(apiGatewayCallout)
+        case JsError(error) => {
+          logger.error(s"Error when parsing JSON: $error")
+          -\/(ApiGatewayResponse.internalServerError(error5xx))
         }
       }
     }

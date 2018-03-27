@@ -38,7 +38,7 @@ object IdentityBackfillSteps extends Logging {
 
     def steps(apiGatewayRequest: ApiGatewayRequest) =
       for {
-        request <- Json.fromJson[IdentityBackfillRequest](Json.parse(apiGatewayRequest.body)).toFailableOp.withLogging("zuora callout")
+        request <- Json.parse(apiGatewayRequest.body).validate[IdentityBackfillRequest].toFailableOp.withLogging("zuora callout")
         emailAddress = fromRequest(request)
         identityId <- getByEmail(emailAddress).leftMap(a => ApiGatewayResponse.internalServerError(a.toString)).withLogging("GetByEmail")
         zuoraAccountsForEmail <- getZuoraAccountsForEmail(emailAddress)

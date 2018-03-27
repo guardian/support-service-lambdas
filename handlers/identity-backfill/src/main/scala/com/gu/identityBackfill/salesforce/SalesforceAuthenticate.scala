@@ -1,11 +1,9 @@
 package com.gu.identityBackfill.salesforce
 
 import com.gu.util.Logging
-import com.gu.util.apigateway.ApiGatewayResponse
-import com.gu.util.reader.Types.FailableOp
+import com.gu.util.reader.Types.{FailableOp, _}
 import okhttp3.{FormBody, Request, Response}
-import play.api.libs.json.{JsSuccess, Json, Reads}
-import scalaz.{-\/, \/-}
+import play.api.libs.json.{Json, Reads}
 
 object SalesforceAuthenticate extends Logging {
 
@@ -22,11 +20,8 @@ object SalesforceAuthenticate extends Logging {
   }
 
   case class SalesforceAuth(access_token: String, instance_url: String)
-
   object SalesforceAuth {
-
     implicit val salesforceAuthReads: Reads[SalesforceAuth] = Json.reads[SalesforceAuth]
-
   }
 
   def apply(
@@ -34,16 +29,8 @@ object SalesforceAuthenticate extends Logging {
     config: SFConfig
   ): FailableOp[SalesforceAuth] = {
     val request: Request = buildAuthRequest(config)
-    logger.info(s"Attempting to perform Salesforce Authentication")
-    val responseBody = Json.parse(response(request).body().string())
-    responseBody.validate[SalesforceAuth] match {
-      case JsSuccess(result, _) =>
-        logger.info(s"Successful Salesforce authentication.")
-        \/-(result)
-      case _ =>
-        logger.error(s"Failed to authenticate with Salesforce | body was: ${responseBody.toString}")
-        -\/(ApiGatewayResponse.internalServerError(s"Failed to authenticate with Salesforce"))
-    }
+    val body = response(request).body().string()
+    Json.parse(body).validate[SalesforceAuth].toFailableOp("Failed to authenticate with Salesforce").withLogging("salesforce auth")
   }
 
   private def buildAuthRequest(config: SFConfig) = {
