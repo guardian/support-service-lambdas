@@ -4,7 +4,7 @@ import com.gu.util.ETConfig.ETSendId
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.exacttarget.ETClient.ETClientDeps
 import com.gu.util.exacttarget.EmailSendSteps.logger
-import com.gu.util.exacttarget.SalesforceAuthenticate.{ETImpure, SalesforceAuth}
+import com.gu.util.exacttarget.ExactTargetAuthenticate.{ETImpure, SalesforceAuth}
 import com.gu.util.reader.Types._
 import com.gu.util.{ETConfig, Logging, Stage}
 import okhttp3.{MediaType, Request, RequestBody, Response}
@@ -130,7 +130,7 @@ object ETClient {
 
   def sendEmail(eTClientDeps: ETClientDeps)(emailRequest: EmailRequest): FailableOp[Unit] = {
     for {
-      auth <- SalesforceAuthenticate(ETImpure(eTClientDeps.response, eTClientDeps.etConfig))
+      auth <- ExactTargetAuthenticate(ETImpure(eTClientDeps.response, eTClientDeps.etConfig))
       req <- buildRequestET(ETReq(eTClientDeps.etConfig, auth))(emailRequest.etSendId)
       response <- sendEmailOp(eTClientDeps.response)(req, emailRequest.message)
       _ <- processResponse(response)
@@ -149,7 +149,7 @@ object ETClient {
   def buildRequestET(et: ETReq)(eTSendId: ETSendId): FailableOp[Request.Builder] = {
     val builder = new Request.Builder()
       .header("Authorization", s"Bearer ${et.salesforceAuth.accessToken}")
-      .url(s"${SalesforceAuthenticate.restEndpoint}/messageDefinitionSends/${eTSendId.id}/send")
+      .url(s"${ExactTargetAuthenticate.restEndpoint}/messageDefinitionSends/${eTSendId.id}/send")
     \/.right(builder): FailableOp[Request.Builder]
   }
 

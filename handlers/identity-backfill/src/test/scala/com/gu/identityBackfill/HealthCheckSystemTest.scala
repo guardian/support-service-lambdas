@@ -1,12 +1,11 @@
-package manualTest
+package com.gu.identityBackfill
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
 import com.gu.effects.RawEffects
-import com.gu.identityBackfill.Handler
+import com.gu.identityBackfill.HealthCheckData._
 import com.gu.test.EffectsTest
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
-import manualTest.HealthCheckData._
 import org.scalatest.{Assertion, FlatSpec, Matchers}
 import play.api.libs.json.Json
 

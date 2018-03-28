@@ -6,6 +6,8 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.RawEffects
 import com.gu.identity.{GetByEmail, IdentityConfig}
 import com.gu.identityBackfill.Types._
+import com.gu.identityBackfill.salesforce.SalesforceAuthenticate
+import com.gu.identityBackfill.salesforce.SalesforceAuthenticate.{SFConfig, SalesforceAuth}
 import com.gu.identityBackfill.zuora.{AddIdentityIdToAccount, CountZuoraAccountsForIdentityId, GetZuoraAccountsForEmail}
 import com.gu.util.Config
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
@@ -23,7 +25,11 @@ object Handler {
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
     runWithEffects(RawEffects.createDefault, LambdaIO(inputStream, outputStream, context))
 
-  case class StepsConfig(identityConfig: IdentityConfig, zuoraRestConfig: ZuoraRestConfig)
+  case class StepsConfig(
+    identityConfig: IdentityConfig,
+    zuoraRestConfig: ZuoraRestConfig,
+    sfConfig: SFConfig
+  )
   implicit val stepsConfigReads: Reads[StepsConfig] = Json.reads[StepsConfig]
 
   def runWithEffects(rawEffects: RawEffects, lambdaIO: LambdaIO): Unit = {
@@ -35,6 +41,7 @@ object Handler {
           GetZuoraAccountsForEmail(zuoraDeps),
           CountZuoraAccountsForIdentityId(zuoraDeps),
           AddIdentityIdToAccount(zuoraDeps),
+          () => SalesforceAuthenticate(rawEffects.response, config.stepsConfig.sfConfig),
           UpdateSalesforceIdentityId.apply
         )
       }
@@ -44,7 +51,7 @@ object Handler {
 }
 
 object UpdateSalesforceIdentityId {
-  def apply(sFContactId: SFContactId, identityId: IdentityId): FailableOp[Unit] = {
+  def apply(salesforceAuth: SalesforceAuth)(sFContactId: SFContactId, identityId: IdentityId): FailableOp[Unit] = {
     ApiGatewayResponse.internalServerError("todo").left
   }
 }
