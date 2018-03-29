@@ -2,7 +2,7 @@ package com.gu.identityBackfill.salesforce
 
 import com.gu.effects.TestingRawEffects
 import com.gu.effects.TestingRawEffects.{HTTPResponse, POSTRequest}
-import com.gu.identityBackfill.salesforce.SalesforceAuthenticate.{SFConfig, SalesforceAuth}
+import com.gu.identityBackfill.salesforce.SalesforceAuthenticate.{SFAuthConfig, SalesforceAuth}
 import org.scalatest.{FlatSpec, Matchers}
 import scalaz.\/-
 
@@ -10,7 +10,7 @@ class SalesforceAuthenticateTest extends FlatSpec with Matchers {
 
   it should "get auth SF correctly" in {
     val effects = new TestingRawEffects(postResponses = SalesforceAuthenticateData.postResponses)
-    val auth = SalesforceAuthenticate(effects.response, SFConfig(
+    val auth = SalesforceAuthenticate(effects.response, SFAuthConfig(
       "https://sfurl.haha",
       "clientsfclient",
       "clientsecretsfsecret",

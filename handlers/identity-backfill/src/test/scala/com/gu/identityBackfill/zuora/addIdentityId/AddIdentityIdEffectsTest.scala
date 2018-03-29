@@ -25,8 +25,9 @@ class AddIdentityIdEffectsTest extends FlatSpec with Matchers {
     val actual = for {
       configAttempt <- ConfigLoad.load(Stage("DEV")).toEither.disjunction
       config <- Config.parseConfig[StepsConfig](configAttempt)
-      _ <- AddIdentityIdToAccount(ZuoraDeps(RawEffects.createDefault.response, config.stepsConfig.zuoraRestConfig))(testAccount, IdentityId(unique))
-      identityId <- GetIdentityIdForAccount(ZuoraDeps(RawEffects.createDefault.response, config.stepsConfig.zuoraRestConfig))(testAccount)
+      zuoraDeps = ZuoraDeps(RawEffects.createDefault.response, config.stepsConfig.zuoraRestConfig)
+      _ <- AddIdentityIdToAccount(zuoraDeps)(testAccount, IdentityId(unique))
+      identityId <- GetIdentityIdForAccount(zuoraDeps)(testAccount)
     } yield {
       identityId
     }

@@ -38,10 +38,11 @@ class EndToEndHandlerTest extends FlatSpec with Matchers {
 
     val expectedResponse =
       s"""
-         |{"statusCode":"500","headers":{"Content-Type":"application/json"},"body":"Failed to process event due to the following error: todo"}
+         |{"statusCode":"200","headers":{"Content-Type":"application/json"},"body":"Success"}
          |""".stripMargin
     responseString jsonMatches expectedResponse
     requests should be(List(
+      BasicRequest("PATCH", "/services/data/v20.0/sobjects/Contact/00110000011AABBAAB", """{"IdentityID__c":"1234"}"""),
       BasicRequest("POST", "/services/oauth2/token", """client_id=clientsfclient&client_secret=clientsecretsfsecret&username=usernamesf&password=passSFpasswordtokentokenSFtoken&grant_type=password"""),
       BasicRequest("PUT", "/accounts/2c92a0fb4a38064e014a3f48f1663ad8", """{"IdentityId__c":"1234"}"""),
       BasicRequest("POST", "/action/query", """{"queryString":"SELECT Id FROM Account where IdentityId__c='1234'"}"""),

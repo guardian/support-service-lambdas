@@ -2,7 +2,7 @@ package com.gu.autoCancel
 
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayResponse.noActionRequired
-import com.gu.util.reader.Types.FailableOp
+import com.gu.util.reader.Types._
 
 import scalaz.{-\/, \/-}
 

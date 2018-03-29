@@ -1,10 +1,10 @@
 package com.gu.identityBackfill.zuora.addIdentityId
 
 import com.gu.identityBackfill.Types.{AccountId, IdentityId}
+import com.gu.identityBackfill.zuora.addIdentityId.GetIdentityIdForAccount.WireModel.ZuoraAccount
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types.FailableOp
 import com.gu.util.zuora.{ZuoraDeps, ZuoraRestRequestMaker}
-import com.gu.identityBackfill.zuora.addIdentityId.GetIdentityIdForAccount.WireModel.ZuoraAccount
 import play.api.libs.json.Json
 
 object GetIdentityIdForAccount {
@@ -24,10 +24,10 @@ object GetIdentityIdForAccount {
 
   def apply(zuoraDeps: ZuoraDeps)(accountId: AccountId): FailableOp[IdentityId] = {
     val accounts = for {
-      account <- ZuoraRestRequestMaker.get[ZuoraAccount](s"/accounts/${accountId.value}")
+      account <- ZuoraRestRequestMaker(zuoraDeps).get[ZuoraAccount](s"/accounts/${accountId.value}")
     } yield IdentityId(account.basicInfo.IdentityId__c)
 
-    accounts.run.run(zuoraDeps).leftMap(e => ApiGatewayResponse.internalServerError(e.message))
+    accounts.leftMap(e => ApiGatewayResponse.internalServerError(e.message))
   }
 
 }

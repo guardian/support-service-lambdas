@@ -2,11 +2,11 @@ package com.gu.stripeCustomerSourceUpdated.zuora
 
 import com.gu.stripeCustomerSourceUpdated._
 import com.gu.util.ZuoraToApiGateway
-import com.gu.util.reader.Types.WithDepsFailableOp
+import com.gu.util.reader.Types._
 import com.gu.util.zuora.ZuoraAccount.{AccountId, NumConsecutiveFailures, PaymentMethodId}
-import com.gu.util.zuora.ZuoraDeps
-import com.gu.util.zuora.ZuoraRestRequestMaker.post
+import com.gu.util.zuora.{ZuoraDeps, ZuoraRestRequestMaker}
 import play.api.libs.json.{JsPath, Json, Reads, Writes}
+import scalaz.Reader
 
 object CreatePaymentMethod {
 
@@ -31,6 +31,7 @@ object CreatePaymentMethod {
 
   }
 
+  // FIXME create WireRequest/Response and converter layer to replace the custom writes and reads
   implicit val writes = new Writes[CreateStripePaymentMethod] {
     def writes(command: CreateStripePaymentMethod) = Json.obj(
       "AccountId" -> command.accountId.value,
@@ -52,6 +53,6 @@ object CreatePaymentMethod {
   case class CreatePaymentMethodResult(id: PaymentMethodId)
 
   def createPaymentMethod(request: CreateStripePaymentMethod): WithDepsFailableOp[ZuoraDeps, CreatePaymentMethodResult] =
-    post[CreateStripePaymentMethod, CreatePaymentMethodResult](request, s"object/payment-method").leftMap(ZuoraToApiGateway.fromClientFail)
+    Reader { zuoraDeps: ZuoraDeps => ZuoraRestRequestMaker(zuoraDeps).post[CreateStripePaymentMethod, CreatePaymentMethodResult](request, s"object/payment-method").leftMap(ZuoraToApiGateway.fromClientFail) }.toEitherT
 
 }

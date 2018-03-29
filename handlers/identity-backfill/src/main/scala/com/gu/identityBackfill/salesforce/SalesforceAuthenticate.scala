@@ -7,7 +7,7 @@ import play.api.libs.json.{Json, Reads}
 
 object SalesforceAuthenticate extends Logging {
 
-  case class SFConfig(
+  case class SFAuthConfig(
     url: String,
     client_id: String,
     client_secret: String,
@@ -15,10 +15,11 @@ object SalesforceAuthenticate extends Logging {
     password: String,
     token: String
   )
-  object SFConfig {
-    implicit val reads: Reads[SFConfig] = Json.reads[SFConfig]
+  object SFAuthConfig {
+    implicit val reads: Reads[SFAuthConfig] = Json.reads[SFAuthConfig]
   }
 
+  // the WireResponse model is the same as the domain model, so keep a friendly name
   case class SalesforceAuth(access_token: String, instance_url: String)
   object SalesforceAuth {
     implicit val salesforceAuthReads: Reads[SalesforceAuth] = Json.reads[SalesforceAuth]
@@ -26,14 +27,14 @@ object SalesforceAuthenticate extends Logging {
 
   def apply(
     response: (Request => Response),
-    config: SFConfig
+    config: SFAuthConfig
   ): FailableOp[SalesforceAuth] = {
     val request: Request = buildAuthRequest(config)
     val body = response(request).body().string()
     Json.parse(body).validate[SalesforceAuth].toFailableOp("Failed to authenticate with Salesforce").withLogging("salesforce auth")
   }
 
-  private def buildAuthRequest(config: SFConfig) = {
+  private def buildAuthRequest(config: SFAuthConfig) = {
     import config._
     val builder =
       new Request.Builder()
@@ -47,4 +48,5 @@ object SalesforceAuthenticate extends Logging {
       .build()
     builder.post(formBody).build()
   }
+
 }

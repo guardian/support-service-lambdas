@@ -1,33 +1,15 @@
 package com.gu.util.zuora
 
-import com.gu.util.zuora.internal.Types._
-import com.gu.util.zuora.ZuoraModels._
-import com.gu.util.zuora.ZuoraAccount.{AccountId, PaymentMethodId}
-import com.gu.util.zuora.ZuoraReaders._
-import com.gu.util.zuora.ZuoraRestRequestMaker._
-import okhttp3.{Request, Response}
 import java.time.LocalDate
 
+import com.gu.util.zuora.RestRequestMaker.ClientFailableOp
+import com.gu.util.zuora.ZuoraAccount.{AccountId, PaymentMethodId}
+import com.gu.util.zuora.ZuoraModels._
+import com.gu.util.zuora.ZuoraReaders._
+import com.gu.util.zuora.internal.Types._
 import play.api.libs.functional.syntax._
 import play.api.libs.json.{JsPath, Json, Reads, Writes}
-
-case class ZuoraRestConfig(
-  baseUrl: String,
-  username: String,
-  password: String
-)
-
-object ZuoraRestConfig {
-
-  implicit val zuoraConfigReads: Reads[ZuoraRestConfig] = (
-    (JsPath \ "baseUrl").read[String] and
-    (JsPath \ "username").read[String] and
-    (JsPath \ "password").read[String]
-  )(ZuoraRestConfig.apply _)
-
-}
-
-case class ZuoraDeps(response: Request => Response, config: ZuoraRestConfig)
+import scalaz.Reader
 
 object ZuoraGetAccountSummary {
 
@@ -65,7 +47,7 @@ object ZuoraGetAccountSummary {
   )(AccountSummary.apply _)
 
   def apply(accountId: String): WithDepsClientFailableOp[ZuoraDeps, AccountSummary] =
-    get[AccountSummary](s"accounts/$accountId/summary")
+    Reader { zuoraDeps: ZuoraDeps => ZuoraRestRequestMaker(zuoraDeps).get[AccountSummary](s"accounts/$accountId/summary") }.toEitherT
 
 }
 
@@ -101,7 +83,7 @@ object ZuoraGetInvoiceTransactions {
     }
 
   def apply(accountId: String): WithDepsClientFailableOp[ZuoraDeps, InvoiceTransactionSummary] =
-    get[InvoiceTransactionSummary](s"transactions/invoices/accounts/$accountId")
+    Reader { zuoraDeps: ZuoraDeps => ZuoraRestRequestMaker(zuoraDeps).get[InvoiceTransactionSummary](s"transactions/invoices/accounts/$accountId") }.toEitherT
 
 }
 
@@ -118,7 +100,7 @@ object ZuoraCancelSubscription {
   }
 
   def apply(subscription: SubscriptionId, cancellationDate: LocalDate): WithDepsClientFailableOp[ZuoraDeps, Unit] =
-    put(SubscriptionCancellation(cancellationDate), s"subscriptions/${subscription.id}/cancel")
+    Reader { zuoraDeps: ZuoraDeps => ZuoraRestRequestMaker(zuoraDeps).put(SubscriptionCancellation(cancellationDate), s"subscriptions/${subscription.id}/cancel"): ClientFailableOp[Unit] }.toEitherT
 
 }
 
@@ -133,7 +115,7 @@ object ZuoraUpdateCancellationReason {
   }
 
   def apply(subscription: SubscriptionId): WithDepsClientFailableOp[ZuoraDeps, Unit] =
-    put(SubscriptionUpdate("System AutoCancel"), s"subscriptions/${subscription.id}")
+    Reader { zuoraDeps: ZuoraDeps => ZuoraRestRequestMaker(zuoraDeps).put(SubscriptionUpdate("System AutoCancel"), s"subscriptions/${subscription.id}"): ClientFailableOp[Unit] }.toEitherT
 
 }
 
@@ -148,7 +130,7 @@ object ZuoraDisableAutoPay {
   }
 
   def apply(accountId: String): WithDepsClientFailableOp[ZuoraDeps, Unit] =
-    put(AccountUpdate(autoPay = false), s"accounts/$accountId")
+    Reader { zuoraDeps: ZuoraDeps => ZuoraRestRequestMaker(zuoraDeps).put(AccountUpdate(autoPay = false), s"accounts/$accountId"): ClientFailableOp[Unit] }.toEitherT
 
 }
 

@@ -12,12 +12,11 @@ import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.exacttarget.EmailSendSteps.EmailSendStepsDeps
 import com.gu.util.exacttarget.{EmailRequest, EmailSendSteps}
 import com.gu.util.reader.Types._
+import com.gu.util.zuora.RestRequestMaker.ClientFailableOp
 import com.gu.util.zuora.ZuoraGetInvoiceTransactions.InvoiceTransactionSummary
-import com.gu.util.zuora.internal.Types.ClientFailableOp
 import com.gu.util.zuora.{ZuoraDeps, ZuoraGetInvoiceTransactions}
 import okhttp3.{Request, Response}
 import play.api.libs.json.Json
-
 import scalaz.syntax.std.option._
 import scalaz.{-\/, \/-}
 

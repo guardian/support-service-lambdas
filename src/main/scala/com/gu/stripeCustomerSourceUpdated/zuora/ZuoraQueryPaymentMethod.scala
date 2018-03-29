@@ -18,6 +18,7 @@ object ZuoraQueryPaymentMethod extends Logging {
     AccountId: AccountId,
     NumConsecutiveFailures: NumConsecutiveFailures
   )
+  // FIXME create WireRequest/Response and converter layer to replace the custom writes and reads
   implicit val QueryRecordR: Format[PaymentMethodFields] = Json.format[PaymentMethodFields]
 
   case class AccountPaymentMethodIds(accountId: AccountId, paymentMethods: NonEmptyList[PaymentMethodFields])

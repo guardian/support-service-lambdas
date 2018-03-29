@@ -1,8 +1,7 @@
 package com.gu.stripeCustomerSourceUpdated
 
-import com.gu.stripeCustomerSourceUpdated.SourceUpdatedSteps.logger
 import com.gu.util.apigateway.StripeAccount
-import com.gu.util.{StripeConfig, StripeSecretKey}
+import com.gu.util.{Logging, StripeConfig, StripeSecretKey}
 import com.stripe.exception.SignatureVerificationException
 import com.stripe.net.Webhook.Signature
 
@@ -10,7 +9,7 @@ import scala.util.{Failure, Success, Try}
 
 case class StripeDeps(config: StripeConfig, signatureChecker: SignatureChecker)
 
-object StripeRequestSignatureChecker {
+object StripeRequestSignatureChecker extends Logging {
   def verifyRequest(stripeDeps: StripeDeps, headers: Map[String, String], payload: String, stripeAccount: Option[StripeAccount]): Boolean = {
     val signatureHeader: Option[String] = headers.get("Stripe-Signature")
 

@@ -1,10 +1,10 @@
 package com.gu.util.zuora.internal
 
-import scalaz.{EitherT, Reader, \/}
+import com.gu.util.zuora.RestRequestMaker.{ClientFail, ClientFailableOp}
+import scalaz.{EitherT, Reader}
 
 object Types {
 
-  type ClientFailableOp[A] = ClientFail \/ A
   // EitherT's first type parameter is a higher kinded type with single arity
   // unfortunately we want to stack a reader into it, which takes two type parameters
   // we can get around this by using a type lambda to define a new anonymous type constructor with 1 arity (the other parameter comes from outside)
@@ -21,5 +21,3 @@ object Types {
   }
 
 }
-
-case class ClientFail(message: String)

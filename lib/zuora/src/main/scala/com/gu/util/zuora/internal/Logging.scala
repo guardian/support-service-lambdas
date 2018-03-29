@@ -1,9 +1,9 @@
 package com.gu.util.zuora.internal
 
-import Types._
-
-import scalaz.{-\/, \/-}
+import com.gu.util.zuora.RestRequestMaker.ClientFailableOp
+import com.gu.util.zuora.internal.Types._
 import org.apache.log4j.Logger
+import scalaz.{-\/, \/-}
 
 trait Logging { // in future maybe put logging into a context so the messages stack together like a stack trace
 

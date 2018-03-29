@@ -36,11 +36,11 @@ class TestingRawEffects(
       val presetResponse =
         if (req.method() == "GET") {
           responses.get(path) // todo should change to have GETs and POSTs in one list using a Sum type, and have a getUnusedRequests or something at the end to assert they were "used" by the code
-        } else if (req.method() == "POST") {
+        } else {
           val reqBody = body(req.body)
-          logger.info(s"HTTP POST body is $reqBody")
-          postResponses.get(POSTRequest(path, reqBody)).orElse(responses.get(path)) // use get response
-        } else responses.get(path)
+          logger.info(s"HTTP ${req.method} body is $reqBody")
+          postResponses.get(POSTRequest(path, reqBody, req.method)).orElse(responses.get(path)) // use get response
+        }
       val HTTPResponse(code, response) = presetResponse.getOrElse(
         HTTPResponse(defaultCode, """{"success": true}""")
       )
@@ -75,7 +75,7 @@ class TestingRawEffects(
 
 object TestingRawEffects {
 
-  case class POSTRequest(urlPathAndQuery: String, postBody: String)
+  case class POSTRequest(urlPathAndQuery: String, postBody: String, method: String = "POST")
   case class HTTPResponse(code: Int, body: String)
 
   case class BasicRequest(method: String, path: String, body: String)

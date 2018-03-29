@@ -1,9 +1,10 @@
 package com.gu.util.zuora
 
-import com.gu.util.zuora.internal.Types.WithDepsClientFailableOp
-import com.gu.util.zuora.ZuoraRestRequestMaker.post
+import com.gu.util.zuora.RestRequestMaker.ClientFailableOp
+import com.gu.util.zuora.internal.Types.{WithDepsClientFailableOp, _}
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
+import scalaz.Reader
 
 object ZuoraQuery {
 
@@ -31,6 +32,6 @@ object ZuoraQuery {
 
   // https://www.zuora.com/developer/api-reference/#operation/Action_POSTquery
   def getResults[QUERYRECORD: Reads](query: Query): WithDepsClientFailableOp[ZuoraDeps, QueryResult[QUERYRECORD]] =
-    post(query, s"action/query")
+    Reader { zuoraDeps: ZuoraDeps => ZuoraRestRequestMaker(zuoraDeps).post(query, s"action/query", true): ClientFailableOp[QueryResult[QUERYRECORD]] }.toEitherT
 
 }

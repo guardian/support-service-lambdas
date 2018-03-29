@@ -1,11 +1,11 @@
 package com.gu.autoCancel
 
-import com.gu.util.{Logging, ZuoraToApiGateway}
-import com.gu.util.reader.Types.FailableOp
-import com.gu.util.zuora.ZuoraModels.SubscriptionId
 import java.time.LocalDate
 
+import com.gu.util.reader.Types._
+import com.gu.util.zuora.ZuoraModels.SubscriptionId
 import com.gu.util.zuora.{ZuoraCancelSubscription, ZuoraDeps, ZuoraDisableAutoPay, ZuoraUpdateCancellationReason}
+import com.gu.util.{Logging, ZuoraToApiGateway}
 
 object AutoCancel extends Logging {
 
