@@ -11,13 +11,13 @@ object ZuoraRestRequestMaker extends Logging {
   def apply(zuoraDeps: ZuoraDeps): RestRequestMaker.Requests = {
     import zuoraDeps._
     new RestRequestMaker.Requests(
-      Map(
+      headers = Map(
         "apiSecretAccessKey" -> config.password,
         "apiAccessKeyId" -> config.username
       ),
-      config.baseUrl + "/", //TODO shouldn't have to add it
-      response,
-      zuoraIsSuccessful
+      baseUrl = config.baseUrl + "/", //TODO shouldn't have to add it
+      getResponse = response,
+      jsonIsSuccessful = zuoraIsSuccessful
     )
   }
 

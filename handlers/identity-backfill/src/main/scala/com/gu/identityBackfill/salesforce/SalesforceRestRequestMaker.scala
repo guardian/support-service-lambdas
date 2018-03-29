@@ -10,12 +10,10 @@ object SalesforceRestRequestMaker extends Logging {
 
   def apply(salesforceAuth: SalesforceAuth, response: Request => Response): RestRequestMaker.Requests = {
     new RestRequestMaker.Requests(
-      Map(
-        "Authorization" -> s"Bearer ${salesforceAuth.access_token}"
-      ),
-      salesforceAuth.instance_url,
-      response,
-      _ => \/-(())
+      headers = Map("Authorization" -> s"Bearer ${salesforceAuth.access_token}"),
+      baseUrl = salesforceAuth.instance_url,
+      getResponse = response,
+      jsonIsSuccessful = _ => \/-(())
     )
   }
 

@@ -32,12 +32,12 @@ object RestRequestMaker extends Logging {
     }
   }
 
-  class Requests(headers: Map[String, String], baseUrl: String, getResponse: Request => Response, zuoraIsSuccessful: JsValue => ClientFailableOp[Unit]) {
+  class Requests(headers: Map[String, String], baseUrl: String, getResponse: Request => Response, jsonIsSuccessful: JsValue => ClientFailableOp[Unit]) {
 
     def get[RESP: Reads](path: String): ClientFailableOp[RESP] =
       for {
         bodyAsJson <- sendRequest(buildRequest(headers, baseUrl + path, _.get()), getResponse).map(Json.parse)
-        _ <- zuoraIsSuccessful(bodyAsJson)
+        _ <- jsonIsSuccessful(bodyAsJson)
         respModel <- toResult[RESP](bodyAsJson)
       } yield respModel
 
@@ -45,7 +45,7 @@ object RestRequestMaker extends Logging {
       val body = createBody[REQ](req)
       for {
         bodyAsJson <- sendRequest(buildRequest(headers, baseUrl + path, _.put(body)), getResponse).map(Json.parse)
-        _ <- zuoraIsSuccessful(bodyAsJson)
+        _ <- jsonIsSuccessful(bodyAsJson)
         respModel <- toResult[RESP](bodyAsJson)
       } yield respModel
     }
@@ -54,7 +54,7 @@ object RestRequestMaker extends Logging {
       val body = createBody[REQ](req)
       for {
         bodyAsJson <- sendRequest(buildRequest(headers, baseUrl + path, _.post(body)), getResponse).map(Json.parse)
-        _ <- if (skipCheck) \/-(()) else zuoraIsSuccessful(bodyAsJson)
+        _ <- if (skipCheck) \/-(()) else jsonIsSuccessful(bodyAsJson)
         respModel <- toResult[RESP](bodyAsJson)
       } yield respModel
     }
