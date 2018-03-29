@@ -1,6 +1,7 @@
 package com.gu.identityBackfill
 
 import com.gu.identity.GetByEmail
+import com.gu.identity.GetByEmail.NotFound
 import com.gu.identityBackfill.IdentityBackfillSteps.WireModel.IdentityBackfillRequest
 import com.gu.identityBackfill.Types._
 import com.gu.identityBackfill.salesforce.SalesforceAuthenticate.SalesforceAuth
@@ -40,7 +41,10 @@ object IdentityBackfillSteps extends Logging {
       for {
         request <- Json.parse(apiGatewayRequest.body).validate[IdentityBackfillRequest].toFailableOp.withLogging("zuora callout")
         emailAddress = fromRequest(request)
-        identityId <- getByEmail(emailAddress).leftMap(a => ApiGatewayResponse.internalServerError(a.toString)).withLogging("GetByEmail")
+        identityId <- getByEmail(emailAddress).leftMap({
+          case NotFound => ApiGatewayResponse.notFound("user doesn't have identity")
+          case a => ApiGatewayResponse.internalServerError(a.toString)
+        }).withLogging("GetByEmail")
         zuoraAccountsForEmail <- getZuoraAccountsForEmail(emailAddress)
         zuoraAccountForEmail <- zuoraAccountsForEmail match {
           case one :: Nil => \/-(one);

@@ -2,10 +2,10 @@ package com.gu.identity
 
 import com.gu.effects.TestingRawEffects
 import com.gu.effects.TestingRawEffects.HTTPResponse
+import com.gu.identity.GetByEmail.NotFound
 import com.gu.identityBackfill.Types.{EmailAddress, IdentityId}
 import org.scalatest.{FlatSpec, Matchers}
-
-import scalaz.{\/, \/-}
+import scalaz.{-\/, \/, \/-}
 
 class GetByEmailTest extends FlatSpec with Matchers {
 
@@ -17,6 +17,16 @@ class GetByEmailTest extends FlatSpec with Matchers {
     val actual: \/[GetByEmail.ApiError, IdentityId] = GetByEmail(testingRawEffects.rawEffects.response, IdentityConfig("http://baseurl", "apitoken"))(EmailAddress("email@address"))
 
     actual should be(\/-(IdentityId("1234")))
+  }
+
+  it should "get not found" in {
+    val testingRawEffects = new TestingRawEffects(
+      responses = NotFoundTestData.responses
+    )
+
+    val actual: \/[GetByEmail.ApiError, IdentityId] = GetByEmail(testingRawEffects.rawEffects.response, IdentityConfig("http://baseurl", "apitoken"))(EmailAddress("email@address"))
+
+    actual should be(-\/(NotFound))
   }
 
 }
@@ -43,6 +53,26 @@ object TestData {
       |            "usernameLowerCase": "johnduffell2"
       |        }
       |    }
+      |}
+    """.stripMargin
+
+}
+
+object NotFoundTestData {
+
+  def responses: Map[String, HTTPResponse] = Map(
+    "/user?emailAddress=email@address" -> HTTPResponse(404, TestData.dummyIdentityResponse)
+  )
+  val dummyIdentityResponse: String =
+    """
+      |{
+      |    "status": "error",
+      |    "errors": [
+      |        {
+      |            "message": "Not found",
+      |            "description": "Resource not found"
+      |        }
+      |    ]
       |}
     """.stripMargin
 
