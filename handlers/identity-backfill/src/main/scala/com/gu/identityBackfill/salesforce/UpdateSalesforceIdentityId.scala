@@ -17,7 +17,6 @@ object UpdateSalesforceIdentityId {
   def apply(response: Request => Response)(salesforceAuth: SalesforceAuth)(sFContactId: SFContactId, identityId: IdentityId): FailableOp[Unit] = {
     val patch = SalesforceRestRequestMaker(salesforceAuth, response).patch(WireRequest(identityId.value), s"/services/data/v20.0/sobjects/Contact/${sFContactId.value}")
     patch.leftMap(e => ApiGatewayResponse.internalServerError(e.message))
-    //    ApiGatewayResponse.internalServerError("todo").left
   }
 
 }
