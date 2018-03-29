@@ -14,21 +14,6 @@ class ZuoraRestServiceTest extends AsyncFlatSpec {
 
   val fakeZConfig = ZuoraRestConfig("https://www.test.com", "fakeUser", "fakePassword")
 
-  //  "buildRequest" should "set the apiSecretAccessKey header correctly" in {
-  //    val request = ZuoraRestRequestMaker.buildRequest(fakeZConfig)("route-test").get.build()
-  //    assert(request.header("apiSecretAccessKey") == "fakePassword")
-  //  }
-  //
-  //  "buildRequest" should "set the apiAccessKeyId header correctly" in {
-  //    val request = ZuoraRestRequestMaker.buildRequest(fakeZConfig)("route-test").get.build()
-  //    assert(request.header("apiAccessKeyId") == "fakeUser")
-  //  }
-  //
-  //  "buildRequest" should "construct an appropriate url" in {
-  //    val request = ZuoraRestRequestMaker.buildRequest(fakeZConfig)("route-test").get.build()
-  //    assert(request.url.toString == "https://www.test.com/route-test")
-  //  }
-
   // Mocks and helper functions for handleFutureResponse testing
   val dummyJson = Json.parse(
     """{
