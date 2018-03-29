@@ -5,7 +5,7 @@ import java.io.{InputStream, OutputStream}
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.RawEffects
 import com.gu.identity.{GetByEmail, IdentityConfig}
-import com.gu.identityBackfill.salesforce.SalesforceAuthenticate.SFConfig
+import com.gu.identityBackfill.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.identityBackfill.salesforce.{SalesforceAuthenticate, UpdateSalesforceIdentityId}
 import com.gu.identityBackfill.zuora.{AddIdentityIdToAccount, CountZuoraAccountsForIdentityId, GetZuoraAccountsForEmail}
 import com.gu.util.Config
@@ -25,7 +25,7 @@ object Handler {
   case class StepsConfig(
     identityConfig: IdentityConfig,
     zuoraRestConfig: ZuoraRestConfig,
-    sfConfig: SFConfig
+    sfConfig: SFAuthConfig
   )
   implicit val stepsConfigReads: Reads[StepsConfig] = Json.reads[StepsConfig]
 

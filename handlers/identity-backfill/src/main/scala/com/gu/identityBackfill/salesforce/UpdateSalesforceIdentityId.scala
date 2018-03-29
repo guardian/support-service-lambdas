@@ -10,9 +10,7 @@ import play.api.libs.json.Json
 object UpdateSalesforceIdentityId {
 
   case class WireRequest(IdentityID__c: String)
-  object WireRequest {
-    implicit val writes = Json.writes[WireRequest]
-  }
+  implicit val writes = Json.writes[WireRequest]
 
   def apply(response: Request => Response)(salesforceAuth: SalesforceAuth)(sFContactId: SFContactId, identityId: IdentityId): FailableOp[Unit] = {
     val patch = SalesforceRestRequestMaker(salesforceAuth, response).patch(WireRequest(identityId.value), s"/services/data/v20.0/sobjects/Contact/${sFContactId.value}")

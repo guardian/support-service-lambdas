@@ -31,6 +31,7 @@ object CreatePaymentMethod {
 
   }
 
+  // FIXME create WireRequest/Response and converter layer to replace the custom writes and reads
   implicit val writes = new Writes[CreateStripePaymentMethod] {
     def writes(command: CreateStripePaymentMethod) = Json.obj(
       "AccountId" -> command.accountId.value,

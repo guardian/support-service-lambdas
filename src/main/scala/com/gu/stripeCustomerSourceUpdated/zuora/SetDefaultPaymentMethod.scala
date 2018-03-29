@@ -12,6 +12,7 @@ object SetDefaultPaymentMethod {
 
   case class SetDefaultPaymentMethod(paymentMethodId: PaymentMethodId)
 
+  // FIXME create WireRequest and converter layer to replace the custom writes
   implicit val writes = new Writes[SetDefaultPaymentMethod] {
     def writes(subscriptionUpdate: SetDefaultPaymentMethod) = Json.obj(
       "DefaultPaymentMethodId" -> subscriptionUpdate.paymentMethodId
