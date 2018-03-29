@@ -33,8 +33,8 @@ val scalaSettings = Seq(
 
     autoCompilerPlugins := true,
 
-addCompilerPlugin("com.lihaoyi" %% "acyclic" % "0.1.7")/*,
-  scalacOptions += "-P:acyclic:force"*/
+addCompilerPlugin("com.lihaoyi" %% "acyclic" % "0.1.7"),
+  scalacOptions += "-P:acyclic:force"
 )
 
 // fixme this whole file needs splitting down appropriately

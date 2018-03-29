@@ -4,6 +4,7 @@ import com.gu.effects.{ConfigLoad, RawEffects}
 import com.gu.util.ETConfig.ETSendIds
 import com.gu.util.exacttarget.EmailSendSteps.EmailSendStepsDeps
 import com.gu.util.exacttarget._
+import com.gu.util.reader.Types._
 import com.gu.util.zuora.ZuoraRestConfig
 import com.gu.util.{Config, Logging, Stage}
 import scalaz.syntax.std.either._

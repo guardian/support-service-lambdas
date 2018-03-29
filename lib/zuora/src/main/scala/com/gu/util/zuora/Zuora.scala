@@ -7,28 +7,9 @@ import com.gu.util.zuora.ZuoraAccount.{AccountId, PaymentMethodId}
 import com.gu.util.zuora.ZuoraModels._
 import com.gu.util.zuora.ZuoraReaders._
 import com.gu.util.zuora.internal.Types._
-import okhttp3.{Request, Response}
 import play.api.libs.functional.syntax._
 import play.api.libs.json.{JsPath, Json, Reads, Writes}
 import scalaz.Reader
-
-case class ZuoraRestConfig(
-  baseUrl: String,
-  username: String,
-  password: String
-)
-
-object ZuoraRestConfig {
-
-  implicit val zuoraConfigReads: Reads[ZuoraRestConfig] = (
-    (JsPath \ "baseUrl").read[String] and
-    (JsPath \ "username").read[String] and
-    (JsPath \ "password").read[String]
-  )(ZuoraRestConfig.apply _)
-
-}
-
-case class ZuoraDeps(response: Request => Response, config: ZuoraRestConfig)
 
 object ZuoraGetAccountSummary {
 

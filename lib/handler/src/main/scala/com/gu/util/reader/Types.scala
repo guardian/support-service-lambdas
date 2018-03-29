@@ -1,14 +1,15 @@
 package com.gu.util.reader
 
+import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayResponse
-import com.gu.util.apigateway.ApiGatewayResponse.{badRequest, internalServerError, logger}
+import com.gu.util.apigateway.ApiGatewayResponse.{badRequest, internalServerError}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import play.api.libs.json.{JsError, JsResult, JsSuccess}
-
-import scala.util.{Failure, Success, Try}
 import scalaz.{-\/, EitherT, Reader, \/, \/-}
 
-object Types {
+import scala.util.{Failure, Success, Try}
+
+object Types extends Logging {
 
   type FailableOp[A] = ApiResponse \/ A
   // EitherT's first type parameter is a higher kinded type with single arity
@@ -77,6 +78,29 @@ object Types {
           -\/(internalServerError(s"Failed to execute lambda - unable to $action"))
         }
       }
+    }
+
+  }
+
+  implicit class LogImplicit[A, D](configHttpFailableOp: WithDepsFailableOp[D, A]) {
+
+    // this is just a handy method to add logging to the end of any for comprehension
+    def withLogging(message: String): WithDepsFailableOp[D, A] = {
+
+      (configHttpFailableOp.run map {
+        _.withLogging(message)
+      }).toEitherT
+
+    }
+
+  }
+
+  implicit class LogImplicit2[A](op: A) {
+
+    // this is just a handy method to add logging to the end of any for comprehension
+    def withLogging(message: String): A = {
+      logger.info(s"$message: continued processing with value: $op")
+      op
     }
 
   }
