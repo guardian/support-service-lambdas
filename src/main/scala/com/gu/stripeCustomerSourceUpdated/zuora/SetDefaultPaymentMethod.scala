@@ -1,12 +1,12 @@
 package com.gu.stripeCustomerSourceUpdated.zuora
 
 import com.gu.util.ZuoraToApiGateway
-import com.gu.util.reader.Types.WithDepsFailableOp
+import com.gu.util.reader.Types._
 import com.gu.util.zuora.ZuoraAccount.{AccountId, PaymentMethodId}
-import com.gu.util.zuora.ZuoraDeps
+import com.gu.util.zuora.{ZuoraDeps, ZuoraRestRequestMaker}
 import com.gu.util.zuora.ZuoraReaders.unitReads
-import com.gu.util.zuora.ZuoraRestRequestMaker.put
 import play.api.libs.json.{Json, Writes}
+import scalaz.Reader
 
 object SetDefaultPaymentMethod {
 
@@ -19,6 +19,6 @@ object SetDefaultPaymentMethod {
   }
 
   def setDefaultPaymentMethod(accountId: AccountId, paymentMethodId: PaymentMethodId): WithDepsFailableOp[ZuoraDeps, Unit] =
-    put(SetDefaultPaymentMethod(paymentMethodId), s"object/account/${accountId.value}").leftMap(ZuoraToApiGateway.fromClientFail)
+    Reader { zuoraDeps: ZuoraDeps => ZuoraRestRequestMaker(zuoraDeps).put(SetDefaultPaymentMethod(paymentMethodId), s"object/account/${accountId.value}").leftMap(ZuoraToApiGateway.fromClientFail) }.toEitherT
 
 }

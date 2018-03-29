@@ -5,17 +5,14 @@ import java.io.{InputStream, OutputStream}
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.RawEffects
 import com.gu.identity.{GetByEmail, IdentityConfig}
-import com.gu.identityBackfill.Types._
-import com.gu.identityBackfill.salesforce.SalesforceAuthenticate
-import com.gu.identityBackfill.salesforce.SalesforceAuthenticate.{SFConfig, SalesforceAuth}
+import com.gu.identityBackfill.salesforce.SalesforceAuthenticate.SFConfig
+import com.gu.identityBackfill.salesforce.{SalesforceAuthenticate, UpdateSalesforceIdentityId}
 import com.gu.identityBackfill.zuora.{AddIdentityIdToAccount, CountZuoraAccountsForIdentityId, GetZuoraAccountsForEmail}
 import com.gu.util.Config
+import com.gu.util.apigateway.ApiGatewayHandler
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
-import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayResponse}
-import com.gu.util.reader.Types.FailableOp
 import com.gu.util.zuora.{ZuoraDeps, ZuoraRestConfig}
 import play.api.libs.json.{Json, Reads}
-import scalaz.syntax.either._
 
 object Handler {
 
@@ -42,7 +39,7 @@ object Handler {
           CountZuoraAccountsForIdentityId(zuoraDeps),
           AddIdentityIdToAccount(zuoraDeps),
           () => SalesforceAuthenticate(rawEffects.response, config.stepsConfig.sfConfig),
-          UpdateSalesforceIdentityId.apply
+          UpdateSalesforceIdentityId(rawEffects.response)
         )
       }
     ApiGatewayHandler.default[StepsConfig](operation, lambdaIO).run((rawEffects.stage, rawEffects.s3Load(rawEffects.stage)))
@@ -50,8 +47,3 @@ object Handler {
 
 }
 
-object UpdateSalesforceIdentityId {
-  def apply(salesforceAuth: SalesforceAuth)(sFContactId: SFContactId, identityId: IdentityId): FailableOp[Unit] = {
-    ApiGatewayResponse.internalServerError("todo").left
-  }
-}

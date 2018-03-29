@@ -2,7 +2,7 @@ package com.gu.util
 
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.apigateway.ResponseModels.ApiResponse
-import com.gu.util.zuora.internal.ClientFail
+import com.gu.util.zuora.RestRequestMaker.ClientFail
 
 object ZuoraToApiGateway {
 

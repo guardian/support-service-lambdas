@@ -1,18 +1,20 @@
 package com.gu.util
 
+import com.gu.util.zuora.RestRequestMaker
 import com.gu.util.zuora.RestRequestMaker.ClientFail
-import com.gu.util.zuora.ZuoraAccount.{AccountId, PaymentMethodId}
-import com.gu.util.zuora.ZuoraGetAccountSummary.BasicAccountInfo
-import com.gu.util.zuora.{ZuoraDeps, ZuoraRestConfig, ZuoraRestRequestMaker}
 import okhttp3._
 import org.scalatest.Matchers._
 import org.scalatest._
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json._
 import scalaz.{-\/, \/-}
 
-class ZuoraRestServiceTest extends AsyncFlatSpec {
+class RestServiceTest extends AsyncFlatSpec {
 
-  val fakeZConfig = ZuoraRestConfig("https://www.test.com", "fakeUser", "fakePassword")
+  case class BasicAccountInfo(id: String)
+  implicit val read = Json.reads[BasicAccountInfo]
+  implicit val readUnit = new Reads[Unit] {
+    override def reads(json: JsValue): JsResult[Unit] = JsSuccess(())
+  }
 
   //  "buildRequest" should "set the apiSecretAccessKey header correctly" in {
   //    val request = ZuoraRestRequestMaker.buildRequest(fakeZConfig)("route-test").get.build()
@@ -78,14 +80,26 @@ class ZuoraRestServiceTest extends AsyncFlatSpec {
 
   def internalServerError(message: String) = ClientFail(message)
 
-  it should "return a left[String] if the body of a successful response cannot be de-serialized with a zuora success response" in {
-    val either = ZuoraRestRequestMaker.zuoraIsSuccessful(dummyJson)
-    assert(either == -\/(internalServerError("Error when reading common fields from zuora")))
+  "convertResponseToCaseClass" should "return a left[String] for an unsuccessful response code" in {
+    val response = constructTestResponse(500)
+    val either = RestRequestMaker.httpIsSuccessful(response)
+    assert(either == -\/(internalServerError("Request to Zuora was unsuccessful")))
   }
 
-  it should "return a left[String] if the body of a successful http response has a zuora failed in it" in {
-    val either = ZuoraRestRequestMaker.zuoraIsSuccessful(validFailedUpdateSubscriptionResult)
-    assert(either == -\/(internalServerError("Received failure result from Zuora during autoCancellation")))
+  it should "return a left[String] if the body of a successful response cannot be de-serialized to that case class" in {
+    val either = RestRequestMaker.toResult[BasicAccountInfo](validZuoraNoOtherFields)
+    assert(either == -\/(internalServerError("Error when converting Zuora response to case class")))
+  }
+
+  it should "return a right[T] if the body of a successful response deserializes to T" in {
+    val either = RestRequestMaker.toResult[BasicAccountInfo](validUpdateSubscriptionResult)
+    val basicInfo = BasicAccountInfo("id123")
+    either should be(\/-(basicInfo))
+  }
+
+  it should "return a right[Unit] if the body of a successful response deserializes to Unit" in {
+    val either = RestRequestMaker.toResult[Unit](validUpdateSubscriptionResult)
+    either should be(\/-(()))
   }
 
   it should "run success end to end GET" in {
@@ -94,8 +108,7 @@ class ZuoraRestServiceTest extends AsyncFlatSpec {
       println(s"request: $request")
       if (request.method() == "GET"
         && request.url().toString == "https://www.test.com/getget"
-        && request.header("apiSecretAccessKey") == "fakePassword"
-        && request.header("apiAccessKeyId") == "fakeUser")
+        && request.header("a") == "b")
         // check body for post/put
         constructTestResponse(200, validUpdateSubscriptionResult)
       else {
@@ -103,8 +116,9 @@ class ZuoraRestServiceTest extends AsyncFlatSpec {
         constructTestResponse(404)
       }
     }
-    val actual = ZuoraRestRequestMaker(ZuoraDeps(response, fakeZConfig)).get[BasicAccountInfo]("getget")
-    val basicInfo = BasicAccountInfo(AccountId("id123"), 1.2, PaymentMethodId("pmid"))
+    val actual = new RestRequestMaker.Requests(Map("a" -> "b"), "https://www.test.com", response, _ => \/-(()))
+      .get[BasicAccountInfo]("/getget")
+    val basicInfo = BasicAccountInfo("id123")
 
     actual should be(\/-(basicInfo))
   }

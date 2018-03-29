@@ -29,7 +29,12 @@ val scalaSettings = Seq(
       .setPreference(DanglingCloseParenthesis, Force)
       .setPreference(SpacesAroundMultiImports, false)
       .setPreference(NewlineAtEndOfFile, true)
-  }
+  },libraryDependencies += "com.lihaoyi" %% "acyclic" % "0.1.7" % "provided",
+
+    autoCompilerPlugins := true,
+
+addCompilerPlugin("com.lihaoyi" %% "acyclic" % "0.1.7")/*,
+  scalacOptions += "-P:acyclic:force"*/
 )
 
 // fixme this whole file needs splitting down appropriately
@@ -54,7 +59,17 @@ val testSettings = inConfig(EffectsTest)(Defaults.testTasks) ++ inConfig(HealthC
 
 def all(theProject: Project) = theProject.settings(scalaSettings, testSettings).configs(EffectsTest, HealthCheckTest)
 
-lazy val zuora = all(project in file("lib/zuora")).settings(
+lazy val zuora = all(project in file("lib/zuora")).dependsOn(restHttp).settings(
+  libraryDependencies ++= Seq(
+    "com.squareup.okhttp3" % "okhttp" % "3.9.1",
+    "com.amazonaws" % "aws-lambda-java-log4j" % "1.0.0",
+    "org.scalaz" %% "scalaz-core" % "7.2.18",
+    "com.typesafe.play" %% "play-json" % "2.6.8",
+    "org.scalatest" %% "scalatest" % "3.0.1" % "test"
+  )
+)
+
+lazy val restHttp = all(project in file("lib/restHttp")).settings(
   libraryDependencies ++= Seq(
     "com.squareup.okhttp3" % "okhttp" % "3.9.1",
     "com.amazonaws" % "aws-lambda-java-log4j" % "1.0.0",

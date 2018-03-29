@@ -24,11 +24,9 @@ object AddIdentityIdToAccount {
   }
 
   def apply(zuoraDeps: ZuoraDeps)(accountId: AccountId, identityId: IdentityId): FailableOp[Unit] = {
-    val accounts = for {
-      accountsWithEmail <- ZuoraRestRequestMaker.put[ZuoraAccount, Unit](reqFromIdentityId(identityId), s"accounts/${accountId.value}")
-    } yield ()
+    val accounts = ZuoraRestRequestMaker(zuoraDeps).put[ZuoraAccount, Unit](reqFromIdentityId(identityId), s"accounts/${accountId.value}")
 
-    accounts.run.run(zuoraDeps).leftMap(e => ApiGatewayResponse.internalServerError(e.message))
+    accounts.leftMap(e => ApiGatewayResponse.internalServerError(e.message))
   }
 
 }
