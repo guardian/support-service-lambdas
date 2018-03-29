@@ -33,6 +33,8 @@ object RestRequestMaker extends Logging {
   }
 
   class Requests(headers: Map[String, String], baseUrl: String, getResponse: Request => Response, jsonIsSuccessful: JsValue => ClientFailableOp[Unit]) {
+    // this can be a class and still be cohesive because every single method in the class needs every single value.  so we are effectively partially
+    // applying everything with these params
 
     def get[RESP: Reads](path: String): ClientFailableOp[RESP] =
       for {
