@@ -62,10 +62,9 @@ Resources:
             Timeout: 300
         DependsOn:
         - DigitalSubscriptionExpiryRole
-
-    Outputs:
-      DigitalSubscriptionExpiryLambdaExport:
-        Description: lambda that returns expiration date for digital pack subscriptions or emergency tokens
-        Value: !GetAtt [ DigitalSubscriptionExpiryLambda, "Arn" ]
-        Export:
-          Name: !Sub ${AWS::StackName}-DigitalSubscriptionExpiryLambda
+Outputs:
+  DigitalSubscriptionExpiryLambdaExport:
+    Description: lambda that returns expiration date for digital pack subscriptions or emergency tokens
+    Value: !GetAtt [ DigitalSubscriptionExpiryLambda, "Arn" ]
+    Export:
+      Name: !Sub ${AWS::StackName}-DigitalSubscriptionExpiryLambda
