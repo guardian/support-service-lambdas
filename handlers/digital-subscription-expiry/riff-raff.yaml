@@ -1,0 +1,21 @@
+stacks:
+- subscriptions
+regions:
+- eu-west-1
+deployments:
+
+  cfn:
+    type: cloud-formation
+    app:  digital-subscription-expiry
+    parameters:
+      templatePath: cfn.yaml
+
+  identity-backfill:
+    type: aws-lambda
+    parameters:
+      fileName: digital-subscription-expiry.jar
+      bucket: subscriptions-dist
+      prefixStack: false
+      functionNames:
+      - digital-subscriptions-expiry-
+    dependencies: [cfn]

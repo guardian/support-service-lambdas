@@ -116,11 +116,15 @@ val testDep = test % "test->test"
 // a set of projects that is "dependsOn(..)" by the sharing projects.  Don't be afraid to restructure things to keep the code nice!
 lazy val root = all(project in file(".")).enablePlugins(RiffRaffArtifact).aggregate(
   `identity-backfill`,
+  `digital-subscription-expiry`,
   zuora,
   effects
 ).dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `identity-backfill` = all(project in file("handlers/identity-backfill")) // when using the "project identity-backfill" command it uses the lazy val name
+  .enablePlugins(RiffRaffArtifact).dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
+
+lazy val `digital-subscription-expiry` = all(project in file("handlers/digital-subscription-expiry"))
   .enablePlugins(RiffRaffArtifact).dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
 
 assemblyJarName := "zuora-auto-cancel.jar"
