@@ -47,8 +47,8 @@ Resources:
             FunctionName:
                 !Sub digital-subscription-expiry-${Stage}
             Code:
-                S3Bucket: zuora-auto-cancel-dist
-                S3Key: !Sub subscriptions-dist/${Stage}/digital-subscription-expiry/digital-subscription-expiry.jar
+                S3Bucket: subscriptions-dist
+                S3Key: !Sub subscriptions/${Stage}/digital-subscription-expiry/digital-subscription-expiry.jar
             Handler: com.gu.digitalSubscriptionExpiry.Handler::apply
             Environment:
                 Variables:

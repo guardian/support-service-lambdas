@@ -1,4 +1,4 @@
-package com.gu.identityBackfill
+package com.gu.digitalSubscriptionExpiry
 
 import java.io.{InputStream, OutputStream}
 
