@@ -1,6 +1,6 @@
 // "Any .sbt files in foo, say foo/build.sbt, will be merged with the build definition for the entire build, but scoped to the hello-foo project."
 // https://www.scala-sbt.org/0.13/docs/Multi-Project.html
-name := "digital subscription expiry"
+name := "digital-subscription-expiry"
 description:= "check digital subscription expiration for authorisation purposes"
 
 scalacOptions += "-Ypartial-unification"
