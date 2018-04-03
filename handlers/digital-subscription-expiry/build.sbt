@@ -9,7 +9,7 @@ assemblyJarName := "digital-subscription-expiry.jar"
 riffRaffPackageType := assembly.value
 riffRaffUploadArtifactBucket := Option("riffraff-artifact")
 riffRaffUploadManifestBucket := Option("riffraff-builds")
-riffRaffManifestProjectName := "MemSub::Subsciptions::Lambdas::Digital Subscription Expiry"
+riffRaffManifestProjectName := "MemSub::Subscriptions::Lambdas::Digital Subscription Expiry"
 riffRaffArtifactResources += (file("handlers/digital-subscription-expiry/cfn.yaml"), "cfn/cfn.yaml")
 
 libraryDependencies ++= Seq(
