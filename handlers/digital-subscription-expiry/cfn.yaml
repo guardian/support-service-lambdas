@@ -62,9 +62,17 @@ Resources:
             Timeout: 300
         DependsOn:
         - DigitalSubscriptionExpiryRole
+
+    DigitalSubAuthApiPermission:
+            Type: AWS::Lambda::Permission
+            Properties:
+                Action: lambda:invokeFunction
+                FunctionName: !Sub digital-subscription-expiry-${Stage}
+                Principal: apigateway.amazonaws.com
+            DependsOn: DigitalSubscriptionExpiryLambda
 Outputs:
   DigitalSubscriptionExpiryLambdaExport:
     Description: lambda that returns expiration date for digital pack subscriptions or emergency tokens
-    Value: !GetAtt [ DigitalSubscriptionExpiryLambda, "Arn" ]
+    Value: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DigitalSubscriptionExpiryLambda.Arn}/invocations
     Export:
-      Name: !Sub ${AWS::StackName}-DigitalSubscriptionExpiryLambda
+      Name: !Sub ${AWS::StackName}-DigitalSubscriptionExpiryLambdaUri
