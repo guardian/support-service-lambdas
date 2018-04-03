@@ -10,7 +10,9 @@ import scalaz.syntax.std.either._
 
 object GetByEmail {
 
-  case class ApiError(message: String)
+  sealed trait ApiError
+  case class OtherError(message: String) extends ApiError
+  case object NotFound extends ApiError
 
   object RawWireModel {
 
@@ -28,7 +30,7 @@ object GetByEmail {
   def userFromResponse(userResponse: UserResponse): ApiError \/ User =
     userResponse match {
       case UserResponse("ok", user) => \/-(user)
-      case _ => -\/(ApiError("not an OK response from api"))
+      case _ => -\/(OtherError("not an OK response from api"))
     }
 
   def apply(getResponse: Request => Response, identityConfig: IdentityConfig)(email: EmailAddress): ApiError \/ IdentityId = {
@@ -37,9 +39,13 @@ object GetByEmail {
     val response = getResponse(new Request.Builder().url(url).addHeader("X-GU-ID-Client-Access-Token", "Bearer " + identityConfig.apiToken).build())
 
     for {
-      _ <- if (response.code == 200) \/-(()) else -\/(ApiError(s"failed http with ${response.code}"))
+      _ <- response.code match {
+        case 200 => \/-(())
+        case 404 => -\/(NotFound)
+        case code => -\/(OtherError(s"failed http with ${code}"))
+      }
       body = response.body.byteStream
-      userResponse <- Json.parse(body).validate[UserResponse].asEither.disjunction.leftMap(err => ApiError(err.mkString(", ")))
+      userResponse <- Json.parse(body).validate[UserResponse].asEither.disjunction.leftMap(err => OtherError(err.mkString(", ")))
       user <- userFromResponse(userResponse)
       identityId = identityIdFromUser(user)
     } yield identityId

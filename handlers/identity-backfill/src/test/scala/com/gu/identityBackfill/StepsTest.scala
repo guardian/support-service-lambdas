@@ -1,5 +1,6 @@
 package com.gu.identityBackfill
 
+import com.gu.identity.GetByEmail.NotFound
 import com.gu.identityBackfill.StepsData._
 import com.gu.identityBackfill.Types.{IdentityId, _}
 import com.gu.identityBackfill.salesforce.SalesforceAuthenticate.SalesforceAuth
@@ -18,9 +19,10 @@ class StepsTest extends FlatSpec with Matchers {
     def getSteps(
       noOfAccountWithSameId: Int = 0,
       numberOfZuoraAccountsForEmail: Int = 1,
-      accountFoundHasIdentityId: Boolean = false
+      accountFoundHasIdentityId: Boolean = false,
+      emailHasIdentity: Boolean = true
     ): ApiGatewayRequest => FailableOp[Unit] = IdentityBackfillSteps(
-      getByEmail = _ => \/-(IdentityId("asdf")),
+      getByEmail = _ => if (emailHasIdentity) \/-(IdentityId("asdf")) else -\/(NotFound),
       getZuoraAccountsForEmail = _ => {
         val dummyContact = ZuoraAccountIdentitySFContact(AccountId("acc"), if (accountFoundHasIdentityId) Some(IdentityId("haha")) else None, SFContactId("sf"))
         \/-(List.fill(numberOfZuoraAccountsForEmail)(dummyContact))
@@ -104,6 +106,20 @@ class StepsTest extends FlatSpec with Matchers {
       getSteps(numberOfZuoraAccountsForEmail = 2)(ApiGatewayRequest(None, identityBackfillRequest(false), None))
 
     val expectedResult = -\/(ApiGatewayResponse.notFound("should have exactly one zuora account per email at this stage"))
+    result should be(expectedResult)
+    zuoraUpdate should be(None)
+    salesforceUpdate should be(None)
+  }
+
+  it should "return a 404 if there's no identity account at all for that email" in {
+
+    val stepsWithMocks = new StepsWithMocks
+    import stepsWithMocks._
+
+    val result =
+      getSteps(emailHasIdentity = false)(ApiGatewayRequest(None, identityBackfillRequest(false), None))
+
+    val expectedResult = -\/(ApiGatewayResponse.notFound("user doesn't have identity"))
     result should be(expectedResult)
     zuoraUpdate should be(None)
     salesforceUpdate should be(None)

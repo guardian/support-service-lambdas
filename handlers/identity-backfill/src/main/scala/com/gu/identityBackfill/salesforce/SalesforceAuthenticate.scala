@@ -31,7 +31,7 @@ object SalesforceAuthenticate extends Logging {
   ): FailableOp[SalesforceAuth] = {
     val request: Request = buildAuthRequest(config)
     val body = response(request).body().string()
-    Json.parse(body).validate[SalesforceAuth].toFailableOp("Failed to authenticate with Salesforce").withLogging("salesforce auth")
+    Json.parse(body).validate[SalesforceAuth].toFailableOp("Failed to authenticate with Salesforce").withLogging(s"salesforce auth for $body")
   }
 
   private def buildAuthRequest(config: SFAuthConfig) = {
