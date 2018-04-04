@@ -1,15 +1,15 @@
 package test.scala.com.gu.digitalSubscriptionExpiry
 
-import main.scala.com.gu.digitalSubscriptionExpiry.DigitalSubscriptionExpiryCallout
+import main.scala.com.gu.digitalSubscriptionExpiry.DigitalSubscriptionExpiryRequest
 import org.scalatest.FlatSpec
 import org.scalatest.Matchers._
 import play.api.libs.json.{JsResult, JsSuccess, Json}
 
-class DigitalSubscriptionExpiryCalloutTest extends FlatSpec {
+class DigitalSubscriptionExpiryRequestTest extends FlatSpec {
 
-  "DigitalSubscriptionExpiryCallout" should "deserialise correctly from a valid callout" in {
+  "DigitalSubscriptionExpiryRequest" should "deserialise correctly from a valid request" in {
 
-    val validSubsAuthorisationCallout =
+    val validSubsAuthorisationRequest =
       """
         |{
         |    "appId": "TEST TEST TEST",
@@ -19,8 +19,8 @@ class DigitalSubscriptionExpiryCalloutTest extends FlatSpec {
         |}
       """.stripMargin
 
-    val expected: JsResult[DigitalSubscriptionExpiryCallout] = JsSuccess(
-      DigitalSubscriptionExpiryCallout(
+    val expected: JsResult[DigitalSubscriptionExpiryRequest] = JsSuccess(
+      DigitalSubscriptionExpiryRequest(
         appId = "TEST TEST TEST",
         deviceId = "my device",
         subscriberId = "A-SOMESTUFF",
@@ -28,7 +28,7 @@ class DigitalSubscriptionExpiryCalloutTest extends FlatSpec {
       )
     )
 
-    val event: JsResult[DigitalSubscriptionExpiryCallout] = Json.parse(validSubsAuthorisationCallout).validate[DigitalSubscriptionExpiryCallout]
+    val event: JsResult[DigitalSubscriptionExpiryRequest] = Json.parse(validSubsAuthorisationRequest).validate[DigitalSubscriptionExpiryRequest]
 
     event should be(expected)
   }

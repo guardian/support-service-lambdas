@@ -10,7 +10,8 @@ import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest}
 import com.gu.util.reader.Types.FailableOp
 import com.gu.util.zuora.ZuoraRestConfig
 import com.gu.util.{Config, Logging}
-import main.scala.com.gu.digitalSubscriptionExpiry.DigitalSubscriptionExpiryCallout
+import main.scala.com.gu.digitalSubscriptionExpiry.DigitalSubscriptionExpiryRequest
+import org.joda.time.DateTime
 import play.api.libs.json.{Json, Reads}
 
 import scalaz.-\/
@@ -32,16 +33,24 @@ object Handler extends Logging {
     def operation: Config[StepsConfig] => Operation =
       config => {
         def steps(apiGatewayRequest: ApiGatewayRequest): FailableOp[Unit] = {
-          val calloutParsed: Option[DigitalSubscriptionExpiryCallout] = Json.fromJson[DigitalSubscriptionExpiryCallout](Json.parse(apiGatewayRequest.body)).asOpt
+          val calloutParsed: Option[DigitalSubscriptionExpiryRequest] = Json.fromJson[DigitalSubscriptionExpiryRequest](Json.parse(apiGatewayRequest.body)).asOpt
 
           logger.info(s"Parsed request as: $calloutParsed")
 
-          -\/(ApiResponse("200", new Headers, "Expiry response would be here"))
+          val responseJson = Json.toJson(getZuoraExpiry())
+
+          -\/(ApiResponse("200", new Headers, Json.prettyPrint(responseJson)))
         }
         Operation.noHealthcheck(steps, false)
       }
     ApiGatewayHandler.default[StepsConfig](operation, lambdaIO).run((rawEffects.stage, rawEffects.s3Load(rawEffects.stage)))
   }
 
+  def getZuoraExpiry() = DigitalSubscriptionExpiryResponse(Expiry(
+    expiryDate = DateTime.now(),
+    expiryType = ExpiryType.SUB,
+    subscriptionCode = None,
+    provider = None
+  ))
 }
 
