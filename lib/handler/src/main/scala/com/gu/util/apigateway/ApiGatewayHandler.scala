@@ -34,14 +34,16 @@ object ApiGatewayHandler extends Logging {
     }
   }
 
-  def authenticateCallout(requestAuth: Option[RequestAuth], trustedApiConfig: TrustedApiConfig): ApiResponse \/ Unit = {
-    if (credentialsAreValid(requestAuth, trustedApiConfig)) \/-(()) else -\/(unauthorized)
+  def authenticateCallout(shouldAuthenticate: Boolean, requestAuth: Option[RequestAuth], trustedApiConfig: TrustedApiConfig): ApiResponse \/ Unit = {
+    if (!shouldAuthenticate || credentialsAreValid(requestAuth, trustedApiConfig)) \/-(()) else -\/(unauthorized)
   }
 
-  case class Operation(steps: ApiGatewayRequest => FailableOp[Unit], healthcheck: () => FailableOp[Unit])
+  //todo just for testing remove default value later
+  case class Operation(steps: ApiGatewayRequest => FailableOp[Unit], healthcheck: () => FailableOp[Unit], shouldAuthenticate: Boolean = true)
   object Operation {
-    def noHealthcheck(steps: ApiGatewayRequest => FailableOp[Unit]) =
-      Operation(steps, () => \/-(()))
+    //todo just for testing remove default value later
+    def noHealthcheck(steps: ApiGatewayRequest => FailableOp[Unit], shouldAuthenticate: Boolean = true) =
+      Operation(steps, () => \/-(()), shouldAuthenticate)
   }
 
   def default[StepsConfig: Reads](operation: Config[StepsConfig] => Operation, io: LambdaIO): Reader[(Stage, Try[String]), Unit] =
@@ -61,7 +63,7 @@ object ApiGatewayHandler extends Logging {
         apiGatewayRequest <- parseApiGatewayRequest(inputStream)
         configuredOperation = operation(config)
         _ <- if (apiGatewayRequest.queryStringParameters.exists(_.isHealthcheck)) configuredOperation.healthcheck().withLogging("healthcheck") else for {
-          _ <- authenticateCallout(apiGatewayRequest.requestAuth, config.trustedApiConfig).withLogging("authentication")
+          _ <- authenticateCallout(configuredOperation.shouldAuthenticate, apiGatewayRequest.requestAuth, config.trustedApiConfig).withLogging("authentication")
           _ <- configuredOperation.steps(apiGatewayRequest).withLogging("steps")
         } yield ()
       } yield ()

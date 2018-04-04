@@ -5,13 +5,14 @@ import java.io.{InputStream, OutputStream}
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.RawEffects
 import com.gu.util.Config
-import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, ApiGatewayResponse}
+import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest}
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
+import com.gu.util.apigateway.ResponseModels.{ApiResponse, Headers}
 import com.gu.util.reader.Types.FailableOp
 import com.gu.util.zuora.ZuoraRestConfig
 import play.api.libs.json.{Json, Reads}
 
-import scalaz.{-\/}
+import scalaz.-\/
 
 object Handler {
 
@@ -30,10 +31,9 @@ object Handler {
     def operation: Config[StepsConfig] => Operation =
       config => {
         def steps(apiGatewayRequest: ApiGatewayRequest): FailableOp[Unit] = {
-          println("hello")
-          -\/(ApiGatewayResponse.successfulExecution)
+          -\/(ApiResponse("200", new Headers, "Expiry response would be here"))
         }
-        Operation.noHealthcheck(steps)
+        Operation.noHealthcheck(steps, false)
       }
     ApiGatewayHandler.default[StepsConfig](operation, lambdaIO).run((rawEffects.stage, rawEffects.s3Load(rawEffects.stage)))
   }
