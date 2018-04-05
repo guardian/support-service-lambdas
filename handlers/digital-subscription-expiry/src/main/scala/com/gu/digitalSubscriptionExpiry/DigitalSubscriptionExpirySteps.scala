@@ -3,22 +3,27 @@ package com.gu.digitalSubscriptionExpiry
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.Operation
 import com.gu.util.apigateway.ResponseModels.{ApiResponse, Headers}
-import com.gu.util.apigateway.{ApiGatewayRequest}
+import com.gu.util.apigateway.ApiGatewayRequest
 import com.gu.util.reader.Types._
 import main.scala.com.gu.digitalSubscriptionExpiry.DigitalSubscriptionExpiryRequest
-import org.joda.time.DateTime
-import play.api.libs.json.{Json}
+import org.joda.time.format.DateTimeFormat
+import play.api.libs.json.Json
 
-import scalaz.{-\/}
+import scalaz.-\/
 
 object DigitalSubscriptionExpirySteps extends Logging {
 
-  def getZuoraExpiry() = DigitalSubscriptionExpiryResponse(Expiry(
-    expiryDate = DateTime.now(),
-    expiryType = ExpiryType.SUB,
-    subscriptionCode = None,
-    provider = Some("test provider")
-  ))
+  def getZuoraExpiry() = {
+    val formatter = DateTimeFormat.forPattern("dd/MM/yyyy")
+    val expiryValue = formatter.parseDateTime("26/10/1985")
+
+    DigitalSubscriptionExpiryResponse(Expiry(
+      expiryDate = expiryValue,
+      expiryType = ExpiryType.SUB,
+      subscriptionCode = None,
+      provider = Some("test provider")
+    ))
+  }
 
   def getEmergencyTokenExpiry() = {
 
