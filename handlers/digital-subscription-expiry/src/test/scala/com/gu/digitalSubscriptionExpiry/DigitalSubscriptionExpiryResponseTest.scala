@@ -1,6 +1,5 @@
 package com.gu.digitalSubscriptionExpiry
 
-
 import org.scalatest.FlatSpec
 import org.scalatest.Matchers._
 import play.api.libs.json.Json
@@ -23,9 +22,9 @@ class DigitalSubscriptionExpiryResponseTest extends FlatSpec {
 
     val formatter = DateTimeFormat.forPattern("dd/MM/yyyy")
     val expiryValue = formatter.parseDateTime("26/10/1985")
-    val res = DigitalSubscriptionExpiryResponse( Expiry(
-      expiryDate =  expiryValue,
-      expiryType =  "ExpiryTypeValue",
+    val res = DigitalSubscriptionExpiryResponse(Expiry(
+      expiryDate = expiryValue,
+      expiryType = "ExpiryTypeValue",
       content = "ContentValue",
       subscriptionCode = Some(SevenDay),
       provider = Some("ProviderValue")

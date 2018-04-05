@@ -33,6 +33,6 @@ object Expiry {
 }
 
 case class DigitalSubscriptionExpiryResponse(expiry: Expiry)
-  object DigitalSubscriptionExpiryResponse {
+object DigitalSubscriptionExpiryResponse {
   implicit val digitalSubscriptionExpiryCalloutWrites = Json.writes[DigitalSubscriptionExpiryResponse]
 }
