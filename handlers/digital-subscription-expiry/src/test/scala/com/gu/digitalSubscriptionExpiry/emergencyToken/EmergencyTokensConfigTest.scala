@@ -11,8 +11,8 @@ class EmergencyTokensConfigTest extends FlatSpec {
     val config =
       """
         |{
-        |       "emergencyTokenPrefix" : "somePrefix",
-        |	      "emergencyTokenSecret" : "someSecret"
+        |       "prefix" : "somePrefix",
+        |	      "secret" : "someSecret"
         | }
       """.stripMargin
 
