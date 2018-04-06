@@ -20,7 +20,7 @@ object Handler extends Logging {
 
   case class StepsConfig(
     zuoraRestConfig: ZuoraRestConfig,
-    emergencyTokensConfig: EmergencyTokensConfig
+    emergencyTokens: EmergencyTokensConfig
   )
 
   implicit val stepsConfigReads: Reads[StepsConfig] = Json.reads[StepsConfig]
@@ -28,7 +28,7 @@ object Handler extends Logging {
   def runWithEffects(rawEffects: RawEffects, lambdaIO: LambdaIO): Unit = {
     def operation: Config[StepsConfig] => Operation =
       config => {
-        DigitalSubscriptionExpirySteps(EmergencyTokens(config.stepsConfig.emergencyTokensConfig))
+        DigitalSubscriptionExpirySteps(EmergencyTokens(config.stepsConfig.emergencyTokens))
       }
 
     ApiGatewayHandler.default[StepsConfig](operation, lambdaIO).run((rawEffects.stage, rawEffects.s3Load(rawEffects.stage)))
