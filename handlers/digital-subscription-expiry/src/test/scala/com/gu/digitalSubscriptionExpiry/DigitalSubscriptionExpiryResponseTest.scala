@@ -1,5 +1,6 @@
 package com.gu.digitalSubscriptionExpiry
 
+import com.gu.cas.SevenDay
 import org.scalatest.FlatSpec
 import org.scalatest.Matchers._
 import play.api.libs.json.Json

@@ -1,17 +1,21 @@
 package com.gu.digitalSubscriptionExpiry
+import com.gu.cas.SubscriptionCode
 import org.joda.time.{DateTime, LocalDate}
 import play.api.libs.json.{JsString, Json, Writes}
-
-sealed trait SubscriptionCode
-case object SevenDay extends SubscriptionCode
-case object Guardian extends SubscriptionCode
 
 object SubscriptionCodeWrites {
   implicit val codeWrites = new Writes[SubscriptionCode] {
     override def writes(code: SubscriptionCode) = JsString(code.toString)
   }
 }
-case class Expiry(expiryDate: DateTime, expiryType: String, content: String = "SevenDay", subscriptionCode: Option[SubscriptionCode] = None, provider: Option[String] = None)
+
+case class Expiry(
+  expiryDate: DateTime,
+  expiryType: String,
+  content: String = "SevenDay",
+  subscriptionCode: Option[SubscriptionCode] = None,
+  provider: Option[String] = None
+)
 
 case class AuthResponse(expiryDate: LocalDate)
 

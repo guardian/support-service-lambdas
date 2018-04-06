@@ -21,8 +21,6 @@ class DigitalSubscriptionExpiryRequestTest extends FlatSpec {
 
     val expected: JsResult[DigitalSubscriptionExpiryRequest] = JsSuccess(
       DigitalSubscriptionExpiryRequest(
-        appId = "TEST TEST TEST",
-        deviceId = "my device",
         subscriberId = "A-SOMESTUFF",
         password = "abc 123"
       )

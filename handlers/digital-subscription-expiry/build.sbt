@@ -21,6 +21,10 @@ libraryDependencies ++= Seq(
   "org.typelevel" %% "cats-core" % "1.0.1",
   "com.typesafe.play" %% "play-json" % "2.6.8",
   "com.typesafe.play" % "play-json-joda_2.12" % "2.6.8",
-  "org.scalatest" %% "scalatest" % "3.0.1" % "test"
+  "org.scalatest" %% "scalatest" % "3.0.1" % "test",
+  "com.gu" %% "content-authorisation-common" % "0.3"
+)
 
+resolvers ++= Seq(
+  Resolver.sonatypeRepo("releases")
 )

@@ -11,12 +11,12 @@ class GetSubscriptionReaderTest extends FlatSpec {
 
     val theDate = Some(new DateTime().withYear(2018).withMonthOfYear(3).withDayOfMonth(20).withTimeAtStartOfDay())
     val expected = JsSuccess(
-        SubscriptionResult(
+      SubscriptionResult(
         id = SubscriptionId("A-S00044860"),
         name = SubscriptionName("2c92c0f9624bbc6c016253a4c4df5023"),
         casActivationDate = None,
         startDate = theDate,
-        endDate = theDate map(_.plusMonths(1)),
+        endDate = theDate map (_.plusMonths(1)),
         customerAcceptanceDate = theDate,
         ratePlans = List(RatePlan("Digital Pack Monthly"))
       )
