@@ -22,7 +22,7 @@ class DigitalSubscriptionExpiryRequestTest extends FlatSpec {
     val expected: JsResult[DigitalSubscriptionExpiryRequest] = JsSuccess(
       DigitalSubscriptionExpiryRequest(
         subscriberId = "A-SOMESTUFF",
-        password = "abc 123"
+        password = Some("abc 123")
       )
     )
 

@@ -1,31 +1,33 @@
 package com.gu.digitalSubscriptionExpiry
 
-import com.gu.cas.{Valid}
+import com.gu.cas.Valid
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.Operation
 import com.gu.util.apigateway.ResponseModels.{ApiResponse, Headers}
 import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.reader.Types._
 import main.scala.com.gu.digitalSubscriptionExpiry.DigitalSubscriptionExpiryRequest
-import org.joda.time.format.DateTimeFormat
-import play.api.libs.json.Json
+//import org.joda.time.format.DateTimeFormat
+import play.api.libs.json.{JsValue, Json}
 import com.gu.digitalSubscriptionExpiry.emergencyToken.EmergencyTokens
 
 import scala.util.{Success, Try}
-import scalaz.-\/
+import scalaz.{-\/, \/-}
+import scalaz.std.option.optionSyntax._
 
 object DigitalSubscriptionExpirySteps extends Logging {
 
   def getZuoraExpiry(): Option[DigitalSubscriptionExpiryResponse] = {
-    val formatter = DateTimeFormat.forPattern("dd/MM/yyyy")
-    val expiryValue = formatter.parseDateTime("26/10/1985")
-
-    Some(DigitalSubscriptionExpiryResponse(Expiry(
-      expiryDate = expiryValue,
-      expiryType = ExpiryType.SUB,
-      subscriptionCode = None,
-      provider = Some("test provider")
-    )))
+//    val formatter = DateTimeFormat.forPattern("dd/MM/yyyy")
+//    val expiryValue = formatter.parseDateTime("26/10/1985")
+//
+//    Some(DigitalSubscriptionExpiryResponse(Expiry(
+//      expiryDate = expiryValue,
+//      expiryType = ExpiryType.SUB,
+//      subscriptionCode = None,
+//      provider = Some("test provider")
+//    )))
+    None
   }
 
   def getEmergencyTokenExpiry(subscriberId: String, emergencyTokens: EmergencyTokens): Option[DigitalSubscriptionExpiryResponse] = {
@@ -58,30 +60,28 @@ object DigitalSubscriptionExpirySteps extends Logging {
       }
     }
   }
-  val notFoundResponse = {
-    val notFoundBody =
-      """
-        |{
-        |    "error": {
-        |        "message": "Unknown subscriber",
-        |        "code": -90
-        |    }
-        |}
-      """.stripMargin
-    ApiGatewayResponse.notFound(notFoundBody)
-  }
+
+  def parseJson(input: String): Option[JsValue] = Try(Json.parse(input)).toOption
+
   def apply(emergencyTokens: EmergencyTokens): Operation = {
 
     def steps(apiGatewayRequest: ApiGatewayRequest): FailableOp[Unit] = {
       //TODO ADD DIFFERENT RESPONSE WHEN PARSING THE REQUEST RETURNS NONE
-      val maybeResponse = for {
-        expiryRequest <- Json.fromJson[DigitalSubscriptionExpiryRequest](Json.parse(apiGatewayRequest.body)).asOpt
-        expiryResponse <- getEmergencyTokenExpiry(expiryRequest.subscriberId, emergencyTokens) orElse getZuoraExpiry()
+      val responseOrError = for {
+        jsonRequest <- parseJson(apiGatewayRequest.body).toRightDisjunction(badRequest)
+        expiryRequest <- Json.fromJson[DigitalSubscriptionExpiryRequest](jsonRequest).asOpt.toRightDisjunction(badRequest)
+        expiryResponse <- (getEmergencyTokenExpiry(expiryRequest.subscriberId, emergencyTokens) orElse getZuoraExpiry()).toRightDisjunction(notFoundResponse)
       } yield {
         val responseJson = Json.toJson(expiryResponse)
         ApiResponse("200", new Headers, Json.prettyPrint(responseJson))
       }
-      -\/(maybeResponse getOrElse notFoundResponse)
+//todo see how to do this properly!
+        responseOrError match {
+          case \/-(response) => -\/(response)
+          case -\/(response) => -\/(response)
+        }
+
+
     }
 
     //TODO
@@ -94,6 +94,32 @@ object DigitalSubscriptionExpirySteps extends Logging {
 
     Operation.noHealthcheck(steps, false)
 
+  }
+
+  val notFoundResponse = {
+    val notFoundBody =
+      """
+        |{
+        |    "error": {
+        |        "message": "Unknown subscriber",
+        |        "code": -90
+        |    }
+        |}
+      """.stripMargin
+    ApiGatewayResponse.notFound(notFoundBody)
+  }
+
+  val badRequest = {
+    val body =
+      """
+        |{
+        |    "error": {
+        |        "message": "Mandatory data missing from request",
+        |        "code": -50
+        |    }
+        |}
+      """.stripMargin
+    ApiGatewayResponse.badRequestWithBody(body)
   }
 
 }

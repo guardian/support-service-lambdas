@@ -4,7 +4,7 @@ import play.api.libs.json._
 
 case class DigitalSubscriptionExpiryRequest(
   subscriberId: String,
-  password: String
+  password: Option[String]
 )
 
 object DigitalSubscriptionExpiryRequest {
