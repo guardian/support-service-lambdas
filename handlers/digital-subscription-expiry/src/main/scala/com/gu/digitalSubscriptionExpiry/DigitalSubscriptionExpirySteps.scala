@@ -12,21 +12,21 @@ import play.api.libs.json.{JsValue, Json}
 import com.gu.digitalSubscriptionExpiry.emergencyToken.EmergencyTokens
 
 import scala.util.{Success, Try}
-import scalaz.{-\/, \/-}
+import scalaz.{-\/}
 import scalaz.std.option.optionSyntax._
 
 object DigitalSubscriptionExpirySteps extends Logging {
 
   def getZuoraExpiry(): Option[DigitalSubscriptionExpiryResponse] = {
-//    val formatter = DateTimeFormat.forPattern("dd/MM/yyyy")
-//    val expiryValue = formatter.parseDateTime("26/10/1985")
-//
-//    Some(DigitalSubscriptionExpiryResponse(Expiry(
-//      expiryDate = expiryValue,
-//      expiryType = ExpiryType.SUB,
-//      subscriptionCode = None,
-//      provider = Some("test provider")
-//    )))
+    //    val formatter = DateTimeFormat.forPattern("dd/MM/yyyy")
+    //    val expiryValue = formatter.parseDateTime("26/10/1985")
+    //
+    //    Some(DigitalSubscriptionExpiryResponse(Expiry(
+    //      expiryDate = expiryValue,
+    //      expiryType = ExpiryType.SUB,
+    //      subscriptionCode = None,
+    //      provider = Some("test provider")
+    //    )))
     None
   }
 
@@ -38,7 +38,6 @@ object DigitalSubscriptionExpirySteps extends Logging {
       println("it is not an emergency token")
       None
     } else {
-      //TODO SEE WHAT WE NEED TO LOG HERE
       logger.info(s"EMERGENCY PROVIDER triggered for subscriber id:'$upperCaseSubId'")
 
       Try(emergencyTokens.codec.decode(upperCaseSubId)) match {
@@ -66,7 +65,6 @@ object DigitalSubscriptionExpirySteps extends Logging {
   def apply(emergencyTokens: EmergencyTokens): Operation = {
 
     def steps(apiGatewayRequest: ApiGatewayRequest): FailableOp[Unit] = {
-      //TODO ADD DIFFERENT RESPONSE WHEN PARSING THE REQUEST RETURNS NONE
       val responseOrError = for {
         jsonRequest <- parseJson(apiGatewayRequest.body).toRightDisjunction(badRequest)
         expiryRequest <- Json.fromJson[DigitalSubscriptionExpiryRequest](jsonRequest).asOpt.toRightDisjunction(badRequest)
@@ -75,13 +73,9 @@ object DigitalSubscriptionExpirySteps extends Logging {
         val responseJson = Json.toJson(expiryResponse)
         ApiResponse("200", new Headers, Json.prettyPrint(responseJson))
       }
-//todo see how to do this properly!
-        responseOrError match {
-          case \/-(response) => -\/(response)
-          case -\/(response) => -\/(response)
-        }
 
-
+      val response = responseOrError.valueOr(identity)
+      -\/(response)
     }
 
     //TODO

@@ -18,7 +18,7 @@ class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
   it should "handle emergency tokens" in {
 
     val request =
-    """{
+      """{
     |      "subscriberId" : "G99IZXCEZLYF"
     |    }
 
