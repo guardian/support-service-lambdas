@@ -7,6 +7,8 @@ import com.gu.util.reader.Types.FailableOp
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
 
+import scalaz.{-\/, \/-}
+
 class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
 
   val digitalSubscriptionExpirySteps = {
@@ -104,16 +106,13 @@ class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
   }
 
   def verifyResponse(actualResponse: FailableOp[Unit], expectedStatus: String, expectedBody: String) = {
-    actualResponse.isLeft shouldBe (true)
-
-    val expectedReponseBodyJson = Json.parse(expectedBody)
-    val actualApiResponse = actualResponse.toEither.left.get
-
-    actualApiResponse.statusCode.shouldBe(expectedStatus)
-
-    val actualResponseBodyJson = Json.parse(actualApiResponse.body)
-
-    actualResponseBodyJson.shouldBe(expectedReponseBodyJson)
+    actualResponse match {
+      case -\/(actualApiResponse) =>
+        val expectedReponseBodyJson = Json.parse(expectedBody)
+        val actualResponseBodyJson = Json.parse(actualApiResponse.body)
+        (actualApiResponse.statusCode, actualResponseBodyJson).shouldBe((expectedStatus, expectedReponseBodyJson))
+      case \/-(_) => fail("response expected to be left ")
+    }
   }
 
   val expectedBadRequestResponseBody =

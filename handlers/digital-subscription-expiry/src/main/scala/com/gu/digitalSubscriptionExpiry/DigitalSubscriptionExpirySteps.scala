@@ -10,7 +10,7 @@ import main.scala.com.gu.digitalSubscriptionExpiry.DigitalSubscriptionExpiryRequ
 //import org.joda.time.format.DateTimeFormat
 import play.api.libs.json.{JsValue, Json}
 import com.gu.digitalSubscriptionExpiry.emergencyToken.EmergencyTokens
-
+import com.gu.digitalSubscriptionExpiry.emergencyToken.TokenPayloadOps._
 import scala.util.{Success, Try}
 import scalaz.{-\/}
 import scalaz.std.option.optionSyntax._
@@ -31,7 +31,6 @@ object DigitalSubscriptionExpirySteps extends Logging {
   }
 
   def getEmergencyTokenExpiry(subscriberId: String, emergencyTokens: EmergencyTokens): Option[DigitalSubscriptionExpiryResponse] = {
-    import com.gu.digitalSubscriptionExpiry.emergencyToken.TokenPayloadOps._
 
     val upperCaseSubId = subscriberId.toUpperCase
     if (!upperCaseSubId.startsWith(emergencyTokens.prefix)) {

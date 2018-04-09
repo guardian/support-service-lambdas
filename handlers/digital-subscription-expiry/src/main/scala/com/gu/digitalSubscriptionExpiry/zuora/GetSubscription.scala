@@ -2,13 +2,12 @@ package com.gu.digitalSubscriptionExpiry.zuora
 
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.apigateway.ResponseModels.ApiResponse
-import com.gu.util.reader.Types.WithDepsFailableOp
+import com.gu.util.reader.Types.{WithDepsFailableOp, _}
 import com.gu.util.zuora.RestRequestMaker.ClientFail
-import com.gu.util.reader.Types._
 import com.gu.util.zuora.{ZuoraDeps, ZuoraRestRequestMaker}
 import org.joda.time.DateTime
-import play.api.libs.json._
 import play.api.libs.functional.syntax._
+import play.api.libs.json._
 
 import scalaz.Reader
 
