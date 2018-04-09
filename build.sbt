@@ -65,7 +65,8 @@ lazy val zuora = all(project in file("lib/zuora")).dependsOn(restHttp).settings(
     "com.amazonaws" % "aws-lambda-java-log4j" % "1.0.0",
     "org.scalaz" %% "scalaz-core" % "7.2.18",
     "com.typesafe.play" %% "play-json" % "2.6.9",
-    "org.scalatest" %% "scalatest" % "3.0.1" % "test"
+    "org.scalatest" %% "scalatest" % "3.0.1" % "test",
+    "com.fasterxml.jackson.core" % "jackson-databind" % "2.8.11.1"
   )
 )
 
@@ -97,7 +98,8 @@ lazy val effects = all(project in file("lib/effects")).dependsOn(handler).settin
     "com.amazonaws" % "aws-java-sdk-s3" % "1.11.311",
     "org.scalaz" %% "scalaz-core" % "7.2.18",
     "com.typesafe.play" %% "play-json" % "2.6.9",
-    "org.scalatest" %% "scalatest" % "3.0.1" % "test"
+    "org.scalatest" %% "scalatest" % "3.0.1" % "test",
+    "com.fasterxml.jackson.core" % "jackson-databind" % "2.8.11.1"
   )
 )
 
@@ -139,7 +141,8 @@ libraryDependencies ++= Seq(
   "org.scalaz" %% "scalaz-core" % "7.2.18",
   "com.typesafe.play" %% "play-json" % "2.6.9",
   "org.scalatest" %% "scalatest" % "3.0.1" % "test",
-  "com.stripe" % "stripe-java" % "5.28.0"
+  "com.stripe" % "stripe-java" % "5.28.0",
+  "com.fasterxml.jackson.core" % "jackson-databind" % "2.8.11.1"
 )
 
 initialize := {
