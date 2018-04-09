@@ -35,7 +35,6 @@ object DigitalSubscriptionExpirySteps extends Logging {
 
     val upperCaseSubId = subscriberId.toUpperCase
     if (!upperCaseSubId.startsWith(emergencyTokens.prefix)) {
-      println("it is not an emergency token")
       None
     } else {
       logger.info(s"EMERGENCY PROVIDER triggered for subscriber id:'$upperCaseSubId'")
@@ -45,7 +44,6 @@ object DigitalSubscriptionExpirySteps extends Logging {
         case Success(Valid(payload)) =>
           logger.info(s"subscriber id:'$upperCaseSubId' resolves to $payload")
           logger.info(s"subscriber id:'$upperCaseSubId' was created on ${payload.creationDate}")
-
           val expiry = Expiry(
             expiryDate = payload.expiryDate,
             expiryType = ExpiryType.SUB,
@@ -53,6 +51,7 @@ object DigitalSubscriptionExpirySteps extends Logging {
             provider = Some(emergencyTokens.prefix)
           )
           Some(DigitalSubscriptionExpiryResponse(expiry))
+
         case errorResponse =>
           logger.error(s"error decoding token $subscriberId :  $errorResponse")
           None
@@ -65,7 +64,7 @@ object DigitalSubscriptionExpirySteps extends Logging {
   def apply(emergencyTokens: EmergencyTokens): Operation = {
 
     def steps(apiGatewayRequest: ApiGatewayRequest): FailableOp[Unit] = {
-      val responseOrError = for {
+      val successfulOrErrorResponse = for {
         jsonRequest <- parseJson(apiGatewayRequest.body).toRightDisjunction(badRequest)
         expiryRequest <- Json.fromJson[DigitalSubscriptionExpiryRequest](jsonRequest).asOpt.toRightDisjunction(badRequest)
         expiryResponse <- (getEmergencyTokenExpiry(expiryRequest.subscriberId, emergencyTokens) orElse getZuoraExpiry()).toRightDisjunction(notFoundResponse)
@@ -73,8 +72,7 @@ object DigitalSubscriptionExpirySteps extends Logging {
         val responseJson = Json.toJson(expiryResponse)
         ApiResponse("200", new Headers, Json.prettyPrint(responseJson))
       }
-
-      val response = responseOrError.valueOr(identity)
+      val response = successfulOrErrorResponse.valueOr(identity)
       -\/(response)
     }
 

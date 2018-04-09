@@ -11,8 +11,8 @@ class EmergencyTokensConfigTest extends FlatSpec {
     val config =
       """
         |{
-        |       "prefix" : "somePrefix",
-        |	      "secret" : "someSecret"
+        |  "prefix" : "somePrefix",
+        |	 "secret" : "someSecret"
         | }
       """.stripMargin
 
@@ -23,9 +23,9 @@ class EmergencyTokensConfigTest extends FlatSpec {
       )
     )
 
-    val event: JsResult[EmergencyTokensConfig] = Json.parse(config).validate[EmergencyTokensConfig]
+    val actual: JsResult[EmergencyTokensConfig] = Json.parse(config).validate[EmergencyTokensConfig]
 
-    event shouldBe expected
+    actual shouldBe expected
   }
 
 }

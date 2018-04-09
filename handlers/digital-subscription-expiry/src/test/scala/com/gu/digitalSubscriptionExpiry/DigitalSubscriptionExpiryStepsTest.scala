@@ -56,18 +56,9 @@ class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
 
     val actual = digitalSubscriptionExpirySteps.steps(ApiGatewayRequest(None, request, None))
 
-    val expectedResponseBody =
-      """{
-        |    "error": {
-        |        "message": "Mandatory data missing from request",
-        |        "code": -50
-        |    }
-        |}
-      """.stripMargin
-
     verifyResponse(
       actualResponse = actual,
-      expectedBody = expectedResponseBody,
+      expectedBody = expectedBadRequestResponseBody,
       expectedStatus = "400"
     )
   }
@@ -78,18 +69,9 @@ class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
 
     val actual = digitalSubscriptionExpirySteps.steps(ApiGatewayRequest(None, request, None))
 
-    val expectedResponseBody =
-      """{
-        |    "error": {
-        |        "message": "Mandatory data missing from request",
-        |        "code": -50
-        |    }
-        |}
-      """.stripMargin
-
     verifyResponse(
       actualResponse = actual,
-      expectedBody = expectedResponseBody,
+      expectedBody = expectedBadRequestResponseBody,
       expectedStatus = "400"
     )
   }
@@ -134,5 +116,13 @@ class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
     actualResponseBodyJson.shouldBe(expectedReponseBodyJson)
   }
 
+  val expectedBadRequestResponseBody =
+    """{
+      |    "error": {
+      |        "message": "Mandatory data missing from request",
+      |        "code": -50
+      |    }
+      |}
+    """.stripMargin
 }
 

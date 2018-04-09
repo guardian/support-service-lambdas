@@ -39,7 +39,7 @@ Resources:
                       Statement:
                           - Effect: Allow
                             Action: s3:GetObject
-                            Resource: !Sub arn:aws:s3:::gu-reader-revenue-private/membership/payment-failure-lambdas/${Stage}/* #TODO CHANGE THIS TO USE ITS OWN CONFIG FILE|
+                            Resource: !Sub arn:aws:s3:::gu-reader-revenue-private/membership/payment-failure-lambdas/${Stage}/*
     DigitalSubscriptionExpiryLambda:
         Type: AWS::Lambda::Function
         Properties:

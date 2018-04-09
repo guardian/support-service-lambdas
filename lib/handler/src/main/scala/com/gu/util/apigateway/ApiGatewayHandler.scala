@@ -38,10 +38,8 @@ object ApiGatewayHandler extends Logging {
     if (!shouldAuthenticate || credentialsAreValid(requestAuth, trustedApiConfig)) \/-(()) else -\/(unauthorized)
   }
 
-  //todo just for testing remove default value later
   case class Operation(steps: ApiGatewayRequest => FailableOp[Unit], healthcheck: () => FailableOp[Unit], shouldAuthenticate: Boolean = true)
   object Operation {
-    //todo just for testing remove default value later
     def noHealthcheck(steps: ApiGatewayRequest => FailableOp[Unit], shouldAuthenticate: Boolean = true) =
       Operation(steps, () => \/-(()), shouldAuthenticate)
   }
