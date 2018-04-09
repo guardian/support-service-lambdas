@@ -18,7 +18,6 @@ libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-java-sdk-s3" % "1.11.265",
   "log4j" % "log4j" % "1.2.17",
   "com.squareup.okhttp3" % "okhttp" % "3.9.1",
-  "org.typelevel" %% "cats-core" % "1.0.1",
   "com.typesafe.play" %% "play-json" % "2.6.8",
   "org.scalatest" %% "scalatest" % "3.0.1" % "test"
 )
