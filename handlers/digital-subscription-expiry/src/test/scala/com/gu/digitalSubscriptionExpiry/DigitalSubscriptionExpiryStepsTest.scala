@@ -1,9 +1,9 @@
 package com.gu.digitalSubscriptionExpiry
 
-import com.gu.cas.PrefixedTokens
-import com.gu.digitalSubscriptionExpiry.emergencyToken.EmergencyTokens
+import com.gu.cas.SevenDay
 import com.gu.util.apigateway.ApiGatewayRequest
 import com.gu.util.reader.Types.FailableOp
+import org.joda.time.format.DateTimeFormat
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
 
@@ -11,17 +11,28 @@ import scalaz.{-\/, \/-}
 
 class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
 
+  val validTokenResponse = {
+    val dateFormatter = DateTimeFormat.forPattern("dd/MM/yyyy")
+    val expiry = Expiry(
+      expiryDate = dateFormatter.parseDateTime("26/10/1985"),
+      expiryType = ExpiryType.SUB,
+      subscriptionCode = Some(SevenDay),
+      provider = Some("G99")
+    )
+    DigitalSubscriptionExpiryResponse(expiry)
+  }
+
   val digitalSubscriptionExpirySteps = {
-    val codec = PrefixedTokens(secretKey = "secret", emergencySubscriberAuthPrefix = "G99")
-    val emergencyTokens = EmergencyTokens("G99", codec)
-    DigitalSubscriptionExpirySteps(emergencyTokens)
+    DigitalSubscriptionExpirySteps(
+      { token: String => if (token == "validToken") Some(validTokenResponse) else None }
+    )
   }
 
   it should "handle emergency tokens" in {
 
     val request =
       """{
-    |      "subscriberId" : "G99IZXCEZLYF"
+    |      "subscriberId" : "validToken"
     |    }
 
   """.stripMargin
@@ -31,7 +42,7 @@ class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
     val expectedResponseBody =
       """{
         |    "expiry" : {
-        |        "expiryDate" : "2017-07-21",
+        |        "expiryDate" : "1985-10-26",
         |        "expiryType" : "sub",
         |        "content" : "SevenDay",
         |        "subscriptionCode" : "SevenDay",

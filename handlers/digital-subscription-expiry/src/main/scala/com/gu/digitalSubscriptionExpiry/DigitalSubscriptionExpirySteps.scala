@@ -1,17 +1,16 @@
 package com.gu.digitalSubscriptionExpiry
 
-import com.gu.cas.Valid
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.Operation
 import com.gu.util.apigateway.ResponseModels.{ApiResponse, Headers}
 import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.reader.Types._
 import main.scala.com.gu.digitalSubscriptionExpiry.DigitalSubscriptionExpiryRequest
+
 //import org.joda.time.format.DateTimeFormat
 import play.api.libs.json.{JsValue, Json}
-import com.gu.digitalSubscriptionExpiry.emergencyToken.EmergencyTokens
-import com.gu.digitalSubscriptionExpiry.emergencyToken.TokenPayloadOps._
-import scala.util.{Success, Try}
+
+import scala.util.{Try}
 import scalaz.{-\/}
 import scalaz.std.option.optionSyntax._
 
@@ -30,43 +29,17 @@ object DigitalSubscriptionExpirySteps extends Logging {
     None
   }
 
-  def getEmergencyTokenExpiry(subscriberId: String, emergencyTokens: EmergencyTokens): Option[DigitalSubscriptionExpiryResponse] = {
-
-    val upperCaseSubId = subscriberId.toUpperCase
-    if (!upperCaseSubId.startsWith(emergencyTokens.prefix)) {
-      None
-    } else {
-      logger.info(s"EMERGENCY PROVIDER triggered for subscriber id:'$upperCaseSubId'")
-
-      Try(emergencyTokens.codec.decode(upperCaseSubId)) match {
-
-        case Success(Valid(payload)) =>
-          logger.info(s"subscriber id:'$upperCaseSubId' resolves to $payload")
-          logger.info(s"subscriber id:'$upperCaseSubId' was created on ${payload.creationDate}")
-          val expiry = Expiry(
-            expiryDate = payload.expiryDate,
-            expiryType = ExpiryType.SUB,
-            subscriptionCode = Some(payload.subscriptionCode),
-            provider = Some(emergencyTokens.prefix)
-          )
-          Some(DigitalSubscriptionExpiryResponse(expiry))
-
-        case errorResponse =>
-          logger.error(s"error decoding token $subscriberId :  $errorResponse")
-          None
-      }
-    }
-  }
-
   def parseJson(input: String): Option[JsValue] = Try(Json.parse(input)).toOption
 
-  def apply(emergencyTokens: EmergencyTokens): Operation = {
+  def apply(
+    getEmergencyTokenExpiry: String => Option[DigitalSubscriptionExpiryResponse]
+  ): Operation = {
 
     def steps(apiGatewayRequest: ApiGatewayRequest): FailableOp[Unit] = {
       val successfulOrErrorResponse = for {
         jsonRequest <- parseJson(apiGatewayRequest.body).toRightDisjunction(badRequest)
         expiryRequest <- Json.fromJson[DigitalSubscriptionExpiryRequest](jsonRequest).asOpt.toRightDisjunction(badRequest)
-        expiryResponse <- (getEmergencyTokenExpiry(expiryRequest.subscriberId, emergencyTokens) orElse getZuoraExpiry()).toRightDisjunction(notFoundResponse)
+        expiryResponse <- (getEmergencyTokenExpiry(expiryRequest.subscriberId) orElse getZuoraExpiry()).toRightDisjunction(notFoundResponse)
       } yield {
         val responseJson = Json.toJson(expiryResponse)
         ApiResponse("200", new Headers, Json.prettyPrint(responseJson))

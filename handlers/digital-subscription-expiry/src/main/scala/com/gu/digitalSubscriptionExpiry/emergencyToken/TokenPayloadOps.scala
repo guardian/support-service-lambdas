@@ -2,7 +2,7 @@ package com.gu.digitalSubscriptionExpiry.emergencyToken
 
 import com.gu.cas.{Guardian, SevenDay, SubscriptionCode, TokenPayload}
 
-object TokenPayloadOps {
+object TokenPayloadImplicits {
 
   implicit class TokenPayloadOps(payload: TokenPayload) {
     def expiryDate = payload.creationDate.plus(payload.period).plusDays(1)

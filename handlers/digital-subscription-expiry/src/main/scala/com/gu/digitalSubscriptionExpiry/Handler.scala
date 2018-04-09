@@ -3,7 +3,7 @@ package com.gu.digitalSubscriptionExpiry
 import java.io.{InputStream, OutputStream}
 
 import com.amazonaws.services.lambda.runtime.Context
-import com.gu.digitalSubscriptionExpiry.emergencyToken.{EmergencyTokens, EmergencyTokensConfig}
+import com.gu.digitalSubscriptionExpiry.emergencyToken.{EmergencyTokens, EmergencyTokensConfig, GetTokenExpiry}
 import com.gu.effects.RawEffects
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.ApiGatewayHandler
@@ -28,7 +28,8 @@ object Handler extends Logging {
   def runWithEffects(rawEffects: RawEffects, lambdaIO: LambdaIO): Unit = {
     def operation: Config[StepsConfig] => Operation =
       config => {
-        DigitalSubscriptionExpirySteps(EmergencyTokens(config.stepsConfig.emergencyTokens))
+        val emergencyTokens = EmergencyTokens(config.stepsConfig.emergencyTokens)
+        DigitalSubscriptionExpirySteps(GetTokenExpiry(emergencyTokens))
       }
 
     ApiGatewayHandler.default[StepsConfig](operation, lambdaIO).run((rawEffects.stage, rawEffects.s3Load(rawEffects.stage)))
