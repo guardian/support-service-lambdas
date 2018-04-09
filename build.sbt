@@ -64,7 +64,7 @@ lazy val zuora = all(project in file("lib/zuora")).dependsOn(restHttp).settings(
     "com.squareup.okhttp3" % "okhttp" % "3.9.1",
     "com.amazonaws" % "aws-lambda-java-log4j" % "1.0.0",
     "org.scalaz" %% "scalaz-core" % "7.2.18",
-    "com.typesafe.play" %% "play-json" % "2.6.8",
+    "com.typesafe.play" %% "play-json" % "2.6.9",
     "org.scalatest" %% "scalatest" % "3.0.1" % "test"
   )
 )
@@ -74,7 +74,7 @@ lazy val restHttp = all(project in file("lib/restHttp")).settings(
     "com.squareup.okhttp3" % "okhttp" % "3.9.1",
     "com.amazonaws" % "aws-lambda-java-log4j" % "1.0.0",
     "org.scalaz" %% "scalaz-core" % "7.2.18",
-    "com.typesafe.play" %% "play-json" % "2.6.8",
+    "com.typesafe.play" %% "play-json" % "2.6.9",
     "org.scalatest" %% "scalatest" % "3.0.1" % "test"
   )
 )
@@ -84,7 +84,7 @@ lazy val handler = all(project in file("lib/handler")).settings(
     "com.squareup.okhttp3" % "okhttp" % "3.9.1",
     "com.amazonaws" % "aws-lambda-java-log4j" % "1.0.0",
     "org.scalaz" %% "scalaz-core" % "7.2.18",
-    "com.typesafe.play" %% "play-json" % "2.6.8",
+    "com.typesafe.play" %% "play-json" % "2.6.9",
     "org.scalatest" %% "scalatest" % "3.0.1" % "test"
   )
 )
@@ -94,9 +94,9 @@ lazy val effects = all(project in file("lib/effects")).dependsOn(handler).settin
   libraryDependencies ++= Seq(
     "com.squareup.okhttp3" % "okhttp" % "3.9.1",
     "com.amazonaws" % "aws-lambda-java-log4j" % "1.0.0",
-    "com.amazonaws" % "aws-java-sdk-s3" % "1.11.265",
+    "com.amazonaws" % "aws-java-sdk-s3" % "1.11.311",
     "org.scalaz" %% "scalaz-core" % "7.2.18",
-    "com.typesafe.play" %% "play-json" % "2.6.8",
+    "com.typesafe.play" %% "play-json" % "2.6.9",
     "org.scalatest" %% "scalatest" % "3.0.1" % "test"
   )
 )
@@ -141,7 +141,7 @@ libraryDependencies ++= Seq(
   "log4j" % "log4j" % "1.2.17",
   "com.squareup.okhttp3" % "okhttp" % "3.9.1",
   "org.scalaz" %% "scalaz-core" % "7.2.18",
-  "com.typesafe.play" %% "play-json" % "2.6.8",
+  "com.typesafe.play" %% "play-json" % "2.6.9",
   "org.scalatest" %% "scalatest" % "3.0.1" % "test",
   "com.stripe" % "stripe-java" % "5.28.0"
 )
