@@ -19,7 +19,7 @@ class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
       subscriptionCode = Some(SevenDay),
       provider = Some("G99")
     )
-    DigitalSubscriptionExpiryResponse(expiry)
+    SuccessResponse(expiry)
   }
 
   val digitalSubscriptionExpirySteps = {

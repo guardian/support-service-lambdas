@@ -2,21 +2,21 @@ package com.gu.digitalSubscriptionExpiry
 
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.Operation
+import com.gu.util.apigateway.ApiGatewayRequest
 import com.gu.util.apigateway.ResponseModels.{ApiResponse, Headers}
-import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.reader.Types._
 import main.scala.com.gu.digitalSubscriptionExpiry.DigitalSubscriptionExpiryRequest
 
 //import org.joda.time.format.DateTimeFormat
 import play.api.libs.json.{JsValue, Json}
 
-import scala.util.{Try}
-import scalaz.{-\/}
+import scala.util.Try
+import scalaz.-\/
 import scalaz.std.option.optionSyntax._
 
 object DigitalSubscriptionExpirySteps extends Logging {
 
-  def getZuoraExpiry(): Option[DigitalSubscriptionExpiryResponse] = {
+  def getZuoraExpiry(): Option[SuccessResponse] = {
     //    val formatter = DateTimeFormat.forPattern("dd/MM/yyyy")
     //    val expiryValue = formatter.parseDateTime("26/10/1985")
     //
@@ -32,7 +32,7 @@ object DigitalSubscriptionExpirySteps extends Logging {
   def parseJson(input: String): Option[JsValue] = Try(Json.parse(input)).toOption
 
   def apply(
-    getEmergencyTokenExpiry: String => Option[DigitalSubscriptionExpiryResponse]
+    getEmergencyTokenExpiry: String => Option[SuccessResponse]
   ): Operation = {
 
     def steps(apiGatewayRequest: ApiGatewayRequest): FailableOp[Unit] = {
@@ -41,8 +41,7 @@ object DigitalSubscriptionExpirySteps extends Logging {
         expiryRequest <- Json.fromJson[DigitalSubscriptionExpiryRequest](jsonRequest).asOpt.toRightDisjunction(badRequest)
         expiryResponse <- (getEmergencyTokenExpiry(expiryRequest.subscriberId) orElse getZuoraExpiry()).toRightDisjunction(notFoundResponse)
       } yield {
-        val responseJson = Json.toJson(expiryResponse)
-        ApiResponse("200", new Headers, Json.prettyPrint(responseJson))
+        apiResponse(expiryResponse, "200")
       }
       val response = successfulOrErrorResponse.valueOr(identity)
       -\/(response)
@@ -60,31 +59,13 @@ object DigitalSubscriptionExpirySteps extends Logging {
 
   }
 
-  val notFoundResponse = {
-    val notFoundBody =
-      """
-        |{
-        |    "error": {
-        |        "message": "Unknown subscriber",
-        |        "code": -90
-        |    }
-        |}
-      """.stripMargin
-    ApiGatewayResponse.notFound(notFoundBody)
+  def apiResponse(body: DigitalSubscriptionExpiryResponse, status: String) = {
+    val bodyTxt = Json.prettyPrint(Json.toJson(body))
+    ApiResponse(status, new Headers, bodyTxt)
   }
 
-  val badRequest = {
-    val body =
-      """
-        |{
-        |    "error": {
-        |        "message": "Mandatory data missing from request",
-        |        "code": -50
-        |    }
-        |}
-      """.stripMargin
-    ApiGatewayResponse.badRequestWithBody(body)
-  }
+  val notFoundResponse = apiResponse(ErrorResponse("Unknown subscriber", -90), "404")
+  val badRequest = apiResponse(ErrorResponse("Mandatory data missing from request", -50), "400")
 
 }
 

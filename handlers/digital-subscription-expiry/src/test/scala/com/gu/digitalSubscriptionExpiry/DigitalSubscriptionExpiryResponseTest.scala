@@ -7,7 +7,7 @@ import play.api.libs.json.Json
 import org.joda.time.format.DateTimeFormat
 class DigitalSubscriptionExpiryResponseTest extends FlatSpec {
 
-  "DigitalSubscriptionExpiryResponse" should "serialise correctly " in {
+  it should "serialise success response" in {
 
     val expectedstr =
       """{
@@ -23,7 +23,7 @@ class DigitalSubscriptionExpiryResponseTest extends FlatSpec {
 
     val formatter = DateTimeFormat.forPattern("dd/MM/yyyy")
     val expiryValue = formatter.parseDateTime("26/10/1985")
-    val res = DigitalSubscriptionExpiryResponse(Expiry(
+    val res = SuccessResponse(Expiry(
       expiryDate = expiryValue,
       expiryType = "ExpiryTypeValue",
       content = "ContentValue",
@@ -35,4 +35,23 @@ class DigitalSubscriptionExpiryResponseTest extends FlatSpec {
     jsonRes should be(expectedJson)
   }
 
+  it should "serialise correctly " in {
+
+    val expectedstr =
+      """{
+        |    "error": {
+        |        "message": "some error message",
+        |        "code": -789
+        |    }
+        |        }""".stripMargin
+    val expectedJson = Json.parse(expectedstr)
+
+    val res = ErrorResponse(
+      message = "some error message",
+      code = -789
+    )
+
+    val jsonRes = Json.toJson(res)
+    jsonRes should be(expectedJson)
+  }
 }
