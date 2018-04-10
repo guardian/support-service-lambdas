@@ -46,8 +46,11 @@ These tests do not (YET!) run automatically.
 If you deploy to PROD without checking this, the lambdas will deploy but not actually work.
 
 You can run the tests that hit external services by running `sbt effectsTest:test`.
-This would need suitable AWS credentials to get hold of the config.
-
+This would need suitable AWS credentials to get hold of the config as well as config file under .aws with the content:
+```
+[default]
+region = eu-west-1
+```
 You can tag your integration new tests with `taggedAs EffectsTest`.  This ignores them from the standard `sbt test`.
 
 ### Testing post deployment to CODE/PROD
