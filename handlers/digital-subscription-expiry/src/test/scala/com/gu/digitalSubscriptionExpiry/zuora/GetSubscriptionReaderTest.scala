@@ -1,4 +1,5 @@
 package com.gu.digitalSubscriptionExpiry.zuora
+import com.gu.digitalSubscriptionExpiry.zuora.GetAccountSummary.AccountId
 import com.gu.digitalSubscriptionExpiry.zuora.GetSubscription._
 import org.joda.time.DateTime
 import org.scalatest.FlatSpec
@@ -14,6 +15,7 @@ class GetSubscriptionReaderTest extends FlatSpec {
       SubscriptionResult(
         id = SubscriptionId("A-S00044860"),
         name = SubscriptionName("2c92c0f9624bbc6c016253a4c4df5023"),
+        accountId = AccountId("2c92c0f86078c4d4016079e1402d6536"),
         casActivationDate = None,
         startDate = theDate,
         endDate = theDate map (_.plusMonths(1)),

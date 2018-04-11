@@ -31,9 +31,7 @@ object DigitalSubscriptionExpirySteps extends Logging {
 
   def parseJson(input: String): Option[JsValue] = Try(Json.parse(input)).toOption
 
-  def apply(
-    getEmergencyTokenExpiry: String => Option[SuccessResponse]
-  ): Operation = {
+  def apply(getEmergencyTokenExpiry: String => Option[SuccessResponse]): Operation = {
 
     def steps(apiGatewayRequest: ApiGatewayRequest): FailableOp[Unit] = {
       val successfulOrErrorResponse = for {
