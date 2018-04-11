@@ -12,7 +12,8 @@ object GetSubscription {
 
   case class SubscriptionId(get: String) extends AnyVal
   case class SubscriptionName(get: String) extends AnyVal
-  case class RatePlan(ratePlanName: String, effectiveStartDate: LocalDate, effectiveEndDate: LocalDate)
+  case class RatePlan(ratePlanName: String, ratePlanCharges: List[RatePlanCharge])
+  case class RatePlanCharge(effectiveStartDate: LocalDate, effectiveEndDate: LocalDate)
   case class RatePlans(ratePlans: List[RatePlan])
 
   case class SubscriptionResult(
@@ -28,7 +29,8 @@ object GetSubscription {
 
   implicit val subscriptionIdReads = Json.reads[SubscriptionId]
   implicit val subscriptionNameReads = Json.reads[SubscriptionName]
-  implicit val ratePlanChargeReader = Json.reads[RatePlan]
+  implicit val ratePlanChargeReader = Json.reads[RatePlanCharge]
+  implicit val ratePlanReader = Json.reads[RatePlan]
 
   implicit val reads: Reads[SubscriptionResult] =
     (

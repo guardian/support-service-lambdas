@@ -18,11 +18,11 @@ class SubscriptionServiceTest extends FlatSpec {
     customerAcceptanceDate = lastWeek,
     startDate = lastWeek,
     endDate = nextWeek,
-    ratePlans = List(RatePlan("Digital Pack", lastWeek, nextWeek))
+    ratePlans = List(RatePlan("Digital Pack", List(RatePlanCharge(lastWeek, nextWeek))))
   )
 
   val monthlyContribution = digitalPack.copy(
-    ratePlans = List(RatePlan("Monthly Contribution", lastWeek, nextWeek))
+    ratePlans = List(RatePlan("Monthly Contribution", List(RatePlanCharge(lastWeek, nextWeek))))
   )
 
   val accountSummary = AccountSummaryResult(

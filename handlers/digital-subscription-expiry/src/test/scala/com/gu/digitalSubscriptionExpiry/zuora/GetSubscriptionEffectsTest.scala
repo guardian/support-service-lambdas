@@ -5,7 +5,7 @@ import java.io
 import com.gu.digitalSubscriptionExpiry.Expiry
 import com.gu.digitalSubscriptionExpiry.Handler.StepsConfig
 import com.gu.digitalSubscriptionExpiry.zuora.GetAccountSummary.AccountId
-import com.gu.digitalSubscriptionExpiry.zuora.GetSubscription.{RatePlan, SubscriptionId, SubscriptionName, SubscriptionResult}
+import com.gu.digitalSubscriptionExpiry.zuora.GetSubscription.{RatePlan, RatePlanCharge, SubscriptionId, SubscriptionName, SubscriptionResult}
 import com.gu.effects.{ConfigLoad, RawEffects}
 import com.gu.test.EffectsTest
 import com.gu.util.zuora.ZuoraDeps
@@ -30,6 +30,7 @@ class GetSubscriptionEffectsTest extends FlatSpec with Matchers {
     }
 
     val dateFormatter = DateTimeFormat.forPattern("dd/MM/yyyy")
+
     def asDate(str: String) = dateFormatter.parseLocalDate(str)
 
     val customerAcceptanceDate = asDate("15/12/2017")
@@ -46,14 +47,18 @@ class GetSubscriptionEffectsTest extends FlatSpec with Matchers {
       startDate.plusYears(1),
       List(
         RatePlan(
-          ratePlanName = "30% off for 3 months",
-          effectiveStartDate = asDate("15/12/2015"),
-          effectiveEndDate = asDate("15/03/2015")
+          "30% off for 3 months",
+          List(RatePlanCharge(
+            effectiveStartDate = asDate("15/12/2015"),
+            effectiveEndDate = asDate("15/03/2015")
+          ))
         ),
         RatePlan(
-          ratePlanName = "Digital Pack Monthly",
-          effectiveStartDate = asDate("15/12/2017"),
-          effectiveEndDate = asDate("29/11/2018")
+          "Digital Pack Monthly",
+          List(RatePlanCharge(
+            effectiveStartDate = asDate("15/12/2017"),
+            effectiveEndDate = asDate("29/11/2018")
+          ))
         )
       )
     )
