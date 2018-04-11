@@ -2,7 +2,6 @@ package com.gu.digitalSubscriptionExpiry.zuora
 
 import com.gu.digitalSubscriptionExpiry.zuora.GetAccountSummary.AccountId
 import com.gu.digitalSubscriptionExpiry.zuora.GetSubscription._
-import org.joda.time.LocalDate
 import org.joda.time.format.DateTimeFormat
 import org.scalatest.FlatSpec
 import org.scalatest.Matchers._

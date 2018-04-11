@@ -1,9 +1,9 @@
 package com.gu.digitalSubscriptionExpiry
 
 import com.gu.digitalSubscriptionExpiry.zuora.GetAccountSummary.AccountSummaryResult
-import com.gu.digitalSubscriptionExpiry.zuora.GetSubscription.SubscriptionResult
+import com.gu.digitalSubscriptionExpiry.zuora.GetSubscription.{RatePlan, RatePlanCharge, SubscriptionResult}
 import com.gu.util.Logging
-import org.joda.time.{DateTime, LocalDate}
+import org.joda.time.LocalDate
 
 class SubscriptionService extends Logging {
   //todo make 'valid' more descriptive
@@ -23,17 +23,21 @@ class SubscriptionService extends Logging {
     }
   }
 
+  implicit def dateOrdering: Ordering[LocalDate] = Ordering.fromLessThan(_ isAfter _)
+
   //todo are we using date as a parameter anywhere
   def getExpiryDateForValidSubscription(subscription: SubscriptionResult, accountSummary: AccountSummaryResult, password: String, date: LocalDate = LocalDate.now()): Option[LocalDate] = {
-    //subscription is digipack
+
     val digipackRateplans = subscription.ratePlans.filter(ratePlan => ratePlan.ratePlanName == "Digital Pack")
 
     val dateToCheck = if (subscription.startDate.isBefore(date) && subscription.customerAcceptanceDate.isAfter(date)) subscription.customerAcceptanceDate else date
 
-    val planIsActive = dateToCheck.isAfter(subscription.startDate) && dateToCheck.isBefore(subscription.endDate)
+    def isActive(charge: RatePlanCharge) = !charge.effectiveEndDate.isBefore(dateToCheck) && !charge.effectiveStartDate.isAfter(dateToCheck)
 
-    // if (!digipackRateplans.isEmpty && planIsActive) subscription.endDate else None
-    None
+    val activeCharges = digipackRateplans.map(_.ratePlanCharges).flatten.filter(isActive)
+
+    if (activeCharges.isEmpty) None else Some(activeCharges.map(_.effectiveEndDate).max)
+
   }
 
   //  def updateActivationDate(subscription: Subscription[Paid]): Unit = {

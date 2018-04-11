@@ -2,7 +2,6 @@ package com.gu.digitalSubscriptionExpiry.zuora
 
 import java.io
 
-import com.gu.digitalSubscriptionExpiry.Expiry
 import com.gu.digitalSubscriptionExpiry.Handler.StepsConfig
 import com.gu.digitalSubscriptionExpiry.zuora.GetAccountSummary.AccountId
 import com.gu.digitalSubscriptionExpiry.zuora.GetSubscription.{RatePlan, RatePlanCharge, SubscriptionId, SubscriptionName, SubscriptionResult}
@@ -11,7 +10,6 @@ import com.gu.test.EffectsTest
 import com.gu.util.zuora.ZuoraDeps
 import com.gu.util.{Config, Stage}
 import org.joda.time.format.DateTimeFormat
-import org.joda.time.{DateTime, LocalDate}
 import org.scalatest.{FlatSpec, Matchers}
 import scalaz.{\/, \/-}
 import scalaz.syntax.std.either._
@@ -35,7 +33,6 @@ class GetSubscriptionEffectsTest extends FlatSpec with Matchers {
 
     val customerAcceptanceDate = asDate("15/12/2017")
     val startDate = asDate("29/11/2017")
-    val bla = asDate("29/11/2017")
 
     val expected = SubscriptionResult(
       testSubscriptionId,
@@ -49,8 +46,8 @@ class GetSubscriptionEffectsTest extends FlatSpec with Matchers {
         RatePlan(
           "30% off for 3 months",
           List(RatePlanCharge(
-            effectiveStartDate = asDate("15/12/2015"),
-            effectiveEndDate = asDate("15/03/2015")
+            effectiveStartDate = asDate("15/12/2017"),
+            effectiveEndDate = asDate("15/03/2018")
           ))
         ),
         RatePlan(

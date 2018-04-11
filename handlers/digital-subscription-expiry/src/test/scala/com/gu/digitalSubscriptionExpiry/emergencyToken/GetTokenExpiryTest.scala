@@ -1,7 +1,7 @@
 package com.gu.digitalSubscriptionExpiry.emergencyToken
 
 import com.gu.cas.{PrefixedTokens, SevenDay}
-import com.gu.digitalSubscriptionExpiry.{Expiry, ExpiryType}
+import com.gu.digitalSubscriptionExpiry.{Expiry, ExpiryType, SuccessResponse}
 import org.joda.time.format.DateTimeFormat
 import org.scalatest.{FlatSpec, Matchers}
 
@@ -26,7 +26,9 @@ class GetTokenExpiryTest extends FlatSpec with Matchers {
       provider = Some("G99")
     )
 
-    getTokenExpiry("G99IZXCEZLYF").shouldBe(Some(expiry))
+    val expectedResponse = Some(SuccessResponse(expiry))
+
+    getTokenExpiry("G99IZXCEZLYF").shouldBe(expectedResponse)
   }
 }
 
