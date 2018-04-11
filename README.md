@@ -1,5 +1,7 @@
 # zuora-auto-cancel
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/df83c14325bc4c29aeae7e529f49f8a9)](https://app.codacy.com/app/johnduffell/zuora-auto-cancel?utm_source=github.com&utm_medium=referral&utm_content=guardian/zuora-auto-cancel&utm_campaign=badger)
+
 This is the reader revenue lambda API/orchestration layer.  But it has a bad name so far - TODO fix this. 
 
 Please keep all the various README in this project up to date, and improve them!
