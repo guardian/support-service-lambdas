@@ -3,7 +3,7 @@ package com.gu.digitalSubscriptionExpiry
 import com.gu.digitalSubscriptionExpiry.zuora.GetAccountSummary.AccountSummaryResult
 import com.gu.digitalSubscriptionExpiry.zuora.GetSubscription.SubscriptionResult
 import com.gu.util.Logging
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, LocalDate}
 
 class SubscriptionService extends Logging {
   //todo make 'valid' more descriptive
@@ -24,28 +24,16 @@ class SubscriptionService extends Logging {
   }
 
   //todo are we using date as a parameter anywhere
-  def getExpiryDateForValidSubscription(subscription: SubscriptionResult, accountSummary: AccountSummaryResult, password: String, date: DateTime = DateTime.now()): Option[DateTime] = {
+  def getExpiryDateForValidSubscription(subscription: SubscriptionResult, accountSummary: AccountSummaryResult, password: String, date: LocalDate = LocalDate.now()): Option[LocalDate] = {
     //subscription is digipack
     val digipackRateplans = subscription.ratePlans.filter(ratePlan => ratePlan.ratePlanName == "Digital Pack")
 
-    val dateToCheck = for {
-      startDate <- subscription.startDate
-      customerAcceptanceDate <- subscription.customerAcceptanceDate
-    } yield {
-      if (startDate.isBefore(date) && customerAcceptanceDate.isAfter(date)) customerAcceptanceDate else date
-    }
+    val dateToCheck = if (subscription.startDate.isBefore(date) && subscription.customerAcceptanceDate.isAfter(date)) subscription.customerAcceptanceDate else date
 
-    val planIsActive = for {
-      startDate <- subscription.startDate
-      endDate <- subscription.endDate
-    } yield {
-      dateToCheck.map { date => date.isAfter(startDate) && date.isBefore(endDate) }
-    }
+    val planIsActive = dateToCheck.isAfter(subscription.startDate) && dateToCheck.isBefore(subscription.endDate)
 
-    val subHasActivePlanWithDates = planIsActive.flatten.getOrElse(false)
-
-    if (!digipackRateplans.isEmpty && subHasActivePlanWithDates) subscription.endDate else None
-
+    // if (!digipackRateplans.isEmpty && planIsActive) subscription.endDate else None
+    None
   }
 
   //  def updateActivationDate(subscription: Subscription[Paid]): Unit = {

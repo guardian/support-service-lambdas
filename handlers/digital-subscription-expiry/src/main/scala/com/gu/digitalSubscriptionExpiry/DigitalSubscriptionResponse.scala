@@ -3,10 +3,9 @@ package com.gu.digitalSubscriptionExpiry
 import com.gu.cas.SubscriptionCode
 import org.joda.time.{DateTime, LocalDate}
 import play.api.libs.json.{JsString, Json, Writes}
-import play.api.libs.json.JodaWrites
-
+import com.gu.digitalSubscriptionExpiry.common.CommonFormatters._
 case class Expiry(
-  expiryDate: DateTime,
+  expiryDate: LocalDate,
   expiryType: String,
   content: String = "SevenDay",
   subscriptionCode: Option[SubscriptionCode] = None,
@@ -17,7 +16,7 @@ object Expiry {
   implicit val codeWrites = new Writes[SubscriptionCode] {
     override def writes(code: SubscriptionCode) = JsString(code.toString)
   }
-  implicit val dateTimeWriter: Writes[DateTime] = JodaWrites.jodaDateWrites("yyyy-MM-dd")
+
   implicit val ExpiryWrites = Json.writes[Expiry]
 }
 
