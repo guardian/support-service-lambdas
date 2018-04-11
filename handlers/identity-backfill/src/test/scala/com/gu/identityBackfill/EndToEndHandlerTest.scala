@@ -4,10 +4,11 @@ import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
 import com.gu.effects.TestingRawEffects
 import com.gu.effects.TestingRawEffects.{BasicRequest, HTTPResponse, POSTRequest}
-import com.gu.identity.TestData
+import com.gu.identity.GetByEmailTest
 import com.gu.identityBackfill.EndToEndData._
 import com.gu.identityBackfill.Runner._
 import com.gu.identityBackfill.salesforce.SalesforceAuthenticateData
+import com.gu.identityBackfill.salesforce.getContact.GetSFContactSyncCheckFieldsTest
 import com.gu.identityBackfill.zuora.{CountZuoraAccountsForIdentityIdData, GetZuoraAccountsForEmailData}
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import org.scalatest.{Assertion, FlatSpec, Matchers}
@@ -25,6 +26,8 @@ class EndToEndHandlerTest extends FlatSpec with Matchers {
          |""".stripMargin
     responseString jsonMatches expectedResponse
     requests should be(List(
+      BasicRequest("GET", "/services/data/v20.0/sobjects/Contact/00110000011AABBAAB", ""),
+      BasicRequest("POST", "/services/oauth2/token", """client_id=clientsfclient&client_secret=clientsecretsfsecret&username=usernamesf&password=passSFpasswordtokentokenSFtoken&grant_type=password"""),
       BasicRequest("POST", "/action/query", """{"queryString":"SELECT Id FROM Account where IdentityId__c='1234'"}"""),
       BasicRequest("POST", "/action/query", """{"queryString":"SELECT Id, IdentityId__c, sfContactId__c FROM Account where BillToId='2c92a0fb4a38064e014a3f48f1713ada'"}"""),
       BasicRequest("POST", "/action/query", """{"queryString":"SELECT Id FROM Contact where WorkEmail='email@address'"}"""),
@@ -43,8 +46,9 @@ class EndToEndHandlerTest extends FlatSpec with Matchers {
     responseString jsonMatches expectedResponse
     requests should be(List(
       BasicRequest("PATCH", "/services/data/v20.0/sobjects/Contact/00110000011AABBAAB", """{"IdentityID__c":"1234"}"""),
-      BasicRequest("POST", "/services/oauth2/token", """client_id=clientsfclient&client_secret=clientsecretsfsecret&username=usernamesf&password=passSFpasswordtokentokenSFtoken&grant_type=password"""),
       BasicRequest("PUT", "/accounts/2c92a0fb4a38064e014a3f48f1663ad8", """{"IdentityId__c":"1234"}"""),
+      BasicRequest("GET", "/services/data/v20.0/sobjects/Contact/00110000011AABBAAB", ""),
+      BasicRequest("POST", "/services/oauth2/token", """client_id=clientsfclient&client_secret=clientsecretsfsecret&username=usernamesf&password=passSFpasswordtokentokenSFtoken&grant_type=password"""),
       BasicRequest("POST", "/action/query", """{"queryString":"SELECT Id FROM Account where IdentityId__c='1234'"}"""),
       BasicRequest("POST", "/action/query", """{"queryString":"SELECT Id, IdentityId__c, sfContactId__c FROM Account where BillToId='2c92a0fb4a38064e014a3f48f1713ada'"}"""),
       BasicRequest("POST", "/action/query", """{"queryString":"SELECT Id FROM Contact where WorkEmail='email@address'"}"""),
@@ -83,7 +87,7 @@ object Runner {
 object EndToEndData {
 
   def responses: Map[String, HTTPResponse] =
-    TestData.responses
+    GetByEmailTest.TestData.responses ++ GetSFContactSyncCheckFieldsTest.responses
   def postResponses: Map[POSTRequest, HTTPResponse] =
     GetZuoraAccountsForEmailData.postResponses(false) ++
       CountZuoraAccountsForIdentityIdData.postResponses(false) ++

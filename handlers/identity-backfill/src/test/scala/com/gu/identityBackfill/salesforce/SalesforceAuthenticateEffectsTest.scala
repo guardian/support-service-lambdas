@@ -16,7 +16,7 @@ class SalesforceAuthenticateEffectsTest extends FlatSpec with Matchers {
     val actual = for {
       configAttempt <- ConfigLoad.load(Stage("DEV")).toEither.disjunction
       config <- Config.parseConfig[StepsConfig](configAttempt)
-      identityId <- SalesforceAuthenticate(RawEffects.createDefault.response, config.stepsConfig.sfConfig)
+      identityId <- SalesforceAuthenticate.doAuth(RawEffects.createDefault.response, config.stepsConfig.sfConfig)
     } yield {
       identityId
     }

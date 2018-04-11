@@ -5,14 +5,19 @@ import java.io.{InputStream, OutputStream}
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.RawEffects
 import com.gu.identity.{GetByEmail, IdentityConfig}
+import com.gu.identityBackfill.Types.{EmailAddress, IdentityId}
+import com.gu.identityBackfill.salesforce.ContactSyncCheck.RecordTypeId
 import com.gu.identityBackfill.salesforce.SalesforceAuthenticate.SFAuthConfig
-import com.gu.identityBackfill.salesforce.{SalesforceAuthenticate, UpdateSalesforceIdentityId}
+import com.gu.identityBackfill.salesforce._
 import com.gu.identityBackfill.zuora.{AddIdentityIdToAccount, CountZuoraAccountsForIdentityId, GetZuoraAccountsForEmail}
 import com.gu.util.Config
-import com.gu.util.apigateway.ApiGatewayHandler
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
+import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayResponse}
+import com.gu.util.reader.Types._
+import com.gu.util.zuora.RestRequestMaker.Requests
 import com.gu.util.zuora.{ZuoraDeps, ZuoraRestConfig}
 import play.api.libs.json.{Json, Reads}
+import scalaz.\/
 
 object Handler {
 
@@ -33,13 +38,27 @@ object Handler {
     def operation: Config[StepsConfig] => Operation =
       config => {
         val zuoraDeps = ZuoraDeps(rawEffects.response, config.stepsConfig.zuoraRestConfig)
-        IdentityBackfillSteps(
-          GetByEmail(rawEffects.response, config.stepsConfig.identityConfig),
-          GetZuoraAccountsForEmail(zuoraDeps),
-          CountZuoraAccountsForIdentityId(zuoraDeps),
-          AddIdentityIdToAccount(zuoraDeps),
-          () => SalesforceAuthenticate(rawEffects.response, config.stepsConfig.sfConfig),
-          UpdateSalesforceIdentityId(rawEffects.response)
+        val getByEmail: EmailAddress => \/[GetByEmail.ApiError, IdentityId] = GetByEmail(rawEffects.response, config.stepsConfig.identityConfig)
+        val countZuoraAccounts: IdentityId => FailableOp[Int] = CountZuoraAccountsForIdentityId(zuoraDeps)
+        lazy val sfRequests: FailableOp[Requests] = SalesforceAuthenticate(rawEffects.response, config.stepsConfig.sfConfig)
+
+        // todo make the zuora one like this too, also "map" the lefts to an api gateway response in one place, not in the for comps everywhere
+        Operation(
+          steps = IdentityBackfillSteps(
+            PreReqCheck(
+              getByEmail,
+              PreReqCheck.getSingleZuoraAccountForEmail(GetZuoraAccountsForEmail(zuoraDeps)),
+              PreReqCheck.noZuoraAccountsForIdentityId(countZuoraAccounts),
+              SyncableSFToIdentity(sfRequests, RecordTypeId("01220000000VB52AAG"))
+            ),
+            AddIdentityIdToAccount(zuoraDeps),
+            UpdateSalesforceIdentityId(sfRequests)
+          ),
+          healthcheck = () => Healthcheck(
+            getByEmail,
+            countZuoraAccounts,
+            sfRequests
+          )
         )
       }
     ApiGatewayHandler.default[StepsConfig](operation, lambdaIO).run((rawEffects.stage, rawEffects.s3Load(rawEffects.stage)))
@@ -47,3 +66,16 @@ object Handler {
 
 }
 
+object Healthcheck {
+  def apply(
+    getByEmail: EmailAddress => \/[GetByEmail.ApiError, IdentityId],
+    countZuoraAccountsForIdentityId: IdentityId => FailableOp[Int],
+    sfAuth: => FailableOp[Any],
+  ): FailableOp[Unit] =
+    for {
+      identityId <- getByEmail(EmailAddress("john.duffell@guardian.co.uk")).leftMap(a => ApiGatewayResponse.internalServerError(a.toString)).withLogging("healthcheck getByEmail")
+      _ <- countZuoraAccountsForIdentityId(identityId)
+      _ <- sfAuth
+    } yield ()
+
+}
