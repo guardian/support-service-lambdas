@@ -47,8 +47,9 @@ object ApiGatewayResponse extends Logging {
   def noActionRequired(reason: String) = ApiResponse("200", new Headers, s"Processing is not required: $reason")
 
   val unauthorized = ApiResponse("401", new Headers, "Credentials are missing or invalid")
-  def notFound(message: String) = ApiResponse("404", new Headers, s"not found: $message")
-  val badRequest = ApiResponse("400", new Headers, "Failure to parse JSON successfully")
+  def notFound(message: String) = ApiResponse("404", new Headers, message)
+  def badRequestWithBody(body: String) = ApiResponse("400", new Headers, body)
+  val badRequest = badRequestWithBody("Failure to parse JSON successfully")
   def internalServerError(error: String) = ApiResponse("500", new Headers, s"Failed to process event due to the following error: $error")
 
 }

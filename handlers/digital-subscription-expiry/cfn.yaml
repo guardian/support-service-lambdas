@@ -1,0 +1,78 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Gets expiry dates for digital subscriptions or emergency tokens
+
+Parameters:
+    Stage:
+        Description: Stage name
+        Type: String
+        AllowedValues:
+            - PROD
+            - CODE
+        Default: CODE
+
+Resources:
+    DigitalSubscriptionExpiryRole:
+        Type: AWS::IAM::Role
+        Properties:
+            AssumeRolePolicyDocument:
+                Statement:
+                    - Effect: Allow
+                      Principal:
+                          Service:
+                             - lambda.amazonaws.com
+                      Action:
+                          - sts:AssumeRole
+            Path: /
+            Policies:
+                - PolicyName: LambdaPolicy
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                            - logs:CreateLogGroup
+                            - logs:CreateLogStream
+                            - logs:PutLogEvents
+                            - lambda:InvokeFunction
+                            Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/digital-subscription-expiry-${Stage}:log-stream:*"
+                - PolicyName: ReadPrivateCredentials
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action: s3:GetObject
+                            Resource: !Sub arn:aws:s3:::gu-reader-revenue-private/membership/payment-failure-lambdas/${Stage}/*
+    DigitalSubscriptionExpiryLambda:
+        Type: AWS::Lambda::Function
+        Properties:
+            Description: get digital subscription expiration dates
+            FunctionName:
+                !Sub digital-subscription-expiry-${Stage}
+            Code:
+                S3Bucket: subscriptions-dist
+                S3Key: !Sub subscriptions/${Stage}/digital-subscription-expiry/digital-subscription-expiry.jar
+            Handler: com.gu.digitalSubscriptionExpiry.Handler::apply
+            Environment:
+                Variables:
+                  Stage: !Ref Stage
+            Role:
+                Fn::GetAtt:
+                - "DigitalSubscriptionExpiryRole"
+                - Arn
+            MemorySize: 1536
+            Runtime: java8
+            Timeout: 300
+        DependsOn:
+        - DigitalSubscriptionExpiryRole
+
+    DigitalSubAuthApiPermission:
+            Type: AWS::Lambda::Permission
+            Properties:
+                Action: lambda:invokeFunction
+                FunctionName: !Sub digital-subscription-expiry-${Stage}
+                Principal: apigateway.amazonaws.com
+            DependsOn: DigitalSubscriptionExpiryLambda
+Outputs:
+  DigitalSubscriptionExpiryLambdaExport:
+    Description: lambda that returns expiration date for digital pack subscriptions or emergency tokens
+    Value: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DigitalSubscriptionExpiryLambda.Arn}/invocations
+    Export:
+      Name: !Sub ${AWS::StackName}-DigitalSubscriptionExpiryLambdaUri

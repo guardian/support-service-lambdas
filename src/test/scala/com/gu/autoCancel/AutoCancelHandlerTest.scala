@@ -66,13 +66,13 @@ class AutoCancelHandlerTest extends FlatSpec {
   "authenticateCallout" should "return a left if the credentials are invalid" in {
     val requestAuth = RequestAuth(apiToken = "incorrectRequestToken")
     val trustedApiConfig = TrustedApiConfig(apiToken = "token", tenantId = "tenant")
-    assert(ApiGatewayHandler.authenticateCallout(Some(requestAuth), trustedApiConfig) == -\/(unauthorized))
+    assert(ApiGatewayHandler.authenticateCallout(true, Some(requestAuth), trustedApiConfig) == -\/(unauthorized))
   }
 
   "authenticateCallout" should "return a right if the credentials are valid" in {
     val requestAuth = RequestAuth(apiToken = "token")
     val trustedApiConfig = TrustedApiConfig(apiToken = "token", tenantId = "tenant")
-    assert(ApiGatewayHandler.authenticateCallout(Some(requestAuth), trustedApiConfig) == \/-(()))
+    assert(ApiGatewayHandler.authenticateCallout(true, Some(requestAuth), trustedApiConfig) == \/-(()))
   }
 
 }
