@@ -22,7 +22,7 @@ class DigitalSubscriptionExpiryResponseTest extends FlatSpec {
     val expectedJson = Json.parse(expectedstr)
 
     val formatter = DateTimeFormat.forPattern("dd/MM/yyyy")
-    val expiryValue = formatter.parseDateTime("26/10/1985")
+    val expiryValue = formatter.parseLocalDate("26/10/1985")
     val res = SuccessResponse(Expiry(
       expiryDate = expiryValue,
       expiryType = "ExpiryTypeValue",

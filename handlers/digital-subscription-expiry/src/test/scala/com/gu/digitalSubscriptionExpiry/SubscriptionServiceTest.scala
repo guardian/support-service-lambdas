@@ -2,12 +2,12 @@ package com.gu.digitalSubscriptionExpiry
 
 import com.gu.digitalSubscriptionExpiry.zuora.GetAccountSummary.{AccountId, AccountSummaryResult}
 import com.gu.digitalSubscriptionExpiry.zuora.GetSubscription._
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, LocalDate}
 import org.scalatest.FlatSpec
 import org.scalatest.Matchers._
 
 class SubscriptionServiceTest extends FlatSpec {
-  val lastWeek = DateTime.now().minusWeeks(1)
+  val lastWeek = LocalDate.now().minusWeeks(1)
   val nextWeek = lastWeek.plusWeeks(2)
 
   val digitalPack = SubscriptionResult(
@@ -15,14 +15,14 @@ class SubscriptionServiceTest extends FlatSpec {
     name = SubscriptionName("subName"),
     accountId = AccountId("accountId"),
     casActivationDate = None,
-    customerAcceptanceDate = Some(lastWeek),
-    startDate = Some(lastWeek),
-    endDate = Some(nextWeek),
-    ratePlans = List(RatePlan("Digital Pack"))
+    customerAcceptanceDate = lastWeek,
+    startDate = lastWeek,
+    endDate = nextWeek,
+    ratePlans = List(RatePlan("Digital Pack", lastWeek, nextWeek))
   )
 
   val monthlyContribution = digitalPack.copy(
-    ratePlans = List(RatePlan("Monthly Contribution"))
+    ratePlans = List(RatePlan("Monthly Contribution", lastWeek, nextWeek))
   )
 
   val accountSummary = AccountSummaryResult(

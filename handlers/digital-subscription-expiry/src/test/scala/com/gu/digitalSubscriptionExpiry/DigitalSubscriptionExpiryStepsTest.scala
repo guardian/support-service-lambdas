@@ -14,7 +14,7 @@ class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
   val validTokenResponse = {
     val dateFormatter = DateTimeFormat.forPattern("dd/MM/yyyy")
     val expiry = Expiry(
-      expiryDate = dateFormatter.parseDateTime("26/10/1985"),
+      expiryDate = dateFormatter.parseLocalDate("26/10/1985"),
       expiryType = ExpiryType.SUB,
       subscriptionCode = Some(SevenDay),
       provider = Some("G99")

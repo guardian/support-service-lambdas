@@ -48,11 +48,13 @@ class GetSubscriptionEffectsTest extends FlatSpec with Matchers {
         RatePlan(
           ratePlanName = "30% off for 3 months",
           effectiveStartDate = asDate("15/12/2015"),
-          effectiveEndDate = asDate("15/03/2015")),
+          effectiveEndDate = asDate("15/03/2015")
+        ),
         RatePlan(
           ratePlanName = "Digital Pack Monthly",
           effectiveStartDate = asDate("15/12/2017"),
-          effectiveEndDate = asDate("29/11/2018"))
+          effectiveEndDate = asDate("29/11/2018")
+        )
       )
     )
 
