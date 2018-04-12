@@ -13,7 +13,10 @@ class GetSFContactSyncCheckFieldsTest extends FlatSpec with Matchers {
 
   it should "send the right request for update identity id" in {
     val effects = new TestingRawEffects(responses = GetSFContactSyncCheckFieldsTest.responses)
-    val auth = GetSFContactSyncCheckFields(SalesforceRestRequestMaker(SalesforceAuth("accesstokentoken", "https://urlsf.hi"), effects.response)) _
+    val auth = GetSFContactSyncCheckFields(SalesforceRestRequestMaker(
+      SalesforceAuth("accesstokentoken", "https://urlsf.hi"),
+      effects.response
+    )) _
     val actual = auth(SFContactId("00110000011AABBAAB"))
     val expected = \/-(ContactSyncCheckFields(Some("01220000000VB52AAG"), "123", "Testing", Some("United Kingdom")))
     actual should be(expected)

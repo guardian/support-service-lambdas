@@ -36,7 +36,11 @@ class PreReqCheckTest extends FlatSpec with Matchers {
 
     val result =
       PreReqCheck.getSingleZuoraAccountForEmail(email =>
-        \/-(List(ZuoraAccountIdentitySFContact(AccountId("acc"), Some(IdentityId("haha")), SFContactId("sf")))))(EmailAddress("email@address"))
+        \/-(List(ZuoraAccountIdentitySFContact(
+          AccountId("acc"),
+          Some(IdentityId("haha")),
+          SFContactId("sf")
+        ))))(EmailAddress("email@address"))
 
     val expectedResult = -\/(ApiGatewayResponse.notFound("the account we found was already populated with an identity id"))
     result should be(expectedResult)
@@ -59,9 +63,9 @@ class PreReqCheckTest extends FlatSpec with Matchers {
     val result =
       PreReqCheck(
         email => -\/(NotFound),
-        email => ???,
-        identityId => ???,
-        _ => ???
+        email => fail("shouldn't be called 1"),
+        identityId => fail("shouldn't be called 2"),
+        _ => fail("shouldn't be called 3")
       )(EmailAddress("email@address"))
 
     val expectedResult = -\/(ApiGatewayResponse.notFound("user doesn't have identity"))
