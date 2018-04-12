@@ -25,7 +25,7 @@ class ContactSyncCheckTest extends FlatSpec with Matchers {
     actual should be(false)
   }
 
-  it should "no last nameis false" in {
+  it should "no last name is false" in {
     val areFieldsValid: ContactSyncCheckFields => Boolean = ContactSyncCheck(RecordTypeId("correctId"))
     val actual = areFieldsValid(ContactSyncCheckFields(Some("correctId"), "", "first", Some("United Kingdom")))
     actual should be(false)

@@ -28,7 +28,7 @@ object GetSFContactSyncCheckFields {
 
 object ContactSyncCheck {
 
-  case class RecordTypeId(value: String)
+  case class RecordTypeId(value: String) // this lets us decide whether it's a related or primary contact
 
   def apply(
     standardRecordType: RecordTypeId

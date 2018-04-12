@@ -23,7 +23,7 @@ class PreReqCheckTest extends FlatSpec with Matchers {
     result should be(expectedResult)
   }
 
-  it should "go through a already got identity (according to the zuora query bu identity id) case without calling update" in {
+  it should "stop processing if it finds there is a zuora account already for the identity id" in {
 
     val result =
       PreReqCheck.noZuoraAccountsForIdentityId(countZuoraAccountsForIdentityId = _ => \/-(1))(IdentityId("asdf"))
@@ -32,7 +32,7 @@ class PreReqCheckTest extends FlatSpec with Matchers {
     result should be(expectedResult)
   }
 
-  it should "go through a already got identity (according to the zuora account query by email) case without calling update" in {
+  it should "stop processing if the zuora account for the given email already has an identity id" in {
 
     val result =
       PreReqCheck.getSingleZuoraAccountForEmail(email =>
@@ -46,7 +46,7 @@ class PreReqCheckTest extends FlatSpec with Matchers {
     result should be(expectedResult)
   }
 
-  it should "go through a multiple zuora account without calling update even not in dry run mode" in {
+  it should "stop processing if there are multiple zuora accounts with the same email address" in {
 
     val result =
       PreReqCheck.getSingleZuoraAccountForEmail(email => {
@@ -58,7 +58,7 @@ class PreReqCheckTest extends FlatSpec with Matchers {
     result should be(expectedResult)
   }
 
-  it should "return a 404 if there's no identity account at all for that email" in {
+  it should "stop processing if it can't find an identity id for the required email" in {
 
     val result =
       PreReqCheck(

@@ -20,7 +20,7 @@ object PreReqCheck {
     for {
       identityId <- getByEmail(emailAddress).leftMap({
         case NotFound => ApiGatewayResponse.notFound("user doesn't have identity")
-        case a => ApiGatewayResponse.internalServerError(a.toString)
+        case unknownError => ApiGatewayResponse.internalServerError(unknownError.toString)
       }).withLogging("GetByEmail")
       zuoraAccountForEmail <- getSingleZuoraAccountForEmail(emailAddress)
       _ <- noZuoraAccountsForIdentityId(identityId)

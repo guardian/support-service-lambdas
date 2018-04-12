@@ -32,7 +32,7 @@ object IdentityBackfillSteps extends Logging {
   )(apiGatewayRequest: ApiGatewayRequest) = {
 
     for {
-      request <- Json.parse(apiGatewayRequest.body).validate[IdentityBackfillRequest].toFailableOp.withLogging("zuora callout")
+      request <- Json.parse(apiGatewayRequest.body).validate[IdentityBackfillRequest].toFailableOp.withLogging("identity id backfill request")
       emailAddress = fromRequest(request)
       preReq <- preReqCheck(emailAddress)
       _ <- (if (request.dryRun) -\/(ApiGatewayResponse.noActionRequired("DRY RUN requested! skipping to the end")) else \/-(())).withLogging("dryrun aborter")
