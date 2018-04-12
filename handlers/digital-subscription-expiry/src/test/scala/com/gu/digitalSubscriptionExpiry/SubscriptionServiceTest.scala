@@ -2,7 +2,7 @@ package com.gu.digitalSubscriptionExpiry
 
 import com.gu.digitalSubscriptionExpiry.zuora.GetAccountSummary.{AccountId, AccountSummaryResult}
 import com.gu.digitalSubscriptionExpiry.zuora.GetSubscription._
-import org.joda.time.{DateTime, LocalDate}
+import org.joda.time.LocalDate
 import org.scalatest.FlatSpec
 import org.scalatest.Matchers._
 
@@ -35,21 +35,21 @@ class SubscriptionServiceTest extends FlatSpec {
   val service = new SubscriptionService
 
   "getExpiryDateForValidSubscription" should "return the expiry date for a subscription" in {
-    val maybeExpiryDate = service.getExpiryDateForValidSubscription(digitalPack, accountSummary, "abc 123")
+    val maybeExpiryDate = service.getExpiryDateForValidSubscription(digitalPack, accountSummary)
 
     maybeExpiryDate should equal(Some(nextWeek))
   }
 
   it should "return None if the sub isn't a digital pack" in {
-    val maybeExpiryDate = service.getExpiryDateForValidSubscription(monthlyContribution, accountSummary, "abc 123")
+    val maybeExpiryDate = service.getExpiryDateForValidSubscription(monthlyContribution, accountSummary)
 
     maybeExpiryDate should equal(None)
   }
-
-  it should "return None if the password check fails" in {
-    val maybeExpiryDate = service.getExpiryDateForValidSubscription(digitalPack, accountSummary, "complete nonsense")
-
-    maybeExpiryDate should equal(None)
-  }
+  //TODO SEE IF WE REFACTOR WHERE THE PASSWORD IS CHECKED OR ELSE JUST ADD A TEST FOR THE PASSWORD CHECKING CODE HERE
+  //  it should "return None if the password check fails" in {
+  //    val maybeExpiryDate = service.getExpiryDateForValidSubscription(digitalPack, accountSummary)
+  //
+  //    maybeExpiryDate should equal(None)
+  //  }
 
 }

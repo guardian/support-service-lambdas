@@ -39,7 +39,8 @@ object Handler {
           CountZuoraAccountsForIdentityId(zuoraDeps),
           AddIdentityIdToAccount(zuoraDeps),
           () => SalesforceAuthenticate(rawEffects.response, config.stepsConfig.sfConfig),
-          UpdateSalesforceIdentityId(rawEffects.response)
+          UpdateSalesforceIdentityId(rawEffects.response),
+
         )
       }
     ApiGatewayHandler.default[StepsConfig](operation, lambdaIO).run((rawEffects.stage, rawEffects.s3Load(rawEffects.stage)))

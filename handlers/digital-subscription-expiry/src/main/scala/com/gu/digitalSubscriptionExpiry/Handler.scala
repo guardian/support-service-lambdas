@@ -4,11 +4,13 @@ import java.io.{InputStream, OutputStream}
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.digitalSubscriptionExpiry.emergencyToken.{EmergencyTokens, EmergencyTokensConfig, GetTokenExpiry}
+import com.gu.digitalSubscriptionExpiry.zuora.{GetAccountSummary, GetSubscription, GetSubscriptionExpiry}
 import com.gu.effects.RawEffects
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.ApiGatewayHandler
-import com.gu.util.zuora.ZuoraRestConfig
+import com.gu.util.zuora.{ZuoraDeps, ZuoraRestConfig}
 import com.gu.util.{Config, Logging}
+import org.joda.time.DateTime
 import play.api.libs.json.{Json, Reads}
 
 object Handler extends Logging {
@@ -29,7 +31,15 @@ object Handler extends Logging {
     def operation: Config[StepsConfig] => Operation =
       config => {
         val emergencyTokens = EmergencyTokens(config.stepsConfig.emergencyTokens)
-        DigitalSubscriptionExpirySteps(GetTokenExpiry(emergencyTokens))
+        val zuoraDeps = ZuoraDeps(rawEffects.response, config.stepsConfig.zuoraRestConfig)
+        val subscriptionService = new SubscriptionService
+        DigitalSubscriptionExpirySteps(
+          getEmergencyTokenExpiry = GetTokenExpiry(emergencyTokens),
+          getSubscription = GetSubscription(zuoraDeps),
+          getAccountSummary = GetAccountSummary(zuoraDeps),
+          getSubscriptionExpiry = GetSubscriptionExpiry(subscriptionService),
+          today = DateTime.now().toLocalDate
+        )
       }
 
     ApiGatewayHandler.default[StepsConfig](operation, lambdaIO).run((rawEffects.stage, rawEffects.s3Load(rawEffects.stage)))
