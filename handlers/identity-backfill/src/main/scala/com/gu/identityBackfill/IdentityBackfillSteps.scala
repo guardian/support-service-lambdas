@@ -32,16 +32,22 @@ object IdentityBackfillSteps extends Logging {
   )(apiGatewayRequest: ApiGatewayRequest) = {
 
     for {
-      request <- Json.parse(apiGatewayRequest.body).validate[IdentityBackfillRequest].toFailableOp.withLogging("identity id backfill request")
-      emailAddress = fromRequest(request)
-      preReq <- preReqCheck(emailAddress)
-      _ <- (if (request.dryRun) -\/(ApiGatewayResponse.noActionRequired("DRY RUN requested! skipping to the end")) else \/-(())).withLogging("dryrun aborter")
+      request <- Json.parse(apiGatewayRequest.body).validate[IdentityBackfillRequest]
+        .toFailableOp.withLogging("identity id backfill request")
+      preReq <- preReqCheck(fromRequest(request))
+      _ <- dryRunAbort(request).withLogging("dryrun aborter")
       _ <- updateZuoraIdentityId(preReq.zuoraAccountId, preReq.requiredIdentityId)
       _ <- updateSalesforceIdentityId(preReq.sFContactId, preReq.requiredIdentityId)
       // need to remember which ones we updated?
     } yield ()
 
   }
+
+  def dryRunAbort(request: IdentityBackfillRequest): FailableOp[Unit] =
+    if (request.dryRun)
+      -\/(ApiGatewayResponse.noActionRequired("DRY RUN requested! skipping to the end"))
+    else
+      \/-(())
 
 }
 
