@@ -79,6 +79,29 @@ class DigitalSubscriptionExpiryHandlerEffectsTest extends FlatSpec with Matchers
     responseString jsonMatches expectedResponse
   }
 
+  it should "successful get expiry date for paper + sub against real backend" taggedAs EffectsTest in {
+    val request: String =
+      """
+        |{
+        |    "body": "{\"subscriberId\" : \"A-S00073288\",\"password\" : \"W1234\"}"
+        |}
+      """.stripMargin
+
+    val stream = new ByteArrayInputStream(request.getBytes(java.nio.charset.StandardCharsets.UTF_8))
+    val os = new ByteArrayOutputStream()
+    val rawEffects = RawEffects.createDefault
+
+    //execute
+    Handler.runWithEffects(rawEffects, LambdaIO(stream, os, null))
+
+    val responseString = new String(os.toByteArray, "UTF-8")
+
+    val expectedResponse =
+      """
+        |{"statusCode":"200","headers":{"Content-Type":"application/json"},"body":"{\n  \"expiry\" : {\n    \"expiryDate\" : \"2019-04-13\",\n    \"expiryType\" : \"sub\",\n    \"content\" : \"SevenDay\"\n  }\n}"}
+        |""".stripMargin
+    responseString jsonMatches expectedResponse
+  }
   implicit class JsonMatcher(private val actual: String) {
     def jsonMatches(expected: String): Assertion = {
       val expectedJson = Json.parse(expected)

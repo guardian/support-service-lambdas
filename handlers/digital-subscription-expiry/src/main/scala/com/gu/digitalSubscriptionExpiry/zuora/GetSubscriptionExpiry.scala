@@ -27,7 +27,7 @@ object GetSubscriptionExpiry {
   implicit def dateOrdering: Ordering[LocalDate] = Ordering.fromLessThan(_ isAfter _)
 
   private def getExpiryDateForValidSubscription(subscription: SubscriptionResult, accountSummary: AccountSummaryResult, date: LocalDate): Option[LocalDate] = {
-
+    //TODO THIS DOESN'T WORK WITH THE PAPER + PLANS WE HAVE TO LOOK AT THE CHARGE NAME AND CHECK THAT IT CONTAINS "DIGITAL PACK"
     val digipackRateplans = subscription.ratePlans.filter(_.productName == "Digital Pack")
 
     val dateToCheck = if (subscription.startDate.isBefore(date) && subscription.customerAcceptanceDate.isAfter(date)) subscription.customerAcceptanceDate else date
