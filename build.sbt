@@ -38,25 +38,23 @@ addCompilerPlugin("com.lihaoyi" %% "acyclic" % "0.1.7"),
 
 // fixme this whole file needs splitting down appropriately
 
-lazy val EffectsTest = config("effectsTest") extend(Test) describedAs("run the edge tests")
+lazy val LocalTest = config("local") extend(Test) describedAs("run the unit/local tests")
+lazy val EffectsTest = config("effects") extend(Test) describedAs("run the edge tests")
 lazy val HealthCheckTest = config("healthCheck") extend(Test) describedAs("run the health checks against prod/code")
-val testSettings = inConfig(EffectsTest)(Defaults.testTasks) ++ inConfig(HealthCheckTest)(Defaults.testTasks) ++ Seq(
-  testOptions in Test += Tests.Argument("-l", "com.gu.test.EffectsTest"),
-  testOptions in Test += Tests.Argument("-l", "com.gu.test.HealthCheck"),
+val testSettings =
+  inConfig(EffectsTest)(Defaults.testTasks) ++
+    inConfig(HealthCheckTest)(Defaults.testTasks) ++
+    inConfig(LocalTest)(Defaults.testTasks) ++
+    Seq(
+      testOptions in LocalTest += Tests.Argument("-l", "com.gu.test.EffectsTest"),
+      testOptions in LocalTest += Tests.Argument("-l", "com.gu.test.HealthCheck"),
 
-  //  configs(EffectsTest),
+      testOptions in EffectsTest += Tests.Argument("-n", "com.gu.test.EffectsTest"),
 
-  testOptions in EffectsTest -= Tests.Argument("-l", "com.gu.test.EffectsTest"),
-  testOptions in EffectsTest -= Tests.Argument("-l", "com.gu.test.HealthCheck"),
-  testOptions in EffectsTest += Tests.Argument("-n", "com.gu.test.EffectsTest"),
-  //  configs(HealthCheckTest),
+      testOptions in HealthCheckTest += Tests.Argument("-n", "com.gu.test.HealthCheck")
+    )
 
-  testOptions in HealthCheckTest -= Tests.Argument("-l", "com.gu.test.EffectsTest"),
-  testOptions in HealthCheckTest -= Tests.Argument("-l", "com.gu.test.HealthCheck"),
-  testOptions in HealthCheckTest += Tests.Argument("-n", "com.gu.test.HealthCheck")
-)
-
-def all(theProject: Project) = theProject.settings(scalaSettings, testSettings).configs(EffectsTest, HealthCheckTest)
+def all(theProject: Project) = theProject.settings(scalaSettings, testSettings).configs(EffectsTest, HealthCheckTest, LocalTest)
 
 lazy val zuora = all(project in file("lib/zuora")).dependsOn(restHttp).settings(
   libraryDependencies ++= Seq(

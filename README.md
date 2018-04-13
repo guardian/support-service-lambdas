@@ -38,8 +38,10 @@ If there's any code in either that you feel could be unit tested, it should prob
 ## Quality matters
 The testing story is not perfect at the moment!  You are responsible for getting your own changes into production safely.  However there are a few common situations you will encounter:
 
+If you just run `sbt test` it will try to run all the tests, including the tagged ones.  You may want `sbt local:test`
+
 ### code only changes
-You can be confident when making code only changes.  Run `sbt test` to run code only tests (ignores other tests).
+You can be confident when making code only changes.  Run `sbt local:test` to run code only tests (ignores other tests).
 They will automatically run on your build of your branch and when you merge to master.
 
 Add your new tests in the normal way, and don't forget to "Run with Coverage" in IntelliJ.
@@ -48,13 +50,13 @@ Add your new tests in the normal way, and don't forget to "Run with Coverage" in
 These tests do not (YET!) run automatically.
 If you deploy to PROD without checking this, the lambdas will deploy but not actually work.
 
-You can run the tests that hit external services by running `sbt effectsTest:test`.
+You can run the tests that hit external services by running `sbt effects:test`.
 This would need suitable AWS credentials to get hold of the config as well as config file under .aws with the content:
 ```
 [default]
 region = eu-west-1
 ```
-You can tag your integration new tests with `taggedAs EffectsTest`.  This ignores them from the standard `sbt test`.
+You can tag your integration new tests with `taggedAs EffectsTest`.  This ignores them from the standard `sbt local:test`.
 
 ### Testing post deployment to CODE/PROD
 After deploy you can't relax until you know an HTTP request will hit your lambda, and that your lambda can access any external services.
