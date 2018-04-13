@@ -270,9 +270,9 @@ Resources:
         EvaluationPeriods: 1
         MetricName: 5XXError
         Namespace: AWS/ApiGateway
-        Period: 300
+        Period: 3600
         Statistic: Sum
-        Threshold: 10
+        Threshold: 5
         TreatMissingData: notBreaching
 
     4xxApiAlarm:
