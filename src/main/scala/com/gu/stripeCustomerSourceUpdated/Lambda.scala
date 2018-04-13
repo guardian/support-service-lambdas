@@ -15,7 +15,8 @@ object Lambda {
   def runWithEffects(rawEffects: RawEffects, lambdaIO: LambdaIO): Unit = {
     def operation(config: Config[StepsConfig]): ApiGatewayHandler.Operation =
       SourceUpdatedSteps(
-        ZuoraRestRequestMaker(rawEffects.response, config.stepsConfig.zuoraRestConfig), StripeDeps(config.stripeConfig, new StripeSignatureChecker)
+        ZuoraRestRequestMaker(rawEffects.response, config.stepsConfig.zuoraRestConfig),
+        StripeDeps(config.stripeConfig, new StripeSignatureChecker)
       )
     ApiGatewayHandler.default[StepsConfig](operation, lambdaIO).run((rawEffects.stage, rawEffects.s3Load(rawEffects.stage)))
   }

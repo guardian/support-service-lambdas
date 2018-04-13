@@ -324,7 +324,12 @@ class SourceUpdatedStepsUpdatePaymentMethodTest extends FlatSpec with Matchers {
       last4 = StripeLast4("1234")
     )
 
-    val actual = SourceUpdatedSteps.createUpdatedDefaultPaymentMethod(TestData.zuoraDeps(effects))(PaymentMethodFields(PaymentMethodId("PMID"), AccountId("fake"), NumConsecutiveFailures(1)), eventData)
+    val actual = SourceUpdatedSteps.createUpdatedDefaultPaymentMethod(
+      TestData.zuoraDeps(effects)
+    )(
+      PaymentMethodFields(PaymentMethodId("PMID"), AccountId("fake"), NumConsecutiveFailures(1)),
+      eventData
+    )
 
     val expectedPOST = BasicRequest(
       "POST",

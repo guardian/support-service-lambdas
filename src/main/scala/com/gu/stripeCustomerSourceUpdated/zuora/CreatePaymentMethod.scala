@@ -52,6 +52,7 @@ object CreatePaymentMethod {
   case class CreatePaymentMethodResult(id: PaymentMethodId)
 
   def createPaymentMethod(requests: Requests)(request: CreateStripePaymentMethod): FailableOp[CreatePaymentMethodResult] =
-    requests.post[CreateStripePaymentMethod, CreatePaymentMethodResult](request, s"object/payment-method").leftMap(ZuoraToApiGateway.fromClientFail)
+    requests.post[CreateStripePaymentMethod, CreatePaymentMethodResult](request, s"object/payment-method")
+      .leftMap(ZuoraToApiGateway.fromClientFail)
 
 }
