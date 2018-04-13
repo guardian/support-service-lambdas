@@ -7,20 +7,30 @@ object ZuoraModels {
 
   case class SubscriptionId(id: String) extends AnyVal
 
-  case class ZuoraCommonFields(success: Boolean)
+  sealed trait ZuoraResponse
+  object ZuoraSuccess extends ZuoraResponse
+
+  case class ErrorReason(code: Int, message: String)
+  case class ZuoraErrorResponse(reasons: List[ErrorReason]) extends ZuoraResponse
 
 }
 
 object ZuoraReaders {
 
+  implicit val errorReasonReads = Json.reads[ErrorReason]
   implicit val unitReads: Reads[Unit] =
     Reads(_ => JsSuccess(()))
 
-  implicit val zuoraCommonFieldsReads: Reads[ZuoraCommonFields] =
-    (JsPath \ "success").read[Boolean]
-      .orElse((JsPath \ "Success").read[Boolean]) // rest object api seems to use title case....!!
-      .map {
-        success => ZuoraCommonFields(success)
+  implicit val ZuoraResponseReads: Reads[ZuoraResponse] =
+    // rest object api seems to use title case for success field....!!
+    for {
+      success <- (JsPath \ "success").read[Boolean].orElse((JsPath \ "Success").read[Boolean])
+      errorReasons <- (JsPath \ "reasons").readNullable[List[ErrorReason]]
+    } yield {
+      if (success) ZuoraSuccess else {
+        val reasons = errorReasons.getOrElse(Nil)
+        ZuoraErrorResponse(reasons)
       }
+    }
 
 }

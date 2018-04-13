@@ -1,6 +1,6 @@
 package com.gu.util.zuora
 
-import com.gu.util.zuora.RestRequestMaker.{ClientFail, ClientFailableOp}
+import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, GenericError, NotFound}
 import com.gu.util.zuora.ZuoraModels._
 import com.gu.util.zuora.ZuoraReaders._
 import play.api.libs.json._
@@ -23,15 +23,18 @@ object ZuoraRestRequestMaker extends Logging {
 
   def zuoraIsSuccessful(bodyAsJson: JsValue): ClientFailableOp[Unit] = {
 
-    bodyAsJson.validate[ZuoraCommonFields] match {
-      case JsSuccess(ZuoraCommonFields(true), _) =>
+    bodyAsJson.validate[ZuoraResponse] match {
+      case JsSuccess(ZuoraSuccess, _) =>
         ().right
-      case JsSuccess(zuoraFailure, _) =>
+      case JsSuccess(ZuoraErrorResponse(reasons), _) => {
         logger.error(s"Zuora rejected our call $bodyAsJson")
-        ClientFail("Received failure result from Zuora during autoCancellation").left
+        //todo see what is the best way to get last 2 digits
+        if (reasons.exists(_.code.toString.endsWith("40"))) NotFound("Received a 'not found' response from Zuora").left else GenericError("Received a failure result from Zuora").left
+
+      }
       case error: JsError => {
         logger.error(s"Failed to read common fields from zuora response: $error. Response body was: \n $bodyAsJson")
-        ClientFail("Error when reading common fields from zuora").left
+        GenericError("Error when reading common fields from zuora").left
       }
     }
   }

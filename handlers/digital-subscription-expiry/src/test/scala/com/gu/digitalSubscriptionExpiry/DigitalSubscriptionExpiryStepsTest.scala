@@ -43,7 +43,8 @@ class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
       \/-(summary)
     }
   }
-  def getSubExpiry(password: String, subscriptionResult: SubscriptionResult, accountSummaryResult: AccountSummaryResult, date: LocalDate): FailableOp[ApiResponse] = {
+  //todo this is not done!!
+  def getSubExpiry(password: String, subscriptionResult: SubscriptionResult, accountSummaryResult: AccountSummaryResult, date: LocalDate): FailableOp[Unit] = {
     -\/(ApiResponse("123", new Headers, "bla"))
   }
 

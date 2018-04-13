@@ -8,6 +8,8 @@ import org.joda.time.{DateTime, LocalDate}
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import com.gu.digitalSubscriptionExpiry.common.CommonFormatters._
+import com.gu.util.zuora.RestRequestMaker.{GenericError, NotFound}
+import com.gu.digitalSubscriptionExpiry.common.CommonApiResponses._
 object GetSubscription {
 
   case class SubscriptionId(get: String) extends AnyVal
@@ -45,6 +47,9 @@ object GetSubscription {
     )(SubscriptionResult.apply _)
 
   def apply(zuoraDeps: ZuoraDeps)(request: SubscriptionId): FailableOp[SubscriptionResult] =
-    ZuoraRestRequestMaker(zuoraDeps).get[SubscriptionResult](s"subscriptions/${request.get}").leftMap(clientFail => ApiGatewayResponse.internalServerError(s"zuora client fail: ${clientFail.message}"))
+    ZuoraRestRequestMaker(zuoraDeps).get[SubscriptionResult](s"subscriptions/${request.get}").leftMap {
+      case genericError: GenericError => ApiGatewayResponse.internalServerError(s"zuora client fail: ${genericError.message}")
+      case notFound: NotFound => notFoundResponse
+    }
 
 }

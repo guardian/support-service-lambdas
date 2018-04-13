@@ -6,7 +6,6 @@ import com.gu.digitalSubscriptionExpiry.zuora.GetSubscription.{SubscriptionId, S
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.Operation
 import com.gu.util.apigateway.ApiGatewayRequest
-import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.reader.Types.FailableOp
 import main.scala.com.gu.digitalSubscriptionExpiry.DigitalSubscriptionExpiryRequest
 import org.joda.time.LocalDate
@@ -22,12 +21,11 @@ object DigitalSubscriptionExpirySteps extends Logging {
     getEmergencyTokenExpiry: String => FailableOp[Unit],
     getSubscription: SubscriptionId => FailableOp[SubscriptionResult],
     getAccountSummary: AccountId => FailableOp[AccountSummaryResult],
-    getSubscriptionExpiry: (String, SubscriptionResult, AccountSummaryResult, LocalDate) => FailableOp[ApiResponse],
+    getSubscriptionExpiry: (String, SubscriptionResult, AccountSummaryResult, LocalDate) => FailableOp[Unit],
     today: LocalDate
   ): Operation = {
 
     def steps(apiGatewayRequest: ApiGatewayRequest): FailableOp[Unit] = for {
-      //expiryRequest <- Json.parse(apiGatewayRequest.body).validate[DigitalSubscriptionExpiryRequest].toFailableOp
       jsonRequest <- parseJson(apiGatewayRequest.body).toFailableOp(badRequest)
       expiryRequest <- Json.fromJson[DigitalSubscriptionExpiryRequest](jsonRequest).asOpt.toFailableOp(badRequest)
       _ <- getEmergencyTokenExpiry(expiryRequest.subscriberId)

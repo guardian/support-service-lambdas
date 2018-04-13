@@ -1,33 +1,31 @@
 package com.gu.digitalSubscriptionExpiry
 
 import com.gu.digitalSubscriptionExpiry.zuora.GetAccountSummary.AccountSummaryResult
-import com.gu.digitalSubscriptionExpiry.zuora.GetSubscription.{RatePlan, RatePlanCharge, SubscriptionResult}
+import com.gu.digitalSubscriptionExpiry.zuora.GetSubscription.{RatePlanCharge, SubscriptionResult}
 import com.gu.util.Logging
 import org.joda.time.LocalDate
 
 class SubscriptionService extends Logging {
-  //todo make 'valid' more descriptive
 
-  def passwordCheck(accountSummary: AccountSummaryResult, password: String): Boolean = {
-    passwordMatches(accountSummary.billToPostcode, accountSummary.billToLastName, password) ||
-      passwordMatches(accountSummary.billToPostcode, accountSummary.soldToLastName, password)
-  }
+  def validPassword(accountSummary: AccountSummaryResult, password: String): Boolean = {
+    //TODO DO WE NEED TO FILTER OUT NON NUMBER OR LETTER CHARS BEFORE COMPARING HERE OR NOT?
+    val candidates = Seq(
+      accountSummary.billToPostcode,
+      accountSummary.billToLastName,
+      accountSummary.soldToLastName,
+      accountSummary.soldToPostcode
+    )
 
-  def passwordMatches(postalCode: String, lastName: String, password: String): Boolean = {
-    def format(str: String): String = str.filter(_.isLetterOrDigit).toLowerCase
-
-    val formattedPwd = format(password)
-
-    Seq(postalCode, lastName).exists { candidate: String =>
-      candidate.filter(_.isLetterOrDigit).toLowerCase.contains(formattedPwd)
-    }
+    candidates.exists { _.equalsIgnoreCase(password) }
   }
 
   implicit def dateOrdering: Ordering[LocalDate] = Ordering.fromLessThan(_ isAfter _)
 
   //todo are we using date as a parameter anywhere
   def getExpiryDateForValidSubscription(subscription: SubscriptionResult, accountSummary: AccountSummaryResult, date: LocalDate = LocalDate.now()): Option[LocalDate] = {
-    val digipackRateplans = subscription.ratePlans.filter(ratePlan => ratePlan.ratePlanName == "Digital Pack")
+    //TODO SEE IF THERE IS A SAFER WAY OF RECOGNIZING DIGIPACK RATEPLANS. Maybe we could check productName instead of rateplan name
+    val digipackRateplanNames = Seq("Digital Pack Monthly", "Digital Pack Annual", "Digital Pack Quarterly")
+    val digipackRateplans = subscription.ratePlans.filter(ratePlan => digipackRateplanNames.contains(ratePlan.ratePlanName))
 
     val dateToCheck = if (subscription.startDate.isBefore(date) && subscription.customerAcceptanceDate.isAfter(date)) subscription.customerAcceptanceDate else date
 
