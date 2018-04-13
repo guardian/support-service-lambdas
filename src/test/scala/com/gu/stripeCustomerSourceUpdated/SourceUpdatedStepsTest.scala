@@ -347,7 +347,7 @@ class SourceUpdatedStepsApplyTest extends FlatSpec with Matchers {
 
   "SourceUpdatedSteps" should "fail with unauthorised if the Stripe Signature header check fails" in {
     val effects = new TestingRawEffects(false, 500)
-    val sourceUpdatedSteps = SourceUpdatedSteps.Deps(TestData.zuoraDeps(effects), TestData.stripeDeps)
+    val sourceUpdatedSteps = SourceUpdatedSteps(TestData.zuoraDeps(effects), TestData.stripeDeps)
 
     val badHeaders = Map(
       "SomeHeader1" -> "testvalue",
@@ -387,7 +387,7 @@ class SourceUpdatedStepsApplyTest extends FlatSpec with Matchers {
 
     val testGatewayRequest = ApiGatewayRequest(None, someBody.toString, Some(badHeaders))
 
-    val actual = SourceUpdatedSteps.apply(sourceUpdatedSteps).steps(testGatewayRequest)
+    val actual = sourceUpdatedSteps.steps(testGatewayRequest)
 
     effects.requestsAttempted should be(Nil)
     actual.leftMap(_.statusCode) should be(-\/("401"))

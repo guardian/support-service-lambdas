@@ -24,14 +24,14 @@ object SourceUpdatedSteps extends Logging {
   case class StepsConfig(zuoraRestConfig: ZuoraRestConfig)
   implicit val stepsConfigReads: Reads[StepsConfig] = Json.reads[StepsConfig]
 
-  def apply(deps: Deps): Operation = Operation.noHealthcheck({ apiGatewayRequest: ApiGatewayRequest =>
+  def apply(zuoraRequests: Requests, stripeDeps: StripeDeps): Operation = Operation.noHealthcheck({ apiGatewayRequest: ApiGatewayRequest =>
     for {
-      _ <- if (deps.stripeDeps.config.signatureChecking) bodyIfSignatureVerified(deps.stripeDeps, apiGatewayRequest) else \/-(())
+      _ <- if (stripeDeps.config.signatureChecking) bodyIfSignatureVerified(stripeDeps, apiGatewayRequest) else \/-(())
       sourceUpdatedCallout <- Json.fromJson[SourceUpdatedCallout](Json.parse(apiGatewayRequest.body)).toFailableOp.withLogging("fromJson SourceUpdatedCallout")
       _ = logger.info(s"from: ${apiGatewayRequest.queryStringParameters.map(_.stripeAccount)}")
       _ <- (for {
-        defaultPaymentMethod <- ListT(getPaymentMethodsToUpdate(deps.zuoraRequests)(sourceUpdatedCallout.data.`object`.customer, sourceUpdatedCallout.data.`object`.id))
-        _ <- ListT[FailableOp, Unit](createUpdatedDefaultPaymentMethod(deps.zuoraRequests)(defaultPaymentMethod, sourceUpdatedCallout.data.`object`).map(_.pure[List]))
+        defaultPaymentMethod <- ListT(getPaymentMethodsToUpdate(zuoraRequests)(sourceUpdatedCallout.data.`object`.customer, sourceUpdatedCallout.data.`object`.id))
+        _ <- ListT[FailableOp, Unit](createUpdatedDefaultPaymentMethod(zuoraRequests)(defaultPaymentMethod, sourceUpdatedCallout.data.`object`).map(_.pure[List]))
       } yield ()).run
     } yield ()
   })
@@ -89,8 +89,6 @@ object SourceUpdatedSteps extends Logging {
   def findDefaultOrSkip(defaultPaymentMethod: PaymentMethodId, paymentMethods: NonEmptyList[PaymentMethodFields]): Option[PaymentMethodFields] = {
     paymentMethods.list.find(_.Id == defaultPaymentMethod)
   }
-
-  case class Deps(zuoraRequests: Requests, stripeDeps: StripeDeps)
 
 }
 
