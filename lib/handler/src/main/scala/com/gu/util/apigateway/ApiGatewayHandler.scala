@@ -10,10 +10,10 @@ import com.gu.util.apigateway.ApiGatewayResponse.{outputForAPIGateway, successfu
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.reader.Types.{FailableOp, _}
 import play.api.libs.json.{Json, Reads}
+import scalaz.{-\/, Reader, \/, \/-}
 
 import scala.io.Source
 import scala.util.Try
-import scalaz.{-\/, Reader, \/, \/-}
 
 object ApiGatewayHandler extends Logging {
 
@@ -77,6 +77,7 @@ object LoadConfig extends Logging {
 
   def default[StepsConfig: Reads]: Reader[(Stage, Try[String]), FailableOp[Config[StepsConfig]]] = loadConfig(Config.parseConfig[StepsConfig] _)
 
+  // FIXME don't use Reader
   def loadConfig[StepsConfig](parseConfig: String => \/[ConfigFailure, Config[StepsConfig]]): Reader[(Stage, Try[String]), FailableOp[Config[StepsConfig]]] = Reader {
     case (stage, s3Load) =>
 

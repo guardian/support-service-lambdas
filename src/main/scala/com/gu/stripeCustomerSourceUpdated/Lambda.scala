@@ -8,12 +8,15 @@ import com.gu.stripeCustomerSourceUpdated.SourceUpdatedSteps.{Deps, StepsConfig}
 import com.gu.util.Config
 import com.gu.util.apigateway.ApiGatewayHandler
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
+import com.gu.util.zuora.ZuoraRestRequestMaker
 
 object Lambda {
 
   def runWithEffects(rawEffects: RawEffects, lambdaIO: LambdaIO): Unit = {
     def operation(config: Config[StepsConfig]): ApiGatewayHandler.Operation =
-      SourceUpdatedSteps(Deps.default(rawEffects.response, config))
+      SourceUpdatedSteps(
+        Deps(ZuoraRestRequestMaker(rawEffects.response, config.stepsConfig.zuoraRestConfig), StripeDeps(config.stripeConfig, new StripeSignatureChecker))
+      )
     ApiGatewayHandler.default[StepsConfig](operation, lambdaIO).run((rawEffects.stage, rawEffects.s3Load(rawEffects.stage)))
   }
 

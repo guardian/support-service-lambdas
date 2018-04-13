@@ -15,7 +15,7 @@ import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayResponse}
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.RestRequestMaker.Requests
-import com.gu.util.zuora.{ZuoraDeps, ZuoraRestConfig}
+import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
 import play.api.libs.json.{Json, Reads}
 import scalaz.\/
 
@@ -37,9 +37,9 @@ object Handler {
   def runWithEffects(rawEffects: RawEffects, lambdaIO: LambdaIO): Unit = {
     def operation: Config[StepsConfig] => Operation =
       config => {
-        val zuoraDeps = ZuoraDeps(rawEffects.response, config.stepsConfig.zuoraRestConfig)
+        val zuoraRequests = ZuoraRestRequestMaker(rawEffects.response, config.stepsConfig.zuoraRestConfig)
         val getByEmail: EmailAddress => \/[GetByEmail.ApiError, IdentityId] = GetByEmail(rawEffects.response, config.stepsConfig.identityConfig)
-        val countZuoraAccounts: IdentityId => FailableOp[Int] = CountZuoraAccountsForIdentityId(zuoraDeps)
+        val countZuoraAccounts: IdentityId => FailableOp[Int] = CountZuoraAccountsForIdentityId(zuoraRequests)
         lazy val sfRequests: FailableOp[Requests] = SalesforceAuthenticate(rawEffects.response, config.stepsConfig.sfConfig)
 
         // todo make the zuora one like this too, also "map" the lefts to an api gateway response in one place, not in the for comps everywhere
@@ -47,11 +47,11 @@ object Handler {
           steps = IdentityBackfillSteps(
             PreReqCheck(
               getByEmail,
-              PreReqCheck.getSingleZuoraAccountForEmail(GetZuoraAccountsForEmail(zuoraDeps)),
+              PreReqCheck.getSingleZuoraAccountForEmail(GetZuoraAccountsForEmail(zuoraRequests)),
               PreReqCheck.noZuoraAccountsForIdentityId(countZuoraAccounts),
               SyncableSFToIdentity(sfRequests, RecordTypeId("01220000000VB52AAG"))
             ),
-            AddIdentityIdToAccount(zuoraDeps),
+            AddIdentityIdToAccount(zuoraRequests),
             UpdateSalesforceIdentityId(sfRequests)
           ),
           healthcheck = () => Healthcheck(

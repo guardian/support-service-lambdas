@@ -1,15 +1,15 @@
 package com.gu.stripeCustomerSourceUpdated.zuora
 
 import com.gu.stripeCustomerSourceUpdated.{StripeCustomerId, StripeSourceId}
-import com.gu.util.{Logging, ZuoraToApiGateway}
 import com.gu.util.apigateway.ApiGatewayResponse
-import play.api.libs.json._
-
-import scalaz.{-\/, NonEmptyList, \/-}
-import com.gu.util.zuora.ZuoraAccount._
-import com.gu.util.zuora.{ZuoraDeps, ZuoraQuery}
-import com.gu.util.zuora.ZuoraQuery.Query
 import com.gu.util.reader.Types._
+import com.gu.util.zuora.RestRequestMaker.Requests
+import com.gu.util.zuora.ZuoraAccount._
+import com.gu.util.zuora.ZuoraQuery
+import com.gu.util.zuora.ZuoraQuery.Query
+import com.gu.util.{Logging, ZuoraToApiGateway}
+import play.api.libs.json._
+import scalaz.{-\/, NonEmptyList, \/-}
 
 object ZuoraQueryPaymentMethod extends Logging {
 
@@ -23,13 +23,13 @@ object ZuoraQueryPaymentMethod extends Logging {
 
   case class AccountPaymentMethodIds(accountId: AccountId, paymentMethods: NonEmptyList[PaymentMethodFields])
 
-  def getPaymentMethodForStripeCustomer(customerId: StripeCustomerId, sourceId: StripeSourceId): WithDepsFailableOp[ZuoraDeps, List[AccountPaymentMethodIds]] = {
+  def getPaymentMethodForStripeCustomer(requests: Requests)(customerId: StripeCustomerId, sourceId: StripeSourceId): FailableOp[List[AccountPaymentMethodIds]] = {
     val query =
       s"""SELECT Id, AccountId, NumConsecutiveFailures
          | FROM PaymentMethod
          |  where Type='CreditCardReferenceTransaction' AND PaymentMethodStatus = 'Active' AND TokenId = '${sourceId.value}' AND SecondTokenId = '${customerId.value}'""".stripMargin
 
-    ZuoraQuery.getResults[PaymentMethodFields](Query(query)).leftMap(ZuoraToApiGateway.fromClientFail).run.map(_.flatMap { result =>
+    ZuoraQuery.getResults[PaymentMethodFields](requests)(Query(query)).leftMap(ZuoraToApiGateway.fromClientFail).flatMap { result =>
 
       def groupedList(records: List[PaymentMethodFields]): List[(AccountId, NonEmptyList[PaymentMethodFields])] = {
         records.groupBy(_.AccountId).toList.collect {
@@ -45,7 +45,7 @@ object ZuoraQueryPaymentMethod extends Logging {
       } else {
         \/-(accountPaymentMethodIds.map((AccountPaymentMethodIds.apply _).tupled))
       }
-    }).toEitherT
+    }
 
   }
 

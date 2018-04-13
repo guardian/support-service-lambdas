@@ -14,7 +14,7 @@ import com.gu.util.exacttarget.{EmailRequest, EmailSendSteps}
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.RestRequestMaker.ClientFailableOp
 import com.gu.util.zuora.ZuoraGetInvoiceTransactions.InvoiceTransactionSummary
-import com.gu.util.zuora.{ZuoraDeps, ZuoraGetInvoiceTransactions}
+import com.gu.util.zuora.{ZuoraGetInvoiceTransactions, ZuoraRestRequestMaker}
 import okhttp3.{Request, Response}
 import play.api.libs.json.Json
 import scalaz.syntax.std.option._
@@ -75,10 +75,11 @@ object ZuoraEmailSteps {
   }
 
   object ZuoraEmailStepsDeps {
+    @deprecated("do the wiring in the handler in future")
     def default(response: Request => Response, config: Config[StepsConfig]): ZuoraEmailStepsDeps = {
       ZuoraEmailStepsDeps(
         EmailSendSteps.apply(EmailSendStepsDeps.default(config.stage, response, config.etConfig)),
-        a => ZuoraGetInvoiceTransactions(a).run.run(ZuoraDeps(response, config.stepsConfig.zuoraRestConfig))
+        a => ZuoraGetInvoiceTransactions(ZuoraRestRequestMaker(response, config.stepsConfig.zuoraRestConfig))(a)
       )
     }
   }
