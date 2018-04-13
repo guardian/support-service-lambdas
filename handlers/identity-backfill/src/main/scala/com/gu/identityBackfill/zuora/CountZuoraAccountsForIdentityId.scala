@@ -14,8 +14,11 @@ object CountZuoraAccountsForIdentityId {
   implicit val reads = Json.reads[WireResponse]
 
   def apply(requests: Requests)(identityId: IdentityId): FailableOp[Int] = {
+    val accountByIdentityQuery = ZuoraQuery.Query(s"SELECT Id FROM Account where IdentityId__c='${identityId.value}'")
     val accounts = for {
-      accountsWithEmail <- ListT[ClientFailableOp, WireResponse](ZuoraQuery.getResults[WireResponse](requests)(ZuoraQuery.Query(s"SELECT Id FROM Account where IdentityId__c='${identityId.value}'")).map(_.records))
+      accountsWithEmail <- ListT[ClientFailableOp, WireResponse](
+        ZuoraQuery.getResults[WireResponse](requests)(accountByIdentityQuery).map(_.records)
+      )
     } yield AccountId(accountsWithEmail.Id)
 
     accounts.run.bimap(e => ApiGatewayResponse.internalServerError(e.message), l => l.size)
