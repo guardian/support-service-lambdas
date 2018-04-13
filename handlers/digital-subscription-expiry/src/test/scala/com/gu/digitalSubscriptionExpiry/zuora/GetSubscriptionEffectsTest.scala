@@ -15,6 +15,7 @@ import scalaz.{-\/, \/, \/-}
 import scalaz.syntax.std.either._
 import com.gu.digitalSubscriptionExpiry.common.CommonApiResponses._
 class GetSubscriptionEffectsTest extends FlatSpec with Matchers {
+
   it should "return not found if sub id is invalid" taggedAs EffectsTest in {
     val testSubscriptionId = SubscriptionId("invalidSubId")
 
@@ -26,14 +27,6 @@ class GetSubscriptionEffectsTest extends FlatSpec with Matchers {
     } yield {
       subscription
     }
-
-    val dateFormatter = DateTimeFormat.forPattern("dd/MM/yyyy")
-
-    def asDate(str: String) = dateFormatter.parseLocalDate(str)
-
-    val customerAcceptanceDate = asDate("15/12/2017")
-    val startDate = asDate("29/11/2017")
-
     actual should be(-\/(notFoundResponse))
   }
 
@@ -66,14 +59,14 @@ class GetSubscriptionEffectsTest extends FlatSpec with Matchers {
       startDate.plusYears(1),
       List(
         RatePlan(
-          "30% off for 3 months",
+          "Promotions",
           List(RatePlanCharge(
             effectiveStartDate = asDate("15/12/2017"),
             effectiveEndDate = asDate("15/03/2018")
           ))
         ),
         RatePlan(
-          "Digital Pack Monthly",
+          "Digital Pack",
           List(RatePlanCharge(
             effectiveStartDate = asDate("15/12/2017"),
             effectiveEndDate = asDate("29/11/2018")

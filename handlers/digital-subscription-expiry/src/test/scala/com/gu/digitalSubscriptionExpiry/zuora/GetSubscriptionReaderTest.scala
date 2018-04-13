@@ -29,7 +29,7 @@ class GetSubscriptionReaderTest extends FlatSpec {
         startDate = asDate("20/03/2018"),
         endDate = asDate("20/04/2018"),
         customerAcceptanceDate = asDate("20/03/2018"),
-        ratePlans = List(RatePlan("Digital Pack Monthly", charges))
+        ratePlans = List(RatePlan("Digital Pack", charges))
       )
     )
     val subscription = Json.parse(subscriptionStream).validate[SubscriptionResult]

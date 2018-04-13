@@ -32,12 +32,11 @@ object Handler extends Logging {
       config => {
         val emergencyTokens = EmergencyTokens(config.stepsConfig.emergencyTokens)
         val zuoraDeps = ZuoraDeps(rawEffects.response, config.stepsConfig.zuoraRestConfig)
-        val subscriptionService = new SubscriptionService
         DigitalSubscriptionExpirySteps(
           getEmergencyTokenExpiry = GetTokenExpiry(emergencyTokens),
           getSubscription = GetSubscription(zuoraDeps),
           getAccountSummary = GetAccountSummary(zuoraDeps),
-          getSubscriptionExpiry = GetSubscriptionExpiry(subscriptionService),
+          getSubscriptionExpiry = GetSubscriptionExpiry.apply,
           today = DateTime.now().toLocalDate
         )
       }

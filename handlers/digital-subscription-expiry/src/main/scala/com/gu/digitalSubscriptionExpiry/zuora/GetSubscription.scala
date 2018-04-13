@@ -14,7 +14,7 @@ object GetSubscription {
 
   case class SubscriptionId(get: String) extends AnyVal
   case class SubscriptionName(get: String) extends AnyVal
-  case class RatePlan(ratePlanName: String, ratePlanCharges: List[RatePlanCharge])
+  case class RatePlan(productName: String, ratePlanCharges: List[RatePlanCharge])
   case class RatePlanCharge(effectiveStartDate: LocalDate, effectiveEndDate: LocalDate)
   case class RatePlans(ratePlans: List[RatePlan])
 
