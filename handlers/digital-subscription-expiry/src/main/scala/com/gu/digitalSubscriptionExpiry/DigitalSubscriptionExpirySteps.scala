@@ -1,49 +1,40 @@
 package com.gu.digitalSubscriptionExpiry
 
+import com.gu.digitalSubscriptionExpiry.common.CommonApiResponses._
+import com.gu.digitalSubscriptionExpiry.zuora.GetAccountSummary.{AccountId, AccountSummaryResult}
+import com.gu.digitalSubscriptionExpiry.zuora.GetSubscription.{SubscriptionId, SubscriptionResult}
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.Operation
 import com.gu.util.apigateway.ApiGatewayRequest
-import com.gu.util.apigateway.ResponseModels.{ApiResponse, Headers}
-import com.gu.util.reader.Types._
+import com.gu.util.reader.Types.FailableOp
 import main.scala.com.gu.digitalSubscriptionExpiry.DigitalSubscriptionExpiryRequest
-
-//import org.joda.time.format.DateTimeFormat
+import org.joda.time.LocalDate
+import com.gu.util.reader.Types._
 import play.api.libs.json.{JsValue, Json}
 
 import scala.util.Try
-import scalaz.-\/
-import scalaz.std.option.optionSyntax._
-
 object DigitalSubscriptionExpirySteps extends Logging {
-
-  def getZuoraExpiry(): Option[SuccessResponse] = {
-    //    val formatter = DateTimeFormat.forPattern("dd/MM/yyyy")
-    //    val expiryValue = formatter.parseDateTime("26/10/1985")
-    //
-    //    Some(DigitalSubscriptionExpiryResponse(Expiry(
-    //      expiryDate = expiryValue,
-    //      expiryType = ExpiryType.SUB,
-    //      subscriptionCode = None,
-    //      provider = Some("test provider")
-    //    )))
-    None
-  }
 
   def parseJson(input: String): Option[JsValue] = Try(Json.parse(input)).toOption
 
-  def apply(getEmergencyTokenExpiry: String => Option[SuccessResponse]): Operation = {
+  def apply(
+    getEmergencyTokenExpiry: String => FailableOp[Unit],
+    getSubscription: SubscriptionId => FailableOp[SubscriptionResult],
+    getAccountSummary: AccountId => FailableOp[AccountSummaryResult],
+    getSubscriptionExpiry: (String, SubscriptionResult, AccountSummaryResult, LocalDate) => FailableOp[Unit],
+    today: LocalDate
+  ): Operation = {
 
-    def steps(apiGatewayRequest: ApiGatewayRequest): FailableOp[Unit] = {
-      val successfulOrErrorResponse = for {
-        jsonRequest <- parseJson(apiGatewayRequest.body).toRightDisjunction(badRequest)
-        expiryRequest <- Json.fromJson[DigitalSubscriptionExpiryRequest](jsonRequest).asOpt.toRightDisjunction(badRequest)
-        expiryResponse <- (getEmergencyTokenExpiry(expiryRequest.subscriberId) orElse getZuoraExpiry()).toRightDisjunction(notFoundResponse)
-      } yield {
-        apiResponse(expiryResponse, "200")
-      }
-      val response = successfulOrErrorResponse.valueOr(identity)
-      -\/(response)
-    }
+    def steps(apiGatewayRequest: ApiGatewayRequest): FailableOp[Unit] = for {
+      jsonRequest <- parseJson(apiGatewayRequest.body).toFailableOp(badRequest)
+      expiryRequest <- Json.fromJson[DigitalSubscriptionExpiryRequest](jsonRequest).asOpt.toFailableOp(badRequest)
+      _ <- getEmergencyTokenExpiry(expiryRequest.subscriberId)
+      subscriptionId = SubscriptionId(expiryRequest.subscriberId)
+      subscriptionResult <- getSubscription(subscriptionId)
+      accountSummary <- getAccountSummary(subscriptionResult.accountId)
+      password <- expiryRequest.password.toFailableOp(badRequest)
+      subscriptionEndDate <- getSubscriptionExpiry(password, subscriptionResult, accountSummary, today)
+    } yield {}
 
     //TODO
     //    def healthcheck() =
@@ -56,14 +47,6 @@ object DigitalSubscriptionExpirySteps extends Logging {
     Operation.noHealthcheck(steps, false)
 
   }
-
-  def apiResponse(body: DigitalSubscriptionExpiryResponse, status: String) = {
-    val bodyTxt = Json.prettyPrint(Json.toJson(body))
-    ApiResponse(status, new Headers, bodyTxt)
-  }
-
-  val notFoundResponse = apiResponse(ErrorResponse("Unknown subscriber", -90), "404")
-  val badRequest = apiResponse(ErrorResponse("Mandatory data missing from request", -50), "400")
 
 }
 

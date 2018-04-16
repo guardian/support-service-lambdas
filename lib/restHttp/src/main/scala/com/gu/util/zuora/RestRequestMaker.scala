@@ -7,7 +7,11 @@ import scalaz.{\/, \/-}
 
 object RestRequestMaker extends Logging {
 
-  case class ClientFail(message: String)
+  sealed trait ClientFail {
+    def message: String
+  }
+  case class NotFound(message: String) extends ClientFail
+  case class GenericError(message: String) extends ClientFail
 
   type ClientFailableOp[A] = ClientFail \/ A
   def httpIsSuccessful(response: Response): ClientFailableOp[Unit] = {
@@ -15,9 +19,12 @@ object RestRequestMaker extends Logging {
       ().right
     } else {
       val body = response.body.string
+
       val truncated = body.take(500) + (if (body.length > 500) "..." else "")
-      logger.error(s"Request to Zuora was unsuccessful, the response was: \n $response\n$truncated")
-      ClientFail("Request to Zuora was unsuccessful").left
+      logger.error(s"Request to Zuora was unsuccessful, response status was ${response.code}, response body: \n $response\n$truncated")
+      if (response.code == 404) {
+        NotFound(response.message).left
+      } else GenericError("Request to Zuora was unsuccessful").left
     }
   }
 
@@ -27,7 +34,7 @@ object RestRequestMaker extends Logging {
         success.get.right
       case error: JsError => {
         logger.error(s"Failed to convert Zuora response to case case $error. Response body was: \n $bodyAsJson")
-        ClientFail("Error when converting Zuora response to case class").left
+        GenericError("Error when converting Zuora response to case class").left
       }
     }
   }

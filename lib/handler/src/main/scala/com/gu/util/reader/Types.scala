@@ -52,6 +52,19 @@ object Types extends Logging {
 
   }
 
+  implicit class OptionOps[A](theOption: Option[A]) {
+
+    def toFailableOp(NoneResponse: ApiResponse): FailableOp[A] = {
+      theOption match {
+        case Some(value) => \/-(value)
+        case None => {
+          -\/(NoneResponse)
+        }
+      }
+    }
+
+  }
+
   // handy classes for converting things
   implicit class TryOps[A](theTry: Try[A]) {
 

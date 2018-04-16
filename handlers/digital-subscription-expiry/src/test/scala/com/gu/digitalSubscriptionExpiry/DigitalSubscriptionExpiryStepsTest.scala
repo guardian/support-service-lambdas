@@ -1,14 +1,17 @@
 package com.gu.digitalSubscriptionExpiry
 
 import com.gu.cas.SevenDay
-import com.gu.util.apigateway.ApiGatewayRequest
+import com.gu.digitalSubscriptionExpiry.zuora.GetAccountSummary.{AccountId, AccountSummaryResult}
+import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
+import com.gu.util.apigateway.ResponseModels.{ApiResponse, Headers}
 import com.gu.util.reader.Types.FailableOp
+import org.joda.time.{DateTime, LocalDate}
 import org.joda.time.format.DateTimeFormat
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
-
 import scalaz.{-\/, \/-}
-
+import com.gu.digitalSubscriptionExpiry.zuora.GetSubscription.{SubscriptionId, SubscriptionResult}
+import com.gu.digitalSubscriptionExpiry.common.CommonApiResponses._
 class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
 
   val validTokenResponse = {
@@ -19,12 +22,43 @@ class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
       subscriptionCode = Some(SevenDay),
       provider = Some("G99")
     )
-    SuccessResponse(expiry)
+    apiResponse(SuccessResponse(expiry), "200")
   }
 
+  def getSubId(s: SubscriptionId): FailableOp[SubscriptionResult] = {
+    -\/(notFoundResponse)
+    //-\/(ApiResponse("123", new Headers, "bla"))
+  }
+  def getAccount(accountId: AccountId): FailableOp[AccountSummaryResult] = {
+    if (accountId.value != "someAccountId") {
+      -\/(ApiGatewayResponse.internalServerError("zuoraError"))
+    } else {
+      val summary = AccountSummaryResult(
+        accountId = AccountId("someAccountId"),
+        billToLastName = "someBillToLastName",
+        billToPostcode = "someBilltoPostCode",
+        soldToLastName = "someSoldToLastName",
+        soldToPostcode = "someSoldtoPostCode"
+      )
+      \/-(summary)
+    }
+  }
+  //todo this is not done!!
+  def getSubExpiry(password: String, subscriptionResult: SubscriptionResult, accountSummaryResult: AccountSummaryResult, date: LocalDate): FailableOp[Unit] = {
+    -\/(ApiResponse("123", new Headers, "bla"))
+  }
+
+  def getTokenExpiry(token: String): FailableOp[Unit] = {
+    if (token == "validToken") -\/(validTokenResponse) else \/-(())
+  }
   val digitalSubscriptionExpirySteps = {
     DigitalSubscriptionExpirySteps(
-      { token: String => if (token == "validToken") Some(validTokenResponse) else None }
+      getEmergencyTokenExpiry = getTokenExpiry,
+      getSubscription = getSubId,
+      getAccountSummary = getAccount,
+      getSubscriptionExpiry = getSubExpiry,
+      today = DateTime.now().toLocalDate
+
     )
   }
 
