@@ -41,13 +41,12 @@ object GetSubscriptionExpiry {
 
     val activeDigipackCharges = subscription.ratePlans.map(_.ratePlanCharges).flatten.filter(isActiveDigipack)
 
-    //todo cas seems to be using the subscription term end date even though it will check the effective dates of the charges to determine the sub has a digipack. Should we do the same ?
     if (activeDigipackCharges.isEmpty) None else Some(activeDigipackCharges.map(_.effectiveEndDate).max)
   }
 
   def apply(providedPassword: String, subscription: SubscriptionResult, accountSummary: AccountSummaryResult, date: LocalDate = LocalDate.now()): FailableOp[Unit] =
     if (!validPassword(accountSummary, providedPassword)) {
-      -\/(notFoundResponse) //todo this should probably return unauthorised or something but cas returns not found
+      -\/(notFoundResponse)
     } else {
       val maybeSubscriptionEndDate = getExpiryDateForValidSubscription(subscription, accountSummary, date)
       maybeSubscriptionEndDate.map {
