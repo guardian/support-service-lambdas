@@ -1,6 +1,6 @@
 package com.gu.digitalSubscriptionExpiry.zuora
 
-import com.gu.digitalSubscriptionExpiry.{Expiry, ExpiryType, SuccessResponse}
+import com.gu.digitalSubscriptionExpiry._
 import com.gu.digitalSubscriptionExpiry.common.CommonApiResponses.apiResponse
 import com.gu.digitalSubscriptionExpiry.zuora.GetAccountSummary.{AccountId, AccountSummaryResult}
 import com.gu.digitalSubscriptionExpiry.zuora.GetSubscription._
@@ -46,6 +46,8 @@ class GetSubscriptionExpiryTest extends FlatSpec {
     -\/(apiResponse(expiry, "200"))
   }
 
+  val notFoundResponse = -\/(apiResponse(ErrorResponse("Unknown subscriber", -90), "404"))
+
   it should "return the expiry date for a subscription using billing last name" in {
     val actualResponse = GetSubscriptionExpiry("billingLastName", digitalPack, accountSummary)
     actualResponse shouldEqual expectedResponse
@@ -71,16 +73,51 @@ class GetSubscriptionExpiryTest extends FlatSpec {
     actualResponse shouldEqual expectedResponse
   }
 
-  //  it should "return None if the sub isn't a digital pack" in {
-  //    val maybeExpiryDate = service.getExpiryDateForValidSubscription(monthlyContribution, accountSummary)
-  //
-  //    maybeExpiryDate should equal(None)
-  //  }
-  //TODO SEE IF WE REFACTOR WHERE THE PASSWORD IS CHECKED OR ELSE JUST ADD A TEST FOR THE PASSWORD CHECKING CODE HERE
-  //  it should "return None if the password check fails" in {
-  //    val maybeExpiryDate = service.getExpiryDateForValidSubscription(digitalPack, accountSummary)
-  //
-  //    maybeExpiryDate should equal(None)
-  //  }
+  it should "recognise digital charges with name set to digipack" in {
+
+    val twoWeeksFromNow = nextWeek.plusWeeks(1)
+    val charges = List(
+      RatePlanCharge("DigiPack", lastWeek, nextWeek),
+      RatePlanCharge("Saturday", lastWeek, twoWeeksFromNow),
+      RatePlanCharge("Sunday", lastWeek, twoWeeksFromNow)
+    )
+
+    val digiPackSub = SubscriptionResult(
+      id = SubscriptionId("subId"),
+      name = SubscriptionName("subName"),
+      accountId = AccountId("accountId"),
+      casActivationDate = None,
+      customerAcceptanceDate = lastWeek,
+      startDate = lastWeek,
+      endDate = nextWeek,
+      ratePlans = List(RatePlan("Weekend+", charges))
+    )
+
+    val actualResponse = GetSubscriptionExpiry("123-sold", digiPackSub, accountSummary)
+    actualResponse shouldEqual expectedResponse
+  }
+
+  it should "return not found for invalid password" in {
+    val actualResponse = GetSubscriptionExpiry("invalid password", digitalPack, accountSummary)
+    actualResponse shouldEqual notFoundResponse
+  }
+
+  it should "return not found for expired subscription" in {
+
+    val lastYear = lastWeek.minusYears(1)
+    val expiredDigitalPack = SubscriptionResult(
+      id = SubscriptionId("subId"),
+      name = SubscriptionName("subName"),
+      accountId = AccountId("accountId"),
+      casActivationDate = None,
+      customerAcceptanceDate = lastYear,
+      startDate = lastYear,
+      endDate = lastWeek,
+      ratePlans = List(RatePlan("Digital Pack", List(RatePlanCharge("Digital Pack Monthly", lastYear, lastWeek))))
+    )
+
+    val actualResponse = GetSubscriptionExpiry("123-sold", expiredDigitalPack, accountSummary)
+    actualResponse shouldEqual notFoundResponse
+  }
 
 }
