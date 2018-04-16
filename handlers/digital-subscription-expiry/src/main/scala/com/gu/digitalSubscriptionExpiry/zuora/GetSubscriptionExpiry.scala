@@ -26,17 +26,23 @@ object GetSubscriptionExpiry {
 
   implicit def dateOrdering: Ordering[LocalDate] = Ordering.fromLessThan(_ isAfter _)
 
+  private val digipackChargeNamePrefixes = List("DIGIPACK", "DIGITAL PACK")
+
+  private def isDigipackName(chargeName: String) = {
+    val upperCaseName = chargeName.toUpperCase
+    digipackChargeNamePrefixes.exists(upperCaseName.contains(_))
+  }
+
   private def getExpiryDateForValidSubscription(subscription: SubscriptionResult, accountSummary: AccountSummaryResult, date: LocalDate): Option[LocalDate] = {
-    //TODO THIS DOESN'T WORK WITH THE PAPER + PLANS WE HAVE TO LOOK AT THE CHARGE NAME AND CHECK THAT IT CONTAINS "DIGITAL PACK"
-    val digipackRateplans = subscription.ratePlans.filter(_.productName == "Digital Pack")
 
-    val dateToCheck = if (subscription.startDate.isBefore(date) && subscription.customerAcceptanceDate.isAfter(date)) subscription.customerAcceptanceDate else date
+    val dateToCheck = if (!subscription.startDate.isAfter(date) && subscription.customerAcceptanceDate.isAfter(date)) subscription.customerAcceptanceDate else date
 
-    def isActive(charge: RatePlanCharge) = !charge.effectiveEndDate.isBefore(dateToCheck) && !charge.effectiveStartDate.isAfter(dateToCheck)
+    def isActiveDigipack(charge: RatePlanCharge) = isDigipackName(charge.name) && !charge.effectiveEndDate.isBefore(dateToCheck) && !charge.effectiveStartDate.isAfter(dateToCheck)
 
-    val activeCharges = digipackRateplans.map(_.ratePlanCharges).flatten.filter(isActive)
+    val activeDigipackCharges = subscription.ratePlans.map(_.ratePlanCharges).flatten.filter(isActiveDigipack)
 
-    if (activeCharges.isEmpty) None else Some(activeCharges.map(_.effectiveEndDate).max)
+    //todo cas seems to be using the subscription term end date even though it will check the effective dates of the charges to determine the sub has a digipack. Should we do the same ?
+    if (activeDigipackCharges.isEmpty) None else Some(activeDigipackCharges.map(_.effectiveEndDate).max)
   }
 
   def apply(providedPassword: String, subscription: SubscriptionResult, accountSummary: AccountSummaryResult, date: LocalDate = LocalDate.now()): FailableOp[Unit] =

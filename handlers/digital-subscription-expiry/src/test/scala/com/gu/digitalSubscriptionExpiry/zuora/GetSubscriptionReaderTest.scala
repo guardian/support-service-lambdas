@@ -17,6 +17,7 @@ class GetSubscriptionReaderTest extends FlatSpec {
     val subscriptionStream = getClass.getResourceAsStream("/digitalSubscriptionExpiry/validSubscription.json")
 
     val charges = List(RatePlanCharge(
+      name = "Digital Pack Monthly",
       effectiveStartDate = asDate("20/03/2018"),
       effectiveEndDate = asDate("20/04/2018")
     ))

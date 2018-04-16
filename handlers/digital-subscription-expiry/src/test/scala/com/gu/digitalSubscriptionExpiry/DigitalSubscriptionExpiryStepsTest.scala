@@ -30,7 +30,7 @@ class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
     //-\/(ApiResponse("123", new Headers, "bla"))
   }
   def getAccount(accountId: AccountId): FailableOp[AccountSummaryResult] = {
-    if (accountId != "someAccountId") {
+    if (accountId.value != "someAccountId") {
       -\/(ApiGatewayResponse.internalServerError("zuoraError"))
     } else {
       val summary = AccountSummaryResult(

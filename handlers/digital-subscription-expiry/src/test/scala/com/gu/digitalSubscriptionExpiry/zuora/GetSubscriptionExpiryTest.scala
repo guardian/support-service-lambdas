@@ -21,11 +21,11 @@ class GetSubscriptionExpiryTest extends FlatSpec {
     customerAcceptanceDate = lastWeek,
     startDate = lastWeek,
     endDate = nextWeek,
-    ratePlans = List(RatePlan("Digital Pack", List(RatePlanCharge(lastWeek, nextWeek))))
+    ratePlans = List(RatePlan("Digital Pack", List(RatePlanCharge("Digital Pack Monthly", lastWeek, nextWeek))))
   )
 
   val monthlyContribution = digitalPack.copy(
-    ratePlans = List(RatePlan("Monthly Contribution", List(RatePlanCharge(lastWeek, nextWeek))))
+    ratePlans = List(RatePlan("Monthly Contribution", List(RatePlanCharge("Montly Contribution", lastWeek, nextWeek))))
   )
 
   val accountSummary = AccountSummaryResult(

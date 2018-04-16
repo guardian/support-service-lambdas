@@ -61,6 +61,7 @@ class GetSubscriptionEffectsTest extends FlatSpec with Matchers {
         RatePlan(
           "Promotions",
           List(RatePlanCharge(
+            name = "Discount template",
             effectiveStartDate = asDate("15/12/2017"),
             effectiveEndDate = asDate("15/03/2018")
           ))
@@ -68,6 +69,7 @@ class GetSubscriptionEffectsTest extends FlatSpec with Matchers {
         RatePlan(
           "Digital Pack",
           List(RatePlanCharge(
+            name = "Digital Pack Monthly",
             effectiveStartDate = asDate("15/12/2017"),
             effectiveEndDate = asDate("29/11/2018")
           ))
