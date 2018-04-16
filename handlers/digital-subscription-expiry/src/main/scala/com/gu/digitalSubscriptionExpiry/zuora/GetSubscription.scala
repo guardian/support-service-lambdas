@@ -4,10 +4,9 @@ import com.gu.digitalSubscriptionExpiry.zuora.GetAccountSummary.AccountId
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.{ZuoraDeps, ZuoraRestRequestMaker}
-import org.joda.time.{DateTime, LocalDate}
+import java.time.{ZonedDateTime, LocalDate}
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
-import com.gu.digitalSubscriptionExpiry.common.CommonFormatters._
 import com.gu.util.zuora.RestRequestMaker.{GenericError, NotFound}
 import com.gu.digitalSubscriptionExpiry.common.CommonApiResponses._
 object GetSubscription {
@@ -22,7 +21,7 @@ object GetSubscription {
     id: SubscriptionId,
     name: SubscriptionName,
     accountId: AccountId,
-    casActivationDate: Option[DateTime],
+    casActivationDate: Option[ZonedDateTime],
     customerAcceptanceDate: LocalDate,
     startDate: LocalDate,
     endDate: LocalDate,
@@ -39,7 +38,7 @@ object GetSubscription {
       (__ \ "subscriptionNumber").read[String].map(SubscriptionId.apply) and
       (__ \ "id").read[String].map(SubscriptionName.apply) and
       (__ \ "accountId").read[String].map(AccountId.apply) and
-      (__ \ "ActivationDate__c").readNullable[DateTime] and
+      (__ \ "ActivationDate__c").readNullable[ZonedDateTime] and
       (__ \ "customerAcceptanceDate").read[LocalDate] and
       (__ \ "termStartDate").read[LocalDate] and
       (__ \ "termEndDate").read[LocalDate] and

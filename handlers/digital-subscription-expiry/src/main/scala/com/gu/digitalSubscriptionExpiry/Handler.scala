@@ -10,7 +10,6 @@ import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.ApiGatewayHandler
 import com.gu.util.zuora.{ZuoraDeps, ZuoraRestConfig}
 import com.gu.util.{Config, Logging}
-import org.joda.time.LocalDate
 import play.api.libs.json.{Json, Reads}
 
 object Handler extends Logging {
@@ -33,13 +32,12 @@ object Handler extends Logging {
 
         val emergencyTokens = EmergencyTokens(config.stepsConfig.emergencyTokens)
         val zuoraDeps = ZuoraDeps(rawEffects.response, config.stepsConfig.zuoraRestConfig)
-        val now = rawEffects.now()
         DigitalSubscriptionExpirySteps(
           getEmergencyTokenExpiry = GetTokenExpiry(emergencyTokens),
           getSubscription = GetSubscription(zuoraDeps),
           getAccountSummary = GetAccountSummary(zuoraDeps),
           getSubscriptionExpiry = GetSubscriptionExpiry.apply,
-          today = new LocalDate(now.getYear, now.getMonthValue, now.getDayOfMonth)
+          today = rawEffects.now()
         )
       }
 

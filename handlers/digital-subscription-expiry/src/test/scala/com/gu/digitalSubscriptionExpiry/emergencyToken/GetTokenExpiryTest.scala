@@ -1,9 +1,10 @@
 package com.gu.digitalSubscriptionExpiry.emergencyToken
 
+import java.time.LocalDate
+
 import com.gu.cas.{PrefixedTokens, SevenDay}
 import com.gu.digitalSubscriptionExpiry.{Expiry, ExpiryType, SuccessResponse}
 import com.gu.util.apigateway.ResponseModels.{ApiResponse, Headers}
-import org.joda.time.format.DateTimeFormat
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
 import scalaz.{-\/, \/-}
@@ -20,10 +21,8 @@ class GetTokenExpiryTest extends FlatSpec with Matchers {
   }
   it should "read valid token" in {
 
-    val dateFormatter = DateTimeFormat.forPattern("dd/MM/yyyy")
-
     val expiry = Expiry(
-      expiryDate = dateFormatter.parseLocalDate("21/07/2017"),
+      expiryDate = LocalDate.of(2017, 7, 21),
       expiryType = ExpiryType.SUB,
       subscriptionCode = Some(SevenDay),
       provider = Some("G99")

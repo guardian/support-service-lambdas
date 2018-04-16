@@ -8,7 +8,7 @@ import com.gu.util.apigateway.ApiGatewayHandler.Operation
 import com.gu.util.apigateway.ApiGatewayRequest
 import com.gu.util.reader.Types.FailableOp
 import main.scala.com.gu.digitalSubscriptionExpiry.DigitalSubscriptionExpiryRequest
-import org.joda.time.LocalDate
+import java.time.LocalDate
 import com.gu.util.reader.Types._
 import play.api.libs.json.{JsValue, Json}
 

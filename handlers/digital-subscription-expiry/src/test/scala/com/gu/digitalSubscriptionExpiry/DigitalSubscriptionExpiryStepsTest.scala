@@ -5,8 +5,7 @@ import com.gu.digitalSubscriptionExpiry.zuora.GetAccountSummary.{AccountId, Acco
 import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.apigateway.ResponseModels.{ApiResponse, Headers}
 import com.gu.util.reader.Types.FailableOp
-import org.joda.time.{DateTime, LocalDate}
-import org.joda.time.format.DateTimeFormat
+import java.time.{ZonedDateTime, LocalDate}
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
 import scalaz.{-\/, \/-}
@@ -15,9 +14,8 @@ import com.gu.digitalSubscriptionExpiry.common.CommonApiResponses._
 class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
 
   val validTokenResponse = {
-    val dateFormatter = DateTimeFormat.forPattern("dd/MM/yyyy")
     val expiry = Expiry(
-      expiryDate = dateFormatter.parseLocalDate("26/10/1985"),
+      expiryDate = LocalDate.of(1985, 10, 26),
       expiryType = ExpiryType.SUB,
       subscriptionCode = Some(SevenDay),
       provider = Some("G99")
@@ -57,7 +55,7 @@ class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
       getSubscription = getSubId,
       getAccountSummary = getAccount,
       getSubscriptionExpiry = getSubExpiry,
-      today = DateTime.now().toLocalDate
+      today = ZonedDateTime.now().toLocalDate
 
     )
   }

@@ -1,10 +1,12 @@
 package com.gu.digitalSubscriptionExpiry
 
+import java.time.LocalDate
+
 import com.gu.cas.SevenDay
 import org.scalatest.FlatSpec
 import org.scalatest.Matchers._
 import play.api.libs.json.Json
-import org.joda.time.format.DateTimeFormat
+
 class DigitalSubscriptionExpiryResponseTest extends FlatSpec {
 
   it should "serialise success response" in {
@@ -21,8 +23,7 @@ class DigitalSubscriptionExpiryResponseTest extends FlatSpec {
  |        }""".stripMargin
     val expectedJson = Json.parse(expectedstr)
 
-    val formatter = DateTimeFormat.forPattern("dd/MM/yyyy")
-    val expiryValue = formatter.parseLocalDate("26/10/1985")
+    val expiryValue = LocalDate.of(1985, 10, 26)
     val res = SuccessResponse(Expiry(
       expiryDate = expiryValue,
       expiryType = "ExpiryTypeValue",
