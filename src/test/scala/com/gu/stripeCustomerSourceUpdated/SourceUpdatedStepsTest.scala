@@ -327,9 +327,9 @@ class SourceUpdatedStepsUpdatePaymentMethodTest extends FlatSpec with Matchers {
     val actual = SourceUpdatedSteps.createUpdatedDefaultPaymentMethod(
       TestData.zuoraDeps(effects)
     )(
-      PaymentMethodFields(PaymentMethodId("PMID"), AccountId("fake"), NumConsecutiveFailures(1)),
-      eventData
-    )
+        PaymentMethodFields(PaymentMethodId("PMID"), AccountId("fake"), NumConsecutiveFailures(1)),
+        eventData
+      )
 
     val expectedPOST = BasicRequest(
       "POST",

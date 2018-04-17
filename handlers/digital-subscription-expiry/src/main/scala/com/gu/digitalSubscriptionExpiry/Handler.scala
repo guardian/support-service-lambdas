@@ -8,7 +8,7 @@ import com.gu.digitalSubscriptionExpiry.zuora.{GetAccountSummary, GetSubscriptio
 import com.gu.effects.RawEffects
 import com.gu.util.apigateway.ApiGatewayHandler
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
-import com.gu.util.zuora.{ZuoraDeps, ZuoraRestConfig}
+import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
 import com.gu.util.{Config, Logging}
 import play.api.libs.json.{Json, Reads}
 
@@ -31,12 +31,13 @@ object Handler extends Logging {
       config => {
 
         val emergencyTokens = EmergencyTokens(config.stepsConfig.emergencyTokens)
-        val zuoraDeps = ZuoraDeps(rawEffects.response, config.stepsConfig.zuoraRestConfig)
+        val zuoraRequests = ZuoraRestRequestMaker(rawEffects.response, config.stepsConfig.zuoraRestConfig)
+
         DigitalSubscriptionExpirySteps(
           getEmergencyTokenExpiry = GetTokenExpiry(emergencyTokens),
-          getSubscription = GetSubscription(zuoraDeps),
-          updateSubscription = UpdateSubscription(zuoraDeps),
-          getAccountSummary = GetAccountSummary(zuoraDeps),
+          getSubscription = GetSubscription(zuoraRequests),
+          updateSubscription = UpdateSubscription(zuoraRequests),
+          getAccountSummary = GetAccountSummary(zuoraRequests),
           getSubscriptionExpiry = GetSubscriptionExpiry.apply,
           today = rawEffects.now()
         )

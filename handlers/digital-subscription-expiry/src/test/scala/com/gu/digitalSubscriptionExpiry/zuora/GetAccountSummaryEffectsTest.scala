@@ -5,10 +5,9 @@ import com.gu.digitalSubscriptionExpiry.Handler.StepsConfig
 import com.gu.digitalSubscriptionExpiry.zuora.GetAccountSummary.{AccountId, AccountSummaryResult}
 import com.gu.effects.{ConfigLoad, RawEffects}
 import com.gu.test.EffectsTest
-import com.gu.util.zuora.ZuoraDeps
+import com.gu.util.zuora.ZuoraRestRequestMaker
 import com.gu.util.{Config, Stage}
 import org.scalatest.{FlatSpec, Matchers}
-
 import scalaz.syntax.std.either._
 import scalaz.{\/, \/-}
 
@@ -19,8 +18,8 @@ class GetAccountSummaryEffectsTest extends FlatSpec with Matchers {
     val actual: \/[io.Serializable, AccountSummaryResult] = for {
       configAttempt <- ConfigLoad.load(Stage("DEV")).toEither.disjunction
       config <- Config.parseConfig[StepsConfig](configAttempt)
-      deps: ZuoraDeps = ZuoraDeps(RawEffects.createDefault.response, config.stepsConfig.zuoraRestConfig)
-      subscription <- GetAccountSummary(deps)(testAccountId)
+      zuoraRequests = ZuoraRestRequestMaker(RawEffects.createDefault.response, config.stepsConfig.zuoraRestConfig)
+      subscription <- GetAccountSummary(zuoraRequests)(testAccountId)
     } yield {
       subscription
     }

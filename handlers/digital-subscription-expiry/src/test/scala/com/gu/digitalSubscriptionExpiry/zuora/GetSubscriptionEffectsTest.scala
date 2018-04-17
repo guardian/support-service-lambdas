@@ -8,12 +8,12 @@ import com.gu.digitalSubscriptionExpiry.zuora.GetAccountSummary.AccountId
 import com.gu.digitalSubscriptionExpiry.zuora.GetSubscription.{RatePlan, RatePlanCharge, SubscriptionId, SubscriptionName, SubscriptionResult}
 import com.gu.effects.{ConfigLoad, RawEffects}
 import com.gu.test.EffectsTest
-import com.gu.util.zuora.ZuoraDeps
 import com.gu.util.{Config, Stage}
 import org.scalatest.{FlatSpec, Matchers}
 import scalaz.{-\/, \/, \/-}
 import scalaz.syntax.std.either._
 import com.gu.digitalSubscriptionExpiry.common.CommonApiResponses._
+import com.gu.util.zuora.ZuoraRestRequestMaker
 class GetSubscriptionEffectsTest extends FlatSpec with Matchers {
 
   it should "return not found if sub id is invalid" taggedAs EffectsTest in {
@@ -22,8 +22,8 @@ class GetSubscriptionEffectsTest extends FlatSpec with Matchers {
     val actual: \/[io.Serializable, SubscriptionResult] = for {
       configAttempt <- ConfigLoad.load(Stage("DEV")).toEither.disjunction
       config <- Config.parseConfig[StepsConfig](configAttempt)
-      deps: ZuoraDeps = ZuoraDeps(RawEffects.createDefault.response, config.stepsConfig.zuoraRestConfig)
-      subscription <- GetSubscription(deps)(testSubscriptionId)
+      zuoraRequests = ZuoraRestRequestMaker(RawEffects.createDefault.response, config.stepsConfig.zuoraRestConfig)
+      subscription <- GetSubscription(zuoraRequests)(testSubscriptionId)
     } yield {
       subscription
     }
@@ -36,8 +36,8 @@ class GetSubscriptionEffectsTest extends FlatSpec with Matchers {
     val actual: \/[io.Serializable, SubscriptionResult] = for {
       configAttempt <- ConfigLoad.load(Stage("DEV")).toEither.disjunction
       config <- Config.parseConfig[StepsConfig](configAttempt)
-      deps: ZuoraDeps = ZuoraDeps(RawEffects.createDefault.response, config.stepsConfig.zuoraRestConfig)
-      subscription <- GetSubscription(deps)(testSubscriptionId)
+      zuoraRequests = ZuoraRestRequestMaker(RawEffects.createDefault.response, config.stepsConfig.zuoraRestConfig)
+      subscription <- GetSubscription(zuoraRequests)(testSubscriptionId)
     } yield {
       subscription
     }
