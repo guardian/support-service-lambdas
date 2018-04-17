@@ -1,7 +1,8 @@
 package com.gu.digitalSubscriptionExpiry.zuora
 
 import java.io
-import java.time.LocalDate
+import java.time.{LocalDate, LocalTime, ZoneId, ZonedDateTime}
+
 import com.gu.digitalSubscriptionExpiry.Handler.StepsConfig
 import com.gu.digitalSubscriptionExpiry.zuora.GetAccountSummary.AccountId
 import com.gu.digitalSubscriptionExpiry.zuora.GetSubscription.{RatePlan, RatePlanCharge, SubscriptionId, SubscriptionName, SubscriptionResult}
@@ -41,13 +42,22 @@ class GetSubscriptionEffectsTest extends FlatSpec with Matchers {
       subscription
     }
 
+    def removeActivationTime(sub: SubscriptionResult) = sub.copy(
+      casActivationDate = sub.casActivationDate.map {
+        activationDateTime =>
+          val activationLocalDate = activationDateTime.toLocalDate
+          ZonedDateTime.of(activationLocalDate, LocalTime.of(0, 0, 0), ZoneId.of("GMT"))
+      }
+    )
+
     val customerAcceptanceDate = LocalDate.of(2017, 12, 15)
+    val expectedActivationDate = ZonedDateTime.of(2018, 4, 13, 0, 0, 0, 0, ZoneId.of("GMT"))
     val startDate = LocalDate.of(2017, 11, 29)
     val expected = SubscriptionResult(
       testSubscriptionId,
       SubscriptionName("2c92c0f860017cd501600893134617b3"),
       AccountId("2c92c0f860017cd501600893130317a7"),
-      None, // todo fix this Some(asDateTime("2018-04-13T11:44:06.352+01:00"))
+      Some(expectedActivationDate),
       customerAcceptanceDate,
       startDate,
       startDate.plusYears(1),
@@ -71,6 +81,6 @@ class GetSubscriptionEffectsTest extends FlatSpec with Matchers {
       )
     )
 
-    actual should be(\/-(expected))
+    actual.map(removeActivationTime) should be(\/-(expected))
   }
 }
