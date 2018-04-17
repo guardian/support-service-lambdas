@@ -107,6 +107,11 @@ class GetSubscriptionExpiryTest extends FlatSpec {
     actualResponse shouldEqual notFoundResponse
   }
 
+  it should "return not found for non digipack subscription" in {
+    val actualResponse = GetSubscriptionExpiry("billingLastName", monthlyContribution, accountSummary)
+    actualResponse shouldEqual notFoundResponse
+  }
+
   it should "return not found for expired subscription" in {
 
     val lastYear = lastWeek.minusYears(1)
