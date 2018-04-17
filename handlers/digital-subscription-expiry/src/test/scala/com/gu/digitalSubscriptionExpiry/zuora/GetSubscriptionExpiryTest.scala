@@ -68,6 +68,11 @@ class GetSubscriptionExpiryTest extends FlatSpec {
     actualResponse shouldEqual expectedResponse
   }
 
+  it should "return the expiry date for a subscription on its first day" in {
+    val actualResponse = GetSubscriptionExpiry("billingLastName", digitalPack, accountSummary, lastWeek)
+    actualResponse shouldEqual expectedResponse
+  }
+
   it should "ignore non alphanumerical characters in password" in {
     val actualResponse = GetSubscriptionExpiry("123-sold", digitalPack, accountSummary)
     actualResponse shouldEqual expectedResponse
@@ -99,6 +104,11 @@ class GetSubscriptionExpiryTest extends FlatSpec {
 
   it should "return not found for invalid password" in {
     val actualResponse = GetSubscriptionExpiry("invalid password", digitalPack, accountSummary)
+    actualResponse shouldEqual notFoundResponse
+  }
+
+  it should "return not found for non digipack subscription" in {
+    val actualResponse = GetSubscriptionExpiry("billingLastName", monthlyContribution, accountSummary)
     actualResponse shouldEqual notFoundResponse
   }
 
