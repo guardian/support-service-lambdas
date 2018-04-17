@@ -36,14 +36,6 @@ object DigitalSubscriptionExpirySteps extends Logging {
       subscriptionEndDate <- getSubscriptionExpiry(password, subscriptionResult, accountSummary, today)
     } yield {}
 
-    //TODO
-    //    def healthcheck() =
-    //      for {
-    //        identityId <- getByEmail(EmailAddress("john.duffell@guardian.co.uk")).leftMap(a => ApiGatewayResponse.internalServerError(a.toString)).withLogging("healthcheck getByEmail")
-    //        _ <- countZuoraAccountsForIdentityId(identityId)
-    //        _ <- sfAuth()
-    //      } yield ()
-
     Operation.noHealthcheck(steps, false)
 
   }
