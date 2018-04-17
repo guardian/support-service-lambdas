@@ -12,21 +12,20 @@ import com.gu.util.apigateway.ApiGatewayHandler.Operation
 import com.gu.util.apigateway.ApiGatewayRequest
 import com.gu.util.exacttarget.EmailRequest
 import com.gu.util.reader.Types._
-import com.gu.util.zuora.ZuoraDeps
+import com.gu.util.zuora.ZuoraRestRequestMaker
 import com.gu.util.{Config, Logging}
 import okhttp3.{Request, Response}
 import play.api.libs.json.Json
-
 import scalaz.\/-
 
 object AutoCancelSteps extends Logging {
 
   object AutoCancelStepsDeps {
     def default(now: LocalDate, response: Request => Response, config: Config[StepsConfig]): AutoCancelStepsDeps = {
-      val zuoraDeps = ZuoraDeps(response, config.stepsConfig.zuoraRestConfig)
+      val zuoraRequests = ZuoraRestRequestMaker(response, config.stepsConfig.zuoraRestConfig)
       AutoCancelStepsDeps(
-        AutoCancel.apply(zuoraDeps),
-        AutoCancelDataCollectionFilter.apply(AutoCancelDataCollectionFilter.ACFilterDeps.default(now, zuoraDeps)),
+        AutoCancel.apply(zuoraRequests),
+        AutoCancelDataCollectionFilter.apply(AutoCancelDataCollectionFilter.ACFilterDeps.default(now, zuoraRequests)),
         config.etConfig.etSendIDs,
         ZuoraEmailSteps.sendEmailRegardingAccount(ZuoraEmailStepsDeps.default(response, config))
       )

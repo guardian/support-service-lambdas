@@ -10,7 +10,7 @@ class SalesforceAuthenticateTest extends FlatSpec with Matchers {
 
   it should "get auth SF correctly" in {
     val effects = new TestingRawEffects(postResponses = SalesforceAuthenticateData.postResponses)
-    val auth = SalesforceAuthenticate(effects.response, SFAuthConfig(
+    val auth = SalesforceAuthenticate.doAuth(effects.response, SFAuthConfig(
       "https://sfurl.haha",
       "clientsfclient",
       "clientsecretsfsecret",

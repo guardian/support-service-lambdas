@@ -3,6 +3,7 @@ package com.gu.identity
 import com.gu.effects.TestingRawEffects
 import com.gu.effects.TestingRawEffects.HTTPResponse
 import com.gu.identity.GetByEmail.NotFound
+import com.gu.identity.GetByEmailTest.{NotFoundTestData, TestData}
 import com.gu.identityBackfill.Types.{EmailAddress, IdentityId}
 import org.scalatest.{FlatSpec, Matchers}
 import scalaz.{-\/, \/, \/-}
@@ -31,49 +32,54 @@ class GetByEmailTest extends FlatSpec with Matchers {
 
 }
 
-object TestData {
+object GetByEmailTest {
 
-  def responses: Map[String, HTTPResponse] = Map(
-    "/user?emailAddress=email@address" -> HTTPResponse(200, TestData.dummyIdentityResponse)
-  )
-  val dummyIdentityResponse: String =
-    """
-      |{
-      |    "status": "ok",
-      |    "user": {
-      |        "id": "1234",
-      |        "dates": {
-      |            "accountCreatedDate": "2015-03-17T11:09:08Z"
-      |        },
-      |        "primaryEmailAddress": "john.duffell@guardian.co.uk",
-      |        "publicFields": {
-      |            "username": "johnduffell2",
-      |            "displayName": "johnduffell2",
-      |            "vanityUrl": "johnduffell2",
-      |            "usernameLowerCase": "johnduffell2"
-      |        }
-      |    }
-      |}
-    """.stripMargin
+  object TestData {
 
-}
+    def responses: Map[String, HTTPResponse] = Map(
+      "/user?emailAddress=email@address" -> HTTPResponse(200, TestData.dummyIdentityResponse)
+    )
 
-object NotFoundTestData {
+    val dummyIdentityResponse: String =
+      """
+        |{
+        |    "status": "ok",
+        |    "user": {
+        |        "id": "1234",
+        |        "dates": {
+        |            "accountCreatedDate": "2015-03-17T11:09:08Z"
+        |        },
+        |        "primaryEmailAddress": "john.duffell@guardian.co.uk",
+        |        "publicFields": {
+        |            "username": "johnduffell2",
+        |            "displayName": "johnduffell2",
+        |            "vanityUrl": "johnduffell2",
+        |            "usernameLowerCase": "johnduffell2"
+        |        }
+        |    }
+        |}
+      """.stripMargin
 
-  def responses: Map[String, HTTPResponse] = Map(
-    "/user?emailAddress=email@address" -> HTTPResponse(404, TestData.dummyIdentityResponse)
-  )
-  val dummyIdentityResponse: String =
-    """
-      |{
-      |    "status": "error",
-      |    "errors": [
-      |        {
-      |            "message": "Not found",
-      |            "description": "Resource not found"
-      |        }
-      |    ]
-      |}
-    """.stripMargin
+  }
+
+  object NotFoundTestData {
+
+    def responses: Map[String, HTTPResponse] = Map(
+      "/user?emailAddress=email@address" -> HTTPResponse(404, TestData.dummyIdentityResponse)
+    )
+    val dummyIdentityResponse: String =
+      """
+        |{
+        |    "status": "error",
+        |    "errors": [
+        |        {
+        |            "message": "Not found",
+        |            "description": "Resource not found"
+        |        }
+        |    ]
+        |}
+      """.stripMargin
+
+  }
 
 }

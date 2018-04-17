@@ -1,32 +1,30 @@
 package com.gu.autoCancel
 
-import com.gu.autoCancel.AutoCancel.AutoCancelRequest
-import com.gu.util.{Logging, ZuoraToApiGateway}
-import com.gu.util.apigateway.ApiGatewayResponse.noActionRequired
-import com.gu.util.reader.Types._
-import com.gu.util.zuora.ZuoraGetAccountSummary.{AccountSummary, Invoice}
-import com.gu.util.zuora.ZuoraModels.SubscriptionId
-import com.gu.util.zuora.{ZuoraDeps, ZuoraGetAccountSummary}
 import java.time.LocalDate
 
-import com.gu.util.zuora.internal.Types.WithDepsClientFailableOp
-
+import com.gu.autoCancel.AutoCancel.AutoCancelRequest
+import com.gu.util.apigateway.ApiGatewayResponse.noActionRequired
+import com.gu.util.reader.Types._
+import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, Requests}
+import com.gu.util.zuora.ZuoraGetAccountSummary
+import com.gu.util.zuora.ZuoraGetAccountSummary.{AccountSummary, Invoice}
+import com.gu.util.zuora.ZuoraModels.SubscriptionId
+import com.gu.util.{Logging, ZuoraToApiGateway}
 import scalaz.Scalaz._
 
 object AutoCancelDataCollectionFilter extends Logging {
 
   case class ACFilterDeps(
     now: LocalDate,
-    getAccountSummary: String => WithDepsClientFailableOp[ZuoraDeps, AccountSummary],
-    zuoraDeps: ZuoraDeps
+    getAccountSummary: String => ClientFailableOp[AccountSummary]
   )
 
   object ACFilterDeps {
-    def default(now: LocalDate, zuoraDeps: ZuoraDeps): ACFilterDeps = {
+    @deprecated("do the wiring in the handler in future")
+    def default(now: LocalDate, requests: Requests): ACFilterDeps = {
       ACFilterDeps(
         now,
-        ZuoraGetAccountSummary.apply,
-        zuoraDeps
+        ZuoraGetAccountSummary.apply(requests)
       )
     }
   }
@@ -34,7 +32,7 @@ object AutoCancelDataCollectionFilter extends Logging {
   def apply(deps: ACFilterDeps)(autoCancelCallout: AutoCancelCallout): FailableOp[AutoCancelRequest] = {
     val accountId = autoCancelCallout.accountId
     for {
-      accountSummary <- deps.getAccountSummary(accountId).leftMap(ZuoraToApiGateway.fromClientFail).run.run(deps.zuoraDeps).withLogging("getAccountSummary")
+      accountSummary <- deps.getAccountSummary(accountId).leftMap(ZuoraToApiGateway.fromClientFail).withLogging("getAccountSummary")
       subToCancel <- getSubscriptionToCancel(accountSummary).withLogging("getSubscriptionToCancel")
       cancellationDate <- getCancellationDateFromInvoices(accountSummary, deps.now).withLogging("getCancellationDateFromInvoices")
     } yield AutoCancelRequest(accountId, subToCancel, cancellationDate)

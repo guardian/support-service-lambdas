@@ -7,15 +7,12 @@ import com.gu.stripeCustomerSourceUpdated.SourceUpdatedSteps.StepsConfig
 import com.gu.stripeCustomerSourceUpdated.{StripeDeps, StripeSignatureChecker}
 import com.gu.util.ETConfig.{ETSendId, ETSendIds}
 import com.gu.util._
-import com.gu.util.zuora.RestRequestMaker.ClientFailableOp
 import com.gu.util.zuora.ZuoraGetInvoiceTransactions.{InvoiceItem, InvoiceTransactionSummary, ItemisedInvoice}
-import com.gu.util.zuora.internal.Types._
-import com.gu.util.zuora.{ZuoraDeps, ZuoraRestConfig}
+import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
 import org.scalatest.Matchers
 import play.api.libs.json.Json
 
 import scala.util.Success
-import scalaz.{Reader, \/}
 
 object TestData extends Matchers {
 
@@ -57,23 +54,7 @@ object TestData extends Matchers {
 
   val handlerDeps =
     (Stage("DEV"), Success(""))
-  def zuoraDeps(effects: TestingRawEffects) = ZuoraDeps(effects.response, TestData.fakeZuoraConfig)
+  def zuoraDeps(effects: TestingRawEffects) = ZuoraRestRequestMaker(effects.response, TestData.fakeZuoraConfig)
   val stripeDeps = StripeDeps(TestData.fakeStripeConfig, new StripeSignatureChecker)
-
-}
-
-object WithDependenciesFailableOp {
-
-  // if we have a failable op in a for comprehension, this call sits at the end of the line to massage the type
-  implicit class FailableOpOps[A](failableOp: ClientFailableOp[A]) {
-
-    def toEitherTPureReader[T]: WithDepsClientFailableOp[T, A] =
-      Reader[T, ClientFailableOp[A]]((_: T) => failableOp).toEitherT
-
-  }
-
-  // lifts any plain value all the way in, usually useful in tests
-  def liftT[R, T](value: R): WithDepsClientFailableOp[T, R] =
-    \/.right(value).toEitherTPureReader[T]
 
 }

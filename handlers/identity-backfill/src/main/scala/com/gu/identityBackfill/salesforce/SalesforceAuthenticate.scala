@@ -1,9 +1,12 @@
 package com.gu.identityBackfill.salesforce
 
+import com.gu.identityBackfill.salesforce.SalesforceAuthenticate.SalesforceAuth
 import com.gu.util.Logging
 import com.gu.util.reader.Types.{FailableOp, _}
+import com.gu.util.zuora.RestRequestMaker
 import okhttp3.{FormBody, Request, Response}
 import play.api.libs.json.{Json, Reads}
+import scalaz.\/-
 
 object SalesforceAuthenticate extends Logging {
 
@@ -25,13 +28,21 @@ object SalesforceAuthenticate extends Logging {
     implicit val salesforceAuthReads: Reads[SalesforceAuth] = Json.reads[SalesforceAuth]
   }
 
-  def apply(
+  def doAuth(
     response: (Request => Response),
     config: SFAuthConfig
   ): FailableOp[SalesforceAuth] = {
     val request: Request = buildAuthRequest(config)
     val body = response(request).body().string()
     Json.parse(body).validate[SalesforceAuth].toFailableOp("Failed to authenticate with Salesforce").withLogging(s"salesforce auth for $body")
+  }
+
+  def apply(
+    response: (Request => Response),
+    config: SFAuthConfig
+  ): FailableOp[RestRequestMaker.Requests] = {
+    doAuth(response, config)
+      .map(sfAuth => SalesforceRestRequestMaker(sfAuth, response))
   }
 
   private def buildAuthRequest(config: SFAuthConfig) = {
@@ -50,3 +61,17 @@ object SalesforceAuthenticate extends Logging {
   }
 
 }
+
+object SalesforceRestRequestMaker extends Logging {
+
+  def apply(salesforceAuth: SalesforceAuth, response: Request => Response): RestRequestMaker.Requests = {
+    new RestRequestMaker.Requests(
+      headers = Map("Authorization" -> s"Bearer ${salesforceAuth.access_token}"),
+      baseUrl = salesforceAuth.instance_url,
+      getResponse = response,
+      jsonIsSuccessful = _ => \/-(())
+    )
+  }
+
+}
+

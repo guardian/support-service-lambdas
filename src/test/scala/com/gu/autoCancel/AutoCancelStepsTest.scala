@@ -2,18 +2,16 @@ package com.gu.autoCancel
 
 import java.time.LocalDate
 
-import com.gu.effects.TestingRawEffects.BasicRequest
+import com.gu.TestData
 import com.gu.autoCancel.AutoCancel.AutoCancelRequest
 import com.gu.autoCancel.AutoCancelDataCollectionFilter.ACFilterDeps
 import com.gu.effects.TestingRawEffects
+import com.gu.effects.TestingRawEffects.BasicRequest
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.ZuoraAccount.{AccountId, PaymentMethodId}
-import com.gu.util.zuora.ZuoraDeps
 import com.gu.util.zuora.ZuoraGetAccountSummary.{AccountSummary, BasicAccountInfo, Invoice, SubscriptionSummary}
 import com.gu.util.zuora.ZuoraModels._
-import com.gu.{TestData, WithDependenciesFailableOp}
 import org.scalatest._
-
 import scalaz.\/-
 
 class AutoCancelStepsTest extends FlatSpec with Matchers {
@@ -23,14 +21,9 @@ class AutoCancelStepsTest extends FlatSpec with Matchers {
   val singleOverdueInvoice = Invoice("inv123", LocalDate.now.minusDays(14), 11.99, "Posted")
 
   "auto cancel filter 2" should "cancel attempt" in {
-    val a = new TestingRawEffects(false, 1)
     val aCDeps = ACFilterDeps(
       now = LocalDate.now,
-      getAccountSummary = _ => WithDependenciesFailableOp.liftT(AccountSummary(basicInfo, List(subscription), List(singleOverdueInvoice))),
-      ZuoraDeps(
-        a.response,
-        TestData.fakeZuoraConfig
-      )
+      getAccountSummary = _ => \/-(AccountSummary(basicInfo, List(subscription), List(singleOverdueInvoice)))
     )
     val autoCancelCallout = AutoCancelHandlerTest.fakeCallout(true)
     val cancel: FailableOp[AutoCancelRequest] = AutoCancelDataCollectionFilter(aCDeps)(autoCancelCallout)
