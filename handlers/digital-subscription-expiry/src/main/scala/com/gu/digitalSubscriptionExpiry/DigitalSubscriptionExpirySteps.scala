@@ -36,11 +36,11 @@ object DigitalSubscriptionExpirySteps extends Logging {
         jsonRequest <- parseJson(apiGatewayRequest.body).toFailableOp(badRequest)
         expiryRequest <- Json.fromJson[DigitalSubscriptionExpiryRequest](jsonRequest).asOpt.toFailableOp(badRequest)
         _ <- getEmergencyTokenExpiry(expiryRequest.subscriberId)
-        subscriptionId = SubscriptionId(expiryRequest.subscriberId)
+        subscriptionId = SubscriptionId(expiryRequest.subscriberId.trim.dropWhile(_ == '0'))
         subscriptionResult <- getSubscription(subscriptionId)
         _ = if (skipActivation(apiGatewayRequest) != Some(true)) updateSubscription(subscriptionResult, LocalDateTime.now().format(ISO_LOCAL_DATE_TIME)) //TODO: trailing zeros??? and why can't this be a default param
         accountSummary <- getAccountSummary(subscriptionResult.accountId)
-        password <- expiryRequest.password.toFailableOp(badRequest)
+        password <- expiryRequest.password.toFailableOp(notFoundResponse)
         subscriptionEndDate <- getSubscriptionExpiry(password, subscriptionResult, accountSummary, today)
       } yield {}
 

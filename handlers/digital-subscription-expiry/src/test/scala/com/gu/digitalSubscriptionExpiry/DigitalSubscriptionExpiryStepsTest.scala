@@ -5,11 +5,12 @@ import com.gu.digitalSubscriptionExpiry.zuora.GetAccountSummary.{AccountId, Acco
 import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.apigateway.ResponseModels.{ApiResponse, Headers}
 import com.gu.util.reader.Types.FailableOp
-import java.time.{ZonedDateTime, LocalDate}
+import java.time.{LocalDate, ZonedDateTime}
+
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
 import scalaz.{-\/, \/-}
-import com.gu.digitalSubscriptionExpiry.zuora.GetSubscription.{SubscriptionId, SubscriptionResult}
+import com.gu.digitalSubscriptionExpiry.zuora.GetSubscription.{SubscriptionId, SubscriptionName, SubscriptionResult}
 import com.gu.digitalSubscriptionExpiry.common.CommonApiResponses._
 
 class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
@@ -24,9 +25,23 @@ class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
     apiResponse(SuccessResponse(expiry), "200")
   }
 
+  val successfulResponseFromZuora = -\/(ApiResponse("123", new Headers, "valid zuora response"))
+
   def getSubId(s: SubscriptionId): FailableOp[SubscriptionResult] = {
-    -\/(notFoundResponse)
-    //-\/(ApiResponse("123", new Headers, "bla"))
+    if (s.get == "validZuoraSubId") {
+      val response = SubscriptionResult(
+        id = s,
+        name = SubscriptionName("someSubName"),
+        accountId = AccountId("someAccountId"),
+        casActivationDate = None,
+        customerAcceptanceDate = LocalDate.of(2015, 10, 21),
+        startDate = LocalDate.of(2015, 10, 21),
+        endDate = LocalDate.of(2015, 10, 26),
+        ratePlans = Nil
+      )
+      \/-(response)
+    } else
+      -\/(notFoundResponse)
   }
   def getAccount(accountId: AccountId): FailableOp[AccountSummaryResult] = {
     if (accountId.value != "someAccountId") {
@@ -42,10 +57,7 @@ class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
       \/-(summary)
     }
   }
-  //todo this is not done!!
-  def getSubExpiry(password: String, subscriptionResult: SubscriptionResult, accountSummaryResult: AccountSummaryResult, date: LocalDate): FailableOp[Unit] = {
-    -\/(ApiResponse("123", new Headers, "bla"))
-  }
+  def getSubExpiry(password: String, subscriptionResult: SubscriptionResult, accountSummaryResult: AccountSummaryResult, date: LocalDate): FailableOp[Unit] = successfulResponseFromZuora
 
   def getTokenExpiry(token: String): FailableOp[Unit] = {
     if (token == "validToken") -\/(validTokenResponse) else \/-(())
@@ -61,6 +73,37 @@ class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
       getAccountSummary = getAccount,
       getSubscriptionExpiry = getSubExpiry,
       today = ZonedDateTime.now().toLocalDate
+    )
+  }
+
+  it should "trim leading spaces and zeroes and return subscription from zuora" in {
+    val request =
+      """{
+    |      "subscriberId" : "   0000validZuoraSubId ",
+    |      "password" : "somePassword"
+    |    }
+
+  """.stripMargin
+
+    val actual = digitalSubscriptionExpirySteps.steps(ApiGatewayRequest(None, request, None))
+
+    actual.shouldBe(successfulResponseFromZuora)
+  }
+
+  it should "return not found for valid zuora id with no password provided" in {
+    val request =
+      """{
+    |      "subscriberId" : "validZuoraSubId"
+    |    }
+
+  """.stripMargin
+
+    val actual = digitalSubscriptionExpirySteps.steps(ApiGatewayRequest(None, request, None))
+
+    verifyResponse(
+      actualResponse = actual,
+      expectedBody = expectedNotFoundResponseBody,
+      expectedStatus = "404"
     )
   }
 
@@ -167,6 +210,15 @@ class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
       |    "error": {
       |        "message": "Mandatory data missing from request",
       |        "code": -50
+      |    }
+      |}
+    """.stripMargin
+
+  val expectedNotFoundResponseBody =
+    """{
+      |    "error": {
+      |       "message": "Unknown subscriber",
+      |        "code": -90
       |    }
       |}
     """.stripMargin
