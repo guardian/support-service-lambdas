@@ -3,16 +3,15 @@ package com.gu.identityBackfill.zuora
 import com.gu.effects.TestingRawEffects
 import com.gu.effects.TestingRawEffects.{HTTPResponse, POSTRequest}
 import com.gu.identityBackfill.Types._
-import com.gu.util.zuora.{ZuoraDeps, ZuoraRestConfig}
+import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
 import org.scalatest.{FlatSpec, Matchers}
-
 import scalaz.\/-
 
 class CountZuoraAccountsForIdentityIdTest extends FlatSpec with Matchers {
 
   it should "get one result for an identity id if there already is one" in {
     val effects = new TestingRawEffects(postResponses = CountZuoraAccountsForIdentityIdData.postResponses(true))
-    val get = CountZuoraAccountsForIdentityId(ZuoraDeps(effects.response, ZuoraRestConfig("https://zuora", "user", "pass"))) _
+    val get = CountZuoraAccountsForIdentityId(ZuoraRestRequestMaker(effects.response, ZuoraRestConfig("https://zuora", "user", "pass"))) _
     val contacts = get(IdentityId("1234"))
     val expected = \/-(1)
     contacts should be(expected)

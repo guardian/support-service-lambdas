@@ -6,7 +6,7 @@ import com.gu.identityBackfill.Types
 import com.gu.identityBackfill.Types.IdentityId
 import com.gu.identityBackfill.zuora.AddIdentityIdToAccount
 import com.gu.test.EffectsTest
-import com.gu.util.zuora.ZuoraDeps
+import com.gu.util.zuora.ZuoraRestRequestMaker
 import com.gu.util.{Config, Stage}
 import org.scalatest.{FlatSpec, Matchers}
 import scalaz.\/-
@@ -25,7 +25,7 @@ class AddIdentityIdEffectsTest extends FlatSpec with Matchers {
     val actual = for {
       configAttempt <- ConfigLoad.load(Stage("DEV")).toEither.disjunction
       config <- Config.parseConfig[StepsConfig](configAttempt)
-      zuoraDeps = ZuoraDeps(RawEffects.createDefault.response, config.stepsConfig.zuoraRestConfig)
+      zuoraDeps = ZuoraRestRequestMaker(RawEffects.createDefault.response, config.stepsConfig.zuoraRestConfig)
       _ <- AddIdentityIdToAccount(zuoraDeps)(testAccount, IdentityId(unique))
       identityId <- GetIdentityIdForAccount(zuoraDeps)(testAccount)
     } yield {

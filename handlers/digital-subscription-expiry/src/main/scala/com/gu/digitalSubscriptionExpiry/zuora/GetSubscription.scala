@@ -2,14 +2,11 @@ package com.gu.digitalSubscriptionExpiry.zuora
 
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.apigateway.ResponseModels.ApiResponse
-import com.gu.util.reader.Types.{WithDepsFailableOp, _}
-import com.gu.util.zuora.RestRequestMaker.ClientFail
-import com.gu.util.zuora.{ZuoraDeps, ZuoraRestRequestMaker}
+import com.gu.util.reader.Types._
+import com.gu.util.zuora.RestRequestMaker.{ClientFail, Requests}
 import org.joda.time.DateTime
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
-
-import scalaz.Reader
 
 object GetSubscription {
   //todo move me I'm duplicated
@@ -49,6 +46,6 @@ object GetSubscription {
       (__ \ "ratePlans").read[List[RatePlan]]
     )(SubscriptionResult.apply _)
 
-  def apply(request: SubscriptionId): WithDepsFailableOp[ZuoraDeps, SubscriptionResult] =
-    Reader { zuoraDeps: ZuoraDeps => ZuoraRestRequestMaker(zuoraDeps).get[SubscriptionResult](s"object/subscriptions/${request.get}").leftMap(fromClientFail) }.toEitherT
+  def apply(requests: Requests)(request: SubscriptionId): FailableOp[SubscriptionResult] =
+    requests.get[SubscriptionResult](s"object/subscriptions/${request.get}").leftMap(fromClientFail)
 }

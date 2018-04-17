@@ -3,7 +3,7 @@ package com.gu.util
 import com.gu.util.zuora.RestRequestMaker.ClientFail
 import com.gu.util.zuora.ZuoraAccount.{AccountId, PaymentMethodId}
 import com.gu.util.zuora.ZuoraGetAccountSummary.BasicAccountInfo
-import com.gu.util.zuora.{ZuoraDeps, ZuoraRestConfig, ZuoraRestRequestMaker}
+import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
 import okhttp3._
 import org.scalatest.Matchers._
 import org.scalatest._
@@ -88,7 +88,7 @@ class ZuoraRestServiceTest extends AsyncFlatSpec {
         constructTestResponse(404)
       }
     }
-    val actual = ZuoraRestRequestMaker(ZuoraDeps(response, fakeZConfig)).get[BasicAccountInfo]("getget")
+    val actual = ZuoraRestRequestMaker(response, fakeZConfig).get[BasicAccountInfo]("getget")
     val basicInfo = BasicAccountInfo(AccountId("id123"), 1.2, PaymentMethodId("pmid"))
 
     actual should be(\/-(basicInfo))

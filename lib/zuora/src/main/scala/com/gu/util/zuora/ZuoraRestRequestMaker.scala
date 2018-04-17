@@ -3,13 +3,13 @@ package com.gu.util.zuora
 import com.gu.util.zuora.RestRequestMaker.{ClientFail, ClientFailableOp}
 import com.gu.util.zuora.ZuoraModels._
 import com.gu.util.zuora.ZuoraReaders._
+import okhttp3.{Request, Response}
 import play.api.libs.json._
 import scalaz.Scalaz._
 
 object ZuoraRestRequestMaker extends Logging {
 
-  def apply(zuoraDeps: ZuoraDeps): RestRequestMaker.Requests = {
-    import zuoraDeps._
+  def apply(response: Request => Response, config: ZuoraRestConfig): RestRequestMaker.Requests = {
     new RestRequestMaker.Requests(
       headers = Map(
         "apiSecretAccessKey" -> config.password,
