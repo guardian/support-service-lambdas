@@ -1,6 +1,6 @@
 package com.gu.identityBackfill
 
-import com.gu.identity.GetByEmail.NotFound
+import com.gu.identity.GetByEmail.{NotFound, NotValidated}
 import com.gu.identityBackfill.PreReqCheck.PreReqResult
 import com.gu.identityBackfill.Types.{IdentityId, _}
 import com.gu.util.apigateway.ApiGatewayResponse
@@ -69,6 +69,20 @@ class PreReqCheckTest extends FlatSpec with Matchers {
       )(EmailAddress("email@address"))
 
     val expectedResult = -\/(ApiGatewayResponse.notFound("user doesn't have identity"))
+    result should be(expectedResult)
+  }
+
+  it should "stop processing if it finds a non validated identity account" in {
+
+    val result =
+      PreReqCheck(
+        email => -\/(NotValidated),
+        email => fail("shouldn't be called 1"),
+        identityId => fail("shouldn't be called 2"),
+        _ => fail("shouldn't be called 3")
+      )(EmailAddress("email@address"))
+
+    val expectedResult = -\/(ApiGatewayResponse.notFound("identity email not validated"))
     result should be(expectedResult)
   }
 

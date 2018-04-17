@@ -13,10 +13,14 @@ object GetByEmail {
   sealed trait ApiError
   case class OtherError(message: String) extends ApiError
   case object NotFound extends ApiError
+  case object NotValidated extends ApiError
 
   object RawWireModel {
 
-    case class User(id: String)
+    case class StatusFields(userEmailValidated: Boolean)
+    implicit val statusFieldsReads: Reads[StatusFields] = Json.reads[StatusFields]
+
+    case class User(id: String, statusFields: StatusFields)
     implicit val userReads: Reads[User] = Json.reads[User]
 
     case class UserResponse(status: String, user: User)
@@ -47,6 +51,7 @@ object GetByEmail {
       body = response.body.byteStream
       userResponse <- Json.parse(body).validate[UserResponse].asEither.disjunction.leftMap(err => OtherError(err.mkString(", ")))
       user <- userFromResponse(userResponse)
+      _ <- if (user.statusFields.userEmailValidated) \/-(()) else -\/(NotValidated)
       identityId = identityIdFromUser(user)
     } yield identityId
 

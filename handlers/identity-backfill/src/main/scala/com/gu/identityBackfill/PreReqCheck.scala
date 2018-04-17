@@ -1,7 +1,7 @@
 package com.gu.identityBackfill
 
 import com.gu.identity.GetByEmail
-import com.gu.identity.GetByEmail.NotFound
+import com.gu.identity.GetByEmail.{NotFound, NotValidated, OtherError}
 import com.gu.identityBackfill.Types.{EmailAddress, IdentityId, SFContactId, ZuoraAccountIdentitySFContact}
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types._
@@ -20,7 +20,8 @@ object PreReqCheck {
     for {
       identityId <- getByEmail(emailAddress).leftMap({
         case NotFound => ApiGatewayResponse.notFound("user doesn't have identity")
-        case unknownError => ApiGatewayResponse.internalServerError(unknownError.toString)
+        case NotValidated => ApiGatewayResponse.notFound("identity email not validated")
+        case OtherError(unknownError) => ApiGatewayResponse.internalServerError(unknownError)
       }).withLogging("GetByEmail")
       zuoraAccountForEmail <- getSingleZuoraAccountForEmail(emailAddress)
       _ <- noZuoraAccountsForIdentityId(identityId)
