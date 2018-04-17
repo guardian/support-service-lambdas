@@ -68,7 +68,7 @@ object Types extends Logging {
 
   }
 
-  implicit class LogImplicit2[A](op: A) {
+  implicit class LogImplicit[A](op: A) {
 
     // this is just a handy method to add logging to the end of any for comprehension
     def withLogging(message: String): A = {
