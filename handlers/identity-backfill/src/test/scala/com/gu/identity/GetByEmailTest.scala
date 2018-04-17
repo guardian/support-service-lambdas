@@ -2,8 +2,8 @@ package com.gu.identity
 
 import com.gu.effects.TestingRawEffects
 import com.gu.effects.TestingRawEffects.HTTPResponse
-import com.gu.identity.GetByEmail.NotFound
-import com.gu.identity.GetByEmailTest.{NotFoundTestData, TestData}
+import com.gu.identity.GetByEmail.{NotFound, NotValidated}
+import com.gu.identity.GetByEmailTest.{NotFoundTestData, NotValidatedTestData, TestData}
 import com.gu.identityBackfill.Types.{EmailAddress, IdentityId}
 import org.scalatest.{FlatSpec, Matchers}
 import scalaz.{-\/, \/, \/-}
@@ -18,6 +18,16 @@ class GetByEmailTest extends FlatSpec with Matchers {
     val actual: \/[GetByEmail.ApiError, IdentityId] = GetByEmail(testingRawEffects.rawEffects.response, IdentityConfig("http://baseurl", "apitoken"))(EmailAddress("email@address"))
 
     actual should be(\/-(IdentityId("1234")))
+  }
+
+  it should "get not validated with an error" in {
+    val testingRawEffects = new TestingRawEffects(
+      responses = NotValidatedTestData.responses
+    )
+
+    val actual: \/[GetByEmail.ApiError, IdentityId] = GetByEmail(testingRawEffects.rawEffects.response, IdentityConfig("http://baseurl", "apitoken"))(EmailAddress("email@address"))
+
+    actual should be(-\/(NotValidated))
   }
 
   it should "get not found" in {
@@ -37,7 +47,7 @@ object GetByEmailTest {
   object TestData {
 
     def responses: Map[String, HTTPResponse] = Map(
-      "/user?emailAddress=email@address" -> HTTPResponse(200, TestData.dummyIdentityResponse)
+      "/user?emailAddress=email@address" -> HTTPResponse(200, dummyIdentityResponse)
     )
 
     val dummyIdentityResponse: String =
@@ -45,17 +55,53 @@ object GetByEmailTest {
         |{
         |    "status": "ok",
         |    "user": {
-        |        "id": "1234",
         |        "dates": {
-        |            "accountCreatedDate": "2015-03-17T11:09:08Z"
+        |            "lastActivityDate": "2016-06-10T10:11:25.610Z",
+        |            "accountCreatedDate": "2015-03-17T11:09:08.000Z"
         |        },
-        |        "primaryEmailAddress": "john.duffell@guardian.co.uk",
         |        "publicFields": {
         |            "username": "johnduffell2",
-        |            "displayName": "johnduffell2",
         |            "vanityUrl": "johnduffell2",
+        |            "displayName": "johnduffell2",
         |            "usernameLowerCase": "johnduffell2"
-        |        }
+        |        },
+        |        "statusFields": {
+        |            "userEmailValidated": true
+        |        },
+        |        "primaryEmailAddress": "john.duffell@guardian.co.uk",
+        |        "id": "1234"
+        |    }
+        |}
+      """.stripMargin
+
+  }
+
+  object NotValidatedTestData {
+
+    def responses: Map[String, HTTPResponse] = Map(
+      "/user?emailAddress=email@address" -> HTTPResponse(200, dummyIdentityResponse)
+    )
+
+    val dummyIdentityResponse: String =
+      """
+        |{
+        |    "status": "ok",
+        |    "user": {
+        |        "dates": {
+        |            "lastActivityDate": "2016-06-10T10:11:25.610Z",
+        |            "accountCreatedDate": "2015-03-17T11:09:08.000Z"
+        |        },
+        |        "publicFields": {
+        |            "username": "johnduffell2",
+        |            "vanityUrl": "johnduffell2",
+        |            "displayName": "johnduffell2",
+        |            "usernameLowerCase": "johnduffell2"
+        |        },
+        |        "statusFields": {
+        |            "userEmailValidated": false
+        |        },
+        |        "primaryEmailAddress": "john.duffell@guardian.co.uk",
+        |        "id": "1234"
         |    }
         |}
       """.stripMargin
@@ -65,7 +111,7 @@ object GetByEmailTest {
   object NotFoundTestData {
 
     def responses: Map[String, HTTPResponse] = Map(
-      "/user?emailAddress=email@address" -> HTTPResponse(404, TestData.dummyIdentityResponse)
+      "/user?emailAddress=email@address" -> HTTPResponse(404, dummyIdentityResponse)
     )
     val dummyIdentityResponse: String =
       """
