@@ -1,7 +1,7 @@
 package com.gu.util
 
 import com.gu.util.zuora.RestRequestMaker
-import com.gu.util.zuora.RestRequestMaker.ClientFail
+import com.gu.util.zuora.RestRequestMaker.GenericError
 import okhttp3._
 import org.scalatest.Matchers._
 import org.scalatest._
@@ -70,7 +70,7 @@ class RestRequestMakerTest extends AsyncFlatSpec {
     response
   }
 
-  def internalServerError(message: String) = ClientFail(message)
+  def internalServerError(message: String) = GenericError(message)
 
   "convertResponseToCaseClass" should "return a left[String] for an unsuccessful response code" in {
     val response = constructTestResponse(500)

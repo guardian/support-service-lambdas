@@ -11,6 +11,7 @@ import play.api.libs.json.Json
 import scalaz.{-\/, \/-}
 import com.gu.digitalSubscriptionExpiry.zuora.GetSubscription.{SubscriptionId, SubscriptionResult}
 import com.gu.digitalSubscriptionExpiry.common.CommonApiResponses._
+
 class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
 
   val validTokenResponse = {
@@ -49,14 +50,17 @@ class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
   def getTokenExpiry(token: String): FailableOp[Unit] = {
     if (token == "validToken") -\/(validTokenResponse) else \/-(())
   }
+
+  def updateSubscription(subscription: SubscriptionResult, now: String): FailableOp[Unit] = \/-(())
+
   val digitalSubscriptionExpirySteps = {
     DigitalSubscriptionExpirySteps(
       getEmergencyTokenExpiry = getTokenExpiry,
       getSubscription = getSubId,
+      updateSubscription = updateSubscription,
       getAccountSummary = getAccount,
       getSubscriptionExpiry = getSubExpiry,
       today = ZonedDateTime.now().toLocalDate
-
     )
   }
 

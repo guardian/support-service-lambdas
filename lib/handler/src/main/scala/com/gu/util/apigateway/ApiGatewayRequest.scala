@@ -21,7 +21,8 @@ case class URLParams(
   apiToken: Option[String],
   onlyCancelDirectDebit: Boolean,
   stripeAccount: Option[StripeAccount],
-  isHealthcheck: Boolean
+  isHealthcheck: Boolean,
+  noActivation: Boolean
 )
 
 /* Using query strings because for Basic Auth to work Zuora requires us to return a WWW-Authenticate
@@ -41,7 +42,8 @@ object URLParams {
     (JsPath \ "apiToken").readNullable[String] and
     (JsPath \ "onlyCancelDirectDebit").readNullable[String].map(_.contains("true")) and
     (JsPath \ "stripeAccount").readNullable[String].map(_.flatMap(StripeAccount.fromString)) and
-    (JsPath \ "isHealthcheck").readNullable[String].map(_.contains("true"))
+    (JsPath \ "isHealthcheck").readNullable[String].map(_.contains("true")) and
+    (JsPath \ "noActivation").readNullable[String].map(_.contains("true"))
   )(URLParams.apply _)
 }
 

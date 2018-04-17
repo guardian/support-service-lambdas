@@ -4,10 +4,10 @@ import java.io.{InputStream, OutputStream}
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.digitalSubscriptionExpiry.emergencyToken.{EmergencyTokens, EmergencyTokensConfig, GetTokenExpiry}
-import com.gu.digitalSubscriptionExpiry.zuora.{GetAccountSummary, GetSubscription, GetSubscriptionExpiry}
+import com.gu.digitalSubscriptionExpiry.zuora.{GetAccountSummary, GetSubscription, GetSubscriptionExpiry, UpdateSubscription}
 import com.gu.effects.RawEffects
-import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.ApiGatewayHandler
+import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.zuora.{ZuoraDeps, ZuoraRestConfig}
 import com.gu.util.{Config, Logging}
 import play.api.libs.json.{Json, Reads}
@@ -35,6 +35,7 @@ object Handler extends Logging {
         DigitalSubscriptionExpirySteps(
           getEmergencyTokenExpiry = GetTokenExpiry(emergencyTokens),
           getSubscription = GetSubscription(zuoraDeps),
+          updateSubscription = UpdateSubscription(zuoraDeps),
           getAccountSummary = GetAccountSummary(zuoraDeps),
           getSubscriptionExpiry = GetSubscriptionExpiry.apply,
           today = rawEffects.now()
