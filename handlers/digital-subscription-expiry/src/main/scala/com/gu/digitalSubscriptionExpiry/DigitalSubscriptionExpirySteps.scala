@@ -8,7 +8,7 @@ import com.gu.util.apigateway.ApiGatewayHandler.Operation
 import com.gu.util.apigateway.ApiGatewayRequest
 import com.gu.util.reader.Types.FailableOp
 import main.scala.com.gu.digitalSubscriptionExpiry.DigitalSubscriptionExpiryRequest
-import org.joda.time.LocalDate
+import java.time.LocalDate
 import com.gu.util.reader.Types._
 import play.api.libs.json.{JsValue, Json}
 
@@ -35,14 +35,6 @@ object DigitalSubscriptionExpirySteps extends Logging {
       password <- expiryRequest.password.toFailableOp(badRequest)
       subscriptionEndDate <- getSubscriptionExpiry(password, subscriptionResult, accountSummary, today)
     } yield {}
-
-    //TODO
-    //    def healthcheck() =
-    //      for {
-    //        identityId <- getByEmail(EmailAddress("john.duffell@guardian.co.uk")).leftMap(a => ApiGatewayResponse.internalServerError(a.toString)).withLogging("healthcheck getByEmail")
-    //        _ <- countZuoraAccountsForIdentityId(identityId)
-    //        _ <- sfAuth()
-    //      } yield ()
 
     Operation.noHealthcheck(steps, false)
 

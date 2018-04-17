@@ -1,9 +1,8 @@
 package com.gu.digitalSubscriptionExpiry
 
 import com.gu.cas.SubscriptionCode
-import org.joda.time.LocalDate
+import java.time.LocalDate
 import play.api.libs.json.{JsString, Json, Writes}
-import com.gu.digitalSubscriptionExpiry.common.CommonFormatters._
 case class Expiry(
   expiryDate: LocalDate,
   expiryType: String,

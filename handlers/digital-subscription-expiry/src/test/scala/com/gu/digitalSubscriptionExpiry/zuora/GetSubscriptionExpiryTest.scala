@@ -4,7 +4,7 @@ import com.gu.digitalSubscriptionExpiry._
 import com.gu.digitalSubscriptionExpiry.common.CommonApiResponses.apiResponse
 import com.gu.digitalSubscriptionExpiry.zuora.GetAccountSummary.{AccountId, AccountSummaryResult}
 import com.gu.digitalSubscriptionExpiry.zuora.GetSubscription._
-import org.joda.time.LocalDate
+import java.time.LocalDate
 import org.scalatest.FlatSpec
 import org.scalatest.Matchers._
 import scalaz.-\/
