@@ -57,7 +57,7 @@ class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
       \/-(summary)
     }
   }
-  def getSubExpiry(password: String, subscriptionResult: SubscriptionResult, accountSummaryResult: AccountSummaryResult, date: LocalDate): FailableOp[Unit] = successfulResponseFromZuora
+  def getSubExpiry(password: String, subscriptionResult: SubscriptionResult, accountSummaryResult: AccountSummaryResult): FailableOp[Unit] = successfulResponseFromZuora
 
   def getTokenExpiry(token: String): FailableOp[Unit] = {
     if (token == "validToken") -\/(validTokenResponse) else \/-(())
@@ -72,7 +72,6 @@ class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
       updateSubscription = updateSubscription,
       getAccountSummary = getAccount,
       getSubscriptionExpiry = getSubExpiry,
-      today = ZonedDateTime.now().toLocalDate
     )
   }
 

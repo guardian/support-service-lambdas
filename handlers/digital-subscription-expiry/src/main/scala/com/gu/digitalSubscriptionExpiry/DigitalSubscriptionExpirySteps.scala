@@ -25,9 +25,8 @@ object DigitalSubscriptionExpirySteps extends Logging {
     getEmergencyTokenExpiry: String => FailableOp[Unit],
     getSubscription: SubscriptionId => FailableOp[SubscriptionResult],
     getAccountSummary: AccountId => FailableOp[AccountSummaryResult],
-    getSubscriptionExpiry: (String, SubscriptionResult, AccountSummaryResult, LocalDate) => FailableOp[Unit],
-    updateSubscription: (SubscriptionResult, String) => FailableOp[Unit],
-    today: LocalDate
+    getSubscriptionExpiry: (String, SubscriptionResult, AccountSummaryResult) => FailableOp[Unit],
+    updateSubscription: (SubscriptionResult, String) => FailableOp[Unit]
   ): Operation = {
 
     def steps(apiGatewayRequest: ApiGatewayRequest): FailableOp[Unit] = {
@@ -38,10 +37,10 @@ object DigitalSubscriptionExpirySteps extends Logging {
         _ <- getEmergencyTokenExpiry(expiryRequest.subscriberId)
         subscriptionId = SubscriptionId(expiryRequest.subscriberId.trim.dropWhile(_ == '0'))
         subscriptionResult <- getSubscription(subscriptionId)
-        _ = if (skipActivation(apiGatewayRequest) != Some(true)) updateSubscription(subscriptionResult, LocalDateTime.now().format(ISO_LOCAL_DATE_TIME)) //TODO: trailing zeros??? and why can't this be a default param
+        _ = if (skipActivation(apiGatewayRequest) != Some(true)) updateSubscription(subscriptionResult, LocalDateTime.now().format(ISO_LOCAL_DATE_TIME))
         accountSummary <- getAccountSummary(subscriptionResult.accountId)
         password <- expiryRequest.password.toFailableOp(notFoundResponse)
-        subscriptionEndDate <- getSubscriptionExpiry(password, subscriptionResult, accountSummary, today)
+        subscriptionEndDate <- getSubscriptionExpiry(password, subscriptionResult, accountSummary)
       } yield {}
 
     }

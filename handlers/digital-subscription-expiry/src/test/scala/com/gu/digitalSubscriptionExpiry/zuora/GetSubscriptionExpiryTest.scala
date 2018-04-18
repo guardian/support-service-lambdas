@@ -47,34 +47,34 @@ class GetSubscriptionExpiryTest extends FlatSpec {
   }
 
   val notFoundResponse = -\/(apiResponse(ErrorResponse("Unknown subscriber", -90), "404"))
-
+  val today: () => LocalDate = LocalDate.now
   it should "return the expiry date for a subscription using billing last name" in {
-    val actualResponse = GetSubscriptionExpiry("billingLastName", digitalPack, accountSummary)
+    val actualResponse = GetSubscriptionExpiry(today)("billingLastName", digitalPack, accountSummary)
     actualResponse shouldEqual expectedResponse
   }
 
   it should "return the expiry date for a subscription using billing postcode" in {
-    val actualResponse = GetSubscriptionExpiry("bill 123", digitalPack, accountSummary)
+    val actualResponse = GetSubscriptionExpiry(today)("bill 123", digitalPack, accountSummary)
     actualResponse shouldEqual expectedResponse
   }
 
   it should "return the expiry date for a subscription using sold to last name" in {
-    val actualResponse = GetSubscriptionExpiry("SoldLastName", digitalPack, accountSummary)
+    val actualResponse = GetSubscriptionExpiry(today)("SoldLastName", digitalPack, accountSummary)
     actualResponse shouldEqual expectedResponse
   }
 
   it should "return the expiry date for a subscription using sold to postcode" in {
-    val actualResponse = GetSubscriptionExpiry("123 sold", digitalPack, accountSummary)
+    val actualResponse = GetSubscriptionExpiry(today)("123 sold", digitalPack, accountSummary)
     actualResponse shouldEqual expectedResponse
   }
 
   it should "return the expiry date for a subscription on its first day" in {
-    val actualResponse = GetSubscriptionExpiry("billingLastName", digitalPack, accountSummary, lastWeek)
+    val actualResponse = GetSubscriptionExpiry(() => lastWeek)("billingLastName", digitalPack, accountSummary)
     actualResponse shouldEqual expectedResponse
   }
 
   it should "ignore non alphanumerical characters in password" in {
-    val actualResponse = GetSubscriptionExpiry("123-sold", digitalPack, accountSummary)
+    val actualResponse = GetSubscriptionExpiry(today)("123-sold", digitalPack, accountSummary)
     actualResponse shouldEqual expectedResponse
   }
 
@@ -98,17 +98,40 @@ class GetSubscriptionExpiryTest extends FlatSpec {
       ratePlans = List(RatePlan("Weekend+", charges))
     )
 
-    val actualResponse = GetSubscriptionExpiry("123-sold", digiPackSub, accountSummary)
+    val actualResponse = GetSubscriptionExpiry(today)("123-sold", digiPackSub, accountSummary)
     actualResponse shouldEqual expectedResponse
   }
 
+  it should "recognise digital charges with name set to Digital Pack-bolt on" in {
+
+    val twoWeeksFromNow = nextWeek.plusWeeks(1)
+    val charges = List(
+      RatePlanCharge("Digital Pack-bolt on", lastWeek, nextWeek),
+      RatePlanCharge("Saturday", lastWeek, twoWeeksFromNow),
+      RatePlanCharge("Sunday", lastWeek, twoWeeksFromNow)
+    )
+
+    val digiPackSub = SubscriptionResult(
+      id = SubscriptionId("subId"),
+      name = SubscriptionName("subName"),
+      accountId = AccountId("accountId"),
+      casActivationDate = None,
+      customerAcceptanceDate = lastWeek,
+      startDate = lastWeek,
+      endDate = nextWeek,
+      ratePlans = List(RatePlan("Weekend+", charges))
+    )
+
+    val actualResponse = GetSubscriptionExpiry(today)("123-sold", digiPackSub, accountSummary)
+    actualResponse shouldEqual expectedResponse
+  }
   it should "return not found for invalid password" in {
-    val actualResponse = GetSubscriptionExpiry("invalid password", digitalPack, accountSummary)
+    val actualResponse = GetSubscriptionExpiry(today)("invalid password", digitalPack, accountSummary)
     actualResponse shouldEqual notFoundResponse
   }
 
   it should "return not found for non digipack subscription" in {
-    val actualResponse = GetSubscriptionExpiry("billingLastName", monthlyContribution, accountSummary)
+    val actualResponse = GetSubscriptionExpiry(today)("billingLastName", monthlyContribution, accountSummary)
     actualResponse shouldEqual notFoundResponse
   }
 
@@ -126,7 +149,7 @@ class GetSubscriptionExpiryTest extends FlatSpec {
       ratePlans = List(RatePlan("Digital Pack", List(RatePlanCharge("Digital Pack Monthly", lastYear, lastWeek))))
     )
 
-    val actualResponse = GetSubscriptionExpiry("123-sold", expiredDigitalPack, accountSummary)
+    val actualResponse = GetSubscriptionExpiry(today)("123-sold", expiredDigitalPack, accountSummary)
     actualResponse shouldEqual notFoundResponse
   }
 
