@@ -48,7 +48,7 @@ class GetSubscriptionEffectsTest extends FlatSpec with Matchers {
       testSubscriptionId,
       SubscriptionName("2c92c0f860017cd501600893134617b3"),
       AccountId("2c92c0f860017cd501600893130317a7"),
-      Some("2018-04-13T10:44:06.352Z"),
+      Some("2018-04-18T14:59:49.368"),
       customerAcceptanceDate,
       startDate,
       startDate.plusYears(1),

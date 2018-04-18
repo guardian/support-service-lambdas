@@ -14,7 +14,7 @@ object AutoCancelHandler extends App with Logging {
 
   def runWithEffects(rawEffects: RawEffects, lambdaIO: LambdaIO): Unit = {
     def operation(config: Config[StepsConfig]): ApiGatewayHandler.Operation =
-      AutoCancelSteps(AutoCancelStepsDeps.default(rawEffects.now(), rawEffects.response, config))
+      AutoCancelSteps(AutoCancelStepsDeps.default(rawEffects.now().toLocalDate, rawEffects.response, config))
     ApiGatewayHandler.default[StepsConfig](operation, lambdaIO).run((rawEffects.stage, rawEffects.s3Load(rawEffects.stage)))
   }
 

@@ -65,13 +65,13 @@ class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
 
   def skipActivationDateUpdate(queryStringParameters: Option[URLParams], sub: SubscriptionResult): Boolean = false
 
-  def updateSubscription(subscription: SubscriptionResult, now: String): FailableOp[Unit] = \/-(())
+  def setActivationDate(subscriptionId: SubscriptionId): FailableOp[Unit] = \/-(())
 
   val digitalSubscriptionExpirySteps = {
     DigitalSubscriptionExpirySteps(
       getEmergencyTokenExpiry = getTokenExpiry,
       getSubscription = getSubId,
-      updateSubscription = updateSubscription,
+      setActivationDate = setActivationDate,
       getAccountSummary = getAccount,
       getSubscriptionExpiry = getSubExpiry,
       skipActivationDateUpdate = skipActivationDateUpdate,

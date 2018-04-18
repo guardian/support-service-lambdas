@@ -1,7 +1,7 @@
 package com.gu.digitalSubscriptionExpiry
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
-import java.time.LocalDate
+import java.time.{LocalDateTime}
 
 import com.gu.effects.RawEffects
 import com.gu.test.EffectsTest
@@ -11,7 +11,7 @@ import play.api.libs.json.Json
 
 class DigitalSubscriptionExpiryHandlerEffectsTest extends FlatSpec with Matchers {
 
-  val rawEffects = RawEffects.createDefault.copy(now = () => LocalDate.of(2018, 4, 20))
+  val rawEffects = RawEffects.createDefault.copy(now = () => LocalDateTime.of(2018, 4, 20, 2, 12))
 
   it should "return 404 for invalid subscriber id" taggedAs EffectsTest in {
 

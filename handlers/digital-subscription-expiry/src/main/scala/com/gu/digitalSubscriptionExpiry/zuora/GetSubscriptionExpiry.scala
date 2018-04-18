@@ -1,6 +1,6 @@
 package com.gu.digitalSubscriptionExpiry.zuora
 
-import java.time.LocalDate
+import java.time.{LocalDate, LocalDateTime}
 
 import com.gu.digitalSubscriptionExpiry._
 import com.gu.digitalSubscriptionExpiry.common.CommonApiResponses._
@@ -45,11 +45,11 @@ object GetSubscriptionExpiry {
     if (activeDigipackCharges.isEmpty) None else Some(activeDigipackCharges.map(_.effectiveEndDate).max)
   }
 
-  def apply(now: () => LocalDate)(providedPassword: String, subscription: SubscriptionResult, accountSummary: AccountSummaryResult): FailableOp[Unit] =
+  def apply(now: () => LocalDateTime)(providedPassword: String, subscription: SubscriptionResult, accountSummary: AccountSummaryResult): FailableOp[Unit] =
     if (!validPassword(accountSummary, providedPassword)) {
       -\/(notFoundResponse)
     } else {
-      val maybeSubscriptionEndDate = getExpiryDateForValidSubscription(subscription, accountSummary, now())
+      val maybeSubscriptionEndDate = getExpiryDateForValidSubscription(subscription, accountSummary, now().toLocalDate)
       maybeSubscriptionEndDate.map {
         subscriptionEndDate =>
           val res = SuccessResponse(Expiry(
