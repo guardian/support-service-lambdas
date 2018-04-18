@@ -48,7 +48,7 @@ class GetSubscriptionExpiryTest extends FlatSpec {
   }
 
   val notFoundResponse = -\/(apiResponse(ErrorResponse("Unknown subscriber", -90), "404"))
-  val today: () => LocalDate = LocalDate.now
+  val today: () => LocalDate = LocalDate.now _
   it should "return the expiry date for a subscription using billing last name" in {
     val actualResponse = GetSubscriptionExpiry(today)("billingLastName", digitalPack, accountSummary)
     actualResponse shouldEqual expectedResponse
