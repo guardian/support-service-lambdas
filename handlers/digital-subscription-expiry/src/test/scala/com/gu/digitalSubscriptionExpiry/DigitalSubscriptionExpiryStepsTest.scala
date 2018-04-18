@@ -5,8 +5,7 @@ import com.gu.digitalSubscriptionExpiry.zuora.GetAccountSummary.{AccountId, Acco
 import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.apigateway.ResponseModels.{ApiResponse, Headers}
 import com.gu.util.reader.Types.FailableOp
-import java.time.{LocalDate, ZonedDateTime}
-
+import java.time.LocalDate
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
 import scalaz.{-\/, \/-}

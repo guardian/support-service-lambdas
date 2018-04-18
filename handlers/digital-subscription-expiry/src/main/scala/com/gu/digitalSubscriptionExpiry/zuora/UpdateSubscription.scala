@@ -8,7 +8,7 @@ import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types.FailableOp
 import com.gu.util.zuora.RestRequestMaker.Requests
 import com.gu.util.zuora.ZuoraReaders.unitReads
-import com.gu.util.zuora.{Logging, ZuoraRestRequestMaker}
+import com.gu.util.zuora.Logging
 import play.api.libs.json.Json
 import scalaz.\/-
 

@@ -34,27 +34,6 @@ class DigitalSubscriptionExpiryHandlerEffectsTest extends FlatSpec with Matchers
     responseString jsonMatches notFoundResponse
   }
 
-  it should "return bad request for invalid json" taggedAs EffectsTest in {
-
-    val invalidRequest: String =
-      """
-        |{
-        |    "body": "this is not json"
-        |}
-      """.stripMargin
-
-    val stream = new ByteArrayInputStream(invalidRequest.getBytes(java.nio.charset.StandardCharsets.UTF_8))
-    val os = new ByteArrayOutputStream()
-
-    //execute
-
-    Handler.runWithEffects(rawEffects, LambdaIO(stream, os, null))
-
-    val responseString = new String(os.toByteArray, "UTF-8")
-
-    responseString jsonMatches badRequest
-  }
-
   it should "successful get expiry date for sub against real backend" taggedAs EffectsTest in {
     val request: String =
       """
@@ -114,15 +93,6 @@ class DigitalSubscriptionExpiryHandlerEffectsTest extends FlatSpec with Matchers
       |"statusCode":"404",
       |"headers":{"Content-Type":"application/json"},
       |"body":"{\n  \"error\" : {\n    \"message\" : \"Unknown subscriber\",\n    \"code\" : -90\n  }\n}"
-      |}
-      |""".stripMargin
-
-  val badRequest =
-    """
-      |{
-      |"statusCode":"400",
-      |"headers":{"Content-Type":"application/json"},
-      |"body":"{\n  \"error\" : {\n    \"message\" : \"Mandatory data missing from request\",\n    \"code\" : -50\n  }\n}"
       |}
       |""".stripMargin
 

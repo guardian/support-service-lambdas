@@ -11,7 +11,7 @@ import com.gu.util.apigateway.ApiGatewayHandler.Operation
 import com.gu.util.apigateway.ApiGatewayRequest
 import com.gu.util.reader.Types.FailableOp
 import main.scala.com.gu.digitalSubscriptionExpiry.DigitalSubscriptionExpiryRequest
-import java.time.{LocalDate, LocalDateTime}
+import java.time.LocalDateTime
 
 import com.gu.util.reader.Types._
 import play.api.libs.json.{JsValue, Json}
