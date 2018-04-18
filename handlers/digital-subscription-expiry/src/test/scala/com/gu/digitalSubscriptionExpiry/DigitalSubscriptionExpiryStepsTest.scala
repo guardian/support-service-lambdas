@@ -1,16 +1,17 @@
 package com.gu.digitalSubscriptionExpiry
 
-import com.gu.cas.SevenDay
-import com.gu.digitalSubscriptionExpiry.zuora.GetAccountSummary.{AccountId, AccountSummaryResult}
-import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
-import com.gu.util.apigateway.ResponseModels.{ApiResponse, Headers}
-import com.gu.util.reader.Types.FailableOp
 import java.time.LocalDate
+
+import com.gu.cas.SevenDay
+import com.gu.digitalSubscriptionExpiry.common.CommonApiResponses._
+import com.gu.digitalSubscriptionExpiry.zuora.GetAccountSummary.{AccountId, AccountSummaryResult}
+import com.gu.digitalSubscriptionExpiry.zuora.GetSubscription.{SubscriptionId, SubscriptionName, SubscriptionResult}
+import com.gu.util.apigateway.ResponseModels.{ApiResponse, Headers}
+import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse, URLParams}
+import com.gu.util.reader.Types.FailableOp
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
 import scalaz.{-\/, \/-}
-import com.gu.digitalSubscriptionExpiry.zuora.GetSubscription.{SubscriptionId, SubscriptionName, SubscriptionResult}
-import com.gu.digitalSubscriptionExpiry.common.CommonApiResponses._
 
 class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
 
@@ -62,6 +63,8 @@ class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
     if (token == "validToken") -\/(validTokenResponse) else \/-(())
   }
 
+  def skipActivationDateUpdate(queryStringParameters: Option[URLParams], sub: SubscriptionResult): Boolean = false
+
   def updateSubscription(subscription: SubscriptionResult, now: String): FailableOp[Unit] = \/-(())
 
   val digitalSubscriptionExpirySteps = {
@@ -71,6 +74,7 @@ class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
       updateSubscription = updateSubscription,
       getAccountSummary = getAccount,
       getSubscriptionExpiry = getSubExpiry,
+      skipActivationDateUpdate = skipActivationDateUpdate,
     )
   }
 

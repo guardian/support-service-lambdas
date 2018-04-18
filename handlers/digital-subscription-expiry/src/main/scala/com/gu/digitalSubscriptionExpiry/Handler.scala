@@ -4,7 +4,7 @@ import java.io.{InputStream, OutputStream}
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.digitalSubscriptionExpiry.emergencyToken.{EmergencyTokens, EmergencyTokensConfig, GetTokenExpiry}
-import com.gu.digitalSubscriptionExpiry.zuora.{GetAccountSummary, GetSubscription, GetSubscriptionExpiry, UpdateSubscription}
+import com.gu.digitalSubscriptionExpiry.zuora._
 import com.gu.effects.RawEffects
 import com.gu.util.apigateway.ApiGatewayHandler
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
@@ -38,7 +38,8 @@ object Handler extends Logging {
           getSubscription = GetSubscription(zuoraRequests),
           updateSubscription = UpdateSubscription(zuoraRequests),
           getAccountSummary = GetAccountSummary(zuoraRequests),
-          getSubscriptionExpiry = GetSubscriptionExpiry(rawEffects.now)
+          getSubscriptionExpiry = GetSubscriptionExpiry(rawEffects.now),
+          skipActivationDateUpdate = SkipActivationDateUpdate.apply
         )
       }
 

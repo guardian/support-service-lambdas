@@ -1,11 +1,12 @@
 package com.gu.digitalSubscriptionExpiry.zuora
 
+import java.time.LocalDate
+
 import com.gu.digitalSubscriptionExpiry._
+import com.gu.digitalSubscriptionExpiry.common.CommonApiResponses._
 import com.gu.digitalSubscriptionExpiry.zuora.GetAccountSummary.AccountSummaryResult
 import com.gu.digitalSubscriptionExpiry.zuora.GetSubscription.{RatePlanCharge, SubscriptionResult}
 import com.gu.util.reader.Types.FailableOp
-import java.time.LocalDate
-import com.gu.digitalSubscriptionExpiry.common.CommonApiResponses._
 import scalaz.-\/
 
 object GetSubscriptionExpiry {
