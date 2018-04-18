@@ -4,14 +4,11 @@ import java.time.LocalDate
 
 import com.gu.digitalSubscriptionExpiry.zuora.GetAccountSummary.AccountId
 import com.gu.digitalSubscriptionExpiry.zuora.GetSubscription._
-import org.joda.time.format.DateTimeFormat
 import org.scalatest.FlatSpec
 import org.scalatest.Matchers._
 import play.api.libs.json._
 
 class GetSubscriptionReaderTest extends FlatSpec {
-
-  val dateFormatter = DateTimeFormat.forPattern("dd/MM/yyyy")
 
   "GetSubscription" should "deserialise correctly a valid response from Zuora" in {
     val subscriptionStream = getClass.getResourceAsStream("/digitalSubscriptionExpiry/validSubscription.json")
