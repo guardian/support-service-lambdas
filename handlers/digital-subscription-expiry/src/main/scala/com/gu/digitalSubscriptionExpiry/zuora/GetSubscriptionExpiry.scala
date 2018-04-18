@@ -45,11 +45,11 @@ object GetSubscriptionExpiry {
     if (activeDigipackCharges.isEmpty) None else Some(activeDigipackCharges.map(_.effectiveEndDate).max)
   }
 
-  def apply(now: () => LocalDateTime)(providedPassword: String, subscription: SubscriptionResult, accountSummary: AccountSummaryResult): FailableOp[Unit] =
+  def apply(today: () => LocalDate)(providedPassword: String, subscription: SubscriptionResult, accountSummary: AccountSummaryResult): FailableOp[Unit] =
     if (!validPassword(accountSummary, providedPassword)) {
       -\/(notFoundResponse)
     } else {
-      val maybeSubscriptionEndDate = getExpiryDateForValidSubscription(subscription, accountSummary, now().toLocalDate)
+      val maybeSubscriptionEndDate = getExpiryDateForValidSubscription(subscription, accountSummary, today())
       maybeSubscriptionEndDate.map {
         subscriptionEndDate =>
           val res = SuccessResponse(Expiry(

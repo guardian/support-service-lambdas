@@ -32,13 +32,13 @@ object Handler extends Logging {
 
         val emergencyTokens = EmergencyTokens(config.stepsConfig.emergencyTokens)
         val zuoraRequests = ZuoraRestRequestMaker(rawEffects.response, config.stepsConfig.zuoraRestConfig)
-
+        def today() = rawEffects.now().toLocalDate
         DigitalSubscriptionExpirySteps(
           getEmergencyTokenExpiry = GetTokenExpiry(emergencyTokens),
           getSubscription = GetSubscription(zuoraRequests),
           setActivationDate = SetActivationDate(zuoraRequests, rawEffects.now),
           getAccountSummary = GetAccountSummary(zuoraRequests),
-          getSubscriptionExpiry = GetSubscriptionExpiry(rawEffects.now),
+          getSubscriptionExpiry = GetSubscriptionExpiry(today),
           skipActivationDateUpdate = SkipActivationDateUpdate.apply
         )
       }

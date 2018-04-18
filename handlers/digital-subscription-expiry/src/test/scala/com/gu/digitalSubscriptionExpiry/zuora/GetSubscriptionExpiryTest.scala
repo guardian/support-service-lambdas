@@ -1,6 +1,6 @@
 package com.gu.digitalSubscriptionExpiry.zuora
 
-import java.time.{LocalDate, LocalDateTime, LocalTime}
+import java.time.LocalDate
 
 import com.gu.digitalSubscriptionExpiry._
 import com.gu.digitalSubscriptionExpiry.common.CommonApiResponses.apiResponse
@@ -48,8 +48,7 @@ class GetSubscriptionExpiryTest extends FlatSpec {
   }
 
   val notFoundResponse = -\/(apiResponse(ErrorResponse("Unknown subscriber", -90), "404"))
-  val today: () => LocalDateTime = LocalDateTime.now _
-  val midnight = LocalTime.of(0, 0)
+  val today: () => LocalDate = LocalDate.now _
   it should "return the expiry date for a subscription using billing last name" in {
     val actualResponse = GetSubscriptionExpiry(today)("billingLastName", digitalPack, accountSummary)
     actualResponse shouldEqual expectedResponse
@@ -71,7 +70,7 @@ class GetSubscriptionExpiryTest extends FlatSpec {
   }
 
   it should "return the expiry date for a subscription on its first day" in {
-    val actualResponse = GetSubscriptionExpiry(() => LocalDateTime.of(lastWeek, midnight))("billingLastName", digitalPack, accountSummary)
+    val actualResponse = GetSubscriptionExpiry(() => lastWeek)("billingLastName", digitalPack, accountSummary)
     actualResponse shouldEqual expectedResponse
   }
 
