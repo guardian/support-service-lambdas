@@ -5,7 +5,6 @@ import org.scalatest.Matchers._
 import com.gu.TestData
 import com.gu.util.apigateway.StripeAccount
 import com.gu.util.{StripeConfig, StripeSecretKey}
-import org.joda.time.DateTime
 import com.gu.stripeCustomerSourceUpdated.StripeRequestSignatureChecker._
 
 class StripeRequestSignatureCheckerTest extends FlatSpec {
@@ -29,7 +28,7 @@ class StripeRequestSignatureCheckerTest extends FlatSpec {
   }
 
   it should "call verify with a valid secret key" in {
-    val nowInSeconds = (DateTime.now().getMillis / 1000).toString
+    val nowInSeconds = (System.currentTimeMillis() / 1000).toString
     val headers = headersWithStripeSignature(nowInSeconds, "test signature")
 
     val signatureCheckPassed = verifyRequest(headers = headers, payload = someBody, stripeDeps = testStripeDeps, stripeAccount = Some(StripeAccount.GNM_Membership))
@@ -38,7 +37,7 @@ class StripeRequestSignatureCheckerTest extends FlatSpec {
   }
 
   it should "still work with the AU secret key" in {
-    val nowInSeconds = (DateTime.now().getMillis / 1000).toString
+    val nowInSeconds = (System.currentTimeMillis() / 1000).toString
     val headers = headersWithStripeSignature(nowInSeconds, "test signature")
 
     val signatureCheckPassed = verifyRequest(headers = headers, payload = someBody, stripeDeps = testStripeDeps, stripeAccount = Some(StripeAccount.GNM_Membership_AUS))

@@ -1,6 +1,6 @@
 package com.gu.effects
 
-import java.time.LocalDate
+import java.time.LocalDateTime
 
 import com.gu.effects.TestingRawEffects._
 import com.gu.util.{Logging, Stage}
@@ -69,7 +69,7 @@ class TestingRawEffects(
     //verify
     requests.map(req => (req.method, req.url.encodedPath) -> Option(req.body).map(body)).toMap
   }
-  val rawEffects = RawEffects(response, stage, _ => Success(codeConfig), () => LocalDate.of(2017, 11, 19))
+  val rawEffects = RawEffects(response, stage, _ => Success(codeConfig), () => LocalDateTime.of(2017, 11, 19, 12, 32))
 
 }
 

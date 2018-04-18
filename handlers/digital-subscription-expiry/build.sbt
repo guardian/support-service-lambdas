@@ -19,7 +19,6 @@ libraryDependencies ++= Seq(
   "log4j" % "log4j" % "1.2.17",
   "com.squareup.okhttp3" % "okhttp" % "3.9.1",
   "com.typesafe.play" %% "play-json" % "2.6.8",
-  "com.typesafe.play" % "play-json-joda_2.12" % "2.6.8",
   "org.scalatest" %% "scalatest" % "3.0.1" % "test",
   "com.gu" %% "content-authorisation-common" % "0.3"
 )

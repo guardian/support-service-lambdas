@@ -1,6 +1,6 @@
 package com.gu.util
 
-import com.gu.util.zuora.RestRequestMaker.ClientFail
+import com.gu.util.zuora.RestRequestMaker.GenericError
 import com.gu.util.zuora.ZuoraAccount.{AccountId, PaymentMethodId}
 import com.gu.util.zuora.ZuoraGetAccountSummary.BasicAccountInfo
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
@@ -61,7 +61,7 @@ class ZuoraRestServiceTest extends AsyncFlatSpec {
     response
   }
 
-  def internalServerError(message: String) = ClientFail(message)
+  def internalServerError(message: String) = GenericError(message)
 
   it should "return a left[String] if the body of a successful response cannot be de-serialized with a zuora success response" in {
     val either = ZuoraRestRequestMaker.zuoraIsSuccessful(dummyJson)
@@ -70,7 +70,7 @@ class ZuoraRestServiceTest extends AsyncFlatSpec {
 
   it should "return a left[String] if the body of a successful http response has a zuora failed in it" in {
     val either = ZuoraRestRequestMaker.zuoraIsSuccessful(validFailedUpdateSubscriptionResult)
-    assert(either == -\/(internalServerError("Received failure result from Zuora during autoCancellation")))
+    assert(either == -\/(internalServerError("Received a failure result from Zuora")))
   }
 
   it should "run success end to end GET" in {

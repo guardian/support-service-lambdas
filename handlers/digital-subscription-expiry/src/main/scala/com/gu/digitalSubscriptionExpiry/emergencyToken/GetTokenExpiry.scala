@@ -3,15 +3,19 @@ package com.gu.digitalSubscriptionExpiry.emergencyToken
 import com.gu.cas.Valid
 import com.gu.digitalSubscriptionExpiry.DigitalSubscriptionExpirySteps.logger
 import TokenPayloadImplicits._
-import com.gu.digitalSubscriptionExpiry.{SuccessResponse, Expiry, ExpiryType}
+import com.gu.digitalSubscriptionExpiry.{Expiry, ExpiryType, SuccessResponse}
+import com.gu.util.reader.Types.FailableOp
+import scalaz.{-\/, \/-}
+import com.gu.digitalSubscriptionExpiry.common.CommonApiResponses._
+
 import scala.util.{Success, Try}
 
 object GetTokenExpiry {
-  def apply(emergencyTokens: EmergencyTokens)(subscriberId: String): Option[SuccessResponse] = {
+  def apply(emergencyTokens: EmergencyTokens)(subscriberId: String): FailableOp[Unit] = {
 
     val upperCaseSubId = subscriberId.toUpperCase
     if (!upperCaseSubId.startsWith(emergencyTokens.prefix)) {
-      None
+      \/-(())
     } else {
       logger.info(s"EMERGENCY PROVIDER triggered for subscriber id:'$upperCaseSubId'")
 
@@ -26,11 +30,11 @@ object GetTokenExpiry {
             subscriptionCode = Some(payload.subscriptionCode),
             provider = Some(emergencyTokens.prefix)
           )
-          Some(SuccessResponse(expiry))
+          -\/(apiResponse(SuccessResponse(expiry), "200"))
 
         case errorResponse =>
           logger.error(s"error decoding token $subscriberId :  $errorResponse")
-          None
+          \/-(())
       }
     }
   }

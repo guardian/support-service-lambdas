@@ -1,30 +1,111 @@
 package com.gu.digitalSubscriptionExpiry
 
+import java.time.LocalDate
+
 import com.gu.cas.SevenDay
-import com.gu.util.apigateway.ApiGatewayRequest
+import com.gu.digitalSubscriptionExpiry.common.CommonApiResponses._
+import com.gu.digitalSubscriptionExpiry.zuora.GetAccountSummary.{AccountId, AccountSummaryResult}
+import com.gu.digitalSubscriptionExpiry.zuora.GetSubscription.{SubscriptionId, SubscriptionName, SubscriptionResult}
+import com.gu.util.apigateway.ResponseModels.{ApiResponse, Headers}
+import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse, URLParams}
 import com.gu.util.reader.Types.FailableOp
-import org.joda.time.format.DateTimeFormat
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
-
 import scalaz.{-\/, \/-}
 
 class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
 
   val validTokenResponse = {
-    val dateFormatter = DateTimeFormat.forPattern("dd/MM/yyyy")
     val expiry = Expiry(
-      expiryDate = dateFormatter.parseDateTime("26/10/1985"),
+      expiryDate = LocalDate.of(1985, 10, 26),
       expiryType = ExpiryType.SUB,
       subscriptionCode = Some(SevenDay),
       provider = Some("G99")
     )
-    SuccessResponse(expiry)
+    apiResponse(SuccessResponse(expiry), "200")
   }
+
+  val successfulResponseFromZuora = -\/(ApiResponse("123", new Headers, "valid zuora response"))
+
+  def getSubId(s: SubscriptionId): FailableOp[SubscriptionResult] = {
+    if (s.get == "validZuoraSubId") {
+      val response = SubscriptionResult(
+        id = s,
+        name = SubscriptionName("someSubName"),
+        accountId = AccountId("someAccountId"),
+        casActivationDate = None,
+        customerAcceptanceDate = LocalDate.of(2015, 10, 21),
+        startDate = LocalDate.of(2015, 10, 21),
+        endDate = LocalDate.of(2015, 10, 26),
+        ratePlans = Nil
+      )
+      \/-(response)
+    } else
+      -\/(notFoundResponse)
+  }
+  def getAccount(accountId: AccountId): FailableOp[AccountSummaryResult] = {
+    if (accountId.value != "someAccountId") {
+      -\/(ApiGatewayResponse.internalServerError("zuoraError"))
+    } else {
+      val summary = AccountSummaryResult(
+        accountId = AccountId("someAccountId"),
+        billToLastName = "someBillToLastName",
+        billToPostcode = "someBilltoPostCode",
+        soldToLastName = "someSoldToLastName",
+        soldToPostcode = "someSoldtoPostCode"
+      )
+      \/-(summary)
+    }
+  }
+  def getSubExpiry(password: String, subscriptionResult: SubscriptionResult, accountSummaryResult: AccountSummaryResult): FailableOp[Unit] = successfulResponseFromZuora
+
+  def getTokenExpiry(token: String): FailableOp[Unit] = {
+    if (token == "validToken") -\/(validTokenResponse) else \/-(())
+  }
+
+  def skipActivationDateUpdate(queryStringParameters: Option[URLParams], sub: SubscriptionResult): Boolean = false
+
+  def setActivationDate(subscriptionId: SubscriptionId): FailableOp[Unit] = \/-(())
 
   val digitalSubscriptionExpirySteps = {
     DigitalSubscriptionExpirySteps(
-      { token: String => if (token == "validToken") Some(validTokenResponse) else None }
+      getEmergencyTokenExpiry = getTokenExpiry,
+      getSubscription = getSubId,
+      setActivationDate = setActivationDate,
+      getAccountSummary = getAccount,
+      getSubscriptionExpiry = getSubExpiry,
+      skipActivationDateUpdate = skipActivationDateUpdate,
+    )
+  }
+
+  it should "trim leading spaces and zeroes and return subscription from zuora" in {
+    val request =
+      """{
+    |      "subscriberId" : "   0000validZuoraSubId ",
+    |      "password" : "somePassword"
+    |    }
+
+  """.stripMargin
+
+    val actual = digitalSubscriptionExpirySteps.steps(ApiGatewayRequest(None, request, None))
+
+    actual.shouldBe(successfulResponseFromZuora)
+  }
+
+  it should "return not found for valid zuora id with no password provided" in {
+    val request =
+      """{
+    |      "subscriberId" : "validZuoraSubId"
+    |    }
+
+  """.stripMargin
+
+    val actual = digitalSubscriptionExpirySteps.steps(ApiGatewayRequest(None, request, None))
+
+    verifyResponse(
+      actualResponse = actual,
+      expectedBody = expectedNotFoundResponseBody,
+      expectedStatus = "404"
     )
   }
 
@@ -131,6 +212,15 @@ class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
       |    "error": {
       |        "message": "Mandatory data missing from request",
       |        "code": -50
+      |    }
+      |}
+    """.stripMargin
+
+  val expectedNotFoundResponseBody =
+    """{
+      |    "error": {
+      |       "message": "Unknown subscriber",
+      |        "code": -90
       |    }
       |}
     """.stripMargin

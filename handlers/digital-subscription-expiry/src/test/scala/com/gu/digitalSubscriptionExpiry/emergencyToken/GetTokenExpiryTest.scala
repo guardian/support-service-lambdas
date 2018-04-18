@@ -1,9 +1,13 @@
 package com.gu.digitalSubscriptionExpiry.emergencyToken
 
+import java.time.LocalDate
+
 import com.gu.cas.{PrefixedTokens, SevenDay}
-import com.gu.digitalSubscriptionExpiry.{Expiry, ExpiryType}
-import org.joda.time.format.DateTimeFormat
+import com.gu.digitalSubscriptionExpiry.{Expiry, ExpiryType, SuccessResponse}
+import com.gu.util.apigateway.ResponseModels.{ApiResponse, Headers}
 import org.scalatest.{FlatSpec, Matchers}
+import play.api.libs.json.Json
+import scalaz.{-\/, \/-}
 
 class GetTokenExpiryTest extends FlatSpec with Matchers {
 
@@ -12,27 +16,22 @@ class GetTokenExpiryTest extends FlatSpec with Matchers {
     GetTokenExpiry(EmergencyTokens("G99", codec))(_)
   }
 
-  it should "return none for invalid token" in {
-    getTokenExpiry("invalidToken").shouldBe(None)
+  it should "return right for invalid token" in {
+    getTokenExpiry("invalidToken").shouldBe(\/-(()))
   }
   it should "read valid token" in {
 
-    val dateFormatter = DateTimeFormat.forPattern("dd/MM/yyyy")
-
     val expiry = Expiry(
-      expiryDate = dateFormatter.parseDateTime("21/07/2017"),
+      expiryDate = LocalDate.of(2017, 7, 21),
       expiryType = ExpiryType.SUB,
       subscriptionCode = Some(SevenDay),
       provider = Some("G99")
     )
 
-    val expectedResponse = Some(expiry)
-    val actual = getTokenExpiry("G99IZXCEZLYF")
+    val responseBody = Json.prettyPrint(Json.toJson(SuccessResponse(expiry)))
+    val expectedResponse = -\/(ApiResponse("200", new Headers, responseBody))
 
-    val actualNoTime = actual.map(x =>
-      x.expiry.copy(expiryDate = x.expiry.expiryDate.withTime(0, 0, 0, 0)))
-
-    actualNoTime.shouldBe(expectedResponse)
+    getTokenExpiry("G99IZXCEZLYF").shouldBe(expectedResponse)
   }
 }
 
