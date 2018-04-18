@@ -8,7 +8,7 @@ import com.gu.digitalSubscriptionExpiry.zuora.GetSubscription.{SubscriptionId, S
 import com.gu.digitalSubscriptionExpiry.zuora.GetSubscription.SubscriptionId
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.Operation
-import com.gu.util.apigateway.ApiGatewayRequest
+import com.gu.util.apigateway.{ApiGatewayRequest, URLParams}
 import com.gu.util.reader.Types.FailableOp
 import main.scala.com.gu.digitalSubscriptionExpiry.DigitalSubscriptionExpiryRequest
 import java.time.{LocalDate, LocalDateTime}
@@ -26,19 +26,20 @@ object DigitalSubscriptionExpirySteps extends Logging {
     getSubscription: SubscriptionId => FailableOp[SubscriptionResult],
     getAccountSummary: AccountId => FailableOp[AccountSummaryResult],
     getSubscriptionExpiry: (String, SubscriptionResult, AccountSummaryResult, LocalDate) => FailableOp[Unit],
+    skipActivationDateUpdate: (Option[URLParams], SubscriptionResult) => Boolean,
     updateSubscription: (SubscriptionResult, String) => FailableOp[Unit],
     today: LocalDate
   ): Operation = {
 
     def steps(apiGatewayRequest: ApiGatewayRequest): FailableOp[Unit] = {
-      def skipActivation(apiGatewayRequest: ApiGatewayRequest) = apiGatewayRequest.queryStringParameters.map { _.noActivation }
+      val nowAsString = LocalDateTime.now().format(ISO_LOCAL_DATE_TIME)
       for {
         jsonRequest <- parseJson(apiGatewayRequest.body).toFailableOp(badRequest)
         expiryRequest <- Json.fromJson[DigitalSubscriptionExpiryRequest](jsonRequest).asOpt.toFailableOp(badRequest)
         _ <- getEmergencyTokenExpiry(expiryRequest.subscriberId)
         subscriptionId = SubscriptionId(expiryRequest.subscriberId.trim.dropWhile(_ == '0'))
         subscriptionResult <- getSubscription(subscriptionId)
-        _ = if (skipActivation(apiGatewayRequest) != Some(true)) updateSubscription(subscriptionResult, LocalDateTime.now().format(ISO_LOCAL_DATE_TIME)) //TODO: trailing zeros??? and why can't this be a default param
+        _ = if (skipActivationDateUpdate(apiGatewayRequest.queryStringParameters, subscriptionResult)) updateSubscription(subscriptionResult, nowAsString)
         accountSummary <- getAccountSummary(subscriptionResult.accountId)
         password <- expiryRequest.password.toFailableOp(notFoundResponse)
         subscriptionEndDate <- getSubscriptionExpiry(password, subscriptionResult, accountSummary, today)
