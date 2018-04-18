@@ -1,6 +1,6 @@
 package com.gu.digitalSubscriptionExpiry.zuora
 
-import java.time.{LocalDate, LocalDateTime}
+import java.time.LocalDate
 
 import com.gu.digitalSubscriptionExpiry._
 import com.gu.digitalSubscriptionExpiry.common.CommonApiResponses._
@@ -40,9 +40,11 @@ object GetSubscriptionExpiry {
 
     def isActiveDigipack(charge: RatePlanCharge) = isDigipackName(charge.name) && !charge.effectiveEndDate.isBefore(dateToCheck) && !charge.effectiveStartDate.isAfter(dateToCheck)
 
-    val activeDigipackCharges = subscription.ratePlans.map(_.ratePlanCharges).flatten.filter(isActiveDigipack)
+    val hasActiveDigipackCharges = subscription.ratePlans.map(_.ratePlanCharges).flatten.exists(isActiveDigipack)
 
-    if (activeDigipackCharges.isEmpty) None else Some(activeDigipackCharges.map(_.effectiveEndDate).max)
+    if (hasActiveDigipackCharges) {
+      Some(subscription.endDate.plusDays(1))
+    } else None
   }
 
   def apply(today: () => LocalDate)(providedPassword: String, subscription: SubscriptionResult, accountSummary: AccountSummaryResult): FailableOp[Unit] =

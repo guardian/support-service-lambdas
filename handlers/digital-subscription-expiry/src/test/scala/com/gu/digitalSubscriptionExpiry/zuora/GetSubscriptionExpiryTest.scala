@@ -11,9 +11,9 @@ import org.scalatest.Matchers._
 import scalaz.-\/
 
 class GetSubscriptionExpiryTest extends FlatSpec {
-  val lastWeek = LocalDate.now().minusWeeks(1)
-  val nextWeek = lastWeek.plusWeeks(2)
-
+  val lastWeek = LocalDate.of(2018, 4, 11)
+  val nextWeek = LocalDate.of(2018, 4, 25)
+  val subEndDate = LocalDate.of(2018, 4, 20)
   val digitalPack = SubscriptionResult(
     id = SubscriptionId("subId"),
     name = SubscriptionName("subName"),
@@ -21,7 +21,7 @@ class GetSubscriptionExpiryTest extends FlatSpec {
     casActivationDate = None,
     customerAcceptanceDate = lastWeek,
     startDate = lastWeek,
-    endDate = nextWeek,
+    endDate = subEndDate,
     ratePlans = List(RatePlan("Digital Pack", List(RatePlanCharge("Digital Pack Monthly", lastWeek, nextWeek))))
   )
 
@@ -39,7 +39,7 @@ class GetSubscriptionExpiryTest extends FlatSpec {
 
   val expectedResponse = {
     val expiry = SuccessResponse(Expiry(
-      expiryDate = nextWeek,
+      expiryDate = subEndDate.plusDays(1),
       expiryType = ExpiryType.SUB,
       subscriptionCode = None,
       provider = None
@@ -48,7 +48,8 @@ class GetSubscriptionExpiryTest extends FlatSpec {
   }
 
   val notFoundResponse = -\/(apiResponse(ErrorResponse("Unknown subscriber", -90), "404"))
-  val today: () => LocalDate = LocalDate.now _
+  val today: () => LocalDate = () => LocalDate.of(2018, 4, 18)
+
   it should "return the expiry date for a subscription using billing last name" in {
     val actualResponse = GetSubscriptionExpiry(today)("billingLastName", digitalPack, accountSummary)
     actualResponse shouldEqual expectedResponse
@@ -95,7 +96,7 @@ class GetSubscriptionExpiryTest extends FlatSpec {
       casActivationDate = None,
       customerAcceptanceDate = lastWeek,
       startDate = lastWeek,
-      endDate = nextWeek,
+      endDate = subEndDate,
       ratePlans = List(RatePlan("Weekend+", charges))
     )
 
@@ -119,7 +120,7 @@ class GetSubscriptionExpiryTest extends FlatSpec {
       casActivationDate = None,
       customerAcceptanceDate = lastWeek,
       startDate = lastWeek,
-      endDate = nextWeek,
+      endDate = subEndDate,
       ratePlans = List(RatePlan("Weekend+", charges))
     )
 
