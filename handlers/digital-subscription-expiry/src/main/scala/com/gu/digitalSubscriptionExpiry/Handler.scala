@@ -38,9 +38,8 @@ object Handler extends Logging {
           getSubscription = GetSubscription(zuoraRequests),
           updateSubscription = UpdateSubscription(zuoraRequests),
           getAccountSummary = GetAccountSummary(zuoraRequests),
-          getSubscriptionExpiry = GetSubscriptionExpiry.apply,
-          skipActivationDateUpdate = SkipActivationDateUpdate.apply,
-          today = rawEffects.now()
+          getSubscriptionExpiry = GetSubscriptionExpiry(rawEffects.now),
+          skipActivationDateUpdate = SkipActivationDateUpdate.apply
         )
       }
 

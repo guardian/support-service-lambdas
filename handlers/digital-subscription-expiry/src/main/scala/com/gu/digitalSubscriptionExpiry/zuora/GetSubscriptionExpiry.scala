@@ -1,11 +1,12 @@
 package com.gu.digitalSubscriptionExpiry.zuora
 
+import java.time.LocalDate
+
 import com.gu.digitalSubscriptionExpiry._
+import com.gu.digitalSubscriptionExpiry.common.CommonApiResponses._
 import com.gu.digitalSubscriptionExpiry.zuora.GetAccountSummary.AccountSummaryResult
 import com.gu.digitalSubscriptionExpiry.zuora.GetSubscription.{RatePlanCharge, SubscriptionResult}
 import com.gu.util.reader.Types.FailableOp
-import java.time.LocalDate
-import com.gu.digitalSubscriptionExpiry.common.CommonApiResponses._
 import scalaz.-\/
 
 object GetSubscriptionExpiry {
@@ -26,7 +27,7 @@ object GetSubscriptionExpiry {
 
   implicit def dateOrdering: Ordering[LocalDate] = Ordering.fromLessThan(_ isAfter _)
 
-  private val digipackChargeNamePrefixes = List("DIGIPACK", "DIGITAL PACK")
+  private val digipackChargeNamePrefixes = List("DIGIPACK", "DIGITAL PACK", "DIGITALPACK")
 
   private def isDigipackName(chargeName: String) = {
     val upperCaseName = chargeName.toUpperCase
@@ -44,11 +45,11 @@ object GetSubscriptionExpiry {
     if (activeDigipackCharges.isEmpty) None else Some(activeDigipackCharges.map(_.effectiveEndDate).max)
   }
 
-  def apply(providedPassword: String, subscription: SubscriptionResult, accountSummary: AccountSummaryResult, date: LocalDate = LocalDate.now()): FailableOp[Unit] =
+  def apply(now: () => LocalDate)(providedPassword: String, subscription: SubscriptionResult, accountSummary: AccountSummaryResult): FailableOp[Unit] =
     if (!validPassword(accountSummary, providedPassword)) {
       -\/(notFoundResponse)
     } else {
-      val maybeSubscriptionEndDate = getExpiryDateForValidSubscription(subscription, accountSummary, date)
+      val maybeSubscriptionEndDate = getExpiryDateForValidSubscription(subscription, accountSummary, now())
       maybeSubscriptionEndDate.map {
         subscriptionEndDate =>
           val res = SuccessResponse(Expiry(

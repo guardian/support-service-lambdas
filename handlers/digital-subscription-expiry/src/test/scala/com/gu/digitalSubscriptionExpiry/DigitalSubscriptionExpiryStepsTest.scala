@@ -1,17 +1,17 @@
 package com.gu.digitalSubscriptionExpiry
 
-import com.gu.cas.SevenDay
-import com.gu.digitalSubscriptionExpiry.zuora.GetAccountSummary.{AccountId, AccountSummaryResult}
-import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse, URLParams}
-import com.gu.util.apigateway.ResponseModels.{ApiResponse, Headers}
-import com.gu.util.reader.Types.FailableOp
-import java.time.{LocalDate, ZonedDateTime}
+import java.time.LocalDate
 
+import com.gu.cas.SevenDay
+import com.gu.digitalSubscriptionExpiry.common.CommonApiResponses._
+import com.gu.digitalSubscriptionExpiry.zuora.GetAccountSummary.{AccountId, AccountSummaryResult}
+import com.gu.digitalSubscriptionExpiry.zuora.GetSubscription.{SubscriptionId, SubscriptionName, SubscriptionResult}
+import com.gu.util.apigateway.ResponseModels.{ApiResponse, Headers}
+import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse, URLParams}
+import com.gu.util.reader.Types.FailableOp
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
 import scalaz.{-\/, \/-}
-import com.gu.digitalSubscriptionExpiry.zuora.GetSubscription.{SubscriptionId, SubscriptionName, SubscriptionResult}
-import com.gu.digitalSubscriptionExpiry.common.CommonApiResponses._
 
 class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
 
@@ -57,7 +57,7 @@ class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
       \/-(summary)
     }
   }
-  def getSubExpiry(password: String, subscriptionResult: SubscriptionResult, accountSummaryResult: AccountSummaryResult, date: LocalDate): FailableOp[Unit] = successfulResponseFromZuora
+  def getSubExpiry(password: String, subscriptionResult: SubscriptionResult, accountSummaryResult: AccountSummaryResult): FailableOp[Unit] = successfulResponseFromZuora
 
   def getTokenExpiry(token: String): FailableOp[Unit] = {
     if (token == "validToken") -\/(validTokenResponse) else \/-(())
@@ -75,7 +75,6 @@ class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
       getAccountSummary = getAccount,
       getSubscriptionExpiry = getSubExpiry,
       skipActivationDateUpdate = skipActivationDateUpdate,
-      today = ZonedDateTime.now().toLocalDate
     )
   }
 
