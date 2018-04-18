@@ -8,7 +8,7 @@ import com.gu.util.apigateway.URLParams
 import org.scalatest.FlatSpec
 import org.scalatest.Matchers._
 
-class SkipActivationUpdateTest extends FlatSpec {
+class SkipActivationDateUpdateTest extends FlatSpec {
 
   val testDate = LocalDate.now()
   def testSubscriptionResult(casActivationDate: Option[String]) = SubscriptionResult(
