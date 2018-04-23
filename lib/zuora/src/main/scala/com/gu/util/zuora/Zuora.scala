@@ -7,7 +7,7 @@ import com.gu.util.zuora.ZuoraAccount.{AccountId, PaymentMethodId}
 import com.gu.util.zuora.ZuoraModels._
 import com.gu.util.zuora.ZuoraReaders._
 import play.api.libs.functional.syntax._
-import play.api.libs.json.{JsPath, Json, Reads, Writes}
+import play.api.libs.json._
 
 object ZuoraGetAccountSummary {
 
@@ -129,6 +129,13 @@ object ZuoraDisableAutoPay {
 
   def apply(requests: Requests)(accountId: String): ClientFailableOp[Unit] =
     requests.put(AccountUpdate(autoPay = false), s"accounts/$accountId"): ClientFailableOp[Unit]
+
+}
+
+object ZuoraReadCatalog {
+
+  def apply(requests: Requests): ClientFailableOp[JsValue] =
+    requests.get[JsValue]("catalog/products?pageSize=40")
 
 }
 
