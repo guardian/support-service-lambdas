@@ -1,0 +1,86 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Reads the product catalog from Zuora and stores it in S3
+
+Parameters:
+    Stage:
+        Description: Stage name
+        Type: String
+        AllowedValues:
+            - PROD
+            - CODE
+        Default: CODE
+
+Resources:
+    CatalogServiceRole:
+        Type: AWS::IAM::Role
+        Properties:
+            AssumeRolePolicyDocument:
+                Statement:
+                    - Effect: Allow
+                      Principal:
+                          Service:
+                             - lambda.amazonaws.com
+                      Action:
+                          - sts:AssumeRole
+            Path: /
+            Policies:
+                - PolicyName: LambdaPolicy
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                            - logs:CreateLogGroup
+                            - logs:CreateLogStream
+                            - logs:PutLogEvents
+                            - lambda:InvokeFunction
+                            Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/catalog-service-${Stage}:log-stream:*"
+                - PolicyName: ReadPrivateCredentials
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action: s3:GetObject
+                            Resource: !Sub arn:aws:s3:::gu-reader-revenue-private/membership/payment-failure-lambdas/${Stage}/*
+
+    CatalogServiceLambda:
+        Type: AWS::Lambda::Function
+        Properties:
+            Description: Reads the product catalog from Zuora and stores it in S3
+            FunctionName:
+                !Sub catalog-service-${Stage}
+            Code:
+                S3Bucket: subscriptions-dist
+                S3Key: !Sub subscriptions/${Stage}/catalog-service/catalog-service.jar
+            Handler: com.gu.catalogService.Handler::apply
+            Environment:
+                Variables:
+                  Stage: !Ref Stage
+            Role:
+                !GetAtt CatalogServiceRole.Arn
+            MemorySize: 1536
+            Runtime: java8
+            Timeout: 300
+        DependsOn:
+        - CatalogServiceRole
+
+    CatalogServiceLambdaInvokePermission:
+        Type: AWS::Lambda::Permission
+        Properties:
+            Action: lambda:invokeFunction
+            FunctionName: !Sub catalog-service-${Stage}
+            Principal: events.amazonaws.com
+            SourceArn: !GetAtt CatalogServiceScheduler.Arn
+        DependsOn:
+        - CatalogServiceLambda
+        - CatalogServiceScheduler
+
+    CatalogServiceScheduler:
+        Type: "AWS::Events::Rule"
+        Properties:
+            Description: Triggers the Catalog Service Lambda on a schedule
+            Name: !Sub catalog-service-scheduler-${Stage}
+            ScheduleExpression: rate(5 minutes) #https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html#RateExpressions
+            Targets:
+              - Arn: !GetAtt CatalogServiceLambda.Arn
+                Id: !Sub catalog-service-lambda-${Stage}
+        DependsOn:
+        - CatalogServiceLambda

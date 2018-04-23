@@ -128,6 +128,9 @@ lazy val `identity-backfill` = all(project in file("handlers/identity-backfill")
 lazy val `digital-subscription-expiry` = all(project in file("handlers/digital-subscription-expiry"))
   .enablePlugins(RiffRaffArtifact).dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
 
+lazy val `catalog-service` = all(project in file("handlers/catalog-service"))
+  .enablePlugins(RiffRaffArtifact).dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
+
 assemblyJarName := "zuora-auto-cancel.jar"
 riffRaffPackageType := assembly.value
 riffRaffUploadArtifactBucket := Option("riffraff-artifact")
