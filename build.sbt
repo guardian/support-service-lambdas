@@ -118,6 +118,7 @@ val testDep = test % "test->test"
 lazy val root = all(project in file(".")).enablePlugins(RiffRaffArtifact).aggregate(
   `identity-backfill`,
   `digital-subscription-expiry`,
+  `catalog-service`,
   zuora,
   effects
 ).dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
