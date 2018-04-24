@@ -22,7 +22,6 @@ object Handler extends Logging {
   // this is the entry point
   // it's referenced by the cloudformation so make sure you keep it in step
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
-    logger.info(s"Starting point for Catalog Service lambda")
     runWithEffects(RawEffects.createDefault, LambdaIO(inputStream, outputStream, context))
   }
 
@@ -47,7 +46,7 @@ object Handler extends Logging {
     def uploadCatalogToS3(catalog: JsValue): Try[PutObjectResult] = {
 
       def jsonFile(catalog: JsValue): Try[File] = for {
-        file <- Try(new File("catalog.json"))
+        file <- Try(new File("/tmp/catalog.json"))
         writer <- Try(new FileWriter(file))
         _ <- Try(writer.write(catalog.as[String]))
         _ <- Try(writer.close())
