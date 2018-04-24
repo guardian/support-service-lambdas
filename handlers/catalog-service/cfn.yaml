@@ -14,12 +14,12 @@ Mappings:
     StageVariables:
         CODE:
             ReadableS3Buckets:
-              - arn:aws:s3:::gu-reader-revenue-private/payment-failure-lambdas/CODE/*
+              - arn:aws:s3:::gu-reader-revenue-private/membership/payment-failure-lambdas/CODE/*
             WriteableS3Buckets:
               - arn:aws:s3:::gu-zuora-catalog/CODE/*
         PROD:
             ReadableS3Buckets:
-              - arn:aws:s3:::gu-reader-revenue-private/payment-failure-lambdas/PROD/*
+              - arn:aws:s3:::gu-reader-revenue-private/membership/payment-failure-lambdas/PROD/*
             WriteableS3Buckets:
               - arn:aws:s3:::gu-zuora-catalog/PROD/*
 
