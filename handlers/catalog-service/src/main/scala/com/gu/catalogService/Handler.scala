@@ -54,7 +54,7 @@ object Handler extends Logging {
 
       for {
         catalogDotJson <- jsonFile(catalog)
-        putRequest = new PutObjectRequest(s"gu-zuora-catalog/${rawEffects.stage}", "catalog.json", catalogDotJson)
+        putRequest = new PutObjectRequest(s"gu-zuora-catalog/${rawEffects.stage.value}", "catalog.json", catalogDotJson)
         result <- AwsS3.putObject(putRequest)
       } yield {
         logger.info(s"Successfully uploaded file to S3: $result")
