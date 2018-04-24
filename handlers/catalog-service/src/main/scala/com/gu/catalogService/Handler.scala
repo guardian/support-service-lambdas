@@ -13,7 +13,7 @@ import scalaz.{-\/, \/-}
 object Handler extends Logging {
 
   case class StepsConfig(zuoraRestConfig: ZuoraRestConfig)
-  implicit val stepsConfigReads: Reads[ZuoraRestConfig] = Json.reads[ZuoraRestConfig]
+  implicit val stepsConfigReads: Reads[StepsConfig] = Json.reads[StepsConfig]
 
   // this is the entry point
   // it's referenced by the cloudformation so make sure you keep it in step
