@@ -10,6 +10,7 @@ deployments:
     parameters:
       templatePath: cfn.yaml
       cloudFormationStackName: catalog-service-
+      prependStackToCloudFormationStackName: false
 
   catalog-service:
     type: aws-lambda
