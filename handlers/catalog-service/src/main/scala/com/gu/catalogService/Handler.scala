@@ -3,7 +3,6 @@ package com.gu.catalogService
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.util.{Config, Logging}
 import java.io.{InputStream, OutputStream}
-
 import com.gu.effects.RawEffects
 import com.gu.util.apigateway.LoadConfig
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
@@ -20,10 +19,6 @@ object Handler extends Logging {
     logger.info(s"Starting point for Catalog Service lambda")
     runWithEffects(RawEffects.createDefault, LambdaIO(inputStream, outputStream, context))
   }
-
-  case class StepsConfig(zuoraRestConfig: ZuoraRestConfig)
-
-  implicit val stepsConfigReads: Reads[StepsConfig] = Json.reads[StepsConfig]
 
   def runWithEffects(rawEffects: RawEffects, lambdaIO: LambdaIO): Unit = {
 
@@ -46,5 +41,8 @@ object Handler extends Logging {
         }
     }.run((rawEffects.stage, rawEffects.s3Load(rawEffects.stage)))
   }
+
+  case class StepsConfig(zuoraRestConfig: ZuoraRestConfig)
+  implicit val stepsConfigReads: Reads[ZuoraRestConfig] = Json.reads[ZuoraRestConfig]
 
 }
