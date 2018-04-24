@@ -106,3 +106,4 @@ Resources:
         Properties:
             AccessControl: Private
             BucketName: gu-zuora-catalog
+        DeletionPolicy: Retain
