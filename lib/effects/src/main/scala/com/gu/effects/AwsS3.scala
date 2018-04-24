@@ -59,11 +59,7 @@ object AwsS3 extends Logging {
   def putObject(request: PutObjectRequest): Try[PutObjectResult] = {
     logger.info(s"Copying file to S3. Bucket: ${request.getBucketName} | Key: ${request.getKey}")
     val uploadRequest = Try(client.putObject(request))
-    uploadRequest.recoverWith {
-      case ex =>
-        logger.error(s"Failed to upload object to S3 due to: ${ex.getMessage}")
-        Failure(ex)
-    }
+    uploadRequest
   }
 
 }

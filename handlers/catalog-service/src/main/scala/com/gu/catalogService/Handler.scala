@@ -3,13 +3,15 @@ package com.gu.catalogService
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.util.{Config, Logging}
 import java.io._
+
 import com.amazonaws.services.s3.model.{PutObjectRequest, PutObjectResult}
 import com.gu.effects.{AwsS3, RawEffects}
 import com.gu.util.apigateway.LoadConfig
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import com.gu.util.zuora.{ZuoraReadCatalog, ZuoraRestConfig, ZuoraRestRequestMaker}
 import play.api.libs.json.{JsValue, Json, Reads}
-import scala.util.Try
+
+import scala.util.{Failure, Try}
 import scalaz.{-\/, \/-}
 
 object Handler extends Logging {
@@ -34,7 +36,11 @@ object Handler extends Logging {
         case -\/(clientFail) => logger.error(s"Failure when loading the catalog: ${clientFail.message}")
         case \/-(catalog) =>
           logger.info(s"Successfully loaded the catalog")
-          uploadCatalogToS3(catalog)
+          uploadCatalogToS3(catalog).recoverWith {
+            case ex =>
+              logger.error(s"Failed to upload file to S3 due to $ex")
+              Failure(ex)
+          }
       }
     }
 
