@@ -7,9 +7,9 @@ deployments:
   cfn:
     type: cloud-formation
     app: catalog-service
-    cloudFormationStackName: catalog-service-
     parameters:
       templatePath: cfn.yaml
+      cloudFormationStackName: catalog-service-
 
   catalog-service:
     type: aws-lambda
