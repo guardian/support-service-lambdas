@@ -46,7 +46,7 @@ object Handler extends Logging {
     def uploadCatalogToS3(catalog: JsValue): Try[PutObjectResult] = {
 
       def jsonFile(catalog: JsValue): Try[File] = for {
-        file <- Try(new File("/tmp/catalog.json"))
+        file <- Try(new File("/tmp/catalog.json")) //Must use /tmp when running in a lambda
         writer <- Try(new FileWriter(file))
         _ <- Try(writer.write(catalog.as[String]))
         _ <- Try(writer.close())
