@@ -53,6 +53,8 @@ object Handler extends Logging {
         _ <- Try(writer.close())
       } yield file
 
+      logger.info("Uploading catalog to S3...")
+
       for {
         catalogDotJson <- jsonFile(catalog)
         putRequest = new PutObjectRequest(s"gu-zuora-catalog/${rawEffects.stage}", "catalog.json", catalogDotJson)
