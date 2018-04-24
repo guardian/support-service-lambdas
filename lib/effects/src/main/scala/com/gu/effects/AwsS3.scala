@@ -3,7 +3,7 @@ package com.gu.effects
 import com.amazonaws.auth._
 import com.amazonaws.auth.profile.ProfileCredentialsProvider
 import com.amazonaws.services.s3.AmazonS3Client
-import com.amazonaws.services.s3.model.{GetObjectRequest, S3ObjectInputStream}
+import com.amazonaws.services.s3.model.{GetObjectRequest, PutObjectRequest, PutObjectResult, S3ObjectInputStream}
 import com.gu.util.{Logging, Stage}
 
 import scala.io.Source
@@ -54,6 +54,16 @@ object AwsS3 extends Logging {
       contentString <- Try(Source.fromInputStream(s3Stream).mkString)
       _ <- Try(s3Stream.close())
     } yield contentString
+  }
+
+  def putObject(request: PutObjectRequest): Try[PutObjectResult] = {
+    logger.info(s"Copying file to S3. Bucket: ${request.getBucketName} | Key: ${request.getKey}")
+    val uploadRequest = Try(client.putObject(request))
+    uploadRequest.recoverWith {
+      case ex =>
+        logger.error(s"Failed to upload object to S3 due to: ${ex.getMessage}")
+        Failure(ex)
+    }
   }
 
 }
