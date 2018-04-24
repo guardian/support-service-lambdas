@@ -6,9 +6,22 @@ Parameters:
         Description: Stage name
         Type: String
         AllowedValues:
-            - PROD
             - CODE
+            - PROD
         Default: CODE
+
+Mappings:
+    StageVariables:
+        CODE:
+            ReadableS3Buckets:
+              - arn:aws:s3:::gu-reader-revenue-private/payment-failure-lambdas/CODE/*
+            WriteableS3Buckets:
+              - arn:aws:s3:::gu-zuora-catalog/CODE/*
+        PROD:
+            ReadableS3Buckets:
+              - arn:aws:s3:::gu-reader-revenue-private/payment-failure-lambdas/PROD/*
+            WriteableS3Buckets:
+              - arn:aws:s3:::gu-zuora-catalog/PROD/*
 
 Resources:
     CatalogServiceRole:
@@ -39,7 +52,10 @@ Resources:
                       Statement:
                           - Effect: Allow
                             Action: s3:GetObject
-                            Resource: !Sub arn:aws:s3:::gu-reader-revenue-private/membership/payment-failure-lambdas/${Stage}/*
+                            Resource: !FindInMap [StageVariables, !Ref Stage, ReadableS3Buckets]
+                          - Effect: Allow
+                            Action: s3:PutObject
+                            Resource: !FindInMap [StageVariables, !Ref Stage, WriteableS3Buckets]
 
     CatalogServiceLambda:
         Type: AWS::Lambda::Function
@@ -84,3 +100,9 @@ Resources:
                 Id: !Sub catalog-service-lambda-${Stage}
         DependsOn:
         - CatalogServiceLambda
+
+    CatalogS3Bucket:
+        Type: "AWS::S3::Bucket"
+        Properties:
+            AccessControl: Private
+            BucketName: gu-zuora-catalog
