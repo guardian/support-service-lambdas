@@ -33,14 +33,7 @@ object Handler extends Logging {
       zuoraRequests = ZuoraRestRequestMaker(response, config.stepsConfig.zuoraRestConfig)
       s3Uploader = s3Write(config.stage).andThen(_.toFailableOp("write to s3"))
       fetchCatalogAttempt <- ZuoraReadCatalog(zuoraRequests).withLogging("loaded catalog")
-      _ <- ValidateCatalog(fetchCatalogAttempt).withLogging("catalog validation")
       _ <- s3Uploader(fetchCatalogAttempt).withLogging("uploaded to s3")
     } yield ()
 
-}
-
-object ValidateCatalog {
-  // testable code, makes a decision.  simplest signature (could even return a boolean?)
-  //TODO
-  def apply(catalog: String): FailableOp[Unit] = ???
 }
