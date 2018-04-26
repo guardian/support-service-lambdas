@@ -131,11 +131,3 @@ object ZuoraDisableAutoPay {
     requests.put(AccountUpdate(autoPay = false), s"accounts/$accountId"): ClientFailableOp[Unit]
 
 }
-
-object ZuoraReadCatalog {
-
-  def apply(requests: Requests): ClientFailableOp[JsValue] =
-    requests.get[JsValue]("catalog/products?pageSize=40")
-
-}
-

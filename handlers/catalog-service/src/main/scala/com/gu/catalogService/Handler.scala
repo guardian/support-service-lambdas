@@ -6,7 +6,7 @@ import java.io.{InputStream, OutputStream}
 import com.gu.effects.RawEffects
 import com.gu.util.apigateway.LoadConfig
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
-import com.gu.util.zuora.{ZuoraReadCatalog, ZuoraRestConfig, ZuoraRestRequestMaker}
+import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
 import play.api.libs.json.{Json, Reads}
 import scalaz.{-\/, \/-}
 
