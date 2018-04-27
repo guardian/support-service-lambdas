@@ -1,16 +1,15 @@
 package com.gu.catalogService
 
-import com.amazonaws.services.lambda.runtime.Context
-import com.gu.util.{Config, Logging}
-import java.io._
 import com.amazonaws.services.s3.model.{PutObjectRequest, PutObjectResult}
 import com.gu.effects.{AwsS3, RawEffects}
 import com.gu.util.apigateway.LoadConfig
-import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
-import com.gu.util.zuora.{ZuoraReadCatalog, ZuoraRestConfig, ZuoraRestRequestMaker}
+import com.gu.util.reader.Types._
+import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
+import com.gu.util.{Logging, Stage}
+import java.io.{File, FileWriter}
+import okhttp3.{Request, Response}
 import play.api.libs.json.{JsValue, Json, Reads}
-import scala.util.{Failure, Try}
-import scalaz.{-\/, \/-}
+import scala.util.Try
 
 object Handler extends Logging {
 
@@ -19,56 +18,43 @@ object Handler extends Logging {
 
   // this is the entry point
   // it's referenced by the cloudformation so make sure you keep it in step
-  def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
-    runWithEffects(RawEffects.createDefault, LambdaIO(inputStream, outputStream, context))
+  def apply(): Unit = {
+    runWithEffects(RawEffects.response, RawEffects.stage, RawEffects.s3Load)
   }
 
-  def runWithEffects(rawEffects: RawEffects, lambdaIO: LambdaIO): Unit = {
+  // this does the wiring except side effects but not any decisions, so can be used for an end to end test
+  def runWithEffects(
+    response: Request => Response,
+    stage: Stage,
+    s3Load: Stage => Try[String]
+  ): Unit =
+    for {
+      config <- LoadConfig.default[StepsConfig].run((stage, s3Load(stage))).withLogging("loaded config")
+      zuoraRequests = ZuoraRestRequestMaker(response, config.stepsConfig.zuoraRestConfig)
+      fetchCatalogAttempt <- ZuoraReadCatalog(zuoraRequests).withLogging("loaded catalog")
+    } yield ()
 
-    def operation(config: Config[StepsConfig]) = {
-      logger.info("Running catalog load operation")
-      val zuoraRequests = ZuoraRestRequestMaker(rawEffects.response, config.stepsConfig.zuoraRestConfig)
-      val catalog = ZuoraReadCatalog(zuoraRequests)
-      catalog match {
-        case -\/(clientFail) => logger.error(s"Failure when loading the catalog: ${clientFail.message}")
-        case \/-(catalog) =>
-          logger.info(s"Successfully loaded the catalog")
-          uploadCatalogToS3(catalog).recoverWith {
-            case ex =>
-              logger.error(s"Failed to upload file to S3 due to $ex")
-              Failure(ex)
-          }
-      }
+
+  def uploadCatalogToS3(stage: Stage, catalog: JsValue): Try[PutObjectResult] = {
+
+    def jsonFile(catalog: JsValue): Try[File] = for {
+      file <- Try(new File("/tmp/catalog.json")) //Must use /tmp when running in a lambda
+      writer <- Try(new FileWriter(file))
+      _ <- Try(writer.write(catalog.toString()))
+      _ <- Try(writer.close())
+    } yield file
+
+    logger.info("Uploading catalog to S3...")
+
+    for {
+      catalogDotJson <- jsonFile(catalog)
+      putRequest = new PutObjectRequest(s"gu-zuora-catalog/${stage.value}", "catalog.json", catalogDotJson)
+      result <- AwsS3.putObject(putRequest)
+    } yield {
+      logger.info(s"Successfully uploaded file to S3: $result")
+      result
     }
 
-    def uploadCatalogToS3(catalog: JsValue): Try[PutObjectResult] = {
-
-      def jsonFile(catalog: JsValue): Try[File] = for {
-        file <- Try(new File("/tmp/catalog.json")) //Must use /tmp when running in a lambda
-        writer <- Try(new FileWriter(file))
-        _ <- Try(writer.write(catalog.toString()))
-        _ <- Try(writer.close())
-      } yield file
-
-      logger.info("Uploading catalog to S3...")
-
-      for {
-        catalogDotJson <- jsonFile(catalog)
-        putRequest = new PutObjectRequest(s"gu-zuora-catalog/${rawEffects.stage.value}", "catalog.json", catalogDotJson)
-        result <- AwsS3.putObject(putRequest)
-      } yield {
-        logger.info(s"Successfully uploaded file to S3: $result")
-        result
-      }
-
-    }
-
-    LoadConfig.default[StepsConfig].map {
-      failableConfig =>
-        failableConfig.map {
-          config => operation(config)
-        }
-    }.run((rawEffects.stage, rawEffects.s3Load(rawEffects.stage)))
   }
 
 }
