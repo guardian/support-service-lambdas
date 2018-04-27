@@ -2,7 +2,7 @@ package com.gu.catalogService
 
 import java.io.{File, FileWriter}
 import com.amazonaws.services.s3.model.{PutObjectRequest, PutObjectResult}
-import com.gu.effects.AwsS3
+import com.gu.effects.UploadToS3
 import com.gu.util.Stage
 import play.api.libs.json.JsValue
 import scala.util.Try
@@ -24,7 +24,7 @@ object S3UploadCatalog extends Logging {
     for {
       catalogDotJson <- jsonFile(catalog)
       putRequest = new PutObjectRequest(s"gu-zuora-catalog/${stage.value}", "catalog.json", catalogDotJson)
-      result <- AwsS3.putObject(putRequest)
+      result <- UploadToS3.putObject(putRequest)
     } yield {
       logger.info(s"Successfully uploaded file to S3: $result")
       result

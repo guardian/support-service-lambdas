@@ -27,18 +27,16 @@ object ConfigLoad extends Logging {
     logger.info(s"Attempting to load config in $stage")
     val bucket = s"gu-reader-revenue-private/membership/payment-failure-lambdas/${stage.value}"
     val request = new GetObjectRequest(bucket, key)
-    AwsS3.fetchString(request)
+    GetFromS3.fetchString(request)
   }
 
 }
 
-object AwsS3 extends Logging {
-
-  val client = AmazonS3Client.builder.withCredentials(aws.CredentialsProvider).build()
+object GetFromS3 extends Logging {
 
   def fetchContent(request: GetObjectRequest): Try[S3ObjectInputStream] = {
     logger.info(s"Getting file from S3. Bucket: ${request.getBucketName} | Key: ${request.getKey}")
-    val contentRequest = Try(client.getObject(request).getObjectContent)
+    val contentRequest = Try(AwsS3.client.getObject(request).getObjectContent)
     contentRequest.recoverWith {
       case ex => {
         logger.error(s"Failed to fetch config from S3 due to: ${ex.getMessage}")
@@ -55,11 +53,21 @@ object AwsS3 extends Logging {
     } yield contentString
   }
 
+}
+
+object UploadToS3 extends Logging {
+
   def putObject(request: PutObjectRequest): Try[PutObjectResult] = {
     logger.info(s"Copying file to S3. Bucket: ${request.getBucketName} | Key: ${request.getKey}")
-    val uploadRequest = Try(client.putObject(request))
+    val uploadRequest = Try(AwsS3.client.putObject(request))
     uploadRequest
   }
+
+}
+
+object AwsS3 {
+
+  val client = AmazonS3Client.builder.withCredentials(aws.CredentialsProvider).build()
 
 }
 

@@ -32,7 +32,4 @@ object Handler extends Logging {
       fetchCatalogAttempt <- ZuoraReadCatalog(zuoraRequests).withLogging("loaded catalog")
     } yield ()
 
-
-
-
 }
