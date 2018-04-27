@@ -35,7 +35,7 @@ object Handler extends Logging {
     for {
       config <- LoadConfig.default[StepsConfig].run((stage, s3Load(stage))).withLogging("loaded config")
       zuoraRequests = ZuoraRestRequestMaker(response, config.stepsConfig.zuoraRestConfig)
-      fetchCatalogAttempt <- ZuoraReadCatalog(zuoraRequests).withLogging("loaded catalog")
+      fetchCatalogAttempt <- ZuoraReadCatalog(zuoraRequests)
       uploadCatalogAttempt <- S3UploadCatalog(stage, fetchCatalogAttempt, localFileWrite, s3Write)
     } yield ()
 
