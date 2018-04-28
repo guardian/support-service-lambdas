@@ -1,11 +1,11 @@
 package manualTest
 
 import com.gu.effects.{ConfigLoad, RawEffects}
+import com.gu.stripeCustomerSourceUpdated.SourceUpdatedSteps.StepsConfig
 import com.gu.util.ETConfig.ETSendIds
 import com.gu.util.exacttarget.EmailSendSteps.EmailSendStepsDeps
 import com.gu.util.exacttarget._
 import com.gu.util.reader.Types._
-import com.gu.util.zuora.ZuoraRestConfig
 import com.gu.util.{Config, Logging, Stage}
 import scalaz.syntax.std.either._
 
@@ -50,7 +50,7 @@ object EmailClientSystemTest extends App with Logging {
 
   for {
     configAttempt <- ConfigLoad.load(Stage("DEV")).toEither.disjunction.withLogging("fromFile")
-    config <- Config.parseConfig[ZuoraRestConfig](configAttempt)
+    config <- Config.parseConfig[StepsConfig](configAttempt)
     deps = EmailSendStepsDeps.default(Stage("CODE"), RawEffects.createDefault.response, config.etConfig)
     etSendIds = config.etConfig.etSendIDs
   } yield Seq(

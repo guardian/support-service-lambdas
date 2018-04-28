@@ -5,17 +5,18 @@ import java.io.{InputStream, OutputStream}
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.RawEffects
 import com.gu.identity.{GetByEmail, IdentityConfig}
+import com.gu.identityBackfill.ResponseMaker._
 import com.gu.identityBackfill.Types.{EmailAddress, IdentityId}
 import com.gu.identityBackfill.salesforce.ContactSyncCheck.RecordTypeId
 import com.gu.identityBackfill.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.identityBackfill.salesforce._
-import com.gu.identityBackfill.zuora.{AddIdentityIdToAccount, CountZuoraAccountsForIdentityId, GetZuoraAccountsForEmail}
+import com.gu.identityBackfill.zuora.{AddIdentityIdToAccount, CountZuoraAccountsForIdentityId, GetZuoraAccountsForEmail, GetZuoraSubTypeForAccount}
 import com.gu.util.Config
+import com.gu.util.apigateway.ApiGatewayHandler
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
-import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayResponse}
 import com.gu.util.reader.Types._
-import com.gu.util.zuora.RestRequestMaker.Requests
-import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
+import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, Requests}
+import com.gu.util.zuora.{ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
 import play.api.libs.json.{Json, Reads}
 import scalaz.\/
 
@@ -38,21 +39,22 @@ object Handler {
     def operation: Config[StepsConfig] => Operation =
       config => {
         val zuoraRequests = ZuoraRestRequestMaker(rawEffects.response, config.stepsConfig.zuoraRestConfig)
+        val zuoraQuerier = ZuoraQuery(zuoraRequests)
         val getByEmail: EmailAddress => \/[GetByEmail.ApiError, IdentityId] = GetByEmail(rawEffects.response, config.stepsConfig.identityConfig)
-        val countZuoraAccounts: IdentityId => FailableOp[Int] = CountZuoraAccountsForIdentityId(zuoraRequests)
+        val countZuoraAccounts: IdentityId => ClientFailableOp[Int] = CountZuoraAccountsForIdentityId(zuoraQuerier)
         lazy val sfRequests: FailableOp[Requests] = SalesforceAuthenticate(rawEffects.response, config.stepsConfig.sfConfig)
 
-        // todo make the zuora one like this too, also "map" the lefts to an api gateway response in one place, not in the for comps everywhere
         Operation(
           steps = IdentityBackfillSteps(
             PreReqCheck(
               getByEmail,
-              PreReqCheck.getSingleZuoraAccountForEmail(GetZuoraAccountsForEmail(zuoraRequests)),
-              PreReqCheck.noZuoraAccountsForIdentityId(countZuoraAccounts),
-              SyncableSFToIdentity(sfRequests, RecordTypeId("01220000000VB52AAG"))
+              GetZuoraAccountsForEmail(zuoraQuerier)_ andThen PreReqCheck.getSingleZuoraAccountForEmail,
+              countZuoraAccounts andThen PreReqCheck.noZuoraAccountsForIdentityId,
+              GetZuoraSubTypeForAccount(zuoraQuerier)_ andThen PreReqCheck.acceptableReaderType,
+              todo => sfRequests.flatMap(sfRequests => SyncableSFToIdentity(sfRequests, RecordTypeId("01220000000VB52AAG"))(todo))
             ),
             AddIdentityIdToAccount(zuoraRequests),
-            UpdateSalesforceIdentityId(sfRequests)
+            (c, d) => sfRequests.flatMap(sfRequests => UpdateSalesforceIdentityId(sfRequests)(c, d).nonSuccessToError)
           ),
           healthcheck = () => Healthcheck(
             getByEmail,
@@ -69,12 +71,12 @@ object Handler {
 object Healthcheck {
   def apply(
     getByEmail: EmailAddress => \/[GetByEmail.ApiError, IdentityId],
-    countZuoraAccountsForIdentityId: IdentityId => FailableOp[Int],
+    countZuoraAccountsForIdentityId: IdentityId => ClientFailableOp[Int],
     sfAuth: => FailableOp[Any],
   ): FailableOp[Unit] =
     for {
-      identityId <- getByEmail(EmailAddress("john.duffell@guardian.co.uk")).leftMap(a => ApiGatewayResponse.internalServerError(a.toString)).withLogging("healthcheck getByEmail")
-      _ <- countZuoraAccountsForIdentityId(identityId)
+      identityId <- getByEmail(EmailAddress("john.duffell@guardian.co.uk")).nonSuccessToError.withLogging("healthcheck getByEmail")
+      _ <- countZuoraAccountsForIdentityId(identityId).nonSuccessToError
       _ <- sfAuth
     } yield ()
 
