@@ -1,14 +1,17 @@
 package com.gu.effects
 
+import java.io.File
 import java.time.LocalDateTime
 
+import com.amazonaws.AmazonServiceException
+import com.amazonaws.services.s3.model.{PutObjectRequest, PutObjectResult}
 import com.gu.effects.TestingRawEffects._
 import com.gu.util.{Logging, Stage}
 import okhttp3._
 import okhttp3.internal.Util.UTF_8
 import okio.Buffer
 
-import scala.util.Success
+import scala.util.{Failure, Success}
 
 class TestingRawEffects(
   val isProd: Boolean = false,
@@ -69,6 +72,23 @@ class TestingRawEffects(
     //verify
     requests.map(req => (req.method, req.url.encodedPath) -> Option(req.body).map(body)).toMap
   }
+
+  val dummyFile = new File("blah", "/tmp/blah")
+  val fakeRequest = new PutObjectRequest(s"gu-fake-bucket-for-testing", "fake-catalog.json", dummyFile)
+
+  val successfulS3Upload = {
+    fakeRequest: PutObjectRequest => Success(new PutObjectResult)
+  }
+
+  val failedS3Upload = {
+    fakeRequest: PutObjectRequest => Failure(new AmazonServiceException("failure"))
+  }
+
+  val localFileWrite = {
+    val fileConstructor = FileConstructor("input", "myPath")
+    fileConstructor: FileConstructor => Success(dummyFile)
+  }
+
   val rawEffects = RawEffects(response, stage, _ => Success(codeConfig), () => LocalDateTime.of(2017, 11, 19, 12, 32))
 
 }

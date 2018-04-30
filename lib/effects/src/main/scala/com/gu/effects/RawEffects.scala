@@ -30,7 +30,7 @@ object RawEffects {
 
   val response: Request => Response = Http.response
   def s3Load: Stage => Try[String] = ConfigLoad.load
-  def localFileWrite: (String, String) => Try[File] = LocalFile.create
+  def localFileWrite: FileConstructor => Try[File] = LocalFile.create
   def s3Write: PutObjectRequest => Try[PutObjectResult] = UploadToS3.putObject
 
 }

@@ -3,7 +3,7 @@ package com.gu.catalogService
 import java.io.File
 
 import com.amazonaws.services.s3.model.{PutObjectRequest, PutObjectResult}
-import com.gu.effects.RawEffects
+import com.gu.effects.{FileConstructor, RawEffects}
 import com.gu.util.apigateway.LoadConfig
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
@@ -30,13 +30,20 @@ object Handler extends Logging {
     stage: Stage,
     s3Load: Stage => Try[String],
     s3Write: PutObjectRequest => Try[PutObjectResult],
-    localFileWrite: (String, String) => Try[File]
-  ): Unit =
-    for {
-      config <- LoadConfig.default[StepsConfig].run((stage, s3Load(stage))).withLogging("loaded config")
+    localFileWrite: FileConstructor => Try[File]
+  ): Unit = {
+
+    val attempt = for {
+      config <- LoadConfig.default[StepsConfig].run((stage, s3Load(stage))).withLogging("loaded config").leftMap(_.body)
       zuoraRequests = ZuoraRestRequestMaker(response, config.stepsConfig.zuoraRestConfig)
-      fetchCatalogAttempt <- ZuoraReadCatalog(zuoraRequests)
+      fetchCatalogAttempt <- ZuoraReadCatalog(zuoraRequests).leftMap(_.message)
       uploadCatalogAttempt <- S3UploadCatalog(stage, fetchCatalogAttempt, localFileWrite, s3Write)
-    } yield ()
+    } yield uploadCatalogAttempt
+
+    attempt.fold(failureReason => throw CatalogServiceException(failureReason), _ => Unit)
+
+  }
+
+  case class CatalogServiceException(message: String) extends Throwable
 
 }
