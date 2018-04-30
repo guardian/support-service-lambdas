@@ -44,6 +44,6 @@ object Handler extends Logging {
 
   }
 
-  case class CatalogServiceException(message: String) extends Throwable
+  case class CatalogServiceException(message: String) extends Throwable(message: String)
 
 }
