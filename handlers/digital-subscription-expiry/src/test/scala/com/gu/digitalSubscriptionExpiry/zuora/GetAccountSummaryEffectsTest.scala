@@ -27,9 +27,9 @@ class GetAccountSummaryEffectsTest extends FlatSpec with Matchers {
     val expected = AccountSummaryResult(
       accountId = testAccountId,
       billToLastName = "Brown",
-      billToPostcode = "SW13 8EB",
+      billToPostcode = Some("SW13 8EB"),
       soldToLastName = "Brown",
-      soldToPostcode = "SW13 8EB"
+      soldToPostcode = Some("SW13 8EB")
     )
 
     actual should be(\/-(expected))

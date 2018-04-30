@@ -32,9 +32,9 @@ class GetSubscriptionExpiryTest extends FlatSpec {
   val accountSummary = AccountSummaryResult(
     accountId = AccountId("accountId"),
     billToLastName = "billingLastName",
-    billToPostcode = "bill 123",
+    billToPostcode = Some("bill 123"),
     soldToLastName = "SoldLastName",
-    soldToPostcode = "123 sold"
+    soldToPostcode = Some("123 sold")
   )
 
   val expectedResponse = {
