@@ -73,22 +73,6 @@ class TestingRawEffects(
     requests.map(req => (req.method, req.url.encodedPath) -> Option(req.body).map(body)).toMap
   }
 
-  val dummyFile = new File("blah", "/tmp/blah")
-  val fakeRequest = new PutObjectRequest(s"gu-fake-bucket-for-testing", "fake-catalog.json", dummyFile)
-
-  val successfulS3Upload = {
-    fakeRequest: PutObjectRequest => Success(new PutObjectResult)
-  }
-
-  val failedS3Upload = {
-    fakeRequest: PutObjectRequest => Failure(new AmazonServiceException("failure"))
-  }
-
-  val localFileWrite = {
-    val fileConstructor = FileConstructor("input", "myPath")
-    fileConstructor: FileConstructor => Success(dummyFile)
-  }
-
   val rawEffects = RawEffects(response, stage, _ => Success(codeConfig), () => LocalDateTime.of(2017, 11, 19, 12, 32))
 
 }
@@ -147,5 +131,21 @@ object TestingRawEffects {
       |  }
       |}
     """.stripMargin
+
+  val dummyFile = new File("blah", "/tmp/blah")
+  val fakeRequest = new PutObjectRequest(s"gu-fake-bucket-for-testing", "fake-catalog.json", dummyFile)
+
+  val successfulS3Upload = {
+    fakeRequest: PutObjectRequest => Success(new PutObjectResult)
+  }
+
+  val failedS3Upload = {
+    fakeRequest: PutObjectRequest => Failure(new AmazonServiceException("failure"))
+  }
+
+  val localFileWrite = {
+    val fileConstructor = FileConstructor("input", "myPath")
+    fileConstructor: FileConstructor => Success(dummyFile)
+  }
 
 }

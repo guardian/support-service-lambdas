@@ -17,8 +17,8 @@ class CatalogServiceStepsTest extends FlatSpec with Matchers {
         successfulResponseEffects.rawEffects.response,
         successfulResponseEffects.rawEffects.stage,
         _ => Failure(new NullPointerException),
-        successfulResponseEffects.successfulS3Upload,
-        successfulResponseEffects.localFileWrite
+        TestingRawEffects.successfulS3Upload,
+        TestingRawEffects.localFileWrite
       )
     }
   }
@@ -29,8 +29,8 @@ class CatalogServiceStepsTest extends FlatSpec with Matchers {
         failureResponseEffects.rawEffects.response,
         failureResponseEffects.rawEffects.stage,
         failureResponseEffects.rawEffects.s3Load,
-        failureResponseEffects.successfulS3Upload,
-        failureResponseEffects.localFileWrite
+        TestingRawEffects.successfulS3Upload,
+        TestingRawEffects.localFileWrite
       )
     }
   }
@@ -41,8 +41,8 @@ class CatalogServiceStepsTest extends FlatSpec with Matchers {
         successfulResponseEffects.rawEffects.response,
         successfulResponseEffects.rawEffects.stage,
         successfulResponseEffects.rawEffects.s3Load,
-        successfulResponseEffects.failedS3Upload,
-        successfulResponseEffects.localFileWrite
+        TestingRawEffects.failedS3Upload,
+        TestingRawEffects.localFileWrite
       )
     }
   }
