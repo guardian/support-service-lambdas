@@ -19,6 +19,7 @@ libraryDependencies ++= Seq(
   "com.squareup.okhttp3" % "okhttp" % "3.9.1",
   "com.typesafe.play" %% "play-json" % "2.6.9",
   "org.scalatest" %% "scalatest" % "3.0.1" % "test",
+  "com.fasterxml.jackson.core" % "jackson-databind" % "2.8.11.1",
   "com.gu" %% "content-authorisation-common" % "0.3"
 )
 
