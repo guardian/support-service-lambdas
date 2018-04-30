@@ -11,7 +11,9 @@ import scalaz.{-\/, \/, \/-}
 
 object S3UploadCatalog extends Logging {
 
-  def apply(stage: Stage, catalog: String, localFileWrite: FileConstructor => Try[File], s3Write: PutObjectRequest => Try[PutObjectResult]): String \/ PutObjectResult = {
+  def apply(stage: Stage, catalog: String,
+            localFileWrite: FileConstructor => Try[File],
+            s3Write: PutObjectRequest => Try[PutObjectResult]): String \/ PutObjectResult = {
     logger.info("Uploading catalog to S3...")
     val path = "/tmp/catalog.json" // Must use /tmp when running in a lambda
     val uploadAttempt = for {
