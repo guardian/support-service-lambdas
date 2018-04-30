@@ -11,7 +11,8 @@ import scalaz.{-\/, \/, \/-}
 object S3UploadCatalog extends Logging {
 
   def apply(
-    stage: Stage, catalog: String,
+    stage: Stage,
+    catalog: String,
     localFileWrite: FileConstructor => Try[File],
     s3Write: PutObjectRequest => Try[PutObjectResult]
   ): String \/ PutObjectResult = {
