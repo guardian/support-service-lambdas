@@ -34,7 +34,7 @@ object Handler extends Logging {
         val zuoraRequests = ZuoraRestRequestMaker(rawEffects.response, config.stepsConfig.zuoraRestConfig)
         val today = () => rawEffects.now().toLocalDate
         DigitalSubscriptionExpirySteps(
-          getEmergencyTokenExpiry = GetTokenExpiry(emergencyTokens),
+          getEmergencyTokenExpiry = GetTokenExpiry(emergencyTokens, today),
           getSubscription = GetSubscription(zuoraRequests),
           setActivationDate = SetActivationDate(zuoraRequests, rawEffects.now),
           getAccountSummary = GetAccountSummary(zuoraRequests),
