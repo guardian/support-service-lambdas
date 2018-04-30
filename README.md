@@ -99,6 +99,14 @@ The main project aggregates all the sub projects from handlers and lib, so we ca
 
 [identity-backfill](handlers/identity-backfill/)
 
+**Digital Subscription Expiry**
+
+[digital-subscription-expiry](handlers/digital-subscription-expiry)
+
+**Catalog Service**
+
+[catalog-service](handlers/catalog-service)
+
 **Libraries**
 
 [shared code](lib/)
