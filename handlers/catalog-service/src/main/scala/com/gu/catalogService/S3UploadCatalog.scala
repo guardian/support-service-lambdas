@@ -4,9 +4,8 @@ import java.io.File
 
 import com.amazonaws.services.s3.model.{PutObjectRequest, PutObjectResult}
 import com.gu.effects.FileConstructor
-import com.gu.util.Stage
+import com.gu.util.{Logging, Stage}
 import scala.util.Try
-import com.gu.util.Logging
 
 import scalaz.{-\/, \/, \/-}
 
