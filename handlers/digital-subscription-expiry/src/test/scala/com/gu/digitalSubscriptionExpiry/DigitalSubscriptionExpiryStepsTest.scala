@@ -50,9 +50,9 @@ class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
       val summary = AccountSummaryResult(
         accountId = AccountId("someAccountId"),
         billToLastName = "someBillToLastName",
-        billToPostcode = "someBilltoPostCode",
+        billToPostcode = Some("someBilltoPostCode"),
         soldToLastName = "someSoldToLastName",
-        soldToPostcode = "someSoldtoPostCode"
+        soldToPostcode = Some("someSoldtoPostCode")
       )
       \/-(summary)
     }
