@@ -47,8 +47,9 @@ object ContactSyncCheck {
 
 object SyncableSFToIdentity {
   def apply(
-    sfRequests: RestRequestMaker.Requests,
     standardRecordType: RecordTypeId
+  )(
+    sfRequests: RestRequestMaker.Requests
   )(
     sFContactId: SFContactId
   ) =

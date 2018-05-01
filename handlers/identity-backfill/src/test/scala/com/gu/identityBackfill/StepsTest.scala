@@ -29,8 +29,8 @@ class StepsTest extends FlatSpec with Matchers {
           zuoraUpdate = Some((accountId, identityId))
           \/-(())
         },
-        updateSalesforceIdentityId = (sFContactId, identityId) => {
-          salesforceUpdate = Some((sFContactId, identityId))
+        updateSalesforceIdentityId = sFContactIdIdentityId => {
+          salesforceUpdate = Some(sFContactIdIdentityId)
           \/-(())
         }
       )

@@ -12,7 +12,7 @@ import com.gu.identityBackfill.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.identityBackfill.salesforce._
 import com.gu.identityBackfill.zuora.{AddIdentityIdToAccount, CountZuoraAccountsForIdentityId, GetZuoraAccountsForEmail, GetZuoraSubTypeForAccount}
 import com.gu.util.Config
-import com.gu.util.apigateway.ApiGatewayHandler
+import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayResponse}
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, Requests}
@@ -51,10 +51,14 @@ object Handler {
               GetZuoraAccountsForEmail(zuoraQuerier)_ andThen PreReqCheck.getSingleZuoraAccountForEmail,
               countZuoraAccounts andThen PreReqCheck.noZuoraAccountsForIdentityId,
               GetZuoraSubTypeForAccount(zuoraQuerier)_ andThen PreReqCheck.acceptableReaderType,
-              todo => sfRequests.flatMap(sfRequests => SyncableSFToIdentity(sfRequests, RecordTypeId("01220000000VB52AAG"))(todo))
+              Need(SyncableSFToIdentity(RecordTypeId("01220000000VB52AAG"))).withFailableDep(sfRequests)
+//                withSF(sfRequests, SyncableSFToIdentity(RecordTypeId("01220000000VB52AAG")))
+//                todo => sfRequests.flatMap(sfRequests => SyncableSFToIdentity(sfRequests, RecordTypeId("01220000000VB52AAG"))(todo))
             ),
             AddIdentityIdToAccount(zuoraRequests),
-            (c, d) => sfRequests.flatMap(sfRequests => UpdateSalesforceIdentityId(sfRequests)(c, d).nonSuccessToError)
+            Need.from2(UpdateSalesforceIdentityId.apply).errMap(e => ApiGatewayResponse.internalServerError(e.message)).withFailableDep(sfRequests)
+//              withSF(sfRequests, (UpdateSalesforceIdentityId.apply _).andThen(_.tupled.andThen(_.nonSuccessToError)))
+//            (c, d) => sfRequests.flatMap(sfRequests => UpdateSalesforceIdentityId(sfRequests)(c, d).nonSuccessToError)
           ),
           healthcheck = () => Healthcheck(
             getByEmail,
@@ -65,6 +69,10 @@ object Handler {
       }
     ApiGatewayHandler.default[StepsConfig](operation, lambdaIO).run((rawEffects.stage, rawEffects.s3Load(rawEffects.stage)))
   }
+
+//  def withSF[PARAM, RESULT](lazyMaybeRequests: => FailableOp[Requests], f: Requests => PARAM => FailableOp[RESULT]): PARAM => FailableOp[RESULT] = { param =>
+//    lazyMaybeRequests.flatMap(sfRequests => f(sfRequests)(param))
+//  }
 
 }
 
@@ -80,4 +88,17 @@ object Healthcheck {
       _ <- sfAuth
     } yield ()
 
+}
+
+object Need {
+  def from2[DEP, P1, P2, ERR, RESULT](f: DEP => (P1, P2) => ERR \/ RESULT): Need[DEP, (P1, P2), ERR, RESULT] =
+    Need(f.andThen(_.tupled))
+}
+
+case class Need[DEP, PARAM, ERR, RESULT](f: DEP => PARAM => ERR \/ RESULT) {
+  def withFailableDep(failableDep: => ERR \/ DEP): PARAM => ERR \/ RESULT = { param =>
+    failableDep.flatMap(dep => f(dep)(param))
+  }
+  def errMap[NEWERR](map: ERR => NEWERR): Need[DEP, PARAM, NEWERR, RESULT] =
+    Need(f.andThen(_.andThen(_.leftMap(map))))
 }
