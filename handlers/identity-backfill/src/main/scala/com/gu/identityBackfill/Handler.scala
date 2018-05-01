@@ -51,12 +51,18 @@ object Handler {
               GetZuoraAccountsForEmail(zuoraQuerier)_ andThen PreReqCheck.getSingleZuoraAccountForEmail,
               countZuoraAccounts andThen PreReqCheck.noZuoraAccountsForIdentityId,
               GetZuoraSubTypeForAccount(zuoraQuerier)_ andThen PreReqCheck.acceptableReaderType,
-              Need(SyncableSFToIdentity(RecordTypeId("01220000000VB52AAG"))).withFailableDep(sfRequests)
+              DepNeeded(
+                SyncableSFToIdentity(RecordTypeId("01220000000VB52AAG"))
+              ).withFailableDep(sfRequests)
 //                withSF(sfRequests, SyncableSFToIdentity(RecordTypeId("01220000000VB52AAG")))
 //                todo => sfRequests.flatMap(sfRequests => SyncableSFToIdentity(sfRequests, RecordTypeId("01220000000VB52AAG"))(todo))
             ),
             AddIdentityIdToAccount(zuoraRequests),
-            Need.from2(UpdateSalesforceIdentityId.apply).errMap(e => ApiGatewayResponse.internalServerError(e.message)).withFailableDep(sfRequests)
+            DepNeeded.from2(
+              UpdateSalesforceIdentityId.apply
+            )
+              .errMap(e => ApiGatewayResponse.internalServerError(e.message))
+              .withFailableDep(sfRequests)
 //              withSF(sfRequests, (UpdateSalesforceIdentityId.apply _).andThen(_.tupled.andThen(_.nonSuccessToError)))
 //            (c, d) => sfRequests.flatMap(sfRequests => UpdateSalesforceIdentityId(sfRequests)(c, d).nonSuccessToError)
           ),
@@ -90,15 +96,15 @@ object Healthcheck {
 
 }
 
-object Need {
-  def from2[DEP, P1, P2, ERR, RESULT](f: DEP => (P1, P2) => ERR \/ RESULT): Need[DEP, (P1, P2), ERR, RESULT] =
-    Need(f.andThen(_.tupled))
+object DepNeeded {
+  def from2[DEP, P1, P2, ERR, RESULT](f: DEP => (P1, P2) => ERR \/ RESULT): DepNeeded[DEP, (P1, P2), ERR, RESULT] =
+    DepNeeded(f.andThen(_.tupled))
 }
 
-case class Need[DEP, PARAM, ERR, RESULT](f: DEP => PARAM => ERR \/ RESULT) {
+case class DepNeeded[DEP, PARAM, ERR, RESULT](f: DEP => PARAM => ERR \/ RESULT) {
   def withFailableDep(failableDep: => ERR \/ DEP): PARAM => ERR \/ RESULT = { param =>
     failableDep.flatMap(dep => f(dep)(param))
   }
-  def errMap[NEWERR](map: ERR => NEWERR): Need[DEP, PARAM, NEWERR, RESULT] =
-    Need(f.andThen(_.andThen(_.leftMap(map))))
+  def errMap[NEWERR](map: ERR => NEWERR): DepNeeded[DEP, PARAM, NEWERR, RESULT] =
+    DepNeeded(f.andThen(_.andThen(_.leftMap(map))))
 }
