@@ -2,14 +2,14 @@ package com.gu.identityBackfill
 
 import com.gu.identityBackfill.IdentityBackfillSteps.WireModel.IdentityBackfillRequest
 import com.gu.identityBackfill.PreReqCheck.PreReqResult
+import com.gu.identityBackfill.ResponseMaker._
 import com.gu.identityBackfill.Types._
 import com.gu.util.Logging
-import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse, ResponseModels}
+import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.RestRequestMaker.ClientFailableOp
 import play.api.libs.json.{Json, Reads}
-import scalaz.{-\/, \/, \/-}
-import ResponseMaker._
+import scalaz.{-\/, \/-}
 
 object IdentityBackfillSteps extends Logging {
 

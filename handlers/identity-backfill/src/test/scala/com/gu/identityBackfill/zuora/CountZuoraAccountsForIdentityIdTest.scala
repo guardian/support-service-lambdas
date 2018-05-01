@@ -11,7 +11,8 @@ class CountZuoraAccountsForIdentityIdTest extends FlatSpec with Matchers {
 
   it should "get one result for an identity id if there already is one" in {
     val effects = new TestingRawEffects(postResponses = CountZuoraAccountsForIdentityIdData.postResponses(true))
-    val get = CountZuoraAccountsForIdentityId(ZuoraQuery(ZuoraRestRequestMaker(effects.response, ZuoraRestConfig("https://zuora", "user", "pass")))) _
+    val requestMaker = ZuoraRestRequestMaker(effects.response, ZuoraRestConfig("https://zuora", "user", "pass"))
+    val get = CountZuoraAccountsForIdentityId(ZuoraQuery(requestMaker)) _
     val contacts = get(IdentityId("1234"))
     val expected = \/-(1)
     contacts should be(expected)
