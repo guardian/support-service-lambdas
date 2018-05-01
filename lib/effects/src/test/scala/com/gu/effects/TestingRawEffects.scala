@@ -1,10 +1,9 @@
 package com.gu.effects
 
-import java.io.File
+import java.io.ByteArrayInputStream
 import java.time.LocalDateTime
-
 import com.amazonaws.AmazonServiceException
-import com.amazonaws.services.s3.model.{PutObjectRequest, PutObjectResult}
+import com.amazonaws.services.s3.model.{ObjectMetadata, PutObjectRequest, PutObjectResult}
 import com.gu.effects.TestingRawEffects._
 import com.gu.util.{Logging, Stage}
 import okhttp3._
@@ -132,8 +131,8 @@ object TestingRawEffects {
       |}
     """.stripMargin
 
-  val dummyFile = new File("blah", "/tmp/blah")
-  val fakeRequest = new PutObjectRequest(s"gu-fake-bucket-for-testing", "fake-catalog.json", dummyFile)
+  val dummyStream = new ByteArrayInputStream("catalog".getBytes(java.nio.charset.StandardCharsets.UTF_8.name))
+  val fakeRequest = new PutObjectRequest(s"gu-fake-bucket-for-testing", "fake-catalog.json", dummyStream, new ObjectMetadata())
 
   val successfulS3Upload = {
     fakeRequest: PutObjectRequest => Success(new PutObjectResult)
@@ -141,11 +140,6 @@ object TestingRawEffects {
 
   val failedS3Upload = {
     fakeRequest: PutObjectRequest => Failure(new AmazonServiceException("failure"))
-  }
-
-  val localFileWrite = {
-    val fileConstructor = FileConstructor("input", "myPath")
-    fileConstructor: FileConstructor => Success(dummyFile)
   }
 
 }

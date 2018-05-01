@@ -1,7 +1,5 @@
 package com.gu.effects
 
-import java.io.File
-
 import com.gu.util.Stage
 import okhttp3.{Request, Response}
 import java.time.LocalDateTime
@@ -30,7 +28,6 @@ object RawEffects {
 
   val response: Request => Response = Http.response
   def s3Load: Stage => Try[String] = ConfigLoad.load
-  def localFileWrite: FileConstructor => Try[File] = LocalFile.create
   def s3Write: PutObjectRequest => Try[PutObjectResult] = UploadToS3.putObject
 
 }
