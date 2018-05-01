@@ -3,7 +3,10 @@ package com.gu.effects
 import com.gu.util.Stage
 import okhttp3.{Request, Response}
 import java.time.LocalDateTime
-import scala.util.{Try}
+
+import com.amazonaws.services.s3.model.{PutObjectRequest, PutObjectResult}
+
+import scala.util.Try
 
 // this is turning into a big object and is not cohesive, don't add anything else
 case class RawEffects(
@@ -25,5 +28,6 @@ object RawEffects {
 
   val response: Request => Response = Http.response
   def s3Load: Stage => Try[String] = ConfigLoad.load
+  def s3Write: PutObjectRequest => Try[PutObjectResult] = UploadToS3.putObject
 
 }
