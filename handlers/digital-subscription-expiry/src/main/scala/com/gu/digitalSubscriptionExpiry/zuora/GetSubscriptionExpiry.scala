@@ -15,11 +15,12 @@ object GetSubscriptionExpiry {
     def format(str: String): String = str.filter(_.isLetterOrDigit).toLowerCase
 
     val candidates = Seq(
-      format(accountSummary.billToPostcode),
-      format(accountSummary.billToLastName),
-      format(accountSummary.soldToLastName),
-      format(accountSummary.soldToPostcode)
-    )
+      accountSummary.billToPostcode,
+      Some(accountSummary.billToLastName),
+      Some(accountSummary.soldToLastName),
+      accountSummary.soldToPostcode
+    ).flatten.map(format)
+
     val formattedPassword = format(password)
 
     candidates.contains(formattedPassword)

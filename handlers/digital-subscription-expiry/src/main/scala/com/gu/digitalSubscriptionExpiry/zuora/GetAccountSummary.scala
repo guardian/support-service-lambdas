@@ -13,18 +13,18 @@ object GetAccountSummary {
   case class AccountSummaryResult(
     accountId: AccountId,
     billToLastName: String,
-    billToPostcode: String,
+    billToPostcode: Option[String],
     soldToLastName: String,
-    soldToPostcode: String
+    soldToPostcode: Option[String]
   )
 
   implicit val reads: Reads[AccountSummaryResult] =
     (
       (__ \ "basicInfo" \ "id").read[String].map(AccountId.apply) and
       (__ \ "billToContact" \ "lastName").read[String] and
-      (__ \ "billToContact" \ "zipCode").read[String] and
+      (__ \ "billToContact" \ "zipCode").readNullable[String] and
       (__ \ "soldToContact" \ "lastName").read[String] and
-      (__ \ "soldToContact" \ "zipCode").read[String]
+      (__ \ "soldToContact" \ "zipCode").readNullable[String]
     )(AccountSummaryResult.apply _)
 
   def apply(requests: Requests)(accountId: AccountId): FailableOp[AccountSummaryResult] =
