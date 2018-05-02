@@ -30,7 +30,7 @@ object IdentityBackfillSteps extends Logging {
   def apply(
     preReqCheck: EmailAddress => FailableOp[PreReqResult],
     updateZuoraIdentityId: (AccountId, IdentityId) => ClientFailableOp[Unit],
-    updateSalesforceIdentityId: ((SFContactId, IdentityId)) => FailableOp[Unit]
+    updateSalesforceIdentityId: (SFContactId, IdentityId) => FailableOp[Unit]
   )(apiGatewayRequest: ApiGatewayRequest): FailableOp[Unit] = {
 
     for {
@@ -39,7 +39,7 @@ object IdentityBackfillSteps extends Logging {
       preReq <- preReqCheck(fromRequest(request))
       _ <- dryRunAbort(request).withLogging("dryrun aborter")
       _ <- updateZuoraIdentityId(preReq.zuoraAccountId, preReq.requiredIdentityId).nonSuccessToError
-      _ <- updateSalesforceIdentityId((preReq.sFContactId, preReq.requiredIdentityId))
+      _ <- updateSalesforceIdentityId(preReq.sFContactId, preReq.requiredIdentityId)
       // need to remember which ones we updated?
     } yield ()
 

@@ -50,7 +50,7 @@ object GetSFContactSyncCheckFieldsTest {
       |    "FirstName": "Testing",
       |    "Salutation": null,
       |    "Name": "Testing 123",
-      |    "RecordTypeId": "01220000000VB52AAG",
+      |    "RecordTypeId": "STANDARD_TEST_DUMMY",
       |    "OtherStreet": null,
       |    "OtherCity": null,
       |    "OtherState": null,

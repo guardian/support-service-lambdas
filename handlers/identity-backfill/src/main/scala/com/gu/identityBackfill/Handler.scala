@@ -11,14 +11,15 @@ import com.gu.identityBackfill.salesforce.ContactSyncCheck.RecordTypeId
 import com.gu.identityBackfill.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.identityBackfill.salesforce._
 import com.gu.identityBackfill.zuora.{AddIdentityIdToAccount, CountZuoraAccountsForIdentityId, GetZuoraAccountsForEmail, GetZuoraSubTypeForAccount}
-import com.gu.util.Config
-import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayResponse}
+import com.gu.util.{Config, Stage}
+import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayResponse, ResponseModels}
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, Requests}
 import com.gu.util.zuora.{ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
 import play.api.libs.json.{Json, Reads}
 import scalaz.\/
+import scalaz.syntax.std.either._
 
 object Handler {
 
@@ -51,20 +52,10 @@ object Handler {
               GetZuoraAccountsForEmail(zuoraQuerier)_ andThen PreReqCheck.getSingleZuoraAccountForEmail,
               countZuoraAccounts andThen PreReqCheck.noZuoraAccountsForIdentityId,
               GetZuoraSubTypeForAccount(zuoraQuerier)_ andThen PreReqCheck.acceptableReaderType,
-              DepNeeded(
-                SyncableSFToIdentity(RecordTypeId("01220000000VB52AAG"))
-              ).withFailableDep(sfRequests)
-//                withSF(sfRequests, SyncableSFToIdentity(RecordTypeId("01220000000VB52AAG")))
-//                todo => sfRequests.flatMap(sfRequests => SyncableSFToIdentity(sfRequests, RecordTypeId("01220000000VB52AAG"))(todo))
+              syncableSFToIdentity(sfRequests, config.stage)
             ),
             AddIdentityIdToAccount(zuoraRequests),
-            DepNeeded.from2(
-              UpdateSalesforceIdentityId.apply
-            )
-              .errMap(e => ApiGatewayResponse.internalServerError(e.message))
-              .withFailableDep(sfRequests)
-//              withSF(sfRequests, (UpdateSalesforceIdentityId.apply _).andThen(_.tupled.andThen(_.nonSuccessToError)))
-//            (c, d) => sfRequests.flatMap(sfRequests => UpdateSalesforceIdentityId(sfRequests)(c, d).nonSuccessToError)
+            updateSalesforceIdentityId(sfRequests)
           ),
           healthcheck = () => Healthcheck(
             getByEmail,
@@ -76,9 +67,23 @@ object Handler {
     ApiGatewayHandler.default[StepsConfig](operation, lambdaIO).run((rawEffects.stage, rawEffects.s3Load(rawEffects.stage)))
   }
 
-//  def withSF[PARAM, RESULT](lazyMaybeRequests: => FailableOp[Requests], f: Requests => PARAM => FailableOp[RESULT]): PARAM => FailableOp[RESULT] = { param =>
-//    lazyMaybeRequests.flatMap(sfRequests => f(sfRequests)(param))
-//  }
+  val standardRecordTypeForBackend: Stage => FailableOp[RecordTypeId] = (Map(
+    Stage("PROD") -> RecordTypeId("01220000000VB52AAG"),
+    Stage("DEV") -> RecordTypeId("STANDARD_TEST_DUMMY")
+  ).get _).andThen(_.toRight(ApiGatewayResponse.internalServerError(s"missing config for stage")).disjunction)
+
+
+  def syncableSFToIdentity(sfRequests: => FailableOp[Requests], stage: Stage)(sFContactId: Types.SFContactId) : FailableOp[Unit] =
+    for {
+      sfRequests <- sfRequests
+      standardRecordType <- standardRecordTypeForBackend(stage)
+      syncable <- SyncableSFToIdentity(standardRecordType)(sfRequests)(sFContactId)
+    } yield syncable
+
+  def updateSalesforceIdentityId(sfRequests: => FailableOp[Requests])(sFContactId: Types.SFContactId, identityId: IdentityId): FailableOp[Unit] = for {
+    sfRequests <- sfRequests
+    x <- UpdateSalesforceIdentityId(sfRequests)(sFContactId, identityId).nonSuccessToError
+  } yield x
 
 }
 
@@ -94,17 +99,4 @@ object Healthcheck {
       _ <- sfAuth
     } yield ()
 
-}
-
-object DepNeeded {
-  def from2[DEP, P1, P2, ERR, RESULT](f: DEP => (P1, P2) => ERR \/ RESULT): DepNeeded[DEP, (P1, P2), ERR, RESULT] =
-    DepNeeded(f.andThen(_.tupled))
-}
-
-case class DepNeeded[DEP, PARAM, ERR, RESULT](f: DEP => PARAM => ERR \/ RESULT) {
-  def withFailableDep(failableDep: => ERR \/ DEP): PARAM => ERR \/ RESULT = { param =>
-    failableDep.flatMap(dep => f(dep)(param))
-  }
-  def errMap[NEWERR](map: ERR => NEWERR): DepNeeded[DEP, PARAM, NEWERR, RESULT] =
-    DepNeeded(f.andThen(_.andThen(_.leftMap(map))))
 }
