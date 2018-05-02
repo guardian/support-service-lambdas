@@ -13,16 +13,14 @@ import com.gu.util.reader.Types._
 import com.gu.util.zuora.ZuoraGetInvoiceTransactions.InvoiceTransactionSummary
 import com.gu.util.{Config, Stage}
 import org.scalatest.{FlatSpec, Matchers}
-import scalaz.{-\/, Reader, \/-}
-
-import scala.util.Try
+import scalaz.{-\/, \/-}
 
 class PaymentFailureHandlerTest extends FlatSpec with Matchers {
 
   "lambda" should "return error if credentials are missing" in {
     val stream = getClass.getResourceAsStream("/paymentFailure/missingCredentials.json")
     val os = new ByteArrayOutputStream()
-    apiGatewayHandler(basicOp(), LambdaIO(stream, os, null)).run(handlerDeps)
+    apiGatewayHandler(basicOp(), LambdaIO(stream, os, null))
     val responseString = new String(os.toByteArray(), "UTF-8")
     responseString jsonMatches missingCredentialsResponse
   }
@@ -30,7 +28,7 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
   "lambda" should "return error if credentials don't match" in {
     val stream = getClass.getResourceAsStream("/paymentFailure/invalidCredentials.json")
     val os = new ByteArrayOutputStream()
-    apiGatewayHandler(basicOp(), LambdaIO(stream, os, null)).run(handlerDeps)
+    apiGatewayHandler(basicOp(), LambdaIO(stream, os, null))
     val responseString = new String(os.toByteArray(), "UTF-8")
     responseString jsonMatches missingCredentialsResponse
   }
@@ -38,7 +36,7 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
   "lambda" should "return an error if tenant id doesn't match" in {
     val stream = getClass.getResourceAsStream("/paymentFailure/invalidTenant.json")
     val os = new ByteArrayOutputStream()
-    apiGatewayHandler(basicOp(), LambdaIO(stream, os, null)).run(handlerDeps)
+    apiGatewayHandler(basicOp(), LambdaIO(stream, os, null))
     val responseString = new String(os.toByteArray(), "UTF-8")
     responseString jsonMatches missingCredentialsResponse
   }
@@ -69,7 +67,7 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
         config.trustedApiConfig
       )
     }
-    apiGatewayHandler(configToFunction, LambdaIO(stream, os, null)).run(handlerDeps)
+    apiGatewayHandler(configToFunction, LambdaIO(stream, os, null))
 
     //verify
     val responseString = new String(os.toByteArray, "UTF-8")
@@ -111,7 +109,7 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
     val os = new ByteArrayOutputStream()
 
     //execute
-    apiGatewayHandler(basicOp(invoiceTransactionSummary), LambdaIO(stream, os, null)).run(handlerDeps)
+    apiGatewayHandler(basicOp(invoiceTransactionSummary), LambdaIO(stream, os, null))
 
     //verify
     val responseString = new String(os.toByteArray(), "UTF-8")
@@ -120,8 +118,8 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
     responseString jsonMatches expectedResponse
   }
 
-  def apiGatewayHandler: (Config[StepsConfig] => Operation, LambdaIO) => Reader[(Stage, Try[String]), Unit] = {
-    ApiGatewayHandler[StepsConfig](Reader { _ => \/-(TestData.fakeConfig) }, _, _)
+  def apiGatewayHandler: (Config[StepsConfig] => Operation, LambdaIO) => Unit = {
+    ApiGatewayHandler[StepsConfig](\/-(TestData.fakeConfig), _, _)
   }
   def basicOp(fakeInvoiceTransactionSummary: InvoiceTransactionSummary = basicInvoiceTransactionSummary) = { config: Config[StepsConfig] =>
     PaymentFailureSteps.apply(
@@ -157,7 +155,7 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
         config.trustedApiConfig
       )
     }
-    apiGatewayHandler(configToFunction, LambdaIO(stream, os, null)).run(handlerDeps)
+    apiGatewayHandler(configToFunction, LambdaIO(stream, os, null))
 
     //verify
 

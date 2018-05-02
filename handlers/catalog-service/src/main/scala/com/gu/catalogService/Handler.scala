@@ -5,7 +5,7 @@ import com.gu.effects.RawEffects
 import com.gu.util.apigateway.LoadConfig
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
-import com.gu.util.{Logging, Stage}
+import com.gu.util.{Config, Logging, Stage}
 import okhttp3.{Request, Response}
 import play.api.libs.json.{Json, Reads}
 
@@ -31,7 +31,7 @@ object Handler extends Logging {
   ): Unit = {
 
     val attempt = for {
-      config <- LoadConfig.default[StepsConfig].run((stage, s3Load(stage))).withLogging("loaded config").leftMap(_.body)
+      config <- LoadConfig[StepsConfig](stage, s3Load(stage))(Config.parseConfig[StepsConfig]).withLogging("loaded config").leftMap(_.body)
       zuoraRequests = ZuoraRestRequestMaker(response, config.stepsConfig.zuoraRestConfig)
       fetchCatalogAttempt <- ZuoraReadCatalog(zuoraRequests).leftMap(_.message)
       uploadCatalogAttempt <- S3UploadCatalog(stage, fetchCatalogAttempt, s3Write)

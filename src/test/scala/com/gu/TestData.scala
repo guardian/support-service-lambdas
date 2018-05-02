@@ -12,8 +12,6 @@ import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
 import org.scalatest.Matchers
 import play.api.libs.json.Json
 
-import scala.util.Success
-
 object TestData extends Matchers {
 
   val today = LocalDate.of(2016, 11, 21)
@@ -52,8 +50,6 @@ object TestData extends Matchers {
     }
   }
 
-  val handlerDeps =
-    (Stage("DEV"), Success(""))
   def zuoraDeps(effects: TestingRawEffects) = ZuoraRestRequestMaker(effects.response, TestData.fakeZuoraConfig)
   val stripeDeps = StripeDeps(TestData.fakeStripeConfig, new StripeSignatureChecker)
 

@@ -29,7 +29,7 @@ object AutoCancelHandler extends App with Logging {
         )
       )
     }
-    ApiGatewayHandler.default[StepsConfig](operation, lambdaIO).run((rawEffects.stage, rawEffects.s3Load(rawEffects.stage)))
+    ApiGatewayHandler.default[StepsConfig](rawEffects.stage, rawEffects.s3Load(rawEffects.stage), operation, lambdaIO)
   }
 
   // this is the entry point

@@ -18,7 +18,7 @@ object Lambda {
         ZuoraRestRequestMaker(rawEffects.response, config.stepsConfig.zuoraRestConfig),
         StripeDeps(config.stripeConfig, new StripeSignatureChecker)
       )
-    ApiGatewayHandler.default[StepsConfig](operation, lambdaIO).run((rawEffects.stage, rawEffects.s3Load(rawEffects.stage)))
+    ApiGatewayHandler.default[StepsConfig](rawEffects.stage, rawEffects.s3Load(rawEffects.stage), operation, lambdaIO)
   }
 
   // this is the entry point
