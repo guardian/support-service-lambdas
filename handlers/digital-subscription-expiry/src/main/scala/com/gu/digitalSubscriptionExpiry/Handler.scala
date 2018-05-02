@@ -1,6 +1,7 @@
 package com.gu.digitalSubscriptionExpiry
 
 import java.io.{InputStream, OutputStream}
+import java.time.LocalDateTime
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.digitalSubscriptionExpiry.emergencyToken.{EmergencyTokens, EmergencyTokensConfig, GetTokenExpiry}
@@ -17,7 +18,7 @@ object Handler extends Logging {
   // it's referenced by the cloudformation so make sure you keep it in step
   // it's the only part you can't test of the handler
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
-    runWithEffects(RawEffects.createDefault, LambdaIO(inputStream, outputStream, context))
+    runWithEffects(RawEffects.createDefault, RawEffects.now, LambdaIO(inputStream, outputStream, context))
 
   case class StepsConfig(
     zuoraRestConfig: ZuoraRestConfig,
@@ -26,17 +27,17 @@ object Handler extends Logging {
 
   implicit val stepsConfigReads: Reads[StepsConfig] = Json.reads[StepsConfig]
 
-  def runWithEffects(rawEffects: RawEffects, lambdaIO: LambdaIO): Unit = {
+  def runWithEffects(rawEffects: RawEffects, now: () => LocalDateTime, lambdaIO: LambdaIO): Unit = {
     def operation: Config[StepsConfig] => Operation =
       config => {
 
         val emergencyTokens = EmergencyTokens(config.stepsConfig.emergencyTokens)
         val zuoraRequests = ZuoraRestRequestMaker(rawEffects.response, config.stepsConfig.zuoraRestConfig)
-        val today = () => rawEffects.now().toLocalDate
+        val today = () => now().toLocalDate
         DigitalSubscriptionExpirySteps(
           getEmergencyTokenExpiry = GetTokenExpiry(emergencyTokens, today),
           getSubscription = GetSubscription(zuoraRequests),
-          setActivationDate = SetActivationDate(zuoraRequests, rawEffects.now),
+          setActivationDate = SetActivationDate(zuoraRequests, now),
           getAccountSummary = GetAccountSummary(zuoraRequests),
           getSubscriptionExpiry = GetSubscriptionExpiry(today),
           skipActivationDateUpdate = SkipActivationDateUpdate.apply

@@ -35,9 +35,9 @@ object Handler extends Logging {
       zuoraRequests = ZuoraRestRequestMaker(response, config.stepsConfig.zuoraRestConfig)
       fetchCatalogAttempt <- ZuoraReadCatalog(zuoraRequests).leftMap(_.message)
       uploadCatalogAttempt <- S3UploadCatalog(stage, fetchCatalogAttempt, s3Write)
-    } yield uploadCatalogAttempt
+    } yield ()
 
-    attempt.fold(failureReason => throw CatalogServiceException(failureReason), _ => Unit)
+    attempt.fold(failureReason => throw CatalogServiceException(failureReason), identity)
 
   }
 

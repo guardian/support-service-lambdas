@@ -4,21 +4,18 @@ import java.io.ByteArrayOutputStream
 
 import com.gu.TestData
 import com.gu.TestData._
-import com.gu.paymentFailure.PaymentFailureSteps.PFDeps
-import com.gu.paymentFailure.ZuoraEmailSteps.ZuoraEmailStepsDeps
 import com.gu.stripeCustomerSourceUpdated.SourceUpdatedSteps.StepsConfig
 import com.gu.util.ETConfig.ETSendId
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayResponse}
-import com.gu.util.exacttarget.EmailSendSteps.EmailSendStepsDeps
 import com.gu.util.exacttarget._
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.ZuoraGetInvoiceTransactions.InvoiceTransactionSummary
 import com.gu.util.{Config, Stage}
 import org.scalatest.{FlatSpec, Matchers}
+import scalaz.{-\/, Reader, \/-}
 
 import scala.util.Try
-import scalaz.{-\/, Reader, \/-}
 
 class PaymentFailureHandlerTest extends FlatSpec with Matchers {
 
@@ -54,23 +51,23 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
     val os = new ByteArrayOutputStream()
     //execute
     def configToFunction(config: Config[StepsConfig]): Operation = {
-      PaymentFailureSteps.apply(PFDeps(
+      PaymentFailureSteps.apply(
         ZuoraEmailSteps.sendEmailRegardingAccount(
-          ZuoraEmailStepsDeps(
-            EmailSendSteps.apply(
-              EmailSendStepsDeps(
-                req => {
-                  storedReq = Some(req)
-                  \/-(()): FailableOp[Unit]
-                }, FilterEmail(Stage("PROD"))
-              )
-            ),
-            a => \/-(basicInvoiceTransactionSummary)
-          )
+
+          EmailSendSteps.apply(
+
+            req => {
+              storedReq = Some(req)
+              \/-(()): FailableOp[Unit]
+            }, FilterEmail(Stage("PROD"))
+
+          ),
+          a => \/-(basicInvoiceTransactionSummary)
+
         ),
         config.etConfig.etSendIDs,
         config.trustedApiConfig
-      ))
+      )
     }
     apiGatewayHandler(configToFunction, LambdaIO(stream, os, null)).run(handlerDeps)
 
@@ -127,14 +124,14 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
     ApiGatewayHandler[StepsConfig](Reader { _ => \/-(TestData.fakeConfig) }, _, _)
   }
   def basicOp(fakeInvoiceTransactionSummary: InvoiceTransactionSummary = basicInvoiceTransactionSummary) = { config: Config[StepsConfig] =>
-    PaymentFailureSteps.apply(PFDeps(
-      ZuoraEmailSteps.sendEmailRegardingAccount(ZuoraEmailStepsDeps(
+    PaymentFailureSteps.apply(
+      ZuoraEmailSteps.sendEmailRegardingAccount(
         sendEmail = _ => -\/(ApiGatewayResponse.internalServerError("something failed!")),
         getInvoiceTransactions = _ => \/-(fakeInvoiceTransactionSummary)
-      )),
+      ),
       config.etConfig.etSendIDs,
       config.trustedApiConfig
-    ))
+    )
   }
 
   "lambda" should "return error if message can't be queued" in {
@@ -147,23 +144,17 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
     //execute
     def configToFunction(config: Config[StepsConfig]): Operation = {
       PaymentFailureSteps.apply(
-        PFDeps(
-          ZuoraEmailSteps.sendEmailRegardingAccount(
-            ZuoraEmailStepsDeps(
-              EmailSendSteps.apply(
-                EmailSendStepsDeps(
-                  req => {
-                    storedReq = Some(req)
-                    -\/(ApiGatewayResponse.internalServerError("something failed!")): FailableOp[Unit]
-                  }, FilterEmail(Stage("PROD"))
-                )
-              ),
-              a => \/-(basicInvoiceTransactionSummary)
-            )
+        ZuoraEmailSteps.sendEmailRegardingAccount(
+          EmailSendSteps.apply(
+            req => {
+              storedReq = Some(req)
+              -\/(ApiGatewayResponse.internalServerError("something failed!")): FailableOp[Unit]
+            }, FilterEmail(Stage("PROD"))
           ),
-          config.etConfig.etSendIDs,
-          config.trustedApiConfig
-        )
+          a => \/-(basicInvoiceTransactionSummary)
+        ),
+        config.etConfig.etSendIDs,
+        config.trustedApiConfig
       )
     }
     apiGatewayHandler(configToFunction, LambdaIO(stream, os, null)).run(handlerDeps)

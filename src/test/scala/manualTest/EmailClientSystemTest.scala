@@ -3,7 +3,6 @@ package manualTest
 import com.gu.effects.{ConfigLoad, RawEffects}
 import com.gu.stripeCustomerSourceUpdated.SourceUpdatedSteps.StepsConfig
 import com.gu.util.ETConfig.ETSendIds
-import com.gu.util.exacttarget.EmailSendSteps.EmailSendStepsDeps
 import com.gu.util.exacttarget._
 import com.gu.util.reader.Types._
 import com.gu.util.{Config, Logging, Stage}
@@ -51,7 +50,7 @@ object EmailClientSystemTest extends App with Logging {
   for {
     configAttempt <- ConfigLoad.load(Stage("DEV")).toEither.disjunction.withLogging("fromFile")
     config <- Config.parseConfig[StepsConfig](configAttempt)
-    deps = EmailSendStepsDeps.default(Stage("CODE"), RawEffects.createDefault.response, config.etConfig)
+    send = EmailSendSteps(ETClient.sendEmail(RawEffects.createDefault.response, config.etConfig), FilterEmail(Stage("CODE")))_
     etSendIds = config.etConfig.etSendIDs
   } yield Seq(
     "Supporter",
@@ -64,9 +63,7 @@ object EmailClientSystemTest extends App with Logging {
     "Newspaper Delivery"
   ).flatMap(product => five(etSendIds, product)).foreach {
       case (etSendId, index) =>
-        val emailResult = EmailSendSteps(
-          deps
-        )(EmailRequest(
+        val emailResult = send(EmailRequest(
           etSendId = etSendId,
           message = index
         ))

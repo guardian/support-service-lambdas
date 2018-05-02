@@ -2,14 +2,12 @@ package com.gu.util.exacttarget
 
 import com.gu.util.ETConfig.ETSendId
 import com.gu.util.apigateway.ApiGatewayResponse
-import com.gu.util.exacttarget.ETClient.ETClientDeps
 import com.gu.util.exacttarget.EmailSendSteps.logger
 import com.gu.util.exacttarget.ExactTargetAuthenticate.{ETImpure, SalesforceAuth}
 import com.gu.util.reader.Types._
 import com.gu.util.{ETConfig, Logging, Stage}
 import okhttp3.{MediaType, Request, RequestBody, Response}
 import play.api.libs.json.{Json, Writes, _}
-
 import scalaz.{-\/, \/, \/-}
 
 case class ContactAttributesDef(SubscriberAttributes: SubscriberAttributesDef)
@@ -101,38 +99,27 @@ object Message {
 
 object EmailSendSteps extends Logging {
 
-  case class EmailSendStepsDeps(
+  def apply(
     sendEmail: EmailRequest => FailableOp[Unit],
     filterEmail: EmailRequest => FailableOp[Unit]
-  )
-
-  object EmailSendStepsDeps {
-    def default(stage: Stage, response: Request => Response, etConfig: ETConfig): EmailSendStepsDeps = {
-      EmailSendStepsDeps(ETClient.sendEmail(ETClientDeps(response, etConfig)), FilterEmail(stage))
-    }
-
-  }
-
-  def apply(ets: EmailSendStepsDeps)(request: EmailRequest): FailableOp[Unit] =
+  )(request: EmailRequest): FailableOp[Unit] =
     for {
-      _ <- ets.filterEmail(request)
-      _ <- ets.sendEmail(request)
+      _ <- filterEmail(request)
+      _ <- sendEmail(request)
     } yield ()
 
 }
 
 object ETClient {
 
-  case class ETClientDeps(
-    response: (Request => Response),
+  def sendEmail(
+    response: Request => Response,
     etConfig: ETConfig
-  )
-
-  def sendEmail(eTClientDeps: ETClientDeps)(emailRequest: EmailRequest): FailableOp[Unit] = {
+  )(emailRequest: EmailRequest): FailableOp[Unit] = {
     for {
-      auth <- ExactTargetAuthenticate(ETImpure(eTClientDeps.response, eTClientDeps.etConfig))
-      req <- buildRequestET(ETReq(eTClientDeps.etConfig, auth))(emailRequest.etSendId)
-      response <- sendEmailOp(eTClientDeps.response)(req, emailRequest.message)
+      auth <- ExactTargetAuthenticate(ETImpure(response, etConfig))
+      req <- buildRequestET(ETReq(etConfig, auth))(emailRequest.etSendId)
+      response <- sendEmailOp(response)(req, emailRequest.message)
       _ <- processResponse(response)
     } yield ()
   }
