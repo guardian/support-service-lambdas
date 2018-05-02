@@ -5,7 +5,7 @@ import com.gu.identity.GetByEmail.{NotFound, NotValidated, OtherError}
 import com.gu.identityBackfill.ResponseMaker._
 import com.gu.identityBackfill.Types._
 import com.gu.identityBackfill.zuora.GetZuoraSubTypeForAccount
-import com.gu.identityBackfill.zuora.GetZuoraSubTypeForAccount.{NoReaderType, ReaderTypeValue}
+import com.gu.identityBackfill.zuora.GetZuoraSubTypeForAccount.ReaderType.{NoReaderType, ReaderTypeValue}
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.RestRequestMaker.ClientFailableOp

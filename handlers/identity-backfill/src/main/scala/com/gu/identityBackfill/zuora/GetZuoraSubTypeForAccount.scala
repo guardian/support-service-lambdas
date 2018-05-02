@@ -1,6 +1,7 @@
 package com.gu.identityBackfill.zuora
 
 import com.gu.identityBackfill.Types._
+import com.gu.identityBackfill.zuora.GetZuoraSubTypeForAccount.ReaderType.{NoReaderType, ReaderTypeValue}
 import com.gu.util.zuora.RestRequestMaker.ClientFailableOp
 import com.gu.util.zuora.ZuoraQuery.{Query, ZuoraQuerier}
 import play.api.libs.json.Json
@@ -11,8 +12,13 @@ object GetZuoraSubTypeForAccount {
   implicit val reads = Json.reads[WireResponse]
 
   sealed trait ReaderType
-  case object NoReaderType extends ReaderType
-  case class ReaderTypeValue(value: String) extends ReaderType
+  object ReaderType {
+
+    case object NoReaderType extends ReaderType
+
+    case class ReaderTypeValue(value: String) extends ReaderType
+
+  }
 
   def apply(zuoraQuerier: ZuoraQuerier)(accountId: AccountId): ClientFailableOp[List[ReaderType]] = {
 

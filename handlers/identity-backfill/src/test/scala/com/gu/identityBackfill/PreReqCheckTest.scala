@@ -4,6 +4,7 @@ import com.gu.identity.GetByEmail
 import com.gu.identity.GetByEmail.{NotFound, NotValidated}
 import com.gu.identityBackfill.PreReqCheck.PreReqResult
 import com.gu.identityBackfill.Types.{IdentityId, _}
+import com.gu.identityBackfill.zuora.GetZuoraSubTypeForAccount.ReaderType
 import com.gu.util.apigateway.ApiGatewayResponse
 import org.scalatest.{FlatSpec, Matchers}
 import scalaz.{-\/, \/-}
@@ -86,4 +87,36 @@ class PreReqCheckTest extends FlatSpec with Matchers {
       _ => fail("shouldn't be called 4")
     )(EmailAddress("email@address"))
   }
+
+  // allow contain either blank or direct, but nothign else
+  "acceptable reader type" should "allow blank" in {
+    val readerTypes = List(ReaderType.NoReaderType)
+    PreReqCheck.acceptableReaderType(\/-(readerTypes)) should be(\/-(()))
+  }
+
+  "acceptable reader type" should "allow direct" in {
+    val readerTypes = List(ReaderType.ReaderTypeValue("Direct"))
+    PreReqCheck.acceptableReaderType(\/-(readerTypes)) should be(\/-(()))
+  }
+
+  "acceptable reader type" should "allow multiple valid" in {
+    val readerTypes = List(ReaderType.ReaderTypeValue("Direct"), ReaderType.ReaderTypeValue("Direct"))
+    PreReqCheck.acceptableReaderType(\/-(readerTypes)) should be(\/-(()))
+  }
+
+  "acceptable reader type" should "not allow agent" in {
+    val readerTypes = List(ReaderType.ReaderTypeValue("Agent"))
+    PreReqCheck.acceptableReaderType(\/-(readerTypes)).leftMap(_.statusCode) should be(-\/("404"))
+  }
+
+  "acceptable reader type" should "not allow gift" in {
+    val readerTypes = List(ReaderType.ReaderTypeValue("Gift"))
+    PreReqCheck.acceptableReaderType(\/-(readerTypes)).leftMap(_.statusCode) should be(-\/("404"))
+  }
+
+  "acceptable reader type" should "not allow a combination of valid and invalid" in {
+    val readerTypes = List(ReaderType.ReaderTypeValue("Direct"), ReaderType.ReaderTypeValue("Gift"))
+    PreReqCheck.acceptableReaderType(\/-(readerTypes)).leftMap(_.statusCode) should be(-\/("404"))
+  }
+
 }
