@@ -68,8 +68,8 @@ class AccountSummaryResultDeserialiseTest extends FlatSpec {
     event should be(expected)
   }
 
-  def getTestAccount(billToPostcode :Option[String] = None, soldToPostcode: Option[String])  = {
-    def toFieldValue(o :Option[String]) = o.map( s => '"' + s + '"').getOrElse("null")
+  def getTestAccount(billToPostcode: Option[String] = None, soldToPostcode: Option[String]) = {
+    def toFieldValue(o: Option[String]) = o.map(s => '"' + s + '"').getOrElse("null")
 
     s"""
       {

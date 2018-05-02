@@ -18,7 +18,7 @@ class GetSFContactSyncCheckFieldsTest extends FlatSpec with Matchers {
       effects.response
     )) _
     val actual = auth(SFContactId("00110000011AABBAAB"))
-    val expected = \/-(ContactSyncCheckFields(Some("01220000000VB52AAG"), "123", "Testing", Some("United Kingdom")))
+    val expected = \/-(ContactSyncCheckFields(Some("STANDARD_TEST_DUMMY"), "123", "Testing", Some("United Kingdom")))
     actual should be(expected)
 
   }
@@ -50,7 +50,7 @@ object GetSFContactSyncCheckFieldsTest {
       |    "FirstName": "Testing",
       |    "Salutation": null,
       |    "Name": "Testing 123",
-      |    "RecordTypeId": "01220000000VB52AAG",
+      |    "RecordTypeId": "STANDARD_TEST_DUMMY",
       |    "OtherStreet": null,
       |    "OtherCity": null,
       |    "OtherState": null,

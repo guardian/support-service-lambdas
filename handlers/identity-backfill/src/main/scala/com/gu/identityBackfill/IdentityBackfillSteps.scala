@@ -2,10 +2,12 @@ package com.gu.identityBackfill
 
 import com.gu.identityBackfill.IdentityBackfillSteps.WireModel.IdentityBackfillRequest
 import com.gu.identityBackfill.PreReqCheck.PreReqResult
+import com.gu.identityBackfill.ResponseMaker._
 import com.gu.identityBackfill.Types._
 import com.gu.util.Logging
 import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.reader.Types._
+import com.gu.util.zuora.RestRequestMaker.ClientFailableOp
 import play.api.libs.json.{Json, Reads}
 import scalaz.{-\/, \/-}
 
@@ -27,16 +29,16 @@ object IdentityBackfillSteps extends Logging {
 
   def apply(
     preReqCheck: EmailAddress => FailableOp[PreReqResult],
-    updateZuoraIdentityId: (AccountId, IdentityId) => FailableOp[Unit],
+    updateZuoraIdentityId: (AccountId, IdentityId) => ClientFailableOp[Unit],
     updateSalesforceIdentityId: (SFContactId, IdentityId) => FailableOp[Unit]
-  )(apiGatewayRequest: ApiGatewayRequest) = {
+  )(apiGatewayRequest: ApiGatewayRequest): FailableOp[Unit] = {
 
     for {
       request <- Json.parse(apiGatewayRequest.body).validate[IdentityBackfillRequest]
         .toFailableOp.withLogging("identity id backfill request")
       preReq <- preReqCheck(fromRequest(request))
       _ <- dryRunAbort(request).withLogging("dryrun aborter")
-      _ <- updateZuoraIdentityId(preReq.zuoraAccountId, preReq.requiredIdentityId)
+      _ <- updateZuoraIdentityId(preReq.zuoraAccountId, preReq.requiredIdentityId).nonSuccessToError
       _ <- updateSalesforceIdentityId(preReq.sFContactId, preReq.requiredIdentityId)
       // need to remember which ones we updated?
     } yield ()

@@ -1,11 +1,12 @@
 package com.gu.identityBackfill.salesforce
 
 import com.gu.i18n.CountryGroup
+import com.gu.identityBackfill.ResponseMaker._
 import com.gu.identityBackfill.Types.SFContactId
 import com.gu.identityBackfill.salesforce.ContactSyncCheck.RecordTypeId
 import com.gu.util.apigateway.ApiGatewayResponse
-import com.gu.util.reader.Types.FailableOp
 import com.gu.util.zuora.RestRequestMaker
+import com.gu.util.zuora.RestRequestMaker.ClientFailableOp
 import play.api.libs.json.Json
 import scalaz.{-\/, \/-}
 
@@ -19,10 +20,8 @@ object GetSFContactSyncCheckFields {
   )
   implicit val reads = Json.reads[ContactSyncCheckFields]
 
-  def apply(sfRequests: RestRequestMaker.Requests)(sFContactId: SFContactId): FailableOp[ContactSyncCheckFields] = {
-    val get = sfRequests.get[ContactSyncCheckFields](s"/services/data/v20.0/sobjects/Contact/${sFContactId.value}")
-    get.leftMap(e => ApiGatewayResponse.internalServerError(e.message))
-  }
+  def apply(sfRequests: RestRequestMaker.Requests)(sFContactId: SFContactId): ClientFailableOp[ContactSyncCheckFields] =
+    sfRequests.get[ContactSyncCheckFields](s"/services/data/v20.0/sobjects/Contact/${sFContactId.value}")
 
 }
 
@@ -48,14 +47,14 @@ object ContactSyncCheck {
 
 object SyncableSFToIdentity {
   def apply(
-    maybeSFRequests: FailableOp[RestRequestMaker.Requests],
     standardRecordType: RecordTypeId
+  )(
+    sfRequests: RestRequestMaker.Requests
   )(
     sFContactId: SFContactId
   ) =
     for {
-      sfRequests <- maybeSFRequests
-      fields <- GetSFContactSyncCheckFields.apply(sfRequests)(sFContactId)
+      fields <- GetSFContactSyncCheckFields(sfRequests)(sFContactId).nonSuccessToError
       _ <- if (ContactSyncCheck.apply(standardRecordType)(fields))
         \/-(())
       else

@@ -12,10 +12,10 @@ class UpdateSalesforceIdentityIdTest extends FlatSpec with Matchers {
 
   it should "send the right request for update identity id" in {
     val effects = new TestingRawEffects(postResponses = UpdateSalesforceIdentityIdData.postResponses)
-    val auth = UpdateSalesforceIdentityId(\/-(SalesforceRestRequestMaker(
+    val auth = UpdateSalesforceIdentityId(SalesforceRestRequestMaker(
       SalesforceAuth("accesstokentoken", "https://urlsf.hi"),
       effects.response
-    ))) _
+    )) _
     val actual = auth(SFContactId("contactsf"), IdentityId("identityid"))
     val expected = \/-(())
     actual should be(expected)
