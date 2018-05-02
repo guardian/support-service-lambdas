@@ -85,8 +85,8 @@ object Handler {
 
   def updateSalesforceIdentityId(sfRequests: => FailableOp[Requests])(sFContactId: Types.SFContactId, identityId: IdentityId): FailableOp[Unit] = for {
     sfRequests <- sfRequests
-    x <- UpdateSalesforceIdentityId(sfRequests)(sFContactId, identityId).nonSuccessToError
-  } yield x
+    _ <- UpdateSalesforceIdentityId(sfRequests)(sFContactId, identityId).nonSuccessToError
+  } yield ()
 
 }
 

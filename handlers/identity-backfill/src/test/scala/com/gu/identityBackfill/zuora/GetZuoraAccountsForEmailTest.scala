@@ -12,8 +12,7 @@ class GetZuoraAccountsForEmailTest extends FlatSpec with Matchers {
   it should "get the accounts for an email with identity" in {
     val effects = new TestingRawEffects(postResponses = GetZuoraAccountsForEmailData.postResponses(true))
     val requestMaker = ZuoraRestRequestMaker(effects.response, ZuoraRestConfig("https://zuora", "user", "pass"))
-    val get = GetZuoraAccountsForEmail(ZuoraQuery(requestMaker)) _
-    val contacts = get(EmailAddress("email@address"))
+    val contacts = GetZuoraAccountsForEmail(ZuoraQuery(requestMaker))(EmailAddress("email@address"))
     val expected = \/-(List(
       ZuoraAccountIdentitySFContact(
         AccountId("2c92a0fb4a38064e014a3f48f1663ad8"),
@@ -27,8 +26,7 @@ class GetZuoraAccountsForEmailTest extends FlatSpec with Matchers {
   it should "get the accounts for an email without identity" in {
     val effects = new TestingRawEffects(postResponses = GetZuoraAccountsForEmailData.postResponses(false))
     val requestMaker = ZuoraRestRequestMaker(effects.response, ZuoraRestConfig("https://zuora", "user", "pass"))
-    val get = GetZuoraAccountsForEmail(ZuoraQuery(requestMaker)) _
-    val contacts = get(EmailAddress("email@address"))
+    val contacts = GetZuoraAccountsForEmail(ZuoraQuery(requestMaker))(EmailAddress("email@address"))
     val expected = \/-(List(
       ZuoraAccountIdentitySFContact(AccountId("2c92a0fb4a38064e014a3f48f1663ad8"), None, SFContactId("00110000011AABBAAB"))
     ))
