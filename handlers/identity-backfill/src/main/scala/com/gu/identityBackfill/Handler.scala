@@ -67,16 +67,19 @@ object Handler {
     ApiGatewayHandler.default[StepsConfig](operation, lambdaIO).run((rawEffects.stage, rawEffects.s3Load(rawEffects.stage)))
   }
 
-  val standardRecordTypeForBackend: Stage => FailableOp[RecordTypeId] = (Map(
-    Stage("PROD") -> RecordTypeId("01220000000VB52AAG"),
-    Stage("DEV") -> RecordTypeId("STANDARD_TEST_DUMMY")
-  ).get _).andThen(_.toRight(ApiGatewayResponse.internalServerError(s"missing config for stage")).disjunction)
-
+  def standardRecordTypeForStage(stage: Stage): FailableOp[RecordTypeId] = {
+    val mappings = Map(
+      Stage("PROD") -> RecordTypeId("01220000000VB52AAG"),
+      Stage("CODE") -> RecordTypeId("012g0000000DZmNAAW"),
+      Stage("DEV") -> RecordTypeId("STANDARD_TEST_DUMMY")
+    )
+    mappings.get(stage).toRight(ApiGatewayResponse.internalServerError(s"missing config for stage $stage")).disjunction
+  }
 
   def syncableSFToIdentity(sfRequests: => FailableOp[Requests], stage: Stage)(sFContactId: Types.SFContactId) : FailableOp[Unit] =
     for {
       sfRequests <- sfRequests
-      standardRecordType <- standardRecordTypeForBackend(stage)
+      standardRecordType <- standardRecordTypeForStage(stage)
       syncable <- SyncableSFToIdentity(standardRecordType)(sfRequests)(sFContactId)
     } yield syncable
 
