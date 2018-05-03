@@ -17,7 +17,7 @@ case class RawEffects(
 object RawEffects {
 
   // This is the effects that actually does stuff in side effects
-  //@deprecated("for testability, don't pass all the effects in in one blob, just the specific ones you actually need from below", "")
+  @deprecated("for testability, don't pass all the effects in in one blob, just the specific ones you actually need from below", "")
   def createDefault = {
     RawEffects(stage, ConfigLoad.load)
   }
