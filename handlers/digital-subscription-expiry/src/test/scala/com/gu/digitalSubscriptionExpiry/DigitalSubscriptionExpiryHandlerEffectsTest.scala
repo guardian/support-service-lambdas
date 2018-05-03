@@ -11,8 +11,6 @@ import play.api.libs.json.Json
 
 class DigitalSubscriptionExpiryHandlerEffectsTest extends FlatSpec with Matchers {
 
-  val rawEffects = RawEffects.createDefault
-
   val now: () => LocalDateTime = () => LocalDateTime.of(2018, 4, 20, 2, 12)
 
   it should "return 404 for invalid subscriber id" taggedAs EffectsTest in {
@@ -29,7 +27,7 @@ class DigitalSubscriptionExpiryHandlerEffectsTest extends FlatSpec with Matchers
 
     //execute
 
-    Handler.runWithEffects(rawEffects, RawEffects.response, now, LambdaIO(stream, os, null))
+    Handler.runWithEffects(RawEffects.createDefault, RawEffects.response, now, LambdaIO(stream, os, null))
 
     val responseString = new String(os.toByteArray, "UTF-8")
 
@@ -48,7 +46,7 @@ class DigitalSubscriptionExpiryHandlerEffectsTest extends FlatSpec with Matchers
     val os = new ByteArrayOutputStream()
 
     //execute
-    Handler.runWithEffects(rawEffects, RawEffects.response, now, LambdaIO(stream, os, null))
+    Handler.runWithEffects(RawEffects.createDefault, RawEffects.response, now, LambdaIO(stream, os, null))
 
     val responseString = new String(os.toByteArray, "UTF-8")
 
@@ -71,7 +69,7 @@ class DigitalSubscriptionExpiryHandlerEffectsTest extends FlatSpec with Matchers
     val os = new ByteArrayOutputStream()
 
     //execute
-    Handler.runWithEffects(rawEffects, RawEffects.response, now, LambdaIO(stream, os, null))
+    Handler.runWithEffects(RawEffects.createDefault, RawEffects.response, now, LambdaIO(stream, os, null))
 
     val responseString = new String(os.toByteArray, "UTF-8")
 
