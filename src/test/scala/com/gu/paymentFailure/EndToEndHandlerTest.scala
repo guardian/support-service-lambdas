@@ -22,7 +22,7 @@ class EndToEndHandlerTest extends FlatSpec with Matchers {
     val os = new ByteArrayOutputStream()
     val config = new TestingRawEffects(false, 200, EndToEndData.responses)
     //execute
-    Lambda.runWithEffects(config.rawEffects, LambdaIO(stream, os, null))
+    Lambda.runWithEffects(config.rawEffects, config.response, LambdaIO(stream, os, null))
 
     config.resultMap
       .get(("POST", "/messaging/v1/messageDefinitionSends/111/send")).get.get jsonMatches endToEndData.expectedEmailSend // TODO check the body too

@@ -13,7 +13,7 @@ class S3UploadCatalogEffectsTest extends FlatSpec with Logging {
 
   "S3UploadCatalog" should "upload a file" taggedAs EffectsTest in {
     val readBefore = getLatestCatalogTimestamp
-    val upload = S3UploadCatalog(Stage("EffectsTest"), """{"catalog":"myProducts"}""", UploadToS3.putObject)
+    S3UploadCatalog(Stage("EffectsTest"), """{"catalog":"myProducts"}""", UploadToS3.putObject)
     val readAfter = getLatestCatalogTimestamp
     val compareDates = for {
       beforeUpload <- readBefore

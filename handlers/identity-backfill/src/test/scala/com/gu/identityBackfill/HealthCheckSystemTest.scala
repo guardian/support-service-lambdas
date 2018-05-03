@@ -20,7 +20,7 @@ class HealthCheckSystemTest extends FlatSpec with Matchers {
     val rawEffects = RawEffects.createDefault
 
     //execute
-    Handler.runWithEffects(rawEffects, LambdaIO(stream, os, null))
+    Handler.runWithEffects(rawEffects, RawEffects.response, LambdaIO(stream, os, null))
 
     val responseString = new String(os.toByteArray, "UTF-8")
 

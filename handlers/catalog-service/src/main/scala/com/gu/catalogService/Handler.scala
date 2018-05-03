@@ -31,13 +31,13 @@ object Handler extends Logging {
   ): Unit = {
 
     val attempt = for {
-      config <- LoadConfig.default[StepsConfig].run((stage, s3Load(stage))).withLogging("loaded config").leftMap(_.body)
+      config <- LoadConfig.default[StepsConfig](implicitly)(stage, s3Load(stage)).withLogging("loaded config").leftMap(_.body)
       zuoraRequests = ZuoraRestRequestMaker(response, config.stepsConfig.zuoraRestConfig)
       fetchCatalogAttempt <- ZuoraReadCatalog(zuoraRequests).leftMap(_.message)
       uploadCatalogAttempt <- S3UploadCatalog(stage, fetchCatalogAttempt, s3Write)
-    } yield uploadCatalogAttempt
+    } yield ()
 
-    attempt.fold(failureReason => throw CatalogServiceException(failureReason), _ => Unit)
+    attempt.fold(failureReason => throw CatalogServiceException(failureReason), identity)
 
   }
 

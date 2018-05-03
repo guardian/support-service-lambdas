@@ -66,7 +66,7 @@ object Runner {
     val config = new TestingRawEffects(false, 200, responses, postResponses)
 
     //execute
-    Handler.runWithEffects(config.rawEffects, LambdaIO(stream, os, null))
+    Handler.runWithEffects(config.rawEffects, config.response, LambdaIO(stream, os, null))
 
     val responseString = new String(os.toByteArray, "UTF-8")
 

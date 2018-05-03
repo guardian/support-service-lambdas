@@ -1,15 +1,17 @@
 package com.gu.digitalSubscriptionExpiry
 
 import java.io.{InputStream, OutputStream}
+import java.time.LocalDateTime
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.digitalSubscriptionExpiry.emergencyToken.{EmergencyTokens, EmergencyTokensConfig, GetTokenExpiry}
 import com.gu.digitalSubscriptionExpiry.zuora._
 import com.gu.effects.RawEffects
-import com.gu.util.apigateway.ApiGatewayHandler
+import com.gu.util.apigateway.{ApiGatewayHandler, LoadConfig}
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
 import com.gu.util.{Config, Logging}
+import okhttp3.{Request, Response}
 import play.api.libs.json.{Json, Reads}
 
 object Handler extends Logging {
@@ -17,7 +19,7 @@ object Handler extends Logging {
   // it's referenced by the cloudformation so make sure you keep it in step
   // it's the only part you can't test of the handler
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
-    runWithEffects(RawEffects.createDefault, LambdaIO(inputStream, outputStream, context))
+    runWithEffects(RawEffects.createDefault, RawEffects.response, RawEffects.now, LambdaIO(inputStream, outputStream, context))
 
   case class StepsConfig(
     zuoraRestConfig: ZuoraRestConfig,
@@ -26,24 +28,28 @@ object Handler extends Logging {
 
   implicit val stepsConfigReads: Reads[StepsConfig] = Json.reads[StepsConfig]
 
-  def runWithEffects(rawEffects: RawEffects, lambdaIO: LambdaIO): Unit = {
+  def runWithEffects(rawEffects: RawEffects, response: Request => Response, now: () => LocalDateTime, lambdaIO: LambdaIO): Unit = {
     def operation: Config[StepsConfig] => Operation =
       config => {
 
         val emergencyTokens = EmergencyTokens(config.stepsConfig.emergencyTokens)
-        val zuoraRequests = ZuoraRestRequestMaker(rawEffects.response, config.stepsConfig.zuoraRestConfig)
-        val today = () => rawEffects.now().toLocalDate
+        val zuoraRequests = ZuoraRestRequestMaker(response, config.stepsConfig.zuoraRestConfig)
+        val today = () => now().toLocalDate
         DigitalSubscriptionExpirySteps(
           getEmergencyTokenExpiry = GetTokenExpiry(emergencyTokens, today),
           getSubscription = GetSubscription(zuoraRequests),
-          setActivationDate = SetActivationDate(zuoraRequests, rawEffects.now),
+          setActivationDate = SetActivationDate(zuoraRequests, now),
           getAccountSummary = GetAccountSummary(zuoraRequests),
           getSubscriptionExpiry = GetSubscriptionExpiry(today),
           skipActivationDateUpdate = SkipActivationDateUpdate.apply
         )
       }
 
-    ApiGatewayHandler.default[StepsConfig](operation, lambdaIO).run((rawEffects.stage, rawEffects.s3Load(rawEffects.stage)))
+    ApiGatewayHandler[StepsConfig](lambdaIO)(for {
+      config <- LoadConfig.default[StepsConfig](implicitly)(rawEffects.stage, rawEffects.s3Load(rawEffects.stage))
+      configuredOp = operation(config)
+
+    } yield (config, configuredOp))
   }
 }
 

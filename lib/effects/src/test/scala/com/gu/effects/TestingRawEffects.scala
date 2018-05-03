@@ -1,7 +1,7 @@
 package com.gu.effects
 
 import java.io.ByteArrayInputStream
-import java.time.LocalDateTime
+
 import com.amazonaws.AmazonServiceException
 import com.amazonaws.services.s3.model.{ObjectMetadata, PutObjectRequest, PutObjectResult}
 import com.gu.effects.TestingRawEffects._
@@ -72,7 +72,7 @@ class TestingRawEffects(
     requests.map(req => (req.method, req.url.encodedPath) -> Option(req.body).map(body)).toMap
   }
 
-  val rawEffects = RawEffects(response, stage, _ => Success(codeConfig), () => LocalDateTime.of(2017, 11, 19, 12, 32))
+  val rawEffects = RawEffects(stage, _ => Success(codeConfig))
 
 }
 

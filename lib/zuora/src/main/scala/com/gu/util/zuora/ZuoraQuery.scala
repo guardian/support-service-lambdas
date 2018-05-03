@@ -28,12 +28,7 @@ object ZuoraQuery {
 
   implicit val wQueryMoreReq: Writes[QueryMoreReq] = Json.writes[QueryMoreReq]
 
-  // https://www.zuora.com/developer/api-reference/#operation/Action_POSTquery
-  @deprecated("use the partial application version below")
-  def getResults[QUERYRECORD: Reads](requests: Requests)(query: Query): ClientFailableOp[QueryResult[QUERYRECORD]] =
-    requests.post(query, s"action/query", true): ClientFailableOp[QueryResult[QUERYRECORD]]
-
-  // in order to allow partial application, we need to use a trait
+  // in order to allow partial application with unapplied type parameter, we need to use a trait
   def apply(requests: Requests): ZuoraQuerier = new ZuoraQuerier {
     def apply[QUERYRECORD: Reads](query: Query): ClientFailableOp[QueryResult[QUERYRECORD]] =
       requests.post(query, s"action/query", true): ClientFailableOp[QueryResult[QUERYRECORD]]

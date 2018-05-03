@@ -15,7 +15,7 @@ class GetSFContactSyncCheckFieldsEffectsTest extends FlatSpec with Matchers {
     val testContact = SFContactId("003g000000LEwO6AAL")
 
     val actual = for {
-      auth <- DevSFEffects(RawEffects.createDefault)
+      auth <- DevSFEffects(RawEffects.createDefault, RawEffects.response)
       authed = GetSFContactSyncCheckFields(auth) _
       result <- authed(testContact)
     } yield result

@@ -17,7 +17,7 @@ class GetByEmailEffectsTest extends FlatSpec with Matchers {
     val actual = for {
       configAttempt <- ConfigLoad.load(Stage("DEV")).toEither.disjunction
       config <- Config.parseConfig[StepsConfig](configAttempt)
-      identityId <- GetByEmail(RawEffects.createDefault.response, config.stepsConfig.identityConfig)(EmailAddress("john.duffell@guardian.co.uk"))
+      identityId <- GetByEmail(RawEffects.response, config.stepsConfig.identityConfig)(EmailAddress("john.duffell@guardian.co.uk"))
     } yield {
       identityId
     }

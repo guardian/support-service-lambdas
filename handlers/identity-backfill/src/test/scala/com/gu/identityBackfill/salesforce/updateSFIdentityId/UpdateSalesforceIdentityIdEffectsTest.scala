@@ -17,7 +17,7 @@ class UpdateSalesforceIdentityIdEffectsTest extends FlatSpec with Matchers {
     val testContact = SFContactId("003g000000LEwO6AAL")
 
     val actual = for {
-      auth <- DevSFEffects(RawEffects.createDefault)
+      auth <- DevSFEffects(RawEffects.createDefault, RawEffects.response)
       authed = UpdateSalesforceIdentityId(auth) _
       _ <- authed(testContact, IdentityId(unique))
       identityId <- GetSalesforceIdentityId(auth)(testContact)

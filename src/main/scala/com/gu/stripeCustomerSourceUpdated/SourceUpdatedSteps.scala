@@ -54,12 +54,21 @@ object SourceUpdatedSteps extends Logging {
       -\/(unauthorized)
   }
 
-  def getPaymentMethodsToUpdate(requests: Requests)(customer: StripeCustomerId, source: StripeSourceId): FailableOp[List[PaymentMethodFields]] = {
+  def getPaymentMethodsToUpdate(
+    requests: Requests,
+  )(customer: StripeCustomerId, source: StripeSourceId): FailableOp[List[PaymentMethodFields]] = {
+    val zuoraQuerier = ZuoraQuery(requests)
     (for {
       // similar to AccountController.updateCard in members-data-api
-      paymentMethods <- ListT.apply[FailableOp, AccountPaymentMethodIds](ZuoraQueryPaymentMethod.getPaymentMethodForStripeCustomer(requests)(customer, source).withLogging("getPaymentMethodForStripeCustomer"))
-      account <- ListT[FailableOp, AccountSummary](ZuoraGetAccountSummary(requests)(paymentMethods.accountId.value).leftMap(ZuoraToApiGateway.fromClientFail).withLogging("getAccountSummary").map(_.pure[List]))
-      defaultPaymentMethods <- ListT[FailableOp, PaymentMethodFields](findDefaultOrSkip(account.basicInfo.defaultPaymentMethod, paymentMethods.paymentMethods).toList.pure[FailableOp].withLogging("skipIfNotDefault"))
+      paymentMethods <- ListT.apply[FailableOp, AccountPaymentMethodIds](
+        ZuoraQueryPaymentMethod.getPaymentMethodForStripeCustomer(zuoraQuerier)(customer, source)
+          .withLogging("getPaymentMethodForStripeCustomer"))
+      account <- ListT[FailableOp, AccountSummary](
+        ZuoraGetAccountSummary(requests)(paymentMethods.accountId.value)
+          .leftMap(ZuoraToApiGateway.fromClientFail).withLogging("getAccountSummary").map(_.pure[List]))
+      defaultPaymentMethods <- ListT[FailableOp, PaymentMethodFields](
+        findDefaultOrSkip(account.basicInfo.defaultPaymentMethod, paymentMethods.paymentMethods)
+          .toList.pure[FailableOp].withLogging("skipIfNotDefault"))
     } yield defaultPaymentMethods).run
   }
 

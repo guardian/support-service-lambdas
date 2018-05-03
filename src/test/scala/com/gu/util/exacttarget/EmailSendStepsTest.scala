@@ -2,9 +2,7 @@ package com.gu.util.exacttarget
 
 import com.gu.util.ETConfig.ETSendId
 import com.gu.util.Stage
-import com.gu.util.exacttarget.EmailSendSteps.EmailSendStepsDeps
 import org.scalatest.{FlatSpec, Matchers}
-
 import scalaz.\/-
 
 class EmailSendStepsTest extends FlatSpec with Matchers {
@@ -47,15 +45,15 @@ class EmailSendStepsTest extends FlatSpec with Matchers {
 
     var varAttempted: Boolean = false
 
-    val deps = EmailSendStepsDeps(
+    val send = EmailSendSteps(
       sendEmail = req => {
         varAttempted = true
         \/-(()) // always success
       },
-      filterEmail = FilterEmail.apply(stage) _
-    )
+      filterEmail = FilterEmail.apply(stage)
+    )_
 
-    EmailSendSteps(deps)(req)
+    send(req)
 
     varAttempted should be(expectedEmail)
   }

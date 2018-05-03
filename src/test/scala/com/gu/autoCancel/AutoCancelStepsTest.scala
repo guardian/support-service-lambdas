@@ -4,7 +4,6 @@ import java.time.LocalDate
 
 import com.gu.TestData
 import com.gu.autoCancel.AutoCancel.AutoCancelRequest
-import com.gu.autoCancel.AutoCancelDataCollectionFilter.ACFilterDeps
 import com.gu.effects.TestingRawEffects
 import com.gu.effects.TestingRawEffects.BasicRequest
 import com.gu.util.reader.Types._
@@ -21,12 +20,12 @@ class AutoCancelStepsTest extends FlatSpec with Matchers {
   val singleOverdueInvoice = Invoice("inv123", LocalDate.now.minusDays(14), 11.99, "Posted")
 
   "auto cancel filter 2" should "cancel attempt" in {
-    val aCDeps = ACFilterDeps(
+    val ac = AutoCancelDataCollectionFilter(
       now = LocalDate.now,
       getAccountSummary = _ => \/-(AccountSummary(basicInfo, List(subscription), List(singleOverdueInvoice)))
-    )
+    )_
     val autoCancelCallout = AutoCancelHandlerTest.fakeCallout(true)
-    val cancel: FailableOp[AutoCancelRequest] = AutoCancelDataCollectionFilter(aCDeps)(autoCancelCallout)
+    val cancel: FailableOp[AutoCancelRequest] = ac(autoCancelCallout)
 
     cancel should be(\/-(AutoCancelRequest("id123", SubscriptionId("sub123"), LocalDate.now.minusDays(14))))
   }

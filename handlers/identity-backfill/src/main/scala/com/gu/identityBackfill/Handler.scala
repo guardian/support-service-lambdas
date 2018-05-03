@@ -11,12 +11,13 @@ import com.gu.identityBackfill.salesforce.ContactSyncCheck.RecordTypeId
 import com.gu.identityBackfill.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.identityBackfill.salesforce._
 import com.gu.identityBackfill.zuora.{AddIdentityIdToAccount, CountZuoraAccountsForIdentityId, GetZuoraAccountsForEmail, GetZuoraSubTypeForAccount}
-import com.gu.util.{Config, Stage}
-import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayResponse, ResponseModels}
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
+import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayResponse, LoadConfig}
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, Requests}
 import com.gu.util.zuora.{ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
+import com.gu.util.{Config, Stage}
+import okhttp3.{Request, Response}
 import play.api.libs.json.{Json, Reads}
 import scalaz.\/
 import scalaz.syntax.std.either._
@@ -27,7 +28,7 @@ object Handler {
   // it's referenced by the cloudformation so make sure you keep it in step
   // it's the only part you can't test of the handler
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
-    runWithEffects(RawEffects.createDefault, LambdaIO(inputStream, outputStream, context))
+    runWithEffects(RawEffects.createDefault, RawEffects.response, LambdaIO(inputStream, outputStream, context))
 
   case class StepsConfig(
     identityConfig: IdentityConfig,
@@ -36,14 +37,14 @@ object Handler {
   )
   implicit val stepsConfigReads: Reads[StepsConfig] = Json.reads[StepsConfig]
 
-  def runWithEffects(rawEffects: RawEffects, lambdaIO: LambdaIO): Unit = {
+  def runWithEffects(rawEffects: RawEffects, response: Request => Response, lambdaIO: LambdaIO): Unit = {
     def operation: Config[StepsConfig] => Operation =
       config => {
-        val zuoraRequests = ZuoraRestRequestMaker(rawEffects.response, config.stepsConfig.zuoraRestConfig)
+        val zuoraRequests = ZuoraRestRequestMaker(response, config.stepsConfig.zuoraRestConfig)
         val zuoraQuerier = ZuoraQuery(zuoraRequests)
-        val getByEmail: EmailAddress => \/[GetByEmail.ApiError, IdentityId] = GetByEmail(rawEffects.response, config.stepsConfig.identityConfig)
+        val getByEmail: EmailAddress => \/[GetByEmail.ApiError, IdentityId] = GetByEmail(response, config.stepsConfig.identityConfig)
         val countZuoraAccounts: IdentityId => ClientFailableOp[Int] = CountZuoraAccountsForIdentityId(zuoraQuerier)
-        lazy val sfRequests: FailableOp[Requests] = SalesforceAuthenticate(rawEffects.response, config.stepsConfig.sfConfig)
+        lazy val sfRequests: FailableOp[Requests] = SalesforceAuthenticate(response, config.stepsConfig.sfConfig)
 
         Operation(
           steps = IdentityBackfillSteps(
@@ -64,7 +65,13 @@ object Handler {
           )
         )
       }
-    ApiGatewayHandler.default[StepsConfig](operation, lambdaIO).run((rawEffects.stage, rawEffects.s3Load(rawEffects.stage)))
+
+    ApiGatewayHandler[StepsConfig](lambdaIO)(for {
+      config <- LoadConfig.default[StepsConfig] (implicitly) (rawEffects.stage, rawEffects.s3Load(rawEffects.stage))
+      configuredOp = operation(config)
+
+    } yield (config, configuredOp))
+
   }
 
   def standardRecordTypeForStage(stage: Stage): FailableOp[RecordTypeId] = {
