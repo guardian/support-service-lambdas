@@ -18,7 +18,7 @@ class GetAccountSummaryEffectsTest extends FlatSpec with Matchers {
     val actual: \/[io.Serializable, AccountSummaryResult] = for {
       configAttempt <- ConfigLoad.load(Stage("DEV")).toEither.disjunction
       config <- Config.parseConfig[StepsConfig](configAttempt)
-      zuoraRequests = ZuoraRestRequestMaker(RawEffects.createDefault.response, config.stepsConfig.zuoraRestConfig)
+      zuoraRequests = ZuoraRestRequestMaker(RawEffects.response, config.stepsConfig.zuoraRestConfig)
       subscription <- GetAccountSummary(zuoraRequests)(testAccountId)
     } yield {
       subscription

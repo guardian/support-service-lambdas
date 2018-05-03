@@ -29,7 +29,7 @@ class DigitalSubscriptionExpiryHandlerEffectsTest extends FlatSpec with Matchers
 
     //execute
 
-    Handler.runWithEffects(rawEffects, now, LambdaIO(stream, os, null))
+    Handler.runWithEffects(rawEffects, RawEffects.response, now, LambdaIO(stream, os, null))
 
     val responseString = new String(os.toByteArray, "UTF-8")
 
@@ -48,7 +48,7 @@ class DigitalSubscriptionExpiryHandlerEffectsTest extends FlatSpec with Matchers
     val os = new ByteArrayOutputStream()
 
     //execute
-    Handler.runWithEffects(rawEffects, now, LambdaIO(stream, os, null))
+    Handler.runWithEffects(rawEffects, RawEffects.response, now, LambdaIO(stream, os, null))
 
     val responseString = new String(os.toByteArray, "UTF-8")
 
@@ -71,7 +71,7 @@ class DigitalSubscriptionExpiryHandlerEffectsTest extends FlatSpec with Matchers
     val os = new ByteArrayOutputStream()
 
     //execute
-    Handler.runWithEffects(rawEffects, now, LambdaIO(stream, os, null))
+    Handler.runWithEffects(rawEffects, RawEffects.response, now, LambdaIO(stream, os, null))
 
     val responseString = new String(os.toByteArray, "UTF-8")
 

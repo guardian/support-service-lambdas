@@ -5,10 +5,10 @@ import java.io.{InputStream, OutputStream}
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.util.Auth.credentialsAreValid
 import com.gu.util.Config.ConfigFailure
-import com.gu.util.{Stage, _}
 import com.gu.util.apigateway.ApiGatewayResponse.{outputForAPIGateway, successfulExecution, unauthorized}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.reader.Types.{FailableOp, _}
+import com.gu.util.{Stage, _}
 import play.api.libs.json.{Json, Reads}
 import scalaz.{-\/, \/, \/-}
 
@@ -44,24 +44,21 @@ object ApiGatewayHandler extends Logging {
       Operation(steps, () => \/-(()), shouldAuthenticate)
   }
 
-  def default[StepsConfig: Reads](stage: Stage, s3Load: Try[String], operation: Config[StepsConfig] => Operation, io: LambdaIO): Unit =
-    apply(LoadConfig[StepsConfig](stage, s3Load)(Config.parseConfig[StepsConfig]), operation, io)
-
   def apply[StepsConfig](
-    failableConfig: FailableOp[Config[StepsConfig]],
-    operation: Config[StepsConfig] => Operation,
     lambdaIO: LambdaIO
+  )(
+    fConfigOp: FailableOp[(Config[StepsConfig], Operation)]
   ): Unit = {
 
     import lambdaIO._
 
     val response = for {
-      config <- failableConfig
+      configOp <- fConfigOp
+      (config, operation) = configOp
       apiGatewayRequest <- parseApiGatewayRequest(inputStream)
-      configuredOperation = operation(config)
-      _ <- if (apiGatewayRequest.queryStringParameters.exists(_.isHealthcheck)) configuredOperation.healthcheck().withLogging("healthcheck") else for {
-        _ <- authenticateCallout(configuredOperation.shouldAuthenticate, apiGatewayRequest.requestAuth, config.trustedApiConfig).withLogging("authentication")
-        _ <- configuredOperation.steps(apiGatewayRequest).withLogging("steps")
+      _ <- if (apiGatewayRequest.queryStringParameters.exists(_.isHealthcheck)) operation.healthcheck().withLogging("healthcheck") else for {
+        _ <- authenticateCallout(operation.shouldAuthenticate, apiGatewayRequest.requestAuth, config.trustedApiConfig).withLogging("authentication")
+        _ <- operation.steps(apiGatewayRequest).withLogging("steps")
       } yield ()
     } yield ()
 
@@ -73,7 +70,9 @@ object ApiGatewayHandler extends Logging {
 
 object LoadConfig extends Logging {
 
-  def apply[StepsConfig](stage: Stage, s3Load: Try[String])(parseConfig: String => \/[ConfigFailure, Config[StepsConfig]]): FailableOp[Config[StepsConfig]] = {
+  def default[StepsConfig: Reads]: (Stage, Try[String]) => FailableOp[Config[StepsConfig]] = apply[StepsConfig](Config.parseConfig[StepsConfig])
+
+  def apply[StepsConfig](parseConfig: String => ConfigFailure \/ Config[StepsConfig])(stage: Stage, s3Load: Try[String]): FailableOp[Config[StepsConfig]] = {
 
     logger.info(s"${this.getClass} Lambda is starting up in $stage")
 

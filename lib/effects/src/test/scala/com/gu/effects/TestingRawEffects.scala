@@ -72,7 +72,7 @@ class TestingRawEffects(
     requests.map(req => (req.method, req.url.encodedPath) -> Option(req.body).map(body)).toMap
   }
 
-  val rawEffects = RawEffects(response, stage, _ => Success(codeConfig))
+  val rawEffects = RawEffects(stage, _ => Success(codeConfig))
 
 }
 

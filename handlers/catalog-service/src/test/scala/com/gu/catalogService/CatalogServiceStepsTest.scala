@@ -14,7 +14,7 @@ class CatalogServiceStepsTest extends FlatSpec with Matchers {
   it should "throw a CatalogServiceException if the config cannot be loaded" in {
     a[CatalogServiceException] should be thrownBy {
       Handler.runWithEffects(
-        successfulResponseEffects.rawEffects.response,
+        successfulResponseEffects.response,
         successfulResponseEffects.rawEffects.stage,
         _ => Failure(new NullPointerException),
         TestingRawEffects.successfulS3Upload
@@ -25,7 +25,7 @@ class CatalogServiceStepsTest extends FlatSpec with Matchers {
   it should "throw a CatalogServiceException if the call to fetch the catalog fails" in {
     a[CatalogServiceException] should be thrownBy {
       Handler.runWithEffects(
-        failureResponseEffects.rawEffects.response,
+        failureResponseEffects.response,
         failureResponseEffects.rawEffects.stage,
         failureResponseEffects.rawEffects.s3Load,
         TestingRawEffects.successfulS3Upload
@@ -36,7 +36,7 @@ class CatalogServiceStepsTest extends FlatSpec with Matchers {
   it should "throw a CatalogServiceException if the catalog cannot be uploaded to S3" in {
     a[CatalogServiceException] should be thrownBy {
       Handler.runWithEffects(
-        successfulResponseEffects.rawEffects.response,
+        successfulResponseEffects.response,
         successfulResponseEffects.rawEffects.stage,
         successfulResponseEffects.rawEffects.s3Load,
         TestingRawEffects.failedS3Upload

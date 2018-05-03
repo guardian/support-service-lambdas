@@ -10,7 +10,6 @@ import scala.util.Try
 
 // this is turning into a big object and is not cohesive, don't add anything else
 case class RawEffects(
-  response: Request => Response,
   stage: Stage,
   s3Load: Stage => Try[String]
 )
@@ -20,7 +19,7 @@ object RawEffects {
   // This is the effects that actually does stuff in side effects
   //@deprecated("for testability, don't pass all the effects in in one blob, just the specific ones you actually need from below", "")
   def createDefault = {
-    RawEffects(Http.response, stage, ConfigLoad.load)
+    RawEffects(stage, ConfigLoad.load)
   }
 
   val stage = Stage(Option(System.getenv("Stage")).filter(_ != "").getOrElse("DEV"))

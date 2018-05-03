@@ -15,7 +15,7 @@ class GetByEmailTest extends FlatSpec with Matchers {
       responses = TestData.responses
     )
 
-    val actual: \/[GetByEmail.ApiError, IdentityId] = GetByEmail(testingRawEffects.rawEffects.response, IdentityConfig("http://baseurl", "apitoken"))(EmailAddress("email@address"))
+    val actual: \/[GetByEmail.ApiError, IdentityId] = GetByEmail(testingRawEffects.response, IdentityConfig("http://baseurl", "apitoken"))(EmailAddress("email@address"))
 
     actual should be(\/-(IdentityId("1234")))
   }
@@ -25,7 +25,7 @@ class GetByEmailTest extends FlatSpec with Matchers {
       responses = NotValidatedTestData.responses
     )
 
-    val actual: \/[GetByEmail.ApiError, IdentityId] = GetByEmail(testingRawEffects.rawEffects.response, IdentityConfig("http://baseurl", "apitoken"))(EmailAddress("email@address"))
+    val actual: \/[GetByEmail.ApiError, IdentityId] = GetByEmail(testingRawEffects.response, IdentityConfig("http://baseurl", "apitoken"))(EmailAddress("email@address"))
 
     actual should be(-\/(NotValidated))
   }
@@ -35,7 +35,7 @@ class GetByEmailTest extends FlatSpec with Matchers {
       responses = NotFoundTestData.responses
     )
 
-    val actual: \/[GetByEmail.ApiError, IdentityId] = GetByEmail(testingRawEffects.rawEffects.response, IdentityConfig("http://baseurl", "apitoken"))(EmailAddress("email@address"))
+    val actual: \/[GetByEmail.ApiError, IdentityId] = GetByEmail(testingRawEffects.response, IdentityConfig("http://baseurl", "apitoken"))(EmailAddress("email@address"))
 
     actual should be(-\/(NotFound))
   }

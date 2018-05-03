@@ -50,7 +50,7 @@ object EmailClientSystemTest extends App with Logging {
   for {
     configAttempt <- ConfigLoad.load(Stage("DEV")).toEither.disjunction.withLogging("fromFile")
     config <- Config.parseConfig[StepsConfig](configAttempt)
-    send = EmailSendSteps(ETClient.sendEmail(RawEffects.createDefault.response, config.etConfig), FilterEmail(Stage("CODE")))_
+    send = EmailSendSteps(ETClient.sendEmail(RawEffects.response, config.etConfig), FilterEmail(Stage("CODE")))_
     etSendIds = config.etConfig.etSendIDs
   } yield Seq(
     "Supporter",

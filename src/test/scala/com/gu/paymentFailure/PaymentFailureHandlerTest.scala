@@ -6,12 +6,12 @@ import com.gu.TestData
 import com.gu.TestData._
 import com.gu.stripeCustomerSourceUpdated.SourceUpdatedSteps.StepsConfig
 import com.gu.util.ETConfig.ETSendId
+import com.gu.util.Stage
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayResponse}
 import com.gu.util.exacttarget._
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.ZuoraGetInvoiceTransactions.InvoiceTransactionSummary
-import com.gu.util.{Config, Stage}
 import org.scalatest.{FlatSpec, Matchers}
 import scalaz.{-\/, \/-}
 
@@ -48,7 +48,7 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
 
     val os = new ByteArrayOutputStream()
     //execute
-    def configToFunction(config: Config[StepsConfig]): Operation = {
+    def configToFunction: Operation = {
       PaymentFailureSteps.apply(
         ZuoraEmailSteps.sendEmailRegardingAccount(
 
@@ -63,8 +63,8 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
           a => \/-(basicInvoiceTransactionSummary)
 
         ),
-        config.etConfig.etSendIDs,
-        config.trustedApiConfig
+        TestData.fakeConfig.etConfig.etSendIDs,
+        TestData.fakeConfig.trustedApiConfig
       )
     }
     apiGatewayHandler(configToFunction, LambdaIO(stream, os, null))
@@ -118,17 +118,18 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
     responseString jsonMatches expectedResponse
   }
 
-  def apiGatewayHandler: (Config[StepsConfig] => Operation, LambdaIO) => Unit = {
-    ApiGatewayHandler[StepsConfig](\/-(TestData.fakeConfig), _, _)
+  def apiGatewayHandler: (Operation, LambdaIO) => Unit = {
+    case (op, io) =>
+      ApiGatewayHandler[StepsConfig](io)(\/-((TestData.fakeConfig, op)))
   }
-  def basicOp(fakeInvoiceTransactionSummary: InvoiceTransactionSummary = basicInvoiceTransactionSummary) = { config: Config[StepsConfig] =>
+  def basicOp(fakeInvoiceTransactionSummary: InvoiceTransactionSummary = basicInvoiceTransactionSummary) = {
     PaymentFailureSteps.apply(
       ZuoraEmailSteps.sendEmailRegardingAccount(
         sendEmail = _ => -\/(ApiGatewayResponse.internalServerError("something failed!")),
         getInvoiceTransactions = _ => \/-(fakeInvoiceTransactionSummary)
       ),
-      config.etConfig.etSendIDs,
-      config.trustedApiConfig
+      TestData.fakeConfig.etConfig.etSendIDs,
+      TestData.fakeConfig.trustedApiConfig
     )
   }
 
@@ -140,7 +141,7 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
     val os = new ByteArrayOutputStream()
 
     //execute
-    def configToFunction(config: Config[StepsConfig]): Operation = {
+    def configToFunction: Operation = {
       PaymentFailureSteps.apply(
         ZuoraEmailSteps.sendEmailRegardingAccount(
           EmailSendSteps.apply(
@@ -151,8 +152,8 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
           ),
           a => \/-(basicInvoiceTransactionSummary)
         ),
-        config.etConfig.etSendIDs,
-        config.trustedApiConfig
+        TestData.fakeConfig.etConfig.etSendIDs,
+        TestData.fakeConfig.trustedApiConfig
       )
     }
     apiGatewayHandler(configToFunction, LambdaIO(stream, os, null))
