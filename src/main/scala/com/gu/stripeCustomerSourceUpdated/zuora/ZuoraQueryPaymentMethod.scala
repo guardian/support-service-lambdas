@@ -21,11 +21,23 @@ object ZuoraQueryPaymentMethod extends Logging {
 
   case class AccountPaymentMethodIds(accountId: AccountId, paymentMethods: NonEmptyList[PaymentMethodFields])
 
-  def getPaymentMethodForStripeCustomer(zuoraQuerier: ZuoraQuerier)(customerId: StripeCustomerId, sourceId: StripeSourceId): FailableOp[List[AccountPaymentMethodIds]] = {
+  def getPaymentMethodForStripeCustomer(
+    zuoraQuerier: ZuoraQuerier
+  )(
+    customerId: StripeCustomerId,
+    sourceId: StripeSourceId
+  ): FailableOp[List[AccountPaymentMethodIds]] = {
     val query =
-      s"""SELECT Id, AccountId, NumConsecutiveFailures
+      s"""SELECT
+         | Id,
+         | AccountId,
+         | NumConsecutiveFailures
          | FROM PaymentMethod
-         |  where Type='CreditCardReferenceTransaction' AND PaymentMethodStatus = 'Active' AND TokenId = '${sourceId.value}' AND SecondTokenId = '${customerId.value}'""".stripMargin
+         |  where Type='CreditCardReferenceTransaction'
+         | AND PaymentMethodStatus = 'Active'
+         | AND TokenId = '${sourceId.value}'
+         | AND SecondTokenId = '${customerId.value}'
+         |""".stripMargin.replaceAll("\n", "")
 
     zuoraQuerier[PaymentMethodFields](Query(query)).leftMap(ZuoraToApiGateway.fromClientFail).flatMap { result =>
 

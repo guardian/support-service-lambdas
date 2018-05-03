@@ -11,33 +11,29 @@ import scalaz.{-\/, \/, \/-}
 class GetByEmailTest extends FlatSpec with Matchers {
 
   it should "get successful ok" in {
-    val testingRawEffects = new TestingRawEffects(
-      responses = TestData.responses
-    )
-
-    val actual: \/[GetByEmail.ApiError, IdentityId] = GetByEmail(testingRawEffects.response, IdentityConfig("http://baseurl", "apitoken"))(EmailAddress("email@address"))
+    val actual = geyByEmailFromResponses(TestData.responses)
 
     actual should be(\/-(IdentityId("1234")))
   }
 
   it should "get not validated with an error" in {
-    val testingRawEffects = new TestingRawEffects(
-      responses = NotValidatedTestData.responses
-    )
-
-    val actual: \/[GetByEmail.ApiError, IdentityId] = GetByEmail(testingRawEffects.response, IdentityConfig("http://baseurl", "apitoken"))(EmailAddress("email@address"))
+    val actual = geyByEmailFromResponses(NotValidatedTestData.responses)
 
     actual should be(-\/(NotValidated))
   }
 
   it should "get not found" in {
-    val testingRawEffects = new TestingRawEffects(
-      responses = NotFoundTestData.responses
-    )
-
-    val actual: \/[GetByEmail.ApiError, IdentityId] = GetByEmail(testingRawEffects.response, IdentityConfig("http://baseurl", "apitoken"))(EmailAddress("email@address"))
+    val actual = geyByEmailFromResponses(NotFoundTestData.responses)
 
     actual should be(-\/(NotFound))
+  }
+
+  private def geyByEmailFromResponses(responses: Map[String, HTTPResponse]): GetByEmail.ApiError \/ IdentityId = {
+    val testingRawEffects = new TestingRawEffects(
+      responses = responses
+    )
+
+    GetByEmail(testingRawEffects.response, IdentityConfig("http://baseurl", "apitoken"))(EmailAddress("email@address"))
   }
 
 }

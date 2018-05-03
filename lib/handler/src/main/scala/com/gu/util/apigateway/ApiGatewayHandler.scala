@@ -22,8 +22,10 @@ object ApiGatewayHandler extends Logging {
   def parseApiGatewayRequest(inputStream: InputStream): FailableOp[ApiGatewayRequest] = {
     for {
 
-      jsonString <- inputFromApiGateway(inputStream).toFailableOp("get json data from API gateway").withLogging("payload from api gateway")
-      apiGatewayRequest <- Json.parse(jsonString).validate[ApiGatewayRequest].toFailableOp.withLogging("parsed api gateway object")
+      jsonString <- inputFromApiGateway(inputStream)
+        .toFailableOp("get json data from API gateway").withLogging("payload from api gateway")
+      apiGatewayRequest <- Json.parse(jsonString).validate[ApiGatewayRequest]
+        .toFailableOp.withLogging("parsed api gateway object")
 
     } yield apiGatewayRequest
   }
@@ -34,11 +36,19 @@ object ApiGatewayHandler extends Logging {
     }
   }
 
-  def authenticateCallout(shouldAuthenticate: Boolean, requestAuth: Option[RequestAuth], trustedApiConfig: TrustedApiConfig): ApiResponse \/ Unit = {
+  def authenticateCallout(
+    shouldAuthenticate: Boolean,
+    requestAuth: Option[RequestAuth],
+    trustedApiConfig: TrustedApiConfig
+  ): ApiResponse \/ Unit = {
     if (!shouldAuthenticate || credentialsAreValid(requestAuth, trustedApiConfig)) \/-(()) else -\/(unauthorized)
   }
 
-  case class Operation(steps: ApiGatewayRequest => FailableOp[Unit], healthcheck: () => FailableOp[Unit], shouldAuthenticate: Boolean = true)
+  case class Operation(
+    steps: ApiGatewayRequest => FailableOp[Unit],
+    healthcheck: () => FailableOp[Unit],
+    shouldAuthenticate: Boolean = true
+  )
   object Operation {
     def noHealthcheck(steps: ApiGatewayRequest => FailableOp[Unit], shouldAuthenticate: Boolean = true) =
       Operation(steps, () => \/-(()), shouldAuthenticate)
@@ -56,10 +66,14 @@ object ApiGatewayHandler extends Logging {
       configOp <- fConfigOp
       (config, operation) = configOp
       apiGatewayRequest <- parseApiGatewayRequest(inputStream)
-      _ <- if (apiGatewayRequest.queryStringParameters.exists(_.isHealthcheck)) operation.healthcheck().withLogging("healthcheck") else for {
-        _ <- authenticateCallout(operation.shouldAuthenticate, apiGatewayRequest.requestAuth, config.trustedApiConfig).withLogging("authentication")
-        _ <- operation.steps(apiGatewayRequest).withLogging("steps")
-      } yield ()
+      _ <- if (apiGatewayRequest.queryStringParameters.exists(_.isHealthcheck))
+        operation.healthcheck().withLogging("healthcheck")
+      else
+        for {
+          _ <- authenticateCallout(operation.shouldAuthenticate, apiGatewayRequest.requestAuth, config.trustedApiConfig)
+            .withLogging("authentication")
+          _ <- operation.steps(apiGatewayRequest).withLogging("steps")
+        } yield ()
     } yield ()
 
     outputForAPIGateway(outputStream, response.fold(identity, _ => successfulExecution))
@@ -70,9 +84,15 @@ object ApiGatewayHandler extends Logging {
 
 object LoadConfig extends Logging {
 
-  def default[StepsConfig: Reads]: (Stage, Try[String]) => FailableOp[Config[StepsConfig]] = apply[StepsConfig](Config.parseConfig[StepsConfig])
+  def default[StepsConfig: Reads]: (Stage, Try[String]) => FailableOp[Config[StepsConfig]] =
+    apply[StepsConfig](Config.parseConfig[StepsConfig])
 
-  def apply[StepsConfig](parseConfig: String => ConfigFailure \/ Config[StepsConfig])(stage: Stage, s3Load: Try[String]): FailableOp[Config[StepsConfig]] = {
+  def apply[StepsConfig](
+    parseConfig: String => ConfigFailure \/ Config[StepsConfig]
+  )(
+    stage: Stage,
+    s3Load: Try[String]
+  ): FailableOp[Config[StepsConfig]] = {
 
     logger.info(s"${this.getClass} Lambda is starting up in $stage")
 
@@ -80,7 +100,10 @@ object LoadConfig extends Logging {
 
       textConfig <- s3Load.toFailableOp("load config from s3")
       config <- parseConfig(textConfig).toFailableOp("parse config file")
-      _ <- if (stage == config.stage) { \/-(()) } else { -\/(ApiGatewayResponse.internalServerError(s"running in $stage with config from ${config.stage}")) }
+      _ <- if (stage == config.stage)
+        \/-(())
+      else
+        -\/(ApiGatewayResponse.internalServerError(s"running in $stage with config from ${config.stage}"))
 
     } yield config
   }

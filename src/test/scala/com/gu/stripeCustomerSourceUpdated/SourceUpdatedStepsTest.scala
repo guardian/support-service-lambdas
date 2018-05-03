@@ -36,7 +36,7 @@ class SourceUpdatedStepsGetPaymentMethodsToUpdateTest extends FlatSpec with Matc
     val expectedPOST = BasicRequest(
       "POST",
       "/action/query",
-      "{\"queryString\":\"SELECT Id, AccountId, NumConsecutiveFailures\\n FROM PaymentMethod\\n  where Type='CreditCardReferenceTransaction' AND PaymentMethodStatus = 'Active' AND TokenId = 'fakecardid' AND SecondTokenId = 'fakecustid'\"}"
+      "{\"queryString\":\"SELECT Id, AccountId, NumConsecutiveFailures FROM PaymentMethod  where Type='CreditCardReferenceTransaction' AND PaymentMethodStatus = 'Active' AND TokenId = 'fakecardid' AND SecondTokenId = 'fakecustid'\"}"
     )
     val expectedGET = BasicRequest(
       "GET",
@@ -72,7 +72,7 @@ class SourceUpdatedStepsGetPaymentMethodsToUpdateTest extends FlatSpec with Matc
     val expectedPOST = BasicRequest(
       "POST",
       "/action/query",
-      "{\"queryString\":\"SELECT Id, AccountId, NumConsecutiveFailures\\n FROM PaymentMethod\\n  where Type='CreditCardReferenceTransaction' AND PaymentMethodStatus = 'Active' AND TokenId = 'fakecardid' AND SecondTokenId = 'fakecustid'\"}"
+      "{\"queryString\":\"SELECT Id, AccountId, NumConsecutiveFailures FROM PaymentMethod  where Type='CreditCardReferenceTransaction' AND PaymentMethodStatus = 'Active' AND TokenId = 'fakecardid' AND SecondTokenId = 'fakecustid'\"}"
     )
     val expectedGET = BasicRequest(
       "GET",
@@ -113,7 +113,7 @@ class SourceUpdatedStepsGetPaymentMethodsToUpdateTest extends FlatSpec with Matc
     val expectedPOST = BasicRequest(
       "POST",
       "/action/query",
-      "{\"queryString\":\"SELECT Id, AccountId, NumConsecutiveFailures\\n FROM PaymentMethod\\n  where Type='CreditCardReferenceTransaction' AND PaymentMethodStatus = 'Active' AND TokenId = 'fakecardid' AND SecondTokenId = 'fakecustid'\"}"
+      "{\"queryString\":\"SELECT Id, AccountId, NumConsecutiveFailures FROM PaymentMethod  where Type='CreditCardReferenceTransaction' AND PaymentMethodStatus = 'Active' AND TokenId = 'fakecardid' AND SecondTokenId = 'fakecustid'\"}"
     )
     val expectedGET = BasicRequest(
       "GET",
@@ -161,7 +161,7 @@ class SourceUpdatedStepsGetPaymentMethodsToUpdateTest extends FlatSpec with Matc
     val expectedPOST = BasicRequest(
       "POST",
       "/action/query",
-      "{\"queryString\":\"SELECT Id, AccountId, NumConsecutiveFailures\\n FROM PaymentMethod\\n  where Type='CreditCardReferenceTransaction' AND PaymentMethodStatus = 'Active' AND TokenId = 'fakecardid' AND SecondTokenId = 'fakecustid'\"}"
+      "{\"queryString\":\"SELECT Id, AccountId, NumConsecutiveFailures FROM PaymentMethod  where Type='CreditCardReferenceTransaction' AND PaymentMethodStatus = 'Active' AND TokenId = 'fakecardid' AND SecondTokenId = 'fakecustid'\"}"
     )
     val expectedGET1 = BasicRequest(
       "GET",
@@ -216,7 +216,7 @@ class SourceUpdatedStepsGetPaymentMethodsToUpdateTest extends FlatSpec with Matc
     val expectedPOST = BasicRequest(
       "POST",
       "/action/query",
-      "{\"queryString\":\"SELECT Id, AccountId, NumConsecutiveFailures\\n FROM PaymentMethod\\n  where Type='CreditCardReferenceTransaction' AND PaymentMethodStatus = 'Active' AND TokenId = 'fakecardid' AND SecondTokenId = 'fakecustid'\"}"
+      "{\"queryString\":\"SELECT Id, AccountId, NumConsecutiveFailures FROM PaymentMethod  where Type='CreditCardReferenceTransaction' AND PaymentMethodStatus = 'Active' AND TokenId = 'fakecardid' AND SecondTokenId = 'fakecustid'\"}"
     )
     val expectedGET1 = BasicRequest(
       "GET",
@@ -273,7 +273,7 @@ class SourceUpdatedStepsGetPaymentMethodsToUpdateTest extends FlatSpec with Matc
     val expectedPOST = BasicRequest(
       "POST",
       "/action/query",
-      "{\"queryString\":\"SELECT Id, AccountId, NumConsecutiveFailures\\n FROM PaymentMethod\\n  where Type='CreditCardReferenceTransaction' AND PaymentMethodStatus = 'Active' AND TokenId = 'fakecardid' AND SecondTokenId = 'fakecustid'\"}"
+      "{\"queryString\":\"SELECT Id, AccountId, NumConsecutiveFailures FROM PaymentMethod  where Type='CreditCardReferenceTransaction' AND PaymentMethodStatus = 'Active' AND TokenId = 'fakecardid' AND SecondTokenId = 'fakecustid'\"}"
     )
     effects.requestsAttempted should be(List(expectedPOST))
     actual should be(-\/(ApiGatewayResponse.internalServerError("could not find correct account for stripe details")))
@@ -298,7 +298,7 @@ class SourceUpdatedStepsGetPaymentMethodsToUpdateTest extends FlatSpec with Matc
     val expectedPOST = BasicRequest(
       "POST",
       "/action/query",
-      "{\"queryString\":\"SELECT Id, AccountId, NumConsecutiveFailures\\n FROM PaymentMethod\\n  where Type='CreditCardReferenceTransaction' AND PaymentMethodStatus = 'Active' AND TokenId = 'fakecardid' AND SecondTokenId = 'fakecustid'\"}"
+      "{\"queryString\":\"SELECT Id, AccountId, NumConsecutiveFailures FROM PaymentMethod  where Type='CreditCardReferenceTransaction' AND PaymentMethodStatus = 'Active' AND TokenId = 'fakecardid' AND SecondTokenId = 'fakecustid'\"}"
     )
     effects.requestsAttempted should be(List(expectedPOST))
     actual should be(\/-(List()))
