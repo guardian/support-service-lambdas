@@ -19,7 +19,7 @@ object Lambda {
       PaymentFailureSteps(
         ZuoraEmailSteps.sendEmailRegardingAccount(
           EmailSendSteps(ETClient.sendEmail(response, config.etConfig), FilterEmail(config.stage)),
-          a => ZuoraGetInvoiceTransactions(ZuoraRestRequestMaker(response, config.stepsConfig.zuoraRestConfig))(a)
+          ZuoraGetInvoiceTransactions(ZuoraRestRequestMaker(response, config.stepsConfig.zuoraRestConfig))
         ),
         config.etConfig.etSendIDs,
         config.trustedApiConfig

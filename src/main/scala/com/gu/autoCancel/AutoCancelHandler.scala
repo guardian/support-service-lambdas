@@ -26,7 +26,7 @@ object AutoCancelHandler extends App with Logging {
         config.etConfig.etSendIDs,
         ZuoraEmailSteps.sendEmailRegardingAccount(
           EmailSendSteps(ETClient.sendEmail(response, config.etConfig), FilterEmail(config.stage)),
-          a => ZuoraGetInvoiceTransactions(ZuoraRestRequestMaker(response, config.stepsConfig.zuoraRestConfig))(a)
+          ZuoraGetInvoiceTransactions(ZuoraRestRequestMaker(response, config.stepsConfig.zuoraRestConfig))
         )
       )
     }
