@@ -1,8 +1,8 @@
 package manualTest
 
-import com.gu.effects.{ConfigLoad, Http}
+import com.gu.effects.{S3ConfigLoad, Http}
 import com.gu.test.HealthCheck
-import com.gu.util.Stage
+import com.gu.util.config.Stage
 import okhttp3._
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
@@ -27,7 +27,7 @@ class CODEPRODHealthCheck extends FlatSpec with Matchers {
 
   private def healthcheckForEnv(env: HealthChecks => List[HealthCheckConfig]) = {
     val healthchecks = for {
-      jsonString <- ConfigLoad.load(Stage("DEV"), "payment-failure-healthcheck.private.json").toFailableOp("read local config")
+      jsonString <- S3ConfigLoad.load(Stage("DEV"), "payment-failure-healthcheck.private.json").toFailableOp("read local config")
       healthcheck <- Json.parse(jsonString).validate[HealthChecks](HealthChecks.reads).toFailableOp
 
     } yield env(healthcheck)

@@ -1,15 +1,15 @@
 package com.gu.util
 
-import com.gu.util.ETConfig.{ETSendId, ETSendIds}
+import com.gu.util.config._
+import com.gu.util.config.ETConfig.{ETSendId, ETSendIds}
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.{JsSuccess, Json}
-
 import scalaz.\/-
 
 class ConfigLoaderTest extends FlatSpec with Matchers {
 
   "loader" should "be able to load config successfully" in {
-    val actualConfigObject = Config.parseConfig[String](codeConfig)
+    val actualConfigObject = LoadConfig.parseConfig[String](codeConfig)
     actualConfigObject should be(\/-(
       Config(
         Stage("DEV"),

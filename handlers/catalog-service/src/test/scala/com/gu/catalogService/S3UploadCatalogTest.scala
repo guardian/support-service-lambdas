@@ -3,7 +3,8 @@ package com.gu.catalogService
 import java.util.Date
 import com.gu.effects.{AwsS3, UploadToS3}
 import com.gu.test.EffectsTest
-import com.gu.util.{Logging, Stage}
+import com.gu.util.Logging
+import com.gu.util.config.Stage
 import org.scalatest.FlatSpec
 import scala.util.Try
 

@@ -1,8 +1,8 @@
 package com.gu.autoCancel
 
-import com.gu.util.TrustedApiConfig
 import com.gu.util.apigateway.ApiGatewayResponse._
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, RequestAuth, StripeAccount}
+import com.gu.util.config.TrustedApiConfig
 import org.scalatest._
 import play.api.libs.json.{JsSuccess, Json}
 

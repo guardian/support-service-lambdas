@@ -1,6 +1,7 @@
-package com.gu.util
+package com.gu.util.apigateway
 
-import com.gu.util.apigateway.RequestAuth
+import com.gu.util.Logging
+import com.gu.util.config.TrustedApiConfig
 
 object Auth extends Logging {
 

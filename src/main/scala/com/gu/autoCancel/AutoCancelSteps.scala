@@ -3,7 +3,7 @@ package com.gu.autoCancel
 import com.gu.autoCancel.AutoCancel.AutoCancelRequest
 import com.gu.paymentFailure.GetPaymentData.PaymentFailureInformation
 import com.gu.paymentFailure.ToMessage
-import com.gu.util.ETConfig.ETSendIds
+import com.gu.util.config.ETConfig.ETSendIds
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.Operation
 import com.gu.util.apigateway.ApiGatewayRequest

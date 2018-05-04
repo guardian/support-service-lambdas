@@ -7,10 +7,11 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.gu.digitalSubscriptionExpiry.emergencyToken.{EmergencyTokens, EmergencyTokensConfig, GetTokenExpiry}
 import com.gu.digitalSubscriptionExpiry.zuora._
 import com.gu.effects.RawEffects
-import com.gu.util.apigateway.{ApiGatewayHandler, LoadConfig}
+import com.gu.util.apigateway.ApiGatewayHandler
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
-import com.gu.util.{Config, Logging}
+import com.gu.util.Logging
+import com.gu.util.config.{Config, LoadConfig}
 import okhttp3.{Request, Response}
 import play.api.libs.json.{Json, Reads}
 

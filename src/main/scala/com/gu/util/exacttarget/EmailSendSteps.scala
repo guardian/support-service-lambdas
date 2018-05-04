@@ -1,11 +1,12 @@
 package com.gu.util.exacttarget
 
-import com.gu.util.ETConfig.ETSendId
+import com.gu.util.config.ETConfig.ETSendId
 import com.gu.util.apigateway.ApiGatewayResponse
+import com.gu.util.config.{ETConfig, Stage}
 import com.gu.util.exacttarget.EmailSendSteps.logger
 import com.gu.util.exacttarget.ExactTargetAuthenticate.{ETImpure, SalesforceAuth}
 import com.gu.util.reader.Types._
-import com.gu.util.{ETConfig, Logging, Stage}
+import com.gu.util.Logging
 import okhttp3.{MediaType, Request, RequestBody, Response}
 import play.api.libs.json.{Json, Writes, _}
 import scalaz.{-\/, \/, \/-}

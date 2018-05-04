@@ -2,17 +2,16 @@ package com.gu.digitalSubscriptionExpiry.zuora
 
 import java.io
 import java.time.LocalDate
-
 import com.gu.digitalSubscriptionExpiry.Handler.StepsConfig
 import com.gu.digitalSubscriptionExpiry.zuora.GetAccountSummary.AccountId
 import com.gu.digitalSubscriptionExpiry.zuora.GetSubscription.{RatePlan, RatePlanCharge, SubscriptionId, SubscriptionName, SubscriptionResult}
-import com.gu.effects.{ConfigLoad, RawEffects}
+import com.gu.effects.{S3ConfigLoad, RawEffects}
 import com.gu.test.EffectsTest
-import com.gu.util.{Config, Stage}
 import org.scalatest.{FlatSpec, Matchers}
 import scalaz.{-\/, \/, \/-}
 import scalaz.syntax.std.either._
 import com.gu.digitalSubscriptionExpiry.common.CommonApiResponses._
+import com.gu.util.config.{LoadConfig, Stage}
 import com.gu.util.zuora.ZuoraRestRequestMaker
 class GetSubscriptionEffectsTest extends FlatSpec with Matchers {
 
@@ -20,8 +19,8 @@ class GetSubscriptionEffectsTest extends FlatSpec with Matchers {
     val testSubscriptionId = SubscriptionId("invalidSubId")
 
     val actual: \/[io.Serializable, SubscriptionResult] = for {
-      configAttempt <- ConfigLoad.load(Stage("DEV")).toEither.disjunction
-      config <- Config.parseConfig[StepsConfig](configAttempt)
+      configAttempt <- S3ConfigLoad.load(Stage("DEV")).toEither.disjunction
+      config <- LoadConfig.parseConfig[StepsConfig](configAttempt)
       zuoraRequests = ZuoraRestRequestMaker(RawEffects.response, config.stepsConfig.zuoraRestConfig)
       subscription <- GetSubscription(zuoraRequests)(testSubscriptionId)
     } yield {
@@ -34,8 +33,8 @@ class GetSubscriptionEffectsTest extends FlatSpec with Matchers {
     val testSubscriptionId = SubscriptionId("A-S00044160")
 
     val actual: \/[io.Serializable, SubscriptionResult] = for {
-      configAttempt <- ConfigLoad.load(Stage("DEV")).toEither.disjunction
-      config <- Config.parseConfig[StepsConfig](configAttempt)
+      configAttempt <- S3ConfigLoad.load(Stage("DEV")).toEither.disjunction
+      config <- LoadConfig.parseConfig[StepsConfig](configAttempt)
       zuoraRequests = ZuoraRestRequestMaker(RawEffects.response, config.stepsConfig.zuoraRestConfig)
       subscription <- GetSubscription(zuoraRequests)(testSubscriptionId)
     } yield {
