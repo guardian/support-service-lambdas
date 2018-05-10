@@ -1,5 +1,6 @@
 package com.gu.util.config
 
+import com.gu.util.Logging
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
@@ -85,11 +86,15 @@ case class Stage(value: String) extends AnyVal {
   def isProd: Boolean = value == "PROD"
 }
 
-case class ZuoraEnvironment(value: String) {
+case class ZuoraEnvironment(value: String) extends Logging {
+
   def stageToLoad: Stage = value match {
     case "PROD" => Stage("PROD")
     case "UAT" => Stage("CODE")
-    case _ => Stage("DEV")
+    case "DEV" => Stage("DEV")
+    case _ =>
+      logger.error("Unknown Zuora environment specified, falling back to DEV")
+      Stage("DEV")
   }
 }
 
