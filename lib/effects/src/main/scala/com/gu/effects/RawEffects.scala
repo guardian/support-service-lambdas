@@ -23,7 +23,7 @@ object RawEffects {
   }
 
   val stage = Stage(Option(System.getenv("Stage")).filter(_ != "").getOrElse("DEV"))
-  val zuoraEnvironment = ZuoraEnvironment(Option(System.getenv("Stage")).filter(_ != "").getOrElse("DEV"))
+  val zuoraEnvironment = ZuoraEnvironment(Option(System.getenv("ZuoraEnvironment")).filter(_ != "").getOrElse("DEV"))
 
   val response: Request => Response = Http.response
   def s3Load: Stage => ConfigFailure \/ String = S3ConfigLoad.load
