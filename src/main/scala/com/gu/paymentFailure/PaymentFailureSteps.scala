@@ -1,12 +1,13 @@
 package com.gu.paymentFailure
 
 import com.gu.paymentFailure.GetPaymentData.PaymentFailureInformation
-import com.gu.util.Auth.validTenant
-import com.gu.util.ETConfig.ETSendIds
+import com.gu.util.apigateway.Auth.validTenant
+import com.gu.util.config.ETConfig.ETSendIds
 import com.gu.util._
 import com.gu.util.apigateway.ApiGatewayHandler.Operation
 import com.gu.util.apigateway.ApiGatewayResponse.unauthorized
 import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
+import com.gu.util.config.TrustedApiConfig
 import com.gu.util.exacttarget.EmailRequest
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.RestRequestMaker.ClientFailableOp

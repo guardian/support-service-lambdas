@@ -6,7 +6,6 @@ import com.gu.util.apigateway.ApiGatewayResponse.{badRequest, internalServerErro
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import play.api.libs.json.{JsError, JsResult, JsSuccess}
 import scalaz.{-\/, \/, \/-}
-
 import scala.util.{Failure, Success, Try}
 
 object Types extends Logging {

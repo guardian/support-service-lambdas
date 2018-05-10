@@ -5,8 +5,8 @@ import java.time.LocalDate
 import com.gu.effects.TestingRawEffects
 import com.gu.stripeCustomerSourceUpdated.SourceUpdatedSteps.StepsConfig
 import com.gu.stripeCustomerSourceUpdated.{StripeDeps, StripeSignatureChecker}
-import com.gu.util.ETConfig.{ETSendId, ETSendIds}
-import com.gu.util._
+import com.gu.util.config.ETConfig.{ETSendId, ETSendIds}
+import com.gu.util.config._
 import com.gu.util.zuora.ZuoraGetInvoiceTransactions.{InvoiceItem, InvoiceTransactionSummary, ItemisedInvoice}
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
 import org.scalatest.Matchers

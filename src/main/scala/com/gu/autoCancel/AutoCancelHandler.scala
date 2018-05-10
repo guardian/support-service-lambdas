@@ -2,16 +2,16 @@ package com.gu.autoCancel
 
 import java.io.{InputStream, OutputStream}
 import java.time.LocalDateTime
-
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.RawEffects
 import com.gu.paymentFailure.ZuoraEmailSteps
 import com.gu.stripeCustomerSourceUpdated.SourceUpdatedSteps.StepsConfig
-import com.gu.util.apigateway.{ApiGatewayHandler, LoadConfig}
+import com.gu.util.apigateway.ApiGatewayHandler
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import com.gu.util.exacttarget.{ETClient, EmailSendSteps, FilterEmail}
 import com.gu.util.zuora.{ZuoraGetAccountSummary, ZuoraGetInvoiceTransactions, ZuoraRestRequestMaker}
-import com.gu.util.{Config, Logging}
+import com.gu.util.Logging
+import com.gu.util.config.{Config, LoadConfig}
 import okhttp3.{Request, Response}
 
 object AutoCancelHandler extends App with Logging {

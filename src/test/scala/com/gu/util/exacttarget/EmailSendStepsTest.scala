@@ -1,7 +1,7 @@
 package com.gu.util.exacttarget
 
-import com.gu.util.ETConfig.ETSendId
-import com.gu.util.Stage
+import com.gu.util.config.ETConfig.ETSendId
+import com.gu.util.config.Stage
 import org.scalatest.{FlatSpec, Matchers}
 import scalaz.\/-
 

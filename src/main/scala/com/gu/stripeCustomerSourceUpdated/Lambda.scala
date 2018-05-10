@@ -5,9 +5,9 @@ import java.io.{InputStream, OutputStream}
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.RawEffects
 import com.gu.stripeCustomerSourceUpdated.SourceUpdatedSteps.StepsConfig
-import com.gu.util.Config
-import com.gu.util.apigateway.{ApiGatewayHandler, LoadConfig}
+import com.gu.util.apigateway.ApiGatewayHandler
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
+import com.gu.util.config.{Config, LoadConfig}
 import com.gu.util.zuora.ZuoraRestRequestMaker
 import okhttp3.{Request, Response}
 

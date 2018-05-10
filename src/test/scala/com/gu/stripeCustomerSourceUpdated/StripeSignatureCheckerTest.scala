@@ -4,8 +4,8 @@ import org.scalatest.FlatSpec
 import org.scalatest.Matchers._
 import com.gu.TestData
 import com.gu.util.apigateway.StripeAccount
-import com.gu.util.{StripeConfig, StripeSecretKey}
 import com.gu.stripeCustomerSourceUpdated.StripeRequestSignatureChecker._
+import com.gu.util.config.{StripeConfig, StripeSecretKey}
 
 class StripeRequestSignatureCheckerTest extends FlatSpec {
 

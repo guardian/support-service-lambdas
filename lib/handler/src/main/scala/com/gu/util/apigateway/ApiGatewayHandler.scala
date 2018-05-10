@@ -1,17 +1,15 @@
 package com.gu.util.apigateway
 
 import java.io.{InputStream, OutputStream}
-
 import com.amazonaws.services.lambda.runtime.Context
-import com.gu.util.Auth.credentialsAreValid
-import com.gu.util.Config.ConfigFailure
+import Auth.credentialsAreValid
+import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayResponse.{outputForAPIGateway, successfulExecution, unauthorized}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
-import com.gu.util.reader.Types.{FailableOp, _}
-import com.gu.util.{Stage, _}
-import play.api.libs.json.{Json, Reads}
+import com.gu.util.config.{Config, TrustedApiConfig}
+import com.gu.util.reader.Types._
+import play.api.libs.json.Json
 import scalaz.{-\/, \/, \/-}
-
 import scala.io.Source
 import scala.util.Try
 
@@ -78,34 +76,6 @@ object ApiGatewayHandler extends Logging {
 
     outputForAPIGateway(outputStream, response.fold(identity, _ => successfulExecution))
 
-  }
-
-}
-
-object LoadConfig extends Logging {
-
-  def default[StepsConfig: Reads]: (Stage, Try[String]) => FailableOp[Config[StepsConfig]] =
-    apply[StepsConfig](Config.parseConfig[StepsConfig])
-
-  def apply[StepsConfig](
-    parseConfig: String => ConfigFailure \/ Config[StepsConfig]
-  )(
-    stage: Stage,
-    s3Load: Try[String]
-  ): FailableOp[Config[StepsConfig]] = {
-
-    logger.info(s"${this.getClass} Lambda is starting up in $stage")
-
-    for {
-
-      textConfig <- s3Load.toFailableOp("load config from s3")
-      config <- parseConfig(textConfig).toFailableOp("parse config file")
-      _ <- if (stage == config.stage)
-        \/-(())
-      else
-        -\/(ApiGatewayResponse.internalServerError(s"running in $stage with config from ${config.stage}"))
-
-    } yield config
   }
 
 }

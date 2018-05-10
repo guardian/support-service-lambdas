@@ -2,10 +2,10 @@ package com.gu.catalogService
 
 import com.amazonaws.services.s3.model.{PutObjectRequest, PutObjectResult}
 import com.gu.effects.RawEffects
-import com.gu.util.apigateway.LoadConfig
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
-import com.gu.util.{Logging, Stage}
+import com.gu.util.Logging
+import com.gu.util.config.{LoadConfig, Stage}
 import okhttp3.{Request, Response}
 import play.api.libs.json.{Json, Reads}
 

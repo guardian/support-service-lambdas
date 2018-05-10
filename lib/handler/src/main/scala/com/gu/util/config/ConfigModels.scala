@@ -1,13 +1,10 @@
-package com.gu.util
+package com.gu.util.config
 
-import com.gu.util.ETConfig.ETSendIds
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
-import scalaz.{-\/, \/, \/-}
-
 case class ETConfig(
-  etSendIDs: ETSendIds,
+  etSendIDs: ETConfig.ETSendIds,
   clientId: String,
   clientSecret: String
 )
@@ -19,6 +16,7 @@ object ETConfig {
   implicit val idsReads: Reads[ETSendIds] = Json.reads[ETSendIds]
 
   case class ETSendId(id: String) extends AnyVal
+
   case class ETSendIds(
     pf1: ETSendId,
     pf2: ETSendId,
@@ -33,7 +31,6 @@ object ETConfig {
       case 4 => pf4
       case _ => ETSendId("")
     }).filter(_.id != "")
-
   }
 
   implicit val zuoraConfigReads: Reads[ETConfig] = (
@@ -59,6 +56,7 @@ object StripeSecretKey {
 }
 
 case class StripeWebhook(ukStripeSecretKey: StripeSecretKey, auStripeSecretKey: StripeSecretKey)
+
 object StripeWebhook {
   implicit val stripeWebhookConfigReads: Reads[StripeWebhook] = (
     (JsPath \ "api.key.secret").read[String].map(StripeSecretKey.apply) and
@@ -66,10 +64,8 @@ object StripeWebhook {
   )(StripeWebhook.apply _)
 }
 
-case class StripeConfig(
-  customerSourceUpdatedWebhook: StripeWebhook,
-  signatureChecking: Boolean
-)
+case class StripeConfig(customerSourceUpdatedWebhook: StripeWebhook, signatureChecking: Boolean)
+
 object StripeConfig {
   implicit val stripeConfigReads: Reads[StripeConfig] = (
     (JsPath \ "customerSourceUpdatedWebhook").read[StripeWebhook] and
@@ -89,7 +85,7 @@ case class Stage(value: String) extends AnyVal {
   def isProd: Boolean = value == "PROD"
 }
 
-object Config extends Logging {
+object ConfigReads {
 
   implicit def configReads[StepsConfig: Reads]: Reads[Config[StepsConfig]] = (
     (JsPath \ "stage").read[String].map(Stage.apply) and
@@ -98,18 +94,6 @@ object Config extends Logging {
     (JsPath \ "etConfig").read[ETConfig] and
     (JsPath \ "stripe").read[StripeConfig]
   )(Config.apply[StepsConfig] _)
-
-  def parseConfig[StepsConfig: Reads](jsonConfig: String): \/[ConfigFailure, Config[StepsConfig]] = {
-    Json.fromJson[Config[StepsConfig]](Json.parse(jsonConfig)) match {
-      case validConfig: JsSuccess[Config[StepsConfig]] =>
-        logger.info(s"Successfully parsed JSON config")
-        \/-(validConfig.value)
-      case error: JsError =>
-        logger.error(s"Failed to parse JSON config")
-        logger.warn(s"Failed to parse JSON config: $error")
-        -\/(ConfigFailure(error))
-    }
-  }
 
   case class ConfigFailure(error: JsError)
 

@@ -2,7 +2,8 @@ package com.gu.util.exacttarget
 
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types.FailableOp
-import com.gu.util.{ETConfig, Logging}
+import com.gu.util.Logging
+import com.gu.util.config.ETConfig
 import okhttp3.{FormBody, Request, Response}
 import play.api.libs.functional.syntax._
 import play.api.libs.json.{JsPath, JsSuccess, Json, Reads}

@@ -5,10 +5,10 @@ import java.io.ByteArrayOutputStream
 import com.gu.TestData
 import com.gu.TestData._
 import com.gu.stripeCustomerSourceUpdated.SourceUpdatedSteps.StepsConfig
-import com.gu.util.ETConfig.ETSendId
-import com.gu.util.Stage
+import com.gu.util.config.ETConfig.ETSendId
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayResponse}
+import com.gu.util.config.Stage
 import com.gu.util.exacttarget._
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.ZuoraGetInvoiceTransactions.InvoiceTransactionSummary

@@ -3,7 +3,8 @@ package com.gu.catalogService
 import java.io.{ByteArrayInputStream, InputStream}
 import com.amazonaws.services.s3.model.{ObjectMetadata, PutObjectRequest, PutObjectResult}
 import com.amazonaws.util.IOUtils
-import com.gu.util.{Logging, Stage}
+import com.gu.util.Logging
+import com.gu.util.config.Stage
 import scala.util.Try
 import scalaz.{-\/, \/, \/-}
 
