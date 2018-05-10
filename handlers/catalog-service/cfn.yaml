@@ -132,7 +132,7 @@ Resources:
     CatalogServiceScheduler:
         Type: "AWS::Events::Rule"
         Properties:
-            Description: Triggers the Catalog Service Lambdas on a schedule
+            Description: Triggers the DEV and UAT Catalog Service Lambdas on a schedule
             Name: !Sub catalog-service-scheduler-${Stage}
             ScheduleExpression: rate(10 minutes) #https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html#RateExpressions
             Targets:
@@ -193,8 +193,9 @@ Resources:
 
     ProdCatalogServiceScheduler:
         Type: "AWS::Events::Rule"
+        Condition: CreateProdOnlyResources
         Properties:
-            Description: Triggers the Catalog Service Lambdas on a schedule
+            Description: Triggers the PROD Catalog Service Lambda on a schedule
             Name: !Sub catalog-service-scheduler-${Stage}
             ScheduleExpression: rate(10 minutes) #https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html#RateExpressions
             Targets:
