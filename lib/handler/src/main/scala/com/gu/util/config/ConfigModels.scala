@@ -89,7 +89,7 @@ case class ZuoraEnvironment(value: String) {
   def stageToLoad: Stage = value match {
     case "PROD" => Stage("PROD")
     case "UAT" => Stage("CODE")
-    case "DEV" => Stage("DEV")
+    case _ => Stage("DEV")
   }
 }
 
