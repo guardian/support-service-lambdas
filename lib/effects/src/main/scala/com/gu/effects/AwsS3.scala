@@ -7,8 +7,9 @@ import com.amazonaws.services.s3.model.{GetObjectRequest, PutObjectRequest, PutO
 import com.gu.util.Logging
 import com.gu.util.config.ConfigReads.ConfigFailure
 import com.gu.util.config.Stage
+
 import scala.io.Source
-import scala.util.{Failure, Try}
+import scala.util.{Failure, Success, Try}
 import scalaz.{-\/, \/, \/-}
 
 object S3ConfigLoad extends Logging {
@@ -30,7 +31,12 @@ object S3ConfigLoad extends Logging {
     logger.info(s"Attempting to load config in $stage")
     val bucket = s"gu-reader-revenue-private/membership/payment-failure-lambdas/${stage.value}"
     val request = new GetObjectRequest(bucket, key)
-    GetFromS3.fetchString(request).fold(_ => -\/(ConfigFailure("Failed to load config from S3")), conf => \/-(conf))
+    GetFromS3.fetchString(request) match {
+      case Success(conf) => \/-(conf)
+      case Failure(ex) =>
+        logger.error(s"Failed to load config", ex)
+        -\/(ConfigFailure("Failed to load config from S3"))
+    }
   }
 
 }
