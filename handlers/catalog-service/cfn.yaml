@@ -175,8 +175,6 @@ Resources:
         DependsOn:
         - CatalogServiceRole
 
-    ### PROD only resources (only the PROD lambdas should be able to access Production Zuora) ###
-
     PRODCatalogServiceLambdaInvokePermission:
         Type: AWS::Lambda::Permission
         Condition: CreateProdOnlyResources
