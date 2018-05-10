@@ -12,6 +12,7 @@ import com.gu.util.exacttarget.{ETClient, EmailSendSteps, FilterEmail}
 import com.gu.util.zuora.{ZuoraGetAccountSummary, ZuoraGetInvoiceTransactions, ZuoraRestRequestMaker}
 import com.gu.util.Logging
 import com.gu.util.config.{Config, LoadConfig}
+import com.gu.util.reader.Types._
 import okhttp3.{Request, Response}
 
 object AutoCancelHandler extends App with Logging {
@@ -32,7 +33,7 @@ object AutoCancelHandler extends App with Logging {
     }
 
     ApiGatewayHandler[StepsConfig](lambdaIO)(for {
-      config <- LoadConfig.default[StepsConfig](implicitly)(rawEffects.stage, rawEffects.s3Load(rawEffects.stage))
+      config <- LoadConfig.default[StepsConfig](implicitly)(rawEffects.stage, rawEffects.s3Load(rawEffects.stage), true).toFailableOp("load config")
       configuredOp = operation(config)
     } yield (config, configuredOp))
 

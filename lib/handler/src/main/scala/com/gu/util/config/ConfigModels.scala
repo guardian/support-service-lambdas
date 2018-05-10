@@ -85,6 +85,14 @@ case class Stage(value: String) extends AnyVal {
   def isProd: Boolean = value == "PROD"
 }
 
+case class ZuoraEnvironment(value: String) {
+  def stageToLoad: Stage = value match {
+    case "PROD" => Stage("PROD")
+    case "UAT" => Stage("CODE")
+    case "DEV" => Stage("DEV")
+  }
+}
+
 object ConfigReads {
 
   implicit def configReads[StepsConfig: Reads]: Reads[Config[StepsConfig]] = (
@@ -95,6 +103,6 @@ object ConfigReads {
     (JsPath \ "stripe").read[StripeConfig]
   )(Config.apply[StepsConfig] _)
 
-  case class ConfigFailure(error: JsError)
+  case class ConfigFailure(error: String)
 
 }

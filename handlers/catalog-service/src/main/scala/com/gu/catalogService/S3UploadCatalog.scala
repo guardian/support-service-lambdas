@@ -4,7 +4,7 @@ import java.io.{ByteArrayInputStream, InputStream}
 import com.amazonaws.services.s3.model.{ObjectMetadata, PutObjectRequest, PutObjectResult}
 import com.amazonaws.util.IOUtils
 import com.gu.util.Logging
-import com.gu.util.config.Stage
+import com.gu.util.config.{Stage, ZuoraEnvironment}
 import scala.util.Try
 import scalaz.{-\/, \/, \/-}
 
@@ -12,6 +12,7 @@ object S3UploadCatalog extends Logging {
 
   def apply(
     stage: Stage,
+    zuoraEnvironment: ZuoraEnvironment,
     catalog: String,
     s3Write: PutObjectRequest => Try[PutObjectResult]
   ): String \/ PutObjectResult = {
@@ -20,7 +21,7 @@ object S3UploadCatalog extends Logging {
     val bytes = IOUtils.toByteArray(stream)
     val uploadMetadata = new ObjectMetadata()
     uploadMetadata.setContentLength(bytes.length.toLong)
-    val putRequest = new PutObjectRequest(s"gu-zuora-catalog/${stage.value}", "catalog.json", new ByteArrayInputStream(bytes), uploadMetadata)
+    val putRequest = new PutObjectRequest(s"gu-zuora-catalog/${stage.value}/Zuora-${zuoraEnvironment.value}", "catalog.json", new ByteArrayInputStream(bytes), uploadMetadata)
     val uploadAttempt = for {
       result <- s3Write(putRequest)
     } yield {

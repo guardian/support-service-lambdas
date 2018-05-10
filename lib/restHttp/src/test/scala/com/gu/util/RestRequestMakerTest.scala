@@ -17,7 +17,7 @@ class RestRequestMakerTest extends AsyncFlatSpec {
   }
 
   "buildRequest" should "set the headers and url correctly" in {
-    val hdr = Map("name" -> "value")
+    val hdr = Map("apiSecretAccessKey" -> "fakePassword")
     val request = RestRequestMaker.buildRequest(hdr, "https://www.test.com/route-test", _.get())
     assert(request.header("apiSecretAccessKey") == "fakePassword")
     assert(request.url.toString == "https://www.test.com/route-test")

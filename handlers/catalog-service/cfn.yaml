@@ -14,14 +14,21 @@ Mappings:
     StageVariables:
         CODE:
             ReadableS3Buckets:
+              - arn:aws:s3:::gu-reader-revenue-private/membership/payment-failure-lambdas/DEV/*
               - arn:aws:s3:::gu-reader-revenue-private/membership/payment-failure-lambdas/CODE/*
             WriteableS3Buckets:
               - arn:aws:s3:::gu-zuora-catalog/CODE/*
         PROD:
             ReadableS3Buckets:
+              - arn:aws:s3:::gu-reader-revenue-private/membership/payment-failure-lambdas/DEV/*
+              - arn:aws:s3:::gu-reader-revenue-private/membership/payment-failure-lambdas/CODE/*
               - arn:aws:s3:::gu-reader-revenue-private/membership/payment-failure-lambdas/PROD/*
             WriteableS3Buckets:
               - arn:aws:s3:::gu-zuora-catalog/PROD/*
+
+Conditions:
+    CreateCodeOnlyResources: !Equals [ !Ref Stage, CODE ]
+    CreateProdOnlyResources: !Equals [ !Ref Stage, PROD ]
 
 Resources:
     CatalogServiceRole:
@@ -57,12 +64,13 @@ Resources:
                             Action: s3:PutObject
                             Resource: !FindInMap [StageVariables, !Ref Stage, WriteableS3Buckets]
 
-    CatalogServiceLambda:
+    PRODCatalogServiceLambda:
         Type: AWS::Lambda::Function
+        Condition: CreateProdResources
         Properties:
-            Description: Reads the product catalog from Zuora and stores it in S3
+            Description: Reads the product catalog from PROD Zuora and stores it in S3
             FunctionName:
-                !Sub catalog-service-${Stage}
+                !Sub catalog-service-${Stage}-zuora-prod
             Code:
                 S3Bucket: subscriptions-dist
                 S3Key: !Sub subscriptions/${Stage}/catalog-service/catalog-service.jar
@@ -70,6 +78,7 @@ Resources:
             Environment:
                 Variables:
                   Stage: !Ref Stage
+                  ZuoraEnvironment: PROD
             Role:
                 !GetAtt CatalogServiceRole.Arn
             MemorySize: 1536
@@ -78,28 +87,117 @@ Resources:
         DependsOn:
         - CatalogServiceRole
 
-    CatalogServiceLambdaInvokePermission:
+    UATCatalogServiceLambda:
+        Type: AWS::Lambda::Function
+        Properties:
+            Description: Reads the product catalog from UAT Zuora and stores it in S3
+            FunctionName:
+                !Sub catalog-service-${Stage}-zuora-uat
+            Code:
+                S3Bucket: subscriptions-dist
+                S3Key: !Sub subscriptions/${Stage}/catalog-service/catalog-service.jar
+            Handler: com.gu.catalogService.Handler::apply
+            Environment:
+                Variables:
+                  Stage: !Ref Stage
+                  ZuoraEnvironment: UAT
+            Role:
+                !GetAtt CatalogServiceRole.Arn
+            MemorySize: 1536
+            Runtime: java8
+            Timeout: 300
+        DependsOn:
+        - CatalogServiceRole
+
+    DEVCatalogServiceLambda:
+        Type: AWS::Lambda::Function
+        Properties:
+            Description: Reads the product catalog from DEV Zuora and stores it in S3
+            FunctionName:
+                !Sub catalog-service-${Stage}-zuora-dev
+            Code:
+                S3Bucket: subscriptions-dist
+                S3Key: !Sub subscriptions/${Stage}/catalog-service/catalog-service.jar
+            Handler: com.gu.catalogService.Handler::apply
+            Environment:
+                Variables:
+                  Stage: !Ref Stage
+                  ZuoraEnvironment: DEV
+            Role:
+                !GetAtt CatalogServiceRole.Arn
+            MemorySize: 1536
+            Runtime: java8
+            Timeout: 300
+        DependsOn:
+        - CatalogServiceRole
+
+    PRODCatalogServiceLambdaInvokePermission:
         Type: AWS::Lambda::Permission
         Properties:
             Action: lambda:invokeFunction
-            FunctionName: !Sub catalog-service-${Stage}
+            FunctionName: !Ref PRODCatalogServiceLambda
             Principal: events.amazonaws.com
             SourceArn: !GetAtt CatalogServiceScheduler.Arn
         DependsOn:
-        - CatalogServiceLambda
+        - PRODCatalogServiceLambda
         - CatalogServiceScheduler
 
-    CatalogServiceScheduler:
-        Type: "AWS::Events::Rule"
+    UATCatalogServiceLambdaInvokePermission:
+        Type: AWS::Lambda::Permission
         Properties:
-            Description: Triggers the Catalog Service Lambda on a schedule
-            Name: !Sub catalog-service-scheduler-${Stage}
-            ScheduleExpression: rate(5 minutes) #https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html#RateExpressions
-            Targets:
-              - Arn: !GetAtt CatalogServiceLambda.Arn
-                Id: !Sub catalog-service-lambda-${Stage}
+            Action: lambda:invokeFunction
+            FunctionName: !Ref UATCatalogServiceLambda
+            Principal: events.amazonaws.com
+            SourceArn: !GetAtt CatalogServiceScheduler.Arn
         DependsOn:
-        - CatalogServiceLambda
+        - UATCatalogServiceLambda
+        - CatalogServiceScheduler
+
+    DEVCatalogServiceLambdaInvokePermission:
+        Type: AWS::Lambda::Permission
+        Properties:
+            Action: lambda:invokeFunction
+            FunctionName: !Ref DEVCatalogServiceLambda
+            Principal: events.amazonaws.com
+            SourceArn: !GetAtt CatalogServiceScheduler.Arn
+        DependsOn:
+        - DEVCatalogServiceLambda
+        - CatalogServiceScheduler
+
+    ProdCatalogServiceScheduler:
+        Type: "AWS::Events::Rule"
+        Condition: CreateProdResources
+        Properties:
+            Description: Triggers the PROD Catalog Service Lambdas on a schedule
+            Name: !Sub catalog-service-scheduler-${Stage}
+            ScheduleExpression: rate(10 minutes) #https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html#RateExpressions
+            Targets:
+              - Arn: !GetAtt PRODCatalogServiceLambda.Arn
+                Id: !Sub PRODCatalogServiceLambda
+              - Arn: !GetAtt UATCatalogServiceLambda.Arn
+                Id: !Ref UATCatalogServiceLambda
+              - Arn: !GetAtt DEVCatalogServiceLambda.Arn
+                Id: !Ref DEVCatalogServiceLambda
+        DependsOn:
+        - PRODCatalogServiceLambda
+        - UATCatalogServiceLambda
+        - DEVCatalogServiceLambda
+
+    CodeCatalogServiceScheduler:
+        Type: "AWS::Events::Rule"
+        Condition: CreateCodeResources
+        Properties:
+            Description: Triggers the CODE Catalog Service Lambdas on a schedule
+            Name: !Sub catalog-service-scheduler-${Stage}
+            ScheduleExpression: rate(30 minutes) #https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html#RateExpressions
+            Targets:
+              - Arn: !GetAtt UATCatalogServiceLambda.Arn
+                Id: !Ref UATCatalogServiceLambda
+              - Arn: !GetAtt DEVCatalogServiceLambda.Arn
+                Id: !Ref DEVCatalogServiceLambda
+        DependsOn:
+        - UATCatalogServiceLambda
+        - DEVCatalogServiceLambda
 
     CatalogS3Bucket:
         Type: "AWS::S3::Bucket"

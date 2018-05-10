@@ -1,13 +1,13 @@
 package com.gu.stripeCustomerSourceUpdated
 
 import java.io.{InputStream, OutputStream}
-
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.RawEffects
 import com.gu.stripeCustomerSourceUpdated.SourceUpdatedSteps.StepsConfig
 import com.gu.util.apigateway.ApiGatewayHandler
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import com.gu.util.config.{Config, LoadConfig}
+import com.gu.util.reader.Types._
 import com.gu.util.zuora.ZuoraRestRequestMaker
 import okhttp3.{Request, Response}
 
@@ -21,7 +21,7 @@ object Lambda {
       )
 
     ApiGatewayHandler[StepsConfig](lambdaIO)(for {
-      config <- LoadConfig.default[StepsConfig](implicitly)(rawEffects.stage, rawEffects.s3Load(rawEffects.stage))
+      config <- LoadConfig.default[StepsConfig](implicitly)(rawEffects.stage, rawEffects.s3Load(rawEffects.stage), true).toFailableOp("load config")
       configuredOp = operation(config)
 
     } yield (config, configuredOp))

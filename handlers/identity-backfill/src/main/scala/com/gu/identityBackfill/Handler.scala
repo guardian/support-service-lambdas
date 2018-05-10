@@ -1,7 +1,6 @@
 package com.gu.identityBackfill
 
 import java.io.{InputStream, OutputStream}
-
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.RawEffects
 import com.gu.identity.{GetByEmail, IdentityConfig}
@@ -67,7 +66,7 @@ object Handler {
       }
 
     ApiGatewayHandler[StepsConfig](lambdaIO)(for {
-      config <- LoadConfig.default[StepsConfig] (implicitly) (rawEffects.stage, rawEffects.s3Load(rawEffects.stage))
+      config <- LoadConfig.default[StepsConfig] (implicitly) (rawEffects.stage, rawEffects.s3Load(rawEffects.stage), true).toFailableOp("load config")
       configuredOp = operation(config)
 
     } yield (config, configuredOp))

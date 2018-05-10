@@ -1,6 +1,5 @@
-package com.gu.util
+package com.gu.util.apigateway
 
-import com.gu.util.apigateway.ApiGatewayRequest
 import org.scalatest.FlatSpec
 import org.scalatest.Matchers._
 import play.api.libs.json.{JsResult, JsSuccess, Json}
