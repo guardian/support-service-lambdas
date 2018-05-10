@@ -68,7 +68,7 @@ Resources:
         Properties:
             Description: Reads the product catalog from UAT Zuora and stores it in S3
             FunctionName:
-                !Sub catalog-service-${Stage}-zuora-uat
+                !Sub catalog-service-zuora-uat-${Stage}
             Code:
                 S3Bucket: subscriptions-dist
                 S3Key: !Sub subscriptions/${Stage}/catalog-service/catalog-service.jar
@@ -90,7 +90,7 @@ Resources:
         Properties:
             Description: Reads the product catalog from DEV Zuora and stores it in S3
             FunctionName:
-                !Sub catalog-service-${Stage}-zuora-dev
+                !Sub catalog-service-zuora-dev-${Stage}
             Code:
                 S3Bucket: subscriptions-dist
                 S3Key: !Sub subscriptions/${Stage}/catalog-service/catalog-service.jar
@@ -153,16 +153,12 @@ Resources:
               Status: Enabled
         DeletionPolicy: Retain
 
-
-    ### PROD only resources (only the PROD lambdas should be able to access Production Zuora) ###
-
     PRODCatalogServiceLambda:
         Type: AWS::Lambda::Function
-        Condition: CreateProdOnlyResources
         Properties:
             Description: Reads the product catalog from PROD Zuora and stores it in S3
             FunctionName:
-                !Sub catalog-service-${Stage}-zuora-prod
+                !Sub catalog-service-zuora-prod-${Stage}
             Code:
                 S3Bucket: subscriptions-dist
                 S3Key: !Sub subscriptions/${Stage}/catalog-service/catalog-service.jar
@@ -179,6 +175,8 @@ Resources:
         DependsOn:
         - CatalogServiceRole
 
+    ### PROD only resources (only the PROD lambdas should be able to access Production Zuora) ###
+
     PRODCatalogServiceLambdaInvokePermission:
         Type: AWS::Lambda::Permission
         Condition: CreateProdOnlyResources
@@ -186,10 +184,10 @@ Resources:
             Action: lambda:invokeFunction
             FunctionName: !Ref PRODCatalogServiceLambda
             Principal: events.amazonaws.com
-            SourceArn: !GetAtt CatalogServiceScheduler.Arn
+            SourceArn: !GetAtt ProdCatalogServiceScheduler.Arn
         DependsOn:
         - PRODCatalogServiceLambda
-        - CatalogServiceScheduler
+        - ProdCatalogServiceScheduler
 
     ProdCatalogServiceScheduler:
         Type: "AWS::Events::Rule"
