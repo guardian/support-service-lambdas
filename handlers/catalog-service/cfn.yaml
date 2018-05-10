@@ -66,7 +66,7 @@ Resources:
 
     PRODCatalogServiceLambda:
         Type: AWS::Lambda::Function
-        Condition: CreateProdResources
+        Condition: CreateProdOnlyResources
         Properties:
             Description: Reads the product catalog from PROD Zuora and stores it in S3
             FunctionName:
@@ -133,6 +133,7 @@ Resources:
 
     PRODCatalogServiceLambdaInvokePermission:
         Type: AWS::Lambda::Permission
+        Condition: CreateProdOnlyResources
         Properties:
             Action: lambda:invokeFunction
             FunctionName: !Ref PRODCatalogServiceLambda
@@ -164,32 +165,12 @@ Resources:
         - DEVCatalogServiceLambda
         - CatalogServiceScheduler
 
-    ProdCatalogServiceScheduler:
+    CatalogServiceScheduler:
         Type: "AWS::Events::Rule"
-        Condition: CreateProdResources
         Properties:
-            Description: Triggers the PROD Catalog Service Lambdas on a schedule
+            Description: Triggers the Catalog Service Lambdas on a schedule
             Name: !Sub catalog-service-scheduler-${Stage}
             ScheduleExpression: rate(10 minutes) #https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html#RateExpressions
-            Targets:
-              - Arn: !GetAtt PRODCatalogServiceLambda.Arn
-                Id: !Sub PRODCatalogServiceLambda
-              - Arn: !GetAtt UATCatalogServiceLambda.Arn
-                Id: !Ref UATCatalogServiceLambda
-              - Arn: !GetAtt DEVCatalogServiceLambda.Arn
-                Id: !Ref DEVCatalogServiceLambda
-        DependsOn:
-        - PRODCatalogServiceLambda
-        - UATCatalogServiceLambda
-        - DEVCatalogServiceLambda
-
-    CodeCatalogServiceScheduler:
-        Type: "AWS::Events::Rule"
-        Condition: CreateCodeResources
-        Properties:
-            Description: Triggers the CODE Catalog Service Lambdas on a schedule
-            Name: !Sub catalog-service-scheduler-${Stage}
-            ScheduleExpression: rate(30 minutes) #https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html#RateExpressions
             Targets:
               - Arn: !GetAtt UATCatalogServiceLambda.Arn
                 Id: !Ref UATCatalogServiceLambda
