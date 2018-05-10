@@ -47,7 +47,8 @@ object Handler extends Logging {
       }
 
     ApiGatewayHandler[StepsConfig](lambdaIO)(for {
-      config <- LoadConfig.default[StepsConfig](implicitly)(rawEffects.stage, rawEffects.s3Load(rawEffects.stage), true).toFailableOp("load config")
+      config <- LoadConfig.default[StepsConfig](implicitly)(rawEffects.stage, rawEffects.s3Load(rawEffects.stage), true)
+        .toFailableOp("load config")
       configuredOp = operation(config)
 
     } yield (config, configuredOp))

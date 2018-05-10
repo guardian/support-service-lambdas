@@ -21,7 +21,12 @@ object S3UploadCatalog extends Logging {
     val bytes = IOUtils.toByteArray(stream)
     val uploadMetadata = new ObjectMetadata()
     uploadMetadata.setContentLength(bytes.length.toLong)
-    val putRequest = new PutObjectRequest(s"gu-zuora-catalog/${stage.value}/Zuora-${zuoraEnvironment.value}", "catalog.json", new ByteArrayInputStream(bytes), uploadMetadata)
+    val putRequest = new PutObjectRequest(
+      s"gu-zuora-catalog/${stage.value}/Zuora-${zuoraEnvironment.value}",
+      "catalog.json",
+      new ByteArrayInputStream(bytes),
+      uploadMetadata
+    )
     val uploadAttempt = for {
       result <- s3Write(putRequest)
     } yield {
