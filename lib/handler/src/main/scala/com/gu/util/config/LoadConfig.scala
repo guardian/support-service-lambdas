@@ -8,25 +8,24 @@ import scalaz.{-\/, \/, \/-}
 
 object LoadConfig extends Logging {
 
-  def default[StepsConfig: Reads]: (Stage, ConfigFailure \/ String, Boolean) => ConfigFailure \/ Config[StepsConfig] =
+  def default[StepsConfig: Reads]: (Stage, ConfigFailure \/ String) => ConfigFailure \/ Config[StepsConfig] =
     apply[StepsConfig](parseConfig[StepsConfig])
 
   def apply[StepsConfig](parseConfig: String => ConfigFailure \/ Config[StepsConfig])(
-    stage: Stage,
-    s3Load: ConfigFailure \/ String,
-    shouldCrossCheckStage: Boolean = true
+    expectedConfigStage: Stage,
+    s3Load: ConfigFailure \/ String
   ): ConfigFailure \/ Config[StepsConfig] = {
-    logger.info(s"${this.getClass} Lambda is starting up in $stage")
+    logger.info(s"${this.getClass} Lambda is starting up, loading config for $expectedConfigStage")
     for {
       textConfig <- s3Load
       config <- parseConfig(textConfig)
-      _ <- safetyCheck(shouldCrossCheckStage, stage, config.stage)
+      _ <- safetyCheck(expectedConfigStage, config.stage)
     } yield config
   }
 
-  def safetyCheck(shouldCompare: Boolean, stageFromEnv: Stage, stageFromConfigFile: Stage) = {
-    if (shouldCompare && stageFromEnv != stageFromConfigFile)
-      -\/(ConfigFailure(s"Attempting to run in $stageFromEnv with config from $stageFromConfigFile"))
+  def safetyCheck(expectedConfigStage: Stage, stageFromConfigFile: Stage) = {
+    if (expectedConfigStage != stageFromConfigFile)
+      -\/(ConfigFailure(s"Expected to load $expectedConfigStage config, but loaded $stageFromConfigFile config"))
     else
       \/-(())
   }

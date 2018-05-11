@@ -20,18 +20,13 @@ class LoadConfigTest extends FlatSpec with Matchers {
     ))
   }
 
-  "loader" should "succeed if the stage from the environment matches the stage in the config file" in {
-    val confAttempt = LoadConfig.default[String](implicitly)(Stage("DEV"), \/-(devConfig), true)
+  "loader" should "succeed if the expected stage provided matches the stage in the config file" in {
+    val confAttempt = LoadConfig.default[String](implicitly)(Stage("DEV"), \/-(devConfig))
     assert(confAttempt.isRight)
   }
 
-  "loader" should "succeed if the config comparison is overridden, regardless of whether the stages match" in {
-    val confAttempt = LoadConfig.default[String](implicitly)(Stage("PROD"), \/-(devConfig), false)
-    assert(confAttempt.isRight)
-  }
-
-  "loader" should "fail if the stages from the environment and the config file do not match, and the safety check is configured" in {
-    val confAttempt = LoadConfig.default[String](implicitly)(Stage("PROD"), \/-(devConfig), true)
+  "loader" should "fail if the stage in the config file differs from the expected stage provided" in {
+    val confAttempt = LoadConfig.default[String](implicitly)(Stage("PROD"), \/-(devConfig))
     assert(confAttempt.isLeft)
   }
 

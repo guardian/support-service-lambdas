@@ -7,7 +7,6 @@ import com.amazonaws.services.s3.model.{GetObjectRequest, PutObjectRequest, PutO
 import com.gu.util.Logging
 import com.gu.util.config.ConfigReads.ConfigFailure
 import com.gu.util.config.Stage
-
 import scala.io.Source
 import scala.util.{Failure, Success, Try}
 import scalaz.{-\/, \/, \/-}

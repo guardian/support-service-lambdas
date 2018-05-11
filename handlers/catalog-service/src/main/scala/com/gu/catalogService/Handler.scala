@@ -33,7 +33,7 @@ object Handler extends Logging {
   ): Unit = {
 
     val attempt = for {
-      config <- LoadConfig.default[StepsConfig](implicitly)(stage, s3Load(zuoraEnvironment.stageToLoad), false)
+      config <- LoadConfig.default[StepsConfig](implicitly)(zuoraEnvironment.stageToLoad, s3Load(zuoraEnvironment.stageToLoad))
         .withLogging("loaded config")
         .leftMap(_.error)
       zuoraRequests = ZuoraRestRequestMaker(response, config.stepsConfig.zuoraRestConfig)
