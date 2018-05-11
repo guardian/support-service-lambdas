@@ -52,7 +52,11 @@ Resources:
                             - logs:CreateLogStream
                             - logs:PutLogEvents
                             - lambda:InvokeFunction
-                            Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/catalog-service-${Stage}:log-stream:*"
+                            Resource:
+                            - !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/catalog-service-zuora-dev-${Stage}:log-stream:*
+                            - !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/catalog-service-zuora-uat-${Stage}:log-stream:*
+                            - !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/catalog-service-zuora-prod-${Stage}:log-stream:*
+
                 - PolicyName: ReadPrivateCredentials
                   PolicyDocument:
                       Statement:
