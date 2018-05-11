@@ -150,6 +150,7 @@ Resources:
 
     CatalogS3Bucket:
         Type: "AWS::S3::Bucket"
+        Condition: CreateProdOnlyResources
         Properties:
             AccessControl: Private
             BucketName: gu-zuora-catalog
