@@ -137,7 +137,7 @@ Resources:
         Type: "AWS::Events::Rule"
         Properties:
             Description: Triggers the DEV and UAT Catalog Service Lambdas on a schedule
-            Name: !Sub catalog-service-scheduler-${Stage}
+            Name: !Sub catalog-service-scheduler-zuora-dev-and-uat-${Stage}
             ScheduleExpression: rate(10 minutes) #https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html#RateExpressions
             Targets:
             - Arn: !GetAtt UATCatalogServiceLambda.Arn
@@ -197,7 +197,7 @@ Resources:
         Condition: CreateProdOnlyResources
         Properties:
             Description: Triggers the PROD Catalog Service Lambda on a schedule
-            Name: !Sub catalog-service-scheduler-${Stage}
+            Name: !Sub catalog-service-scheduler-zuora-prod-${Stage}
             ScheduleExpression: rate(10 minutes) #https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html#RateExpressions
             Targets:
             - Arn: !GetAtt PRODCatalogServiceLambda.Arn
