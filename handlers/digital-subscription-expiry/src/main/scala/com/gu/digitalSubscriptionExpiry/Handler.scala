@@ -2,7 +2,6 @@ package com.gu.digitalSubscriptionExpiry
 
 import java.io.{InputStream, OutputStream}
 import java.time.LocalDateTime
-
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.digitalSubscriptionExpiry.emergencyToken.{EmergencyTokens, EmergencyTokensConfig, GetTokenExpiry}
 import com.gu.digitalSubscriptionExpiry.zuora._
@@ -12,6 +11,7 @@ import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
 import com.gu.util.Logging
 import com.gu.util.config.{Config, LoadConfig}
+import com.gu.util.reader.Types._
 import okhttp3.{Request, Response}
 import play.api.libs.json.{Json, Reads}
 
@@ -48,6 +48,7 @@ object Handler extends Logging {
 
     ApiGatewayHandler[StepsConfig](lambdaIO)(for {
       config <- LoadConfig.default[StepsConfig](implicitly)(rawEffects.stage, rawEffects.s3Load(rawEffects.stage))
+        .toFailableOp("load config")
       configuredOp = operation(config)
 
     } yield (config, configuredOp))

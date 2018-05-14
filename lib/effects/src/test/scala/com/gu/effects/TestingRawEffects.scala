@@ -6,12 +6,12 @@ import com.amazonaws.AmazonServiceException
 import com.amazonaws.services.s3.model.{ObjectMetadata, PutObjectRequest, PutObjectResult}
 import com.gu.effects.TestingRawEffects._
 import com.gu.util.Logging
-import com.gu.util.config.Stage
+import com.gu.util.config.{Stage, ZuoraEnvironment}
 import okhttp3._
 import okhttp3.internal.Util.UTF_8
 import okio.Buffer
-
 import scala.util.{Failure, Success}
+import scalaz.\/-
 
 class TestingRawEffects(
   val isProd: Boolean = false,
@@ -23,6 +23,8 @@ class TestingRawEffects(
   var requests: List[Request] = Nil // !
 
   val stage = Stage(if (isProd) "PROD" else "DEV")
+
+  val zuoraEnvironment = ZuoraEnvironment(if (isProd) "PROD" else "DEV")
 
   def requestsAttempted: List[BasicRequest] = requests.map { request =>
     val buffer = new Buffer()
@@ -73,7 +75,7 @@ class TestingRawEffects(
     requests.map(req => (req.method, req.url.encodedPath) -> Option(req.body).map(body)).toMap
   }
 
-  val rawEffects = RawEffects(stage, _ => Success(codeConfig))
+  val rawEffects = RawEffects(stage, _ => \/-(codeConfig))
 
 }
 

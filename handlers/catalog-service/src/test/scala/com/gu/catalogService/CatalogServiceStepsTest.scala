@@ -2,9 +2,9 @@ package com.gu.catalogService
 
 import com.gu.catalogService.Handler.CatalogServiceException
 import com.gu.effects.TestingRawEffects
+import com.gu.util.config.ConfigReads.ConfigFailure
 import org.scalatest.{FlatSpec, Matchers}
-
-import scala.util.Failure
+import scalaz.-\/
 
 class CatalogServiceStepsTest extends FlatSpec with Matchers {
 
@@ -15,8 +15,9 @@ class CatalogServiceStepsTest extends FlatSpec with Matchers {
     a[CatalogServiceException] should be thrownBy {
       Handler.runWithEffects(
         successfulResponseEffects.response,
-        successfulResponseEffects.rawEffects.stage,
-        _ => Failure(new NullPointerException),
+        successfulResponseEffects.stage,
+        successfulResponseEffects.zuoraEnvironment,
+        _ => -\/(ConfigFailure("broken config load")),
         TestingRawEffects.successfulS3Upload
       )
     }
@@ -26,7 +27,8 @@ class CatalogServiceStepsTest extends FlatSpec with Matchers {
     a[CatalogServiceException] should be thrownBy {
       Handler.runWithEffects(
         failureResponseEffects.response,
-        failureResponseEffects.rawEffects.stage,
+        successfulResponseEffects.stage,
+        successfulResponseEffects.zuoraEnvironment,
         failureResponseEffects.rawEffects.s3Load,
         TestingRawEffects.successfulS3Upload
       )
@@ -37,7 +39,8 @@ class CatalogServiceStepsTest extends FlatSpec with Matchers {
     a[CatalogServiceException] should be thrownBy {
       Handler.runWithEffects(
         successfulResponseEffects.response,
-        successfulResponseEffects.rawEffects.stage,
+        successfulResponseEffects.stage,
+        successfulResponseEffects.zuoraEnvironment,
         successfulResponseEffects.rawEffects.s3Load,
         TestingRawEffects.failedS3Upload
       )
