@@ -96,13 +96,13 @@ Resources:
             ApiKeyRequired: true
             RestApiId: !Ref IdentityRetentionAPI
             ResourceId: !Ref IdentityRetentionProxyResource
-            HttpMethod: POST
+            HttpMethod: GET
             RequestParameters:
               method.request.querystring.apiClientId: true
               method.request.querystring.apiToken: true
             Integration:
               Type: AWS_PROXY
-              IntegrationHttpMethod: POST
+              IntegrationHttpMethod: GET
               Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${IdentityRetentionLambda.Arn}/invocations
         DependsOn:
         - IdentityRetentionAPI
