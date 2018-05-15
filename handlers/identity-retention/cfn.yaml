@@ -97,9 +97,6 @@ Resources:
             RestApiId: !Ref IdentityRetentionAPI
             ResourceId: !Ref IdentityRetentionProxyResource
             HttpMethod: GET
-            RequestParameters:
-              method.request.querystring.apiClientId: true
-              method.request.querystring.apiToken: true
             Integration:
               Type: AWS_PROXY
               IntegrationHttpMethod: GET
