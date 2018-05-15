@@ -119,6 +119,7 @@ lazy val root = all(project in file(".")).enablePlugins(RiffRaffArtifact).aggreg
   `identity-backfill`,
   `digital-subscription-expiry`,
   `catalog-service`,
+  `identity-retention`,
   effects,
   handler,
   restHttp,
@@ -132,6 +133,9 @@ lazy val `digital-subscription-expiry` = all(project in file("handlers/digital-s
   .enablePlugins(RiffRaffArtifact).dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `catalog-service` = all(project in file("handlers/catalog-service"))
+  .enablePlugins(RiffRaffArtifact).dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
+
+lazy val `identity-retention` = all(project in file("handlers/identity-retention"))
   .enablePlugins(RiffRaffArtifact).dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
 
 assemblyJarName := "zuora-auto-cancel.jar"
