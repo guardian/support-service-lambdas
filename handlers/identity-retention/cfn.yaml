@@ -1,0 +1,163 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Performs a reader revenue check to determine whether an identity account should be retained
+
+Parameters:
+    Stage:
+        Description: Stage name
+        Type: String
+        AllowedValues:
+            - PROD
+            - CODE
+        Default: CODE
+
+Conditions:
+  CreateProdMonitoring: !Equals [ !Ref Stage, PROD ]
+
+Mappings:
+    StageMap:
+        CODE:
+            ApiName: identity-retention-api-CODE
+        PROD:
+            ApiName: identity-retention-api-PROD
+
+Resources:
+    IdentityRetentionRole:
+        Type: AWS::IAM::Role
+        Properties:
+            AssumeRolePolicyDocument:
+                Statement:
+                    - Effect: Allow
+                      Principal:
+                          Service:
+                             - lambda.amazonaws.com
+                      Action:
+                          - sts:AssumeRole
+            Path: /
+            Policies:
+                - PolicyName: LambdaPolicy
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                            - logs:CreateLogGroup
+                            - logs:CreateLogStream
+                            - logs:PutLogEvents
+                            - lambda:InvokeFunction
+                            Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/identity-retention-${Stage}:log-stream:*"
+                - PolicyName: ReadPrivateCredentials
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action: s3:GetObject
+                            Resource: !Sub arn:aws:s3:::gu-reader-revenue-private/membership/payment-failure-lambdas/${Stage}/*
+    IdentityRetentionLambda:
+        Type: AWS::Lambda::Function
+        Properties:
+            Description: Check whether an identity account is attached to an active billing account in Zuora
+            FunctionName:
+                !Sub identity-retention-${Stage}
+            Code:
+                S3Bucket: zuora-auto-cancel-dist
+                S3Key: !Sub membership/${Stage}/identity-retention/identity-retention.jar
+            Handler: com.gu.identityRetention.Handler::apply
+            Environment:
+                Variables:
+                  Stage: !Ref Stage
+            Role:
+                Fn::GetAtt:
+                - "IdentityRetentionRole"
+                - Arn
+            MemorySize: 1536
+            Runtime: java8
+            Timeout: 300
+        DependsOn:
+        - "IdentityRetentionRole"
+
+    IdentityRetentionAPIPermission:
+        Type: AWS::Lambda::Permission
+        Properties:
+            Action: lambda:invokeFunction
+            FunctionName: !Sub identity-retention-${Stage}
+            Principal: apigateway.amazonaws.com
+        DependsOn: IdentityRetentionLambda
+
+    IdentityRetentionProxyResource:
+        Type: AWS::ApiGateway::Resource
+        Properties:
+            RestApiId: !Ref IdentityRetentionAPI
+            ParentId: !GetAtt [IdentityRetentionAPI, RootResourceId]
+            PathPart: identity-retention
+        DependsOn: IdentityRetentionAPI
+
+    IdentityRetentionMethod:
+        Type: AWS::ApiGateway::Method
+        Properties:
+            AuthorizationType: NONE
+            ApiKeyRequired: true
+            RestApiId: !Ref IdentityRetentionAPI
+            ResourceId: !Ref IdentityRetentionProxyResource
+            HttpMethod: GET
+            Integration:
+              Type: AWS_PROXY
+              IntegrationHttpMethod: POST
+              Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${IdentityRetentionLambda.Arn}/invocations
+        DependsOn:
+        - IdentityRetentionAPI
+        - IdentityRetentionLambda
+        - IdentityRetentionProxyResource
+
+    IdentityRetentionAPI:
+        Type: "AWS::ApiGateway::RestApi"
+        Properties:
+            Description: Identity call this API as part of a clean-up process for dormant identity accounts
+            Name: !FindInMap [StageMap, !Ref Stage, ApiName]
+
+    IdentityRetentionAPIStage:
+        Type: AWS::ApiGateway::Stage
+        Properties:
+            Description: Stage for identity-retention-api
+            RestApiId: !Ref IdentityRetentionAPI
+            DeploymentId: !Ref IdentityRetentionAPIDeployment
+            StageName: !Sub ${Stage}
+        DependsOn: IdentityRetentionMethod
+
+    IdentityRetentionAPIDeployment:
+        Type: AWS::ApiGateway::Deployment
+        Properties:
+            Description: Deploys identity-retention-api into an environment/stage
+            RestApiId: !Ref IdentityRetentionAPI
+        DependsOn: IdentityRetentionMethod
+
+    IdentityRetentionAPIKey:
+      Type: AWS::ApiGateway::ApiKey
+      Properties:
+        Description: Key required to call identity retention API
+        Enabled: true
+        Name: !Sub identity-retention-api-key-${Stage}
+        StageKeys:
+          - RestApiId: !Ref IdentityRetentionAPI
+            StageName: !Sub ${Stage}
+      DependsOn:
+      - IdentityRetentionAPI
+      - IdentityRetentionAPIStage
+
+    IdentityRetentionUsagePlan:
+      Type: "AWS::ApiGateway::UsagePlan"
+      Properties:
+        UsagePlanName: !Sub identity-retention-api-usage-plan-${Stage}
+        ApiStages:
+        - ApiId: !Ref IdentityRetentionAPI
+          Stage: !Ref IdentityRetentionAPIStage
+      DependsOn:
+      - IdentityRetentionAPI
+      - IdentityRetentionAPIStage
+
+    IdentityRetentionUsagePlanKey:
+      Type: "AWS::ApiGateway::UsagePlanKey"
+      Properties:
+        KeyId: !Ref IdentityRetentionAPIKey
+        KeyType: API_KEY
+        UsagePlanId: !Ref IdentityRetentionUsagePlan
+      DependsOn:
+      - IdentityRetentionAPIKey
+      - IdentityRetentionUsagePlan

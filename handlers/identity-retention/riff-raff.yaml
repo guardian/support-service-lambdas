@@ -1,0 +1,21 @@
+stacks:
+- membership
+regions:
+- eu-west-1
+deployments:
+
+  cfn:
+    type: cloud-formation
+    app: identity-retention
+    parameters:
+      templatePath: cfn.yaml
+
+  identity-retention:
+    type: aws-lambda
+    parameters:
+      fileName: identity-retention.jar
+      bucket: zuora-auto-cancel-dist
+      prefixStack: false
+      functionNames:
+      - identity-retention-
+    dependencies: [cfn]
