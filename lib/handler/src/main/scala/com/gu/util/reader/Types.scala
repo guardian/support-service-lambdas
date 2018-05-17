@@ -15,12 +15,12 @@ object Types extends Logging {
   // handy classes for converting things
   implicit class JsResultOps[A](jsResult: JsResult[A]) {
 
-    def toFailableOp: FailableOp[A] = {
+    def toFailableOp(response: ApiResponse = badRequest): FailableOp[A] = {
       jsResult match {
-        case JsSuccess(apiGatewayCallout, _) => \/-(apiGatewayCallout)
+        case JsSuccess(value, _) => \/-(value)
         case JsError(error) => {
-          logger.error(s"Error when parsing JSON from API Gateway: $error")
-          -\/(badRequest)
+          logger.error(s"Error when deserializing JSON from API Gateway: $error")
+          -\/(response)
         }
       }
     }

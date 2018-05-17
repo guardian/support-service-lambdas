@@ -34,8 +34,7 @@ object IdentityBackfillSteps extends Logging {
   )(apiGatewayRequest: ApiGatewayRequest): FailableOp[Unit] = {
 
     for {
-      request <- Json.parse(apiGatewayRequest.body).validate[IdentityBackfillRequest]
-        .toFailableOp.withLogging("identity id backfill request")
+      request <- apiGatewayRequest.parseBody[IdentityBackfillRequest]()
       preReq <- preReqCheck(fromRequest(request))
       _ <- dryRunAbort(request).withLogging("dryrun aborter")
       _ <- updateZuoraIdentityId(preReq.zuoraAccountId, preReq.requiredIdentityId).nonSuccessToError

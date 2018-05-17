@@ -28,7 +28,7 @@ class CODEPRODHealthCheck extends FlatSpec with Matchers {
   private def healthcheckForEnv(env: HealthChecks => List[HealthCheckConfig]) = {
     val healthchecks = for {
       jsonString <- S3ConfigLoad.load(Stage("DEV"), "payment-failure-healthcheck.private.json").toFailableOp("read local config")
-      healthcheck <- Json.parse(jsonString).validate[HealthChecks](HealthChecks.reads).toFailableOp
+      healthcheck <- Json.parse(jsonString).validate[HealthChecks](HealthChecks.reads).toFailableOp()
 
     } yield env(healthcheck)
 

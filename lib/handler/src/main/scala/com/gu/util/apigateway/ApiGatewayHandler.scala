@@ -23,7 +23,7 @@ object ApiGatewayHandler extends Logging {
       jsonString <- inputFromApiGateway(inputStream)
         .toFailableOp("get json data from API gateway").withLogging("payload from api gateway")
       apiGatewayRequest <- Json.parse(jsonString).validate[ApiGatewayRequest]
-        .toFailableOp.withLogging("parsed api gateway object")
+        .toFailableOp().withLogging("parsed api gateway object")
 
     } yield apiGatewayRequest
   }

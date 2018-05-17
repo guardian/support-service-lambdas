@@ -1,7 +1,12 @@
 package com.gu.util.apigateway
 
+import com.gu.util.apigateway.ResponseModels.ApiResponse
+import com.gu.util.reader.Types._
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
+
+import scala.util.{Failure, Success, Try}
+import scalaz.-\/
 
 case class RequestAuth(apiToken: String)
 
@@ -28,13 +33,31 @@ case class URLParams(
 /* Using query strings because for Basic Auth to work Zuora requires us to return a WWW-Authenticate
   header, and API Gateway does not support this header (returns x-amzn-Remapped-WWW-Authenticate instead)
   */
-case class ApiGatewayRequest(queryStringParameters: Option[URLParams], body: String, headers: Option[Map[String, String]]) {
+case class ApiGatewayRequest(queryStringParameters: Option[URLParams], body: Option[String], headers: Option[Map[String, String]]) {
+
   def onlyCancelDirectDebit: Boolean = queryStringParameters.exists(_.onlyCancelDirectDebit)
   def requestAuth: Option[RequestAuth] =
     for {
       queryStringParameters <- queryStringParameters
       apiToken <- queryStringParameters.apiToken
     } yield RequestAuth(apiToken)
+
+  def parseBody[A](failureResponse: ApiResponse = ApiGatewayResponse.badRequest)(implicit reads: Reads[A]): FailableOp[A] = {
+    body match {
+      case Some(requestBody) =>
+        Try(Json.parse(requestBody)) match {
+          case Success(js) =>
+            Json.fromJson[A](js).toFailableOp(failureResponse)
+          case Failure(ex) =>
+            logger.warn(s"Tried to parse JSON but it was invalid")
+            -\/(failureResponse)
+        }
+      case None =>
+        logger.warn(s"Attempted to access response body but there was none")
+        None.toFailableOp(ApiGatewayResponse.internalServerError("attempted to parse body when handling a GET request"))
+    }
+  }
+
 }
 
 object URLParams {

@@ -360,7 +360,7 @@ class SourceUpdatedStepsApplyTest extends FlatSpec with Matchers {
       "Stripe-Signature" -> "t=1513759648,v1=longAlphanumericString"
     )
 
-    val someBody =
+    val body =
       """
         |{
         |  "id": "evt_lettersAndNumbers",
@@ -390,7 +390,7 @@ class SourceUpdatedStepsApplyTest extends FlatSpec with Matchers {
         |}
       """.stripMargin
 
-    val testGatewayRequest = ApiGatewayRequest(None, someBody.toString, Some(badHeaders))
+    val testGatewayRequest = ApiGatewayRequest(None, Some(body.toString), Some(badHeaders))
 
     val actual = sourceUpdatedSteps.steps(testGatewayRequest)
 

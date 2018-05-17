@@ -9,7 +9,6 @@ import com.gu.util.apigateway.ApiGatewayHandler.Operation
 import com.gu.util.apigateway.ApiGatewayRequest
 import com.gu.util.exacttarget.EmailRequest
 import com.gu.util.reader.Types._
-import play.api.libs.json.Json
 import scalaz.\/-
 
 object AutoCancelSteps extends Logging {
@@ -21,7 +20,7 @@ object AutoCancelSteps extends Logging {
     sendEmailRegardingAccount: (String, PaymentFailureInformation => EmailRequest) => FailableOp[Unit]
   ): Operation = Operation.noHealthcheck({ apiGatewayRequest: ApiGatewayRequest =>
     for {
-      autoCancelCallout <- Json.fromJson[AutoCancelCallout](Json.parse(apiGatewayRequest.body)).toFailableOp.withLogging("zuora callout")
+      autoCancelCallout <- apiGatewayRequest.parseBody[AutoCancelCallout]()
       _ <- AutoCancelInputFilter(autoCancelCallout, onlyCancelDirectDebit = apiGatewayRequest.onlyCancelDirectDebit)
       acRequest <- autoCancelFilter2(autoCancelCallout).withLogging(s"auto-cancellation filter for ${autoCancelCallout.accountId}")
       _ <- autoCancel(acRequest).withLogging(s"auto-cancellation for ${autoCancelCallout.accountId}")
