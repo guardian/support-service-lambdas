@@ -26,8 +26,7 @@ object SourceUpdatedSteps extends Logging {
 
   def apply(zuoraRequests: Requests, stripeDeps: StripeDeps): Operation = Operation.noHealthcheck({ apiGatewayRequest: ApiGatewayRequest =>
     for {
-      _ <- if (stripeDeps.config.signatureChecking) bodyIfSignatureVerified(stripeDeps, apiGatewayRequest) else \/-(())
-      sourceUpdatedCallout <- apiGatewayRequest.parseBody[SourceUpdatedCallout]()
+      sourceUpdatedCallout <- if (stripeDeps.config.signatureChecking) bodyIfSignatureVerified(stripeDeps, apiGatewayRequest) else apiGatewayRequest.parseBody[SourceUpdatedCallout]()
       _ = logger.info(s"from: ${apiGatewayRequest.queryStringParameters.map(_.stripeAccount)}")
       _ <- (for {
         defaultPaymentMethod <- ListT(getPaymentMethodsToUpdate(zuoraRequests)(sourceUpdatedCallout.data.`object`.customer, sourceUpdatedCallout.data.`object`.id))
