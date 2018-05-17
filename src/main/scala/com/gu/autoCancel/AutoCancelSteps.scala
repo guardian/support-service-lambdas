@@ -20,7 +20,7 @@ object AutoCancelSteps extends Logging {
     sendEmailRegardingAccount: (String, PaymentFailureInformation => EmailRequest) => FailableOp[Unit]
   ): Operation = Operation.noHealthcheck({ apiGatewayRequest: ApiGatewayRequest =>
     for {
-      autoCancelCallout <- apiGatewayRequest.parseBody[AutoCancelCallout]()
+      autoCancelCallout <- apiGatewayRequest.bodyAsCaseClass[AutoCancelCallout]()
       _ <- AutoCancelInputFilter(autoCancelCallout, onlyCancelDirectDebit = apiGatewayRequest.onlyCancelDirectDebit)
       acRequest <- autoCancelFilter2(autoCancelCallout).withLogging(s"auto-cancellation filter for ${autoCancelCallout.accountId}")
       _ <- autoCancel(acRequest).withLogging(s"auto-cancellation for ${autoCancelCallout.accountId}")

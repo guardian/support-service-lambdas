@@ -42,7 +42,7 @@ case class ApiGatewayRequest(queryStringParameters: Option[URLParams], body: Opt
       apiToken <- queryStringParameters.apiToken
     } yield RequestAuth(apiToken)
 
-  def parseBody[A](failureResponse: ApiResponse = ApiGatewayResponse.badRequest)(implicit reads: Reads[A]): FailableOp[A] = {
+  def bodyAsCaseClass[A](failureResponse: ApiResponse = ApiGatewayResponse.badRequest)(implicit reads: Reads[A]): FailableOp[A] = {
     body match {
       case Some(requestBody) =>
         Try(Json.parse(requestBody)) match {

@@ -23,7 +23,7 @@ object DigitalSubscriptionExpirySteps extends Logging {
 
     def steps(apiGatewayRequest: ApiGatewayRequest): FailableOp[Unit] = {
       for {
-        expiryRequest <- apiGatewayRequest.parseBody[DigitalSubscriptionExpiryRequest](CommonApiResponses.badRequest)
+        expiryRequest <- apiGatewayRequest.bodyAsCaseClass[DigitalSubscriptionExpiryRequest](CommonApiResponses.badRequest)
         _ <- getEmergencyTokenExpiry(expiryRequest.subscriberId)
         subscriptionId = SubscriptionId(expiryRequest.subscriberId.trim.dropWhile(_ == '0'))
         subscriptionResult <- getSubscription(subscriptionId)
