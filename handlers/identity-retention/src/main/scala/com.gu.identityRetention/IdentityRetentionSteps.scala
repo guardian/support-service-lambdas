@@ -11,8 +11,10 @@ object IdentityRetentionSteps extends Logging {
 
   def apply(zuoraQuerier: ZuoraQuerier): Operation = Operation.noHealthcheck({
     apiGatewayRequest: ApiGatewayRequest =>
-      extractIdentityId(apiGatewayRequest.queryStringParameters)
-      ActiveZuoraCheck.apply("123", zuoraQuerier)
+      for {
+        identityId <- extractIdentityId(apiGatewayRequest.queryStringParameters)
+        _ <- ActiveZuoraCheck.apply(identityId, zuoraQuerier)
+      } yield ()
   }, false)
 
   def extractIdentityId(queryStringParams: Option[URLParams]): FailableOp[String] = {
