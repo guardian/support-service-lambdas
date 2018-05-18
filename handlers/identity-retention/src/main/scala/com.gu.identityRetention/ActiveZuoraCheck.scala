@@ -25,7 +25,7 @@ object ActiveZuoraCheck {
       case \/-(result) if result.size == 0 =>
         -\/(ApiGatewayResponse.notFound("Identity user has no linked Zuora accounts"))
       case -\/(error) =>
-        -\/(ApiGatewayResponse.internalServerError("Failed to retrieve the identity user's from Zuora"))
+        -\/(ApiGatewayResponse.internalServerError("Failed to retrieve the identity user's details from Zuora"))
     }
 
   }
