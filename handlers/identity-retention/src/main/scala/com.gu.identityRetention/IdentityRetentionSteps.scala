@@ -2,17 +2,28 @@ package com.gu.identityRetention
 
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.Operation
-import com.gu.util.apigateway.ApiGatewayRequest
-import com.gu.util.reader.Types._
-import scala.util.Success
+import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse, URLParams}
+import com.gu.util.reader.Types.FailableOp
+import com.gu.util.zuora.ZuoraQuery.ZuoraQuerier
+import scalaz.{-\/, \/-}
 
 object IdentityRetentionSteps extends Logging {
 
-  def apply: Operation = Operation.noHealthcheck(steps, false)
+  def apply(zuoraQuerier: ZuoraQuerier): Operation = Operation.noHealthcheck({
+    apiGatewayRequest: ApiGatewayRequest =>
+      extractIdentityId(apiGatewayRequest.queryStringParameters)
+      ActiveZuoraCheck.apply("123", zuoraQuerier)
+  }, false)
 
-  def steps(apiGatewayRequest: ApiGatewayRequest): FailableOp[Unit] = {
-    logger.info("Running fake identity retention steps")
-    Success(()).toFailableOp("always succeeds")
+  def extractIdentityId(queryStringParams: Option[URLParams]): FailableOp[String] = {
+    val identityId = for {
+      queryStrings <- queryStringParams
+      id <- queryStrings.identityId
+    } yield id
+    identityId match {
+      case Some(user) => \/-(user)
+      case None => -\/(ApiGatewayResponse.badRequest)
+    }
   }
 
 }

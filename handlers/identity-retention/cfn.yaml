@@ -86,7 +86,7 @@ Resources:
         Properties:
             RestApiId: !Ref IdentityRetentionAPI
             ParentId: !GetAtt [IdentityRetentionAPI, RootResourceId]
-            PathPart: identity-retention
+            PathPart: user
         DependsOn: IdentityRetentionAPI
 
     IdentityRetentionMethod:
@@ -97,6 +97,8 @@ Resources:
             RestApiId: !Ref IdentityRetentionAPI
             ResourceId: !Ref IdentityRetentionProxyResource
             HttpMethod: GET
+            RequestParameters:
+              method.request.querystring.identityId: true
             Integration:
               Type: AWS_PROXY
               IntegrationHttpMethod: POST
