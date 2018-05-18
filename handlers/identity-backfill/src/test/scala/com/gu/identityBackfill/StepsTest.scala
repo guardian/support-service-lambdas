@@ -44,7 +44,7 @@ class StepsTest extends FlatSpec with Matchers {
     import stepsWithMocks._
 
     val result =
-      getSteps()(ApiGatewayRequest(None, identityBackfillRequest(false), None))
+      getSteps()(ApiGatewayRequest(None, Some(identityBackfillRequest(false)), None))
 
     val expectedResult = \/-(())
     result should be(expectedResult)
@@ -59,7 +59,7 @@ class StepsTest extends FlatSpec with Matchers {
     import stepsWithMocks._
 
     val result =
-      getSteps()(ApiGatewayRequest(None, identityBackfillRequest(true), None))
+      getSteps()(ApiGatewayRequest(None, Some(identityBackfillRequest(true)), None))
 
     val expectedResult = -\/(ApiGatewayResponse.noActionRequired("DRY RUN requested! skipping to the end"))
     result should be(expectedResult)
@@ -74,7 +74,7 @@ class StepsTest extends FlatSpec with Matchers {
     import stepsWithMocks._
 
     val result =
-      getSteps(false)(ApiGatewayRequest(None, identityBackfillRequest(false), None))
+      getSteps(false)(ApiGatewayRequest(None, Some(identityBackfillRequest(false)), None))
 
     val expectedResult = -\/(ApiGatewayResponse.notFound("dummy"))
     result should be(expectedResult)

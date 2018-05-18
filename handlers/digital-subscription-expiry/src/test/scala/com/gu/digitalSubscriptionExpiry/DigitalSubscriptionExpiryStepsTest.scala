@@ -87,7 +87,7 @@ class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
 
   """.stripMargin
 
-    val actual = digitalSubscriptionExpirySteps.steps(ApiGatewayRequest(None, request, None))
+    val actual = digitalSubscriptionExpirySteps.steps(ApiGatewayRequest(None, Some(request), None))
 
     actual.shouldBe(successfulResponseFromZuora)
   }
@@ -100,7 +100,7 @@ class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
 
   """.stripMargin
 
-    val actual = digitalSubscriptionExpirySteps.steps(ApiGatewayRequest(None, request, None))
+    val actual = digitalSubscriptionExpirySteps.steps(ApiGatewayRequest(None, Some(request), None))
 
     verifyResponse(
       actualResponse = actual,
@@ -118,7 +118,7 @@ class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
 
   """.stripMargin
 
-    val actual = digitalSubscriptionExpirySteps.steps(ApiGatewayRequest(None, request, None))
+    val actual = digitalSubscriptionExpirySteps.steps(ApiGatewayRequest(None, Some(request), None))
 
     val expectedResponseBody =
       """{
@@ -148,7 +148,7 @@ class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
 
   """.stripMargin
 
-    val actual = digitalSubscriptionExpirySteps.steps(ApiGatewayRequest(None, request, None))
+    val actual = digitalSubscriptionExpirySteps.steps(ApiGatewayRequest(None, Some(request), None))
 
     verifyResponse(
       actualResponse = actual,
@@ -161,7 +161,7 @@ class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
 
     val request = "{}"
 
-    val actual = digitalSubscriptionExpirySteps.steps(ApiGatewayRequest(None, request, None))
+    val actual = digitalSubscriptionExpirySteps.steps(ApiGatewayRequest(None, Some(request), None))
 
     verifyResponse(
       actualResponse = actual,
@@ -179,7 +179,7 @@ class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
 
   """.stripMargin
 
-    val actual = digitalSubscriptionExpirySteps.steps(ApiGatewayRequest(None, request, None))
+    val actual = digitalSubscriptionExpirySteps.steps(ApiGatewayRequest(None, Some(request), None))
 
     val expectedResponseBody =
       """{

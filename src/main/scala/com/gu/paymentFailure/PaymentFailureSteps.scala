@@ -28,7 +28,7 @@ object PaymentFailureSteps extends Logging {
     trustedApiConfig: TrustedApiConfig
   ): Operation = Operation.noHealthcheck({ apiGatewayRequest: ApiGatewayRequest =>
     for {
-      paymentFailureCallout <- Json.fromJson[PaymentFailureCallout](Json.parse(apiGatewayRequest.body)).toFailableOp
+      paymentFailureCallout <- apiGatewayRequest.bodyAsCaseClass[PaymentFailureCallout]()
       _ = logger.info(s"received ${loggableData(paymentFailureCallout)}")
       _ <- validateTenantCallout(trustedApiConfig)(paymentFailureCallout.tenantId)
       request <- makeRequest(etSendIDs, paymentFailureCallout)

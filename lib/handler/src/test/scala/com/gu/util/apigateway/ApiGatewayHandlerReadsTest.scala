@@ -63,7 +63,7 @@ class ApiGatewayHandlerReadsTest extends FlatSpec {
     val expected: JsResult[ApiGatewayRequest] = JsSuccess(
       ApiGatewayRequest(
         queryStringParameters = None,
-        body = eventBodySimple,
+        body = Some(eventBodySimple),
         headers = Some(eventHeaders)
       )
     )
