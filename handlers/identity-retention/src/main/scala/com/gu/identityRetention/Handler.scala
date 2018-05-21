@@ -1,7 +1,6 @@
 package com.gu.identityRetention
 
 import java.io.{InputStream, OutputStream}
-
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.RawEffects
 import com.gu.util.apigateway.ApiGatewayHandler
@@ -12,7 +11,6 @@ import com.gu.util.reader.Types._
 import com.gu.util.zuora.{ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
 import okhttp3.{Request, Response}
 import play.api.libs.json.{Json, Reads}
-
 import scalaz.\/
 
 object Handler {
