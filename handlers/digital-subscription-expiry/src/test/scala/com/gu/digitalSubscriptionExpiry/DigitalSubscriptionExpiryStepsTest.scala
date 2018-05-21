@@ -1,9 +1,9 @@
 package com.gu.digitalSubscriptionExpiry
 
 import java.time.LocalDate
-
 import com.gu.cas.SevenDay
-import com.gu.digitalSubscriptionExpiry.common.CommonApiResponses._
+import com.gu.digitalSubscriptionExpiry.responses.DigitalSubscriptionApiResponses._
+import com.gu.digitalSubscriptionExpiry.responses.{Expiry, ExpiryType, SuccessResponse}
 import com.gu.digitalSubscriptionExpiry.zuora.GetAccountSummary.{AccountId, AccountSummaryResult}
 import com.gu.digitalSubscriptionExpiry.zuora.GetSubscription.{SubscriptionId, SubscriptionName, SubscriptionResult}
 import com.gu.util.apigateway.ResponseModels.{ApiResponse, Headers}

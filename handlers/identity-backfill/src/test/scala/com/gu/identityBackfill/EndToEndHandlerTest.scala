@@ -21,9 +21,13 @@ class EndToEndHandlerTest extends FlatSpec with Matchers {
     val (responseString, requests): (String, List[TestingRawEffects.BasicRequest]) = getResultAndRequests(identityBackfillRequest(true))
 
     val expectedResponse =
-      s"""
-         |{"statusCode":"200","headers":{"Content-Type":"application/json"},"body":"Processing is not required: DRY RUN requested! skipping to the end"}
-         |""".stripMargin
+      """{
+        |"statusCode":"200",
+        |"headers":{"Content-Type":"application/json"},
+        |"body":"{\n  \"message\" : \"Processing is not required: DRY RUN requested! skipping to the end\"\n}"
+        |}
+        |""".stripMargin
+
     responseString jsonMatches expectedResponse
     requests should be(List(
       BasicRequest("GET", "/services/data/v20.0/sobjects/Contact/00110000011AABBAAB", ""),
@@ -40,9 +44,13 @@ class EndToEndHandlerTest extends FlatSpec with Matchers {
     val (responseString, requests): (String, List[TestingRawEffects.BasicRequest]) = getResultAndRequests(identityBackfillRequest(false))
 
     val expectedResponse =
-      s"""
-         |{"statusCode":"200","headers":{"Content-Type":"application/json"},"body":"Success"}
-         |""".stripMargin
+      """{
+        |"statusCode":"200",
+        |"headers":{"Content-Type":"application/json"},
+        |"body":"{\n  \"message\" : \"Success\"\n}"
+        |}
+        |""".stripMargin
+
     responseString jsonMatches expectedResponse
     requests should be(List(
       BasicRequest("PATCH", "/services/data/v20.0/sobjects/Contact/00110000011AABBAAB", """{"IdentityID__c":"1234"}"""),

@@ -114,8 +114,7 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
     //verify
     val responseString = new String(os.toByteArray(), "UTF-8")
 
-    val expectedResponse = s"""{"statusCode":"500","headers":{"Content-Type":"application/json"},"body":"Failed to process event due to the following error: Could not retrieve additional data for account $accountId"} """
-    responseString jsonMatches expectedResponse
+    responseString jsonMatches internalServerErrorResponse
   }
 
   def apiGatewayHandler: (Operation, LambdaIO) => Unit = {
@@ -164,8 +163,7 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
 
     val responseString = new String(os.toByteArray(), "UTF-8")
 
-    val expectedResponse = s"""{"statusCode":"500","headers":{"Content-Type":"application/json"},"body":"email not sent for account $accountId"} """
-    responseString jsonMatches expectedResponse
+    responseString jsonMatches internalServerErrorResponse
   }
 
 }

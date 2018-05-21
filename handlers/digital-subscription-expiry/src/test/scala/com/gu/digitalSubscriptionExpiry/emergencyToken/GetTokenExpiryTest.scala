@@ -1,9 +1,8 @@
 package com.gu.digitalSubscriptionExpiry.emergencyToken
 
 import java.time.LocalDate
-
 import com.gu.cas.{PrefixedTokens, SevenDay}
-import com.gu.digitalSubscriptionExpiry.{Expiry, ExpiryType, SuccessResponse}
+import com.gu.digitalSubscriptionExpiry.responses.{Expiry, ExpiryType, SuccessResponse}
 import com.gu.util.apigateway.ResponseModels.{ApiResponse, Headers}
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json

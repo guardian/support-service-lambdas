@@ -5,14 +5,13 @@ import com.gu.util.apigateway.Auth.validTenant
 import com.gu.util.config.ETConfig.ETSendIds
 import com.gu.util._
 import com.gu.util.apigateway.ApiGatewayHandler.Operation
-import com.gu.util.apigateway.ApiGatewayResponse.unauthorized
+import com.gu.util.apigateway.ApiGatewayResponse.{unauthorized, internalServerError}
 import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.config.TrustedApiConfig
 import com.gu.util.exacttarget.EmailRequest
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.RestRequestMaker.ClientFailableOp
 import com.gu.util.zuora.ZuoraGetInvoiceTransactions.InvoiceTransactionSummary
-import play.api.libs.json.Json
 import scalaz.syntax.std.option._
 import scalaz.{-\/, \/-}
 
@@ -57,7 +56,7 @@ object ZuoraEmailSteps {
       invoiceTransactionSummary <- getInvoiceTransactions(accountId).leftMap(ZuoraToApiGateway.fromClientFail)
       paymentInformation <- GetPaymentData(accountId)(invoiceTransactionSummary)
       message = toMessage(paymentInformation)
-      _ <- sendEmail(message).leftMap(resp => resp.copy(body = s"email not sent for account ${accountId}"))
+      _ <- sendEmail(message).leftMap(_ => internalServerError(s"email not sent for account ${accountId}"))
     } yield ()
   }
 

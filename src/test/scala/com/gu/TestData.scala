@@ -39,8 +39,25 @@ object TestData extends Matchers {
     stripeConfig = StripeConfig(customerSourceUpdatedWebhook = StripeWebhook(ukStripeSecretKey = StripeSecretKey("abc"), auStripeSecretKey = StripeSecretKey("def")), true)
   )
 
-  val missingCredentialsResponse = """{"statusCode":"401","headers":{"Content-Type":"application/json"},"body":"Credentials are missing or invalid"}"""
-  val successfulResponse = """{"statusCode":"200","headers":{"Content-Type":"application/json"},"body":"Success"}"""
+  val missingCredentialsResponse = """{
+                                     |"statusCode":"401",
+                                     |"headers":{"Content-Type":"application/json"},
+                                     |"body":"{\n  \"message\" : \"Credentials are missing or invalid\"\n}"
+                                     |}
+                                     |""".stripMargin
+  val successfulResponse = """{
+                             |"statusCode":"200",
+                             |"headers":{"Content-Type":"application/json"},
+                             |"body":"{\n  \"message\" : \"Success\"\n}"
+                             |}
+                             |""".stripMargin
+
+  val internalServerErrorResponse = """{
+                                      |"statusCode":"500",
+                                      |"headers":{"Content-Type":"application/json"},
+                                      |"body":"{\n  \"message\" : \"Internal server error\"\n}"
+                                      |}
+                                      |""".stripMargin
 
   implicit class JsonMatcher(private val actual: String) {
     def jsonMatches(expected: String) = {
