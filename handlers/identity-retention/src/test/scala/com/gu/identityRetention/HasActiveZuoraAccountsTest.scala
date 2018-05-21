@@ -2,14 +2,14 @@ package com.gu.identityRetention
 
 import com.gu.effects.TestingRawEffects
 import com.gu.effects.TestingRawEffects.{HTTPResponse, POSTRequest}
-import com.gu.identityRetention.ActiveZuoraCheck.IdentityQueryResponse
+import com.gu.identityRetention.HasActiveZuoraAccounts.IdentityQueryResponse
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.zuora.{ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
 import com.gu.util.zuora.ZuoraQuery.QueryResult
 import org.scalatest.{FlatSpec, Matchers}
 import scalaz.{-\/, \/-}
 
-class ActiveZuoraCheckTest extends FlatSpec with Matchers {
+class HasActiveZuoraAccountsTest extends FlatSpec with Matchers {
 
   val noZuoraAccounts = QueryResult[IdentityQueryResponse](Nil, 0, true, None)
 
@@ -19,7 +19,7 @@ class ActiveZuoraCheckTest extends FlatSpec with Matchers {
     val effects = new TestingRawEffects(postResponses = ZuoraQueryMocks.postResponse(Nil))
     val requestMaker = ZuoraRestRequestMaker(effects.response, ZuoraRestConfig("https://zuora", "user", "pass"))
     val zuoraQuerier = ZuoraQuery(requestMaker)
-    val zuoraCheck = ActiveZuoraCheck("321", zuoraQuerier)
+    val zuoraCheck = HasActiveZuoraAccounts("321", zuoraQuerier)
     val expected = -\/(ApiGatewayResponse.notFound("Identity user has no linked Zuora accounts"))
     zuoraCheck should be(expected)
   }
@@ -28,8 +28,8 @@ class ActiveZuoraCheckTest extends FlatSpec with Matchers {
     val effects = new TestingRawEffects(postResponses = ZuoraQueryMocks.failedPOST)
     val requestMaker = ZuoraRestRequestMaker(effects.response, ZuoraRestConfig("https://zuora", "user", "pass"))
     val zuoraQuerier = ZuoraQuery(requestMaker)
-    val zuoraCheck = ActiveZuoraCheck("321", zuoraQuerier)
-    val expected = -\/(ApiGatewayResponse.internalServerError("Failed to retrieve the identity user's from Zuora"))
+    val zuoraCheck = HasActiveZuoraAccounts("321", zuoraQuerier)
+    val expected = -\/(ApiGatewayResponse.internalServerError("Failed to retrieve the identity user's details from Zuora"))
     zuoraCheck should be(expected)
   }
 
@@ -37,7 +37,7 @@ class ActiveZuoraCheckTest extends FlatSpec with Matchers {
     val effects = new TestingRawEffects(postResponses = ZuoraQueryMocks.postResponse(List(ZuoraQueryMocks.activeResult)))
     val requestMaker = ZuoraRestRequestMaker(effects.response, ZuoraRestConfig("https://zuora", "user", "pass"))
     val zuoraQuerier = ZuoraQuery(requestMaker)
-    val zuoraCheck = ActiveZuoraCheck("321", zuoraQuerier)
+    val zuoraCheck = HasActiveZuoraAccounts("321", zuoraQuerier)
     val expected = \/-(())
     zuoraCheck should be(expected)
   }

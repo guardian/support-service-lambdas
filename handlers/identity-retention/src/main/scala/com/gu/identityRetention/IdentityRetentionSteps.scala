@@ -5,6 +5,7 @@ import com.gu.util.apigateway.ApiGatewayHandler.Operation
 import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse, URLParams}
 import com.gu.util.reader.Types.FailableOp
 import com.gu.util.zuora.ZuoraQuery.ZuoraQuerier
+
 import scalaz.{-\/, \/-}
 
 object IdentityRetentionSteps extends Logging {
@@ -13,7 +14,7 @@ object IdentityRetentionSteps extends Logging {
     apiGatewayRequest: ApiGatewayRequest =>
       for {
         identityId <- extractIdentityId(apiGatewayRequest.queryStringParameters)
-        _ <- ActiveZuoraCheck.apply(identityId, zuoraQuerier)
+        _ <- HasActiveZuoraAccounts(identityId, zuoraQuerier)
       } yield ()
   }, false)
 

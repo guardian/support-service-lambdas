@@ -5,9 +5,10 @@ import com.gu.util.reader.Types.FailableOp
 import com.gu.util.zuora.ZuoraQuery
 import com.gu.util.zuora.ZuoraQuery.ZuoraQuerier
 import play.api.libs.json.Json
+
 import scalaz.{-\/, \/-}
 
-object ActiveZuoraCheck {
+object HasActiveZuoraAccounts {
 
   case class IdentityQueryResponse(Id: String, Status: String)
   implicit val reads = Json.reads[IdentityQueryResponse]
