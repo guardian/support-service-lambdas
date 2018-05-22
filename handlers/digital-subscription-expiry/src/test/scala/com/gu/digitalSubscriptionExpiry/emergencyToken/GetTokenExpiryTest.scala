@@ -42,7 +42,7 @@ class GetTokenExpiryTest extends FlatSpec with Matchers {
     )
 
     val responseBody = Json.prettyPrint(Json.toJson(SuccessResponse(expiry)))
-    -\/(ApiResponse("200", new Headers, responseBody))
+    -\/(ApiResponse("200", responseBody))
   }
 }
 

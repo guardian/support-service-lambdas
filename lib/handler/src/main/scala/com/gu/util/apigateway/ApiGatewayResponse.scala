@@ -11,7 +11,7 @@ object ResponseModels {
 
   case class Headers(contentType: String = "application/json")
 
-  case class ApiResponse(statusCode: String, headers: Headers, body: String)
+  case class ApiResponse(statusCode: String, body: String, headers: Headers = new Headers)
 
 }
 
@@ -51,31 +51,26 @@ object ApiGatewayResponse extends Logging {
 
   val successfulExecution = ApiResponse(
     "200",
-    new Headers,
     toJsonBody(ResponseBody("Success"))
   )
 
   def noActionRequired(reason: String) = ApiResponse(
     "200",
-    new Headers,
     toJsonBody(ResponseBody(s"Processing is not required: $reason"))
   )
 
   val badRequest = ApiResponse(
     "400",
-    new Headers,
     toJsonBody(ResponseBody("Failure to parse JSON successfully"))
   )
 
   val unauthorized = ApiResponse(
     "401",
-    new Headers,
     toJsonBody(ResponseBody("Credentials are missing or invalid"))
   )
 
   def notFound(message: String) = ApiResponse(
     "404",
-    new Headers,
     toJsonBody(ResponseBody(message))
   )
 
@@ -83,7 +78,6 @@ object ApiGatewayResponse extends Logging {
     logger.error(s"Processing failed due to $error")
     ApiResponse(
       "500",
-      new Headers,
       toJsonBody(ResponseBody(s"Internal server error"))
     )
   }
