@@ -1,14 +1,13 @@
 package com.gu.digitalSubscriptionExpiry.emergencyToken
 
 import java.time.LocalDate
-
 import com.gu.cas.Valid
 import com.gu.digitalSubscriptionExpiry.DigitalSubscriptionExpirySteps.logger
 import TokenPayloadImplicits._
-import com.gu.digitalSubscriptionExpiry.{Expiry, ExpiryType, SuccessResponse}
 import com.gu.util.reader.Types.FailableOp
 import scalaz.{-\/, \/-}
-import com.gu.digitalSubscriptionExpiry.common.CommonApiResponses._
+import com.gu.digitalSubscriptionExpiry.responses.DigitalSubscriptionApiResponses._
+import com.gu.digitalSubscriptionExpiry.responses.{Expiry, ExpiryType, SuccessResponse}
 
 import scala.util.{Success, Try}
 

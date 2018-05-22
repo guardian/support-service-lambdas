@@ -29,10 +29,13 @@ class EndToEndHandlerTest extends FlatSpec with Matchers {
 
     val responseString = new String(os.toByteArray(), "UTF-8")
 
-    val expectedResponse =
-      s"""
-         |{"statusCode":"200","headers":{"Content-Type":"application/json"},"body":"Success"}
-         |""".stripMargin
+    val expectedResponse = """{
+                             |"statusCode":"200",
+                             |"headers":{"Content-Type":"application/json"},
+                             |"body":"{\n  \"message\" : \"Success\"\n}"
+                             |}
+                             |""".stripMargin
+
     responseString jsonMatches expectedResponse
   }
 }

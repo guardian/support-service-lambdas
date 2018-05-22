@@ -1,9 +1,8 @@
 package com.gu.digitalSubscriptionExpiry.emergencyToken
 
 import java.time.LocalDate
-
 import com.gu.cas.{PrefixedTokens, SevenDay}
-import com.gu.digitalSubscriptionExpiry.{Expiry, ExpiryType, SuccessResponse}
+import com.gu.digitalSubscriptionExpiry.responses.{Expiry, ExpiryType, SuccessResponse}
 import com.gu.util.apigateway.ResponseModels.{ApiResponse, Headers}
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
@@ -43,7 +42,7 @@ class GetTokenExpiryTest extends FlatSpec with Matchers {
     )
 
     val responseBody = Json.prettyPrint(Json.toJson(SuccessResponse(expiry)))
-    -\/(ApiResponse("200", new Headers, responseBody))
+    -\/(ApiResponse("200", responseBody))
   }
 }
 

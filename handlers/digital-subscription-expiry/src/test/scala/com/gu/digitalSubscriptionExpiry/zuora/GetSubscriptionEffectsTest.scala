@@ -10,7 +10,7 @@ import com.gu.test.EffectsTest
 import org.scalatest.{FlatSpec, Matchers}
 import scalaz.{-\/, \/, \/-}
 import scalaz.syntax.std.either._
-import com.gu.digitalSubscriptionExpiry.common.CommonApiResponses._
+import com.gu.digitalSubscriptionExpiry.responses.DigitalSubscriptionApiResponses._
 import com.gu.util.config.{LoadConfig, Stage}
 import com.gu.util.zuora.ZuoraRestRequestMaker
 class GetSubscriptionEffectsTest extends FlatSpec with Matchers {

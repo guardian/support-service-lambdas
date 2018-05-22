@@ -4,11 +4,11 @@ import com.gu.digitalSubscriptionExpiry.zuora.GetAccountSummary.AccountId
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types._
 import java.time.LocalDate
-
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import com.gu.util.zuora.RestRequestMaker.{GenericError, NotFound, Requests}
-import com.gu.digitalSubscriptionExpiry.common.CommonApiResponses._
+import com.gu.digitalSubscriptionExpiry.responses.DigitalSubscriptionApiResponses._
+
 object GetSubscription {
 
   case class SubscriptionId(get: String) extends AnyVal

@@ -2,7 +2,6 @@ package com.gu.digitalSubscriptionExpiry
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 import java.time.{LocalDateTime}
-
 import com.gu.effects.RawEffects
 import com.gu.test.EffectsTest
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO

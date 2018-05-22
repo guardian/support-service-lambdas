@@ -1,9 +1,8 @@
 package com.gu.digitalSubscriptionExpiry.zuora
 
 import java.time.LocalDate
-
-import com.gu.digitalSubscriptionExpiry._
-import com.gu.digitalSubscriptionExpiry.common.CommonApiResponses.apiResponse
+import com.gu.digitalSubscriptionExpiry.responses.DigitalSubscriptionApiResponses.apiResponse
+import com.gu.digitalSubscriptionExpiry.responses.{ErrorResponse, Expiry, ExpiryType, SuccessResponse}
 import com.gu.digitalSubscriptionExpiry.zuora.GetAccountSummary.{AccountId, AccountSummaryResult}
 import com.gu.digitalSubscriptionExpiry.zuora.GetSubscription._
 import org.scalatest.FlatSpec

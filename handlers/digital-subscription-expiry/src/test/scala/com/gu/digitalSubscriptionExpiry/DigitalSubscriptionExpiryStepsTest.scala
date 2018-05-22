@@ -1,12 +1,12 @@
 package com.gu.digitalSubscriptionExpiry
 
 import java.time.LocalDate
-
 import com.gu.cas.SevenDay
-import com.gu.digitalSubscriptionExpiry.common.CommonApiResponses._
+import com.gu.digitalSubscriptionExpiry.responses.DigitalSubscriptionApiResponses._
+import com.gu.digitalSubscriptionExpiry.responses.{Expiry, ExpiryType, SuccessResponse}
 import com.gu.digitalSubscriptionExpiry.zuora.GetAccountSummary.{AccountId, AccountSummaryResult}
 import com.gu.digitalSubscriptionExpiry.zuora.GetSubscription.{SubscriptionId, SubscriptionName, SubscriptionResult}
-import com.gu.util.apigateway.ResponseModels.{ApiResponse, Headers}
+import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse, URLParams}
 import com.gu.util.reader.Types.FailableOp
 import org.scalatest.{FlatSpec, Matchers}
@@ -25,7 +25,7 @@ class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
     apiResponse(SuccessResponse(expiry), "200")
   }
 
-  val successfulResponseFromZuora = -\/(ApiResponse("123", new Headers, "valid zuora response"))
+  val successfulResponseFromZuora = -\/(ApiResponse("123", "valid zuora response"))
 
   def getSubId(s: SubscriptionId): FailableOp[SubscriptionResult] = {
     if (s.get == "validZuoraSubId") {
