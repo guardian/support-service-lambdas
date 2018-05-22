@@ -10,7 +10,7 @@ deployments:
     parameters:
       templatePath: cfn.yaml
 
-  catalog-service:
+  zuora-retention:
     type: aws-lambda
     parameters:
       fileName: zuora-retention.jar
