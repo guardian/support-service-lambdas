@@ -14,9 +14,9 @@ object SubscriptionsForAccounts {
   case class SubscriptionsQueryResponse(
     Id: String,
     Status: String,
-    Name: String,
     TermEndDate: LocalDate
   )
+
   implicit val reads = Json.reads[SubscriptionsQueryResponse]
 
   def buildQuery(accountsToQuery: List[AccountId]): String = {
