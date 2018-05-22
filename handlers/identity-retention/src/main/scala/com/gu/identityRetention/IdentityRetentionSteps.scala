@@ -16,8 +16,8 @@ object IdentityRetentionSteps extends Logging {
       for {
         identityId <- extractIdentityId(apiGatewayRequest.queryStringParameters)
         accounts <- HasActiveZuoraAccounts(identityId, zuoraQuerier)
-        subs <- QueryZuoraSubscriptions(accounts, zuoraQuerier)
-        _ <- SubscriptionResults(subs)
+        subs <- SubscriptionsForAccounts(accounts, zuoraQuerier)
+        _ <- RelationshipForSubscriptions(subs)
       } yield ()
   }, false)
 

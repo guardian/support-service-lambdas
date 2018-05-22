@@ -1,11 +1,11 @@
 package com.gu.identityRetention
 
 import java.time.LocalDate
-import com.gu.identityRetention.QueryZuoraSubscriptions.SubscriptionsQueryResponse
+import com.gu.identityRetention.SubscriptionsForAccounts.SubscriptionsQueryResponse
 import com.gu.util.reader.Types.FailableOp
 import scalaz.{-\/, \/-}
 
-object SubscriptionResults {
+object RelationshipForSubscriptions {
 
   implicit def ordering: Ordering[LocalDate] = Ordering.by(_.toEpochDay)
 
