@@ -1,7 +1,7 @@
 package com.gu.identityRetention
 
 import java.time.LocalDate
-import com.gu.util.apigateway.ResponseModels.{ApiResponse, Headers}
+import com.gu.util.apigateway.ResponseModels.ApiResponse
 import play.api.libs.json.{Json, Writes}
 
 object IdentityRetentionResponseModels {
