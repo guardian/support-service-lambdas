@@ -11,11 +11,12 @@ object RelationshipForSubscriptions {
 
   def apply(subscriptions: List[SubscriptionsQueryResponse]): FailableOp[Unit] = {
     subscriptions match {
-      case subs if (subs.size == 0) =>
+      case Nil =>
         -\/(IdentityRetentionApiResponses.notFoundInZuora)
-      case subs if (subs.map(_.Status).contains("Active")) =>
+      case subs if (subs.exists(_.Status == "Active")) =>
         -\/(IdentityRetentionApiResponses.ongoingRelationship)
       case _ =>
+        // User only has cancelled subs
         val serviceEndDate = subscriptions.map(_.TermEndDate).max
         -\/(IdentityRetentionApiResponses.cancelledRelationship(serviceEndDate))
     }
