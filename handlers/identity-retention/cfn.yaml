@@ -86,7 +86,7 @@ Resources:
         Properties:
             RestApiId: !Ref IdentityRetentionAPI
             ParentId: !GetAtt [IdentityRetentionAPI, RootResourceId]
-            PathPart: /retention-status
+            PathPart: retention-status
         DependsOn: IdentityRetentionAPI
 
     IdentityRetentionMethod:
