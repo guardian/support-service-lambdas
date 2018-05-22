@@ -31,7 +31,7 @@ object HasActiveZuoraAccounts {
     case \/-(result) if result.size == 0 =>
       -\/(IdentityRetentionApiResponses.notFoundInZuora)
     case -\/(error) =>
-      -\/(ApiGatewayResponse.internalServerError("Failed to retrieve the identity user's details from Zuora"))
+      -\/(ApiGatewayResponse.internalServerError(s"Failed to retrieve the identity user's details from Zuora: $error"))
   }
 
 }
