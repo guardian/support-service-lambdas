@@ -19,9 +19,8 @@ class IdentityRetentionHandlerTest extends FlatSpec with Matchers {
     Handler.runWithEffects(RawEffects.response, RawEffects.stage, RawEffects.s3Load, LambdaIO(stream, os, null))
 
     val actualResponse = new String(os.toByteArray, "UTF-8")
-    val expectedResponse = responseString(ApiGatewayResponse.notFound("Identity user has no linked Zuora accounts"))
 
-    actualResponse jsonMatches (expectedResponse)
+    actualResponse jsonMatches (notFoundResponse)
 
   }
 
@@ -33,9 +32,8 @@ class IdentityRetentionHandlerTest extends FlatSpec with Matchers {
     Handler.runWithEffects(RawEffects.response, RawEffects.stage, RawEffects.s3Load, LambdaIO(stream, os, null))
 
     val actualResponse = new String(os.toByteArray, "UTF-8")
-    val expectedResponse = responseString(ApiGatewayResponse.successfulExecution)
 
-    actualResponse jsonMatches (expectedResponse)
+    actualResponse jsonMatches (successResponse)
 
   }
 
@@ -45,15 +43,6 @@ class IdentityRetentionHandlerTest extends FlatSpec with Matchers {
       val actualJson = Json.parse(actual)
       actualJson should be(expectedJson)
     }
-  }
-
-  def responseString(apiResponse: ApiResponse) = {
-    s"""
-      |{
-      |  "statusCode":"${apiResponse.statusCode}",
-      |  "headers":{"Content-Type":"application/json"},
-      |  "body":"${apiResponse.body}"
-      |}""".stripMargin
   }
 
   def dummyRequest(identityId: String) = s"""
@@ -110,5 +99,19 @@ class IdentityRetentionHandlerTest extends FlatSpec with Matchers {
      |    "isBase64Encoded": false
      |}
     """.stripMargin
+
+  val successResponse =
+    """{
+      |"statusCode":"200",
+      |"headers":{"Content-Type":"application/json"},
+      |"body":"{\n  \"message\" : \"Success\"\n}"
+      |}""".stripMargin
+
+  val notFoundResponse =
+    """{
+      |"statusCode":"404",
+      |"headers":{"Content-Type":"application/json"},
+      |"body":"{\n  \"message\" : \"Identity user has no linked Zuora accounts\"\n}"
+      |}""".stripMargin
 
 }
