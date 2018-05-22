@@ -78,43 +78,42 @@ Resources:
             Runtime: java8
             Timeout: 300
         DependsOn:
-        - CatalogServiceRole
-
-  ZuoraRetentionBucket:
-    Type: "AWS::S3::Bucket"
-    Properties:
-      BucketName: !Sub gu_zuora_retention_${Stage}
-      AccessControl: Private
-      LifecycleConfiguration:
-        Rules:
-          - Id: DeleteAllOldFiles
-            Prefix: ""
-            Status: Enabled
-            ExpirationInDays: 14
-  EncryptBucketPolicy:
-    Type: AWS::S3::BucketPolicy
-    DependsOn: ZuoraRetentionBucket
-    Properties:
-      Bucket: !Sub ${ZuoraRetentionBucket}
-      PolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-        - Sid: DenyIncorrectEncryptionHeader
-          Effect: Deny
-          Principal: "*"
-          Action: s3:PutObject
-          Resource: !Sub arn:aws:s3:::${ZuoraRetentionBucket}/*
-          Condition:
-            StringNotEquals:
-              s3:x-amz-server-side-encryption:
-              - AES256
-              - aws:kms
-        - Sid: DenyUnEncryptedObjectUploads
-          Effect: Deny
-          Principal: "*"
-          Action: s3:PutObject
-          Resource: !Sub arn:aws:s3:::${ZuoraRetentionBucket}/*
-          Condition:
-            'Null':
-              s3:x-amz-server-side-encryption: 'true'
+        - ZuoraRetentionRole
+    ZuoraRetentionBucket:
+      Type: "AWS::S3::Bucket"
+      Properties:
+        BucketName: !Sub gu_zuora_retention_${Stage}
+        AccessControl: Private
+        LifecycleConfiguration:
+          Rules:
+            - Id: DeleteAllOldFiles
+              Prefix: ""
+              Status: Enabled
+              ExpirationInDays: 14
+    EncryptBucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      DependsOn: ZuoraRetentionBucket
+      Properties:
+        Bucket: !Sub ${ZuoraRetentionBucket}
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Sid: DenyIncorrectEncryptionHeader
+            Effect: Deny
+            Principal: "*"
+            Action: s3:PutObject
+            Resource: !Sub arn:aws:s3:::${ZuoraRetentionBucket}/*
+            Condition:
+              StringNotEquals:
+                s3:x-amz-server-side-encryption:
+                - AES256
+                - aws:kms
+          - Sid: DenyUnEncryptedObjectUploads
+            Effect: Deny
+            Principal: "*"
+            Action: s3:PutObject
+            Resource: !Sub arn:aws:s3:::${ZuoraRetentionBucket}/*
+            Condition:
+              'Null':
+                s3:x-amz-server-side-encryption: 'true'
 
