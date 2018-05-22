@@ -11,7 +11,7 @@ object ResponseModels {
 
   case class Headers(contentType: String = "application/json")
 
-  case class ApiResponse(statusCode: String, headers: Headers, body: String)
+  case class ApiResponse(statusCode: String, body: String, headers: Headers = new Headers)
 
 }
 
@@ -43,13 +43,43 @@ object ApiGatewayResponse extends Logging {
     writer.close()
   }
 
-  val successfulExecution = ApiResponse("200", new Headers, "Success")
-  def noActionRequired(reason: String) = ApiResponse("200", new Headers, s"Processing is not required: $reason")
+  case class ResponseBody(message: String)
 
-  val unauthorized = ApiResponse("401", new Headers, "Credentials are missing or invalid")
-  def notFound(message: String) = ApiResponse("404", new Headers, message)
-  def badRequestWithBody(body: String) = ApiResponse("400", new Headers, body)
-  val badRequest = badRequestWithBody("Failure to parse JSON successfully")
-  def internalServerError(error: String) = ApiResponse("500", new Headers, s"Failed to process event due to the following error: $error")
+  implicit val responseBodyWrites = Json.writes[ResponseBody]
+
+  def toJsonBody(responseBody: ResponseBody) = Json.prettyPrint(Json.toJson(responseBody))
+
+  val successfulExecution = ApiResponse(
+    "200",
+    toJsonBody(ResponseBody("Success"))
+  )
+
+  def noActionRequired(reason: String) = ApiResponse(
+    "200",
+    toJsonBody(ResponseBody(s"Processing is not required: $reason"))
+  )
+
+  val badRequest = ApiResponse(
+    "400",
+    toJsonBody(ResponseBody("Failure to parse JSON successfully"))
+  )
+
+  val unauthorized = ApiResponse(
+    "401",
+    toJsonBody(ResponseBody("Credentials are missing or invalid"))
+  )
+
+  def notFound(message: String) = ApiResponse(
+    "404",
+    toJsonBody(ResponseBody(message))
+  )
+
+  def internalServerError(error: String) = {
+    logger.error(s"Processing failed due to $error")
+    ApiResponse(
+      "500",
+      toJsonBody(ResponseBody(s"Internal server error"))
+    )
+  }
 
 }
