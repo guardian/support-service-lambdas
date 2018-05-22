@@ -58,12 +58,12 @@ Resources:
                             Action: s3:GetObject
                             Resource: !Sub arn:aws:s3:::gu-reader-revenue-private/membership/payment-failure-lambdas/${Stage}
 
-    ZuoraRetentionQuerier:
+    ZuoraRetention:
         Type: AWS::Lambda::Function
         Properties:
-            Description: Queries Zuora to get data needed to identify accounts with only long cancelled subs
+            Description: no description yet
             FunctionName:
-                !Sub zuora-retention-querier-${Stage}
+                !Sub zuora-retention-${Stage}
             Code:
                 S3Bucket: subscriptions-dist
                 S3Key: !Sub subscriptions/${Stage}/zuora-retention/zuora-retention.jar
@@ -78,4 +78,3 @@ Resources:
             Timeout: 300
         DependsOn:
         - ZuoraRetentionRole
-   

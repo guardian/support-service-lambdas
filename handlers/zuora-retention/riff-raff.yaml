@@ -17,5 +17,5 @@ deployments:
       bucket: subscriptions-dist
       prefixStack: false
       functionNames:
-      - zuora-retention-querier-
+      - zuora-retention-
     dependencies: [cfn]
