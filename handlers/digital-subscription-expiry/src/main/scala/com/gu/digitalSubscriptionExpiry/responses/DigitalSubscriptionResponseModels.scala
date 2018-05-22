@@ -1,4 +1,4 @@
-package com.gu.digitalSubscriptionExpiry
+package com.gu.digitalSubscriptionExpiry.responses
 
 import com.gu.cas.SubscriptionCode
 import java.time.LocalDate

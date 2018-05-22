@@ -37,7 +37,7 @@ object IdentityRetentionApiResponses {
 
   def apiResponse(body: IdentityRetentionResponse, status: String) = {
     val bodyTxt = Json.prettyPrint(Json.toJson(body))
-    ApiResponse(status, new Headers, bodyTxt)
+    ApiResponse(status, bodyTxt)
   }
 
   val ongoingRelationship = apiResponse(SuccessResponse(true, None), "200")

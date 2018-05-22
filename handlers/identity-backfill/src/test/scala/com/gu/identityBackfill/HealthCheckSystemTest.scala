@@ -13,7 +13,7 @@ import play.api.libs.json.Json
 // you should also run the healthcheck in code after deploy
 class HealthCheckSystemTest extends FlatSpec with Matchers {
 
-  it should "successfull run the health check using the local code against real backend" taggedAs EffectsTest in {
+  it should "successfully run the health check using the local code against real backend" taggedAs EffectsTest in {
 
     val stream = new ByteArrayInputStream(healthcheckRequest.getBytes(java.nio.charset.StandardCharsets.UTF_8))
     val os = new ByteArrayOutputStream()
@@ -25,9 +25,13 @@ class HealthCheckSystemTest extends FlatSpec with Matchers {
     val responseString = new String(os.toByteArray, "UTF-8")
 
     val expectedResponse =
-      s"""
-         |{"statusCode":"200","headers":{"Content-Type":"application/json"},"body":"Success"}
-         |""".stripMargin
+      """{
+        |"statusCode":"200",
+        |"headers":{"Content-Type":"application/json"},
+        |"body":"{\n  \"message\" : \"Success\"\n}"
+        |}
+        |""".stripMargin
+
     responseString jsonMatches expectedResponse
   }
 

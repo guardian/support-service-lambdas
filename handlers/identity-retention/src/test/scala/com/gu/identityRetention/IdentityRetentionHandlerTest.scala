@@ -4,7 +4,6 @@ import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 import com.gu.effects.RawEffects
 import com.gu.test.EffectsTest
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
-import com.gu.util.apigateway.ResponseModels.ApiResponse
 import org.scalatest.{Assertion, FlatSpec, Matchers}
 import play.api.libs.json.Json
 
@@ -18,15 +17,8 @@ class IdentityRetentionHandlerTest extends FlatSpec with Matchers {
     Handler.runWithEffects(RawEffects.response, RawEffects.stage, RawEffects.s3Load, LambdaIO(stream, os, null))
 
     val actualResponse = new String(os.toByteArray, "UTF-8")
-    val expectedResponse =
-      """
-        |{
-        |"statusCode":"404",
-        |"headers":{"Content-Type":"application/json"},
-        |"body":"{\n  \"previousRelationship\" : false\n}"
-        |}""".stripMargin
 
-    actualResponse jsonMatches (expectedResponse)
+    actualResponse jsonMatches (noPreviousRelationship)
 
   }
 
@@ -38,14 +30,8 @@ class IdentityRetentionHandlerTest extends FlatSpec with Matchers {
     Handler.runWithEffects(RawEffects.response, RawEffects.stage, RawEffects.s3Load, LambdaIO(stream, os, null))
 
     val actualResponse = new String(os.toByteArray, "UTF-8")
-    val expectedResponse = """
-                             |{
-                             |"statusCode":"200",
-                             |"headers":{"Content-Type":"application/json"},
-                             |"body":"{\n  \"ongoingRelationship\" : true\n}"
-                             |}""".stripMargin
 
-    actualResponse jsonMatches (expectedResponse)
+    actualResponse jsonMatches (ongoingRelationship)
 
   }
 
@@ -57,15 +43,8 @@ class IdentityRetentionHandlerTest extends FlatSpec with Matchers {
     Handler.runWithEffects(RawEffects.response, RawEffects.stage, RawEffects.s3Load, LambdaIO(stream, os, null))
 
     val actualResponse = new String(os.toByteArray, "UTF-8")
-    val expectedResponse =
-      """
-        |{
-        |"statusCode":"200",
-        |"headers":{"Content-Type":"application/json"},
-        |"body":"{\n  \"ongoingRelationship\" : false,\n  \"serviceEndDate\" : \"2018-04-04\"\n}"
-        |}""".stripMargin
 
-    actualResponse jsonMatches (expectedResponse)
+    actualResponse jsonMatches (cancelledRelationship)
 
   }
 
@@ -75,15 +54,6 @@ class IdentityRetentionHandlerTest extends FlatSpec with Matchers {
       val actualJson = Json.parse(actual)
       actualJson should be(expectedJson)
     }
-  }
-
-  def responseString(apiResponse: ApiResponse) = {
-    s"""
-      |{
-      |  "statusCode":"${apiResponse.statusCode}",
-      |  "headers":{"Content-Type":"application/json"},
-      |  "body":"${apiResponse.body}"
-      |}""".stripMargin
   }
 
   def dummyRequest(identityId: String) = s"""
@@ -140,5 +110,29 @@ class IdentityRetentionHandlerTest extends FlatSpec with Matchers {
      |    "isBase64Encoded": false
      |}
     """.stripMargin
+
+  val ongoingRelationship =
+    """
+      |{
+      |"statusCode":"200",
+      |"headers":{"Content-Type":"application/json"},
+      |"body":"{\n  \"ongoingRelationship\" : true\n}"
+      |}""".stripMargin
+
+  val cancelledRelationship =
+    """
+      |{
+      |"statusCode":"200",
+      |"headers":{"Content-Type":"application/json"},
+      |"body":"{\n  \"ongoingRelationship\" : false,\n  \"serviceEndDate\" : \"2018-04-04\"\n}"
+      |}""".stripMargin
+
+  val noPreviousRelationship =
+    """
+      |{
+      |"statusCode":"404",
+      |"headers":{"Content-Type":"application/json"},
+      |"body":"{\n  \"previousRelationship\" : false\n}"
+      |}""".stripMargin
 
 }
