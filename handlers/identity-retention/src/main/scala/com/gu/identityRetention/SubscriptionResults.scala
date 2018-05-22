@@ -17,7 +17,7 @@ object SubscriptionResults {
         -\/(IdentityRetentionApiResponses.ongoingRelationship)
       case _ =>
         val serviceEndDate = subscriptions.map(_.TermEndDate).max
-        -\/(IdentityRetentionApiResponses.cancelledRelationship(serviceEndDate)) // Pass the date through here
+        -\/(IdentityRetentionApiResponses.cancelledRelationship(serviceEndDate))
     }
   }
 
