@@ -1,9 +1,8 @@
 package com.gu.identityRetention
 
 import com.gu.effects.TestingRawEffects
-import com.gu.effects.TestingRawEffects.{HTTPResponse, POSTRequest}
 import com.gu.identityRetention.HasActiveZuoraAccounts.IdentityQueryResponse
-import com.gu.identityRetention.Types.IdentityId
+import com.gu.identityRetention.Types.{AccountId, IdentityId}
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.zuora.{ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
 import com.gu.util.zuora.ZuoraQuery.QueryResult
@@ -21,7 +20,7 @@ class HasActiveZuoraAccountsTest extends FlatSpec with Matchers {
     val requestMaker = ZuoraRestRequestMaker(effects.response, ZuoraRestConfig("https://zuora", "user", "pass"))
     val zuoraQuerier = ZuoraQuery(requestMaker)
     val zuoraCheck = HasActiveZuoraAccounts(IdentityId(321), zuoraQuerier)
-    val expected = -\/(ApiGatewayResponse.notFound("Identity user has no linked Zuora accounts"))
+    val expected = -\/(IdentityRetentionApiResponses.notFoundInZuora)
     zuoraCheck should be(expected)
   }
 
@@ -39,46 +38,8 @@ class HasActiveZuoraAccountsTest extends FlatSpec with Matchers {
     val requestMaker = ZuoraRestRequestMaker(effects.response, ZuoraRestConfig("https://zuora", "user", "pass"))
     val zuoraQuerier = ZuoraQuery(requestMaker)
     val zuoraCheck = HasActiveZuoraAccounts(IdentityId(321), zuoraQuerier)
-    val expected = \/-(())
+    val expected = \/-(List(AccountId("acc321")))
     zuoraCheck should be(expected)
   }
-
-}
-
-object ZuoraQueryMocks {
-
-  val activeResult = """
-                       |{
-                       |  "Id": "321",
-                       |  "Status": "Active"
-                       |}
-                       |"""
-
-  val cancelledResult = """
-                          |{
-                          |  "Id": "321",
-                          |  "Status": "Cancelled"
-                          |}
-                          |"""
-
-  def postResponse(zuoraAccounts: List[String]): Map[POSTRequest, HTTPResponse] = {
-
-    val accountQueryResponse: String =
-      s"""
-         |{
-         |    "records": [${zuoraAccounts.mkString(",")}],
-         |    "size": ${zuoraAccounts.size},
-         |    "done": true
-         |}
-    """.stripMargin
-
-    Map(
-      POSTRequest("/action/query", """{"queryString":"select id, status from account where IdentityId__c = '321'"}""") -> HTTPResponse(200, accountQueryResponse)
-    )
-  }
-
-  val failedPOST = Map(
-    POSTRequest("/action/query", """{"queryString":"select id, status from account where IdentityId__c = '321'"}""") -> HTTPResponse(500, """{ error: Internal server error }""")
-  )
 
 }

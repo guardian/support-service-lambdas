@@ -4,7 +4,6 @@ import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 import com.gu.effects.RawEffects
 import com.gu.test.EffectsTest
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
-import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import org.scalatest.{Assertion, FlatSpec, Matchers}
 import play.api.libs.json.Json
@@ -19,21 +18,52 @@ class IdentityRetentionHandlerTest extends FlatSpec with Matchers {
     Handler.runWithEffects(RawEffects.response, RawEffects.stage, RawEffects.s3Load, LambdaIO(stream, os, null))
 
     val actualResponse = new String(os.toByteArray, "UTF-8")
-    val expectedResponse = responseString(ApiGatewayResponse.notFound("Identity user has no linked Zuora accounts"))
+    val expectedResponse =
+      """
+        |{
+        |"statusCode":"404",
+        |"headers":{"Content-Type":"application/json"},
+        |"body":"{\n  \"previousRelationship\" : false\n}"
+        |}""".stripMargin
 
     actualResponse jsonMatches (expectedResponse)
 
   }
 
-  it should "return 200 if the identity id is linked to a Zuora billing account" taggedAs EffectsTest in {
+  it should "return an ongoing relationship response (200) if identity id is linked to an active sub" taggedAs EffectsTest in {
 
-    val stream = new ByteArrayInputStream(dummyRequest("30000311").getBytes(java.nio.charset.StandardCharsets.UTF_8))
+    val stream = new ByteArrayInputStream(dummyRequest("78973512").getBytes(java.nio.charset.StandardCharsets.UTF_8))
     val os = new ByteArrayOutputStream()
 
     Handler.runWithEffects(RawEffects.response, RawEffects.stage, RawEffects.s3Load, LambdaIO(stream, os, null))
 
     val actualResponse = new String(os.toByteArray, "UTF-8")
-    val expectedResponse = responseString(ApiGatewayResponse.successfulExecution)
+    val expectedResponse = """
+                             |{
+                             |"statusCode":"200",
+                             |"headers":{"Content-Type":"application/json"},
+                             |"body":"{\n  \"ongoingRelationship\" : true\n}"
+                             |}""".stripMargin
+
+    actualResponse jsonMatches (expectedResponse)
+
+  }
+
+  it should "return 200 if the identity id has a cancelled sub" taggedAs EffectsTest in {
+
+    val stream = new ByteArrayInputStream(dummyRequest("78973513").getBytes(java.nio.charset.StandardCharsets.UTF_8))
+    val os = new ByteArrayOutputStream()
+
+    Handler.runWithEffects(RawEffects.response, RawEffects.stage, RawEffects.s3Load, LambdaIO(stream, os, null))
+
+    val actualResponse = new String(os.toByteArray, "UTF-8")
+    val expectedResponse =
+      """
+        |{
+        |"statusCode":"200",
+        |"headers":{"Content-Type":"application/json"},
+        |"body":"{\n  \"ongoingRelationship\" : false,\n  \"serviceEndDate\" : \"2018-04-04\"\n}"
+        |}""".stripMargin
 
     actualResponse jsonMatches (expectedResponse)
 
