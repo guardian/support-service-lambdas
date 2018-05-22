@@ -1,0 +1,120 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Deletes zuora accounts with only long cancelled subscriptions
+
+Parameters:
+    Stage:
+        Description: Stage name
+        Type: String
+        AllowedValues:
+            - CODE
+            - PROD
+        Default: CODE
+
+Mappings:
+    StageVariables:
+        CODE:
+            ReadableS3Buckets:
+              - arn:aws:s3:::gu-reader-revenue-private/membership/payment-failure-lambdas/DEV/*
+              - arn:aws:s3:::gu-reader-revenue-private/membership/payment-failure-lambdas/CODE/*
+        PROD:
+            ReadableS3Buckets:
+              - arn:aws:s3:::gu-reader-revenue-private/membership/payment-failure-lambdas/DEV/*
+              - arn:aws:s3:::gu-reader-revenue-private/membership/payment-failure-lambdas/CODE/*
+              - arn:aws:s3:::gu-reader-revenue-private/membership/payment-failure-lambdas/PROD/*
+
+Conditions:
+    CreateProdOnlyResources: !Equals [ !Ref Stage, PROD ]
+
+Resources:
+    ZuoraRetentionRole:
+        Type: AWS::IAM::Role
+        Properties:
+            AssumeRolePolicyDocument:
+                Statement:
+                    - Effect: Allow
+                      Principal:
+                          Service:
+                             - lambda.amazonaws.com
+                      Action:
+                          - sts:AssumeRole
+            Path: /
+            Policies:
+                - PolicyName: LambdaPolicy
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                            - logs:CreateLogGroup
+                            - logs:CreateLogStream
+                            - logs:PutLogEvents
+                            - lambda:InvokeFunction
+                            Resource:
+                            - !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/zuora-retention-${Stage}:log-stream:*
+
+                - PolicyName: ReadPrivateCredentials
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action: s3:GetObject
+                            Resource: !Sub arn:aws:s3:::gu-reader-revenue-private/membership/payment-failure-lambdas/${Stage}
+
+
+    ZuoraRetentionQuerier:
+        Type: AWS::Lambda::Function
+        Properties:
+            Description: Queries Zuora to get data needed to identify accounts with only long cancelled subs
+            FunctionName:
+                !Sub zuora-retention-querier-${Stage}
+            Code:
+                S3Bucket: subscriptions-dist
+                S3Key: !Sub subscriptions/${Stage}/zuora-retention/zuora-retention.jar
+            Handler: com.gu.zuora.retention.Handler::apply
+            Environment:
+                Variables:
+                  Stage: !Ref Stage
+            Role:
+                !GetAtt ZuoraRetentionRole.Arn
+            MemorySize: 1536
+            Runtime: java8
+            Timeout: 300
+        DependsOn:
+        - CatalogServiceRole
+
+  ZuoraRetentionBucket:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      BucketName: !Sub gu_zuora_retention_${Stage}
+      AccessControl: Private
+      LifecycleConfiguration:
+        Rules:
+          - Id: DeleteAllOldFiles
+            Prefix: ""
+            Status: Enabled
+            ExpirationInDays: 14
+  EncryptBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    DependsOn: ZuoraRetentionBucket
+    Properties:
+      Bucket: !Sub ${ZuoraRetentionBucket}
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Sid: DenyIncorrectEncryptionHeader
+          Effect: Deny
+          Principal: "*"
+          Action: s3:PutObject
+          Resource: !Sub arn:aws:s3:::${ZuoraRetentionBucket}/*
+          Condition:
+            StringNotEquals:
+              s3:x-amz-server-side-encryption:
+              - AES256
+              - aws:kms
+        - Sid: DenyUnEncryptedObjectUploads
+          Effect: Deny
+          Principal: "*"
+          Action: s3:PutObject
+          Resource: !Sub arn:aws:s3:::${ZuoraRetentionBucket}/*
+          Condition:
+            'Null':
+              s3:x-amz-server-side-encryption: 'true'
+
