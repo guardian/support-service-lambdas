@@ -26,7 +26,7 @@ class SkipActivationDateUpdateTest extends FlatSpec {
   val subWithActivationDateNotSet = testSubscriptionResult(None)
   val subWithActivationDateSet = testSubscriptionResult(Some(testDate.toString))
 
-  def testURLParams(noActivation: Boolean) = URLParams(None, false, None, false, noActivation)
+  def testURLParams(noActivation: Boolean) = URLParams(None, false, None, false, noActivation, None)
 
   "SkipActivationUpdate" should "be true if the parameter noActivation is provided in the request and set to true" in {
 
