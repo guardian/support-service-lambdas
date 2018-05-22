@@ -29,8 +29,8 @@ object QueryZuoraSubscriptions {
     searchForSubscriptions match {
       case \/-(subscriptions) =>
         \/-(subscriptions.records)
-      case -\/(_) =>
-        -\/(ApiGatewayResponse.internalServerError("Fail"))
+      case -\/(error) =>
+        -\/(ApiGatewayResponse.internalServerError(s"Failed whilst querying Zuora for subscriptions: $error"))
     }
 
   }
