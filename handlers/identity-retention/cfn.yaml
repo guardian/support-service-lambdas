@@ -9,6 +9,10 @@ Parameters:
             - PROD
             - CODE
         Default: CODE
+    DomainName:
+        Type: String
+    CertificateArn:
+        Type: String
 
 Conditions:
   CreateProdMonitoring: !Equals [ !Ref Stage, PROD ]
@@ -163,3 +167,22 @@ Resources:
       DependsOn:
       - IdentityRetentionAPIKey
       - IdentityRetentionUsagePlan
+
+    IdentityRetentionDomainName:
+      Type: "AWS::ApiGateway::DomainName"
+      Properties:
+        RegionalCertificateArn: !Sub ${CertificateArn}
+        DomainName: !Sub ${DomainName}
+        EndpointConfiguration:
+          Types:
+            - REGIONAL
+
+    IdentityRetentionBasePathMapping:
+      Type: "AWS::ApiGateway::BasePathMapping"
+      Properties:
+        RestApiId: !Ref IdentityRetentionAPI
+        DomainName: !Ref IdentityRetentionDomainName
+        Stage: !Sub ${Stage}
+      DependsOn:
+      - IdentityRetentionAPI
+      - IdentityRetentionDomainName
