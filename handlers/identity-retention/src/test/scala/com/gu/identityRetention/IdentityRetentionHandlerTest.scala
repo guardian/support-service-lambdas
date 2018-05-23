@@ -4,37 +4,24 @@ import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 import com.gu.effects.RawEffects
 import com.gu.test.EffectsTest
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
-import com.gu.util.apigateway.ApiGatewayResponse
-import com.gu.util.apigateway.ResponseModels.ApiResponse
 import org.scalatest.{Assertion, FlatSpec, Matchers}
 import play.api.libs.json.Json
 
 class IdentityRetentionHandlerTest extends FlatSpec with Matchers {
 
   it should "return 404 if the identity id is not linked to any Zuora billing accounts" taggedAs EffectsTest in {
-
-    val stream = new ByteArrayInputStream(dummyRequest("12345").getBytes(java.nio.charset.StandardCharsets.UTF_8))
-    val os = new ByteArrayOutputStream()
-
-    Handler.runWithEffects(RawEffects.response, RawEffects.stage, RawEffects.s3Load, LambdaIO(stream, os, null))
-
-    val actualResponse = new String(os.toByteArray, "UTF-8")
-
-    actualResponse jsonMatches (notFoundResponse)
-
+    val actualResponse = runWithMock(dummyRequest("12345"))
+    actualResponse jsonMatches (noPreviousRelationship)
   }
 
-  it should "return 200 if the identity id is linked to a Zuora billing account" taggedAs EffectsTest in {
+  it should "return an ongoing relationship response (200) if identity id is linked to an active sub" taggedAs EffectsTest in {
+    val actualResponse = runWithMock(dummyRequest("78973512"))
+    actualResponse jsonMatches (ongoingRelationship)
+  }
 
-    val stream = new ByteArrayInputStream(dummyRequest("30000311").getBytes(java.nio.charset.StandardCharsets.UTF_8))
-    val os = new ByteArrayOutputStream()
-
-    Handler.runWithEffects(RawEffects.response, RawEffects.stage, RawEffects.s3Load, LambdaIO(stream, os, null))
-
-    val actualResponse = new String(os.toByteArray, "UTF-8")
-
-    actualResponse jsonMatches (successResponse)
-
+  it should "return 200 if the identity id has a cancelled sub" taggedAs EffectsTest in {
+    val actualResponse = runWithMock(dummyRequest("78973513"))
+    actualResponse jsonMatches (cancelledRelationship)
   }
 
   implicit class JsonMatcher(private val actual: String) {
@@ -43,6 +30,13 @@ class IdentityRetentionHandlerTest extends FlatSpec with Matchers {
       val actualJson = Json.parse(actual)
       actualJson should be(expectedJson)
     }
+  }
+
+  def runWithMock(mockRequest: String): String = {
+    val stream = new ByteArrayInputStream(mockRequest.getBytes(java.nio.charset.StandardCharsets.UTF_8))
+    val output = new ByteArrayOutputStream()
+    Handler.runWithEffects(RawEffects.response, RawEffects.stage, RawEffects.s3Load, LambdaIO(stream, output, null))
+    new String(output.toByteArray, "UTF-8")
   }
 
   def dummyRequest(identityId: String) = s"""
@@ -100,18 +94,28 @@ class IdentityRetentionHandlerTest extends FlatSpec with Matchers {
      |}
     """.stripMargin
 
-  val successResponse =
-    """{
+  val ongoingRelationship =
+    """
+      |{
       |"statusCode":"200",
       |"headers":{"Content-Type":"application/json"},
-      |"body":"{\n  \"message\" : \"Success\"\n}"
+      |"body":"{\n  \"ongoingRelationship\" : true\n}"
       |}""".stripMargin
 
-  val notFoundResponse =
-    """{
+  val cancelledRelationship =
+    """
+      |{
+      |"statusCode":"200",
+      |"headers":{"Content-Type":"application/json"},
+      |"body":"{\n  \"ongoingRelationship\" : false,\n  \"relationshipEndDate\" : \"2018-04-04\"\n}"
+      |}""".stripMargin
+
+  val noPreviousRelationship =
+    """
+      |{
       |"statusCode":"404",
       |"headers":{"Content-Type":"application/json"},
-      |"body":"{\n  \"message\" : \"Identity user has no linked Zuora accounts\"\n}"
+      |"body":"{\n  \"previousRelationship\" : false\n}"
       |}""".stripMargin
 
 }
