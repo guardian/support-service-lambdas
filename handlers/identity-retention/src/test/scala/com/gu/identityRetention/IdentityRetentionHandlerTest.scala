@@ -10,42 +10,18 @@ import play.api.libs.json.Json
 class IdentityRetentionHandlerTest extends FlatSpec with Matchers {
 
   it should "return 404 if the identity id is not linked to any Zuora billing accounts" taggedAs EffectsTest in {
-
-    val stream = new ByteArrayInputStream(dummyRequest("12345").getBytes(java.nio.charset.StandardCharsets.UTF_8))
-    val os = new ByteArrayOutputStream()
-
-    Handler.runWithEffects(RawEffects.response, RawEffects.stage, RawEffects.s3Load, LambdaIO(stream, os, null))
-
-    val actualResponse = new String(os.toByteArray, "UTF-8")
-
+    val actualResponse = runWithMock(dummyRequest("12345"))
     actualResponse jsonMatches (noPreviousRelationship)
-
   }
 
   it should "return an ongoing relationship response (200) if identity id is linked to an active sub" taggedAs EffectsTest in {
-
-    val stream = new ByteArrayInputStream(dummyRequest("78973512").getBytes(java.nio.charset.StandardCharsets.UTF_8))
-    val os = new ByteArrayOutputStream()
-
-    Handler.runWithEffects(RawEffects.response, RawEffects.stage, RawEffects.s3Load, LambdaIO(stream, os, null))
-
-    val actualResponse = new String(os.toByteArray, "UTF-8")
-
+    val actualResponse = runWithMock(dummyRequest("78973512"))
     actualResponse jsonMatches (ongoingRelationship)
-
   }
 
   it should "return 200 if the identity id has a cancelled sub" taggedAs EffectsTest in {
-
-    val stream = new ByteArrayInputStream(dummyRequest("78973513").getBytes(java.nio.charset.StandardCharsets.UTF_8))
-    val os = new ByteArrayOutputStream()
-
-    Handler.runWithEffects(RawEffects.response, RawEffects.stage, RawEffects.s3Load, LambdaIO(stream, os, null))
-
-    val actualResponse = new String(os.toByteArray, "UTF-8")
-
+    val actualResponse = runWithMock(dummyRequest("78973513"))
     actualResponse jsonMatches (cancelledRelationship)
-
   }
 
   implicit class JsonMatcher(private val actual: String) {
@@ -54,6 +30,13 @@ class IdentityRetentionHandlerTest extends FlatSpec with Matchers {
       val actualJson = Json.parse(actual)
       actualJson should be(expectedJson)
     }
+  }
+
+  def runWithMock(mockRequest: String): String = {
+    val stream = new ByteArrayInputStream(mockRequest.getBytes(java.nio.charset.StandardCharsets.UTF_8))
+    val output = new ByteArrayOutputStream()
+    Handler.runWithEffects(RawEffects.response, RawEffects.stage, RawEffects.s3Load, LambdaIO(stream, output, null))
+    new String(output.toByteArray, "UTF-8")
   }
 
   def dummyRequest(identityId: String) = s"""
