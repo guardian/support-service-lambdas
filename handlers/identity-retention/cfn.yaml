@@ -13,6 +13,9 @@ Parameters:
         Type: String
     CertificateArn:
         Type: String
+    ApiGatewayTargetDomainName:
+        Description: The target domain name created by IdentityRetentionDomainName (not currently available in CFN)
+        Type: String
 
 Conditions:
   CreateProdMonitoring: !Equals [ !Ref Stage, PROD ]
@@ -186,3 +189,14 @@ Resources:
       DependsOn:
       - IdentityRetentionAPI
       - IdentityRetentionDomainName
+
+    IdentityRetentionDNSRecord:
+      Type: AWS::Route53::RecordSet
+      Properties:
+        HostedZoneName: membership.guardianapis.com.
+        Name: !Sub ${DomainName}
+        Comment: !Sub CNAME for identity-retention API ${Stage}
+        Type: CNAME
+        TTL: '120'
+        ResourceRecords:
+        - !Sub ${ApiGatewayTargetDomainName}
