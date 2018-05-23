@@ -8,7 +8,7 @@ object IdentityRetentionResponseModels {
 
   sealed trait IdentityRetentionResponse
 
-  case class SuccessResponse(ongoingRelationship: Boolean, serviceEndDate: Option[LocalDate]) extends IdentityRetentionResponse
+  case class SuccessResponse(ongoingRelationship: Boolean, relationshipEndDate: Option[LocalDate]) extends IdentityRetentionResponse
 
   object SuccessResponse {
     implicit val successResponseWrites = Json.writes[SuccessResponse]

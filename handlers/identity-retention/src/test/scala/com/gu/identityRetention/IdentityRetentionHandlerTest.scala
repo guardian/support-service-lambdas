@@ -107,7 +107,7 @@ class IdentityRetentionHandlerTest extends FlatSpec with Matchers {
       |{
       |"statusCode":"200",
       |"headers":{"Content-Type":"application/json"},
-      |"body":"{\n  \"ongoingRelationship\" : false,\n  \"serviceEndDate\" : \"2018-04-04\"\n}"
+      |"body":"{\n  \"ongoingRelationship\" : false,\n  \"relationshipEndDate\" : \"2018-04-04\"\n}"
       |}""".stripMargin
 
   val noPreviousRelationship =
