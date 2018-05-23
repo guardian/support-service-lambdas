@@ -9,10 +9,6 @@ Parameters:
             - PROD
             - CODE
         Default: CODE
-    DomainName:
-        Type: String
-    CertificateArn:
-        Type: String
 
 Conditions:
   CreateProdMonitoring: !Equals [ !Ref Stage, PROD ]
@@ -21,8 +17,12 @@ Mappings:
     StageMap:
         CODE:
             ApiName: identity-retention-api-CODE
+            DomainName: supporter-relationship-code.membership.guardianapis.com
+            CertificateId: e4e6431e-08b9-4315-b997-75f2f9569d6c
         PROD:
             ApiName: identity-retention-api-PROD
+            DomainName: supporter-relationship-prod.membership.guardianapis.com
+            CertificateId: c1e85179-09e3-4222-adee-e4ee77e73304
 
 Resources:
     IdentityRetentionRole:
@@ -171,8 +171,10 @@ Resources:
     IdentityRetentionDomainName:
       Type: "AWS::ApiGateway::DomainName"
       Properties:
-        RegionalCertificateArn: !Sub ${CertificateArn}
-        DomainName: !Sub ${DomainName}
+        RegionalCertificateArn: !Sub
+        - arn:aws:acm:${AWS::Region}:${AWS::AccountId}:certificate/${CertificateId}
+        - { CertificateId: !FindInMap [ StageMap, !Ref Stage, CertificateId ] }
+        DomainName: !FindInMap [ StageMap, !Ref Stage, DomainName ]
         EndpointConfiguration:
           Types:
             - REGIONAL
