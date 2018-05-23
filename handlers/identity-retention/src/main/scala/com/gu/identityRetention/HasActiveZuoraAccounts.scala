@@ -25,13 +25,14 @@ object HasActiveZuoraAccounts {
 
   }
 
-  def processQueryResult(queryAttempt: ClientFailableOp[QueryResult[IdentityQueryResponse]]): FailableOp[List[AccountId]] = queryAttempt match {
-    case \/-(result) if result.size > 0 =>
-      \/-(result.records.map(account => AccountId(account.Id)))
-    case \/-(result) if result.size == 0 =>
-      -\/(IdentityRetentionApiResponses.notFoundInZuora)
-    case -\/(error) =>
-      -\/(ApiGatewayResponse.internalServerError(s"Failed to retrieve the identity user's details from Zuora: $error"))
-  }
+  def processQueryResult(queryAttempt: ClientFailableOp[QueryResult[IdentityQueryResponse]]): FailableOp[List[AccountId]] =
+    queryAttempt match {
+      case \/-(result) if result.size > 0 =>
+        \/-(result.records.map(account => AccountId(account.Id)))
+      case \/-(result) if result.size == 0 =>
+        -\/(IdentityRetentionApiResponses.notFoundInZuora)
+      case -\/(error) =>
+        -\/(ApiGatewayResponse.internalServerError(s"Failed to retrieve the identity user's details from Zuora: $error"))
+    }
 
 }
