@@ -3,7 +3,6 @@ package com.gu.identityRetention
 import java.time.LocalDate
 import com.gu.identityRetention.SubscriptionsForAccounts.SubscriptionsQueryResponse
 import org.scalatest.{FlatSpec, Matchers}
-import scalaz.{-\/, \/-}
 
 class RelationshipForSubscriptionsTest extends FlatSpec with Matchers {
 
@@ -13,25 +12,25 @@ class RelationshipForSubscriptionsTest extends FlatSpec with Matchers {
 
   it should "return a 404 if no subscriptions are found" in {
     val subResults = RelationshipForSubscriptions(List())
-    val expected = -\/(IdentityRetentionApiResponses.notFoundInZuora)
+    val expected = IdentityRetentionApiResponses.notFoundInZuora
     subResults should be(expected)
   }
 
   it should "return a 200 if the user has an ongoing relationship only" in {
     val subResults = RelationshipForSubscriptions(List(activeSubResponse))
-    val expected = -\/(IdentityRetentionApiResponses.ongoingRelationship)
+    val expected = IdentityRetentionApiResponses.ongoingRelationship
     subResults should be(expected)
   }
 
   it should "return a 200 if the user has an ongoing relationship, even if they have other cancelled subs" in {
     val subResults = RelationshipForSubscriptions(List(activeSubResponse, cancelledSubResponse(today)))
-    val expected = -\/(IdentityRetentionApiResponses.ongoingRelationship)
+    val expected = IdentityRetentionApiResponses.ongoingRelationship
     subResults should be(expected)
   }
 
   it should "return a 200 if the user has cancelled" in {
     val subResults = RelationshipForSubscriptions(List(cancelledSubResponse(today)))
-    val expected = -\/(IdentityRetentionApiResponses.cancelledRelationship(today))
+    val expected = IdentityRetentionApiResponses.cancelledRelationship(today)
     subResults should be(expected)
   }
 
@@ -42,7 +41,7 @@ class RelationshipForSubscriptionsTest extends FlatSpec with Matchers {
       cancelledSubResponse(today.plusMonths(1)),
       cancelledSubResponse(expectedServiceEndDate)
     ))
-    subResults should be(-\/(IdentityRetentionApiResponses.cancelledRelationship(expectedServiceEndDate)))
+    subResults should be(IdentityRetentionApiResponses.cancelledRelationship(expectedServiceEndDate))
   }
 
 }
