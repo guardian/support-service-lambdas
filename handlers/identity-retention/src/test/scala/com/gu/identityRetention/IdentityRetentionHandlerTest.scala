@@ -120,7 +120,7 @@ class IdentityRetentionHandlerTest extends FlatSpec with Matchers {
       |{
       |"statusCode":"404",
       |"headers":{"Content-Type":"application/json"},
-      |"body":"{\n  \"message\" : \"identity account can be deleted\"\n}"
+      |"body":"{\n  \"message\" : \"User has no active relationships\"\n}"
       |}""".stripMargin
 
 }

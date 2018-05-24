@@ -14,7 +14,7 @@ object IdentityRetentionResponseModels {
     implicit val successResponseWrites = Json.writes[SuccessResponse]
   }
 
-  case class NotFoundResponse(message: String = "identity account can be deleted") extends IdentityRetentionResponse
+  case class NotFoundResponse(message: String = "User has no active relationships") extends IdentityRetentionResponse
 
   object NotFoundResponse {
     implicit val notFoundResponseWrites = Json.writes[NotFoundResponse]
