@@ -12,11 +12,11 @@ class HasActiveZuoraAccountsTest extends FlatSpec with Matchers {
 
   val noZuoraAccounts = QueryResult[IdentityQueryResponse](Nil, 0, true, None)
 
-  val singleZuoraAccount = QueryResult[IdentityQueryResponse](List(IdentityQueryResponse("acc123", "Active")), 1, true, None)
+  val singleZuoraAccount = QueryResult[IdentityQueryResponse](List(IdentityQueryResponse("acc123")), 1, true, None)
 
   it should "return a left(404) if the identity id is not linked to any Zuora accounts" in {
     val zuoraCheck = HasActiveZuoraAccounts.processQueryResult(\/-(noZuoraAccounts))
-    val expected = -\/(IdentityRetentionApiResponses.notFoundInZuora)
+    val expected = -\/(IdentityRetentionApiResponses.canBeDeleted)
     zuoraCheck should be(expected)
   }
 

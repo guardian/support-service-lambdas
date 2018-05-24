@@ -11,13 +11,25 @@ import scalaz.{-\/, \/-}
 
 object HasActiveZuoraAccounts {
 
-  case class IdentityQueryResponse(Id: String, Status: String)
+  case class IdentityQueryResponse(Id: String)
   implicit val reads = Json.reads[IdentityQueryResponse]
 
   def apply(identityId: IdentityId, zuoraQuerier: ZuoraQuerier): FailableOp[List[AccountId]] = {
 
     def searchForAccounts = {
-      val identityQuery = ZuoraQuery.Query(s"select id, status from account where IdentityId__c = '${identityId.value}'")
+
+      val commonConditions = s"IdentityId__c = '${identityId.value}' and status != 'Canceled'"
+
+      /*
+      Todo simplify this once we can rely on Account.Status
+      Unfortunately Zuora do not support parentheses, and != doesn't pick up nulls
+      https://knowledgecenter.zuora.com/DC_Developers/K_Zuora_Object_Query_Language#Syntax
+      */
+      val identityQuery = ZuoraQuery.Query(
+        s"select id from account where $commonConditions and ProcessingAdvice__c != 'DoNotProcess' or " +
+          s"$commonConditions and ProcessingAdvice__c = null"
+      )
+
       zuoraQuerier[IdentityQueryResponse](identityQuery)
     }
 
@@ -30,7 +42,7 @@ object HasActiveZuoraAccounts {
       case \/-(result) if result.size > 0 =>
         \/-(result.records.map(account => AccountId(account.Id)))
       case \/-(result) if result.size == 0 =>
-        -\/(IdentityRetentionApiResponses.notFoundInZuora)
+        -\/(IdentityRetentionApiResponses.canBeDeleted)
       case -\/(error) =>
         -\/(ApiGatewayResponse.internalServerError(s"Failed to retrieve the identity user's details from Zuora: $error"))
     }

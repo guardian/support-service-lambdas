@@ -12,7 +12,7 @@ class RelationshipForSubscriptionsTest extends FlatSpec with Matchers {
 
   it should "return a 404 if no subscriptions are found" in {
     val subResults = RelationshipForSubscriptions(List())
-    val expected = IdentityRetentionApiResponses.notFoundInZuora
+    val expected = IdentityRetentionApiResponses.canBeDeleted
     subResults should be(expected)
   }
 

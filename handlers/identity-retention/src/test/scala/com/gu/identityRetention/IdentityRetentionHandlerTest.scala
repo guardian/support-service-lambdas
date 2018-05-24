@@ -11,7 +11,7 @@ class IdentityRetentionHandlerTest extends FlatSpec with Matchers {
 
   it should "return 404 if the identity id is not linked to any Zuora billing accounts" taggedAs EffectsTest in {
     val actualResponse = runWithMock(dummyRequest("12345"))
-    actualResponse jsonMatches (noPreviousRelationship)
+    actualResponse jsonMatches (safeToDelete)
   }
 
   it should "return an ongoing relationship response (200) if identity id is linked to an active sub" taggedAs EffectsTest in {
@@ -22,6 +22,11 @@ class IdentityRetentionHandlerTest extends FlatSpec with Matchers {
   it should "return 200 if the identity id has a cancelled sub" taggedAs EffectsTest in {
     val actualResponse = runWithMock(dummyRequest("78973513"))
     actualResponse jsonMatches (cancelledRelationship)
+  }
+
+  it should "return 404 if the identity id is only linked to Zuora accounts which are cancelled or tagged with DoNotProcess" taggedAs EffectsTest in {
+    val actualResponse = runWithMock(dummyRequest("78973514"))
+    actualResponse jsonMatches (safeToDelete)
   }
 
   implicit class JsonMatcher(private val actual: String) {
@@ -110,12 +115,12 @@ class IdentityRetentionHandlerTest extends FlatSpec with Matchers {
       |"body":"{\n  \"ongoingRelationship\" : false,\n  \"relationshipEndDate\" : \"2018-04-04\"\n}"
       |}""".stripMargin
 
-  val noPreviousRelationship =
+  val safeToDelete =
     """
       |{
       |"statusCode":"404",
       |"headers":{"Content-Type":"application/json"},
-      |"body":"{\n  \"previousRelationship\" : false\n}"
+      |"body":"{\n  \"message\" : \"User has no active relationships\"\n}"
       |}""".stripMargin
 
 }

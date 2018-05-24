@@ -11,7 +11,7 @@ object RelationshipForSubscriptions {
   def apply(subscriptions: List[SubscriptionsQueryResponse]): ApiResponse = {
     subscriptions match {
       case Nil =>
-        IdentityRetentionApiResponses.notFoundInZuora
+        IdentityRetentionApiResponses.canBeDeleted
       case subs if (subs.exists(_.Status == "Active")) =>
         IdentityRetentionApiResponses.ongoingRelationship
       case _ =>
