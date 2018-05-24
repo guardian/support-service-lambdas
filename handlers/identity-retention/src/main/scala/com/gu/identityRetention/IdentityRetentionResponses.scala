@@ -14,7 +14,7 @@ object IdentityRetentionResponseModels {
     implicit val successResponseWrites = Json.writes[SuccessResponse]
   }
 
-  case class NotFoundResponse(previousRelationship: Boolean) extends IdentityRetentionResponse
+  case class NotFoundResponse(message: String = "identity account can be deleted") extends IdentityRetentionResponse
 
   object NotFoundResponse {
     implicit val notFoundResponseWrites = Json.writes[NotFoundResponse]
@@ -43,8 +43,7 @@ object IdentityRetentionApiResponses {
   val ongoingRelationship = apiResponse(SuccessResponse(true, None), "200")
   def cancelledRelationship(latestCancellationDate: LocalDate) = apiResponse(SuccessResponse(false, Some(latestCancellationDate)), "200")
 
-  val notFoundInZuora = apiResponse(NotFoundResponse(false), "404")
-  val outsideOfRetentionPeriod = apiResponse(NotFoundResponse(true), "404")
+  val canBeDeleted = apiResponse(NotFoundResponse(), "404")
 
 }
 
