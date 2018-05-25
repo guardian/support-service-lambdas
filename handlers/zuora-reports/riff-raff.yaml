@@ -1,21 +1,21 @@
 stacks:
-- subscriptions
+- membership
 regions:
 - eu-west-1
 deployments:
 
   cfn:
     type: cloud-formation
-    app: zuora-retention
+    app: zuora-reports
     parameters:
       templatePath: cfn.yaml
 
   zuora-retention:
     type: aws-lambda
     parameters:
-      fileName: zuora-retention.jar
+      fileName: zuora-reports.jar
       bucket: subscriptions-dist
       prefixStack: false
       functionNames:
-      - zuora-retention-
+      - zuora-reports-
     dependencies: [cfn]
