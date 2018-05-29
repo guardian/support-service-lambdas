@@ -9,7 +9,7 @@ import com.gu.util.config.{LoadConfig, Stage}
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, Requests}
 import com.gu.util.zuora.ZuoraRestConfig
-import com.gu.zuora.reports.aqua.{QuerierResponse, ZuoraAquaRequestMaker}
+import com.gu.zuora.reports.aqua.ZuoraAquaRequestMaker
 import okhttp3.{Request, Response}
 import play.api.libs.json.{Json, Reads, Writes}
 import scalaz.Scalaz._
@@ -18,7 +18,7 @@ import scalaz._
 import scala.io.Source
 import scala.util.Try
 
-object AquaLambda extends Logging {
+object ReportsLambda extends Logging {
 
   case class StepsConfig(zuoraRestConfig: ZuoraRestConfig)
 

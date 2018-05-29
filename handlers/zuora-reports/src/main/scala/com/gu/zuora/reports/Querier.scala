@@ -1,4 +1,4 @@
-package com.gu.zuora.reports.aqua
+package com.gu.zuora.reports
 
 import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, Requests}
 import com.gu.util.zuora.aqua.ZuoraAquaResponse
@@ -25,9 +25,7 @@ case class Query(name: String, query: String)
 
 case class AquaQuery(name: String, query: String, `type`: String = "zoqlexport")
 
-trait ZuoraAquaRequest
-
-case class QuerierRequest(name: String, queries: Seq[Query]) extends ZuoraAquaRequest
+case class QuerierRequest(name: String, queries: Seq[Query])
 
 object Query {
   implicit val reads = Json.reads[Query]
