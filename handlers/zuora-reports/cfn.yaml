@@ -44,9 +44,9 @@ Resources:
     ZuoraReports:
         Type: AWS::Lambda::Function
         Properties:
-            Description: no description yet
+            Description: submit query jobs to Zuora AQuA API
             FunctionName:
-                !Sub zuora-reports-${Stage}
+                !Sub zuora-reports-querier-${Stage}
             Code:
                 S3Bucket: membership-dist
                 S3Key: !Sub membership/${Stage}/zuora-reports/zuora-reports.jar
