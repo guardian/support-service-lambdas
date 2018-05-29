@@ -8,8 +8,9 @@ import org.scalatest.{FlatSpec, Matchers}
 import scalaz.{-\/, \/}
 import scalaz.syntax.std.either._
 
+//TODO SEE HOW TO DO EFFECT TESTS FOR REPORT QUERIES SINCE THEY ALL DEPEND ON THIS ONE
 class RetentionQueryEffectsTest extends FlatSpec with Matchers {
-  it should "execute submit retention query" taggedAs EffectsTest in {
+  it should "execute submit query" taggedAs EffectsTest in {
 
     val expected = QuerierResponse(
       jobId = "something",
@@ -24,6 +25,6 @@ class RetentionQueryEffectsTest extends FlatSpec with Matchers {
     } yield {
       res
     }
-    actual should be(-\/(expected))
+    actual.map(_.status) should be(-\/("submitted"))
   }
 }
