@@ -14,7 +14,7 @@ deployments:
     type: aws-lambda
     parameters:
       fileName: zuora-reports.jar
-      bucket: subscriptions-dist
+      bucket: membership-dist
       prefixStack: false
       functionNames:
       - zuora-reports-

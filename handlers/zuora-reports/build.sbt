@@ -9,7 +9,7 @@ assemblyJarName := "zuora-reports.jar"
 riffRaffPackageType := assembly.value
 riffRaffUploadArtifactBucket := Option("riffraff-artifact")
 riffRaffUploadManifestBucket := Option("riffraff-builds")
-riffRaffManifestProjectName := "MemSub::Subscriptions::Lambdas::Zuora Reports"
+riffRaffManifestProjectName := "MemSub::Membership Admin::Zuora Reports"
 riffRaffArtifactResources += (file("handlers/zuora-reports/cfn.yaml"), "cfn/cfn.yaml")
 
 libraryDependencies ++= Seq(
