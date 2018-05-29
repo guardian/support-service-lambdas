@@ -49,7 +49,7 @@ Resources:
                             - logs:PutLogEvents
                             - lambda:InvokeFunction
                             Resource:
-                            - !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/zuora-reports-${Stage}:log-stream:*
+                            - !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:`/aws/lambda/zuora-reports-${Stage}:log-stream:*
 
                 - PolicyName: ReadPrivateCredentials
                   PolicyDocument:
@@ -67,7 +67,7 @@ Resources:
             Code:
                 S3Bucket: membership-dist
                 S3Key: !Sub membership/${Stage}/zuora-reports/zuora-reports.jar
-            Handler: com.gu.zuora.reports.Handler::apply
+            Handler: com.gu.zuora.report.Handlers::queryHandler
             Environment:
                 Variables:
                   Stage: !Ref Stage

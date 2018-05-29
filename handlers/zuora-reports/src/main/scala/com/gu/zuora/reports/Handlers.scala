@@ -1,12 +1,11 @@
-package com.gu.zuora.report
+package com.gu.zuora.reports
 
 import java.io.{InputStream, OutputStream}
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.RawEffects
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
-import com.gu.zuora.report.aqua.{Querier, QuerierRequest}
-import com.gu.zuora.retention.AquaLambda
+import com.gu.zuora.reports.aqua.{Querier, QuerierRequest}
 
 object Handlers {
 

@@ -1,4 +1,4 @@
-package com.gu.zuora.report.aqua
+package com.gu.zuora.reports.aqua
 
 import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, Requests}
 import com.gu.util.zuora.aqua.ZuoraAquaResponse

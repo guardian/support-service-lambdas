@@ -1,15 +1,15 @@
-package com.gu.zuora.report.aqua
+package com.gu.zuora.reports.aqua
 
 import com.gu.effects.{RawEffects, S3ConfigLoad}
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfig, Stage}
-import com.gu.zuora.retention.AquaLambda.StepsConfig
+import com.gu.zuora.reports.AquaLambda.StepsConfig
 import org.scalatest.{FlatSpec, Matchers}
 import scalaz.{-\/, \/}
 import scalaz.syntax.std.either._
 
 //TODO SEE HOW TO DO EFFECT TESTS FOR REPORT QUERIES SINCE THEY ALL DEPEND ON THIS ONE
-class RetentionQueryEffectsTest extends FlatSpec with Matchers {
+class QuerierEffectsTest extends FlatSpec with Matchers {
   it should "execute submit query" taggedAs EffectsTest in {
 
     val expected = QuerierResponse(

@@ -1,4 +1,4 @@
-package com.gu.zuora.report.aqua
+package com.gu.zuora.reports.aqua
 
 import org.scalatest._
 import play.api.libs.json.Json
