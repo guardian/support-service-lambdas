@@ -9,22 +9,6 @@ Parameters:
             - CODE
             - PROD
         Default: CODE
-
-Mappings:
-    StageVariables:
-        CODE:
-            ReadableS3Buckets:
-              - arn:aws:s3:::gu-reader-revenue-private/membership/payment-failure-lambdas/DEV/*
-              - arn:aws:s3:::gu-reader-revenue-private/membership/payment-failure-lambdas/CODE/*
-        PROD:
-            ReadableS3Buckets:
-              - arn:aws:s3:::gu-reader-revenue-private/membership/payment-failure-lambdas/DEV/*
-              - arn:aws:s3:::gu-reader-revenue-private/membership/payment-failure-lambdas/CODE/*
-              - arn:aws:s3:::gu-reader-revenue-private/membership/payment-failure-lambdas/PROD/*
-
-Conditions:
-    CreateProdOnlyResources: !Equals [ !Ref Stage, PROD ]
-
 Resources:
     ZuoraReportsRole:
         Type: AWS::IAM::Role
@@ -56,8 +40,7 @@ Resources:
                       Statement:
                           - Effect: Allow
                             Action: s3:GetObject
-                            Resource: !Sub arn:aws:s3:::gu-reader-revenue-private/membership/payment-failure-lambdas/${Stage}
-
+                            Resource: !Sub arn:aws:s3:::gu-reader-revenue-private/membership/payment-failure-lambdas/${Stage}/*
     ZuoraReports:
         Type: AWS::Lambda::Function
         Properties:
