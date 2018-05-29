@@ -13,7 +13,6 @@ case class ZuoraAquaResponse(
   id: Option[String]
 )
 
-//todo support syntax error response which is completely different
 object Batch {
   implicit val reads = Json.reads[Batch]
 }
