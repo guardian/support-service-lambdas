@@ -10,7 +10,7 @@ deployments:
     parameters:
       templatePath: cfn.yaml
 
-  zuora-retention:
+  zuora-reports:
     type: aws-lambda
     parameters:
       fileName: zuora-reports.jar
