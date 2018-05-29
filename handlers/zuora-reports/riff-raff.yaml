@@ -17,5 +17,5 @@ deployments:
       bucket: membership-dist
       prefixStack: false
       functionNames:
-      - zuora-reports-
+      - zuora-reports-querier-
     dependencies: [cfn]

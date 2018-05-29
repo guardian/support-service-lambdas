@@ -23,6 +23,17 @@ Resources:
                           - sts:AssumeRole
             Path: /
             Policies:
+                - PolicyName: LambdaPolicy
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                            - logs:CreateLogGroup
+                            - logs:CreateLogStream
+                            - logs:PutLogEvents
+                            - lambda:InvokeFunction
+                            Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/zuora-reports-querier-${Stage}:log-stream:*"
+
                 - PolicyName: ReadPrivateCredentials
                   PolicyDocument:
                       Statement:
