@@ -32,7 +32,7 @@ object ZuoraAquaRequestMaker extends Logging {
         val messagePart = message.getOrElse("No error message")
         GenericError(s"$codePart $messagePart").left
       }
-      case JsSuccess(ZuoraAquaResponse(_, _, _, _, _, _), _) => ().right
+      case JsSuccess(_: ZuoraAquaResponse, _) => ().right
 
       case error: JsError => {
         logger.error(s"Failed to parse Zuora AQuA API response: $error. Response body was: \n $bodyAsJson")

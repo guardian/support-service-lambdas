@@ -24,13 +24,7 @@ object ReportsLambda extends Logging {
 
   implicit val stepsConfigReads: Reads[StepsConfig] = Json.reads[StepsConfig]
 
-  trait LambdaException extends Exception
-
-  object LambdaException {
-    def apply(message: String, root: Throwable) = new Exception(message, root) with LambdaException
-
-    def apply(message: String) = new Exception(message) with LambdaException
-  }
+  case class LambdaException(message: String) extends Exception(message)
 
   def parseRequest[REQUEST](inputStream: InputStream)(implicit r: Reads[REQUEST]): Try[REQUEST] = {
     for {
