@@ -46,7 +46,7 @@ object Runner {
 
     val rawEffects = new TestingRawEffects(defaultCode = 200, postResponses = postResponses)
 
-    def s3Load(s: Stage) = \/-(config)
+    def s3Load(s: Stage) = \/-(TestingRawEffects.codeConfig)
 
     //execute
     ReportsLambda[QuerierRequest](rawEffects.response, rawEffects.stage, s3Load, LambdaIO(stream, os, null), Querier.apply)
@@ -71,56 +71,6 @@ object Runner {
 
 object EndToEndData {
 
-  val config =
-    """
-   {
- |"stage": "DEV",
- |"trustedApiConfig": {
- |"apiToken": "devToken",
- |"tenantId": "someTenant"
- |},
- |"stepsConfig": {
- |"zuoraRestConfig": {
- |"baseUrl": "https://zuoraUrl.com",
- |"username": "someZuoraUserName",
- |"password": "someZuoraPassword"
- |},
- |"identityConfig": {
- |"baseUrl": "https://id.com",
- |"apiToken": "someToken"
- |},
- |"sfConfig": {
- |"url": "https://salesforce.com",
- |"client_id": "someClientId",
- |"client_secret": "someSecret",
- |"username": "someUserName",
- |"password": "somePassword",
- |"token": "someToken"
- |},
- |"emergencyTokens": {
- |"prefix": "SomePrefix",
- |"secret": "someSecret"
- |}
- |},
- |"etConfig": {
- |"etSendIDs": {
- |"pf1": "nothing",
- |"pf2": "nothing",
- |"pf3": "nothing",
- |"pf4": "nothing",
- |"cancelled": "nothing"
- |},
- |"clientId": "someId",
- |"clientSecret": "someSecret"
- |},
- |"stripe": {
- |"customerSourceUpdatedWebhook": {
- |"api.key.secret": "secret",
- |"au-membership.key.secret": "anotherSecret"
- |}
- |}
- |}
-  """.stripMargin
   val aquaQueryResponse =
     """
       |{
