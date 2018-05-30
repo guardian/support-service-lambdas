@@ -1,6 +1,5 @@
 package com.gu.zuora.reports.aqua
 
-import com.gu.util.zuora.aqua.{Batch, ZuoraAquaResponse}
 import org.scalatest.Matchers._
 import org.scalatest._
 import play.api.libs.json.Json

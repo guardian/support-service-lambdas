@@ -4,7 +4,6 @@ import java.util.Base64
 
 import com.gu.util.zuora.{Logging, RestRequestMaker, ZuoraRestConfig}
 import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, GenericError}
-import com.gu.util.zuora.aqua.ZuoraAquaResponse
 import okhttp3.{Request, Response}
 import play.api.libs.json._
 import scalaz.Scalaz._

@@ -1,4 +1,4 @@
-package com.gu.util.zuora.aqua
+package com.gu.zuora.reports.aqua
 
 import play.api.libs.json._
 //probably will have to add the info needed to get file once the query is done
