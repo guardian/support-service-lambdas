@@ -51,7 +51,7 @@ object ReportsLambda extends Logging {
 
     val lambdaResponse = for {
       request <- parseRequest[REQUEST](lambdaIO.inputStream).toEither.disjunction
-      config <- LoadConfig.default[StepsConfig](implicitly)(stage, s3Load(stage)).withLogging("loaded config").leftMap(configError => LambdaException(configError.error))
+      config <- LoadConfig.default[StepsConfig](implicitly)(stage, s3Load(stage)).leftMap(configError => LambdaException(configError.error))
       zuoraRequests = ZuoraAquaRequestMaker(response, config.stepsConfig.zuoraRestConfig)
       callResponse <- aquaCall(zuoraRequests, request).leftMap(error => LambdaException(error.message))
     } yield callResponse
