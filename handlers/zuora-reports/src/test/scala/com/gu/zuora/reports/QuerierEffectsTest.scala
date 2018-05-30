@@ -14,7 +14,7 @@ class QuerierEffectsTest extends FlatSpec with Matchers {
     it should "execute submit query" taggedAs EffectsTest in {
 
       val expected = QuerierResponse(
-        jobId = "something",
+        jobId = "something"
       )
       val actual = for {
         configAttempt <- S3ConfigLoad.load(Stage("DEV")).toEither.disjunction
