@@ -6,7 +6,7 @@ import play.api.libs.json.Json
 
 class AquaResponseTest extends AsyncFlatSpec {
 
-  it should "deserialise successfull query response " in {
+  it should "deserialise successful query response " in {
     val successResponse = Json.parse(
       """{
       |    "encrypted": "none",

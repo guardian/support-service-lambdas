@@ -90,7 +90,7 @@ object EndToEndData {
       |        }
       |    ],
       |    "status": "submitted",
-      |    "name": "verificationQuery3",
+      |    "name": "TestQuery",
       |    "id": "aquaJobId",
       |    "version": "1.0",
       |    "format": "CSV"

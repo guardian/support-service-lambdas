@@ -21,7 +21,7 @@ class QuerierTest extends AsyncFlatSpec {
     Querier.toQuerierResponse(noJobIdResponse) shouldBe -\/(GenericError("unexpected response from zuora: ZuoraAquaResponse(submitted,someNAme,None,None,List(),None)"))
   }
 
-  it should "return jobId if response from Zuora is successfull " in {
+  it should "return jobId if response from Zuora is successful " in {
     val noJobIdResponse = \/-(ZuoraAquaResponse(
       id = Some("jobId"),
       status = "submitted",
