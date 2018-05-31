@@ -33,9 +33,7 @@ object Handler extends Logging {
   ): Unit = {
 
     val attempt = for {
-      config <- LoadConfig.default[StepsConfig](implicitly)(zuoraEnvironment.stageToLoad, s3Load(zuoraEnvironment.stageToLoad))
-        .withLogging("loaded config")
-        .leftMap(_.error)
+      config <- LoadConfig.default[StepsConfig](implicitly)(zuoraEnvironment.stageToLoad, s3Load(zuoraEnvironment.stageToLoad)).leftMap(_.error)
       zuoraRequests = ZuoraRestRequestMaker(response, config.stepsConfig.zuoraRestConfig)
       fetchCatalogAttempt <- ZuoraReadCatalog(zuoraRequests).leftMap(_.message)
       uploadCatalogAttempt <- S3UploadCatalog(stage, zuoraEnvironment, fetchCatalogAttempt, s3Write)
