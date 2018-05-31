@@ -97,6 +97,7 @@ object EndToEndData {
       |}
     """.stripMargin
 
+  //this has to be all in the same line otherwise it would not match the expected request and the test would fail
   val aquaQueryRequest = """{"format":"csv","version":"1.0","name":"TestQuery","encrypted":"none","useQueryLabels":"true","dateTimeUtc":"true","queries":[{"name":"query1","query":"select something from somethingElse","type":"zoqlexport"}]}"""
 
 }
