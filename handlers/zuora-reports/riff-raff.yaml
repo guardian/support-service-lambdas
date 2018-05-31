@@ -1,0 +1,21 @@
+stacks:
+- membership
+regions:
+- eu-west-1
+deployments:
+
+  cfn:
+    type: cloud-formation
+    app: zuora-reports
+    parameters:
+      templatePath: cfn.yaml
+
+  zuora-reports:
+    type: aws-lambda
+    parameters:
+      fileName: zuora-reports.jar
+      bucket: membership-dist
+      prefixStack: false
+      functionNames:
+      - zuora-reports-querier-
+    dependencies: [cfn]
