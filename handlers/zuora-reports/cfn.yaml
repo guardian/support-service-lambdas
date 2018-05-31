@@ -40,7 +40,7 @@ Resources:
                           - Effect: Allow
                             Action: s3:GetObject
                             Resource: !Sub arn:aws:s3:::gu-reader-revenue-private/membership/payment-failure-lambdas/${Stage}/*
-    ZuoraReportsQuery:
+    ZuoraReports:
         Type: AWS::Lambda::Function
         Properties:
             Description: submit query jobs to Zuora AQuA API
