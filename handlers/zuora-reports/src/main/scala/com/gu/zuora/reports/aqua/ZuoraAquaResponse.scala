@@ -1,8 +1,12 @@
 package com.gu.zuora.reports.aqua
 
 import play.api.libs.json._
-//probably will have to add the info needed to get file once the query is done
-case class Batch(status: String, name: String)
+
+case class Batch(
+  status: String,
+  name: String,
+  fileId: Option[String] = None
+)
 
 case class ZuoraAquaResponse(
   status: String,
@@ -16,6 +20,7 @@ case class ZuoraAquaResponse(
 object Batch {
   implicit val reads = Json.reads[Batch]
 }
+
 object ZuoraAquaResponse {
   implicit val reads = Json.reads[ZuoraAquaResponse]
 }

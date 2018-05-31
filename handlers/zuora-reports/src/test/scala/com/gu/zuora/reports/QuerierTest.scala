@@ -12,25 +12,25 @@ class QuerierTest extends AsyncFlatSpec {
     val noJobIdResponse = \/-(ZuoraAquaResponse(
       id = None,
       status = "submitted",
-      name = "someNAme",
+      name = "someName",
       errorCode = None,
       message = None,
       batches = Seq()
     ))
 
-    Querier.toQuerierResponse(noJobIdResponse) shouldBe -\/(GenericError("unexpected response from zuora: ZuoraAquaResponse(submitted,someNAme,None,None,List(),None)"))
+    Querier.toQuerierResponse(noJobIdResponse) shouldBe -\/(GenericError("unexpected response from zuora: ZuoraAquaResponse(submitted,someName,None,None,List(),None)"))
   }
 
   it should "return jobId if response from Zuora is successful " in {
     val noJobIdResponse = \/-(ZuoraAquaResponse(
       id = Some("jobId"),
       status = "submitted",
-      name = "someNAme",
+      name = "someName",
       errorCode = None,
       message = None,
       batches = Seq()
     ))
 
-    Querier.toQuerierResponse(noJobIdResponse) shouldBe \/-(QuerierResponse("jobId"))
+    Querier.toQuerierResponse(noJobIdResponse) shouldBe \/-(QuerierResponse("someName", "jobId"))
   }
 }

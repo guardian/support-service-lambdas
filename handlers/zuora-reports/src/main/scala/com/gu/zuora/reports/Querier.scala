@@ -15,7 +15,7 @@ object Querier {
 
   def toQuerierResponse(aquaResponse: ClientFailableOp[ZuoraAquaResponse]): ClientFailableOp[QuerierResponse] = {
     aquaResponse match {
-      case \/-(ZuoraAquaResponse(status, _, _, _, _, Some(jobId))) if (status.toLowerCase == "submitted") => \/-(QuerierResponse(jobId))
+      case \/-(ZuoraAquaResponse(status, name, _, _, _, Some(jobId))) if (status.toLowerCase == "submitted") => \/-(QuerierResponse(name, jobId))
       case \/-(zuoraResponse) => -\/(GenericError(s"unexpected response from zuora: $zuoraResponse"))
       case -\/(error) => -\/(error)
     }
@@ -32,7 +32,7 @@ object Querier {
   )
 }
 
-case class QuerierResponse(jobId: String)
+case class QuerierResponse(name: String, jobId: String)
 
 object QuerierResponse {
   implicit val writes = Json.writes[QuerierResponse]
