@@ -207,11 +207,11 @@ Resources:
 
     InvocationErrorsAlarm:
       Type: AWS::CloudWatch::Alarm
-      # Condition: CreateProdOnlyResources
+      Condition: CreateProdOnlyResources
       Properties:
         AlarmActions:
         - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:subscriptions_dev
-        AlarmName: High error rate for PROD Zuora Catalog Service
+        AlarmName: High error rate for Zuora PROD Catalog Service
         ComparisonOperator: GreaterThanThreshold
         Dimensions:
           - Name: FunctionName
@@ -219,7 +219,7 @@ Resources:
         EvaluationPeriods: 9
         MetricName: Errors
         Namespace: AWS/Lambda
-        Period: 3600
+        Period: 600
         Statistic: Sum
         Threshold: 1
         TreatMissingData: notBreaching
