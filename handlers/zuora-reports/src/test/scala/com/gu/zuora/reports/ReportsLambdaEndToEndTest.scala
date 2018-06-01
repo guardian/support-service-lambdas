@@ -56,7 +56,7 @@ class ReportsLambdaEndToEndTest extends FlatSpec with Matchers {
 
     val responses = Map("/batch-query/jobs/aquaJobId" -> HTTPResponse(200, aquaJobResponse))
 
-    val (response, bla) = getResultAndRequests[JobResultRequest, JobResultResponse](
+    val (response, bla) = getResultAndRequests[JobResultRequest, JobResult](
       input = jobInput,
       responses = responses,
       handlerToTest = GetJobResult.apply

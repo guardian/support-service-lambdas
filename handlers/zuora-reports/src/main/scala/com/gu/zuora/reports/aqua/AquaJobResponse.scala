@@ -1,6 +1,6 @@
 package com.gu.zuora.reports.aqua
 
-import play.api.libs.json._
+import play.api.libs.json.Json
 
 case class Batch(
   status: String,
@@ -8,11 +8,9 @@ case class Batch(
   fileId: Option[String] = None
 )
 
-case class ZuoraAquaResponse(
+case class AquaJobResponse(
   status: String,
   name: String,
-  errorCode: Option[String] = None,
-  message: Option[String] = None,
   batches: Seq[Batch],
   id: Option[String]
 )
@@ -21,7 +19,7 @@ object Batch {
   implicit val reads = Json.reads[Batch]
 }
 
-object ZuoraAquaResponse {
-  implicit val reads = Json.reads[ZuoraAquaResponse]
+object AquaJobResponse {
+  implicit val reads = Json.reads[AquaJobResponse]
 }
 
