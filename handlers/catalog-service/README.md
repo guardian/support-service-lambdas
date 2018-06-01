@@ -8,7 +8,7 @@ This means that applications can use the product catalog without requiring API c
 The PROD stack fetches the catalog from each Zuora environment (DEV, UAT and PROD). 
 The CODE stack fetches the catalog from Zuora DEV and UAT only, and cannot access the PROD Zuora credentials or environment.
 
-Each stack contains a function per Zuora environment to simplify monitoring and prevent any instability of Zuora's sandbox from affecting the PROD service.
+Each stack contains a lambda per Zuora environment to simplify monitoring and prevent any instability of Zuora's sandbox from affecting the PROD service.
 
 The PROD and CODE stacks upload files to different S3 locations so that applications (and developers running locally) always download a catalog which has been uploaded by a PROD function.
 Consequently, developers can test in CODE without worrying about their changes affecting other developers or applications. 
