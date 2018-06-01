@@ -111,7 +111,7 @@ The main project aggregates all the sub projects from handlers and lib, so we ca
 
 [identity-retention](handlers/identity-retention)
 
-*Zuora Reports*
+**Zuora Reports**
 
 [zuora-reports](handlers/zuora-reports)
 
