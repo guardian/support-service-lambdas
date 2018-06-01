@@ -205,18 +205,56 @@ Resources:
         DependsOn:
         - PRODCatalogServiceLambda
 
-    InvocationErrorsAlarm:
+    StaleProdCatalogAlarm:
       Type: AWS::CloudWatch::Alarm
       Condition: CreateProdOnlyResources
       Properties:
         AlarmActions:
         - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:subscriptions_dev
-        AlarmName: High error rate for Zuora PROD Catalog Service
+        AlarmName: High error rate when fetching PROD Zuora Catalog
         ComparisonOperator: GreaterThanThreshold
         Dimensions:
           - Name: FunctionName
             Value: !Ref PRODCatalogServiceLambda
         EvaluationPeriods: 9
+        MetricName: Errors
+        Namespace: AWS/Lambda
+        Period: 600
+        Statistic: Sum
+        Threshold: 1
+        TreatMissingData: notBreaching
+
+    StaleUatCatalogAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Condition: CreateProdOnlyResources
+      Properties:
+        AlarmActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:subscriptions_dev
+        AlarmName: High error rate when fetching UAT Zuora Catalog
+        ComparisonOperator: GreaterThanThreshold
+        Dimensions:
+          - Name: FunctionName
+            Value: !Ref UATCatalogServiceLambda
+        EvaluationPeriods: 18
+        MetricName: Errors
+        Namespace: AWS/Lambda
+        Period: 600
+        Statistic: Sum
+        Threshold: 1
+        TreatMissingData: notBreaching
+
+    StaleDevCatalogAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Condition: CreateProdOnlyResources
+      Properties:
+        AlarmActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:subscriptions_dev
+        AlarmName: High error rate when fetching DEV Zuora Catalog
+        ComparisonOperator: GreaterThanThreshold
+        Dimensions:
+          - Name: FunctionName
+            Value: !Ref DEVCatalogServiceLambda
+        EvaluationPeriods: 36
         MetricName: Errors
         Namespace: AWS/Lambda
         Period: 600
