@@ -29,13 +29,13 @@ class GetJobResultTest extends AsyncFlatSpec {
   ))
 
   it should "return pending if zuora response status is pending " in {
-    GetJobResult.toCheckerResponse(ZuoraResponseWithStatus("pending")) shouldBe \/-(Pending)
+    GetJobResult.toJobResultResponse(ZuoraResponseWithStatus("pending")) shouldBe \/-(Pending)
   }
   it should "return pending if zuora response status is executing " in {
-    GetJobResult.toCheckerResponse(ZuoraResponseWithStatus("executing")) shouldBe \/-(Pending)
+    GetJobResult.toJobResultResponse(ZuoraResponseWithStatus("executing")) shouldBe \/-(Pending)
   }
   it should "return error if zuora response status is an unexpected value " in {
-    GetJobResult.toCheckerResponse(ZuoraResponseWithStatus("aborted")) shouldBe -\/(GenericError("unexpected status in zuora response: ZuoraAquaResponse(aborted,testResponse,None,None,List(Batch(completed,batch1,Some(fileId1)), Batch(completed,batch2,Some(fileId2))),None)"))
+    GetJobResult.toJobResultResponse(ZuoraResponseWithStatus("aborted")) shouldBe -\/(GenericError("unexpected status in zuora response: ZuoraAquaResponse(aborted,testResponse,None,None,List(Batch(completed,batch1,Some(fileId1)), Batch(completed,batch2,Some(fileId2))),None)"))
   }
 
   it should "return completed if zuora response status is completed " in {
@@ -46,7 +46,7 @@ class GetJobResultTest extends AsyncFlatSpec {
         Batch("fileId2", "batch2")
       )
     )
-    GetJobResult.toCheckerResponse(ZuoraResponseWithStatus("completed")) shouldBe \/-(expected)
+    GetJobResult.toJobResultResponse(ZuoraResponseWithStatus("completed")) shouldBe \/-(expected)
   }
   it should "return error if zuora response status is completed but the response is missing fileIds" in {
 
@@ -70,6 +70,6 @@ class GetJobResultTest extends AsyncFlatSpec {
       )
     ))
 
-    GetJobResult.toCheckerResponse(responseWithMissingFileId) shouldBe -\/(GenericError("file Id missing from response : \\/-(ZuoraAquaResponse(completed,testResponse,None,None,List(Batch(completed,batch1,Some(fileId1)), Batch(completed,batch2,None)),None))"))
+    GetJobResult.toJobResultResponse(responseWithMissingFileId) shouldBe -\/(GenericError("file Id missing from response : \\/-(ZuoraAquaResponse(completed,testResponse,None,None,List(Batch(completed,batch1,Some(fileId1)), Batch(completed,batch2,None)),None))"))
   }
 }
