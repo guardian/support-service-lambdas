@@ -9,14 +9,14 @@ import scalaz.{-\/, \/-}
 object GetJobResult {
   def apply(zuoraRequester: Requests, JobResultRequest: JobResultRequest): ClientFailableOp[JobResultResponse] = {
     val zuoraAquaResponse = zuoraRequester.get[ZuoraAquaResponse](s"batch-query/jobs/${JobResultRequest.jobId}")
-    toCheckerResponse(zuoraAquaResponse)
+    toJobResultResponse(zuoraAquaResponse)
   }
 
   def toBatch(aquaBatch: aqua.Batch): Option[Batch] = aquaBatch.fileId.map {
     fileId => Batch(name = aquaBatch.name, fileId = fileId)
   }
 
-  def toCheckerResponse(aquaResponse: ClientFailableOp[ZuoraAquaResponse]): ClientFailableOp[JobResultResponse] = {
+  def toJobResultResponse(aquaResponse: ClientFailableOp[ZuoraAquaResponse]): ClientFailableOp[JobResultResponse] = {
     aquaResponse match {
       case \/-(ZuoraAquaResponse(status, name, _, _, aquaBatches, _)) if (status.isCompleted) =>
         val batches = aquaBatches.map(toBatch)

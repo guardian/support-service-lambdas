@@ -61,12 +61,12 @@ Resources:
         DependsOn:
         - ZuoraReportsRole
 
-    ZuoraReportsFetcher:
+    ZuoraReportsJobResult:
         Type: AWS::Lambda::Function
         Properties:
             Description: fetch job results from zuora
             FunctionName:
-                !Sub zuora-reports-fetcher-${Stage}
+                !Sub zuora-reports-jobResult-${Stage}
             Code:
                 S3Bucket: membership-dist
                 S3Key: !Sub membership/${Stage}/zuora-reports/zuora-reports.jar
