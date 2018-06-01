@@ -6,7 +6,7 @@ import org.scalatest.AsyncFlatSpec
 import org.scalatest.Matchers._
 import scalaz.{-\/, \/-}
 
-class GetJobStatusTest extends AsyncFlatSpec {
+class GetJobResultTest extends AsyncFlatSpec {
 
   def ZuoraResponseWithStatus(status: String) = \/-(ZuoraAquaResponse(
     id = None,
