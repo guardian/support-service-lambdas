@@ -1,5 +1,7 @@
 package com.gu.util.zuora
 
+import java.io.InputStream
+
 import okhttp3.{MediaType, Request, RequestBody, Response}
 import play.api.libs.json._
 import scalaz.Scalaz._
@@ -75,6 +77,12 @@ object RestRequestMaker extends Logging {
       } yield ()
     }
 
+
+    def download(path: String) : InputStream = {
+      //TODO GETRESPONSE HAS A 15 SECONDS TIMEOUT SET IN RAWEFFECTS!!
+      val request =  buildRequest(headers, baseUrl + path, _.get())
+      val response = getResponse(request)
+      response.body().byteStream()
   }
 
   def sendRequest(request: Request, getResponse: Request => Response): ClientFailableOp[String] = {

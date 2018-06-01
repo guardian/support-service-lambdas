@@ -1,10 +1,14 @@
 package com.gu.effects
 
+import java.io.{InputStream, OutputStream}
+
 import okhttp3.{Request, Response}
 import java.time.LocalDateTime
+
 import com.amazonaws.services.s3.model.{PutObjectRequest, PutObjectResult}
 import com.gu.util.config.ConfigReads.ConfigFailure
 import com.gu.util.config.{Stage, ZuoraEnvironment}
+
 import scala.util.Try
 import scalaz.\/
 
@@ -28,6 +32,8 @@ object RawEffects {
   val response: Request => Response = Http.response
   def s3Load: Stage => ConfigFailure \/ String = S3ConfigLoad.load
   def s3Write: PutObjectRequest => Try[PutObjectResult] = UploadToS3.putObject
+  def s3WriteStream: InputStream => Try[Unit] = StreamToS3.stream
+
   def now = () => LocalDateTime.now
 
 }

@@ -1,5 +1,7 @@
 package com.gu.effects
 
+import java.io.InputStream
+
 import com.amazonaws.auth._
 import com.amazonaws.auth.profile.ProfileCredentialsProvider
 import com.amazonaws.services.s3.AmazonS3Client
@@ -7,9 +9,12 @@ import com.amazonaws.services.s3.model.{GetObjectRequest, PutObjectRequest, PutO
 import com.gu.util.Logging
 import com.gu.util.config.ConfigReads.ConfigFailure
 import com.gu.util.config.Stage
+
 import scala.io.Source
 import scala.util.{Failure, Success, Try}
 import scalaz.{-\/, \/, \/-}
+
+import scala.sys.process.processInternal.OutputStream
 
 object S3ConfigLoad extends Logging {
 
@@ -71,6 +76,13 @@ object UploadToS3 extends Logging {
     uploadRequest
   }
 
+}
+
+object StreamToS3 extends Logging {
+
+  def stream(inputstream: InputStream): Try[Unit] = {
+    Success()
+  }
 }
 
 object AwsS3 {
