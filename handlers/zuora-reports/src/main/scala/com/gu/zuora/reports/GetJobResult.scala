@@ -7,8 +7,8 @@ import play.api.libs.json._
 import scalaz.{-\/, \/-}
 
 object GetJobResult {
-  def apply(zuoraRequester: Requests, JobResultRequest: JobResultRequest): ClientFailableOp[JobResult] = {
-    val zuoraAquaResponse = zuoraRequester.get[AquaJobResponse](s"batch-query/jobs/${JobResultRequest.jobId}")
+  def apply(zuoraRequester: Requests, jobResultRequest: JobResultRequest): ClientFailableOp[JobResult] = {
+    val zuoraAquaResponse = zuoraRequester.get[AquaJobResponse](s"batch-query/jobs/${jobResultRequest.jobId}")
     toJobResultResponse(zuoraAquaResponse)
   }
 
@@ -18,7 +18,7 @@ object GetJobResult {
 
   def toJobResultResponse(aquaResponse: ClientFailableOp[AquaJobResponse]): ClientFailableOp[JobResult] = {
     aquaResponse match {
-      case \/-(AquaJobResponse(status, name, aquaBatches, _)) if (status == "completed") =>
+      case \/-(AquaJobResponse(status, name, aquaBatches, _)) if status == "completed" =>
         val batches = aquaBatches.map(toBatch)
         if (batches.contains(None)) {
           -\/(RestRequestMaker.GenericError(s"file Id missing from response : $aquaResponse"))
@@ -26,7 +26,7 @@ object GetJobResult {
           \/-(Completed(name, batches.flatten))
         }
 
-      case \/-(AquaJobResponse(status, _, _, _)) if (pendingValues.contains((status))) => \/-(Pending)
+      case \/-(AquaJobResponse(status, _, _, _)) if pendingValues.contains(status) => \/-(Pending)
       case \/-(zuoraResponse) => -\/(GenericError(s"unexpected status in zuora response: $zuoraResponse"))
       case -\/(error) => -\/(error)
     }
