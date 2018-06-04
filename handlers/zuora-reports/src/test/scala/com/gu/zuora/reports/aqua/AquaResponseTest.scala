@@ -43,7 +43,7 @@ class AquaResponseTest extends AsyncFlatSpec {
       |}""".stripMargin
     )
 
-    val expected = ZuoraAquaResponse(
+    val expected = AquaJobResponse(
       status = "submitted",
       name = "testJob",
       batches = Seq(
@@ -53,48 +53,7 @@ class AquaResponseTest extends AsyncFlatSpec {
       id = Some("1adsad12983729873298173982173982")
     )
 
-    val actual = successResponse.as[ZuoraAquaResponse]
-    actual shouldBe expected
-  }
-
-  it should "deserialise query syntax error response " in {
-    val successResponse = Json.parse(
-      """{
-        |    "errorCode": "90005",
-        |    "message": "There is a syntax error in one of the queries in the AQuA input",
-        |    "batches": [
-        |        {
-        |            "localizedStatus": "pending",
-        |            "recordCount": 0,
-        |            "batchType": "zoqlexport",
-        |            "apiVersion": "91.0",
-        |            "full": true,
-        |            "status": "pending",
-        |            "name": "job1",
-        |            "query": "bad query"
-        |        }
-        |    ],
-        |    "useLastCompletedJobQueries": false,
-        |    "encrypted": "none",
-        |    "status": "error",
-        |    "name": "testJob",
-        |    "version": "1.0",
-        |    "format": "CSV"
-        |}""".stripMargin
-    )
-
-    val expected = ZuoraAquaResponse(
-      status = "error",
-      name = "testJob",
-      errorCode = Some("90005"),
-      message = Some("There is a syntax error in one of the queries in the AQuA input"),
-      batches = Seq(
-        Batch("pending", "job1")
-      ),
-      id = None
-    )
-
-    val actual = successResponse.as[ZuoraAquaResponse]
+    val actual = successResponse.as[AquaJobResponse]
     actual shouldBe expected
   }
 

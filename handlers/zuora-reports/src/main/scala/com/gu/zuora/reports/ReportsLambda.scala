@@ -41,13 +41,13 @@ object ReportsLambda extends Logging {
     writer.close()
   }
 
-  def apply[REQUEST](
+  def apply[REQUEST, RESPONSE](
     response: Request => Response,
     stage: Stage,
     s3Load: Stage => ConfigFailure \/ String,
     lambdaIO: LambdaIO,
-    aquaCall: (Requests, REQUEST) => ClientFailableOp[QuerierResponse]
-  )(implicit r: Reads[REQUEST]): Unit = {
+    aquaCall: (Requests, REQUEST) => ClientFailableOp[RESPONSE]
+  )(implicit r: Reads[REQUEST], w: Writes[RESPONSE]): Unit = {
 
     val lambdaResponse = for {
       request <- parseRequest[REQUEST](lambdaIO.inputStream).toEither.disjunction

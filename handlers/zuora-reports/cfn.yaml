@@ -60,3 +60,24 @@ Resources:
             Timeout: 300
         DependsOn:
         - ZuoraReportsRole
+
+    ZuoraReportsJobResult:
+        Type: AWS::Lambda::Function
+        Properties:
+            Description: fetch job results from zuora
+            FunctionName:
+                !Sub zuora-reports-jobResult-${Stage}
+            Code:
+                S3Bucket: membership-dist
+                S3Key: !Sub membership/${Stage}/zuora-reports/zuora-reports.jar
+            Handler: com.gu.zuora.reports.Handlers::fetchResultsHandler
+            Environment:
+                Variables:
+                  Stage: !Ref Stage
+            Role:
+                !GetAtt ZuoraReportsRole.Arn
+            MemorySize: 1536
+            Runtime: java8
+            Timeout: 300
+        DependsOn:
+        - ZuoraReportsRole

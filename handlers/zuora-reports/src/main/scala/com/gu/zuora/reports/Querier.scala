@@ -1,7 +1,7 @@
 package com.gu.zuora.reports
 
 import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, GenericError, Requests}
-import com.gu.zuora.reports.aqua.{AquaQuery, AquaQueryRequest, ZuoraAquaResponse}
+import com.gu.zuora.reports.aqua.{AquaQuery, AquaQueryRequest, AquaJobResponse}
 import play.api.libs.json.Json
 import scalaz.{-\/, \/-}
 
@@ -9,13 +9,13 @@ object Querier {
 
   def apply(zuoraRequester: Requests, querierRequest: QuerierRequest): ClientFailableOp[QuerierResponse] = {
     val aquaRequest = toAquaQueryRequest(querierRequest)
-    val aquaResponse = zuoraRequester.post[AquaQueryRequest, ZuoraAquaResponse](aquaRequest, "batch-query/")
+    val aquaResponse = zuoraRequester.post[AquaQueryRequest, AquaJobResponse](aquaRequest, "batch-query/")
     toQuerierResponse(aquaResponse)
   }
 
-  def toQuerierResponse(aquaResponse: ClientFailableOp[ZuoraAquaResponse]): ClientFailableOp[QuerierResponse] = {
+  def toQuerierResponse(aquaResponse: ClientFailableOp[AquaJobResponse]): ClientFailableOp[QuerierResponse] = {
     aquaResponse match {
-      case \/-(ZuoraAquaResponse(status, _, _, _, _, Some(jobId))) if (status.toLowerCase == "submitted") => \/-(QuerierResponse(jobId))
+      case \/-(AquaJobResponse(status, name, _, Some(jobId))) if (status.toLowerCase == "submitted") => \/-(QuerierResponse(name, jobId))
       case \/-(zuoraResponse) => -\/(GenericError(s"unexpected response from zuora: $zuoraResponse"))
       case -\/(error) => -\/(error)
     }
@@ -32,7 +32,7 @@ object Querier {
   )
 }
 
-case class QuerierResponse(jobId: String)
+case class QuerierResponse(name: String, jobId: String)
 
 object QuerierResponse {
   implicit val writes = Json.writes[QuerierResponse]
