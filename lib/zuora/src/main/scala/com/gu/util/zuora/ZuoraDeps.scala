@@ -1,6 +1,6 @@
 package com.gu.util.zuora
 
-import play.api.libs.json.{JsPath, Json, Reads}
+import play.api.libs.json.Json
 
 case class ZuoraRestConfig(
   baseUrl: String,

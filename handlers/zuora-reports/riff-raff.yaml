@@ -18,4 +18,5 @@ deployments:
       prefixStack: false
       functionNames:
       - zuora-reports-querier-
+      - zuora-reports-jobResult-
     dependencies: [cfn]
