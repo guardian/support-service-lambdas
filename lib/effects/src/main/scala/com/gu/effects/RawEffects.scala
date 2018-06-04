@@ -32,7 +32,7 @@ object RawEffects {
   val response: Request => Response = Http.response
   def s3Load: Stage => ConfigFailure \/ String = S3ConfigLoad.load
   def s3Write: PutObjectRequest => Try[PutObjectResult] = UploadToS3.putObject
-  def s3WriteStream: InputStream => Try[Unit] = StreamToS3.stream
+  def s3WriteStream: (InputStream, Int, String) => Try[Unit] = StreamToS3.stream
 
   def now = () => LocalDateTime.now
 

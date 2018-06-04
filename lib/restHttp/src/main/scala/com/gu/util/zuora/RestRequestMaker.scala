@@ -77,12 +77,21 @@ object RestRequestMaker extends Logging {
       } yield ()
     }
 
-
-    def download(path: String) : InputStream = {
-      //TODO GETRESPONSE HAS A 15 SECONDS TIMEOUT SET IN RAWEFFECTS!!
-      val request =  buildRequest(headers, baseUrl + path, _.get())
+    case class DownloadStream(stream: InputStream, lengthBytes: Int)
+    def download(path: String): DownloadStream = {
+      logger.info("HELLO!!!")
+      logger.info(s"path is $path")
+      logger.info(s"baseUrl is $baseUrl")
+      //TODO GETRESPONSE HAS A 15 SECOND TIMEOUT SET IN RAWEFFECTS!!
+      val request = buildRequest(headers, baseUrl + path, _.get())
+      logger.info(s"request headers ${request.headers()}")
       val response = getResponse(request)
-      response.body().byteStream()
+      logger.info(s"reqsponse headers ${response.headers()}")
+      DownloadStream(
+        stream = response.body().byteStream,
+        lengthBytes = response.header("content-length").toInt
+      ) //todo see what to do if we don't get the lenght
+    }
   }
 
   def sendRequest(request: Request, getResponse: Request => Response): ClientFailableOp[String] = {
