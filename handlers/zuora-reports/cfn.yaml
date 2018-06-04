@@ -139,7 +139,6 @@ Resources:
             Timeout: 300
         DependsOn:
         - ZuoraQuerierRole
-
     ZuoraReportsJobResult:
         Type: AWS::Lambda::Function
         Properties:
@@ -160,7 +159,7 @@ Resources:
             Timeout: 300
         DependsOn:
         - ZuoraResultsRole
-    ZuoraReportsJobResult:
+    ZuoraReportsFileFetcher:
         Type: AWS::Lambda::Function
         Properties:
             Description: fetches report files and saves them to s3
