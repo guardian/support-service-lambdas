@@ -15,4 +15,9 @@ object Handlers {
     ReportsLambda[JobResultRequest, JobResult](RawEffects.response, RawEffects.stage, RawEffects.s3Load, LambdaIO(inputStream, outputStream, context), GetJobResult.apply)
   }
 
+  def fetchFileHandler(inputStream: InputStream, outputStream: OutputStream, context: Context) = {
+    val fetchFile = FetchFile(RawEffects.s3Write) _
+    ReportsLambda[FetchFileRequest, FetchFileResponse](RawEffects.response, RawEffects.stage, RawEffects.s3Load, LambdaIO(inputStream, outputStream, context), fetchFile)
+  }
+
 }

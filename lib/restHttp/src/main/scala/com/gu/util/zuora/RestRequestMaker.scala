@@ -77,7 +77,7 @@ object RestRequestMaker extends Logging {
       } yield ()
     }
 
-    case class DownloadStream(stream: InputStream, lengthBytes: Int)
+    case class DownloadStream(stream: InputStream, lengthBytes: Long)
     def download(path: String): DownloadStream = {
       logger.info("HELLO!!!")
       logger.info(s"path is $path")
@@ -89,7 +89,7 @@ object RestRequestMaker extends Logging {
       logger.info(s"reqsponse headers ${response.headers()}")
       DownloadStream(
         stream = response.body().byteStream,
-        lengthBytes = response.header("content-length").toInt
+        lengthBytes = response.header("content-length").toLong
       ) //todo see what to do if we don't get the lenght
     }
   }
