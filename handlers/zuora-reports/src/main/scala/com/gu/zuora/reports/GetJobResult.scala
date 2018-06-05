@@ -26,7 +26,7 @@ object GetJobResult {
           \/-(Completed(name, batches.flatten))
         }
 
-      case \/-(AquaJobResponse(status, _, _, _)) if pendingValues.contains(status) => \/-(Pending)
+      case \/-(AquaJobResponse(status, name, _, _)) if pendingValues.contains(status) => \/-(Pending(name))
       case \/-(zuoraResponse) => -\/(GenericError(s"unexpected status in zuora response: $zuoraResponse"))
       case -\/(error) => -\/(error)
     }
@@ -41,27 +41,40 @@ object JobResultRequest {
   implicit val reads = Json.reads[JobResultRequest]
 }
 
-sealed trait JobResult
+sealed trait JobResult {
+  def name: String
+}
 
 case class Completed(name: String, batches: Seq[Batch]) extends JobResult
 
-object Pending extends JobResult
+case class Pending(name: String) extends JobResult
 
 case class Batch(fileId: String, name: String)
-
-object JobResult {
-  implicit val writes = new Writes[JobResult] {
-    override def writes(jobResult: JobResult): JsValue = jobResult match {
-      case Pending => JsString("Pending")
-      case c: Completed => Completed.writes.writes(c)
-    }
-  }
-}
 
 object Batch {
   implicit val writes = Json.writes[Batch]
 }
 
-object Completed {
-  val writes = Json.writes[Completed]
+case class JobResultWire(
+  name: String,
+  status: String,
+  batches: Option[Seq[Batch]]
+)
+
+object JobResultWire {
+  implicit val writes = Json.writes[JobResultWire]
+  def fromJobResult(jobResult: JobResult) = jobResult match {
+    case Completed(name, batches) => JobResultWire(name, "completed", Some(batches))
+    case Pending(name) => JobResultWire(name, "pending", None)
+  }
 }
+
+object JobResult {
+  implicit val writes = new Writes[JobResult] {
+    override def writes(result: JobResult): JsValue = {
+      val wireResult = JobResultWire.fromJobResult(result)
+      JobResultWire.writes.writes(wireResult)
+    }
+  }
+}
+
