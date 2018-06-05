@@ -2,20 +2,16 @@ package com.gu.zuora.reports
 
 import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, DownloadStream, GenericError, Requests}
 import play.api.libs.json._
-import scalaz.{-\/, \/-}
-
-import scala.util.{Failure, Success, Try}
 
 object FetchFile {
   def apply(
-    uploader: (DownloadStream, String) => Try[String],
+    uploader: (DownloadStream, String) => ClientFailableOp[String],
     zuoraRequester: Requests
   )(fetchFileRequest: FetchFileRequest): ClientFailableOp[FetchFileResponse] = {
-    val downloadStream = zuoraRequester.download(s"batch-query/file/${fetchFileRequest.fileId}")
-    uploader(downloadStream, fetchFileRequest.name) match {
-      case Success(path) => \/-(FetchFileResponse(fetchFileRequest.fileId, path))
-      case Failure(ex) => -\/(GenericError(ex.getMessage))
-    }
+    for {
+      downloadStream <- zuoraRequester.getDownloadStream(s"batch-query/file/${fetchFileRequest.fileId}")
+      uploadPath <- uploader(downloadStream, fetchFileRequest.name)
+    } yield FetchFileResponse(fetchFileRequest.fileId, uploadPath)
   }
 }
 

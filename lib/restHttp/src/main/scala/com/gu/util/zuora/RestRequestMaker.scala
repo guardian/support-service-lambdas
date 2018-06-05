@@ -5,17 +5,22 @@ import java.io.InputStream
 import okhttp3.{MediaType, Request, RequestBody, Response}
 import play.api.libs.json._
 import scalaz.Scalaz._
-import scalaz.{\/, \/-}
+import scalaz.{-\/, \/, \/-}
+
+import scala.util.{Failure, Success, Try}
 
 object RestRequestMaker extends Logging {
 
   sealed trait ClientFail {
     def message: String
   }
+
   case class NotFound(message: String) extends ClientFail
+
   case class GenericError(message: String) extends ClientFail
 
   type ClientFailableOp[A] = ClientFail \/ A
+
   def httpIsSuccessful(response: Response): ClientFailableOp[Unit] = {
     if (response.isSuccessful) {
       ().right
@@ -40,6 +45,7 @@ object RestRequestMaker extends Logging {
       }
     }
   }
+
   case class DownloadStream(stream: InputStream, lengthBytes: Long)
 
   class Requests(headers: Map[String, String], baseUrl: String, getResponse: Request => Response, jsonIsSuccessful: JsValue => ClientFailableOp[Unit]) {
@@ -78,19 +84,20 @@ object RestRequestMaker extends Logging {
       } yield ()
     }
 
-    def download(path: String): DownloadStream = {
-      logger.info("HELLO!!!")
-      logger.info(s"path is $path")
-      logger.info(s"baseUrl is $baseUrl")
-      //TODO GETRESPONSE HAS A 15 SECOND TIMEOUT SET IN RAWEFFECTS!!
+    private def extractContentLength(response: Response) = {
+      Try(response.header("content-length").toLong) match {
+        case Success(contentlength) => \/-(contentlength)
+        case Failure(error) => -\/(GenericError(s"could not extract content length from response ${error.getMessage}"))
+      }
+    }
+
+    def getDownloadStream(path: String): ClientFailableOp[DownloadStream] = {
       val request = buildRequest(headers, baseUrl + path, _.get())
-      logger.info(s"request headers ${request.headers()}")
       val response = getResponse(request)
-      logger.info(s"reqsponse headers ${response.headers()}")
-      DownloadStream(
-        stream = response.body().byteStream,
-        lengthBytes = response.header("content-length").toLong
-      ) //todo see what to do if we don't get the lenght
+      for {
+        _ <- httpIsSuccessful(response)
+        contentlength <- extractContentLength(response)
+      } yield DownloadStream(response.body.byteStream, contentlength)
     }
   }
 
