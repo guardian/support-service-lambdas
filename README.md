@@ -95,18 +95,26 @@ The main project aggregates all the sub projects from handlers and lib, so we ca
 
 [root handlers readme](handlers/root.md)
 
-**Identity backfill**
+**Catalog Service**
 
-[identity-backfill](handlers/identity-backfill/)
+[catalog-service](handlers/catalog-service)
 
 **Digital Subscription Expiry**
 
 [digital-subscription-expiry](handlers/digital-subscription-expiry)
 
-**Catalog Service**
+**Identity Backfill**
 
-[catalog-service](handlers/catalog-service)
+[identity-backfill](handlers/identity-backfill)
+
+**Identity Retention**
+
+[identity-retention](handlers/identity-retention)
+
+**Zuora Reports**
+
+[zuora-reports](handlers/zuora-reports)
 
 **Libraries**
 
-[shared code](lib/)
+[shared code](lib)
