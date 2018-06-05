@@ -40,6 +40,7 @@ object RestRequestMaker extends Logging {
       }
     }
   }
+  case class DownloadStream(stream: InputStream, lengthBytes: Long)
 
   class Requests(headers: Map[String, String], baseUrl: String, getResponse: Request => Response, jsonIsSuccessful: JsValue => ClientFailableOp[Unit]) {
     // this can be a class and still be cohesive because every single method in the class needs every single value.  so we are effectively partially
@@ -77,7 +78,6 @@ object RestRequestMaker extends Logging {
       } yield ()
     }
 
-    case class DownloadStream(stream: InputStream, lengthBytes: Long)
     def download(path: String): DownloadStream = {
       logger.info("HELLO!!!")
       logger.info(s"path is $path")

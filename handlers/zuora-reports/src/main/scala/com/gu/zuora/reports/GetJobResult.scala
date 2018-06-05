@@ -7,7 +7,7 @@ import play.api.libs.json._
 import scalaz.{-\/, \/-}
 
 object GetJobResult {
-  def apply(zuoraRequester: Requests, jobResultRequest: JobResultRequest): ClientFailableOp[JobResult] = {
+  def apply(zuoraRequester: Requests)(jobResultRequest: JobResultRequest): ClientFailableOp[JobResult] = {
     val zuoraAquaResponse = zuoraRequester.get[AquaJobResponse](s"batch-query/jobs/${jobResultRequest.jobId}")
     toJobResultResponse(zuoraAquaResponse)
   }

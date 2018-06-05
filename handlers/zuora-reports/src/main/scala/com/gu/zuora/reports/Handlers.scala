@@ -5,19 +5,33 @@ import java.io.{InputStream, OutputStream}
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.RawEffects
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
+import com.gu.util.config.Config
+import com.gu.zuora.reports.ReportsLambda.StepsConfig
+import com.gu.zuora.reports.aqua.ZuoraAquaRequestMaker
 
 object Handlers {
 
+  def requestMaker(config: Config[StepsConfig]) = ZuoraAquaRequestMaker(RawEffects.response, config.stepsConfig.zuoraRestConfig)
+
   def queryHandler(inputStream: InputStream, outputStream: OutputStream, context: Context) = {
-    ReportsLambda[QuerierRequest, QuerierResponse](RawEffects.response, RawEffects.stage, RawEffects.s3Load, LambdaIO(inputStream, outputStream, context), Querier.apply)
+
+    def wireCall(config: Config[StepsConfig]) = Querier(requestMaker(config)) _
+
+    ReportsLambda[QuerierRequest, QuerierResponse](RawEffects.stage, RawEffects.s3Load, LambdaIO(inputStream, outputStream, context), wireCall)
   }
   def fetchResultsHandler(inputStream: InputStream, outputStream: OutputStream, context: Context) = {
-    ReportsLambda[JobResultRequest, JobResult](RawEffects.response, RawEffects.stage, RawEffects.s3Load, LambdaIO(inputStream, outputStream, context), GetJobResult.apply)
+    def wireCall(config: Config[StepsConfig]) = GetJobResult(requestMaker(config)) _
+
+    ReportsLambda[JobResultRequest, JobResult](RawEffects.stage, RawEffects.s3Load, LambdaIO(inputStream, outputStream, context), wireCall)
   }
 
   def fetchFileHandler(inputStream: InputStream, outputStream: OutputStream, context: Context) = {
-    val fetchFile = FetchFile(RawEffects.s3Write) _
-    ReportsLambda[FetchFileRequest, FetchFileResponse](RawEffects.response, RawEffects.stage, RawEffects.s3Load, LambdaIO(inputStream, outputStream, context), fetchFile)
+    def wireCall(config: Config[StepsConfig]) = {
+      val uploader = S3ReportUploader(config.stage, RawEffects.s3Write) _
+      FetchFile(uploader, requestMaker(config)) _
+    }
+
+    ReportsLambda[FetchFileRequest, FetchFileResponse](RawEffects.stage, RawEffects.s3Load, LambdaIO(inputStream, outputStream, context), wireCall)
   }
 
 }
