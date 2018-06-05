@@ -12,7 +12,8 @@ object S3ReportUploader extends Logging {
 
   val buckets = Map(
     Stage("CODE") -> "zuora-reports-code",
-    Stage("PROD") -> "zuora-reports-prod"
+    Stage("PROD") -> "zuora-reports-prod",
+    Stage("DEV") -> "zuora-reports-dev"
   )
 
   def apply(stage: Stage, s3Write: PutObjectRequest => Try[PutObjectResult])(downloadStream: DownloadStream, queryName: String): ClientFailableOp[String] = {

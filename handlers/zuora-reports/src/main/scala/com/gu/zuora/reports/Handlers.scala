@@ -28,7 +28,8 @@ object Handlers {
   def fetchFileHandler(inputStream: InputStream, outputStream: OutputStream, context: Context) = {
     def wireCall(config: Config[StepsConfig]) = {
       val uploader = S3ReportUploader(config.stage, RawEffects.s3Write) _
-      FetchFile(uploader, requestMaker(config)) _
+      val downloadRequestMaker = ZuoraAquaRequestMaker(RawEffects.downloadResponse, config.stepsConfig.zuoraRestConfig)
+      FetchFile(uploader, downloadRequestMaker) _
     }
 
     ReportsLambda[FetchFileRequest, FetchFileResponse](RawEffects.stage, RawEffects.s3Load, LambdaIO(inputStream, outputStream, context), wireCall)
