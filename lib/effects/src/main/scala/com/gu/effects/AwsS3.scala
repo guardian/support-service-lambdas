@@ -77,48 +77,6 @@ object UploadToS3 extends Logging {
 
 }
 
-object StreamToS3 extends Logging {
-
-  def stream(inputStream: InputStream, lengthBytes: Int, name: String): Try[Unit] = {
-    logger.info(s"HERE I WOULD ATTEMP TO UPLOAD $lengthBytes bytes !!!")
-    //    import com.amazonaws.services.s3.model.InitiateMultipartUploadRequest
-    //    val bucketName = "zuora-reports-dev"
-    //    val keyName = s"$name.csv"
-    //    val initRequest = new InitiateMultipartUploadRequest(bucketName, keyName)
-    //    val initResponse = AwsS3.client.initiateMultipartUpload(initRequest)
-    //    val bin = new BufferedInputStream(inputStream)
-    //      val partSize = 5000000
-    //     val bytes = Array.fill[Byte](partSize)(0)
-    //    //todo see how to do this in a proper way for now it is just modified java code
-    //    var read = 1;
-    //    var partNumber = 1
-    //    var filePosition : Long = 0
-    //    while (read >0 ) {
-    //      read = bin.read(bytes)
-    //      val uploadRequest = new UploadPartRequest()
-    //        .withBucketName(bucketName)
-    //        .withKey(keyName)
-    //        .withUploadId(initResponse.getUploadId())
-    //        .withPartNumber(partNumber)
-    //        .withFileOffset(filePosition)
-    //        .withInputStream(inputStream)
-    //        .withPartSize(partSize)
-    //
-    //      partNumber = partNumber +1
-    // }
-
-    //val sc = new Scanner(inputStream, "UTF-8")
-
-    //val bufSrc = scala.io.Source.fromInputStream(inputStream)
-
-    //    val iterator = bufSrc.take(5000000)
-    //    while(iterator.hasNext) {
-    //      val next5Megs = iterator.
-    //    }
-    Success(())
-  }
-}
-
 object AwsS3 {
 
   val client = AmazonS3Client.builder.withCredentials(aws.CredentialsProvider).build()
