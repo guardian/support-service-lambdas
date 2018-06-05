@@ -197,3 +197,19 @@ Resources:
         DependsOn:
         - ZuoraFileFetcherRole
 
+Outputs:
+  querierExport:
+    Description: lambda that submits queries to Zuora AQuA
+    Value: !Ref ZuoraReports
+    Export:
+      Name: !Sub ${AWS::StackName}-Querier
+  jobResultsExport:
+    Description: lambda that get current status of submitted jobs to Zuora AQua
+    Value: !Ref ZuoraReportsJobResult
+    Export:
+      Name: !Sub ${AWS::StackName}-JobResults
+  fileFetcherExport:
+    Description: lambda that fetches zuora AQuA query results and stores them in S3
+    Value: !Ref ZuoraReportsFileFetcher
+    Export:
+      Name: !Sub ${AWS::StackName}-FileFetcher
