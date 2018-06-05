@@ -16,6 +16,29 @@ Mappings:
     PROD:
       reportsBucketName : "zuora-reports-prod"
 Resources:
+    ReportsBucket:
+        Type: "AWS::S3::Bucket"
+        Properties:
+          BucketName:
+            Fn::FindInMap:
+              - StageVariables
+              - Ref: Stage
+              - "reportsBucketName"
+          AccessControl: Private
+          BucketEncryption:
+            ServerSideEncryptionConfiguration:
+              - ServerSideEncryptionByDefault:
+                  SSEAlgorithm: AES256
+          LifecycleConfiguration:
+            Rules:
+              - Id: DeleteAllOldFiles
+                Prefix: ""
+                Status: Enabled
+                ExpirationInDays: 365
+              - Id: DeleteOldFiles
+                Prefix: ""
+                Status: Enabled
+                ExpirationInDays: 14
     ZuoraQuerierRole:
         Type: AWS::IAM::Role
         Properties:
@@ -78,6 +101,7 @@ Resources:
                             Resource: !Sub arn:aws:s3:::gu-reader-revenue-private/membership/payment-failure-lambdas/${Stage}/*
     ZuoraFileFetcherRole:
         Type: AWS::IAM::Role
+        DependsOn: ReportsBucket
         Properties:
             AssumeRolePolicyDocument:
                 Statement:
@@ -92,18 +116,10 @@ Resources:
                 - PolicyName: writeToReportsBucket
                   PolicyDocument:
                       Statement:
-                          - Effect: Allow
-                            Action:
-                            - s3:AbortMultipartUpload
-                            - s3:DeleteObject
-                            - s3:GetObject
-                            - s3:GetObjectAcl
-                            - s3:GetBucketAcl
-                            - s3:ListBucket
-                            - s3:PutObject
-                            - s3:GetObjectVersion
-                            - s3:DeleteObjectVersion
-                            Resource: !Sub arn:aws:s3:::${ReportsBucket}/*
+                        - Effect: Allow
+                          Action:
+                          - s3:PutObject
+                          Resource: !Sub arn:aws:s3:::${ReportsBucket}/*
                 - PolicyName: LambdaPolicy
                   PolicyDocument:
                       Statement:
@@ -114,7 +130,6 @@ Resources:
                             - logs:PutLogEvents
                             - lambda:InvokeFunction
                             Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/zuora-reports-fileFetcher-${Stage}:log-stream:*"
-
                 - PolicyName: ReadPrivateCredentials
                   PolicyDocument:
                       Statement:
@@ -182,48 +197,3 @@ Resources:
         DependsOn:
         - ZuoraFileFetcherRole
 
-    ReportsBucket:
-      Type: "AWS::S3::Bucket"
-      Properties:
-        BucketName:
-          Fn::FindInMap:
-            - StageVariables
-            - Ref: Stage
-            - "reportsBucketName"
-        AccessControl: Private
-        LifecycleConfiguration:
-          Rules:
-            - Id: DeleteAllOldFiles
-              Prefix: ""
-              Status: Enabled
-              ExpirationInDays: 365
-            - Id: DeleteOldFiles
-              Prefix: ""
-              Status: Enabled
-              ExpirationInDays: 14
-    EncryptBucketPolicy:
-      Type: AWS::S3::BucketPolicy
-      DependsOn: ReportsBucket
-      Properties:
-        Bucket: !Sub ${ReportsBucket}
-        PolicyDocument:
-          Version: '2012-10-17'
-          Statement:
-          - Sid: DenyIncorrectEncryptionHeader
-            Effect: Deny
-            Principal: "*"
-            Action: s3:PutObject
-            Resource: !Sub arn:aws:s3:::${ReportsBucket}/*
-            Condition:
-              StringNotEquals:
-                s3:x-amz-server-side-encryption:
-                - AES256
-                - aws:kms
-          - Sid: DenyUnEncryptedObjectUploads
-            Effect: Deny
-            Principal: "*"
-            Action: s3:PutObject
-            Resource: !Sub arn:aws:s3:::${ReportsBucket}/*
-            Condition:
-              'Null':
-                s3:x-amz-server-side-encryption: 'true'
