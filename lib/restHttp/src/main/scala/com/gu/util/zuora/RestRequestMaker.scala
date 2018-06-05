@@ -14,13 +14,10 @@ object RestRequestMaker extends Logging {
   sealed trait ClientFail {
     def message: String
   }
-
   case class NotFound(message: String) extends ClientFail
-
   case class GenericError(message: String) extends ClientFail
 
   type ClientFailableOp[A] = ClientFail \/ A
-
   def httpIsSuccessful(response: Response): ClientFailableOp[Unit] = {
     if (response.isSuccessful) {
       ().right
