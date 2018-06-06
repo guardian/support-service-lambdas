@@ -38,7 +38,7 @@ This Lambda is used to check the status of an Aqua job (normally submitted using
 The response will include whether the job is completed or not and the file id that can be used to fetch the results.
 ### sample usage
 Here we get the results of the job submitted in the previous example and get a completed response with the file ids we will need to download the query results: 
-####input
+#### input
 ```
 {
   "jobId": "23049832094823098403284039284"
@@ -68,10 +68,10 @@ Here we get the results of the job submitted in the previous example and get a c
   "status" : "pending"
 }
 ```
-##zuora-reports-fileFetcher
+## zuora-reports-fileFetcher
 This lambda is used to fetch the results of a query using the file ids retrieved from the response of jobResul.
 
-###sample usage
+### sample usage
 The input contains the the file id and the name we want the file to have when it saved to s3 ( .csv will be appended to the end of it).
 The output will contain the fileId and the path in s3 where the file was saved.
  #### input
