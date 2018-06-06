@@ -1,7 +1,5 @@
 package com.gu.effects
 
-import java.io.{InputStream, OutputStream}
-
 import okhttp3.{Request, Response}
 import java.time.LocalDateTime
 import com.amazonaws.services.s3.model.{PutObjectRequest, PutObjectResult}
