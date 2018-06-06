@@ -8,7 +8,7 @@ import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, DownloadStream, Gen
 import scala.util.Try
 import scalaz.syntax.std.either._
 
-object S3ReportUploader extends Logging {
+object S3ReportUpload extends Logging {
 
   val buckets = Map(
     Stage("CODE") -> "zuora-reports-code",

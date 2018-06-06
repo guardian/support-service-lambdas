@@ -1,25 +1,28 @@
 package com.gu.zuora.reports
 
 import com.gu.effects.{RawEffects, S3ConfigLoad}
-import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfig, Stage}
 import com.gu.zuora.reports.ReportsLambda.StepsConfig
 import com.gu.zuora.reports.aqua.ZuoraAquaRequestMaker
-import org.scalatest.{FlatSpec, Matchers}
-import scalaz.\/-
+import okhttp3.{Request, Response}
 import scalaz.syntax.std.either._
 
 object ReportsManualEffectsTest extends App {
-  def querierTest {
+
+  def getZuoraRequest(response: Request => Response) = for {
+    configAttempt <- S3ConfigLoad.load(Stage("DEV")).toEither.disjunction
+    config <- LoadConfig.parseConfig[StepsConfig](configAttempt)
+    zuoraRequests = ZuoraAquaRequestMaker(RawEffects.response, config.stepsConfig.zuoraRestConfig)
+  } yield zuoraRequests
+
+  def querierTest = {
 
     val expected = QuerierResponse(
       jobId = "something",
       name = "bla"
     )
     val response = for {
-      configAttempt <- S3ConfigLoad.load(Stage("DEV")).toEither.disjunction
-      config <- LoadConfig.parseConfig[StepsConfig](configAttempt)
-      zuoraRequests = ZuoraAquaRequestMaker(RawEffects.response, config.stepsConfig.zuoraRestConfig)
+      zuoraRequests <- getZuoraRequest(RawEffects.response)
       request = QuerierRequest("testRequest", Seq(Query("testQuery", "SELECT Name FROM Subscription WHERE  id='2c92c0856391fbe001639b8a61d25d7b'")))
       res <- Querier(zuoraRequests)(request)
     } yield {
@@ -29,11 +32,9 @@ object ReportsManualEffectsTest extends App {
 
   }
 
-  def getTestResultsTest {
+  def getResultsTest = {
     val response = for {
-      configAttempt <- S3ConfigLoad.load(Stage("DEV")).toEither.disjunction
-      config <- LoadConfig.parseConfig[StepsConfig](configAttempt)
-      zuoraRequests = ZuoraAquaRequestMaker(RawEffects.response, config.stepsConfig.zuoraRestConfig)
+      zuoraRequests <- getZuoraRequest(RawEffects.response)
       request = JobResultRequest("2c92c0f863b81bf20163cb25b5b10a8b")
       res <- GetJobResult(zuoraRequests)(request)
     } yield {
@@ -43,20 +44,19 @@ object ReportsManualEffectsTest extends App {
 
   }
 
-  def fetchFileTest {
+  def fetchFileTest = {
     val response = for {
-      configAttempt <- S3ConfigLoad.load(Stage("DEV")).toEither.disjunction
-      config <- LoadConfig.parseConfig[StepsConfig](configAttempt)
-      zuoraRequests = ZuoraAquaRequestMaker(RawEffects.downloadResponse, config.stepsConfig.zuoraRestConfig)
-      request = FetchFileRequest("2c92c086639207960163cb25b64a009b", "someFile.csv")
-      uploader = S3ReportUploader(Stage("DEV"), RawEffects.s3Write) _
-      res <- FetchFile(uploader, zuoraRequests)(request)
+      zuoraRequests <- getZuoraRequest(RawEffects.downloadResponse)
+      request = FetchFileRequest("2c92c086639207960163cb25b64a009b", "someFile")
+      upload = S3ReportUpload(Stage("DEV"), RawEffects.s3Write) _
+      res <- FetchFile(upload, zuoraRequests)(request)
     } yield {
       res
     }
     println(s"fetch file response : $response")
   }
+
   println("Executing manual test for Zuora reports")
-  fetchFileTest
+  getResultsTest
 }
 
