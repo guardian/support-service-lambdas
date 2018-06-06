@@ -31,10 +31,6 @@ Resources:
                   SSEAlgorithm: AES256
           LifecycleConfiguration:
             Rules:
-              - Id: DeleteAllOldFiles
-                Prefix: ""
-                Status: Enabled
-                ExpirationInDays: 365
               - Id: DeleteOldFiles
                 Prefix: ""
                 Status: Enabled
