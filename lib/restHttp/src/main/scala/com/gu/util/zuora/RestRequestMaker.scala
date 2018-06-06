@@ -1,9 +1,13 @@
 package com.gu.util.zuora
 
+import java.io.InputStream
+
 import okhttp3.{MediaType, Request, RequestBody, Response}
 import play.api.libs.json._
 import scalaz.Scalaz._
-import scalaz.{\/, \/-}
+import scalaz.{-\/, \/, \/-}
+
+import scala.util.{Failure, Success, Try}
 
 object RestRequestMaker extends Logging {
 
@@ -38,6 +42,8 @@ object RestRequestMaker extends Logging {
       }
     }
   }
+
+  case class DownloadStream(stream: InputStream, lengthBytes: Long)
 
   class Requests(headers: Map[String, String], baseUrl: String, getResponse: Request => Response, jsonIsSuccessful: JsValue => ClientFailableOp[Unit]) {
     // this can be a class and still be cohesive because every single method in the class needs every single value.  so we are effectively partially
@@ -75,6 +81,21 @@ object RestRequestMaker extends Logging {
       } yield ()
     }
 
+    private def extractContentLength(response: Response) = {
+      Try(response.header("content-length").toLong) match {
+        case Success(contentlength) => \/-(contentlength)
+        case Failure(error) => -\/(GenericError(s"could not extract content length from response ${error.getMessage}"))
+      }
+    }
+
+    def getDownloadStream(path: String): ClientFailableOp[DownloadStream] = {
+      val request = buildRequest(headers, baseUrl + path, _.get())
+      val response = getResponse(request)
+      for {
+        _ <- httpIsSuccessful(response)
+        contentlength <- extractContentLength(response)
+      } yield DownloadStream(response.body.byteStream, contentlength)
+    }
   }
 
   def sendRequest(request: Request, getResponse: Request => Response): ClientFailableOp[String] = {

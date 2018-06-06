@@ -9,8 +9,33 @@ Parameters:
             - CODE
             - PROD
         Default: CODE
+Mappings:
+  StageVariables:
+    CODE:
+      reportsBucketName : "zuora-reports-code"
+    PROD:
+      reportsBucketName : "zuora-reports-prod"
 Resources:
-    ZuoraReportsRole:
+    ReportsBucket:
+        Type: "AWS::S3::Bucket"
+        Properties:
+          BucketName:
+            Fn::FindInMap:
+              - StageVariables
+              - Ref: Stage
+              - "reportsBucketName"
+          AccessControl: Private
+          BucketEncryption:
+            ServerSideEncryptionConfiguration:
+              - ServerSideEncryptionByDefault:
+                  SSEAlgorithm: AES256
+          LifecycleConfiguration:
+            Rules:
+              - Id: DeleteOldFiles
+                Prefix: ""
+                Status: Enabled
+                ExpirationInDays: 1
+    ZuoraQuerierRole:
         Type: AWS::IAM::Role
         Properties:
             AssumeRolePolicyDocument:
@@ -40,6 +65,73 @@ Resources:
                           - Effect: Allow
                             Action: s3:GetObject
                             Resource: !Sub arn:aws:s3:::gu-reader-revenue-private/membership/payment-failure-lambdas/${Stage}/*
+    ZuoraResultsRole:
+        Type: AWS::IAM::Role
+        Properties:
+            AssumeRolePolicyDocument:
+                Statement:
+                    - Effect: Allow
+                      Principal:
+                          Service:
+                             - lambda.amazonaws.com
+                      Action:
+                          - sts:AssumeRole
+            Path: /
+            Policies:
+                - PolicyName: LambdaPolicy
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                            - logs:CreateLogGroup
+                            - logs:CreateLogStream
+                            - logs:PutLogEvents
+                            - lambda:InvokeFunction
+                            Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/zuora-reports-jobResult-${Stage}:log-stream:*"
+
+                - PolicyName: ReadPrivateCredentials
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action: s3:GetObject
+                            Resource: !Sub arn:aws:s3:::gu-reader-revenue-private/membership/payment-failure-lambdas/${Stage}/*
+    ZuoraFileFetcherRole:
+        Type: AWS::IAM::Role
+        DependsOn: ReportsBucket
+        Properties:
+            AssumeRolePolicyDocument:
+                Statement:
+                    - Effect: Allow
+                      Principal:
+                          Service:
+                             - lambda.amazonaws.com
+                      Action:
+                          - sts:AssumeRole
+            Path: /
+            Policies:
+                - PolicyName: writeToReportsBucket
+                  PolicyDocument:
+                      Statement:
+                        - Effect: Allow
+                          Action:
+                          - s3:PutObject
+                          Resource: !Sub arn:aws:s3:::${ReportsBucket}/*
+                - PolicyName: LambdaPolicy
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                            - logs:CreateLogGroup
+                            - logs:CreateLogStream
+                            - logs:PutLogEvents
+                            - lambda:InvokeFunction
+                            Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/zuora-reports-fileFetcher-${Stage}:log-stream:*"
+                - PolicyName: ReadPrivateCredentials
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action: s3:GetObject
+                            Resource: !Sub arn:aws:s3:::gu-reader-revenue-private/membership/payment-failure-lambdas/${Stage}/*
     ZuoraReports:
         Type: AWS::Lambda::Function
         Properties:
@@ -54,13 +146,12 @@ Resources:
                 Variables:
                   Stage: !Ref Stage
             Role:
-                !GetAtt ZuoraReportsRole.Arn
+                !GetAtt ZuoraQuerierRole.Arn
             MemorySize: 1536
             Runtime: java8
             Timeout: 300
         DependsOn:
-        - ZuoraReportsRole
-
+        - ZuoraQuerierRole
     ZuoraReportsJobResult:
         Type: AWS::Lambda::Function
         Properties:
@@ -75,9 +166,46 @@ Resources:
                 Variables:
                   Stage: !Ref Stage
             Role:
-                !GetAtt ZuoraReportsRole.Arn
+                !GetAtt ZuoraResultsRole.Arn
             MemorySize: 1536
             Runtime: java8
             Timeout: 300
         DependsOn:
-        - ZuoraReportsRole
+        - ZuoraResultsRole
+    ZuoraReportsFileFetcher:
+        Type: AWS::Lambda::Function
+        Properties:
+            Description: fetches report files and saves them to s3
+            FunctionName:
+                !Sub zuora-reports-fileFetcher-${Stage}
+            Code:
+                S3Bucket: membership-dist
+                S3Key: !Sub membership/${Stage}/zuora-reports/zuora-reports.jar
+            Handler: com.gu.zuora.reports.Handlers::fetchFileHandler
+            Environment:
+                Variables:
+                  Stage: !Ref Stage
+            Role:
+                !GetAtt ZuoraFileFetcherRole.Arn
+            MemorySize: 1536
+            Runtime: java8
+            Timeout: 300
+        DependsOn:
+        - ZuoraFileFetcherRole
+
+Outputs:
+  querierExport:
+    Description: lambda that submits queries to Zuora AQuA
+    Value: !Ref ZuoraReports
+    Export:
+      Name: !Sub ${AWS::StackName}-Querier
+  jobResultsExport:
+    Description: lambda that get current status of submitted jobs to Zuora AQua
+    Value: !Ref ZuoraReportsJobResult
+    Export:
+      Name: !Sub ${AWS::StackName}-JobResults
+  fileFetcherExport:
+    Description: lambda that fetches zuora AQuA query results and stores them in S3
+    Value: !Ref ZuoraReportsFileFetcher
+    Export:
+      Name: !Sub ${AWS::StackName}-FileFetcher

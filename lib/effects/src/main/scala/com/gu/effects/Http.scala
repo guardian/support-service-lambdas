@@ -30,4 +30,17 @@ object Http extends Logging {
     }
   }
 
+  val downloadResponse: Request => Response = {
+    val restClient = new OkHttpClient().newBuilder()
+      .readTimeout(0, TimeUnit.SECONDS)
+      .build()
+
+    { request: Request =>
+      logger.info(s"HTTP request: ${request.method} ${request.url} ${request.headers.toMultimap.size} headers")
+      val response = restClient.newCall(request).execute
+      logger.info(s"HTTP response: ${response.code}")
+      response
+    }
+  }
+
 }

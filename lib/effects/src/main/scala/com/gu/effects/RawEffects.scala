@@ -26,6 +26,7 @@ object RawEffects {
   val zuoraEnvironment = ZuoraEnvironment(Option(System.getenv("ZuoraEnvironment")).filter(_ != "").getOrElse("DEV"))
 
   val response: Request => Response = Http.response
+  val downloadResponse: Request => Response = Http.downloadResponse
   def s3Load: Stage => ConfigFailure \/ String = S3ConfigLoad.load
   def s3Write: PutObjectRequest => Try[PutObjectResult] = UploadToS3.putObject
   def now = () => LocalDateTime.now
