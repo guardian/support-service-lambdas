@@ -34,7 +34,7 @@ Resources:
               - Id: DeleteOldFiles
                 Prefix: ""
                 Status: Enabled
-                ExpirationInDays: 14
+                ExpirationInDays: 1
     ZuoraQuerierRole:
         Type: AWS::IAM::Role
         Properties:

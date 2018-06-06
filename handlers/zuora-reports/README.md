@@ -69,11 +69,14 @@ Here we get the results of the job submitted in the previous example and get a c
 }
 ```
 ## zuora-reports-fileFetcher
-This lambda is used to fetch the results of a query using the file ids retrieved from the response of jobResul.
+This lambda is used to fetch the results of a query using the file ids retrieved from the response of JobResult.
 
 ### sample usage
-The input contains the the file id and the name we want the file to have when it saved to s3 ( .csv will be appended to the end of it).
-The output will contain the fileId and the path in s3 where the file was saved.
+The input contains the the file id and the location we want to full within the zuora-reports-[STAGE] bucket.
+
+The output will contain the uri of the file with the results of the query.
+This uri will remain valid for up to a day to ensure complicance with GDPR.
+ 
  #### input
 ```
 {
