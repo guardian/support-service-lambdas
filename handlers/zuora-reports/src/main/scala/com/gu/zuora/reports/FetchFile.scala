@@ -17,7 +17,7 @@ object FetchFile {
 
 case class FetchFileRequest(fileId: String, name: String)
 
-case class FetchFileResponse(fileId: String, s3Path: String)
+case class FetchFileResponse(fileId: String, uri: String)
 
 object FetchFileRequest {
   implicit val reads = Json.reads[FetchFileRequest]
