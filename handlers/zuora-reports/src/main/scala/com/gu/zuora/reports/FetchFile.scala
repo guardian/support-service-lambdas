@@ -5,12 +5,12 @@ import play.api.libs.json._
 
 object FetchFile {
   def apply(
-    uploader: (DownloadStream, String) => ClientFailableOp[String],
+    upload: (DownloadStream, String) => ClientFailableOp[String],
     zuoraRequester: Requests
   )(fetchFileRequest: FetchFileRequest): ClientFailableOp[FetchFileResponse] = {
     for {
       downloadStream <- zuoraRequester.getDownloadStream(s"batch-query/file/${fetchFileRequest.fileId}")
-      uploadPath <- uploader(downloadStream, fetchFileRequest.name)
+      uploadPath <- upload(downloadStream, fetchFileRequest.name)
     } yield FetchFileResponse(fetchFileRequest.fileId, uploadPath)
   }
 }
