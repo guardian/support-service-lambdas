@@ -67,6 +67,7 @@ class ReportsLambdaEndToEndTest extends FlatSpec with Matchers {
     val expected =
       """{
         |   "name" : "testJob",
+        |   "status" : "completed",
         |   "batches" : [{
         |   "name" : "query1",
         |   "fileId": "someFileId"
