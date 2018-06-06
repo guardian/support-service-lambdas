@@ -3,7 +3,7 @@ package com.gu.stripeCustomerSourceUpdated.zuora
 import com.gu.stripeCustomerSourceUpdated.{StripeCustomerId, StripeSourceId}
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types._
-import com.gu.util.zuora.ZuoraAccount._
+import com.gu.util.zuora.ZuoraGetAccountSummary.ZuoraAccount._
 import com.gu.util.zuora.ZuoraQuery.{Query, ZuoraQuerier}
 import com.gu.util.{Logging, ZuoraToApiGateway}
 import play.api.libs.json._

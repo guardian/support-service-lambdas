@@ -10,8 +10,9 @@ import com.gu.util.config.{Stage, ZuoraEnvironment}
 import okhttp3._
 import okhttp3.internal.Util.UTF_8
 import okio.Buffer
-import scala.util.{Failure, Success}
 import scalaz.\/-
+
+import scala.util.{Failure, Success}
 
 class TestingRawEffects(
   val isProd: Boolean = false,
@@ -75,7 +76,7 @@ class TestingRawEffects(
     requests.map(req => (req.method, req.url.encodedPath) -> Option(req.body).map(body)).toMap
   }
 
-  val rawEffects = RawEffects(stage, _ => \/-(codeConfig))
+  def s3Load(s: Stage) = \/-(TestingRawEffects.codeConfig)
 
 }
 

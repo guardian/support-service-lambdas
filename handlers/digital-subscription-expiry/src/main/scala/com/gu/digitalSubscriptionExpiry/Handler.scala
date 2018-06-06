@@ -2,6 +2,7 @@ package com.gu.digitalSubscriptionExpiry
 
 import java.io.{InputStream, OutputStream}
 import java.time.LocalDateTime
+
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.digitalSubscriptionExpiry.emergencyToken.{EmergencyTokens, EmergencyTokensConfig, GetTokenExpiry}
 import com.gu.digitalSubscriptionExpiry.zuora._
@@ -10,17 +11,19 @@ import com.gu.util.apigateway.ApiGatewayHandler
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
 import com.gu.util.Logging
-import com.gu.util.config.{Config, LoadConfig}
+import com.gu.util.config.ConfigReads.ConfigFailure
+import com.gu.util.config.{Config, LoadConfig, Stage}
 import com.gu.util.reader.Types._
 import okhttp3.{Request, Response}
 import play.api.libs.json.{Json, Reads}
+import scalaz.\/
 
 object Handler extends Logging {
   // this is the entry point
   // it's referenced by the cloudformation so make sure you keep it in step
   // it's the only part you can't test of the handler
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
-    runWithEffects(RawEffects.createDefault, RawEffects.response, RawEffects.now, LambdaIO(inputStream, outputStream, context))
+    runWithEffects(RawEffects.stage, RawEffects.s3Load, RawEffects.response, RawEffects.now, LambdaIO(inputStream, outputStream, context))
 
   case class StepsConfig(
     zuoraRestConfig: ZuoraRestConfig,
@@ -29,7 +32,13 @@ object Handler extends Logging {
 
   implicit val stepsConfigReads: Reads[StepsConfig] = Json.reads[StepsConfig]
 
-  def runWithEffects(rawEffects: RawEffects, response: Request => Response, now: () => LocalDateTime, lambdaIO: LambdaIO): Unit = {
+  def runWithEffects(
+    stage: Stage,
+    s3Load: Stage => ConfigFailure \/ String,
+    response: Request => Response,
+    now: () => LocalDateTime,
+    lambdaIO: LambdaIO
+  ): Unit = {
     def operation: Config[StepsConfig] => Operation =
       config => {
 
@@ -47,7 +56,7 @@ object Handler extends Logging {
       }
 
     ApiGatewayHandler[StepsConfig](lambdaIO)(for {
-      config <- LoadConfig.default[StepsConfig](implicitly)(rawEffects.stage, rawEffects.s3Load(rawEffects.stage))
+      config <- LoadConfig.default[StepsConfig](implicitly)(stage, s3Load(stage))
         .toFailableOp("load config")
       configuredOp = operation(config)
 

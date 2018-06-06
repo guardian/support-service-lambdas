@@ -22,10 +22,9 @@ class EndToEndHandlerTest extends FlatSpec with Matchers {
     val os = new ByteArrayOutputStream()
     val config = new TestingRawEffects(false, 200, EndToEndData.responses)
     //execute
-    Lambda.runWithEffects(config.rawEffects, config.response, LambdaIO(stream, os, null))
+    Lambda.runWithEffects(config.stage, config.s3Load, config.response, LambdaIO(stream, os, null))
 
-    config.resultMap
-      .get(("POST", "/messaging/v1/messageDefinitionSends/111/send")).get.get jsonMatches endToEndData.expectedEmailSend // TODO check the body too
+    config.resultMap(("POST", "/messaging/v1/messageDefinitionSends/111/send")).get jsonMatches endToEndData.expectedEmailSend // TODO check the body too
 
     val responseString = new String(os.toByteArray(), "UTF-8")
 

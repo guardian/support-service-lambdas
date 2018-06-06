@@ -6,7 +6,6 @@ import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import com.gu.util.config.ConfigReads.ConfigFailure
 import com.gu.util.config.{LoadConfig, Stage}
-import com.gu.util.reader.Types._
 import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, Requests}
 import com.gu.util.zuora.ZuoraRestConfig
 import com.gu.zuora.reports.aqua.ZuoraAquaRequestMaker

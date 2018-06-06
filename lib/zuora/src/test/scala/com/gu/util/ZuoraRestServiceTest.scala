@@ -1,13 +1,11 @@
 package com.gu.util
 
 import com.gu.util.zuora.RestRequestMaker.GenericError
-import com.gu.util.zuora.ZuoraAccount.{AccountId, PaymentMethodId}
-import com.gu.util.zuora.ZuoraGetAccountSummary.BasicAccountInfo
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
 import okhttp3._
 import org.scalatest.Matchers._
 import org.scalatest._
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json._
 import scalaz.{-\/, \/-}
 
 class ZuoraRestServiceTest extends AsyncFlatSpec {
@@ -73,6 +71,13 @@ class ZuoraRestServiceTest extends AsyncFlatSpec {
     assert(either == -\/(internalServerError("Received a failure result from Zuora")))
   }
 
+  case class BasicAccountInfo(id: String, balance: Double, defaultPaymentMethod: PaymentMethodId)
+
+  case class PaymentMethodId(id: String)
+
+  implicit val pmiReads = Json.reads[PaymentMethodId]
+  implicit val baiReads = Json.reads[BasicAccountInfo]
+
   it should "run success end to end GET" in {
     // TODO tests for POST/PUT as well
     def response(request: Request): Response = {
@@ -89,7 +94,7 @@ class ZuoraRestServiceTest extends AsyncFlatSpec {
       }
     }
     val actual = ZuoraRestRequestMaker(response, fakeZConfig).get[BasicAccountInfo]("getget")
-    val basicInfo = BasicAccountInfo(AccountId("id123"), 1.2, PaymentMethodId("pmid"))
+    val basicInfo = BasicAccountInfo("id123", 1.2, PaymentMethodId("pmid"))
 
     actual should be(\/-(basicInfo))
   }

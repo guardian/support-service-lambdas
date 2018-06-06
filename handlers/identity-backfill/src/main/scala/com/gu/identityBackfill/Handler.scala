@@ -1,6 +1,7 @@
 package com.gu.identityBackfill
 
 import java.io.{InputStream, OutputStream}
+
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.RawEffects
 import com.gu.identity.{GetByEmail, IdentityConfig}
@@ -12,6 +13,7 @@ import com.gu.identityBackfill.salesforce._
 import com.gu.identityBackfill.zuora.{AddIdentityIdToAccount, CountZuoraAccountsForIdentityId, GetZuoraAccountsForEmail, GetZuoraSubTypeForAccount}
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayResponse}
+import com.gu.util.config.ConfigReads.ConfigFailure
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, Requests}
 import com.gu.util.zuora.{ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
@@ -27,7 +29,7 @@ object Handler {
   // it's referenced by the cloudformation so make sure you keep it in step
   // it's the only part you can't test of the handler
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
-    runWithEffects(RawEffects.createDefault, RawEffects.response, LambdaIO(inputStream, outputStream, context))
+    runWithEffects(RawEffects.stage, RawEffects.s3Load, RawEffects.response, LambdaIO(inputStream, outputStream, context))
 
   case class StepsConfig(
     identityConfig: IdentityConfig,
@@ -36,7 +38,12 @@ object Handler {
   )
   implicit val stepsConfigReads: Reads[StepsConfig] = Json.reads[StepsConfig]
 
-  def runWithEffects(rawEffects: RawEffects, response: Request => Response, lambdaIO: LambdaIO): Unit = {
+  def runWithEffects(
+    stage: Stage,
+    s3Load: Stage => ConfigFailure \/ String,
+    response: Request => Response,
+    lambdaIO: LambdaIO
+  ): Unit = {
     def operation: Config[StepsConfig] => Operation =
       config => {
         val zuoraRequests = ZuoraRestRequestMaker(response, config.stepsConfig.zuoraRestConfig)
@@ -66,7 +73,7 @@ object Handler {
       }
 
     ApiGatewayHandler[StepsConfig](lambdaIO)(for {
-      config <- LoadConfig.default[StepsConfig] (implicitly) (rawEffects.stage, rawEffects.s3Load(rawEffects.stage)).toFailableOp("load config")
+      config <- LoadConfig.default[StepsConfig](implicitly)(stage, s3Load(stage)).toFailableOp("load config")
       configuredOp = operation(config)
 
     } yield (config, configuredOp))
@@ -82,7 +89,7 @@ object Handler {
     mappings.get(stage).toRight(ApiGatewayResponse.internalServerError(s"missing config for stage $stage")).disjunction
   }
 
-  def syncableSFToIdentity(sfRequests: => FailableOp[Requests], stage: Stage)(sFContactId: Types.SFContactId) : FailableOp[Unit] =
+  def syncableSFToIdentity(sfRequests: => FailableOp[Requests], stage: Stage)(sFContactId: Types.SFContactId): FailableOp[Unit] =
     for {
       sfRequests <- sfRequests
       standardRecordType <- standardRecordTypeForStage(stage)
@@ -100,7 +107,7 @@ object Healthcheck {
   def apply(
     getByEmail: EmailAddress => \/[GetByEmail.ApiError, IdentityId],
     countZuoraAccountsForIdentityId: IdentityId => ClientFailableOp[Int],
-    sfAuth: => FailableOp[Any],
+    sfAuth: => FailableOp[Any]
   ): FailableOp[Unit] =
     for {
       identityId <- getByEmail(EmailAddress("john.duffell@guardian.co.uk")).nonSuccessToError.withLogging("healthcheck getByEmail")

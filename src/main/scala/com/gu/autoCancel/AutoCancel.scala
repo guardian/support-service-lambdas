@@ -4,7 +4,7 @@ import java.time.LocalDate
 
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.RestRequestMaker.Requests
-import com.gu.util.zuora.ZuoraModels.SubscriptionId
+import com.gu.util.zuora.ZuoraGetAccountSummary.SubscriptionId
 import com.gu.util.zuora.{ZuoraCancelSubscription, ZuoraDisableAutoPay, ZuoraUpdateCancellationReason}
 import com.gu.util.{Logging, ZuoraToApiGateway}
 
