@@ -7,7 +7,7 @@ import scalaz.{-\/, \/-}
 
 object Querier {
 
-  def apply(zuoraRequester: Requests, querierRequest: QuerierRequest): ClientFailableOp[QuerierResponse] = {
+  def apply(zuoraRequester: Requests)(querierRequest: QuerierRequest): ClientFailableOp[QuerierResponse] = {
     val aquaRequest = toAquaQueryRequest(querierRequest)
     val aquaResponse = zuoraRequester.post[AquaQueryRequest, AquaJobResponse](aquaRequest, "batch-query/")
     toQuerierResponse(aquaResponse)

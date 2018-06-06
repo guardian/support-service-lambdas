@@ -5,10 +5,12 @@ import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 import com.gu.effects.TestingRawEffects
 import com.gu.effects.TestingRawEffects.{HTTPResponse, POSTRequest}
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
-import com.gu.util.config.Stage
+import com.gu.util.config.{Config, Stage}
 import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, Requests}
 import com.gu.zuora.reports.EndToEndData._
+import com.gu.zuora.reports.ReportsLambda.StepsConfig
 import com.gu.zuora.reports.Runner._
+import com.gu.zuora.reports.aqua.ZuoraAquaRequestMaker
 import org.scalatest.{Assertion, FlatSpec, Matchers}
 import play.api.libs.json.{Json, Reads, Writes}
 import scalaz.\/-
@@ -65,6 +67,7 @@ class ReportsLambdaEndToEndTest extends FlatSpec with Matchers {
     val expected =
       """{
         |   "name" : "testJob",
+        |   "status" : "completed",
         |   "batches" : [{
         |   "name" : "query1",
         |   "fileId": "someFileId"
@@ -79,7 +82,7 @@ class ReportsLambdaEndToEndTest extends FlatSpec with Matchers {
 
 object Runner {
 
-  def getResultAndRequests[REQUEST, RESPONSE](input: String, responses: Map[String, HTTPResponse] = Map(), postResponses: Map[POSTRequest, HTTPResponse] = Map(), handlerToTest: (Requests, REQUEST) => ClientFailableOp[RESPONSE])(implicit r: Reads[REQUEST], w: Writes[RESPONSE]): (String, List[TestingRawEffects.BasicRequest]) = {
+  def getResultAndRequests[REQUEST, RESPONSE](input: String, responses: Map[String, HTTPResponse] = Map(), postResponses: Map[POSTRequest, HTTPResponse] = Map(), handlerToTest: Requests => REQUEST => ClientFailableOp[RESPONSE])(implicit r: Reads[REQUEST], w: Writes[RESPONSE]): (String, List[TestingRawEffects.BasicRequest]) = {
     val stream = new ByteArrayInputStream(input.getBytes(java.nio.charset.StandardCharsets.UTF_8))
     val os = new ByteArrayOutputStream()
 
@@ -87,8 +90,9 @@ object Runner {
 
     def s3Load(s: Stage) = \/-(TestingRawEffects.codeConfig)
 
+    def wire(config: Config[StepsConfig]) = handlerToTest(ZuoraAquaRequestMaker(rawEffects.response, config.stepsConfig.zuoraRestConfig))
     //execute
-    ReportsLambda[REQUEST, RESPONSE](rawEffects.response, rawEffects.stage, s3Load, LambdaIO(stream, os, null), handlerToTest)
+    ReportsLambda[REQUEST, RESPONSE](rawEffects.stage, s3Load, LambdaIO(stream, os, null), wire)
 
     val responseString = new String(os.toByteArray, "UTF-8")
 

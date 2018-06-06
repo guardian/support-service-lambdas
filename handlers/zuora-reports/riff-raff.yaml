@@ -19,4 +19,6 @@ deployments:
       functionNames:
       - zuora-reports-querier-
       - zuora-reports-jobResult-
+      - zuora-reports-fileFetcher-
+
     dependencies: [cfn]

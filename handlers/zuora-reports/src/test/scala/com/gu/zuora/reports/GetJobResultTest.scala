@@ -27,10 +27,10 @@ class GetJobResultTest extends AsyncFlatSpec {
   ))
 
   it should "return pending if zuora response status is pending " in {
-    GetJobResult.toJobResultResponse(ZuoraResponseWithStatus("pending")) shouldBe \/-(Pending)
+    GetJobResult.toJobResultResponse(ZuoraResponseWithStatus("pending")) shouldBe \/-(Pending("testResponse"))
   }
   it should "return pending if zuora response status is executing " in {
-    GetJobResult.toJobResultResponse(ZuoraResponseWithStatus("executing")) shouldBe \/-(Pending)
+    GetJobResult.toJobResultResponse(ZuoraResponseWithStatus("executing")) shouldBe \/-(Pending("testResponse"))
   }
   it should "return error if zuora response status is an unexpected value " in {
     GetJobResult.toJobResultResponse(ZuoraResponseWithStatus("aborted")) shouldBe -\/(GenericError("unexpected status in zuora response: AquaJobResponse(aborted,testResponse,List(Batch(completed,batch1,Some(fileId1)), Batch(completed,batch2,Some(fileId2))),None)"))
