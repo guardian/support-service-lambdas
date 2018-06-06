@@ -2,6 +2,7 @@ package com.gu.autoCancel
 
 import java.io.{InputStream, OutputStream}
 import java.time.LocalDateTime
+
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.RawEffects
 import com.gu.paymentFailure.ZuoraEmailSteps
@@ -11,13 +12,21 @@ import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import com.gu.util.exacttarget.{ETClient, EmailSendSteps, FilterEmail}
 import com.gu.util.zuora.{ZuoraGetAccountSummary, ZuoraGetInvoiceTransactions, ZuoraRestRequestMaker}
 import com.gu.util.Logging
-import com.gu.util.config.{Config, LoadConfig}
+import com.gu.util.config.ConfigReads.ConfigFailure
+import com.gu.util.config.{Config, LoadConfig, Stage}
 import com.gu.util.reader.Types._
 import okhttp3.{Request, Response}
+import scalaz.\/
 
 object AutoCancelHandler extends App with Logging {
 
-  def runWithEffects(rawEffects: RawEffects, response: Request => Response, now: () => LocalDateTime, lambdaIO: LambdaIO): Unit = {
+  def runWithEffects(
+    stage: Stage,
+    s3Load: Stage => ConfigFailure \/ String,
+    response: Request => Response,
+    now: () => LocalDateTime,
+    lambdaIO: LambdaIO
+  ): Unit = {
     def operation(config: Config[StepsConfig]): ApiGatewayHandler.Operation = {
 
       val zuoraRequests = ZuoraRestRequestMaker(response, config.stepsConfig.zuoraRestConfig)
@@ -33,7 +42,7 @@ object AutoCancelHandler extends App with Logging {
     }
 
     ApiGatewayHandler[StepsConfig](lambdaIO)(for {
-      config <- LoadConfig.default[StepsConfig](implicitly)(rawEffects.stage, rawEffects.s3Load(rawEffects.stage))
+      config <- LoadConfig.default[StepsConfig](implicitly)(stage, s3Load(stage))
         .toFailableOp("load config")
       configuredOp = operation(config)
     } yield (config, configuredOp))
@@ -44,6 +53,6 @@ object AutoCancelHandler extends App with Logging {
   // it's referenced by the cloudformation so make sure you keep it in step
   // it's the only part you can't test of the handler
   def handleRequest(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
-    runWithEffects(RawEffects.createDefault, RawEffects.response, RawEffects.now, LambdaIO(inputStream, outputStream, context))
+    runWithEffects(RawEffects.stage, RawEffects.s3Load, RawEffects.response, RawEffects.now, LambdaIO(inputStream, outputStream, context))
 
 }

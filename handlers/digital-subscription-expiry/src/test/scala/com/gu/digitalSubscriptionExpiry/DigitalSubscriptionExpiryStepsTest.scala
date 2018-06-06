@@ -74,7 +74,7 @@ class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
       setActivationDate = setActivationDate,
       getAccountSummary = getAccount,
       getSubscriptionExpiry = getSubExpiry,
-      skipActivationDateUpdate = skipActivationDateUpdate,
+      skipActivationDateUpdate = skipActivationDateUpdate
     )
   }
 

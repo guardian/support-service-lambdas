@@ -17,10 +17,9 @@ class HealthCheckSystemTest extends FlatSpec with Matchers {
 
     val stream = new ByteArrayInputStream(healthcheckRequest.getBytes(java.nio.charset.StandardCharsets.UTF_8))
     val os = new ByteArrayOutputStream()
-    val rawEffects = RawEffects.createDefault
 
     //execute
-    Handler.runWithEffects(rawEffects, RawEffects.response, LambdaIO(stream, os, null))
+    Handler.runWithEffects(RawEffects.stage, RawEffects.s3Load, RawEffects.response, LambdaIO(stream, os, null))
 
     val responseString = new String(os.toByteArray, "UTF-8")
 

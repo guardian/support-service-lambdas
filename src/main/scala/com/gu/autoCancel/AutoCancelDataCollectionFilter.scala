@@ -7,7 +7,7 @@ import com.gu.util.apigateway.ApiGatewayResponse.noActionRequired
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.RestRequestMaker.ClientFailableOp
 import com.gu.util.zuora.ZuoraGetAccountSummary.{AccountSummary, Invoice}
-import com.gu.util.zuora.ZuoraModels.SubscriptionId
+import com.gu.util.zuora.ZuoraGetAccountSummary.SubscriptionId
 import com.gu.util.{Logging, ZuoraToApiGateway}
 import scalaz.Scalaz._
 

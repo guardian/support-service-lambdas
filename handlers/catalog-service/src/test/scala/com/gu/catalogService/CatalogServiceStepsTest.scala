@@ -29,7 +29,7 @@ class CatalogServiceStepsTest extends FlatSpec with Matchers {
         failureResponseEffects.response,
         successfulResponseEffects.stage,
         successfulResponseEffects.zuoraEnvironment,
-        failureResponseEffects.rawEffects.s3Load,
+        failureResponseEffects.s3Load,
         TestingRawEffects.successfulS3Upload
       )
     }
@@ -41,7 +41,7 @@ class CatalogServiceStepsTest extends FlatSpec with Matchers {
         successfulResponseEffects.response,
         successfulResponseEffects.stage,
         successfulResponseEffects.zuoraEnvironment,
-        successfulResponseEffects.rawEffects.s3Load,
+        successfulResponseEffects.s3Load,
         TestingRawEffects.failedS3Upload
       )
     }

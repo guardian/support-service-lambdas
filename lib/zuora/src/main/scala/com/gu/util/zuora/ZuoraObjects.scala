@@ -5,8 +5,6 @@ import play.api.libs.json._
 
 object ZuoraModels {
 
-  case class SubscriptionId(id: String) extends AnyVal
-
   sealed trait ZuoraResponse
   object ZuoraSuccess extends ZuoraResponse
 
@@ -18,8 +16,6 @@ object ZuoraModels {
 object ZuoraReaders {
 
   implicit val errorReasonReads = Json.reads[ErrorReason]
-  implicit val unitReads: Reads[Unit] =
-    Reads(_ => JsSuccess(()))
 
   implicit val ZuoraResponseReads: Reads[ZuoraResponse] =
     // rest object api seems to use title case for success field....!!

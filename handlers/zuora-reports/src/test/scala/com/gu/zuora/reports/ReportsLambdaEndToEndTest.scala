@@ -6,14 +6,14 @@ import com.gu.effects.TestingRawEffects
 import com.gu.effects.TestingRawEffects.{HTTPResponse, POSTRequest}
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import com.gu.util.config.{Config, Stage}
+import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, Requests}
+import com.gu.zuora.reports.EndToEndData._
+import com.gu.zuora.reports.ReportsLambda.StepsConfig
+import com.gu.zuora.reports.Runner._
+import com.gu.zuora.reports.aqua.ZuoraAquaRequestMaker
 import org.scalatest.{Assertion, FlatSpec, Matchers}
 import play.api.libs.json.{Json, Reads, Writes}
-import scalaz.{\/, \/-}
-import Runner._
-import EndToEndData._
-import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, Requests}
-import com.gu.zuora.reports.ReportsLambda.StepsConfig
-import com.gu.zuora.reports.aqua.ZuoraAquaRequestMaker
+import scalaz.\/-
 
 class ReportsLambdaEndToEndTest extends FlatSpec with Matchers {
 

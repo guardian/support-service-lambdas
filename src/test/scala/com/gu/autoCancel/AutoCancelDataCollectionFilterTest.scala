@@ -1,13 +1,11 @@
 package com.gu.autoCancel
 
-import com.gu.util.apigateway.ApiGatewayResponse._
-import com.gu.util.zuora.ZuoraGetAccountSummary.{AccountSummary, BasicAccountInfo, Invoice, SubscriptionSummary}
-import com.gu.util.zuora.ZuoraModels._
 import java.time.LocalDate
 
-import com.gu.util.zuora.ZuoraAccount.{AccountId, PaymentMethodId}
+import com.gu.util.apigateway.ApiGatewayResponse._
+import com.gu.util.zuora.ZuoraGetAccountSummary.ZuoraAccount.{AccountId, PaymentMethodId}
+import com.gu.util.zuora.ZuoraGetAccountSummary.{AccountSummary, BasicAccountInfo, Invoice, SubscriptionId, SubscriptionSummary}
 import org.scalatest._
-
 import scalaz.{-\/, \/-}
 
 class AutoCancelDataCollectionFilterTest extends FlatSpec {
