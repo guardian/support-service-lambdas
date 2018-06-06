@@ -10,12 +10,12 @@ object FetchFile {
   )(fetchFileRequest: FetchFileRequest): ClientFailableOp[FetchFileResponse] = {
     for {
       downloadStream <- zuoraRequester.getDownloadStream(s"batch-query/file/${fetchFileRequest.fileId}")
-      uploadPath <- upload(downloadStream, fetchFileRequest.name)
+      uploadPath <- upload(downloadStream, fetchFileRequest.saveLocation)
     } yield FetchFileResponse(fetchFileRequest.fileId, uploadPath)
   }
 }
 
-case class FetchFileRequest(fileId: String, name: String)
+case class FetchFileRequest(fileId: String, saveLocation: String)
 
 case class FetchFileResponse(fileId: String, uri: String)
 

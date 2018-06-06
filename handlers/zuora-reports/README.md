@@ -78,13 +78,13 @@ The output will contain the fileId and the path in s3 where the file was saved.
 ```
 {
   "fileId": "20341983092183092180392810",
-  "name": "accounts"
+  "saveLocation": "myReports/accounts.csv"
 }
 ```
 #### output
 ```
 {
   "fileId": "20341983092183092180392810",
-  "S3Path": "zuora-reports-code/accounts.csv"
+  "uri": "s3://zuora-reports-code/myReports/accounts.csv"
 }
 ```
