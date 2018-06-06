@@ -1,5 +1,4 @@
-name := "zuora-auto-cancel"
-description:= "Handles auto-cancellations for membership and subscriptions"
+import Dependencies._
 
 val scalaSettings = Seq(
   scalaVersion := "2.12.6",
@@ -44,12 +43,9 @@ val testSettings = inConfig(EffectsTest)(Defaults.testTasks) ++ inConfig(HealthC
   testOptions in Test += Tests.Argument("-l", "com.gu.test.EffectsTest"),
   testOptions in Test += Tests.Argument("-l", "com.gu.test.HealthCheck"),
 
-  //  configs(EffectsTest),
-
   testOptions in EffectsTest -= Tests.Argument("-l", "com.gu.test.EffectsTest"),
   testOptions in EffectsTest -= Tests.Argument("-l", "com.gu.test.HealthCheck"),
   testOptions in EffectsTest += Tests.Argument("-n", "com.gu.test.EffectsTest"),
-  //  configs(HealthCheckTest),
 
   testOptions in HealthCheckTest -= Tests.Argument("-l", "com.gu.test.EffectsTest"),
   testOptions in HealthCheckTest -= Tests.Argument("-l", "com.gu.test.HealthCheck"),
@@ -58,46 +54,28 @@ val testSettings = inConfig(EffectsTest)(Defaults.testTasks) ++ inConfig(HealthC
 
 def all(theProject: Project) = theProject.settings(scalaSettings, testSettings).configs(EffectsTest, HealthCheckTest)
 
+// ==== START libraries ====
+
 lazy val zuora = all(project in file("lib/zuora")).dependsOn(restHttp).settings(
   libraryDependencies ++= Seq(
-    "com.squareup.okhttp3" % "okhttp" % "3.9.1",
-    "com.amazonaws" % "aws-lambda-java-log4j" % "1.0.0",
-    "org.scalaz" %% "scalaz-core" % "7.2.18",
-    "com.typesafe.play" %% "play-json" % "2.6.9",
-    "org.scalatest" %% "scalatest" % "3.0.1" % "test",
+    okhttp3, logging, scalaz, playJson, scalatest,
     "com.fasterxml.jackson.core" % "jackson-databind" % "2.8.11.1"
   )
 )
 
 lazy val restHttp = all(project in file("lib/restHttp")).settings(
-  libraryDependencies ++= Seq(
-    "com.squareup.okhttp3" % "okhttp" % "3.9.1",
-    "com.amazonaws" % "aws-lambda-java-log4j" % "1.0.0",
-    "org.scalaz" %% "scalaz-core" % "7.2.18",
-    "com.typesafe.play" %% "play-json" % "2.6.9",
-    "org.scalatest" %% "scalatest" % "3.0.1" % "test"
-  )
+  libraryDependencies ++= Seq(okhttp3, logging, scalaz, playJson, scalatest)
 )
 
 lazy val handler = all(project in file("lib/handler")).settings(
-  libraryDependencies ++= Seq(
-    "com.squareup.okhttp3" % "okhttp" % "3.9.1",
-    "com.amazonaws" % "aws-lambda-java-log4j" % "1.0.0",
-    "org.scalaz" %% "scalaz-core" % "7.2.18",
-    "com.typesafe.play" %% "play-json" % "2.6.9",
-    "org.scalatest" %% "scalatest" % "3.0.1" % "test"
-  )
+  libraryDependencies ++= Seq(okhttp3, logging, scalaz, playJson, scalatest)
 )
 
 // to aid testability, only the actual handlers called as a lambda can depend on this
 lazy val effects = all(project in file("lib/effects")).dependsOn(handler).settings(
   libraryDependencies ++= Seq(
-    "com.squareup.okhttp3" % "okhttp" % "3.9.1",
-    "com.amazonaws" % "aws-lambda-java-log4j" % "1.0.0",
+    okhttp3, logging, scalaz, playJson, scalatest,
     "com.amazonaws" % "aws-java-sdk-s3" % "1.11.311",
-    "org.scalaz" %% "scalaz-core" % "7.2.18",
-    "com.typesafe.play" %% "play-json" % "2.6.9",
-    "org.scalatest" %% "scalatest" % "3.0.1" % "test",
     "com.fasterxml.jackson.core" % "jackson-databind" % "2.8.11.1"
   )
 )
@@ -111,6 +89,10 @@ lazy val test = all(project in file("lib/test")).settings(
 )
 
 val testDep = test % "test->test"
+
+// ==== END libraries ====
+
+// ==== START handlers ====
 
 // currently the original code is lying in the root, in due course we need to make three separate sub projects for these original lambdas
 // they should produce their own self contained jar to reduce the artifact size and startup time.  Any shared code can be
@@ -142,25 +124,7 @@ lazy val `identity-retention` = all(project in file("handlers/identity-retention
 lazy val `zuora-reports` = all(project in file("handlers/zuora-reports"))
   .enablePlugins(RiffRaffArtifact).dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
 
-assemblyJarName := "zuora-auto-cancel.jar"
-riffRaffPackageType := assembly.value
-riffRaffUploadArtifactBucket := Option("riffraff-artifact")
-riffRaffUploadManifestBucket := Option("riffraff-builds")
-riffRaffManifestProjectName := "MemSub::Membership Admin::Zuora Auto Cancel"
-
-addCommandAlias("dist", ";riffRaffArtifact")
-
-libraryDependencies ++= Seq(
-  "com.amazonaws" % "aws-lambda-java-log4j" % "1.0.0",
-  "com.amazonaws" % "aws-lambda-java-core" % "1.2.0",
-  "log4j" % "log4j" % "1.2.17",
-  "com.squareup.okhttp3" % "okhttp" % "3.9.1",
-  "org.scalaz" %% "scalaz-core" % "7.2.18",
-  "com.typesafe.play" %% "play-json" % "2.6.9",
-  "org.scalatest" %% "scalatest" % "3.0.1" % "test",
-  "com.stripe" % "stripe-java" % "5.28.0",
-  "com.fasterxml.jackson.core" % "jackson-databind" % "2.8.11.1"
-)
+// ==== END handlers ====
 
 initialize := {
   val _ = initialize.value
