@@ -4,8 +4,9 @@ import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.apigateway.ApiGatewayResponse.{badRequest, internalServerError}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
+import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
 import play.api.libs.json.{JsError, JsResult, JsSuccess}
-import scalaz.Monad
+import scalaz.{-\/, Monad, \/, \/-}
 
 import scala.util.{Failure, Success, Try}
 
@@ -13,32 +14,35 @@ object Types extends Logging {
 
   object ApiGatewayOp {
 
-    def ContinueProcessing[A]: A => ApiGatewayOp[A] = (apply[A] _).compose(scalaz.\/-.apply[A])
-    def ReturnWithResponse: ApiResponse => ApiGatewayOp[Nothing] = (apply[Nothing] _).compose(scalaz.-\/.apply[ApiResponse])
+    case class ContinueProcessing[A](a: A) extends ApiGatewayOp[A] {
+      override def underlying: ApiResponse \/ A = \/-(a)
+    }
+    case class ReturnWithResponse(resp: ApiResponse) extends ApiGatewayOp[Nothing] {
+      override def underlying: ApiResponse \/ Nothing = -\/(resp)
+    }
 
   }
-  case class ApiGatewayOp[+A](underlying: scalaz.\/[ApiResponse, A]) {
+  sealed trait ApiGatewayOp[+A] {
 
-    def flatMap[B](f: A => ApiGatewayOp[B]): ApiGatewayOp[B] = ApiGatewayOp {
-      underlying.flatMap(f.andThen(_.underlying))
-    }
+    def underlying: scalaz.\/[ApiResponse, A]
 
-    def map[B](f: A => B): ApiGatewayOp[B] = ApiGatewayOp {
-      underlying.map(f)
-    }
+    def flatMap[B](f: A => ApiGatewayOp[B]): ApiGatewayOp[B] =
+      underlying.flatMap(f.andThen(_.underlying)).toApiGatewayOp
 
-    def mapResponse(f: ApiResponse => ApiResponse): ApiGatewayOp[A] = ApiGatewayOp {
-      underlying.leftMap(f)
-    }
+    def map[B](f: A => B): ApiGatewayOp[B] =
+      underlying.map(f).toApiGatewayOp
+
+    def mapResponse(f: ApiResponse => ApiResponse): ApiGatewayOp[A] =
+      underlying.leftMap(f).toApiGatewayOp
 
   }
 
   implicit val apiGatewayOpM: Monad[ApiGatewayOp] = {
     val a = implicitly[Monad[({ type Q[X] = scalaz.\/[ApiResponse, X] })#Q]]
     new Monad[ApiGatewayOp] {
-      override def bind[A, B](fa: ApiGatewayOp[A])(f: A => ApiGatewayOp[B]): ApiGatewayOp[B] = ApiGatewayOp(a.bind(fa.underlying)(f.andThen(_.underlying)))
+      override def bind[A, B](fa: ApiGatewayOp[A])(f: A => ApiGatewayOp[B]): ApiGatewayOp[B] = a.bind(fa.underlying)(f.andThen(_.underlying)).toApiGatewayOp
 
-      override def point[A](a: => A): ApiGatewayOp[A] = ApiGatewayOp(scalaz.\/-(a))
+      override def point[A](a: => A): ApiGatewayOp[A] = ContinueProcessing(a)
     }
   }
 
