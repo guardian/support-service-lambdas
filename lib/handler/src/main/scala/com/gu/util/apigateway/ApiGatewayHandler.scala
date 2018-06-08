@@ -1,15 +1,17 @@
 package com.gu.util.apigateway
 
 import java.io.{InputStream, OutputStream}
+
 import com.amazonaws.services.lambda.runtime.Context
-import Auth.credentialsAreValid
 import com.gu.util.Logging
-import com.gu.util.apigateway.ApiGatewayResponse.{outputForAPIGateway, successfulExecution, unauthorized}
+import com.gu.util.apigateway.ApiGatewayResponse.{outputForAPIGateway, unauthorized}
+import com.gu.util.apigateway.Auth.credentialsAreValid
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.config.{Config, TrustedApiConfig}
+import com.gu.util.reader.Types.ApiGatewayOp._
 import com.gu.util.reader.Types._
 import play.api.libs.json.Json
-import scalaz.{-\/, \/, \/-}
+
 import scala.io.Source
 import scala.util.Try
 
@@ -17,13 +19,13 @@ object ApiGatewayHandler extends Logging {
 
   case class LambdaIO(inputStream: InputStream, outputStream: OutputStream, context: Context)
 
-  def parseApiGatewayRequest(inputStream: InputStream): FailableOp[ApiGatewayRequest] = {
+  def parseApiGatewayRequest(inputStream: InputStream): ApiGatewayOp[ApiGatewayRequest] = {
     for {
 
       jsonString <- inputFromApiGateway(inputStream)
-        .toFailableOp("get json data from API gateway").withLogging("payload from api gateway")
+        .toApiGatewayOp("get json data from API gateway").withLogging("payload from api gateway")
       apiGatewayRequest <- Json.parse(jsonString).validate[ApiGatewayRequest]
-        .toFailableOp().withLogging("parsed api gateway object")
+        .toApiGatewayOp().withLogging("parsed api gateway object")
 
     } yield apiGatewayRequest
   }
@@ -38,24 +40,24 @@ object ApiGatewayHandler extends Logging {
     shouldAuthenticate: Boolean,
     requestAuth: Option[RequestAuth],
     trustedApiConfig: TrustedApiConfig
-  ): ApiResponse \/ Unit = {
-    if (!shouldAuthenticate || credentialsAreValid(requestAuth, trustedApiConfig)) \/-(()) else -\/(unauthorized)
+  ): ApiGatewayOp[Unit] = {
+    if (!shouldAuthenticate || credentialsAreValid(requestAuth, trustedApiConfig)) ContinueProcessing(()) else ReturnWithResponse(unauthorized)
   }
 
   case class Operation(
-    steps: ApiGatewayRequest => FailableOp[Unit],
-    healthcheck: () => FailableOp[Unit],
+    steps: ApiGatewayRequest => ApiResponse,
+    healthcheck: () => ApiResponse,
     shouldAuthenticate: Boolean = true
   )
   object Operation {
-    def noHealthcheck(steps: ApiGatewayRequest => FailableOp[Unit], shouldAuthenticate: Boolean = true) =
-      Operation(steps, () => \/-(()), shouldAuthenticate)
+    def noHealthcheck(steps: ApiGatewayRequest => ApiResponse, shouldAuthenticate: Boolean = true) =
+      Operation(steps, () => ApiGatewayResponse.successfulExecution, shouldAuthenticate)
   }
 
   def apply[StepsConfig](
     lambdaIO: LambdaIO
   )(
-    fConfigOp: FailableOp[(Config[StepsConfig], Operation)]
+    fConfigOp: ApiGatewayOp[(Config[StepsConfig], Operation)]
   ): Unit = {
 
     import lambdaIO._
@@ -64,17 +66,16 @@ object ApiGatewayHandler extends Logging {
       configOp <- fConfigOp
       (config, operation) = configOp
       apiGatewayRequest <- parseApiGatewayRequest(inputStream)
-      _ <- if (apiGatewayRequest.queryStringParameters.exists(_.isHealthcheck))
-        operation.healthcheck().withLogging("healthcheck")
+      response <- if (apiGatewayRequest.queryStringParameters.exists(_.isHealthcheck))
+        ContinueProcessing(operation.healthcheck()).withLogging("healthcheck")
       else
         for {
           _ <- authenticateCallout(operation.shouldAuthenticate, apiGatewayRequest.requestAuth, config.trustedApiConfig)
             .withLogging("authentication")
-          _ <- operation.steps(apiGatewayRequest).withLogging("steps")
-        } yield ()
-    } yield ()
+        } yield operation.steps(apiGatewayRequest).withLogging("steps")
+    } yield response
 
-    outputForAPIGateway(outputStream, response.fold(identity, _ => successfulExecution))
+    outputForAPIGateway(outputStream, response.apiResponse)
 
   }
 

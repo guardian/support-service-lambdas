@@ -7,6 +7,7 @@ import com.gu.identityBackfill.salesforce.{DevSFEffects, GetSFContactSyncCheckFi
 import com.gu.test.EffectsTest
 import org.scalatest.{FlatSpec, Matchers}
 import scalaz.\/-
+import com.gu.util.reader.Types._
 
 class GetSFContactSyncCheckFieldsEffectsTest extends FlatSpec with Matchers {
 
@@ -16,11 +17,10 @@ class GetSFContactSyncCheckFieldsEffectsTest extends FlatSpec with Matchers {
 
     val actual = for {
       auth <- DevSFEffects(RawEffects.s3Load, RawEffects.response)
-      authed = GetSFContactSyncCheckFields(auth) _
-      result <- authed(testContact)
+      result <- GetSFContactSyncCheckFields(auth)(testContact).toApiGatewayOp("failed")
     } yield result
 
-    actual should be(\/-(ContactSyncCheckFields(None, "123", "Testing", None)))
+    actual.underlying should be(\/-(ContactSyncCheckFields(None, "123", "Testing", None)))
 
   }
 

@@ -6,7 +6,7 @@ import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import com.gu.util.config.ConfigReads.ConfigFailure
 import com.gu.util.config.{Config, LoadConfig, Stage}
-import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, Requests}
+import com.gu.util.zuora.RestRequestMaker.ClientFailableOp
 import com.gu.util.zuora.ZuoraRestConfig
 import play.api.libs.json.{Json, Reads, Writes}
 import scalaz.Scalaz._

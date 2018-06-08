@@ -4,10 +4,8 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME
 
 import com.gu.digitalSubscriptionExpiry.zuora.GetSubscription.SubscriptionId
-import com.gu.util.apigateway.ApiGatewayResponse
-import com.gu.util.reader.Types.FailableOp
 import com.gu.util.zuora.Logging
-import com.gu.util.zuora.RestRequestMaker.Requests
+import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, Requests}
 import play.api.libs.json.{JsSuccess, Json, Reads}
 
 object SetActivationDate extends Logging {
@@ -19,9 +17,9 @@ object SetActivationDate extends Logging {
   implicit val unitReads: Reads[Unit] =
     Reads(_ => JsSuccess(()))
 
-  def apply(requests: Requests, now: () => LocalDateTime)(subscriptionId: SubscriptionId): FailableOp[Unit] = {
+  def apply(requests: Requests, now: () => LocalDateTime)(subscriptionId: SubscriptionId): ClientFailableOp[Unit] = {
     val activationDateString = now().format(ISO_LOCAL_DATE_TIME)
-    requests.put[UpdateRequestBody, Unit](UpdateRequestBody(activationDateString), s"subscriptions/${subscriptionId.get}").leftMap(clientFail => ApiGatewayResponse.internalServerError(s"zuora client fail: ${clientFail.message}"))
+    requests.put[UpdateRequestBody, Unit](UpdateRequestBody(activationDateString), s"subscriptions/${subscriptionId.get}")
   }
 
 }

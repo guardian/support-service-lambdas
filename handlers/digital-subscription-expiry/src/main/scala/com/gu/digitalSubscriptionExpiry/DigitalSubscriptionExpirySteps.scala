@@ -8,33 +8,34 @@ import com.gu.util.apigateway.ApiGatewayHandler.Operation
 import com.gu.util.apigateway.{ApiGatewayRequest, URLParams}
 import com.gu.util.reader.Types._
 import main.scala.com.gu.digitalSubscriptionExpiry.DigitalSubscriptionExpiryRequest
-import scalaz.\/-
+import ApiGatewayOp.ContinueProcessing
+import com.gu.util.apigateway.ResponseModels.ApiResponse
 
 object DigitalSubscriptionExpirySteps extends Logging {
 
   def apply(
-    getEmergencyTokenExpiry: String => FailableOp[Unit],
-    getSubscription: SubscriptionId => FailableOp[SubscriptionResult],
-    getAccountSummary: AccountId => FailableOp[AccountSummaryResult],
-    getSubscriptionExpiry: (String, SubscriptionResult, AccountSummaryResult) => FailableOp[Unit],
+    getEmergencyTokenExpiry: String => ApiGatewayOp[Unit],
+    getSubscription: SubscriptionId => ApiGatewayOp[SubscriptionResult],
+    getAccountSummary: AccountId => ApiGatewayOp[AccountSummaryResult],
+    getSubscriptionExpiry: (String, SubscriptionResult, AccountSummaryResult) => ApiResponse,
     skipActivationDateUpdate: (Option[URLParams], SubscriptionResult) => Boolean,
-    setActivationDate: (SubscriptionId) => FailableOp[Unit]
+    setActivationDate: (SubscriptionId) => ApiGatewayOp[Unit]
   ): Operation = {
 
-    def steps(apiGatewayRequest: ApiGatewayRequest): FailableOp[Unit] = {
+    def steps(apiGatewayRequest: ApiGatewayRequest): ApiGatewayOp[ApiResponse] = {
       for {
         expiryRequest <- apiGatewayRequest.bodyAsCaseClass[DigitalSubscriptionExpiryRequest](DigitalSubscriptionApiResponses.badRequest)
         _ <- getEmergencyTokenExpiry(expiryRequest.subscriberId)
         subscriptionId = SubscriptionId(expiryRequest.subscriberId.trim.dropWhile(_ == '0'))
         subscriptionResult <- getSubscription(subscriptionId)
-        _ <- if (skipActivationDateUpdate(apiGatewayRequest.queryStringParameters, subscriptionResult)) \/-(()) else setActivationDate(subscriptionResult.id)
+        _ <- if (skipActivationDateUpdate(apiGatewayRequest.queryStringParameters, subscriptionResult)) ContinueProcessing(()) else setActivationDate(subscriptionResult.id)
         accountSummary <- getAccountSummary(subscriptionResult.accountId)
-        password <- expiryRequest.password.toFailableOp(DigitalSubscriptionApiResponses.notFoundResponse)
-        subscriptionEndDate <- getSubscriptionExpiry(password, subscriptionResult, accountSummary)
-      } yield {}
+        password <- expiryRequest.password.toApiGatewayOp(DigitalSubscriptionApiResponses.notFoundResponse)
+        subscriptionEndDate = getSubscriptionExpiry(password, subscriptionResult, accountSummary)
+      } yield subscriptionEndDate
 
     }
-    Operation.noHealthcheck(steps, false)
+    Operation.noHealthcheck((steps _).andThen(_.apiResponse), false)
 
   }
 

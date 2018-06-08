@@ -1,9 +1,7 @@
 package com.gu.stripeCustomerSourceUpdated.zuora
 
 import com.gu.stripeCustomerSourceUpdated._
-import com.gu.util.ZuoraToApiGateway
-import com.gu.util.reader.Types._
-import com.gu.util.zuora.RestRequestMaker.Requests
+import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, Requests}
 import com.gu.util.zuora.ZuoraGetAccountSummary.ZuoraAccount.{AccountId, NumConsecutiveFailures, PaymentMethodId}
 import play.api.libs.json.{JsPath, Json, Reads, Writes}
 
@@ -51,8 +49,7 @@ object CreatePaymentMethod {
 
   case class CreatePaymentMethodResult(id: PaymentMethodId)
 
-  def createPaymentMethod(requests: Requests)(request: CreateStripePaymentMethod): FailableOp[CreatePaymentMethodResult] =
+  def createPaymentMethod(requests: Requests)(request: CreateStripePaymentMethod): ClientFailableOp[CreatePaymentMethodResult] =
     requests.post[CreateStripePaymentMethod, CreatePaymentMethodResult](request, s"object/payment-method")
-      .leftMap(ZuoraToApiGateway.fromClientFail)
 
 }

@@ -1,45 +1,38 @@
 package com.gu.digitalSubscriptionExpiry.zuora
 
-import java.io
 import java.time.LocalDate
+
 import com.gu.digitalSubscriptionExpiry.Handler.StepsConfig
+import com.gu.digitalSubscriptionExpiry.responses.DigitalSubscriptionApiResponses._
 import com.gu.digitalSubscriptionExpiry.zuora.GetAccountSummary.AccountId
 import com.gu.digitalSubscriptionExpiry.zuora.GetSubscription.{RatePlan, RatePlanCharge, SubscriptionId, SubscriptionName, SubscriptionResult}
-import com.gu.effects.{S3ConfigLoad, RawEffects}
+import com.gu.effects.{RawEffects, S3ConfigLoad}
 import com.gu.test.EffectsTest
-import org.scalatest.{FlatSpec, Matchers}
-import scalaz.{-\/, \/, \/-}
-import scalaz.syntax.std.either._
-import com.gu.digitalSubscriptionExpiry.responses.DigitalSubscriptionApiResponses._
 import com.gu.util.config.{LoadConfig, Stage}
+import com.gu.util.reader.Types._
 import com.gu.util.zuora.ZuoraRestRequestMaker
+import org.scalatest.{FlatSpec, Matchers}
+import scalaz.{-\/, \/-}
+
 class GetSubscriptionEffectsTest extends FlatSpec with Matchers {
+
+  private def actual(testSubscriptionId: SubscriptionId): ApiGatewayOp[SubscriptionResult] = for {
+    configAttempt <- S3ConfigLoad.load(Stage("DEV")).toApiGatewayOp("couldn't load")
+    config <- LoadConfig.parseConfig[StepsConfig](configAttempt).toApiGatewayOp("couldn't parse")
+    zuoraRequests = ZuoraRestRequestMaker(RawEffects.response, config.stepsConfig.zuoraRestConfig)
+    subscription <- GetSubscription(zuoraRequests)(testSubscriptionId)
+  } yield {
+    subscription
+  }
 
   it should "return not found if sub id is invalid" taggedAs EffectsTest in {
     val testSubscriptionId = SubscriptionId("invalidSubId")
 
-    val actual: \/[io.Serializable, SubscriptionResult] = for {
-      configAttempt <- S3ConfigLoad.load(Stage("DEV")).toEither.disjunction
-      config <- LoadConfig.parseConfig[StepsConfig](configAttempt)
-      zuoraRequests = ZuoraRestRequestMaker(RawEffects.response, config.stepsConfig.zuoraRestConfig)
-      subscription <- GetSubscription(zuoraRequests)(testSubscriptionId)
-    } yield {
-      subscription
-    }
-    actual should be(-\/(notFoundResponse))
+    actual(testSubscriptionId).underlying should be(-\/(notFoundResponse))
   }
 
   it should "successfully get subscription info against dev" taggedAs EffectsTest in {
     val testSubscriptionId = SubscriptionId("A-S00044160")
-
-    val actual: \/[io.Serializable, SubscriptionResult] = for {
-      configAttempt <- S3ConfigLoad.load(Stage("DEV")).toEither.disjunction
-      config <- LoadConfig.parseConfig[StepsConfig](configAttempt)
-      zuoraRequests = ZuoraRestRequestMaker(RawEffects.response, config.stepsConfig.zuoraRestConfig)
-      subscription <- GetSubscription(zuoraRequests)(testSubscriptionId)
-    } yield {
-      subscription
-    }
 
     val customerAcceptanceDate = LocalDate.of(2017, 12, 15)
     val startDate = LocalDate.of(2017, 11, 29)
@@ -71,6 +64,6 @@ class GetSubscriptionEffectsTest extends FlatSpec with Matchers {
       )
     )
 
-    actual should be(\/-(expected))
+    actual(testSubscriptionId).underlying should be(\/-(expected))
   }
 }

@@ -1,20 +1,19 @@
 package com.gu.paymentFailure
 
-import com.gu.util.Logging
-import com.gu.util.apigateway.ApiGatewayResponse.internalServerError
-import com.gu.util.reader.Types.FailableOp
-import com.gu.util.zuora.ZuoraGetInvoiceTransactions.{InvoiceItem, InvoiceTransactionSummary, ItemisedInvoice}
 import java.time.LocalDate
 
-import scalaz.\/
-import scalaz.syntax.std.option._
+import com.gu.util.Logging
+import com.gu.util.apigateway.ApiGatewayResponse.internalServerError
+import com.gu.util.reader.Types.ApiGatewayOp._
+import com.gu.util.reader.Types._
+import com.gu.util.zuora.ZuoraGetInvoiceTransactions.{InvoiceItem, InvoiceTransactionSummary, ItemisedInvoice}
 
 object GetPaymentData extends Logging {
 
   case class PaymentFailureInformation(subscriptionName: String, product: String, amount: Double, serviceStartDate: LocalDate, serviceEndDate: LocalDate)
 
   //todo for now just return an option here but the error handling has to be refactored a little bit
-  def apply(message: String)(invoiceTransactionSummary: InvoiceTransactionSummary): FailableOp[PaymentFailureInformation] = {
+  def apply(message: String)(invoiceTransactionSummary: InvoiceTransactionSummary): ApiGatewayOp[PaymentFailureInformation] = {
     logger.info(s"Attempting to get further details from account $message")
     val unpaidInvoices =
       invoiceTransactionSummary.invoices.filter {
@@ -31,11 +30,11 @@ object GetPaymentData extends Logging {
               logger.info(s"Payment failure information for account: $message is: $paymentFailureInfo")
               paymentFailureInfo
             }
-        }.toRightDisjunction(internalServerError(s"Could not retrieve additional data for account $message"))
+        }.toApiGatewayOp(internalServerError(s"Could not retrieve additional data for account $message"))
       }
       case None => {
         logger.error(s"No unpaid invoice found - nothing to do")
-        \/.left(internalServerError(s"Could not retrieve additional data for account $message"))
+        ReturnWithResponse(internalServerError(s"Could not retrieve additional data for account $message"))
       }
     }
   }

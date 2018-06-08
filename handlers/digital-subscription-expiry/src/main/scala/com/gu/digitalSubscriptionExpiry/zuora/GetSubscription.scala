@@ -45,10 +45,10 @@ object GetSubscription {
       (__ \ "ratePlans").read[List[RatePlan]]
     )(SubscriptionResult.apply _)
 
-  def apply(requests: Requests)(subscriptionId: SubscriptionId): FailableOp[SubscriptionResult] =
+  def apply(requests: Requests)(subscriptionId: SubscriptionId): ApiGatewayOp[SubscriptionResult] =
     requests.get[SubscriptionResult](s"subscriptions/${subscriptionId.get}").leftMap {
       case genericError: GenericError => ApiGatewayResponse.internalServerError(s"zuora client fail: ${genericError.message}")
       case notFound: NotFound => notFoundResponse
-    }
+    }.toApiGatewayOp
 
 }
