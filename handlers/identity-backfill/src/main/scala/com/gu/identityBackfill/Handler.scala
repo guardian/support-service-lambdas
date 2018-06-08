@@ -85,20 +85,26 @@ object Handler {
       Stage("CODE") -> RecordTypeId("012g0000000DZmNAAW"),
       Stage("DEV") -> RecordTypeId("STANDARD_TEST_DUMMY")
     )
-    mappings.get(stage).toApiGatewayOp(ApiGatewayResponse.internalServerError(s"missing config for stage $stage"))
+    mappings.get(stage).toApiGatewayContinueProcessing(ApiGatewayResponse.internalServerError(s"missing config for stage $stage"))
   }
 
-  def syncableSFToIdentity(sfRequests: => ApiGatewayOp[Requests], stage: Stage)(sFContactId: Types.SFContactId): ApiGatewayOp[Unit] =
+  def syncableSFToIdentity(sfRequests: ApiGatewayOp[Requests], stage: Stage)(sFContactId: Types.SFContactId): ApiGatewayOp[Unit] =
     for {
       sfRequests <- sfRequests
       standardRecordType <- standardRecordTypeForStage(stage)
       syncable <- SyncableSFToIdentity(standardRecordType)(sfRequests)(sFContactId)
     } yield syncable
 
-  def updateSalesforceIdentityId(sfRequests: => ApiGatewayOp[Requests])(sFContactId: Types.SFContactId, identityId: IdentityId): ApiGatewayOp[Unit] = for {
-    sfRequests <- sfRequests
-    _ <- UpdateSalesforceIdentityId(sfRequests)(sFContactId, identityId).toApiGatewayOp("zuora issue")
-  } yield ()
+  def updateSalesforceIdentityId(
+    sfRequests: ApiGatewayOp[Requests]
+  )(
+    sFContactId: Types.SFContactId,
+    identityId: IdentityId
+  ): ApiGatewayOp[Unit] =
+    for {
+      sfRequests <- sfRequests
+      _ <- UpdateSalesforceIdentityId(sfRequests)(sFContactId, identityId).toApiGatewayOp("zuora issue")
+    } yield ()
 
 }
 
@@ -109,7 +115,8 @@ object Healthcheck {
     sfAuth: => ApiGatewayOp[Any]
   ): ApiResponse =
     (for {
-      identityId <- getByEmail(EmailAddress("john.duffell@guardian.co.uk")).toApiGatewayOp("problem with email").withLogging("healthcheck getByEmail")
+      identityId <- getByEmail(EmailAddress("john.duffell@guardian.co.uk"))
+        .toApiGatewayOp("problem with email").withLogging("healthcheck getByEmail")
       _ <- countZuoraAccountsForIdentityId(identityId).toApiGatewayOp("zuora issue")
       _ <- sfAuth
     } yield ApiGatewayResponse.successfulExecution).apiResponse

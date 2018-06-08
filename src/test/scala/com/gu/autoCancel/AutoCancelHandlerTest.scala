@@ -1,11 +1,9 @@
 package com.gu.autoCancel
 
-import com.gu.util.apigateway.ApiGatewayResponse._
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, RequestAuth, StripeAccount}
 import com.gu.util.config.TrustedApiConfig
 import org.scalatest._
 import play.api.libs.json.{JsSuccess, Json}
-
 import scalaz.{-\/, \/-}
 object AutoCancelHandlerTest {
 
@@ -18,8 +16,8 @@ object AutoCancelHandlerTest {
 }
 class AutoCancelHandlerTest extends FlatSpec {
 
-  import AutoCancelInputFilter._
   import AutoCancelHandlerTest._
+  import AutoCancelInputFilter._
 
   "filterInvalidAccount" should "return a left if AutoPay = false" in {
     val autoCancelCallout = fakeCallout(false)
@@ -66,13 +64,13 @@ class AutoCancelHandlerTest extends FlatSpec {
   "authenticateCallout" should "return a left if the credentials are invalid" in {
     val requestAuth = RequestAuth(apiToken = "incorrectRequestToken")
     val trustedApiConfig = TrustedApiConfig(apiToken = "token", tenantId = "tenant")
-    assert(ApiGatewayHandler.authenticateCallout(true, Some(requestAuth), trustedApiConfig).toDisjunction == -\/(unauthorized))
+    assert(ApiGatewayHandler.isAuthorised(true, Some(requestAuth), trustedApiConfig) == false)
   }
 
   "authenticateCallout" should "return a right if the credentials are valid" in {
     val requestAuth = RequestAuth(apiToken = "token")
     val trustedApiConfig = TrustedApiConfig(apiToken = "token", tenantId = "tenant")
-    assert(ApiGatewayHandler.authenticateCallout(true, Some(requestAuth), trustedApiConfig).toDisjunction == \/-(()))
+    assert(ApiGatewayHandler.isAuthorised(true, Some(requestAuth), trustedApiConfig) == true)
   }
 
 }

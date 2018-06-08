@@ -29,7 +29,7 @@ class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
   val successfulResponseFromZuora = ApiResponse("123", "valid zuora response")
 
   def getSubId(s: SubscriptionId): ApiGatewayOp[SubscriptionResult] = {
-    if (s.get == "validZuoraSubId") {
+    if (s.value == "validZuoraSubId") {
       val response = SubscriptionResult(
         id = s,
         name = SubscriptionName("someSubName"),
@@ -58,7 +58,12 @@ class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
       ContinueProcessing(summary)
     }
   }
-  def getSubExpiry(password: String, subscriptionResult: SubscriptionResult, accountSummaryResult: AccountSummaryResult): ApiResponse = successfulResponseFromZuora
+  def getSubExpiry(
+    password: String,
+    subscriptionResult: SubscriptionResult,
+    accountSummaryResult: AccountSummaryResult
+  ): ApiResponse =
+    successfulResponseFromZuora
 
   def getTokenExpiry(token: String): ApiGatewayOp[Unit] = {
     if (token == "validToken") ReturnWithResponse(validTokenResponse) else ContinueProcessing(())

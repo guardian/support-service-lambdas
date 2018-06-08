@@ -39,7 +39,8 @@ object PreReqCheck {
   ): ApiGatewayOp[Unit] = {
     for {
       zuoraAccountsForIdentityId <- countZuoraAccountsForIdentityId.toApiGatewayOp("zuora issue")
-      _ <- if (zuoraAccountsForIdentityId == 0) ContinueProcessing(()) else ReturnWithResponse(ApiGatewayResponse.notFound("already used that identity id"))
+      _ <- (zuoraAccountsForIdentityId == 0)
+        .toApiGatewayContinueProcessing(ApiGatewayResponse.notFound("already used that identity id"))
     } yield ()
   }
 
@@ -65,10 +66,8 @@ object PreReqCheck {
       incorrectReaderTypes = readerTypes.collect {
         case ReaderTypeValue(readerType) if readerType != "Direct" => readerType // it's bad
       }
-      _ <- if (incorrectReaderTypes.isEmpty)
-        ContinueProcessing(())
-      else
-        ReturnWithResponse(ApiGatewayResponse.notFound(s"had an incorrect reader type(s): ${incorrectReaderTypes.mkString(",")}"))
+      _ <- incorrectReaderTypes.isEmpty
+        .toApiGatewayContinueProcessing(ApiGatewayResponse.notFound(s"had an incorrect reader type(s): ${incorrectReaderTypes.mkString(",")}"))
     } yield ()
   }
 

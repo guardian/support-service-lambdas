@@ -34,9 +34,16 @@ object PaymentFailureSteps extends Logging {
     } yield ApiGatewayResponse.successfulExecution).apiResponse
   })
 
-  def makeRequest(etSendIds: ETSendIds, paymentFailureCallout: PaymentFailureCallout): ApiGatewayOp[PaymentFailureInformation => EmailRequest] = {
-    etSendIds.find(paymentFailureCallout.failureNumber).map { etId => pFI: PaymentFailureInformation => EmailRequest(etId, ToMessage(paymentFailureCallout, pFI))
-    }.toApiGatewayOp(ApiGatewayResponse.internalServerError(s"no ET id configured for failure number: ${paymentFailureCallout.failureNumber}"))
+  def makeRequest(
+    etSendIds: ETSendIds,
+    paymentFailureCallout: PaymentFailureCallout
+  ): ApiGatewayOp[PaymentFailureInformation => EmailRequest] = {
+    val maybeETSendId = etSendIds.find(paymentFailureCallout.failureNumber)
+    maybeETSendId.map { etId => pFI: PaymentFailureInformation =>
+      EmailRequest(etId, ToMessage(paymentFailureCallout, pFI))
+    }.toApiGatewayContinueProcessing(
+      ApiGatewayResponse.internalServerError(s"no ET id configured for failure number: ${paymentFailureCallout.failureNumber}")
+    )
   }
 
   def validateTenantCallout(trustedApiConfig: TrustedApiConfig)(calloutTenantId: String): ApiGatewayOp[Unit] = {

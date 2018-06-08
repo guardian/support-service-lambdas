@@ -100,14 +100,29 @@ object Types extends Logging {
 
   implicit class OptionOps[A](theOption: Option[A]) {
 
-    def toApiGatewayOp(NoneResponse: ApiResponse): ApiGatewayOp[A] = {
+    def toApiGatewayContinueProcessing(NoneResponse: ApiResponse): ApiGatewayOp[A] =
       theOption match {
         case Some(value) => ContinueProcessing(value)
-        case None => {
-          ReturnWithResponse(NoneResponse)
-        }
+        case None => ReturnWithResponse(NoneResponse)
       }
-    }
+
+  }
+
+  implicit class OptionApiResponseOps(theOption: Option[ApiResponse]) {
+
+    def toApiGatewayReturnResponse[A](NoneContinue: A = ()): ApiGatewayOp[A] =
+      theOption match {
+        case Some(value) => ReturnWithResponse(value)
+        case None => ContinueProcessing(NoneContinue)
+      }
+
+  }
+
+  implicit class BooleanOps[A](is: Boolean) {
+
+    def toApiGatewayContinueProcessing(falseResponse: ApiResponse): ApiGatewayOp[Unit] =
+      if (is) ContinueProcessing(())
+      else ReturnWithResponse(falseResponse)
 
   }
 

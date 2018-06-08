@@ -28,9 +28,12 @@ object DigitalSubscriptionExpirySteps extends Logging {
         _ <- getEmergencyTokenExpiry(expiryRequest.subscriberId)
         subscriptionId = SubscriptionId(expiryRequest.subscriberId.trim.dropWhile(_ == '0'))
         subscriptionResult <- getSubscription(subscriptionId)
-        _ <- if (skipActivationDateUpdate(apiGatewayRequest.queryStringParameters, subscriptionResult)) ContinueProcessing(()) else setActivationDate(subscriptionResult.id)
+        _ <- if (skipActivationDateUpdate(apiGatewayRequest.queryStringParameters, subscriptionResult))
+          ContinueProcessing(())
+        else
+          setActivationDate(subscriptionResult.id)
         accountSummary <- getAccountSummary(subscriptionResult.accountId)
-        password <- expiryRequest.password.toApiGatewayOp(DigitalSubscriptionApiResponses.notFoundResponse)
+        password <- expiryRequest.password.toApiGatewayContinueProcessing(DigitalSubscriptionApiResponses.notFoundResponse)
         subscriptionEndDate = getSubscriptionExpiry(password, subscriptionResult, accountSummary)
       } yield subscriptionEndDate).apiResponse
 

@@ -30,7 +30,7 @@ object GetPaymentData extends Logging {
               logger.info(s"Payment failure information for account: $message is: $paymentFailureInfo")
               paymentFailureInfo
             }
-        }.toApiGatewayOp(internalServerError(s"Could not retrieve additional data for account $message"))
+        }.toApiGatewayContinueProcessing(internalServerError(s"Could not retrieve additional data for account $message"))
       }
       case None => {
         logger.error(s"No unpaid invoice found - nothing to do")

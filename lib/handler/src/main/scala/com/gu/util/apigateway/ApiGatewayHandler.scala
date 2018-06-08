@@ -36,12 +36,13 @@ object ApiGatewayHandler extends Logging {
     }
   }
 
-  def authenticateCallout(
+  def isAuthorised(
     shouldAuthenticate: Boolean,
     requestAuth: Option[RequestAuth],
     trustedApiConfig: TrustedApiConfig
-  ): ApiGatewayOp[Unit] = {
-    if (!shouldAuthenticate || credentialsAreValid(requestAuth, trustedApiConfig)) ContinueProcessing(()) else ReturnWithResponse(unauthorized)
+  ): Boolean = {
+    !shouldAuthenticate || credentialsAreValid(requestAuth, trustedApiConfig)
+
   }
 
   case class Operation(
@@ -70,8 +71,8 @@ object ApiGatewayHandler extends Logging {
         ContinueProcessing(operation.healthcheck()).withLogging("healthcheck")
       else
         for {
-          _ <- authenticateCallout(operation.shouldAuthenticate, apiGatewayRequest.requestAuth, config.trustedApiConfig)
-            .withLogging("authentication")
+          _ <- isAuthorised(operation.shouldAuthenticate, apiGatewayRequest.requestAuth, config.trustedApiConfig)
+            .toApiGatewayContinueProcessing(unauthorized).withLogging("authentication")
         } yield operation.steps(apiGatewayRequest).withLogging("steps")
     } yield response
 

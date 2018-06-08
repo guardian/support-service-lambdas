@@ -11,8 +11,8 @@ import com.gu.digitalSubscriptionExpiry.responses.DigitalSubscriptionApiResponse
 
 object GetSubscription {
 
-  case class SubscriptionId(get: String) extends AnyVal
-  case class SubscriptionName(get: String) extends AnyVal
+  case class SubscriptionId(value: String) extends AnyVal
+  case class SubscriptionName(value: String) extends AnyVal
   case class RatePlan(productName: String, ratePlanCharges: List[RatePlanCharge])
   case class RatePlanCharge(name: String, effectiveStartDate: LocalDate, effectiveEndDate: LocalDate)
   case class RatePlans(ratePlans: List[RatePlan])
@@ -46,7 +46,7 @@ object GetSubscription {
     )(SubscriptionResult.apply _)
 
   def apply(requests: Requests)(subscriptionId: SubscriptionId): ApiGatewayOp[SubscriptionResult] =
-    requests.get[SubscriptionResult](s"subscriptions/${subscriptionId.get}").leftMap {
+    requests.get[SubscriptionResult](s"subscriptions/${subscriptionId.value}").leftMap {
       case genericError: GenericError => ApiGatewayResponse.internalServerError(s"zuora client fail: ${genericError.message}")
       case notFound: NotFound => notFoundResponse
     }.toApiGatewayOp

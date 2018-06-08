@@ -55,7 +55,7 @@ case class ApiGatewayRequest(queryStringParameters: Option[URLParams], body: Opt
         }
       case None =>
         logger.warn(s"Attempted to access response body but there was none")
-        None.toApiGatewayOp(ApiGatewayResponse.internalServerError("attempted to parse body when handling a GET request"))
+        None.toApiGatewayContinueProcessing(ApiGatewayResponse.internalServerError("attempted to parse body when handling a GET request"))
     }
   }
 

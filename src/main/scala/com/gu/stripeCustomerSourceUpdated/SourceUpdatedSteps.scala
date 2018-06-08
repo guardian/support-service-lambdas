@@ -77,14 +77,17 @@ object SourceUpdatedSteps extends Logging {
 
   import com.gu.util.reader.Types._
 
-  def createPaymentMethod(requests: Requests)(eventDataObject: EventDataObject, paymentMethodFields: PaymentMethodFields): ApiGatewayOp[CreatePaymentMethod.CreatePaymentMethodResult] = {
+  def createPaymentMethod(requests: Requests)(
+    eventDataObject: EventDataObject,
+    paymentMethodFields: PaymentMethodFields
+  ): ApiGatewayOp[CreatePaymentMethod.CreatePaymentMethodResult] = {
     for {
       creditCardType <- Some(eventDataObject.brand).collect {
         case StripeBrand.Visa => CreditCardType.Visa
         case StripeBrand.Discover => CreditCardType.Discover
         case StripeBrand.MasterCard => CreditCardType.MasterCard
         case StripeBrand.AmericanExpress => CreditCardType.AmericanExpress
-      }.toApiGatewayOp(ApiGatewayResponse.internalServerError(s"not valid card type for zuora: ${eventDataObject.brand}"))
+      }.toApiGatewayContinueProcessing(ApiGatewayResponse.internalServerError(s"not valid card type for zuora: ${eventDataObject.brand}"))
       result <- CreatePaymentMethod.createPaymentMethod(requests)(CreateStripePaymentMethod(
         paymentMethodFields.AccountId,
         eventDataObject.id,
