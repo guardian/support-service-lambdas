@@ -113,7 +113,7 @@ The main project aggregates all the sub projects from handlers and lib, so we ca
 
 **Zuora Reports**
 
-[zuora-reports](handlers/zuora-reports)
+[zuora-reports](handlers/zuora-retention)
 
 **Libraries**
 

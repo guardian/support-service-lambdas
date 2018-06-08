@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: Lambdas used to extract data from Zuora using the Aggregate Query API (AQuA)
+Description: Finds and marks zuora accounts that are out of the retention period
 
 Parameters:
     Stage:
@@ -12,18 +12,18 @@ Parameters:
 Mappings:
   StageVariables:
     CODE:
-      reportsBucketName : "zuora-reports-code"
+      retentionBucketName : "zuora-retention-code"
     PROD:
-      reportsBucketName : "zuora-reports-prod"
+      retentionBucketName : "zuora-retention-prod"
 Resources:
-    ReportsBucket:
+    RetentionBucket:
         Type: "AWS::S3::Bucket"
         Properties:
           BucketName:
             Fn::FindInMap:
               - StageVariables
               - Ref: Stage
-              - "reportsBucketName"
+              - "retentionBucketName"
           AccessControl: Private
           BucketEncryption:
             ServerSideEncryptionConfiguration:
@@ -57,7 +57,7 @@ Resources:
                             - logs:CreateLogStream
                             - logs:PutLogEvents
                             - lambda:InvokeFunction
-                            Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/zuora-reports-querier-${Stage}:log-stream:*"
+                            Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/zuora-retention-querier-${Stage}:log-stream:*"
 
                 - PolicyName: ReadPrivateCredentials
                   PolicyDocument:
@@ -87,7 +87,7 @@ Resources:
                             - logs:CreateLogStream
                             - logs:PutLogEvents
                             - lambda:InvokeFunction
-                            Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/zuora-reports-jobResult-${Stage}:log-stream:*"
+                            Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/zuora-retention-jobResult-${Stage}:log-stream:*"
 
                 - PolicyName: ReadPrivateCredentials
                   PolicyDocument:
@@ -97,7 +97,7 @@ Resources:
                             Resource: !Sub arn:aws:s3:::gu-reader-revenue-private/membership/payment-failure-lambdas/${Stage}/*
     ZuoraFileFetcherRole:
         Type: AWS::IAM::Role
-        DependsOn: ReportsBucket
+        DependsOn: RetentionBucket
         Properties:
             AssumeRolePolicyDocument:
                 Statement:
@@ -109,13 +109,13 @@ Resources:
                           - sts:AssumeRole
             Path: /
             Policies:
-                - PolicyName: writeToReportsBucket
+                - PolicyName: writeToRetentionBucket
                   PolicyDocument:
                       Statement:
                         - Effect: Allow
                           Action:
                           - s3:PutObject
-                          Resource: !Sub arn:aws:s3:::${ReportsBucket}/*
+                          Resource: !Sub arn:aws:s3:::${RetentionBucket}/*
                 - PolicyName: LambdaPolicy
                   PolicyDocument:
                       Statement:
@@ -125,23 +125,23 @@ Resources:
                             - logs:CreateLogStream
                             - logs:PutLogEvents
                             - lambda:InvokeFunction
-                            Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/zuora-reports-fileFetcher-${Stage}:log-stream:*"
+                            Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/zuora-retention-fileFetcher-${Stage}:log-stream:*"
                 - PolicyName: ReadPrivateCredentials
                   PolicyDocument:
                       Statement:
                           - Effect: Allow
                             Action: s3:GetObject
                             Resource: !Sub arn:aws:s3:::gu-reader-revenue-private/membership/payment-failure-lambdas/${Stage}/*
-    ZuoraReports:
+    ZuoraRetentionQuerier:
         Type: AWS::Lambda::Function
         Properties:
             Description: submit query jobs to Zuora AQuA API
             FunctionName:
-                !Sub zuora-reports-querier-${Stage}
+                !Sub zuora-retention-querier-${Stage}
             Code:
                 S3Bucket: membership-dist
-                S3Key: !Sub membership/${Stage}/zuora-reports/zuora-reports.jar
-            Handler: com.gu.zuora.reports.Handlers::queryHandler
+                S3Key: !Sub membership/${Stage}/zuora-retention/zuora-retention.jar
+            Handler: com.gu.zuora.retention.Handlers::queryHandler
             Environment:
                 Variables:
                   Stage: !Ref Stage
@@ -152,16 +152,16 @@ Resources:
             Timeout: 300
         DependsOn:
         - ZuoraQuerierRole
-    ZuoraReportsJobResult:
+    ZuoraRetentionJobResult:
         Type: AWS::Lambda::Function
         Properties:
             Description: fetch job results from zuora
             FunctionName:
-                !Sub zuora-reports-jobResult-${Stage}
+                !Sub zuora-retention-jobResult-${Stage}
             Code:
                 S3Bucket: membership-dist
-                S3Key: !Sub membership/${Stage}/zuora-reports/zuora-reports.jar
-            Handler: com.gu.zuora.reports.Handlers::fetchResultsHandler
+                S3Key: !Sub membership/${Stage}/zuora-retention/zuora-retention.jar
+            Handler: com.gu.zuora.retention.Handlers::fetchResultsHandler
             Environment:
                 Variables:
                   Stage: !Ref Stage
@@ -172,16 +172,16 @@ Resources:
             Timeout: 300
         DependsOn:
         - ZuoraResultsRole
-    ZuoraReportsFileFetcher:
+    ZuoraRetentionFileFetcher:
         Type: AWS::Lambda::Function
         Properties:
             Description: fetches report files and saves them to s3
             FunctionName:
-                !Sub zuora-reports-fileFetcher-${Stage}
+                !Sub zuora-retention-fileFetcher-${Stage}
             Code:
                 S3Bucket: membership-dist
-                S3Key: !Sub membership/${Stage}/zuora-reports/zuora-reports.jar
-            Handler: com.gu.zuora.reports.Handlers::fetchFileHandler
+                S3Key: !Sub membership/${Stage}/zuora-retention/zuora-retention.jar
+            Handler: com.gu.zuora.retention.Handlers::fetchFileHandler
             Environment:
                 Variables:
                   Stage: !Ref Stage
@@ -192,20 +192,3 @@ Resources:
             Timeout: 300
         DependsOn:
         - ZuoraFileFetcherRole
-
-Outputs:
-  querierExport:
-    Description: lambda that submits queries to Zuora AQuA
-    Value: !Ref ZuoraReports
-    Export:
-      Name: !Sub ${AWS::StackName}-Querier
-  jobResultsExport:
-    Description: lambda that get current status of submitted jobs to Zuora AQua
-    Value: !Ref ZuoraReportsJobResult
-    Export:
-      Name: !Sub ${AWS::StackName}-JobResults
-  fileFetcherExport:
-    Description: lambda that fetches zuora AQuA query results and stores them in S3
-    Value: !Ref ZuoraReportsFileFetcher
-    Export:
-      Name: !Sub ${AWS::StackName}-FileFetcher

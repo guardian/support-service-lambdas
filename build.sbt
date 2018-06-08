@@ -90,6 +90,9 @@ lazy val test = all(project in file("lib/test")).settings(
 
 val testDep = test % "test->test"
 
+lazy val `zuora-reports` = all(project in file("lib/zuora-reports")).dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
+
+
 // ==== END libraries ====
 
 // ==== START handlers ====
@@ -121,8 +124,9 @@ lazy val `catalog-service` = all(project in file("handlers/catalog-service"))
 lazy val `identity-retention` = all(project in file("handlers/identity-retention"))
   .enablePlugins(RiffRaffArtifact).dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
 
-lazy val `zuora-reports` = all(project in file("handlers/zuora-reports"))
-  .enablePlugins(RiffRaffArtifact).dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
+lazy val `zuora-retention` = all(project in file("handlers/zuora-retention"))
+  .enablePlugins(RiffRaffArtifact).dependsOn(`zuora-reports`, handler, effectsDepIncludingTestFolder, testDep)
+
 
 // ==== END handlers ====
 
