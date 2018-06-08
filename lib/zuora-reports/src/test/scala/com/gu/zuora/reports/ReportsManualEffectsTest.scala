@@ -15,22 +15,23 @@ object ReportsManualEffectsTest extends App {
     zuoraRequests = ZuoraAquaRequestMaker(RawEffects.response, config.stepsConfig.zuoraRestConfig)
   } yield zuoraRequests
 
-  def querierTest = {
-
-    val expected = QuerierResponse(
-      jobId = "something",
-      name = "bla"
-    )
-    val response = for {
-      zuoraRequests <- getZuoraRequest(RawEffects.response)
-      request = QuerierRequest("testRequest", Seq(Query("testQuery", "SELECT Name FROM Subscription WHERE  id='2c92c0856391fbe001639b8a61d25d7b'")))
-      res <- Querier(zuoraRequests)(request)
-    } yield {
-      res
-    }
-    println(s"querier response : $response")
-
-  }
+  //todo the query format is not defined in reports anymore, we'll have to rethink this tests
+  //  def querierTest = {
+  //
+  //    val expected = QuerierResponse(
+  //      jobId = "something",
+  //      name = "bla"
+  //    )
+  //    val response = for {
+  //      zuoraRequests <- getZuoraRequest(RawEffects.response)
+  //      request = QuerierRequest("testRequest", Seq(Query("testQuery", "SELECT Name FROM Subscription WHERE  id='2c92c0856391fbe001639b8a61d25d7b'")))
+  //      res <- Querier(zuoraRequests)(request)
+  //    } yield {
+  //      res
+  //    }
+  //    println(s"querier response : $response")
+  //
+  //  }
 
   def getResultsTest = {
     val response = for {

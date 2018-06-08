@@ -8,17 +8,22 @@ import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import com.gu.util.config.Config
 import com.gu.util.zuora.RestRequestMaker.Requests
 import com.gu.zuora.reports.ReportsLambda.{AquaCall, StepsConfig}
-import com.gu.zuora.reports.aqua.ZuoraAquaRequestMaker
+import com.gu.zuora.reports.aqua.{AquaQueryRequest, ZuoraAquaRequestMaker}
+import play.api.libs.json.Reads
 
-trait ReportHandlers {
+trait ReportHandlers[QUERY_REQUEST] {
 
   def reportsBucketPrefix: String
-
+  def toQueryRequest: QUERY_REQUEST => AquaQueryRequest
+  implicit def queryReads: Reads[QUERY_REQUEST]
   private def defaultWiring[REQ, RES](call: Requests => AquaCall[REQ, RES])(config: Config[StepsConfig]) = call(ZuoraAquaRequestMaker(RawEffects.response, config.stepsConfig.zuoraRestConfig))
 
-  def queryHandler(inputStream: InputStream, outputStream: OutputStream, context: Context) =
-    ReportsLambda[QuerierRequest, QuerierResponse](RawEffects.stage, RawEffects.s3Load, LambdaIO(inputStream, outputStream, context), defaultWiring(Querier.apply))
-
+  def queryHandler(inputStream: InputStream, outputStream: OutputStream, context: Context) = {
+    def wireQuerier(config: Config[StepsConfig]) = {
+      Querier(toQueryRequest, ZuoraAquaRequestMaker(RawEffects.response, config.stepsConfig.zuoraRestConfig)) _
+    }
+    ReportsLambda[QUERY_REQUEST, QuerierResponse](RawEffects.stage, RawEffects.s3Load, LambdaIO(inputStream, outputStream, context), wireQuerier)
+  }
   def fetchResultsHandler(inputStream: InputStream, outputStream: OutputStream, context: Context) =
     ReportsLambda[JobResultRequest, JobResult](RawEffects.stage, RawEffects.s3Load, LambdaIO(inputStream, outputStream, context), defaultWiring(GetJobResult.apply))
 
