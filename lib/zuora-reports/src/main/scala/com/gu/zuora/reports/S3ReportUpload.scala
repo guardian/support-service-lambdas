@@ -10,20 +10,13 @@ import scalaz.syntax.std.either._
 
 object S3ReportUpload extends Logging {
 
-  val buckets = Map(
-    Stage("CODE") -> "zuora-reports-code",
-    Stage("PROD") -> "zuora-reports-prod",
-    Stage("DEV") -> "zuora-reports-dev"
-  )
-
-  def apply(stage: Stage, s3Write: PutObjectRequest => Try[PutObjectResult])(downloadStream: DownloadStream, saveLocation: String): ClientFailableOp[String] = {
+  def apply(destinationBucket: String, s3Write: PutObjectRequest => Try[PutObjectResult])(downloadStream: DownloadStream, saveLocation: String): ClientFailableOp[String] = {
 
     val metadata = new ObjectMetadata()
     metadata.setContentLength(downloadStream.lengthBytes)
 
-    val destBucket = buckets(stage)
-    val putObjectRequest = new PutObjectRequest(destBucket, saveLocation, downloadStream.stream, metadata)
-    s3Write(putObjectRequest).map(_ => s"s3://$destBucket/$saveLocation").toEither.disjunction.leftMap { exception =>
+    val putObjectRequest = new PutObjectRequest(destinationBucket, saveLocation, downloadStream.stream, metadata)
+    s3Write(putObjectRequest).map(_ => s"s3://$destinationBucket/$saveLocation").toEither.disjunction.leftMap { exception =>
       logger.error("could not upload report to S3", exception)
       GenericError(s"could not upload report to S3: ${exception.getMessage}")
     }
