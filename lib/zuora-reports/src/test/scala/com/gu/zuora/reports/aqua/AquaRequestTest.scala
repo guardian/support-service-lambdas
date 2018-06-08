@@ -1,5 +1,4 @@
 package com.gu.zuora.reports.aqua
-
 import org.scalatest._
 import play.api.libs.json.Json
 import org.scalatest.Matchers._
