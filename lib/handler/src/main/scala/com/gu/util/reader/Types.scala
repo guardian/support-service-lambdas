@@ -38,11 +38,29 @@ object Types extends Logging {
   }
 
   implicit val apiGatewayOpM: Monad[ApiGatewayOp] = {
-    val a = implicitly[Monad[({ type Q[X] = scalaz.\/[ApiResponse, X] })#Q]]
+
+    type ApiGatewayDisjunction[A] = scalaz.\/[ApiResponse, A]
+
+    val disjunctionMonad = implicitly[Monad[ApiGatewayDisjunction]]
+
     new Monad[ApiGatewayOp] {
-      override def bind[A, B](fa: ApiGatewayOp[A])(f: A => ApiGatewayOp[B]): ApiGatewayOp[B] = a.bind(fa.toDisjunction)(f.andThen(_.toDisjunction)).toApiGatewayOp
+
+      override def bind[A, B](fa: ApiGatewayOp[A])(f: A => ApiGatewayOp[B]): ApiGatewayOp[B] = {
+
+        val originalAsDisjunction: ApiGatewayDisjunction[A] =
+          fa.toDisjunction
+
+        val functionWithResultAsDisjunction: A => ApiGatewayDisjunction[B] =
+          f.andThen(_.toDisjunction)
+
+        val boundAsDisjunction: ApiGatewayDisjunction[B] =
+          disjunctionMonad.bind(originalAsDisjunction)(functionWithResultAsDisjunction)
+
+        boundAsDisjunction.toApiGatewayOp
+      }
 
       override def point[A](a: => A): ApiGatewayOp[A] = ContinueProcessing(a)
+
     }
   }
 
@@ -118,8 +136,7 @@ object Types extends Logging {
 
   }
 
-  // handy class for converting things
-  implicit class EitherOps[L, A](theEither: scalaz.\/[L, A]) {
+  implicit class DisjunctionOps[L, A](theEither: scalaz.\/[L, A]) {
 
     def toApiGatewayOp(action: String): ApiGatewayOp[A] =
       theEither match {

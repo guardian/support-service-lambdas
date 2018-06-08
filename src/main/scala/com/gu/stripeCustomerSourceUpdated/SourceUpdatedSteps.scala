@@ -30,7 +30,7 @@ object SourceUpdatedSteps extends Logging {
       _ = logger.info(s"from: ${apiGatewayRequest.queryStringParameters.map(_.stripeAccount)}")
       _ <- (for {
         defaultPaymentMethod <- ListT(getPaymentMethodsToUpdate(zuoraRequests)(sourceUpdatedCallout.data.`object`.customer, sourceUpdatedCallout.data.`object`.id))
-        _ <- ListT[ApiGatewayOp, Unit](createUpdatedDefaultPaymentMethod(zuoraRequests)(defaultPaymentMethod, sourceUpdatedCallout.data.`object`).map(_.pure[List]))
+        _ <- ListT[ApiGatewayOp, Unit](createUpdatedDefaultPaymentMethod(zuoraRequests)(defaultPaymentMethod, sourceUpdatedCallout.data.`object`).map((_: Unit) => List(())))
       } yield ()).run
     } yield ApiGatewayResponse.successfulExecution).apiResponse
   })
