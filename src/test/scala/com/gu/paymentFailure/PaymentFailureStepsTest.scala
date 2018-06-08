@@ -15,7 +15,7 @@ class PaymentFailureStepsTest extends FlatSpec with Matchers {
     val expected = \/.left(unauthorized)
     val result = PaymentFailureSteps.validateTenantCallout(fakeApiConfig)(actualWrongTenantId)
 
-    result.underlying should be(expected)
+    result.toDisjunction should be(expected)
   }
 
 }

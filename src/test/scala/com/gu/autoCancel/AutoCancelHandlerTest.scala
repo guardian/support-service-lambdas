@@ -24,7 +24,7 @@ class AutoCancelHandlerTest extends FlatSpec {
   "filterInvalidAccount" should "return a left if AutoPay = false" in {
     val autoCancelCallout = fakeCallout(false)
     val either = apply(autoCancelCallout, false)
-    assert(either.underlying match {
+    assert(either.toDisjunction match {
       case -\/(_) => true
       case _ => false
     }, s"We got: $either")
@@ -33,7 +33,7 @@ class AutoCancelHandlerTest extends FlatSpec {
   "filterInvalidAccount" should "return a right if AutoPay = true" in {
     val autoCancelCallout = fakeCallout(true)
     val either = apply(autoCancelCallout, false)
-    assert(either.underlying match {
+    assert(either.toDisjunction match {
       case \/-(_) => true
       case _ => false
     }, s"We got: $either")
@@ -41,7 +41,7 @@ class AutoCancelHandlerTest extends FlatSpec {
 
   "filterDirectDebit" should "return a left if we're only cancelling direct debits, but the sub isn't paid that way" in {
     val either = filterDirectDebit(onlyCancelDirectDebit = true, nonDirectDebit = true)
-    assert(either.underlying match {
+    assert(either.toDisjunction match {
       case -\/(_) => true
       case _ => false
     }, s"We got: $either")
@@ -49,7 +49,7 @@ class AutoCancelHandlerTest extends FlatSpec {
 
   "filterDirectDebit" should "return a right if we're not just cancelling direct debits even if it's not paid by DD" in {
     val either = filterDirectDebit(onlyCancelDirectDebit = false, nonDirectDebit = true)
-    assert(either.underlying match {
+    assert(either.toDisjunction match {
       case \/-(_) => true
       case _ => false
     }, s"We got: $either")
@@ -57,7 +57,7 @@ class AutoCancelHandlerTest extends FlatSpec {
 
   "filterDirectDebit" should "return a right if we're only cancelling DDs and it is a direct debit" in {
     val either = filterDirectDebit(onlyCancelDirectDebit = true, nonDirectDebit = false)
-    assert(either.underlying match {
+    assert(either.toDisjunction match {
       case \/-(_) => true
       case _ => false
     }, s"We got: $either")
@@ -66,13 +66,13 @@ class AutoCancelHandlerTest extends FlatSpec {
   "authenticateCallout" should "return a left if the credentials are invalid" in {
     val requestAuth = RequestAuth(apiToken = "incorrectRequestToken")
     val trustedApiConfig = TrustedApiConfig(apiToken = "token", tenantId = "tenant")
-    assert(ApiGatewayHandler.authenticateCallout(true, Some(requestAuth), trustedApiConfig).underlying == -\/(unauthorized))
+    assert(ApiGatewayHandler.authenticateCallout(true, Some(requestAuth), trustedApiConfig).toDisjunction == -\/(unauthorized))
   }
 
   "authenticateCallout" should "return a right if the credentials are valid" in {
     val requestAuth = RequestAuth(apiToken = "token")
     val trustedApiConfig = TrustedApiConfig(apiToken = "token", tenantId = "tenant")
-    assert(ApiGatewayHandler.authenticateCallout(true, Some(requestAuth), trustedApiConfig).underlying == \/-(()))
+    assert(ApiGatewayHandler.authenticateCallout(true, Some(requestAuth), trustedApiConfig).toDisjunction == \/-(()))
   }
 
 }

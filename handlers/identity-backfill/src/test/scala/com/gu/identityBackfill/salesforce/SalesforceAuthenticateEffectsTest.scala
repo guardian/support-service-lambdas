@@ -21,7 +21,7 @@ class SalesforceAuthenticateEffectsTest extends FlatSpec with Matchers {
       identityId
     }
     withClue(s"wrong result: $actual") {
-      actual.underlying match {
+      actual.toDisjunction match {
         case \/-(SalesforceAuth(token, instanceUrl)) =>
           token should not be ("")
           token.length > 20 should be(true)

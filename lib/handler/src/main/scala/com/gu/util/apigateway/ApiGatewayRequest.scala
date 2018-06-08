@@ -62,7 +62,7 @@ case class ApiGatewayRequest(queryStringParameters: Option[URLParams], body: Opt
 }
 
 object URLParams {
-  implicit val jf = (//FIXME should be parameterised
+  implicit val jf = ( //FIXME should be parameterised
     (JsPath \ "apiToken").readNullable[String] and
     (JsPath \ "onlyCancelDirectDebit").readNullable[String].map(_.contains("true")) and
     (JsPath \ "stripeAccount").readNullable[String].map(_.flatMap(StripeAccount.fromString)) and

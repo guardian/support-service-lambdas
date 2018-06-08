@@ -23,7 +23,7 @@ class UpdateSalesforceIdentityIdEffectsTest extends FlatSpec with Matchers {
       identityId <- GetSalesforceIdentityId(auth)(testContact)
     } yield identityId
 
-    actual.underlying should be(\/-(IdentityId(unique)))
+    actual.toDisjunction should be(\/-(IdentityId(unique)))
 
   }
 

@@ -26,7 +26,7 @@ class AutoCancelStepsTest extends FlatSpec with Matchers {
     val autoCancelCallout = AutoCancelHandlerTest.fakeCallout(true)
     val cancel: ApiGatewayOp[AutoCancelRequest] = ac(autoCancelCallout)
 
-    cancel.underlying should be(\/-(AutoCancelRequest("id123", SubscriptionId("sub123"), LocalDate.now.minusDays(14))))
+    cancel.toDisjunction should be(\/-(AutoCancelRequest("id123", SubscriptionId("sub123"), LocalDate.now.minusDays(14))))
   }
 
   "auto cancel" should "turn off auto pay" in {

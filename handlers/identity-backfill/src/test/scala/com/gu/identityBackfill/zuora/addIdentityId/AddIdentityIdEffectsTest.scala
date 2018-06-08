@@ -31,7 +31,7 @@ class AddIdentityIdEffectsTest extends FlatSpec with Matchers {
     } yield {
       identityId
     }
-    actual.underlying should be(\/-(IdentityId(unique)))
+    actual.toDisjunction should be(\/-(IdentityId(unique)))
 
   }
 

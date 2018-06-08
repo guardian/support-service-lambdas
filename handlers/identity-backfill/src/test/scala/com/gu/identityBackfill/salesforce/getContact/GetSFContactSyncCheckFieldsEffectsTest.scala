@@ -20,7 +20,7 @@ class GetSFContactSyncCheckFieldsEffectsTest extends FlatSpec with Matchers {
       result <- GetSFContactSyncCheckFields(auth)(testContact).toApiGatewayOp("failed")
     } yield result
 
-    actual.underlying should be(\/-(ContactSyncCheckFields(None, "123", "Testing", None)))
+    actual.toDisjunction should be(\/-(ContactSyncCheckFields(None, "123", "Testing", None)))
 
   }
 

@@ -28,7 +28,7 @@ class GetSubscriptionEffectsTest extends FlatSpec with Matchers {
   it should "return not found if sub id is invalid" taggedAs EffectsTest in {
     val testSubscriptionId = SubscriptionId("invalidSubId")
 
-    actual(testSubscriptionId).underlying should be(-\/(notFoundResponse))
+    actual(testSubscriptionId).toDisjunction should be(-\/(notFoundResponse))
   }
 
   it should "successfully get subscription info against dev" taggedAs EffectsTest in {
@@ -64,6 +64,6 @@ class GetSubscriptionEffectsTest extends FlatSpec with Matchers {
       )
     )
 
-    actual(testSubscriptionId).underlying should be(\/-(expected))
+    actual(testSubscriptionId).toDisjunction should be(\/-(expected))
   }
 }

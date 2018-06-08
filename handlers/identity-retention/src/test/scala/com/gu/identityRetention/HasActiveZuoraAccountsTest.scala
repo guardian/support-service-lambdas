@@ -17,19 +17,19 @@ class HasActiveZuoraAccountsTest extends FlatSpec with Matchers {
   it should "return a left(404) if the identity id is not linked to any Zuora accounts" in {
     val zuoraCheck = HasActiveZuoraAccounts.processQueryResult(\/-(noZuoraAccounts))
     val expected = -\/(IdentityRetentionApiResponses.canBeDeleted)
-    zuoraCheck.underlying should be(expected)
+    zuoraCheck.toDisjunction should be(expected)
   }
 
   it should "return a left(500) if the call to Zuora fails" in {
     val zuoraCheck = HasActiveZuoraAccounts.processQueryResult(-\/(GenericError("Zuora response was a 500")))
     val expected = -\/(ApiGatewayResponse.internalServerError("Failed to retrieve the identity user's details from Zuora"))
-    zuoraCheck.underlying should be(expected)
+    zuoraCheck.toDisjunction should be(expected)
   }
 
   it should "return a list of account ids if we find an identity id linked to a billing account" in {
     val zuoraCheck = HasActiveZuoraAccounts.processQueryResult(\/-(singleZuoraAccount))
     val expected = \/-(List(AccountId("acc123")))
-    zuoraCheck.underlying should be(expected)
+    zuoraCheck.toDisjunction should be(expected)
   }
 
 }

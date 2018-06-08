@@ -15,32 +15,32 @@ object Types extends Logging {
   object ApiGatewayOp {
 
     case class ContinueProcessing[A](a: A) extends ApiGatewayOp[A] {
-      override def underlying: ApiResponse \/ A = \/-(a)
+      override def toDisjunction: ApiResponse \/ A = \/-(a)
     }
     case class ReturnWithResponse(resp: ApiResponse) extends ApiGatewayOp[Nothing] {
-      override def underlying: ApiResponse \/ Nothing = -\/(resp)
+      override def toDisjunction: ApiResponse \/ Nothing = -\/(resp)
     }
 
   }
   sealed trait ApiGatewayOp[+A] {
 
-    def underlying: scalaz.\/[ApiResponse, A]
+    def toDisjunction: scalaz.\/[ApiResponse, A]
 
     def flatMap[B](f: A => ApiGatewayOp[B]): ApiGatewayOp[B] =
-      underlying.flatMap(f.andThen(_.underlying)).toApiGatewayOp
+      toDisjunction.flatMap(f.andThen(_.toDisjunction)).toApiGatewayOp
 
     def map[B](f: A => B): ApiGatewayOp[B] =
-      underlying.map(f).toApiGatewayOp
+      toDisjunction.map(f).toApiGatewayOp
 
     def mapResponse(f: ApiResponse => ApiResponse): ApiGatewayOp[A] =
-      underlying.leftMap(f).toApiGatewayOp
+      toDisjunction.leftMap(f).toApiGatewayOp
 
   }
 
   implicit val apiGatewayOpM: Monad[ApiGatewayOp] = {
     val a = implicitly[Monad[({ type Q[X] = scalaz.\/[ApiResponse, X] })#Q]]
     new Monad[ApiGatewayOp] {
-      override def bind[A, B](fa: ApiGatewayOp[A])(f: A => ApiGatewayOp[B]): ApiGatewayOp[B] = a.bind(fa.underlying)(f.andThen(_.underlying)).toApiGatewayOp
+      override def bind[A, B](fa: ApiGatewayOp[A])(f: A => ApiGatewayOp[B]): ApiGatewayOp[B] = a.bind(fa.toDisjunction)(f.andThen(_.toDisjunction)).toApiGatewayOp
 
       override def point[A](a: => A): ApiGatewayOp[A] = ContinueProcessing(a)
     }
@@ -49,7 +49,7 @@ object Types extends Logging {
   implicit class ApiResponseOps(apiGatewayOp: ApiGatewayOp[ApiResponse]) {
 
     def apiResponse: ApiResponse =
-      apiGatewayOp.underlying.fold(identity, identity)
+      apiGatewayOp.toDisjunction.fold(identity, identity)
 
   }
 

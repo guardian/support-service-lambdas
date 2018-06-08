@@ -34,7 +34,7 @@ class CODEPRODHealthCheck extends FlatSpec with Matchers {
 
     val expectedResponse = "Success"
 
-    healthchecks.underlying.fold(err => fail(s"couldn't load config: $err"), identity).foreach { healthcheck =>
+    healthchecks.toDisjunction.fold(err => fail(s"couldn't load config: $err"), identity).foreach { healthcheck =>
       val responseString = post(healthcheck, Http.response)
       responseString should be(expectedResponse)
     }
