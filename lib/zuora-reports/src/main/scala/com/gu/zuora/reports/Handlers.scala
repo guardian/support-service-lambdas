@@ -24,7 +24,7 @@ trait ReportHandlers {
 
   def fetchFileHandler(inputStream: InputStream, outputStream: OutputStream, context: Context) = {
     def customWiring(config: Config[StepsConfig]) = {
-      val destinationBucket= s"$reportsBucketPrefix-${config.stage.value.toLowerCase}"
+      val destinationBucket = s"$reportsBucketPrefix-${config.stage.value.toLowerCase}"
       val upload = S3ReportUpload(destinationBucket, RawEffects.s3Write) _
       val downloadRequestMaker = ZuoraAquaRequestMaker(RawEffects.downloadResponse, config.stepsConfig.zuoraRestConfig)
       FetchFile(upload, downloadRequestMaker) _
