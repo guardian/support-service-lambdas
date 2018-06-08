@@ -105,11 +105,12 @@ lazy val root = all(project in file(".")).enablePlugins(RiffRaffArtifact).aggreg
   `digital-subscription-expiry`,
   `catalog-service`,
   `identity-retention`,
-  `zuora-reports`,
+  `zuora-retention`,
   effects,
   handler,
   restHttp,
   zuora,
+  `zuora-reports`
 ).dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `identity-backfill` = all(project in file("handlers/identity-backfill")) // when using the "project identity-backfill" command it uses the lazy val name
