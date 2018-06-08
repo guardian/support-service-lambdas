@@ -11,7 +11,7 @@ import scala.util.{Failure, Success, Try}
 
 object Types extends Logging {
 
-  object ApiGatewayOp { // TODO make \/[String, \/[ApiResponse, A]] so we can have errors independently of API gateway
+  object ApiGatewayOp {
 
     def ContinueProcessing[A]: A => ApiGatewayOp[A] = (apply[A] _).compose(scalaz.\/-.apply[A])
     def ReturnWithResponse: ApiResponse => ApiGatewayOp[Nothing] = (apply[Nothing] _).compose(scalaz.-\/.apply[ApiResponse])

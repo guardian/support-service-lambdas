@@ -19,11 +19,11 @@ object DigitalSubscriptionExpirySteps extends Logging {
     getAccountSummary: AccountId => ApiGatewayOp[AccountSummaryResult],
     getSubscriptionExpiry: (String, SubscriptionResult, AccountSummaryResult) => ApiResponse,
     skipActivationDateUpdate: (Option[URLParams], SubscriptionResult) => Boolean,
-    setActivationDate: (SubscriptionId) => ApiGatewayOp[Unit]
+    setActivationDate: SubscriptionId => ApiGatewayOp[Unit]
   ): Operation = {
 
-    def steps(apiGatewayRequest: ApiGatewayRequest): ApiGatewayOp[ApiResponse] = {
-      for {
+    def steps(apiGatewayRequest: ApiGatewayRequest): ApiResponse = {
+      (for {
         expiryRequest <- apiGatewayRequest.bodyAsCaseClass[DigitalSubscriptionExpiryRequest](DigitalSubscriptionApiResponses.badRequest)
         _ <- getEmergencyTokenExpiry(expiryRequest.subscriberId)
         subscriptionId = SubscriptionId(expiryRequest.subscriberId.trim.dropWhile(_ == '0'))
@@ -32,10 +32,10 @@ object DigitalSubscriptionExpirySteps extends Logging {
         accountSummary <- getAccountSummary(subscriptionResult.accountId)
         password <- expiryRequest.password.toApiGatewayOp(DigitalSubscriptionApiResponses.notFoundResponse)
         subscriptionEndDate = getSubscriptionExpiry(password, subscriptionResult, accountSummary)
-      } yield subscriptionEndDate
+      } yield subscriptionEndDate).apiResponse
 
     }
-    Operation.noHealthcheck((steps _).andThen(_.apiResponse), false)
+    Operation.noHealthcheck(steps, false)
 
   }
 
