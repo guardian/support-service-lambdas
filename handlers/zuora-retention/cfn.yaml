@@ -192,3 +192,69 @@ Resources:
             Timeout: 300
         DependsOn:
         - ZuoraFileFetcherRole
+    StatesExecutionRole:
+      Type: 'AWS::IAM::Role'
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: 2012-10-17
+          Statement:
+            Effect: Allow
+            Principal:
+              Service: !Sub 'states.${AWS::Region}.amazonaws.com'
+            Action: 'sts:AssumeRole'
+        Path: /
+        Policies:
+          - PolicyName: StatesExecutionPolicy
+            PolicyDocument:
+              Version: 2012-10-17
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - 'lambda:InvokeFunction'
+                  Resource: '*'
+    stateMachine:
+      Type: 'AWS::StepFunctions::StateMachine'
+      Properties:
+        StateMachineName: !Sub 'zuoraRetention-${Stage}'
+        RoleArn: !GetAtt
+          - StatesExecutionRole
+          - Arn
+        DefinitionString: !Sub
+          - |-
+            {
+              "StartAt": "QueryZuora",
+              "States": {
+                "QueryZuora": {
+                  "Type": "Task",
+                  "Resource": "${querierArn}",
+                  "Next": "WaitSomeTime",
+                  "Retry": [
+                     {
+                      "ErrorEquals": ["States.ALL"],
+                      "IntervalSeconds": 30,
+                      "MaxAttempts": 3
+                    }]
+                },
+                "WaitSomeTime": {
+                  "Type": "Wait",
+                  "Seconds": 10,
+                  "Next": "FetchResults"
+                },
+                "FetchResults": {
+                  "Type": "Task",
+                  "Resource": "${fetcherArn}",
+                 "End": true,
+                  "Retry": [
+                     {
+                      "ErrorEquals": ["States.ALL"],
+                      "IntervalSeconds": 60,
+                      "MaxAttempts": 10,
+                      "BackoffRate": 1.0
+                    }]
+                }
+              }
+            }
+          - {
+            querierArn: !GetAtt [ ZuoraRetentionQuerier, Arn ],
+            fetcherArn: !GetAtt [ ZuoraRetentionJobResult, Arn ]
+          }
