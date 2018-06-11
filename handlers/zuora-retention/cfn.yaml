@@ -222,39 +222,79 @@ Resources:
         DefinitionString: !Sub
           - |-
             {
-              "StartAt": "QueryZuora",
-              "States": {
-                "QueryZuora": {
-                  "Type": "Task",
-                  "Resource": "${querierArn}",
-                  "Next": "WaitSomeTime",
-                  "Retry": [
-                     {
-                      "ErrorEquals": ["States.ALL"],
-                      "IntervalSeconds": 30,
-                      "MaxAttempts": 3
-                    }]
-                },
-                "WaitSomeTime": {
-                  "Type": "Wait",
-                  "Seconds": 10,
-                  "Next": "FetchResults"
-                },
-                "FetchResults": {
-                  "Type": "Task",
-                  "Resource": "${fetcherArn}",
-                 "End": true,
-                  "Retry": [
-                     {
-                      "ErrorEquals": ["States.ALL"],
-                      "IntervalSeconds": 60,
-                      "MaxAttempts": 10,
-                      "BackoffRate": 1.0
-                    }]
-                }
-              }
+               "StartAt":"QueryZuora",
+               "States":{
+                  "QueryZuora":{
+                     "Type":"Task",
+                     "Resource":"${querierArn}",
+                     "Next":"WaitSomeTime",
+                     "Retry":[
+                        {
+                           "ErrorEquals":[
+                              "States.ALL"
+                           ],
+                           "IntervalSeconds":30,
+                           "MaxAttempts":3
+                        }
+                     ]
+                  },
+                  "WaitSomeTime":{
+                     "Type":"Wait",
+                     "Seconds":10,
+                     "Next":"FetchResults"
+                  },
+                  "FetchResults":{
+                     "Type":"Task",
+                     "Resource":"${fetcherArn}",
+                     "Next":"FetchFiles",
+                     "Retry":[
+                        {
+                           "ErrorEquals":[
+                              "States.ALL"
+                           ],
+                           "IntervalSeconds":60,
+                           "MaxAttempts":10,
+                           "BackoffRate":1.0
+                        }
+                     ]
+                  },
+                  "FetchFiles":{
+                     "Type":"Task",
+                     "Resource":"${fetchFilesArn}",
+                     "Next":"CheckRemainingFiles",
+
+                     "Retry":[
+                        {
+                           "ErrorEquals":[
+                              "States.ALL"
+                           ],
+                           "IntervalSeconds":60,
+                           "MaxAttempts":10,
+                           "BackoffRate":1.0
+                        }
+                     ]
+                  },
+                  "CheckRemainingFiles":{
+                     "Type":"Choice",
+                     "Choices":[
+                        {
+                           "Variable":"$.done",
+                           "BooleanEquals":false,
+                           "Next":"FetchFiles"
+                        }
+                     ],
+                     "Default":"Done"
+                  },
+                  "Done": {
+                        "Type": "Pass",
+                        "End": true
+                      }
+               }
             }
+
           - {
             querierArn: !GetAtt [ ZuoraRetentionQuerier, Arn ],
-            fetcherArn: !GetAtt [ ZuoraRetentionJobResult, Arn ]
+            fetcherArn: !GetAtt [ ZuoraRetentionJobResult, Arn ],
+            fetchFilesArn: !GetAtt [ ZuoraRetentionFileFetcher, Arn ]
+
           }
