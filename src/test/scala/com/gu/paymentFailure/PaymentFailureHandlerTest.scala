@@ -13,7 +13,7 @@ import com.gu.util.exacttarget._
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.ZuoraGetInvoiceTransactions.InvoiceTransactionSummary
 import org.scalatest.{FlatSpec, Matchers}
-import scalaz.{-\/, \/-}
+import ApiGatewayOp.{ReturnWithResponse, ContinueProcessing}
 
 class PaymentFailureHandlerTest extends FlatSpec with Matchers {
 
@@ -56,11 +56,11 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
 
             req => {
               storedReq = Some(req)
-              \/-(()): FailableOp[Unit]
+              ContinueProcessing(()): ApiGatewayOp[Unit]
             }, FilterEmail(Stage("PROD"))
 
           ),
-          a => \/-(basicInvoiceTransactionSummary)
+          a => scalaz.\/-(basicInvoiceTransactionSummary)
 
         ),
         TestData.fakeConfig.etConfig.etSendIDs,
@@ -119,13 +119,13 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
 
   def apiGatewayHandler: (Operation, LambdaIO) => Unit = {
     case (op, io) =>
-      ApiGatewayHandler[StepsConfig](io)(\/-((TestData.fakeConfig, op)))
+      ApiGatewayHandler[StepsConfig](io)(ContinueProcessing((TestData.fakeConfig, op)))
   }
   def basicOp(fakeInvoiceTransactionSummary: InvoiceTransactionSummary = basicInvoiceTransactionSummary) = {
     PaymentFailureSteps.apply(
       ZuoraEmailSteps.sendEmailRegardingAccount(
-        sendEmail = _ => -\/(ApiGatewayResponse.internalServerError("something failed!")),
-        getInvoiceTransactions = _ => \/-(fakeInvoiceTransactionSummary)
+        sendEmail = _ => ReturnWithResponse(ApiGatewayResponse.internalServerError("something failed!")),
+        getInvoiceTransactions = _ => scalaz.\/-(fakeInvoiceTransactionSummary)
       ),
       TestData.fakeConfig.etConfig.etSendIDs,
       TestData.fakeConfig.trustedApiConfig
@@ -146,10 +146,10 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
           EmailSendSteps.apply(
             req => {
               storedReq = Some(req)
-              -\/(ApiGatewayResponse.internalServerError("something failed!")): FailableOp[Unit]
+              ReturnWithResponse(ApiGatewayResponse.internalServerError("something failed!")): ApiGatewayOp[Unit]
             }, FilterEmail(Stage("PROD"))
           ),
-          a => \/-(basicInvoiceTransactionSummary)
+          a => scalaz.\/-(basicInvoiceTransactionSummary)
         ),
         TestData.fakeConfig.etConfig.etSendIDs,
         TestData.fakeConfig.trustedApiConfig

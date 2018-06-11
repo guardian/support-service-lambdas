@@ -4,32 +4,31 @@ import com.gu.identityRetention.Types.IdentityId
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.Operation
 import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse, URLParams}
-import com.gu.util.reader.Types.FailableOp
+import com.gu.util.reader.Types.ApiGatewayOp
+import ApiGatewayOp._
 import com.gu.util.zuora.ZuoraQuery.ZuoraQuerier
 import scala.util.{Try, Success, Failure}
-import scalaz.{-\/, \/-}
 
 object IdentityRetentionSteps extends Logging {
 
   def apply(zuoraQuerier: ZuoraQuerier): Operation = Operation.noHealthcheck({
     apiGatewayRequest: ApiGatewayRequest =>
-      for {
+      (for {
         identityId <- extractIdentityId(apiGatewayRequest.queryStringParameters)
         accounts <- HasActiveZuoraAccounts(identityId, zuoraQuerier)
         subs <- SubscriptionsForAccounts(accounts, zuoraQuerier)
-        _ <- -\/(RelationshipForSubscriptions(subs))
-      } yield ()
+      } yield RelationshipForSubscriptions(subs)).apiResponse
   }, false)
 
-  def extractIdentityId(queryStringParams: Option[URLParams]): FailableOp[IdentityId] = {
+  def extractIdentityId(queryStringParams: Option[URLParams]): ApiGatewayOp[IdentityId] = {
     val user = for {
       queryStrings <- queryStringParams
       inputId <- queryStrings.identityId
       identityId <- validate(inputId)
     } yield identityId
     user match {
-      case Some(id) => \/-(id)
-      case None => -\/(ApiGatewayResponse.badRequest)
+      case Some(id) => ContinueProcessing(id)
+      case None => ReturnWithResponse(ApiGatewayResponse.badRequest)
     }
   }
 

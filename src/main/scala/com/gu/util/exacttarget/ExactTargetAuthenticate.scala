@@ -1,14 +1,13 @@
 package com.gu.util.exacttarget
 
-import com.gu.util.apigateway.ApiGatewayResponse
-import com.gu.util.reader.Types.FailableOp
 import com.gu.util.Logging
+import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.config.ETConfig
+import com.gu.util.reader.Types.ApiGatewayOp
+import com.gu.util.reader.Types.ApiGatewayOp.{ReturnWithResponse, ContinueProcessing}
 import okhttp3.{FormBody, Request, Response}
 import play.api.libs.functional.syntax._
 import play.api.libs.json.{JsPath, JsSuccess, Json, Reads}
-
-import scalaz.{-\/, \/-}
 
 object ExactTargetAuthenticate extends Logging {
 
@@ -33,7 +32,7 @@ object ExactTargetAuthenticate extends Logging {
 
   case class ETImpure(response: (Request => Response), config: ETConfig)
 
-  def apply(et: ETImpure): FailableOp[SalesforceAuth] = {
+  def apply(et: ETImpure): ApiGatewayOp[SalesforceAuth] = {
     val builder = requestBuilder()
     val formBody = new FormBody.Builder()
       .add("clientId", et.config.clientId)
@@ -46,10 +45,10 @@ object ExactTargetAuthenticate extends Logging {
     responseBody.validate[SalesforceAuth] match {
       case JsSuccess(result, _) =>
         logger.info(s"Successful Salesforce authentication.")
-        \/-(result)
+        ContinueProcessing(result)
       case _ =>
         logger.error(s"Failed to authenticate with Salesforce | body was: ${responseBody.toString}")
-        -\/(ApiGatewayResponse.internalServerError(s"Failed to authenticate with Salesforce"))
+        ReturnWithResponse(ApiGatewayResponse.internalServerError(s"Failed to authenticate with Salesforce"))
     }
   }
 }

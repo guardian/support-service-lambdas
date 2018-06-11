@@ -8,12 +8,12 @@ trait Logging { // in future maybe put logging into a context so the messages st
 
   val logger = Logger.getLogger(getClass.getName)
 
-  protected implicit class LogImplicit2[A](failableOp: ClientFailableOp[A]) {
+  protected implicit class LogImplicit2[A](apiGatewayOp: ClientFailableOp[A]) {
 
     // this is just a handy method to add logging to the end of any for comprehension
     def withLogging(message: String): ClientFailableOp[A] = {
 
-      failableOp match {
+      apiGatewayOp match {
         case \/-(continuation) =>
           logger.info(s"$message: continued processing with value: $continuation")
           \/-(continuation)

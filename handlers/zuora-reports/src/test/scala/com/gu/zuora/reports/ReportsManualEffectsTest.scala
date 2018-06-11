@@ -15,12 +15,8 @@ object ReportsManualEffectsTest extends App {
     zuoraRequests = ZuoraAquaRequestMaker(RawEffects.response, config.stepsConfig.zuoraRestConfig)
   } yield zuoraRequests
 
-  def querierTest = {
+  def querierTest(): Unit = {
 
-    val expected = QuerierResponse(
-      jobId = "something",
-      name = "bla"
-    )
     val response = for {
       zuoraRequests <- getZuoraRequest(RawEffects.response)
       request = QuerierRequest("testRequest", Seq(Query("testQuery", "SELECT Name FROM Subscription WHERE  id='2c92c0856391fbe001639b8a61d25d7b'")))
@@ -32,7 +28,7 @@ object ReportsManualEffectsTest extends App {
 
   }
 
-  def getResultsTest = {
+  def getResultsTest(): Unit = {
     val response = for {
       zuoraRequests <- getZuoraRequest(RawEffects.response)
       request = JobResultRequest("2c92c0f863b81bf20163cb25b5b10a8b")
@@ -44,7 +40,7 @@ object ReportsManualEffectsTest extends App {
 
   }
 
-  def fetchFileTest = {
+  def fetchFileTest(): Unit = {
     val response = for {
       zuoraRequests <- getZuoraRequest(RawEffects.downloadResponse)
       request = FetchFileRequest("2c92c086639207960163cb25b64a009b", "manualTest/SomeTest.csv")
@@ -57,6 +53,6 @@ object ReportsManualEffectsTest extends App {
   }
 
   println("Executing manual test for Zuora reports")
-  getResultsTest
+  getResultsTest()
 }
 

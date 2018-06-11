@@ -1,14 +1,12 @@
 package com.gu.identityRetention
 
 import java.time.LocalDate
+
 import com.gu.identityRetention.Types.AccountId
-import com.gu.util.apigateway.ApiGatewayResponse
-import com.gu.util.reader.Types.FailableOp
+import com.gu.util.reader.Types._
 import com.gu.util.zuora.ZuoraQuery
 import com.gu.util.zuora.ZuoraQuery.ZuoraQuerier
 import play.api.libs.json.Json
-import scalaz.{-\/, \/-}
-
 object SubscriptionsForAccounts {
 
   case class SubscriptionsQueryResponse(
@@ -24,19 +22,14 @@ object SubscriptionsForAccounts {
     s"select id, name, status, termEndDate from subscription where status != 'Expired' and $accountIdClause"
   }
 
-  def apply(activeAccounts: List[AccountId], zuoraQuerier: ZuoraQuerier): FailableOp[List[SubscriptionsQueryResponse]] = {
+  def apply(activeAccounts: List[AccountId], zuoraQuerier: ZuoraQuerier): ApiGatewayOp[List[SubscriptionsQueryResponse]] = {
 
     def searchForSubscriptions = {
       val subscriptionsQuery = ZuoraQuery.Query(buildQuery(activeAccounts))
       zuoraQuerier[SubscriptionsQueryResponse](subscriptionsQuery)
     }
 
-    searchForSubscriptions match {
-      case \/-(subscriptions) =>
-        \/-(subscriptions.records)
-      case -\/(error) =>
-        -\/(ApiGatewayResponse.internalServerError(s"Failed whilst querying Zuora for subscriptions: $error"))
-    }
+    searchForSubscriptions.map(_.records).toApiGatewayOp("Failed whilst querying Zuora for subscriptions")
 
   }
 

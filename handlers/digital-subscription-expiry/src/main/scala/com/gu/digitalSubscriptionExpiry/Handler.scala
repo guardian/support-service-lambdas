@@ -48,8 +48,8 @@ object Handler extends Logging {
         DigitalSubscriptionExpirySteps(
           getEmergencyTokenExpiry = GetTokenExpiry(emergencyTokens, today),
           getSubscription = GetSubscription(zuoraRequests),
-          setActivationDate = SetActivationDate(zuoraRequests, now),
-          getAccountSummary = GetAccountSummary(zuoraRequests),
+          setActivationDate = (SetActivationDate(zuoraRequests, now) _).andThen(_.toApiGatewayOp(s"zuora SetActivationDate fail")),
+          getAccountSummary = (GetAccountSummary(zuoraRequests) _).andThen(_.toApiGatewayOp(s"zuora GetAccountSummary fail")),
           getSubscriptionExpiry = GetSubscriptionExpiry(today),
           skipActivationDateUpdate = SkipActivationDateUpdate.apply
         )
@@ -57,7 +57,7 @@ object Handler extends Logging {
 
     ApiGatewayHandler[StepsConfig](lambdaIO)(for {
       config <- LoadConfig.default[StepsConfig](implicitly)(stage, s3Load(stage))
-        .toFailableOp("load config")
+        .toApiGatewayOp("load config")
       configuredOp = operation(config)
 
     } yield (config, configuredOp))

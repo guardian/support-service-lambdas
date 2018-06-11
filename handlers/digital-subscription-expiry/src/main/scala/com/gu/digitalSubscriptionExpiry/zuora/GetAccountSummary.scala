@@ -1,8 +1,6 @@
 package com.gu.digitalSubscriptionExpiry.zuora
 
-import com.gu.util.apigateway.ApiGatewayResponse
-import com.gu.util.reader.Types.FailableOp
-import com.gu.util.zuora.RestRequestMaker.Requests
+import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, Requests}
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
@@ -27,7 +25,7 @@ object GetAccountSummary {
       (__ \ "soldToContact" \ "zipCode").readNullable[String]
     )(AccountSummaryResult.apply _)
 
-  def apply(requests: Requests)(accountId: AccountId): FailableOp[AccountSummaryResult] =
-    requests.get[AccountSummaryResult](s"accounts/${accountId.value}/summary").leftMap(clientFail => ApiGatewayResponse.internalServerError(s"zuora client fail: ${clientFail.message}"))
+  def apply(requests: Requests)(accountId: AccountId): ClientFailableOp[AccountSummaryResult] =
+    requests.get[AccountSummaryResult](s"accounts/${accountId.value}/summary")
 
 }

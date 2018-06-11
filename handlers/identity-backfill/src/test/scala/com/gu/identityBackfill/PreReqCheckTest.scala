@@ -6,8 +6,9 @@ import com.gu.identityBackfill.PreReqCheck.PreReqResult
 import com.gu.identityBackfill.Types.{IdentityId, _}
 import com.gu.identityBackfill.zuora.GetZuoraSubTypeForAccount.ReaderType
 import com.gu.util.apigateway.ApiGatewayResponse
+import com.gu.util.reader.Types.ApiGatewayOp
 import org.scalatest.{FlatSpec, Matchers}
-import scalaz.{-\/, \/-}
+import ApiGatewayOp.{ReturnWithResponse, ContinueProcessing}
 
 class PreReqCheckTest extends FlatSpec with Matchers {
 
@@ -15,23 +16,23 @@ class PreReqCheckTest extends FlatSpec with Matchers {
 
     val result =
       PreReqCheck(
-        email => \/-(IdentityId("asdf")),
-        email => \/-(ZuoraAccountIdentitySFContact(AccountId("acc"), None, SFContactId("sf"))),
-        identityId => \/-(()),
-        _ => \/-(()),
-        _ => \/-(())
+        email => scalaz.\/-(IdentityId("asdf")),
+        email => ContinueProcessing(ZuoraAccountIdentitySFContact(AccountId("acc"), None, SFContactId("sf"))),
+        identityId => ContinueProcessing(()),
+        _ => ContinueProcessing(()),
+        _ => ContinueProcessing(())
       )(EmailAddress("email@address"))
 
-    val expectedResult = \/-(PreReqResult(AccountId("acc"), SFContactId("sf"), IdentityId("asdf")))
+    val expectedResult = ContinueProcessing(PreReqResult(AccountId("acc"), SFContactId("sf"), IdentityId("asdf")))
     result should be(expectedResult)
   }
 
   it should "stop processing if it finds there is a zuora account already for the identity id" in {
 
     val result =
-      PreReqCheck.noZuoraAccountsForIdentityId(countZuoraAccountsForIdentityId = \/-(1))
+      PreReqCheck.noZuoraAccountsForIdentityId(countZuoraAccountsForIdentityId = scalaz.\/-(1))
 
-    val expectedResult = -\/(ApiGatewayResponse.notFound("already used that identity id"))
+    val expectedResult = ReturnWithResponse(ApiGatewayResponse.notFound("already used that identity id"))
     result should be(expectedResult)
   }
 
@@ -39,14 +40,14 @@ class PreReqCheckTest extends FlatSpec with Matchers {
 
     val result =
       PreReqCheck.getSingleZuoraAccountForEmail(
-        \/-(List(ZuoraAccountIdentitySFContact(
+        scalaz.\/-(List(ZuoraAccountIdentitySFContact(
           AccountId("acc"),
           Some(IdentityId("haha")),
           SFContactId("sf")
         )))
       )
 
-    val expectedResult = -\/(ApiGatewayResponse.notFound("the account we found was already populated with an identity id"))
+    val expectedResult = ReturnWithResponse(ApiGatewayResponse.notFound("the account we found was already populated with an identity id"))
     result should be(expectedResult)
   }
 
@@ -55,10 +56,10 @@ class PreReqCheckTest extends FlatSpec with Matchers {
     val result =
       PreReqCheck.getSingleZuoraAccountForEmail({
         val contactWithoutIdentity = ZuoraAccountIdentitySFContact(AccountId("acc"), None, SFContactId("sf"))
-        \/-(List(contactWithoutIdentity, contactWithoutIdentity))
+        scalaz.\/-(List(contactWithoutIdentity, contactWithoutIdentity))
       })
 
-    val expectedResult = -\/(ApiGatewayResponse.notFound("should have exactly one zuora account per email at this stage"))
+    val expectedResult = ReturnWithResponse(ApiGatewayResponse.notFound("should have exactly one zuora account per email at this stage"))
     result should be(expectedResult)
   }
 
@@ -66,7 +67,7 @@ class PreReqCheckTest extends FlatSpec with Matchers {
 
     val result = emailCheckFailure(NotFound)
 
-    val expectedResult = -\/(ApiGatewayResponse.notFound("user doesn't have identity"))
+    val expectedResult = ReturnWithResponse(ApiGatewayResponse.notFound("user doesn't have identity"))
     result should be(expectedResult)
   }
 
@@ -74,13 +75,13 @@ class PreReqCheckTest extends FlatSpec with Matchers {
 
     val result = emailCheckFailure(NotValidated)
 
-    val expectedResult = -\/(ApiGatewayResponse.notFound("identity email not validated"))
+    val expectedResult = ReturnWithResponse(ApiGatewayResponse.notFound("identity email not validated"))
     result should be(expectedResult)
   }
 
   private def emailCheckFailure(identityError: GetByEmail.ApiError) = {
     PreReqCheck(
-      email => -\/(identityError),
+      email => scalaz.-\/(identityError),
       email => fail("shouldn't be called 1"),
       identityId => fail("shouldn't be called 2"),
       _ => fail("shouldn't be called 3"),
@@ -91,32 +92,32 @@ class PreReqCheckTest extends FlatSpec with Matchers {
   // allow contain either blank or direct, but nothign else
   "acceptable reader type" should "allow blank" in {
     val readerTypes = List(ReaderType.NoReaderType)
-    PreReqCheck.acceptableReaderType(\/-(readerTypes)) should be(\/-(()))
+    PreReqCheck.acceptableReaderType(scalaz.\/-(readerTypes)) should be(ContinueProcessing(()))
   }
 
   "acceptable reader type" should "allow direct" in {
     val readerTypes = List(ReaderType.ReaderTypeValue("Direct"))
-    PreReqCheck.acceptableReaderType(\/-(readerTypes)) should be(\/-(()))
+    PreReqCheck.acceptableReaderType(scalaz.\/-(readerTypes)) should be(ContinueProcessing(()))
   }
 
   "acceptable reader type" should "allow multiple valid" in {
     val readerTypes = List(ReaderType.ReaderTypeValue("Direct"), ReaderType.ReaderTypeValue("Direct"))
-    PreReqCheck.acceptableReaderType(\/-(readerTypes)) should be(\/-(()))
+    PreReqCheck.acceptableReaderType(scalaz.\/-(readerTypes)) should be(ContinueProcessing(()))
   }
 
   "acceptable reader type" should "not allow agent" in {
     val readerTypes = List(ReaderType.ReaderTypeValue("Agent"))
-    PreReqCheck.acceptableReaderType(\/-(readerTypes)).leftMap(_.statusCode) should be(-\/("404"))
+    PreReqCheck.acceptableReaderType(scalaz.\/-(readerTypes)).toDisjunction.leftMap(_.statusCode) should be(scalaz.-\/("404"))
   }
 
   "acceptable reader type" should "not allow gift" in {
     val readerTypes = List(ReaderType.ReaderTypeValue("Gift"))
-    PreReqCheck.acceptableReaderType(\/-(readerTypes)).leftMap(_.statusCode) should be(-\/("404"))
+    PreReqCheck.acceptableReaderType(scalaz.\/-(readerTypes)).toDisjunction.leftMap(_.statusCode) should be(scalaz.-\/("404"))
   }
 
   "acceptable reader type" should "not allow a combination of valid and invalid" in {
     val readerTypes = List(ReaderType.ReaderTypeValue("Direct"), ReaderType.ReaderTypeValue("Gift"))
-    PreReqCheck.acceptableReaderType(\/-(readerTypes)).leftMap(_.statusCode) should be(-\/("404"))
+    PreReqCheck.acceptableReaderType(scalaz.\/-(readerTypes)).toDisjunction.leftMap(_.statusCode) should be(scalaz.-\/("404"))
   }
 
 }

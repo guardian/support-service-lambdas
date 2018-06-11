@@ -1,15 +1,15 @@
 package com.gu.util.exacttarget
 
-import com.gu.util.config.ETConfig.ETSendId
+import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayResponse
+import com.gu.util.config.ETConfig.ETSendId
 import com.gu.util.config.{ETConfig, Stage}
 import com.gu.util.exacttarget.EmailSendSteps.logger
 import com.gu.util.exacttarget.ExactTargetAuthenticate.{ETImpure, SalesforceAuth}
+import com.gu.util.reader.Types.ApiGatewayOp.{ReturnWithResponse, ContinueProcessing}
 import com.gu.util.reader.Types._
-import com.gu.util.Logging
 import okhttp3.{MediaType, Request, RequestBody, Response}
 import play.api.libs.json.{Json, Writes, _}
-import scalaz.{-\/, \/, \/-}
 
 case class ContactAttributesDef(SubscriberAttributes: SubscriberAttributesDef)
 
@@ -101,9 +101,9 @@ object Message {
 object EmailSendSteps extends Logging {
 
   def apply(
-    sendEmail: EmailRequest => FailableOp[Unit],
-    filterEmail: EmailRequest => FailableOp[Unit]
-  )(request: EmailRequest): FailableOp[Unit] =
+    sendEmail: EmailRequest => ApiGatewayOp[Unit],
+    filterEmail: EmailRequest => ApiGatewayOp[Unit]
+  )(request: EmailRequest): ApiGatewayOp[Unit] =
     for {
       _ <- filterEmail(request)
       _ <- sendEmail(request)
@@ -116,7 +116,7 @@ object ETClient {
   def sendEmail(
     response: Request => Response,
     etConfig: ETConfig
-  )(emailRequest: EmailRequest): FailableOp[Unit] = {
+  )(emailRequest: EmailRequest): ApiGatewayOp[Unit] = {
     for {
       auth <- ExactTargetAuthenticate(ETImpure(response, etConfig))
       req <- buildRequestET(ETReq(etConfig, auth))(emailRequest.etSendId)
@@ -125,30 +125,30 @@ object ETClient {
     } yield ()
   }
 
-  private def sendEmailOp(response: Request => Response)(req: Request.Builder, message: Message): FailableOp[Response] = {
+  private def sendEmailOp(response: Request => Response)(req: Request.Builder, message: Message): ApiGatewayOp[Response] = {
     val jsonMT = MediaType.parse("application/json; charset=utf-8")
     val body = RequestBody.create(jsonMT, Json.stringify(Json.toJson(message)))
-    \/.right(response(req.post(body).build())): FailableOp[Response]
+    ContinueProcessing(response(req.post(body).build())): ApiGatewayOp[Response]
 
   }
 
   case class ETReq(config: ETConfig, salesforceAuth: SalesforceAuth)
 
-  def buildRequestET(et: ETReq)(eTSendId: ETSendId): FailableOp[Request.Builder] = {
+  def buildRequestET(et: ETReq)(eTSendId: ETSendId): ApiGatewayOp[Request.Builder] = {
     val builder = new Request.Builder()
       .header("Authorization", s"Bearer ${et.salesforceAuth.accessToken}")
       .url(s"${ExactTargetAuthenticate.restEndpoint}/messageDefinitionSends/${eTSendId.id}/send")
-    \/.right(builder): FailableOp[Request.Builder]
+    ContinueProcessing(builder): ApiGatewayOp[Request.Builder]
   }
 
-  private def processResponse(response: Response): FailableOp[Unit] = {
+  private def processResponse(response: Response): ApiGatewayOp[Unit] = {
     response.code() match {
       case 202 =>
         logger.info(s"send email result ${response.body().string()}")
-        \/-(())
+        ContinueProcessing(())
       case statusCode =>
         logger.warn(s"email not sent due to $statusCode - ${response.body().string()}")
-        -\/(ApiGatewayResponse.internalServerError(s"email not sent due to $statusCode"))
+        ReturnWithResponse(ApiGatewayResponse.internalServerError(s"email not sent due to $statusCode"))
     }
   }
 
@@ -156,7 +156,7 @@ object ETClient {
 
 object FilterEmail {
 
-  def apply(stage: Stage)(request: EmailRequest): FailableOp[Unit] = {
+  def apply(stage: Stage)(request: EmailRequest): ApiGatewayOp[Unit] = {
     for {
       prod <- isProd(stage)
       _ <- filterTestEmail(request.message.To.Address, prod)
@@ -164,17 +164,17 @@ object FilterEmail {
 
   }
 
-  private def isProd(stage: Stage): FailableOp[Boolean] = {
-    \/.right(stage.isProd)
+  private def isProd(stage: Stage): ApiGatewayOp[Boolean] = {
+    ContinueProcessing(stage.isProd)
   }
 
-  private def filterTestEmail(email: String, prod: Boolean): FailableOp[Unit] = {
+  private def filterTestEmail(email: String, prod: Boolean): ApiGatewayOp[Unit] = {
     val guardianEmail = email.endsWith("@guardian.co.uk") || email.endsWith("@theguardian.com")
     if (!prod && !guardianEmail) {
       logger.warn("not sending email in non prod as it's not a guardian address")
-      -\/(ApiGatewayResponse.successfulExecution)
+      ReturnWithResponse(ApiGatewayResponse.successfulExecution)
     } else {
-      \/-(())
+      ContinueProcessing(())
     }
   }
 }

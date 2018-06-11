@@ -30,7 +30,7 @@ object Lambda {
 
     ApiGatewayHandler[StepsConfig](lambdaIO)(for {
       config <- LoadConfig.default[StepsConfig](implicitly)(stage, s3Load(stage))
-        .toFailableOp("load config")
+        .toApiGatewayOp("load config")
       configuredOp = operation(config)
 
     } yield (config, configuredOp))
