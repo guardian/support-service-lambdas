@@ -1,6 +1,7 @@
 package com.gu.zuora.retention.query
 
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 import com.gu.zuora.reports.aqua.{AquaQuery, AquaQueryRequest}
 import play.api.libs.json.Json
@@ -13,7 +14,7 @@ object RetentionQueryRequest {
 //TODO THIS HAS TO MOVE SOMEWHERE ELSE
 object ToAquaRequest {
   def apply(request: RetentionQueryRequest): AquaQueryRequest = {
-    val dateStr = request.cutOffDate.formatted("YYYY-MM-DD")
+    val dateStr = request.cutOffDate.format(DateTimeFormatter.ISO_LOCAL_DATE)
     val statements =
       s"""
       SELECT
