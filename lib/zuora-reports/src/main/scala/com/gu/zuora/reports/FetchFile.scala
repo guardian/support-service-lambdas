@@ -1,6 +1,6 @@
 package com.gu.zuora.reports
 
-import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, DownloadStream, GenericError, Requests}
+import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, DownloadStream, Requests}
 import play.api.libs.json._
 
 object FetchFile {

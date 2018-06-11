@@ -24,9 +24,9 @@ class AutoCancelStepsTest extends FlatSpec with Matchers {
       getAccountSummary = _ => \/-(AccountSummary(basicInfo, List(subscription), List(singleOverdueInvoice)))
     )_
     val autoCancelCallout = AutoCancelHandlerTest.fakeCallout(true)
-    val cancel: FailableOp[AutoCancelRequest] = ac(autoCancelCallout)
+    val cancel: ApiGatewayOp[AutoCancelRequest] = ac(autoCancelCallout)
 
-    cancel should be(\/-(AutoCancelRequest("id123", SubscriptionId("sub123"), LocalDate.now.minusDays(14))))
+    cancel.toDisjunction should be(\/-(AutoCancelRequest("id123", SubscriptionId("sub123"), LocalDate.now.minusDays(14))))
   }
 
   "auto cancel" should "turn off auto pay" in {

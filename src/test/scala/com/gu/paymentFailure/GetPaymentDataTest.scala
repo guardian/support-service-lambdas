@@ -9,7 +9,7 @@ class GetPaymentDataTest extends FlatSpec {
 
   "getPaymentData" should "identify the correct product information" in {
     val actual = GetPaymentData(accountId)(weirdInvoiceTransactionSummary).map(_.product)
-    assert(actual == \/.right("Supporter"))
+    assert(actual.toDisjunction == \/.right("Supporter"))
   }
 
 }

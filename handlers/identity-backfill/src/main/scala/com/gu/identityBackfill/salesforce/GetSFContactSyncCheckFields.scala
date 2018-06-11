@@ -1,14 +1,15 @@
 package com.gu.identityBackfill.salesforce
 
 import com.gu.i18n.CountryGroup
-import com.gu.identityBackfill.ResponseMaker._
+
 import com.gu.identityBackfill.Types.SFContactId
 import com.gu.identityBackfill.salesforce.ContactSyncCheck.RecordTypeId
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.zuora.RestRequestMaker
 import com.gu.util.zuora.RestRequestMaker.ClientFailableOp
 import play.api.libs.json.Json
-import scalaz.{-\/, \/-}
+import com.gu.util.reader.Types.ApiGatewayOp._
+import com.gu.util.reader.Types._
 
 object GetSFContactSyncCheckFields {
 
@@ -54,10 +55,10 @@ object SyncableSFToIdentity {
     sFContactId: SFContactId
   ) =
     for {
-      fields <- GetSFContactSyncCheckFields(sfRequests)(sFContactId).nonSuccessToError
-      _ <- if (ContactSyncCheck.apply(standardRecordType)(fields))
-        \/-(())
+      fields <- GetSFContactSyncCheckFields(sfRequests)(sFContactId).toApiGatewayOp("zuora issue")
+      _ <- if (ContactSyncCheck(standardRecordType)(fields))
+        ContinueProcessing(())
       else
-        -\/(ApiGatewayResponse.notFound("this sf contact can't be synced back to zuora/identity"))
+        ReturnWithResponse(ApiGatewayResponse.notFound("this sf contact can't be synced back to zuora/identity"))
     } yield ()
 }

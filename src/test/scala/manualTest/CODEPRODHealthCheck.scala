@@ -27,14 +27,14 @@ class CODEPRODHealthCheck extends FlatSpec with Matchers {
 
   private def healthcheckForEnv(env: HealthChecks => List[HealthCheckConfig]) = {
     val healthchecks = for {
-      jsonString <- S3ConfigLoad.load(Stage("DEV"), "payment-failure-healthcheck.private.json").toFailableOp("read local config")
-      healthcheck <- Json.parse(jsonString).validate[HealthChecks](HealthChecks.reads).toFailableOp()
+      jsonString <- S3ConfigLoad.load(Stage("DEV"), "payment-failure-healthcheck.private.json").toApiGatewayOp("read local config")
+      healthcheck <- Json.parse(jsonString).validate[HealthChecks](HealthChecks.reads).toApiGatewayOp()
 
     } yield env(healthcheck)
 
     val expectedResponse = "Success"
 
-    healthchecks.fold(err => fail(s"couldn't load config: $err"), identity).foreach { healthcheck =>
+    healthchecks.toDisjunction.fold(err => fail(s"couldn't load config: $err"), identity).foreach { healthcheck =>
       val responseString = post(healthcheck, Http.response)
       responseString should be(expectedResponse)
     }

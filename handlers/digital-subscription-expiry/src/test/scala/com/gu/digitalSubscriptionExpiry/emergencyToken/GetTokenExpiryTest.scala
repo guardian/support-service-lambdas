@@ -7,7 +7,7 @@ import com.gu.digitalSubscriptionExpiry.responses.{Expiry, ExpiryType, SuccessRe
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
-import scalaz.{-\/, \/-}
+import com.gu.util.reader.Types.ApiGatewayOp.{ReturnWithResponse, ContinueProcessing}
 
 class GetTokenExpiryTest extends FlatSpec with Matchers {
 
@@ -17,24 +17,24 @@ class GetTokenExpiryTest extends FlatSpec with Matchers {
   }
 
   it should "return right for invalid token" in {
-    getTokenExpiry("invalidToken").shouldBe(\/-(()))
+    getTokenExpiry("invalidToken").shouldBe(ContinueProcessing(()))
   }
   it should "read valid token in the second era" in {
 
-    val expectedResponse: -\/[ApiResponse] =
+    val expectedResponse =
       expectedExpiryForDate(LocalDate.of(2018, 5, 23))
 
     getTokenExpiry("G99HXJLJHOCN").shouldBe(expectedResponse)
   }
   it should "read valid token overlapping the eras" in {
 
-    val expectedResponse: -\/[ApiResponse] =
+    val expectedResponse =
       expectedExpiryForDate(LocalDate.of(2018, 5, 21))
 
     getTokenExpiry("G99DPZBLIVIIAP").shouldBe(expectedResponse)
   }
 
-  private def expectedExpiryForDate(expiryDate: LocalDate): -\/[ApiResponse] = {
+  private def expectedExpiryForDate(expiryDate: LocalDate) = {
     val expiry = Expiry(
       expiryDate = expiryDate,
       expiryType = ExpiryType.SUB,
@@ -43,7 +43,7 @@ class GetTokenExpiryTest extends FlatSpec with Matchers {
     )
 
     val responseBody = Json.prettyPrint(Json.toJson(SuccessResponse(expiry)))
-    -\/(ApiResponse("200", responseBody))
+    ReturnWithResponse(ApiResponse("200", responseBody))
   }
 }
 
