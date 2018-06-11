@@ -12,7 +12,6 @@ object RetentionQueryRequest {
   implicit val reads = Json.reads[RetentionQueryRequest]
 }
 
-//TODO THIS HAS TO MOVE SOMEWHERE ELSE
 object ToAquaRequest {
   def apply(request: RetentionQueryRequest): AquaQueryRequest = {
     val dateStr = request.cutOffDate.format(DateTimeFormatter.ISO_LOCAL_DATE)
@@ -33,8 +32,7 @@ object ToAquaRequest {
            | Account.CrmId
            |HAVING
            |  MAX(Status) = 'Cancelled' AND
-           |  (MIN(Status) = 'Active' OR
-           |  SubscriptionEndDate >= '$dateStr')
+           |  (MIN(Status) = 'Active' OR MAX(SubscriptionEndDate) >= '$dateStr')
     """.stripMargin
     )
     val candidatesQuery = AquaQuery(
