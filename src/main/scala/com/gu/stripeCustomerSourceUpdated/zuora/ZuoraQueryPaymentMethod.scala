@@ -1,13 +1,14 @@
 package com.gu.stripeCustomerSourceUpdated.zuora
 
 import com.gu.stripeCustomerSourceUpdated.{StripeCustomerId, StripeSourceId}
+import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayResponse
+import com.gu.util.reader.Types.ApiGatewayOp.{ReturnWithResponse, ContinueProcessing}
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.ZuoraGetAccountSummary.ZuoraAccount._
 import com.gu.util.zuora.ZuoraQuery.{Query, ZuoraQuerier}
-import com.gu.util.{Logging, ZuoraToApiGateway}
 import play.api.libs.json._
-import scalaz.{-\/, NonEmptyList, \/-}
+import scalaz.NonEmptyList
 
 object ZuoraQueryPaymentMethod extends Logging {
 
@@ -26,7 +27,7 @@ object ZuoraQueryPaymentMethod extends Logging {
   )(
     customerId: StripeCustomerId,
     sourceId: StripeSourceId
-  ): FailableOp[List[AccountPaymentMethodIds]] = {
+  ): ApiGatewayOp[List[AccountPaymentMethodIds]] = {
     val query =
       s"""SELECT
          | Id,
@@ -39,7 +40,7 @@ object ZuoraQueryPaymentMethod extends Logging {
          | AND SecondTokenId = '${customerId.value}'
          |""".stripMargin.replaceAll("\n", "")
 
-    zuoraQuerier[PaymentMethodFields](Query(query)).leftMap(ZuoraToApiGateway.fromClientFail).flatMap { result =>
+    zuoraQuerier[PaymentMethodFields](Query(query)).toApiGatewayOp("query failed").flatMap { result =>
 
       def groupedList(records: List[PaymentMethodFields]): List[(AccountId, NonEmptyList[PaymentMethodFields])] = {
         records.groupBy(_.AccountId).toList.collect {
@@ -51,9 +52,9 @@ object ZuoraQueryPaymentMethod extends Logging {
       val accountPaymentMethodIds = groupedList(result.records)
       if (accountPaymentMethodIds.length > 3) {
         logger.warn(s"too many accounts using the customer token, could indicate a fault in the logic: $result")
-        -\/(ApiGatewayResponse.internalServerError("could not find correct account for stripe details"))
+        ReturnWithResponse(ApiGatewayResponse.internalServerError("could not find correct account for stripe details"))
       } else {
-        \/-(accountPaymentMethodIds.map((AccountPaymentMethodIds.apply _).tupled))
+        ContinueProcessing(accountPaymentMethodIds.map((AccountPaymentMethodIds.apply _).tupled))
       }
     }
 

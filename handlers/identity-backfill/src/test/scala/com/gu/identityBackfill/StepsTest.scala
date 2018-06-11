@@ -3,9 +3,10 @@ package com.gu.identityBackfill
 import com.gu.identityBackfill.StepsData._
 import com.gu.identityBackfill.Types.{IdentityId, _}
 import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
-import com.gu.util.reader.Types.FailableOp
+import com.gu.util.reader.Types.ApiGatewayOp
 import org.scalatest.{FlatSpec, Matchers}
-import scalaz.{-\/, \/-}
+import ApiGatewayOp.{ReturnWithResponse, ContinueProcessing}
+import com.gu.util.apigateway.ResponseModels.ApiResponse
 
 class StepsTest extends FlatSpec with Matchers {
 
@@ -15,23 +16,23 @@ class StepsTest extends FlatSpec with Matchers {
     var salesforceUpdate: Option[(SFContactId, IdentityId)] = None // !!
     var emailToCheck: Option[EmailAddress] = None // !!
 
-    def getSteps(succeed: Boolean = true): ApiGatewayRequest => FailableOp[Unit] = {
-      val preReqCheck: EmailAddress => FailableOp[PreReqCheck.PreReqResult] = { email =>
+    def getSteps(succeed: Boolean = true): ApiGatewayRequest => ApiResponse = {
+      val preReqCheck: EmailAddress => ApiGatewayOp[PreReqCheck.PreReqResult] = { email =>
         emailToCheck = Some(email)
         if (succeed)
-          \/-(PreReqCheck.PreReqResult(AccountId("acc"), SFContactId("sf"), IdentityId("asdf")))
+          ContinueProcessing(PreReqCheck.PreReqResult(AccountId("acc"), SFContactId("sf"), IdentityId("asdf")))
         else
-          -\/(ApiGatewayResponse.notFound("dummy"))
+          ReturnWithResponse(ApiGatewayResponse.notFound("dummy"))
       }
       IdentityBackfillSteps(
         preReqCheck,
         updateZuoraIdentityId = (accountId, identityId) => {
           zuoraUpdate = Some((accountId, identityId))
-          \/-(())
+          scalaz.\/-(())
         },
         updateSalesforceIdentityId = (sFContactId, identityId) => {
           salesforceUpdate = Some((sFContactId, identityId))
-          \/-(())
+          ContinueProcessing(())
         }
       )
     }
@@ -46,7 +47,7 @@ class StepsTest extends FlatSpec with Matchers {
     val result =
       getSteps()(ApiGatewayRequest(None, Some(identityBackfillRequest(false)), None))
 
-    val expectedResult = \/-(())
+    val expectedResult = ApiGatewayResponse.successfulExecution
     result should be(expectedResult)
     zuoraUpdate should be(Some((AccountId("acc"), IdentityId("asdf"))))
     salesforceUpdate should be(Some((SFContactId("sf"), IdentityId("asdf"))))
@@ -61,7 +62,7 @@ class StepsTest extends FlatSpec with Matchers {
     val result =
       getSteps()(ApiGatewayRequest(None, Some(identityBackfillRequest(true)), None))
 
-    val expectedResult = -\/(ApiGatewayResponse.noActionRequired("DRY RUN requested! skipping to the end"))
+    val expectedResult = ApiGatewayResponse.noActionRequired("DRY RUN requested! skipping to the end")
     result should be(expectedResult)
     zuoraUpdate should be(None)
     salesforceUpdate should be(None)
@@ -76,7 +77,7 @@ class StepsTest extends FlatSpec with Matchers {
     val result =
       getSteps(false)(ApiGatewayRequest(None, Some(identityBackfillRequest(false)), None))
 
-    val expectedResult = -\/(ApiGatewayResponse.notFound("dummy"))
+    val expectedResult = ApiGatewayResponse.notFound("dummy")
     result should be(expectedResult)
     zuoraUpdate should be(None)
     salesforceUpdate should be(None)

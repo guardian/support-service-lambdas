@@ -4,7 +4,7 @@ import com.gu.effects.TestingRawEffects
 import com.gu.effects.TestingRawEffects.{HTTPResponse, POSTRequest}
 import com.gu.identityBackfill.salesforce.SalesforceAuthenticate.{SFAuthConfig, SalesforceAuth}
 import org.scalatest.{FlatSpec, Matchers}
-import scalaz.\/-
+import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
 
 class SalesforceAuthenticateTest extends FlatSpec with Matchers {
 
@@ -18,7 +18,7 @@ class SalesforceAuthenticateTest extends FlatSpec with Matchers {
       "passSFpassword",
       "tokentokenSFtoken"
     ))
-    val expected = \/-(SalesforceAuth("tokentoken", "https://instance.url"))
+    val expected = ContinueProcessing(SalesforceAuth("tokentoken", "https://instance.url"))
     auth should be(expected)
 
   }

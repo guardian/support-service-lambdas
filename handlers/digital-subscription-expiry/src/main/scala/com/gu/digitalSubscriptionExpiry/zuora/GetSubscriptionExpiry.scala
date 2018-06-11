@@ -1,12 +1,12 @@
 package com.gu.digitalSubscriptionExpiry.zuora
 
 import java.time.LocalDate
+
 import com.gu.digitalSubscriptionExpiry.responses.DigitalSubscriptionApiResponses._
 import com.gu.digitalSubscriptionExpiry.responses.{Expiry, ExpiryType, SuccessResponse}
 import com.gu.digitalSubscriptionExpiry.zuora.GetAccountSummary.AccountSummaryResult
 import com.gu.digitalSubscriptionExpiry.zuora.GetSubscription.{RatePlanCharge, SubscriptionResult}
-import com.gu.util.reader.Types.FailableOp
-import scalaz.-\/
+import com.gu.util.apigateway.ResponseModels.ApiResponse
 
 object GetSubscriptionExpiry {
   private def validPassword(accountSummary: AccountSummaryResult, password: String): Boolean = {
@@ -47,9 +47,9 @@ object GetSubscriptionExpiry {
     } else None
   }
 
-  def apply(today: () => LocalDate)(providedPassword: String, subscription: SubscriptionResult, accountSummary: AccountSummaryResult): FailableOp[Unit] =
+  def apply(today: () => LocalDate)(providedPassword: String, subscription: SubscriptionResult, accountSummary: AccountSummaryResult): ApiResponse =
     if (!validPassword(accountSummary, providedPassword)) {
-      -\/(notFoundResponse)
+      notFoundResponse
     } else {
       val maybeSubscriptionEndDate = getExpiryDateForValidSubscription(subscription, accountSummary, today())
       maybeSubscriptionEndDate.map {
@@ -60,7 +60,7 @@ object GetSubscriptionExpiry {
             subscriptionCode = None,
             provider = None
           ))
-          -\/(apiResponse(res, "200"))
-      }.getOrElse(-\/(notFoundResponse))
+          apiResponse(res, "200")
+      }.getOrElse(notFoundResponse)
     }
 }

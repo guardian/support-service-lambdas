@@ -1,6 +1,7 @@
 package com.gu.digitalSubscriptionExpiry
 
 import java.time.LocalDate
+
 import com.gu.cas.SevenDay
 import com.gu.digitalSubscriptionExpiry.responses.DigitalSubscriptionApiResponses._
 import com.gu.digitalSubscriptionExpiry.responses.{Expiry, ExpiryType, SuccessResponse}
@@ -8,10 +9,10 @@ import com.gu.digitalSubscriptionExpiry.zuora.GetAccountSummary.{AccountId, Acco
 import com.gu.digitalSubscriptionExpiry.zuora.GetSubscription.{SubscriptionId, SubscriptionName, SubscriptionResult}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse, URLParams}
-import com.gu.util.reader.Types.FailableOp
+import com.gu.util.reader.Types.ApiGatewayOp.{ReturnWithResponse, ContinueProcessing}
+import com.gu.util.reader.Types._
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
-import scalaz.{-\/, \/-}
 
 class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
 
@@ -25,10 +26,10 @@ class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
     apiResponse(SuccessResponse(expiry), "200")
   }
 
-  val successfulResponseFromZuora = -\/(ApiResponse("123", "valid zuora response"))
+  val successfulResponseFromZuora = ApiResponse("123", "valid zuora response")
 
-  def getSubId(s: SubscriptionId): FailableOp[SubscriptionResult] = {
-    if (s.get == "validZuoraSubId") {
+  def getSubId(s: SubscriptionId): ApiGatewayOp[SubscriptionResult] = {
+    if (s.value == "validZuoraSubId") {
       val response = SubscriptionResult(
         id = s,
         name = SubscriptionName("someSubName"),
@@ -39,13 +40,13 @@ class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
         endDate = LocalDate.of(2015, 10, 26),
         ratePlans = Nil
       )
-      \/-(response)
+      ContinueProcessing(response)
     } else
-      -\/(notFoundResponse)
+      ReturnWithResponse(notFoundResponse)
   }
-  def getAccount(accountId: AccountId): FailableOp[AccountSummaryResult] = {
+  def getAccount(accountId: AccountId): ApiGatewayOp[AccountSummaryResult] = {
     if (accountId.value != "someAccountId") {
-      -\/(ApiGatewayResponse.internalServerError("zuoraError"))
+      ReturnWithResponse(ApiGatewayResponse.internalServerError("zuoraError"))
     } else {
       val summary = AccountSummaryResult(
         accountId = AccountId("someAccountId"),
@@ -54,18 +55,23 @@ class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
         soldToLastName = "someSoldToLastName",
         soldToPostcode = Some("someSoldtoPostCode")
       )
-      \/-(summary)
+      ContinueProcessing(summary)
     }
   }
-  def getSubExpiry(password: String, subscriptionResult: SubscriptionResult, accountSummaryResult: AccountSummaryResult): FailableOp[Unit] = successfulResponseFromZuora
+  def getSubExpiry(
+    password: String,
+    subscriptionResult: SubscriptionResult,
+    accountSummaryResult: AccountSummaryResult
+  ): ApiResponse =
+    successfulResponseFromZuora
 
-  def getTokenExpiry(token: String): FailableOp[Unit] = {
-    if (token == "validToken") -\/(validTokenResponse) else \/-(())
+  def getTokenExpiry(token: String): ApiGatewayOp[Unit] = {
+    if (token == "validToken") ReturnWithResponse(validTokenResponse) else ContinueProcessing(())
   }
 
   def skipActivationDateUpdate(queryStringParameters: Option[URLParams], sub: SubscriptionResult): Boolean = false
 
-  def setActivationDate(subscriptionId: SubscriptionId): FailableOp[Unit] = \/-(())
+  def setActivationDate(subscriptionId: SubscriptionId): ApiGatewayOp[Unit] = ContinueProcessing(())
 
   val digitalSubscriptionExpirySteps = {
     DigitalSubscriptionExpirySteps(
@@ -197,14 +203,10 @@ class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
     )
   }
 
-  def verifyResponse(actualResponse: FailableOp[Unit], expectedStatus: String, expectedBody: String) = {
-    actualResponse match {
-      case -\/(actualApiResponse) =>
-        val expectedReponseBodyJson = Json.parse(expectedBody)
-        val actualResponseBodyJson = Json.parse(actualApiResponse.body)
-        (actualApiResponse.statusCode, actualResponseBodyJson).shouldBe((expectedStatus, expectedReponseBodyJson))
-      case \/-(_) => fail("response expected to be left ")
-    }
+  def verifyResponse(actualResponse: ApiResponse, expectedStatus: String, expectedBody: String) = {
+    val expectedReponseBodyJson = Json.parse(expectedBody)
+    val actualResponseBodyJson = Json.parse(actualResponse.body)
+    (actualResponse.statusCode, actualResponseBodyJson).shouldBe((expectedStatus, expectedReponseBodyJson))
   }
 
   val expectedBadRequestResponseBody =

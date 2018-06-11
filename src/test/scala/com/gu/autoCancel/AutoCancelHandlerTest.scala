@@ -1,11 +1,9 @@
 package com.gu.autoCancel
 
-import com.gu.util.apigateway.ApiGatewayResponse._
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, RequestAuth, StripeAccount}
 import com.gu.util.config.TrustedApiConfig
 import org.scalatest._
 import play.api.libs.json.{JsSuccess, Json}
-
 import scalaz.{-\/, \/-}
 object AutoCancelHandlerTest {
 
@@ -18,61 +16,61 @@ object AutoCancelHandlerTest {
 }
 class AutoCancelHandlerTest extends FlatSpec {
 
-  import AutoCancelInputFilter._
   import AutoCancelHandlerTest._
+  import AutoCancelInputFilter._
 
   "filterInvalidAccount" should "return a left if AutoPay = false" in {
     val autoCancelCallout = fakeCallout(false)
-    val either = apply(autoCancelCallout, false)
-    assert(either match {
+    val apiGatewayOp = apply(autoCancelCallout, false)
+    assert(apiGatewayOp.toDisjunction match {
       case -\/(_) => true
       case _ => false
-    }, s"We got: $either")
+    }, s"We got: $apiGatewayOp")
   }
 
   "filterInvalidAccount" should "return a right if AutoPay = true" in {
     val autoCancelCallout = fakeCallout(true)
-    val either = apply(autoCancelCallout, false)
-    assert(either match {
+    val apiGatewayOp = apply(autoCancelCallout, false)
+    assert(apiGatewayOp.toDisjunction match {
       case \/-(_) => true
       case _ => false
-    }, s"We got: $either")
+    }, s"We got: $apiGatewayOp")
   }
 
   "filterDirectDebit" should "return a left if we're only cancelling direct debits, but the sub isn't paid that way" in {
-    val either = filterDirectDebit(onlyCancelDirectDebit = true, nonDirectDebit = true)
-    assert(either match {
+    val apiGatewayOp = filterDirectDebit(onlyCancelDirectDebit = true, nonDirectDebit = true)
+    assert(apiGatewayOp.toDisjunction match {
       case -\/(_) => true
       case _ => false
-    }, s"We got: $either")
+    }, s"We got: $apiGatewayOp")
   }
 
   "filterDirectDebit" should "return a right if we're not just cancelling direct debits even if it's not paid by DD" in {
-    val either = filterDirectDebit(onlyCancelDirectDebit = false, nonDirectDebit = true)
-    assert(either match {
+    val apiGatewayOp = filterDirectDebit(onlyCancelDirectDebit = false, nonDirectDebit = true)
+    assert(apiGatewayOp.toDisjunction match {
       case \/-(_) => true
       case _ => false
-    }, s"We got: $either")
+    }, s"We got: $apiGatewayOp")
   }
 
   "filterDirectDebit" should "return a right if we're only cancelling DDs and it is a direct debit" in {
-    val either = filterDirectDebit(onlyCancelDirectDebit = true, nonDirectDebit = false)
-    assert(either match {
+    val apiGatewayOp = filterDirectDebit(onlyCancelDirectDebit = true, nonDirectDebit = false)
+    assert(apiGatewayOp.toDisjunction match {
       case \/-(_) => true
       case _ => false
-    }, s"We got: $either")
+    }, s"We got: $apiGatewayOp")
   }
 
   "authenticateCallout" should "return a left if the credentials are invalid" in {
     val requestAuth = RequestAuth(apiToken = "incorrectRequestToken")
     val trustedApiConfig = TrustedApiConfig(apiToken = "token", tenantId = "tenant")
-    assert(ApiGatewayHandler.authenticateCallout(true, Some(requestAuth), trustedApiConfig) == -\/(unauthorized))
+    assert(ApiGatewayHandler.isAuthorised(true, Some(requestAuth), trustedApiConfig) == false)
   }
 
   "authenticateCallout" should "return a right if the credentials are valid" in {
     val requestAuth = RequestAuth(apiToken = "token")
     val trustedApiConfig = TrustedApiConfig(apiToken = "token", tenantId = "tenant")
-    assert(ApiGatewayHandler.authenticateCallout(true, Some(requestAuth), trustedApiConfig) == \/-(()))
+    assert(ApiGatewayHandler.isAuthorised(true, Some(requestAuth), trustedApiConfig) == true)
   }
 
 }

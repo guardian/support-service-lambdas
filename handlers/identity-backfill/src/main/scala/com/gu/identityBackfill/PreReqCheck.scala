@@ -2,16 +2,14 @@ package com.gu.identityBackfill
 
 import com.gu.identity.GetByEmail
 import com.gu.identity.GetByEmail.{NotFound, NotValidated, OtherError}
-import com.gu.identityBackfill.ResponseMaker._
 import com.gu.identityBackfill.Types._
 import com.gu.identityBackfill.zuora.GetZuoraSubTypeForAccount
-import com.gu.identityBackfill.zuora.GetZuoraSubTypeForAccount.ReaderType.{NoReaderType, ReaderTypeValue}
+import com.gu.identityBackfill.zuora.GetZuoraSubTypeForAccount.ReaderType.ReaderTypeValue
 import com.gu.util.apigateway.ApiGatewayResponse
+import com.gu.util.reader.Types.ApiGatewayOp._
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.RestRequestMaker.ClientFailableOp
-import scalaz.std.list._
-import scalaz.syntax.traverse._
-import scalaz.{-\/, \/, \/-}
+import scalaz.\/
 
 object PreReqCheck {
 
@@ -19,17 +17,17 @@ object PreReqCheck {
 
   def apply(
     getByEmail: EmailAddress => \/[GetByEmail.ApiError, IdentityId],
-    getSingleZuoraAccountForEmail: EmailAddress => FailableOp[ZuoraAccountIdentitySFContact],
-    noZuoraAccountsForIdentityId: IdentityId => FailableOp[Unit],
-    zuoraSubType: AccountId => FailableOp[Unit],
-    syncableSFToIdentity: SFContactId => FailableOp[Unit]
-  )(emailAddress: EmailAddress): FailableOp[PreReqResult] = {
+    getSingleZuoraAccountForEmail: EmailAddress => ApiGatewayOp[ZuoraAccountIdentitySFContact],
+    noZuoraAccountsForIdentityId: IdentityId => ApiGatewayOp[Unit],
+    zuoraSubType: AccountId => ApiGatewayOp[Unit],
+    syncableSFToIdentity: SFContactId => ApiGatewayOp[Unit]
+  )(emailAddress: EmailAddress): ApiGatewayOp[PreReqResult] = {
     for {
       identityId <- getByEmail(emailAddress).leftMap({
         case NotFound => ApiGatewayResponse.notFound("user doesn't have identity")
         case NotValidated => ApiGatewayResponse.notFound("identity email not validated")
         case OtherError(unknownError) => ApiGatewayResponse.internalServerError(unknownError)
-      }).withLogging("GetByEmail")
+      }).toApiGatewayOp.withLogging("GetByEmail")
       zuoraAccountForEmail <- getSingleZuoraAccountForEmail(emailAddress)
       _ <- noZuoraAccountsForIdentityId(identityId)
       _ <- syncableSFToIdentity(zuoraAccountForEmail.sfContactId)
@@ -38,38 +36,38 @@ object PreReqCheck {
 
   def noZuoraAccountsForIdentityId(
     countZuoraAccountsForIdentityId: ClientFailableOp[Int]
-  ): FailableOp[Unit] = {
+  ): ApiGatewayOp[Unit] = {
     for {
-      zuoraAccountsForIdentityId <- countZuoraAccountsForIdentityId.nonSuccessToError
-      _ <- if (zuoraAccountsForIdentityId == 0) \/-(()) else -\/(ApiGatewayResponse.notFound("already used that identity id"))
+      zuoraAccountsForIdentityId <- countZuoraAccountsForIdentityId.toApiGatewayOp("zuora issue")
+      _ <- (zuoraAccountsForIdentityId == 0)
+        .toApiGatewayContinueProcessing(ApiGatewayResponse.notFound("already used that identity id"))
     } yield ()
   }
 
   def getSingleZuoraAccountForEmail(
     getZuoraAccountsForEmail: ClientFailableOp[List[ZuoraAccountIdentitySFContact]]
-  ): FailableOp[ZuoraAccountIdentitySFContact] = {
+  ): ApiGatewayOp[ZuoraAccountIdentitySFContact] = {
     for {
-      zuoraAccountsForEmail <- getZuoraAccountsForEmail.nonSuccessToError
+      zuoraAccountsForEmail <- getZuoraAccountsForEmail.toApiGatewayOp("zuora issue")
       zuoraAccountForEmail <- zuoraAccountsForEmail match {
-        case one :: Nil => \/-(one);
-        case _ => -\/(ApiGatewayResponse.notFound("should have exactly one zuora account per email at this stage"))
+        case one :: Nil => ContinueProcessing(one);
+        case _ => ReturnWithResponse(ApiGatewayResponse.notFound("should have exactly one zuora account per email at this stage"))
       }
       _ <- zuoraAccountForEmail match {
-        case zuoraAccount if zuoraAccount.identityId.isEmpty => \/-(());
-        case _ => -\/(ApiGatewayResponse.notFound("the account we found was already populated with an identity id"))
+        case zuoraAccount if zuoraAccount.identityId.isEmpty => ContinueProcessing(());
+        case _ => ReturnWithResponse(ApiGatewayResponse.notFound("the account we found was already populated with an identity id"))
       }
     } yield zuoraAccountForEmail
   }
 
-  def acceptableReaderType(function: ClientFailableOp[List[GetZuoraSubTypeForAccount.ReaderType]]): FailableOp[Unit] = {
+  def acceptableReaderType(function: ClientFailableOp[List[GetZuoraSubTypeForAccount.ReaderType]]): ApiGatewayOp[Unit] = {
     for {
-      readerTypes <- function.nonSuccessToError
-      _ <- readerTypes.traverseU {
-        case NoReaderType => \/-(())
-        case ReaderTypeValue("Direct") => \/-(())
-        case ReaderTypeValue(readerType) => -\/(ApiGatewayResponse.notFound(s"had a reader type: $readerType")) // it's bad
-      }.map { _: List[Unit] => () }
-
+      readerTypes <- function.toApiGatewayOp("zuora issue")
+      incorrectReaderTypes = readerTypes.collect {
+        case ReaderTypeValue(readerType) if readerType != "Direct" => readerType // it's bad
+      }
+      _ <- incorrectReaderTypes.isEmpty
+        .toApiGatewayContinueProcessing(ApiGatewayResponse.notFound(s"had an incorrect reader type(s): ${incorrectReaderTypes.mkString(",")}"))
     } yield ()
   }
 

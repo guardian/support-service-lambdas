@@ -6,10 +6,12 @@ import com.gu.zuora.reports.aqua.{AquaQuery, AquaQueryRequest}
 import play.api.libs.json.Json
 
 case class RetentionQueryRequest(cutOffDate: LocalDate) //todo check if this should be localdate or some other format
+
 object RetentionQueryRequest {
   implicit val reads = Json.reads[RetentionQueryRequest]
 }
-object ConstructQuery {
+//TODO THIS HAS TO MOVE SOMEWHERE ELSE
+object ToAquaRequest {
   def apply(request: RetentionQueryRequest): AquaQueryRequest = {
     val dateStr = request.cutOffDate.formatted("YYYY-MM-DD")
     val statements =

@@ -39,43 +39,43 @@ class AutoCancelDataCollectionFilterTest extends FlatSpec {
   }
 
   "getCancellationDateFromInvoices" should "return a left if no overdue invoices are found" in {
-    val either = getCancellationDateFromInvoices(AccountSummary(basicInfo, List(subscription), List(invoiceZeroBalance, invoiceNotDue, invoiceNotPosted)), LocalDate.now)
-    assert(either == -\/(noActionRequired("No unpaid and overdue invoices found!")))
+    val apiGatewayOp = getCancellationDateFromInvoices(AccountSummary(basicInfo, List(subscription), List(invoiceZeroBalance, invoiceNotDue, invoiceNotPosted)), LocalDate.now)
+    assert(apiGatewayOp.toDisjunction == -\/(noActionRequired("No unpaid and overdue invoices found!")))
   }
 
   "getCancellationDateFromInvoices" should "return the due date of an invoice, if exactly one overdue invoice is found on the account" in {
-    val either = getCancellationDateFromInvoices(AccountSummary(basicInfo, List(subscription), List(singleOverdueInvoice)), LocalDate.now)
-    assert(either == \/-(LocalDate.now.minusDays(14)))
+    val apiGatewayOp = getCancellationDateFromInvoices(AccountSummary(basicInfo, List(subscription), List(singleOverdueInvoice)), LocalDate.now)
+    assert(apiGatewayOp.toDisjunction == \/-(LocalDate.now.minusDays(14)))
   }
 
   "getCancellationDateFromInvoices" should "return the earliest due date of all unpaid invoices, if there is more than one overdue invoice on the account" in {
     val accountSummaryUnpaidInvs = AccountSummary(basicInfo, List(subscription), twoOverdueInvoices)
-    val either = getCancellationDateFromInvoices(accountSummaryUnpaidInvs, LocalDate.now)
-    assert(either == \/-(LocalDate.now.minusDays(35)))
+    val apiGatewayOp = getCancellationDateFromInvoices(accountSummaryUnpaidInvs, LocalDate.now)
+    assert(apiGatewayOp.toDisjunction == \/-(LocalDate.now.minusDays(35)))
   }
 
   "getSubscriptionToCancel" should "return a left if there is more than one active sub on the account summary" in {
     val accountSummaryWithTwoSubs = AccountSummary(basicInfo, twoSubscriptions, twoOverdueInvoices)
-    val either = getSubscriptionToCancel(accountSummaryWithTwoSubs)
-    assert(either == -\/(noActionRequired("More than one active sub found!")))
+    val apiGatewayOp = getSubscriptionToCancel(accountSummaryWithTwoSubs)
+    assert(apiGatewayOp.toDisjunction == -\/(noActionRequired("More than one active sub found!")))
   }
 
   "getSubscriptionToCancel" should "return a left if there are no subs on the account summary" in {
     val accountSummaryWithCancelledSub = AccountSummary(basicInfo, List(), List(invoiceNotDue))
-    val either = getSubscriptionToCancel(accountSummaryWithCancelledSub)
-    assert(either == -\/(noActionRequired("No Active subscriptions to cancel!")))
+    val apiGatewayOp = getSubscriptionToCancel(accountSummaryWithCancelledSub)
+    assert(apiGatewayOp.toDisjunction == -\/(noActionRequired("No Active subscriptions to cancel!")))
   }
 
   "getSubscriptionToCancel" should "return a left if the account summary only contains cancelled and expired subs" in {
     val accountSummaryCancelledSub = AccountSummary(basicInfo, inactiveSubscriptions, List(singleOverdueInvoice))
-    val either = getSubscriptionToCancel(accountSummaryCancelledSub)
-    assert(either == -\/(noActionRequired("No Active subscriptions to cancel!")))
+    val apiGatewayOp = getSubscriptionToCancel(accountSummaryCancelledSub)
+    assert(apiGatewayOp.toDisjunction == -\/(noActionRequired("No Active subscriptions to cancel!")))
   }
 
   "getSubscriptionToCancel" should "return a right[Subscription] if there is exactly one active sub on the account summary" in {
     val accountSummaryWithSingleSub = AccountSummary(basicInfo, List(subscription), List(invoiceNotDue))
-    val either = getSubscriptionToCancel(accountSummaryWithSingleSub)
-    assert(either == \/-(subscription.id))
+    val apiGatewayOp = getSubscriptionToCancel(accountSummaryWithSingleSub)
+    assert(apiGatewayOp.toDisjunction == \/-(subscription.id))
   }
 
 }

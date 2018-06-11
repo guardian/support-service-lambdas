@@ -3,7 +3,7 @@ package com.gu.util.exacttarget
 import com.gu.util.config.ETConfig.ETSendId
 import com.gu.util.config.Stage
 import org.scalatest.{FlatSpec, Matchers}
-import scalaz.\/-
+import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
 
 class EmailSendStepsTest extends FlatSpec with Matchers {
 
@@ -48,7 +48,7 @@ class EmailSendStepsTest extends FlatSpec with Matchers {
     val send = EmailSendSteps(
       sendEmail = req => {
         varAttempted = true
-        \/-(()) // always success
+        ContinueProcessing(()) // always success
       },
       filterEmail = FilterEmail.apply(stage)
     )_
