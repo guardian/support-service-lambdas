@@ -62,7 +62,7 @@ object ReportsManualEffectsTest extends App {
     val response = for {
       zuoraRequests <- getZuoraRequest(RawEffects.downloadResponse)
       request = FetchFileRequest(List(FileInfo("2c92c08563ed59430163eefa4b3815c0", "manualTest/SomeTest2")))
-      upload = S3ReportUpload("zuora-reports-dev", RawEffects.s3Write) _
+      upload = S3ReportUpload("zuora-reports-dev", "reports", RawEffects.s3Write) _
       res <- FetchFile(upload, zuoraRequests)(request)
     } yield {
       res

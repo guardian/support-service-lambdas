@@ -10,7 +10,7 @@ object Querier {
   def apply[REQ](
     generateQuery: REQ => AquaQueryRequest,
     zuoraRequester: Requests
-  )(querierRequest: REQ)(implicit reads: Reads[REQ]): ClientFailableOp[QuerierResponse] = {
+  )(querierRequest: REQ): ClientFailableOp[QuerierResponse] = {
     val aquaRequest = generateQuery(querierRequest)
     val aquaResponse = zuoraRequester.post[AquaQueryRequest, AquaJobResponse](aquaRequest, "batch-query/")
     toQuerierResponse(aquaResponse)
