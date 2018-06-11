@@ -42,8 +42,7 @@ class RetentionQueryRequestTest extends AsyncFlatSpec {
                   | Account.CrmId
                   |HAVING
                   |  MAX(Status) = 'Cancelled' AND
-                  |  (MIN(Status) = 'Active' OR
-                  |  SubscriptionEndDate >= '2012-12-31')
+                  |  (MIN(Status) = 'Active' OR MAX(SubscriptionEndDate) >= '2012-12-31')
     """.stripMargin
     )
 
