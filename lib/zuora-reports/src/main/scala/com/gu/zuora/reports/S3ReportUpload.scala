@@ -13,9 +13,9 @@ object S3ReportUpload extends Logging {
 
     val metadata = new ObjectMetadata()
     metadata.setContentLength(downloadStream.lengthBytes)
-    val fileName = queryName + ".csv"
-    val putObjectRequest = new PutObjectRequest(destinationBucket, fileName, downloadStream.stream, metadata)
-    s3Write(putObjectRequest).map(_ => s"s3://$destinationBucket/$basePath/$fileName").toEither.disjunction.leftMap { exception =>
+    val key = s"$basePath/$queryName.csv"
+    val putObjectRequest = new PutObjectRequest(destinationBucket, key, downloadStream.stream, metadata)
+    s3Write(putObjectRequest).map(_ => s"s3://$destinationBucket/$key").toEither.disjunction.leftMap { exception =>
       logger.error("could not upload report to S3", exception)
       GenericError(s"could not upload report to S3: ${exception.getMessage}")
     }
