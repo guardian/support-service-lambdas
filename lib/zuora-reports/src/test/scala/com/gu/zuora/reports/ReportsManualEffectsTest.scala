@@ -20,7 +20,7 @@ object ReportsManualEffectsTest extends App {
 
   implicit val requestReads = Json.reads[QuerierTestRequest]
 
-  def querierTest(): Unit = {
+  def querierTest: Unit = {
 
     def generateTestQuery(request: QuerierTestRequest): AquaQueryRequest = {
       val statements = "SELECT Name FROM Subscription WHERE  id='2c92c0856391fbe001639b8a61d25d7b'"
@@ -46,10 +46,10 @@ object ReportsManualEffectsTest extends App {
 
   }
 
-  def getResultsTest(): Unit = {
+  def getResultsTest: Unit = {
     val response = for {
       zuoraRequests <- getZuoraRequest(RawEffects.response)
-      request = JobResultRequest("2c92c0f863b81bf20163cb25b5b10a8b")
+      request = JobResultRequest("2c92c0f863ed5f9f0163eefa4abd1de5")
       res <- GetJobResult(zuoraRequests)(request)
     } yield {
       res
@@ -58,10 +58,10 @@ object ReportsManualEffectsTest extends App {
 
   }
 
-  def fetchFileTest(): Unit = {
+  def fetchFileTest: Unit = {
     val response = for {
       zuoraRequests <- getZuoraRequest(RawEffects.downloadResponse)
-      request = FetchFileRequest("2c92c086639207960163cb25b64a009b", "manualTest/SomeTest.csv")
+      request = FetchFileRequest(List(FileInfo("2c92c08563ed59430163eefa4b3815c0", "manualTest/SomeTest2")))
       upload = S3ReportUpload("zuora-reports-dev", RawEffects.s3Write) _
       res <- FetchFile(upload, zuoraRequests)(request)
     } yield {
@@ -71,6 +71,6 @@ object ReportsManualEffectsTest extends App {
   }
 
   println("Executing manual test for Zuora reports")
-  querierTest()
+  getResultsTest
 }
 

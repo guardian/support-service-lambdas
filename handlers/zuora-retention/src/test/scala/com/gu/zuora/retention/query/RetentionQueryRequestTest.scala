@@ -7,7 +7,6 @@ import org.scalatest.AsyncFlatSpec
 import play.api.libs.json.Json
 import org.scalatest.Matchers._
 
-
 class RetentionQueryRequestTest extends AsyncFlatSpec {
 
   val jsonRequest = Json.parse(
@@ -30,7 +29,7 @@ class RetentionQueryRequestTest extends AsyncFlatSpec {
 
     val expectedExclusionQuery = AquaQuery(
       name = "exclusionQuery",
-      query =  s"""
+      query = s"""
                   |SELECT
                   | Account.CrmId
                   |FROM
@@ -72,5 +71,4 @@ class RetentionQueryRequestTest extends AsyncFlatSpec {
     ToAquaRequest(retentionQuery) shouldBe expected
   }
 }
-
 
