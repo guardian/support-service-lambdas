@@ -132,6 +132,37 @@ Resources:
                           - Effect: Allow
                             Action: s3:GetObject
                             Resource: !Sub arn:aws:s3:::gu-reader-revenue-private/membership/payment-failure-lambdas/${Stage}/*
+    FilterRole:
+        Type: AWS::IAM::Role
+        Properties:
+            AssumeRolePolicyDocument:
+                Statement:
+                    - Effect: Allow
+                      Principal:
+                          Service:
+                             - lambda.amazonaws.com
+                      Action:
+                          - sts:AssumeRole
+            Path: /
+            Policies:
+                - PolicyName: LambdaPolicy
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                            - logs:CreateLogGroup
+                            - logs:CreateLogStream
+                            - logs:PutLogEvents
+                            - lambda:InvokeFunction
+                            Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/zuora-retention-filter-${Stage}:log-stream:*"
+
+                - PolicyName: ReadPrivateCredentials
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action: s3:GetObject
+                            Action: s3:PutObject
+                            Resource: !Sub "arn:aws:s3:::zuora-retention-${Stage}/*"
     ZuoraRetentionQuerier:
         Type: AWS::Lambda::Function
         Properties:
@@ -192,6 +223,26 @@ Resources:
             Timeout: 300
         DependsOn:
         - ZuoraFileFetcherRole
+    ZuoraRetentionFilter:
+            Type: AWS::Lambda::Function
+            Properties:
+                Description: filters candidates using the exclusion list to get the final list of accounts to process
+                FunctionName:
+                    !Sub zuora-retention-filter-${Stage}
+                Code:
+                    S3Bucket: membership-dist
+                    S3Key: !Sub membership/${Stage}/zuora-retention/zuora-retention.jar
+                Handler: com.gu.zuora.retention.FilterCandidates::apply
+                Environment:
+                    Variables:
+                      Stage: !Ref Stage
+                Role:
+                    !GetAtt FilterRole.Arn
+                MemorySize: 1536
+                Runtime: java8
+                Timeout: 300
+            DependsOn:
+            - FilterRole
     StatesExecutionRole:
       Type: 'AWS::IAM::Role'
       Properties:

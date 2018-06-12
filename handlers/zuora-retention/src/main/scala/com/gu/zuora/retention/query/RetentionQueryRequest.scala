@@ -13,11 +13,12 @@ object RetentionQueryRequest {
 }
 
 object ToAquaRequest {
+  val exclusionQueryName = "exclusionQuery"
+  val candidatesQueryName = "candidatesQuery"
   def apply(request: RetentionQueryRequest): AquaQueryRequest = {
     val dateStr = request.cutOffDate.format(DateTimeFormatter.ISO_LOCAL_DATE)
-
     val exclusionQuery = AquaQuery(
-      name = "exclusionQuery",
+      name = exclusionQueryName,
       query =
         s"""
            |SELECT
@@ -36,7 +37,7 @@ object ToAquaRequest {
     """.stripMargin
     )
     val candidatesQuery = AquaQuery(
-      name = "candidatesQuery",
+      name = candidatesQueryName,
       query =
         s"""
            |SELECT

@@ -4,6 +4,7 @@ import com.gu.effects.{RawEffects, S3ConfigLoad}
 import com.gu.util.config.{LoadConfig, Stage}
 import com.gu.zuora.reports.ReportsLambda.StepsConfig
 import com.gu.zuora.reports.aqua.{AquaQuery, AquaQueryRequest, ZuoraAquaRequestMaker}
+import com.gu.zuora.reports.dataModel.Batch
 import okhttp3.{Request, Response}
 import play.api.libs.json.Json
 import scalaz.syntax.std.either._
@@ -61,7 +62,7 @@ object ReportsManualEffectsTest extends App {
   def fetchFileTest: Unit = {
     val response = for {
       zuoraRequests <- getZuoraRequest(RawEffects.downloadResponse)
-      request = FetchFileRequest(Nil, List(FileInfo("2c92c08563ed59430163eefa4b3815c0", "manualTest/SomeTest2")))
+      request = FetchFileRequest(Nil, List(Batch("2c92c08563ed59430163eefa4b3815c0", "manualTest/SomeTest2")))
       upload = S3ReportUpload("zuora-reports-dev", "reports", RawEffects.s3Write) _
       res <- FetchFile(upload, zuoraRequests.getDownloadStream)(request)
     } yield {

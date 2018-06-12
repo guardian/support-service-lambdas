@@ -2,6 +2,7 @@ package com.gu.zuora.reports
 
 import com.gu.util.zuora.RestRequestMaker.GenericError
 import com.gu.zuora.reports.aqua.AquaJobResponse
+import com.gu.zuora.reports.dataModel.Batch
 import org.scalatest.AsyncFlatSpec
 import org.scalatest.Matchers._
 import scalaz.{-\/, \/-}
