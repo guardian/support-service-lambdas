@@ -10,44 +10,53 @@ import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, Requests}
 import com.gu.zuora.reports.EndToEndData._
 import com.gu.zuora.reports.ReportsLambda.StepsConfig
 import com.gu.zuora.reports.Runner._
-import com.gu.zuora.reports.aqua.ZuoraAquaRequestMaker
+import com.gu.zuora.reports.aqua.{AquaQuery, AquaQueryRequest, ZuoraAquaRequestMaker}
 import org.scalatest.{Assertion, FlatSpec, Matchers}
 import play.api.libs.json.{Json, Reads, Writes}
 import scalaz.\/-
 
 class ReportsLambdaEndToEndTest extends FlatSpec with Matchers {
 
-  //TODO the query request is not defined here anymore so we will have to rethink this test...
-  //  it should "handle query request" in {
-  //    val querierInput =
-  //      """
-  //        |{
-  //        |  "name": "testJob",
-  //        |  "queries": [
-  //        |    {
-  //        |      "name": "query1",
-  //        |      "query": "select something from somethingElse"
-  //        |    }
-  //        |  ]
-  //        |}
-  //      """.stripMargin
-  //
-  //    val postResponses = Map(POSTRequest("/batch-query/", aquaQueryRequest) -> HTTPResponse(200, aquaQueryResponse))
-  //
-  //    val (response, bla) = getResultAndRequests[QuerierRequest, QuerierResponse](
-  //      input = querierInput,
-  //      postResponses = postResponses,
-  //      handlerToTest = Querier.apply
-  //    )
-  //
-  //    val expectedResponse =
-  //      """
-  //        |{
-  //        | "name" : "testJob",
-  //        | "jobId" : "aquaJobId"
-  //        |}""".stripMargin
-  //    response jsonMatches expectedResponse
-  //  }
+  case class QuerierRequest(id: String)
+  implicit val reads = Json.reads[QuerierRequest]
+
+  def generateAquaQuery(req: QuerierRequest) = AquaQueryRequest(
+    name = "testJob",
+    queries = List(
+      AquaQuery(
+        name = "query1",
+        query = "select something from somethingElse"
+      )
+    )
+  )
+
+  it should "handle query request" in {
+
+    val postResponses1 = Map(POSTRequest("/batch-query/", aquaQueryRequest) -> HTTPResponse(200, aquaQueryResponse))
+
+    def handlerToTest(requests: Requests)(querierRequest: QuerierRequest) = Querier(generateAquaQuery, requests)(querierRequest)
+
+    val inputJson =
+      """
+          |{
+          |"id" : "someId"
+          |}
+        """.stripMargin
+
+    val (response, bla) = getResultAndRequests[QuerierRequest, QuerierResponse](
+      input = inputJson,
+      postResponses = postResponses1,
+      handlerToTest = handlerToTest
+    )
+
+    val expectedResponse =
+      """
+          |{
+          | "name" : "testJob",
+          | "jobId" : "aquaJobId"
+          |}""".stripMargin
+    response jsonMatches expectedResponse
+  }
 
   it should "handle job status request" in {
     val jobInput =
@@ -83,7 +92,12 @@ class ReportsLambdaEndToEndTest extends FlatSpec with Matchers {
 
 object Runner {
 
-  def getResultAndRequests[REQUEST, RESPONSE](input: String, responses: Map[String, HTTPResponse] = Map(), postResponses: Map[POSTRequest, HTTPResponse] = Map(), handlerToTest: Requests => REQUEST => ClientFailableOp[RESPONSE])(implicit r: Reads[REQUEST], w: Writes[RESPONSE]): (String, List[TestingRawEffects.BasicRequest]) = {
+  def getResultAndRequests[REQUEST, RESPONSE](
+    input: String,
+    responses: Map[String, HTTPResponse] = Map(),
+    postResponses: Map[POSTRequest, HTTPResponse] = Map(),
+    handlerToTest: Requests => REQUEST => ClientFailableOp[RESPONSE]
+  )(implicit r: Reads[REQUEST], w: Writes[RESPONSE]): (String, List[TestingRawEffects.BasicRequest]) = {
     val stream = new ByteArrayInputStream(input.getBytes(java.nio.charset.StandardCharsets.UTF_8))
     val os = new ByteArrayOutputStream()
 
