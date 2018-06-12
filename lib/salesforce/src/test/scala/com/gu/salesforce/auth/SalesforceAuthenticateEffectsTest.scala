@@ -1,15 +1,20 @@
-package com.gu.identityBackfill.salesforce
+package com.gu.salesforce.auth
 
 import com.gu.effects.{RawEffects, S3ConfigLoad}
-import com.gu.identityBackfill.Handler.StepsConfig
-import com.gu.identityBackfill.salesforce.SalesforceAuthenticate.SalesforceAuth
+import com.gu.salesforce.auth.SalesforceAuthenticate.{SFAuthConfig, SalesforceAuth}
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfig, Stage}
 import com.gu.util.reader.Types._
 import org.scalatest.{FlatSpec, Matchers}
+import play.api.libs.json.{Json, Reads}
 import scalaz.\/-
 
 class SalesforceAuthenticateEffectsTest extends FlatSpec with Matchers {
+
+  case class StepsConfig(
+    sfConfig: SFAuthConfig
+  )
+  implicit val stepsConfigReads: Reads[StepsConfig] = Json.reads[StepsConfig]
 
   it should "get auth SF correctly" taggedAs EffectsTest in {
 

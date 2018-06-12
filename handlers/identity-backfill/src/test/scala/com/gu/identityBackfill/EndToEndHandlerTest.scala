@@ -7,9 +7,9 @@ import com.gu.effects.TestingRawEffects.{BasicRequest, HTTPResponse, POSTRequest
 import com.gu.identity.GetByEmailTest
 import com.gu.identityBackfill.EndToEndData._
 import com.gu.identityBackfill.Runner._
-import com.gu.identityBackfill.salesforce.SalesforceAuthenticateData
 import com.gu.identityBackfill.salesforce.getContact.GetSFContactSyncCheckFieldsTest
 import com.gu.identityBackfill.zuora.{CountZuoraAccountsForIdentityIdData, GetZuoraAccountsForEmailData}
+import com.gu.salesforce.auth.SalesforceAuthenticateData
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import org.scalatest.{Assertion, FlatSpec, Matchers}
 import play.api.libs.json.Json

@@ -1,6 +1,6 @@
-package com.gu.identityBackfill.salesforce
+package com.gu.salesforce.auth
 
-import com.gu.identityBackfill.salesforce.SalesforceAuthenticate.SalesforceAuth
+import com.gu.salesforce.auth.SalesforceAuthenticate.SalesforceAuth
 import com.gu.util.Logging
 import com.gu.util.reader.Types.{ApiGatewayOp, _}
 import com.gu.util.zuora.RestRequestMaker

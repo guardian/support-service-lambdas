@@ -56,11 +56,25 @@ def all(theProject: Project) = theProject.settings(scalaSettings, testSettings).
 
 // ==== START libraries ====
 
+lazy val test = all(project in file("lib/test")).settings(
+  libraryDependencies ++= Seq(
+    "org.scalatest" %% "scalatest" % "3.0.1" % "test"
+  )
+)
+
+val testDep = test % "test->test"
+
 lazy val zuora = all(project in file("lib/zuora")).dependsOn(restHttp).settings(
   libraryDependencies ++= Seq(
     okhttp3, logging, scalaz, playJson, scalatest,
     "com.fasterxml.jackson.core" % "jackson-databind" % "2.8.11.1"
   )
+)
+
+lazy val salesforce = all(project in file("lib/salesforce")).dependsOn(
+  restHttp, handler, effects % "test->test", testDep
+).settings(
+  libraryDependencies ++= Seq(okhttp3, logging, scalaz, playJson, scalatest)
 )
 
 lazy val restHttp = all(project in file("lib/restHttp")).settings(
@@ -82,13 +96,6 @@ lazy val effects = all(project in file("lib/effects")).dependsOn(handler).settin
 
 val effectsDepIncludingTestFolder: ClasspathDependency = effects % "compile->compile;test->test"
 
-lazy val test = all(project in file("lib/test")).settings(
-  libraryDependencies ++= Seq(
-    "org.scalatest" %% "scalatest" % "3.0.1" % "test"
-  )
-)
-
-val testDep = test % "test->test"
 
 lazy val `zuora-reports` = all(project in file("lib/zuora-reports")).dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
 
@@ -110,11 +117,12 @@ lazy val root = all(project in file(".")).enablePlugins(RiffRaffArtifact).aggreg
   handler,
   restHttp,
   zuora,
-  `zuora-reports`
+  `zuora-reports`,
+  salesforce
 ).dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `identity-backfill` = all(project in file("handlers/identity-backfill")) // when using the "project identity-backfill" command it uses the lazy val name
-  .enablePlugins(RiffRaffArtifact).dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
+  .enablePlugins(RiffRaffArtifact).dependsOn(zuora, salesforce, handler, effectsDepIncludingTestFolder, testDep, salesforce % "test->test")
 
 lazy val `digital-subscription-expiry` = all(project in file("handlers/digital-subscription-expiry"))
   .enablePlugins(RiffRaffArtifact).dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
