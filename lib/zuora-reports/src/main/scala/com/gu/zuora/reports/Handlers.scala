@@ -33,7 +33,7 @@ trait ReportHandlers[QUERY_REQUEST] {
       val destinationBucket = s"$reportsBucketPrefix-${config.stage.value.toLowerCase}"
       val upload = S3ReportUpload(destinationBucket, reportsBasePath, RawEffects.s3Write) _
       val downloadRequestMaker = ZuoraAquaRequestMaker(RawEffects.downloadResponse, config.stepsConfig.zuoraRestConfig)
-      FetchFile(upload, downloadRequestMaker) _
+      FetchFile(upload, downloadRequestMaker.getDownloadStream) _
     }
 
     ReportsLambda[FetchFileRequest, FetchFileResponse](RawEffects.stage, RawEffects.s3Load, LambdaIO(inputStream, outputStream, context), customWiring)
