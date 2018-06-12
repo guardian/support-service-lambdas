@@ -25,7 +25,7 @@ case class FileInfo(fileId: String, name: String)
 
 case class FetchedFileInfo(fileId: String, uri: String)
 
-case class FetchFileRequest(fetched: List[FetchedFileInfo] = Nil, batches: List[FileInfo])
+case class FetchFileRequest(fetched: List[FetchedFileInfo] = List.empty, batches: List[FileInfo])
 
 case class FetchFileResponse(fetched: List[FetchedFileInfo], batches: List[FileInfo], done: Boolean)
 
@@ -40,7 +40,7 @@ object FetchedFileInfo {
 }
 
 object FetchFileRequest {
-  implicit val reads = Json.reads[FetchFileRequest]
+  implicit val reads = Json.using[Json.WithDefaultValues].reads[FetchFileRequest]
 }
 
 object FetchFileResponse {
