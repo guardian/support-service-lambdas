@@ -4,8 +4,9 @@ import com.gu.effects.TestingRawEffects
 import com.gu.effects.TestingRawEffects.HTTPResponse
 import com.gu.identityBackfill.Types.SFContactId
 import com.gu.identityBackfill.salesforce.GetSFContactSyncCheckFields.ContactSyncCheckFields
-import com.gu.identityBackfill.salesforce.SalesforceAuthenticate.SalesforceAuth
-import com.gu.identityBackfill.salesforce.{GetSFContactSyncCheckFields, SalesforceRestRequestMaker}
+import com.gu.salesforce.auth.SalesforceAuthenticate.SalesforceAuth
+import com.gu.identityBackfill.salesforce.GetSFContactSyncCheckFields
+import com.gu.salesforce.auth.SalesforceRestRequestMaker
 import org.scalatest.{FlatSpec, Matchers}
 import scalaz.\/-
 

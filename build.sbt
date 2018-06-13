@@ -29,9 +29,9 @@ val scalaSettings = Seq(
       .setPreference(NewlineAtEndOfFile, true)
   },libraryDependencies += "com.lihaoyi" %% "acyclic" % "0.1.7" % "provided",
 
-    autoCompilerPlugins := true,
+  autoCompilerPlugins := true,
 
-addCompilerPlugin("com.lihaoyi" %% "acyclic" % "0.1.7"),
+  addCompilerPlugin("com.lihaoyi" %% "acyclic" % "0.1.7"),
   scalacOptions += "-P:acyclic:force"
 )
 
@@ -56,41 +56,46 @@ def all(theProject: Project) = theProject.settings(scalaSettings, testSettings).
 
 // ==== START libraries ====
 
-lazy val zuora = all(project in file("lib/zuora")).dependsOn(restHttp).settings(
-  libraryDependencies ++= Seq(
-    okhttp3, logging, scalaz, playJson, scalatest,
-    "com.fasterxml.jackson.core" % "jackson-databind" % "2.8.11.1"
+lazy val test = all(project in file("lib/test"))
+  .settings(
+    libraryDependencies ++= Seq(scalatest)
   )
-)
-
-lazy val restHttp = all(project in file("lib/restHttp")).settings(
-  libraryDependencies ++= Seq(okhttp3, logging, scalaz, playJson, scalatest)
-)
-
-lazy val handler = all(project in file("lib/handler")).settings(
-  libraryDependencies ++= Seq(okhttp3, logging, scalaz, playJson, scalatest)
-)
-
-// to aid testability, only the actual handlers called as a lambda can depend on this
-lazy val effects = all(project in file("lib/effects")).dependsOn(handler).settings(
-  libraryDependencies ++= Seq(
-    okhttp3, logging, scalaz, playJson, scalatest,
-    "com.amazonaws" % "aws-java-sdk-s3" % "1.11.311",
-    "com.fasterxml.jackson.core" % "jackson-databind" % "2.8.11.1"
-  )
-)
-
-val effectsDepIncludingTestFolder: ClasspathDependency = effects % "compile->compile;test->test"
-
-lazy val test = all(project in file("lib/test")).settings(
-  libraryDependencies ++= Seq(
-    "org.scalatest" %% "scalatest" % "3.0.1" % "test"
-  )
-)
 
 val testDep = test % "test->test"
 
-lazy val `zuora-reports` = all(project in file("lib/zuora-reports")).dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
+lazy val zuora = all(project in file("lib/zuora"))
+  .dependsOn(restHttp)
+  .settings(
+    libraryDependencies ++= Seq(okhttp3, logging, scalaz, playJson, scalatest, jacksonDatabind)
+  )
+
+lazy val salesforce = all(project in file("lib/salesforce"))
+  .dependsOn(restHttp, handler, effects % "test->test", testDep)
+  .settings(
+    libraryDependencies ++= Seq(okhttp3, logging, scalaz, playJson, scalatest)
+  )
+
+lazy val restHttp = all(project in file("lib/restHttp"))
+  .settings(
+    libraryDependencies ++= Seq(okhttp3, logging, scalaz, playJson, scalatest)
+  )
+
+lazy val handler = all(project in file("lib/handler"))
+  .settings(
+    libraryDependencies ++= Seq(okhttp3, logging, scalaz, playJson, scalatest)
+  )
+
+// to aid testability, only the actual handlers called as a lambda can depend on this
+lazy val effects = all(project in file("lib/effects"))
+  .dependsOn(handler)
+  .settings(
+    libraryDependencies ++= Seq(okhttp3, logging, scalaz, playJson, scalatest, awsS3, jacksonDatabind)
+  )
+
+val effectsDepIncludingTestFolder: ClasspathDependency = effects % "compile->compile;test->test"
+
+lazy val `zuora-reports` = all(project in file("lib/zuora-reports"))
+  .dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
 
 
 // ==== END libraries ====
@@ -110,24 +115,29 @@ lazy val root = all(project in file(".")).enablePlugins(RiffRaffArtifact).aggreg
   handler,
   restHttp,
   zuora,
-  `zuora-reports`
+  `zuora-reports`,
+  salesforce
 ).dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `identity-backfill` = all(project in file("handlers/identity-backfill")) // when using the "project identity-backfill" command it uses the lazy val name
-  .enablePlugins(RiffRaffArtifact).dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
+  .enablePlugins(RiffRaffArtifact)
+  .dependsOn(zuora, salesforce, handler, effectsDepIncludingTestFolder, testDep, salesforce % "test->test")
 
 lazy val `digital-subscription-expiry` = all(project in file("handlers/digital-subscription-expiry"))
-  .enablePlugins(RiffRaffArtifact).dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
+  .enablePlugins(RiffRaffArtifact)
+  .dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `catalog-service` = all(project in file("handlers/catalog-service"))
-  .enablePlugins(RiffRaffArtifact).dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
+  .enablePlugins(RiffRaffArtifact)
+  .dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `identity-retention` = all(project in file("handlers/identity-retention"))
-  .enablePlugins(RiffRaffArtifact).dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
+  .enablePlugins(RiffRaffArtifact)
+  .dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `zuora-retention` = all(project in file("handlers/zuora-retention"))
-  .enablePlugins(RiffRaffArtifact).dependsOn(`zuora-reports`, handler, effectsDepIncludingTestFolder, testDep)
-
+  .enablePlugins(RiffRaffArtifact)
+  .dependsOn(`zuora-reports`, handler, effectsDepIncludingTestFolder, testDep)
 
 // ==== END handlers ====
 

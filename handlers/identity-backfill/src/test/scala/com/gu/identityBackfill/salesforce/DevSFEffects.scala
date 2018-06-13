@@ -1,6 +1,7 @@
 package com.gu.identityBackfill.salesforce
 
 import com.gu.identityBackfill.Handler.StepsConfig
+import com.gu.salesforce.auth.SalesforceAuthenticate
 import com.gu.util.config.ConfigReads.ConfigFailure
 import com.gu.util.config.{LoadConfig, Stage}
 import com.gu.util.reader.Types._

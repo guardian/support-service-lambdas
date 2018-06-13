@@ -1,8 +1,8 @@
-package com.gu.identityBackfill.salesforce
+package com.gu.salesforce.auth
 
 import com.gu.effects.TestingRawEffects
 import com.gu.effects.TestingRawEffects.{HTTPResponse, POSTRequest}
-import com.gu.identityBackfill.salesforce.SalesforceAuthenticate.{SFAuthConfig, SalesforceAuth}
+import com.gu.salesforce.auth.SalesforceAuthenticate.{SFAuthConfig, SalesforceAuth}
 import org.scalatest.{FlatSpec, Matchers}
 import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
 
