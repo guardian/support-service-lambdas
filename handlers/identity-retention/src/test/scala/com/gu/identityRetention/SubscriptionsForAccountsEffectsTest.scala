@@ -30,7 +30,7 @@ class SubscriptionsForAccountsEffectsTest extends FlatSpec with Matchers {
       configAttempt <- S3ConfigLoad.load(Stage("DEV")).toEither.disjunction
       config <- LoadConfig.parseConfig[StepsConfig](configAttempt)
       zuoraQuerier = ZuoraQuery(ZuoraRestRequestMaker(RawEffects.response, config.stepsConfig.zuoraRestConfig))
-      subsForAccounts = SubscriptionsForAccounts(zuoraQuerier)
+      subsForAccounts = SubscriptionsForAccounts(zuoraQuerier) _
       subs <- subsForAccounts(testAccountIds).toDisjunction
     } yield {
       subs

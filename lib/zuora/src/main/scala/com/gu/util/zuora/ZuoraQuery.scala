@@ -50,7 +50,8 @@ object ZuoraQuery {
 
   case class QueryResult[QUERYRECORD](records: List[QUERYRECORD], size: Int, done: Boolean, queryLocator: Option[QueryLocator])
 
-  implicit val queryW: Writes[SanitisedQuery] = Json.writes[SanitisedQuery]
+  // can't generate from macro as it needs an apply method for some reason which we'd rather not expose
+  implicit val queryW: Writes[SanitisedQuery] = (JsPath \ "queryString").write[String].contramap(_.queryString)
 
   implicit val queryLocator: Format[QueryLocator] =
     Format[QueryLocator](JsPath.read[String].map(QueryLocator.apply), Writes { (o: QueryLocator) => JsString(o.value) })
