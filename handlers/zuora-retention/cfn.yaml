@@ -156,13 +156,14 @@ Resources:
                             - lambda:InvokeFunction
                             Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/zuora-retention-filter-${Stage}:log-stream:*"
 
-                - PolicyName: ReadPrivateCredentials
+                - PolicyName: RetentionBucket
                   PolicyDocument:
                       Statement:
-                          - Effect: Allow
-                            Action: s3:GetObject
-                            Action: s3:PutObject
-                            Resource: !Sub "arn:aws:s3:::zuora-retention-${Stage}/*"
+                        - Effect: Allow
+                          Action:
+                          - s3:PutObject
+                          - s3:GetObject
+                          Resource: !Sub arn:aws:s3:::${RetentionBucket}/*
     ZuoraRetentionQuerier:
         Type: AWS::Lambda::Function
         Properties:

@@ -8,8 +8,8 @@ import org.scalatest.{FlatSpec, Matchers}
 
 class FilterCandidatesEffectsTest extends FlatSpec with Matchers {
   it should "do something" taggedAs EffectsTest in {
-val input =
-  """
+    val input =
+      """
     |{
     |"fetched": [
     |    {
@@ -33,7 +33,7 @@ val input =
     )
 
     val request = FilterCandidatesRequest(files)
-    FilterCandidates(testInputStream,null, null )
-     "bla" shouldBe("bla")
+    FilterCandidates(testInputStream, null, null)
+    "bla" shouldBe ("bla")
   }
 }
