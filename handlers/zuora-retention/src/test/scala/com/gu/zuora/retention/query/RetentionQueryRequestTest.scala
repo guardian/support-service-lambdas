@@ -43,6 +43,8 @@ class RetentionQueryRequestTest extends AsyncFlatSpec {
                   |HAVING
                   |  MAX(Status) = 'Cancelled' AND
                   |  (MIN(Status) = 'Active' OR MAX(SubscriptionEndDate) >= '2012-12-31')
+                  |ORDER BY
+                  |  Account.CrmId
     """.stripMargin
     )
 
@@ -59,6 +61,8 @@ class RetentionQueryRequestTest extends AsyncFlatSpec {
            |  (Account.ProcessingAdvice__c != 'DoNotProcess' OR Account.ProcessingAdvice__c IS NULL) AND
            |  Subscription.Status = 'Cancelled' AND
            |  SubscriptionEndDate <= '2012-12-31'
+           |ORDER BY
+           |  Account.CrmId
     """.stripMargin
     )
 

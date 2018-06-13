@@ -34,6 +34,8 @@ object ToAquaRequest {
            |HAVING
            |  MAX(Status) = 'Cancelled' AND
            |  (MIN(Status) = 'Active' OR MAX(SubscriptionEndDate) >= '$dateStr')
+           |ORDER BY
+           |  Account.CrmId
     """.stripMargin
     )
     val candidatesQuery = AquaQuery(
@@ -49,6 +51,8 @@ object ToAquaRequest {
            |  (Account.ProcessingAdvice__c != 'DoNotProcess' OR Account.ProcessingAdvice__c IS NULL) AND
            |  Subscription.Status = 'Cancelled' AND
            |  SubscriptionEndDate <= '$dateStr'
+           |ORDER BY
+           |  Account.CrmId
     """.stripMargin
     )
     AquaQueryRequest(
