@@ -12,7 +12,6 @@ import org.scalatest.{FlatSpec, Matchers}
 import scalaz.\/-
 import scalaz.syntax.std.either._
 
-// run this manually
 class SubscriptionsForAccountsEffectsTest extends FlatSpec with Matchers {
 
   it should "successfull query multiple accounts" taggedAs EffectsTest in {
@@ -21,11 +20,20 @@ class SubscriptionsForAccountsEffectsTest extends FlatSpec with Matchers {
       configAttempt <- S3ConfigLoad.load(Stage("DEV")).toEither.disjunction
       config <- LoadConfig.parseConfig[StepsConfig](configAttempt)
       zuoraQuerier = ZuoraQuery(ZuoraRestRequestMaker(RawEffects.response, config.stepsConfig.zuoraRestConfig))
-      subs <- SubscriptionsForAccounts(zuoraQuerier)(List(AccountId("2c92c0f86371efdc0163871a9ad72274"), AccountId("2c92c0f86371f0360163871d94eb0e68"))).toDisjunction
+      subsForAccounts = SubscriptionsForAccounts(zuoraQuerier)
+      subs <- subsForAccounts(List(
+        AccountId("2c92c0f86371efdc0163871a9ad72274"),
+        AccountId("2c92c0f86371f0360163871d94eb0e68")
+      )).toDisjunction
     } yield {
       subs
     }
-    actual.map(_.map(_.TermEndDate)) should be(\/-(List(LocalDate.of(2019, 5, 21), LocalDate.of(2018, 4, 4))))
+
+    val expectedEndDates = List(
+      LocalDate.of(2019, 5, 21),
+      LocalDate.of(2018, 4, 4)
+    )
+    actual.map(_.map(_.TermEndDate)) should be(\/-(expectedEndDates))
 
   }
 
