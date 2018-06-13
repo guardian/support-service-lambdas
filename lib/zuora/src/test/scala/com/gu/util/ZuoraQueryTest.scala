@@ -1,6 +1,6 @@
 package com.gu.util
 
-import com.gu.util.zuora.ZuoraQuery.{SanitisedQuery, Query}
+import com.gu.util.zuora.ZuoraQuery.{Or, Query, SanitisedQuery}
 import org.scalatest._
 
 class WireQueryEscapeTest extends FlatSpec with Matchers {
@@ -66,7 +66,7 @@ class WireQueryApplyTest extends FlatSpec with Matchers {
 
   it should "use a List in insert clause" in {
     val ids = List("anna", "bill")
-    val insert = ids.map { id => zoql"""id = $id""" }.or
+    val insert = Or(ids.map { id => zoql"""id = $id""" })
     val actual: SanitisedQuery = zoql"""select * from table where $insert"""
     actual.queryString should be("""select * from table where id = 'anna' or id = 'bill'""")
   }

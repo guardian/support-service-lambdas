@@ -23,7 +23,7 @@ class ZuoraQueryEffectsTest extends FlatSpec with Matchers {
       configAttempt <- S3ConfigLoad.load(Stage("DEV")).toEither.disjunction
       config <- LoadConfig.parseConfig[StepsConfig](configAttempt)
       zuoraQuerier = ZuoraQuery(ZuoraRestRequestMaker(RawEffects.response, config.stepsConfig.zuoraRestConfig))
-      subs <- SubscriptionsForAccounts(zuoraQuerier)("""qwerty"asdf'zxcv\1234""")
+      subs <- SubscriptionsForPromoCode(zuoraQuerier)("""qwerty"asdf'zxcv\1234""")
     } yield {
       subs
     }
@@ -32,7 +32,7 @@ class ZuoraQueryEffectsTest extends FlatSpec with Matchers {
   }
 
 }
-object SubscriptionsForAccounts {
+object SubscriptionsForPromoCode {
 
   //POST query - SELECT Id, promotioncode__c FROM Subscription where PromotionCode__c = 'qwerty\"asdf\'zxcv\\1234'
   // NOTE for "zoql export" we don't escape anything, just double up on single quotes only. tested all june 2018

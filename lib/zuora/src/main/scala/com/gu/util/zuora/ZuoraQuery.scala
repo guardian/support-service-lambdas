@@ -12,8 +12,8 @@ object ZuoraQuery {
     }
   }
 
-  implicit class QueryAnd(val queries: List[SanitisedQuery]) extends AnyVal {
-    def or: SanitisedQuery = {
+  object Or {
+    def apply(queries: List[SanitisedQuery]): SanitisedQuery = {
       new SanitisedQuery(queries.map(_.queryString).mkString(" or "))
     }
   }
