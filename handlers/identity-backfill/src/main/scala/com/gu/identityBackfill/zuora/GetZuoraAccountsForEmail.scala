@@ -20,11 +20,11 @@ object GetZuoraAccountsForEmail {
   def apply(zuoraQuerier: ZuoraQuerier)(emailAddress: EmailAddress): ClientFailableOp[List[ZuoraAccountIdentitySFContact]] = {
     val accounts = for {
       contactWithEmail <- {
-        val contactQuery = Query(s"SELECT Id FROM Contact where WorkEmail='${emailAddress.value}'")
+        val contactQuery = zoql"SELECT Id FROM Contact where WorkEmail=${emailAddress.value}"
         ListT(zuoraQuerier[WireResponseContact](contactQuery).map(_.records))
       }
       accountsWithEmail <- {
-        val accountQuery = Query(s"SELECT Id, IdentityId__c, sfContactId__c FROM Account where BillToId='${contactWithEmail.Id}'")
+        val accountQuery = zoql"SELECT Id, IdentityId__c, sfContactId__c FROM Account where BillToId=${contactWithEmail.Id}"
         ListT[ClientFailableOp, WireResponseAccount](zuoraQuerier[WireResponseAccount](accountQuery).map(_.records))
       }
     } yield ZuoraAccountIdentitySFContact(

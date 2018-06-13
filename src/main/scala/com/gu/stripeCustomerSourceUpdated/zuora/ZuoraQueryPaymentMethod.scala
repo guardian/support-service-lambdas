@@ -29,18 +29,18 @@ object ZuoraQueryPaymentMethod extends Logging {
     sourceId: StripeSourceId
   ): ApiGatewayOp[List[AccountPaymentMethodIds]] = {
     val query =
-      s"""SELECT
+      zoql"""SELECT
          | Id,
          | AccountId,
          | NumConsecutiveFailures
          | FROM PaymentMethod
          |  where Type='CreditCardReferenceTransaction'
          | AND PaymentMethodStatus = 'Active'
-         | AND TokenId = '${sourceId.value}'
-         | AND SecondTokenId = '${customerId.value}'
-         |""".stripMargin.replaceAll("\n", "")
+         | AND TokenId = ${sourceId.value}
+         | AND SecondTokenId = ${customerId.value}
+         |""".stripMarginAndNewline
 
-    zuoraQuerier[PaymentMethodFields](Query(query)).toApiGatewayOp("query failed").flatMap { result =>
+    zuoraQuerier[PaymentMethodFields](query).toApiGatewayOp("query failed").flatMap { result =>
 
       def groupedList(records: List[PaymentMethodFields]): List[(AccountId, NonEmptyList[PaymentMethodFields])] = {
         records.groupBy(_.AccountId).toList.collect {

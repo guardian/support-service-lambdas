@@ -4,8 +4,7 @@ import java.time.LocalDate
 
 import com.gu.identityRetention.Types.AccountId
 import com.gu.util.reader.Types._
-import com.gu.util.zuora.ZuoraQuery
-import com.gu.util.zuora.ZuoraQuery.ZuoraQuerier
+import com.gu.util.zuora.ZuoraQuery.{Query, SanitisedQuery, ZuoraQuerier}
 import play.api.libs.json.Json
 object SubscriptionsForAccounts {
 
@@ -17,15 +16,22 @@ object SubscriptionsForAccounts {
 
   implicit val reads = Json.reads[SubscriptionsQueryResponse]
 
-  def buildQuery(accountsToQuery: List[AccountId]): String = {
-    val accountIdClause = "accountId = '" + accountsToQuery.map(_.value).mkString("' or accountId = '") + "'"
-    s"select id, name, status, termEndDate from subscription where status != 'Expired' and $accountIdClause"
+  def buildQuery(accountsToQuery: List[AccountId]): SanitisedQuery = {
+    zoql"""select
+       | id,
+       | name,
+       | status,
+       | termEndDate
+       | from subscription
+       | where ${accountsToQuery.map(acc => zoql"status != 'Expired' and accountId = ${acc.value}").or}
+       |"""
+      .stripMarginAndNewline
   }
 
-  def apply(activeAccounts: List[AccountId], zuoraQuerier: ZuoraQuerier): ApiGatewayOp[List[SubscriptionsQueryResponse]] = {
+  def apply(zuoraQuerier: ZuoraQuerier)(activeAccounts: List[AccountId]): ApiGatewayOp[List[SubscriptionsQueryResponse]] = {
 
     def searchForSubscriptions = {
-      val subscriptionsQuery = ZuoraQuery.Query(buildQuery(activeAccounts))
+      val subscriptionsQuery = buildQuery(activeAccounts)
       zuoraQuerier[SubscriptionsQueryResponse](subscriptionsQuery)
     }
 

@@ -4,7 +4,7 @@ import com.gu.identityRetention.Types.{AccountId, IdentityId}
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.RestRequestMaker.ClientFailableOp
-import com.gu.util.zuora.ZuoraQuery
+import com.gu.util.zuora.ZuoraQuery._
 import com.gu.util.zuora.ZuoraQuery.{QueryResult, ZuoraQuerier}
 import play.api.libs.json.Json
 import scalaz.{-\/, \/-}
@@ -18,17 +18,19 @@ object HasActiveZuoraAccounts {
 
     def searchForAccounts = {
 
-      val commonConditions = s"IdentityId__c = '${identityId.value}' and status != 'Canceled'"
+      val commonConditions = zoql"IdentityId__c = ${identityId.value} and status != 'Canceled'"
 
       /*
       Todo simplify this once we can rely on Account.Status
       Unfortunately Zuora do not support parentheses, and != doesn't pick up nulls
       https://knowledgecenter.zuora.com/DC_Developers/K_Zuora_Object_Query_Language#Syntax
       */
-      val identityQuery = ZuoraQuery.Query(
-        s"select id from account where $commonConditions and ProcessingAdvice__c != 'DoNotProcess' or " +
-          s"$commonConditions and ProcessingAdvice__c = null"
-      )
+      val identityQuery =
+        zoql"""select id
+           | from account
+           | where $commonConditions and ProcessingAdvice__c != 'DoNotProcess'
+           |    or $commonConditions and ProcessingAdvice__c = null
+           |""".stripMarginAndNewline
 
       zuoraQuerier[IdentityQueryResponse](identityQuery)
     }
