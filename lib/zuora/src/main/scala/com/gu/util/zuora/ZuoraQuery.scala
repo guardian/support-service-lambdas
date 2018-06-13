@@ -20,16 +20,13 @@ object ZuoraQuery {
 
   object SanitisedQuery {
 
-    @deprecated("use zoql\"query=$here\" string interpolation", "")
-    def apply(queryString: String): SanitisedQuery = new SanitisedQuery("")
-
     def sanitise(input: String): String = {
       val sanitised = input
         .replaceAll("""\p{Cntrl}""", "")
         .replaceAll("""\\""", """\\\\""")
         .replaceAll("'", """\\'""")
         .replaceAll(""""""", """\\"""")
-      s"'${sanitised}'"
+      s"'$sanitised'"
     }
 
     def doInsert(input: Any): String = input match {
@@ -41,9 +38,11 @@ object ZuoraQuery {
       val queryString = hardCode.s(inserts.map(doInsert).toArray: _*)
       new SanitisedQuery(queryString)
     }
+
+    def unapply(arg: SanitisedQuery): Option[String] = Some(arg.queryString)
   }
 
-  case class SanitisedQuery(queryString: String) {
+  class SanitisedQuery(val queryString: String) {
     def stripMarginAndNewline: SanitisedQuery = new SanitisedQuery(queryString.stripMargin.replaceAll("\n", ""))
   }
 
