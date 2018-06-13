@@ -319,9 +319,8 @@ Resources:
                            "ErrorEquals":[
                               "States.ALL"
                            ],
-                           "IntervalSeconds":60,
-                           "MaxAttempts":10,
-                           "BackoffRate":1.0
+                            "IntervalSeconds":30,
+                            "MaxAttempts":3
                         }
                      ]
                   },
@@ -334,18 +333,29 @@ Resources:
                            "Next":"FetchFiles"
                         }
                      ],
-                     "Default":"Done"
+                     "Default":"Filter"
                   },
-                  "Done": {
-                        "Type": "Pass",
-                        "End": true
-                      }
+               "Filter":{
+                          "Type":"Task",
+                          "Resource":"${filterArn}",
+                          "End": true,
+                          "Retry":[
+                             {
+                                "ErrorEquals":[
+                                   "States.ALL"
+                                ],
+                              "IntervalSeconds":30,
+                              "MaxAttempts":3
+                             }
+                          ]
+                       }
                }
             }
 
           - {
             querierArn: !GetAtt [ ZuoraRetentionQuerier, Arn ],
             fetcherArn: !GetAtt [ ZuoraRetentionJobResult, Arn ],
-            fetchFilesArn: !GetAtt [ ZuoraRetentionFileFetcher, Arn ]
+            fetchFilesArn: !GetAtt [ ZuoraRetentionFileFetcher, Arn ],
+            filterArn: !GetAtt [ ZuoraRetentionFilter, Arn ]
 
           }

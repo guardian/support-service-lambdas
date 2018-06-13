@@ -13,7 +13,7 @@ object FetchFile {
     val fileName = fileInfo.name + ".csv"
     val alreadyFetched = fetchFileRequest.fetched
     for {
-      downloadStream <- getDownloadStream(s"batch-query/file/$fileName")
+      downloadStream <- getDownloadStream(s"batch-query/file/${fileInfo.fileId}")
       uploadPath <- upload(downloadStream, fileName)
     } yield {
       val fetched = FetchedFile(fileInfo.fileId, fileInfo.name, uploadPath)
