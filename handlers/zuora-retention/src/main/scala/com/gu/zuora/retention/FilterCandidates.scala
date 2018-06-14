@@ -11,16 +11,14 @@ import com.gu.zuora.reports.S3ReportUpload.logger
 import com.gu.zuora.reports.dataModel.FetchedFile
 import com.gu.zuora.retention.query.ToAquaRequest
 import play.api.libs.json.Json
-
-import scala.io.Source
 import scala.util.{Failure, Success, Try}
 
-case class FilterCandidatesRequest(fetched: List[FetchedFile] = List.empty)
+case class FilterCandidatesRequest(fetched: List[FetchedFile])
 
 case class FilterCandidatesResponse(uri: String)
 
 object FilterCandidatesRequest {
-  implicit val reads = Json.using[Json.WithDefaultValues].reads[FilterCandidatesRequest]
+  implicit val reads = Json.reads[FilterCandidatesRequest]
 }
 
 object FilterCandidatesResponse {
@@ -33,27 +31,23 @@ object FilterCandidates {
     val buckets = Map(
       "PROD" -> "zuora-retention-prod",
       "CODE" -> "zuora-retention-code",
-      "DEV" -> "zuora-reports-dev"
+      "DEV" -> "zuora-retention-dev"
     )
 
     val wiredS3Upload = uploadToS3(RawEffects.s3Write, buckets(RawEffects.stage.value.toUpperCase), "doNotProcessList.csv") _
-    val lambdaIO = new LambdaIO(inputStream, outputStream, context)
-    runWithEffects(lambdaIO, RawEffects.fetchContent, wiredS3Upload, Diff.apply)
+    val wiredS3Iterator = S3Iterator(RawEffects.fetchContent) _
+
+    runWithEffects(
+      lambdaIO = new LambdaIO(inputStream, outputStream, context),
+      s3Iterator = wiredS3Iterator,
+      uploadToS3 = wiredS3Upload,
+      diff = Diff.apply
+    )
   }
 
   def getUri(files: List[FetchedFile], queryName: String) = {
     val queryResultUri = files.find(_.name == queryName).map(_.uri)
     queryResultUri.map(Success(_)).getOrElse(Failure(new LambdaException(s"could not find query result for $queryName")))
-  }
-
-  def getInputStream(
-    uri: String,
-    fetchContent: GetObjectRequest => Try[S3ObjectInputStream]
-  ) = {
-    val parsedUri = new java.net.URI(uri)
-    val path = parsedUri.getPath.stripPrefix("/")
-    val request = new GetObjectRequest(parsedUri.getHost, path)
-    fetchContent(request)
   }
 
   def uploadToS3(
@@ -64,7 +58,6 @@ object FilterCandidates {
     val uploadLocation = s"s3://$bucket/$key"
     logger.info(s"uploading do do not process list to $uploadLocation")
 
-    //TODO IS THERE A WAY TO SAVE THIS WITHOUT PUTTING IT ALL IN MEMORY ?
     val stringData = filteredCandidates.toList.mkString("\n")
     val data = stringData.getBytes("UTF-8")
     val stream = new ByteArrayInputStream(data)
@@ -73,23 +66,21 @@ object FilterCandidates {
     metadata.setContentLength(data.length)
 
     val putObjectRequest = new PutObjectRequest(bucket, key, stream, metadata)
-    s3Write(putObjectRequest).map { _ =>
-      uploadLocation
-    }
+    s3Write(putObjectRequest).map(_ => uploadLocation)
   }
 
   def runWithEffects(
     lambdaIO: LambdaIO,
-    fetchContent: GetObjectRequest => Try[S3ObjectInputStream],
+    s3Iterator: String => Try[Iterator[String]],
     uploadToS3: Iterator[String] => Try[String],
     diff: (Iterator[String], Iterator[String]) => Iterator[String]
   ) = {
     val result = for {
       request <- ParseRequest[FilterCandidatesRequest](lambdaIO.inputStream)
       exclusionsUri <- getUri(request.fetched, ToAquaRequest.exclusionQueryName)
-      exclusionsIterator <- getInputStream(exclusionsUri, fetchContent).map(Source.fromInputStream(_).getLines)
+      exclusionsIterator <- s3Iterator(exclusionsUri)
       candidatesUri <- getUri(request.fetched, ToAquaRequest.candidatesQueryName)
-      candidatesIterator <- getInputStream(candidatesUri, fetchContent).map(Source.fromInputStream(_).getLines)
+      candidatesIterator <- s3Iterator(candidatesUri)
       filteredCandidates = diff(candidatesIterator, exclusionsIterator)
       putResult <- uploadToS3(filteredCandidates)
     } yield (putResult)
