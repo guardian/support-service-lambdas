@@ -13,41 +13,40 @@ object SafeQueryBuilder {
 
     implicit class Query(val sc: StringContext) extends AnyVal {
 
-      def zoql[A: Conv, B: Conv, C: Conv, D: Conv](a: A, b: B, c: C, d: D): ClientFailableOp[SanitisedQuery] =
-        SanitisedQuery(hardCode = sc, inserts = List(conv(a), conv(b), conv(c), conv(d)))
+      // only went up to 4 at the moment, might need more
 
-      def zoql[A: Conv, B: Conv, C: Conv](a: A, b: B, c: C): ClientFailableOp[SanitisedQuery] =
-        SanitisedQuery(hardCode = sc, inserts = List(conv(a), conv(b), conv(c)))
+      def zoql[A: MakeSafe, B: MakeSafe, C: MakeSafe, D: MakeSafe](a: A, b: B, c: C, d: D): ClientFailableOp[SanitisedQuery] =
+        SanitisedQuery(hardCode = sc, inserts = List(asSafe(a), asSafe(b), asSafe(c), asSafe(d)))
 
-      def zoql[A: Conv, B: Conv](a: A, b: B): ClientFailableOp[SanitisedQuery] =
-        SanitisedQuery(hardCode = sc, inserts = List(conv(a), conv(b)))
+      def zoql[A: MakeSafe, B: MakeSafe, C: MakeSafe](a: A, b: B, c: C): ClientFailableOp[SanitisedQuery] =
+        SanitisedQuery(hardCode = sc, inserts = List(asSafe(a), asSafe(b), asSafe(c)))
 
-      def zoql[A: Conv](a: A): ClientFailableOp[SanitisedQuery] =
-        SanitisedQuery(hardCode = sc, inserts = List(conv(a)))
+      def zoql[A: MakeSafe, B: MakeSafe](a: A, b: B): ClientFailableOp[SanitisedQuery] =
+        SanitisedQuery(hardCode = sc, inserts = List(asSafe(a), asSafe(b)))
+
+      def zoql[A: MakeSafe](a: A): ClientFailableOp[SanitisedQuery] =
+        SanitisedQuery(hardCode = sc, inserts = List(asSafe(a)))
 
     }
 
-    def conv[A](a: A)(implicit convertToString: Conv[A]) = convertToString(a)
+    def asSafe[A](a: A)(implicit makeSafe: MakeSafe[A]) = makeSafe(a)
 
     @implicitNotFound("implicitNotFound: ZuoraQuery: can only insert a string literal or a sanitised query into a parent query")
-    trait Conv[A] {
+    trait MakeSafe[A] {
       def apply(a: A): ClientFailableOp[String]
     }
 
-    implicit val sanitisedConv = new Conv[SanitisedQuery] {
+    implicit val sanitisedConv = new MakeSafe[SanitisedQuery] {
       override def apply(sanitised: SanitisedQuery): ClientFailableOp[String] =
         \/-(sanitised.queryString) // already sanitised
     }
 
-    implicit val failableSanitisedConv = new Conv[ClientFail \/ SanitisedQuery] {
+    implicit val failableSanitisedConv = new MakeSafe[ClientFail \/ SanitisedQuery] {
       override def apply(failableSanitised: ClientFail \/ SanitisedQuery): ClientFailableOp[String] =
-        failableSanitised match {
-          case \/-(SanitisedQuery(sanitisedString)) => \/-(sanitisedString) // already sanitised
-          case -\/(fail: ClientFail) => -\/(fail) // failed to sanitise the sub query
-        }
+        failableSanitised.map(_.queryString)
     }
 
-    implicit val stringInsertToQueryLiteral = new Conv[String] {
+    implicit val stringInsertToQueryLiteral = new MakeSafe[String] {
       override def apply(untrusted: String): ClientFailableOp[String] = {
         val sanitised = \/-(untrusted)
           .flatMap { orig =>
