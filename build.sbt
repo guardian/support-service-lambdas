@@ -111,6 +111,7 @@ lazy val root = all(project in file(".")).enablePlugins(RiffRaffArtifact).aggreg
   `catalog-service`,
   `identity-retention`,
   `zuora-retention`,
+  `cancellation-sf-cases`,
   effects,
   handler,
   restHttp,
@@ -138,6 +139,11 @@ lazy val `identity-retention` = all(project in file("handlers/identity-retention
 lazy val `zuora-retention` = all(project in file("handlers/zuora-retention"))
   .enablePlugins(RiffRaffArtifact)
   .dependsOn(`zuora-reports`, handler, effectsDepIncludingTestFolder, testDep)
+
+lazy val `cancellation-sf-cases` = all(project in file("handlers/cancellation-sf-cases"))
+  .enablePlugins(RiffRaffArtifact)
+  .dependsOn(salesforce, handler, effectsDepIncludingTestFolder, testDep)
+
 
 // ==== END handlers ====
 

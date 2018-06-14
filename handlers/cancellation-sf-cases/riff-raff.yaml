@@ -1,0 +1,21 @@
+stacks:
+- subscriptions
+regions:
+- eu-west-1
+deployments:
+
+  cfn:
+    type: cloud-formation
+    app: cancellation-sf-cases
+    parameters:
+      templatePath: cfn.yaml
+
+  cancellation-sf-cases:
+    type: aws-lambda
+    parameters:
+      fileName: cancellation-sf-cases.jar
+      bucket: zuora-auto-cancel-dist
+      prefixStack: false
+      functionNames:
+      - cancellation-sf-cases-
+    dependencies: [cfn]
