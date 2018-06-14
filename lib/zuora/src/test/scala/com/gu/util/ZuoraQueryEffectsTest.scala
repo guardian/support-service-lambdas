@@ -3,6 +3,7 @@ package com.gu.util
 import com.gu.effects.{RawEffects, S3ConfigLoad}
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfig, Stage}
+import com.gu.util.zuora.SafeQueryBuilder.Implicits._
 import com.gu.util.zuora.ZuoraQuery._
 import com.gu.util.zuora.{RestRequestMaker, ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
 import org.scalatest.{FlatSpec, Matchers}

@@ -5,7 +5,9 @@ import java.time.LocalDate
 import com.gu.identityRetention.Types.AccountId
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.RestRequestMaker.ClientFailableOp
-import com.gu.util.zuora.ZuoraQuery.{OrTraverse, Query, SanitisedQuery, ZuoraQuerier}
+import com.gu.util.zuora.SafeQueryBuilder.{OrTraverse, SanitisedQuery}
+import com.gu.util.zuora.SafeQueryBuilder.Implicits._
+import com.gu.util.zuora.ZuoraQuery.ZuoraQuerier
 import play.api.libs.json.Json
 
 object SubscriptionsForAccounts {

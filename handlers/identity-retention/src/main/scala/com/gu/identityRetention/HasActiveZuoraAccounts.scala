@@ -4,7 +4,7 @@ import com.gu.identityRetention.Types.{AccountId, IdentityId}
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.RestRequestMaker.ClientFailableOp
-import com.gu.util.zuora.ZuoraQuery._
+import com.gu.util.zuora.SafeQueryBuilder.Implicits._
 import com.gu.util.zuora.ZuoraQuery.{QueryResult, ZuoraQuerier}
 import play.api.libs.json.Json
 import scalaz.{-\/, \/-}
