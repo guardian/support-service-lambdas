@@ -7,8 +7,8 @@ import com.gu.util.zuora.ZuoraQuery._
 import com.gu.util.zuora.{RestRequestMaker, ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.{Json, Reads}
-import scalaz.{\/, \/-}
 import scalaz.syntax.std.either._
+import scalaz.{\/, \/-}
 
 // run this manually
 class ZuoraQueryEffectsTest extends FlatSpec with Matchers {
@@ -46,18 +46,16 @@ object SubscriptionsForPromoCode {
 
   def apply(zuoraQuerier: ZuoraQuerier)(testString: String): RestRequestMaker.ClientFail \/ List[TestQueryResponse] = {
 
-    def searchForSubscriptions = {
-      val subscriptionsQuery = zoql"""select
-                                     | id,
-                                     | promotionCode__c
-                                     | from subscription
-                                     | where PromotionCode__c = $testString
-                                     |"""
-        .stripMarginAndNewline
-      zuoraQuerier[TestQueryResponse](subscriptionsQuery)
-    }
-
-    searchForSubscriptions.map(_.records)
+    for {
+      subscriptionsQuery <- zoql"""
+                select
+                id,
+                promotionCode__c
+                from subscription
+                where PromotionCode__c = $testString
+                """
+      queryResult <- zuoraQuerier[TestQueryResponse](subscriptionsQuery)
+    } yield queryResult.records
 
   }
 

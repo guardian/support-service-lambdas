@@ -28,35 +28,42 @@ object ZuoraQueryPaymentMethod extends Logging {
     customerId: StripeCustomerId,
     sourceId: StripeSourceId
   ): ApiGatewayOp[List[AccountPaymentMethodIds]] = {
-    val query =
-      zoql"""SELECT
-         | Id,
-         | AccountId,
-         | NumConsecutiveFailures
-         | FROM PaymentMethod
-         |  where Type='CreditCardReferenceTransaction'
-         | AND PaymentMethodStatus = 'Active'
-         | AND TokenId = ${sourceId.value}
-         | AND SecondTokenId = ${customerId.value}
-         |""".stripMarginAndNewline
+    val maybeQueryResult = for {
+      query <- zoql"""SELECT
+          Id,
+          AccountId,
+          NumConsecutiveFailures
+          FROM PaymentMethod
+           where Type='CreditCardReferenceTransaction'
+          AND PaymentMethodStatus = 'Active'
+          AND TokenId = ${sourceId.value}
+          AND SecondTokenId = ${customerId.value}
+         """
 
-    zuoraQuerier[PaymentMethodFields](query).toApiGatewayOp("query failed").flatMap { result =>
+      queryResult <- zuoraQuerier[PaymentMethodFields](query)
+    } yield queryResult
 
-      def groupedList(records: List[PaymentMethodFields]): List[(AccountId, NonEmptyList[PaymentMethodFields])] = {
-        records.groupBy(_.AccountId).toList.collect {
-          case (accountId, head :: tail) =>
-            (accountId, NonEmptyList(head, tail: _*))
+    for {
+      queryResult <- maybeQueryResult.toApiGatewayOp("query failed")
+      paymentMethodIds <- {
+
+        def groupedList(records: List[PaymentMethodFields]): List[(AccountId, NonEmptyList[PaymentMethodFields])] = {
+          records.groupBy(_.AccountId).toList.collect {
+            case (accountId, head :: tail) =>
+              (accountId, NonEmptyList(head, tail: _*))
+          }
         }
-      }
 
-      val accountPaymentMethodIds = groupedList(result.records)
-      if (accountPaymentMethodIds.length > 3) {
-        logger.warn(s"too many accounts using the customer token, could indicate a fault in the logic: $result")
-        ReturnWithResponse(ApiGatewayResponse.internalServerError("could not find correct account for stripe details"))
-      } else {
-        ContinueProcessing(accountPaymentMethodIds.map((AccountPaymentMethodIds.apply _).tupled))
+        val accountPaymentMethodIds = groupedList(queryResult.records)
+        if (accountPaymentMethodIds.length > 3) {
+          logger.warn(s"too many accounts using the customer token, could indicate a fault in the logic: $queryResult")
+          ReturnWithResponse(ApiGatewayResponse.internalServerError("could not find correct account for stripe details"))
+        } else {
+          ContinueProcessing(accountPaymentMethodIds.map((AccountPaymentMethodIds.apply _).tupled))
+        }
+
       }
-    }
+    } yield paymentMethodIds
 
   }
 

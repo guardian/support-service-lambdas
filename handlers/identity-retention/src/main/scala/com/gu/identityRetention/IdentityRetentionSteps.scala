@@ -34,7 +34,7 @@ object IdentityRetentionSteps extends Logging {
 
   def validate(input: String): Option[IdentityId] = {
     Try(input.toLong) match {
-      case Success(validUserId) => Some(IdentityId(validUserId))
+      case Success(validUserId) => Some(IdentityId(validUserId.toString))
       case Failure(ex) =>
         logger.error(s"Invalid identity id provided", ex)
         None

@@ -22,8 +22,10 @@ object GetZuoraSubTypeForAccount {
 
   def apply(zuoraQuerier: ZuoraQuerier)(accountId: AccountId): ClientFailableOp[List[ReaderType]] = {
 
-    val contactQuery = zoql"SELECT ReaderType__c FROM Subscription where AccountId=${accountId.value}"
-    zuoraQuerier[WireResponse](contactQuery).map(_.records.map(_.ReaderType__c.map(ReaderTypeValue.apply).getOrElse(NoReaderType)))
+    for {
+      contactQuery <- zoql"SELECT ReaderType__c FROM Subscription where AccountId=${accountId.value}"
+      queryResults <- zuoraQuerier[WireResponse](contactQuery).map(_.records.map(_.ReaderType__c.map(ReaderTypeValue.apply).getOrElse(NoReaderType)))
+    } yield queryResults
 
   }
 

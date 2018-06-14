@@ -18,21 +18,20 @@ object HasActiveZuoraAccounts {
 
     def searchForAccounts = {
 
-      val commonConditions = zoql"IdentityId__c = ${identityId.value} and status != 'Canceled'"
-
       /*
       Todo simplify this once we can rely on Account.Status
       Unfortunately Zuora do not support parentheses, and != doesn't pick up nulls
       https://knowledgecenter.zuora.com/DC_Developers/K_Zuora_Object_Query_Language#Syntax
       */
-      val identityQuery =
-        zoql"""select id
-           | from account
-           | where $commonConditions and ProcessingAdvice__c != 'DoNotProcess'
-           |    or $commonConditions and ProcessingAdvice__c = null
-           |""".stripMarginAndNewline
-
-      zuoraQuerier[IdentityQueryResponse](identityQuery)
+      for {
+        commonConditions <- zoql"IdentityId__c = ${identityId.value} and status != 'Canceled'"
+        identityQuery <- zoql"""select id
+            from account
+            where $commonConditions and ProcessingAdvice__c != 'DoNotProcess'
+               or $commonConditions and ProcessingAdvice__c = null
+           """
+        queryResult <- zuoraQuerier[IdentityQueryResponse](identityQuery)
+      } yield queryResult
     }
 
     processQueryResult(searchForAccounts)

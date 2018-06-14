@@ -36,7 +36,7 @@ object CountZuoraAccountsForIdentityIdData {
          |    "records": [
          |      ${if (hasResult) result else ""}
          |    ],
-         |    "size": 1,
+         |    "size": ${if (hasResult) "1" else "0"},
          |    "done": true
          |}
     """.stripMargin
