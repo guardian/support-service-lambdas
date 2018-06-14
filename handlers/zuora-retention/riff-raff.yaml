@@ -20,4 +20,5 @@ deployments:
       - zuora-retention-querier-
       - zuora-retention-jobResult-
       - zuora-retention-fileFetcher-
+      - zuora-retention-filter-
     dependencies: [cfn]
