@@ -8,7 +8,7 @@ import scalaz.{-\/, \/-}
 
 class WireQueryEscapeTest extends FlatSpec with Matchers {
 
-  it should "escape signel quotes" in {
+  it should "escape single quotes" in {
     val actual = stringInsertToQueryLiteral("""bobby tables'drop database students""")
     actual should be(\/-("""'bobby tables\'drop database students'"""))
   }
@@ -23,7 +23,7 @@ class WireQueryEscapeTest extends FlatSpec with Matchers {
     actual should be(\/-("""'a very \\ query'"""))
   }
 
-  it should "escape signel quotes double check the length" in {
+  it should "escape single quotes double check the length" in {
     val actual = stringInsertToQueryLiteral("""'""")
     actual.map(_.length) should be(\/-(4))
   }
@@ -33,7 +33,7 @@ class WireQueryEscapeTest extends FlatSpec with Matchers {
     actual.map(_.length) should be(\/-(4))
   }
 
-  it should "escape backslasgh double check the length" in {
+  it should "escape backslash double check the length" in {
     val actual = stringInsertToQueryLiteral("""\""")
     actual.map(_.length) should be(\/-(4))
   }
