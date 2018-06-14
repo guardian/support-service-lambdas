@@ -2,44 +2,44 @@ package com.gu.util
 
 import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, GenericError}
 import com.gu.util.zuora.SafeQueryBuilder.Implicits._
-import com.gu.util.zuora.SafeQueryBuilder.{OrTraverse, SanitisedQuery}
+import com.gu.util.zuora.SafeQueryBuilder.{OrTraverse, SafeQuery}
 import org.scalatest._
 import scalaz.{-\/, \/-}
 
-class WireQueryEscapeTest extends FlatSpec with Matchers {
+class SafeQueryBuilderEscapeTest extends FlatSpec with Matchers {
 
   it should "escape single quotes" in {
-    val actual = makeSafeStringIntoLiteral("""bobby tables'drop database students""")
+    val actual = makeSafeStringIntoQueryLiteral("""bobby tables'drop database students""")
     actual should be(\/-("""'bobby tables\'drop database students'"""))
   }
 
   it should "escape double quotes" in {
-    val actual = makeSafeStringIntoLiteral("""a very "nice" query""")
+    val actual = makeSafeStringIntoQueryLiteral("""a very "nice" query""")
     actual should be(\/-("""'a very \"nice\" query'"""))
   }
 
   it should "escape backslashes" in {
-    val actual = makeSafeStringIntoLiteral("""a very \ query""")
+    val actual = makeSafeStringIntoQueryLiteral("""a very \ query""")
     actual should be(\/-("""'a very \\ query'"""))
   }
 
   it should "escape single quotes double check the length" in {
-    val actual = makeSafeStringIntoLiteral("""'""")
+    val actual = makeSafeStringIntoQueryLiteral("""'""")
     actual.map(_.length) should be(\/-(4))
   }
 
   it should "escape double quotes double check the length" in {
-    val actual = makeSafeStringIntoLiteral(""""""")
+    val actual = makeSafeStringIntoQueryLiteral(""""""")
     actual.map(_.length) should be(\/-(4))
   }
 
   it should "escape backslash double check the length" in {
-    val actual = makeSafeStringIntoLiteral("""\""")
+    val actual = makeSafeStringIntoQueryLiteral("""\""")
     actual.map(_.length) should be(\/-(4))
   }
 
   it should "remove control chars - this is not 100% safe - we should reject completely" in {
-    val actual = makeSafeStringIntoLiteral("\t\n\rhello\u007f\u0000")
+    val actual = makeSafeStringIntoQueryLiteral("\t\n\rhello\u007f\u0000")
     actual.leftMap {
       case GenericError(mess) => mess.split(':')(0)
       case a => a
@@ -48,32 +48,32 @@ class WireQueryEscapeTest extends FlatSpec with Matchers {
 
 }
 
-class WireQueryApplyTest extends FlatSpec with Matchers {
+class SafeQueryBuilderApplyTest extends FlatSpec with Matchers {
 
   it should "assemble a whole query with no fanfare" in {
-    val actual: ClientFailableOp[SanitisedQuery] = zoql"""field=${"hahaha"}"""
+    val actual: ClientFailableOp[SafeQuery] = zoql"""field=${"hahaha"}"""
     actual.map(_.queryString) should be(\/-("""field='hahaha'"""))
   }
 
   it should "assemble a whole query apostrophe" in {
-    val actual: ClientFailableOp[SanitisedQuery] = zoql"""field=${"o'leary"}"""
+    val actual: ClientFailableOp[SafeQuery] = zoql"""field=${"o'leary"}"""
     actual.map(_.queryString) should be(\/-("""field='o\'leary'"""))
   }
 
   it should "assemble a whole query double quote" in {
-    val actual: ClientFailableOp[SanitisedQuery] = zoql"""field=${"""o"leary"""}"""
+    val actual: ClientFailableOp[SafeQuery] = zoql"""field=${"""o"leary"""}"""
     actual.map(_.queryString) should be(\/-("""field='o\"leary'"""))
   }
 
   it should "assemble a whole query backslash" in {
-    val actual: ClientFailableOp[SanitisedQuery] = zoql"""field=${"""o\leary"""}"""
+    val actual: ClientFailableOp[SafeQuery] = zoql"""field=${"""o\leary"""}"""
     actual.map(_.queryString) should be(\/-("""field='o\\leary'"""))
   }
 
   it should "use a List in insert clause" in {
     val ids = List("anna", "bill")
     val insert = OrTraverse(ids)({ id => zoql"""id = $id""" })
-    val actual: ClientFailableOp[SanitisedQuery] = zoql"""select hi from table where $insert"""
+    val actual: ClientFailableOp[SafeQuery] = zoql"""select hi from table where $insert"""
     actual.map(_.queryString) should be(\/-("""select hi from table where id = 'anna' or id = 'bill'"""))
   }
 

@@ -5,7 +5,7 @@ import java.time.LocalDate
 import com.gu.identityRetention.Types.AccountId
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.RestRequestMaker.ClientFailableOp
-import com.gu.util.zuora.SafeQueryBuilder.{OrTraverse, SanitisedQuery}
+import com.gu.util.zuora.SafeQueryBuilder.{OrTraverse, SafeQuery}
 import com.gu.util.zuora.SafeQueryBuilder.Implicits._
 import com.gu.util.zuora.ZuoraQuery.ZuoraQuerier
 import play.api.libs.json.Json
@@ -20,7 +20,7 @@ object SubscriptionsForAccounts {
 
   implicit val reads = Json.reads[SubscriptionsQueryResponse]
 
-  def buildQuery(accountsToQuery: List[AccountId]): ClientFailableOp[SanitisedQuery] = {
+  def buildQuery(accountsToQuery: List[AccountId]): ClientFailableOp[SafeQuery] = {
     zoql"""select
         id,
         name,
