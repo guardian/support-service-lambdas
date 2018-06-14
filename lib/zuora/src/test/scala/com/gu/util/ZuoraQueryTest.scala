@@ -9,37 +9,37 @@ import scalaz.{-\/, \/-}
 class WireQueryEscapeTest extends FlatSpec with Matchers {
 
   it should "escape single quotes" in {
-    val actual = stringInsertToQueryLiteral("""bobby tables'drop database students""")
+    val actual = makeSafeStringIntoLiteral("""bobby tables'drop database students""")
     actual should be(\/-("""'bobby tables\'drop database students'"""))
   }
 
   it should "escape double quotes" in {
-    val actual = stringInsertToQueryLiteral("""a very "nice" query""")
+    val actual = makeSafeStringIntoLiteral("""a very "nice" query""")
     actual should be(\/-("""'a very \"nice\" query'"""))
   }
 
   it should "escape backslashes" in {
-    val actual = stringInsertToQueryLiteral("""a very \ query""")
+    val actual = makeSafeStringIntoLiteral("""a very \ query""")
     actual should be(\/-("""'a very \\ query'"""))
   }
 
   it should "escape single quotes double check the length" in {
-    val actual = stringInsertToQueryLiteral("""'""")
+    val actual = makeSafeStringIntoLiteral("""'""")
     actual.map(_.length) should be(\/-(4))
   }
 
   it should "escape double quotes double check the length" in {
-    val actual = stringInsertToQueryLiteral(""""""")
+    val actual = makeSafeStringIntoLiteral(""""""")
     actual.map(_.length) should be(\/-(4))
   }
 
   it should "escape backslash double check the length" in {
-    val actual = stringInsertToQueryLiteral("""\""")
+    val actual = makeSafeStringIntoLiteral("""\""")
     actual.map(_.length) should be(\/-(4))
   }
 
   it should "remove control chars - this is not 100% safe - we should reject completely" in {
-    val actual = stringInsertToQueryLiteral("\t\n\rhello\u007f\u0000")
+    val actual = makeSafeStringIntoLiteral("\t\n\rhello\u007f\u0000")
     actual.leftMap {
       case GenericError(mess) => mess.split(':')(0)
       case a => a

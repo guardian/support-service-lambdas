@@ -36,17 +36,17 @@ object SafeQueryBuilder {
       def apply(a: A): ClientFailableOp[String]
     }
 
-    implicit val sanitisedConv = new MakeSafe[SanitisedQuery] {
+    implicit val makeSafeSanitised = new MakeSafe[SanitisedQuery] {
       override def apply(sanitised: SanitisedQuery): ClientFailableOp[String] =
         \/-(sanitised.queryString) // already sanitised
     }
 
-    implicit val failableSanitisedConv = new MakeSafe[ClientFail \/ SanitisedQuery] {
+    implicit val makeSafeFailableSanitised = new MakeSafe[ClientFail \/ SanitisedQuery] {
       override def apply(failableSanitised: ClientFail \/ SanitisedQuery): ClientFailableOp[String] =
         failableSanitised.map(_.queryString)
     }
 
-    implicit val stringInsertToQueryLiteral = new MakeSafe[String] {
+    implicit val makeSafeStringIntoLiteral = new MakeSafe[String] {
       override def apply(untrusted: String): ClientFailableOp[String] = {
         val sanitised = \/-(untrusted)
           .flatMap { orig =>
