@@ -25,6 +25,9 @@ class ZuoraQueryEffectsTest extends FlatSpec with Matchers {
       config <- LoadConfig.parseConfig[StepsConfig](configAttempt)
       zuoraQuerier = ZuoraQuery(ZuoraRestRequestMaker(RawEffects.response, config.stepsConfig.zuoraRestConfig))
       subs <- SubscriptionsForPromoCode(zuoraQuerier)("""qwerty"asdf'zxcv\1234""")
+
+      //POST query should be - SELECT Id, promotioncode__c FROM Subscription where PromotionCode__c = 'qwerty\"asdf\'zxcv\\1234'
+
     } yield {
       subs
     }

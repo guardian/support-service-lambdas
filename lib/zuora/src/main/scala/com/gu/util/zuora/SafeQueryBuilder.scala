@@ -41,6 +41,13 @@ object SafeQueryBuilder {
         \/-(safeQuery.queryString)
     }
 
+    // this code is designed for the zoql query interface, where backslash is used to escape any special characters
+    // https://knowledgecenter.zuora.com/DC_Developers/K_Zuora_Object_Query_Language/Filter_Statements#Reserved_and_Escaped_Characters
+    // However, in the "zoql export" api, which takes pretty much the same types of queries, in typical zuora style they
+    // have gone for escaping single quotes by doubling them up. So we will need a separate serialiser for that at some point
+    // https://knowledgecenter.zuora.com/DC_Developers/M_Export_ZOQL/A_Select_Statement#Reserved_and_Escaped_Characters
+    //
+    // this has been tested and confirmed in june 2018
     implicit val makeSafeStringIntoQueryLiteral: MakeSafe[String] = new MakeSafe[String] {
       override def apply(untrusted: String): ClientFailableOp[String] = {
         if (untrusted.replaceFirst("""\p{Cntrl}""", "") != untrusted) {

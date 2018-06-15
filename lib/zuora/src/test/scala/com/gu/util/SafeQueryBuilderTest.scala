@@ -82,7 +82,4 @@ class SafeQueryBuilderApplyTest extends FlatSpec with Matchers {
     actual.map(_.queryString) should be(\/-("""select hi from table where id = 'anna' or id = 'bill'"""))
   }
 
-  //POST query - SELECT Id, promotioncode__c FROM Subscription where PromotionCode__c = 'qwerty\"asdf\'zxcv\\1234'
-  // NOTE for "zoql export" we don't escape anything, just double up on single quotes only. tested all june 2018
-
 }
