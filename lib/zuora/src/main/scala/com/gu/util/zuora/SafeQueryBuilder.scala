@@ -1,9 +1,9 @@
 package com.gu.util.zuora
 
-import com.gu.util.zuora.RestRequestMaker.{ClientFail, ClientFailableOp, GenericError}
+import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, GenericError}
 import scalaz.std.list.listInstance
 import scalaz.syntax.traverse.ToTraverseOps
-import scalaz.{-\/, \/, \/-}
+import scalaz.{-\/, \/-}
 
 import scala.annotation.implicitNotFound
 
@@ -29,24 +29,19 @@ object SafeQueryBuilder {
 
     }
 
-    def asSafe[A](a: A)(implicit makeSafe: MakeSafe[A]) = makeSafe(a)
+    private def asSafe[A](a: A)(implicit makeSafe: MakeSafe[A]) = makeSafe(a)
 
-    @implicitNotFound("implicitNotFound: ZuoraQuery: can only insert a string literal or an already safe query into a parent query")
+    @implicitNotFound("implicitNotFound: SafeQueryBuilder: can only insert a string literal or an already safe query into a parent query")
     trait MakeSafe[A] {
       def apply(a: A): ClientFailableOp[String]
     }
 
-    implicit val makeSafeAlreadySafe = new MakeSafe[SafeQuery] {
+    implicit val makeSafeAlreadySafe: MakeSafe[SafeQuery] = new MakeSafe[SafeQuery] {
       override def apply(safeQuery: SafeQuery): ClientFailableOp[String] =
         \/-(safeQuery.queryString)
     }
 
-    implicit val makeSafeFailableAlreadySafe = new MakeSafe[ClientFail \/ SafeQuery] {
-      override def apply(failableSafeQuery: ClientFail \/ SafeQuery): ClientFailableOp[String] =
-        failableSafeQuery.map(_.queryString)
-    }
-
-    implicit val makeSafeStringIntoQueryLiteral = new MakeSafe[String] {
+    implicit val makeSafeStringIntoQueryLiteral: MakeSafe[String] = new MakeSafe[String] {
       override def apply(untrusted: String): ClientFailableOp[String] = {
         if (untrusted.replaceAll("""\p{Cntrl}""", "") != untrusted) {
           -\/(GenericError(s"control characters can't be inserted into a query: $untrusted"))
@@ -79,7 +74,6 @@ object SafeQueryBuilder {
       }
     }
 
-    def unapply(arg: SafeQuery): Option[String] = Some(arg.queryString)
   }
 
   class SafeQuery(val queryString: String)

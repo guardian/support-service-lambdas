@@ -72,8 +72,10 @@ class SafeQueryBuilderApplyTest extends FlatSpec with Matchers {
 
   it should "use a List in insert clause" in {
     val ids = List("anna", "bill")
-    val insert = OrTraverse(ids)({ id => zoql"""id = $id""" })
-    val actual: ClientFailableOp[SafeQuery] = zoql"""select hi from table where $insert"""
+    val actual = for {
+      insert <- OrTraverse(ids)({ id => zoql"""id = $id""" })
+      wholeQuery <- zoql"""select hi from table where $insert"""
+    } yield wholeQuery
     actual.map(_.queryString) should be(\/-("""select hi from table where id = 'anna' or id = 'bill'"""))
   }
 

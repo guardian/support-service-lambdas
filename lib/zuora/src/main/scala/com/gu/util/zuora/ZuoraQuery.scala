@@ -1,6 +1,6 @@
 package com.gu.util.zuora
 
-import com.gu.util.zuora.RestRequestMaker.{ClientFail, ClientFailableOp, GenericError, Requests}
+import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, Requests}
 import com.gu.util.zuora.SafeQueryBuilder.SafeQuery
 import play.api.libs.functional.syntax._
 import play.api.libs.json._

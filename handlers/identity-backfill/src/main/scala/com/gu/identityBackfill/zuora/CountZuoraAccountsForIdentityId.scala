@@ -14,7 +14,7 @@ object CountZuoraAccountsForIdentityId {
   def apply(zuoraQuerier: ZuoraQuerier)(identityId: IdentityId): ClientFailableOp[Int] =
     for {
       accountByIdentityQuery <- zoql"SELECT Id FROM Account where IdentityId__c=${identityId.value}"
-      noOfAccountsWithID <- zuoraQuerier[WireResponse](accountByIdentityQuery).map(_.size)
-    } yield noOfAccountsWithID
+      noOfAccountsWithID <- zuoraQuerier[WireResponse](accountByIdentityQuery)
+    } yield noOfAccountsWithID.size
 
 }

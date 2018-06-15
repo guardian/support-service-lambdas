@@ -20,16 +20,23 @@ object SubscriptionsForAccounts {
 
   implicit val reads = Json.reads[SubscriptionsQueryResponse]
 
-  def buildQuery(accountsToQuery: List[AccountId]): ClientFailableOp[SafeQuery] = {
-    zoql"""select
-        id,
-        name,
-        status,
-        termEndDate
-        from subscription
-        where ${OrTraverse(accountsToQuery)(acc => zoql"status != 'Expired' and accountId = ${acc.value}")}
-       """
-  }
+  def buildQuery(activeAccounts: List[AccountId]): ClientFailableOp[SafeQuery] =
+    for {
+      or <- OrTraverse(activeAccounts) { acc =>
+        zoql"""
+                status != 'Expired' and accountId = ${acc.value}
+            """
+      }
+      subscriptionsQuery <- zoql"""
+          select
+            id,
+            name,
+            status,
+            termEndDate
+          from subscription
+          where $or
+        """
+    } yield subscriptionsQuery
 
   def apply(zuoraQuerier: ZuoraQuerier)(activeAccounts: List[AccountId]): ApiGatewayOp[List[SubscriptionsQueryResponse]] = {
 
