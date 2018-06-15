@@ -38,12 +38,15 @@ class SafeQueryBuilderEscapeTest extends FlatSpec with Matchers {
     actual.map(_.length) should be(\/-(4))
   }
 
-  it should "remove control chars - this is not 100% safe - we should reject completely" in {
-    val actual = makeSafeStringIntoQueryLiteral("\t\n\rhello\u007f\u0000")
-    actual.leftMap {
-      case GenericError(mess) => mess.split(':')(0)
-      case a => a
-    } should be(-\/("control characters can't be inserted into a query"))
+  it should "reject control chars completely" in {
+    val badChars = "\t\n\r\u007f\u0000".toCharArray.toList
+    badChars.foreach { char =>
+      val actual = makeSafeStringIntoQueryLiteral(s"hello${char}bye")
+      actual.leftMap {
+        case GenericError(mess) => mess.split(':')(0)
+        case a => a
+      } should be(-\/("control characters can't be inserted into a query"))
+    }
   }
 
 }

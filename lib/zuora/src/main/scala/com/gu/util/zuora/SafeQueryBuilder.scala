@@ -43,7 +43,7 @@ object SafeQueryBuilder {
 
     implicit val makeSafeStringIntoQueryLiteral: MakeSafe[String] = new MakeSafe[String] {
       override def apply(untrusted: String): ClientFailableOp[String] = {
-        if (untrusted.replaceAll("""\p{Cntrl}""", "") != untrusted) {
+        if (untrusted.replaceFirst("""\p{Cntrl}""", "") != untrusted) {
           -\/(GenericError(s"control characters can't be inserted into a query: $untrusted"))
         } else {
           val trusted = untrusted.replaceAll("""\\""", """\\\\""")
