@@ -64,13 +64,23 @@ lazy val test = all(project in file("lib/test"))
 val testDep = test % "test->test"
 
 lazy val zuora = all(project in file("lib/zuora"))
-  .dependsOn(restHttp)
+  .dependsOn(
+    restHttp,
+    testDep,
+    handler % "test->test",//only for the config, which should ideally be split out
+    effects % "test->test"
+  )
   .settings(
     libraryDependencies ++= Seq(okhttp3, logging, scalaz, playJson, scalatest, jacksonDatabind)
   )
 
 lazy val salesforce = all(project in file("lib/salesforce"))
-  .dependsOn(restHttp, handler, effects % "test->test", testDep)
+  .dependsOn(
+    restHttp,
+    handler,// % "test->test" TODO make this dep only in test - SF client shouldn't depends on ApiGateway
+    effects % "test->test",
+    testDep
+  )
   .settings(
     libraryDependencies ++= Seq(okhttp3, logging, scalaz, playJson, scalatest)
   )

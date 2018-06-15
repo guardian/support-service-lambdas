@@ -3,7 +3,8 @@ package com.gu.identityBackfill.zuora
 import com.gu.identityBackfill.Types._
 import com.gu.identityBackfill.zuora.GetZuoraSubTypeForAccount.ReaderType.{NoReaderType, ReaderTypeValue}
 import com.gu.util.zuora.RestRequestMaker.ClientFailableOp
-import com.gu.util.zuora.ZuoraQuery.{Query, ZuoraQuerier}
+import com.gu.util.zuora.ZuoraQuery.ZuoraQuerier
+import com.gu.util.zuora.SafeQueryBuilder.Implicits._
 import play.api.libs.json.Json
 
 object GetZuoraSubTypeForAccount {
@@ -22,8 +23,10 @@ object GetZuoraSubTypeForAccount {
 
   def apply(zuoraQuerier: ZuoraQuerier)(accountId: AccountId): ClientFailableOp[List[ReaderType]] = {
 
-    val contactQuery = Query(s"SELECT ReaderType__c FROM Subscription where AccountId='${accountId.value}'")
-    zuoraQuerier[WireResponse](contactQuery).map(_.records.map(_.ReaderType__c.map(ReaderTypeValue.apply).getOrElse(NoReaderType)))
+    for {
+      contactQuery <- zoql"SELECT ReaderType__c FROM Subscription where AccountId=${accountId.value}"
+      queryResults <- zuoraQuerier[WireResponse](contactQuery)
+    } yield queryResults.records.map(_.ReaderType__c.map(ReaderTypeValue.apply).getOrElse(NoReaderType))
 
   }
 

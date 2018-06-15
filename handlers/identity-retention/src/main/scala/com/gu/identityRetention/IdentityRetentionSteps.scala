@@ -16,7 +16,7 @@ object IdentityRetentionSteps extends Logging {
       (for {
         identityId <- extractIdentityId(apiGatewayRequest.queryStringParameters)
         accounts <- HasActiveZuoraAccounts(identityId, zuoraQuerier)
-        subs <- SubscriptionsForAccounts(accounts, zuoraQuerier)
+        subs <- SubscriptionsForAccounts(zuoraQuerier)(accounts)
       } yield RelationshipForSubscriptions(subs)).apiResponse
   }, false)
 
@@ -34,7 +34,7 @@ object IdentityRetentionSteps extends Logging {
 
   def validate(input: String): Option[IdentityId] = {
     Try(input.toLong) match {
-      case Success(validUserId) => Some(IdentityId(validUserId))
+      case Success(validUserId) => Some(IdentityId(validUserId.toString))
       case Failure(ex) =>
         logger.error(s"Invalid identity id provided", ex)
         None

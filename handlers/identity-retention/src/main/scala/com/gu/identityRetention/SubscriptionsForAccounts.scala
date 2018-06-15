@@ -4,9 +4,12 @@ import java.time.LocalDate
 
 import com.gu.identityRetention.Types.AccountId
 import com.gu.util.reader.Types._
-import com.gu.util.zuora.ZuoraQuery
+import com.gu.util.zuora.RestRequestMaker.ClientFailableOp
+import com.gu.util.zuora.SafeQueryBuilder.{OrTraverse, SafeQuery}
+import com.gu.util.zuora.SafeQueryBuilder.Implicits._
 import com.gu.util.zuora.ZuoraQuery.ZuoraQuerier
 import play.api.libs.json.Json
+
 object SubscriptionsForAccounts {
 
   case class SubscriptionsQueryResponse(
@@ -17,17 +20,31 @@ object SubscriptionsForAccounts {
 
   implicit val reads = Json.reads[SubscriptionsQueryResponse]
 
-  def buildQuery(accountsToQuery: List[AccountId]): String = {
-    val accountIdClause = "accountId = '" + accountsToQuery.map(_.value).mkString("' or accountId = '") + "'"
-    s"select id, name, status, termEndDate from subscription where status != 'Expired' and $accountIdClause"
-  }
+  def buildQuery(activeAccounts: List[AccountId]): ClientFailableOp[SafeQuery] =
+    for {
+      or <- OrTraverse(activeAccounts) { acc =>
+        zoql"""
+                status != 'Expired' and accountId = ${acc.value}
+            """
+      }
+      subscriptionsQuery <- zoql"""
+          select
+            id,
+            name,
+            status,
+            termEndDate
+          from subscription
+          where $or
+        """
+    } yield subscriptionsQuery
 
-  def apply(activeAccounts: List[AccountId], zuoraQuerier: ZuoraQuerier): ApiGatewayOp[List[SubscriptionsQueryResponse]] = {
+  def apply(zuoraQuerier: ZuoraQuerier)(activeAccounts: List[AccountId]): ApiGatewayOp[List[SubscriptionsQueryResponse]] = {
 
-    def searchForSubscriptions = {
-      val subscriptionsQuery = ZuoraQuery.Query(buildQuery(activeAccounts))
-      zuoraQuerier[SubscriptionsQueryResponse](subscriptionsQuery)
-    }
+    def searchForSubscriptions =
+      for {
+        subscriptionsQuery <- buildQuery(activeAccounts)
+        queryResults <- zuoraQuerier[SubscriptionsQueryResponse](subscriptionsQuery)
+      } yield queryResults
 
     searchForSubscriptions.map(_.records).toApiGatewayOp("Failed whilst querying Zuora for subscriptions")
 
