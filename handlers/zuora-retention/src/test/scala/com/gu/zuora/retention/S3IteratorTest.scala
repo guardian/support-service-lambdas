@@ -9,7 +9,7 @@ import org.scalatest.Matchers._
 import scala.util.{Failure, Success, Try}
 
 class S3IteratorTest extends AsyncFlatSpec {
-val testContent = "some test content"
+  val testContent = "some test content"
   it should "parse Uri correctly" in {
     def fakeFetchContent(req: GetObjectRequest): Try[InputStream] = {
       if (req.getBucketName == "testbucket" && req.getKey == "some/key.csv")
@@ -20,7 +20,6 @@ val testContent = "some test content"
     S3Iterator(fakeFetchContent)("s3://testbucket/some/key.csv").map(_.mkString) shouldBe Success(testContent)
 
   }
-
 
 }
 

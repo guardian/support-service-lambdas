@@ -6,11 +6,13 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.s3.model._
 import com.gu.effects.RawEffects
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
+import com.gu.util.config.Stage
 import com.gu.util.handlers.{LambdaException, ParseRequest, SerialiseResponse}
 import com.gu.zuora.reports.S3ReportUpload.logger
 import com.gu.zuora.reports.dataModel.FetchedFile
 import com.gu.zuora.retention.query.ToAquaRequest
 import play.api.libs.json.Json
+
 import scala.util.{Failure, Success, Try}
 
 case class FilterCandidatesRequest(fetched: List[FetchedFile])
@@ -27,14 +29,16 @@ object FilterCandidatesResponse {
 
 object FilterCandidates {
 
-  def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
-    val buckets = Map(
-      "PROD" -> "zuora-retention-prod",
-      "CODE" -> "zuora-retention-code",
-      "DEV" -> "zuora-retention-dev"
-    )
+  val retentionBucketFor = Map(
+    Stage("PROD") -> "zuora-retention-prod",
+    Stage("CODE") -> "zuora-retention-code",
+    Stage("DEV") -> "zuora-retention-dev"
+  )
 
-    val wiredS3Upload = uploadToS3(RawEffects.s3Write, buckets(RawEffects.stage.value.toUpperCase), "doNotProcessList.csv") _
+  // this is the entry point
+  // it's referenced by the cloudformation so make sure you keep it in step
+  def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
+    val wiredS3Upload = uploadToS3(RawEffects.s3Write, retentionBucketFor(RawEffects.stage), "doNotProcessList.csv") _
     val wiredS3Iterator = S3Iterator(RawEffects.fetchContent) _
 
     runWithEffects(

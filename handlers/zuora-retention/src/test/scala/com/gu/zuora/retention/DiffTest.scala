@@ -9,24 +9,24 @@ class DiffTest extends AsyncFlatSpec {
   it should "should exclude crmIds" in {
     val candidates =
       """Account.Id,Account.CrmId,BillToContact.Id,SoldToContact.Id
-        |11,crmId1,13,14
-        |21,crmId2,23,24
-        |31,crmId3,33,34
-        |41,crmId4,43,44
-        |51,crmId5,54,54
+        |11,A,13,14
+        |21,C,23,24
+        |31,D,33,34
+        |41,F,43,44
+        |51,Z,54,54
     """.stripMargin
 
     val excluded =
       """Account.CrmId
-        |crmId1
-        |crmId4
-        |crmId5
+        |A
+        |F
+        |Z
       """.stripMargin
 
     val expected =
       """Account.Id,Account.CrmId,BillToContact.Id,SoldToContact.Id
-        |21,crmId2,23,24
-        |31,crmId3,33,34""".stripMargin
+        |21,C,23,24
+        |31,D,33,34""".stripMargin
 
     Diff(candidates.lines, excluded.lines).mkString("\n") shouldBe expected
   }
@@ -34,68 +34,41 @@ class DiffTest extends AsyncFlatSpec {
   it should "should correctly exclude crmIds even if the input has duplicate values" in {
     val candidates =
       """Account.Id,Account.CrmId,BillToContact.Id,SoldToContact.Id
-        |11,crmId1,13,14
-        |11,crmId1,13,14
-        |11,crmId1,13,14
-        |11,crmId1,13,14
-        |21,crmId2,23,24
-        |31,crmId3,33,34
-        |31,crmId3,33,34
-        |31,crmId3,33,34
-        |41,crmId4,43,44
-        |51,crmId5,54,54
+        |11,A_duplicate,13,14
+        |11,A_duplicate,13,14
+        |21,C,23,24
+        |31,E_duplicate,33,34
+        |31,E_duplicate,33,34
+        |41,F,43,44
+        |51,G,54,54
       """.stripMargin
 
     val excluded =
       """Account.CrmId
-        |crmId1
-        |crmId4
-        |crmId5
+        |A_duplicate
+        |F
+        |G
       """.stripMargin
 
     val expected =
       """Account.Id,Account.CrmId,BillToContact.Id,SoldToContact.Id
-        |21,crmId2,23,24
-        |31,crmId3,33,34
-        |31,crmId3,33,34
-        |31,crmId3,33,34""".stripMargin
-
-    Diff(candidates.lines, excluded.lines).mkString("\n") shouldBe expected
+        |21,C,23,24
+        |31,E_duplicate,33,34
+        |31,E_duplicate,33,34""".stripMargin
+    val ss = Diff(candidates.lines, excluded.lines).mkString("\n")
+    println(ss)
+    ss shouldBe expected
   }
 
-  it should "should exclude crmIds with upper and lower " in {
-    val candidates =
-      """Account.Id,Account.CrmId,BillToContact.Id,SoldToContact.Id
-        |11,crmId1,13,14
-        |21,crmId2,23,24
-        |31,crmId3,33,34
-        |41,crmId4,43,44
-        |51,crmId5,54,54
-      """.stripMargin
-
-    val excluded =
-      """Account.CrmId
-        |crmId1
-        |crmId4
-        |crmId5
-      """.stripMargin
-
-    val expected =
-      """Account.Id,Account.CrmId,BillToContact.Id,SoldToContact.Id
-        |21,crmId2,23,24
-        |31,crmId3,33,34""".stripMargin
-
-    Diff(candidates.lines, excluded.lines).mkString("\n") shouldBe expected
-  }
 
   it should "should not exclude anything with an empty exclusion list " in {
     val candidates =
       """Account.Id,Account.CrmId,BillToContact.Id,SoldToContact.Id
-        |11,crmId1,13,14
-        |21,crmId2,23,24
-        |31,crmId3,33,34
-        |41,crmId4,43,44
-        |51,crmId5,54,54
+        |11,B,13,14
+        |21,E,23,24
+        |31,G,33,34
+        |41,H,43,44
+        |51,L,54,54
       """.stripMargin
 
     val excluded =
@@ -104,11 +77,11 @@ class DiffTest extends AsyncFlatSpec {
 
     val expected =
       """Account.Id,Account.CrmId,BillToContact.Id,SoldToContact.Id
-        |11,crmId1,13,14
-        |21,crmId2,23,24
-        |31,crmId3,33,34
-        |41,crmId4,43,44
-        |51,crmId5,54,54""".stripMargin
+        |11,B,13,14
+        |21,E,23,24
+        |31,G,33,34
+        |41,H,43,44
+        |51,L,54,54""".stripMargin
 
     Diff(candidates.lines, excluded.lines).mkString("\n") shouldBe expected
   }
@@ -120,9 +93,9 @@ class DiffTest extends AsyncFlatSpec {
 
     val excluded =
       """Account.CrmId
-        |crmId1
-        |crmId4
-        |crmId5
+        |B
+        |H
+        |L
       """.stripMargin
 
     val expected =
