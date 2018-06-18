@@ -35,7 +35,7 @@ object Handler extends Logging {
   //    server.start()
   //  }
 
-  case class StepsConfig(sfAuthConfig: SFAuthConfig)
+  case class StepsConfig(sfConfig: SFAuthConfig)
   case class RaisePostBody(subName: String)
 
   implicit val stepsConfigReads: Reads[StepsConfig] = Json.reads[StepsConfig]
@@ -57,7 +57,7 @@ object Handler extends Logging {
       def steps(apiGatewayRequest: ApiGatewayRequest) = {
         (for {
           postRequestBody <- apiGatewayRequest.bodyAsCaseClass[RaisePostBody]()
-          //          sfRequests <- SalesforceAuthenticate(response, config.stepsConfig.sfAuthConfig)
+          sfRequests <- SalesforceAuthenticate(response, config.stepsConfig.sfConfig)
           //          caseCreated <- SalesforceCase.Raise(sfRequests)(postRequestBody.subName).toApiGatewayOp("raise case")
           //          _ <- ApiGatewayResponse.outputForAPIGateway()
         } yield ApiGatewayResponse.successfulExecution).apiResponse
