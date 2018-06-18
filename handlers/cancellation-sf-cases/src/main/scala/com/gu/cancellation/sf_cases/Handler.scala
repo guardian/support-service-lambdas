@@ -58,8 +58,7 @@ object Handler extends Logging {
         (for {
           postRequestBody <- apiGatewayRequest.bodyAsCaseClass[RaisePostBody]()
           sfRequests <- SalesforceAuthenticate(response, config.stepsConfig.sfConfig)
-          //          caseCreated <- SalesforceCase.Raise(sfRequests)(postRequestBody.subName).toApiGatewayOp("raise case")
-          //          _ <- ApiGatewayResponse.outputForAPIGateway()
+          caseCreated <- SalesforceCase.Raise(sfRequests)(postRequestBody.subName).toApiGatewayOp("raise case")
         } yield ApiGatewayResponse.successfulExecution).apiResponse
       }
 
