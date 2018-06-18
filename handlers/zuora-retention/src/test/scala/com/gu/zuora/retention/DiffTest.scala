@@ -59,7 +59,6 @@ class DiffTest extends AsyncFlatSpec {
     Diff(candidates.lines, excluded.lines).mkString("\n") shouldBe expected
   }
 
-
   it should "should not exclude anything with an empty exclusion list " in {
     val candidates =
       """Account.Id,Account.CrmId,BillToContact.Id,SoldToContact.Id

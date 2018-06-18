@@ -164,6 +164,44 @@ Resources:
                           - s3:PutObject
                           - s3:GetObject
                           Resource: !Sub arn:aws:s3:::${RetentionBucket}/*
+    UpdaterRole:
+          Type: AWS::IAM::Role
+          Properties:
+              AssumeRolePolicyDocument:
+                  Statement:
+                      - Effect: Allow
+                        Principal:
+                            Service:
+                               - lambda.amazonaws.com
+                        Action:
+                            - sts:AssumeRole
+              Path: /
+              Policies:
+                  - PolicyName: LambdaPolicy
+                    PolicyDocument:
+                        Statement:
+                            - Effect: Allow
+                              Action:
+                              - logs:CreateLogGroup
+                              - logs:CreateLogStream
+                              - logs:PutLogEvents
+                              - lambda:InvokeFunction
+                              Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/zuora-retention-account-updater-${Stage}:log-stream:*"
+
+                  - PolicyName: ReadPrivateCredentials
+                    PolicyDocument:
+                        Statement:
+                            - Effect: Allow
+                              Action: s3:GetObject
+                              Resource: !Sub arn:aws:s3:::gu-reader-revenue-private/membership/payment-failure-lambdas/${Stage}/*
+
+                  - PolicyName: ReadRetentionBucket
+                    PolicyDocument:
+                        Statement:
+                          - Effect: Allow
+                            Action:
+                            - s3:GetObject
+                            Resource: !Sub arn:aws:s3:::${RetentionBucket}/*
     ZuoraRetentionQuerier:
         Type: AWS::Lambda::Function
         Properties:
@@ -244,6 +282,26 @@ Resources:
                 Timeout: 300
             DependsOn:
             - FilterRole
+    ZuoraRetentionAccountUpdater:
+            Type: AWS::Lambda::Function
+            Properties:
+                Description: sets the field 'ProcessingAdvice__c' to 'DoNotProcess' for a list of accounts coming from a csv file
+                FunctionName:
+                    !Sub zuora-retention-account-updater-${Stage}
+                Code:
+                    S3Bucket: membership-dist
+                    S3Key: !Sub membership/${Stage}/zuora-retention/zuora-retention.jar
+                Handler: com.gu.zuora.retention.UpdateAccounts::apply
+                Environment:
+                    Variables:
+                      Stage: !Ref Stage
+                Role:
+                    !GetAtt UpdaterRole.Arn
+                MemorySize: 1536
+                Runtime: java8
+                Timeout: 300
+            DependsOn:
+            - UpdaterRole
     StatesExecutionRole:
       Type: 'AWS::IAM::Role'
       Properties:

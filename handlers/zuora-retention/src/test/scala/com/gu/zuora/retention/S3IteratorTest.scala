@@ -2,7 +2,7 @@ package com.gu.zuora.retention
 
 import java.io.{ByteArrayInputStream, InputStream}
 
-import com.amazonaws.services.s3.model.{GetObjectRequest, S3ObjectInputStream}
+import com.amazonaws.services.s3.model.GetObjectRequest
 import org.scalatest.AsyncFlatSpec
 import org.scalatest.Matchers._
 
