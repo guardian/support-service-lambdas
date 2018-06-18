@@ -17,10 +17,10 @@ import scalaz.\/-
 
 class ReportsLambdaEndToEndTest extends FlatSpec with Matchers {
 
-  case class QuerierRequest(id: String)
-  implicit val reads = Json.reads[QuerierRequest]
+  case class FakeQueryRequest(id: String, dryRun: Option[Boolean] = None) extends QuerierRequest
+  implicit val reads = Json.reads[FakeQueryRequest]
 
-  def generateAquaQuery(req: QuerierRequest) = AquaQueryRequest(
+  def generateAquaQuery(req: FakeQueryRequest) = AquaQueryRequest(
     name = "testJob",
     queries = List(
       AquaQuery(
@@ -34,7 +34,7 @@ class ReportsLambdaEndToEndTest extends FlatSpec with Matchers {
 
     val postResponses1 = Map(POSTRequest("/batch-query/", aquaQueryRequest) -> HTTPResponse(200, aquaQueryResponse))
 
-    def handlerToTest(requests: Requests)(querierRequest: QuerierRequest) = Querier(generateAquaQuery, requests)(querierRequest)
+    def handlerToTest(requests: Requests)(querierRequest: FakeQueryRequest) = Querier(generateAquaQuery, requests)(querierRequest)
 
     val inputJson =
       """
@@ -43,7 +43,7 @@ class ReportsLambdaEndToEndTest extends FlatSpec with Matchers {
           |}
         """.stripMargin
 
-    val (response, bla) = getResultAndRequests[QuerierRequest, QuerierResponse](
+    val (response, bla) = getResultAndRequests[FakeQueryRequest, QuerierResponse](
       input = inputJson,
       postResponses = postResponses1,
       handlerToTest = handlerToTest
@@ -53,7 +53,8 @@ class ReportsLambdaEndToEndTest extends FlatSpec with Matchers {
       """
           |{
           | "name" : "testJob",
-          | "jobId" : "aquaJobId"
+          | "jobId" : "aquaJobId",
+          | "dryRun": false
           |}""".stripMargin
     response jsonMatches expectedResponse
   }
@@ -62,7 +63,8 @@ class ReportsLambdaEndToEndTest extends FlatSpec with Matchers {
     val jobInput =
       """
         |{
-        | "jobId" : "aquaJobId"
+        | "jobId" : "aquaJobId",
+        | "dryRun" : false
         |}
       """.stripMargin
 
@@ -77,11 +79,13 @@ class ReportsLambdaEndToEndTest extends FlatSpec with Matchers {
     val expected =
       """{
         |   "name" : "testJob",
+        |   "jobId" : "aquaJobId",
         |   "status" : "completed",
         |   "batches" : [{
         |   "name" : "query1",
         |   "fileId": "someFileId"
-        |   }]
+        |   }],
+        |   "dryRun" : false
         |}
       """.stripMargin
 

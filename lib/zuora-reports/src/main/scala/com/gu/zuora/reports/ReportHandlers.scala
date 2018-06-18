@@ -11,7 +11,7 @@ import com.gu.zuora.reports.ReportsLambda.{AquaCall, StepsConfig}
 import com.gu.zuora.reports.aqua.{AquaQueryRequest, ZuoraAquaRequestMaker}
 import play.api.libs.json.Reads
 
-trait ReportHandlers[QUERY_REQUEST] {
+trait ReportHandlers[QUERY_REQUEST <: QuerierRequest] {
 
   def reportsBucketPrefix: String
   def reportsBasePath: String

@@ -17,7 +17,7 @@ object ReportsManualEffectsTest extends App {
     zuoraRequests = ZuoraAquaRequestMaker(RawEffects.response, config.stepsConfig.zuoraRestConfig)
   } yield zuoraRequests
 
-  case class QuerierTestRequest(id: String)
+  case class QuerierTestRequest(id: String, dryRun: Option[Boolean] = None) extends QuerierRequest
 
   implicit val requestReads = Json.reads[QuerierTestRequest]
 
@@ -50,7 +50,7 @@ object ReportsManualEffectsTest extends App {
   def getResultsTest: Unit = {
     val response = for {
       zuoraRequests <- getZuoraRequest(RawEffects.response)
-      request = JobResultRequest("2c92c0f863ed5f9f0163eefa4abd1de5")
+      request = JobResultRequest("2c92c0f863ed5f9f0163eefa4abd1de5", true)
       res <- GetJobResult(zuoraRequests)(request)
     } yield {
       res
@@ -62,7 +62,7 @@ object ReportsManualEffectsTest extends App {
   def fetchFileTest: Unit = {
     val response = for {
       zuoraRequests <- getZuoraRequest(RawEffects.downloadResponse)
-      request = FetchFileRequest(Nil, List(Batch("2c92c08563ed59430163eefa4b3815c0", "manualTest/SomeTest2")))
+      request = FetchFileRequest("someJobId", Nil, List(Batch("2c92c08563ed59430163eefa4b3815c0", "manualTest/SomeTest2")), false)
       upload = S3ReportUpload("zuora-reports-dev", "reports", RawEffects.s3Write) _
       res <- FetchFile(upload, zuoraRequests.getDownloadStream)(request)
     } yield {

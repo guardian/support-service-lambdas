@@ -10,24 +10,24 @@ import scalaz.{-\/, \/-}
 object GetJobResult {
   def apply(zuoraRequester: Requests)(jobResultRequest: JobResultRequest): ClientFailableOp[JobResult] = {
     val zuoraAquaResponse = zuoraRequester.get[AquaJobResponse](s"batch-query/jobs/${jobResultRequest.jobId}")
-    toJobResultResponse(zuoraAquaResponse)
+    toJobResultResponse(zuoraAquaResponse, jobResultRequest.dryRun, jobResultRequest.jobId)
   }
 
   def toBatch(aquaBatch: aqua.Batch): Option[Batch] = aquaBatch.fileId.map {
     fileId => Batch(name = aquaBatch.name, fileId = fileId)
   }
 
-  def toJobResultResponse(aquaResponse: ClientFailableOp[AquaJobResponse]): ClientFailableOp[JobResult] = {
+  def toJobResultResponse(aquaResponse: ClientFailableOp[AquaJobResponse], dryRun: Boolean, jobId: String): ClientFailableOp[JobResult] = {
     aquaResponse match {
       case \/-(AquaJobResponse(status, name, aquaBatches, _)) if status == "completed" =>
         val batches = aquaBatches.map(toBatch)
         if (batches.contains(None)) {
           -\/(RestRequestMaker.GenericError(s"file Id missing from response : $aquaResponse"))
         } else {
-          \/-(Completed(name, batches.flatten))
+          \/-(Completed(name, jobId, batches.flatten, dryRun))
         }
 
-      case \/-(AquaJobResponse(status, name, _, _)) if pendingValues.contains(status) => \/-(Pending(name))
+      case \/-(AquaJobResponse(status, name, _, _)) if pendingValues.contains(status) => \/-(Pending(name, jobId, dryRun))
       case \/-(zuoraResponse) => -\/(GenericError(s"unexpected status in zuora response: $zuoraResponse"))
       case -\/(error) => -\/(error)
     }
@@ -36,7 +36,7 @@ object GetJobResult {
   val pendingValues = List("pending", "executing")
 }
 
-case class JobResultRequest(jobId: String)
+case class JobResultRequest(jobId: String, dryRun: Boolean)
 
 object JobResultRequest {
   implicit val reads = Json.reads[JobResultRequest]
@@ -44,24 +44,28 @@ object JobResultRequest {
 
 sealed trait JobResult {
   def name: String
+  def jobId: String
+  def dryRun: Boolean
 }
 
-case class Completed(name: String, batches: Seq[Batch]) extends JobResult
+case class Completed(name: String, jobId: String, batches: Seq[Batch], dryRun: Boolean) extends JobResult
 
-case class Pending(name: String) extends JobResult
+case class Pending(name: String, jobId: String, dryRun: Boolean) extends JobResult
 
 case class JobResultWire(
   name: String,
+  jobId: String,
   status: String,
-  batches: Option[Seq[Batch]]
+  batches: Option[Seq[Batch]],
+  dryRun: Boolean
 )
 
 object JobResultWire {
   implicit val writes = Json.writes[JobResultWire]
 
   def fromJobResult(jobResult: JobResult) = jobResult match {
-    case Completed(name, batches) => JobResultWire(name, "completed", Some(batches))
-    case Pending(name) => JobResultWire(name, "pending", None)
+    case Completed(name, jobId, batches, dryRun) => JobResultWire(name, jobId, "completed", Some(batches), dryRun)
+    case Pending(name, jobId, dryRun) => JobResultWire(name, jobId, "pending", None, dryRun)
   }
 }
 

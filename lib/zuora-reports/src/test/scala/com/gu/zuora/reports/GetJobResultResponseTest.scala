@@ -9,16 +9,19 @@ class GetJobResultResponseTest extends AsyncFlatSpec {
   it should "deserialize completed response correctly" in {
     val completedResponse = Completed(
       name = "testResponse",
+      jobId = "someJobId",
       batches = List(
         Batch("fileId1", "batch1"),
         Batch("fileId2", "batch2")
-      )
+      ),
+      true
     )
 
     val expected =
       """
         |{
         |  "name": "testResponse",
+        |  "jobId" : "someJobId",
         |  "status": "completed",
         |  "batches": [
         |    {
@@ -29,7 +32,8 @@ class GetJobResultResponseTest extends AsyncFlatSpec {
         |      "fileId": "fileId2",
         |      "name": "batch2"
         |    }
-        |  ]
+        |  ],
+        |  "dryRun": true
         |}
       """.stripMargin
 
@@ -42,11 +46,13 @@ class GetJobResultResponseTest extends AsyncFlatSpec {
       """
         |{
         |  "name": "testResponse",
-        |  "status" : "pending"
+        |  "jobId" : "someJobId",
+        |  "status" : "pending",
+        |  "dryRun" : false
         |}
       """.stripMargin
 
-    val pendingResponse = Pending("testResponse")
+    val pendingResponse = Pending("testResponse", "someJobId", false)
 
     Json.toJson(pendingResponse) shouldBe Json.parse(expected)
   }

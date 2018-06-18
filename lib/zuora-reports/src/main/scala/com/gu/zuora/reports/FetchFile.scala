@@ -18,14 +18,14 @@ object FetchFile {
     } yield {
       val fetched = FetchedFile(fileInfo.fileId, fileInfo.name, uploadPath)
       val remaining = fetchFileRequest.batches.tail
-      FetchFileResponse(fetched :: alreadyFetched, remaining, remaining.isEmpty)
+      FetchFileResponse(fetchFileRequest.jobId, fetched :: alreadyFetched, remaining, remaining.isEmpty, fetchFileRequest.dryRun)
     }
   }
 }
 
-case class FetchFileRequest(fetched: List[FetchedFile] = List.empty, batches: List[Batch])
+case class FetchFileRequest(jobId: String, fetched: List[FetchedFile] = List.empty, batches: List[Batch], dryRun: Boolean)
 
-case class FetchFileResponse(fetched: List[FetchedFile], batches: List[Batch], done: Boolean)
+case class FetchFileResponse(jobId: String, fetched: List[FetchedFile], batches: List[Batch], done: Boolean, dryRun: Boolean)
 
 object FetchFileRequest {
   implicit val reads = Json.using[Json.WithDefaultValues].reads[FetchFileRequest]

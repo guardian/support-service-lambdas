@@ -9,15 +9,16 @@ import org.scalatest.Matchers._
 
 class RetentionQueryRequestTest extends AsyncFlatSpec {
 
-  val jsonRequest = Json.parse(
-    """{
-        "cutOffDate" : "2012-11-03"
-        |}""".stripMargin
-  )
-
   it should "deserialise zuora retention query request " in {
 
-    val expected = RetentionQueryRequest(LocalDate.of(2012, 11, 3))
+    val jsonRequest = Json.parse(
+      """{
+        "cutOffDate" : "2012-11-03",
+        "dryRun": true
+        |}""".stripMargin
+    )
+
+    val expected = RetentionQueryRequest(LocalDate.of(2012, 11, 3), Some(true))
     val actual = jsonRequest.as[RetentionQueryRequest]
 
     actual.shouldBe(expected)
