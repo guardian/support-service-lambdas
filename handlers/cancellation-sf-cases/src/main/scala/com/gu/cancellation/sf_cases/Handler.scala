@@ -52,8 +52,8 @@ object Handler {
       def steps(apiGatewayRequest: ApiGatewayRequest) = {
         (for {
           postBody <- apiGatewayRequest.bodyAsCaseClass[RaisePostBody]()
-          sfRequests <- SalesforceAuthenticate(response, config.stepsConfig.sfAuthConfig)
-          _ <- SalesforceCase.Raise(sfRequests)(postBody.subName).toApiGatewayOp("raise case")
+          //          sfRequests <- SalesforceAuthenticate(response, config.stepsConfig.sfAuthConfig)
+          //          _ <- SalesforceCase.Raise(sfRequests)(postBody.subName).toApiGatewayOp("raise case")
         } yield ApiGatewayResponse.successfulExecution).apiResponse
       }
 
