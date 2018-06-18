@@ -15,9 +15,9 @@ import play.api.libs.json.Json
 
 import scala.util.{Failure, Success, Try}
 
-case class FilterCandidatesRequest(fetched: List[FetchedFile])
+case class FilterCandidatesRequest(jobId: String, fetched: List[FetchedFile], dryRun: Boolean)
 
-case class FilterCandidatesResponse(uri: String)
+case class FilterCandidatesResponse(jobId: String, uri: String, dryRun: Boolean)
 
 object FilterCandidatesRequest {
   implicit val reads = Json.reads[FilterCandidatesRequest]
@@ -86,12 +86,12 @@ object FilterCandidates {
       candidatesUri <- getUri(request.fetched, ToAquaRequest.candidatesQueryName)
       candidatesIterator <- s3Iterator(candidatesUri)
       filteredCandidates = diff(candidatesIterator, exclusionsIterator)
-      putResult <- uploadToS3(filteredCandidates)
+      putResult <- uploadToS3(filteredCandidates).map(uri => FilterCandidatesResponse(request.jobId, uri, request.dryRun))
     } yield (putResult)
     result match {
-      case Success(uploadUri) => {
+      case Success(filterCandidatesResponse) => {
         logger.info("lambda finished successfully")
-        SerialiseResponse(lambdaIO.outputStream, FilterCandidatesResponse(uploadUri))
+        SerialiseResponse(lambdaIO.outputStream, filterCandidatesResponse)
       }
       case Failure(ex) => {
         logger.error(("lambda finished unsuccessfully", ex))
