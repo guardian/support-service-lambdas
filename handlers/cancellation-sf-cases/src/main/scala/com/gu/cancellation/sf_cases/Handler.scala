@@ -55,13 +55,13 @@ object Handler extends Logging {
 
       implicit val reads = Json.reads[RaisePostBody]
 
-      def steps(apiGatewayRequest: ApiGatewayRequest) = {
+      def steps(apiGatewayRequest: ApiGatewayRequest) = ApiGatewayResponse.successfulExecution/*{
         (for {
-          sfRequests <- sfRequests
-          postRequestBody <- apiGatewayRequest.bodyAsCaseClass[RaisePostBody]()
-          caseCreated <- SalesforceCase.Raise(sfRequests)(postRequestBody.subName).toApiGatewayOp("raise case")
+//          sfRequests <- sfRequests
+//          postRequestBody <- apiGatewayRequest.bodyAsCaseClass[RaisePostBody]()
+//          caseCreated <- SalesforceCase.Raise(sfRequests)(postRequestBody.subName).toApiGatewayOp("raise case")
         } yield ApiGatewayResponse.successfulExecution).apiResponse
-      }
+      }*/
 
       Operation.noHealthcheck(steps)
 
