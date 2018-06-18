@@ -7,13 +7,14 @@ import com.gu.effects.RawEffects
 import com.gu.salesforce.auth.SalesforceAuthenticate
 import com.gu.salesforce.auth.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.cases.SalesforceCase
+import com.gu.salesforce.cases.SalesforceCase.CaseResponse
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
-import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, ApiGatewayResponse}
+import com.gu.util.apigateway.ResponseModels.ApiResponse
+import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest}
 import com.gu.util.config.ConfigReads.ConfigFailure
 import com.gu.util.config.{Config, LoadConfig, Stage}
 import com.gu.util.reader.Types._
-import com.gu.util.zuora.RestRequestMaker.Requests
 import okhttp3.{Request, Response}
 import play.api.libs.json.{Json, Reads}
 import scalaz.\/
@@ -37,28 +38,27 @@ object Handler extends Logging {
   //  }
 
   case class StepsConfig(sfConfig: SFAuthConfig)
-  case class RaisePostBody(subName: String)
+  case class RequestBody(subscriptionName: String)
 
   implicit val stepsConfigReads: Reads[StepsConfig] = Json.reads[StepsConfig]
 
   // Referenced in Cloudformation
-  def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
-    logger.info("entered lambda")
+  def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
     runWithEffects(RawEffects.response, RawEffects.stage, RawEffects.s3Load, LambdaIO(inputStream, outputStream, context))
-  }
 
   def runWithEffects(response: Request => Response, stage: Stage, s3Load: Stage => ConfigFailure \/ String, lambdaIO: LambdaIO) = {
 
     def operation: Config[StepsConfig] => Operation = config => {
 
-      implicit val reads = Json.reads[RaisePostBody]
+      implicit val reads = Json.reads[RequestBody]
+      implicit val responseBodyWrites = Json.writes[CaseResponse]
 
       def steps(apiGatewayRequest: ApiGatewayRequest) = {
         (for {
           sfRequests <- SalesforceAuthenticate(response, config.stepsConfig.sfConfig)
-          postRequestBody <- apiGatewayRequest.bodyAsCaseClass[RaisePostBody]()
-//          caseCreated <- SalesforceCase.Raise(sfRequests)(postRequestBody.subName).toApiGatewayOp("raise case")
-        } yield ApiGatewayResponse.successfulExecution).apiResponse
+          requestBody <- apiGatewayRequest.bodyAsCaseClass[RequestBody]()
+          raiseCaseResponse <- SalesforceCase.Raise(sfRequests)().toApiGatewayOp("raise case")
+        } yield ApiResponse("200", Json.prettyPrint(Json.toJson(raiseCaseResponse)))).apiResponse
       }
 
       Operation.noHealthcheck(steps, false)

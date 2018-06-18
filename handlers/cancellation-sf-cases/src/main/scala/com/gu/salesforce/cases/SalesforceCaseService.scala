@@ -6,24 +6,24 @@ import play.api.libs.json.Json
 
 object SalesforceCase extends Logging {
 
-  private val caseBaseUrl = "/services/data/v29.0/sobjects/Case/"
+  private val caseBaseUrl = "/services/data/v29.0/sobjects/Case"
 
-  private case class NewCase(IdentityID__c: String)
+  private case class NewCase(Product__c: String)
   private implicit val writes = Json.writes[NewCase]
 
-  case class CaseResponse(CaseId: String)
+  case class CaseResponse(id: String)
   implicit val reads = Json.reads[CaseResponse]
 
   object Raise {
-    def apply(sfRequests: Requests)(identityId: String): ClientFailableOp[CaseResponse] = {
-      sfRequests.post(NewCase(identityId), caseBaseUrl)
+    def apply(sfRequests: Requests)(): ClientFailableOp[CaseResponse] = {
+      sfRequests.post(NewCase("Membership"), caseBaseUrl)
     }
   }
-
-  object Update {
-    def apply(sfRequests: Requests)(identityId: String, caseId: String): ClientFailableOp[CaseResponse] = {
-      sfRequests.post(NewCase(identityId), s"${caseBaseUrl}${caseId}")
-    }
-  }
+  //
+  //  object Update {
+  //    def apply(sfRequests: Requests)(caseId: String): ClientFailableOp[CaseResponse] = {
+  //      sfRequests.post(UpdateCase(), s"${caseBaseUrl}/${caseId}")
+  //    }
+  //  }
 
 }
