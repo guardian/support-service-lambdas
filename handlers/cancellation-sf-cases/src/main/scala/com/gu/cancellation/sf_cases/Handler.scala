@@ -51,19 +51,17 @@ object Handler extends Logging {
 
     def operation: Config[StepsConfig] => Operation = config => {
 
-      lazy val sfRequests: ApiGatewayOp[Requests] = SalesforceAuthenticate(response, config.stepsConfig.sfConfig)
-
       implicit val reads = Json.reads[RaisePostBody]
 
-      def steps(apiGatewayRequest: ApiGatewayRequest) = ApiGatewayResponse.successfulExecution/*{
+      def steps(apiGatewayRequest: ApiGatewayRequest) = {
         (for {
-//          sfRequests <- sfRequests
-//          postRequestBody <- apiGatewayRequest.bodyAsCaseClass[RaisePostBody]()
+          sfRequests <- SalesforceAuthenticate(response, config.stepsConfig.sfConfig)
+          postRequestBody <- apiGatewayRequest.bodyAsCaseClass[RaisePostBody]()
 //          caseCreated <- SalesforceCase.Raise(sfRequests)(postRequestBody.subName).toApiGatewayOp("raise case")
         } yield ApiGatewayResponse.successfulExecution).apiResponse
-      }*/
+      }
 
-      Operation.noHealthcheck(steps)
+      Operation.noHealthcheck(steps, false)
 
     }
 
