@@ -3,6 +3,7 @@ package com.gu.zuora.reports
 import com.gu.util.zuora.RestRequestMaker
 import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, GenericError, Requests}
 import com.gu.zuora.reports.aqua.AquaJobResponse
+import com.gu.zuora.reports.dataModel.Batch
 import play.api.libs.json._
 import scalaz.{-\/, \/-}
 
@@ -49,12 +50,6 @@ case class Completed(name: String, batches: Seq[Batch]) extends JobResult
 
 case class Pending(name: String) extends JobResult
 
-case class Batch(fileId: String, name: String)
-
-object Batch {
-  implicit val writes = Json.writes[Batch]
-}
-
 case class JobResultWire(
   name: String,
   status: String,
@@ -63,6 +58,7 @@ case class JobResultWire(
 
 object JobResultWire {
   implicit val writes = Json.writes[JobResultWire]
+
   def fromJobResult(jobResult: JobResult) = jobResult match {
     case Completed(name, batches) => JobResultWire(name, "completed", Some(batches))
     case Pending(name) => JobResultWire(name, "pending", None)

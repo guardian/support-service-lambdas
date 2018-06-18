@@ -2,7 +2,6 @@ package com.gu.zuora.reports
 
 import com.amazonaws.services.s3.model.{ObjectMetadata, PutObjectRequest, PutObjectResult}
 import com.gu.util.Logging
-import com.gu.util.config.Stage
 import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, DownloadStream, GenericError}
 
 import scala.util.Try
@@ -10,20 +9,13 @@ import scalaz.syntax.std.either._
 
 object S3ReportUpload extends Logging {
 
-  val buckets = Map(
-    Stage("CODE") -> "zuora-reports-code",
-    Stage("PROD") -> "zuora-reports-prod",
-    Stage("DEV") -> "zuora-reports-dev"
-  )
-
-  def apply(stage: Stage, s3Write: PutObjectRequest => Try[PutObjectResult])(downloadStream: DownloadStream, saveLocation: String): ClientFailableOp[String] = {
+  def apply(destinationBucket: String, basePath: String, s3Write: PutObjectRequest => Try[PutObjectResult])(downloadStream: DownloadStream, fileName: String): ClientFailableOp[String] = {
 
     val metadata = new ObjectMetadata()
     metadata.setContentLength(downloadStream.lengthBytes)
-
-    val destBucket = buckets(stage)
-    val putObjectRequest = new PutObjectRequest(destBucket, saveLocation, downloadStream.stream, metadata)
-    s3Write(putObjectRequest).map(_ => s"s3://$destBucket/$saveLocation").toEither.disjunction.leftMap { exception =>
+    val key = s"$basePath/$fileName"
+    val putObjectRequest = new PutObjectRequest(destinationBucket, key, downloadStream.stream, metadata)
+    s3Write(putObjectRequest).map(_ => s"s3://$destinationBucket/$key").toEither.disjunction.leftMap { exception =>
       logger.error("could not upload report to S3", exception)
       GenericError(s"could not upload report to S3: ${exception.getMessage}")
     }

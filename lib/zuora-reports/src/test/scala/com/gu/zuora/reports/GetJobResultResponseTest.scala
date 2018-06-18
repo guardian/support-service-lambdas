@@ -4,6 +4,7 @@ import play.api.libs.json.Json
 import org.scalatest.AsyncFlatSpec
 import org.scalatest.Matchers._
 import JobResult.writes
+import com.gu.zuora.reports.dataModel.Batch
 class GetJobResultResponseTest extends AsyncFlatSpec {
   it should "deserialize completed response correctly" in {
     val completedResponse = Completed(
