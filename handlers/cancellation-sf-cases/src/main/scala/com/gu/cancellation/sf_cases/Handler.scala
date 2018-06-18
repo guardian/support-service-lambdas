@@ -13,6 +13,7 @@ import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, ApiGatewayR
 import com.gu.util.config.ConfigReads.ConfigFailure
 import com.gu.util.config.{Config, LoadConfig, Stage}
 import com.gu.util.reader.Types._
+import com.gu.util.zuora.RestRequestMaker.Requests
 import okhttp3.{Request, Response}
 import play.api.libs.json.{Json, Reads}
 import scalaz.\/
@@ -50,14 +51,14 @@ object Handler extends Logging {
 
     def operation: Config[StepsConfig] => Operation = config => {
 
-      logger.info("sf url" + config.stepsConfig.sfConfig.url)
+      lazy val sfRequests: ApiGatewayOp[Requests] = SalesforceAuthenticate(response, config.stepsConfig.sfConfig)
 
       implicit val reads = Json.reads[RaisePostBody]
 
       def steps(apiGatewayRequest: ApiGatewayRequest) = {
         (for {
+          sfRequests <- sfRequests
           postRequestBody <- apiGatewayRequest.bodyAsCaseClass[RaisePostBody]()
-          sfRequests <- SalesforceAuthenticate(response, config.stepsConfig.sfConfig)
           caseCreated <- SalesforceCase.Raise(sfRequests)(postRequestBody.subName).toApiGatewayOp("raise case")
         } yield ApiGatewayResponse.successfulExecution).apiResponse
       }
