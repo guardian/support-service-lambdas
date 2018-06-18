@@ -7,6 +7,7 @@ import com.gu.effects.RawEffects
 import com.gu.salesforce.auth.SalesforceAuthenticate
 import com.gu.salesforce.auth.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.cases.SalesforceCase
+import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.config.ConfigReads.ConfigFailure
@@ -16,7 +17,7 @@ import okhttp3.{Request, Response}
 import play.api.libs.json.{Json, Reads}
 import scalaz.\/
 
-object Handler {
+object Handler extends Logging {
 
   //  def main(args: Array[String]): Unit = {
   //    val port = 9000
@@ -40,20 +41,25 @@ object Handler {
   implicit val stepsConfigReads: Reads[StepsConfig] = Json.reads[StepsConfig]
 
   // Referenced in Cloudformation
-  def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
+  def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
+    logger.info("entered lambda")
     runWithEffects(RawEffects.response, RawEffects.stage, RawEffects.s3Load, LambdaIO(inputStream, outputStream, context))
+  }
 
   def runWithEffects(response: Request => Response, stage: Stage, s3Load: Stage => ConfigFailure \/ String, lambdaIO: LambdaIO) = {
 
     def operation: Config[StepsConfig] => Operation = config => {
 
+      logger.info("got config")
+
       implicit val reads = Json.reads[RaisePostBody]
 
       def steps(apiGatewayRequest: ApiGatewayRequest) = {
         (for {
-          postBody <- apiGatewayRequest.bodyAsCaseClass[RaisePostBody]()
+          postRequestBody <- apiGatewayRequest.bodyAsCaseClass[RaisePostBody]()
           //          sfRequests <- SalesforceAuthenticate(response, config.stepsConfig.sfAuthConfig)
-          //          _ <- SalesforceCase.Raise(sfRequests)(postBody.subName).toApiGatewayOp("raise case")
+          //          caseCreated <- SalesforceCase.Raise(sfRequests)(postRequestBody.subName).toApiGatewayOp("raise case")
+          //          _ <- ApiGatewayResponse.outputForAPIGateway()
         } yield ApiGatewayResponse.successfulExecution).apiResponse
       }
 
