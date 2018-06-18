@@ -55,9 +55,8 @@ class DiffTest extends AsyncFlatSpec {
         |21,C,23,24
         |31,E_duplicate,33,34
         |31,E_duplicate,33,34""".stripMargin
-    val ss = Diff(candidates.lines, excluded.lines).mkString("\n")
-    println(ss)
-    ss shouldBe expected
+
+    Diff(candidates.lines, excluded.lines).mkString("\n") shouldBe expected
   }
 
 
