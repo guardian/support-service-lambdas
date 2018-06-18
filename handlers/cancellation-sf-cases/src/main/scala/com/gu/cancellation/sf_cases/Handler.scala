@@ -50,7 +50,7 @@ object Handler extends Logging {
 
     def operation: Config[StepsConfig] => Operation = config => {
 
-      logger.info("got config")
+      logger.info("sf url" + config.stepsConfig.sfConfig.url)
 
       implicit val reads = Json.reads[RaisePostBody]
 
