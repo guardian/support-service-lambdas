@@ -7,7 +7,7 @@ import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import org.scalatest.{Assertion, FlatSpec, Matchers}
 import play.api.libs.json.Json
 
-class IdentityRetentionHandlerTest extends FlatSpec with Matchers {
+class IdentityRetentionHandlerEffectsTest extends FlatSpec with Matchers {
 
   it should "return 404 if the identity id is not linked to any Zuora billing accounts" taggedAs EffectsTest in {
     val actualResponse = runWithMock(dummyRequest("12345"))

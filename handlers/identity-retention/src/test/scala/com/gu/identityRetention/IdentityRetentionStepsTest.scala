@@ -15,7 +15,7 @@ class IdentityRetentionStepsTest extends FlatSpec with Matchers {
 
   it should "return the identity id if it was included in a query string param" in {
     val result = IdentityRetentionSteps.extractIdentityId(Some(URLParams(None, false, None, false, false, Some("123"))))
-    val expected = \/-(IdentityId(123))
+    val expected = \/-(IdentityId("123"))
     result.toDisjunction should be(expected)
   }
 

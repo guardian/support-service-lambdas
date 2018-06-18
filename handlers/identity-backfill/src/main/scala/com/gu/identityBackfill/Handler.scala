@@ -7,9 +7,10 @@ import com.gu.effects.RawEffects
 import com.gu.identity.{GetByEmail, IdentityConfig}
 import com.gu.identityBackfill.Types.{EmailAddress, IdentityId}
 import com.gu.identityBackfill.salesforce.ContactSyncCheck.RecordTypeId
-import com.gu.identityBackfill.salesforce.SalesforceAuthenticate.SFAuthConfig
+import com.gu.salesforce.auth.SalesforceAuthenticate.SFAuthConfig
 import com.gu.identityBackfill.salesforce._
 import com.gu.identityBackfill.zuora.{AddIdentityIdToAccount, CountZuoraAccountsForIdentityId, GetZuoraAccountsForEmail, GetZuoraSubTypeForAccount}
+import com.gu.salesforce.auth.SalesforceAuthenticate
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayResponse}
