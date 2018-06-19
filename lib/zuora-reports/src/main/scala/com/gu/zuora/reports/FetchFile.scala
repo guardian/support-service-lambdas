@@ -10,11 +10,11 @@ object FetchFile {
     getDownloadStream: (String) => ClientFailableOp[DownloadStream]
   )(fetchFileRequest: FetchFileRequest): ClientFailableOp[FetchFileResponse] = {
     val fileInfo = fetchFileRequest.batches.head
-    val fileName = fileInfo.name + ".csv"
+    val key = s"${fetchFileRequest.jobId}/${fileInfo.name}.csv"
     val alreadyFetched = fetchFileRequest.fetched
     for {
       downloadStream <- getDownloadStream(s"batch-query/file/${fileInfo.fileId}")
-      uploadPath <- upload(downloadStream, fileName)
+      uploadPath <- upload(downloadStream, key)
     } yield {
       val fetched = FetchedFile(fileInfo.fileId, fileInfo.name, uploadPath)
       val remaining = fetchFileRequest.batches.tail

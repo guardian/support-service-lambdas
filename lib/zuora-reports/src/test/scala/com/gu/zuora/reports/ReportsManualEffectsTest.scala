@@ -50,7 +50,7 @@ object ReportsManualEffectsTest extends App {
   def getResultsTest: Unit = {
     val response = for {
       zuoraRequests <- getZuoraRequest(RawEffects.response)
-      request = JobResultRequest("2c92c0f863ed5f9f0163eefa4abd1de5", true)
+      request = JobResultRequest("2c92c0f963f800ac0164174918d905f2", true)
       res <- GetJobResult(zuoraRequests)(request)
     } yield {
       res
@@ -62,8 +62,8 @@ object ReportsManualEffectsTest extends App {
   def fetchFileTest: Unit = {
     val response = for {
       zuoraRequests <- getZuoraRequest(RawEffects.downloadResponse)
-      request = FetchFileRequest("someJobId", Nil, List(Batch("2c92c08563ed59430163eefa4b3815c0", "manualTest/SomeTest2")), false)
-      upload = S3ReportUpload("zuora-reports-dev", "reports", RawEffects.s3Write) _
+      request = FetchFileRequest("2c92c0f963f800ac0164174918d905f2", Nil, List(Batch("2c92c08663f7f01701641749196b2a76", "manualTest/SomeTest2")), false)
+      upload = S3ReportUpload("zuora-retention-dev", "reports", RawEffects.s3Write) _
       res <- FetchFile(upload, zuoraRequests.getDownloadStream)(request)
     } yield {
       res
@@ -72,6 +72,6 @@ object ReportsManualEffectsTest extends App {
   }
 
   println("Executing manual test for Zuora reports")
-  getResultsTest
+  fetchFileTest
 }
 
