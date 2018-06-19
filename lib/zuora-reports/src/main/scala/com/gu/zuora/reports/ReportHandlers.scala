@@ -14,7 +14,6 @@ import play.api.libs.json.Reads
 trait ReportHandlers[QUERY_REQUEST <: QuerierRequest] {
 
   def reportsBucketPrefix: String
-  def reportsBasePath: String
   def toQueryRequest: QUERY_REQUEST => AquaQueryRequest
   implicit def queryReads: Reads[QUERY_REQUEST]
   private def defaultWiring[REQ, RES](call: Requests => AquaCall[REQ, RES])(config: Config[StepsConfig]) = call(ZuoraAquaRequestMaker(RawEffects.response, config.stepsConfig.zuoraRestConfig))
@@ -31,7 +30,7 @@ trait ReportHandlers[QUERY_REQUEST <: QuerierRequest] {
   def fetchFileHandler(inputStream: InputStream, outputStream: OutputStream, context: Context) = {
     def customWiring(config: Config[StepsConfig]) = {
       val destinationBucket = s"$reportsBucketPrefix-${config.stage.value.toLowerCase}"
-      val upload = S3ReportUpload(destinationBucket, reportsBasePath, RawEffects.s3Write) _
+      val upload = S3ReportUpload(destinationBucket, RawEffects.s3Write) _
       val downloadRequestMaker = ZuoraAquaRequestMaker(RawEffects.downloadResponse, config.stepsConfig.zuoraRestConfig)
       FetchFile(upload, downloadRequestMaker.getDownloadStream) _
     }

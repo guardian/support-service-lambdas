@@ -38,7 +38,7 @@ object FilterCandidates {
   // this is the entry point
   // it's referenced by the cloudformation so make sure you keep it in step
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
-    val wiredS3Upload = uploadToS3(RawEffects.s3Write, retentionBucketFor(RawEffects.stage), "doNotProcessList.csv") _
+    val wiredS3Upload = uploadToS3(RawEffects.s3Write, retentionBucketFor(RawEffects.stage)) _
     val wiredS3Iterator = S3Iterator(RawEffects.fetchContent) _
 
     runWithEffects(
@@ -56,9 +56,8 @@ object FilterCandidates {
 
   def uploadToS3(
     s3Write: PutObjectRequest => Try[PutObjectResult],
-    bucket: String,
-    key: String
-  )(filteredCandidates: Iterator[String]) = {
+    bucket: String
+  )(filteredCandidates: Iterator[String], key: String) = {
     val uploadLocation = s"s3://$bucket/$key"
     logger.info(s"uploading do do not process list to $uploadLocation")
 
@@ -76,7 +75,7 @@ object FilterCandidates {
   def runWithEffects(
     lambdaIO: LambdaIO,
     s3Iterator: String => Try[Iterator[String]],
-    uploadToS3: Iterator[String] => Try[String],
+    uploadToS3: (Iterator[String], String) => Try[String],
     diff: (Iterator[String], Iterator[String]) => Iterator[String]
   ) = {
     val result = for {
@@ -86,8 +85,10 @@ object FilterCandidates {
       candidatesUri <- getUri(request.fetched, ToAquaRequest.candidatesQueryName)
       candidatesIterator <- s3Iterator(candidatesUri)
       filteredCandidates = diff(candidatesIterator, exclusionsIterator)
-      putResult <- uploadToS3(filteredCandidates).map(uri => FilterCandidatesResponse(request.jobId, uri, request.dryRun))
-    } yield (putResult)
+      uploadKey = s"${request.jobId}/doNoProcess.csv"
+      uploadUri <- uploadToS3(filteredCandidates, uploadKey)
+      filterResponse = FilterCandidatesResponse(request.jobId, uploadUri, request.dryRun)
+    } yield (filterResponse)
     result match {
       case Success(filterCandidatesResponse) => {
         logger.info("lambda finished successfully")
