@@ -17,5 +17,6 @@ deployments:
       bucket: zuora-auto-cancel-dist
       prefixStack: false
       functionNames:
-      - cancellation-sf-cases-
+      - cancellation-sf-cases-raise-
+      - cancellation-sf-cases-update-
     dependencies: [cfn]
