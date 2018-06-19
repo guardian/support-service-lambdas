@@ -8,7 +8,6 @@ import com.gu.salesforce.auth.SalesforceAuthenticate
 import com.gu.salesforce.auth.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.cases.SalesforceCase
 import com.gu.salesforce.cases.SalesforceCase.Raise.{NewCase, RaiseCaseResponse}
-import com.gu.salesforce.cases.SalesforceCase.Update.CaseUpdate
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
@@ -18,7 +17,7 @@ import com.gu.util.config.{Config, LoadConfig, Stage}
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.RestRequestMaker
 import okhttp3.{Request, Response}
-import play.api.libs.json.{Json, Reads}
+import play.api.libs.json.{JsValue, Json, Reads}
 import scalaz.\/
 
 object Handler extends Logging {
@@ -59,9 +58,6 @@ object Handler extends Logging {
 
   object UpdateCase {
 
-    case class UpdateRequestBody(Description: String)
-    implicit val reads = Json.reads[UpdateRequestBody]
-
     case class UpdateCasePathParams(caseId: String)
     implicit val pathParamReads = Json.reads[UpdateCasePathParams]
 
@@ -69,8 +65,8 @@ object Handler extends Logging {
       (for {
         sfRequests <- sfRequests
         pathParams <- apiGatewayRequest.pathParamsAsCaseClass[UpdateCasePathParams]()
-        updateCaseDetail <- apiGatewayRequest.bodyAsCaseClass[UpdateRequestBody]()
-        _ <- SalesforceCase.Update(sfRequests)(pathParams.caseId, CaseUpdate()).toApiGatewayOp("update case")
+        requestBody <- apiGatewayRequest.bodyAsCaseClass[JsValue]()
+        _ <- SalesforceCase.Update(sfRequests)(pathParams.caseId, requestBody).toApiGatewayOp("update case")
       } yield ApiGatewayResponse.successfulExecution).apiResponse
 
   }

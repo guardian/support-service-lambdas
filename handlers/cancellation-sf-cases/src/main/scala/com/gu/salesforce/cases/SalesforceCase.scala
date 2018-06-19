@@ -2,7 +2,7 @@ package com.gu.salesforce.cases
 
 import com.gu.util.Logging
 import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, Requests}
-import play.api.libs.json.Json
+import play.api.libs.json.{JsValue, Json}
 
 object SalesforceCase extends Logging {
 
@@ -23,25 +23,15 @@ object SalesforceCase extends Logging {
     case class RaiseCaseResponse(id: String)
     implicit val reads = Json.reads[RaiseCaseResponse]
 
-    def apply(sfRequests: Requests)(newCase: NewCase): ClientFailableOp[RaiseCaseResponse] = {
+    def apply(sfRequests: Requests)(newCase: NewCase): ClientFailableOp[RaiseCaseResponse] =
       sfRequests.post(newCase, caseBaseUrl)
-    }
 
   }
 
   object Update {
 
-    case class CaseUpdate(
-      Journey__c: Option[String] = None,
-      Description: Option[String] = None,
-      Subject: Option[String] = None,
-      Status: Option[String] = None
-    )
-    implicit val writes = Json.writes[CaseUpdate]
-
-    def apply(sfRequests: Requests)(caseId: String, caseUpdate: CaseUpdate): ClientFailableOp[Unit] = {
-      sfRequests.patch(caseUpdate, s"${caseBaseUrl}/${caseId}")
-    }
+    def apply(sfRequests: Requests)(caseId: String, body: JsValue): ClientFailableOp[Unit] =
+      sfRequests.patch(body, s"${caseBaseUrl}/${caseId}")
 
   }
 
