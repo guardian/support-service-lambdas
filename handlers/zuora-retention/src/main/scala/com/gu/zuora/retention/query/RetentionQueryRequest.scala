@@ -7,7 +7,7 @@ import com.gu.zuora.reports.QuerierRequest
 import com.gu.zuora.reports.aqua.{AquaQuery, AquaQueryRequest}
 import play.api.libs.json.Json
 
-case class RetentionQueryRequest(cutOffDate: LocalDate, dryRun: Option[Boolean] = None) extends QuerierRequest
+case class RetentionQueryRequest(cutOffDate: LocalDate, dryRun: Boolean) extends QuerierRequest
 
 object RetentionQueryRequest {
   implicit val reads = Json.reads[RetentionQueryRequest]

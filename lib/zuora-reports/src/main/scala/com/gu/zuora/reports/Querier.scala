@@ -6,7 +6,7 @@ import play.api.libs.json.Json
 import scalaz.{-\/, \/-}
 
 trait QuerierRequest {
-  val dryRun: Option[Boolean]
+  val dryRun: Boolean
 }
 
 object Querier {
@@ -17,7 +17,7 @@ object Querier {
   )(querierRequest: REQ): ClientFailableOp[QuerierResponse] = {
     val aquaRequest = generateQuery(querierRequest)
     val aquaResponse = zuoraRequester.post[AquaQueryRequest, AquaJobResponse](aquaRequest, "batch-query/")
-    toQuerierResponse(aquaResponse, querierRequest.dryRun.getOrElse(false))
+    toQuerierResponse(aquaResponse, querierRequest.dryRun)
   }
 
   def toQuerierResponse(aquaResponse: ClientFailableOp[AquaJobResponse], dryRun: Boolean): ClientFailableOp[QuerierResponse] = {

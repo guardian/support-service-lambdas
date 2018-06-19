@@ -17,7 +17,7 @@ import scalaz.\/-
 
 class ReportsLambdaEndToEndTest extends FlatSpec with Matchers {
 
-  case class FakeQueryRequest(id: String, dryRun: Option[Boolean] = None) extends QuerierRequest
+  case class FakeQueryRequest(id: String, dryRun: Boolean) extends QuerierRequest
   implicit val reads = Json.reads[FakeQueryRequest]
 
   def generateAquaQuery(req: FakeQueryRequest) = AquaQueryRequest(
@@ -39,7 +39,8 @@ class ReportsLambdaEndToEndTest extends FlatSpec with Matchers {
     val inputJson =
       """
           |{
-          |"id" : "someId"
+          |"id" : "someId",
+          |"dryRun": false
           |}
         """.stripMargin
 

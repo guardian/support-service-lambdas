@@ -17,7 +17,7 @@ object ReportsManualEffectsTest extends App {
     zuoraRequests = ZuoraAquaRequestMaker(RawEffects.response, config.stepsConfig.zuoraRestConfig)
   } yield zuoraRequests
 
-  case class QuerierTestRequest(id: String, dryRun: Option[Boolean] = None) extends QuerierRequest
+  case class QuerierTestRequest(id: String, dryRun: Boolean) extends QuerierRequest
 
   implicit val requestReads = Json.reads[QuerierTestRequest]
 
@@ -38,7 +38,7 @@ object ReportsManualEffectsTest extends App {
 
     val response = for {
       zuoraRequests <- getZuoraRequest(RawEffects.response)
-      request = QuerierTestRequest("2c92c0856391fbe001639b8a61d25d7b")
+      request = QuerierTestRequest("2c92c0856391fbe001639b8a61d25d7b", true)
       res <- Querier(generateTestQuery, zuoraRequests)(request)
     } yield {
       res

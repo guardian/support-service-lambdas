@@ -18,7 +18,7 @@ class RetentionQueryRequestTest extends AsyncFlatSpec {
         |}""".stripMargin
     )
 
-    val expected = RetentionQueryRequest(LocalDate.of(2012, 11, 3), Some(true))
+    val expected = RetentionQueryRequest(LocalDate.of(2012, 11, 3), true)
     val actual = jsonRequest.as[RetentionQueryRequest]
 
     actual.shouldBe(expected)
@@ -26,7 +26,7 @@ class RetentionQueryRequestTest extends AsyncFlatSpec {
   }
 
   it should "convert to Aqua request " in {
-    val retentionQuery = RetentionQueryRequest(LocalDate.of(2012, 12, 31))
+    val retentionQuery = RetentionQueryRequest(LocalDate.of(2012, 12, 31), false)
 
     val expectedExclusionQuery = AquaQuery(
       name = "exclusionQuery",
@@ -54,7 +54,7 @@ class RetentionQueryRequestTest extends AsyncFlatSpec {
       query =
         s"""
            |SELECT
-           |  Account.Id, Account.CrmId, BillToContact.Id, SoldToContact.Id
+           |  Account.Id, Account.CrmId
            |FROM
            |  Subscription
            |WHERE
