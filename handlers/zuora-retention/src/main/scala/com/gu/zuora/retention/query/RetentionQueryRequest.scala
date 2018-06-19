@@ -44,7 +44,7 @@ object ToAquaRequest {
       query =
         s"""
            |SELECT
-           |  Account.Id, Account.CrmId, BillToContact.Id, SoldToContact.Id
+           |  Account.Id, Account.CrmId
            |FROM
            |  Subscription
            |WHERE
