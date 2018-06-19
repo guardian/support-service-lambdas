@@ -1,7 +1,7 @@
 package com.gu.zuora.retention.updateAccounts
 
 import com.gu.util.handlers.LambdaException
-import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, Requests}
+import com.gu.util.zuora.RestRequestMaker.ClientFailableOp
 
 import scala.util.Try
 
@@ -13,7 +13,6 @@ object UpdateAccounts {
     getRemainingTimeInMillis: () => Int
   )(accountIdsIterator: AccountIdIterator) = {
 
-    //TODO THIS CODE IS NOT FUNCTIONAL AT ALL...
     Try {
       while (accountIdsIterator.hasNext && getRemainingTimeInMillis() > oneMinuteMillis) {
         val response = setDoNotProcess(accountIdsIterator.next)
@@ -25,7 +24,7 @@ object UpdateAccounts {
       if (accountIdsIterator.hasNext) {
         UpdateAccountsResponse(done = false, skipTo = accountIdsIterator.currentPosition)
       } else {
-        UpdateAccountsResponse(done = true, skipTo = -1) //todo make skipToAnOption or something
+        UpdateAccountsResponse(done = true, skipTo = -1)
       }
     }
   }
