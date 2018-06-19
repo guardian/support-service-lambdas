@@ -415,14 +415,25 @@ Resources:
                "UpdateAccounts":{
                            "Type":"Task",
                            "Resource":"${accountUpdaterArn}",
-                           "Next":"done",
+                           "Next":"checkRemainingAccounts",
                            "Retry":[
                               {
-                                 "ErrorEquals":["States.ALL"],
+                               "ErrorEquals":["States.ALL"],
                                "IntervalSeconds":30,
                                "MaxAttempts":3
                               }
                            ]
+                },
+                "checkRemainingAccounts": {
+                "Type":"Choice",
+                "Choices":[
+                           {
+                              "Variable":"$.done",
+                              "BooleanEquals":false,
+                              "Next":"UpdateAccounts"
+                           }
+                        ],
+                        "Default":"done"
                 },
                 "done": {
                   "Type": "Pass",
