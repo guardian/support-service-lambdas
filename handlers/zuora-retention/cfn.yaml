@@ -340,9 +340,7 @@ Resources:
                      "Next":"WaitSomeTime",
                      "Retry":[
                         {
-                           "ErrorEquals":[
-                              "States.ALL"
-                           ],
+                           "ErrorEquals":["States.ALL"],
                            "IntervalSeconds":30,
                            "MaxAttempts":3
                         }
@@ -359,9 +357,7 @@ Resources:
                      "Next":"FetchFiles",
                      "Retry":[
                         {
-                           "ErrorEquals":[
-                              "States.ALL"
-                           ],
+                           "ErrorEquals":["States.ALL"],
                            "IntervalSeconds":60,
                            "MaxAttempts":10,
                            "BackoffRate":1.0
@@ -375,9 +371,7 @@ Resources:
 
                      "Retry":[
                         {
-                           "ErrorEquals":[
-                              "States.ALL"
-                           ],
+                           "ErrorEquals":["States.ALL"],
                             "IntervalSeconds":30,
                             "MaxAttempts":3
                         }
@@ -397,24 +391,50 @@ Resources:
                "Filter":{
                           "Type":"Task",
                           "Resource":"${filterArn}",
-                          "End": true,
+                          "Next":"isDryRun",
                           "Retry":[
                              {
-                                "ErrorEquals":[
-                                   "States.ALL"
-                                ],
+                              "ErrorEquals":["States.ALL"],
                               "IntervalSeconds":30,
                               "MaxAttempts":3
                              }
                           ]
                        }
-               }
+               ,
+               "isDryRun":{
+                  "Type":"Choice",
+                  "Choices":[
+                     {
+                        "Variable":"$.dryRun",
+                        "BooleanEquals":false,
+                        "Next":"UpdateAccounts"
+                     }
+                  ],
+                  "Default":"done"
+               },
+               "UpdateAccounts":{
+                           "Type":"Task",
+                           "Resource":"${accountUpdaterArn}",
+                           "Next":"done",
+                           "Retry":[
+                              {
+                                 "ErrorEquals":["States.ALL"],
+                               "IntervalSeconds":30,
+                               "MaxAttempts":3
+                              }
+                           ]
+                },
+                "done": {
+                  "Type": "Pass",
+                  "End": true
+                }
+              }
             }
 
           - {
             querierArn: !GetAtt [ ZuoraRetentionQuerier, Arn ],
             fetcherArn: !GetAtt [ ZuoraRetentionJobResult, Arn ],
             fetchFilesArn: !GetAtt [ ZuoraRetentionFileFetcher, Arn ],
-            filterArn: !GetAtt [ ZuoraRetentionFilter, Arn ]
-
+            filterArn: !GetAtt [ ZuoraRetentionFilter, Arn ],
+            accountUpdaterArn: !GetAtt [ ZuoraRetentionAccountUpdater, Arn ]
           }

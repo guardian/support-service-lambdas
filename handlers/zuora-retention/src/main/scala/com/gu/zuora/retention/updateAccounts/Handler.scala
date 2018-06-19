@@ -43,7 +43,7 @@ object Handler {
     config <- toTry(LoadConfig.default[StepsConfig](implicitly)(stage, s3Load(stage)))
     zuoraRequests = ZuoraRestRequestMaker(response, config.stepsConfig.zuoraRestConfig)
     linesIterator <- s3Iterator(request.uri)
-    accountIdsIterator <- AccountIdIterator(linesIterator, request.skipTo)
+    accountIdsIterator <- AccountIdIterator(linesIterator, request.skipTo.getOrElse(0))
     setDoNotProcess = SetDoNotProcess(zuoraRequests)_
     wiredUpdateAccounts = UpdateAccounts(setDoNotProcess, getRemainingTimeInMsec) _
     response <- wiredUpdateAccounts(accountIdsIterator)
