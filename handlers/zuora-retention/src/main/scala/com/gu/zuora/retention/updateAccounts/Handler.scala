@@ -32,7 +32,7 @@ object Handler {
   }
   type SetDoNotProcess = String => ClientFailableOp[Unit]
   type GetRemainingTime = () => Int
-  def doStuff(
+  def operation(
     response: Request => Response,
     stage: Stage,
     s3Load: Stage => ConfigFailure \/ String,
@@ -55,7 +55,7 @@ object Handler {
     val getRemainingTime = context.getRemainingTimeInMillis _
 
     val s3Iterator = S3Iterator.apply(RawEffects.fetchContent) _
-    val wiredOp = doStuff(
+    val wiredOp = operation(
       RawEffects.response,
       RawEffects.stage,
       RawEffects.s3Load,
