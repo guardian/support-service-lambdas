@@ -1,16 +1,15 @@
-package com.gu.zuora.retention
+package com.gu.zuora.retention.filterCandidates
 
 import java.io.{ByteArrayInputStream, InputStream, OutputStream}
 
 import com.amazonaws.services.lambda.runtime.Context
-import com.amazonaws.services.s3.model._
 import com.gu.effects.RawEffects
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import com.gu.util.config.Stage
 import com.gu.util.handlers.{JsonHandler, LambdaException}
-import com.gu.zuora.reports.S3ReportUpload.logger
 import com.gu.zuora.reports.dataModel.FetchedFile
 import com.gu.zuora.retention.query.ToAquaRequest
+import com.gu.zuora.retention.Diff
 import play.api.libs.json.Json
 
 import scala.util.{Failure, Success, Try}
@@ -39,7 +38,7 @@ object FilterCandidates {
   // it's referenced by the cloudformation so make sure you keep it in step
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
 
-    val wiredS3Upload = uploadToS3(RawEffects.s3Write, retentionBucketFor(RawEffects.stage)) _
+    val wiredS3Upload = UploadToS3(RawEffects.s3Write, retentionBucketFor(RawEffects.stage)) _
     val wiredS3Iterator = S3Iterator(RawEffects.fetchContent) _
     val lambdaIO = new LambdaIO(inputStream, outputStream, context)
     val wiredOperation = operation(wiredS3Iterator, wiredS3Upload, Diff.apply _) _
@@ -49,24 +48,6 @@ object FilterCandidates {
   def getUri(files: List[FetchedFile], queryName: String) = {
     val queryResultUri = files.find(_.name == queryName).map(_.uri)
     queryResultUri.map(Success(_)).getOrElse(Failure(new LambdaException(s"could not find query result for $queryName")))
-  }
-
-  def uploadToS3(
-    s3Write: PutObjectRequest => Try[PutObjectResult],
-    bucket: String
-  )(filteredCandidates: Iterator[String], key: String) = {
-    val uploadLocation = s"s3://$bucket/$key"
-    logger.info(s"uploading do do not process list to $uploadLocation")
-
-    val stringData = filteredCandidates.toList.mkString("\n")
-    val data = stringData.getBytes("UTF-8")
-    val stream = new ByteArrayInputStream(data)
-
-    val metadata = new ObjectMetadata()
-    metadata.setContentLength(data.length.toLong)
-
-    val putObjectRequest = new PutObjectRequest(bucket, key, stream, metadata)
-    s3Write(putObjectRequest).map(_ => uploadLocation)
   }
 
   def operation(

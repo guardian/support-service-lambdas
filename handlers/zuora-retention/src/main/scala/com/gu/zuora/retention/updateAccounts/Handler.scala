@@ -10,12 +10,12 @@ import com.gu.util.config.{Config, LoadConfig, Stage}
 import com.gu.util.handlers.{JsonHandler, LambdaException}
 import com.gu.util.zuora.RestRequestMaker.ClientFailableOp
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
-import com.gu.zuora.retention.S3Iterator
 import okhttp3.{Request, Response}
 import play.api.libs.json.{Json, Reads}
 import scalaz.{-\/, \/, \/-}
 import UpdateAccountsResponse._
 import UpdateAccountsRequest._
+import com.gu.zuora.retention.filterCandidates.S3Iterator
 
 import scala.util.{Failure, Success, Try}
 

@@ -4,7 +4,7 @@ import com.gu.util.Logging
 import com.gu.util.zuora.RestRequestMaker.Requests
 import play.api.libs.json.{JsSuccess, Json, Reads}
 
-object SetDoNotProcess extends Logging{
+object SetDoNotProcess extends Logging {
 
   case class UpdateRequestBody(ProcessingAdvice__c: String = "DoNotProcess")
 

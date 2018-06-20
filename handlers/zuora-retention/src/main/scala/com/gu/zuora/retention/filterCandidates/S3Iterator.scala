@@ -1,4 +1,4 @@
-package com.gu.zuora.retention
+package com.gu.zuora.retention.filterCandidates
 
 import java.io.InputStream
 

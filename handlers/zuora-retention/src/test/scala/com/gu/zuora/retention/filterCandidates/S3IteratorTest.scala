@@ -1,14 +1,13 @@
-package com.gu.zuora.retention
+package com.gu.zuora.retention.filterCandidates
 
 import java.io.{ByteArrayInputStream, InputStream}
 
 import com.amazonaws.services.s3.model.GetObjectRequest
-import org.scalatest.AsyncFlatSpec
-import org.scalatest.Matchers._
+import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.{Failure, Success, Try}
 
-class S3IteratorTest extends AsyncFlatSpec {
+class S3IteratorTest extends FlatSpec with Matchers {
   val testContent = "some test content"
 
   it should "parse Uri correctly" in {

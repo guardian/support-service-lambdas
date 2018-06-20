@@ -10,12 +10,12 @@ import scala.util.{Failure, Success}
 
 class JsonHandlerTest extends FlatSpec with Matchers {
 
-  case class TestRequest(requestValue:String)
+  case class TestRequest(requestValue: String)
   implicit val reqFormat = Json.format[TestRequest]
-  case class TestResponse(responseValue:String)
+  case class TestResponse(responseValue: String)
   implicit val resFormat = Json.format[TestResponse]
 
-  def testOperation(req : TestRequest) =
+  def testOperation(req: TestRequest) =
     if (req.requestValue == "testValue")
       Success(TestResponse("success"))
     else
