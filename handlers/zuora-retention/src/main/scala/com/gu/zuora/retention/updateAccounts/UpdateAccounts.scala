@@ -9,6 +9,7 @@ object UpdateAccounts {
   val oneMinuteMillis = 60000
 
   def apply(
+    uri: String,
     setDoNotProcess: String => ClientFailableOp[Unit],
     getRemainingTimeInMillis: () => Int
   )(accountIdsIterator: AccountIdIterator) = {
@@ -22,9 +23,9 @@ object UpdateAccounts {
       }
 
       if (accountIdsIterator.hasNext) {
-        UpdateAccountsResponse(done = false, skipTo = accountIdsIterator.currentPosition)
+        UpdateAccountsResponse(done = false, skipTo = accountIdsIterator.currentPosition, uri)
       } else {
-        UpdateAccountsResponse(done = true, skipTo = -1)
+        UpdateAccountsResponse(done = true, skipTo = -1, uri)
       }
     }
   }

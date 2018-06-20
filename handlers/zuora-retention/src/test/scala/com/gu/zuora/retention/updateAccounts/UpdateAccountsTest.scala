@@ -8,7 +8,7 @@ import scalaz.{-\/, \/-}
 import scala.util.{Failure, Success}
 
 class UpdateAccountsTest extends FlatSpec with Matchers {
-
+  val testUri = "someUri"
   def successZuoraUpdate(AccountId: String): ClientFailableOp[Unit] = \/-(())
 
   it should "process all accounts if there is enough execution time left" in {
@@ -18,8 +18,8 @@ class UpdateAccountsTest extends FlatSpec with Matchers {
 
     def getRemainingTime() = responses.next()
 
-    val response = UpdateAccounts(successZuoraUpdate, getRemainingTime)(AccountIdIterator(linesIterator, 0).get)
-    response shouldBe Success(UpdateAccountsResponse(done = true, skipTo = -1))
+    val response = UpdateAccounts(testUri, successZuoraUpdate, getRemainingTime)(AccountIdIterator(linesIterator, 0).get)
+    response shouldBe Success(UpdateAccountsResponse(done = true, skipTo = -1, testUri))
   }
 
   it should "should stop iterating if there less than a minute left for the lambda to execute" in {
@@ -28,8 +28,8 @@ class UpdateAccountsTest extends FlatSpec with Matchers {
 
     def getRemainingTime() = responses.next()
 
-    val response = UpdateAccounts(successZuoraUpdate, getRemainingTime)(AccountIdIterator(linesIterator, 0).get)
-    response shouldBe Success(UpdateAccountsResponse(done = false, skipTo = 2))
+    val response = UpdateAccounts(testUri, successZuoraUpdate, getRemainingTime)(AccountIdIterator(linesIterator, 0).get)
+    response shouldBe Success(UpdateAccountsResponse(done = false, skipTo = 2, testUri))
   }
 
   it should "should return failure if zuora returns an error" in {
@@ -44,7 +44,7 @@ class UpdateAccountsTest extends FlatSpec with Matchers {
 
     def getRemainingTime() = responses.next()
 
-    val response = UpdateAccounts(fakeZuoraUpdate, getRemainingTime)(AccountIdIterator(linesIterator, 0).get)
+    val response = UpdateAccounts(testUri, fakeZuoraUpdate, getRemainingTime)(AccountIdIterator(linesIterator, 0).get)
     response shouldBe Failure(LambdaException("error response from lambda -\\/(GenericError(something failed!))"))
 
   }

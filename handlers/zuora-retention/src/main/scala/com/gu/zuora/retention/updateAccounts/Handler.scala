@@ -33,14 +33,14 @@ object Handler {
     s3Load: Stage => ConfigFailure \/ String,
     s3Iterator: String => Try[Iterator[String]],
     getRemainingTimeInMsec: () => Int,
-    updateAccounts: (SetDoNotProcess, GetRemainingTime) => AccountIdIterator => Try[UpdateAccountsResponse]
+    updateAccounts: (String, SetDoNotProcess, GetRemainingTime) => AccountIdIterator => Try[UpdateAccountsResponse]
   )(request: UpdateAccountsRequest): Try[UpdateAccountsResponse] = for {
     config <- toTry(LoadConfig.default[StepsConfig](implicitly)(stage, s3Load(stage)))
     zuoraRequests = ZuoraRestRequestMaker(response, config.stepsConfig.zuoraRestConfig)
     linesIterator <- s3Iterator(request.uri)
     accountIdsIterator <- AccountIdIterator(linesIterator, request.skipTo.getOrElse(0))
     setDoNotProcess = SetDoNotProcess(zuoraRequests) _
-    wiredUpdateAccounts = UpdateAccounts(setDoNotProcess, getRemainingTimeInMsec) _
+    wiredUpdateAccounts = UpdateAccounts(request.uri, setDoNotProcess, getRemainingTimeInMsec) _
     response <- wiredUpdateAccounts(accountIdsIterator)
     _ <- validateProgress(request.skipTo, response.skipTo)
   } yield (response)
