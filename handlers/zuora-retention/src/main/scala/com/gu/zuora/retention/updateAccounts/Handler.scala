@@ -24,14 +24,9 @@ object Handler {
   case class StepsConfig(zuoraRestConfig: ZuoraRestConfig)
 
   implicit val stepsConfigReads: Reads[StepsConfig] = Json.reads[StepsConfig]
-
-  //TODO SEE IF THERE'S A BETTER WAY TO DO THIS..
-  def toTry(res: ConfigFailure \/ Config[StepsConfig]) = res match {
-    case -\/(configError) => Failure(LambdaException(configError.error))
-    case \/-(config) => Success(config)
-  }
   type SetDoNotProcess = String => ClientFailableOp[Unit]
   type GetRemainingTime = () => Int
+
   def operation(
     response: Request => Response,
     stage: Stage,
@@ -44,10 +39,18 @@ object Handler {
     zuoraRequests = ZuoraRestRequestMaker(response, config.stepsConfig.zuoraRestConfig)
     linesIterator <- s3Iterator(request.uri)
     accountIdsIterator <- AccountIdIterator(linesIterator, request.skipTo.getOrElse(0))
-    setDoNotProcess = SetDoNotProcess(zuoraRequests)_
+    setDoNotProcess = SetDoNotProcess(zuoraRequests) _
     wiredUpdateAccounts = UpdateAccounts(setDoNotProcess, getRemainingTimeInMsec) _
     response <- wiredUpdateAccounts(accountIdsIterator)
+    _ <- validateProgress(request.skipTo, response.skipTo)
   } yield (response)
+
+  def toTry(res: ConfigFailure \/ Config[StepsConfig]) = res match {
+    case -\/(configError) => Failure(LambdaException(configError.error))
+    case \/-(config) => Success(config)
+  }
+
+  def validateProgress(requestPosition: Option[Int], responsePosition: Int): Try[Unit] = if (requestPosition.getOrElse(0) == responsePosition) Failure(LambdaException("no accounts updated!")) else Success(())
 
   // this is the entry point
   // it's referenced by the cloudformation so make sure you keep it in step
