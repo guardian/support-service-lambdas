@@ -30,7 +30,11 @@ object Handler extends Logging {
 
   object RaiseCase {
 
-    case class RaiseRequestBody(product: String)
+    case class RaiseRequestBody(
+      product: String,
+      reason: String,
+      subscriptionName: String
+    )
     implicit val reads = Json.reads[RaiseRequestBody]
 
     implicit val writes = Json.writes[RaiseCaseResponse]
@@ -38,8 +42,9 @@ object Handler extends Logging {
     def embellishRaiseRequestBody(raiseRequestBody: RaiseRequestBody) = NewCase(
       Origin = "Self Service",
       Product__c = raiseRequestBody.product,
+      Subscription_Name__c = raiseRequestBody.subscriptionName,
       Journey__c = "SV - At Risk - MB",
-      Enquiry_Type__c = "Canx Reason Chosen",
+      Enquiry_Type__c = raiseRequestBody.reason,
       Status = "Closed",
       Subject = "Online Cancellation Attempt"
     )

@@ -11,6 +11,9 @@ object SalesforceCase extends Logging {
   object Raise {
 
     case class NewCase(
+//      Owner: String, //TODO new queue
+      Subscription_Name__c: String,
+//      Contact: String, //TODO new lookup based on identityID
       Origin: String,
       Product__c: String,
       Journey__c: String,
