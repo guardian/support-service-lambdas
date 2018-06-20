@@ -14,22 +14,22 @@ class UpdateAccountsTest extends FlatSpec with Matchers {
   it should "process all accounts if there is enough execution time left" in {
 
     val linesIterator = List("Account.Id", "firstAccount", "secondAccount", "thirdAccount").iterator
-    val responses = List(120000, 110000, 75000).iterator
+    val remainingMsValues = List(120000, 110000, 75000).iterator
 
-    def getRemainingTime() = responses.next()
+    def getRemainingTime() = remainingMsValues.next()
 
     val response = UpdateAccounts(testUri, successZuoraUpdate, getRemainingTime)(AccountIdIterator(linesIterator, 0).get)
-    response shouldBe Success(UpdateAccountsResponse(done = true, skipTo = -1, testUri))
+    response shouldBe Success(UpdateAccountsResponse(done = true, skipTo = None, testUri))
   }
 
   it should "should stop iterating if there less than a minute left for the lambda to execute" in {
     val linesIterator = List("Account.Id", "firstAccount", "secondAccount", "thirdAccount").iterator
-    val responses = List(120000, 65000, 50000).iterator
+    val remainingMsValues = List(120000, 65000, 50000).iterator
 
-    def getRemainingTime() = responses.next()
+    def getRemainingTime() = remainingMsValues.next()
 
     val response = UpdateAccounts(testUri, successZuoraUpdate, getRemainingTime)(AccountIdIterator(linesIterator, 0).get)
-    response shouldBe Success(UpdateAccountsResponse(done = false, skipTo = 2, testUri))
+    response shouldBe Success(UpdateAccountsResponse(done = false, skipTo = Some(2), testUri))
   }
 
   it should "should return failure if zuora returns an error" in {
@@ -40,13 +40,12 @@ class UpdateAccountsTest extends FlatSpec with Matchers {
     }
 
     val linesIterator = List("Account.Id", "firstAccount", "secondAccount", "thirdAccount").iterator
-    val responses = List(120000, 110000, 75000).iterator
+    val remainingMsValues = List(120000, 110000, 75000).iterator
 
-    def getRemainingTime() = responses.next()
+    def getRemainingTime() = remainingMsValues.next()
 
     val response = UpdateAccounts(testUri, fakeZuoraUpdate, getRemainingTime)(AccountIdIterator(linesIterator, 0).get)
     response shouldBe Failure(LambdaException("error response from lambda -\\/(GenericError(something failed!))"))
 
   }
-
 }

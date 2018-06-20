@@ -1,6 +1,6 @@
 package com.gu.zuora.retention.updateAccounts
 
-import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, Requests}
+import com.gu.util.zuora.RestRequestMaker.Requests
 import play.api.libs.json.{JsSuccess, Json, Reads}
 
 object SetDoNotProcess {

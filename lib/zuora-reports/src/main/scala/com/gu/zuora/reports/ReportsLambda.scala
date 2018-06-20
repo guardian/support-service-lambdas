@@ -1,7 +1,5 @@
 package com.gu.zuora.reports
 
-import java.io.{InputStream, OutputStream, OutputStreamWriter}
-
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import com.gu.util.config.ConfigReads.ConfigFailure

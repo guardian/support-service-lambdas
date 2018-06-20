@@ -8,7 +8,7 @@ import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import com.gu.util.config.ConfigReads.ConfigFailure
 import com.gu.util.config.{Config, LoadConfig, Stage}
 import com.gu.util.handlers.{BaseHandler, LambdaException}
-import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, Requests}
+import com.gu.util.zuora.RestRequestMaker.ClientFailableOp
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
 import com.gu.zuora.retention.S3Iterator
 import okhttp3.{Request, Response}
@@ -42,7 +42,7 @@ object Handler {
     setDoNotProcess = SetDoNotProcess(zuoraRequests) _
     wiredUpdateAccounts = UpdateAccounts(request.uri, setDoNotProcess, getRemainingTimeInMsec) _
     response <- wiredUpdateAccounts(accountIdsIterator)
-    _ <- validateProgress(request.skipTo, response.skipTo)
+    _ <- validateProgress(request, response)
   } yield (response)
 
   def toTry(res: ConfigFailure \/ Config[StepsConfig]) = res match {
@@ -50,7 +50,8 @@ object Handler {
     case \/-(config) => Success(config)
   }
 
-  def validateProgress(requestPosition: Option[Int], responsePosition: Int): Try[Unit] = if (requestPosition.getOrElse(0) == responsePosition) Failure(LambdaException("no accounts updated!")) else Success(())
+  def validateProgress(request: UpdateAccountsRequest, response: UpdateAccountsResponse): Try[Unit] =
+    if (!response.done && request.skipTo == response.skipTo) Failure(LambdaException("no accounts processed in execution!")) else Success(())
 
   // this is the entry point
   // it's referenced by the cloudformation so make sure you keep it in step

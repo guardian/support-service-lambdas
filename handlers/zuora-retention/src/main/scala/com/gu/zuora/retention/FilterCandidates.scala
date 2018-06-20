@@ -63,7 +63,7 @@ object FilterCandidates {
     val stream = new ByteArrayInputStream(data)
 
     val metadata = new ObjectMetadata()
-    metadata.setContentLength(data.length)
+    metadata.setContentLength(data.length.toLong)
 
     val putObjectRequest = new PutObjectRequest(bucket, key, stream, metadata)
     s3Write(putObjectRequest).map(_ => uploadLocation)
