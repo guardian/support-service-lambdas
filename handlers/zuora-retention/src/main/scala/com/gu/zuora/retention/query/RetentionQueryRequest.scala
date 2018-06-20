@@ -7,7 +7,7 @@ import com.gu.zuora.reports.QuerierRequest
 import com.gu.zuora.reports.aqua.{AquaQuery, AquaQueryRequest}
 import play.api.libs.json.Json
 
-case class RetentionQueryRequest(cutOffDate: LocalDate, dryRun: Boolean) extends QuerierRequest
+case class RetentionQueryRequest(cutOffDate: Option[LocalDate], dryRun: Boolean) extends QuerierRequest
 
 object RetentionQueryRequest {
   implicit val reads = Json.reads[RetentionQueryRequest]
@@ -17,7 +17,9 @@ object ToAquaRequest {
   val exclusionQueryName = "exclusionQuery"
   val candidatesQueryName = "candidatesQuery"
   def apply(request: RetentionQueryRequest): AquaQueryRequest = {
-    val dateStr = request.cutOffDate.format(DateTimeFormatter.ISO_LOCAL_DATE)
+
+    val filterDate = request.cutOffDate getOrElse LocalDate.now.minusMonths(30)
+    val dateStr = filterDate.format(DateTimeFormatter.ISO_LOCAL_DATE)
     val exclusionQuery = AquaQuery(
       name = exclusionQueryName,
       query =
