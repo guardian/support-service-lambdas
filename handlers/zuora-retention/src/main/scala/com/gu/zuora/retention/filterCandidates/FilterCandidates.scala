@@ -1,6 +1,6 @@
 package com.gu.zuora.retention.filterCandidates
 
-import java.io.{ByteArrayInputStream, InputStream, OutputStream}
+import java.io.{InputStream, OutputStream}
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.RawEffects

@@ -271,7 +271,7 @@ Resources:
                 Code:
                     S3Bucket: membership-dist
                     S3Key: !Sub membership/${Stage}/zuora-retention/zuora-retention.jar
-                Handler: com.gu.zuora.retention.FilterCandidates::apply
+                Handler: com.gu.zuora.retention.filterCandidates.FilterCandidates::apply
                 Environment:
                     Variables:
                       Stage: !Ref Stage
