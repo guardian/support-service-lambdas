@@ -7,7 +7,7 @@ import com.amazonaws.services.s3.model._
 import com.gu.effects.RawEffects
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import com.gu.util.config.Stage
-import com.gu.util.handlers.{BaseHandler, LambdaException}
+import com.gu.util.handlers.{JsonHandler, LambdaException}
 import com.gu.zuora.reports.S3ReportUpload.logger
 import com.gu.zuora.reports.dataModel.FetchedFile
 import com.gu.zuora.retention.query.ToAquaRequest
@@ -43,7 +43,7 @@ object FilterCandidates {
     val wiredS3Iterator = S3Iterator(RawEffects.fetchContent) _
     val lambdaIO = new LambdaIO(inputStream, outputStream, context)
     val wiredOperation = operation(wiredS3Iterator, wiredS3Upload, Diff.apply _) _
-    BaseHandler(lambdaIO, wiredOperation)
+    JsonHandler(lambdaIO, wiredOperation)
   }
 
   def getUri(files: List[FetchedFile], queryName: String) = {

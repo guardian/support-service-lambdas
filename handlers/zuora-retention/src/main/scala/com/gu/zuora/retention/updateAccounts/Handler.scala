@@ -7,7 +7,7 @@ import com.gu.effects.RawEffects
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import com.gu.util.config.ConfigReads.ConfigFailure
 import com.gu.util.config.{Config, LoadConfig, Stage}
-import com.gu.util.handlers.{BaseHandler, LambdaException}
+import com.gu.util.handlers.{JsonHandler, LambdaException}
 import com.gu.util.zuora.RestRequestMaker.ClientFailableOp
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
 import com.gu.zuora.retention.S3Iterator
@@ -67,7 +67,7 @@ object Handler {
       getRemainingTime,
       UpdateAccounts.apply
     ) _
-    BaseHandler(
+    JsonHandler(
       lambdaIO = LambdaIO(inputStream, outputStream, context),
       operation = wiredOp
     )

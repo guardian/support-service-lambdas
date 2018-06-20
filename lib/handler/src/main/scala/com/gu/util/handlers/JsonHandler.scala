@@ -6,7 +6,7 @@ import play.api.libs.json.{Reads, Writes}
 
 import scala.util.{Failure, Success, Try}
 
-object BaseHandler extends Logging {
+object JsonHandler extends Logging {
 
   def apply[REQUEST, RESPONSE](
     lambdaIO: LambdaIO,
