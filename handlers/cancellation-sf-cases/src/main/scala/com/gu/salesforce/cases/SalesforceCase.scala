@@ -10,10 +10,10 @@ object SalesforceCase extends Logging {
 
   object Raise {
 
+    // NOTE : Case Owner is set by SF Rule based on Origin='Self Service'
     case class NewCase(
-//      Owner: String, //TODO new queue
-      Subscription_Name__c: String,
-//      Contact: String, //TODO new lookup based on identityID
+      SF_Subscription__c: String,
+      ContactId: String,
       Origin: String,
       Product__c: String,
       Journey__c: String,
