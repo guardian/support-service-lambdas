@@ -4,7 +4,7 @@ import com.amazonaws.services.s3.model.{PutObjectRequest, PutObjectResult}
 import com.gu.util.handlers.LambdaException
 import org.scalatest.{FlatSpec, Matchers}
 
-import scala.util.{Failure, Success, Try}
+import scala.util.{Failure, Success}
 
 class UploadToS3Test extends FlatSpec with Matchers {
 

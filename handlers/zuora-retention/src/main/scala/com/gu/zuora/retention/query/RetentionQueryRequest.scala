@@ -16,9 +16,9 @@ object RetentionQueryRequest {
 object ToAquaRequest {
   val exclusionQueryName = "exclusionQuery"
   val candidatesQueryName = "candidatesQuery"
-  def apply(request: RetentionQueryRequest): AquaQueryRequest = {
+  def apply(getCurrentDate: () => LocalDate)(request: RetentionQueryRequest): AquaQueryRequest = {
 
-    val filterDate = request.cutOffDate getOrElse LocalDate.now.minusMonths(30)
+    val filterDate = request.cutOffDate getOrElse getCurrentDate().minusMonths(30)
     val dateStr = filterDate.format(DateTimeFormatter.ISO_LOCAL_DATE)
     val exclusionQuery = AquaQuery(
       name = exclusionQueryName,

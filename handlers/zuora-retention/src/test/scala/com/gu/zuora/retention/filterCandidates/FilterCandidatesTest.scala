@@ -34,7 +34,7 @@ class FilterCandidatesTest extends FlatSpec with Matchers {
       candidatesIt
   }
 
-  private def wiredFilteredCandidates = FilterCandidates.operation(
+  private def wiredOperation = FilterCandidates.operation(
     s3Iterator,
     uploadToS3,
     diff
@@ -44,11 +44,7 @@ class FilterCandidatesTest extends FlatSpec with Matchers {
 
     val fetchedFiles = List(candidatesFetchedFile)
     val req = FilterCandidatesRequest("someJobId", fetchedFiles, false)
-    val res = FilterCandidates.operation(
-      s3Iterator,
-      uploadToS3,
-      diff
-    )(req)
+    val res = wiredOperation(req)
     res shouldBe Failure(LambdaException("could not find query result for exclusionQuery"))
   }
 
@@ -56,11 +52,7 @@ class FilterCandidatesTest extends FlatSpec with Matchers {
 
     val fetchedFiles = List(exclusionsFetchedFile)
     val req = FilterCandidatesRequest("someJobId", fetchedFiles, false)
-    val res = FilterCandidates.operation(
-      s3Iterator,
-      uploadToS3,
-      diff
-    )(req)
+    val res = wiredOperation(req)
     res shouldBe Failure(LambdaException("could not find query result for candidatesQuery"))
   }
 
@@ -68,11 +60,7 @@ class FilterCandidatesTest extends FlatSpec with Matchers {
 
     val fetchedFiles = List(candidatesFetchedFile, exclusionsFetchedFile)
     val req = FilterCandidatesRequest("someJobId", fetchedFiles, false)
-    val res = FilterCandidates.operation(
-      s3Iterator,
-      uploadToS3,
-      diff
-    )(req)
+    val res = wiredOperation(req)
     res shouldBe Success(FilterCandidatesResponse("someJobId", "s3://fakeBucket/filename.csv", false))
   }
 }
