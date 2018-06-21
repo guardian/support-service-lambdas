@@ -4,6 +4,7 @@ import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
 import com.gu.test.EffectsTest
 import org.scalatest.{FlatSpec, Matchers}
+import play.api.libs.json.Json
 
 class FilterCandidatesEffectsTest extends FlatSpec with Matchers {
   it should "filter candidates with exclusion results" taggedAs EffectsTest in {
@@ -31,6 +32,15 @@ class FilterCandidatesEffectsTest extends FlatSpec with Matchers {
 
     FilterCandidates(testInputStream, testOutputStream, null)
 
-    testOutputStream.toString shouldBe "{\"jobId\":\"testJobId\",\"uri\":\"s3://zuora-retention-dev/testJobId/doNoProcess.csv\",\"dryRun\":false}"
+    val expectedOutput = Json.parse(
+      """
+        {
+          "jobId":"testJobId",
+          "uri":"s3://zuora-retention-dev/testJobId/doNoProcess.csv",
+          "dryRun":false
+          }
+      """)
+
+    Json.parse(testOutputStream.toString) shouldBe expectedOutput
   }
 }
