@@ -6,24 +6,24 @@ import scala.util.{Failure, Success}
 
 class HandlerTest extends FlatSpec with Matchers {
   it should "detect if there was no progress made in api call" in {
-    val request = UpdateAccountsRequest(uri = "someUri", skipTo = Option(10))
-    val noProgressResponse = UpdateAccountsResponse(uri = "someUri", skipTo = Option(10), done = false)
+    val request = UpdateAccountsRequest(uri = "someUri", nextIndex = Option(10))
+    val noProgressResponse = UpdateAccountsResponse(uri = "someUri", nextIndex = Option(10), done = false)
     val noProgressError = Failure(LambdaException("no accounts processed in execution!"))
 
     Handler.validateProgress(request, noProgressResponse) shouldBe (noProgressError)
   }
 
-  it should "detect if there was no progress made in api call with no skipTo param" in {
-    val request = UpdateAccountsRequest(uri = "someUri", skipTo = None)
-    val noProgressResponse = UpdateAccountsResponse(uri = "someUri", skipTo = None, done = false)
+  it should "detect if there was no progress made in api call with no nextIndex param" in {
+    val request = UpdateAccountsRequest(uri = "someUri", nextIndex = None)
+    val noProgressResponse = UpdateAccountsResponse(uri = "someUri", nextIndex = None, done = false)
     val noProgressError = Failure(LambdaException("no accounts processed in execution!"))
 
     Handler.validateProgress(request, noProgressResponse) shouldBe (noProgressError)
   }
 
   it should "validate when all accounts processed" in {
-    val request = UpdateAccountsRequest(uri = "someUri", skipTo = None)
-    val noProgressResponse = UpdateAccountsResponse(uri = "someUri", skipTo = None, done = true)
+    val request = UpdateAccountsRequest(uri = "someUri", nextIndex = None)
+    val noProgressResponse = UpdateAccountsResponse(uri = "someUri", nextIndex = None, done = true)
     Handler.validateProgress(request, noProgressResponse) shouldBe (Success(()))
   }
 }

@@ -23,9 +23,9 @@ object UpdateAccounts {
       }
 
       if (accountIdsIterator.hasNext) {
-        UpdateAccountsResponse(done = false, skipTo = Some(accountIdsIterator.currentPosition), uri = uri)
+        UpdateAccountsResponse(done = false, nextIndex = Some(accountIdsIterator.currentPosition), uri = uri)
       } else {
-        UpdateAccountsResponse(done = true, skipTo = None, uri = uri)
+        UpdateAccountsResponse(done = true, nextIndex = None, uri = uri)
       }
     }
   }

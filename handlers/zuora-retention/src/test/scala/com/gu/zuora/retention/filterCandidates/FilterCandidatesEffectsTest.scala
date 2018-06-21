@@ -39,7 +39,8 @@ class FilterCandidatesEffectsTest extends FlatSpec with Matchers {
           "uri":"s3://zuora-retention-dev/testJobId/doNoProcess.csv",
           "dryRun":false
           }
-      """)
+      """
+    )
 
     Json.parse(testOutputStream.toString) shouldBe expectedOutput
   }

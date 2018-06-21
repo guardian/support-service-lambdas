@@ -19,7 +19,7 @@ class UpdateAccountsTest extends FlatSpec with Matchers {
     def getRemainingTime() = remainingMsValues.next()
 
     val response = UpdateAccounts(testUri, successZuoraUpdate, getRemainingTime)(AccountIdIterator(linesIterator, 0).get)
-    response shouldBe Success(UpdateAccountsResponse(done = true, skipTo = None, testUri))
+    response shouldBe Success(UpdateAccountsResponse(done = true, nextIndex = None, testUri))
   }
 
   it should "should stop iterating if there less than a minute left for the lambda to execute" in {
@@ -29,7 +29,7 @@ class UpdateAccountsTest extends FlatSpec with Matchers {
     def getRemainingTime() = remainingMsValues.next()
 
     val response = UpdateAccounts(testUri, successZuoraUpdate, getRemainingTime)(AccountIdIterator(linesIterator, 0).get)
-    response shouldBe Success(UpdateAccountsResponse(done = false, skipTo = Some(2), testUri))
+    response shouldBe Success(UpdateAccountsResponse(done = false, nextIndex = Some(2), testUri))
   }
 
   it should "should return failure if zuora returns an error" in {

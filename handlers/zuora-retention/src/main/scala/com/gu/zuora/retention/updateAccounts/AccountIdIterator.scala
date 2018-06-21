@@ -17,11 +17,11 @@ class AccountIdIterator(iterator: Iterator[String], accountIdLocation: Int, var 
 object AccountIdIterator {
   val accountIdHeader = "Account.Id"
 
-  def apply(lines: Iterator[String], skipTo: Int): Try[AccountIdIterator] = {
+  def apply(lines: Iterator[String], startingPosition: Int): Try[AccountIdIterator] = {
     Try {
       val headers = lines.next()
       val accountIdLocation = headers.split(",").indexOf(accountIdHeader)
-      new AccountIdIterator(lines.drop(skipTo), accountIdLocation, skipTo)
+      new AccountIdIterator(lines.drop(startingPosition), accountIdLocation, startingPosition)
     }
   }
 }

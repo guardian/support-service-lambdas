@@ -38,7 +38,7 @@ object Handler {
     config <- toTry(LoadConfig.default[StepsConfig](implicitly)(stage, s3Load(stage)))
     zuoraRequests = ZuoraRestRequestMaker(response, config.stepsConfig.zuoraRestConfig)
     linesIterator <- s3Iterator(request.uri)
-    accountIdsIterator <- AccountIdIterator(linesIterator, request.skipTo.getOrElse(0))
+    accountIdsIterator <- AccountIdIterator(linesIterator, request.nextIndex.getOrElse(0))
     setDoNotProcess = SetDoNotProcess(zuoraRequests) _
     wiredUpdateAccounts = UpdateAccounts(request.uri, setDoNotProcess, getRemainingTimeInMsec) _
     response <- wiredUpdateAccounts(accountIdsIterator)
@@ -51,7 +51,7 @@ object Handler {
   }
 
   def validateProgress(request: UpdateAccountsRequest, response: UpdateAccountsResponse): Try[Unit] =
-    if (!response.done && request.skipTo == response.skipTo) Failure(LambdaException("no accounts processed in execution!")) else Success(())
+    if (!response.done && request.nextIndex == response.nextIndex) Failure(LambdaException("no accounts processed in execution!")) else Success(())
 
   // this is the entry point
   // it's referenced by the cloudformation so make sure you keep it in step

@@ -36,23 +36,23 @@ Example input and output can be found on the [test code](src/test/scala/com/gu/z
 The file generated in the previous step is iterated over and each account is updated with ProcessingAdvice= 'DoNotProcess'.
 
 Similarly to the fetch files step, in the actual state machine this is represented by two states in order to accommodate work loads that take longer than the limit on a single lambda execution time:
-* updateAccounts step: this will update as many accounts as possible until it's within a minute of the lambda execution time limit. if it runs out of time it will return done=false and skipTo set to the first line of the file that was not processed
+* updateAccounts step: this will update as many accounts as possible until it's within a minute of the lambda execution time limit. if it runs out of time it will return done=false and nextIndex set to the first line of the file that was not processed
 * checkRemainingAccounts step: just a choice state to re-run updateAccounts until it returns done = true
 #### input
 ```
 {
   "uri": "s3://zuora-retention-code/2c92c0f963f800a901641ccfe6fd2344/doNoProcess.csv",
-  "skipTo" : 3
+  "nextIndex" : 3
 }
 ```
-the uri parameter determines where the file should be fetched from and the option skipTo param determines the first line of the file that should be processed (excluding headers)
+the uri parameter determines where the file should be fetched from and the option nextIndex param determines the first line of the file that should be processed (excluding headers)
 
 #### output
 ```
 {
   "done": false,
   "uri": "s3://zuora-retention-code/2c92c0f963f800a901641ccfe6fd2344/doNoProcess.csv",
-  "skipTo": 10
+  "nextIndex": 10
 }
 ```
 
