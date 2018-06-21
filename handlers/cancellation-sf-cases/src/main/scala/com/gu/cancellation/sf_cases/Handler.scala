@@ -44,7 +44,7 @@ object Handler extends Logging {
       Origin = "Self Service",
       ContactId = raiseRequestBody.contactId,
       Product__c = raiseRequestBody.product,
-      SF_Subscription__c = raiseRequestBody.subscriptionName,
+      SF_Subscription__c = "", // TODO perform mapping from raiseRequestBody.subscriptionName (perhaps with SF rule)
       Journey__c = "SV - At Risk - MB",
       Enquiry_Type__c = raiseRequestBody.reason,
       Status = "Closed",
