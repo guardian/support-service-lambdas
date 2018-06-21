@@ -11,9 +11,11 @@ object ZuoraRetentionQueryHandler {
 
   // this is the entry point
   // it's referenced by the cloudformation so make sure you keep it in step
-  def apply: (InputStream, OutputStream, Context) => Unit = QueryHandler[RetentionQueryRequest](
-    reportsBucketPrefix = "zuora-retention",
-    toQueryRequest = ToAquaRequest(RawEffects.now().toLocalDate),
-    queryReads = RetentionQueryRequest.reads
-  )
+  def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
+    QueryHandler[RetentionQueryRequest](
+      reportsBucketPrefix = "zuora-retention",
+      toQueryRequest = ToAquaRequest(RawEffects.now().toLocalDate),
+      queryReads = RetentionQueryRequest.reads
+    )(inputStream, outputStream, context)
+  }
 }
