@@ -231,7 +231,7 @@ Resources:
             Code:
                 S3Bucket: membership-dist
                 S3Key: !Sub membership/${Stage}/zuora-retention/zuora-retention.jar
-            Handler: com.gu.zuora.reports.handlers.fetchResultsHandler::apply
+            Handler: com.gu.zuora.reports.handlers.FetchResultsHandler::apply
             Environment:
                 Variables:
                   Stage: !Ref Stage
