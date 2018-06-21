@@ -30,7 +30,7 @@ For more information about the details of this lambda check the [zuora-reports r
 ### Filter result
 In this step all the results from the list of candidates that are also present in the exclusion list are filtered out, leaving the list of accounts we want to update.
 The result of this step will be saved in the same bucket and directory as the zuora reports with the name 'doNotProcess.csv'
-Example input and output can be found on the [test code](src/test/scala/com/gu/zuora/retention/filterCandidates/FilterCandidatesEffectsTest.scalaL9-L44)
+Example input and output can be found on the [test code](src/test/scala/com/gu/zuora/retention/filterCandidates/FilterCandidatesEffectsTest.scala#L9-L44)
 
 ### Update account  
 The file generated in the previous step is iterated over and each account is updated with ProcessingAdvice= 'DoNotProcess'.
