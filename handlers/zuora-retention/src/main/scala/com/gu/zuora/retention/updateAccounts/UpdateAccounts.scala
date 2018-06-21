@@ -12,7 +12,7 @@ object UpdateAccounts {
     uri: String,
     setDoNotProcess: String => ClientFailableOp[Unit],
     getRemainingTimeInMillis: () => Int
-  )(accountIdsIterator: AccountIdIterator) = {
+  )(accountIdsIterator: AccountIdIterator): Try[UpdateAccountsResponse] = {
 
     Try {
       while (accountIdsIterator.hasNext && getRemainingTimeInMillis() > oneMinuteMillis) {

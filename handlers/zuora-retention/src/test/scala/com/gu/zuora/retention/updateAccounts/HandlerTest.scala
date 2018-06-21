@@ -10,7 +10,7 @@ class HandlerTest extends FlatSpec with Matchers {
     val noProgressResponse = UpdateAccountsResponse(uri = "someUri", nextIndex = Option(10), done = false)
     val noProgressError = Failure(LambdaException("no accounts processed in execution!"))
 
-    Handler.validateProgress(request, noProgressResponse) shouldBe (noProgressError)
+    Handler.failIfNoProgress(request, noProgressResponse) shouldBe (noProgressError)
   }
 
   it should "detect if there was no progress made in api call with no nextIndex param" in {
@@ -18,12 +18,12 @@ class HandlerTest extends FlatSpec with Matchers {
     val noProgressResponse = UpdateAccountsResponse(uri = "someUri", nextIndex = None, done = false)
     val noProgressError = Failure(LambdaException("no accounts processed in execution!"))
 
-    Handler.validateProgress(request, noProgressResponse) shouldBe (noProgressError)
+    Handler.failIfNoProgress(request, noProgressResponse) shouldBe (noProgressError)
   }
 
   it should "validate when all accounts processed" in {
     val request = UpdateAccountsRequest(uri = "someUri", nextIndex = None)
     val noProgressResponse = UpdateAccountsResponse(uri = "someUri", nextIndex = None, done = true)
-    Handler.validateProgress(request, noProgressResponse) shouldBe (Success(()))
+    Handler.failIfNoProgress(request, noProgressResponse) shouldBe (Success(()))
   }
 }
