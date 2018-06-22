@@ -26,15 +26,38 @@ class GetJobResultTest extends AsyncFlatSpec {
       )
     )
   ))
+  it should "decrease the amount of retries left on each execution" in {
+    def get(path :String) = ZuoraResponseWithStatus("pending")
+    val jobResultRequest = JobResultRequest(jobId= "someJobId", dryRun = false, retries = Some(7))
+    GetJobResult(get)(jobResultRequest) shouldBe \/-(Pending("testResponse", "someJobId", false, 6))
+  }
+
+  it should "return -1 retires when called with retries = 0" in {
+    def get(path :String) = ZuoraResponseWithStatus("pending")
+    val jobResultRequest = JobResultRequest(jobId= "someJobId", dryRun = false, retries = Some(0))
+    GetJobResult(get)(jobResultRequest) shouldBe \/-(Pending("testResponse", "someJobId", false, -1))
+  }
+
+  it should "return error if called with a negative number of retries" in {
+    def get(path :String) = ZuoraResponseWithStatus("pending")
+    val jobResultRequest = JobResultRequest(jobId= "someJobId", dryRun = false, retries = Some(-1))
+    GetJobResult(get)(jobResultRequest) shouldBe -\/(GenericError("too many retries!"))
+  }
 
   it should "return pending if zuora response status is pending " in {
-    GetJobResult.toJobResultResponse(ZuoraResponseWithStatus("pending"), false, "someJobId", 0) shouldBe \/-(Pending("testResponse", "someJobId", false, 0))
+    def get(path :String) = ZuoraResponseWithStatus("pending")
+    val jobResultRequest = JobResultRequest("someJobId", false, None)
+    GetJobResult(get)(jobResultRequest) shouldBe \/-(Pending("testResponse", "someJobId", false, 9))
   }
   it should "return pending if zuora response status is executing " in {
-    GetJobResult.toJobResultResponse(ZuoraResponseWithStatus("executing"), true, "someJobId", 0) shouldBe \/-(Pending("testResponse", "someJobId", true, 0))
+    def get(path :String) = ZuoraResponseWithStatus("executing")
+    val jobResultRequest = JobResultRequest("someJobId", true, None)
+    GetJobResult(get)(jobResultRequest) shouldBe \/-(Pending("testResponse", "someJobId", true, 9))
   }
   it should "return error if zuora response status is an unexpected value " in {
-    GetJobResult.toJobResultResponse(ZuoraResponseWithStatus("aborted"), false, "someJobId", 0) shouldBe -\/(GenericError("unexpected status in zuora response: AquaJobResponse(aborted,testResponse,List(Batch(completed,batch1,Some(fileId1)), Batch(completed,batch2,Some(fileId2))),None)"))
+    def get(path :String) = ZuoraResponseWithStatus("aborted")
+    val jobResultRequest = JobResultRequest("someJobId", false, None)
+    GetJobResult(get)(jobResultRequest) shouldBe -\/(GenericError("unexpected status in zuora response: AquaJobResponse(aborted,testResponse,List(Batch(completed,batch1,Some(fileId1)), Batch(completed,batch2,Some(fileId2))),None)"))
   }
 
   it should "return completed if zuora response status is completed " in {
@@ -46,9 +69,13 @@ class GetJobResultTest extends AsyncFlatSpec {
         Batch("fileId2", "batch2")
       ),
       false,
-      1
+      9
     )
-    GetJobResult.toJobResultResponse(ZuoraResponseWithStatus("completed"), false, "someJobId",1) shouldBe \/-(expected)
+
+    def get(path :String) = ZuoraResponseWithStatus("completed")
+    val jobResultRequest = JobResultRequest("someJobId", false, None)
+
+    GetJobResult(get)(jobResultRequest) shouldBe \/-(expected)
   }
   it should "return error if zuora response status is completed but the response is missing fileIds" in {
 
@@ -70,6 +97,9 @@ class GetJobResultTest extends AsyncFlatSpec {
       )
     ))
 
-    GetJobResult.toJobResultResponse(responseWithMissingFileId, true, "someJobId",1) shouldBe -\/(GenericError("file Id missing from response : \\/-(AquaJobResponse(completed,testResponse,List(Batch(completed,batch1,Some(fileId1)), Batch(completed,batch2,None)),None))"))
+    def get(path :String) = responseWithMissingFileId
+    val jobResultRequest = JobResultRequest("someJobId", false, None)
+
+    GetJobResult(get)(jobResultRequest) shouldBe -\/(GenericError("file Id missing from response : \\/-(AquaJobResponse(completed,testResponse,List(Batch(completed,batch1,Some(fileId1)), Batch(completed,batch2,None)),None))"))
   }
 }

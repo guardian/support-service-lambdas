@@ -1,7 +1,7 @@
 package com.gu.zuora.reports
 
 import com.gu.util.zuora.RestRequestMaker
-import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, GenericError, Requests}
+import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, GenericError}
 import com.gu.zuora.reports.aqua.AquaJobResponse
 import com.gu.zuora.reports.dataModel.Batch
 import play.api.libs.json._
@@ -9,8 +9,8 @@ import scalaz.{-\/, \/-}
 
 object GetJobResult {
   val MAX_RETRIES = 10
-  def apply(zuoraRequester: Requests)(jobResultRequest: JobResultRequest): ClientFailableOp[JobResult] = {
-    val zuoraAquaResponse = zuoraRequester.get[AquaJobResponse](s"batch-query/jobs/${jobResultRequest.jobId}")
+  def apply(aquaGet: String => ClientFailableOp[AquaJobResponse])(jobResultRequest: JobResultRequest): ClientFailableOp[JobResult] = {
+    val zuoraAquaResponse = aquaGet(s"batch-query/jobs/${jobResultRequest.jobId}")
     val retries = jobResultRequest.retries.getOrElse(MAX_RETRIES)
     if (retries < 0)
       -\/(GenericError("too many retries!"))

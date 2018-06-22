@@ -10,7 +10,7 @@ import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, Requests}
 import com.gu.zuora.reports.EndToEndData._
 import com.gu.zuora.reports.ReportsLambda.StepsConfig
 import com.gu.zuora.reports.Runner._
-import com.gu.zuora.reports.aqua.{AquaQuery, AquaQueryRequest, ZuoraAquaRequestMaker}
+import com.gu.zuora.reports.aqua.{AquaJobResponse, AquaQuery, AquaQueryRequest, ZuoraAquaRequestMaker}
 import org.scalatest.{Assertion, FlatSpec, Matchers}
 import play.api.libs.json.{Json, Reads, Writes}
 import scalaz.\/-
@@ -60,39 +60,41 @@ class ReportsLambdaEndToEndTest extends FlatSpec with Matchers {
     response jsonMatches expectedResponse
   }
 
-  it should "handle job status request" in {
-    val jobInput =
-      """
-        |{
-        | "jobId" : "aquaJobId",
-        | "dryRun" : false
-        |}
-      """.stripMargin
+    it should "handle job status request" in {
+      val jobInput =
+        """
+          |{
+          | "jobId" : "aquaJobId",
+          | "dryRun" : false
+          |}
+        """.stripMargin
 
-    val responses = Map("/batch-query/jobs/aquaJobId" -> HTTPResponse(200, aquaJobResponse))
+      val responses = Map("/batch-query/jobs/aquaJobId" -> HTTPResponse(200, aquaJobResponse))
 
-    val (response, bla) = getResultAndRequests[JobResultRequest, JobResult](
-      input = jobInput,
-      responses = responses,
-      handlerToTest = GetJobResult.apply
-    )
+      def getJobResultAdapter(requests: Requests) = GetJobResult(requests.get[AquaJobResponse]) _
+      val (response, bla) = getResultAndRequests[JobResultRequest, JobResult](
+        input = jobInput,
+        responses = responses,
+        handlerToTest = getJobResultAdapter
+      )
 
-    val expected =
-      """{
-        |   "name" : "testJob",
-        |   "jobId" : "aquaJobId",
-        |   "status" : "completed",
-        |   "batches" : [{
-        |   "name" : "query1",
-        |   "fileId": "someFileId"
-        |   }],
-        |   "dryRun" : false
-        |}
-      """.stripMargin
+      val expected =
+        """{
+          |   "name" : "testJob",
+          |   "jobId" : "aquaJobId",
+          |   "status" : "completed",
+          |   "batches" : [{
+          |   "name" : "query1",
+          |   "fileId": "someFileId"
+          |   }],
+          |   "dryRun" : false,
+          |   "retries" : 9
+          |}
+        """.stripMargin
 
-    response jsonMatches expected
+      response jsonMatches expected
 
-  }
+    }
 }
 
 object Runner {
