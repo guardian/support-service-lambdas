@@ -14,7 +14,7 @@ object ZuoraRetentionQueryHandler {
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
     QueryHandler[RetentionQueryRequest](
       reportsBucketPrefix = "zuora-retention",
-      toQueryRequest = ToAquaRequest(RawEffects.now().toLocalDate),
+      toQueryRequest = ToAquaRequest(RawEffects.now().toLocalDate _),
       queryReads = RetentionQueryRequest.reads
     )(inputStream, outputStream, context)
   }

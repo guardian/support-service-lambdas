@@ -18,7 +18,7 @@ class UpdateAccountsTest extends FlatSpec with Matchers {
 
     def getRemainingTime() = remainingMsValues.next()
 
-    val response = UpdateAccounts(testUri, successZuoraUpdate, getRemainingTime)(AccountIdIterator(linesIterator, 0).get)
+    val response = UpdateAccounts(successZuoraUpdate, getRemainingTime _)(testUri, AccountIdIterator(linesIterator, 0).get)
     response shouldBe Success(UpdateAccountsResponse(done = true, nextIndex = None, testUri))
   }
 
@@ -28,7 +28,7 @@ class UpdateAccountsTest extends FlatSpec with Matchers {
 
     def getRemainingTime() = remainingMsValues.next()
 
-    val response = UpdateAccounts(testUri, successZuoraUpdate, getRemainingTime)(AccountIdIterator(linesIterator, 0).get)
+    val response = UpdateAccounts(successZuoraUpdate, getRemainingTime _)(testUri, AccountIdIterator(linesIterator, 0).get)
     response shouldBe Success(UpdateAccountsResponse(done = false, nextIndex = Some(2), testUri))
   }
 
@@ -44,7 +44,7 @@ class UpdateAccountsTest extends FlatSpec with Matchers {
 
     def getRemainingTime() = remainingMsValues.next()
 
-    val response = UpdateAccounts(testUri, fakeZuoraUpdate, getRemainingTime)(AccountIdIterator(linesIterator, 0).get)
+    val response = UpdateAccounts(fakeZuoraUpdate, getRemainingTime _)(testUri, AccountIdIterator(linesIterator, 0).get)
     response shouldBe Failure(LambdaException("error response from lambda -\\/(GenericError(something failed!))"))
 
   }

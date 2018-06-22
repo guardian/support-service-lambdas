@@ -21,7 +21,7 @@ object ReportsManualEffectsTest extends App {
 
   implicit val requestReads = Json.reads[QuerierTestRequest]
 
-  def querierTest: Unit = {
+  def querierTest(): Unit = {
 
     def generateTestQuery(request: QuerierTestRequest): AquaQueryRequest = {
       val statements = "SELECT Name FROM Subscription WHERE  id='2c92c0856391fbe001639b8a61d25d7b'"
@@ -47,7 +47,7 @@ object ReportsManualEffectsTest extends App {
 
   }
 
-  def getResultsTest: Unit = {
+  def getResultsTest(): Unit = {
     val response = for {
       zuoraRequests <- getZuoraRequest(RawEffects.response)
       request = JobResultRequest("2c92c0f963f800ac0164174918d905f2", true)
@@ -59,7 +59,7 @@ object ReportsManualEffectsTest extends App {
 
   }
 
-  def fetchFileTest: Unit = {
+  def fetchFileTest(): Unit = {
     val response = for {
       zuoraRequests <- getZuoraRequest(RawEffects.downloadResponse)
       request = FetchFileRequest("2c92c0f963f800ac0164174918d905f2", Nil, List(Batch("2c92c08663f7f01701641749196b2a76", "manualTest/SomeTest2")), false)

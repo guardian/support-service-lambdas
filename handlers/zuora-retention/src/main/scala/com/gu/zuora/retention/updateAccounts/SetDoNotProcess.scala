@@ -1,19 +1,20 @@
 package com.gu.zuora.retention.updateAccounts
 
 import com.gu.util.Logging
-import com.gu.util.zuora.RestRequestMaker.Requests
-import play.api.libs.json.{JsSuccess, Json, Reads}
+import com.gu.util.zuora.RestRequestMaker.ClientFailableOp
+import play.api.libs.json.Json
 
 object SetDoNotProcess extends Logging {
 
   case class UpdateRequestBody(ProcessingAdvice__c: String = "DoNotProcess")
 
-  implicit val updateRequestBodyWrites = Json.writes[UpdateRequestBody]
-  implicit val unitReads: Reads[Unit] = Reads(_ => JsSuccess(()))
+  object UpdateRequestBody {
+    implicit val updateRequestBodyWrites = Json.writes[UpdateRequestBody]
+  }
 
-  def apply(zuoraRequests: Requests)(accountId: String) = {
+  def apply(put: (UpdateRequestBody, String) => ClientFailableOp[Unit])(accountId: String) = {
     logger.info(s"updating account $accountId with DoNotProcess")
-    zuoraRequests.put(UpdateRequestBody(), s"accounts/${accountId}")
+    put(UpdateRequestBody(), s"accounts/${accountId}")
   }
 
 }

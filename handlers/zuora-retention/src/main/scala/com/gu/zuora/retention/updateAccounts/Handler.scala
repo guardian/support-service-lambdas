@@ -11,11 +11,12 @@ import com.gu.util.handlers.{JsonHandler, LambdaException}
 import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, Requests}
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
 import okhttp3.{Request, Response}
-import play.api.libs.json.{Json, Reads}
+import play.api.libs.json.{JsSuccess, Json, Reads}
 import scalaz.{-\/, \/, \/-}
 import UpdateAccountsResponse._
 import UpdateAccountsRequest._
 import com.gu.zuora.retention.filterCandidates.S3Iterator
+import com.gu.zuora.retention.updateAccounts.SetDoNotProcess.UpdateRequestBody._
 
 import scala.util.{Failure, Success, Try}
 
@@ -27,21 +28,22 @@ object Handler {
   type SetDoNotProcess = String => ClientFailableOp[Unit]
   type GetRemainingTime = () => Int
 
-  def operation(
+  def getZuoraRequestMaker(
     response: Request => Response,
     stage: Stage,
-    s3Load: Stage => ConfigFailure \/ String,
-    s3Iterator: String => Try[Iterator[String]],
-    getRemainingTimeInMsec: () => Int,
-    updateAccounts: (String, SetDoNotProcess, GetRemainingTime) => AccountIdIterator => Try[UpdateAccountsResponse]
-  )(request: UpdateAccountsRequest): Try[UpdateAccountsResponse] = for {
+    s3Load: Stage => ConfigFailure \/ String
+  ): Try[Requests] = for {
     config <- toTry(LoadConfig.default[StepsConfig](implicitly)(stage, s3Load(stage)))
-    zuoraRequests = ZuoraRestRequestMaker(response, config.stepsConfig.zuoraRestConfig)
+  } yield ZuoraRestRequestMaker(response, config.stepsConfig.zuoraRestConfig)
+
+  def operation(
+    zuoraRequests: Requests,
+    s3Iterator: String => Try[Iterator[String]],
+    updateAccounts: (String, AccountIdIterator) => Try[UpdateAccountsResponse]
+  )(request: UpdateAccountsRequest): Try[UpdateAccountsResponse] = for {
     linesIterator <- s3Iterator(request.uri)
     accountIdsIterator <- AccountIdIterator(linesIterator, request.nextIndex.getOrElse(0))
-    setDoNotProcess = SetDoNotProcess(zuoraRequests) _
-    wiredUpdateAccounts = UpdateAccounts(request.uri, setDoNotProcess, getRemainingTimeInMsec) _
-    response <- wiredUpdateAccounts(accountIdsIterator)
+    response <- updateAccounts(request.uri, accountIdsIterator)
     _ <- failIfNoProgress(request, response)
   } yield (response)
 
@@ -59,17 +61,22 @@ object Handler {
     val getRemainingTime = context.getRemainingTimeInMillis _
 
     val s3Iterator = S3Iterator.apply(RawEffects.fetchContent) _
-    val wiredOp = operation(
-      RawEffects.response,
-      RawEffects.stage,
-      RawEffects.s3Load,
-      s3Iterator,
-      getRemainingTime,
-      UpdateAccounts.apply
-    ) _
+
+    implicit val unitReads: Reads[Unit] = Reads(_ => JsSuccess(()))
+
+    def wiredOperation(updateAccountsRequest: UpdateAccountsRequest): Try[UpdateAccountsResponse] = for {
+      zuoraRequests <- getZuoraRequestMaker(RawEffects.response, RawEffects.stage, RawEffects.s3Load)
+      setDoNotProcess = SetDoNotProcess(zuoraRequests.put) _
+      operation <- operation(
+        zuoraRequests,
+        s3Iterator,
+        UpdateAccounts(setDoNotProcess, getRemainingTime) _
+      )(updateAccountsRequest)
+    } yield operation
+
     JsonHandler(
       lambdaIO = LambdaIO(inputStream, outputStream, context),
-      operation = wiredOp
+      operation = wiredOperation
     )
   }
 }
