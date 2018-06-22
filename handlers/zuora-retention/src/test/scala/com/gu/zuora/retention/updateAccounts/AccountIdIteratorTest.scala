@@ -30,7 +30,7 @@ class AccountIdIteratorTest extends FlatSpec with Matchers {
     AccountIdIterator(linesIterator(noAccountIdData), 0) shouldBe errorResponse("No Account.Id column found in csv file header")
   }
 
-  it should "return error skip to the correct starting position" in {
+  it should "skip to the correct starting position" in {
     val csvData =
       """Account.Id
         |Line_0
