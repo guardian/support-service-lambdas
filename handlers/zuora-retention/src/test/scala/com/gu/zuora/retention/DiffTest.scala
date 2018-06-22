@@ -1,10 +1,8 @@
 package com.gu.zuora.retention
 
-import org.scalatest.AsyncFlatSpec
+import org.scalatest.{FlatSpec, Matchers}
 
-import org.scalatest.Matchers._
-
-class DiffTest extends AsyncFlatSpec {
+class DiffTest extends FlatSpec with Matchers {
 
   it should "should exclude crmIds" in {
     val candidates =
@@ -58,7 +56,6 @@ class DiffTest extends AsyncFlatSpec {
 
     Diff(candidates.lines, excluded.lines).mkString("\n") shouldBe expected
   }
-
 
   it should "should not exclude anything with an empty exclusion list " in {
     val candidates =

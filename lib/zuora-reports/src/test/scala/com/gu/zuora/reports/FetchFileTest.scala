@@ -20,29 +20,29 @@ class FetchFileTest extends AsyncFlatSpec {
 
   val fetchFile = FetchFile(fakeUpload, getFakeDownloadStream) _
 
-  it should "should upload file and append to results list" in {
+  it should "upload file and append to results list" in {
 
     val alreadyFetched = List(FetchedFile("fileId-1", "file1", "s3://someBucket/file1.csv"))
     val batchesToFetch = List(Batch("fileId-2", "file2"), Batch("fileId-3", "file3"))
-    val fetchFileRequest = FetchFileRequest(alreadyFetched, batchesToFetch)
+    val fetchFileRequest = FetchFileRequest("someJobId", alreadyFetched, batchesToFetch, true)
 
-    val expectedFetched = FetchedFile("fileId-2", "file2", "s3://someBucket/file2.csv") :: alreadyFetched
+    val expectedFetched = FetchedFile("fileId-2", "file2", "s3://someBucket/someJobId/file2.csv") :: alreadyFetched
     val expectedRemainingBatches = batchesToFetch.tail
-    val expected = \/-(FetchFileResponse(expectedFetched, expectedRemainingBatches, false))
+    val expected = \/-(FetchFileResponse("someJobId", expectedFetched, expectedRemainingBatches, false, true))
 
     fetchFile(fetchFileRequest).shouldBe(expected)
 
   }
 
-  it should "should return done = true when fetching last batch" in {
+  it should "return done = true when fetching last batch" in {
 
-    val alreadyFetched = List(FetchedFile("fileId-1", "file1", "s3://someBucket/file1.csv"))
+    val alreadyFetched = List(FetchedFile("fileId-1", "file1", "s3://someBucket/someJobId/file1.csv"))
     val batchesToFetch = List(Batch("fileId-2", "file2"))
-    val fetchFileRequest = FetchFileRequest(alreadyFetched, batchesToFetch)
+    val fetchFileRequest = FetchFileRequest("someJobId", alreadyFetched, batchesToFetch, false)
 
-    val expectedFetched = FetchedFile("fileId-2", "file2", "s3://someBucket/file2.csv") :: alreadyFetched
+    val expectedFetched = FetchedFile("fileId-2", "file2", "s3://someBucket/someJobId/file2.csv") :: alreadyFetched
     val expectedRemainingBatches = List.empty
-    val expected = \/-(FetchFileResponse(expectedFetched, expectedRemainingBatches, true))
+    val expected = \/-(FetchFileResponse("someJobId", expectedFetched, expectedRemainingBatches, true, false))
 
     fetchFile(fetchFileRequest).shouldBe(expected)
 

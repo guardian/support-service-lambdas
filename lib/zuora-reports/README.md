@@ -1,35 +1,32 @@
 # zuora-reports
-This project consists of 4 lambdas used for zuora report generation:
+This project contains reusable code for zuora reports lambdas. Currently it's being used in the zuora retention project.
+
 * zuora-reports-querier: Submits Zuora AQuA query jobs
 * zuora-reports-jobResult: Checks the status of submitted Zuora AQuA query jobs 
 * zuora-reports-fileFetcher: Fetches csv result files from completed jobs and saves them in S3
 
-These lambdas are exported to be used as part of step functions that require zuora reports.
+
 ## zuora-reports-querier
-Used to submit query jobs to Zuora AQuA. The lambda takes an array of AQuA queries and returns a jobId that can later be used to get the results.
+Used to submit query jobs to Zuora AQuA. This lambda does not define the request format as the parameters needed will vary depending on the specific queries to execute. 
+To deploy this as a lambda a 'query generator' the request type must be specific along with a 'query generator' function that converts from our custom request into a Zuora Aqua query request than can be executed.
+
 ### sample usage
 Here is an example of a successful request which returns the job id that can be passed to the jobResult lambda and check the status of the job.
 #### Input
+
 ```
 {
-  "name": "someQueryJob",
-  "queries": [
-    {
-      "name": "subs",
-      "query": "SELECT Id FROM Subscription WHERE  Name='1234'"
-    },
-    {
-      "name": "accounts",
-      "query": "SELECT Id FROM Account WHERE  Name='4321'"
-    }    
-  ]
+"dryRun": false,
+.. any other custom parameters 
 }
 ```
+
 #### Ouput
 ```
 {
   "name": "someQueryJob",
-  "jobId": "23049832094823098403284039284"
+  "jobId": "23049832094823098403284039284",
+  "dryRun": false
 }
 ```
 
@@ -41,13 +38,15 @@ Here we get the results of the job submitted in the previous example and get a c
 #### input
 ```
 {
-  "jobId": "23049832094823098403284039284"
+  "jobId": "23049832094823098403284039284",
+  "dryRun": false
 }
 ```
 #### completed job output
 ```
 {
   "name": "someQueryJob",
+  "jobId". "23049832094823098403284039284",
   "status": "completed",
   "batches": [
     {
@@ -58,36 +57,56 @@ Here we get the results of the job submitted in the previous example and get a c
       "fileId": "20341983092183092180392810",
       "name": "accounts"
     }
-  ]
+  ],
+  "dryRun": false
 }
 ```
 #### pending job output
 ```
 {
   "name": "someQueryJob",
-  "status" : "pending"
+  "status" : "pending",
+  "dryRun": false
 }
 ```
 ## zuora-reports-fileFetcher
 This lambda is used to fetch the results of a query using the file ids retrieved from the response of JobResult.
 
 ### sample usage
-The input contains the the file id and the location we want to full within the zuora-reports-[STAGE] bucket.
+This lambda will accept a list of files to download but will download just one of them on each execution. It will typically be used in step functions followed with a condition state that will make it run again until it is done fetching all files.
+Since this lambda's output will be used as it's own input on the next iteration it's requests and responses follow the same format. 
+The main components of the input/output are :
+* a list of batches representing the files to fetch from zuora into s3
+* a list of fetched files so far
+* a done boolean to indicate when the iteration should stop
 
-The output will contain the uri of the file with the results of the query.
-This uri will remain valid for up to a day to ensure complicance with GDPR.
+As the iteration goes on this lambda should move the files in the batches list into the fetched list until there are no more batches to move, in which case the lambda will return done = true
+
  
- #### input
+ #### input / output
 ```
 {
-  "fileId": "20341983092183092180392810",
-  "saveLocation": "myReports/accounts.csv"
-}
-```
-#### output
-```
 {
-  "fileId": "20341983092183092180392810",
-  "uri": "s3://zuora-reports-code/myReports/accounts.csv"
+  "jobId": "23049832094823098403284039284",
+  "fetched": [
+    {
+      "fileId": "10293821098320983091283012",
+      "name": "subs",
+      "uri": "s3://[SOME_BUCKET]/23049832094823098403284039284/subs.csv"
+    }
+  ],
+  "batches": [
+    {
+      "fileId": "20341983092183092180392810",
+      "name": "accounts"
+    }
+  ],
+  "done": false,
+  "dryRun": false
+}
 }
 ```
+
+
+##dryRun parameter
+This parameter will be present in all inputs and outputs but is not used by these lambdas, it is up to the projects using this to have a different behaviour whenever an execution is a dry run. The parameter has to be in all inputs and outputs in order to reach later steps when used within step functions. 

@@ -28,24 +28,26 @@ class GetJobResultTest extends AsyncFlatSpec {
   ))
 
   it should "return pending if zuora response status is pending " in {
-    GetJobResult.toJobResultResponse(ZuoraResponseWithStatus("pending")) shouldBe \/-(Pending("testResponse"))
+    GetJobResult.toJobResultResponse(ZuoraResponseWithStatus("pending"), false, "someJobId") shouldBe \/-(Pending("testResponse", "someJobId", false))
   }
   it should "return pending if zuora response status is executing " in {
-    GetJobResult.toJobResultResponse(ZuoraResponseWithStatus("executing")) shouldBe \/-(Pending("testResponse"))
+    GetJobResult.toJobResultResponse(ZuoraResponseWithStatus("executing"), true, "someJobId") shouldBe \/-(Pending("testResponse", "someJobId", true))
   }
   it should "return error if zuora response status is an unexpected value " in {
-    GetJobResult.toJobResultResponse(ZuoraResponseWithStatus("aborted")) shouldBe -\/(GenericError("unexpected status in zuora response: AquaJobResponse(aborted,testResponse,List(Batch(completed,batch1,Some(fileId1)), Batch(completed,batch2,Some(fileId2))),None)"))
+    GetJobResult.toJobResultResponse(ZuoraResponseWithStatus("aborted"), false, "someJobId") shouldBe -\/(GenericError("unexpected status in zuora response: AquaJobResponse(aborted,testResponse,List(Batch(completed,batch1,Some(fileId1)), Batch(completed,batch2,Some(fileId2))),None)"))
   }
 
   it should "return completed if zuora response status is completed " in {
     val expected = Completed(
       name = "testResponse",
+      jobId = "someJobId",
       batches = List(
         Batch("fileId1", "batch1"),
         Batch("fileId2", "batch2")
-      )
+      ),
+      false
     )
-    GetJobResult.toJobResultResponse(ZuoraResponseWithStatus("completed")) shouldBe \/-(expected)
+    GetJobResult.toJobResultResponse(ZuoraResponseWithStatus("completed"), false, "someJobId") shouldBe \/-(expected)
   }
   it should "return error if zuora response status is completed but the response is missing fileIds" in {
 
@@ -67,6 +69,6 @@ class GetJobResultTest extends AsyncFlatSpec {
       )
     ))
 
-    GetJobResult.toJobResultResponse(responseWithMissingFileId) shouldBe -\/(GenericError("file Id missing from response : \\/-(AquaJobResponse(completed,testResponse,List(Batch(completed,batch1,Some(fileId1)), Batch(completed,batch2,None)),None))"))
+    GetJobResult.toJobResultResponse(responseWithMissingFileId, true, "someJobId") shouldBe -\/(GenericError("file Id missing from response : \\/-(AquaJobResponse(completed,testResponse,List(Batch(completed,batch1,Some(fileId1)), Batch(completed,batch2,None)),None))"))
   }
 }

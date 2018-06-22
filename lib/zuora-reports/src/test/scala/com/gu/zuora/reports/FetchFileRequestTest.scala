@@ -16,6 +16,7 @@ class FetchFileRequestTest extends AsyncFlatSpec {
     val fetcFileRequest = Json.parse(
       """{
       |  "name": "zuora-retention",
+      |  "jobId": "someJobId",
       |  "status": "completed",
       |  "batches": [
       |    {
@@ -26,18 +27,20 @@ class FetchFileRequestTest extends AsyncFlatSpec {
       |      "fileId": "exclusionFileId",
       |      "name": "exclusionQuery"
       |    }
-      |  ]
+      |  ],
+      |  "dryRun": false
       |}""".stripMargin
     )
 
     val actual = fetcFileRequest.as[FetchFileRequest]
-    actual shouldBe FetchFileRequest(List.empty, batches)
+    actual shouldBe FetchFileRequest("someJobId", List.empty, batches, false)
   }
 
   it should "deserialise successfully with already fetched files in request  " in {
     val fetcFileRequest = Json.parse(
       """{
         |  "name": "zuora-retention",
+        |  "jobId": "someJobId",
         |  "status": "completed",
         |  "batches": [
         |    {
@@ -54,14 +57,15 @@ class FetchFileRequestTest extends AsyncFlatSpec {
         |   "name" : "someOtherQuery",
         |  "uri" : "s3://someBucket/someOtherFile.csv"
         |  }
-        |  ]
+        |  ],
+        |  "dryRun" : true
         |}""".stripMargin
     )
     val fetchedFiles = List(
       FetchedFile("someOtherFileId", "someOtherQuery", "s3://someBucket/someOtherFile.csv")
     )
     val actual = fetcFileRequest.as[FetchFileRequest]
-    actual shouldBe FetchFileRequest(fetchedFiles, batches)
+    actual shouldBe FetchFileRequest("someJobId", fetchedFiles, batches, true)
   }
 
 }

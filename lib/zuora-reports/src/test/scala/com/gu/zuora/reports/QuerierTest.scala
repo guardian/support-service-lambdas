@@ -16,7 +16,7 @@ class QuerierTest extends AsyncFlatSpec {
       batches = Seq()
     ))
 
-    Querier.toQuerierResponse(noJobIdResponse) shouldBe -\/(GenericError("unexpected response from zuora: AquaJobResponse(submitted,someName,List(),None)"))
+    Querier.toQuerierResponse(noJobIdResponse, false) shouldBe -\/(GenericError("unexpected response from zuora: AquaJobResponse(submitted,someName,List(),None)"))
   }
 
   it should "return jobId if response from Zuora is successful " in {
@@ -27,6 +27,6 @@ class QuerierTest extends AsyncFlatSpec {
       batches = Seq()
     ))
 
-    Querier.toQuerierResponse(noJobIdResponse) shouldBe \/-(QuerierResponse("someName", "jobId"))
+    Querier.toQuerierResponse(noJobIdResponse, false) shouldBe \/-(QuerierResponse("someName", "jobId", false))
   }
 }

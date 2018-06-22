@@ -3,10 +3,11 @@ package com.gu.zuora.retention.query
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+import com.gu.zuora.reports.QuerierRequest
 import com.gu.zuora.reports.aqua.{AquaQuery, AquaQueryRequest}
 import play.api.libs.json.Json
 
-case class RetentionQueryRequest(cutOffDate: LocalDate) //todo check if this should be localdate or some other format
+case class RetentionQueryRequest(cutOffDate: Option[LocalDate], dryRun: Boolean) extends QuerierRequest
 
 object RetentionQueryRequest {
   implicit val reads = Json.reads[RetentionQueryRequest]
@@ -15,8 +16,10 @@ object RetentionQueryRequest {
 object ToAquaRequest {
   val exclusionQueryName = "exclusionQuery"
   val candidatesQueryName = "candidatesQuery"
-  def apply(request: RetentionQueryRequest): AquaQueryRequest = {
-    val dateStr = request.cutOffDate.format(DateTimeFormatter.ISO_LOCAL_DATE)
+  def apply(getCurrentDate: () => LocalDate)(request: RetentionQueryRequest): AquaQueryRequest = {
+
+    val filterDate = request.cutOffDate getOrElse getCurrentDate().minusMonths(30)
+    val dateStr = filterDate.format(DateTimeFormatter.ISO_LOCAL_DATE)
     val exclusionQuery = AquaQuery(
       name = exclusionQueryName,
       query =
@@ -43,7 +46,7 @@ object ToAquaRequest {
       query =
         s"""
            |SELECT
-           |  Account.Id, Account.CrmId, BillToContact.Id, SoldToContact.Id
+           |  Account.Id, Account.CrmId
            |FROM
            |  Subscription
            |WHERE

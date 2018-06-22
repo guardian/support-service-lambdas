@@ -9,11 +9,10 @@ import scalaz.syntax.std.either._
 
 object S3ReportUpload extends Logging {
 
-  def apply(destinationBucket: String, basePath: String, s3Write: PutObjectRequest => Try[PutObjectResult])(downloadStream: DownloadStream, fileName: String): ClientFailableOp[String] = {
+  def apply(destinationBucket: String, s3Write: PutObjectRequest => Try[PutObjectResult])(downloadStream: DownloadStream, key: String): ClientFailableOp[String] = {
 
     val metadata = new ObjectMetadata()
     metadata.setContentLength(downloadStream.lengthBytes)
-    val key = s"$basePath/$fileName"
     val putObjectRequest = new PutObjectRequest(destinationBucket, key, downloadStream.stream, metadata)
     s3Write(putObjectRequest).map(_ => s"s3://$destinationBucket/$key").toEither.disjunction.leftMap { exception =>
       logger.error("could not upload report to S3", exception)
