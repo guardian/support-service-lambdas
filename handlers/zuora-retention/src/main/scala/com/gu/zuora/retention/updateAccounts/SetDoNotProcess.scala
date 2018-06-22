@@ -12,9 +12,9 @@ object SetDoNotProcess extends Logging {
     implicit val updateRequestBodyWrites = Json.writes[UpdateRequestBody]
   }
 
-  def apply(put: (UpdateRequestBody, String) => ClientFailableOp[Unit])(accountId: String) = {
+  def apply(put: (UpdateRequestBody, String) => ClientFailableOp[Unit])(accountId: AccountId) = {
     logger.info(s"updating account $accountId with DoNotProcess")
-    put(UpdateRequestBody(), s"accounts/${accountId}")
+    put(UpdateRequestBody(), s"accounts/${accountId.value}")
   }
 
 }

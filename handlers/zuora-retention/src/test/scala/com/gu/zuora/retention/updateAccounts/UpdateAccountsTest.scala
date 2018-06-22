@@ -9,7 +9,7 @@ import scala.util.{Failure, Success}
 
 class UpdateAccountsTest extends FlatSpec with Matchers {
   val testUri = "someUri"
-  def successZuoraUpdate(AccountId: String): ClientFailableOp[Unit] = \/-(())
+  def successZuoraUpdate(accountId: AccountId): ClientFailableOp[Unit] = \/-(())
 
   it should "process all accounts if there is enough execution time left" in {
 
@@ -33,8 +33,8 @@ class UpdateAccountsTest extends FlatSpec with Matchers {
   }
 
   it should "should return failure if zuora returns an error" in {
-    def fakeZuoraUpdate(accountId: String) = {
-      if (accountId == "secondAccount")
+    def fakeZuoraUpdate(accountId: AccountId) = {
+      if (accountId.value == "secondAccount")
         -\/(GenericError("something failed!"))
       else \/-(())
     }

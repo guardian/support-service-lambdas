@@ -30,7 +30,7 @@ class HandlerTest extends FlatSpec with Matchers {
   def s3Iterator(uri: String) = Success(List("Account.Id", "testAccountId").iterator)
 
   def updateAccounts(uri: String, accountIdIterator: AccountIdIterator) = {
-    if (accountIdIterator.next == "testAccountId")
+    if (accountIdIterator.next.value == "testAccountId")
       Success(UpdateAccountsResponse(true, None, uri))
     else
       Failure(LambdaException("test: unexpected input params to fake updateAccounts"))

@@ -3,16 +3,16 @@ package com.gu.zuora.retention.updateAccounts
 import com.gu.util.handlers.LambdaException
 
 import scala.util.Try
-
+case class AccountId(value: String)
 class AccountIdIterator(iterator: Iterator[String], accountIdLocation: Int, var currentPosition: Int) {
 
   def hasNext = iterator.hasNext
 
-  def next = {
+  def next: AccountId = {
     val line = iterator.next()
     currentPosition = currentPosition + 1
-    val accountId = line.split(",")(accountIdLocation)
-    accountId
+    val accountIdValue = line.split(",")(accountIdLocation)
+    AccountId(accountIdValue)
   }
 }
 

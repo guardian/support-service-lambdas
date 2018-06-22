@@ -7,8 +7,8 @@ import scala.util.{Failure, Success}
 
 class AccountIdIteratorTest extends FlatSpec with Matchers {
 
-  def linesIterator(data:String) = data.split("\n").iterator
-  def errorResponse(msg: String) =   Failure(LambdaException(msg))
+  def linesIterator(data: String) = data.split("\n").iterator
+  def errorResponse(msg: String) = Failure(LambdaException(msg))
 
   it should "return account id from the correct file column" in {
     val csvData =
@@ -18,7 +18,7 @@ class AccountIdIteratorTest extends FlatSpec with Matchers {
         |A3,AccountId3,C2
       """.stripMargin
 
-    AccountIdIterator(linesIterator(csvData), 0).map(_.next) shouldBe Success("AccountId1")
+    AccountIdIterator(linesIterator(csvData), 0).map(_.next) shouldBe Success(AccountId("AccountId1"))
   }
 
   it should "return error if no account id column in header" in {
@@ -38,7 +38,7 @@ class AccountIdIteratorTest extends FlatSpec with Matchers {
         |Line_2
         |Line_3""".stripMargin
 
-    AccountIdIterator(linesIterator(csvData), 2).map(_.next) shouldBe Success("Line_2")
+    AccountIdIterator(linesIterator(csvData), 2).map(_.next) shouldBe Success(AccountId("Line_2"))
   }
 
   it should "hasNext should return false if starting position is past the end of the csv file" in {
@@ -62,12 +62,12 @@ class AccountIdIteratorTest extends FlatSpec with Matchers {
 
     AccountIdIterator(linesIterator(csvData), 0).map(getAllAccounts) shouldBe Success(List("Line_0", "Line_1", "Line_2", "Line_3"))
 
-    def getAllAccounts(iterator: AccountIdIterator) : List[String] = {
-      def appendNextId() : List[String] = {
+    def getAllAccounts(iterator: AccountIdIterator): List[String] = {
+      def appendNextId(): List[String] = {
         if (!iterator.hasNext)
           List.empty
         else
-          iterator.next :: appendNextId()
+          iterator.next.value :: appendNextId()
       }
       appendNextId()
     }
