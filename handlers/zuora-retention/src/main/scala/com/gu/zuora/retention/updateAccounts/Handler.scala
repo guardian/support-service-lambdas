@@ -37,7 +37,6 @@ object Handler {
   } yield ZuoraRestRequestMaker(response, config.stepsConfig.zuoraRestConfig)
 
   def operation(
-    zuoraRequests: Requests,
     s3Iterator: String => Try[Iterator[String]],
     updateAccounts: (String, AccountIdIterator) => Try[UpdateAccountsResponse]
   )(request: UpdateAccountsRequest): Try[UpdateAccountsResponse] = for {
@@ -68,7 +67,6 @@ object Handler {
       zuoraRequests <- getZuoraRequestMaker(RawEffects.response, RawEffects.stage, RawEffects.s3Load)
       setDoNotProcess = SetDoNotProcess(zuoraRequests.put) _
       operation <- operation(
-        zuoraRequests,
         s3Iterator,
         UpdateAccounts(setDoNotProcess, getRemainingTime) _
       )(updateAccountsRequest)

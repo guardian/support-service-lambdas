@@ -26,4 +26,20 @@ class HandlerTest extends FlatSpec with Matchers {
     val noProgressResponse = UpdateAccountsResponse(uri = "someUri", nextIndex = None, done = true)
     Handler.failIfNoProgress(request, noProgressResponse) shouldBe (Success(()))
   }
+
+  def s3Iterator(uri: String) = Success(List("Account.Id", "testAccountId").iterator)
+
+  def updateAccounts(uri: String, accountIdIterator: AccountIdIterator) = {
+    if (accountIdIterator.next == "testAccountId")
+      Success(UpdateAccountsResponse(true, None, uri))
+    else
+      Failure(LambdaException("test: unexpected input params to fake updateAccounts"))
+  }
+
+  def operation = Handler.operation(s3Iterator, updateAccounts) _
+
+  it should "execute operation" in {
+    val updateAccountsRequest = UpdateAccountsRequest("someUri", None)
+    operation(updateAccountsRequest) shouldBe (Success(UpdateAccountsResponse(true, None, "someUri")))
+  }
 }

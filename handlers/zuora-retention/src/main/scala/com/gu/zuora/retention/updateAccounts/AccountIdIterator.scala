@@ -1,5 +1,7 @@
 package com.gu.zuora.retention.updateAccounts
 
+import com.gu.util.handlers.LambdaException
+
 import scala.util.Try
 
 class AccountIdIterator(iterator: Iterator[String], accountIdLocation: Int, var currentPosition: Int) {
@@ -21,6 +23,7 @@ object AccountIdIterator {
     Try {
       val headers = lines.next()
       val accountIdLocation = headers.split(",").indexOf(accountIdHeader)
+      if (accountIdLocation < 0) throw new LambdaException(s"No $accountIdHeader column found in csv file header")
       new AccountIdIterator(lines.drop(startingPosition), accountIdLocation, startingPosition)
     }
   }
