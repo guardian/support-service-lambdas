@@ -14,7 +14,8 @@ class GetJobResultResponseTest extends AsyncFlatSpec {
         Batch("fileId1", "batch1"),
         Batch("fileId2", "batch2")
       ),
-      true
+      true,
+      13
     )
 
     val expected =
@@ -33,7 +34,8 @@ class GetJobResultResponseTest extends AsyncFlatSpec {
         |      "name": "batch2"
         |    }
         |  ],
-        |  "dryRun": true
+        |  "dryRun": true,
+        |  "retries" : 13
         |}
       """.stripMargin
 
@@ -48,11 +50,12 @@ class GetJobResultResponseTest extends AsyncFlatSpec {
         |  "name": "testResponse",
         |  "jobId" : "someJobId",
         |  "status" : "pending",
-        |  "dryRun" : false
+        |  "dryRun" : false,
+        |  "retries" : 13
         |}
       """.stripMargin
 
-    val pendingResponse = Pending("testResponse", "someJobId", false)
+    val pendingResponse = Pending("testResponse", "someJobId", false, 13)
 
     Json.toJson(pendingResponse) shouldBe Json.parse(expected)
   }

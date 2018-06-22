@@ -28,13 +28,13 @@ class GetJobResultTest extends AsyncFlatSpec {
   ))
 
   it should "return pending if zuora response status is pending " in {
-    GetJobResult.toJobResultResponse(ZuoraResponseWithStatus("pending"), false, "someJobId") shouldBe \/-(Pending("testResponse", "someJobId", false))
+    GetJobResult.toJobResultResponse(ZuoraResponseWithStatus("pending"), false, "someJobId", 0) shouldBe \/-(Pending("testResponse", "someJobId", false, 0))
   }
   it should "return pending if zuora response status is executing " in {
-    GetJobResult.toJobResultResponse(ZuoraResponseWithStatus("executing"), true, "someJobId") shouldBe \/-(Pending("testResponse", "someJobId", true))
+    GetJobResult.toJobResultResponse(ZuoraResponseWithStatus("executing"), true, "someJobId", 0) shouldBe \/-(Pending("testResponse", "someJobId", true, 0))
   }
   it should "return error if zuora response status is an unexpected value " in {
-    GetJobResult.toJobResultResponse(ZuoraResponseWithStatus("aborted"), false, "someJobId") shouldBe -\/(GenericError("unexpected status in zuora response: AquaJobResponse(aborted,testResponse,List(Batch(completed,batch1,Some(fileId1)), Batch(completed,batch2,Some(fileId2))),None)"))
+    GetJobResult.toJobResultResponse(ZuoraResponseWithStatus("aborted"), false, "someJobId", 0) shouldBe -\/(GenericError("unexpected status in zuora response: AquaJobResponse(aborted,testResponse,List(Batch(completed,batch1,Some(fileId1)), Batch(completed,batch2,Some(fileId2))),None)"))
   }
 
   it should "return completed if zuora response status is completed " in {
@@ -45,9 +45,10 @@ class GetJobResultTest extends AsyncFlatSpec {
         Batch("fileId1", "batch1"),
         Batch("fileId2", "batch2")
       ),
-      false
+      false,
+      1
     )
-    GetJobResult.toJobResultResponse(ZuoraResponseWithStatus("completed"), false, "someJobId") shouldBe \/-(expected)
+    GetJobResult.toJobResultResponse(ZuoraResponseWithStatus("completed"), false, "someJobId",1) shouldBe \/-(expected)
   }
   it should "return error if zuora response status is completed but the response is missing fileIds" in {
 
@@ -69,6 +70,6 @@ class GetJobResultTest extends AsyncFlatSpec {
       )
     ))
 
-    GetJobResult.toJobResultResponse(responseWithMissingFileId, true, "someJobId") shouldBe -\/(GenericError("file Id missing from response : \\/-(AquaJobResponse(completed,testResponse,List(Batch(completed,batch1,Some(fileId1)), Batch(completed,batch2,None)),None))"))
+    GetJobResult.toJobResultResponse(responseWithMissingFileId, true, "someJobId",1) shouldBe -\/(GenericError("file Id missing from response : \\/-(AquaJobResponse(completed,testResponse,List(Batch(completed,batch1,Some(fileId1)), Batch(completed,batch2,None)),None))"))
   }
 }

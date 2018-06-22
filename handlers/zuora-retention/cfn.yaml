@@ -348,21 +348,31 @@ Resources:
                   },
                   "WaitSomeTime":{
                      "Type":"Wait",
-                     "Seconds":10,
+                     "Seconds":60,
                      "Next":"FetchResults"
                   },
                   "FetchResults":{
                      "Type":"Task",
                      "Resource":"${fetcherArn}",
-                     "Next":"FetchFiles",
+                     "Next":"checkResultsAvailable",
                      "Retry":[
                         {
                            "ErrorEquals":["States.ALL"],
-                           "IntervalSeconds":60,
-                           "MaxAttempts":10,
-                           "BackoffRate":1.0
+                            "IntervalSeconds":30,
+                            "MaxAttempts":3
                         }
                      ]
+                  },
+                  "checkResultsAvailable":{
+                     "Type":"Choice",
+                     "Choices":[
+                        {
+                           "Variable":"$.status",
+                           "StringEquals":"pending",
+                           "Next":"WaitSomeTime"
+                        }
+                     ],
+                     "Default":"FetchFiles"
                   },
                   "FetchFiles":{
                      "Type":"Task",
