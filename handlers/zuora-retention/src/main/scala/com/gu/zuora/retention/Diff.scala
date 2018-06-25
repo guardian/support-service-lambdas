@@ -5,10 +5,10 @@ object Diff {
   val crmIdColName = "Account.CrmId"
 
   /**
-    * Returns an iterator for the lines in candidateLines with crmIds that are not in the exclusionLines
-    * The candidates and exclusion iterators are expected to iterate ascending CrmId order.
-    * The point of this is to avoid loading the whole exclusionLines in memory.
-    */
+   * Returns an iterator for the lines in candidateLines with crmIds that are not in the exclusionLines
+   * The candidates and exclusion iterators are expected to iterate ascending CrmId order.
+   * The point of this is to avoid loading the whole exclusionLines in memory.
+   */
   def apply(candidateLines: Iterator[String], exclusionLines: Iterator[String]): Iterator[String] = {
     exclusionLines.next //skip header
     val exclusionCrmIds = SortedCrmIdIterator(exclusionLines)
@@ -17,7 +17,7 @@ object Diff {
     val valueRows = candidateLines.filterNot { line =>
       line.trim.isEmpty || {
         val crmId = line.split(",", -1)(crmidLocation).trim
-        if (crmId.trim.isEmpty) false
+        if (crmId.trim.isEmpty) true
         else {
           val comp = exclusionCrmIds.nextGreaterOrEqual(crmId)
           comp.exists(_.toLowerCase == crmId.toLowerCase)

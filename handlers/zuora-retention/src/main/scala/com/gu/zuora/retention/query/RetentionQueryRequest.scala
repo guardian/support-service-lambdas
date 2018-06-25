@@ -30,6 +30,7 @@ object ToAquaRequest {
            | Subscription
            |WHERE
            | Account.CrmId != '' AND
+           | Account.CrmId IS NOT NULL AND
            | Status != 'Expired' AND
            | Status != 'Draft'
            |GROUP BY
@@ -51,6 +52,8 @@ object ToAquaRequest {
            |  Subscription
            |WHERE
            |  Account.Status != 'Canceled' AND
+           |  Account.CrmId != '' AND
+           |  Account.CrmId IS NOT NULL AND
            |  (Account.ProcessingAdvice__c != 'DoNotProcess' OR Account.ProcessingAdvice__c IS NULL) AND
            |  Subscription.Status = 'Cancelled' AND
            |  SubscriptionEndDate <= '$dateStr' AND
