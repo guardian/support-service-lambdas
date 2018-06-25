@@ -88,7 +88,7 @@ class ReportsLambdaEndToEndTest extends FlatSpec with Matchers {
           |   "fileId": "someFileId"
           |   }],
           |   "dryRun" : false,
-          |   "retries" : 9
+          |   "tries" : 9
           |}
         """.stripMargin
 

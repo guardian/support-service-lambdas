@@ -26,7 +26,7 @@ class GetJobResultTest extends AsyncFlatSpec {
       )
     )
   ))
-  it should "decrease the amount of retries left on each execution" in {
+  it should "decrease the amount of tries left on each execution" in {
     def get(path: String) = ZuoraResponseWithStatus("pending")
     val jobResultRequest = JobResultRequest(jobId = "someJobId", dryRun = false, tries = Some(7))
     GetJobResult(get)(jobResultRequest) shouldBe \/-(Pending("testResponse", "someJobId", false, 6))

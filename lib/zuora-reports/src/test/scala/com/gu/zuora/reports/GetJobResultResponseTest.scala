@@ -35,7 +35,7 @@ class GetJobResultResponseTest extends AsyncFlatSpec {
         |    }
         |  ],
         |  "dryRun": true,
-        |  "retries" : 13
+        |  "tries" : 13
         |}
       """.stripMargin
 
@@ -51,7 +51,7 @@ class GetJobResultResponseTest extends AsyncFlatSpec {
         |  "jobId" : "someJobId",
         |  "status" : "pending",
         |  "dryRun" : false,
-        |  "retries" : 13
+        |  "tries" : 13
         |}
       """.stripMargin
 
