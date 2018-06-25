@@ -4,6 +4,8 @@ import java.io.{InputStream, OutputStream}
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.RawEffects
+import com.gu.salesforce.SalesforceGenericIdLookup
+import com.gu.salesforce.SalesforceGenericIdLookup.ResponseWithId
 import com.gu.salesforce.auth.SalesforceAuthenticate
 import com.gu.salesforce.auth.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.cases.SalesforceCase
@@ -40,11 +42,11 @@ object Handler extends Logging {
 
     implicit val writes = Json.writes[RaiseCaseResponse]
 
-    def embellishRaiseRequestBody(raiseRequestBody: RaiseRequestBody) = NewCase(
+    def embellishRaiseRequestBody(raiseRequestBody: RaiseRequestBody, sfSubscriptionIdContainer: ResponseWithId) = NewCase(
       Origin = "Self Service",
       ContactId = raiseRequestBody.contactId,
       Product__c = raiseRequestBody.product,
-      SF_Subscription__c = "", // TODO perform mapping from raiseRequestBody.subscriptionName (perhaps with SF rule)
+      SF_Subscription__c = sfSubscriptionIdContainer.Id,
       Journey__c = "SV - At Risk - MB",
       Enquiry_Type__c = raiseRequestBody.reason,
       Status = "Closed",
@@ -55,7 +57,8 @@ object Handler extends Logging {
       (for {
         sfRequests <- sfRequests
         raiseCaseDetail <- apiGatewayRequest.bodyAsCaseClass[RaiseRequestBody]()
-        raiseCaseResponse <- SalesforceCase.Raise(sfRequests)(embellishRaiseRequestBody(raiseCaseDetail)).toApiGatewayOp("raise case")
+        sfSubscriptionIdContainer <- SalesforceGenericIdLookup(sfRequests)("SF_Subscription__c", "Name", raiseCaseDetail.subscriptionName).toApiGatewayOp("lookup SF subscription ID")
+        raiseCaseResponse <- SalesforceCase.Raise(sfRequests)(embellishRaiseRequestBody(raiseCaseDetail, sfSubscriptionIdContainer)).toApiGatewayOp("raise sf case")
       } yield ApiResponse("200", Json.prettyPrint(Json.toJson(raiseCaseResponse)))).apiResponse
 
   }
