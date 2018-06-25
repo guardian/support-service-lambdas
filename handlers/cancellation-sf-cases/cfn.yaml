@@ -49,7 +49,7 @@ Resources:
                             - logs:CreateLogStream
                             - logs:PutLogEvents
                             - lambda:InvokeFunction
-                            Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/cancellation-sf-cases-${Stage}:log-stream:*"
+                            Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/cancellation-sf-cases-*-${Stage}:log-stream:*"
                 - PolicyName: ReadPrivateCredentials
                   PolicyDocument:
                       Statement:
