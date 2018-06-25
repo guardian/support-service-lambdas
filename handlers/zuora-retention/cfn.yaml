@@ -202,6 +202,26 @@ Resources:
                             Action:
                             - s3:GetObject
                             Resource: !Sub arn:aws:s3:::${RetentionBucket}/*
+    StateMachineTriggerRole:
+      Type: AWS::IAM::Role
+      Properties:
+          AssumeRolePolicyDocument:
+              Statement:
+                  - Effect: Allow
+                    Principal:
+                        Service:
+                           - events.amazonaws.com
+                    Action:
+                        - sts:AssumeRole
+          Policies:
+              - PolicyName: TriggerStateMchine
+                PolicyDocument:
+                    Version : "2012-10-17"
+                    Statement:
+                       - Effect: Allow
+                         Action:
+                         - states:StartExecution
+                         Resource: !Ref stateMachine
     ZuoraRetentionQuerier:
         Type: AWS::Lambda::Function
         Properties:
@@ -459,3 +479,18 @@ Resources:
             filterArn: !GetAtt [ ZuoraRetentionFilter, Arn ],
             accountUpdaterArn: !GetAtt [ ZuoraRetentionAccountUpdater, Arn ]
           }
+    ScheduleRule:
+        Type: "AWS::Events::Rule"
+        Properties:
+          Description: "triggerZuoraRetention"
+          ScheduleExpression: "cron(00 3 ? * * *)"
+          State: "ENABLED"
+          Targets:
+            -
+              Arn: !Ref stateMachine
+              Id: !Sub 'trigger_zuoraRetention-${Stage}'
+              Input: |
+                {
+                  "dryRun": false
+                }
+              RoleArn: !GetAtt [ StateMachineTriggerRole, Arn ]
