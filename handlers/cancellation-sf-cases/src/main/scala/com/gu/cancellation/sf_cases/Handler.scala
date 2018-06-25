@@ -4,6 +4,7 @@ import java.io.{InputStream, OutputStream}
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.RawEffects
+import com.gu.identity.IdentityCookieToIdentityId
 import com.gu.salesforce.SalesforceGenericIdLookup
 import com.gu.salesforce.SalesforceGenericIdLookup.ResponseWithId
 import com.gu.salesforce.auth.SalesforceAuthenticate
@@ -27,6 +28,8 @@ object Handler extends Logging {
   case class StepsConfig(sfConfig: SFAuthConfig)
   implicit val stepsConfigReads: Reads[StepsConfig] = Json.reads[StepsConfig]
 
+  type LazySalesforceAuthenticatedReqMaker = () => ApiGatewayOp[RestRequestMaker.Requests]
+
   def raiseCase(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
     runWithEffects(RaiseCase.steps, RawEffects.response, RawEffects.stage, RawEffects.s3Load, LambdaIO(inputStream, outputStream, context))
 
@@ -35,16 +38,15 @@ object Handler extends Logging {
     case class RaiseRequestBody(
       product: String,
       reason: String,
-      subscriptionName: String,
-      contactId: String
+      subscriptionName: String
     )
     implicit val reads = Json.reads[RaiseRequestBody]
 
     implicit val writes = Json.writes[RaiseCaseResponse]
 
-    def embellishRaiseRequestBody(raiseRequestBody: RaiseRequestBody, sfSubscriptionIdContainer: ResponseWithId) = NewCase(
+    def embellishRaiseRequestBody(raiseRequestBody: RaiseRequestBody, sfSubscriptionIdContainer: ResponseWithId, sfContactId: ResponseWithId) = NewCase(
       Origin = "Self Service",
-      ContactId = raiseRequestBody.contactId,
+      ContactId = sfContactId.Id,
       Product__c = raiseRequestBody.product,
       SF_Subscription__c = sfSubscriptionIdContainer.Id,
       Journey__c = "SV - At Risk - MB",
@@ -53,14 +55,15 @@ object Handler extends Logging {
       Subject = "Online Cancellation Attempt"
     )
 
-    def steps(sfRequests: ApiGatewayOp[RestRequestMaker.Requests])(apiGatewayRequest: ApiGatewayRequest) =
+    def steps(sfRequests: LazySalesforceAuthenticatedReqMaker)(apiGatewayRequest: ApiGatewayRequest) =
       (for {
-        sfRequests <- sfRequests
+        identityId <- IdentityCookieToIdentityId(apiGatewayRequest.headers)
+        sfRequests <- sfRequests()
         raiseCaseDetail <- apiGatewayRequest.bodyAsCaseClass[RaiseRequestBody]()
+        sfContactId <- SalesforceGenericIdLookup(sfRequests)("Contact", "IdentityID__c", identityId).toApiGatewayOp("lookup SF contact from identityID")
         sfSubscriptionIdContainer <- SalesforceGenericIdLookup(sfRequests)("SF_Subscription__c", "Name", raiseCaseDetail.subscriptionName).toApiGatewayOp("lookup SF subscription ID")
-        raiseCaseResponse <- SalesforceCase.Raise(sfRequests)(embellishRaiseRequestBody(raiseCaseDetail, sfSubscriptionIdContainer)).toApiGatewayOp("raise sf case")
+        raiseCaseResponse <- SalesforceCase.Raise(sfRequests)(embellishRaiseRequestBody(raiseCaseDetail, sfSubscriptionIdContainer, sfContactId)).toApiGatewayOp("raise sf case")
       } yield ApiResponse("200", Json.prettyPrint(Json.toJson(raiseCaseResponse)))).apiResponse
-
   }
 
   def updateCase(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
@@ -71,9 +74,10 @@ object Handler extends Logging {
     case class UpdateCasePathParams(caseId: String)
     implicit val pathParamReads = Json.reads[UpdateCasePathParams]
 
-    def steps(sfRequests: ApiGatewayOp[RestRequestMaker.Requests])(apiGatewayRequest: ApiGatewayRequest) =
+    def steps(sfRequests: LazySalesforceAuthenticatedReqMaker)(apiGatewayRequest: ApiGatewayRequest) =
       (for {
-        sfRequests <- sfRequests
+        _ <- IdentityCookieToIdentityId(apiGatewayRequest.headers) // TODO verify case belongs to identity user
+        sfRequests <- sfRequests()
         pathParams <- apiGatewayRequest.pathParamsAsCaseClass[UpdateCasePathParams]()
         requestBody <- apiGatewayRequest.bodyAsCaseClass[JsValue]()
         _ <- SalesforceCase.Update(sfRequests)(pathParams.caseId, requestBody).toApiGatewayOp("update case")
@@ -81,13 +85,13 @@ object Handler extends Logging {
 
   }
 
-  def runWithEffects(steps: ApiGatewayOp[RestRequestMaker.Requests] => ApiGatewayRequest => ApiResponse, response: Request => Response, stage: Stage, s3Load: Stage => ConfigFailure \/ String, lambdaIO: LambdaIO) = {
+  def runWithEffects(steps: LazySalesforceAuthenticatedReqMaker => ApiGatewayRequest => ApiResponse, response: Request => Response, stage: Stage, s3Load: Stage => ConfigFailure \/ String, lambdaIO: LambdaIO) = {
 
     def operation: Config[StepsConfig] => Operation = config => {
 
-      val sfRequests = SalesforceAuthenticate(response, config.stepsConfig.sfConfig)
+      val sfRequests: LazySalesforceAuthenticatedReqMaker = () => SalesforceAuthenticate(response, config.stepsConfig.sfConfig)
 
-      Operation.noHealthcheck(steps(sfRequests), false)
+      Operation.noHealthcheck(steps(sfRequests), shouldAuthenticate = false)
 
     }
 
