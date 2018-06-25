@@ -53,7 +53,8 @@ object ToAquaRequest {
            |  Account.Status != 'Canceled' AND
            |  (Account.ProcessingAdvice__c != 'DoNotProcess' OR Account.ProcessingAdvice__c IS NULL) AND
            |  Subscription.Status = 'Cancelled' AND
-           |  SubscriptionEndDate <= '$dateStr'
+           |  SubscriptionEndDate <= '$dateStr' AND
+           |  SubscriptionEndDate > '1000-01-01'
            |ORDER BY
            |  Account.CrmId
     """.stripMargin
