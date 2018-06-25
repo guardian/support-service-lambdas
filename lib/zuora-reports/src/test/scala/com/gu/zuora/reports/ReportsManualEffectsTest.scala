@@ -3,7 +3,7 @@ package com.gu.zuora.reports
 import com.gu.effects.{RawEffects, S3ConfigLoad}
 import com.gu.util.config.{LoadConfig, Stage}
 import com.gu.zuora.reports.ReportsLambda.StepsConfig
-import com.gu.zuora.reports.aqua.{AquaQuery, AquaQueryRequest, ZuoraAquaRequestMaker}
+import com.gu.zuora.reports.aqua.{AquaJobResponse, AquaQuery, AquaQueryRequest, ZuoraAquaRequestMaker}
 import com.gu.zuora.reports.dataModel.Batch
 import okhttp3.{Request, Response}
 import play.api.libs.json.Json
@@ -50,8 +50,8 @@ object ReportsManualEffectsTest extends App {
   def getResultsTest(): Unit = {
     val response = for {
       zuoraRequests <- getZuoraRequest(RawEffects.response)
-      request = JobResultRequest("2c92c0f963f800ac0164174918d905f2", true)
-      res <- GetJobResult(zuoraRequests)(request)
+      request = JobResultRequest("2c92c0f963f800ac0164174918d905f2", true, None)
+      res <- GetJobResult(zuoraRequests.get[AquaJobResponse])(request)
     } yield {
       res
     }
