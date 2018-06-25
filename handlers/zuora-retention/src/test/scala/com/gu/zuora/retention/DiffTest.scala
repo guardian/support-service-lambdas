@@ -122,5 +122,26 @@ class DiffTest extends FlatSpec with Matchers {
 
     Diff(candidates.lines, excluded.lines).mkString("\n") shouldBe expected
   }
+
+  it should "not exclude candidates with no crmId" in {
+    val candidates =
+      """Account.Id,Account.CrmId
+        |NoCrmId_Account,
+        |excludedAccount,B
+        |includedAccount,C""".stripMargin
+
+    val excluded =
+      """Account.CrmId
+        |B
+        |0
+        """.stripMargin
+
+    val expected =
+      """Account.Id,Account.CrmId
+        |NoCrmId_Account,
+        |includedAccount,C""".stripMargin
+
+    Diff(candidates.lines, excluded.lines).mkString("\n") shouldBe expected
+  }
 }
 
