@@ -8,14 +8,14 @@ import play.api.libs.json._
 import scalaz.{-\/, \/-}
 
 object GetJobResult {
-  val MAX_RETRIES = 10
+  val MAX_TRIES = 10
   def apply(aquaGet: String => ClientFailableOp[AquaJobResponse])(jobResultRequest: JobResultRequest): ClientFailableOp[JobResult] = {
     val zuoraAquaResponse = aquaGet(s"batch-query/jobs/${jobResultRequest.jobId}")
-    val retries = jobResultRequest.retries.getOrElse(MAX_RETRIES)
-    if (retries < 0)
-      -\/(GenericError("too many retries!"))
-    else
+    val retries = jobResultRequest.tries.getOrElse(MAX_TRIES)
+    if (retries > 0)
       toJobResultResponse(zuoraAquaResponse, jobResultRequest.dryRun, jobResultRequest.jobId, retries - 1)
+    else
+      -\/(GenericError("tries must be > 0"))
   }
 
   def toBatch(aquaBatch: aqua.Batch): Option[Batch] = aquaBatch.fileId.map {
@@ -41,7 +41,7 @@ object GetJobResult {
   val pendingValues = List("pending", "executing")
 }
 
-case class JobResultRequest(jobId: String, dryRun: Boolean, retries: Option[Int])
+case class JobResultRequest(jobId: String, dryRun: Boolean, tries: Option[Int])
 
 object JobResultRequest {
   implicit val reads = Json.reads[JobResultRequest]
@@ -51,12 +51,12 @@ sealed trait JobResult {
   def name: String
   def jobId: String
   def dryRun: Boolean
-  def retries: Int
+  def tries: Int
 }
 
-case class Completed(name: String, jobId: String, batches: Seq[Batch], dryRun: Boolean, retries: Int) extends JobResult
+case class Completed(name: String, jobId: String, batches: Seq[Batch], dryRun: Boolean, tries: Int) extends JobResult
 
-case class Pending(name: String, jobId: String, dryRun: Boolean, retries: Int) extends JobResult
+case class Pending(name: String, jobId: String, dryRun: Boolean, tries: Int) extends JobResult
 
 case class JobResultWire(
   name: String,

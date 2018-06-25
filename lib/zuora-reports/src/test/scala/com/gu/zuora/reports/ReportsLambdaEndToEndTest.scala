@@ -60,26 +60,26 @@ class ReportsLambdaEndToEndTest extends FlatSpec with Matchers {
     response jsonMatches expectedResponse
   }
 
-    it should "handle job status request" in {
-      val jobInput =
-        """
+  it should "handle job status request" in {
+    val jobInput =
+      """
           |{
           | "jobId" : "aquaJobId",
           | "dryRun" : false
           |}
         """.stripMargin
 
-      val responses = Map("/batch-query/jobs/aquaJobId" -> HTTPResponse(200, aquaJobResponse))
+    val responses = Map("/batch-query/jobs/aquaJobId" -> HTTPResponse(200, aquaJobResponse))
 
-      def getJobResultAdapter(requests: Requests) = GetJobResult(requests.get[AquaJobResponse]) _
-      val (response, bla) = getResultAndRequests[JobResultRequest, JobResult](
-        input = jobInput,
-        responses = responses,
-        handlerToTest = getJobResultAdapter
-      )
+    def getJobResultAdapter(requests: Requests) = GetJobResult(requests.get[AquaJobResponse]) _
+    val (response, bla) = getResultAndRequests[JobResultRequest, JobResult](
+      input = jobInput,
+      responses = responses,
+      handlerToTest = getJobResultAdapter
+    )
 
-      val expected =
-        """{
+    val expected =
+      """{
           |   "name" : "testJob",
           |   "jobId" : "aquaJobId",
           |   "status" : "completed",
@@ -92,9 +92,9 @@ class ReportsLambdaEndToEndTest extends FlatSpec with Matchers {
           |}
         """.stripMargin
 
-      response jsonMatches expected
+    response jsonMatches expected
 
-    }
+  }
 }
 
 object Runner {
