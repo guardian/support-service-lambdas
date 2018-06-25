@@ -22,7 +22,7 @@ object AccountIdIterator {
   def apply(lines: Iterator[String], startingPosition: Int): Try[AccountIdIterator] = {
     Try {
       val headers = lines.next()
-      val accountIdLocation = headers.split(",").indexOf(accountIdHeader)
+      val accountIdLocation = headers.split(",", -1).indexOf(accountIdHeader)
       if (accountIdLocation < 0) throw new LambdaException(s"No $accountIdHeader column found in csv file header")
       new AccountIdIterator(lines.drop(startingPosition), accountIdLocation, startingPosition)
     }
