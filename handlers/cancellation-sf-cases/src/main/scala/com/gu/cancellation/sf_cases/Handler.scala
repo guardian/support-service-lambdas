@@ -87,11 +87,18 @@ object Handler extends Logging {
 
   def runWithEffects(steps: LazySalesforceAuthenticatedReqMaker => ApiGatewayRequest => ApiResponse, response: Request => Response, stage: Stage, s3Load: Stage => ConfigFailure \/ String, lambdaIO: LambdaIO) = {
 
+    def healthcheckSteps(sfRequests: LazySalesforceAuthenticatedReqMaker)() =
+      (for { _ <- sfRequests() } yield ApiGatewayResponse.successfulExecution).apiResponse
+
     def operation: Config[StepsConfig] => Operation = config => {
 
       val sfRequests: LazySalesforceAuthenticatedReqMaker = () => SalesforceAuthenticate(response, config.stepsConfig.sfConfig)
 
-      Operation.noHealthcheck(steps(sfRequests), shouldAuthenticate = false)
+      Operation(
+        steps(sfRequests),
+        healthcheckSteps(sfRequests),
+        shouldAuthenticate = false
+      )
 
     }
 
