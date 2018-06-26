@@ -8,6 +8,7 @@ Parameters:
         AllowedValues:
             - PROD
             - CODE
+            - DEV
         Default: CODE
 
 Conditions:
@@ -15,6 +16,8 @@ Conditions:
 
 Mappings:
     StageMap:
+        DEV:
+            ApiName: cancellation-sf-cases-api-DEV
         CODE:
             ApiName: cancellation-sf-cases-api-CODE
 #            DomainName: cancellation-sf-cases-api-code.membership.guardianapis.com
