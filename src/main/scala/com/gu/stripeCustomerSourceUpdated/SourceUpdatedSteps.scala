@@ -7,7 +7,7 @@ import com.gu.stripeCustomerSourceUpdated.zuora.{CreatePaymentMethod, SetDefault
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.Operation
 import com.gu.util.apigateway.ApiGatewayResponse.unauthorized
-import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse, StripeAccount}
+import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.reader.Types.ApiGatewayOp._
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.RestRequestMaker.Requests
@@ -21,13 +21,17 @@ import scalaz.{ListT, NonEmptyList}
 
 object SourceUpdatedSteps extends Logging {
 
+  case class SourceUpdatedUrlParams(stripeAccount: Option[StripeAccount])
+  object SourceUpdatedUrlParams {
+    implicit val reads = Json.reads[SourceUpdatedUrlParams]
+  }
+
   case class StepsConfig(zuoraRestConfig: ZuoraRestConfig)
   implicit val stepsConfigReads: Reads[StepsConfig] = Json.reads[StepsConfig]
 
   def apply(zuoraRequests: Requests, stripeDeps: StripeDeps): Operation = Operation.noHealthcheck({ apiGatewayRequest: ApiGatewayRequest =>
     (for {
       sourceUpdatedCallout <- if (stripeDeps.config.signatureChecking) bodyIfSignatureVerified(stripeDeps, apiGatewayRequest) else apiGatewayRequest.bodyAsCaseClass[SourceUpdatedCallout]()
-      _ = logger.info(s"from: ${apiGatewayRequest.queryStringParameters.map(_.stripeAccount)}")
       _ <- (for {
         defaultPaymentMethod <- ListT(getPaymentMethodsToUpdate(zuoraRequests)(sourceUpdatedCallout.data.`object`.customer, sourceUpdatedCallout.data.`object`.id))
         _ <- ListT[ApiGatewayOp, Unit](createUpdatedDefaultPaymentMethod(zuoraRequests)(defaultPaymentMethod, sourceUpdatedCallout.data.`object`).map((_: Unit) => List(())))
@@ -45,13 +49,24 @@ object SourceUpdatedSteps extends Logging {
   }
 
   def bodyIfSignatureVerified(stripeDeps: StripeDeps, apiGatewayRequest: ApiGatewayRequest): ApiGatewayOp[SourceUpdatedCallout] = {
-    val maybeStripeAccount: Option[StripeAccount] = apiGatewayRequest.queryStringParameters.flatMap { params => params.stripeAccount }
-    val signatureVerified: Boolean = verifyRequest(stripeDeps, apiGatewayRequest.headers.getOrElse(Map()), apiGatewayRequest.body.getOrElse(""), maybeStripeAccount)
-
-    if (signatureVerified)
-      apiGatewayRequest.bodyAsCaseClass[SourceUpdatedCallout]()
-    else
-      ReturnWithResponse(unauthorized)
+    //    val maybeStripeAccount: Option[StripeAccount] = apiGatewayRequest.queryParamsAsCaseClass[URLParams]().flatMap { params => params.stripeAccount }
+    //    val signatureVerified: Boolean = verifyRequest(stripeDeps, apiGatewayRequest.headers.getOrElse(Map()), apiGatewayRequest.body.getOrElse(""), maybeStripeAccount)
+    //
+    //    if (signatureVerified)
+    //      apiGatewayRequest.bodyAsCaseClass[SourceUpdatedCallout]()
+    //    else
+    //      ReturnWithResponse(unauthorized)
+    //TODO FIX THIS PROPERLY
+    for {
+      queryParams <- apiGatewayRequest.queryParamsAsCaseClass[SourceUpdatedUrlParams]()
+      _ = logger.info(s"from: ${queryParams.stripeAccount}")
+      maybeStripeAccount = queryParams.stripeAccount
+      signatureVerified = verifyRequest(stripeDeps, apiGatewayRequest.headers.getOrElse(Map()), apiGatewayRequest.body.getOrElse(""), maybeStripeAccount)
+      res <- if (signatureVerified) {
+        apiGatewayRequest.bodyAsCaseClass[SourceUpdatedCallout]()
+      } else
+        ReturnWithResponse(unauthorized)
+    } yield res
   }
 
   def getPaymentMethodsToUpdate(

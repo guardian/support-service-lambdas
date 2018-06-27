@@ -10,19 +10,35 @@ import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.exacttarget.EmailRequest
 import com.gu.util.reader.Types._
 import ApiGatewayOp.ContinueProcessing
-
+import play.api.libs.json._
 object AutoCancelSteps extends Logging {
+
+  case class AutoCancelUrlParams(onlyCancelDirectDebit: Boolean)
+
+  object AutoCancelUrlParams {
+
+    case class UrlParamsWire(onlyCancelDirectDebit: String = "false") {
+      def toAutoCancelUrlParams = AutoCancelUrlParams(onlyCancelDirectDebit == "true")
+    }
+
+    implicit val wireReads = Json.using[Json.WithDefaultValues].reads[UrlParamsWire]
+
+    implicit val autoCancelUrlParamsReads = new Reads[AutoCancelUrlParams] {
+      override def reads(json: JsValue): JsResult[AutoCancelUrlParams] = wireReads.reads(json).map(_.toAutoCancelUrlParams)
+    }
+  }
 
   def apply(
     autoCancel: AutoCancelRequest => ApiGatewayOp[Unit],
-    autoCancelFilter2: AutoCancelCallout => ApiGatewayOp[AutoCancelRequest],
+    autoCancelFilter: AutoCancelCallout => ApiGatewayOp[AutoCancelRequest],
     etSendIds: ETSendIds,
     sendEmailRegardingAccount: (String, PaymentFailureInformation => EmailRequest) => ApiGatewayOp[Unit]
   ): Operation = Operation.noHealthcheck({ apiGatewayRequest: ApiGatewayRequest =>
     (for {
       autoCancelCallout <- apiGatewayRequest.bodyAsCaseClass[AutoCancelCallout]()
-      _ <- AutoCancelInputFilter(autoCancelCallout, onlyCancelDirectDebit = apiGatewayRequest.onlyCancelDirectDebit)
-      acRequest <- autoCancelFilter2(autoCancelCallout).withLogging(s"auto-cancellation filter for ${autoCancelCallout.accountId}")
+      urlParams <- apiGatewayRequest.queryParamsAsCaseClass[AutoCancelUrlParams]()
+      _ <- AutoCancelInputFilter(autoCancelCallout, onlyCancelDirectDebit = urlParams.onlyCancelDirectDebit)
+      acRequest <- autoCancelFilter(autoCancelCallout).withLogging(s"auto-cancellation filter for ${autoCancelCallout.accountId}")
       _ <- autoCancel(acRequest).withLogging(s"auto-cancellation for ${autoCancelCallout.accountId}")
       request <- makeRequest(etSendIds, autoCancelCallout)
       _ <- sendEmailRegardingAccount(autoCancelCallout.accountId, request)
