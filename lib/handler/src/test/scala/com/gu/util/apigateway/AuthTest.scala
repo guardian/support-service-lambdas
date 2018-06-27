@@ -37,7 +37,7 @@ class AuthTest extends FlatSpec {
   }
 
   "credentialsAreValid" should "return false for an incorrect password" in {
-    val requestAuth = Some(RequestAuth(apiToken = "ndjashjkhajshs"))
+    val requestAuth = Some(RequestAuth(apiToken = "incorrectPassword"))
     assert(credentialsAreValid(requestAuth, trustedApiConfig) == false)
   }
 

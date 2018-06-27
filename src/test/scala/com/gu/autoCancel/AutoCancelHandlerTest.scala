@@ -102,29 +102,5 @@ class DeserialiserTest extends FlatSpec with Matchers {
     Json.parse(json).validate[AutoCancelUrlParams] should be(JsSuccess(AutoCancelUrlParams(true)))
 
   }
-  //TODO SEE WHERE TO MOVE THESE
-  //  "deserialise APIGatewayRequest" should "manage without the stripe param" in {
-  //    val json = """{"queryStringParameters": {"apiToken": "a", "apiClientId": "b"}, "body": "haha"}"""
-  //    val actualRequest = Json.parse(json).validate[ApiGatewayRequest]
-  //
-  //    actualRequest.map(_.queryStringParameters.flatMap(_.stripeAccount)) should be(JsSuccess(None))
-  //
-  //  }
-  //
-  //  "deserialise APIGatewayRequest" should "manage without a valid stripe param" in {
-  //    val json = """{"queryStringParameters": {"apiToken": "a", "apiClientId": "b", "stripeAccount": "HAHAHAHAHAHA"}, "body": "haha"}"""
-  //    val actualRequest = Json.parse(json).validate[ApiGatewayRequest]
-  //
-  //    actualRequest.map(_.queryStringParameters.flatMap(_.stripeAccount)) should be(JsSuccess(None))
-  //
-  //  }
-  //
-  //  it should "manage with the only stripe param set" in {
-  //    val json = """{"queryStringParameters": {"apiToken": "a", "apiClientId": "b", "stripeAccount": "GNM_Membership_AUS"}, "body": "haha"}"""
-  //    val actualRequest = Json.parse(json).validate[ApiGatewayRequest]
-  //
-  //    actualRequest.map(_.queryStringParameters.flatMap(_.stripeAccount)) should be(JsSuccess(Some(StripeAccount.GNM_Membership_AUS)))
-  //
-  //  }
 
 }

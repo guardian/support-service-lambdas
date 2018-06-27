@@ -89,7 +89,6 @@ class ApiGatewayHandlerReadsTest extends FlatSpec {
 
   it should "deserialise empty query string to case class" in {
 
-
     val noQueryParamsRequest = ApiGatewayRequest(queryStringParameters = None, body = None, headers = None)
 
     noQueryParamsRequest.queryParamsAsCaseClass[TestParams]() shouldBe ContinueProcessing(TestParams(None))
@@ -104,7 +103,7 @@ class ApiGatewayHandlerReadsTest extends FlatSpec {
     noQueryParamsRequest.queryParamsAsCaseClass[TestParams]() shouldBe ContinueProcessing(TestParams(Some("testValue")))
   }
 
-  case class NonOptionalParams(testQueryParam: String )
+  case class NonOptionalParams(testQueryParam: String)
   object NonOptionalParams {
     implicit val nonOptionalReads = Json.reads[NonOptionalParams]
   }

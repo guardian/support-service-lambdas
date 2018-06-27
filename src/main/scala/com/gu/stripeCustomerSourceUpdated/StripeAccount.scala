@@ -1,7 +1,5 @@
 package com.gu.stripeCustomerSourceUpdated
 
-import play.api.libs.json.{JsPath, Reads}
-
 sealed abstract class StripeAccount(val string: String)
 
 object StripeAccount {
@@ -15,6 +13,4 @@ object StripeAccount {
   def fromString(string: String): Option[StripeAccount] = {
     all.find(_.string == string)
   }
-
-  implicit val reads: Reads[StripeAccount] = JsPath.read[String].map(fromString(_).get)
 }

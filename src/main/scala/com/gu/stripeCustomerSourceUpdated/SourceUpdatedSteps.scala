@@ -14,16 +14,19 @@ import com.gu.util.zuora.RestRequestMaker.Requests
 import com.gu.util.zuora.ZuoraGetAccountSummary.AccountSummary
 import com.gu.util.zuora.ZuoraGetAccountSummary.ZuoraAccount.PaymentMethodId
 import com.gu.util.zuora._
-import play.api.libs.json.{Json, Reads}
+import play.api.libs.json.{JsPath, Json, Reads}
 import scalaz.std.list._
 import scalaz.syntax.applicative._
 import scalaz.{ListT, NonEmptyList}
 
 object SourceUpdatedSteps extends Logging {
 
-  case class SourceUpdatedUrlParams(stripeAccount: Option[StripeAccount])
+  case class SourceUpdatedUrlParams(stripeAccount: Option[StripeAccount] = None)
   object SourceUpdatedUrlParams {
-    implicit val reads = Json.reads[SourceUpdatedUrlParams]
+    implicit val reads = (JsPath \ "stripeAccount").readNullable[String].map { accountName =>
+      val maybeStripeAccount = accountName.flatMap(StripeAccount.fromString)
+      SourceUpdatedUrlParams(maybeStripeAccount)
+    }
   }
 
   case class StepsConfig(zuoraRestConfig: ZuoraRestConfig)
