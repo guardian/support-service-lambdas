@@ -84,7 +84,7 @@ Follow the same process to update the prod config, and for DEV there is no versi
 To check that you have done it correctly, run the ConfigLoaderSystemTest.
 That will check the relevant version can be understood by the local version of the code.
 
-Ideally this test should be automated and your PR shouldn't be mergable until the config is readable.
+Ideally this test should be automated and your PR shouldn't be mergeable until the config is readable.
 
 ---
 
