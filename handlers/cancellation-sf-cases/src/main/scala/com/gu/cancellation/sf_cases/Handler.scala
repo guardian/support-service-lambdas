@@ -44,14 +44,14 @@ object Handler extends Logging {
 
     implicit val writes = Json.writes[RaiseCaseResponse]
 
-    def embellishRaiseRequestBody(
+    def buildNewCaseForSalesforce(
       raiseRequestBody: RaiseRequestBody,
       sfSubscriptionIdContainer: ResponseWithId,
-      sfContactId: ResponseWithId
+      sfContactIdContainer: ResponseWithId
     ) =
       NewCase(
         Origin = "Self Service",
-        ContactId = sfContactId.Id,
+        ContactId = sfContactIdContainer.Id,
         Product__c = raiseRequestBody.product,
         SF_Subscription__c = sfSubscriptionIdContainer.Id,
         Journey__c = "SV - At Risk - MB",
@@ -66,7 +66,7 @@ object Handler extends Logging {
           .toApiGatewayOp("lookup SF contact from identityID")
         sfSubscriptionIdContainer <- lookup("SF_Subscription__c", "Name", raiseCaseDetail.subscriptionName)
           .toApiGatewayOp("lookup SF subscription ID")
-        raiseCaseResponse <- raiseCase(embellishRaiseRequestBody(raiseCaseDetail, sfSubscriptionIdContainer, sfContactId))
+        raiseCaseResponse <- raiseCase(buildNewCaseForSalesforce(raiseCaseDetail, sfSubscriptionIdContainer, sfContactId))
           .toApiGatewayOp("raise sf case")
       } yield raiseCaseResponse
 
