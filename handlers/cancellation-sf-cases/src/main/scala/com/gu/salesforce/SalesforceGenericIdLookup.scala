@@ -5,6 +5,8 @@ import play.api.libs.json.Json
 
 object SalesforceGenericIdLookup {
 
+  type TSalesforceGenericIdLookup = (String, String, String) => ClientFailableOp[ResponseWithId]
+
   case class ResponseWithId(Id: String)
   implicit val reads = Json.reads[ResponseWithId]
 

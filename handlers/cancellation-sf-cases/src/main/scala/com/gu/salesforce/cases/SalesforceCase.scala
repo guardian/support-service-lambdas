@@ -10,6 +10,8 @@ object SalesforceCase extends Logging {
 
   object Raise {
 
+    type RaiseCase = NewCase => ClientFailableOp[RaiseCaseResponse]
+
     // NOTE : Case Owner is set by SF Rule based on Origin='Self Service'
     case class NewCase(
       SF_Subscription__c: String,

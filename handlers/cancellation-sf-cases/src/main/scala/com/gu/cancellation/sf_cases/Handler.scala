@@ -6,11 +6,11 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.RawEffects
 import com.gu.identity.IdentityCookieToIdentityId
 import com.gu.salesforce.SalesforceGenericIdLookup
-import com.gu.salesforce.SalesforceGenericIdLookup.ResponseWithId
+import com.gu.salesforce.SalesforceGenericIdLookup.{ResponseWithId, TSalesforceGenericIdLookup}
 import com.gu.salesforce.auth.SalesforceAuthenticate
 import com.gu.salesforce.auth.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.cases.SalesforceCase
-import com.gu.salesforce.cases.SalesforceCase.Raise.{NewCase, RaiseCaseResponse}
+import com.gu.salesforce.cases.SalesforceCase.Raise.{NewCase, RaiseCase, RaiseCaseResponse}
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
@@ -44,25 +44,39 @@ object Handler extends Logging {
 
     implicit val writes = Json.writes[RaiseCaseResponse]
 
-    def embellishRaiseRequestBody(raiseRequestBody: RaiseRequestBody, sfSubscriptionIdContainer: ResponseWithId, sfContactId: ResponseWithId) = NewCase(
-      Origin = "Self Service",
-      ContactId = sfContactId.Id,
-      Product__c = raiseRequestBody.product,
-      SF_Subscription__c = sfSubscriptionIdContainer.Id,
-      Journey__c = "SV - At Risk - MB",
-      Enquiry_Type__c = raiseRequestBody.reason,
-      Status = "Closed",
-      Subject = "Online Cancellation Attempt"
-    )
+    def embellishRaiseRequestBody(
+      raiseRequestBody: RaiseRequestBody,
+      sfSubscriptionIdContainer: ResponseWithId,
+      sfContactId: ResponseWithId
+    ) =
+      NewCase(
+        Origin = "Self Service",
+        ContactId = sfContactId.Id,
+        Product__c = raiseRequestBody.product,
+        SF_Subscription__c = sfSubscriptionIdContainer.Id,
+        Journey__c = "SV - At Risk - MB",
+        Enquiry_Type__c = raiseRequestBody.reason,
+        Status = "Closed",
+        Subject = "Online Cancellation Attempt"
+      )
+
+    def raiseCase(lookup: TSalesforceGenericIdLookup, raiseCase: RaiseCase)(identityId: String, raiseCaseDetail: RaiseRequestBody) =
+      for {
+        sfContactId <- lookup("Contact", "IdentityID__c", identityId)
+          .toApiGatewayOp("lookup SF contact from identityID")
+        sfSubscriptionIdContainer <- lookup("SF_Subscription__c", "Name", raiseCaseDetail.subscriptionName)
+          .toApiGatewayOp("lookup SF subscription ID")
+        raiseCaseResponse <- raiseCase(embellishRaiseRequestBody(raiseCaseDetail, sfSubscriptionIdContainer, sfContactId))
+          .toApiGatewayOp("raise sf case")
+      } yield raiseCaseResponse
 
     def steps(sfRequests: LazySalesforceAuthenticatedReqMaker)(apiGatewayRequest: ApiGatewayRequest) =
       (for {
         identityId <- IdentityCookieToIdentityId(apiGatewayRequest.headers)
         sfRequests <- sfRequests()
         raiseCaseDetail <- apiGatewayRequest.bodyAsCaseClass[RaiseRequestBody]()
-        sfContactId <- SalesforceGenericIdLookup(sfRequests)("Contact", "IdentityID__c", identityId).toApiGatewayOp("lookup SF contact from identityID")
-        sfSubscriptionIdContainer <- SalesforceGenericIdLookup(sfRequests)("SF_Subscription__c", "Name", raiseCaseDetail.subscriptionName).toApiGatewayOp("lookup SF subscription ID")
-        raiseCaseResponse <- SalesforceCase.Raise(sfRequests)(embellishRaiseRequestBody(raiseCaseDetail, sfSubscriptionIdContainer, sfContactId)).toApiGatewayOp("raise sf case")
+        wiredRaiseCase = raiseCase(SalesforceGenericIdLookup(sfRequests), SalesforceCase.Raise(sfRequests))_
+        raiseCaseResponse <- wiredRaiseCase(identityId, raiseCaseDetail)
       } yield ApiResponse("200", Json.prettyPrint(Json.toJson(raiseCaseResponse)))).apiResponse
   }
 
@@ -85,9 +99,15 @@ object Handler extends Logging {
 
   }
 
-  def runWithEffects(steps: LazySalesforceAuthenticatedReqMaker => ApiGatewayRequest => ApiResponse, response: Request => Response, stage: Stage, s3Load: Stage => ConfigFailure \/ String, lambdaIO: LambdaIO) = {
+  def runWithEffects(
+    steps: LazySalesforceAuthenticatedReqMaker => ApiGatewayRequest => ApiResponse,
+    response: Request => Response,
+    stage: Stage,
+    s3Load: Stage => ConfigFailure \/ String,
+    lambdaIO: LambdaIO
+  ) = {
 
-    def healthcheckSteps(sfRequests: LazySalesforceAuthenticatedReqMaker)() =
+    def healthcheckSteps(sfRequests: LazySalesforceAuthenticatedReqMaker) = () =>
       (for { _ <- sfRequests() } yield ApiGatewayResponse.successfulExecution).apiResponse
 
     def operation: Config[StepsConfig] => Operation = config => {
