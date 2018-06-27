@@ -10,7 +10,12 @@ import scala.util.{Failure, Success, Try}
 /* Using query strings because for Basic Auth to work Zuora requires us to return a WWW-Authenticate
   header, and API Gateway does not support this header (returns x-amzn-Remapped-WWW-Authenticate instead)
   */
-case class ApiGatewayRequest(queryStringParameters: Option[Map[String, String]], body: Option[String], headers: Option[Map[String, String]]) {
+case class ApiGatewayRequest(
+  queryStringParameters: Option[Map[String, String]],
+  body: Option[String],
+  headers: Option[Map[String, String]],
+  pathParameters: Option[JsValue] = None
+) {
 
   def queryParamsAsCaseClass[A](failureResponse: ApiResponse = ApiGatewayResponse.badRequest)(implicit reads: Reads[A]): ApiGatewayOp[A] = {
     val paramsMap = queryStringParameters.getOrElse(Map.empty)
@@ -33,6 +38,12 @@ case class ApiGatewayRequest(queryStringParameters: Option[Map[String, String]],
         None.toApiGatewayContinueProcessing(ApiGatewayResponse.internalServerError("attempted to parse body when handling a GET request"))
     }
   }
+
+  def pathParamsAsCaseClass[T](failureResponse: ApiResponse = ApiGatewayResponse.badRequest)(implicit reads: Reads[T]): ApiGatewayOp[T] =
+    pathParameters match {
+      case Some(pathParamsJSON) => Json.fromJson[T](pathParamsJSON).toApiGatewayOp(failureResponse)
+      case None => ReturnWithResponse(failureResponse)
+    }
 
 }
 

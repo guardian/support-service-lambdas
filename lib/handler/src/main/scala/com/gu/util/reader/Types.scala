@@ -106,6 +106,15 @@ object Types extends Logging {
         case None => ReturnWithResponse(NoneResponse)
       }
 
+    def toApiGatewayContinueProcessing(NoneResponse: ApiResponse, debugMessage: String) =
+      theOption match {
+        case Some(value) => ContinueProcessing(value)
+        case None => {
+          logger.debug(debugMessage)
+          ReturnWithResponse(NoneResponse)
+        }
+      }
+
   }
 
   implicit class OptionApiResponseOps(theOption: Option[ApiResponse]) {
