@@ -51,26 +51,16 @@ object SourceUpdatedSteps extends Logging {
     } yield ()
   }
 
-  def bodyIfSignatureVerified(stripeDeps: StripeDeps, apiGatewayRequest: ApiGatewayRequest): ApiGatewayOp[SourceUpdatedCallout] = {
-    //    val maybeStripeAccount: Option[StripeAccount] = apiGatewayRequest.queryParamsAsCaseClass[URLParams]().flatMap { params => params.stripeAccount }
-    //    val signatureVerified: Boolean = verifyRequest(stripeDeps, apiGatewayRequest.headers.getOrElse(Map()), apiGatewayRequest.body.getOrElse(""), maybeStripeAccount)
-    //
-    //    if (signatureVerified)
-    //      apiGatewayRequest.bodyAsCaseClass[SourceUpdatedCallout]()
-    //    else
-    //      ReturnWithResponse(unauthorized)
-    //TODO FIX THIS PROPERLY
-    for {
-      queryParams <- apiGatewayRequest.queryParamsAsCaseClass[SourceUpdatedUrlParams]()
-      _ = logger.info(s"from: ${queryParams.stripeAccount}")
-      maybeStripeAccount = queryParams.stripeAccount
-      signatureVerified = verifyRequest(stripeDeps, apiGatewayRequest.headers.getOrElse(Map()), apiGatewayRequest.body.getOrElse(""), maybeStripeAccount)
-      res <- if (signatureVerified) {
-        apiGatewayRequest.bodyAsCaseClass[SourceUpdatedCallout]()
-      } else
-        ReturnWithResponse(unauthorized)
-    } yield res
-  }
+  def bodyIfSignatureVerified(stripeDeps: StripeDeps, apiGatewayRequest: ApiGatewayRequest): ApiGatewayOp[SourceUpdatedCallout] = for {
+    queryParams <- apiGatewayRequest.queryParamsAsCaseClass[SourceUpdatedUrlParams]()
+    _ = logger.info(s"from: ${queryParams.stripeAccount}")
+    maybeStripeAccount = queryParams.stripeAccount
+    signatureVerified = verifyRequest(stripeDeps, apiGatewayRequest.headers.getOrElse(Map()), apiGatewayRequest.body.getOrElse(""), maybeStripeAccount)
+    res <- if (signatureVerified) {
+      apiGatewayRequest.bodyAsCaseClass[SourceUpdatedCallout]()
+    } else
+      ReturnWithResponse(unauthorized)
+  } yield res
 
   def getPaymentMethodsToUpdate(
     requests: Requests
