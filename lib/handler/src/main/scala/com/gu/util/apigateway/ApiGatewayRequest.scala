@@ -34,7 +34,12 @@ case class URLParams(
 /* Using query strings because for Basic Auth to work Zuora requires us to return a WWW-Authenticate
   header, and API Gateway does not support this header (returns x-amzn-Remapped-WWW-Authenticate instead)
   */
-case class ApiGatewayRequest(queryStringParameters: Option[URLParams], body: Option[String], headers: Option[Map[String, String]]) {
+case class ApiGatewayRequest(
+  queryStringParameters: Option[URLParams],
+  body: Option[String],
+  headers: Option[Map[String, String]],
+  pathParameters: Option[JsValue] = None
+) {
 
   def onlyCancelDirectDebit: Boolean = queryStringParameters.exists(_.onlyCancelDirectDebit)
   def requestAuth: Option[RequestAuth] =
@@ -58,6 +63,12 @@ case class ApiGatewayRequest(queryStringParameters: Option[URLParams], body: Opt
         None.toApiGatewayContinueProcessing(ApiGatewayResponse.internalServerError("attempted to parse body when handling a GET request"))
     }
   }
+
+  def pathParamsAsCaseClass[T](failureResponse: ApiResponse = ApiGatewayResponse.badRequest)(implicit reads: Reads[T]): ApiGatewayOp[T] =
+    pathParameters match {
+      case Some(pathParamsJSON) => Json.fromJson[T](pathParamsJSON).toApiGatewayOp(failureResponse)
+      case None => ReturnWithResponse(failureResponse)
+    }
 
 }
 
