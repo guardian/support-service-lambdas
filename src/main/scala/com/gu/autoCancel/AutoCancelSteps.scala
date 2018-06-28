@@ -17,15 +17,12 @@ object AutoCancelSteps extends Logging {
 
   object AutoCancelUrlParams {
 
-    case class UrlParamsWire(onlyCancelDirectDebit: String = "false") {
-      def toAutoCancelUrlParams = AutoCancelUrlParams(onlyCancelDirectDebit == "true")
+    case class UrlParamsWire(onlyCancelDirectDebit: Option[String]) {
+      def toAutoCancelUrlParams = AutoCancelUrlParams(onlyCancelDirectDebit.contains("true"))
     }
 
-    implicit val wireReads = Json.using[Json.WithDefaultValues].reads[UrlParamsWire]
-
-    implicit val autoCancelUrlParamsReads = new Reads[AutoCancelUrlParams] {
-      override def reads(json: JsValue): JsResult[AutoCancelUrlParams] = wireReads.reads(json).map(_.toAutoCancelUrlParams)
-    }
+    val wireReads = Json.reads[UrlParamsWire]
+    implicit val autoCancelUrlParamsReads: Reads[AutoCancelUrlParams] = json => wireReads.reads(json).map(_.toAutoCancelUrlParams)
   }
 
   def apply(

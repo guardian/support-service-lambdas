@@ -10,20 +10,16 @@ import com.gu.util.reader.Types._
 import main.scala.com.gu.digitalSubscriptionExpiry.DigitalSubscriptionExpiryRequest
 import ApiGatewayOp.ContinueProcessing
 import com.gu.util.apigateway.ResponseModels.ApiResponse
-import play.api.libs.json.{JsResult, JsValue, Json, Reads}
+import play.api.libs.json.{Json, Reads}
 
 case class UrlParams(noActivation: Boolean)
 object UrlParams {
 
-  case class UrlParamsWire(noActivation: String = "false") {
-    def toUrlParams = UrlParams(noActivation == "true")
+  case class UrlParamsWire(noActivation: Option[String]) {
+    def toUrlParams = UrlParams(noActivation.contains("true"))
   }
-
-  implicit val wireReads = Json.using[Json.WithDefaultValues].reads[UrlParamsWire]
-
-  implicit val urlParamsReads = new Reads[UrlParams] {
-    override def reads(json: JsValue): JsResult[UrlParams] = wireReads.reads(json).map(_.toUrlParams)
-  }
+  val wireReads = Json.reads[UrlParamsWire]
+  implicit val urlParamsReads: Reads[UrlParams] = json => wireReads.reads(json).map(_.toUrlParams)
 }
 object DigitalSubscriptionExpirySteps extends Logging {
 
