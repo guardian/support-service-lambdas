@@ -82,7 +82,7 @@ class ApiGatewayHandlerReadsTest extends FlatSpec {
     event should be(expected)
   }
 
-  case class TestParams(testQueryParam: Option[String] = None)
+  case class TestParams(testQueryParam: Option[String])
   object TestParams {
     implicit val testReads = Json.reads[TestParams]
   }
@@ -116,4 +116,39 @@ class ApiGatewayHandlerReadsTest extends FlatSpec {
     noQueryParamsRequest.queryParamsAsCaseClass[NonOptionalParams](ApiGatewayResponse.badRequest) shouldBe ReturnWithResponse(ApiGatewayResponse.badRequest)
   }
 
+  it should "deserialise ApiGatewayHandlerParams with no query string" in {
+    val noQueryParamsRequest = ApiGatewayRequest(queryStringParameters = None, body = None, headers = None)
+    val expected = ApiGatewayHandlerParams(apiToken = None, isHealthcheck = false)
+    noQueryParamsRequest.queryParamsAsCaseClass[ApiGatewayHandlerParams]() shouldBe ContinueProcessing(expected)
+
+  }
+
+  it should "deserialise ApiGatewayHandlerParams with token" in {
+    val request = ApiGatewayRequest(queryStringParameters = Some(Map("apiToken" -> "tokenValue")), body = None, headers = None)
+    val expected = ApiGatewayHandlerParams(apiToken = Some("tokenValue"), isHealthcheck = false)
+    request.queryParamsAsCaseClass[ApiGatewayHandlerParams]() shouldBe ContinueProcessing(expected)
+
+  }
+
+  it should "deserialise ApiGatewayHandlerParams with isHealthcheck= true" in {
+    val request = ApiGatewayRequest(queryStringParameters = Some(Map("isHealthcheck" -> "true")), body = None, headers = None)
+    val expected = ApiGatewayHandlerParams(apiToken = None, isHealthcheck = true)
+
+    request.queryParamsAsCaseClass[ApiGatewayHandlerParams]() shouldBe ContinueProcessing(expected)
+
+  }
+
+  it should "deserialise ApiGatewayHandlerParams with isHealthcheck= false" in {
+    val request = ApiGatewayRequest(queryStringParameters = Some(Map("isHealthcheck" -> "false")), body = None, headers = None)
+    val expected = ApiGatewayHandlerParams(apiToken = None, isHealthcheck = false)
+
+    request.queryParamsAsCaseClass[ApiGatewayHandlerParams]() shouldBe ContinueProcessing(expected)
+  }
+
+  it should "deserialise ApiGatewayHandlerParams with isHealthcheck set to an invalid value" in {
+    val request = ApiGatewayRequest(queryStringParameters = Some(Map("isHealthcheck" -> "invalidValue")), body = None, headers = None)
+    val expected = ApiGatewayHandlerParams(apiToken = None, isHealthcheck = false)
+
+    request.queryParamsAsCaseClass[ApiGatewayHandlerParams]() shouldBe ContinueProcessing(expected)
+  }
 }

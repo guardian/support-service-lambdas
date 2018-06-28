@@ -10,18 +10,19 @@ import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.config.{Config, TrustedApiConfig}
 import com.gu.util.reader.Types.ApiGatewayOp._
 import com.gu.util.reader.Types._
-import play.api.libs.json.{JsPath, Json}
-import play.api.libs.functional.syntax._
+import play.api.libs.json.{Json, Reads}
 
 import scala.io.Source
 import scala.util.Try
 
 case class ApiGatewayHandlerParams(apiToken: Option[String], isHealthcheck: Boolean)
+
 object ApiGatewayHandlerParams {
-  implicit val reads = (
-    (JsPath \ "apiToken").readNullable[String] and
-    (JsPath \ "isHealthcheck").readNullable[String].map(_.contains("true"))
-  )(ApiGatewayHandlerParams.apply _)
+  case class UrlParamsWire(apiToken: Option[String], isHealthcheck: Option[String]) {
+    def toApiHandlerParams = ApiGatewayHandlerParams(apiToken, isHealthcheck.contains("true"))
+  }
+  val wireReads = Json.reads[UrlParamsWire]
+  implicit val reads: Reads[ApiGatewayHandlerParams] = json => wireReads.reads(json).map(_.toApiHandlerParams)
 }
 
 object ApiGatewayHandler extends Logging {
@@ -87,8 +88,5 @@ object ApiGatewayHandler extends Logging {
     } yield response
 
     outputForAPIGateway(outputStream, response.apiResponse)
-
   }
-
 }
-
