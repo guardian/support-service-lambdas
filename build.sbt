@@ -92,14 +92,14 @@ lazy val restHttp = all(project in file("lib/restHttp"))
 
 lazy val handler = all(project in file("lib/handler"))
   .settings(
-    libraryDependencies ++= Seq(okhttp3, logging, scalaz, playJson, scalatest)
+    libraryDependencies ++= Seq(okhttp3, logging, scalaz, playJson, scalatest, awsLambda)
   )
 
 // to aid testability, only the actual handlers called as a lambda can depend on this
 lazy val effects = all(project in file("lib/effects"))
   .dependsOn(handler)
   .settings(
-    libraryDependencies ++= Seq(okhttp3, logging, scalaz, playJson, scalatest, awsS3, jacksonDatabind, awsLambda)
+    libraryDependencies ++= Seq(okhttp3, logging, scalaz, playJson, scalatest, awsS3, jacksonDatabind)
   )
 
 val effectsDepIncludingTestFolder: ClasspathDependency = effects % "compile->compile;test->test"
