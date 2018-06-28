@@ -17,6 +17,13 @@ object JsonMatchers {
 
   // *** //
 
+  /*
+  this marks a field as being a JsString which contains serialised json.  This is common where the body
+  is json within a json api gateway json descriptor.
+  When we deserialise, we store the serialised form to use when we serialise again, so that the higher level
+  JsValue comparison will still match exactly.
+  The structure of the embedded value will be checked when it in turn is deseralised.
+   */
   case class JsEmbeddded[C](c: C, origIgnoredInComparison: Option[String] = None) {
     override def equals(obj: scala.Any): Boolean = obj match {
       case JsEmbeddded(objc, _) => c.equals(objc)
@@ -44,6 +51,9 @@ object JsonMatchers {
       withExtrasCheck.map(c => JsEmbeddded(c, Some(stringContainingEmbeddedJson)))
     }
 
+  /*
+  This class wraps a class so that when we deserialise json into the object contained, it will ensure no extra fields whatsoever
+   */
   case class WithoutExtras[C](c: C)
 
   implicit def weW[C: OFormat]: Writes[WithoutExtras[C]] = (o: WithoutExtras[C]) =>
