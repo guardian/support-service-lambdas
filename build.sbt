@@ -99,7 +99,7 @@ lazy val handler = all(project in file("lib/handler"))
 lazy val effects = all(project in file("lib/effects"))
   .dependsOn(handler)
   .settings(
-    libraryDependencies ++= Seq(okhttp3, logging, scalaz, playJson, scalatest, awsS3, jacksonDatabind)
+    libraryDependencies ++= Seq(okhttp3, logging, scalaz, playJson, scalatest, awsS3, jacksonDatabind, awsLambda)
   )
 
 val effectsDepIncludingTestFolder: ClasspathDependency = effects % "compile->compile;test->test"
