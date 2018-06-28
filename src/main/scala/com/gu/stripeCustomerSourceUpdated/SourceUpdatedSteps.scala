@@ -7,19 +7,27 @@ import com.gu.stripeCustomerSourceUpdated.zuora.{CreatePaymentMethod, SetDefault
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.Operation
 import com.gu.util.apigateway.ApiGatewayResponse.unauthorized
-import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse, StripeAccount}
+import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.reader.Types.ApiGatewayOp._
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.RestRequestMaker.Requests
 import com.gu.util.zuora.ZuoraGetAccountSummary.AccountSummary
 import com.gu.util.zuora.ZuoraGetAccountSummary.ZuoraAccount.PaymentMethodId
 import com.gu.util.zuora._
-import play.api.libs.json.{Json, Reads}
+import play.api.libs.json.{JsPath, Json, Reads}
 import scalaz.std.list._
 import scalaz.syntax.applicative._
 import scalaz.{ListT, NonEmptyList}
 
 object SourceUpdatedSteps extends Logging {
+
+  case class SourceUpdatedUrlParams(stripeAccount: Option[StripeAccount] = None)
+  object SourceUpdatedUrlParams {
+    implicit val reads = (JsPath \ "stripeAccount").readNullable[String].map { accountName =>
+      val maybeStripeAccount = accountName.flatMap(StripeAccount.fromString)
+      SourceUpdatedUrlParams(maybeStripeAccount)
+    }
+  }
 
   case class StepsConfig(zuoraRestConfig: ZuoraRestConfig)
   implicit val stepsConfigReads: Reads[StepsConfig] = Json.reads[StepsConfig]
@@ -27,7 +35,6 @@ object SourceUpdatedSteps extends Logging {
   def apply(zuoraRequests: Requests, stripeDeps: StripeDeps): Operation = Operation.noHealthcheck({ apiGatewayRequest: ApiGatewayRequest =>
     (for {
       sourceUpdatedCallout <- if (stripeDeps.config.signatureChecking) bodyIfSignatureVerified(stripeDeps, apiGatewayRequest) else apiGatewayRequest.bodyAsCaseClass[SourceUpdatedCallout]()
-      _ = logger.info(s"from: ${apiGatewayRequest.queryStringParameters.map(_.stripeAccount)}")
       _ <- (for {
         defaultPaymentMethod <- ListT(getPaymentMethodsToUpdate(zuoraRequests)(sourceUpdatedCallout.data.`object`.customer, sourceUpdatedCallout.data.`object`.id))
         _ <- ListT[ApiGatewayOp, Unit](createUpdatedDefaultPaymentMethod(zuoraRequests)(defaultPaymentMethod, sourceUpdatedCallout.data.`object`).map((_: Unit) => List(())))
@@ -44,15 +51,16 @@ object SourceUpdatedSteps extends Logging {
     } yield ()
   }
 
-  def bodyIfSignatureVerified(stripeDeps: StripeDeps, apiGatewayRequest: ApiGatewayRequest): ApiGatewayOp[SourceUpdatedCallout] = {
-    val maybeStripeAccount: Option[StripeAccount] = apiGatewayRequest.queryStringParameters.flatMap { params => params.stripeAccount }
-    val signatureVerified: Boolean = verifyRequest(stripeDeps, apiGatewayRequest.headers.getOrElse(Map()), apiGatewayRequest.body.getOrElse(""), maybeStripeAccount)
-
-    if (signatureVerified)
+  def bodyIfSignatureVerified(stripeDeps: StripeDeps, apiGatewayRequest: ApiGatewayRequest): ApiGatewayOp[SourceUpdatedCallout] = for {
+    queryParams <- apiGatewayRequest.queryParamsAsCaseClass[SourceUpdatedUrlParams]()
+    _ = logger.info(s"from: ${queryParams.stripeAccount}")
+    maybeStripeAccount = queryParams.stripeAccount
+    signatureVerified = verifyRequest(stripeDeps, apiGatewayRequest.headers.getOrElse(Map()), apiGatewayRequest.body.getOrElse(""), maybeStripeAccount)
+    res <- if (signatureVerified) {
       apiGatewayRequest.bodyAsCaseClass[SourceUpdatedCallout]()
-    else
+    } else
       ReturnWithResponse(unauthorized)
-  }
+  } yield res
 
   def getPaymentMethodsToUpdate(
     requests: Requests

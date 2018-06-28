@@ -5,15 +5,25 @@ import java.io.{InputStream, OutputStream}
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayResponse.{outputForAPIGateway, unauthorized}
-import com.gu.util.apigateway.Auth.credentialsAreValid
+import com.gu.util.apigateway.Auth.{RequestAuth, credentialsAreValid}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.config.{Config, TrustedApiConfig}
 import com.gu.util.reader.Types.ApiGatewayOp._
 import com.gu.util.reader.Types._
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, Reads}
 
 import scala.io.Source
 import scala.util.Try
+
+case class ApiGatewayHandlerParams(apiToken: Option[String], isHealthcheck: Boolean)
+
+object ApiGatewayHandlerParams {
+  case class UrlParamsWire(apiToken: Option[String], isHealthcheck: Option[String]) {
+    def toApiHandlerParams = ApiGatewayHandlerParams(apiToken, isHealthcheck.contains("true"))
+  }
+  val wireReads = Json.reads[UrlParamsWire]
+  implicit val reads: Reads[ApiGatewayHandlerParams] = json => wireReads.reads(json).map(_.toApiHandlerParams)
+}
 
 object ApiGatewayHandler extends Logging {
 
@@ -67,18 +77,16 @@ object ApiGatewayHandler extends Logging {
       configOp <- fConfigOp
       (config, operation) = configOp
       apiGatewayRequest <- parseApiGatewayRequest(inputStream)
-      response <- if (apiGatewayRequest.queryStringParameters.exists(_.isHealthcheck))
+      queryParams <- apiGatewayRequest.queryParamsAsCaseClass[ApiGatewayHandlerParams]()
+      response <- if (queryParams.isHealthcheck)
         ContinueProcessing(operation.healthcheck()).withLogging("healthcheck")
       else
         for {
-          _ <- isAuthorised(operation.shouldAuthenticate, apiGatewayRequest.requestAuth, config.trustedApiConfig)
+          _ <- isAuthorised(operation.shouldAuthenticate, queryParams.apiToken.map(RequestAuth(_)), config.trustedApiConfig)
             .toApiGatewayContinueProcessing(unauthorized).withLogging("authentication")
         } yield operation.steps(apiGatewayRequest).withLogging("steps")
     } yield response
 
     outputForAPIGateway(outputStream, response.apiResponse)
-
   }
-
 }
-

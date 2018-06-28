@@ -29,26 +29,15 @@ class AuthTest extends FlatSpec {
   }
 
   "deprecatedCredentialsAreValid" should "return false if the username query string is missing" in {
-    val sampleJson = Json.obj(
-      "resource" -> "test-resource",
-      "path" -> "/test-path",
-      "httpMethod" -> "POST",
-      "body" -> ""
-    )
-    sampleJson.validate[ApiGatewayRequest] match {
-      case JsError(e) => fail(s"couldn't parse with $e")
-      case JsSuccess(req, _) =>
-        assert(credentialsAreValid(req.requestAuth, trustedApiConfig) == false)
-    }
+    assert(credentialsAreValid(None, trustedApiConfig) == false)
   }
-
   "credentialsAreValid" should "return true for correct credentials" in {
     val requestAuth = Some(RequestAuth(apiToken = "correctPassword"))
     assert(credentialsAreValid(requestAuth, trustedApiConfig) == true)
   }
 
   "credentialsAreValid" should "return false for an incorrect password" in {
-    val requestAuth = Some(RequestAuth(apiToken = "ndjashjkhajshs"))
+    val requestAuth = Some(RequestAuth(apiToken = "incorrectPassword"))
     assert(credentialsAreValid(requestAuth, trustedApiConfig) == false)
   }
 

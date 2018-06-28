@@ -3,11 +3,14 @@ package com.gu.stripeCustomerSourceUpdated
 import com.gu.TestData
 import com.gu.effects.TestingRawEffects
 import com.gu.effects.TestingRawEffects.{BasicRequest, HTTPResponse}
+import com.gu.stripeCustomerSourceUpdated.SourceUpdatedSteps.SourceUpdatedUrlParams
 import com.gu.stripeCustomerSourceUpdated.SourceUpdatedStepsTestData._
 import com.gu.stripeCustomerSourceUpdated.zuora.ZuoraQueryPaymentMethod.PaymentMethodFields
 import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.zuora.ZuoraGetAccountSummary.ZuoraAccount.{AccountId, NumConsecutiveFailures, PaymentMethodId}
+import org.scalatest.Matchers.be
 import org.scalatest.{FlatSpec, Matchers}
+import play.api.libs.json.{JsSuccess, Json}
 import scalaz.{-\/, \/-}
 
 class SourceUpdatedStepsGetPaymentMethodsToUpdateTest extends FlatSpec with Matchers {
@@ -396,6 +399,29 @@ class SourceUpdatedStepsApplyTest extends FlatSpec with Matchers {
 
     effects.requestsAttempted should be(Nil)
     actual.statusCode should be("401")
+  }
+
+  it should "manage without the stripe param in Url" in {
+    val queryStringJson = """{"apiToken": "a", "apiClientId": "b"}"""
+    Json.parse(queryStringJson).validate[SourceUpdatedUrlParams] should be(JsSuccess(SourceUpdatedUrlParams(None)))
+
+  }
+
+  it should "manage without a valid stripe param in Url" in {
+    val queryStringJson = """{"apiToken": "a", "apiClientId": "b", "stripeAccount": "invalidValue"}"""
+
+    Json.parse(queryStringJson).as[SourceUpdatedUrlParams] should be(SourceUpdatedUrlParams(None))
+
+  }
+
+  it should "manage with the GMN AUS stripe param set" in {
+    val queryStringJson = """{"apiToken": "a", "apiClientId": "b", "stripeAccount": "GNM_Membership_AUS"}"""
+    val actualRequest = Json.parse(queryStringJson).as[SourceUpdatedUrlParams] should be(SourceUpdatedUrlParams(Some(StripeAccount.GNM_Membership_AUS)))
+  }
+
+  it should "manage with the GMN stripe param set" in {
+    val queryStringJson = """{"apiToken": "a", "apiClientId": "b", "stripeAccount": "GNM_Membership"}"""
+    val actualRequest = Json.parse(queryStringJson).as[SourceUpdatedUrlParams] should be(SourceUpdatedUrlParams(Some(StripeAccount.GNM_Membership)))
   }
 
 }

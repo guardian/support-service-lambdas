@@ -8,11 +8,11 @@ import com.gu.digitalSubscriptionExpiry.responses.{Expiry, ExpiryType, SuccessRe
 import com.gu.digitalSubscriptionExpiry.zuora.GetAccountSummary.{AccountId, AccountSummaryResult}
 import com.gu.digitalSubscriptionExpiry.zuora.GetSubscription.{SubscriptionId, SubscriptionName, SubscriptionResult}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
-import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse, URLParams}
-import com.gu.util.reader.Types.ApiGatewayOp.{ReturnWithResponse, ContinueProcessing}
+import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
+import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.reader.Types._
 import org.scalatest.{FlatSpec, Matchers}
-import play.api.libs.json.Json
+import play.api.libs.json.{JsSuccess, Json}
 
 class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
 
@@ -69,7 +69,7 @@ class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
     if (token == "validToken") ReturnWithResponse(validTokenResponse) else ContinueProcessing(())
   }
 
-  def skipActivationDateUpdate(queryStringParameters: Option[URLParams], sub: SubscriptionResult): Boolean = false
+  def skipActivationDateUpdate(queryStringParameters: UrlParams, sub: SubscriptionResult): Boolean = false
 
   def setActivationDate(subscriptionId: SubscriptionId): ApiGatewayOp[Unit] = ContinueProcessing(())
 
@@ -228,3 +228,27 @@ class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
     """.stripMargin
 }
 
+class DeserialiserTest extends FlatSpec with Matchers {
+
+  "deserialise url params" should "manage without the noActivation param" in {
+    val json = """{"apiToken": "a", "apiClientId": "b"}"""
+    val actualRequest = Json.parse(json).validate[UrlParams]
+
+    Json.parse(json).validate[UrlParams] should be(JsSuccess(UrlParams(false)))
+
+  }
+
+  it should "manage with the noActivation param being false" in {
+    val json = """{"apiToken": "a", "apiClientId": "b", "noActivation": "false"}"""
+    val actualRequest = Json.parse(json).validate[ApiGatewayRequest]
+
+    Json.parse(json).validate[UrlParams] should be(JsSuccess(UrlParams(false)))
+  }
+
+  it should "manage with the noActivation param being true" in {
+    val json = """{"apiToken": "a", "apiClientId": "b", "noActivation": "true"}"""
+    val actualRequest = Json.parse(json).validate[ApiGatewayRequest]
+
+    Json.parse(json).validate[UrlParams] should be(JsSuccess(UrlParams(true)))
+  }
+}

@@ -15,7 +15,7 @@ class FetchFileTest extends AsyncFlatSpec {
   def getFakeDownloadStream(path: String): ClientFailableOp[DownloadStream] = {
     val fakeContent = "some fake content"
     val inputStream = new ByteArrayInputStream(fakeContent.getBytes)
-    \/-(DownloadStream(inputStream, fakeContent.getBytes.length))
+    \/-(DownloadStream(inputStream, fakeContent.getBytes.length.toLong))
   }
 
   val fetchFile = FetchFile(fakeUpload, getFakeDownloadStream) _

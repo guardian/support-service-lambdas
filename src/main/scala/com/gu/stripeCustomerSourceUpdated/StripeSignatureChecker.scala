@@ -1,6 +1,5 @@
 package com.gu.stripeCustomerSourceUpdated
 
-import com.gu.util.apigateway.StripeAccount
 import com.gu.util.config.{StripeConfig, StripeSecretKey}
 import com.gu.util.Logging
 import com.stripe.exception.SignatureVerificationException
