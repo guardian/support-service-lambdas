@@ -482,8 +482,8 @@ Resources:
     ScheduleRule:
         Type: "AWS::Events::Rule"
         Properties:
-          Description: "triggerZuoraRetention"
-          ScheduleExpression: "cron(00 3 ? * * *)"
+          Description: "Trigger the Zuora Retention state machine every day at 03:00 GMT"
+          ScheduleExpression: "cron(0 3 ? * * *)"
           State: "ENABLED"
           Targets:
             -
