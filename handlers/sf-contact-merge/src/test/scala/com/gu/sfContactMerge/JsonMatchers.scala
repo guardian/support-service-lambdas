@@ -15,41 +15,40 @@ object JsonMatchers {
 
   }
 
-  // *** //
+  case class JsEmbedded[C](c: C)
 
-  /*
-  this marks a field as being a JsString which contains serialised json.  This is common where the body
-  is json within a json api gateway json descriptor.
-  When we deserialise, we store the serialised form to use when we serialise again, so that the higher level
-  JsValue comparison will still match exactly.
-  The structure of the embedded value will be checked when it in turn is deseralised.
-   */
-  case class JsEmbeddded[C](c: C, origIgnoredInComparison: Option[String] = None) {
-    override def equals(obj: scala.Any): Boolean = obj match {
-      case JsEmbeddded(objc, _) => c.equals(objc)
-      case _ => false
-    }
+  implicit def eW[C: OFormat]: Writes[JsEmbedded[C]] = (o: JsEmbedded[C]) =>
+    JsString(Json.prettyPrint(Json.toJsObject(o.c)))
 
-    override def hashCode(): Int = c.hashCode
-
-    override def toString: String = s"JsEmbeddded(${c.toString})"
-  }
-
-  implicit def eW[C: OFormat]: Writes[JsEmbeddded[C]] = (o: JsEmbeddded[C]) =>
-    JsString(o.origIgnoredInComparison.getOrElse(s"missing orig (salt ${scala.util.Random.nextInt})"))
-
-  implicit def eR[C: OFormat]: Reads[JsEmbeddded[C]] = (jsValue: JsValue) =>
+  implicit def eR[C: OFormat]: Reads[JsEmbedded[C]] = (jsValue: JsValue) =>
     JsPath.read[String].reads(jsValue).flatMap { stringContainingEmbeddedJson =>
       val jsValue = Json.parse(stringContainingEmbeddedJson)
       val maybeC = jsValue.validate[C]
       val withExtrasCheck = maybeC.flatMap { c =>
         val backToJsValue: JsValue = Json.toJsObject(c)
-        if (backToJsValue == jsValue)
+        if (sameStructure(backToJsValue, jsValue))
           JsSuccess(c)
-        else JsError("extra fields")
+        else JsError(s"extra fields, $backToJsValue == $jsValue")
       }
-      withExtrasCheck.map(c => JsEmbeddded(c, Some(stringContainingEmbeddedJson)))
+      withExtrasCheck.map(c => JsEmbedded(c))
     }
+
+  def sameStructure: (JsValue, JsValue) => Boolean = {
+    case (o1: JsObject, o2: JsObject) =>
+      if (o1.keys == o2.keys) {
+        // check what's inside
+        val keysMatch = o1.keys.map { key =>
+          (for {
+            v1 <- o1.value.get(key)
+            v2 <- o2.value.get(key)
+          } yield sameStructure(v1, v2)).getOrElse(false /*won't happen*/ )
+        }
+        println(s"keysMatch $keysMatch")
+        !keysMatch.contains(false)
+      } else false
+    case (s1: JsArray, s2: JsArray) => false // may need to check inside JsArray too later
+    case (v1, v2) => true //don't care about the content, will be chceck by the normal equals
+  }
 
   /*
   This class wraps a class so that when we deserialise json into the object contained, it will ensure no extra fields whatsoever
@@ -62,9 +61,9 @@ object JsonMatchers {
   implicit def weR[C: OFormat]: Reads[WithoutExtras[C]] = (jsValue: JsValue) =>
     implicitly[Reads[C]].reads(jsValue).flatMap { c =>
       val backToJsValue: JsValue = Json.toJsObject(c)
-      if (backToJsValue == jsValue)
+      if (sameStructure(backToJsValue, jsValue))
         JsSuccess(WithoutExtras(c))
-      else JsError("extra fields")
+      else JsError(s"extra fields, $backToJsValue == $jsValue")
     }
 
 }

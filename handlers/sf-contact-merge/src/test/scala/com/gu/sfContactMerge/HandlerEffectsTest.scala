@@ -11,7 +11,7 @@ class HandlerEffectsTest extends FlatSpec with Matchers {
 
   import TestData._
 
-  case class ApiResponse(statusCode: String, body: JsEmbeddded[Message], headers: Map[String, String] = Map("Content-Type" -> "application/json"))
+  case class ApiResponse(statusCode: String, body: JsEmbedded[Message], headers: Map[String, String] = Map("Content-Type" -> "application/json"))
 
   case class Message(message: String)
 
@@ -24,7 +24,7 @@ class HandlerEffectsTest extends FlatSpec with Matchers {
 
     val expected = ApiResponse(
       "404",
-      JsEmbeddded(Message("implementation Not Found (yet)")),
+      JsEmbedded(Message("implementation Not Found (yet)")),
       Map("Content-Type" -> "application/json")
     )
 
