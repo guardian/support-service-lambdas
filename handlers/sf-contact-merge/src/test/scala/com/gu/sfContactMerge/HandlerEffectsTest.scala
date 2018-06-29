@@ -11,7 +11,11 @@ class HandlerEffectsTest extends FlatSpec with Matchers {
 
   import TestData._
 
-  case class ApiResponse(statusCode: String, body: JsEmbedded[Message], headers: Map[String, String] = Map("Content-Type" -> "application/json"))
+  case class ApiResponse(
+    statusCode: String,
+    body: JsEmbedded[Message],
+    headers: Map[String, String] = Map("Content-Type" -> "application/json")
+  )
 
   case class Message(message: String)
 
