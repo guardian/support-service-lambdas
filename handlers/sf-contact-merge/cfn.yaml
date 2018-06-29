@@ -18,12 +18,11 @@ Mappings:
         CODE:
             ApiName: sf-contact-merge-api-CODE
             DomainName: sf-contact-merge-code.membership.guardianapis.com
-            CertificateId: e4e6431e-08b9-4315-b997-75f2f9569d6c
+            # need to cloudform, then find out the RegionalDomainName of the api gateway stage manually and replace it here
             ApiGatewayTargetDomainName: tbc.execute-api.eu-west-1.amazonaws.com
         PROD:
             ApiName: sf-contact-merge-api-PROD
             DomainName: sf-contact-merge-prod.membership.guardianapis.com
-            CertificateId: c1e85179-09e3-4222-adee-e4ee77e73304
             ApiGatewayTargetDomainName: tbc.execute-api.eu-west-1.amazonaws.com
 
 Resources:
@@ -173,9 +172,8 @@ Resources:
     SfContactMergeDomainName:
       Type: "AWS::ApiGateway::DomainName"
       Properties:
-        RegionalCertificateArn: !Sub
-        - arn:aws:acm:${AWS::Region}:${AWS::AccountId}:certificate/${CertificateId}
-        - { CertificateId: !FindInMap [ StageMap, !Ref Stage, CertificateId ] }
+        RegionalCertificateArn: # only for *.membership.guardianapis.com
+          !Sub arn:aws:acm:${AWS::Region}:${AWS::AccountId}:certificate/c1efc564-9ff8-4a03-be48-d1990a3d79d2
         DomainName: !FindInMap [ StageMap, !Ref Stage, DomainName ]
         EndpointConfiguration:
           Types:
@@ -189,6 +187,7 @@ Resources:
         Stage: !Sub ${Stage}
       DependsOn:
       - SfContactMergeAPI
+      - SfContactMergeAPIStage
       - SfContactMergeDomainName
 
     SfContactMergeDNSRecord:
