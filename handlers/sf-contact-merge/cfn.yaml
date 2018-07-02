@@ -19,7 +19,7 @@ Mappings:
             ApiName: sf-contact-merge-api-CODE
             DomainName: sf-contact-merge-code.membership.guardianapis.com
             # need to cloudform, then find out the RegionalDomainName of the api gateway stage manually and replace it here
-            ApiGatewayTargetDomainName: wda6lq4gre.execute-api.eu-west-1.amazonaws.com
+            ApiGatewayTargetDomainName: d-33cbf5a76l.execute-api.eu-west-1.amazonaws.com
         PROD:
             ApiName: sf-contact-merge-api-PROD
             DomainName: sf-contact-merge-prod.membership.guardianapis.com
