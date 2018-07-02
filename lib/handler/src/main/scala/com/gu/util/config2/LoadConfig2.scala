@@ -11,7 +11,6 @@ import scala.util.{Failure, Success, Try}
 
 case class ConfigLocation[CONFIG](val path: String, version: Int)
 
-
 class LoadConfig2(stage: Stage, fetchString: GetObjectRequest => Try[String]) extends Logging {
 
   //todo maybe this is a good chance to change the directory we load the config from

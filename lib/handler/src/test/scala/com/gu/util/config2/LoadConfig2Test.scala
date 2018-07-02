@@ -21,7 +21,6 @@ class LoadConfig2Test extends FlatSpec with Matchers {
 
   val prodStage = Stage("PROD")
 
-
   case class TestConfig(someValue: String, someOtherValue: Int)
 
   object TestConfig {
@@ -31,7 +30,6 @@ class LoadConfig2Test extends FlatSpec with Matchers {
 
   it should "be able to load config successfully with version" in {
 
-
     def prodS3Load = fakeS3Load(Map("PROD" -> prodJson)) _
 
     val prodConfig = LoadConfig2(prodStage, prodS3Load)
@@ -40,7 +38,6 @@ class LoadConfig2Test extends FlatSpec with Matchers {
 
   }
   it should "fail if the configuration is invalid json" in {
-
 
     def invalidJsonLoad = fakeS3Load(Map("PROD" -> "hello world")) _
 
