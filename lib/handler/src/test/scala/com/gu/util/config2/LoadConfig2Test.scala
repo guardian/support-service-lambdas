@@ -56,7 +56,7 @@ class LoadConfig2Test extends FlatSpec with Matchers {
     prodConfig[TestConfig] shouldBe -\/(ConfigFailure("Expected to load PROD config, but loaded DEV config"))
   }
 
-  it should "fail if the no stage variable in configuration file" in {
+  it should "fail if no stage variable in configuration file" in {
 
     val noStageConfig =
       """{
@@ -71,7 +71,7 @@ class LoadConfig2Test extends FlatSpec with Matchers {
     prodConfig[TestConfig].isLeft shouldBe(true)
   }
 
-  it should "fail if the no stage variable in configuration file is not a string" in {
+  it should "fail if the stage variable in configuration file is not a string" in {
 
     val noStageConfig =
       """{

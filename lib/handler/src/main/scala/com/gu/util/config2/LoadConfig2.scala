@@ -15,12 +15,12 @@ class LoadConfig2(stage: Stage, fetchString: GetObjectRequest => Try[String]) ex
 
   //todo maybe this is a good chance to change the directory we load the config from
   val basePath = s"membership/payment-failure-lambdas/${stage.value}"
-  val BucketName = "gu-reader-revenue-private"
+  val bucketName = "gu-reader-revenue-private"
 
   def apply[CONF](implicit configLocation: ConfigLocation[CONF], reads: Reads[CONF]): ConfigFailure \/ CONF = {
     logger.info(s"Attempting to load config in $stage")
     val relativePath = if (stage.value == "DEV") configLocation.path else pathWithVersion(configLocation)
-    val request = new GetObjectRequest(BucketName, s"$basePath/$relativePath")
+    val request = new GetObjectRequest(bucketName, s"$basePath/$relativePath")
 
     for {
       configStr <- toDisjunction(fetchString(request))
