@@ -11,28 +11,28 @@ class HandlerEffectsTest extends FlatSpec with Matchers {
 
   import TestData._
 
-  case class TestJsonFormat(
+  case class ExpectedJsonFormat(
     statusCode: String,
-    body: JsEmbedded[TestBodyFormat],
+    body: JsStringContainingJson[ExpectedBodyFormat],
     headers: Map[String, String] = Map("Content-Type" -> "application/json")
   )
 
-  case class TestBodyFormat(message: String)
+  case class ExpectedBodyFormat(message: String)
 
-  implicit val mF: OFormat[TestBodyFormat] = Json.format[TestBodyFormat]
-  implicit val apiF: OFormat[TestJsonFormat] = Json.format[TestJsonFormat]
+  implicit val mF: OFormat[ExpectedBodyFormat] = Json.format[ExpectedBodyFormat]
+  implicit val apiF: OFormat[ExpectedJsonFormat] = Json.format[ExpectedJsonFormat]
 
   it should "return 404 if the lambda hasn't been implemented" taggedAs EffectsTest in {
 
     val actualResponse = runWithEffects(dummyRequest())
 
-    val expected = TestJsonFormat(
+    val expected = ExpectedJsonFormat(
       "404",
-      JsEmbedded(TestBodyFormat("implementation Not Found (yet)")),
+      JsStringContainingJson(ExpectedBodyFormat("implementation Not Found (yet)")),
       Map("Content-Type" -> "application/json")
     )
 
-    actualResponse jsonMatches expected
+    actualResponse jsonMatchesFormat expected
   }
 
 }

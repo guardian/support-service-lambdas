@@ -38,7 +38,7 @@ class JSComparisonEmdeddedTest extends FlatSpec with Matchers {
 
   case class Simple(key: String)
   implicit val sR = Json.format[Simple]
-  case class WithEmbed(embed: JsEmbedded[Simple])
+  case class WithEmbed(embed: JsStringContainingJson[Simple])
   implicit val wR = Json.format[WithEmbed]
 
   it should "handle missed fields as normal" in {
@@ -58,7 +58,7 @@ class JSComparisonEmdeddedTest extends FlatSpec with Matchers {
   it should "work with the correct fields" in {
     val testData = """{"embed":"{\"key\":\"test\"  }"}"""
     val actual = Json.parse(testData).validate[WithoutExtras[WithEmbed]]
-    actual should be(JsSuccess(WithoutExtras(WithEmbed(JsEmbedded(Simple("test"))))))
+    actual should be(JsSuccess(WithoutExtras(WithEmbed(JsStringContainingJson(Simple("test"))))))
   }
 
   it should "fail for extra fields in the nested class" in {
