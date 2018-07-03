@@ -13,28 +13,22 @@ case class ConfigLocation[CONFIG](val path: String, version: Int)
 
 class LoadConfig2(stage: Stage, fetchString: GetObjectRequest => Try[String]) extends Logging {
 
-  //todo maybe this is a good chance to change the directory we load the config from
-  val basePath = s"membership/payment-failure-lambdas/${stage.value}"
   val bucketName = "gu-reader-revenue-private"
 
   def apply[CONF](implicit configLocation: ConfigLocation[CONF], reads: Reads[CONF]): ConfigFailure \/ CONF = {
-    logger.info(s"Attempting to load config in $stage")
-    val relativePath = if (stage.value == "DEV") configLocation.path else pathWithVersion(configLocation)
-    val request = new GetObjectRequest(bucketName, s"$basePath/$relativePath")
+    //todo maybe this is a good chance to change the directory we load the config from
+    val basePath = s"membership/payment-failure-lambdas/${stage.value}"
 
+    logger.info(s"Attempting to load config in $stage")
+    val versionString = if (stage.value == "DEV") "" else s".v${configLocation.version}"
+    val relativePath = s"${configLocation.path}$versionString.json"
+    val request = new GetObjectRequest(bucketName, s"$basePath/$relativePath")
     for {
       configStr <- toDisjunction(fetchString(request))
       jsValue <- toDisjunction(Try(Json.parse(configStr)))
-      _ <- validateStage(jsValue)
+      _ <- validateStage(jsValue, stage)
       config <- toDisjunction(Json.fromJson[CONF](jsValue))
     } yield config
-  }
-
-  def pathWithVersion(configLocation: ConfigLocation[_]) = {
-    val path = configLocation.path
-    val versionString = s".v${configLocation.version}"
-    val lastDotPosition = path.lastIndexOf(".")
-    if (lastDotPosition > 0) path.substring(0, lastDotPosition) + versionString + path.substring(lastDotPosition) else path + versionString
   }
 
   case class ConfigWithStage(stage: String)
@@ -43,10 +37,10 @@ class LoadConfig2(stage: Stage, fetchString: GetObjectRequest => Try[String]) ex
     implicit val reads = Json.reads[ConfigWithStage]
   }
 
-  def validateStage(jsValue: JsValue): ConfigFailure \/ Unit = {
+  def validateStage(jsValue: JsValue, expectedStage: Stage): ConfigFailure \/ Unit = {
     jsValue.validate[ConfigWithStage] match {
-      case JsSuccess(ConfigWithStage(stage.value), _) => \/-(())
-      case JsSuccess(ConfigWithStage(otherStage), _) => -\/(ConfigFailure(s"Expected to load ${stage.value} config, but loaded $otherStage config"))
+      case JsSuccess(ConfigWithStage(expectedStage.value), _) => \/-(())
+      case JsSuccess(ConfigWithStage(otherStage), _) => -\/(ConfigFailure(s"Expected to load ${expectedStage.value} config, but loaded $otherStage config"))
       case JsError(error) => -\/(ConfigFailure(s"could not parse stage in configuration file: ${error}"))
     }
   }

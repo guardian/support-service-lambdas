@@ -11,10 +11,9 @@ import scala.util.Try
 
 class LoadConfig2Test extends FlatSpec with Matchers {
 
-  def fakeS3Load(responsesForStage: Map[String, String])(req: GetObjectRequest): Try[String] = Try {
+  def fakeS3Load(response: String)(req: GetObjectRequest): Try[String] = Try {
     if (req.getBucketName != "gu-reader-revenue-private") throw (new RuntimeException(s"test failed: unexpected bucket name ${req.getBucketName}"))
-    if (req.getKey == "membership/payment-failure-lambdas/PROD/someDir/filename.v2.json") responsesForStage("PROD")
-    else if (req.getKey == "membership/payment-failure-lambdas/DEV/someDir/filename.v2.json") responsesForStage("DEV")
+    if (req.getKey == "membership/payment-failure-lambdas/PROD/someDir/filename.v2.json") response
     else
       throw (new RuntimeException(s"test failed unexpected key ${req.getKey}"))
   }
@@ -25,12 +24,12 @@ class LoadConfig2Test extends FlatSpec with Matchers {
 
   object TestConfig {
     implicit val reads = Json.reads[TestConfig]
-    implicit val location = ConfigLocation[TestConfig](path = "someDir/filename.json", version = 2)
+    implicit val location = ConfigLocation[TestConfig](path = "someDir/filename", version = 2)
   }
 
   it should "be able to load config successfully with version" in {
 
-    def prodS3Load = fakeS3Load(Map("PROD" -> prodJson)) _
+    def prodS3Load = fakeS3Load(prodJson) _
 
     val prodConfig = LoadConfig2(prodStage, prodS3Load)
 
@@ -39,17 +38,17 @@ class LoadConfig2Test extends FlatSpec with Matchers {
   }
   it should "fail if the configuration is invalid json" in {
 
-    def invalidJsonLoad = fakeS3Load(Map("PROD" -> "hello world")) _
+    def invalidJsonLoad = fakeS3Load("hello world") _
 
     val prodConfig = LoadConfig2(prodStage, invalidJsonLoad)
 
-    prodConfig[TestConfig].isLeft shouldBe(true)
+    prodConfig[TestConfig].isLeft shouldBe (true)
   }
 
   it should "fail if the stage in the config file differs from the expected stage provided" in {
 
     //note this will return the dev json when asking for the prod stage
-    def wrongFileS3Load = fakeS3Load(Map("PROD" -> devJSon)) _
+    def wrongFileS3Load = fakeS3Load(devJSon) _
 
     val prodConfig = LoadConfig2(prodStage, wrongFileS3Load)
 
@@ -64,11 +63,11 @@ class LoadConfig2Test extends FlatSpec with Matchers {
         |  "someOtherValue" : 92
         |  }
       """.stripMargin
-    def noStageS3Load = fakeS3Load(Map("PROD" -> noStageConfig)) _
+    def noStageS3Load = fakeS3Load(noStageConfig) _
 
     val prodConfig = LoadConfig2(prodStage, noStageS3Load)
 
-    prodConfig[TestConfig].isLeft shouldBe(true)
+    prodConfig[TestConfig].isLeft shouldBe (true)
   }
 
   it should "fail if the stage variable in configuration file is not a string" in {
@@ -80,11 +79,11 @@ class LoadConfig2Test extends FlatSpec with Matchers {
         |  "someOtherValue" : 92
         |  }
       """.stripMargin
-    def invalidStageS3Load = fakeS3Load(Map("PROD" -> noStageConfig)) _
+    def invalidStageS3Load = fakeS3Load(noStageConfig) _
 
     val prodConfig = LoadConfig2(prodStage, invalidStageS3Load)
 
-    prodConfig[TestConfig].isLeft shouldBe(true)
+    prodConfig[TestConfig].isLeft shouldBe (true)
   }
 
   val prodJson: String =
