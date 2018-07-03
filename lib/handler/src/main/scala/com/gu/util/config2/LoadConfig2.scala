@@ -19,6 +19,8 @@ object ConfigWithStage {
 
 object LoadConfig2 extends Logging {
 
+  val bucketName = "gu-reader-revenue-private"
+
   //we need this extra class here because otherwise we cannot partially apply the LoadConfig apply method without specifying the generic param
   class PartialApply(stage: Stage, fetchString: GetObjectRequest => Try[String]) extends Logging {
     def apply[CONF](implicit configLocation: ConfigLocation[CONF], reads: Reads[CONF]): ConfigFailure \/ CONF = {
@@ -37,8 +39,6 @@ object LoadConfig2 extends Logging {
       } yield config
     }
   }
-
-  val bucketName = "gu-reader-revenue-private"
 
   def apply(stage: Stage, fetchString: GetObjectRequest => Try[String]) = new PartialApply(stage = stage, fetchString = fetchString)
 
