@@ -3,7 +3,7 @@ package com.gu.util.apigateway
 import com.gu.util.apigateway.Auth._
 import com.gu.util.config.TrustedApiConfig
 import org.scalatest.FlatSpec
-import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
+import play.api.libs.json.{JsValue, Json}
 
 class AuthTest extends FlatSpec {
 

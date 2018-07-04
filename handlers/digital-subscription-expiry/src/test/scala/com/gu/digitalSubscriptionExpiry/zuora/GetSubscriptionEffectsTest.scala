@@ -2,24 +2,22 @@ package com.gu.digitalSubscriptionExpiry.zuora
 
 import java.time.LocalDate
 
-import com.gu.digitalSubscriptionExpiry.Handler.StepsConfig
 import com.gu.digitalSubscriptionExpiry.responses.DigitalSubscriptionApiResponses._
 import com.gu.digitalSubscriptionExpiry.zuora.GetAccountSummary.AccountId
 import com.gu.digitalSubscriptionExpiry.zuora.GetSubscription.{RatePlan, RatePlanCharge, SubscriptionId, SubscriptionName, SubscriptionResult}
-import com.gu.effects.{RawEffects, S3ConfigLoad}
+import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.test.EffectsTest
-import com.gu.util.config.{LoadConfig, Stage}
+import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.reader.Types._
-import com.gu.util.zuora.ZuoraRestRequestMaker
+import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
 import org.scalatest.{FlatSpec, Matchers}
 import scalaz.{-\/, \/-}
 
 class GetSubscriptionEffectsTest extends FlatSpec with Matchers {
 
   private def actual(testSubscriptionId: SubscriptionId): ApiGatewayOp[SubscriptionResult] = for {
-    configAttempt <- S3ConfigLoad.load(Stage("DEV")).toApiGatewayOp("couldn't load")
-    config <- LoadConfig.parseConfig[StepsConfig](configAttempt).toApiGatewayOp("couldn't parse")
-    zuoraRequests = ZuoraRestRequestMaker(RawEffects.response, config.stepsConfig.zuoraRestConfig)
+    zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig].toApiGatewayOp("coun't load config")
+    zuoraRequests = ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig)
     subscription <- GetSubscription(zuoraRequests)(testSubscriptionId)
   } yield {
     subscription
