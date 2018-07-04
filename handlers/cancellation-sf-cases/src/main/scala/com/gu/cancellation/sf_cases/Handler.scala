@@ -31,7 +31,13 @@ object Handler extends Logging {
   type LazySalesforceAuthenticatedReqMaker = () => ApiGatewayOp[RestRequestMaker.Requests]
 
   def raiseCase(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
-    runWithEffects(RaiseCase.steps, RawEffects.response, RawEffects.stage, RawEffects.s3Load, LambdaIO(inputStream, outputStream, context))
+    runWithEffects(
+      RaiseCase.steps(RawEffects.stage),
+      RawEffects.response,
+      RawEffects.stage,
+      RawEffects.s3Load,
+      LambdaIO(inputStream, outputStream, context)
+    )
 
   object RaiseCase {
 
@@ -81,7 +87,13 @@ object Handler extends Logging {
   }
 
   def updateCase(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
-    runWithEffects(UpdateCase.steps, RawEffects.response, RawEffects.stage, RawEffects.s3Load, LambdaIO(inputStream, outputStream, context))
+    runWithEffects(
+      UpdateCase.steps(RawEffects.stage),
+      RawEffects.response,
+      RawEffects.stage,
+      RawEffects.s3Load,
+      LambdaIO(inputStream, outputStream, context)
+    )
 
   object UpdateCase {
 
@@ -100,7 +112,7 @@ object Handler extends Logging {
   }
 
   def runWithEffects(
-    steps: Stage => LazySalesforceAuthenticatedReqMaker => ApiGatewayRequest => ApiResponse,
+    steps: LazySalesforceAuthenticatedReqMaker => ApiGatewayRequest => ApiResponse,
     response: Request => Response,
     stage: Stage,
     s3Load: Stage => ConfigFailure \/ String,
@@ -115,7 +127,7 @@ object Handler extends Logging {
       val sfRequests: LazySalesforceAuthenticatedReqMaker = () => SalesforceAuthenticate(response, config.stepsConfig.sfConfig)
 
       Operation(
-        steps(stage)(sfRequests),
+        steps(sfRequests),
         healthcheckSteps(sfRequests),
         shouldAuthenticate = false
       )
