@@ -31,7 +31,7 @@ object Handler {
         config <- LoadConfig.default[StepsConfig](implicitly)(stage, s3Load(stage))
           .toApiGatewayOp("load config")
         configuredOp = Operation.noHealthcheck(req => ApiGatewayResponse.notFound("implementation Not Found (yet)"), false)
-      } yield (config, configuredOp)
+      } yield (config.trustedApiConfig, configuredOp)
     }
 
   }

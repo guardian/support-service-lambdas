@@ -45,7 +45,7 @@ object AutoCancelHandler extends App with Logging {
       config <- LoadConfig.default[StepsConfig](implicitly)(stage, s3Load(stage))
         .toApiGatewayOp("load config")
       configuredOp = operation(config)
-    } yield (config, configuredOp))
+    } yield (config.trustedApiConfig, configuredOp))
 
   }
 
