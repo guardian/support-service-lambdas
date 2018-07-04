@@ -92,7 +92,7 @@ lazy val restHttp = all(project in file("lib/restHttp"))
 
 lazy val handler = all(project in file("lib/handler"))
   .settings(
-    libraryDependencies ++= Seq(okhttp3, logging, scalaz, playJson, scalatest)
+    libraryDependencies ++= Seq(okhttp3, logging, scalaz, playJson, scalatest, awsLambda)
   )
 
 // to aid testability, only the actual handlers called as a lambda can depend on this
@@ -121,6 +121,7 @@ lazy val root = all(project in file(".")).enablePlugins(RiffRaffArtifact).aggreg
   `catalog-service`,
   `identity-retention`,
   `zuora-retention`,
+  `sf-contact-merge`,
   `cancellation-sf-cases`,
   effects,
   handler,
@@ -149,6 +150,10 @@ lazy val `identity-retention` = all(project in file("handlers/identity-retention
 lazy val `zuora-retention` = all(project in file("handlers/zuora-retention"))
   .enablePlugins(RiffRaffArtifact)
   .dependsOn(`zuora-reports`, handler, effectsDepIncludingTestFolder, testDep)
+
+lazy val `sf-contact-merge` = all(project in file("handlers/sf-contact-merge"))
+  .enablePlugins(RiffRaffArtifact)
+  .dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `cancellation-sf-cases` = all(project in file("handlers/cancellation-sf-cases"))
   .enablePlugins(RiffRaffArtifact)
