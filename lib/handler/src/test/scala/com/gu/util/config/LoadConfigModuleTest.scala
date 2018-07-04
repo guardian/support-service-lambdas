@@ -1,19 +1,18 @@
-package com.gu.util.config2
+package com.gu.util.config
 
 import com.amazonaws.services.s3.model.GetObjectRequest
 import com.gu.util.config.ConfigReads.ConfigFailure
-import com.gu.util.config.Stage
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
 import scalaz.{-\/, \/-}
 
 import scala.util.Try
 
-class LoadConfig2Test extends FlatSpec with Matchers {
+class LoadConfigModuleTest extends FlatSpec with Matchers {
 
   def fakeS3Load(response: String)(req: GetObjectRequest): Try[String] = Try {
     if (req.getBucketName != "gu-reader-revenue-private") throw (new RuntimeException(s"test failed: unexpected bucket name ${req.getBucketName}"))
-    if (req.getKey == "membership/payment-failure-lambdas/PROD/someDir/filename.v2.json") response
+    if (req.getKey == "membership/support-service-lambdas/PROD/someDir/filename-PROD.v2.json") response
     else
       throw (new RuntimeException(s"test failed unexpected key ${req.getKey}"))
   }
@@ -31,7 +30,7 @@ class LoadConfig2Test extends FlatSpec with Matchers {
 
     def prodS3Load = fakeS3Load(prodJson) _
 
-    val prodConfig = LoadConfig2(prodStage, prodS3Load)
+    val prodConfig = LoadConfigModule(prodStage, prodS3Load)
 
     prodConfig[TestConfig] shouldBe \/-(TestConfig("prodValue", 92))
 
@@ -40,7 +39,7 @@ class LoadConfig2Test extends FlatSpec with Matchers {
 
     def invalidJsonLoad = fakeS3Load("hello world") _
 
-    val prodConfig = LoadConfig2(prodStage, invalidJsonLoad)
+    val prodConfig = LoadConfigModule(prodStage, invalidJsonLoad)
 
     prodConfig[TestConfig].isLeft shouldBe (true)
   }
@@ -50,7 +49,7 @@ class LoadConfig2Test extends FlatSpec with Matchers {
     //note this will return the dev json when asking for the prod stage
     def wrongFileS3Load = fakeS3Load(devJSon) _
 
-    val prodConfig = LoadConfig2(prodStage, wrongFileS3Load)
+    val prodConfig = LoadConfigModule(prodStage, wrongFileS3Load)
 
     prodConfig[TestConfig] shouldBe -\/(ConfigFailure("Expected to load PROD config, but loaded DEV config"))
   }
@@ -65,7 +64,7 @@ class LoadConfig2Test extends FlatSpec with Matchers {
       """.stripMargin
     def noStageS3Load = fakeS3Load(noStageConfig) _
 
-    val prodConfig = LoadConfig2(prodStage, noStageS3Load)
+    val prodConfig = LoadConfigModule(prodStage, noStageS3Load)
 
     prodConfig[TestConfig].isLeft shouldBe (true)
   }
@@ -81,7 +80,7 @@ class LoadConfig2Test extends FlatSpec with Matchers {
       """.stripMargin
     def invalidStageS3Load = fakeS3Load(noStageConfig) _
 
-    val prodConfig = LoadConfig2(prodStage, invalidStageS3Load)
+    val prodConfig = LoadConfigModule(prodStage, invalidStageS3Load)
 
     prodConfig[TestConfig].isLeft shouldBe (true)
   }

@@ -1,9 +1,8 @@
-package com.gu.util.config2
+package com.gu.util.config
 
 import com.amazonaws.services.s3.model.GetObjectRequest
 import com.gu.util.Logging
 import com.gu.util.config.ConfigReads.ConfigFailure
-import com.gu.util.config.Stage
 import play.api.libs.json._
 import scalaz.{-\/, \/, \/-}
 
@@ -17,19 +16,18 @@ object ConfigWithStage {
   implicit val reads = Json.reads[ConfigWithStage]
 }
 
-object LoadConfig2 extends Logging {
+object LoadConfigModule extends Logging {
 
   val bucketName = "gu-reader-revenue-private"
 
   //we need this extra class here because otherwise we cannot partially apply the LoadConfig apply method without specifying the generic param
   class PartialApply(stage: Stage, fetchString: GetObjectRequest => Try[String]) extends Logging {
     def apply[CONF](implicit configLocation: ConfigLocation[CONF], reads: Reads[CONF]): ConfigFailure \/ CONF = {
-      //todo maybe this is a good chance to change the directory we load the config from
-      val basePath = s"membership/payment-failure-lambdas/${stage.value}"
+      val basePath = s"membership/support-service-lambdas/${stage.value}"
 
       logger.info(s"Attempting to load config in $stage")
       val versionString = if (stage.value == "DEV") "" else s".v${configLocation.version}"
-      val relativePath = s"${configLocation.path}$versionString.json"
+      val relativePath = s"${configLocation.path}-${stage.value}$versionString.json"
       val request = new GetObjectRequest(bucketName, s"$basePath/$relativePath")
       for {
         configStr <- toDisjunction(fetchString(request))
