@@ -21,7 +21,7 @@ object LoadConfigModule extends Logging {
   val bucketName = "gu-reader-revenue-private"
 
   //we need this extra class here because otherwise we cannot partially apply the LoadConfig apply method without specifying the generic param
-  class PartialApply(stage: Stage, fetchString: GetObjectRequest => Try[String]) extends Logging {
+  class PartialApply(stage: Stage, fetchString: GetObjectRequest => Try[String]) {
     def apply[CONF](implicit configLocation: ConfigLocation[CONF], reads: Reads[CONF]): ConfigFailure \/ CONF = {
       val basePath = s"membership/support-service-lambdas/${stage.value}"
 
