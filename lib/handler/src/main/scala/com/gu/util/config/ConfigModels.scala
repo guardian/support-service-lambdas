@@ -44,10 +44,8 @@ object ETConfig {
 case class TrustedApiConfig(apiToken: String, tenantId: String)
 
 object TrustedApiConfig {
-  implicit val apiConfigReads: Reads[TrustedApiConfig] = (
-    (JsPath \ "apiToken").read[String] and
-    (JsPath \ "tenantId").read[String]
-  )(TrustedApiConfig.apply _)
+  implicit val location = ConfigLocation[TrustedApiConfig](path = "trustedApi", version = 1)
+  implicit val apiConfigReads = Json.reads[TrustedApiConfig]
 }
 
 case class StripeSecretKey(key: String) extends AnyVal

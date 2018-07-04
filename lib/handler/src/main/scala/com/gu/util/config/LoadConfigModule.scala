@@ -8,8 +8,6 @@ import scalaz.{-\/, \/, \/-}
 
 import scala.util.{Failure, Success, Try}
 
-case class ConfigLocation[CONFIG](val path: String, version: Int)
-
 case class ConfigWithStage(stage: String)
 
 object ConfigWithStage {
