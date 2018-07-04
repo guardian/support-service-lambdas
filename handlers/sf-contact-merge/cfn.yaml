@@ -23,7 +23,7 @@ Mappings:
         PROD:
             ApiName: sf-contact-merge-api-PROD
             DomainName: sf-contact-merge-prod.membership.guardianapis.com
-            ApiGatewayTargetDomainName: tbc.execute-api.eu-west-1.amazonaws.com
+            ApiGatewayTargetDomainName: d-66g24d7g2k.execute-api.eu-west-1.amazonaws.com
 
 Resources:
     SfContactMergeRole:
