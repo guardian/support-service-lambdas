@@ -70,7 +70,7 @@ object Handler extends Logging {
           .toApiGatewayOp("raise sf case")
       } yield raiseCaseResponse
 
-    def steps(stage:Stage)(sfRequests: LazySalesforceAuthenticatedReqMaker)(apiGatewayRequest: ApiGatewayRequest) =
+    def steps(stage: Stage)(sfRequests: LazySalesforceAuthenticatedReqMaker)(apiGatewayRequest: ApiGatewayRequest) =
       (for {
         identityId <- IdentityCookieToIdentityId(apiGatewayRequest.headers, stage)
         sfRequests <- sfRequests()
@@ -88,7 +88,7 @@ object Handler extends Logging {
     case class UpdateCasePathParams(caseId: String)
     implicit val pathParamReads = Json.reads[UpdateCasePathParams]
 
-    def steps(stage:Stage)(sfRequests: LazySalesforceAuthenticatedReqMaker)(apiGatewayRequest: ApiGatewayRequest) =
+    def steps(stage: Stage)(sfRequests: LazySalesforceAuthenticatedReqMaker)(apiGatewayRequest: ApiGatewayRequest) =
       (for {
         _ <- IdentityCookieToIdentityId(apiGatewayRequest.headers, stage) // TODO verify case belongs to identity user
         sfRequests <- sfRequests()
