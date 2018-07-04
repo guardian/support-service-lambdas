@@ -8,7 +8,6 @@ import com.gu.stripeCustomerSourceUpdated.SourceUpdatedStepsTestData._
 import com.gu.stripeCustomerSourceUpdated.zuora.ZuoraQueryPaymentMethod.PaymentMethodFields
 import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.zuora.ZuoraGetAccountSummary.ZuoraAccount.{AccountId, NumConsecutiveFailures, PaymentMethodId}
-import org.scalatest.Matchers.be
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.{JsSuccess, Json}
 import scalaz.{-\/, \/-}

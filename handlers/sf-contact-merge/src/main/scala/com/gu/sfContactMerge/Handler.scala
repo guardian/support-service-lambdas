@@ -26,7 +26,7 @@ object Handler {
 
   def runWithEffects(stage: Stage, s3Load: Stage => ConfigFailure \/ String, lambdaIO: LambdaIO) = {
 
-    ApiGatewayHandler[StepsConfig](lambdaIO) {
+    ApiGatewayHandler(lambdaIO) {
       for {
         config <- LoadConfig.default[StepsConfig](implicitly)(stage, s3Load(stage))
           .toApiGatewayOp("load config")

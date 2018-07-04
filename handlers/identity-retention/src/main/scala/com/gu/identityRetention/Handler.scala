@@ -32,7 +32,7 @@ object Handler {
       IdentityRetentionSteps(zuoraQuerier)
     }
 
-    ApiGatewayHandler[StepsConfig](lambdaIO)(for {
+    ApiGatewayHandler(lambdaIO)(for {
       config <- LoadConfig.default[StepsConfig](implicitly)(stage, s3Load(stage))
         .toApiGatewayOp("load config")
       configuredOp = operation(config)

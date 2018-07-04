@@ -54,7 +54,7 @@ object Handler extends Logging {
         )
       }
     val loadConfig = LoadConfigModule(stage, fetchString)
-    ApiGatewayHandler[StepsConfig](lambdaIO)(for {
+    ApiGatewayHandler(lambdaIO)(for {
       zuoraConfig <- loadConfig[ZuoraRestConfig].toApiGatewayOp("load zuora config")
       emergencyTokensConf <- loadConfig[EmergencyTokensConfig].toApiGatewayOp("load emergency tokens config")
       trustedApiConf <- loadConfig[TrustedApiConfig].toApiGatewayOp("load trusted api config")

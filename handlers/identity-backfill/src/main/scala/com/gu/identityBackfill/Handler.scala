@@ -77,7 +77,7 @@ object Handler {
       }
 
     val loadConfig = LoadConfigModule(stage, fetchString)
-    ApiGatewayHandler[StepsConfig](lambdaIO)(for {
+    ApiGatewayHandler(lambdaIO)(for {
       zuoraRestConfig <- loadConfig[ZuoraRestConfig].toApiGatewayOp("load zuora config")
       sfAuthConfig <- loadConfig[SFAuthConfig].toApiGatewayOp("load sfAuth config")
       identityConfig <- loadConfig[IdentityConfig].toApiGatewayOp("load identity config")

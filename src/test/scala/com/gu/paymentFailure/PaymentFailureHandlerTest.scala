@@ -4,7 +4,6 @@ import java.io.ByteArrayOutputStream
 
 import com.gu.TestData
 import com.gu.TestData._
-import com.gu.stripeCustomerSourceUpdated.SourceUpdatedSteps.StepsConfig
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayResponse}
 import com.gu.util.config.ETConfig.ETSendId
@@ -119,7 +118,7 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
 
   def apiGatewayHandler: (Operation, LambdaIO) => Unit = {
     case (op, io) =>
-      ApiGatewayHandler[StepsConfig](io)(ContinueProcessing((TestData.fakeConfig.trustedApiConfig, op)))
+      ApiGatewayHandler(io)(ContinueProcessing((TestData.fakeConfig.trustedApiConfig, op)))
   }
   def basicOp(fakeInvoiceTransactionSummary: InvoiceTransactionSummary = basicInvoiceTransactionSummary) = {
     PaymentFailureSteps.apply(

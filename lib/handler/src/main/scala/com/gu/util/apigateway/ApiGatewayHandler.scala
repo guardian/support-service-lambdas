@@ -65,7 +65,7 @@ object ApiGatewayHandler extends Logging {
       Operation(steps, () => ApiGatewayResponse.successfulExecution, shouldAuthenticate)
   }
 
-  def apply[StepsConfig](
+  def apply(
     lambdaIO: LambdaIO
   )(
     fConfigOp: ApiGatewayOp[(TrustedApiConfig, Operation)]
