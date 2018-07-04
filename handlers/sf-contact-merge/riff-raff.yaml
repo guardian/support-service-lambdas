@@ -1,0 +1,21 @@
+stacks:
+- membership
+regions:
+- eu-west-1
+deployments:
+
+  cfn:
+    type: cloud-formation
+    app: sf-contact-merge
+    parameters:
+      templatePath: cfn.yaml
+
+  sf-contact-merge:
+    type: aws-lambda
+    parameters:
+      fileName: sf-contact-merge.jar
+      bucket: zuora-auto-cancel-dist
+      prefixStack: false
+      functionNames:
+      - sf-contact-merge-
+    dependencies: [cfn]
