@@ -2,18 +2,20 @@ package com.gu.zuora.reports
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
+import com.amazonaws.services.s3.model.GetObjectRequest
 import com.gu.effects.TestingRawEffects
 import com.gu.effects.TestingRawEffects.{HTTPResponse, POSTRequest}
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
-import com.gu.util.config.{Config, Stage}
+
 import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, Requests}
+import com.gu.util.zuora.ZuoraRestConfig
 import com.gu.zuora.reports.EndToEndData._
-import com.gu.zuora.reports.ReportsLambda.StepsConfig
 import com.gu.zuora.reports.Runner._
 import com.gu.zuora.reports.aqua.{AquaJobResponse, AquaQuery, AquaQueryRequest, ZuoraAquaRequestMaker}
 import org.scalatest.{Assertion, FlatSpec, Matchers}
 import play.api.libs.json.{Json, Reads, Writes}
-import scalaz.\/-
+
+import scala.util.{Failure, Success}
 
 class ReportsLambdaEndToEndTest extends FlatSpec with Matchers {
 
@@ -110,9 +112,22 @@ object Runner {
 
     val rawEffects = new TestingRawEffects(defaultCode = 200, postResponses = postResponses, responses = responses)
 
-    def s3Load(s: Stage) = \/-(TestingRawEffects.codeConfig)
+    val zuoraRestTestConfig =
+      """
+        {
+        |"stage" : "DEV",
+        |"baseUrl": "https://ddd",
+        | "username": "e@f.com",
+        | "password": "ggg"
+        |}
+      """.stripMargin
 
-    def wire(config: Config[StepsConfig]) = handlerToTest(ZuoraAquaRequestMaker(rawEffects.response, config.stepsConfig.zuoraRestConfig))
+    def s3Load(r: GetObjectRequest) = if (r.getBucketName == "gu-reader-revenue-private" && r.getKey == "membership/support-service-lambdas/DEV/zuoraRest-DEV.json")
+      Success(zuoraRestTestConfig)
+    else
+      Failure(new RuntimeException(s"test failure : unexpected bucket or key requested bucket : ${r.getBucketName}, key: ${r.getKey}"))
+
+    def wire(zuoraRestConfig: ZuoraRestConfig) = handlerToTest(ZuoraAquaRequestMaker(rawEffects.response, zuoraRestConfig))
     //execute
     ReportsLambda[REQUEST, RESPONSE](rawEffects.stage, s3Load, LambdaIO(stream, os, null), wire)
 

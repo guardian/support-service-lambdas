@@ -119,7 +119,7 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
 
   def apiGatewayHandler: (Operation, LambdaIO) => Unit = {
     case (op, io) =>
-      ApiGatewayHandler[StepsConfig](io)(ContinueProcessing((TestData.fakeConfig, op)))
+      ApiGatewayHandler[StepsConfig](io)(ContinueProcessing((TestData.fakeConfig.trustedApiConfig, op)))
   }
   def basicOp(fakeInvoiceTransactionSummary: InvoiceTransactionSummary = basicInvoiceTransactionSummary) = {
     PaymentFailureSteps.apply(

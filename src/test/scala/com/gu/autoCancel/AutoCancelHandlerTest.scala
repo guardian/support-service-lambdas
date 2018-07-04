@@ -81,26 +81,20 @@ class DeserialiserTest extends FlatSpec with Matchers {
 
   "deserialise UrlParams" should "manage without the only direct debit param" in {
     val json = """{"apiToken": "a", "apiClientId": "b"}"""
-    val actualRequest = Json.parse(json).validate[AutoCancelUrlParams]
 
     Json.parse(json).validate[AutoCancelUrlParams] should be(JsSuccess(AutoCancelUrlParams(false)))
-
   }
 
   it should "manage with the only direct debit param being false" in {
     val json = """{"apiToken": "a", "apiClientId": "b", "onlyCancelDirectDebit": "false"}"""
-    val actualRequest = Json.parse(json).validate[ApiGatewayRequest]
 
     Json.parse(json).validate[AutoCancelUrlParams] should be(JsSuccess(AutoCancelUrlParams(false)))
-
   }
 
   it should "manage with the only direct debit param being true" in {
     val json = """{"apiToken": "a", "apiClientId": "b", "onlyCancelDirectDebit": "true"}"""
-    val actualRequest = Json.parse(json).validate[ApiGatewayRequest]
 
     Json.parse(json).validate[AutoCancelUrlParams] should be(JsSuccess(AutoCancelUrlParams(true)))
-
   }
 
 }

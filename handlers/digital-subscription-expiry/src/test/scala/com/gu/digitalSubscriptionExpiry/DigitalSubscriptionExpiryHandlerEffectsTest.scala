@@ -4,7 +4,7 @@ import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 import java.time.LocalDateTime
 
 import com.gu.digitalSubscriptionExpiry.Runner._
-import com.gu.effects.RawEffects
+import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.test.EffectsTest
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import org.scalatest.{Assertion, FlatSpec, Matchers}
@@ -70,7 +70,7 @@ object Runner {
     val os = new ByteArrayOutputStream()
 
     //execute
-    Handler.runWithEffects(RawEffects.stage, RawEffects.s3Load, RawEffects.response, now, LambdaIO(stream, os, null))
+    Handler.runWithEffects(RawEffects.stage, GetFromS3.fetchString, RawEffects.response, now, LambdaIO(stream, os, null))
 
     val responseString = new String(os.toByteArray, "UTF-8")
     responseString
