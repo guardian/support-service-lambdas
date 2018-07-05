@@ -13,10 +13,6 @@ import scalaz.{\/, \/-}
 // run this manually
 class ZuoraQueryEffectsTest extends FlatSpec with Matchers {
 
-  case class StepsConfig(zuoraRestConfig: ZuoraRestConfig)
-
-  implicit val stepsConfigReads: Reads[StepsConfig] = Json.reads[StepsConfig]
-
   it should "successfull query multiple accounts" taggedAs EffectsTest in {
 
     val actual = for {

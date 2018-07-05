@@ -6,19 +6,11 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayResponse}
-import com.gu.util.config.ConfigReads.ConfigFailure
 import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config.{LoadConfigModule, Stage, TrustedApiConfig}
 import com.gu.util.reader.Types._
-import com.gu.util.zuora.ZuoraRestConfig
-import play.api.libs.json.{Json, Reads}
-import scalaz.\/
 
 object Handler {
-
-  case class StepsConfig(zuoraRestConfig: ZuoraRestConfig)
-
-  implicit val stepsConfigReads: Reads[StepsConfig] = Json.reads[StepsConfig]
 
   // Referenced in Cloudformation
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {

@@ -7,15 +7,11 @@ import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.handlers.{LambdaException, ParseRequest, SerialiseResponse}
 import com.gu.util.zuora.RestRequestMaker.ClientFailableOp
 import com.gu.util.zuora.ZuoraRestConfig
-import play.api.libs.json.{Json, Reads, Writes}
+import play.api.libs.json.{Reads, Writes}
 import scalaz.Scalaz._
 import scalaz._
 
 object ReportsLambda extends Logging {
-
-  case class StepsConfig(zuoraRestConfig: ZuoraRestConfig)
-
-  implicit val stepsConfigReads: Reads[StepsConfig] = Json.reads[StepsConfig]
 
   type AquaCall[REQUEST, RESPONSE] = REQUEST => ClientFailableOp[RESPONSE]
 

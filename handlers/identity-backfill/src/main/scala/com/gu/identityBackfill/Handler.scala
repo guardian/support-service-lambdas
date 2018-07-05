@@ -20,7 +20,6 @@ import com.gu.util.reader.Types._
 import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, Requests}
 import com.gu.util.zuora.{ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
 import okhttp3.{Request, Response}
-import play.api.libs.json.{Json, Reads}
 import scalaz.\/
 
 object Handler {
@@ -30,13 +29,6 @@ object Handler {
   // it's the only part you can't test of the handler
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
     runWithEffects(RawEffects.stage, GetFromS3.fetchString, RawEffects.response, LambdaIO(inputStream, outputStream, context))
-
-  case class StepsConfig(
-    identityConfig: IdentityConfig,
-    zuoraRestConfig: ZuoraRestConfig,
-    sfConfig: SFAuthConfig
-  )
-  implicit val stepsConfigReads: Reads[StepsConfig] = Json.reads[StepsConfig]
 
   def runWithEffects(
     stage: Stage,

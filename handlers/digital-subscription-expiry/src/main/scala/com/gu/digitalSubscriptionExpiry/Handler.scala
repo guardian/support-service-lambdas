@@ -15,7 +15,6 @@ import com.gu.util.config._
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
 import okhttp3.{Request, Response}
-import play.api.libs.json.{Json, Reads}
 
 object Handler extends Logging {
   // this is the entry point
@@ -23,13 +22,6 @@ object Handler extends Logging {
   // it's the only part you can't test of the handler
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
     runWithEffects(RawEffects.stage, GetFromS3.fetchString, RawEffects.response, RawEffects.now, LambdaIO(inputStream, outputStream, context))
-
-  case class StepsConfig(
-    zuoraRestConfig: ZuoraRestConfig,
-    emergencyTokens: EmergencyTokensConfig
-  )
-
-  implicit val stepsConfigReads: Reads[StepsConfig] = Json.reads[StepsConfig]
 
   def runWithEffects(
     stage: Stage,

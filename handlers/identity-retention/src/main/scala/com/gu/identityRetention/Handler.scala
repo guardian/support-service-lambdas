@@ -11,13 +11,8 @@ import com.gu.util.config.{LoadConfigModule, Stage, TrustedApiConfig}
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.{ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
 import okhttp3.{Request, Response}
-import play.api.libs.json.{Json, Reads}
 
 object Handler {
-
-  case class StepsConfig(zuoraRestConfig: ZuoraRestConfig)
-
-  implicit val stepsConfigReads: Reads[StepsConfig] = Json.reads[StepsConfig]
 
   // Referenced in Cloudformation
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {

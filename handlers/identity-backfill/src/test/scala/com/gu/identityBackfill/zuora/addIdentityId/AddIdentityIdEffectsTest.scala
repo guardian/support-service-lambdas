@@ -1,7 +1,6 @@
 package com.gu.identityBackfill.zuora.addIdentityId
 
-import com.gu.effects.{GetFromS3, RawEffects, S3ConfigLoad}
-import com.gu.identityBackfill.Handler.StepsConfig
+import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.identityBackfill.Types
 import com.gu.identityBackfill.Types.IdentityId
 import com.gu.identityBackfill.zuora.AddIdentityIdToAccount
