@@ -8,6 +8,7 @@ import com.gu.util.config.{LoadConfig, Stage}
 import org.scalatest.{FlatSpec, Matchers}
 import scalaz.{\/, \/-}
 
+//TODO WE HOULD WE FIX THIS TO USE THE NEW CONFIG LOADING CODE
 // this test checks the actual config in S3 so it needs credentials.  this means you can only run it manually
 // however it does stop you deploying a new version without updating the config first
 class ConfigLoaderSystemTest extends FlatSpec with Matchers {

@@ -3,42 +3,45 @@ package com.gu.paymentFailure
 import java.io.{InputStream, OutputStream}
 
 import com.amazonaws.services.lambda.runtime.Context
-import com.gu.effects.RawEffects
-import com.gu.stripeCustomerSourceUpdated.SourceUpdatedSteps.StepsConfig
+import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.util.apigateway.ApiGatewayHandler
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
-import com.gu.util.config.ConfigReads.ConfigFailure
-import com.gu.util.config.{Config, LoadConfig, Stage}
+import com.gu.util.config.LoadConfigModule.StringFromS3
+import com.gu.util.config._
 import com.gu.util.exacttarget.{ETClient, EmailSendSteps, FilterEmail}
 import com.gu.util.reader.Types._
-import com.gu.util.zuora.{ZuoraGetInvoiceTransactions, ZuoraRestRequestMaker}
+import com.gu.util.zuora.{ZuoraGetInvoiceTransactions, ZuoraRestConfig, ZuoraRestRequestMaker}
 import okhttp3.{Request, Response}
-import scalaz.\/
 
 object Lambda {
 
   def runWithEffects(
     stage: Stage,
-    s3Load: Stage => ConfigFailure \/ String,
+    fetchString: StringFromS3,
     response: Request => Response,
     lambdaIO: LambdaIO
   ): Unit = {
-    def operation(config: Config[StepsConfig]): ApiGatewayHandler.Operation =
+    def operation(
+      zuoraRestConfig: ZuoraRestConfig,
+      etConfig: ETConfig,
+      trustedApiConfig: TrustedApiConfig
+    ): ApiGatewayHandler.Operation =
       PaymentFailureSteps(
         ZuoraEmailSteps.sendEmailRegardingAccount(
-          EmailSendSteps(ETClient.sendEmail(response, config.etConfig), FilterEmail(config.stage)),
-          ZuoraGetInvoiceTransactions(ZuoraRestRequestMaker(response, config.stepsConfig.zuoraRestConfig))
+          EmailSendSteps(ETClient.sendEmail(response, etConfig), FilterEmail(stage)),
+          ZuoraGetInvoiceTransactions(ZuoraRestRequestMaker(response, zuoraRestConfig))
         ),
-        config.etConfig.etSendIDs,
-        config.trustedApiConfig
+        etConfig.etSendIDs,
+        trustedApiConfig
       )
-
+    val loadConfigModule = LoadConfigModule(stage, fetchString)
     ApiGatewayHandler(lambdaIO)(for {
-      config <- LoadConfig.default[StepsConfig](implicitly)(stage, s3Load(stage))
-        .toApiGatewayOp("load config")
-      configuredOp = operation(config)
+      zuoraRestConfig <- loadConfigModule[ZuoraRestConfig].toApiGatewayOp("load zuora config")
+      etconfig <- loadConfigModule[ETConfig].toApiGatewayOp("load et config")
+      trustedApiConfig <- loadConfigModule[TrustedApiConfig].toApiGatewayOp("load trusted Api config")
+      configuredOp = operation(zuoraRestConfig, etconfig, trustedApiConfig)
 
-    } yield (config.trustedApiConfig, configuredOp))
+    } yield (trustedApiConfig, configuredOp))
 
   }
 
@@ -46,6 +49,6 @@ object Lambda {
   // it's referenced by the cloudformation so make sure you keep it in step
   // it's the only part you can't test of the handler
   def handleRequest(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
-    runWithEffects(RawEffects.stage, RawEffects.s3Load, RawEffects.response, LambdaIO(inputStream, outputStream, context))
+    runWithEffects(RawEffects.stage, GetFromS3.fetchString, RawEffects.response, LambdaIO(inputStream, outputStream, context))
 
 }

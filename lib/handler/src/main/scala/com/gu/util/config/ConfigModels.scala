@@ -11,6 +11,7 @@ case class ETConfig(
 )
 
 object ETConfig {
+  implicit val location = ConfigLocation[ETConfig](path = "exactTarget", version = 1)
 
   implicit val idReads: Reads[ETSendId] = JsPath.read[String].map(ETSendId.apply)
 
@@ -66,6 +67,8 @@ object StripeWebhook {
 case class StripeConfig(customerSourceUpdatedWebhook: StripeWebhook, signatureChecking: Boolean)
 
 object StripeConfig {
+  implicit val location = ConfigLocation[StripeConfig](path = "stripe", version = 1)
+
   implicit val stripeConfigReads: Reads[StripeConfig] = (
     (JsPath \ "customerSourceUpdatedWebhook").read[StripeWebhook] and
     (JsPath \ "signatureChecking").readNullable[String].map(!_.contains("false"))

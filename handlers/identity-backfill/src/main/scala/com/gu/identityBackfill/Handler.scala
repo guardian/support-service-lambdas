@@ -3,18 +3,18 @@ package com.gu.identityBackfill
 import java.io.{InputStream, OutputStream}
 
 import com.amazonaws.services.lambda.runtime.Context
-import com.amazonaws.services.s3.model.GetObjectRequest
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.identity.{GetByEmail, IdentityConfig}
 import com.gu.identityBackfill.Types.{EmailAddress, IdentityId}
 import com.gu.identityBackfill.salesforce.ContactSyncCheck.RecordTypeId
-import com.gu.salesforce.auth.SalesforceAuthenticate.SFAuthConfig
 import com.gu.identityBackfill.salesforce._
 import com.gu.identityBackfill.zuora.{AddIdentityIdToAccount, CountZuoraAccountsForIdentityId, GetZuoraAccountsForEmail, GetZuoraSubTypeForAccount}
 import com.gu.salesforce.auth.SalesforceAuthenticate
+import com.gu.salesforce.auth.SalesforceAuthenticate.SFAuthConfig
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayResponse}
+import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config.{LoadConfigModule, Stage, TrustedApiConfig}
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, Requests}
@@ -22,8 +22,6 @@ import com.gu.util.zuora.{ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
 import okhttp3.{Request, Response}
 import play.api.libs.json.{Json, Reads}
 import scalaz.\/
-
-import scala.util.Try
 
 object Handler {
 
@@ -42,7 +40,7 @@ object Handler {
 
   def runWithEffects(
     stage: Stage,
-    fetchString: GetObjectRequest => Try[String],
+    fetchString: StringFromS3,
     response: Request => Response,
     lambdaIO: LambdaIO
   ): Unit = {

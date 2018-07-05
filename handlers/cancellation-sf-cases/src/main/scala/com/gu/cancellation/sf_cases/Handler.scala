@@ -3,7 +3,6 @@ package com.gu.cancellation.sf_cases
 import java.io.{InputStream, OutputStream}
 
 import com.amazonaws.services.lambda.runtime.Context
-import com.amazonaws.services.s3.model.GetObjectRequest
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.identity.IdentityCookieToIdentityId
 import com.gu.salesforce.SalesforceGenericIdLookup
@@ -16,12 +15,12 @@ import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, ApiGatewayResponse}
+import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config.{LoadConfigModule, Stage, TrustedApiConfig}
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.RestRequestMaker
 import okhttp3.{Request, Response}
 import play.api.libs.json.{JsValue, Json}
-import scala.util.Try
 
 object Handler extends Logging {
 
@@ -102,7 +101,7 @@ object Handler extends Logging {
     steps: LazySalesforceAuthenticatedReqMaker => ApiGatewayRequest => ApiResponse,
     response: Request => Response,
     stage: Stage,
-    fetchString: GetObjectRequest => Try[String],
+    fetchString: StringFromS3,
     lambdaIO: LambdaIO
   ) = {
 

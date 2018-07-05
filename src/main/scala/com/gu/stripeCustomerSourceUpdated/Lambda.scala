@@ -3,37 +3,38 @@ package com.gu.stripeCustomerSourceUpdated
 import java.io.{InputStream, OutputStream}
 
 import com.amazonaws.services.lambda.runtime.Context
-import com.gu.effects.RawEffects
-import com.gu.stripeCustomerSourceUpdated.SourceUpdatedSteps.StepsConfig
+import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.util.apigateway.ApiGatewayHandler
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
-import com.gu.util.config.ConfigReads.ConfigFailure
-import com.gu.util.config.{Config, LoadConfig, Stage}
+import com.gu.util.config.LoadConfigModule.StringFromS3
+import com.gu.util.config._
 import com.gu.util.reader.Types._
-import com.gu.util.zuora.ZuoraRestRequestMaker
+import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
 import okhttp3.{Request, Response}
-import scalaz.\/
 
 object Lambda {
 
   def runWithEffects(
     stage: Stage,
-    s3Load: Stage => ConfigFailure \/ String,
+    fetchString: StringFromS3,
     response: Request => Response,
     lambdaIO: LambdaIO
   ): Unit = {
-    def operation(config: Config[StepsConfig]): ApiGatewayHandler.Operation =
+    def operation(zuoraRestConfig: ZuoraRestConfig, stripeConfig: StripeConfig): ApiGatewayHandler.Operation =
       SourceUpdatedSteps(
-        ZuoraRestRequestMaker(response, config.stepsConfig.zuoraRestConfig),
-        StripeDeps(config.stripeConfig, new StripeSignatureChecker)
+        ZuoraRestRequestMaker(response, zuoraRestConfig),
+        StripeDeps(stripeConfig, new StripeSignatureChecker)
       )
+    val loadConfigModule = LoadConfigModule(stage, fetchString)
 
     ApiGatewayHandler(lambdaIO)(for {
-      config <- LoadConfig.default[StepsConfig](implicitly)(stage, s3Load(stage))
-        .toApiGatewayOp("load config")
-      configuredOp = operation(config)
+      zuoraRestConfig <- loadConfigModule[ZuoraRestConfig].toApiGatewayOp("load zuora config")
+      stripeConfig <- loadConfigModule[StripeConfig].toApiGatewayOp("load stripe config")
+      trustedApiConfig <- loadConfigModule[TrustedApiConfig].toApiGatewayOp("load trusted Api config")
 
-    } yield (config.trustedApiConfig, configuredOp))
+      configuredOp = operation(zuoraRestConfig, stripeConfig)
+
+    } yield (trustedApiConfig, configuredOp))
 
   }
 
@@ -41,6 +42,6 @@ object Lambda {
   // it's referenced by the cloudformation so make sure you keep it in step
   // it's the only part you can't test of the handler
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
-    runWithEffects(RawEffects.stage, RawEffects.s3Load, RawEffects.response, LambdaIO(inputStream, outputStream, context))
+    runWithEffects(RawEffects.stage, GetFromS3.fetchString, RawEffects.response, LambdaIO(inputStream, outputStream, context))
 
 }

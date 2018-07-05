@@ -1,8 +1,9 @@
 package com.gu.catalogService
 
-import com.amazonaws.services.s3.model.{GetObjectRequest, PutObjectRequest, PutObjectResult}
+import com.amazonaws.services.s3.model.{PutObjectRequest, PutObjectResult}
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.util.Logging
+import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config.{LoadConfigModule, Stage, ZuoraEnvironment}
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
 import okhttp3.{Request, Response}
@@ -21,7 +22,7 @@ object Handler extends Logging {
     response: Request => Response,
     stage: Stage,
     zuoraEnvironment: ZuoraEnvironment,
-    fetchString: GetObjectRequest => Try[String],
+    fetchString: StringFromS3,
     s3Write: PutObjectRequest => Try[PutObjectResult]
   ): Unit = {
     val attempt = for {

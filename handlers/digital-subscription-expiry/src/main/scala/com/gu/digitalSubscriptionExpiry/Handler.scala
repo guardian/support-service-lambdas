@@ -2,20 +2,20 @@ package com.gu.digitalSubscriptionExpiry
 
 import java.io.{InputStream, OutputStream}
 import java.time.LocalDateTime
+
 import com.amazonaws.services.lambda.runtime.Context
-import com.amazonaws.services.s3.model.GetObjectRequest
 import com.gu.digitalSubscriptionExpiry.emergencyToken.{EmergencyTokens, EmergencyTokensConfig, GetTokenExpiry}
 import com.gu.digitalSubscriptionExpiry.zuora._
 import com.gu.effects.{GetFromS3, RawEffects}
+import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
-import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
-import com.gu.util.Logging
+import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config._
 import com.gu.util.reader.Types._
+import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
 import okhttp3.{Request, Response}
 import play.api.libs.json.{Json, Reads}
-import scala.util.Try
 
 object Handler extends Logging {
   // this is the entry point
@@ -33,7 +33,7 @@ object Handler extends Logging {
 
   def runWithEffects(
     stage: Stage,
-    fetchString: GetObjectRequest => Try[String],
+    fetchString: StringFromS3,
     response: Request => Response,
     now: () => LocalDateTime,
     lambdaIO: LambdaIO

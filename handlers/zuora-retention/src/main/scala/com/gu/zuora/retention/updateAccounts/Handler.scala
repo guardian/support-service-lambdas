@@ -15,7 +15,7 @@ import play.api.libs.json.{JsSuccess, Reads}
 import scalaz.{-\/, \/, \/-}
 import UpdateAccountsResponse._
 import UpdateAccountsRequest._
-import com.amazonaws.services.s3.model.GetObjectRequest
+import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.zuora.retention.filterCandidates.S3Iterator
 import com.gu.zuora.retention.updateAccounts.SetDoNotProcess.UpdateRequestBody._
 
@@ -29,7 +29,7 @@ object Handler {
   def getZuoraRequestMaker(
     response: Request => Response,
     stage: Stage,
-    fetchString: GetObjectRequest => Try[String]
+    fetchString: StringFromS3
   ): Try[Requests] = for {
     zuoraRestConfig <- toTry(LoadConfigModule(stage, fetchString)[ZuoraRestConfig])
   } yield ZuoraRestRequestMaker(response, zuoraRestConfig)

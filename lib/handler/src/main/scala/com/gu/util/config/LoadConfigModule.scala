@@ -16,19 +16,22 @@ object ConfigWithStage {
 
 object LoadConfigModule extends Logging {
 
+  type StringFromS3 = GetObjectRequest => Try[String]
+
   val bucketName = "gu-reader-revenue-private"
 
   //we need this extra class here because otherwise we cannot partially apply the LoadConfig apply method without specifying the generic param
-  class PartialApply(stage: Stage, fetchString: GetObjectRequest => Try[String]) {
+  class PartialApply(stage: Stage, fetchString: StringFromS3) {
     def apply[CONF](implicit configLocation: ConfigLocation[CONF], reads: Reads[CONF]): ConfigFailure \/ CONF = {
       val basePath = s"membership/support-service-lambdas/${stage.value}"
 
       logger.info(s"Attempting to load config in $stage")
       val versionString = if (stage.value == "DEV") "" else s".v${configLocation.version}"
       val relativePath = s"${configLocation.path}-${stage.value}$versionString.json"
-      val request = new GetObjectRequest(bucketName, s"$basePath/$relativePath")
+      val s3Key = s"$basePath/$relativePath"
+      val req = new GetObjectRequest(bucketName, s3Key)
       for {
-        configStr <- toDisjunction(fetchString(request))
+        configStr <- toDisjunction(fetchString(req))
         jsValue <- toDisjunction(Try(Json.parse(configStr)))
         _ <- validateStage(jsValue, stage)
         config <- toDisjunction(Json.fromJson[CONF](jsValue))
@@ -36,7 +39,7 @@ object LoadConfigModule extends Logging {
     }
   }
 
-  def apply(stage: Stage, fetchString: GetObjectRequest => Try[String]) = new PartialApply(stage = stage, fetchString = fetchString)
+  def apply(stage: Stage, fetchString: StringFromS3) = new PartialApply(stage = stage, fetchString = fetchString)
 
   def validateStage(jsValue: JsValue, expectedStage: Stage): ConfigFailure \/ Unit = {
     jsValue.validate[ConfigWithStage] match {

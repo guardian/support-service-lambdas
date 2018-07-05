@@ -21,4 +21,5 @@ object RawEffects {
   def s3Write: PutObjectRequest => Try[PutObjectResult] = UploadToS3.putObject
   def now = () => LocalDateTime.now
   def fetchContent(request: GetObjectRequest): Try[S3ObjectInputStream] = GetFromS3.fetchContent(request)
+
 }

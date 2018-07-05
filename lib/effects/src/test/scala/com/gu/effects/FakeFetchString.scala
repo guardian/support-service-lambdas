@@ -48,11 +48,40 @@ object FakeFetchString {
        |}
       """.stripMargin
 
+  val exactTargetConfig =
+    """
+      |{
+      | "stage" : "DEV",
+      | "etSendIDs":
+      |   {
+      |     "pf1": "111",
+      |     "pf2": "222",
+      |     "pf3": "333",
+      |     "pf4": "444",
+      |     "cancelled": "ccc"
+      |   },
+      |   "clientId": "jjj",
+      |   "clientSecret": "kkk"
+      | }
+    """.stripMargin
+  val stripeConfig =
+    """
+      |{
+      | "stage" : "DEV",
+      | "customerSourceUpdatedWebhook": {
+      | "api.key.secret": "abc",
+      | "au-membership.key.secret": "def"
+      |}
+    """.stripMargin
+
   val configFiles = Map(
     "membership/support-service-lambdas/DEV/identity-DEV.json" -> identityTestConfig,
     "membership/support-service-lambdas/DEV/sfAuth-DEV.json" -> sfTestConfig,
     "membership/support-service-lambdas/DEV/trustedApi-DEV.json" -> trustedApiconfig,
-    "membership/support-service-lambdas/DEV/zuoraRest-DEV.json" -> zuoraRestTestConfig
+    "membership/support-service-lambdas/DEV/zuoraRest-DEV.json" -> zuoraRestTestConfig,
+    "membership/support-service-lambdas/DEV/exactTarget-DEV.json" -> exactTargetConfig,
+    "membership/support-service-lambdas/DEV/stripe-DEV.json" -> stripeConfig
+
   )
 
   def fetchString(r: GetObjectRequest): Try[String] = {

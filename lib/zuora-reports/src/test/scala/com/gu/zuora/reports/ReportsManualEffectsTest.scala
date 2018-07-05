@@ -1,8 +1,8 @@
 package com.gu.zuora.reports
 
-import com.gu.effects.{RawEffects, S3ConfigLoad}
-import com.gu.util.config.{LoadConfig, Stage}
-import com.gu.zuora.reports.ReportsLambda.StepsConfig
+import com.gu.effects.{GetFromS3, RawEffects, S3ConfigLoad}
+import com.gu.util.config.{LoadConfigModule, Stage}
+import com.gu.util.zuora.ZuoraRestConfig
 import com.gu.zuora.reports.aqua.{AquaJobResponse, AquaQuery, AquaQueryRequest, ZuoraAquaRequestMaker}
 import com.gu.zuora.reports.dataModel.Batch
 import okhttp3.{Request, Response}
@@ -13,8 +13,8 @@ object ReportsManualEffectsTest extends App {
 
   def getZuoraRequest(response: Request => Response) = for {
     configAttempt <- S3ConfigLoad.load(Stage("DEV")).toEither.disjunction
-    config <- LoadConfig.parseConfig[StepsConfig](configAttempt)
-    zuoraRequests = ZuoraAquaRequestMaker(RawEffects.response, config.stepsConfig.zuoraRestConfig)
+    zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig]
+    zuoraRequests = ZuoraAquaRequestMaker(RawEffects.response, zuoraRestConfig)
   } yield zuoraRequests
 
   case class QuerierTestRequest(id: String, dryRun: Boolean) extends QuerierRequest
@@ -50,7 +50,7 @@ object ReportsManualEffectsTest extends App {
   def getResultsTest(): Unit = {
     val response = for {
       zuoraRequests <- getZuoraRequest(RawEffects.response)
-      request = JobResultRequest("2c92c0f963f800ac0164174918d905f2", true, None)
+      request = JobResultRequest("2c92c0f8644618e801646a397eff4df9", true, None)
       res <- GetJobResult(zuoraRequests.get[AquaJobResponse])(request)
     } yield {
       res
@@ -72,6 +72,6 @@ object ReportsManualEffectsTest extends App {
   }
 
   println("Executing manual test for Zuora reports")
-  fetchFileTest
+  getResultsTest
 }
 
