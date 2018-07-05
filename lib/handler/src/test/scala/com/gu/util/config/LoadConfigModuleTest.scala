@@ -1,6 +1,5 @@
 package com.gu.util.config
 
-import com.amazonaws.services.s3.model.GetObjectRequest
 import com.gu.util.config.ConfigReads.ConfigFailure
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
@@ -10,11 +9,11 @@ import scala.util.Try
 
 class LoadConfigModuleTest extends FlatSpec with Matchers {
 
-  def fakeS3Load(response: String)(req: GetObjectRequest): Try[String] = Try {
-    if (req.getBucketName != "gu-reader-revenue-private") throw (new RuntimeException(s"test failed: unexpected bucket name ${req.getBucketName}"))
-    if (req.getKey == "membership/support-service-lambdas/PROD/someDir/filename-PROD.v2.json") response
+  def fakeS3Load(response: String)(bucket: String, key: String): Try[String] = Try {
+    if (bucket != "gu-reader-revenue-private") throw (new RuntimeException(s"test failed: unexpected bucket name $bucket"))
+    if (key == "membership/support-service-lambdas/PROD/someDir/filename-PROD.v2.json") response
     else
-      throw (new RuntimeException(s"test failed unexpected key ${req.getKey}"))
+      throw (new RuntimeException(s"test failed unexpected key $key"))
   }
 
   val prodStage = Stage("PROD")

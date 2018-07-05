@@ -415,12 +415,12 @@ class SourceUpdatedStepsApplyTest extends FlatSpec with Matchers {
 
   it should "manage with the GMN AUS stripe param set" in {
     val queryStringJson = """{"apiToken": "a", "apiClientId": "b", "stripeAccount": "GNM_Membership_AUS"}"""
-    val actualRequest = Json.parse(queryStringJson).as[SourceUpdatedUrlParams] should be(SourceUpdatedUrlParams(Some(StripeAccount.GNM_Membership_AUS)))
+    Json.parse(queryStringJson).as[SourceUpdatedUrlParams] should be(SourceUpdatedUrlParams(Some(StripeAccount.GNM_Membership_AUS)))
   }
 
   it should "manage with the GMN stripe param set" in {
     val queryStringJson = """{"apiToken": "a", "apiClientId": "b", "stripeAccount": "GNM_Membership"}"""
-    val actualRequest = Json.parse(queryStringJson).as[SourceUpdatedUrlParams] should be(SourceUpdatedUrlParams(Some(StripeAccount.GNM_Membership)))
+    Json.parse(queryStringJson).as[SourceUpdatedUrlParams] should be(SourceUpdatedUrlParams(Some(StripeAccount.GNM_Membership)))
   }
 
 }

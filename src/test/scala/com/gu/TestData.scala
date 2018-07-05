@@ -3,7 +3,6 @@ package com.gu
 import java.time.LocalDate
 
 import com.gu.effects.TestingRawEffects
-import com.gu.stripeCustomerSourceUpdated.SourceUpdatedSteps.StepsConfig
 import com.gu.stripeCustomerSourceUpdated.{StripeDeps, StripeSignatureChecker}
 import com.gu.util.config.ETConfig.{ETSendId, ETSendIds}
 import com.gu.util.config._
@@ -30,7 +29,8 @@ object TestData extends Matchers {
   val fakeETSendIds = ETSendIds(ETSendId("11"), ETSendId("22"), ETSendId("33"), ETSendId("44"), ETSendId("can"))
   val fakeETConfig = ETConfig(etSendIDs = fakeETSendIds, "fakeClientId", "fakeClientSecret")
   val fakeStripeConfig = StripeConfig(customerSourceUpdatedWebhook = StripeWebhook(StripeSecretKey("ukCustomerSourceUpdatedSecretKey"), StripeSecretKey("auCustomerSourceUpdatedStripeSecretKey")), true)
-
+  //todo see what to do with this
+  case class StepsConfig(zuoraRestConfig: ZuoraRestConfig)
   val fakeConfig = Config(
     stage = Stage("DEV"),
     trustedApiConfig = fakeApiConfig,

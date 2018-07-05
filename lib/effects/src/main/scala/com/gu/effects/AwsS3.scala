@@ -7,9 +7,10 @@ import com.amazonaws.services.s3.model.{GetObjectRequest, PutObjectRequest, PutO
 import com.gu.util.Logging
 import com.gu.util.config.ConfigReads.ConfigFailure
 import com.gu.util.config.Stage
+import scalaz.{-\/, \/, \/-}
+
 import scala.io.Source
 import scala.util.{Failure, Success, Try}
-import scalaz.{-\/, \/, \/-}
 
 object S3ConfigLoad extends Logging {
 
@@ -52,12 +53,11 @@ object GetFromS3 extends Logging {
       }
     }
   }
-  //  type StringFromS3 = (String, String) => Try[String]
-  //
-  //  def fetchString: StringFromS3 = (bucket: String, key: String) => {
-  //    val request = new GetObjectRequest(bucket, key)
-  //    fetchString(request)
-  //  }
+
+  def fetchString(bucket: String, key: String): Try[String] = {
+    val request = new GetObjectRequest(bucket, key)
+    fetchString(request)
+  }
 
   def fetchString(request: GetObjectRequest): Try[String] = {
     for {

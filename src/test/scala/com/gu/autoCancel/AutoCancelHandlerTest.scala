@@ -2,7 +2,7 @@ package com.gu.autoCancel
 
 import com.gu.autoCancel.AutoCancelSteps.AutoCancelUrlParams
 import com.gu.util.apigateway.Auth.RequestAuth
-import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest}
+import com.gu.util.apigateway.ApiGatewayHandler
 import com.gu.util.config.TrustedApiConfig
 import org.scalatest._
 import play.api.libs.json.{JsSuccess, Json}

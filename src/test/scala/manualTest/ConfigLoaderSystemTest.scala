@@ -1,14 +1,15 @@
 package manualTest
 
 import com.gu.effects.S3ConfigLoad
-import com.gu.stripeCustomerSourceUpdated.SourceUpdatedSteps.StepsConfig
 import com.gu.test.EffectsTest
 import com.gu.util.config.ConfigReads.ConfigFailure
 import com.gu.util.config.{LoadConfig, Stage}
+import com.gu.util.zuora.ZuoraRestConfig
 import org.scalatest.{FlatSpec, Matchers}
+import play.api.libs.json.{Json, Reads}
 import scalaz.{\/, \/-}
 
-//TODO WE HOULD WE FIX THIS TO USE THE NEW CONFIG LOADING CODE
+//TODO WE SHOULD WE FIX THIS TO USE THE NEW CONFIG LOADING CODE
 // this test checks the actual config in S3 so it needs credentials.  this means you can only run it manually
 // however it does stop you deploying a new version without updating the config first
 class ConfigLoaderSystemTest extends FlatSpec with Matchers {
@@ -22,6 +23,8 @@ class ConfigLoaderSystemTest extends FlatSpec with Matchers {
     val code: ConfigFailure \/ String = S3ConfigLoad.load(Stage("CODE"))
     validate(code, Stage("CODE"))
   }
+  case class StepsConfig(zuoraRestConfig: ZuoraRestConfig)
+  implicit val stepsConfigReads = Json.reads[StepsConfig]
 
   def validate(configAttempt: ConfigFailure \/ String, stage: Stage) = {
     val con = for {

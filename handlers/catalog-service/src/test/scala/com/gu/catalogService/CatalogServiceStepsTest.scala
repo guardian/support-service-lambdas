@@ -1,24 +1,15 @@
 package com.gu.catalogService
 
-import com.amazonaws.services.s3.model.GetObjectRequest
 import com.gu.catalogService.Handler.CatalogServiceException
-import com.gu.effects.TestingRawEffects
+import com.gu.effects.{FakeFetchString, TestingRawEffects}
 import org.scalatest.{FlatSpec, Matchers}
 
-import scala.util.{Failure, Success}
+import scala.util.{Failure}
 
 class CatalogServiceStepsTest extends FlatSpec with Matchers {
 
   val successfulResponseEffects = new TestingRawEffects(false, 200)
   val failureResponseEffects = new TestingRawEffects(false, 500)
-  val fakeZuoraRestConfig = """{
-                              | "stage" : "DEV",
-                              | "baseUrl": "https://ddd",
-                              | "username": "e@f.com",
-                              | "password": "ggg"
-                              | }
-                            """.stripMargin
-  def fakeS3FetchString(getObjectRequest: GetObjectRequest) = Success(fakeZuoraRestConfig)
 
   it should "throw a CatalogServiceException if the config cannot be loaded" in {
     a[CatalogServiceException] should be thrownBy {
@@ -26,7 +17,7 @@ class CatalogServiceStepsTest extends FlatSpec with Matchers {
         successfulResponseEffects.response,
         successfulResponseEffects.stage,
         successfulResponseEffects.zuoraEnvironment,
-        _ => Failure(new RuntimeException("broken config load")),
+        (_, _) => Failure(new RuntimeException("broken config load")),
         TestingRawEffects.successfulS3Upload
       )
     }
@@ -38,7 +29,7 @@ class CatalogServiceStepsTest extends FlatSpec with Matchers {
         failureResponseEffects.response,
         successfulResponseEffects.stage,
         successfulResponseEffects.zuoraEnvironment,
-        fakeS3FetchString,
+        FakeFetchString.fetchString,
         TestingRawEffects.successfulS3Upload
       )
     }
@@ -50,7 +41,7 @@ class CatalogServiceStepsTest extends FlatSpec with Matchers {
         successfulResponseEffects.response,
         successfulResponseEffects.stage,
         successfulResponseEffects.zuoraEnvironment,
-        fakeS3FetchString,
+        FakeFetchString.fetchString,
         TestingRawEffects.failedS3Upload
       )
     }

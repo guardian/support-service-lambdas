@@ -84,8 +84,10 @@ object FakeFetchString {
 
   )
 
-  def fetchString(r: GetObjectRequest): Try[String] = {
-    configFiles.get(r.getKey).map(key => Success(key)).getOrElse(Failure(new RuntimeException(s"test failure unexpected config s3 key ${r.getKey}")))
+  def fetchString(bucket: String, key: String): Try[String] = {
+    if (bucket != "gu-reader-revenue-private") Failure(new RuntimeException(s"test failure, unexpected bucket: $bucket"))
+    else
+      configFiles.get(key).map(key => Success(key)).getOrElse(Failure(new RuntimeException(s"test failure unexpected config s3 key $key")))
   }
 
 }

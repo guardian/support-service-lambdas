@@ -1,6 +1,5 @@
 package com.gu.util.config
 
-import com.amazonaws.services.s3.model.GetObjectRequest
 import com.gu.util.Logging
 import com.gu.util.config.ConfigReads.ConfigFailure
 import play.api.libs.json._
@@ -16,7 +15,7 @@ object ConfigWithStage {
 
 object LoadConfigModule extends Logging {
 
-  type StringFromS3 = GetObjectRequest => Try[String]
+  type StringFromS3 = (String, String) => Try[String]
 
   val bucketName = "gu-reader-revenue-private"
 
@@ -29,9 +28,8 @@ object LoadConfigModule extends Logging {
       val versionString = if (stage.value == "DEV") "" else s".v${configLocation.version}"
       val relativePath = s"${configLocation.path}-${stage.value}$versionString.json"
       val s3Key = s"$basePath/$relativePath"
-      val req = new GetObjectRequest(bucketName, s3Key)
       for {
-        configStr <- toDisjunction(fetchString(req))
+        configStr <- toDisjunction(fetchString(bucketName, s3Key))
         jsValue <- toDisjunction(Try(Json.parse(configStr)))
         _ <- validateStage(jsValue, stage)
         config <- toDisjunction(Json.fromJson[CONF](jsValue))
