@@ -14,15 +14,15 @@ Mappings:
     StageVariables:
         CODE:
             ReadableS3Buckets:
-              - arn:aws:s3:::gu-reader-revenue-private/membership/payment-failure-lambdas/DEV/*
-              - arn:aws:s3:::gu-reader-revenue-private/membership/payment-failure-lambdas/CODE/*
+              - arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/DEV/zuoraRest-DEV.json
+              - arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/CODE/zuoraRest-CODE.*.json
             WriteableS3Buckets:
               - arn:aws:s3:::gu-zuora-catalog/CODE/*
         PROD:
             ReadableS3Buckets:
-              - arn:aws:s3:::gu-reader-revenue-private/membership/payment-failure-lambdas/DEV/*
-              - arn:aws:s3:::gu-reader-revenue-private/membership/payment-failure-lambdas/CODE/*
-              - arn:aws:s3:::gu-reader-revenue-private/membership/payment-failure-lambdas/PROD/*
+              - arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/DEV/zuoraRest-DEV.json
+              - arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/CODE/zuoraRest-CODE.*.json
+              - arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/PROD/zuoraRest-PROD.*.json
             WriteableS3Buckets:
               - arn:aws:s3:::gu-zuora-catalog/PROD/*
 
