@@ -14,18 +14,9 @@ import scalaz.\/-
 
 import scala.util.{Failure, Success}
 
-class TestingRawEffects(
-  val isProd: Boolean = false,
-  val defaultCode: Int = 1,
-  responses: Map[String, HTTPResponse] = Map(),
-  postResponses: Map[POSTRequest, HTTPResponse] = Map()
-) extends Logging {
+class TestingRawEffects(val defaultCode: Int = 1, responses: Map[String, HTTPResponse] = Map(), postResponses: Map[POSTRequest, HTTPResponse] = Map()) extends Logging {
 
   var requests: List[Request] = Nil // !
-
-  val stage = Stage(if (isProd) "PROD" else "DEV")
-
-  val zuoraEnvironment = ZuoraEnvironment(if (isProd) "PROD" else "DEV")
 
   def requestsAttempted: List[BasicRequest] = requests.map { request =>
     val buffer = new Buffer()
@@ -76,8 +67,6 @@ class TestingRawEffects(
     requests.map(req => (req.method, req.url.encodedPath) -> Option(req.body).map(body)).toMap
   }
 
-  def s3Load(s: Stage) = \/-(TestingRawEffects.codeConfig)
-
 }
 
 object TestingRawEffects {
@@ -86,6 +75,8 @@ object TestingRawEffects {
   case class HTTPResponse(code: Int, body: String)
 
   case class BasicRequest(method: String, path: String, body: String)
+
+  def s3Load(s: Stage) = \/-(TestingRawEffects.codeConfig)
 
   val codeConfig: String =
     """

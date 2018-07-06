@@ -1,4 +1,4 @@
-package com.gu.sfContactMerge
+package com.gu.test
 
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.{JsSuccess, Json}

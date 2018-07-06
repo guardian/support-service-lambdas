@@ -11,6 +11,7 @@ import com.gu.identityBackfill.salesforce.getContact.GetSFContactSyncCheckFields
 import com.gu.identityBackfill.zuora.{CountZuoraAccountsForIdentityIdData, GetZuoraAccountsForEmailData}
 import com.gu.salesforce.auth.SalesforceAuthenticateData
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
+import com.gu.util.config.Stage
 import org.scalatest.{Assertion, FlatSpec, Matchers}
 import play.api.libs.json.Json
 
@@ -71,10 +72,10 @@ object Runner {
   def getResultAndRequests(input: String): (String, List[TestingRawEffects.BasicRequest]) = {
     val stream = new ByteArrayInputStream(input.getBytes(java.nio.charset.StandardCharsets.UTF_8))
     val os = new ByteArrayOutputStream()
-    val config = new TestingRawEffects(false, 200, responses, postResponses)
+    val config = new TestingRawEffects(200, responses, postResponses)
 
     //execute
-    Handler.runWithEffects(config.stage, config.s3Load, config.response, LambdaIO(stream, os, null))
+    Handler.runWithEffects(Stage("DEV"), TestingRawEffects.s3Load, config.response, LambdaIO(stream, os, null))
 
     val responseString = new String(os.toByteArray, "UTF-8")
 

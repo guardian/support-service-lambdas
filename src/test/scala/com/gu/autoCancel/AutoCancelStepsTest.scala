@@ -30,7 +30,7 @@ class AutoCancelStepsTest extends FlatSpec with Matchers {
   }
 
   "auto cancel" should "turn off auto pay" in {
-    val effects = new TestingRawEffects(false, 200)
+    val effects = new TestingRawEffects(200)
     AutoCancel(TestData.zuoraDeps(effects))(AutoCancelRequest("AID", SubscriptionId("subid"), LocalDate.now))
 
     effects.requestsAttempted should contain(BasicRequest("PUT", "/accounts/AID", "{\"autoPay\":false}"))

@@ -83,6 +83,10 @@ object SafeQueryBuilder {
 
   }
 
+  // to make one of these just
+  //import com.gu.util.zuora.SafeQueryBuilder.Implicits._
+  // and do
+  // zoql"SELECT Id FROM Account where IdentityId__c=${identityId.value}"
   class SafeQuery(val queryString: String)
 
 }

@@ -1,8 +1,8 @@
-package com.gu.sfContactMerge
+package com.gu.sf_contact_merge
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
-import com.gu.sfContactMerge.JsonMatchers._
+import com.gu.test.JsonMatchers._
 import com.gu.test.EffectsTest
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json._
@@ -27,8 +27,8 @@ class HandlerEffectsTest extends FlatSpec with Matchers {
     val actualResponse = runWithEffects(dummyRequest())
 
     val expected = ExpectedJsonFormat(
-      "404",
-      JsStringContainingJson(ExpectedBodyFormat("implementation Not Found (yet)")),
+      "200",
+      JsStringContainingJson(ExpectedBodyFormat("Success")),
       Map("Content-Type" -> "application/json")
     )
 
@@ -70,7 +70,7 @@ object TestData {
        |        "X-Forwarded-Proto": "https"
        |    },
        |    "body": "",
-       |    "queryStringParameters": null,
+       |    "queryStringParameters": {"isHealthcheck": "true"},
        |    "pathParameters": null,
        |    "stageVariables": null,
        |    "requestContext": {

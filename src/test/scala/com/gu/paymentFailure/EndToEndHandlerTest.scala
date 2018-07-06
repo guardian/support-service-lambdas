@@ -6,6 +6,7 @@ import com.gu.TestData._
 import com.gu.effects.TestingRawEffects
 import com.gu.effects.TestingRawEffects.HTTPResponse
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
+import com.gu.util.config.Stage
 import org.scalatest.{FlatSpec, Matchers}
 
 class EndToEndHandlerTest extends FlatSpec with Matchers {
@@ -20,9 +21,9 @@ class EndToEndHandlerTest extends FlatSpec with Matchers {
 
     val stream = new ByteArrayInputStream(endToEndData.zuoraCalloutJson.getBytes(java.nio.charset.StandardCharsets.UTF_8))
     val os = new ByteArrayOutputStream()
-    val config = new TestingRawEffects(false, 200, EndToEndData.responses)
+    val config = new TestingRawEffects(200, EndToEndData.responses)
     //execute
-    Lambda.runWithEffects(config.stage, config.s3Load, config.response, LambdaIO(stream, os, null))
+    Lambda.runWithEffects(Stage("DEV"), TestingRawEffects.s3Load, config.response, LambdaIO(stream, os, null))
 
     config.resultMap(("POST", "/messaging/v1/messageDefinitionSends/111/send")).get jsonMatches endToEndData.expectedEmailSend // TODO check the body too
 

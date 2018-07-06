@@ -108,13 +108,13 @@ object Runner {
     val stream = new ByteArrayInputStream(input.getBytes(java.nio.charset.StandardCharsets.UTF_8))
     val os = new ByteArrayOutputStream()
 
-    val rawEffects = new TestingRawEffects(defaultCode = 200, postResponses = postResponses, responses = responses)
+    val rawEffects = new TestingRawEffects(defaultCode = 200, responses = responses, postResponses = postResponses)
 
     def s3Load(s: Stage) = \/-(TestingRawEffects.codeConfig)
 
     def wire(config: Config[StepsConfig]) = handlerToTest(ZuoraAquaRequestMaker(rawEffects.response, config.stepsConfig.zuoraRestConfig))
     //execute
-    ReportsLambda[REQUEST, RESPONSE](rawEffects.stage, s3Load, LambdaIO(stream, os, null), wire)
+    ReportsLambda[REQUEST, RESPONSE](Stage("DEV"), s3Load, LambdaIO(stream, os, null), wire)
 
     val responseString = new String(os.toByteArray, "UTF-8")
 
