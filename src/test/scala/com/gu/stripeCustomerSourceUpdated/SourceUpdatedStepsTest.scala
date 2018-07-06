@@ -17,22 +17,22 @@ class SourceUpdatedStepsGetPaymentMethodsToUpdateTest extends FlatSpec with Matc
 
   "SourceUpdatedSteps" should "getAccountToUpdate non default pm" in {
     val effects = new TestingRawEffects(500, Map(
-          ("/action/query", HTTPResponse(
-            200,
-            """{
-              |  "records": [
-              |    {
-              |      "Id": "nondefaultPMID",
-              |      "AccountId": "accid",
-              |      "NumConsecutiveFailures": 3
-              |    }
-              |  ],
-              |  "size": 1,
-              |  "done": true
-              |}""".stripMargin
-          )), //defaultPMID
-          ("/accounts/accid/summary", HTTPResponse(200, defaultAccountSummaryJson))
-        ))
+      ("/action/query", HTTPResponse(
+        200,
+        """{
+          |  "records": [
+          |    {
+          |      "Id": "nondefaultPMID",
+          |      "AccountId": "accid",
+          |      "NumConsecutiveFailures": 3
+          |    }
+          |  ],
+          |  "size": 1,
+          |  "done": true
+          |}""".stripMargin
+      )), //defaultPMID
+      ("/accounts/accid/summary", HTTPResponse(200, defaultAccountSummaryJson))
+    ))
 
     val actual = SourceUpdatedSteps.getPaymentMethodsToUpdate(TestData.zuoraDeps(effects))(StripeCustomerId("fakecustid"), StripeSourceId("fakecardid"))
 
@@ -53,22 +53,22 @@ class SourceUpdatedStepsGetPaymentMethodsToUpdateTest extends FlatSpec with Matc
 
   "SourceUpdatedSteps" should "getAccountToUpdate default pm" in {
     val effects = new TestingRawEffects(500, Map(
-          ("/action/query", HTTPResponse(
-            200,
-            """{
-              |  "records": [
-              |    {
-              |      "Id": "defaultPMID",
-              |      "AccountId": "accid",
-              |      "NumConsecutiveFailures": 3
-              |    }
-              |  ],
-              |  "size": 1,
-              |  "done": true
-              |}""".stripMargin
-          )), //defaultPMID
-          ("/accounts/accid/summary", HTTPResponse(200, defaultAccountSummaryJson))
-        ))
+      ("/action/query", HTTPResponse(
+        200,
+        """{
+          |  "records": [
+          |    {
+          |      "Id": "defaultPMID",
+          |      "AccountId": "accid",
+          |      "NumConsecutiveFailures": 3
+          |    }
+          |  ],
+          |  "size": 1,
+          |  "done": true
+          |}""".stripMargin
+      )), //defaultPMID
+      ("/accounts/accid/summary", HTTPResponse(200, defaultAccountSummaryJson))
+    ))
 
     val actual = SourceUpdatedSteps.getPaymentMethodsToUpdate(TestData.zuoraDeps(effects))(StripeCustomerId("fakecustid"), StripeSourceId("fakecardid"))
 
@@ -89,27 +89,27 @@ class SourceUpdatedStepsGetPaymentMethodsToUpdateTest extends FlatSpec with Matc
 
   "SourceUpdatedSteps" should "getAccountToUpdate default pm with multiple on the same account" in {
     val effects = new TestingRawEffects(500, Map(
-          ("/action/query", HTTPResponse(
-            200,
-            """{
-              |  "records": [
-              |    {
-              |      "Id": "defaultPMID",
-              |      "AccountId": "accountidfake",
-              |      "NumConsecutiveFailures": 2
-              |    },
-              |    {
-              |      "Id": "anotherPM",
-              |      "AccountId": "accountidfake",
-              |      "NumConsecutiveFailures": 4
-              |    }
-              |  ],
-              |  "size": 2,
-              |  "done": true
-              |}""".stripMargin
-          )), //defaultPMID
-          ("/accounts/accountidfake/summary", HTTPResponse(200, defaultAccountSummaryJson))
-        ))
+      ("/action/query", HTTPResponse(
+        200,
+        """{
+          |  "records": [
+          |    {
+          |      "Id": "defaultPMID",
+          |      "AccountId": "accountidfake",
+          |      "NumConsecutiveFailures": 2
+          |    },
+          |    {
+          |      "Id": "anotherPM",
+          |      "AccountId": "accountidfake",
+          |      "NumConsecutiveFailures": 4
+          |    }
+          |  ],
+          |  "size": 2,
+          |  "done": true
+          |}""".stripMargin
+      )), //defaultPMID
+      ("/accounts/accountidfake/summary", HTTPResponse(200, defaultAccountSummaryJson))
+    ))
 
     val actual = SourceUpdatedSteps.getPaymentMethodsToUpdate(TestData.zuoraDeps(effects))(StripeCustomerId("fakecustid"), StripeSourceId("fakecardid"))
 
@@ -130,34 +130,34 @@ class SourceUpdatedStepsGetPaymentMethodsToUpdateTest extends FlatSpec with Matc
 
   "SourceUpdatedSteps" should "getAccountToUpdate multiple on different account three only" in {
     val effects = new TestingRawEffects(500, Map(
-          ("/action/query", HTTPResponse(
-            200,
-            """{
-              |  "records": [
-              |    {
-              |      "Id": "defaultPMID",
-              |      "AccountId": "accountidfake",
-              |      "NumConsecutiveFailures": 2
-              |    },
-              |    {
-              |      "Id": "anotherPM",
-              |      "AccountId": "accountidANOTHER",
-              |      "NumConsecutiveFailures": 4
-              |    },
-              |    {
-              |      "Id": "anotherPMAGAIN",
-              |      "AccountId": "accountidANOTHERONE",
-              |      "NumConsecutiveFailures": 4
-              |    }
-              |  ],
-              |  "size": 3,
-              |  "done": true
-              |}""".stripMargin
-          )),
-          ("/accounts/accountidfake/summary", HTTPResponse(200, defaultAccountSummaryJson)),
-          ("/accounts/accountidANOTHER/summary", HTTPResponse(200, accountSummaryJson("anotherPM"))),
-          ("/accounts/accountidANOTHERONE/summary", HTTPResponse(200, accountSummaryJson("anotherPMAGAIN")))
-        ))
+      ("/action/query", HTTPResponse(
+        200,
+        """{
+          |  "records": [
+          |    {
+          |      "Id": "defaultPMID",
+          |      "AccountId": "accountidfake",
+          |      "NumConsecutiveFailures": 2
+          |    },
+          |    {
+          |      "Id": "anotherPM",
+          |      "AccountId": "accountidANOTHER",
+          |      "NumConsecutiveFailures": 4
+          |    },
+          |    {
+          |      "Id": "anotherPMAGAIN",
+          |      "AccountId": "accountidANOTHERONE",
+          |      "NumConsecutiveFailures": 4
+          |    }
+          |  ],
+          |  "size": 3,
+          |  "done": true
+          |}""".stripMargin
+      )),
+      ("/accounts/accountidfake/summary", HTTPResponse(200, defaultAccountSummaryJson)),
+      ("/accounts/accountidANOTHER/summary", HTTPResponse(200, accountSummaryJson("anotherPM"))),
+      ("/accounts/accountidANOTHERONE/summary", HTTPResponse(200, accountSummaryJson("anotherPMAGAIN")))
+    ))
 
     val actual = SourceUpdatedSteps.getPaymentMethodsToUpdate(TestData.zuoraDeps(effects))(StripeCustomerId("fakecustid"), StripeSourceId("fakecardid"))
 
@@ -191,28 +191,28 @@ class SourceUpdatedStepsGetPaymentMethodsToUpdateTest extends FlatSpec with Matc
 
   "SourceUpdatedSteps" should "getAccountToUpdate multiple on different account two of them but only one is default PM" in {
     val effects = new TestingRawEffects(500, Map(
-          ("/action/query", HTTPResponse(
-            200,
-            """{
-              |  "records": [
-              |    {
-              |      "Id": "defaultPMID",
-              |      "AccountId": "accountidfake",
-              |      "NumConsecutiveFailures": 2
-              |    },
-              |    {
-              |      "Id": "anotherPMThatIsntTheDefaultForThisAccount",
-              |      "AccountId": "accountidANOTHER",
-              |      "NumConsecutiveFailures": 4
-              |    }
-              |  ],
-              |  "size": 2,
-              |  "done": true
-              |}""".stripMargin
-          )),
-          ("/accounts/accountidfake/summary", HTTPResponse(200, defaultAccountSummaryJson)),
-          ("/accounts/accountidANOTHER/summary", HTTPResponse(200, accountSummaryJson("anotherPM")))
-        ))
+      ("/action/query", HTTPResponse(
+        200,
+        """{
+          |  "records": [
+          |    {
+          |      "Id": "defaultPMID",
+          |      "AccountId": "accountidfake",
+          |      "NumConsecutiveFailures": 2
+          |    },
+          |    {
+          |      "Id": "anotherPMThatIsntTheDefaultForThisAccount",
+          |      "AccountId": "accountidANOTHER",
+          |      "NumConsecutiveFailures": 4
+          |    }
+          |  ],
+          |  "size": 2,
+          |  "done": true
+          |}""".stripMargin
+      )),
+      ("/accounts/accountidfake/summary", HTTPResponse(200, defaultAccountSummaryJson)),
+      ("/accounts/accountidANOTHER/summary", HTTPResponse(200, accountSummaryJson("anotherPM")))
+    ))
 
     val actual = SourceUpdatedSteps.getPaymentMethodsToUpdate(TestData.zuoraDeps(effects))(StripeCustomerId("fakecustid"), StripeSourceId("fakecardid"))
 
@@ -239,37 +239,37 @@ class SourceUpdatedStepsGetPaymentMethodsToUpdateTest extends FlatSpec with Matc
 
   "SourceUpdatedSteps" should "getAccountToUpdate multiple on different account more than three" in {
     val effects = new TestingRawEffects(500, Map(
-          ("/action/query", HTTPResponse(
-            200,
-            """{
-              |  "records": [
-              |    {
-              |      "Id": "defaultPMID",
-              |      "AccountId": "accountidfake",
-              |      "NumConsecutiveFailures": 2
-              |    },
-              |    {
-              |      "Id": "anotherPM",
-              |      "AccountId": "accountidANOTHER",
-              |      "NumConsecutiveFailures": 4
-              |    },
-              |    {
-              |      "Id": "anotherPMAGAIN",
-              |      "AccountId": "accountidANOTHERONE",
-              |      "NumConsecutiveFailures": 4
-              |    },
-              |    {
-              |      "Id": "anotherPMAGAINAGAIN",
-              |      "AccountId": "accountidANOTHERONEANOTHER",
-              |      "NumConsecutiveFailures": 4
-              |    }
-              |  ],
-              |  "size": 4,
-              |  "done": true
-              |}""".stripMargin
-          )), //defaultPMID
-          ("/accounts/accountidfake/summary", HTTPResponse(200, defaultAccountSummaryJson))
-        ))
+      ("/action/query", HTTPResponse(
+        200,
+        """{
+          |  "records": [
+          |    {
+          |      "Id": "defaultPMID",
+          |      "AccountId": "accountidfake",
+          |      "NumConsecutiveFailures": 2
+          |    },
+          |    {
+          |      "Id": "anotherPM",
+          |      "AccountId": "accountidANOTHER",
+          |      "NumConsecutiveFailures": 4
+          |    },
+          |    {
+          |      "Id": "anotherPMAGAIN",
+          |      "AccountId": "accountidANOTHERONE",
+          |      "NumConsecutiveFailures": 4
+          |    },
+          |    {
+          |      "Id": "anotherPMAGAINAGAIN",
+          |      "AccountId": "accountidANOTHERONEANOTHER",
+          |      "NumConsecutiveFailures": 4
+          |    }
+          |  ],
+          |  "size": 4,
+          |  "done": true
+          |}""".stripMargin
+      )), //defaultPMID
+      ("/accounts/accountidfake/summary", HTTPResponse(200, defaultAccountSummaryJson))
+    ))
 
     val actual = SourceUpdatedSteps.getPaymentMethodsToUpdate(TestData.zuoraDeps(effects))(StripeCustomerId("fakecustid"), StripeSourceId("fakecardid"))
 
@@ -284,17 +284,17 @@ class SourceUpdatedStepsGetPaymentMethodsToUpdateTest extends FlatSpec with Matc
 
   "SourceUpdatedSteps" should "getAccountToUpdate no payment methods at all" in {
     val effects = new TestingRawEffects(500, Map(
-          ("/action/query", HTTPResponse(
-            200,
-            """{
-              |  "records": [
-              |  ],
-              |  "size": 0,
-              |  "done": true
-              |}""".stripMargin
-          )), //defaultPMID
-          ("/accounts/accountidfake/summary", HTTPResponse(200, defaultAccountSummaryJson))
-        ))
+      ("/action/query", HTTPResponse(
+        200,
+        """{
+          |  "records": [
+          |  ],
+          |  "size": 0,
+          |  "done": true
+          |}""".stripMargin
+      )), //defaultPMID
+      ("/accounts/accountidfake/summary", HTTPResponse(200, defaultAccountSummaryJson))
+    ))
 
     val actual = SourceUpdatedSteps.getPaymentMethodsToUpdate(TestData.zuoraDeps(effects))(StripeCustomerId("fakecustid"), StripeSourceId("fakecardid"))
 
@@ -314,9 +314,9 @@ class SourceUpdatedStepsUpdatePaymentMethodTest extends FlatSpec with Matchers {
   "SourceUpdatedSteps" should "updatePaymentMethod" in {
 
     val effects = new TestingRawEffects(500, Map(
-          ("/object/payment-method", HTTPResponse(200, """{"Success": true,"Id": "newPMID"}""")),
-          ("/object/account/fake", HTTPResponse(200, """{"Success": true,"Id": "fakeaccountid"}"""))
-        ))
+      ("/object/payment-method", HTTPResponse(200, """{"Success": true,"Id": "newPMID"}""")),
+      ("/object/account/fake", HTTPResponse(200, """{"Success": true,"Id": "fakeaccountid"}"""))
+    ))
 
     val eventData = EventDataObject(
       id = StripeSourceId("card_def456"),
@@ -330,9 +330,9 @@ class SourceUpdatedStepsUpdatePaymentMethodTest extends FlatSpec with Matchers {
     val actual = SourceUpdatedSteps.createUpdatedDefaultPaymentMethod(
       TestData.zuoraDeps(effects)
     )(
-        PaymentMethodFields(PaymentMethodId("PMID"), AccountId("fake"), NumConsecutiveFailures(1)),
-        eventData
-      )
+      PaymentMethodFields(PaymentMethodId("PMID"), AccountId("fake"), NumConsecutiveFailures(1)),
+      eventData
+    )
 
     val expectedPOST = BasicRequest(
       "POST",

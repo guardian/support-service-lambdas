@@ -14,7 +14,11 @@ import scalaz.\/-
 
 import scala.util.{Failure, Success}
 
-class TestingRawEffects(val defaultCode: Int = 1, responses: Map[String, HTTPResponse] = Map(), postResponses: Map[POSTRequest, HTTPResponse] = Map()) extends Logging {
+class TestingRawEffects(
+  val defaultCode: Int = 1,
+  responses: Map[String, HTTPResponse] = Map(),
+  postResponses: Map[POSTRequest, HTTPResponse] = Map()
+) extends Logging {
 
   var requests: List[Request] = Nil // !
 
