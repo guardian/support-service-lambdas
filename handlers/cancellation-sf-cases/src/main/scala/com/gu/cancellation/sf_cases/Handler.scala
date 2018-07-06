@@ -27,7 +27,13 @@ object Handler extends Logging {
   type LazySalesforceAuthenticatedReqMaker = () => ApiGatewayOp[RestRequestMaker.Requests]
 
   def raiseCase(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
-    runWithEffects(RaiseCase.steps, RawEffects.response, RawEffects.stage, GetFromS3.fetchString, LambdaIO(inputStream, outputStream, context))
+    runWithEffects(
+      RaiseCase.steps(RawEffects.stage),
+      RawEffects.response,
+      RawEffects.stage,
+      GetFromS3.fetchString,
+      LambdaIO(inputStream, outputStream, context)
+    )
 
   object RaiseCase {
 
@@ -36,7 +42,6 @@ object Handler extends Logging {
       reason: String,
       subscriptionName: String
     )
-
     implicit val reads = Json.reads[RaiseRequestBody]
 
     implicit val writes = Json.writes[RaiseCaseResponse]
@@ -67,9 +72,9 @@ object Handler extends Logging {
           .toApiGatewayOp("raise sf case")
       } yield raiseCaseResponse
 
-    def steps(sfRequests: LazySalesforceAuthenticatedReqMaker)(apiGatewayRequest: ApiGatewayRequest) =
+    def steps(stage: Stage)(sfRequests: LazySalesforceAuthenticatedReqMaker)(apiGatewayRequest: ApiGatewayRequest) =
       (for {
-        identityId <- IdentityCookieToIdentityId(apiGatewayRequest.headers)
+        identityId <- IdentityCookieToIdentityId(apiGatewayRequest.headers, stage)
         sfRequests <- sfRequests()
         raiseCaseDetail <- apiGatewayRequest.bodyAsCaseClass[RaiseRequestBody]()
         wiredRaiseCase = raiseCase(SalesforceGenericIdLookup(sfRequests), SalesforceCase.Raise(sfRequests)) _
@@ -78,17 +83,22 @@ object Handler extends Logging {
   }
 
   def updateCase(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
-    runWithEffects(UpdateCase.steps, RawEffects.response, RawEffects.stage, GetFromS3.fetchString, LambdaIO(inputStream, outputStream, context))
+    runWithEffects(
+      UpdateCase.steps(RawEffects.stage),
+      RawEffects.response,
+      RawEffects.stage,
+      GetFromS3.fetchString,
+      LambdaIO(inputStream, outputStream, context)
+    )
 
   object UpdateCase {
 
     case class UpdateCasePathParams(caseId: String)
-
     implicit val pathParamReads = Json.reads[UpdateCasePathParams]
 
-    def steps(sfRequests: LazySalesforceAuthenticatedReqMaker)(apiGatewayRequest: ApiGatewayRequest) =
+    def steps(stage: Stage)(sfRequests: LazySalesforceAuthenticatedReqMaker)(apiGatewayRequest: ApiGatewayRequest) =
       (for {
-        _ <- IdentityCookieToIdentityId(apiGatewayRequest.headers) // TODO verify case belongs to identity user
+        _ <- IdentityCookieToIdentityId(apiGatewayRequest.headers, stage) // TODO verify case belongs to identity user
         sfRequests <- sfRequests()
         pathParams <- apiGatewayRequest.pathParamsAsCaseClass[UpdateCasePathParams]()
         requestBody <- apiGatewayRequest.bodyAsCaseClass[JsValue]()
