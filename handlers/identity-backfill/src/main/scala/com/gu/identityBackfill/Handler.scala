@@ -1,7 +1,6 @@
 package com.gu.identityBackfill
 
 import java.io.{InputStream, OutputStream}
-
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.identity.{GetByEmail, IdentityConfig}
@@ -36,35 +35,36 @@ object Handler {
     response: Request => Response,
     lambdaIO: LambdaIO
   ): Unit = {
-    def operation: (ZuoraRestConfig, SFAuthConfig, IdentityConfig) => Operation =
-      (zuoraRestConfig: ZuoraRestConfig,
-        sfConfig: SFAuthConfig,
-        identityConfig: IdentityConfig) => {
-        val zuoraRequests = ZuoraRestRequestMaker(response, zuoraRestConfig)
-        val zuoraQuerier = ZuoraQuery(zuoraRequests)
-        val getByEmail: EmailAddress => \/[GetByEmail.ApiError, IdentityId] = GetByEmail(response, identityConfig)
-        val countZuoraAccounts: IdentityId => ClientFailableOp[Int] = CountZuoraAccountsForIdentityId(zuoraQuerier)
-        lazy val sfRequests: ApiGatewayOp[Requests] = SalesforceAuthenticate(response, sfConfig)
+    def operation(
+      zuoraRestConfig: ZuoraRestConfig,
+      sfConfig: SFAuthConfig,
+      identityConfig: IdentityConfig
+    ) = {
+      val zuoraRequests = ZuoraRestRequestMaker(response, zuoraRestConfig)
+      val zuoraQuerier = ZuoraQuery(zuoraRequests)
+      val getByEmail: EmailAddress => \/[GetByEmail.ApiError, IdentityId] = GetByEmail(response, identityConfig)
+      val countZuoraAccounts: IdentityId => ClientFailableOp[Int] = CountZuoraAccountsForIdentityId(zuoraQuerier)
+      lazy val sfRequests: ApiGatewayOp[Requests] = SalesforceAuthenticate(response, sfConfig)
 
-        Operation(
-          steps = IdentityBackfillSteps(
-            PreReqCheck(
-              getByEmail,
-              GetZuoraAccountsForEmail(zuoraQuerier)_ andThen PreReqCheck.getSingleZuoraAccountForEmail,
-              countZuoraAccounts andThen PreReqCheck.noZuoraAccountsForIdentityId,
-              GetZuoraSubTypeForAccount(zuoraQuerier)_ andThen PreReqCheck.acceptableReaderType,
-              syncableSFToIdentity(sfRequests, stage)
-            ),
-            AddIdentityIdToAccount(zuoraRequests),
-            updateSalesforceIdentityId(sfRequests)
-          ),
-          healthcheck = () => Healthcheck(
+      Operation(
+        steps = IdentityBackfillSteps(
+          PreReqCheck(
             getByEmail,
-            countZuoraAccounts,
-            sfRequests
-          )
+            GetZuoraAccountsForEmail(zuoraQuerier)_ andThen PreReqCheck.getSingleZuoraAccountForEmail,
+            countZuoraAccounts andThen PreReqCheck.noZuoraAccountsForIdentityId,
+            GetZuoraSubTypeForAccount(zuoraQuerier)_ andThen PreReqCheck.acceptableReaderType,
+            syncableSFToIdentity(sfRequests, stage)
+          ),
+          AddIdentityIdToAccount(zuoraRequests),
+          updateSalesforceIdentityId(sfRequests)
+        ),
+        healthcheck = () => Healthcheck(
+          getByEmail,
+          countZuoraAccounts,
+          sfRequests
         )
-      }
+      )
+    }
 
     val loadConfig = LoadConfigModule(stage, fetchString)
     ApiGatewayHandler(lambdaIO)(for {

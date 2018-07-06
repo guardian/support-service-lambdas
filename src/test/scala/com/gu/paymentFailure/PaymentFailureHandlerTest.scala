@@ -62,8 +62,8 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
           a => scalaz.\/-(basicInvoiceTransactionSummary)
 
         ),
-        TestData.fakeConfig.etConfig.etSendIDs,
-        TestData.fakeConfig.trustedApiConfig
+        TestData.fakeETSendIds,
+        TestData.fakeApiConfig
       )
     }
     apiGatewayHandler(configToFunction, LambdaIO(stream, os, null))
@@ -118,7 +118,7 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
 
   def apiGatewayHandler: (Operation, LambdaIO) => Unit = {
     case (op, io) =>
-      ApiGatewayHandler(io)(ContinueProcessing((TestData.fakeConfig.trustedApiConfig, op)))
+      ApiGatewayHandler(io)(ContinueProcessing((TestData.fakeApiConfig, op)))
   }
   def basicOp(fakeInvoiceTransactionSummary: InvoiceTransactionSummary = basicInvoiceTransactionSummary) = {
     PaymentFailureSteps.apply(
@@ -126,8 +126,8 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
         sendEmail = _ => ReturnWithResponse(ApiGatewayResponse.internalServerError("something failed!")),
         getInvoiceTransactions = _ => scalaz.\/-(fakeInvoiceTransactionSummary)
       ),
-      TestData.fakeConfig.etConfig.etSendIDs,
-      TestData.fakeConfig.trustedApiConfig
+      TestData.fakeETSendIds,
+      TestData.fakeApiConfig
     )
   }
 
@@ -150,8 +150,8 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
           ),
           a => scalaz.\/-(basicInvoiceTransactionSummary)
         ),
-        TestData.fakeConfig.etConfig.etSendIDs,
-        TestData.fakeConfig.trustedApiConfig
+        TestData.fakeETSendIds,
+        TestData.fakeApiConfig
       )
     }
     apiGatewayHandler(configToFunction, LambdaIO(stream, os, null))
