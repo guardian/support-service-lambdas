@@ -16,7 +16,7 @@ import scalaz.{-\/, \/-}
 class GetSubscriptionEffectsTest extends FlatSpec with Matchers {
 
   private def actual(testSubscriptionId: SubscriptionId): ApiGatewayOp[SubscriptionResult] = for {
-    zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig].toApiGatewayOp("coun't load config")
+    zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig].toApiGatewayOp("couldn't load config")
     zuoraRequests = ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig)
     subscription <- GetSubscription(zuoraRequests)(testSubscriptionId)
   } yield {

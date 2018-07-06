@@ -1,5 +1,7 @@
 package com.gu.effects
 
+import com.gu.util.config.LoadConfigModule.S3Location
+
 import scala.util.{Failure, Success, Try}
 
 object FakeFetchString {
@@ -82,10 +84,10 @@ object FakeFetchString {
 
   )
 
-  def fetchString(bucket: String, key: String): Try[String] = {
-    if (bucket != "gu-reader-revenue-private") Failure(new RuntimeException(s"test failure, unexpected bucket: $bucket"))
+  def fetchString(location: S3Location): Try[String] = {
+    if (location.bucket != "gu-reader-revenue-private") Failure(new RuntimeException(s"test failure, unexpected bucket: ${location.bucket}"))
     else
-      configFiles.get(key).map(key => Success(key)).getOrElse(Failure(new RuntimeException(s"test failure unexpected config s3 key $key")))
+      configFiles.get(location.key).map(key => Success(key)).getOrElse(Failure(new RuntimeException(s"test failure unexpected config s3 key ${location.key}")))
   }
 
 }

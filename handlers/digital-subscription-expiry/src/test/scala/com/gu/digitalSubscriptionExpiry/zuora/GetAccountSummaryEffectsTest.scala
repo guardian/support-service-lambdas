@@ -1,6 +1,6 @@
 package com.gu.digitalSubscriptionExpiry.zuora
 import com.gu.digitalSubscriptionExpiry.zuora.GetAccountSummary.{AccountId, AccountSummaryResult}
-import com.gu.effects.{GetFromS3, RawEffects, S3ConfigLoad}
+import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing

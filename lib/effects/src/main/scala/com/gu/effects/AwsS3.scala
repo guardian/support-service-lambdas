@@ -6,6 +6,7 @@ import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.s3.model.{GetObjectRequest, PutObjectRequest, PutObjectResult, S3ObjectInputStream}
 import com.gu.util.Logging
 import com.gu.util.config.ConfigReads.ConfigFailure
+import com.gu.util.config.LoadConfigModule.{S3Location, StringFromS3}
 import com.gu.util.config.Stage
 import scalaz.{-\/, \/, \/-}
 
@@ -53,9 +54,8 @@ object GetFromS3 extends Logging {
       }
     }
   }
-
-  def fetchString(bucket: String, key: String): Try[String] = {
-    val request = new GetObjectRequest(bucket, key)
+  def fetchString(s3Location: S3Location): Try[String] = {
+    val request = new GetObjectRequest(s3Location.bucket, s3Location.key)
     fetchString(request)
   }
 

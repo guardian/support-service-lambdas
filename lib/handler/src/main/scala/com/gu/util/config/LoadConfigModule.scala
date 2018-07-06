@@ -15,7 +15,8 @@ object ConfigWithStage {
 
 object LoadConfigModule extends Logging {
 
-  type StringFromS3 = (String, String) => Try[String]
+  case class S3Location(bucket: String, key: String)
+  type StringFromS3 = S3Location => Try[String]
 
   val bucketName = "gu-reader-revenue-private"
 
@@ -27,9 +28,9 @@ object LoadConfigModule extends Logging {
       logger.info(s"Attempting to load config in $stage")
       val versionString = if (stage.value == "DEV") "" else s".v${configLocation.version}"
       val relativePath = s"${configLocation.path}-${stage.value}$versionString.json"
-      val s3Key = s"$basePath/$relativePath"
+      val s3Location = S3Location(bucket = bucketName, key = s"$basePath/$relativePath")
       for {
-        configStr <- toDisjunction(fetchString(bucketName, s3Key))
+        configStr <- toDisjunction(fetchString(s3Location))
         jsValue <- toDisjunction(Try(Json.parse(configStr)))
         _ <- validateStage(jsValue, stage)
         config <- toDisjunction(Json.fromJson[CONF](jsValue))

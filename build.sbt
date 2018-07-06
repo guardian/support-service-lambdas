@@ -67,7 +67,7 @@ lazy val zuora = all(project in file("lib/zuora"))
   .dependsOn(
     restHttp,
     testDep,
-    handler,// TODO only for the config, which should ideally be split out
+    handler,// TODO only for the config, which needs to be split out
     effects % "test->test"
   )
   .settings(

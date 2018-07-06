@@ -17,7 +17,7 @@ class CatalogServiceStepsTest extends FlatSpec with Matchers {
         successfulResponseEffects.response,
         successfulResponseEffects.stage,
         successfulResponseEffects.zuoraEnvironment,
-        (_, _) => Failure(new RuntimeException("broken config load")),
+        _ => Failure(new RuntimeException("broken config load")),
         TestingRawEffects.successfulS3Upload
       )
     }
