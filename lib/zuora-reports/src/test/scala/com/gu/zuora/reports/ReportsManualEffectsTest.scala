@@ -1,18 +1,16 @@
 package com.gu.zuora.reports
 
-import com.gu.effects.{GetFromS3, RawEffects, S3ConfigLoad}
+import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.zuora.ZuoraRestConfig
 import com.gu.zuora.reports.aqua.{AquaJobResponse, AquaQuery, AquaQueryRequest, ZuoraAquaRequestMaker}
 import com.gu.zuora.reports.dataModel.Batch
 import okhttp3.{Request, Response}
 import play.api.libs.json.Json
-import scalaz.syntax.std.either._
 
 object ReportsManualEffectsTest extends App {
 
   def getZuoraRequest(response: Request => Response) = for {
-    configAttempt <- S3ConfigLoad.load(Stage("DEV")).toEither.disjunction
     zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig]
     zuoraRequests = ZuoraAquaRequestMaker(RawEffects.response, zuoraRestConfig)
   } yield zuoraRequests

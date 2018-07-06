@@ -1,8 +1,8 @@
 package manualTest
 
-import com.gu.effects.{S3ConfigLoad, Http}
+import com.gu.effects.{GetFromS3, Http}
 import com.gu.test.HealthCheck
-import com.gu.util.config.Stage
+import com.gu.util.config.LoadConfigModule.S3Location
 import okhttp3._
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
@@ -13,30 +13,35 @@ class CODEPRODHealthCheck extends FlatSpec with Matchers {
 
   import com.gu.util.reader.Types._
 
-  it should "successfull run the health checks against CODE" taggedAs HealthCheck in {
+  it should "successfully run the health checks against CODE" taggedAs HealthCheck in {
 
     healthcheckForEnv(_.CODE)
 
   }
 
-  it should "successfull run the health checks against PROD" taggedAs HealthCheck in {
+  it should "successfully run the health checks against PROD" taggedAs HealthCheck in {
 
     healthcheckForEnv(_.PROD)
 
   }
 
   private def healthcheckForEnv(env: HealthChecks => List[HealthCheckConfig]) = {
+    val configLocation = S3Location(bucket = "gu-reader-revenue-private", key = "membership/support-service-lambdas/DEV/support-service-lambdas-healthcheck.private.json")
     val healthchecks = for {
-      jsonString <- S3ConfigLoad.load(Stage("DEV"), "payment-failure-healthcheck.private.json").toApiGatewayOp("read local config")
+      jsonString <- GetFromS3.fetchString(configLocation).toApiGatewayOp("read local config")
       healthcheck <- Json.parse(jsonString).validate[HealthChecks](HealthChecks.reads).toApiGatewayOp()
 
     } yield env(healthcheck)
 
-    val expectedResponse = "Success"
-
+    val expectedResponse =
+      """{
+        |  "message" : "Success"
+        |}
+      """.stripMargin
+    println(healthchecks)
     healthchecks.toDisjunction.fold(err => fail(s"couldn't load config: $err"), identity).foreach { healthcheck =>
       val responseString = post(healthcheck, Http.response)
-      responseString should be(expectedResponse)
+      Json.parse(responseString) should be(Json.parse(expectedResponse))
     }
   }
 
