@@ -1,7 +1,5 @@
 package com.gu.effects
 
-import com.amazonaws.services.s3.model.GetObjectRequest
-
 import scala.util.{Failure, Success, Try}
 
 object FakeFetchString {

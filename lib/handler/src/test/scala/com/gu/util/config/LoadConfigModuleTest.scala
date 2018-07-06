@@ -34,6 +34,40 @@ class LoadConfigModuleTest extends FlatSpec with Matchers {
     prodConfig[TestConfig] shouldBe \/-(TestConfig("prodValue", 92))
 
   }
+
+  it should "fail if the configuration file is missing fields" in {
+
+    val jsonMissingSomeValue =
+      """
+        |{
+        |"stage" : "PROD",
+        | "someOtherValue" : 22
+        |}
+      """.stripMargin
+    def invalidJsonLoad = fakeS3Load(jsonMissingSomeValue) _
+
+    val prodConfig = LoadConfigModule(prodStage, invalidJsonLoad)
+    prodConfig[TestConfig].isLeft shouldBe (true)
+
+  }
+
+  it should "fail if the configuration file contains fields of the wrong type" in {
+
+    val jsonMissingSomeValue =
+      """
+        |{
+        |"stage" : "PROD",
+        | "someValue" : "something",
+        | "someOtherValue" : "this should be an Int"
+        |}
+      """.stripMargin
+    def invalidJsonLoad = fakeS3Load(jsonMissingSomeValue) _
+
+    val prodConfig = LoadConfigModule(prodStage, invalidJsonLoad)
+    prodConfig[TestConfig].isLeft shouldBe (true)
+
+  }
+
   it should "fail if the configuration is invalid json" in {
 
     def invalidJsonLoad = fakeS3Load("hello world") _

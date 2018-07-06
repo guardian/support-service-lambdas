@@ -90,6 +90,12 @@ lazy val restHttp = all(project in file("lib/restHttp"))
     libraryDependencies ++= Seq(okhttp3, logging, scalaz, playJson, scalatest)
   )
 
+lazy val s3ConfigValidator = all(project in file("lib/s3ConfigValidator"))
+  .dependsOn(testDep, handler, zuora, `digital-subscription-expiry`, `identity-backfill`, effectsDepIncludingTestFolder)
+  .settings(
+    libraryDependencies ++= Seq(scalatest)
+  )
+
 lazy val handler = all(project in file("lib/handler"))
   .settings(
     libraryDependencies ++= Seq(okhttp3, logging, scalaz, playJson, scalatest, awsLambda, awsS3)
@@ -128,7 +134,8 @@ lazy val root = all(project in file(".")).enablePlugins(RiffRaffArtifact).aggreg
   restHttp,
   zuora,
   `zuora-reports`,
-  salesforce
+  salesforce,
+  s3ConfigValidator
 ).dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `identity-backfill` = all(project in file("handlers/identity-backfill")) // when using the "project identity-backfill" command it uses the lazy val name
