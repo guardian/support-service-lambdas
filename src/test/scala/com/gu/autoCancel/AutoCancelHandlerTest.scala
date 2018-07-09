@@ -2,7 +2,7 @@ package com.gu.autoCancel
 
 import com.gu.autoCancel.AutoCancelSteps.AutoCancelUrlParams
 import com.gu.util.apigateway.Auth.RequestAuth
-import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest}
+import com.gu.util.apigateway.ApiGatewayHandler
 import com.gu.util.config.TrustedApiConfig
 import org.scalatest._
 import play.api.libs.json.{JsSuccess, Json}
@@ -81,26 +81,20 @@ class DeserialiserTest extends FlatSpec with Matchers {
 
   "deserialise UrlParams" should "manage without the only direct debit param" in {
     val json = """{"apiToken": "a", "apiClientId": "b"}"""
-    val actualRequest = Json.parse(json).validate[AutoCancelUrlParams]
 
     Json.parse(json).validate[AutoCancelUrlParams] should be(JsSuccess(AutoCancelUrlParams(false)))
-
   }
 
   it should "manage with the only direct debit param being false" in {
     val json = """{"apiToken": "a", "apiClientId": "b", "onlyCancelDirectDebit": "false"}"""
-    val actualRequest = Json.parse(json).validate[ApiGatewayRequest]
 
     Json.parse(json).validate[AutoCancelUrlParams] should be(JsSuccess(AutoCancelUrlParams(false)))
-
   }
 
   it should "manage with the only direct debit param being true" in {
     val json = """{"apiToken": "a", "apiClientId": "b", "onlyCancelDirectDebit": "true"}"""
-    val actualRequest = Json.parse(json).validate[ApiGatewayRequest]
 
     Json.parse(json).validate[AutoCancelUrlParams] should be(JsSuccess(AutoCancelUrlParams(true)))
-
   }
 
 }

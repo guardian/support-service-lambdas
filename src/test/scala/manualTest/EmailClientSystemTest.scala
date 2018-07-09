@@ -1,13 +1,11 @@
 package manualTest
 
-import com.gu.effects.{S3ConfigLoad, RawEffects}
-import com.gu.stripeCustomerSourceUpdated.SourceUpdatedSteps.StepsConfig
-import com.gu.util.config.ETConfig.ETSendIds
-import com.gu.util.exacttarget._
-import com.gu.util.reader.Types._
+import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.util.Logging
-import com.gu.util.config.{LoadConfig, Stage}
-import scalaz.syntax.std.either._
+import com.gu.util.config.ETConfig.ETSendIds
+import com.gu.util.config.{ETConfig, LoadConfigModule, Stage}
+import com.gu.util.exacttarget._
+
 import scala.util.Random
 
 // run this to send a one off email to yourself.  the email will take a few mins to arrive, but it proves the ET logic works
@@ -48,10 +46,9 @@ object EmailClientSystemTest extends App with Logging {
     )
 
   for {
-    configAttempt <- S3ConfigLoad.load(Stage("DEV")).toEither.disjunction.withLogging("fromFile")
-    config <- LoadConfig.parseConfig[StepsConfig](configAttempt)
-    send = EmailSendSteps(ETClient.sendEmail(RawEffects.response, config.etConfig), FilterEmail(Stage("CODE")))_
-    etSendIds = config.etConfig.etSendIDs
+    etConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ETConfig]
+    send = EmailSendSteps(ETClient.sendEmail(RawEffects.response, etConfig), FilterEmail(Stage("CODE")))_
+    etSendIds = etConfig.etSendIDs
   } yield Seq(
     "Supporter",
     "Digital Pack",

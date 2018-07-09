@@ -55,8 +55,11 @@ Resources:
                       Statement:
                           - Effect: Allow
                             Action: s3:GetObject
-                            Resource: !Sub arn:aws:s3:::gu-reader-revenue-private/membership/payment-failure-lambdas/${Stage}/*
-
+                            Resource:
+                            - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/zuoraRest-${Stage}.*.json
+                            - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/trustedApi-${Stage}.*.json
+                            - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/exactTarget-${Stage}.*.json
+                            - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/stripe-${Stage}.*.json
     ZuoraAutoCancelLambda:
         Type: AWS::Lambda::Function
         Properties:

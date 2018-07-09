@@ -8,7 +8,6 @@ import com.gu.stripeCustomerSourceUpdated.SourceUpdatedStepsTestData._
 import com.gu.stripeCustomerSourceUpdated.zuora.ZuoraQueryPaymentMethod.PaymentMethodFields
 import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.zuora.ZuoraGetAccountSummary.ZuoraAccount.{AccountId, NumConsecutiveFailures, PaymentMethodId}
-import org.scalatest.Matchers.be
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.{JsSuccess, Json}
 import scalaz.{-\/, \/-}
@@ -416,12 +415,12 @@ class SourceUpdatedStepsApplyTest extends FlatSpec with Matchers {
 
   it should "manage with the GMN AUS stripe param set" in {
     val queryStringJson = """{"apiToken": "a", "apiClientId": "b", "stripeAccount": "GNM_Membership_AUS"}"""
-    val actualRequest = Json.parse(queryStringJson).as[SourceUpdatedUrlParams] should be(SourceUpdatedUrlParams(Some(StripeAccount.GNM_Membership_AUS)))
+    Json.parse(queryStringJson).as[SourceUpdatedUrlParams] should be(SourceUpdatedUrlParams(Some(StripeAccount.GNM_Membership_AUS)))
   }
 
   it should "manage with the GMN stripe param set" in {
     val queryStringJson = """{"apiToken": "a", "apiClientId": "b", "stripeAccount": "GNM_Membership"}"""
-    val actualRequest = Json.parse(queryStringJson).as[SourceUpdatedUrlParams] should be(SourceUpdatedUrlParams(Some(StripeAccount.GNM_Membership)))
+    Json.parse(queryStringJson).as[SourceUpdatedUrlParams] should be(SourceUpdatedUrlParams(Some(StripeAccount.GNM_Membership)))
   }
 
 }

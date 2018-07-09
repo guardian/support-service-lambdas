@@ -3,7 +3,7 @@ package com.gu.cancellation.sf_cases
 import java.io.{InputStream, OutputStream}
 
 import com.amazonaws.services.lambda.runtime.Context
-import com.gu.effects.RawEffects
+import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.identity.IdentityCookieToIdentityId
 import com.gu.salesforce.SalesforceGenericIdLookup
 import com.gu.salesforce.SalesforceGenericIdLookup.{ResponseWithId, TSalesforceGenericIdLookup}
@@ -15,18 +15,14 @@ import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, ApiGatewayResponse}
-import com.gu.util.config.ConfigReads.ConfigFailure
-import com.gu.util.config.{Config, LoadConfig, Stage}
+import com.gu.util.config.LoadConfigModule.StringFromS3
+import com.gu.util.config.{LoadConfigModule, Stage, TrustedApiConfig}
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.RestRequestMaker
 import okhttp3.{Request, Response}
-import play.api.libs.json.{JsValue, Json, Reads}
-import scalaz.\/
+import play.api.libs.json.{JsValue, Json}
 
 object Handler extends Logging {
-
-  case class StepsConfig(sfConfig: SFAuthConfig)
-  implicit val stepsConfigReads: Reads[StepsConfig] = Json.reads[StepsConfig]
 
   type LazySalesforceAuthenticatedReqMaker = () => ApiGatewayOp[RestRequestMaker.Requests]
 
@@ -35,7 +31,7 @@ object Handler extends Logging {
       RaiseCase.steps(RawEffects.stage),
       RawEffects.response,
       RawEffects.stage,
-      RawEffects.s3Load,
+      GetFromS3.fetchString,
       LambdaIO(inputStream, outputStream, context)
     )
 
@@ -81,7 +77,7 @@ object Handler extends Logging {
         identityId <- IdentityCookieToIdentityId(apiGatewayRequest.headers, stage)
         sfRequests <- sfRequests()
         raiseCaseDetail <- apiGatewayRequest.bodyAsCaseClass[RaiseRequestBody]()
-        wiredRaiseCase = raiseCase(SalesforceGenericIdLookup(sfRequests), SalesforceCase.Raise(sfRequests))_
+        wiredRaiseCase = raiseCase(SalesforceGenericIdLookup(sfRequests), SalesforceCase.Raise(sfRequests)) _
         raiseCaseResponse <- wiredRaiseCase(identityId, raiseCaseDetail)
       } yield ApiResponse("200", Json.prettyPrint(Json.toJson(raiseCaseResponse)))).apiResponse
   }
@@ -91,7 +87,7 @@ object Handler extends Logging {
       UpdateCase.steps(RawEffects.stage),
       RawEffects.response,
       RawEffects.stage,
-      RawEffects.s3Load,
+      GetFromS3.fetchString,
       LambdaIO(inputStream, outputStream, context)
     )
 
@@ -115,16 +111,16 @@ object Handler extends Logging {
     steps: LazySalesforceAuthenticatedReqMaker => ApiGatewayRequest => ApiResponse,
     response: Request => Response,
     stage: Stage,
-    s3Load: Stage => ConfigFailure \/ String,
+    fetchString: StringFromS3,
     lambdaIO: LambdaIO
   ) = {
 
     def healthcheckSteps(sfRequests: LazySalesforceAuthenticatedReqMaker) = () =>
       (for { _ <- sfRequests() } yield ApiGatewayResponse.successfulExecution).apiResponse
 
-    def operation: Config[StepsConfig] => Operation = config => {
+    def operation: SFAuthConfig => Operation = sfConfig => {
 
-      val sfRequests: LazySalesforceAuthenticatedReqMaker = () => SalesforceAuthenticate(response, config.stepsConfig.sfConfig)
+      val sfRequests: LazySalesforceAuthenticatedReqMaker = () => SalesforceAuthenticate(response, sfConfig)
 
       Operation(
         steps(sfRequests),
@@ -134,10 +130,13 @@ object Handler extends Logging {
 
     }
 
-    ApiGatewayHandler[StepsConfig](lambdaIO)(for {
-      config <- LoadConfig.default[StepsConfig](implicitly)(stage, s3Load(stage)).toApiGatewayOp("load config")
-      configuredOp = operation(config)
-    } yield (config, configuredOp))
+    val loadConfig = LoadConfigModule(stage, fetchString)
+
+    ApiGatewayHandler(lambdaIO)(for {
+      sfConfig <- loadConfig[SFAuthConfig].toApiGatewayOp("load sf config")
+      trustedApiConfig <- loadConfig[TrustedApiConfig].toApiGatewayOp("load trusted api config")
+      configuredOp = operation(sfConfig)
+    } yield (trustedApiConfig, configuredOp))
 
   }
 

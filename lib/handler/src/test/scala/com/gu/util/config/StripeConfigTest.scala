@@ -1,37 +1,11 @@
 package com.gu.util.config
 
-import com.gu.util.config.ETConfig.{ETSendId, ETSendIds}
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.{JsSuccess, Json}
-import scalaz.\/-
 
-class LoadConfigTest extends FlatSpec with Matchers {
-
-  "loader" should "be able to load config successfully" in {
-    val actualConfigObject = LoadConfig.parseConfig[String](devConfig)
-    actualConfigObject should be(\/-(
-      Config(
-        Stage("DEV"),
-        TrustedApiConfig("b", "c"),
-        stepsConfig = "hi",
-        etConfig = ETConfig(etSendIDs = ETSendIds(ETSendId("111"), ETSendId("222"), ETSendId("333"), ETSendId("444"), ETSendId("ccc")), clientId = "jjj", clientSecret = "kkk"),
-        stripeConfig = StripeConfig(StripeWebhook(StripeSecretKey("abc"), StripeSecretKey("def")), true)
-      )
-    ))
-  }
-
-  "loader" should "succeed if the expected stage provided matches the stage in the config file" in {
-    val confAttempt = LoadConfig.default[String](implicitly)(Stage("DEV"), \/-(devConfig))
-    assert(confAttempt.isRight)
-  }
-
-  "loader" should "fail if the stage in the config file differs from the expected stage provided" in {
-    val confAttempt = LoadConfig.default[String](implicitly)(Stage("PROD"), \/-(devConfig))
-    assert(confAttempt.isLeft)
-  }
-
+class StripeConfigTest extends FlatSpec with Matchers {
   // Stripe specific tests
-  "loader" should "the sig verified status is on by default" in {
+  it should "the sig verified status is on by default" in {
     val configString = """{
                          |     "customerSourceUpdatedWebhook": {
                          |       "api.key.secret": "abc",
@@ -44,7 +18,7 @@ class LoadConfigTest extends FlatSpec with Matchers {
     ))
   }
 
-  "loader" should "sig verifying is on if we ask for it to be on" in {
+  it should "sig verifying is on if we ask for it to be on" in {
     val configString = """{
                          |     "customerSourceUpdatedWebhook": {
                          |       "api.key.secret": "abc",
@@ -58,7 +32,7 @@ class LoadConfigTest extends FlatSpec with Matchers {
     ))
   }
 
-  "loader" should "sig verifying is still on if we ask for sdjfkhgsdf" in {
+  it should "sig verifying is still on if we ask for sdjfkhgsdf" in {
     val configString = """{
                          |     "customerSourceUpdatedWebhook": {
                          |       "api.key.secret": "abc",
@@ -72,7 +46,7 @@ class LoadConfigTest extends FlatSpec with Matchers {
     ))
   }
 
-  "loader" should "sig verifying is ONLY off if we ask for false" in {
+  it should "sig verifying is ONLY off if we ask for false" in {
     val configString = """{
                          |     "customerSourceUpdatedWebhook": {
                          |       "api.key.secret": "abc",
@@ -85,35 +59,4 @@ class LoadConfigTest extends FlatSpec with Matchers {
       StripeConfig(StripeWebhook(StripeSecretKey("abc"), StripeSecretKey("def")), false)
     ))
   }
-
-  val devConfig: String =
-    """
-      |{ "stage": "DEV",
-      |  "trustedApiConfig": {
-      |    "apiClientId": "a",
-      |    "apiToken": "b",
-      |    "tenantId": "c"
-      |  },
-      |  "stepsConfig": "hi",
-      |  "etConfig": {
-      |    "etSendIDs":
-      |    {
-      |      "pf1": "111",
-      |      "pf2": "222",
-      |      "pf3": "333",
-      |      "pf4": "444",
-      |      "cancelled": "ccc"
-      |    },
-      |    "clientId": "jjj",
-      |    "clientSecret": "kkk"
-      |  },
-      |  "stripe": {
-      |     "customerSourceUpdatedWebhook": {
-      |       "api.key.secret": "abc",
-      |       "au-membership.key.secret": "def"
-      |     }
-      |  }
-      |}
-    """.stripMargin
-
 }

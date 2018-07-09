@@ -3,35 +3,27 @@ package com.gu.sfContactMerge
 import java.io.{InputStream, OutputStream}
 
 import com.amazonaws.services.lambda.runtime.Context
-import com.gu.effects.RawEffects
+import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayResponse}
-import com.gu.util.config.ConfigReads.ConfigFailure
-import com.gu.util.config.{LoadConfig, Stage}
+import com.gu.util.config.LoadConfigModule.StringFromS3
+import com.gu.util.config.{LoadConfigModule, Stage, TrustedApiConfig}
 import com.gu.util.reader.Types._
-import com.gu.util.zuora.ZuoraRestConfig
-import play.api.libs.json.{Json, Reads}
-import scalaz.\/
 
 object Handler {
 
-  case class StepsConfig(zuoraRestConfig: ZuoraRestConfig)
-
-  implicit val stepsConfigReads: Reads[StepsConfig] = Json.reads[StepsConfig]
-
   // Referenced in Cloudformation
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
-    runWithEffects(RawEffects.stage, RawEffects.s3Load, LambdaIO(inputStream, outputStream, context))
+    runWithEffects(RawEffects.stage, GetFromS3.fetchString, LambdaIO(inputStream, outputStream, context))
   }
 
-  def runWithEffects(stage: Stage, s3Load: Stage => ConfigFailure \/ String, lambdaIO: LambdaIO) = {
+  def runWithEffects(stage: Stage, fetchString: StringFromS3, lambdaIO: LambdaIO) = {
 
-    ApiGatewayHandler[StepsConfig](lambdaIO) {
+    ApiGatewayHandler(lambdaIO) {
       for {
-        config <- LoadConfig.default[StepsConfig](implicitly)(stage, s3Load(stage))
-          .toApiGatewayOp("load config")
+        trustedApiConfig <- LoadConfigModule(stage, fetchString)[TrustedApiConfig].toApiGatewayOp("load trusted Api config")
         configuredOp = Operation.noHealthcheck(req => ApiGatewayResponse.notFound("implementation Not Found (yet)"), false)
-      } yield (config, configuredOp)
+      } yield (trustedApiConfig, configuredOp)
     }
 
   }

@@ -13,7 +13,7 @@ object IdentityCookieToIdentityId extends Logging {
       headers <- headersOption.toApiGatewayContinueProcessing(badRequest, "no headers")
       cookieHeader <- headers.get("Cookie").toApiGatewayContinueProcessing(badRequest, "no cookie")
       scGuU <- extractCookieHeaderValue(cookieHeader, "SC_GU_U")
-      keys = if(stage.isProd) new ProductionKeys else new PreProductionKeys
+      keys = if (stage.isProd) new ProductionKeys else new PreProductionKeys
       cookieDecoder = new IdentityCookieDecoder(keys)
       userFromScGuU <- cookieDecoder.getUserDataForScGuU(scGuU).toApiGatewayContinueProcessing(unauthorized)
     } yield userFromScGuU.getId

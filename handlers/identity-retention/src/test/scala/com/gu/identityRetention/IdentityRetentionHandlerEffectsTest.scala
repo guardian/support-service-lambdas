@@ -1,7 +1,8 @@
 package com.gu.identityRetention
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
-import com.gu.effects.RawEffects
+
+import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.test.EffectsTest
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import org.scalatest.{Assertion, FlatSpec, Matchers}
@@ -40,7 +41,7 @@ class IdentityRetentionHandlerEffectsTest extends FlatSpec with Matchers {
   def runWithMock(mockRequest: String): String = {
     val stream = new ByteArrayInputStream(mockRequest.getBytes(java.nio.charset.StandardCharsets.UTF_8))
     val output = new ByteArrayOutputStream()
-    Handler.runWithEffects(RawEffects.response, RawEffects.stage, RawEffects.s3Load, LambdaIO(stream, output, null))
+    Handler.runWithEffects(RawEffects.response, RawEffects.stage, GetFromS3.fetchString, LambdaIO(stream, output, null))
     new String(output.toByteArray, "UTF-8")
   }
 

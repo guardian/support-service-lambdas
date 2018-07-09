@@ -2,12 +2,15 @@ package com.gu.identityBackfill
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
-import com.gu.effects.RawEffects
+import com.amazonaws.services.s3.model.GetObjectRequest
+import com.gu.effects.{FakeFetchString, GetFromS3, RawEffects}
 import com.gu.identityBackfill.HealthCheckData._
 import com.gu.test.EffectsTest
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import org.scalatest.{Assertion, FlatSpec, Matchers}
 import play.api.libs.json.Json
+
+import scala.util.Success
 
 // this test runs the health check from locally. this means you can only run it manually
 // you should also run the healthcheck in code after deploy
@@ -19,7 +22,7 @@ class HealthCheckSystemTest extends FlatSpec with Matchers {
     val os = new ByteArrayOutputStream()
 
     //execute
-    Handler.runWithEffects(RawEffects.stage, RawEffects.s3Load, RawEffects.response, LambdaIO(stream, os, null))
+    Handler.runWithEffects(RawEffects.stage, GetFromS3.fetchString, RawEffects.response, LambdaIO(stream, os, null))
 
     val responseString = new String(os.toByteArray, "UTF-8")
 
