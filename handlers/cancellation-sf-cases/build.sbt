@@ -20,5 +20,6 @@ libraryDependencies ++= Seq(
   playJson,
   scalatest,
   jacksonDatabind,
-  "com.gu.identity" %% "identity-cookie" % "3.160"
+  "com.gu.identity" %% "identity-cookie" % "3.160",
+  "com.gu" %% "identity-test-users" % "0.7"
 )

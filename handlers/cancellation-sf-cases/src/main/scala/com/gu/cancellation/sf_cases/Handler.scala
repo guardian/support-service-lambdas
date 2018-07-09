@@ -4,7 +4,8 @@ import java.io.{InputStream, OutputStream}
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
-import com.gu.identity.IdentityCookieToIdentityId
+import com.gu.identity.IdentityCookieToIdentityUser.IdentityUser
+import com.gu.identity.{IdentityCookieToIdentityUser, IsIdentityTestUser}
 import com.gu.salesforce.SalesforceGenericIdLookup
 import com.gu.salesforce.SalesforceGenericIdLookup.{ResponseWithId, TSalesforceGenericIdLookup}
 import com.gu.salesforce.auth.SalesforceAuthenticate
@@ -16,15 +17,16 @@ import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.config.LoadConfigModule.StringFromS3
-import com.gu.util.config.{LoadConfigModule, Stage, TrustedApiConfig}
+import com.gu.util.config._
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.RestRequestMaker
 import okhttp3.{Request, Response}
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsValue, Json, Reads}
+import scalaz.{-\/, \/-}
 
 object Handler extends Logging {
 
-  type LazySalesforceAuthenticatedReqMaker = () => ApiGatewayOp[RestRequestMaker.Requests]
+  type LazySalesforceAuthenticatedReqMaker = IdentityUser => ApiGatewayOp[RestRequestMaker.Requests]
 
   def raiseCase(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
     runWithEffects(
@@ -43,7 +45,6 @@ object Handler extends Logging {
       subscriptionName: String
     )
     implicit val reads = Json.reads[RaiseRequestBody]
-
     implicit val writes = Json.writes[RaiseCaseResponse]
 
     def buildNewCaseForSalesforce(
@@ -74,11 +75,11 @@ object Handler extends Logging {
 
     def steps(stage: Stage)(sfRequests: LazySalesforceAuthenticatedReqMaker)(apiGatewayRequest: ApiGatewayRequest) =
       (for {
-        identityId <- IdentityCookieToIdentityId(apiGatewayRequest.headers, stage)
-        sfRequests <- sfRequests()
+        identityUser <- IdentityCookieToIdentityUser(apiGatewayRequest.headers, stage)
+        sfRequests <- sfRequests(identityUser)
         raiseCaseDetail <- apiGatewayRequest.bodyAsCaseClass[RaiseRequestBody]()
-        wiredRaiseCase = raiseCase(SalesforceGenericIdLookup(sfRequests), SalesforceCase.Raise(sfRequests)) _
-        raiseCaseResponse <- wiredRaiseCase(identityId, raiseCaseDetail)
+        wiredRaiseCase = raiseCase(SalesforceGenericIdLookup(sfRequests), SalesforceCase.Raise(sfRequests))_
+        raiseCaseResponse <- wiredRaiseCase(identityUser.id, raiseCaseDetail)
       } yield ApiResponse("200", Json.prettyPrint(Json.toJson(raiseCaseResponse)))).apiResponse
   }
 
@@ -98,8 +99,9 @@ object Handler extends Logging {
 
     def steps(stage: Stage)(sfRequests: LazySalesforceAuthenticatedReqMaker)(apiGatewayRequest: ApiGatewayRequest) =
       (for {
-        _ <- IdentityCookieToIdentityId(apiGatewayRequest.headers, stage) // TODO verify case belongs to identity user
-        sfRequests <- sfRequests()
+        identityUser <- IdentityCookieToIdentityUser(apiGatewayRequest.headers, stage)
+        sfRequests <- sfRequests(identityUser)
+        // TODO verify case belongs to identity user
         pathParams <- apiGatewayRequest.pathParamsAsCaseClass[UpdateCasePathParams]()
         requestBody <- apiGatewayRequest.bodyAsCaseClass[JsValue]()
         _ <- SalesforceCase.Update(sfRequests)(pathParams.caseId, requestBody).toApiGatewayOp("update case")
@@ -115,26 +117,41 @@ object Handler extends Logging {
     lambdaIO: LambdaIO
   ) = {
 
+    val loadConfig = LoadConfigModule(stage, fetchString)
+
     def healthcheckSteps(sfRequests: LazySalesforceAuthenticatedReqMaker) = () =>
-      (for { _ <- sfRequests() } yield ApiGatewayResponse.successfulExecution).apiResponse
+      (for { _ <- sfRequests(IdentityUser("")) } yield ApiGatewayResponse.successfulExecution).apiResponse
 
     def operation: SFAuthConfig => Operation = sfConfig => {
 
-      val sfRequests: LazySalesforceAuthenticatedReqMaker = () => SalesforceAuthenticate(response, sfConfig)
+      val sfRequests: LazySalesforceAuthenticatedReqMaker = (identityUser: IdentityUser) => {
+
+        if (IsIdentityTestUser(loadConfig)(identityUser)) {
+          implicit val reads: Reads[SFAuthConfig] = SFAuthConfig.reads
+          implicit val sfUatConfLocation: ConfigLocation[SFAuthConfig] = ConfigLocation[SFAuthConfig](path = "UAT/sfAuth", version = 1)
+          loadConfig[SFAuthConfig] match {
+            case \/-(sfUatConf) => {
+              logger.info("using UAT SalesForce config")
+              SalesforceAuthenticate(response, sfUatConf)
+            }
+            case -\/(_) => SalesforceAuthenticate(response, sfConfig)
+          }
+        } else
+          SalesforceAuthenticate(response, sfConfig)
+
+      }
 
       Operation(
         steps(sfRequests),
         healthcheckSteps(sfRequests),
-        shouldAuthenticate = false
+        shouldAuthenticate = false //TODO this could be removed when 'trustedApiConfig' is an Option
       )
 
     }
 
-    val loadConfig = LoadConfigModule(stage, fetchString)
-
     ApiGatewayHandler(lambdaIO)(for {
       sfConfig <- loadConfig[SFAuthConfig].toApiGatewayOp("load sf config")
-      trustedApiConfig <- loadConfig[TrustedApiConfig].toApiGatewayOp("load trusted api config")
+      trustedApiConfig <- loadConfig[TrustedApiConfig].toApiGatewayOp("load trusted api config") //TODO this can be removed since 'shouldAuthenticate = false'
       configuredOp = operation(sfConfig)
     } yield (trustedApiConfig, configuredOp))
 
