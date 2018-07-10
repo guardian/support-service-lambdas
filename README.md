@@ -81,7 +81,7 @@ otherwise it will break the existing lambda immediately.
 
 Follow the same process to update the prod config, and for DEV there is no version number.
 
-To check that you have done it correctly, run the ConfigLoaderSystemTest.
+To check that you have done it correctly, run the [S3ConfigFilesEffectsTest](lib/s3ConfigValidator/src/test/scala/com/gu/test/S3ConfigFilesEffectsTest.scala).
 That will check the relevant version can be understood by the local version of the code.
 
 Ideally this test should be automated and your PR shouldn't be mergable until the config is readable.
