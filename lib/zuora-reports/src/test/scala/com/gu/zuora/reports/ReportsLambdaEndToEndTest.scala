@@ -2,18 +2,16 @@ package com.gu.zuora.reports
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
-import com.gu.effects.TestingRawEffects
+import com.gu.effects.{FakeFetchString, TestingRawEffects}
 import com.gu.effects.TestingRawEffects.{HTTPResponse, POSTRequest}
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
-import com.gu.util.config.{Config, Stage}
 import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, Requests}
+import com.gu.util.zuora.ZuoraRestConfig
 import com.gu.zuora.reports.EndToEndData._
-import com.gu.zuora.reports.ReportsLambda.StepsConfig
 import com.gu.zuora.reports.Runner._
 import com.gu.zuora.reports.aqua.{AquaJobResponse, AquaQuery, AquaQueryRequest, ZuoraAquaRequestMaker}
 import org.scalatest.{Assertion, FlatSpec, Matchers}
 import play.api.libs.json.{Json, Reads, Writes}
-import scalaz.\/-
 
 class ReportsLambdaEndToEndTest extends FlatSpec with Matchers {
 
@@ -110,11 +108,14 @@ object Runner {
 
     val rawEffects = new TestingRawEffects(defaultCode = 200, responses = responses, postResponses = postResponses)
 
-    def s3Load(s: Stage) = \/-(TestingRawEffects.codeConfig)
-
-    def wire(config: Config[StepsConfig]) = handlerToTest(ZuoraAquaRequestMaker(rawEffects.response, config.stepsConfig.zuoraRestConfig))
+    def wire(zuoraRestConfig: ZuoraRestConfig) = handlerToTest(ZuoraAquaRequestMaker(rawEffects.response, zuoraRestConfig))
     //execute
-    ReportsLambda[REQUEST, RESPONSE](Stage("DEV"), s3Load, LambdaIO(stream, os, null), wire)
+    ReportsLambda[REQUEST, RESPONSE](
+      Stage("DEV"),
+      FakeFetchString.fetchString,
+      LambdaIO(stream, os, null),
+      wire
+    )
 
     val responseString = new String(os.toByteArray, "UTF-8")
 

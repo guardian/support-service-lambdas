@@ -1,5 +1,6 @@
 package com.gu.util.zuora
 
+import com.gu.util.config.ConfigLocation
 import play.api.libs.json.Json
 
 case class ZuoraRestConfig(
@@ -10,4 +11,5 @@ case class ZuoraRestConfig(
 
 object ZuoraRestConfig {
   implicit val zuoraConfigReads = Json.reads[ZuoraRestConfig]
+  implicit val location = ConfigLocation[ZuoraRestConfig](path = "zuoraRest", version = 1)
 }

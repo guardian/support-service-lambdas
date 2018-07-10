@@ -2,6 +2,7 @@ package com.gu.salesforce.auth
 
 import com.gu.salesforce.auth.SalesforceAuthenticate.SalesforceAuth
 import com.gu.util.Logging
+import com.gu.util.config.ConfigLocation
 import com.gu.util.reader.Types.{ApiGatewayOp, _}
 import com.gu.util.zuora.RestRequestMaker
 import okhttp3.{FormBody, Request, Response}
@@ -20,6 +21,7 @@ object SalesforceAuthenticate extends Logging {
   )
   object SFAuthConfig {
     implicit val reads: Reads[SFAuthConfig] = Json.reads[SFAuthConfig]
+    implicit val location = ConfigLocation[SFAuthConfig](path = "sfAuth", version = 1)
   }
 
   // the WireResponse model is the same as the domain model, so keep a friendly name

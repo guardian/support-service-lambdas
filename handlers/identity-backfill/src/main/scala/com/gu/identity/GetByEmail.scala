@@ -2,9 +2,9 @@ package com.gu.identity
 
 import com.gu.identity.GetByEmail.RawWireModel.{User, UserResponse}
 import com.gu.identityBackfill.Types.{EmailAddress, IdentityId}
+import com.gu.util.config.ConfigLocation
 import okhttp3.{HttpUrl, Request, Response}
 import play.api.libs.json.{Json, Reads}
-
 import scalaz.{-\/, \/, \/-}
 import scalaz.syntax.std.either._
 
@@ -66,4 +66,5 @@ case class IdentityConfig(
 
 object IdentityConfig {
   implicit val reads: Reads[IdentityConfig] = Json.reads[IdentityConfig]
+  implicit val location = ConfigLocation[IdentityConfig](path = "identity", version = 1)
 }

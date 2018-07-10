@@ -1,6 +1,6 @@
 package com.gu.identityBackfill.salesforce.updateSFIdentityId
 
-import com.gu.effects.RawEffects
+import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.identityBackfill.Types.{IdentityId, SFContactId}
 import com.gu.identityBackfill.salesforce.{DevSFEffects, UpdateSalesforceIdentityId}
 import com.gu.test.EffectsTest
@@ -18,7 +18,7 @@ class UpdateSalesforceIdentityIdEffectsTest extends FlatSpec with Matchers {
     val testContact = SFContactId("003g000000LEwO6AAL")
 
     val actual = for {
-      auth <- DevSFEffects(RawEffects.s3Load, RawEffects.response)
+      auth <- DevSFEffects(GetFromS3.fetchString, RawEffects.response)
       _ <- UpdateSalesforceIdentityId(auth)(testContact, IdentityId(unique)).toApiGatewayOp("update")
       identityId <- GetSalesforceIdentityId(auth)(testContact)
     } yield identityId

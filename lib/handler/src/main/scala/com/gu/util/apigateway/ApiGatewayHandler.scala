@@ -7,7 +7,7 @@ import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayResponse.{outputForAPIGateway, unauthorized}
 import com.gu.util.apigateway.Auth.{RequestAuth, credentialsAreValid}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
-import com.gu.util.config.{Config, TrustedApiConfig}
+import com.gu.util.config.TrustedApiConfig
 import com.gu.util.reader.Types.ApiGatewayOp._
 import com.gu.util.reader.Types._
 import play.api.libs.json.{Json, Reads}
@@ -65,24 +65,24 @@ object ApiGatewayHandler extends Logging {
       Operation(steps, () => ApiGatewayResponse.successfulExecution, shouldAuthenticate)
   }
 
-  def apply[StepsConfig](
+  def apply(
     lambdaIO: LambdaIO
   )(
-    fConfigOp: ApiGatewayOp[(Config[StepsConfig], Operation)]
+    fConfigOp: ApiGatewayOp[(TrustedApiConfig, Operation)]
   ): Unit = {
 
     import lambdaIO._
 
     val response = for {
       configOp <- fConfigOp
-      (config, operation) = configOp
+      (trustedApiConf, operation) = configOp
       apiGatewayRequest <- parseApiGatewayRequest(inputStream)
       queryParams <- apiGatewayRequest.queryParamsAsCaseClass[ApiGatewayHandlerParams]()
       response <- if (queryParams.isHealthcheck)
         ContinueProcessing(operation.healthcheck()).withLogging("healthcheck")
       else
         for {
-          _ <- isAuthorised(operation.shouldAuthenticate, queryParams.apiToken.map(RequestAuth(_)), config.trustedApiConfig)
+          _ <- isAuthorised(operation.shouldAuthenticate, queryParams.apiToken.map(RequestAuth(_)), trustedApiConf)
             .toApiGatewayContinueProcessing(unauthorized).withLogging("authentication")
         } yield operation.steps(apiGatewayRequest).withLogging("steps")
     } yield response

@@ -1,7 +1,7 @@
 package com.gu.util.config
 
-import com.amazonaws.services.s3.model.GetObjectRequest
 import com.gu.util.config.ConfigReads.ConfigFailure
+import com.gu.util.config.LoadConfigModule.S3Location
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
 import scalaz.{-\/, \/-}
@@ -10,11 +10,11 @@ import scala.util.Try
 
 class LoadConfigModuleTest extends FlatSpec with Matchers {
 
-  def fakeS3Load(response: String)(req: GetObjectRequest): Try[String] = Try {
-    if (req.getBucketName != "gu-reader-revenue-private") throw (new RuntimeException(s"test failed: unexpected bucket name ${req.getBucketName}"))
-    if (req.getKey == "membership/support-service-lambdas/PROD/someDir/filename-PROD.v2.json") response
+  def fakeS3Load(response: String)(location: S3Location): Try[String] = Try {
+    if (location.bucket != "gu-reader-revenue-private") throw (new RuntimeException(s"test failed: unexpected bucket name ${location.bucket}"))
+    if (location.key == "membership/support-service-lambdas/PROD/someDir/filename-PROD.v2.json") response
     else
-      throw (new RuntimeException(s"test failed unexpected key ${req.getKey}"))
+      throw (new RuntimeException(s"test failed unexpected key ${location.key}"))
   }
 
   val prodStage = Stage("PROD")
@@ -35,6 +35,40 @@ class LoadConfigModuleTest extends FlatSpec with Matchers {
     prodConfig[TestConfig] shouldBe \/-(TestConfig("prodValue", 92))
 
   }
+
+  it should "fail if the configuration file is missing fields" in {
+
+    val jsonMissingSomeValue =
+      """
+        |{
+        |"stage" : "PROD",
+        | "someOtherValue" : 22
+        |}
+      """.stripMargin
+    def invalidJsonLoad = fakeS3Load(jsonMissingSomeValue) _
+
+    val prodConfig = LoadConfigModule(prodStage, invalidJsonLoad)
+    prodConfig[TestConfig].isLeft shouldBe (true)
+
+  }
+
+  it should "fail if the configuration file contains fields of the wrong type" in {
+
+    val jsonMissingSomeValue =
+      """
+        |{
+        |"stage" : "PROD",
+        | "someValue" : "something",
+        | "someOtherValue" : "this should be an Int"
+        |}
+      """.stripMargin
+    def invalidJsonLoad = fakeS3Load(jsonMissingSomeValue) _
+
+    val prodConfig = LoadConfigModule(prodStage, invalidJsonLoad)
+    prodConfig[TestConfig].isLeft shouldBe (true)
+
+  }
+
   it should "fail if the configuration is invalid json" in {
 
     def invalidJsonLoad = fakeS3Load("hello world") _

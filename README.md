@@ -68,11 +68,11 @@ If you are changing the ET emails, it is worth running EmailClientSystemTest wit
 ---
 
 ## Howto update config
-At the moment we just use S3 for config.
+We store private config in S3.  The config for different services (e.g. Zuora and Stripe) is split out into separate files so that each lambda only has access to the secrets it needs.  This will also help with automated key rotation.
 
 If you're making an addition, you can just copy the file from S3 for PROD and CODE, then update and upload.
 Check the version in the AwsS3.scala ConfigLoad object.
-`aws s3 cp s3://gu-reader-revenue-private/membership/payment-failure-lambdas/CODE/payment-failure-lambdas.private.v<VERSION>.json /etc/gu/CODE/ --profile membership`
+`aws s3 cp s3://gu-reader-revenue-private/membership/support-service-lambdas/CODE/<config-name>-CODE.v<VERSION>.json /etc/gu/CODE/ --profile membership`
 Then do the reverse to upload again.
 
 If you're making a change that you only want to go live on deployment (and have the ability to roll back
@@ -81,7 +81,7 @@ otherwise it will break the existing lambda immediately.
 
 Follow the same process to update the prod config, and for DEV there is no version number.
 
-To check that you have done it correctly, run the ConfigLoaderSystemTest.
+To check that you have done it correctly, run the [S3ConfigFilesEffectsTest](lib/s3ConfigValidator/src/test/scala/com/gu/test/S3ConfigFilesEffectsTest.scala).
 That will check the relevant version can be understood by the local version of the code.
 
 Ideally this test should be automated and your PR shouldn't be mergable until the config is readable.

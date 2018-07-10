@@ -67,7 +67,7 @@ lazy val zuora = all(project in file("lib/zuora"))
   .dependsOn(
     restHttp,
     testDep,
-    handler % "test->test",//only for the config, which should ideally be split out
+    handler,// TODO only for the config, which needs to be split out
     effects % "test->test"
   )
   .settings(
@@ -88,6 +88,12 @@ lazy val salesforce = all(project in file("lib/salesforce"))
 lazy val restHttp = all(project in file("lib/restHttp"))
   .settings(
     libraryDependencies ++= Seq(okhttp3, logging, scalaz, playJson, scalatest)
+  )
+
+lazy val s3ConfigValidator = all(project in file("lib/s3ConfigValidator"))
+  .dependsOn(testDep, handler, zuora, `digital-subscription-expiry`, `identity-backfill`, effectsDepIncludingTestFolder)
+  .settings(
+    libraryDependencies ++= Seq(scalatest)
   )
 
 lazy val handler = all(project in file("lib/handler"))
@@ -128,7 +134,8 @@ lazy val root = all(project in file(".")).enablePlugins(RiffRaffArtifact).aggreg
   restHttp,
   zuora,
   `zuora-reports`,
-  salesforce
+  salesforce,
+  s3ConfigValidator
 ).dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `identity-backfill` = all(project in file("handlers/identity-backfill")) // when using the "project identity-backfill" command it uses the lazy val name

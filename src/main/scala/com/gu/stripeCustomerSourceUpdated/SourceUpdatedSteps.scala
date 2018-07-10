@@ -14,7 +14,7 @@ import com.gu.util.zuora.RestRequestMaker.Requests
 import com.gu.util.zuora.ZuoraGetAccountSummary.AccountSummary
 import com.gu.util.zuora.ZuoraGetAccountSummary.ZuoraAccount.PaymentMethodId
 import com.gu.util.zuora._
-import play.api.libs.json.{JsPath, Json, Reads}
+import play.api.libs.json.JsPath
 import scalaz.std.list._
 import scalaz.syntax.applicative._
 import scalaz.{ListT, NonEmptyList}
@@ -28,9 +28,6 @@ object SourceUpdatedSteps extends Logging {
       SourceUpdatedUrlParams(maybeStripeAccount)
     }
   }
-
-  case class StepsConfig(zuoraRestConfig: ZuoraRestConfig)
-  implicit val stepsConfigReads: Reads[StepsConfig] = Json.reads[StepsConfig]
 
   def apply(zuoraRequests: Requests, stripeDeps: StripeDeps): Operation = Operation.noHealthcheck({ apiGatewayRequest: ApiGatewayRequest =>
     (for {

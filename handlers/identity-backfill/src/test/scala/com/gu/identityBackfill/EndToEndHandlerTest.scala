@@ -2,7 +2,8 @@ package com.gu.identityBackfill
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
-import com.gu.effects.TestingRawEffects
+import com.amazonaws.services.s3.model.GetObjectRequest
+import com.gu.effects.{FakeFetchString, TestingRawEffects}
 import com.gu.effects.TestingRawEffects.{BasicRequest, HTTPResponse, POSTRequest}
 import com.gu.identity.GetByEmailTest
 import com.gu.identityBackfill.EndToEndData._
@@ -75,7 +76,12 @@ object Runner {
     val config = new TestingRawEffects(200, responses, postResponses)
 
     //execute
-    Handler.runWithEffects(Stage("DEV"), TestingRawEffects.s3Load, config.response, LambdaIO(stream, os, null))
+    Handler.runWithEffects(
+      Stage("DEV"),
+      FakeFetchString.fetchString,
+      config.response,
+      LambdaIO(stream, os, null)
+    )
 
     val responseString = new String(os.toByteArray, "UTF-8")
 

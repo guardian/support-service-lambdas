@@ -3,7 +3,7 @@ package com.gu.paymentFailure
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
 import com.gu.TestData._
-import com.gu.effects.TestingRawEffects
+import com.gu.effects.{FakeFetchString, TestingRawEffects}
 import com.gu.effects.TestingRawEffects.HTTPResponse
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import com.gu.util.config.Stage
@@ -23,7 +23,12 @@ class EndToEndHandlerTest extends FlatSpec with Matchers {
     val os = new ByteArrayOutputStream()
     val config = new TestingRawEffects(200, EndToEndData.responses)
     //execute
-    Lambda.runWithEffects(Stage("DEV"), TestingRawEffects.s3Load, config.response, LambdaIO(stream, os, null))
+    Lambda.runWithEffects(
+      Stage("DEV"),
+      FakeFetchString.fetchString,
+      config.response,
+      LambdaIO(stream, os, null)
+    )
 
     config.resultMap(("POST", "/messaging/v1/messageDefinitionSends/111/send")).get jsonMatches endToEndData.expectedEmailSend // TODO check the body too
 

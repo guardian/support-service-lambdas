@@ -2,15 +2,13 @@ package com.gu.identityRetention
 
 import java.time.LocalDate
 
-import com.gu.effects.{RawEffects, S3ConfigLoad}
-import com.gu.identityRetention.Handler.StepsConfig
+import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.identityRetention.Types.AccountId
 import com.gu.test.EffectsTest
-import com.gu.util.config.{LoadConfig, Stage}
-import com.gu.util.zuora.{ZuoraQuery, ZuoraRestRequestMaker}
+import com.gu.util.config.{LoadConfigModule, Stage}
+import com.gu.util.zuora.{ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
 import org.scalatest.{FlatSpec, Matchers}
 import scalaz.\/-
-import scalaz.syntax.std.either._
 
 class SubscriptionsForAccountsEffectsTest extends FlatSpec with Matchers {
 
@@ -27,9 +25,8 @@ class SubscriptionsForAccountsEffectsTest extends FlatSpec with Matchers {
     )
 
     val actual = for {
-      configAttempt <- S3ConfigLoad.load(Stage("DEV")).toEither.disjunction
-      config <- LoadConfig.parseConfig[StepsConfig](configAttempt)
-      zuoraQuerier = ZuoraQuery(ZuoraRestRequestMaker(RawEffects.response, config.stepsConfig.zuoraRestConfig))
+      zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig]
+      zuoraQuerier = ZuoraQuery(ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig))
       subsForAccounts = SubscriptionsForAccounts(zuoraQuerier) _
       subs <- subsForAccounts(testAccountIds).toDisjunction
     } yield {

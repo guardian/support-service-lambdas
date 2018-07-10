@@ -1,24 +1,55 @@
 package com.gu.catalogService
 
 import com.gu.catalogService.Handler.CatalogServiceException
-import com.gu.effects.TestingRawEffects
-import com.gu.util.config.ConfigReads.ConfigFailure
+import com.gu.effects.{FakeFetchString, TestingRawEffects}
+import com.gu.util.config.LoadConfigModule.S3Location
 import com.gu.util.config.{Stage, ZuoraEnvironment}
+import com.gu.util.zuora.ZuoraRestConfig
 import org.scalatest.{FlatSpec, Matchers}
-import scalaz.-\/
+
+import scala.util.{Failure, Try}
 
 class CatalogServiceStepsTest extends FlatSpec with Matchers {
 
   val successfulResponseEffects = new TestingRawEffects(200)
   val failureResponseEffects = new TestingRawEffects(500)
 
+  it should "load the correct stage catalog" in {
+
+    def validatingStringFromS3(s3Location: S3Location): Try[String] = Try {
+      val zuoraLocation = ZuoraRestConfig.location
+      val uatlocation = s"membership/support-service-lambdas/CODE/${zuoraLocation.path}-CODE.v${zuoraLocation.version}.json"
+      val expectedS3Location = S3Location("gu-reader-revenue-private", uatlocation)
+      if (s3Location != expectedS3Location)
+        throw new RuntimeException(s"test failure : unexpected s3Location $s3Location expected $expectedS3Location")
+      else
+        """
+       {
+       |"stage" : "CODE",
+       |"baseUrl": "https://ddd",
+       | "username": "e@f.com",
+       | "password": "ggg"
+       |}
+      """.stripMargin
+    }
+
+    noException should be thrownBy {
+      Handler.runWithEffects(
+        successfulResponseEffects.response,
+        successfulResponseEffects.stage,
+        ZuoraEnvironment("UAT"),
+        validatingStringFromS3,
+        TestingRawEffects.successfulS3Upload
+      )
+    }
+  }
   it should "throw a CatalogServiceException if the config cannot be loaded" in {
     a[CatalogServiceException] should be thrownBy {
       Handler.runWithEffects(
         successfulResponseEffects.response,
         Stage("DEV"),
         ZuoraEnvironment("DEV"),
-        _ => -\/(ConfigFailure("broken config load")),
+        _ => Failure(new RuntimeException("broken config load")),
         TestingRawEffects.successfulS3Upload
       )
     }
@@ -30,7 +61,7 @@ class CatalogServiceStepsTest extends FlatSpec with Matchers {
         failureResponseEffects.response,
         Stage("DEV"),
         ZuoraEnvironment("DEV"),
-        TestingRawEffects.s3Load,
+        FakeFetchString.fetchString,
         TestingRawEffects.successfulS3Upload
       )
     }
@@ -42,7 +73,7 @@ class CatalogServiceStepsTest extends FlatSpec with Matchers {
         successfulResponseEffects.response,
         Stage("DEV"),
         ZuoraEnvironment("DEV"),
-        TestingRawEffects.s3Load,
+        FakeFetchString.fetchString,
         TestingRawEffects.failedS3Upload
       )
     }
