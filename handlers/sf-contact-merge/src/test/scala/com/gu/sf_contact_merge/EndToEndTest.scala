@@ -16,7 +16,7 @@ class EndToEndTest extends FlatSpec with Matchers {
   import EndToEndTest._
   import Runner._
 
-  it should "work" in {
+  it should "accept a request in the format we expect" in {
 
     val expected = ExpectedJsonFormat(
       "404",
