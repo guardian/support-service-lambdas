@@ -1,0 +1,228 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: new product api
+
+Parameters:
+    Stage:
+        Description: Stage name
+        Type: String
+        AllowedValues:
+            - PROD
+            - CODE
+        Default: CODE
+
+Conditions:
+  CreateProdMonitoring: !Equals [ !Ref Stage, PROD ]
+
+Mappings:
+    StageMap:
+        CODE:
+            ApiName: new-product-api-CODE
+            DomainName: new-product-api-code.membership.guardianapis.com
+            CertificateId: e4e6431e-08b9-4315-b997-75f2f9569d6c
+            ApiGatewayTargetDomainName: tbd
+        PROD:
+            ApiName: new-product-api-CODE
+            DomainName: new-product-api-prod.membership.guardianapis.com
+            CertificateId: c1e85179-09e3-4222-adee-e4ee77e73304
+            ApiGatewayTargetDomainName: tbd
+
+Resources:
+    NewSubscriptionRole:
+        Type: AWS::IAM::Role
+        Properties:
+            AssumeRolePolicyDocument:
+                Statement:
+                    - Effect: Allow
+                      Principal:
+                          Service:
+                             - lambda.amazonaws.com
+                      Action:
+                          - sts:AssumeRole
+            Path: /
+            Policies:
+                - PolicyName: LambdaPolicy
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                            - logs:CreateLogGroup
+                            - logs:CreateLogStream
+                            - logs:PutLogEvents
+                            - lambda:InvokeFunction
+                            Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/add-subscription-${Stage}:log-stream:*"
+                - PolicyName: ReadPrivateCredentials
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action: s3:GetObject
+                            Resource:
+                            - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/zuoraRest-${Stage}.*.json
+                            - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/trustedApi-${Stage}.*.json
+
+    AddSubscriptionLambda:
+        Type: AWS::Lambda::Function
+        Properties:
+            Description: add subscription to account
+            FunctionName:
+                !Sub add-subscription-${Stage}
+            Code:
+                S3Bucket: zuora-auto-cancel-dist
+                S3Key: !Sub membership/${Stage}/new-product-api/new-product-api.jar
+            Handler: com.gu.newProductApi.addSubscription.Handler::apply
+            Environment:
+                Variables:
+                  Stage: !Ref Stage
+            Role:
+                Fn::GetAtt:
+                - "NewSubscriptionRole"
+                - Arn
+            MemorySize: 1536
+            Runtime: java8
+            Timeout: 300
+        DependsOn:
+        - "NewSubscriptionRole"
+
+    NewProductAPIPermission:
+        Type: AWS::Lambda::Permission
+        Properties:
+            Action: lambda:invokeFunction
+            FunctionName: !Sub add-subscription-${Stage}
+            Principal: apigateway.amazonaws.com
+        DependsOn: AddSubscriptionLambda
+
+    AddSubscriptionResource:
+        Type: AWS::ApiGateway::Resource
+        Properties:
+            RestApiId: !Ref NewProductApi
+            ParentId: !GetAtt [NewProductApi, RootResourceId]
+            PathPart: retention-status
+        DependsOn: NewProductApi
+
+    AddSubscriptionMethod:
+        Type: AWS::ApiGateway::Method
+        Properties:
+            AuthorizationType: NONE
+            ApiKeyRequired: true
+            RestApiId: !Ref NewProductApi
+            ResourceId: !Ref AddSubscriptionResource
+            HttpMethod: POST
+            Integration:
+              Type: AWS_PROXY
+              IntegrationHttpMethod: POST
+              Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AddSubscriptionLambda.Arn}/invocations
+        DependsOn:
+        - NewProductApi
+        - AddSubscriptionLambda
+        - AddSubscriptionResource
+
+    NewProductApi:
+        Type: "AWS::ApiGateway::RestApi"
+        Properties:
+            Description: salesforce calls this api to enable csrs to add subscriptions to accounts 
+            Name: !FindInMap [StageMap, !Ref Stage, ApiName]
+
+    NewProductApiStage:
+        Type: AWS::ApiGateway::Stage
+        Properties:
+            Description: Stage for new product api
+            RestApiId: !Ref NewProductApi
+            DeploymentId: !Ref NewProductApiDeployment
+            StageName: !Sub ${Stage}
+        DependsOn: AddSubscriptionMethod
+
+    NewProductApiDeployment:
+        Type: AWS::ApiGateway::Deployment
+        Properties:
+            Description: Deploys new-product-api into an environment/stage
+            RestApiId: !Ref NewProductApi
+        DependsOn: AddSubscriptionMethod
+
+    NewProductApiKey:
+      Type: AWS::ApiGateway::ApiKey
+      Properties:
+        Description: Key required to call new product API
+        Enabled: true
+        Name: !Sub new-product-api-key-${Stage}
+        StageKeys:
+          - RestApiId: !Ref NewProductApi
+            StageName: !Sub ${Stage}
+      DependsOn:
+      - NewProductApi
+      - NewProductApiStage
+
+    NewProductUsagePlan:
+      Type: "AWS::ApiGateway::UsagePlan"
+      Properties:
+        UsagePlanName: !Sub new-product-api-usage-plan-${Stage}
+        ApiStages:
+        - ApiId: !Ref NewProductApi
+          Stage: !Ref NewProductApiStage
+      DependsOn:
+      - NewProductApi
+      - NewProductApiStage
+
+    NewProductUsagePlankey:
+      Type: "AWS::ApiGateway::UsagePlanKey"
+      Properties:
+        KeyId: !Ref NewProductApiKey
+        KeyType: API_KEY
+        UsagePlanId: !Ref NewProductUsagePlan
+      DependsOn:
+      - NewProductApiKey
+      - NewProductUsagePlan
+
+    NewProductDomainName:
+      Type: "AWS::ApiGateway::DomainName"
+      Properties:
+        RegionalCertificateArn: !Sub
+        - arn:aws:acm:${AWS::Region}:${AWS::AccountId}:certificate/${CertificateId}
+        - { CertificateId: !FindInMap [ StageMap, !Ref Stage, CertificateId ] }
+        DomainName: !FindInMap [ StageMap, !Ref Stage, DomainName ]
+        EndpointConfiguration:
+          Types:
+            - REGIONAL
+
+    NewProductBasePathMapping:
+      Type: "AWS::ApiGateway::BasePathMapping"
+      Properties:
+        RestApiId: !Ref NewProductApi
+        DomainName: !Ref NewProductDomainName
+        Stage: !Sub ${Stage}
+      DependsOn:
+      - NewProductApi
+      - NewProductDomainName
+
+    NewProductDNSRecord:
+      Type: AWS::Route53::RecordSet
+      Properties:
+        HostedZoneName: membership.guardianapis.com.
+        Name: !FindInMap [ StageMap, !Ref Stage, DomainName ]
+        Comment: !Sub CNAME for new product API ${Stage}
+        Type: CNAME
+        TTL: '120'
+        ResourceRecords:
+        - !FindInMap [ StageMap, !Ref Stage, ApiGatewayTargetDomainName ]
+
+    5xxApiAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Condition: CreateProdMonitoring
+      Properties:
+        AlarmActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:subscriptions_dev
+        AlarmName:
+          !Sub
+            - 5XX rate from ${ApiName}
+            - { ApiName: !FindInMap [StageMap, !Ref Stage, ApiName] }
+        ComparisonOperator: GreaterThanThreshold
+        Dimensions:
+          - Name: ApiName
+            Value: !FindInMap [StageMap, !Ref Stage, ApiName]
+          - Name: Stage
+            Value: !Sub ${Stage}
+        EvaluationPeriods: 1
+        MetricName: 5XXError
+        Namespace: AWS/ApiGateway
+        Period: 3600
+        Statistic: Sum
+        Threshold: 5
+        TreatMissingData: notBreaching

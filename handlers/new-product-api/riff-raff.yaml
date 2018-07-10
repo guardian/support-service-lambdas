@@ -1,0 +1,21 @@
+stacks:
+- membership
+regions:
+- eu-west-1
+deployments:
+
+  cfn:
+    type: cloud-formation
+    app: new-product-api
+    parameters:
+      templatePath: cfn.yaml
+
+  new-product-api:
+    type: aws-lambda
+    parameters:
+      fileName: new-product-api.jar
+      bucket: zuora-auto-cancel-dist
+      prefixStack: false
+      functionNames:
+      - add-subscription-
+    dependencies: [cfn]
