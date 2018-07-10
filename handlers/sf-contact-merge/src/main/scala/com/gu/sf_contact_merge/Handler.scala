@@ -64,7 +64,7 @@ object Handler {
 object AssertSameEmails {
 
   def apply(emailAddresses: List[Option[EmailAddress]]): ApiGatewayOp[Unit] = {
-    if (emailAddresses.toSet.size == 1) ContinueProcessing(()) else ReturnWithResponse(ApiGatewayResponse.notFound("those zuora accounts had differing emails"))
+    if (emailAddresses.distinct.size == 1) ContinueProcessing(()) else ReturnWithResponse(ApiGatewayResponse.notFound("those zuora accounts had differing emails"))
   }
 
 }
