@@ -36,7 +36,7 @@ class CatalogServiceStepsTest extends FlatSpec with Matchers {
     noException should be thrownBy {
       Handler.runWithEffects(
         successfulResponseEffects.response,
-        successfulResponseEffects.stage,
+        Stage("DEV"),
         ZuoraEnvironment("UAT"),
         validatingStringFromS3,
         TestingRawEffects.successfulS3Upload

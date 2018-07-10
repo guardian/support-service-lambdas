@@ -2,8 +2,8 @@ package com.gu.sf_contact_merge
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
-import com.gu.effects.TestingRawEffects
 import com.gu.effects.TestingRawEffects.{HTTPResponse, POSTRequest}
+import com.gu.effects.{FakeFetchString, TestingRawEffects}
 import com.gu.test.JsonMatchers._
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import com.gu.util.apigateway.ApiGatewayRequest
@@ -53,7 +53,12 @@ object Runner {
     val os = new ByteArrayOutputStream()
 
     //execute
-    Handler.runWithEffects(Stage("DEV"), TestingRawEffects.s3Load, EndToEndTest.mock.response, LambdaIO(stream, os, null))
+    Handler.runWithEffects(
+      Stage("DEV"),
+      FakeFetchString.fetchString,
+      EndToEndTest.mock.response,
+      LambdaIO(stream, os, null)
+    )
 
     val responseString = new String(os.toByteArray, "UTF-8")
 

@@ -2,9 +2,8 @@ package com.gu.identityBackfill
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
-import com.amazonaws.services.s3.model.GetObjectRequest
-import com.gu.effects.{FakeFetchString, TestingRawEffects}
 import com.gu.effects.TestingRawEffects.{BasicRequest, HTTPResponse, POSTRequest}
+import com.gu.effects.{FakeFetchString, TestingRawEffects}
 import com.gu.identity.GetByEmailTest
 import com.gu.identityBackfill.EndToEndData._
 import com.gu.identityBackfill.Runner._

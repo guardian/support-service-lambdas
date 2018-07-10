@@ -8,7 +8,7 @@ import com.gu.util.Logging
 import com.gu.util.config.LoadConfigModule.S3Location
 
 import scala.io.Source
-import scala.util.{Failure, Success, Try}
+import scala.util.{Failure, Try}
 
 object GetFromS3 extends Logging {
 

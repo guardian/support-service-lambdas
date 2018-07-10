@@ -6,7 +6,7 @@ import com.amazonaws.AmazonServiceException
 import com.amazonaws.services.s3.model.{ObjectMetadata, PutObjectRequest, PutObjectResult}
 import com.gu.effects.TestingRawEffects._
 import com.gu.util.Logging
-import com.gu.util.config.{Stage, ZuoraEnvironment}
+import com.gu.util.config.Stage
 import okhttp3._
 import okhttp3.internal.Util.UTF_8
 import okio.Buffer

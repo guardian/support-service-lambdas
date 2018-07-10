@@ -3,19 +3,18 @@ package com.gu.sf_contact_merge
 import java.io.{InputStream, OutputStream}
 
 import com.amazonaws.services.lambda.runtime.Context
-import com.gu.effects.RawEffects
+import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.sf_contact_merge.GetZuoraEmailsForAccounts.{AccountId, EmailAddress}
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, ApiGatewayResponse, ResponseModels}
-import com.gu.util.config.ConfigReads.ConfigFailure
-import com.gu.util.config.{LoadConfig, Stage}
+import com.gu.util.config.LoadConfigModule.StringFromS3
+import com.gu.util.config.{LoadConfigModule, Stage, TrustedApiConfig}
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.RestRequestMaker.ClientFailableOp
 import com.gu.util.zuora.{ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
 import okhttp3.{Request, Response}
 import play.api.libs.json.{Json, Reads}
-import scalaz.\/
 
 object Handler {
 
@@ -25,20 +24,21 @@ object Handler {
 
   // Referenced in Cloudformation
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
-    runWithEffects(RawEffects.stage, RawEffects.s3Load, RawEffects.response, LambdaIO(inputStream, outputStream, context))
+    runWithEffects(RawEffects.stage, GetFromS3.fetchString, RawEffects.response, LambdaIO(inputStream, outputStream, context))
   }
 
-  def runWithEffects(stage: Stage, s3Load: Stage => ConfigFailure \/ String, getResponse: Request => Response, lambdaIO: LambdaIO) = {
+  def runWithEffects(stage: Stage, fetchString: StringFromS3, getResponse: Request => Response, lambdaIO: LambdaIO) = {
 
-    ApiGatewayHandler[StepsConfig](lambdaIO) {
+    val loadConfig = LoadConfigModule(stage, fetchString)
+    ApiGatewayHandler(lambdaIO) {
       for {
-        config <- LoadConfig.default[StepsConfig](implicitly)(stage, s3Load(stage))
-          .toApiGatewayOp("load config")
-        requests = ZuoraRestRequestMaker(getResponse, config.stepsConfig.zuoraRestConfig)
+        trustedApiConfig <- loadConfig[TrustedApiConfig].toApiGatewayOp("load trusted Api config")
+        zuoraRestConfig <- loadConfig[ZuoraRestConfig].toApiGatewayOp("load trusted Api config")
+        requests = ZuoraRestRequestMaker(getResponse, zuoraRestConfig)
         zuoraQuerier = ZuoraQuery(requests)
         wiredSteps = steps(GetZuoraEmailsForAccounts(zuoraQuerier))_
         configuredOp = Operation.noHealthcheck(wiredSteps, false)
-      } yield (config, configuredOp)
+      } yield (trustedApiConfig, configuredOp)
     }
 
   }

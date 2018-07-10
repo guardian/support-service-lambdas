@@ -3,10 +3,9 @@ package com.gu.sf_contact_merge
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
 import com.gu.sf_contact_merge.EndToEndTest.{ExpectedBodyFormat, ExpectedJsonFormat}
-import com.gu.test.JsonMatchers._
 import com.gu.test.EffectsTest
+import com.gu.test.JsonMatchers._
 import org.scalatest.{FlatSpec, Matchers}
-import play.api.libs.json._
 
 class HandlerEffectsTest extends FlatSpec with Matchers {
 

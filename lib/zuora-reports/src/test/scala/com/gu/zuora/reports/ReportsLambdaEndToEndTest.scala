@@ -2,9 +2,10 @@ package com.gu.zuora.reports
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
-import com.gu.effects.{FakeFetchString, TestingRawEffects}
 import com.gu.effects.TestingRawEffects.{HTTPResponse, POSTRequest}
+import com.gu.effects.{FakeFetchString, TestingRawEffects}
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
+import com.gu.util.config.Stage
 import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, Requests}
 import com.gu.util.zuora.ZuoraRestConfig
 import com.gu.zuora.reports.EndToEndData._
