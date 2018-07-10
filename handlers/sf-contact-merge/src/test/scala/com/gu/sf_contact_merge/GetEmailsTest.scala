@@ -24,10 +24,10 @@ class GetEmailsTest extends FlatSpec with Matchers {
 
 object GetEmailsTest {
 
-  val accountQueryRequest =
+  val contactQueryRequest =
     """{"queryString":"SELECT WorkEmail FROM Contact WHERE Id = '2c92c0f8644618e30164652a55986e21' or Id = '2c92c0f9624bbc5f016253e5739b0b17'"}"""
 
-  val accountQueryResponse =
+  val contactQueryResponse =
     """{
       |    "records": [
       |        {
@@ -43,7 +43,7 @@ object GetEmailsTest {
       |}""".stripMargin
 
   val mock = new TestingRawEffects(postResponses = Map(
-    POSTRequest("/action/query", accountQueryRequest) -> HTTPResponse(200, accountQueryResponse)
+    POSTRequest("/action/query", contactQueryRequest) -> HTTPResponse(200, contactQueryResponse)
   ))
 
 }

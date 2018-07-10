@@ -43,19 +43,6 @@ object Handler {
 
   }
 
-  /*
-  {
-   "fullContactId":"sfcont",
-   "billingAccountZouraIds":[
-      "zuoraac",
-      "zuoraac",
-      "zuoraac",
-      "zuoraac"
-   ],
-   "accountId":"sfacc"
-}
-
-   */
   case class WireSfContactRequest(
     fullContactId: String,
     billingAccountZuoraIds: List[String],
