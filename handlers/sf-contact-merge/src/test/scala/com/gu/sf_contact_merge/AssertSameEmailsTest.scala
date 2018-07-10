@@ -6,14 +6,14 @@ import org.scalatest.{FlatSpec, Matchers}
 class AssertSameEmailsTest extends FlatSpec with Matchers {
 
   it should "be all ok with the same email addresses" in {
-    val testData = List("hi", "hi").map(Some.apply[EmailAddress] _ compose EmailAddress.apply)
+    val testData = List("hi", "hi").map(email => Some(EmailAddress(email)))
 
     AssertSameEmails(testData).toDisjunction.isRight should be(true)
 
   }
 
   it should "complain with different email addresses" in {
-    val testData = List("hi", "lo").map(Some.apply[EmailAddress] _ compose EmailAddress.apply)
+    val testData = List("hi", "lo").map(email => Some(EmailAddress(email)))
 
     AssertSameEmails(testData).toDisjunction.isRight should be(false)
 
