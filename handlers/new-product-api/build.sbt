@@ -10,7 +10,7 @@ riffRaffPackageType := assembly.value
 riffRaffUploadArtifactBucket := Option("riffraff-artifact")
 riffRaffUploadManifestBucket := Option("riffraff-builds")
 riffRaffManifestProjectName := "MemSub::Membership Admin::New product API"
-riffRaffArtifactResources += (file("handlers/new-product-api/cfn.yaml"), "cfn/cfn.yaml")
+riffRaffArtifactResources += (file("handlers/New product API/cfn.yaml"), "cfn/cfn.yaml")
 
 libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-lambda-java-log4j" % "1.0.0",
