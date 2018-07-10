@@ -63,8 +63,13 @@ object Handler extends Logging {
         Subject = "Online Cancellation Attempt"
       )
 
-    def raiseCase(lookup: TSalesforceGenericIdLookup, raiseCase: RaiseCase)
-                 (identityId: String, raiseCaseDetail: RaiseRequestBody) =
+    def raiseCase(
+      lookup: TSalesforceGenericIdLookup,
+      raiseCase: RaiseCase
+    )(
+      identityId: String,
+      raiseCaseDetail: RaiseRequestBody
+    ) =
       for {
         sfContactId <- lookup("Contact", "IdentityID__c", identityId)
           .toApiGatewayOp("lookup SF contact from identityID")
@@ -74,9 +79,13 @@ object Handler extends Logging {
           .toApiGatewayOp("raise sf case")
       } yield raiseCaseResponse
 
-    def steps(stage: Stage)
-             (sfRequestsFollowingIdentityCheck: IdentityUser => ApiGatewayOp[RestRequestMaker.Requests])
-             (apiGatewayRequest: ApiGatewayRequest) =
+    def steps(
+      stage: Stage
+    )(
+      sfRequestsFollowingIdentityCheck: IdentityUser => ApiGatewayOp[RestRequestMaker.Requests]
+    )(
+      apiGatewayRequest: ApiGatewayRequest
+    ) =
       (for {
         identityUser <- IdentityCookieToIdentityUser(apiGatewayRequest.headers, stage)
         sfRequests <- sfRequestsFollowingIdentityCheck(identityUser)
@@ -100,9 +109,13 @@ object Handler extends Logging {
     case class UpdateCasePathParams(caseId: String)
     implicit val pathParamReads = Json.reads[UpdateCasePathParams]
 
-    def steps(stage: Stage)
-             (sfRequestsFollowingIdentityCheck: IdentityUser => ApiGatewayOp[RestRequestMaker.Requests])
-             (apiGatewayRequest: ApiGatewayRequest) =
+    def steps(
+      stage: Stage
+    )(
+      sfRequestsFollowingIdentityCheck: IdentityUser => ApiGatewayOp[RestRequestMaker.Requests]
+    )(
+      apiGatewayRequest: ApiGatewayRequest
+    ) =
       (for {
         identityUser <- IdentityCookieToIdentityUser(apiGatewayRequest.headers, stage)
         sfRequests <- sfRequestsFollowingIdentityCheck(identityUser)

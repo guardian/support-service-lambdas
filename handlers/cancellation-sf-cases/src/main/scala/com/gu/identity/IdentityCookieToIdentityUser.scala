@@ -8,7 +8,7 @@ import com.gu.util.reader.Types._
 
 object IdentityCookieToIdentityUser extends Logging {
 
-  case class IdentityUser(id: String, displayName: Option[String] = None)
+  case class IdentityUser(id: String, displayName: Option[String])
 
   def apply(headersOption: Option[Map[String, String]], stage: Stage): ApiGatewayOp[IdentityUser] =
     for {
