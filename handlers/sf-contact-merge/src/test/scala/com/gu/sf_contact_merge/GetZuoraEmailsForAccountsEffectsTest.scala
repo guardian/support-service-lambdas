@@ -13,13 +13,19 @@ import org.scalatest.{FlatSpec, Matchers}
 class GetZuoraEmailsForAccountsEffectsTest extends FlatSpec with Matchers {
 
   it should "return the right emails" taggedAs EffectsTest in {
+
+    val testData = ToNel.literal(AccountId("2c92c0f9624bbc5f016253e573970b16"), AccountId("2c92c0f8646e0a6601646ff9b98e7b5f"))
+
     val actual = for {
       zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig].toApiGatewayOp("parse config")
       getZuoraEmailsForAccounts = GetZuoraEmailsForAccounts(ZuoraQuery(ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig))) _
-      testData = ToNel.literal(AccountId("2c92c0f9624bbc5f016253e573970b16"), AccountId("2c92c0f8646e0a6601646ff9b98e7b5f"))
       maybeEmailAddresses <- getZuoraEmailsForAccounts(testData).toApiGatewayOp("get zuora emails for accounts")
     } yield maybeEmailAddresses
-    actual should be(ContinueProcessing(List(Some(EmailAddress("peppa.pig@guardian.co.uk")), None)))
+
+    actual should be(ContinueProcessing(List(
+      Some(EmailAddress("peppa.pig@guardian.co.uk")),
+      None
+    )))
   }
 
 }

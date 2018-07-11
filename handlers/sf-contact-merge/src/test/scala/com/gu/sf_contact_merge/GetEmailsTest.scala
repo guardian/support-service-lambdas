@@ -14,8 +14,12 @@ class GetEmailsTest extends FlatSpec with Matchers {
 
   it should "work" in {
 
-    val getContacts = GetZuoraEmailsForAccounts.GetEmails(ZuoraQuery(ZuoraRestRequestMaker(mock.response, ZuoraRestConfig("http://server", "user", "pass"))))_
-    val actual = getContacts(ToNel.literal(ContactId("2c92c0f8644618e30164652a55986e21"), ContactId("2c92c0f9624bbc5f016253e5739b0b17")))
+    val zuoraQuerier = ZuoraQuery(ZuoraRestRequestMaker(mock.response, ZuoraRestConfig("http://server", "user", "pass")))
+    val getContacts = GetZuoraEmailsForAccounts.GetEmails(zuoraQuerier)_
+    val actual = getContacts(ToNel.literal(
+      ContactId("cid1"),
+      ContactId("cid2")
+    ))
 
     actual.map(_.map(_.map(_.value))) should be(\/-(List(Some("peppa.pig@guardian.co.uk"), None)))
 
@@ -26,17 +30,17 @@ class GetEmailsTest extends FlatSpec with Matchers {
 object GetEmailsTest {
 
   val contactQueryRequest =
-    """{"queryString":"SELECT WorkEmail FROM Contact WHERE Id = '2c92c0f8644618e30164652a55986e21' or Id = '2c92c0f9624bbc5f016253e5739b0b17'"}"""
+    """{"queryString":"SELECT WorkEmail FROM Contact WHERE Id = 'cid1' or Id = 'cid2'"}"""
 
   val contactQueryResponse =
     """{
       |    "records": [
       |        {
       |            "WorkEmail": "peppa.pig@guardian.co.uk",
-      |            "Id": "2c92c0f8644618e30164652a55986e21"
+      |            "Id": "cid1"
       |        },
       |        {
-      |            "Id": "2c92c0f9624bbc5f016253e5739b0b17"
+      |            "Id": "cid2"
       |        }
       |    ],
       |    "size": 2,
