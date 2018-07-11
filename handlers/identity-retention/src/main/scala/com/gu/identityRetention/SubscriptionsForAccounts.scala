@@ -20,7 +20,7 @@ object SubscriptionsForAccounts {
 
   implicit val reads = Json.reads[SubscriptionsQueryResponse]
 
-  def buildQuery(activeAccounts: List[AccountId]): ClientFailableOp[SafeQuery] =
+  def buildQuery(activeAccounts: ::[AccountId]): ClientFailableOp[SafeQuery] =
     for {
       or <- OrTraverse(activeAccounts) { acc =>
         zoql"""
@@ -38,7 +38,7 @@ object SubscriptionsForAccounts {
         """
     } yield subscriptionsQuery
 
-  def apply(zuoraQuerier: ZuoraQuerier)(activeAccounts: List[AccountId]): ApiGatewayOp[List[SubscriptionsQueryResponse]] = {
+  def apply(zuoraQuerier: ZuoraQuerier)(activeAccounts: ::[AccountId]): ApiGatewayOp[List[SubscriptionsQueryResponse]] = {
 
     def searchForSubscriptions =
       for {

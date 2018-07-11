@@ -2,7 +2,7 @@ package com.gu.sf_contact_merge
 
 import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, GenericError}
 import com.gu.util.zuora.SafeQueryBuilder.Implicits._
-import com.gu.util.zuora.SafeQueryBuilder.OrTraverse
+import com.gu.util.zuora.SafeQueryBuilder.{OrTraverse, ToNel}
 import com.gu.util.zuora.ZuoraQuery.ZuoraQuerier
 import play.api.libs.json.Json
 import scalaz.{-\/, \/-}
@@ -12,10 +12,12 @@ object GetZuoraEmailsForAccounts {
   case class AccountId(value: String) extends AnyVal
 
   case class EmailAddress(value: String) extends AnyVal
-  def apply(zuoraQuerier: ZuoraQuerier)(accountIds: List[AccountId]): ClientFailableOp[List[Option[EmailAddress]]] =
+  def apply(zuoraQuerier: ZuoraQuerier)(accountIds: ::[AccountId]): ClientFailableOp[List[Option[EmailAddress]]] =
     for {
       billToContacts <- GetContacts(zuoraQuerier)(accountIds)
-      emailAddresses <- GetEmails(zuoraQuerier)(billToContacts)
+      emailAddresses <- ToNel(billToContacts).map { emailAddresses =>
+        GetEmails(zuoraQuerier)(emailAddresses)
+      }.getOrElse(\/-(Nil))
     } yield emailAddresses
 
   case class ContactId(value: String) extends AnyVal
@@ -25,7 +27,7 @@ object GetZuoraEmailsForAccounts {
     case class WireAccount(BillToId: String)
     implicit val readWireAccount = Json.reads[WireAccount]
 
-    def apply(zuoraQuerier: ZuoraQuerier)(accountIds: List[AccountId]): ClientFailableOp[List[ContactId]] =
+    def apply(zuoraQuerier: ZuoraQuerier)(accountIds: ::[AccountId]): ClientFailableOp[List[ContactId]] =
       for {
         or <- OrTraverse(accountIds) { accountId =>
           zoql"""Id = ${accountId.value}"""
@@ -42,7 +44,7 @@ object GetZuoraEmailsForAccounts {
     case class WireContact(WorkEmail: Option[String])
     implicit val readWireContact = Json.reads[WireContact]
 
-    def apply(zuoraQuerier: ZuoraQuerier)(contactIds: List[ContactId]): ClientFailableOp[List[Option[EmailAddress]]] =
+    def apply(zuoraQuerier: ZuoraQuerier)(contactIds: ::[ContactId]): ClientFailableOp[List[Option[EmailAddress]]] =
       for {
         or <- OrTraverse(contactIds) { accountId =>
           zoql"""Id = ${accountId.value}"""

@@ -64,9 +64,20 @@ object SafeQueryBuilder {
 
   }
 
+  object ToNel {
+    def apply[A](list: List[A]): Option[::[A]] =
+      list match {
+        case Nil => None
+        case account :: accounts =>
+          Some(::(account, accounts))
+      }
+    def literal[A](first: A, rest: A*): ::[A] =
+      ::(first, List(rest: _*))
+  }
+
   object OrTraverse {
-    def apply[A](queries: List[A])(f: A => ClientFailableOp[SafeQuery]): ClientFailableOp[SafeQuery] = {
-      queries.traverseU(f.andThen(_.map(_.queryString))).map(_.mkString(" or ")).map(new SafeQuery(_))
+    def apply[A](queries: ::[A])(f: A => ClientFailableOp[SafeQuery]): ClientFailableOp[SafeQuery] = {
+      queries.toList.traverseU(f.andThen(_.map(_.queryString))).map(_.mkString(" or ")).map(new SafeQuery(_))
     }
   }
 

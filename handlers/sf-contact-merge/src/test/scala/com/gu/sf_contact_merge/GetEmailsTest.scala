@@ -3,6 +3,7 @@ package com.gu.sf_contact_merge
 import com.gu.effects.TestingRawEffects
 import com.gu.effects.TestingRawEffects.{HTTPResponse, POSTRequest}
 import com.gu.sf_contact_merge.GetZuoraEmailsForAccounts.ContactId
+import com.gu.util.zuora.SafeQueryBuilder.ToNel
 import com.gu.util.zuora.{ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
 import org.scalatest.{FlatSpec, Matchers}
 import scalaz.\/-
@@ -14,7 +15,7 @@ class GetEmailsTest extends FlatSpec with Matchers {
   it should "work" in {
 
     val getContacts = GetZuoraEmailsForAccounts.GetEmails(ZuoraQuery(ZuoraRestRequestMaker(mock.response, ZuoraRestConfig("http://server", "user", "pass"))))_
-    val actual = getContacts(List("2c92c0f8644618e30164652a55986e21", "2c92c0f9624bbc5f016253e5739b0b17").map(ContactId.apply))
+    val actual = getContacts(ToNel.literal(ContactId("2c92c0f8644618e30164652a55986e21"), ContactId("2c92c0f9624bbc5f016253e5739b0b17")))
 
     actual.map(_.map(_.map(_.value))) should be(\/-(List(Some("peppa.pig@guardian.co.uk"), None)))
 

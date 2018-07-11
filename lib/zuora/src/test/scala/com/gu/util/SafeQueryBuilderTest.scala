@@ -2,7 +2,7 @@ package com.gu.util
 
 import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, GenericError}
 import com.gu.util.zuora.SafeQueryBuilder.Implicits._
-import com.gu.util.zuora.SafeQueryBuilder.{OrTraverse, SafeQuery}
+import com.gu.util.zuora.SafeQueryBuilder.{OrTraverse, SafeQuery, ToNel}
 import org.scalatest._
 import scalaz.{-\/, \/-}
 
@@ -74,7 +74,7 @@ class SafeQueryBuilderApplyTest extends FlatSpec with Matchers {
   }
 
   it should "use a List in insert clause" in {
-    val ids = List("anna", "bill")
+    val ids = ToNel.literal("anna", "bill")
     val actual = for {
       insert <- OrTraverse(ids)({ id => zoql"""id = $id""" })
       wholeQuery <- zoql"""select hi from table where $insert"""
