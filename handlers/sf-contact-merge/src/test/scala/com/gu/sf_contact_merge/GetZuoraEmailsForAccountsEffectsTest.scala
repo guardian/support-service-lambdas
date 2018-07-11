@@ -6,15 +6,15 @@ import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
 import com.gu.util.reader.Types._
-import com.gu.util.zuora.SafeQueryBuilder.ToNel
 import com.gu.util.zuora.{ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
 import org.scalatest.{FlatSpec, Matchers}
+import scalaz.NonEmptyList
 
 class GetZuoraEmailsForAccountsEffectsTest extends FlatSpec with Matchers {
 
   it should "return the right emails" taggedAs EffectsTest in {
 
-    val testData = ToNel.literal(AccountId("2c92c0f9624bbc5f016253e573970b16"), AccountId("2c92c0f8646e0a6601646ff9b98e7b5f"))
+    val testData = NonEmptyList(AccountId("2c92c0f9624bbc5f016253e573970b16"), AccountId("2c92c0f8646e0a6601646ff9b98e7b5f"))
 
     val actual = for {
       zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig].toApiGatewayOp("parse config")

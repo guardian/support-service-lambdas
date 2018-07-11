@@ -12,10 +12,11 @@ import com.gu.util.config.{LoadConfigModule, Stage, TrustedApiConfig}
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.RestRequestMaker.ClientFailableOp
-import com.gu.util.zuora.SafeQueryBuilder.ToNel
+import com.gu.util.zuora.SafeQueryBuilder.MaybeNonEmptyList
 import com.gu.util.zuora.{ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
 import okhttp3.{Request, Response}
 import play.api.libs.json.{Json, Reads}
+import scalaz.NonEmptyList
 
 object Handler {
 
@@ -51,11 +52,11 @@ object Handler {
   )
   implicit val readWireSfContactRequest = Json.reads[WireSfContactRequest]
 
-  def steps(getZuoraEmails: ::[AccountId] => ClientFailableOp[List[Option[EmailAddress]]])(req: ApiGatewayRequest): ResponseModels.ApiResponse =
+  def steps(getZuoraEmails: NonEmptyList[AccountId] => ClientFailableOp[List[Option[EmailAddress]]])(req: ApiGatewayRequest): ResponseModels.ApiResponse =
     (for {
       input <- req.bodyAsCaseClass[WireSfContactRequest]()
       someAccountIds = input.billingAccountZuoraIds.map(AccountId.apply)
-      accountIds <- ToNel(someAccountIds).toApiGatewayContinueProcessing(ApiGatewayResponse.badRequest)
+      accountIds <- MaybeNonEmptyList(someAccountIds).toApiGatewayContinueProcessing(ApiGatewayResponse.badRequest)
       emailAddresses <- getZuoraEmails(accountIds).toApiGatewayOp("get zuora emails")
       _ <- AssertSameEmails(emailAddresses)
       // todo add the update call in the next PR

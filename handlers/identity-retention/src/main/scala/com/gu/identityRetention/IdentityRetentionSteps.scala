@@ -6,7 +6,7 @@ import com.gu.util.apigateway.ApiGatewayHandler.Operation
 import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.reader.Types.ApiGatewayOp
 import ApiGatewayOp._
-import com.gu.util.zuora.SafeQueryBuilder.ToNel
+import com.gu.util.zuora.SafeQueryBuilder.MaybeNonEmptyList
 import com.gu.util.zuora.ZuoraQuery.ZuoraQuerier
 import play.api.libs.json.Json
 import com.gu.util.reader.Types._
@@ -26,7 +26,7 @@ object IdentityRetentionSteps extends Logging {
         queryStringParameters <- apiGatewayRequest.queryParamsAsCaseClass[UrlParams]()
         identityId <- extractIdentityId(queryStringParameters)
         possibleAccounts <- GetActiveZuoraAccounts(zuoraQuerier)(identityId)
-        accounts <- ToNel(possibleAccounts).toApiGatewayContinueProcessing(ApiGatewayResponse.notFound("no active zuora accounts"))
+        accounts <- MaybeNonEmptyList(possibleAccounts).toApiGatewayContinueProcessing(ApiGatewayResponse.notFound("no active zuora accounts"))
         subs <- SubscriptionsForAccounts(zuoraQuerier)(accounts)
       } yield RelationshipForSubscriptions(subs)).apiResponse
   }, false)
