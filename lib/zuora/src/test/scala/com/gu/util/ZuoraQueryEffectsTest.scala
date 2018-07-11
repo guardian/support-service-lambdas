@@ -7,7 +7,7 @@ import com.gu.util.zuora.SafeQueryBuilder.Implicits._
 import com.gu.util.zuora.ZuoraQuery._
 import com.gu.util.zuora.{RestRequestMaker, ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
 import org.scalatest.{FlatSpec, Matchers}
-import play.api.libs.json.{Json, Reads}
+import play.api.libs.json.Json
 import scalaz.{\/, \/-}
 
 // run this manually

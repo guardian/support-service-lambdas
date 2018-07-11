@@ -15,7 +15,7 @@ import scalaz.{-\/, \/-}
 class SourceUpdatedStepsGetPaymentMethodsToUpdateTest extends FlatSpec with Matchers {
 
   "SourceUpdatedSteps" should "getAccountToUpdate non default pm" in {
-    val effects = new TestingRawEffects(false, 500, Map(
+    val effects = new TestingRawEffects(500, Map(
       ("/action/query", HTTPResponse(
         200,
         """{
@@ -51,7 +51,7 @@ class SourceUpdatedStepsGetPaymentMethodsToUpdateTest extends FlatSpec with Matc
   }
 
   "SourceUpdatedSteps" should "getAccountToUpdate default pm" in {
-    val effects = new TestingRawEffects(false, 500, Map(
+    val effects = new TestingRawEffects(500, Map(
       ("/action/query", HTTPResponse(
         200,
         """{
@@ -87,7 +87,7 @@ class SourceUpdatedStepsGetPaymentMethodsToUpdateTest extends FlatSpec with Matc
   }
 
   "SourceUpdatedSteps" should "getAccountToUpdate default pm with multiple on the same account" in {
-    val effects = new TestingRawEffects(false, 500, Map(
+    val effects = new TestingRawEffects(500, Map(
       ("/action/query", HTTPResponse(
         200,
         """{
@@ -128,7 +128,7 @@ class SourceUpdatedStepsGetPaymentMethodsToUpdateTest extends FlatSpec with Matc
   }
 
   "SourceUpdatedSteps" should "getAccountToUpdate multiple on different account three only" in {
-    val effects = new TestingRawEffects(false, 500, Map(
+    val effects = new TestingRawEffects(500, Map(
       ("/action/query", HTTPResponse(
         200,
         """{
@@ -189,7 +189,7 @@ class SourceUpdatedStepsGetPaymentMethodsToUpdateTest extends FlatSpec with Matc
   }
 
   "SourceUpdatedSteps" should "getAccountToUpdate multiple on different account two of them but only one is default PM" in {
-    val effects = new TestingRawEffects(false, 500, Map(
+    val effects = new TestingRawEffects(500, Map(
       ("/action/query", HTTPResponse(
         200,
         """{
@@ -237,7 +237,7 @@ class SourceUpdatedStepsGetPaymentMethodsToUpdateTest extends FlatSpec with Matc
   }
 
   "SourceUpdatedSteps" should "getAccountToUpdate multiple on different account more than three" in {
-    val effects = new TestingRawEffects(false, 500, Map(
+    val effects = new TestingRawEffects(500, Map(
       ("/action/query", HTTPResponse(
         200,
         """{
@@ -282,7 +282,7 @@ class SourceUpdatedStepsGetPaymentMethodsToUpdateTest extends FlatSpec with Matc
   }
 
   "SourceUpdatedSteps" should "getAccountToUpdate no payment methods at all" in {
-    val effects = new TestingRawEffects(false, 500, Map(
+    val effects = new TestingRawEffects(500, Map(
       ("/action/query", HTTPResponse(
         200,
         """{
@@ -312,7 +312,7 @@ class SourceUpdatedStepsUpdatePaymentMethodTest extends FlatSpec with Matchers {
 
   "SourceUpdatedSteps" should "updatePaymentMethod" in {
 
-    val effects = new TestingRawEffects(false, 500, Map(
+    val effects = new TestingRawEffects(500, Map(
       ("/object/payment-method", HTTPResponse(200, """{"Success": true,"Id": "newPMID"}""")),
       ("/object/account/fake", HTTPResponse(200, """{"Success": true,"Id": "fakeaccountid"}"""))
     ))
@@ -353,7 +353,7 @@ class SourceUpdatedStepsUpdatePaymentMethodTest extends FlatSpec with Matchers {
 class SourceUpdatedStepsApplyTest extends FlatSpec with Matchers {
 
   "SourceUpdatedSteps" should "fail with unauthorised if the Stripe Signature header check fails" in {
-    val effects = new TestingRawEffects(false, 500)
+    val effects = new TestingRawEffects(500)
     val sourceUpdatedSteps = SourceUpdatedSteps(TestData.zuoraDeps(effects), TestData.stripeDeps)
 
     val badHeaders = Map(

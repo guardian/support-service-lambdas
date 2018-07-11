@@ -1,34 +1,23 @@
-package com.gu.sfContactMerge
+package com.gu.sf_contact_merge
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
-import com.gu.sfContactMerge.JsonMatchers._
+import com.gu.sf_contact_merge.EndToEndTest.{ExpectedBodyFormat, ExpectedJsonFormat}
 import com.gu.test.EffectsTest
+import com.gu.test.JsonMatchers._
 import org.scalatest.{FlatSpec, Matchers}
-import play.api.libs.json._
 
 class HandlerEffectsTest extends FlatSpec with Matchers {
 
   import TestData._
-
-  case class ExpectedJsonFormat(
-    statusCode: String,
-    body: JsStringContainingJson[ExpectedBodyFormat],
-    headers: Map[String, String] = Map("Content-Type" -> "application/json")
-  )
-
-  case class ExpectedBodyFormat(message: String)
-
-  implicit val mF: OFormat[ExpectedBodyFormat] = Json.format[ExpectedBodyFormat]
-  implicit val apiF: OFormat[ExpectedJsonFormat] = Json.format[ExpectedJsonFormat]
 
   it should "return 404 if the lambda hasn't been implemented" taggedAs EffectsTest in {
 
     val actualResponse = runWithEffects(dummyRequest())
 
     val expected = ExpectedJsonFormat(
-      "404",
-      JsStringContainingJson(ExpectedBodyFormat("implementation Not Found (yet)")),
+      "200",
+      JsStringContainingJson(ExpectedBodyFormat("Success")),
       Map("Content-Type" -> "application/json")
     )
 
@@ -70,7 +59,7 @@ object TestData {
        |        "X-Forwarded-Proto": "https"
        |    },
        |    "body": "",
-       |    "queryStringParameters": null,
+       |    "queryStringParameters": {"isHealthcheck": "true"},
        |    "pathParameters": null,
        |    "stageVariables": null,
        |    "requestContext": {

@@ -29,9 +29,7 @@ class GetByEmailTest extends FlatSpec with Matchers {
   }
 
   private def geyByEmailFromResponses(responses: Map[String, HTTPResponse]): GetByEmail.ApiError \/ IdentityId = {
-    val testingRawEffects = new TestingRawEffects(
-      responses = responses
-    )
+    val testingRawEffects = new TestingRawEffects(responses = responses)
 
     GetByEmail(testingRawEffects.response, IdentityConfig("http://baseurl", "apitoken"))(EmailAddress("email@address"))
   }
