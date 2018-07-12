@@ -8,7 +8,7 @@ import scalaz.syntax.std.either._
 object FakeRequestsPut {
   def apply(expectedUrl: String, expectedInput: JsValue, response: JsValue): (() => List[JsValue], RequestsPUT) = {
     var requestsMade: List[JsValue] = List()
-    (() => requestsMade, new RequestsPUT() {
+    val requestsPUT = new RequestsPUT() {
       override def put[REQ: Writes, RESP: Reads](req: REQ, path: String): ClientFailableOp[RESP] = {
         val actualJson = Json.toJson(req)
         requestsMade = actualJson :: requestsMade
@@ -17,6 +17,7 @@ object FakeRequestsPut {
         else
           -\/(GenericError("not found a fake response for that"))
       }
-    })
+    }
+    (() => requestsMade, requestsPUT)
   }
 }

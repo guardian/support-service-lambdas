@@ -22,8 +22,8 @@ class UpdateAccountSFLinksTest extends FlatSpec with Matchers {
       """.stripMargin
     )
 
-    val (requestsMade, fake) = FakeRequestsPut(expectedUrl, expectedInput, response)
-    val operation = UpdateAccountSFLinks(fake)_
+    val (requestsMade, fakePutter) = FakeRequestsPut(expectedUrl, expectedInput, response)
+    val operation = UpdateAccountSFLinks(fakePutter)_
     val actual = operation(
       "crmIdjohn",
       "johnjohn_c"
