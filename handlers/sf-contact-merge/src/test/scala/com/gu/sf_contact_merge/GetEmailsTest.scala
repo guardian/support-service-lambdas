@@ -1,9 +1,7 @@
 package com.gu.sf_contact_merge
 
-import com.gu.effects.TestingRawEffects
-import com.gu.effects.TestingRawEffects.{HTTPResponse, POSTRequest}
 import com.gu.sf_contact_merge.GetZuoraEmailsForAccounts.ContactId
-import com.gu.util.zuora.{ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
+import com.gu.zuora.fake.FakeZuoraQuerier
 import org.scalatest.{FlatSpec, Matchers}
 import scalaz.{NonEmptyList, \/-}
 
@@ -11,25 +9,25 @@ class GetEmailsTest extends FlatSpec with Matchers {
 
   import GetEmailsTest._
 
-  it should "work" in {
+  it should "handle an email and a missing email with a fake querier" in {
 
-    val zuoraQuerier = ZuoraQuery(ZuoraRestRequestMaker(mock.response, ZuoraRestConfig("http://server", "user", "pass")))
-    val getContacts = GetZuoraEmailsForAccounts.GetEmails(zuoraQuerier)_
+    val expectedQuery = """SELECT WorkEmail FROM Contact WHERE Id = 'cid1' or Id = 'cid2'"""
+
+    val querier = FakeZuoraQuerier(expectedQuery, contactQueryResponse)
+    val getContacts = GetZuoraEmailsForAccounts.GetEmails(querier)_
     val actual = getContacts(NonEmptyList(
       ContactId("cid1"),
       ContactId("cid2")
     ))
 
-    actual.map(_.map(_.map(_.value))) should be(\/-(List(Some("peppa.pig@guardian.co.uk"), None)))
+    val expectedEmails = List(Some("peppa.pig@guardian.co.uk"), None)
+    actual.map(_.map(_.map(_.value))) should be(\/-(expectedEmails))
 
   }
 
 }
 
 object GetEmailsTest {
-
-  val contactQueryRequest =
-    """{"queryString":"SELECT WorkEmail FROM Contact WHERE Id = 'cid1' or Id = 'cid2'"}"""
 
   val contactQueryResponse =
     """{
@@ -45,9 +43,5 @@ object GetEmailsTest {
       |    "size": 2,
       |    "done": true
       |}""".stripMargin
-
-  val mock = new TestingRawEffects(postResponses = Map(
-    POSTRequest("/action/query", contactQueryRequest) -> HTTPResponse(200, contactQueryResponse)
-  ))
 
 }
