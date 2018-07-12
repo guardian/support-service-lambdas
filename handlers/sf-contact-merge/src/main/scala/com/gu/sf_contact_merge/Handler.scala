@@ -17,6 +17,7 @@ import com.gu.util.zuora.{ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
 import okhttp3.{Request, Response}
 import play.api.libs.json.{Json, Reads}
 import scalaz.NonEmptyList
+import scalaz.syntax.traverse.ToTraverseOps
 
 object Handler {
 
@@ -38,7 +39,10 @@ object Handler {
         zuoraRestConfig <- loadConfig[ZuoraRestConfig].toApiGatewayOp("load trusted Api config")
         requests = ZuoraRestRequestMaker(getResponse, zuoraRestConfig)
         zuoraQuerier = ZuoraQuery(requests)
-        wiredSteps = steps(GetZuoraEmailsForAccounts(zuoraQuerier))_
+        wiredSteps = steps(
+          GetZuoraEmailsForAccounts(zuoraQuerier),
+          UpdateAccountSFLinks(requests)
+        )_
         configuredOp = Operation.noHealthcheck(wiredSteps, false)
       } yield (trustedApiConfig, configuredOp)
     }
@@ -52,15 +56,19 @@ object Handler {
   )
   implicit val readWireSfContactRequest = Json.reads[WireSfContactRequest]
 
-  def steps(getZuoraEmails: NonEmptyList[AccountId] => ClientFailableOp[List[Option[EmailAddress]]])(req: ApiGatewayRequest): ResponseModels.ApiResponse =
+  def steps(
+    getZuoraEmails: NonEmptyList[AccountId] => ClientFailableOp[List[Option[EmailAddress]]],
+    updateAccountSFLinks: (String, String) => AccountId => ClientFailableOp[Unit]
+  )(req: ApiGatewayRequest): ResponseModels.ApiResponse =
     (for {
       input <- req.bodyAsCaseClass[WireSfContactRequest]()
       someAccountIds = input.billingAccountZuoraIds.map(AccountId.apply)
       accountIds <- MaybeNonEmptyList(someAccountIds).toApiGatewayContinueProcessing(ApiGatewayResponse.badRequest)
       emailAddresses <- getZuoraEmails(accountIds).toApiGatewayOp("get zuora emails")
       _ <- AssertSameEmails(emailAddresses)
-      // todo add the update call in the next PR
-    } yield ApiGatewayResponse.notFound("passed the prereq check")).apiResponse
+      updateAccount = updateAccountSFLinks(input.fullContactId, input.accountId)
+      _ <- accountIds.traverseU(updateAccount).toApiGatewayOp("updating all the accounts")
+    } yield ApiGatewayResponse.successfulExecution).apiResponse
 
 }
 
@@ -70,9 +78,4 @@ object AssertSameEmails {
     if (emailAddresses.distinct.size == 1) ContinueProcessing(()) else ReturnWithResponse(ApiGatewayResponse.notFound("those zuora accounts had differing emails"))
   }
 
-}
-
-object UpdateZuoraSFAccountAndContact {
-  //sfContactId__c
-  //CrmId
 }

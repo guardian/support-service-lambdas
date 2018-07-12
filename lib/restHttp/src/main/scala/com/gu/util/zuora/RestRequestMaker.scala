@@ -45,7 +45,16 @@ object RestRequestMaker extends Logging {
 
   case class DownloadStream(stream: InputStream, lengthBytes: Long)
 
-  class Requests(headers: Map[String, String], baseUrl: String, getResponse: Request => Response, jsonIsSuccessful: JsValue => ClientFailableOp[Unit]) {
+  trait RequestsPUT {
+    def put[REQ: Writes, RESP: Reads](req: REQ, path: String): ClientFailableOp[RESP]
+  }
+
+  class Requests(
+    headers: Map[String, String],
+    baseUrl: String,
+    getResponse: Request => Response,
+    jsonIsSuccessful: JsValue => ClientFailableOp[Unit]
+  ) extends RequestsPUT {
     // this can be a class and still be cohesive because every single method in the class needs every single value.  so we are effectively partially
     // applying everything with these params
 

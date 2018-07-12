@@ -40,7 +40,8 @@ class TestingRawEffects(
         } else {
           val reqBody = body(req.body)
           logger.info(s"HTTP ${req.method} body is $reqBody")
-          postResponses.get(POSTRequest(path, reqBody, req.method)).orElse(responses.get(path)) // use get response
+          val incomingRequest = POSTRequest(path, reqBody, req.method)
+          postResponses.get(incomingRequest).orElse(responses.get(path)) // use get response
         }
       val HTTPResponse(code, response) = presetResponse.getOrElse(
         HTTPResponse(defaultCode, """{"success": true}""")
