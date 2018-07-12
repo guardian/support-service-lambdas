@@ -18,7 +18,7 @@ Mappings:
         CODE:
             ApiName: new-product-api-CODE
             DomainName: new-product-api-code.membership.guardianapis.com
-            ApiGatewayTargetDomainName: d-dw6f4h9bf9.execute-api.eu-west-1.amazonaws.com
+            ApiGatewayTargetDomainName: d-ecyddyj7nk.execute-api.eu-west-1.amazonaws.com
         PROD:
             ApiName: new-product-api-PROD
             DomainName: new-product-api-prod.membership.guardianapis.com
