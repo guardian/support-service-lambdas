@@ -23,7 +23,7 @@ class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
       subscriptionCode = Some(SevenDay),
       provider = Some("G99")
     )
-    apiResponse(SuccessResponse(expiry), "200")
+    ApiGatewayResponse("200", SuccessResponse(expiry))
   }
 
   val successfulResponseFromZuora = ApiResponse("123", "valid zuora response")

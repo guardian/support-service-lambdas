@@ -2,10 +2,10 @@ package com.gu.digitalSubscriptionExpiry.zuora
 
 import java.time.LocalDate
 
-import com.gu.digitalSubscriptionExpiry.responses.DigitalSubscriptionApiResponses.apiResponse
 import com.gu.digitalSubscriptionExpiry.responses.{ErrorResponse, Expiry, ExpiryType, SuccessResponse}
 import com.gu.digitalSubscriptionExpiry.zuora.GetAccountSummary.{AccountId, AccountSummaryResult}
 import com.gu.digitalSubscriptionExpiry.zuora.GetSubscription._
+import com.gu.util.apigateway.ApiGatewayResponse
 import org.scalatest.FlatSpec
 import org.scalatest.Matchers._
 
@@ -43,10 +43,10 @@ class GetSubscriptionExpiryTest extends FlatSpec {
       subscriptionCode = None,
       provider = None
     ))
-    apiResponse(expiry, "200")
+    ApiGatewayResponse("200", expiry)
   }
 
-  val notFoundResponse = apiResponse(ErrorResponse("Unknown subscriber", -90), "404")
+  val notFoundResponse = ApiGatewayResponse("404", ErrorResponse("Unknown subscriber", -90))
   val today: () => LocalDate = () => LocalDate.of(2018, 4, 18)
 
   it should "return the expiry date for a subscription using billing last name" in {

@@ -11,7 +11,7 @@ case class AddSubscriptionRequest(
                                    contractEffectiveDate: LocalDate,
                                    acquisitionSource: String,
                                    createdByCSR: String,
-                                   priceInCents: Int,
+                                   amountMinorUnits: Int,
                                  )
 
 
@@ -22,7 +22,7 @@ object AddSubscriptionRequest {
                                          contractEffectiveDate: String,
                                          acquisitionSource: String,
                                          createdByCSR: String,
-                                         price: Int,
+                                         amountMinorUnits: Int,
                                        ) {
     def toAddSubscriptionRequest = {
 
@@ -33,7 +33,7 @@ object AddSubscriptionRequest {
           contractEffectiveDate = parsedEffectiveDate,
           acquisitionSource = this.acquisitionSource,
           createdByCSR = this.createdByCSR,
-          priceInCents = this.price * 100
+          amountMinorUnits = this.amountMinorUnits
         )
       }
 

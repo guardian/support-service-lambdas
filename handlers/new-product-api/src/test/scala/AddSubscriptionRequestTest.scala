@@ -12,7 +12,7 @@ class AddSubscriptionRequestTest extends FlatSpec with Matchers {
         |   "contractEffectiveDate":"2018-07-11",
         |   "acquisitionSource":"CSR",
         |   "createdByCSR":"CSRName",
-        |   "price": 2
+        |   "amountMinorUnits": 123
         |}
       """.stripMargin
 
@@ -23,7 +23,7 @@ class AddSubscriptionRequestTest extends FlatSpec with Matchers {
       contractEffectiveDate = LocalDate.of(2018, 7, 11),
       acquisitionSource = "CSR",
       createdByCSR = "CSRName",
-      priceInCents = 200
+      amountMinorUnits = 123
     )
   }
 
@@ -36,7 +36,7 @@ class AddSubscriptionRequestTest extends FlatSpec with Matchers {
         |   "productRatePlanChargeId":"rateplanChargeId",
         |   "acquisitionSource":"CSR",
         |   "createdByCSR":"CSRName",
-        |   "price": 2
+        |   "amountMinorUnits": 220
         |}
       """.stripMargin
 
