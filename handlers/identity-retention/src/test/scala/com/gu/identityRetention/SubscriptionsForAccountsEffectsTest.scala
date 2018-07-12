@@ -8,13 +8,13 @@ import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.zuora.{ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
 import org.scalatest.{FlatSpec, Matchers}
-import scalaz.\/-
+import scalaz.{NonEmptyList, \/-}
 
 class SubscriptionsForAccountsEffectsTest extends FlatSpec with Matchers {
 
   it should "successfull query multiple accounts" taggedAs EffectsTest in {
 
-    val testAccountIds = List(
+    val testAccountIds = NonEmptyList(
       AccountId("2c92c0f86371efdc0163871a9ad72274"),
       AccountId("2c92c0f86371f0360163871d94eb0e68")
     )

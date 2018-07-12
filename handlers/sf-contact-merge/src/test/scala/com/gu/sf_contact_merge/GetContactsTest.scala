@@ -5,7 +5,7 @@ import com.gu.effects.TestingRawEffects.{HTTPResponse, POSTRequest}
 import com.gu.sf_contact_merge.GetZuoraEmailsForAccounts.AccountId
 import com.gu.util.zuora.{ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
 import org.scalatest.{FlatSpec, Matchers}
-import scalaz.\/-
+import scalaz.{NonEmptyList, \/-}
 
 class GetContactsTest extends FlatSpec with Matchers {
 
@@ -13,10 +13,17 @@ class GetContactsTest extends FlatSpec with Matchers {
 
   it should "work" in {
 
-    val getContacts = GetZuoraEmailsForAccounts.GetContacts(ZuoraQuery(ZuoraRestRequestMaker(mock.response, ZuoraRestConfig("http://server", "user", "pass"))))_
-    val actual = getContacts(List("2c92c0f9624bbc5f016253e573970b16", "2c92c0f8644618e30164652a558c6e20").map(AccountId.apply))
+    val zuoraQuerier = ZuoraQuery(ZuoraRestRequestMaker(mock.response, ZuoraRestConfig("http://server", "user", "pass")))
+    val getContacts = GetZuoraEmailsForAccounts.GetContacts(zuoraQuerier)_
+    val actual = getContacts(NonEmptyList(
+      AccountId("acid1"),
+      AccountId("acid2")
+    ))
 
-    actual.map(_.map(_.value)) should be(\/-(List("2c92c0f8644618e30164652a55986e21", "2c92c0f9624bbc5f016253e5739b0b17")))
+    actual.map(_.map(_.value)) should be(\/-(List(
+      "b2id1",
+      "b2id2"
+    )))
 
   }
 
@@ -25,18 +32,18 @@ class GetContactsTest extends FlatSpec with Matchers {
 object GetContactsTest {
 
   val accountQueryRequest =
-    """{"queryString":"SELECT BillToId FROM Account WHERE Id = '2c92c0f9624bbc5f016253e573970b16' or Id = '2c92c0f8644618e30164652a558c6e20'"}"""
+    """{"queryString":"SELECT BillToId FROM Account WHERE Id = 'acid1' or Id = 'acid2'"}"""
 
   val accountQueryResponse =
     """{
       |    "records": [
       |        {
-      |            "BillToId": "2c92c0f8644618e30164652a55986e21",
-      |            "Id": "2c92c0f8644618e30164652a558c6e20"
+      |            "BillToId": "b2id1",
+      |            "Id": "acid1"
       |        },
       |        {
-      |            "BillToId": "2c92c0f9624bbc5f016253e5739b0b17",
-      |            "Id": "2c92c0f9624bbc5f016253e573970b16"
+      |            "BillToId": "b2id2",
+      |            "Id": "acid2"
       |        }
       |    ],
       |    "size": 2,

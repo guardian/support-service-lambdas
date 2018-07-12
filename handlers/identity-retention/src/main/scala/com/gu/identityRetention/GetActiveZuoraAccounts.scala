@@ -9,12 +9,12 @@ import com.gu.util.zuora.ZuoraQuery.{QueryResult, ZuoraQuerier}
 import play.api.libs.json.Json
 import scalaz.{-\/, \/-}
 
-object HasActiveZuoraAccounts {
+object GetActiveZuoraAccounts {
 
   case class IdentityQueryResponse(Id: String)
   implicit val reads = Json.reads[IdentityQueryResponse]
 
-  def apply(identityId: IdentityId, zuoraQuerier: ZuoraQuerier): ApiGatewayOp[List[AccountId]] = {
+  def apply(zuoraQuerier: ZuoraQuerier)(identityId: IdentityId): ApiGatewayOp[List[AccountId]] = {
 
     def searchForAccounts = {
 

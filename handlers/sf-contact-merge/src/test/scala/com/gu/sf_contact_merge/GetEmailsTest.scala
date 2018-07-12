@@ -1,22 +1,27 @@
 package com.gu.sf_contact_merge
 
-import com.gu.effects.TestingRawEffects
-import com.gu.effects.TestingRawEffects.{HTTPResponse, POSTRequest}
 import com.gu.sf_contact_merge.GetZuoraEmailsForAccounts.ContactId
-import com.gu.util.zuora.{ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
+import com.gu.zuora.fake.FakeZuoraQuerier
 import org.scalatest.{FlatSpec, Matchers}
-import scalaz.\/-
+import scalaz.{NonEmptyList, \/-}
 
 class GetEmailsTest extends FlatSpec with Matchers {
 
   import GetEmailsTest._
 
-  it should "work" in {
+  it should "handle an email and a missing email with a fake querier" in {
 
-    val getContacts = GetZuoraEmailsForAccounts.GetEmails(ZuoraQuery(ZuoraRestRequestMaker(mock.response, ZuoraRestConfig("http://server", "user", "pass"))))_
-    val actual = getContacts(List("2c92c0f8644618e30164652a55986e21", "2c92c0f9624bbc5f016253e5739b0b17").map(ContactId.apply))
+    val expectedQuery = """SELECT WorkEmail FROM Contact WHERE Id = 'cid1' or Id = 'cid2'"""
 
-    actual.map(_.map(_.map(_.value))) should be(\/-(List(Some("peppa.pig@guardian.co.uk"), None)))
+    val querier = FakeZuoraQuerier(expectedQuery, contactQueryResponse)
+    val getContacts = GetZuoraEmailsForAccounts.GetEmails(querier)_
+    val actual = getContacts(NonEmptyList(
+      ContactId("cid1"),
+      ContactId("cid2")
+    ))
+
+    val expectedEmails = List(Some("peppa.pig@guardian.co.uk"), None)
+    actual.map(_.map(_.map(_.value))) should be(\/-(expectedEmails))
 
   }
 
@@ -24,26 +29,19 @@ class GetEmailsTest extends FlatSpec with Matchers {
 
 object GetEmailsTest {
 
-  val contactQueryRequest =
-    """{"queryString":"SELECT WorkEmail FROM Contact WHERE Id = '2c92c0f8644618e30164652a55986e21' or Id = '2c92c0f9624bbc5f016253e5739b0b17'"}"""
-
   val contactQueryResponse =
     """{
       |    "records": [
       |        {
       |            "WorkEmail": "peppa.pig@guardian.co.uk",
-      |            "Id": "2c92c0f8644618e30164652a55986e21"
+      |            "Id": "cid1"
       |        },
       |        {
-      |            "Id": "2c92c0f9624bbc5f016253e5739b0b17"
+      |            "Id": "cid2"
       |        }
       |    ],
       |    "size": 2,
       |    "done": true
       |}""".stripMargin
-
-  val mock = new TestingRawEffects(postResponses = Map(
-    POSTRequest("/action/query", contactQueryRequest) -> HTTPResponse(200, contactQueryResponse)
-  ))
 
 }

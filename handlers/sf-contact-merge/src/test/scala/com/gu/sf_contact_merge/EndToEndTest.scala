@@ -19,9 +19,9 @@ class EndToEndTest extends FlatSpec with Matchers {
   it should "accept a request in the format we expect" in {
 
     val expected = ExpectedJsonFormat(
-      "404",
-      JsStringContainingJson(ExpectedBodyFormat("passed the prereq check")),
-      Map("Content-Type" -> "application/json")
+      statusCode = "404",
+      body = JsStringContainingJson(ExpectedBodyFormat(message = "passed the prereq check")),
+      headers = Map("Content-Type" -> "application/json")
     )
 
     val body =
