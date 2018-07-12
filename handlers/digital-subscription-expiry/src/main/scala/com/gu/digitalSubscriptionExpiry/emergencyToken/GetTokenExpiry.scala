@@ -1,13 +1,14 @@
 package com.gu.digitalSubscriptionExpiry.emergencyToken
 
 import java.time.LocalDate
+
 import com.gu.cas.Valid
 import com.gu.digitalSubscriptionExpiry.DigitalSubscriptionExpirySteps.logger
 import TokenPayloadImplicits._
 import com.gu.util.reader.Types.ApiGatewayOp
-import ApiGatewayOp.{ReturnWithResponse, ContinueProcessing}
-import com.gu.digitalSubscriptionExpiry.responses.DigitalSubscriptionApiResponses._
+import ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.digitalSubscriptionExpiry.responses.{Expiry, ExpiryType, SuccessResponse}
+import com.gu.util.apigateway.ApiGatewayResponse
 
 import scala.util.{Success, Try}
 
@@ -31,7 +32,7 @@ object GetTokenExpiry {
             subscriptionCode = Some(payload.subscriptionCode),
             provider = Some(emergencyTokens.prefix)
           )
-          ReturnWithResponse(apiResponse(SuccessResponse(expiry), "200"))
+          ReturnWithResponse(ApiGatewayResponse("200", SuccessResponse(expiry)))
 
         case errorResponse =>
           logger.error(s"error decoding token $subscriberId :  $errorResponse")

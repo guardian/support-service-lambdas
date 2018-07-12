@@ -13,7 +13,6 @@ import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.zuora.ZuoraRestConfig
 import okhttp3.{Request, Response}
 import com.gu.util.reader.Types._
-import play.api.libs.json.Json
 
 object Handler extends Logging {
 
@@ -22,26 +21,16 @@ object Handler extends Logging {
     runWithEffects(RawEffects.response, RawEffects.stage, GetFromS3.fetchString, LambdaIO(inputStream, outputStream, context))
   }
 
-  //todo make this generic and move it somewhere
-  def apiResponse(body: AddSubscriptionResponse, status: String) = {
-    val bodyTxt = Json.prettyPrint(Json.toJson(body))
-    ApiResponse(status, bodyTxt)
-  }
-
   def addSubscriptionSteps(apiGatewayRequest: ApiGatewayRequest): ApiResponse = {
     (for {
       request <- apiGatewayRequest.bodyAsCaseClass[AddSubscriptionRequest]()
       _ = logger.info(s"parsed request as $request")
-      resp = apiResponse(body = AddedSubscription("A-S00045523"), status = "200")
-    } yield resp).apiResponse
-
+    } yield ApiGatewayResponse(body = AddedSubscription("A-S00045523"), statusCode = "200")).apiResponse
   }
 
   def runWithEffects(response: Request => Response, stage: Stage, fetchString: StringFromS3, lambdaIO: LambdaIO) = {
 
     def operation: ZuoraRestConfig => Operation = zuoraRestConfig => {
-      //  val zuoraRequests = ZuoraRestRequestMaker(response, zuoraRestConfig)
-      // val zuoraQuerier = ZuoraQuery(zuoraRequests)
       Operation.noHealthcheck(
         steps = addSubscriptionSteps,
         shouldAuthenticate = false
