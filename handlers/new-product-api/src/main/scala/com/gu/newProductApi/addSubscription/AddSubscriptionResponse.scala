@@ -15,8 +15,8 @@ object AddedSubscription {
 }
 
 object AddSubscriptionResponse {
-  implicit val writes: Writes[AddSubscriptionResponse] = { bla =>
-    bla match {
+  implicit val writes: Writes[AddSubscriptionResponse] = { response =>
+    response match {
       case e: Error => Error.writes.writes(e)
       case s: AddedSubscription => AddedSubscription.writes.writes(s)
     }

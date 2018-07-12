@@ -32,7 +32,7 @@ object Handler extends Logging {
     (for {
       request <- apiGatewayRequest.bodyAsCaseClass[AddSubscriptionRequest]()
       _ = logger.info(s"parsed request as $request")
-      resp = apiResponse(body = AddedSubscription("fakeSubNumber"), status = "200")
+      resp = apiResponse(body = AddedSubscription("A-S00045523"), status = "200")
     } yield resp).apiResponse
 
   }

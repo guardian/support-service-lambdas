@@ -7,10 +7,8 @@ import play.api.libs.json.{JsError, JsSuccess, Json, Reads}
 import scala.util.{Failure, Success, Try}
 
 case class AddSubscriptionRequest(
-                                   accountKey: String,
+                                   zuoraAccountId: String,
                                    contractEffectiveDate: LocalDate,
-                                   productRatePlanId: String,
-                                   productRatePlanChargeId: String,
                                    acquisitionSource: String,
                                    createdByCSR: String,
                                    priceInCents: Int,
@@ -20,10 +18,8 @@ case class AddSubscriptionRequest(
 object AddSubscriptionRequest {
 
   case class AddSubscriptionRequestWire(
-                                         accountKey: String,
+                                         zuoraAccountId: String,
                                          contractEffectiveDate: String,
-                                         productRatePlanId: String,
-                                         productRatePlanChargeId: String,
                                          acquisitionSource: String,
                                          createdByCSR: String,
                                          price: Int,
@@ -33,13 +29,11 @@ object AddSubscriptionRequest {
 
       val maybeParsedRequest = Try(LocalDate.parse(contractEffectiveDate)).map { parsedEffectiveDate =>
         AddSubscriptionRequest(
-          accountKey = this.accountKey,
+          zuoraAccountId = this.zuoraAccountId,
           contractEffectiveDate = parsedEffectiveDate,
-          productRatePlanChargeId = this.productRatePlanChargeId,
-          productRatePlanId = this.productRatePlanId,
           acquisitionSource = this.acquisitionSource,
           createdByCSR = this.createdByCSR,
-          priceInCents = this.price
+          priceInCents = this.price * 100
         )
       }
 
