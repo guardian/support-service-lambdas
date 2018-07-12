@@ -54,7 +54,9 @@ Resources:
                       Statement:
                           - Effect: Allow
                             Action: s3:GetObject
-                            Resource: !Sub arn:aws:s3:::gu-reader-revenue-private/membership/payment-failure-lambdas/${Stage}/*
+                            Resource:
+                            - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/zuoraRest-${Stage}.*.json
+                            - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/trustedApi-${Stage}.*.json
     SfContactMergeLambda:
         Type: AWS::Lambda::Function
         Properties:
@@ -64,7 +66,7 @@ Resources:
             Code:
                 S3Bucket: zuora-auto-cancel-dist
                 S3Key: !Sub membership/${Stage}/sf-contact-merge/sf-contact-merge.jar
-            Handler: com.gu.sfContactMerge.Handler::apply
+            Handler: com.gu.sf_contact_merge.Handler::apply
             Environment:
                 Variables:
                   Stage: !Ref Stage
