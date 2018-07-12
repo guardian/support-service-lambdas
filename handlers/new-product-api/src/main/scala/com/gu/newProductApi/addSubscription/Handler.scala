@@ -24,7 +24,9 @@ object Handler {
     def operation: ZuoraRestConfig => Operation = zuoraRestConfig => {
       //  val zuoraRequests = ZuoraRestRequestMaker(response, zuoraRestConfig)
       // val zuoraQuerier = ZuoraQuery(zuoraRequests)
-      Operation.noHealthcheck({ apiGatewayRequest: ApiGatewayRequest => ApiGatewayResponse.successfulExecution })
+      Operation.noHealthcheck(
+        steps = { apiGatewayRequest: ApiGatewayRequest => ApiGatewayResponse.successfulExecution },
+        shouldAuthenticate = false)
     }
 
     val loadConfig = LoadConfigModule(stage, fetchString)
