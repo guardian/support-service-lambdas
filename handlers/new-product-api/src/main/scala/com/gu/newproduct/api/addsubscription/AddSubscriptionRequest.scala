@@ -6,8 +6,10 @@ import play.api.libs.json.{JsError, JsSuccess, Json, Reads}
 
 import scala.util.{Failure, Success, Try}
 
+case class ZuoraAccountId(value: String) extends AnyVal
+
 case class AddSubscriptionRequest(
-  zuoraAccountId: String,
+  zuoraAccountId: ZuoraAccountId,
   startDate: LocalDate,
   acquisitionSource: String,
   createdByCSR: String,
@@ -26,7 +28,7 @@ object AddSubscriptionRequest {
     def toAddSubscriptionRequest = {
       val maybeParsedRequest = Try(LocalDate.parse(startDate)).map { parsedStartDate =>
         AddSubscriptionRequest(
-          zuoraAccountId = this.zuoraAccountId,
+          zuoraAccountId = ZuoraAccountId(zuoraAccountId),
           startDate = parsedStartDate,
           acquisitionSource = this.acquisitionSource,
           createdByCSR = this.createdByCSR,

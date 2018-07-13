@@ -20,7 +20,7 @@ class AddSubscriptionRequestTest extends FlatSpec with Matchers {
     val actual = Json.parse(input).as[AddSubscriptionRequest]
 
     actual shouldBe AddSubscriptionRequest(
-      zuoraAccountId = "accountkeyValue",
+      zuoraAccountId = ZuoraAccountId("accountkeyValue"),
       startDate = LocalDate.of(2018, 7, 11),
       acquisitionSource = "CSR",
       createdByCSR = "CSRName",
