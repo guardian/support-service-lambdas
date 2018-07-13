@@ -1,4 +1,5 @@
-import com.gu.newProductApi.addSubscription.{AddSubscriptionResponse, AddedSubscription}
+package com.gu.newproduct.api.addsubscription
+
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
 

@@ -1,6 +1,7 @@
+package com.gu.newproduct.api.addsubscription
+
 import java.time.LocalDate
 
-import com.gu.newProductApi.addSubscription.AddSubscriptionRequest
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.{JsError, Json}
 

@@ -1,4 +1,4 @@
-package com.gu.newProductApi.addSubscription
+package com.gu.newproduct.api.addsubscription
 
 import java.time.LocalDate
 
