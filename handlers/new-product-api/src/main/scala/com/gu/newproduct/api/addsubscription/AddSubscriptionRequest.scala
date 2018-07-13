@@ -8,7 +8,7 @@ import scala.util.{Failure, Success, Try}
 
 case class AddSubscriptionRequest(
   zuoraAccountId: String,
-  contractEffectiveDate: LocalDate,
+  startDate: LocalDate,
   acquisitionSource: String,
   createdByCSR: String,
   amountMinorUnits: Int,
@@ -18,16 +18,16 @@ object AddSubscriptionRequest {
 
   case class AddSubscriptionRequestWire(
     zuoraAccountId: String,
-    contractEffectiveDate: String,
+    startDate: String,
     acquisitionSource: String,
     createdByCSR: String,
     amountMinorUnits: Int,
   ) {
     def toAddSubscriptionRequest = {
-      val maybeParsedRequest = Try(LocalDate.parse(contractEffectiveDate)).map { parsedEffectiveDate =>
+      val maybeParsedRequest = Try(LocalDate.parse(startDate)).map { parsedStartDate =>
         AddSubscriptionRequest(
           zuoraAccountId = this.zuoraAccountId,
-          contractEffectiveDate = parsedEffectiveDate,
+          startDate = parsedStartDate,
           acquisitionSource = this.acquisitionSource,
           createdByCSR = this.createdByCSR,
           amountMinorUnits = this.amountMinorUnits

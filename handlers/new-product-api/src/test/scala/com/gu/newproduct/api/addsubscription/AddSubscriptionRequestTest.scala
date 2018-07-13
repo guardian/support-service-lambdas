@@ -10,7 +10,7 @@ class AddSubscriptionRequestTest extends FlatSpec with Matchers {
     val input =
       """{
         |   "zuoraAccountId":"accountkeyValue",
-        |   "contractEffectiveDate":"2018-07-11",
+        |   "startDate":"2018-07-11",
         |   "acquisitionSource":"CSR",
         |   "createdByCSR":"CSRName",
         |   "amountMinorUnits": 123
@@ -21,7 +21,7 @@ class AddSubscriptionRequestTest extends FlatSpec with Matchers {
 
     actual shouldBe AddSubscriptionRequest(
       zuoraAccountId = "accountkeyValue",
-      contractEffectiveDate = LocalDate.of(2018, 7, 11),
+      startDate = LocalDate.of(2018, 7, 11),
       acquisitionSource = "CSR",
       createdByCSR = "CSRName",
       amountMinorUnits = 123
@@ -32,7 +32,7 @@ class AddSubscriptionRequestTest extends FlatSpec with Matchers {
     val input =
       """{
         |   "zuoraAccountId":"accountkeyValue",
-        |   "contractEffectiveDate":"december 7, 2018",
+        |   "startDate":"december 7, 2018",
         |   "productRatePlanId":"rateplanId",
         |   "productRatePlanChargeId":"rateplanChargeId",
         |   "acquisitionSource":"CSR",
