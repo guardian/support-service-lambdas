@@ -66,7 +66,7 @@ Resources:
             Code:
                 S3Bucket: zuora-auto-cancel-dist
                 S3Key: !Sub membership/${Stage}/new-product-api/new-product-api.jar
-            Handler: com.gu.newProductApi.addSubscription.Handler::apply
+            Handler: com.gu.newproduct.api.addsubscription.Handler::apply
             Environment:
                 Variables:
                   Stage: !Ref Stage
