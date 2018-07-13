@@ -135,7 +135,8 @@ lazy val root = all(project in file(".")).enablePlugins(RiffRaffArtifact).aggreg
   zuora,
   `zuora-reports`,
   salesforce,
-  s3ConfigValidator
+  s3ConfigValidator,
+  `new-product-api`
 ).dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `identity-backfill` = all(project in file("handlers/identity-backfill")) // when using the "project identity-backfill" command it uses the lazy val name
@@ -151,6 +152,10 @@ lazy val `catalog-service` = all(project in file("handlers/catalog-service"))
   .dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `identity-retention` = all(project in file("handlers/identity-retention"))
+  .enablePlugins(RiffRaffArtifact)
+  .dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
+
+lazy val `new-product-api` = all(project in file("handlers/new-product-api"))
   .enablePlugins(RiffRaffArtifact)
   .dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
 

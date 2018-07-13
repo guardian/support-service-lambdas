@@ -6,6 +6,7 @@ import com.gu.digitalSubscriptionExpiry.responses.DigitalSubscriptionApiResponse
 import com.gu.digitalSubscriptionExpiry.responses.{Expiry, ExpiryType, SuccessResponse}
 import com.gu.digitalSubscriptionExpiry.zuora.GetAccountSummary.AccountSummaryResult
 import com.gu.digitalSubscriptionExpiry.zuora.GetSubscription.{RatePlanCharge, SubscriptionResult}
+import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 
 object GetSubscriptionExpiry {
@@ -60,7 +61,7 @@ object GetSubscriptionExpiry {
             subscriptionCode = None,
             provider = None
           ))
-          apiResponse(res, "200")
+          ApiGatewayResponse("200", res)
       }.getOrElse(notFoundResponse)
     }
 }

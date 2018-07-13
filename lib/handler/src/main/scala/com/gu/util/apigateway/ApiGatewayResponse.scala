@@ -49,6 +49,11 @@ object ApiGatewayResponse extends Logging {
 
   def toJsonBody(responseBody: ResponseBody) = Json.prettyPrint(Json.toJson(responseBody))
 
+  def apply[B](statusCode: String, body: B)(implicit writes: Writes[B]) = {
+    val bodyTxt = Json.prettyPrint(Json.toJson(body))
+    ApiResponse(statusCode, bodyTxt)
+  }
+
   val successfulExecution = ApiResponse(
     "200",
     toJsonBody(ResponseBody("Success"))
