@@ -2,10 +2,11 @@ package com.gu.zuora.reports
 
 import com.amazonaws.services.s3.model.{ObjectMetadata, PutObjectRequest, PutObjectResult}
 import com.gu.util.Logging
+import com.gu.util.zuora.RestRequestMaker.Types._
 import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, DownloadStream, GenericError}
+import scalaz.syntax.std.either._
 
 import scala.util.Try
-import scalaz.syntax.std.either._
 
 object S3ReportUpload extends Logging {
 
@@ -17,7 +18,7 @@ object S3ReportUpload extends Logging {
     s3Write(putObjectRequest).map(_ => s"s3://$destinationBucket/$key").toEither.disjunction.leftMap { exception =>
       logger.error("could not upload report to S3", exception)
       GenericError(s"could not upload report to S3: ${exception.getMessage}")
-    }
+    }.toClientFailableOp
 
   }
 }

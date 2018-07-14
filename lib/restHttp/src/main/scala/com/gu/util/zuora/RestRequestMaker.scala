@@ -4,41 +4,110 @@ import java.io.InputStream
 
 import okhttp3.{MediaType, Request, RequestBody, Response}
 import play.api.libs.json._
-import scalaz.Scalaz._
-import scalaz.{-\/, \/, \/-}
+import scalaz.{-\/, Monad, \/, \/-}
 
 import scala.util.{Failure, Success, Try}
 
 object RestRequestMaker extends Logging {
 
-  sealed trait ClientFail {
+  import Types._
+
+  sealed trait ClientFail extends ClientFailableOp[Nothing] {
+    override def toDisjunction: ClientFail \/ Nothing = -\/(this)
+
+    val isFail = true
+
     def message: String
   }
+
   case class NotFound(message: String) extends ClientFail
+
   case class GenericError(message: String) extends ClientFail
 
-  type ClientFailableOp[A] = ClientFail \/ A
+  case class ClientSuccess[A](value: A) extends ClientFailableOp[A] {
+    val isFail = false
+    override def toDisjunction: ClientFail \/ A = \/-(value)
+  }
+
+  sealed trait ClientFailableOp[+A] {
+
+    def isFail: Boolean
+
+    def toDisjunction: scalaz.\/[ClientFail, A]
+
+    def flatMap[B](f: A => ClientFailableOp[B]): ClientFailableOp[B] =
+      toDisjunction.flatMap(f.andThen(_.toDisjunction)).toClientFailableOp
+
+    def map[B](f: A => B): ClientFailableOp[B] =
+      toDisjunction.map(f).toClientFailableOp
+
+    def mapFailure(f: ClientFail => ClientFail): ClientFailableOp[A] =
+      toDisjunction.leftMap(f).toClientFailableOp
+
+  }
+
+  object Types {
+
+    implicit class UnderlyingOps[A](theEither: scalaz.\/[ClientFail, A]) {
+
+      def toClientFailableOp: ClientFailableOp[A] =
+        theEither match {
+          case scalaz.\/-(success) => ClientSuccess(success)
+          case scalaz.-\/(finished) => finished
+        }
+
+    }
+
+    implicit val clientFailableOpM: Monad[ClientFailableOp] = {
+
+      type ClientDisjunction[A] = scalaz.\/[ClientFail, A]
+
+      val disjunctionMonad = implicitly[Monad[ClientDisjunction]]
+
+      new Monad[ClientFailableOp] {
+
+        override def bind[A, B](fa: ClientFailableOp[A])(f: A => ClientFailableOp[B]): ClientFailableOp[B] = {
+
+          val originalAsDisjunction: ClientDisjunction[A] =
+            fa.toDisjunction
+
+          val functionWithResultAsDisjunction: A => ClientDisjunction[B] =
+            f.andThen(_.toDisjunction)
+
+          val boundAsDisjunction: ClientDisjunction[B] =
+            disjunctionMonad.bind(originalAsDisjunction)(functionWithResultAsDisjunction)
+
+          boundAsDisjunction.toClientFailableOp
+        }
+
+        override def point[A](a: => A): ClientFailableOp[A] = ClientSuccess(a)
+
+      }
+    }
+
+  }
+
   def httpIsSuccessful(response: Response): ClientFailableOp[Unit] = {
     if (response.isSuccessful) {
-      ().right
+      ClientSuccess(())
     } else {
       val body = response.body.string
 
       val truncated = body.take(500) + (if (body.length > 500) "..." else "")
       logger.error(s"Request to Zuora was unsuccessful, response status was ${response.code}, response body: \n $response\n$truncated")
       if (response.code == 404) {
-        NotFound(response.message).left
-      } else GenericError("Request to Zuora was unsuccessful").left
+        NotFound(response.message)
+      } else GenericError("Request to Zuora was unsuccessful")
     }
   }
 
   def toResult[T: Reads](bodyAsJson: JsValue): ClientFailableOp[T] = {
     bodyAsJson.validate[T] match {
       case success: JsSuccess[T] =>
-        success.get.right
+        ClientSuccess(success.get)
       case error: JsError => {
         logger.error(s"Failed to convert Zuora response to case case $error. Response body was: \n $bodyAsJson")
-        GenericError("Error when converting Zuora response to case class").left
+        GenericError("Error when converting Zuora response to case class")
       }
     }
   }
@@ -78,7 +147,7 @@ object RestRequestMaker extends Logging {
       val body = createBody[REQ](req)
       for {
         bodyAsJson <- sendRequest(buildRequest(headers, baseUrl + path, _.post(body)), getResponse).map(Json.parse)
-        _ <- if (skipCheck) \/-(()) else jsonIsSuccessful(bodyAsJson)
+        _ <- if (skipCheck) ClientSuccess(()) else jsonIsSuccessful(bodyAsJson)
         respModel <- toResult[RESP](bodyAsJson)
       } yield respModel
     }
@@ -92,8 +161,8 @@ object RestRequestMaker extends Logging {
 
     private def extractContentLength(response: Response) = {
       Try(response.header("content-length").toLong) match {
-        case Success(contentlength) => \/-(contentlength)
-        case Failure(error) => -\/(GenericError(s"could not extract content length from response ${error.getMessage}"))
+        case Success(contentlength) => ClientSuccess(contentlength)
+        case Failure(error) => GenericError(s"could not extract content length from response ${error.getMessage}")
       }
     }
 

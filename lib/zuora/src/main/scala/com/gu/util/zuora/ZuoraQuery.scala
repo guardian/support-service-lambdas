@@ -34,7 +34,7 @@ object ZuoraQuery {
   // in order to allow partial application with unapplied type parameter, we need to use a trait
   def apply(requests: Requests): ZuoraQuerier = new ZuoraQuerier {
     def apply[QUERYRECORD: Reads](query: SafeQuery): ClientFailableOp[QueryResult[QUERYRECORD]] =
-      requests.post(query, s"action/query", true): ClientFailableOp[QueryResult[QUERYRECORD]]
+      requests.post[SafeQuery, QueryResult[QUERYRECORD]](query, s"action/query", true)
   }
 
   trait ZuoraQuerier {

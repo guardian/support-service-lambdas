@@ -55,7 +55,7 @@ object SyncableSFToIdentity {
     sFContactId: SFContactId
   ) =
     for {
-      fields <- GetSFContactSyncCheckFields(sfRequests)(sFContactId).toApiGatewayOp("zuora issue")
+      fields <- GetSFContactSyncCheckFields(sfRequests)(sFContactId).toDisjunction.toApiGatewayOp("zuora issue")
       _ <- if (ContactSyncCheck(standardRecordType)(fields))
         ContinueProcessing(())
       else

@@ -59,7 +59,7 @@ object ZuoraEmailSteps {
     getInvoiceTransactions: String => ClientFailableOp[InvoiceTransactionSummary]
   )(accountId: String, toMessage: PaymentFailureInformation => EmailRequest): ApiGatewayOp[Unit] = {
     for {
-      invoiceTransactionSummary <- getInvoiceTransactions(accountId).toApiGatewayOp("getInvoiceTransactions failed")
+      invoiceTransactionSummary <- getInvoiceTransactions(accountId).toDisjunction.toApiGatewayOp("getInvoiceTransactions failed")
       paymentInformation <- GetPaymentData(accountId)(invoiceTransactionSummary)
       message = toMessage(paymentInformation)
       _ <- sendEmail(message).mapResponse(resp =>

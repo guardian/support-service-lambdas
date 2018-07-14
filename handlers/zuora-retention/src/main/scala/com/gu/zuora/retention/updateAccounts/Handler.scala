@@ -17,6 +17,7 @@ import UpdateAccountsResponse._
 import UpdateAccountsRequest._
 import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.zuora.retention.filterCandidates.S3Iterator
+import com.gu.zuora.retention.updateAccounts.SetDoNotProcess.UpdateRequestBody
 import com.gu.zuora.retention.updateAccounts.SetDoNotProcess.UpdateRequestBody._
 
 import scala.util.{Failure, Success, Try}
@@ -63,7 +64,7 @@ object Handler {
 
     def wiredOperation(updateAccountsRequest: UpdateAccountsRequest): Try[UpdateAccountsResponse] = for {
       zuoraRequests <- getZuoraRequestMaker(RawEffects.response, RawEffects.stage, GetFromS3.fetchString)
-      setDoNotProcess = SetDoNotProcess(zuoraRequests.put) _
+      setDoNotProcess = SetDoNotProcess(zuoraRequests.put[UpdateRequestBody, Unit]) _
       operation <- operation(
         s3Iterator,
         UpdateAccounts(setDoNotProcess, getRemainingTime) _

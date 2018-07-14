@@ -102,7 +102,7 @@ object Handler {
   ): ApiGatewayOp[Unit] =
     for {
       sfRequests <- sfRequests
-      _ <- UpdateSalesforceIdentityId(sfRequests)(sFContactId, identityId).toApiGatewayOp("zuora issue")
+      _ <- UpdateSalesforceIdentityId(sfRequests)(sFContactId, identityId).toDisjunction.toApiGatewayOp("zuora issue")
     } yield ()
 
 }
@@ -116,7 +116,7 @@ object Healthcheck {
     (for {
       identityId <- getByEmail(EmailAddress("john.duffell@guardian.co.uk"))
         .toApiGatewayOp("problem with email").withLogging("healthcheck getByEmail")
-      _ <- countZuoraAccountsForIdentityId(identityId).toApiGatewayOp("zuora issue")
+      _ <- countZuoraAccountsForIdentityId(identityId).toDisjunction.toApiGatewayOp("zuora issue")
       _ <- sfAuth
     } yield ApiGatewayResponse.successfulExecution).apiResponse
 

@@ -19,7 +19,7 @@ class GetZuoraEmailsForAccountsEffectsTest extends FlatSpec with Matchers {
     val actual = for {
       zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig].toApiGatewayOp("parse config")
       getZuoraEmailsForAccounts = GetZuoraEmailsForAccounts(ZuoraQuery(ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig))) _
-      maybeEmailAddresses <- getZuoraEmailsForAccounts(testData).toApiGatewayOp("get zuora emails for accounts")
+      maybeEmailAddresses <- getZuoraEmailsForAccounts(testData).toDisjunction.toApiGatewayOp("get zuora emails for accounts")
     } yield maybeEmailAddresses
 
     actual should be(ContinueProcessing(List(

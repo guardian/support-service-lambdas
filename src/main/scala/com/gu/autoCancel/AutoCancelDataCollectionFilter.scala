@@ -18,7 +18,7 @@ object AutoCancelDataCollectionFilter extends Logging {
   )(autoCancelCallout: AutoCancelCallout): ApiGatewayOp[AutoCancelRequest] = {
     val accountId = autoCancelCallout.accountId
     for {
-      accountSummary <- getAccountSummary(accountId).toApiGatewayOp("getAccountSummary").withLogging("getAccountSummary")
+      accountSummary <- getAccountSummary(accountId).toDisjunction.toApiGatewayOp("getAccountSummary").withLogging("getAccountSummary")
       subToCancel <- getSubscriptionToCancel(accountSummary).withLogging("getSubscriptionToCancel")
       cancellationDate <- getCancellationDateFromInvoices(accountSummary, now).withLogging("getCancellationDateFromInvoices")
     } yield AutoCancelRequest(accountId, subToCancel, cancellationDate)

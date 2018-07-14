@@ -24,8 +24,8 @@ class AddIdentityIdEffectsTest extends FlatSpec with Matchers {
     val actual = for {
       zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig].toApiGatewayOp("load config")
       zuoraDeps = ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig)
-      _ <- AddIdentityIdToAccount(zuoraDeps)(testAccount, IdentityId(unique)).toApiGatewayOp("AddIdentityIdToAccount")
-      identityId <- GetIdentityIdForAccount(zuoraDeps)(testAccount).toApiGatewayOp("GetIdentityIdForAccount")
+      _ <- AddIdentityIdToAccount(zuoraDeps)(testAccount, IdentityId(unique)).toDisjunction.toApiGatewayOp("AddIdentityIdToAccount")
+      identityId <- GetIdentityIdForAccount(zuoraDeps)(testAccount).toDisjunction.toApiGatewayOp("GetIdentityIdForAccount")
     } yield {
       identityId
     }

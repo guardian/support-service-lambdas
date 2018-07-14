@@ -19,7 +19,7 @@ class UpdateSalesforceIdentityIdEffectsTest extends FlatSpec with Matchers {
 
     val actual = for {
       auth <- DevSFEffects(GetFromS3.fetchString, RawEffects.response)
-      _ <- UpdateSalesforceIdentityId(auth)(testContact, IdentityId(unique)).toApiGatewayOp("update")
+      _ <- UpdateSalesforceIdentityId(auth)(testContact, IdentityId(unique)).toDisjunction.toApiGatewayOp("update")
       identityId <- GetSalesforceIdentityId(auth)(testContact)
     } yield identityId
 

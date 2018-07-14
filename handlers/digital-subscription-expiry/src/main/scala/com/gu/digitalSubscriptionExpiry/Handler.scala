@@ -39,8 +39,8 @@ object Handler extends Logging {
         DigitalSubscriptionExpirySteps(
           getEmergencyTokenExpiry = GetTokenExpiry(emergencyTokens, today),
           getSubscription = GetSubscription(zuoraRequests),
-          setActivationDate = (SetActivationDate(zuoraRequests, now) _).andThen(_.toApiGatewayOp(s"zuora SetActivationDate fail")),
-          getAccountSummary = (GetAccountSummary(zuoraRequests) _).andThen(_.toApiGatewayOp(s"zuora GetAccountSummary fail")),
+          setActivationDate = (SetActivationDate(zuoraRequests, now) _).andThen(_.toDisjunction.toApiGatewayOp(s"zuora SetActivationDate fail")),
+          getAccountSummary = (GetAccountSummary(zuoraRequests) _).andThen(_.toDisjunction.toApiGatewayOp(s"zuora GetAccountSummary fail")),
           getSubscriptionExpiry = GetSubscriptionExpiry(today),
           skipActivationDateUpdate = SkipActivationDateUpdate.apply
         )

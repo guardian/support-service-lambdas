@@ -3,9 +3,10 @@ package com.gu.sf_contact_merge
 import com.gu.effects.TestingRawEffects
 import com.gu.effects.TestingRawEffects.{HTTPResponse, POSTRequest}
 import com.gu.sf_contact_merge.GetZuoraEmailsForAccounts.AccountId
+import com.gu.util.zuora.RestRequestMaker.ClientSuccess
 import com.gu.util.zuora.{ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
 import org.scalatest.{FlatSpec, Matchers}
-import scalaz.{NonEmptyList, \/-}
+import scalaz.NonEmptyList
 
 class GetContactsTest extends FlatSpec with Matchers {
 
@@ -20,7 +21,7 @@ class GetContactsTest extends FlatSpec with Matchers {
       AccountId("acid2")
     ))
 
-    actual.map(_.map(_.value)) should be(\/-(List(
+    actual.map(_.map(_.value)) should be(ClientSuccess(List(
       "b2id1",
       "b2id2"
     )))

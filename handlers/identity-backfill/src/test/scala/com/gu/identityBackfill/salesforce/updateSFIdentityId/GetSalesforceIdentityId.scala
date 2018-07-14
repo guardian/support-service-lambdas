@@ -14,7 +14,7 @@ object GetSalesforceIdentityId {
 
   def apply(get: RestRequestMaker.Requests)(sFContactId: SFContactId): ApiGatewayOp[IdentityId] = {
     val id = get.get[WireResult](s"/services/data/v20.0/sobjects/Contact/${sFContactId.value}")
-    id.toApiGatewayOp("failed").map(id => IdentityId(id.IdentityID__c))
+    id.toDisjunction.toApiGatewayOp("failed").map(id => IdentityId(id.IdentityID__c))
   }
 
 }

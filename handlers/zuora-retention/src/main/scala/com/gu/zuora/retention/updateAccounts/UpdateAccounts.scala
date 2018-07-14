@@ -16,7 +16,7 @@ object UpdateAccounts {
     Try {
       while (accountIdsIterator.hasNext && getRemainingTimeInMillis() > oneMinuteMillis) {
         val response = setDoNotProcess(accountIdsIterator.next)
-        if (response.isLeft) {
+        if (response.isFail) {
           throw LambdaException(s"error response from lambda $response")
         }
       }

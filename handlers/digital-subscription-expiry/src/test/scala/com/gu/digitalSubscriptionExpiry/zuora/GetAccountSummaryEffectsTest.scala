@@ -16,7 +16,7 @@ class GetAccountSummaryEffectsTest extends FlatSpec with Matchers {
       zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig].toApiGatewayOp("parse config")
 
       zuoraRequests = ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig)
-      subscription <- GetAccountSummary(zuoraRequests)(testAccountId).toApiGatewayOp("get summary")
+      subscription <- GetAccountSummary(zuoraRequests)(testAccountId).toDisjunction.toApiGatewayOp("get summary")
     } yield {
       subscription
     }

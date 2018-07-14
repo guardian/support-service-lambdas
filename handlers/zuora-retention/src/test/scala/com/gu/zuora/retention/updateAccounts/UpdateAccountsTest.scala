@@ -1,15 +1,14 @@
 package com.gu.zuora.retention.updateAccounts
 
 import com.gu.util.handlers.LambdaException
-import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, GenericError}
+import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, ClientSuccess, GenericError}
 import org.scalatest.{FlatSpec, Matchers}
-import scalaz.{-\/, \/-}
 
 import scala.util.{Failure, Success}
 
 class UpdateAccountsTest extends FlatSpec with Matchers {
   val testUri = "someUri"
-  def successZuoraUpdate(accountId: AccountId): ClientFailableOp[Unit] = \/-(())
+  def successZuoraUpdate(accountId: AccountId): ClientFailableOp[Unit] = ClientSuccess(())
 
   it should "process all accounts if there is enough execution time left" in {
 
@@ -35,8 +34,8 @@ class UpdateAccountsTest extends FlatSpec with Matchers {
   it should "should return failure if zuora returns an error" in {
     def fakeZuoraUpdate(accountId: AccountId) = {
       if (accountId.value == "secondAccount")
-        -\/(GenericError("something failed!"))
-      else \/-(())
+        GenericError("something failed!")
+      else ClientSuccess(())
     }
 
     val linesIterator = List("Account.Id", "firstAccount", "secondAccount", "thirdAccount").iterator
@@ -45,7 +44,8 @@ class UpdateAccountsTest extends FlatSpec with Matchers {
     def getRemainingTime() = remainingMsValues.next()
 
     val response = UpdateAccounts(fakeZuoraUpdate, getRemainingTime _)(testUri, AccountIdIterator(linesIterator, 0).get)
-    response shouldBe Failure(LambdaException("error response from lambda -\\/(GenericError(something failed!))"))
+    // this test is a bit specific, no need to check the exact message
+    response shouldBe Failure(LambdaException("error response from lambda GenericError(something failed!)"))
 
   }
 }

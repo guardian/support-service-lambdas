@@ -1,11 +1,11 @@
 package com.gu.sf_contact_merge
 
-import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, GenericError}
+import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, ClientSuccess, GenericError}
 import com.gu.util.zuora.SafeQueryBuilder.Implicits._
-import com.gu.util.zuora.SafeQueryBuilder.{OrTraverse, MaybeNonEmptyList}
+import com.gu.util.zuora.SafeQueryBuilder.{MaybeNonEmptyList, OrTraverse}
 import com.gu.util.zuora.ZuoraQuery.ZuoraQuerier
 import play.api.libs.json.Json
-import scalaz.{-\/, NonEmptyList, \/-}
+import scalaz.NonEmptyList
 
 object GetZuoraEmailsForAccounts {
 
@@ -19,7 +19,7 @@ object GetZuoraEmailsForAccounts {
 
     for {
       billToContacts <- getContacts(accountIds)
-      emailAddresses <- MaybeNonEmptyList(billToContacts).map(getEmails).getOrElse(\/-(Nil))
+      emailAddresses <- MaybeNonEmptyList(billToContacts).map(getEmails).getOrElse(ClientSuccess(Nil))
     } yield emailAddresses
   }
 
@@ -37,7 +37,7 @@ object GetZuoraEmailsForAccounts {
         }
         query <- zoql"SELECT BillToId FROM Account WHERE $or"
         result <- zuoraQuerier[WireAccount](query)
-        _ <- if (result.done) \/-(()) else -\/(GenericError("oops, query was too big for one page"))
+        _ <- if (result.done) ClientSuccess(()) else GenericError("oops, query was too big for one page")
       } yield result.records.map(acc => ContactId(acc.BillToId))
 
   }
@@ -54,7 +54,7 @@ object GetZuoraEmailsForAccounts {
         }
         query <- zoql"SELECT WorkEmail FROM Contact WHERE $or"
         result <- zuoraQuerier[WireContact](query)
-        _ <- if (result.done) \/-(()) else -\/(GenericError("oops, query was too big for one page"))
+        _ <- if (result.done) ClientSuccess(()) else GenericError("oops, query was too big for one page")
       } yield result.records.map(contact => contact.WorkEmail.map(EmailAddress.apply))
 
   }

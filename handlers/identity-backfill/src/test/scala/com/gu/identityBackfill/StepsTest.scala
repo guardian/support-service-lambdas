@@ -2,11 +2,12 @@ package com.gu.identityBackfill
 
 import com.gu.identityBackfill.StepsData._
 import com.gu.identityBackfill.Types.{IdentityId, _}
+import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.reader.Types.ApiGatewayOp
+import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
+import com.gu.util.zuora.RestRequestMaker.ClientSuccess
 import org.scalatest.{FlatSpec, Matchers}
-import ApiGatewayOp.{ReturnWithResponse, ContinueProcessing}
-import com.gu.util.apigateway.ResponseModels.ApiResponse
 
 class StepsTest extends FlatSpec with Matchers {
 
@@ -28,7 +29,7 @@ class StepsTest extends FlatSpec with Matchers {
         preReqCheck,
         updateZuoraIdentityId = (accountId, identityId) => {
           zuoraUpdate = Some((accountId, identityId))
-          scalaz.\/-(())
+          ClientSuccess(())
         },
         updateSalesforceIdentityId = (sFContactId, identityId) => {
           salesforceUpdate = Some((sFContactId, identityId))

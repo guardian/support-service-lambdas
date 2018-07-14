@@ -5,9 +5,9 @@ import com.gu.util.Logging
 import com.gu.util.config.ConfigLocation
 import com.gu.util.reader.Types.{ApiGatewayOp, _}
 import com.gu.util.zuora.RestRequestMaker
+import com.gu.util.zuora.RestRequestMaker.ClientSuccess
 import okhttp3.{FormBody, Request, Response}
 import play.api.libs.json.{Json, Reads}
-import scalaz.\/-
 
 object SalesforceAuthenticate extends Logging {
 
@@ -71,7 +71,7 @@ object SalesforceRestRequestMaker extends Logging {
       headers = Map("Authorization" -> s"Bearer ${salesforceAuth.access_token}"),
       baseUrl = salesforceAuth.instance_url,
       getResponse = response,
-      jsonIsSuccessful = _ => \/-(())
+      jsonIsSuccessful = _ => ClientSuccess(())
     )
   }
 

@@ -8,7 +8,8 @@ import com.gu.identityBackfill.zuora.GetZuoraSubTypeForAccount.ReaderType
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types.ApiGatewayOp
 import org.scalatest.{FlatSpec, Matchers}
-import ApiGatewayOp.{ReturnWithResponse, ContinueProcessing}
+import ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
+import com.gu.util.zuora.RestRequestMaker.ClientSuccess
 
 class PreReqCheckTest extends FlatSpec with Matchers {
 
@@ -30,7 +31,7 @@ class PreReqCheckTest extends FlatSpec with Matchers {
   it should "stop processing if it finds there is a zuora account already for the identity id" in {
 
     val result =
-      PreReqCheck.noZuoraAccountsForIdentityId(countZuoraAccountsForIdentityId = scalaz.\/-(1))
+      PreReqCheck.noZuoraAccountsForIdentityId(countZuoraAccountsForIdentityId = ClientSuccess(1))
 
     val expectedResult = ReturnWithResponse(ApiGatewayResponse.notFound("already used that identity id"))
     result should be(expectedResult)
@@ -40,7 +41,7 @@ class PreReqCheckTest extends FlatSpec with Matchers {
 
     val result =
       PreReqCheck.getSingleZuoraAccountForEmail(
-        scalaz.\/-(List(ZuoraAccountIdentitySFContact(
+        ClientSuccess(List(ZuoraAccountIdentitySFContact(
           AccountId("acc"),
           Some(IdentityId("haha")),
           SFContactId("sf")
@@ -56,7 +57,7 @@ class PreReqCheckTest extends FlatSpec with Matchers {
     val result =
       PreReqCheck.getSingleZuoraAccountForEmail({
         val contactWithoutIdentity = ZuoraAccountIdentitySFContact(AccountId("acc"), None, SFContactId("sf"))
-        scalaz.\/-(List(contactWithoutIdentity, contactWithoutIdentity))
+        ClientSuccess(List(contactWithoutIdentity, contactWithoutIdentity))
       })
 
     val expectedResult = ReturnWithResponse(ApiGatewayResponse.notFound("should have exactly one zuora account per email at this stage"))
@@ -92,32 +93,32 @@ class PreReqCheckTest extends FlatSpec with Matchers {
   // allow contain either blank or direct, but nothign else
   "acceptable reader type" should "allow blank" in {
     val readerTypes = List(ReaderType.NoReaderType)
-    PreReqCheck.acceptableReaderType(scalaz.\/-(readerTypes)) should be(ContinueProcessing(()))
+    PreReqCheck.acceptableReaderType(ClientSuccess(readerTypes)) should be(ContinueProcessing(()))
   }
 
   "acceptable reader type" should "allow direct" in {
     val readerTypes = List(ReaderType.ReaderTypeValue("Direct"))
-    PreReqCheck.acceptableReaderType(scalaz.\/-(readerTypes)) should be(ContinueProcessing(()))
+    PreReqCheck.acceptableReaderType(ClientSuccess(readerTypes)) should be(ContinueProcessing(()))
   }
 
   "acceptable reader type" should "allow multiple valid" in {
     val readerTypes = List(ReaderType.ReaderTypeValue("Direct"), ReaderType.ReaderTypeValue("Direct"))
-    PreReqCheck.acceptableReaderType(scalaz.\/-(readerTypes)) should be(ContinueProcessing(()))
+    PreReqCheck.acceptableReaderType(ClientSuccess(readerTypes)) should be(ContinueProcessing(()))
   }
 
   "acceptable reader type" should "not allow agent" in {
     val readerTypes = List(ReaderType.ReaderTypeValue("Agent"))
-    PreReqCheck.acceptableReaderType(scalaz.\/-(readerTypes)).toDisjunction.leftMap(_.statusCode) should be(scalaz.-\/("404"))
+    PreReqCheck.acceptableReaderType(ClientSuccess(readerTypes)).toDisjunction.leftMap(_.statusCode) should be(scalaz.-\/("404"))
   }
 
   "acceptable reader type" should "not allow gift" in {
     val readerTypes = List(ReaderType.ReaderTypeValue("Gift"))
-    PreReqCheck.acceptableReaderType(scalaz.\/-(readerTypes)).toDisjunction.leftMap(_.statusCode) should be(scalaz.-\/("404"))
+    PreReqCheck.acceptableReaderType(ClientSuccess(readerTypes)).toDisjunction.leftMap(_.statusCode) should be(scalaz.-\/("404"))
   }
 
   "acceptable reader type" should "not allow a combination of valid and invalid" in {
     val readerTypes = List(ReaderType.ReaderTypeValue("Direct"), ReaderType.ReaderTypeValue("Gift"))
-    PreReqCheck.acceptableReaderType(scalaz.\/-(readerTypes)).toDisjunction.leftMap(_.statusCode) should be(scalaz.-\/("404"))
+    PreReqCheck.acceptableReaderType(ClientSuccess(readerTypes)).toDisjunction.leftMap(_.statusCode) should be(scalaz.-\/("404"))
   }
 
 }

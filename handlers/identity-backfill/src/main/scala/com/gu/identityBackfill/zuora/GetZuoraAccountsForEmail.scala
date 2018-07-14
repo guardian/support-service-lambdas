@@ -6,6 +6,7 @@ import com.gu.util.zuora.SafeQueryBuilder.Implicits._
 import com.gu.util.zuora.ZuoraQuery.ZuoraQuerier
 import play.api.libs.json.Json
 import scalaz.ListT
+import com.gu.util.zuora.RestRequestMaker.Types._
 
 object GetZuoraAccountsForEmail {
 

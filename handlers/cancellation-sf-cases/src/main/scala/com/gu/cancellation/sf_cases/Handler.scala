@@ -65,11 +65,11 @@ object Handler extends Logging {
     def raiseCase(lookup: TSalesforceGenericIdLookup, raiseCase: RaiseCase)(identityId: String, raiseCaseDetail: RaiseRequestBody) =
       for {
         sfContactId <- lookup("Contact", "IdentityID__c", identityId)
-          .toApiGatewayOp("lookup SF contact from identityID")
+          .toDisjunction.toApiGatewayOp("lookup SF contact from identityID")
         sfSubscriptionIdContainer <- lookup("SF_Subscription__c", "Name", raiseCaseDetail.subscriptionName)
-          .toApiGatewayOp("lookup SF subscription ID")
+          .toDisjunction.toApiGatewayOp("lookup SF subscription ID")
         raiseCaseResponse <- raiseCase(buildNewCaseForSalesforce(raiseCaseDetail, sfSubscriptionIdContainer, sfContactId))
-          .toApiGatewayOp("raise sf case")
+          .toDisjunction.toApiGatewayOp("raise sf case")
       } yield raiseCaseResponse
 
     def steps(stage: Stage)(sfRequests: LazySalesforceAuthenticatedReqMaker)(apiGatewayRequest: ApiGatewayRequest) =
@@ -102,7 +102,7 @@ object Handler extends Logging {
         sfRequests <- sfRequests()
         pathParams <- apiGatewayRequest.pathParamsAsCaseClass[UpdateCasePathParams]()
         requestBody <- apiGatewayRequest.bodyAsCaseClass[JsValue]()
-        _ <- SalesforceCase.Update(sfRequests)(pathParams.caseId, requestBody).toApiGatewayOp("update case")
+        _ <- SalesforceCase.Update(sfRequests)(pathParams.caseId, requestBody).toDisjunction.toApiGatewayOp("update case")
       } yield ApiGatewayResponse.successfulExecution).apiResponse
 
   }

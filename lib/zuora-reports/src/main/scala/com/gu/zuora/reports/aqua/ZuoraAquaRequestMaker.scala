@@ -1,11 +1,11 @@
 package com.gu.zuora.reports.aqua
 
 import java.util.Base64
+
+import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, ClientSuccess, GenericError}
 import com.gu.util.zuora.{Logging, RestRequestMaker, ZuoraRestConfig}
-import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, GenericError}
 import okhttp3.{Request, Response}
 import play.api.libs.json._
-import scalaz.Scalaz._
 
 object ZuoraAquaRequestMaker extends Logging {
 
@@ -37,14 +37,14 @@ object ZuoraAquaRequestMaker extends Logging {
         logger.error(s"Zuora Aqua Api rejected our call $bodyAsJson")
         val codePart = errorCode.map(c => s"error code $c:")
         val messagePart = message.getOrElse("No error message")
-        GenericError(s"$codePart $messagePart").left
+        GenericError(s"$codePart $messagePart")
       }
-      case JsSuccess(_: ZuoraAquaResponse, _) => ().right
+      case JsSuccess(_: ZuoraAquaResponse, _) => ClientSuccess(())
 
       case error: JsError => {
         val errorMessage = s"Failed to parse Zuora AQuA API response: $error. Response body was: \n $bodyAsJson"
         logger.error(errorMessage)
-        GenericError(errorMessage).left
+        GenericError(errorMessage)
       }
     }
   }

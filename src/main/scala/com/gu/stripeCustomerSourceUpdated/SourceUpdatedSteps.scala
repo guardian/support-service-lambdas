@@ -44,7 +44,7 @@ object SourceUpdatedSteps extends Logging {
       // similar to ZuoraService.createPaymentMethod only in REST api
       paymentMethod <- createPaymentMethod(requests)(eventDataObject, paymentMethodFields).withLogging("createPaymentMethod")
       _ <- SetDefaultPaymentMethod.setDefaultPaymentMethod(requests)(paymentMethodFields.AccountId, paymentMethod.id)
-        .toApiGatewayOp("SetDefaultPaymentMethod failed").withLogging("setDefaultPaymentMethod")
+        .toDisjunction.toApiGatewayOp("SetDefaultPaymentMethod failed").withLogging("setDefaultPaymentMethod")
     } yield ()
   }
 
@@ -71,7 +71,7 @@ object SourceUpdatedSteps extends Logging {
       )
       account <- ListT[ApiGatewayOp, AccountSummary](
         ZuoraGetAccountSummary(requests)(paymentMethods.accountId.value)
-          .toApiGatewayOp("ZuoraGetAccountSummary failed").withLogging("getAccountSummary").map(_.pure[List])
+          .toDisjunction.toApiGatewayOp("ZuoraGetAccountSummary failed").withLogging("getAccountSummary").map(_.pure[List])
       )
       defaultPaymentMethods <- ListT[ApiGatewayOp, PaymentMethodFields](
         findDefaultOrSkip(account.basicInfo.defaultPaymentMethod, paymentMethods.paymentMethods)
@@ -102,7 +102,7 @@ object SourceUpdatedSteps extends Logging {
         eventDataObject.expiry,
         creditCardType,
         paymentMethodFields.NumConsecutiveFailures
-      )).toApiGatewayOp("CreatePaymentMethod failed")
+      )).toDisjunction.toApiGatewayOp("CreatePaymentMethod failed")
     } yield result
   }
 

@@ -3,12 +3,12 @@ package com.gu.identityBackfill.salesforce.getContact
 import com.gu.effects.TestingRawEffects
 import com.gu.effects.TestingRawEffects.HTTPResponse
 import com.gu.identityBackfill.Types.SFContactId
+import com.gu.identityBackfill.salesforce.GetSFContactSyncCheckFields
 import com.gu.identityBackfill.salesforce.GetSFContactSyncCheckFields.ContactSyncCheckFields
 import com.gu.salesforce.auth.SalesforceAuthenticate.SalesforceAuth
-import com.gu.identityBackfill.salesforce.GetSFContactSyncCheckFields
 import com.gu.salesforce.auth.SalesforceRestRequestMaker
+import com.gu.util.zuora.RestRequestMaker.ClientSuccess
 import org.scalatest.{FlatSpec, Matchers}
-import scalaz.\/-
 
 class GetSFContactSyncCheckFieldsTest extends FlatSpec with Matchers {
 
@@ -19,7 +19,7 @@ class GetSFContactSyncCheckFieldsTest extends FlatSpec with Matchers {
       effects.response
     )) _
     val actual = auth(SFContactId("00110000011AABBAAB"))
-    val expected = \/-(ContactSyncCheckFields(Some("STANDARD_TEST_DUMMY"), "123", "Testing", Some("United Kingdom")))
+    val expected = ClientSuccess(ContactSyncCheckFields(Some("STANDARD_TEST_DUMMY"), "123", "Testing", Some("United Kingdom")))
     actual should be(expected)
 
   }

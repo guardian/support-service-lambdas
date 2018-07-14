@@ -3,12 +3,13 @@ package com.gu.util
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
+import com.gu.util.zuora.RestRequestMaker.ClientFailableOp
 import com.gu.util.zuora.SafeQueryBuilder.Implicits._
 import com.gu.util.zuora.ZuoraQuery._
-import com.gu.util.zuora.{RestRequestMaker, ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
+import com.gu.util.zuora.{ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
-import scalaz.{\/, \/-}
+import scalaz.\/-
 
 // run this manually
 class ZuoraQueryEffectsTest extends FlatSpec with Matchers {
@@ -19,7 +20,7 @@ class ZuoraQueryEffectsTest extends FlatSpec with Matchers {
 
       zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig]
       zuoraQuerier = ZuoraQuery(ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig))
-      subs <- SubscriptionsForPromoCode(zuoraQuerier)("""qwerty"asdf'zxcv\1234""")
+      subs <- SubscriptionsForPromoCode(zuoraQuerier)("""qwerty"asdf'zxcv\1234""").toDisjunction
 
       //POST query should be - SELECT Id, promotioncode__c FROM Subscription where PromotionCode__c = 'qwerty\"asdf\'zxcv\\1234'
 
@@ -44,7 +45,7 @@ object SubscriptionsForPromoCode {
 
   implicit val reads = Json.reads[TestQueryResponse]
 
-  def apply(zuoraQuerier: ZuoraQuerier)(testString: String): RestRequestMaker.ClientFail \/ List[TestQueryResponse] = {
+  def apply(zuoraQuerier: ZuoraQuerier)(testString: String): ClientFailableOp[List[TestQueryResponse]] = {
 
     for {
       subscriptionsQuery <- zoql"""

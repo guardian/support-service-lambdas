@@ -17,7 +17,7 @@ class GetSFContactSyncCheckFieldsEffectsTest extends FlatSpec with Matchers {
 
     val actual = for {
       auth <- DevSFEffects(GetFromS3.fetchString, RawEffects.response)
-      result <- GetSFContactSyncCheckFields(auth)(testContact).toApiGatewayOp("failed")
+      result <- GetSFContactSyncCheckFields(auth)(testContact).toDisjunction.toApiGatewayOp("failed")
     } yield result
 
     actual.toDisjunction should be(\/-(ContactSyncCheckFields(None, "123", "Testing", None)))

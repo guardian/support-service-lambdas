@@ -20,6 +20,6 @@ object AutoCancel extends Logging {
       _ <- ZuoraCancelSubscription(requests)(subToCancel, cancellationDate).withLogging("cancelSubscription")
       _ <- ZuoraDisableAutoPay(requests)(accountId).withLogging("disableAutoPay")
     } yield ()
-    zuoraOp.toApiGatewayOp("AutoCancel failed")
+    zuoraOp.toDisjunction.toApiGatewayOp("AutoCancel failed")
   }
 }
