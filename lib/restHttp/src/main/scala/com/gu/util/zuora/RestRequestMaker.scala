@@ -49,23 +49,27 @@ object RestRequestMaker extends Logging {
     def put[REQ: Writes, RESP: Reads](req: REQ, path: String): ClientFailableOp[RESP]
   }
 
+  trait RequestGet {
+    def get[RESP: Reads](path: String, skipCheck: Boolean = false): ClientFailableOp[RESP]
+  }
+
   class Requests(
     headers: Map[String, String],
     baseUrl: String,
     getResponse: Request => Response,
     jsonIsSuccessful: JsValue => ClientFailableOp[Unit]
-  ) extends RequestsPUT {
+  ) extends RequestsPUT with RequestGet {
     // this can be a class and still be cohesive because every single method in the class needs every single value.  so we are effectively partially
     // applying everything with these params
 
-    def get[RESP: Reads](path: String): ClientFailableOp[RESP] =
+    override def get[RESP: Reads](path: String, skipCheck: Boolean = false): ClientFailableOp[RESP] =
       for {
         bodyAsJson <- sendRequest(buildRequest(headers, baseUrl + path, _.get()), getResponse).map(Json.parse)
-        _ <- jsonIsSuccessful(bodyAsJson)
+        _ <- if (skipCheck) \/-(()) else jsonIsSuccessful(bodyAsJson)
         respModel <- toResult[RESP](bodyAsJson)
       } yield respModel
 
-    def put[REQ: Writes, RESP: Reads](req: REQ, path: String): ClientFailableOp[RESP] = {
+    override def put[REQ: Writes, RESP: Reads](req: REQ, path: String): ClientFailableOp[RESP] = {
       val body = createBody[REQ](req)
       for {
         bodyAsJson <- sendRequest(buildRequest(headers, baseUrl + path, _.put(body)), getResponse).map(Json.parse)
