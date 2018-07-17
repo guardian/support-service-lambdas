@@ -74,7 +74,7 @@ object Handler extends Logging {
           productRatePlanChargeId = ProductRatePlanChargeId("2c92c0f95e1d5c9c015e38f8c8ac19a3")
         )
       )
-      // probably don't need dev as we'd just pass in the actual object in the test
+    // probably don't need dev as we'd just pass in the actual object in the test
     )
     mappings.get(stage).toApiGatewayContinueProcessing(ApiGatewayResponse.internalServerError(s"missing zuora ids for stage $stage"))
   }
