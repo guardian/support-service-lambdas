@@ -23,6 +23,10 @@ object SalesforceAuthenticate extends Logging {
     implicit val reads: Reads[SFAuthConfig] = Json.reads[SFAuthConfig]
     implicit val location = ConfigLocation[SFAuthConfig](path = "sfAuth", version = 1)
   }
+  object SFAuthTestConfig {
+    implicit val reads: Reads[SFAuthConfig] = SFAuthConfig.reads
+    implicit val location = ConfigLocation[SFAuthConfig](path = "TEST/sfAuth", version = 1)
+  }
 
   // the WireResponse model is the same as the domain model, so keep a friendly name
   case class SalesforceAuth(access_token: String, instance_url: String)

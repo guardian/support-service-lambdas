@@ -84,7 +84,7 @@ object Handler {
       Stage("CODE") -> RecordTypeId("012g0000000DZmNAAW"),
       Stage("DEV") -> RecordTypeId("STANDARD_TEST_DUMMY")
     )
-    mappings.get(stage).toApiGatewayContinueProcessing(ApiGatewayResponse.internalServerError(s"missing config for stage $stage"))
+    mappings.get(stage).toApiGatewayContinueProcessing(ApiGatewayResponse.internalServerError(s"missing standard record type for stage $stage"))
   }
 
   def syncableSFToIdentity(sfRequests: ApiGatewayOp[Requests], stage: Stage)(sFContactId: Types.SFContactId): ApiGatewayOp[Unit] =

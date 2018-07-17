@@ -15,10 +15,6 @@ riffRaffManifestProjectName := "MemSub::Subscriptions::Lambdas::Cancellation SF 
 riffRaffArtifactResources += (file("handlers/cancellation-sf-cases/cfn.yaml"), "cfn/cfn.yaml")
 
 libraryDependencies ++= Seq(
-  logging,
-  awsS3,
-  playJson,
-  scalatest,
-  jacksonDatabind,
-  "com.gu.identity" %% "identity-cookie" % "3.160"
+  "com.gu.identity" %% "identity-cookie" % "3.160",
+  "com.gu" %% "identity-test-users" % "0.7"
 )
