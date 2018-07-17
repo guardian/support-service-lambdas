@@ -14,10 +14,10 @@ object PrerequesiteCheck {
     getAccount: ZuoraAccountId => ClientFailableOp[Account],
     getPaymentMethodStatus: PaymentMethodId => ClientFailableOp[PaymentMethodStatus],
     getAccountSubscriptions: ZuoraAccountId => ClientFailableOp[List[Subscription]],
-    contributionRatePlanIds : List[ProductRatePlanId]
+    contributionRatePlanIds: List[ProductRatePlanId]
   )(accountId: ZuoraAccountId): ClientFailableOp[Unit] = {
 
-    def hasContributions(s:Subscription) = s.productRateplanIds.exists(contributionRatePlanIds.contains(_))
+    def hasContributions(s: Subscription) = s.productRateplanIds.exists(contributionRatePlanIds.contains(_))
 
     for {
       account <- getAccount(accountId)
