@@ -87,4 +87,11 @@ object ApiGatewayResponse extends Logging {
     )
   }
 
+  def messageResponse(statusCode: String, message: String) = {
+    ApiResponse(
+      statusCode,
+      toJsonBody(ResponseBody(message))
+    )
+  }
+
 }

@@ -5,35 +5,39 @@ import com.gu.newproduct.api.addsubscription.zuora.GetAccount._
 import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions
 import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.Subscription
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethodStatus.{Active, Closed}
+import com.gu.util.apigateway.ApiGatewayResponse
+import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.zuora.RestRequestMaker.GenericError
 import org.scalatest.{FlatSpec, Matchers}
 import scalaz.{-\/, \/-}
 
 class PrerequisiteCheckTest extends FlatSpec with Matchers {
 
+  def validationError(msg: String) = ReturnWithResponse(ApiGatewayResponse.messageResponse(statusCode = "422", message = msg))
+
   it should "succeed with valid account" in {
-    wiredPrerequisiteCheck(ZuoraAccountId("validAccount")) shouldBe \/-(())
+    wiredPrerequisiteCheck(ZuoraAccountId("validAccount")) shouldBe ContinueProcessing(())
   }
   it should "fail if account cannot be loaded" in {
-    wiredPrerequisiteCheck(ZuoraAccountId("wrongAccountId")) shouldBe -\/(GenericError("invalid account"))
+    wiredPrerequisiteCheck(ZuoraAccountId("wrongAccountId")) shouldBe ReturnWithResponse(ApiGatewayResponse.internalServerError("something"))
   }
   it should "fail if account has no identity id" in {
-    wiredPrerequisiteCheck(ZuoraAccountId("noIdentityAccount")) shouldBe -\/(GenericError("Zuora account has no Identity Id"))
+    wiredPrerequisiteCheck(ZuoraAccountId("noIdentityAccount")) shouldBe validationError("Zuora account has no Identity Id")
   }
   it should "fail if account has no default payment method id" in {
-    wiredPrerequisiteCheck(ZuoraAccountId("noPaymentAccount")) shouldBe -\/(GenericError("Zuora account has no default payment method"))
+    wiredPrerequisiteCheck(ZuoraAccountId("noPaymentAccount")) shouldBe validationError("Zuora account has no default payment method")
   }
   it should "fail if account has autopay disabled" in {
-    wiredPrerequisiteCheck(ZuoraAccountId("noAutoPayAccount")) shouldBe -\/(GenericError("Zuora account has autopay disabled"))
+    wiredPrerequisiteCheck(ZuoraAccountId("noAutoPayAccount")) shouldBe validationError("Zuora account has autopay disabled")
   }
   it should "fail if payment method is disabled" in {
-    wiredPrerequisiteCheck(ZuoraAccountId("disabledPaymentMethodAccount")) shouldBe -\/(GenericError("Default payment method status in Zuora account is not active"))
+    wiredPrerequisiteCheck(ZuoraAccountId("disabledPaymentMethodAccount")) shouldBe validationError("Default payment method status in Zuora account is not active")
   }
   it should "fail if account balance is not zero" in {
-    wiredPrerequisiteCheck(ZuoraAccountId("balanceNotZeroAccount")) shouldBe -\/(GenericError("Zuora account balance is not zero"))
+    wiredPrerequisiteCheck(ZuoraAccountId("balanceNotZeroAccount")) shouldBe validationError("Zuora account balance is not zero")
   }
   it should "fail if account already has an active recurring contribution subscription" in {
-    wiredPrerequisiteCheck(ZuoraAccountId("monthlyContributingAccount")) shouldBe -\/(GenericError("Zuora account already has an active recurring contribution subscription"))
+    wiredPrerequisiteCheck(ZuoraAccountId("monthlyContributingAccount")) shouldBe validationError("Zuora account already has an active recurring contribution subscription")
   }
 
   def getAccount(id: ZuoraAccountId) = {
