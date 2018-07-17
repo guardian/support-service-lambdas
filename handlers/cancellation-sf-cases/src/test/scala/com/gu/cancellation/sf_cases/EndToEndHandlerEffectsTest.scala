@@ -28,7 +28,7 @@ class EndToEndHandlerEffectsTest extends FlatSpec with Matchers {
       // TODO verify case belongs to identity user
       pathParams <- apiGatewayRequest.pathParamsAsCaseClass[CasePathParams]()
       sfGet = SalesforceCase.GetById[JsValue](identityAndSfRequests.sfRequests)_
-      getCaseResponse <- sfGet(pathParams.caseId).toApiGatewayOp("get case detail")
+      getCaseResponse <- sfGet(pathParams.caseId).toDisjunction.toApiGatewayOp("get case detail")
     } yield ApiGatewayResponse("200", getCaseResponse)).apiResponse
 
   it should "create a case, update 'Description' field of the case and check the update worked" taggedAs EffectsTest in {

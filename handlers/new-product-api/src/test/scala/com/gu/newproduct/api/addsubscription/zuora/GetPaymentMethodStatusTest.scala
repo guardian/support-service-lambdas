@@ -3,9 +3,8 @@ package com.gu.newproduct.api.addsubscription.zuora
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.PaymentMethodId
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethodStatus.{Active, Closed, PaymentMethodWire}
 import com.gu.test.EffectsTest
-import com.gu.util.zuora.RestRequestMaker.{GenericError, IsCheckNeeded}
+import com.gu.util.zuora.RestRequestMaker.{ClientSuccess, GenericError, IsCheckNeeded}
 import org.scalatest.{FlatSpec, Matchers}
-import scalaz.{-\/, \/-}
 
 class GetPaymentMethodStatusTest extends FlatSpec with Matchers {
 
@@ -15,7 +14,7 @@ class GetPaymentMethodStatusTest extends FlatSpec with Matchers {
     "object/payment-method/unexpected" -> PaymentMethodWire("unexpected"),
   )
 
-  def fakeGet(path: String, skipCheck: IsCheckNeeded) = \/-(fakeResponses(path))
+  def fakeGet(path: String, skipCheck: IsCheckNeeded) = ClientSuccess(fakeResponses(path))
 
   it should "get active payment status" taggedAs EffectsTest in {
 
@@ -24,7 +23,7 @@ class GetPaymentMethodStatusTest extends FlatSpec with Matchers {
     } yield {
       res
     }
-    actual shouldBe \/-(Active)
+    actual shouldBe ClientSuccess(Active)
   }
 
   it should "get closed payment status" taggedAs EffectsTest in {
@@ -33,7 +32,7 @@ class GetPaymentMethodStatusTest extends FlatSpec with Matchers {
     } yield {
       res
     }
-    actual shouldBe \/-(Closed)
+    actual shouldBe ClientSuccess(Closed)
   }
 
   it should "return failure if payment method is unexpected value" taggedAs EffectsTest in {
@@ -42,7 +41,7 @@ class GetPaymentMethodStatusTest extends FlatSpec with Matchers {
     } yield {
       res
     }
-    actual shouldBe -\/(GenericError("Unknown payment method status: 'unexpected'"))
+    actual shouldBe GenericError("Unknown payment method status: 'unexpected'")
   }
 
 }

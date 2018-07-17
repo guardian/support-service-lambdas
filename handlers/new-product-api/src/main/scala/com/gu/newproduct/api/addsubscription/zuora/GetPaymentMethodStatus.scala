@@ -3,7 +3,6 @@ package com.gu.newproduct.api.addsubscription.zuora
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.PaymentMethodId
 import com.gu.util.zuora.RestRequestMaker._
 import play.api.libs.json._
-import scalaz.{-\/, \/-}
 
 object GetPaymentMethodStatus {
 
@@ -15,9 +14,9 @@ object GetPaymentMethodStatus {
 
   case class PaymentMethodWire(PaymentMethodStatus: String) {
     def toPayMentMethodStatus: ClientFailableOp[PaymentMethodStatus] = PaymentMethodStatus match {
-      case "Active" => \/-(Active)
-      case "Closed" => \/-(Closed)
-      case unknown => -\/(GenericError(s"Unknown payment method status: '$unknown'"))
+      case "Active" => ClientSuccess(Active)
+      case "Closed" => ClientSuccess(Closed)
+      case unknown => GenericError(s"Unknown payment method status: '$unknown'")
     }
   }
   implicit val wireReads = Json.reads[PaymentMethodWire]
