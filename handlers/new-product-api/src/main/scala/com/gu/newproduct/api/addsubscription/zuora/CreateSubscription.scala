@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 import com.gu.newproduct.api.addsubscription.Handler.PlanAndCharge
-import com.gu.newproduct.api.addsubscription.ZuoraAccountId
+import com.gu.newproduct.api.addsubscription.{CaseId, ZuoraAccountId}
 import com.gu.util.zuora.RestRequestMaker._
 import play.api.libs.json.{Json, Reads}
 
@@ -59,8 +59,6 @@ object CreateSubscription {
       )
     )
   }
-
-  case class CaseId(value: String) extends AnyVal
 
   case class CreateReq(
     accountId: ZuoraAccountId,

@@ -2,7 +2,6 @@ package com.gu.newproduct.api.addsubscription
 
 import java.time.LocalDate
 
-import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.CaseId
 import play.api.libs.json.{JsError, JsSuccess, Json, Reads}
 
 import scala.util.{Failure, Success, Try}
@@ -17,6 +16,8 @@ case class AddSubscriptionRequest(
   amountMinorUnits: Int,
   cancellationCase: CaseId
 )
+
+case class CaseId(value: String) extends AnyVal
 
 object AddSubscriptionRequest {
 
