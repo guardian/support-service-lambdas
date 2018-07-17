@@ -2,6 +2,7 @@ package com.gu.newproduct.api.addsubscription
 
 import java.time.LocalDate
 
+import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.CaseId
 import play.api.libs.json.{JsError, JsSuccess, Json, Reads}
 
 import scala.util.{Failure, Success, Try}
@@ -14,6 +15,7 @@ case class AddSubscriptionRequest(
   acquisitionSource: String,
   createdByCSR: String,
   amountMinorUnits: Int,
+  cancellationCase: CaseId
 )
 
 object AddSubscriptionRequest {
@@ -24,6 +26,7 @@ object AddSubscriptionRequest {
     acquisitionSource: String,
     createdByCSR: String,
     amountMinorUnits: Int,
+    cancellationCase: String
   ) {
     def toAddSubscriptionRequest = {
       val maybeParsedRequest = Try(LocalDate.parse(startDate)).map { parsedStartDate =>
@@ -32,7 +35,8 @@ object AddSubscriptionRequest {
           startDate = parsedStartDate,
           acquisitionSource = this.acquisitionSource,
           createdByCSR = this.createdByCSR,
-          amountMinorUnits = this.amountMinorUnits
+          amountMinorUnits = this.amountMinorUnits,
+          CaseId(cancellationCase)
         )
       }
 
