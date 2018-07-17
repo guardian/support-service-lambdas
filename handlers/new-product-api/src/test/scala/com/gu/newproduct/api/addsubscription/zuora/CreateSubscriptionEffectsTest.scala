@@ -19,11 +19,12 @@ class CreateSubscriptionEffectsTest extends FlatSpec with Matchers {
   import ZuoraDevContributions._
 
   it should "create subscription in account" taggedAs EffectsTest in {
+    val validCaseIdToAvoidCausingSFErrors = CaseId("5006E000005b5cf")
     val request = CreateSubscription.CreateReq(
       ZuoraAccountId("2c92c0f864a214c30164a8b5accb650b"),
       100,
       LocalDate.now,
-      CaseId("hellocaseId")
+      validCaseIdToAvoidCausingSFErrors
     )
     val actual = for {
       zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig]

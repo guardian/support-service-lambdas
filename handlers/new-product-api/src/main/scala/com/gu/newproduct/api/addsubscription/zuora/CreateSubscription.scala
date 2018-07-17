@@ -25,8 +25,6 @@ object CreateSubscription {
     )
     implicit val writesSubscribe = Json.writes[SubscribeToRatePlans]
     case class WireCreateRequest(
-      //runBilling: Boolean = true,
-      //collect: Boolean = true,
       accountKey: String,
       autoRenew: Boolean = true,
       contractEffectiveDate: String,
