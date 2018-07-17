@@ -1,9 +1,10 @@
 package com.gu.util.apigateway
 
-import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
+import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
 import org.scalatest.FlatSpec
 import org.scalatest.Matchers._
 import play.api.libs.json.{JsResult, JsSuccess, Json}
+import scalaz.-\/
 
 class ApiGatewayHandlerReadsTest extends FlatSpec {
 
@@ -113,7 +114,9 @@ class ApiGatewayHandlerReadsTest extends FlatSpec {
       "wrongParamName" -> "someValue"
     ))
     val noQueryParamsRequest = ApiGatewayRequest(queryStringParameters = queryParams, body = None, headers = None)
-    noQueryParamsRequest.queryParamsAsCaseClass[NonOptionalParams](ApiGatewayResponse.badRequest) shouldBe ReturnWithResponse(ApiGatewayResponse.badRequest)
+    val actual = noQueryParamsRequest.queryParamsAsCaseClass[NonOptionalParams]()
+    val expected = -\/("400")
+    actual.toDisjunction.leftMap(_.statusCode) shouldBe expected
   }
 
   it should "deserialise ApiGatewayHandlerParams with no query string" in {

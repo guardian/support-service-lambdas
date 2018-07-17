@@ -51,7 +51,7 @@ object LoadConfigModule extends Logging {
   def toDisjunction[A](t: Try[A]) = t match {
     case Success(s) => \/-(s)
     case Failure(e) =>
-      logger.error("error parsing json", e)
+      logger.error(s"error parsing json: ${e.toString}")
       -\/(ConfigFailure(e.toString))
   }
 

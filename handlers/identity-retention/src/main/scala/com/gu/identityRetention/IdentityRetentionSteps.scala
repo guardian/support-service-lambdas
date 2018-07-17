@@ -34,7 +34,7 @@ object IdentityRetentionSteps extends Logging {
   def extractIdentityId(queryStringParams: UrlParams): ApiGatewayOp[IdentityId] = {
     validate(queryStringParams.identityId) match {
       case Some(id) => ContinueProcessing(id)
-      case None => ReturnWithResponse(ApiGatewayResponse.badRequest)
+      case None => ReturnWithResponse(ApiGatewayResponse.badRequest("no identity id"))
     }
   }
 

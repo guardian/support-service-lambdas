@@ -17,32 +17,52 @@ case class ApiGatewayRequest(
   pathParameters: Option[JsValue] = None
 ) {
 
-  def queryParamsAsCaseClass[A](failureResponse: ApiResponse = ApiGatewayResponse.badRequest)(implicit reads: Reads[A]): ApiGatewayOp[A] = {
+  def queryParamsAsCaseClass[A]()(implicit reads: Reads[A]): ApiGatewayOp[A] = {
     val paramsMap = queryStringParameters.getOrElse(Map.empty)
     val paramsJson = Json.toJson(paramsMap)
-    Json.fromJson[A](paramsJson).toApiGatewayOp(failureResponse)
+    Json.fromJson[A](paramsJson).toApiGatewayOp("query parameters", None)
   }
 
-  def bodyAsCaseClass[A](failureResponse: ApiResponse = ApiGatewayResponse.badRequest)(implicit reads: Reads[A]): ApiGatewayOp[A] = {
+  implicit class TryOps[A](theTry: Try[A]) {
+
+    def toApiGatewayOp(action: Option[ApiResponse]): ApiGatewayOp[A] = {
+      theTry match {
+        case Success(success) => ContinueProcessing(success)
+        case Failure(error) =>
+          ReturnWithResponse(action.getOrElse(ApiGatewayResponse.badRequest(s"request body couldn't be parsed: $error")))
+      }
+    }
+
+  }
+
+  implicit class JsResultOps[A](jsResult: JsResult[A]) {
+
+    def toApiGatewayOp(field: String, response: Option[ApiResponse]): ApiGatewayOp[A] = {
+      jsResult match {
+        case JsSuccess(value, _) => ContinueProcessing(value)
+        case JsError(error) =>
+          ReturnWithResponse(response.getOrElse(ApiGatewayResponse.badRequest(s"$field couldn't be parsed: $error")))
+      }
+    }
+  }
+
+  def bodyAsCaseClass[A](failureResponse: Option[ApiResponse] = None)(implicit reads: Reads[A]): ApiGatewayOp[A] = {
     body match {
       case Some(requestBody) =>
-        Try(Json.parse(requestBody)) match {
-          case Success(js) =>
-            Json.fromJson[A](js).toApiGatewayOp(failureResponse)
-          case Failure(ex) =>
-            logger.warn(s"Tried to parse JSON but it was invalid")
-            ReturnWithResponse(failureResponse)
-        }
+        for {
+          js <- Try(Json.parse(requestBody)).toApiGatewayOp(failureResponse)
+          obj <- Json.fromJson[A](js).toApiGatewayOp("request body", failureResponse)
+        } yield obj
       case None =>
         logger.warn(s"Attempted to access response body but there was none")
         None.toApiGatewayContinueProcessing(ApiGatewayResponse.internalServerError("attempted to parse body when handling a GET request"))
     }
   }
 
-  def pathParamsAsCaseClass[T](failureResponse: ApiResponse = ApiGatewayResponse.badRequest)(implicit reads: Reads[T]): ApiGatewayOp[T] =
+  def pathParamsAsCaseClass[T]()(implicit reads: Reads[T]): ApiGatewayOp[T] =
     pathParameters match {
-      case Some(pathParamsJSON) => Json.fromJson[T](pathParamsJSON).toApiGatewayOp(failureResponse)
-      case None => ReturnWithResponse(failureResponse)
+      case Some(pathParamsJSON) => Json.fromJson[T](pathParamsJSON).toApiGatewayOp("path parameters", None)
+      case None => ReturnWithResponse(ApiGatewayResponse.badRequest("no path parameters"))
     }
 
 }

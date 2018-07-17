@@ -63,7 +63,7 @@ object Handler {
     (for {
       input <- req.bodyAsCaseClass[WireSfContactRequest]()
       someAccountIds = input.billingAccountZuoraIds.map(AccountId.apply)
-      accountIds <- MaybeNonEmptyList(someAccountIds).toApiGatewayContinueProcessing(ApiGatewayResponse.badRequest)
+      accountIds <- MaybeNonEmptyList(someAccountIds).toApiGatewayContinueProcessing(ApiGatewayResponse.badRequest("no account ids supplied"))
       emailAddresses <- getZuoraEmails(accountIds).toApiGatewayOp("get zuora emails")
       _ <- AssertSameEmails(emailAddresses)
       updateAccount = updateAccountSFLinks(input.fullContactId, input.accountId)
