@@ -9,8 +9,8 @@ import scalaz.{-\/, \/-}
 
 object GetJobResult {
   val MAX_TRIES = 10
-  def apply(aquaGet: String => ClientFailableOp[AquaJobResponse])(jobResultRequest: JobResultRequest): ClientFailableOp[JobResult] = {
-    val zuoraAquaResponse = aquaGet(s"batch-query/jobs/${jobResultRequest.jobId}")
+  def apply(aquaGet: (String, Boolean) => ClientFailableOp[AquaJobResponse])(jobResultRequest: JobResultRequest): ClientFailableOp[JobResult] = {
+    val zuoraAquaResponse = aquaGet(s"batch-query/jobs/${jobResultRequest.jobId}", false)
     val tries = jobResultRequest.tries.getOrElse(MAX_TRIES)
     if (tries > 0)
       toJobResultResponse(zuoraAquaResponse, jobResultRequest.dryRun, jobResultRequest.jobId, tries - 1)
