@@ -29,8 +29,8 @@ object Handler extends Logging {
 
   type HeadersOption = Option[Map[String, String]]
   type IdentityAndSfRequestsApiGatewayOp = ApiGatewayOp[IdentityAndSfRequests]
-  type HeadersToIdentityAndSfRequests = HeadersOption => IdentityAndSfRequestsApiGatewayOp
-  type Steps = HeadersToIdentityAndSfRequests => ApiGatewayRequest => ApiResponse
+  type SfBackendForIdentityCookieHeader = HeadersOption => IdentityAndSfRequestsApiGatewayOp
+  type Steps = SfBackendForIdentityCookieHeader => ApiGatewayRequest => ApiResponse
   type LazySalesforceAuthenticatedReqMaker = () => ApiGatewayOp[RestRequestMaker.Requests]
   case class SfRequests(normal: LazySalesforceAuthenticatedReqMaker, test: LazySalesforceAuthenticatedReqMaker)
 
@@ -86,15 +86,15 @@ object Handler extends Logging {
           .toApiGatewayOp("raise sf case")
       } yield raiseCaseResponse
 
-    def steps(headersToIdentityAndSfRequests: HeadersToIdentityAndSfRequests)(apiGatewayRequest: ApiGatewayRequest) =
+    def steps(sfBackendForIdentityCookieHeader: SfBackendForIdentityCookieHeader)(apiGatewayRequest: ApiGatewayRequest) =
       (for {
-        identityAndSfRequests <- headersToIdentityAndSfRequests(apiGatewayRequest.headers)
+        identityAndSfRequests <- sfBackendForIdentityCookieHeader(apiGatewayRequest.headers)
         raiseCaseDetail <- apiGatewayRequest.bodyAsCaseClass[RaiseRequestBody]()
         lookupOp = SalesforceGenericIdLookup(identityAndSfRequests.sfRequests)_
         raiseOp = SalesforceCase.Raise(identityAndSfRequests.sfRequests)_
         wiredRaiseCase = raiseCase(lookupOp, raiseOp)_
         raiseCaseResponse <- wiredRaiseCase(identityAndSfRequests.identityUser.id, raiseCaseDetail)
-      } yield ApiResponse("200", Json.prettyPrint(Json.toJson(raiseCaseResponse)))).apiResponse
+      } yield ApiGatewayResponse("200", raiseCaseResponse)).apiResponse
   }
 
   case class CasePathParams(caseId: String)
@@ -112,39 +112,15 @@ object Handler extends Logging {
 
   object UpdateCase {
 
-    def steps(headersToIdentityAndSfRequests: HeadersToIdentityAndSfRequests)(apiGatewayRequest: ApiGatewayRequest) =
+    def steps(sfBackendForIdentityCookieHeader: SfBackendForIdentityCookieHeader)(apiGatewayRequest: ApiGatewayRequest) =
       (for {
-        identityAndSfRequests <- headersToIdentityAndSfRequests(apiGatewayRequest.headers)
+        identityAndSfRequests <- sfBackendForIdentityCookieHeader(apiGatewayRequest.headers)
         // TODO verify case belongs to identity user
         pathParams <- apiGatewayRequest.pathParamsAsCaseClass[CasePathParams]()
         requestBody <- apiGatewayRequest.bodyAsCaseClass[JsValue]()
         sfUpdate = SalesforceCase.Update(identityAndSfRequests.sfRequests)_
         _ <- sfUpdate(pathParams.caseId, requestBody).toApiGatewayOp("update case")
       } yield ApiGatewayResponse.successfulExecution).apiResponse
-
-  }
-
-  // CURRENTLY NO API GATEWAY CONFIGURED FOR THIS
-  def getCase(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
-    runWithEffects(
-      IdentityCookieToIdentityUser.defaultCookiesToIdentityUser(RawEffects.stage.isProd),
-      GetCase.steps,
-      RawEffects.response,
-      RawEffects.stage,
-      GetFromS3.fetchString,
-      LambdaIO(inputStream, outputStream, context)
-    )
-
-  object GetCase {
-
-    def steps(headersToIdentityAndSfRequests: HeadersToIdentityAndSfRequests)(apiGatewayRequest: ApiGatewayRequest) =
-      (for {
-        identityAndSfRequests <- headersToIdentityAndSfRequests(apiGatewayRequest.headers)
-        // TODO verify case belongs to identity user
-        pathParams <- apiGatewayRequest.pathParamsAsCaseClass[CasePathParams]()
-        sfGet = SalesforceCase.GetById(identityAndSfRequests.sfRequests)_
-        getCaseResponse <- sfGet(pathParams.caseId).toApiGatewayOp("get case detail")
-      } yield ApiResponse("200", Json.prettyPrint(Json.toJson(getCaseResponse)))).apiResponse
 
   }
 
@@ -179,7 +155,7 @@ object Handler extends Logging {
           sfRequests <- SalesforceAuthenticate(response, config)
         } yield sfRequests
 
-      def headersToIdentityAndSfRequests(headers: HeadersOption): IdentityAndSfRequestsApiGatewayOp = {
+      def sfBackendForIdentityCookieHeader(headers: HeadersOption): IdentityAndSfRequestsApiGatewayOp = {
         for {
           identityUser <- IdentityCookieToIdentityUser(cookieValuesToIdentityUser)(headers)
           sfRequests <- if (IsIdentityTestUser(identityTestUsersConfig)(identityUser)) sfRequestsTest() else sfRequestsNormal()
@@ -187,7 +163,7 @@ object Handler extends Logging {
       }
 
       Operation(
-        steps(headersToIdentityAndSfRequests),
+        steps(sfBackendForIdentityCookieHeader),
         healthcheckSteps(SfRequests(sfRequestsNormal, sfRequestsTest)),
         shouldAuthenticate = false //TODO this could be removed when 'trustedApiConfig' is an Option
       )

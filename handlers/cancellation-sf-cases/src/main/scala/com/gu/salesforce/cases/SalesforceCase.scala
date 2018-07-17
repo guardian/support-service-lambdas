@@ -2,7 +2,7 @@ package com.gu.salesforce.cases
 
 import com.gu.util.Logging
 import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, Requests}
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsValue, Json, Reads}
 
 object SalesforceCase extends Logging {
 
@@ -42,7 +42,7 @@ object SalesforceCase extends Logging {
 
   object GetById {
 
-    def apply(sfRequests: Requests)(caseId: String): ClientFailableOp[JsValue] =
+    def apply[ResponseType](sfRequests: Requests)(caseId: String)(implicit ev1: Reads[ResponseType]): ClientFailableOp[ResponseType] =
       sfRequests.get(s"${caseBaseUrl}/${caseId}")
   }
 

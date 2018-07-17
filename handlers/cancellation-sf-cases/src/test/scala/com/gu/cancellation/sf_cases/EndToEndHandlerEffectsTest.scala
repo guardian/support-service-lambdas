@@ -2,14 +2,17 @@ package com.gu.cancellation.sf_cases
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
-import com.gu.cancellation.sf_cases.Handler.Steps
+import com.gu.cancellation.sf_cases.Handler.{CasePathParams, SfBackendForIdentityCookieHeader, Steps}
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.identity.IdentityCookieToIdentityUser.IdentityUser
+import com.gu.salesforce.cases.SalesforceCase
 import com.gu.salesforce.cases.SalesforceCase.Raise.RaiseCaseResponse
 import com.gu.test.EffectsTest
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
+import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json._
+import com.gu.util.reader.Types._
 
 case class PartialApiResponse(statusCode: String, body: String)
 case class GetCaseResponse(Description: String)
@@ -18,6 +21,15 @@ class EndToEndHandlerEffectsTest extends FlatSpec with Matchers {
 
   import com.gu.cancellation.sf_cases.EndToEndData._
   import com.gu.cancellation.sf_cases.Runner._
+
+  def getCaseSteps(sfBackendForIdentityCookieHeader: SfBackendForIdentityCookieHeader)(apiGatewayRequest: ApiGatewayRequest) =
+    (for {
+      identityAndSfRequests <- sfBackendForIdentityCookieHeader(apiGatewayRequest.headers)
+      // TODO verify case belongs to identity user
+      pathParams <- apiGatewayRequest.pathParamsAsCaseClass[CasePathParams]()
+      sfGet = SalesforceCase.GetById[JsValue](identityAndSfRequests.sfRequests)_
+      getCaseResponse <- sfGet(pathParams.caseId).toApiGatewayOp("get case detail")
+    } yield ApiGatewayResponse("200", getCaseResponse)).apiResponse
 
   it should "create a case, update 'Description' field of the case and check the update worked" taggedAs EffectsTest in {
 
@@ -39,7 +51,7 @@ class EndToEndHandlerEffectsTest extends FlatSpec with Matchers {
     implicit val getDetailReads: Reads[GetCaseResponse] = Json.reads[GetCaseResponse]
     val getCaseDetailResponse = getResponse[GetCaseResponse](
       getCaseDetailRequest(raiseCaseResponse.id),
-      Handler.GetCase.steps
+      getCaseSteps
     )
 
     getCaseDetailResponse.Description shouldEqual expectedDescription
