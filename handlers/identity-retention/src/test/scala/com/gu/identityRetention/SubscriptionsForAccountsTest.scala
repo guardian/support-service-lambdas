@@ -1,7 +1,7 @@
 package com.gu.identityRetention
 
 import com.gu.identityRetention.Types.AccountId
-import com.gu.util.zuora.RestRequestMaker.ClientSuccess
+import com.gu.util.resthttp.Types.ClientSuccess
 import org.scalatest.{FlatSpec, Matchers}
 import scalaz.NonEmptyList
 

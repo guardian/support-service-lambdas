@@ -6,7 +6,7 @@ import com.gu.identityBackfill.Types.{IdentityId, SFContactId}
 import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId
 import com.gu.salesforce.auth.SalesforceAuthenticate.SalesforceAuth
 import com.gu.salesforce.auth.SalesforceRestRequestMaker
-import com.gu.util.zuora.RestRequestMaker.ClientSuccess
+import com.gu.util.resthttp.Types.ClientSuccess
 import org.scalatest.{FlatSpec, Matchers}
 
 class UpdateSalesforceIdentityIdTest extends FlatSpec with Matchers {

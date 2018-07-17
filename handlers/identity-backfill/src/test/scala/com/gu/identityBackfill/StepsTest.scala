@@ -6,7 +6,7 @@ import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.reader.Types.ApiGatewayOp
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
-import com.gu.util.zuora.RestRequestMaker.ClientSuccess
+import com.gu.util.resthttp.Types.ClientSuccess
 import org.scalatest.{FlatSpec, Matchers}
 
 class StepsTest extends FlatSpec with Matchers {

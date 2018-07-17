@@ -3,7 +3,7 @@ package com.gu.util
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
-import com.gu.util.zuora.RestRequestMaker.ClientFailableOp
+import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.zuora.SafeQueryBuilder.Implicits._
 import com.gu.util.zuora.ZuoraQuery._
 import com.gu.util.zuora.{ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}

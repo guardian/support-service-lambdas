@@ -6,7 +6,8 @@ import com.gu.digitalSubscriptionExpiry.responses.DigitalSubscriptionApiResponse
 import com.gu.digitalSubscriptionExpiry.zuora.GetAccountSummary.AccountId
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types._
-import com.gu.util.zuora.RestRequestMaker.{GenericError, NotFound, Requests}
+import com.gu.util.resthttp.RestRequestMaker.Requests
+import com.gu.util.resthttp.Types.{GenericError, NotFound}
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 

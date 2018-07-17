@@ -2,7 +2,8 @@ package com.gu.zuora.reports
 
 import java.io.ByteArrayInputStream
 
-import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, ClientSuccess, DownloadStream}
+import com.gu.util.resthttp.RestRequestMaker.DownloadStream
+import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess}
 import com.gu.zuora.reports.dataModel.{Batch, FetchedFile}
 import org.scalatest.AsyncFlatSpec
 import org.scalatest.Matchers._

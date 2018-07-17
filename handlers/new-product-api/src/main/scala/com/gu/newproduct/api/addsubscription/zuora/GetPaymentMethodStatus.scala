@@ -1,7 +1,8 @@
 package com.gu.newproduct.api.addsubscription.zuora
 
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.PaymentMethodId
-import com.gu.util.zuora.RestRequestMaker._
+import com.gu.util.resthttp.RestRequestMaker.{RequestsGet, WithoutCheck}
+import com.gu.util.resthttp.Types._
 import play.api.libs.json._
 
 object GetPaymentMethodStatus {

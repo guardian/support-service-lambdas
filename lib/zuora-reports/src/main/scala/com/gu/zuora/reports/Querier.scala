@@ -1,6 +1,7 @@
 package com.gu.zuora.reports
 
-import com.gu.util.zuora.RestRequestMaker._
+import com.gu.util.resthttp.RestRequestMaker.Requests
+import com.gu.util.resthttp.Types._
 import com.gu.zuora.reports.aqua.{AquaJobResponse, AquaQueryRequest}
 import play.api.libs.json.Json
 

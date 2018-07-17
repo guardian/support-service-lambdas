@@ -8,7 +8,7 @@ import com.gu.identityBackfill.zuora.GetZuoraSubTypeForAccount.ReaderType.Reader
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types.ApiGatewayOp._
 import com.gu.util.reader.Types._
-import com.gu.util.zuora.RestRequestMaker.ClientFailableOp
+import com.gu.util.resthttp.Types.ClientFailableOp
 import scalaz.\/
 import TypeConvert._
 

@@ -1,7 +1,7 @@
 package com.gu.sf_contact_merge
 
 import com.gu.util.reader.Types._
-import com.gu.util.zuora.RestRequestMaker.ClientFailableOp
+import com.gu.util.resthttp.Types.ClientFailableOp
 
 object TypeConvert {
 

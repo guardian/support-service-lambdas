@@ -1,6 +1,6 @@
 package com.gu.sf_contact_merge
 
-import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, ClientSuccess, GenericError}
+import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError}
 import com.gu.util.zuora.SafeQueryBuilder.Implicits._
 import com.gu.util.zuora.SafeQueryBuilder.{MaybeNonEmptyList, OrTraverse}
 import com.gu.util.zuora.ZuoraQuery.ZuoraQuerier

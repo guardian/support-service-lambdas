@@ -3,7 +3,7 @@ package com.gu.identityBackfill.zuora
 import com.gu.effects.TestingRawEffects
 import com.gu.effects.TestingRawEffects.{HTTPResponse, POSTRequest}
 import com.gu.identityBackfill.Types._
-import com.gu.util.zuora.RestRequestMaker.ClientSuccess
+import com.gu.util.resthttp.Types.ClientSuccess
 import com.gu.util.zuora.{ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
 import org.scalatest.{FlatSpec, Matchers}
 

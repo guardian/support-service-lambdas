@@ -1,7 +1,7 @@
 package com.gu.sf_contact_merge
 
 import com.gu.sf_contact_merge.GetZuoraEmailsForAccounts.ContactId
-import com.gu.util.zuora.RestRequestMaker.ClientSuccess
+import com.gu.util.resthttp.Types.ClientSuccess
 import com.gu.zuora.fake.FakeZuoraQuerier
 import org.scalatest.{FlatSpec, Matchers}
 import scalaz.NonEmptyList

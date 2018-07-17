@@ -1,7 +1,7 @@
 package com.gu.zuora.reports
 
-import com.gu.util.zuora.RestRequestMaker
-import com.gu.util.zuora.RestRequestMaker.{ClientFailure, ClientFailableOp, ClientSuccess, GenericError, RequestsGet, WithCheck}
+import com.gu.util.resthttp.RestRequestMaker.{RequestsGet, WithCheck}
+import com.gu.util.resthttp.Types.{ClientFailableOp, ClientFailure, ClientSuccess, GenericError}
 import com.gu.zuora.reports.aqua.AquaJobResponse
 import com.gu.zuora.reports.dataModel.Batch
 import play.api.libs.json._
@@ -26,7 +26,7 @@ object GetJobResult {
       case ClientSuccess(AquaJobResponse(status, name, aquaBatches, _)) if status == "completed" =>
         val batches = aquaBatches.map(toBatch)
         if (batches.contains(None)) {
-          RestRequestMaker.GenericError(s"file Id missing from response : $aquaResponse")
+          GenericError(s"file Id missing from response : $aquaResponse")
         } else {
           ClientSuccess(Completed(name, jobId, batches.flatten, dryRun, tries))
         }

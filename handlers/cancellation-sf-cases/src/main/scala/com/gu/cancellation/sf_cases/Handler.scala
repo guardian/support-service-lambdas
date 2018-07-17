@@ -20,7 +20,7 @@ import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, ApiGatewayR
 import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config._
 import com.gu.util.reader.Types._
-import com.gu.util.zuora.RestRequestMaker
+import com.gu.util.resthttp.RestRequestMaker
 import okhttp3.{Request, Response}
 import play.api.libs.json.{JsValue, Json}
 

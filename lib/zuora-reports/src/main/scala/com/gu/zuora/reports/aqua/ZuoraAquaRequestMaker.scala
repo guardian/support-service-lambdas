@@ -2,8 +2,9 @@ package com.gu.zuora.reports.aqua
 
 import java.util.Base64
 
-import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, ClientSuccess, GenericError}
-import com.gu.util.zuora.{Logging, RestRequestMaker, ZuoraRestConfig}
+import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError}
+import com.gu.util.resthttp.{Logging, RestRequestMaker}
+import com.gu.util.zuora.ZuoraRestConfig
 import okhttp3.{Request, Response}
 import play.api.libs.json._
 

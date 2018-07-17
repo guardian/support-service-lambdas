@@ -1,6 +1,7 @@
 package com.gu.util.zuora
 
-import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, ClientSuccess, GenericError, NotFound}
+import com.gu.util.resthttp.{Logging, RestRequestMaker}
+import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError, NotFound}
 import com.gu.util.zuora.ZuoraModels._
 import com.gu.util.zuora.ZuoraReaders._
 import okhttp3.{Request, Response}

@@ -7,7 +7,7 @@ import com.gu.identityBackfill.salesforce.GetSFContactSyncCheckFields
 import com.gu.identityBackfill.salesforce.GetSFContactSyncCheckFields.ContactSyncCheckFields
 import com.gu.salesforce.auth.SalesforceAuthenticate.SalesforceAuth
 import com.gu.salesforce.auth.SalesforceRestRequestMaker
-import com.gu.util.zuora.RestRequestMaker.ClientSuccess
+import com.gu.util.resthttp.Types.ClientSuccess
 import org.scalatest.{FlatSpec, Matchers}
 
 class GetSFContactSyncCheckFieldsTest extends FlatSpec with Matchers {

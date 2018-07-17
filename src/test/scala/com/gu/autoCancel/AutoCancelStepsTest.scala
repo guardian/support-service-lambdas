@@ -7,7 +7,7 @@ import com.gu.autoCancel.AutoCancel.AutoCancelRequest
 import com.gu.effects.TestingRawEffects
 import com.gu.effects.TestingRawEffects.BasicRequest
 import com.gu.util.reader.Types._
-import com.gu.util.zuora.RestRequestMaker.ClientSuccess
+import com.gu.util.resthttp.Types.ClientSuccess
 import com.gu.util.zuora.ZuoraGetAccountSummary.ZuoraAccount.{AccountId, PaymentMethodId}
 import com.gu.util.zuora.ZuoraGetAccountSummary.{AccountSummary, BasicAccountInfo, Invoice, SubscriptionId, SubscriptionSummary}
 import org.scalatest._

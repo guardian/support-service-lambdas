@@ -5,7 +5,7 @@ import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.handlers.{LambdaException, ParseRequest, SerialiseResponse}
-import com.gu.util.zuora.RestRequestMaker.ClientFailableOp
+import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.zuora.ZuoraRestConfig
 import play.api.libs.json.{Reads, Writes}
 import scalaz.Scalaz._

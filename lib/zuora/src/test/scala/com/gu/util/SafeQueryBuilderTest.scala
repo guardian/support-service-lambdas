@@ -1,6 +1,6 @@
 package com.gu.util
 
-import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, ClientSuccess, GenericError}
+import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError}
 import com.gu.util.zuora.SafeQueryBuilder.Implicits._
 import com.gu.util.zuora.SafeQueryBuilder.{OrTraverse, SafeQuery}
 import org.scalatest._

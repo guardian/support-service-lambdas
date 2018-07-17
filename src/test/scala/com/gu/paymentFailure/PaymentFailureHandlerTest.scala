@@ -11,7 +11,7 @@ import com.gu.util.config.Stage
 import com.gu.util.exacttarget._
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.reader.Types._
-import com.gu.util.zuora.RestRequestMaker.ClientSuccess
+import com.gu.util.resthttp.Types.ClientSuccess
 import com.gu.util.zuora.ZuoraGetInvoiceTransactions.InvoiceTransactionSummary
 import org.scalatest.{FlatSpec, Matchers}
 

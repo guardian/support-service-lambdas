@@ -1,7 +1,6 @@
 package com.gu.util.zuora
 
-import com.gu.util.zuora.RestRequestMaker.Types._
-import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, ClientSuccess, GenericError}
+import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError}
 import scalaz.NonEmptyList
 import scalaz.std.list.listInstance
 import scalaz.syntax.traverse.ToTraverseOps

@@ -3,7 +3,8 @@ package com.gu.newproduct.api.addsubscription.zuora
 import com.gu.newproduct.api.addsubscription.ZuoraAccountId
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAccount
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount._
-import com.gu.util.zuora.RestRequestMaker.{ClientSuccess, GenericError, RequestsGet, WithoutCheck}
+import com.gu.util.resthttp.RestRequestMaker.{RequestsGet, WithoutCheck}
+import com.gu.util.resthttp.Types.{ClientSuccess, GenericError}
 import org.scalatest.{FlatSpec, Matchers}
 
 class GetAccountTest extends FlatSpec with Matchers {

@@ -4,8 +4,8 @@ import com.gu.salesforce.auth.SalesforceAuthenticate.SalesforceAuth
 import com.gu.util.Logging
 import com.gu.util.config.ConfigLocation
 import com.gu.util.reader.Types.{ApiGatewayOp, _}
-import com.gu.util.zuora.RestRequestMaker
-import com.gu.util.zuora.RestRequestMaker.ClientSuccess
+import com.gu.util.resthttp.RestRequestMaker
+import com.gu.util.resthttp.Types.ClientSuccess
 import okhttp3.{FormBody, Request, Response}
 import play.api.libs.json.{Json, Reads}
 

@@ -2,8 +2,8 @@ package com.gu.zuora.reports
 
 import com.amazonaws.services.s3.model.{ObjectMetadata, PutObjectRequest, PutObjectResult}
 import com.gu.util.Logging
-import com.gu.util.zuora.RestRequestMaker.Types._
-import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, DownloadStream, GenericError}
+import com.gu.util.resthttp.RestRequestMaker.DownloadStream
+import com.gu.util.resthttp.Types.{ClientFailableOp, GenericError}
 import scalaz.syntax.std.either._
 
 import scala.util.Try

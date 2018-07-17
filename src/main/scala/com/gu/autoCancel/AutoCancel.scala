@@ -2,12 +2,12 @@ package com.gu.autoCancel
 
 import java.time.LocalDate
 
+import com.gu.stripeCustomerSourceUpdated.TypeConvert._
 import com.gu.util.Logging
 import com.gu.util.reader.Types._
-import com.gu.util.zuora.RestRequestMaker.Requests
+import com.gu.util.resthttp.RestRequestMaker.Requests
 import com.gu.util.zuora.ZuoraGetAccountSummary.SubscriptionId
 import com.gu.util.zuora.{ZuoraCancelSubscription, ZuoraDisableAutoPay, ZuoraUpdateCancellationReason}
-import com.gu.stripeCustomerSourceUpdated.TypeConvert._
 
 object AutoCancel extends Logging {
 

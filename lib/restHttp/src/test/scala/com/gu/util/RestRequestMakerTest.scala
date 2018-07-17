@@ -1,7 +1,7 @@
 package com.gu.util
 
-import com.gu.util.zuora.RestRequestMaker
-import com.gu.util.zuora.RestRequestMaker.{ClientSuccess, GenericError}
+import com.gu.util.resthttp.RestRequestMaker
+import com.gu.util.resthttp.Types.{ClientSuccess, GenericError}
 import okhttp3._
 import org.scalatest.Matchers._
 import org.scalatest._

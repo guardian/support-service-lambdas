@@ -6,7 +6,7 @@ import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel._
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount._
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
-import com.gu.util.zuora.RestRequestMaker.ClientSuccess
+import com.gu.util.resthttp.Types.ClientSuccess
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
 import org.scalatest.{FlatSpec, Matchers}
 

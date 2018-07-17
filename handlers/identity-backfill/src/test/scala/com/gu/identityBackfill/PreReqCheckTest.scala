@@ -9,7 +9,7 @@ import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types.ApiGatewayOp
 import org.scalatest.{FlatSpec, Matchers}
 import ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
-import com.gu.util.zuora.RestRequestMaker.ClientSuccess
+import com.gu.util.resthttp.Types.ClientSuccess
 
 class PreReqCheckTest extends FlatSpec with Matchers {
 

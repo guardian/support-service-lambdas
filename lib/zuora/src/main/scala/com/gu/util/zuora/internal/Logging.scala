@@ -1,6 +1,6 @@
 package com.gu.util.zuora.internal
 
-import com.gu.util.zuora.RestRequestMaker.{ClientFailure, ClientFailableOp, ClientSuccess}
+import com.gu.util.resthttp.Types.{ClientFailure, ClientFailableOp, ClientSuccess}
 import org.apache.log4j.Logger
 
 trait Logging { // in future maybe put logging into a context so the messages stack together like a stack trace

@@ -1,7 +1,7 @@
 package com.gu.zuora.fake
 
-import com.gu.util.zuora.RestRequestMaker.Types._
-import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, GenericError, RequestsPUT}
+import com.gu.util.resthttp.RestRequestMaker.RequestsPUT
+import com.gu.util.resthttp.Types.{ClientFailableOp, GenericError}
 import play.api.libs.json.{JsValue, Json, Reads, Writes}
 import scalaz.syntax.std.either._
 

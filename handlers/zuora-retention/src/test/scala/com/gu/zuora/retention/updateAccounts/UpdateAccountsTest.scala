@@ -1,7 +1,7 @@
 package com.gu.zuora.retention.updateAccounts
 
 import com.gu.util.handlers.LambdaException
-import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, ClientSuccess, GenericError}
+import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError}
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.{Failure, Success}

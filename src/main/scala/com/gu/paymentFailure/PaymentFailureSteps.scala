@@ -11,7 +11,7 @@ import com.gu.util.config.TrustedApiConfig
 import com.gu.util.exacttarget.EmailRequest
 import com.gu.util.reader.Types.ApiGatewayOp.{ReturnWithResponse, ContinueProcessing}
 import com.gu.util.reader.Types._
-import com.gu.util.zuora.RestRequestMaker.ClientFailableOp
+import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.zuora.ZuoraGetInvoiceTransactions.InvoiceTransactionSummary
 import com.gu.stripeCustomerSourceUpdated.TypeConvert._
 

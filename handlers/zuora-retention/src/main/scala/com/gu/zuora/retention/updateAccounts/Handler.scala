@@ -6,19 +6,20 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import com.gu.util.config.ConfigReads.ConfigFailure
+import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.handlers.{JsonHandler, LambdaException}
-import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, Requests}
+import com.gu.util.resthttp.RestRequestMaker.Requests
+import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
-import okhttp3.{Request, Response}
-import play.api.libs.json.{JsSuccess, Reads}
-import scalaz.{-\/, \/, \/-}
-import UpdateAccountsResponse._
-import UpdateAccountsRequest._
-import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.zuora.retention.filterCandidates.S3Iterator
 import com.gu.zuora.retention.updateAccounts.SetDoNotProcess.UpdateRequestBody
 import com.gu.zuora.retention.updateAccounts.SetDoNotProcess.UpdateRequestBody._
+import com.gu.zuora.retention.updateAccounts.UpdateAccountsRequest._
+import com.gu.zuora.retention.updateAccounts.UpdateAccountsResponse._
+import okhttp3.{Request, Response}
+import play.api.libs.json.{JsSuccess, Reads}
+import scalaz.{-\/, \/, \/-}
 
 import scala.util.{Failure, Success, Try}
 

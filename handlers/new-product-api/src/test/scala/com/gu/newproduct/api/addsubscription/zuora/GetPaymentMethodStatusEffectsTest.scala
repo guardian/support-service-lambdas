@@ -5,7 +5,7 @@ import com.gu.newproduct.api.addsubscription.zuora.GetAccount.PaymentMethodId
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethodStatus._
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
-import com.gu.util.zuora.RestRequestMaker.ClientSuccess
+import com.gu.util.resthttp.Types.ClientSuccess
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
 import org.scalatest.{FlatSpec, Matchers}
 

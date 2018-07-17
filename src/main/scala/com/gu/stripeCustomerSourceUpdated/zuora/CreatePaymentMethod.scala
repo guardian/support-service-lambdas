@@ -1,7 +1,8 @@
 package com.gu.stripeCustomerSourceUpdated.zuora
 
 import com.gu.stripeCustomerSourceUpdated._
-import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, Requests}
+import com.gu.util.resthttp.RestRequestMaker.Requests
+import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.zuora.ZuoraGetAccountSummary.ZuoraAccount.{AccountId, NumConsecutiveFailures, PaymentMethodId}
 import play.api.libs.json.{JsPath, Json, Reads, Writes}
 

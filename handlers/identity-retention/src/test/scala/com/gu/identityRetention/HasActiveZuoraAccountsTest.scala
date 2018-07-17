@@ -3,7 +3,7 @@ package com.gu.identityRetention
 import com.gu.identityRetention.GetActiveZuoraAccounts.IdentityQueryResponse
 import com.gu.identityRetention.Types.AccountId
 import com.gu.util.apigateway.ApiGatewayResponse
-import com.gu.util.zuora.RestRequestMaker.{ClientSuccess, GenericError}
+import com.gu.util.resthttp.Types.{ClientSuccess, GenericError}
 import com.gu.util.zuora.ZuoraQuery.QueryResult
 import org.scalatest.{FlatSpec, Matchers}
 import scalaz.{-\/, \/-}

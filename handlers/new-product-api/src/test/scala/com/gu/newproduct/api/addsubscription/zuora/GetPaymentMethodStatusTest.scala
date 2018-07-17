@@ -3,7 +3,8 @@ package com.gu.newproduct.api.addsubscription.zuora
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.PaymentMethodId
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethodStatus.{Active, Closed, PaymentMethodWire}
 import com.gu.test.EffectsTest
-import com.gu.util.zuora.RestRequestMaker.{ClientSuccess, GenericError, IsCheckNeeded}
+import com.gu.util.resthttp.RestRequestMaker.IsCheckNeeded
+import com.gu.util.resthttp.Types.{ClientSuccess, GenericError}
 import org.scalatest.{FlatSpec, Matchers}
 
 class GetPaymentMethodStatusTest extends FlatSpec with Matchers {

@@ -1,7 +1,6 @@
 package com.gu.zuora.fake
 
-import com.gu.util.zuora.RestRequestMaker.Types._
-import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, GenericError}
+import com.gu.util.resthttp.Types.{ClientFailableOp, GenericError}
 import com.gu.util.zuora.ZuoraQuery.{QueryResult, ZuoraQuerier}
 import com.gu.util.zuora.{SafeQueryBuilder, ZuoraQuery}
 import play.api.libs.json.{Json, Reads}
