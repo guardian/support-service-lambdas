@@ -56,12 +56,12 @@ object Handler extends Logging {
       // todo ideally we should add an id to the fields in zuora so we don't have to hard code
       Stage("PROD") -> ContributionsZuoraIds(
         monthly = PlanAndCharge(
-          productRatePlanId = ProductRatePlanId("2c92c0f85ab269be015acd9d014549b7"),
-          productRatePlanChargeId = ProductRatePlanChargeId("2c92c0f85ab2696b015acd9eeb6150ab")
+          productRatePlanId = ProductRatePlanId("2c92a0fc5aacfadd015ad24db4ff5e97"),
+          productRatePlanChargeId = ProductRatePlanChargeId("2c92a0fc5aacfadd015ad250bf2c6d38")
         ),
         annual = PlanAndCharge(
-          productRatePlanId = ProductRatePlanId("2c92c0f95e1d5c9c015e38f8c87d19a1"),
-          productRatePlanChargeId = ProductRatePlanChargeId("2c92c0f95e1d5c9c015e38f8c8ac19a3")
+          productRatePlanId = ProductRatePlanId("2c92a0fc5e1dc084015e37f58c200eea"),
+          productRatePlanChargeId = ProductRatePlanChargeId("2c92a0fc5e1dc084015e37f58c7b0f34")
         )
       ),
       Stage("CODE") -> ContributionsZuoraIds(
