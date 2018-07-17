@@ -28,7 +28,10 @@ object ZuoraRestRequestMaker extends Logging {
         ().right
       case JsSuccess(ZuoraErrorResponse(reasons), _) => {
         logger.error(s"Zuora rejected our call $bodyAsJson")
-        if (reasons.exists(_.code.toString.endsWith("40"))) NotFound("Received a 'not found' response from Zuora").left else GenericError("Received a failure result from Zuora").left
+        if (reasons.exists(_.code.toString.endsWith("40")))
+          NotFound("Received a 'not found' response from Zuora").left
+        else
+          GenericError(s"Received a failure result from Zuora: $reasons").left
 
       }
       case error: JsError => {

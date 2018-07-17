@@ -18,7 +18,7 @@ class GetAccountTest extends FlatSpec with Matchers {
     )
     val accF: RequestsGet[ZuoraAccount] = {
       case ("object/account/2c92c0f9624bbc5f016253e573970b16", WithoutCheck) => \/-(acc)
-      case _ => -\/(GenericError("bad request"))
+      case in => -\/(GenericError(s"bad request: $in"))
     }
     val actual = GetAccount(accF)(ZuoraAccountId("2c92c0f9624bbc5f016253e573970b16"))
     actual shouldBe \/-(AccountSummary(
