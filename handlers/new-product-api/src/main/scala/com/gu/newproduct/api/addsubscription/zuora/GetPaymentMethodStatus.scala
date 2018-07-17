@@ -1,6 +1,6 @@
 package com.gu.newproduct.api.addsubscription.zuora
 
-import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, GenericError}
+import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, GenericError, RequestsGet, WithCheck}
 import play.api.libs.json._
 import scalaz.{-\/, \/-}
 
@@ -22,6 +22,6 @@ object GetPaymentMethodStatus {
   implicit val wireReads = Json.reads[PaymentMethodWire]
 
   //todo use john's case class for the payment method id
-  def apply(get: (String, Boolean) => ClientFailableOp[PaymentMethodWire])(paymentMethodId: String): ClientFailableOp[PaymentMethodStatus] =
-    get(s"object/payment-method/$paymentMethodId", true).flatMap(_.toPayMentMethodStatus)
+  def apply(get: RequestsGet[PaymentMethodWire])(paymentMethodId: String): ClientFailableOp[PaymentMethodStatus] =
+    get(s"object/payment-method/$paymentMethodId", WithCheck).flatMap(_.toPayMentMethodStatus)
 }
