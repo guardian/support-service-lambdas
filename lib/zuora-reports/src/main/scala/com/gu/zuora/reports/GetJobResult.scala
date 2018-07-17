@@ -1,7 +1,7 @@
 package com.gu.zuora.reports
 
 import com.gu.util.zuora.RestRequestMaker
-import com.gu.util.zuora.RestRequestMaker.{ClientFail, ClientFailableOp, ClientSuccess, GenericError, RequestsGet, WithCheck}
+import com.gu.util.zuora.RestRequestMaker.{ClientFailure, ClientFailableOp, ClientSuccess, GenericError, RequestsGet, WithCheck}
 import com.gu.zuora.reports.aqua.AquaJobResponse
 import com.gu.zuora.reports.dataModel.Batch
 import play.api.libs.json._
@@ -33,7 +33,7 @@ object GetJobResult {
 
       case ClientSuccess(AquaJobResponse(status, name, _, _)) if pendingValues.contains(status) => ClientSuccess(Pending(name, jobId, dryRun, tries))
       case ClientSuccess(zuoraResponse) => (GenericError(s"unexpected status in zuora response: $zuoraResponse"))
-      case error: ClientFail => error
+      case error: ClientFailure => error
     }
   }
 

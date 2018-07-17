@@ -24,7 +24,7 @@ object Querier {
       case ClientSuccess(AquaJobResponse(status, name, _, Some(jobId))) if status.toLowerCase == "submitted" =>
         ClientSuccess(QuerierResponse(name, jobId, dryRun))
       case ClientSuccess(zuoraResponse) => GenericError(s"unexpected response from zuora: $zuoraResponse")
-      case error: ClientFail => error
+      case error: ClientFailure => error
     }
   }
 }

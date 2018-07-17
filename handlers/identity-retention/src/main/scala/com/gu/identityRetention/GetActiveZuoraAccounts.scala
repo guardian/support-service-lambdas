@@ -3,7 +3,7 @@ package com.gu.identityRetention
 import com.gu.identityRetention.Types.{AccountId, IdentityId}
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types._
-import com.gu.util.zuora.RestRequestMaker.{ClientFail, ClientFailableOp, ClientSuccess}
+import com.gu.util.zuora.RestRequestMaker.{ClientFailure, ClientFailableOp, ClientSuccess}
 import com.gu.util.zuora.SafeQueryBuilder.Implicits._
 import com.gu.util.zuora.ZuoraQuery.{QueryResult, ZuoraQuerier}
 import play.api.libs.json.Json
@@ -44,7 +44,7 @@ object GetActiveZuoraAccounts {
         \/-(result.records.map(account => AccountId(account.Id)))
       case ClientSuccess(result) if result.size == 0 =>
         -\/(IdentityRetentionApiResponses.canBeDeleted)
-      case error: ClientFail =>
+      case error: ClientFailure =>
         -\/(ApiGatewayResponse.internalServerError(s"Failed to retrieve the identity user's details from Zuora: $error"))
     }).toApiGatewayOp
 

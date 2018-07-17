@@ -12,28 +12,28 @@ object RestRequestMaker extends Logging {
 
   import Types._
 
-  sealed trait ClientFail extends ClientFailableOp[Nothing] {
-    override def toDisjunction: ClientFail \/ Nothing = -\/(this)
+  sealed trait ClientFailure extends ClientFailableOp[Nothing] {
+    override def toDisjunction: ClientFailure \/ Nothing = -\/(this)
 
-    val isFail = true
+    val isFailure = true
 
     def message: String
   }
 
-  case class NotFound(message: String) extends ClientFail
+  case class NotFound(message: String) extends ClientFailure
 
-  case class GenericError(message: String) extends ClientFail
+  case class GenericError(message: String) extends ClientFailure
 
   case class ClientSuccess[A](value: A) extends ClientFailableOp[A] {
-    val isFail = false
-    override def toDisjunction: ClientFail \/ A = \/-(value)
+    val isFailure = false
+    override def toDisjunction: ClientFailure \/ A = \/-(value)
   }
 
   sealed trait ClientFailableOp[+A] {
 
-    def isFail: Boolean
+    def isFailure: Boolean
 
-    def toDisjunction: scalaz.\/[ClientFail, A]
+    def toDisjunction: scalaz.\/[ClientFailure, A]
 
     def flatMap[B](f: A => ClientFailableOp[B]): ClientFailableOp[B] =
       toDisjunction.flatMap(f.andThen(_.toDisjunction)).toClientFailableOp
@@ -41,26 +41,26 @@ object RestRequestMaker extends Logging {
     def map[B](f: A => B): ClientFailableOp[B] =
       toDisjunction.map(f).toClientFailableOp
 
-    def mapFailure(f: ClientFail => ClientFail): ClientFailableOp[A] =
+    def mapFailure(f: ClientFailure => ClientFailure): ClientFailableOp[A] =
       toDisjunction.leftMap(f).toClientFailableOp
 
   }
 
   object Types {
 
-    implicit class UnderlyingOps[A](theEither: scalaz.\/[ClientFail, A]) {
+    implicit class UnderlyingOps[A](theEither: scalaz.\/[ClientFailure, A]) {
 
       def toClientFailableOp: ClientFailableOp[A] =
         theEither match {
           case scalaz.\/-(success) => ClientSuccess(success)
-          case scalaz.-\/(finished) => finished
+          case scalaz.-\/(failure) => failure
         }
 
     }
 
     implicit val clientFailableOpM: Monad[ClientFailableOp] = {
 
-      type ClientDisjunction[A] = scalaz.\/[ClientFail, A]
+      type ClientDisjunction[A] = scalaz.\/[ClientFailure, A]
 
       val disjunctionMonad = implicitly[Monad[ClientDisjunction]]
 
