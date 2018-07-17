@@ -58,10 +58,10 @@ object RestRequestMaker extends Logging {
     // this can be a class and still be cohesive because every single method in the class needs every single value.  so we are effectively partially
     // applying everything with these params
 
-    def get[RESP: Reads](path: String): ClientFailableOp[RESP] =
+    def get[RESP: Reads](path: String, skipCheck: Boolean = false): ClientFailableOp[RESP] =
       for {
         bodyAsJson <- sendRequest(buildRequest(headers, baseUrl + path, _.get()), getResponse).map(Json.parse)
-        _ <- jsonIsSuccessful(bodyAsJson)
+        _ <- if (skipCheck) \/-(()) else jsonIsSuccessful(bodyAsJson)
         respModel <- toResult[RESP](bodyAsJson)
       } yield respModel
 
