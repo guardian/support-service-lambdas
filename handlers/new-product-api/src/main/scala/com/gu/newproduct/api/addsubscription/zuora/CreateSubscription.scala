@@ -6,13 +6,14 @@ import java.time.format.DateTimeFormatter
 import com.gu.newproduct.api.addsubscription.Handler.PlanAndCharge
 import com.gu.newproduct.api.addsubscription.ZuoraAccountId
 import com.gu.util.zuora.RestRequestMaker._
-import play.api.libs.json.{JsSuccess, Json, Reads}
+import play.api.libs.json.{Json, Reads}
 
 object CreateSubscription {
 
   object WireModel {
 
-    implicit val readsResponse: Reads[Unit] = _ => JsSuccess(())
+    case class WireSubscription(subscriptionNumber: String)
+    implicit val readsResponse: Reads[WireSubscription] = Json.reads[WireSubscription]
 
     case class ChargeOverrides(
       price: Double,
@@ -68,10 +69,12 @@ object CreateSubscription {
     acquisitionCase: CaseId
   )
 
+  case class SubscriptionName(value: String) extends AnyVal
+
   def apply(
     planAndCharge: PlanAndCharge,
-    post: RequestsPost[WireCreateRequest, Unit]
-  )(createSubscription: CreateReq): ClientFailableOp[Unit] =
-    post(createRequest(createSubscription, planAndCharge), s"subscriptions", WithCheck)
+    post: RequestsPost[WireCreateRequest, WireSubscription]
+  )(createSubscription: CreateReq): ClientFailableOp[SubscriptionName] =
+    post(createRequest(createSubscription, planAndCharge), s"subscriptions", WithCheck).map(id => SubscriptionName(id.subscriptionNumber))
 
 }

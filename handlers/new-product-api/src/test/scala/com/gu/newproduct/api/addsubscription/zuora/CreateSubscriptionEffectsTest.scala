@@ -29,12 +29,13 @@ class CreateSubscriptionEffectsTest extends FlatSpec with Matchers {
     val actual = for {
       zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig]
       zuoraDeps = ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig)
-      post: RequestsPost[WireCreateRequest, Unit] = zuoraDeps.post[WireCreateRequest, Unit]
+      post: RequestsPost[WireCreateRequest, WireSubscription] = zuoraDeps.post[WireCreateRequest, WireSubscription]
       res <- CreateSubscription(monthlyIds, post)(request)
     } yield res
-    val expected = ()
-    actual shouldBe \/-(expected)
-    // TODO should check that it was really created
+    withClue(actual) {
+      actual.map(_.value.substring(0, 3)) shouldBe \/-("A-S")
+    }
+    // ideally should check that it was really created with the right fields
   }
 }
 
