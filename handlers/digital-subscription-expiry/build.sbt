@@ -13,13 +13,6 @@ riffRaffManifestProjectName := "MemSub::Subscriptions::Lambdas::Digital Subscrip
 riffRaffArtifactResources += (file("handlers/digital-subscription-expiry/cfn.yaml"), "cfn/cfn.yaml")
 
 libraryDependencies ++= Seq(
-  "com.amazonaws" % "aws-lambda-java-log4j" % "1.0.0",
-  "com.amazonaws" % "aws-lambda-java-core" % "1.2.0",
-  "com.amazonaws" % "aws-java-sdk-s3" % "1.11.265",
-  "com.squareup.okhttp3" % "okhttp" % "3.9.1",
-  "com.typesafe.play" %% "play-json" % "2.6.9",
-  "org.scalatest" %% "scalatest" % "3.0.1" % "test",
-  "com.fasterxml.jackson.core" % "jackson-databind" % "2.8.11.1",
   "com.gu" %% "content-authorisation-common" % "0.4"
 )
 

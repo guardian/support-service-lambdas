@@ -9,6 +9,7 @@ import com.gu.util.zuora.SafeQueryBuilder.{OrTraverse, SafeQuery}
 import com.gu.util.zuora.SafeQueryBuilder.Implicits._
 import com.gu.util.zuora.ZuoraQuery.ZuoraQuerier
 import play.api.libs.json.Json
+import scalaz.NonEmptyList
 
 object SubscriptionsForAccounts {
 
@@ -20,7 +21,7 @@ object SubscriptionsForAccounts {
 
   implicit val reads = Json.reads[SubscriptionsQueryResponse]
 
-  def buildQuery(activeAccounts: List[AccountId]): ClientFailableOp[SafeQuery] =
+  def buildQuery(activeAccounts: NonEmptyList[AccountId]): ClientFailableOp[SafeQuery] =
     for {
       or <- OrTraverse(activeAccounts) { acc =>
         zoql"""
@@ -38,7 +39,7 @@ object SubscriptionsForAccounts {
         """
     } yield subscriptionsQuery
 
-  def apply(zuoraQuerier: ZuoraQuerier)(activeAccounts: List[AccountId]): ApiGatewayOp[List[SubscriptionsQueryResponse]] = {
+  def apply(zuoraQuerier: ZuoraQuerier)(activeAccounts: NonEmptyList[AccountId]): ApiGatewayOp[List[SubscriptionsQueryResponse]] = {
 
     def searchForSubscriptions =
       for {

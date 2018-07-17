@@ -35,7 +35,7 @@ class RetentionQueryRequestTest extends AsyncFlatSpec {
   }
 
   def toAquaRequest = ToAquaRequest(now) _
-  def now() = LocalDate.of(2015, 11, 23)
+  val now: () => LocalDate = () => LocalDate.of(2015, 11, 23)
 
   def expectedQuery(dateStr: String) = {
     val expectedExclusionQuery = AquaQuery(

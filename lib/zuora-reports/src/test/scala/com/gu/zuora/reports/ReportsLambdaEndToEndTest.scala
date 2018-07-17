@@ -2,9 +2,10 @@ package com.gu.zuora.reports
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
-import com.gu.effects.{FakeFetchString, TestingRawEffects}
 import com.gu.effects.TestingRawEffects.{HTTPResponse, POSTRequest}
+import com.gu.effects.{FakeFetchString, TestingRawEffects}
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
+import com.gu.util.config.Stage
 import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, Requests}
 import com.gu.util.zuora.ZuoraRestConfig
 import com.gu.zuora.reports.EndToEndData._
@@ -106,11 +107,16 @@ object Runner {
     val stream = new ByteArrayInputStream(input.getBytes(java.nio.charset.StandardCharsets.UTF_8))
     val os = new ByteArrayOutputStream()
 
-    val rawEffects = new TestingRawEffects(defaultCode = 200, postResponses = postResponses, responses = responses)
+    val rawEffects = new TestingRawEffects(defaultCode = 200, responses = responses, postResponses = postResponses)
 
     def wire(zuoraRestConfig: ZuoraRestConfig) = handlerToTest(ZuoraAquaRequestMaker(rawEffects.response, zuoraRestConfig))
     //execute
-    ReportsLambda[REQUEST, RESPONSE](rawEffects.stage, FakeFetchString.fetchString, LambdaIO(stream, os, null), wire)
+    ReportsLambda[REQUEST, RESPONSE](
+      Stage("DEV"),
+      FakeFetchString.fetchString,
+      LambdaIO(stream, os, null),
+      wire
+    )
 
     val responseString = new String(os.toByteArray, "UTF-8")
 

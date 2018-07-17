@@ -45,14 +45,28 @@ object RestRequestMaker extends Logging {
 
   case class DownloadStream(stream: InputStream, lengthBytes: Long)
 
-  class Requests(headers: Map[String, String], baseUrl: String, getResponse: Request => Response, jsonIsSuccessful: JsValue => ClientFailableOp[Unit]) {
+  trait RequestsPUT {
+    def put[REQ: Writes, RESP: Reads](req: REQ, path: String): ClientFailableOp[RESP]
+  }
+
+  sealed trait IsCheckNeeded
+  case object WithCheck extends IsCheckNeeded
+  case object WithoutCheck extends IsCheckNeeded
+  type RequestsGet[A] = (String, IsCheckNeeded) => ClientFailableOp[A]
+
+  class Requests(
+    headers: Map[String, String],
+    baseUrl: String,
+    getResponse: Request => Response,
+    jsonIsSuccessful: JsValue => ClientFailableOp[Unit]
+  ) extends RequestsPUT {
     // this can be a class and still be cohesive because every single method in the class needs every single value.  so we are effectively partially
     // applying everything with these params
 
-    def get[RESP: Reads](path: String): ClientFailableOp[RESP] =
+    def get[RESP: Reads](path: String, skipCheck: IsCheckNeeded = WithCheck): ClientFailableOp[RESP] =
       for {
         bodyAsJson <- sendRequest(buildRequest(headers, baseUrl + path, _.get()), getResponse).map(Json.parse)
-        _ <- jsonIsSuccessful(bodyAsJson)
+        _ <- if (skipCheck == WithoutCheck) \/-(()) else jsonIsSuccessful(bodyAsJson)
         respModel <- toResult[RESP](bodyAsJson)
       } yield respModel
 
