@@ -4,11 +4,12 @@ import java.io.{InputStream, OutputStream}
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
-import com.gu.identity.IdentityCookieToIdentityId
+import com.gu.identity.IdentityCookieToIdentityUser.{CookieValuesToIdentityUser, IdentityUser}
+import com.gu.identity.{IdentityCookieToIdentityUser, IdentityTestUserConfig, IsIdentityTestUser}
 import com.gu.salesforce.SalesforceGenericIdLookup
 import com.gu.salesforce.SalesforceGenericIdLookup.{ResponseWithId, TSalesforceGenericIdLookup}
 import com.gu.salesforce.auth.SalesforceAuthenticate
-import com.gu.salesforce.auth.SalesforceAuthenticate.SFAuthConfig
+import com.gu.salesforce.auth.SalesforceAuthenticate.{SFAuthConfig, SFAuthTestConfig}
 import com.gu.salesforce.cases.SalesforceCase
 import com.gu.salesforce.cases.SalesforceCase.Raise.{NewCase, RaiseCase, RaiseCaseResponse}
 import com.gu.util.Logging
@@ -16,7 +17,7 @@ import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.config.LoadConfigModule.StringFromS3
-import com.gu.util.config.{LoadConfigModule, Stage, TrustedApiConfig}
+import com.gu.util.config._
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.RestRequestMaker
 import okhttp3.{Request, Response}
@@ -24,11 +25,19 @@ import play.api.libs.json.{JsValue, Json}
 
 object Handler extends Logging {
 
+  case class IdentityAndSfRequests(identityUser: IdentityUser, sfRequests: RestRequestMaker.Requests)
+
+  type HeadersOption = Option[Map[String, String]]
+  type IdentityAndSfRequestsApiGatewayOp = ApiGatewayOp[IdentityAndSfRequests]
+  type SfBackendForIdentityCookieHeader = HeadersOption => IdentityAndSfRequestsApiGatewayOp
+  type Steps = SfBackendForIdentityCookieHeader => ApiGatewayRequest => ApiResponse
   type LazySalesforceAuthenticatedReqMaker = () => ApiGatewayOp[RestRequestMaker.Requests]
+  case class SfRequests(normal: LazySalesforceAuthenticatedReqMaker, test: LazySalesforceAuthenticatedReqMaker)
 
   def raiseCase(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
     runWithEffects(
-      RaiseCase.steps(RawEffects.stage),
+      IdentityCookieToIdentityUser.defaultCookiesToIdentityUser(RawEffects.stage.isProd),
+      RaiseCase.steps,
       RawEffects.response,
       RawEffects.stage,
       GetFromS3.fetchString,
@@ -43,7 +52,6 @@ object Handler extends Logging {
       subscriptionName: String
     )
     implicit val reads = Json.reads[RaiseRequestBody]
-
     implicit val writes = Json.writes[RaiseCaseResponse]
 
     def buildNewCaseForSalesforce(
@@ -62,7 +70,13 @@ object Handler extends Logging {
         Subject = "Online Cancellation Attempt"
       )
 
-    def raiseCase(lookup: TSalesforceGenericIdLookup, raiseCase: RaiseCase)(identityId: String, raiseCaseDetail: RaiseRequestBody) =
+    def raiseCase(
+      lookup: TSalesforceGenericIdLookup,
+      raiseCase: RaiseCase
+    )(
+      identityId: String,
+      raiseCaseDetail: RaiseRequestBody
+    ) =
       for {
         sfContactId <- lookup("Contact", "IdentityID__c", identityId)
           .toApiGatewayOp("lookup SF contact from identityID")
@@ -72,19 +86,24 @@ object Handler extends Logging {
           .toApiGatewayOp("raise sf case")
       } yield raiseCaseResponse
 
-    def steps(stage: Stage)(sfRequests: LazySalesforceAuthenticatedReqMaker)(apiGatewayRequest: ApiGatewayRequest) =
+    def steps(sfBackendForIdentityCookieHeader: SfBackendForIdentityCookieHeader)(apiGatewayRequest: ApiGatewayRequest) =
       (for {
-        identityId <- IdentityCookieToIdentityId(apiGatewayRequest.headers, stage)
-        sfRequests <- sfRequests()
+        identityAndSfRequests <- sfBackendForIdentityCookieHeader(apiGatewayRequest.headers)
         raiseCaseDetail <- apiGatewayRequest.bodyAsCaseClass[RaiseRequestBody]()
-        wiredRaiseCase = raiseCase(SalesforceGenericIdLookup(sfRequests), SalesforceCase.Raise(sfRequests)) _
-        raiseCaseResponse <- wiredRaiseCase(identityId, raiseCaseDetail)
-      } yield ApiResponse("200", Json.prettyPrint(Json.toJson(raiseCaseResponse)))).apiResponse
+        lookupOp = SalesforceGenericIdLookup(identityAndSfRequests.sfRequests)_
+        raiseOp = SalesforceCase.Raise(identityAndSfRequests.sfRequests)_
+        wiredRaiseCase = raiseCase(lookupOp, raiseOp)_
+        raiseCaseResponse <- wiredRaiseCase(identityAndSfRequests.identityUser.id, raiseCaseDetail)
+      } yield ApiGatewayResponse("200", raiseCaseResponse)).apiResponse
   }
+
+  case class CasePathParams(caseId: String)
+  implicit val pathParamReads = Json.reads[CasePathParams]
 
   def updateCase(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
     runWithEffects(
-      UpdateCase.steps(RawEffects.stage),
+      IdentityCookieToIdentityUser.defaultCookiesToIdentityUser(RawEffects.stage.isProd),
+      UpdateCase.steps,
       RawEffects.response,
       RawEffects.stage,
       GetFromS3.fetchString,
@@ -93,49 +112,72 @@ object Handler extends Logging {
 
   object UpdateCase {
 
-    case class UpdateCasePathParams(caseId: String)
-    implicit val pathParamReads = Json.reads[UpdateCasePathParams]
-
-    def steps(stage: Stage)(sfRequests: LazySalesforceAuthenticatedReqMaker)(apiGatewayRequest: ApiGatewayRequest) =
+    def steps(sfBackendForIdentityCookieHeader: SfBackendForIdentityCookieHeader)(apiGatewayRequest: ApiGatewayRequest) =
       (for {
-        _ <- IdentityCookieToIdentityId(apiGatewayRequest.headers, stage) // TODO verify case belongs to identity user
-        sfRequests <- sfRequests()
-        pathParams <- apiGatewayRequest.pathParamsAsCaseClass[UpdateCasePathParams]()
+        identityAndSfRequests <- sfBackendForIdentityCookieHeader(apiGatewayRequest.headers)
+        // TODO verify case belongs to identity user
+        pathParams <- apiGatewayRequest.pathParamsAsCaseClass[CasePathParams]()
         requestBody <- apiGatewayRequest.bodyAsCaseClass[JsValue]()
-        _ <- SalesforceCase.Update(sfRequests)(pathParams.caseId, requestBody).toApiGatewayOp("update case")
+        sfUpdate = SalesforceCase.Update(identityAndSfRequests.sfRequests)_
+        _ <- sfUpdate(pathParams.caseId, requestBody).toApiGatewayOp("update case")
       } yield ApiGatewayResponse.successfulExecution).apiResponse
 
   }
 
   def runWithEffects(
-    steps: LazySalesforceAuthenticatedReqMaker => ApiGatewayRequest => ApiResponse,
+    cookieValuesToIdentityUser: CookieValuesToIdentityUser,
+    steps: Steps,
     response: Request => Response,
     stage: Stage,
     fetchString: StringFromS3,
     lambdaIO: LambdaIO
   ) = {
 
-    def healthcheckSteps(sfRequests: LazySalesforceAuthenticatedReqMaker) = () =>
-      (for { _ <- sfRequests() } yield ApiGatewayResponse.successfulExecution).apiResponse
+    val loadConfig = LoadConfigModule(stage, fetchString)
 
-    def operation: SFAuthConfig => Operation = sfConfig => {
+    def healthcheckSteps(sfRequests: SfRequests) = () =>
+      (for {
+        _ <- sfRequests.normal()
+        _ <- sfRequests.test()
+      } yield ApiGatewayResponse.successfulExecution).apiResponse
 
-      val sfRequests: LazySalesforceAuthenticatedReqMaker = () => SalesforceAuthenticate(response, sfConfig)
+    def operation(identityTestUsersConfig: IdentityTestUserConfig): Operation = {
+
+      val sfRequestsNormal: LazySalesforceAuthenticatedReqMaker = () =>
+        for {
+          config <- loadNormalSfConfig.toApiGatewayOp("load 'normal' SF config")
+          sfRequests <- SalesforceAuthenticate(response, config)
+        } yield sfRequests
+
+      val sfRequestsTest: LazySalesforceAuthenticatedReqMaker = () =>
+        for {
+          config <- loadTestSfConfig.toApiGatewayOp("load 'test' SF config")
+          sfRequests <- SalesforceAuthenticate(response, config)
+        } yield sfRequests
+
+      def sfBackendForIdentityCookieHeader(headers: HeadersOption): IdentityAndSfRequestsApiGatewayOp = {
+        for {
+          identityUser <- IdentityCookieToIdentityUser(cookieValuesToIdentityUser)(headers)
+          sfRequests <- if (IsIdentityTestUser(identityTestUsersConfig)(identityUser)) sfRequestsTest() else sfRequestsNormal()
+        } yield IdentityAndSfRequests(identityUser, sfRequests)
+      }
 
       Operation(
-        steps(sfRequests),
-        healthcheckSteps(sfRequests),
-        shouldAuthenticate = false
+        steps(sfBackendForIdentityCookieHeader),
+        healthcheckSteps(SfRequests(sfRequestsNormal, sfRequestsTest)),
+        shouldAuthenticate = false //TODO this could be removed when 'trustedApiConfig' is an Option
       )
 
     }
 
-    val loadConfig = LoadConfigModule(stage, fetchString)
+    def loadNormalSfConfig = loadConfig[SFAuthConfig](SFAuthConfig.location, SFAuthConfig.reads)
+    def loadTestSfConfig = loadConfig[SFAuthConfig](SFAuthTestConfig.location, SFAuthTestConfig.reads)
 
     ApiGatewayHandler(lambdaIO)(for {
-      sfConfig <- loadConfig[SFAuthConfig].toApiGatewayOp("load sf config")
+      identityTestUsersConfig <- loadConfig[IdentityTestUserConfig].toApiGatewayOp("load identity 'test-users' config")
+      //TODO line below can be removed since 'shouldAuthenticate = false'
       trustedApiConfig <- loadConfig[TrustedApiConfig].toApiGatewayOp("load trusted api config")
-      configuredOp = operation(sfConfig)
+      configuredOp = operation(identityTestUsersConfig)
     } yield (trustedApiConfig, configuredOp))
 
   }
