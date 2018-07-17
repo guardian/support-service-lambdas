@@ -1,5 +1,6 @@
 package com.gu.newproduct.api.addsubscription.zuora
 
+import com.gu.newproduct.api.addsubscription.zuora.GetAccount.PaymentMethodId
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethodStatus.{Active, Closed, PaymentMethodWire}
 import com.gu.test.EffectsTest
 import com.gu.util.zuora.RestRequestMaker.{GenericError, IsCheckNeeded}
@@ -19,7 +20,7 @@ class GetPaymentMethodStatusTest extends FlatSpec with Matchers {
   it should "get active payment status" taggedAs EffectsTest in {
 
     val actual = for {
-     res <- GetPaymentMethodStatus(fakeGet)("activeAccountId")
+     res <- GetPaymentMethodStatus(fakeGet)(PaymentMethodId("activeAccountId"))
     } yield {
       res
     }
@@ -28,7 +29,7 @@ class GetPaymentMethodStatusTest extends FlatSpec with Matchers {
 
   it should "get closed payment status" taggedAs EffectsTest in {
     val actual = for {
-      res <- GetPaymentMethodStatus(fakeGet)("closedAccountId")
+      res <- GetPaymentMethodStatus(fakeGet)(PaymentMethodId("closedAccountId"))
     } yield {
       res
     }
@@ -37,7 +38,7 @@ class GetPaymentMethodStatusTest extends FlatSpec with Matchers {
 
   it should "return failure if payment method is unexpected value" taggedAs EffectsTest in {
     val actual = for {
-      res <- GetPaymentMethodStatus(fakeGet)("unexpected")
+      res <- GetPaymentMethodStatus(fakeGet)(PaymentMethodId("unexpected"))
     } yield {
       res
     }
