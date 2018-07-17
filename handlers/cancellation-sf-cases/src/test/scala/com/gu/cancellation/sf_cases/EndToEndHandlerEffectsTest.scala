@@ -9,7 +9,7 @@ import com.gu.salesforce.cases.SalesforceCase.Raise.RaiseCaseResponse
 import com.gu.test.EffectsTest
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import org.scalatest.{FlatSpec, Matchers}
-import play.api.libs.json.{JsValue, Json, Reads}
+import play.api.libs.json._
 
 case class PartialApiResponse(statusCode: String, body: String)
 case class GetCaseResponse(Description: String)
@@ -70,12 +70,20 @@ object Runner extends Matchers {
       LambdaIO(stream, os, null)
     )
 
+    val parsed = Json.parse(new String(os.toByteArray, "UTF-8"))
+
     implicit val apiResponseReads: Reads[PartialApiResponse] = Json.reads[PartialApiResponse]
-    val awsResponse = Json.fromJson[PartialApiResponse](Json.parse(new String(os.toByteArray, "UTF-8"))).get
+    val awsResponse: PartialApiResponse = Json.fromJson[PartialApiResponse](parsed) match {
+      case JsSuccess(worked, _) => worked
+      case jsError: JsError => fail(s"API Response did not contain body and statusCode : $jsError")
+    }
 
     awsResponse.statusCode shouldEqual "200"
 
-    Json.fromJson[ResponseType](Json.parse(awsResponse.body)).get
+    Json.fromJson[ResponseType](Json.parse(awsResponse.body)) match {
+      case JsSuccess(worked, _) => worked
+      case jsError: JsError => fail(s"API Response body did not conform to desired type, see : $jsError")
+    }
 
   }
 
