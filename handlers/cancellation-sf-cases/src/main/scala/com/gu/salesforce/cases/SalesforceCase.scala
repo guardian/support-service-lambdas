@@ -40,4 +40,10 @@ object SalesforceCase extends Logging {
 
   }
 
+  object GetById {
+
+    def apply(sfRequests: Requests)(caseId: String): ClientFailableOp[JsValue] =
+      sfRequests.get(s"${caseBaseUrl}/${caseId}")
+  }
+
 }

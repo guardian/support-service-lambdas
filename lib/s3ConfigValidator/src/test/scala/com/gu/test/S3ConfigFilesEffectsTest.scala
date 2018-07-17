@@ -1,8 +1,9 @@
 package com.gu.test
 import com.gu.digitalSubscriptionExpiry.emergencyToken.EmergencyTokensConfig
 import com.gu.effects.GetFromS3
-import com.gu.identity.IdentityConfig
+import com.gu.identity.{IdentityConfig, IdentityTestUserConfig}
 import com.gu.salesforce.auth.SalesforceAuthenticate.SFAuthConfig
+import com.gu.salesforce.auth.SalesforceAuthenticate.SFAuthTestConfig
 import com.gu.util.config._
 import com.gu.util.zuora.ZuoraRestConfig
 import org.scalatest.{FlatSpec, Matchers}
@@ -45,12 +46,28 @@ class S3ConfigFilesEffectsTest extends FlatSpec with Matchers {
     validate[ETConfig](PROD)
   }
 
-  it should "successfully parse CODE Salesforce config" taggedAs EffectsTest in {
-    validate[SFAuthConfig](CODE)
+  it should "successfully parse CODE Salesforce NORMAL config" taggedAs EffectsTest in {
+    validate[SFAuthConfig](CODE)(SFAuthConfig.location, SFAuthConfig.reads)
   }
 
-  it should "successfully parse PROD Salesforce config" taggedAs EffectsTest in {
-    validate[SFAuthConfig](PROD)
+  it should "successfully parse PROD Salesforce NORMAL config" taggedAs EffectsTest in {
+    validate[SFAuthConfig](PROD)(SFAuthConfig.location, SFAuthConfig.reads)
+  }
+
+  it should "successfully parse CODE Salesforce TEST config" taggedAs EffectsTest in {
+    validate[SFAuthConfig](CODE)(SFAuthTestConfig.location, SFAuthTestConfig.reads)
+  }
+
+  it should "successfully parse PROD Salesforce TEST config" taggedAs EffectsTest in {
+    validate[SFAuthConfig](PROD)(SFAuthTestConfig.location, SFAuthTestConfig.reads)
+  }
+
+  it should "successfully parse CODE identity 'test-user' config" taggedAs EffectsTest in {
+    validate[IdentityTestUserConfig](CODE)
+  }
+
+  it should "successfully parse PROD identity 'test-user' config" taggedAs EffectsTest in {
+    validate[IdentityTestUserConfig](PROD)
   }
 
   it should "successfully parse CODE Stripe config" taggedAs EffectsTest in {
@@ -76,7 +93,7 @@ class S3ConfigFilesEffectsTest extends FlatSpec with Matchers {
     CODE -> wireConfigLoader(CODE)
 
   )
-  def validate[CONF](stage: String)(implicit r: Reads[CONF], loc: ConfigLocation[CONF]) = {
+  def validate[CONF](stage: String)(implicit loc: ConfigLocation[CONF], r: Reads[CONF]) = {
     val configLoader = configLoaders(stage)
     val config = configLoader[CONF]
     config.isRight shouldBe (true)

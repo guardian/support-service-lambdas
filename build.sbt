@@ -91,7 +91,15 @@ lazy val restHttp = all(project in file("lib/restHttp"))
   )
 
 lazy val s3ConfigValidator = all(project in file("lib/s3ConfigValidator"))
-  .dependsOn(testDep, handler, zuora, `digital-subscription-expiry`, `identity-backfill`, effectsDepIncludingTestFolder)
+  .dependsOn(
+    testDep,
+    handler,
+    zuora,
+    `digital-subscription-expiry`,
+    `identity-backfill`,
+    effectsDepIncludingTestFolder,
+    `cancellation-sf-cases`
+  )
   .settings(
     libraryDependencies ++= Seq(scalatest)
   )

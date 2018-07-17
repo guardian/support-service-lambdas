@@ -3,25 +3,26 @@ package com.gu.identity
 import com.gu.identity.cookie.{IdentityCookieDecoder, PreProductionKeys, ProductionKeys}
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayResponse._
-import com.gu.util.config.Stage
 import com.gu.util.reader.Types._
 
 object IdentityCookieToIdentityUser extends Logging {
 
+  type CookieValuesToIdentityUser = (String, String) => Option[IdentityUser]
+
   case class IdentityUser(id: String, displayName: Option[String])
 
-  def apply(headersOption: Option[Map[String, String]], stage: Stage): ApiGatewayOp[IdentityUser] =
+  def apply(
+    cookiesToIdentityUser: CookieValuesToIdentityUser
+  )(
+    headersOption: Option[Map[String, String]]
+  ): ApiGatewayOp[IdentityUser] =
     for {
       headers <- headersOption.toApiGatewayContinueProcessing(badRequest, "no headers")
       cookieHeader <- headers.get("Cookie").toApiGatewayContinueProcessing(badRequest, "no cookie")
       scGuU <- extractCookieHeaderValue(cookieHeader, "SC_GU_U")
       guU <- extractCookieHeaderValue(cookieHeader, "GU_U")
-      keys = if (stage.isProd) new ProductionKeys else new PreProductionKeys
-      cookieDecoder = new IdentityCookieDecoder(keys)
-      userFromScGuU <- cookieDecoder.getUserDataForScGuU(scGuU).toApiGatewayContinueProcessing(unauthorized)
-      userFromGuU <- cookieDecoder.getUserDataForGuU(guU).toApiGatewayContinueProcessing(unauthorized)
-      displayName = if (userFromScGuU.id equals userFromGuU.getUser.id) userFromGuU.getUser.publicFields.displayName else None
-    } yield IdentityUser(userFromScGuU.id, displayName)
+      identityUser <- cookiesToIdentityUser(scGuU, guU).toApiGatewayContinueProcessing(unauthorized)
+    } yield identityUser
 
   private def extractCookieHeaderValue(cookieHeader: String, specificCookieName: String): ApiGatewayOp[String] = {
     val specificCookieValueOption = for {
@@ -30,6 +31,16 @@ object IdentityCookieToIdentityUser extends Logging {
     } yield keyValue.substring(keyValue.indexOf('=') + 1)
 
     specificCookieValueOption.toApiGatewayContinueProcessing(badRequest, specificCookieName + " cookie is missing")
+  }
+
+  def defaultCookiesToIdentityUser(isProd: Boolean)(scGuU: String, guU: String) = {
+    val keys = if (isProd) new ProductionKeys else new PreProductionKeys
+    val cookieDecoder = new IdentityCookieDecoder(keys)
+    for {
+      userFromScGuU <- cookieDecoder.getUserDataForScGuU(scGuU)
+      userFromGuU <- cookieDecoder.getUserDataForGuU(guU)
+      displayName = if (userFromScGuU.id equals userFromGuU.getUser.id) userFromGuU.getUser.publicFields.displayName else None
+    } yield IdentityUser(userFromScGuU.id, displayName)
   }
 
 }
