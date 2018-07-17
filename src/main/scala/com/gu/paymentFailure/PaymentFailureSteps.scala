@@ -13,6 +13,7 @@ import com.gu.util.reader.Types.ApiGatewayOp.{ReturnWithResponse, ContinueProces
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.RestRequestMaker.ClientFailableOp
 import com.gu.util.zuora.ZuoraGetInvoiceTransactions.InvoiceTransactionSummary
+import com.gu.stripeCustomerSourceUpdated.TypeConvert._
 
 object PaymentFailureSteps extends Logging {
 
@@ -59,7 +60,7 @@ object ZuoraEmailSteps {
     getInvoiceTransactions: String => ClientFailableOp[InvoiceTransactionSummary]
   )(accountId: String, toMessage: PaymentFailureInformation => EmailRequest): ApiGatewayOp[Unit] = {
     for {
-      invoiceTransactionSummary <- getInvoiceTransactions(accountId).toDisjunction.toApiGatewayOp("getInvoiceTransactions failed")
+      invoiceTransactionSummary <- getInvoiceTransactions(accountId).toApiGatewayOp("getInvoiceTransactions failed")
       paymentInformation <- GetPaymentData(accountId)(invoiceTransactionSummary)
       message = toMessage(paymentInformation)
       _ <- sendEmail(message).mapResponse(resp =>

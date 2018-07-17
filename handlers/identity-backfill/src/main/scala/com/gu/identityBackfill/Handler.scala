@@ -1,6 +1,7 @@
 package com.gu.identityBackfill
 
 import java.io.{InputStream, OutputStream}
+
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.identity.{GetByEmail, IdentityConfig}
@@ -20,6 +21,7 @@ import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, Requests}
 import com.gu.util.zuora.{ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
 import okhttp3.{Request, Response}
 import scalaz.\/
+import TypeConvert._
 
 object Handler {
 
@@ -102,7 +104,7 @@ object Handler {
   ): ApiGatewayOp[Unit] =
     for {
       sfRequests <- sfRequests
-      _ <- UpdateSalesforceIdentityId(sfRequests)(sFContactId, identityId).toDisjunction.toApiGatewayOp("zuora issue")
+      _ <- UpdateSalesforceIdentityId(sfRequests)(sFContactId, identityId).toApiGatewayOp("zuora issue")
     } yield ()
 
 }
@@ -116,7 +118,7 @@ object Healthcheck {
     (for {
       identityId <- getByEmail(EmailAddress("john.duffell@guardian.co.uk"))
         .toApiGatewayOp("problem with email").withLogging("healthcheck getByEmail")
-      _ <- countZuoraAccountsForIdentityId(identityId).toDisjunction.toApiGatewayOp("zuora issue")
+      _ <- countZuoraAccountsForIdentityId(identityId).toApiGatewayOp("zuora issue")
       _ <- sfAuth
     } yield ApiGatewayResponse.successfulExecution).apiResponse
 

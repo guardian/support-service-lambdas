@@ -10,6 +10,7 @@ import com.gu.util.zuora.SafeQueryBuilder.Implicits._
 import com.gu.util.zuora.ZuoraQuery.ZuoraQuerier
 import play.api.libs.json.Json
 import scalaz.NonEmptyList
+import TypeConvert._
 
 object SubscriptionsForAccounts {
 
@@ -47,7 +48,7 @@ object SubscriptionsForAccounts {
         queryResults <- zuoraQuerier[SubscriptionsQueryResponse](subscriptionsQuery)
       } yield queryResults
 
-    searchForSubscriptions.map(_.records).toDisjunction.toApiGatewayOp("Failed whilst querying Zuora for subscriptions")
+    searchForSubscriptions.map(_.records).toApiGatewayOp("Failed whilst querying Zuora for subscriptions")
 
   }
 

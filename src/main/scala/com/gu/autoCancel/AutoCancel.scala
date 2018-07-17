@@ -7,6 +7,7 @@ import com.gu.util.reader.Types._
 import com.gu.util.zuora.RestRequestMaker.Requests
 import com.gu.util.zuora.ZuoraGetAccountSummary.SubscriptionId
 import com.gu.util.zuora.{ZuoraCancelSubscription, ZuoraDisableAutoPay, ZuoraUpdateCancellationReason}
+import com.gu.stripeCustomerSourceUpdated.TypeConvert._
 
 object AutoCancel extends Logging {
 
@@ -20,6 +21,6 @@ object AutoCancel extends Logging {
       _ <- ZuoraCancelSubscription(requests)(subToCancel, cancellationDate).withLogging("cancelSubscription")
       _ <- ZuoraDisableAutoPay(requests)(accountId).withLogging("disableAutoPay")
     } yield ()
-    zuoraOp.toDisjunction.toApiGatewayOp("AutoCancel failed")
+    zuoraOp.toApiGatewayOp("AutoCancel failed")
   }
 }

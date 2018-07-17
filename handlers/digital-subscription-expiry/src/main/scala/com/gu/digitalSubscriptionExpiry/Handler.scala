@@ -4,6 +4,7 @@ import java.io.{InputStream, OutputStream}
 import java.time.LocalDateTime
 
 import com.amazonaws.services.lambda.runtime.Context
+import com.gu.digitalSubscriptionExpiry.TypeConvert._
 import com.gu.digitalSubscriptionExpiry.emergencyToken.{EmergencyTokens, EmergencyTokensConfig, GetTokenExpiry}
 import com.gu.digitalSubscriptionExpiry.zuora._
 import com.gu.effects.{GetFromS3, RawEffects}
@@ -39,8 +40,8 @@ object Handler extends Logging {
         DigitalSubscriptionExpirySteps(
           getEmergencyTokenExpiry = GetTokenExpiry(emergencyTokens, today),
           getSubscription = GetSubscription(zuoraRequests),
-          setActivationDate = (SetActivationDate(zuoraRequests, now) _).andThen(_.toDisjunction.toApiGatewayOp(s"zuora SetActivationDate fail")),
-          getAccountSummary = (GetAccountSummary(zuoraRequests) _).andThen(_.toDisjunction.toApiGatewayOp(s"zuora GetAccountSummary fail")),
+          setActivationDate = (SetActivationDate(zuoraRequests, now) _).andThen(_.toApiGatewayOp(s"zuora SetActivationDate fail")),
+          getAccountSummary = (GetAccountSummary(zuoraRequests) _).andThen(_.toApiGatewayOp(s"zuora GetAccountSummary fail")),
           getSubscriptionExpiry = GetSubscriptionExpiry(today),
           skipActivationDateUpdate = SkipActivationDateUpdate.apply
         )

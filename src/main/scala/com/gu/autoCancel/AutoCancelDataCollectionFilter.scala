@@ -9,6 +9,7 @@ import com.gu.util.reader.Types.ApiGatewayOp._
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.RestRequestMaker.ClientFailableOp
 import com.gu.util.zuora.ZuoraGetAccountSummary.{AccountSummary, Invoice, SubscriptionId}
+import com.gu.stripeCustomerSourceUpdated.TypeConvert._
 
 object AutoCancelDataCollectionFilter extends Logging {
 
@@ -18,7 +19,7 @@ object AutoCancelDataCollectionFilter extends Logging {
   )(autoCancelCallout: AutoCancelCallout): ApiGatewayOp[AutoCancelRequest] = {
     val accountId = autoCancelCallout.accountId
     for {
-      accountSummary <- getAccountSummary(accountId).toDisjunction.toApiGatewayOp("getAccountSummary").withLogging("getAccountSummary")
+      accountSummary <- getAccountSummary(accountId).toApiGatewayOp("getAccountSummary").withLogging("getAccountSummary")
       subToCancel <- getSubscriptionToCancel(accountSummary).withLogging("getSubscriptionToCancel")
       cancellationDate <- getCancellationDateFromInvoices(accountSummary, now).withLogging("getCancellationDateFromInvoices")
     } yield AutoCancelRequest(accountId, subToCancel, cancellationDate)

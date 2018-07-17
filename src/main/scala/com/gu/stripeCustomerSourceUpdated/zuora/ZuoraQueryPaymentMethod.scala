@@ -1,5 +1,6 @@
 package com.gu.stripeCustomerSourceUpdated.zuora
 
+import com.gu.stripeCustomerSourceUpdated.TypeConvert._
 import com.gu.stripeCustomerSourceUpdated.{StripeCustomerId, StripeSourceId}
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayResponse
@@ -45,7 +46,7 @@ object ZuoraQueryPaymentMethod extends Logging {
     } yield queryResult
 
     for {
-      queryResult <- maybeQueryResult.toDisjunction.toApiGatewayOp("query failed")
+      queryResult <- maybeQueryResult.toApiGatewayOp("query failed")
       paymentMethodIds <- {
 
         def groupedList(records: List[PaymentMethodFields]): List[(AccountId, NonEmptyList[PaymentMethodFields])] = {

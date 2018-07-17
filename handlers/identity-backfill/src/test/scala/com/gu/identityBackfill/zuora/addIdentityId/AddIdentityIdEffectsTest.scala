@@ -10,6 +10,7 @@ import com.gu.util.reader.Types._
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
 import org.scalatest.{FlatSpec, Matchers}
 import scalaz.\/-
+import com.gu.identityBackfill.TypeConvert._
 
 import scala.util.Random
 
@@ -24,8 +25,8 @@ class AddIdentityIdEffectsTest extends FlatSpec with Matchers {
     val actual = for {
       zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig].toApiGatewayOp("load config")
       zuoraDeps = ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig)
-      _ <- AddIdentityIdToAccount(zuoraDeps)(testAccount, IdentityId(unique)).toDisjunction.toApiGatewayOp("AddIdentityIdToAccount")
-      identityId <- GetIdentityIdForAccount(zuoraDeps)(testAccount).toDisjunction.toApiGatewayOp("GetIdentityIdForAccount")
+      _ <- AddIdentityIdToAccount(zuoraDeps)(testAccount, IdentityId(unique)).toApiGatewayOp("AddIdentityIdToAccount")
+      identityId <- GetIdentityIdForAccount(zuoraDeps)(testAccount).toApiGatewayOp("GetIdentityIdForAccount")
     } yield {
       identityId
     }

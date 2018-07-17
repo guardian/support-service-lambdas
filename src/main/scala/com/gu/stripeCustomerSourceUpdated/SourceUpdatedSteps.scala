@@ -18,6 +18,7 @@ import play.api.libs.json.JsPath
 import scalaz.std.list._
 import scalaz.syntax.applicative._
 import scalaz.{ListT, NonEmptyList}
+import TypeConvert._
 
 object SourceUpdatedSteps extends Logging {
 
@@ -44,7 +45,7 @@ object SourceUpdatedSteps extends Logging {
       // similar to ZuoraService.createPaymentMethod only in REST api
       paymentMethod <- createPaymentMethod(requests)(eventDataObject, paymentMethodFields).withLogging("createPaymentMethod")
       _ <- SetDefaultPaymentMethod.setDefaultPaymentMethod(requests)(paymentMethodFields.AccountId, paymentMethod.id)
-        .toDisjunction.toApiGatewayOp("SetDefaultPaymentMethod failed").withLogging("setDefaultPaymentMethod")
+        .toApiGatewayOp("SetDefaultPaymentMethod failed").withLogging("setDefaultPaymentMethod")
     } yield ()
   }
 
@@ -71,7 +72,7 @@ object SourceUpdatedSteps extends Logging {
       )
       account <- ListT[ApiGatewayOp, AccountSummary](
         ZuoraGetAccountSummary(requests)(paymentMethods.accountId.value)
-          .toDisjunction.toApiGatewayOp("ZuoraGetAccountSummary failed").withLogging("getAccountSummary").map(_.pure[List])
+          .toApiGatewayOp("ZuoraGetAccountSummary failed").withLogging("getAccountSummary").map(_.pure[List])
       )
       defaultPaymentMethods <- ListT[ApiGatewayOp, PaymentMethodFields](
         findDefaultOrSkip(account.basicInfo.defaultPaymentMethod, paymentMethods.paymentMethods)
@@ -102,7 +103,7 @@ object SourceUpdatedSteps extends Logging {
         eventDataObject.expiry,
         creditCardType,
         paymentMethodFields.NumConsecutiveFailures
-      )).toDisjunction.toApiGatewayOp("CreatePaymentMethod failed")
+      )).toApiGatewayOp("CreatePaymentMethod failed")
     } yield result
   }
 

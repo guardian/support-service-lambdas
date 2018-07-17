@@ -19,6 +19,7 @@ import play.api.libs.json.{Json, Reads}
 import scalaz.NonEmptyList
 import scalaz.syntax.traverse.ToTraverseOps
 import com.gu.util.zuora.RestRequestMaker.Types._
+import TypeConvert._
 
 object Handler {
 
@@ -65,10 +66,10 @@ object Handler {
       input <- req.bodyAsCaseClass[WireSfContactRequest]()
       someAccountIds = input.billingAccountZuoraIds.map(AccountId.apply)
       accountIds <- MaybeNonEmptyList(someAccountIds).toApiGatewayContinueProcessing(ApiGatewayResponse.badRequest)
-      emailAddresses <- getZuoraEmails(accountIds).toDisjunction.toApiGatewayOp("get zuora emails")
+      emailAddresses <- getZuoraEmails(accountIds).toApiGatewayOp("get zuora emails")
       _ <- AssertSameEmails(emailAddresses)
       updateAccount = updateAccountSFLinks(input.fullContactId, input.accountId)
-      _ <- accountIds.traverseU(updateAccount).toDisjunction.toApiGatewayOp("updating all the accounts")
+      _ <- accountIds.traverseU(updateAccount).toApiGatewayOp("updating all the accounts")
     } yield ApiGatewayResponse.successfulExecution).apiResponse
 
 }

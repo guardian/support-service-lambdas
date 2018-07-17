@@ -3,6 +3,7 @@ package com.gu.cancellation.sf_cases
 import java.io.{InputStream, OutputStream}
 
 import com.amazonaws.services.lambda.runtime.Context
+import com.gu.cancellation.sf_cases.TypeConvert._
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.identity.IdentityCookieToIdentityUser.{CookieValuesToIdentityUser, IdentityUser}
 import com.gu.identity.{IdentityCookieToIdentityUser, IdentityTestUserConfig, IsIdentityTestUser}
@@ -79,11 +80,11 @@ object Handler extends Logging {
     ) =
       for {
         sfContactId <- lookup("Contact", "IdentityID__c", identityId)
-          .toDisjunction.toApiGatewayOp("lookup SF contact from identityID")
+          .toApiGatewayOp("lookup SF contact from identityID")
         sfSubscriptionIdContainer <- lookup("SF_Subscription__c", "Name", raiseCaseDetail.subscriptionName)
-          .toDisjunction.toApiGatewayOp("lookup SF subscription ID")
+          .toApiGatewayOp("lookup SF subscription ID")
         raiseCaseResponse <- raiseCase(buildNewCaseForSalesforce(raiseCaseDetail, sfSubscriptionIdContainer, sfContactId))
-          .toDisjunction.toApiGatewayOp("raise sf case")
+          .toApiGatewayOp("raise sf case")
       } yield raiseCaseResponse
 
     def steps(sfBackendForIdentityCookieHeader: SfBackendForIdentityCookieHeader)(apiGatewayRequest: ApiGatewayRequest) =
@@ -119,7 +120,7 @@ object Handler extends Logging {
         pathParams <- apiGatewayRequest.pathParamsAsCaseClass[CasePathParams]()
         requestBody <- apiGatewayRequest.bodyAsCaseClass[JsValue]()
         sfUpdate = SalesforceCase.Update(identityAndSfRequests.sfRequests)_
-        _ <- sfUpdate(pathParams.caseId, requestBody).toDisjunction.toApiGatewayOp("update case")
+        _ <- sfUpdate(pathParams.caseId, requestBody).toApiGatewayOp("update case")
       } yield ApiGatewayResponse.successfulExecution).apiResponse
 
   }

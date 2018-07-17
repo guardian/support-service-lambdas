@@ -12,7 +12,7 @@ import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json._
-import com.gu.util.reader.Types._
+import TypeConvert._
 
 case class PartialApiResponse(statusCode: String, body: String)
 case class GetCaseResponse(Description: String)
@@ -28,7 +28,7 @@ class EndToEndHandlerEffectsTest extends FlatSpec with Matchers {
       // TODO verify case belongs to identity user
       pathParams <- apiGatewayRequest.pathParamsAsCaseClass[CasePathParams]()
       sfGet = SalesforceCase.GetById[JsValue](identityAndSfRequests.sfRequests)_
-      getCaseResponse <- sfGet(pathParams.caseId).toDisjunction.toApiGatewayOp("get case detail")
+      getCaseResponse <- sfGet(pathParams.caseId).toApiGatewayOp("get case detail")
     } yield ApiGatewayResponse("200", getCaseResponse)).apiResponse
 
   it should "create a case, update 'Description' field of the case and check the update worked" taggedAs EffectsTest in {

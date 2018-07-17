@@ -6,7 +6,7 @@ import com.gu.identityBackfill.salesforce.{DevSFEffects, UpdateSalesforceIdentit
 import com.gu.test.EffectsTest
 import org.scalatest.{FlatSpec, Matchers}
 import scalaz.\/-
-import com.gu.util.reader.Types._
+import com.gu.identityBackfill.TypeConvert._
 
 import scala.util.Random
 
@@ -19,7 +19,7 @@ class UpdateSalesforceIdentityIdEffectsTest extends FlatSpec with Matchers {
 
     val actual = for {
       auth <- DevSFEffects(GetFromS3.fetchString, RawEffects.response)
-      _ <- UpdateSalesforceIdentityId(auth)(testContact, IdentityId(unique)).toDisjunction.toApiGatewayOp("update")
+      _ <- UpdateSalesforceIdentityId(auth)(testContact, IdentityId(unique)).toApiGatewayOp("update")
       identityId <- GetSalesforceIdentityId(auth)(testContact)
     } yield identityId
 
