@@ -70,17 +70,16 @@ class RestRequestMakerTest extends AsyncFlatSpec {
     response
   }
 
-  def internalServerError(message: String) = GenericError(message)
-
   "convertResponseToCaseClass" should "return a left[String] for an unsuccessful response code" in {
     val response = constructTestResponse(500)
     val either = RestRequestMaker.httpIsSuccessful(response)
-    assert(either == -\/(internalServerError("Request to Zuora was unsuccessful")))
+    assert(either == -\/(GenericError("Request to Zuora was unsuccessful")))
   }
 
   it should "return a left[String] if the body of a successful response cannot be de-serialized to that case class" in {
     val either = RestRequestMaker.toResult[BasicAccountInfo](validZuoraNoOtherFields)
-    assert(either == -\/(internalServerError("Error when converting Zuora response to case class")))
+    val result = either.leftMap(first => GenericError(first.message.split(":")(0)))
+    assert(result == -\/(GenericError("Error when converting Zuora response to case class")))
   }
 
   it should "return a right[T] if the body of a successful response deserializes to T" in {
