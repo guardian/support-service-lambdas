@@ -1,6 +1,6 @@
 package com.gu.newproduct.api.addsubscription.zuora
 
-import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, GenericError, RequestsGet, WithCheck}
+import com.gu.util.zuora.RestRequestMaker._
 import play.api.libs.json._
 import scalaz.{-\/, \/-}
 
@@ -23,5 +23,5 @@ object GetPaymentMethodStatus {
 
   //todo use john's case class for the payment method id
   def apply(get: RequestsGet[PaymentMethodWire])(paymentMethodId: String): ClientFailableOp[PaymentMethodStatus] =
-    get(s"object/payment-method/$paymentMethodId", WithCheck).flatMap(_.toPayMentMethodStatus)
+    get(s"object/payment-method/$paymentMethodId", WithoutCheck).flatMap(_.toPayMentMethodStatus)
 }

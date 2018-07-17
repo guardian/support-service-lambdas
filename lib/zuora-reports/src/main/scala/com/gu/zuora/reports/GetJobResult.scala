@@ -1,7 +1,7 @@
 package com.gu.zuora.reports
 
 import com.gu.util.zuora.RestRequestMaker
-import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, GenericError}
+import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, GenericError, RequestsGet, WithCheck}
 import com.gu.zuora.reports.aqua.AquaJobResponse
 import com.gu.zuora.reports.dataModel.Batch
 import play.api.libs.json._
@@ -9,8 +9,8 @@ import scalaz.{-\/, \/-}
 
 object GetJobResult {
   val MAX_TRIES = 10
-  def apply(aquaGet: (String, Boolean) => ClientFailableOp[AquaJobResponse])(jobResultRequest: JobResultRequest): ClientFailableOp[JobResult] = {
-    val zuoraAquaResponse = aquaGet(s"batch-query/jobs/${jobResultRequest.jobId}", false)
+  def apply(aquaGet: RequestsGet[AquaJobResponse])(jobResultRequest: JobResultRequest): ClientFailableOp[JobResult] = {
+    val zuoraAquaResponse = aquaGet(s"batch-query/jobs/${jobResultRequest.jobId}", WithCheck)
     val tries = jobResultRequest.tries.getOrElse(MAX_TRIES)
     if (tries > 0)
       toJobResultResponse(zuoraAquaResponse, jobResultRequest.dryRun, jobResultRequest.jobId, tries - 1)

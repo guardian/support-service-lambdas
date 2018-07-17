@@ -66,7 +66,7 @@ object RestRequestMaker extends Logging {
     def get[RESP: Reads](path: String, skipCheck: IsCheckNeeded = WithCheck): ClientFailableOp[RESP] =
       for {
         bodyAsJson <- sendRequest(buildRequest(headers, baseUrl + path, _.get()), getResponse).map(Json.parse)
-        _ <- if (skipCheck == WithCheck) \/-(()) else jsonIsSuccessful(bodyAsJson)
+        _ <- if (skipCheck == WithoutCheck) \/-(()) else jsonIsSuccessful(bodyAsJson)
         respModel <- toResult[RESP](bodyAsJson)
       } yield respModel
 
