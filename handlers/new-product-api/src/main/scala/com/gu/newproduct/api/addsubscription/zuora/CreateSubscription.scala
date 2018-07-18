@@ -75,7 +75,11 @@ object CreateSubscription {
   def apply(
     planAndCharge: PlanAndCharge,
     post: RequestsPost[WireCreateRequest, WireSubscription]
-  )(createSubscription: CreateReq): ClientFailableOp[SubscriptionName] =
-    post(createRequest(createSubscription, planAndCharge), s"subscriptions", WithCheck).map(id => SubscriptionName(id.subscriptionNumber))
+  )(createSubscription: CreateReq): ClientFailableOp[SubscriptionName] = {
+    val maybeWireSubscription = post(createRequest(createSubscription, planAndCharge), s"subscriptions", WithCheck)
+    maybeWireSubscription.map { wireSubscription =>
+      SubscriptionName(wireSubscription.subscriptionNumber)
+    }
+  }
 
 }
