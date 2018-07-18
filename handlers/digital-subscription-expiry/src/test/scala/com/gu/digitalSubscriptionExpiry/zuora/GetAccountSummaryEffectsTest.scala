@@ -1,4 +1,6 @@
 package com.gu.digitalSubscriptionExpiry.zuora
+
+import com.gu.digitalSubscriptionExpiry.TypeConvert._
 import com.gu.digitalSubscriptionExpiry.zuora.GetAccountSummary.{AccountId, AccountSummaryResult}
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.test.EffectsTest

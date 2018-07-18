@@ -12,7 +12,7 @@ import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json._
-import com.gu.util.reader.Types._
+import TypeConvert._
 
 case class PartialApiResponse(statusCode: String, body: String)
 case class GetCaseResponse(Description: String)

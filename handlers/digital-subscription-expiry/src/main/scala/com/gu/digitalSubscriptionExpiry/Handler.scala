@@ -4,6 +4,7 @@ import java.io.{InputStream, OutputStream}
 import java.time.LocalDateTime
 
 import com.amazonaws.services.lambda.runtime.Context
+import com.gu.digitalSubscriptionExpiry.TypeConvert._
 import com.gu.digitalSubscriptionExpiry.emergencyToken.{EmergencyTokens, EmergencyTokensConfig, GetTokenExpiry}
 import com.gu.digitalSubscriptionExpiry.zuora._
 import com.gu.effects.{GetFromS3, RawEffects}

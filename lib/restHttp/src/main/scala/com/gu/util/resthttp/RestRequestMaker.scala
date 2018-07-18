@@ -1,44 +1,36 @@
-package com.gu.util.zuora
+package com.gu.util.resthttp
 
 import java.io.InputStream
 
+import com.gu.util.resthttp.Types._
 import okhttp3.{MediaType, Request, RequestBody, Response}
 import play.api.libs.json._
-import scalaz.Scalaz._
-import scalaz.{-\/, \/, \/-}
 
 import scala.util.{Failure, Success, Try}
 
 object RestRequestMaker extends Logging {
 
-  sealed trait ClientFail {
-    def message: String
-  }
-  case class NotFound(message: String) extends ClientFail
-  case class GenericError(message: String) extends ClientFail
-
-  type ClientFailableOp[A] = ClientFail \/ A
   def httpIsSuccessful(response: Response): ClientFailableOp[Unit] = {
     if (response.isSuccessful) {
-      ().right
+      ClientSuccess(())
     } else {
       val body = response.body.string
 
       val truncated = body.take(500) + (if (body.length > 500) "..." else "")
       logger.error(s"Request to Zuora was unsuccessful, response status was ${response.code}, response body: \n $response\n$truncated")
       if (response.code == 404) {
-        NotFound(response.message).left
-      } else GenericError("Request to Zuora was unsuccessful").left
+        NotFound(response.message)
+      } else GenericError("Request to Zuora was unsuccessful")
     }
   }
 
   def toResult[T: Reads](bodyAsJson: JsValue): ClientFailableOp[T] = {
     bodyAsJson.validate[T] match {
       case success: JsSuccess[T] =>
-        success.get.right
+        ClientSuccess(success.get)
       case error: JsError => {
         logger.error(s"Failed to convert Zuora response to case case $error. Response body was: \n $bodyAsJson")
-        GenericError("Error when converting Zuora response to case class").left
+        GenericError("Error when converting Zuora response to case class")
       }
     }
   }
@@ -66,7 +58,7 @@ object RestRequestMaker extends Logging {
     def get[RESP: Reads](path: String, skipCheck: IsCheckNeeded = WithCheck): ClientFailableOp[RESP] =
       for {
         bodyAsJson <- sendRequest(buildRequest(headers, baseUrl + path, _.get()), getResponse).map(Json.parse)
-        _ <- if (skipCheck == WithoutCheck) \/-(()) else jsonIsSuccessful(bodyAsJson)
+        _ <- if (skipCheck == WithoutCheck) ClientSuccess(()) else jsonIsSuccessful(bodyAsJson)
         respModel <- toResult[RESP](bodyAsJson)
       } yield respModel
 
@@ -83,7 +75,7 @@ object RestRequestMaker extends Logging {
       val body = createBody[REQ](req)
       for {
         bodyAsJson <- sendRequest(buildRequest(headers, baseUrl + path, _.post(body)), getResponse).map(Json.parse)
-        _ <- if (skipCheck) \/-(()) else jsonIsSuccessful(bodyAsJson)
+        _ <- if (skipCheck) ClientSuccess(()) else jsonIsSuccessful(bodyAsJson)
         respModel <- toResult[RESP](bodyAsJson)
       } yield respModel
     }
@@ -97,8 +89,8 @@ object RestRequestMaker extends Logging {
 
     private def extractContentLength(response: Response) = {
       Try(response.header("content-length").toLong) match {
-        case Success(contentlength) => \/-(contentlength)
-        case Failure(error) => -\/(GenericError(s"could not extract content length from response ${error.getMessage}"))
+        case Success(contentlength) => ClientSuccess(contentlength)
+        case Failure(error) => GenericError(s"could not extract content length from response ${error.getMessage}")
       }
     }
 

@@ -5,7 +5,7 @@ import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.handlers.{LambdaException, ParseRequest, SerialiseResponse}
-import com.gu.util.zuora.RestRequestMaker.ClientFailableOp
+import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.zuora.ZuoraRestConfig
 import play.api.libs.json.{Reads, Writes}
 import scalaz.Scalaz._
@@ -26,7 +26,7 @@ object ReportsLambda extends Logging {
       request <- ParseRequest[REQUEST](lambdaIO.inputStream).toEither.disjunction
       config <- LoadConfigModule(stage, fetchString)[ZuoraRestConfig].leftMap(configError => LambdaException(configError.error))
       aquaCall = wireCall(config)
-      callResponse <- aquaCall(request).leftMap(error => LambdaException(error.message))
+      callResponse <- aquaCall(request).toDisjunction.leftMap(error => LambdaException(error.message))
     } yield callResponse
 
     lambdaResponse match {

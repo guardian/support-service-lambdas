@@ -1,11 +1,10 @@
 package com.gu.zuora.reports
 
-import com.gu.util.zuora.RestRequestMaker
-import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, GenericError, RequestsGet, WithCheck}
+import com.gu.util.resthttp.RestRequestMaker.{RequestsGet, WithCheck}
+import com.gu.util.resthttp.Types.{ClientFailableOp, ClientFailure, ClientSuccess, GenericError}
 import com.gu.zuora.reports.aqua.AquaJobResponse
 import com.gu.zuora.reports.dataModel.Batch
 import play.api.libs.json._
-import scalaz.{-\/, \/-}
 
 object GetJobResult {
   val MAX_TRIES = 10
@@ -15,7 +14,7 @@ object GetJobResult {
     if (tries > 0)
       toJobResultResponse(zuoraAquaResponse, jobResultRequest.dryRun, jobResultRequest.jobId, tries - 1)
     else
-      -\/(GenericError("tries must be > 0"))
+      GenericError("tries must be > 0")
   }
 
   def toBatch(aquaBatch: aqua.Batch): Option[Batch] = aquaBatch.fileId.map {
@@ -24,17 +23,17 @@ object GetJobResult {
 
   def toJobResultResponse(aquaResponse: ClientFailableOp[AquaJobResponse], dryRun: Boolean, jobId: String, tries: Int): ClientFailableOp[JobResult] = {
     aquaResponse match {
-      case \/-(AquaJobResponse(status, name, aquaBatches, _)) if status == "completed" =>
+      case ClientSuccess(AquaJobResponse(status, name, aquaBatches, _)) if status == "completed" =>
         val batches = aquaBatches.map(toBatch)
         if (batches.contains(None)) {
-          -\/(RestRequestMaker.GenericError(s"file Id missing from response : $aquaResponse"))
+          GenericError(s"file Id missing from response : $aquaResponse")
         } else {
-          \/-(Completed(name, jobId, batches.flatten, dryRun, tries))
+          ClientSuccess(Completed(name, jobId, batches.flatten, dryRun, tries))
         }
 
-      case \/-(AquaJobResponse(status, name, _, _)) if pendingValues.contains(status) => \/-(Pending(name, jobId, dryRun, tries))
-      case \/-(zuoraResponse) => -\/(GenericError(s"unexpected status in zuora response: $zuoraResponse"))
-      case -\/(error) => -\/(error)
+      case ClientSuccess(AquaJobResponse(status, name, _, _)) if pendingValues.contains(status) => ClientSuccess(Pending(name, jobId, dryRun, tries))
+      case ClientSuccess(zuoraResponse) => (GenericError(s"unexpected status in zuora response: $zuoraResponse"))
+      case error: ClientFailure => error
     }
   }
 

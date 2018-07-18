@@ -1,12 +1,11 @@
 package com.gu.util
 
-import com.gu.util.zuora.RestRequestMaker
-import com.gu.util.zuora.RestRequestMaker.GenericError
+import com.gu.util.resthttp.RestRequestMaker
+import com.gu.util.resthttp.Types.{ClientSuccess, GenericError}
 import okhttp3._
 import org.scalatest.Matchers._
 import org.scalatest._
 import play.api.libs.json._
-import scalaz.{-\/, \/-}
 
 class RestRequestMakerTest extends AsyncFlatSpec {
 
@@ -75,23 +74,23 @@ class RestRequestMakerTest extends AsyncFlatSpec {
   "convertResponseToCaseClass" should "return a left[String] for an unsuccessful response code" in {
     val response = constructTestResponse(500)
     val either = RestRequestMaker.httpIsSuccessful(response)
-    assert(either == -\/(internalServerError("Request to Zuora was unsuccessful")))
+    assert(either == GenericError("Request to Zuora was unsuccessful"))
   }
 
   it should "return a left[String] if the body of a successful response cannot be de-serialized to that case class" in {
     val either = RestRequestMaker.toResult[BasicAccountInfo](validZuoraNoOtherFields)
-    assert(either == -\/(internalServerError("Error when converting Zuora response to case class")))
+    assert(either == GenericError("Error when converting Zuora response to case class"))
   }
 
   it should "return a right[T] if the body of a successful response deserializes to T" in {
     val either = RestRequestMaker.toResult[BasicAccountInfo](validUpdateSubscriptionResult)
     val basicInfo = BasicAccountInfo("id123")
-    either should be(\/-(basicInfo))
+    either should be(ClientSuccess(basicInfo))
   }
 
   it should "return a right[Unit] if the body of a successful response deserializes to Unit" in {
     val either = RestRequestMaker.toResult[Unit](validUpdateSubscriptionResult)
-    either should be(\/-(()))
+    either should be(ClientSuccess(()))
   }
 
   it should "run success end to end GET" in {
@@ -108,11 +107,11 @@ class RestRequestMakerTest extends AsyncFlatSpec {
         constructTestResponse(404)
       }
     }
-    val actual = new RestRequestMaker.Requests(Map("a" -> "b"), "https://www.test.com", response, _ => \/-(()))
+    val actual = new RestRequestMaker.Requests(Map("a" -> "b"), "https://www.test.com", response, _ => ClientSuccess(()))
       .get[BasicAccountInfo]("/getget")
     val basicInfo = BasicAccountInfo("id123")
 
-    actual should be(\/-(basicInfo))
+    actual should be(ClientSuccess(basicInfo))
   }
 
 }

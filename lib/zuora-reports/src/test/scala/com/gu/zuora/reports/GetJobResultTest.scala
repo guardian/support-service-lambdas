@@ -1,15 +1,16 @@
 package com.gu.zuora.reports
 
-import com.gu.util.zuora.RestRequestMaker.{GenericError, RequestsGet}
+import com.gu.util.resthttp.RestRequestMaker.RequestsGet
+import com.gu.util.resthttp.Types.{ClientSuccess, GenericError}
 import com.gu.zuora.reports.aqua.AquaJobResponse
 import com.gu.zuora.reports.dataModel.Batch
 import org.scalatest.AsyncFlatSpec
 import org.scalatest.Matchers._
-import scalaz.{-\/, \/-}
+import scalaz.-\/
 
 class GetJobResultTest extends AsyncFlatSpec {
 
-  def ZuoraResponseWithStatus(status: String) = \/-(AquaJobResponse(
+  def ZuoraResponseWithStatus(status: String) = ClientSuccess(AquaJobResponse(
     id = None,
     status = status,
     name = "testResponse",
@@ -30,29 +31,29 @@ class GetJobResultTest extends AsyncFlatSpec {
   it should "decrease the amount of tries left on each execution" in {
     def get: RequestsGet[AquaJobResponse] = { case notTested => ZuoraResponseWithStatus("pending") }
     val jobResultRequest = JobResultRequest(jobId = "someJobId", dryRun = false, tries = Some(7))
-    GetJobResult(get)(jobResultRequest) shouldBe \/-(Pending("testResponse", "someJobId", false, 6))
+    GetJobResult(get)(jobResultRequest) shouldBe ClientSuccess(Pending("testResponse", "someJobId", false, 6))
   }
 
   it should "return error if called with 0 tries left" in {
     def get: RequestsGet[AquaJobResponse] = { case notTested => ZuoraResponseWithStatus("pending") }
     val jobResultRequest = JobResultRequest(jobId = "someJobId", dryRun = false, tries = Some(0))
-    GetJobResult(get)(jobResultRequest) shouldBe -\/(GenericError("tries must be > 0"))
+    GetJobResult(get)(jobResultRequest) shouldBe GenericError("tries must be > 0")
   }
 
   it should "return pending if zuora response status is pending " in {
     def get: RequestsGet[AquaJobResponse] = { case notTested => ZuoraResponseWithStatus("pending") }
     val jobResultRequest = JobResultRequest("someJobId", false, None)
-    GetJobResult(get)(jobResultRequest) shouldBe \/-(Pending("testResponse", "someJobId", false, 9))
+    GetJobResult(get)(jobResultRequest) shouldBe ClientSuccess(Pending("testResponse", "someJobId", false, 9))
   }
   it should "return pending if zuora response status is executing " in {
     def get: RequestsGet[AquaJobResponse] = { case notTested => ZuoraResponseWithStatus("executing") }
     val jobResultRequest = JobResultRequest("someJobId", true, None)
-    GetJobResult(get)(jobResultRequest) shouldBe \/-(Pending("testResponse", "someJobId", true, 9))
+    GetJobResult(get)(jobResultRequest) shouldBe ClientSuccess(Pending("testResponse", "someJobId", true, 9))
   }
   it should "return error if zuora response status is an unexpected value " in {
     def get: RequestsGet[AquaJobResponse] = { case notTested => ZuoraResponseWithStatus("aborted") }
     val jobResultRequest = JobResultRequest("someJobId", false, None)
-    val actualResponse = GetJobResult(get)(jobResultRequest)
+    val actualResponse = GetJobResult(get)(jobResultRequest).toDisjunction
     actualResponse.leftMap(_.message.split(":")(0)) shouldBe -\/("unexpected status in zuora response")
   }
 
@@ -71,11 +72,11 @@ class GetJobResultTest extends AsyncFlatSpec {
     def get: RequestsGet[AquaJobResponse] = { case notTested => ZuoraResponseWithStatus("completed") }
     val jobResultRequest = JobResultRequest("someJobId", false, None)
 
-    GetJobResult(get)(jobResultRequest) shouldBe \/-(expected)
+    GetJobResult(get)(jobResultRequest) shouldBe ClientSuccess(expected)
   }
   it should "return error if zuora response status is completed but the response is missing fileIds" in {
 
-    val responseWithMissingFileId = \/-(AquaJobResponse(
+    val responseWithMissingFileId = ClientSuccess(AquaJobResponse(
       id = None,
       status = "completed",
       name = "testResponse",
@@ -96,6 +97,7 @@ class GetJobResultTest extends AsyncFlatSpec {
     def get: RequestsGet[AquaJobResponse] = { case notTested => responseWithMissingFileId }
     val jobResultRequest = JobResultRequest("someJobId", false, None)
 
-    GetJobResult(get)(jobResultRequest) shouldBe -\/(GenericError("file Id missing from response : \\/-(AquaJobResponse(completed,testResponse,List(Batch(completed,batch1,Some(fileId1)), Batch(completed,batch2,None)),None))"))
+    // test is too specific, shoudlnt' check so much detail
+    GetJobResult(get)(jobResultRequest) shouldBe GenericError("file Id missing from response : ClientSuccess(AquaJobResponse(completed,testResponse,List(Batch(completed,batch1,Some(fileId1)), Batch(completed,batch2,None)),None))")
   }
 }

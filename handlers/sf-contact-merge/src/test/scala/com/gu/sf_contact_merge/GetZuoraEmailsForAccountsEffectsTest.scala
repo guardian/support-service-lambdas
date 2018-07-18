@@ -2,6 +2,7 @@ package com.gu.sf_contact_merge
 
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.sf_contact_merge.GetZuoraEmailsForAccounts.{AccountId, EmailAddress}
+import com.gu.sf_contact_merge.TypeConvert._
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing

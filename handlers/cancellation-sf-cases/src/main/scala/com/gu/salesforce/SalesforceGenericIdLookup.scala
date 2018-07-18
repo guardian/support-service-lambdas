@@ -1,6 +1,7 @@
 package com.gu.salesforce
 
-import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, Requests}
+import com.gu.util.resthttp.RestRequestMaker.Requests
+import com.gu.util.resthttp.Types.ClientFailableOp
 import play.api.libs.json.Json
 
 object SalesforceGenericIdLookup {

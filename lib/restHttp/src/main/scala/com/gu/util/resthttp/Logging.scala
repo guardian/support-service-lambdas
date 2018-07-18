@@ -1,4 +1,4 @@
-package com.gu.util.zuora
+package com.gu.util.resthttp
 
 import org.apache.log4j.Logger
 

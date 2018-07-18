@@ -1,8 +1,9 @@
 package com.gu.identityRetention
 
 import com.gu.identityRetention.Types.AccountId
+import com.gu.util.resthttp.Types.ClientSuccess
 import org.scalatest.{FlatSpec, Matchers}
-import scalaz.{NonEmptyList, \/-}
+import scalaz.NonEmptyList
 
 class SubscriptionsForAccountsTest extends FlatSpec with Matchers {
 
@@ -11,7 +12,7 @@ class SubscriptionsForAccountsTest extends FlatSpec with Matchers {
       AccountId("acc123")
     ))
     val expectedQuery = s"select id, name, status, termEndDate from subscription where status != 'Expired' and accountId = 'acc123'"
-    query.map(_.queryString) should be(\/-(expectedQuery))
+    query.map(_.queryString) should be(ClientSuccess(expectedQuery))
   }
 
   it should "build a valid query for multiple accounts" in {
@@ -24,7 +25,7 @@ class SubscriptionsForAccountsTest extends FlatSpec with Matchers {
          | where status != 'Expired' and accountId = 'acc123'
             | or status != 'Expired' and accountId = 'acc321'
          |""".stripMargin.replaceAll("\n", "")
-    query.map(_.queryString) should be(\/-(expectedQuery))
+    query.map(_.queryString) should be(ClientSuccess(expectedQuery))
   }
 
 }

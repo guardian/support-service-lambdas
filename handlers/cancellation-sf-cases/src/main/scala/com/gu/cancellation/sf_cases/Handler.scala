@@ -3,6 +3,7 @@ package com.gu.cancellation.sf_cases
 import java.io.{InputStream, OutputStream}
 
 import com.amazonaws.services.lambda.runtime.Context
+import com.gu.cancellation.sf_cases.TypeConvert._
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.identity.IdentityCookieToIdentityUser.{CookieValuesToIdentityUser, IdentityUser}
 import com.gu.identity.{IdentityCookieToIdentityUser, IdentityTestUserConfig, IsIdentityTestUser}
@@ -19,7 +20,7 @@ import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, ApiGatewayR
 import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config._
 import com.gu.util.reader.Types._
-import com.gu.util.zuora.RestRequestMaker
+import com.gu.util.resthttp.RestRequestMaker
 import okhttp3.{Request, Response}
 import play.api.libs.json.{JsValue, Json}
 

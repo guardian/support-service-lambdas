@@ -9,10 +9,11 @@ import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayResponse}
 import com.gu.util.config.ETConfig.ETSendId
 import com.gu.util.config.Stage
 import com.gu.util.exacttarget._
+import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.reader.Types._
+import com.gu.util.resthttp.Types.ClientSuccess
 import com.gu.util.zuora.ZuoraGetInvoiceTransactions.InvoiceTransactionSummary
 import org.scalatest.{FlatSpec, Matchers}
-import ApiGatewayOp.{ReturnWithResponse, ContinueProcessing}
 
 class PaymentFailureHandlerTest extends FlatSpec with Matchers {
 
@@ -59,7 +60,7 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
             }, FilterEmail(Stage("PROD"))
 
           ),
-          a => scalaz.\/-(basicInvoiceTransactionSummary)
+          a => ClientSuccess(basicInvoiceTransactionSummary)
 
         ),
         TestData.fakeETSendIds,
@@ -124,7 +125,7 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
     PaymentFailureSteps.apply(
       ZuoraEmailSteps.sendEmailRegardingAccount(
         sendEmail = _ => ReturnWithResponse(ApiGatewayResponse.internalServerError("something failed!")),
-        getInvoiceTransactions = _ => scalaz.\/-(fakeInvoiceTransactionSummary)
+        getInvoiceTransactions = _ => ClientSuccess(fakeInvoiceTransactionSummary)
       ),
       TestData.fakeETSendIds,
       TestData.fakeApiConfig
@@ -148,7 +149,7 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
               ReturnWithResponse(ApiGatewayResponse.internalServerError("something failed!")): ApiGatewayOp[Unit]
             }, FilterEmail(Stage("PROD"))
           ),
-          a => scalaz.\/-(basicInvoiceTransactionSummary)
+          a => ClientSuccess(basicInvoiceTransactionSummary)
         ),
         TestData.fakeETSendIds,
         TestData.fakeApiConfig

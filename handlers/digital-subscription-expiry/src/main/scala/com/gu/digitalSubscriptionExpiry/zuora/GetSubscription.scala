@@ -1,13 +1,15 @@
 package com.gu.digitalSubscriptionExpiry.zuora
 
+import java.time.LocalDate
+
+import com.gu.digitalSubscriptionExpiry.responses.DigitalSubscriptionApiResponses._
 import com.gu.digitalSubscriptionExpiry.zuora.GetAccountSummary.AccountId
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types._
-import java.time.LocalDate
+import com.gu.util.resthttp.RestRequestMaker.Requests
+import com.gu.util.resthttp.Types.{GenericError, NotFound}
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
-import com.gu.util.zuora.RestRequestMaker.{GenericError, NotFound, Requests}
-import com.gu.digitalSubscriptionExpiry.responses.DigitalSubscriptionApiResponses._
 
 object GetSubscription {
 
@@ -46,7 +48,7 @@ object GetSubscription {
     )(SubscriptionResult.apply _)
 
   def apply(requests: Requests)(subscriptionId: SubscriptionId): ApiGatewayOp[SubscriptionResult] =
-    requests.get[SubscriptionResult](s"subscriptions/${subscriptionId.value}").leftMap {
+    requests.get[SubscriptionResult](s"subscriptions/${subscriptionId.value}").toDisjunction.leftMap {
       case genericError: GenericError => ApiGatewayResponse.internalServerError(s"zuora client fail: ${genericError.message}")
       case notFound: NotFound => notFoundResponse
     }.toApiGatewayOp
