@@ -2,20 +2,20 @@ package com.gu.zuora.reports
 
 import java.io.ByteArrayInputStream
 
-import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, DownloadStream}
+import com.gu.util.resthttp.RestRequestMaker.DownloadStream
+import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess}
 import com.gu.zuora.reports.dataModel.{Batch, FetchedFile}
 import org.scalatest.AsyncFlatSpec
 import org.scalatest.Matchers._
-import scalaz.\/-
 
 class FetchFileTest extends AsyncFlatSpec {
 
-  def fakeUpload(stream: DownloadStream, fileName: String) = \/-(s"s3://someBucket/$fileName")
+  def fakeUpload(stream: DownloadStream, fileName: String) = ClientSuccess(s"s3://someBucket/$fileName")
 
   def getFakeDownloadStream(path: String): ClientFailableOp[DownloadStream] = {
     val fakeContent = "some fake content"
     val inputStream = new ByteArrayInputStream(fakeContent.getBytes)
-    \/-(DownloadStream(inputStream, fakeContent.getBytes.length.toLong))
+    ClientSuccess(DownloadStream(inputStream, fakeContent.getBytes.length.toLong))
   }
 
   val fetchFile = FetchFile(fakeUpload, getFakeDownloadStream) _
@@ -28,7 +28,7 @@ class FetchFileTest extends AsyncFlatSpec {
 
     val expectedFetched = FetchedFile("fileId-2", "file2", "s3://someBucket/someJobId/file2.csv") :: alreadyFetched
     val expectedRemainingBatches = batchesToFetch.tail
-    val expected = \/-(FetchFileResponse("someJobId", expectedFetched, expectedRemainingBatches, false, true))
+    val expected = ClientSuccess(FetchFileResponse("someJobId", expectedFetched, expectedRemainingBatches, false, true))
 
     fetchFile(fetchFileRequest).shouldBe(expected)
 
@@ -42,7 +42,7 @@ class FetchFileTest extends AsyncFlatSpec {
 
     val expectedFetched = FetchedFile("fileId-2", "file2", "s3://someBucket/someJobId/file2.csv") :: alreadyFetched
     val expectedRemainingBatches = List.empty
-    val expected = \/-(FetchFileResponse("someJobId", expectedFetched, expectedRemainingBatches, true, false))
+    val expected = ClientSuccess(FetchFileResponse("someJobId", expectedFetched, expectedRemainingBatches, true, false))
 
     fetchFile(fetchFileRequest).shouldBe(expected)
 

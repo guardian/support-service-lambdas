@@ -10,6 +10,7 @@ import com.gu.util.reader.Types._
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
 import org.scalatest.{FlatSpec, Matchers}
 import scalaz.\/-
+import com.gu.identityBackfill.TypeConvert._
 
 import scala.util.Random
 

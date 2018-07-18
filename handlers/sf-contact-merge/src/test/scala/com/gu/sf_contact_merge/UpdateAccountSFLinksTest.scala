@@ -1,10 +1,10 @@
 package com.gu.sf_contact_merge
 
 import com.gu.sf_contact_merge.GetZuoraEmailsForAccounts.AccountId
+import com.gu.util.resthttp.Types.ClientSuccess
 import com.gu.zuora.fake.FakeRequestsPut
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json._
-import scalaz.\/-
 
 class UpdateAccountSFLinksTest extends FlatSpec with Matchers {
 
@@ -29,7 +29,7 @@ class UpdateAccountSFLinksTest extends FlatSpec with Matchers {
       "johnjohn_c"
     )(AccountId("1234"))
 
-    actual should be(\/-(()))
+    actual should be(ClientSuccess(()))
     requestsMade() should be(List(expectedInput))
 
   }

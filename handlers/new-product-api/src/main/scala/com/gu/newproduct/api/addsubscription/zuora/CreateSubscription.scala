@@ -5,7 +5,8 @@ import java.time.format.DateTimeFormatter
 
 import com.gu.newproduct.api.addsubscription.Handler.PlanAndCharge
 import com.gu.newproduct.api.addsubscription.{CaseId, ZuoraAccountId}
-import com.gu.util.zuora.RestRequestMaker._
+import com.gu.util.resthttp.RestRequestMaker.{RequestsPost, WithCheck}
+import com.gu.util.resthttp.Types.ClientFailableOp
 import play.api.libs.json.{Json, Reads}
 
 object CreateSubscription {
@@ -72,7 +73,11 @@ object CreateSubscription {
   def apply(
     planAndCharge: PlanAndCharge,
     post: RequestsPost[WireCreateRequest, WireSubscription]
-  )(createSubscription: CreateReq): ClientFailableOp[SubscriptionName] =
-    post(createRequest(createSubscription, planAndCharge), s"subscriptions", WithCheck).map(id => SubscriptionName(id.subscriptionNumber))
+  )(createSubscription: CreateReq): ClientFailableOp[SubscriptionName] = {
+    val maybeWireSubscription = post(createRequest(createSubscription, planAndCharge), s"subscriptions", WithCheck)
+    maybeWireSubscription.map { wireSubscription =>
+      SubscriptionName(wireSubscription.subscriptionNumber)
+    }
+  }
 
 }

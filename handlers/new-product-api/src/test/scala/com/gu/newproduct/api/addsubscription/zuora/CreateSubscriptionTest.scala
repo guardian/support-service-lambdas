@@ -6,9 +6,9 @@ import com.gu.newproduct.api.addsubscription.Handler.{PlanAndCharge, ProductRate
 import com.gu.newproduct.api.addsubscription.ZuoraAccountId
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.WireModel.{ChargeOverrides, SubscribeToRatePlans, WireCreateRequest, WireSubscription}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{CaseId, CreateReq, SubscriptionName}
-import com.gu.util.zuora.RestRequestMaker.{GenericError, RequestsPost, WithCheck}
+import com.gu.util.resthttp.RestRequestMaker.{RequestsPost, WithCheck}
+import com.gu.util.resthttp.Types.{ClientSuccess, GenericError}
 import org.scalatest.{FlatSpec, Matchers}
-import scalaz.{-\/, \/-}
 
 class CreateSubscriptionTest extends FlatSpec with Matchers {
 
@@ -35,8 +35,8 @@ class CreateSubscriptionTest extends FlatSpec with Matchers {
     )
     val accF: RequestsPost[WireCreateRequest, WireSubscription] = {
       case (req, "subscriptions", WithCheck) if req == expectedReq =>
-        \/-(WireSubscription("a-s123"))
-      case in => -\/(GenericError(s"bad request: $in"))
+        ClientSuccess(WireSubscription("a-s123"))
+      case in => GenericError(s"bad request: $in")
     }
     val createReq = CreateReq(
       accountId = ZuoraAccountId("zac"),
@@ -45,7 +45,7 @@ class CreateSubscriptionTest extends FlatSpec with Matchers {
       acquisitionCase = CaseId("casecase")
     )
     val actual = CreateSubscription(ids, accF)(createReq)
-    actual shouldBe \/-(SubscriptionName("a-s123"))
+    actual shouldBe ClientSuccess(SubscriptionName("a-s123"))
   }
 }
 
