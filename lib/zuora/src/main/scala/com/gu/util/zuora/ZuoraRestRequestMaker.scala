@@ -31,7 +31,7 @@ object ZuoraRestRequestMaker extends Logging {
         if (reasons.exists(_.code.toString.endsWith("40")))
           NotFound("Received a 'not found' response from Zuora")
         else
-          GenericError("Received a failure result from Zuora")
+          GenericError(s"Received a failure result from Zuora: $reasons")
 
       }
       case error: JsError => {

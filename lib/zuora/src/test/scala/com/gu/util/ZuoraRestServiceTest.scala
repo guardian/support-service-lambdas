@@ -58,8 +58,6 @@ class ZuoraRestServiceTest extends AsyncFlatSpec {
     response
   }
 
-  def internalServerError(message: String) = GenericError(message)
-
   it should "return a left[String] if the body of a successful response cannot be de-serialized with a zuora success response" in {
     val either = ZuoraRestRequestMaker.zuoraIsSuccessful(dummyJson)
     assert(either == GenericError("Error when reading common fields from zuora"))
@@ -67,7 +65,8 @@ class ZuoraRestServiceTest extends AsyncFlatSpec {
 
   it should "return a left[String] if the body of a successful http response has a zuora failed in it" in {
     val either = ZuoraRestRequestMaker.zuoraIsSuccessful(validFailedUpdateSubscriptionResult)
-    assert(either == GenericError("Received a failure result from Zuora"))
+    val result = either.mapFailure(first => GenericError(first.message.split(":")(0)))
+    assert(result == GenericError("Received a failure result from Zuora"))
   }
 
   case class BasicAccountInfo(id: String, balance: Double, defaultPaymentMethod: PaymentMethodId)
