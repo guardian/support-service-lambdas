@@ -2,7 +2,6 @@ package com.gu.newproduct.api.addsubscription
 
 import java.time.LocalDate
 
-import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.CaseId
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.{JsError, Json}
 
