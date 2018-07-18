@@ -1,7 +1,6 @@
 package com.gu.util.apigateway
 
 import com.gu.util.apigateway.Auth._
-import com.gu.util.config.TrustedApiConfig
 import org.scalatest.FlatSpec
 import play.api.libs.json.{JsValue, Json}
 
@@ -29,16 +28,16 @@ class AuthTest extends FlatSpec {
   }
 
   "deprecatedCredentialsAreValid" should "return false if the username query string is missing" in {
-    assert(credentialsAreValid(None, trustedApiConfig) == false)
+    assert(credentialsAreValid(trustedApiConfig, RequestAuth(None)) == false)
   }
   "credentialsAreValid" should "return true for correct credentials" in {
-    val requestAuth = Some(RequestAuth(apiToken = "correctPassword"))
-    assert(credentialsAreValid(requestAuth, trustedApiConfig) == true)
+    val requestAuth = RequestAuth(apiToken = Some("correctPassword"))
+    assert(credentialsAreValid(trustedApiConfig, requestAuth) == true)
   }
 
   "credentialsAreValid" should "return false for an incorrect password" in {
-    val requestAuth = Some(RequestAuth(apiToken = "incorrectPassword"))
-    assert(credentialsAreValid(requestAuth, trustedApiConfig) == false)
+    val requestAuth = RequestAuth(apiToken = Some("incorrectPassword"))
+    assert(credentialsAreValid(trustedApiConfig, requestAuth) == false)
   }
 
 }
