@@ -29,7 +29,7 @@ class StepsTest extends FlatSpec with Matchers {
       else ReturnWithResponse(ApiGatewayResponse.internalServerError(s"whoops: $accountId was wrong for prereq check"))
 
     val requestInput = JsObject(Map(
-      "cancellationCase" -> JsString("case"),
+      "acquisitionCase" -> JsString("case"),
       "amountMinorUnits" -> JsNumber(123),
       "startDate" -> JsString("2018-07-18"),
       "zuoraAccountId" -> JsString("acccc"),
