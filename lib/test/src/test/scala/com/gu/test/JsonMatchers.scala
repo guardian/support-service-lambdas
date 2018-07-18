@@ -12,7 +12,9 @@ object JsonMatchers {
     def jsonMatchesFormat[FORMAT: OFormat](expected: FORMAT): Assertion = {
       val expectedJson: JsResult[WithoutExtras[FORMAT]] = JsSuccess(WithoutExtras(expected))
       val actualJson: JsResult[WithoutExtras[FORMAT]] = Json.parse(actual).validate[WithoutExtras[FORMAT]]
-      actualJson should be(expectedJson)
+      withClue(actual) {
+        actualJson should be(expectedJson)
+      }
     }
 
   }

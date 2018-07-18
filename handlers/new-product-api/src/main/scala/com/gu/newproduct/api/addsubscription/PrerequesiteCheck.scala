@@ -1,13 +1,13 @@
 package com.gu.newproduct.api.addsubscription
 
-import com.gu.newproduct.api.addsubscription.Handler.ProductRatePlanId
+import com.gu.newproduct.api.addsubscription.TypeConvert._
+import com.gu.newproduct.api.addsubscription.ZuoraIds.ProductRatePlanId
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.{Account, PaymentMethodId}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.{Subscription, Active => ActiveSub}
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethodStatus.{PaymentMethodStatus, Active => ActivePaymentMethod}
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.Types.ClientFailableOp
-import TypeConvert._
 
 object PrerequesiteCheck {
   def apply(

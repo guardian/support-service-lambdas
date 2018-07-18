@@ -1,6 +1,6 @@
 package com.gu.newproduct.api.addsubscription
 
-import com.gu.newproduct.api.addsubscription.Handler.ProductRatePlanId
+import com.gu.newproduct.api.addsubscription.ZuoraIds.ProductRatePlanId
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount._
 import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions
 import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.Subscription

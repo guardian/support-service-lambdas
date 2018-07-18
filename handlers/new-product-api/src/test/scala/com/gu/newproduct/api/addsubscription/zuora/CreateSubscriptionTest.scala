@@ -2,7 +2,7 @@ package com.gu.newproduct.api.addsubscription.zuora
 
 import java.time.LocalDate
 
-import com.gu.newproduct.api.addsubscription.Handler.{PlanAndCharge, ProductRatePlanChargeId, ProductRatePlanId}
+import com.gu.newproduct.api.addsubscription.ZuoraIds.{PlanAndCharge, ProductRatePlanChargeId, ProductRatePlanId}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.WireModel.{ChargeOverrides, SubscribeToRatePlans, WireCreateRequest, WireSubscription}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{CreateReq, SubscriptionName}
 import com.gu.newproduct.api.addsubscription.{CaseId, ZuoraAccountId}
