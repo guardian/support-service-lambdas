@@ -21,7 +21,8 @@ class ValidateSubscriptionsTest extends FlatSpec with Matchers {
   val contributionRateplans = List("monthlyRatePlanId", "annualRateplanId").map(ProductRatePlanId)
 
   def fakeGetSubs(response: List[Subscription])(id: ZuoraAccountId) = {
-    if (id.value == "zuoraAccountId") ClientSuccess(response) else throw new RuntimeException(s"Test Failed: unexpected accountid $id, expected 'zuoraAccountId")
+    id.value shouldBe "zuoraAccountId"
+    ClientSuccess(response)
   }
 
   it should "fail if account already has an active recurring contribution subscription" in {

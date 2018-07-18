@@ -12,10 +12,9 @@ class ValidatePaymentMethodTest extends FlatSpec with Matchers {
   def validationError(msg: String) = ReturnWithResponse(ApiGatewayResponse.messageResponse(statusCode = "422", message = msg))
 
   def fakeGetPaymentMethodStatus(response: ClientFailableOp[PaymentMethodStatus])(id: PaymentMethodId) = {
-    if (id.value == "paymentMethodId")
-      response
-    else
-      throw new RuntimeException(s"test error: unexpected payment method id: expected 'paymentMethodId' got ${id.value}")
+    id.value shouldBe "paymentMethodId"
+    response
+
   }
   it should "fail if payment method is not active" in {
     def getPaymentMethodStatus = fakeGetPaymentMethodStatus(ClientSuccess(Closed)) _
