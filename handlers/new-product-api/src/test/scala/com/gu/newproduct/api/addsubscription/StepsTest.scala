@@ -5,7 +5,9 @@ import java.time.LocalDate
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{CreateReq, SubscriptionName}
 import com.gu.test.JsonMatchers.JsonMatcher
-import com.gu.util.apigateway.ApiGatewayRequest
+import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
+import com.gu.util.reader.Types.ApiGatewayOp
+import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.resthttp.Types
 import com.gu.util.resthttp.Types.{ClientSuccess, GenericError}
 import org.scalatest.{FlatSpec, Matchers}
@@ -18,9 +20,13 @@ class StepsTest extends FlatSpec with Matchers {
 
     val expectedIn = CreateReq(ZuoraAccountId("acccc"), 123, LocalDate.of(2018, 7, 18), CaseId("case"))
 
-    def fake(in: CreateSubscription.CreateReq): Types.ClientFailableOp[CreateSubscription.SubscriptionName] =
+    def fakeCreate(in: CreateSubscription.CreateReq): Types.ClientFailableOp[CreateSubscription.SubscriptionName] =
       if (in == expectedIn) ClientSuccess(SubscriptionName("well done"))
       else GenericError(s"whoops: $in should have been $expectedIn")
+
+    def fakeCheck(accountId: ZuoraAccountId): ApiGatewayOp[Unit] =
+      if (accountId.value == "acccc") ContinueProcessing(())
+      else ReturnWithResponse(ApiGatewayResponse.internalServerError(s"whoops: $accountId was wrong for prereq check"))
 
     val requestInput = JsObject(Map(
       "cancellationCase" -> JsString("case"),
@@ -35,9 +41,9 @@ class StepsTest extends FlatSpec with Matchers {
     implicit val format: OFormat[ExpectedOut] = Json.format[ExpectedOut]
     val expectedOutput = ExpectedOut("well done")
 
-    val actual = Steps.addSubscriptionSteps(fake)(ApiGatewayRequest(None, Some(Json.stringify(requestInput)), None, None))
+    val actual = Steps.addSubscriptionSteps(fakeCheck, fakeCreate)(ApiGatewayRequest(None, Some(Json.stringify(requestInput)), None, None))
     actual.statusCode should be("200")
-    actual.body jsonMatchesFormat (expectedOutput)
+    actual.body jsonMatchesFormat expectedOutput
   }
 
 }
