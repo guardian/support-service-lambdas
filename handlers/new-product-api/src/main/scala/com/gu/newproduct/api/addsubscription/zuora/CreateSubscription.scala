@@ -5,7 +5,8 @@ import java.time.format.DateTimeFormatter
 
 import com.gu.newproduct.api.addsubscription.Handler.PlanAndCharge
 import com.gu.newproduct.api.addsubscription.ZuoraAccountId
-import com.gu.util.zuora.RestRequestMaker._
+import com.gu.util.resthttp.RestRequestMaker.{RequestsPost, WithCheck}
+import com.gu.util.resthttp.Types.ClientFailableOp
 import play.api.libs.json.{Json, Reads}
 
 object CreateSubscription {

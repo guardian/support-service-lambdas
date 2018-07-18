@@ -77,7 +77,7 @@ class RestRequestMakerTest extends AsyncFlatSpec {
 
   it should "return a left[String] if the body of a successful response cannot be de-serialized to that case class" in {
     val either = RestRequestMaker.toResult[BasicAccountInfo](validZuoraNoOtherFields)
-    val result = either.mapResponse(first => GenericError(first.message.split(":")(0)))
+    val result = either.mapFailure(first => GenericError(first.message.split(":")(0)))
     assert(result == GenericError("Error when converting Zuora response to case class"))
   }
 

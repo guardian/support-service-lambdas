@@ -9,7 +9,7 @@ import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.CaseId
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.WireModel._
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
-import com.gu.util.zuora.RestRequestMaker.RequestsPost
+import com.gu.util.resthttp.RestRequestMaker.RequestsPost
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
 import org.scalatest.{FlatSpec, Matchers}
 import scalaz.\/-
@@ -30,7 +30,7 @@ class CreateSubscriptionEffectsTest extends FlatSpec with Matchers {
       zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig]
       zuoraDeps = ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig)
       post: RequestsPost[WireCreateRequest, WireSubscription] = zuoraDeps.post[WireCreateRequest, WireSubscription]
-      res <- CreateSubscription(monthlyIds, post)(request)
+      res <- CreateSubscription(monthlyIds, post)(request).toDisjunction
     } yield res
     withClue(actual) {
       actual.map(_.value.substring(0, 3)) shouldBe \/-("A-S")
