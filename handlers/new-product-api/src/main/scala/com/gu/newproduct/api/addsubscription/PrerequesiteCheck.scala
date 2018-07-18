@@ -5,10 +5,10 @@ import com.gu.newproduct.api.addsubscription.zuora.GetAccount.{Account, PaymentM
 import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.{Subscription, Active => ActiveSub}
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethodStatus.{PaymentMethodStatus, Active => ActivePaymentMethod}
 import com.gu.util.apigateway.ApiGatewayResponse
-import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.Types.ClientFailableOp
 import TypeConvert._
+
 object PrerequesiteCheck {
   def apply(
     getAccount: ZuoraAccountId => ClientFailableOp[Account],
@@ -17,7 +17,7 @@ object PrerequesiteCheck {
     contributionRatePlanIds: List[ProductRatePlanId]
   )(accountId: ZuoraAccountId): ApiGatewayOp[Unit] = {
 
-    def hasContributions(s: Subscription) = s.productRateplanIds.exists(contributionRatePlanIds.contains(_))
+    def hasActiveContributions(s: Subscription) = s.status == ActiveSub && s.productRateplanIds.exists(contributionRatePlanIds.contains(_))
 
     for {
       account <- getAccount(accountId).toApiGatewayOp("load account from Zuora")
@@ -28,15 +28,15 @@ object PrerequesiteCheck {
       paymentMethodStatus <- getPaymentMethodStatus(paymentMethodId).toApiGatewayOp("load payment method status from Zuora")
       _ <- check(paymentMethodStatus == ActivePaymentMethod, "Default payment method status in Zuora account is not active")
       subscriptions <- getAccountSubscriptions(accountId).toApiGatewayOp("load subscriptions for Zuora account")
-      _ <- check(!subscriptions.filter(_.status == ActiveSub).exists(hasContributions), ifFalseReturn = "Zuora account already has an active recurring contribution subscription")
+      _ <- check(!subscriptions.exists(hasActiveContributions), ifFalseReturn = "Zuora account already has an active recurring contribution subscription")
     } yield ()
   }
 
-  def errorResponse(msg: String) = ReturnWithResponse(ApiGatewayResponse.messageResponse("422", msg))
+  def errorResponse(msg: String) = ApiGatewayResponse.messageResponse("422", msg)
 
-  def check(condition: Boolean, ifFalseReturn: String): ApiGatewayOp[Unit] = if (condition) ContinueProcessing(()) else errorResponse(ifFalseReturn)
+  def check(condition: Boolean, ifFalseReturn: String): ApiGatewayOp[Unit] = condition.toApiGatewayContinueProcessing(errorResponse(ifFalseReturn))
 
-  def extract[V](option: Option[V], ifNoneReturn: String): ApiGatewayOp[V] = option.map(someValue => ContinueProcessing(someValue)).getOrElse(errorResponse(ifNoneReturn))
+  def extract[V](option: Option[V], ifNoneReturn: String): ApiGatewayOp[V] = option.toApiGatewayContinueProcessing(errorResponse(ifNoneReturn))
 
 }
 

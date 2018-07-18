@@ -19,29 +19,20 @@ class GetPaymentMethodStatusTest extends FlatSpec with Matchers {
 
   it should "get active payment status" taggedAs EffectsTest in {
 
-    val actual = for {
-     res <- GetPaymentMethodStatus(fakeGet)(PaymentMethodId("activeAccountId"))
-    } yield {
-      res
-    }
+    val actual = GetPaymentMethodStatus(fakeGet)(PaymentMethodId("activeAccountId"))
+
     actual shouldBe ClientSuccess(Active)
   }
 
   it should "get closed payment status" taggedAs EffectsTest in {
-    val actual = for {
-      res <- GetPaymentMethodStatus(fakeGet)(PaymentMethodId("closedAccountId"))
-    } yield {
-      res
-    }
+    val actual = GetPaymentMethodStatus(fakeGet)(PaymentMethodId("closedAccountId"))
+
     actual shouldBe ClientSuccess(Closed)
   }
 
   it should "return failure if payment method is unexpected value" taggedAs EffectsTest in {
-    val actual = for {
-      res <- GetPaymentMethodStatus(fakeGet)(PaymentMethodId("unexpected"))
-    } yield {
-      res
-    }
+    val actual = GetPaymentMethodStatus(fakeGet)(PaymentMethodId("unexpected"))
+
     actual shouldBe GenericError("Unknown payment method status: 'unexpected'")
   }
 

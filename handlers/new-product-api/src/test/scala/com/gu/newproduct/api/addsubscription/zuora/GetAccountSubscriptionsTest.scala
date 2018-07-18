@@ -39,11 +39,7 @@ class GetAccountSubscriptionsTest extends FlatSpec with Matchers {
 
   it should "get subscriptions from Account" taggedAs EffectsTest in {
 
-    val actual = for {
-      res <- GetAccountSubscriptions(fakeGet)(ZuoraAccountId("account1"))
-    } yield {
-      res
-    }
+    val actual = GetAccountSubscriptions(fakeGet)(ZuoraAccountId("account1"))
 
     val expected = List(
       Subscription(
