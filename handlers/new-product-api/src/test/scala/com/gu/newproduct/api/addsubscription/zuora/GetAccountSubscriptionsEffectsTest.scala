@@ -1,8 +1,8 @@
 package com.gu.newproduct.api.addsubscription.zuora
 
 import com.gu.effects.{GetFromS3, RawEffects}
-import com.gu.newproduct.api.addsubscription.Handler.ProductRatePlanId
 import com.gu.newproduct.api.addsubscription.ZuoraAccountId
+import com.gu.newproduct.api.addsubscription.ZuoraIds.ProductRatePlanId
 import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.WireModel.ZuoraSubscriptionsResponse
 import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.{Active, Subscription}
 import com.gu.test.EffectsTest

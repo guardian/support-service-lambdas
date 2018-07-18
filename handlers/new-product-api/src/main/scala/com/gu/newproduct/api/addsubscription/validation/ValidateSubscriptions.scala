@@ -1,8 +1,8 @@
 package com.gu.newproduct.api.addsubscription.validation
 
-import com.gu.newproduct.api.addsubscription.Handler.ProductRatePlanId
 import com.gu.newproduct.api.addsubscription.TypeConvert._
 import com.gu.newproduct.api.addsubscription.ZuoraAccountId
+import com.gu.newproduct.api.addsubscription.ZuoraIds.ProductRatePlanId
 import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.{Active, Subscription}
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.Types.ClientFailableOp
