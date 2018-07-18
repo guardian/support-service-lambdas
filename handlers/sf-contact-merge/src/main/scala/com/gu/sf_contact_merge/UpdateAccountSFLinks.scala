@@ -1,7 +1,8 @@
 package com.gu.sf_contact_merge
 
 import com.gu.sf_contact_merge.GetZuoraEmailsForAccounts.AccountId
-import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, RequestsPUT}
+import com.gu.util.resthttp.RestRequestMaker.RequestsPUT
+import com.gu.util.resthttp.Types.ClientFailableOp
 import play.api.libs.json.{JsSuccess, Json, Reads}
 
 object UpdateAccountSFLinks {

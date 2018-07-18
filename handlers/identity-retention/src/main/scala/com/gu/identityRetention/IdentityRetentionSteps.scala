@@ -42,7 +42,7 @@ object IdentityRetentionSteps extends Logging {
     Try(input.toLong) match {
       case Success(validUserId) => Some(IdentityId(validUserId.toString))
       case Failure(ex) =>
-        logger.error(s"Invalid identity id provided", ex)
+        logger.error(s"Invalid identity id provided: $input")
         None
     }
   }

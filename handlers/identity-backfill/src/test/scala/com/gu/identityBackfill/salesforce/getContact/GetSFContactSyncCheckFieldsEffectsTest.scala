@@ -7,7 +7,7 @@ import com.gu.identityBackfill.salesforce.{DevSFEffects, GetSFContactSyncCheckFi
 import com.gu.test.EffectsTest
 import org.scalatest.{FlatSpec, Matchers}
 import scalaz.\/-
-import com.gu.util.reader.Types._
+import com.gu.identityBackfill.TypeConvert._
 
 class GetSFContactSyncCheckFieldsEffectsTest extends FlatSpec with Matchers {
 

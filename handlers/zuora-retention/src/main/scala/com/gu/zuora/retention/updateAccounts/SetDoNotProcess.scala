@@ -1,7 +1,7 @@
 package com.gu.zuora.retention.updateAccounts
 
 import com.gu.util.Logging
-import com.gu.util.zuora.RestRequestMaker.ClientFailableOp
+import com.gu.util.resthttp.Types.ClientFailableOp
 import play.api.libs.json.Json
 
 object SetDoNotProcess extends Logging {

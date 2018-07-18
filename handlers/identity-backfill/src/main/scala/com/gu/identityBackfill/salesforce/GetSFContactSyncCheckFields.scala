@@ -1,15 +1,14 @@
 package com.gu.identityBackfill.salesforce
 
 import com.gu.i18n.CountryGroup
-
+import com.gu.identityBackfill.TypeConvert._
 import com.gu.identityBackfill.Types.SFContactId
 import com.gu.identityBackfill.salesforce.ContactSyncCheck.RecordTypeId
 import com.gu.util.apigateway.ApiGatewayResponse
-import com.gu.util.zuora.RestRequestMaker
-import com.gu.util.zuora.RestRequestMaker.ClientFailableOp
-import play.api.libs.json.Json
 import com.gu.util.reader.Types.ApiGatewayOp._
-import com.gu.util.reader.Types._
+import com.gu.util.resthttp.RestRequestMaker
+import com.gu.util.resthttp.Types.ClientFailableOp
+import play.api.libs.json.Json
 
 object GetSFContactSyncCheckFields {
 

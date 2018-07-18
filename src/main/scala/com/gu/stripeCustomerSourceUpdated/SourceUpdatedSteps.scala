@@ -1,6 +1,7 @@
 package com.gu.stripeCustomerSourceUpdated
 
 import com.gu.stripeCustomerSourceUpdated.StripeRequestSignatureChecker.verifyRequest
+import com.gu.stripeCustomerSourceUpdated.TypeConvert._
 import com.gu.stripeCustomerSourceUpdated.zuora.CreatePaymentMethod.{CreateStripePaymentMethod, CreditCardType}
 import com.gu.stripeCustomerSourceUpdated.zuora.ZuoraQueryPaymentMethod.{AccountPaymentMethodIds, PaymentMethodFields}
 import com.gu.stripeCustomerSourceUpdated.zuora.{CreatePaymentMethod, SetDefaultPaymentMethod, ZuoraQueryPaymentMethod}
@@ -10,7 +11,7 @@ import com.gu.util.apigateway.ApiGatewayResponse.unauthorized
 import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.reader.Types.ApiGatewayOp._
 import com.gu.util.reader.Types._
-import com.gu.util.zuora.RestRequestMaker.Requests
+import com.gu.util.resthttp.RestRequestMaker.Requests
 import com.gu.util.zuora.ZuoraGetAccountSummary.AccountSummary
 import com.gu.util.zuora.ZuoraGetAccountSummary.ZuoraAccount.PaymentMethodId
 import com.gu.util.zuora._

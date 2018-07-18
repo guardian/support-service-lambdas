@@ -3,9 +3,9 @@ package com.gu.identityBackfill.zuora
 import com.gu.effects.TestingRawEffects
 import com.gu.effects.TestingRawEffects.{HTTPResponse, POSTRequest}
 import com.gu.identityBackfill.Types._
+import com.gu.util.resthttp.Types.ClientSuccess
 import com.gu.util.zuora.{ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
 import org.scalatest.{FlatSpec, Matchers}
-import scalaz.\/-
 
 class CountZuoraAccountsForIdentityIdTest extends FlatSpec with Matchers {
 
@@ -14,7 +14,7 @@ class CountZuoraAccountsForIdentityIdTest extends FlatSpec with Matchers {
     val requestMaker = ZuoraRestRequestMaker(effects.response, ZuoraRestConfig("https://zuora", "user", "pass"))
     val get = CountZuoraAccountsForIdentityId(ZuoraQuery(requestMaker)) _
     val contacts = get(IdentityId("1234"))
-    val expected = \/-(1)
+    val expected = ClientSuccess(1)
     contacts should be(expected)
   }
 

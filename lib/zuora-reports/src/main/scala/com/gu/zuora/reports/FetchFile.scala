@@ -1,6 +1,7 @@
 package com.gu.zuora.reports
 
-import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, DownloadStream}
+import com.gu.util.resthttp.RestRequestMaker.DownloadStream
+import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.zuora.reports.dataModel.{Batch, FetchedFile}
 import play.api.libs.json._
 

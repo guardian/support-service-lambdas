@@ -7,9 +7,10 @@ import com.gu.util.Logging
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.reader.Types._
-import com.gu.util.zuora.RestRequestMaker.ClientFailableOp
+import com.gu.util.resthttp.Types.ClientFailableOp
 import play.api.libs.json.{Json, Reads}
 import ApiGatewayOp._
+import TypeConvert._
 
 object IdentityBackfillSteps extends Logging {
 

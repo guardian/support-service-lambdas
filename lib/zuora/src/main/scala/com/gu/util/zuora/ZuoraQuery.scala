@@ -1,6 +1,7 @@
 package com.gu.util.zuora
 
-import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, Requests, WithoutCheck}
+import com.gu.util.resthttp.RestRequestMaker.{Requests, WithoutCheck}
+import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.zuora.SafeQueryBuilder.SafeQuery
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
@@ -34,7 +35,7 @@ object ZuoraQuery {
   // in order to allow partial application with unapplied type parameter, we need to use a trait
   def apply(requests: Requests): ZuoraQuerier = new ZuoraQuerier {
     def apply[QUERYRECORD: Reads](query: SafeQuery): ClientFailableOp[QueryResult[QUERYRECORD]] =
-      requests.post(query, s"action/query", WithoutCheck): ClientFailableOp[QueryResult[QUERYRECORD]]
+      requests.post[SafeQuery, QueryResult[QUERYRECORD]](query, s"action/query", WithoutCheck)
   }
 
   trait ZuoraQuerier {

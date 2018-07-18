@@ -1,7 +1,8 @@
 package com.gu.salesforce.cases
 
 import com.gu.util.Logging
-import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, Requests}
+import com.gu.util.resthttp.RestRequestMaker.Requests
+import com.gu.util.resthttp.Types.ClientFailableOp
 import play.api.libs.json.{JsValue, Json, Reads}
 
 object SalesforceCase extends Logging {

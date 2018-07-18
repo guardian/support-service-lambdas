@@ -1,6 +1,7 @@
 package com.gu.digitalSubscriptionExpiry.zuora
 
-import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, Requests}
+import com.gu.util.resthttp.RestRequestMaker.Requests
+import com.gu.util.resthttp.Types.ClientFailableOp
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 

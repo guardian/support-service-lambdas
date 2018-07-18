@@ -4,8 +4,9 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME
 
 import com.gu.digitalSubscriptionExpiry.zuora.GetSubscription.SubscriptionId
-import com.gu.util.zuora.Logging
-import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, Requests}
+import com.gu.util.resthttp.Logging
+import com.gu.util.resthttp.RestRequestMaker.Requests
+import com.gu.util.resthttp.Types.ClientFailableOp
 import play.api.libs.json.{JsSuccess, Json, Reads}
 
 object SetActivationDate extends Logging {

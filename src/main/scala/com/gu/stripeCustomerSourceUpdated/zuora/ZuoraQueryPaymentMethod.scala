@@ -1,13 +1,14 @@
 package com.gu.stripeCustomerSourceUpdated.zuora
 
+import com.gu.stripeCustomerSourceUpdated.TypeConvert._
 import com.gu.stripeCustomerSourceUpdated.{StripeCustomerId, StripeSourceId}
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayResponse
-import com.gu.util.reader.Types.ApiGatewayOp.{ReturnWithResponse, ContinueProcessing}
+import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.reader.Types._
+import com.gu.util.zuora.SafeQueryBuilder.Implicits._
 import com.gu.util.zuora.ZuoraGetAccountSummary.ZuoraAccount._
 import com.gu.util.zuora.ZuoraQuery.ZuoraQuerier
-import com.gu.util.zuora.SafeQueryBuilder.Implicits._
 import play.api.libs.json._
 import scalaz.NonEmptyList
 

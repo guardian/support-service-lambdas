@@ -37,7 +37,7 @@ object ReportsManualEffectsTest extends App {
     val response = for {
       zuoraRequests <- getZuoraRequest(RawEffects.response)
       request = QuerierTestRequest("2c92c0856391fbe001639b8a61d25d7b", true)
-      res <- Querier(generateTestQuery, zuoraRequests)(request)
+      res <- Querier(generateTestQuery, zuoraRequests)(request).toDisjunction
     } yield {
       res
     }
@@ -49,7 +49,7 @@ object ReportsManualEffectsTest extends App {
     val response = for {
       zuoraRequests <- getZuoraRequest(RawEffects.response)
       request = JobResultRequest("2c92c0f8644618e801646a397eff4df9", true, None)
-      res <- GetJobResult(zuoraRequests.get[AquaJobResponse])(request)
+      res <- GetJobResult(zuoraRequests.get[AquaJobResponse])(request).toDisjunction
     } yield {
       res
     }
@@ -62,7 +62,7 @@ object ReportsManualEffectsTest extends App {
       zuoraRequests <- getZuoraRequest(RawEffects.downloadResponse)
       request = FetchFileRequest("2c92c0f963f800ac0164174918d905f2", Nil, List(Batch("2c92c08663f7f01701641749196b2a76", "manualTest/SomeTest2")), false)
       upload = S3ReportUpload("zuora-retention-dev", RawEffects.s3Write) _
-      res <- FetchFile(upload, zuoraRequests.getDownloadStream)(request)
+      res <- FetchFile(upload, zuoraRequests.getDownloadStream)(request).toDisjunction
     } yield {
       res
     }

@@ -2,12 +2,13 @@ package com.gu.newproduct.api.addsubscription.zuora
 
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.newproduct.api.addsubscription.ZuoraAccountId
+import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel._
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount._
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
+import com.gu.util.resthttp.Types.ClientSuccess
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
 import org.scalatest.{FlatSpec, Matchers}
-import scalaz.\/-
 
 class GetAccountSummaryEffectsTest extends FlatSpec with Matchers {
 
@@ -15,7 +16,7 @@ class GetAccountSummaryEffectsTest extends FlatSpec with Matchers {
     val actual = for {
       zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig]
       zuoraDeps = ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig)
-      res <- GetAccount(zuoraDeps.get)(ZuoraAccountId("2c92c0f860017cd501600893130317a7"))
+      res <- GetAccount(zuoraDeps.get[ZuoraAccount])(ZuoraAccountId("2c92c0f860017cd501600893130317a7")).toDisjunction
     } yield res
     val expected = AccountSummary(
       identityId = IdentityId("30000549"),
@@ -23,6 +24,6 @@ class GetAccountSummaryEffectsTest extends FlatSpec with Matchers {
       autoPay = AutoPay(true),
       accountBalanceMinorUnits = AccountBalanceMinorUnits(0)
     )
-    actual shouldBe \/-(expected)
+    actual shouldBe ClientSuccess(expected)
   }
 }

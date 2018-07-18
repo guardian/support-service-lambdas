@@ -1,9 +1,10 @@
 package com.gu.sf_contact_merge
 
 import com.gu.sf_contact_merge.GetZuoraEmailsForAccounts.ContactId
+import com.gu.util.resthttp.Types.ClientSuccess
 import com.gu.zuora.fake.FakeZuoraQuerier
 import org.scalatest.{FlatSpec, Matchers}
-import scalaz.{NonEmptyList, \/-}
+import scalaz.NonEmptyList
 
 class GetEmailsTest extends FlatSpec with Matchers {
 
@@ -21,7 +22,7 @@ class GetEmailsTest extends FlatSpec with Matchers {
     ))
 
     val expectedEmails = List(Some("peppa.pig@guardian.co.uk"), None)
-    actual.map(_.map(_.map(_.value))) should be(\/-(expectedEmails))
+    actual.map(_.map(_.map(_.value))) should be(ClientSuccess(expectedEmails))
 
   }
 
