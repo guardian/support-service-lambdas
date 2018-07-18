@@ -1,8 +1,9 @@
 package com.gu.identityBackfill.salesforce.updateSFIdentityId
 
+import com.gu.identityBackfill.TypeConvert._
 import com.gu.identityBackfill.Types.{IdentityId, SFContactId}
 import com.gu.util.reader.Types._
-import com.gu.util.zuora.RestRequestMaker
+import com.gu.util.resthttp.RestRequestMaker
 import play.api.libs.json.Json
 
 object GetSalesforceIdentityId {

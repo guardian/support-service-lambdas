@@ -6,7 +6,7 @@ import com.gu.identityBackfill.salesforce.{DevSFEffects, UpdateSalesforceIdentit
 import com.gu.test.EffectsTest
 import org.scalatest.{FlatSpec, Matchers}
 import scalaz.\/-
-import com.gu.util.reader.Types._
+import com.gu.identityBackfill.TypeConvert._
 
 import scala.util.Random
 
@@ -15,7 +15,7 @@ class UpdateSalesforceIdentityIdEffectsTest extends FlatSpec with Matchers {
   it should "get auth SF correctly" taggedAs EffectsTest in {
 
     val unique = s"${Random.nextInt(10000)}"
-    val testContact = SFContactId("003g000000LEwO6AAL")
+    val testContact = SFContactId("0036E00000Ho05i")
 
     val actual = for {
       auth <- DevSFEffects(GetFromS3.fetchString, RawEffects.response)

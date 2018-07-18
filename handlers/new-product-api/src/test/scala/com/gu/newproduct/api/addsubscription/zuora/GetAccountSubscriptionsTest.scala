@@ -5,9 +5,9 @@ import com.gu.newproduct.api.addsubscription.ZuoraAccountId
 import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.WireModel.{ZuoraRatePlan, ZuoraSubscription, ZuoraSubscriptionsResponse}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.{Active, NotActive, Subscription}
 import com.gu.test.EffectsTest
-import com.gu.util.zuora.RestRequestMaker.IsCheckNeeded
+import com.gu.util.resthttp.RestRequestMaker.IsCheckNeeded
+import com.gu.util.resthttp.Types.ClientSuccess
 import org.scalatest.{FlatSpec, Matchers}
-import scalaz.{-\/, \/-}
 
 class GetAccountSubscriptionsTest extends FlatSpec with Matchers {
 
@@ -35,7 +35,7 @@ class GetAccountSubscriptionsTest extends FlatSpec with Matchers {
 
   )
 
-  def fakeGet(path: String, skipCheck: IsCheckNeeded) = \/-(fakeResponses(path))
+  def fakeGet(path: String, skipCheck: IsCheckNeeded) = ClientSuccess(fakeResponses(path))
 
   it should "get subscriptions from Account" taggedAs EffectsTest in {
 
@@ -55,7 +55,7 @@ class GetAccountSubscriptionsTest extends FlatSpec with Matchers {
         productRateplanIds = Set(ProductRatePlanId("plan3"), ProductRatePlanId("plan2"))
       )
     )
-    actual shouldBe \/-(expected)
+    actual shouldBe ClientSuccess(expected)
   }
 
 }

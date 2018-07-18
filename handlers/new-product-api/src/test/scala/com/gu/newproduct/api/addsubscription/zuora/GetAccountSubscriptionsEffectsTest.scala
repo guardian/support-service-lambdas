@@ -3,6 +3,7 @@ package com.gu.newproduct.api.addsubscription.zuora
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.newproduct.api.addsubscription.Handler.ProductRatePlanId
 import com.gu.newproduct.api.addsubscription.ZuoraAccountId
+import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.WireModel.ZuoraSubscriptionsResponse
 import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.{Active, Subscription}
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
@@ -16,7 +17,7 @@ class GetAccountSubscriptionsEffectsTest extends FlatSpec with Matchers {
     val actual = for {
       zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig]
       zuoraDeps = ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig)
-      res <- GetAccountSubscriptions(zuoraDeps.get)(ZuoraAccountId("2c92c0f860017cd501600893130317a7"))
+      res <- GetAccountSubscriptions(zuoraDeps.get[ZuoraSubscriptionsResponse])(ZuoraAccountId("2c92c0f860017cd501600893130317a7")).toDisjunction
     } yield {
       res
     }

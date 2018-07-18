@@ -2,7 +2,8 @@ package com.gu.util.zuora
 
 import java.time.LocalDate
 
-import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, Requests}
+import com.gu.util.resthttp.RestRequestMaker.Requests
+import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.zuora.ZuoraGetAccountSummary.SubscriptionId
 import play.api.libs.json.{JsSuccess, Json, Reads, Writes}
 

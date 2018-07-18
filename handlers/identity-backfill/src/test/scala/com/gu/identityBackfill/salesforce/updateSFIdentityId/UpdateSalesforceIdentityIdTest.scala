@@ -3,11 +3,11 @@ package com.gu.identityBackfill.salesforce.updateSFIdentityId
 import com.gu.effects.TestingRawEffects
 import com.gu.effects.TestingRawEffects.{HTTPResponse, POSTRequest}
 import com.gu.identityBackfill.Types.{IdentityId, SFContactId}
-import com.gu.salesforce.auth.SalesforceAuthenticate.SalesforceAuth
 import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId
+import com.gu.salesforce.auth.SalesforceAuthenticate.SalesforceAuth
 import com.gu.salesforce.auth.SalesforceRestRequestMaker
+import com.gu.util.resthttp.Types.ClientSuccess
 import org.scalatest.{FlatSpec, Matchers}
-import scalaz.\/-
 
 class UpdateSalesforceIdentityIdTest extends FlatSpec with Matchers {
 
@@ -18,7 +18,7 @@ class UpdateSalesforceIdentityIdTest extends FlatSpec with Matchers {
       effects.response
     )) _
     val actual = auth(SFContactId("contactsf"), IdentityId("identityid"))
-    val expected = \/-(())
+    val expected = ClientSuccess(())
     actual should be(expected)
 
   }

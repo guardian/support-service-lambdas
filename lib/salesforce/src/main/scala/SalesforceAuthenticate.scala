@@ -4,10 +4,10 @@ import com.gu.salesforce.auth.SalesforceAuthenticate.SalesforceAuth
 import com.gu.util.Logging
 import com.gu.util.config.ConfigLocation
 import com.gu.util.reader.Types.{ApiGatewayOp, _}
-import com.gu.util.zuora.RestRequestMaker
+import com.gu.util.resthttp.RestRequestMaker
+import com.gu.util.resthttp.Types.ClientSuccess
 import okhttp3.{FormBody, Request, Response}
 import play.api.libs.json.{Json, Reads}
-import scalaz.\/-
 
 object SalesforceAuthenticate extends Logging {
 
@@ -22,6 +22,10 @@ object SalesforceAuthenticate extends Logging {
   object SFAuthConfig {
     implicit val reads: Reads[SFAuthConfig] = Json.reads[SFAuthConfig]
     implicit val location = ConfigLocation[SFAuthConfig](path = "sfAuth", version = 1)
+  }
+  object SFAuthTestConfig {
+    implicit val reads: Reads[SFAuthConfig] = SFAuthConfig.reads
+    implicit val location = ConfigLocation[SFAuthConfig](path = "TEST/sfAuth", version = 1)
   }
 
   // the WireResponse model is the same as the domain model, so keep a friendly name
@@ -71,7 +75,7 @@ object SalesforceRestRequestMaker extends Logging {
       headers = Map("Authorization" -> s"Bearer ${salesforceAuth.access_token}"),
       baseUrl = salesforceAuth.instance_url,
       getResponse = response,
-      jsonIsSuccessful = _ => \/-(())
+      jsonIsSuccessful = _ => ClientSuccess(())
     )
   }
 

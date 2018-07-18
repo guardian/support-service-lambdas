@@ -7,6 +7,7 @@ import com.gu.autoCancel.AutoCancel.AutoCancelRequest
 import com.gu.effects.TestingRawEffects
 import com.gu.effects.TestingRawEffects.BasicRequest
 import com.gu.util.reader.Types._
+import com.gu.util.resthttp.Types.ClientSuccess
 import com.gu.util.zuora.ZuoraGetAccountSummary.ZuoraAccount.{AccountId, PaymentMethodId}
 import com.gu.util.zuora.ZuoraGetAccountSummary.{AccountSummary, BasicAccountInfo, Invoice, SubscriptionId, SubscriptionSummary}
 import org.scalatest._
@@ -21,7 +22,7 @@ class AutoCancelStepsTest extends FlatSpec with Matchers {
   "auto cancel filter 2" should "cancel attempt" in {
     val ac = AutoCancelDataCollectionFilter(
       now = LocalDate.now,
-      getAccountSummary = _ => \/-(AccountSummary(basicInfo, List(subscription), List(singleOverdueInvoice)))
+      getAccountSummary = _ => ClientSuccess(AccountSummary(basicInfo, List(subscription), List(singleOverdueInvoice)))
     )_
     val autoCancelCallout = AutoCancelHandlerTest.fakeCallout(true)
     val cancel: ApiGatewayOp[AutoCancelRequest] = ac(autoCancelCallout)

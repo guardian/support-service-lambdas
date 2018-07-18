@@ -4,12 +4,11 @@ import com.gu.newproduct.api.addsubscription.Handler.ProductRatePlanId
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount._
 import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions
 import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.Subscription
-import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethodStatus.{Active, Closed}
+import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethodStatus.{Active, Closed, PaymentMethodStatus}
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
-import com.gu.util.zuora.RestRequestMaker.GenericError
+import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError}
 import org.scalatest.{FlatSpec, Matchers}
-import scalaz.{-\/, \/-}
 
 class PrerequisiteCheckTest extends FlatSpec with Matchers {
 
@@ -65,10 +64,10 @@ class PrerequisiteCheckTest extends FlatSpec with Matchers {
       "annualContributingAccount" -> validAccount
     )
 
-    testAccounts.get(id.value).map(\/-(_)).getOrElse(-\/(GenericError("invalid account")))
+    testAccounts.get(id.value).map(ClientSuccess(_)).getOrElse(GenericError("invalid account"))
   }
 
-  def getPaymentMethodStatus(id: PaymentMethodId) = if (id.value == "activePaymentMethod") \/-(Active) else \/-(Closed)
+  def getPaymentMethodStatus(id: PaymentMethodId): ClientFailableOp[PaymentMethodStatus] = if (id.value == "activePaymentMethod") ClientSuccess(Active) else ClientSuccess(Closed)
 
   def getAccountSubscriptions(id: ZuoraAccountId) = {
 
@@ -96,7 +95,7 @@ class PrerequisiteCheckTest extends FlatSpec with Matchers {
       "annualContributingAccount" -> annualSubs
     )
 
-    subsByAccount.get(id.value).map(\/-(_)).getOrElse(-\/(GenericError("invalid account")))
+    subsByAccount.get(id.value).map(ClientSuccess(_)).getOrElse(GenericError("invalid account"))
   }
 
   val wiredPrerequisiteCheck = PrerequesiteCheck(

@@ -1,9 +1,9 @@
 package com.gu.util.zuora
 
-import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, GenericError}
+import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError}
+import scalaz.NonEmptyList
 import scalaz.std.list.listInstance
 import scalaz.syntax.traverse.ToTraverseOps
-import scalaz.{-\/, NonEmptyList, \/-}
 
 import scala.annotation.implicitNotFound
 
@@ -38,7 +38,7 @@ object SafeQueryBuilder {
 
     implicit val makeSafeAlreadySafe: MakeSafe[SafeQuery] = new MakeSafe[SafeQuery] {
       override def apply(safeQuery: SafeQuery): ClientFailableOp[String] =
-        \/-(safeQuery.queryString)
+        ClientSuccess(safeQuery.queryString)
     }
 
     // this code is designed for the zoql query interface, where backslash is used to escape any special characters
@@ -51,12 +51,12 @@ object SafeQueryBuilder {
     implicit val makeSafeStringIntoQueryLiteral: MakeSafe[String] = new MakeSafe[String] {
       override def apply(untrusted: String): ClientFailableOp[String] = {
         if (untrusted.replaceFirst("""\p{Cntrl}""", "") != untrusted) {
-          -\/(GenericError(s"control characters can't be inserted into a query: $untrusted"))
+          GenericError(s"control characters can't be inserted into a query: $untrusted")
         } else {
           val trusted = untrusted.replaceAll("""\\""", """\\\\""")
             .replaceAll("'", """\\'""")
             .replaceAll(""""""", """\\"""")
-          \/-(s"'$trusted'")
+          ClientSuccess(s"'$trusted'")
         }
 
       }

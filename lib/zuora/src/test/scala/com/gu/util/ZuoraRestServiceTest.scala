@@ -1,12 +1,11 @@
 package com.gu.util
 
-import com.gu.util.zuora.RestRequestMaker.GenericError
+import com.gu.util.resthttp.Types.{ClientSuccess, GenericError}
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
 import okhttp3._
 import org.scalatest.Matchers._
 import org.scalatest._
 import play.api.libs.json._
-import scalaz.{-\/, \/-}
 
 class ZuoraRestServiceTest extends AsyncFlatSpec {
 
@@ -59,16 +58,15 @@ class ZuoraRestServiceTest extends AsyncFlatSpec {
     response
   }
 
-  def internalServerError(message: String) = GenericError(message)
-
   it should "return a left[String] if the body of a successful response cannot be de-serialized with a zuora success response" in {
     val either = ZuoraRestRequestMaker.zuoraIsSuccessful(dummyJson)
-    assert(either == -\/(internalServerError("Error when reading common fields from zuora")))
+    assert(either == GenericError("Error when reading common fields from zuora"))
   }
 
   it should "return a left[String] if the body of a successful http response has a zuora failed in it" in {
     val either = ZuoraRestRequestMaker.zuoraIsSuccessful(validFailedUpdateSubscriptionResult)
-    assert(either == -\/(internalServerError("Received a failure result from Zuora")))
+    val result = either.mapFailure(first => GenericError(first.message.split(":")(0)))
+    assert(result == GenericError("Received a failure result from Zuora"))
   }
 
   case class BasicAccountInfo(id: String, balance: Double, defaultPaymentMethod: PaymentMethodId)
@@ -96,7 +94,7 @@ class ZuoraRestServiceTest extends AsyncFlatSpec {
     val actual = ZuoraRestRequestMaker(response, fakeZConfig).get[BasicAccountInfo]("getget")
     val basicInfo = BasicAccountInfo("id123", 1.2, PaymentMethodId("pmid"))
 
-    actual should be(\/-(basicInfo))
+    actual should be(ClientSuccess(basicInfo))
   }
 
 }

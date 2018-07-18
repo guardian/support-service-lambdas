@@ -49,12 +49,15 @@ These tests do not (YET!) run automatically.
 If you deploy to PROD without checking this, the lambdas will deploy but not actually work.
 
 You can run the tests that hit external services by running `sbt effectsTest:test`.
-This would need suitable AWS credentials to get hold of the config as well as config file under .aws with the content:
+This would need suitable AWS credentials to get hold of the config as well as file called `config` under `~/.aws` directory with the content:
 ```
 [default]
 region = eu-west-1
 ```
 You can tag your integration new tests with `taggedAs EffectsTest`.  This ignores them from the standard `sbt test`.
+
+NOTE: You may notice that IntelliJ doesn't compile the effects tests on-the-fly (as it does with source files) you can re-enable this behaviour by commenting out the contents of the `Seq(...)` at the end of the `val testSettings` assignent in the top-level `build.sbt` .
+This is also means you can run them with the IntelliJ debugger :)
 
 ### Testing post deployment to CODE/PROD
 After deploy you can't relax until you know an HTTP request will hit your lambda, and that your lambda can access any external services.

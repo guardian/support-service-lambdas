@@ -2,7 +2,8 @@ package com.gu.identityBackfill.zuora.addIdentityId
 
 import com.gu.identityBackfill.Types.{AccountId, IdentityId}
 import com.gu.identityBackfill.zuora.addIdentityId.GetIdentityIdForAccount.WireModel.ZuoraAccount
-import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, Requests}
+import com.gu.util.resthttp.RestRequestMaker.Requests
+import com.gu.util.resthttp.Types.ClientFailableOp
 import play.api.libs.json.Json
 
 object GetIdentityIdForAccount {

@@ -2,9 +2,10 @@ package com.gu.util.zuora
 
 import java.time.LocalDate
 
-import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, Requests}
-import play.api.libs.json.{JsPath, Reads}
+import com.gu.util.resthttp.RestRequestMaker.Requests
+import com.gu.util.resthttp.Types.ClientFailableOp
 import play.api.libs.functional.syntax._
+import play.api.libs.json.{JsPath, Reads}
 
 object ZuoraGetInvoiceTransactions {
   case class InvoiceItem(id: String, subscriptionName: String, serviceStartDate: LocalDate, serviceEndDate: LocalDate, chargeAmount: Double, chargeName: String, productName: String)

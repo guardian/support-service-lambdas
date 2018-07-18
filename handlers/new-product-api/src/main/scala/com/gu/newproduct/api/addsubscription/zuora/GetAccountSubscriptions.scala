@@ -2,7 +2,8 @@ package com.gu.newproduct.api.addsubscription.zuora
 
 import com.gu.newproduct.api.addsubscription.Handler.ProductRatePlanId
 import com.gu.newproduct.api.addsubscription.ZuoraAccountId
-import com.gu.util.zuora.RestRequestMaker.{ClientFailableOp, RequestsGet, WithCheck}
+import com.gu.util.resthttp.RestRequestMaker.{RequestsGet, WithCheck}
+import com.gu.util.resthttp.Types.ClientFailableOp
 import play.api.libs.json.Json
 
 object GetAccountSubscriptions {

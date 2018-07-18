@@ -7,8 +7,8 @@ import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethodStatus.{Payme
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.reader.Types._
-import com.gu.util.zuora.RestRequestMaker.ClientFailableOp
-
+import com.gu.util.resthttp.Types.ClientFailableOp
+import TypeConvert._
 object PrerequesiteCheck {
   def apply(
     getAccount: ZuoraAccountId => ClientFailableOp[Account],

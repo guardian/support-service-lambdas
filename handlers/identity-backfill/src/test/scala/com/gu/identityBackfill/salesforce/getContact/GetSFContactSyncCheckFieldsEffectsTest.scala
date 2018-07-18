@@ -7,20 +7,20 @@ import com.gu.identityBackfill.salesforce.{DevSFEffects, GetSFContactSyncCheckFi
 import com.gu.test.EffectsTest
 import org.scalatest.{FlatSpec, Matchers}
 import scalaz.\/-
-import com.gu.util.reader.Types._
+import com.gu.identityBackfill.TypeConvert._
 
 class GetSFContactSyncCheckFieldsEffectsTest extends FlatSpec with Matchers {
 
   it should "get auth SF correctly" taggedAs EffectsTest in {
 
-    val testContact = SFContactId("003g000000LEwO6AAL")
+    val testContact = SFContactId("0036E00000NLzPkQAL")
 
     val actual = for {
       auth <- DevSFEffects(GetFromS3.fetchString, RawEffects.response)
       result <- GetSFContactSyncCheckFields(auth)(testContact).toApiGatewayOp("failed")
     } yield result
 
-    actual.toDisjunction should be(\/-(ContactSyncCheckFields(None, "123", "Testing", None)))
+    actual.toDisjunction should be(\/-(ContactSyncCheckFields(None, "One", "Day", None)))
 
   }
 
