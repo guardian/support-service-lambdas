@@ -4,79 +4,56 @@ import java.io.{InputStream, OutputStream}
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
+import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription
+import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{CreateReq, SubscriptionName}
 import com.gu.util.Logging
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.config.{LoadConfigModule, Stage, TrustedApiConfig}
 import com.gu.util.config.LoadConfigModule.StringFromS3
-import com.gu.util.zuora.ZuoraRestConfig
+import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
 import okhttp3.{Request, Response}
 import com.gu.util.reader.Types._
+import com.gu.util.resthttp.Types.ClientFailableOp
+import TypeConvert._
+import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.WireModel.{WireCreateRequest, WireSubscription}
 
 object Handler extends Logging {
 
   // Referenced in Cloudformation
-  def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
-    runWithEffects(RawEffects.response, RawEffects.stage, GetFromS3.fetchString, LambdaIO(inputStream, outputStream, context))
-  }
-
-  def addSubscriptionSteps(apiGatewayRequest: ApiGatewayRequest): ApiResponse = {
-    (for {
-      request <- apiGatewayRequest.bodyAsCaseClass[AddSubscriptionRequest]()
-      _ = logger.info(s"parsed request as $request")
-    } yield ApiGatewayResponse(body = AddedSubscription("A-S00045523"), statusCode = "200")).apiResponse
-  }
-
-  def runWithEffects(response: Request => Response, stage: Stage, fetchString: StringFromS3, lambdaIO: LambdaIO) = {
-
-    def operation: ZuoraRestConfig => Operation = zuoraRestConfig => {
-      Operation.noHealthcheck(
-        steps = addSubscriptionSteps,
-        shouldAuthenticate = false
-      )
+  def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
+    ApiGatewayHandler(LambdaIO(inputStream, outputStream, context)) {
+      Steps.runWithEffects(RawEffects.response, RawEffects.stage, GetFromS3.fetchString)
     }
 
-    val loadConfig = LoadConfigModule(stage, fetchString)
-    ApiGatewayHandler(lambdaIO)(for {
-      zuoraConfig <- loadConfig[ZuoraRestConfig].toApiGatewayOp("load zuora config")
-      trustedApiConfig <- loadConfig[TrustedApiConfig].toApiGatewayOp("load trusted api config")
-      configuredOp = operation(zuoraConfig)
-    } yield (trustedApiConfig, configuredOp))
+}
 
+object Steps {
+
+  def addSubscriptionSteps(createMonthlyContribution: CreateReq => ClientFailableOp[SubscriptionName])(apiGatewayRequest: ApiGatewayRequest): ApiResponse = {
+    (for {
+      request <- apiGatewayRequest.bodyAsCaseClass[AddSubscriptionRequest]().withLogging("parsed request")
+      // validation goes here
+      req = CreateReq(request.zuoraAccountId, request.amountMinorUnits, request.startDate, request.cancellationCase)
+      subscriptionName <- createMonthlyContribution(req).toApiGatewayOp("create monthly contribution")
+    } yield ApiGatewayResponse(body = AddedSubscription(subscriptionName.value), statusCode = "200")).apiResponse
   }
 
-  case class ProductRatePlanId(value: String) extends AnyVal
-  case class ProductRatePlanChargeId(value: String) extends AnyVal
-  case class PlanAndCharge(productRatePlanId: ProductRatePlanId, productRatePlanChargeId: ProductRatePlanChargeId)
-  case class ContributionsZuoraIds(monthly: PlanAndCharge, annual: PlanAndCharge)
-
-  def zuoraIdsForStage(stage: Stage): ApiGatewayOp[ContributionsZuoraIds] = {
-    val mappings = Map(
-      // todo ideally we should add an id to the fields in zuora so we don't have to hard code
-      Stage("PROD") -> ContributionsZuoraIds(
-        monthly = PlanAndCharge(
-          productRatePlanId = ProductRatePlanId("2c92a0fc5aacfadd015ad24db4ff5e97"),
-          productRatePlanChargeId = ProductRatePlanChargeId("2c92a0fc5aacfadd015ad250bf2c6d38")
-        ),
-        annual = PlanAndCharge(
-          productRatePlanId = ProductRatePlanId("2c92a0fc5e1dc084015e37f58c200eea"),
-          productRatePlanChargeId = ProductRatePlanChargeId("2c92a0fc5e1dc084015e37f58c7b0f34")
-        )
-      ),
-      Stage("CODE") -> ContributionsZuoraIds(
-        monthly = PlanAndCharge(
-          productRatePlanId = ProductRatePlanId("2c92c0f85ab269be015acd9d014549b7"),
-          productRatePlanChargeId = ProductRatePlanChargeId("2c92c0f85ab2696b015acd9eeb6150ab")
-        ),
-        annual = PlanAndCharge(
-          productRatePlanId = ProductRatePlanId("2c92c0f95e1d5c9c015e38f8c87d19a1"),
-          productRatePlanChargeId = ProductRatePlanChargeId("2c92c0f95e1d5c9c015e38f8c8ac19a3")
-        )
+  def runWithEffects(response: Request => Response, stage: Stage, fetchString: StringFromS3): ApiGatewayOp[(TrustedApiConfig, Operation)] = {
+    for {
+      zuoraIds <- ZuoraIds.zuoraIdsForStage(stage)
+      loadConfig = LoadConfigModule(stage, fetchString)
+      zuoraConfig <- loadConfig[ZuoraRestConfig].toApiGatewayOp("load zuora config")
+      trustedApiConfig <- loadConfig[TrustedApiConfig].toApiGatewayOp("load trusted api config")
+      zuoraClient = ZuoraRestRequestMaker(response, zuoraConfig)
+      createMonthlyContribution = CreateSubscription(zuoraIds.monthly, zuoraClient.post[WireCreateRequest, WireSubscription]) _
+      configuredOp = Operation.noHealthcheck(
+        steps = addSubscriptionSteps(createMonthlyContribution),
+        shouldAuthenticate = false
       )
-    // probably don't need dev as we'd just pass in the actual object in the test
-    )
-    mappings.get(stage).toApiGatewayContinueProcessing(ApiGatewayResponse.internalServerError(s"missing zuora ids for stage $stage"))
+    } yield (trustedApiConfig, configuredOp)
   }
 
 }
+

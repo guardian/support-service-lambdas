@@ -58,7 +58,10 @@ def all(theProject: Project) = theProject.settings(scalaSettings, testSettings).
 
 lazy val test = all(project in file("lib/test"))
   .settings(
-    libraryDependencies ++= Seq(scalatest)
+    libraryDependencies ++= Seq(
+      scalatest,
+      playJson % "test"
+    )
   )
 
 val testDep = test % "test->test"

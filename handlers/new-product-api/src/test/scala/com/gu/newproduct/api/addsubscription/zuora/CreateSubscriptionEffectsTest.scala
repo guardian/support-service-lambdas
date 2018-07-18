@@ -3,9 +3,9 @@ package com.gu.newproduct.api.addsubscription.zuora
 import java.time.LocalDate
 
 import com.gu.effects.{GetFromS3, RawEffects}
-import com.gu.newproduct.api.addsubscription.Handler.{PlanAndCharge, ProductRatePlanChargeId, ProductRatePlanId}
-import com.gu.newproduct.api.addsubscription.{CaseId, ZuoraAccountId}
+import com.gu.newproduct.api.addsubscription.ZuoraIds.{PlanAndCharge, ProductRatePlanChargeId, ProductRatePlanId}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.WireModel._
+import com.gu.newproduct.api.addsubscription.{CaseId, ZuoraAccountId}
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.resthttp.RestRequestMaker.RequestsPost

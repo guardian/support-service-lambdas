@@ -3,7 +3,7 @@ package com.gu.newproduct.api.addsubscription.zuora
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-import com.gu.newproduct.api.addsubscription.Handler.PlanAndCharge
+import com.gu.newproduct.api.addsubscription.ZuoraIds.PlanAndCharge
 import com.gu.newproduct.api.addsubscription.{CaseId, ZuoraAccountId}
 import com.gu.util.resthttp.RestRequestMaker.{RequestsPost, WithCheck}
 import com.gu.util.resthttp.Types.ClientFailableOp
