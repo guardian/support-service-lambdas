@@ -13,7 +13,8 @@ class AddSubscriptionRequestTest extends FlatSpec with Matchers {
         |   "startDate":"2018-07-11",
         |   "acquisitionSource":"CSR",
         |   "createdByCSR":"CSRName",
-        |   "amountMinorUnits": 123
+        |   "amountMinorUnits": 123,
+        |   "cancellationCase": "5006E000005b5cf"
         |}
       """.stripMargin
 
@@ -24,7 +25,8 @@ class AddSubscriptionRequestTest extends FlatSpec with Matchers {
       startDate = LocalDate.of(2018, 7, 11),
       acquisitionSource = "CSR",
       createdByCSR = "CSRName",
-      amountMinorUnits = 123
+      amountMinorUnits = 123,
+      cancellationCase = CaseId("5006E000005b5cf")
     )
   }
 
@@ -37,7 +39,8 @@ class AddSubscriptionRequestTest extends FlatSpec with Matchers {
         |   "productRatePlanChargeId":"rateplanChargeId",
         |   "acquisitionSource":"CSR",
         |   "createdByCSR":"CSRName",
-        |   "amountMinorUnits": 220
+        |   "amountMinorUnits": 220,
+        |   "cancellationCase": "5006E000005b5cf"
         |}
       """.stripMargin
 

@@ -14,7 +14,10 @@ case class AddSubscriptionRequest(
   acquisitionSource: String,
   createdByCSR: String,
   amountMinorUnits: Int,
+  cancellationCase: CaseId
 )
+
+case class CaseId(value: String) extends AnyVal
 
 object AddSubscriptionRequest {
 
@@ -24,6 +27,7 @@ object AddSubscriptionRequest {
     acquisitionSource: String,
     createdByCSR: String,
     amountMinorUnits: Int,
+    cancellationCase: String
   ) {
     def toAddSubscriptionRequest = {
       val maybeParsedRequest = Try(LocalDate.parse(startDate)).map { parsedStartDate =>
@@ -32,7 +36,8 @@ object AddSubscriptionRequest {
           startDate = parsedStartDate,
           acquisitionSource = this.acquisitionSource,
           createdByCSR = this.createdByCSR,
-          amountMinorUnits = this.amountMinorUnits
+          amountMinorUnits = this.amountMinorUnits,
+          CaseId(cancellationCase)
         )
       }
 

@@ -64,9 +64,9 @@ object ApiGatewayResponse extends Logging {
     toJsonBody(ResponseBody(s"Processing is not required: $reason"))
   )
 
-  val badRequest = ApiResponse(
+  def badRequest(reason: String) = ApiResponse(
     "400",
-    toJsonBody(ResponseBody("Failure to parse JSON successfully"))
+    toJsonBody(ResponseBody(s"Failure to parse JSON successfully: $reason"))
   )
 
   val unauthorized = ApiResponse(

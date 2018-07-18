@@ -2,7 +2,7 @@ package com.gu.util.reader
 
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayResponse
-import com.gu.util.apigateway.ApiGatewayResponse.{badRequest, internalServerError}
+import com.gu.util.apigateway.ApiGatewayResponse.internalServerError
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
 import play.api.libs.json.{JsError, JsResult, JsSuccess}
@@ -76,12 +76,12 @@ object Types extends Logging {
   // handy classes for converting things
   implicit class JsResultOps[A](jsResult: JsResult[A]) {
 
-    def toApiGatewayOp(response: ApiResponse = badRequest): ApiGatewayOp[A] = {
+    def toApiGatewayOp(): ApiGatewayOp[A] = {
       jsResult match {
         case JsSuccess(value, _) => ContinueProcessing(value)
         case JsError(error) => {
           logger.error(s"Error when deserializing JSON from API Gateway: $error")
-          ReturnWithResponse(response)
+          ReturnWithResponse(ApiGatewayResponse.internalServerError("Error when deserializing JSON from API Gateway"))
         }
       }
     }
@@ -104,25 +104,6 @@ object Types extends Logging {
       theOption match {
         case Some(value) => ContinueProcessing(value)
         case None => ReturnWithResponse(NoneResponse)
-      }
-
-    def toApiGatewayContinueProcessing(NoneResponse: ApiResponse, debugMessage: String) =
-      theOption match {
-        case Some(value) => ContinueProcessing(value)
-        case None => {
-          logger.debug(debugMessage)
-          ReturnWithResponse(NoneResponse)
-        }
-      }
-
-  }
-
-  implicit class OptionApiResponseOps(theOption: Option[ApiResponse]) {
-
-    def toApiGatewayReturnResponse[A](NoneContinue: A = ()): ApiGatewayOp[A] =
-      theOption match {
-        case Some(value) => ReturnWithResponse(value)
-        case None => ContinueProcessing(NoneContinue)
       }
 
   }

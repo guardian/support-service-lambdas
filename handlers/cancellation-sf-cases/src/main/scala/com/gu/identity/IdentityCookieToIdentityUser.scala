@@ -17,8 +17,8 @@ object IdentityCookieToIdentityUser extends Logging {
     headersOption: Option[Map[String, String]]
   ): ApiGatewayOp[IdentityUser] =
     for {
-      headers <- headersOption.toApiGatewayContinueProcessing(badRequest, "no headers")
-      cookieHeader <- headers.get("Cookie").toApiGatewayContinueProcessing(badRequest, "no cookie")
+      headers <- headersOption.toApiGatewayContinueProcessing(badRequest("no headers"))
+      cookieHeader <- headers.get("Cookie").toApiGatewayContinueProcessing(badRequest("no cookie"))
       scGuU <- extractCookieHeaderValue(cookieHeader, "SC_GU_U")
       guU <- extractCookieHeaderValue(cookieHeader, "GU_U")
       identityUser <- cookiesToIdentityUser(scGuU, guU).toApiGatewayContinueProcessing(unauthorized)
@@ -30,7 +30,7 @@ object IdentityCookieToIdentityUser extends Logging {
       keyValue <- keyValues.find(keyValue => keyValue.trim startsWith (specificCookieName + '='))
     } yield keyValue.substring(keyValue.indexOf('=') + 1)
 
-    specificCookieValueOption.toApiGatewayContinueProcessing(badRequest, specificCookieName + " cookie is missing")
+    specificCookieValueOption.toApiGatewayContinueProcessing(badRequest(specificCookieName + " cookie is missing"))
   }
 
   def defaultCookiesToIdentityUser(isProd: Boolean)(scGuU: String, guU: String) = {

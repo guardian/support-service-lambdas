@@ -16,7 +16,7 @@ class IdentityRetentionStepsTest extends FlatSpec with Matchers {
 
   it should "return a bad response if the query string value contains a ZOQL injection attempt" in {
     val result = IdentityRetentionSteps.extractIdentityId(UrlParams(identityId = "123 or status='Active"))
-    val expected = -\/(ApiGatewayResponse.badRequest)
+    val expected = -\/(ApiGatewayResponse.badRequest("no identity id"))
     result.toDisjunction should be(expected)
   }
 
