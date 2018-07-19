@@ -5,8 +5,8 @@ import com.gu.newproduct.api.addsubscription.zuora.GetAccount.PaymentMethodId
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethodStatus.{Active, PaymentMethodStatus}
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.Types.ClientFailableOp
-
-object ValidatePaymentMethod extends Validation {
+import Validation.BooleanValidation
+object ValidatePaymentMethod {
   def apply(
     getPaymentMethodStatus: PaymentMethodId => ClientFailableOp[PaymentMethodStatus]
   )(
@@ -14,7 +14,7 @@ object ValidatePaymentMethod extends Validation {
   ): ApiGatewayOp[Unit] = {
     for {
       paymentMethodStatus <- getPaymentMethodStatus(paymentMethodId).toApiGatewayOp("load payment method status from Zuora")
-      _ <- check(paymentMethodStatus == Active, "Default payment method status in Zuora account is not active")
+      _ <- (paymentMethodStatus == Active) ifFalseReturn "Default payment method status in Zuora account is not active"
     } yield ()
   }
 
