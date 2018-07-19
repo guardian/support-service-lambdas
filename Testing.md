@@ -1,11 +1,14 @@
 # Testing best practice
 ## is testing important?
-The purpose of testing is for two main reasons
+The purpose of unit/component testing is for two main reasons
 1. to prevent us breaking things
-1. to give developers confidence to modify and ship the code
+1. to support modification of the code
+1. to give developers confidence to ship the code
 
 It's important that the tests are maintainable, therefore we should avoid extra boiler plate.
 This means we should understand the essential parts of a test and try to stick to them.
+
+TODO how do integration/recorded/effects tests fit in with this?
 
 ## the components of an ideal functional test are
 
