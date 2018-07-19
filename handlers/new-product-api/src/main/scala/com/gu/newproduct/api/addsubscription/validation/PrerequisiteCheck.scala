@@ -9,13 +9,12 @@ object PrerequisiteCheck {
     validateAccount: ZuoraAccountId => ApiGatewayOp[PaymentMethodId],
     validatePaymentMethod: PaymentMethodId => ApiGatewayOp[Unit],
     validateSubscriptions: ZuoraAccountId => ApiGatewayOp[Unit]
-  )(accountId: ZuoraAccountId): ApiGatewayOp[Unit] = {
-
+  )(accountId: ZuoraAccountId): ApiGatewayOp[Unit] =
     for {
       paymentMethodId <- validateAccount(accountId)
       _ <- validatePaymentMethod(paymentMethodId)
       _ <- validateSubscriptions(accountId)
     } yield ()
-  }
+
 }
 

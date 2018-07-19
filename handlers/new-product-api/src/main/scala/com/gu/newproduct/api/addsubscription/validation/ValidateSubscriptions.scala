@@ -17,7 +17,7 @@ object ValidateSubscriptions {
     for {
       subscriptions <- getAccountSubscriptions(accountId).toApiGatewayOp("load subscriptions for Zuora account")
       hasActiveContributions = hasActiveRateplans(contributionRatePlanIds) _
-      _ <- (!subscriptions.exists(hasActiveContributions)) ifFalseReturn "Zuora account already has an active recurring contribution subscription"
+      _ <- !subscriptions.exists(hasActiveContributions) ifFalseReturn "Zuora account already has an active recurring contribution subscription"
     } yield ()
 
   }
