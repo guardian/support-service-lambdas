@@ -11,13 +11,15 @@ case class ZuoraAccountId(value: String) extends AnyVal
 case class AddSubscriptionRequest(
   zuoraAccountId: ZuoraAccountId,
   startDate: LocalDate,
-  acquisitionSource: String,
-  createdByCSR: String,
+  acquisitionSource: AcquisitionSource,
+  createdByCSR: CreatedByCSR,
   amountMinorUnits: Int,
   acquisitionCase: CaseId
 )
 
 case class CaseId(value: String) extends AnyVal
+case class AcquisitionSource(value: String) extends AnyVal
+case class CreatedByCSR(value: String) extends AnyVal
 
 object AddSubscriptionRequest {
 
@@ -34,8 +36,8 @@ object AddSubscriptionRequest {
         AddSubscriptionRequest(
           zuoraAccountId = ZuoraAccountId(zuoraAccountId),
           startDate = parsedStartDate,
-          acquisitionSource = this.acquisitionSource,
-          createdByCSR = this.createdByCSR,
+          acquisitionSource = AcquisitionSource(this.acquisitionSource),
+          createdByCSR = CreatedByCSR(this.createdByCSR),
           amountMinorUnits = this.amountMinorUnits,
           CaseId(acquisitionCase)
         )

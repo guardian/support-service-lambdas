@@ -42,7 +42,14 @@ object Steps {
     (for {
       request <- apiGatewayRequest.bodyAsCaseClass[AddSubscriptionRequest]().withLogging("parsed request")
       _ <- prerequesiteCheck(request.zuoraAccountId)
-      req = CreateReq(request.zuoraAccountId, request.amountMinorUnits, request.startDate, request.acquisitionCase)
+      req = CreateReq(
+        request.zuoraAccountId,
+        request.amountMinorUnits,
+        request.startDate,
+        request.acquisitionCase,
+        request.acquisitionSource,
+        request.createdByCSR
+      )
       subscriptionName <- createMonthlyContribution(req).toApiGatewayOp("create monthly contribution")
     } yield ApiGatewayResponse(body = AddedSubscription(subscriptionName.value), statusCode = "200")).apiResponse
   }
