@@ -1,6 +1,7 @@
 package com.gu.newproduct.api.addsubscription.zuora
 
 import com.gu.effects.{GetFromS3, RawEffects}
+import com.gu.i18n.Currency.GBP
 import com.gu.newproduct.api.addsubscription.ZuoraAccountId
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel._
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount._
@@ -22,7 +23,8 @@ class GetAccountEffectsTest extends FlatSpec with Matchers {
       identityId = Some(IdentityId("30000549")),
       paymentMethodId = Some(PaymentMethodId("2c92c0f860017cd501600893132117ae")),
       autoPay = AutoPay(true),
-      accountBalanceMinorUnits = AccountBalanceMinorUnits(0)
+      accountBalanceMinorUnits = AccountBalanceMinorUnits(0),
+      currency = GBP
     )
     actual shouldBe \/-(expected)
   }

@@ -10,8 +10,8 @@ import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.WireModel.
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{CreateReq, SubscriptionName}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAccount
 import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.WireModel.ZuoraSubscriptionsResponse
-import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethodStatus.PaymentMethodWire
-import com.gu.newproduct.api.addsubscription.zuora.{CreateSubscription, GetAccount, GetAccountSubscriptions, GetPaymentMethodStatus}
+import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.PaymentMethodWire
+import com.gu.newproduct.api.addsubscription.zuora.{CreateSubscription, GetAccount, GetAccountSubscriptions, GetPaymentMethod}
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
@@ -69,7 +69,7 @@ object Steps {
   ): ZuoraAccountId => ApiGatewayOp[Unit] =
     PrerequisiteCheck(
       ValidateAccount(GetAccount(zuoraClient.get[ZuoraAccount])),
-      ValidatePaymentMethod(GetPaymentMethodStatus(zuoraClient.get[PaymentMethodWire])),
+      ValidatePaymentMethod(GetPaymentMethod(zuoraClient.get[PaymentMethodWire])),
       ValidateSubscriptions(
         GetAccountSubscriptions(zuoraClient.get[ZuoraSubscriptionsResponse]),
         List(zuoraIds.monthly.productRatePlanId, zuoraIds.annual.productRatePlanId)
