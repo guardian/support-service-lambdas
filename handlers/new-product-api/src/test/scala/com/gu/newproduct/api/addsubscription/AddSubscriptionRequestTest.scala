@@ -14,7 +14,7 @@ class AddSubscriptionRequestTest extends FlatSpec with Matchers {
         |   "acquisitionSource":"CSR",
         |   "createdByCSR":"CSRName",
         |   "amountMinorUnits": 123,
-        |   "cancellationCase": "5006E000005b5cf"
+        |   "acquisitionCase": "5006E000005b5cf"
         |}
       """.stripMargin
 
@@ -26,7 +26,7 @@ class AddSubscriptionRequestTest extends FlatSpec with Matchers {
       acquisitionSource = "CSR",
       createdByCSR = "CSRName",
       amountMinorUnits = 123,
-      cancellationCase = CaseId("5006E000005b5cf")
+      acquisitionCase = CaseId("5006E000005b5cf")
     )
   }
 
@@ -40,7 +40,7 @@ class AddSubscriptionRequestTest extends FlatSpec with Matchers {
         |   "acquisitionSource":"CSR",
         |   "createdByCSR":"CSRName",
         |   "amountMinorUnits": 220,
-        |   "cancellationCase": "5006E000005b5cf"
+        |   "acquisitionCase": "5006E000005b5cf"
         |}
       """.stripMargin
 
