@@ -36,7 +36,7 @@ object Handler extends Logging {
   case class SfRequests(normal: LazySalesforceAuthenticatedReqMaker, test: LazySalesforceAuthenticatedReqMaker)
 
   def raiseCase(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
-    runWithEffectsDontTestAtThisLevel(
+    runForLegacyTestsSeeTestingMd(
       IdentityCookieToIdentityUser.defaultCookiesToIdentityUser(RawEffects.stage.isProd),
       RaiseCase.steps,
       RawEffects.response,
@@ -102,7 +102,7 @@ object Handler extends Logging {
   implicit val pathParamReads = Json.reads[CasePathParams]
 
   def updateCase(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
-    runWithEffectsDontTestAtThisLevel(
+    runForLegacyTestsSeeTestingMd(
       IdentityCookieToIdentityUser.defaultCookiesToIdentityUser(RawEffects.stage.isProd),
       UpdateCase.steps,
       RawEffects.response,
@@ -125,7 +125,7 @@ object Handler extends Logging {
 
   }
 
-  def runWithEffectsDontTestAtThisLevel(
+  def runForLegacyTestsSeeTestingMd(
     cookieValuesToIdentityUser: CookieValuesToIdentityUser,
     steps: Steps,
     response: Request => Response,

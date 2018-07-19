@@ -23,7 +23,7 @@ class EndToEndHandlerTest extends FlatSpec with Matchers {
     val os = new ByteArrayOutputStream()
     val config = new TestingRawEffects(200, EndToEndData.responses)
     //execute
-    Lambda.runWithEffectsDontTestAtThisLevel(
+    Lambda.runForLegacyTestsSeeTestingMd(
       Stage("DEV"),
       FakeFetchString.fetchString,
       config.response,

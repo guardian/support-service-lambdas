@@ -75,7 +75,7 @@ object Runner {
     val config = new TestingRawEffects(200, responses, postResponses)
 
     //execute
-    Handler.runWithEffectsDontTestAtThisLevel(
+    Handler.runForLegacyTestsSeeTestingMd(
       Stage("DEV"),
       FakeFetchString.fetchString,
       config.response,

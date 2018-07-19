@@ -18,7 +18,7 @@ import scalaz.\/
 
 object Lambda {
 
-  def runWithEffectsDontTestAtThisLevel(
+  def runForLegacyTestsSeeTestingMd(
     stage: Stage,
     fetchString: StringFromS3,
     response: Request => Response,
@@ -56,6 +56,6 @@ object Lambda {
   // it's referenced by the cloudformation so make sure you keep it in step
   // it's the only part you can't test of the handler
   def handleRequest(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
-    runWithEffectsDontTestAtThisLevel(RawEffects.stage, GetFromS3.fetchString, RawEffects.response, LambdaIO(inputStream, outputStream, context))
+    runForLegacyTestsSeeTestingMd(RawEffects.stage, GetFromS3.fetchString, RawEffects.response, LambdaIO(inputStream, outputStream, context))
 
 }
