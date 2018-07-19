@@ -64,11 +64,13 @@ object Steps {
     zuoraIds: ZuoraIds.ContributionsZuoraIds,
     zuoraClient: RestRequestMaker.Requests
   ): ZuoraAccountId => ApiGatewayOp[Unit] =
-    PrerequesiteCheck(
-      GetAccount(zuoraClient.get[ZuoraAccount]),
-      GetPaymentMethodStatus(zuoraClient.get[PaymentMethodWire]),
-      GetAccountSubscriptions(zuoraClient.get[ZuoraSubscriptionsResponse]),
-      List(zuoraIds.monthly.productRatePlanId, zuoraIds.annual.productRatePlanId)
+    PrerequisiteCheck(
+      ValidateAccount(GetAccount(zuoraClient.get[ZuoraAccount])),
+      ValidatePaymentMethod(GetPaymentMethodStatus(zuoraClient.get[PaymentMethodWire])),
+      ValidateSubscriptions(
+        GetAccountSubscriptions(zuoraClient.get[ZuoraSubscriptionsResponse]),
+        List(zuoraIds.monthly.productRatePlanId, zuoraIds.annual.productRatePlanId)
+      )
     )
 
 }
