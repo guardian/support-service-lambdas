@@ -39,7 +39,7 @@ object AutoCancelHandler extends App with Logging {
           EmailSendSteps(ETClient.sendEmail(response, etConfig), FilterEmail(stage)),
           ZuoraGetInvoiceTransactions(ZuoraRestRequestMaker(response, zuoraRestConfig))
         )
-      ).prependValidationStep(Auth(loadConfigModule[TrustedApiConfig]))
+      ).prependRequestValidationToSteps(Auth(loadConfigModule[TrustedApiConfig]))
     }
   }
 

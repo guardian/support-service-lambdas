@@ -32,7 +32,7 @@ object Lambda {
     loadConfigModule: ConfigFailure \/ TrustedApiConfig,
     wiredOperation: ApiGatewayOp[ApiGatewayHandler.Operation]
   ): ApiGatewayOp[ApiGatewayHandler.Operation] = {
-    wiredOperation.map(_.prependValidationStep(Auth(loadConfigModule)))
+    wiredOperation.map(_.prependRequestValidationToSteps(Auth(loadConfigModule)))
   }
 
   def wiredOperation(stage: Stage, response: Request => Response, loadConfigModule: LoadConfigModule.PartialApply): ApiGatewayOp[ApiGatewayHandler.Operation] = {

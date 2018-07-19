@@ -33,7 +33,7 @@ object Lambda {
           zuoraClient,
           stripeChecker
         )
-      } yield configuredOp.prependValidationStep(Auth(loadConfigModule[TrustedApiConfig]))
+      } yield configuredOp.prependRequestValidationToSteps(Auth(loadConfigModule[TrustedApiConfig]))
     }
 
   }

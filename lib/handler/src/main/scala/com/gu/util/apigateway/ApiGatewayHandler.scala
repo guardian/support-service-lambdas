@@ -47,13 +47,16 @@ object ApiGatewayHandler extends Logging {
     steps: ApiGatewayRequest => ApiResponse,
     healthcheck: () => ApiResponse
   ) {
-    def prependValidationStep(validate: ApiGatewayRequest => ApiGatewayOp[Unit]): Operation = {
-      def newSteps(request: ApiGatewayRequest): ApiResponse =
+
+    def prependRequestValidationToSteps(validate: ApiGatewayRequest => ApiGatewayOp[Unit]): Operation = {
+      val validateAndRunSteps: ApiGatewayRequest => ApiResponse = { request =>
         (for {
           _ <- validate(request)
           result = steps(request)
         } yield result).apiResponse
-      Operation(newSteps, healthcheck)
+      }
+      Operation(validateAndRunSteps, healthcheck)
+
     }
 
   }

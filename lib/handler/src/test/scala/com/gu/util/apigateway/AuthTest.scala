@@ -27,7 +27,7 @@ class AuthTest extends FlatSpec {
     sampleJson
   }
 
-  "deprecatedCredentialsAreValid" should "return false if the username query string is missing" in {
+  "credentialsAreValid" should "return false if the username query string is missing" in {
     assert(credentialsAreValid(trustedApiConfig, RequestAuth(None)) == false)
   }
   "credentialsAreValid" should "return true for correct credentials" in {
