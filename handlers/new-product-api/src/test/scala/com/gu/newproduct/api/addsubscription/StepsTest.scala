@@ -20,9 +20,10 @@ class StepsTest extends FlatSpec with Matchers {
 
     val expectedIn = CreateReq(ZuoraAccountId("acccc"), 123, LocalDate.of(2018, 7, 18), CaseId("case"))
 
-    def fakeCreate(in: CreateSubscription.CreateReq): Types.ClientFailableOp[CreateSubscription.SubscriptionName] =
-      if (in == expectedIn) ClientSuccess(SubscriptionName("well done"))
-      else GenericError(s"whoops: $in should have been $expectedIn")
+    def fakeCreate(in: CreateSubscription.CreateReq): Types.ClientFailableOp[CreateSubscription.SubscriptionName] = {
+      in shouldBe expectedIn
+      ClientSuccess(SubscriptionName("well done"))
+    }
 
     def fakeCheck(accountId: ZuoraAccountId): ApiGatewayOp[Unit] =
       if (accountId.value == "acccc") ContinueProcessing(())
