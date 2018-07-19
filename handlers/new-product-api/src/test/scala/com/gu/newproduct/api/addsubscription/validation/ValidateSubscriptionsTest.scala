@@ -31,8 +31,6 @@ class ValidateSubscriptionsTest extends FlatSpec with Matchers {
       sub(active = true, rateplans = Set("monthlyRatePlanId", "someOtherPlan"))
     )
 
-    def getSubscriptions = fakeGetSubs(subs) _
-
     ValidateSubscriptions(fakeGetSubs(subs), contributionRateplans)(ZuoraAccountId("zuoraAccountId")) shouldBe validationError("Zuora account already has an active recurring contribution subscription")
   }
   it should "succeed if account has inactive recurring subs" in {
@@ -42,9 +40,7 @@ class ValidateSubscriptionsTest extends FlatSpec with Matchers {
       sub(active = false, rateplans = Set("monthlyRatePlanId", "someOtherPlan"))
     )
 
-    def getSubscriptions = fakeGetSubs(subs) _
-
-    ValidateSubscriptions(getSubscriptions, contributionRateplans)(ZuoraAccountId("zuoraAccountId")) shouldBe ContinueProcessing(())
+    ValidateSubscriptions(fakeGetSubs(subs), contributionRateplans)(ZuoraAccountId("zuoraAccountId")) shouldBe ContinueProcessing(())
   }
   it should "succeed if account has no recurring subs" in {
 
@@ -53,9 +49,7 @@ class ValidateSubscriptionsTest extends FlatSpec with Matchers {
       sub(active = true, rateplans = Set("yetAnotherplan", "somePlan"))
     )
 
-    def getSubscriptions = fakeGetSubs(subs) _
-
-    ValidateSubscriptions(getSubscriptions, contributionRateplans)(ZuoraAccountId("zuoraAccountId")) shouldBe ContinueProcessing(())
+    ValidateSubscriptions(fakeGetSubs(subs), contributionRateplans)(ZuoraAccountId("zuoraAccountId")) shouldBe ContinueProcessing(())
   }
 
   it should "return error if zuora call fails" in {
