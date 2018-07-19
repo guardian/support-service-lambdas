@@ -18,7 +18,7 @@ class ValidateSubscriptionsTest extends FlatSpec with Matchers {
     productRateplanIds = rateplans.map(ProductRatePlanId)
   )
 
-  val contributionRateplans = List("monthlyRatePlanId", "annualRateplanId").map(ProductRatePlanId)
+  val contributionRateplans = List("monthyContributionRateplanId", "annualContributionRateplanId").map(ProductRatePlanId)
 
   def fakeGetSubs(response: List[Subscription])(id: ZuoraAccountId) = {
     id.value shouldBe "zuoraAccountId"
@@ -28,7 +28,7 @@ class ValidateSubscriptionsTest extends FlatSpec with Matchers {
   it should "fail if account already has an active recurring contribution subscription" in {
     val subs = List(
       sub(active = true, rateplans = Set("somePlan", "someOtherPlan")),
-      sub(active = true, rateplans = Set("monthlyRatePlanId", "someOtherPlan"))
+      sub(active = true, rateplans = Set("monthyContributionRateplanId", "someOtherPlan"))
     )
 
     ValidateSubscriptions(fakeGetSubs(subs), contributionRateplans)(ZuoraAccountId("zuoraAccountId")) shouldBe validationError("Zuora account already has an active recurring contribution subscription")
@@ -37,7 +37,7 @@ class ValidateSubscriptionsTest extends FlatSpec with Matchers {
 
     val subs = List(
       sub(active = true, rateplans = Set("somePlan", "someOtherPlan")),
-      sub(active = false, rateplans = Set("monthlyRatePlanId", "someOtherPlan"))
+      sub(active = false, rateplans = Set("monthyContributionRateplanId", "someOtherPlan"))
     )
 
     ValidateSubscriptions(fakeGetSubs(subs), contributionRateplans)(ZuoraAccountId("zuoraAccountId")) shouldBe ContinueProcessing(())
