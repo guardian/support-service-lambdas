@@ -41,7 +41,7 @@ class IdentityRetentionHandlerEffectsTest extends FlatSpec with Matchers {
   def runWithMock(mockRequest: String): String = {
     val stream = new ByteArrayInputStream(mockRequest.getBytes(java.nio.charset.StandardCharsets.UTF_8))
     val output = new ByteArrayOutputStream()
-    Handler.runWithEffects(RawEffects.response, RawEffects.stage, GetFromS3.fetchString, LambdaIO(stream, output, null))
+    Handler.runForLegacyTestsSeeTestingMd(RawEffects.response, RawEffects.stage, GetFromS3.fetchString, LambdaIO(stream, output, null))
     new String(output.toByteArray, "UTF-8")
   }
 

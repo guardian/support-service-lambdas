@@ -73,7 +73,7 @@ object Runner extends Matchers {
     val os = new ByteArrayOutputStream()
 
     //execute
-    Handler.runWithEffects(
+    Handler.runForLegacyTestsSeeTestingMd(
       fakeCookiesToIdentityUser,
       steps,
       RawEffects.response,

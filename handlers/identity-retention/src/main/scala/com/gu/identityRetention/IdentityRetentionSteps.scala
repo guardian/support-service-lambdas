@@ -29,7 +29,7 @@ object IdentityRetentionSteps extends Logging {
         accounts <- MaybeNonEmptyList(possibleAccounts).toApiGatewayContinueProcessing(ApiGatewayResponse.notFound("no active zuora accounts"))
         subs <- SubscriptionsForAccounts(zuoraQuerier)(accounts)
       } yield RelationshipForSubscriptions(subs)).apiResponse
-  }, false)
+  })
 
   def extractIdentityId(queryStringParams: UrlParams): ApiGatewayOp[IdentityId] = {
     validate(queryStringParams.identityId) match {

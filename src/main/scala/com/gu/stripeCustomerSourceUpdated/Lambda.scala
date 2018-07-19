@@ -4,8 +4,9 @@ import java.io.{InputStream, OutputStream}
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
-import com.gu.util.apigateway.ApiGatewayHandler
+import com.gu.util.apigateway.{ApiGatewayHandler, Auth}
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
+import com.gu.util.apigateway.Auth.TrustedApiConfig
 import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config._
 import com.gu.util.reader.Types._
@@ -20,21 +21,20 @@ object Lambda {
     response: Request => Response,
     lambdaIO: LambdaIO
   ): Unit = {
-    def operation(zuoraRestConfig: ZuoraRestConfig, stripeConfig: StripeConfig): ApiGatewayHandler.Operation =
-      SourceUpdatedSteps(
-        ZuoraRestRequestMaker(response, zuoraRestConfig),
-        StripeDeps(stripeConfig, new StripeSignatureChecker)
-      )
     val loadConfigModule = LoadConfigModule(stage, fetchString)
 
-    ApiGatewayHandler(lambdaIO)(for {
-      zuoraRestConfig <- loadConfigModule[ZuoraRestConfig].toApiGatewayOp("load zuora config")
-      stripeConfig <- loadConfigModule[StripeConfig].toApiGatewayOp("load stripe config")
-      trustedApiConfig <- loadConfigModule[TrustedApiConfig].toApiGatewayOp("load trusted Api config")
-
-      configuredOp = operation(zuoraRestConfig, stripeConfig)
-
-    } yield (trustedApiConfig, configuredOp))
+    ApiGatewayHandler(lambdaIO) {
+      for {
+        zuoraRestConfig <- loadConfigModule[ZuoraRestConfig].toApiGatewayOp("load zuora config")
+        stripeConfig <- loadConfigModule[StripeConfig].toApiGatewayOp("load stripe config")
+        zuoraClient = ZuoraRestRequestMaker(response, zuoraRestConfig)
+        stripeChecker = StripeDeps(stripeConfig, new StripeSignatureChecker)
+        configuredOp = SourceUpdatedSteps(
+          zuoraClient,
+          stripeChecker
+        )
+      } yield configuredOp.prependRequestValidationToSteps(Auth(loadConfigModule[TrustedApiConfig]))
+    }
 
   }
 

@@ -42,13 +42,6 @@ object ETConfig {
   )(ETConfig.apply _)
 }
 
-case class TrustedApiConfig(apiToken: String, tenantId: String)
-
-object TrustedApiConfig {
-  implicit val location = ConfigLocation[TrustedApiConfig](path = "trustedApi", version = 1)
-  implicit val apiConfigReads = Json.reads[TrustedApiConfig]
-}
-
 case class StripeSecretKey(key: String) extends AnyVal
 
 object StripeSecretKey {
@@ -75,14 +68,6 @@ object StripeConfig {
   )(StripeConfig.apply _)
 }
 
-case class Config[StepsConfig](
-  stage: Stage,
-  trustedApiConfig: TrustedApiConfig,
-  stepsConfig: StepsConfig,
-  etConfig: ETConfig,
-  stripeConfig: StripeConfig
-)
-
 case class Stage(value: String) extends AnyVal {
   def isProd: Boolean = value == "PROD"
 }
@@ -100,14 +85,6 @@ case class ZuoraEnvironment(value: String) extends Logging {
 }
 
 object ConfigReads {
-
-  implicit def configReads[StepsConfig: Reads]: Reads[Config[StepsConfig]] = (
-    (JsPath \ "stage").read[String].map(Stage.apply) and
-    (JsPath \ "trustedApiConfig").read[TrustedApiConfig] and
-    (JsPath \ "stepsConfig").read[StepsConfig] and
-    (JsPath \ "etConfig").read[ETConfig] and
-    (JsPath \ "stripe").read[StripeConfig]
-  )(Config.apply[StepsConfig] _)
 
   case class ConfigFailure(error: String)
 

@@ -16,7 +16,7 @@ import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayResponse}
 import com.gu.util.config.LoadConfigModule.StringFromS3
-import com.gu.util.config.{LoadConfigModule, Stage, TrustedApiConfig}
+import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.RestRequestMaker.Requests
 import com.gu.util.resthttp.Types.ClientFailableOp
@@ -30,14 +30,17 @@ object Handler {
   // it's referenced by the cloudformation so make sure you keep it in step
   // it's the only part you can't test of the handler
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
-    runWithEffects(RawEffects.stage, GetFromS3.fetchString, RawEffects.response, LambdaIO(inputStream, outputStream, context))
+    runForLegacyTestsSeeTestingMd(RawEffects.stage, GetFromS3.fetchString, RawEffects.response, LambdaIO(inputStream, outputStream, context))
 
-  def runWithEffects(
+  def runForLegacyTestsSeeTestingMd(
     stage: Stage,
     fetchString: StringFromS3,
     response: Request => Response,
     lambdaIO: LambdaIO
-  ): Unit = {
+  ): Unit =
+    ApiGatewayHandler(lambdaIO)(operationForEffects(stage, fetchString, response))
+
+  def operationForEffects(stage: Stage, fetchString: StringFromS3, response: Request => Response): ApiGatewayOp[Operation] = {
     def operation(
       zuoraRestConfig: ZuoraRestConfig,
       sfConfig: SFAuthConfig,
@@ -45,7 +48,7 @@ object Handler {
     ) = {
       val zuoraRequests = ZuoraRestRequestMaker(response, zuoraRestConfig)
       val zuoraQuerier = ZuoraQuery(zuoraRequests)
-      val getByEmail: EmailAddress => \/[GetByEmail.ApiError, IdentityId] = GetByEmail(response, identityConfig)
+      val getByEmail: EmailAddress => GetByEmail.ApiError \/ IdentityId = GetByEmail(response, identityConfig)
       val countZuoraAccounts: IdentityId => ClientFailableOp[Int] = CountZuoraAccountsForIdentityId(zuoraQuerier)
       lazy val sfRequests: ApiGatewayOp[Requests] = SalesforceAuthenticate(response, sfConfig)
 
@@ -53,9 +56,9 @@ object Handler {
         steps = IdentityBackfillSteps(
           PreReqCheck(
             getByEmail,
-            GetZuoraAccountsForEmail(zuoraQuerier)_ andThen PreReqCheck.getSingleZuoraAccountForEmail,
+            GetZuoraAccountsForEmail(zuoraQuerier) _ andThen PreReqCheck.getSingleZuoraAccountForEmail,
             countZuoraAccounts andThen PreReqCheck.noZuoraAccountsForIdentityId,
-            GetZuoraSubTypeForAccount(zuoraQuerier)_ andThen PreReqCheck.acceptableReaderType,
+            GetZuoraSubTypeForAccount(zuoraQuerier) _ andThen PreReqCheck.acceptableReaderType,
             syncableSFToIdentity(sfRequests, stage)
           ),
           AddIdentityIdToAccount(zuoraRequests),
@@ -70,15 +73,14 @@ object Handler {
     }
 
     val loadConfig = LoadConfigModule(stage, fetchString)
-    ApiGatewayHandler(lambdaIO)(for {
+    val fOperation = for {
       zuoraRestConfig <- loadConfig[ZuoraRestConfig].toApiGatewayOp("load zuora config")
       sfAuthConfig <- loadConfig[SFAuthConfig].toApiGatewayOp("load sfAuth config")
       identityConfig <- loadConfig[IdentityConfig].toApiGatewayOp("load identity config")
-      trustedApiConfig <- loadConfig[TrustedApiConfig].toApiGatewayOp("load trustedApi config")
       configuredOp = operation(zuoraRestConfig, sfAuthConfig, identityConfig)
 
-    } yield (trustedApiConfig, configuredOp))
-
+    } yield configuredOp
+    fOperation
   }
 
   def standardRecordTypeForStage(stage: Stage): ApiGatewayOp[RecordTypeId] = {
