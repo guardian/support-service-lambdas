@@ -30,3 +30,6 @@ If this happens, we just need to refactor the code to remove the dependencies, t
 
 # examples
 TODO
+
+# runForLegacyTestsSeeTestingMd ??! Testing tech debt.
+These tests are testing something with input streams and output streams.  This means we need a load of boiler plate just to call the test nicely - but we're just testing the ApiGatewayHandler in the process.  These tests should be changed to call the operationForEffects function that is supplied to the api gateway handler function, and just combine the above strangely named function with the top level handler.
