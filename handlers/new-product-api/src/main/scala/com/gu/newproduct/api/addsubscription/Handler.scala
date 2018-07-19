@@ -8,6 +8,7 @@ import com.gu.newproduct.api.addsubscription.TypeConvert._
 import com.gu.newproduct.api.addsubscription.validation.{PrerequisiteCheck, ValidateAccount, ValidatePaymentMethod, ValidateSubscriptions}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.WireModel.{WireCreateRequest, WireSubscription}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{CreateReq, SubscriptionName}
+import com.gu.newproduct.api.addsubscription.zuora.GetAccount.IdentityId
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAccount
 import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.WireModel.ZuoraSubscriptionsResponse
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethodStatus.PaymentMethodWire
@@ -56,10 +57,22 @@ object Steps {
       zuoraClient = ZuoraRestRequestMaker(response, zuoraConfig)
       createMonthlyContribution = CreateSubscription(zuoraIds.monthly, zuoraClient.post[WireCreateRequest, WireSubscription]) _
       prerequesiteCheck = wiredPrereqCheck(zuoraIds, zuoraClient)
-      configuredOp = Operation.noHealthcheck(
-        steps = addSubscriptionSteps(prerequesiteCheck, createMonthlyContribution)
+      configuredOp = Operation(
+        steps = addSubscriptionSteps(prerequesiteCheck, createMonthlyContribution),
+        healthcheck = () =>
+          healthCheck(GetAccount(zuoraClient.get[ZuoraAccount]))
       )
     } yield configuredOp
+
+  def healthCheck(getAccount: ZuoraAccountId => ClientFailableOp[GetAccount.Account]): ApiResponse =
+    (for {
+      account <- getAccount(ZuoraAccountId("2c92a0fb4a38064e014a3f48f1663ad8")).toApiGatewayOp("get test account from zuora")
+      isCorrect = account.identityId.contains(IdentityId("13552794"))
+    } yield
+      if (isCorrect)
+        ApiGatewayResponse.successfulExecution
+      else
+        ApiGatewayResponse.internalServerError("check identity id in health check")).apiResponse
 
   def wiredPrereqCheck(
     zuoraIds: ZuoraIds.ContributionsZuoraIds,
