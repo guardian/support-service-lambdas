@@ -75,6 +75,6 @@ object Steps {
         GetAccountSubscriptions(zuoraClient.get[ZuoraSubscriptionsResponse]),
         List(zuoraIds.monthly.productRatePlanId, zuoraIds.annual.productRatePlanId)
       ),
-      ValidateRequest(() => now().toLocalDate)
+      ValidateRequest(() => now().toLocalDate, AmountLimits.limitsFor)
     )
 }

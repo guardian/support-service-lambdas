@@ -1,6 +1,6 @@
 package com.gu.newproduct.api.addsubscription.validation
 
-import java.time.{LocalDate, LocalDateTime}
+import java.time.LocalDate
 
 import com.gu.i18n.Currency
 import com.gu.i18n.Currency._
@@ -21,9 +21,9 @@ class ValidateRequestTest extends FlatSpec with Matchers {
   )
 
   def now = () => LocalDate.of(2018, 7, 20)
-  def amountLimitsFor(currency:Currency) = {
+  def amountLimitsFor(currency: Currency) = {
     currency shouldBe GBP
-    AmountLimits(min = 100, max= 200)
+    AmountLimits(min = 100, max = 200)
   }
   def wiredValidator = ValidateRequest(now, amountLimitsFor) _
   def validationError(msg: String) = ReturnWithResponse(ApiGatewayResponse.messageResponse(statusCode = "422", message = msg))
