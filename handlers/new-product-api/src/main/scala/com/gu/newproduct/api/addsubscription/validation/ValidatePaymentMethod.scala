@@ -1,11 +1,13 @@
 package com.gu.newproduct.api.addsubscription.validation
 
 import com.gu.newproduct.api.addsubscription.TypeConvert._
+import com.gu.newproduct.api.addsubscription.validation.Validation.BooleanValidation
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.PaymentMethodId
-import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{ActivePaymentMethod, BankTransfer, CreditCard, CreditCardReferenceTransaction, PayPal, PaymentMethod, PaymentMethodType}
+import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.PaymentMethod
+import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.ActivePaymentMethod
+import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType.{BankTransfer, CreditCard, CreditCardReferenceTransaction, PayPal}
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.Types.ClientFailableOp
-import Validation.BooleanValidation
 
 object ValidatePaymentMethod {
   def apply(

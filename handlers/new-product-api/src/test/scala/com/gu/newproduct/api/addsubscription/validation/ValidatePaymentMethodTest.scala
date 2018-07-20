@@ -1,7 +1,9 @@
 package com.gu.newproduct.api.addsubscription.validation
 
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount._
-import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{ActivePaymentMethod, CreditCard, NotActivePaymentMethod, Other, PaymentMethod, PaymentMethodStatus}
+import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.PaymentMethod
+import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.{ActivePaymentMethod, NotActivePaymentMethod}
+import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType.{CreditCard, Other}
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError}

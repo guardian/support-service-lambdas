@@ -1,7 +1,9 @@
 package com.gu.newproduct.api.addsubscription.zuora
 
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.PaymentMethodId
-import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{ActivePaymentMethod, BankTransfer, CreditCard, CreditCardReferenceTransaction, NotActivePaymentMethod, Other, PayPal, PaymentMethod, PaymentMethodWire}
+import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{PaymentMethod, PaymentMethodWire}
+import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.{ActivePaymentMethod, NotActivePaymentMethod}
+import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType._
 import com.gu.test.EffectsTest
 import com.gu.util.resthttp.RestRequestMaker.IsCheckNeeded
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError}
