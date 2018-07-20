@@ -11,12 +11,12 @@ object PrerequisiteCheck {
     validatePaymentMethod: PaymentMethodId => ApiGatewayOp[Unit],
     validateSubscriptions: ZuoraAccountId => ApiGatewayOp[Unit],
     validateRequest: (AddSubscriptionRequest, Currency) => ApiGatewayOp[Unit]
-  )(request: AddSubscriptionRequest, accountId: ZuoraAccountId): ApiGatewayOp[Unit] =
+  )(accountId: ZuoraAccountId, request: AddSubscriptionRequest): ApiGatewayOp[Unit] =
     for {
       validatedAccount <- validateAccount(accountId)
       _ <- validatePaymentMethod(validatedAccount.paymentMethodId)
-      _ <- validateSubscriptions(request, validatedAccount.currency)
       _ <- validateSubscriptions(accountId)
+      _ <- validateRequest(request, validatedAccount.currency)
     } yield ()
 
 }

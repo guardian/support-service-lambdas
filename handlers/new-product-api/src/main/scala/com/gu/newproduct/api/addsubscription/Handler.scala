@@ -1,11 +1,12 @@
 package com.gu.newproduct.api.addsubscription
 
 import java.io.{InputStream, OutputStream}
+import java.time.LocalDateTime
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.newproduct.api.addsubscription.TypeConvert._
-import com.gu.newproduct.api.addsubscription.validation.{PrerequisiteCheck, ValidateAccount, ValidatePaymentMethod, ValidateSubscriptions}
+import com.gu.newproduct.api.addsubscription.validation._
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.WireModel.{WireCreateRequest, WireSubscription}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{CreateReq, SubscriptionName}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAccount
@@ -37,12 +38,12 @@ object Handler extends Logging {
 object Steps {
 
   def addSubscriptionSteps(
-    prerequesiteCheck: ZuoraAccountId => ApiGatewayOp[Unit],
+    prerequesiteCheck: (ZuoraAccountId, AddSubscriptionRequest) => ApiGatewayOp[Unit],
     createMonthlyContribution: CreateReq => ClientFailableOp[SubscriptionName]
   )(apiGatewayRequest: ApiGatewayRequest): ApiResponse = {
     (for {
       request <- apiGatewayRequest.bodyAsCaseClass[AddSubscriptionRequest]().withLogging("parsed request")
-      _ <- prerequesiteCheck(request.zuoraAccountId)
+      _ <- prerequesiteCheck(request.zuoraAccountId, request)
       req = CreateReq(request.zuoraAccountId, request.amountMinorUnits, request.startDate, request.acquisitionCase)
       subscriptionName <- createMonthlyContribution(req).toApiGatewayOp("create monthly contribution")
     } yield ApiGatewayResponse(body = AddedSubscription(subscriptionName.value), statusCode = "200")).apiResponse
@@ -56,7 +57,7 @@ object Steps {
       trustedApiConfig <- loadConfig[TrustedApiConfig].toApiGatewayOp("load trusted api config")
       zuoraClient = ZuoraRestRequestMaker(response, zuoraConfig)
       createMonthlyContribution = CreateSubscription(zuoraIds.monthly, zuoraClient.post[WireCreateRequest, WireSubscription]) _
-      prerequesiteCheck = wiredPrereqCheck(zuoraIds, zuoraClient)
+      prerequesiteCheck = wiredPrereqCheck(zuoraIds, zuoraClient, RawEffects.now)
       configuredOp = Operation.noHealthcheck(
         steps = addSubscriptionSteps(prerequesiteCheck, createMonthlyContribution),
         shouldAuthenticate = false
@@ -65,15 +66,17 @@ object Steps {
 
   def wiredPrereqCheck(
     zuoraIds: ZuoraIds.ContributionsZuoraIds,
-    zuoraClient: RestRequestMaker.Requests
-  ): ZuoraAccountId => ApiGatewayOp[Unit] =
+    zuoraClient: RestRequestMaker.Requests,
+    now: () => LocalDateTime
+  ): (ZuoraAccountId, AddSubscriptionRequest) => ApiGatewayOp[Unit] =
     PrerequisiteCheck(
       ValidateAccount(GetAccount(zuoraClient.get[ZuoraAccount])),
       ValidatePaymentMethod(GetPaymentMethod(zuoraClient.get[PaymentMethodWire])),
       ValidateSubscriptions(
         GetAccountSubscriptions(zuoraClient.get[ZuoraSubscriptionsResponse]),
         List(zuoraIds.monthly.productRatePlanId, zuoraIds.annual.productRatePlanId)
-      )
+      ),
+      ValidateRequest(now)
     )
 
 }

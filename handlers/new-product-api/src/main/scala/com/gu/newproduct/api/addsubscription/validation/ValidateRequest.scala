@@ -9,7 +9,12 @@ import com.gu.i18n.Currency
 import com.gu.i18n.Currency._
 
 object ValidateRequest {
-  def apply(now: () => LocalDateTime)(addSubscriptionRequest: AddSubscriptionRequest, currency: Currency): ApiGatewayOp[Unit] =
+  def apply(
+    now: () => LocalDateTime
+  )(
+    addSubscriptionRequest: AddSubscriptionRequest,
+    currency: Currency
+  ): ApiGatewayOp[Unit] =
     for {
       _ <- (addSubscriptionRequest.startDate == now().toLocalDate) ifFalseReturn "start date must be today"
       limits = limitsFor(currency)
