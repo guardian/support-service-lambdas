@@ -2,6 +2,7 @@ package com.gu.newproduct.api.addsubscription.validation
 
 import java.time.{LocalDate, LocalDateTime}
 
+import com.gu.i18n.Currency
 import com.gu.i18n.Currency._
 import com.gu.newproduct.api.addsubscription.{AddSubscriptionRequest, CaseId, ZuoraAccountId}
 import com.gu.util.apigateway.ApiGatewayResponse
@@ -19,67 +20,27 @@ class ValidateRequestTest extends FlatSpec with Matchers {
     acquisitionCase = CaseId("caseId")
   )
 
-  def now = () => LocalDateTime.of(2018, 7, 20, 0, 0)
-  def wiredValidator = ValidateRequest(now) _
+  def now = () => LocalDate.of(2018, 7, 20)
+  def amountLimitsFor(currency:Currency) = {
+    currency shouldBe GBP
+    AmountLimits(min = 100, max= 200)
+  }
+  def wiredValidator = ValidateRequest(now, amountLimitsFor) _
   def validationError(msg: String) = ReturnWithResponse(ApiGatewayResponse.messageResponse(statusCode = "422", message = msg))
 
   it should "return error if startdate is not today" in {
     val oldRequest = testRequest.copy(startDate = LocalDate.of(1985, 10, 26))
     wiredValidator(oldRequest, GBP) shouldBe validationError("start date must be today")
   }
-  it should "return error if amount is too small for GBP" in {
-    wiredValidator(testRequest.copy(amountMinorUnits = 199), GBP) shouldBe validationError("amount must be at least 200")
+  it should "return error if amount is too small" in {
+    wiredValidator(testRequest.copy(amountMinorUnits = 99), GBP) shouldBe validationError("amount must be at least 100")
   }
-  it should "return error if amount is too small for EUR" in {
-    wiredValidator(testRequest.copy(amountMinorUnits = 199), EUR) shouldBe validationError("amount must be at least 200")
+
+  it should "return error if amount is too large" in {
+    wiredValidator(testRequest.copy(amountMinorUnits = 201), GBP) shouldBe validationError("amount must not be more than 200")
   }
-  it should "return error if amount is too small for USD" in {
-    wiredValidator(testRequest.copy(amountMinorUnits = 199), USD) shouldBe validationError("amount must be at least 200")
-  }
-  it should "return error if amount is too small for CAD" in {
-    wiredValidator(testRequest.copy(amountMinorUnits = 499), CAD) shouldBe validationError("amount must be at least 500")
-  }
-  it should "return error if amount is too small for AUD" in {
-    wiredValidator(testRequest.copy(amountMinorUnits = 199), AUD) shouldBe validationError("amount must be at least 200")
-  }
-  it should "return error if amount is too small for NZD" in {
-    wiredValidator(testRequest.copy(amountMinorUnits = 999), NZD) shouldBe validationError("amount must be at least 1000")
-  }
-  it should "return error if amount is too large for GBP" in {
-    wiredValidator(testRequest.copy(amountMinorUnits = 16601), GBP) shouldBe validationError("amount must not be more than 16600")
-  }
-  it should "return error if amount is too large for EUR" in {
-    wiredValidator(testRequest.copy(amountMinorUnits = 16601), EUR) shouldBe validationError("amount must not be more than 16600")
-  }
-  it should "return error if amount is too large for USD" in {
-    wiredValidator(testRequest.copy(amountMinorUnits = 16601), USD) shouldBe validationError("amount must not be more than 16600")
-  }
-  it should "return error if amount is too large for CAD" in {
-    wiredValidator(testRequest.copy(amountMinorUnits = 16601), CAD) shouldBe validationError("amount must not be more than 16600")
-  }
-  it should "return error if amount is too large for AUD" in {
-    wiredValidator(testRequest.copy(amountMinorUnits = 16601), AUD) shouldBe validationError("amount must not be more than 16600")
-  }
-  it should "return error if amount is too large for NZD" in {
-    wiredValidator(testRequest.copy(amountMinorUnits = 16601), NZD) shouldBe validationError("amount must not be more than 16600")
-  }
-  it should "return success if amount is within valid range for GBP" in {
-    wiredValidator(testRequest.copy(amountMinorUnits = 2000), GBP) shouldBe ContinueProcessing(())
-  }
-  it should "return success if amount is within valid range for EUR" in {
-    wiredValidator(testRequest.copy(amountMinorUnits = 2000), EUR) shouldBe ContinueProcessing(())
-  }
-  it should "return success if amount is within valid range forUSD" in {
-    wiredValidator(testRequest.copy(amountMinorUnits = 2000), USD) shouldBe ContinueProcessing(())
-  }
-  it should "return success if amount is within valid range for CAD" in {
-    wiredValidator(testRequest.copy(amountMinorUnits = 2000), CAD) shouldBe ContinueProcessing(())
-  }
-  it should "return success if amount is within valid range for AUD" in {
-    wiredValidator(testRequest.copy(amountMinorUnits = 2000), AUD) shouldBe ContinueProcessing(())
-  }
-  it should "return success if amount is within valid range for NZD" in {
-    wiredValidator(testRequest.copy(amountMinorUnits = 2000), NZD) shouldBe ContinueProcessing(())
+  it should "return success if amount is within valid range" in {
+    wiredValidator(testRequest.copy(amountMinorUnits = 150), GBP) shouldBe ContinueProcessing(())
   }
 
 }
