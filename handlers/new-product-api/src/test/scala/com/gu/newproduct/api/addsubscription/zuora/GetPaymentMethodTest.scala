@@ -35,7 +35,8 @@ class GetPaymentMethodTest extends FlatSpec with Matchers {
     PaymentMethodWire("Active", "CreditCard").toPaymentMethod shouldBe PaymentMethod(ActivePaymentMethod, CreditCard)
   }
   it should "convert credit card reference payment" in {
-    PaymentMethodWire("Active", "CreditCardReferenceTransaction").toPaymentMethod shouldBe PaymentMethod(ActivePaymentMethod, CreditCardReferenceTransaction)
+    val actual = PaymentMethodWire("Active", "CreditCardReferenceTransaction").toPaymentMethod
+    actual shouldBe PaymentMethod(ActivePaymentMethod, CreditCardReferenceTransaction)
   }
   it should "convert bank transfer payment" in {
     PaymentMethodWire("Active", "BankTransfer").toPaymentMethod shouldBe PaymentMethod(ActivePaymentMethod, BankTransfer)
@@ -46,7 +47,7 @@ class GetPaymentMethodTest extends FlatSpec with Matchers {
   }
 
   it should "convert any payment status other than active to 'NotActive'" in {
-    PaymentMethodWire("some unknown status", "some other payment method").toPaymentMethod shouldBe PaymentMethod(NotActivePaymentMethod, Other)
+    PaymentMethodWire("some unknown status", "anotherPaymentMethod").toPaymentMethod shouldBe PaymentMethod(NotActivePaymentMethod, Other)
   }
 }
 

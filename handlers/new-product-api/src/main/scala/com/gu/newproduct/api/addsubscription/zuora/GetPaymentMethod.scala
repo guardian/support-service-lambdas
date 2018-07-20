@@ -8,11 +8,6 @@ import com.gu.util.resthttp.Types._
 import play.api.libs.json._
 
 object GetPaymentMethod {
-
-  object PaymentMethod {
-    val all = List(PayPal, CreditCard, CreditCardReferenceTransaction, BankTransfer, Other)
-  }
-
   case class PaymentMethodWire(PaymentMethodStatus: String, Type: String) {
 
     val stringToType = Map(
@@ -40,6 +35,7 @@ object GetPaymentMethod {
 sealed trait PaymentMethodType
 
 object PaymentMethodType {
+  val all = List(PayPal, CreditCard, CreditCardReferenceTransaction, BankTransfer, Other)
 
   case object PayPal extends PaymentMethodType
 

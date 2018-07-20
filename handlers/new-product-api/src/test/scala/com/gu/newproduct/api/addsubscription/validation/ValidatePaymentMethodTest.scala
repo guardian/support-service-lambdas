@@ -3,6 +3,7 @@ package com.gu.newproduct.api.addsubscription.validation
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount._
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.PaymentMethod
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.{ActivePaymentMethod, NotActivePaymentMethod}
+import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType.{CreditCard, Other}
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
@@ -18,28 +19,33 @@ class ValidatePaymentMethodTest extends FlatSpec with Matchers {
     response
 
   }
+
+  val paymentMethodId = PaymentMethodId("paymentMethodId")
   it should "fail if payment method is not active" in {
     val paymentMethod = PaymentMethod(NotActivePaymentMethod, CreditCard)
     def getPaymentMethodStatus = fakeGetPaymentMethodStatus(ClientSuccess(paymentMethod)) _
-    ValidatePaymentMethod(getPaymentMethodStatus)(PaymentMethodId("paymentMethodId")).shouldBe(validationError("Default payment method status in Zuora account is not active"))
+    val expectedMessage = "Default payment method status in Zuora account is not active"
+    ValidatePaymentMethod(getPaymentMethodStatus)(paymentMethodId).shouldBe(validationError(expectedMessage))
   }
 
   it should "succeed if payment method is active" in {
     val paymentMethod = PaymentMethod(ActivePaymentMethod, CreditCard)
 
     def getPaymentMethodStatus = fakeGetPaymentMethodStatus(ClientSuccess(paymentMethod)) _
-    ValidatePaymentMethod(getPaymentMethodStatus)(PaymentMethodId("paymentMethodId")) shouldBe ContinueProcessing(())
+    ValidatePaymentMethod(getPaymentMethodStatus)(paymentMethodId) shouldBe ContinueProcessing(())
   }
 
   it should "return error if zuora call fails" in {
     def getPaymentMethodStatus(id: PaymentMethodId) = GenericError("zuora error")
-    ValidatePaymentMethod(getPaymentMethodStatus)(PaymentMethodId("paymentMethodId")) shouldBe ReturnWithResponse(ApiGatewayResponse.internalServerError("some log message"))
+    val internalServerError = ReturnWithResponse(ApiGatewayResponse.internalServerError("some log message"))
+    ValidatePaymentMethod(getPaymentMethodStatus)(paymentMethodId) shouldBe internalServerError
   }
 
   it should "fail if payment method is of an unknown type" in {
     val paymentMethod = PaymentMethod(ActivePaymentMethod, Other)
     def getPaymentMethodStatus = fakeGetPaymentMethodStatus(ClientSuccess(paymentMethod)) _
-    //todo see how to assert that the message at least starts with invalid payment method type
-    ValidatePaymentMethod(getPaymentMethodStatus)(PaymentMethodId("paymentMethodId")).shouldBe(validationError(ValidatePaymentMethod.paymentTypeError))
+    val validPaymentTypes = PaymentMethodType.all.filterNot(_ == Other)
+    val expectedMessage = s"Invalid payment method type in Zuora account, must be one of ${validPaymentTypes.mkString(",")}"
+    ValidatePaymentMethod(getPaymentMethodStatus)(paymentMethodId) shouldBe validationError(expectedMessage)
   }
 }
