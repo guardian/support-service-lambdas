@@ -16,7 +16,7 @@ object RawEffects {
   val response: Request => Response = Http.response
   val downloadResponse: Request => Response = Http.downloadResponse
   def s3Write: PutObjectRequest => Try[PutObjectResult] = UploadToS3.putObject
-  def now = () => LocalDateTime.now
+  def now: () => LocalDateTime = () => LocalDateTime.now
   def fetchContent(request: GetObjectRequest): Try[S3ObjectInputStream] = GetFromS3.fetchContent(request)
 
 }

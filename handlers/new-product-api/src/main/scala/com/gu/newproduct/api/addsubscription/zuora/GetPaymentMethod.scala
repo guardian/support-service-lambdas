@@ -15,16 +15,19 @@ object GetPaymentMethod {
 
   sealed trait PaymentMethodType
 
-  object PayPal extends PaymentMethodType
+  case object PayPal extends PaymentMethodType
 
-  object CreditCard extends PaymentMethodType
+  case object CreditCard extends PaymentMethodType
 
-  object BankTransfer extends PaymentMethodType
+  case object BankTransfer extends PaymentMethodType
 
-  object CreditCardReferenceTransaction extends PaymentMethodType
+  case object CreditCardReferenceTransaction extends PaymentMethodType
 
-  object Other extends PaymentMethodType
+  case object Other extends PaymentMethodType
 
+  object PaymentMethod {
+    val all = List(PayPal, CreditCard, CreditCardReferenceTransaction, BankTransfer, Other)
+  }
   case class PaymentMethodWire(PaymentMethodStatus: String, Type: String) {
 
     val stringToType = Map(

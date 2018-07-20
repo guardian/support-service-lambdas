@@ -1,7 +1,7 @@
 package com.gu.newproduct.api.addsubscription.validation
 
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount._
-import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{ActivePaymentMethod, CreditCard, NotActivePaymentMethod, PaymentMethod, PaymentMethodStatus}
+import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{ActivePaymentMethod, CreditCard, NotActivePaymentMethod, Other, PaymentMethod, PaymentMethodStatus}
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError}
@@ -34,4 +34,10 @@ class ValidatePaymentMethodTest extends FlatSpec with Matchers {
     ValidatePaymentMethod(getPaymentMethodStatus)(PaymentMethodId("paymentMethodId")) shouldBe ReturnWithResponse(ApiGatewayResponse.internalServerError("some log message"))
   }
 
+  it should "fail if payment method is of an unknown type" in {
+    val paymentMethod = PaymentMethod(ActivePaymentMethod, Other)
+    def getPaymentMethodStatus = fakeGetPaymentMethodStatus(ClientSuccess(paymentMethod)) _
+    //todo see how to assert that the message at least starts with invalid payment method type
+    ValidatePaymentMethod(getPaymentMethodStatus)(PaymentMethodId("paymentMethodId")).shouldBe(validationError(ValidatePaymentMethod.paymentTypeError))
+  }
 }

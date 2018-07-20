@@ -32,7 +32,7 @@ class ValidateAccountTest extends FlatSpec with Matchers {
   it should "succeed with valid account" in {
     def getAccount = fakeGetAccount(response = validAccount) _
 
-    ValidateAccount(getAccount)(ZuoraAccountId("validAccountId")) shouldBe ContinueProcessing(PaymentMethodId("activePaymentMethod"))
+    ValidateAccount(getAccount)(ZuoraAccountId("validAccountId")) shouldBe ContinueProcessing(ValidatedAccount(PaymentMethodId("activePaymentMethod"), GBP))
   }
   it should "fail if account cannot be loaded" in {
     def errorGetAccount(zuoraAccountId: ZuoraAccountId) = GenericError("zuora is down")
