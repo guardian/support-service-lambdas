@@ -32,18 +32,17 @@ object Handler extends Logging {
     ApiGatewayHandler(LambdaIO(inputStream, outputStream, context)) {
       Steps.runWithEffects(RawEffects.response, RawEffects.stage, GetFromS3.fetchString)
     }
-
 }
 
 object Steps {
 
   def addSubscriptionSteps(
-    prerequesiteCheck: (ZuoraAccountId, AddSubscriptionRequest) => ApiGatewayOp[Unit],
+    prerequesiteCheck: AddSubscriptionRequest => ApiGatewayOp[Unit],
     createMonthlyContribution: CreateReq => ClientFailableOp[SubscriptionName]
   )(apiGatewayRequest: ApiGatewayRequest): ApiResponse = {
     (for {
       request <- apiGatewayRequest.bodyAsCaseClass[AddSubscriptionRequest]().withLogging("parsed request")
-      _ <- prerequesiteCheck(request.zuoraAccountId, request)
+      _ <- prerequesiteCheck(request)
       req = CreateReq(request.zuoraAccountId, request.amountMinorUnits, request.startDate, request.acquisitionCase)
       subscriptionName <- createMonthlyContribution(req).toApiGatewayOp("create monthly contribution")
     } yield ApiGatewayResponse(body = AddedSubscription(subscriptionName.value), statusCode = "200")).apiResponse
@@ -68,7 +67,7 @@ object Steps {
     zuoraIds: ZuoraIds.ContributionsZuoraIds,
     zuoraClient: RestRequestMaker.Requests,
     now: () => LocalDateTime
-  ): (ZuoraAccountId, AddSubscriptionRequest) => ApiGatewayOp[Unit] =
+  ): AddSubscriptionRequest => ApiGatewayOp[Unit] =
     PrerequisiteCheck(
       ValidateAccount(GetAccount(zuoraClient.get[ZuoraAccount])),
       ValidatePaymentMethod(GetPaymentMethod(zuoraClient.get[PaymentMethodWire])),
@@ -78,6 +77,4 @@ object Steps {
       ),
       ValidateRequest(now)
     )
-
 }
-

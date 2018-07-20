@@ -25,9 +25,9 @@ class StepsTest extends FlatSpec with Matchers {
       ClientSuccess(SubscriptionName("well done"))
     }
 
-    def fakeCheck(accountId: ZuoraAccountId, request: AddSubscriptionRequest): ApiGatewayOp[Unit] =
-      if (accountId.value == "acccc") ContinueProcessing(())
-      else ReturnWithResponse(ApiGatewayResponse.internalServerError(s"whoops: $accountId was wrong for prereq check"))
+    def fakeCheck(request: AddSubscriptionRequest): ApiGatewayOp[Unit] =
+      if (request.zuoraAccountId.value == "acccc") ContinueProcessing(())
+      else ReturnWithResponse(ApiGatewayResponse.internalServerError(s"whoops: ${request.zuoraAccountId.value} was wrong for prereq check"))
 
     val requestInput = JsObject(Map(
       "acquisitionCase" -> JsString("case"),
