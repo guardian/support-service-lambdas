@@ -22,15 +22,15 @@ object ValidateRequest {
       _ <- (addSubscriptionRequest.amountMinorUnits >= limits.min) ifFalseReturn s"amount must be at least ${limits.min}"
     } yield ()
 
-  case class AmountLimits(min: Int, max: Int = 16600)
+  case class AmountLimits(min: Int, max: Int)
 
   def limitsFor(currency: Currency) = currency match {
-    case GBP => AmountLimits(min = 200)
-    case AUD => AmountLimits(200)
-    case USD => AmountLimits(200)
-    case NZD => AmountLimits(1000)
-    case CAD => AmountLimits(500)
-    case EUR => AmountLimits(200)
+    case GBP => AmountLimits(min = 200, max = 16600)
+    case AUD => AmountLimits(min = 200, max = 16600)
+    case USD => AmountLimits(min = 200, max = 16600)
+    case NZD => AmountLimits(min = 1000, max = 16600)
+    case CAD => AmountLimits(min = 500, max = 16600)
+    case EUR => AmountLimits(min = 200, max = 16600)
   }
 
 }
