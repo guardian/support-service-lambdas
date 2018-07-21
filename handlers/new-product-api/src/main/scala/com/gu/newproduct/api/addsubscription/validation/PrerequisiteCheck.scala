@@ -3,7 +3,6 @@ package com.gu.newproduct.api.addsubscription.validation
 import java.time.LocalDateTime
 
 import com.gu.newproduct.api.addsubscription.{AddSubscriptionRequest, ZuoraAccountId}
-import com.gu.newproduct.api.addsubscription.zuora.GetAccount.PaymentMethodId
 import com.gu.newproduct.api.addsubscription.TypeConvert._
 import com.gu.newproduct.api.addsubscription.ZuoraIds.ProductRatePlanId
 import com.gu.newproduct.api.addsubscription.validation.Validation._
