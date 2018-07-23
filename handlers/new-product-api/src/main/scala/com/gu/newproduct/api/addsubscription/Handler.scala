@@ -64,8 +64,10 @@ object Steps {
       zuoraClient = ZuoraRestRequestMaker(response, zuoraConfig)
       createMonthlyContribution = CreateSubscription(zuoraIds.monthly, zuoraClient.post[WireCreateRequest, WireSubscription]) _
       prerequesiteCheck = wiredPrereqCheck(zuoraIds, zuoraClient, RawEffects.now)
-      configuredOp = Operation.noHealthcheck(
-        steps = addSubscriptionSteps(prerequesiteCheck, createMonthlyContribution)
+      configuredOp = Operation(
+        steps = addSubscriptionSteps(prerequesiteCheck, createMonthlyContribution),
+        healthcheck = () =>
+          HealthCheck(GetAccount(zuoraClient.get[ZuoraAccount]), AccountIdentitys.accountIdentitys(stage))
       )
     } yield configuredOp
 
