@@ -54,36 +54,41 @@ object ApiGatewayResponse extends Logging {
     ApiResponse(statusCode, bodyTxt)
   }
 
-  val successfulExecution = ApiResponse(
+  val successfulExecution = messageResponse(
     "200",
-    toJsonBody(ResponseBody("Success"))
+    "Success"
   )
 
-  def noActionRequired(reason: String) = ApiResponse(
+  def noActionRequired(reason: String) = messageResponse(
     "200",
-    toJsonBody(ResponseBody(s"Processing is not required: $reason"))
+    s"Processing is not required: $reason"
   )
 
-  def badRequest(reason: String) = ApiResponse(
+  def badRequest(reason: String) = messageResponse(
     "400",
-    toJsonBody(ResponseBody(s"Failure to parse JSON successfully: $reason"))
+    s"Failure to parse JSON successfully: $reason"
   )
 
-  val unauthorized = ApiResponse(
+  val unauthorized = messageResponse(
     "401",
-    toJsonBody(ResponseBody("Credentials are missing or invalid"))
+    "Credentials are missing or invalid"
   )
 
-  def notFound(message: String) = ApiResponse(
+  def forbidden(message: String) = messageResponse(
+    "403",
+    message
+  )
+
+  def notFound(message: String) = messageResponse(
     "404",
-    toJsonBody(ResponseBody(message))
+    message
   )
 
   def internalServerError(error: String) = {
     logger.error(s"Processing failed due to $error")
-    ApiResponse(
+    messageResponse(
       "500",
-      toJsonBody(ResponseBody(s"Internal server error"))
+      "Internal server error"
     )
   }
 
