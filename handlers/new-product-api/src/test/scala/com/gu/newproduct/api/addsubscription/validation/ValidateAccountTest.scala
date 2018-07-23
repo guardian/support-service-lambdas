@@ -1,5 +1,6 @@
 package com.gu.newproduct.api.addsubscription.validation
 
+import com.gu.i18n.Currency.GBP
 import com.gu.newproduct.api.addsubscription.ZuoraAccountId
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount._
 import com.gu.util.apigateway.ApiGatewayResponse
@@ -15,7 +16,8 @@ class ValidateAccountTest extends FlatSpec with Matchers {
     identityId = Some(IdentityId("idAccount1")),
     paymentMethodId = Some(PaymentMethodId("activePaymentMethod")),
     autoPay = AutoPay(true),
-    accountBalanceMinorUnits = AccountBalanceMinorUnits(0)
+    accountBalanceMinorUnits = AccountBalanceMinorUnits(0),
+    currency = GBP
   )
 
   def fakeGetAccount(response: Account)(zuoraAccountId: ZuoraAccountId): ClientFailableOp[Account] =
@@ -29,8 +31,8 @@ class ValidateAccountTest extends FlatSpec with Matchers {
 
   it should "succeed with valid account" in {
     def getAccount = fakeGetAccount(response = validAccount) _
-
-    ValidateAccount(getAccount)(ZuoraAccountId("validAccountId")) shouldBe ContinueProcessing(PaymentMethodId("activePaymentMethod"))
+    val expected = ContinueProcessing(ValidatedAccount(PaymentMethodId("activePaymentMethod"), GBP))
+    ValidateAccount(getAccount)(ZuoraAccountId("validAccountId")) shouldBe expected
   }
   it should "fail if account cannot be loaded" in {
     def errorGetAccount(zuoraAccountId: ZuoraAccountId) = GenericError("zuora is down")
@@ -65,4 +67,5 @@ class ValidateAccountTest extends FlatSpec with Matchers {
 
     ValidateAccount(getAccount)(ZuoraAccountId("validAccountId")) shouldBe validationError("Zuora account balance is not zero")
   }
+
 }
