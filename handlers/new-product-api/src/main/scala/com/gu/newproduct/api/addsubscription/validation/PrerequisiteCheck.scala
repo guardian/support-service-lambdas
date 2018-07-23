@@ -2,18 +2,15 @@ package com.gu.newproduct.api.addsubscription.validation
 
 import java.time.LocalDateTime
 
+import com.gu.newproduct.api.addsubscription.AddSubscriptionRequest
 import com.gu.newproduct.api.addsubscription.TypeConvert._
 import com.gu.newproduct.api.addsubscription.ZuoraIds.ProductRatePlanId
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAccount
-import com.gu.newproduct.api.addsubscription.zuora.GetAccount.{Account, PaymentMethodId}
-import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.Subscription
 import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.WireModel.ZuoraSubscriptionsResponse
-import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{PaymentMethod, PaymentMethodWire}
+import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.PaymentMethodWire
 import com.gu.newproduct.api.addsubscription.zuora.{GetAccount, GetAccountSubscriptions, GetPaymentMethod}
-import com.gu.newproduct.api.addsubscription.{AddSubscriptionRequest, ZuoraAccountId}
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.RestRequestMaker
-import com.gu.util.resthttp.Types.ClientFailableOp
 
 object PrerequisiteCheck {
   def apply(
