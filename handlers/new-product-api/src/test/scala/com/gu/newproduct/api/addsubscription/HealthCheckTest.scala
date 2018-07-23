@@ -14,7 +14,7 @@ class HealthCheckTest extends FlatSpec with Matchers {
       ClientSuccess(Account(Some(IdentityId("1313")), None, AutoPay(false), AccountBalanceMinorUnits(0), Currency.GBP))
     }
 
-    HealthCheck(getAccount, AccountIdentitys.AccountIdentity(ZuoraAccountId("accacc"), IdentityId("1313"))).statusCode should be("200")
+    HealthCheck(getAccount, AccountIdentitys.HealthCheckTestAccountData(ZuoraAccountId("accacc"), IdentityId("1313"))).statusCode should be("200")
   }
 
   it should "fail" in {
@@ -22,7 +22,7 @@ class HealthCheckTest extends FlatSpec with Matchers {
       ClientSuccess(Account(Some(IdentityId("asdf")), None, AutoPay(false), AccountBalanceMinorUnits(0), Currency.GBP))
     }
 
-    HealthCheck(getAccount, AccountIdentitys.AccountIdentity(ZuoraAccountId("accacc"), IdentityId("1313"))).statusCode should be("500")
+    HealthCheck(getAccount, AccountIdentitys.HealthCheckTestAccountData(ZuoraAccountId("accacc"), IdentityId("1313"))).statusCode should be("500")
   }
 
 }
