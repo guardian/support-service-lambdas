@@ -16,8 +16,8 @@ object HealthCheck {
     accountIdentity: AccountIdentity
   ): ApiResponse =
     (for {
-      account <- getAccount(accountIdentity.zuoraAccountId).toApiGatewayOp("get test account from zuora")
-      isCorrect = account.identityId.contains(accountIdentity.identityId)
+      account <- getAccount(accountIdentity.testZuoraAccountId).toApiGatewayOp("get test account from zuora")
+      isCorrect = account.identityId.contains(accountIdentity.expectedIdentityId)
     } yield if (isCorrect)
       ApiGatewayResponse.successfulExecution
     else
@@ -27,7 +27,7 @@ object HealthCheck {
 
 object AccountIdentitys {
 
-  case class AccountIdentity(zuoraAccountId: ZuoraAccountId, identityId: IdentityId)
+  case class AccountIdentity(testZuoraAccountId: ZuoraAccountId, expectedIdentityId: IdentityId)
 
   def accountIdentitys(stage: Stage): AccountIdentity =
     stage match {

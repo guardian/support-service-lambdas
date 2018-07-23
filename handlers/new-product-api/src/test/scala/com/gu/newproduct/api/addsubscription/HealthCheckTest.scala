@@ -9,8 +9,8 @@ import org.scalatest.{FlatSpec, Matchers}
 class HealthCheckTest extends FlatSpec with Matchers {
 
   it should "pass" in {
-    def getAccount(dontcare: ZuoraAccountId): Types.ClientFailableOp[Account] = {
-      dontcare should be(ZuoraAccountId("accacc"))
+    def getAccount(requestedAccountId: ZuoraAccountId): Types.ClientFailableOp[Account] = {
+      requestedAccountId should be(ZuoraAccountId("accacc"))
       ClientSuccess(Account(Some(IdentityId("1313")), None, AutoPay(false), AccountBalanceMinorUnits(0), Currency.GBP))
     }
 
