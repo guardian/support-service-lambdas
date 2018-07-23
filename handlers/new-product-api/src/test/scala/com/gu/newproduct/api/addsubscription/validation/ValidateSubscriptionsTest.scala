@@ -20,7 +20,9 @@ class ValidateSubscriptionsTest extends FlatSpec with Matchers {
       sub(active = true, rateplans = Set("monthyContributionRateplanId", "someOtherPlan"))
     )
 
-    ValidateSubscriptions(contributionRateplans)(subs) shouldBe Failed("Zuora account already has an active recurring contribution subscription")
+    val actual = ValidateSubscriptions(contributionRateplans)(subs)
+
+    actual shouldBe Failed("Zuora account already has an active recurring contribution subscription")
   }
   it should "succeed if account has inactive recurring subs" in {
 

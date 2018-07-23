@@ -21,19 +21,31 @@ class TypeConvertTest extends FlatSpec with Matchers {
 
   "toApiResponseCheckingNotFound" should "convert not found client error to status 422 api response" in {
     val notFound = NotFound("server specific error")
-    val actual = ClientFailableOpToApiResponse(notFound).toApiResponseCheckingNotFound(action = "some action", ifNotFoundReturn = "validation message")
+
+    val actual = ClientFailableOpToApiResponse(notFound).toApiResponseCheckingNotFound(
+      action = "some action",
+      ifNotFoundReturn = "validation message")
+
     actual shouldBe api422Response("validation message")
   }
 
   it should "convert generic errors to 500 status response" in {
     val genericError = GenericError("fatal error")
-    val actual = ClientFailableOpToApiResponse(genericError).toApiResponseCheckingNotFound(action = "some action", ifNotFoundReturn = "validation message")
+
+    val actual = ClientFailableOpToApiResponse(genericError).toApiResponseCheckingNotFound(
+      action = "some action",
+      ifNotFoundReturn = "validation message")
+
     actual shouldBe ReturnWithResponse(ApiGatewayResponse.internalServerError(error = "ignored log message"))
   }
 
   it should "convert client success to continue processing" in {
     val success = ClientSuccess("something")
-    val actual = ClientFailableOpToApiResponse(success).toApiResponseCheckingNotFound(action = "some action", ifNotFoundReturn = "validation message")
+
+    val actual = ClientFailableOpToApiResponse(success).toApiResponseCheckingNotFound(
+      action = "some action",
+      ifNotFoundReturn = "validation message")
+
     actual shouldBe ContinueProcessing("something")
   }
 }
