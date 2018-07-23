@@ -60,7 +60,7 @@ object Steps {
       configuredOp = Operation(
         steps = addSubscriptionSteps(prerequesiteCheck, createMonthlyContribution),
         healthcheck = () =>
-          HealthCheck(GetAccount(zuoraClient.get[ZuoraAccount]))
+          HealthCheck(GetAccount(zuoraClient.get[ZuoraAccount]), AccountIdentitys.accountIdentitys(stage))
       )
     } yield configuredOp
 

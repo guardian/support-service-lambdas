@@ -13,11 +13,12 @@ class HealthCheckEffectsTest extends FlatSpec with Matchers {
 
   it should "pass" taggedAs EffectsTest in {
 
+    val stage = Stage("DEV")
     val actual = (for {
-      zuoraConfig <- LoadConfigModule(Stage("PROD"), GetFromS3.fetchString)[ZuoraRestConfig].toApiGatewayOp("load zuora config")
+      zuoraConfig <- LoadConfigModule(stage, GetFromS3.fetchString)[ZuoraRestConfig].toApiGatewayOp("load zuora config")
       zuoraClient = ZuoraRestRequestMaker(Http.response, zuoraConfig)
       getAccount = GetAccount(zuoraClient.get[ZuoraAccount])_
-    } yield HealthCheck(getAccount)).apiResponse
+    } yield HealthCheck(getAccount, AccountIdentitys.accountIdentitys(stage))).apiResponse
 
     actual.statusCode should be("200")
   }

@@ -9,10 +9,11 @@ class HealthCheckTest extends FlatSpec with Matchers {
 
   it should "pass" in {
     def getAccount(dontcare: ZuoraAccountId): Types.ClientFailableOp[Account] = {
-      ClientSuccess(Account(Some(IdentityId("13552794")), None, AutoPay(false), AccountBalanceMinorUnits(0)))
+      dontcare should be(ZuoraAccountId("accacc"))
+      ClientSuccess(Account(Some(IdentityId("1313")), None, AutoPay(false), AccountBalanceMinorUnits(0)))
     }
 
-    HealthCheck(getAccount).statusCode should be("200")
+    HealthCheck(getAccount, AccountIdentitys.AccountIdentity(ZuoraAccountId("accacc"), IdentityId("1313"))).statusCode should be("200")
   }
 
   it should "fail" in {
@@ -20,7 +21,7 @@ class HealthCheckTest extends FlatSpec with Matchers {
       ClientSuccess(Account(Some(IdentityId("asdf")), None, AutoPay(false), AccountBalanceMinorUnits(0)))
     }
 
-    HealthCheck(getAccount).statusCode should be("500")
+    HealthCheck(getAccount, AccountIdentitys.AccountIdentity(ZuoraAccountId("accacc"), IdentityId("1313"))).statusCode should be("500")
   }
 
 }
