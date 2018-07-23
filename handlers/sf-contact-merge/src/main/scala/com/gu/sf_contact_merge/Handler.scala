@@ -9,7 +9,7 @@ import com.gu.sf_contact_merge.TypeConvert._
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, ApiGatewayResponse, ResponseModels}
 import com.gu.util.config.LoadConfigModule.StringFromS3
-import com.gu.util.config.{LoadConfigModule, Stage, TrustedApiConfig}
+import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.Types.ClientFailableOp
@@ -28,26 +28,27 @@ object Handler {
 
   // Referenced in Cloudformation
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
-    runWithEffects(RawEffects.stage, GetFromS3.fetchString, RawEffects.response, LambdaIO(inputStream, outputStream, context))
+    runForLegacyTestsSeeTestingMd(RawEffects.stage, GetFromS3.fetchString, RawEffects.response, LambdaIO(inputStream, outputStream, context))
   }
 
-  def runWithEffects(stage: Stage, fetchString: StringFromS3, getResponse: Request => Response, lambdaIO: LambdaIO) = {
-
-    val loadConfig = LoadConfigModule(stage, fetchString)
+  def runForLegacyTestsSeeTestingMd(stage: Stage, fetchString: StringFromS3, getResponse: Request => Response, lambdaIO: LambdaIO) =
     ApiGatewayHandler(lambdaIO) {
-      for {
-        trustedApiConfig <- loadConfig[TrustedApiConfig].toApiGatewayOp("load trusted Api config")
-        zuoraRestConfig <- loadConfig[ZuoraRestConfig].toApiGatewayOp("load trusted Api config")
-        requests = ZuoraRestRequestMaker(getResponse, zuoraRestConfig)
-        zuoraQuerier = ZuoraQuery(requests)
-        wiredSteps = steps(
-          GetZuoraEmailsForAccounts(zuoraQuerier),
-          UpdateAccountSFLinks(requests)
-        )_
-        configuredOp = Operation.noHealthcheck(wiredSteps, false)
-      } yield (trustedApiConfig, configuredOp)
+      operationForEffects(stage, fetchString, getResponse)
     }
 
+  def operationForEffects(stage: Stage, fetchString: StringFromS3, getResponse: Request => Response): ApiGatewayOp[Operation] = {
+    val loadConfig = LoadConfigModule(stage, fetchString)
+    val fConfig = for {
+      zuoraRestConfig <- loadConfig[ZuoraRestConfig].toApiGatewayOp("load trusted Api config")
+      requests = ZuoraRestRequestMaker(getResponse, zuoraRestConfig)
+      zuoraQuerier = ZuoraQuery(requests)
+      wiredSteps = steps(
+        GetZuoraEmailsForAccounts(zuoraQuerier),
+        UpdateAccountSFLinks(requests)
+      ) _
+      configuredOp = Operation.noHealthcheck(wiredSteps)
+    } yield configuredOp
+    fConfig
   }
 
   case class WireSfContactRequest(

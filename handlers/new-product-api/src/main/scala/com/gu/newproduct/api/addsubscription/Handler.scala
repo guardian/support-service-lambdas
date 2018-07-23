@@ -14,7 +14,7 @@ import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.config.LoadConfigModule.StringFromS3
-import com.gu.util.config.{LoadConfigModule, Stage, TrustedApiConfig}
+import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
@@ -25,8 +25,9 @@ object Handler extends Logging {
   // Referenced in Cloudformation
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
     ApiGatewayHandler(LambdaIO(inputStream, outputStream, context)) {
-      Steps.runWithEffects(RawEffects.response, RawEffects.stage, GetFromS3.fetchString)
+      Steps.operationForEffects(RawEffects.response, RawEffects.stage, GetFromS3.fetchString)
     }
+
 }
 
 object Steps {
@@ -38,25 +39,30 @@ object Steps {
     (for {
       request <- apiGatewayRequest.bodyAsCaseClass[AddSubscriptionRequest]().withLogging("parsed request")
       _ <- prerequesiteCheck(request)
-      req = CreateReq(request.zuoraAccountId, request.amountMinorUnits, request.startDate, request.acquisitionCase)
+      req = CreateReq(
+        request.zuoraAccountId,
+        request.amountMinorUnits,
+        request.startDate,
+        request.acquisitionCase,
+        request.acquisitionSource,
+        request.createdByCSR
+      )
       subscriptionName <- createMonthlyContribution(req).toApiGatewayOp("create monthly contribution")
     } yield ApiGatewayResponse(body = AddedSubscription(subscriptionName.value), statusCode = "200")).apiResponse
   }
 
-  def runWithEffects(response: Request => Response, stage: Stage, fetchString: StringFromS3): ApiGatewayOp[(TrustedApiConfig, Operation)] =
+  def operationForEffects(response: Request => Response, stage: Stage, fetchString: StringFromS3): ApiGatewayOp[Operation] =
     for {
       zuoraIds <- ZuoraIds.zuoraIdsForStage(stage)
       loadConfig = LoadConfigModule(stage, fetchString)
       zuoraConfig <- loadConfig[ZuoraRestConfig].toApiGatewayOp("load zuora config")
-      trustedApiConfig <- loadConfig[TrustedApiConfig].toApiGatewayOp("load trusted api config")
       zuoraClient = ZuoraRestRequestMaker(response, zuoraConfig)
       createMonthlyContribution = CreateSubscription(zuoraIds.monthly, zuoraClient.post[WireCreateRequest, WireSubscription]) _
       contributionIds = List(zuoraIds.monthly.productRatePlanId, zuoraIds.annual.productRatePlanId)
       prerequesiteCheck = PrerequisiteCheck(zuoraClient, contributionIds, RawEffects.now) _
       configuredOp = Operation.noHealthcheck(
-        steps = addSubscriptionSteps(prerequesiteCheck, createMonthlyContribution),
-        shouldAuthenticate = false
+        steps = addSubscriptionSteps(prerequesiteCheck, createMonthlyContribution)
       )
-    } yield (trustedApiConfig, configuredOp)
-
+    } yield configuredOp
 }
+

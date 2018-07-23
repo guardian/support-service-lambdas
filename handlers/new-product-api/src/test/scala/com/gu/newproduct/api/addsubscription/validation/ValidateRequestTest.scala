@@ -4,7 +4,7 @@ import java.time.LocalDate
 
 import com.gu.i18n.Currency
 import com.gu.i18n.Currency._
-import com.gu.newproduct.api.addsubscription.{AddSubscriptionRequest, CaseId, ZuoraAccountId}
+import com.gu.newproduct.api.addsubscription.{AddSubscriptionRequest, CaseId, ZuoraAccountId, _}
 import org.scalatest.{FlatSpec, Matchers}
 
 class ValidateRequestTest extends FlatSpec with Matchers {
@@ -12,8 +12,8 @@ class ValidateRequestTest extends FlatSpec with Matchers {
   val testRequest = AddSubscriptionRequest(
     zuoraAccountId = ZuoraAccountId("accountId"),
     startDate = LocalDate.of(2018, 7, 20),
-    acquisitionSource = "someSource",
-    createdByCSR = "csrName",
+    acquisitionSource = AcquisitionSource("someSource"),
+    createdByCSR = CreatedByCSR("csrName"),
     amountMinorUnits = 100,
     acquisitionCase = CaseId("caseId")
   )

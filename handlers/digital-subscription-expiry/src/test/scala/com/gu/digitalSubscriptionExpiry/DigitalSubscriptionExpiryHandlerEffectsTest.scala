@@ -70,7 +70,7 @@ object Runner {
     val os = new ByteArrayOutputStream()
 
     //execute
-    Handler.runWithEffects(RawEffects.stage, GetFromS3.fetchString, RawEffects.response, now, LambdaIO(stream, os, null))
+    Handler.runForLegacyTestsSeeTestingMd(RawEffects.stage, GetFromS3.fetchString, RawEffects.response, now, LambdaIO(stream, os, null))
 
     val responseString = new String(os.toByteArray, "UTF-8")
     responseString

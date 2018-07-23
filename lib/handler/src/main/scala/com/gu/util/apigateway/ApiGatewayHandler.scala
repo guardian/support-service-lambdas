@@ -4,25 +4,22 @@ import java.io.{InputStream, OutputStream}
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.util.Logging
-import com.gu.util.apigateway.ApiGatewayResponse.{outputForAPIGateway, unauthorized}
-import com.gu.util.apigateway.Auth.{RequestAuth, credentialsAreValid}
+import com.gu.util.apigateway.ApiGatewayHandlerParams.UrlParamsWire
+import com.gu.util.apigateway.ApiGatewayResponse.outputForAPIGateway
 import com.gu.util.apigateway.ResponseModels.ApiResponse
-import com.gu.util.config.TrustedApiConfig
-import com.gu.util.reader.Types.ApiGatewayOp._
 import com.gu.util.reader.Types._
-import play.api.libs.json.{Json, Reads}
+import play.api.libs.json.Json
 
 import scala.io.Source
 import scala.util.Try
 
-case class ApiGatewayHandlerParams(apiToken: Option[String], isHealthcheck: Boolean)
+case class ApiGatewayHandlerParams(isHealthcheck: Boolean)
 
 object ApiGatewayHandlerParams {
-  case class UrlParamsWire(apiToken: Option[String], isHealthcheck: Option[String]) {
-    def toApiHandlerParams = ApiGatewayHandlerParams(apiToken, isHealthcheck.contains("true"))
+  case class UrlParamsWire(isHealthcheck: Option[String]) {
+    def toApiHandlerParams = ApiGatewayHandlerParams(isHealthcheck.contains("true"))
   }
-  val wireReads = Json.reads[UrlParamsWire]
-  implicit val reads: Reads[ApiGatewayHandlerParams] = json => wireReads.reads(json).map(_.toApiHandlerParams)
+  implicit val wireReads = Json.reads[UrlParamsWire]
 }
 
 object ApiGatewayHandler extends Logging {
@@ -46,46 +43,44 @@ object ApiGatewayHandler extends Logging {
     }
   }
 
-  def isAuthorised(
-    shouldAuthenticate: Boolean,
-    requestAuth: Option[RequestAuth],
-    trustedApiConfig: TrustedApiConfig
-  ): Boolean = {
-    !shouldAuthenticate || credentialsAreValid(requestAuth, trustedApiConfig)
-
-  }
-
   case class Operation(
     steps: ApiGatewayRequest => ApiResponse,
-    healthcheck: () => ApiResponse,
-    shouldAuthenticate: Boolean = true
-  )
-  object Operation {
-    def noHealthcheck(steps: ApiGatewayRequest => ApiResponse, shouldAuthenticate: Boolean = true) =
-      Operation(steps, () => ApiGatewayResponse.successfulExecution, shouldAuthenticate)
+    healthcheck: () => ApiResponse
+  ) {
+
+    def prependRequestValidationToSteps(validate: ApiGatewayRequest => ApiGatewayOp[Unit]): Operation = {
+      val validateAndRunSteps: ApiGatewayRequest => ApiResponse = { request =>
+        (for {
+          _ <- validate(request)
+          result = steps(request)
+        } yield result).apiResponse
+      }
+      Operation(validateAndRunSteps, healthcheck)
+
+    }
+
   }
 
-  def apply(
-    lambdaIO: LambdaIO
-  )(
-    fConfigOp: ApiGatewayOp[(TrustedApiConfig, Operation)]
-  ): Unit = {
+  object Operation {
+    def noHealthcheck(steps: ApiGatewayRequest => ApiResponse) =
+      Operation(steps, () => ApiGatewayResponse.successfulExecution)
+  }
+
+  def apply(lambdaIO: LambdaIO)(fConfigOp: ApiGatewayOp[Operation]): Unit = {
 
     import lambdaIO._
 
-    val response = for {
-      configOp <- fConfigOp
-      (trustedApiConf, operation) = configOp
-      apiGatewayRequest <- parseApiGatewayRequest(inputStream)
-      queryParams <- apiGatewayRequest.queryParamsAsCaseClass[ApiGatewayHandlerParams]()
-      response <- if (queryParams.isHealthcheck)
-        ContinueProcessing(operation.healthcheck()).withLogging("healthcheck")
-      else
-        for {
-          _ <- isAuthorised(operation.shouldAuthenticate, queryParams.apiToken.map(RequestAuth(_)), trustedApiConf)
-            .toApiGatewayContinueProcessing(unauthorized).withLogging("authentication")
-        } yield operation.steps(apiGatewayRequest).withLogging("steps")
-    } yield response
+    val response =
+      for {
+        operation <- fConfigOp
+        apiGatewayRequest <- parseApiGatewayRequest(inputStream)
+        queryParams <- apiGatewayRequest.queryParamsAsCaseClass[UrlParamsWire]().map(_.toApiHandlerParams)
+      } yield {
+        if (queryParams.isHealthcheck)
+          operation.healthcheck().withLogging("healthcheck")
+        else
+          operation.steps(apiGatewayRequest).withLogging("steps")
+      }
 
     outputForAPIGateway(outputStream, response.apiResponse)
   }

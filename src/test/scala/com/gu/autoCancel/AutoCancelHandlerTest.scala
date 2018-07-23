@@ -1,9 +1,6 @@
 package com.gu.autoCancel
 
 import com.gu.autoCancel.AutoCancelSteps.AutoCancelUrlParams
-import com.gu.util.apigateway.Auth.RequestAuth
-import com.gu.util.apigateway.ApiGatewayHandler
-import com.gu.util.config.TrustedApiConfig
 import org.scalatest._
 import play.api.libs.json.{JsSuccess, Json}
 import scalaz.{-\/, \/-}
@@ -61,18 +58,6 @@ class AutoCancelHandlerTest extends FlatSpec {
       case \/-(_) => true
       case _ => false
     }, s"We got: $apiGatewayOp")
-  }
-
-  "authenticateCallout" should "return a left if the credentials are invalid" in {
-    val requestAuth = RequestAuth(apiToken = "incorrectRequestToken")
-    val trustedApiConfig = TrustedApiConfig(apiToken = "token", tenantId = "tenant")
-    assert(ApiGatewayHandler.isAuthorised(true, Some(requestAuth), trustedApiConfig) == false)
-  }
-
-  "authenticateCallout" should "return a right if the credentials are valid" in {
-    val requestAuth = RequestAuth(apiToken = "token")
-    val trustedApiConfig = TrustedApiConfig(apiToken = "token", tenantId = "tenant")
-    assert(ApiGatewayHandler.isAuthorised(true, Some(requestAuth), trustedApiConfig) == true)
   }
 
 }

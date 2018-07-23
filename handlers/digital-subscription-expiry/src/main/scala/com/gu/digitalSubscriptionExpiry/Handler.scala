@@ -22,37 +22,41 @@ object Handler extends Logging {
   // it's referenced by the cloudformation so make sure you keep it in step
   // it's the only part you can't test of the handler
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
-    runWithEffects(RawEffects.stage, GetFromS3.fetchString, RawEffects.response, RawEffects.now, LambdaIO(inputStream, outputStream, context))
+    runForLegacyTestsSeeTestingMd(RawEffects.stage, GetFromS3.fetchString, RawEffects.response, RawEffects.now, LambdaIO(inputStream, outputStream, context))
 
-  def runWithEffects(
+  def runForLegacyTestsSeeTestingMd(
     stage: Stage,
     fetchString: StringFromS3,
     response: Request => Response,
     now: () => LocalDateTime,
     lambdaIO: LambdaIO
-  ): Unit = {
-    def operation =
-      (zuoraRestConfig: ZuoraRestConfig, emergencyTokensConfig: EmergencyTokensConfig) => {
+  ): Unit =
+    ApiGatewayHandler(lambdaIO)(operationForEffects(stage, fetchString, response, now))
 
-        val emergencyTokens = EmergencyTokens(emergencyTokensConfig)
-        val zuoraRequests = ZuoraRestRequestMaker(response, zuoraRestConfig)
-        val today = () => now().toLocalDate
-        DigitalSubscriptionExpirySteps(
-          getEmergencyTokenExpiry = GetTokenExpiry(emergencyTokens, today),
-          getSubscription = GetSubscription(zuoraRequests),
-          setActivationDate = (SetActivationDate(zuoraRequests, now) _).andThen(_.toApiGatewayOp(s"zuora SetActivationDate fail")),
-          getAccountSummary = (GetAccountSummary(zuoraRequests) _).andThen(_.toApiGatewayOp(s"zuora GetAccountSummary fail")),
-          getSubscriptionExpiry = GetSubscriptionExpiry(today),
-          skipActivationDateUpdate = SkipActivationDateUpdate.apply
-        )
-      }
+  def operationForEffects(
+    stage: Stage,
+    fetchString: StringFromS3,
+    response: Request => Response,
+    now: () => LocalDateTime
+  ): ApiGatewayOp[ApiGatewayHandler.Operation] = {
     val loadConfig = LoadConfigModule(stage, fetchString)
-    ApiGatewayHandler(lambdaIO)(for {
-      zuoraConfig <- loadConfig[ZuoraRestConfig].toApiGatewayOp("load zuora config")
-      emergencyTokensConf <- loadConfig[EmergencyTokensConfig].toApiGatewayOp("load emergency tokens config")
-      trustedApiConf <- loadConfig[TrustedApiConfig].toApiGatewayOp("load trusted api config")
-      configuredOp = operation(zuoraConfig, emergencyTokensConf)
-    } yield (trustedApiConf, configuredOp))
+    for {
+      zuoraRestConfig <- loadConfig[ZuoraRestConfig].toApiGatewayOp("load zuora config")
+      emergencyTokensConfig <- loadConfig[EmergencyTokensConfig].toApiGatewayOp("load emergency tokens config")
+    } yield {
+      val emergencyTokens = EmergencyTokens(emergencyTokensConfig)
+      val zuoraRequests = ZuoraRestRequestMaker(response, zuoraRestConfig)
+      val today = () => now().toLocalDate
+      DigitalSubscriptionExpirySteps(
+        getEmergencyTokenExpiry = GetTokenExpiry(emergencyTokens, today),
+        getSubscription = GetSubscription(zuoraRequests),
+        setActivationDate = (SetActivationDate(zuoraRequests, now) _).andThen(_.toApiGatewayOp(s"zuora SetActivationDate fail")),
+        getAccountSummary = (GetAccountSummary(zuoraRequests) _).andThen(_.toApiGatewayOp(s"zuora GetAccountSummary fail")),
+        getSubscriptionExpiry = GetSubscriptionExpiry(today),
+        skipActivationDateUpdate = SkipActivationDateUpdate.apply
+      )
+    }
   }
+
 }
 

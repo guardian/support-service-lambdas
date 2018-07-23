@@ -18,7 +18,14 @@ class StepsTest extends FlatSpec with Matchers {
   case class ExpectedOut(subscriptionNumber: String)
   "it" should "run end to end with fakes" in {
 
-    val expectedIn = CreateReq(ZuoraAccountId("acccc"), 123, LocalDate.of(2018, 7, 18), CaseId("case"))
+    val expectedIn = CreateReq(
+      ZuoraAccountId("acccc"),
+      123,
+      LocalDate.of(2018, 7, 18),
+      CaseId("case"),
+      AcquisitionSource("CSR"),
+      CreatedByCSR("bob")
+    )
 
     def fakeCreate(in: CreateSubscription.CreateReq): Types.ClientFailableOp[CreateSubscription.SubscriptionName] = {
       in shouldBe expectedIn

@@ -5,7 +5,7 @@ import java.time.LocalDate
 import com.gu.newproduct.api.addsubscription.ZuoraIds.{PlanAndCharge, ProductRatePlanChargeId, ProductRatePlanId}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.WireModel.{ChargeOverrides, SubscribeToRatePlans, WireCreateRequest, WireSubscription}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{CreateReq, SubscriptionName}
-import com.gu.newproduct.api.addsubscription.{CaseId, ZuoraAccountId}
+import com.gu.newproduct.api.addsubscription.{AcquisitionSource, CaseId, CreatedByCSR, ZuoraAccountId}
 import com.gu.util.resthttp.RestRequestMaker.{RequestsPost, WithCheck}
 import com.gu.util.resthttp.Types.{ClientSuccess, GenericError}
 import org.scalatest.{FlatSpec, Matchers}
@@ -26,6 +26,8 @@ class CreateSubscriptionTest extends FlatSpec with Matchers {
       renewalTerm = 12,
       initialTerm = 12,
       AcquisitionCase__c = "casecase",
+      AcquisitionSource__c = "sourcesource",
+      CreatedByCSR__c = "csrcsr",
       subscribeToRatePlans = List(
         SubscribeToRatePlans(
           productRatePlanId = "hiProductRatePlanId",
@@ -42,7 +44,9 @@ class CreateSubscriptionTest extends FlatSpec with Matchers {
       accountId = ZuoraAccountId("zac"),
       amountMinorUnits = 125,
       start = LocalDate.of(2018, 7, 17),
-      acquisitionCase = CaseId("casecase")
+      acquisitionCase = CaseId("casecase"),
+      acquisitionSource = AcquisitionSource("sourcesource"),
+      createdByCSR = CreatedByCSR("csrcsr")
     )
     val actual = CreateSubscription(ids, accF)(createReq)
     actual shouldBe ClientSuccess(SubscriptionName("a-s123"))
