@@ -19,10 +19,11 @@ import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config._
+import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.RestRequestMaker
 import okhttp3.{Request, Response}
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsValue, Json, Reads}
 
 object Handler extends Logging {
 
@@ -72,16 +73,16 @@ object Handler extends Logging {
       )
 
     def raiseCase(
-      lookup: TSalesforceGenericIdLookup,
+      lookupById: TSalesforceGenericIdLookup,
       raiseCase: RaiseCase
     )(
       identityId: String,
       raiseCaseDetail: RaiseRequestBody
     ) =
       for {
-        sfContactId <- lookup("Contact", "IdentityID__c", identityId)
+        sfContactId <- lookupById("Contact", "IdentityID__c", identityId)
           .toApiGatewayOp("lookup SF contact from identityID")
-        sfSubscriptionIdContainer <- lookup("SF_Subscription__c", "Name", raiseCaseDetail.subscriptionName)
+        sfSubscriptionIdContainer <- lookupById("SF_Subscription__c", "Name", raiseCaseDetail.subscriptionName)
           .toApiGatewayOp("lookup SF subscription ID")
         raiseCaseResponse <- raiseCase(buildNewCaseForSalesforce(raiseCaseDetail, sfSubscriptionIdContainer, sfContactId))
           .toApiGatewayOp("raise sf case")
@@ -91,9 +92,9 @@ object Handler extends Logging {
       (for {
         identityAndSfRequests <- sfBackendForIdentityCookieHeader(apiGatewayRequest.headers)
         raiseCaseDetail <- apiGatewayRequest.bodyAsCaseClass[RaiseRequestBody]()
-        lookupOp = SalesforceGenericIdLookup(identityAndSfRequests.sfRequests)_
+        lookupByIdOp = SalesforceGenericIdLookup(identityAndSfRequests.sfRequests)_
         raiseOp = SalesforceCase.Raise(identityAndSfRequests.sfRequests)_
-        wiredRaiseCase = raiseCase(lookupOp, raiseOp)_
+        wiredRaiseCase = raiseCase(lookupByIdOp, raiseOp)_
         raiseCaseResponse <- wiredRaiseCase(identityAndSfRequests.identityUser.id, raiseCaseDetail)
       } yield ApiGatewayResponse("200", raiseCaseResponse)).apiResponse
   }
@@ -113,11 +114,32 @@ object Handler extends Logging {
 
   object UpdateCase {
 
+    case class CaseWithContactId(ContactId: String)
+    implicit val caseReads: Reads[CaseWithContactId] = Json.reads[CaseWithContactId]
+
+    def verifyCaseBelongsToUser(
+      sfRequests: RestRequestMaker.Requests
+    )(
+      identityId: String,
+      caseId: String
+    ) =
+      for {
+        sfContactIdFromIdentity <- SalesforceGenericIdLookup(sfRequests)("Contact", "IdentityID__c", identityId)
+          .toApiGatewayOp("lookup SF contact ID from identityID")
+        sfCaseDetail <- SalesforceCase.GetById[CaseWithContactId](sfRequests)(caseId)
+          .toApiGatewayOp("lookup SF Case details")
+        sfContactIdFromCase = sfCaseDetail.ContactId
+        _ <- if (sfContactIdFromIdentity.Id equals sfContactIdFromCase) ContinueProcessing(())
+        else ReturnWithResponse(ApiGatewayResponse.forbidden(
+          s"Authenticated user (${sfContactIdFromIdentity.Id}) does not match ContactId ($sfContactIdFromCase) for Case ($caseId)"
+        ))
+      } yield ()
+
     def steps(sfBackendForIdentityCookieHeader: SfBackendForIdentityCookieHeader)(apiGatewayRequest: ApiGatewayRequest) =
       (for {
         identityAndSfRequests <- sfBackendForIdentityCookieHeader(apiGatewayRequest.headers)
-        // TODO verify case belongs to identity user
         pathParams <- apiGatewayRequest.pathParamsAsCaseClass[CasePathParams]()
+        _ <- verifyCaseBelongsToUser(identityAndSfRequests.sfRequests)(identityAndSfRequests.identityUser.id, pathParams.caseId)
         requestBody <- apiGatewayRequest.bodyAsCaseClass[JsValue]()
         sfUpdate = SalesforceCase.Update(identityAndSfRequests.sfRequests)_
         _ <- sfUpdate(pathParams.caseId, requestBody).toApiGatewayOp("update case")
