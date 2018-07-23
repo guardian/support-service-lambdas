@@ -1,20 +1,22 @@
 package com.gu.newproduct.api.addsubscription.validation
 
-import com.gu.newproduct.api.addsubscription.ZuoraAccountId
+import com.gu.i18n.Currency
+import com.gu.newproduct.api.addsubscription.{AddSubscriptionRequest, ZuoraAccountId}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.PaymentMethodId
 import com.gu.util.reader.Types._
 
 object PrerequisiteCheck {
   def apply(
-    validateAccount: ZuoraAccountId => ApiGatewayOp[PaymentMethodId],
+    validateAccount: ZuoraAccountId => ApiGatewayOp[ValidatedAccount],
     validatePaymentMethod: PaymentMethodId => ApiGatewayOp[Unit],
-    validateSubscriptions: ZuoraAccountId => ApiGatewayOp[Unit]
-  )(accountId: ZuoraAccountId): ApiGatewayOp[Unit] =
+    validateSubscriptions: ZuoraAccountId => ApiGatewayOp[Unit],
+    validateRequest: (AddSubscriptionRequest, Currency) => ApiGatewayOp[Unit]
+  )(request: AddSubscriptionRequest): ApiGatewayOp[Unit] =
     for {
-      paymentMethodId <- validateAccount(accountId)
-      _ <- validatePaymentMethod(paymentMethodId)
-      _ <- validateSubscriptions(accountId)
+      validatedAccount <- validateAccount(request.zuoraAccountId)
+      _ <- validatePaymentMethod(validatedAccount.paymentMethodId)
+      _ <- validateSubscriptions(request.zuoraAccountId)
+      _ <- validateRequest(request, validatedAccount.currency)
     } yield ()
-
 }
 

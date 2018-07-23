@@ -1,5 +1,6 @@
 package com.gu.newproduct.api.addsubscription.zuora
 
+import com.gu.i18n.Currency.GBP
 import com.gu.newproduct.api.addsubscription.ZuoraAccountId
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAccount
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount._
@@ -13,7 +14,8 @@ class GetAccountTest extends FlatSpec with Matchers {
     IdentityId__c = Some("6002"),
     DefaultPaymentMethodId = Some("2c92c0f8649cc8a60164a2bfd475000c"),
     AutoPay = false,
-    Balance = 24.55
+    Balance = 24.55,
+    Currency = "GBP"
   )
   it should "get account as object" in {
 
@@ -26,7 +28,8 @@ class GetAccountTest extends FlatSpec with Matchers {
       Some(IdentityId("6002")),
       Some(PaymentMethodId("2c92c0f8649cc8a60164a2bfd475000c")),
       AutoPay(false),
-      AccountBalanceMinorUnits(2455)
+      AccountBalanceMinorUnits(2455),
+      GBP
     ))
   }
 
@@ -41,8 +44,18 @@ class GetAccountTest extends FlatSpec with Matchers {
       None,
       None,
       AutoPay(false),
-      AccountBalanceMinorUnits(2455)
+      AccountBalanceMinorUnits(2455),
+      GBP
     ))
+  }
+  it should "return error if Account has unknown currencyu" in {
+    val unknownCurrencyAccount = acc.copy(Currency = "unknown currency code here")
+    val accF: RequestsGet[ZuoraAccount] = {
+      case ("object/account/id", WithoutCheck) => ClientSuccess(unknownCurrencyAccount)
+      case in => GenericError(s"bad request: $in")
+    }
+    val actual = GetAccount(accF)(ZuoraAccountId("id"))
+    actual.isFailure shouldBe (true)
   }
 }
 
