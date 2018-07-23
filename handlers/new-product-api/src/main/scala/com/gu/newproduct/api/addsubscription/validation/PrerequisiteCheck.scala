@@ -22,11 +22,9 @@ object PrerequisiteCheck {
     now: () => LocalDateTime
   )(request: AddSubscriptionRequest): ApiGatewayOp[Unit] = {
 
-    def getAccount: ZuoraAccountId => ClientFailableOp[Account] = GetAccount(zuoraClient.get[ZuoraAccount]) _
-
-    def getPaymentMethod: PaymentMethodId => ClientFailableOp[PaymentMethod] = GetPaymentMethod(zuoraClient.get[PaymentMethodWire]) _
-
-    def getSubscriptions: ZuoraAccountId => ClientFailableOp[List[Subscription]] = GetAccountSubscriptions(zuoraClient.get[ZuoraSubscriptionsResponse]) _
+    def getAccount = GetAccount(zuoraClient.get[ZuoraAccount]) _
+    def getPaymentMethod = GetPaymentMethod(zuoraClient.get[PaymentMethodWire]) _
+    def getSubscriptions = GetAccountSubscriptions(zuoraClient.get[ZuoraSubscriptionsResponse]) _
 
     val currentDate = () => now().toLocalDate
     val accountNotFoundError = "Zuora account id is not valid"
