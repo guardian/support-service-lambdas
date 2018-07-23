@@ -4,10 +4,11 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 import com.gu.newproduct.api.addsubscription.ZuoraIds.PlanAndCharge
-import com.gu.newproduct.api.addsubscription.{CaseId, ZuoraAccountId}
+import com.gu.newproduct.api.addsubscription.{AcquisitionSource, CaseId, CreatedByCSR, ZuoraAccountId}
 import com.gu.util.resthttp.RestRequestMaker.{RequestsPost, WithCheck}
 import com.gu.util.resthttp.Types.ClientFailableOp
 import play.api.libs.json.{Json, Reads}
+import com.gu.util.resthttp.ClientFailableOpLogging.LogImplicit2
 
 object CreateSubscription {
 
@@ -34,7 +35,9 @@ object CreateSubscription {
       renewalTerm: Int = 12,
       initialTerm: Int = 12,
       subscribeToRatePlans: List[SubscribeToRatePlans],
-      AcquisitionCase__c: String
+      AcquisitionCase__c: String,
+      AcquisitionSource__c: String,
+      CreatedByCSR__c: String
     )
     implicit val writesRequest = Json.writes[WireCreateRequest]
   }
@@ -47,6 +50,8 @@ object CreateSubscription {
       accountKey = accountId.value,
       contractEffectiveDate = start.format(DateTimeFormatter.ISO_LOCAL_DATE),
       AcquisitionCase__c = acquisitionCase.value,
+      AcquisitionSource__c = acquisitionSource.value,
+      CreatedByCSR__c = createdByCSR.value,
       subscribeToRatePlans = List(
         SubscribeToRatePlans(
           productRatePlanId = planAndCharge.productRatePlanId.value,
@@ -65,7 +70,9 @@ object CreateSubscription {
     accountId: ZuoraAccountId,
     amountMinorUnits: Int,
     start: LocalDate,
-    acquisitionCase: CaseId
+    acquisitionCase: CaseId,
+    acquisitionSource: AcquisitionSource,
+    createdByCSR: CreatedByCSR
   )
 
   case class SubscriptionName(value: String) extends AnyVal
@@ -77,7 +84,7 @@ object CreateSubscription {
     val maybeWireSubscription = post(createRequest(createSubscription, planAndCharge), s"subscriptions", WithCheck)
     maybeWireSubscription.map { wireSubscription =>
       SubscriptionName(wireSubscription.subscriptionNumber)
-    }
+    }.withLogging("created subscription")
   }
 
 }

@@ -12,13 +12,13 @@ import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{CreateReq
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAccount
 import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.WireModel.ZuoraSubscriptionsResponse
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.PaymentMethodWire
-import com.gu.newproduct.api.addsubscription.zuora.{CreateSubscription, GetAccount, GetAccountSubscriptions, GetPaymentMethod}
+import com.gu.newproduct.api.addsubscription.zuora._
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.config.LoadConfigModule.StringFromS3
-import com.gu.util.config.{LoadConfigModule, Stage, TrustedApiConfig}
+import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.RestRequestMaker
 import com.gu.util.resthttp.Types.ClientFailableOp
@@ -30,8 +30,9 @@ object Handler extends Logging {
   // Referenced in Cloudformation
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
     ApiGatewayHandler(LambdaIO(inputStream, outputStream, context)) {
-      Steps.runWithEffects(RawEffects.response, RawEffects.stage, GetFromS3.fetchString)
+      Steps.operationForEffects(RawEffects.response, RawEffects.stage, GetFromS3.fetchString)
     }
+
 }
 
 object Steps {
@@ -43,25 +44,30 @@ object Steps {
     (for {
       request <- apiGatewayRequest.bodyAsCaseClass[AddSubscriptionRequest]().withLogging("parsed request")
       _ <- prerequesiteCheck(request)
-      req = CreateReq(request.zuoraAccountId, request.amountMinorUnits, request.startDate, request.acquisitionCase)
+      req = CreateReq(
+        request.zuoraAccountId,
+        request.amountMinorUnits,
+        request.startDate,
+        request.acquisitionCase,
+        request.acquisitionSource,
+        request.createdByCSR
+      )
       subscriptionName <- createMonthlyContribution(req).toApiGatewayOp("create monthly contribution")
     } yield ApiGatewayResponse(body = AddedSubscription(subscriptionName.value), statusCode = "200")).apiResponse
   }
 
-  def runWithEffects(response: Request => Response, stage: Stage, fetchString: StringFromS3): ApiGatewayOp[(TrustedApiConfig, Operation)] =
+  def operationForEffects(response: Request => Response, stage: Stage, fetchString: StringFromS3): ApiGatewayOp[Operation] =
     for {
       zuoraIds <- ZuoraIds.zuoraIdsForStage(stage)
       loadConfig = LoadConfigModule(stage, fetchString)
       zuoraConfig <- loadConfig[ZuoraRestConfig].toApiGatewayOp("load zuora config")
-      trustedApiConfig <- loadConfig[TrustedApiConfig].toApiGatewayOp("load trusted api config")
       zuoraClient = ZuoraRestRequestMaker(response, zuoraConfig)
       createMonthlyContribution = CreateSubscription(zuoraIds.monthly, zuoraClient.post[WireCreateRequest, WireSubscription]) _
       prerequesiteCheck = wiredPrereqCheck(zuoraIds, zuoraClient, RawEffects.now)
       configuredOp = Operation.noHealthcheck(
-        steps = addSubscriptionSteps(prerequesiteCheck, createMonthlyContribution),
-        shouldAuthenticate = false
+        steps = addSubscriptionSteps(prerequesiteCheck, createMonthlyContribution)
       )
-    } yield (trustedApiConfig, configuredOp)
+    } yield configuredOp
 
   def wiredPrereqCheck(
     zuoraIds: ZuoraIds.ContributionsZuoraIds,
@@ -77,4 +83,6 @@ object Steps {
       ),
       ValidateRequest(() => now().toLocalDate, AmountLimits.limitsFor)
     )
+
 }
+

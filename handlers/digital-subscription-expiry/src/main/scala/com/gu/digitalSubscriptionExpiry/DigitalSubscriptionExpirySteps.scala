@@ -49,7 +49,7 @@ object DigitalSubscriptionExpirySteps extends Logging {
       } yield subscriptionEndDate).apiResponse
 
     }
-    Operation.noHealthcheck(steps, false)
+    Operation.noHealthcheck(steps)
 
   }
 

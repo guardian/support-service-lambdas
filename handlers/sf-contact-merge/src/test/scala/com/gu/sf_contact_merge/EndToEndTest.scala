@@ -53,7 +53,7 @@ object Runner {
     val os = new ByteArrayOutputStream()
 
     //execute
-    Handler.runWithEffects(
+    Handler.runForLegacyTestsSeeTestingMd(
       Stage("DEV"),
       FakeFetchString.fetchString,
       EndToEndTest.mock.response,

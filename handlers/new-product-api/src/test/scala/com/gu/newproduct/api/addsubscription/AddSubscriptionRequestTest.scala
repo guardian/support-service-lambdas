@@ -23,8 +23,8 @@ class AddSubscriptionRequestTest extends FlatSpec with Matchers {
     actual shouldBe AddSubscriptionRequest(
       zuoraAccountId = ZuoraAccountId("accountkeyValue"),
       startDate = LocalDate.of(2018, 7, 11),
-      acquisitionSource = "CSR",
-      createdByCSR = "CSRName",
+      acquisitionSource = AcquisitionSource("CSR"),
+      createdByCSR = CreatedByCSR("CSRName"),
       amountMinorUnits = 123,
       acquisitionCase = CaseId("5006E000005b5cf")
     )

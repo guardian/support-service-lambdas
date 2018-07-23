@@ -36,7 +36,7 @@ object Handler extends Logging {
   case class SfRequests(normal: LazySalesforceAuthenticatedReqMaker, test: LazySalesforceAuthenticatedReqMaker)
 
   def raiseCase(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
-    runWithEffects(
+    runForLegacyTestsSeeTestingMd(
       IdentityCookieToIdentityUser.defaultCookiesToIdentityUser(RawEffects.stage.isProd),
       RaiseCase.steps,
       RawEffects.response,
@@ -102,7 +102,7 @@ object Handler extends Logging {
   implicit val pathParamReads = Json.reads[CasePathParams]
 
   def updateCase(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
-    runWithEffects(
+    runForLegacyTestsSeeTestingMd(
       IdentityCookieToIdentityUser.defaultCookiesToIdentityUser(RawEffects.stage.isProd),
       UpdateCase.steps,
       RawEffects.response,
@@ -125,15 +125,23 @@ object Handler extends Logging {
 
   }
 
-  def runWithEffects(
+  def runForLegacyTestsSeeTestingMd(
     cookieValuesToIdentityUser: CookieValuesToIdentityUser,
     steps: Steps,
     response: Request => Response,
     stage: Stage,
     fetchString: StringFromS3,
     lambdaIO: LambdaIO
-  ) = {
+  ) =
+    ApiGatewayHandler(lambdaIO)(operationForEffects(cookieValuesToIdentityUser, steps, response, stage, fetchString))
 
+  def operationForEffects(
+    cookieValuesToIdentityUser: CookieValuesToIdentityUser,
+    steps: Steps,
+    response: Request => Response,
+    stage: Stage,
+    fetchString: StringFromS3
+  ): ApiGatewayOp[Operation] = {
     val loadConfig = LoadConfigModule(stage, fetchString)
 
     def healthcheckSteps(sfRequests: SfRequests) = () =>
@@ -142,45 +150,39 @@ object Handler extends Logging {
         _ <- sfRequests.test()
       } yield ApiGatewayResponse.successfulExecution).apiResponse
 
-    def operation(identityTestUsersConfig: IdentityTestUserConfig): Operation = {
-
-      val sfRequestsNormal: LazySalesforceAuthenticatedReqMaker = () =>
-        for {
-          config <- loadNormalSfConfig.toApiGatewayOp("load 'normal' SF config")
-          sfRequests <- SalesforceAuthenticate(response, config)
-        } yield sfRequests
-
-      val sfRequestsTest: LazySalesforceAuthenticatedReqMaker = () =>
-        for {
-          config <- loadTestSfConfig.toApiGatewayOp("load 'test' SF config")
-          sfRequests <- SalesforceAuthenticate(response, config)
-        } yield sfRequests
-
-      def sfBackendForIdentityCookieHeader(headers: HeadersOption): IdentityAndSfRequestsApiGatewayOp = {
-        for {
-          identityUser <- IdentityCookieToIdentityUser(cookieValuesToIdentityUser)(headers)
-          sfRequests <- if (IsIdentityTestUser(identityTestUsersConfig)(identityUser)) sfRequestsTest() else sfRequestsNormal()
-        } yield IdentityAndSfRequests(identityUser, sfRequests)
-      }
-
-      Operation(
-        steps(sfBackendForIdentityCookieHeader),
-        healthcheckSteps(SfRequests(sfRequestsNormal, sfRequestsTest)),
-        shouldAuthenticate = false //TODO this could be removed when 'trustedApiConfig' is an Option
-      )
-
-    }
-
     def loadNormalSfConfig = loadConfig[SFAuthConfig](SFAuthConfig.location, SFAuthConfig.reads)
+
     def loadTestSfConfig = loadConfig[SFAuthConfig](SFAuthTestConfig.location, SFAuthTestConfig.reads)
 
-    ApiGatewayHandler(lambdaIO)(for {
+    for {
       identityTestUsersConfig <- loadConfig[IdentityTestUserConfig].toApiGatewayOp("load identity 'test-users' config")
-      //TODO line below can be removed since 'shouldAuthenticate = false'
-      trustedApiConfig <- loadConfig[TrustedApiConfig].toApiGatewayOp("load trusted api config")
-      configuredOp = operation(identityTestUsersConfig)
-    } yield (trustedApiConfig, configuredOp))
+      configuredOp = {
 
+        val sfRequestsNormal: LazySalesforceAuthenticatedReqMaker = () =>
+          for {
+            config <- loadNormalSfConfig.toApiGatewayOp("load 'normal' SF config")
+            sfRequests <- SalesforceAuthenticate(response, config)
+          } yield sfRequests
+
+        val sfRequestsTest: LazySalesforceAuthenticatedReqMaker = () =>
+          for {
+            config <- loadTestSfConfig.toApiGatewayOp("load 'test' SF config")
+            sfRequests <- SalesforceAuthenticate(response, config)
+          } yield sfRequests
+
+        def sfBackendForIdentityCookieHeader(headers: HeadersOption): IdentityAndSfRequestsApiGatewayOp = {
+          for {
+            identityUser <- IdentityCookieToIdentityUser(cookieValuesToIdentityUser)(headers)
+            sfRequests <- if (IsIdentityTestUser(identityTestUsersConfig)(identityUser)) sfRequestsTest() else sfRequestsNormal()
+          } yield IdentityAndSfRequests(identityUser, sfRequests)
+        }
+
+        Operation(
+          steps(sfBackendForIdentityCookieHeader),
+          healthcheckSteps(SfRequests(sfRequestsNormal, sfRequestsTest))
+        )
+
+      }
+    } yield configuredOp
   }
-
 }

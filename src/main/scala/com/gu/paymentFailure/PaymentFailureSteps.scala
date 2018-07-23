@@ -1,19 +1,18 @@
 package com.gu.paymentFailure
 
 import com.gu.paymentFailure.GetPaymentData.PaymentFailureInformation
+import com.gu.stripeCustomerSourceUpdated.TypeConvert._
 import com.gu.util._
 import com.gu.util.apigateway.ApiGatewayHandler.Operation
 import com.gu.util.apigateway.ApiGatewayResponse.{ResponseBody, toJsonBody, unauthorized}
-import com.gu.util.apigateway.Auth.validTenant
+import com.gu.util.apigateway.Auth.{TrustedApiConfig, validTenant}
 import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.config.ETConfig.ETSendIds
-import com.gu.util.config.TrustedApiConfig
 import com.gu.util.exacttarget.EmailRequest
-import com.gu.util.reader.Types.ApiGatewayOp.{ReturnWithResponse, ContinueProcessing}
+import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.zuora.ZuoraGetInvoiceTransactions.InvoiceTransactionSummary
-import com.gu.stripeCustomerSourceUpdated.TypeConvert._
 
 object PaymentFailureSteps extends Logging {
 
