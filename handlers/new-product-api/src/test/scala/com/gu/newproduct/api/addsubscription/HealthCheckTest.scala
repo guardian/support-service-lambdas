@@ -1,6 +1,7 @@
 package com.gu.newproduct.api.addsubscription
 
 import com.gu.i18n.Currency
+import com.gu.newproduct.api.addsubscription.AccountIdentitys.HealthCheckTestAccountData
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.{Account, AccountBalanceMinorUnits, AutoPay, IdentityId}
 import com.gu.util.resthttp.Types
 import com.gu.util.resthttp.Types.ClientSuccess
@@ -14,7 +15,8 @@ class HealthCheckTest extends FlatSpec with Matchers {
       ClientSuccess(Account(Some(IdentityId("1313")), None, AutoPay(false), AccountBalanceMinorUnits(0), Currency.GBP))
     }
 
-    HealthCheck(getAccount, AccountIdentitys.HealthCheckTestAccountData(ZuoraAccountId("accacc"), IdentityId("1313"))).statusCode should be("200")
+    val fakeTestData = HealthCheckTestAccountData(ZuoraAccountId("accacc"), IdentityId("1313"))
+    HealthCheck(getAccount, fakeTestData).statusCode should be("200")
   }
 
   it should "fail" in {
@@ -22,7 +24,8 @@ class HealthCheckTest extends FlatSpec with Matchers {
       ClientSuccess(Account(Some(IdentityId("asdf")), None, AutoPay(false), AccountBalanceMinorUnits(0), Currency.GBP))
     }
 
-    HealthCheck(getAccount, AccountIdentitys.HealthCheckTestAccountData(ZuoraAccountId("accacc"), IdentityId("1313"))).statusCode should be("500")
+    val fakeTestData = HealthCheckTestAccountData(ZuoraAccountId("accacc"), IdentityId("1313"))
+    HealthCheck(getAccount, fakeTestData).statusCode should be("500")
   }
 
 }
