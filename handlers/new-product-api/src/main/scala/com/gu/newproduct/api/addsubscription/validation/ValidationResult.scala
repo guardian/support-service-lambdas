@@ -1,6 +1,6 @@
 package com.gu.newproduct.api.addsubscription.validation
 
-import com.gu.newproduct.api.addsubscription.validation.AAA._
+import com.gu.newproduct.api.addsubscription.validation.Conversion._
 import scalaz.{-\/, \/, \/-}
 
 sealed trait ValidationResult[+A] {
@@ -20,7 +20,7 @@ case class Failed(message: String) extends ValidationResult[Nothing] {
   override def toDisjunction: Failed \/ Nothing = -\/(this)
 }
 
-object AAA {
+object Conversion {
 
   implicit class UnderlyingOps[A](theEither: Failed \/ A) {
 
