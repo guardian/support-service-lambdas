@@ -118,6 +118,11 @@ lazy val effects = all(project in file("lib/effects"))
   .settings(
     libraryDependencies ++= Seq(okhttp3, logging, scalaz, playJson, scalatest, awsS3, jacksonDatabind)
   )
+lazy val `effects-sqs` = all(project in file("lib/effects-sqs"))
+  .dependsOn(testDep)
+  .settings(
+    libraryDependencies ++= Seq(logging, awsSQS)
+  )
 
 val effectsDepIncludingTestFolder: ClasspathDependency = effects % "compile->compile;test->test"
 
