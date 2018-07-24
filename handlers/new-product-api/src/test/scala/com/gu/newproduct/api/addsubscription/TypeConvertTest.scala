@@ -24,7 +24,8 @@ class TypeConvertTest extends FlatSpec with Matchers {
 
     val actual = ClientFailableOpToApiResponse(notFound).toApiResponseCheckingNotFound(
       action = "some action",
-      ifNotFoundReturn = "validation message")
+      ifNotFoundReturn = "validation message"
+    )
 
     actual shouldBe api422Response("validation message")
   }
@@ -34,7 +35,8 @@ class TypeConvertTest extends FlatSpec with Matchers {
 
     val actual = ClientFailableOpToApiResponse(genericError).toApiResponseCheckingNotFound(
       action = "some action",
-      ifNotFoundReturn = "validation message")
+      ifNotFoundReturn = "validation message"
+    )
 
     actual shouldBe ReturnWithResponse(ApiGatewayResponse.internalServerError(error = "ignored log message"))
   }
@@ -44,7 +46,8 @@ class TypeConvertTest extends FlatSpec with Matchers {
 
     val actual = ClientFailableOpToApiResponse(success).toApiResponseCheckingNotFound(
       action = "some action",
-      ifNotFoundReturn = "validation message")
+      ifNotFoundReturn = "validation message"
+    )
 
     actual shouldBe ContinueProcessing("something")
   }
