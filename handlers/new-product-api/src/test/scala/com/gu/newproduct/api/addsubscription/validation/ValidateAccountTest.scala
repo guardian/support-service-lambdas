@@ -2,7 +2,6 @@ package com.gu.newproduct.api.addsubscription.validation
 
 import com.gu.i18n.Currency.GBP
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount._
-import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
 import org.scalatest.{FlatSpec, Matchers}
 
 class ValidateAccountTest extends FlatSpec with Matchers {
@@ -16,7 +15,7 @@ class ValidateAccountTest extends FlatSpec with Matchers {
   )
 
   it should "succeed with valid account" in {
-    ValidateAccount(validAccount) shouldBe Passed(ValidatedAccount(PaymentMethodId("activePaymentMethod"), GBP))
+    ValidateAccount(validAccount) shouldBe Passed(PaymentMethodId("activePaymentMethod"))
   }
   it should "fail if account has no identity id" in {
     val noIdentityAccount = validAccount.copy(identityId = None)

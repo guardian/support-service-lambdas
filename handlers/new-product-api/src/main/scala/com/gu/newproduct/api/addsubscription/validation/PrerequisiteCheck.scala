@@ -28,12 +28,12 @@ object PrerequisiteCheck {
 
     for {
       account <- getAccount(request.zuoraAccountId).toApiResponseCheckingNotFound(action = "load account from Zuora", ifNotFoundReturn = accountNotFoundError)
-      validatedAccount <- ValidateAccount(account).toApiGatewayOp
-      paymentMethod <- getPaymentMethod(validatedAccount.paymentMethodId).toApiGatewayOp("load payment method from Zuora")
+      paymentMethodId <- ValidateAccount(account).toApiGatewayOp
+      paymentMethod <- getPaymentMethod(paymentMethodId).toApiGatewayOp("load payment method from Zuora")
       _ <- ValidatePaymentMethod(paymentMethod).toApiGatewayOp
       subs <- getSubscriptions(request.zuoraAccountId).toApiGatewayOp("get subscriptions for account from Zuora")
       _ <- ValidateSubscriptions(contributionRatePlanIds)(subs).toApiGatewayOp
-      _ <- ValidateRequest(currentDate, AmountLimits.limitsFor)(request, validatedAccount.currency).toApiGatewayOp
+      _ <- ValidateRequest(currentDate, AmountLimits.limitsFor)(request, account.currency).toApiGatewayOp
     } yield ()
   }
 }
