@@ -27,7 +27,7 @@ object TypeConvert {
   implicit class ClientFailableOpToApiResponse[A](clientFailableOp: ClientFailableOp[A]) {
     def toApiResponseCheckingNotFound(action: String, ifNotFoundReturn: String): ApiGatewayOp[A] = clientFailableOp match {
       case NotFound(_) => ReturnWithResponse(ApiValidationErrorResponse(ifNotFoundReturn))
-      case x => x.toDisjunction.toApiGatewayOp(action)
+      case anyOtherResponse => anyOtherResponse.toDisjunction.toApiGatewayOp(action)
     }
   }
 

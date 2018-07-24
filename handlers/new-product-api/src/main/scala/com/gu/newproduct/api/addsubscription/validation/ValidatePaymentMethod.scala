@@ -8,8 +8,8 @@ import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType.{BankTransf
 object ValidatePaymentMethod {
   def apply(paymentMethod: PaymentMethod): ValidationResult[Unit] = {
     for {
-      _ <- (paymentMethod.status == ActivePaymentMethod) ifFalseReturn "Default payment method status in Zuora account is not active"
-      _ <- allowedPaymentMethods.contains(paymentMethod.paymentMethodType) ifFalseReturn paymentTypeError
+      _ <- (paymentMethod.status == ActivePaymentMethod) orFailWith "Default payment method status in Zuora account is not active"
+      _ <- allowedPaymentMethods.contains(paymentMethod.paymentMethodType) orFailWith paymentTypeError
     } yield ()
   }
 

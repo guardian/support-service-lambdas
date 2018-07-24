@@ -15,10 +15,10 @@ object ValidateRequest {
     currency: Currency
   ): ValidationResult[Unit] =
     for {
-      _ <- (addSubscriptionRequest.startDate == now()) ifFalseReturn "start date must be today"
+      _ <- (addSubscriptionRequest.startDate == now()) orFailWith "start date must be today"
       limits = limitsFor(currency)
-      _ <- (addSubscriptionRequest.amountMinorUnits <= limits.max) ifFalseReturn s"amount must not be more than ${limits.max}"
-      _ <- (addSubscriptionRequest.amountMinorUnits >= limits.min) ifFalseReturn s"amount must be at least ${limits.min}"
+      _ <- (addSubscriptionRequest.amountMinorUnits <= limits.max) orFailWith s"amount must not be more than ${limits.max}"
+      _ <- (addSubscriptionRequest.amountMinorUnits >= limits.min) orFailWith s"amount must be at least ${limits.min}"
     } yield ()
 }
 

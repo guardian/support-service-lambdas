@@ -7,7 +7,7 @@ import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.{Acti
 object ValidateSubscriptions {
   def apply(contributionRatePlanIds: List[ProductRatePlanId])(subscriptions: List[Subscription]): ValidationResult[Unit] = {
     def hasActiveContributions = hasActiveRateplans(contributionRatePlanIds) _
-    !subscriptions.exists(hasActiveContributions) ifFalseReturn "Zuora account already has an active recurring contribution subscription"
+    !subscriptions.exists(hasActiveContributions) orFailWith "Zuora account already has an active recurring contribution subscription"
   }
 
   def hasActiveRateplans(targetRatePlanIds: List[ProductRatePlanId])(s: Subscription) =
