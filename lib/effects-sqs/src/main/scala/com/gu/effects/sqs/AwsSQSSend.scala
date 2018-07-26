@@ -7,16 +7,17 @@ import com.amazonaws.services.sqs.AmazonSQSAsyncClientBuilder
 import com.amazonaws.services.sqs.model.SendMessageRequest
 import org.apache.log4j.Logger
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 object AwsSQSSend {
 
   val logger = Logger.getLogger(getClass.getName)
 
   case class QueueName(value: String) extends AnyVal
+
   case class Payload(value: String) extends AnyVal
 
-  val apply: QueueName => Payload => Future[Unit] = queueName => payload => {
+  def apply(queueName: QueueName)(payload: Payload)(implicit ex: ExecutionContext): Future[Unit] = {
     val sqsClient = AmazonSQSAsyncClientBuilder
       .standard()
       .withCredentials(aws.CredentialsProvider)

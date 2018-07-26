@@ -2,15 +2,14 @@ package com.gu.effects.sqs
 
 import com.amazonaws.regions.Regions
 import com.amazonaws.services.sqs.AmazonSQSAsyncClientBuilder
-import com.amazonaws.services.sqs.model.{ReceiveMessageRequest, SendMessageRequest}
+import com.amazonaws.services.sqs.model.ReceiveMessageRequest
 import com.gu.effects.sqs.AwsSQSSend.{Payload, QueueName}
 import com.gu.test.EffectsTest
 import org.apache.log4j.Logger
-import org.scalatest.{AsyncFlatSpec, FlatSpec, Matchers}
+import org.scalatest.{AsyncFlatSpec, Matchers}
 
-import scala.concurrent.Future
-import scala.util.{Failure, Random, Success, Try}
 import scala.collection.JavaConverters._
+import scala.util.{Failure, Random, Success, Try}
 
 class AWSSQSSendTest extends AsyncFlatSpec with Matchers {
 
@@ -19,13 +18,14 @@ class AWSSQSSendTest extends AsyncFlatSpec with Matchers {
     val data = s"hello${Random.nextInt(10000)}"
 
     val testQueueName = QueueName("test-support-service-effects-tests")
-    for {
-      aaa <- AwsSQSSend.apply(testQueueName)(Payload(data))
-    } yield {
-      val bbb = SQSRead(testQueueName)
-      bbb should be(List(data))
-    }
 
+    for {
+      _ <- AwsSQSSend(testQueueName)(Payload(data))
+    } yield {
+      val allMessages = SQSRead(testQueueName)
+      val myMessages = allMessages.filter(_ == data)
+      myMessages should be(List(data))
+    }
 
   }
 

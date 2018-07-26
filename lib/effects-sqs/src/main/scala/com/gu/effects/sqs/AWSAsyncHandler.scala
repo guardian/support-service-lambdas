@@ -3,7 +3,7 @@ package com.gu.effects.sqs
 import java.util.concurrent.{Future => JFuture}
 
 import com.amazonaws.handlers.AsyncHandler
-import com.amazonaws.{AmazonServiceException, AmazonWebServiceRequest}
+import com.amazonaws.AmazonWebServiceRequest
 import org.apache.log4j.Logger
 
 import scala.concurrent.{Future, Promise}
@@ -19,17 +19,8 @@ class AwsAsyncHandler[Request <: AmazonWebServiceRequest, Response](f: (Request,
 
   override def onError(exception: Exception): Unit = {
     logger.warn("Failure from AWSAsyncHandler", exception)
-    exception match {
-      case e: AmazonServiceException =>
-        if (e.getErrorCode == "ThrottlingException") {
-          logger.warn("A rate limiting exception was thrown, we may need to adjust the rate limiting in ClientWrapper.scala")
-          Thread.sleep(1000) //Wait for a second and retry
-          f(request, this)
-        } else {
-          promise.failure(exception)
-        }
-      case _ => promise.failure(exception)
-    }
+    promise.failure(exception)
+
   }
 
   override def onSuccess(request: Request, result: Response): Unit = {
