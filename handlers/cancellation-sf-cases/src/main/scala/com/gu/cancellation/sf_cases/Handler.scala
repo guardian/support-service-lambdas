@@ -2,26 +2,26 @@ package com.gu.cancellation.sf_cases
 
 import java.io.{InputStream, OutputStream}
 
+import ai.x.play.json.Jsonx
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.cancellation.sf_cases.TypeConvert._
 import com.gu.effects.{GetFromS3, RawEffects}
-import com.gu.identity.IdentityCookieToIdentityUser.{CookieValuesToIdentityUser, IdentityUser}
+import com.gu.identity.IdentityCookieToIdentityUser.{CookieValuesToIdentityUser, IdentityId, IdentityUser}
 import com.gu.identity.{IdentityCookieToIdentityUser, IdentityTestUserConfig, IsIdentityTestUser}
 import com.gu.salesforce.SalesforceGenericIdLookup
-import com.gu.salesforce.SalesforceGenericIdLookup.{ResponseWithId, SalesforceGenericIdLookupParams, TSalesforceGenericIdLookup}
+import com.gu.salesforce.SalesforceGenericIdLookup.{FieldName, LookupValue, ResponseWithId, SfObjectType, TSalesforceGenericIdLookup}
 import com.gu.salesforce.auth.SalesforceAuthenticate
 import com.gu.salesforce.auth.SalesforceAuthenticate.{SFAuthConfig, SFAuthTestConfig}
 import com.gu.salesforce.cases.SalesforceCase
-import com.gu.salesforce.cases.SalesforceCase.GetMostRecentCaseByContactId.{GetMostRecentCaseByContactIdParams, TGetMostRecentCaseByContactId}
-import com.gu.salesforce.cases.SalesforceCase.Raise.{NewCase, RaiseCase}
-import com.gu.salesforce.cases.SalesforceCase.{CaseWithId, GetMostRecentCaseByContactId}
+import com.gu.salesforce.cases.SalesforceCase.Create.NewCase
+import com.gu.salesforce.cases.SalesforceCase.GetMostRecentCaseByContactId.TGetMostRecentCaseByContactId
+import com.gu.salesforce.cases.SalesforceCase.{CaseId, CaseOrigin, CaseSubject, CaseWithId, ContactId, SubscriptionId}
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config._
-import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.resthttp.{RestRequestMaker, Types}
@@ -51,121 +51,114 @@ object Handler extends Logging {
 
   object RaiseCase {
 
-    case class ProductName(value: String)
-    case class Reason(value: String)
-    case class SubscriptionName(value: String)
+    final case class ProductName(value: String) extends AnyVal
+    implicit val formatProductName = Jsonx.formatInline[ProductName]
 
-    case class RaiseRequestBody(
-      product: String,
-      reason: String,
-      subscriptionName: String
-    )
+    final case class Reason(value: String) extends AnyVal
+    implicit val formatReason = Jsonx.formatInline[Reason]
+
+    final case class SubscriptionName(value: String) extends AnyVal
+    implicit val formatSubscriptionName = Jsonx.formatInline[SubscriptionName]
+
     case class RaiseCaseDetail(
       product: ProductName,
       reason: Reason,
       subscriptionName: SubscriptionName
     )
-    object RaiseCaseDetail {
-      def apply(raiseRequestBody: RaiseRequestBody): RaiseCaseDetail = new RaiseCaseDetail(
-        ProductName(raiseRequestBody.product),
-        Reason(raiseRequestBody.reason),
-        SubscriptionName(raiseRequestBody.subscriptionName)
-      )
-    }
-    implicit val reads = Json.reads[RaiseRequestBody]
+    implicit val reads = Json.reads[RaiseCaseDetail]
     implicit val writes = Json.writes[CaseWithId]
 
-    val CASE_ORIGIN = "Self Service"
     val STARTING_CASE_SUBJECT = "Online Cancellation Attempt"
 
-    def buildNewCaseForSalesforce(
+    val buildNewCaseForSalesforce = (
       raiseCaseDetail: RaiseCaseDetail,
       sfSubscriptionIdContainer: ResponseWithId,
       sfContactIdContainer: ResponseWithId
-    ) =
+    ) =>
       NewCase(
-        Origin = CASE_ORIGIN,
-        ContactId = sfContactIdContainer.Id,
+        Origin = CaseOrigin(),
+        ContactId = ContactId(sfContactIdContainer.Id),
         Product__c = raiseCaseDetail.product.value,
-        SF_Subscription__c = sfSubscriptionIdContainer.Id,
+        SF_Subscription__c = SubscriptionId(sfSubscriptionIdContainer.Id),
         Journey__c = "SV - At Risk - MB",
         Enquiry_Type__c = raiseCaseDetail.reason.value,
         Status = "Closed",
-        Subject = STARTING_CASE_SUBJECT
+        Subject = CaseSubject(STARTING_CASE_SUBJECT)
       )
 
     def updateReasonOnRecentCase(
-      sfUpdateOp: (String, JsValue) => Types.ClientFailableOp[Unit]
+      sfUpdateOp: (CaseId, JsValue) => Types.ClientFailableOp[Unit]
     )(
       reason: Reason,
       recentCase: CaseWithId
-    ): ClientFailableOp[CaseWithId] = for {
-      _ <- sfUpdateOp(recentCase.Id, JsObject(Map("Enquiry_Type__c" -> JsString(reason.value))))
-    } yield recentCase
+    ): ClientFailableOp[Unit] = sfUpdateOp(recentCase.Id, JsObject(Map("Enquiry_Type__c" -> JsString(reason.value))))
+
+    type TNewOrResumeCase = (ResponseWithId, ResponseWithId, Option[CaseWithId]) => ApiGatewayOp[CaseWithId]
 
     def raiseCase(
       lookupByIdOp: TSalesforceGenericIdLookup,
       recentCasesOp: TGetMostRecentCaseByContactId,
-      raiseOrResumeCaseOp: TRaiseOrResumeCase
+      newOrResumeCaseOp: TNewOrResumeCase
     )(
-      identityId: String,
+      identityId: IdentityId,
       subscriptionName: SubscriptionName
     ): ApiGatewayOp[CaseWithId] =
       for {
-        sfContactId <- lookupByIdOp(SalesforceGenericIdLookupParams(
-          sfObjectType = "Contact",
-          fieldName = "IdentityID__c",
-          lookupValue = identityId
-        )).toApiGatewayOp("lookup SF contact from identityID")
-        sfSubscriptionIdContainer <- lookupByIdOp(SalesforceGenericIdLookupParams(
-          sfObjectType = "SF_Subscription__c",
-          fieldName = "Name",
-          lookupValue = subscriptionName.value
-        )).toApiGatewayOp("lookup SF subscription ID")
-        sfRecentCases <- recentCasesOp(GetMostRecentCaseByContactIdParams(
-          contactId = sfContactId.Id,
-          caseOrigin = CASE_ORIGIN,
-          subscriptionId = sfSubscriptionIdContainer.Id,
-          caseSubject = STARTING_CASE_SUBJECT
-        )).toApiGatewayOp("find most recent case for identity user")
-        raiseCaseResponse <- raiseOrResumeCaseOp(sfContactId, sfSubscriptionIdContainer, sfRecentCases)
+        sfContactId <- lookupByIdOp(
+          SfObjectType("Contact"),
+          FieldName("IdentityID__c"),
+          LookupValue(identityId.value)
+        ).toApiGatewayOp("lookup SF contact from identityID")
+        sfSubscriptionIdContainer <- lookupByIdOp(
+          SfObjectType("SF_Subscription__c"),
+          FieldName("Name"),
+          LookupValue(subscriptionName.value)
+        ).toApiGatewayOp("lookup SF subscription ID")
+        sfRecentCases <- recentCasesOp(
+          ContactId(sfContactId.Id),
+          CaseOrigin(),
+          SubscriptionId(sfSubscriptionIdContainer.Id),
+          CaseSubject(STARTING_CASE_SUBJECT)
+        ).toApiGatewayOp("find most recent case for identity user")
+        raiseCaseResponse <- newOrResumeCaseOp(sfContactId, sfSubscriptionIdContainer, sfRecentCases)
       } yield raiseCaseResponse
 
-    type TRaiseOrResumeCase = (ResponseWithId, ResponseWithId, GetMostRecentCaseByContactId.RecentCases) => ApiGatewayOp[CaseWithId]
-
-    private def raiseOrResumeCase(
-      raiseCaseOp: RaiseCase,
-      sfUpdateOp: (String, JsValue) => ClientFailableOp[Unit],
+    private def newOrResumeCase(
+      createCaseOp: ((RaiseCaseDetail, ResponseWithId, ResponseWithId)) => ClientFailableOp[CaseWithId],
+      updateReasonOnRecentCaseOp: (Reason, CaseWithId) => ClientFailableOp[Unit],
       raiseCaseDetail: RaiseCaseDetail
     )(
-      sfContactId: ResponseWithId,
+      sfContactIdContainer: ResponseWithId,
       sfSubscriptionIdContainer: ResponseWithId,
-      sfRecentCases: GetMostRecentCaseByContactId.RecentCases
-    ) = {
-      if (sfRecentCases.records.isEmpty) // no recent cases so create one
-        raiseCaseOp(buildNewCaseForSalesforce(raiseCaseDetail, sfSubscriptionIdContainer, sfContactId))
-          .toApiGatewayOp("raise sf case")
-      else // recent case exists, so just update the reason and return the case
-        updateReasonOnRecentCase(sfUpdateOp)(raiseCaseDetail.reason, sfRecentCases.records.head)
+      sfRecentCase: Option[CaseWithId]
+    ) = sfRecentCase match {
+      // recent case exists, so just update the reason and return the case
+      case Some(recentCase) => for {
+        _ <- updateReasonOnRecentCaseOp(raiseCaseDetail.reason, recentCase)
           .toApiGatewayOp("update reason of recent sf case")
+      } yield recentCase
+      // no recent cases so create one
+      case None => createCaseOp((raiseCaseDetail, sfSubscriptionIdContainer, sfContactIdContainer))
+        .toApiGatewayOp("create sf case")
     }
 
     def steps(sfBackendForIdentityCookieHeader: SfBackendForIdentityCookieHeader)(apiGatewayRequest: ApiGatewayRequest) =
       (for {
         identityAndSfRequests <- sfBackendForIdentityCookieHeader(apiGatewayRequest.headers)
-        raiseRequestBody <- apiGatewayRequest.bodyAsCaseClass[RaiseRequestBody]()
-        raiseCaseDetail = RaiseCaseDetail(raiseRequestBody)
+        raiseCaseDetail <- apiGatewayRequest.bodyAsCaseClass[RaiseCaseDetail]()
         lookupByIdOp = SalesforceGenericIdLookup(identityAndSfRequests.sfRequests)_
         mostRecentCaseOp = SalesforceCase.GetMostRecentCaseByContactId(identityAndSfRequests.sfRequests)_
-        raiseCaseOp = SalesforceCase.Raise(identityAndSfRequests.sfRequests)_
+        createCaseOp = SalesforceCase.Create(identityAndSfRequests.sfRequests)_
+        wiredCreateCaseOp = buildNewCaseForSalesforce.tupled andThen createCaseOp
         sfUpdateOp = SalesforceCase.Update(identityAndSfRequests.sfRequests)_
-        raiseOrResumeCaseOp = raiseOrResumeCase(raiseCaseOp, sfUpdateOp, raiseCaseDetail)_
-        wiredRaiseCase = raiseCase(lookupByIdOp, mostRecentCaseOp, raiseOrResumeCaseOp)_
+        updateReasonOnRecentCaseOp = updateReasonOnRecentCase(sfUpdateOp)_
+        newOrResumeCaseOp = newOrResumeCase(wiredCreateCaseOp, updateReasonOnRecentCaseOp, raiseCaseDetail)_
+        wiredRaiseCase = raiseCase(lookupByIdOp, mostRecentCaseOp, newOrResumeCaseOp)_
         raiseCaseResponse <- wiredRaiseCase(identityAndSfRequests.identityUser.id, raiseCaseDetail.subscriptionName)
       } yield ApiGatewayResponse("200", raiseCaseResponse)).apiResponse
   }
 
-  case class CasePathParams(caseId: String)
+  case class CasePathParams(caseId: CaseId)
   implicit val pathParamReads = Json.reads[CasePathParams]
 
   def updateCase(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
@@ -180,35 +173,36 @@ object Handler extends Logging {
 
   object UpdateCase {
 
-    case class CaseWithContactId(ContactId: String)
+    case class CaseWithContactId(ContactId: ContactId)
     implicit val caseReads: Reads[CaseWithContactId] = Json.reads[CaseWithContactId]
 
     def verifyCaseBelongsToUser(
-      sfRequests: RestRequestMaker.Requests
+      lookupByIdOp: TSalesforceGenericIdLookup,
+      getCaseByIdOp: CaseId => ClientFailableOp[CaseWithContactId]
     )(
-      identityId: String,
-      caseId: String
+      identityId: IdentityId,
+      caseId: CaseId
     ) =
       for {
-        sfContactIdFromIdentity <- SalesforceGenericIdLookup(sfRequests)(SalesforceGenericIdLookupParams(
-          sfObjectType = "Contact",
-          fieldName = "IdentityID__c",
-          lookupValue = identityId
-        )).toApiGatewayOp("lookup SF contact ID from identityID")
-        sfCaseDetail <- SalesforceCase.GetById[CaseWithContactId](sfRequests)(caseId)
-          .toApiGatewayOp("lookup SF Case details")
-        sfContactIdFromCase = sfCaseDetail.ContactId
-        _ <- if (sfContactIdFromIdentity.Id equals sfContactIdFromCase) ContinueProcessing(())
-        else ReturnWithResponse(ApiGatewayResponse.forbidden(
-          s"Authenticated user (${sfContactIdFromIdentity.Id}) does not match ContactId ($sfContactIdFromCase) for Case ($caseId)"
-        ))
+        sfContactIdFromIdentity <- lookupByIdOp(
+          SfObjectType("Contact"),
+          FieldName("IdentityID__c"),
+          LookupValue(identityId.value)
+        ).toApiGatewayOp("lookup SF contact ID from identityID")
+        caseWithContactId <- getCaseByIdOp(caseId).toApiGatewayOp("lookup ContactId from SF Case")
+        _ <- (sfContactIdFromIdentity.Id equals caseWithContactId.ContactId.value)
+          .toApiGatewayContinueProcessing(ApiGatewayResponse.forbidden(
+            s"Authenticated user (${sfContactIdFromIdentity.Id}) does not match ContactId ($caseWithContactId) for Case ($caseId)"
+          ))
       } yield ()
 
     def steps(sfBackendForIdentityCookieHeader: SfBackendForIdentityCookieHeader)(apiGatewayRequest: ApiGatewayRequest) =
       (for {
         identityAndSfRequests <- sfBackendForIdentityCookieHeader(apiGatewayRequest.headers)
         pathParams <- apiGatewayRequest.pathParamsAsCaseClass[CasePathParams]()
-        _ <- verifyCaseBelongsToUser(identityAndSfRequests.sfRequests)(identityAndSfRequests.identityUser.id, pathParams.caseId)
+        lookupByIdOp = SalesforceGenericIdLookup(identityAndSfRequests.sfRequests)_
+        getCaseByIdOp = SalesforceCase.GetById[CaseWithContactId](identityAndSfRequests.sfRequests)_
+        _ <- verifyCaseBelongsToUser(lookupByIdOp, getCaseByIdOp)(identityAndSfRequests.identityUser.id, pathParams.caseId)
         requestBody <- apiGatewayRequest.bodyAsCaseClass[JsValue]()
         sfUpdateOp = SalesforceCase.Update(identityAndSfRequests.sfRequests)_
         _ <- sfUpdateOp(pathParams.caseId, requestBody).toApiGatewayOp("update case")

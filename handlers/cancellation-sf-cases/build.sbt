@@ -16,5 +16,6 @@ riffRaffArtifactResources += (file("handlers/cancellation-sf-cases/cfn.yaml"), "
 
 libraryDependencies ++= Seq(
   "com.gu.identity" %% "identity-cookie" % "3.160",
-  "com.gu" %% "identity-test-users" % "0.7"
+  "com.gu" %% "identity-test-users" % "0.7",
+  "ai.x" %% "play-json-extensions" % "0.10.0"
 )

@@ -5,7 +5,7 @@ import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 import com.gu.cancellation.sf_cases.Handler.{CasePathParams, SfBackendForIdentityCookieHeader, Steps}
 import com.gu.cancellation.sf_cases.TypeConvert._
 import com.gu.effects.{GetFromS3, RawEffects}
-import com.gu.identity.IdentityCookieToIdentityUser.IdentityUser
+import com.gu.identity.IdentityCookieToIdentityUser.{IdentityId, IdentityUser}
 import com.gu.salesforce.cases.SalesforceCase
 import com.gu.salesforce.cases.SalesforceCase.CaseWithId
 import com.gu.test.EffectsTest
@@ -13,6 +13,8 @@ import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json._
+
+import scala.util.Random
 
 case class PartialApiResponse(statusCode: String, body: String)
 case class GetCaseResponse(Description: String)
@@ -50,14 +52,14 @@ class EndToEndHandlerEffectsTest extends FlatSpec with Matchers {
 
     // update case by setting 'Description' field
     getResponse[JsValue](
-      updateCaseRequest(firstRaiseCaseResponse.Id, expectedDescription),
+      updateCaseRequest(firstRaiseCaseResponse.Id.value, expectedDescription),
       Handler.UpdateCase.steps
     )
 
     // fetch the case to ensure the 'Description' field has been updated
     implicit val getDetailReads: Reads[GetCaseResponse] = Json.reads[GetCaseResponse]
     val getCaseDetailResponse = getResponse[GetCaseResponse](
-      getCaseDetailRequest(firstRaiseCaseResponse.Id),
+      getCaseDetailRequest(firstRaiseCaseResponse.Id.value),
       getCaseSteps
     )
 
@@ -72,7 +74,7 @@ object Runner extends Matchers {
   def fakeCookiesToIdentityUser(scGuU: String, guU: String) = {
     scGuU shouldEqual EndToEndData.scGuU
     guU shouldEqual EndToEndData.guU
-    Some(IdentityUser("100000932", None))
+    Some(IdentityUser(IdentityId("100000932"), None))
   }
 
   def getResponse[ResponseType](input: String, steps: Steps)(implicit reads: Reads[ResponseType]): ResponseType = {
@@ -147,7 +149,11 @@ object EndToEndData {
 
   val createCaseRequest: String = ApiGatewayRequestPayloadBuilder(
     httpMethod = "POST",
-    bodyString = "{\\\"reason\\\":\\\"mma_editorial\\\",\\\"product\\\":\\\"Membership\\\",\\\"subscriptionName\\\":\\\"A-S00045062\\\"}"
+    bodyString = "{" +
+      s"""\\\"reason\\\":\\\"${Random.alphanumeric.take(10).mkString}\\\",""" +
+      "\\\"product\\\":\\\"Membership\\\"," +
+      "\\\"subscriptionName\\\":\\\"A-S00045062\\\"" +
+      "}"
   )
 
   def updateCaseRequest(caseId: String, description: String): String = ApiGatewayRequestPayloadBuilder(

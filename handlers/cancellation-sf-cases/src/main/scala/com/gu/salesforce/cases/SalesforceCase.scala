@@ -1,5 +1,6 @@
 package com.gu.salesforce.cases
 
+import ai.x.play.json.Jsonx
 import com.gu.util.Logging
 import com.gu.util.resthttp.RestRequestMaker.Requests
 import com.gu.util.resthttp.Types.ClientFailableOp
@@ -11,70 +12,83 @@ object SalesforceCase extends Logging {
   private val caseSObjectsBaseUrl = caseBaseUrl + "/sobjects/Case"
   private val caseSoqlQueryBaseUrl = caseBaseUrl + "/query/?q="
 
-  case class CaseWithId(Id: String)
+  case class CaseId(value: String) extends AnyVal
+  implicit val formatCaseId = Jsonx.formatInline[CaseId]
+
+  case class CaseWithId(Id: CaseId)
   implicit val caseWithIdReads = Json.reads[CaseWithId]
 
-  object Raise {
+  case class ContactId(value: String) extends AnyVal
+  implicit val formatContactId = Jsonx.formatInline[ContactId]
 
-    type RaiseCase = NewCase => ClientFailableOp[CaseWithId]
+  case class SubscriptionId(value: String) extends AnyVal
+  implicit val formatSubscriptionId = Jsonx.formatInline[SubscriptionId]
+
+  case class CaseOrigin(value: String = "Self Service") extends AnyVal
+  implicit val formatCaseOrigin = Jsonx.formatInline[CaseOrigin]
+
+  case class CaseSubject(value: String) extends AnyVal
+  implicit val formatCaseSubject = Jsonx.formatInline[CaseSubject]
+
+  object Create {
 
     // NOTE : Case Owner is set by SF Rule based on Origin='Self Service'
     case class NewCase(
-      SF_Subscription__c: String,
-      ContactId: String,
-      Origin: String,
+      SF_Subscription__c: SubscriptionId,
+      ContactId: ContactId,
+      Origin: CaseOrigin,
       Product__c: String,
       Journey__c: String,
       Enquiry_Type__c: String,
       Status: String,
-      Subject: String
+      Subject: CaseSubject
     )
     implicit val writes = Json.writes[NewCase]
 
     def apply(sfRequests: Requests)(newCase: NewCase): ClientFailableOp[CaseWithId] =
-      sfRequests.post(newCase, caseSObjectsBaseUrl)
+      sfRequests.post[NewCase, CaseWithId](newCase, caseSObjectsBaseUrl)
 
   }
 
   object Update {
 
-    def apply(sfRequests: Requests)(caseId: String, body: JsValue): ClientFailableOp[Unit] =
-      sfRequests.patch(body, s"$caseSObjectsBaseUrl/$caseId")
+    def apply(sfRequests: Requests)(caseId: CaseId, body: JsValue): ClientFailableOp[Unit] =
+      sfRequests.patch(body, s"$caseSObjectsBaseUrl/${caseId.value}")
 
   }
 
   object GetById {
 
-    def apply[ResponseType](sfRequests: Requests)(caseId: String)(implicit ev1: Reads[ResponseType]): ClientFailableOp[ResponseType] =
-      sfRequests.get[ResponseType](s"$caseSObjectsBaseUrl/$caseId")
+    def apply[ResponseType: Reads](sfRequests: Requests)(caseId: CaseId): ClientFailableOp[ResponseType] =
+      sfRequests.get[ResponseType](s"$caseSObjectsBaseUrl/${caseId.value}")
   }
 
   object GetMostRecentCaseByContactId {
 
-    case class GetMostRecentCaseByContactIdParams(
-      contactId: String,
-      caseOrigin: String,
-      subscriptionId: String,
-      caseSubject: String,
-      limit: Int = 1
-    )
-    type TGetMostRecentCaseByContactId = GetMostRecentCaseByContactIdParams => ClientFailableOp[RecentCases]
+    private case class RecentCases(records: List[CaseWithId])
+    private implicit val readsCases = Json.reads[RecentCases]
 
-    case class RecentCases(records: List[CaseWithId])
-    implicit val readsCases = Json.reads[RecentCases]
+    type TGetMostRecentCaseByContactId = (ContactId, CaseOrigin, SubscriptionId, CaseSubject) => ClientFailableOp[Option[CaseWithId]]
 
-    def apply(sfRequests: Requests)(params: GetMostRecentCaseByContactIdParams): ClientFailableOp[RecentCases] = {
+    def apply(
+      sfRequests: Requests
+    )(
+      contactId: ContactId,
+      caseOrigin: CaseOrigin,
+      subscriptionId: SubscriptionId,
+      caseSubject: CaseSubject
+    ): ClientFailableOp[Option[CaseWithId]] = {
       val soqlQuery = s"SELECT Id " +
-          s"FROM Case " +
-          s"WHERE ContactId = '${params.contactId}' " +
-          s"AND Origin = '${params.caseOrigin}' " +
-          s"AND CreatedDate = LAST_N_DAYS:3 " +
-          s"AND SF_Subscription__c = '${params.subscriptionId}' " +
-          s"AND Subject = '${params.caseSubject}' " +
-          s"ORDER BY CreatedDate DESC " +
-          s"LIMIT ${params.limit}"
-      logger.info(soqlQuery)
-      sfRequests.get[RecentCases](s"$caseSoqlQueryBaseUrl$soqlQuery")
+        s"FROM Case " +
+        s"WHERE ContactId = '${contactId.value}' " +
+        s"AND Origin = '${caseOrigin.value}' " +
+        s"AND CreatedDate = LAST_N_DAYS:3 " +
+        s"AND SF_Subscription__c = '${subscriptionId.value}' " +
+        s"AND Subject = '${caseSubject.value}' " +
+        s"ORDER BY CreatedDate DESC " +
+        s"LIMIT 1"
+      logger.info(s"using SF query : $soqlQuery")
+      sfRequests.get[RecentCases](s"$caseSoqlQueryBaseUrl$soqlQuery").map(_.records.headOption)
     }
   }
 
