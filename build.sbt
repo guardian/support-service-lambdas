@@ -173,7 +173,7 @@ lazy val `identity-retention` = all(project in file("handlers/identity-retention
 
 lazy val `new-product-api` = all(project in file("handlers/new-product-api"))
   .enablePlugins(RiffRaffArtifact)
-  .dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
+  .dependsOn(zuora, handler,`effects-sqs`, effectsDepIncludingTestFolder, testDep)
 
 lazy val `zuora-retention` = all(project in file("handlers/zuora-retention"))
   .enablePlugins(RiffRaffArtifact)
