@@ -9,6 +9,7 @@ object Dependencies {
   val scalatest = "org.scalatest" %% "scalatest" % "3.0.1" % "test"
   val jacksonDatabind = "com.fasterxml.jackson.core" % "jackson-databind" % "2.8.11.1"
   val awsS3 = "com.amazonaws" % "aws-java-sdk-s3" % "1.11.311"
+  val awsSQS = "com.amazonaws" % "aws-java-sdk-sqs" % "1.11.371"
   val awsLambda = "com.amazonaws" % "aws-lambda-java-core" % "1.2.0"
   val supportInternationalisation = "com.gu" %% "support-internationalisation" % "0.9"
 }
