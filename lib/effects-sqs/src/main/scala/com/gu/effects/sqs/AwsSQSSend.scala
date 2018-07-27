@@ -4,10 +4,11 @@ import com.amazonaws.auth._
 import com.amazonaws.auth.profile.ProfileCredentialsProvider
 import com.amazonaws.regions.Regions
 import com.amazonaws.services.sqs.AmazonSQSAsyncClientBuilder
-import com.amazonaws.services.sqs.model.SendMessageRequest
+import com.amazonaws.services.sqs.model.{SendMessageRequest, SendMessageResult}
 import org.apache.log4j.Logger
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success, Try}
 
 object AwsSQSSend {
 
@@ -26,16 +27,16 @@ object AwsSQSSend {
     val queueUrl = sqsClient.getQueueUrl(queueName.value).getQueueUrl
     logger.info(s"Sending message to SQS queue $queueUrl")
     val messageResult = AwsAsync(sqsClient.sendMessageAsync, new SendMessageRequest(queueUrl, payload.value))
-    messageResult.recover {
-      case throwable =>
-        logger.error("Failed to send message due to $queueUrl due to:", throwable)
-        throw throwable
-    }.map { result =>
-      logger.info(s"Successfully sent message to $queueUrl: $result")
-      result
-    }
-  }
 
+    messageResult.transform {
+      case Success(result) =>
+        logger.info(s"Successfully sent message to $queueUrl: $result")
+        Success(())
+      case Failure(throwable) =>
+        logger.error(s"Failed to send message due to $queueUrl due to:", throwable)
+        Failure(throwable)
+   }
+  }
 }
 
 object aws {
