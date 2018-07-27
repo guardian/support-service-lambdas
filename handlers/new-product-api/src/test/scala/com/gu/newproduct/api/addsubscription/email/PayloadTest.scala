@@ -5,8 +5,6 @@ import play.api.libs.json.Json
 
 class PayloadTest extends FlatSpec with Matchers {
 
-
-
   it should "serialise contributions Email to json" in {
 
     val contributionFields = ContributionFields(

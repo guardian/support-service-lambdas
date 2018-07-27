@@ -4,9 +4,9 @@ import play.api.libs.json.{JsValue, Json, Writes}
 
 trait EmailFields
 
-case class DirectDebitFields //these are optional but should be at the same level as the rest of the fields in the json
+//case class DirectDebitFields //these are optional but should be at the same level as the rest of the fields in the json
 case class ContributionFields(
-  EmailAddress:String, // why do we need the email here as well?
+  EmailAddress: String, // why do we need the email here as well?
   created: String,
   amount: String,
   currency: String,
@@ -17,7 +17,7 @@ case class ContributionFields(
 object ContributionFields {
   implicit val writes = Json.writes[ContributionFields]
 }
-object EmailFields{
+object EmailFields {
   implicit val writes = new Writes[EmailFields] {
     override def writes(o: EmailFields): JsValue = o match {
       case c: ContributionFields => ContributionFields.writes.writes(c)
