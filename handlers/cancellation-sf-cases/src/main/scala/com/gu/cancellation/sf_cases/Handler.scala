@@ -9,7 +9,7 @@ import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.identity.IdentityCookieToIdentityUser.{CookieValuesToIdentityUser, IdentityId, IdentityUser}
 import com.gu.identity.{IdentityCookieToIdentityUser, IdentityTestUserConfig, IsIdentityTestUser}
 import com.gu.salesforce.SalesforceGenericIdLookup
-import com.gu.salesforce.SalesforceGenericIdLookup.{FieldName, LookupValue, ResponseWithId, SfObjectType, TSalesforceGenericIdLookup}
+import com.gu.salesforce.SalesforceGenericIdLookup.{FieldName, LookupValue, SfObjectType, TSalesforceGenericIdLookup}
 import com.gu.salesforce.auth.SalesforceAuthenticate
 import com.gu.salesforce.auth.SalesforceAuthenticate.{SFAuthConfig, SFAuthTestConfig}
 import com.gu.salesforce.cases.SalesforceCase
@@ -60,20 +60,25 @@ object Handler extends Logging {
     final case class SubscriptionName(value: String) extends AnyVal
     implicit val formatSubscriptionName = Jsonx.formatInline[SubscriptionName]
 
+    final case class ContactIdContainer(Id: String)
+    implicit val readsContactIdContainer = Json.reads[ContactIdContainer]
+    final case class SubscriptionIdContainer(Id: String)
+    implicit val readsSubscriptionIdContainer = Json.reads[SubscriptionIdContainer]
+
     case class RaiseCaseDetail(
       product: ProductName,
       reason: Reason,
       subscriptionName: SubscriptionName
     )
-    implicit val reads = Json.reads[RaiseCaseDetail]
-    implicit val writes = Json.writes[CaseWithId]
+    implicit val readsRaiseCaseDetail = Json.reads[RaiseCaseDetail]
+    implicit val writesCaseWithId = Json.writes[CaseWithId]
 
     val STARTING_CASE_SUBJECT = "Online Cancellation Attempt"
 
     val buildWireNewCaseForSalesforce = (
       raiseCaseDetail: RaiseCaseDetail,
-      sfSubscriptionIdContainer: ResponseWithId,
-      sfContactIdContainer: ResponseWithId
+      sfSubscriptionIdContainer: SubscriptionIdContainer,
+      sfContactIdContainer: ContactIdContainer
     ) =>
       WireNewCase(
         ContactId = ContactId(sfContactIdContainer.Id),
@@ -92,7 +97,7 @@ object Handler extends Logging {
       sfCase: CaseWithId
     ): ClientFailableOp[Unit] = sfUpdateOp(sfCase.Id, JsObject(Map("Enquiry_Type__c" -> JsString(reason.value))))
 
-    type TNewOrResumeCase = (ResponseWithId, ResponseWithId, Option[CaseWithId]) => ApiGatewayOp[CaseWithId]
+    type TNewOrResumeCase = (ContactIdContainer, SubscriptionIdContainer, Option[CaseWithId]) => ApiGatewayOp[CaseWithId]
 
     def raiseCase(
       lookupByIdOp: TSalesforceGenericIdLookup,
@@ -107,12 +112,12 @@ object Handler extends Logging {
           SfObjectType("Contact"),
           FieldName("IdentityID__c"),
           LookupValue(identityId.value)
-        ).toApiGatewayOp("lookup SF contact from identityID")
+        ).map(_.Id).map(ContactIdContainer).toApiGatewayOp("lookup SF contact from identityID")
         sfSubscriptionIdContainer <- lookupByIdOp(
           SfObjectType("SF_Subscription__c"),
           FieldName("Name"),
           LookupValue(subscriptionName.value)
-        ).toApiGatewayOp("lookup SF subscription ID")
+        ).map(_.Id).map(SubscriptionIdContainer).toApiGatewayOp("lookup SF subscription ID")
         sfRecentCases <- recentCasesOp(
           ContactId(sfContactId.Id),
           SubscriptionId(sfSubscriptionIdContainer.Id),
@@ -121,15 +126,15 @@ object Handler extends Logging {
         raiseCaseResponse <- newOrResumeCaseOp(sfContactId, sfSubscriptionIdContainer, sfRecentCases)
       } yield raiseCaseResponse
 
-    type NewCase = (RaiseCaseDetail, ResponseWithId, ResponseWithId)
+    type NewCase = (RaiseCaseDetail, SubscriptionIdContainer, ContactIdContainer)
 
     private def newOrResumeCase(
       createCaseOp: NewCase => ClientFailableOp[CaseWithId],
       updateReasonOnRecentCaseOp: (Reason, CaseWithId) => ClientFailableOp[Unit],
       raiseCaseDetail: RaiseCaseDetail
     )(
-      sfContactIdContainer: ResponseWithId,
-      sfSubscriptionIdContainer: ResponseWithId,
+      sfContactIdContainer: ContactIdContainer,
+      sfSubscriptionIdContainer: SubscriptionIdContainer,
       sfRecentCase: Option[CaseWithId]
     ) = sfRecentCase match {
       // recent case exists, so just update the reason and return the case

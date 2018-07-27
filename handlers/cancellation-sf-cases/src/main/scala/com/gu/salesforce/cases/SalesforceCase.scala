@@ -42,7 +42,7 @@ object SalesforceCase extends Logging {
       Subject: CaseSubject,
       Origin: String = CASE_ORIGIN
     )
-    implicit val writes = Json.writes[WireNewCase]
+    implicit val writesWireNewCase = Json.writes[WireNewCase]
 
     def apply(sfRequests: Requests)(newCase: WireNewCase): ClientFailableOp[CaseWithId] =
       sfRequests.post[WireNewCase, CaseWithId](newCase, caseSObjectsBaseUrl)
