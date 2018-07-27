@@ -12,7 +12,7 @@ class AwsAsyncHandler[Request <: AmazonWebServiceRequest, Response](f: (Request,
   extends AsyncHandler[Request, Response] {
 
   val logger = Logger.getLogger(getClass.getName)
-
+h
   f(request, this)
 
   private val promise = Promise[Response]()

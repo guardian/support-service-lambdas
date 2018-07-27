@@ -73,7 +73,7 @@ object GetPaymentMethod {
   case class DirectDebit(
     status: PaymentMethodStatus,
     accountName: BankAccountName,
-    number: BankAccountNumberMask,
+    accountNumberMask: BankAccountNumberMask,
     sortCode: SortCode,
     mandateId: MandateId
   ) extends PaymentMethod {

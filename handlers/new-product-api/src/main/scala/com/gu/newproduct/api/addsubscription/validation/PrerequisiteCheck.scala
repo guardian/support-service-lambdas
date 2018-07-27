@@ -7,7 +7,7 @@ import com.gu.newproduct.api.addsubscription.TypeConvert._
 import com.gu.newproduct.api.addsubscription.ZuoraIds.ProductRatePlanId
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAccount
 import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.WireModel.ZuoraSubscriptionsResponse
-import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.PaymentMethodWire
+import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{PaymentMethod, PaymentMethodWire}
 import com.gu.newproduct.api.addsubscription.zuora.{GetAccount, GetAccountSubscriptions, GetPaymentMethod}
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.RestRequestMaker
@@ -17,7 +17,7 @@ object PrerequisiteCheck {
     zuoraClient: RestRequestMaker.Requests,
     contributionRatePlanIds: List[ProductRatePlanId],
     now: () => LocalDateTime
-  )(request: AddSubscriptionRequest): ApiGatewayOp[Unit] = {
+  )(request: AddSubscriptionRequest): ApiGatewayOp[PaymentMethod] = {
 
     def getAccount = GetAccount(zuoraClient.get[ZuoraAccount]) _
     def getPaymentMethod = GetPaymentMethod(zuoraClient.get[PaymentMethodWire]) _
@@ -34,6 +34,6 @@ object PrerequisiteCheck {
       subs <- getSubscriptions(request.zuoraAccountId).toApiGatewayOp("get subscriptions for account from Zuora")
       _ <- ValidateSubscriptions(contributionRatePlanIds)(subs).toApiGatewayOp
       _ <- ValidateRequest(currentDate, AmountLimits.limitsFor)(request, account.currency).toApiGatewayOp
-    } yield ()
+    } yield (paymentMethod)
   }
 }

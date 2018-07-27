@@ -10,6 +10,7 @@ import com.gu.newproduct.api.addsubscription.zuora.{CreateSubscription, GetAccou
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.WireModel.{WireCreateRequest, WireSubscription}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{CreateReq, SubscriptionName}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAccount
+import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.PaymentMethod
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
@@ -34,12 +35,12 @@ object Handler extends Logging {
 object Steps {
 
   def addSubscriptionSteps(
-    prerequesiteCheck: AddSubscriptionRequest => ApiGatewayOp[Unit],
+    prerequisiteCheck: AddSubscriptionRequest => ApiGatewayOp[PaymentMethod],
     createMonthlyContribution: CreateReq => ClientFailableOp[SubscriptionName]
   )(apiGatewayRequest: ApiGatewayRequest): ApiResponse = {
     (for {
       request <- apiGatewayRequest.bodyAsCaseClass[AddSubscriptionRequest]().withLogging("parsed request")
-      _ <- prerequesiteCheck(request)
+      paymentMethod <- prerequisiteCheck(request)
       req = CreateReq(
         request.zuoraAccountId,
         request.amountMinorUnits,
