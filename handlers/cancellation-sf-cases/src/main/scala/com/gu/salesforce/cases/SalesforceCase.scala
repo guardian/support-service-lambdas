@@ -8,6 +8,8 @@ import play.api.libs.json.{JsValue, Json, Reads}
 
 object SalesforceCase extends Logging {
 
+  private val CASE_ORIGIN = "Self Service"
+
   private val caseBaseUrl = "/services/data/v29.0"
   private val caseSObjectsBaseUrl = caseBaseUrl + "/sobjects/Case"
   private val caseSoqlQueryBaseUrl = caseBaseUrl + "/query/?q="
@@ -24,29 +26,26 @@ object SalesforceCase extends Logging {
   case class SubscriptionId(value: String) extends AnyVal
   implicit val formatSubscriptionId = Jsonx.formatInline[SubscriptionId]
 
-  case class CaseOrigin(value: String = "Self Service") extends AnyVal
-  implicit val formatCaseOrigin = Jsonx.formatInline[CaseOrigin]
-
   case class CaseSubject(value: String) extends AnyVal
   implicit val formatCaseSubject = Jsonx.formatInline[CaseSubject]
 
   object Create {
 
     // NOTE : Case Owner is set by SF Rule based on Origin='Self Service'
-    case class NewCase(
+    case class WireNewCase(
       SF_Subscription__c: SubscriptionId,
       ContactId: ContactId,
-      Origin: CaseOrigin,
       Product__c: String,
       Journey__c: String,
       Enquiry_Type__c: String,
       Status: String,
-      Subject: CaseSubject
+      Subject: CaseSubject,
+      Origin: String = CASE_ORIGIN
     )
-    implicit val writes = Json.writes[NewCase]
+    implicit val writes = Json.writes[WireNewCase]
 
-    def apply(sfRequests: Requests)(newCase: NewCase): ClientFailableOp[CaseWithId] =
-      sfRequests.post[NewCase, CaseWithId](newCase, caseSObjectsBaseUrl)
+    def apply(sfRequests: Requests)(newCase: WireNewCase): ClientFailableOp[CaseWithId] =
+      sfRequests.post[WireNewCase, CaseWithId](newCase, caseSObjectsBaseUrl)
 
   }
 
@@ -68,20 +67,19 @@ object SalesforceCase extends Logging {
     private case class RecentCases(records: List[CaseWithId])
     private implicit val readsCases = Json.reads[RecentCases]
 
-    type TGetMostRecentCaseByContactId = (ContactId, CaseOrigin, SubscriptionId, CaseSubject) => ClientFailableOp[Option[CaseWithId]]
+    type TGetMostRecentCaseByContactId = (ContactId, SubscriptionId, CaseSubject) => ClientFailableOp[Option[CaseWithId]]
 
     def apply(
       sfRequests: Requests
     )(
       contactId: ContactId,
-      caseOrigin: CaseOrigin,
       subscriptionId: SubscriptionId,
       caseSubject: CaseSubject
     ): ClientFailableOp[Option[CaseWithId]] = {
       val soqlQuery = s"SELECT Id " +
         s"FROM Case " +
         s"WHERE ContactId = '${contactId.value}' " +
-        s"AND Origin = '${caseOrigin.value}' " +
+        s"AND Origin = '$CASE_ORIGIN' " +
         s"AND CreatedDate = LAST_N_DAYS:3 " +
         s"AND SF_Subscription__c = '${subscriptionId.value}' " +
         s"AND Subject = '${caseSubject.value}' " +

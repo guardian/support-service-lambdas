@@ -13,9 +13,9 @@ import com.gu.salesforce.SalesforceGenericIdLookup.{FieldName, LookupValue, Resp
 import com.gu.salesforce.auth.SalesforceAuthenticate
 import com.gu.salesforce.auth.SalesforceAuthenticate.{SFAuthConfig, SFAuthTestConfig}
 import com.gu.salesforce.cases.SalesforceCase
-import com.gu.salesforce.cases.SalesforceCase.Create.NewCase
+import com.gu.salesforce.cases.SalesforceCase.Create.WireNewCase
 import com.gu.salesforce.cases.SalesforceCase.GetMostRecentCaseByContactId.TGetMostRecentCaseByContactId
-import com.gu.salesforce.cases.SalesforceCase.{CaseId, CaseOrigin, CaseSubject, CaseWithId, ContactId, SubscriptionId}
+import com.gu.salesforce.cases.SalesforceCase.{CaseId, CaseSubject, CaseWithId, ContactId, SubscriptionId}
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
@@ -70,13 +70,12 @@ object Handler extends Logging {
 
     val STARTING_CASE_SUBJECT = "Online Cancellation Attempt"
 
-    val buildNewCaseForSalesforce = (
+    val buildWireNewCaseForSalesforce = (
       raiseCaseDetail: RaiseCaseDetail,
       sfSubscriptionIdContainer: ResponseWithId,
       sfContactIdContainer: ResponseWithId
     ) =>
-      NewCase(
-        Origin = CaseOrigin(),
+      WireNewCase(
         ContactId = ContactId(sfContactIdContainer.Id),
         Product__c = raiseCaseDetail.product.value,
         SF_Subscription__c = SubscriptionId(sfSubscriptionIdContainer.Id),
@@ -86,12 +85,12 @@ object Handler extends Logging {
         Subject = CaseSubject(STARTING_CASE_SUBJECT)
       )
 
-    def updateReasonOnRecentCase(
+    def updateCaseReason(
       sfUpdateOp: (CaseId, JsValue) => Types.ClientFailableOp[Unit]
     )(
       reason: Reason,
-      recentCase: CaseWithId
-    ): ClientFailableOp[Unit] = sfUpdateOp(recentCase.Id, JsObject(Map("Enquiry_Type__c" -> JsString(reason.value))))
+      sfCase: CaseWithId
+    ): ClientFailableOp[Unit] = sfUpdateOp(sfCase.Id, JsObject(Map("Enquiry_Type__c" -> JsString(reason.value))))
 
     type TNewOrResumeCase = (ResponseWithId, ResponseWithId, Option[CaseWithId]) => ApiGatewayOp[CaseWithId]
 
@@ -116,15 +115,16 @@ object Handler extends Logging {
         ).toApiGatewayOp("lookup SF subscription ID")
         sfRecentCases <- recentCasesOp(
           ContactId(sfContactId.Id),
-          CaseOrigin(),
           SubscriptionId(sfSubscriptionIdContainer.Id),
           CaseSubject(STARTING_CASE_SUBJECT)
         ).toApiGatewayOp("find most recent case for identity user")
         raiseCaseResponse <- newOrResumeCaseOp(sfContactId, sfSubscriptionIdContainer, sfRecentCases)
       } yield raiseCaseResponse
 
+    type NewCase = (RaiseCaseDetail, ResponseWithId, ResponseWithId)
+
     private def newOrResumeCase(
-      createCaseOp: ((RaiseCaseDetail, ResponseWithId, ResponseWithId)) => ClientFailableOp[CaseWithId],
+      createCaseOp: NewCase => ClientFailableOp[CaseWithId],
       updateReasonOnRecentCaseOp: (Reason, CaseWithId) => ClientFailableOp[Unit],
       raiseCaseDetail: RaiseCaseDetail
     )(
@@ -149,9 +149,9 @@ object Handler extends Logging {
         lookupByIdOp = SalesforceGenericIdLookup(identityAndSfRequests.sfRequests)_
         mostRecentCaseOp = SalesforceCase.GetMostRecentCaseByContactId(identityAndSfRequests.sfRequests)_
         createCaseOp = SalesforceCase.Create(identityAndSfRequests.sfRequests)_
-        wiredCreateCaseOp = buildNewCaseForSalesforce.tupled andThen createCaseOp
+        wiredCreateCaseOp = buildWireNewCaseForSalesforce.tupled andThen createCaseOp
         sfUpdateOp = SalesforceCase.Update(identityAndSfRequests.sfRequests)_
-        updateReasonOnRecentCaseOp = updateReasonOnRecentCase(sfUpdateOp)_
+        updateReasonOnRecentCaseOp = updateCaseReason(sfUpdateOp)_
         newOrResumeCaseOp = newOrResumeCase(wiredCreateCaseOp, updateReasonOnRecentCaseOp, raiseCaseDetail)_
         wiredRaiseCase = raiseCase(lookupByIdOp, mostRecentCaseOp, newOrResumeCaseOp)_
         raiseCaseResponse <- wiredRaiseCase(identityAndSfRequests.identityUser.id, raiseCaseDetail.subscriptionName)

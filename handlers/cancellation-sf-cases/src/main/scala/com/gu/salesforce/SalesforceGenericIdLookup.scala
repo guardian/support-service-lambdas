@@ -18,7 +18,7 @@ object SalesforceGenericIdLookup {
   case class LookupValue(value: String) extends AnyVal
   implicit val formatLookupValue = Jsonx.formatInline[LookupValue]
 
-  case class ResponseWithId(Id: String) //TODO genericise so Id is a single value class
+  case class ResponseWithId(Id: String)
   implicit val reads = Json.reads[ResponseWithId]
 
   def apply(sfRequests: Requests)(
