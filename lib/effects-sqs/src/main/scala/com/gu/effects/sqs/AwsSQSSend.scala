@@ -17,6 +17,7 @@ object AwsSQSSend {
 
   case class QueueName(value: String) extends AnyVal
 
+  //do we want to keep this generic by accepting just strings or do we want to accept any case classes with writes defined ?
   case class Payload(value: String) extends AnyVal
 
   def apply(queueName: QueueName)(payload: Payload)(implicit ex: ExecutionContext): Future[Unit] = {
@@ -36,7 +37,7 @@ object AwsSQSSend {
       case Failure(throwable) =>
         logger.error(s"Failed to send message due to $queueUrl due to:", throwable)
         Failure(throwable)
-   }
+    }
   }
 }
 

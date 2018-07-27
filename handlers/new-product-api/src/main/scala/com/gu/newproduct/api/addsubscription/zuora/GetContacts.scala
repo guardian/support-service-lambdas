@@ -14,7 +14,6 @@ object GetContacts {
 
     case class ZuoraContacts(billToContact: ZuoraContact, soldToContact: ZuoraContact)
 
-
     implicit val ZuoraContactReads = Json.reads[ZuoraContact]
     implicit val ZuoraContactsReads = Json.reads[ZuoraContacts]
 

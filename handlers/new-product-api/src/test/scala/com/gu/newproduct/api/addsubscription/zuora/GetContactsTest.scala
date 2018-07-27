@@ -23,7 +23,7 @@ class GetContactsTest extends FlatSpec with Matchers {
 
   it should "get contacts" in {
     val zuoraGet: RequestsGet[ZuoraContacts] = (path, isCheckNeeded) => {
-      (path, isCheckNeeded) shouldBe(("accounts/accountId", WithCheck))
+      (path, isCheckNeeded) shouldBe (("accounts/accountId", WithCheck))
       ClientSuccess(ZuoraContacts(billToContact = billToZuoraContact, soldToContact = soldToZuoraContact))
     }
 
