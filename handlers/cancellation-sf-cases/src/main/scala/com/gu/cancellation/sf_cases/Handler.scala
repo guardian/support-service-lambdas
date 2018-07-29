@@ -95,7 +95,7 @@ object Handler extends Logging {
     )(
       reason: Reason,
       sfCase: CaseWithId
-    ): ClientFailableOp[Unit] = sfUpdateOp(sfCase.Id, JsObject(Map("Enquiry_Type__c" -> JsString(reason.value))))
+    ): ClientFailableOp[Unit] = sfUpdateOp(sfCase.id, JsObject(Map("Enquiry_Type__c" -> JsString(reason.value))))
 
     type TNewOrResumeCase = (ContactIdContainer, SubscriptionIdContainer, Option[CaseWithId]) => ApiGatewayOp[CaseWithId]
 

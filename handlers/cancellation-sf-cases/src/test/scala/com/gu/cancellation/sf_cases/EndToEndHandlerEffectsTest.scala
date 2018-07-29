@@ -46,20 +46,20 @@ class EndToEndHandlerEffectsTest extends FlatSpec with Matchers {
       Handler.RaiseCase.steps
     )
 
-    firstRaiseCaseResponse.Id shouldEqual secondRaiseCaseResponse.Id
+    firstRaiseCaseResponse.id shouldEqual secondRaiseCaseResponse.id
 
     val expectedDescription = "EndToEndTest"
 
     // update case by setting 'Description' field
     getResponse[JsValue](
-      updateCaseRequest(firstRaiseCaseResponse.Id.value, expectedDescription),
+      updateCaseRequest(firstRaiseCaseResponse.id.value, expectedDescription),
       Handler.UpdateCase.steps
     )
 
     // fetch the case to ensure the 'Description' field has been updated
     implicit val getDetailReads: Reads[GetCaseResponse] = Json.reads[GetCaseResponse]
     val getCaseDetailResponse = getResponse[GetCaseResponse](
-      getCaseDetailRequest(firstRaiseCaseResponse.Id.value),
+      getCaseDetailRequest(firstRaiseCaseResponse.id.value),
       getCaseSteps
     )
 

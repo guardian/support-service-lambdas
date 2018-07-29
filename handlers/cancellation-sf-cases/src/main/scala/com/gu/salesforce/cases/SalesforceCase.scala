@@ -17,7 +17,7 @@ object SalesforceCase extends Logging {
   case class CaseId(value: String) extends AnyVal
   implicit val formatCaseId = Jsonx.formatInline[CaseId]
 
-  case class CaseWithId(Id: CaseId)
+  case class CaseWithId(id: CaseId)
   implicit val caseWithIdReads = Json.reads[CaseWithId]
 
   case class ContactId(value: String) extends AnyVal
@@ -64,8 +64,11 @@ object SalesforceCase extends Logging {
 
   object GetMostRecentCaseByContactId {
 
-    private case class RecentCases(records: List[CaseWithId])
-    private implicit val readsCases = Json.reads[RecentCases]
+    private case class CaseWithCamelcaseId(Id: String)
+    private implicit val readsCaseWithCamelcaseId = Json.reads[CaseWithCamelcaseId]
+
+    private case class CaseQueryResponse(records: List[CaseWithCamelcaseId])
+    private implicit val readsCases = Json.reads[CaseQueryResponse]
 
     type TGetMostRecentCaseByContactId = (ContactId, SubscriptionId, CaseSubject) => ClientFailableOp[Option[CaseWithId]]
 
@@ -86,7 +89,8 @@ object SalesforceCase extends Logging {
         s"ORDER BY CreatedDate DESC " +
         s"LIMIT 1"
       logger.info(s"using SF query : $soqlQuery")
-      sfRequests.get[RecentCases](s"$caseSoqlQueryBaseUrl$soqlQuery").map(_.records.headOption)
+      sfRequests.get[CaseQueryResponse](s"$caseSoqlQueryBaseUrl$soqlQuery")
+        .map(_.records.headOption.map(camelId => CaseWithId(CaseId(camelId.Id))))
     }
   }
 
