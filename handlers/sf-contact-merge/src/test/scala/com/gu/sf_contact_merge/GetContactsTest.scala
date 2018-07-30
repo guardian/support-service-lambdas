@@ -1,10 +1,9 @@
 package com.gu.sf_contact_merge
 
-import com.gu.effects.TestingRawEffects
-import com.gu.effects.TestingRawEffects.{HTTPResponse, POSTRequest}
-import com.gu.sf_contact_merge.GetZuoraEmailsForAccounts.AccountId
+import com.gu.sf_contact_merge.GetContacts.{Account, AccountId, IdentityId, SFContactId}
+import com.gu.sf_contact_merge.GetEmails.ContactId
 import com.gu.util.resthttp.Types.ClientSuccess
-import com.gu.util.zuora.{ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
+import com.gu.zuora.fake.FakeZuoraQuerier
 import org.scalatest.{FlatSpec, Matchers}
 import scalaz.NonEmptyList
 
@@ -14,16 +13,16 @@ class GetContactsTest extends FlatSpec with Matchers {
 
   it should "work" in {
 
-    val zuoraQuerier = ZuoraQuery(ZuoraRestRequestMaker(mock.response, ZuoraRestConfig("http://server", "user", "pass")))
-    val getContacts = GetZuoraEmailsForAccounts.GetContacts(zuoraQuerier)_
+    val zuoraQuerier = FakeZuoraQuerier(accountQueryRequest, accountQueryResponse)
+    val getContacts = GetContacts(zuoraQuerier)_
     val actual = getContacts(NonEmptyList(
       AccountId("acid1"),
       AccountId("acid2")
     ))
 
-    actual.map(_.map(_.value)) should be(ClientSuccess(List(
-      "b2id1",
-      "b2id2"
+    actual should be(ClientSuccess(Map(
+      ContactId("b2id1") -> Account(Some(IdentityId("idid1")), SFContactId("sfsf1")),
+      ContactId("b2id2") -> Account(Some(IdentityId("idid2")), SFContactId("sfsf2"))
     )))
 
   }
@@ -33,26 +32,26 @@ class GetContactsTest extends FlatSpec with Matchers {
 object GetContactsTest {
 
   val accountQueryRequest =
-    """{"queryString":"SELECT BillToId FROM Account WHERE Id = 'acid1' or Id = 'acid2'"}"""
+    """SELECT BillToId, IdentityId__c, sfContactId__c FROM Account WHERE Id = 'acid1' or Id = 'acid2'"""
 
   val accountQueryResponse =
     """{
       |    "records": [
       |        {
       |            "BillToId": "b2id1",
-      |            "Id": "acid1"
+      |            "Id": "acid1",
+      |            "IdentityId__c": "idid1",
+      |            "sfContactId__c": "sfsf1"
       |        },
       |        {
       |            "BillToId": "b2id2",
-      |            "Id": "acid2"
+      |            "Id": "acid2",
+      |            "IdentityId__c": "idid2",
+      |            "sfContactId__c": "sfsf2"
       |        }
       |    ],
       |    "size": 2,
       |    "done": true
       |}""".stripMargin
-
-  val mock = new TestingRawEffects(postResponses = Map(
-    POSTRequest("/action/query", accountQueryRequest) -> HTTPResponse(200, accountQueryResponse)
-  ))
 
 }

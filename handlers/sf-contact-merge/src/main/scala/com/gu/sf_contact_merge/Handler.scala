@@ -4,13 +4,14 @@ import java.io.{InputStream, OutputStream}
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
-import com.gu.sf_contact_merge.GetZuoraEmailsForAccounts.{AccountId, EmailAddress}
+import com.gu.sf_contact_merge.GetContacts.{AccountId, IdentityId, SFContactId}
+import com.gu.sf_contact_merge.GetIdentityAndZuoraEmailsForAccounts._
 import com.gu.sf_contact_merge.TypeConvert._
+import com.gu.sf_contact_merge.UpdateAccountSFLinks.{CRMAccountId, SFPointer}
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, ApiGatewayResponse, ResponseModels}
 import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config.{LoadConfigModule, Stage}
-import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.zuora.SafeQueryBuilder.MaybeNonEmptyList
@@ -43,7 +44,7 @@ object Handler {
       requests = ZuoraRestRequestMaker(getResponse, zuoraRestConfig)
       zuoraQuerier = ZuoraQuery(requests)
       wiredSteps = steps(
-        GetZuoraEmailsForAccounts(zuoraQuerier),
+        GetIdentityAndZuoraEmailsForAccounts(zuoraQuerier),
         UpdateAccountSFLinks(requests)
       ) _
       configuredOp = Operation.noHealthcheck(wiredSteps)
@@ -54,30 +55,42 @@ object Handler {
   case class WireSfContactRequest(
     fullContactId: String,
     billingAccountZuoraIds: List[String],
-    accountId: String
+    accountId: String,
+    identityId: Option[String]
   )
   implicit val readWireSfContactRequest = Json.reads[WireSfContactRequest]
 
   def steps(
-    getZuoraEmails: NonEmptyList[AccountId] => ClientFailableOp[List[Option[EmailAddress]]],
-    updateAccountSFLinks: (String, String) => AccountId => ClientFailableOp[Unit]
+    getZuoraEmails: NonEmptyList[AccountId] => ClientFailableOp[List[AccountAndEmail]],
+    updateAccountSFLinks: SFPointer => AccountId => ClientFailableOp[Unit]
   )(req: ApiGatewayRequest): ResponseModels.ApiResponse =
     (for {
-      input <- req.bodyAsCaseClass[WireSfContactRequest]()
-      someAccountIds = input.billingAccountZuoraIds.map(AccountId.apply)
-      accountIds <- MaybeNonEmptyList(someAccountIds).toApiGatewayContinueProcessing(ApiGatewayResponse.badRequest("no account ids supplied"))
-      emailAddresses <- getZuoraEmails(accountIds).toApiGatewayOp("get zuora emails")
-      _ <- AssertSameEmails(emailAddresses)
-      updateAccount = updateAccountSFLinks(input.fullContactId, input.accountId)
+      wireInput <- req.bodyAsCaseClass[WireSfContactRequest]()
+      mergeRequest = wireRequestToDomainObject(wireInput)
+      accountIds <- MaybeNonEmptyList(mergeRequest.zuoraAccountIds)
+        .toApiGatewayContinueProcessing(ApiGatewayResponse.badRequest("no account ids supplied"))
+      accountAndEmails <- getZuoraEmails(accountIds).toApiGatewayOp("get zuora emails")
+      _ <- AssertSameEmails(accountAndEmails.map(_.emailAddress))
+      _ <- EnsureNoAccountWithWrongIdentityId(accountAndEmails.map(_.account.identityId), mergeRequest.identityId)
+        .toApiGatewayReturnResponse(ApiGatewayResponse.notFound)
+      updateAccount = updateAccountSFLinks(mergeRequest.sFPointer)
       _ <- accountIds.traverseU(updateAccount).toApiGatewayOp("updating all the accounts")
     } yield ApiGatewayResponse.successfulExecution).apiResponse
 
+  case class MergeRequest(
+    sFPointer: SFPointer,
+    zuoraAccountIds: List[AccountId],
+    identityId: Option[IdentityId]
+  )
+  def wireRequestToDomainObject(request: Handler.WireSfContactRequest): MergeRequest =
+    MergeRequest(
+      SFPointer(
+        SFContactId(request.fullContactId),
+        CRMAccountId(request.accountId)
+      ),
+      request.billingAccountZuoraIds.map(AccountId.apply),
+      request.identityId.map(IdentityId.apply) // need to remove all identity ids and use this identity id on all the accounts after linking
+    )
+
 }
 
-object AssertSameEmails {
-
-  def apply(emailAddresses: List[Option[EmailAddress]]): ApiGatewayOp[Unit] = {
-    if (emailAddresses.distinct.size == 1) ContinueProcessing(()) else ReturnWithResponse(ApiGatewayResponse.notFound("those zuora accounts had differing emails"))
-  }
-
-}
