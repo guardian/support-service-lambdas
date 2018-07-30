@@ -1,10 +1,11 @@
 package com.gu.sf_contact_merge
 
 import com.gu.effects.{GetFromS3, RawEffects}
-import com.gu.sf_contact_merge.GetContacts.{Account, AccountId, IdentityId, SFContactId}
-import com.gu.sf_contact_merge.GetEmails.EmailAddress
-import com.gu.sf_contact_merge.GetIdentityAndZuoraEmailsForAccounts._
+import com.gu.sf_contact_merge.validation.GetContacts.{Account, AccountId, IdentityId, SFContactId}
+import com.gu.sf_contact_merge.validation.GetEmails.EmailAddress
+import com.gu.sf_contact_merge.validation.GetIdentityAndZuoraEmailsForAccounts._
 import com.gu.sf_contact_merge.TypeConvert._
+import com.gu.sf_contact_merge.validation.GetIdentityAndZuoraEmailsForAccounts
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing

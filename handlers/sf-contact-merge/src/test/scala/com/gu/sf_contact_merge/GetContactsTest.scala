@@ -1,7 +1,8 @@
 package com.gu.sf_contact_merge
 
-import com.gu.sf_contact_merge.GetContacts.{Account, AccountId, IdentityId, SFContactId}
-import com.gu.sf_contact_merge.GetEmails.ContactId
+import com.gu.sf_contact_merge.validation.GetContacts
+import com.gu.sf_contact_merge.validation.GetContacts.{Account, AccountId, IdentityId, SFContactId}
+import com.gu.sf_contact_merge.validation.GetEmails.ContactId
 import com.gu.util.resthttp.Types.ClientSuccess
 import com.gu.zuora.fake.FakeZuoraQuerier
 import org.scalatest.{FlatSpec, Matchers}

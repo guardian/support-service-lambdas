@@ -1,7 +1,7 @@
-package com.gu.sf_contact_merge
+package com.gu.sf_contact_merge.validation
 
-import com.gu.sf_contact_merge.GetContacts.{Account, AccountId}
-import com.gu.sf_contact_merge.GetEmails.{ContactId, EmailAddress}
+import com.gu.sf_contact_merge.validation.GetContacts.{Account, AccountId}
+import com.gu.sf_contact_merge.validation.GetEmails.{ContactId, EmailAddress}
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError}
 import com.gu.util.zuora.SafeQueryBuilder.Implicits._
 import com.gu.util.zuora.SafeQueryBuilder.{MaybeNonEmptyList, OrTraverse}
