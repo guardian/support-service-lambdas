@@ -32,7 +32,8 @@ class EndToEndTest extends FlatSpec with Matchers {
         |      "2c92c0f9624bbc5f016253e573970b16",
         |      "2c92c0f8644618e30164652a558c6e20"
         |   ],
-        |   "accountId":"sfacc"
+        |   "accountId":"sfacc",
+        |   "identityId":"identest"
         |}
       """.stripMargin
     val input = ApiGatewayRequest(None, Some(body), None, None)
@@ -81,18 +82,22 @@ object EndToEndTest {
   implicit val apiF: OFormat[ExpectedJsonFormat] = Json.format[ExpectedJsonFormat]
 
   val accountQueryRequest =
-    """{"queryString":"SELECT BillToId FROM Account WHERE Id = '2c92c0f9624bbc5f016253e573970b16' or Id = '2c92c0f8644618e30164652a558c6e20'"}"""
+    """{"queryString":"SELECT BillToId, IdentityId__c, sfContactId__c FROM Account WHERE Id = '2c92c0f9624bbc5f016253e573970b16' or Id = '2c92c0f8644618e30164652a558c6e20'"}"""
 
   val accountQueryResponse =
     """{
       |    "records": [
       |        {
       |            "BillToId": "2c92c0f8644618e30164652a55986e21",
-      |            "Id": "2c92c0f8644618e30164652a558c6e20"
+      |            "Id": "2c92c0f8644618e30164652a558c6e20",
+      |            "IdentityId__c": "identest",
+      |            "sfContactId__c": "sfsf1"
       |        },
       |        {
       |            "BillToId": "2c92c0f9624bbc5f016253e5739b0b17",
-      |            "Id": "2c92c0f9624bbc5f016253e573970b16"
+      |            "Id": "2c92c0f9624bbc5f016253e573970b16",
+      |            "IdentityId__c": "identest",
+      |            "sfContactId__c": "sfsf2"
       |        }
       |    ],
       |    "size": 2,
@@ -100,7 +105,7 @@ object EndToEndTest {
       |}""".stripMargin
 
   val contactQueryRequest =
-    """{"queryString":"SELECT WorkEmail FROM Contact WHERE Id = '2c92c0f8644618e30164652a55986e21' or Id = '2c92c0f9624bbc5f016253e5739b0b17'"}"""
+    """{"queryString":"SELECT Id, WorkEmail FROM Contact WHERE Id = '2c92c0f8644618e30164652a55986e21' or Id = '2c92c0f9624bbc5f016253e5739b0b17'"}"""
 
   val contactQueryResponse =
     """{
@@ -118,7 +123,7 @@ object EndToEndTest {
       |    "done": true
       |}""".stripMargin
 
-  val updateAccountRequestBody = """{"crmId":"sfcont","sfContactId__c":"sfacc"}"""
+  val updateAccountRequestBody = """{"crmId":"sfacc","sfContactId__c":"sfcont"}"""
 
   val updateAccountResponse = HTTPResponse(200, """{"Success": true}""")
 

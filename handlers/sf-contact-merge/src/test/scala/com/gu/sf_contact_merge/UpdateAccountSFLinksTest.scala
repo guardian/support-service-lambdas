@@ -1,6 +1,7 @@
 package com.gu.sf_contact_merge
 
-import com.gu.sf_contact_merge.GetZuoraEmailsForAccounts.AccountId
+import com.gu.sf_contact_merge.GetIdentityAndZuoraEmailsForAccounts.{AccountId, SFContactId}
+import com.gu.sf_contact_merge.UpdateAccountSFLinks.{CRMAccountId, SFPointer}
 import com.gu.util.resthttp.Types.ClientSuccess
 import com.gu.zuora.fake.FakeRequestsPut
 import org.scalatest.{FlatSpec, Matchers}
@@ -25,8 +26,10 @@ class UpdateAccountSFLinksTest extends FlatSpec with Matchers {
     val (requestsMade, fakePutter) = FakeRequestsPut(expectedUrl, expectedInput, response)
     val operation = UpdateAccountSFLinks(fakePutter)_
     val actual = operation(
-      "crmIdjohn",
-      "johnjohn_c"
+      SFPointer(
+        SFContactId("johnjohn_c"),
+        CRMAccountId("crmIdjohn")
+      )
     )(AccountId("1234"))
 
     actual should be(ClientSuccess(()))
