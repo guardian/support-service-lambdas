@@ -3,12 +3,17 @@ package com.gu.sf_contact_merge
 import com.gu.sf_contact_merge.GetIdentityAndZuoraEmailsForAccounts.IdentityId
 
 object EnsureNoAccountWithWrongIdentityId { // make sure all accounts are either this identity id or none
-  def apply(accounts: List[Option[IdentityId]], maybeCorrectIdentityId: Option[IdentityId]): Option[String] = //FIXME use the validation from new-product-api
+  def apply(
+    accounts: List[Option[IdentityId]],
+    maybeCorrectIdentityId: Option[IdentityId]
+  ): Option[String] = //FIXME use the validation from new-product-api
     maybeCorrectIdentityId match {
       case Some(correctIdentityId) =>
         val wrongIdentityIdIsThere = accounts.filter(_.exists(_ != correctIdentityId))
         if (wrongIdentityIdIsThere.nonEmpty)
-          Some(s"one of the accounts had an unexpected identity id other than: $correctIdentityId - can't merge yet: $wrongIdentityIdIsThere")
+          Some(
+            s"one of the accounts had an unexpected identity id other than: $correctIdentityId - can't merge yet: $wrongIdentityIdIsThere"
+          )
         else
           None
       case None =>

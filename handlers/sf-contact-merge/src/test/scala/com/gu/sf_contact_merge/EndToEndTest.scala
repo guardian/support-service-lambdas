@@ -82,7 +82,11 @@ object EndToEndTest {
   implicit val apiF: OFormat[ExpectedJsonFormat] = Json.format[ExpectedJsonFormat]
 
   val accountQueryRequest =
-    """{"queryString":"SELECT BillToId, IdentityId__c, sfContactId__c FROM Account WHERE Id = '2c92c0f9624bbc5f016253e573970b16' or Id = '2c92c0f8644618e30164652a558c6e20'"}"""
+    """{"queryString":"
+      |SELECT BillToId, IdentityId__c, sfContactId__c
+      | FROM Account
+      | WHERE Id = '2c92c0f9624bbc5f016253e573970b16' or Id = '2c92c0f8644618e30164652a558c6e20'
+      |"}""".stripMargin.replaceAll("""\n""", "")
 
   val accountQueryResponse =
     """{
@@ -105,7 +109,9 @@ object EndToEndTest {
       |}""".stripMargin
 
   val contactQueryRequest =
-    """{"queryString":"SELECT Id, WorkEmail FROM Contact WHERE Id = '2c92c0f8644618e30164652a55986e21' or Id = '2c92c0f9624bbc5f016253e5739b0b17'"}"""
+    """{"queryString":"
+      |SELECT Id, WorkEmail FROM Contact WHERE Id = '2c92c0f8644618e30164652a55986e21' or Id = '2c92c0f9624bbc5f016253e5739b0b17'
+      |"}""".stripMargin.replaceAll("""\n""", "")
 
   val contactQueryResponse =
     """{
@@ -121,7 +127,7 @@ object EndToEndTest {
       |    ],
       |    "size": 2,
       |    "done": true
-      |}""".stripMargin
+      |}""".stripMargin.replaceAll("""\n""", "")
 
   val updateAccountRequestBody = """{"crmId":"sfacc","sfContactId__c":"sfcont"}"""
 

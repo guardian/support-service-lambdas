@@ -66,10 +66,12 @@ object Handler {
     (for {
       wireInput <- req.bodyAsCaseClass[WireSfContactRequest]()
       mergeRequest = wireRequestToDomainObject(wireInput)
-      accountIds <- MaybeNonEmptyList(mergeRequest.zuoraAccountIds).toApiGatewayContinueProcessing(ApiGatewayResponse.badRequest("no account ids supplied"))
+      accountIds <- MaybeNonEmptyList(mergeRequest.zuoraAccountIds)
+        .toApiGatewayContinueProcessing(ApiGatewayResponse.badRequest("no account ids supplied"))
       accountAndEmails <- getZuoraEmails(accountIds).toApiGatewayOp("get zuora emails")
       _ <- AssertSameEmails(accountAndEmails.map(_.emailAddress))
-      _ <- EnsureNoAccountWithWrongIdentityId(accountAndEmails.map(_.account.identityId), mergeRequest.identityId).toApiGatewayReturnResponse(ApiGatewayResponse.notFound)
+      _ <- EnsureNoAccountWithWrongIdentityId(accountAndEmails.map(_.account.identityId), mergeRequest.identityId)
+        .toApiGatewayReturnResponse(ApiGatewayResponse.notFound)
       updateAccount = updateAccountSFLinks(mergeRequest.sFPointer)
       _ <- accountIds.traverseU(updateAccount).toApiGatewayOp("updating all the accounts")
     } yield ApiGatewayResponse.successfulExecution).apiResponse

@@ -21,7 +21,10 @@ object GetIdentityAndZuoraEmailsForAccounts {
 
     for {
       identityForBillingContact <- getContacts(accountIds)
-      emailForBillingContact <- MaybeNonEmptyList(identityForBillingContact.keys.toList).map(getEmails).getOrElse(ClientSuccess(Map.empty[Any, Nothing]))
+      emailForBillingContact <- MaybeNonEmptyList(identityForBillingContact.keys.toList) match {
+        case Some(contactIds) => getEmails(contactIds)
+        case None => ClientSuccess(Map.empty[Any, Nothing])
+      }
     } yield {
       identityForBillingContact.map {
         case (contact, account) =>

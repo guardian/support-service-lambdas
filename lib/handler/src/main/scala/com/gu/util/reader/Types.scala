@@ -120,10 +120,6 @@ object Types extends Logging {
       if (is) ContinueProcessing(())
       else ReturnWithResponse(falseResponse)
 
-    def toApiGatewayReturnResponse(trueResponse: ApiResponse): ApiGatewayOp[Unit] =
-      if (is) ReturnWithResponse(trueResponse)
-      else ContinueProcessing(())
-
   }
 
   // handy classes for converting things
