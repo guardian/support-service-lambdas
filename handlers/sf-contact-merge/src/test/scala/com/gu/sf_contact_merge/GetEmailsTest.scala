@@ -1,6 +1,6 @@
 package com.gu.sf_contact_merge
 
-import com.gu.sf_contact_merge.GetIdentityAndZuoraEmailsForAccounts.{ContactId, EmailAddress}
+import com.gu.sf_contact_merge.GetEmails.{ContactId, EmailAddress}
 import com.gu.util.resthttp.Types.ClientSuccess
 import com.gu.zuora.fake.FakeZuoraQuerier
 import org.scalatest.{FlatSpec, Matchers}
@@ -15,7 +15,7 @@ class GetEmailsTest extends FlatSpec with Matchers {
     val expectedQuery = """SELECT Id, WorkEmail FROM Contact WHERE Id = 'cid1' or Id = 'cid2'"""
 
     val querier = FakeZuoraQuerier(expectedQuery, contactQueryResponse)
-    val getContacts = GetIdentityAndZuoraEmailsForAccounts.GetEmails(querier)_
+    val getContacts = GetEmails(querier)_
     val actual = getContacts(NonEmptyList(
       ContactId("cid1"),
       ContactId("cid2")

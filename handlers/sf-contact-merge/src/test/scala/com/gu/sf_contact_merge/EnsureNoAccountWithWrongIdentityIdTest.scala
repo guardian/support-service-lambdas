@@ -1,6 +1,6 @@
 package com.gu.sf_contact_merge
 
-import com.gu.sf_contact_merge.GetIdentityAndZuoraEmailsForAccounts.IdentityId
+import com.gu.sf_contact_merge.GetContacts.IdentityId
 import org.scalatest.{FlatSpec, Matchers}
 
 class EnsureNoAccountWithWrongIdentityIdTest extends FlatSpec with Matchers {

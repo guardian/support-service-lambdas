@@ -1,6 +1,7 @@
 package com.gu.sf_contact_merge
 
-import com.gu.sf_contact_merge.GetIdentityAndZuoraEmailsForAccounts._
+import com.gu.sf_contact_merge.GetContacts.{Account, AccountId, IdentityId, SFContactId}
+import com.gu.sf_contact_merge.GetEmails.ContactId
 import com.gu.util.resthttp.Types.ClientSuccess
 import com.gu.zuora.fake.FakeZuoraQuerier
 import org.scalatest.{FlatSpec, Matchers}
@@ -13,7 +14,7 @@ class GetContactsTest extends FlatSpec with Matchers {
   it should "work" in {
 
     val zuoraQuerier = FakeZuoraQuerier(accountQueryRequest, accountQueryResponse)
-    val getContacts = GetIdentityAndZuoraEmailsForAccounts.GetContacts(zuoraQuerier)_
+    val getContacts = GetContacts(zuoraQuerier)_
     val actual = getContacts(NonEmptyList(
       AccountId("acid1"),
       AccountId("acid2")

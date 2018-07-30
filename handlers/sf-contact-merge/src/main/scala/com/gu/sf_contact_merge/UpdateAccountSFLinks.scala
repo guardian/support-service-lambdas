@@ -1,6 +1,6 @@
 package com.gu.sf_contact_merge
 
-import com.gu.sf_contact_merge.GetIdentityAndZuoraEmailsForAccounts.{AccountId, SFContactId}
+import com.gu.sf_contact_merge.GetContacts.{AccountId, SFContactId}
 import com.gu.util.resthttp.RestRequestMaker.RequestsPUT
 import com.gu.util.resthttp.Types.ClientFailableOp
 import play.api.libs.json.{JsSuccess, Json, Reads}

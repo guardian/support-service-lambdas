@@ -1,6 +1,6 @@
 package com.gu.sf_contact_merge
 
-import com.gu.sf_contact_merge.GetIdentityAndZuoraEmailsForAccounts.IdentityId
+import com.gu.sf_contact_merge.GetContacts.IdentityId
 
 object EnsureNoAccountWithWrongIdentityId { // make sure all accounts are either this identity id or none
   def apply(

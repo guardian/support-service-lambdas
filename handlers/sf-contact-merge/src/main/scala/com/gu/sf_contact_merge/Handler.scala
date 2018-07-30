@@ -4,6 +4,7 @@ import java.io.{InputStream, OutputStream}
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
+import com.gu.sf_contact_merge.GetContacts.{AccountId, IdentityId, SFContactId}
 import com.gu.sf_contact_merge.GetIdentityAndZuoraEmailsForAccounts._
 import com.gu.sf_contact_merge.TypeConvert._
 import com.gu.sf_contact_merge.UpdateAccountSFLinks.{CRMAccountId, SFPointer}
