@@ -1,4 +1,4 @@
-package com.gu.sf_contact_merge.validation
+package com.gu.sf_contact_merge.validate
 
 import GetEmails.EmailAddress
 import com.gu.util.apigateway.ApiGatewayResponse

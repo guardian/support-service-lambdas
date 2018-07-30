@@ -1,8 +1,8 @@
-package com.gu.sf_contact_merge.validation
+package com.gu.sf_contact_merge.validate
 
 import com.gu.sf_contact_merge.TypeConvert._
-import com.gu.sf_contact_merge.validation.GetContacts.{AccountId, IdentityId}
-import com.gu.sf_contact_merge.validation.GetIdentityAndZuoraEmailsForAccounts.AccountAndEmail
+import com.gu.sf_contact_merge.validate.GetContacts.{AccountId, IdentityId}
+import com.gu.sf_contact_merge.validate.GetIdentityAndZuoraEmailsForAccounts.AccountAndEmail
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.Types.ClientFailableOp

@@ -1,7 +1,6 @@
-package com.gu.sf_contact_merge
+package com.gu.sf_contact_merge.validate
 
-import com.gu.sf_contact_merge.validation.GetEmails
-import com.gu.sf_contact_merge.validation.GetEmails.{ContactId, EmailAddress}
+import com.gu.sf_contact_merge.validate.GetEmails.{ContactId, EmailAddress}
 import com.gu.util.resthttp.Types.ClientSuccess
 import com.gu.zuora.fake.FakeZuoraQuerier
 import org.scalatest.{FlatSpec, Matchers}

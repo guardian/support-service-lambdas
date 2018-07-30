@@ -1,7 +1,7 @@
-package com.gu.sf_contact_merge.update
+package com.gu.sf_contact_merge.update.identityid
 
-import com.gu.sf_contact_merge.update.GetIdentityIdForAccount.WireModel.ZuoraAccount
-import com.gu.sf_contact_merge.validation.GetContacts.AccountId
+import com.gu.sf_contact_merge.update.identityid.GetIdentityIdForAccount.WireModel.ZuoraAccount
+import com.gu.sf_contact_merge.validate.GetContacts.AccountId
 import com.gu.util.resthttp.RestRequestMaker.Requests
 import com.gu.util.resthttp.Types.ClientFailableOp
 import play.api.libs.json.Json

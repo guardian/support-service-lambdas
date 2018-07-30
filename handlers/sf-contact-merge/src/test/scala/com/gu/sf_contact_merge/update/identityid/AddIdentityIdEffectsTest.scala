@@ -1,14 +1,15 @@
-package com.gu.sf_contact_merge.update
+package com.gu.sf_contact_merge.update.identityid
 
 import com.gu.effects.{GetFromS3, RawEffects}
-import com.gu.sf_contact_merge.validation.GetContacts.{AccountId, IdentityId}
+import com.gu.sf_contact_merge.TypeConvert._
+import com.gu.sf_contact_merge.update.SetOrClearZuoraIdentityId
+import com.gu.sf_contact_merge.validate.GetContacts.{AccountId, IdentityId}
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
 import org.scalatest.{FlatSpec, Matchers}
 import scalaz.\/-
-import com.gu.sf_contact_merge.TypeConvert._
 
 import scala.util.Random
 
