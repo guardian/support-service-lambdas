@@ -106,6 +106,12 @@ object Types extends Logging {
         case None => ReturnWithResponse(NoneResponse)
       }
 
+    def toApiGatewayReturnResponse(toApiResponse: A => ApiResponse): ApiGatewayOp[Unit] =
+      theOption match {
+        case Some(value) => ReturnWithResponse(toApiResponse(value))
+        case None => ContinueProcessing(())
+      }
+
   }
 
   implicit class BooleanOps[A](is: Boolean) {
