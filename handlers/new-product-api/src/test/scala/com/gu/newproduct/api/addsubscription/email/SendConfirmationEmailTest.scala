@@ -9,14 +9,14 @@ import com.gu.newproduct.api.addsubscription.ZuoraAccountId
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts._
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{BankAccountName, BankAccountNumberMask, DirectDebit, MandateId, SortCode}
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.ActivePaymentMethod
-import com.gu.util.apigateway.ApiGatewayResponse
-import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
+import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError}
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
-import scala.language.postfixOps
-import scala.concurrent.{Await, Future}
+
 import scala.concurrent.duration._
+import scala.concurrent.{Await, Future}
+import scala.language.postfixOps
 
 class SendConfirmationEmailTest extends FlatSpec with Matchers {
 
@@ -80,17 +80,17 @@ class SendConfirmationEmailTest extends FlatSpec with Matchers {
 
   }
 
-  it should "return error if contacts cannot be retrieved" in {
+  it should "return success but not send message if getContacts fails" in {
 
     def getContacts(accountId: ZuoraAccountId): ClientFailableOp[Contacts] = GenericError("could not retrieve contacts")
 
-    def sqsSend(payload: Payload): Future[Unit] = Future.successful(())
+    def sqsSend(payload: Payload): Future[Unit] = fail("unexpected invocation of sqsSend")
 
     val send = SendConfirmationEmail(today, sqsSend, getContacts) _
 
     val res = Await.result(send(ZuoraAccountId("id"), GBP, Some(directDebit), 1234).underlying, 3 seconds)
 
-    res.shouldBe(ReturnWithResponse(ApiGatewayResponse.internalServerError("ignored message")))
+    res.shouldBe(ContinueProcessing(()))
 
   }
 
@@ -102,18 +102,17 @@ class SendConfirmationEmailTest extends FlatSpec with Matchers {
         testContact.copy(email = None)
       ))
 
-    def sqsSend(payload: Payload): Future[Unit] =
-      Future.failed(new RuntimeException("should not have attempted to send message!"))
+    def sqsSend(payload: Payload): Future[Unit] = fail("unexpected invocation of sqsSend")
 
     val send = SendConfirmationEmail(today, sqsSend, getContacts) _
 
     val res = Await.result(send(ZuoraAccountId("id"), GBP, Some(directDebit), 1234).underlying, 3 seconds)
 
-    res.shouldBe(ReturnWithResponse(ApiGatewayResponse.successfulExecution))
+    res.shouldBe(ContinueProcessing(()))
 
   }
 
-  it should "return error if sqs send fails" in {
+  it should "return success if sqs send fails" in {
 
     def getContacts(accountId: ZuoraAccountId): ClientFailableOp[Contacts] = ClientSuccess(Contacts(testContact, testContact))
 
@@ -123,7 +122,7 @@ class SendConfirmationEmailTest extends FlatSpec with Matchers {
 
     val res = Await.result(send(ZuoraAccountId("id"), GBP, Some(directDebit), 1234).underlying, 3 seconds)
 
-    res.shouldBe(ReturnWithResponse(ApiGatewayResponse.internalServerError("ignored message")))
+    res.shouldBe(ContinueProcessing(()))
 
   }
 

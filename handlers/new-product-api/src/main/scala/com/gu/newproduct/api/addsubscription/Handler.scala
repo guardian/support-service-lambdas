@@ -62,7 +62,7 @@ object Steps {
         case d: DirectDebit => Some(d)
         case _ => None
       }
-      r <- sendConfirmationEmail(request.zuoraAccountId, validatedFields.currency, directDebit, request.amountMinorUnits)
+      _ <- sendConfirmationEmail(request.zuoraAccountId, validatedFields.currency, directDebit, request.amountMinorUnits)
     } yield ApiGatewayResponse(body = AddedSubscription(subscriptionName.value), statusCode = "200")).apiResponse
   }
 
