@@ -66,18 +66,13 @@ object Steps {
     } yield ApiGatewayResponse(body = AddedSubscription(subscriptionName.value), statusCode = "200")).apiResponse
   }
 
-  val confirmationEmailQueueFor = Map(
-    Stage("DEV") -> "contributions-thanks-dev",
-    Stage("PROD") -> "contributions-thanks"
-  )
-
   def operationForEffects(response: Request => Response, stage: Stage, fetchString: StringFromS3): ApiGatewayOp[Operation] =
     for {
       zuoraIds <- ZuoraIds.zuoraIdsForStage(stage)
       loadConfig = LoadConfigModule(stage, fetchString)
       zuoraConfig <- loadConfig[ZuoraRestConfig].toApiGatewayOp("load zuora config")
       zuoraClient = ZuoraRestRequestMaker(response, zuoraConfig)
-      sqsSend = AwsSQSSend(QueueName("contributions-thanks")) _
+      sqsSend = AwsSQSSend(emailQueueFor(stage)) _
       getContacts = GetContacts(zuoraClient.get[ZuoraContacts]) _
       createMonthlyContribution = CreateSubscription(zuoraIds.monthly, zuoraClient.post[WireCreateRequest, WireSubscription]) _
       contributionIds = List(zuoraIds.monthly.productRatePlanId, zuoraIds.annual.productRatePlanId)
@@ -89,5 +84,13 @@ object Steps {
           HealthCheck(GetAccount(zuoraClient.get[ZuoraAccount]), AccountIdentitys.accountIdentitys(stage))
       )
     } yield configuredOp
+
+
+  def emailQueueFor(stage: Stage) = stage match {
+    case Stage("PROD") => QueueName("contributions-thanks")
+    case Stage("CODE") => QueueName("contributions-thanks")
+    case _ => QueueName("contributions-thanks-dev")
+  }
+
 }
 
