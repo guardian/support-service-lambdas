@@ -1,7 +1,6 @@
 package com.gu.newproduct.api.addsubscription.email
 
 import java.time.LocalDate
-
 import com.gu.effects.sqs.AwsSQSSend.Payload
 import com.gu.i18n.Currency
 import com.gu.newproduct.api.addsubscription.TypeConvert._
@@ -11,11 +10,11 @@ import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.DirectDebit
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
-import com.gu.util.reader.Types.{AsyncApiGatewayOp, _}
+import com.gu.util.reader.AsyncTypes._
 import com.gu.util.resthttp.Types.ClientFailableOp
 import play.api.libs.json.Json
+import scala.concurrent.Future
 
-import scala.concurrent.{ExecutionContext, Future}
 object contributionEmailRequest {
 
   case class CurrencyGlyph(value: String) extends AnyVal

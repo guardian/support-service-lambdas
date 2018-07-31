@@ -5,6 +5,7 @@ import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.reader.Types._
+import com.gu.util.reader.AsyncTypes._
 import com.gu.util.resthttp.Types.{ClientFailableOp, NotFound}
 
 import scala.concurrent.Future
@@ -40,8 +41,6 @@ object TypeConvert {
     }
   }
 
-  /////
-
   implicit class ValidationToAsyncApiGatewayOp[A](validationResult: ValidationResult[A]) {
     def toAsyncApiGatewayOp: AsyncApiGatewayOp[A] = validationResult match {
       case Passed(value) => AsyncApiGatewayOp(ContinueProcessing(value))
@@ -55,6 +54,5 @@ object TypeConvert {
       case anyOtherResponse => AsyncApiGatewayOp(Future.successful(anyOtherResponse.toDisjunction.toApiGatewayOp(action)))
     }
   }
-  /////
 
 }

@@ -8,9 +8,7 @@ import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
 import play.api.libs.json.{JsError, JsResult, JsSuccess}
 import scalaz.{-\/, Monad, \/, \/-}
 
-import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
-import scala.concurrent.ExecutionContext.Implicits.global
 
 object Types extends Logging {
 
@@ -19,13 +17,11 @@ object Types extends Logging {
     case class ContinueProcessing[A](a: A) extends ApiGatewayOp[A] {
       override def toDisjunction: ApiResponse \/ A = \/-(a)
     }
-
     case class ReturnWithResponse(resp: ApiResponse) extends ApiGatewayOp[Nothing] {
       override def toDisjunction: ApiResponse \/ Nothing = -\/(resp)
     }
 
   }
-
   sealed trait ApiGatewayOp[+A] {
 
     def toDisjunction: scalaz.\/[ApiResponse, A]
@@ -72,10 +68,7 @@ object Types extends Logging {
 
     def apiResponse: ApiResponse =
       apiGatewayOp.toDisjunction.fold(identity, identity)
-  }
 
-  implicit class AsyncApiResponseOps(apiGatewayOp: AsyncApiGatewayOp[ApiResponse]) {
-    def apiResponse: Future[ApiResponse] = apiGatewayOp.asFuture.map(x => x.apiResponse)
   }
 
   import Types.ApiGatewayOp._
@@ -111,6 +104,12 @@ object Types extends Logging {
       theOption match {
         case Some(value) => ContinueProcessing(value)
         case None => ReturnWithResponse(NoneResponse)
+      }
+
+    def toApiGatewayReturnResponse(toApiResponse: A => ApiResponse): ApiGatewayOp[Unit] =
+      theOption match {
+        case Some(value) => ReturnWithResponse(toApiResponse(value))
+        case None => ContinueProcessing(())
       }
 
   }
@@ -168,47 +167,6 @@ object Types extends Logging {
       op
     }
 
-  }
-
-  object AsyncApiGatewayOp {
-    def apply[A](continue: ContinueProcessing[A]): AsyncApiGatewayOp[A] = AsyncApiGatewayOp(Future.successful(continue))
-    def apply[A](response: ReturnWithResponse): AsyncApiGatewayOp[Nothing] = AsyncApiGatewayOp(Future.successful(response))
-
-  }
-
-  implicit class FutureToAsyncOp[A](future: Future[A]) {
-    def toAsyncApiGatewayOp(action: String): AsyncApiGatewayOp[A] = {
-      val apiGatewayOp = future.map(ContinueProcessing(_))
-      AsyncApiGatewayOp(apiGatewayOp)
-    }
-  }
-
-  case class AsyncApiGatewayOp[+A](underlying: Future[ApiGatewayOp[A]]) {
-
-    def asFuture: Future[ApiGatewayOp[A]] = underlying recover {
-      case err =>
-        logger.error(s"future failed executing AsyncApiGatewayOp.asFuture: ${err.getMessage}", err)
-        ReturnWithResponse(ApiGatewayResponse.internalServerError(err.getMessage))
-    }
-
-    def map[B](f: A => B): AsyncApiGatewayOp[B] = AsyncApiGatewayOp {
-      asFuture.map {
-        case ContinueProcessing(a: A) => ContinueProcessing(f(a))
-        case returnWithResponse: ReturnWithResponse => returnWithResponse
-      }
-    }
-
-    def flatMap[B](f: A => AsyncApiGatewayOp[B]): AsyncApiGatewayOp[B] = AsyncApiGatewayOp {
-      asFuture.flatMap {
-        case ContinueProcessing(a: A) => f(a).asFuture
-        case returnWithResponse: ReturnWithResponse => Future.successful(returnWithResponse)
-      }
-    }
-
-  }
-
-  implicit class SyncToAsync[A](apiGatewayOp: ApiGatewayOp[A]) {
-    def toAsync: AsyncApiGatewayOp[A] = AsyncApiGatewayOp(Future.successful(apiGatewayOp))
   }
 
 }

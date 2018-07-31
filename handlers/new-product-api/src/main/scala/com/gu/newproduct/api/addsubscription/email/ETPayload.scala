@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 import com.gu.i18n.Currency
-import com.gu.newproduct.api.addsubscription.zuora.GetContacts.{Contact, Contacts}
+import com.gu.newproduct.api.addsubscription.zuora.GetContacts.Contacts
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.DirectDebit
 import play.api.libs.json.{JsValue, Json, Writes}
 

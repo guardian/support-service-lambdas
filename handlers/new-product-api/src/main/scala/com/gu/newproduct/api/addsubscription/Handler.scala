@@ -10,18 +10,19 @@ import com.gu.i18n.Currency
 import com.gu.newproduct.api.addsubscription.TypeConvert._
 import com.gu.newproduct.api.addsubscription.email.SendConfirmationEmail
 import com.gu.newproduct.api.addsubscription.validation._
-import com.gu.newproduct.api.addsubscription.zuora.{CreateSubscription, GetAccount, GetContacts}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.WireModel.{WireCreateRequest, WireSubscription}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{CreateReq, SubscriptionName}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAccount
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.WireModel.ZuoraContacts
-import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{DirectDebit, PaymentMethod}
+import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.DirectDebit
+import com.gu.newproduct.api.addsubscription.zuora.{CreateSubscription, GetAccount, GetContacts}
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config.{LoadConfigModule, Stage}
+import com.gu.util.reader.AsyncTypes._
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
@@ -80,10 +81,10 @@ object Steps {
       getContacts = GetContacts(zuoraClient.get[ZuoraContacts]) _
       createMonthlyContribution = CreateSubscription(zuoraIds.monthly, zuoraClient.post[WireCreateRequest, WireSubscription]) _
       contributionIds = List(zuoraIds.monthly.productRatePlanId, zuoraIds.annual.productRatePlanId)
-      prerequesiteCheck = PrerequisiteCheck(zuoraClient, contributionIds, RawEffects.now) _
+      prerequisiteCheck = PrerequisiteCheck(zuoraClient, contributionIds, RawEffects.now) _
       sendConfirmationEmail = SendConfirmationEmail(() => RawEffects.now().toLocalDate, sqsSend, getContacts) _
       configuredOp = Operation.async(
-        steps = addSubscriptionSteps(prerequesiteCheck, createMonthlyContribution, sendConfirmationEmail),
+        steps = addSubscriptionSteps(prerequisiteCheck, createMonthlyContribution, sendConfirmationEmail),
         healthcheck = () =>
           HealthCheck(GetAccount(zuoraClient.get[ZuoraAccount]), AccountIdentitys.accountIdentitys(stage))
       )

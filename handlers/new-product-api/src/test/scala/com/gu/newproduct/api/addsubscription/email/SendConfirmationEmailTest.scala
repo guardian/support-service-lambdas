@@ -14,9 +14,8 @@ import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResp
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError}
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
-
-import scala.concurrent.{Await, ExecutionContext, Future}
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.language.postfixOps
+import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
 
 class SendConfirmationEmailTest extends FlatSpec with Matchers {
@@ -42,7 +41,7 @@ class SendConfirmationEmailTest extends FlatSpec with Matchers {
 
     def getContacts(accountId: ZuoraAccountId): ClientFailableOp[Contacts] = ClientSuccess(Contacts(testContact, testContact))
 
-    def sqsSend(payload: Payload)(implicit ex: ExecutionContext): Future[Unit] = {
+    def sqsSend(payload: Payload): Future[Unit] = {
       val expectedString =
         """{
           |  "To": {
@@ -85,7 +84,7 @@ class SendConfirmationEmailTest extends FlatSpec with Matchers {
 
     def getContacts(accountId: ZuoraAccountId): ClientFailableOp[Contacts] = GenericError("could not retrieve contacts")
 
-    def sqsSend(payload: Payload)(implicit ex: ExecutionContext): Future[Unit] = Future.successful(())
+    def sqsSend(payload: Payload): Future[Unit] = Future.successful(())
 
     val send = SendConfirmationEmail(today, sqsSend, getContacts) _
 
@@ -103,7 +102,7 @@ class SendConfirmationEmailTest extends FlatSpec with Matchers {
         testContact.copy(email = None)
       ))
 
-    def sqsSend(payload: Payload)(implicit ex: ExecutionContext): Future[Unit] =
+    def sqsSend(payload: Payload): Future[Unit] =
       Future.failed(new RuntimeException("should not have attempted to send message!"))
 
     val send = SendConfirmationEmail(today, sqsSend, getContacts) _
@@ -118,7 +117,7 @@ class SendConfirmationEmailTest extends FlatSpec with Matchers {
 
     def getContacts(accountId: ZuoraAccountId): ClientFailableOp[Contacts] = ClientSuccess(Contacts(testContact, testContact))
 
-    def sqsSend(payload: Payload)(implicit ex: ExecutionContext): Future[Unit] = Future.failed(new RuntimeException("sqs error`"))
+    def sqsSend(payload: Payload): Future[Unit] = Future.failed(new RuntimeException("sqs error`"))
 
     val send = SendConfirmationEmail(today, sqsSend, getContacts) _
 

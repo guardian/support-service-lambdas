@@ -6,12 +6,11 @@ import com.gu.i18n.Currency
 import com.gu.newproduct.api.addsubscription.AddSubscriptionRequest
 import com.gu.newproduct.api.addsubscription.TypeConvert._
 import com.gu.newproduct.api.addsubscription.ZuoraIds.ProductRatePlanId
-import com.gu.newproduct.api.addsubscription.zuora.GetAccount.PaymentMethodId
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAccount
 import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.WireModel.ZuoraSubscriptionsResponse
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{PaymentMethod, PaymentMethodWire}
 import com.gu.newproduct.api.addsubscription.zuora.{GetAccount, GetAccountSubscriptions, GetPaymentMethod}
-import com.gu.util.reader.Types._
+import com.gu.util.reader.AsyncTypes._
 import com.gu.util.resthttp.RestRequestMaker
 
 case class ValidatedFields(paymentMethod: PaymentMethod, currency: Currency)
