@@ -48,7 +48,7 @@ object GetContacts {
 
   //TODO are the first or last names optional ?
   case class Contact(firstName: FirstName, lastName: LastName, email: Option[Email], country: Option[Country])
-  
+
   //todo do we need both contacts ? also see what do to if one or both are missing
   case class Contacts(billTo: Contact, soldTo: Contact)
 

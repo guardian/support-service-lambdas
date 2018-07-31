@@ -1,6 +1,6 @@
 package com.gu.newproduct.api.addsubscription.validation
 
-import java.time.LocalDateTime
+import java.time.LocalDate
 
 import com.gu.i18n.Currency
 import com.gu.newproduct.api.addsubscription.AddSubscriptionRequest
@@ -18,7 +18,7 @@ object PrerequisiteCheck {
   def apply(
     zuoraClient: RestRequestMaker.Requests,
     contributionRatePlanIds: List[ProductRatePlanId],
-    now: () => LocalDateTime
+    getCurrentDate: () => LocalDate
   )(request: AddSubscriptionRequest): AsyncApiGatewayOp[ValidatedFields] = {
 
     def getAccount = GetAccount(zuoraClient.get[ZuoraAccount]) _
@@ -27,7 +27,6 @@ object PrerequisiteCheck {
 
     def getSubscriptions = GetAccountSubscriptions(zuoraClient.get[ZuoraSubscriptionsResponse]) _
 
-    val currentDate = () => now().toLocalDate
     val accountNotFoundError = "Zuora account id is not valid"
 
     for {
@@ -40,7 +39,7 @@ object PrerequisiteCheck {
       _ <- ValidatePaymentMethod(paymentMethod).toAsyncApiGatewayOp
       subs <- getSubscriptions(request.zuoraAccountId).toAsyncApiGatewayOp("get subscriptions for account from Zuora")
       _ <- ValidateSubscriptions(contributionRatePlanIds)(subs).toAsyncApiGatewayOp
-      _ <- ValidateRequest(currentDate, AmountLimits.limitsFor)(request, account.currency).toAsyncApiGatewayOp
+      _ <- ValidateRequest(getCurrentDate, AmountLimits.limitsFor)(request, account.currency).toAsyncApiGatewayOp
     } yield ValidatedFields(paymentMethod, account.currency)
   }
 }

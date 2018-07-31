@@ -76,15 +76,15 @@ object Steps {
       getContacts = GetContacts(zuoraClient.get[ZuoraContacts]) _
       createMonthlyContribution = CreateSubscription(zuoraIds.monthly, zuoraClient.post[WireCreateRequest, WireSubscription]) _
       contributionIds = List(zuoraIds.monthly.productRatePlanId, zuoraIds.annual.productRatePlanId)
-      prerequisiteCheck = PrerequisiteCheck(zuoraClient, contributionIds, RawEffects.now) _
-      sendConfirmationEmail = SendConfirmationEmail(() => RawEffects.now().toLocalDate, sqsSend, getContacts) _
+      getCurrentDate = () => RawEffects.now().toLocalDate
+      prerequisiteCheck = PrerequisiteCheck(zuoraClient, contributionIds, getCurrentDate) _
+      sendConfirmationEmail = SendConfirmationEmail(getCurrentDate, sqsSend, getContacts) _
       configuredOp = Operation.async(
         steps = addSubscriptionSteps(prerequisiteCheck, createMonthlyContribution, sendConfirmationEmail),
         healthcheck = () =>
           HealthCheck(GetAccount(zuoraClient.get[ZuoraAccount]), AccountIdentitys.accountIdentitys(stage))
       )
     } yield configuredOp
-
 
   def emailQueueFor(stage: Stage) = stage match {
     case Stage("PROD") => QueueName("contributions-thanks")
