@@ -4,10 +4,11 @@ import java.io.{InputStream, OutputStream}
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
-import com.gu.sf_contact_merge.GetContacts.{AccountId, IdentityId, SFContactId}
-import com.gu.sf_contact_merge.GetIdentityAndZuoraEmailsForAccounts._
 import com.gu.sf_contact_merge.TypeConvert._
-import com.gu.sf_contact_merge.UpdateAccountSFLinks.{CRMAccountId, SFPointer}
+import com.gu.sf_contact_merge.update.UpdateAccountSFLinks.{CRMAccountId, SFPointer}
+import com.gu.sf_contact_merge.update.{SetOrClearZuoraIdentityId, UpdateAccountSFLinks, UpdateStepsWiring}
+import com.gu.sf_contact_merge.validate.GetContacts.{AccountId, IdentityId, SFContactId}
+import com.gu.sf_contact_merge.validate.{GetIdentityAndZuoraEmailsForAccounts, ValidationSteps}
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, ApiGatewayResponse, ResponseModels}
 import com.gu.util.config.LoadConfigModule.StringFromS3
@@ -19,7 +20,6 @@ import com.gu.util.zuora.{ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
 import okhttp3.{Request, Response}
 import play.api.libs.json.{Json, Reads}
 import scalaz.NonEmptyList
-import scalaz.syntax.traverse.ToTraverseOps
 
 object Handler {
 
@@ -44,8 +44,11 @@ object Handler {
       requests = ZuoraRestRequestMaker(getResponse, zuoraRestConfig)
       zuoraQuerier = ZuoraQuery(requests)
       wiredSteps = steps(
-        GetIdentityAndZuoraEmailsForAccounts(zuoraQuerier),
-        UpdateAccountSFLinks(requests)
+        ValidationSteps(GetIdentityAndZuoraEmailsForAccounts(zuoraQuerier)),
+        sfPointer => UpdateStepsWiring(
+          SetOrClearZuoraIdentityId(requests),
+          UpdateAccountSFLinks(requests)(sfPointer)
+        )
       ) _
       configuredOp = Operation.noHealthcheck(wiredSteps)
     } yield configuredOp
@@ -61,20 +64,19 @@ object Handler {
   implicit val readWireSfContactRequest = Json.reads[WireSfContactRequest]
 
   def steps(
-    getZuoraEmails: NonEmptyList[AccountId] => ClientFailableOp[List[AccountAndEmail]],
-    updateAccountSFLinks: SFPointer => AccountId => ClientFailableOp[Unit]
+    validation: Option[IdentityId] => NonEmptyList[AccountId] => ApiGatewayOp[Unit],
+    update: SFPointer => Option[IdentityId] => NonEmptyList[AccountId] => ClientFailableOp[Unit]
   )(req: ApiGatewayRequest): ResponseModels.ApiResponse =
     (for {
       wireInput <- req.bodyAsCaseClass[WireSfContactRequest]()
       mergeRequest = wireRequestToDomainObject(wireInput)
+      updateAccounts = update(mergeRequest.sFPointer)(mergeRequest.identityId)
+      validateAccounts = validation(mergeRequest.identityId)
       accountIds <- MaybeNonEmptyList(mergeRequest.zuoraAccountIds)
         .toApiGatewayContinueProcessing(ApiGatewayResponse.badRequest("no account ids supplied"))
-      accountAndEmails <- getZuoraEmails(accountIds).toApiGatewayOp("get zuora emails")
-      _ <- AssertSameEmails(accountAndEmails.map(_.emailAddress))
-      _ <- EnsureNoAccountWithWrongIdentityId(accountAndEmails.map(_.account.identityId), mergeRequest.identityId)
-        .toApiGatewayReturnResponse(ApiGatewayResponse.notFound)
-      updateAccount = updateAccountSFLinks(mergeRequest.sFPointer)
-      _ <- accountIds.traverseU(updateAccount).toApiGatewayOp("updating all the accounts")
+      _ <- validateAccounts(accountIds)
+      _ <- updateAccounts(accountIds)
+        .toApiGatewayOp("update accounts with winning details")
     } yield ApiGatewayResponse.successfulExecution).apiResponse
 
   case class MergeRequest(

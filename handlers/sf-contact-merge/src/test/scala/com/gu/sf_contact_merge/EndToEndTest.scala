@@ -130,6 +130,8 @@ object EndToEndTest {
       |}""".stripMargin.replaceAll("""\n""", "")
 
   val updateAccountRequestBody = """{"crmId":"sfacc","sfContactId__c":"sfcont"}"""
+  val removeIdentityBody = """{"IdentityId__c":""}"""
+  val addIdentityBody = """{"IdentityId__c":"identest"}"""
 
   val updateAccountResponse = HTTPResponse(200, """{"Success": true}""")
 
@@ -137,7 +139,11 @@ object EndToEndTest {
     POSTRequest("/action/query", accountQueryRequest) -> HTTPResponse(200, accountQueryResponse),
     POSTRequest("/action/query", contactQueryRequest) -> HTTPResponse(200, contactQueryResponse),
     POSTRequest("/accounts/2c92c0f9624bbc5f016253e573970b16", updateAccountRequestBody, "PUT") -> updateAccountResponse,
-    POSTRequest("/accounts/2c92c0f8644618e30164652a558c6e20", updateAccountRequestBody, "PUT") -> updateAccountResponse
+    POSTRequest("/accounts/2c92c0f8644618e30164652a558c6e20", updateAccountRequestBody, "PUT") -> updateAccountResponse,
+    POSTRequest("/accounts/2c92c0f9624bbc5f016253e573970b16", removeIdentityBody, "PUT") -> updateAccountResponse,
+    POSTRequest("/accounts/2c92c0f8644618e30164652a558c6e20", removeIdentityBody, "PUT") -> updateAccountResponse,
+    POSTRequest("/accounts/2c92c0f9624bbc5f016253e573970b16", addIdentityBody, "PUT") -> updateAccountResponse,
+    POSTRequest("/accounts/2c92c0f8644618e30164652a558c6e20", addIdentityBody, "PUT") -> updateAccountResponse
   ))
 
 }
