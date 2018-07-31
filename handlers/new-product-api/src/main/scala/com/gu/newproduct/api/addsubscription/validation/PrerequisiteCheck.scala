@@ -2,9 +2,11 @@ package com.gu.newproduct.api.addsubscription.validation
 
 import java.time.LocalDateTime
 
+import com.gu.i18n.Currency
 import com.gu.newproduct.api.addsubscription.AddSubscriptionRequest
 import com.gu.newproduct.api.addsubscription.TypeConvert._
 import com.gu.newproduct.api.addsubscription.ZuoraIds.ProductRatePlanId
+import com.gu.newproduct.api.addsubscription.zuora.GetAccount.PaymentMethodId
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAccount
 import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.WireModel.ZuoraSubscriptionsResponse
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{PaymentMethod, PaymentMethodWire}
@@ -12,17 +14,14 @@ import com.gu.newproduct.api.addsubscription.zuora.{GetAccount, GetAccountSubscr
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.RestRequestMaker
 
-import scala.concurrent.ExecutionContext
-
+case class ValidatedFields(paymentMethod: PaymentMethod, currency: Currency)
 object PrerequisiteCheck {
   def apply(
     zuoraClient: RestRequestMaker.Requests,
     contributionRatePlanIds: List[ProductRatePlanId],
-    now: () => LocalDateTime,
-    ec: ExecutionContext
-  )(request: AddSubscriptionRequest): AsyncApiGatewayOp[PaymentMethod] = {
+    now: () => LocalDateTime
+  )(request: AddSubscriptionRequest): AsyncApiGatewayOp[ValidatedFields] = {
 
-    implicit val context = ec
     def getAccount = GetAccount(zuoraClient.get[ZuoraAccount]) _
 
     def getPaymentMethod = GetPaymentMethod(zuoraClient.get[PaymentMethodWire]) _
@@ -43,6 +42,6 @@ object PrerequisiteCheck {
       subs <- getSubscriptions(request.zuoraAccountId).toAsyncApiGatewayOp("get subscriptions for account from Zuora")
       _ <- ValidateSubscriptions(contributionRatePlanIds)(subs).toAsyncApiGatewayOp
       _ <- ValidateRequest(currentDate, AmountLimits.limitsFor)(request, account.currency).toAsyncApiGatewayOp
-    } yield (paymentMethod)
+    } yield ValidatedFields(paymentMethod, account.currency)
   }
 }

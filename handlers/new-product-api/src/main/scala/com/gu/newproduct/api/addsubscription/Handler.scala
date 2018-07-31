@@ -7,7 +7,6 @@ import com.gu.effects.sqs.AwsSQSSend
 import com.gu.effects.sqs.AwsSQSSend.QueueName
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.i18n.Currency
-import com.gu.i18n.Currency.GBP
 import com.gu.newproduct.api.addsubscription.TypeConvert._
 import com.gu.newproduct.api.addsubscription.email.SendConfirmationEmail
 import com.gu.newproduct.api.addsubscription.validation._
@@ -28,8 +27,7 @@ import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
 import okhttp3.{Request, Response}
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 object Handler extends Logging {
 
   // Referenced in Cloudformation
@@ -43,13 +41,13 @@ object Handler extends Logging {
 object Steps {
 
   def addSubscriptionSteps(
-    prerequisiteCheck: AddSubscriptionRequest => AsyncApiGatewayOp[PaymentMethod],
+    prerequisiteCheck: AddSubscriptionRequest => AsyncApiGatewayOp[ValidatedFields],
     createMonthlyContribution: CreateReq => ClientFailableOp[SubscriptionName],
     sendConfirmationEmail: (ZuoraAccountId, Currency, Option[DirectDebit], Int) => AsyncApiGatewayOp[Unit]
   )(apiGatewayRequest: ApiGatewayRequest): Future[ApiResponse] = {
     (for {
       request <- apiGatewayRequest.bodyAsCaseClass[AddSubscriptionRequest]().withLogging("parsed request").toAsync
-      paymentMethod <- prerequisiteCheck(request)
+      validatedFields <- prerequisiteCheck(request)
       req = CreateReq(
         request.zuoraAccountId,
         request.amountMinorUnits,
@@ -59,12 +57,11 @@ object Steps {
         request.createdByCSR
       )
       subscriptionName <- createMonthlyContribution(req).toAsyncApiGatewayOp("create monthly contribution")
-      //TODO SEE HOW TO PASS THE PARAMS TO THE SEND EMAIL FUNCTION IN A NICER WAY
-      directDebit = paymentMethod match {
+      directDebit = validatedFields.paymentMethod match {
         case d: DirectDebit => Some(d)
         case _ => None
       }
-      r <- sendConfirmationEmail(request.zuoraAccountId, GBP, directDebit, request.amountMinorUnits) //TODO REMOVE HARDCODED CURRENCY HERE
+      r <- sendConfirmationEmail(request.zuoraAccountId, validatedFields.currency, directDebit, request.amountMinorUnits)
     } yield ApiGatewayResponse(body = AddedSubscription(subscriptionName.value), statusCode = "200")).apiResponse
   }
 
@@ -83,7 +80,7 @@ object Steps {
       getContacts = GetContacts(zuoraClient.get[ZuoraContacts]) _
       createMonthlyContribution = CreateSubscription(zuoraIds.monthly, zuoraClient.post[WireCreateRequest, WireSubscription]) _
       contributionIds = List(zuoraIds.monthly.productRatePlanId, zuoraIds.annual.productRatePlanId)
-      prerequesiteCheck = PrerequisiteCheck(zuoraClient, contributionIds, RawEffects.now, scala.concurrent.ExecutionContext.Implicits.global) _
+      prerequesiteCheck = PrerequisiteCheck(zuoraClient, contributionIds, RawEffects.now) _
       sendConfirmationEmail = SendConfirmationEmail(() => RawEffects.now().toLocalDate, sqsSend, getContacts) _
       configuredOp = Operation.async(
         steps = addSubscriptionSteps(prerequesiteCheck, createMonthlyContribution, sendConfirmationEmail),

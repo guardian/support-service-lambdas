@@ -3,21 +3,24 @@ package com.gu.newproduct.api.addsubscription
 import java.time.LocalDate
 
 import com.gu.i18n.Currency
+import com.gu.i18n.Currency.GBP
+import com.gu.newproduct.api.addsubscription.validation.ValidatedFields
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{CreateReq, SubscriptionName}
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{DirectDebit, NonDirectDebitMethod, PaymentMethod}
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.ActivePaymentMethod
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType.CreditCard
 import com.gu.test.JsonMatchers.JsonMatcher
-import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
-import com.gu.util.reader.Types.{ApiGatewayOp, AsyncApiGatewayOp}
-import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
+import com.gu.util.apigateway.ApiGatewayRequest
+import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
+import com.gu.util.reader.Types.AsyncApiGatewayOp
 import com.gu.util.resthttp.Types
 import com.gu.util.resthttp.Types.ClientSuccess
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json._
-import scala.concurrent.duration._
+
 import scala.concurrent.Await
+import scala.concurrent.duration._
 
 class StepsTest extends FlatSpec with Matchers {
 
@@ -38,10 +41,11 @@ class StepsTest extends FlatSpec with Matchers {
       ClientSuccess(SubscriptionName("well done"))
     }
 
-    def fakeCheck(request: AddSubscriptionRequest): AsyncApiGatewayOp[PaymentMethod] = {
+    def fakeCheck(request: AddSubscriptionRequest): AsyncApiGatewayOp[ValidatedFields] = {
       request.zuoraAccountId.value shouldBe "acccc"
       val paymentMethod = NonDirectDebitMethod(ActivePaymentMethod, CreditCard)
-      AsyncApiGatewayOp(ContinueProcessing((paymentMethod)))
+      val validatedFields = ValidatedFields(paymentMethod, GBP)
+      AsyncApiGatewayOp(ContinueProcessing((validatedFields)))
     }
 
     def fakeSendEmails(zuoraAccountId: ZuoraAccountId, currency: Currency, directDebit: Option[DirectDebit], amountMinorUnits: Int) = {

@@ -65,7 +65,7 @@ object ApiGatewayHandler extends Logging {
   object Operation {
     def noHealthcheck(steps: ApiGatewayRequest => ApiResponse) =
       Operation(steps, () => ApiGatewayResponse.successfulExecution)
-    def async( //todo this just accepts async steps but wraps it in a wait
+    def async(
       steps: ApiGatewayRequest => Future[ApiResponse],
       healthcheck: () => ApiResponse
     ) = {

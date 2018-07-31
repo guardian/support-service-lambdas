@@ -4,20 +4,18 @@ import java.time.LocalDate
 
 import com.gu.effects.sqs.AwsSQSSend.Payload
 import com.gu.i18n.Currency
+import com.gu.newproduct.api.addsubscription.TypeConvert._
 import com.gu.newproduct.api.addsubscription.ZuoraAccountId
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.{Contacts, Email}
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.DirectDebit
 import com.gu.util.Logging
-import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess}
-
-import scala.concurrent.{ExecutionContext, Future}
-import com.gu.newproduct.api.addsubscription.TypeConvert._
 import com.gu.util.apigateway.ApiGatewayResponse
-import com.gu.util.reader.Types
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
-import com.gu.util.reader.Types.AsyncApiGatewayOp
+import com.gu.util.reader.Types.{AsyncApiGatewayOp, _}
+import com.gu.util.resthttp.Types.ClientFailableOp
 import play.api.libs.json.Json
 
+import scala.concurrent.{ExecutionContext, Future}
 object contributionEmailRequest {
 
   case class CurrencyGlyph(value: String) extends AnyVal
@@ -39,12 +37,6 @@ object contributionEmailRequest {
 }
 
 object SendConfirmationEmail extends Logging {
-
-  def toAsyncApiGatewayOp[A](f: Future[A], action: String)(implicit ec: ExecutionContext): AsyncApiGatewayOp[A] = {
-    val futureClientFailable: Future[ClientFailableOp[A]] = f.map(ClientSuccess(_))
-    val futureApiGatewayOp = futureClientFailable.map(_.toApiGatewayOp(action))
-    AsyncApiGatewayOp(futureApiGatewayOp)
-  }
 
   def getPayload(
     now: LocalDate,
@@ -72,14 +64,14 @@ object SendConfirmationEmail extends Logging {
     currency: Currency,
     directDebit: Option[DirectDebit],
     amountMinorUnits: Int
-  )(implicit ex: ExecutionContext) = {
+  ) = {
 
     for {
       contacts <- getContacts(accountid).toAsyncApiGatewayOp("getting contacts from Zuora")
       etPayload <- getPayload(now(), contacts, currency, directDebit, amountMinorUnits)
       payloadString = Json.prettyPrint(Json.toJson(etPayload))
-      a <- toAsyncApiGatewayOp(sqsSend(Payload(payloadString)), "sending sqs message")
-    } yield a
+      sendMessageResult <- sqsSend(Payload(payloadString)).toAsyncApiGatewayOp("sending sqs message")
+    } yield sendMessageResult
 
   }
 }
