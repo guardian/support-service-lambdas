@@ -58,11 +58,11 @@ object Steps {
         request.createdByCSR
       )
       subscriptionName <- createMonthlyContribution(req).toAsyncApiGatewayOp("create monthly contribution")
-      directDebit = validatedFields.paymentMethod match {
+      maybeDirectDebit = validatedFields.paymentMethod match {
         case d: DirectDebit => Some(d)
         case _ => None
       }
-      _ <- sendConfirmationEmail(request.zuoraAccountId, validatedFields.currency, directDebit, request.amountMinorUnits)
+      _ <- sendConfirmationEmail(request.zuoraAccountId, validatedFields.currency, maybeDirectDebit, request.amountMinorUnits)
     } yield ApiGatewayResponse(body = AddedSubscription(subscriptionName.value), statusCode = "200")).apiResponse
   }
 

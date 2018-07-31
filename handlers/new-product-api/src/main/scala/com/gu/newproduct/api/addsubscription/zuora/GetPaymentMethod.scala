@@ -25,27 +25,27 @@ object GetPaymentMethod {
       "BankTransfer" -> BankTransfer
     )
 
-    private def toStatus(statusString: String) = if (statusString == "Active") ActivePaymentMethod else NotActivePaymentMethod
+    def toPaymentMethod: ClientFailableOp[PaymentMethod] = {
+      val methodType = stringToType.getOrElse(Type, Other)
+      if (methodType == BankTransfer) toDirectDebit
+      else ClientSuccess(NonDirectDebitMethod(toStatus(PaymentMethodStatus), methodType))
+    }
 
-    private def toDirectDebit(paymentMethodWire: PaymentMethodWire): ClientFailableOp[DirectDebit] = for {
-      mandateId <- paymentMethodWire.MandateID.toClientFailable("no MandateID in zuora direct debit")
-      accountName <- paymentMethodWire.BankTransferAccountName.toClientFailable("no account name in zuora direct debit")
-      accountNumberMask <- paymentMethodWire.BankTransferAccountNumberMask.toClientFailable("no account number mask in zuora direct debit")
-      sortCode <- paymentMethodWire.BankCode.toClientFailable("no bank code in zuora direct debit")
+    private def toDirectDebit: ClientFailableOp[DirectDebit] = for {
+      mandateId <- MandateID.toClientFailable("no MandateID in zuora direct debit")
+      accountName <- BankTransferAccountName.toClientFailable("no account name in zuora direct debit")
+      accountNumberMask <- BankTransferAccountNumberMask.toClientFailable("no account number mask in zuora direct debit")
+      sortCode <- BankCode.toClientFailable("no bank code in zuora direct debit")
     } yield DirectDebit(
-      toStatus(paymentMethodWire.PaymentMethodStatus),
+      toStatus(PaymentMethodStatus),
       BankAccountName(accountName),
       BankAccountNumberMask(accountNumberMask),
       SortCode(sortCode),
       MandateId(mandateId)
     )
-
-    def toPaymentMethod: ClientFailableOp[PaymentMethod] = {
-      val methodType = stringToType.getOrElse(Type, Other)
-      if (methodType == BankTransfer) toDirectDebit(this)
-      else ClientSuccess(NonDirectDebitMethod(toStatus(PaymentMethodStatus), methodType))
-    }
   }
+
+  private def toStatus(statusString: String) = if (statusString == "Active") ActivePaymentMethod else NotActivePaymentMethod
 
   implicit class OptionToClientFailableOp[A](option: Option[A]) {
     def toClientFailable(errorMessage: String) = option match {
