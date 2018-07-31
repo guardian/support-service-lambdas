@@ -1,6 +1,7 @@
 package com.gu.newproduct.api.addsubscription.zuora
 
 import com.gu.effects.{GetFromS3, RawEffects}
+import com.gu.i18n.Country
 import com.gu.newproduct.api.addsubscription.ZuoraAccountId
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel._
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.{apply => _, _}
@@ -21,8 +22,8 @@ class GetContactsEffectsTest extends FlatSpec with Matchers {
     } yield res
 
     val expected = Contacts(
-      billTo = Contact(FirstName("Dory"), LastName("Jones"), Some(Email("fake@fake.co.us"))),
-      soldTo = Contact(FirstName("velma"), LastName("kelly"), Some(Email("velmakelly@test.com")))
+      billTo = Contact(FirstName("Dory"), LastName("Jones"), Some(Email("fake@fake.co.us")), Some(Country.Canada)),
+      soldTo = Contact(FirstName("velma"), LastName("kelly"), Some(Email("velmakelly@test.com")), Some(Country.UK))
     )
 
     actual shouldBe \/-(expected)

@@ -10,6 +10,8 @@ import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.reader.Types._
 import play.api.libs.json.Json
 
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future}
 import scala.io.Source
 import scala.util.Try
 
@@ -58,12 +60,18 @@ object ApiGatewayHandler extends Logging {
       Operation(validateAndRunSteps, healthcheck)
 
     }
-
   }
 
   object Operation {
     def noHealthcheck(steps: ApiGatewayRequest => ApiResponse) =
       Operation(steps, () => ApiGatewayResponse.successfulExecution)
+    def async( //todo this just accepts async steps but wraps it in a wait
+      steps: ApiGatewayRequest => Future[ApiResponse],
+      healthcheck: () => ApiResponse
+    ) = {
+      def syncSteps(request: ApiGatewayRequest) = Await.result(steps(request), Duration.Inf)
+      Operation(syncSteps _, healthcheck)
+    }
   }
 
   def apply(lambdaIO: LambdaIO)(fConfigOp: ApiGatewayOp[Operation]): Unit = {

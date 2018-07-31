@@ -1,16 +1,16 @@
 package com.gu.newproduct.api.addsubscription.zuora
 
-import com.gu.i18n.Currency
+import com.gu.i18n.{Country, CountryGroup}
 import com.gu.newproduct.api.addsubscription.ZuoraAccountId
-import com.gu.util.resthttp.RestRequestMaker.{RequestsGet, WithCheck, WithoutCheck}
-import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError}
+import com.gu.util.resthttp.RestRequestMaker.{RequestsGet, WithCheck}
+import com.gu.util.resthttp.Types.{ClientFailableOp}
 import play.api.libs.json.Json
 
 object GetContacts {
 
   object WireModel {
 
-    case class ZuoraContact(firstName: String, lastName: String, workEmail: Option[String])
+    case class ZuoraContact(firstName: String, lastName: String, workEmail: Option[String], country: Option[String])
 
     case class ZuoraContacts(billToContact: ZuoraContact, soldToContact: ZuoraContact)
 
@@ -24,12 +24,15 @@ object GetContacts {
         billTo = Contact(
           FirstName(zBillto.firstName),
           LastName(zBillto.lastName),
-          zBillto.workEmail.map(Email)
+          zBillto.workEmail.map(Email),
+          zBillto.country.flatMap(CountryGroup.countryByNameOrCode(_))
         ),
         soldTo = Contact(
           FirstName(zSoldTo.firstName),
           LastName(zSoldTo.lastName),
-          zSoldTo.workEmail.map(Email)
+          zSoldTo.workEmail.map(Email),
+          zSoldTo.country.flatMap(CountryGroup.countryByNameOrCode(_))
+
         )
       )
     }
@@ -43,7 +46,10 @@ object GetContacts {
 
   case class Email(value: String) extends AnyVal
 
-  case class Contact(firstName: FirstName, lastName: LastName, email: Option[Email]) //TODO are the first or last names optional ?
+  case class Contact(firstName: FirstName, lastName: LastName, email: Option[Email], country: Option[Country]) //TODO are the first or
+  // last names
+  // optional ?
+  //todo do we need both contacts ? also if one or both are missing we should return none!!!
   case class Contacts(billTo: Contact, soldTo: Contact)
 
   def apply(get: RequestsGet[ZuoraContacts])(accountId: ZuoraAccountId): ClientFailableOp[Contacts] =
