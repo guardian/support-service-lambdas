@@ -1,7 +1,7 @@
 package com.gu.newproduct.api.addsubscription.zuora
 
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.PaymentMethodId
-import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{BankAccountName, BankAccountNumberMask, DirectDebit, MandateId, NonDirectDebitMethod, PaymentMethod, PaymentMethodWire, SortCode}
+import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{BankAccountName, BankAccountNumberMask, DirectDebit, MandateId, NonDirectDebitMethod, PaymentMethodWire, SortCode}
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.{ActivePaymentMethod, NotActivePaymentMethod}
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType._
 import com.gu.test.EffectsTest

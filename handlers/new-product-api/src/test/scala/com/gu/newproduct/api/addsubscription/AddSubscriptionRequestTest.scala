@@ -25,7 +25,7 @@ class AddSubscriptionRequestTest extends FlatSpec with Matchers {
       startDate = LocalDate.of(2018, 7, 11),
       acquisitionSource = AcquisitionSource("CSR"),
       createdByCSR = CreatedByCSR("CSRName"),
-      amountMinorUnits = 123,
+      amountMinorUnits = AmountMinorUnits(123),
       acquisitionCase = CaseId("5006E000005b5cf")
     )
   }

@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 import com.gu.newproduct.api.addsubscription.ZuoraIds.PlanAndCharge
-import com.gu.newproduct.api.addsubscription.{AcquisitionSource, CaseId, CreatedByCSR, ZuoraAccountId}
+import com.gu.newproduct.api.addsubscription._
 import com.gu.util.resthttp.RestRequestMaker.{RequestsPost, WithCheck}
 import com.gu.util.resthttp.Types.ClientFailableOp
 import play.api.libs.json.{Json, Reads}
@@ -57,7 +57,7 @@ object CreateSubscription {
           productRatePlanId = planAndCharge.productRatePlanId.value,
           chargeOverrides = List(
             ChargeOverrides(
-              price = amountMinorUnits.toDouble / 100,
+              price = amountMinorUnits.value.toDouble / 100,
               productRatePlanChargeId = planAndCharge.productRatePlanChargeId.value
             )
           )
@@ -68,7 +68,7 @@ object CreateSubscription {
 
   case class CreateReq(
     accountId: ZuoraAccountId,
-    amountMinorUnits: Int,
+    amountMinorUnits: AmountMinorUnits,
     start: LocalDate,
     acquisitionCase: CaseId,
     acquisitionSource: AcquisitionSource,

@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 import com.gu.i18n.Currency
+import com.gu.newproduct.api.addsubscription.AmountMinorUnits
 import com.gu.newproduct.api.addsubscription.zuora.GetBillToContact.Contact
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.DirectDebit
 import play.api.libs.json.Json
@@ -29,12 +30,13 @@ object ContributionFields {
 
   protected def hyphenate(s: String): String = s"${s.substring(0, 2)}-${s.substring(2, 4)}-${s.substring(4, 6)}"
 
-  protected def formatAmount(amountMinorUnits: Int): String = (amountMinorUnits / BigDecimal(100)).bigDecimal.stripTrailingZeros.toPlainString
+  protected def formatAmount(amount: AmountMinorUnits): String = (amount.value / BigDecimal(100)).bigDecimal.stripTrailingZeros
+    .toPlainString
 
   val firstPaymentDateFormat = DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy")
 
   def fromData(
-    amountMinorUnits: Int,
+    amountMinorUnits: AmountMinorUnits,
     created: LocalDate,
     currency: Currency,
     directDebit: Option[DirectDebit],

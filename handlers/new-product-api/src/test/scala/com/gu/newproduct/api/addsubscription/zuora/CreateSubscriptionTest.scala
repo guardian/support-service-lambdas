@@ -5,7 +5,7 @@ import java.time.LocalDate
 import com.gu.newproduct.api.addsubscription.ZuoraIds.{PlanAndCharge, ProductRatePlanChargeId, ProductRatePlanId}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.WireModel.{ChargeOverrides, SubscribeToRatePlans, WireCreateRequest, WireSubscription}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{CreateReq, SubscriptionName}
-import com.gu.newproduct.api.addsubscription.{AcquisitionSource, CaseId, CreatedByCSR, ZuoraAccountId}
+import com.gu.newproduct.api.addsubscription._
 import com.gu.util.resthttp.RestRequestMaker.{RequestsPost, WithCheck}
 import com.gu.util.resthttp.Types.{ClientSuccess, GenericError}
 import org.scalatest.{FlatSpec, Matchers}
@@ -42,7 +42,7 @@ class CreateSubscriptionTest extends FlatSpec with Matchers {
     }
     val createReq = CreateReq(
       accountId = ZuoraAccountId("zac"),
-      amountMinorUnits = 125,
+      amountMinorUnits = AmountMinorUnits(125),
       start = LocalDate.of(2018, 7, 17),
       acquisitionCase = CaseId("casecase"),
       acquisitionSource = AcquisitionSource("sourcesource"),

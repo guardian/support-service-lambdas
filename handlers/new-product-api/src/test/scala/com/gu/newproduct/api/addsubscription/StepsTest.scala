@@ -29,7 +29,7 @@ class StepsTest extends FlatSpec with Matchers {
 
     val expectedIn = CreateReq(
       ZuoraAccountId("acccc"),
-      123,
+      AmountMinorUnits(123),
       LocalDate.of(2018, 7, 18),
       CaseId("case"),
       AcquisitionSource("CSR"),
@@ -48,7 +48,7 @@ class StepsTest extends FlatSpec with Matchers {
       AsyncApiGatewayOp(ContinueProcessing((validatedFields)))
     }
 
-    def fakeSendEmails(zuoraAccountId: ZuoraAccountId, currency: Currency, directDebit: Option[DirectDebit], amountMinorUnits: Int) = {
+    def fakeSendEmails(zuoraAccountId: ZuoraAccountId, currency: Currency, directDebit: Option[DirectDebit], amount: AmountMinorUnits) = {
       AsyncApiGatewayOp(ContinueProcessing(()))
     }
 

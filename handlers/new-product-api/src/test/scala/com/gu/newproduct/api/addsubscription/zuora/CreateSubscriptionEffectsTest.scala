@@ -5,7 +5,7 @@ import java.time.LocalDate
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.newproduct.api.addsubscription.ZuoraIds.{PlanAndCharge, ProductRatePlanChargeId, ProductRatePlanId}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.WireModel._
-import com.gu.newproduct.api.addsubscription.{AcquisitionSource, CaseId, CreatedByCSR, ZuoraAccountId}
+import com.gu.newproduct.api.addsubscription._
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.resthttp.RestRequestMaker.RequestsPost
@@ -21,7 +21,7 @@ class CreateSubscriptionEffectsTest extends FlatSpec with Matchers {
     val validCaseIdToAvoidCausingSFErrors = CaseId("5006E000005b5cf")
     val request = CreateSubscription.CreateReq(
       ZuoraAccountId("2c92c0f864a214c30164a8b5accb650b"),
-      100,
+      AmountMinorUnits(100),
       LocalDate.now,
       validCaseIdToAvoidCausingSFErrors,
       AcquisitionSource("sourcesource"),

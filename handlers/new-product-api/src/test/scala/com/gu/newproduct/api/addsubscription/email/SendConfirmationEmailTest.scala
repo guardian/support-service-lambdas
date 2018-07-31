@@ -5,7 +5,7 @@ import java.time.LocalDate
 import com.gu.effects.sqs.AwsSQSSend.Payload
 import com.gu.i18n.Country
 import com.gu.i18n.Currency.GBP
-import com.gu.newproduct.api.addsubscription.ZuoraAccountId
+import com.gu.newproduct.api.addsubscription.{AmountMinorUnits, ZuoraAccountId}
 import com.gu.newproduct.api.addsubscription.zuora.GetBillToContact._
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{BankAccountName, BankAccountNumberMask, DirectDebit, MandateId, SortCode}
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.ActivePaymentMethod
@@ -74,7 +74,7 @@ class SendConfirmationEmailTest extends FlatSpec with Matchers {
 
     val send = SendConfirmationEmail(today, sqsSend, getContact) _
 
-    val res = Await.result(send(ZuoraAccountId("id"), GBP, Some(directDebit), 1234).underlying, 3 seconds)
+    val res = Await.result(send(ZuoraAccountId("id"), GBP, Some(directDebit), AmountMinorUnits(1234)).underlying, 3 seconds)
 
     res.shouldBe(ContinueProcessing(()))
 
@@ -88,7 +88,7 @@ class SendConfirmationEmailTest extends FlatSpec with Matchers {
 
     val send = SendConfirmationEmail(today, sqsSend, getContact) _
 
-    val res = Await.result(send(ZuoraAccountId("id"), GBP, Some(directDebit), 1234).underlying, 3 seconds)
+    val res = Await.result(send(ZuoraAccountId("id"), GBP, Some(directDebit), AmountMinorUnits(1234)).underlying, 3 seconds)
 
     res.shouldBe(ContinueProcessing(()))
 
@@ -102,7 +102,7 @@ class SendConfirmationEmailTest extends FlatSpec with Matchers {
 
     val send = SendConfirmationEmail(today, sqsSend, getContact) _
 
-    val res = Await.result(send(ZuoraAccountId("id"), GBP, Some(directDebit), 1234).underlying, 3 seconds)
+    val res = Await.result(send(ZuoraAccountId("id"), GBP, Some(directDebit), AmountMinorUnits(1234)).underlying, 3 seconds)
 
     res.shouldBe(ContinueProcessing(()))
 
@@ -116,7 +116,7 @@ class SendConfirmationEmailTest extends FlatSpec with Matchers {
 
     val send = SendConfirmationEmail(today, sqsSend, getContact) _
 
-    val res = Await.result(send(ZuoraAccountId("id"), GBP, Some(directDebit), 1234).underlying, 3 seconds)
+    val res = Await.result(send(ZuoraAccountId("id"), GBP, Some(directDebit), AmountMinorUnits(1234)).underlying, 3 seconds)
 
     res.shouldBe(ContinueProcessing(()))
   }

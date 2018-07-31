@@ -4,6 +4,7 @@ import java.time.LocalDate
 
 import com.gu.i18n.Country
 import com.gu.i18n.Currency.GBP
+import com.gu.newproduct.api.addsubscription.AmountMinorUnits
 import com.gu.newproduct.api.addsubscription.zuora.GetBillToContact._
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{BankAccountName, BankAccountNumberMask, DirectDebit, MandateId, SortCode}
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.ActivePaymentMethod
@@ -101,7 +102,7 @@ class ContributionsFieldsTest extends FlatSpec with Matchers {
 
     )
 
-    val actual = ContributionFields.fromData(1023, LocalDate.of(2018, 7, 12), GBP, None, billTo)
+    val actual = ContributionFields.fromData(AmountMinorUnits(1023), LocalDate.of(2018, 7, 12), GBP, None, billTo)
     actual shouldBe Some(expectedContributionFields)
 
   }
@@ -134,7 +135,7 @@ class ContributionsFieldsTest extends FlatSpec with Matchers {
 
     )
 
-    val actual = ContributionFields.fromData(1023, LocalDate.of(2018, 7, 12), GBP, Some(directDebit), billTo)
+    val actual = ContributionFields.fromData(AmountMinorUnits(1023), LocalDate.of(2018, 7, 12), GBP, Some(directDebit), billTo)
     actual shouldBe Some(expectedContributionFields)
 
   }

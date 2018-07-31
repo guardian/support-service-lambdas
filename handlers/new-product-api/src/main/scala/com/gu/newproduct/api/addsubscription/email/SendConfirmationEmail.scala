@@ -5,7 +5,7 @@ import java.time.LocalDate
 import com.gu.effects.sqs.AwsSQSSend.Payload
 import com.gu.i18n.Currency
 import com.gu.newproduct.api.addsubscription.TypeConvert._
-import com.gu.newproduct.api.addsubscription.ZuoraAccountId
+import com.gu.newproduct.api.addsubscription.{AmountMinorUnits, ZuoraAccountId}
 import com.gu.newproduct.api.addsubscription.zuora.GetBillToContact.Contact
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.DirectDebit
 import com.gu.util.Logging
@@ -24,7 +24,7 @@ object SendConfirmationEmail extends Logging {
     billTo: Contact,
     currency: Currency,
     directDebit: Option[DirectDebit],
-    amountMinorUnits: Int
+    amountMinorUnits: AmountMinorUnits
   ): AsyncApiGatewayOp[ETPayload[ContributionFields]] = {
     val maybeContributionFields = ContributionFields.fromData(amountMinorUnits, now, currency, directDebit, billTo)
 
@@ -45,7 +45,7 @@ object SendConfirmationEmail extends Logging {
     accountid: ZuoraAccountId,
     currency: Currency,
     directDebit: Option[DirectDebit],
-    amountMinorUnits: Int
+    amountMinorUnits: AmountMinorUnits
   ) = {
 
     val response = for {

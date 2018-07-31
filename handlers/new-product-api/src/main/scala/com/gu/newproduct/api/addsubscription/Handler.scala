@@ -44,7 +44,7 @@ object Steps {
   def addSubscriptionSteps(
     prerequisiteCheck: AddSubscriptionRequest => AsyncApiGatewayOp[ValidatedFields],
     createMonthlyContribution: CreateReq => ClientFailableOp[SubscriptionName],
-    sendConfirmationEmail: (ZuoraAccountId, Currency, Option[DirectDebit], Int) => AsyncApiGatewayOp[Unit]
+    sendConfirmationEmail: (ZuoraAccountId, Currency, Option[DirectDebit], AmountMinorUnits) => AsyncApiGatewayOp[Unit]
   )(apiGatewayRequest: ApiGatewayRequest): Future[ApiResponse] = {
     (for {
       request <- apiGatewayRequest.bodyAsCaseClass[AddSubscriptionRequest]().withLogging("parsed request").toAsync
