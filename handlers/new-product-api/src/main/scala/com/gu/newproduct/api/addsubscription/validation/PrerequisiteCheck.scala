@@ -10,7 +10,7 @@ import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAcc
 import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.WireModel.ZuoraSubscriptionsResponse
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{PaymentMethod, PaymentMethodWire}
 import com.gu.newproduct.api.addsubscription.zuora.{GetAccount, GetAccountSubscriptions, GetPaymentMethod}
-import com.gu.util.reader.AsyncTypes._
+import com.gu.util.reader.Types._
 import com.gu.util.resthttp.RestRequestMaker
 
 case class ValidatedFields(paymentMethod: PaymentMethod, currency: Currency)
@@ -19,7 +19,7 @@ object PrerequisiteCheck {
     zuoraClient: RestRequestMaker.Requests,
     contributionRatePlanIds: List[ProductRatePlanId],
     getCurrentDate: () => LocalDate
-  )(request: AddSubscriptionRequest): AsyncApiGatewayOp[ValidatedFields] = {
+  )(request: AddSubscriptionRequest): ApiGatewayOp[ValidatedFields] = {
 
     def getAccount = GetAccount(zuoraClient.get[ZuoraAccount]) _
 
@@ -30,16 +30,16 @@ object PrerequisiteCheck {
     val accountNotFoundError = "Zuora account id is not valid"
 
     for {
-      account <- getAccount(request.zuoraAccountId).toAsyncApiResponseCheckingNotFound(
+      account <- getAccount(request.zuoraAccountId).toApiResponseCheckingNotFound(
         action = "load account from Zuora",
         ifNotFoundReturn = accountNotFoundError
       )
-      paymentMethodId <- ValidateAccount(account).toAsyncApiGatewayOp
-      paymentMethod <- getPaymentMethod(paymentMethodId).toAsyncApiGatewayOp("load payment method from Zuora")
-      _ <- ValidatePaymentMethod(paymentMethod).toAsyncApiGatewayOp
-      subs <- getSubscriptions(request.zuoraAccountId).toAsyncApiGatewayOp("get subscriptions for account from Zuora")
-      _ <- ValidateSubscriptions(contributionRatePlanIds)(subs).toAsyncApiGatewayOp
-      _ <- ValidateRequest(getCurrentDate, AmountLimits.limitsFor)(request, account.currency).toAsyncApiGatewayOp
+      paymentMethodId <- ValidateAccount(account).toApiGatewayOp
+      paymentMethod <- getPaymentMethod(paymentMethodId).toApiGatewayOp("load payment method from Zuora")
+      _ <- ValidatePaymentMethod(paymentMethod).toApiGatewayOp
+      subs <- getSubscriptions(request.zuoraAccountId).toApiGatewayOp("get subscriptions for account from Zuora")
+      _ <- ValidateSubscriptions(contributionRatePlanIds)(subs).toApiGatewayOp
+      _ <- ValidateRequest(getCurrentDate, AmountLimits.limitsFor)(request, account.currency).toApiGatewayOp
     } yield ValidatedFields(paymentMethod, account.currency)
   }
 }

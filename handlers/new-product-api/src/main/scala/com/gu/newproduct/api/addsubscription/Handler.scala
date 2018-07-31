@@ -13,9 +13,9 @@ import com.gu.newproduct.api.addsubscription.validation._
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.WireModel.{WireCreateRequest, WireSubscription}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{CreateReq, SubscriptionName}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAccount
-import com.gu.newproduct.api.addsubscription.zuora.GetContacts.WireModel.ZuoraContacts
+import com.gu.newproduct.api.addsubscription.zuora.GetBillToContact.WireModel.GetBillToResponse
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.DirectDebit
-import com.gu.newproduct.api.addsubscription.zuora.{CreateSubscription, GetAccount, GetContacts}
+import com.gu.newproduct.api.addsubscription.zuora.{CreateSubscription, GetAccount, GetBillToContact}
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
@@ -73,12 +73,12 @@ object Steps {
       zuoraConfig <- loadConfig[ZuoraRestConfig].toApiGatewayOp("load zuora config")
       zuoraClient = ZuoraRestRequestMaker(response, zuoraConfig)
       sqsSend = AwsSQSSend(emailQueueFor(stage)) _
-      getContacts = GetContacts(zuoraClient.get[ZuoraContacts]) _
+      getBillTo = GetBillToContact(zuoraClient.get[GetBillToResponse]) _
       createMonthlyContribution = CreateSubscription(zuoraIds.monthly, zuoraClient.post[WireCreateRequest, WireSubscription]) _
       contributionIds = List(zuoraIds.monthly.productRatePlanId, zuoraIds.annual.productRatePlanId)
       getCurrentDate = () => RawEffects.now().toLocalDate
-      prerequisiteCheck = PrerequisiteCheck(zuoraClient, contributionIds, getCurrentDate) _
-      sendConfirmationEmail = SendConfirmationEmail(getCurrentDate, sqsSend, getContacts) _
+      prerequisiteCheck = (PrerequisiteCheck(zuoraClient, contributionIds, getCurrentDate) _).toAsync
+      sendConfirmationEmail = SendConfirmationEmail(getCurrentDate, sqsSend, getBillTo) _
       configuredOp = Operation.async(
         steps = addSubscriptionSteps(prerequisiteCheck, createMonthlyContribution, sendConfirmationEmail),
         healthcheck = () =>

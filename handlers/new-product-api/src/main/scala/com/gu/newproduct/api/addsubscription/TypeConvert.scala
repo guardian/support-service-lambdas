@@ -41,18 +41,4 @@ object TypeConvert {
     }
   }
 
-  implicit class ValidationToAsyncApiGatewayOp[A](validationResult: ValidationResult[A]) {
-    def toAsyncApiGatewayOp: AsyncApiGatewayOp[A] = validationResult match {
-      case Passed(value) => AsyncApiGatewayOp(ContinueProcessing(value))
-      case Failed(message) => AsyncApiGatewayOp(ReturnWithResponse(ApiValidationErrorResponse(message)))
-    }
-  }
-
-  implicit class ClientFailableOpToAsyncApiResponse[A](clientFailableOp: ClientFailableOp[A]) {
-    def toAsyncApiResponseCheckingNotFound(action: String, ifNotFoundReturn: String): AsyncApiGatewayOp[A] = clientFailableOp match {
-      case NotFound(_) => AsyncApiGatewayOp(ReturnWithResponse(ApiValidationErrorResponse(ifNotFoundReturn)))
-      case anyOtherResponse => AsyncApiGatewayOp(Future.successful(anyOtherResponse.toDisjunction.toApiGatewayOp(action)))
-    }
-  }
-
 }

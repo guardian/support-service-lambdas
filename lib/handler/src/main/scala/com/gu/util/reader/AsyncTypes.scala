@@ -58,4 +58,8 @@ object AsyncTypes extends Logging {
   implicit class SyncToAsync[A](apiGatewayOp: ApiGatewayOp[A]) {
     def toAsync: AsyncApiGatewayOp[A] = AsyncApiGatewayOp(Future.successful(apiGatewayOp))
   }
+
+  implicit class FSyncToAsync[A, B](f: B => ApiGatewayOp[A]) {
+    def toAsync: B => AsyncApiGatewayOp[A] = f andThen (_.toAsync)
+  }
 }

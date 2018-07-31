@@ -6,7 +6,7 @@ import com.gu.effects.sqs.AwsSQSSend.Payload
 import com.gu.i18n.Currency
 import com.gu.newproduct.api.addsubscription.TypeConvert._
 import com.gu.newproduct.api.addsubscription.ZuoraAccountId
-import com.gu.newproduct.api.addsubscription.zuora.GetContacts.Contacts
+import com.gu.newproduct.api.addsubscription.zuora.GetBillToContact.Contact
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.DirectDebit
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayResponse
@@ -21,12 +21,12 @@ object SendConfirmationEmail extends Logging {
 
   def getPayload(
     now: LocalDate,
-    contacts: Contacts,
+    billTo: Contact,
     currency: Currency,
     directDebit: Option[DirectDebit],
     amountMinorUnits: Int
   ): AsyncApiGatewayOp[ETPayload[ContributionFields]] = {
-    val maybeContributionFields = ContributionFields.fromData(amountMinorUnits, now, currency, directDebit, contacts)
+    val maybeContributionFields = ContributionFields.fromData(amountMinorUnits, now, currency, directDebit, billTo)
 
     maybeContributionFields.map { fields =>
       val payload = ETPayload(fields.EmailAddress, fields)
@@ -40,7 +40,7 @@ object SendConfirmationEmail extends Logging {
   def apply(
     now: () => LocalDate,
     sqsSend: Payload => Future[Unit],
-    getContacts: ZuoraAccountId => ClientFailableOp[Contacts]
+    getBillTo: ZuoraAccountId => ClientFailableOp[Contact]
   )(
     accountid: ZuoraAccountId,
     currency: Currency,
@@ -49,8 +49,8 @@ object SendConfirmationEmail extends Logging {
   ) = {
 
     val response = for {
-      contacts <- getContacts(accountid).toAsyncApiGatewayOp("getting contacts from Zuora")
-      etPayload <- getPayload(now(), contacts, currency, directDebit, amountMinorUnits)
+      billTo <- getBillTo(accountid).toAsyncApiGatewayOp("getting billTo contact from Zuora")
+      etPayload <- getPayload(now(), billTo, currency, directDebit, amountMinorUnits)
       payloadString = Json.prettyPrint(Json.toJson(etPayload))
       sendMessageResult <- sqsSend(Payload(payloadString)).toAsyncApiGatewayOp("sending sqs message")
     } yield sendMessageResult

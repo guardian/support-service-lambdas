@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 import com.gu.i18n.Currency
-import com.gu.newproduct.api.addsubscription.zuora.GetContacts.Contacts
+import com.gu.newproduct.api.addsubscription.zuora.GetBillToContact.Contact
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.DirectDebit
 import play.api.libs.json.Json
 
@@ -20,7 +20,7 @@ case class ContributionFields(
   `account number`: Option[String] = None,
   `sort code`: Option[String] = None,
   `Mandate ID`: Option[String] = None,
-  `first payment date`: Option[String] = None, // is this going to be created + 10 days as in acquisitions from the web ?
+  `first payment date`: Option[String] = None,
   `payment method`: Option[String] = None
 )
 
@@ -38,11 +38,10 @@ object ContributionFields {
     created: LocalDate,
     currency: Currency,
     directDebit: Option[DirectDebit],
-    contacts: Contacts
+    billTo: Contact
   ): Option[ContributionFields] = {
-    val billTo = contacts.billTo
 
-    contacts.billTo.email.map { email =>
+    billTo.email.map { email =>
       ContributionFields(
         EmailAddress = email.value,
         created = created.toString,
@@ -56,10 +55,10 @@ object ContributionFields {
         `sort code` = directDebit.map(x => hyphenate(x.sortCode.value)),
         `Mandate ID` = directDebit.map(_.mandateId.value),
         `first payment date` = directDebit.map { _ =>
-          val firstPayment = created.plusDays(10)
+          val firstPayment = created.plusDays(10) // todo the contract acceptance date should be at the same time as the first payment date
           val formatted = firstPayment.format(firstPaymentDateFormat)
           formatted
-        }, // todo is created + 10 days also valid here (copied from the web)
+        },
         `payment method` = directDebit.map(_ => "Direct Debit")
       )
 

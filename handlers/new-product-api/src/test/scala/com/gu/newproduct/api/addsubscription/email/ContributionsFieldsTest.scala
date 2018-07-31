@@ -4,7 +4,7 @@ import java.time.LocalDate
 
 import com.gu.i18n.Country
 import com.gu.i18n.Currency.GBP
-import com.gu.newproduct.api.addsubscription.zuora.GetContacts._
+import com.gu.newproduct.api.addsubscription.zuora.GetBillToContact._
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{BankAccountName, BankAccountNumberMask, DirectDebit, MandateId, SortCode}
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.ActivePaymentMethod
 import org.scalatest.{FlatSpec, Matchers}
@@ -83,8 +83,6 @@ class ContributionsFieldsTest extends FlatSpec with Matchers {
   it should "convert to contributions fiels from data without direct debit" in {
 
     val billTo = Contact(FirstName("Marty"), LastName("McFly"), Some(Email("some@email.com")), Some(Country.UK))
-    val soldTo = Contact(FirstName("something"), LastName("else"), Some(Email("else@else.com")), Some(Country.UK))
-    val contacts = Contacts(billTo = billTo, soldTo = soldTo)
 
     val expectedContributionFields = ContributionFields(
       EmailAddress = "some@email.com",
@@ -103,7 +101,7 @@ class ContributionsFieldsTest extends FlatSpec with Matchers {
 
     )
 
-    val actual = ContributionFields.fromData(1023, LocalDate.of(2018, 7, 12), GBP, None, contacts)
+    val actual = ContributionFields.fromData(1023, LocalDate.of(2018, 7, 12), GBP, None, billTo)
     actual shouldBe Some(expectedContributionFields)
 
   }
@@ -111,8 +109,6 @@ class ContributionsFieldsTest extends FlatSpec with Matchers {
   it should "convert to contribution fields from data with direct debit" in {
 
     val billTo = Contact(FirstName("Marty"), LastName("McFly"), Some(Email("some@email.com")), Some(Country.UK))
-    val soldTo = Contact(FirstName("something"), LastName("else"), Some(Email("else@else.com")), Some(Country.UK))
-    val contacts = Contacts(billTo = billTo, soldTo = soldTo)
     val directDebit = DirectDebit(
       ActivePaymentMethod,
       BankAccountName("someName"),
@@ -138,7 +134,7 @@ class ContributionsFieldsTest extends FlatSpec with Matchers {
 
     )
 
-    val actual = ContributionFields.fromData(1023, LocalDate.of(2018, 7, 12), GBP, Some(directDebit), contacts)
+    val actual = ContributionFields.fromData(1023, LocalDate.of(2018, 7, 12), GBP, Some(directDebit), billTo)
     actual shouldBe Some(expectedContributionFields)
 
   }
