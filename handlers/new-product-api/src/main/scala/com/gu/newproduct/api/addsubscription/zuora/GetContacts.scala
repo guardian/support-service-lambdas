@@ -46,10 +46,10 @@ object GetContacts {
 
   case class Email(value: String) extends AnyVal
 
-  case class Contact(firstName: FirstName, lastName: LastName, email: Option[Email], country: Option[Country]) //TODO are the first or
-  // last names
-  // optional ?
-  //todo do we need both contacts ? also if one or both are missing we should return none!!!
+  //TODO are the first or last names optional ?
+  case class Contact(firstName: FirstName, lastName: LastName, email: Option[Email], country: Option[Country])
+  
+  //todo do we need both contacts ? also see what do to if one or both are missing
   case class Contacts(billTo: Contact, soldTo: Contact)
 
   def apply(get: RequestsGet[ZuoraContacts])(accountId: ZuoraAccountId): ClientFailableOp[Contacts] =

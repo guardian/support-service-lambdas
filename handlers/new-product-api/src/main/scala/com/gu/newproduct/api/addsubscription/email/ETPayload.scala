@@ -57,6 +57,7 @@ object ETPayload {
   protected def hyphenate(s: String): String = s"${s.substring(0, 2)}-${s.substring(2, 4)}-${s.substring(4, 6)}"
 
   protected def formatAmount(amountMinorUnits: Int): String = (amountMinorUnits / BigDecimal(100)).bigDecimal.stripTrailingZeros.toPlainString
+
   val firstPaymentDateFormat = DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy")
   implicit val writes = Json.writes[ETPayload]
 
@@ -86,6 +87,5 @@ object ETPayload {
       val to = CTo(email.value, email.value, CContactAttributes(emailFields))
       ETPayload(To = to, DataExtensionName = "regular-contribution-thank-you")
     }
-    //
   }
 }
