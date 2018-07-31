@@ -12,8 +12,9 @@ object ValidationSteps {
   def apply(
     getZuoraEmails: NonEmptyList[AccountId] => ClientFailableOp[List[AccountAndEmail]]
   )(
-    accountIds: NonEmptyList[AccountId],
     identityId: Option[IdentityId]
+  )(
+    accountIds: NonEmptyList[AccountId]
   ): ApiGatewayOp[Unit] = for {
     accountAndEmails <- getZuoraEmails(accountIds).toApiGatewayOp("get zuora emails")
     _ <- AssertSameEmails(accountAndEmails.map(_.emailAddress))

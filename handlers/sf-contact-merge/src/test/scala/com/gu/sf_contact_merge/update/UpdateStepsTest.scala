@@ -19,14 +19,14 @@ class UpdateStepsTest extends FlatSpec with Matchers {
       ClientSuccess(())
     }
 
-    val wired = UpdateSteps(setOrClearIdentityId, updateAccountSFLinks) _
+    val wired = UpdateStepsWiring(setOrClearIdentityId, updateAccountSFLinks) _
 
     val accountIds: NonEmptyList[GetContacts.AccountId] =
       NonEmptyList(AccountId("account1"))
 
     val maybeIdentityId: Option[GetContacts.IdentityId] = None
 
-    val actual = wired(accountIds, maybeIdentityId)
+    val actual = wired(maybeIdentityId)(accountIds)
 
     actual should be(ClientSuccess(()))
   }
@@ -51,14 +51,14 @@ class UpdateStepsTest extends FlatSpec with Matchers {
       ClientSuccess(())
     }
 
-    val wired = UpdateSteps(setOrClearIdentityId, updateAccountSFLinks) _
+    val wired = UpdateStepsWiring(setOrClearIdentityId, updateAccountSFLinks) _
 
     val accountIds: NonEmptyList[GetContacts.AccountId] =
       NonEmptyList(AccountId("account1"))
 
     val maybeIdentityId: Option[GetContacts.IdentityId] = Some(IdentityId("newIdentityId"))
 
-    val actual = wired(accountIds, maybeIdentityId)
+    val actual = wired(maybeIdentityId)(accountIds)
 
     order.reverse should be(List("clear", "doLink", "addidentity"))
     actual should be(ClientSuccess(()))
