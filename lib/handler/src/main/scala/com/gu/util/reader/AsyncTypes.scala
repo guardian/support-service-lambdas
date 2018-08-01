@@ -6,7 +6,6 @@ import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.reader.Types.ApiGatewayOp
 import scala.concurrent.ExecutionContext.Implicits.global
-
 import scala.concurrent.Future
 
 object AsyncTypes extends Logging {

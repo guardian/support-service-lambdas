@@ -22,6 +22,7 @@ class CreateSubscriptionTest extends FlatSpec with Matchers {
       accountKey = "zac",
       autoRenew = true,
       contractEffectiveDate = "2018-07-17",
+      customerAcceptanceDate = "2018-07-27",
       termType = "TERMED",
       renewalTerm = 12,
       initialTerm = 12,
@@ -43,7 +44,8 @@ class CreateSubscriptionTest extends FlatSpec with Matchers {
     val createReq = CreateReq(
       accountId = ZuoraAccountId("zac"),
       amountMinorUnits = AmountMinorUnits(125),
-      start = LocalDate.of(2018, 7, 17),
+      effectiveDate = LocalDate.of(2018, 7, 17),
+      acceptanceDate = LocalDate.of(2018, 7, 27),
       acquisitionCase = CaseId("casecase"),
       acquisitionSource = AcquisitionSource("sourcesource"),
       createdByCSR = CreatedByCSR("csrcsr")
