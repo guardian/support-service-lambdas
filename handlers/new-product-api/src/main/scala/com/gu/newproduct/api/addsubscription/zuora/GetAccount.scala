@@ -38,13 +38,13 @@ object GetAccount {
 
   import WireModel._
 
-  case class IdentityId(value: String)
+  case class IdentityId(value: String) extends AnyVal
 
-  case class PaymentMethodId(value: String)
+  case class PaymentMethodId(value: String) extends AnyVal
 
-  case class AutoPay(value: Boolean)
+  case class AutoPay(value: Boolean) extends AnyVal
 
-  case class AccountBalanceMinorUnits(value: Int)
+  case class AccountBalanceMinorUnits(value: Int) extends AnyVal
 
   case class Account(
     identityId: Option[IdentityId],

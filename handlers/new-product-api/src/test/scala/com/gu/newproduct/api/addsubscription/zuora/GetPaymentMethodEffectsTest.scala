@@ -21,7 +21,7 @@ class GetPaymentMethodEffectsTest extends FlatSpec with Matchers {
     } yield {
       res
     }
-    actual shouldBe \/-(PaymentMethod(ActivePaymentMethod, CreditCard))
+    actual shouldBe \/-(NonDirectDebitMethod(ActivePaymentMethod, CreditCard))
   }
 }
 

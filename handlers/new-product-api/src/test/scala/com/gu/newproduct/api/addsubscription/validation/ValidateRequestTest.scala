@@ -14,7 +14,7 @@ class ValidateRequestTest extends FlatSpec with Matchers {
     startDate = LocalDate.of(2018, 7, 20),
     acquisitionSource = AcquisitionSource("someSource"),
     createdByCSR = CreatedByCSR("csrName"),
-    amountMinorUnits = 100,
+    amountMinorUnits = AmountMinorUnits(100),
     acquisitionCase = CaseId("caseId")
   )
 
@@ -31,14 +31,14 @@ class ValidateRequestTest extends FlatSpec with Matchers {
     wiredValidator(oldRequest, GBP) shouldBe Failed("start date must be today")
   }
   it should "return error if amount is too small" in {
-    wiredValidator(testRequest.copy(amountMinorUnits = 99), GBP) shouldBe Failed("amount must be at least 100")
+    wiredValidator(testRequest.copy(amountMinorUnits = AmountMinorUnits(99)), GBP) shouldBe Failed("amount must be at least 100")
   }
 
   it should "return error if amount is too large" in {
-    wiredValidator(testRequest.copy(amountMinorUnits = 201), GBP) shouldBe Failed("amount must not be more than 200")
+    wiredValidator(testRequest.copy(amountMinorUnits = AmountMinorUnits(201)), GBP) shouldBe Failed("amount must not be more than 200")
   }
   it should "return success if amount is within valid range" in {
-    wiredValidator(testRequest.copy(amountMinorUnits = 150), GBP) shouldBe Passed(())
+    wiredValidator(testRequest.copy(amountMinorUnits = AmountMinorUnits(150)), GBP) shouldBe Passed(())
   }
 
 }

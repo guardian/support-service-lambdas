@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 import com.gu.newproduct.api.addsubscription.ZuoraIds.PlanAndCharge
-import com.gu.newproduct.api.addsubscription.{AcquisitionSource, CaseId, CreatedByCSR, ZuoraAccountId}
+import com.gu.newproduct.api.addsubscription._
 import com.gu.util.resthttp.RestRequestMaker.{RequestsPost, WithCheck}
 import com.gu.util.resthttp.Types.ClientFailableOp
 import play.api.libs.json.{Json, Reads}
@@ -31,6 +31,7 @@ object CreateSubscription {
       accountKey: String,
       autoRenew: Boolean = true,
       contractEffectiveDate: String,
+      customerAcceptanceDate: String,
       termType: String = "TERMED",
       renewalTerm: Int = 12,
       initialTerm: Int = 12,
@@ -48,7 +49,8 @@ object CreateSubscription {
     import createSubscription._
     WireCreateRequest(
       accountKey = accountId.value,
-      contractEffectiveDate = start.format(DateTimeFormatter.ISO_LOCAL_DATE),
+      contractEffectiveDate = effectiveDate.format(DateTimeFormatter.ISO_LOCAL_DATE),
+      customerAcceptanceDate = acceptanceDate.format(DateTimeFormatter.ISO_LOCAL_DATE),
       AcquisitionCase__c = acquisitionCase.value,
       AcquisitionSource__c = acquisitionSource.value,
       CreatedByCSR__c = createdByCSR.value,
@@ -57,7 +59,7 @@ object CreateSubscription {
           productRatePlanId = planAndCharge.productRatePlanId.value,
           chargeOverrides = List(
             ChargeOverrides(
-              price = amountMinorUnits.toDouble / 100,
+              price = amountMinorUnits.value.toDouble / 100,
               productRatePlanChargeId = planAndCharge.productRatePlanChargeId.value
             )
           )
@@ -68,8 +70,9 @@ object CreateSubscription {
 
   case class CreateReq(
     accountId: ZuoraAccountId,
-    amountMinorUnits: Int,
-    start: LocalDate,
+    amountMinorUnits: AmountMinorUnits,
+    effectiveDate: LocalDate,
+    acceptanceDate: LocalDate,
     acquisitionCase: CaseId,
     acquisitionSource: AcquisitionSource,
     createdByCSR: CreatedByCSR

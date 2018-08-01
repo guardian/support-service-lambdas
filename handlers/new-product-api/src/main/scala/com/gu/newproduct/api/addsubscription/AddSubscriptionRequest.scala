@@ -13,10 +13,10 @@ case class AddSubscriptionRequest(
   startDate: LocalDate,
   acquisitionSource: AcquisitionSource,
   createdByCSR: CreatedByCSR,
-  amountMinorUnits: Int,
+  amountMinorUnits: AmountMinorUnits,
   acquisitionCase: CaseId
 )
-
+case class AmountMinorUnits(value: Int) extends AnyVal
 case class CaseId(value: String) extends AnyVal
 case class AcquisitionSource(value: String) extends AnyVal
 case class CreatedByCSR(value: String) extends AnyVal
@@ -38,7 +38,7 @@ object AddSubscriptionRequest {
           startDate = parsedStartDate,
           acquisitionSource = AcquisitionSource(this.acquisitionSource),
           createdByCSR = CreatedByCSR(this.createdByCSR),
-          amountMinorUnits = this.amountMinorUnits,
+          amountMinorUnits = AmountMinorUnits(amountMinorUnits),
           CaseId(acquisitionCase)
         )
       }

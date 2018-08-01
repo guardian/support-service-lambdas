@@ -5,12 +5,22 @@ import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.reader.Types._
+import com.gu.util.reader.AsyncTypes._
 import com.gu.util.resthttp.Types.{ClientFailableOp, NotFound}
+
+import scala.concurrent.Future
 
 object TypeConvert {
 
-  implicit class TypeConvertClientOp[A](theEither: ClientFailableOp[A]) {
-    def toApiGatewayOp = theEither.toDisjunction.toApiGatewayOp(_)
+  implicit class TypeConvertClientOp[A](clientOp: ClientFailableOp[A]) {
+    def toApiGatewayOp = clientOp.toDisjunction.toApiGatewayOp(_)
+  }
+
+  implicit class TypeConvertClientOpAsync[A](clientOp: ClientFailableOp[A]) {
+    def toAsyncApiGatewayOp(action: String) = {
+      val apiGatewayOp = Future.successful(clientOp.toApiGatewayOp(action))
+      AsyncApiGatewayOp(apiGatewayOp)
+    }
   }
 
   implicit class ValidationToApiGatewayOp[A](validationResult: ValidationResult[A]) {

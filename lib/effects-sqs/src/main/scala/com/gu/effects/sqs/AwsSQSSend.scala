@@ -4,11 +4,12 @@ import com.amazonaws.auth._
 import com.amazonaws.auth.profile.ProfileCredentialsProvider
 import com.amazonaws.regions.Regions
 import com.amazonaws.services.sqs.AmazonSQSAsyncClientBuilder
-import com.amazonaws.services.sqs.model.{SendMessageRequest, SendMessageResult}
+import com.amazonaws.services.sqs.model.SendMessageRequest
 import org.apache.log4j.Logger
 
-import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success, Try}
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.util.{Failure, Success}
 
 object AwsSQSSend {
 
@@ -18,7 +19,7 @@ object AwsSQSSend {
 
   case class Payload(value: String) extends AnyVal
 
-  def apply(queueName: QueueName)(payload: Payload)(implicit ex: ExecutionContext): Future[Unit] = {
+  def apply(queueName: QueueName)(payload: Payload): Future[Unit] = {
     val sqsClient = AmazonSQSAsyncClientBuilder
       .standard()
       .withCredentials(aws.CredentialsProvider)
@@ -35,7 +36,7 @@ object AwsSQSSend {
       case Failure(throwable) =>
         logger.error(s"Failed to send message due to $queueUrl due to:", throwable)
         Failure(throwable)
-   }
+    }
   }
 }
 
