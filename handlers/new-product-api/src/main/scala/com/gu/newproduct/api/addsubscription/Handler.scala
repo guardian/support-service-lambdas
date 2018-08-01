@@ -77,10 +77,11 @@ object Steps {
       createMonthlyContribution = CreateSubscription(zuoraIds.monthly, zuoraClient.post[WireCreateRequest, WireSubscription]) _
       contributionIds = List(zuoraIds.monthly.productRatePlanId, zuoraIds.annual.productRatePlanId)
       getCurrentDate = () => RawEffects.now().toLocalDate
-      prerequisiteCheck = (PrerequisiteCheck(zuoraClient, contributionIds, getCurrentDate) _).toAsync
+      prerequisiteCheck = PrerequisiteCheck(zuoraClient, contributionIds, getCurrentDate) _
+      asyncPrerequisiteCheck = prerequisiteCheck.andThenConvertToAsync
       sendConfirmationEmail = SendConfirmationEmail(getCurrentDate, sqsSend, getBillTo) _
       configuredOp = Operation.async(
-        steps = addSubscriptionSteps(prerequisiteCheck, createMonthlyContribution, sendConfirmationEmail),
+        steps = addSubscriptionSteps(asyncPrerequisiteCheck, createMonthlyContribution, sendConfirmationEmail),
         healthcheck = () =>
           HealthCheck(GetAccount(zuoraClient.get[ZuoraAccount]), AccountIdentitys.accountIdentitys(stage))
       )

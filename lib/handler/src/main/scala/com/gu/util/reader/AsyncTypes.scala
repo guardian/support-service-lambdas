@@ -59,7 +59,12 @@ object AsyncTypes extends Logging {
     def toAsync: AsyncApiGatewayOp[A] = AsyncApiGatewayOp(Future.successful(apiGatewayOp))
   }
 
-  implicit class FSyncToAsync[A, B](f: B => ApiGatewayOp[A]) {
-    def toAsync: B => AsyncApiGatewayOp[A] = f andThen (_.toAsync)
+  implicit class FunctionReturningSyncConvert[IN, OUT](syncOut: IN => ApiGatewayOp[OUT]) {
+    // this used for wiring when a function only returns a sync operation but we
+    // want to wire it in where an async operation is needed.  It prevents us having
+    // to put .toAsync all over the for comprehensions themselves.
+    def andThenConvertToAsync: IN => AsyncApiGatewayOp[OUT] =
+      syncOut.andThen(_.toAsync)
   }
+
 }
