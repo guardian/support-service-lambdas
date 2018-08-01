@@ -30,10 +30,10 @@ object SendConfirmationEmail extends Logging {
 
     maybeContributionFields.map { fields =>
       val payload = ETPayload(fields.EmailAddress, fields)
-      AsyncApiGatewayOp(ContinueProcessing(payload))
+      ContinueProcessing(payload).toAsync
     }.getOrElse {
       logger.info("Not enough data in zuora account to send contribution thank you email, skipping")
-      AsyncApiGatewayOp(ReturnWithResponse(ApiGatewayResponse.successfulExecution))
+      ReturnWithResponse(ApiGatewayResponse.successfulExecution).toAsync
     }
   }
 

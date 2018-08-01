@@ -45,11 +45,11 @@ class StepsTest extends FlatSpec with Matchers {
       request.zuoraAccountId.value shouldBe "acccc"
       val paymentMethod = NonDirectDebitMethod(ActivePaymentMethod, CreditCard)
       val validatedFields = ValidatedFields(paymentMethod, GBP)
-      AsyncApiGatewayOp(ContinueProcessing((validatedFields)))
+      ContinueProcessing((validatedFields)).toAsync
     }
 
     def fakeSendEmails(zuoraAccountId: ZuoraAccountId, currency: Currency, directDebit: Option[DirectDebit], amount: AmountMinorUnits) = {
-      AsyncApiGatewayOp(ContinueProcessing(()))
+      ContinueProcessing(()).toAsync
     }
 
     val requestInput = JsObject(Map(

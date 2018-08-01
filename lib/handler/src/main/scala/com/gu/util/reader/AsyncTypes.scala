@@ -14,10 +14,7 @@ object AsyncTypes extends Logging {
   case class AsyncApiGatewayOp[A](underlying: Future[ApiGatewayOp[A]]) {
 
     def map[B](f: A => B): AsyncApiGatewayOp[B] = AsyncApiGatewayOp {
-      underlying.map {
-        case ContinueProcessing(a) => ContinueProcessing(f(a))
-        case returnWithResponse: ReturnWithResponse => returnWithResponse
-      }
+      underlying.map(apigatewayOp => apigatewayOp.map(f))
     }
 
     def flatMap[B](f: A => AsyncApiGatewayOp[B]): AsyncApiGatewayOp[B] = AsyncApiGatewayOp {
@@ -35,15 +32,15 @@ object AsyncTypes extends Logging {
   }
 
   object AsyncApiGatewayOp {
-    def apply[A](continue: ContinueProcessing[A]): AsyncApiGatewayOp[A] = AsyncApiGatewayOp(Future.successful(continue))
-    def apply[A](response: ReturnWithResponse): AsyncApiGatewayOp[A] = AsyncApiGatewayOp(Future.successful(response))
+    //  def apply[A](continue: ContinueProcessing[A]): AsyncApiGatewayOp[A] = AsyncApiGatewayOp(Future.successful(continue))
+    //  def apply[A](response: ReturnWithResponse): AsyncApiGatewayOp[A] = AsyncApiGatewayOp(Future.successful(response))
     def apply[A](underlying: Future[ApiGatewayOp[A]]): AsyncApiGatewayOp[A] = {
-      val f = underlying recover {
+      val successfulFuture = underlying recover {
         case err =>
           logger.error(s"future failed in AsyncApiGatewayOp: ${err.getMessage}", err)
           ReturnWithResponse(ApiGatewayResponse.internalServerError(err.getMessage))
       }
-      new AsyncApiGatewayOp(f)
+      new AsyncApiGatewayOp(successfulFuture)
     }
 
   }
