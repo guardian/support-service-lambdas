@@ -31,10 +31,8 @@ object AsyncTypes extends Logging {
   }
 
   object AsyncApiGatewayOp {
-    //  def apply[A](continue: ContinueProcessing[A]): AsyncApiGatewayOp[A] = AsyncApiGatewayOp(Future.successful(continue))
-    //  def apply[A](response: ReturnWithResponse): AsyncApiGatewayOp[A] = AsyncApiGatewayOp(Future.successful(response))
-    def apply[A](underlying: Future[ApiGatewayOp[A]]): AsyncApiGatewayOp[A] = {
-      val successfulFuture = underlying recover {
+    def apply[A](possiblyFailedFuture: Future[ApiGatewayOp[A]]): AsyncApiGatewayOp[A] = {
+      val successfulFuture = possiblyFailedFuture recover {
         case err =>
           logger.error(s"future failed in AsyncApiGatewayOp: ${err.getMessage}", err)
           ReturnWithResponse(ApiGatewayResponse.internalServerError(err.getMessage))
