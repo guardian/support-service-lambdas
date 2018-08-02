@@ -55,7 +55,6 @@ Resources:
                             Action: s3:GetObject
                             Resource:
                             - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/zuoraRest-${Stage}.*.json
-                            - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/trustedApi-${Stage}.*.json
                 - PolicyName: SQSAddEmailRequest
                   PolicyDocument:
                     Statement:
@@ -87,13 +86,6 @@ Resources:
               - logs:PutLogEvents
               - lambda:InvokeFunction
               Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/product-catalog-${Stage}:log-stream:*"
-        - PolicyName: ReadPrivateCredentials
-          PolicyDocument:
-            Statement:
-            - Effect: Allow
-              Action: s3:GetObject
-              Resource:
-              - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/trustedApi-${Stage}.*.json
     AddSubscriptionLambda:
         Type: AWS::Lambda::Function
         Properties:
