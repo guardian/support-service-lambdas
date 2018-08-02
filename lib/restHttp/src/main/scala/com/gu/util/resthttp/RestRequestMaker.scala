@@ -47,6 +47,22 @@ object RestRequestMaker extends Logging {
   type RequestsGet[A] = (String, IsCheckNeeded) => ClientFailableOp[A]
   type RequestsPost[IN, OUT] = (IN, String, IsCheckNeeded) => ClientFailableOp[OUT]
 
+  case class RelativePath(value: String) extends AnyVal
+
+  case class PutRequest(body: JsValue, path: RelativePath)
+  object PutRequest {
+    def apply[REQ: Writes](body: REQ, path: RelativePath): PutRequest = new PutRequest(Json.toJson(body), path)
+  }
+
+  case class PatchRequest(body: JsValue, path: RelativePath)
+  object PatchRequest {
+    def apply[REQ: Writes](body: REQ, path: RelativePath): PatchRequest = new PatchRequest(Json.toJson(body), path)
+  }
+
+  case class JsonResponse(bodyAsJson: JsValue) {
+    def value[RESP: Reads] = toResult[RESP](bodyAsJson)
+  }
+
   class Requests(
     headers: Map[String, String],
     baseUrl: String,
@@ -62,6 +78,14 @@ object RestRequestMaker extends Logging {
         _ <- if (skipCheck == WithoutCheck) ClientSuccess(()) else jsonIsSuccessful(bodyAsJson)
         respModel <- toResult[RESP](bodyAsJson)
       } yield respModel
+
+    def put[RESP](putRequest: PutRequest): ClientFailableOp[JsonResponse] = {
+      val body = createBodyFromJs(putRequest.body)
+      for {
+        bodyAsJson <- sendRequest(buildRequest(headers, baseUrl + putRequest.path.value, _.put(body)), getResponse).map(Json.parse)
+        _ <- jsonIsSuccessful(bodyAsJson)
+      } yield JsonResponse(bodyAsJson)
+    }
 
     def put[REQ: Writes, RESP: Reads](req: REQ, path: String): ClientFailableOp[RESP] = {
       val body = createBody[REQ](req)
@@ -79,6 +103,13 @@ object RestRequestMaker extends Logging {
         _ <- if (skipCheck == WithoutCheck) ClientSuccess(()) else jsonIsSuccessful(bodyAsJson)
         respModel <- toResult[RESP](bodyAsJson)
       } yield respModel
+    }
+
+    def patch(patchRequest: PatchRequest): ClientFailableOp[Unit] = {
+      val body = createBodyFromJs(patchRequest.body)
+      for {
+        _ <- sendRequest(buildRequest(headers, baseUrl + patchRequest.path.value, _.patch(body)), getResponse)
+      } yield ()
     }
 
     def patch[REQ: Writes](req: REQ, path: String, skipCheck: Boolean = false): ClientFailableOp[Unit] = {
@@ -121,7 +152,11 @@ object RestRequestMaker extends Logging {
   }
 
   private def createBody[REQ: Writes](req: REQ) = {
-    RequestBody.create(MediaType.parse("application/json"), Json.toJson(req).toString)
+    createBodyFromJs(Json.toJson(req))
+  }
+
+  private def createBodyFromJs(req: JsValue) = {
+    RequestBody.create(MediaType.parse("application/json"), Json.stringify(req))
   }
 
 }

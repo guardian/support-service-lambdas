@@ -27,7 +27,7 @@ class EndToEndTest extends FlatSpec with Matchers {
     val body =
       """
         |{
-        |   "fullContactId":"sfcont",
+        |   "fullContactId":"newSFCont",
         |   "billingAccountZuoraIds":[
         |      "2c92c0f9624bbc5f016253e573970b16",
         |      "2c92c0f8644618e30164652a558c6e20"
@@ -95,7 +95,7 @@ object EndToEndTest {
       |            "BillToId": "2c92c0f8644618e30164652a55986e21",
       |            "Id": "2c92c0f8644618e30164652a558c6e20",
       |            "IdentityId__c": "identest",
-      |            "sfContactId__c": "sfsf1"
+      |            "sfContactId__c": "oldSFCont"
       |        },
       |        {
       |            "BillToId": "2c92c0f9624bbc5f016253e5739b0b17",
@@ -129,9 +129,9 @@ object EndToEndTest {
       |    "done": true
       |}""".stripMargin.replaceAll("""\n""", "")
 
-  val updateAccountRequestBody = """{"crmId":"sfacc","sfContactId__c":"sfcont"}"""
-  val removeIdentityBody = """{"IdentityId__c":""}"""
-  val addIdentityBody = """{"IdentityId__c":"identest"}"""
+  val updateAccountRequestBody = """{"crmId":"sfacc","sfContactId__c":"newSFCont","IdentityId__c":"identest"}"""
+  val removeIdentityBody = """{"IdentityID__c":""}"""
+  val addIdentityBody = """{"IdentityID__c":"identest"}"""
 
   val updateAccountResponse = HTTPResponse(200, """{"Success": true}""")
 
@@ -140,10 +140,8 @@ object EndToEndTest {
     POSTRequest("/action/query", contactQueryRequest) -> HTTPResponse(200, contactQueryResponse),
     POSTRequest("/accounts/2c92c0f9624bbc5f016253e573970b16", updateAccountRequestBody, "PUT") -> updateAccountResponse,
     POSTRequest("/accounts/2c92c0f8644618e30164652a558c6e20", updateAccountRequestBody, "PUT") -> updateAccountResponse,
-    POSTRequest("/accounts/2c92c0f9624bbc5f016253e573970b16", removeIdentityBody, "PUT") -> updateAccountResponse,
-    POSTRequest("/accounts/2c92c0f8644618e30164652a558c6e20", removeIdentityBody, "PUT") -> updateAccountResponse,
-    POSTRequest("/accounts/2c92c0f9624bbc5f016253e573970b16", addIdentityBody, "PUT") -> updateAccountResponse,
-    POSTRequest("/accounts/2c92c0f8644618e30164652a558c6e20", addIdentityBody, "PUT") -> updateAccountResponse
+    POSTRequest("/services/data/v20.0/sobjects/Contact/oldSFCont", removeIdentityBody, "PATCH") -> updateAccountResponse,
+    POSTRequest("/services/data/v20.0/sobjects/Contact/newSFCont", addIdentityBody, "PATCH") -> updateAccountResponse
   ))
 
 }

@@ -1,6 +1,6 @@
 package com.gu.sf_contact_merge.validate
 
-import com.gu.sf_contact_merge.validate.GetContacts.{Account, AccountId, IdentityId, SFContactId}
+import com.gu.sf_contact_merge.validate.GetContacts.{IdentityAndSFContact, AccountId, IdentityId, SFContactId}
 import com.gu.sf_contact_merge.validate.GetEmails.ContactId
 import com.gu.util.resthttp.Types.ClientSuccess
 import com.gu.zuora.fake.FakeZuoraQuerier
@@ -21,8 +21,8 @@ class GetContactsTest extends FlatSpec with Matchers {
     ))
 
     actual should be(ClientSuccess(Map(
-      ContactId("b2id1") -> Account(Some(IdentityId("idid1")), SFContactId("sfsf1")),
-      ContactId("b2id2") -> Account(Some(IdentityId("idid2")), SFContactId("sfsf2"))
+      ContactId("b2id1") -> IdentityAndSFContact(Some(IdentityId("idid1")), SFContactId("sfsf1")),
+      ContactId("b2id2") -> IdentityAndSFContact(Some(IdentityId("idid2")), SFContactId("sfsf2"))
     )))
 
   }

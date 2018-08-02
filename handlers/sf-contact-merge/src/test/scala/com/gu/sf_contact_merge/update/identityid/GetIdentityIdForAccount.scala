@@ -1,6 +1,6 @@
 package com.gu.sf_contact_merge.update.identityid
 
-import com.gu.sf_contact_merge.update.identityid.GetIdentityIdForAccount.WireModel.ZuoraAccount
+import com.gu.sf_contact_merge.update.identityid.GetIdentityIdForAccount.WireModel.{BasicInfo, ZuoraAccount}
 import com.gu.sf_contact_merge.validate.GetContacts.AccountId
 import com.gu.util.resthttp.RestRequestMaker.Requests
 import com.gu.util.resthttp.Types.ClientFailableOp
@@ -10,6 +10,8 @@ object GetIdentityIdForAccount {
   object WireModel {
 
     case class BasicInfo(
+      sfContactId__c: String,
+      crmId: String,
       IdentityId__c: Option[String]
     )
 
@@ -21,7 +23,7 @@ object GetIdentityIdForAccount {
 
   }
 
-  def apply(requests: Requests)(accountId: AccountId): ClientFailableOp[Option[String]] =
-    requests.get[ZuoraAccount](s"/accounts/${accountId.value}").map(_.basicInfo.IdentityId__c)
+  def apply(requests: Requests)(accountId: AccountId): ClientFailableOp[BasicInfo] =
+    requests.get[ZuoraAccount](s"/accounts/${accountId.value}").map(_.basicInfo)
 
 }

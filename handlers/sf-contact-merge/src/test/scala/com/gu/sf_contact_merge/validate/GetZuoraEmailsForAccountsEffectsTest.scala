@@ -2,7 +2,7 @@ package com.gu.sf_contact_merge.validate
 
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.sf_contact_merge.TypeConvert._
-import com.gu.sf_contact_merge.validate.GetContacts.{Account, AccountId, IdentityId, SFContactId}
+import com.gu.sf_contact_merge.validate.GetContacts.{AccountId, IdentityId, SFContactId}
 import com.gu.sf_contact_merge.validate.GetEmails.EmailAddress
 import com.gu.sf_contact_merge.validate.GetIdentityAndZuoraEmailsForAccounts._
 import com.gu.test.EffectsTest
@@ -27,12 +27,14 @@ class GetZuoraEmailsForAccountsEffectsTest extends FlatSpec with Matchers {
     } yield maybeEmailAddresses
 
     actual should be(ContinueProcessing(List(
-      AccountAndEmail(
-        Account(Some(IdentityId("1234567890")), SFContactId("contactIdForEffectsTests")),
+      IdentityAndSFContactAndEmail(
+        Some(IdentityId("1234567890")),
+        SFContactId("contactIdForEffectsTests"),
         Some(EmailAddress("peppa.pig@guardian.co.uk"))
       ),
-      AccountAndEmail(
-        Account(None, SFContactId("contactIdForEffectsTests3")),
+      IdentityAndSFContactAndEmail(
+        None,
+        SFContactId("contactIdForEffectsTests3"),
         None
       )
     )))

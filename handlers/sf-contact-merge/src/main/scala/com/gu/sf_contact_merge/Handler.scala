@@ -6,8 +6,9 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.sf_contact_merge.TypeConvert._
 import com.gu.sf_contact_merge.update.UpdateAccountSFLinks.{CRMAccountId, SFPointer}
-import com.gu.sf_contact_merge.update.{SetOrClearZuoraIdentityId, UpdateAccountSFLinks, UpdateStepsWiring}
+import com.gu.sf_contact_merge.update.UpdateStepsWiring
 import com.gu.sf_contact_merge.validate.GetContacts.{AccountId, IdentityId, SFContactId}
+import com.gu.sf_contact_merge.validate.GetIdentityAndZuoraEmailsForAccounts.IdentityAndSFContactAndEmail
 import com.gu.sf_contact_merge.validate.{GetIdentityAndZuoraEmailsForAccounts, ValidationSteps}
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, ApiGatewayResponse, ResponseModels}
@@ -39,20 +40,17 @@ object Handler {
 
   def operationForEffects(stage: Stage, fetchString: StringFromS3, getResponse: Request => Response): ApiGatewayOp[Operation] = {
     val loadConfig = LoadConfigModule(stage, fetchString)
-    val fConfig = for {
+    for {
       zuoraRestConfig <- loadConfig[ZuoraRestConfig].toApiGatewayOp("load trusted Api config")
       requests = ZuoraRestRequestMaker(getResponse, zuoraRestConfig)
       zuoraQuerier = ZuoraQuery(requests)
       wiredSteps = steps(
-        ValidationSteps(GetIdentityAndZuoraEmailsForAccounts(zuoraQuerier)),
-        sfPointer => UpdateStepsWiring(
-          SetOrClearZuoraIdentityId(requests),
-          UpdateAccountSFLinks(requests)(sfPointer)
-        )
+        GetIdentityAndZuoraEmailsForAccounts(zuoraQuerier),
+        ValidationSteps.apply _,
+        UpdateStepsWiring(requests.patch, requests)
       ) _
       configuredOp = Operation.noHealthcheck(wiredSteps)
     } yield configuredOp
-    fConfig
   }
 
   case class WireSfContactRequest(
@@ -64,35 +62,46 @@ object Handler {
   implicit val readWireSfContactRequest = Json.reads[WireSfContactRequest]
 
   def steps(
-    validation: Option[IdentityId] => NonEmptyList[AccountId] => ApiGatewayOp[Unit],
-    update: SFPointer => Option[IdentityId] => NonEmptyList[AccountId] => ClientFailableOp[Unit]
+    getIdentityAndZuoraEmailsForAccounts: NonEmptyList[AccountId] => ClientFailableOp[List[IdentityAndSFContactAndEmail]],
+    validation: (Option[IdentityId], List[IdentityAndSFContactAndEmail]) => ApiGatewayOp[Unit],
+    update: (SFPointer, Option[SFContactId], NonEmptyList[AccountId]) => ClientFailableOp[Unit]
   )(req: ApiGatewayRequest): ResponseModels.ApiResponse =
     (for {
       wireInput <- req.bodyAsCaseClass[WireSfContactRequest]()
-      mergeRequest = wireRequestToDomainObject(wireInput)
-      updateAccounts = update(mergeRequest.sFPointer)(mergeRequest.identityId)
-      validateAccounts = validation(mergeRequest.identityId)
-      accountIds <- MaybeNonEmptyList(mergeRequest.zuoraAccountIds)
-        .toApiGatewayContinueProcessing(ApiGatewayResponse.badRequest("no account ids supplied"))
-      _ <- validateAccounts(accountIds)
-      _ <- updateAccounts(accountIds)
+      mergeRequest <- wireRequestToDomainObject(wireInput).toApiGatewayContinueProcessing(ApiGatewayResponse.badRequest("no account ids supplied"))
+      accountAndEmails <- getIdentityAndZuoraEmailsForAccounts(mergeRequest.zuoraAccountIds)
+        .toApiGatewayOp("getIdentityAndZuoraEmailsForAccounts")
+      _ <- validation(mergeRequest.sFPointer.identityId, accountAndEmails)
+      oldContact = accountAndEmails.find(_.identityId.isDefined).map(_.sfContactId)
+      _ <- update(mergeRequest.sFPointer, oldContact, mergeRequest.zuoraAccountIds)
         .toApiGatewayOp("update accounts with winning details")
     } yield ApiGatewayResponse.successfulExecution).apiResponse
 
+  //  class Lazy[A](a: () => A) {
+  //    lazy val value: A = a()
+  //  }
+  //  object Lazy {
+  //    def apply[A](a: => A): Lazy[A] = new Lazy(() => a)
+  //  }
+
   case class MergeRequest(
     sFPointer: SFPointer,
-    zuoraAccountIds: List[AccountId],
-    identityId: Option[IdentityId]
+    zuoraAccountIds: NonEmptyList[AccountId]
   )
-  def wireRequestToDomainObject(request: Handler.WireSfContactRequest): MergeRequest =
-    MergeRequest(
+
+  def wireRequestToDomainObject(request: Handler.WireSfContactRequest): Option[MergeRequest] = {
+    val zuoraAccountIds = request.billingAccountZuoraIds.map(AccountId.apply)
+    for {
+      accountIds <- MaybeNonEmptyList(zuoraAccountIds)
+    } yield MergeRequest(
       SFPointer(
         SFContactId(request.fullContactId),
-        CRMAccountId(request.accountId)
+        CRMAccountId(request.accountId),
+        request.identityId.map(IdentityId.apply) // need to remove all identity ids and use this identity id on all the accounts after linking
       ),
-      request.billingAccountZuoraIds.map(AccountId.apply),
-      request.identityId.map(IdentityId.apply) // need to remove all identity ids and use this identity id on all the accounts after linking
+      accountIds
     )
+  }
 
 }
 

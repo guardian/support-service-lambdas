@@ -1,6 +1,6 @@
 package com.gu.sf_contact_merge.validate
 
-import com.gu.sf_contact_merge.validate.GetContacts.{Account, AccountId}
+import com.gu.sf_contact_merge.validate.GetContacts.{AccountId, IdentityId, SFContactId}
 import com.gu.sf_contact_merge.validate.GetEmails.{ContactId, EmailAddress}
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError}
 import com.gu.util.zuora.SafeQueryBuilder.Implicits._
@@ -11,9 +11,13 @@ import scalaz.NonEmptyList
 
 object GetIdentityAndZuoraEmailsForAccounts {
 
-  case class AccountAndEmail(account: Account, emailAddress: Option[EmailAddress])
+  case class IdentityAndSFContactAndEmail(
+    identityId: Option[IdentityId],
+    sfContactId: SFContactId,
+    emailAddress: Option[EmailAddress]
+  )
 
-  def apply(zuoraQuerier: ZuoraQuerier)(accountIds: NonEmptyList[AccountId]): ClientFailableOp[List[AccountAndEmail]] = {
+  def apply(zuoraQuerier: ZuoraQuerier)(accountIds: NonEmptyList[AccountId]): ClientFailableOp[List[IdentityAndSFContactAndEmail]] = {
 
     val getEmails = GetEmails(zuoraQuerier)_
     val getContacts = GetContacts(zuoraQuerier)_
@@ -27,7 +31,7 @@ object GetIdentityAndZuoraEmailsForAccounts {
     } yield {
       identityForBillingContact.map {
         case (contact, account) =>
-          AccountAndEmail(account, emailForBillingContact.get(contact).flatten)
+          IdentityAndSFContactAndEmail(account.identityId, account.sfContactId, emailForBillingContact.get(contact).flatten)
       }.toList
     }
   }
@@ -36,7 +40,7 @@ object GetIdentityAndZuoraEmailsForAccounts {
 
 object GetContacts {
 
-  case class Account(identityId: Option[IdentityId], sfContactId: SFContactId)
+  case class IdentityAndSFContact(identityId: Option[IdentityId], sfContactId: SFContactId)
 
   case class IdentityId(value: String) extends AnyVal
   case class SFContactId(value: String) extends AnyVal
@@ -46,7 +50,7 @@ object GetContacts {
   case class WireAccount(BillToId: String, IdentityId__c: Option[String], sfContactId__c: String)
   implicit val readWireAccount = Json.reads[WireAccount]
 
-  def apply(zuoraQuerier: ZuoraQuerier)(accountIds: NonEmptyList[AccountId]): ClientFailableOp[Map[ContactId, Account]] =
+  def apply(zuoraQuerier: ZuoraQuerier)(accountIds: NonEmptyList[AccountId]): ClientFailableOp[Map[ContactId, IdentityAndSFContact]] =
     for {
       or <- OrTraverse(accountIds) { accountId =>
         zoql"""Id = ${accountId.value}"""
@@ -57,7 +61,7 @@ object GetContacts {
     } yield result.records.map { acc =>
       (
         ContactId(acc.BillToId),
-        Account(
+        IdentityAndSFContact(
           acc.IdentityId__c.map(IdentityId.apply),
           SFContactId(acc.sfContactId__c)
         )
