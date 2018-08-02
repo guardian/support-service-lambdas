@@ -171,7 +171,7 @@ Resources:
         Timeout: 300
       DependsOn:
       - "ProductCatalogRole"
-      ProductCatalogApiPermission:
+    ProductCatalogApiPermission:
         Type: AWS::Lambda::Permission
         Properties:
           Action: lambda:invokeFunction
@@ -179,7 +179,7 @@ Resources:
           Principal: apigateway.amazonaws.com
         DependsOn: ProductCatalogLambda
 
-      ProductCatalogResource:
+    ProductCatalogResource:
         Type: AWS::ApiGateway::Resource
         Properties:
           RestApiId: !Ref NewProductApi
@@ -187,22 +187,22 @@ Resources:
           PathPart: product-catalog
         DependsOn: NewProductApi
 
-      ProductCatalogMethod:
-        Type: AWS::ApiGateway::Method
-        Properties:
-          AuthorizationType: NONE
-          ApiKeyRequired: true
-          RestApiId: !Ref NewProductApi
-          ResourceId: !Ref ProductCatalogResource
-          HttpMethod: POST
-          Integration:
-            Type: AWS_PROXY
-            IntegrationHttpMethod: POST
-            Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ProductCatalogLambda.Arn}/invocations
-        DependsOn:
-        - NewProductApi
-        - ProductCatalogLambda
-        - ProductCatalogResource
+    ProductCatalogMethod:
+      Type: AWS::ApiGateway::Method
+      Properties:
+        AuthorizationType: NONE
+        ApiKeyRequired: true
+        RestApiId: !Ref NewProductApi
+        ResourceId: !Ref ProductCatalogResource
+        HttpMethod: GET
+        Integration:
+          Type: AWS_PROXY
+          IntegrationHttpMethod: POST
+          Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ProductCatalogLambda.Arn}/invocations
+      DependsOn:
+            - NewProductApi
+            - ProductCatalogLambda
+            - ProductCatalogResource
     NewProductApi:
         Type: "AWS::ApiGateway::RestApi"
         Properties:
