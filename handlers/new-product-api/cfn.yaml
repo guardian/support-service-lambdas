@@ -64,7 +64,36 @@ Resources:
                         - sqs:GetQueueUrl
                         - sqs:SendMessage
                         Resource: !Sub "arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:contributions-thanks"
-
+    ProductCatalogRole:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument:
+          Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+              - lambda.amazonaws.com
+            Action:
+            - sts:AssumeRole
+        Path: /
+        Policies:
+        - PolicyName: LambdaPolicy
+          PolicyDocument:
+            Statement:
+            - Effect: Allow
+              Action:
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+              - lambda:InvokeFunction
+              Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/product-catalog-${Stage}:log-stream:*"
+        - PolicyName: ReadPrivateCredentials
+          PolicyDocument:
+            Statement:
+            - Effect: Allow
+              Action: s3:GetObject
+              Resource:
+              - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/trustedApi-${Stage}.*.json
     AddSubscriptionLambda:
         Type: AWS::Lambda::Function
         Properties:
@@ -120,7 +149,60 @@ Resources:
         - NewProductApi
         - AddSubscriptionLambda
         - AddSubscriptionResource
+    ProductCatalogLambda:
+      Type: AWS::Lambda::Function
+      Properties:
+        Description: get description of available products
+        FunctionName:
+          !Sub product-catalog-${Stage}
+        Code:
+          S3Bucket: zuora-auto-cancel-dist
+          S3Key: !Sub membership/${Stage}/new-product-api/new-product-api.jar
+        Handler: com.gu.newproduct.api.productcatalog.Handler::apply
+        Environment:
+          Variables:
+            Stage: !Ref Stage
+        Role:
+          Fn::GetAtt:
+          - "ProductCatalogRole"
+          - Arn
+        MemorySize: 1536
+        Runtime: java8
+        Timeout: 300
+      DependsOn:
+      - "ProductCatalogRole"
+      ProductCatalogApiPermission:
+        Type: AWS::Lambda::Permission
+        Properties:
+          Action: lambda:invokeFunction
+          FunctionName: !Sub product-catalog-${Stage}
+          Principal: apigateway.amazonaws.com
+        DependsOn: ProductCatalogLambda
 
+      ProductCatalogResource:
+        Type: AWS::ApiGateway::Resource
+        Properties:
+          RestApiId: !Ref NewProductApi
+          ParentId: !GetAtt [NewProductApi, RootResourceId]
+          PathPart: product-catalog
+        DependsOn: NewProductApi
+
+      ProductCatalogMethod:
+        Type: AWS::ApiGateway::Method
+        Properties:
+          AuthorizationType: NONE
+          ApiKeyRequired: true
+          RestApiId: !Ref NewProductApi
+          ResourceId: !Ref ProductCatalogResource
+          HttpMethod: POST
+          Integration:
+            Type: AWS_PROXY
+            IntegrationHttpMethod: POST
+            Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ProductCatalogLambda.Arn}/invocations
+        DependsOn:
+        - NewProductApi
+        - ProductCatalogLambda
+        - ProductCatalogResource
     NewProductApi:
         Type: "AWS::ApiGateway::RestApi"
         Properties:
@@ -134,14 +216,18 @@ Resources:
             RestApiId: !Ref NewProductApi
             DeploymentId: !Ref NewProductApiDeployment
             StageName: !Sub ${Stage}
-        DependsOn: AddSubscriptionMethod
+        DependsOn:
+          - AddSubscriptionMethod
+          - ProductCatalogMethod
 
     NewProductApiDeployment:
         Type: AWS::ApiGateway::Deployment
         Properties:
             Description: Deploys new-product-api into an environment/stage
             RestApiId: !Ref NewProductApi
-        DependsOn: AddSubscriptionMethod
+        DependsOn:
+          - AddSubscriptionMethod
+          - ProductCatalogMethod
 
     NewProductApiKey:
       Type: AWS::ApiGateway::ApiKey
