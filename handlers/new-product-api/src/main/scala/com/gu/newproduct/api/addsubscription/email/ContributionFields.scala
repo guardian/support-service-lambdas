@@ -1,12 +1,5 @@
 package com.gu.newproduct.api.addsubscription.email
 
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-
-import com.gu.i18n.Currency
-import com.gu.newproduct.api.addsubscription.AmountMinorUnits
-import com.gu.newproduct.api.addsubscription.zuora.GetBillToContact.Contact
-import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.DirectDebit
 import play.api.libs.json.Json
 
 case class ContributionFields(

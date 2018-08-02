@@ -69,7 +69,7 @@ object SendConfirmationEmail extends Logging {
         amount = formatAmount(data.amountMinorUnits),
         currency = data.currency.glyph,
         edition = billTo.country.map(_.alpha2).getOrElse(""),
-        name = s"${billTo.firstName.value} ${billTo.lastName.value}",
+        name = billTo.firstName.value,
         product = "monthly-contribution",
         `account name` = maybeDirectDebit.map(_.accountName.value),
         `account number` = maybeDirectDebit.map(_.accountNumberMask.value),
