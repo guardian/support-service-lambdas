@@ -15,7 +15,7 @@ object UpdateAccountSFLinks {
   implicit val writes = Json.writes[Request]
   implicit val unitReads: Reads[Unit] = Reads(_ => JsSuccess(()))
 
-  case class SFPointer(
+  case class LinksFromZuora(
     sfContactId: SFContactId,
     crmAccountId: CRMAccountId,
     identityId: Option[IdentityId]
@@ -23,10 +23,10 @@ object UpdateAccountSFLinks {
 
   case class CRMAccountId(value: String) extends AnyVal
 
-  def apply(put: PutRequest => ClientFailableOp[JsonResponse]): SFPointer => AccountId => ClientFailableOp[Unit] =
+  def apply(put: PutRequest => ClientFailableOp[JsonResponse]): LinksFromZuora => AccountId => ClientFailableOp[Unit] =
     (toRequest _).andThen(_.andThen(put).andThen(_.map(_ => ())))
 
-  def toRequest(sFPointer: SFPointer)(account: AccountId): PutRequest = {
+  def toRequest(sFPointer: LinksFromZuora)(account: AccountId): PutRequest = {
     val request = Request(sFPointer.crmAccountId.value, sFPointer.sfContactId.value, sFPointer.identityId.map(_.value))
     val path = RelativePath(s"accounts/${account.value}") // TODO danger - we shoudn't go building urls with string concatenation!
     PutRequest(request, path)

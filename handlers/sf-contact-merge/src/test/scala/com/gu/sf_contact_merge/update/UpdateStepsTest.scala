@@ -1,6 +1,6 @@
 package com.gu.sf_contact_merge.update
 
-import com.gu.sf_contact_merge.update.UpdateAccountSFLinks.{CRMAccountId, SFPointer}
+import com.gu.sf_contact_merge.update.UpdateAccountSFLinks.{CRMAccountId, LinksFromZuora}
 import com.gu.sf_contact_merge.validate.GetContacts
 import com.gu.sf_contact_merge.validate.GetContacts.{AccountId, IdentityId, SFContactId}
 import com.gu.util.resthttp.Types
@@ -23,7 +23,7 @@ class UpdateStepsTest extends FlatSpec with Matchers {
       ClientSuccess(())
     }
 
-    def updateAccountSFLinks(SFPointer: SFPointer)(acId: GetContacts.AccountId): Types.ClientFailableOp[Unit] = {
+    def updateAccountSFLinks(SFPointer: LinksFromZuora)(acId: GetContacts.AccountId): Types.ClientFailableOp[Unit] = {
       acId should be(AccountId("account1"))
       order = "doLink" :: order
       ClientSuccess(())
@@ -35,7 +35,7 @@ class UpdateStepsTest extends FlatSpec with Matchers {
       NonEmptyList(AccountId("account1"))
 
     val maybeIdentityId: Option[GetContacts.IdentityId] = None
-    val sfPointer = SFPointer(SFContactId("contnew"), CRMAccountId("crmcrm"), maybeIdentityId)
+    val sfPointer = LinksFromZuora(SFContactId("contnew"), CRMAccountId("crmcrm"), maybeIdentityId)
     val maybeContactId = Some(SFContactId("contold"))
 
     val actual = wired(sfPointer, maybeContactId, accountIds)
@@ -59,9 +59,9 @@ class UpdateStepsTest extends FlatSpec with Matchers {
 
     val maybeIdentityId: Option[GetContacts.IdentityId] = Some(IdentityId("newIdentityId"))
 
-    val sfPointer = SFPointer(SFContactId("contnew"), CRMAccountId("crmcrm"), maybeIdentityId)
+    val sfPointer = LinksFromZuora(SFContactId("contnew"), CRMAccountId("crmcrm"), maybeIdentityId)
 
-    def updateAccountSFLinks(actualSFPointer: SFPointer)(acId: GetContacts.AccountId): Types.ClientFailableOp[Unit] = {
+    def updateAccountSFLinks(actualSFPointer: LinksFromZuora)(acId: GetContacts.AccountId): Types.ClientFailableOp[Unit] = {
       actualSFPointer should be(sfPointer)
       acId should be(AccountId("account1"))
       order = "doLink" :: order

@@ -1,6 +1,6 @@
 package com.gu.sf_contact_merge.update
 
-import com.gu.sf_contact_merge.update.UpdateAccountSFLinks.{CRMAccountId, SFPointer}
+import com.gu.sf_contact_merge.update.UpdateAccountSFLinks.{CRMAccountId, LinksFromZuora}
 import com.gu.sf_contact_merge.validate.GetContacts.{AccountId, IdentityId, SFContactId}
 import com.gu.util.resthttp.RestRequestMaker.{PutRequest, RelativePath}
 import org.scalatest.{FlatSpec, Matchers}
@@ -22,7 +22,7 @@ class UpdateAccountSFLinksTest extends FlatSpec with Matchers {
     )
 
     val actual = UpdateAccountSFLinks.toRequest(
-      SFPointer(
+      LinksFromZuora(
         SFContactId("johnjohn_c"),
         CRMAccountId("crmIdjohn"),
         None
@@ -50,7 +50,7 @@ class UpdateAccountSFLinksTest extends FlatSpec with Matchers {
     )
 
     val actual = UpdateAccountSFLinks.toRequest(
-      SFPointer(
+      LinksFromZuora(
         SFContactId("johnjohn_c"),
         CRMAccountId("crmIdjohn"),
         Some(IdentityId("identity"))

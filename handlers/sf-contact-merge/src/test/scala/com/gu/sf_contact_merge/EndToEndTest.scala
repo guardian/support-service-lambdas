@@ -1,27 +1,25 @@
 package com.gu.sf_contact_merge
 
-import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
-
 import com.gu.effects.TestingRawEffects.{HTTPResponse, POSTRequest}
 import com.gu.effects.{FakeFetchString, TestingRawEffects}
-import com.gu.test.JsonMatchers._
-import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import com.gu.util.apigateway.ApiGatewayRequest
+import com.gu.util.apigateway.ResponseModels.{ApiResponse, Headers}
 import com.gu.util.config.Stage
 import org.scalatest.{FlatSpec, Matchers}
-import play.api.libs.json.{Json, OFormat}
 
 class EndToEndTest extends FlatSpec with Matchers {
 
-  import EndToEndTest._
   import Runner._
 
   it should "accept a request in the format we expect" in {
 
-    val expected = ExpectedJsonFormat(
+    val expected = ApiResponse(
       statusCode = "200",
-      body = JsStringContainingJson(ExpectedBodyFormat(message = "Success")),
-      headers = Map("Content-Type" -> "application/json")
+      body =
+        """{
+          |  "message" : "Success"
+          |}""".stripMargin,
+      headers = Headers()
     )
 
     val body =
@@ -38,10 +36,9 @@ class EndToEndTest extends FlatSpec with Matchers {
       """.stripMargin
     val input = ApiGatewayRequest(None, Some(body), None, None)
 
-    implicit val jf = Json.writes[ApiGatewayRequest]
-    val (responseString, requests) = getResultAndRequests(Json.stringify(Json.toJsObject(input)))
+    val (responseString, requests) = getResultAndRequests(input)
 
-    responseString jsonMatchesFormat (expected)
+    responseString should be(expected)
 
   }
 
@@ -49,37 +46,20 @@ class EndToEndTest extends FlatSpec with Matchers {
 
 object Runner {
 
-  def getResultAndRequests(input: String): (String, List[TestingRawEffects.BasicRequest]) = {
-    val stream = new ByteArrayInputStream(input.getBytes(java.nio.charset.StandardCharsets.UTF_8))
-    val os = new ByteArrayOutputStream()
+  def getResultAndRequests(input: ApiGatewayRequest): (ApiResponse, List[TestingRawEffects.BasicRequest]) = {
 
-    //execute
-    Handler.runForLegacyTestsSeeTestingMd(
+    val result = Handler.operationForEffects(
       Stage("DEV"),
       FakeFetchString.fetchString,
-      EndToEndTest.mock.response,
-      LambdaIO(stream, os, null)
-    )
+      EndToEndTest.mock.response
+    ).map(_.steps(input)).apiResponse
 
-    val responseString = new String(os.toByteArray, "UTF-8")
-
-    (responseString, EndToEndTest.mock.requestsAttempted)
+    (result, EndToEndTest.mock.requestsAttempted)
   }
 
 }
 
 object EndToEndTest {
-
-  case class ExpectedJsonFormat(
-    statusCode: String,
-    body: JsStringContainingJson[ExpectedBodyFormat],
-    headers: Map[String, String] = Map("Content-Type" -> "application/json")
-  )
-
-  case class ExpectedBodyFormat(message: String)
-
-  implicit val mF: OFormat[ExpectedBodyFormat] = Json.format[ExpectedBodyFormat]
-  implicit val apiF: OFormat[ExpectedJsonFormat] = Json.format[ExpectedJsonFormat]
 
   val accountQueryRequest =
     """{"queryString":"

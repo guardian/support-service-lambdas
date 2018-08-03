@@ -1,6 +1,6 @@
 package com.gu.sf_contact_merge.update
 
-import com.gu.sf_contact_merge.update.UpdateAccountSFLinks.SFPointer
+import com.gu.sf_contact_merge.update.UpdateAccountSFLinks.LinksFromZuora
 import com.gu.sf_contact_merge.validate.GetContacts.{AccountId, IdentityId, SFContactId}
 import com.gu.util.resthttp.RestRequestMaker.{PatchRequest, Requests}
 import com.gu.util.resthttp.Types
@@ -12,9 +12,9 @@ object UpdateSteps {
 
   def apply(
     setOrClearIdentityId: ((SFContactId, Option[IdentityId])) => ClientFailableOp[Unit],
-    updateAccountSFLinks: SFPointer => AccountId => ClientFailableOp[Unit]
+    updateAccountSFLinks: LinksFromZuora => AccountId => ClientFailableOp[Unit]
   )(
-    sfPointer: SFPointer,
+    sfPointer: LinksFromZuora,
     maybeOldContactId: Option[SFContactId],
     accountIds: NonEmptyList[AccountId]
   ): ClientFailableOp[Unit] = {
@@ -38,7 +38,7 @@ object UpdateStepsWiring { // not sure if having it here rather than Handler is 
   def apply(
     patch: PatchRequest => Types.ClientFailableOp[Unit],
     zuoraRequests: Requests
-  ): (SFPointer, Option[SFContactId], NonEmptyList[AccountId]) => ClientFailableOp[Unit] =
+  ): (LinksFromZuora, Option[SFContactId], NonEmptyList[AccountId]) => ClientFailableOp[Unit] =
     UpdateSteps(
       UpdateSalesforceIdentityId(patch),
       UpdateAccountSFLinks(zuoraRequests.put)
