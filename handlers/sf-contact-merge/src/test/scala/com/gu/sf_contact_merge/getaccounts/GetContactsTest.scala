@@ -14,8 +14,8 @@ class GetContactsTest extends FlatSpec with Matchers {
   it should "work" in {
 
     val zuoraQuerier = FakeZuoraQuerier(accountQueryRequest, accountQueryResponse)
-    val getContacts = GetContacts(zuoraQuerier)_
-    val actual = getContacts(NonEmptyList(
+
+    val actual = GetContacts(zuoraQuerier, NonEmptyList(
       AccountId("acid1"),
       AccountId("acid2")
     ))

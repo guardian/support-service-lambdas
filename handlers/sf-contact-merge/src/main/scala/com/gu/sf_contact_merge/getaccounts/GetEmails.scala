@@ -16,7 +16,7 @@ object GetEmails {
   case class WireContact(Id: String, WorkEmail: Option[String])
   implicit val readWireContact = Json.reads[WireContact]
 
-  def apply(zuoraQuerier: ZuoraQuerier)(contactIds: NonEmptyList[ContactId]): ClientFailableOp[Map[ContactId, Option[EmailAddress]]] =
+  def apply(zuoraQuerier: ZuoraQuerier, contactIds: NonEmptyList[ContactId]): ClientFailableOp[Map[ContactId, Option[EmailAddress]]] =
     for {
       or <- OrTraverse(contactIds) { accountId =>
         zoql"""Id = ${accountId.value}"""

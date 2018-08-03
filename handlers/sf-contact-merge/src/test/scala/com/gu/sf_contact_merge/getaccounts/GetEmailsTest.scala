@@ -15,8 +15,8 @@ class GetEmailsTest extends FlatSpec with Matchers {
     val expectedQuery = """SELECT Id, WorkEmail FROM Contact WHERE Id = 'cid1' or Id = 'cid2'"""
 
     val querier = FakeZuoraQuerier(expectedQuery, contactQueryResponse)
-    val getContacts = GetEmails(querier)_
-    val actual = getContacts(NonEmptyList(
+
+    val actual = GetEmails(querier, NonEmptyList(
       ContactId("cid1"),
       ContactId("cid2")
     ))

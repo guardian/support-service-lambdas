@@ -29,8 +29,6 @@ class UpdateStepsTest extends FlatSpec with Matchers {
       ClientSuccess(())
     }
 
-    val wired = UpdateSteps((setOrClearIdentityId _).tupled, updateAccountSFLinks) _
-
     val accountIds: NonEmptyList[GetContacts.AccountId] =
       NonEmptyList(AccountId("account1"))
 
@@ -38,7 +36,7 @@ class UpdateStepsTest extends FlatSpec with Matchers {
     val sfPointer = LinksFromZuora(SFContactId("contnew"), CRMAccountId("crmcrm"), maybeIdentityId)
     val maybeContactId = Some(SFContactId("contold"))
 
-    val actual = wired(sfPointer, maybeContactId, accountIds)
+    val actual = UpdateSteps((setOrClearIdentityId _).tupled, updateAccountSFLinks, sfPointer, maybeContactId, accountIds)
 
     order.reverse should be(List("doLink", "clear contold"))
     actual should be(ClientSuccess(()))
@@ -68,14 +66,12 @@ class UpdateStepsTest extends FlatSpec with Matchers {
       ClientSuccess(())
     }
 
-    val wired = UpdateSteps((setOrClearIdentityId _).tupled, updateAccountSFLinks) _
-
     val accountIds: NonEmptyList[GetContacts.AccountId] =
       NonEmptyList(AccountId("account1"))
 
     val maybeContactId = Some(SFContactId("contold"))
 
-    val actual = wired(sfPointer, maybeContactId, accountIds)
+    val actual = UpdateSteps((setOrClearIdentityId _).tupled, updateAccountSFLinks, sfPointer, maybeContactId, accountIds)
 
     order.reverse should be(List("doLink", "clear", "addidentity contnew"))
     actual should be(ClientSuccess(()))
