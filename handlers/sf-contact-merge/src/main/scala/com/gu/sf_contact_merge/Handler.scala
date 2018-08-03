@@ -5,6 +5,7 @@ import java.io.{InputStream, OutputStream}
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.sf_contact_merge.TypeConvert._
+import com.gu.sf_contact_merge.WireRequestToDomainObject.WireSfContactRequest
 import com.gu.sf_contact_merge.update.UpdateAccountSFLinks.{CRMAccountId, LinksFromZuora}
 import com.gu.sf_contact_merge.update.UpdateStepsWiring
 import com.gu.sf_contact_merge.validate.GetContacts.{AccountId, IdentityId, SFContactId}
@@ -36,31 +37,29 @@ object Handler {
       zuoraRestConfig <- loadConfig[ZuoraRestConfig].toApiGatewayOp("load trusted Api config")
       requests = ZuoraRestRequestMaker(getResponse, zuoraRestConfig)
       zuoraQuerier = ZuoraQuery(requests)
-      wiredSteps = steps(
+      wiredSteps = Steps(
         GetIdentityAndZuoraEmailsForAccounts(zuoraQuerier),
         ValidationSteps.apply _,
         UpdateStepsWiring(requests.patch, requests)
       ) _
-      configuredOp = Operation.noHealthcheck(wiredSteps)
-    } yield configuredOp
+    } yield Operation.noHealthcheck(wiredSteps)
   }
 
-  case class WireSfContactRequest(
-    fullContactId: String,
-    billingAccountZuoraIds: List[String],
-    accountId: String,
-    identityId: Option[String]
-  )
+}
+
+object Steps {
+
   implicit val readWireSfContactRequest = Json.reads[WireSfContactRequest]
 
-  def steps(
+  def apply(
     getIdentityAndZuoraEmailsForAccounts: NonEmptyList[AccountId] => ClientFailableOp[List[IdentityAndSFContactAndEmail]],
     validation: (Option[IdentityId], List[IdentityAndSFContactAndEmail]) => ApiGatewayOp[Unit],
     update: (LinksFromZuora, Option[SFContactId], NonEmptyList[AccountId]) => ClientFailableOp[Unit]
   )(req: ApiGatewayRequest): ResponseModels.ApiResponse =
     (for {
       wireInput <- req.bodyAsCaseClass[WireSfContactRequest]()
-      mergeRequest <- WireRequestToDomainObject(wireInput).toApiGatewayContinueProcessing(ApiGatewayResponse.badRequest("no account ids supplied"))
+      mergeRequest <- WireRequestToDomainObject(wireInput)
+        .toApiGatewayContinueProcessing(ApiGatewayResponse.badRequest("no account ids supplied"))
       accountAndEmails <- getIdentityAndZuoraEmailsForAccounts(mergeRequest.zuoraAccountIds)
         .toApiGatewayOp("getIdentityAndZuoraEmailsForAccounts")
       _ <- validation(mergeRequest.sFPointer.identityId, accountAndEmails)
@@ -73,22 +72,27 @@ object Handler {
 
 object WireRequestToDomainObject {
 
+  case class WireSfContactRequest(
+    fullContactId: String,
+    billingAccountZuoraIds: List[String],
+    accountId: String,
+    identityId: Option[String]
+  )
   case class MergeRequest(
     sFPointer: LinksFromZuora,
     zuoraAccountIds: NonEmptyList[AccountId]
   )
 
-  def apply(request: Handler.WireSfContactRequest): Option[MergeRequest] = {
-    for {
-      accountIds <- MaybeNonEmptyList(request.billingAccountZuoraIds.map(AccountId.apply))
-    } yield MergeRequest(
-      LinksFromZuora(
-        SFContactId(request.fullContactId),
-        CRMAccountId(request.accountId),
-        request.identityId.map(IdentityId.apply)
-      ),
-      accountIds
-    )
-  }
+  def apply(request: WireSfContactRequest): Option[MergeRequest] =
+    MaybeNonEmptyList(request.billingAccountZuoraIds.map(AccountId.apply)).map { accountIds =>
+      MergeRequest(
+        LinksFromZuora(
+          SFContactId(request.fullContactId),
+          CRMAccountId(request.accountId),
+          request.identityId.map(IdentityId.apply)
+        ),
+        accountIds
+      )
+    }
 
 }
