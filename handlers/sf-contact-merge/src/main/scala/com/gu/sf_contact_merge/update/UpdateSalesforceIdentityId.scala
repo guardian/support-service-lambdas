@@ -1,6 +1,6 @@
 package com.gu.sf_contact_merge.update
 
-import com.gu.sf_contact_merge.validate.GetContacts.{IdentityId, SFContactId}
+import com.gu.sf_contact_merge.getaccounts.GetContacts.{IdentityId, SFContactId}
 import com.gu.util.resthttp.RestRequestMaker.{PatchRequest, RelativePath}
 import com.gu.util.resthttp.Types.ClientFailableOp
 import play.api.libs.json.Json

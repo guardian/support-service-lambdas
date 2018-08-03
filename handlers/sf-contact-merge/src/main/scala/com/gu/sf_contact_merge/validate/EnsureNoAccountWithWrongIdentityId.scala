@@ -1,6 +1,6 @@
 package com.gu.sf_contact_merge.validate
 
-import com.gu.sf_contact_merge.validate.GetContacts.IdentityId
+import com.gu.sf_contact_merge.getaccounts.GetContacts.IdentityId
 
 object EnsureNoAccountWithWrongIdentityId { // make sure all accounts are either this identity id or none
   def apply(

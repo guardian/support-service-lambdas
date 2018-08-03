@@ -6,11 +6,12 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.sf_contact_merge.TypeConvert._
 import com.gu.sf_contact_merge.WireRequestToDomainObject.WireSfContactRequest
+import com.gu.sf_contact_merge.getaccounts.GetContacts.{AccountId, IdentityId, SFContactId}
+import com.gu.sf_contact_merge.getaccounts.GetIdentityAndZuoraEmailsForAccountsSteps
+import com.gu.sf_contact_merge.getaccounts.GetIdentityAndZuoraEmailsForAccountsSteps.IdentityAndSFContactAndEmail
 import com.gu.sf_contact_merge.update.UpdateAccountSFLinks.{CRMAccountId, LinksFromZuora}
-import com.gu.sf_contact_merge.update.UpdateStepsWiring
-import com.gu.sf_contact_merge.validate.GetContacts.{AccountId, IdentityId, SFContactId}
-import com.gu.sf_contact_merge.validate.GetIdentityAndZuoraEmailsForAccounts.IdentityAndSFContactAndEmail
-import com.gu.sf_contact_merge.validate.{GetIdentityAndZuoraEmailsForAccounts, ValidationSteps}
+import com.gu.sf_contact_merge.update.{UpdateAccountSFLinks, UpdateSalesforceIdentityId, UpdateSteps}
+import com.gu.sf_contact_merge.validate.ValidationSteps
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, ApiGatewayResponse, ResponseModels}
 import com.gu.util.config.LoadConfigModule.StringFromS3
@@ -38,9 +39,12 @@ object Handler {
       requests = ZuoraRestRequestMaker(getResponse, zuoraRestConfig)
       zuoraQuerier = ZuoraQuery(requests)
       wiredSteps = Steps(
-        GetIdentityAndZuoraEmailsForAccounts(zuoraQuerier),
+        GetIdentityAndZuoraEmailsForAccountsSteps(zuoraQuerier),
         ValidationSteps.apply _,
-        UpdateStepsWiring(requests.patch, requests)
+        UpdateSteps(
+          UpdateSalesforceIdentityId(requests.patch),
+          UpdateAccountSFLinks(requests.put)
+        )
       ) _
     } yield Operation.noHealthcheck(wiredSteps)
   }

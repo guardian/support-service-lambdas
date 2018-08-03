@@ -1,6 +1,6 @@
 package com.gu.sf_contact_merge.validate
 
-import GetEmails.EmailAddress
+import com.gu.sf_contact_merge.getaccounts.GetEmails.EmailAddress
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types.ApiGatewayOp
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}

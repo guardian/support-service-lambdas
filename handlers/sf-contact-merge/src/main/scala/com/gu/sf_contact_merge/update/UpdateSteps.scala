@@ -1,9 +1,7 @@
 package com.gu.sf_contact_merge.update
 
+import com.gu.sf_contact_merge.getaccounts.GetContacts.{AccountId, IdentityId, SFContactId}
 import com.gu.sf_contact_merge.update.UpdateAccountSFLinks.LinksFromZuora
-import com.gu.sf_contact_merge.validate.GetContacts.{AccountId, IdentityId, SFContactId}
-import com.gu.util.resthttp.RestRequestMaker.{PatchRequest, Requests}
-import com.gu.util.resthttp.Types
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess}
 import scalaz.NonEmptyList
 import scalaz.syntax.traverse.ToTraverseOps
@@ -30,18 +28,5 @@ object UpdateSteps {
       }
     } yield ()
   }
-
-}
-
-object UpdateStepsWiring { // not sure if having it here rather than Handler is a nice idea
-
-  def apply(
-    patch: PatchRequest => Types.ClientFailableOp[Unit],
-    zuoraRequests: Requests
-  ): (LinksFromZuora, Option[SFContactId], NonEmptyList[AccountId]) => ClientFailableOp[Unit] =
-    UpdateSteps(
-      UpdateSalesforceIdentityId(patch),
-      UpdateAccountSFLinks(zuoraRequests.put)
-    )
 
 }

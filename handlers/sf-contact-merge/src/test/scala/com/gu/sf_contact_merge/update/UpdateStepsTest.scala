@@ -1,8 +1,8 @@
 package com.gu.sf_contact_merge.update
 
+import com.gu.sf_contact_merge.getaccounts.GetContacts
+import com.gu.sf_contact_merge.getaccounts.GetContacts.{AccountId, IdentityId, SFContactId}
 import com.gu.sf_contact_merge.update.UpdateAccountSFLinks.{CRMAccountId, LinksFromZuora}
-import com.gu.sf_contact_merge.validate.GetContacts
-import com.gu.sf_contact_merge.validate.GetContacts.{AccountId, IdentityId, SFContactId}
 import com.gu.util.resthttp.Types
 import com.gu.util.resthttp.Types.ClientSuccess
 import org.scalatest.{FlatSpec, Matchers}

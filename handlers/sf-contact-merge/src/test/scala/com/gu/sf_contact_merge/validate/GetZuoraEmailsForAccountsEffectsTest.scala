@@ -2,9 +2,10 @@ package com.gu.sf_contact_merge.validate
 
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.sf_contact_merge.TypeConvert._
-import com.gu.sf_contact_merge.validate.GetContacts.{AccountId, IdentityId, SFContactId}
-import com.gu.sf_contact_merge.validate.GetEmails.EmailAddress
-import com.gu.sf_contact_merge.validate.GetIdentityAndZuoraEmailsForAccounts._
+import com.gu.sf_contact_merge.getaccounts.GetContacts.{AccountId, IdentityId, SFContactId}
+import com.gu.sf_contact_merge.getaccounts.GetEmails.EmailAddress
+import com.gu.sf_contact_merge.getaccounts.GetIdentityAndZuoraEmailsForAccountsSteps
+import com.gu.sf_contact_merge.getaccounts.GetIdentityAndZuoraEmailsForAccountsSteps.IdentityAndSFContactAndEmail
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
@@ -22,7 +23,7 @@ class GetZuoraEmailsForAccountsEffectsTest extends FlatSpec with Matchers {
     val actual = for {
       zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig].toApiGatewayOp("parse config")
       zuoraQuerier = ZuoraQuery(ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig))
-      getZuoraEmailsForAccounts = GetIdentityAndZuoraEmailsForAccounts(zuoraQuerier) _
+      getZuoraEmailsForAccounts = GetIdentityAndZuoraEmailsForAccountsSteps(zuoraQuerier) _
       maybeEmailAddresses <- getZuoraEmailsForAccounts(testData).toApiGatewayOp("get zuora emails for accounts")
     } yield maybeEmailAddresses
 

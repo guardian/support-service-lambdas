@@ -5,7 +5,7 @@ import com.gu.sf_contact_merge.TypeConvert._
 import com.gu.sf_contact_merge.update.UpdateAccountSFLinks
 import com.gu.sf_contact_merge.update.UpdateAccountSFLinks.{CRMAccountId, LinksFromZuora}
 import com.gu.sf_contact_merge.update.identityid.GetIdentityIdForAccount.WireModel.BasicInfo
-import com.gu.sf_contact_merge.validate.GetContacts.{AccountId, IdentityId, SFContactId}
+import com.gu.sf_contact_merge.getaccounts.GetContacts.{AccountId, IdentityId, SFContactId}
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.reader.Types._
