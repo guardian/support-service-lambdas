@@ -49,7 +49,8 @@ object Handler extends Logging {
 
     val monthlyContribution = ProductInfo(
       id = "monthly_contribution",
-      label = "Monthly"
+      label = "Monthly",
+      startDateRules = Some(contributionRules)
     )
     val voucherGroup = Group("Voucher", List(voucherWeekend, voucherEveryday))
     val contributionGroup = Group("Contribution", List(monthlyContribution))
