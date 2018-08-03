@@ -27,11 +27,11 @@ case class ProductInfo(
 case class SelectableWindowRules(
   cutOffDayInclusive: Option[DayOfWeek] = None,
   minDaysAfterCutOff: Option[Int] = None,
-  sizeInDays: Option[Int] = None,
+  sizeInDays: Option[Int] = None
 )
 case class StartDateRules(
   daysOfWeek: Option[List[DayOfWeek]] = None,
-  selectableWindowRules: Option[SelectableWindowRules] = None,
+  selectableWindowRules: Option[SelectableWindowRules] = None
 )
 
 case class Group(label: String, products: List[ProductInfo])
@@ -42,10 +42,10 @@ object DayOfWeek {
   implicit val writes: Writes[DayOfWeek] = { (day: DayOfWeek) => JsString(day.toString) }
 }
 
-object SelectableWindowRules{
+object SelectableWindowRules {
   implicit val writes = Json.writes[SelectableWindowRules]
 }
-object StartDateRules{
+object StartDateRules {
   implicit val writes = Json.writes[StartDateRules]
 }
 object ProductInfo {
