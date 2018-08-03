@@ -15,11 +15,46 @@ object Handler extends Logging {
     ApiGatewayHandler(LambdaIO(inputStream, outputStream, context)) {
       ContinueProcessing(
         Operation.noHealthcheck {
-          Req: ApiGatewayRequest => ApiGatewayResponse.successfulExecution
+          Req: ApiGatewayRequest => ApiGatewayResponse(body = catalog, statusCode = "200")
         }
       )
     }
+
+  val catalog = {
+    val voucherEverydayRules = StartDateRules(
+      cutOffDayInclusive = Some(Tuesday),
+      daysOfWeek = Some(List(Monday)),
+      minDaysAfterCutOff = Some(20),
+      windowSizeDays = Some(28)
+    )
+
+    val voucherEveryday = ProductInfo(
+      id = "voucher_everyday",
+      label = "Every day",
+      startDateRules = Some(voucherEverydayRules)
+    )
+
+    val weekendsRule = voucherEverydayRules.copy(
+      daysOfWeek = Some(List(Saturday, Sunday))
+    )
+    val voucherWeekend = ProductInfo(
+      id = "voucher_weekend",
+      label = "Weekend",
+      startDateRules = Some(weekendsRule)
+    )
+
+    val contributionRules = StartDateRules(
+      windowSizeDays = Some(1)
+    )
+
+    val monthlyContribution = ProductInfo(
+      id = "monthly_contribution",
+      label = "Monthly",
+      startDateRules = Some(contributionRules)
+    )
+    val voucherGroup = Group("Voucher", List(voucherWeekend, voucherEveryday))
+    val contributionGroup = Group("Contribution", List(monthlyContribution))
+    Catalog(List(voucherGroup, contributionGroup))
+  }
 }
-
-
 
