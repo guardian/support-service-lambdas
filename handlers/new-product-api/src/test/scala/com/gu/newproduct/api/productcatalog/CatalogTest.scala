@@ -6,11 +6,14 @@ import play.api.libs.json.Json
 class CatalogTest extends FlatSpec with Matchers {
   it should "serialise catalog" in {
 
-    val everyDayRules = StartDateRules(
+    val everyDayWindowRules = WindowRules(
       cutOffDayInclusive = Some(Tuesday),
-      daysOfWeek = Some(List(Monday)),
       minDaysAfterCutOff = Some(20),
-      windowSizeDays = Some(28)
+      sizeDays = Some(28)
+    )
+    val everyDayRules = StartDateRules(
+      daysOfWeek = Some(List(Monday)),
+      windowRules = Some(everyDayWindowRules)
     )
 
     val voucherEveryday = ProductInfo(
@@ -45,9 +48,11 @@ class CatalogTest extends FlatSpec with Matchers {
         |            "id": "voucher_weekend",
         |            "label": "Weekend",
         |            "startDateRules" : {
-        |            "cutOffDayInclusive": "Tuesday",
-        |            "minDaysAfterCutOff" : 20,
-        |            "windowSizeDays" : 28,
+        |            "windowRules" : {
+        |              "cutOffDayInclusive": "Tuesday",
+        |              "minDaysAfterCutOff" : 20,
+        |              "sizeDays" : 28
+        |              },
         |            "daysOfWeek": ["Saturday", "Sunday"]
         |            }
         |        },
@@ -55,10 +60,12 @@ class CatalogTest extends FlatSpec with Matchers {
         |            "id": "voucher_everyday",
         |            "label": "Every day",
         |             "startDateRules" : {
-        |            "cutOffDayInclusive": "Tuesday",
-        |            "minDaysAfterCutOff" : 20,
-        |            "windowSizeDays" : 28,
-        |            "daysOfWeek": ["Monday"]
+        |             "windowRules" : {
+        |                "cutOffDayInclusive": "Tuesday",
+        |                "minDaysAfterCutOff" : 20,
+        |                "sizeDays" : 28
+        |                },
+        |             "daysOfWeek": ["Monday"]
         |            }
         |        }
         |    ]

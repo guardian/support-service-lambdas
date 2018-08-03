@@ -21,11 +21,14 @@ object Handler extends Logging {
     }
 
   val catalog = {
-    val voucherEverydayRules = StartDateRules(
+    val voucherWindowRules = WindowRules(
       cutOffDayInclusive = Some(Tuesday),
-      daysOfWeek = Some(List(Monday)),
       minDaysAfterCutOff = Some(20),
-      windowSizeDays = Some(28)
+      sizeDays = Some(28)
+    )
+    val voucherEverydayRules = StartDateRules(
+      daysOfWeek = Some(List(Monday)),
+      windowRules = Some(voucherWindowRules)
     )
 
     val voucherEveryday = ProductInfo(
@@ -43,8 +46,11 @@ object Handler extends Logging {
       startDateRules = Some(weekendsRule)
     )
 
+    val contributionWindowRules = WindowRules(
+      sizeDays = Some(1)
+    )
     val contributionRules = StartDateRules(
-      windowSizeDays = Some(1)
+      windowRules = Some(contributionWindowRules)
     )
 
     val monthlyContribution = ProductInfo(
