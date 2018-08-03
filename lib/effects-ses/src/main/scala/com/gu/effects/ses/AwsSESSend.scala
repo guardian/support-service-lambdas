@@ -20,7 +20,7 @@ object AwsSESSend {
   case class EmailSubject(value: String) extends AnyVal
   case class EmailBody(value: String) extends AnyVal
 
-  val apply: EmailAddress => List[EmailAddress] => EmailSubject => EmailBody => Future[Unit] = { from => to => subject => body =>
+  def apply(from: EmailAddress, to: List[EmailAddress], subject: EmailSubject, body: EmailBody): Future[Unit] = {
     val sesClient = AmazonSimpleEmailServiceAsyncClientBuilder
       .standard()
       .withCredentials(aws.CredentialsProvider)
@@ -45,6 +45,7 @@ object AwsSESSend {
         Failure(throwable)
     }
   }
+
 }
 
 object aws {

@@ -17,7 +17,7 @@ object AWSSESSendManualTest extends App {
   private val body = EmailBody(s"this is a test email ${Random.nextInt(10000)}")
 
   println(s"sending email to $testEmailAddress")
-  val r = AwsSESSend.apply(testEmailAddress)(List(testEmailAddress))(subject)(body)
+  val r = AwsSESSend(testEmailAddress, List(testEmailAddress), subject, body)
   r.onComplete {
     case Success(result) =>
       println(s"res: $result - please check your email")
