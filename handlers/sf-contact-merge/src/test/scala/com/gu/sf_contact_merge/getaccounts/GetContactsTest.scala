@@ -1,6 +1,5 @@
-package com.gu.sf_contact_merge.validate
+package com.gu.sf_contact_merge.getaccounts
 
-import com.gu.sf_contact_merge.getaccounts.GetContacts
 import com.gu.sf_contact_merge.getaccounts.GetContacts.{AccountId, IdentityAndSFContact, IdentityId, SFContactId}
 import com.gu.sf_contact_merge.getaccounts.GetEmails.ContactId
 import com.gu.util.resthttp.Types.ClientSuccess
