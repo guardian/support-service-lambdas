@@ -124,6 +124,12 @@ lazy val `effects-sqs` = all(project in file("lib/effects-sqs"))
     libraryDependencies ++= Seq(logging, awsSQS)
   )
 
+lazy val `effects-ses` = all(project in file("lib/effects-ses"))
+  .dependsOn(testDep)
+  .settings(
+    libraryDependencies ++= Seq(logging, awsSES)
+  )
+
 val effectsDepIncludingTestFolder: ClasspathDependency = effects % "compile->compile;test->test"
 
 lazy val `zuora-reports` = all(project in file("lib/zuora-reports"))
@@ -152,7 +158,9 @@ lazy val root = all(project in file(".")).enablePlugins(RiffRaffArtifact).aggreg
   `zuora-reports`,
   salesforce,
   s3ConfigValidator,
-  `new-product-api`
+  `new-product-api`,
+  `effects-sqs`,
+  `effects-ses`
 ).dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `identity-backfill` = all(project in file("handlers/identity-backfill")) // when using the "project identity-backfill" command it uses the lazy val name
