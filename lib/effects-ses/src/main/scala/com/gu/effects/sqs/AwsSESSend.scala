@@ -1,4 +1,4 @@
-package manualTest
+package com.gu.effects.sqs
 
 import com.amazonaws.auth._
 import com.amazonaws.auth.profile.ProfileCredentialsProvider

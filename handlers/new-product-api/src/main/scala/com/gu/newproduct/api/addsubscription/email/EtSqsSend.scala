@@ -1,5 +1,6 @@
 package com.gu.newproduct.api.addsubscription.email
 
+import com.gu.effects.sqs.AwsSQSSend.Payload
 import com.gu.util.Logging
 import play.api.libs.json.{Json, Writes}
 

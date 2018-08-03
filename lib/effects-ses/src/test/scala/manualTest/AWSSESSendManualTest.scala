@@ -1,6 +1,7 @@
-package manualTest
+package manualtest
 
-import AwsSESSend.{EmailAddress, EmailBody, EmailSubject}
+import com.gu.effects.sqs.AwsSESSend
+import com.gu.effects.sqs.AwsSESSend.{EmailAddress, EmailBody, EmailSubject}
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
