@@ -1,9 +1,9 @@
-package com.gu.effects.sqs
+package manualTest
 
 import com.amazonaws.regions.Regions
 import com.amazonaws.services.sqs.AmazonSQSAsyncClientBuilder
 import com.amazonaws.services.sqs.model.ReceiveMessageRequest
-import com.gu.effects.sqs.AwsSQSSend.{Payload, QueueName}
+import AwsSQSSend.{Payload, QueueName}
 import com.gu.test.EffectsTest
 import org.apache.log4j.Logger
 import org.scalatest.{AsyncFlatSpec, Matchers}

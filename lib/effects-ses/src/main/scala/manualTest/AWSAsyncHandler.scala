@@ -1,4 +1,4 @@
-package com.gu.effects.sqs
+package manualTest
 
 import java.util.concurrent.{Future => JFuture}
 

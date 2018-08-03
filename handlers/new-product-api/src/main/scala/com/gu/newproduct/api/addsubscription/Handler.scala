@@ -3,7 +3,6 @@ package com.gu.newproduct.api.addsubscription
 import java.io.{InputStream, OutputStream}
 
 import com.amazonaws.services.lambda.runtime.Context
-import com.gu.effects.sqs.AwsSQSSend
 import com.gu.effects.sqs.AwsSQSSend.QueueName
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.newproduct.api.addsubscription.TypeConvert._
@@ -26,6 +25,7 @@ import com.gu.util.reader.AsyncTypes._
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
+import manualTest.AwsSQSSend
 import okhttp3.{Request, Response}
 
 import scala.concurrent.Future
@@ -82,7 +82,7 @@ object Steps {
       loadConfig = LoadConfigModule(stage, fetchString)
       zuoraConfig <- loadConfig[ZuoraRestConfig].toApiGatewayOp("load zuora config")
       zuoraClient = ZuoraRestRequestMaker(response, zuoraConfig)
-      sqsSend = AwsSQSSend(emailQueueFor(stage)) _
+      sqsSend = manualTest.AwsSQSSend(emailQueueFor(stage)) _
       contributionsSqsSend = EtSqsSend[ContributionFields](sqsSend) _
 
       getBillTo = GetBillToContact(zuoraClient.get[GetBillToResponse]) _
