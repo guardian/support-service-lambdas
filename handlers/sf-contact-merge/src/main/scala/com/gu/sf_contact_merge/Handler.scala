@@ -45,19 +45,18 @@ object Handler {
       sfConfig <- loadConfig[SFAuthConfig].toApiGatewayOp("load trusted Api config")
       sfRequests <- SalesforceAuthenticate(getResponse, sfConfig)
 
-      wiredSteps = Steps(
-        GetIdentityAndZuoraEmailsForAccountsSteps(zuoraQuerier, _),
-        ValidationSteps(_, _),
-        UpdateSteps(
-          UpdateSalesforceIdentityId(sfRequests.patch),
-          UpdateAccountSFLinks(requests.put),
-          _,
-          _,
-          _
-        ),
-        _: ApiGatewayRequest
-      )
-    } yield Operation.noHealthcheck(wiredSteps)
+    } yield Operation.noHealthcheck(Steps(
+      GetIdentityAndZuoraEmailsForAccountsSteps(zuoraQuerier, _),
+      ValidationSteps(_, _),
+      UpdateSteps(
+        UpdateSalesforceIdentityId(sfRequests.patch),
+        UpdateAccountSFLinks(requests.put),
+        _,
+        _,
+        _
+      ),
+      _
+    ))
   }
 
 }
