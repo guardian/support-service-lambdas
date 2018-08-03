@@ -2,10 +2,10 @@ package com.gu.sf_contact_merge
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
-import com.gu.sf_contact_merge.EndToEndTest.{ExpectedBodyFormat, ExpectedJsonFormat}
 import com.gu.test.EffectsTest
 import com.gu.test.JsonMatchers._
 import org.scalatest.{FlatSpec, Matchers}
+import play.api.libs.json.{Json, OFormat}
 
 class HandlerEffectsTest extends FlatSpec with Matchers {
 
@@ -27,6 +27,17 @@ class HandlerEffectsTest extends FlatSpec with Matchers {
 }
 
 object TestData {
+
+  case class ExpectedJsonFormat(
+    statusCode: String,
+    body: JsStringContainingJson[ExpectedBodyFormat],
+    headers: Map[String, String] = Map("Content-Type" -> "application/json")
+  )
+
+  case class ExpectedBodyFormat(message: String)
+
+  implicit val mF: OFormat[ExpectedBodyFormat] = Json.format[ExpectedBodyFormat]
+  implicit val apiF: OFormat[ExpectedJsonFormat] = Json.format[ExpectedJsonFormat]
 
   def runWithEffects(mockRequest: String): String = {
     val stream = new ByteArrayInputStream(mockRequest.getBytes(java.nio.charset.StandardCharsets.UTF_8))

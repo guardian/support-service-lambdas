@@ -1,33 +1,31 @@
 package com.gu.sf_contact_merge
 
-import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
-
 import com.gu.effects.TestingRawEffects.{HTTPResponse, POSTRequest}
 import com.gu.effects.{FakeFetchString, TestingRawEffects}
-import com.gu.test.JsonMatchers._
-import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import com.gu.util.apigateway.ApiGatewayRequest
+import com.gu.util.apigateway.ResponseModels.{ApiResponse, Headers}
 import com.gu.util.config.Stage
 import org.scalatest.{FlatSpec, Matchers}
-import play.api.libs.json.{Json, OFormat}
 
 class EndToEndTest extends FlatSpec with Matchers {
 
-  import EndToEndTest._
   import Runner._
 
   it should "accept a request in the format we expect" in {
 
-    val expected = ExpectedJsonFormat(
+    val expected = ApiResponse(
       statusCode = "200",
-      body = JsStringContainingJson(ExpectedBodyFormat(message = "Success")),
-      headers = Map("Content-Type" -> "application/json")
+      body =
+        """{
+          |  "message" : "Success"
+          |}""".stripMargin,
+      headers = Headers()
     )
 
     val body =
       """
         |{
-        |   "fullContactId":"sfcont",
+        |   "fullContactId":"newSFCont",
         |   "billingAccountZuoraIds":[
         |      "2c92c0f9624bbc5f016253e573970b16",
         |      "2c92c0f8644618e30164652a558c6e20"
@@ -38,10 +36,9 @@ class EndToEndTest extends FlatSpec with Matchers {
       """.stripMargin
     val input = ApiGatewayRequest(None, Some(body), None, None)
 
-    implicit val jf = Json.writes[ApiGatewayRequest]
-    val (responseString, requests) = getResultAndRequests(Json.stringify(Json.toJsObject(input)))
+    val (responseString, requests) = getResultAndRequests(input)
 
-    responseString jsonMatchesFormat (expected)
+    responseString should be(expected)
 
   }
 
@@ -49,37 +46,20 @@ class EndToEndTest extends FlatSpec with Matchers {
 
 object Runner {
 
-  def getResultAndRequests(input: String): (String, List[TestingRawEffects.BasicRequest]) = {
-    val stream = new ByteArrayInputStream(input.getBytes(java.nio.charset.StandardCharsets.UTF_8))
-    val os = new ByteArrayOutputStream()
+  def getResultAndRequests(input: ApiGatewayRequest): (ApiResponse, List[TestingRawEffects.BasicRequest]) = {
 
-    //execute
-    Handler.runForLegacyTestsSeeTestingMd(
+    val result = Handler.operationForEffects(
       Stage("DEV"),
       FakeFetchString.fetchString,
-      EndToEndTest.mock.response,
-      LambdaIO(stream, os, null)
-    )
+      EndToEndTest.mock.response
+    ).map(_.steps(input)).apiResponse
 
-    val responseString = new String(os.toByteArray, "UTF-8")
-
-    (responseString, EndToEndTest.mock.requestsAttempted)
+    (result, EndToEndTest.mock.requestsAttempted)
   }
 
 }
 
 object EndToEndTest {
-
-  case class ExpectedJsonFormat(
-    statusCode: String,
-    body: JsStringContainingJson[ExpectedBodyFormat],
-    headers: Map[String, String] = Map("Content-Type" -> "application/json")
-  )
-
-  case class ExpectedBodyFormat(message: String)
-
-  implicit val mF: OFormat[ExpectedBodyFormat] = Json.format[ExpectedBodyFormat]
-  implicit val apiF: OFormat[ExpectedJsonFormat] = Json.format[ExpectedJsonFormat]
 
   val accountQueryRequest =
     """{"queryString":"
@@ -95,7 +75,7 @@ object EndToEndTest {
       |            "BillToId": "2c92c0f8644618e30164652a55986e21",
       |            "Id": "2c92c0f8644618e30164652a558c6e20",
       |            "IdentityId__c": "identest",
-      |            "sfContactId__c": "sfsf1"
+      |            "sfContactId__c": "oldSFCont"
       |        },
       |        {
       |            "BillToId": "2c92c0f9624bbc5f016253e5739b0b17",
@@ -129,9 +109,9 @@ object EndToEndTest {
       |    "done": true
       |}""".stripMargin.replaceAll("""\n""", "")
 
-  val updateAccountRequestBody = """{"crmId":"sfacc","sfContactId__c":"sfcont"}"""
-  val removeIdentityBody = """{"IdentityId__c":""}"""
-  val addIdentityBody = """{"IdentityId__c":"identest"}"""
+  val updateAccountRequestBody = """{"crmId":"sfacc","sfContactId__c":"newSFCont","IdentityId__c":"identest"}"""
+  val removeIdentityBody = """{"IdentityID__c":""}"""
+  val addIdentityBody = """{"IdentityID__c":"identest"}"""
 
   val updateAccountResponse = HTTPResponse(200, """{"Success": true}""")
 
@@ -140,10 +120,8 @@ object EndToEndTest {
     POSTRequest("/action/query", contactQueryRequest) -> HTTPResponse(200, contactQueryResponse),
     POSTRequest("/accounts/2c92c0f9624bbc5f016253e573970b16", updateAccountRequestBody, "PUT") -> updateAccountResponse,
     POSTRequest("/accounts/2c92c0f8644618e30164652a558c6e20", updateAccountRequestBody, "PUT") -> updateAccountResponse,
-    POSTRequest("/accounts/2c92c0f9624bbc5f016253e573970b16", removeIdentityBody, "PUT") -> updateAccountResponse,
-    POSTRequest("/accounts/2c92c0f8644618e30164652a558c6e20", removeIdentityBody, "PUT") -> updateAccountResponse,
-    POSTRequest("/accounts/2c92c0f9624bbc5f016253e573970b16", addIdentityBody, "PUT") -> updateAccountResponse,
-    POSTRequest("/accounts/2c92c0f8644618e30164652a558c6e20", addIdentityBody, "PUT") -> updateAccountResponse
+    POSTRequest("/services/data/v20.0/sobjects/Contact/oldSFCont", removeIdentityBody, "PATCH") -> updateAccountResponse,
+    POSTRequest("/services/data/v20.0/sobjects/Contact/newSFCont", addIdentityBody, "PATCH") -> updateAccountResponse
   ))
 
 }
