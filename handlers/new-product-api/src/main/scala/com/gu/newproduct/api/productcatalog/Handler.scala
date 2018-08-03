@@ -22,10 +22,10 @@ object Handler extends Logging {
 
   val catalog = {
     val everyDayRules = StartDateRules(
-      cutOffDay = Some(Wednesday),
+      cutOffDayInclusive = Some(Tuesday),
       daysOfWeek = Some(List(Monday)),
-      minDelay = Some(21),
-      maxDelay = Some(49)
+      minDaysAfterCutOff = Some(20),
+      windowSizeDays = Some(28)
     )
 
     val voucherEveryday = ProductInfo(

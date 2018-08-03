@@ -26,9 +26,9 @@ case class ProductInfo(
 
 case class StartDateRules(
   daysOfWeek: Option[List[DayOfWeek]] = None,
-  cutOffDay: Option[DayOfWeek] = None,
-  minDelay: Option[Int] = None,
-  maxDelay: Option[Int] = None,
+  cutOffDayInclusive: Option[DayOfWeek] = None,
+  minDaysAfterCutOff: Option[Int] = None,
+  windowSizeDays: Option[Int] = None,
 )
 
 

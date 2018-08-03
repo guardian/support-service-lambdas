@@ -7,10 +7,10 @@ class CatalogTest extends FlatSpec with Matchers {
   it should "serialise catalog" in {
 
     val everyDayRules = StartDateRules(
-      cutOffDay = Some(Wednesday),
+      cutOffDayInclusive = Some(Tuesday),
       daysOfWeek = Some(List(Monday)),
-      minDelay = Some(21),
-      maxDelay = Some(49)
+      minDaysAfterCutOff = Some(20),
+      windowSizeDays = Some(28)
     )
 
     val voucherEveryday = ProductInfo(
@@ -45,9 +45,9 @@ class CatalogTest extends FlatSpec with Matchers {
         |            "id": "voucher_weekend",
         |            "label": "Weekend",
         |            "startDateRules" : {
-        |            "cutOffDay": "Wednesday",
-        |            "minDelay" : 21,
-        |            "maxDelay" : 49,
+        |            "cutOffDayInclusive": "Tuesday",
+        |            "minDaysAfterCutOff" : 20,
+        |            "windowSizeDays" : 28,
         |            "daysOfWeek": ["Saturday", "Sunday"]
         |            }
         |        },
@@ -55,9 +55,9 @@ class CatalogTest extends FlatSpec with Matchers {
         |            "id": "voucher_everyday",
         |            "label": "Every day",
         |             "startDateRules" : {
-        |            "cutOffDay": "Wednesday",
-        |            "minDelay" : 21,
-        |            "maxDelay" : 49,
+        |            "cutOffDayInclusive": "Tuesday",
+        |            "minDaysAfterCutOff" : 20,
+        |            "windowSizeDays" : 28,
         |            "daysOfWeek": ["Monday"]
         |            }
         |        }
