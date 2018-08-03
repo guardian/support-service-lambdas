@@ -26,7 +26,9 @@ class UpdateAccountSFLinksEffectsTest extends FlatSpec with Matchers {
     val actual = for {
       zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig].toApiGatewayOp("load config")
       zuoraDeps = ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig)
-      _ <- UpdateAccountSFLinks(zuoraDeps.put)(LinksFromZuora(SFContactId(s"cont$unique"), CRMAccountId(s"acc$unique"), Some(IdentityId(s"ident$unique"))))(DevZuora.accountWithRandomLinks).toApiGatewayOp("AddIdentityIdToAccount")
+      update = UpdateAccountSFLinks(zuoraDeps.put)
+      updateAccount = update(LinksFromZuora(SFContactId(s"cont$unique"), CRMAccountId(s"acc$unique"), Some(IdentityId(s"ident$unique"))))
+      _ <- updateAccount(DevZuora.accountWithRandomLinks).toApiGatewayOp("AddIdentityIdToAccount")
       basicInfo <- GetIdentityIdForAccount(zuoraDeps)(DevZuora.accountWithRandomLinks).toApiGatewayOp("GetIdentityIdForAccount")
     } yield basicInfo
     actual.toDisjunction should be(\/-(BasicInfo(s"cont$unique", s"acc$unique", Some(s"ident$unique"))))

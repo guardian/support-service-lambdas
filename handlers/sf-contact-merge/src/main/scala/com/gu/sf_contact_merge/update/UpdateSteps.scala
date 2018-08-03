@@ -23,8 +23,10 @@ object UpdateSteps {
         case None => ClientSuccess(())
       }
       _ <- sfPointer.identityId match {
-        case Some(identityId) => setOrClearIdentityId((sfPointer.sfContactId, Some(identityId))) // this causes the sync to identity and zuora
-        case None => ClientSuccess(())
+        case Some(identityId) =>
+          setOrClearIdentityId((sfPointer.sfContactId, Some(identityId))) // this causes the sync to identity and zuora
+        case None =>
+          ClientSuccess(())
       }
     } yield ()
   }

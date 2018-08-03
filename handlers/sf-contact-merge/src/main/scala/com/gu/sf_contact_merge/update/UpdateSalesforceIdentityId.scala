@@ -13,7 +13,10 @@ object UpdateSalesforceIdentityId {
   def apply(patch: PatchRequest => ClientFailableOp[Unit]): ((SFContactId, Option[IdentityId])) => ClientFailableOp[Unit] =
     (toRequest _).tupled.andThen(patch)
 
-  def toRequest(sFContactId: SFContactId, identityId: Option[IdentityId]): PatchRequest =
-    PatchRequest(WireRequest(identityId.map(_.value).getOrElse("")), RelativePath(s"services/data/v20.0/sobjects/Contact/${sFContactId.value}"))
+  def toRequest(sFContactId: SFContactId, identityId: Option[IdentityId]): PatchRequest = {
+    val wireRequest = WireRequest(identityId.map(_.value).getOrElse(""))
+    val relativePath = RelativePath(s"services/data/v20.0/sobjects/Contact/${sFContactId.value}")
+    PatchRequest(wireRequest, relativePath)
+  }
 
 }
