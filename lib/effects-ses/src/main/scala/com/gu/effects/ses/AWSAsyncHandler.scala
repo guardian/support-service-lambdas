@@ -1,9 +1,9 @@
-package com.gu.effects.sqs
+package com.gu.effects.ses
 
 import java.util.concurrent.{Future => JFuture}
 
-import com.amazonaws.handlers.AsyncHandler
 import com.amazonaws.AmazonWebServiceRequest
+import com.amazonaws.handlers.AsyncHandler
 import org.apache.log4j.Logger
 
 import scala.concurrent.{Future, Promise}

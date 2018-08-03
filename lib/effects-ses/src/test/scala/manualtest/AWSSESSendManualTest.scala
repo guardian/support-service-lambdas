@@ -1,12 +1,12 @@
 package manualtest
 
-import com.gu.effects.sqs.AwsSESSend
-import com.gu.effects.sqs.AwsSESSend.{EmailAddress, EmailBody, EmailSubject}
+import com.gu.effects.ses.AwsSESSend
+import com.gu.effects.ses.AwsSESSend.{EmailAddress, EmailBody, EmailSubject}
 
 import scala.concurrent.Await
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import scala.util.{Failure, Random, Success}
-import scala.concurrent.ExecutionContext.Implicits.global
 
 object AWSSESSendManualTest extends App {
 
