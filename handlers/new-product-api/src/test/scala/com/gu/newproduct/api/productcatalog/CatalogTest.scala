@@ -16,7 +16,7 @@ class CatalogTest extends FlatSpec with Matchers {
       selectableWindow = Some(everyDayWindowRules)
     )
 
-    val voucherEveryday = ProductInfo(
+    val voucherEveryday = PlanInfo(
       id = "voucher_everyday",
       label = "Every day",
       startDateRules = Some(everyDayRules)
@@ -25,26 +25,26 @@ class CatalogTest extends FlatSpec with Matchers {
     val weekendsRule = everyDayRules.copy(
       daysOfWeek = Some(List(Saturday, Sunday))
     )
-    val voucherWeekend = ProductInfo(
+    val voucherWeekend = PlanInfo(
       id = "voucher_weekend",
       label = "Weekend",
       startDateRules = Some(weekendsRule)
     )
 
-    val monthlyContribution = ProductInfo(
+    val monthlyContribution = PlanInfo(
       id = "monthly_contribution",
       label = "Monthly"
     )
 
-    val voucherGroup = Group("Voucher", List(voucherWeekend, voucherEveryday))
-    val contributionGroup = Group("Contribution", List(monthlyContribution))
-    val catalog = Catalog(List(voucherGroup, contributionGroup))
+    val voucherPlans = Product("Voucher", List(voucherWeekend, voucherEveryday))
+    val contributionPlans = Product("Contribution", List(monthlyContribution))
+    val catalog = Catalog(List(voucherPlans, contributionPlans))
     val expected =
       """
         |{
-        |"groups": [{
+        |"products": [{
         |    "label": "Voucher",
-        |    "products": [{
+        |    "plans": [{
         |            "id": "voucher_weekend",
         |            "label": "Weekend",
         |            "startDateRules" : {
@@ -71,7 +71,7 @@ class CatalogTest extends FlatSpec with Matchers {
         |    ]
         |}, {
         |    "label": "Contribution",
-        |    "products": [{
+        |    "plans": [{
         |        "id": "monthly_contribution",
         |        "label": "Monthly"
         |    }]
