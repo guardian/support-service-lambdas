@@ -109,6 +109,15 @@ object EndToEndTest {
       |    "done": true
       |}""".stripMargin.replaceAll("""\n""", "")
 
+  val sfAuthReq =
+    "client_id=clientsfclient&" +
+      "client_secret=clientsecretsfsecret&" +
+      "username=usernamesf&" +
+      "password=passSFpasswordtokentokenSFtoken&" +
+      "grant_type=password"
+
+  val sfAuthResponse = """{"access_token":"aaaccess", "instance_url":"https://iinstance"}"""
+
   val updateAccountRequestBody = """{"crmId":"sfacc","sfContactId__c":"newSFCont","IdentityId__c":"identest"}"""
   val removeIdentityBody = """{"IdentityID__c":""}"""
   val addIdentityBody = """{"IdentityID__c":"identest"}"""
@@ -116,12 +125,13 @@ object EndToEndTest {
   val updateAccountResponse = HTTPResponse(200, """{"Success": true}""")
 
   val mock = new TestingRawEffects(postResponses = Map(
+    POSTRequest("/services/oauth2/token", sfAuthReq) -> HTTPResponse(200, sfAuthResponse),
     POSTRequest("/action/query", accountQueryRequest) -> HTTPResponse(200, accountQueryResponse),
     POSTRequest("/action/query", contactQueryRequest) -> HTTPResponse(200, contactQueryResponse),
     POSTRequest("/accounts/2c92c0f9624bbc5f016253e573970b16", updateAccountRequestBody, "PUT") -> updateAccountResponse,
     POSTRequest("/accounts/2c92c0f8644618e30164652a558c6e20", updateAccountRequestBody, "PUT") -> updateAccountResponse,
-    POSTRequest("/services/data/v20.0/sobjects/Contact/oldSFCont", removeIdentityBody, "PATCH") -> updateAccountResponse,
-    POSTRequest("/services/data/v20.0/sobjects/Contact/newSFCont", addIdentityBody, "PATCH") -> updateAccountResponse
+    POSTRequest("/data/v20.0/sobjects/Contact/oldSFCont", removeIdentityBody, "PATCH") -> updateAccountResponse,
+    POSTRequest("/data/v20.0/sobjects/Contact/newSFCont", addIdentityBody, "PATCH") -> updateAccountResponse
   ))
 
 }

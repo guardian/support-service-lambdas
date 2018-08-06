@@ -10,8 +10,7 @@ object UpdateSteps {
 
   def apply(
     setOrClearIdentityId: ((SFContactId, Option[IdentityId])) => ClientFailableOp[Unit],
-    updateAccountSFLinks: LinksFromZuora => AccountId => ClientFailableOp[Unit]
-  )(
+    updateAccountSFLinks: LinksFromZuora => AccountId => ClientFailableOp[Unit],
     sfPointer: LinksFromZuora,
     maybeOldContactId: Option[SFContactId],
     accountIds: NonEmptyList[AccountId]

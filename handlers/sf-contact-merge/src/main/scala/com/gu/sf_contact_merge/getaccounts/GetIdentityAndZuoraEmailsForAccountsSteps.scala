@@ -15,10 +15,12 @@ object GetIdentityAndZuoraEmailsForAccountsSteps {
     emailAddress: Option[EmailAddress]
   )
 
-  def apply(zuoraQuerier: ZuoraQuerier)(accountIds: NonEmptyList[AccountId]): ClientFailableOp[List[IdentityAndSFContactAndEmail]] = {
+  def apply(zuoraQuerier: ZuoraQuerier, accountIds: NonEmptyList[AccountId]): ClientFailableOp[List[IdentityAndSFContactAndEmail]] = {
 
-    val getEmails = GetEmails(zuoraQuerier)_
-    val getContacts = GetContacts(zuoraQuerier)_
+    val getEmails: NonEmptyList[GetEmails.ContactId] => ClientFailableOp[Map[GetEmails.ContactId, Option[EmailAddress]]] =
+      GetEmails(zuoraQuerier, _)
+    val getContacts: NonEmptyList[AccountId] => ClientFailableOp[Map[GetEmails.ContactId, GetContacts.IdentityAndSFContact]] =
+      GetContacts(zuoraQuerier, _)
 
     for {
       identityForBillingContact <- getContacts(accountIds)

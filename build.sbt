@@ -189,7 +189,7 @@ lazy val `zuora-retention` = all(project in file("handlers/zuora-retention"))
 
 lazy val `sf-contact-merge` = all(project in file("handlers/sf-contact-merge"))
   .enablePlugins(RiffRaffArtifact)
-  .dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
+  .dependsOn(zuora, salesforce, handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `cancellation-sf-cases` = all(project in file("handlers/cancellation-sf-cases"))
   .enablePlugins(RiffRaffArtifact)

@@ -4,6 +4,8 @@ import java.io.{InputStream, OutputStream}
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
+import com.gu.salesforce.auth.SalesforceAuthenticate
+import com.gu.salesforce.auth.SalesforceAuthenticate.SFAuthConfig
 import com.gu.sf_contact_merge.TypeConvert._
 import com.gu.sf_contact_merge.WireRequestToDomainObject.WireSfContactRequest
 import com.gu.sf_contact_merge.getaccounts.GetContacts.{AccountId, IdentityId, SFContactId}
@@ -35,18 +37,26 @@ object Handler {
   def operationForEffects(stage: Stage, fetchString: StringFromS3, getResponse: Request => Response): ApiGatewayOp[Operation] = {
     val loadConfig = LoadConfigModule(stage, fetchString)
     for {
+
       zuoraRestConfig <- loadConfig[ZuoraRestConfig].toApiGatewayOp("load trusted Api config")
       requests = ZuoraRestRequestMaker(getResponse, zuoraRestConfig)
       zuoraQuerier = ZuoraQuery(requests)
-      wiredSteps = Steps(
-        GetIdentityAndZuoraEmailsForAccountsSteps(zuoraQuerier),
-        ValidationSteps.apply _,
-        UpdateSteps(
-          UpdateSalesforceIdentityId(requests.patch),
-          UpdateAccountSFLinks(requests.put)
-        )
-      ) _
-    } yield Operation.noHealthcheck(wiredSteps)
+
+      sfConfig <- loadConfig[SFAuthConfig].toApiGatewayOp("load trusted Api config")
+      sfRequests <- SalesforceAuthenticate(getResponse, sfConfig)
+
+    } yield Operation.noHealthcheck(Steps(
+      GetIdentityAndZuoraEmailsForAccountsSteps(zuoraQuerier, _),
+      ValidationSteps(_, _),
+      UpdateSteps(
+        UpdateSalesforceIdentityId(sfRequests.patch),
+        UpdateAccountSFLinks(requests.put),
+        _,
+        _,
+        _
+      ),
+      _
+    ))
   }
 
 }
@@ -58,8 +68,9 @@ object Steps {
   def apply(
     getIdentityAndZuoraEmailsForAccounts: NonEmptyList[AccountId] => ClientFailableOp[List[IdentityAndSFContactAndEmail]],
     validation: (Option[IdentityId], List[IdentityAndSFContactAndEmail]) => ApiGatewayOp[Unit],
-    update: (LinksFromZuora, Option[SFContactId], NonEmptyList[AccountId]) => ClientFailableOp[Unit]
-  )(req: ApiGatewayRequest): ResponseModels.ApiResponse =
+    update: (LinksFromZuora, Option[SFContactId], NonEmptyList[AccountId]) => ClientFailableOp[Unit],
+    req: ApiGatewayRequest
+  ): ResponseModels.ApiResponse =
     (for {
       wireInput <- req.bodyAsCaseClass[WireSfContactRequest]()
       mergeRequest <- WireRequestToDomainObject(wireInput)
