@@ -63,7 +63,6 @@ object WireModel {
     implicit val writes = Json.writes[WireSelectableWindow]
   }
 
-
   object WireStartDateRules {
     implicit val writes = Json.writes[WireStartDateRules]
 
@@ -95,7 +94,6 @@ object WireModel {
         startDateRules = if (plan.startDateRules.isEmpty) None
         else Some(WireStartDateRules.fromDateRules(plan.startDateRules))
       )
-
 
   }
 
