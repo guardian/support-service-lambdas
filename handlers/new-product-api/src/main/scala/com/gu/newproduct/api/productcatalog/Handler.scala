@@ -3,6 +3,7 @@ package com.gu.newproduct.api.productcatalog
 import java.io.{InputStream, OutputStream}
 
 import com.amazonaws.services.lambda.runtime.Context
+import com.gu.newproduct.api.productcatalog.WireModel._
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, ApiGatewayResponse}
@@ -21,17 +22,17 @@ object Handler extends Logging {
     }
 
   val catalog = {
-    val voucherWindowRules = SelectableWindow(
+    val voucherWindowRules = WireSelectableWindow(
       cutOffDayInclusive = Some(Tuesday),
       startDaysAfterCutOff = Some(20),
       sizeInDays = Some(28)
     )
-    val voucherEverydayRules = StartDateRules(
+    val voucherEverydayRules = WireStartDateRules(
       daysOfWeek = Some(List(Monday)),
       selectableWindow = Some(voucherWindowRules)
     )
 
-    val voucherEveryday = ProductInfo(
+    val voucherEveryday = WirePlanInfo(
       id = "voucher_everyday",
       label = "Every day",
       startDateRules = Some(voucherEverydayRules)
@@ -40,27 +41,27 @@ object Handler extends Logging {
     val weekendsRule = voucherEverydayRules.copy(
       daysOfWeek = Some(List(Saturday, Sunday))
     )
-    val voucherWeekend = ProductInfo(
+    val voucherWeekend = WirePlanInfo(
       id = "voucher_weekend",
       label = "Weekend",
       startDateRules = Some(weekendsRule)
     )
 
-    val contributionWindowRules = SelectableWindow(
+    val contributionWindowRules = WireSelectableWindow(
       sizeInDays = Some(1)
     )
-    val contributionRules = StartDateRules(
+    val contributionRules = WireStartDateRules(
       selectableWindow = Some(contributionWindowRules)
     )
 
-    val monthlyContribution = ProductInfo(
+    val monthlyContribution = WirePlanInfo(
       id = "monthly_contribution",
       label = "Monthly",
       startDateRules = Some(contributionRules)
     )
-    val voucherGroup = Group("Voucher", List(voucherWeekend, voucherEveryday))
-    val contributionGroup = Group("Contribution", List(monthlyContribution))
-    Catalog(List(voucherGroup, contributionGroup))
+    val voucherGroup = WireProduct("Voucher", List(voucherWeekend, voucherEveryday))
+    val contributionGroup = WireProduct("Contribution", List(monthlyContribution))
+    WireCatalog(List(voucherGroup, contributionGroup))
   }
 }
 
