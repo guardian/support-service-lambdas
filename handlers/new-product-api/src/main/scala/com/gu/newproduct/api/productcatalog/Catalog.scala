@@ -11,7 +11,7 @@ case class Catalog(
 )
 
 object Catalog {
-  def apply(getCurrentDate: () => LocalDate) {
+  def apply(getCurrentDate: () => LocalDate): Catalog = {
     val voucherWindowRule = WindowRule(
       now = getCurrentDate,
       cutOffDay = Some(DayOfWeek.TUESDAY),
