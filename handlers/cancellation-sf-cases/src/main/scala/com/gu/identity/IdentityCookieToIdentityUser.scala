@@ -9,7 +9,9 @@ object IdentityCookieToIdentityUser extends Logging {
 
   type CookieValuesToIdentityUser = (String, String) => Option[IdentityUser]
 
-  case class IdentityUser(id: String, displayName: Option[String])
+  final case class IdentityId(value: String) extends AnyVal
+
+  case class IdentityUser(id: IdentityId, displayName: Option[String])
 
   def apply(
     cookiesToIdentityUser: CookieValuesToIdentityUser
@@ -40,7 +42,7 @@ object IdentityCookieToIdentityUser extends Logging {
       userFromScGuU <- cookieDecoder.getUserDataForScGuU(scGuU)
       userFromGuU <- cookieDecoder.getUserDataForGuU(guU)
       displayName = if (userFromScGuU.id equals userFromGuU.getUser.id) userFromGuU.getUser.publicFields.displayName else None
-    } yield IdentityUser(userFromScGuU.id, displayName)
+    } yield IdentityUser(IdentityId(userFromScGuU.id), displayName)
   }
 
 }
