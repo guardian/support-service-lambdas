@@ -31,7 +31,7 @@ object Handler extends Logging {
       selectableWindow = Some(voucherWindowRules)
     )
 
-    val voucherEveryday = ProductInfo(
+    val voucherEveryday = PlanInfo(
       id = "voucher_everyday",
       label = "Every day",
       startDateRules = Some(voucherEverydayRules)
@@ -40,7 +40,7 @@ object Handler extends Logging {
     val weekendsRule = voucherEverydayRules.copy(
       daysOfWeek = Some(List(Saturday, Sunday))
     )
-    val voucherWeekend = ProductInfo(
+    val voucherWeekend = PlanInfo(
       id = "voucher_weekend",
       label = "Weekend",
       startDateRules = Some(weekendsRule)
@@ -53,13 +53,13 @@ object Handler extends Logging {
       selectableWindow = Some(contributionWindowRules)
     )
 
-    val monthlyContribution = ProductInfo(
+    val monthlyContribution = PlanInfo(
       id = "monthly_contribution",
       label = "Monthly",
       startDateRules = Some(contributionRules)
     )
-    val voucherGroup = Group("Voucher", List(voucherWeekend, voucherEveryday))
-    val contributionGroup = Group("Contribution", List(monthlyContribution))
+    val voucherGroup = Product("Voucher", List(voucherWeekend, voucherEveryday))
+    val contributionGroup = Product("Contribution", List(monthlyContribution))
     Catalog(List(voucherGroup, contributionGroup))
   }
 }

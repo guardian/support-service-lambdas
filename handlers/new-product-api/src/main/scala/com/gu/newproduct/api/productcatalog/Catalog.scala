@@ -18,7 +18,7 @@ case object Saturday extends DayOfWeek
 
 case object Sunday extends DayOfWeek
 
-case class ProductInfo(
+case class PlanInfo(
   id: String,
   label: String,
   startDateRules: Option[StartDateRules] = None
@@ -34,9 +34,9 @@ case class StartDateRules(
   selectableWindow: Option[SelectableWindow] = None
 )
 
-case class Group(label: String, products: List[ProductInfo])
+case class Product(label: String, plans: List[PlanInfo])
 
-case class Catalog(groups: List[Group])
+case class Catalog(products: List[Product])
 
 object DayOfWeek {
   implicit val writes: Writes[DayOfWeek] = { (day: DayOfWeek) => JsString(day.toString) }
@@ -48,12 +48,12 @@ object SelectableWindow {
 object StartDateRules {
   implicit val writes = Json.writes[StartDateRules]
 }
-object ProductInfo {
-  implicit val writes = Json.writes[ProductInfo]
+object PlanInfo {
+  implicit val writes = Json.writes[PlanInfo]
 }
 
-object Group {
-  implicit val writes = Json.writes[Group]
+object Product {
+  implicit val writes = Json.writes[Product]
 }
 
 object Catalog {
