@@ -109,7 +109,13 @@ object EndToEndTest {
       |    "done": true
       |}""".stripMargin.replaceAll("""\n""", "")
 
-  val sfAuthReq = """client_id=clientsfclient&client_secret=clientsecretsfsecret&username=usernamesf&password=passSFpasswordtokentokenSFtoken&grant_type=password"""
+  val sfAuthReq =
+    "client_id=clientsfclient&" +
+      "client_secret=clientsecretsfsecret&" +
+      "username=usernamesf&" +
+      "password=passSFpasswordtokentokenSFtoken&" +
+      "grant_type=password"
+
   val sfAuthResponse = """{"access_token":"aaaccess", "instance_url":"https://iinstance"}"""
 
   val updateAccountRequestBody = """{"crmId":"sfacc","sfContactId__c":"newSFCont","IdentityId__c":"identest"}"""
