@@ -12,7 +12,8 @@ class UpdateSalesforceIdentityIdTest extends FlatSpec with Matchers {
   it should "send the right request for update identity id" in {
 
     val actual = UpdateSalesforceIdentityId.toRequest(SFContactId("contactsf"), Some(IdentityId("identityid")))
-    val expected = new PatchRequest(JsObject(Seq("IdentityID__c" -> JsString("identityid"))), RelativePath("/services/data/v20.0/sobjects/Contact/contactsf"))
+    val expectedJson = JsObject(Seq("IdentityID__c" -> JsString("identityid")))
+    val expected = new PatchRequest(expectedJson, RelativePath("/services/data/v20.0/sobjects/Contact/contactsf"))
     actual should be(expected)
 
   }
