@@ -20,7 +20,7 @@ object PrerequisiteCheck {
   def apply(
     zuoraClient: RestRequestMaker.Requests,
     contributionRatePlanIds: List[ProductRatePlanId],
-    catalog: Catalog,
+    isValidStartDate: LocalDate => ValidationResult[Unit],
   )(request: AddSubscriptionRequest): ApiGatewayOp[ValidatedFields] = {
 
     def getAccount = GetAccount(zuoraClient.get[ZuoraAccount]) _
@@ -30,8 +30,7 @@ object PrerequisiteCheck {
     def getSubscriptions = GetAccountSubscriptions(zuoraClient.get[ZuoraSubscriptionsResponse]) _
 
     val accountNotFoundError = "Zuora account id is not valid"
-    def dummyDateValidation(d:LocalDate) = Passed(())
-    val isValidStartDate = catalog.monthlyContribution.startDateRule.map(rule => rule.isValid _).getOrElse(dummyDateValidation _)
+
 
     for {
       account <- getAccount(request.zuoraAccountId).toApiResponseCheckingNotFound(

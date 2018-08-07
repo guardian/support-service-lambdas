@@ -1,6 +1,8 @@
 package com.gu.newproduct.api.addsubscription
 
-import com.gu.newproduct.api.addsubscription.validation.{Failed, Passed, ValidationResult}
+import java.time.LocalDate
+
+import com.gu.newproduct.api.addsubscription.validation.{DateRule, Failed, Passed, ValidationResult}
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
@@ -39,6 +41,11 @@ object TypeConvert {
       case NotFound(_) => ReturnWithResponse(ApiValidationErrorResponse(ifNotFoundReturn))
       case anyOtherResponse => anyOtherResponse.toDisjunction.toApiGatewayOp(action)
     }
+  }
+
+  implicit class OptionalRuleConverter(maybeRule: Option[DateRule]) {
+    def alwaysValid(d: LocalDate) = Passed(())
+    def isValid: LocalDate => ValidationResult[Unit] = maybeRule.map(rule => rule.isValid _).getOrElse(alwaysValid _)
   }
 
 }
