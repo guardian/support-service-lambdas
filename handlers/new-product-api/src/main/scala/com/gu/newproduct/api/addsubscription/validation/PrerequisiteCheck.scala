@@ -1,5 +1,7 @@
 package com.gu.newproduct.api.addsubscription.validation
 
+import java.time.LocalDate
+
 import com.gu.i18n.Currency
 import com.gu.newproduct.api.addsubscription.AddSubscriptionRequest
 import com.gu.newproduct.api.addsubscription.TypeConvert._
@@ -28,6 +30,8 @@ object PrerequisiteCheck {
     def getSubscriptions = GetAccountSubscriptions(zuoraClient.get[ZuoraSubscriptionsResponse]) _
 
     val accountNotFoundError = "Zuora account id is not valid"
+    def dummyDateValidation(d:LocalDate) = Passed(())
+    val isValidStartDate = catalog.monthlyContribution.startDateRule.map(rule => rule.isValid _).getOrElse(dummyDateValidation _)
 
     for {
       account <- getAccount(request.zuoraAccountId).toApiResponseCheckingNotFound(
@@ -39,7 +43,9 @@ object PrerequisiteCheck {
       _ <- ValidatePaymentMethod(paymentMethod).toApiGatewayOp
       subs <- getSubscriptions(request.zuoraAccountId).toApiGatewayOp("get subscriptions for account from Zuora")
       _ <- ValidateSubscriptions(contributionRatePlanIds)(subs).toApiGatewayOp
-      _ <- ValidateRequest(catalog.monthlyContribution.startDateRule, AmountLimits.limitsFor)(request, account.currency).toApiGatewayOp
+
+
+      _ <- ValidateRequest(isValidStartDate, AmountLimits.limitsFor)(request, account.currency).toApiGatewayOp
     } yield ValidatedFields(paymentMethod, account.currency)
   }
 }
