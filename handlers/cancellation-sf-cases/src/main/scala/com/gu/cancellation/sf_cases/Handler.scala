@@ -68,7 +68,8 @@ object Handler extends Logging {
     case class RaiseCaseDetail(
       product: ProductName,
       reason: Reason,
-      subscriptionName: SubscriptionName
+      subscriptionName: SubscriptionName,
+      gaData: String
     )
     implicit val readsRaiseCaseDetail = Json.reads[RaiseCaseDetail]
     implicit val writesCaseWithId = Json.writes[CaseWithId]
@@ -86,6 +87,7 @@ object Handler extends Logging {
         SF_Subscription__c = SubscriptionId(sfSubscriptionIdContainer.Id),
         Journey__c = "SV - At Risk - MB",
         Enquiry_Type__c = raiseCaseDetail.reason.value,
+        Case_Closure_Reason__c = raiseCaseDetail.gaData,
         Status = "Closed",
         Subject = CaseSubject(STARTING_CASE_SUBJECT)
       )
