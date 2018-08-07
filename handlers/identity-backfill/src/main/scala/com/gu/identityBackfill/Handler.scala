@@ -6,10 +6,12 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.identity.{GetByEmail, IdentityConfig}
 import com.gu.identityBackfill.TypeConvert._
-import com.gu.identityBackfill.Types.{EmailAddress, IdentityId}
+import com.gu.identityBackfill.Types.EmailAddress
 import com.gu.identityBackfill.salesforce.ContactSyncCheck.RecordTypeId
+import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
 import com.gu.identityBackfill.salesforce._
 import com.gu.identityBackfill.zuora.{AddIdentityIdToAccount, CountZuoraAccountsForIdentityId, GetZuoraAccountsForEmail, GetZuoraSubTypeForAccount}
+import com.gu.salesforce.AnyVals.SFContactId
 import com.gu.salesforce.auth.SalesforceAuthenticate
 import com.gu.salesforce.auth.SalesforceAuthenticate.SFAuthConfig
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
@@ -92,7 +94,7 @@ object Handler {
     mappings.get(stage).toApiGatewayContinueProcessing(ApiGatewayResponse.internalServerError(s"missing standard record type for stage $stage"))
   }
 
-  def syncableSFToIdentity(sfRequests: ApiGatewayOp[Requests], stage: Stage)(sFContactId: Types.SFContactId): ApiGatewayOp[Unit] =
+  def syncableSFToIdentity(sfRequests: ApiGatewayOp[Requests], stage: Stage)(sFContactId: SFContactId): ApiGatewayOp[Unit] =
     for {
       sfRequests <- sfRequests
       standardRecordType <- standardRecordTypeForStage(stage)
@@ -102,12 +104,12 @@ object Handler {
   def updateSalesforceIdentityId(
     sfRequests: ApiGatewayOp[Requests]
   )(
-    sFContactId: Types.SFContactId,
+    sFContactId: SFContactId,
     identityId: IdentityId
   ): ApiGatewayOp[Unit] =
     for {
       sfRequests <- sfRequests
-      _ <- UpdateSalesforceIdentityId(sfRequests)(sFContactId, identityId).toApiGatewayOp("zuora issue")
+      _ <- UpdateSalesforceIdentityId.set(sfRequests.patch)(sFContactId, identityId).toApiGatewayOp("zuora issue")
     } yield ()
 
 }

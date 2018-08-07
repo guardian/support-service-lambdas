@@ -1,8 +1,9 @@
 package com.gu.identityBackfill.zuora.addIdentityId
 
 import com.gu.effects.{GetFromS3, RawEffects}
+import com.gu.identityBackfill.TypeConvert._
 import com.gu.identityBackfill.Types
-import com.gu.identityBackfill.Types.IdentityId
+import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
 import com.gu.identityBackfill.zuora.AddIdentityIdToAccount
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
@@ -10,7 +11,6 @@ import com.gu.util.reader.Types._
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
 import org.scalatest.{FlatSpec, Matchers}
 import scalaz.\/-
-import com.gu.identityBackfill.TypeConvert._
 
 import scala.util.Random
 

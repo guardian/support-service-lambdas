@@ -1,9 +1,9 @@
 package com.gu.identityBackfill.salesforce.updateSFIdentityId
 
-import com.gu.identityBackfill.TypeConvert._
-import com.gu.identityBackfill.Types.{IdentityId, SFContactId}
-import com.gu.util.reader.Types._
+import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
+import com.gu.salesforce.AnyVals.SFContactId
 import com.gu.util.resthttp.RestRequestMaker
+import com.gu.util.resthttp.Types.ClientFailableOp
 import play.api.libs.json.Json
 
 object GetSalesforceIdentityId {
@@ -13,9 +13,9 @@ object GetSalesforceIdentityId {
     implicit val reads = Json.reads[WireResult]
   }
 
-  def apply(get: RestRequestMaker.Requests)(sFContactId: SFContactId): ApiGatewayOp[IdentityId] = {
+  def apply(get: RestRequestMaker.Requests)(sFContactId: SFContactId): ClientFailableOp[IdentityId] = {
     val id = get.get[WireResult](s"/services/data/v20.0/sobjects/Contact/${sFContactId.value}")
-    id.toApiGatewayOp("failed").map(id => IdentityId(id.IdentityID__c))
+    id.map(id => IdentityId(id.IdentityID__c))
   }
 
 }

@@ -2,15 +2,17 @@ package com.gu.identityBackfill
 
 import com.gu.identityBackfill.IdentityBackfillSteps.WireModel.IdentityBackfillRequest
 import com.gu.identityBackfill.PreReqCheck.PreReqResult
+import com.gu.identityBackfill.TypeConvert._
 import com.gu.identityBackfill.Types._
+import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
+import com.gu.salesforce.AnyVals.SFContactId
 import com.gu.util.Logging
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
+import com.gu.util.reader.Types.ApiGatewayOp._
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.Types.ClientFailableOp
 import play.api.libs.json.{Json, Reads}
-import ApiGatewayOp._
-import TypeConvert._
 
 object IdentityBackfillSteps extends Logging {
 

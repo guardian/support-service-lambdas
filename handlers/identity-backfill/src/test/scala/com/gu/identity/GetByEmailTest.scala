@@ -4,7 +4,8 @@ import com.gu.effects.TestingRawEffects
 import com.gu.effects.TestingRawEffects.HTTPResponse
 import com.gu.identity.GetByEmail.{NotFound, NotValidated}
 import com.gu.identity.GetByEmailTest.{NotFoundTestData, NotValidatedTestData, TestData}
-import com.gu.identityBackfill.Types.{EmailAddress, IdentityId}
+import com.gu.identityBackfill.Types.EmailAddress
+import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
 import org.scalatest.{FlatSpec, Matchers}
 import scalaz.{-\/, \/, \/-}
 
