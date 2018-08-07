@@ -1,6 +1,6 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Coverage/02af78419f69421396f090fea607ac3c)](https://www.codacy.com/app/johnduffell/zuora-auto-cancel?utm_source=github.com&utm_medium=referral&utm_content=guardian/zuora-auto-cancel&utm_campaign=Badge_Coverage) codacy
 
-[![Coverage Status](https://coveralls.io/repos/github/guardian/zuora-auto-cancel/badge.svg?branch=coveralls)](https://coveralls.io/github/guardian/zuora-auto-cancel?branch=coveralls) coveralls
+[![Coverage Status](https://coveralls.io/repos/github/guardian/zuora-auto-cancel/badge.svg?branch=master)](https://coveralls.io/github/guardian/zuora-auto-cancel?branch=master) coveralls
 # zuora-auto-cancel
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/df83c14325bc4c29aeae7e529f49f8a9)](https://app.codacy.com/app/johnduffell/zuora-auto-cancel?utm_source=github.com&utm_medium=referral&utm_content=guardian/zuora-auto-cancel&utm_campaign=badger)
