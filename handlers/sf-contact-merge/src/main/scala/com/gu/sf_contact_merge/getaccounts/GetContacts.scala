@@ -1,5 +1,7 @@
 package com.gu.sf_contact_merge.getaccounts
 
+import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
+import com.gu.salesforce.AnyVals.SFContactId
 import com.gu.sf_contact_merge.getaccounts.GetEmails.ContactId
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError}
 import com.gu.util.zuora.SafeQueryBuilder.Implicits._
@@ -11,9 +13,6 @@ import scalaz.NonEmptyList
 object GetContacts {
 
   case class IdentityAndSFContact(identityId: Option[IdentityId], sfContactId: SFContactId)
-
-  case class IdentityId(value: String) extends AnyVal
-  case class SFContactId(value: String) extends AnyVal
 
   case class AccountId(value: String) extends AnyVal
 

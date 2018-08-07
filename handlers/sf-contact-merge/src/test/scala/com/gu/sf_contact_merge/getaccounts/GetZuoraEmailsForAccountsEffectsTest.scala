@@ -1,8 +1,10 @@
 package com.gu.sf_contact_merge.getaccounts
 
 import com.gu.effects.{GetFromS3, RawEffects}
+import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
+import com.gu.salesforce.AnyVals.SFContactId
 import com.gu.sf_contact_merge.TypeConvert._
-import com.gu.sf_contact_merge.getaccounts.GetContacts.{AccountId, IdentityId, SFContactId}
+import com.gu.sf_contact_merge.getaccounts.GetContacts.AccountId
 import com.gu.sf_contact_merge.getaccounts.GetEmails.EmailAddress
 import com.gu.sf_contact_merge.getaccounts.GetIdentityAndZuoraEmailsForAccountsSteps.IdentityAndSFContactAndEmail
 import com.gu.test.EffectsTest

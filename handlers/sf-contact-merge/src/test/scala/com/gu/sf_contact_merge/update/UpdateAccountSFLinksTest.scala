@@ -1,7 +1,9 @@
 package com.gu.sf_contact_merge.update
 
+import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
+import com.gu.salesforce.AnyVals.SFContactId
+import com.gu.sf_contact_merge.getaccounts.GetContacts.AccountId
 import com.gu.sf_contact_merge.update.UpdateAccountSFLinks.{CRMAccountId, LinksFromZuora}
-import com.gu.sf_contact_merge.getaccounts.GetContacts.{AccountId, IdentityId, SFContactId}
 import com.gu.util.resthttp.RestRequestMaker.{PutRequest, RelativePath}
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json._
