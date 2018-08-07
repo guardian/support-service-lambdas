@@ -39,8 +39,7 @@ object PrerequisiteCheck {
       _ <- ValidatePaymentMethod(paymentMethod).toApiGatewayOp
       subs <- getSubscriptions(request.zuoraAccountId).toApiGatewayOp("get subscriptions for account from Zuora")
       _ <- ValidateSubscriptions(contributionRatePlanIds)(subs).toApiGatewayOp
-      startDateRule = CompositeRule(catalog.monthlyContribution.startDateRules) //TODO put the composite rule in the catalog directly
-      _ <- ValidateRequest(startDateRule, AmountLimits.limitsFor)(request, account.currency).toApiGatewayOp
+      _ <- ValidateRequest(catalog.monthlyContribution.startDateRule, AmountLimits.limitsFor)(request, account.currency).toApiGatewayOp
     } yield ValidatedFields(paymentMethod, account.currency)
   }
 }

@@ -3,7 +3,7 @@ package scala.com.gu.newproduct.api.productcatalog
 import java.time.{DayOfWeek, LocalDate}
 import java.time.DayOfWeek._
 
-import com.gu.newproduct.api.addsubscription.validation.{DateRule, Days, DaysOfWeekRule, WindowRule}
+import com.gu.newproduct.api.addsubscription.validation._
 
 case class Catalog(
   voucherWeekend: Plan,
@@ -21,15 +21,17 @@ object Catalog {
     )
     val weekendRule = DaysOfWeekRule(List(SATURDAY, SUNDAY))
     val mondayRule = DaysOfWeekRule(List(MONDAY))
-    val voucherWeekend = Plan(PlanId("voucher_weekend"), List(voucherWindowRule, weekendRule))
-    val voucherEveryDay = Plan(PlanId("voucher_everyDay"), List(voucherWindowRule, mondayRule))
+    val voucherWeekednDateRules = CompositeRule(List(voucherWindowRule, weekendRule))
+    val voucherWeekend = Plan(PlanId("voucher_weekend"), Some(voucherWeekednDateRules))
+    val voucherEveryDayDateRules = CompositeRule(List(voucherWindowRule, mondayRule))
+    val voucherEveryDay = Plan(PlanId("voucher_everyDay"), Some(voucherEveryDayDateRules))
     val monthlyContributionwindow = WindowRule(
       now = getCurrentDate,
       size = Some(Days(1)),
       cutOffDay = None,
       startDelay = None
     )
-    val monthlyContribution = Plan(PlanId("monthly_contribution"), List(monthlyContributionwindow))
+    val monthlyContribution = Plan(PlanId("monthly_contribution"), Some(monthlyContributionwindow))
 
     Catalog(
       voucherWeekend = voucherWeekend,
@@ -39,4 +41,4 @@ object Catalog {
   }
 }
 case class PlanId(value: String) extends AnyVal
-case class Plan(id: PlanId, startDateRules: List[DateRule])
+case class Plan(id: PlanId, startDateRule: Option[DateRule])

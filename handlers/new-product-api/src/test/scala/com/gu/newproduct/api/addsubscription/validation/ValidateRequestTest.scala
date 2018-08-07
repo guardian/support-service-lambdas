@@ -25,10 +25,10 @@ class ValidateRequestTest extends FlatSpec with Matchers {
     AmountLimits(min = 100, max = 200)
   }
   val rule = new DateRule {
-    override def isValid(d: LocalDate): ValidationResult[Unit] = if (d== LocalDate.of(2018, 7 ,20)) Passed(())
+    override def isValid(d: LocalDate): ValidationResult[Unit] = if (d == LocalDate.of(2018, 7, 20)) Passed(())
     else Failed("Date validation failed!")
   }
-  def wiredValidator = ValidateRequest(rule, amountLimitsFor) _
+  def wiredValidator = ValidateRequest(Some(rule), amountLimitsFor) _
 
   it should "return error if date validation fails" in {
     val oldRequest = testRequest.copy(startDate = LocalDate.of(1985, 10, 26))
