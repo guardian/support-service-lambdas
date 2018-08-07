@@ -1,7 +1,5 @@
 package com.gu.newproduct.api.addsubscription.validation
 
-import java.time.LocalDate
-
 import com.gu.i18n.Currency
 import com.gu.newproduct.api.addsubscription.AddSubscriptionRequest
 import com.gu.newproduct.api.addsubscription.TypeConvert._
@@ -13,12 +11,14 @@ import com.gu.newproduct.api.addsubscription.zuora.{GetAccount, GetAccountSubscr
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.RestRequestMaker
 
+import scala.com.gu.newproduct.api.productcatalog.Catalog
+
 case class ValidatedFields(paymentMethod: PaymentMethod, currency: Currency)
 object PrerequisiteCheck {
   def apply(
     zuoraClient: RestRequestMaker.Requests,
     contributionRatePlanIds: List[ProductRatePlanId],
-    getCurrentDate: () => LocalDate
+    catalog: Catalog,
   )(request: AddSubscriptionRequest): ApiGatewayOp[ValidatedFields] = {
 
     def getAccount = GetAccount(zuoraClient.get[ZuoraAccount]) _
@@ -39,7 +39,8 @@ object PrerequisiteCheck {
       _ <- ValidatePaymentMethod(paymentMethod).toApiGatewayOp
       subs <- getSubscriptions(request.zuoraAccountId).toApiGatewayOp("get subscriptions for account from Zuora")
       _ <- ValidateSubscriptions(contributionRatePlanIds)(subs).toApiGatewayOp
-      _ <- ValidateRequest(getCurrentDate, AmountLimits.limitsFor)(request, account.currency).toApiGatewayOp
+      startDateRule = CompositeRule(catalog.monthlyContribution.startDateRules) //TODO put the composite rule in the catalog directly
+      _ <- ValidateRequest(startDateRule, AmountLimits.limitsFor)(request, account.currency).toApiGatewayOp
     } yield ValidatedFields(paymentMethod, account.currency)
   }
 }

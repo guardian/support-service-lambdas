@@ -3,11 +3,12 @@ package com.gu.newproduct.api.productcatalog
 import java.time.{DayOfWeek, LocalDate}
 import java.time.DayOfWeek._
 
+import com.gu.newproduct.api.addsubscription.validation.{Days, DaysOfWeekRule, WindowRule}
 import com.gu.newproduct.api.productcatalog.WireModel._
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
 
-import scala.com.gu.newproduct.api.productcatalog.Catalog
+import scala.com.gu.newproduct.api.productcatalog.{Catalog, Plan, PlanId}
 
 class CatalogWireTest extends FlatSpec with Matchers {
   it should "serialise wire catalog" in {
@@ -56,7 +57,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
   }
 
   it should "convert catalog to wire catalog" in {
-    val fakeDate = () => LocalDate.of(2018,8,6)
+    val fakeDate = () => LocalDate.of(2018, 8, 6)
     val testCatalog = TestData.getTestCatalog(fakeDate)
 
     WireCatalog.fromCatalog(testCatalog) shouldBe TestData.testWireCatalog

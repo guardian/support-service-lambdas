@@ -2,7 +2,8 @@ package scala.com.gu.newproduct.api.productcatalog
 
 import java.time.{DayOfWeek, LocalDate}
 import java.time.DayOfWeek._
-import com.gu.newproduct.api.productcatalog._
+
+import com.gu.newproduct.api.addsubscription.validation.{DateRule, Days, DaysOfWeekRule, WindowRule}
 
 case class Catalog(
   voucherWeekend: Plan,
@@ -37,3 +38,5 @@ object Catalog {
     )
   }
 }
+case class PlanId(value: String) extends AnyVal
+case class Plan(id: PlanId, startDateRules: List[DateRule])

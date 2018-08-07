@@ -28,6 +28,7 @@ import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
 import okhttp3.{Request, Response}
 
+import scala.com.gu.newproduct.api.productcatalog.Catalog
 import scala.concurrent.Future
 object Handler extends Logging {
 
@@ -84,12 +85,12 @@ object Steps {
       zuoraClient = ZuoraRestRequestMaker(response, zuoraConfig)
       sqsSend = AwsSQSSend(emailQueueFor(stage)) _
       contributionsSqsSend = EtSqsSend[ContributionFields](sqsSend) _
-
+      getCurrentDate = () => RawEffects.now().toLocalDate
+      catalog = Catalog(getCurrentDate)
       getBillTo = GetBillToContact(zuoraClient.get[GetBillToResponse]) _
       createMonthlyContribution = CreateSubscription(zuoraIds.monthly, zuoraClient.post[WireCreateRequest, WireSubscription]) _
       contributionIds = List(zuoraIds.monthly.productRatePlanId, zuoraIds.annual.productRatePlanId)
-      getCurrentDate = () => RawEffects.now().toLocalDate
-      prerequisiteCheck = PrerequisiteCheck(zuoraClient, contributionIds, getCurrentDate) _
+      prerequisiteCheck = PrerequisiteCheck(zuoraClient, contributionIds, catalog) _
       asyncPrerequisiteCheck = prerequisiteCheck.andThenConvertToAsync
       sendConfirmationEmail = SendConfirmationEmail(contributionsSqsSend, getCurrentDate, getBillTo) _
       configuredOp = Operation.async(

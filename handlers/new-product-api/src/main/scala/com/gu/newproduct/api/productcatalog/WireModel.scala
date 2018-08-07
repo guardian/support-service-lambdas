@@ -2,9 +2,10 @@ package com.gu.newproduct.api.productcatalog
 
 import java.time.DayOfWeek
 
+import com.gu.newproduct.api.addsubscription.validation.{DateRule, DaysOfWeekRule, WindowRule}
 import play.api.libs.json.{JsString, Json, Writes}
 
-import scala.com.gu.newproduct.api.productcatalog.Catalog
+import scala.com.gu.newproduct.api.productcatalog.{Catalog, Plan}
 
 object WireModel {
 
