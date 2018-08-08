@@ -50,28 +50,37 @@ case class WindowRule(
   maybeSize: Option[Days]
 ) extends DateRule {
 
-  override def isValid(dateToValidate: LocalDate): ValidationResult[Unit] = {
-
+  val selectableWindow = {
     val baseDate = maybeCutOffDay match {
       case Some(cutOffDayOfWeek) => now().minusDays(1) `with` TemporalAdjusters.next(cutOffDayOfWeek)
       case None => now()
     }
-
     val startDelay = maybeStartDelay.getOrElse(Days(0))
     val startDate = baseDate.plusDays(startDelay.value.toLong)
     val maybeWindowEnd = maybeSize.map { windowSize => startDate.plusDays(windowSize.value.toLong) }
-
-    val isOnOrAfterWindowStart = dateToValidate.isAfter(startDate) || dateToValidate.isEqual(startDate)
-
-    def isBeforeWindowEnd = maybeWindowEnd match {
-      case None => true
-      case Some(windowEnd) => dateToValidate.isBefore(windowEnd)
-    }
-
-    def errorMessage = s"$dateToValidate is out of the selectable range: [$startDate - ${maybeWindowEnd.map(_.toString).getOrElse("")})"
-
-    (isOnOrAfterWindowStart && isBeforeWindowEnd) orFailWith errorMessage
+    SelectableWindow(startDate, maybeWindowEnd)
   }
 
+  override def isValid(dateToValidate: LocalDate): ValidationResult[Unit] = {
+    def errorMessage = {
+      val windowEndStr = selectableWindow.maybeEndExclusive.map(_.toString).getOrElse("")
+      s"$dateToValidate is out of the selectable range: [${selectableWindow.start} - $windowEndStr)"
+    }
+
+    selectableWindow contains dateToValidate orFailWith errorMessage
+  }
+}
+
+case class SelectableWindow(start: LocalDate, maybeEndExclusive: Option[LocalDate]) {
+  def contains(date: LocalDate) = {
+    val isOnOrAfterWindowStart = date.isAfter(start) || date.isEqual(start)
+
+    def isBeforeWindowEnd = maybeEndExclusive match {
+      case None => true
+      case Some(windowEnd) => date.isBefore(windowEnd)
+    }
+
+    isOnOrAfterWindowStart && isBeforeWindowEnd
+  }
 }
 
