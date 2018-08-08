@@ -12,15 +12,15 @@ import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
 import com.gu.identityBackfill.salesforce._
 import com.gu.identityBackfill.zuora.{AddIdentityIdToAccount, CountZuoraAccountsForIdentityId, GetZuoraAccountsForEmail, GetZuoraSubTypeForAccount}
 import com.gu.salesforce.AnyVals.SFContactId
-import com.gu.salesforce.auth.SalesforceAuthenticate
 import com.gu.salesforce.auth.SalesforceAuthenticate.SFAuthConfig
+import com.gu.salesforce.auth.{SalesforceAuthenticate, SalesforceRestRequestMaker}
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayResponse}
 import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.reader.Types._
-import com.gu.util.resthttp.RestRequestMaker.Requests
+import com.gu.util.resthttp.RestRequestMaker.{PatchRequest, Requests}
 import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.zuora.{ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
 import okhttp3.{Request, Response}
@@ -52,7 +52,10 @@ object Handler {
       val zuoraQuerier = ZuoraQuery(zuoraRequests)
       val getByEmail: EmailAddress => GetByEmail.ApiError \/ IdentityId = GetByEmail(response, identityConfig)
       val countZuoraAccounts: IdentityId => ClientFailableOp[Int] = CountZuoraAccountsForIdentityId(zuoraQuerier)
-      lazy val sfRequests: ApiGatewayOp[Requests] = SalesforceAuthenticate(response, sfConfig)
+
+      lazy val sfAuth = SalesforceAuthenticate.doAuth(response, sfConfig)
+      lazy val sfRequests = sfAuth.map(s => SalesforceRestRequestMaker(s, response))
+      lazy val sfPatch = sfAuth.map(s => HttpOp(response).prepend(SalesforceRestRequestMaker.patch(s)))
 
       Operation(
         steps = IdentityBackfillSteps(
@@ -64,12 +67,12 @@ object Handler {
             syncableSFToIdentity(sfRequests, stage)
           ),
           AddIdentityIdToAccount(zuoraRequests),
-          updateSalesforceIdentityId(sfRequests)
+          updateSalesforceIdentityId(sfPatch)
         ),
         healthcheck = () => Healthcheck(
           getByEmail,
           countZuoraAccounts,
-          sfRequests
+          sfAuth
         )
       )
     }
@@ -102,14 +105,14 @@ object Handler {
     } yield syncable
 
   def updateSalesforceIdentityId(
-    sfRequests: ApiGatewayOp[Requests]
+    sfRequests: ApiGatewayOp[HttpOp[PatchRequest]]
   )(
     sFContactId: SFContactId,
     identityId: IdentityId
   ): ApiGatewayOp[Unit] =
     for {
       sfRequests <- sfRequests
-      _ <- UpdateSalesforceIdentityId.set(sfRequests.patch)(sFContactId, identityId).toApiGatewayOp("zuora issue")
+      _ <- UpdateSalesforceIdentityId.set(sfRequests).run2(sFContactId, identityId).toApiGatewayOp("zuora issue")
     } yield ()
 
 }

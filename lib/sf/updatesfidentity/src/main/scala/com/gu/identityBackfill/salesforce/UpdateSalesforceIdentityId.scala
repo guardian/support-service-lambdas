@@ -2,7 +2,6 @@ package com.gu.identityBackfill.salesforce
 
 import com.gu.salesforce.AnyVals.SFContactId
 import com.gu.util.resthttp.RestRequestMaker.{PatchRequest, RelativePath}
-import com.gu.util.resthttp.Types.ClientFailableOp
 import play.api.libs.json.Json
 
 object UpdateSalesforceIdentityId {
@@ -12,11 +11,12 @@ object UpdateSalesforceIdentityId {
 
   case class IdentityId(value: String)
 
-  def apply(patch: PatchRequest => ClientFailableOp[Unit]): (SFContactId, Option[IdentityId]) => ClientFailableOp[Unit] =
-    Function.untupled((toRequest _).tupled.andThen(patch))
+  // handy extra function to do it without the option
+  def set(joinFunctions: HttpOp[PatchRequest]): HttpOp[(SFContactId, IdentityId)] =
+    joinFunctions.prepend2 { (contact, identity) => toRequest(contact, Some(identity)) }
 
-  def set(patch: PatchRequest => ClientFailableOp[Unit]): (SFContactId, IdentityId) => ClientFailableOp[Unit] =
-    Function.uncurried(Function.untupled((toRequest _).tupled.andThen(patch)).curried.andThen(_.compose[IdentityId](Some.apply)))
+  def apply(joinFunctions: HttpOp[PatchRequest]): HttpOp[(SFContactId, Option[IdentityId])] =
+    joinFunctions.prepend2(toRequest)
 
   def toRequest(sFContactId: SFContactId, identityId: Option[IdentityId]): PatchRequest = {
     val wireRequest = WireRequest(identityId.map(_.value).getOrElse(""))

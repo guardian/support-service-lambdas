@@ -46,13 +46,13 @@ object Handler {
       zuoraQuerier = ZuoraQuery(requests)
 
       sfConfig <- loadConfig[SFAuthConfig].toApiGatewayOp("load trusted Api config")
-      sfRequests <- SalesforceAuthenticate(getResponse, sfConfig)
+      sfPatch <- SalesforceAuthenticate.patch(getResponse, sfConfig)
 
     } yield Operation.noHealthcheck(Steps(
       GetIdentityAndZuoraEmailsForAccountsSteps(zuoraQuerier, _),
       ValidationSteps(_, _),
       UpdateSteps(
-        UpdateSalesforceIdentityId(sfRequests.patch),
+        UpdateSalesforceIdentityId(sfPatch).run2,
         UpdateAccountSFLinks(requests.put),
         _,
         _,
