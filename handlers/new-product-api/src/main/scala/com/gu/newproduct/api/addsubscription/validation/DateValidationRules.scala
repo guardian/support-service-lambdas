@@ -26,14 +26,15 @@ case class StartDateRules(
   windowRule: Option[WindowRule] = None
 ) extends DateRule {
   override def isValid(d: LocalDate): ValidationResult[Unit] = for {
-    _ <- daysOfWeekRule.isValid(d)
     _ <- windowRule.isValid(d)
+    _ <- daysOfWeekRule.isValid(d)
   } yield (Passed(()))
 }
 
 case class DaysOfWeekRule(allowedDays: List[DayOfWeek]) extends DateRule {
 
-  override def isValid(d: LocalDate): ValidationResult[Unit] = allowedDays contains d.getDayOfWeek orFailWith errorMessage(d)
+  override def isValid(requestedDate: LocalDate): ValidationResult[Unit] =
+    allowedDays contains requestedDate.getDayOfWeek orFailWith errorMessage(requestedDate)
 
   private def errorMessage(date: LocalDate) = {
     val allowedDaysStr = allowedDays.mkString(",")
@@ -45,18 +46,22 @@ case class DaysOfWeekRule(allowedDays: List[DayOfWeek]) extends DateRule {
 case class WindowRule
 (
   now: () => LocalDate,
-  cutOffDay: Option[DayOfWeek],
-  startDelay: Option[Days],
-  size: Option[Days],
+  maybeCutOffDay: Option[DayOfWeek],
+  maybeStartDelay: Option[Days],
+  maybeSize: Option[Days]
 ) extends DateRule {
+
   override def isValid(d: LocalDate): ValidationResult[Unit] = {
-    val today = now()
-    val maybeCutOffDate = cutOffDay.map(cutoffDayOfweek => today.`with`(TemporalAdjusters.next(cutoffDayOfweek)))
-    val baseDate = maybeCutOffDate.getOrElse(today)
-    val startOffset = startDelay.map(_.value).getOrElse(0)
-    val startDate = baseDate.plusDays(startOffset)
+
+    val baseDate = maybeCutOffDay match {
+      case Some(cutOffDayOfWeek) => now().minusDays(1) `with` (TemporalAdjusters.next(cutOffDayOfWeek))
+      case None => now()
+    }
+
+    val startDelay = maybeStartDelay.getOrElse(Days(0))
+    val startDate = baseDate.plusDays(startDelay.value)
     val isBeforeWindowStartDay = d.isBefore(startDate)
-    val maybeWindowEnd = size.map { windowSize => baseDate.plusDays(windowSize.value) }
+    val maybeWindowEnd = maybeSize.map { windowSize => startDate.plusDays(windowSize.value) }
 
     def isOnWindowEndDayOrAfter = maybeWindowEnd.map(!d.isBefore(_)).getOrElse(false)
 

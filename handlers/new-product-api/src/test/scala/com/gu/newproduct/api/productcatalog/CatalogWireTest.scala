@@ -105,9 +105,9 @@ object TestData {
   def getTestCatalog(fakeDate: () => LocalDate) = {
     val voucherWindowRule = WindowRule(
       now = fakeDate,
-      cutOffDay = Some(DayOfWeek.TUESDAY),
-      startDelay = Some(Days(20)),
-      size = Some(Days(28))
+      maybeCutOffDay = Some(DayOfWeek.TUESDAY),
+      maybeStartDelay = Some(Days(20)),
+      maybeSize = Some(Days(28))
     )
     val weekendRule = DaysOfWeekRule(List(SATURDAY, SUNDAY))
     val tuesdayRule = DaysOfWeekRule(List(MONDAY))

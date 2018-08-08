@@ -16,9 +16,9 @@ object Catalog {
   def apply(getCurrentDate: () => LocalDate): Catalog = {
     val voucherWindowRule = WindowRule(
       now = getCurrentDate,
-      cutOffDay = Some(DayOfWeek.TUESDAY),
-      startDelay = Some(Days(20)),
-      size = Some(Days(28))
+      maybeCutOffDay = Some(DayOfWeek.TUESDAY),
+      maybeStartDelay = Some(Days(20)),
+      maybeSize = Some(Days(28))
     )
     val weekendRule = DaysOfWeekRule(List(SATURDAY, SUNDAY))
     val mondayRule = DaysOfWeekRule(List(MONDAY))
@@ -28,9 +28,9 @@ object Catalog {
     val voucherEveryDay = Plan(PlanId("voucher_everyDay"), voucherEveryDayDateRules)
     val monthlyContributionWindow = WindowRule(
       now = getCurrentDate,
-      size = Some(Days(1)),
-      cutOffDay = None,
-      startDelay = None
+      maybeSize = Some(Days(1)),
+      maybeCutOffDay = None,
+      maybeStartDelay = None
     )
     val monthlyContributionRules = StartDateRules(windowRule = Some(monthlyContributionWindow))
     val monthlyContribution = Plan(PlanId("monthly_contribution"), monthlyContributionRules)
