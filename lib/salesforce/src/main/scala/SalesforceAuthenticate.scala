@@ -1,11 +1,10 @@
 package com.gu.salesforce.auth
 
-import com.gu.identityBackfill.salesforce.HttpOp
 import com.gu.salesforce.auth.SalesforceAuthenticate.SalesforceAuth
 import com.gu.util.Logging
 import com.gu.util.config.ConfigLocation
 import com.gu.util.reader.Types.{ApiGatewayOp, _}
-import com.gu.util.resthttp.RestRequestMaker
+import com.gu.util.resthttp.{HttpOp, RestRequestMaker}
 import com.gu.util.resthttp.RestRequestMaker.{PatchRequest, createBodyFromJs}
 import com.gu.util.resthttp.Types.ClientSuccess
 import okhttp3.{FormBody, Request, Response}

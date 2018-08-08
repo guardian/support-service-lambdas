@@ -1,4 +1,4 @@
-package com.gu.identityBackfill.salesforce
+package com.gu.util.resthttp
 
 import com.gu.util.resthttp.RestRequestMaker.httpIsSuccessful
 import com.gu.util.resthttp.Types.ClientFailableOp
@@ -30,11 +30,8 @@ object HttpOp {
 
   // convenience, tuples for you
   implicit class HttpOpOps[IN](httpOpTuple2: HttpOp[IN]) {
-    import httpOpTuple2._
-
-    def prepend2[A1, A2](prepend: (A1, A2) => IN): HttpOp[(A1, A2)] =
-      HttpOp(prepend.tupled.andThen(inputToRequest), effect, responseToOutput)
-
+    def prepend2[A1, A2](function2: (A1, A2) => IN): HttpOp[(A1, A2)] =
+      httpOpTuple2.prepend(function2.tupled)
   }
 
 }

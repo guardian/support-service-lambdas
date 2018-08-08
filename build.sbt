@@ -88,7 +88,7 @@ lazy val salesforce = all(project in file("lib/salesforce"))
     libraryDependencies ++= Seq(okhttp3, logging, scalaz, playJson, scalatest)
   )
 
-lazy val updatesfidentity = all(project in file("lib/sf/updatesfidentity"))
+lazy val `update-sf-identityid` = all(project in file("lib/sf/update-sf-identityid"))
   .dependsOn(
     salesforce % "compile->compile;test->test",
     effects % "test->test",
@@ -171,7 +171,7 @@ lazy val root = all(project in file(".")).enablePlugins(RiffRaffArtifact).aggreg
   `new-product-api`,
   `effects-sqs`,
   `effects-ses`,
-  updatesfidentity
+  `update-sf-identityid`
 ).dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `identity-backfill` = all(project in file("handlers/identity-backfill")) // when using the "project identity-backfill" command it uses the lazy val name
@@ -183,7 +183,7 @@ lazy val `identity-backfill` = all(project in file("handlers/identity-backfill")
     effectsDepIncludingTestFolder,
     testDep,
     salesforce % "test->test",
-    updatesfidentity % "compile->compile;test->test"
+    `update-sf-identityid` % "compile->compile;test->test"
   )
 
 lazy val `digital-subscription-expiry` = all(project in file("handlers/digital-subscription-expiry"))
@@ -208,7 +208,7 @@ lazy val `zuora-retention` = all(project in file("handlers/zuora-retention"))
 
 lazy val `sf-contact-merge` = all(project in file("handlers/sf-contact-merge"))
   .enablePlugins(RiffRaffArtifact)
-  .dependsOn(zuora, salesforce, handler, effectsDepIncludingTestFolder, testDep, updatesfidentity % "compile->compile;test->test")
+  .dependsOn(zuora, salesforce, handler, effectsDepIncludingTestFolder, testDep, `update-sf-identityid` % "compile->compile;test->test")
 
 lazy val `cancellation-sf-cases` = all(project in file("handlers/cancellation-sf-cases"))
   .enablePlugins(RiffRaffArtifact)
