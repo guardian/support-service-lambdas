@@ -3,6 +3,7 @@ package scala.com.gu.newproduct.api.productcatalog
 import java.time.{DayOfWeek, LocalDate}
 import java.time.DayOfWeek._
 
+import com.gu.newproduct.api.addsubscription.validation
 import com.gu.newproduct.api.addsubscription.validation._
 
 case class Catalog(
@@ -21,18 +22,18 @@ object Catalog {
     )
     val weekendRule = DaysOfWeekRule(List(SATURDAY, SUNDAY))
     val mondayRule = DaysOfWeekRule(List(MONDAY))
-    val voucherWeekednDateRules = CompositeRule(List(voucherWindowRule, weekendRule))
-    val voucherWeekend = Plan(PlanId("voucher_weekend"), Some(voucherWeekednDateRules))
-    val voucherEveryDayDateRules = CompositeRule(List(voucherWindowRule, mondayRule))
-    val voucherEveryDay = Plan(PlanId("voucher_everyDay"), Some(voucherEveryDayDateRules))
-    val monthlyContributionwindow = WindowRule(
+    val voucherWeekednDateRules = StartDateRules(Some(weekendRule), Some(voucherWindowRule))
+    val voucherWeekend = Plan(PlanId("voucher_weekend"), voucherWeekednDateRules)
+    val voucherEveryDayDateRules = validation.StartDateRules(Some(mondayRule), Some(voucherWindowRule))
+    val voucherEveryDay = Plan(PlanId("voucher_everyDay"), voucherEveryDayDateRules)
+    val monthlyContributionWindow = WindowRule(
       now = getCurrentDate,
       size = Some(Days(1)),
       cutOffDay = None,
       startDelay = None
     )
-    val monthlyContribution = Plan(PlanId("monthly_contribution"), Some(monthlyContributionwindow))
-
+    val monthlyContributionRules = StartDateRules(windowRule = Some(monthlyContributionWindow))
+    val monthlyContribution = Plan(PlanId("monthly_contribution"), monthlyContributionRules)
     Catalog(
       voucherWeekend = voucherWeekend,
       voucherEveryDay = voucherEveryDay,
@@ -41,4 +42,4 @@ object Catalog {
   }
 }
 case class PlanId(value: String) extends AnyVal
-case class Plan(id: PlanId, startDateRule: Option[DateRule])
+case class Plan(id: PlanId, startDateRules: StartDateRules = StartDateRules())

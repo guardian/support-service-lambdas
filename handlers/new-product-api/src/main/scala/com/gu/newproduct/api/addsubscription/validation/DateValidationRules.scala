@@ -1,7 +1,9 @@
 package com.gu.newproduct.api.addsubscription.validation
-import Validation._
-import java.time.{DayOfWeek, LocalDate}
+
 import java.time.temporal.TemporalAdjusters
+import java.time.{DayOfWeek, LocalDate}
+
+import com.gu.newproduct.api.addsubscription.validation.Validation._
 
 case class Days(value: Int) extends AnyVal
 
@@ -9,12 +11,24 @@ trait DateRule {
   def isValid(d: LocalDate): ValidationResult[Unit]
 }
 
-case class CompositeRule(rules: List[DateRule]) extends DateRule {
-  def isValid(d: LocalDate): ValidationResult[Unit] = {
-    val results = rules.map(_.isValid(d))
-    val failed = results.collect { case f: Failed => f }
-    if (failed.isEmpty) Passed(()) else failed.head
+object DateRule {
+
+  implicit class OptionalRuleConverter(maybeRule: Option[DateRule]) {
+    def alwaysValid(d: LocalDate) = Passed(())
+
+    def isValid: LocalDate => ValidationResult[Unit] = maybeRule.map(rule => rule.isValid _).getOrElse(alwaysValid _)
   }
+
+}
+
+case class StartDateRules(
+  daysOfWeekRule: Option[DaysOfWeekRule] = None,
+  windowRule: Option[WindowRule] = None
+) extends DateRule {
+  override def isValid(d: LocalDate): ValidationResult[Unit] = for {
+    _ <- daysOfWeekRule.isValid(d)
+    _ <- windowRule.isValid(d)
+  } yield (Passed(()))
 }
 
 case class DaysOfWeekRule(allowedDays: List[DayOfWeek]) extends DateRule {
@@ -52,3 +66,5 @@ case class WindowRule
   }
 
 }
+
+

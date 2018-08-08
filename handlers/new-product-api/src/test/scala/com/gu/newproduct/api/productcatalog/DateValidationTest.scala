@@ -3,6 +3,7 @@ package com.gu.newproduct.api.productcatalog
 import java.time.{DayOfWeek, LocalDate}
 import java.time.DayOfWeek._
 
+import com.gu.newproduct.api.addsubscription.validation
 import com.gu.newproduct.api.addsubscription.validation._
 import org.scalatest.{FlatSpec, Matchers}
 
@@ -64,15 +65,15 @@ class DateValidationTest extends FlatSpec with Matchers {
 
   val IsWednesdayRule = DaysOfWeekRule(allowedDays = List(WEDNESDAY))
   val twoDayWindowAfterTuesday = windowRule(cutOffDay = Some(TUESDAY), startDelay = Some(Days(1)), size = Some(Days(2)))
-  val compositeRule = CompositeRule(List(IsWednesdayRule, twoDayWindowAfterTuesday))
+  val compositeRule = validation.StartDateRules(Some(IsWednesdayRule), Some(twoDayWindowAfterTuesday))
 
-  "CompositeValidation" should "return error from first rule that fails" in {
+  "StartDateValidation" should "return error from first window rule if both fail" in {
     val thursdayAfterWindow = LocalDate.of(2018, 8, 16)
 
     compositeRule.isValid(thursdayAfterWindow) shouldBe Failed("invalid day of the week: 2018-08-16 is a THURSDAY. Allowed days are WEDNESDAY")
   }
 
-  it should "return return error from last rule if that is the only one that fails" in {
+  it should "return return error from day of the week rule if it's the only one that fails" in {
     val wednesdayAfterWindow = LocalDate.of(2018, 8, 15)
 
     compositeRule.isValid(wednesdayAfterWindow) shouldBe Failed("2018-08-15 is out of the selectable range: [2018-08-08 - 2018-08-09)")

@@ -43,9 +43,4 @@ object TypeConvert {
     }
   }
 
-  implicit class OptionalRuleConverter(maybeRule: Option[DateRule]) {
-    def alwaysValid(d: LocalDate) = Passed(())
-    def isValid: LocalDate => ValidationResult[Unit] = maybeRule.map(rule => rule.isValid _).getOrElse(alwaysValid _)
-  }
-
 }

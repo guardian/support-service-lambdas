@@ -1,15 +1,14 @@
 package com.gu.newproduct.api.addsubscription
 
 import java.io.{InputStream, OutputStream}
-import java.time.LocalDate
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.sqs.AwsSQSSend
 import com.gu.effects.sqs.AwsSQSSend.QueueName
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.newproduct.api.addsubscription.TypeConvert._
-import com.gu.newproduct.api.addsubscription.email.{ContributionFields, EtSqsSend, SendConfirmationEmail}
 import com.gu.newproduct.api.addsubscription.email.SendConfirmationEmail.ContributionsEmailData
+import com.gu.newproduct.api.addsubscription.email.{ContributionFields, EtSqsSend, SendConfirmationEmail}
 import com.gu.newproduct.api.addsubscription.validation._
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.WireModel.{WireCreateRequest, WireSubscription}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{CreateReq, SubscriptionName}
@@ -28,6 +27,7 @@ import com.gu.util.reader.Types._
 import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
 import okhttp3.{Request, Response}
+
 import scala.com.gu.newproduct.api.productcatalog.Catalog
 import scala.concurrent.Future
 
@@ -87,7 +87,7 @@ object Steps {
       contributionsSqsSend = EtSqsSend[ContributionFields](sqsSend) _
       getCurrentDate = () => RawEffects.now().toLocalDate
       catalog = Catalog(getCurrentDate)
-      isValidStartDate = catalog.monthlyContribution.startDateRule.isValid
+      isValidStartDate = catalog.monthlyContribution.startDateRules.isValid _
       getBillTo = GetBillToContact(zuoraClient.get[GetBillToResponse]) _
       createMonthlyContribution = CreateSubscription(zuoraIds.monthly, zuoraClient.post[WireCreateRequest, WireSubscription]) _
       contributionIds = List(zuoraIds.monthly.productRatePlanId, zuoraIds.annual.productRatePlanId)

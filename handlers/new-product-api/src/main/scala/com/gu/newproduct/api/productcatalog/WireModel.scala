@@ -2,7 +2,7 @@ package com.gu.newproduct.api.productcatalog
 
 import java.time.DayOfWeek
 
-import com.gu.newproduct.api.addsubscription.validation.{CompositeRule, DateRule, DaysOfWeekRule, WindowRule}
+import com.gu.newproduct.api.addsubscription.validation._
 import play.api.libs.json.{JsString, Json, Writes}
 
 import scala.com.gu.newproduct.api.productcatalog.{Catalog, Plan}
@@ -62,47 +62,35 @@ object WireModel {
 
   object WireSelectableWindow {
     implicit val writes = Json.writes[WireSelectableWindow]
+    def fromWindowRule(rule: WindowRule) = {
+      val wireCutoffDay = rule.cutOffDay.map(WireDayOfWeek.fromDayOfWeek)
+      WireSelectableWindow(wireCutoffDay, rule.startDelay.map(_.value), rule.size.map(_.value))
+    }
   }
 
   object WireStartDateRules {
     implicit val writes = Json.writes[WireStartDateRules]
 
-    private def addDaysOfWeekRule(partialRules: WireStartDateRules, rule: DaysOfWeekRule): WireStartDateRules = {
-      val wireAllowedDays = rule.allowedDays.map(WireDayOfWeek.fromDayOfWeek)
-      partialRules.copy(daysOfWeek = Some(wireAllowedDays))
-    }
-
-    private def addWindowRule(partialRules: WireStartDateRules, rule: WindowRule): WireStartDateRules = {
-      val wireCutoffDay = rule.cutOffDay.map(WireDayOfWeek.fromDayOfWeek)
-      val wireWindowRules = WireSelectableWindow(wireCutoffDay, rule.startDelay.map(_.value), rule.size.map(_.value))
-      partialRules.copy(selectableWindow = Some(wireWindowRules))
-    }
-
-    private def addCompositeRule(partialRules: WireStartDateRules, rule: CompositeRule): WireStartDateRules =
-      rule.rules.foldRight(partialRules) { (rule: DateRule, partialRules: WireStartDateRules) => addDateRule(partialRules, rule) }
-
-    private def addDateRule(partialRules: WireStartDateRules, rule: DateRule): WireStartDateRules = rule match {
-      case daysRule: DaysOfWeekRule => addDaysOfWeekRule(partialRules, daysRule)
-      case windowRule: WindowRule => addWindowRule(partialRules, windowRule)
-      case composite: CompositeRule => addCompositeRule(partialRules, composite)
-      case _ => partialRules //ignoring unknown rules
-    }
-
-    def fromDateRule(rule: DateRule): WireStartDateRules = {
-      val emptyRules = WireStartDateRules()
-      addDateRule(emptyRules, rule)
+    def fromStartDateRules(rule: StartDateRules): WireStartDateRules = {
+      val maybeWireAllowedDaysOfWeek = rule.daysOfWeekRule.map(_.allowedDays.map(WireDayOfWeek.fromDayOfWeek))
+      val maybeWireWindowRules = rule.windowRule.map(WireSelectableWindow.fromWindowRule(_))
+      WireStartDateRules(maybeWireAllowedDaysOfWeek, maybeWireWindowRules)
     }
   }
   object WirePlanInfo {
     implicit val writes = Json.writes[WirePlanInfo]
 
-    def fromPlan(plan: Plan, label: String) =
+    def toOptionalWireRules(startDateRules: StartDateRules): Option[WireStartDateRules] =
+      if (startDateRules == StartDateRules()) None else Some(WireStartDateRules.fromStartDateRules(startDateRules))
+
+    def fromPlan(plan: Plan, label: String) = {
+
       WirePlanInfo(
         id = plan.id.value,
         label = label,
-        startDateRules = plan.startDateRule.map(WireStartDateRules.fromDateRule)
+        startDateRules = toOptionalWireRules(plan.startDateRules)
       )
-
+    }
   }
 
   object WireProduct {
