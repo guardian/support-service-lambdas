@@ -6,10 +6,9 @@ import com.gu.digitalSubscriptionExpiry.zuora.GetSubscription.{SubscriptionId, S
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.Operation
 import com.gu.util.apigateway.ApiGatewayRequest
-import com.gu.util.reader.Types._
-import main.scala.com.gu.digitalSubscriptionExpiry.DigitalSubscriptionExpiryRequest
-import ApiGatewayOp.ContinueProcessing
 import com.gu.util.apigateway.ResponseModels.ApiResponse
+import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
+import com.gu.util.reader.Types._
 import play.api.libs.json.{Json, Reads}
 
 case class UrlParams(noActivation: Boolean)

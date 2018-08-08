@@ -80,6 +80,5 @@ class DateValidationTest extends FlatSpec with Matchers {
     val thursdayInWindow = LocalDate.of(2018, 8, 9)
     startDateRules.isValid(thursdayInWindow) shouldBe Failed("invalid day of the week: 2018-08-09 is a THURSDAY. Allowed days are WEDNESDAY")
 
-
   }
 }

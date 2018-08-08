@@ -13,8 +13,6 @@ import com.gu.newproduct.api.addsubscription.zuora.{GetAccount, GetAccountSubscr
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.RestRequestMaker
 
-import scala.com.gu.newproduct.api.productcatalog.Catalog
-
 case class ValidatedFields(paymentMethod: PaymentMethod, currency: Currency)
 object PrerequisiteCheck {
   def apply(

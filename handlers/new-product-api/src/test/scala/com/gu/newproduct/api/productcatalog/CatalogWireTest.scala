@@ -2,12 +2,11 @@ package com.gu.newproduct.api.productcatalog
 
 import java.time.DayOfWeek._
 import java.time.{DayOfWeek, LocalDate}
+
 import com.gu.newproduct.api.addsubscription.validation._
 import com.gu.newproduct.api.productcatalog.WireModel._
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
-
-import scala.com.gu.newproduct.api.productcatalog.{Catalog, Plan, PlanId}
 
 class CatalogWireTest extends FlatSpec with Matchers {
   it should "serialise wire catalog" in {

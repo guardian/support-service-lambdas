@@ -1,8 +1,7 @@
-package scala.com.gu.newproduct.api.productcatalog
+package com.gu.newproduct.api.productcatalog
 
 import java.time.{DayOfWeek, LocalDate}
 import java.time.DayOfWeek._
-
 import com.gu.newproduct.api.addsubscription.validation
 import com.gu.newproduct.api.addsubscription.validation._
 

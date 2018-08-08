@@ -28,7 +28,7 @@ import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
 import okhttp3.{Request, Response}
 
-import scala.com.gu.newproduct.api.productcatalog.Catalog
+import com.gu.newproduct.api.productcatalog.Catalog
 import scala.concurrent.Future
 
 object Handler extends Logging {

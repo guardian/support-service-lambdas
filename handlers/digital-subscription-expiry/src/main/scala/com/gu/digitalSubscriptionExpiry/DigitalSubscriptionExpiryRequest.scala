@@ -1,4 +1,4 @@
-package main.scala.com.gu.digitalSubscriptionExpiry
+package com.gu.digitalSubscriptionExpiry
 
 import play.api.libs.json._
 

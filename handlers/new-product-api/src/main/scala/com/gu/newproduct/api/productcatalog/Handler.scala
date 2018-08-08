@@ -10,8 +10,6 @@ import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
 
-import scala.com.gu.newproduct.api.productcatalog.Catalog
-
 object Handler extends Logging {
 
   val catalog = Catalog(() => RawEffects.now().toLocalDate())

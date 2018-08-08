@@ -5,8 +5,6 @@ import java.time.DayOfWeek
 import com.gu.newproduct.api.addsubscription.validation._
 import play.api.libs.json.{JsString, Json, Writes}
 
-import scala.com.gu.newproduct.api.productcatalog.{Catalog, Plan}
-
 object WireModel {
 
   sealed trait WireDayOfWeek

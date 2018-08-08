@@ -28,7 +28,7 @@ case class StartDateRules(
   override def isValid(d: LocalDate): ValidationResult[Unit] = for {
     _ <- windowRule.isValid(d)
     _ <- daysOfWeekRule.isValid(d)
-  } yield (Passed(()))
+  } yield ()
 }
 
 case class DaysOfWeekRule(allowedDays: List[DayOfWeek]) extends DateRule {
@@ -43,33 +43,35 @@ case class DaysOfWeekRule(allowedDays: List[DayOfWeek]) extends DateRule {
   }
 }
 
-case class WindowRule
-(
+case class WindowRule(
   now: () => LocalDate,
   maybeCutOffDay: Option[DayOfWeek],
   maybeStartDelay: Option[Days],
   maybeSize: Option[Days]
 ) extends DateRule {
 
-  override def isValid(d: LocalDate): ValidationResult[Unit] = {
+  override def isValid(dateToValidate: LocalDate): ValidationResult[Unit] = {
 
     val baseDate = maybeCutOffDay match {
-      case Some(cutOffDayOfWeek) => now().minusDays(1) `with` (TemporalAdjusters.next(cutOffDayOfWeek))
+      case Some(cutOffDayOfWeek) => now().minusDays(1) `with` TemporalAdjusters.next(cutOffDayOfWeek)
       case None => now()
     }
 
     val startDelay = maybeStartDelay.getOrElse(Days(0))
-    val startDate = baseDate.plusDays(startDelay.value)
-    val isBeforeWindowStartDay = d.isBefore(startDate)
-    val maybeWindowEnd = maybeSize.map { windowSize => startDate.plusDays(windowSize.value) }
+    val startDate = baseDate.plusDays(startDelay.value.toLong)
+    val maybeWindowEnd = maybeSize.map { windowSize => startDate.plusDays(windowSize.value.toLong) }
 
-    def isOnWindowEndDayOrAfter = maybeWindowEnd.map(!d.isBefore(_)).getOrElse(false)
+    val isOnOrAfterWindowStart = dateToValidate.isAfter(startDate) || dateToValidate.isEqual(startDate)
 
-    def errorMessage = s"$d is out of the selectable range: [$startDate - ${maybeWindowEnd.map(_.toString).getOrElse("")})"
+    def isBeforeWindowEnd = maybeWindowEnd match {
+      case None => true
+      case Some(windowEnd) => dateToValidate.isBefore(windowEnd)
+    }
 
-    !isBeforeWindowStartDay && !isOnWindowEndDayOrAfter orFailWith (errorMessage)
+    def errorMessage = s"$dateToValidate is out of the selectable range: [$startDate - ${maybeWindowEnd.map(_.toString).getOrElse("")})"
+
+    (isOnOrAfterWindowStart && isBeforeWindowEnd) orFailWith errorMessage
   }
 
 }
-
 
