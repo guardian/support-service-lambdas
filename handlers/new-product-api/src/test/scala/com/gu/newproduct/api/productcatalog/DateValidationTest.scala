@@ -43,12 +43,6 @@ class DateValidationTest extends FlatSpec with Matchers {
     mondayCutOff.isValid(lastMonday) shouldBe Failed("2018-07-30 is out of the selectable range: [2018-08-08 - 2018-08-10)")
   }
 
-  it should "pass if startDate is in the past" in {
-    val mondayCutOff = windowRule(cutOffDay = Some(TUESDAY), startDelay = Some(Days(1)), size = Some(Days(2)))
-    val lastMonday = LocalDate.of(2018, 7, 30)
-    mondayCutOff.isValid(lastMonday) shouldBe Failed("2018-07-30 is out of the selectable range: [2018-08-08 - 2018-08-10)")
-  }
-
   it should "fail if date is the day after the window ends" in {
     val mondayCutOff = windowRule(cutOffDay = Some(TUESDAY), startDelay = Some(Days(1)), size = Some(Days(2)))
     val lastDayOfWindow = LocalDate.of(2018, 8, 10)
