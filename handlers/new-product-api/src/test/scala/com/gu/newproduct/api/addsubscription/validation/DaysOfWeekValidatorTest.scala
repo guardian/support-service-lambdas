@@ -1,9 +1,8 @@
-package com.gu.newproduct.api.productcatalog
+package com.gu.newproduct.api.addsubscription.validation
 
 import java.time.DayOfWeek._
 import java.time.LocalDate
 
-import com.gu.newproduct.api.addsubscription.validation.{DayOfWeekValidator, Failed, Passed}
 import org.scalatest.{FlatSpec, Matchers}
 
 class DaysOfWeekValidatorTest extends FlatSpec with Matchers {

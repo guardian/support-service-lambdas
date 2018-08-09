@@ -3,7 +3,6 @@ package com.gu.newproduct.api.productcatalog
 import java.time.DayOfWeek
 import java.time.DayOfWeek._
 
-import com.gu.newproduct.api.addsubscription.validation._
 import com.gu.newproduct.api.productcatalog.WireModel._
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json

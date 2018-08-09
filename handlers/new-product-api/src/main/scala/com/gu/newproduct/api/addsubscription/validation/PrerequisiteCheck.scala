@@ -18,7 +18,7 @@ object PrerequisiteCheck {
   def apply(
     zuoraClient: RestRequestMaker.Requests,
     contributionRatePlanIds: List[ProductRatePlanId],
-    isValidStartDate: LocalDate => ValidationResult[Unit],
+    isValidStartDate: LocalDate => ValidationResult[Unit]
   )(request: AddSubscriptionRequest): ApiGatewayOp[ValidatedFields] = {
 
     def getAccount = GetAccount(zuoraClient.get[ZuoraAccount]) _
@@ -28,7 +28,6 @@ object PrerequisiteCheck {
     def getSubscriptions = GetAccountSubscriptions(zuoraClient.get[ZuoraSubscriptionsResponse]) _
 
     val accountNotFoundError = "Zuora account id is not valid"
-
 
     for {
       account <- getAccount(request.zuoraAccountId).toApiResponseCheckingNotFound(
@@ -40,7 +39,6 @@ object PrerequisiteCheck {
       _ <- ValidatePaymentMethod(paymentMethod).toApiGatewayOp
       subs <- getSubscriptions(request.zuoraAccountId).toApiGatewayOp("get subscriptions for account from Zuora")
       _ <- ValidateSubscriptions(contributionRatePlanIds)(subs).toApiGatewayOp
-
 
       _ <- ValidateRequest(isValidStartDate, AmountLimits.limitsFor)(request, account.currency).toApiGatewayOp
     } yield ValidatedFields(paymentMethod, account.currency)

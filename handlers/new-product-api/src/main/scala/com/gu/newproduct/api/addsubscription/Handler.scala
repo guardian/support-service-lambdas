@@ -16,7 +16,7 @@ import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAcc
 import com.gu.newproduct.api.addsubscription.zuora.GetBillToContact.WireModel.GetBillToResponse
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.DirectDebit
 import com.gu.newproduct.api.addsubscription.zuora.{CreateSubscription, GetAccount, GetBillToContact}
-import com.gu.newproduct.api.productcatalog.NewProductApi
+import com.gu.newproduct.api.productcatalog.{DateRule, NewProductApi}
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
@@ -44,7 +44,7 @@ object Steps {
   def addSubscriptionSteps(
     prerequisiteCheck: AddSubscriptionRequest => AsyncApiGatewayOp[ValidatedFields],
     createMonthlyContribution: CreateReq => ClientFailableOp[SubscriptionName],
-    sendConfirmationEmail: ContributionsEmailData => AsyncApiGatewayOp[Unit],
+    sendConfirmationEmail: ContributionsEmailData => AsyncApiGatewayOp[Unit]
   )(apiGatewayRequest: ApiGatewayRequest): Future[ApiResponse] = {
     (for {
       request <- apiGatewayRequest.bodyAsCaseClass[AddSubscriptionRequest]().withLogging("parsed request").toAsync
@@ -88,7 +88,7 @@ object Steps {
       sqsSend = AwsSQSSend(emailQueueFor(stage)) _
       contributionsSqsSend = EtSqsSend[ContributionFields](sqsSend) _
       getCurrentDate = () => RawEffects.now().toLocalDate
-      validatorFor = DateValidator.validatorFor(getCurrentDate, _ :DateRule)
+      validatorFor = DateValidator.validatorFor(getCurrentDate, _: DateRule)
       isValidStartDate = StartDateValidator.fromRule(validatorFor, NewProductApi.catalog.monthlyContribution.startDateRules)
       getBillTo = GetBillToContact(zuoraClient.get[GetBillToResponse]) _
       createMonthlyContribution = CreateSubscription(zuoraIds.monthly, zuoraClient.post[WireCreateRequest, WireSubscription]) _

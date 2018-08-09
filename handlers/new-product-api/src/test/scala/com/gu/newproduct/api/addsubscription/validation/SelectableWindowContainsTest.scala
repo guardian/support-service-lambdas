@@ -1,7 +1,7 @@
-package com.gu.newproduct.api.productcatalog
+package com.gu.newproduct.api.addsubscription.validation
 
 import java.time.LocalDate
-import com.gu.newproduct.api.addsubscription.validation._
+
 import org.scalatest.{FlatSpec, Matchers}
 
 class SelectableWindowContainsTest extends FlatSpec with Matchers {

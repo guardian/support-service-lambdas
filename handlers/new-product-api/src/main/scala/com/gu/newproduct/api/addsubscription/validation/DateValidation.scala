@@ -4,17 +4,8 @@ import java.time.temporal.TemporalAdjusters
 import java.time.{DayOfWeek, LocalDate}
 
 import com.gu.newproduct.api.addsubscription.validation.Validation._
-
-case class DelayDays(value: Int) extends AnyVal
-case class WindowSizeDays(value: Int) extends AnyVal
-
-sealed trait DateRule
-
-case class StartDateRules(daysOfWeekRule: Option[DaysOfWeekRule] = None, windowRule: Option[WindowRule] = None)
-
-case class DaysOfWeekRule(allowedDays: List[DayOfWeek]) extends DateRule
-
-case class WindowRule(maybeCutOffDay: Option[DayOfWeek], maybeStartDelay: Option[DelayDays], maybeSize: Option[WindowSizeDays]) extends DateRule
+import com.gu.newproduct.api.productcatalog._
+import scala.language.postfixOps
 
 case class SelectableWindow(start: LocalDate, maybeEndExclusive: Option[LocalDate]) {
   def contains(date: LocalDate) = {

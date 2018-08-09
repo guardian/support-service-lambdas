@@ -1,8 +1,6 @@
 package com.gu.newproduct.api.productcatalog
 
 import java.time.DayOfWeek
-
-import com.gu.newproduct.api.addsubscription.validation._
 import play.api.libs.json.{JsString, Json, Writes}
 
 object WireModel {

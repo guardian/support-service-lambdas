@@ -1,9 +1,9 @@
-package com.gu.newproduct.api.productcatalog
+package com.gu.newproduct.api.addsubscription.validation
 
 import java.time.DayOfWeek._
 import java.time.LocalDate
 
-import com.gu.newproduct.api.addsubscription.validation._
+import com.gu.newproduct.api.productcatalog.{DelayDays, WindowRule, WindowSizeDays}
 import org.scalatest.{FlatSpec, Matchers}
 
 class InitSelectableWindowTest extends FlatSpec with Matchers {
