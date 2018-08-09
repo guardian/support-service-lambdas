@@ -1,6 +1,7 @@
 package com.gu.newproduct.api.addsubscription
 
 import java.io.{InputStream, OutputStream}
+import java.time.LocalDate
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.sqs.AwsSQSSend
@@ -27,8 +28,8 @@ import com.gu.util.reader.Types._
 import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
 import okhttp3.{Request, Response}
-
 import com.gu.newproduct.api.productcatalog.Catalog
+
 import scala.concurrent.Future
 
 object Handler extends Logging {
@@ -87,7 +88,8 @@ object Steps {
       contributionsSqsSend = EtSqsSend[ContributionFields](sqsSend) _
       getCurrentDate = () => RawEffects.now().toLocalDate
       catalog = Catalog(getCurrentDate)
-      isValidStartDate = catalog.monthlyContribution.startDateRules.isValid _
+      validatorFor = DateValidator.validatorFor(getCurrentDate, _ :DateRule)
+      isValidStartDate = StartDateValidator.fromRule(validatorFor, catalog.monthlyContribution.startDateRules)
       getBillTo = GetBillToContact(zuoraClient.get[GetBillToResponse]) _
       createMonthlyContribution = CreateSubscription(zuoraIds.monthly, zuoraClient.post[WireCreateRequest, WireSubscription]) _
       contributionIds = List(zuoraIds.monthly.productRatePlanId, zuoraIds.annual.productRatePlanId)

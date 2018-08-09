@@ -4,7 +4,7 @@ import java.time.LocalDate
 import com.gu.newproduct.api.addsubscription.validation._
 import org.scalatest.{FlatSpec, Matchers}
 
-class SelectableWindowTest extends FlatSpec with Matchers {
+class SelectableWindowContainsTest extends FlatSpec with Matchers {
 
   val august6 = LocalDate.of(2018, 8, 6)
   val august26 = LocalDate.of(2018, 8, 26)
@@ -27,9 +27,9 @@ class SelectableWindowTest extends FlatSpec with Matchers {
   }
 
   it should "contain a date five years in the future if there is no upper limit defined" in {
-    val noUpperboundWindow = SelectableWindow(start = august6, maybeEndExclusive = None)
+    val noUpperBoundWindow = SelectableWindow(start = august6, maybeEndExclusive = None)
 
-    noUpperboundWindow.contains(august6.plusYears(5))
+    noUpperBoundWindow.contains(august6.plusYears(5))
   }
 
 }
