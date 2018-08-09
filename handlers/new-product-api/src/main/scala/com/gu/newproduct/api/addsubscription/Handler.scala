@@ -11,7 +11,7 @@ import com.gu.newproduct.api.addsubscription.email.{ContributionFields, EtSqsSen
 import com.gu.newproduct.api.addsubscription.email.SendConfirmationEmail.ContributionsEmailData
 import com.gu.newproduct.api.addsubscription.validation._
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.WireModel.{WireCreateRequest, WireSubscription}
-import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{CreateReq, SubscriptionName}
+import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{ZuoraCreateSubRequest, SubscriptionName}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAccount
 import com.gu.newproduct.api.addsubscription.zuora.GetBillToContact.WireModel.GetBillToResponse
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.DirectDebit
@@ -42,8 +42,8 @@ object Steps {
 
   def addSubscriptionSteps(
     prerequisiteCheck: AddSubscriptionRequest => AsyncApiGatewayOp[ValidatedFields],
-    createMonthlyContribution: CreateReq => ClientFailableOp[SubscriptionName],
-    sendConfirmationEmail: ContributionsEmailData => AsyncApiGatewayOp[Unit],
+    createMonthlyContribution: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName],
+    sendConfirmationEmail: ContributionsEmailData => AsyncApiGatewayOp[Unit]
   )(apiGatewayRequest: ApiGatewayRequest): Future[ApiResponse] = {
     (for {
       request <- apiGatewayRequest.bodyAsCaseClass[AddSubscriptionRequest]().withLogging("parsed request").toAsync
@@ -54,7 +54,7 @@ object Steps {
         case _ => request.startDate
       }
 
-      req = CreateReq(
+      zuoraCreateSubRequest = ZuoraCreateSubRequest(
         request.zuoraAccountId,
         request.amountMinorUnits,
         request.startDate,
@@ -63,13 +63,13 @@ object Steps {
         request.acquisitionSource,
         request.createdByCSR
       )
-      subscriptionName <- createMonthlyContribution(req).toAsyncApiGatewayOp("create monthly contribution")
+      subscriptionName <- createMonthlyContribution(zuoraCreateSubRequest).toAsyncApiGatewayOp("create monthly contribution")
 
       contributionEmailData = ContributionsEmailData(
         accountId = request.zuoraAccountId,
         currency = validatedFields.currency,
         paymentMethod = validatedFields.paymentMethod,
-        amountMinorUnits = req.amountMinorUnits,
+        amountMinorUnits = zuoraCreateSubRequest.amountMinorUnits,
         firstPaymentDate = acceptanceDate
       )
       _ <- sendConfirmationEmail(contributionEmailData)
