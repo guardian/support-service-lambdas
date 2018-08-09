@@ -13,12 +13,7 @@ case class StartDateRules(daysOfWeekRule: Option[DaysOfWeekRule] = None, windowR
 
 case class DaysOfWeekRule(allowedDays: List[DayOfWeek]) extends DateRule
 
-case class WindowRule(
-  now: () => LocalDate,
-  maybeCutOffDay: Option[DayOfWeek],
-  maybeStartDelay: Option[Days],
-  maybeSize: Option[Days]
-) extends DateRule
+case class WindowRule(maybeCutOffDay: Option[DayOfWeek], maybeStartDelay: Option[Days], maybeSize: Option[Days]) extends DateRule
 
 case class SelectableWindow(start: LocalDate, maybeEndExclusive: Option[LocalDate]) {
   def contains(date: LocalDate) = {
@@ -36,22 +31,20 @@ case class SelectableWindow(start: LocalDate, maybeEndExclusive: Option[LocalDat
 object SelectableWindow {
   def apply(
     now: () => LocalDate,
-    maybeCutOffDay: Option[DayOfWeek],
-    maybeStartDelay: Option[Days],
-    maybeSize: Option[Days]
+    windowRule: WindowRule
   ): SelectableWindow = {
-    val baseDate = maybeCutOffDay match {
+
+    val baseDate = windowRule.maybeCutOffDay match {
       case Some(cutOffDayOfWeek) => now().minusDays(1) `with` TemporalAdjusters.next(cutOffDayOfWeek)
       case None => now()
     }
-    val startDelay = maybeStartDelay.getOrElse(Days(0))
+    val startDelay = windowRule.maybeStartDelay.getOrElse(Days(0))
     val startDate = baseDate.plusDays(startDelay.value.toLong)
-    val maybeWindowEnd = maybeSize.map { windowSize => startDate.plusDays(windowSize.value.toLong) }
+    val maybeWindowEnd = windowRule.maybeSize.map { windowSize => startDate.plusDays(windowSize.value.toLong) }
     SelectableWindow(startDate, maybeWindowEnd)
   }
 }
 
-//todo maybe move the validator and the rules to different places later
 object StartDateValidator {
   def apply(
     isValidDayOfWeek: LocalDate => ValidationResult[Unit],
@@ -80,15 +73,7 @@ object StartDateValidator {
 object DateValidator {
   def validatorFor(now: () => LocalDate, dateRule: DateRule): LocalDate => ValidationResult[Unit] = dateRule match {
     case rule: DaysOfWeekRule => DayOfWeekValidator(rule.allowedDays, _)
-    case rule: WindowRule => WindowValidator(
-      SelectableWindow(
-        now = now,
-        maybeCutOffDay = rule.maybeCutOffDay,
-        maybeStartDelay = rule.maybeStartDelay,
-        maybeSize = rule.maybeSize
-      ),
-      _
-    )
+    case rule: WindowRule => WindowValidator(SelectableWindow(now, rule), _)
   }
 }
 

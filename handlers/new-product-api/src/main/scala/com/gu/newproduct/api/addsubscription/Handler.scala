@@ -1,7 +1,6 @@
 package com.gu.newproduct.api.addsubscription
 
 import java.io.{InputStream, OutputStream}
-import java.time.LocalDate
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.sqs.AwsSQSSend
@@ -17,6 +16,7 @@ import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAcc
 import com.gu.newproduct.api.addsubscription.zuora.GetBillToContact.WireModel.GetBillToResponse
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.DirectDebit
 import com.gu.newproduct.api.addsubscription.zuora.{CreateSubscription, GetAccount, GetBillToContact}
+import com.gu.newproduct.api.productcatalog.NewProductApi
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
@@ -28,7 +28,6 @@ import com.gu.util.reader.Types._
 import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
 import okhttp3.{Request, Response}
-import com.gu.newproduct.api.productcatalog.Catalog
 
 import scala.concurrent.Future
 
@@ -81,15 +80,16 @@ object Steps {
   def operationForEffects(response: Request => Response, stage: Stage, fetchString: StringFromS3): ApiGatewayOp[Operation] =
     for {
       zuoraIds <- ZuoraIds.zuoraIdsForStage(stage)
-      loadConfig = LoadConfigModule(stage, fetchString)
-      zuoraConfig <- loadConfig[ZuoraRestConfig].toApiGatewayOp("load zuora config")
+      zuoraConfig <- {
+        val loadConfig = LoadConfigModule(stage, fetchString)
+        loadConfig[ZuoraRestConfig].toApiGatewayOp("load zuora config")
+      }
       zuoraClient = ZuoraRestRequestMaker(response, zuoraConfig)
       sqsSend = AwsSQSSend(emailQueueFor(stage)) _
       contributionsSqsSend = EtSqsSend[ContributionFields](sqsSend) _
       getCurrentDate = () => RawEffects.now().toLocalDate
-      catalog = Catalog(getCurrentDate)
       validatorFor = DateValidator.validatorFor(getCurrentDate, _ :DateRule)
-      isValidStartDate = StartDateValidator.fromRule(validatorFor, catalog.monthlyContribution.startDateRules)
+      isValidStartDate = StartDateValidator.fromRule(validatorFor, NewProductApi.catalog.monthlyContribution.startDateRules)
       getBillTo = GetBillToContact(zuoraClient.get[GetBillToResponse]) _
       createMonthlyContribution = CreateSubscription(zuoraIds.monthly, zuoraClient.post[WireCreateRequest, WireSubscription]) _
       contributionIds = List(zuoraIds.monthly.productRatePlanId, zuoraIds.annual.productRatePlanId)

@@ -56,7 +56,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
 
   it should "convert catalog to wire catalog" in {
     val fakeDate = () => LocalDate.of(2018, 8, 6)
-    val testCatalog = TestData.getTestCatalog(fakeDate)
+    val testCatalog = TestData.testCatalog
 
     WireCatalog.fromCatalog(testCatalog) shouldBe TestData.testWireCatalog
   }
@@ -101,9 +101,8 @@ object TestData {
     WireCatalog(List(voucherGroup, contributionGroup))
   }
 
-  def getTestCatalog(fakeDate: () => LocalDate) = {
+  val testCatalog = {
     val voucherWindowRule = WindowRule(
-      now = fakeDate,
       maybeCutOffDay = Some(DayOfWeek.TUESDAY),
       maybeStartDelay = Some(Days(20)),
       maybeSize = Some(Days(28))

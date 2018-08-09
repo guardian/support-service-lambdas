@@ -11,10 +11,9 @@ case class Catalog(
   monthlyContribution: Plan
 )
 
-object Catalog {
-  def apply(getCurrentDate: () => LocalDate): Catalog = {
+object NewProductApi {
+  val catalog: Catalog = {
     val voucherWindowRule = WindowRule(
-      now = getCurrentDate,
       maybeCutOffDay = Some(DayOfWeek.TUESDAY),
       maybeStartDelay = Some(Days(20)),
       maybeSize = Some(Days(28))
@@ -26,7 +25,6 @@ object Catalog {
     val voucherEveryDayDateRules = validation.StartDateRules(Some(mondayRule), Some(voucherWindowRule))
     val voucherEveryDay = Plan(PlanId("voucher_everyDay"), voucherEveryDayDateRules)
     val monthlyContributionWindow = WindowRule(
-      now = getCurrentDate,
       maybeSize = Some(Days(1)),
       maybeCutOffDay = None,
       maybeStartDelay = None

@@ -15,9 +15,11 @@ class InitSelectableWindowTest extends FlatSpec with Matchers {
   "SelectableWindow" should "define an unbounded window starting today if no params are defined" in {
     val window = SelectableWindow(
       now = getWedAugust8,
-      maybeCutOffDay = None,
-      maybeStartDelay = None,
-      maybeSize = None
+      WindowRule(
+        maybeCutOffDay = None,
+        maybeStartDelay = None,
+        maybeSize = None
+      )
     )
 
     window shouldBe SelectableWindow(wednesdayAugust8, None)
@@ -26,9 +28,11 @@ class InitSelectableWindowTest extends FlatSpec with Matchers {
   "windowRule" should "define an unbounded window starting tomorrow if tomorrow is the cut off day and there are no other parameters defined " in {
     val window = SelectableWindow(
       now = getWedAugust8,
-      maybeCutOffDay = Some(THURSDAY),
-      maybeStartDelay = None,
-      maybeSize = None
+      WindowRule(
+        maybeCutOffDay = Some(THURSDAY),
+        maybeStartDelay = None,
+        maybeSize = None
+      )
     )
 
     window shouldBe SelectableWindow(LocalDate.of(2018, 8, 9), None)
@@ -37,9 +41,11 @@ class InitSelectableWindowTest extends FlatSpec with Matchers {
   it should "define an unbounded window starting cut off day next week if the cut off date was yesterday" in {
     val window = SelectableWindow(
       now = getWedAugust8,
-      maybeCutOffDay = Some(TUESDAY),
-      maybeStartDelay = None,
-      maybeSize = None
+      WindowRule(
+        maybeCutOffDay = Some(TUESDAY),
+        maybeStartDelay = None,
+        maybeSize = None
+      )
     )
 
     window shouldBe SelectableWindow(LocalDate.of(2018, 8, 14), None)
@@ -48,9 +54,11 @@ class InitSelectableWindowTest extends FlatSpec with Matchers {
   it should "define an unbounded window starting in two days if only the start delay is set to 2" in {
     val window = SelectableWindow(
       now = getWedAugust8,
-      maybeCutOffDay = None,
-      maybeStartDelay = Some(Days(2)),
-      maybeSize = None
+      WindowRule(
+        maybeCutOffDay = None,
+        maybeStartDelay = Some(Days(2)),
+        maybeSize = None
+      )
     )
 
     window shouldBe SelectableWindow(wednesdayAugust8.plusDays(2), None)
@@ -59,9 +67,11 @@ class InitSelectableWindowTest extends FlatSpec with Matchers {
   it should "define a 2 day window starting today if only the window size is set to 2 days" in {
     val window = SelectableWindow(
       now = getWedAugust8,
-      maybeCutOffDay = None,
-      maybeStartDelay = None,
-      maybeSize = Some(Days(2))
+      WindowRule(
+        maybeCutOffDay = None,
+        maybeStartDelay = None,
+        maybeSize = Some(Days(2))
+      )
     )
     window shouldBe SelectableWindow(wednesdayAugust8, Some(wednesdayAugust8.plusDays(2)))
   }
@@ -69,9 +79,11 @@ class InitSelectableWindowTest extends FlatSpec with Matchers {
   it should "define a 2 day window starting next week 3 days after cut off date" in {
     val window = SelectableWindow(
       now = getWedAugust8,
-      maybeCutOffDay = Some(MONDAY),
-      maybeStartDelay = Some(Days(3)),
-      maybeSize = Some(Days(2))
+      WindowRule(
+        maybeCutOffDay = Some(MONDAY),
+        maybeStartDelay = Some(Days(3)),
+        maybeSize = Some(Days(2))
+      )
     )
     val mondayNextWeek = LocalDate.of(2018, 8, 13)
     val expectedWindowStart = mondayNextWeek.plusDays(3)
