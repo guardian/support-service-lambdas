@@ -1,6 +1,6 @@
 package com.gu.newproduct.api.productcatalog
 
-import java.time.{DayOfWeek, LocalDate}
+import java.time.DayOfWeek
 import java.time.DayOfWeek._
 import com.gu.newproduct.api.addsubscription.validation
 import com.gu.newproduct.api.addsubscription.validation._
@@ -15,17 +15,17 @@ object NewProductApi {
   val catalog: Catalog = {
     val voucherWindowRule = WindowRule(
       maybeCutOffDay = Some(DayOfWeek.TUESDAY),
-      maybeStartDelay = Some(Days(20)),
-      maybeSize = Some(Days(28))
+      maybeStartDelay = Some(DelayDays(20)),
+      maybeSize = Some(WindowSizeDays(28))
     )
     val weekendRule = DaysOfWeekRule(List(SATURDAY, SUNDAY))
     val mondayRule = DaysOfWeekRule(List(MONDAY))
-    val voucherWeekednDateRules = StartDateRules(Some(weekendRule), Some(voucherWindowRule))
-    val voucherWeekend = Plan(PlanId("voucher_weekend"), voucherWeekednDateRules)
+    val voucherWeekendDateRules = StartDateRules(Some(weekendRule), Some(voucherWindowRule))
+    val voucherWeekend = Plan(PlanId("voucher_weekend"), voucherWeekendDateRules)
     val voucherEveryDayDateRules = validation.StartDateRules(Some(mondayRule), Some(voucherWindowRule))
     val voucherEveryDay = Plan(PlanId("voucher_everyDay"), voucherEveryDayDateRules)
     val monthlyContributionWindow = WindowRule(
-      maybeSize = Some(Days(1)),
+      maybeSize = Some(WindowSizeDays(1)),
       maybeCutOffDay = None,
       maybeStartDelay = None
     )

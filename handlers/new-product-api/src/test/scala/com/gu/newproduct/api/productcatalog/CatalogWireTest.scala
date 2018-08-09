@@ -1,7 +1,7 @@
 package com.gu.newproduct.api.productcatalog
 
+import java.time.DayOfWeek
 import java.time.DayOfWeek._
-import java.time.{DayOfWeek, LocalDate}
 
 import com.gu.newproduct.api.addsubscription.validation._
 import com.gu.newproduct.api.productcatalog.WireModel._
@@ -55,9 +55,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
   }
 
   it should "convert catalog to wire catalog" in {
-    val fakeDate = () => LocalDate.of(2018, 8, 6)
     val testCatalog = TestData.testCatalog
-
     WireCatalog.fromCatalog(testCatalog) shouldBe TestData.testWireCatalog
   }
 }
@@ -104,8 +102,8 @@ object TestData {
   val testCatalog = {
     val voucherWindowRule = WindowRule(
       maybeCutOffDay = Some(DayOfWeek.TUESDAY),
-      maybeStartDelay = Some(Days(20)),
-      maybeSize = Some(Days(28))
+      maybeStartDelay = Some(DelayDays(20)),
+      maybeSize = Some(WindowSizeDays(28))
     )
     val weekendRule = DaysOfWeekRule(List(SATURDAY, SUNDAY))
     val tuesdayRule = DaysOfWeekRule(List(MONDAY))

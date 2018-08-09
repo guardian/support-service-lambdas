@@ -56,7 +56,7 @@ class InitSelectableWindowTest extends FlatSpec with Matchers {
       now = getWedAugust8,
       WindowRule(
         maybeCutOffDay = None,
-        maybeStartDelay = Some(Days(2)),
+        maybeStartDelay = Some(DelayDays(2)),
         maybeSize = None
       )
     )
@@ -70,7 +70,7 @@ class InitSelectableWindowTest extends FlatSpec with Matchers {
       WindowRule(
         maybeCutOffDay = None,
         maybeStartDelay = None,
-        maybeSize = Some(Days(2))
+        maybeSize = Some(WindowSizeDays(2))
       )
     )
     window shouldBe SelectableWindow(wednesdayAugust8, Some(wednesdayAugust8.plusDays(2)))
@@ -81,8 +81,8 @@ class InitSelectableWindowTest extends FlatSpec with Matchers {
       now = getWedAugust8,
       WindowRule(
         maybeCutOffDay = Some(MONDAY),
-        maybeStartDelay = Some(Days(3)),
-        maybeSize = Some(Days(2))
+        maybeStartDelay = Some(DelayDays(3)),
+        maybeSize = Some(WindowSizeDays(2))
       )
     )
     val mondayNextWeek = LocalDate.of(2018, 8, 13)

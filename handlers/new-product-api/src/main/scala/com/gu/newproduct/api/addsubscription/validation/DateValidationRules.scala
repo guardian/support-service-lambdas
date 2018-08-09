@@ -5,7 +5,8 @@ import java.time.{DayOfWeek, LocalDate}
 
 import com.gu.newproduct.api.addsubscription.validation.Validation._
 
-case class Days(value: Int) extends AnyVal
+case class DelayDays(value: Int) extends AnyVal
+case class WindowSizeDays(value: Int) extends AnyVal
 
 sealed trait DateRule
 
@@ -13,7 +14,7 @@ case class StartDateRules(daysOfWeekRule: Option[DaysOfWeekRule] = None, windowR
 
 case class DaysOfWeekRule(allowedDays: List[DayOfWeek]) extends DateRule
 
-case class WindowRule(maybeCutOffDay: Option[DayOfWeek], maybeStartDelay: Option[Days], maybeSize: Option[Days]) extends DateRule
+case class WindowRule(maybeCutOffDay: Option[DayOfWeek], maybeStartDelay: Option[DelayDays], maybeSize: Option[WindowSizeDays]) extends DateRule
 
 case class SelectableWindow(start: LocalDate, maybeEndExclusive: Option[LocalDate]) {
   def contains(date: LocalDate) = {
@@ -38,7 +39,7 @@ object SelectableWindow {
       case Some(cutOffDayOfWeek) => now().minusDays(1) `with` TemporalAdjusters.next(cutOffDayOfWeek)
       case None => now()
     }
-    val startDelay = windowRule.maybeStartDelay.getOrElse(Days(0))
+    val startDelay = windowRule.maybeStartDelay.getOrElse(DelayDays(0))
     val startDate = baseDate.plusDays(startDelay.value.toLong)
     val maybeWindowEnd = windowRule.maybeSize.map { windowSize => startDate.plusDays(windowSize.value.toLong) }
     SelectableWindow(startDate, maybeWindowEnd)
