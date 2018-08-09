@@ -11,7 +11,7 @@ import com.gu.identityBackfill.salesforce.ContactSyncCheck.RecordTypeId
 import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
 import com.gu.identityBackfill.salesforce._
 import com.gu.identityBackfill.zuora.{AddIdentityIdToAccount, CountZuoraAccountsForIdentityId, GetZuoraAccountsForEmail, GetZuoraSubTypeForAccount}
-import com.gu.salesforce.AnyVals.SFContactId
+import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.salesforce.auth.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.auth.{SalesforceAuthenticate, SalesforceRestRequestMaker}
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
@@ -56,7 +56,7 @@ object Handler {
 
       lazy val sfAuth = SalesforceAuthenticate.doAuth(response, sfConfig)
       lazy val sfRequests = sfAuth.map(s => SalesforceRestRequestMaker(s, response))
-      lazy val sfPatch = sfAuth.map(s => HttpOp(response).prepend(SalesforceRestRequestMaker.patch(s)))
+      lazy val sfPatch = sfAuth.map(s => HttpOp(response).beforeRequest(SalesforceRestRequestMaker.patch(s)))
 
       Operation(
         steps = IdentityBackfillSteps(
@@ -113,7 +113,7 @@ object Handler {
   ): ApiGatewayOp[Unit] =
     for {
       sfRequests <- sfRequests
-      _ <- UpdateSalesforceIdentityId.set(sfRequests).run2(sFContactId, identityId).toApiGatewayOp("zuora issue")
+      _ <- UpdateSalesforceIdentityId.set(sfRequests).runRequestUntupled(sFContactId, identityId).toApiGatewayOp("zuora issue")
     } yield ()
 
 }

@@ -1,7 +1,7 @@
 package com.gu.identityBackfill.salesforce.updateSFIdentityId
 
 import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
-import com.gu.salesforce.AnyVals.SFContactId
+import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.util.resthttp.RestRequestMaker
 import com.gu.util.resthttp.Types.ClientFailableOp
 import play.api.libs.json.Json

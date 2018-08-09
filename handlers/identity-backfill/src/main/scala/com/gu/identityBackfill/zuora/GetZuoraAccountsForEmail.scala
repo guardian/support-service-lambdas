@@ -2,7 +2,7 @@ package com.gu.identityBackfill.zuora
 
 import com.gu.identityBackfill.Types._
 import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
-import com.gu.salesforce.AnyVals.SFContactId
+import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.zuora.SafeQueryBuilder.Implicits._
 import com.gu.util.zuora.ZuoraQuery.ZuoraQuerier

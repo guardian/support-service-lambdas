@@ -2,7 +2,7 @@ package com.gu.identityBackfill.salesforce.updateSFIdentityId
 
 import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId
 import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
-import com.gu.salesforce.AnyVals.SFContactId
+import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.util.resthttp.RestRequestMaker.{PatchRequest, RelativePath}
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.{JsObject, JsString}

@@ -12,7 +12,7 @@ import com.gu.util.resthttp.Types.ClientFailableOp
 import scalaz.\/
 import TypeConvert._
 import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
-import com.gu.salesforce.AnyVals.SFContactId
+import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 
 object PreReqCheck {
 

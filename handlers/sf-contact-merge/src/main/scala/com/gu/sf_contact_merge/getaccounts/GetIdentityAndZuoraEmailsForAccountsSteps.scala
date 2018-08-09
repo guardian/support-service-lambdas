@@ -1,7 +1,7 @@
 package com.gu.sf_contact_merge.getaccounts
 
 import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
-import com.gu.salesforce.AnyVals.SFContactId
+import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.sf_contact_merge.getaccounts.GetContacts.AccountId
 import com.gu.sf_contact_merge.getaccounts.GetEmails.EmailAddress
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess}

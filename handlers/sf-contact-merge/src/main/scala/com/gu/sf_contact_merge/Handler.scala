@@ -6,7 +6,7 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId
 import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
-import com.gu.salesforce.AnyVals.SFContactId
+import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.salesforce.auth.SalesforceAuthenticate
 import com.gu.salesforce.auth.SalesforceAuthenticate.SFAuthConfig
 import com.gu.sf_contact_merge.TypeConvert._
@@ -52,7 +52,7 @@ object Handler {
       GetIdentityAndZuoraEmailsForAccountsSteps(zuoraQuerier, _),
       ValidationSteps(_, _),
       UpdateSteps(
-        UpdateSalesforceIdentityId(sfPatch).run2,
+        UpdateSalesforceIdentityId(sfPatch).runRequestUntupled,
         UpdateAccountSFLinks(requests.put),
         _,
         _,

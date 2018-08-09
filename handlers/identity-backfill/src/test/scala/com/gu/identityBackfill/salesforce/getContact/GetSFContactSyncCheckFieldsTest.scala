@@ -4,7 +4,7 @@ import com.gu.effects.TestingRawEffects
 import com.gu.effects.TestingRawEffects.HTTPResponse
 import com.gu.identityBackfill.salesforce.GetSFContactSyncCheckFields
 import com.gu.identityBackfill.salesforce.GetSFContactSyncCheckFields.ContactSyncCheckFields
-import com.gu.salesforce.AnyVals.SFContactId
+import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.salesforce.auth.SalesforceAuthenticate.SalesforceAuth
 import com.gu.salesforce.auth.SalesforceRestRequestMaker
 import com.gu.util.resthttp.Types.ClientSuccess

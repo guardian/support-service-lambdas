@@ -4,16 +4,16 @@ import com.gu.util.resthttp.RestRequestMaker.httpIsSuccessful
 import com.gu.util.resthttp.Types.ClientFailableOp
 import okhttp3.{Request, Response}
 
-case class HttpOp[IN](
-  inputToRequest: IN => Request,
+case class HttpOp[PARAM](
+  inputToRequest: PARAM => Request,
   effect: Request => Response,
   responseToOutput: Response => ClientFailableOp[Unit]
 ) {
 
-  def run(in: IN): ClientFailableOp[Unit] =
+  def runRequest(in: PARAM): ClientFailableOp[Unit] =
     responseToOutput(effect(inputToRequest(in)))
 
-  def prepend[NEWIN](function: NEWIN => IN): HttpOp[NEWIN] =
+  def beforeRequest[UPDATEDPARAM](function: UPDATEDPARAM => PARAM): HttpOp[UPDATEDPARAM] =
     HttpOp(function.andThen(inputToRequest), effect, responseToOutput)
 
 }
@@ -25,13 +25,13 @@ object HttpOp {
 
   // convenience, untuples for you
   implicit class HttpOpTuple2Ops[A1, A2](httpOpTuple2: HttpOp[(A1, A2)]) {
-    def run2(a1: A1, a2: A2): ClientFailableOp[Unit] = httpOpTuple2.run((a1, a2))
+    def runRequestUntupled: (A1, A2) => ClientFailableOp[Unit] = Function.untupled(httpOpTuple2.runRequest)
   }
 
   // convenience, tuples for you
   implicit class HttpOpOps[IN](httpOpTuple2: HttpOp[IN]) {
-    def prepend2[A1, A2](function2: (A1, A2) => IN): HttpOp[(A1, A2)] =
-      httpOpTuple2.prepend(function2.tupled)
+    def beforeRequestTupled[A1, A2](function2: (A1, A2) => IN): HttpOp[(A1, A2)] =
+      httpOpTuple2.beforeRequest(function2.tupled)
   }
 
 }

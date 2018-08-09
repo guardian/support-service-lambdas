@@ -49,7 +49,7 @@ object SalesforceAuthenticate extends Logging {
     config: SFAuthConfig
   ): ApiGatewayOp[HttpOp[PatchRequest]] = {
     doAuth(response, config)
-      .map(sfAuth => HttpOp(response).prepend(SalesforceRestRequestMaker.patch(sfAuth)))
+      .map(sfAuth => HttpOp(response).beforeRequest(SalesforceRestRequestMaker.patch(sfAuth)))
   }
 
   def apply(

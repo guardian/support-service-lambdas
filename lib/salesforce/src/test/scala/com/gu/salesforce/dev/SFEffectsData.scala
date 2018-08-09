@@ -1,6 +1,6 @@
 package com.gu.salesforce.dev
 
-import com.gu.salesforce.AnyVals.SFContactId
+import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 
 object SFEffectsData {
   // this class represents a compile safe set of data that we (hope) is present in dev sf for the Effects tests.
