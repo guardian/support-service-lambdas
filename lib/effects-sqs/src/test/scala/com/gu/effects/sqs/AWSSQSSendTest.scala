@@ -45,7 +45,6 @@ object SQSRead {
 
     logger.info(s"reading message to SQS queue $queueUrl")
 
-
     val request = new ReceiveMessageRequest(queueName.value)
       .withAttributeNames("ApproximateReceiveCount")
       .withMaxNumberOfMessages(10)

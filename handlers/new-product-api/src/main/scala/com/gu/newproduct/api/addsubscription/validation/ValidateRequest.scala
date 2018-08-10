@@ -8,14 +8,14 @@ import com.gu.newproduct.api.addsubscription.validation.Validation.BooleanValida
 
 object ValidateRequest {
   def apply(
-    now: () => LocalDate,
+    isValidStartDate: LocalDate => ValidationResult[Unit],
     limitsFor: Currency => AmountLimits
   )(
     addSubscriptionRequest: AddSubscriptionRequest,
     currency: Currency
   ): ValidationResult[Unit] =
     for {
-      _ <- (addSubscriptionRequest.startDate == now()) orFailWith "start date must be today"
+      _ <- isValidStartDate(addSubscriptionRequest.startDate)
       limits = limitsFor(currency)
       _ <- (addSubscriptionRequest.amountMinorUnits.value <= limits.max) orFailWith s"amount must not be more than ${limits.max}"
       _ <- (addSubscriptionRequest.amountMinorUnits.value >= limits.min) orFailWith s"amount must be at least ${limits.min}"
