@@ -13,7 +13,7 @@ case class HttpOp[PARAM](
   def runRequest(in: PARAM): ClientFailableOp[Unit] =
     responseToOutput(effect(inputToRequest(in)))
 
-  def beforeRequest[UPDATEDPARAM](function: UPDATEDPARAM => PARAM): HttpOp[UPDATEDPARAM] =
+  def setupRequest[UPDATEDPARAM](function: UPDATEDPARAM => PARAM): HttpOp[UPDATEDPARAM] =
     HttpOp(function.andThen(inputToRequest), effect, responseToOutput)
 
 }
@@ -30,8 +30,8 @@ object HttpOp {
 
   // convenience, tuples for you
   implicit class HttpOpOps[IN](httpOp: HttpOp[IN]) {
-    def beforeRequestMultiArg[A1, A2](function2Arg: (A1, A2) => IN): HttpOp[(A1, A2)] =
-      httpOp.beforeRequest(function2Arg.tupled)
+    def setupRequestMultiArg[A1, A2](function2Arg: (A1, A2) => IN): HttpOp[(A1, A2)] =
+      httpOp.setupRequest(function2Arg.tupled)
   }
 
 }

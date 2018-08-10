@@ -56,7 +56,7 @@ object Handler {
 
       lazy val sfAuth = SalesforceAuthenticate.doAuth(response, sfConfig)
       lazy val sfRequests = sfAuth.map(s => SalesforceRestRequestMaker(s, response))
-      lazy val sfPatch = sfAuth.map(s => HttpOp(response).beforeRequest(SalesforceRestRequestMaker.patch(s)))
+      lazy val sfPatch = sfAuth.map(s => HttpOp(response).setupRequest(SalesforceRestRequestMaker.patch(s)))
 
       Operation(
         steps = IdentityBackfillSteps(
