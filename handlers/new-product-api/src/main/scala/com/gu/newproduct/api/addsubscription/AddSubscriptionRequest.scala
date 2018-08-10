@@ -2,6 +2,7 @@ package com.gu.newproduct.api.addsubscription
 
 import java.time.LocalDate
 
+import com.gu.newproduct.api.productcatalog.PlanId
 import play.api.libs.json.{JsError, JsSuccess, Json, Reads}
 
 import scala.util.{Failure, Success, Try}
@@ -14,7 +15,8 @@ case class AddSubscriptionRequest(
   acquisitionSource: AcquisitionSource,
   createdByCSR: CreatedByCSR,
   amountMinorUnits: AmountMinorUnits,
-  acquisitionCase: CaseId
+  acquisitionCase: CaseId,
+  planId: PlanId
 )
 case class AmountMinorUnits(value: Int) extends AnyVal
 case class CaseId(value: String) extends AnyVal
@@ -29,7 +31,8 @@ object AddSubscriptionRequest {
     acquisitionSource: String,
     createdByCSR: String,
     amountMinorUnits: Int,
-    acquisitionCase: String
+    acquisitionCase: String,
+    planId: String
   ) {
     def toAddSubscriptionRequest = {
       val maybeParsedRequest = Try(LocalDate.parse(startDate)).map { parsedStartDate =>
@@ -39,7 +42,8 @@ object AddSubscriptionRequest {
           acquisitionSource = AcquisitionSource(this.acquisitionSource),
           createdByCSR = CreatedByCSR(this.createdByCSR),
           amountMinorUnits = AmountMinorUnits(amountMinorUnits),
-          CaseId(acquisitionCase)
+          CaseId(acquisitionCase),
+          PlanId(planId)
         )
       }
 

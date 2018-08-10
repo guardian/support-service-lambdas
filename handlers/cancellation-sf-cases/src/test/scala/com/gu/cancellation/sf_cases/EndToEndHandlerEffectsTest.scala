@@ -152,7 +152,9 @@ object EndToEndData {
     bodyString = "{" +
       s"""\\\"reason\\\":\\\"${Random.alphanumeric.take(10).mkString}\\\",""" +
       "\\\"product\\\":\\\"Membership\\\"," +
-      "\\\"subscriptionName\\\":\\\"A-S00045062\\\"" +
+      "\\\"subscriptionName\\\":\\\"A-S00045062\\\"," +
+      "\\\"gaData\\\":\\\"{\\\\\\\"UA-51507017-5\\\\\\\":{\\\\\\\"experiments\\\\\\\":" +
+      "{\\\\\\\"9ycLuqmFRBGBDGV5bnFlCA\\\\\\\":\\\\\\\"1\\\\\\\"},\\\\\\\"hitcount\\\\\\\":3}\\\"" +
       "}"
   )
 

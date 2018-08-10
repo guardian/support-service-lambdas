@@ -60,6 +60,9 @@ object Handler extends Logging {
     final case class SubscriptionName(value: String) extends AnyVal
     implicit val formatSubscriptionName = Jsonx.formatInline[SubscriptionName]
 
+    final case class GaDataJsonString(value: String) extends AnyVal
+    implicit val formatGaDataJsonString = Jsonx.formatInline[GaDataJsonString]
+
     final case class ContactIdContainer(Id: String)
     implicit val readsContactIdContainer = Json.reads[ContactIdContainer]
     final case class SubscriptionIdContainer(Id: String)
@@ -68,7 +71,8 @@ object Handler extends Logging {
     case class RaiseCaseDetail(
       product: ProductName,
       reason: Reason,
-      subscriptionName: SubscriptionName
+      subscriptionName: SubscriptionName,
+      gaData: GaDataJsonString
     )
     implicit val readsRaiseCaseDetail = Json.reads[RaiseCaseDetail]
     implicit val writesCaseWithId = Json.writes[CaseWithId]
@@ -86,6 +90,7 @@ object Handler extends Logging {
         SF_Subscription__c = SubscriptionId(sfSubscriptionIdContainer.Id),
         Journey__c = "SV - At Risk - MB",
         Enquiry_Type__c = raiseCaseDetail.reason.value,
+        Case_Closure_Reason__c = raiseCaseDetail.gaData.value,
         Status = "Closed",
         Subject = CaseSubject(STARTING_CASE_SUBJECT)
       )

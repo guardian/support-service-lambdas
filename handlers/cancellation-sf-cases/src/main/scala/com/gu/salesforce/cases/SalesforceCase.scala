@@ -38,6 +38,7 @@ object SalesforceCase extends Logging {
       Product__c: String,
       Journey__c: String,
       Enquiry_Type__c: String,
+      Case_Closure_Reason__c: String,
       Status: String,
       Subject: CaseSubject,
       Origin: String = CASE_ORIGIN

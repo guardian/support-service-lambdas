@@ -3,9 +3,9 @@ package com.gu.newproduct.api.addsubscription
 import com.gu.newproduct.api.addsubscription.validation.{Failed, Passed, ValidationResult}
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.apigateway.ResponseModels.ApiResponse
+import com.gu.util.reader.AsyncTypes._
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.reader.Types._
-import com.gu.util.reader.AsyncTypes._
 import com.gu.util.resthttp.Types.{ClientFailableOp, NotFound}
 
 import scala.concurrent.Future
