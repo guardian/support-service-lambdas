@@ -5,7 +5,7 @@ import java.time.LocalDate
 import com.gu.i18n.Country
 import com.gu.i18n.Currency.GBP
 import com.gu.newproduct.api.addsubscription.email.contributions.SendConfirmationEmail.ContributionsEmailData
-import com.gu.newproduct.api.addsubscription.email.{CContactAttributes, CTo, ETPayload, contributions}
+import com.gu.newproduct.api.addsubscription.email.{CContactAttributes, CTo, ETPayload}
 import com.gu.newproduct.api.addsubscription.zuora.GetBillToContact._
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{BankAccountName, BankAccountNumberMask, DirectDebit, MandateId, NonDirectDebitMethod, SortCode}
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.ActivePaymentMethod
@@ -96,7 +96,7 @@ class SendConfirmationEmailContributionsTest extends FlatSpec with Matchers {
 
     //todo this check that it is not called does not work
     def sqsSend(ETPayload: ETPayload[ContributionFields]): Future[Unit] = fail("unexpected invocation of sqsSend")
-    val send = contributions.SendConfirmationEmail(sqsSend, today, getContact) _
+    val send = SendConfirmationEmail(sqsSend, today, getContact) _
 
     val res = Await.result(send(testData).underlying, 3 seconds)
 
@@ -111,7 +111,7 @@ class SendConfirmationEmailContributionsTest extends FlatSpec with Matchers {
     //todo this check that it is not called does not work
     def sqsSend(ETPayload: ETPayload[ContributionFields]): Future[Unit] = fail("unexpected invocation of sqsSend")
 
-    val send = contributions.SendConfirmationEmail(sqsSend, today, getContact) _
+    val send = SendConfirmationEmail(sqsSend, today, getContact) _
 
     val res = Await.result(send(testData).underlying, 3 seconds)
 
@@ -125,7 +125,7 @@ class SendConfirmationEmailContributionsTest extends FlatSpec with Matchers {
 
     def sqsSend(payload: ETPayload[ContributionFields]): Future[Unit] = Future.failed(new RuntimeException("sqs error`"))
 
-    val send = contributions.SendConfirmationEmail(sqsSend, today, getContact) _
+    val send = SendConfirmationEmail(sqsSend, today, getContact) _
 
     val res = Await.result(send(testData).underlying, 3 seconds)
 
