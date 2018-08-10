@@ -52,7 +52,7 @@ object Handler {
       GetIdentityAndZuoraEmailsForAccountsSteps(zuoraQuerier, _),
       ValidationSteps(_, _),
       UpdateSteps(
-        UpdateSalesforceIdentityId(sfPatch).runRequestUntupled,
+        UpdateSalesforceIdentityId(sfPatch).runRequestMultiArg,
         UpdateAccountSFLinks(requests.put),
         _,
         _,

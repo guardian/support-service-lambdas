@@ -113,7 +113,7 @@ object Handler {
   ): ApiGatewayOp[Unit] =
     for {
       sfRequests <- sfRequests
-      _ <- UpdateSalesforceIdentityId.set(sfRequests).runRequestUntupled(sFContactId, identityId).toApiGatewayOp("zuora issue")
+      _ <- UpdateSalesforceIdentityId.set(sfRequests).runRequestMultiArg(sFContactId, identityId).toApiGatewayOp("zuora issue")
     } yield ()
 
 }

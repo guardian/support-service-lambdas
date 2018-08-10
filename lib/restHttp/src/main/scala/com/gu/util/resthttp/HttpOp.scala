@@ -24,14 +24,14 @@ object HttpOp {
     HttpOp[Request](identity, getResponse, httpIsSuccessful)
 
   // convenience, untuples for you
-  implicit class HttpOpTuple2Ops[A1, A2](httpOpTuple2: HttpOp[(A1, A2)]) {
-    def runRequestUntupled: (A1, A2) => ClientFailableOp[Unit] = Function.untupled(httpOpTuple2.runRequest)
+  implicit class HttpOpTuple2Ops[A1, A2](httpOp2Arg: HttpOp[(A1, A2)]) {
+    def runRequestMultiArg: (A1, A2) => ClientFailableOp[Unit] = Function.untupled(httpOp2Arg.runRequest)
   }
 
   // convenience, tuples for you
-  implicit class HttpOpOps[IN](httpOpTuple2: HttpOp[IN]) {
-    def beforeRequestTupled[A1, A2](function2: (A1, A2) => IN): HttpOp[(A1, A2)] =
-      httpOpTuple2.beforeRequest(function2.tupled)
+  implicit class HttpOpOps[IN](httpOp: HttpOp[IN]) {
+    def beforeRequestMultiArg[A1, A2](function2Arg: (A1, A2) => IN): HttpOp[(A1, A2)] =
+      httpOp.beforeRequest(function2Arg.tupled)
   }
 
 }

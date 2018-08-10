@@ -14,10 +14,10 @@ object UpdateSalesforceIdentityId {
 
   // handy extra function to do it without the option
   def set(patchOp: HttpOp[PatchRequest]): HttpOp[(SFContactId, IdentityId)] =
-    patchOp.beforeRequestTupled { (contact, identity) => toRequest(contact, Some(identity)) }
+    patchOp.beforeRequestMultiArg { (contact, identity) => toRequest(contact, Some(identity)) }
 
   def apply(patchOp: HttpOp[PatchRequest]): HttpOp[(SFContactId, Option[IdentityId])] =
-    patchOp.beforeRequestTupled(toRequest)
+    patchOp.beforeRequestMultiArg(toRequest)
 
   def toRequest(sFContactId: SFContactId, identityId: Option[IdentityId]): PatchRequest = {
     val wireRequest = WireRequest(identityId.map(_.value).getOrElse(""))

@@ -26,7 +26,7 @@ class UpdateSalesforceIdentityIdEffectsTest extends FlatSpec with Matchers {
       response = RawEffects.response
       auth <- SalesforceAuthenticate.doAuth(response, sfConfig).toDisjunction
       updateSalesforceIdentityId = UpdateSalesforceIdentityId(HttpOp(response).beforeRequest(SalesforceRestRequestMaker.patch(auth)))
-      _ <- updateSalesforceIdentityId.runRequestUntupled(testContact, Some(IdentityId(unique))).toDisjunction
+      _ <- updateSalesforceIdentityId.runRequestMultiArg(testContact, Some(IdentityId(unique))).toDisjunction
       getSalesforceIdentityId = GetSalesforceIdentityId(SalesforceRestRequestMaker(auth, response)) _
       identityId <- getSalesforceIdentityId(testContact).toDisjunction
     } yield identityId
