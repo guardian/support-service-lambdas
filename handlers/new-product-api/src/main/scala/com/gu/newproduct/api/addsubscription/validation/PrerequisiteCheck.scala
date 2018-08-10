@@ -19,7 +19,7 @@ object PrerequisiteCheck {
   def apply(
     zuoraClient: RestRequestMaker.Requests,
     contributionRatePlanIds: List[ProductRatePlanId],
-    getCurrentDate: () => LocalDate
+    isValidStartDate: LocalDate => ValidationResult[Unit]
   )(request: AddSubscriptionRequest): ApiGatewayOp[ValidatedFields] = {
 
     def getAccount = GetAccount(zuoraClient.get[ZuoraAccount]) _
@@ -41,7 +41,7 @@ object PrerequisiteCheck {
       subs <- getSubscriptions(request.zuoraAccountId).toApiGatewayOp("get subscriptions for account from Zuora")
       _ <- ValidateSubscriptions(contributionRatePlanIds)(subs).toApiGatewayOp
       validatableFields = ValidatableFields(request.amountMinorUnits, request.startDate)
-      _ <- ValidateRequest(getCurrentDate, AmountLimits.limitsFor)(validatableFields, account.currency).toApiGatewayOp
+      _ <- ValidateRequest(isValidStartDate, AmountLimits.limitsFor)(validatableFields, account.currency).toApiGatewayOp
     } yield ValidatedFields(paymentMethod, account.currency)
   }
 

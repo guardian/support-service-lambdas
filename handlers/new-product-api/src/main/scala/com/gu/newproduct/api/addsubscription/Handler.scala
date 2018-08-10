@@ -7,8 +7,8 @@ import com.gu.effects.sqs.AwsSQSSend
 import com.gu.effects.sqs.AwsSQSSend.QueueName
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.newproduct.api.addsubscription.TypeConvert._
-import com.gu.newproduct.api.addsubscription.email.{ContributionFields, EtSqsSend, SendConfirmationEmail}
 import com.gu.newproduct.api.addsubscription.email.SendConfirmationEmail.ContributionsEmailData
+import com.gu.newproduct.api.addsubscription.email.{ContributionFields, EtSqsSend, SendConfirmationEmail}
 import com.gu.newproduct.api.addsubscription.validation._
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.WireModel.{WireCreateRequest, WireSubscription}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{ZuoraCreateSubRequest, SubscriptionName}
@@ -16,6 +16,7 @@ import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAcc
 import com.gu.newproduct.api.addsubscription.zuora.GetBillToContact.WireModel.GetBillToResponse
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.DirectDebit
 import com.gu.newproduct.api.addsubscription.zuora.{CreateSubscription, GetAccount, GetBillToContact}
+import com.gu.newproduct.api.productcatalog.{DateRule, NewProductApi}
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
@@ -29,8 +30,8 @@ import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
 import okhttp3.{Request, Response}
 
 import scala.concurrent.Future
-object Handler extends Logging {
 
+object Handler extends Logging {
   // Referenced in Cloudformation
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
     ApiGatewayHandler(LambdaIO(inputStream, outputStream, context)) {
@@ -79,17 +80,20 @@ object Steps {
   def operationForEffects(response: Request => Response, stage: Stage, fetchString: StringFromS3): ApiGatewayOp[Operation] =
     for {
       zuoraIds <- ZuoraIds.zuoraIdsForStage(stage)
-      loadConfig = LoadConfigModule(stage, fetchString)
-      zuoraConfig <- loadConfig[ZuoraRestConfig].toApiGatewayOp("load zuora config")
+      zuoraConfig <- {
+        val loadConfig = LoadConfigModule(stage, fetchString)
+        loadConfig[ZuoraRestConfig].toApiGatewayOp("load zuora config")
+      }
       zuoraClient = ZuoraRestRequestMaker(response, zuoraConfig)
       sqsSend = AwsSQSSend(emailQueueFor(stage)) _
       contributionsSqsSend = EtSqsSend[ContributionFields](sqsSend) _
-
+      getCurrentDate = () => RawEffects.now().toLocalDate
+      validatorFor = DateValidator.validatorFor(getCurrentDate, _: DateRule)
+      isValidStartDate = StartDateValidator.fromRule(validatorFor, NewProductApi.catalog.monthlyContribution.startDateRules)
       getBillTo = GetBillToContact(zuoraClient.get[GetBillToResponse]) _
       createMonthlyContribution = CreateSubscription(zuoraIds.monthly, zuoraClient.post[WireCreateRequest, WireSubscription]) _
       contributionIds = List(zuoraIds.monthly.productRatePlanId, zuoraIds.annual.productRatePlanId)
-      getCurrentDate = () => RawEffects.now().toLocalDate
-      prerequisiteCheck = PrerequisiteCheck(zuoraClient, contributionIds, getCurrentDate) _
+      prerequisiteCheck = PrerequisiteCheck(zuoraClient, contributionIds, isValidStartDate) _
       asyncPrerequisiteCheck = prerequisiteCheck.andThenConvertToAsync
       sendConfirmationEmail = SendConfirmationEmail(contributionsSqsSend, getCurrentDate, getBillTo) _
       configuredOp = Operation.async(

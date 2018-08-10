@@ -14,14 +14,14 @@ object ValidateRequest {
   )
 
   def apply(
-    now: () => LocalDate,
+    isValidStartDate: LocalDate => ValidationResult[Unit],
     limitsFor: Currency => AmountLimits
   )(
     validatableFields: ValidatableFields,
     currency: Currency
   ): ValidationResult[Unit] =
     for {
-      _ <- (validatableFields.startDate == now()) orFailWith "start date must be today"
+      _ <- isValidStartDate(validatableFields.startDate)
       limits = limitsFor(currency)
       _ <- (validatableFields.amountMinorUnits.value <= limits.max) orFailWith s"amount must not be more than ${limits.max}"
       _ <- (validatableFields.amountMinorUnits.value >= limits.min) orFailWith s"amount must be at least ${limits.min}"

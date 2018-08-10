@@ -1,61 +1,51 @@
 package com.gu.newproduct.api.productcatalog
 
-import play.api.libs.json.{JsString, Json, Writes}
+import java.time.DayOfWeek
+import java.time.DayOfWeek._
 
-sealed trait DayOfWeek
-
-case object Monday extends DayOfWeek
-
-case object Tuesday extends DayOfWeek
-
-case object Wednesday extends DayOfWeek
-
-case object Thursday extends DayOfWeek
-
-case object Friday extends DayOfWeek
-
-case object Saturday extends DayOfWeek
-
-case object Sunday extends DayOfWeek
-
-case class PlanInfo(
-  id: String,
-  label: String,
-  startDateRules: Option[StartDateRules] = None
+case class Catalog(
+  voucherWeekend: Plan,
+  voucherEveryDay: Plan,
+  monthlyContribution: Plan
 )
 
-case class SelectableWindow(
-  cutOffDayInclusive: Option[DayOfWeek] = None,
-  startDaysAfterCutOff: Option[Int] = None,
-  sizeInDays: Option[Int] = None
-)
-case class StartDateRules(
-  daysOfWeek: Option[List[DayOfWeek]] = None,
-  selectableWindow: Option[SelectableWindow] = None
-)
-
-case class Product(label: String, plans: List[PlanInfo])
-
-case class Catalog(products: List[Product])
-
-object DayOfWeek {
-  implicit val writes: Writes[DayOfWeek] = { (day: DayOfWeek) => JsString(day.toString) }
+object NewProductApi {
+  val catalog: Catalog = {
+    val voucherWindowRule = WindowRule(
+      maybeCutOffDay = Some(DayOfWeek.TUESDAY),
+      maybeStartDelay = Some(DelayDays(20)),
+      maybeSize = Some(WindowSizeDays(28))
+    )
+    val weekendRule = DaysOfWeekRule(List(SATURDAY, SUNDAY))
+    val mondayRule = DaysOfWeekRule(List(MONDAY))
+    val voucherWeekendDateRules = StartDateRules(Some(weekendRule), Some(voucherWindowRule))
+    val voucherWeekend = Plan(PlanId("voucher_weekend"), voucherWeekendDateRules)
+    val voucherEveryDayDateRules = StartDateRules(Some(mondayRule), Some(voucherWindowRule))
+    val voucherEveryDay = Plan(PlanId("voucher_everyDay"), voucherEveryDayDateRules)
+    val monthlyContributionWindow = WindowRule(
+      maybeSize = Some(WindowSizeDays(1)),
+      maybeCutOffDay = None,
+      maybeStartDelay = None
+    )
+    val monthlyContributionRules = StartDateRules(windowRule = Some(monthlyContributionWindow))
+    val monthlyContribution = Plan(PlanId("monthly_contribution"), monthlyContributionRules)
+    Catalog(
+      voucherWeekend = voucherWeekend,
+      voucherEveryDay = voucherEveryDay,
+      monthlyContribution = monthlyContribution
+    )
+  }
 }
+case class PlanId(value: String) extends AnyVal
+case class Plan(id: PlanId, startDateRules: StartDateRules = StartDateRules())
 
-object SelectableWindow {
-  implicit val writes = Json.writes[SelectableWindow]
-}
-object StartDateRules {
-  implicit val writes = Json.writes[StartDateRules]
-}
-object PlanInfo {
-  implicit val writes = Json.writes[PlanInfo]
-}
+case class DelayDays(value: Int) extends AnyVal
+case class WindowSizeDays(value: Int) extends AnyVal
 
-object Product {
-  implicit val writes = Json.writes[Product]
-}
+sealed trait DateRule
 
-object Catalog {
-  implicit val writes = Json.writes[Catalog]
-}
+case class StartDateRules(daysOfWeekRule: Option[DaysOfWeekRule] = None, windowRule: Option[WindowRule] = None)
+
+case class DaysOfWeekRule(allowedDays: List[DayOfWeek]) extends DateRule
+
+case class WindowRule(maybeCutOffDay: Option[DayOfWeek], maybeStartDelay: Option[DelayDays], maybeSize: Option[WindowSizeDays]) extends DateRule
