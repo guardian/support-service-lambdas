@@ -18,7 +18,7 @@ import com.gu.util.resthttp.Types.ClientSuccess
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
-object SendConfirmationEmailContributionsManualTest {
+object SendConfirmationEmailsManualTest {
 
   def fakeContact(email: Email) = Contact(
     FirstName("john"),
