@@ -1,4 +1,4 @@
-package com.gu.newproduct.api.addsubscription.email
+package com.gu.newproduct.api.addsubscription.email.contributions
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -13,6 +13,7 @@ import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResp
 import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.reader.AsyncTypes._
 import com.gu.newproduct.api.addsubscription.TypeConvert._
+import com.gu.newproduct.api.addsubscription.email.ETPayload
 
 import scala.concurrent.Future
 
@@ -83,4 +84,3 @@ object SendConfirmationEmail extends Logging {
     }
   }
 }
-

@@ -1,4 +1,4 @@
-package com.gu.newproduct.api.addsubscription.email
+package com.gu.newproduct.api.addsubscription.email.contributions
 
 import play.api.libs.json.Json
 

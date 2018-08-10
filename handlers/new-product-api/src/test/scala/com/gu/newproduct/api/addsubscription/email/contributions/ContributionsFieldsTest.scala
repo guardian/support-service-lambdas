@@ -1,4 +1,5 @@
-package com.gu.newproduct.api.addsubscription.email
+package com.gu.newproduct.api.addsubscription.email.contributions
+
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
 
