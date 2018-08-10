@@ -17,7 +17,7 @@ import com.gu.newproduct.api.addsubscription.email.ETPayload
 
 import scala.concurrent.Future
 
-object SendConfirmationEmail extends Logging {
+object SendConfirmationEmailContributions extends Logging {
 
   case class ContributionsEmailData(
     accountId: ZuoraAccountId,

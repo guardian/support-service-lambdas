@@ -7,8 +7,8 @@ import com.gu.effects.sqs.AwsSQSSend
 import com.gu.effects.sqs.AwsSQSSend.QueueName
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.newproduct.api.addsubscription.TypeConvert._
-import com.gu.newproduct.api.addsubscription.email.contributions.SendConfirmationEmail.ContributionsEmailData
-import com.gu.newproduct.api.addsubscription.email.contributions.{ContributionFields, SendConfirmationEmail}
+import com.gu.newproduct.api.addsubscription.email.contributions.SendConfirmationEmailContributions.ContributionsEmailData
+import com.gu.newproduct.api.addsubscription.email.contributions.{ContributionFields, SendConfirmationEmailContributions}
 import com.gu.newproduct.api.addsubscription.email.EtSqsSend
 import com.gu.newproduct.api.addsubscription.validation._
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.WireModel.{WireCreateRequest, WireSubscription}
@@ -101,7 +101,7 @@ object Steps {
       contributionIds = List(zuoraIds.monthly.productRatePlanId, zuoraIds.annual.productRatePlanId)
       prerequisiteCheck = PrerequisiteCheck(zuoraClient, contributionIds, isValidStartDate) _
       asyncPrerequisiteCheck = prerequisiteCheck.andThenConvertToAsync
-      sendConfirmationEmail = SendConfirmationEmail(contributionsSqsSend, getCurrentDate, getBillTo) _
+      sendConfirmationEmail = SendConfirmationEmailContributions(contributionsSqsSend, getCurrentDate, getBillTo) _
       configuredOp = Operation.async(
         steps = addSubscriptionSteps(asyncPrerequisiteCheck, createMonthlyContribution, sendConfirmationEmail),
         healthcheck = () =>

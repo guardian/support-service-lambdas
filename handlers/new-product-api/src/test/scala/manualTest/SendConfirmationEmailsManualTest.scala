@@ -6,8 +6,8 @@ import com.gu.effects.sqs.AwsSQSSend
 import com.gu.i18n.{Country, Currency}
 import com.gu.newproduct.api.addsubscription.Steps.emailQueueFor
 import com.gu.newproduct.api.addsubscription.email.EtSqsSend
-import com.gu.newproduct.api.addsubscription.email.contributions.SendConfirmationEmail.ContributionsEmailData
-import com.gu.newproduct.api.addsubscription.email.contributions.{ContributionFields, SendConfirmationEmail}
+import com.gu.newproduct.api.addsubscription.email.contributions.SendConfirmationEmailContributions.ContributionsEmailData
+import com.gu.newproduct.api.addsubscription.email.contributions.{ContributionFields, SendConfirmationEmailContributions}
 import com.gu.newproduct.api.addsubscription.zuora.GetBillToContact.{Contact, Email, FirstName, LastName}
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.NonDirectDebitMethod
 import com.gu.newproduct.api.addsubscription.zuora.{PaymentMethodStatus, PaymentMethodType}
@@ -41,7 +41,7 @@ object SendConfirmationEmailsManualTest {
       email <- args.headOption.map(Email.apply)
       sqsSend = AwsSQSSend(emailQueueFor(Stage("PROD"))) _
       contributionsSqsSend = EtSqsSend[ContributionFields](sqsSend) _
-      sendConfirmationEmail = SendConfirmationEmail(contributionsSqsSend, () => fakeDate, _ => ClientSuccess(fakeContact(email))) _
+      sendConfirmationEmail = SendConfirmationEmailContributions(contributionsSqsSend, () => fakeDate, _ => ClientSuccess(fakeContact(email))) _
       sendResult = sendConfirmationEmail(contributionsEmailData)
     } yield sendResult
     result match {
