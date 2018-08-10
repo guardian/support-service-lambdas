@@ -1,6 +1,8 @@
 package com.gu.sf_contact_merge.update
 
-import com.gu.sf_contact_merge.getaccounts.GetContacts.{AccountId, IdentityId, SFContactId}
+import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
+import com.gu.salesforce.TypesForSFEffectsData.SFContactId
+import com.gu.sf_contact_merge.getaccounts.GetContacts.AccountId
 import com.gu.util.resthttp.RestRequestMaker.{JsonResponse, PutRequest, RelativePath}
 import com.gu.util.resthttp.Types.ClientFailableOp
 import play.api.libs.json.{JsSuccess, Json, Reads}

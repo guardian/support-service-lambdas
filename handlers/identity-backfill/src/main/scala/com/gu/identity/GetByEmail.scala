@@ -1,12 +1,13 @@
 package com.gu.identity
 
 import com.gu.identity.GetByEmail.RawWireModel.{User, UserResponse}
-import com.gu.identityBackfill.Types.{EmailAddress, IdentityId}
+import com.gu.identityBackfill.Types.EmailAddress
+import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
 import com.gu.util.config.ConfigLocation
 import okhttp3.{HttpUrl, Request, Response}
 import play.api.libs.json.{Json, Reads}
-import scalaz.{-\/, \/, \/-}
 import scalaz.syntax.std.either._
+import scalaz.{-\/, \/, \/-}
 
 object GetByEmail {
 

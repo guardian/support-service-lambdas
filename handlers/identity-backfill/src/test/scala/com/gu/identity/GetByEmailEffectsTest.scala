@@ -1,7 +1,8 @@
 package com.gu.identity
 
 import com.gu.effects.{GetFromS3, RawEffects}
-import com.gu.identityBackfill.Types.{EmailAddress, IdentityId}
+import com.gu.identityBackfill.Types.EmailAddress
+import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
 import org.scalatest.{FlatSpec, Matchers}

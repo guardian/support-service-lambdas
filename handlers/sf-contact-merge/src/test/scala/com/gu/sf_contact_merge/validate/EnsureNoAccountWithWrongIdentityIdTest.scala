@@ -1,6 +1,6 @@
 package com.gu.sf_contact_merge.validate
 
-import com.gu.sf_contact_merge.getaccounts.GetContacts.IdentityId
+import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
 import org.scalatest.{FlatSpec, Matchers}
 
 class EnsureNoAccountWithWrongIdentityIdTest extends FlatSpec with Matchers {

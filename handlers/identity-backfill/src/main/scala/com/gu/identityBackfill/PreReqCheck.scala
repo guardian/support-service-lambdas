@@ -11,10 +11,12 @@ import com.gu.util.reader.Types._
 import com.gu.util.resthttp.Types.ClientFailableOp
 import scalaz.\/
 import TypeConvert._
+import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
+import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 
 object PreReqCheck {
 
-  case class PreReqResult(zuoraAccountId: Types.AccountId, sFContactId: Types.SFContactId, requiredIdentityId: Types.IdentityId)
+  case class PreReqResult(zuoraAccountId: Types.AccountId, sFContactId: SFContactId, requiredIdentityId: IdentityId)
 
   def apply(
     getByEmail: EmailAddress => \/[GetByEmail.ApiError, IdentityId],

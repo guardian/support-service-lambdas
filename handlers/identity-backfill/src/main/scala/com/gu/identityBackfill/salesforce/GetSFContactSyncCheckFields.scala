@@ -2,8 +2,8 @@ package com.gu.identityBackfill.salesforce
 
 import com.gu.i18n.CountryGroup
 import com.gu.identityBackfill.TypeConvert._
-import com.gu.identityBackfill.Types.SFContactId
 import com.gu.identityBackfill.salesforce.ContactSyncCheck.RecordTypeId
+import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types.ApiGatewayOp._
 import com.gu.util.resthttp.RestRequestMaker
