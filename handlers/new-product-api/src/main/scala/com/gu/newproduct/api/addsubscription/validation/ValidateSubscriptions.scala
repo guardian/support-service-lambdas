@@ -14,3 +14,14 @@ object ValidateSubscriptions {
     s.status == Active && s.productRateplanIds.exists(targetRatePlanIds.contains(_))
 }
 
+object ValidateSubscriptions1 {
+  def apply(contributionRatePlanIds: List[ProductRatePlanId])(subscriptions: List[Subscription]): ValidationResult[ List[Subscription]] = {
+    def hasActiveContributions = hasActiveRateplans(contributionRatePlanIds) _
+    val response = !subscriptions.exists(hasActiveContributions) orFailWith "Zuora account already has an active recurring contribution subscription"
+
+    response.map(_ => subscriptions) //TODO just to make it work, do this is a nicer way
+  }
+
+  def hasActiveRateplans(targetRatePlanIds: List[ProductRatePlanId])(s: Subscription) =
+    s.status == Active && s.productRateplanIds.exists(targetRatePlanIds.contains(_))
+}
