@@ -2,6 +2,7 @@ package com.gu.newproduct.api.addsubscription
 
 import java.time.LocalDate
 
+import com.gu.newproduct.api.productcatalog.PlanId
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.{JsError, Json}
 
@@ -14,7 +15,8 @@ class AddSubscriptionRequestTest extends FlatSpec with Matchers {
         |   "acquisitionSource":"CSR",
         |   "createdByCSR":"CSRName",
         |   "amountMinorUnits": 123,
-        |   "acquisitionCase": "5006E000005b5cf"
+        |   "acquisitionCase": "5006E000005b5cf",
+        |   "planId": "helloPlan"
         |}
       """.stripMargin
 
@@ -26,7 +28,8 @@ class AddSubscriptionRequestTest extends FlatSpec with Matchers {
       acquisitionSource = AcquisitionSource("CSR"),
       createdByCSR = CreatedByCSR("CSRName"),
       amountMinorUnits = AmountMinorUnits(123),
-      acquisitionCase = CaseId("5006E000005b5cf")
+      acquisitionCase = CaseId("5006E000005b5cf"),
+      planId = PlanId("helloPlan")
     )
   }
 
@@ -40,12 +43,13 @@ class AddSubscriptionRequestTest extends FlatSpec with Matchers {
         |   "acquisitionSource":"CSR",
         |   "createdByCSR":"CSRName",
         |   "amountMinorUnits": 220,
-        |   "acquisitionCase": "5006E000005b5cf"
+        |   "acquisitionCase": "5006E000005b5cf",
+        |   "planId": "helloPlan"
         |}
       """.stripMargin
 
     Json.parse(input).validate[AddSubscriptionRequest] shouldBe JsError("invalid date format")
-
   }
+
 }
 

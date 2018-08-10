@@ -4,18 +4,15 @@ import java.time.LocalDate
 
 import com.gu.i18n.Currency
 import com.gu.i18n.Currency._
-import com.gu.newproduct.api.addsubscription.{AddSubscriptionRequest, CaseId, ZuoraAccountId, _}
+import com.gu.newproduct.api.addsubscription._
+import com.gu.newproduct.api.addsubscription.validation.ValidateRequest.ValidatableFields
 import org.scalatest.{FlatSpec, Matchers}
 
 class ValidateRequestTest extends FlatSpec with Matchers {
 
-  val testRequest = AddSubscriptionRequest(
-    zuoraAccountId = ZuoraAccountId("accountId"),
+  val testRequest = ValidatableFields(
     startDate = LocalDate.of(2018, 7, 20),
-    acquisitionSource = AcquisitionSource("someSource"),
-    createdByCSR = CreatedByCSR("csrName"),
-    amountMinorUnits = AmountMinorUnits(100),
-    acquisitionCase = CaseId("caseId")
+    amountMinorUnits = AmountMinorUnits(100)
   )
 
   def now = () => LocalDate.of(2018, 7, 20)

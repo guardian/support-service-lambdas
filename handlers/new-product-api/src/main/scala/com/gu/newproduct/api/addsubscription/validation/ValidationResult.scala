@@ -10,6 +10,8 @@ sealed trait ValidationResult[+A] {
 
   def map[B](f: A => B): ValidationResult[B] =
     toDisjunction.map(f).toValidationResult
+  def mapFailure(f: String => String): ValidationResult[A] =
+    toDisjunction.leftMap(old => Failed(f(old.message))).toValidationResult
 }
 
 case class Passed[A](value: A) extends ValidationResult[A] {

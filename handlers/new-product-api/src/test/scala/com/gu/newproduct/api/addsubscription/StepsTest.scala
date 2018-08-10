@@ -6,7 +6,7 @@ import com.gu.i18n.Currency.GBP
 import com.gu.newproduct.api.addsubscription.email.SendConfirmationEmail.ContributionsEmailData
 import com.gu.newproduct.api.addsubscription.validation.ValidatedFields
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription
-import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{CreateReq, SubscriptionName}
+import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{SubscriptionName, ZuoraCreateSubRequest}
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{BankAccountName, BankAccountNumberMask, DirectDebit, MandateId, SortCode}
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.ActivePaymentMethod
 import com.gu.test.JsonMatchers.JsonMatcher
@@ -28,7 +28,7 @@ class StepsTest extends FlatSpec with Matchers {
 
   "it" should "run end to end with fakes" in {
 
-    val expectedIn = CreateReq(
+    val expectedIn = ZuoraCreateSubRequest(
       ZuoraAccountId("acccc"),
       AmountMinorUnits(123),
       LocalDate.of(2018, 7, 18),
@@ -38,7 +38,7 @@ class StepsTest extends FlatSpec with Matchers {
       CreatedByCSR("bob")
     )
 
-    def fakeCreate(in: CreateSubscription.CreateReq): Types.ClientFailableOp[CreateSubscription.SubscriptionName] = {
+    def fakeCreate(in: CreateSubscription.ZuoraCreateSubRequest): Types.ClientFailableOp[CreateSubscription.SubscriptionName] = {
       in shouldBe expectedIn
       ClientSuccess(SubscriptionName("well done"))
     }
@@ -66,7 +66,8 @@ class StepsTest extends FlatSpec with Matchers {
       "startDate" -> JsString("2018-07-18"),
       "zuoraAccountId" -> JsString("acccc"),
       "acquisitionSource" -> JsString("CSR"),
-      "createdByCSR" -> JsString("bob")
+      "createdByCSR" -> JsString("bob"),
+      "planId" -> JsString("plan!")
 
     ))
 
