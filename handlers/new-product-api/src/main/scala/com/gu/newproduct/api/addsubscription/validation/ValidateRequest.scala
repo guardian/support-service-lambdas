@@ -5,10 +5,12 @@ import java.time.LocalDate
 import com.gu.i18n.Currency
 import com.gu.newproduct.api.addsubscription.AmountMinorUnits
 import com.gu.newproduct.api.addsubscription.validation.Validation.BooleanValidation
+import com.gu.newproduct.api.productcatalog.PlanId
 
 object ValidateRequest {
 
   case class ValidatableFields(
+    planId: PlanId,
     amountMinorUnits: AmountMinorUnits,
     startDate: LocalDate
   )
@@ -21,6 +23,7 @@ object ValidateRequest {
     currency: Currency
   ): ValidationResult[Unit] =
     for {
+      _ <- validatableFields.planId.value == "monthly_contribution" orFailWith s"unsupported plan: only accepted value is 'monthly_contribution'"
       _ <- isValidStartDate(validatableFields.startDate)
       limits = limitsFor(currency)
       _ <- (validatableFields.amountMinorUnits.value <= limits.max) orFailWith s"amount must not be more than ${limits.max}"
