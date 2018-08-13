@@ -8,9 +8,9 @@ object ValidateSubscriptions {
   def apply(contributionRatePlanIds: List[ProductRatePlanId])(subscriptions: List[Subscription]): ValidationResult[List[Subscription]] = {
     def hasActiveContributions = hasActiveRateplans(contributionRatePlanIds) _
 
-    val response = !subscriptions.exists(hasActiveContributions) orFailWith "Zuora account already has an active recurring contribution subscription"
+    val validationResult = !subscriptions.exists(hasActiveContributions) orFailWith "Zuora account already has an active recurring contribution subscription"
 
-    response.map(_ => subscriptions) //TODO just to make it work, do this is a nicer way
+    validationResult.map(_ => subscriptions)
   }
 
   def hasActiveRateplans(targetRatePlanIds: List[ProductRatePlanId])(s: Subscription) =

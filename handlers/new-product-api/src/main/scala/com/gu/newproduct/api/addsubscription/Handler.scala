@@ -87,10 +87,10 @@ object Steps {
   )(apiGatewayRequest: ApiGatewayRequest): Future[ApiResponse] = {
     (for {
       request <- apiGatewayRequest.bodyAsCaseClass[AddSubscriptionRequest]().withLogging("parsed request with steps1!").toAsync
-      cus <- getCustomerData(request.zuoraAccountId).toAsync
-      CustomerData(account, paymentMethod, subscriptions, billTo) = cus //todo fix later
+      customerData <- getCustomerData(request.zuoraAccountId).toAsync
+      CustomerData(account, paymentMethod, subscriptions, billTo) = customerData
       validatableFields = ValidatableFields(request.planId, request.amountMinorUnits, request.startDate)
-      _ <- validateRequest(validatableFields, account.currency).toApiGatewayOp.toAsync //todo maybe we don't need the two step conversion
+      _ <- validateRequest(validatableFields, account.currency).toApiGatewayOp.toAsync
       acceptanceDate = request.startDate.plusDays(paymentDelayFor(paymentMethod))
       zuoraCreateSubRequest = createZuoraSubRequest(request, acceptanceDate)
       subscriptionName <- createMonthlyContribution(zuoraCreateSubRequest).toAsyncApiGatewayOp("create monthly contribution")
