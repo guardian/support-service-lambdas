@@ -15,7 +15,16 @@ class ValidateAccountTest extends FlatSpec with Matchers {
   )
 
   it should "succeed with valid account" in {
-    ValidateAccount(validAccount) shouldBe Passed(PaymentMethodId("activePaymentMethod"))
+
+    val validatedAccount = ValidatedAccount(
+      identityId = IdentityId("idAccount1"),
+      paymentMethodId = PaymentMethodId("activePaymentMethod"),
+      autoPay = AutoPay(true),
+      accountBalanceMinorUnits = AccountBalanceMinorUnits(0),
+      currency = GBP
+    )
+
+    ValidateAccount(validAccount) shouldBe Passed(validatedAccount)
   }
   it should "fail if account has no identity id" in {
     val noIdentityAccount = validAccount.copy(identityId = None)

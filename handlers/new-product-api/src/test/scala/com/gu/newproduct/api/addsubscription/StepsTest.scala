@@ -3,10 +3,14 @@ package com.gu.newproduct.api.addsubscription
 import java.time.LocalDate
 
 import com.gu.i18n.Currency.GBP
+import com.gu.i18n.{Country, Currency}
 import com.gu.newproduct.api.addsubscription.email.SendConfirmationEmail.ContributionsEmailData
-import com.gu.newproduct.api.addsubscription.validation.ValidatedFields
+import com.gu.newproduct.api.addsubscription.validation.ValidateRequest.ValidatableFields
+import com.gu.newproduct.api.addsubscription.validation.{CustomerData, Passed, ValidatedAccount}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{SubscriptionName, ZuoraCreateSubRequest}
+import com.gu.newproduct.api.addsubscription.zuora.GetAccount.{AccountBalanceMinorUnits, AutoPay, IdentityId, PaymentMethodId}
+import com.gu.newproduct.api.addsubscription.zuora.GetBillToContact.{Contact, Email, FirstName, LastName}
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{BankAccountName, BankAccountNumberMask, DirectDebit, MandateId, SortCode}
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.ActivePaymentMethod
 import com.gu.test.JsonMatchers.JsonMatcher
@@ -26,7 +30,7 @@ class StepsTest extends FlatSpec with Matchers {
 
   case class ExpectedOut(subscriptionNumber: String)
 
-  "it" should "run end to end with fakes" in {
+  it should "run end to end with fakes" in {
 
     val expectedIn = ZuoraCreateSubRequest(
       ZuoraAccountId("acccc"),
@@ -43,22 +47,37 @@ class StepsTest extends FlatSpec with Matchers {
       ClientSuccess(SubscriptionName("well done"))
     }
 
-    def fakeCheck(request: AddSubscriptionRequest): AsyncApiGatewayOp[ValidatedFields] = {
-      request.zuoraAccountId.value shouldBe "acccc"
-      val paymentMethod = DirectDebit(
-        ActivePaymentMethod,
-        BankAccountName("someName"),
-        BankAccountNumberMask("123312***"),
-        SortCode("233331"),
-        MandateId("1234 ")
-      )
-      val validatedFields = ValidatedFields(paymentMethod, GBP)
-      ContinueProcessing((validatedFields)).toAsync
-    }
-
     def fakeSendEmails(contributionsEmailData: ContributionsEmailData) = {
       ContinueProcessing(()).toAsync
     }
+
+    def fakeValidateRequest(fields: ValidatableFields, currency: Currency) = Passed(())
+
+    def fakeGetCustomerData(zuoraAccountId: ZuoraAccountId) = ContinueProcessing(
+      CustomerData(
+        account = ValidatedAccount(
+          identityId = IdentityId("identityId"),
+          paymentMethodId = PaymentMethodId("paymentMethodId"),
+          autoPay = AutoPay(true),
+          accountBalanceMinorUnits = AccountBalanceMinorUnits(1234),
+          currency = GBP
+        ),
+        paymentMethod = DirectDebit(
+          ActivePaymentMethod,
+          BankAccountName("someName"),
+          BankAccountNumberMask("123312***"),
+          SortCode("233331"),
+          MandateId("1234 ")
+        ),
+        accountSubscriptions = Nil,
+        billToContact = Contact(
+          firstName = FirstName("firstName"),
+          lastName = LastName("lastName"),
+          email = Some(Email("email@mail.com")),
+          country = Some(Country.UK)
+        )
+      )
+    )
 
     val requestInput = JsObject(Map(
       "acquisitionCase" -> JsString("case"),
@@ -75,7 +94,8 @@ class StepsTest extends FlatSpec with Matchers {
     val expectedOutput = ExpectedOut("well done")
 
     val futureActual = Steps.addSubscriptionSteps(
-      fakeCheck,
+      fakeGetCustomerData,
+      fakeValidateRequest,
       fakeCreate,
       fakeSendEmails
     )(ApiGatewayRequest(None, Some(Json.stringify(requestInput)), None, None))
