@@ -51,13 +51,12 @@ class ValidationImplicitsTest extends FlatSpec with Matchers {
 
     def validationFunc(testData: TestData) = Passed(ValidatedTestData("some response"))
 
-    def getValidatedData: String => ApiGatewayOp[ValidatedTestData] = getData _ andValidateWith(
+    def getValidatedData: String => ApiGatewayOp[ValidatedTestData] = getData _ andValidateWith (
       validate = validationFunc,
       ifNotFoundReturn = Some("invalid test data Id")
     )
 
-    getValidatedData("testId") shouldBe ReturnWithResponse(ApiGatewayResponse.messageResponse("422", "invalid test data Id")
-    )
+    getValidatedData("testId") shouldBe ReturnWithResponse(ApiGatewayResponse.messageResponse("422", "invalid test data Id"))
   }
 
   it should "return 422 with validation error if validation fails" in {
@@ -67,7 +66,6 @@ class ValidationImplicitsTest extends FlatSpec with Matchers {
 
     def getValidatedData: String => ApiGatewayOp[ValidatedTestData] = getData _ andValidateWith validationFunc
 
-    getValidatedData("testId") shouldBe ReturnWithResponse(ApiGatewayResponse.messageResponse("422", "validation failed!")
-    )
+    getValidatedData("testId") shouldBe ReturnWithResponse(ApiGatewayResponse.messageResponse("422", "validation failed!"))
   }
 }
