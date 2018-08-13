@@ -19,11 +19,15 @@ object Validation {
   }
 
   implicit class ComposeValidation[ID, DATA](getter: ID => ClientFailableOp[DATA]) {
-    def andValidateWith[VALIDATED](validate: DATA => ValidationResult[VALIDATED]): ID => ApiGatewayOp[VALIDATED] = (id: ID) =>
-      for {
-        data <- getter(id).toApiGatewayOp("getting data") //todo see if we need to improve logging here
-        validatedData <- validate(data).toApiGatewayOp
-      } yield validatedData
+    def andValidateWith[VALIDATED](validate: DATA => ValidationResult[VALIDATED], ifNotFoundReturn: Option[String] = None): ID => ApiGatewayOp[VALIDATED] =
+      (id: ID) =>
+        for {
+          data <- ifNotFoundReturn match {
+            case Some(notFoundError) => getter(id).toApiResponseCheckingNotFound("getting data", notFoundError)
+            case None => getter(id).toApiGatewayOp("getting data")
+          }
+          validatedData <- validate(data).toApiGatewayOp
+        } yield validatedData
   }
 
 }

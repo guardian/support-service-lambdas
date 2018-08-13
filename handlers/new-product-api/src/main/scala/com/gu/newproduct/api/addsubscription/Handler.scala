@@ -162,7 +162,10 @@ object Steps {
     contributionPlanIds: List[ProductRatePlanId]
   ): ZuoraAccountId => ApiGatewayOp[CustomerData] = {
 
-    val getValidatedAccount = GetAccount(zuoraClient.get[ZuoraAccount]) _ andValidateWith ValidateAccount1.apply _
+    val getValidatedAccount = GetAccount(zuoraClient.get[ZuoraAccount]) _ andValidateWith(
+      validate = ValidateAccount1.apply _,
+      ifNotFoundReturn = Some("Zuora account id is not valid")
+      )
     val getValidatedPaymentMethod = GetPaymentMethod(zuoraClient.get[PaymentMethodWire]) _ andValidateWith ValidatePaymentMethod1.apply _
     val validateSubs = ValidateSubscriptions1(contributionPlanIds) _
     val getValidatedSubs = GetAccountSubscriptions(zuoraClient.get[ZuoraSubscriptionsResponse]) _ andValidateWith validateSubs
