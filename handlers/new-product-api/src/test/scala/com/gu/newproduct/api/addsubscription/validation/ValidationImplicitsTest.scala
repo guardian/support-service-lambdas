@@ -1,18 +1,21 @@
 package com.gu.newproduct.api.addsubscription.validation
 
-import org.scalatest.{FlatSpec, Matchers}
-import Validation._
+import com.gu.newproduct.api.addsubscription.validation.Validation._
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types.ApiGatewayOp
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError, NotFound}
+import org.scalatest.{FlatSpec, Matchers}
+
 class ValidationImplicitsTest extends FlatSpec with Matchers {
 
   case class TestData(maybeValue: Option[String])
+
   case class ValidatedTestData(validatedValue: String)
 
   "andValidateWith" should "compose getter and validation into a single function" in {
     def getData(id: String): ClientFailableOp[TestData] = ClientSuccess(TestData(Some(s"data for id $id")))
+
     def validationFunc(testData: TestData): ValidationResult[ValidatedTestData] = testData.maybeValue match {
       case None => Failed("value is missing")
       case Some(value) => Passed(ValidatedTestData(value))
@@ -25,6 +28,7 @@ class ValidationImplicitsTest extends FlatSpec with Matchers {
 
   it should "return 500 error if getter return generic error" in {
     def getData(id: String): ClientFailableOp[TestData] = GenericError("something failed!")
+
     def validationFunc(testData: TestData) = Passed(ValidatedTestData("some response"))
 
     def getValidatedData: String => ApiGatewayOp[ValidatedTestData] = getData _ andValidateWith validationFunc
@@ -34,6 +38,7 @@ class ValidationImplicitsTest extends FlatSpec with Matchers {
 
   it should "return 500 error if getter returns not found and no custom not found mesage was specified" in {
     def getData(id: String): ClientFailableOp[TestData] = NotFound("test data not found")
+
     def validationFunc(testData: TestData) = Passed(ValidatedTestData("some response"))
 
     def getValidatedData: String => ApiGatewayOp[ValidatedTestData] = getData _ andValidateWith validationFunc
@@ -43,6 +48,7 @@ class ValidationImplicitsTest extends FlatSpec with Matchers {
 
   it should "return 422 with custom message if getter returns not found and a custom error is specified" in {
     def getData(id: String): ClientFailableOp[TestData] = NotFound("test data not found")
+
     def validationFunc(testData: TestData) = Passed(ValidatedTestData("some response"))
 
     def getValidatedData: String => ApiGatewayOp[ValidatedTestData] = getData _ andValidateWith(
@@ -56,6 +62,7 @@ class ValidationImplicitsTest extends FlatSpec with Matchers {
 
   it should "return 422 with validation error if validation fails" in {
     def getData(id: String): ClientFailableOp[TestData] = ClientSuccess(TestData(Some(s"data for id $id")))
+
     def validationFunc(testData: TestData) = Failed("validation failed!")
 
     def getValidatedData: String => ApiGatewayOp[ValidatedTestData] = getData _ andValidateWith validationFunc
