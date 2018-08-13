@@ -43,8 +43,8 @@ object PlanId {
   case object MonthlyContribution extends PlanId("monthly_contribution")
   case object VoucherWeekend extends PlanId("voucher_weekend")
   case object VoucherEveryDay extends PlanId("voucher_everyday")
-  val all = List(MonthlyContribution) //we only support monthly contribution for now..
-  def fromName(name: String): Option[PlanId] = all.find(_.name == name)
+  val supported = List(MonthlyContribution)
+  def fromName(name: String): Option[PlanId] = supported.find(_.name == name)
 }
 
 case class Plan(id: PlanId, startDateRules: StartDateRules = StartDateRules())
