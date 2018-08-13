@@ -6,15 +6,13 @@ import com.gu.i18n.Currency
 import com.gu.i18n.Currency._
 import com.gu.newproduct.api.addsubscription._
 import com.gu.newproduct.api.addsubscription.validation.ValidateRequest.ValidatableFields
-import com.gu.newproduct.api.productcatalog.PlanId
 import org.scalatest.{FlatSpec, Matchers}
 
 class ValidateRequestTest extends FlatSpec with Matchers {
 
   val testRequest = ValidatableFields(
     startDate = LocalDate.of(2018, 7, 20),
-    amountMinorUnits = AmountMinorUnits(100),
-    planId = PlanId("monthly_contribution")
+    amountMinorUnits = AmountMinorUnits(100)
   )
 
   def now = () => LocalDate.of(2018, 7, 20)
@@ -43,10 +41,4 @@ class ValidateRequestTest extends FlatSpec with Matchers {
   it should "return success if amount is within valid range" in {
     wiredValidator(testRequest.copy(amountMinorUnits = AmountMinorUnits(150)), GBP) shouldBe Passed(())
   }
-
-  it should "return error if planId is invalid " in {
-    val actual = wiredValidator(testRequest.copy(planId = PlanId("wrong")), GBP)
-    actual.mapFailure(_.split(":")(0)) should be(Failed("unsupported plan"))
-  }
-
 }

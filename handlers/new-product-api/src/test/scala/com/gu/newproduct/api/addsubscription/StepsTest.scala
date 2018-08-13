@@ -86,7 +86,7 @@ class StepsTest extends FlatSpec with Matchers {
       "zuoraAccountId" -> JsString("acccc"),
       "acquisitionSource" -> JsString("CSR"),
       "createdByCSR" -> JsString("bob"),
-      "planId" -> JsString("plan!")
+      "planId" -> JsString("monthly_contribution")
 
     ))
 

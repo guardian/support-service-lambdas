@@ -82,7 +82,7 @@ object WireModel {
     def fromPlan(plan: Plan, label: String) = {
 
       WirePlanInfo(
-        id = plan.id.value,
+        id = plan.id.name,
         label = label,
         startDateRules = toOptionalWireRules(plan.startDateRules)
       )

@@ -89,7 +89,7 @@ object Steps {
       request <- apiGatewayRequest.bodyAsCaseClass[AddSubscriptionRequest]().withLogging("parsed request with steps1!").toAsync
       customerData <- getCustomerData(request.zuoraAccountId).toAsync
       CustomerData(account, paymentMethod, subscriptions, billTo) = customerData
-      validatableFields = ValidatableFields(request.planId, request.amountMinorUnits, request.startDate)
+      validatableFields = ValidatableFields(request.amountMinorUnits, request.startDate)
       _ <- validateRequest(validatableFields, account.currency).toApiGatewayOp.toAsync
       acceptanceDate = request.startDate.plusDays(paymentDelayFor(paymentMethod))
       zuoraCreateSubRequest = createZuoraSubRequest(request, acceptanceDate)
