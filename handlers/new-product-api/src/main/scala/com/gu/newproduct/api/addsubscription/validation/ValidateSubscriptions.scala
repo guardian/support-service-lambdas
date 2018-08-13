@@ -15,7 +15,7 @@ object ValidateSubscriptions {
 }
 
 object ValidateSubscriptions1 {
-  def apply(contributionRatePlanIds: List[ProductRatePlanId])(subscriptions: List[Subscription]): ValidationResult[ List[Subscription]] = {
+  def apply(contributionRatePlanIds: List[ProductRatePlanId])(subscriptions: List[Subscription]): ValidationResult[List[Subscription]] = {
     def hasActiveContributions = hasActiveRateplans(contributionRatePlanIds) _
     val response = !subscriptions.exists(hasActiveContributions) orFailWith "Zuora account already has an active recurring contribution subscription"
 

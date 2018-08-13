@@ -18,12 +18,12 @@ object Validation {
     }
   }
 
-  implicit class ComposeValidation[IN](clientFailable: ClientFailableOp[IN]) {
-    def andValidateWith[OUT](validate: IN => ValidationResult[OUT]): ApiGatewayOp[OUT] =
+  implicit class ComposeValidation[ID, DATA](getter: ID => ClientFailableOp[DATA]) {
+    def andValidateWith[VALIDATED](validate: DATA => ValidationResult[VALIDATED]): ID => ApiGatewayOp[VALIDATED] = (id: ID) =>
       for {
-        data <- clientFailable.toApiGatewayOp("getting stuff!")
-        response <- validate(data).toApiGatewayOp
-      } yield response
+        data <- getter(id).toApiGatewayOp("getting data") //todo see if we need to improve logging here
+        validatedData <- validate(data).toApiGatewayOp
+      } yield validatedData
   }
 
 }
