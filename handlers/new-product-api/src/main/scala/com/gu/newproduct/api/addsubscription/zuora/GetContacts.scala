@@ -10,6 +10,7 @@ object GetContacts {
 
   object WireModel {
 
+    //TODO it looks like the country is mandatory in zuora for sold to contacts so maybe we could have different objects for soldto and billto which would also help avoiding mixups between soldto and billto
     case class ZuoraContact(firstName: String, lastName: String, workEmail: Option[String], country: Option[String])
 
     //TODO IS ANY OR BOTH OF THESE CONTACTS OPTIONAL ?

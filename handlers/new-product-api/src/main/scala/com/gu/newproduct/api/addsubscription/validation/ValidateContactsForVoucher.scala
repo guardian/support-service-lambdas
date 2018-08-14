@@ -10,7 +10,7 @@ object ValidateContactsForVoucher {
   def apply(contacts: Contacts): ValidationResult[Contacts] = {
     for {
       deliveryCountry <- contacts.soldTo.country getOrFailWith ("No country in zuora sold to contact")
-      _ <- deliveryCountry == Country.UK orFailWith (s"invalid sold to country: $deliveryCountry should be UK")
+      _ <- deliveryCountry == Country.UK orFailWith (s"Invalid country: ${deliveryCountry.name}, only UK addresses are allowed")
     } yield contacts
   }
 }

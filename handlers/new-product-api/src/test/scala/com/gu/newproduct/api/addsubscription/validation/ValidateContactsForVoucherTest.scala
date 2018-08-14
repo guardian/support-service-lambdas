@@ -24,4 +24,18 @@ class ValidateContactsForVoucherTest extends FlatSpec with Matchers {
   it should "succeed if sold to contact is in UK" in {
     ValidateContactsForVoucher(testContacts) shouldBe Passed(testContacts)
   }
+
+  it should "fail if sold to contact is missing" in { //todo i think this case is impossible in zuora, we should remove the option
+    val noSoldToCountryContacts  = testContacts.copy(
+      soldTo = testContacts.soldTo.copy(country = None)
+    )
+    ValidateContactsForVoucher(noSoldToCountryContacts) shouldBe Failed("No country in zuora sold to contact")
+  }
+
+  it should "fail if sold to contact is not uk" in {
+    val australianSoldToContacts  = testContacts.copy(
+      soldTo = testContacts.soldTo.copy(country = Some(Country.Australia))
+    )
+    ValidateContactsForVoucher(australianSoldToContacts) shouldBe Failed("Invalid country: Australia, only UK addresses are allowed")
+  }
 }

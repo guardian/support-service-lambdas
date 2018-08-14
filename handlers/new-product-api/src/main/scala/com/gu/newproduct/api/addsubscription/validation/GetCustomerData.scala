@@ -6,11 +6,10 @@ import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.Subsc
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.Contacts
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.PaymentMethod
 import com.gu.util.reader.Types.ApiGatewayOp
-import com.gu.util.resthttp.Types.ClientFailableOp
 case class CustomerData(
   account: ValidatedAccount,
   paymentMethod: PaymentMethod,
-  accountSubscriptions: List[Subscription],
+  accountSubscriptions: List[Subscription], //todo we should probably come up with a different object or something for voucher since we don't need the extra call to get subs
   contacts: Contacts
 )
 
