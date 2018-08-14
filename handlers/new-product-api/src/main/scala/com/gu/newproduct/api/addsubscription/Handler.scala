@@ -86,7 +86,7 @@ object Steps {
     sendConfirmationEmail: ContributionsEmailData => AsyncApiGatewayOp[Unit]
   )(apiGatewayRequest: ApiGatewayRequest): Future[ApiResponse] = {
     (for {
-      request <- apiGatewayRequest.bodyAsCaseClass[AddSubscriptionRequest]().withLogging("parsed request with steps1!").toAsync
+      request <- apiGatewayRequest.bodyAsCaseClass[AddSubscriptionRequest]().withLogging("parsed request").toAsync
       customerData <- getCustomerData(request.zuoraAccountId).toAsync
       CustomerData(account, paymentMethod, subscriptions, billTo) = customerData
       validatableFields = ValidatableFields(request.amountMinorUnits, request.startDate)
