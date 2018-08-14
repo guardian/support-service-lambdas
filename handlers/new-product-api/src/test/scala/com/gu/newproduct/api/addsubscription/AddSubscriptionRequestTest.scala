@@ -66,7 +66,7 @@ class AddSubscriptionRequestTest extends FlatSpec with Matchers {
         |}
       """.stripMargin
 
-    Json.parse(input).validate[AddSubscriptionRequest] shouldBe JsError("unsupported plan: allowed values are monthly_contribution")
+    Json.parse(input).validate[AddSubscriptionRequest] shouldBe JsError("unsupported plan: allowed values are monthly_contribution,voucher_everyday")
   }
 }
 
