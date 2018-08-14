@@ -102,16 +102,16 @@ object WireModel {
       val voucherProduct = WireProduct(
         label = "Voucher",
         plans = List(
-          WirePlanInfo.fromPlan(catalog.voucherWeekend, "Weekend"),
-          WirePlanInfo.fromPlan(catalog.voucherWeekendPlus, "Weekend+"),
-          WirePlanInfo.fromPlan(catalog.voucherSunday, "Sunday"),
-          WirePlanInfo.fromPlan(catalog.voucherSundayPlus, "Sunday+"),
-          WirePlanInfo.fromPlan(catalog.voucherSaturday, "Saturday"),
-          WirePlanInfo.fromPlan(catalog.voucherSaturdayPlus, "Saturday+"),
           WirePlanInfo.fromPlan(catalog.voucherEveryDay, "Every day"),
           WirePlanInfo.fromPlan(catalog.voucherEveryDayPlus, "Every day+"),
+          WirePlanInfo.fromPlan(catalog.voucherSaturday, "Saturday"),
+          WirePlanInfo.fromPlan(catalog.voucherSaturdayPlus, "Saturday+"),
           WirePlanInfo.fromPlan(catalog.voucherSixDay, "Six day"),
-          WirePlanInfo.fromPlan(catalog.voucherSixDayPlus, "Six day+")
+          WirePlanInfo.fromPlan(catalog.voucherSixDayPlus, "Six day+"),
+          WirePlanInfo.fromPlan(catalog.voucherSunday, "Sunday"),
+          WirePlanInfo.fromPlan(catalog.voucherSundayPlus, "Sunday+"),
+          WirePlanInfo.fromPlan(catalog.voucherWeekend, "Weekend"),
+          WirePlanInfo.fromPlan(catalog.voucherWeekendPlus, "Weekend+")
         )
       )
       val contributionProduct = WireProduct(
@@ -120,7 +120,7 @@ object WireModel {
           WirePlanInfo.fromPlan(catalog.monthlyContribution, "Monthly")
         )
       )
-      WireCatalog(List(voucherProduct, contributionProduct))
+      WireCatalog(List(contributionProduct, voucherProduct))
     }
   }
 

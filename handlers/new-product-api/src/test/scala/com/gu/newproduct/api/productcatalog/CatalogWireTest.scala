@@ -10,14 +10,28 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |{
         |  "products": [
         |    {
+        |      "label": "Contribution",
+        |      "plans": [
+        |        {
+        |          "id": "monthly_contribution",
+        |          "label": "Monthly",
+        |          "startDateRules": {
+        |            "selectableWindow": {
+        |              "sizeInDays": 1
+        |            }
+        |          }
+        |        }
+        |      ]
+        |    },
+        |    {
         |      "label": "Voucher",
         |      "plans": [
         |        {
-        |          "id": "voucher_weekend",
-        |          "label": "Weekend",
+        |          "id": "voucher_everyday",
+        |          "label": "Every day",
         |          "startDateRules": {
         |            "daysOfWeek": [
-        |              "Saturday"
+        |              "Monday"
         |            ],
         |            "selectableWindow": {
         |              "cutOffDayInclusive": "Tuesday",
@@ -25,14 +39,14 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "sizeInDays": 28
         |            }
         |          },
-        |          "paymentPlan": "£20.76 every month"
+        |          "paymentPlan": "£47.62 every month"
         |        },
         |        {
-        |          "id": "voucher_weekend_plus",
-        |          "label": "Weekend+",
+        |          "id": "voucher_everyday_plus",
+        |          "label": "Every day+",
         |          "startDateRules": {
         |            "daysOfWeek": [
-        |              "Saturday"
+        |              "Monday"
         |            ],
         |            "selectableWindow": {
         |              "cutOffDayInclusive": "Tuesday",
@@ -40,37 +54,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "sizeInDays": 28
         |            }
         |          },
-        |          "paymentPlan": "£29.42 every month"
-        |        },
-        |        {
-        |          "id": "voucher_sunday",
-        |          "label": "Sunday",
-        |          "startDateRules": {
-        |            "daysOfWeek": [
-        |              "Sunday"
-        |            ],
-        |            "selectableWindow": {
-        |              "cutOffDayInclusive": "Tuesday",
-        |              "startDaysAfterCutOff": 20,
-        |              "sizeInDays": 28
-        |            }
-        |          },
-        |          "paymentPlan": "£10.79 every month"
-        |        },
-        |        {
-        |          "id": "voucher_sunday_plus",
-        |          "label": "Sunday+",
-        |          "startDateRules": {
-        |            "daysOfWeek": [
-        |              "Sunday"
-        |            ],
-        |            "selectableWindow": {
-        |              "cutOffDayInclusive": "Tuesday",
-        |              "startDaysAfterCutOff": 20,
-        |              "sizeInDays": 28
-        |            }
-        |          },
-        |          "paymentPlan": "£22.06 every month"
+        |          "paymentPlan": "£51.96 every month"
         |        },
         |        {
         |          "id": "voucher_saturday",
@@ -103,36 +87,6 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |          "paymentPlan": "£21.62 every month"
         |        },
         |        {
-        |          "id": "voucher_everyday",
-        |          "label": "Every day",
-        |          "startDateRules": {
-        |            "daysOfWeek": [
-        |              "Monday"
-        |            ],
-        |            "selectableWindow": {
-        |              "cutOffDayInclusive": "Tuesday",
-        |              "startDaysAfterCutOff": 20,
-        |              "sizeInDays": 28
-        |            }
-        |          },
-        |          "paymentPlan": "£47.62 every month"
-        |        },
-        |        {
-        |          "id": "voucher_everyday_plus",
-        |          "label": "Every day+",
-        |          "startDateRules": {
-        |            "daysOfWeek": [
-        |              "Monday"
-        |            ],
-        |            "selectableWindow": {
-        |              "cutOffDayInclusive": "Tuesday",
-        |              "startDaysAfterCutOff": 20,
-        |              "sizeInDays": 28
-        |            }
-        |          },
-        |          "paymentPlan": "£51.96 every month"
-        |        },
-        |        {
         |          "id": "voucher_sixday",
         |          "label": "Six day",
         |          "startDateRules": {
@@ -161,20 +115,66 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |            }
         |          },
         |          "paymentPlan": "£47.62 every month"
-        |        }
-        |      ]
-        |    },
-        |    {
-        |      "label": "Contribution",
-        |      "plans": [
+        |        },
         |        {
-        |          "id": "monthly_contribution",
-        |          "label": "Monthly",
+        |          "id": "voucher_sunday",
+        |          "label": "Sunday",
         |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Sunday"
+        |            ],
         |            "selectableWindow": {
-        |              "sizeInDays": 1
+        |              "cutOffDayInclusive": "Tuesday",
+        |              "startDaysAfterCutOff": 20,
+        |              "sizeInDays": 28
         |            }
-        |          }
+        |          },
+        |          "paymentPlan": "£10.79 every month"
+        |        },
+        |        {
+        |          "id": "voucher_sunday_plus",
+        |          "label": "Sunday+",
+        |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Sunday"
+        |            ],
+        |            "selectableWindow": {
+        |              "cutOffDayInclusive": "Tuesday",
+        |              "startDaysAfterCutOff": 20,
+        |              "sizeInDays": 28
+        |            }
+        |          },
+        |          "paymentPlan": "£22.06 every month"
+        |        },
+        |        {
+        |          "id": "voucher_weekend",
+        |          "label": "Weekend",
+        |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Saturday"
+        |            ],
+        |            "selectableWindow": {
+        |              "cutOffDayInclusive": "Tuesday",
+        |              "startDaysAfterCutOff": 20,
+        |              "sizeInDays": 28
+        |            }
+        |          },
+        |          "paymentPlan": "£20.76 every month"
+        |        },
+        |        {
+        |          "id": "voucher_weekend_plus",
+        |          "label": "Weekend+",
+        |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Saturday"
+        |            ],
+        |            "selectableWindow": {
+        |              "cutOffDayInclusive": "Tuesday",
+        |              "startDaysAfterCutOff": 20,
+        |              "sizeInDays": 28
+        |            }
+        |          },
+        |          "paymentPlan": "£29.42 every month"
         |        }
         |      ]
         |    }
@@ -185,5 +185,4 @@ class CatalogWireTest extends FlatSpec with Matchers {
     Json.toJson(wireCatalog) shouldBe Json.parse(expected)
   }
 }
-
 
