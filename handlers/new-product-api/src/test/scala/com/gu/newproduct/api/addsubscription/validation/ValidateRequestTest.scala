@@ -35,7 +35,7 @@ class ValidateRequestTest extends FlatSpec with Matchers {
     wiredValidator(testRequest.copy(amountMinorUnits = Some(AmountMinorUnits(99))), GBP) shouldBe Failed("amount must be at least 100")
   }
 
-  it should "return error if amount is too large" in {c
+  it should "return error if amount is too large" in {
     wiredValidator(testRequest.copy(amountMinorUnits = Some(AmountMinorUnits(201))), GBP) shouldBe Failed("amount must not be more than 200")
   }
   it should "return success if amount is within valid range" in {
