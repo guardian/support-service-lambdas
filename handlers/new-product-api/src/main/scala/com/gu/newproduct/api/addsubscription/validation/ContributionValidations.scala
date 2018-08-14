@@ -5,12 +5,14 @@ import java.time.LocalDate
 import com.gu.i18n.Currency
 import com.gu.newproduct.api.addsubscription.AmountMinorUnits
 import com.gu.newproduct.api.addsubscription.validation.Validation._
+import com.gu.newproduct.api.addsubscription.zuora.GetAccount.IdentityId
 
-object ValidateRequest {
+object ContributionValidations {
 
   case class ValidatableFields(
     amountMinorUnits: Option[AmountMinorUnits],
-    startDate: LocalDate
+    startDate: LocalDate,
+    identityId: Option[IdentityId]
   )
 
   def apply(
@@ -21,6 +23,7 @@ object ValidateRequest {
     currency: Currency
   ): ValidationResult[AmountMinorUnits] =
     for {
+      _ <- validatableFields.identityId.isDefined orFailWith "Zuora account has no Identity Id"
       amount <- validatableFields.amountMinorUnits getOrFailWith s"amount is missing"
       _ <- isValidStartDate(validatableFields.startDate)
       limits = limitsFor(currency)

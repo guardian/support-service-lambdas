@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 import com.gu.i18n.Currency
-import com.gu.newproduct.api.addsubscription.zuora.GetBillToContact.Contact
+import com.gu.newproduct.api.addsubscription.zuora.GetContacts.Contact
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{DirectDebit, PaymentMethod}
 import com.gu.newproduct.api.addsubscription.{AmountMinorUnits, ZuoraAccountId}
 import com.gu.util.Logging

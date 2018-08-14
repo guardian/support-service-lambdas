@@ -5,12 +5,14 @@ import java.time.LocalDate
 import com.gu.i18n.Currency
 import com.gu.i18n.Currency._
 import com.gu.newproduct.api.addsubscription._
-import com.gu.newproduct.api.addsubscription.validation.ValidateRequest.ValidatableFields
+import com.gu.newproduct.api.addsubscription.validation.ContributionValidations.ValidatableFields
+import com.gu.newproduct.api.addsubscription.zuora.GetAccount.IdentityId
 import org.scalatest.{FlatSpec, Matchers}
 
-class ValidateRequestTest extends FlatSpec with Matchers {
+class ContributionValidationsTest extends FlatSpec with Matchers {
 
   val testRequest = ValidatableFields(
+    identityId = Some(IdentityId("identityId")),
     startDate = LocalDate.of(2018, 7, 20),
     amountMinorUnits = Some(AmountMinorUnits(100))
   )
@@ -25,7 +27,7 @@ class ValidateRequestTest extends FlatSpec with Matchers {
   def isValidStartDate(d: LocalDate): ValidationResult[Unit] =
     if (d == LocalDate.of(2018, 7, 20)) Passed(()) else Failed("Date validation failed!")
 
-  def wiredValidator = ValidateRequest(isValidStartDate, amountLimitsFor) _
+  def wiredValidator = ContributionValidations(isValidStartDate, amountLimitsFor) _
 
   it should "return error if date validation fails" in {
     val oldRequest = testRequest.copy(startDate = LocalDate.of(1985, 10, 26))
@@ -44,5 +46,9 @@ class ValidateRequestTest extends FlatSpec with Matchers {
 
   it should "return error if amount is missing" in {
     wiredValidator(testRequest.copy(amountMinorUnits = None), GBP) shouldBe Failed("amount is missing")
+  }
+
+  it should "return error if identityId is missing" in {
+    wiredValidator(testRequest.copy(identityId = None), GBP) shouldBe Failed("Zuora account has no Identity Id")
   }
 }

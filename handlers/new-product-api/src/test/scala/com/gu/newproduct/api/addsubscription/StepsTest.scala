@@ -5,12 +5,12 @@ import java.time.LocalDate
 import com.gu.i18n.Currency.GBP
 import com.gu.i18n.{Country, Currency}
 import com.gu.newproduct.api.addsubscription.email.SendConfirmationEmail.ContributionsEmailData
-import com.gu.newproduct.api.addsubscription.validation.ValidateRequest.ValidatableFields
+import com.gu.newproduct.api.addsubscription.validation.ContributionValidations.ValidatableFields
 import com.gu.newproduct.api.addsubscription.validation.{CustomerData, Failed, Passed, ValidatedAccount}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{SubscriptionName, ZuoraCreateSubRequest}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.{AccountBalanceMinorUnits, AutoPay, IdentityId, PaymentMethodId}
-import com.gu.newproduct.api.addsubscription.zuora.GetBillToContact.{Contact, Email, FirstName, LastName}
+import com.gu.newproduct.api.addsubscription.zuora.GetContacts._
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{BankAccountName, BankAccountNumberMask, DirectDebit, MandateId, SortCode}
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.ActivePaymentMethod
 import com.gu.test.JsonMatchers.JsonMatcher
@@ -58,7 +58,7 @@ class StepsTest extends FlatSpec with Matchers {
     def fakeGetCustomerData(zuoraAccountId: ZuoraAccountId) = ContinueProcessing(
       CustomerData(
         account = ValidatedAccount(
-          identityId = IdentityId("identityId"),
+          identityId = Some(IdentityId("identityId")),
           paymentMethodId = PaymentMethodId("paymentMethodId"),
           autoPay = AutoPay(true),
           accountBalanceMinorUnits = AccountBalanceMinorUnits(1234),
@@ -72,11 +72,19 @@ class StepsTest extends FlatSpec with Matchers {
           MandateId("1234 ")
         ),
         accountSubscriptions = Nil,
-        billToContact = Contact(
-          firstName = FirstName("firstName"),
-          lastName = LastName("lastName"),
-          email = Some(Email("email@mail.com")),
-          country = Some(Country.UK)
+        contacts = Contacts(
+          billTo = Contact(
+            firstName = FirstName("firstName"),
+            lastName = LastName("lastName"),
+            email = Some(Email("email@mail.com")),
+            country = Some(Country.UK)
+          ),
+          soldTo = Contact(
+            firstName = FirstName("soldToFirstName"),
+            lastName = LastName("soldToLastName"),
+            email = Some(Email("soldtoEmail@mail.com")),
+            country = Some(Country.US)
+          )
         )
       )
     )
@@ -95,11 +103,19 @@ class StepsTest extends FlatSpec with Matchers {
     implicit val format: OFormat[ExpectedOut] = Json.format[ExpectedOut]
     val expectedOutput = ExpectedOut("well done")
 
-    val futureActual = Steps.addSubscriptionSteps(
+    val fakeAddContributionSteps = Steps.addContributionSteps(
       fakeGetCustomerData,
       fakeValidateRequest,
       fakeCreate,
       fakeSendEmails
+    ) _
+
+    val fakeAddVoucherSteps = Steps.addVoucherSteps(
+      fakeGetCustomerData
+    ) _
+    val futureActual = Steps.someFunctionName(
+      addContribution = fakeAddContributionSteps,
+      addVoucher = fakeAddVoucherSteps
     )(ApiGatewayRequest(None, Some(Json.stringify(requestInput)), None, None))
 
     val actual = Await.result(futureActual, 30 seconds)
