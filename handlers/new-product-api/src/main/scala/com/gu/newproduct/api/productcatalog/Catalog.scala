@@ -7,8 +7,17 @@ import com.gu.newproduct.api.productcatalog.PlanId._
 
 case class Catalog(
   voucherWeekend: Plan,
+  voucherSaturday: Plan,
+  voucherSunday:Plan,
   voucherEveryDay: Plan,
-  monthlyContribution: Plan
+  voucherSixDay: Plan,
+  voucherWeekendPlus: Plan,
+  voucherSaturdayPlus: Plan,
+  voucherSundayPlus:Plan,
+  voucherEveryDayPlus: Plan,
+  voucherSixDayPlus: Plan,
+  monthlyContribution: Plan,
+
 )
 
 object NewProductApi {
@@ -26,29 +35,25 @@ object NewProductApi {
     val voucherSundayDateRules = voucherDateRules(List(SUNDAY))
     val voucherSaturdayDateRules = voucherDateRules(List(SATURDAY))
 
-    val voucherWeekend = Plan(VoucherWeekend, voucherSaturdayDateRules, monthlyPayment("20.76"))
-    val voucherEveryDay = Plan(VoucherEveryDay, voucherMondayRules, monthlyPayment("47.62"))
-    val voucherSixDay = Plan(VoucherSixDay, voucherMondayRules, monthlyPayment("41.12"))
-    val voucherSaturday = Plan(VoucherSaturday, voucherSaturdayDateRules, monthlyPayment("10.36"))
-    val voucherSunday = Plan(VoucherSunday, voucherSundayDateRules, monthlyPayment("10.79"))
-
-    val voucherWeekendPlus = Plan(VoucherWeekendPlus, voucherSaturdayDateRules, monthlyPayment("29.42"))
-    val voucherEveryDayPlus = Plan(VoucherEveryDayPlus, voucherMondayRules, monthlyPayment("51.96"))
-    val voucherSixDayPlus = Plan(VoucherSixDayPlus, voucherMondayRules, monthlyPayment("47.62"))
-    val voucherSaturdayPlus = Plan(VoucherSaturdayPlus, voucherSaturdayDateRules, monthlyPayment("21.62"))
-    val voucherSundayPlus = Plan(VoucherSundayPlus, voucherSundayDateRules, monthlyPayment("22.06"))
-
     val monthlyContributionWindow = WindowRule(
       maybeSize = Some(WindowSizeDays(1)),
       maybeCutOffDay = None,
       maybeStartDelay = None
     )
     val monthlyContributionRules = StartDateRules(windowRule = Some(monthlyContributionWindow))
-    val monthlyContribution = Plan(MonthlyContribution, monthlyContributionRules)
+
     Catalog(
-      voucherWeekend = voucherWeekend,
-      voucherEveryDay = voucherEveryDay,
-      monthlyContribution = monthlyContribution
+      voucherWeekendPlus = Plan(VoucherWeekendPlus, voucherSaturdayDateRules, monthlyPayment("29.42")),
+      voucherWeekend = Plan(VoucherWeekend, voucherSaturdayDateRules, monthlyPayment("20.76")),
+      voucherSixDay = Plan(VoucherSixDay, voucherMondayRules, monthlyPayment("41.12")),
+      voucherSixDayPlus = Plan(VoucherSixDayPlus, voucherMondayRules, monthlyPayment("47.62")),
+      voucherEveryDay = Plan(VoucherEveryDay, voucherMondayRules, monthlyPayment("47.62")),
+      voucherEveryDayPlus = Plan(VoucherEveryDayPlus, voucherMondayRules, monthlyPayment("51.96")),
+      voucherSaturday = Plan(VoucherSaturday, voucherSaturdayDateRules, monthlyPayment("10.36")),
+      voucherSaturdayPlus = Plan(VoucherSaturdayPlus, voucherSaturdayDateRules, monthlyPayment("21.62")),
+      voucherSunday = Plan(VoucherSunday, voucherSundayDateRules, monthlyPayment("10.79")),
+      voucherSundayPlus = Plan(VoucherSundayPlus, voucherSundayDateRules, monthlyPayment("22.06")),
+      monthlyContribution = Plan(MonthlyContribution, monthlyContributionRules)
     )
   }
 }
