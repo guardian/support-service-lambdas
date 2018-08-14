@@ -3,6 +3,7 @@ package com.gu.newproduct.api.productcatalog
 import java.time.DayOfWeek
 import java.time.DayOfWeek._
 
+import com.gu.newproduct.api.productcatalog.PlanId.{MonthlyContribution, VoucherEveryDay, VoucherWeekend}
 import com.gu.newproduct.api.productcatalog.WireModel._
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
@@ -107,11 +108,11 @@ object TestData {
     val weekendRule = DaysOfWeekRule(List(SATURDAY, SUNDAY))
     val tuesdayRule = DaysOfWeekRule(List(MONDAY))
     val voucherWeekendRule = StartDateRules(Some(weekendRule), Some(voucherWindowRule))
-    val voucherWeekend = Plan(PlanId("voucher_weekend"), voucherWeekendRule)
+    val voucherWeekend = Plan(VoucherWeekend, voucherWeekendRule)
     val voucherEveryDayRule = StartDateRules(Some(tuesdayRule), Some(voucherWindowRule))
-    val voucherEveryDay = Plan(PlanId("voucher_everyday"), voucherEveryDayRule)
+    val voucherEveryDay = Plan(VoucherEveryDay, voucherEveryDayRule)
 
-    val monthlyContribution = Plan(PlanId("monthly_contribution"))
+    val monthlyContribution = Plan(MonthlyContribution)
 
     Catalog(
       voucherWeekend = voucherWeekend,

@@ -41,5 +41,4 @@ class ValidateRequestTest extends FlatSpec with Matchers {
   it should "return success if amount is within valid range" in {
     wiredValidator(testRequest.copy(amountMinorUnits = AmountMinorUnits(150)), GBP) shouldBe Passed(())
   }
-
 }

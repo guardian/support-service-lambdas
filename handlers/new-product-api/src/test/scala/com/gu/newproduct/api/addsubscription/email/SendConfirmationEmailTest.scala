@@ -11,7 +11,6 @@ import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.ActivePay
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType.CreditCard
 import com.gu.newproduct.api.addsubscription.{AmountMinorUnits, ZuoraAccountId}
 import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
-import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError}
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.concurrent.duration._
@@ -42,12 +41,11 @@ class SendConfirmationEmailTest extends FlatSpec with Matchers {
     currency = GBP,
     paymentMethod = directDebit,
     amountMinorUnits = AmountMinorUnits(1234),
-    firstPaymentDate = LocalDate.of(2018, 8, 9)
+    firstPaymentDate = LocalDate.of(2018, 8, 9),
+    billTo = testContact
   )
 
   it should "send confirmation email" in {
-
-    def getContact(accountId: ZuoraAccountId): ClientFailableOp[Contact] = ClientSuccess(testContact)
 
     def sqsSend(payload: ETPayload[ContributionFields]): Future[Unit] = {
 
@@ -81,21 +79,7 @@ class SendConfirmationEmailTest extends FlatSpec with Matchers {
       Future.successful(())
     }
 
-    val send = SendConfirmationEmail(sqsSend, today, getContact) _
-
-    val res = Await.result(send(testData).underlying, 3 seconds)
-
-    res.shouldBe(ContinueProcessing(()))
-
-  }
-
-  it should "return success but not send message if getContacts fails" in {
-
-    def getContact(accountId: ZuoraAccountId): ClientFailableOp[Contact] = GenericError("could not retrieve contacts")
-
-    //todo this check that it is not called does not work
-    def sqsSend(ETPayload: ETPayload[ContributionFields]): Future[Unit] = fail("unexpected invocation of sqsSend")
-    val send = SendConfirmationEmail(sqsSend, today, getContact) _
+    val send = SendConfirmationEmail(sqsSend, today) _
 
     val res = Await.result(send(testData).underlying, 3 seconds)
 
@@ -105,12 +89,10 @@ class SendConfirmationEmailTest extends FlatSpec with Matchers {
 
   it should "return success but not send message if contact has no email" in {
 
-    def getContact(accountId: ZuoraAccountId): ClientFailableOp[Contact] = ClientSuccess(testContact.copy(email = None))
-
     //todo this check that it is not called does not work
     def sqsSend(ETPayload: ETPayload[ContributionFields]): Future[Unit] = fail("unexpected invocation of sqsSend")
 
-    val send = SendConfirmationEmail(sqsSend, today, getContact) _
+    val send = SendConfirmationEmail(sqsSend, today) _
 
     val res = Await.result(send(testData).underlying, 3 seconds)
 
@@ -120,11 +102,9 @@ class SendConfirmationEmailTest extends FlatSpec with Matchers {
 
   it should "return success if sqs send fails" in {
 
-    def getContact(accountId: ZuoraAccountId): ClientFailableOp[Contact] = ClientSuccess(testContact)
-
     def sqsSend(payload: ETPayload[ContributionFields]): Future[Unit] = Future.failed(new RuntimeException("sqs error`"))
 
-    val send = SendConfirmationEmail(sqsSend, today, getContact) _
+    val send = SendConfirmationEmail(sqsSend, today) _
 
     val res = Await.result(send(testData).underlying, 3 seconds)
 
@@ -133,10 +113,8 @@ class SendConfirmationEmailTest extends FlatSpec with Matchers {
 
   it should "convert to contributions fields from data without direct debit" in {
 
-    val billTo = Contact(FirstName("Marty"), LastName("McFly"), Some(Email("some@email.com")), Some(Country.UK))
-
     val expectedContributionFields = ContributionFields(
-      EmailAddress = "some@email.com",
+      EmailAddress = "email@email.com",
       created = "2018-07-12",
       amount = "12.34",
       currency = "£",
@@ -154,17 +132,15 @@ class SendConfirmationEmailTest extends FlatSpec with Matchers {
 
     val noDirectDebitData = testData.copy(paymentMethod = NonDirectDebitMethod(ActivePaymentMethod, CreditCard))
 
-    val actual = SendConfirmationEmail.toContributionFields(LocalDate.of(2018, 7, 12), billTo, noDirectDebitData)
+    val actual = SendConfirmationEmail.toContributionFields(LocalDate.of(2018, 7, 12), noDirectDebitData)
     actual shouldBe Some(expectedContributionFields)
 
   }
 
   it should "convert to contribution fields from data with direct debit" in {
 
-    val billTo = Contact(FirstName("Marty"), LastName("McFly"), Some(Email("some@email.com")), Some(Country.UK))
-
     val expectedContributionFields = ContributionFields(
-      EmailAddress = "some@email.com",
+      EmailAddress = "email@email.com",
       created = "2018-07-12",
       amount = "12.34",
       currency = "£",
@@ -180,7 +156,7 @@ class SendConfirmationEmailTest extends FlatSpec with Matchers {
 
     )
 
-    val actual = SendConfirmationEmail.toContributionFields(LocalDate.of(2018, 7, 12), billTo, testData)
+    val actual = SendConfirmationEmail.toContributionFields(LocalDate.of(2018, 7, 12), testData)
     actual shouldBe Some(expectedContributionFields)
 
   }

@@ -5,6 +5,7 @@ import java.time.LocalDate
 import com.gu.i18n.Currency
 import com.gu.newproduct.api.addsubscription.AmountMinorUnits
 import com.gu.newproduct.api.addsubscription.validation.Validation.BooleanValidation
+import com.gu.newproduct.api.productcatalog.PlanId
 
 object ValidateRequest {
 

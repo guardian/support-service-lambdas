@@ -3,6 +3,8 @@ package com.gu.newproduct.api.productcatalog
 import java.time.DayOfWeek
 import java.time.DayOfWeek._
 
+import com.gu.newproduct.api.productcatalog.PlanId.{MonthlyContribution, VoucherEveryDay, VoucherWeekend}
+
 case class Catalog(
   voucherWeekend: Plan,
   voucherEveryDay: Plan,
@@ -19,16 +21,16 @@ object NewProductApi {
     val weekendRule = DaysOfWeekRule(List(SATURDAY, SUNDAY))
     val mondayRule = DaysOfWeekRule(List(MONDAY))
     val voucherWeekendDateRules = StartDateRules(Some(weekendRule), Some(voucherWindowRule))
-    val voucherWeekend = Plan(PlanId("voucher_weekend"), voucherWeekendDateRules)
+    val voucherWeekend = Plan(VoucherWeekend, voucherWeekendDateRules)
     val voucherEveryDayDateRules = StartDateRules(Some(mondayRule), Some(voucherWindowRule))
-    val voucherEveryDay = Plan(PlanId("voucher_everyDay"), voucherEveryDayDateRules)
+    val voucherEveryDay = Plan(VoucherEveryDay, voucherEveryDayDateRules)
     val monthlyContributionWindow = WindowRule(
       maybeSize = Some(WindowSizeDays(1)),
       maybeCutOffDay = None,
       maybeStartDelay = None
     )
     val monthlyContributionRules = StartDateRules(windowRule = Some(monthlyContributionWindow))
-    val monthlyContribution = Plan(PlanId("monthly_contribution"), monthlyContributionRules)
+    val monthlyContribution = Plan(MonthlyContribution, monthlyContributionRules)
     Catalog(
       voucherWeekend = voucherWeekend,
       voucherEveryDay = voucherEveryDay,
@@ -36,7 +38,15 @@ object NewProductApi {
     )
   }
 }
-case class PlanId(value: String) extends AnyVal
+sealed abstract class PlanId(val name: String)
+object PlanId {
+  case object MonthlyContribution extends PlanId("monthly_contribution")
+  case object VoucherWeekend extends PlanId("voucher_weekend")
+  case object VoucherEveryDay extends PlanId("voucher_everyday")
+  val supported = List(MonthlyContribution)
+  def fromName(name: String): Option[PlanId] = supported.find(_.name == name)
+}
+
 case class Plan(id: PlanId, startDateRules: StartDateRules = StartDateRules())
 
 case class DelayDays(value: Int) extends AnyVal

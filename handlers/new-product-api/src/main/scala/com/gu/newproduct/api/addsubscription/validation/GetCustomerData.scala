@@ -1,0 +1,33 @@
+package com.gu.newproduct.api.addsubscription.validation
+
+import com.gu.newproduct.api.addsubscription.TypeConvert._
+import com.gu.newproduct.api.addsubscription.ZuoraAccountId
+import com.gu.newproduct.api.addsubscription.zuora.GetAccount.PaymentMethodId
+import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.Subscription
+import com.gu.newproduct.api.addsubscription.zuora.GetBillToContact.Contact
+import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.PaymentMethod
+import com.gu.util.reader.Types.ApiGatewayOp
+import com.gu.util.resthttp.Types.ClientFailableOp
+case class CustomerData(
+  account: ValidatedAccount,
+  paymentMethod: PaymentMethod,
+  accountSubscriptions: List[Subscription],
+  billToContact: Contact
+)
+
+object GetCustomerData {
+  def apply(
+    getAccount: ZuoraAccountId => ApiGatewayOp[ValidatedAccount],
+    getPaymentMethod: PaymentMethodId => ApiGatewayOp[PaymentMethod],
+    getBilltoContact: ZuoraAccountId => ClientFailableOp[Contact],
+    getAccountSubscriptions: ZuoraAccountId => ApiGatewayOp[List[Subscription]],
+    accountId: ZuoraAccountId
+  ) = for {
+    account <- getAccount(accountId)
+    paymentMethod <- getPaymentMethod(account.paymentMethodId)
+    accountSubscriptions <- getAccountSubscriptions(accountId)
+    billToContact <- getBilltoContact(accountId).toApiGatewayOp("getting bill to contact")
+  } yield CustomerData(account, paymentMethod, accountSubscriptions, billToContact)
+
+}
+

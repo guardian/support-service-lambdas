@@ -16,7 +16,7 @@ class ValidatePaymentMethodTest extends FlatSpec with Matchers {
 
   it should "succeed if payment method is active" in {
     val validPaymentMethod = NonDirectDebitMethod(ActivePaymentMethod, CreditCard)
-    ValidatePaymentMethod(validPaymentMethod) shouldBe Passed(())
+    ValidatePaymentMethod(validPaymentMethod) shouldBe Passed((validPaymentMethod))
   }
 
   it should "fail if payment method is of an unknown type" in {

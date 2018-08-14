@@ -9,10 +9,8 @@ import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{DirectDebit
 import com.gu.newproduct.api.addsubscription.{AmountMinorUnits, ZuoraAccountId}
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayResponse
-import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
-import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.reader.AsyncTypes._
-import com.gu.newproduct.api.addsubscription.TypeConvert._
+import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 
 import scala.concurrent.Future
 
@@ -23,18 +21,16 @@ object SendConfirmationEmail extends Logging {
     currency: Currency,
     paymentMethod: PaymentMethod,
     amountMinorUnits: AmountMinorUnits,
-    firstPaymentDate: LocalDate
+    firstPaymentDate: LocalDate,
+    billTo: Contact
   )
 
   def apply(
     etSqsSend: ETPayload[ContributionFields] => Future[Unit],
     getCurrentDate: () => LocalDate,
-    getBillTo: ZuoraAccountId => ClientFailableOp[Contact]
   )(data: ContributionsEmailData) = {
-
+    val maybeContributionFields = toContributionFields(getCurrentDate(), data)
     val response = for {
-      billTo <- getBillTo(data.accountId).toAsyncApiGatewayOp("getting billTo contact from Zuora")
-      maybeContributionFields = toContributionFields(getCurrentDate(), billTo, data)
       etPayload <- toPayload(maybeContributionFields)
       sendMessageResult <- etSqsSend(etPayload).toAsyncApiGatewayOp("sending sqs message")
     } yield sendMessageResult
@@ -53,23 +49,25 @@ object SendConfirmationEmail extends Logging {
     }
 
   def hyphenate(s: String) = s"${s.substring(0, 2)}-${s.substring(2, 4)}-${s.substring(4, 6)}"
+
   def formatAmount(amount: AmountMinorUnits) = (amount.value / BigDecimal(100)).bigDecimal.stripTrailingZeros.toPlainString
+
   val firstPaymentDateFormat = DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy")
 
-  def toContributionFields(currentDate: LocalDate, billTo: Contact, data: ContributionsEmailData): Option[ContributionFields] = {
+  def toContributionFields(currentDate: LocalDate, data: ContributionsEmailData): Option[ContributionFields] = {
 
     val maybeDirectDebit = data.paymentMethod match {
       case d: DirectDebit => Some(d)
       case _ => None
     }
-    billTo.email.map { email =>
+    data.billTo.email.map { email =>
       ContributionFields(
         EmailAddress = email.value,
         created = currentDate.toString,
         amount = formatAmount(data.amountMinorUnits),
         currency = data.currency.glyph,
-        edition = billTo.country.map(_.alpha2).getOrElse(""),
-        name = billTo.firstName.value,
+        edition = data.billTo.country.map(_.alpha2).getOrElse(""),
+        name = data.billTo.firstName.value,
         product = "monthly-contribution",
         `account name` = maybeDirectDebit.map(_.accountName.value),
         `account number` = maybeDirectDebit.map(_.accountNumberMask.value),
@@ -83,4 +81,3 @@ object SendConfirmationEmail extends Logging {
     }
   }
 }
-
