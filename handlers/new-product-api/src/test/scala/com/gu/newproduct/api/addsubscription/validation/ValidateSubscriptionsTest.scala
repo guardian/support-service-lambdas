@@ -31,7 +31,7 @@ class ValidateSubscriptionsTest extends FlatSpec with Matchers {
       sub(active = false, rateplans = Set("monthyContributionRateplanId", "someOtherPlan"))
     )
 
-    ValidateSubscriptions(contributionRateplans)(subs) shouldBe Passed((subs))
+    ValidateSubscriptions(contributionRateplans)(subs) shouldBe Passed(subs)
   }
   it should "succeed if account has no recurring subs" in {
 
@@ -40,7 +40,7 @@ class ValidateSubscriptionsTest extends FlatSpec with Matchers {
       sub(active = true, rateplans = Set("yetAnotherplan", "somePlan"))
     )
 
-    ValidateSubscriptions(contributionRateplans)(subs) shouldBe Passed((subs))
+    ValidateSubscriptions(contributionRateplans)(subs) shouldBe Passed(subs)
   }
 
 }
