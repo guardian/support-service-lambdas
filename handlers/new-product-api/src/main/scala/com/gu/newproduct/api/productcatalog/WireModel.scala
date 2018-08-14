@@ -24,7 +24,8 @@ object WireModel {
   case class WirePlanInfo(
     id: String,
     label: String,
-    startDateRules: Option[WireStartDateRules] = None
+    startDateRules: Option[WireStartDateRules] = None,
+    paymentPlan: Option[String] = None
   )
 
   case class WireSelectableWindow(
@@ -84,7 +85,8 @@ object WireModel {
       WirePlanInfo(
         id = plan.id.name,
         label = label,
-        startDateRules = toOptionalWireRules(plan.startDateRules)
+        startDateRules = toOptionalWireRules(plan.startDateRules),
+        paymentPlan = plan.paymentPlan.map(_.description)
       )
     }
   }

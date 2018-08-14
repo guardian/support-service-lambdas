@@ -19,6 +19,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |    "plans": [{
         |            "id": "voucher_weekend",
         |            "label": "Weekend",
+        |            "paymentPlan": "£10.50 every month",
         |            "startDateRules" : {
         |            "selectableWindow" : {
         |              "cutOffDayInclusive": "Tuesday",
@@ -31,6 +32,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |        {
         |            "id": "voucher_everyday",
         |            "label": "Every day",
+        |            "paymentPlan" : "£37 every month",
         |             "startDateRules" : {
         |             "selectableWindow" : {
         |                "cutOffDayInclusive": "Tuesday",
@@ -77,7 +79,8 @@ object TestData {
     val voucherEveryday = WirePlanInfo(
       id = "voucher_everyday",
       label = "Every day",
-      startDateRules = Some(everyDayRules)
+      startDateRules = Some(everyDayRules),
+      paymentPlan = Some("£37 every month")
     )
 
     val weekendsRule = everyDayRules.copy(
@@ -86,7 +89,9 @@ object TestData {
     val voucherWeekend = WirePlanInfo(
       id = "voucher_weekend",
       label = "Weekend",
-      startDateRules = Some(weekendsRule)
+      startDateRules = Some(weekendsRule),
+      paymentPlan = Some("£10.50 every month")
+
     )
 
     val monthlyContribution = WirePlanInfo(
@@ -108,9 +113,9 @@ object TestData {
     val weekendRule = DaysOfWeekRule(List(SATURDAY, SUNDAY))
     val tuesdayRule = DaysOfWeekRule(List(MONDAY))
     val voucherWeekendRule = StartDateRules(Some(weekendRule), Some(voucherWindowRule))
-    val voucherWeekend = Plan(VoucherWeekend, voucherWeekendRule)
+    val voucherWeekend = Plan(VoucherWeekend, voucherWeekendRule, Some(PaymentPlan("£10.50 every month")))
     val voucherEveryDayRule = StartDateRules(Some(tuesdayRule), Some(voucherWindowRule))
-    val voucherEveryDay = Plan(VoucherEveryDay, voucherEveryDayRule)
+    val voucherEveryDay = Plan(VoucherEveryDay, voucherEveryDayRule, Some(PaymentPlan("£37 every month")))
 
     val monthlyContribution = Plan(MonthlyContribution)
 
