@@ -12,7 +12,7 @@ class ValidateRequestTest extends FlatSpec with Matchers {
 
   val testRequest = ValidatableFields(
     startDate = LocalDate.of(2018, 7, 20),
-    amountMinorUnits = AmountMinorUnits(100)
+    amountMinorUnits = Some(AmountMinorUnits(100))
   )
 
   def now = () => LocalDate.of(2018, 7, 20)
@@ -32,13 +32,17 @@ class ValidateRequestTest extends FlatSpec with Matchers {
     wiredValidator(oldRequest, GBP) shouldBe Failed("Date validation failed!")
   }
   it should "return error if amount is too small" in {
-    wiredValidator(testRequest.copy(amountMinorUnits = AmountMinorUnits(99)), GBP) shouldBe Failed("amount must be at least 100")
+    wiredValidator(testRequest.copy(amountMinorUnits = Some(AmountMinorUnits(99))), GBP) shouldBe Failed("amount must be at least 100")
   }
 
-  it should "return error if amount is too large" in {
-    wiredValidator(testRequest.copy(amountMinorUnits = AmountMinorUnits(201)), GBP) shouldBe Failed("amount must not be more than 200")
+  it should "return error if amount is too large" in {c
+    wiredValidator(testRequest.copy(amountMinorUnits = Some(AmountMinorUnits(201))), GBP) shouldBe Failed("amount must not be more than 200")
   }
   it should "return success if amount is within valid range" in {
-    wiredValidator(testRequest.copy(amountMinorUnits = AmountMinorUnits(150)), GBP) shouldBe Passed(())
+    wiredValidator(testRequest.copy(amountMinorUnits = Some(AmountMinorUnits(150))), GBP) shouldBe Passed((AmountMinorUnits(150)))
+  }
+
+  it should "return error if amount is missing" in {
+    wiredValidator(testRequest.copy(amountMinorUnits = None), GBP) shouldBe Failed("amount is missing")
   }
 }

@@ -6,7 +6,7 @@ import com.gu.i18n.Currency.GBP
 import com.gu.i18n.{Country, Currency}
 import com.gu.newproduct.api.addsubscription.email.SendConfirmationEmail.ContributionsEmailData
 import com.gu.newproduct.api.addsubscription.validation.ValidateRequest.ValidatableFields
-import com.gu.newproduct.api.addsubscription.validation.{CustomerData, Passed, ValidatedAccount}
+import com.gu.newproduct.api.addsubscription.validation.{CustomerData, Failed, Passed, ValidatedAccount}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{SubscriptionName, ZuoraCreateSubRequest}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.{AccountBalanceMinorUnits, AutoPay, IdentityId, PaymentMethodId}
@@ -51,7 +51,9 @@ class StepsTest extends FlatSpec with Matchers {
       ContinueProcessing(()).toAsync
     }
 
-    def fakeValidateRequest(fields: ValidatableFields, currency: Currency) = Passed(())
+    def fakeValidateRequest(fields: ValidatableFields, currency: Currency) = {
+      fields.amountMinorUnits.map(Passed(_)).getOrElse(Failed("missing amount"))
+    }
 
     def fakeGetCustomerData(zuoraAccountId: ZuoraAccountId) = ContinueProcessing(
       CustomerData(

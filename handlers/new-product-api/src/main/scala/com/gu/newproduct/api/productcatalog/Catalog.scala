@@ -76,7 +76,7 @@ object PlanId {
   case object VoucherSaturdayPlus extends PlanId("voucher_saturday_plus")
   case object VoucherSundayPlus extends PlanId("voucher_sunday_plus")
 
-  val supported = List(MonthlyContribution)
+  val supported = List(MonthlyContribution, VoucherEveryDay)
 
   def fromName(name: String): Option[PlanId] = supported.find(_.name == name)
 }
