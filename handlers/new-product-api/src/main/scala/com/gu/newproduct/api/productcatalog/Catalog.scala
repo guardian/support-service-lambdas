@@ -8,21 +8,37 @@ import com.gu.newproduct.api.productcatalog.PlanId._
 case class Catalog(
   voucherWeekend: Plan,
   voucherSaturday: Plan,
-  voucherSunday:Plan,
+  voucherSunday: Plan,
   voucherEveryDay: Plan,
   voucherSixDay: Plan,
   voucherWeekendPlus: Plan,
   voucherSaturdayPlus: Plan,
-  voucherSundayPlus:Plan,
+  voucherSundayPlus: Plan,
   voucherEveryDayPlus: Plan,
   voucherSixDayPlus: Plan,
-  monthlyContribution: Plan,
+  monthlyContribution: Plan
+) {
+  val allPlans = List(
+    voucherWeekend,
+    voucherSaturday,
+    voucherSunday,
+    voucherEveryDay,
+    voucherSixDay,
+    voucherWeekendPlus,
+    voucherSaturdayPlus,
+    voucherSundayPlus,
+    voucherEveryDayPlus,
+    voucherSixDayPlus,
+    monthlyContribution
+  )
 
-)
+  val planForId: Map[PlanId, Plan] = allPlans.map(x => x.id -> x).toMap
+}
 
 object NewProductApi {
   val catalog: Catalog = {
     def monthlyPayment(priceInPounds: String) = Some(PaymentPlan(s"£$priceInPounds every month"))
+
     val voucherWindowRule = WindowRule(
       maybeCutOffDay = Some(DayOfWeek.TUESDAY),
       maybeStartDelay = Some(DelayDays(20)),
@@ -65,15 +81,23 @@ object PlanId {
   case object MonthlyContribution extends PlanId("monthly_contribution")
 
   case object VoucherWeekend extends PlanId("voucher_weekend")
+
   case object VoucherEveryDay extends PlanId("voucher_everyday")
+
   case object VoucherSixDay extends PlanId("voucher_sixday")
+
   case object VoucherSaturday extends PlanId("voucher_saturday")
+
   case object VoucherSunday extends PlanId("voucher_sunday")
 
   case object VoucherWeekendPlus extends PlanId("voucher_weekend_plus")
+
   case object VoucherEveryDayPlus extends PlanId("voucher_everyday_plus")
+
   case object VoucherSixDayPlus extends PlanId("voucher_sixday_plus")
+
   case object VoucherSaturdayPlus extends PlanId("voucher_saturday_plus")
+
   case object VoucherSundayPlus extends PlanId("voucher_sunday_plus")
 
   val supported = List(MonthlyContribution, VoucherEveryDay)

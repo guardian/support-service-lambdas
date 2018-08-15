@@ -24,7 +24,7 @@ import com.gu.newproduct.api.addsubscription.zuora.GetContacts.WireModel.GetCont
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{DirectDebit, PaymentMethod, PaymentMethodWire}
 import com.gu.newproduct.api.addsubscription.zuora.{GetContacts, _}
 import com.gu.newproduct.api.productcatalog.PlanId.MonthlyContribution
-import com.gu.newproduct.api.productcatalog.{DateRule, NewProductApi}
+import com.gu.newproduct.api.productcatalog.{DateRule, NewProductApi, PlanId}
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
@@ -115,12 +115,12 @@ object Steps {
 
   def addVoucherSteps(
     getCustomerData: ZuoraAccountId => ApiGatewayOp[VoucherCustomerData],
-  )
-    (request: AddSubscriptionRequest): AsyncApiGatewayOp[SubscriptionName] = for {
+    validateStartDate: (PlanId, LocalDate) => ValidationResult[Unit]
+  )(request: AddSubscriptionRequest): AsyncApiGatewayOp[SubscriptionName] = for {
+    _ <- validateStartDate(request.planId, request.startDate).toApiGatewayOp.toAsync
     customerData <- getCustomerData(request.zuoraAccountId).toAsync
 
   } yield SubscriptionName("fakeSubId")
-
 
   def operationForEffects(response: Request => Response, stage: Stage, fetchString: StringFromS3): ApiGatewayOp[Operation] =
     for {
@@ -134,16 +134,26 @@ object Steps {
       contributionsSqsSend = EtSqsSend[ContributionFields](sqsSend) _
       getCurrentDate = () => RawEffects.now().toLocalDate
       validatorFor = DateValidator.validatorFor(getCurrentDate, _: DateRule)
-      isValidStartDate = StartDateValidator.fromRule(validatorFor, NewProductApi.catalog.monthlyContribution.startDateRules)
 
+      isValidContributionStartDate = StartDateValidator.fromRule(validatorFor, NewProductApi.catalog.monthlyContribution.startDateRules)
       createMonthlyContribution = CreateSubscription(zuoraIds.monthly, zuoraClient.post[WireCreateRequest, WireSubscription]) _
       contributionIds = List(zuoraIds.monthly.productRatePlanId, zuoraIds.annual.productRatePlanId)
       getCustomerData = getValidatedCustomerData(zuoraClient, contributionIds)
-      validateRequest = ContributionValidations(isValidStartDate, AmountLimits.limitsFor) _
+      validateRequest = ContributionValidations(isValidContributionStartDate, AmountLimits.limitsFor) _
       sendConfirmationEmail = SendConfirmationEmail(contributionsSqsSend, getCurrentDate) _
-      getVoucherData = getValidatedVoucherCustomerData(zuoraClient, contributionIds)
+
       contributionSteps = addContributionSteps(getCustomerData, validateRequest, createMonthlyContribution, sendConfirmationEmail) _
-      voucherSteps = addVoucherSteps(getVoucherData) _
+
+      getVoucherData = getValidatedVoucherCustomerData(zuoraClient, contributionIds)
+
+      isValidVoucherStartDate = Function.uncurried(
+        NewProductApi.catalog.planForId andThen { plan =>
+          StartDateValidator.fromRule(validatorFor, plan.startDateRules)
+        }
+      )
+
+      voucherSteps = addVoucherSteps(getVoucherData, isValidVoucherStartDate) _
+
       addSubSteps = handleRequest(
         addContribution = contributionSteps,
         addVoucher = voucherSteps
@@ -161,7 +171,7 @@ object Steps {
     contributionPlanIds: List[ProductRatePlanId]
   ): ZuoraAccountId => ApiGatewayOp[CustomerData] = {
 
-    val getValidatedAccount = GetAccount(zuoraClient.get[ZuoraAccount]) _ andValidateWith(
+    val getValidatedAccount = GetAccount(zuoraClient.get[ZuoraAccount]) _ andValidateWith (
       validate = ValidateAccount.apply _,
       ifNotFoundReturn = Some("Zuora account id is not valid")
     )
@@ -179,13 +189,12 @@ object Steps {
     )
   }
 
-
   def getValidatedVoucherCustomerData(
     zuoraClient: Requests,
     contributionPlanIds: List[ProductRatePlanId]
   ): ZuoraAccountId => ApiGatewayOp[VoucherCustomerData] = {
 
-    val getValidatedAccount = GetAccount(zuoraClient.get[ZuoraAccount]) _ andValidateWith(
+    val getValidatedAccount = GetAccount(zuoraClient.get[ZuoraAccount]) _ andValidateWith (
       validate = ValidateAccount.apply _,
       ifNotFoundReturn = Some("Zuora account id is not valid")
     )
@@ -199,7 +208,6 @@ object Steps {
       _
     )
   }
-
 
   def emailQueueFor(stage: Stage) = stage match {
     case Stage("PROD") => QueueName("contributions-thanks")

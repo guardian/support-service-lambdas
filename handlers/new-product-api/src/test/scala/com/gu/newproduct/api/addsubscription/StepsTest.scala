@@ -13,6 +13,7 @@ import com.gu.newproduct.api.addsubscription.zuora.GetAccount.{AccountBalanceMin
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts._
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{BankAccountName, BankAccountNumberMask, DirectDebit, MandateId, SortCode}
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.ActivePaymentMethod
+import com.gu.newproduct.api.productcatalog.PlanId
 import com.gu.test.JsonMatchers.JsonMatcher
 import com.gu.util.apigateway.ApiGatewayRequest
 import com.gu.util.reader.AsyncTypes._
@@ -121,9 +122,13 @@ class StepsTest extends FlatSpec with Matchers {
       fakeSendEmails
     ) _
 
+    def fakeValidateVoucherStart( id: PlanId,d: LocalDate) = Passed(())
+
     val fakeAddVoucherSteps = Steps.addVoucherSteps(
-      fakeGetVoucherCustomerData
+      fakeGetVoucherCustomerData,
+      fakeValidateVoucherStart
     ) _
+    //TODO MAKE INDEPENDENT TESTS FOR CONTRIBUTIONS AND VOUCHERS
     val futureActual = Steps.handleRequest(
       addContribution = fakeAddContributionSteps,
       addVoucher = fakeAddVoucherSteps
