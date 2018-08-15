@@ -6,7 +6,7 @@ import com.gu.i18n.Currency.GBP
 import com.gu.i18n.{Country, Currency}
 import com.gu.newproduct.api.addsubscription.email.SendConfirmationEmail.ContributionsEmailData
 import com.gu.newproduct.api.addsubscription.validation.ContributionValidations.ValidatableFields
-import com.gu.newproduct.api.addsubscription.validation.{CustomerData, Failed, Passed, ValidatedAccount}
+import com.gu.newproduct.api.addsubscription.validation._
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{SubscriptionName, ZuoraCreateSubRequest}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.{AccountBalanceMinorUnits, AutoPay, IdentityId, PaymentMethodId}
@@ -88,6 +88,39 @@ class StepsTest extends FlatSpec with Matchers {
         )
       )
     )
+    //TODO REMOVE DUPLICATION HERE
+    def fakeGetVoucherCustomerData(zuoraAccountId: ZuoraAccountId) = ContinueProcessing(
+      VoucherCustomerData(
+        account = ValidatedAccount(
+          identityId = Some(IdentityId("identityId")),
+          paymentMethodId = PaymentMethodId("paymentMethodId"),
+          autoPay = AutoPay(true),
+          accountBalanceMinorUnits = AccountBalanceMinorUnits(1234),
+          currency = GBP
+        ),
+        paymentMethod = DirectDebit(
+          ActivePaymentMethod,
+          BankAccountName("someName"),
+          BankAccountNumberMask("123312***"),
+          SortCode("233331"),
+          MandateId("1234 ")
+        ),
+        contacts = Contacts(
+          billTo = Contact(
+            firstName = FirstName("firstName"),
+            lastName = LastName("lastName"),
+            email = Some(Email("email@mail.com")),
+            country = Some(Country.UK)
+          ),
+          soldTo = Contact(
+            firstName = FirstName("soldToFirstName"),
+            lastName = LastName("soldToLastName"),
+            email = Some(Email("soldtoEmail@mail.com")),
+            country = Some(Country.US)
+          )
+        )
+      )
+    )
 
     val requestInput = JsObject(Map(
       "acquisitionCase" -> JsString("case"),
@@ -111,9 +144,9 @@ class StepsTest extends FlatSpec with Matchers {
     ) _
 
     val fakeAddVoucherSteps = Steps.addVoucherSteps(
-      fakeGetCustomerData
+      fakeGetVoucherCustomerData
     ) _
-    val futureActual = Steps.someFunctionName(
+    val futureActual = Steps.handleRequest(
       addContribution = fakeAddContributionSteps,
       addVoucher = fakeAddVoucherSteps
     )(ApiGatewayRequest(None, Some(Json.stringify(requestInput)), None, None))
