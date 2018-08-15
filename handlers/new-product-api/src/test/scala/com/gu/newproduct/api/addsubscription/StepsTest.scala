@@ -1,12 +1,13 @@
 package com.gu.newproduct.api.addsubscription
 
 import java.time.LocalDate
-
 import com.gu.i18n.Currency.GBP
 import com.gu.i18n.{Country, Currency}
 import com.gu.newproduct.api.addsubscription.email.SendConfirmationEmail.ContributionsEmailData
-import com.gu.newproduct.api.addsubscription.validation.ContributionValidations.ValidatableFields
 import com.gu.newproduct.api.addsubscription.validation._
+import com.gu.newproduct.api.addsubscription.validation.contribution.ContributionCustomerData
+import com.gu.newproduct.api.addsubscription.validation.contribution.ContributionValidations.ValidatableFields
+import com.gu.newproduct.api.addsubscription.validation.voucher.VoucherCustomerData
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{SubscriptionName, ZuoraCreateSubRequest}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.{AccountBalanceMinorUnits, AutoPay, IdentityId, PaymentMethodId}
@@ -22,7 +23,6 @@ import com.gu.util.resthttp.Types
 import com.gu.util.resthttp.Types.ClientSuccess
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json._
-
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
@@ -86,7 +86,7 @@ class StepsTest extends FlatSpec with Matchers {
       MandateId("1234 ")
     )
     def fakeGetCustomerData(zuoraAccountId: ZuoraAccountId) = ContinueProcessing(
-      CustomerData(
+      ContributionCustomerData(
         account = fakeAccount,
         paymentMethod = fakeDirectDebit,
         accountSubscriptions = Nil,
@@ -122,7 +122,7 @@ class StepsTest extends FlatSpec with Matchers {
       fakeSendEmails
     ) _
 
-    def fakeValidateVoucherStart( id: PlanId,d: LocalDate) = Passed(())
+    def fakeValidateVoucherStart(id: PlanId, d: LocalDate) = Passed(())
 
     val fakeAddVoucherSteps = Steps.addVoucherSteps(
       fakeGetVoucherCustomerData,

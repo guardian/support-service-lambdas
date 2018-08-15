@@ -1,18 +1,17 @@
-package com.gu.newproduct.api.addsubscription.validation
+package com.gu.newproduct.api.addsubscription.validation.contribution
 
 import java.time.LocalDate
 
 import com.gu.i18n.Currency
 import com.gu.i18n.Currency._
 import com.gu.newproduct.api.addsubscription._
-import com.gu.newproduct.api.addsubscription.validation.ContributionValidations.ValidatableFields
-import com.gu.newproduct.api.addsubscription.zuora.GetAccount.IdentityId
+import com.gu.newproduct.api.addsubscription.validation.contribution.ContributionValidations.ValidatableFields
+import com.gu.newproduct.api.addsubscription.validation.{AmountLimits, Failed, Passed, ValidationResult}
 import org.scalatest.{FlatSpec, Matchers}
 
 class ContributionValidationsTest extends FlatSpec with Matchers {
 
   val testRequest = ValidatableFields(
-    identityId = Some(IdentityId("identityId")),
     startDate = LocalDate.of(2018, 7, 20),
     amountMinorUnits = Some(AmountMinorUnits(100))
   )
@@ -48,7 +47,4 @@ class ContributionValidationsTest extends FlatSpec with Matchers {
     wiredValidator(testRequest.copy(amountMinorUnits = None), GBP) shouldBe Failed("amount is missing")
   }
 
-  it should "return error if identityId is missing" in {
-    wiredValidator(testRequest.copy(identityId = None), GBP) shouldBe Failed("Zuora account has no Identity Id")
-  }
 }

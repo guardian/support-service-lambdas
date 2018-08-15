@@ -1,6 +1,7 @@
-package com.gu.newproduct.api.addsubscription.validation
+package com.gu.newproduct.api.addsubscription.validation.voucher
 
 import com.gu.i18n.Country
+import com.gu.newproduct.api.addsubscription.validation.{Failed, Passed}
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts._
 import org.scalatest.{FlatSpec, Matchers}
 
