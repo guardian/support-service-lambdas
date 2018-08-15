@@ -7,17 +7,17 @@ import org.scalatest.{FlatSpec, Matchers}
 class ValidateContactsForVoucherTest extends FlatSpec with Matchers {
 
   val testContacts = Contacts(
-    billTo = Contact(
+    billTo = BilltoContact(
       FirstName("billToName"),
       LastName("billToLastName"),
       None,
       Some(Country.US)
     ),
-    soldTo = Contact(
+    soldTo = SoldToContact(
       FirstName("soldToName"),
       LastName("soldToLastName"),
       Some(Email("work@email.com")),
-      Some(Country.UK)
+      Country.UK
     )
   )
 
@@ -25,16 +25,9 @@ class ValidateContactsForVoucherTest extends FlatSpec with Matchers {
     ValidateContactsForVoucher(testContacts) shouldBe Passed(testContacts)
   }
 
-  it should "fail if sold to contact is missing" in { //todo i think this case is impossible in zuora, we should remove the option
-    val noSoldToCountryContacts = testContacts.copy(
-      soldTo = testContacts.soldTo.copy(country = None)
-    )
-    ValidateContactsForVoucher(noSoldToCountryContacts) shouldBe Failed("No country in zuora sold to contact")
-  }
-
   it should "fail if sold to contact is not uk" in {
     val australianSoldToContacts = testContacts.copy(
-      soldTo = testContacts.soldTo.copy(country = Some(Country.Australia))
+      soldTo = testContacts.soldTo.copy(country = Country.Australia)
     )
     ValidateContactsForVoucher(australianSoldToContacts) shouldBe Failed("Invalid country: Australia, only UK addresses are allowed")
   }

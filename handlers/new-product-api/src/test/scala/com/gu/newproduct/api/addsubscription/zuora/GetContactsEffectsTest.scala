@@ -20,8 +20,8 @@ class GetContactsEffectsTest extends FlatSpec with Matchers {
       res <- GetContacts(zuoraDeps.get[GetContactsResponse])(ZuoraAccountId("2c92c0f860017cd501600893130317a7")).toDisjunction
     } yield res
 
-    val expectedBillTo = Contact(FirstName("Dory"), LastName("Jones"), Some(Email("fake@fake.co.us")), Some(Country.Canada))
-    val expectedSoldTo = Contact(FirstName("velma"), LastName("kelly"), Some(Email("velmakelly@test.com")), Some(Country.UK))
+    val expectedBillTo = BilltoContact(FirstName("Dory"), LastName("Jones"), Some(Email("fake@fake.co.us")), Some(Country.Canada))
+    val expectedSoldTo = GetContacts.SoldToContact(FirstName("velma"), LastName("kelly"), Some(Email("velmakelly@test.com")), Country.UK)
 
     actual shouldBe \/-(Contacts(billTo = expectedBillTo, soldTo = expectedSoldTo))
   }

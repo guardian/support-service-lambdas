@@ -21,7 +21,7 @@ class SendConfirmationEmailTest extends FlatSpec with Matchers {
 
   def today = () => LocalDate.of(2018, 7, 30)
 
-  val testContact = Contact(
+  val testContact = BilltoContact(
     FirstName("Marty"),
     LastName("McFly"),
     email = Some(Email("email@email.com")),

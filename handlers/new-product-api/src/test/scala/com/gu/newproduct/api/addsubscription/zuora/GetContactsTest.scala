@@ -2,8 +2,8 @@ package com.gu.newproduct.api.addsubscription.zuora
 
 import com.gu.i18n.Country
 import com.gu.newproduct.api.addsubscription.ZuoraAccountId
-import com.gu.newproduct.api.addsubscription.zuora.GetContacts.WireModel.{GetContactsResponse, ZuoraContact}
-import com.gu.newproduct.api.addsubscription.zuora.GetContacts._
+import com.gu.newproduct.api.addsubscription.zuora.GetContacts.WireModel.{GetContactsResponse, ZuoraBillTo}
+import com.gu.newproduct.api.addsubscription.zuora.GetContacts.{WireModel, _}
 import com.gu.util.resthttp.RestRequestMaker.{RequestsGet, WithCheck}
 import com.gu.util.resthttp.Types.ClientSuccess
 import org.scalatest.{FlatSpec, Matchers}
@@ -12,13 +12,13 @@ class GetContactsTest extends FlatSpec with Matchers {
 
   it should "get contacts" in {
 
-    val soldToZuoraContact = ZuoraContact(
+    val soldToZuoraContact = WireModel.ZuoraSoldTo(
       firstName = "soldToName",
       lastName = "soldToLastName",
       workEmail = Some("work@email.com"),
-      country = Some("United States")
+      country = "United States"
     )
-    val billToZuoraContact = ZuoraContact(
+    val billToZuoraContact = ZuoraBillTo(
       firstName = "billToName",
       lastName = "billToLastName",
       workEmail = None,
@@ -31,17 +31,17 @@ class GetContactsTest extends FlatSpec with Matchers {
     }
 
     val expected = Contacts(
-      billTo = Contact(
+      billTo = BilltoContact(
         FirstName("billToName"),
         LastName("billToLastName"),
         None,
         Some(Country.UK)
       ),
-      soldTo = Contact(
+      soldTo = SoldToContact(
         FirstName("soldToName"),
         LastName("soldToLastName"),
         Some(Email("work@email.com")),
-        Some(Country.US)
+        Country.US
       )
     )
 

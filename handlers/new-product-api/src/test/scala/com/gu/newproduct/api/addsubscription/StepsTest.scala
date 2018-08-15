@@ -55,70 +55,48 @@ class StepsTest extends FlatSpec with Matchers {
       fields.amountMinorUnits.map(Passed(_)).getOrElse(Failed("missing amount"))
     }
 
-    def fakeGetCustomerData(zuoraAccountId: ZuoraAccountId) = ContinueProcessing(
-      CustomerData(
-        account = ValidatedAccount(
-          identityId = Some(IdentityId("identityId")),
-          paymentMethodId = PaymentMethodId("paymentMethodId"),
-          autoPay = AutoPay(true),
-          accountBalanceMinorUnits = AccountBalanceMinorUnits(1234),
-          currency = GBP
-        ),
-        paymentMethod = DirectDebit(
-          ActivePaymentMethod,
-          BankAccountName("someName"),
-          BankAccountNumberMask("123312***"),
-          SortCode("233331"),
-          MandateId("1234 ")
-        ),
-        accountSubscriptions = Nil,
-        contacts = Contacts(
-          billTo = Contact(
-            firstName = FirstName("firstName"),
-            lastName = LastName("lastName"),
-            email = Some(Email("email@mail.com")),
-            country = Some(Country.UK)
-          ),
-          soldTo = Contact(
-            firstName = FirstName("soldToFirstName"),
-            lastName = LastName("soldToLastName"),
-            email = Some(Email("soldtoEmail@mail.com")),
-            country = Some(Country.US)
-          )
-        )
+    val fakeAccount = ValidatedAccount(
+      identityId = Some(IdentityId("identityId")),
+      paymentMethodId = PaymentMethodId("paymentMethodId"),
+      autoPay = AutoPay(true),
+      accountBalanceMinorUnits = AccountBalanceMinorUnits(1234),
+      currency = GBP
+    )
+    val fakeContacts = Contacts(
+      billTo = BilltoContact(
+        firstName = FirstName("firstName"),
+        lastName = LastName("lastName"),
+        email = Some(Email("email@mail.com")),
+        country = Some(Country.UK)
+      ),
+      soldTo = SoldToContact(
+        firstName = FirstName("soldToFirstName"),
+        lastName = LastName("soldToLastName"),
+        email = Some(Email("soldtoEmail@mail.com")),
+        country = Country.US
       )
     )
-    //TODO REMOVE DUPLICATION HERE
+
+    val fakeDirectDebit = DirectDebit(
+      ActivePaymentMethod,
+      BankAccountName("someName"),
+      BankAccountNumberMask("123312***"),
+      SortCode("233331"),
+      MandateId("1234 ")
+    )
+    def fakeGetCustomerData(zuoraAccountId: ZuoraAccountId) = ContinueProcessing(
+      CustomerData(
+        account = fakeAccount,
+        paymentMethod = fakeDirectDebit,
+        accountSubscriptions = Nil,
+        contacts = fakeContacts
+      )
+    )
     def fakeGetVoucherCustomerData(zuoraAccountId: ZuoraAccountId) = ContinueProcessing(
       VoucherCustomerData(
-        account = ValidatedAccount(
-          identityId = Some(IdentityId("identityId")),
-          paymentMethodId = PaymentMethodId("paymentMethodId"),
-          autoPay = AutoPay(true),
-          accountBalanceMinorUnits = AccountBalanceMinorUnits(1234),
-          currency = GBP
-        ),
-        paymentMethod = DirectDebit(
-          ActivePaymentMethod,
-          BankAccountName("someName"),
-          BankAccountNumberMask("123312***"),
-          SortCode("233331"),
-          MandateId("1234 ")
-        ),
-        contacts = Contacts(
-          billTo = Contact(
-            firstName = FirstName("firstName"),
-            lastName = LastName("lastName"),
-            email = Some(Email("email@mail.com")),
-            country = Some(Country.UK)
-          ),
-          soldTo = Contact(
-            firstName = FirstName("soldToFirstName"),
-            lastName = LastName("soldToLastName"),
-            email = Some(Email("soldtoEmail@mail.com")),
-            country = Some(Country.US)
-          )
-        )
+        account = fakeAccount,
+        paymentMethod = fakeDirectDebit,
+        contacts = fakeContacts
       )
     )
 

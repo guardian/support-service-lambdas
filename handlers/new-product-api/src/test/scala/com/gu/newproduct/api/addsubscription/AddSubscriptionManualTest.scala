@@ -5,7 +5,7 @@ import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 import play.api.libs.json.{JsString, Json}
 
 //This is just a way to locally run the addSubscription lambda in dev
-object AddSubscriptionManualTest extends App{
+object AddSubscriptionManualTest extends App {
   val requestBody =
     """{
       |   "zuoraAccountId":"2c92c0f865244687016538e563b85fac",
@@ -25,7 +25,6 @@ object AddSubscriptionManualTest extends App{
 
   println(s"sending request..")
   println(requestText)
-
 
   val testInputStream = new ByteArrayInputStream(requestText.getBytes)
   val testOutput = new ByteArrayOutputStream()

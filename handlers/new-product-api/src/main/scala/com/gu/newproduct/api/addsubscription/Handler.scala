@@ -19,7 +19,7 @@ import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.WireModel.
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{SubscriptionName, ZuoraCreateSubRequest}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAccount
 import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.WireModel.ZuoraSubscriptionsResponse
-import com.gu.newproduct.api.addsubscription.zuora.GetContacts.Contact
+import com.gu.newproduct.api.addsubscription.zuora.GetContacts.BilltoContact
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.WireModel.GetContactsResponse
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{DirectDebit, PaymentMethod, PaymentMethodWire}
 import com.gu.newproduct.api.addsubscription.zuora.{GetContacts, _}
@@ -69,7 +69,7 @@ object Steps {
     currency: Currency,
     paymentMethod: PaymentMethod,
     firstPaymentDate: LocalDate,
-    billToContact: Contact,
+    billToContact: BilltoContact,
     amountMinorUnits: AmountMinorUnits
   ) =
     ContributionsEmailData(

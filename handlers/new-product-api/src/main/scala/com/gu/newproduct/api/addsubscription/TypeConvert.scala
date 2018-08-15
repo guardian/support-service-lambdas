@@ -6,7 +6,7 @@ import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.reader.AsyncTypes._
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.reader.Types._
-import com.gu.util.resthttp.Types.{ClientFailableOp, NotFound}
+import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError, NotFound}
 
 import scala.concurrent.Future
 
@@ -38,6 +38,13 @@ object TypeConvert {
     def toApiResponseCheckingNotFound(action: String, ifNotFoundReturn: String): ApiGatewayOp[A] = clientFailableOp match {
       case NotFound(_) => ReturnWithResponse(ApiValidationErrorResponse(ifNotFoundReturn))
       case anyOtherResponse => anyOtherResponse.toDisjunction.toApiGatewayOp(action)
+    }
+  }
+
+  implicit class OptionToClientFailableOp[A](option: Option[A]) {
+    def toClientFailable(errorMessage: String) = option match {
+      case None => GenericError(errorMessage)
+      case Some(value) => ClientSuccess(value)
     }
   }
 
