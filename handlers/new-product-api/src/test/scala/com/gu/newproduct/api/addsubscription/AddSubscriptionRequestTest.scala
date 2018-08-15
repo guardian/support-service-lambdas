@@ -2,6 +2,7 @@ package com.gu.newproduct.api.addsubscription
 
 import java.time.LocalDate
 
+import com.gu.newproduct.api.productcatalog.PlanId
 import com.gu.newproduct.api.productcatalog.PlanId.MonthlyContribution
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.{JsError, Json}
@@ -66,7 +67,8 @@ class AddSubscriptionRequestTest extends FlatSpec with Matchers {
         |}
       """.stripMargin
 
-    Json.parse(input).validate[AddSubscriptionRequest] shouldBe JsError("unsupported plan: allowed values are monthly_contribution,voucher_everyday")
+    val supportedPlansStr = PlanId.supported.map(_.name).mkString(",")
+    Json.parse(input).validate[AddSubscriptionRequest] shouldBe JsError(s"unsupported plan: allowed values are $supportedPlansStr")
   }
 }
 
