@@ -56,7 +56,8 @@ object Steps {
     request: AddSubscriptionRequest,
     acceptanceDate: LocalDate,
     chargeOverride: Option[ChargeOverride],
-    productRatePlanId: ProductRatePlanId) = ZuoraCreateSubRequest(
+    productRatePlanId: ProductRatePlanId
+  ) = ZuoraCreateSubRequest(
     productRatePlanId,
     request.zuoraAccountId,
     chargeOverride,
@@ -127,8 +128,7 @@ object Steps {
     getZuoraRateplanId: PlanId => Option[ProductRatePlanId],
     getCustomerData: ZuoraAccountId => ApiGatewayOp[VoucherCustomerData],
     validateStartDate: (PlanId, LocalDate) => ValidationResult[Unit],
-    createSubscription: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName],
-
+    createSubscription: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName]
   )(request: AddSubscriptionRequest): AsyncApiGatewayOp[SubscriptionName] = for {
     _ <- validateStartDate(request.planId, request.startDate).toApiGatewayOp.toAsync
     customerData <- getCustomerData(request.zuoraAccountId).toAsync
