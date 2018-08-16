@@ -9,7 +9,7 @@ import com.gu.newproduct.api.addsubscription.email.SendConfirmationEmail.Contrib
 import com.gu.newproduct.api.addsubscription.validation._
 import com.gu.newproduct.api.addsubscription.validation.contribution.ContributionValidations.ValidatableFields
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription
-import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{SubscriptionName, ZuoraCreateSubRequest}
+import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{ChargeOverride, SubscriptionName, ZuoraCreateSubRequest}
 import com.gu.test.JsonMatchers.JsonMatcher
 import com.gu.util.apigateway.ApiGatewayRequest
 import com.gu.util.reader.AsyncTypes._
@@ -28,11 +28,19 @@ class ContributionStepsTest extends FlatSpec with Matchers {
   case class ExpectedOut(subscriptionNumber: String)
 
   it should "run end to end with fakes" in {
-    val planAndCharge = PlanAndCharge(ProductRatePlanId("ratePlanId"), ProductRatePlanChargeId("ratePlanChargeId"))
+
+    val planAndCharge = PlanAndCharge(
+      ProductRatePlanId("ratePlanId"),
+      ProductRatePlanChargeId("ratePlanChargeId")
+    )
+
     val expectedIn = ZuoraCreateSubRequest(
-      planAndCharge,
+      planAndCharge.productRatePlanId,
       ZuoraAccountId("acccc"),
-      Some(AmountMinorUnits(123)),
+      Some(ChargeOverride(
+        AmountMinorUnits(123),
+        planAndCharge.productRatePlanChargeId
+      )),
       LocalDate.of(2018, 7, 18),
       LocalDate.of(2018, 7, 28),
       CaseId("case"),

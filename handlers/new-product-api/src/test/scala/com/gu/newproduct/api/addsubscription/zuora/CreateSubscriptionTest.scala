@@ -4,7 +4,7 @@ import java.time.LocalDate
 
 import com.gu.newproduct.api.addsubscription.ZuoraIds.{PlanAndCharge, ProductRatePlanChargeId, ProductRatePlanId}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.WireModel.{ChargeOverrides, SubscribeToRatePlans, WireCreateRequest, WireSubscription}
-import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{ZuoraCreateSubRequest, SubscriptionName}
+import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{ChargeOverride, SubscriptionName, ZuoraCreateSubRequest}
 import com.gu.newproduct.api.addsubscription._
 import com.gu.util.resthttp.RestRequestMaker.{RequestsPost, WithCheck}
 import com.gu.util.resthttp.Types.{ClientSuccess, GenericError}
@@ -42,9 +42,13 @@ class CreateSubscriptionTest extends FlatSpec with Matchers {
       case in => GenericError(s"bad request: $in")
     }
     val createReq = ZuoraCreateSubRequest(
-      planAndCharge = ids,
+      productRatePlanId = ids.productRatePlanId,
       accountId = ZuoraAccountId("zac"),
-      maybeAmountMinorUnits = Some(AmountMinorUnits(125)),
+      maybeChargeOverride = Some(ChargeOverride(
+        AmountMinorUnits(125),
+        ids.productRatePlanChargeId
+      )),
+
       effectiveDate = LocalDate.of(2018, 7, 17),
       acceptanceDate = LocalDate.of(2018, 7, 27),
       acquisitionCase = CaseId("casecase"),

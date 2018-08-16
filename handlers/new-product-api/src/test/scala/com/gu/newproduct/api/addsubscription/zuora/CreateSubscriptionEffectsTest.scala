@@ -6,6 +6,7 @@ import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.newproduct.api.addsubscription.ZuoraIds.{PlanAndCharge, ProductRatePlanChargeId, ProductRatePlanId}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.WireModel._
 import com.gu.newproduct.api.addsubscription._
+import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.ChargeOverride
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.resthttp.RestRequestMaker.RequestsPost
@@ -20,9 +21,12 @@ class CreateSubscriptionEffectsTest extends FlatSpec with Matchers {
   it should "create subscription in account" taggedAs EffectsTest in {
     val validCaseIdToAvoidCausingSFErrors = CaseId("5006E000005b5cf")
     val request = CreateSubscription.ZuoraCreateSubRequest(
-      monthlyIds,
+      monthlyContribution.productRatePlanId,
       ZuoraAccountId("2c92c0f864a214c30164a8b5accb650b"),
-      Some(AmountMinorUnits(100)),
+      Some(ChargeOverride(
+        AmountMinorUnits(100),
+        monthlyContribution.productRatePlanChargeId
+      )),
       LocalDate.now,
       LocalDate.now.plusDays(2),
       validCaseIdToAvoidCausingSFErrors,
@@ -44,7 +48,7 @@ class CreateSubscriptionEffectsTest extends FlatSpec with Matchers {
 
 object ZuoraDevContributions {
 
-  val monthlyIds = PlanAndCharge(
+  val monthlyContribution = PlanAndCharge(
     productRatePlanId = ProductRatePlanId("2c92c0f85a6b134e015a7fcd9f0c7855"),
     productRatePlanChargeId = ProductRatePlanChargeId("2c92c0f85a6b1352015a7fcf35ab397c")
   )

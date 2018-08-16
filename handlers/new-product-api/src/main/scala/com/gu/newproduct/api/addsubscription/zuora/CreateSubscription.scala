@@ -3,7 +3,7 @@ package com.gu.newproduct.api.addsubscription.zuora
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-import com.gu.newproduct.api.addsubscription.ZuoraIds.PlanAndCharge
+import com.gu.newproduct.api.addsubscription.ZuoraIds.{PlanAndCharge, ProductRatePlanChargeId, ProductRatePlanId}
 import com.gu.newproduct.api.addsubscription._
 import com.gu.util.resthttp.RestRequestMaker.{RequestsPost, WithCheck}
 import com.gu.util.resthttp.Types.ClientFailableOp
@@ -62,21 +62,25 @@ object CreateSubscription {
       CreatedByCSR__c = createdByCSR.value,
       subscribeToRatePlans = List(
         SubscribeToRatePlans(
-          productRatePlanId = planAndCharge.productRatePlanId.value,
-          chargeOverrides = maybeAmountMinorUnits.map(amountMinorUnits =>
+          productRatePlanId = productRatePlanId.value,
+          chargeOverrides = maybeChargeOverride.map(chargeOverride =>
             ChargeOverrides(
-              price = amountMinorUnits.value.toDouble / 100,
-              productRatePlanChargeId = planAndCharge.productRatePlanChargeId.value
+              price = chargeOverride.amountMinorUnits.value.toDouble / 100,
+              productRatePlanChargeId = chargeOverride.productRatePlanChargeId.value
             )).toList
         )
       )
     )
   }
 
+  case class ChargeOverride(
+    amountMinorUnits: AmountMinorUnits,
+    productRatePlanChargeId: ProductRatePlanChargeId
+  )
   case class ZuoraCreateSubRequest(
-    planAndCharge: PlanAndCharge,
+    productRatePlanId: ProductRatePlanId,
     accountId: ZuoraAccountId,
-    maybeAmountMinorUnits: Option[AmountMinorUnits],
+    maybeChargeOverride: Option[ChargeOverride],
     effectiveDate: LocalDate,
     acceptanceDate: LocalDate,
     acquisitionCase: CaseId,
