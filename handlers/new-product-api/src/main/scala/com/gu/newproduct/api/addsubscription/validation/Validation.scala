@@ -30,12 +30,12 @@ object Validation {
         } yield validatedData
   }
 
-  implicit class ComposeValidation[UNVALIDATED, VALIDATED](validate: UNVALIDATED => ValidationResult[VALIDATED]) {
-    def thenValidate[TWICEVALIDATED](validateAgain: VALIDATED => ValidationResult[TWICEVALIDATED]): UNVALIDATED => ValidationResult[TWICEVALIDATED] =
+  implicit class ComposeValidation[UNVALIDATED, VALIDATED](initialValidation: UNVALIDATED => ValidationResult[VALIDATED]) {
+    def thenValidate[TWICEVALIDATED](finalValidation: VALIDATED => ValidationResult[TWICEVALIDATED]): UNVALIDATED => ValidationResult[TWICEVALIDATED] =
       (unvalidated: UNVALIDATED) =>
         for {
-          validated <- validate(unvalidated)
-          twiceValidated <- validateAgain(validated)
+          validated <- initialValidation(unvalidated)
+          twiceValidated <- finalValidation(validated)
         } yield twiceValidated
   }
 

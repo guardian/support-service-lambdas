@@ -2,11 +2,11 @@ package com.gu.newproduct.api.addsubscription.zuora
 
 import com.gu.i18n.Country
 import com.gu.i18n.CountryGroup.countryByNameOrCode
+import com.gu.newproduct.api.addsubscription.TypeConvert._
 import com.gu.newproduct.api.addsubscription.ZuoraAccountId
 import com.gu.util.resthttp.RestRequestMaker.{RequestsGet, WithCheck}
-import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError}
+import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess}
 import play.api.libs.json.Json
-import com.gu.newproduct.api.addsubscription.TypeConvert._
 
 object GetContacts {
 
