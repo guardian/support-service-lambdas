@@ -64,7 +64,7 @@ class GetContributionCustomerDataTest extends FlatSpec with Matchers {
   }
 
   val errorResponse = ReturnWithResponse(ApiGatewayResponse.internalServerError("error"))
-  def failedCall(accountId:ZuoraAccountId) = errorResponse
+  def failedCall(accountId: ZuoraAccountId) = errorResponse
   def failedPaymentMethodCall(paymentMethodId: PaymentMethodId) = errorResponse
 
   def getAccountSuccess(accountId: ZuoraAccountId) = {
