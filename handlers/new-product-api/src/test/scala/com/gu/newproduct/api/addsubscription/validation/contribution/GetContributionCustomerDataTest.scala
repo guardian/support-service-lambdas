@@ -21,7 +21,7 @@ class GetContributionCustomerDataTest extends FlatSpec with Matchers {
 
     actual shouldBe ContinueProcessing(ContributionCustomerData(
       TestData.validatedAccount,
-      TestData.nonDirectDebitPaymentMethod,
+      TestData.directDebitPaymentMethod,
       TestData.subscriptionList,
       TestData.contacts
     ))
@@ -73,8 +73,8 @@ class GetContributionCustomerDataTest extends FlatSpec with Matchers {
   }
 
   def getPaymentMethodSuccess(paymentMethodId: PaymentMethodId) = {
-    paymentMethodId shouldBe PaymentMethodId("paymentId")
-    ContinueProcessing(TestData.nonDirectDebitPaymentMethod)
+    paymentMethodId shouldBe PaymentMethodId("paymentMethodId")
+    ContinueProcessing(TestData.directDebitPaymentMethod)
   }
 
   def getAccountSubscriptionsSuccess(accountId: ZuoraAccountId) = {

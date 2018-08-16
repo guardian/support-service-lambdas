@@ -1,20 +1,14 @@
 package com.gu.newproduct.api.addsubscription
 
 import java.time.LocalDate
-import com.gu.i18n.Currency.GBP
-import com.gu.i18n.{Country, Currency}
+
+import com.gu.i18n.Currency
+import com.gu.newproduct.TestData
 import com.gu.newproduct.api.addsubscription.email.SendConfirmationEmail.ContributionsEmailData
 import com.gu.newproduct.api.addsubscription.validation._
-import com.gu.newproduct.api.addsubscription.validation.contribution.ContributionCustomerData
 import com.gu.newproduct.api.addsubscription.validation.contribution.ContributionValidations.ValidatableFields
-import com.gu.newproduct.api.addsubscription.validation.voucher.VoucherCustomerData
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{SubscriptionName, ZuoraCreateSubRequest}
-import com.gu.newproduct.api.addsubscription.zuora.GetAccount.{AccountBalanceMinorUnits, AutoPay, IdentityId, PaymentMethodId}
-import com.gu.newproduct.api.addsubscription.zuora.GetContacts._
-import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{BankAccountName, BankAccountNumberMask, DirectDebit, MandateId, SortCode}
-import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.ActivePaymentMethod
-import com.gu.newproduct.api.productcatalog.PlanId
 import com.gu.test.JsonMatchers.JsonMatcher
 import com.gu.util.apigateway.ApiGatewayRequest
 import com.gu.util.reader.AsyncTypes._
@@ -23,11 +17,12 @@ import com.gu.util.resthttp.Types
 import com.gu.util.resthttp.Types.ClientSuccess
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json._
+
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
-class StepsTest extends FlatSpec with Matchers {
+class ContributionStepsTest extends FlatSpec with Matchers {
 
   case class ExpectedOut(subscriptionNumber: String)
 
@@ -56,50 +51,7 @@ class StepsTest extends FlatSpec with Matchers {
       fields.amountMinorUnits.map(Passed(_)).getOrElse(Failed("missing amount"))
     }
 
-    val fakeAccount = ValidatedAccount(
-      identityId = Some(IdentityId("identityId")),
-      paymentMethodId = PaymentMethodId("paymentMethodId"),
-      autoPay = AutoPay(true),
-      accountBalanceMinorUnits = AccountBalanceMinorUnits(1234),
-      currency = GBP
-    )
-    val fakeContacts = Contacts(
-      billTo = BilltoContact(
-        firstName = FirstName("firstName"),
-        lastName = LastName("lastName"),
-        email = Some(Email("email@mail.com")),
-        country = Some(Country.UK)
-      ),
-      soldTo = SoldToContact(
-        firstName = FirstName("soldToFirstName"),
-        lastName = LastName("soldToLastName"),
-        email = Some(Email("soldtoEmail@mail.com")),
-        country = Country.US
-      )
-    )
-
-    val fakeDirectDebit = DirectDebit(
-      ActivePaymentMethod,
-      BankAccountName("someName"),
-      BankAccountNumberMask("123312***"),
-      SortCode("233331"),
-      MandateId("1234 ")
-    )
-    def fakeGetCustomerData(zuoraAccountId: ZuoraAccountId) = ContinueProcessing(
-      ContributionCustomerData(
-        account = fakeAccount,
-        paymentMethod = fakeDirectDebit,
-        accountSubscriptions = Nil,
-        contacts = fakeContacts
-      )
-    )
-    def fakeGetVoucherCustomerData(zuoraAccountId: ZuoraAccountId) = ContinueProcessing(
-      VoucherCustomerData(
-        account = fakeAccount,
-        paymentMethod = fakeDirectDebit,
-        contacts = fakeContacts
-      )
-    )
+    def fakeGetCustomerData(zuoraAccountId: ZuoraAccountId) = ContinueProcessing(TestData.contributionCustomerData)
 
     val requestInput = JsObject(Map(
       "acquisitionCase" -> JsString("case"),
@@ -122,16 +74,12 @@ class StepsTest extends FlatSpec with Matchers {
       fakeSendEmails
     ) _
 
-    def fakeValidateVoucherStart(id: PlanId, d: LocalDate) = Passed(())
-
-    val fakeAddVoucherSteps = Steps.addVoucherSteps(
-      fakeGetVoucherCustomerData,
-      fakeValidateVoucherStart
-    ) _
-    //TODO MAKE INDEPENDENT TESTS FOR CONTRIBUTIONS AND VOUCHERS
+    val dummyVoucherSteps = (req: AddSubscriptionRequest) => {
+      fail("unexpected execution of voucher steps while processing contribution request!")
+    }
     val futureActual = Steps.handleRequest(
       addContribution = fakeAddContributionSteps,
-      addVoucher = fakeAddVoucherSteps
+      addVoucher = dummyVoucherSteps
     )(ApiGatewayRequest(None, Some(Json.stringify(requestInput)), None, None))
 
     val actual = Await.result(futureActual, 30 seconds)

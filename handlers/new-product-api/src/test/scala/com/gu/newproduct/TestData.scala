@@ -4,26 +4,43 @@ import com.gu.i18n.Country
 import com.gu.i18n.Currency.GBP
 import com.gu.newproduct.api.addsubscription.ZuoraIds.ProductRatePlanId
 import com.gu.newproduct.api.addsubscription.validation.ValidatedAccount
+import com.gu.newproduct.api.addsubscription.validation.contribution.ContributionCustomerData
+import com.gu.newproduct.api.addsubscription.validation.voucher.VoucherCustomerData
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.{AccountBalanceMinorUnits, AutoPay, IdentityId, PaymentMethodId}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.{Active, Subscription}
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts._
-import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.NonDirectDebitMethod
+import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{BankAccountName, BankAccountNumberMask, DirectDebit, MandateId, SortCode}
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.ActivePaymentMethod
-import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType.CreditCard
 
 object TestData {
-
   val validatedAccount = ValidatedAccount(
-    Some(IdentityId("identityId")),
-    PaymentMethodId("paymentId"),
-    AutoPay(true),
-    AccountBalanceMinorUnits(1234),
-    GBP
+    identityId = Some(IdentityId("identityId")),
+    paymentMethodId = PaymentMethodId("paymentMethodId"),
+    autoPay = AutoPay(true),
+    accountBalanceMinorUnits = AccountBalanceMinorUnits(1234),
+    currency = GBP
+  )
+  val contacts = Contacts(
+    billTo = BilltoContact(
+      firstName = FirstName("billToFirstName"),
+      lastName = LastName("billToLastName"),
+      email = Some(Email("billToEmail@mail.com")),
+      country = Some(Country.UK)
+    ),
+    soldTo = SoldToContact(
+      firstName = FirstName("soldToFirstName"),
+      lastName = LastName("soldToLastName"),
+      email = Some(Email("soldtoEmail@mail.com")),
+      country = Country.US
+    )
   )
 
-  val nonDirectDebitPaymentMethod = NonDirectDebitMethod(
+  val directDebitPaymentMethod = DirectDebit(
     ActivePaymentMethod,
-    CreditCard
+    BankAccountName("someName"),
+    BankAccountNumberMask("123312***"),
+    SortCode("233331"),
+    MandateId("1234 ")
   )
 
   val subscriptionList = List(
@@ -33,18 +50,17 @@ object TestData {
     )
   )
 
-  val contacts = Contacts(
-    billTo = BilltoContact(
-      FirstName("billToName"),
-      LastName("billToLastName"),
-      None,
-      Some(Country.UK)
-    ),
-    soldTo = SoldToContact(
-      FirstName("soldToName"),
-      LastName("soldToLastName"),
-      Some(Email("work@email.com")),
-      Country.US
-    )
+  val contributionCustomerData = ContributionCustomerData(
+    account = validatedAccount,
+    paymentMethod = directDebitPaymentMethod,
+    accountSubscriptions = subscriptionList,
+    contacts = contacts
   )
+
+  val voucherCustomerData = VoucherCustomerData(
+    account = validatedAccount,
+    paymentMethod = directDebitPaymentMethod,
+    contacts = contacts
+  )
+
 }
