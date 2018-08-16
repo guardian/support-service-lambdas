@@ -5,7 +5,7 @@ import com.gu.newproduct.api.addsubscription.validation.Validation._
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount._
 
 case class ValidatedAccount(
-  identityId: IdentityId,
+  identityId: Option[IdentityId],
   paymentMethodId: PaymentMethodId,
   autoPay: AutoPay,
   accountBalanceMinorUnits: AccountBalanceMinorUnits,
@@ -15,12 +15,11 @@ case class ValidatedAccount(
 object ValidateAccount {
   def apply(account: Account): ValidationResult[ValidatedAccount] = {
     for {
-      identityId <- account.identityId getOrFailWith "Zuora account has no Identity Id"
       _ <- account.autoPay.value orFailWith "Zuora account has autopay disabled"
       _ <- (account.accountBalanceMinorUnits.value == 0) orFailWith "Zuora account balance is not zero"
       paymentMethodId <- account.paymentMethodId getOrFailWith "Zuora account has no default payment method"
     } yield ValidatedAccount(
-      identityId,
+      account.identityId,
       paymentMethodId,
       account.autoPay,
       account.accountBalanceMinorUnits,

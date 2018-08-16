@@ -6,7 +6,7 @@ import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType._
 import com.gu.util.resthttp.RestRequestMaker.{RequestsGet, WithoutCheck}
 import com.gu.util.resthttp.Types._
 import play.api.libs.json._
-
+import com.gu.newproduct.api.addsubscription.TypeConvert._
 object GetPaymentMethod {
 
   case class PaymentMethodWire(
@@ -46,13 +46,6 @@ object GetPaymentMethod {
   }
 
   private def toStatus(statusString: String) = if (statusString == "Active") ActivePaymentMethod else NotActivePaymentMethod
-
-  implicit class OptionToClientFailableOp[A](option: Option[A]) {
-    def toClientFailable(errorMessage: String) = option match {
-      case None => GenericError(errorMessage)
-      case Some(value) => ClientSuccess(value)
-    }
-  }
 
   implicit val wireReads = Json.reads[PaymentMethodWire]
 

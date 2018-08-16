@@ -68,4 +68,41 @@ class ValidationImplicitsTest extends FlatSpec with Matchers {
 
     getValidatedData("testId") shouldBe ReturnWithResponse(ApiGatewayResponse.messageResponse("422", "validation failed!"))
   }
+
+  case class Unvalidated(value: String)
+
+  case class OnceValidated(value: String)
+
+  case class TwiceValidated(value: String)
+
+  "thenValidate" should "pass if both validations pass" in {
+    def validationFunc1(data: Unvalidated) = Passed(OnceValidated(data.value))
+    def validationFunc2(data: OnceValidated) = Passed(TwiceValidated(data.value))
+    def validateTwice = validationFunc1 _ thenValidate validationFunc2 _
+
+    validateTwice(Unvalidated("something")) shouldBe Passed(TwiceValidated("something"))
+  }
+
+  it should "fail if first validation fails" in {
+    def validationFunc1(data: Unvalidated) = Failed("first validation error")
+    def validationFunc2(data: OnceValidated) = Passed(TwiceValidated(data.value))
+    def validateTwice = validationFunc1 _ thenValidate validationFunc2 _
+
+    validateTwice(Unvalidated("something")) shouldBe Failed("first validation error")
+  }
+
+  it should "fail if second validation fails" in {
+    def validationFunc1(data: Unvalidated) = Passed(OnceValidated(data.value))
+    def validationFunc2(data: OnceValidated) = Failed("second validation error")
+    def validateTwice = validationFunc1 _ thenValidate validationFunc2 _
+
+    validateTwice(Unvalidated("something")) shouldBe Failed("second validation error")
+  }
+  it should "return first validation error if both fail" in {
+    def validationFunc1(data: Unvalidated) = Failed("first validation error")
+    def validationFunc2(data: OnceValidated) = Failed("second validation error")
+    def validateTwice = validationFunc1 _ thenValidate validationFunc2 _
+
+    validateTwice(Unvalidated("something")) shouldBe Failed("first validation error")
+  }
 }

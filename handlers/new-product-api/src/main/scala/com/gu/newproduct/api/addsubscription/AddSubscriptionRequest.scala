@@ -6,7 +6,7 @@ import com.gu.newproduct.api.productcatalog.PlanId
 import play.api.libs.json.{JsError, JsSuccess, Json, Reads}
 import scalaz._
 import Scalaz._
-import scala.util.{Failure, Success, Try}
+import scala.util.{Try}
 
 case class ZuoraAccountId(value: String) extends AnyVal
 
@@ -15,7 +15,7 @@ case class AddSubscriptionRequest(
   startDate: LocalDate,
   acquisitionSource: AcquisitionSource,
   createdByCSR: CreatedByCSR,
-  amountMinorUnits: AmountMinorUnits,
+  amountMinorUnits: Option[AmountMinorUnits],
   acquisitionCase: CaseId,
   planId: PlanId
 )
@@ -31,7 +31,7 @@ object AddSubscriptionRequest {
     startDate: String,
     acquisitionSource: String,
     createdByCSR: String,
-    amountMinorUnits: Int,
+    amountMinorUnits: Option[Int],
     acquisitionCase: String,
     planId: String
   ) {
@@ -44,7 +44,7 @@ object AddSubscriptionRequest {
         startDate = parsedDate,
         acquisitionSource = AcquisitionSource(this.acquisitionSource),
         createdByCSR = CreatedByCSR(this.createdByCSR),
-        amountMinorUnits = AmountMinorUnits(amountMinorUnits),
+        amountMinorUnits = amountMinorUnits.map(AmountMinorUnits),
         CaseId(acquisitionCase),
         parsedPlanId
       )
