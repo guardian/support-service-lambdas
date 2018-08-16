@@ -9,7 +9,7 @@ import com.gu.effects.sqs.AwsSQSSend.QueueName
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.i18n.Currency
 import com.gu.newproduct.api.addsubscription.TypeConvert._
-import com.gu.newproduct.api.addsubscription.ZuoraIds.ProductRatePlanId
+import com.gu.newproduct.api.addsubscription.ZuoraIds.{PlanAndCharge, ProductRatePlanId}
 import com.gu.newproduct.api.addsubscription.email.SendConfirmationEmail.ContributionsEmailData
 import com.gu.newproduct.api.addsubscription.email.{ContributionFields, EtSqsSend, SendConfirmationEmail}
 import com.gu.newproduct.api.addsubscription.validation.Validation._
@@ -51,7 +51,8 @@ object Handler extends Logging {
 }
 
 object Steps {
-  def createZuoraSubRequest(request: AddSubscriptionRequest, acceptanceDate: LocalDate) = ZuoraCreateSubRequest(
+  def createZuoraSubRequest(request: AddSubscriptionRequest, acceptanceDate: LocalDate, planAndChargeToAdd: PlanAndCharge) = ZuoraCreateSubRequest(
+    planAndChargeToAdd,
     request.zuoraAccountId,
     request.amountMinorUnits,
     request.startDate,
@@ -97,6 +98,7 @@ object Steps {
   } yield ApiGatewayResponse(body = AddedSubscription(subscriptionName.value), statusCode = "200")).apiResponse
 
   def addContributionSteps(
+    contributionZuoraIds: PlanAndCharge,
     getCustomerData: ZuoraAccountId => ApiGatewayOp[ContributionCustomerData],
     contributionValidations: (ValidatableFields, Currency) => ValidationResult[AmountMinorUnits],
     createMonthlyContribution: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName],
@@ -108,7 +110,7 @@ object Steps {
       validatableFields = ValidatableFields(request.amountMinorUnits, request.startDate)
       amountMinorUnits <- contributionValidations(validatableFields, account.currency).toApiGatewayOp.toAsync
       acceptanceDate = request.startDate.plusDays(paymentDelayFor(paymentMethod))
-      zuoraCreateSubRequest = createZuoraSubRequest(request, acceptanceDate)
+      zuoraCreateSubRequest = createZuoraSubRequest(request, acceptanceDate, contributionZuoraIds)
       subscriptionName <- createMonthlyContribution(zuoraCreateSubRequest).toAsyncApiGatewayOp("create monthly contribution")
       contributionEmailData = toContributionEmailData(request, account.currency, paymentMethod, acceptanceDate, contacts.billTo, amountMinorUnits)
       _ <- sendConfirmationEmail(contributionEmailData)
@@ -143,13 +145,14 @@ object Steps {
         }
       )
 
-      createMonthlyContribution = CreateSubscription(zuoraIds.monthly, zuoraClient.post[WireCreateRequest, WireSubscription]) _
+      createMonthlyContribution = CreateSubscription(zuoraClient.post[WireCreateRequest, WireSubscription]) _
       contributionIds = List(zuoraIds.monthly.productRatePlanId, zuoraIds.annual.productRatePlanId)
       getCustomerData = getValidatedContributionCustomerData(zuoraClient, contributionIds)
       isValidContributionStartDate = isValidStartDateForPlan(MonthlyContribution, _: LocalDate)
       validateRequest = ContributionValidations(isValidContributionStartDate, AmountLimits.limitsFor) _
+
       sendConfirmationEmail = SendConfirmationEmail(contributionsSqsSend, getCurrentDate) _
-      contributionSteps = addContributionSteps(getCustomerData, validateRequest, createMonthlyContribution, sendConfirmationEmail) _
+      contributionSteps = addContributionSteps(zuoraIds.monthly, getCustomerData, validateRequest, createMonthlyContribution, sendConfirmationEmail) _
 
       getVoucherData = getValidatedVoucherCustomerData(zuoraClient, contributionIds)
       voucherSteps = addVoucherSteps(getVoucherData, isValidStartDateForPlan) _

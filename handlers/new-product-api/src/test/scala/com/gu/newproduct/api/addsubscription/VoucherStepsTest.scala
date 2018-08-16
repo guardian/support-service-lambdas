@@ -4,7 +4,6 @@ import java.time.LocalDate
 
 import com.gu.newproduct.TestData
 import com.gu.newproduct.api.addsubscription.validation._
-import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.ZuoraCreateSubRequest
 import com.gu.newproduct.api.productcatalog.PlanId
 import com.gu.test.JsonMatchers.JsonMatcher
 import com.gu.util.apigateway.ApiGatewayRequest

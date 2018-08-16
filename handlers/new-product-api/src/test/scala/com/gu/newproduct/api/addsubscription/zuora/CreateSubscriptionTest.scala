@@ -42,6 +42,7 @@ class CreateSubscriptionTest extends FlatSpec with Matchers {
       case in => GenericError(s"bad request: $in")
     }
     val createReq = ZuoraCreateSubRequest(
+      planAndCharge = ids,
       accountId = ZuoraAccountId("zac"),
       maybeAmountMinorUnits = Some(AmountMinorUnits(125)),
       effectiveDate = LocalDate.of(2018, 7, 17),
@@ -50,7 +51,7 @@ class CreateSubscriptionTest extends FlatSpec with Matchers {
       acquisitionSource = AcquisitionSource("sourcesource"),
       createdByCSR = CreatedByCSR("csrcsr")
     )
-    val actual = CreateSubscription(ids, accF)(createReq)
+    val actual = CreateSubscription(accF)(createReq)
     actual shouldBe ClientSuccess(SubscriptionName("a-s123"))
   }
 }

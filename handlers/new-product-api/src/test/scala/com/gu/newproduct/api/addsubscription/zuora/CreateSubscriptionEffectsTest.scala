@@ -20,6 +20,7 @@ class CreateSubscriptionEffectsTest extends FlatSpec with Matchers {
   it should "create subscription in account" taggedAs EffectsTest in {
     val validCaseIdToAvoidCausingSFErrors = CaseId("5006E000005b5cf")
     val request = CreateSubscription.ZuoraCreateSubRequest(
+      monthlyIds,
       ZuoraAccountId("2c92c0f864a214c30164a8b5accb650b"),
       Some(AmountMinorUnits(100)),
       LocalDate.now,
@@ -32,7 +33,7 @@ class CreateSubscriptionEffectsTest extends FlatSpec with Matchers {
       zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig]
       zuoraDeps = ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig)
       post: RequestsPost[WireCreateRequest, WireSubscription] = zuoraDeps.post[WireCreateRequest, WireSubscription]
-      res <- CreateSubscription(monthlyIds, post)(request).toDisjunction
+      res <- CreateSubscription(post)(request).toDisjunction
     } yield res
     withClue(actual) {
       actual.map(_.value.substring(0, 3)) shouldBe \/-("A-S")
