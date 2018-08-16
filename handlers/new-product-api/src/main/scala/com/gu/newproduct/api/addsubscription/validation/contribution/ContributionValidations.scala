@@ -9,7 +9,7 @@ object ContributionValidations {
 
   case class ValidatableFields(
     amountMinorUnits: Option[AmountMinorUnits],
-    startDate: LocalDate,
+    startDate: LocalDate
   )
 
   def apply(

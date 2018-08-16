@@ -21,7 +21,7 @@ class CreateSubscriptionEffectsTest extends FlatSpec with Matchers {
     val validCaseIdToAvoidCausingSFErrors = CaseId("5006E000005b5cf")
     val request = CreateSubscription.ZuoraCreateSubRequest(
       ZuoraAccountId("2c92c0f864a214c30164a8b5accb650b"),
-      AmountMinorUnits(100),
+      Some(AmountMinorUnits(100)),
       LocalDate.now,
       LocalDate.now.plusDays(2),
       validCaseIdToAvoidCausingSFErrors,

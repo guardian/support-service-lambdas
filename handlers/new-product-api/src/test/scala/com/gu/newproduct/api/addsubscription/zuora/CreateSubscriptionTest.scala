@@ -43,7 +43,7 @@ class CreateSubscriptionTest extends FlatSpec with Matchers {
     }
     val createReq = ZuoraCreateSubRequest(
       accountId = ZuoraAccountId("zac"),
-      amountMinorUnits = AmountMinorUnits(125),
+      maybeAmountMinorUnits = Some(AmountMinorUnits(125)),
       effectiveDate = LocalDate.of(2018, 7, 17),
       acceptanceDate = LocalDate.of(2018, 7, 27),
       acquisitionCase = CaseId("casecase"),

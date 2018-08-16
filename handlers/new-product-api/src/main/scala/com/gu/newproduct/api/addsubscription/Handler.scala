@@ -51,9 +51,9 @@ object Handler extends Logging {
 }
 
 object Steps {
-  def createZuoraSubRequest(request: AddSubscriptionRequest, acceptanceDate: LocalDate, amountMinorUnits: AmountMinorUnits) = ZuoraCreateSubRequest(
+  def createZuoraSubRequest(request: AddSubscriptionRequest, acceptanceDate: LocalDate) = ZuoraCreateSubRequest(
     request.zuoraAccountId,
-    amountMinorUnits,
+    request.amountMinorUnits,
     request.startDate,
     acceptanceDate,
     request.acquisitionCase,
@@ -108,7 +108,7 @@ object Steps {
       validatableFields = ValidatableFields(request.amountMinorUnits, request.startDate)
       amountMinorUnits <- contributionValidations(validatableFields, account.currency).toApiGatewayOp.toAsync
       acceptanceDate = request.startDate.plusDays(paymentDelayFor(paymentMethod))
-      zuoraCreateSubRequest = createZuoraSubRequest(request, acceptanceDate, amountMinorUnits)
+      zuoraCreateSubRequest = createZuoraSubRequest(request, acceptanceDate)
       subscriptionName <- createMonthlyContribution(zuoraCreateSubRequest).toAsyncApiGatewayOp("create monthly contribution")
       contributionEmailData = toContributionEmailData(request, account.currency, paymentMethod, acceptanceDate, contacts.billTo, amountMinorUnits)
       _ <- sendConfirmationEmail(contributionEmailData)

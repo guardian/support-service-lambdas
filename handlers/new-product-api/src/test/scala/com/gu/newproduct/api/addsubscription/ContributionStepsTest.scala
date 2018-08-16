@@ -30,7 +30,7 @@ class ContributionStepsTest extends FlatSpec with Matchers {
 
     val expectedIn = ZuoraCreateSubRequest(
       ZuoraAccountId("acccc"),
-      AmountMinorUnits(123),
+      Some(AmountMinorUnits(123)),
       LocalDate.of(2018, 7, 18),
       LocalDate.of(2018, 7, 28),
       CaseId("case"),

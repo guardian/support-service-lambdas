@@ -15,18 +15,23 @@ object CreateSubscription {
   object WireModel {
 
     case class WireSubscription(subscriptionNumber: String)
+
     implicit val readsResponse: Reads[WireSubscription] = Json.reads[WireSubscription]
 
     case class ChargeOverrides(
       price: Double,
       productRatePlanChargeId: String
     )
+
     implicit val writesCharge = Json.writes[ChargeOverrides]
+
     case class SubscribeToRatePlans(
       productRatePlanId: String,
       chargeOverrides: List[ChargeOverrides]
     )
+
     implicit val writesSubscribe = Json.writes[SubscribeToRatePlans]
+
     case class WireCreateRequest(
       accountKey: String,
       autoRenew: Boolean = true,
@@ -40,6 +45,7 @@ object CreateSubscription {
       AcquisitionSource__c: String,
       CreatedByCSR__c: String
     )
+
     implicit val writesRequest = Json.writes[WireCreateRequest]
   }
 
@@ -57,12 +63,11 @@ object CreateSubscription {
       subscribeToRatePlans = List(
         SubscribeToRatePlans(
           productRatePlanId = planAndCharge.productRatePlanId.value,
-          chargeOverrides = List(
+          chargeOverrides = maybeAmountMinorUnits.map(amountMinorUnits =>
             ChargeOverrides(
               price = amountMinorUnits.value.toDouble / 100,
               productRatePlanChargeId = planAndCharge.productRatePlanChargeId.value
-            )
-          )
+            )).toList
         )
       )
     )
@@ -70,7 +75,7 @@ object CreateSubscription {
 
   case class ZuoraCreateSubRequest(
     accountId: ZuoraAccountId,
-    amountMinorUnits: AmountMinorUnits,
+    maybeAmountMinorUnits: Option[AmountMinorUnits],
     effectiveDate: LocalDate,
     acceptanceDate: LocalDate,
     acquisitionCase: CaseId,

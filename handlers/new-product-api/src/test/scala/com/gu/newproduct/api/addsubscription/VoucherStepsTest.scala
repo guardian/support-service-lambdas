@@ -22,16 +22,6 @@ class VoucherStepsTest extends FlatSpec with Matchers {
 
   it should "run end to end with fakes" in {
 
-    val expectedIn = ZuoraCreateSubRequest(
-      ZuoraAccountId("acccc"),
-      AmountMinorUnits(123),
-      LocalDate.of(2018, 7, 18),
-      LocalDate.of(2018, 7, 28),
-      CaseId("case"),
-      AcquisitionSource("CSR"),
-      CreatedByCSR("bob")
-    )
-
     def fakeGetVoucherCustomerData(zuoraAccountId: ZuoraAccountId) = ContinueProcessing(TestData.voucherCustomerData)
 
     val requestInput = JsObject(Map(
