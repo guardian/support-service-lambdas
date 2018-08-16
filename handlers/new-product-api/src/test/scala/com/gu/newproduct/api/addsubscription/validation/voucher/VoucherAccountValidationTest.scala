@@ -17,7 +17,7 @@ class VoucherAccountValidationTest extends FlatSpec with Matchers {
     VoucherAccountValidation(account) shouldBe Passed(account)
   }
 
-  it should "pass if currency in account is not GBP " in {
+  it should "fail if currency in account is not GBP " in {
     val dollarAccount = account.copy(currency = USD)
     VoucherAccountValidation(dollarAccount) shouldBe Failed("Invalid currency in Zuora account: USD. Only GBP is allowed for voucher plans")
   }
