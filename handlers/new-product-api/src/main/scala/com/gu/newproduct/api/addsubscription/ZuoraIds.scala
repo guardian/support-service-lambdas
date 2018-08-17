@@ -115,9 +115,9 @@ object ZuoraIds {
           sixDay = ProductRatePlanId("2c92c0f8555ce5cf01556e7f01771b8a"),
           everydayPlus = ProductRatePlanId("2c92c0f95aff3b53015b10469bbf5f5f"),
           sundayPlus = ProductRatePlanId("2c92c0f955a0b5bf0155b62623846fc8"),
-          saturdayPlus = ProductRatePlanId("2c92c0f961f9cf300161fc44f2661258"), //for some reason this is effective in the future in the dev catalog
+          saturdayPlus = ProductRatePlanId("2c92c0f961f9cf300161fc44f2661258"),
           weekendPlus = ProductRatePlanId("2c92c0f95aff3b54015b1047efaa2ac3"),
-          sixDayPlus = ProductRatePlanId("2c92c0f855c3b8190155c585a95e6f5a") //TODO for some reason at least in dev this sets all the charges for the days to quantity = 0 !
+          sixDayPlus = ProductRatePlanId("2c92c0f855c3b8190155c585a95e6f5a")
 
         )
       )
