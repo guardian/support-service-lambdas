@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 import com.gu.i18n.Currency
-import com.gu.newproduct.api.addsubscription.email.ETPayload
+import com.gu.newproduct.api.addsubscription.email.{DataExtensionName, ETPayload}
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.BilltoContact
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{DirectDebit, PaymentMethod}
 import com.gu.newproduct.api.addsubscription.{AmountMinorUnits, ZuoraAccountId}
@@ -42,7 +42,7 @@ object SendConfirmationEmailContributions extends Logging {
 
   def toPayload(maybeContributionFields: Option[ContributionFields]): AsyncApiGatewayOp[ETPayload[ContributionFields]] =
     maybeContributionFields.map { fields =>
-      val payload = ETPayload(fields.EmailAddress, fields)
+      val payload = ETPayload(fields.EmailAddress, fields, DataExtensionName("regular-contribution-thank-you"))
       ContinueProcessing(payload).toAsync
     }.getOrElse {
       logger.info("Not enough data in zuora account to send contribution thank you email, skipping")

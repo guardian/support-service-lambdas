@@ -20,12 +20,11 @@ object ETPayload {
 
   implicit def writes[A: Writes] = Json.writes[ETPayload[A]]
 
-  def apply[A](email: String, fields: A)(implicit name: DataExtensionName[A]): ETPayload[A] =
+  def apply[A](email: String, fields: A, name: DataExtensionName): ETPayload[A] =
     ETPayload(
       To = CTo(email, email, CContactAttributes(fields)),
       DataExtensionName = name.value
     )
 }
 
-// did not know you could have an abstract case class!
-class DataExtensionName[T](val value: String)
+case class DataExtensionName(value: String)

@@ -1,6 +1,5 @@
 package com.gu.newproduct.api.addsubscription.email.contributions
 
-import com.gu.newproduct.api.addsubscription.email.DataExtensionName
 import play.api.libs.json.Json
 
 case class ContributionFields(
@@ -21,6 +20,4 @@ case class ContributionFields(
 
 object ContributionFields {
   implicit val writes = Json.writes[ContributionFields]
-
-  implicit val dexName = new DataExtensionName[ContributionFields]("regular-contribution-thank-you")
 }
