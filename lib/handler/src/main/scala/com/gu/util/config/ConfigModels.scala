@@ -83,6 +83,16 @@ case class ZuoraEnvironment(value: String) extends Logging {
       Stage("DEV")
   }
 }
+object ZuoraEnvironment extends Logging {
+  def EnvForStage(stage: Stage): ZuoraEnvironment = stage match {
+    case Stage("PROD") => ZuoraEnvironment("PROD")
+    case Stage("CODE") => ZuoraEnvironment("UAT")
+    case Stage("DEV") => ZuoraEnvironment("DEV")
+    case unknown =>
+      logger.error(s"Unknown Stage specified: '$unknown', falling back to Zuora DEV env")
+      ZuoraEnvironment("DEV")
+  }
+}
 
 object ConfigReads {
 

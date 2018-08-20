@@ -4,7 +4,7 @@ import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, PlanWithPrice, Pr
 import com.gu.newproduct.api.productcatalog.PlanId._
 import com.gu.newproduct.api.productcatalog.ZuoraIds.ProductRatePlanId
 import com.gu.util.config.LoadConfigModule.{S3Location, StringFromS3}
-import com.gu.util.config.Stage
+import com.gu.util.config.{Stage, ZuoraEnvironment}
 import com.gu.util.resthttp.Types.ClientSuccess
 
 import scala.io.Source
@@ -38,7 +38,7 @@ class PricesFromZuoraCatalogTest extends FlatSpec with Matchers {
     )
 
     val actual = PricesFromZuoraCatalog(
-      Stage("DEV"),
+      ZuoraEnvironment("DEV"),
       fakeGetStringFromS3,
       rateplanToPlanId.get
     )

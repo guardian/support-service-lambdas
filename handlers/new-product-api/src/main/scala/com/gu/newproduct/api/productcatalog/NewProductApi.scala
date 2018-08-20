@@ -5,13 +5,13 @@ import java.time.DayOfWeek.{MONDAY, SATURDAY, SUNDAY}
 
 import com.gu.newproduct.api.addsubscription.Formatters._
 import com.gu.newproduct.api.productcatalog.PlanId._
-import com.gu.util.config.Stage
+import com.gu.util.config.{Stage, ZuoraEnvironment}
 import com.gu.util.resthttp.Types.ClientFailableOp
 
 object NewProductApi {
   def catalog1(
-    plansWithPrice: Stage => ClientFailableOp[List[PlanWithPrice]],
-    stage: Stage
+    plansWithPrice: ZuoraEnvironment => ClientFailableOp[List[PlanWithPrice]],
+    zuoraEnvironment: ZuoraEnvironment
   ): ClientFailableOp[Catalog] = {
 
     val voucherWindowRule = WindowRule(
@@ -33,7 +33,7 @@ object NewProductApi {
     )
     val monthlyContributionRules = StartDateRules(windowRule = Some(monthlyContributionWindow))
 
-    plansWithPrice(stage).map { prices =>
+    plansWithPrice(zuoraEnvironment).map { prices =>
       val planIdToPrice: Map[PlanId, Option[AmountMinorUnits]] = prices.map(p => p.planId -> p.maybepriceMinorUnits).toMap
 
       def getPaymentPlanFor(planId: PlanId): Option[PaymentPlan] = {

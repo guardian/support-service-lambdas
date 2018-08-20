@@ -2,7 +2,7 @@ package com.gu.newproduct.api.productcatalog
 import com.gu.newproduct.api.productcatalog.ZuoraIds.ProductRatePlanId
 import com.gu.util.Logging
 import com.gu.util.config.LoadConfigModule.{S3Location, StringFromS3}
-import com.gu.util.config.Stage
+import com.gu.util.config.{Stage, ZuoraEnvironment}
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError}
 import play.api.libs.json.Json
 
@@ -95,11 +95,11 @@ object PricesFromZuoraCatalog extends Logging {
   import ZuoraCatalogWireModel._
 
   def apply(
-    stage: Stage,
+    zuoraEnvironment: ZuoraEnvironment,
     fetchString: StringFromS3,
     planIdFor: ProductRatePlanId => Option[PlanId]
   ): ClientFailableOp[List[PlanWithPrice]] = (for {
-    catalogString <- fetchString(S3Location(bucket = "gu-zuora-catalog", key = s"PROD/Zuora-${stage.value}/catalog.json"))
+    catalogString <- fetchString(S3Location(bucket = "gu-zuora-catalog", key = s"PROD/Zuora-${zuoraEnvironment.value}/catalog.json"))
     jsonCatalog <- Try(Json.parse(catalogString))
     wireCatalog <- Try(jsonCatalog.as[ZuoraCatalog])
     parsed = wireCatalog.toParsedPlans(planIdFor)
