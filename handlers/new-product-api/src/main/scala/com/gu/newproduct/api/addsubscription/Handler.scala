@@ -9,17 +9,17 @@ import com.gu.effects.sqs.AwsSQSSend.QueueName
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.i18n.Currency
 import com.gu.newproduct.api.addsubscription.TypeConvert._
-import com.gu.newproduct.api.addsubscription.ZuoraIds.ProductRatePlanId
+import com.gu.newproduct.api.addsubscription.ZuoraIds.{PlanAndCharge, ProductRatePlanId}
+import com.gu.newproduct.api.addsubscription.email.EtSqsSend
 import com.gu.newproduct.api.addsubscription.email.contributions.SendConfirmationEmailContributions.ContributionsEmailData
 import com.gu.newproduct.api.addsubscription.email.contributions.{ContributionFields, SendConfirmationEmailContributions}
-import com.gu.newproduct.api.addsubscription.email.EtSqsSend
 import com.gu.newproduct.api.addsubscription.validation.Validation._
 import com.gu.newproduct.api.addsubscription.validation.contribution.ContributionValidations.ValidatableFields
 import com.gu.newproduct.api.addsubscription.validation.contribution.{ContributionAccountValidation, ContributionCustomerData, ContributionValidations, GetContributionCustomerData}
 import com.gu.newproduct.api.addsubscription.validation.voucher.{GetVoucherCustomerData, ValidateContactsForVoucher, VoucherAccountValidation, VoucherCustomerData}
 import com.gu.newproduct.api.addsubscription.validation.{ValidationResult, _}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.WireModel.{WireCreateRequest, WireSubscription}
-import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{SubscriptionName, ZuoraCreateSubRequest}
+import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{ChargeOverride, SubscriptionName, ZuoraCreateSubRequest}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAccount
 import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.WireModel.ZuoraSubscriptionsResponse
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.BilltoContact
@@ -30,6 +30,7 @@ import com.gu.newproduct.api.productcatalog.PlanId.MonthlyContribution
 import com.gu.newproduct.api.productcatalog.{DateRule, NewProductApi, PlanId}
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
+import com.gu.util.apigateway.ApiGatewayResponse.internalServerError
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.config.LoadConfigModule.StringFromS3
@@ -52,9 +53,15 @@ object Handler extends Logging {
 }
 
 object Steps {
-  def createZuoraSubRequest(request: AddSubscriptionRequest, acceptanceDate: LocalDate, amountMinorUnits: AmountMinorUnits) = ZuoraCreateSubRequest(
+  def createZuoraSubRequest(
+    request: AddSubscriptionRequest,
+    acceptanceDate: LocalDate,
+    chargeOverride: Option[ChargeOverride],
+    productRatePlanId: ProductRatePlanId
+  ) = ZuoraCreateSubRequest(
+    productRatePlanId,
     request.zuoraAccountId,
-    amountMinorUnits,
+    chargeOverride,
     request.startDate,
     acceptanceDate,
     request.acquisitionCase,
@@ -98,9 +105,10 @@ object Steps {
   } yield ApiGatewayResponse(body = AddedSubscription(subscriptionName.value), statusCode = "200")).apiResponse
 
   def addContributionSteps(
+    contributionZuoraIds: PlanAndCharge,
     getCustomerData: ZuoraAccountId => ApiGatewayOp[ContributionCustomerData],
     contributionValidations: (ValidatableFields, Currency) => ValidationResult[AmountMinorUnits],
-    createMonthlyContribution: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName],
+    createSubscription: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName],
     sendConfirmationEmail: ContributionsEmailData => AsyncApiGatewayOp[Unit]
   )(request: AddSubscriptionRequest): AsyncApiGatewayOp[SubscriptionName] = {
     for {
@@ -109,21 +117,26 @@ object Steps {
       validatableFields = ValidatableFields(request.amountMinorUnits, request.startDate)
       amountMinorUnits <- contributionValidations(validatableFields, account.currency).toApiGatewayOp.toAsync
       acceptanceDate = request.startDate.plusDays(paymentDelayFor(paymentMethod))
-      zuoraCreateSubRequest = createZuoraSubRequest(request, acceptanceDate, amountMinorUnits)
-      subscriptionName <- createMonthlyContribution(zuoraCreateSubRequest).toAsyncApiGatewayOp("create monthly contribution")
+      chargeOverride = ChargeOverride(amountMinorUnits, contributionZuoraIds.productRatePlanChargeId)
+      zuoraCreateSubRequest = createZuoraSubRequest(request, acceptanceDate, Some(chargeOverride), contributionZuoraIds.productRatePlanId)
+      subscriptionName <- createSubscription(zuoraCreateSubRequest).toAsyncApiGatewayOp("create monthly contribution")
       contributionEmailData = toContributionEmailData(request, account.currency, paymentMethod, acceptanceDate, contacts.billTo, amountMinorUnits)
       _ <- sendConfirmationEmail(contributionEmailData)
     } yield subscriptionName
   }
 
   def addVoucherSteps(
+    getZuoraRateplanId: PlanId => Option[ProductRatePlanId],
     getCustomerData: ZuoraAccountId => ApiGatewayOp[VoucherCustomerData],
-    validateStartDate: (PlanId, LocalDate) => ValidationResult[Unit]
+    validateStartDate: (PlanId, LocalDate) => ValidationResult[Unit],
+    createSubscription: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName]
   )(request: AddSubscriptionRequest): AsyncApiGatewayOp[SubscriptionName] = for {
     _ <- validateStartDate(request.planId, request.startDate).toApiGatewayOp.toAsync
     customerData <- getCustomerData(request.zuoraAccountId).toAsync
-
-  } yield SubscriptionName("fakeSubId")
+    zuoraRatePlanId <- getZuoraRateplanId(request.planId).toApiGatewayContinueProcessing(internalServerError(s"no Zuora id for ${request.planId}!")).toAsync
+    createSubRequest = createZuoraSubRequest(request, request.startDate, None, zuoraRatePlanId)
+    subscriptionName <- createSubscription(createSubRequest).toAsyncApiGatewayOp("create voucher subscription")
+  } yield subscriptionName
 
   def operationForEffects(
     response: Request => Response,
@@ -149,16 +162,18 @@ object Steps {
         }
       )
 
-      createMonthlyContribution = CreateSubscription(zuoraIds.monthly, zuoraClient.post[WireCreateRequest, WireSubscription]) _
-      contributionIds = List(zuoraIds.monthly.productRatePlanId, zuoraIds.annual.productRatePlanId)
+      createSubscription = CreateSubscription(zuoraClient.post[WireCreateRequest, WireSubscription]) _
+      contributionIds = List(zuoraIds.contributionsZuoraIds.monthly.productRatePlanId, zuoraIds.contributionsZuoraIds.annual.productRatePlanId)
       getCustomerData = getValidatedContributionCustomerData(zuoraClient, contributionIds)
       isValidContributionStartDate = isValidStartDateForPlan(MonthlyContribution, _: LocalDate)
       validateRequest = ContributionValidations(isValidContributionStartDate, AmountLimits.limitsFor) _
-      sendConfirmationEmail = SendConfirmationEmailContributions(contributionsSqsSend, getCurrentDate) _
-      contributionSteps = addContributionSteps(getCustomerData, validateRequest, createMonthlyContribution, sendConfirmationEmail) _
 
-      getVoucherData = getValidatedVoucherCustomerData(zuoraClient, contributionIds)
-      voucherSteps = addVoucherSteps(getVoucherData, isValidStartDateForPlan) _
+      sendConfirmationEmail = SendConfirmationEmailContributions(contributionsSqsSend, getCurrentDate) _
+      contributionSteps = addContributionSteps(zuoraIds.contributionsZuoraIds.monthly, getCustomerData, validateRequest, createSubscription, sendConfirmationEmail) _
+
+      getZuoraIdForVoucherPlan = zuoraIds.voucherZuoraIds.byApiPlanId.get _
+      getVoucherData = getValidatedVoucherCustomerData(zuoraClient)
+      voucherSteps = addVoucherSteps(getZuoraIdForVoucherPlan, getVoucherData, isValidStartDateForPlan, createSubscription) _
 
       addSubSteps = handleRequest(
         addContribution = contributionSteps,
@@ -196,10 +211,7 @@ object Steps {
     )
   }
 
-  def getValidatedVoucherCustomerData(
-    zuoraClient: Requests,
-    contributionPlanIds: List[ProductRatePlanId]
-  ): ZuoraAccountId => ApiGatewayOp[VoucherCustomerData] = {
+  def getValidatedVoucherCustomerData(zuoraClient: Requests): ZuoraAccountId => ApiGatewayOp[VoucherCustomerData] = {
 
     val validateAccount = ValidateAccount.apply _ thenValidate VoucherAccountValidation.apply _
     val getValidatedAccount = GetAccount(zuoraClient.get[ZuoraAccount]) _ andValidateWith (

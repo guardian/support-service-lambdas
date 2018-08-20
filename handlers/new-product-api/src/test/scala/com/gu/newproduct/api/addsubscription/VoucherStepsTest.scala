@@ -3,12 +3,16 @@ package com.gu.newproduct.api.addsubscription
 import java.time.LocalDate
 
 import com.gu.newproduct.TestData
+import com.gu.newproduct.api.addsubscription.ZuoraIds.ProductRatePlanId
 import com.gu.newproduct.api.addsubscription.validation._
-import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.ZuoraCreateSubRequest
+import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription
+import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{SubscriptionName, ZuoraCreateSubRequest}
 import com.gu.newproduct.api.productcatalog.PlanId
 import com.gu.test.JsonMatchers.JsonMatcher
 import com.gu.util.apigateway.ApiGatewayRequest
 import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
+import com.gu.util.resthttp.Types
+import com.gu.util.resthttp.Types.ClientSuccess
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json._
 
@@ -21,16 +25,7 @@ class VoucherStepsTest extends FlatSpec with Matchers {
   case class ExpectedOut(subscriptionNumber: String)
 
   it should "run end to end with fakes" in {
-
-    val expectedIn = ZuoraCreateSubRequest(
-      ZuoraAccountId("acccc"),
-      AmountMinorUnits(123),
-      LocalDate.of(2018, 7, 18),
-      LocalDate.of(2018, 7, 28),
-      CaseId("case"),
-      AcquisitionSource("CSR"),
-      CreatedByCSR("bob")
-    )
+    val ratePlanId = ProductRatePlanId("ratePlanId")
 
     def fakeGetVoucherCustomerData(zuoraAccountId: ZuoraAccountId) = ContinueProcessing(TestData.voucherCustomerData)
 
@@ -46,17 +41,37 @@ class VoucherStepsTest extends FlatSpec with Matchers {
     ))
 
     implicit val format: OFormat[ExpectedOut] = Json.format[ExpectedOut]
-    val expectedOutput = ExpectedOut("fakeSubId")
+    val expectedOutput = ExpectedOut("well done")
 
     val dummyContributionSteps = (req: AddSubscriptionRequest) => {
       fail("unexpected execution of contribution steps while processing voucher request!")
     }
 
+    val expectedIn = ZuoraCreateSubRequest(
+      ratePlanId,
+      ZuoraAccountId("acccc"),
+      None,
+      LocalDate.of(2018, 7, 18),
+      LocalDate.of(2018, 7, 18),
+      CaseId("case"),
+      AcquisitionSource("CSR"),
+      CreatedByCSR("bob")
+    )
+
+    def fakeCreate(in: CreateSubscription.ZuoraCreateSubRequest): Types.ClientFailableOp[CreateSubscription.SubscriptionName] = {
+      in shouldBe expectedIn
+      ClientSuccess(SubscriptionName("well done"))
+    }
+
+    val fakeGetZuoraId = (planId: PlanId) => Some(ratePlanId)
+
     def fakeValidateVoucherStartDate(id: PlanId, d: LocalDate) = Passed(())
 
     val fakeAddVoucherSteps = Steps.addVoucherSteps(
+      fakeGetZuoraId,
       fakeGetVoucherCustomerData,
-      fakeValidateVoucherStartDate
+      fakeValidateVoucherStartDate,
+      fakeCreate
     ) _
 
     val futureActual = Steps.handleRequest(

@@ -4,11 +4,12 @@ import java.time.LocalDate
 
 import com.gu.i18n.Currency
 import com.gu.newproduct.TestData
+import com.gu.newproduct.api.addsubscription.ZuoraIds.{PlanAndCharge, ProductRatePlanChargeId, ProductRatePlanId}
 import com.gu.newproduct.api.addsubscription.email.contributions.SendConfirmationEmailContributions.ContributionsEmailData
 import com.gu.newproduct.api.addsubscription.validation.contribution.ContributionValidations.ValidatableFields
 import com.gu.newproduct.api.addsubscription.validation.{Failed, Passed}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription
-import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{SubscriptionName, ZuoraCreateSubRequest}
+import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{ChargeOverride, SubscriptionName, ZuoraCreateSubRequest}
 import com.gu.test.JsonMatchers.JsonMatcher
 import com.gu.util.apigateway.ApiGatewayRequest
 import com.gu.util.reader.AsyncTypes._
@@ -28,9 +29,18 @@ class ContributionStepsTest extends FlatSpec with Matchers {
 
   it should "run end to end with fakes" in {
 
+    val planAndCharge = PlanAndCharge(
+      ProductRatePlanId("ratePlanId"),
+      ProductRatePlanChargeId("ratePlanChargeId")
+    )
+
     val expectedIn = ZuoraCreateSubRequest(
+      planAndCharge.productRatePlanId,
       ZuoraAccountId("acccc"),
-      AmountMinorUnits(123),
+      Some(ChargeOverride(
+        AmountMinorUnits(123),
+        planAndCharge.productRatePlanChargeId
+      )),
       LocalDate.of(2018, 7, 18),
       LocalDate.of(2018, 7, 28),
       CaseId("case"),
@@ -68,6 +78,7 @@ class ContributionStepsTest extends FlatSpec with Matchers {
     val expectedOutput = ExpectedOut("well done")
 
     val fakeAddContributionSteps = Steps.addContributionSteps(
+      planAndCharge,
       fakeGetCustomerData,
       fakeValidateRequest,
       fakeCreate,

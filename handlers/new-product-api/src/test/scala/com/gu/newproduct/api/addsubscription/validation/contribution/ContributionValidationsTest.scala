@@ -44,7 +44,7 @@ class ContributionValidationsTest extends FlatSpec with Matchers {
   }
 
   it should "return error if amount is missing" in {
-    wiredValidator(testRequest.copy(amountMinorUnits = None), GBP) shouldBe Failed("amount is missing")
+    wiredValidator(testRequest.copy(amountMinorUnits = None), GBP) shouldBe Failed("amountMinorUnits is missing")
   }
 
 }

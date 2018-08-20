@@ -20,7 +20,7 @@ object ContributionValidations {
     currency: Currency
   ): ValidationResult[AmountMinorUnits] =
     for {
-      amount <- validatableFields.amountMinorUnits getOrFailWith s"amount is missing"
+      amount <- validatableFields.amountMinorUnits getOrFailWith s"amountMinorUnits is missing"
       _ <- isValidStartDate(validatableFields.startDate)
       limits = limitsFor(currency)
       _ <- (amount.value <= limits.max) orFailWith s"amount must not be more than ${limits.max}"
