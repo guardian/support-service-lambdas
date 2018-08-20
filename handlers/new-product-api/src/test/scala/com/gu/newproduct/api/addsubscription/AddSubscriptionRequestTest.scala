@@ -3,6 +3,7 @@ package com.gu.newproduct.api.addsubscription
 import java.time.LocalDate
 
 import com.gu.newproduct.api.productcatalog.PlanId
+import com.gu.newproduct.api.productcatalog.PlanId.MonthlyContribution
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.{JsError, Json}
 
@@ -16,7 +17,7 @@ class AddSubscriptionRequestTest extends FlatSpec with Matchers {
         |   "createdByCSR":"CSRName",
         |   "amountMinorUnits": 123,
         |   "acquisitionCase": "5006E000005b5cf",
-        |   "planId": "helloPlan"
+        |   "planId": "monthly_contribution"
         |}
       """.stripMargin
 
@@ -27,9 +28,9 @@ class AddSubscriptionRequestTest extends FlatSpec with Matchers {
       startDate = LocalDate.of(2018, 7, 11),
       acquisitionSource = AcquisitionSource("CSR"),
       createdByCSR = CreatedByCSR("CSRName"),
-      amountMinorUnits = AmountMinorUnits(123),
+      amountMinorUnits = Some(AmountMinorUnits(123)),
       acquisitionCase = CaseId("5006E000005b5cf"),
-      planId = PlanId("helloPlan")
+      planId = MonthlyContribution
     )
   }
 
@@ -44,12 +45,30 @@ class AddSubscriptionRequestTest extends FlatSpec with Matchers {
         |   "createdByCSR":"CSRName",
         |   "amountMinorUnits": 220,
         |   "acquisitionCase": "5006E000005b5cf",
-        |   "planId": "helloPlan"
+        |   "planId": "monthly_contribution"
         |}
       """.stripMargin
 
     Json.parse(input).validate[AddSubscriptionRequest] shouldBe JsError("invalid date format")
   }
 
+  it should "fail if unsupported plan" in {
+    val input =
+      """{
+        |   "zuoraAccountId":"accountkeyValue",
+        |   "startDate":"2018-07-11",
+        |   "productRatePlanId":"rateplanId",
+        |   "productRatePlanChargeId":"rateplanChargeId",
+        |   "acquisitionSource":"CSR",
+        |   "createdByCSR":"CSRName",
+        |   "amountMinorUnits": 220,
+        |   "acquisitionCase": "5006E000005b5cf",
+        |   "planId": "invalid_plan_id"
+        |}
+      """.stripMargin
+
+    val supportedPlansStr = PlanId.supported.map(_.name).mkString(",")
+    Json.parse(input).validate[AddSubscriptionRequest] shouldBe JsError(s"unsupported plan: allowed values are $supportedPlansStr")
+  }
 }
 

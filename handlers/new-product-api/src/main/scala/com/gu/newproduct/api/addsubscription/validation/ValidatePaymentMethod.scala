@@ -6,14 +6,14 @@ import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.ActivePay
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType.{BankTransfer, CreditCard, CreditCardReferenceTransaction, PayPal}
 
 object ValidatePaymentMethod {
-  def apply(paymentMethod: PaymentMethod): ValidationResult[Unit] = {
+  def apply(paymentMethod: PaymentMethod): ValidationResult[PaymentMethod] = {
     for {
       _ <- (paymentMethod.status == ActivePaymentMethod) orFailWith "Default payment method status in Zuora account is not active"
       _ <- allowedPaymentMethods.contains(paymentMethod.paymentMethodType) orFailWith paymentTypeError
-    } yield ()
+    } yield (paymentMethod)
   }
 
   val allowedPaymentMethods = List(PayPal, CreditCard, CreditCardReferenceTransaction, BankTransfer)
+
   def paymentTypeError = s"Invalid payment method type in Zuora account, must be one of ${allowedPaymentMethods.mkString(",")}"
 }
-
