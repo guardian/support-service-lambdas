@@ -3,16 +3,16 @@ package com.gu.newproduct.api.productcatalog
 import java.time.DayOfWeek
 import java.time.DayOfWeek.{MONDAY, SATURDAY, SUNDAY}
 
+import com.gu.newproduct.api.addsubscription.Formatters._
 import com.gu.newproduct.api.productcatalog.PlanId._
 import com.gu.util.config.Stage
+import com.gu.util.resthttp.Types.ClientFailableOp
 
-import scala.util.Try
-
-object NewProductApiCatalog {
+object NewProductApi {
   def catalog1(
-    pricesFromZuora: Stage => Try[List[PlanWithPrice]],
+    plansWithPrice: Stage => ClientFailableOp[List[PlanWithPrice]],
     stage: Stage
-  ): Try[Catalog] = {
+  ): ClientFailableOp[Catalog] = {
 
     val voucherWindowRule = WindowRule(
       maybeCutOffDay = Some(DayOfWeek.TUESDAY),
@@ -33,15 +33,12 @@ object NewProductApiCatalog {
     )
     val monthlyContributionRules = StartDateRules(windowRule = Some(monthlyContributionWindow))
 
-    pricesFromZuora(stage).map { prices =>
+    plansWithPrice(stage).map { prices =>
       val planIdToPrice: Map[PlanId, Option[AmountMinorUnits]] = prices.map(p => p.planId -> p.maybepriceMinorUnits).toMap
 
       def getPaymentPlanFor(planId: PlanId): Option[PaymentPlan] = {
         val maybePrice: Option[AmountMinorUnits] = planIdToPrice.get(planId).flatten
-        maybePrice.map { price =>
-          val priceInPounds = BigDecimal(price.value * 100).setScale(2) // todo move the formatter we use for the emails into an implicit thingy
-          PaymentPlan(s"GBP $priceInPounds every month")
-        }
+        maybePrice.map(amount => PaymentPlan(s"GBP ${amount.prettyPrint} every month"))
       }
 
       Catalog(

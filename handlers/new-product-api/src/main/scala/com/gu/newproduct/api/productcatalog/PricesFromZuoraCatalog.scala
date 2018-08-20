@@ -1,10 +1,12 @@
 package com.gu.newproduct.api.productcatalog
 import com.gu.newproduct.api.productcatalog.ZuoraIds.ProductRatePlanId
+import com.gu.util.Logging
 import com.gu.util.config.LoadConfigModule.{S3Location, StringFromS3}
 import com.gu.util.config.Stage
+import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError}
 import play.api.libs.json.Json
 
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 /*
 TODO just for now we are just loading the price, we should try to also load plan and charge ids
@@ -88,7 +90,7 @@ object ZuoraCatalogWireModel {
 
 }
 
-object PricesFromZuoraCatalog {
+object PricesFromZuoraCatalog extends Logging {
 
   import ZuoraCatalogWireModel._
 
@@ -96,10 +98,16 @@ object PricesFromZuoraCatalog {
     stage: Stage,
     fetchString: StringFromS3,
     planIdFor: ProductRatePlanId => Option[PlanId]
-  ): Try[List[PlanWithPrice]] = for {
+  ): ClientFailableOp[List[PlanWithPrice]] = (for {
     catalogString <- fetchString(S3Location(bucket = "gu-zuora-catalog", key = s"PROD/Zuora-${stage.value}/catalog.json"))
     jsonCatalog <- Try(Json.parse(catalogString))
     wireCatalog <- Try(jsonCatalog.as[ZuoraCatalog])
     parsed = wireCatalog.toParsedPlans(planIdFor)
-  } yield parsed
+  } yield parsed) match { //TODO SEE IF WE ALREADY HAVE THIS CONVERSION SOMEWHERE AND IF NOT MOVE IT
+    case Success(plansWithPrice) => ClientSuccess(plansWithPrice)
+    case Failure(exception) => {
+      logger.error("could not load prices from zuora", exception)
+      GenericError(exception.getMessage)
+    }
+  }
 }

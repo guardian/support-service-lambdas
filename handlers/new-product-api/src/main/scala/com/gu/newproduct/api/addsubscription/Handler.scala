@@ -26,7 +26,7 @@ import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{DirectDebit
 import com.gu.newproduct.api.addsubscription.zuora.{GetContacts, _}
 import com.gu.newproduct.api.productcatalog.PlanId.MonthlyContribution
 import com.gu.newproduct.api.productcatalog.ZuoraIds.{PlanAndCharge, ProductRatePlanId, zuoraIdsForStage}
-import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, DateRule, NewProductApiCatalog, PlanId}
+import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, DateRule, NewProductApi, PlanId}
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.ApiGatewayResponse.internalServerError
@@ -151,7 +151,7 @@ object Steps {
       validatorFor = DateValidator.validatorFor(getCurrentDate, _: DateRule)
 
       isValidStartDateForPlan = Function.uncurried(
-        NewProductApiCatalog.catalog.planForId andThen { plan =>
+        NewProductApi.catalog.planForId andThen { plan =>
           StartDateValidator.fromRule(validatorFor, plan.startDateRules)
         }
       )

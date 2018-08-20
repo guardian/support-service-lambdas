@@ -181,7 +181,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |  ]
         |}
       """.stripMargin
-    val wireCatalog = WireCatalog.fromCatalog(NewProductApiCatalog.catalog)
+    val wireCatalog = WireCatalog.fromCatalog(NewProductApi.catalog)
     Json.toJson(wireCatalog) shouldBe Json.parse(expected)
   }
 }

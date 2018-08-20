@@ -5,6 +5,7 @@ import com.gu.newproduct.api.productcatalog.PlanId._
 import com.gu.newproduct.api.productcatalog.ZuoraIds.ProductRatePlanId
 import com.gu.util.config.LoadConfigModule.{S3Location, StringFromS3}
 import com.gu.util.config.Stage
+import com.gu.util.resthttp.Types.ClientSuccess
 
 import scala.io.Source
 import org.scalatest.{FlatSpec, Matchers}
@@ -41,7 +42,7 @@ class PricesFromZuoraCatalogTest extends FlatSpec with Matchers {
       fakeGetStringFromS3,
       rateplanToPlanId.get
     )
-    actual shouldBe Success(
+    actual shouldBe ClientSuccess(
       List(
         PlanWithPrice(VoucherSaturdayPlus, Some(AmountMinorUnits(2161))),
         PlanWithPrice(VoucherSundayPlus, Some(AmountMinorUnits(2206))),

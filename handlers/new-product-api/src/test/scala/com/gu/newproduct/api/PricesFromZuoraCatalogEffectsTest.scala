@@ -16,7 +16,7 @@ class PricesFromZuoraCatalogEffectsTest extends FlatSpec with Matchers {
     val actual = for {
       zuoraIds <- ZuoraIds.zuoraIdsForStage(Stage("DEV")).toDisjunction
       zuoraToPlanId = zuoraIds.voucherZuoraIds.zuoraIdToPlanid.get _
-      response <- PricesFromZuoraCatalog(Stage("DEV"), GetFromS3.fetchString, zuoraToPlanId).toEither.disjunction
+      response <- PricesFromZuoraCatalog(Stage("DEV"), GetFromS3.fetchString, zuoraToPlanId).toDisjunction
     } yield response
     actual shouldBe \/-(
       List(
