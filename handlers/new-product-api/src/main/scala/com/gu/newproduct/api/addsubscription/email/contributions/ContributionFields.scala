@@ -1,4 +1,4 @@
-package com.gu.newproduct.api.addsubscription.email
+package com.gu.newproduct.api.addsubscription.email.contributions
 
 import play.api.libs.json.Json
 
@@ -20,5 +20,4 @@ case class ContributionFields(
 
 object ContributionFields {
   implicit val writes = Json.writes[ContributionFields]
-
 }
