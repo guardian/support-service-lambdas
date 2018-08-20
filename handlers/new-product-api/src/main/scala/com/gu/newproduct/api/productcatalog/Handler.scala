@@ -11,7 +11,7 @@ import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
 
 object Handler extends Logging {
 
-  val wireCatalog = WireCatalog.fromCatalog(NewProductApi.catalog)
+  val wireCatalog = WireCatalog.fromCatalog(NewProductApiCatalog.catalog)
 
   // Referenced in Cloudformation
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =

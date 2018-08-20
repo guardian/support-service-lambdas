@@ -4,12 +4,13 @@ import java.time.LocalDate
 
 import com.gu.i18n.Currency
 import com.gu.newproduct.TestData
-import com.gu.newproduct.api.addsubscription.ZuoraIds.{PlanAndCharge, ProductRatePlanChargeId, ProductRatePlanId}
 import com.gu.newproduct.api.addsubscription.email.SendConfirmationEmail.ContributionsEmailData
 import com.gu.newproduct.api.addsubscription.validation._
 import com.gu.newproduct.api.addsubscription.validation.contribution.ContributionValidations.ValidatableFields
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{ChargeOverride, SubscriptionName, ZuoraCreateSubRequest}
+import com.gu.newproduct.api.productcatalog.AmountMinorUnits
+import com.gu.newproduct.api.productcatalog.ZuoraIds.{PlanAndCharge, ProductRatePlanChargeId, ProductRatePlanId}
 import com.gu.test.JsonMatchers.JsonMatcher
 import com.gu.util.apigateway.ApiGatewayRequest
 import com.gu.util.reader.AsyncTypes._

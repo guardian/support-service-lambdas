@@ -2,9 +2,9 @@ package com.gu.newproduct.api.addsubscription.zuora
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-
-import com.gu.newproduct.api.addsubscription.ZuoraIds.{ProductRatePlanChargeId, ProductRatePlanId}
 import com.gu.newproduct.api.addsubscription._
+import com.gu.newproduct.api.productcatalog.AmountMinorUnits
+import com.gu.newproduct.api.productcatalog.ZuoraIds.{ProductRatePlanChargeId, ProductRatePlanId}
 import com.gu.util.resthttp.ClientFailableOpLogging.LogImplicit2
 import com.gu.util.resthttp.RestRequestMaker.{RequestsPost, WithCheck}
 import com.gu.util.resthttp.Types.ClientFailableOp

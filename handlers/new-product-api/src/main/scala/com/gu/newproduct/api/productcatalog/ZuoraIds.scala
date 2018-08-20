@@ -1,11 +1,9 @@
-package com.gu.newproduct.api.addsubscription
+package com.gu.newproduct.api.productcatalog
 
-import com.gu.newproduct.api.productcatalog.PlanId
 import com.gu.newproduct.api.productcatalog.PlanId._
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.config.Stage
-import com.gu.util.reader.Types.{ApiGatewayOp, _}
-
+import com.gu.util.reader.Types.{ApiGatewayOp, OptionOps}
 object ZuoraIds {
 
   case class ProductRatePlanId(value: String) extends AnyVal
@@ -41,13 +39,16 @@ object ZuoraIds {
       VoucherSaturdayPlus -> saturdayPlus
     )
 
+    val zuoraIdToPlanid = byApiPlanId.map(_.swap)
+
   }
 
   case class ZuoraIds(contributionsZuoraIds: ContributionsZuoraIds, voucherZuoraIds: VoucherZuoraIds)
 
   def zuoraIdsForStage(stage: Stage): ApiGatewayOp[ZuoraIds] = {
     val mappings = Map(
-      // todo ideally we should add an id to the fields in zuora so we don't have to hard code
+      // todo ideally we should add an id to the fields in zuea"),
+      //            ProductRatePlanChargeId("2c92a0fc5e1dc084015e37f5ora so we don't have to hard code
       Stage("PROD") -> ZuoraIds(
         ContributionsZuoraIds(
           monthly = PlanAndCharge(

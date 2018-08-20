@@ -1,10 +1,11 @@
 package com.gu.newproduct.api.addsubscription.validation.contribution
 
 import java.time.LocalDate
+
 import com.gu.i18n.Currency
-import com.gu.newproduct.api.addsubscription.AmountMinorUnits
 import com.gu.newproduct.api.addsubscription.validation.{AmountLimits, ValidationResult}
 import com.gu.newproduct.api.addsubscription.validation.Validation._
+import com.gu.newproduct.api.productcatalog.AmountMinorUnits
 object ContributionValidations {
 
   case class ValidatableFields(

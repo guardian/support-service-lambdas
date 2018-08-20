@@ -9,7 +9,6 @@ import com.gu.effects.sqs.AwsSQSSend.QueueName
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.i18n.Currency
 import com.gu.newproduct.api.addsubscription.TypeConvert._
-import com.gu.newproduct.api.addsubscription.ZuoraIds.{PlanAndCharge, ProductRatePlanId}
 import com.gu.newproduct.api.addsubscription.email.SendConfirmationEmail.ContributionsEmailData
 import com.gu.newproduct.api.addsubscription.email.{ContributionFields, EtSqsSend, SendConfirmationEmail}
 import com.gu.newproduct.api.addsubscription.validation.Validation._
@@ -26,12 +25,13 @@ import com.gu.newproduct.api.addsubscription.zuora.GetContacts.WireModel.GetCont
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{DirectDebit, PaymentMethod, PaymentMethodWire}
 import com.gu.newproduct.api.addsubscription.zuora.{GetContacts, _}
 import com.gu.newproduct.api.productcatalog.PlanId.MonthlyContribution
-import com.gu.newproduct.api.productcatalog.{DateRule, NewProductApi, PlanId}
+import com.gu.newproduct.api.productcatalog.ZuoraIds.{PlanAndCharge, ProductRatePlanId, zuoraIdsForStage}
+import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, DateRule, NewProductApiCatalog, PlanId}
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
+import com.gu.util.apigateway.ApiGatewayResponse.internalServerError
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, ApiGatewayResponse}
-import com.gu.util.apigateway.ApiGatewayResponse.internalServerError
 import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.reader.AsyncTypes._
@@ -139,7 +139,7 @@ object Steps {
 
   def operationForEffects(response: Request => Response, stage: Stage, fetchString: StringFromS3): ApiGatewayOp[Operation] =
     for {
-      zuoraIds <- ZuoraIds.zuoraIdsForStage(stage)
+      zuoraIds <- zuoraIdsForStage(stage)
       zuoraConfig <- {
         val loadConfig = LoadConfigModule(stage, fetchString)
         loadConfig[ZuoraRestConfig].toApiGatewayOp("load zuora config")
@@ -151,7 +151,7 @@ object Steps {
       validatorFor = DateValidator.validatorFor(getCurrentDate, _: DateRule)
 
       isValidStartDateForPlan = Function.uncurried(
-        NewProductApi.catalog.planForId andThen { plan =>
+        NewProductApiCatalog.catalog.planForId andThen { plan =>
           StartDateValidator.fromRule(validatorFor, plan.startDateRules)
         }
       )

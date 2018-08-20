@@ -1,7 +1,7 @@
 package com.gu.newproduct.api.addsubscription.zuora
 
 import com.gu.newproduct.api.addsubscription.ZuoraAccountId
-import com.gu.newproduct.api.addsubscription.ZuoraIds.ProductRatePlanId
+import com.gu.newproduct.api.productcatalog.ZuoraIds.ProductRatePlanId
 import com.gu.util.resthttp.RestRequestMaker.{RequestsGet, WithCheck}
 import com.gu.util.resthttp.Types.ClientFailableOp
 import play.api.libs.json.Json

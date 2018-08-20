@@ -1,9 +1,9 @@
 package com.gu.newproduct.api.addsubscription.zuora
 
 import com.gu.newproduct.api.addsubscription.ZuoraAccountId
-import com.gu.newproduct.api.addsubscription.ZuoraIds.ProductRatePlanId
 import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.WireModel.{ZuoraRatePlan, ZuoraSubscription, ZuoraSubscriptionsResponse}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.{Active, NotActive, Subscription}
+import com.gu.newproduct.api.productcatalog.ZuoraIds.ProductRatePlanId
 import com.gu.test.EffectsTest
 import com.gu.util.resthttp.RestRequestMaker.IsCheckNeeded
 import com.gu.util.resthttp.Types.ClientSuccess

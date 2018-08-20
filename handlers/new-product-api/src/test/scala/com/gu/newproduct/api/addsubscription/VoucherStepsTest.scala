@@ -3,11 +3,11 @@ package com.gu.newproduct.api.addsubscription
 import java.time.LocalDate
 
 import com.gu.newproduct.TestData
-import com.gu.newproduct.api.addsubscription.ZuoraIds.ProductRatePlanId
 import com.gu.newproduct.api.addsubscription.validation._
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{SubscriptionName, ZuoraCreateSubRequest}
 import com.gu.newproduct.api.productcatalog.PlanId
+import com.gu.newproduct.api.productcatalog.ZuoraIds.ProductRatePlanId
 import com.gu.test.JsonMatchers.JsonMatcher
 import com.gu.util.apigateway.ApiGatewayRequest
 import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing

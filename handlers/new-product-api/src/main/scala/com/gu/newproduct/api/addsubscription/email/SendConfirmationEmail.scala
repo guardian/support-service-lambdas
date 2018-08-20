@@ -6,7 +6,8 @@ import java.time.format.DateTimeFormatter
 import com.gu.i18n.Currency
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.BilltoContact
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{DirectDebit, PaymentMethod}
-import com.gu.newproduct.api.addsubscription.{AmountMinorUnits, ZuoraAccountId}
+import com.gu.newproduct.api.addsubscription.ZuoraAccountId
+import com.gu.newproduct.api.productcatalog.AmountMinorUnits
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.AsyncTypes._
