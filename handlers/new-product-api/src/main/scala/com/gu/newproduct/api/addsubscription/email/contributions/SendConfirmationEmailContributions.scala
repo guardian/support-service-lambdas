@@ -4,14 +4,13 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 import com.gu.i18n.Currency
+import com.gu.newproduct.api.addsubscription.email.ETPayload
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.BilltoContact
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{DirectDebit, PaymentMethod}
 import com.gu.newproduct.api.addsubscription.{AmountMinorUnits, ZuoraAccountId}
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.AsyncTypes._
-import com.gu.newproduct.api.addsubscription.TypeConvert._
-import com.gu.newproduct.api.addsubscription.email.ETPayload
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 
 import scala.concurrent.Future
@@ -29,7 +28,7 @@ object SendConfirmationEmailContributions extends Logging {
 
   def apply(
     etSqsSend: ETPayload[ContributionFields] => Future[Unit],
-    getCurrentDate: () => LocalDate,
+    getCurrentDate: () => LocalDate
   )(data: ContributionsEmailData) = {
     val maybeContributionFields = toContributionFields(getCurrentDate(), data)
     val response = for {

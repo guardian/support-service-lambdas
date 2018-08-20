@@ -6,7 +6,7 @@ import com.gu.i18n.Country
 import com.gu.i18n.Currency.GBP
 import com.gu.newproduct.api.addsubscription.email.contributions.SendConfirmationEmailContributions.ContributionsEmailData
 import com.gu.newproduct.api.addsubscription.email.{CContactAttributes, CTo, ETPayload}
-import com.gu.newproduct.api.addsubscription.zuora.GetBillToContact._
+import com.gu.newproduct.api.addsubscription.zuora.GetContacts.{BilltoContact, Email, FirstName, LastName}
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{BankAccountName, BankAccountNumberMask, DirectDebit, MandateId, NonDirectDebitMethod, SortCode}
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.ActivePaymentMethod
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType.CreditCard
