@@ -10,8 +10,9 @@ import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.i18n.Currency
 import com.gu.newproduct.api.addsubscription.TypeConvert._
 import com.gu.newproduct.api.addsubscription.ZuoraIds.ProductRatePlanId
-import com.gu.newproduct.api.addsubscription.email.SendConfirmationEmail.ContributionsEmailData
-import com.gu.newproduct.api.addsubscription.email.{ContributionFields, EtSqsSend, SendConfirmationEmail}
+import com.gu.newproduct.api.addsubscription.email.contributions.SendConfirmationEmailContributions.ContributionsEmailData
+import com.gu.newproduct.api.addsubscription.email.contributions.{ContributionFields, SendConfirmationEmailContributions}
+import com.gu.newproduct.api.addsubscription.email.EtSqsSend
 import com.gu.newproduct.api.addsubscription.validation.Validation._
 import com.gu.newproduct.api.addsubscription.validation.contribution.ContributionValidations.ValidatableFields
 import com.gu.newproduct.api.addsubscription.validation.contribution.{ContributionAccountValidation, ContributionCustomerData, ContributionValidations, GetContributionCustomerData}
@@ -46,7 +47,7 @@ object Handler extends Logging {
   // Referenced in Cloudformation
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
     ApiGatewayHandler(LambdaIO(inputStream, outputStream, context)) {
-      Steps.operationForEffects(RawEffects.response, RawEffects.stage, GetFromS3.fetchString)
+      Steps.operationForEffects(RawEffects.response, RawEffects.stage, GetFromS3.fetchString, AwsSQSSend.apply)
     }
 }
 
@@ -124,7 +125,12 @@ object Steps {
 
   } yield SubscriptionName("fakeSubId")
 
-  def operationForEffects(response: Request => Response, stage: Stage, fetchString: StringFromS3): ApiGatewayOp[Operation] =
+  def operationForEffects(
+    response: Request => Response,
+    stage: Stage,
+    fetchString: StringFromS3,
+    awsSQSSend: QueueName => AwsSQSSend.Payload => Future[Unit]
+  ): ApiGatewayOp[Operation] =
     for {
       zuoraIds <- ZuoraIds.zuoraIdsForStage(stage)
       zuoraConfig <- {
@@ -132,7 +138,7 @@ object Steps {
         loadConfig[ZuoraRestConfig].toApiGatewayOp("load zuora config")
       }
       zuoraClient = ZuoraRestRequestMaker(response, zuoraConfig)
-      sqsSend = AwsSQSSend(emailQueueFor(stage)) _
+      sqsSend = awsSQSSend(emailQueueFor(stage))
       contributionsSqsSend = EtSqsSend[ContributionFields](sqsSend) _
       getCurrentDate = () => RawEffects.now().toLocalDate
       validatorFor = DateValidator.validatorFor(getCurrentDate, _: DateRule)
@@ -148,7 +154,7 @@ object Steps {
       getCustomerData = getValidatedContributionCustomerData(zuoraClient, contributionIds)
       isValidContributionStartDate = isValidStartDateForPlan(MonthlyContribution, _: LocalDate)
       validateRequest = ContributionValidations(isValidContributionStartDate, AmountLimits.limitsFor) _
-      sendConfirmationEmail = SendConfirmationEmail(contributionsSqsSend, getCurrentDate) _
+      sendConfirmationEmail = SendConfirmationEmailContributions(contributionsSqsSend, getCurrentDate) _
       contributionSteps = addContributionSteps(getCustomerData, validateRequest, createMonthlyContribution, sendConfirmationEmail) _
 
       getVoucherData = getValidatedVoucherCustomerData(zuoraClient, contributionIds)

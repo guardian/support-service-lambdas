@@ -1,11 +1,12 @@
-package com.gu.newproduct.api.addsubscription.email
+package com.gu.newproduct.api.addsubscription.email.contributions
 
 import java.time.LocalDate
 
 import com.gu.i18n.Country
 import com.gu.i18n.Currency.GBP
-import com.gu.newproduct.api.addsubscription.email.SendConfirmationEmail.ContributionsEmailData
-import com.gu.newproduct.api.addsubscription.zuora.GetContacts._
+import com.gu.newproduct.api.addsubscription.email.contributions.SendConfirmationEmailContributions.ContributionsEmailData
+import com.gu.newproduct.api.addsubscription.email.{CContactAttributes, CTo, ETPayload}
+import com.gu.newproduct.api.addsubscription.zuora.GetContacts.{BilltoContact, Email, FirstName, LastName}
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{BankAccountName, BankAccountNumberMask, DirectDebit, MandateId, NonDirectDebitMethod, SortCode}
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.ActivePaymentMethod
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType.CreditCard
@@ -17,7 +18,7 @@ import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 import scala.language.postfixOps
 
-class SendConfirmationEmailTest extends FlatSpec with Matchers {
+class SendConfirmationEmailContributionsTest extends FlatSpec with Matchers {
 
   def today = () => LocalDate.of(2018, 7, 30)
 
@@ -79,7 +80,7 @@ class SendConfirmationEmailTest extends FlatSpec with Matchers {
       Future.successful(())
     }
 
-    val send = SendConfirmationEmail(sqsSend, today) _
+    val send = SendConfirmationEmailContributions(sqsSend, today) _
 
     val res = Await.result(send(testData).underlying, 3 seconds)
 
@@ -92,7 +93,7 @@ class SendConfirmationEmailTest extends FlatSpec with Matchers {
     //todo this check that it is not called does not work
     def sqsSend(ETPayload: ETPayload[ContributionFields]): Future[Unit] = fail("unexpected invocation of sqsSend")
 
-    val send = SendConfirmationEmail(sqsSend, today) _
+    val send = SendConfirmationEmailContributions(sqsSend, today) _
 
     val res = Await.result(send(testData).underlying, 3 seconds)
 
@@ -104,7 +105,7 @@ class SendConfirmationEmailTest extends FlatSpec with Matchers {
 
     def sqsSend(payload: ETPayload[ContributionFields]): Future[Unit] = Future.failed(new RuntimeException("sqs error`"))
 
-    val send = SendConfirmationEmail(sqsSend, today) _
+    val send = SendConfirmationEmailContributions(sqsSend, today) _
 
     val res = Await.result(send(testData).underlying, 3 seconds)
 
@@ -132,7 +133,7 @@ class SendConfirmationEmailTest extends FlatSpec with Matchers {
 
     val noDirectDebitData = testData.copy(paymentMethod = NonDirectDebitMethod(ActivePaymentMethod, CreditCard))
 
-    val actual = SendConfirmationEmail.toContributionFields(LocalDate.of(2018, 7, 12), noDirectDebitData)
+    val actual = SendConfirmationEmailContributions.toContributionFields(LocalDate.of(2018, 7, 12), noDirectDebitData)
     actual shouldBe Some(expectedContributionFields)
 
   }
@@ -156,7 +157,7 @@ class SendConfirmationEmailTest extends FlatSpec with Matchers {
 
     )
 
-    val actual = SendConfirmationEmail.toContributionFields(LocalDate.of(2018, 7, 12), testData)
+    val actual = SendConfirmationEmailContributions.toContributionFields(LocalDate.of(2018, 7, 12), testData)
     actual shouldBe Some(expectedContributionFields)
 
   }

@@ -4,9 +4,9 @@ import java.time.LocalDate
 
 import com.gu.i18n.Currency
 import com.gu.newproduct.TestData
-import com.gu.newproduct.api.addsubscription.email.SendConfirmationEmail.ContributionsEmailData
-import com.gu.newproduct.api.addsubscription.validation._
+import com.gu.newproduct.api.addsubscription.email.contributions.SendConfirmationEmailContributions.ContributionsEmailData
 import com.gu.newproduct.api.addsubscription.validation.contribution.ContributionValidations.ValidatableFields
+import com.gu.newproduct.api.addsubscription.validation.{Failed, Passed}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{SubscriptionName, ZuoraCreateSubRequest}
 import com.gu.test.JsonMatchers.JsonMatcher
