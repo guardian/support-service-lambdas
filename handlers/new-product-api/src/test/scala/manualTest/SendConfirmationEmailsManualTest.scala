@@ -8,30 +8,30 @@ import com.gu.newproduct.api.addsubscription.Steps.emailQueueFor
 import com.gu.newproduct.api.addsubscription.email.EtSqsSend
 import com.gu.newproduct.api.addsubscription.email.contributions.SendConfirmationEmailContributions.ContributionsEmailData
 import com.gu.newproduct.api.addsubscription.email.contributions.{ContributionFields, SendConfirmationEmailContributions}
-import com.gu.newproduct.api.addsubscription.zuora.GetBillToContact.{Contact, Email, FirstName, LastName}
+import com.gu.newproduct.api.addsubscription.zuora.GetContacts.{BilltoContact, Email, FirstName, LastName}
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.NonDirectDebitMethod
 import com.gu.newproduct.api.addsubscription.zuora.{PaymentMethodStatus, PaymentMethodType}
 import com.gu.newproduct.api.addsubscription.{AmountMinorUnits, ZuoraAccountId}
 import com.gu.util.config.Stage
-import com.gu.util.resthttp.Types.ClientSuccess
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
 object SendConfirmationEmailsManualTest {
 
-  def fakeContact(email: Email) = Contact(
+  def fakeContact(email: Email) = BilltoContact(
     FirstName("john"),
     LastName("bloggs"),
     email = Some(email),
     country = Some(Country.UK)
   )
-  val contributionsEmailData = ContributionsEmailData(
+  def contributionsEmailData(billtoContact: BilltoContact) = ContributionsEmailData(
     ZuoraAccountId("oops"),
     Currency.GBP,
     NonDirectDebitMethod(PaymentMethodStatus.ActivePaymentMethod, PaymentMethodType.PayPal),
     AmountMinorUnits(123),
-    LocalDate.of(2018, 9, 1)
+    LocalDate.of(2018, 9, 1),
+    billtoContact
   )
 
   val fakeDate = LocalDate.of(2018, 8, 10)
@@ -41,8 +41,8 @@ object SendConfirmationEmailsManualTest {
       email <- args.headOption.map(Email.apply)
       sqsSend = AwsSQSSend(emailQueueFor(Stage("PROD"))) _
       contributionsSqsSend = EtSqsSend[ContributionFields](sqsSend) _
-      sendConfirmationEmail = SendConfirmationEmailContributions(contributionsSqsSend, () => fakeDate, _ => ClientSuccess(fakeContact(email))) _
-      sendResult = sendConfirmationEmail(contributionsEmailData)
+      sendConfirmationEmail = SendConfirmationEmailContributions(contributionsSqsSend, () => fakeDate) _
+      sendResult = sendConfirmationEmail(contributionsEmailData(fakeContact(email)))
     } yield sendResult
     result match {
       case None =>

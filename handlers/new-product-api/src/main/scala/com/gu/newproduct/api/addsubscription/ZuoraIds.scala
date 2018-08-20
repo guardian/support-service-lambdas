@@ -33,8 +33,17 @@ object ZuoraIds {
           productRatePlanId = ProductRatePlanId("2c92c0f95e1d5c9c015e38f8c87d19a1"),
           productRatePlanChargeId = ProductRatePlanChargeId("2c92c0f95e1d5c9c015e38f8c8ac19a3")
         )
+      ),
+      Stage("DEV") -> ContributionsZuoraIds(
+        monthly = PlanAndCharge(
+          productRatePlanId = ProductRatePlanId("2c92c0f85a6b134e015a7fcd9f0c7855"),
+          productRatePlanChargeId = ProductRatePlanChargeId("2c92c0f85a6b1352015a7fcf35ab397c")
+        ),
+        annual = PlanAndCharge(
+          productRatePlanId = ProductRatePlanId("2c92c0f85e2d19af015e3896e824092c"),
+          productRatePlanChargeId = ProductRatePlanChargeId("2c92c0f85e2d19af015e3896e84d092e")
+        )
       )
-    // probably don't need dev as we'd just pass in the actual object in the test
     )
     mappings.get(stage).toApiGatewayContinueProcessing(ApiGatewayResponse.internalServerError(s"missing zuora ids for stage $stage"))
   }

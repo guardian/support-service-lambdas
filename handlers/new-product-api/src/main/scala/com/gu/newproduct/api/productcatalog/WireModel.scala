@@ -24,7 +24,8 @@ object WireModel {
   case class WirePlanInfo(
     id: String,
     label: String,
-    startDateRules: Option[WireStartDateRules] = None
+    startDateRules: Option[WireStartDateRules] = None,
+    paymentPlan: Option[String] = None
   )
 
   case class WireSelectableWindow(
@@ -82,9 +83,10 @@ object WireModel {
     def fromPlan(plan: Plan, label: String) = {
 
       WirePlanInfo(
-        id = plan.id.value,
+        id = plan.id.name,
         label = label,
-        startDateRules = toOptionalWireRules(plan.startDateRules)
+        startDateRules = toOptionalWireRules(plan.startDateRules),
+        paymentPlan = plan.paymentPlan.map(_.description)
       )
     }
   }
@@ -100,8 +102,16 @@ object WireModel {
       val voucherProduct = WireProduct(
         label = "Voucher",
         plans = List(
+          WirePlanInfo.fromPlan(catalog.voucherEveryDay, "Every day"),
+          WirePlanInfo.fromPlan(catalog.voucherEveryDayPlus, "Every day+"),
+          WirePlanInfo.fromPlan(catalog.voucherSaturday, "Saturday"),
+          WirePlanInfo.fromPlan(catalog.voucherSaturdayPlus, "Saturday+"),
+          WirePlanInfo.fromPlan(catalog.voucherSixDay, "Six day"),
+          WirePlanInfo.fromPlan(catalog.voucherSixDayPlus, "Six day+"),
+          WirePlanInfo.fromPlan(catalog.voucherSunday, "Sunday"),
+          WirePlanInfo.fromPlan(catalog.voucherSundayPlus, "Sunday+"),
           WirePlanInfo.fromPlan(catalog.voucherWeekend, "Weekend"),
-          WirePlanInfo.fromPlan(catalog.voucherEveryDay, "Every day")
+          WirePlanInfo.fromPlan(catalog.voucherWeekendPlus, "Weekend+")
         )
       )
       val contributionProduct = WireProduct(
@@ -110,7 +120,7 @@ object WireModel {
           WirePlanInfo.fromPlan(catalog.monthlyContribution, "Monthly")
         )
       )
-      WireCatalog(List(voucherProduct, contributionProduct))
+      WireCatalog(List(contributionProduct, voucherProduct))
     }
   }
 
