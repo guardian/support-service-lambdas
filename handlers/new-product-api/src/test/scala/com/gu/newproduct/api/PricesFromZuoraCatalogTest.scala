@@ -24,16 +24,16 @@ class PricesFromZuoraCatalogTest extends FlatSpec with Matchers {
   it should "load catalog" in {
 
     val rateplanToPlanId = Map(
-      ProductRatePlanId("2c92c0f9555cf10501556e84a70440e2") -> VoucherEveryDay,
-      ProductRatePlanId("2c92c0f95aff3b56015b1045fb9332d2") -> VoucherSunday,
-      ProductRatePlanId("2c92c0f861f9c26d0161fc434bfe004c") -> VoucherSaturday,
-      ProductRatePlanId("2c92c0f8555ce5cf01556e7f01b81b94") -> VoucherWeekend,
-      ProductRatePlanId("2c92c0f8555ce5cf01556e7f01771b8a") -> VoucherSixDay,
-      ProductRatePlanId("2c92c0f95aff3b53015b10469bbf5f5f") -> VoucherEveryDayPlus,
-      ProductRatePlanId("2c92c0f955a0b5bf0155b62623846fc8") -> VoucherSundayPlus,
-      ProductRatePlanId("2c92c0f961f9cf300161fc44f2661258") -> VoucherSaturdayPlus,
-      ProductRatePlanId("2c92c0f95aff3b54015b1047efaa2ac3") -> VoucherWeekendPlus,
-      ProductRatePlanId("2c92c0f855c3b8190155c585a95e6f5a") -> VoucherSixDayPlus
+      ProductRatePlanId("VoucherEverydayId") -> VoucherEveryDay,
+      ProductRatePlanId("VoucherSundayId") -> VoucherSunday,
+      ProductRatePlanId("VoucherSaturdayId") -> VoucherSaturday,
+      ProductRatePlanId("VoucherWeekendId") -> VoucherWeekend,
+      ProductRatePlanId("VoucherSixdayId") -> VoucherSixDay,
+      ProductRatePlanId("VoucherEverydayPlusId") -> VoucherEveryDayPlus,
+      ProductRatePlanId("VoucherSundayPlusId") -> VoucherSundayPlus,
+      ProductRatePlanId("VoucherSaturdayPlusId") -> VoucherSaturdayPlus,
+      ProductRatePlanId("VoucherWeekendPlusId") -> VoucherWeekendPlus,
+      ProductRatePlanId("VoucherSixdayPlusId") -> VoucherSixDayPlus
     )
 
     val actual = PricesFromZuoraCatalog(
