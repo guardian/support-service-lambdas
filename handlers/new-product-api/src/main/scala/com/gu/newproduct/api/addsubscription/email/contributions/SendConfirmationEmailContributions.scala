@@ -12,7 +12,7 @@ import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.AsyncTypes._
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
-
+import com.gu.newproduct.api.addsubscription.Formatters._
 import scala.concurrent.Future
 
 object SendConfirmationEmailContributions extends Logging {
@@ -49,8 +49,6 @@ object SendConfirmationEmailContributions extends Logging {
       ReturnWithResponse(ApiGatewayResponse.successfulExecution).toAsync
     }
 
-  def hyphenate(s: String) = s"${s.substring(0, 2)}-${s.substring(2, 4)}-${s.substring(4, 6)}"
-
   def formatAmount(amount: AmountMinorUnits) = (amount.value / BigDecimal(100)).bigDecimal.stripTrailingZeros.toPlainString
 
   val firstPaymentDateFormat = DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy")
@@ -72,7 +70,7 @@ object SendConfirmationEmailContributions extends Logging {
         product = "monthly-contribution",
         `account name` = maybeDirectDebit.map(_.accountName.value),
         `account number` = maybeDirectDebit.map(_.accountNumberMask.value),
-        `sort code` = maybeDirectDebit.map(x => hyphenate(x.sortCode.value)),
+        `sort code` = maybeDirectDebit.map(_.sortCode.hyphenated),
         `Mandate ID` = maybeDirectDebit.map(_.mandateId.value),
         `first payment date` = maybeDirectDebit.map { _ =>
           data.firstPaymentDate.format(firstPaymentDateFormat)
