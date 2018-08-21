@@ -1,8 +1,9 @@
-package com.gu.newproduct.api.addsubscription.email
+package com.gu.newproduct.api.addsubscription.email.contributions
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import com.gu.i18n.Currency
+import com.gu.newproduct.api.addsubscription.email.{DataExtensionName, ETPayload}
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.BilltoContact
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{DirectDebit, PaymentMethod}
 import com.gu.newproduct.api.addsubscription.{AmountMinorUnits, ZuoraAccountId}
@@ -13,7 +14,7 @@ import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResp
 import com.gu.newproduct.api.addsubscription.Formatters._
 import scala.concurrent.Future
 
-object SendConfirmationEmail extends Logging {
+object SendConfirmationEmailContributions extends Logging {
 
   case class ContributionsEmailData(
     accountId: ZuoraAccountId,
@@ -26,7 +27,7 @@ object SendConfirmationEmail extends Logging {
 
   def apply(
     etSqsSend: ETPayload[ContributionFields] => Future[Unit],
-    getCurrentDate: () => LocalDate,
+    getCurrentDate: () => LocalDate
   )(data: ContributionsEmailData) = {
     val maybeContributionFields = toContributionFields(getCurrentDate(), data)
     val response = for {
@@ -40,7 +41,7 @@ object SendConfirmationEmail extends Logging {
 
   def toPayload(maybeContributionFields: Option[ContributionFields]): AsyncApiGatewayOp[ETPayload[ContributionFields]] =
     maybeContributionFields.map { fields =>
-      val payload = ETPayload(fields.EmailAddress, fields)
+      val payload = ETPayload(fields.EmailAddress, fields, DataExtensionName("regular-contribution-thank-you"))
       ContinueProcessing(payload).toAsync
     }.getOrElse {
       logger.info("Not enough data in zuora account to send contribution thank you email, skipping")

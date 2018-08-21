@@ -20,9 +20,11 @@ object ETPayload {
 
   implicit def writes[A: Writes] = Json.writes[ETPayload[A]]
 
-  def apply[A](email: String, fields: A): ETPayload[A] =
+  def apply[A](email: String, fields: A, name: DataExtensionName): ETPayload[A] =
     ETPayload(
       To = CTo(email, email, CContactAttributes(fields)),
-      DataExtensionName = "regular-contribution-thank-you"
+      DataExtensionName = name.value
     )
 }
+
+case class DataExtensionName(value: String)
