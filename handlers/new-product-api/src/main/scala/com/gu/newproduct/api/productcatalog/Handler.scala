@@ -12,14 +12,14 @@ import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config.{Stage, ZuoraEnvironment}
 import com.gu.util.reader.Types.ApiGatewayOp
 import com.gu.newproduct.api.addsubscription.TypeConvert._
+
 object Handler extends Logging {
 
   // Referenced in Cloudformation
-  def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
+  def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
     ApiGatewayHandler(LambdaIO(inputStream, outputStream, context)) {
       runWithEffects(LambdaIO(inputStream, outputStream, context), RawEffects.stage, GetFromS3.fetchString)
     }
-  }
 
   def runWithEffects(lambdaIO: LambdaIO, stage: Stage, fetchString: StringFromS3): ApiGatewayOp[Operation] = for {
     zuoraIds <- ZuoraIds.zuoraIdsForStage(stage)
@@ -27,11 +27,8 @@ object Handler extends Logging {
     zuoraEnv = ZuoraEnvironment.EnvForStage(stage)
     plansWithPrice <- PricesFromZuoraCatalog(zuoraEnv, fetchString, zuoraToPlanId).toApiGatewayOp("get prices from zuora catalog")
     wireCatalog = WireCatalog.fromCatalog(NewProductApi.catalog, plansWithPrice.get)
-  } yield {
-    Operation.noHealthcheck {
-      Req: ApiGatewayRequest => ApiGatewayResponse(body = wireCatalog, statusCode = "200")
-    }
+  } yield Operation.noHealthcheck {
+    Req: ApiGatewayRequest => ApiGatewayResponse(body = wireCatalog, statusCode = "200")
   }
-
 }
 
