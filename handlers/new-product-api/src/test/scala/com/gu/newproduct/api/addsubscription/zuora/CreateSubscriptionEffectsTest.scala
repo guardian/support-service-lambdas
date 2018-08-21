@@ -6,7 +6,6 @@ import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.WireModel._
 import com.gu.newproduct.api.addsubscription._
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.ChargeOverride
-import com.gu.newproduct.api.productcatalog.AmountMinorUnits
 import com.gu.newproduct.api.productcatalog.ZuoraIds.{PlanAndCharge, ProductRatePlanChargeId, ProductRatePlanId}
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}

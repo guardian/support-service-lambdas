@@ -5,7 +5,6 @@ import java.time.LocalDate
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.WireModel.{ChargeOverrides, SubscribeToRatePlans, WireCreateRequest, WireSubscription}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{ChargeOverride, SubscriptionName, ZuoraCreateSubRequest}
 import com.gu.newproduct.api.addsubscription._
-import com.gu.newproduct.api.productcatalog.AmountMinorUnits
 import com.gu.newproduct.api.productcatalog.ZuoraIds.{PlanAndCharge, ProductRatePlanChargeId, ProductRatePlanId}
 import com.gu.util.resthttp.RestRequestMaker.{RequestsPost, WithCheck}
 import com.gu.util.resthttp.Types.{ClientSuccess, GenericError}

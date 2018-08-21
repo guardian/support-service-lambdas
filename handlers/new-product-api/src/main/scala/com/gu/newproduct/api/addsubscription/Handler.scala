@@ -26,7 +26,7 @@ import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{DirectDebit
 import com.gu.newproduct.api.addsubscription.zuora.{GetContacts, _}
 import com.gu.newproduct.api.productcatalog.PlanId.MonthlyContribution
 import com.gu.newproduct.api.productcatalog.ZuoraIds.{PlanAndCharge, ProductRatePlanId, zuoraIdsForStage}
-import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, DateRule, NewProductApi, PlanId}
+import com.gu.newproduct.api.productcatalog.{DateRule, NewProductApi, PlanId}
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.ApiGatewayResponse.internalServerError

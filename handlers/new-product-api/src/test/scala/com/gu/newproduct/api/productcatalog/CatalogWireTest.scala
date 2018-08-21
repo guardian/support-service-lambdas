@@ -1,5 +1,6 @@
 package com.gu.newproduct.api.productcatalog
 
+import com.gu.newproduct.api.addsubscription.AmountMinorUnits
 import com.gu.newproduct.api.productcatalog.PlanId._
 import com.gu.newproduct.api.productcatalog.WireModel._
 import org.scalatest.{FlatSpec, Matchers}

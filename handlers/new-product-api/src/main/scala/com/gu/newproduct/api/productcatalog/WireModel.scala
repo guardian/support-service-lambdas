@@ -1,6 +1,8 @@
 package com.gu.newproduct.api.productcatalog
 
 import java.time.DayOfWeek
+
+import com.gu.newproduct.api.addsubscription.AmountMinorUnits
 import play.api.libs.json.{JsString, Json, Writes}
 import com.gu.newproduct.api.addsubscription.Formatters._
 object WireModel {
@@ -81,7 +83,7 @@ object WireModel {
       if (startDateRules == StartDateRules()) None else Some(WireStartDateRules.fromStartDateRules(startDateRules))
 
     def fromPlan(plan: Plan, label: String, priceFor: PlanId => Option[AmountMinorUnits]) = {
-      val paymentDescription = priceFor(plan.id).map(amount => s"GBP${amount.prettyPrint} every month")
+      val paymentDescription = priceFor(plan.id).map(amount => s"GBP${amount.formatted} every month")
       WirePlanInfo(
         id = plan.id.name,
         label = label,

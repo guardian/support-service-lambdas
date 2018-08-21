@@ -2,12 +2,13 @@ package com.gu.newproduct.api.productcatalog
 
 import com.gu.newproduct.api.addsubscription.TypeConvert._
 import com.gu.newproduct.api.productcatalog.ZuoraIds.ProductRatePlanId
-import com.gu.util.Logging
 import com.gu.util.config.LoadConfigModule.{S3Location, StringFromS3}
 import com.gu.util.config.ZuoraEnvironment
 import com.gu.util.resthttp.Types.ClientFailableOp
 import play.api.libs.json.Json
 import ZuoraCatalogWireModel._
+import com.gu.newproduct.api.addsubscription.AmountMinorUnits
+
 import scala.util.Try
 
 case class PlanWithPrice(planId: PlanId, maybepriceMinorUnits: AmountMinorUnits)

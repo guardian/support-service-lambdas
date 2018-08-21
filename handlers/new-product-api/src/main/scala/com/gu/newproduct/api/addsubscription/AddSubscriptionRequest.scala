@@ -2,10 +2,10 @@ package com.gu.newproduct.api.addsubscription
 
 import java.time.LocalDate
 
-import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, PlanId}
 import play.api.libs.json.{JsError, JsSuccess, Json, Reads}
 import scalaz._
 import Scalaz._
+import com.gu.newproduct.api.productcatalog.PlanId
 
 import scala.util.Try
 
@@ -20,7 +20,7 @@ case class AddSubscriptionRequest(
   acquisitionCase: CaseId,
   planId: PlanId
 )
-
+case class AmountMinorUnits(value: Int) extends AnyVal
 case class CaseId(value: String) extends AnyVal
 case class AcquisitionSource(value: String) extends AnyVal
 case class CreatedByCSR(value: String) extends AnyVal
