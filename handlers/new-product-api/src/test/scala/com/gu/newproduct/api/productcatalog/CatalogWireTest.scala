@@ -42,7 +42,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "sizeInDays": 28
         |            }
         |          },
-        |          "paymentPlan": "GBP47.62 every month"
+        |          "paymentPlan": "GBP 47.62 every month"
         |        },
         |        {
         |          "id": "voucher_everyday_plus",
@@ -57,7 +57,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "sizeInDays": 28
         |            }
         |          },
-        |          "paymentPlan": "GBP51.96 every month"
+        |          "paymentPlan": "GBP 51.96 every month"
         |        },
         |        {
         |          "id": "voucher_saturday",
@@ -72,7 +72,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "sizeInDays": 28
         |            }
         |          },
-        |          "paymentPlan": "GBP10.36 every month"
+        |          "paymentPlan": "GBP 10.36 every month"
         |        },
         |        {
         |          "id": "voucher_saturday_plus",
@@ -87,7 +87,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "sizeInDays": 28
         |            }
         |          },
-        |          "paymentPlan": "GBP21.62 every month"
+        |          "paymentPlan": "GBP 21.62 every month"
         |        },
         |        {
         |          "id": "voucher_sixday",
@@ -102,7 +102,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "sizeInDays": 28
         |            }
         |          },
-        |          "paymentPlan": "GBP41.12 every month"
+        |          "paymentPlan": "GBP 41.12 every month"
         |        },
         |        {
         |          "id": "voucher_sixday_plus",
@@ -117,7 +117,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "sizeInDays": 28
         |            }
         |          },
-        |          "paymentPlan": "GBP47.62 every month"
+        |          "paymentPlan": "GBP 47.62 every month"
         |        },
         |        {
         |          "id": "voucher_sunday",
@@ -132,7 +132,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "sizeInDays": 28
         |            }
         |          },
-        |          "paymentPlan": "GBP10.79 every month"
+        |          "paymentPlan": "GBP 10.79 every month"
         |        },
         |        {
         |          "id": "voucher_sunday_plus",
@@ -147,7 +147,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "sizeInDays": 28
         |            }
         |          },
-        |          "paymentPlan": "GBP22.06 every month"
+        |          "paymentPlan": "GBP 22.06 every month"
         |        },
         |        {
         |          "id": "voucher_weekend",
@@ -162,7 +162,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "sizeInDays": 28
         |            }
         |          },
-        |          "paymentPlan": "GBP20.76 every month"
+        |          "paymentPlan": "GBP 20.76 every month"
         |        },
         |        {
         |          "id": "voucher_weekend_plus",
@@ -177,7 +177,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "sizeInDays": 28
         |            }
         |          },
-        |          "paymentPlan": "GBP29.42 every month"
+        |          "paymentPlan": "GBP 29.42 every month"
         |        }
         |      ]
         |    }

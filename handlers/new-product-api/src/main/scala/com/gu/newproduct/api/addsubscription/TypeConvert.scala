@@ -54,8 +54,9 @@ object TypeConvert {
     def toClientFailable(action: String) = tryValue match {
       case Success(response) => ClientSuccess(response)
       case Failure(exception) => {
-        logger.error(s"exception thrown while trying to $action : ${exception.getMessage}", exception)
-        GenericError(exception.getMessage)
+        val errorMessage = s"exception thrown while trying to $action : ${exception.getMessage}"
+        logger.error(errorMessage, exception)
+        GenericError(errorMessage)
       }
     }
   }

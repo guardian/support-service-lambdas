@@ -1,7 +1,6 @@
 package com.gu.newproduct.api.addsubscription.validation.contribution
 
 import java.time.LocalDate
-
 import com.gu.i18n.Currency
 import com.gu.newproduct.api.addsubscription.AmountMinorUnits
 import com.gu.newproduct.api.addsubscription.validation.{AmountLimits, ValidationResult}

@@ -2,12 +2,11 @@ package com.gu.newproduct.api.addsubscription
 
 import java.time.LocalDate
 
+import com.gu.newproduct.api.productcatalog.PlanId
 import play.api.libs.json.{JsError, JsSuccess, Json, Reads}
 import scalaz._
 import Scalaz._
-import com.gu.newproduct.api.productcatalog.PlanId
-
-import scala.util.Try
+import scala.util.{Try}
 
 case class ZuoraAccountId(value: String) extends AnyVal
 

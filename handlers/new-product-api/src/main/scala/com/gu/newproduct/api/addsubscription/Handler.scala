@@ -25,8 +25,8 @@ import com.gu.newproduct.api.addsubscription.zuora.GetContacts.WireModel.GetCont
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{DirectDebit, PaymentMethod, PaymentMethodWire}
 import com.gu.newproduct.api.addsubscription.zuora.{GetContacts, _}
 import com.gu.newproduct.api.productcatalog.PlanId.MonthlyContribution
-import com.gu.newproduct.api.productcatalog.ZuoraIds.{PlanAndCharge, ProductRatePlanId, zuoraIdsForStage}
-import com.gu.newproduct.api.productcatalog.{DateRule, NewProductApi, PlanId}
+import com.gu.newproduct.api.productcatalog.ZuoraIds.{PlanAndCharge, ProductRatePlanId}
+import com.gu.newproduct.api.productcatalog.{DateRule, NewProductApi, PlanId, ZuoraIds}
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.ApiGatewayResponse.internalServerError
@@ -139,7 +139,7 @@ object Steps {
 
   def operationForEffects(response: Request => Response, stage: Stage, fetchString: StringFromS3): ApiGatewayOp[Operation] =
     for {
-      zuoraIds <- zuoraIdsForStage(stage)
+      zuoraIds <- ZuoraIds.zuoraIdsForStage(stage)
       zuoraConfig <- {
         val loadConfig = LoadConfigModule(stage, fetchString)
         loadConfig[ZuoraRestConfig].toApiGatewayOp("load zuora config")

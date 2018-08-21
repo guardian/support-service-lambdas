@@ -65,7 +65,6 @@ Resources:
                         - sqs:GetQueueUrl
                         - sqs:SendMessage
                         Resource: !Sub "arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:contributions-thanks"
-
     ProductCatalogRole:
       Type: AWS::IAM::Role
       Properties:

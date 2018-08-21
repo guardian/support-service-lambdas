@@ -83,7 +83,7 @@ object WireModel {
       if (startDateRules == StartDateRules()) None else Some(WireStartDateRules.fromStartDateRules(startDateRules))
 
     def fromPlan(plan: Plan, label: String, priceFor: PlanId => Option[AmountMinorUnits]) = {
-      val paymentDescription = priceFor(plan.id).map(amount => s"GBP${amount.formatted} every month")
+      val paymentDescription = priceFor(plan.id).map(amount => s"GBP ${amount.formatted} every month")
       WirePlanInfo(
         id = plan.id.name,
         label = label,
