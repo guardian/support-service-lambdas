@@ -11,7 +11,7 @@ import com.gu.newproduct.api.addsubscription.AmountMinorUnits
 
 import scala.util.Try
 
-case class PlanWithPrice(planId: PlanId, maybepriceMinorUnits: AmountMinorUnits)
+case class PlanWithPrice(planId: PlanId, priceMinorUnits: AmountMinorUnits)
 
 object ZuoraCatalogWireModel {
 
@@ -23,7 +23,6 @@ object ZuoraCatalogWireModel {
 
   case class RateplanCharge(
     id: String,
-    name: String,
     pricing: List[Price]
   )
 
@@ -31,17 +30,16 @@ object ZuoraCatalogWireModel {
     implicit val reads = Json.reads[RateplanCharge]
   }
 
+  def toMinorUnits(amount: Double) = AmountMinorUnits((amount * 100).toInt)
+
   case class Rateplan(
     id: String,
-    name: String,
-    FrontendId__c: Option[String],
     productRatePlanCharges: List[RateplanCharge]
   ) {
     def toParsedPlan(planIdFor: ProductRatePlanId => Option[PlanId]): Option[PlanWithPrice] = {
-      val planId = planIdFor(ProductRatePlanId(id))
+      val maybePlanId = planIdFor(ProductRatePlanId(id))
 
-      planId flatMap { planId =>
-        def toMinorUnits(amount: Double) = AmountMinorUnits((amount * 100).toInt)
+      maybePlanId flatMap { planId =>
 
         val allPrices = for {
           charge <- productRatePlanCharges
@@ -80,7 +78,7 @@ object ZuoraCatalogWireModel {
         rateplan <- product.productRatePlans
         parsedPlan <- rateplan.toParsedPlan(planIdFor).toList
       } yield parsedPlan
-      plansWithPrice.map(x => x.planId -> x.maybepriceMinorUnits).toMap
+      plansWithPrice.map(x => x.planId -> x.priceMinorUnits).toMap
     }
   }
 

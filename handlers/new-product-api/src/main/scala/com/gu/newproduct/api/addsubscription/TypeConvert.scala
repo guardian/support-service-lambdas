@@ -53,11 +53,8 @@ object TypeConvert {
   implicit class TryToClientFailableOp[A](tryValue: Try[A]) extends Logging {
     def toClientFailable(action: String) = tryValue match {
       case Success(response) => ClientSuccess(response)
-      case Failure(exception) => {
-        val errorMessage = s"exception thrown while trying to $action : ${exception.getMessage}"
-        logger.error(errorMessage, exception)
-        GenericError(errorMessage)
-      }
+      case Failure(exception) => GenericError(s"exception thrown while trying to $action : ${exception.toString}")
+
     }
   }
 
