@@ -22,7 +22,6 @@ object ZuoraCatalogWireModel {
   }
 
   case class RateplanCharge(
-    id: String,
     pricing: List[Price]
   )
 
@@ -60,8 +59,6 @@ object ZuoraCatalogWireModel {
 
   case class Product(
     id: String,
-    name: String,
-    ProductType__c: Option[String],
     productRatePlans: List[Rateplan]
   )
 

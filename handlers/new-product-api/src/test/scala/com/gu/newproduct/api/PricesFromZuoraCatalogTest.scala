@@ -17,24 +17,52 @@ class PricesFromZuoraCatalogTest extends FlatSpec with Matchers {
   val fakeGetStringFromS3: StringFromS3 = s3Location => {
     s3Location shouldBe S3Location(bucket = "gu-zuora-catalog", key = "PROD/Zuora-DEV/catalog.json")
     Try {
-      val source = Source.fromURL(getClass.getResource("/TestZuoraCatalog.json"))
-      source.mkString
+      """
+        |{
+        |  "products": [
+        |    {
+        |      "id": "voucherProductId",
+        |      "productRatePlans": [
+        |        {
+        |          "id": "VoucherSaturdayPlusId",
+        |          "productRatePlanCharges": [
+        |            {
+        |              "name": "Saturday",
+        |              "pricing": [ { "currency": "GBP", "price": 10.36 } ]
+        |            },
+        |            {
+        |              "name": "Digital Pack",
+        |              "pricing": [ { "currency": "GBP", "price": 11.26 } ]
+        |            }
+        |          ]
+        |        },
+        |        {
+        |          "id": "VoucherSundayPlusId",
+        |          "productRatePlanCharges": [
+        |            {
+        |              "name": "Digital Pack",
+        |              "pricing": [ { "currency": "GBP", "price": 11.27 }
+        |              ]
+        |            },
+        |            {
+        |              "name": "Sunday",
+        |              "pricing": [ {"currency": "GBP", "price": 10.79 } ]
+        |            }
+        |          ]
+        |        }
+        |      ]
+        |    }
+        |  ]
+        |}
+      """.stripMargin
     }
   }
 
   it should "load catalog" in {
 
     val rateplanToPlanId = Map(
-      ProductRatePlanId("VoucherEverydayId") -> VoucherEveryDay,
-      ProductRatePlanId("VoucherSundayId") -> VoucherSunday,
-      ProductRatePlanId("VoucherSaturdayId") -> VoucherSaturday,
-      ProductRatePlanId("VoucherWeekendId") -> VoucherWeekend,
-      ProductRatePlanId("VoucherSixdayId") -> VoucherSixDay,
-      ProductRatePlanId("VoucherEverydayPlusId") -> VoucherEveryDayPlus,
       ProductRatePlanId("VoucherSundayPlusId") -> VoucherSundayPlus,
       ProductRatePlanId("VoucherSaturdayPlusId") -> VoucherSaturdayPlus,
-      ProductRatePlanId("VoucherWeekendPlusId") -> VoucherWeekendPlus,
-      ProductRatePlanId("VoucherSixdayPlusId") -> VoucherSixDayPlus
     )
 
     val actual = PricesFromZuoraCatalog(
@@ -45,15 +73,7 @@ class PricesFromZuoraCatalogTest extends FlatSpec with Matchers {
     actual shouldBe ClientSuccess(
       Map(
         VoucherSaturdayPlus -> AmountMinorUnits(2161),
-        VoucherSundayPlus -> AmountMinorUnits(2206),
-        VoucherWeekendPlus -> AmountMinorUnits(1256),
-        VoucherSixDayPlus -> AmountMinorUnits(2736),
-        VoucherEveryDayPlus -> AmountMinorUnits(2920),
-        VoucherSunday -> AmountMinorUnits(1079),
-        VoucherWeekend -> AmountMinorUnits(390),
-        VoucherSixDay -> AmountMinorUnits(2386),
-        VoucherEveryDay -> AmountMinorUnits(2486),
-        VoucherSaturday -> AmountMinorUnits(1036)
+        VoucherSundayPlus -> AmountMinorUnits(2206)
       )
     )
   }
