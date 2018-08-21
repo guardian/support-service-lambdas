@@ -1,16 +1,15 @@
 package com.gu.newproduct.api
 
-import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, PlanWithPrice, PricesFromZuoraCatalog}
 import com.gu.newproduct.api.productcatalog.PlanId._
 import com.gu.newproduct.api.productcatalog.ZuoraIds.ProductRatePlanId
+import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, PricesFromZuoraCatalog}
 import com.gu.util.config.LoadConfigModule.{S3Location, StringFromS3}
-import com.gu.util.config.{Stage, ZuoraEnvironment}
+import com.gu.util.config.ZuoraEnvironment
 import com.gu.util.resthttp.Types.ClientSuccess
-
-import scala.io.Source
 import org.scalatest.{FlatSpec, Matchers}
 
-import scala.util.{Success, Try}
+import scala.io.Source
+import scala.util.Try
 
 class PricesFromZuoraCatalogTest extends FlatSpec with Matchers {
 
@@ -43,17 +42,17 @@ class PricesFromZuoraCatalogTest extends FlatSpec with Matchers {
       rateplanToPlanId.get
     )
     actual shouldBe ClientSuccess(
-      List(
-        PlanWithPrice(VoucherSaturdayPlus, Some(AmountMinorUnits(2161))),
-        PlanWithPrice(VoucherSundayPlus, Some(AmountMinorUnits(2206))),
-        PlanWithPrice(VoucherWeekendPlus, Some(AmountMinorUnits(1256))),
-        PlanWithPrice(VoucherSixDayPlus, Some(AmountMinorUnits(2736))),
-        PlanWithPrice(VoucherEveryDayPlus, Some(AmountMinorUnits(2920))),
-        PlanWithPrice(VoucherSunday, Some(AmountMinorUnits(1079))),
-        PlanWithPrice(VoucherWeekend, Some(AmountMinorUnits(390))),
-        PlanWithPrice(VoucherSixDay, Some(AmountMinorUnits(2386))),
-        PlanWithPrice(VoucherEveryDay, Some(AmountMinorUnits(2486))),
-        PlanWithPrice(VoucherSaturday, Some(AmountMinorUnits(1036)))
+      Map(
+        VoucherSaturdayPlus -> AmountMinorUnits(2161),
+        VoucherSundayPlus -> AmountMinorUnits(2206),
+        VoucherWeekendPlus -> AmountMinorUnits(1256),
+        VoucherSixDayPlus -> AmountMinorUnits(2736),
+        VoucherEveryDayPlus -> AmountMinorUnits(2920),
+        VoucherSunday -> AmountMinorUnits(1079),
+        VoucherWeekend -> AmountMinorUnits(390),
+        VoucherSixDay -> AmountMinorUnits(2386),
+        VoucherEveryDay -> AmountMinorUnits(2486),
+        VoucherSaturday -> AmountMinorUnits(1036)
       )
     )
   }

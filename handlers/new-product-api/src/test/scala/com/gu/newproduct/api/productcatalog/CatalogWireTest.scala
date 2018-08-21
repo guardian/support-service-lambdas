@@ -1,4 +1,6 @@
 package com.gu.newproduct.api.productcatalog
+
+import com.gu.newproduct.api.productcatalog.PlanId._
 import com.gu.newproduct.api.productcatalog.WireModel._
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
@@ -39,7 +41,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "sizeInDays": 28
         |            }
         |          },
-        |          "paymentPlan": "£47.62 every month"
+        |          "paymentPlan": "GBP47.62 every month"
         |        },
         |        {
         |          "id": "voucher_everyday_plus",
@@ -54,7 +56,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "sizeInDays": 28
         |            }
         |          },
-        |          "paymentPlan": "£51.96 every month"
+        |          "paymentPlan": "GBP51.96 every month"
         |        },
         |        {
         |          "id": "voucher_saturday",
@@ -69,7 +71,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "sizeInDays": 28
         |            }
         |          },
-        |          "paymentPlan": "£10.36 every month"
+        |          "paymentPlan": "GBP10.36 every month"
         |        },
         |        {
         |          "id": "voucher_saturday_plus",
@@ -84,7 +86,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "sizeInDays": 28
         |            }
         |          },
-        |          "paymentPlan": "£21.62 every month"
+        |          "paymentPlan": "GBP21.62 every month"
         |        },
         |        {
         |          "id": "voucher_sixday",
@@ -99,7 +101,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "sizeInDays": 28
         |            }
         |          },
-        |          "paymentPlan": "£41.12 every month"
+        |          "paymentPlan": "GBP41.12 every month"
         |        },
         |        {
         |          "id": "voucher_sixday_plus",
@@ -114,7 +116,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "sizeInDays": 28
         |            }
         |          },
-        |          "paymentPlan": "£47.62 every month"
+        |          "paymentPlan": "GBP47.62 every month"
         |        },
         |        {
         |          "id": "voucher_sunday",
@@ -129,7 +131,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "sizeInDays": 28
         |            }
         |          },
-        |          "paymentPlan": "£10.79 every month"
+        |          "paymentPlan": "GBP10.79 every month"
         |        },
         |        {
         |          "id": "voucher_sunday_plus",
@@ -144,7 +146,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "sizeInDays": 28
         |            }
         |          },
-        |          "paymentPlan": "£22.06 every month"
+        |          "paymentPlan": "GBP22.06 every month"
         |        },
         |        {
         |          "id": "voucher_weekend",
@@ -159,7 +161,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "sizeInDays": 28
         |            }
         |          },
-        |          "paymentPlan": "£20.76 every month"
+        |          "paymentPlan": "GBP20.76 every month"
         |        },
         |        {
         |          "id": "voucher_weekend_plus",
@@ -174,14 +176,29 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "sizeInDays": 28
         |            }
         |          },
-        |          "paymentPlan": "£29.42 every month"
+        |          "paymentPlan": "GBP29.42 every month"
         |        }
         |      ]
         |    }
         |  ]
         |}
       """.stripMargin
-    val wireCatalog = WireCatalog.fromCatalog(NewProductApi.catalog)
+
+    def fakePricesFor(planId: PlanId): Option[AmountMinorUnits] = planId match {
+      case VoucherWeekendPlus => Some(AmountMinorUnits(2942))
+      case VoucherWeekend => Some(AmountMinorUnits(2076))
+      case VoucherSunday => Some(AmountMinorUnits(1079))
+      case VoucherSundayPlus => Some(AmountMinorUnits(2206))
+      case VoucherSaturday => Some(AmountMinorUnits(1036))
+      case VoucherSaturdayPlus => Some(AmountMinorUnits(2162))
+      case VoucherEveryDay => Some(AmountMinorUnits(4762))
+      case VoucherEveryDayPlus => Some(AmountMinorUnits(5196))
+      case VoucherSixDay => Some(AmountMinorUnits(4112))
+      case VoucherSixDayPlus => Some(AmountMinorUnits(4762))
+      case MonthlyContribution => None
+    }
+
+    val wireCatalog = WireCatalog.fromCatalog(NewProductApi.catalog, fakePricesFor)
     Json.toJson(wireCatalog) shouldBe Json.parse(expected)
   }
 }

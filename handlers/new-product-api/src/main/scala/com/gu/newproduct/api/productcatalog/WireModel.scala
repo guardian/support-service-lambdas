@@ -2,7 +2,7 @@ package com.gu.newproduct.api.productcatalog
 
 import java.time.DayOfWeek
 import play.api.libs.json.{JsString, Json, Writes}
-
+import com.gu.newproduct.api.addsubscription.Formatters._
 object WireModel {
 
   sealed trait WireDayOfWeek
@@ -80,13 +80,13 @@ object WireModel {
     def toOptionalWireRules(startDateRules: StartDateRules): Option[WireStartDateRules] =
       if (startDateRules == StartDateRules()) None else Some(WireStartDateRules.fromStartDateRules(startDateRules))
 
-    def fromPlan(plan: Plan, label: String) = {
-
+    def fromPlan(plan: Plan, label: String, priceFor: PlanId => Option[AmountMinorUnits]) = {
+      val paymentDescription = priceFor(plan.id).map(amount => s"GBP${amount.prettyPrint} every month")
       WirePlanInfo(
         id = plan.id.name,
         label = label,
         startDateRules = toOptionalWireRules(plan.startDateRules),
-        paymentPlan = plan.paymentPlan.map(_.description)
+        paymentPlan = paymentDescription
       )
     }
   }
@@ -98,26 +98,26 @@ object WireModel {
   object WireCatalog {
     implicit val writes = Json.writes[WireCatalog]
 
-    def fromCatalog(catalog: Catalog) = {
+    def fromCatalog(catalog: Catalog, priceFor: PlanId => Option[AmountMinorUnits]) = {
       val voucherProduct = WireProduct(
         label = "Voucher",
         plans = List(
-          WirePlanInfo.fromPlan(catalog.voucherEveryDay, "Every day"),
-          WirePlanInfo.fromPlan(catalog.voucherEveryDayPlus, "Every day+"),
-          WirePlanInfo.fromPlan(catalog.voucherSaturday, "Saturday"),
-          WirePlanInfo.fromPlan(catalog.voucherSaturdayPlus, "Saturday+"),
-          WirePlanInfo.fromPlan(catalog.voucherSixDay, "Six day"),
-          WirePlanInfo.fromPlan(catalog.voucherSixDayPlus, "Six day+"),
-          WirePlanInfo.fromPlan(catalog.voucherSunday, "Sunday"),
-          WirePlanInfo.fromPlan(catalog.voucherSundayPlus, "Sunday+"),
-          WirePlanInfo.fromPlan(catalog.voucherWeekend, "Weekend"),
-          WirePlanInfo.fromPlan(catalog.voucherWeekendPlus, "Weekend+")
+          WirePlanInfo.fromPlan(catalog.voucherEveryDay, "Every day", priceFor),
+          WirePlanInfo.fromPlan(catalog.voucherEveryDayPlus, "Every day+", priceFor),
+          WirePlanInfo.fromPlan(catalog.voucherSaturday, "Saturday", priceFor),
+          WirePlanInfo.fromPlan(catalog.voucherSaturdayPlus, "Saturday+", priceFor),
+          WirePlanInfo.fromPlan(catalog.voucherSixDay, "Six day", priceFor),
+          WirePlanInfo.fromPlan(catalog.voucherSixDayPlus, "Six day+", priceFor),
+          WirePlanInfo.fromPlan(catalog.voucherSunday, "Sunday", priceFor),
+          WirePlanInfo.fromPlan(catalog.voucherSundayPlus, "Sunday+", priceFor),
+          WirePlanInfo.fromPlan(catalog.voucherWeekend, "Weekend", priceFor),
+          WirePlanInfo.fromPlan(catalog.voucherWeekendPlus, "Weekend+", priceFor)
         )
       )
       val contributionProduct = WireProduct(
         label = "Contribution",
         plans = List(
-          WirePlanInfo.fromPlan(catalog.monthlyContribution, "Monthly")
+          WirePlanInfo.fromPlan(catalog.monthlyContribution, "Monthly", priceFor)
         )
       )
       WireCatalog(List(contributionProduct, voucherProduct))

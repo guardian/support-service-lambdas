@@ -65,12 +65,7 @@ Resources:
                         - sqs:GetQueueUrl
                         - sqs:SendMessage
                         Resource: !Sub "arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:contributions-thanks"
-                - PolicyName: ReadZuoraCatalog
-                  PolicyDocument:
-                    Statement:
-                      - Effect: Allow
-                        Action: s3:GetObject
-                        Resource: !FindInMap [ StageMap, !Ref Stage, ZuoraCatalogLocation ]
+
     ProductCatalogRole:
       Type: AWS::IAM::Role
       Properties:
@@ -94,6 +89,12 @@ Resources:
               - logs:PutLogEvents
               - lambda:InvokeFunction
               Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/product-catalog-${Stage}:log-stream:*"
+        - PolicyName: ReadZuoraCatalog
+          PolicyDocument:
+            Statement:
+            - Effect: Allow
+              Action: s3:GetObject
+              Resource: !FindInMap [ StageMap, !Ref Stage, ZuoraCatalogLocation ]
     AddSubscriptionLambda:
         Type: AWS::Lambda::Function
         Properties:

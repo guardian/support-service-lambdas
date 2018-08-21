@@ -14,8 +14,6 @@ import com.gu.util.reader.Types.ApiGatewayOp
 import com.gu.newproduct.api.addsubscription.TypeConvert._
 object Handler extends Logging {
 
-  //  val wireCatalog = WireCatalog.fromCatalog(NewProductApi.catalog)
-
   // Referenced in Cloudformation
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
     ApiGatewayHandler(LambdaIO(inputStream, outputStream, context)) {
@@ -27,9 +25,8 @@ object Handler extends Logging {
     zuoraIds <- ZuoraIds.zuoraIdsForStage(stage)
     zuoraToPlanId = zuoraIds.voucherZuoraIds.zuoraIdToPlanid.get _
     zuoraEnv = ZuoraEnvironment.EnvForStage(stage)
-    plansWithPrice = PricesFromZuoraCatalog(_: ZuoraEnvironment, fetchString, zuoraToPlanId)
-    catalog <- NewProductApi.catalog1(plansWithPrice, zuoraEnv).toApiGatewayOp("load plan prices from zuora")
-    wireCatalog = WireCatalog.fromCatalog(catalog)
+    plansWithPrice <- PricesFromZuoraCatalog(zuoraEnv, fetchString, zuoraToPlanId).toApiGatewayOp("get prices from zuora catalog")
+    wireCatalog = WireCatalog.fromCatalog(NewProductApi.catalog, plansWithPrice.get)
   } yield {
     Operation.noHealthcheck {
       Req: ApiGatewayRequest => ApiGatewayResponse(body = wireCatalog, statusCode = "200")

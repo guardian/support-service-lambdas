@@ -1,19 +1,16 @@
 package com.gu.newproduct.api.productcatalog
+
+import com.gu.newproduct.api.addsubscription.TypeConvert._
 import com.gu.newproduct.api.productcatalog.ZuoraIds.ProductRatePlanId
 import com.gu.util.Logging
 import com.gu.util.config.LoadConfigModule.{S3Location, StringFromS3}
-import com.gu.util.config.{Stage, ZuoraEnvironment}
-import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError}
+import com.gu.util.config.ZuoraEnvironment
+import com.gu.util.resthttp.Types.ClientFailableOp
 import play.api.libs.json.Json
+import ZuoraCatalogWireModel._
+import scala.util.Try
 
-import scala.util.{Failure, Success, Try}
-
-/*
-TODO just for now we are just loading the price, we should try to also load plan and charge ids
- Not all products have frontend_id defined and we probably need something similar for the charges unless we are ok with assuming contributions will have only one charge
- */
-//todo left price as string for now
-case class PlanWithPrice(planId: PlanId, maybepriceMinorUnits: Option[AmountMinorUnits])
+case class PlanWithPrice(planId: PlanId, maybepriceMinorUnits: AmountMinorUnits)
 
 object ZuoraCatalogWireModel {
 
@@ -42,7 +39,7 @@ object ZuoraCatalogWireModel {
     def toParsedPlan(planIdFor: ProductRatePlanId => Option[PlanId]): Option[PlanWithPrice] = {
       val planId = planIdFor(ProductRatePlanId(id))
 
-      planId map { planId =>
+      planId flatMap { planId =>
         def toMinorUnits(amount: Double) = AmountMinorUnits((amount * 100).toInt)
 
         val allPrices = for {
@@ -52,8 +49,7 @@ object ZuoraCatalogWireModel {
 
         val gbpAmounts = allPrices.collect { case Price(Some(amount), "GBP") => amount }
         val totalPrice = if (gbpAmounts.isEmpty) None else Some(toMinorUnits(gbpAmounts.sum))
-        PlanWithPrice(planId, totalPrice)
-
+        totalPrice.map(price => PlanWithPrice(planId, price))
       }
     }
   }
@@ -77,37 +73,36 @@ object ZuoraCatalogWireModel {
   case class ZuoraCatalog(
     products: List[Product]
   ) {
-    def toParsedPlans(planIdFor: ProductRatePlanId => Option[PlanId]): List[PlanWithPrice] = for {
-      product <- products
-      rateplan <- product.productRatePlans
-      parsedPlan <- rateplan.toParsedPlan(planIdFor).toList
-    } yield parsedPlan
+    def toParsedPlans(planIdFor: ProductRatePlanId => Option[PlanId]): Map[PlanId, AmountMinorUnits] = {
+      val plansWithPrice = for {
+        product <- products
+        rateplan <- product.productRatePlans
+        parsedPlan <- rateplan.toParsedPlan(planIdFor).toList
+      } yield parsedPlan
+      plansWithPrice.map(x => x.planId -> x.maybepriceMinorUnits).toMap
+    }
   }
 
   object ZuoraCatalog {
     implicit val reads = Json.reads[ZuoraCatalog]
   }
-
 }
 
-object PricesFromZuoraCatalog extends Logging {
-
-  import ZuoraCatalogWireModel._
+object PricesFromZuoraCatalog {
 
   def apply(
     zuoraEnvironment: ZuoraEnvironment,
     fetchString: StringFromS3,
     planIdFor: ProductRatePlanId => Option[PlanId]
-  ): ClientFailableOp[List[PlanWithPrice]] = (for {
-    catalogString <- fetchString(S3Location(bucket = "gu-zuora-catalog", key = s"PROD/Zuora-${zuoraEnvironment.value}/catalog.json"))
-    jsonCatalog <- Try(Json.parse(catalogString))
-    wireCatalog <- Try(jsonCatalog.as[ZuoraCatalog])
-    parsed = wireCatalog.toParsedPlans(planIdFor)
-  } yield parsed) match { //TODO SEE IF WE ALREADY HAVE THIS CONVERSION SOMEWHERE AND IF NOT MOVE IT
-    case Success(plansWithPrice) => ClientSuccess(plansWithPrice)
-    case Failure(exception) => {
-      logger.error("could not load prices from zuora", exception)
-      GenericError(exception.getMessage)
-    }
+  ): ClientFailableOp[Map[PlanId, AmountMinorUnits]] = {
+
+    val tryPrices = for {
+      catalogString <- fetchString(S3Location(bucket = "gu-zuora-catalog", key = s"PROD/Zuora-${zuoraEnvironment.value}/catalog.json"))
+      jsonCatalog <- Try(Json.parse(catalogString))
+      wireCatalog <- Try(jsonCatalog.as[ZuoraCatalog])
+      parsed = wireCatalog.toParsedPlans(planIdFor)
+    } yield parsed
+
+    tryPrices.toClientFailable(action = "get prices from zuora")
   }
 }

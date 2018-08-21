@@ -76,9 +76,7 @@ object PlanId {
 
 case class AmountMinorUnits(value: Int) extends AnyVal
 
-case class Plan(id: PlanId, startDateRules: StartDateRules = StartDateRules(), paymentPlan: Option[PaymentPlan] = None)
-
-case class PaymentPlan(description: String)
+case class Plan(id: PlanId, startDateRules: StartDateRules = StartDateRules())
 
 case class DelayDays(value: Int) extends AnyVal
 
