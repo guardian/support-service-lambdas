@@ -101,25 +101,26 @@ object WireModel {
     implicit val writes = Json.writes[WireCatalog]
 
     def fromCatalog(catalog: Catalog, priceFor: PlanId => Option[AmountMinorUnits]) = {
+      val toWirePlan: (Plan, String) => WirePlanInfo = WirePlanInfo.fromPlan(_, _, priceFor)
       val voucherProduct = WireProduct(
         label = "Voucher",
         plans = List(
-          WirePlanInfo.fromPlan(catalog.voucherEveryDay, "Every day", priceFor),
-          WirePlanInfo.fromPlan(catalog.voucherEveryDayPlus, "Every day+", priceFor),
-          WirePlanInfo.fromPlan(catalog.voucherSaturday, "Saturday", priceFor),
-          WirePlanInfo.fromPlan(catalog.voucherSaturdayPlus, "Saturday+", priceFor),
-          WirePlanInfo.fromPlan(catalog.voucherSixDay, "Six day", priceFor),
-          WirePlanInfo.fromPlan(catalog.voucherSixDayPlus, "Six day+", priceFor),
-          WirePlanInfo.fromPlan(catalog.voucherSunday, "Sunday", priceFor),
-          WirePlanInfo.fromPlan(catalog.voucherSundayPlus, "Sunday+", priceFor),
-          WirePlanInfo.fromPlan(catalog.voucherWeekend, "Weekend", priceFor),
-          WirePlanInfo.fromPlan(catalog.voucherWeekendPlus, "Weekend+", priceFor)
+          toWirePlan(catalog.voucherEveryDay, "Every day"),
+          toWirePlan(catalog.voucherEveryDayPlus, "Every day+"),
+          toWirePlan(catalog.voucherSaturday, "Saturday"),
+          toWirePlan(catalog.voucherSaturdayPlus, "Saturday+"),
+          toWirePlan(catalog.voucherSixDay, "Six day"),
+          toWirePlan(catalog.voucherSixDayPlus, "Six day+"),
+          toWirePlan(catalog.voucherSunday, "Sunday"),
+          toWirePlan(catalog.voucherSundayPlus, "Sunday+"),
+          toWirePlan(catalog.voucherWeekend, "Weekend"),
+          toWirePlan(catalog.voucherWeekendPlus, "Weekend+")
         )
       )
       val contributionProduct = WireProduct(
         label = "Contribution",
         plans = List(
-          WirePlanInfo.fromPlan(catalog.monthlyContribution, "Monthly", priceFor)
+          toWirePlan(catalog.monthlyContribution, "Monthly")
         )
       )
       WireCatalog(List(contributionProduct, voucherProduct))
