@@ -1,14 +1,12 @@
 package com.gu.sf_contact_merge.update
 
-import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
-import com.gu.sf_contact_merge.getaccounts.GetContacts
-import com.gu.sf_contact_merge.getaccounts.GetContacts.AccountId
+import com.gu.sf_contact_merge.getaccounts.GetEmails.FirstName
 import com.gu.sf_contact_merge.update.UpdateAccountSFLinks.{CRMAccountId, LinksFromZuora}
+import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId.{IdentityId, SFContactUpdate}
 import com.gu.util.resthttp.Types
 import com.gu.util.resthttp.Types.ClientSuccess
 import org.scalatest.{FlatSpec, Matchers}
-import scalaz.NonEmptyList
 
 class UpdateStepsTest extends FlatSpec with Matchers {
 
@@ -16,31 +14,22 @@ class UpdateStepsTest extends FlatSpec with Matchers {
 
     var order = List[String]()
 
-    def setOrClearIdentityId(sfContactId: SFContactId, idid: Option[IdentityId]): Types.ClientFailableOp[Unit] = {
+    def setOrClearIdentityId(sfContactId: SFContactId, idid: Option[SFContactUpdate]): Types.ClientFailableOp[Unit] = {
       order = (idid match {
         case None => s"clear ${sfContactId.value}"
-        case Some(IdentityId("newIdentityId")) => "addidentity"
-        case Some(IdentityId(other)) => s"try to set identity id to: <$other>"
+        case Some(SFContactUpdate(IdentityId("newIdentityId"), FirstName("hello"))) => "addidentity"
+        case Some(other) => s"try to set identity id to: <$other>"
       }) :: order
       ClientSuccess(())
     }
-
-    def updateAccountSFLinks(SFPointer: LinksFromZuora)(acId: GetContacts.AccountId): Types.ClientFailableOp[Unit] = {
-      acId should be(AccountId("account1"))
-      order = "doLink" :: order
-      ClientSuccess(())
-    }
-
-    val accountIds: NonEmptyList[GetContacts.AccountId] =
-      NonEmptyList(AccountId("account1"))
 
     val maybeIdentityId: Option[IdentityId] = None
     val sfPointer = LinksFromZuora(SFContactId("contnew"), CRMAccountId("crmcrm"), maybeIdentityId)
     val maybeContactId = Some(SFContactId("contold"))
 
-    val actual = UpdateSteps(setOrClearIdentityId, updateAccountSFLinks, sfPointer, maybeContactId, accountIds)
+    val actual = MoveIdentityId(setOrClearIdentityId)(sfPointer, maybeContactId, FirstName("hello"))
 
-    order.reverse should be(List("doLink", "clear contold"))
+    order.reverse should be(List("clear contold"))
     actual should be(ClientSuccess(()))
   }
 
@@ -48,11 +37,11 @@ class UpdateStepsTest extends FlatSpec with Matchers {
 
     var order = List[String]()
 
-    def setOrClearIdentityId(sfContactId: SFContactId, idid: Option[IdentityId]): Types.ClientFailableOp[Unit] = {
+    def setOrClearIdentityId(sfContactId: SFContactId, idid: Option[SFContactUpdate]): Types.ClientFailableOp[Unit] = {
       order = (idid match {
         case None => "clear"
-        case Some(IdentityId("newIdentityId")) => s"addidentity ${sfContactId.value}"
-        case Some(IdentityId(other)) => s"try to set identity id to: <$other>"
+        case Some(SFContactUpdate(IdentityId("newIdentityId"), FirstName("hello"))) => s"addidentity ${sfContactId.value}"
+        case Some(other) => s"try to set identity id to: <$other>"
       }) :: order
       ClientSuccess(())
     }
@@ -61,21 +50,11 @@ class UpdateStepsTest extends FlatSpec with Matchers {
 
     val sfPointer = LinksFromZuora(SFContactId("contnew"), CRMAccountId("crmcrm"), maybeIdentityId)
 
-    def updateAccountSFLinks(actualSFPointer: LinksFromZuora)(acId: GetContacts.AccountId): Types.ClientFailableOp[Unit] = {
-      actualSFPointer should be(sfPointer)
-      acId should be(AccountId("account1"))
-      order = "doLink" :: order
-      ClientSuccess(())
-    }
-
-    val accountIds: NonEmptyList[GetContacts.AccountId] =
-      NonEmptyList(AccountId("account1"))
-
     val maybeContactId = Some(SFContactId("contold"))
 
-    val actual = UpdateSteps(setOrClearIdentityId, updateAccountSFLinks, sfPointer, maybeContactId, accountIds)
+    val actual = MoveIdentityId(setOrClearIdentityId)(sfPointer, maybeContactId, FirstName("hello"))
 
-    order.reverse should be(List("doLink", "clear", "addidentity contnew"))
+    order.reverse should be(List("clear", "addidentity contnew"))
     actual should be(ClientSuccess(()))
   }
 

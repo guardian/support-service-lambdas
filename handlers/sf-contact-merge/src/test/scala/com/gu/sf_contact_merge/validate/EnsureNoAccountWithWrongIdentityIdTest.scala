@@ -1,6 +1,6 @@
 package com.gu.sf_contact_merge.validate
 
-import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
+import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId.IdentityId
 import org.scalatest.{FlatSpec, Matchers}
 
 class EnsureNoAccountWithWrongIdentityIdTest extends FlatSpec with Matchers {
@@ -10,7 +10,7 @@ class EnsureNoAccountWithWrongIdentityIdTest extends FlatSpec with Matchers {
     val existingAccounts = List(Some(IdentityId("newidid")))
     val newIdentityId = Some(IdentityId("newidid"))
 
-    val actual = EnsureNoAccountWithWrongIdentityId(existingAccounts, newIdentityId)
+    val actual = EnsureNoAccountWithWrongIdentityId.apply(existingAccounts, newIdentityId)
 
     actual should be(None)
   }
@@ -20,7 +20,7 @@ class EnsureNoAccountWithWrongIdentityIdTest extends FlatSpec with Matchers {
     val existingAccounts = List(None)
     val newIdentityId = Some(IdentityId("newidid"))
 
-    val actual = EnsureNoAccountWithWrongIdentityId(existingAccounts, newIdentityId)
+    val actual = EnsureNoAccountWithWrongIdentityId.apply(existingAccounts, newIdentityId)
 
     actual should be(None)
   }
@@ -30,7 +30,7 @@ class EnsureNoAccountWithWrongIdentityIdTest extends FlatSpec with Matchers {
     val existingAccounts = List(None)
     val newIdentityId = None
 
-    val actual = EnsureNoAccountWithWrongIdentityId(existingAccounts, newIdentityId)
+    val actual = EnsureNoAccountWithWrongIdentityId.apply(existingAccounts, newIdentityId)
 
     actual should be(None)
   }
@@ -40,7 +40,7 @@ class EnsureNoAccountWithWrongIdentityIdTest extends FlatSpec with Matchers {
     val existingAccounts = List(Some(IdentityId("existingidid")))
     val newIdentityId = Some(IdentityId("newidid"))
 
-    val actual = EnsureNoAccountWithWrongIdentityId(existingAccounts, newIdentityId)
+    val actual = EnsureNoAccountWithWrongIdentityId.apply(existingAccounts, newIdentityId)
 
     actual.map(_.split(":")(0)) should be(Some("one of the accounts had an unexpected identity id other than"))
   }
@@ -50,7 +50,7 @@ class EnsureNoAccountWithWrongIdentityIdTest extends FlatSpec with Matchers {
     val existingAccounts = List(Some(IdentityId("existingidid")))
     val newIdentityId = None
 
-    val actual = EnsureNoAccountWithWrongIdentityId(existingAccounts, newIdentityId)
+    val actual = EnsureNoAccountWithWrongIdentityId.apply(existingAccounts, newIdentityId)
 
     actual.map(_.split(":")(0)) should be(Some("one of the accounts had an identity id but will lose it"))
   }

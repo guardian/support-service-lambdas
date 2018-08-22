@@ -1,6 +1,6 @@
 package com.gu.sf_contact_merge.getaccounts
 
-import com.gu.sf_contact_merge.getaccounts.GetEmails.{ContactId, EmailAddress}
+import com.gu.sf_contact_merge.getaccounts.GetEmails.{ContactId, EmailAddress, FirstName, LastName, Record}
 import com.gu.util.resthttp.Types.ClientSuccess
 import com.gu.zuora.fake.FakeZuoraQuerier
 import org.scalatest.{FlatSpec, Matchers}
@@ -12,7 +12,7 @@ class GetEmailsTest extends FlatSpec with Matchers {
 
   it should "handle an email and a missing email with a fake querier" in {
 
-    val expectedQuery = """SELECT Id, WorkEmail FROM Contact WHERE Id = 'cid1' or Id = 'cid2'"""
+    val expectedQuery = """SELECT Id, WorkEmail, FirstName, LastName FROM Contact WHERE Id = 'cid1' or Id = 'cid2'"""
 
     val querier = FakeZuoraQuerier(expectedQuery, contactQueryResponse)
 
@@ -21,7 +21,10 @@ class GetEmailsTest extends FlatSpec with Matchers {
       ContactId("cid2")
     ))
 
-    val expectedEmails = Map(ContactId("cid1") -> Some(EmailAddress("peppa.pig@guardian.co.uk")), ContactId("cid2") -> None)
+    val expectedEmails = Map(
+      ContactId("cid1") -> Record(Some(EmailAddress("peppa.pig@guardian.co.uk")), Some(FirstName("peppa")), LastName("pig")),
+      ContactId("cid2") -> Record(None, None, LastName("pig"))
+    )
     actual should be(ClientSuccess(expectedEmails))
 
   }
@@ -35,10 +38,14 @@ object GetEmailsTest {
       |    "records": [
       |        {
       |            "WorkEmail": "peppa.pig@guardian.co.uk",
-      |            "Id": "cid1"
+      |            "Id": "cid1",
+      |            "FirstName": "peppa",
+      |            "LastName": "pig"
       |        },
       |        {
-      |            "Id": "cid2"
+      |            "Id": "cid2",
+      |            "FirstName": ".",
+      |            "LastName": "pig"
       |        }
       |    ],
       |    "size": 2,

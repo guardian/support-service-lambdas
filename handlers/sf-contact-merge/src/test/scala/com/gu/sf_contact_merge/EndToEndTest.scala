@@ -90,7 +90,7 @@ object EndToEndTest {
 
   val contactQueryRequest =
     """{"queryString":"
-      |SELECT Id, WorkEmail FROM Contact WHERE Id = '2c92c0f8644618e30164652a55986e21' or Id = '2c92c0f9624bbc5f016253e5739b0b17'
+      |SELECT Id, WorkEmail, FirstName, LastName FROM Contact WHERE Id = '2c92c0f8644618e30164652a55986e21' or Id = '2c92c0f9624bbc5f016253e5739b0b17'
       |"}""".stripMargin.replaceAll("""\n""", "")
 
   val contactQueryResponse =
@@ -98,11 +98,15 @@ object EndToEndTest {
       |    "records": [
       |        {
       |            "WorkEmail": "peppa.pig@guardian.co.uk",
-      |            "Id": "2c92c0f8644618e30164652a55986e21"
+      |            "Id": "2c92c0f8644618e30164652a55986e21",
+      |            "FirstName": "peppa",
+      |            "LastName": "pig"
       |        },
       |        {
       |            "WorkEmail": "peppa.pig@guardian.co.uk",
-      |            "Id": "2c92c0f9624bbc5f016253e5739b0b17"
+      |            "Id": "2c92c0f9624bbc5f016253e5739b0b17",
+      |            "FirstName": "peppa",
+      |            "LastName": "pig"
       |        }
       |    ],
       |    "size": 2,
@@ -120,7 +124,7 @@ object EndToEndTest {
 
   val updateAccountRequestBody = """{"crmId":"sfacc","sfContactId__c":"newSFCont","IdentityId__c":"identest"}"""
   val removeIdentityBody = """{"IdentityID__c":""}"""
-  val addIdentityBody = """{"IdentityID__c":"identest"}"""
+  val addIdentityBody = """{"IdentityID__c":"identest","FirstName":"peppa"}"""
 
   val updateAccountResponse = HTTPResponse(200, """{"Success": true}""")
 
