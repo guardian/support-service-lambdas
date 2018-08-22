@@ -34,13 +34,14 @@ object RunBatch {
 
     val result = for {
       args <- GetArgs(rawArgs)
-      postIt = HttpOp(Http.response).setupRequest(post(args.apiKey))
+      postString = HttpOp(Http.response).setupRequest(post(args.apiKey))
       jsons <- ReadFile(args.fileName)
-      updateIt = postIt.setupRequest[JsonString](a => BodyAsString(a.value))
-      requestWithResultAsTry = (updateIt.runRequest _) andThen {
-        case ClientSuccess(unit) => \/-(())
-        case f: ClientFailure => -\/(s"failed to call sf contact merge: $f")
-      }
+      postJsonString = postString.setupRequest[JsonString](jsonString => BodyAsString(jsonString.value))
+      requestWithResultAsTry = (jsonString: JsonString) =>
+        postJsonString.runRequest(jsonString) match {
+          case ClientSuccess(unit) => \/-(())
+          case f: ClientFailure => -\/(s"failed to call sf contact merge: $f")
+        }
       err <- jsons.traverseU(requestWithResultAsTry)
     } yield err
 
