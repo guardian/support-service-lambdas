@@ -2,10 +2,10 @@ package com.gu.newproduct.api.addsubscription.zuora
 
 import java.time.LocalDate
 
-import com.gu.newproduct.api.addsubscription.ZuoraIds.{PlanAndCharge, ProductRatePlanChargeId, ProductRatePlanId}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.WireModel.{ChargeOverrides, SubscribeToRatePlans, WireCreateRequest, WireSubscription}
-import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{ZuoraCreateSubRequest, SubscriptionName}
+import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{ChargeOverride, SubscriptionName, ZuoraCreateSubRequest}
 import com.gu.newproduct.api.addsubscription._
+import com.gu.newproduct.api.productcatalog.ZuoraIds.{PlanAndCharge, ProductRatePlanChargeId, ProductRatePlanId}
 import com.gu.util.resthttp.RestRequestMaker.{RequestsPost, WithCheck}
 import com.gu.util.resthttp.Types.{ClientSuccess, GenericError}
 import org.scalatest.{FlatSpec, Matchers}
@@ -42,15 +42,20 @@ class CreateSubscriptionTest extends FlatSpec with Matchers {
       case in => GenericError(s"bad request: $in")
     }
     val createReq = ZuoraCreateSubRequest(
+      productRatePlanId = ids.productRatePlanId,
       accountId = ZuoraAccountId("zac"),
-      amountMinorUnits = AmountMinorUnits(125),
+      maybeChargeOverride = Some(ChargeOverride(
+        AmountMinorUnits(125),
+        ids.productRatePlanChargeId
+      )),
+
       effectiveDate = LocalDate.of(2018, 7, 17),
       acceptanceDate = LocalDate.of(2018, 7, 27),
       acquisitionCase = CaseId("casecase"),
       acquisitionSource = AcquisitionSource("sourcesource"),
       createdByCSR = CreatedByCSR("csrcsr")
     )
-    val actual = CreateSubscription(ids, accF)(createReq)
+    val actual = CreateSubscription(accF)(createReq)
     actual shouldBe ClientSuccess(SubscriptionName("a-s123"))
   }
 }

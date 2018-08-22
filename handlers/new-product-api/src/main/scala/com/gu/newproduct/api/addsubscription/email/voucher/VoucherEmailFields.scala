@@ -14,7 +14,6 @@ import com.gu.newproduct.api.productcatalog.PlanId._
 
 object VoucherEmailFields {
 
-
   val digipackPlans = List(VoucherWeekendPlus, VoucherEveryDayPlus, VoucherSixDayPlus, VoucherSundayPlus, VoucherSaturdayPlus)
   val dateformat = DateTimeFormatter.ofPattern("d MMMM yyyy")
 
@@ -24,7 +23,8 @@ object VoucherEmailFields {
     firstPaperDate: LocalDate,
     subscriptionName: SubscriptionName,
     contacts: Contacts,
-    paymentMethod: PaymentMethod) = {
+    paymentMethod: PaymentMethod
+  ) = {
     Map(
       "ZuoraSubscriberId" -> subscriptionName.value,
       "SubscriberKey" -> contacts.soldTo.email.map(_.value).getOrElse(""),
@@ -37,7 +37,6 @@ object VoucherEmailFields {
     ) ++ paymentMethodFields(paymentMethod) ++ addressFields(contacts)
 
   }
-
 
   def toDescription(methodType: PaymentMethodType) = methodType match {
     case CreditCardReferenceTransaction | CreditCard => "Credit/Debit Card"
@@ -82,11 +81,7 @@ object VoucherEmailFields {
     "delivery_country" -> contacts.soldTo.country.name
   )
 
-
 }
 
-
 // https://github.com/guardian/subscriptions-frontend/blob/207bb039ab4a26e6fa2cc23eb5d6b6d842d662df/app/model/exactTarget/DataExtensionRow.scala#L227
-
-
 

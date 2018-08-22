@@ -2,7 +2,6 @@ package com.gu.newproduct
 
 import com.gu.i18n.Country
 import com.gu.i18n.Currency.GBP
-import com.gu.newproduct.api.addsubscription.ZuoraIds.ProductRatePlanId
 import com.gu.newproduct.api.addsubscription.validation.ValidatedAccount
 import com.gu.newproduct.api.addsubscription.validation.contribution.ContributionCustomerData
 import com.gu.newproduct.api.addsubscription.validation.voucher.VoucherCustomerData
@@ -11,6 +10,7 @@ import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.{Acti
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts._
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{BankAccountName, BankAccountNumberMask, DirectDebit, MandateId, SortCode}
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.ActivePaymentMethod
+import com.gu.newproduct.api.productcatalog.ZuoraIds.ProductRatePlanId
 
 object TestData {
   val validatedAccount = ValidatedAccount(

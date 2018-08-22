@@ -19,10 +19,12 @@ Mappings:
             ApiName: new-product-api-CODE
             DomainName: new-product-api-code.membership.guardianapis.com
             ApiGatewayTargetDomainName: d-ecyddyj7nk.execute-api.eu-west-1.amazonaws.com
+            ZuoraCatalogLocation: arn:aws:s3:::gu-zuora-catalog/PROD/Zuora-UAT/catalog.json
         PROD:
             ApiName: new-product-api-PROD
             DomainName: new-product-api-prod.membership.guardianapis.com
             ApiGatewayTargetDomainName: d-yyh9pmqphi.execute-api.eu-west-1.amazonaws.com
+            ZuoraCatalogLocation: arn:aws:s3:::gu-zuora-catalog/PROD/Zuora-PROD/catalog.json
 
 Resources:
     NewSubscriptionRole:
@@ -86,6 +88,12 @@ Resources:
               - logs:PutLogEvents
               - lambda:InvokeFunction
               Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/product-catalog-${Stage}:log-stream:*"
+        - PolicyName: ReadZuoraCatalog
+          PolicyDocument:
+            Statement:
+            - Effect: Allow
+              Action: s3:GetObject
+              Resource: !FindInMap [ StageMap, !Ref Stage, ZuoraCatalogLocation ]
     AddSubscriptionLambda:
         Type: AWS::Lambda::Function
         Properties:

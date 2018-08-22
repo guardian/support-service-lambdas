@@ -37,7 +37,6 @@ case class Catalog(
 
 object NewProductApi {
   val catalog: Catalog = {
-    def monthlyPayment(priceInPounds: String) = Some(PaymentPlan(s"£$priceInPounds every month"))
 
     val voucherWindowRule = WindowRule(
       maybeCutOffDay = Some(DayOfWeek.TUESDAY),
@@ -59,16 +58,16 @@ object NewProductApi {
     val monthlyContributionRules = StartDateRules(windowRule = Some(monthlyContributionWindow))
 
     Catalog(
-      voucherWeekendPlus = Plan(VoucherWeekendPlus, voucherSaturdayDateRules, monthlyPayment("29.42")),
-      voucherWeekend = Plan(VoucherWeekend, voucherSaturdayDateRules, monthlyPayment("20.76")),
-      voucherSixDay = Plan(VoucherSixDay, voucherMondayRules, monthlyPayment("41.12")),
-      voucherSixDayPlus = Plan(VoucherSixDayPlus, voucherMondayRules, monthlyPayment("47.62")),
-      voucherEveryDay = Plan(VoucherEveryDay, voucherMondayRules, monthlyPayment("47.62")),
-      voucherEveryDayPlus = Plan(VoucherEveryDayPlus, voucherMondayRules, monthlyPayment("51.96")),
-      voucherSaturday = Plan(VoucherSaturday, voucherSaturdayDateRules, monthlyPayment("10.36")),
-      voucherSaturdayPlus = Plan(VoucherSaturdayPlus, voucherSaturdayDateRules, monthlyPayment("21.62")),
-      voucherSunday = Plan(VoucherSunday, voucherSundayDateRules, monthlyPayment("10.79")),
-      voucherSundayPlus = Plan(VoucherSundayPlus, voucherSundayDateRules, monthlyPayment("22.06")),
+      voucherWeekendPlus = Plan(VoucherWeekendPlus, voucherSaturdayDateRules),
+      voucherWeekend = Plan(VoucherWeekend, voucherSaturdayDateRules),
+      voucherSixDay = Plan(VoucherSixDay, voucherMondayRules),
+      voucherSixDayPlus = Plan(VoucherSixDayPlus, voucherMondayRules),
+      voucherEveryDay = Plan(VoucherEveryDay, voucherMondayRules),
+      voucherEveryDayPlus = Plan(VoucherEveryDayPlus, voucherMondayRules),
+      voucherSaturday = Plan(VoucherSaturday, voucherSaturdayDateRules),
+      voucherSaturdayPlus = Plan(VoucherSaturdayPlus, voucherSaturdayDateRules),
+      voucherSunday = Plan(VoucherSunday, voucherSundayDateRules),
+      voucherSundayPlus = Plan(VoucherSundayPlus, voucherSundayDateRules),
       monthlyContribution = Plan(MonthlyContribution, monthlyContributionRules)
     )
   }
@@ -117,9 +116,7 @@ object PlanId {
   def fromName(name: String): Option[PlanId] = supported.find(_.name == name)
 }
 
-case class Plan(id: PlanId, startDateRules: StartDateRules = StartDateRules(), paymentPlan: Option[PaymentPlan] = None)
-
-case class PaymentPlan(description: String)
+case class Plan(id: PlanId, startDateRules: StartDateRules = StartDateRules())
 
 case class DelayDays(value: Int) extends AnyVal
 
