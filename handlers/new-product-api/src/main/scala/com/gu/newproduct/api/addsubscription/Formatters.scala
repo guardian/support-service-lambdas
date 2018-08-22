@@ -1,6 +1,7 @@
 package com.gu.newproduct.api.addsubscription
 
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.SortCode
+import com.gu.newproduct.api.productcatalog.AmountMinorUnits
 
 object Formatters {
 

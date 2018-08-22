@@ -6,11 +6,12 @@ import com.gu.i18n.Country
 import com.gu.i18n.Currency.GBP
 import com.gu.newproduct.api.addsubscription.email.contributions.SendConfirmationEmailContributions.ContributionsEmailData
 import com.gu.newproduct.api.addsubscription.email.{CContactAttributes, CTo, ETPayload}
-import com.gu.newproduct.api.addsubscription.zuora.GetContacts.{BilltoContact, Email, FirstName, LastName}
+import com.gu.newproduct.api.addsubscription.zuora.GetContacts._
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{BankAccountName, BankAccountNumberMask, DirectDebit, MandateId, NonDirectDebitMethod, SortCode}
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.ActivePaymentMethod
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType.CreditCard
-import com.gu.newproduct.api.addsubscription.{AmountMinorUnits, ZuoraAccountId}
+import com.gu.newproduct.api.addsubscription.ZuoraAccountId
+import com.gu.newproduct.api.productcatalog.AmountMinorUnits
 import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
 import org.scalatest.{FlatSpec, Matchers}
 
@@ -22,11 +23,19 @@ class SendConfirmationEmailContributionsTest extends FlatSpec with Matchers {
 
   def today = () => LocalDate.of(2018, 7, 30)
 
-  val testContact = BilltoContact(
-    FirstName("Marty"),
-    LastName("McFly"),
+  val testContact = BillToContact(
+    title = None,
+    firstName = FirstName("Marty"),
+    lastName = LastName("McFly"),
     email = Some(Email("email@email.com")),
-    Some(Country.UK)
+    address = BillToAddress(
+      address1 = None,
+      address2 = None,
+      city = None,
+      state = None,
+      country = Some(Country.UK),
+      postcode = None
+    )
   )
 
   val directDebit = DirectDebit(

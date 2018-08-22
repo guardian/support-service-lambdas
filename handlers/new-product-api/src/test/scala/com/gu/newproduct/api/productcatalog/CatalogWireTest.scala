@@ -1,6 +1,5 @@
 package com.gu.newproduct.api.productcatalog
 
-import com.gu.newproduct.api.addsubscription.AmountMinorUnits
 import com.gu.newproduct.api.productcatalog.PlanId._
 import com.gu.newproduct.api.productcatalog.WireModel._
 import org.scalatest.{FlatSpec, Matchers}
@@ -31,7 +30,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |      "plans": [
         |        {
         |          "id": "voucher_everyday",
-        |          "label": "Every day",
+        |          "label": "Everyday",
         |          "startDateRules": {
         |            "daysOfWeek": [
         |              "Monday"
@@ -46,7 +45,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |        },
         |        {
         |          "id": "voucher_everyday_plus",
-        |          "label": "Every day+",
+        |          "label": "Everyday+",
         |          "startDateRules": {
         |            "daysOfWeek": [
         |              "Monday"
@@ -91,7 +90,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |        },
         |        {
         |          "id": "voucher_sixday",
-        |          "label": "Six day",
+        |          "label": "Sixday",
         |          "startDateRules": {
         |            "daysOfWeek": [
         |              "Monday"
@@ -106,7 +105,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |        },
         |        {
         |          "id": "voucher_sixday_plus",
-        |          "label": "Six day+",
+        |          "label": "Sixday+",
         |          "startDateRules": {
         |            "daysOfWeek": [
         |              "Monday"
@@ -199,7 +198,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
       case MonthlyContribution => None
     }
 
-    val wireCatalog = WireCatalog.fromCatalog(NewProductApi.catalog, fakePricesFor)
+    val wireCatalog = WireCatalog.fromCatalog(NewProductApi.catalog(fakePricesFor))
     Json.toJson(wireCatalog) shouldBe Json.parse(expected)
   }
 }

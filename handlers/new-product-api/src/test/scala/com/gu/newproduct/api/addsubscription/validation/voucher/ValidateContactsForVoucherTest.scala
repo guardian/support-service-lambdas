@@ -8,17 +8,26 @@ import org.scalatest.{FlatSpec, Matchers}
 class ValidateContactsForVoucherTest extends FlatSpec with Matchers {
 
   val testContacts = Contacts(
-    billTo = BilltoContact(
+    billTo = BillToContact(
+      None,
       FirstName("billToName"),
       LastName("billToLastName"),
       None,
-      Some(Country.US)
+      BillToAddress(None, None, None, None, None, None)
     ),
     soldTo = SoldToContact(
+      None,
       FirstName("soldToName"),
       LastName("soldToLastName"),
       Some(Email("work@email.com")),
-      Country.UK
+      SoldToAddress(
+        Some(Address1("soldToAddress1")),
+        Some(Address2("soldToAddress2")),
+        Some(City("soldToCity")),
+        Some(State("soldToState")),
+        Country.UK,
+        Some(Postcode("soldToPostcode"))
+      )
     )
   )
 
@@ -27,9 +36,8 @@ class ValidateContactsForVoucherTest extends FlatSpec with Matchers {
   }
 
   it should "fail if sold to contact is not uk" in {
-    val australianSoldToContacts = testContacts.copy(
-      soldTo = testContacts.soldTo.copy(country = Country.Australia)
-    )
+    val australianAddress = testContacts.soldTo.address.copy(country = Country.Australia)
+    val australianSoldToContacts = testContacts.copy(soldTo = testContacts.soldTo.copy(address = australianAddress))
     ValidateContactsForVoucher(australianSoldToContacts) shouldBe Failed("Invalid country: Australia, only UK addresses are allowed")
   }
 }

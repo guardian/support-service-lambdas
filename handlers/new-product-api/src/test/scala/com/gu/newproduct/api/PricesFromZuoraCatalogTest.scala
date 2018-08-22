@@ -1,15 +1,12 @@
 package com.gu.newproduct.api
 
-import com.gu.newproduct.api.addsubscription.AmountMinorUnits
 import com.gu.newproduct.api.productcatalog.PlanId._
 import com.gu.newproduct.api.productcatalog.ZuoraIds.ProductRatePlanId
-import com.gu.newproduct.api.productcatalog.PricesFromZuoraCatalog
+import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, PricesFromZuoraCatalog}
 import com.gu.util.config.LoadConfigModule.{S3Location, StringFromS3}
 import com.gu.util.config.ZuoraEnvironment
 import com.gu.util.resthttp.Types.ClientSuccess
 import org.scalatest.{FlatSpec, Matchers}
-
-import scala.io.Source
 import scala.util.Try
 
 class PricesFromZuoraCatalogTest extends FlatSpec with Matchers {

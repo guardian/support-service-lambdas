@@ -21,17 +21,33 @@ object TestData {
     currency = GBP
   )
   val contacts = Contacts(
-    billTo = BilltoContact(
-      firstName = FirstName("billToFirstName"),
-      lastName = LastName("billToLastName"),
-      email = Some(Email("billToEmail@mail.com")),
-      country = Some(Country.UK)
+    billTo = BillToContact(
+      Some(Title("billToTitle")),
+      FirstName("billToFirstName"),
+      LastName("billToLastName"),
+      Some(Email("billToEmail@mail.com")),
+      BillToAddress(
+        Some(Address1("billToAddress1")),
+        Some(Address2("billToAddress2")),
+        Some(City("billToCity")),
+        Some(State("billToState")),
+        Some(Country.UK),
+        Some(Postcode("billToPostcode"))
+      )
     ),
     soldTo = SoldToContact(
-      firstName = FirstName("soldToFirstName"),
-      lastName = LastName("soldToLastName"),
-      email = Some(Email("soldtoEmail@mail.com")),
-      country = Country.US
+      Some(Title("soldToTitle")),
+      FirstName("soldToFirstName"),
+      LastName("soldToLastName"),
+      Some(Email("soldToEmail@mail.com")),
+      SoldToAddress(
+        Some(Address1("soldToAddress1")),
+        Some(Address2("soldToAddress2")),
+        Some(City("soldToCity")),
+        Some(State("soldToState")),
+        Country.US,
+        Some(Postcode("soldToPostcode"))
+      )
     )
   )
 

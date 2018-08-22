@@ -2,6 +2,7 @@ package com.gu.newproduct.api.addsubscription
 
 import org.scalatest.{FlatSpec, Matchers}
 import Formatters._
+import com.gu.newproduct.api.productcatalog.AmountMinorUnits
 
 class FormattersTest extends FlatSpec with Matchers {
   it should "format 4 digit amount" in {

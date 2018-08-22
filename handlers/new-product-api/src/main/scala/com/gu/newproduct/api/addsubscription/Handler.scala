@@ -21,20 +21,20 @@ import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.WireModel.
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{ChargeOverride, SubscriptionName, ZuoraCreateSubRequest}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAccount
 import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.WireModel.ZuoraSubscriptionsResponse
-import com.gu.newproduct.api.addsubscription.zuora.GetContacts.BilltoContact
+import com.gu.newproduct.api.addsubscription.zuora.GetContacts.BillToContact
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.WireModel.GetContactsResponse
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{DirectDebit, PaymentMethod, PaymentMethodWire}
 import com.gu.newproduct.api.addsubscription.zuora.{GetContacts, _}
 import com.gu.newproduct.api.productcatalog.PlanId.MonthlyContribution
 import com.gu.newproduct.api.productcatalog.ZuoraIds.{PlanAndCharge, ProductRatePlanId}
-import com.gu.newproduct.api.productcatalog.{DateRule, NewProductApi, PlanId, ZuoraIds}
+import com.gu.newproduct.api.productcatalog._
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.ApiGatewayResponse.internalServerError
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.config.LoadConfigModule.StringFromS3
-import com.gu.util.config.{LoadConfigModule, Stage}
+import com.gu.util.config.{LoadConfigModule, Stage, ZuoraEnvironment}
 import com.gu.util.reader.AsyncTypes._
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.RestRequestMaker.Requests
@@ -79,7 +79,7 @@ object Steps {
     currency: Currency,
     paymentMethod: PaymentMethod,
     firstPaymentDate: LocalDate,
-    billToContact: BilltoContact,
+    billToContact: BillToContact,
     amountMinorUnits: AmountMinorUnits
   ) =
     ContributionsEmailData(
@@ -155,9 +155,13 @@ object Steps {
       contributionsSqsSend = EtSqsSend[ContributionFields](sqsSend) _
       getCurrentDate = () => RawEffects.now().toLocalDate
       validatorFor = DateValidator.validatorFor(getCurrentDate, _: DateRule)
+      zuoraToPlanId = zuoraIds.voucherZuoraIds.zuoraIdToPlanid.get _
+      zuoraEnv = ZuoraEnvironment.EnvForStage(stage)
+      plansWithPrice <- PricesFromZuoraCatalog(zuoraEnv, fetchString, zuoraToPlanId).toApiGatewayOp("get prices from zuora catalog")
+      catalog = NewProductApi.catalog(plansWithPrice.get)
 
       isValidStartDateForPlan = Function.uncurried(
-        NewProductApi.catalog.planForId andThen { plan =>
+        catalog.planForId andThen { plan =>
           StartDateValidator.fromRule(validatorFor, plan.startDateRules)
         }
       )
