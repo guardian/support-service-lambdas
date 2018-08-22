@@ -155,8 +155,14 @@ object RestRequestMaker extends Logging {
     createBodyFromJs(Json.toJson(req))
   }
 
+  case class BodyAsString(value: String) extends AnyVal
+
   def createBodyFromJs(req: JsValue) = {
-    RequestBody.create(MediaType.parse("application/json"), Json.stringify(req))
+    val bodyAsString = BodyAsString(Json.stringify(req))
+    createBodyFromString(bodyAsString)
   }
 
+  def createBodyFromString(bodyAsString: BodyAsString): RequestBody = {
+    RequestBody.create(MediaType.parse("application/json"), bodyAsString.value)
+  }
 }
