@@ -1,6 +1,7 @@
 package com.gu.newproduct.api.addsubscription
 
 import com.gu.newproduct.api.addsubscription.validation.{Failed, Passed, ValidationResult}
+import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.reader.AsyncTypes._
@@ -9,6 +10,7 @@ import com.gu.util.reader.Types._
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError, NotFound}
 
 import scala.concurrent.Future
+import scala.util.{Failure, Success, Try}
 
 object TypeConvert {
 
@@ -45,6 +47,14 @@ object TypeConvert {
     def toClientFailable(errorMessage: String) = option match {
       case None => GenericError(errorMessage)
       case Some(value) => ClientSuccess(value)
+    }
+  }
+
+  implicit class TryToClientFailableOp[A](tryValue: Try[A]) extends Logging {
+    def toClientFailable(action: String) = tryValue match {
+      case Success(response) => ClientSuccess(response)
+      case Failure(exception) => GenericError(s"exception thrown while trying to $action : ${exception.toString}")
+
     }
   }
 

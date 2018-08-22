@@ -9,7 +9,6 @@ import com.gu.effects.sqs.AwsSQSSend.QueueName
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.i18n.Currency
 import com.gu.newproduct.api.addsubscription.TypeConvert._
-import com.gu.newproduct.api.addsubscription.ZuoraIds.{PlanAndCharge, ProductRatePlanId}
 import com.gu.newproduct.api.addsubscription.email.EtSqsSend
 import com.gu.newproduct.api.addsubscription.email.contributions.SendConfirmationEmailContributions.ContributionsEmailData
 import com.gu.newproduct.api.addsubscription.email.contributions.{ContributionFields, SendConfirmationEmailContributions}
@@ -27,7 +26,8 @@ import com.gu.newproduct.api.addsubscription.zuora.GetContacts.WireModel.GetCont
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{DirectDebit, PaymentMethod, PaymentMethodWire}
 import com.gu.newproduct.api.addsubscription.zuora.{GetContacts, _}
 import com.gu.newproduct.api.productcatalog.PlanId.MonthlyContribution
-import com.gu.newproduct.api.productcatalog.{DateRule, NewProductApi, PlanId}
+import com.gu.newproduct.api.productcatalog.ZuoraIds.{PlanAndCharge, ProductRatePlanId}
+import com.gu.newproduct.api.productcatalog.{DateRule, NewProductApi, PlanId, ZuoraIds}
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.ApiGatewayResponse.internalServerError

@@ -4,7 +4,7 @@ import java.time.LocalDate
 
 import com.gu.i18n.Currency
 import com.gu.i18n.Currency._
-import com.gu.newproduct.api.addsubscription._
+import com.gu.newproduct.api.addsubscription.AmountMinorUnits
 import com.gu.newproduct.api.addsubscription.validation.contribution.ContributionValidations.ValidatableFields
 import com.gu.newproduct.api.addsubscription.validation.{AmountLimits, Failed, Passed, ValidationResult}
 import org.scalatest.{FlatSpec, Matchers}

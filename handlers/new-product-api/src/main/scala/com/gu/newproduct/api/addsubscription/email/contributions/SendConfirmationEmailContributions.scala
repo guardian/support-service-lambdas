@@ -2,7 +2,6 @@ package com.gu.newproduct.api.addsubscription.email.contributions
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-
 import com.gu.i18n.Currency
 import com.gu.newproduct.api.addsubscription.email.{DataExtensionName, ETPayload}
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.BilltoContact
@@ -12,7 +11,7 @@ import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.AsyncTypes._
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
-
+import com.gu.newproduct.api.addsubscription.Formatters._
 import scala.concurrent.Future
 
 object SendConfirmationEmailContributions extends Logging {
@@ -51,8 +50,6 @@ object SendConfirmationEmailContributions extends Logging {
 
   def hyphenate(s: String) = s"${s.substring(0, 2)}-${s.substring(2, 4)}-${s.substring(4, 6)}"
 
-  def formatAmount(amount: AmountMinorUnits) = (amount.value / BigDecimal(100)).bigDecimal.stripTrailingZeros.toPlainString
-
   val firstPaymentDateFormat = DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy")
 
   def toContributionFields(currentDate: LocalDate, data: ContributionsEmailData): Option[ContributionFields] = {
@@ -65,7 +62,7 @@ object SendConfirmationEmailContributions extends Logging {
       ContributionFields(
         EmailAddress = email.value,
         created = currentDate.toString,
-        amount = formatAmount(data.amountMinorUnits),
+        amount = data.amountMinorUnits.formatted,
         currency = data.currency.glyph,
         edition = data.billTo.country.map(_.alpha2).getOrElse(""),
         name = data.billTo.firstName.value,

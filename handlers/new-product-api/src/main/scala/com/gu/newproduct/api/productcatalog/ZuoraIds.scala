@@ -1,11 +1,9 @@
-package com.gu.newproduct.api.addsubscription
+package com.gu.newproduct.api.productcatalog
 
-import com.gu.newproduct.api.productcatalog.PlanId
 import com.gu.newproduct.api.productcatalog.PlanId._
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.config.Stage
-import com.gu.util.reader.Types.{ApiGatewayOp, _}
-
+import com.gu.util.reader.Types.{ApiGatewayOp, OptionOps}
 object ZuoraIds {
 
   case class ProductRatePlanId(value: String) extends AnyVal
@@ -40,6 +38,8 @@ object ZuoraIds {
       VoucherSundayPlus -> sundayPlus,
       VoucherSaturdayPlus -> saturdayPlus
     )
+
+    val zuoraIdToPlanid = byApiPlanId.map(_.swap)
 
   }
 
