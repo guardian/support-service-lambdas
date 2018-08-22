@@ -13,6 +13,8 @@ case class HttpOp[PARAM](
   def runRequest(in: PARAM): ClientFailableOp[Unit] =
     responseToOutput(effect(inputToRequest(in)))
 
+  // this is effectively "contramap" so it is actually setting it up to run the given function before any previously setup functions
+  // you can learn more about contravariant functors https://www.google.co.uk/search?q=contravariant+functor
   def setupRequest[UPDATEDPARAM](function: UPDATEDPARAM => PARAM): HttpOp[UPDATEDPARAM] =
     HttpOp(function.andThen(inputToRequest), effect, responseToOutput)
 
