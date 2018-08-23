@@ -86,13 +86,16 @@ object DomainSteps {
       _ <- validateIdentityIds(accountAndEmails.map(_.identityId), mergeRequest.sFPointer.identityId)
         .toApiGatewayReturnResponse(ApiGatewayResponse.notFound)
       _ <- validateLastNames(accountAndEmails.map(_.lastName))
-      firstNameToUse <- getFirstNameToUse(mergeRequest.sFPointer.sfContactId, accountAndEmails)
+      firstNameToUse <- GetFirstNameToUse(mergeRequest.sFPointer.sfContactId, accountAndEmails)
       oldContact = accountAndEmails.find(_.identityId.isDefined).map(_.sfContactId).map(OldSFContact.apply)
       _ <- mergeRequest.zuoraAccountIds.traverseU(updateAccountSFLinks(mergeRequest.sFPointer))
         .toApiGatewayOp("update accounts with winning details")
       _ <- update(mergeRequest.sFPointer, oldContact, firstNameToUse)
         .toApiGatewayOp("update sf contact(s) to force a sync")
     } yield ApiGatewayResponse.successfulExecution).apiResponse
+}
+
+object GetFirstNameToUse {
 
   case class NameForIdentityId(identityId: Option[IdentityId], firstName: Option[FirstName])
   def firstNameForIdentityAccount(namesForIdentityIds: List[NameForIdentityId]): Option[FirstName] = {
@@ -112,7 +115,7 @@ object DomainSteps {
     }
   }
 
-  def getFirstNameToUse(sfContactId: SFContactId, accountAndEmails: List[IdentityAndSFContactAndEmail]): ApiGatewayOp[FirstName] = {
+  def apply(sfContactId: SFContactId, accountAndEmails: List[IdentityAndSFContactAndEmail]): ApiGatewayOp[FirstName] = {
     val nameForIdentityIds = accountAndEmails.map { info => NameForIdentityId(info.identityId, info.firstName) }
     val maybeIdentityFirstName = firstNameForIdentityAccount(nameForIdentityIds)
     val nameForContactIds = accountAndEmails.map { info => NameForContactId(info.sfContactId, info.firstName) }
