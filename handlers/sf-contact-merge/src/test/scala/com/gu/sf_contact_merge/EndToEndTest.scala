@@ -90,7 +90,9 @@ object EndToEndTest {
 
   val contactQueryRequest =
     """{"queryString":"
-      |SELECT Id, WorkEmail, FirstName, LastName FROM Contact WHERE Id = '2c92c0f8644618e30164652a55986e21' or Id = '2c92c0f9624bbc5f016253e5739b0b17'
+      |SELECT Id, WorkEmail, FirstName, LastName
+      | FROM Contact
+      | WHERE Id = '2c92c0f8644618e30164652a55986e21' or Id = '2c92c0f9624bbc5f016253e5739b0b17'
       |"}""".stripMargin.replaceAll("""\n""", "")
 
   val contactQueryResponse =

@@ -23,7 +23,8 @@ object MoveIdentityId {
       }
       _ <- sfPointer.identityId match {
         case Some(identityId) =>
-          setOrClearIdentityId(sfPointer.sfContactId, Some(SFContactUpdate(identityId, firstName))) // this causes the sync to identity and zuora
+          val sFContactUpdate = SFContactUpdate(identityId, firstName)
+          setOrClearIdentityId(sfPointer.sfContactId, Some(sFContactUpdate)) // this causes the sync to identity and zuora
         case None =>
           ClientSuccess(())
       }

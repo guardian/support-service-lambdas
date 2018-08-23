@@ -22,17 +22,21 @@ class UpdateSalesforceIdentityIdEffectsTest extends FlatSpec with Matchers {
     val unique = s"${Random.nextInt(10000)}"
     val testContact = SFEffectsData.updateIdentityIdAndFirstNameContact
 
+    val testIdentityId = IdentityId(s"iden$unique")
+    val testFirstName = FirstName(s"name$unique")
+
     val actual = for {
       sfConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[SFAuthConfig]
       response = RawEffects.response
       auth <- SalesforceAuthenticate.doAuth(response, sfConfig).toDisjunction
       updateSalesforceIdentityId = UpdateSalesforceIdentityId(HttpOp(response).setupRequest(SalesforceRestRequestMaker.patch(auth)))
-      _ <- updateSalesforceIdentityId.runRequestMultiArg(testContact, Some(SFContactUpdate(IdentityId(s"iden$unique"), FirstName(s"name$unique")))).toDisjunction
+      sFContactUpdate = SFContactUpdate(testIdentityId, testFirstName)
+      _ <- updateSalesforceIdentityId.runRequestMultiArg(testContact, Some(sFContactUpdate)).toDisjunction
       getSalesforceIdentityId = GetSalesforceIdentityId(SalesforceRestRequestMaker(auth, response)) _
-      identityId <- getSalesforceIdentityId(testContact).toDisjunction
-    } yield identityId
+      updatedIdentityId <- getSalesforceIdentityId(testContact).toDisjunction
+    } yield updatedIdentityId
 
-    actual should be(\/-((IdentityId(s"iden$unique"), FirstName(s"name$unique"))))
+    actual should be(\/-((testIdentityId, testFirstName)))
 
   }
 

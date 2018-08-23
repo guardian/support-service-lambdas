@@ -113,8 +113,10 @@ object DomainSteps {
   }
 
   def getFirstNameToUse(sfContactId: SFContactId, accountAndEmails: List[IdentityAndSFContactAndEmail]): ApiGatewayOp[FirstName] = {
-    val maybeIdentityFirstName = firstNameForIdentityAccount(accountAndEmails.map { info => NameForIdentityId(info.identityId, info.firstName) })
-    val maybeOldFirstName = firstNameForSFContact(sfContactId, accountAndEmails.map { info => NameForContactId(info.sfContactId, info.firstName) })
+    val nameForIdentityIds = accountAndEmails.map { info => NameForIdentityId(info.identityId, info.firstName) }
+    val maybeIdentityFirstName = firstNameForIdentityAccount(nameForIdentityIds)
+    val nameForContactIds = accountAndEmails.map { info => NameForContactId(info.sfContactId, info.firstName) }
+    val maybeOldFirstName = firstNameForSFContact(sfContactId, nameForContactIds)
     firstNameIfNot(maybeOldFirstName, maybeIdentityFirstName)
   }
 
