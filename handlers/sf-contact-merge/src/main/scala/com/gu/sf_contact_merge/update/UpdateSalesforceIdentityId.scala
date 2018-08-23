@@ -12,13 +12,23 @@ object UpdateSalesforceIdentityId {
   implicit val writes = Json.writes[WireRequest]
 
   case class IdentityId(value: String) extends AnyVal
-  case class SFContactUpdate(identityId: IdentityId, firstName: Option[FirstName])
 
-  def apply(patchOp: HttpOp[PatchRequest]): HttpOp[(SFContactId, Option[SFContactUpdate])] =
+  sealed trait UpdateFirstName
+  case class SetFirstName(firstName: FirstName) extends UpdateFirstName
+  case object DummyFirstName extends UpdateFirstName
+  case object DontChangeFirstName extends UpdateFirstName
+  case class SFContactUpdate(identityId: Option[IdentityId], firstName: UpdateFirstName)
+
+  def apply(patchOp: HttpOp[PatchRequest]): HttpOp[(SFContactId, SFContactUpdate)] =
     patchOp.setupRequestMultiArg(toRequest)
 
-  def toRequest(sFContactId: SFContactId, identityId: Option[SFContactUpdate]): PatchRequest = {
-    val wireRequest = WireRequest(identityId.map(_.identityId.value).getOrElse(""), identityId.map(_.firstName.map(_.value).getOrElse(".")))
+  def toRequest(sFContactId: SFContactId, contactUpdate: SFContactUpdate): PatchRequest = {
+    val maybeFireFirstName = contactUpdate.firstName match {
+      case SetFirstName(firstName) => Some(firstName.value)
+      case DummyFirstName => Some(".")
+      case DontChangeFirstName => None
+    }
+    val wireRequest = WireRequest(contactUpdate.identityId.map(_.value).getOrElse(""), maybeFireFirstName)
     val relativePath = RelativePath(s"/services/data/v20.0/sobjects/Contact/${sFContactId.value}")
     PatchRequest(wireRequest, relativePath)
   }

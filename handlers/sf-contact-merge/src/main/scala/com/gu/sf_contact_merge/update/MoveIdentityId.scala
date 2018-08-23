@@ -4,13 +4,13 @@ import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.sf_contact_merge.getaccounts.GetEmails.FirstName
 import com.gu.sf_contact_merge.update.MoveIdentityId.OldSFContact
 import com.gu.sf_contact_merge.update.UpdateAccountSFLinks.LinksFromZuora
-import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId.SFContactUpdate
+import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId.{DontChangeFirstName, DummyFirstName, SFContactUpdate, SetFirstName}
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess}
 
 object MoveIdentityId {
 
   def apply(
-    setOrClearIdentityId: (SFContactId, Option[SFContactUpdate]) => ClientFailableOp[Unit]
+    setOrClearIdentityId: (SFContactId, SFContactUpdate) => ClientFailableOp[Unit]
   ): MoveIdentityId = (
     sfPointer: LinksFromZuora,
     maybeOldContactId: Option[OldSFContact],
@@ -18,15 +18,15 @@ object MoveIdentityId {
   ) =>
     for {
       _ <- maybeOldContactId match {
-        case Some(oldContactId) => setOrClearIdentityId(oldContactId.sfContactId, None)
+        case Some(oldContactId) => {
+          val sFContactUpdate = SFContactUpdate(None, DontChangeFirstName)
+          setOrClearIdentityId(oldContactId.sfContactId, sFContactUpdate)
+        }
         case None => ClientSuccess(())
       }
-      _ <- sfPointer.identityId match {
-        case Some(identityId) =>
-          val sFContactUpdate = SFContactUpdate(identityId, firstName)
-          setOrClearIdentityId(sfPointer.sfContactId, Some(sFContactUpdate)) // this causes the sync to identity and zuora
-        case None =>
-          ClientSuccess(())
+      _ <- {
+        val sFContactUpdate = SFContactUpdate(sfPointer.identityId, firstName.map(SetFirstName.apply).getOrElse(DummyFirstName))
+        setOrClearIdentityId(sfPointer.sfContactId, sFContactUpdate) // this causes the sync to identity and zuora
       }
     } yield ()
 

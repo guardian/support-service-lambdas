@@ -4,7 +4,7 @@ import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.sf_contact_merge.getaccounts.GetEmails.FirstName
 import com.gu.sf_contact_merge.update.MoveIdentityId.OldSFContact
 import com.gu.sf_contact_merge.update.UpdateAccountSFLinks.{CRMAccountId, LinksFromZuora}
-import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId.{IdentityId, SFContactUpdate}
+import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId.{IdentityId, SFContactUpdate, SetFirstName}
 import com.gu.util.resthttp.Types
 import com.gu.util.resthttp.Types.ClientSuccess
 import org.scalatest.{FlatSpec, Matchers}
@@ -15,11 +15,11 @@ class MoveIdentityIdTest extends FlatSpec with Matchers {
 
     var order = List[String]()
 
-    def setOrClearIdentityId(sfContactId: SFContactId, idid: Option[SFContactUpdate]): Types.ClientFailableOp[Unit] = {
+    def setOrClearIdentityId(sfContactId: SFContactId, idid: SFContactUpdate): Types.ClientFailableOp[Unit] = {
       order = (idid match {
-        case None => s"clear ${sfContactId.value}"
-        case Some(SFContactUpdate(IdentityId("newIdentityId"), Some(FirstName("hello")))) => s"addidentity ${sfContactId.value}"
-        case Some(other) => s"try to set identity id to: <$other>"
+        case SFContactUpdate(None, setname) => s"clear ${sfContactId.value} setname: $setname"
+        case SFContactUpdate(Some(IdentityId("newIdentityId")), SetFirstName(FirstName(name))) => s"addidentity ${sfContactId.value} setname $name"
+        case other => s"try to set identity id to: <$other>"
       }) :: order
       ClientSuccess(())
     }
@@ -30,7 +30,7 @@ class MoveIdentityIdTest extends FlatSpec with Matchers {
 
     val actual = MoveIdentityId(setOrClearIdentityId)(sfPointer, maybeContactId, Some(FirstName("hello")))
 
-    order.reverse should be(List("clear contold"))
+    order.reverse should be(List("clear contold setname: DontChangeFirstName", "clear contnew setname: SetFirstName(FirstName(hello))"))
     actual should be(ClientSuccess(()))
   }
 
@@ -38,11 +38,11 @@ class MoveIdentityIdTest extends FlatSpec with Matchers {
 
     var order = List[String]()
 
-    def setOrClearIdentityId(sfContactId: SFContactId, idid: Option[SFContactUpdate]): Types.ClientFailableOp[Unit] = {
+    def setOrClearIdentityId(sfContactId: SFContactId, idid: SFContactUpdate): Types.ClientFailableOp[Unit] = {
       order = (idid match {
-        case None => s"clear ${sfContactId.value}"
-        case Some(SFContactUpdate(IdentityId("newIdentityId"), Some(FirstName("hello")))) => s"addidentity ${sfContactId.value}"
-        case Some(other) => s"try to set identity id to: <$other>"
+        case SFContactUpdate(None, setname) => s"clear ${sfContactId.value} setname: $setname"
+        case SFContactUpdate(Some(IdentityId("newIdentityId")), SetFirstName(FirstName(name))) => s"addidentity ${sfContactId.value} setname $name"
+        case other => s"try to set identity id to: <$other>"
       }) :: order
       ClientSuccess(())
     }
@@ -55,7 +55,7 @@ class MoveIdentityIdTest extends FlatSpec with Matchers {
 
     val actual = MoveIdentityId(setOrClearIdentityId)(sfPointer, maybeContactId, Some(FirstName("hello")))
 
-    order.reverse should be(List("clear contold", "addidentity contnew"))
+    order.reverse should be(List("clear contold setname: DontChangeFirstName", "addidentity contnew setname hello"))
     actual should be(ClientSuccess(()))
   }
 
@@ -63,11 +63,11 @@ class MoveIdentityIdTest extends FlatSpec with Matchers {
 
     var order = List[String]()
 
-    def setOrClearIdentityId(sfContactId: SFContactId, idid: Option[SFContactUpdate]): Types.ClientFailableOp[Unit] = {
+    def setOrClearIdentityId(sfContactId: SFContactId, idid: SFContactUpdate): Types.ClientFailableOp[Unit] = {
       order = (idid match {
-        case None => s"clear ${sfContactId.value}"
-        case Some(SFContactUpdate(IdentityId("newIdentityId"), Some(FirstName("hello")))) => s"addidentity ${sfContactId.value}"
-        case Some(other) => s"try to set identity id to: <$other>"
+        case SFContactUpdate(None, setname) => s"clear ${sfContactId.value} setname: $setname"
+        case SFContactUpdate(Some(IdentityId("newIdentityId")), SetFirstName(FirstName(name))) => s"addidentity ${sfContactId.value} setname $name"
+        case other => s"try to set identity id to: <$other>"
       }) :: order
       ClientSuccess(())
     }
@@ -80,7 +80,7 @@ class MoveIdentityIdTest extends FlatSpec with Matchers {
 
     val actual = MoveIdentityId(setOrClearIdentityId)(sfPointer, maybeContactId, Some(FirstName("hello")))
 
-    order.reverse should be(List())
+    order.reverse should be(List("clear contnew setname: SetFirstName(FirstName(hello))"))
     actual should be(ClientSuccess(()))
   }
 

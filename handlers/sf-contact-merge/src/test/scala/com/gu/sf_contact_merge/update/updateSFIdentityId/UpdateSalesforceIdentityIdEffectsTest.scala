@@ -6,7 +6,7 @@ import com.gu.salesforce.auth.{SalesforceAuthenticate, SalesforceRestRequestMake
 import com.gu.salesforce.dev.SFEffectsData
 import com.gu.sf_contact_merge.getaccounts.GetEmails.FirstName
 import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId
-import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId.{IdentityId, SFContactUpdate}
+import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId.{IdentityId, SFContactUpdate, SetFirstName}
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.resthttp.HttpOp
@@ -30,8 +30,8 @@ class UpdateSalesforceIdentityIdEffectsTest extends FlatSpec with Matchers {
       response = RawEffects.response
       auth <- SalesforceAuthenticate.doAuth(response, sfConfig).toDisjunction
       updateSalesforceIdentityId = UpdateSalesforceIdentityId(HttpOp(response).setupRequest(SalesforceRestRequestMaker.patch(auth)))
-      sFContactUpdate = SFContactUpdate(testIdentityId, Some(testFirstName))
-      _ <- updateSalesforceIdentityId.runRequestMultiArg(testContact, Some(sFContactUpdate)).toDisjunction
+      sFContactUpdate = SFContactUpdate(Some(testIdentityId), SetFirstName(testFirstName))
+      _ <- updateSalesforceIdentityId.runRequestMultiArg(testContact, sFContactUpdate).toDisjunction
       getSalesforceIdentityId = GetSalesforceIdentityId(SalesforceRestRequestMaker(auth, response)) _
       updatedIdentityId <- getSalesforceIdentityId(testContact).toDisjunction
     } yield updatedIdentityId
