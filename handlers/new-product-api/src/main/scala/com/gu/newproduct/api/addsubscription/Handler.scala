@@ -12,6 +12,7 @@ import com.gu.newproduct.api.addsubscription.TypeConvert._
 import com.gu.newproduct.api.addsubscription.email.EtSqsSend
 import com.gu.newproduct.api.addsubscription.email.contributions.SendConfirmationEmailContributions.ContributionsEmailData
 import com.gu.newproduct.api.addsubscription.email.contributions.{ContributionFields, SendConfirmationEmailContributions}
+import com.gu.newproduct.api.addsubscription.email.voucher.{SendConfirmationEmailVoucher, VoucherEmailData}
 import com.gu.newproduct.api.addsubscription.validation.Validation._
 import com.gu.newproduct.api.addsubscription.validation.contribution.ContributionValidations.ValidatableFields
 import com.gu.newproduct.api.addsubscription.validation.contribution.{ContributionAccountValidation, ContributionCustomerData, ContributionValidations, GetContributionCustomerData}
@@ -130,7 +131,8 @@ object Steps {
     getZuoraRateplanId: PlanId => Option[ProductRatePlanId],
     getCustomerData: ZuoraAccountId => ApiGatewayOp[VoucherCustomerData],
     validateStartDate: (PlanId, LocalDate) => ValidationResult[Unit],
-    createSubscription: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName]
+    createSubscription: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName],
+    sendConfirmationEmail: VoucherEmailData => AsyncApiGatewayOp[Unit]
   )(request: AddSubscriptionRequest): AsyncApiGatewayOp[SubscriptionName] = for {
     _ <- validateStartDate(request.planId, request.startDate).toApiGatewayOp.toAsync
     customerData <- getCustomerData(request.zuoraAccountId).toAsync
@@ -138,6 +140,15 @@ object Steps {
     createSubRequest = createZuoraSubRequest(request, request.startDate, None, zuoraRatePlanId)
     subscriptionName <- createSubscription(createSubRequest).toAsyncApiGatewayOp("create voucher subscription")
     plan = getPlan(request.planId)
+    voucherEmailData = VoucherEmailData(
+      plan = plan,
+      firstPaymentDate = request.startDate, // TODO is this correct?
+      firstPaperDate = request.startDate,
+      subscriptionName = subscriptionName,
+      contacts = customerData.contacts,
+      paymentMethod = customerData.paymentMethod
+    )
+    _ <- sendConfirmationEmail(voucherEmailData)
   } yield subscriptionName
 
   def operationForEffects(
@@ -176,6 +187,9 @@ object Steps {
 
       sendConfirmationEmail = SendConfirmationEmailContributions(contributionsSqsSend, getCurrentDate) _
       contributionSteps = addContributionSteps(zuoraIds.contributionsZuoraIds.monthly, getCustomerData, validateRequest, createSubscription, sendConfirmationEmail) _
+
+      voucherSqsSend = EtSqsSend[VoucherEmailData](sqsSend) _
+      sendVoucherEmail = SendConfirmationEmailVoucher(voucherSqsSend, getCurrentDate) _
 
       getZuoraIdForVoucherPlan = zuoraIds.voucherZuoraIds.byApiPlanId.get _
       getVoucherData = getValidatedVoucherCustomerData(zuoraClient)
