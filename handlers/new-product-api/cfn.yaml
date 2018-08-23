@@ -64,7 +64,15 @@ Resources:
                         Action:
                         - sqs:GetQueueUrl
                         - sqs:SendMessage
-                        Resource: !Sub "arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:contributions-thanks"
+                        Resource:
+                          - !Sub "arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:contributions-thanks"
+                          - !Sub "arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:subs-welcome-email"
+                - PolicyName: ReadZuoraCatalog
+                  PolicyDocument:
+                    Statement:
+                    - Effect: Allow
+                      Action: s3:GetObject
+                      Resource: !FindInMap [ StageMap, !Ref Stage, ZuoraCatalogLocation ]
     ProductCatalogRole:
       Type: AWS::IAM::Role
       Properties:

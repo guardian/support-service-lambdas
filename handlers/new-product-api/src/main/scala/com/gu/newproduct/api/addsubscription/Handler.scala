@@ -164,8 +164,10 @@ object Steps {
         loadConfig[ZuoraRestConfig].toApiGatewayOp("load zuora config")
       }
       zuoraClient = ZuoraRestRequestMaker(response, zuoraConfig)
-      sqsSend = awsSQSSend(emailQueueFor(stage))
-      contributionsSqsSend = EtSqsSend[ContributionFields](sqsSend) _
+      queueNames = emailQueuesFor(stage)
+
+      contributionSqsSend = awsSQSSend(queueNames.contributions)
+      contributionEtSqsSend = EtSqsSend[ContributionFields](contributionSqsSend) _
       getCurrentDate = () => RawEffects.now().toLocalDate
       validatorFor = DateValidator.validatorFor(getCurrentDate, _: DateRule)
       zuoraToPlanId = zuoraIds.voucherZuoraIds.zuoraIdToPlanid.get _
@@ -185,11 +187,11 @@ object Steps {
       isValidContributionStartDate = isValidStartDateForPlan(MonthlyContribution, _: LocalDate)
       validateRequest = ContributionValidations(isValidContributionStartDate, AmountLimits.limitsFor) _
 
-      sendConfirmationEmail = SendConfirmationEmailContributions(contributionsSqsSend, getCurrentDate) _
+      sendConfirmationEmail = SendConfirmationEmailContributions(contributionEtSqsSend, getCurrentDate) _
       contributionSteps = addContributionSteps(zuoraIds.contributionsZuoraIds.monthly, getCustomerData, validateRequest, createSubscription, sendConfirmationEmail) _
-
-      voucherSqsSend = EtSqsSend[VoucherEmailData](sqsSend) _
-      sendVoucherEmail = SendConfirmationEmailVoucher(voucherSqsSend, getCurrentDate) _
+      voucherSqsSend = awsSQSSend(queueNames.voucher)
+      voucherEtSqsSend = EtSqsSend[VoucherEmailData](voucherSqsSend) _
+      sendVoucherEmail = SendConfirmationEmailVoucher(voucherEtSqsSend, getCurrentDate) _
 
       getZuoraIdForVoucherPlan = zuoraIds.voucherZuoraIds.byApiPlanId.get _
       getVoucherData = getValidatedVoucherCustomerData(zuoraClient)
@@ -256,10 +258,10 @@ object Steps {
     )
   }
 
-  def emailQueueFor(stage: Stage) = stage match {
-    case Stage("PROD") => QueueName("contributions-thanks")
-    case Stage("CODE") => QueueName("contributions-thanks")
-    case _ => QueueName("contributions-thanks-dev")
+  case class EmailQueueNames(contributions : QueueName, voucher: QueueName)
+  def emailQueuesFor(stage: Stage) = stage match {
+    case Stage("PROD") | Stage("CODE") => EmailQueueNames(contributions = QueueName("contributions-thanks"), voucher = QueueName("subs-welcome-email"))
+    case _ => EmailQueueNames(contributions = QueueName("contributions-thanks-dev"), voucher = QueueName("subs-welcome-email-dev"))
   }
 
 }
