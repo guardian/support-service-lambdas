@@ -13,6 +13,7 @@ import com.gu.sf_contact_merge.getaccounts.GetContacts.AccountId
 import com.gu.sf_contact_merge.getaccounts.GetEmails.{EmailAddress, FirstName, LastName}
 import com.gu.sf_contact_merge.getaccounts.GetIdentityAndZuoraEmailsForAccountsSteps
 import com.gu.sf_contact_merge.getaccounts.GetIdentityAndZuoraEmailsForAccountsSteps.IdentityAndSFContactAndEmail
+import com.gu.sf_contact_merge.update.MoveIdentityId.OldSFContact
 import com.gu.sf_contact_merge.update.UpdateAccountSFLinks.{CRMAccountId, LinksFromZuora}
 import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId.IdentityId
 import com.gu.sf_contact_merge.update.{MoveIdentityId, UpdateAccountSFLinks, UpdateSalesforceIdentityId}
@@ -52,7 +53,7 @@ object Handler {
 
     } yield Operation.noHealthcheck {
       WireRequestToDomainObject {
-        Steps(
+        DomainSteps(
           GetIdentityAndZuoraEmailsForAccountsSteps(zuoraQuerier, _),
           AssertSame[Option[EmailAddress]],
           AssertSame[LastName],
@@ -68,7 +69,7 @@ object Handler {
 
 }
 
-object Steps {
+object DomainSteps {
 
   def apply(
     getIdentityAndZuoraEmailsForAccounts: NonEmptyList[AccountId] => ClientFailableOp[List[IdentityAndSFContactAndEmail]],
@@ -85,22 +86,22 @@ object Steps {
       _ <- validateIdentityIds(accountAndEmails.map(_.identityId), mergeRequest.sFPointer.identityId)
         .toApiGatewayReturnResponse(ApiGatewayResponse.notFound)
       _ <- validateLastNames(accountAndEmails.map(_.lastName))
-      maybeIdentityFirstName = firstNameForIdentityAccount(accountAndEmails.map { info => (info.identityId, info.firstName) })
-      maybeOldFirstName = firstNameForSFContact(mergeRequest.sFPointer.sfContactId, accountAndEmails.map { info => (info.sfContactId, info.firstName) })
-      firstNameToUse <- firstNameIfNot(maybeOldFirstName, maybeIdentityFirstName)
-      oldContact = accountAndEmails.find(_.identityId.isDefined).map(_.sfContactId)
+      firstNameToUse <- getFirstNameToUse(mergeRequest.sFPointer.sfContactId, accountAndEmails)
+      oldContact = accountAndEmails.find(_.identityId.isDefined).map(_.sfContactId).map(OldSFContact.apply)
       _ <- mergeRequest.zuoraAccountIds.traverseU(updateAccountSFLinks(mergeRequest.sFPointer))
         .toApiGatewayOp("update accounts with winning details")
       _ <- update(mergeRequest.sFPointer, oldContact, firstNameToUse)
         .toApiGatewayOp("update sf contact(s) to force a sync")
     } yield ApiGatewayResponse.successfulExecution).apiResponse
 
-  def firstNameForIdentityAccount(emails: List[(Option[IdentityId], Option[FirstName])]): Option[FirstName] = {
-    emails.find(_._1.isDefined).flatMap(_._2)
+  case class NameForIdentityId(identityId: Option[IdentityId], firstName: Option[FirstName])
+  def firstNameForIdentityAccount(namesForIdentityIds: List[NameForIdentityId]): Option[FirstName] = {
+    namesForIdentityIds.find(_.identityId.isDefined).flatMap(_.firstName)
   }
 
-  def firstNameForSFContact(newSFContactId: SFContactId, tuples: List[(SFContactId, Option[FirstName])]): Option[FirstName] = {
-    tuples.find(_._1 == newSFContactId).flatMap(_._2)
+  case class NameForContactId(sfContactId: SFContactId, firstName: Option[FirstName])
+  def firstNameForSFContact(newSFContactId: SFContactId, namesForContactIds: List[NameForContactId]): Option[FirstName] = {
+    namesForContactIds.find(_.sfContactId == newSFContactId).flatMap(_.firstName)
   }
 
   def firstNameIfNot(maybeOld: Option[FirstName], maybeIdentity: Option[FirstName]): ApiGatewayOp[FirstName] = {
@@ -109,6 +110,12 @@ object Steps {
       case (None, Some(identityFirstName)) => ContinueProcessing(identityFirstName)
       case _ => ReturnWithResponse(ApiGatewayResponse.notFound("missing first name from old and new contact"))
     }
+  }
+
+  def getFirstNameToUse(sfContactId: SFContactId, accountAndEmails: List[IdentityAndSFContactAndEmail]): ApiGatewayOp[FirstName] = {
+    val maybeIdentityFirstName = firstNameForIdentityAccount(accountAndEmails.map { info => NameForIdentityId(info.identityId, info.firstName) })
+    val maybeOldFirstName = firstNameForSFContact(sfContactId, accountAndEmails.map { info => NameForContactId(info.sfContactId, info.firstName) })
+    firstNameIfNot(maybeOldFirstName, maybeIdentityFirstName)
   }
 
 }

@@ -2,13 +2,14 @@ package com.gu.sf_contact_merge.update
 
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.sf_contact_merge.getaccounts.GetEmails.FirstName
+import com.gu.sf_contact_merge.update.MoveIdentityId.OldSFContact
 import com.gu.sf_contact_merge.update.UpdateAccountSFLinks.{CRMAccountId, LinksFromZuora}
 import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId.{IdentityId, SFContactUpdate}
 import com.gu.util.resthttp.Types
 import com.gu.util.resthttp.Types.ClientSuccess
 import org.scalatest.{FlatSpec, Matchers}
 
-class UpdateStepsTest extends FlatSpec with Matchers {
+class MoveIdentityIdTest extends FlatSpec with Matchers {
 
   it should "not edit identity id at all if we're not setting one" in {
 
@@ -25,7 +26,7 @@ class UpdateStepsTest extends FlatSpec with Matchers {
 
     val maybeIdentityId: Option[IdentityId] = None
     val sfPointer = LinksFromZuora(SFContactId("contnew"), CRMAccountId("crmcrm"), maybeIdentityId)
-    val maybeContactId = Some(SFContactId("contold"))
+    val maybeContactId = Some(OldSFContact(SFContactId("contold")))
 
     val actual = MoveIdentityId(setOrClearIdentityId)(sfPointer, maybeContactId, FirstName("hello"))
 
@@ -50,7 +51,7 @@ class UpdateStepsTest extends FlatSpec with Matchers {
 
     val sfPointer = LinksFromZuora(SFContactId("contnew"), CRMAccountId("crmcrm"), maybeIdentityId)
 
-    val maybeContactId = Some(SFContactId("contold"))
+    val maybeContactId = Some(OldSFContact(SFContactId("contold")))
 
     val actual = MoveIdentityId(setOrClearIdentityId)(sfPointer, maybeContactId, FirstName("hello"))
 
