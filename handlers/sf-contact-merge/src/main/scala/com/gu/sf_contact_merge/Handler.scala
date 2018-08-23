@@ -108,20 +108,12 @@ object GetFirstNameToUse {
       .map(_.firstName)
   }
 
-  def firstNameIfNot(maybeOld: Option[FirstName], maybeIdentity: Option[FirstName]): Option[FirstName] = {
-    (maybeOld, maybeIdentity) match {
-      case (Some(old), _) => Some(old)
-      case (None, Some(identityFirstName)) => Some(identityFirstName)
-      case (old, _) => old // will be none
-    }
-  }
-
   def apply(sfContactId: SFContactId, accountAndEmails: List[IdentityAndSFContactAndEmail]): ApiGatewayOp[Option[FirstName]] = {
     val nameForIdentityIds = accountAndEmails.map { info => NameForIdentityId(info.identityId, info.firstName) }
     val maybeIdentityFirstName = firstNameForIdentityAccount(nameForIdentityIds)
     val nameForContactIds = accountAndEmails.map { info => NameForContactId(info.sfContactId, info.firstName) }
     firstNameForSFContact(sfContactId, nameForContactIds).map { maybeOldFirstName =>
-      firstNameIfNot(maybeOldFirstName, maybeIdentityFirstName)
+      maybeOldFirstName orElse maybeIdentityFirstName
     }
   }
 

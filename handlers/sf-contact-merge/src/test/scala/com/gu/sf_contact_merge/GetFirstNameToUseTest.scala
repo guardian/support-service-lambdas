@@ -7,30 +7,6 @@ import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
 import org.scalatest.{FlatSpec, Matchers}
 import scalaz.-\/
 
-class GetFirstNameToUseFirstNameIfNotTest extends FlatSpec with Matchers {
-
-  "firstNameIfNot" should "if both present use winning one" in {
-
-    val actual = GetFirstNameToUse.firstNameIfNot(Some(FirstName("oldname")), Some(FirstName("identityname")))
-    actual should be(Some(FirstName("oldname")))
-
-  }
-
-  it should "if winning contact first name missing should use identity one" in {
-
-    val actual = GetFirstNameToUse.firstNameIfNot(None, Some(FirstName("identityname")))
-    actual should be(Some(FirstName("identityname")))
-
-  }
-
-  it should "if no identity or winning contact name return a 404" in {
-
-    val actual = GetFirstNameToUse.firstNameIfNot(None, None)
-    actual should be(None)
-
-  }
-
-}
 class GetFirstNameToUseFirstNameForSFContactTest extends FlatSpec with Matchers {
 
   it should "abort if the winning contact isn't in any zuora account" in {
