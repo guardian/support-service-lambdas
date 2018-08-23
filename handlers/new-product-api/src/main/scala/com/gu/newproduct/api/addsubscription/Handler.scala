@@ -126,6 +126,7 @@ object Steps {
   }
 
   def addVoucherSteps(
+    getPlan: PlanId => Plan,
     getZuoraRateplanId: PlanId => Option[ProductRatePlanId],
     getCustomerData: ZuoraAccountId => ApiGatewayOp[VoucherCustomerData],
     validateStartDate: (PlanId, LocalDate) => ValidationResult[Unit],
@@ -136,6 +137,7 @@ object Steps {
     zuoraRatePlanId <- getZuoraRateplanId(request.planId).toApiGatewayContinueProcessing(internalServerError(s"no Zuora id for ${request.planId}!")).toAsync
     createSubRequest = createZuoraSubRequest(request, request.startDate, None, zuoraRatePlanId)
     subscriptionName <- createSubscription(createSubRequest).toAsyncApiGatewayOp("create voucher subscription")
+    plan = getPlan(request.planId)
   } yield subscriptionName
 
   def operationForEffects(
@@ -177,7 +179,7 @@ object Steps {
 
       getZuoraIdForVoucherPlan = zuoraIds.voucherZuoraIds.byApiPlanId.get _
       getVoucherData = getValidatedVoucherCustomerData(zuoraClient)
-      voucherSteps = addVoucherSteps(getZuoraIdForVoucherPlan, getVoucherData, isValidStartDateForPlan, createSubscription) _
+      voucherSteps = addVoucherSteps(catalog.planForId, getZuoraIdForVoucherPlan, getVoucherData, isValidStartDateForPlan, createSubscription) _
 
       addSubSteps = handleRequest(
         addContribution = contributionSteps,

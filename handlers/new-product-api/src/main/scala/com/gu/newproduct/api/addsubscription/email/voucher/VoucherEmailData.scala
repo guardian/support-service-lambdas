@@ -24,7 +24,7 @@ case class VoucherEmailData(
 
 object VoucherEmailData {
   implicit val writes: Writes[VoucherEmailData] = (data: VoucherEmailData) => {
-    val fields: Map[String,String] = VoucherEmailFields(data)
+    val fields: Map[String, String] = VoucherEmailFields(data)
     Json.toJson(fields)
   }
 }

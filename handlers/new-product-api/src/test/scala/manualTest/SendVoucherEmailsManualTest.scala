@@ -22,7 +22,6 @@ object SendVoucherEmailsManualTest {
 
   def fakeVoucherEmailData(soldToEmail: Email) = {
 
-
     val contacts = Contacts(
       billTo = BillToContact(
         Some(Title("billToTitle")),

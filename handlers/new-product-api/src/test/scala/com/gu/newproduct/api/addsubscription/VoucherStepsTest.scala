@@ -6,7 +6,8 @@ import com.gu.newproduct.TestData
 import com.gu.newproduct.api.addsubscription.validation._
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{SubscriptionName, ZuoraCreateSubRequest}
-import com.gu.newproduct.api.productcatalog.PlanId
+import com.gu.newproduct.api.productcatalog.PlanId.VoucherEveryDay
+import com.gu.newproduct.api.productcatalog.{Plan, PlanDescription, PlanId}
 import com.gu.newproduct.api.productcatalog.ZuoraIds.ProductRatePlanId
 import com.gu.test.JsonMatchers.JsonMatcher
 import com.gu.util.apigateway.ApiGatewayRequest
@@ -67,7 +68,9 @@ class VoucherStepsTest extends FlatSpec with Matchers {
 
     def fakeValidateVoucherStartDate(id: PlanId, d: LocalDate) = Passed(())
 
+    def fakeGetPlan(planId: PlanId) = Plan(VoucherEveryDay, PlanDescription("Everyday"))
     val fakeAddVoucherSteps = Steps.addVoucherSteps(
+      fakeGetPlan,
       fakeGetZuoraId,
       fakeGetVoucherCustomerData,
       fakeValidateVoucherStartDate,

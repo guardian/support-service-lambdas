@@ -117,7 +117,6 @@ class VoucherEmailDataTest extends FlatSpec with Matchers {
     VoucherEmailFields(cardVoucherData).keySet.filter(directDebitFields.contains(_)) shouldBe Set.empty
   }
 
-
   def fieldsForPlanIds(ids: List[PlanId]): List[Map[String, String]] = {
     val allPlansVoucherData = ids.map(
       planId => directDebitVoucherData.copy(plan = Plan(planId, PlanDescription("test plan")))
@@ -135,12 +134,12 @@ class VoucherEmailDataTest extends FlatSpec with Matchers {
 
   }
 
-    it should "IncludesDigipack should be true for plus plans " in {
+  it should "IncludesDigipack should be true for plus plans " in {
 
-      val digipackPlans = List(VoucherEveryDayPlus, VoucherWeekendPlus, VoucherSixDayPlus, VoucherSaturdayPlus, VoucherSundayPlus)
+    val digipackPlans = List(VoucherEveryDayPlus, VoucherWeekendPlus, VoucherSixDayPlus, VoucherSaturdayPlus, VoucherSundayPlus)
 
-      val allDigipackPlanFields: List[Map[String, String]] = fieldsForPlanIds(digipackPlans)
+    val allDigipackPlanFields: List[Map[String, String]] = fieldsForPlanIds(digipackPlans)
 
-      allDigipackPlanFields.forall(_.get("IncludesDigipack").contains("true"))
-    }
+    allDigipackPlanFields.forall(_.get("IncludesDigipack").contains("true"))
+  }
 }
