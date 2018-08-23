@@ -4,7 +4,7 @@ import java.time.LocalDate
 
 import com.gu.effects.sqs.AwsSQSSend
 import com.gu.i18n.{Country, Currency}
-import com.gu.newproduct.api.addsubscription.Steps.emailQueueFor
+import com.gu.newproduct.api.addsubscription.Steps.emailQueuesFor
 import com.gu.newproduct.api.addsubscription.email.EtSqsSend
 import com.gu.newproduct.api.addsubscription.email.contributions.SendConfirmationEmailContributions.ContributionsEmailData
 import com.gu.newproduct.api.addsubscription.email.contributions.{ContributionFields, SendConfirmationEmailContributions}
@@ -49,7 +49,8 @@ object SendConfirmationEmailsManualTest {
   def main(args: Array[String]): Unit = {
     val result = for {
       email <- args.headOption.map(Email.apply)
-      sqsSend = AwsSQSSend(emailQueueFor(Stage("PROD"))) _
+      queueName = emailQueuesFor(Stage("PROD")).contributions
+      sqsSend = AwsSQSSend(queueName) _
       contributionsSqsSend = EtSqsSend[ContributionFields](sqsSend) _
       sendConfirmationEmail = SendConfirmationEmailContributions(contributionsSqsSend, () => fakeDate) _
       sendResult = sendConfirmationEmail(contributionsEmailData(fakeContact(email)))

@@ -5,6 +5,7 @@ import java.time.LocalDate
 import com.gu.effects.sqs.AwsSQSSend
 import com.gu.effects.sqs.AwsSQSSend.QueueName
 import com.gu.i18n.Country
+import com.gu.newproduct.api.addsubscription.Steps.emailQueuesFor
 import com.gu.newproduct.api.addsubscription.email.EtSqsSend
 import com.gu.newproduct.api.addsubscription.email.voucher.{SendConfirmationEmailVoucher, VoucherEmailData}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.SubscriptionName
@@ -13,6 +14,7 @@ import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{BankAccount
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.ActivePaymentMethod
 import com.gu.newproduct.api.productcatalog.PlanId.VoucherEveryDayPlus
 import com.gu.newproduct.api.productcatalog.{PaymentPlan, Plan, PlanDescription, StartDateRules}
+import com.gu.util.config.Stage
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
@@ -76,7 +78,8 @@ object SendVoucherEmailsManualTest {
   def main(args: Array[String]): Unit = {
     val result = for {
       email <- args.headOption.map(Email.apply)
-      sqsSend = AwsSQSSend(QueueName("subs-welcome-email")) _
+      queueName = emailQueuesFor(Stage("PROD")).voucher
+      sqsSend = AwsSQSSend(queueName) _
       voucherSqsSend = EtSqsSend[VoucherEmailData](sqsSend) _
       sendConfirmationEmail = SendConfirmationEmailVoucher(voucherSqsSend, () => fakeDate) _
       data = fakeVoucherEmailData(email)

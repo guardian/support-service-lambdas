@@ -258,7 +258,7 @@ object Steps {
     )
   }
 
-  case class EmailQueueNames(contributions : QueueName, voucher: QueueName)
+  case class EmailQueueNames(contributions: QueueName, voucher: QueueName)
   def emailQueuesFor(stage: Stage) = stage match {
     case Stage("PROD") | Stage("CODE") => EmailQueueNames(contributions = QueueName("contributions-thanks"), voucher = QueueName("subs-welcome-email"))
     case _ => EmailQueueNames(contributions = QueueName("contributions-thanks-dev"), voucher = QueueName("subs-welcome-email-dev"))
