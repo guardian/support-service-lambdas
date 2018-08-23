@@ -6,12 +6,12 @@ import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResp
 
 object AssertSame {
 
-  def apply[EmailAddress]: AssertSame[EmailAddress] = (emailAddresses: List[EmailAddress]) =>
-    if (emailAddresses.distinct.size == 1) ContinueProcessing(())
-    else ReturnWithResponse(ApiGatewayResponse.notFound("those zuora accounts had differing emails"))
+  def apply[Element](message: String): AssertSame[Element] = (elements: List[Element]) =>
+    if (elements.distinct.size == 1) ContinueProcessing(())
+    else ReturnWithResponse(ApiGatewayResponse.notFound(s"those zuora accounts had differing $message"))
 
 }
 
-trait AssertSame[EmailAddress] {
-  def apply(emailAddresses: List[EmailAddress]): ApiGatewayOp[Unit]
+trait AssertSame[Element] {
+  def apply(emailAddresses: List[Element]): ApiGatewayOp[Unit]
 }

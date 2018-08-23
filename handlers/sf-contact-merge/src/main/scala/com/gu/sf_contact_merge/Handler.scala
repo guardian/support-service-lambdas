@@ -54,8 +54,8 @@ object Handler {
       WireRequestToDomainObject {
         DomainSteps(
           GetIdentityAndZuoraEmailsForAccountsSteps(zuoraQuerier, _),
-          AssertSame[Option[EmailAddress]],
-          AssertSame[LastName],
+          AssertSame[Option[EmailAddress]]("emails"),
+          AssertSame[LastName]("last names"),
           EnsureNoAccountWithWrongIdentityId.apply,
           MoveIdentityId(
             UpdateSalesforceIdentityId(sfPatch).runRequestMultiArg
