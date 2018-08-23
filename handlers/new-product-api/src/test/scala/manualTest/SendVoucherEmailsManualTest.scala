@@ -16,6 +16,7 @@ import com.gu.newproduct.api.productcatalog.{PaymentPlan, Plan, PlanDescription,
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
+import scala.util.Random
 
 object SendVoucherEmailsManualTest {
 
@@ -52,15 +53,18 @@ object SendVoucherEmailsManualTest {
         )
       )
     )
+
+    val randomSubName = "T-" + Random.alphanumeric.take(10).mkString
+
     VoucherEmailData(
       plan = Plan(VoucherEveryDayPlus, PlanDescription("Everyday+"), StartDateRules(), Some(PaymentPlan("GBP 32.12 every month"))),
       firstPaymentDate = LocalDate.of(2018, 12, 12),
       firstPaperDate = LocalDate.of(2018, 11, 12),
-      subscriptionName = SubscriptionName("testSub12323"),
+      subscriptionName = SubscriptionName(randomSubName),
       contacts = contacts,
       paymentMethod = DirectDebit(
         ActivePaymentMethod,
-        BankAccountName("bankAccountNAme"),
+        BankAccountName("bankAccountName"),
         BankAccountNumberMask("********1234"),
         SortCode("123456"),
         MandateId("MandateId")
@@ -76,9 +80,7 @@ object SendVoucherEmailsManualTest {
       sqsSend = AwsSQSSend(QueueName("subs-welcome-email")) _
       voucherSqsSend = EtSqsSend[VoucherEmailData](sqsSend) _
       sendConfirmationEmail = SendConfirmationEmailVoucher(voucherSqsSend, () => fakeDate) _
-      b = println(s"email is $email")
       data = fakeVoucherEmailData(email)
-      a = println(data)
       sendResult = sendConfirmationEmail(fakeVoucherEmailData(email))
     } yield sendResult
     result match {

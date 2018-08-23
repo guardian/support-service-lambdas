@@ -5,67 +5,68 @@ import java.time.LocalDate
 import com.gu.i18n.Country
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.SubscriptionName
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.{BillToContact, _}
-import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{BankAccountName, BankAccountNumberMask, DirectDebit, MandateId, SortCode}
+import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{BankAccountName, BankAccountNumberMask, DirectDebit, MandateId, NonDirectDebitMethod, SortCode}
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.ActivePaymentMethod
-import com.gu.newproduct.api.productcatalog.{PaymentPlan, Plan, PlanDescription}
-import com.gu.newproduct.api.productcatalog.PlanId.VoucherEveryDayPlus
+import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType.CreditCard
+import com.gu.newproduct.api.productcatalog.{PaymentPlan, Plan, PlanDescription, PlanId}
+import com.gu.newproduct.api.productcatalog.PlanId._
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
 
 class VoucherEmailDataTest extends FlatSpec with Matchers {
-  it should "generate json payload " in {
 
-    val billto = BillToContact(
-      None,
-      FirstName("FirstBill"),
-      LastName("lastBill"),
-      Some(Email("bill@contact.com")),
-      BillToAddress(
-        Some(Address1("billToAddress1")),
-        Some(Address2("billToAddress2")),
-        Some(City("billToCity")),
-        Some(State("billToState")),
-        Some(Country.UK),
-        Some(Postcode("billToPostcode"))
-      )
+  val billto = BillToContact(
+    None,
+    FirstName("FirstBill"),
+    LastName("lastBill"),
+    Some(Email("bill@contact.com")),
+    BillToAddress(
+      Some(Address1("billToAddress1")),
+      Some(Address2("billToAddress2")),
+      Some(City("billToCity")),
+      Some(State("billToState")),
+      Some(Country.UK),
+      Some(Postcode("billToPostcode"))
     )
+  )
 
-    val soldto = SoldToContact(
-      Some(Title("SoldToTitle")),
-      FirstName("FirstSold"),
-      LastName("lastSold"),
-      Some(Email("sold@contact.com")),
-      SoldToAddress(
-        Some(Address1("soldToAddress1")),
-        Some(Address2("soldToAddress2")),
-        Some(City("soldToCity")),
-        Some(State("soldToState")),
-        Country.US,
-        Some(Postcode("soldToPostcode"))
-      )
+  val soldto = SoldToContact(
+    Some(Title("SoldToTitle")),
+    FirstName("FirstSold"),
+    LastName("lastSold"),
+    Some(Email("sold@contact.com")),
+    SoldToAddress(
+      Some(Address1("soldToAddress1")),
+      Some(Address2("soldToAddress2")),
+      Some(City("soldToCity")),
+      Some(State("soldToState")),
+      Country.US,
+      Some(Postcode("soldToPostcode"))
     )
-    val contacts = Contacts(billto, soldto)
+  )
+  val contacts = Contacts(billto, soldto)
 
-    val data = VoucherEmailData(
-      plan = Plan(
-        id = VoucherEveryDayPlus,
-        description = PlanDescription("Everyday+"),
-        paymentPlan = Some(PaymentPlan("GBP 12.25 every month"))
-      ),
-      firstPaymentDate = LocalDate.of(2018, 12, 1),
-      firstPaperDate = LocalDate.of(2018, 11, 1),
-      subscriptionName = SubscriptionName("A-S000SubId"),
-      contacts = contacts,
-      paymentMethod = DirectDebit(
-        ActivePaymentMethod,
-        BankAccountName("someAccountName"),
-        BankAccountNumberMask("*****mask"),
-        SortCode("123456"),
-        MandateId("MandateId")
-      )
+  val directDebitVoucherData = VoucherEmailData(
+    plan = Plan(
+      id = VoucherEveryDayPlus,
+      description = PlanDescription("Everyday+"),
+      paymentPlan = Some(PaymentPlan("GBP 12.25 every month"))
+    ),
+    firstPaymentDate = LocalDate.of(2018, 12, 1),
+    firstPaperDate = LocalDate.of(2018, 11, 1),
+    subscriptionName = SubscriptionName("A-S000SubId"),
+    contacts = contacts,
+    paymentMethod = DirectDebit(
+      ActivePaymentMethod,
+      BankAccountName("someAccountName"),
+      BankAccountNumberMask("*****mask"),
+      SortCode("123456"),
+      MandateId("MandateId")
     )
+  )
+  it should "generate json payload for voucher data with direct debit fields" in {
 
-    val actualJson = Json.toJson(data)
+    val actualJson = Json.toJson(directDebitVoucherData)
 
     val expected =
       """
@@ -106,4 +107,40 @@ class VoucherEmailDataTest extends FlatSpec with Matchers {
 
     actualJson shouldBe Json.parse(expected)
   }
+
+  it should "not include direct debit fields if payment method is not direct debit" in {
+
+    val cardVoucherData = directDebitVoucherData.copy(paymentMethod = NonDirectDebitMethod(ActivePaymentMethod, CreditCard))
+
+    val directDebitFields = List("bank_account_no", "bank_sort_code", "account_holder", "mandate_id")
+
+    VoucherEmailFields(cardVoucherData).keySet.filter(directDebitFields.contains(_)) shouldBe Set.empty
+  }
+
+
+  def fieldsForPlanIds(ids: List[PlanId]): List[Map[String, String]] = {
+    val allPlansVoucherData = ids.map(
+      planId => directDebitVoucherData.copy(plan = Plan(planId, PlanDescription("test plan")))
+    )
+    allPlansVoucherData.map(VoucherEmailFields(_))
+  }
+
+  it should "IncludesDigipack should be false for non plus plans " in {
+
+    val nonDigipackPlans = List(VoucherEveryDay, VoucherWeekend, VoucherSixDay, VoucherSaturday, VoucherSunday)
+
+    val allNonDigipackPlanFields: List[Map[String, String]] = fieldsForPlanIds(nonDigipackPlans)
+
+    allNonDigipackPlanFields.forall(_.get("IncludesDigipack").contains("false"))
+
+  }
+
+    it should "IncludesDigipack should be true for plus plans " in {
+
+      val digipackPlans = List(VoucherEveryDayPlus, VoucherWeekendPlus, VoucherSixDayPlus, VoucherSaturdayPlus, VoucherSundayPlus)
+
+      val allDigipackPlanFields: List[Map[String, String]] = fieldsForPlanIds(digipackPlans)
+
+      allDigipackPlanFields.forall(_.get("IncludesDigipack").contains("true"))
+    }
 }

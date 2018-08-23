@@ -9,7 +9,7 @@ import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.Subscripti
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.Contacts
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType._
-import com.gu.newproduct.api.productcatalog.{Plan, PlanId}
+import com.gu.newproduct.api.productcatalog.Plan
 import com.gu.newproduct.api.productcatalog.PlanId._
 import play.api.libs.json.{Json, Writes}
 
@@ -24,14 +24,7 @@ case class VoucherEmailData(
 
 object VoucherEmailData {
   implicit val writes: Writes[VoucherEmailData] = (data: VoucherEmailData) => {
-    val fields: Map[String,String] = VoucherEmailFields(
-      plan = data.plan,
-      firstPaperDate = data.firstPaperDate,
-      firstPaymentDate = data.firstPaymentDate,
-      subscriptionName = data.subscriptionName,
-      contacts = data.contacts,
-      paymentMethod = data.paymentMethod
-    )
+    val fields: Map[String,String] = VoucherEmailFields(data)
     Json.toJson(fields)
   }
 }
@@ -42,23 +35,18 @@ object VoucherEmailFields {
   val dateformat = DateTimeFormatter.ofPattern("d MMMM yyyy")
 
   def apply(
-    plan: Plan,
-    firstPaymentDate: LocalDate,
-    firstPaperDate: LocalDate,
-    subscriptionName: SubscriptionName,
-    contacts: Contacts,
-    paymentMethod: PaymentMethod
+    data: VoucherEmailData
   ) = {
     Map(
-      "ZuoraSubscriberId" -> subscriptionName.value,
-      "SubscriberKey" -> contacts.soldTo.email.map(_.value).getOrElse(""),
-      "subscriber_id" -> subscriptionName.value,
-      "IncludesDigipack" -> digipackPlans.contains(plan.id).toString,
-      "date_of_first_paper" -> firstPaperDate.format(dateformat),
-      "date_of_first_payment" -> firstPaymentDate.format(dateformat),
-      "package" -> plan.description.value,
-      "subscription_rate" -> plan.paymentPlan.map(_.value).getOrElse("")
-    ) ++ paymentMethodFields(paymentMethod) ++ addressFields(contacts)
+      "ZuoraSubscriberId" -> data.subscriptionName.value,
+      "SubscriberKey" -> data.contacts.soldTo.email.map(_.value).getOrElse(""),
+      "subscriber_id" -> data.subscriptionName.value,
+      "IncludesDigipack" -> digipackPlans.contains(data.plan.id).toString,
+      "date_of_first_paper" -> data.firstPaperDate.format(dateformat),
+      "date_of_first_payment" -> data.firstPaymentDate.format(dateformat),
+      "package" -> data.plan.description.value,
+      "subscription_rate" -> data.plan.paymentPlan.map(_.value).getOrElse("")
+    ) ++ paymentMethodFields(data.paymentMethod) ++ addressFields(data.contacts)
 
   }
 
@@ -76,7 +64,6 @@ object VoucherEmailFields {
       "account_holder" -> accountName.value,
       "mandate_id" -> mandateId.value,
       "payment_method" -> toDescription(BankTransfer)
-
     )
     case NonDirectDebitMethod(_, paymentMethodType) => Map(
       "payment_method" -> toDescription(paymentMethodType)
