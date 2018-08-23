@@ -18,7 +18,7 @@ class MoveIdentityIdTest extends FlatSpec with Matchers {
     def setOrClearIdentityId(sfContactId: SFContactId, idid: Option[SFContactUpdate]): Types.ClientFailableOp[Unit] = {
       order = (idid match {
         case None => s"clear ${sfContactId.value}"
-        case Some(SFContactUpdate(IdentityId("newIdentityId"), FirstName("hello"))) => "addidentity"
+        case Some(SFContactUpdate(IdentityId("newIdentityId"), Some(FirstName("hello")))) => s"addidentity ${sfContactId.value}"
         case Some(other) => s"try to set identity id to: <$other>"
       }) :: order
       ClientSuccess(())
@@ -28,7 +28,7 @@ class MoveIdentityIdTest extends FlatSpec with Matchers {
     val sfPointer = LinksFromZuora(SFContactId("contnew"), CRMAccountId("crmcrm"), maybeIdentityId)
     val maybeContactId = Some(OldSFContact(SFContactId("contold")))
 
-    val actual = MoveIdentityId(setOrClearIdentityId)(sfPointer, maybeContactId, FirstName("hello"))
+    val actual = MoveIdentityId(setOrClearIdentityId)(sfPointer, maybeContactId, Some(FirstName("hello")))
 
     order.reverse should be(List("clear contold"))
     actual should be(ClientSuccess(()))
@@ -40,8 +40,8 @@ class MoveIdentityIdTest extends FlatSpec with Matchers {
 
     def setOrClearIdentityId(sfContactId: SFContactId, idid: Option[SFContactUpdate]): Types.ClientFailableOp[Unit] = {
       order = (idid match {
-        case None => "clear"
-        case Some(SFContactUpdate(IdentityId("newIdentityId"), FirstName("hello"))) => s"addidentity ${sfContactId.value}"
+        case None => s"clear ${sfContactId.value}"
+        case Some(SFContactUpdate(IdentityId("newIdentityId"), Some(FirstName("hello")))) => s"addidentity ${sfContactId.value}"
         case Some(other) => s"try to set identity id to: <$other>"
       }) :: order
       ClientSuccess(())
@@ -53,9 +53,34 @@ class MoveIdentityIdTest extends FlatSpec with Matchers {
 
     val maybeContactId = Some(OldSFContact(SFContactId("contold")))
 
-    val actual = MoveIdentityId(setOrClearIdentityId)(sfPointer, maybeContactId, FirstName("hello"))
+    val actual = MoveIdentityId(setOrClearIdentityId)(sfPointer, maybeContactId, Some(FirstName("hello")))
 
-    order.reverse should be(List("clear", "addidentity contnew"))
+    order.reverse should be(List("clear contold", "addidentity contnew"))
+    actual should be(ClientSuccess(()))
+  }
+
+  it should "not clear or set identity id if we aren't setting it" in {
+
+    var order = List[String]()
+
+    def setOrClearIdentityId(sfContactId: SFContactId, idid: Option[SFContactUpdate]): Types.ClientFailableOp[Unit] = {
+      order = (idid match {
+        case None => s"clear ${sfContactId.value}"
+        case Some(SFContactUpdate(IdentityId("newIdentityId"), Some(FirstName("hello")))) => s"addidentity ${sfContactId.value}"
+        case Some(other) => s"try to set identity id to: <$other>"
+      }) :: order
+      ClientSuccess(())
+    }
+
+    val maybeIdentityId: Option[IdentityId] = None
+
+    val sfPointer = LinksFromZuora(SFContactId("contnew"), CRMAccountId("crmcrm"), maybeIdentityId)
+
+    val maybeContactId = None
+
+    val actual = MoveIdentityId(setOrClearIdentityId)(sfPointer, maybeContactId, Some(FirstName("hello")))
+
+    order.reverse should be(List())
     actual should be(ClientSuccess(()))
   }
 

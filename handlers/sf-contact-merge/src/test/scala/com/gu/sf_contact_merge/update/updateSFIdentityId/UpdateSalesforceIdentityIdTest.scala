@@ -14,11 +14,26 @@ class UpdateSalesforceIdentityIdTest extends FlatSpec with Matchers {
 
     val actual = UpdateSalesforceIdentityId.toRequest(
       SFContactId("contactsf"),
-      Some(SFContactUpdate(IdentityId("identityid"), FirstName("firstname")))
+      Some(SFContactUpdate(IdentityId("identityid"), Some(FirstName("firstname"))))
     )
     val expectedJson = JsObject(Seq(
       "IdentityID__c" -> JsString("identityid"),
       "FirstName" -> JsString("firstname")
+    ))
+    val expected = new PatchRequest(expectedJson, RelativePath("/services/data/v20.0/sobjects/Contact/contactsf"))
+    actual should be(expected)
+
+  }
+
+  it should "when we update with no first name, should set a dot" in {
+
+    val actual = UpdateSalesforceIdentityId.toRequest(
+      SFContactId("contactsf"),
+      Some(SFContactUpdate(IdentityId("identityid"), None))
+    )
+    val expectedJson = JsObject(Seq(
+      "IdentityID__c" -> JsString("identityid"),
+      "FirstName" -> JsString(".")
     ))
     val expected = new PatchRequest(expectedJson, RelativePath("/services/data/v20.0/sobjects/Contact/contactsf"))
     actual should be(expected)

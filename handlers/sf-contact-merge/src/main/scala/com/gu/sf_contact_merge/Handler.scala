@@ -22,7 +22,6 @@ import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, ApiGatewayResponse, ResponseModels}
 import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config.{LoadConfigModule, Stage}
-import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.zuora.SafeQueryBuilder.MaybeNonEmptyList
@@ -103,24 +102,27 @@ object GetFirstNameToUse {
   }
 
   case class NameForContactId(sfContactId: SFContactId, firstName: Option[FirstName])
-  def firstNameForSFContact(newSFContactId: SFContactId, namesForContactIds: List[NameForContactId]): Option[FirstName] = {
-    namesForContactIds.find(_.sfContactId == newSFContactId).flatMap(_.firstName)
+  def firstNameForSFContact(newSFContactId: SFContactId, namesForContactIds: List[NameForContactId]): ApiGatewayOp[Option[FirstName]] = {
+    namesForContactIds.find(_.sfContactId == newSFContactId)
+      .toApiGatewayContinueProcessing(ApiGatewayResponse.notFound("winning contact id wasn't in any zuora account"))
+      .map(_.firstName)
   }
 
-  def firstNameIfNot(maybeOld: Option[FirstName], maybeIdentity: Option[FirstName]): ApiGatewayOp[FirstName] = {
+  def firstNameIfNot(maybeOld: Option[FirstName], maybeIdentity: Option[FirstName]): Option[FirstName] = {
     (maybeOld, maybeIdentity) match {
-      case (Some(old), _) => ContinueProcessing(old)
-      case (None, Some(identityFirstName)) => ContinueProcessing(identityFirstName)
-      case _ => ReturnWithResponse(ApiGatewayResponse.notFound("missing first name from old and new contact"))
+      case (Some(old), _) => Some(old)
+      case (None, Some(identityFirstName)) => Some(identityFirstName)
+      case (old, _) => old // will be none
     }
   }
 
-  def apply(sfContactId: SFContactId, accountAndEmails: List[IdentityAndSFContactAndEmail]): ApiGatewayOp[FirstName] = {
+  def apply(sfContactId: SFContactId, accountAndEmails: List[IdentityAndSFContactAndEmail]): ApiGatewayOp[Option[FirstName]] = {
     val nameForIdentityIds = accountAndEmails.map { info => NameForIdentityId(info.identityId, info.firstName) }
     val maybeIdentityFirstName = firstNameForIdentityAccount(nameForIdentityIds)
     val nameForContactIds = accountAndEmails.map { info => NameForContactId(info.sfContactId, info.firstName) }
-    val maybeOldFirstName = firstNameForSFContact(sfContactId, nameForContactIds)
-    firstNameIfNot(maybeOldFirstName, maybeIdentityFirstName)
+    firstNameForSFContact(sfContactId, nameForContactIds).map { maybeOldFirstName =>
+      firstNameIfNot(maybeOldFirstName, maybeIdentityFirstName)
+    }
   }
 
 }

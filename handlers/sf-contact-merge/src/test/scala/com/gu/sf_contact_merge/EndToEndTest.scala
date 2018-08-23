@@ -81,7 +81,7 @@ object EndToEndTest {
       |            "BillToId": "2c92c0f9624bbc5f016253e5739b0b17",
       |            "Id": "2c92c0f9624bbc5f016253e573970b16",
       |            "IdentityId__c": "identest",
-      |            "sfContactId__c": "sfsf2"
+      |            "sfContactId__c": "newSFCont"
       |        }
       |    ],
       |    "size": 2,

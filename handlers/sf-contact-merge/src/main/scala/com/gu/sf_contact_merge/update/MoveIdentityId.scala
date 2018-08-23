@@ -14,7 +14,7 @@ object MoveIdentityId {
   ): MoveIdentityId = (
     sfPointer: LinksFromZuora,
     maybeOldContactId: Option[OldSFContact],
-    firstName: FirstName
+    firstName: Option[FirstName]
   ) =>
     for {
       _ <- maybeOldContactId match {
@@ -39,7 +39,7 @@ trait MoveIdentityId {
   def apply(
     sfPointer: LinksFromZuora,
     maybeOldContactId: Option[OldSFContact],
-    firstNameToUse: FirstName
+    firstNameToUse: Option[FirstName]
   ): ClientFailableOp[Unit]
 
 }
