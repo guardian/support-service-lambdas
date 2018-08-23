@@ -193,7 +193,14 @@ object Steps {
 
       getZuoraIdForVoucherPlan = zuoraIds.voucherZuoraIds.byApiPlanId.get _
       getVoucherData = getValidatedVoucherCustomerData(zuoraClient)
-      voucherSteps = addVoucherSteps(catalog.planForId, getZuoraIdForVoucherPlan, getVoucherData, isValidStartDateForPlan, createSubscription) _
+      voucherSteps = addVoucherSteps(
+        catalog.planForId,
+        getZuoraIdForVoucherPlan,
+        getVoucherData,
+        isValidStartDateForPlan,
+        createSubscription,
+        sendVoucherEmail
+      ) _
 
       addSubSteps = handleRequest(
         addContribution = contributionSteps,
