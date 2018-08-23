@@ -9,21 +9,21 @@ import scalaz.-\/
 
 class GetFirstNameToUseFirstNameIfNotTest extends FlatSpec with Matchers {
 
-  it should "firstNameIfNot both present should use winning one" in {
+  "firstNameIfNot" should "if both present use winning one" in {
 
     val actual = GetFirstNameToUse.firstNameIfNot(Some(FirstName("oldname")), Some(FirstName("identityname")))
     actual should be(Some(FirstName("oldname")))
 
   }
 
-  it should "firstNameIfNot old missing should use identity one" in {
+  it should "if winning contact first name missing should use identity one" in {
 
     val actual = GetFirstNameToUse.firstNameIfNot(None, Some(FirstName("identityname")))
     actual should be(Some(FirstName("identityname")))
 
   }
 
-  it should "firstNameIfNot if no identity or old name return a 404" in {
+  it should "if no identity or winning contact name return a 404" in {
 
     val actual = GetFirstNameToUse.firstNameIfNot(None, None)
     actual should be(None)
