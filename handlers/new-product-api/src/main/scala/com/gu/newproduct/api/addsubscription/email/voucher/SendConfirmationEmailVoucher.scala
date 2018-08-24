@@ -27,10 +27,7 @@ object SendConfirmationEmailVoucher extends Logging {
     }.getOrElse {
       val errorLogMessage = "No email address in zuora sold to contact, skipping voucher thank you email"
       logger.warn(errorLogMessage)
-      val response = ApiGatewayResponse.messageResponse(
-        "500",
-        "Internal server error"
-      )
+      val response = ApiGatewayResponse.messageResponse( "500","Internal server error")
       ReturnWithResponse(response).toAsync
     }
 }
