@@ -92,3 +92,5 @@ case class StartDateRules(daysOfWeekRule: Option[DaysOfWeekRule] = None, windowR
 case class DaysOfWeekRule(allowedDays: List[DayOfWeek]) extends DateRule
 
 case class WindowRule(maybeCutOffDay: Option[DayOfWeek], maybeStartDelay: Option[DelayDays], maybeSize: Option[WindowSizeDays]) extends DateRule
+
+case class AmountMinorUnits(value: Int) extends AnyVal
