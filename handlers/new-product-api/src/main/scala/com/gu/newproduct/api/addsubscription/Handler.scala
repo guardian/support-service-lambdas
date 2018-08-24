@@ -142,7 +142,7 @@ object Steps {
     plan = getPlan(request.planId)
     voucherEmailData = VoucherEmailData(
       plan = plan,
-      firstPaymentDate = request.startDate, // TODO is this correct?
+      firstPaymentDate = request.startDate,
       firstPaperDate = request.startDate,
       subscriptionName = subscriptionName,
       contacts = customerData.contacts,
