@@ -31,14 +31,12 @@ object SendConfirmationEmailContributions extends Logging {
   def apply(
     etSqsSend: ETPayload[ContributionFields] => Future[Unit],
     getCurrentDate: () => LocalDate
-  )(data: ContributionsEmailData) = {
+  )(data: ContributionsEmailData): AsyncApiGatewayOp[Unit] = {
     val maybeContributionFields = toContributionFields(getCurrentDate(), data)
-    val response = for {
+    for {
       etPayload <- toPayload(maybeContributionFields)
       sendMessageResult <- etSqsSend(etPayload).toAsyncApiGatewayOp("sending contribution email sqs message")
     } yield sendMessageResult
-
-    response.replace(ContinueProcessing(()))
 
   }
 

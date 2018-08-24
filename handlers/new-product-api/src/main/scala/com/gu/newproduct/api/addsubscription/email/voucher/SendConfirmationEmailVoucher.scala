@@ -15,20 +15,22 @@ object SendConfirmationEmailVoucher extends Logging {
   def apply(
     etSqsSend: ETPayload[VoucherEmailData] => Future[Unit],
     getCurrentDate: () => LocalDate,
-  )(data: VoucherEmailData): AsyncApiGatewayOp[Unit] = {
-    val response = for {
-      etPayload <- toPayload(data)
-      sendMessageResult <- etSqsSend(etPayload).toAsyncApiGatewayOp("sending voucher email sqs message")
-    } yield sendMessageResult
-    response.replace(ContinueProcessing(()))
-  }
+  )(data: VoucherEmailData): AsyncApiGatewayOp[Unit] = for {
+    etPayload <- toPayload(data)
+    sendMessageResult <- etSqsSend(etPayload).toAsyncApiGatewayOp("sending voucher email sqs message")
+  } yield sendMessageResult
 
   def toPayload(voucherEmailData: VoucherEmailData): AsyncApiGatewayOp[ETPayload[VoucherEmailData]] =
     voucherEmailData.contacts.soldTo.email.map { email =>
       val payload = ETPayload(email = email.value, fields = voucherEmailData, DataExtensionName("paper-voucher"))
       ContinueProcessing(payload).toAsync
     }.getOrElse {
-      logger.info("No email in zuora contact skipping thank you email")
-      ReturnWithResponse(ApiGatewayResponse.successfulExecution).toAsync
+      val errorLogMessage = "No email address in zuora sold to contact, skipping voucher thank you email"
+      logger.warn(errorLogMessage)
+      val response = ApiGatewayResponse.messageResponse(
+        "500",
+        "Internal server error"
+      )
+      ReturnWithResponse(response).toAsync
     }
 }

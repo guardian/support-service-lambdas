@@ -79,7 +79,7 @@ object VoucherEmailFields {
       "title" -> soldTo.title.map(_.value).getOrElse(""),
       "first_name" -> soldTo.firstName.value,
       "last_name" -> soldTo.lastName.value,
-      "EmailAddress" -> soldTo.email.map(_.value).getOrElse(""), 
+      "EmailAddress" -> soldTo.email.map(_.value).getOrElse(""),
 
       "billing_address_line_1" -> billToAddress.address1.map(_.value).getOrElse(""),
       "billing_address_line_2" -> billToAddress.address2.map(_.value).getOrElse(""),
