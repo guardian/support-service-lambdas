@@ -3,7 +3,6 @@ package manualTest
 import java.time.LocalDate
 
 import com.gu.effects.sqs.AwsSQSSend
-import com.gu.effects.sqs.AwsSQSSend.QueueName
 import com.gu.i18n.Country
 import com.gu.newproduct.api.addsubscription.Steps.emailQueuesFor
 import com.gu.newproduct.api.addsubscription.email.EtSqsSend
