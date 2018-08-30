@@ -11,12 +11,12 @@ import org.scalatest.{FlatSpec, Matchers}
 
 class MoveIdentityIdTest extends FlatSpec with Matchers {
 
-  final class Var() {
+  final class MockSetOrClearIdentityId() {
 
-    var order = List[String]() // we want to check ordering of side effects...
+    var invocationLog = List[String]() // we want to check ordering of side effects...
 
-    def setOrClearIdentityId(sfContactId: SFContactId, sfUpdateRequest: SFContactUpdate): Types.ClientFailableOp[Unit] = {
-      order = order ++ List(sfUpdateRequest match {
+    def apply(sfContactId: SFContactId, sfUpdateRequest: SFContactUpdate): Types.ClientFailableOp[Unit] = {
+      invocationLog = invocationLog ++ List(sfUpdateRequest match {
         case SFContactUpdate(None, setname) => s"clear ${sfContactId.value} setname: $setname"
         case SFContactUpdate(Some(IdentityId("newIdentityId")), SetFirstName(FirstName(name))) => s"addidentity ${sfContactId.value} setname $name"
         case other => s"try to set identity id to: <$other>"
@@ -28,21 +28,21 @@ class MoveIdentityIdTest extends FlatSpec with Matchers {
 
   it should "not edit identity id at all if we're not setting one" in {
 
-    val mock = new Var()
+    val invocationLog = new MockSetOrClearIdentityId()
 
     val maybeIdentityId: Option[IdentityId] = None
     val sfPointer = LinksFromZuora(SFContactId("contnew"), CRMAccountId("crmcrm"), maybeIdentityId)
     val maybeContactId = Some(OldSFContact(SFContactId("contold")))
 
-    val actual = MoveIdentityId(mock.setOrClearIdentityId)(sfPointer, maybeContactId, Some(FirstName("hello")))
+    val actual = MoveIdentityId(invocationLog.apply)(sfPointer, maybeContactId, Some(FirstName("hello")))
 
-    mock.order should be(List("clear contold setname: DontChangeFirstName", "clear contnew setname: SetFirstName(FirstName(hello))"))
+    invocationLog.invocationLog should be(List("clear contold setname: DontChangeFirstName", "clear contnew setname: SetFirstName(FirstName(hello))"))
     actual should be(ClientSuccess(()))
   }
 
   it should "clear and then set identity id if we're setting one" in {
 
-    val mock = new Var()
+    val mockSetOrClearIdentityId = new MockSetOrClearIdentityId()
 
     val maybeIdentityId: Option[IdentityId] = Some(IdentityId("newIdentityId"))
 
@@ -50,15 +50,15 @@ class MoveIdentityIdTest extends FlatSpec with Matchers {
 
     val maybeContactId = Some(OldSFContact(SFContactId("contold")))
 
-    val actual = MoveIdentityId(mock.setOrClearIdentityId)(sfPointer, maybeContactId, Some(FirstName("hello")))
+    val actual = MoveIdentityId(mockSetOrClearIdentityId.apply)(sfPointer, maybeContactId, Some(FirstName("hello")))
 
-    mock.order should be(List("clear contold setname: DontChangeFirstName", "addidentity contnew setname hello"))
+    mockSetOrClearIdentityId.invocationLog should be(List("clear contold setname: DontChangeFirstName", "addidentity contnew setname hello"))
     actual should be(ClientSuccess(()))
   }
 
   it should "not clear or set identity id if we aren't setting it" in {
 
-    val mock = new Var()
+    val mockSetOrClearIdentityId = new MockSetOrClearIdentityId()
 
     val maybeIdentityId: Option[IdentityId] = None
 
@@ -66,9 +66,9 @@ class MoveIdentityIdTest extends FlatSpec with Matchers {
 
     val maybeContactId = None
 
-    val actual = MoveIdentityId(mock.setOrClearIdentityId)(sfPointer, maybeContactId, Some(FirstName("hello")))
+    val actual = MoveIdentityId(mockSetOrClearIdentityId.apply)(sfPointer, maybeContactId, Some(FirstName("hello")))
 
-    mock.order.reverse should be(List("clear contnew setname: SetFirstName(FirstName(hello))"))
+    mockSetOrClearIdentityId.invocationLog should be(List("clear contnew setname: SetFirstName(FirstName(hello))"))
     actual should be(ClientSuccess(()))
   }
 
