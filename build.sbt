@@ -88,16 +88,6 @@ lazy val salesforce = all(project in file("lib/salesforce"))
     libraryDependencies ++= Seq(okhttp3, logging, scalaz, playJson, scalatest)
   )
 
-lazy val `update-sf-identityid` = all(project in file("lib/sf/update-sf-identityid"))
-  .dependsOn(
-    salesforce % "compile->compile;test->test",
-    effects % "test->test",
-    testDep
-  )
-  .settings(
-    libraryDependencies ++= Seq(okhttp3, logging, scalaz, playJson, scalatest)
-  )
-
 lazy val restHttp = all(project in file("lib/restHttp"))
   .settings(
     libraryDependencies ++= Seq(okhttp3, logging, scalaz, playJson, scalatest)
@@ -170,20 +160,17 @@ lazy val root = all(project in file(".")).enablePlugins(RiffRaffArtifact).aggreg
   s3ConfigValidator,
   `new-product-api`,
   `effects-sqs`,
-  `effects-ses`,
-  `update-sf-identityid`
+  `effects-ses`
 ).dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `identity-backfill` = all(project in file("handlers/identity-backfill")) // when using the "project identity-backfill" command it uses the lazy val name
   .enablePlugins(RiffRaffArtifact)
   .dependsOn(
     zuora,
-    salesforce,
+    salesforce % "compile->compile;test->test",
     handler,
     effectsDepIncludingTestFolder,
-    testDep,
-    salesforce % "test->test",
-    `update-sf-identityid` % "compile->compile;test->test"
+    testDep
   )
 
 lazy val `digital-subscription-expiry` = all(project in file("handlers/digital-subscription-expiry"))
@@ -208,7 +195,7 @@ lazy val `zuora-retention` = all(project in file("handlers/zuora-retention"))
 
 lazy val `sf-contact-merge` = all(project in file("handlers/sf-contact-merge"))
   .enablePlugins(RiffRaffArtifact)
-  .dependsOn(zuora, salesforce, handler, effectsDepIncludingTestFolder, testDep, `update-sf-identityid` % "compile->compile;test->test")
+  .dependsOn(zuora, salesforce % "compile->compile;test->test", handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `cancellation-sf-cases` = all(project in file("handlers/cancellation-sf-cases"))
   .enablePlugins(RiffRaffArtifact)
