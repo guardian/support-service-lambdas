@@ -112,9 +112,9 @@ class VoucherEmailDataTest extends FlatSpec with Matchers {
 
     val cardVoucherData = directDebitVoucherData.copy(paymentMethod = NonDirectDebitMethod(ActivePaymentMethod, CreditCard))
 
-    val directDebitFields = List("bank_account_no", "bank_sort_code", "account_holder", "mandate_id")
+    val directDebitFieldNames = List("bank_account_no", "bank_sort_code", "account_holder", "mandate_id")
 
-    VoucherEmailFields(cardVoucherData).keySet.filter(directDebitFields.contains(_)) shouldBe Set.empty
+    VoucherEmailFields(cardVoucherData).keySet.filter(directDebitFieldNames.contains(_)) shouldBe Set.empty
   }
 
   def fieldsForPlanIds(ids: List[PlanId]): List[Map[String, String]] = {
