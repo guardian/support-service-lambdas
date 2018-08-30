@@ -16,11 +16,11 @@ class MoveIdentityIdTest extends FlatSpec with Matchers {
     var order = List[String]() // we want to check ordering of side effects...
 
     def setOrClearIdentityId(sfContactId: SFContactId, sfUpdateRequest: SFContactUpdate): Types.ClientFailableOp[Unit] = {
-      order = (sfUpdateRequest match {
+      order = order ++ List(sfUpdateRequest match {
         case SFContactUpdate(None, setname) => s"clear ${sfContactId.value} setname: $setname"
         case SFContactUpdate(Some(IdentityId("newIdentityId")), SetFirstName(FirstName(name))) => s"addidentity ${sfContactId.value} setname $name"
         case other => s"try to set identity id to: <$other>"
-      }) :: order
+      })
       ClientSuccess(())
     }
 
@@ -36,7 +36,7 @@ class MoveIdentityIdTest extends FlatSpec with Matchers {
 
     val actual = MoveIdentityId(mock.setOrClearIdentityId)(sfPointer, maybeContactId, Some(FirstName("hello")))
 
-    mock.order.reverse should be(List("clear contold setname: DontChangeFirstName", "clear contnew setname: SetFirstName(FirstName(hello))"))
+    mock.order should be(List("clear contold setname: DontChangeFirstName", "clear contnew setname: SetFirstName(FirstName(hello))"))
     actual should be(ClientSuccess(()))
   }
 
@@ -52,7 +52,7 @@ class MoveIdentityIdTest extends FlatSpec with Matchers {
 
     val actual = MoveIdentityId(mock.setOrClearIdentityId)(sfPointer, maybeContactId, Some(FirstName("hello")))
 
-    mock.order.reverse should be(List("clear contold setname: DontChangeFirstName", "addidentity contnew setname hello"))
+    mock.order should be(List("clear contold setname: DontChangeFirstName", "addidentity contnew setname hello"))
     actual should be(ClientSuccess(()))
   }
 
