@@ -22,4 +22,14 @@ class GetFirstNameToUseFirstNameForSFContactTest extends FlatSpec with Matchers 
     actual should be(ContinueProcessing(someFirstName))
   }
 
+  it should "skip any non winning contacts in the list" in {
+    val someFirstName = Some(FirstName("hi"))
+    val contactIdsFromZuora = List(
+      NameForContactId(SFContactId("wrong"), None),
+      NameForContactId(SFContactId("winningSfContact"), someFirstName)
+    )
+    val actual = GetFirstNameToUse.firstNameForSFContact(SFContactId("winningSfContact"), contactIdsFromZuora)
+    actual should be(ContinueProcessing(someFirstName))
+  }
+
 }
