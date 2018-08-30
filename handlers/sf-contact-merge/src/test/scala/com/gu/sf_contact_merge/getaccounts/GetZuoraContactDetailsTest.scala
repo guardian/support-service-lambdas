@@ -1,14 +1,14 @@
 package com.gu.sf_contact_merge.getaccounts
 
-import com.gu.sf_contact_merge.getaccounts.GetEmails.{ContactId, EmailAddress, FirstName, LastName, Record}
+import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.{ContactId, EmailAddress, FirstName, LastName, ZuoraContactDetails}
 import com.gu.util.resthttp.Types.ClientSuccess
 import com.gu.zuora.fake.FakeZuoraQuerier
 import org.scalatest.{FlatSpec, Matchers}
 import scalaz.NonEmptyList
 
-class GetEmailsTest extends FlatSpec with Matchers {
+class GetZuoraContactDetailsTest extends FlatSpec with Matchers {
 
-  import GetEmailsTest._
+  import GetZuoraContactDetailsTest._
 
   it should "handle an email and a missing email with a fake querier" in {
 
@@ -16,22 +16,22 @@ class GetEmailsTest extends FlatSpec with Matchers {
 
     val querier = FakeZuoraQuerier(expectedQuery, contactQueryResponse)
 
-    val actual = GetEmails(querier, NonEmptyList(
+    val actual = GetZuoraContactDetails(querier, NonEmptyList(
       ContactId("cid1"),
       ContactId("cid2")
     ))
 
-    val expectedEmails = Map(
-      ContactId("cid1") -> Record(Some(EmailAddress("peppa.pig@guardian.co.uk")), Some(FirstName("peppa")), LastName("pig")),
-      ContactId("cid2") -> Record(None, None, LastName("pig"))
+    val expected = Map(
+      ContactId("cid1") -> ZuoraContactDetails(Some(EmailAddress("peppa.pig@guardian.co.uk")), Some(FirstName("peppa")), LastName("pig")),
+      ContactId("cid2") -> ZuoraContactDetails(None, None, LastName("pig"))
     )
-    actual should be(ClientSuccess(expectedEmails))
+    actual should be(ClientSuccess(expected))
 
   }
 
 }
 
-object GetEmailsTest {
+object GetZuoraContactDetailsTest {
 
   val contactQueryResponse =
     """{

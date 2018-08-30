@@ -1,6 +1,6 @@
 package com.gu.sf_contact_merge.validate
 
-import com.gu.sf_contact_merge.getaccounts.GetEmails.EmailAddress
+import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.EmailAddress
 import org.scalatest.{FlatSpec, Matchers}
 
 class AssertSameEmailsTest extends FlatSpec with Matchers {

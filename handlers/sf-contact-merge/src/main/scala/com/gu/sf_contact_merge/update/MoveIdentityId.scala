@@ -1,7 +1,7 @@
 package com.gu.sf_contact_merge.update
 
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
-import com.gu.sf_contact_merge.getaccounts.GetEmails.FirstName
+import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.FirstName
 import com.gu.sf_contact_merge.update.MoveIdentityId.OldSFContact
 import com.gu.sf_contact_merge.update.UpdateAccountSFLinks.LinksFromZuora
 import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId.{DontChangeFirstName, DummyFirstName, SFContactUpdate, SetFirstName}

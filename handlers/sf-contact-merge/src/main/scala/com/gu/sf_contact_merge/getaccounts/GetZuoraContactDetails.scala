@@ -7,14 +7,14 @@ import com.gu.util.zuora.ZuoraQuery.ZuoraQuerier
 import play.api.libs.json.Json
 import scalaz.NonEmptyList
 
-object GetEmails {
+object GetZuoraContactDetails {
 
   case class ContactId(value: String) extends AnyVal
 
   case class EmailAddress(value: String) extends AnyVal
   case class FirstName(value: String) extends AnyVal
   case class LastName(value: String) extends AnyVal
-  case class Record(emailAddress: Option[EmailAddress], firstName: Option[FirstName], lastName: LastName)
+  case class ZuoraContactDetails(emailAddress: Option[EmailAddress], firstName: Option[FirstName], lastName: LastName)
 
   case class WireContact(
     Id: String,
@@ -25,7 +25,7 @@ object GetEmails {
 
   implicit val readWireContact = Json.reads[WireContact]
 
-  def apply(zuoraQuerier: ZuoraQuerier, contactIds: NonEmptyList[ContactId]): ClientFailableOp[Map[ContactId, Record]] =
+  def apply(zuoraQuerier: ZuoraQuerier, contactIds: NonEmptyList[ContactId]): ClientFailableOp[Map[ContactId, ZuoraContactDetails]] =
     for {
       or <- OrTraverse(contactIds) { accountId =>
         zoql"""Id = ${accountId.value}"""
@@ -36,7 +36,7 @@ object GetEmails {
     } yield result.records.map { contact =>
       (
         ContactId(contact.Id),
-        Record(
+        ZuoraContactDetails(
           contact.WorkEmail.map(EmailAddress.apply),
           Some(FirstName(contact.FirstName)).filter(_.value != "."),
           LastName(contact.LastName)

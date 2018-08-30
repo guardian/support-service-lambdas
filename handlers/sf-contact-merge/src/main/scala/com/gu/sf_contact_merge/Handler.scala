@@ -10,7 +10,7 @@ import com.gu.salesforce.auth.SalesforceAuthenticate.SFAuthConfig
 import com.gu.sf_contact_merge.TypeConvert._
 import com.gu.sf_contact_merge.WireRequestToDomainObject.MergeRequest
 import com.gu.sf_contact_merge.getaccounts.GetContacts.AccountId
-import com.gu.sf_contact_merge.getaccounts.GetEmails.{EmailAddress, FirstName, LastName}
+import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.{EmailAddress, FirstName, LastName}
 import com.gu.sf_contact_merge.getaccounts.GetIdentityAndZuoraEmailsForAccountsSteps
 import com.gu.sf_contact_merge.getaccounts.GetIdentityAndZuoraEmailsForAccountsSteps.IdentityAndSFContactAndEmail
 import com.gu.sf_contact_merge.update.MoveIdentityId.OldSFContact

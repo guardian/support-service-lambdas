@@ -4,7 +4,7 @@ import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.salesforce.auth.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.auth.{SalesforceAuthenticate, SalesforceRestRequestMaker}
 import com.gu.salesforce.dev.SFEffectsData
-import com.gu.sf_contact_merge.getaccounts.GetEmails.FirstName
+import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.FirstName
 import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId
 import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId.{IdentityId, SFContactUpdate, SetFirstName}
 import com.gu.test.EffectsTest

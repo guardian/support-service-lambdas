@@ -1,7 +1,7 @@
 package com.gu.sf_contact_merge.update.updateSFIdentityId
 
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
-import com.gu.sf_contact_merge.getaccounts.GetEmails.FirstName
+import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.FirstName
 import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId.IdentityId
 import com.gu.util.resthttp.RestRequestMaker
 import com.gu.util.resthttp.Types.ClientFailableOp

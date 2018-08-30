@@ -1,7 +1,7 @@
 package com.gu.sf_contact_merge.getaccounts
 
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
-import com.gu.sf_contact_merge.getaccounts.GetEmails.ContactId
+import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.ContactId
 import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId.IdentityId
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError}
 import com.gu.util.zuora.SafeQueryBuilder.Implicits._

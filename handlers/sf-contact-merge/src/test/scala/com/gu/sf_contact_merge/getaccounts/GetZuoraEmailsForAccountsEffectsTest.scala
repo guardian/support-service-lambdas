@@ -6,7 +6,7 @@ import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId.IdentityId
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.sf_contact_merge.TypeConvert._
 import com.gu.sf_contact_merge.getaccounts.GetContacts.AccountId
-import com.gu.sf_contact_merge.getaccounts.GetEmails.{EmailAddress, FirstName, LastName}
+import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.{EmailAddress, FirstName, LastName}
 import com.gu.sf_contact_merge.getaccounts.GetIdentityAndZuoraEmailsForAccountsSteps.IdentityAndSFContactAndEmail
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}

@@ -3,7 +3,7 @@ package com.gu.sf_contact_merge.getaccounts
 import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId.IdentityId
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.sf_contact_merge.getaccounts.GetContacts.{AccountId, IdentityAndSFContact}
-import com.gu.sf_contact_merge.getaccounts.GetEmails.ContactId
+import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.ContactId
 import com.gu.util.resthttp.Types.ClientSuccess
 import com.gu.zuora.fake.FakeZuoraQuerier
 import org.scalatest.{FlatSpec, Matchers}

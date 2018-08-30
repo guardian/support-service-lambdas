@@ -2,7 +2,7 @@ package com.gu.sf_contact_merge
 
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.sf_contact_merge.GetFirstNameToUse.NameForContactId
-import com.gu.sf_contact_merge.getaccounts.GetEmails.FirstName
+import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.FirstName
 import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
 import org.scalatest.{FlatSpec, Matchers}
 import scalaz.-\/
