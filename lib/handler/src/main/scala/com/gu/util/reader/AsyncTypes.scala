@@ -26,6 +26,16 @@ object AsyncTypes extends Logging {
     def replace(replacement: ApiGatewayOp[A]): AsyncApiGatewayOp[A] = AsyncApiGatewayOp(underlying.map(_ => replacement))
   }
 
+  implicit class UnitAsyncApiGatewayOps(asyncApiGatewayOp: AsyncApiGatewayOp[Unit]) extends Logging {
+    def recoverAndLog(action: String): AsyncApiGatewayOp[Unit] = AsyncApiGatewayOp(
+      asyncApiGatewayOp.underlying.map {
+        case ReturnWithResponse(response) =>
+          logger.warn(s"ignoring error while $action, original response was :$response")
+          ContinueProcessing(())
+        case continue => continue
+      }
+    )
+  }
   implicit class AsyncApiResponseOps(apiGatewayOp: AsyncApiGatewayOp[ApiResponse]) {
     def apiResponse: Future[ApiResponse] = apiGatewayOp.underlying.map(x => x.apiResponse)
   }
@@ -43,6 +53,7 @@ object AsyncTypes extends Logging {
   }
 
   implicit class FutureToAsyncOp[A](future: Future[A]) {
+    //todo remove the action param since it's not used for anything anymore
     def toAsyncApiGatewayOp(action: String): AsyncApiGatewayOp[A] = {
       val apiGatewayOp = future.map(ContinueProcessing(_))
       AsyncApiGatewayOp(apiGatewayOp)

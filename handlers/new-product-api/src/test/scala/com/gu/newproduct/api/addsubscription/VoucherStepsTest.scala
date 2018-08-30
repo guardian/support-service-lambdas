@@ -3,10 +3,12 @@ package com.gu.newproduct.api.addsubscription
 import java.time.LocalDate
 
 import com.gu.newproduct.TestData
+import com.gu.newproduct.api.addsubscription.email.voucher.VoucherEmailData
 import com.gu.newproduct.api.addsubscription.validation._
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{SubscriptionName, ZuoraCreateSubRequest}
-import com.gu.newproduct.api.productcatalog.PlanId
+import com.gu.newproduct.api.productcatalog.PlanId.VoucherEveryDay
+import com.gu.newproduct.api.productcatalog.{Plan, PlanDescription, PlanId}
 import com.gu.newproduct.api.productcatalog.ZuoraIds.ProductRatePlanId
 import com.gu.test.JsonMatchers.JsonMatcher
 import com.gu.util.apigateway.ApiGatewayRequest
@@ -15,7 +17,7 @@ import com.gu.util.resthttp.Types
 import com.gu.util.resthttp.Types.ClientSuccess
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json._
-
+import com.gu.util.reader.AsyncTypes._
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
@@ -63,15 +65,24 @@ class VoucherStepsTest extends FlatSpec with Matchers {
       ClientSuccess(SubscriptionName("well done"))
     }
 
-    val fakeGetZuoraId = (planId: PlanId) => Some(ratePlanId)
+    val fakeGetZuoraId = (planId: PlanId) => {
+      planId shouldBe VoucherEveryDay
+      Some(ratePlanId)
+    }
 
+    //todo maybe add assertions on the input params for these two
     def fakeValidateVoucherStartDate(id: PlanId, d: LocalDate) = Passed(())
 
+    def fakeSendEmail(voucherEmailData: VoucherEmailData) = ContinueProcessing(()).toAsync
+
+    def fakeGetPlan(planId: PlanId) = Plan(VoucherEveryDay, PlanDescription("Everyday"))
     val fakeAddVoucherSteps = Steps.addVoucherSteps(
+      fakeGetPlan,
       fakeGetZuoraId,
       fakeGetVoucherCustomerData,
       fakeValidateVoucherStartDate,
-      fakeCreate
+      fakeCreate,
+      fakeSendEmail
     ) _
 
     val futureActual = Steps.handleRequest(

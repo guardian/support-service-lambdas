@@ -7,7 +7,6 @@ import com.gu.util.config.ZuoraEnvironment
 import com.gu.util.resthttp.Types.ClientFailableOp
 import play.api.libs.json.Json
 import ZuoraCatalogWireModel._
-import com.gu.newproduct.api.addsubscription.AmountMinorUnits
 
 import scala.util.Try
 

@@ -12,6 +12,7 @@ import com.gu.newproduct.api.addsubscription.TypeConvert._
 import com.gu.newproduct.api.addsubscription.email.EtSqsSend
 import com.gu.newproduct.api.addsubscription.email.contributions.SendConfirmationEmailContributions.ContributionsEmailData
 import com.gu.newproduct.api.addsubscription.email.contributions.{ContributionFields, SendConfirmationEmailContributions}
+import com.gu.newproduct.api.addsubscription.email.voucher.{SendConfirmationEmailVoucher, VoucherEmailData}
 import com.gu.newproduct.api.addsubscription.validation.Validation._
 import com.gu.newproduct.api.addsubscription.validation.contribution.ContributionValidations.ValidatableFields
 import com.gu.newproduct.api.addsubscription.validation.contribution.{ContributionAccountValidation, ContributionCustomerData, ContributionValidations, GetContributionCustomerData}
@@ -21,20 +22,20 @@ import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.WireModel.
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{ChargeOverride, SubscriptionName, ZuoraCreateSubRequest}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAccount
 import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.WireModel.ZuoraSubscriptionsResponse
-import com.gu.newproduct.api.addsubscription.zuora.GetContacts.BilltoContact
+import com.gu.newproduct.api.addsubscription.zuora.GetContacts.BillToContact
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.WireModel.GetContactsResponse
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{DirectDebit, PaymentMethod, PaymentMethodWire}
 import com.gu.newproduct.api.addsubscription.zuora.{GetContacts, _}
 import com.gu.newproduct.api.productcatalog.PlanId.MonthlyContribution
 import com.gu.newproduct.api.productcatalog.ZuoraIds.{PlanAndCharge, ProductRatePlanId}
-import com.gu.newproduct.api.productcatalog.{DateRule, NewProductApi, PlanId, ZuoraIds}
+import com.gu.newproduct.api.productcatalog._
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.ApiGatewayResponse.internalServerError
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.config.LoadConfigModule.StringFromS3
-import com.gu.util.config.{LoadConfigModule, Stage}
+import com.gu.util.config.{LoadConfigModule, Stage, ZuoraEnvironment}
 import com.gu.util.reader.AsyncTypes._
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.RestRequestMaker.Requests
@@ -79,7 +80,7 @@ object Steps {
     currency: Currency,
     paymentMethod: PaymentMethod,
     firstPaymentDate: LocalDate,
-    billToContact: BilltoContact,
+    billToContact: BillToContact,
     amountMinorUnits: AmountMinorUnits
   ) =
     ContributionsEmailData(
@@ -121,21 +122,33 @@ object Steps {
       zuoraCreateSubRequest = createZuoraSubRequest(request, acceptanceDate, Some(chargeOverride), contributionZuoraIds.productRatePlanId)
       subscriptionName <- createSubscription(zuoraCreateSubRequest).toAsyncApiGatewayOp("create monthly contribution")
       contributionEmailData = toContributionEmailData(request, account.currency, paymentMethod, acceptanceDate, contacts.billTo, amountMinorUnits)
-      _ <- sendConfirmationEmail(contributionEmailData)
+      _ <- sendConfirmationEmail(contributionEmailData).recoverAndLog("send contribution confirmation email")
     } yield subscriptionName
   }
 
   def addVoucherSteps(
+    getPlan: PlanId => Plan,
     getZuoraRateplanId: PlanId => Option[ProductRatePlanId],
     getCustomerData: ZuoraAccountId => ApiGatewayOp[VoucherCustomerData],
     validateStartDate: (PlanId, LocalDate) => ValidationResult[Unit],
-    createSubscription: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName]
+    createSubscription: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName],
+    sendConfirmationEmail: VoucherEmailData => AsyncApiGatewayOp[Unit]
   )(request: AddSubscriptionRequest): AsyncApiGatewayOp[SubscriptionName] = for {
     _ <- validateStartDate(request.planId, request.startDate).toApiGatewayOp.toAsync
     customerData <- getCustomerData(request.zuoraAccountId).toAsync
     zuoraRatePlanId <- getZuoraRateplanId(request.planId).toApiGatewayContinueProcessing(internalServerError(s"no Zuora id for ${request.planId}!")).toAsync
     createSubRequest = createZuoraSubRequest(request, request.startDate, None, zuoraRatePlanId)
     subscriptionName <- createSubscription(createSubRequest).toAsyncApiGatewayOp("create voucher subscription")
+    plan = getPlan(request.planId)
+    voucherEmailData = VoucherEmailData(
+      plan = plan,
+      firstPaymentDate = request.startDate,
+      firstPaperDate = request.startDate,
+      subscriptionName = subscriptionName,
+      contacts = customerData.contacts,
+      paymentMethod = customerData.paymentMethod
+    )
+    _ <- sendConfirmationEmail(voucherEmailData).recoverAndLog("send voucher confirmation email")
   } yield subscriptionName
 
   def operationForEffects(
@@ -151,13 +164,19 @@ object Steps {
         loadConfig[ZuoraRestConfig].toApiGatewayOp("load zuora config")
       }
       zuoraClient = ZuoraRestRequestMaker(response, zuoraConfig)
-      sqsSend = awsSQSSend(emailQueueFor(stage))
-      contributionsSqsSend = EtSqsSend[ContributionFields](sqsSend) _
+      queueNames = emailQueuesFor(stage)
+
+      contributionSqsSend = awsSQSSend(queueNames.contributions)
+      contributionEtSqsSend = EtSqsSend[ContributionFields](contributionSqsSend) _
       getCurrentDate = () => RawEffects.now().toLocalDate
       validatorFor = DateValidator.validatorFor(getCurrentDate, _: DateRule)
+      zuoraToPlanId = zuoraIds.voucherZuoraIds.zuoraIdToPlanid.get _
+      zuoraEnv = ZuoraEnvironment.EnvForStage(stage)
+      plansWithPrice <- PricesFromZuoraCatalog(zuoraEnv, fetchString, zuoraToPlanId).toApiGatewayOp("get prices from zuora catalog")
+      catalog = NewProductApi.catalog(plansWithPrice.get)
 
       isValidStartDateForPlan = Function.uncurried(
-        NewProductApi.catalog.planForId andThen { plan =>
+        catalog.planForId andThen { plan =>
           StartDateValidator.fromRule(validatorFor, plan.startDateRules)
         }
       )
@@ -168,12 +187,22 @@ object Steps {
       isValidContributionStartDate = isValidStartDateForPlan(MonthlyContribution, _: LocalDate)
       validateRequest = ContributionValidations(isValidContributionStartDate, AmountLimits.limitsFor) _
 
-      sendConfirmationEmail = SendConfirmationEmailContributions(contributionsSqsSend, getCurrentDate) _
+      sendConfirmationEmail = SendConfirmationEmailContributions(contributionEtSqsSend, getCurrentDate) _
       contributionSteps = addContributionSteps(zuoraIds.contributionsZuoraIds.monthly, getCustomerData, validateRequest, createSubscription, sendConfirmationEmail) _
+      voucherSqsSend = awsSQSSend(queueNames.voucher)
+      voucherEtSqsSend = EtSqsSend[VoucherEmailData](voucherSqsSend) _
+      sendVoucherEmail = SendConfirmationEmailVoucher(voucherEtSqsSend, getCurrentDate) _
 
       getZuoraIdForVoucherPlan = zuoraIds.voucherZuoraIds.byApiPlanId.get _
       getVoucherData = getValidatedVoucherCustomerData(zuoraClient)
-      voucherSteps = addVoucherSteps(getZuoraIdForVoucherPlan, getVoucherData, isValidStartDateForPlan, createSubscription) _
+      voucherSteps = addVoucherSteps(
+        catalog.planForId,
+        getZuoraIdForVoucherPlan,
+        getVoucherData,
+        isValidStartDateForPlan,
+        createSubscription,
+        sendVoucherEmail
+      ) _
 
       addSubSteps = handleRequest(
         addContribution = contributionSteps,
@@ -229,10 +258,10 @@ object Steps {
     )
   }
 
-  def emailQueueFor(stage: Stage) = stage match {
-    case Stage("PROD") => QueueName("contributions-thanks")
-    case Stage("CODE") => QueueName("contributions-thanks")
-    case _ => QueueName("contributions-thanks-dev")
+  case class EmailQueueNames(contributions: QueueName, voucher: QueueName)
+  def emailQueuesFor(stage: Stage) = stage match {
+    case Stage("PROD") | Stage("CODE") => EmailQueueNames(contributions = QueueName("contributions-thanks"), voucher = QueueName("subs-welcome-email"))
+    case _ => EmailQueueNames(contributions = QueueName("contributions-thanks-dev"), voucher = QueueName("subs-welcome-email-dev"))
   }
 
 }

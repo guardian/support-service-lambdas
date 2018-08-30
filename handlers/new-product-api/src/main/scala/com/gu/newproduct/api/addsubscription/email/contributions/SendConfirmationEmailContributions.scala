@@ -2,16 +2,19 @@ package com.gu.newproduct.api.addsubscription.email.contributions
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+
 import com.gu.i18n.Currency
 import com.gu.newproduct.api.addsubscription.email.{DataExtensionName, ETPayload}
-import com.gu.newproduct.api.addsubscription.zuora.GetContacts.BilltoContact
+import com.gu.newproduct.api.addsubscription.zuora.GetContacts.BillToContact
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{DirectDebit, PaymentMethod}
-import com.gu.newproduct.api.addsubscription.{AmountMinorUnits, ZuoraAccountId}
+import com.gu.newproduct.api.addsubscription.ZuoraAccountId
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.AsyncTypes._
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.newproduct.api.addsubscription.Formatters._
+import com.gu.newproduct.api.productcatalog.AmountMinorUnits
+
 import scala.concurrent.Future
 
 object SendConfirmationEmailContributions extends Logging {
@@ -22,20 +25,18 @@ object SendConfirmationEmailContributions extends Logging {
     paymentMethod: PaymentMethod,
     amountMinorUnits: AmountMinorUnits,
     firstPaymentDate: LocalDate,
-    billTo: BilltoContact
+    billTo: BillToContact
   )
 
   def apply(
     etSqsSend: ETPayload[ContributionFields] => Future[Unit],
     getCurrentDate: () => LocalDate
-  )(data: ContributionsEmailData) = {
+  )(data: ContributionsEmailData): AsyncApiGatewayOp[Unit] = {
     val maybeContributionFields = toContributionFields(getCurrentDate(), data)
-    val response = for {
+    for {
       etPayload <- toPayload(maybeContributionFields)
-      sendMessageResult <- etSqsSend(etPayload).toAsyncApiGatewayOp("sending sqs message")
+      sendMessageResult <- etSqsSend(etPayload).toAsyncApiGatewayOp("sending contribution email sqs message")
     } yield sendMessageResult
-
-    response.replace(ContinueProcessing(()))
 
   }
 
@@ -47,8 +48,6 @@ object SendConfirmationEmailContributions extends Logging {
       logger.info("Not enough data in zuora account to send contribution thank you email, skipping")
       ReturnWithResponse(ApiGatewayResponse.successfulExecution).toAsync
     }
-
-  def hyphenate(s: String) = s"${s.substring(0, 2)}-${s.substring(2, 4)}-${s.substring(4, 6)}"
 
   val firstPaymentDateFormat = DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy")
 
@@ -64,12 +63,12 @@ object SendConfirmationEmailContributions extends Logging {
         created = currentDate.toString,
         amount = data.amountMinorUnits.formatted,
         currency = data.currency.glyph,
-        edition = data.billTo.country.map(_.alpha2).getOrElse(""),
+        edition = data.billTo.address.country.map(_.alpha2).getOrElse(""),
         name = data.billTo.firstName.value,
         product = "monthly-contribution",
         `account name` = maybeDirectDebit.map(_.accountName.value),
         `account number` = maybeDirectDebit.map(_.accountNumberMask.value),
-        `sort code` = maybeDirectDebit.map(x => hyphenate(x.sortCode.value)),
+        `sort code` = maybeDirectDebit.map(_.sortCode.hyphenated),
         `Mandate ID` = maybeDirectDebit.map(_.mandateId.value),
         `first payment date` = maybeDirectDebit.map { _ =>
           data.firstPaymentDate.format(firstPaymentDateFormat)

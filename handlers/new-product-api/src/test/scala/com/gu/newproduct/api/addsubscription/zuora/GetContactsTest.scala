@@ -13,16 +13,28 @@ class GetContactsTest extends FlatSpec with Matchers {
   it should "get contacts" in {
 
     val soldToZuoraContact = WireModel.ZuoraSoldTo(
-      firstName = "soldToName",
-      lastName = "soldToLastName",
-      workEmail = Some("work@email.com"),
+      Title__c = Some("Dr"),
+      firstName = "Emmett",
+      lastName = "Brown",
+      workEmail = Some("doc@email.com"),
+      address1 = Some("1640"),
+      address2 = Some("Riverside Drive"),
+      city = Some("Hill Valley"),
+      state = Some("California"),
+      zipCode = Some("95420"),
       country = "United States"
     )
     val billToZuoraContact = ZuoraBillTo(
-      firstName = "billToName",
-      lastName = "billToLastName",
-      workEmail = None,
-      country = Some("United Kingdom")
+      Title__c = Some("Mr"),
+      firstName = "Marty",
+      lastName = "McFly",
+      workEmail = Some("marty@email.com"),
+      address1 = Some("9303 Lyon Drive"),
+      address2 = Some("Lyon Estates"),
+      city = Some("Hill Valley"),
+      state = Some("California"),
+      zipCode = Some("95423"),
+      country = Some("USA")
     )
 
     val zuoraGet: RequestsGet[GetContactsResponse] = (path, isCheckNeeded) => {
@@ -31,17 +43,33 @@ class GetContactsTest extends FlatSpec with Matchers {
     }
 
     val expected = Contacts(
-      billTo = BilltoContact(
-        FirstName("billToName"),
-        LastName("billToLastName"),
-        None,
-        Some(Country.UK)
-      ),
       soldTo = SoldToContact(
-        FirstName("soldToName"),
-        LastName("soldToLastName"),
-        Some(Email("work@email.com")),
-        Country.US
+        Some(Title("Dr")),
+        FirstName("Emmett"),
+        LastName("Brown"),
+        Some(Email("doc@email.com")),
+        SoldToAddress(
+          Some(Address1("1640")),
+          Some(Address2("Riverside Drive")),
+          Some(City("Hill Valley")),
+          Some(State("California")),
+          Country.US,
+          Some(Postcode("95420"))
+        )
+      ),
+      billTo = BillToContact(
+        Some(Title("Mr")),
+        FirstName("Marty"),
+        LastName("McFly"),
+        Some(Email("marty@email.com")),
+        BillToAddress(
+          Some(Address1("9303 Lyon Drive")),
+          Some(Address2("Lyon Estates")),
+          Some(City("Hill Valley")),
+          Some(State("California")),
+          Some(Country.US),
+          Some(Postcode("95423"))
+        )
       )
     )
 

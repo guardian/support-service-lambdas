@@ -4,29 +4,38 @@ import java.time.LocalDate
 
 import com.gu.i18n.Country
 import com.gu.i18n.Currency.GBP
+import com.gu.newproduct.api.addsubscription.ZuoraAccountId
 import com.gu.newproduct.api.addsubscription.email.contributions.SendConfirmationEmailContributions.ContributionsEmailData
 import com.gu.newproduct.api.addsubscription.email.{CContactAttributes, CTo, ETPayload}
-import com.gu.newproduct.api.addsubscription.zuora.GetContacts.{BilltoContact, Email, FirstName, LastName}
+import com.gu.newproduct.api.addsubscription.zuora.GetContacts._
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{BankAccountName, BankAccountNumberMask, DirectDebit, MandateId, NonDirectDebitMethod, SortCode}
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.ActivePaymentMethod
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType.CreditCard
-import com.gu.newproduct.api.addsubscription.{AmountMinorUnits, ZuoraAccountId}
-import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
-import org.scalatest.{FlatSpec, Matchers}
+import com.gu.newproduct.api.productcatalog.AmountMinorUnits
+import com.gu.util.apigateway.ApiGatewayResponse
+import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
+import org.scalatest.{AsyncFlatSpec, Matchers}
 
-import scala.concurrent.duration._
-import scala.concurrent.{Await, Future}
+import scala.concurrent.Future
 import scala.language.postfixOps
 
-class SendConfirmationEmailContributionsTest extends FlatSpec with Matchers {
+class SendConfirmationEmailContributionsTest extends AsyncFlatSpec with Matchers {
 
   def today = () => LocalDate.of(2018, 7, 30)
 
-  val testContact = BilltoContact(
-    FirstName("Marty"),
-    LastName("McFly"),
+  val testContact = BillToContact(
+    title = None,
+    firstName = FirstName("Marty"),
+    lastName = LastName("McFly"),
     email = Some(Email("email@email.com")),
-    Some(Country.UK)
+    address = BillToAddress(
+      address1 = None,
+      address2 = None,
+      city = None,
+      state = None,
+      country = Some(Country.UK),
+      postcode = None
+    )
   )
 
   val directDebit = DirectDebit(
@@ -82,34 +91,32 @@ class SendConfirmationEmailContributionsTest extends FlatSpec with Matchers {
 
     val send = SendConfirmationEmailContributions(sqsSend, today) _
 
-    val res = Await.result(send(testData).underlying, 3 seconds)
-
-    res.shouldBe(ContinueProcessing(()))
+    send(testData).underlying map {
+      res => res shouldBe ContinueProcessing(())
+    }
 
   }
 
-  it should "return success but not send message if contact has no email" in {
+  it should "return error and not attempt to send email if contact has no email" in {
 
-    //todo this check that it is not called does not work
     def sqsSend(ETPayload: ETPayload[ContributionFields]): Future[Unit] = fail("unexpected invocation of sqsSend")
 
     val send = SendConfirmationEmailContributions(sqsSend, today) _
 
-    val res = Await.result(send(testData).underlying, 3 seconds)
-
-    res.shouldBe(ContinueProcessing(()))
-
+    send(testData).underlying map {
+      res => res shouldBe ReturnWithResponse(ApiGatewayResponse.internalServerError("some log message"))
+    }
   }
 
-  it should "return success if sqs send fails" in {
+  it should "return error if sqs send fails" in {
 
     def sqsSend(payload: ETPayload[ContributionFields]): Future[Unit] = Future.failed(new RuntimeException("sqs error`"))
 
     val send = SendConfirmationEmailContributions(sqsSend, today) _
 
-    val res = Await.result(send(testData).underlying, 3 seconds)
-
-    res.shouldBe(ContinueProcessing(()))
+    send(testData).underlying map {
+      res => res shouldBe ReturnWithResponse(ApiGatewayResponse.internalServerError("some log message"))
+    }
   }
 
   it should "convert to contributions fields from data without direct debit" in {

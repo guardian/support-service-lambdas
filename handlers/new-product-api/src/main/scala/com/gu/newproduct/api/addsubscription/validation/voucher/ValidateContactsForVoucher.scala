@@ -6,9 +6,9 @@ import com.gu.newproduct.api.addsubscription.zuora.GetContacts.Contacts
 
 object ValidateContactsForVoucher {
   def apply(contacts: Contacts): ValidationResult[Contacts] = {
-    if (contacts.soldTo.country == Country.UK)
+    if (contacts.soldTo.address.country == Country.UK)
       Passed(contacts)
     else
-      Failed(s"Invalid country: ${contacts.soldTo.country.name}, only UK addresses are allowed")
+      Failed(s"Invalid country: ${contacts.soldTo.address.country.name}, only UK addresses are allowed")
   }
 }
