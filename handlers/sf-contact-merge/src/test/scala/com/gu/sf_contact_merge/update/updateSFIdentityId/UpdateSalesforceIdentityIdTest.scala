@@ -3,7 +3,7 @@ package com.gu.sf_contact_merge.update.updateSFIdentityId
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.FirstName
 import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId
-import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId.{DontChangeFirstName, DummyFirstName, IdentityId, SFContactUpdate, SetFirstName}
+import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId._
 import com.gu.util.resthttp.RestRequestMaker.{PatchRequest, RelativePath}
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.{JsObject, JsString}

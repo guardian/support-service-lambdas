@@ -17,9 +17,12 @@ class MoveIdentityIdTest extends FlatSpec with Matchers {
 
     def apply(sfContactId: SFContactId, sfUpdateRequest: SFContactUpdate): Types.ClientFailableOp[Unit] = {
       invocationLog = invocationLog ++ List(sfUpdateRequest match {
-        case SFContactUpdate(None, setname) => s"clear ${sfContactId.value} setname: $setname"
-        case SFContactUpdate(Some(IdentityId("newIdentityId")), SetFirstName(FirstName(name))) => s"addidentity ${sfContactId.value} setname $name"
-        case other => s"try to set identity id to: <$other>"
+        case SFContactUpdate(None, setname) =>
+          s"clear ${sfContactId.value} setname: $setname"
+        case SFContactUpdate(Some(IdentityId("newIdentityId")), SetFirstName(FirstName(name))) =>
+          s"addidentity ${sfContactId.value} setname $name"
+        case other =>
+          s"try to set identity id to: <$other>"
       })
       ClientSuccess(())
     }
@@ -36,7 +39,8 @@ class MoveIdentityIdTest extends FlatSpec with Matchers {
 
     val actual = MoveIdentityId(invocationLog.apply)(sfPointer, maybeContactId, Some(FirstName("hello")))
 
-    invocationLog.invocationLog should be(List("clear contold setname: DontChangeFirstName", "clear contnew setname: SetFirstName(FirstName(hello))"))
+    val expectedOrder = List("clear contold setname: DontChangeFirstName", "clear contnew setname: SetFirstName(FirstName(hello))")
+    invocationLog.invocationLog should be(expectedOrder)
     actual should be(ClientSuccess(()))
   }
 
@@ -52,7 +56,8 @@ class MoveIdentityIdTest extends FlatSpec with Matchers {
 
     val actual = MoveIdentityId(mockSetOrClearIdentityId.apply)(sfPointer, maybeContactId, Some(FirstName("hello")))
 
-    mockSetOrClearIdentityId.invocationLog should be(List("clear contold setname: DontChangeFirstName", "addidentity contnew setname hello"))
+    val expectedOrder = List("clear contold setname: DontChangeFirstName", "addidentity contnew setname hello")
+    mockSetOrClearIdentityId.invocationLog should be(expectedOrder)
     actual should be(ClientSuccess(()))
   }
 
@@ -68,7 +73,8 @@ class MoveIdentityIdTest extends FlatSpec with Matchers {
 
     val actual = MoveIdentityId(mockSetOrClearIdentityId.apply)(sfPointer, maybeContactId, Some(FirstName("hello")))
 
-    mockSetOrClearIdentityId.invocationLog should be(List("clear contnew setname: SetFirstName(FirstName(hello))"))
+    val expectedOrder = List("clear contnew setname: SetFirstName(FirstName(hello))")
+    mockSetOrClearIdentityId.invocationLog should be(expectedOrder)
     actual should be(ClientSuccess(()))
   }
 
