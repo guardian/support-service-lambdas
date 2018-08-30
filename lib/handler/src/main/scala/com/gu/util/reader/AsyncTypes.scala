@@ -27,7 +27,7 @@ object AsyncTypes extends Logging {
   }
 
   implicit class UnitAsyncApiGatewayOps(asyncApiGatewayOp: AsyncApiGatewayOp[Unit]) extends Logging {
-    def logAndContinue(action: String): AsyncApiGatewayOp[Unit] = AsyncApiGatewayOp(
+    def recoverAndLog(action: String): AsyncApiGatewayOp[Unit] = AsyncApiGatewayOp(
       asyncApiGatewayOp.underlying.map {
         case ReturnWithResponse(response) =>
           logger.warn(s"ignoring error while $action, original response was :$response")

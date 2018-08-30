@@ -122,7 +122,7 @@ object Steps {
       zuoraCreateSubRequest = createZuoraSubRequest(request, acceptanceDate, Some(chargeOverride), contributionZuoraIds.productRatePlanId)
       subscriptionName <- createSubscription(zuoraCreateSubRequest).toAsyncApiGatewayOp("create monthly contribution")
       contributionEmailData = toContributionEmailData(request, account.currency, paymentMethod, acceptanceDate, contacts.billTo, amountMinorUnits)
-      _ <- sendConfirmationEmail(contributionEmailData).logAndContinue("send contribution confirmation email")
+      _ <- sendConfirmationEmail(contributionEmailData).recoverAndLog("send contribution confirmation email")
     } yield subscriptionName
   }
 
@@ -148,7 +148,7 @@ object Steps {
       contacts = customerData.contacts,
       paymentMethod = customerData.paymentMethod
     )
-    _ <- sendConfirmationEmail(voucherEmailData).logAndContinue("send voucher confirmation email")
+    _ <- sendConfirmationEmail(voucherEmailData).recoverAndLog("send voucher confirmation email")
   } yield subscriptionName
 
   def operationForEffects(
