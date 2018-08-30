@@ -25,7 +25,7 @@ object GetZuoraContactDetails {
 
   implicit val readWireContact = Json.reads[WireContact]
 
-  def apply(zuoraQuerier: ZuoraQuerier, contactIds: NonEmptyList[ContactId]): ClientFailableOp[Map[ContactId, ZuoraContactDetails]] =
+  def apply(zuoraQuerier: ZuoraQuerier): GetZuoraContactDetails = (contactIds: NonEmptyList[ContactId]) =>
     for {
       or <- OrTraverse(contactIds) { accountId =>
         zoql"""Id = ${accountId.value}"""
@@ -44,4 +44,10 @@ object GetZuoraContactDetails {
       )
     }.toMap
 
+}
+
+trait GetZuoraContactDetails {
+  def apply(
+    contactIds: NonEmptyList[GetZuoraContactDetails.ContactId]
+  ): ClientFailableOp[Map[GetZuoraContactDetails.ContactId, GetZuoraContactDetails.ZuoraContactDetails]]
 }

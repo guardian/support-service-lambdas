@@ -21,8 +21,7 @@ object GetIdentityAndZuoraEmailsForAccountsSteps {
 
   def apply(zuoraQuerier: ZuoraQuerier, accountIds: NonEmptyList[AccountId]): ClientFailableOp[List[IdentityAndSFContactAndEmail]] = {
 
-    val getZuoraContactDetails: NonEmptyList[GetZuoraContactDetails.ContactId] => ClientFailableOp[Map[GetZuoraContactDetails.ContactId, GetZuoraContactDetails.ZuoraContactDetails]] =
-      GetZuoraContactDetails(zuoraQuerier, _)
+    val getZuoraContactDetails: GetZuoraContactDetails = GetZuoraContactDetails(zuoraQuerier)
     val getContacts: NonEmptyList[AccountId] => ClientFailableOp[Map[GetZuoraContactDetails.ContactId, GetContacts.IdentityAndSFContact]] =
       GetContacts(zuoraQuerier, _)
 

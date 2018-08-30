@@ -16,7 +16,7 @@ class GetZuoraContactDetailsTest extends FlatSpec with Matchers {
 
     val querier = FakeZuoraQuerier(expectedQuery, contactQueryResponse)
 
-    val actual = GetZuoraContactDetails(querier, NonEmptyList(
+    val actual = GetZuoraContactDetails(querier)(NonEmptyList(
       ContactId("cid1"),
       ContactId("cid2")
     ))
