@@ -12,15 +12,11 @@ object UpdateSalesforceIdentityId {
 
   case class IdentityId(value: String)
 
-  // handy extra function to do it without the option
-  def set(patchOp: HttpOp[PatchRequest]): HttpOp[(SFContactId, IdentityId)] =
-    patchOp.setupRequestMultiArg { (contact, identity) => toRequest(contact, Some(identity)) }
-
-  def apply(patchOp: HttpOp[PatchRequest]): HttpOp[(SFContactId, Option[IdentityId])] =
+  def apply(patchOp: HttpOp[PatchRequest]): HttpOp[(SFContactId, IdentityId)] =
     patchOp.setupRequestMultiArg(toRequest)
 
-  def toRequest(sFContactId: SFContactId, identityId: Option[IdentityId]): PatchRequest = {
-    val wireRequest = WireRequest(identityId.map(_.value).getOrElse(""))
+  def toRequest(sFContactId: SFContactId, identityId: IdentityId): PatchRequest = {
+    val wireRequest = WireRequest(identityId.value)
     val relativePath = RelativePath(s"/services/data/v20.0/sobjects/Contact/${sFContactId.value}")
     PatchRequest(wireRequest, relativePath)
   }

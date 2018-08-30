@@ -2,7 +2,7 @@ package com.gu.sf_contact_merge.update.identityid
 
 import com.gu.DevZuora
 import com.gu.effects.{GetFromS3, RawEffects}
-import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
+import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId.IdentityId
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.sf_contact_merge.TypeConvert._
 import com.gu.sf_contact_merge.update.UpdateAccountSFLinks

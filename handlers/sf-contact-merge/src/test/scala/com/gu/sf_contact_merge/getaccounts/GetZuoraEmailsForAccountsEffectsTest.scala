@@ -1,11 +1,12 @@
 package com.gu.sf_contact_merge.getaccounts
 
+import com.gu.DevZuora
 import com.gu.effects.{GetFromS3, RawEffects}
-import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
+import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId.IdentityId
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.sf_contact_merge.TypeConvert._
 import com.gu.sf_contact_merge.getaccounts.GetContacts.AccountId
-import com.gu.sf_contact_merge.getaccounts.GetEmails.EmailAddress
+import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.{EmailAddress, FirstName, LastName}
 import com.gu.sf_contact_merge.getaccounts.GetIdentityAndZuoraEmailsForAccountsSteps.IdentityAndSFContactAndEmail
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
@@ -19,7 +20,7 @@ class GetZuoraEmailsForAccountsEffectsTest extends FlatSpec with Matchers {
 
   it should "return the right emails" taggedAs EffectsTest in {
 
-    val testData = NonEmptyList("2c92c0f8646e0a6601646ff9b98e7b5f", "2c92c0f964db696f0164dc671eb0245f").map(AccountId.apply)
+    val testData = NonEmptyList(DevZuora.account1, DevZuora.account2)
 
     val actual = for {
       zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig].toApiGatewayOp("parse config")
@@ -32,12 +33,16 @@ class GetZuoraEmailsForAccountsEffectsTest extends FlatSpec with Matchers {
       IdentityAndSFContactAndEmail(
         Some(IdentityId("1234567890")),
         SFContactId("contactIdForEffectsTests"),
-        Some(EmailAddress("peppa.pig@guardian.co.uk"))
+        Some(EmailAddress("peppa.pig@guardian.co.uk")),
+        Some(FirstName("Peppa")),
+        LastName("Pig")
       ),
       IdentityAndSFContactAndEmail(
         None,
         SFContactId("contactIdForEffectsTests3"),
-        None
+        None,
+        Some(FirstName("Suzie")),
+        LastName("Sheep")
       )
     )))
   }
