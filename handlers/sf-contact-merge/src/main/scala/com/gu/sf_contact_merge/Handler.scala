@@ -82,14 +82,15 @@ object DomainSteps {
       accountAndEmails <- getIdentityAndZuoraEmailsForAccounts(mergeRequest.zuoraAccountIds)
         .toApiGatewayOp("getIdentityAndZuoraEmailsForAccounts")
       _ <- validateEmails(accountAndEmails.map(_.emailAddress))
-      _ <- validateIdentityIds(accountAndEmails.map(_.identityId), mergeRequest.sFPointer.identityId)
-        .toApiGatewayReturnResponse(ApiGatewayResponse.notFound)
+      maybeIdentityId <- validateIdentityIds(accountAndEmails.map(_.identityId))
+        .toApiGatewayOp(ApiGatewayResponse.notFound _)
       _ <- validateLastNames(accountAndEmails.map(_.lastName))
-      firstNameToUse <- GetFirstNameToUse(mergeRequest.sFPointer.sfContactId, accountAndEmails)
+      firstNameToUse <- GetFirstNameToUse(mergeRequest.sfContactId, accountAndEmails)
       oldContact = accountAndEmails.find(_.identityId.isDefined).map(_.sfContactId).map(OldSFContact.apply)
-      _ <- mergeRequest.zuoraAccountIds.traverseU(updateAccountSFLinks(mergeRequest.sFPointer))
+      linksFromZuora = LinksFromZuora(mergeRequest.sfContactId, mergeRequest.crmAccountId, maybeIdentityId)
+      _ <- mergeRequest.zuoraAccountIds.traverseU(updateAccountSFLinks(linksFromZuora))
         .toApiGatewayOp("update accounts with winning details")
-      _ <- update(mergeRequest.sFPointer, oldContact, firstNameToUse)
+      _ <- update(linksFromZuora, oldContact, firstNameToUse)
         .toApiGatewayOp("update sf contact(s) to force a sync")
     } yield ApiGatewayResponse.successfulExecution).apiResponse
 }
@@ -126,11 +127,11 @@ object WireRequestToDomainObject {
   case class WireSfContactRequest(
     fullContactId: String,
     billingAccountZuoraIds: List[String],
-    accountId: String,
-    identityId: Option[String]
+    accountId: String
   )
   case class MergeRequest(
-    sFPointer: LinksFromZuora,
+    sfContactId: SFContactId,
+    crmAccountId: CRMAccountId,
     zuoraAccountIds: NonEmptyList[AccountId]
   )
 
@@ -146,11 +147,8 @@ object WireRequestToDomainObject {
   def toMergeRequest(request: WireSfContactRequest): Option[MergeRequest] =
     MaybeNonEmptyList(request.billingAccountZuoraIds.map(AccountId.apply)).map { accountIds =>
       MergeRequest(
-        LinksFromZuora(
-          SFContactId(request.fullContactId),
-          CRMAccountId(request.accountId),
-          request.identityId.map(IdentityId.apply)
-        ),
+        SFContactId(request.fullContactId),
+        CRMAccountId(request.accountId),
         accountIds
       )
     }

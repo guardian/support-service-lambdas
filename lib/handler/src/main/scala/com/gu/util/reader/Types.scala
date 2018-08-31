@@ -157,6 +157,12 @@ object Types extends Logging {
           ReturnWithResponse(internalServerError(s"Failed to execute lambda - unable to $action"))
       }
 
+    def toApiGatewayOp(toApiResponse: L => ApiResponse): ApiGatewayOp[A] =
+      theEither match {
+        case scalaz.\/-(success) => ContinueProcessing(success)
+        case scalaz.-\/(error) => ReturnWithResponse(toApiResponse(error))
+      }
+
   }
 
   implicit class LogImplicit[A](op: A) {

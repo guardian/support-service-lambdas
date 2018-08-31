@@ -30,8 +30,7 @@ class EndToEndTest extends FlatSpec with Matchers {
         |      "2c92c0f9624bbc5f016253e573970b16",
         |      "2c92c0f8644618e30164652a558c6e20"
         |   ],
-        |   "accountId":"sfacc",
-        |   "identityId":"identest"
+        |   "accountId":"sfacc"
         |}
       """.stripMargin
     val input = ApiGatewayRequest(None, Some(body), None, None)
