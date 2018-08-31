@@ -15,7 +15,7 @@ object NewProductApi {
     val voucherWindowRule = WindowRule(
       maybeCutOffDay = Some(DayOfWeek.TUESDAY),
       maybeStartDelay = Some(DelayDays(20)),
-      maybeSize = Some(WindowSizeDays(28))
+      maybeSize = Some(WindowSizeDays(35))
     )
 
     def voucherDateRules(allowedDays: List[DayOfWeek]) = StartDateRules(Some(DaysOfWeekRule(allowedDays)), Some(voucherWindowRule))
