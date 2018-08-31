@@ -38,7 +38,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |            "selectableWindow": {
         |              "cutOffDayInclusive": "Tuesday",
         |              "startDaysAfterCutOff": 20,
-        |              "sizeInDays": 28
+        |              "sizeInDays": 35
         |            }
         |          },
         |          "paymentPlan": "GBP 47.62 every month"
@@ -53,7 +53,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |            "selectableWindow": {
         |              "cutOffDayInclusive": "Tuesday",
         |              "startDaysAfterCutOff": 20,
-        |              "sizeInDays": 28
+        |              "sizeInDays": 35
         |            }
         |          },
         |          "paymentPlan": "GBP 51.96 every month"
@@ -68,7 +68,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |            "selectableWindow": {
         |              "cutOffDayInclusive": "Tuesday",
         |              "startDaysAfterCutOff": 20,
-        |              "sizeInDays": 28
+        |              "sizeInDays": 35
         |            }
         |          },
         |          "paymentPlan": "GBP 10.36 every month"
@@ -83,7 +83,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |            "selectableWindow": {
         |              "cutOffDayInclusive": "Tuesday",
         |              "startDaysAfterCutOff": 20,
-        |              "sizeInDays": 28
+        |              "sizeInDays": 35
         |            }
         |          },
         |          "paymentPlan": "GBP 21.62 every month"
@@ -98,7 +98,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |            "selectableWindow": {
         |              "cutOffDayInclusive": "Tuesday",
         |              "startDaysAfterCutOff": 20,
-        |              "sizeInDays": 28
+        |              "sizeInDays": 35
         |            }
         |          },
         |          "paymentPlan": "GBP 41.12 every month"
@@ -113,7 +113,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |            "selectableWindow": {
         |              "cutOffDayInclusive": "Tuesday",
         |              "startDaysAfterCutOff": 20,
-        |              "sizeInDays": 28
+        |              "sizeInDays": 35
         |            }
         |          },
         |          "paymentPlan": "GBP 47.62 every month"
@@ -128,7 +128,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |            "selectableWindow": {
         |              "cutOffDayInclusive": "Tuesday",
         |              "startDaysAfterCutOff": 20,
-        |              "sizeInDays": 28
+        |              "sizeInDays": 35
         |            }
         |          },
         |          "paymentPlan": "GBP 10.79 every month"
@@ -143,7 +143,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |            "selectableWindow": {
         |              "cutOffDayInclusive": "Tuesday",
         |              "startDaysAfterCutOff": 20,
-        |              "sizeInDays": 28
+        |              "sizeInDays": 35
         |            }
         |          },
         |          "paymentPlan": "GBP 22.06 every month"
@@ -158,7 +158,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |            "selectableWindow": {
         |              "cutOffDayInclusive": "Tuesday",
         |              "startDaysAfterCutOff": 20,
-        |              "sizeInDays": 28
+        |              "sizeInDays": 35
         |            }
         |          },
         |          "paymentPlan": "GBP 20.76 every month"
@@ -173,7 +173,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |            "selectableWindow": {
         |              "cutOffDayInclusive": "Tuesday",
         |              "startDaysAfterCutOff": 20,
-        |              "sizeInDays": 28
+        |              "sizeInDays": 35
         |            }
         |          },
         |          "paymentPlan": "GBP 29.42 every month"
