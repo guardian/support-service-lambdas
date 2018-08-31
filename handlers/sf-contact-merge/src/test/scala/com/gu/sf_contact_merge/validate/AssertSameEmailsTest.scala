@@ -1,6 +1,6 @@
 package com.gu.sf_contact_merge.validate
 
-import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.EmailAddress
+import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.{EmailAddress, LastName}
 import org.scalatest.{FlatSpec, Matchers}
 
 class AssertSameEmailsTest extends FlatSpec with Matchers {
@@ -23,6 +23,20 @@ class AssertSameEmailsTest extends FlatSpec with Matchers {
     val testData = List(Some("hi"), None).map(_.map(EmailAddress.apply))
 
     AssertSame("").apply(testData).toDisjunction.isRight should be(false)
+
+  }
+
+  it should "be happy that superficially different items are the same if they are transformed" in {
+    val testData = List("JOHN", "john").map(LastName.apply)
+
+    AssertSame.lastName.apply(testData).toDisjunction.isRight should be(true)
+
+  }
+
+  it should "be happy that actually different items are the still different if they are transformed" in {
+    val testData = List("JOHN", "JOHNHI").map(LastName.apply)
+
+    AssertSame.lastName.apply(testData).toDisjunction.isRight should be(false)
 
   }
 
