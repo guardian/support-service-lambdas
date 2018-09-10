@@ -44,7 +44,10 @@ object SendConfirmationEmailContributions extends Logging {
 
   }
 
-  def toPayload(sfContactId: Option[SfContactId], maybeContributionFields: Option[ContributionFields]): AsyncApiGatewayOp[ETPayload[ContributionFields]] =
+  def toPayload(
+    sfContactId: Option[SfContactId],
+    maybeContributionFields: Option[ContributionFields]
+  ): AsyncApiGatewayOp[ETPayload[ContributionFields]] =
     maybeContributionFields.map { fields =>
       val payload = ETPayload(fields.EmailAddress, fields, DataExtensionName("regular-contribution-thank-you"), sfContactId.map(_.value))
       ContinueProcessing(payload).toAsync

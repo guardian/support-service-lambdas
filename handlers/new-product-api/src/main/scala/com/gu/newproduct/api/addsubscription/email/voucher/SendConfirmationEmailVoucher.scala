@@ -27,7 +27,12 @@ object SendConfirmationEmailVoucher extends Logging {
   def toPayload(sfContactId: Option[SfContactId], voucherEmailData: VoucherEmailData): ApiGatewayOp[ETPayload[VoucherEmailData]] =
     voucherEmailData.contacts.soldTo.email match {
       case Some(email) =>
-        val payload = ETPayload(email = email.value, fields = voucherEmailData, DataExtensionName("paper-voucher"), sfContactId.map(_.value))
+        val payload = ETPayload(
+          email = email.value,
+          fields = voucherEmailData,
+          DataExtensionName("paper-voucher"),
+          sfContactId.map(_.value)
+        )
         ContinueProcessing(payload)
       case None =>
         val errorLogMessage = "No email address in zuora sold to contact, skipping voucher thank you email"

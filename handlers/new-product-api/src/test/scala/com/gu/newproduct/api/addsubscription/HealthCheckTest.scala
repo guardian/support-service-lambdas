@@ -12,7 +12,15 @@ class HealthCheckTest extends FlatSpec with Matchers {
   it should "pass" in {
     def getAccount(requestedAccountId: ZuoraAccountId): Types.ClientFailableOp[Account] = {
       requestedAccountId should be(ZuoraAccountId("accacc"))
-      ClientSuccess(Account(Some(IdentityId("1313")), Some(SfContactId("1414")), None, AutoPay(false), AccountBalanceMinorUnits(0), Currency.GBP))
+      ClientSuccess(
+        Account(
+          Some(IdentityId("1313")),
+          Some(SfContactId("1414")),
+          None, AutoPay(false),
+          AccountBalanceMinorUnits(0),
+          Currency.GBP
+        )
+      )
     }
 
     val fakeTestData = HealthCheckTestAccountData(ZuoraAccountId("accacc"), IdentityId("1313"))
@@ -21,7 +29,16 @@ class HealthCheckTest extends FlatSpec with Matchers {
 
   it should "fail" in {
     def getAccount(dontcare: ZuoraAccountId): Types.ClientFailableOp[Account] = {
-      ClientSuccess(Account(Some(IdentityId("asdf")), Some(SfContactId("1414")), None, AutoPay(false), AccountBalanceMinorUnits(0), Currency.GBP))
+      ClientSuccess(
+        Account(
+          Some(IdentityId("asdf")),
+          Some(SfContactId("1414")),
+          None,
+          AutoPay(false),
+          AccountBalanceMinorUnits(0),
+          Currency.GBP
+        )
+      )
     }
 
     val fakeTestData = HealthCheckTestAccountData(ZuoraAccountId("accacc"), IdentityId("1313"))
