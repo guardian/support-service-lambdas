@@ -8,6 +8,7 @@ import com.gu.newproduct.api.addsubscription.Steps.emailQueuesFor
 import com.gu.newproduct.api.addsubscription.email.EtSqsSend
 import com.gu.newproduct.api.addsubscription.email.voucher.{SendConfirmationEmailVoucher, VoucherEmailData}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.SubscriptionName
+import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts._
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{BankAccountName, BankAccountNumberMask, DirectDebit, MandateId, SortCode}
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.ActivePaymentMethod
@@ -82,7 +83,7 @@ object SendVoucherEmailsManualTest {
       voucherSqsSend = EtSqsSend[VoucherEmailData](sqsSend) _
       sendConfirmationEmail = SendConfirmationEmailVoucher(voucherSqsSend, () => fakeDate) _
       data = fakeVoucherEmailData(email)
-      sendResult = sendConfirmationEmail(fakeVoucherEmailData(email))
+      sendResult = sendConfirmationEmail(Some(SfContactId("sfContactId")), fakeVoucherEmailData(email))
     } yield sendResult
     result match {
       case None =>

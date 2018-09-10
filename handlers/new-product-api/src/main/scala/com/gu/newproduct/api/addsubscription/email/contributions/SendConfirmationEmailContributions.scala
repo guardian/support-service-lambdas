@@ -13,6 +13,7 @@ import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.AsyncTypes._
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.newproduct.api.addsubscription.Formatters._
+import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.productcatalog.AmountMinorUnits
 
 import scala.concurrent.Future
@@ -31,18 +32,21 @@ object SendConfirmationEmailContributions extends Logging {
   def apply(
     etSqsSend: ETPayload[ContributionFields] => Future[Unit],
     getCurrentDate: () => LocalDate
-  )(data: ContributionsEmailData): AsyncApiGatewayOp[Unit] = {
+  )(
+    sfContactId: Option[SfContactId],
+    data: ContributionsEmailData
+  ): AsyncApiGatewayOp[Unit] = {
     val maybeContributionFields = toContributionFields(getCurrentDate(), data)
     for {
-      etPayload <- toPayload(maybeContributionFields)
+      etPayload <- toPayload(sfContactId, maybeContributionFields)
       sendMessageResult <- etSqsSend(etPayload).toAsyncApiGatewayOp("sending contribution email sqs message")
     } yield sendMessageResult
 
   }
 
-  def toPayload(maybeContributionFields: Option[ContributionFields]): AsyncApiGatewayOp[ETPayload[ContributionFields]] =
+  def toPayload(sfContactId: Option[SfContactId], maybeContributionFields: Option[ContributionFields]): AsyncApiGatewayOp[ETPayload[ContributionFields]] =
     maybeContributionFields.map { fields =>
-      val payload = ETPayload(fields.EmailAddress, fields, DataExtensionName("regular-contribution-thank-you"))
+      val payload = ETPayload(fields.EmailAddress, fields, DataExtensionName("regular-contribution-thank-you"), sfContactId.map(_.value))
       ContinueProcessing(payload).toAsync
     }.getOrElse {
       logger.info("Not enough data in zuora account to send contribution thank you email, skipping")

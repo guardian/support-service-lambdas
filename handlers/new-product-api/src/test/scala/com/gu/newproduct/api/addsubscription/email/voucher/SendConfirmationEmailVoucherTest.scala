@@ -4,6 +4,7 @@ import java.time.LocalDate
 import com.gu.newproduct.TestData
 import com.gu.newproduct.api.addsubscription.email.{DataExtensionName, ETPayload}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.SubscriptionName
+import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.productcatalog.PlanId.VoucherSunday
 import com.gu.newproduct.api.productcatalog.{Plan, PlanDescription}
 import com.gu.util.apigateway.ApiGatewayResponse
@@ -14,11 +15,12 @@ import scala.concurrent.Future
 class SendConfirmationEmailVoucherTest extends AsyncFlatSpec with Matchers {
   it should "send voucher confirmation email" in {
     def sqsSend(payload: ETPayload[VoucherEmailData]): Future[Unit] = Future {
-      payload shouldBe ETPayload("soldToEmail@mail.com", testVoucherData, DataExtensionName("paper-voucher"))
+      payload shouldBe ETPayload("soldToEmail@mail.com", testVoucherData, DataExtensionName("paper-voucher"), Some("sfContactId"))
+      ()
     }
 
     val send = SendConfirmationEmailVoucher(sqsSend, today) _
-    send(testVoucherData).underlying map {
+    send(Some(SfContactId("sfContactId")), testVoucherData).underlying map {
       result => result shouldBe ContinueProcessing(())
     }
   }
@@ -32,7 +34,7 @@ class SendConfirmationEmailVoucherTest extends AsyncFlatSpec with Matchers {
     def sqsSend(payload: ETPayload[VoucherEmailData]): Future[Unit] = Future.successful(())
 
     val send = SendConfirmationEmailVoucher(sqsSend, today) _
-    send(noSoldToEmailVoucherData).underlying map {
+    send(Some(SfContactId("sfContactId")), noSoldToEmailVoucherData).underlying map {
       result => result shouldBe ReturnWithResponse(ApiGatewayResponse.internalServerError("some error"))
     }
   }
@@ -43,7 +45,7 @@ class SendConfirmationEmailVoucherTest extends AsyncFlatSpec with Matchers {
 
     val send = SendConfirmationEmailVoucher(sqsSend, today) _
 
-    send(testVoucherData).underlying map {
+    send(Some(SfContactId("sfContactId")), testVoucherData).underlying map {
       result => result shouldBe ReturnWithResponse(ApiGatewayResponse.internalServerError("some error"))
     }
   }

@@ -12,6 +12,7 @@ import com.gu.newproduct.api.addsubscription.zuora.GetContacts._
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.NonDirectDebitMethod
 import com.gu.newproduct.api.addsubscription.zuora.{PaymentMethodStatus, PaymentMethodType}
 import com.gu.newproduct.api.addsubscription.ZuoraAccountId
+import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.productcatalog.AmountMinorUnits
 import com.gu.util.config.Stage
 
@@ -53,7 +54,7 @@ object SendConfirmationEmailsManualTest {
       sqsSend = AwsSQSSend(queueName) _
       contributionsSqsSend = EtSqsSend[ContributionFields](sqsSend) _
       sendConfirmationEmail = SendConfirmationEmailContributions(contributionsSqsSend, () => fakeDate) _
-      sendResult = sendConfirmationEmail(contributionsEmailData(fakeContact(email)))
+      sendResult = sendConfirmationEmail(Some(SfContactId("sfContactId")), contributionsEmailData(fakeContact(email)))
     } yield sendResult
     result match {
       case None =>

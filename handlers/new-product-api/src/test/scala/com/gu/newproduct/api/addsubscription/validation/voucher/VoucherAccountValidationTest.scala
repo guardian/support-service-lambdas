@@ -2,12 +2,13 @@ package com.gu.newproduct.api.addsubscription.validation.voucher
 
 import com.gu.i18n.Currency.{GBP, USD}
 import com.gu.newproduct.api.addsubscription.validation.{Failed, Passed, ValidatedAccount}
-import com.gu.newproduct.api.addsubscription.zuora.GetAccount.{AccountBalanceMinorUnits, AutoPay, PaymentMethodId}
+import com.gu.newproduct.api.addsubscription.zuora.GetAccount.{AccountBalanceMinorUnits, AutoPay, PaymentMethodId, SfContactId}
 import org.scalatest.{FlatSpec, Matchers}
 
 class VoucherAccountValidationTest extends FlatSpec with Matchers {
   val account = ValidatedAccount(
     identityId = None,
+    sfContactId = Some(SfContactId("sfContactId")),
     paymentMethodId = PaymentMethodId("id"),
     autoPay = AutoPay(true),
     accountBalanceMinorUnits = AccountBalanceMinorUnits(1233),

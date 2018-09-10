@@ -7,6 +7,7 @@ import com.gu.i18n.Currency.GBP
 import com.gu.newproduct.api.addsubscription.ZuoraAccountId
 import com.gu.newproduct.api.addsubscription.email.contributions.SendConfirmationEmailContributions.ContributionsEmailData
 import com.gu.newproduct.api.addsubscription.email.{CContactAttributes, CTo, ETPayload}
+import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts._
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{BankAccountName, BankAccountNumberMask, DirectDebit, MandateId, NonDirectDebitMethod, SortCode}
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.ActivePaymentMethod
@@ -15,9 +16,7 @@ import com.gu.newproduct.api.productcatalog.AmountMinorUnits
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import org.scalatest.{AsyncFlatSpec, Matchers}
-
 import scala.concurrent.Future
-import scala.language.postfixOps
 
 class SendConfirmationEmailContributionsTest extends AsyncFlatSpec with Matchers {
 
@@ -55,6 +54,8 @@ class SendConfirmationEmailContributionsTest extends AsyncFlatSpec with Matchers
     billTo = testContact
   )
 
+  val sfContactId = Some(SfContactId("sfContactId"))
+
   it should "send confirmation email" in {
 
     def sqsSend(payload: ETPayload[ContributionFields]): Future[Unit] = {
@@ -82,7 +83,8 @@ class SendConfirmationEmailContributionsTest extends AsyncFlatSpec with Matchers
           SubscriberKey = "email@email.com",
           ContactAttributes = expectedContactAttributes
         ),
-        DataExtensionName = "regular-contribution-thank-you"
+        DataExtensionName = "regular-contribution-thank-you",
+        SfContactId = Some("sfContactId")
       )
 
       payload shouldBe expectedPayload
@@ -91,7 +93,7 @@ class SendConfirmationEmailContributionsTest extends AsyncFlatSpec with Matchers
 
     val send = SendConfirmationEmailContributions(sqsSend, today) _
 
-    send(testData).underlying map {
+    send(sfContactId, testData).underlying map {
       res => res shouldBe ContinueProcessing(())
     }
 
@@ -103,7 +105,7 @@ class SendConfirmationEmailContributionsTest extends AsyncFlatSpec with Matchers
 
     val send = SendConfirmationEmailContributions(sqsSend, today) _
 
-    send(testData).underlying map {
+    send(sfContactId, testData).underlying map {
       res => res shouldBe ReturnWithResponse(ApiGatewayResponse.internalServerError("some log message"))
     }
   }
@@ -114,7 +116,7 @@ class SendConfirmationEmailContributionsTest extends AsyncFlatSpec with Matchers
 
     val send = SendConfirmationEmailContributions(sqsSend, today) _
 
-    send(testData).underlying map {
+    send(sfContactId, testData).underlying map {
       res => res shouldBe ReturnWithResponse(ApiGatewayResponse.internalServerError("some log message"))
     }
   }

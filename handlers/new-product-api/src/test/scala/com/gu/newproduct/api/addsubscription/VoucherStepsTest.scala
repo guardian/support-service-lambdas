@@ -7,6 +7,7 @@ import com.gu.newproduct.api.addsubscription.email.voucher.VoucherEmailData
 import com.gu.newproduct.api.addsubscription.validation._
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{SubscriptionName, ZuoraCreateSubRequest}
+import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.productcatalog.PlanId.VoucherEveryDay
 import com.gu.newproduct.api.productcatalog.{Plan, PlanDescription, PlanId}
 import com.gu.newproduct.api.productcatalog.ZuoraIds.ProductRatePlanId
@@ -73,7 +74,7 @@ class VoucherStepsTest extends FlatSpec with Matchers {
     //todo maybe add assertions on the input params for these two
     def fakeValidateVoucherStartDate(id: PlanId, d: LocalDate) = Passed(())
 
-    def fakeSendEmail(voucherEmailData: VoucherEmailData) = ContinueProcessing(()).toAsync
+    def fakeSendEmail(sfContactId: Option[SfContactId], voucherEmailData: VoucherEmailData) = ContinueProcessing(()).toAsync
 
     def fakeGetPlan(planId: PlanId) = Plan(VoucherEveryDay, PlanDescription("Everyday"))
     val fakeAddVoucherSteps = Steps.addVoucherSteps(

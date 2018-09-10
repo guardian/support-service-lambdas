@@ -22,7 +22,8 @@ class ETPayloadTest extends FlatSpec with Matchers {
         )
 
       ),
-      DataExtensionName = "someDataExtension"
+      DataExtensionName = "someDataExtension",
+      SfContactId = Some("sfContactId")
     )
 
     val expected =
@@ -37,7 +38,8 @@ class ETPayloadTest extends FlatSpec with Matchers {
         |            }
         |        }
         |    },
-        |    "DataExtensionName": "someDataExtension"
+        |    "DataExtensionName": "someDataExtension",
+        |    "SfContactId" : "sfContactId"
         |}
       """.stripMargin
     Json.toJson(testPayload) shouldBe Json.parse(expected)

@@ -15,7 +15,8 @@ class GetAccountTest extends FlatSpec with Matchers {
     DefaultPaymentMethodId = Some("2c92c0f8649cc8a60164a2bfd475000c"),
     AutoPay = false,
     Balance = 24.55,
-    Currency = "GBP"
+    Currency = "GBP",
+    sfContactId__c = Some("sfContactId")
   )
   it should "get account as object" in {
 
@@ -26,6 +27,7 @@ class GetAccountTest extends FlatSpec with Matchers {
     val actual = GetAccount(accF)(ZuoraAccountId("2c92c0f9624bbc5f016253e573970b16"))
     actual shouldBe ClientSuccess(Account(
       Some(IdentityId("6002")),
+      Some(SfContactId("sfContactId")),
       Some(PaymentMethodId("2c92c0f8649cc8a60164a2bfd475000c")),
       AutoPay(false),
       AccountBalanceMinorUnits(2455),
@@ -34,13 +36,14 @@ class GetAccountTest extends FlatSpec with Matchers {
   }
 
   it should "deserialise accounts with missing identity id or default payment method" in {
-    val missingFieldsAccount = acc.copy(IdentityId__c = None, DefaultPaymentMethodId = None)
+    val missingFieldsAccount = acc.copy(IdentityId__c = None, DefaultPaymentMethodId = None, sfContactId__c = None)
     val accF: RequestsGet[ZuoraAccount] = {
       case ("object/account/missingFieldsAccount", WithoutCheck) => ClientSuccess(missingFieldsAccount)
       case in => GenericError(s"bad request: $in")
     }
     val actual = GetAccount(accF)(ZuoraAccountId("missingFieldsAccount"))
     actual shouldBe ClientSuccess(Account(
+      None,
       None,
       None,
       AutoPay(false),
