@@ -6,7 +6,7 @@ import com.gu.util.resthttp.Types.ClientFailableOp
 object TypeConvert {
 
   implicit class TypeConvertClientOp[A](theEither: ClientFailableOp[A]) {
-    def toApiGatewayOp = theEither.toDisjunction.toApiGatewayOp(_)
+    def toApiGatewayOp(action: String): ApiGatewayOp[A] = theEither.toDisjunction.toApiGatewayOp(action)
   }
 
 }

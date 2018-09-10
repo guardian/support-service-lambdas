@@ -80,7 +80,7 @@ object ReadFile {
 
   case class JsonString(value: String) extends AnyVal
 
-  case class Record(Json_For_Zuora__c: String)
+  case class Record(Json_For_Zuora__c: Option[String])
 
   implicit val readsRecord = Json.reads[Record]
 
@@ -93,7 +93,7 @@ object ReadFile {
       val json = Json.parse(new FileInputStream(name.value))
       val resp = json.validate[SFQueryResponse]
       resp match {
-        case JsSuccess(value, _) => \/-(value.records.map(a => JsonString(a.Json_For_Zuora__c)))
+        case JsSuccess(value, _) => \/-(value.records.flatMap(_.Json_For_Zuora__c.map(JsonString.apply)))
         case fail => -\/(s"FAIL to parse: $fail")
       }
     }.toEither.disjunction.leftMap(_.toString).flatMap(identity)
