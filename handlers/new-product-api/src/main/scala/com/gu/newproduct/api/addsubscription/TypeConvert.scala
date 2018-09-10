@@ -15,7 +15,7 @@ import scala.util.{Failure, Success, Try}
 object TypeConvert {
 
   implicit class TypeConvertClientOp[A](clientOp: ClientFailableOp[A]) {
-    def toApiGatewayOp = clientOp.toDisjunction.toApiGatewayOp(_)
+    def toApiGatewayOp(action: String): ApiGatewayOp[A] = clientOp.toDisjunction.toApiGatewayOp(action)
   }
 
   implicit class TypeConvertClientOpAsync[A](clientOp: ClientFailableOp[A]) {
