@@ -20,6 +20,7 @@ import com.gu.newproduct.api.addsubscription.validation.voucher.{GetVoucherCusto
 import com.gu.newproduct.api.addsubscription.validation.{ValidationResult, _}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.WireModel.{WireCreateRequest, WireSubscription}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{ChargeOverride, SubscriptionName, ZuoraCreateSubRequest}
+import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAccount
 import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.WireModel.ZuoraSubscriptionsResponse
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.BillToContact
@@ -110,7 +111,7 @@ object Steps {
     getCustomerData: ZuoraAccountId => ApiGatewayOp[ContributionCustomerData],
     contributionValidations: (ValidatableFields, Currency) => ValidationResult[AmountMinorUnits],
     createSubscription: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName],
-    sendConfirmationEmail: ContributionsEmailData => AsyncApiGatewayOp[Unit]
+    sendConfirmationEmail: (Option[SfContactId], ContributionsEmailData) => AsyncApiGatewayOp[Unit]
   )(request: AddSubscriptionRequest): AsyncApiGatewayOp[SubscriptionName] = {
     for {
       customerData <- getCustomerData(request.zuoraAccountId).toAsync
@@ -122,7 +123,7 @@ object Steps {
       zuoraCreateSubRequest = createZuoraSubRequest(request, acceptanceDate, Some(chargeOverride), contributionZuoraIds.productRatePlanId)
       subscriptionName <- createSubscription(zuoraCreateSubRequest).toAsyncApiGatewayOp("create monthly contribution")
       contributionEmailData = toContributionEmailData(request, account.currency, paymentMethod, acceptanceDate, contacts.billTo, amountMinorUnits)
-      _ <- sendConfirmationEmail(contributionEmailData).recoverAndLog("send contribution confirmation email")
+      _ <- sendConfirmationEmail(account.sfContactId, contributionEmailData).recoverAndLog("send contribution confirmation email")
     } yield subscriptionName
   }
 
@@ -132,7 +133,7 @@ object Steps {
     getCustomerData: ZuoraAccountId => ApiGatewayOp[VoucherCustomerData],
     validateStartDate: (PlanId, LocalDate) => ValidationResult[Unit],
     createSubscription: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName],
-    sendConfirmationEmail: VoucherEmailData => AsyncApiGatewayOp[Unit]
+    sendConfirmationEmail: (Option[SfContactId], VoucherEmailData) => AsyncApiGatewayOp[Unit]
   )(request: AddSubscriptionRequest): AsyncApiGatewayOp[SubscriptionName] = for {
     _ <- validateStartDate(request.planId, request.startDate).toApiGatewayOp.toAsync
     customerData <- getCustomerData(request.zuoraAccountId).toAsync
@@ -148,7 +149,7 @@ object Steps {
       contacts = customerData.contacts,
       paymentMethod = customerData.paymentMethod
     )
-    _ <- sendConfirmationEmail(voucherEmailData).recoverAndLog("send voucher confirmation email")
+    _ <- sendConfirmationEmail(customerData.account.sfContactId, voucherEmailData).recoverAndLog("send voucher confirmation email")
   } yield subscriptionName
 
   def operationForEffects(

@@ -12,6 +12,7 @@ object GetAccount {
 
     case class ZuoraAccount(
       IdentityId__c: Option[String],
+      sfContactId__c: Option[String],
       DefaultPaymentMethodId: Option[String],
       AutoPay: Boolean,
       Balance: Double,
@@ -24,6 +25,7 @@ object GetAccount {
       case Some(currency) => ClientSuccess(
         Account(
           zuoraAccount.IdentityId__c.map(IdentityId),
+          zuoraAccount.sfContactId__c.map(SfContactId.apply),
           zuoraAccount.DefaultPaymentMethodId.map(PaymentMethodId),
           AutoPay(zuoraAccount.AutoPay),
           AccountBalanceMinorUnits((zuoraAccount.Balance * 100).toInt),
@@ -40,6 +42,8 @@ object GetAccount {
 
   case class IdentityId(value: String) extends AnyVal
 
+  case class SfContactId(value: String) extends AnyVal
+
   case class PaymentMethodId(value: String) extends AnyVal
 
   case class AutoPay(value: Boolean) extends AnyVal
@@ -48,6 +52,7 @@ object GetAccount {
 
   case class Account(
     identityId: Option[IdentityId],
+    sfContactId: Option[SfContactId],
     paymentMethodId: Option[PaymentMethodId],
     autoPay: AutoPay,
     accountBalanceMinorUnits: AccountBalanceMinorUnits,

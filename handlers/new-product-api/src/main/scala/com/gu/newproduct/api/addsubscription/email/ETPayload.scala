@@ -6,7 +6,7 @@ case class CContactAttributes[A](SubscriberAttributes: A)
 
 case class CTo[A](Address: String, SubscriberKey: String, ContactAttributes: CContactAttributes[A])
 
-case class ETPayload[A](To: CTo[A], DataExtensionName: String)
+case class ETPayload[A](To: CTo[A], DataExtensionName: String, SfContactId: Option[String])
 
 object CContactAttributes {
   implicit def writes[A: Writes] = Json.writes[CContactAttributes[A]]
@@ -20,10 +20,11 @@ object ETPayload {
 
   implicit def writes[A: Writes] = Json.writes[ETPayload[A]]
 
-  def apply[A](email: String, fields: A, name: DataExtensionName): ETPayload[A] =
+  def apply[A](email: String, fields: A, name: DataExtensionName, sfContactId: Option[String]): ETPayload[A] =
     ETPayload(
       To = CTo(email, email, CContactAttributes(fields)),
-      DataExtensionName = name.value
+      DataExtensionName = name.value,
+      SfContactId = sfContactId
     )
 }
 

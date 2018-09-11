@@ -232,7 +232,6 @@ class DeserialiserTest extends FlatSpec with Matchers {
 
   "deserialise url params" should "manage without the noActivation param" in {
     val json = """{"apiToken": "a", "apiClientId": "b"}"""
-    val actualRequest = Json.parse(json).validate[UrlParams]
 
     Json.parse(json).validate[UrlParams] should be(JsSuccess(UrlParams(false)))
 
@@ -240,14 +239,12 @@ class DeserialiserTest extends FlatSpec with Matchers {
 
   it should "manage with the noActivation param being false" in {
     val json = """{"apiToken": "a", "apiClientId": "b", "noActivation": "false"}"""
-    val actualRequest = Json.parse(json).validate[ApiGatewayRequest]
 
     Json.parse(json).validate[UrlParams] should be(JsSuccess(UrlParams(false)))
   }
 
   it should "manage with the noActivation param being true" in {
     val json = """{"apiToken": "a", "apiClientId": "b", "noActivation": "true"}"""
-    val actualRequest = Json.parse(json).validate[ApiGatewayRequest]
 
     Json.parse(json).validate[UrlParams] should be(JsSuccess(UrlParams(true)))
   }

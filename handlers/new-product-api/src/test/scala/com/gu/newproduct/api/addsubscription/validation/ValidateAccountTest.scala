@@ -8,6 +8,7 @@ class ValidateAccountTest extends FlatSpec with Matchers {
 
   val validAccount = Account(
     identityId = Some(IdentityId("idAccount1")),
+    sfContactId = Some(SfContactId("sfContactId")),
     paymentMethodId = Some(PaymentMethodId("activePaymentMethod")),
     autoPay = AutoPay(true),
     accountBalanceMinorUnits = AccountBalanceMinorUnits(0),
@@ -16,6 +17,7 @@ class ValidateAccountTest extends FlatSpec with Matchers {
 
   val validatedAccount = ValidatedAccount(
     identityId = Some(IdentityId("idAccount1")),
+    sfContactId = Some(SfContactId("sfContactId")),
     paymentMethodId = PaymentMethodId("activePaymentMethod"),
     autoPay = AutoPay(true),
     accountBalanceMinorUnits = AccountBalanceMinorUnits(0),
