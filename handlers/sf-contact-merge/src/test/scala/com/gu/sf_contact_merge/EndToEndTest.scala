@@ -89,7 +89,7 @@ object EndToEndTest {
 
   val contactQueryRequest =
     """{"queryString":"
-      |SELECT Id, WorkEmail, FirstName, LastName
+      |SELECT Id, WorkEmail, FirstName, LastName, Address1, City, State, PostalCode, Country
       | FROM Contact
       | WHERE Id = '2c92c0f8644618e30164652a55986e21' or Id = '2c92c0f9624bbc5f016253e5739b0b17'
       |"}""".stripMargin.replaceAll("""\n""", "")
@@ -101,13 +101,23 @@ object EndToEndTest {
       |            "WorkEmail": "peppa.pig@guardian.co.uk",
       |            "Id": "2c92c0f8644618e30164652a55986e21",
       |            "FirstName": "peppa",
-      |            "LastName": "pig"
+      |            "LastName": "pig",
+      |            "State": "Farmland",
+      |            "PostalCode": "N1 9GU",
+      |            "Country": "United Kingdom",
+      |            "City": "Grassy Hills",
+      |            "Address1": "Windy Castle"
       |        },
       |        {
       |            "WorkEmail": "peppa.pig@guardian.co.uk",
       |            "Id": "2c92c0f9624bbc5f016253e5739b0b17",
       |            "FirstName": "peppa",
-      |            "LastName": "pig"
+      |            "LastName": "pig",
+      |            "State": "Farmland",
+      |            "PostalCode": "N1 9GU",
+      |            "Country": "United Kingdom",
+      |            "City": "Grassy Hills",
+      |            "Address1": "Windy Castle"
       |        }
       |    ],
       |    "size": 2,

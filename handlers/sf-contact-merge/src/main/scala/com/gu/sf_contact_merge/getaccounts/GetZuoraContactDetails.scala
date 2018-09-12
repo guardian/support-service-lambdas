@@ -14,13 +14,36 @@ object GetZuoraContactDetails {
   case class EmailAddress(value: String) extends AnyVal
   case class FirstName(value: String) extends AnyVal
   case class LastName(value: String) extends AnyVal
-  case class ZuoraContactDetails(emailAddress: Option[EmailAddress], firstName: Option[FirstName], lastName: LastName)
+  case class ZuoraContactDetails(
+    emailAddress: Option[EmailAddress],
+    firstName: Option[FirstName],
+    lastName: LastName,
+    address: Address
+  )
+
+  case class Address1(value: String) extends AnyVal
+  case class City(value: String) extends AnyVal
+  case class State(value: String) extends AnyVal
+  case class PostalCode(value: String) extends AnyVal
+  case class Country(value: String) extends AnyVal
+  case class Address(
+    address1: Option[Address1],
+    city: Option[City],
+    state: Option[State],
+    postalCode: Option[PostalCode],
+    country: Country
+  )
 
   case class WireContact(
     Id: String,
     WorkEmail: Option[String],
     FirstName: String,
-    LastName: String
+    LastName: String,
+    Address1: Option[String],
+    City: Option[String],
+    State: Option[String],
+    PostalCode: Option[String],
+    Country: String
   )
 
   implicit val readWireContact = Json.reads[WireContact]
@@ -30,7 +53,7 @@ object GetZuoraContactDetails {
       or <- OrTraverse(contactIds) { accountId =>
         zoql"""Id = ${accountId.value}"""
       }
-      query <- zoql"SELECT Id, WorkEmail, FirstName, LastName FROM Contact WHERE $or"
+      query <- zoql"SELECT Id, WorkEmail, FirstName, LastName, Address1, City, State, PostalCode, Country FROM Contact WHERE $or"
       result <- zuoraQuerier[WireContact](query)
       _ <- if (result.done) ClientSuccess(()) else GenericError("oops, query was too big for one page")
     } yield result.records.map { contact =>
@@ -39,7 +62,14 @@ object GetZuoraContactDetails {
         ZuoraContactDetails(
           contact.WorkEmail.map(EmailAddress.apply),
           Some(FirstName(contact.FirstName)).filter(_.value != "."),
-          LastName(contact.LastName)
+          LastName(contact.LastName),
+          Address(
+            contact.Address1.filter(_ != ",").map(Address1),
+            contact.City.map(City),
+            contact.State.map(State),
+            contact.PostalCode.map(PostalCode),
+            Country(contact.Country)
+          )
         )
       )
     }.toMap
