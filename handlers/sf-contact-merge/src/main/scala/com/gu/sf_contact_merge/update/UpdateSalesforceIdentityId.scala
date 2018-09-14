@@ -2,13 +2,25 @@ package com.gu.sf_contact_merge.update
 
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.FirstName
+import com.gu.sf_contact_merge.getsfcontacts.GetSfAddress.SFAddress
+import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId.SFContactUpdate
 import com.gu.util.resthttp.HttpOp
 import com.gu.util.resthttp.RestRequestMaker.{PatchRequest, RelativePath}
+import com.gu.util.resthttp.Types.ClientFailableOp
 import play.api.libs.json.Json
 
 object UpdateSalesforceIdentityId {
 
-  case class WireRequest(IdentityID__c: String, FirstName: Option[String])
+  case class WireRequest(
+    IdentityID__c: String,
+    FirstName: Option[String],
+    OtherStreet: Option[String], // billing
+    OtherCity: Option[String],
+    OtherState: Option[String],
+    OtherPostalCode: Option[String],
+    OtherCountry: Option[String],
+    Phone: Option[String]
+  )
   implicit val writes = Json.writes[WireRequest]
 
   case class IdentityId(value: String) extends AnyVal
@@ -17,20 +29,34 @@ object UpdateSalesforceIdentityId {
   case class SetFirstName(firstName: FirstName) extends UpdateFirstName
   case object DummyFirstName extends UpdateFirstName
   case object DontChangeFirstName extends UpdateFirstName
-  case class SFContactUpdate(identityId: Option[IdentityId], firstName: UpdateFirstName)
+  case class SFContactUpdate(identityId: Option[IdentityId], firstName: UpdateFirstName, maybeNewAddress: Option[SFAddress])
 
-  def apply(patchOp: HttpOp[PatchRequest]): HttpOp[(SFContactId, SFContactUpdate)] =
-    patchOp.setupRequestMultiArg(toRequest)
+  def apply(patchOp: HttpOp[PatchRequest, Unit]): SetOrClearIdentityId =
+    SetOrClearIdentityId(patchOp.setupRequestMultiArg(toRequest).runRequestMultiArg)
 
   def toRequest(sFContactId: SFContactId, contactUpdate: SFContactUpdate): PatchRequest = {
+
+    val wireIdentityId = contactUpdate.identityId.map(_.value).getOrElse("")
     val maybeFireFirstName = contactUpdate.firstName match {
       case SetFirstName(firstName) => Some(firstName.value)
       case DummyFirstName => Some(".")
       case DontChangeFirstName => None
     }
-    val wireRequest = WireRequest(contactUpdate.identityId.map(_.value).getOrElse(""), maybeFireFirstName)
-    val relativePath = RelativePath(s"/services/data/v20.0/sobjects/Contact/${sFContactId.value}")
+    val wireRequest = WireRequest(
+      wireIdentityId,
+      maybeFireFirstName,
+      contactUpdate.maybeNewAddress.map(_.OtherStreet.value),
+      contactUpdate.maybeNewAddress.flatMap(_.OtherCity.map(_.value)),
+      contactUpdate.maybeNewAddress.flatMap(_.OtherState.map(_.value)),
+      contactUpdate.maybeNewAddress.flatMap(_.OtherPostalCode.map(_.value)),
+      contactUpdate.maybeNewAddress.map(_.OtherCountry.value),
+      contactUpdate.maybeNewAddress.flatMap(_.Phone.map(_.value))
+    )
+
+    val relativePath = RelativePath(s"/services/data/v43.0/sobjects/Contact/${sFContactId.value}")
     PatchRequest(wireRequest, relativePath)
   }
 
 }
+
+case class SetOrClearIdentityId(apply: (SFContactId, SFContactUpdate) => ClientFailableOp[Unit])

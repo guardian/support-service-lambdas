@@ -17,7 +17,8 @@ object SendConfirmationEmailVoucher extends Logging {
   def apply(
     etSqsSend: ETPayload[VoucherEmailData] => Future[Unit],
     getCurrentDate: () => LocalDate
-  )(sfContactId: Option[SfContactId],
+  )(
+    sfContactId: Option[SfContactId],
     data: VoucherEmailData
   ): AsyncApiGatewayOp[Unit] = for {
     etPayload <- toPayload(sfContactId, data).toAsync

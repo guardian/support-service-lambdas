@@ -12,7 +12,7 @@ object UpdateSalesforceIdentityId {
 
   case class IdentityId(value: String)
 
-  def apply(patchOp: HttpOp[PatchRequest]): HttpOp[(SFContactId, IdentityId)] =
+  def apply(patchOp: HttpOp[PatchRequest, Unit]): HttpOp[(SFContactId, IdentityId), Unit] =
     patchOp.setupRequestMultiArg(toRequest)
 
   def toRequest(sFContactId: SFContactId, identityId: IdentityId): PatchRequest = {

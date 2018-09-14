@@ -2,6 +2,7 @@ package com.gu.sf_contact_merge.update.updateSFIdentityId
 
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.FirstName
+import com.gu.sf_contact_merge.getsfcontacts.GetSfAddress.{SFAddress, SFCity, SFCountry, SFPhone, SFPostalCode, SFState, SFStreet}
 import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId
 import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId._
 import com.gu.util.resthttp.RestRequestMaker.{PatchRequest, RelativePath}
@@ -14,13 +15,30 @@ class UpdateSalesforceIdentityIdTest extends FlatSpec with Matchers {
 
     val actual = UpdateSalesforceIdentityId.toRequest(
       SFContactId("contactsf"),
-      SFContactUpdate(Some(IdentityId("identityid")), SetFirstName(FirstName("firstname")))
+      SFContactUpdate(
+        Some(IdentityId("identityid")),
+        SetFirstName(FirstName("firstname")),
+        Some(SFAddress(
+          SFStreet("street1"),
+          Some(SFCity("city1")),
+          Some(SFState("state2")),
+          Some(SFPostalCode("post1")),
+          SFCountry("country1"),
+          Some(SFPhone("phone1"))
+        ))
+      )
     )
     val expectedJson = JsObject(Seq(
       "IdentityID__c" -> JsString("identityid"),
-      "FirstName" -> JsString("firstname")
+      "FirstName" -> JsString("firstname"),
+      "OtherStreet" -> JsString("street1"),
+      "OtherCity" -> JsString("city1"),
+      "OtherState" -> JsString("state2"),
+      "OtherPostalCode" -> JsString("post1"),
+      "OtherCountry" -> JsString("country1"),
+      "Phone" -> JsString("phone1")
     ))
-    val expected = new PatchRequest(expectedJson, RelativePath("/services/data/v20.0/sobjects/Contact/contactsf"))
+    val expected = new PatchRequest(expectedJson, RelativePath("/services/data/v43.0/sobjects/Contact/contactsf"))
     actual should be(expected)
 
   }
@@ -29,13 +47,17 @@ class UpdateSalesforceIdentityIdTest extends FlatSpec with Matchers {
 
     val actual = UpdateSalesforceIdentityId.toRequest(
       SFContactId("contactsf"),
-      SFContactUpdate(Some(IdentityId("identityid")), DummyFirstName)
+      SFContactUpdate(
+        Some(IdentityId("identityid")),
+        DummyFirstName,
+        None
+      )
     )
     val expectedJson = JsObject(Seq(
       "IdentityID__c" -> JsString("identityid"),
       "FirstName" -> JsString(".")
     ))
-    val expected = new PatchRequest(expectedJson, RelativePath("/services/data/v20.0/sobjects/Contact/contactsf"))
+    val expected = new PatchRequest(expectedJson, RelativePath("/services/data/v43.0/sobjects/Contact/contactsf"))
     actual should be(expected)
 
   }
@@ -44,12 +66,16 @@ class UpdateSalesforceIdentityIdTest extends FlatSpec with Matchers {
 
     val actual = UpdateSalesforceIdentityId.toRequest(
       SFContactId("contactsf"),
-      SFContactUpdate(Some(IdentityId("identityid")), DontChangeFirstName)
+      SFContactUpdate(
+        Some(IdentityId("identityid")),
+        DontChangeFirstName,
+        None
+      )
     )
     val expectedJson = JsObject(Seq(
       "IdentityID__c" -> JsString("identityid")
     ))
-    val expected = new PatchRequest(expectedJson, RelativePath("/services/data/v20.0/sobjects/Contact/contactsf"))
+    val expected = new PatchRequest(expectedJson, RelativePath("/services/data/v43.0/sobjects/Contact/contactsf"))
     actual should be(expected)
 
   }
@@ -58,12 +84,16 @@ class UpdateSalesforceIdentityIdTest extends FlatSpec with Matchers {
 
     val actual = UpdateSalesforceIdentityId.toRequest(
       SFContactId("contactsf"),
-      SFContactUpdate(None, DontChangeFirstName)
+      SFContactUpdate(
+        None,
+        DontChangeFirstName,
+        None
+      )
     )
     val expectedJson = JsObject(Seq(
       "IdentityID__c" -> JsString("")
     ))
-    val expected = new PatchRequest(expectedJson, RelativePath("/services/data/v20.0/sobjects/Contact/contactsf"))
+    val expected = new PatchRequest(expectedJson, RelativePath("/services/data/v43.0/sobjects/Contact/contactsf"))
     actual should be(expected)
 
   }

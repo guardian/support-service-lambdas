@@ -56,7 +56,7 @@ object Handler {
 
       lazy val sfAuth = SalesforceAuthenticate.doAuth(response, sfConfig)
       lazy val sfRequests = sfAuth.map(s => SalesforceRestRequestMaker(s, response))
-      lazy val sfPatch = sfAuth.map(s => HttpOp(response).setupRequest(SalesforceRestRequestMaker.patch(s)))
+      lazy val sfPatch = sfAuth.map(s => SalesforceAuthenticate.patch(response, s))
 
       Operation(
         steps = IdentityBackfillSteps(
@@ -106,7 +106,7 @@ object Handler {
     } yield syncable
 
   def updateSalesforceIdentityId(
-    sfRequests: ApiGatewayOp[HttpOp[PatchRequest]]
+    sfRequests: ApiGatewayOp[HttpOp[PatchRequest, Unit]]
   )(
     sFContactId: SFContactId,
     identityId: IdentityId

@@ -8,7 +8,6 @@ import com.gu.salesforce.auth.{SalesforceAuthenticate, SalesforceRestRequestMake
 import com.gu.salesforce.dev.SFEffectsData
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
-import com.gu.util.resthttp.HttpOp
 import org.scalatest.{FlatSpec, Matchers}
 import scalaz.\/-
 
@@ -25,7 +24,7 @@ class UpdateSalesforceIdentityIdEffectsTest extends FlatSpec with Matchers {
       sfConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[SFAuthConfig]
       response = RawEffects.response
       auth <- SalesforceAuthenticate.doAuth(response, sfConfig).toDisjunction
-      updateSalesforceIdentityId = UpdateSalesforceIdentityId(HttpOp(response).setupRequest(SalesforceRestRequestMaker.patch(auth)))
+      updateSalesforceIdentityId = UpdateSalesforceIdentityId(SalesforceAuthenticate.patch(response, auth))
       _ <- updateSalesforceIdentityId.runRequestMultiArg(testContact, IdentityId(unique)).toDisjunction
       getSalesforceIdentityId = GetSalesforceIdentityId(SalesforceRestRequestMaker(auth, response)) _
       identityId <- getSalesforceIdentityId(testContact).toDisjunction
