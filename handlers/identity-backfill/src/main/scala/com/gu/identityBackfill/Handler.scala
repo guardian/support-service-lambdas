@@ -54,7 +54,7 @@ object Handler {
       val getByEmail: EmailAddress => GetByEmail.ApiError \/ IdentityId = GetByEmail(response, identityConfig)
       val countZuoraAccounts: IdentityId => ClientFailableOp[Int] = CountZuoraAccountsForIdentityId(zuoraQuerier)
 
-      lazy val sfAuth = SalesforceAuthenticate.doAuth(response, sfConfig)
+      lazy val sfAuth: ApiGatewayOp[SalesforceAuthenticate.SalesforceAuth] = SalesforceAuthenticate.doAuth(response, sfConfig)
       lazy val sfRequests = sfAuth.map(salesforceAuth => SalesforceRestRequestMaker(salesforceAuth, response))
       lazy val sfPatch = sfAuth.map(salesforceAuth => SalesforceAuthenticate.patch(response, salesforceAuth))
 
