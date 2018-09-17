@@ -1,9 +1,8 @@
 package com.gu.util.resthttp
 
-import com.gu.util.resthttp.RestRequestMaker.filterIfSuccessful
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess}
 import okhttp3.{Request, Response}
-import play.api.libs.json.{JsValue, Json, Reads}
+import play.api.libs.json.{JsValue, Reads}
 
 case class HttpOp[PARAM, RESPONSE](
   inputToRequest: PARAM => Request,

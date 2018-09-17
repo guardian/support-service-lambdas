@@ -4,9 +4,9 @@ import com.gu.salesforce.auth.SalesforceAuthenticate.SalesforceAuth
 import com.gu.util.Logging
 import com.gu.util.config.ConfigLocation
 import com.gu.util.reader.Types.{ApiGatewayOp, _}
-import com.gu.util.resthttp.{HttpOp, RestOp, RestRequestMaker}
-import com.gu.util.resthttp.RestRequestMaker.{GetRequest, PatchRequest, createBodyFromJs, filterIfSuccessful}
+import com.gu.util.resthttp.RestRequestMaker.{GetRequest, PatchRequest, createBodyFromJs, toClientFailableOp}
 import com.gu.util.resthttp.Types.ClientSuccess
+import com.gu.util.resthttp.{HttpOp, RestRequestMaker}
 import okhttp3.{FormBody, Request, Response}
 import play.api.libs.json.{JsValue, Json, Reads}
 
@@ -51,7 +51,7 @@ object SalesforceAuthenticate extends Logging {
     HttpOp(response).setupRequest {
       SalesforceRestRequestMaker.patch(sfAuth)
     }.flatMap {
-      filterIfSuccessful
+      toClientFailableOp
     }.flatMap { _ =>
       ClientSuccess(())
     }
@@ -63,7 +63,7 @@ object SalesforceAuthenticate extends Logging {
     HttpOp(response).setupRequest {
       SalesforceRestRequestMaker.get(sfAuth)
     }.flatMap {
-      filterIfSuccessful
+      toClientFailableOp
     }.map { response =>
       Json.parse(response.body.string)
     }
