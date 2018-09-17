@@ -2,7 +2,7 @@ package com.gu.sf_contact_merge.update
 
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.FirstName
-import com.gu.sf_contact_merge.getsfcontacts.GetSfAddress.SFAddress
+import com.gu.sf_contact_merge.getsfcontacts.GetSfAddressOverride.SFAddressOverride
 import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId.SFContactUpdate
 import com.gu.util.resthttp.HttpOp
 import com.gu.util.resthttp.RestRequestMaker.{PatchRequest, RelativePath}
@@ -29,7 +29,7 @@ object UpdateSalesforceIdentityId {
   case class SetFirstName(firstName: FirstName) extends UpdateFirstName
   case object DummyFirstName extends UpdateFirstName
   case object DontChangeFirstName extends UpdateFirstName
-  case class SFContactUpdate(identityId: Option[IdentityId], firstName: UpdateFirstName, maybeNewAddress: Option[SFAddress])
+  case class SFContactUpdate(identityId: Option[IdentityId], firstName: UpdateFirstName, maybeNewAddress: SFAddressOverride)
 
   def apply(patchOp: HttpOp[PatchRequest, Unit]): SetOrClearIdentityId =
     SetOrClearIdentityId(patchOp.setupRequestMultiArg(toRequest).runRequestMultiArg)
@@ -45,12 +45,12 @@ object UpdateSalesforceIdentityId {
     val wireRequest = WireRequest(
       wireIdentityId,
       maybeFireFirstName,
-      contactUpdate.maybeNewAddress.map(_.OtherStreet.value),
-      contactUpdate.maybeNewAddress.flatMap(_.OtherCity.map(_.value)),
-      contactUpdate.maybeNewAddress.flatMap(_.OtherState.map(_.value)),
-      contactUpdate.maybeNewAddress.flatMap(_.OtherPostalCode.map(_.value)),
-      contactUpdate.maybeNewAddress.map(_.OtherCountry.value),
-      contactUpdate.maybeNewAddress.flatMap(_.Phone.map(_.value))
+      contactUpdate.maybeNewAddress.toOption.map(_.OtherStreet.value),
+      contactUpdate.maybeNewAddress.toOption.flatMap(_.OtherCity.map(_.value)),
+      contactUpdate.maybeNewAddress.toOption.flatMap(_.OtherState.map(_.value)),
+      contactUpdate.maybeNewAddress.toOption.flatMap(_.OtherPostalCode.map(_.value)),
+      contactUpdate.maybeNewAddress.toOption.map(_.OtherCountry.value),
+      contactUpdate.maybeNewAddress.toOption.flatMap(_.Phone.map(_.value))
     )
 
     val relativePath = RelativePath(s"/services/data/v43.0/sobjects/Contact/${sFContactId.value}")

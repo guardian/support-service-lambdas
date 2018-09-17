@@ -1,8 +1,9 @@
 package com.gu.sf_contact_merge.getsfcontacts
 
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
-import com.gu.sf_contact_merge.getsfcontacts.GetSfAddress.SFAddress
+import com.gu.sf_contact_merge.getsfcontacts.GetSfAddress.{SFAddress, SFMaybeAddress, UnusableContactAddress, UsableContactAddress}
 import com.gu.sf_contact_merge.getsfcontacts.GetSfAddress.SFAddressFields._
+import com.gu.sf_contact_merge.getsfcontacts.GetSfAddressOverride.{DontOverrideAddress, OverrideAddressWith}
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError}
 import org.scalatest.{FlatSpec, Matchers}
 
@@ -21,12 +22,12 @@ class GetSfAddressOverrideTest extends FlatSpec with Matchers {
 
     var invocationLog = List[String]() // we want to check ordering of side effects...
 
-    def apply(sfContactId: SFContactId): ClientFailableOp[Option[SFAddress]] = {
+    def apply(sfContactId: SFContactId): ClientFailableOp[SFMaybeAddress] = {
       val (log, result) = sfContactId match {
         case SFContactId(name) if name.startsWith("noaddress") =>
-          (s"get ${sfContactId.value}", ClientSuccess(None))
+          (s"get ${sfContactId.value}", ClientSuccess(UnusableContactAddress))
         case SFContactId(label) if label.startsWith("a") =>
-          (s"get ${sfContactId.value}", ClientSuccess(Some(testAddress(label))))
+          (s"get ${sfContactId.value}", ClientSuccess(UsableContactAddress(testAddress(label))))
         case other =>
           (s"other: <$other>", GenericError("whoops"))
       }
@@ -47,7 +48,7 @@ class GetSfAddressOverrideTest extends FlatSpec with Matchers {
     val expectedOrder = List("get a1")
     invocationLog.invocationLog should be(expectedOrder)
 
-    actual should be(ClientSuccess(None))
+    actual should be(ClientSuccess(DontOverrideAddress))
   }
 
   "GetSfAddressOverride" should "not give an override if it only has no addresses" in {
@@ -61,7 +62,7 @@ class GetSfAddressOverrideTest extends FlatSpec with Matchers {
     val expectedOrder = List("get noaddress")
     invocationLog.invocationLog should be(expectedOrder)
 
-    actual should be(ClientSuccess(None))
+    actual should be(ClientSuccess(DontOverrideAddress))
   }
 
   "GetSfAddressOverride" should "give an override if the main contact doesn't have but the other does" in {
@@ -75,7 +76,7 @@ class GetSfAddressOverrideTest extends FlatSpec with Matchers {
     val expectedOrder = List("get noaddress", "get a1")
     invocationLog.invocationLog should be(expectedOrder)
 
-    actual should be(ClientSuccess(Some(testAddress("a1"))))
+    actual should be(ClientSuccess(OverrideAddressWith(testAddress("a1"))))
   }
 
   "GetSfAddressOverride" should "remove the main contact from the ones to fetch later" in {
@@ -89,7 +90,7 @@ class GetSfAddressOverrideTest extends FlatSpec with Matchers {
     val expectedOrder = List("get noaddress")
     invocationLog.invocationLog should be(expectedOrder)
 
-    actual should be(ClientSuccess(None))
+    actual should be(ClientSuccess(DontOverrideAddress))
   }
 
   "GetSfAddressOverride" should "remove duplicates from the list" in {
@@ -103,7 +104,7 @@ class GetSfAddressOverrideTest extends FlatSpec with Matchers {
     val expectedOrder = List("get noaddress", "get noaddress1")
     invocationLog.invocationLog should be(expectedOrder)
 
-    actual should be(ClientSuccess(None))
+    actual should be(ClientSuccess(DontOverrideAddress))
   }
 
   "GetSfAddressOverride" should "not carry on checking contacts once one with an address is found" in {
@@ -117,7 +118,7 @@ class GetSfAddressOverrideTest extends FlatSpec with Matchers {
     val expectedOrder = List("get noaddress", "get a1")
     invocationLog.invocationLog should be(expectedOrder)
 
-    actual should be(ClientSuccess(Some(testAddress("a1"))))
+    actual should be(ClientSuccess(OverrideAddressWith(testAddress("a1"))))
   }
 
 }

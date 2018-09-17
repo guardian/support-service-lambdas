@@ -4,6 +4,7 @@ import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.FirstName
 import com.gu.sf_contact_merge.getsfcontacts.GetSfAddress.SFAddress
 import com.gu.sf_contact_merge.getsfcontacts.GetSfAddress.SFAddressFields._
+import com.gu.sf_contact_merge.getsfcontacts.GetSfAddressOverride.{DontOverrideAddress, OverrideAddressWith}
 import com.gu.sf_contact_merge.update.UpdateSFContacts.OldSFContact
 import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId.{IdentityId, SFContactUpdate, SetFirstName}
 import com.gu.util.resthttp.Types
@@ -18,11 +19,11 @@ class UpdateSFContactsTest extends FlatSpec with Matchers {
 
     def apply(sfContactId: SFContactId, sfUpdateRequest: SFContactUpdate): Types.ClientFailableOp[Unit] = {
       invocationLog = invocationLog ++ List(sfUpdateRequest match {
-        case SFContactUpdate(None, setname, None) =>
+        case SFContactUpdate(None, setname, DontOverrideAddress) =>
           s"clear ${sfContactId.value} setname: $setname"
-        case SFContactUpdate(None, setname, Some(a: SFAddress)) =>
+        case SFContactUpdate(None, setname, OverrideAddressWith(a)) =>
           s"clear ${sfContactId.value} setname: $setname, setaddress"
-        case SFContactUpdate(Some(IdentityId("newIdentityId")), SetFirstName(FirstName(name)), Some(a: SFAddress)) =>
+        case SFContactUpdate(Some(IdentityId("newIdentityId")), SetFirstName(FirstName(name)), OverrideAddressWith(a)) =>
           s"addidentity ${sfContactId.value} setname $name, setaddress"
         case other =>
           s"try to set identity id to: <$other>"
@@ -44,7 +45,7 @@ class UpdateSFContactsTest extends FlatSpec with Matchers {
       maybeIdentityId,
       maybeContactId,
       Some(FirstName("hello")),
-      None
+      DontOverrideAddress
     )
 
     val expectedOrder = List("clear contold setname: DontChangeFirstName", "clear contnew setname: SetFirstName(FirstName(hello))")
@@ -65,7 +66,7 @@ class UpdateSFContactsTest extends FlatSpec with Matchers {
       maybeIdentityId,
       maybeContactId,
       Some(FirstName("hello")),
-      Some(SFAddress(
+      OverrideAddressWith(SFAddress(
         SFStreet("street1"),
         Some(SFCity("city1")),
         Some(SFState("state2")),
@@ -93,7 +94,7 @@ class UpdateSFContactsTest extends FlatSpec with Matchers {
       maybeIdentityId,
       maybeContactId,
       Some(FirstName("hello")),
-      None
+      DontOverrideAddress
     )
 
     val expectedOrder = List("clear contnew setname: SetFirstName(FirstName(hello))")

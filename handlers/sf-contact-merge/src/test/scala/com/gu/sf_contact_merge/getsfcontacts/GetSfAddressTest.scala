@@ -2,7 +2,7 @@ package com.gu.sf_contact_merge.getsfcontacts
 
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.sf_contact_merge.getsfcontacts.GetSfAddress.SFAddressFields._
-import com.gu.sf_contact_merge.getsfcontacts.GetSfAddress.{SFAddress, WireResult}
+import com.gu.sf_contact_merge.getsfcontacts.GetSfAddress.{SFAddress, SFMaybeAddress, UnusableContactAddress, UsableContactAddress, WireResult}
 import com.gu.util.resthttp.RestRequestMaker.{GetRequest, RelativePath}
 import org.scalatest.{FlatSpec, Matchers}
 
@@ -22,7 +22,7 @@ class GetSfAddressTest extends FlatSpec with Matchers {
       OtherCountry = Some("country1"),
       Phone = Some("phone1")
     )
-    val actual: Option[SFAddress] = GetSfAddress.toResponse(wireResult)
+    val actual: SFMaybeAddress = GetSfAddress.toResponse(wireResult)
 
     val expected = SFAddress(
       SFStreet("street1"),
@@ -33,7 +33,7 @@ class GetSfAddressTest extends FlatSpec with Matchers {
       Some(SFPhone("phone1"))
     )
 
-    actual should be(Some(expected))
+    actual should be(UsableContactAddress(expected))
   }
 
   "toResponse" should "return some if only required are set" in {
@@ -45,7 +45,7 @@ class GetSfAddressTest extends FlatSpec with Matchers {
       OtherCountry = Some("country1"),
       Phone = None
     )
-    val actual: Option[SFAddress] = GetSfAddress.toResponse(wireResult)
+    val actual: SFMaybeAddress = GetSfAddress.toResponse(wireResult)
 
     val expected = SFAddress(
       SFStreet("street1"),
@@ -56,7 +56,7 @@ class GetSfAddressTest extends FlatSpec with Matchers {
       None
     )
 
-    actual should be(Some(expected))
+    actual should be(UsableContactAddress(expected))
   }
 
   "toResponse" should "return none if street is a single char" in {
@@ -68,9 +68,9 @@ class GetSfAddressTest extends FlatSpec with Matchers {
       OtherCountry = Some("country1"),
       Phone = Some("phone1")
     )
-    val actual: Option[SFAddress] = GetSfAddress.toResponse(wireResult)
+    val actual: SFMaybeAddress = GetSfAddress.toResponse(wireResult)
 
-    actual should be(None)
+    actual should be(UnusableContactAddress)
   }
 
   "toResponse" should "return none if street is empty" in {
@@ -82,9 +82,9 @@ class GetSfAddressTest extends FlatSpec with Matchers {
       OtherCountry = Some("country1"),
       Phone = Some("phone1")
     )
-    val actual: Option[SFAddress] = GetSfAddress.toResponse(wireResult)
+    val actual: SFMaybeAddress = GetSfAddress.toResponse(wireResult)
 
-    actual should be(None)
+    actual should be(UnusableContactAddress)
   }
 
   "toResponse" should "return none if street is missing" in {
@@ -96,9 +96,9 @@ class GetSfAddressTest extends FlatSpec with Matchers {
       OtherCountry = Some("country1"),
       Phone = Some("phone1")
     )
-    val actual: Option[SFAddress] = GetSfAddress.toResponse(wireResult)
+    val actual: SFMaybeAddress = GetSfAddress.toResponse(wireResult)
 
-    actual should be(None)
+    actual should be(UnusableContactAddress)
   }
 
   "toResponse" should "return none if country is missing" in {
@@ -110,9 +110,9 @@ class GetSfAddressTest extends FlatSpec with Matchers {
       OtherCountry = None,
       Phone = Some("phone1")
     )
-    val actual: Option[SFAddress] = GetSfAddress.toResponse(wireResult)
+    val actual: SFMaybeAddress = GetSfAddress.toResponse(wireResult)
 
-    actual should be(None)
+    actual should be(UnusableContactAddress)
   }
 
 }

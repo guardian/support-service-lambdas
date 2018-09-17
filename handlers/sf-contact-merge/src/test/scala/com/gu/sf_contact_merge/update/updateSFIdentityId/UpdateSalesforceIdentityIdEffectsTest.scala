@@ -8,6 +8,7 @@ import com.gu.salesforce.dev.SFEffectsData
 import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.FirstName
 import com.gu.sf_contact_merge.getsfcontacts.GetSfAddress.SFAddress
 import com.gu.sf_contact_merge.getsfcontacts.GetSfAddress.SFAddressFields._
+import com.gu.sf_contact_merge.getsfcontacts.GetSfAddressOverride.OverrideAddressWith
 import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId
 import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId.{IdentityId, SFContactUpdate, SetFirstName}
 import com.gu.sf_contact_merge.update.updateSFIdentityId.GetSalesforceIdentityId.WireResult
@@ -45,7 +46,7 @@ class UpdateSalesforceIdentityIdEffectsTest extends FlatSpec with Matchers {
       auth <- SalesforceAuthenticate.doAuth(response, sfConfig).toDisjunction
       patch = SalesforceAuthenticate.patch(response, auth)
       updateSalesforceIdentityId = UpdateSalesforceIdentityId(patch)
-      sFContactUpdate = SFContactUpdate(Some(testIdentityId), SetFirstName(testFirstName), Some(testAddress))
+      sFContactUpdate = SFContactUpdate(Some(testIdentityId), SetFirstName(testFirstName), OverrideAddressWith(testAddress))
       _ <- updateSalesforceIdentityId.apply(testContact, sFContactUpdate).toDisjunction
       getSalesforceIdentityId = GetSalesforceIdentityId(SalesforceRestRequestMaker(auth, response)) _
       updatedIdentityId <- getSalesforceIdentityId(testContact).toDisjunction

@@ -2,7 +2,7 @@ package com.gu.sf_contact_merge.update
 
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.FirstName
-import com.gu.sf_contact_merge.getsfcontacts.GetSfAddress.SFAddress
+import com.gu.sf_contact_merge.getsfcontacts.GetSfAddressOverride.{DontOverrideAddress, SFAddressOverride}
 import com.gu.sf_contact_merge.update.UpdateSFContacts.OldSFContact
 import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId.{DontChangeFirstName, DummyFirstName, IdentityId, SFContactUpdate, SetFirstName}
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess}
@@ -16,12 +16,12 @@ object UpdateSFContacts {
     identityId: Option[IdentityId],
     maybeOldContactId: Option[OldSFContact],
     firstName: Option[FirstName],
-    maybeSFAddressOverride: Option[SFAddress]
+    maybeSFAddressOverride: SFAddressOverride
   ) =>
     for {
       _ <- maybeOldContactId match {
         case Some(oldContactId) => {
-          val sFContactUpdate = SFContactUpdate(None, DontChangeFirstName, None)
+          val sFContactUpdate = SFContactUpdate(None, DontChangeFirstName, DontOverrideAddress)
           setOrClearIdentityId.apply(oldContactId.sfContactId, sFContactUpdate)
         }
         case None => ClientSuccess(())
@@ -47,7 +47,7 @@ trait UpdateSFContacts {
     identityId: Option[IdentityId],
     maybeOldContactId: Option[OldSFContact],
     firstNameToUse: Option[FirstName],
-    maybeSFAddressOverride: Option[SFAddress]
+    maybeSFAddressOverride: SFAddressOverride
   ): ClientFailableOp[Unit]
 
 }
