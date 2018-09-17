@@ -2,6 +2,7 @@ package com.gu.sf_contact_merge.getsfcontacts
 
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.sf_contact_merge.getsfcontacts.GetSfAddress.SFAddress
+import com.gu.sf_contact_merge.getsfcontacts.GetSfAddress.SFAddressFields._
 import com.gu.util.resthttp.HttpOp
 import com.gu.util.resthttp.RestOp.HttpOpParseOp
 import com.gu.util.resthttp.RestRequestMaker.{GetRequest, RelativePath}
@@ -10,12 +11,16 @@ import play.api.libs.json.{JsValue, Json}
 
 object GetSfAddress {
 
-  case class SFStreet(value: String) extends AnyVal
-  case class SFCity(value: String) extends AnyVal
-  case class SFState(value: String) extends AnyVal
-  case class SFPostalCode(value: String) extends AnyVal
-  case class SFCountry(value: String) extends AnyVal
-  case class SFPhone(value: String) extends AnyVal
+  object SFAddressFields {
+
+    case class SFStreet(value: String) extends AnyVal
+    case class SFCity(value: String) extends AnyVal
+    case class SFState(value: String) extends AnyVal
+    case class SFPostalCode(value: String) extends AnyVal
+    case class SFCountry(value: String) extends AnyVal
+    case class SFPhone(value: String) extends AnyVal
+
+  }
 
   case class SFAddress( //minimal useful address needs the street and country
     OtherStreet: SFStreet,

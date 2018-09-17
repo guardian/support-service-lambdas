@@ -48,13 +48,25 @@ object SalesforceAuthenticate extends Logging {
     response: Request => Response,
     sfAuth: SalesforceAuth
   ): HttpOp[PatchRequest, Unit] =
-    HttpOp(response).setupRequest(SalesforceRestRequestMaker.patch(sfAuth)).flatMap(filterIfSuccessful).flatMap(_ => ClientSuccess(()))
+    HttpOp(response).setupRequest {
+      SalesforceRestRequestMaker.patch(sfAuth)
+    }.flatMap {
+      filterIfSuccessful
+    }.flatMap { _ =>
+      ClientSuccess(())
+    }
 
   def get(
     response: Request => Response,
     sfAuth: SalesforceAuth
   ): HttpOp[GetRequest, JsValue] =
-    HttpOp(response).setupRequest(SalesforceRestRequestMaker.get(sfAuth)).flatMap(filterIfSuccessful).flatMap(RestOp.responseToJs)
+    HttpOp(response).setupRequest {
+      SalesforceRestRequestMaker.get(sfAuth)
+    }.flatMap {
+      filterIfSuccessful
+    }.map { response =>
+      Json.parse(response.body.string)
+    }
 
   def apply(
     response: (Request => Response),
@@ -83,6 +95,7 @@ object SalesforceAuthenticate extends Logging {
 
 object SalesforceRestRequestMaker extends Logging {
 
+  @deprecated("prefer to use the patch and get functions")
   def apply(salesforceAuth: SalesforceAuth, response: Request => Response): RestRequestMaker.Requests = {
     new RestRequestMaker.Requests(
       headers = Map("Authorization" -> s"Bearer ${salesforceAuth.access_token}"),

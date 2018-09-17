@@ -53,8 +53,4 @@ object RestOp {
 
   }
 
-  def responseToJs(response: Response): ClientFailableOp[JsValue] = {
-    filterIfSuccessful(response).map(response => Json.parse(response.body.string))
-  }
-
 }

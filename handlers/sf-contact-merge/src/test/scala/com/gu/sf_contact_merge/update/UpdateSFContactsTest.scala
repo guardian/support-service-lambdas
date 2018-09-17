@@ -2,7 +2,8 @@ package com.gu.sf_contact_merge.update
 
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.FirstName
-import com.gu.sf_contact_merge.getsfcontacts.GetSfAddress.{SFAddress, SFCity, SFCountry, SFPhone, SFPostalCode, SFState, SFStreet}
+import com.gu.sf_contact_merge.getsfcontacts.GetSfAddress.SFAddress
+import com.gu.sf_contact_merge.getsfcontacts.GetSfAddress.SFAddressFields._
 import com.gu.sf_contact_merge.update.UpdateSFContacts.OldSFContact
 import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId.{IdentityId, SFContactUpdate, SetFirstName}
 import com.gu.util.resthttp.Types

@@ -6,15 +6,15 @@ import com.gu.salesforce.auth.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.auth.{SalesforceAuthenticate, SalesforceRestRequestMaker}
 import com.gu.salesforce.dev.SFEffectsData
 import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.FirstName
-import com.gu.sf_contact_merge.getsfcontacts.GetSfAddress.{SFAddress, SFCity, SFCountry, SFPhone, SFPostalCode, SFState, SFStreet}
+import com.gu.sf_contact_merge.getsfcontacts.GetSfAddress.SFAddress
+import com.gu.sf_contact_merge.getsfcontacts.GetSfAddress.SFAddressFields._
 import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId
 import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId.{IdentityId, SFContactUpdate, SetFirstName}
 import com.gu.sf_contact_merge.update.updateSFIdentityId.GetSalesforceIdentityId.WireResult
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
-import com.gu.util.resthttp.RestRequestMaker.filterIfSuccessful
-import com.gu.util.resthttp.{HttpOp, RestRequestMaker}
-import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess}
+import com.gu.util.resthttp.RestRequestMaker
+import com.gu.util.resthttp.Types.ClientFailableOp
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
 import scalaz.\/-
@@ -43,7 +43,7 @@ class UpdateSalesforceIdentityIdEffectsTest extends FlatSpec with Matchers {
       sfConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[SFAuthConfig]
       response = RawEffects.response
       auth <- SalesforceAuthenticate.doAuth(response, sfConfig).toDisjunction
-      patch = HttpOp(response).setupRequest(SalesforceRestRequestMaker.patch(auth)).flatMap(filterIfSuccessful).flatMap(_ => ClientSuccess(()))
+      patch = SalesforceAuthenticate.patch(response, auth)
       updateSalesforceIdentityId = UpdateSalesforceIdentityId(patch)
       sFContactUpdate = SFContactUpdate(Some(testIdentityId), SetFirstName(testFirstName), Some(testAddress))
       _ <- updateSalesforceIdentityId.apply(testContact, sFContactUpdate).toDisjunction

@@ -1,7 +1,8 @@
 package com.gu.sf_contact_merge.getsfcontacts
 
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
-import com.gu.sf_contact_merge.getsfcontacts.GetSfAddress.{SFAddress, SFCity, SFCountry, SFPhone, SFPostalCode, SFState, SFStreet}
+import com.gu.sf_contact_merge.getsfcontacts.GetSfAddress.SFAddress
+import com.gu.sf_contact_merge.getsfcontacts.GetSfAddress.SFAddressFields._
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError}
 import org.scalatest.{FlatSpec, Matchers}
 

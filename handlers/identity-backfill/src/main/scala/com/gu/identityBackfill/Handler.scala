@@ -55,8 +55,8 @@ object Handler {
       val countZuoraAccounts: IdentityId => ClientFailableOp[Int] = CountZuoraAccountsForIdentityId(zuoraQuerier)
 
       lazy val sfAuth = SalesforceAuthenticate.doAuth(response, sfConfig)
-      lazy val sfRequests = sfAuth.map(s => SalesforceRestRequestMaker(s, response))
-      lazy val sfPatch = sfAuth.map(s => SalesforceAuthenticate.patch(response, s))
+      lazy val sfRequests = sfAuth.map(salesforceAuth => SalesforceRestRequestMaker(salesforceAuth, response))
+      lazy val sfPatch = sfAuth.map(salesforceAuth => SalesforceAuthenticate.patch(response, salesforceAuth))
 
       Operation(
         steps = IdentityBackfillSteps(

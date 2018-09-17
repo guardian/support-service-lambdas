@@ -60,9 +60,7 @@ object Handler {
           AssertSame.emailAddress,
           AssertSame.lastName,
           EnsureNoAccountWithWrongIdentityId.apply,
-          UpdateSFContacts(
-            UpdateSalesforceIdentityId(sfPatch)
-          ),
+          UpdateSFContacts(UpdateSalesforceIdentityId(sfPatch)),
           UpdateAccountSFLinks(requests.put),
           GetSfAddressOverride.apply(GetSfAddress(sfGet))
         )
