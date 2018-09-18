@@ -34,12 +34,12 @@ object RunBatch {
 
     val result = for {
       args <- GetArgs(rawArgs)
-      postString = HttpOp(Http.response).setupRequest(post(args.apiKey))
+      postString = HttpOp(Http.response).setupRequest(post(args.apiKey)).flatMap(RestRequestMaker.toClientFailableOp)
       jsons <- ReadFile(args.fileName)
       postJsonString = postString.setupRequest[JsonString](jsonString => BodyAsString(jsonString.value))
       requestWithResultAsTry = (jsonString: JsonString) =>
         postJsonString.runRequest(jsonString) match {
-          case ClientSuccess(unit) => \/-(())
+          case ClientSuccess(_) => \/-(())
           case f: ClientFailure => -\/(s"failed to call sf contact merge: $f")
         }
       err <- jsons.traverseU(requestWithResultAsTry)
