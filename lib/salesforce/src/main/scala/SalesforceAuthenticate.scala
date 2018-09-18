@@ -4,11 +4,11 @@ import com.gu.salesforce.auth.SalesforceAuthenticate.SalesforceAuth
 import com.gu.util.Logging
 import com.gu.util.config.ConfigLocation
 import com.gu.util.reader.Types.{ApiGatewayOp, _}
-import com.gu.util.resthttp.{HttpOp, RestRequestMaker}
-import com.gu.util.resthttp.RestRequestMaker.{PatchRequest, createBodyFromJs}
+import com.gu.util.resthttp.RestRequestMaker.{GetRequest, PatchRequest, createBodyFromJs, toClientFailableOp}
 import com.gu.util.resthttp.Types.ClientSuccess
+import com.gu.util.resthttp.{HttpOp, RestRequestMaker}
 import okhttp3.{FormBody, Request, Response}
-import play.api.libs.json.{Json, Reads}
+import play.api.libs.json.{JsValue, Json, Reads}
 
 object SalesforceAuthenticate extends Logging {
 
@@ -36,7 +36,7 @@ object SalesforceAuthenticate extends Logging {
   }
 
   def doAuth(
-    response: (Request => Response),
+    response: Request => Response,
     config: SFAuthConfig
   ): ApiGatewayOp[SalesforceAuth] = {
     val request: Request = buildAuthRequest(config)
@@ -45,12 +45,28 @@ object SalesforceAuthenticate extends Logging {
   }
 
   def patch(
-    response: (Request => Response),
-    config: SFAuthConfig
-  ): ApiGatewayOp[HttpOp[PatchRequest]] = {
-    doAuth(response, config)
-      .map(sfAuth => HttpOp(response).setupRequest(SalesforceRestRequestMaker.patch(sfAuth)))
-  }
+    response: Request => Response,
+    sfAuth: SalesforceAuth
+  ): HttpOp[PatchRequest, Unit] =
+    HttpOp(response).setupRequest {
+      SalesforceRestRequestMaker.patch(sfAuth)
+    }.flatMap {
+      toClientFailableOp
+    }.flatMap { _ =>
+      ClientSuccess(())
+    }
+
+  def get(
+    response: Request => Response,
+    sfAuth: SalesforceAuth
+  ): HttpOp[GetRequest, JsValue] =
+    HttpOp(response).setupRequest {
+      SalesforceRestRequestMaker.get(sfAuth)
+    }.flatMap {
+      toClientFailableOp
+    }.map { response =>
+      Json.parse(response.body.string)
+    }
 
   def apply(
     response: (Request => Response),
@@ -79,6 +95,7 @@ object SalesforceAuthenticate extends Logging {
 
 object SalesforceRestRequestMaker extends Logging {
 
+  @deprecated("prefer to use the patch and get functions")
   def apply(salesforceAuth: SalesforceAuth, response: Request => Response): RestRequestMaker.Requests = {
     new RestRequestMaker.Requests(
       headers = Map("Authorization" -> s"Bearer ${salesforceAuth.access_token}"),
@@ -93,6 +110,12 @@ object SalesforceRestRequestMaker extends Logging {
     val headers = Map("Authorization" -> s"Bearer ${salesforceAuth.access_token}")
     val baseUrl = salesforceAuth.instance_url
     RestRequestMaker.buildRequest(headers, baseUrl + patchRequest.path.value, _.patch(createBodyFromJs(patchRequest.body)))
+  }
+
+  def get(salesforceAuth: SalesforceAuth)(getRequest: GetRequest): Request = {
+    val headers = Map("Authorization" -> s"Bearer ${salesforceAuth.access_token}")
+    val baseUrl = salesforceAuth.instance_url
+    RestRequestMaker.buildRequest(headers, baseUrl + getRequest.path.value, _.get())
   }
 
 }

@@ -2,14 +2,16 @@ package com.gu.sf_contact_merge.update
 
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.FirstName
-import com.gu.sf_contact_merge.update.MoveIdentityId.OldSFContact
-import com.gu.sf_contact_merge.update.UpdateAccountSFLinks.{CRMAccountId, LinksFromZuora}
+import com.gu.sf_contact_merge.getsfcontacts.GetSfAddress.SFAddress
+import com.gu.sf_contact_merge.getsfcontacts.GetSfAddress.SFAddressFields._
+import com.gu.sf_contact_merge.getsfcontacts.GetSfAddressOverride.{DontOverrideAddress, OverrideAddressWith}
+import com.gu.sf_contact_merge.update.UpdateSFContacts.OldSFContact
 import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId.{IdentityId, SFContactUpdate, SetFirstName}
 import com.gu.util.resthttp.Types
 import com.gu.util.resthttp.Types.ClientSuccess
 import org.scalatest.{FlatSpec, Matchers}
 
-class MoveIdentityIdTest extends FlatSpec with Matchers {
+class UpdateSFContactsTest extends FlatSpec with Matchers {
 
   final class MockSetOrClearIdentityId() {
 
@@ -17,10 +19,12 @@ class MoveIdentityIdTest extends FlatSpec with Matchers {
 
     def apply(sfContactId: SFContactId, sfUpdateRequest: SFContactUpdate): Types.ClientFailableOp[Unit] = {
       invocationLog = invocationLog ++ List(sfUpdateRequest match {
-        case SFContactUpdate(None, setname) =>
+        case SFContactUpdate(None, setname, DontOverrideAddress) =>
           s"clear ${sfContactId.value} setname: $setname"
-        case SFContactUpdate(Some(IdentityId("newIdentityId")), SetFirstName(FirstName(name))) =>
-          s"addidentity ${sfContactId.value} setname $name"
+        case SFContactUpdate(None, setname, OverrideAddressWith(a)) =>
+          s"clear ${sfContactId.value} setname: $setname, setaddress"
+        case SFContactUpdate(Some(IdentityId("newIdentityId")), SetFirstName(FirstName(name)), OverrideAddressWith(a)) =>
+          s"addidentity ${sfContactId.value} setname $name, setaddress"
         case other =>
           s"try to set identity id to: <$other>"
       })
@@ -34,10 +38,15 @@ class MoveIdentityIdTest extends FlatSpec with Matchers {
     val invocationLog = new MockSetOrClearIdentityId()
 
     val maybeIdentityId: Option[IdentityId] = None
-    val sfPointer = LinksFromZuora(SFContactId("contnew"), CRMAccountId("crmcrm"), maybeIdentityId)
     val maybeContactId = Some(OldSFContact(SFContactId("contold")))
 
-    val actual = MoveIdentityId(invocationLog.apply)(sfPointer, maybeContactId, Some(FirstName("hello")))
+    val actual = UpdateSFContacts(SetOrClearIdentityId(invocationLog.apply))(
+      SFContactId("contnew"),
+      maybeIdentityId,
+      maybeContactId,
+      Some(FirstName("hello")),
+      DontOverrideAddress
+    )
 
     val expectedOrder = List("clear contold setname: DontChangeFirstName", "clear contnew setname: SetFirstName(FirstName(hello))")
     invocationLog.invocationLog should be(expectedOrder)
@@ -50,13 +59,24 @@ class MoveIdentityIdTest extends FlatSpec with Matchers {
 
     val maybeIdentityId: Option[IdentityId] = Some(IdentityId("newIdentityId"))
 
-    val sfPointer = LinksFromZuora(SFContactId("contnew"), CRMAccountId("crmcrm"), maybeIdentityId)
-
     val maybeContactId = Some(OldSFContact(SFContactId("contold")))
 
-    val actual = MoveIdentityId(mockSetOrClearIdentityId.apply)(sfPointer, maybeContactId, Some(FirstName("hello")))
+    val actual = UpdateSFContacts(SetOrClearIdentityId(mockSetOrClearIdentityId.apply))(
+      SFContactId("contnew"),
+      maybeIdentityId,
+      maybeContactId,
+      Some(FirstName("hello")),
+      OverrideAddressWith(SFAddress(
+        SFStreet("street1"),
+        Some(SFCity("city1")),
+        Some(SFState("state2")),
+        Some(SFPostalCode("post1")),
+        SFCountry("country1"),
+        Some(SFPhone("phone1"))
+      ))
+    )
 
-    val expectedOrder = List("clear contold setname: DontChangeFirstName", "addidentity contnew setname hello")
+    val expectedOrder = List("clear contold setname: DontChangeFirstName", "addidentity contnew setname hello, setaddress")
     mockSetOrClearIdentityId.invocationLog should be(expectedOrder)
     actual should be(ClientSuccess(()))
   }
@@ -67,11 +87,15 @@ class MoveIdentityIdTest extends FlatSpec with Matchers {
 
     val maybeIdentityId: Option[IdentityId] = None
 
-    val sfPointer = LinksFromZuora(SFContactId("contnew"), CRMAccountId("crmcrm"), maybeIdentityId)
-
     val maybeContactId = None
 
-    val actual = MoveIdentityId(mockSetOrClearIdentityId.apply)(sfPointer, maybeContactId, Some(FirstName("hello")))
+    val actual = UpdateSFContacts(SetOrClearIdentityId(mockSetOrClearIdentityId.apply))(
+      SFContactId("contnew"),
+      maybeIdentityId,
+      maybeContactId,
+      Some(FirstName("hello")),
+      DontOverrideAddress
+    )
 
     val expectedOrder = List("clear contnew setname: SetFirstName(FirstName(hello))")
     mockSetOrClearIdentityId.invocationLog should be(expectedOrder)

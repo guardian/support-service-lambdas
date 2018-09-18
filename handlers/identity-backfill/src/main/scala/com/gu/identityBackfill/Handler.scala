@@ -54,9 +54,9 @@ object Handler {
       val getByEmail: EmailAddress => GetByEmail.ApiError \/ IdentityId = GetByEmail(response, identityConfig)
       val countZuoraAccounts: IdentityId => ClientFailableOp[Int] = CountZuoraAccountsForIdentityId(zuoraQuerier)
 
-      lazy val sfAuth = SalesforceAuthenticate.doAuth(response, sfConfig)
-      lazy val sfRequests = sfAuth.map(s => SalesforceRestRequestMaker(s, response))
-      lazy val sfPatch = sfAuth.map(s => HttpOp(response).setupRequest(SalesforceRestRequestMaker.patch(s)))
+      lazy val sfAuth: ApiGatewayOp[SalesforceAuthenticate.SalesforceAuth] = SalesforceAuthenticate.doAuth(response, sfConfig)
+      lazy val sfRequests = sfAuth.map(salesforceAuth => SalesforceRestRequestMaker(salesforceAuth, response))
+      lazy val sfPatch = sfAuth.map(salesforceAuth => SalesforceAuthenticate.patch(response, salesforceAuth))
 
       Operation(
         steps = IdentityBackfillSteps(
@@ -106,7 +106,7 @@ object Handler {
     } yield syncable
 
   def updateSalesforceIdentityId(
-    sfRequests: ApiGatewayOp[HttpOp[PatchRequest]]
+    sfRequests: ApiGatewayOp[HttpOp[PatchRequest, Unit]]
   )(
     sFContactId: SFContactId,
     identityId: IdentityId

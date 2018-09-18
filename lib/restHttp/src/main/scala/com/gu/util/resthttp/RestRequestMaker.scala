@@ -59,6 +59,8 @@ object RestRequestMaker extends Logging {
     def apply[REQ: Writes](body: REQ, path: RelativePath): PatchRequest = new PatchRequest(Json.toJson(body), path)
   }
 
+  case class GetRequest(path: RelativePath)
+
   case class JsonResponse(bodyAsJson: JsValue) {
     def value[RESP: Reads] = toResult[RESP](bodyAsJson)
   }
@@ -139,7 +141,11 @@ object RestRequestMaker extends Logging {
   def sendRequest(request: Request, getResponse: Request => Response): ClientFailableOp[String] = {
     logger.info(s"Attempting to do request")
     val response = getResponse(request)
-    httpIsSuccessful(response).map(_ => response.body.string)
+    toClientFailableOp(response).map(_.body.string)
+  }
+
+  def toClientFailableOp(response: Response): ClientFailableOp[Response] = {
+    httpIsSuccessful(response).map(_ => response)
   }
 
   def buildRequest(headers: Map[String, String], url: String, addMethod: Request.Builder => Request.Builder): Request = {
