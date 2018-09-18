@@ -16,7 +16,10 @@ object AssertSame {
     _.value.toLowerCase // some seem to be entered entirely lower case, but this isn't a significant difference, so ignore
   )
 
-  val emailAddress: AssertSame[Option[EmailAddress]] = AssertSame[Option[EmailAddress]]("emails")
+  val emailAddress: AssertSame[Option[EmailAddress]] = AssertSame[Option[EmailAddress]](
+    "emails",
+    _.map(_.value.toLowerCase) // although emails are technically case sensitive on the first part, it's usually just a typing in difference
+  )
 
 }
 
