@@ -16,13 +16,18 @@ object Types extends Logging {
 
     case class ContinueProcessing[A](a: A) extends ApiGatewayOp[A] {
       override def toDisjunction: ApiResponse \/ A = \/-(a)
+
+      override def isComplete: Boolean = false
     }
     case class ReturnWithResponse(resp: ApiResponse) extends ApiGatewayOp[Nothing] {
       override def toDisjunction: ApiResponse \/ Nothing = -\/(resp)
+
+      override def isComplete: Boolean = true
     }
 
   }
   sealed trait ApiGatewayOp[+A] {
+    def isComplete: Boolean
 
     def toDisjunction: scalaz.\/[ApiResponse, A]
 

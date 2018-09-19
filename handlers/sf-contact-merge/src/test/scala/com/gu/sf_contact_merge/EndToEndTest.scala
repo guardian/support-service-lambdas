@@ -140,12 +140,29 @@ object EndToEndTest {
       |    "OtherCountry": "country1",
       |    "OtherAddress": null,
       |    "Phone": null,
-      |    "IdentityID__c": "12121"
+      |    "IdentityID__c": "12121",
+      |    "Digital_Voucher_User__c": true
+      |}""".stripMargin.replaceAll("""\n""", "")
+
+  val oldSFContResponse =
+    """{
+      |    "LastName": "lastlast",
+      |    "FirstName": "firstfirst",
+      |    "OtherStreet": "street1",
+      |    "OtherCity": null,
+      |    "OtherState": null,
+      |    "OtherPostalCode": null,
+      |    "OtherCountry": "country1",
+      |    "OtherAddress": null,
+      |    "Phone": null,
+      |    "IdentityID__c": "12121",
+      |    "Digital_Voucher_User__c": false
       |}""".stripMargin.replaceAll("""\n""", "")
 
   val mock = new TestingRawEffects(
     responses = Map(
-      "/services/data/v43.0/sobjects/Contact/newSFCont" -> HTTPResponse(200, newSFContResponse)
+      "/services/data/v43.0/sobjects/Contact/newSFCont" -> HTTPResponse(200, newSFContResponse),
+      "/services/data/v43.0/sobjects/Contact/oldSFCont" -> HTTPResponse(200, oldSFContResponse)
     ),
     postResponses = Map(
       POSTRequest("/services/oauth2/token", sfAuthReq) -> HTTPResponse(200, sfAuthResponse),

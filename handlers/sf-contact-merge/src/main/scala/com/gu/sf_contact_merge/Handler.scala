@@ -13,7 +13,8 @@ import com.gu.sf_contact_merge.getaccounts.GetContacts.AccountId
 import com.gu.sf_contact_merge.getaccounts.GetIdentityAndZuoraEmailsForAccountsSteps
 import com.gu.sf_contact_merge.getaccounts.GetIdentityAndZuoraEmailsForAccountsSteps.IdentityAndSFContactAndEmail
 import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.{EmailAddress, FirstName, LastName}
-import com.gu.sf_contact_merge.getsfcontacts.{GetSfAddress, GetSfAddressOverride}
+import com.gu.sf_contact_merge.getsfcontacts.GetSfAddress.IsDigitalVoucherUser
+import com.gu.sf_contact_merge.getsfcontacts.{GetSfAddress, GetSfAddressOverride, GetSfContacts}
 import com.gu.sf_contact_merge.update.UpdateAccountSFLinks.{CRMAccountId, LinksFromZuora}
 import com.gu.sf_contact_merge.update.UpdateSFContacts.OldSFContact
 import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId.IdentityId
@@ -23,7 +24,9 @@ import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, ApiGatewayResponse, ResponseModels}
 import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config.{LoadConfigModule, Stage}
+import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.reader.Types._
+import com.gu.util.resthttp.LazyClientFailableOp
 import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.zuora.SafeQueryBuilder.MaybeNonEmptyList
 import com.gu.util.zuora.{ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
@@ -62,7 +65,8 @@ object Handler {
           EnsureNoAccountWithWrongIdentityId.apply,
           UpdateSFContacts(UpdateSalesforceIdentityId(sfPatch)),
           UpdateAccountSFLinks(requests.put),
-          GetSfAddressOverride.apply(GetSfAddress(sfGet))
+          GetSfAddressOverride.apply,
+          GetSfContacts(GetSfAddress(sfGet))
         )
       }
     }
@@ -79,7 +83,8 @@ object DomainSteps {
     validateIdentityIds: EnsureNoAccountWithWrongIdentityId,
     updateSFContacts: UpdateSFContacts,
     updateAccountSFLinks: LinksFromZuora => AccountId => ClientFailableOp[Unit],
-    getSfAddressOverride: GetSfAddressOverride
+    getSfAddressOverride: GetSfAddressOverride,
+    getSfContacts: GetSfContacts
   )(mergeRequest: MergeRequest): ResponseModels.ApiResponse =
     (for {
       accountAndEmails <- getIdentityAndZuoraEmailsForAccounts(mergeRequest.zuoraAccountIds)
@@ -89,8 +94,10 @@ object DomainSteps {
         .toApiGatewayOp(ApiGatewayResponse.notFound _)
       _ <- validateLastNames(accountAndEmails.map(_.lastName))
       firstNameToUse <- GetFirstNameToUse(mergeRequest.sfContactId, accountAndEmails)
-      maybeSFAddressOverride <- getSfAddressOverride(mergeRequest.sfContactId, accountAndEmails.map(_.sfContactId))
+      winningContact = getSfContacts.apply(mergeRequest.sfContactId, accountAndEmails.map(_.sfContactId))
+      maybeSFAddressOverride <- getSfAddressOverride(winningContact.winner.map(_.SFMaybeAddress), winningContact.others.map(_.map(_.SFMaybeAddress)))
         .toApiGatewayOp("get salesforce addresses")
+      _ <- ValidateNoLosingDigitalVoucher(winningContact.others.map(_.map(_.isDigitalVoucherUser)))
       oldContact = accountAndEmails.find(_.identityId.isDefined).map(_.sfContactId).map(OldSFContact.apply)
       linksFromZuora = LinksFromZuora(mergeRequest.sfContactId, mergeRequest.crmAccountId, maybeIdentityId)
       _ <- mergeRequest.zuoraAccountIds.traverseU(updateAccountSFLinks(linksFromZuora))
@@ -98,6 +105,18 @@ object DomainSteps {
       _ <- updateSFContacts(mergeRequest.sfContactId, maybeIdentityId, oldContact, firstNameToUse, maybeSFAddressOverride)
         .toApiGatewayOp("update sf contact(s) to force a sync")
     } yield ApiGatewayResponse.successfulExecution).apiResponse
+}
+
+object ValidateNoLosingDigitalVoucher {
+
+  def apply(losingContacts: List[LazyClientFailableOp[GetSfAddress.IsDigitalVoucherUser]]): ApiGatewayOp[Unit] =
+    losingContacts.toStream.map {
+      _.value.toApiGatewayOp("get SF address").flatMap {
+        case IsDigitalVoucherUser(true) => ReturnWithResponse(ApiGatewayResponse.notFound("failed validation due to a "))
+        case IsDigitalVoucherUser(false) => ContinueProcessing(())
+      }
+    }.find(_.isComplete).getOrElse(ContinueProcessing(()))
+
 }
 
 object GetFirstNameToUse {

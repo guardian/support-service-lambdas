@@ -23,7 +23,7 @@ class GetSfAddressEffectsTest extends FlatSpec with Matchers {
       sfAuth <- SalesforceAuthenticate.doAuth(response, sfConfig).toDisjunction
       get = SalesforceAuthenticate.get(response, sfAuth)
       getSfAddress = GetSfAddress(get)
-      address <- getSfAddress.apply(testContact).toDisjunction
+      address <- getSfAddress.apply(testContact).value.toDisjunction
     } yield address
 
     val expected = SFAddress(
