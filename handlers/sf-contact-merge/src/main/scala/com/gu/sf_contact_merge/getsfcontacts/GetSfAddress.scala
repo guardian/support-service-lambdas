@@ -2,11 +2,10 @@ package com.gu.sf_contact_merge.getsfcontacts
 
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.sf_contact_merge.getsfcontacts.GetSfAddress.SFAddressFields._
-import com.gu.sf_contact_merge.getsfcontacts.GetSfAddress.SFMaybeAddress
-import com.gu.util.resthttp.HttpOp
+import com.gu.sf_contact_merge.getsfcontacts.GetSfAddress.SFContact
 import com.gu.util.resthttp.RestOp.HttpOpParseOp
 import com.gu.util.resthttp.RestRequestMaker.{GetRequest, RelativePath}
-import com.gu.util.resthttp.Types.ClientFailableOp
+import com.gu.util.resthttp.{HttpOp, LazyClientFailableOp}
 import play.api.libs.json.{JsValue, Json}
 
 object GetSfAddress {
@@ -37,14 +36,21 @@ object GetSfAddress {
     OtherState: Option[String],
     OtherPostalCode: Option[String],
     OtherCountry: Option[String],
-    Phone: Option[String]
+    Phone: Option[String],
+    Digital_Voucher_User__c: Boolean
   )
   implicit val wireResultReads = Json.reads[WireResult]
 
   def apply(getOp: HttpOp[GetRequest, JsValue]): GetSfAddress =
-    new GetSfAddress(getOp.setupRequest(toRequest).parse[WireResult].map(toResponse).runRequest)
+    new GetSfAddress(getOp.setupRequest(toRequest).parse[WireResult].map(toResponse).runRequestLazy)
 
-  def toResponse(wireResult: WireResult): SFMaybeAddress = {
+  def toResponse(wireResult: WireResult): SFContact =
+    SFContact(
+      toMaybeAddress(wireResult),
+      IsDigitalVoucherUser(wireResult.Digital_Voucher_User__c)
+    )
+
+  def toMaybeAddress(wireResult: WireResult): SFMaybeAddress = {
     import wireResult._
     val maybeAddress = for {
       street <- OtherStreet.filter(_.length > 1) // could just be a comma or dot
@@ -63,6 +69,13 @@ object GetSfAddress {
     }
   }
 
+  case class SFContact(
+    SFMaybeAddress: SFMaybeAddress,
+    isDigitalVoucherUser: IsDigitalVoucherUser
+  )
+
+  case class IsDigitalVoucherUser(value: Boolean) extends AnyVal
+
   sealed abstract class SFMaybeAddress
   case class UsableContactAddress(sfAddress: SFAddress) extends SFMaybeAddress
   case object UnusableContactAddress extends SFMaybeAddress
@@ -70,4 +83,4 @@ object GetSfAddress {
   def toRequest(sfContactId: SFContactId) = GetRequest(RelativePath(s"/services/data/v43.0/sobjects/Contact/${sfContactId.value}"))
 }
 
-case class GetSfAddress(apply: SFContactId => ClientFailableOp[SFMaybeAddress])
+case class GetSfAddress(apply: SFContactId => LazyClientFailableOp[SFContact])

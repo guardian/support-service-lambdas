@@ -12,11 +12,11 @@ import com.gu.sf_contact_merge.WireRequestToDomainObject.MergeRequest
 import com.gu.sf_contact_merge.getaccounts.GetContacts.AccountId
 import com.gu.sf_contact_merge.getaccounts.GetIdentityAndZuoraEmailsForAccountsSteps
 import com.gu.sf_contact_merge.getaccounts.GetIdentityAndZuoraEmailsForAccountsSteps.IdentityAndSFContactAndEmail
-import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.{EmailAddress, FirstName, LastName}
-import com.gu.sf_contact_merge.getsfcontacts.{GetSfAddress, GetSfAddressOverride}
+import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.{EmailAddress, LastName}
+import com.gu.sf_contact_merge.getsfcontacts.DedupSfContacts.SFContactsForMerge
+import com.gu.sf_contact_merge.getsfcontacts.{GetSfAddress, GetSfAddressOverride, DedupSfContacts}
 import com.gu.sf_contact_merge.update.UpdateAccountSFLinks.{CRMAccountId, LinksFromZuora}
 import com.gu.sf_contact_merge.update.UpdateSFContacts.OldSFContact
-import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId.IdentityId
 import com.gu.sf_contact_merge.update.{UpdateAccountSFLinks, UpdateSFContacts, UpdateSalesforceIdentityId}
 import com.gu.sf_contact_merge.validate._
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
@@ -62,7 +62,9 @@ object Handler {
           EnsureNoAccountWithWrongIdentityId.apply,
           UpdateSFContacts(UpdateSalesforceIdentityId(sfPatch)),
           UpdateAccountSFLinks(requests.put),
-          GetSfAddressOverride.apply(GetSfAddress(sfGet))
+          GetSfAddressOverride.apply,
+          DedupSfContacts.apply,
+          GetSfAddress(sfGet)
         )
       }
     }
@@ -79,7 +81,9 @@ object DomainSteps {
     validateIdentityIds: EnsureNoAccountWithWrongIdentityId,
     updateSFContacts: UpdateSFContacts,
     updateAccountSFLinks: LinksFromZuora => AccountId => ClientFailableOp[Unit],
-    getSfAddressOverride: GetSfAddressOverride
+    getSfAddressOverride: GetSfAddressOverride,
+    dedupSfContacts: DedupSfContacts,
+    getSfAddress: GetSfAddress
   )(mergeRequest: MergeRequest): ResponseModels.ApiResponse =
     (for {
       accountAndEmails <- getIdentityAndZuoraEmailsForAccounts(mergeRequest.zuoraAccountIds)
@@ -89,8 +93,11 @@ object DomainSteps {
         .toApiGatewayOp(ApiGatewayResponse.notFound _)
       _ <- validateLastNames(accountAndEmails.map(_.lastName))
       firstNameToUse <- GetFirstNameToUse(mergeRequest.sfContactId, accountAndEmails)
-      maybeSFAddressOverride <- getSfAddressOverride(mergeRequest.sfContactId, accountAndEmails.map(_.sfContactId))
+      rawSFContactIds = SFContactsForMerge(mergeRequest.sfContactId, accountAndEmails.map(_.sfContactId))
+      winningAndOtherContact = dedupSfContacts.apply(rawSFContactIds).map(getSfAddress.apply)
+      maybeSFAddressOverride <- getSfAddressOverride(winningAndOtherContact.map(_.map(_.SFMaybeAddress)))
         .toApiGatewayOp("get salesforce addresses")
+      _ <- ValidateNoLosingDigitalVoucher(winningAndOtherContact.others.map(_.map(_.isDigitalVoucherUser)))
       oldContact = accountAndEmails.find(_.identityId.isDefined).map(_.sfContactId).map(OldSFContact.apply)
       linksFromZuora = LinksFromZuora(mergeRequest.sfContactId, mergeRequest.crmAccountId, maybeIdentityId)
       _ <- mergeRequest.zuoraAccountIds.traverseU(updateAccountSFLinks(linksFromZuora))
@@ -98,31 +105,6 @@ object DomainSteps {
       _ <- updateSFContacts(mergeRequest.sfContactId, maybeIdentityId, oldContact, firstNameToUse, maybeSFAddressOverride)
         .toApiGatewayOp("update sf contact(s) to force a sync")
     } yield ApiGatewayResponse.successfulExecution).apiResponse
-}
-
-object GetFirstNameToUse {
-
-  case class NameForIdentityId(identityId: Option[IdentityId], firstName: Option[FirstName])
-  def firstNameForIdentityAccount(namesForIdentityIds: List[NameForIdentityId]): Option[FirstName] = {
-    namesForIdentityIds.find(_.identityId.isDefined).flatMap(_.firstName)
-  }
-
-  case class NameForContactId(sfContactId: SFContactId, firstName: Option[FirstName])
-  def firstNameForSFContact(newSFContactId: SFContactId, namesForContactIds: List[NameForContactId]): ApiGatewayOp[Option[FirstName]] = {
-    namesForContactIds.find(_.sfContactId == newSFContactId)
-      .toApiGatewayContinueProcessing(ApiGatewayResponse.notFound("winning contact id wasn't in any zuora account"))
-      .map(_.firstName)
-  }
-
-  def apply(sfContactId: SFContactId, accountAndEmails: List[IdentityAndSFContactAndEmail]): ApiGatewayOp[Option[FirstName]] = {
-    val nameForIdentityIds = accountAndEmails.map { info => NameForIdentityId(info.identityId, info.firstName) }
-    val maybeIdentityFirstName = firstNameForIdentityAccount(nameForIdentityIds)
-    val nameForContactIds = accountAndEmails.map { info => NameForContactId(info.sfContactId, info.firstName) }
-    firstNameForSFContact(sfContactId, nameForContactIds).map { maybeOldFirstName =>
-      maybeOldFirstName orElse maybeIdentityFirstName
-    }
-  }
-
 }
 
 object WireRequestToDomainObject {

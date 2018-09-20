@@ -4,7 +4,7 @@ import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.salesforce.auth.SalesforceAuthenticate
 import com.gu.salesforce.auth.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.dev.SFEffectsData
-import com.gu.sf_contact_merge.getsfcontacts.GetSfAddress.{SFAddress, UsableContactAddress}
+import com.gu.sf_contact_merge.getsfcontacts.GetSfAddress.{IsDigitalVoucherUser, SFAddress, SFContact, UsableContactAddress}
 import com.gu.sf_contact_merge.getsfcontacts.GetSfAddress.SFAddressFields._
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
@@ -23,19 +23,22 @@ class GetSfAddressEffectsTest extends FlatSpec with Matchers {
       sfAuth <- SalesforceAuthenticate.doAuth(response, sfConfig).toDisjunction
       get = SalesforceAuthenticate.get(response, sfAuth)
       getSfAddress = GetSfAddress(get)
-      address <- getSfAddress.apply(testContact).toDisjunction
+      address <- getSfAddress.apply(testContact).value.toDisjunction
     } yield address
 
-    val expected = SFAddress(
-      SFStreet("123 dayone street"),
-      Some(SFCity("city1")),
-      Some(SFState("state1")),
-      Some(SFPostalCode("postal1")),
-      SFCountry("Afghanistan"),
-      Some(SFPhone("012345"))
+    val expected = SFContact(
+      UsableContactAddress(SFAddress(
+        SFStreet("123 dayone street"),
+        Some(SFCity("city1")),
+        Some(SFState("state1")),
+        Some(SFPostalCode("postal1")),
+        SFCountry("Afghanistan"),
+        Some(SFPhone("012345"))
+      )),
+      IsDigitalVoucherUser(false)
     )
 
-    actual should be(\/-(UsableContactAddress(expected)))
+    actual should be(\/-(expected))
 
   }
 

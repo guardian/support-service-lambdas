@@ -19,6 +19,9 @@ case class HttpOp[PARAM, RESPONSE](
   def runRequest(in: PARAM): ClientFailableOp[RESPONSE] =
     responseToOutput(effect(inputToRequest(in)))
 
+  def runRequestLazy(in: PARAM): LazyClientFailableOp[RESPONSE] =
+    LazyClientFailableOp(() => responseToOutput(effect(inputToRequest(in))))
+
   // this is effectively "contramap" so it is actually setting it up to run the given function before any previously setup functions
   // you can learn more about contravariant functors https://www.google.co.uk/search?q=contravariant+functor
   def setupRequest[UPDATEDPARAM](fromNewParam: UPDATEDPARAM => PARAM): HttpOp[UPDATEDPARAM, RESPONSE] =
@@ -41,6 +44,18 @@ object HttpOp {
     def setupRequestMultiArg[A1, A2](function2Arg: (A1, A2) => IN): HttpOp[(A1, A2), RESPONSE] =
       httpOp.setupRequest(function2Arg.tupled)
   }
+
+}
+
+// this is used for non effectful/expensive operations to call them at the last minute, if at all.
+case class LazyClientFailableOp[+VALUE](underlying: () => ClientFailableOp[VALUE]) {
+  lazy val value = underlying()
+
+  def flatMap[OUT](function: VALUE => LazyClientFailableOp[OUT]): LazyClientFailableOp[OUT] =
+    LazyClientFailableOp(() => value.flatMap(function(_).value))
+
+  def map[OUT](function: VALUE => OUT): LazyClientFailableOp[OUT] =
+    LazyClientFailableOp(() => value.map(function))
 
 }
 
