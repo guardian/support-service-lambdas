@@ -20,7 +20,7 @@ case class HttpOp[PARAM, RESPONSE](
     responseToOutput(effect(inputToRequest(in)))
 
   def runRequestLazy(in: PARAM): LazyClientFailableOp[RESPONSE] =
-    LazyClientFailableOp(responseToOutput(effect(inputToRequest(in))))
+    LazyClientFailableOp(() => responseToOutput(effect(inputToRequest(in))))
 
   // this is effectively "contramap" so it is actually setting it up to run the given function before any previously setup functions
   // you can learn more about contravariant functors https://www.google.co.uk/search?q=contravariant+functor
@@ -48,18 +48,15 @@ object HttpOp {
 }
 
 // this is used for non effectful/expensive operations to call them at the last minute, if at all.
-class LazyClientFailableOp[+VALUE](underlying: () => ClientFailableOp[VALUE]) {
+case class LazyClientFailableOp[+VALUE](underlying: () => ClientFailableOp[VALUE]) {
   lazy val value = underlying()
 
   def flatMap[OUT](function: VALUE => LazyClientFailableOp[OUT]): LazyClientFailableOp[OUT] =
-    LazyClientFailableOp(underlying().flatMap(function(_).value))
+    LazyClientFailableOp(() => value.flatMap(function(_).value))
 
   def map[OUT](function: VALUE => OUT): LazyClientFailableOp[OUT] =
-    LazyClientFailableOp(underlying().map(function))
+    LazyClientFailableOp(() => value.map(function))
 
-}
-object LazyClientFailableOp {
-  def apply[VALUE](lazyVal: => ClientFailableOp[VALUE]): LazyClientFailableOp[VALUE] = new LazyClientFailableOp(() => lazyVal)
 }
 
 object RestOp {

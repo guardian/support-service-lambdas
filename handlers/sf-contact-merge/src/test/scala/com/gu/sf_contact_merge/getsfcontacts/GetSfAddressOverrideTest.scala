@@ -31,7 +31,7 @@ class GetSfAddressOverrideTest extends FlatSpec with Matchers {
         case other =>
           (s"other: <$other>", GenericError("whoops"))
       }
-      LazyClientFailableOp {
+      LazyClientFailableOp { () =>
         invocationLog = invocationLog ++ List(log)
         result
       }

@@ -23,7 +23,7 @@ class GetSfContactsTest extends FlatSpec with Matchers {
     var invocationLog = List[String]() // we want to check ordering of side effects...
 
     def apply(sfContactId: SFContactId): LazyClientFailableOp[SFContact] =
-      LazyClientFailableOp {
+      LazyClientFailableOp { () =>
         invocationLog = invocationLog ++ List(s"get ${sfContactId.value}")
         testAddress(sfContactId.value)
       }
