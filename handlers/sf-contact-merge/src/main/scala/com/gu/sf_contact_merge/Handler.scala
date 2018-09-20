@@ -13,7 +13,6 @@ import com.gu.sf_contact_merge.getaccounts.GetContacts.AccountId
 import com.gu.sf_contact_merge.getaccounts.GetIdentityAndZuoraEmailsForAccountsSteps
 import com.gu.sf_contact_merge.getaccounts.GetIdentityAndZuoraEmailsForAccountsSteps.IdentityAndSFContactAndEmail
 import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.{EmailAddress, LastName}
-import com.gu.sf_contact_merge.getsfcontacts.GetSfAddress.IsDigitalVoucherUser
 import com.gu.sf_contact_merge.getsfcontacts.{GetSfAddress, GetSfAddressOverride, GetSfContacts}
 import com.gu.sf_contact_merge.update.UpdateAccountSFLinks.{CRMAccountId, LinksFromZuora}
 import com.gu.sf_contact_merge.update.UpdateSFContacts.OldSFContact
@@ -23,9 +22,7 @@ import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, ApiGatewayResponse, ResponseModels}
 import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config.{LoadConfigModule, Stage}
-import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.reader.Types._
-import com.gu.util.resthttp.LazyClientFailableOp
 import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.zuora.SafeQueryBuilder.MaybeNonEmptyList
 import com.gu.util.zuora.{ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
@@ -93,10 +90,10 @@ object DomainSteps {
         .toApiGatewayOp(ApiGatewayResponse.notFound _)
       _ <- validateLastNames(accountAndEmails.map(_.lastName))
       firstNameToUse <- GetFirstNameToUse(mergeRequest.sfContactId, accountAndEmails)
-      winningContact = getSfContacts.apply(mergeRequest.sfContactId, accountAndEmails.map(_.sfContactId))
-      maybeSFAddressOverride <- getSfAddressOverride(winningContact.winner.map(_.SFMaybeAddress), winningContact.others.map(_.map(_.SFMaybeAddress)))
+      winningAndOtherContact = getSfContacts.apply(mergeRequest.sfContactId, accountAndEmails.map(_.sfContactId))
+      maybeSFAddressOverride <- getSfAddressOverride(winningAndOtherContact.winner.map(_.SFMaybeAddress), winningAndOtherContact.others.map(_.map(_.SFMaybeAddress)))
         .toApiGatewayOp("get salesforce addresses")
-      _ <- ValidateNoLosingDigitalVoucher(winningContact.others.map(_.map(_.isDigitalVoucherUser)))
+      _ <- ValidateNoLosingDigitalVoucher(winningAndOtherContact.others.map(_.map(_.isDigitalVoucherUser)))
       oldContact = accountAndEmails.find(_.identityId.isDefined).map(_.sfContactId).map(OldSFContact.apply)
       linksFromZuora = LinksFromZuora(mergeRequest.sfContactId, mergeRequest.crmAccountId, maybeIdentityId)
       _ <- mergeRequest.zuoraAccountIds.traverseU(updateAccountSFLinks(linksFromZuora))

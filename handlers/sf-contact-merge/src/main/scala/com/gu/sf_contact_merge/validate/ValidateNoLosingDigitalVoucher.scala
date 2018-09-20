@@ -13,7 +13,9 @@ object ValidateNoLosingDigitalVoucher {
   def apply(losingContacts: List[LazyClientFailableOp[GetSfAddress.IsDigitalVoucherUser]]): ApiGatewayOp[Unit] =
     losingContacts.toStream.map {
       _.value.toApiGatewayOp("get SF address").flatMap {
-        case IsDigitalVoucherUser(true) => ReturnWithResponse(ApiGatewayResponse.notFound("failed validation due to a "))
+        case IsDigitalVoucherUser(true) => ReturnWithResponse(ApiGatewayResponse.notFound(
+          "one of the losing contacts is in the digital vouchers and would be broken"
+        ))
         case IsDigitalVoucherUser(false) => ContinueProcessing(())
       }
     }.find(_.isComplete).getOrElse(ContinueProcessing(()))
