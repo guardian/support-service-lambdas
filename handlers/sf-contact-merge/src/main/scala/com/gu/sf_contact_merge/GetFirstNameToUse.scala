@@ -10,9 +10,10 @@ import com.gu.util.reader.Types.{ApiGatewayOp, _}
 object GetFirstNameToUse {
 
   case class NameForIdentityId(identityId: Option[IdentityId], firstName: Option[FirstName])
+
   def firstNameForIdentityAccount(namesForIdentityIds: List[NameForIdentityId]): Option[FirstName] =
     namesForIdentityIds.collectFirst {
-      case NameForIdentityId(Some(_), Some(firstName)) => firstName
+      case NameForIdentityId(Some(_: IdentityId), Some(firstName: FirstName)) => firstName
     }
 
   case class NameForContactId(sfContactId: SFContactId, firstName: Option[FirstName])
