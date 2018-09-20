@@ -1,5 +1,6 @@
 package com.gu.sf_contact_merge.getsfcontacts
 
+import com.gu.sf_contact_merge.getsfcontacts.DedupSfContacts.SFContactsForMerge
 import com.gu.sf_contact_merge.getsfcontacts.GetSfAddress.SFAddressFields._
 import com.gu.sf_contact_merge.getsfcontacts.GetSfAddress.{SFAddress, UnusableContactAddress, UsableContactAddress}
 import com.gu.sf_contact_merge.getsfcontacts.GetSfAddressOverride.{DontOverrideAddress, OverrideAddressWith}
@@ -22,10 +23,10 @@ class GetSfAddressOverrideTest extends FlatSpec with Matchers {
 
     val getSfAddressOverride = GetSfAddressOverride.apply
 
-    val actual = getSfAddressOverride.apply(
+    val actual = getSfAddressOverride.apply(SFContactsForMerge(
       LazyClientFailableOp(() => ClientSuccess(UsableContactAddress(testAddress("a1")))),
       List()
-    )
+    ))
 
     actual should be(ClientSuccess(DontOverrideAddress))
   }
@@ -34,35 +35,35 @@ class GetSfAddressOverrideTest extends FlatSpec with Matchers {
 
     val getSfAddressOverride = GetSfAddressOverride.apply
 
-    val actual = getSfAddressOverride.apply(
+    val actual = getSfAddressOverride.apply(SFContactsForMerge(
       LazyClientFailableOp(() => ClientSuccess(UnusableContactAddress)),
       List()
-    )
+    ))
 
     actual should be(ClientSuccess(DontOverrideAddress))
   }
 
   "GetSfAddressOverride" should "give an override if the main contact doesn't have but the other does" in {
 
-    val actual = GetSfAddressOverride.apply(
+    val actual = GetSfAddressOverride.apply(SFContactsForMerge(
       LazyClientFailableOp(() => ClientSuccess(UnusableContactAddress)),
       List(
         LazyClientFailableOp(() => ClientSuccess(UsableContactAddress(testAddress("a1"))))
       )
-    )
+    ))
 
     actual should be(ClientSuccess(OverrideAddressWith(testAddress("a1"))))
   }
 
   "GetSfAddressOverride" should "not carry on checking contacts once one with an address is found" in {
 
-    val actual = GetSfAddressOverride.apply(
+    val actual = GetSfAddressOverride.apply(SFContactsForMerge(
       LazyClientFailableOp(() => ClientSuccess(UnusableContactAddress)),
       List(
         LazyClientFailableOp(() => ClientSuccess(UsableContactAddress(testAddress("a1")))),
         LazyClientFailableOp(() => fail("whoops"))
       )
-    )
+    ))
 
     actual should be(ClientSuccess(OverrideAddressWith(testAddress("a1"))))
   }

@@ -13,7 +13,8 @@ import com.gu.sf_contact_merge.getaccounts.GetContacts.AccountId
 import com.gu.sf_contact_merge.getaccounts.GetIdentityAndZuoraEmailsForAccountsSteps
 import com.gu.sf_contact_merge.getaccounts.GetIdentityAndZuoraEmailsForAccountsSteps.IdentityAndSFContactAndEmail
 import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.{EmailAddress, LastName}
-import com.gu.sf_contact_merge.getsfcontacts.{GetSfAddress, GetSfAddressOverride, GetSfContacts}
+import com.gu.sf_contact_merge.getsfcontacts.DedupSfContacts.SFContactsForMerge
+import com.gu.sf_contact_merge.getsfcontacts.{GetSfAddress, GetSfAddressOverride, DedupSfContacts}
 import com.gu.sf_contact_merge.update.UpdateAccountSFLinks.{CRMAccountId, LinksFromZuora}
 import com.gu.sf_contact_merge.update.UpdateSFContacts.OldSFContact
 import com.gu.sf_contact_merge.update.{UpdateAccountSFLinks, UpdateSFContacts, UpdateSalesforceIdentityId}
@@ -62,7 +63,8 @@ object Handler {
           UpdateSFContacts(UpdateSalesforceIdentityId(sfPatch)),
           UpdateAccountSFLinks(requests.put),
           GetSfAddressOverride.apply,
-          GetSfContacts(GetSfAddress(sfGet))
+          DedupSfContacts.apply,
+          GetSfAddress(sfGet)
         )
       }
     }
@@ -80,7 +82,8 @@ object DomainSteps {
     updateSFContacts: UpdateSFContacts,
     updateAccountSFLinks: LinksFromZuora => AccountId => ClientFailableOp[Unit],
     getSfAddressOverride: GetSfAddressOverride,
-    getSfContacts: GetSfContacts
+    dedupSfContacts: DedupSfContacts,
+    getSfAddress: GetSfAddress
   )(mergeRequest: MergeRequest): ResponseModels.ApiResponse =
     (for {
       accountAndEmails <- getIdentityAndZuoraEmailsForAccounts(mergeRequest.zuoraAccountIds)
@@ -90,8 +93,9 @@ object DomainSteps {
         .toApiGatewayOp(ApiGatewayResponse.notFound _)
       _ <- validateLastNames(accountAndEmails.map(_.lastName))
       firstNameToUse <- GetFirstNameToUse(mergeRequest.sfContactId, accountAndEmails)
-      winningAndOtherContact = getSfContacts.apply(mergeRequest.sfContactId, accountAndEmails.map(_.sfContactId))
-      maybeSFAddressOverride <- getSfAddressOverride(winningAndOtherContact.winner.map(_.SFMaybeAddress), winningAndOtherContact.others.map(_.map(_.SFMaybeAddress)))
+      rawSFContactIds = SFContactsForMerge(mergeRequest.sfContactId, accountAndEmails.map(_.sfContactId))
+      winningAndOtherContact = dedupSfContacts.apply(rawSFContactIds).map(getSfAddress.apply)
+      maybeSFAddressOverride <- getSfAddressOverride(winningAndOtherContact.map(_.map(_.SFMaybeAddress)))
         .toApiGatewayOp("get salesforce addresses")
       _ <- ValidateNoLosingDigitalVoucher(winningAndOtherContact.others.map(_.map(_.isDigitalVoucherUser)))
       oldContact = accountAndEmails.find(_.identityId.isDefined).map(_.sfContactId).map(OldSFContact.apply)
