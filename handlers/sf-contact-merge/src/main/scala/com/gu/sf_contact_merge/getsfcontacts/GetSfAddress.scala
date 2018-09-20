@@ -81,6 +81,7 @@ object GetSfAddress {
   case object UnusableContactAddress extends SFMaybeAddress
 
   def toRequest(sfContactId: SFContactId) = GetRequest(RelativePath(s"/services/data/v43.0/sobjects/Contact/${sfContactId.value}"))
+
 }
 
 case class GetSfAddress(apply: SFContactId => LazyClientFailableOp[SFContact])

@@ -12,8 +12,8 @@ import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
 import com.gu.identityBackfill.salesforce._
 import com.gu.identityBackfill.zuora.{AddIdentityIdToAccount, CountZuoraAccountsForIdentityId, GetZuoraAccountsForEmail, GetZuoraSubTypeForAccount}
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
+import com.gu.salesforce.auth.SalesforceAuthenticate
 import com.gu.salesforce.auth.SalesforceAuthenticate.SFAuthConfig
-import com.gu.salesforce.auth.{SalesforceAuthenticate, SalesforceRestRequestMaker}
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayResponse}
@@ -21,10 +21,11 @@ import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.HttpOp
-import com.gu.util.resthttp.RestRequestMaker.{PatchRequest, Requests}
+import com.gu.util.resthttp.RestRequestMaker.{GetRequest, PatchRequest}
 import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.zuora.{ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
 import okhttp3.{Request, Response}
+import play.api.libs.json.JsValue
 import scalaz.\/
 
 object Handler {
@@ -55,8 +56,8 @@ object Handler {
       val countZuoraAccounts: IdentityId => ClientFailableOp[Int] = CountZuoraAccountsForIdentityId(zuoraQuerier)
 
       lazy val sfAuth: ApiGatewayOp[SalesforceAuthenticate.SalesforceAuth] = SalesforceAuthenticate.doAuth(response, sfConfig)
-      lazy val sfRequests = sfAuth.map(salesforceAuth => SalesforceRestRequestMaker(salesforceAuth, response))
       lazy val sfPatch = sfAuth.map(salesforceAuth => SalesforceAuthenticate.patch(response, salesforceAuth))
+      lazy val sfGet = sfAuth.map(salesforceAuth => SalesforceAuthenticate.get(response, salesforceAuth))
 
       Operation(
         steps = IdentityBackfillSteps(
@@ -65,7 +66,7 @@ object Handler {
             GetZuoraAccountsForEmail(zuoraQuerier) _ andThen PreReqCheck.getSingleZuoraAccountForEmail,
             countZuoraAccounts andThen PreReqCheck.noZuoraAccountsForIdentityId,
             GetZuoraSubTypeForAccount(zuoraQuerier) _ andThen PreReqCheck.acceptableReaderType,
-            syncableSFToIdentity(sfRequests, stage)
+            syncableSFToIdentity(sfGet, stage)
           ),
           AddIdentityIdToAccount(zuoraRequests),
           updateSalesforceIdentityId(sfPatch)
@@ -98,11 +99,12 @@ object Handler {
     mappings.get(stage).toApiGatewayContinueProcessing(ApiGatewayResponse.internalServerError(s"missing standard record type for stage $stage"))
   }
 
-  def syncableSFToIdentity(sfRequests: ApiGatewayOp[Requests], stage: Stage)(sFContactId: SFContactId): ApiGatewayOp[Unit] =
+  def syncableSFToIdentity(sfRequests: ApiGatewayOp[HttpOp[GetRequest, JsValue]], stage: Stage)(sFContactId: SFContactId): ApiGatewayOp[Unit] =
     for {
       sfRequests <- sfRequests
       standardRecordType <- standardRecordTypeForStage(stage)
-      syncable <- SyncableSFToIdentity(standardRecordType)(sfRequests)(sFContactId)
+      fields <- GetSFContactSyncCheckFields(sfRequests).apply(sFContactId).value.toApiGatewayOp("zuora issue")
+      syncable <- SyncableSFToIdentity(standardRecordType)(fields)(sFContactId)
     } yield syncable
 
   def updateSalesforceIdentityId(

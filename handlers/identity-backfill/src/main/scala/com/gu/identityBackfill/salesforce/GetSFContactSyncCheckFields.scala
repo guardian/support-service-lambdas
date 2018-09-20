@@ -1,14 +1,15 @@
 package com.gu.identityBackfill.salesforce
 
 import com.gu.i18n.CountryGroup
-import com.gu.identityBackfill.TypeConvert._
 import com.gu.identityBackfill.salesforce.ContactSyncCheck.RecordTypeId
+import com.gu.identityBackfill.salesforce.GetSFContactSyncCheckFields.ContactSyncCheckFields
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types.ApiGatewayOp._
-import com.gu.util.resthttp.RestRequestMaker
-import com.gu.util.resthttp.Types.ClientFailableOp
-import play.api.libs.json.Json
+import com.gu.util.resthttp.RestOp.HttpOpParseOp
+import com.gu.util.resthttp.RestRequestMaker.{GetRequest, RelativePath}
+import com.gu.util.resthttp.{HttpOp, LazyClientFailableOp}
+import play.api.libs.json.{JsValue, Json}
 
 object GetSFContactSyncCheckFields {
 
@@ -20,10 +21,14 @@ object GetSFContactSyncCheckFields {
   )
   implicit val reads = Json.reads[ContactSyncCheckFields]
 
-  def apply(sfRequests: RestRequestMaker.Requests)(sFContactId: SFContactId): ClientFailableOp[ContactSyncCheckFields] =
-    sfRequests.get[ContactSyncCheckFields](s"/services/data/v20.0/sobjects/Contact/${sFContactId.value}")
+  def apply(getOp: HttpOp[GetRequest, JsValue]): GetSFContactSyncCheckFields =
+    new GetSFContactSyncCheckFields(getOp.setupRequest(toRequest).parse[ContactSyncCheckFields].runRequestLazy)
+
+  def toRequest(sfContactId: SFContactId) = GetRequest(RelativePath(s"/services/data/v20.0/sobjects/Contact/${sfContactId.value}"))
 
 }
+
+case class GetSFContactSyncCheckFields(apply: SFContactId => LazyClientFailableOp[ContactSyncCheckFields])
 
 object ContactSyncCheck {
 
@@ -49,12 +54,11 @@ object SyncableSFToIdentity {
   def apply(
     standardRecordType: RecordTypeId
   )(
-    sfRequests: RestRequestMaker.Requests
+    fields: ContactSyncCheckFields
   )(
     sFContactId: SFContactId
   ) =
     for {
-      fields <- GetSFContactSyncCheckFields(sfRequests)(sFContactId).toApiGatewayOp("zuora issue")
       _ <- if (ContactSyncCheck(standardRecordType)(fields))
         ContinueProcessing(())
       else

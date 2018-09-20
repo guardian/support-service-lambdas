@@ -2,9 +2,10 @@ package com.gu.identityBackfill.salesforce.updateSFIdentityId
 
 import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
-import com.gu.util.resthttp.RestRequestMaker
-import com.gu.util.resthttp.Types.ClientFailableOp
-import play.api.libs.json.Json
+import com.gu.util.resthttp.RestOp.HttpOpParseOp
+import com.gu.util.resthttp.RestRequestMaker.{GetRequest, RelativePath}
+import com.gu.util.resthttp.{HttpOp, LazyClientFailableOp}
+import play.api.libs.json.{JsValue, Json}
 
 object GetSalesforceIdentityId {
 
@@ -13,9 +14,9 @@ object GetSalesforceIdentityId {
     implicit val reads = Json.reads[WireResult]
   }
 
-  def apply(get: RestRequestMaker.Requests)(sFContactId: SFContactId): ClientFailableOp[IdentityId] = {
-    val id = get.get[WireResult](s"/services/data/v20.0/sobjects/Contact/${sFContactId.value}")
-    id.map(id => IdentityId(id.IdentityID__c))
-  }
+  def apply(getOp: HttpOp[GetRequest, JsValue]): SFContactId => LazyClientFailableOp[IdentityId] =
+    getOp.setupRequest(toRequest).parse[WireResult].map(_.IdentityID__c).map(IdentityId.apply).runRequestLazy
+
+  def toRequest(sfContactId: SFContactId) = GetRequest(RelativePath(s"/services/data/v43.0/sobjects/Contact/${sfContactId.value}"))
 
 }

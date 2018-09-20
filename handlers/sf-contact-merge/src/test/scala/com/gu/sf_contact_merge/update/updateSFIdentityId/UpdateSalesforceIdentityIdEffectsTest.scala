@@ -2,8 +2,8 @@ package com.gu.sf_contact_merge.update.updateSFIdentityId
 
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
+import com.gu.salesforce.auth.SalesforceAuthenticate
 import com.gu.salesforce.auth.SalesforceAuthenticate.SFAuthConfig
-import com.gu.salesforce.auth.{SalesforceAuthenticate, SalesforceRestRequestMaker}
 import com.gu.salesforce.dev.SFEffectsData
 import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.FirstName
 import com.gu.sf_contact_merge.getsfcontacts.GetSfAddress.SFAddress
@@ -14,10 +14,12 @@ import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId.{IdentityId, SF
 import com.gu.sf_contact_merge.update.updateSFIdentityId.GetSalesforceIdentityId.WireResult
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
-import com.gu.util.resthttp.RestRequestMaker
+import com.gu.util.resthttp.HttpOp
+import com.gu.util.resthttp.RestOp.HttpOpParseOp
+import com.gu.util.resthttp.RestRequestMaker.{GetRequest, RelativePath}
 import com.gu.util.resthttp.Types.ClientFailableOp
 import org.scalatest.{FlatSpec, Matchers}
-import play.api.libs.json.Json
+import play.api.libs.json.{JsValue, Json}
 import scalaz.\/-
 
 import scala.util.Random
@@ -48,7 +50,7 @@ class UpdateSalesforceIdentityIdEffectsTest extends FlatSpec with Matchers {
       updateSalesforceIdentityId = UpdateSalesforceIdentityId(patch)
       sFContactUpdate = SFContactUpdate(Some(testIdentityId), SetFirstName(testFirstName), OverrideAddressWith(testAddress))
       _ <- updateSalesforceIdentityId.apply(testContact, sFContactUpdate).toDisjunction
-      getSalesforceIdentityId = GetSalesforceIdentityId(SalesforceRestRequestMaker(auth, response)) _
+      getSalesforceIdentityId = GetSalesforceIdentityId(SalesforceAuthenticate.get(response, auth)) _
       updatedIdentityId <- getSalesforceIdentityId(testContact).toDisjunction
     } yield updatedIdentityId
 
@@ -84,7 +86,9 @@ object GetSalesforceIdentityId {
     implicit val reads = Json.reads[WireResult]
   }
 
-  def apply(get: RestRequestMaker.Requests)(sFContactId: SFContactId): ClientFailableOp[WireResult] =
-    get.get[WireResult](s"/services/data/v43.0/sobjects/Contact/${sFContactId.value}")
+  def apply(getOp: HttpOp[GetRequest, JsValue])(sFContactId: SFContactId): ClientFailableOp[WireResult] =
+    getOp.setupRequest(toRequest).parse[WireResult].runRequest(sFContactId)
+
+  def toRequest(sfContactId: SFContactId) = GetRequest(RelativePath(s"/services/data/v43.0/sobjects/Contact/${sfContactId.value}"))
 
 }
