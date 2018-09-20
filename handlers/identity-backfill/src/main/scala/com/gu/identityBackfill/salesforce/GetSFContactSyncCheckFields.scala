@@ -24,7 +24,7 @@ object GetSFContactSyncCheckFields {
   def apply(getOp: HttpOp[GetRequest, JsValue]): GetSFContactSyncCheckFields =
     new GetSFContactSyncCheckFields(getOp.setupRequest(toRequest).parse[ContactSyncCheckFields].runRequestLazy)
 
-  def toRequest(sfContactId: SFContactId) = GetRequest(RelativePath(s"/services/data/v20.0/sobjects/Contact/${sfContactId.value}"))
+  def toRequest(sfContactId: SFContactId) = GetRequest(RelativePath(s"/services/data/v43.0/sobjects/Contact/${sfContactId.value}"))
 
 }
 
