@@ -21,7 +21,7 @@ class GetAccountEffectsTest extends FlatSpec with Matchers {
     } yield res
     val expected = Account(
       identityId = Some(IdentityId("30000549")),
-      sfContactId = Some(SfContactId("sfContactId")),
+      sfContactId = Some(SfContactId("003g000001W5FCeAAN")),
       paymentMethodId = Some(PaymentMethodId("2c92c0f860017cd501600893132117ae")),
       autoPay = AutoPay(true),
       accountBalanceMinorUnits = AccountBalanceMinorUnits(0),
