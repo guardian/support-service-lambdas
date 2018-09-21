@@ -96,14 +96,16 @@ object Handler {
       Stage("CODE") -> RecordTypeId("012g0000000DZmNAAW"),
       Stage("DEV") -> RecordTypeId("STANDARD_TEST_DUMMY")
     )
-    mappings.get(stage).toApiGatewayContinueProcessing(ApiGatewayResponse.internalServerError(s"missing standard record type for stage $stage"))
+    mappings.get(stage)
+      .toApiGatewayContinueProcessing(ApiGatewayResponse.internalServerError(s"missing standard record type for stage $stage"))
   }
 
   def syncableSFToIdentity(sfRequests: ApiGatewayOp[HttpOp[GetRequest, JsValue]], stage: Stage)(sFContactId: SFContactId): ApiGatewayOp[Unit] =
     for {
       sfRequests <- sfRequests
       standardRecordType <- standardRecordTypeForStage(stage)
-      fields <- GetSFContactSyncCheckFields(sfRequests).apply(sFContactId).value.toApiGatewayOp("zuora issue")
+      fields <- GetSFContactSyncCheckFields(sfRequests).apply(sFContactId).value
+        .toApiGatewayOp("get contact from salesforce")
       syncable <- SyncableSFToIdentity(standardRecordType)(fields)(sFContactId)
     } yield syncable
 
@@ -115,7 +117,8 @@ object Handler {
   ): ApiGatewayOp[Unit] =
     for {
       sfRequests <- sfRequests
-      _ <- UpdateSalesforceIdentityId(sfRequests).runRequestMultiArg(sFContactId, identityId).toApiGatewayOp("zuora issue")
+      _ <- UpdateSalesforceIdentityId(sfRequests).runRequestMultiArg(sFContactId, identityId)
+        .toApiGatewayOp("update identity id in salesforce")
     } yield ()
 
 }
@@ -129,7 +132,7 @@ object Healthcheck {
     (for {
       identityId <- getByEmail(EmailAddress("john.duffell@guardian.co.uk"))
         .toApiGatewayOp("problem with email").withLogging("healthcheck getByEmail")
-      _ <- countZuoraAccountsForIdentityId(identityId).toApiGatewayOp("zuora issue")
+      _ <- countZuoraAccountsForIdentityId(identityId).toApiGatewayOp("get zuora accounts for identity id")
       _ <- sfAuth
     } yield ApiGatewayResponse.successfulExecution).apiResponse
 
