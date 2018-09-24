@@ -68,14 +68,6 @@ object SalesforceAuthenticate extends Logging {
       Json.parse(response.body.string)
     }
 
-  def apply(
-    response: (Request => Response),
-    config: SFAuthConfig
-  ): ApiGatewayOp[RestRequestMaker.Requests] = {
-    doAuth(response, config)
-      .map(sfAuth => SalesforceRestRequestMaker(sfAuth, response))
-  }
-
   private def buildAuthRequest(config: SFAuthConfig) = {
     import config._
     val builder =

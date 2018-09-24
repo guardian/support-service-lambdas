@@ -40,7 +40,7 @@ object IdentityBackfillSteps extends Logging {
       request <- apiGatewayRequest.bodyAsCaseClass[IdentityBackfillRequest]()
       preReq <- preReqCheck(fromRequest(request))
       _ <- dryRunAbort(request).withLogging("dryrun aborter")
-      _ <- updateZuoraIdentityId(preReq.zuoraAccountId, preReq.requiredIdentityId).toApiGatewayOp("zuora issue")
+      _ <- updateZuoraIdentityId(preReq.zuoraAccountId, preReq.requiredIdentityId).toApiGatewayOp("update zuora identity id field")
       _ <- updateSalesforceIdentityId(preReq.sFContactId, preReq.requiredIdentityId)
       // need to remember which ones we updated?
     } yield ApiGatewayResponse.successfulExecution).apiResponse

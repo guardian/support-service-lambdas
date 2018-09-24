@@ -41,7 +41,7 @@ object PreReqCheck {
     countZuoraAccountsForIdentityId: ClientFailableOp[Int]
   ): ApiGatewayOp[Unit] = {
     for {
-      zuoraAccountsForIdentityId <- countZuoraAccountsForIdentityId.toApiGatewayOp("zuora issue")
+      zuoraAccountsForIdentityId <- countZuoraAccountsForIdentityId.toApiGatewayOp("count zuora accounts for identity id")
       _ <- (zuoraAccountsForIdentityId == 0)
         .toApiGatewayContinueProcessing(ApiGatewayResponse.notFound("already used that identity id"))
     } yield ()
@@ -51,7 +51,7 @@ object PreReqCheck {
     getZuoraAccountsForEmail: ClientFailableOp[List[ZuoraAccountIdentitySFContact]]
   ): ApiGatewayOp[ZuoraAccountIdentitySFContact] = {
     for {
-      zuoraAccountsForEmail <- getZuoraAccountsForEmail.toApiGatewayOp("zuora issue")
+      zuoraAccountsForEmail <- getZuoraAccountsForEmail.toApiGatewayOp("get zuora accounts for email address")
       zuoraAccountForEmail <- zuoraAccountsForEmail match {
         case one :: Nil => ContinueProcessing(one);
         case _ => ReturnWithResponse(ApiGatewayResponse.notFound("should have exactly one zuora account per email at this stage"))
@@ -63,9 +63,9 @@ object PreReqCheck {
     } yield zuoraAccountForEmail
   }
 
-  def acceptableReaderType(function: ClientFailableOp[List[GetZuoraSubTypeForAccount.ReaderType]]): ApiGatewayOp[Unit] = {
+  def acceptableReaderType(readerTypes: ClientFailableOp[List[GetZuoraSubTypeForAccount.ReaderType]]): ApiGatewayOp[Unit] = {
     for {
-      readerTypes <- function.toApiGatewayOp("zuora issue")
+      readerTypes <- readerTypes.toApiGatewayOp("checking acceptable reader type in zuora")
       incorrectReaderTypes = readerTypes.collect {
         case ReaderTypeValue(readerType) if readerType != "Direct" => readerType // it's bad
       }

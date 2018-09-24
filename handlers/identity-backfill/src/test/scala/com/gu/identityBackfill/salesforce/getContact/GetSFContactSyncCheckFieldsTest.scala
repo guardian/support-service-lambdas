@@ -1,40 +1,29 @@
 package com.gu.identityBackfill.salesforce.getContact
 
-import com.gu.effects.TestingRawEffects
-import com.gu.effects.TestingRawEffects.HTTPResponse
 import com.gu.identityBackfill.salesforce.GetSFContactSyncCheckFields
 import com.gu.identityBackfill.salesforce.GetSFContactSyncCheckFields.ContactSyncCheckFields
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
-import com.gu.salesforce.auth.SalesforceAuthenticate.SalesforceAuth
-import com.gu.salesforce.auth.SalesforceRestRequestMaker
-import com.gu.util.resthttp.Types.ClientSuccess
+import com.gu.util.resthttp.RestRequestMaker.{GetRequest, RelativePath}
 import org.scalatest.{FlatSpec, Matchers}
+import play.api.libs.json.{JsSuccess, Json}
 
 class GetSFContactSyncCheckFieldsTest extends FlatSpec with Matchers {
 
-  it should "send the right request for update identity id" in {
-    val effects = new TestingRawEffects(responses = GetSFContactSyncCheckFieldsTest.responses)
-    val auth = GetSFContactSyncCheckFields(SalesforceRestRequestMaker(
-      SalesforceAuth("accesstokentoken", "https://urlsf.hi"),
-      effects.response
-    )) _
-    val actual = auth(SFContactId("00110000011AABBAAB"))
-    val expected = ClientSuccess(ContactSyncCheckFields(Some("STANDARD_TEST_DUMMY"), "123", "Testing", Some("United Kingdom")))
+  it should "send the right request for get the contact sync fields" in {
+    val actual = GetSFContactSyncCheckFields.toRequest(SFContactId("00110000011AABBAAB"))
+    val expected = GetRequest(RelativePath("/services/data/v43.0/sobjects/Contact/00110000011AABBAAB"))
     actual should be(expected)
-
   }
+
+  it should "parse the response" in {
+    val actual = Json.parse(GetSFContactSyncCheckFieldsTest.dummyContact).validate[ContactSyncCheckFields]
+    val expected = JsSuccess(ContactSyncCheckFields(Some("STANDARD_TEST_DUMMY"), "123", "Testing", Some("United Kingdom")))
+    actual should be(expected)
+  }
+
 }
 
 object GetSFContactSyncCheckFieldsTest {
-
-  def responses: Map[String, HTTPResponse] = {
-
-    Map(
-
-      "/services/data/v20.0/sobjects/Contact/00110000011AABBAAB"
-        -> HTTPResponse(200, dummyContact)
-    )
-  }
 
   val dummyContact: String =
     """

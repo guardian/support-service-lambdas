@@ -10,7 +10,7 @@ import com.gu.identity.IdentityCookieToIdentityUser.{CookieValuesToIdentityUser,
 import com.gu.identity.{IdentityCookieToIdentityUser, IdentityTestUserConfig, IsIdentityTestUser}
 import com.gu.salesforce.SalesforceGenericIdLookup
 import com.gu.salesforce.SalesforceGenericIdLookup.{FieldName, LookupValue, SfObjectType, TSalesforceGenericIdLookup}
-import com.gu.salesforce.auth.SalesforceAuthenticate
+import com.gu.salesforce.auth.{SalesforceAuthenticate, SalesforceRestRequestMaker}
 import com.gu.salesforce.auth.SalesforceAuthenticate.{SFAuthConfig, SFAuthTestConfig}
 import com.gu.salesforce.cases.SalesforceCase
 import com.gu.salesforce.cases.SalesforceCase.Create.WireNewCase
@@ -256,14 +256,14 @@ object Handler extends Logging {
         val sfRequestsNormal: LazySalesforceAuthenticatedReqMaker = () =>
           for {
             config <- loadNormalSfConfig.toApiGatewayOp("load 'normal' SF config")
-            sfRequests <- SalesforceAuthenticate(response, config)
-          } yield sfRequests
+            sfAuth <- SalesforceAuthenticate.doAuth(response, config)
+          } yield SalesforceRestRequestMaker(sfAuth, response)
 
         val sfRequestsTest: LazySalesforceAuthenticatedReqMaker = () =>
           for {
             config <- loadTestSfConfig.toApiGatewayOp("load 'test' SF config")
-            sfRequests <- SalesforceAuthenticate(response, config)
-          } yield sfRequests
+            sfAuth <- SalesforceAuthenticate.doAuth(response, config)
+          } yield SalesforceRestRequestMaker(sfAuth, response)
 
         def sfBackendForIdentityCookieHeader(headers: HeadersOption): IdentityAndSfRequestsApiGatewayOp = {
           for {
