@@ -4,9 +4,9 @@ import java.io.{InputStream, OutputStream}
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
+import com.gu.salesforce.{JsonHttp, SalesforceClient}
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
-import com.gu.salesforce.auth.SalesforceAuthenticate
-import com.gu.salesforce.auth.SalesforceAuthenticate.SFAuthConfig
+import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.sf_contact_merge.TypeConvert._
 import com.gu.sf_contact_merge.WireRequestToDomainObject.MergeRequest
 import com.gu.sf_contact_merge.getaccounts.GetContacts.AccountId
@@ -14,7 +14,7 @@ import com.gu.sf_contact_merge.getaccounts.GetIdentityAndZuoraEmailsForAccountsS
 import com.gu.sf_contact_merge.getaccounts.GetIdentityAndZuoraEmailsForAccountsSteps.IdentityAndSFContactAndEmail
 import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.{EmailAddress, LastName}
 import com.gu.sf_contact_merge.getsfcontacts.DedupSfContacts.SFContactsForMerge
-import com.gu.sf_contact_merge.getsfcontacts.{GetSfAddress, GetSfAddressOverride, DedupSfContacts}
+import com.gu.sf_contact_merge.getsfcontacts.{DedupSfContacts, GetSfAddress, GetSfAddressOverride}
 import com.gu.sf_contact_merge.update.UpdateAccountSFLinks.{CRMAccountId, LinksFromZuora}
 import com.gu.sf_contact_merge.update.UpdateSFContacts.OldSFContact
 import com.gu.sf_contact_merge.update.{UpdateAccountSFLinks, UpdateSFContacts, UpdateSalesforceIdentityId}
@@ -49,9 +49,7 @@ object Handler {
       zuoraQuerier = ZuoraQuery(requests)
 
       sfConfig <- loadConfig[SFAuthConfig].toApiGatewayOp("load trusted Api config")
-      sfAuth <- SalesforceAuthenticate.doAuth(getResponse, sfConfig)
-      sfPatch = SalesforceAuthenticate.patch(getResponse, sfAuth)
-      sfGet = SalesforceAuthenticate.get(getResponse, sfAuth)
+      sfAuth <- SalesforceClient(getResponse, sfConfig).value.toApiGatewayOp("Failed to authenticate with Salesforce")
 
     } yield Operation.noHealthcheck {
       WireRequestToDomainObject {
@@ -60,11 +58,11 @@ object Handler {
           AssertSame.emailAddress,
           AssertSame.lastName,
           EnsureNoAccountWithWrongIdentityId.apply,
-          UpdateSFContacts(UpdateSalesforceIdentityId(sfPatch)),
+          UpdateSFContacts(UpdateSalesforceIdentityId(sfAuth.wrap(JsonHttp.patch))),
           UpdateAccountSFLinks(requests.put),
           GetSfAddressOverride.apply,
           DedupSfContacts.apply,
-          GetSfAddress(sfGet)
+          GetSfAddress(sfAuth.wrap(JsonHttp.get))
         )
       }
     }

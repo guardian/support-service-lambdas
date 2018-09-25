@@ -1,11 +1,11 @@
 package com.gu.sf_contact_merge.getsfcontacts
 
 import com.gu.effects.{GetFromS3, RawEffects}
-import com.gu.salesforce.auth.SalesforceAuthenticate
-import com.gu.salesforce.auth.SalesforceAuthenticate.SFAuthConfig
+import com.gu.salesforce.{JsonHttp, SalesforceClient}
+import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.dev.SFEffectsData
-import com.gu.sf_contact_merge.getsfcontacts.GetSfAddress.{IsDigitalVoucherUser, SFAddress, SFContact, UsableContactAddress}
 import com.gu.sf_contact_merge.getsfcontacts.GetSfAddress.SFAddressFields._
+import com.gu.sf_contact_merge.getsfcontacts.GetSfAddress.{IsDigitalVoucherUser, SFAddress, SFContact, UsableContactAddress}
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
 import org.scalatest.{FlatSpec, Matchers}
@@ -20,8 +20,8 @@ class GetSfAddressEffectsTest extends FlatSpec with Matchers {
     val actual = for {
       sfConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[SFAuthConfig]
       response = RawEffects.response
-      sfAuth <- SalesforceAuthenticate.doAuth(response, sfConfig).toDisjunction
-      get = SalesforceAuthenticate.get(response, sfAuth)
+      sfAuth <- SalesforceClient(response, sfConfig).value.toDisjunction
+      get = sfAuth.wrap(JsonHttp.get)
       getSfAddress = GetSfAddress(get)
       address <- getSfAddress.apply(testContact).value.toDisjunction
     } yield address

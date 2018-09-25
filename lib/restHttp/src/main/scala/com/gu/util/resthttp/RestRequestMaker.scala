@@ -146,11 +146,11 @@ object RestRequestMaker extends Logging {
   def sendRequest(request: Request, getResponse: Request => Response): ClientFailableOp[String] = {
     logger.info(s"Attempting to do request")
     val response = getResponse(request)
-    toClientFailableOp(response).map(_.body.string)
+    toClientFailableOp(response).map(_.value)
   }
 
-  def toClientFailableOp(response: Response): ClientFailableOp[Response] = {
-    httpIsSuccessful(response).map(_ => response)
+  def toClientFailableOp(response: Response): ClientFailableOp[BodyAsString] = {
+    httpIsSuccessful(response).map(_ => response).map(_.body.string).map(BodyAsString.apply)
   }
 
   def buildRequest(headers: Map[String, String], url: String, addMethod: Request.Builder => Request.Builder): Request = {

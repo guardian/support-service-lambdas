@@ -2,7 +2,7 @@ package com.gu.test
 import com.gu.digitalSubscriptionExpiry.emergencyToken.EmergencyTokensConfig
 import com.gu.effects.GetFromS3
 import com.gu.identity.{IdentityConfig, IdentityTestUserConfig}
-import com.gu.salesforce.auth.SalesforceAuthenticate.{SFAuthConfig, SFAuthTestConfig}
+import com.gu.salesforce.SalesforceAuthenticate.{SFAuthConfig, SFAuthTestConfig}
 import com.gu.util.apigateway.Auth.TrustedApiConfig
 import com.gu.util.config._
 import com.gu.util.zuora.ZuoraRestConfig

@@ -1,9 +1,9 @@
 package com.gu.sf_contact_merge.update.updateSFIdentityId
 
 import com.gu.effects.{GetFromS3, RawEffects}
+import com.gu.salesforce.{JsonHttp, SalesforceClient}
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
-import com.gu.salesforce.auth.SalesforceAuthenticate
-import com.gu.salesforce.auth.SalesforceAuthenticate.SFAuthConfig
+import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.dev.SFEffectsData
 import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.FirstName
 import com.gu.sf_contact_merge.getsfcontacts.GetSfAddress.SFAddress
@@ -45,12 +45,12 @@ class UpdateSalesforceIdentityIdEffectsTest extends FlatSpec with Matchers {
     val actual = for {
       sfConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[SFAuthConfig]
       response = RawEffects.response
-      auth <- SalesforceAuthenticate.doAuth(response, sfConfig).toDisjunction
-      patch = SalesforceAuthenticate.patch(response, auth)
+      sfClient <- SalesforceClient(response, sfConfig).value.toDisjunction
+      patch = sfClient.wrap(JsonHttp.patch)
       updateSalesforceIdentityId = UpdateSalesforceIdentityId(patch)
       sFContactUpdate = SFContactUpdate(Some(testIdentityId), SetFirstName(testFirstName), OverrideAddressWith(testAddress))
       _ <- updateSalesforceIdentityId.apply(testContact, sFContactUpdate).toDisjunction
-      getSalesforceIdentityId = GetSalesforceIdentityId(SalesforceAuthenticate.get(response, auth)) _
+      getSalesforceIdentityId = GetSalesforceIdentityId(sfClient.wrap(JsonHttp.get)) _
       updatedIdentityId <- getSalesforceIdentityId(testContact).toDisjunction
     } yield updatedIdentityId
 

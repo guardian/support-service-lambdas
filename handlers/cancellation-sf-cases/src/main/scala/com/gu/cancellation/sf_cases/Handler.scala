@@ -8,10 +8,9 @@ import com.gu.cancellation.sf_cases.TypeConvert._
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.identity.IdentityCookieToIdentityUser.{CookieValuesToIdentityUser, IdentityId, IdentityUser}
 import com.gu.identity.{IdentityCookieToIdentityUser, IdentityTestUserConfig, IsIdentityTestUser}
-import com.gu.salesforce.SalesforceGenericIdLookup
+import com.gu.salesforce.{JsonHttp, SalesforceClient, SalesforceGenericIdLookup}
 import com.gu.salesforce.SalesforceGenericIdLookup.{FieldName, LookupValue, SfObjectType, TSalesforceGenericIdLookup}
-import com.gu.salesforce.auth.SalesforceAuthenticate
-import com.gu.salesforce.auth.SalesforceAuthenticate.{SFAuthConfig, SFAuthTestConfig}
+import com.gu.salesforce.SalesforceAuthenticate.{SFAuthConfig, SFAuthTestConfig}
 import com.gu.salesforce.cases.SalesforceCase
 import com.gu.salesforce.cases.SalesforceCase.Create.WireNewCase
 import com.gu.salesforce.cases.SalesforceCase.GetMostRecentCaseByContactId.TGetMostRecentCaseByContactId
@@ -30,18 +29,16 @@ import play.api.libs.json._
 
 object Handler extends Logging {
 
-  case class IdentityAndSfRequests(identityUser: IdentityUser, sfRequests: SfRequestMethods)
-  case class SfRequestMethods(
-    post: HttpOp[RestRequestMaker.PostRequest, JsValue],
-    patch: HttpOp[RestRequestMaker.PatchRequest, Unit],
-    get: HttpOp[RestRequestMaker.GetRequest, JsValue]
+  case class IdentityAndSfRequests(
+    identityUser: IdentityUser,
+    sfRequests: HttpOp[JsonHttp.HttpRequestInfo, RestRequestMaker.BodyAsString]
   )
 
   type HeadersOption = Option[Map[String, String]]
   type IdentityAndSfRequestsApiGatewayOp = ApiGatewayOp[IdentityAndSfRequests]
   type SfBackendForIdentityCookieHeader = HeadersOption => IdentityAndSfRequestsApiGatewayOp
   type Steps = SfBackendForIdentityCookieHeader => ApiGatewayRequest => ApiResponse
-  type LazySalesforceAuthenticatedReqMaker = () => ApiGatewayOp[SfRequestMethods]
+  type LazySalesforceAuthenticatedReqMaker = () => ApiGatewayOp[HttpOp[JsonHttp.HttpRequestInfo, RestRequestMaker.BodyAsString]]
   case class SfRequests(normal: LazySalesforceAuthenticatedReqMaker, test: LazySalesforceAuthenticatedReqMaker)
 
   def raiseCase(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
@@ -161,11 +158,11 @@ object Handler extends Logging {
       (for {
         identityAndSfRequests <- sfBackendForIdentityCookieHeader(apiGatewayRequest.headers)
         raiseCaseDetail <- apiGatewayRequest.bodyAsCaseClass[RaiseCaseDetail]()
-        lookupByIdOp = SalesforceGenericIdLookup(identityAndSfRequests.sfRequests.get)
-        mostRecentCaseOp = SalesforceCase.GetMostRecentCaseByContactId(identityAndSfRequests.sfRequests.get)
-        createCaseOp = SalesforceCase.Create(identityAndSfRequests.sfRequests.post)
+        lookupByIdOp = SalesforceGenericIdLookup(identityAndSfRequests.sfRequests.wrap(JsonHttp.get))
+        mostRecentCaseOp = SalesforceCase.GetMostRecentCaseByContactId(identityAndSfRequests.sfRequests.wrap(JsonHttp.get))
+        createCaseOp = SalesforceCase.Create(identityAndSfRequests.sfRequests.wrap(JsonHttp.post))
         wiredCreateCaseOp = buildWireNewCaseForSalesforce.tupled andThen createCaseOp
-        sfUpdateOp = SalesforceCase.Update(identityAndSfRequests.sfRequests.patch)
+        sfUpdateOp = SalesforceCase.Update(identityAndSfRequests.sfRequests.wrap(JsonHttp.patch))
         updateReasonOnRecentCaseOp = updateCaseReason(sfUpdateOp)_
         newOrResumeCaseOp = newOrResumeCase(wiredCreateCaseOp, updateReasonOnRecentCaseOp, raiseCaseDetail)_
         wiredRaiseCase = raiseCase(lookupByIdOp, mostRecentCaseOp, newOrResumeCaseOp)_
@@ -215,11 +212,11 @@ object Handler extends Logging {
       (for {
         identityAndSfRequests <- sfBackendForIdentityCookieHeader(apiGatewayRequest.headers)
         pathParams <- apiGatewayRequest.pathParamsAsCaseClass[CasePathParams]()
-        lookupByIdOp = SalesforceGenericIdLookup(identityAndSfRequests.sfRequests.get)
-        getCaseByIdOp = SalesforceCase.GetById[CaseWithContactId](identityAndSfRequests.sfRequests.get)_
+        lookupByIdOp = SalesforceGenericIdLookup(identityAndSfRequests.sfRequests.wrap(JsonHttp.get))
+        getCaseByIdOp = SalesforceCase.GetById[CaseWithContactId](identityAndSfRequests.sfRequests.wrap(JsonHttp.get))_
         _ <- verifyCaseBelongsToUser(lookupByIdOp, getCaseByIdOp)(identityAndSfRequests.identityUser.id, pathParams.caseId)
         requestBody <- apiGatewayRequest.bodyAsCaseClass[JsValue]()
-        sfUpdateOp = SalesforceCase.Update(identityAndSfRequests.sfRequests.patch)
+        sfUpdateOp = SalesforceCase.Update(identityAndSfRequests.sfRequests.wrap(JsonHttp.patch))
         _ <- sfUpdateOp(pathParams.caseId, requestBody).toApiGatewayOp("update case")
       } yield ApiGatewayResponse.successfulExecution).apiResponse
 
@@ -261,22 +258,14 @@ object Handler extends Logging {
         val sfRequestsNormal: LazySalesforceAuthenticatedReqMaker = () =>
           for {
             config <- loadNormalSfConfig.toApiGatewayOp("load 'normal' SF config")
-            sfAuth <- SalesforceAuthenticate.doAuth(response, config)
-          } yield SfRequestMethods(
-            SalesforceAuthenticate.post(response, sfAuth),
-            SalesforceAuthenticate.patch(response, sfAuth),
-            SalesforceAuthenticate.get(response, sfAuth)
-          )
+            sfAuth <- SalesforceClient(response, config).value.toApiGatewayOp("Failed to authenticate with Salesforce")
+          } yield sfAuth
 
         val sfRequestsTest: LazySalesforceAuthenticatedReqMaker = () =>
           for {
             config <- loadTestSfConfig.toApiGatewayOp("load 'test' SF config")
-            sfAuth <- SalesforceAuthenticate.doAuth(response, config)
-          } yield SfRequestMethods(
-            SalesforceAuthenticate.post(response, sfAuth),
-            SalesforceAuthenticate.patch(response, sfAuth),
-            SalesforceAuthenticate.get(response, sfAuth)
-          )
+            sfAuth <- SalesforceClient(response, config).value.toApiGatewayOp("Failed to authenticate with Salesforce")
+          } yield sfAuth
 
         def sfBackendForIdentityCookieHeader(headers: HeadersOption): IdentityAndSfRequestsApiGatewayOp = {
           for {

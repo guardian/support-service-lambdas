@@ -6,6 +6,7 @@ import com.gu.cancellation.sf_cases.Handler.{CasePathParams, SfBackendForIdentit
 import com.gu.cancellation.sf_cases.TypeConvert._
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.identity.IdentityCookieToIdentityUser.{IdentityId, IdentityUser}
+import com.gu.salesforce.JsonHttp
 import com.gu.salesforce.cases.SalesforceCase
 import com.gu.salesforce.cases.SalesforceCase.CaseWithId
 import com.gu.test.EffectsTest
@@ -28,7 +29,7 @@ class EndToEndHandlerEffectsTest extends FlatSpec with Matchers {
     (for {
       identityAndSfRequests <- sfBackendForIdentityCookieHeader(apiGatewayRequest.headers)
       pathParams <- apiGatewayRequest.pathParamsAsCaseClass[CasePathParams]()
-      sfGet = SalesforceCase.GetById[JsValue](identityAndSfRequests.sfRequests.get)_
+      sfGet = SalesforceCase.GetById[JsValue](identityAndSfRequests.sfRequests.wrap(JsonHttp.get))_
       getCaseResponse <- sfGet(pathParams.caseId).toApiGatewayOp("get case detail")
     } yield ApiGatewayResponse("200", getCaseResponse)).apiResponse
 
