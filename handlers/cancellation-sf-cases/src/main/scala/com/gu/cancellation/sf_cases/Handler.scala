@@ -8,13 +8,14 @@ import com.gu.cancellation.sf_cases.TypeConvert._
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.identity.IdentityCookieToIdentityUser.{CookieValuesToIdentityUser, IdentityId, IdentityUser}
 import com.gu.identity.{IdentityCookieToIdentityUser, IdentityTestUserConfig, IsIdentityTestUser}
-import com.gu.salesforce.{JsonHttp, SalesforceClient, SalesforceGenericIdLookup}
-import com.gu.salesforce.SalesforceGenericIdLookup.{FieldName, LookupValue, SfObjectType, TSalesforceGenericIdLookup}
 import com.gu.salesforce.SalesforceAuthenticate.{SFAuthConfig, SFAuthTestConfig}
+import com.gu.salesforce.SalesforceClient.StringHttpRequest
+import com.gu.salesforce.SalesforceGenericIdLookup.{FieldName, LookupValue, SfObjectType, TSalesforceGenericIdLookup}
 import com.gu.salesforce.cases.SalesforceCase
 import com.gu.salesforce.cases.SalesforceCase.Create.WireNewCase
 import com.gu.salesforce.cases.SalesforceCase.GetMostRecentCaseByContactId.TGetMostRecentCaseByContactId
 import com.gu.salesforce.cases.SalesforceCase.{CaseId, CaseSubject, CaseWithId, ContactId, SubscriptionId}
+import com.gu.salesforce.{JsonHttp, SalesforceClient, SalesforceGenericIdLookup}
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
@@ -22,8 +23,9 @@ import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, ApiGatewayR
 import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config._
 import com.gu.util.reader.Types._
+import com.gu.util.resthttp.RestRequestMaker.BodyAsString
 import com.gu.util.resthttp.Types.ClientFailableOp
-import com.gu.util.resthttp.{HttpOp, RestRequestMaker, Types}
+import com.gu.util.resthttp.{HttpOp, Types}
 import okhttp3.{Request, Response}
 import play.api.libs.json._
 
@@ -31,14 +33,14 @@ object Handler extends Logging {
 
   case class IdentityAndSfRequests(
     identityUser: IdentityUser,
-    sfRequests: HttpOp[JsonHttp.HttpRequestInfo, RestRequestMaker.BodyAsString]
+    sfClient: HttpOp[StringHttpRequest, BodyAsString]
   )
 
   type HeadersOption = Option[Map[String, String]]
   type IdentityAndSfRequestsApiGatewayOp = ApiGatewayOp[IdentityAndSfRequests]
   type SfBackendForIdentityCookieHeader = HeadersOption => IdentityAndSfRequestsApiGatewayOp
   type Steps = SfBackendForIdentityCookieHeader => ApiGatewayRequest => ApiResponse
-  type LazySalesforceAuthenticatedReqMaker = () => ApiGatewayOp[HttpOp[JsonHttp.HttpRequestInfo, RestRequestMaker.BodyAsString]]
+  type LazySalesforceAuthenticatedReqMaker = () => ApiGatewayOp[HttpOp[StringHttpRequest, BodyAsString]]
   case class SfRequests(normal: LazySalesforceAuthenticatedReqMaker, test: LazySalesforceAuthenticatedReqMaker)
 
   def raiseCase(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
@@ -158,11 +160,11 @@ object Handler extends Logging {
       (for {
         identityAndSfRequests <- sfBackendForIdentityCookieHeader(apiGatewayRequest.headers)
         raiseCaseDetail <- apiGatewayRequest.bodyAsCaseClass[RaiseCaseDetail]()
-        lookupByIdOp = SalesforceGenericIdLookup(identityAndSfRequests.sfRequests.wrap(JsonHttp.get))
-        mostRecentCaseOp = SalesforceCase.GetMostRecentCaseByContactId(identityAndSfRequests.sfRequests.wrap(JsonHttp.get))
-        createCaseOp = SalesforceCase.Create(identityAndSfRequests.sfRequests.wrap(JsonHttp.post))
+        lookupByIdOp = SalesforceGenericIdLookup(identityAndSfRequests.sfClient.wrap(JsonHttp.get))
+        mostRecentCaseOp = SalesforceCase.GetMostRecentCaseByContactId(identityAndSfRequests.sfClient.wrap(JsonHttp.get))
+        createCaseOp = SalesforceCase.Create(identityAndSfRequests.sfClient.wrap(JsonHttp.post))
         wiredCreateCaseOp = buildWireNewCaseForSalesforce.tupled andThen createCaseOp
-        sfUpdateOp = SalesforceCase.Update(identityAndSfRequests.sfRequests.wrap(JsonHttp.patch))
+        sfUpdateOp = SalesforceCase.Update(identityAndSfRequests.sfClient.wrap(JsonHttp.patch))
         updateReasonOnRecentCaseOp = updateCaseReason(sfUpdateOp)_
         newOrResumeCaseOp = newOrResumeCase(wiredCreateCaseOp, updateReasonOnRecentCaseOp, raiseCaseDetail)_
         wiredRaiseCase = raiseCase(lookupByIdOp, mostRecentCaseOp, newOrResumeCaseOp)_
@@ -212,11 +214,11 @@ object Handler extends Logging {
       (for {
         identityAndSfRequests <- sfBackendForIdentityCookieHeader(apiGatewayRequest.headers)
         pathParams <- apiGatewayRequest.pathParamsAsCaseClass[CasePathParams]()
-        lookupByIdOp = SalesforceGenericIdLookup(identityAndSfRequests.sfRequests.wrap(JsonHttp.get))
-        getCaseByIdOp = SalesforceCase.GetById[CaseWithContactId](identityAndSfRequests.sfRequests.wrap(JsonHttp.get))_
+        lookupByIdOp = SalesforceGenericIdLookup(identityAndSfRequests.sfClient.wrap(JsonHttp.get))
+        getCaseByIdOp = SalesforceCase.GetById[CaseWithContactId](identityAndSfRequests.sfClient.wrap(JsonHttp.get))_
         _ <- verifyCaseBelongsToUser(lookupByIdOp, getCaseByIdOp)(identityAndSfRequests.identityUser.id, pathParams.caseId)
         requestBody <- apiGatewayRequest.bodyAsCaseClass[JsValue]()
-        sfUpdateOp = SalesforceCase.Update(identityAndSfRequests.sfRequests.wrap(JsonHttp.patch))
+        sfUpdateOp = SalesforceCase.Update(identityAndSfRequests.sfClient.wrap(JsonHttp.patch))
         _ <- sfUpdateOp(pathParams.caseId, requestBody).toApiGatewayOp("update case")
       } yield ApiGatewayResponse.successfulExecution).apiResponse
 

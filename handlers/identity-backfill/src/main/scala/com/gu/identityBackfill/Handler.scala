@@ -11,10 +11,10 @@ import com.gu.identityBackfill.salesforce.ContactSyncCheck.RecordTypeId
 import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
 import com.gu.identityBackfill.salesforce._
 import com.gu.identityBackfill.zuora.{AddIdentityIdToAccount, CountZuoraAccountsForIdentityId, GetZuoraAccountsForEmail, GetZuoraSubTypeForAccount}
-import com.gu.salesforce.{JsonHttp, SalesforceClient}
-import com.gu.salesforce.TypesForSFEffectsData.SFContactId
-import com.gu.salesforce.JsonHttp.HttpRequestInfo
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
+import com.gu.salesforce.SalesforceClient.StringHttpRequest
+import com.gu.salesforce.TypesForSFEffectsData.SFContactId
+import com.gu.salesforce.{JsonHttp, SalesforceClient}
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayResponse}
@@ -56,7 +56,7 @@ object Handler {
       val getByEmail: EmailAddress => GetByEmail.ApiError \/ IdentityId = GetByEmail(response, identityConfig)
       val countZuoraAccounts: IdentityId => ClientFailableOp[Int] = CountZuoraAccountsForIdentityId(zuoraQuerier)
 
-      lazy val sfAuth: LazyClientFailableOp[HttpOp[HttpRequestInfo, RestRequestMaker.BodyAsString]] = SalesforceClient(response, sfConfig)
+      lazy val sfAuth: LazyClientFailableOp[HttpOp[StringHttpRequest, RestRequestMaker.BodyAsString]] = SalesforceClient(response, sfConfig)
       lazy val sfPatch = sfAuth.map(_.wrap(JsonHttp.patch))
       lazy val sfGet = sfAuth.map(_.wrap(JsonHttp.get))
 
