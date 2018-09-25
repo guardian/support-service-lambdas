@@ -32,7 +32,7 @@ object UpdateSalesforceIdentityId {
   case class SFContactUpdate(identityId: Option[IdentityId], firstName: UpdateFirstName, maybeNewAddress: SFAddressOverride)
 
   def apply(patchOp: HttpOp[PatchRequest, Unit]): SetOrClearIdentityId =
-    SetOrClearIdentityId(patchOp.setupRequestMultiArg(toRequest).runRequestMultiArg)
+    SetOrClearIdentityId(patchOp.setupRequestMultiArg(toRequest _).runRequestMultiArg)
 
   def toRequest(sFContactId: SFContactId, contactUpdate: SFContactUpdate): PatchRequest = {
 

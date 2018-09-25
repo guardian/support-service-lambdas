@@ -28,7 +28,7 @@ class EndToEndHandlerEffectsTest extends FlatSpec with Matchers {
     (for {
       identityAndSfRequests <- sfBackendForIdentityCookieHeader(apiGatewayRequest.headers)
       pathParams <- apiGatewayRequest.pathParamsAsCaseClass[CasePathParams]()
-      sfGet = SalesforceCase.GetById[JsValue](identityAndSfRequests.sfRequests)_
+      sfGet = SalesforceCase.GetById[JsValue](identityAndSfRequests.sfRequests.get)_
       getCaseResponse <- sfGet(pathParams.caseId).toApiGatewayOp("get case detail")
     } yield ApiGatewayResponse("200", getCaseResponse)).apiResponse
 
