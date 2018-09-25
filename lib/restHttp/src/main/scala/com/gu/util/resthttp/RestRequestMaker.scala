@@ -59,6 +59,11 @@ object RestRequestMaker extends Logging {
     def apply[REQ: Writes](body: REQ, path: RelativePath): PatchRequest = new PatchRequest(Json.toJson(body), path)
   }
 
+  case class PostRequest(body: JsValue, path: RelativePath)
+  object PostRequest {
+    def apply[REQ: Writes](body: REQ, path: RelativePath): PostRequest = new PostRequest(Json.toJson(body), path)
+  }
+
   case class GetRequest(path: RelativePath)
 
   case class JsonResponse(bodyAsJson: JsValue) {

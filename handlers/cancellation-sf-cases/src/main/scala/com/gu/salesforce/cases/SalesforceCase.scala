@@ -4,7 +4,7 @@ import ai.x.play.json.Jsonx
 import com.gu.util.Logging
 import com.gu.util.resthttp.{HttpOp, RestRequestMaker}
 import com.gu.util.resthttp.RestOp._
-import com.gu.util.resthttp.RestRequestMaker.{GetRequest, PatchRequest, RelativePath, Requests}
+import com.gu.util.resthttp.RestRequestMaker._
 import com.gu.util.resthttp.Types.ClientFailableOp
 import play.api.libs.json.{JsValue, Json, Reads}
 
@@ -47,8 +47,10 @@ object SalesforceCase extends Logging {
     )
     implicit val writesWireNewCase = Json.writes[WireNewCase]
 
-    def apply(sfRequests: Requests)(newCase: WireNewCase): ClientFailableOp[CaseWithId] =
-      sfRequests.post[WireNewCase, CaseWithId](newCase, caseSObjectsBaseUrl)
+    def apply(post: HttpOp[RestRequestMaker.PostRequest, JsValue]): WireNewCase => ClientFailableOp[CaseWithId] =
+      post.setupRequest[WireNewCase] { newCase =>
+        PostRequest(newCase, RelativePath(caseSObjectsBaseUrl))
+      }.parse[CaseWithId].runRequest
 
   }
 

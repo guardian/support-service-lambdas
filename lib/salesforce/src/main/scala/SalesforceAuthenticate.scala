@@ -4,7 +4,7 @@ import com.gu.salesforce.auth.SalesforceAuthenticate.SalesforceAuth
 import com.gu.util.Logging
 import com.gu.util.config.ConfigLocation
 import com.gu.util.reader.Types.{ApiGatewayOp, _}
-import com.gu.util.resthttp.RestRequestMaker.{GetRequest, PatchRequest, createBodyFromJs, toClientFailableOp}
+import com.gu.util.resthttp.RestRequestMaker._
 import com.gu.util.resthttp.Types.ClientSuccess
 import com.gu.util.resthttp.{HttpOp, RestRequestMaker}
 import okhttp3.{FormBody, Request, Response}
@@ -48,22 +48,32 @@ object SalesforceAuthenticate extends Logging {
     response: Request => Response,
     sfAuth: SalesforceAuth
   ): HttpOp[PatchRequest, Unit] =
-    HttpOp(response).setupRequest {
-      SalesforceRestRequestMaker.patch(sfAuth)
-    }.flatMap {
+    HttpOp(response).flatMap {
       toClientFailableOp
-    }.flatMap { _ =>
-      ClientSuccess(())
+    }.setupRequest {
+      SalesforceRestRequestMaker.patch(sfAuth)
+    }.map { _ => () }
+
+  def post(
+    response: Request => Response,
+    sfAuth: SalesforceAuth
+  ): HttpOp[PostRequest, JsValue] =
+    HttpOp(response).flatMap {
+      toClientFailableOp
+    }.setupRequest {
+      SalesforceRestRequestMaker.post(sfAuth)
+    }.map { response =>
+      Json.parse(response.body.string)
     }
 
   def get(
     response: Request => Response,
     sfAuth: SalesforceAuth
   ): HttpOp[GetRequest, JsValue] =
-    HttpOp(response).setupRequest {
-      SalesforceRestRequestMaker.get(sfAuth)
-    }.flatMap {
+    HttpOp(response).flatMap {
       toClientFailableOp
+    }.setupRequest {
+      SalesforceRestRequestMaker.get(sfAuth)
     }.map { response =>
       Json.parse(response.body.string)
     }
@@ -102,6 +112,12 @@ object SalesforceRestRequestMaker extends Logging {
     val headers = Map("Authorization" -> s"Bearer ${salesforceAuth.access_token}")
     val baseUrl = salesforceAuth.instance_url
     RestRequestMaker.buildRequest(headers, baseUrl + patchRequest.path.value, _.patch(createBodyFromJs(patchRequest.body)))
+  }
+
+  def post(salesforceAuth: SalesforceAuth)(postRequest: PostRequest): Request = {
+    val headers = Map("Authorization" -> s"Bearer ${salesforceAuth.access_token}")
+    val baseUrl = salesforceAuth.instance_url
+    RestRequestMaker.buildRequest(headers, baseUrl + postRequest.path.value, _.post(createBodyFromJs(postRequest.body)))
   }
 
   def get(salesforceAuth: SalesforceAuth)(getRequest: GetRequest): Request = {

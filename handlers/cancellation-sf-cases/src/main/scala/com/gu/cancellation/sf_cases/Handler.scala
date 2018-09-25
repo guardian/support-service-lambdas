@@ -10,7 +10,7 @@ import com.gu.identity.IdentityCookieToIdentityUser.{CookieValuesToIdentityUser,
 import com.gu.identity.{IdentityCookieToIdentityUser, IdentityTestUserConfig, IsIdentityTestUser}
 import com.gu.salesforce.SalesforceGenericIdLookup
 import com.gu.salesforce.SalesforceGenericIdLookup.{FieldName, LookupValue, SfObjectType, TSalesforceGenericIdLookup}
-import com.gu.salesforce.auth.{SalesforceAuthenticate, SalesforceRestRequestMaker}
+import com.gu.salesforce.auth.SalesforceAuthenticate
 import com.gu.salesforce.auth.SalesforceAuthenticate.{SFAuthConfig, SFAuthTestConfig}
 import com.gu.salesforce.cases.SalesforceCase
 import com.gu.salesforce.cases.SalesforceCase.Create.WireNewCase
@@ -32,7 +32,7 @@ object Handler extends Logging {
 
   case class IdentityAndSfRequests(identityUser: IdentityUser, sfRequests: SfRequestMethods)
   case class SfRequestMethods(
-    deprecatedTODO: RestRequestMaker.Requests,
+    post: HttpOp[RestRequestMaker.PostRequest, JsValue],
     patch: HttpOp[RestRequestMaker.PatchRequest, Unit],
     get: HttpOp[RestRequestMaker.GetRequest, JsValue]
   )
@@ -163,7 +163,7 @@ object Handler extends Logging {
         raiseCaseDetail <- apiGatewayRequest.bodyAsCaseClass[RaiseCaseDetail]()
         lookupByIdOp = SalesforceGenericIdLookup(identityAndSfRequests.sfRequests.get)
         mostRecentCaseOp = SalesforceCase.GetMostRecentCaseByContactId(identityAndSfRequests.sfRequests.get)
-        createCaseOp = SalesforceCase.Create(identityAndSfRequests.sfRequests.deprecatedTODO)_
+        createCaseOp = SalesforceCase.Create(identityAndSfRequests.sfRequests.post)
         wiredCreateCaseOp = buildWireNewCaseForSalesforce.tupled andThen createCaseOp
         sfUpdateOp = SalesforceCase.Update(identityAndSfRequests.sfRequests.patch)
         updateReasonOnRecentCaseOp = updateCaseReason(sfUpdateOp)_
@@ -263,7 +263,7 @@ object Handler extends Logging {
             config <- loadNormalSfConfig.toApiGatewayOp("load 'normal' SF config")
             sfAuth <- SalesforceAuthenticate.doAuth(response, config)
           } yield SfRequestMethods(
-            SalesforceRestRequestMaker(sfAuth, response),
+            SalesforceAuthenticate.post(response, sfAuth),
             SalesforceAuthenticate.patch(response, sfAuth),
             SalesforceAuthenticate.get(response, sfAuth)
           )
@@ -273,7 +273,7 @@ object Handler extends Logging {
             config <- loadTestSfConfig.toApiGatewayOp("load 'test' SF config")
             sfAuth <- SalesforceAuthenticate.doAuth(response, config)
           } yield SfRequestMethods(
-            SalesforceRestRequestMaker(sfAuth, response),
+            SalesforceAuthenticate.post(response, sfAuth),
             SalesforceAuthenticate.patch(response, sfAuth),
             SalesforceAuthenticate.get(response, sfAuth)
           )
