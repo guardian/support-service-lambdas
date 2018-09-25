@@ -131,7 +131,7 @@ object Healthcheck {
   def apply(
     getByEmail: EmailAddress => \/[GetByEmail.ApiError, IdentityId],
     countZuoraAccountsForIdentityId: IdentityId => ClientFailableOp[Int],
-    sfAuth: => LazyClientFailableOp[Any]
+    sfAuth: LazyClientFailableOp[Any]
   ): ApiResponse =
     (for {
       identityId <- getByEmail(EmailAddress("john.duffell@guardian.co.uk"))
