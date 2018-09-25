@@ -9,6 +9,7 @@ import com.gu.identityBackfill.zuora.GetZuoraSubTypeForAccount.ReaderType
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
+import com.gu.util.resthttp.LazyClientFailableOp
 import com.gu.util.resthttp.Types.ClientSuccess
 import org.scalatest.{FlatSpec, Matchers}
 
@@ -22,7 +23,7 @@ class PreReqCheckTest extends FlatSpec with Matchers {
         email => ContinueProcessing(ZuoraAccountIdentitySFContact(AccountId("acc"), None, SFContactId("sf"))),
         identityId => ContinueProcessing(()),
         _ => ContinueProcessing(()),
-        _ => ContinueProcessing(())
+        _ => LazyClientFailableOp(() => ClientSuccess(ContinueProcessing(())))
       )(EmailAddress("email@address"))
 
     val expectedResult = ContinueProcessing(PreReqResult(AccountId("acc"), SFContactId("sf"), IdentityId("asdf")))

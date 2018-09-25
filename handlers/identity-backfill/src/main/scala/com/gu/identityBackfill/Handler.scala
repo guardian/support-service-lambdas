@@ -101,12 +101,15 @@ object Handler {
       .toApiGatewayContinueProcessing(ApiGatewayResponse.internalServerError(s"missing standard record type for stage $stage"))
   }
 
-  def syncableSFToIdentity(sfRequests: LazyClientFailableOp[HttpOp[GetRequest, JsValue]], stage: Stage)(sFContactId: SFContactId): ApiGatewayOp[Unit] =
+  def syncableSFToIdentity(
+    sfRequests: LazyClientFailableOp[HttpOp[GetRequest, JsValue]],
+    stage: Stage
+  )(sFContactId: SFContactId): LazyClientFailableOp[ApiGatewayOp[Unit]] =
     for {
-      sfRequests <- sfRequests.value.toApiGatewayOp("Failed to authenticate with Salesforce")
+      sfRequests <- sfRequests
+      fields <- GetSFContactSyncCheckFields(sfRequests).apply(sFContactId)
+    } yield for {
       standardRecordType <- standardRecordTypeForStage(stage)
-      fields <- GetSFContactSyncCheckFields(sfRequests).apply(sFContactId).value
-        .toApiGatewayOp("get contact from salesforce")
       syncable <- SyncableSFToIdentity(standardRecordType)(fields)(sFContactId)
     } yield syncable
 
