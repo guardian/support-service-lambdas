@@ -31,6 +31,9 @@ object SalesforceGenericIdLookup {
     sfObjectType: SfObjectType,
     fieldName: FieldName,
     lookupValue: LookupValue
-  ): GetRequest = RestRequestMaker.GetRequest(RelativePath(s"/services/data/v29.0/sobjects/${sfObjectType.value}/${fieldName.value}/${lookupValue.value}"))
+  ): GetRequest =
+    RestRequestMaker.GetRequest(
+      RelativePath(s"/services/data/v29.0/sobjects/${sfObjectType.value}/${fieldName.value}/${lookupValue.value}")
+    )
 
 }
