@@ -43,6 +43,13 @@ object HttpOp {
   implicit class HttpOpOps[IN, RESPONSE](httpOp: HttpOp[IN, RESPONSE]) {
     def setupRequestMultiArg[A1, A2](function2Arg: (A1, A2) => IN): HttpOp[(A1, A2), RESPONSE] =
       httpOp.setupRequest(function2Arg.tupled)
+    def setupRequestMultiArg[A1, A2, A3](function2Arg: (A1, A2, A3) => IN): HttpOp[(A1, A2, A3), RESPONSE] =
+      httpOp.setupRequest(function2Arg.tupled)
+  }
+
+  // convenience, untuples for you
+  implicit class HttpOpTuple3Ops[A1, A2, A3, RESPONSE](httpOp3Arg: HttpOp[(A1, A2, A3), RESPONSE]) {
+    def runRequestMultiArg: (A1, A2, A3) => ClientFailableOp[RESPONSE] = Function.untupled(httpOp3Arg.runRequest)
   }
 
 }

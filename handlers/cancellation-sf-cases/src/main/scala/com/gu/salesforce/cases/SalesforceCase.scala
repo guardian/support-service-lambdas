@@ -2,7 +2,9 @@ package com.gu.salesforce.cases
 
 import ai.x.play.json.Jsonx
 import com.gu.util.Logging
-import com.gu.util.resthttp.RestRequestMaker.Requests
+import com.gu.util.resthttp.{HttpOp, RestRequestMaker}
+import com.gu.util.resthttp.RestOp._
+import com.gu.util.resthttp.RestRequestMaker.{GetRequest, PatchRequest, RelativePath, Requests}
 import com.gu.util.resthttp.Types.ClientFailableOp
 import play.api.libs.json.{JsValue, Json, Reads}
 
@@ -52,15 +54,21 @@ object SalesforceCase extends Logging {
 
   object Update {
 
-    def apply(sfRequests: Requests)(caseId: CaseId, body: JsValue): ClientFailableOp[Unit] =
-      sfRequests.patch(body, s"$caseSObjectsBaseUrl/${caseId.value}")
+    def apply(patch: HttpOp[RestRequestMaker.PatchRequest, Unit]): (CaseId, JsValue) => ClientFailableOp[Unit] =
+      patch.setupRequestMultiArg(toRequest _).runRequestMultiArg
+
+    def toRequest(caseId: CaseId, body: JsValue): PatchRequest =
+      PatchRequest(body, RelativePath(s"$caseSObjectsBaseUrl/${caseId.value}"))
 
   }
 
   object GetById {
 
-    def apply[ResponseType: Reads](sfRequests: Requests)(caseId: CaseId): ClientFailableOp[ResponseType] =
-      sfRequests.get[ResponseType](s"$caseSObjectsBaseUrl/${caseId.value}")
+    def apply[ResponseType: Reads](get: HttpOp[RestRequestMaker.GetRequest, JsValue]): CaseId => ClientFailableOp[ResponseType] =
+      get.setupRequest(toRequest _).parse[ResponseType].runRequest
+
+    def toRequest(caseId: CaseId): GetRequest = RestRequestMaker.GetRequest(RelativePath(s"$caseSObjectsBaseUrl/${caseId.value}"))
+
   }
 
   object GetMostRecentCaseByContactId {
@@ -74,12 +82,15 @@ object SalesforceCase extends Logging {
     type TGetMostRecentCaseByContactId = (ContactId, SubscriptionId, CaseSubject) => ClientFailableOp[Option[CaseWithId]]
 
     def apply(
-      sfRequests: Requests
-    )(
+      get: HttpOp[RestRequestMaker.GetRequest, JsValue]
+    ): (ContactId, SubscriptionId, CaseSubject) => ClientFailableOp[Option[CaseWithId]] =
+      get.setupRequestMultiArg(toRequest _).parse[CaseQueryResponse].map(toResponse).runRequestMultiArg
+
+    def toRequest(
       contactId: ContactId,
       subscriptionId: SubscriptionId,
       caseSubject: CaseSubject
-    ): ClientFailableOp[Option[CaseWithId]] = {
+    ): GetRequest = {
       val soqlQuery = s"SELECT Id " +
         s"FROM Case " +
         s"WHERE ContactId = '${contactId.value}' " +
@@ -90,9 +101,13 @@ object SalesforceCase extends Logging {
         s"ORDER BY CreatedDate DESC " +
         s"LIMIT 1"
       logger.info(s"using SF query : $soqlQuery")
-      sfRequests.get[CaseQueryResponse](s"$caseSoqlQueryBaseUrl$soqlQuery")
-        .map(_.records.headOption.map(camelId => CaseWithId(CaseId(camelId.Id))))
+      RestRequestMaker.GetRequest(RelativePath(s"$caseSoqlQueryBaseUrl$soqlQuery"))
     }
+
+    def toResponse(caseQueryResponse: CaseQueryResponse): Option[CaseWithId] = {
+      caseQueryResponse.records.headOption.map(camelId => CaseWithId(CaseId(camelId.Id)))
+    }
+
   }
 
 }
