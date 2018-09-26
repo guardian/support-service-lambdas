@@ -1,6 +1,5 @@
 package com.gu.salesforce
 
-import com.gu.salesforce
 import com.gu.salesforce.SalesforceAuthenticate.{SFAuthConfig, SalesforceAuth}
 import com.gu.util.resthttp.RestRequestMaker.{BodyAsString, RelativePath, createBodyFromString, toClientFailableOp}
 import com.gu.util.resthttp.{HttpOp, LazyClientFailableOp}
@@ -12,7 +11,7 @@ object SalesforceClient {
     response: Request => Response,
     config: SFAuthConfig
   ): LazyClientFailableOp[HttpOp[StringHttpRequest, BodyAsString]] =
-    salesforce.SalesforceAuthenticate(response)(config).map { sfAuth =>
+    SalesforceAuthenticate(response)(config).map { sfAuth =>
       HttpOp(response).flatMap {
         toClientFailableOp
       }.setupRequest[StringHttpRequest] {
