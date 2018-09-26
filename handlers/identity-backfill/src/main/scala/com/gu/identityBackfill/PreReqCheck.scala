@@ -13,6 +13,7 @@ import scalaz.\/
 import TypeConvert._
 import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
+import com.gu.util.resthttp.LazyClientFailableOp
 
 object PreReqCheck {
 
@@ -23,7 +24,7 @@ object PreReqCheck {
     getSingleZuoraAccountForEmail: EmailAddress => ApiGatewayOp[ZuoraAccountIdentitySFContact],
     noZuoraAccountsForIdentityId: IdentityId => ApiGatewayOp[Unit],
     zuoraSubType: AccountId => ApiGatewayOp[Unit],
-    syncableSFToIdentity: SFContactId => ApiGatewayOp[Unit]
+    syncableSFToIdentity: SFContactId => LazyClientFailableOp[ApiGatewayOp[Unit]]
   )(emailAddress: EmailAddress): ApiGatewayOp[PreReqResult] = {
     for {
       identityId <- getByEmail(emailAddress).leftMap({
@@ -33,7 +34,7 @@ object PreReqCheck {
       }).toApiGatewayOp.withLogging("GetByEmail")
       zuoraAccountForEmail <- getSingleZuoraAccountForEmail(emailAddress)
       _ <- noZuoraAccountsForIdentityId(identityId)
-      _ <- syncableSFToIdentity(zuoraAccountForEmail.sfContactId)
+      _ <- syncableSFToIdentity(zuoraAccountForEmail.sfContactId).value.toApiGatewayOp("load SF contact").flatMap(identity)
     } yield PreReqResult(zuoraAccountForEmail.accountId, zuoraAccountForEmail.sfContactId, identityId)
   }
 

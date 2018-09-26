@@ -2,23 +2,24 @@ package com.gu.salesforce.auth
 
 import com.gu.effects.TestingRawEffects
 import com.gu.effects.TestingRawEffects.{HTTPResponse, POSTRequest}
-import com.gu.salesforce.auth.SalesforceAuthenticate.{SFAuthConfig, SalesforceAuth}
+import com.gu.salesforce.SalesforceAuthenticate
+import com.gu.salesforce.SalesforceAuthenticate.{SFAuthConfig, SalesforceAuth}
+import com.gu.util.resthttp.Types.ClientSuccess
 import org.scalatest.{FlatSpec, Matchers}
-import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
 
 class SalesforceAuthenticateTest extends FlatSpec with Matchers {
 
   it should "get auth SF correctly" in {
     val effects = new TestingRawEffects(postResponses = SalesforceAuthenticateData.postResponses)
-    val auth = SalesforceAuthenticate.doAuth(effects.response, SFAuthConfig(
+    val auth = SalesforceAuthenticate.apply(effects.response)(SFAuthConfig(
       "https://sfurl.haha",
       "clientsfclient",
       "clientsecretsfsecret",
       "usernamesf",
       "passSFpassword",
       "tokentokenSFtoken"
-    ))
-    val expected = ContinueProcessing(SalesforceAuth("tokentoken", "https://instance.url"))
+    )).value
+    val expected = ClientSuccess(SalesforceAuth("tokentoken", "https://instance.url"))
     auth should be(expected)
 
   }

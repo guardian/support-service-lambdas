@@ -11,18 +11,19 @@ import com.gu.identityBackfill.salesforce.ContactSyncCheck.RecordTypeId
 import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
 import com.gu.identityBackfill.salesforce._
 import com.gu.identityBackfill.zuora.{AddIdentityIdToAccount, CountZuoraAccountsForIdentityId, GetZuoraAccountsForEmail, GetZuoraSubTypeForAccount}
+import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
+import com.gu.salesforce.SalesforceClient.StringHttpRequest
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
-import com.gu.salesforce.auth.SalesforceAuthenticate
-import com.gu.salesforce.auth.SalesforceAuthenticate.SFAuthConfig
+import com.gu.salesforce.{JsonHttp, SalesforceClient}
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayResponse}
 import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.reader.Types._
-import com.gu.util.resthttp.HttpOp
 import com.gu.util.resthttp.RestRequestMaker.{GetRequest, PatchRequest}
 import com.gu.util.resthttp.Types.ClientFailableOp
+import com.gu.util.resthttp.{HttpOp, LazyClientFailableOp, RestRequestMaker}
 import com.gu.util.zuora.{ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
 import okhttp3.{Request, Response}
 import play.api.libs.json.JsValue
@@ -55,9 +56,9 @@ object Handler {
       val getByEmail: EmailAddress => GetByEmail.ApiError \/ IdentityId = GetByEmail(response, identityConfig)
       val countZuoraAccounts: IdentityId => ClientFailableOp[Int] = CountZuoraAccountsForIdentityId(zuoraQuerier)
 
-      lazy val sfAuth: ApiGatewayOp[SalesforceAuthenticate.SalesforceAuth] = SalesforceAuthenticate.doAuth(response, sfConfig)
-      lazy val sfPatch = sfAuth.map(salesforceAuth => SalesforceAuthenticate.patch(response, salesforceAuth))
-      lazy val sfGet = sfAuth.map(salesforceAuth => SalesforceAuthenticate.get(response, salesforceAuth))
+      lazy val sfAuth: LazyClientFailableOp[HttpOp[StringHttpRequest, RestRequestMaker.BodyAsString]] = SalesforceClient(response, sfConfig)
+      lazy val sfPatch = sfAuth.map(_.wrap(JsonHttp.patch))
+      lazy val sfGet = sfAuth.map(_.wrap(JsonHttp.get))
 
       Operation(
         steps = IdentityBackfillSteps(
@@ -100,23 +101,26 @@ object Handler {
       .toApiGatewayContinueProcessing(ApiGatewayResponse.internalServerError(s"missing standard record type for stage $stage"))
   }
 
-  def syncableSFToIdentity(sfRequests: ApiGatewayOp[HttpOp[GetRequest, JsValue]], stage: Stage)(sFContactId: SFContactId): ApiGatewayOp[Unit] =
+  def syncableSFToIdentity(
+    sfRequests: LazyClientFailableOp[HttpOp[GetRequest, JsValue]],
+    stage: Stage
+  )(sFContactId: SFContactId): LazyClientFailableOp[ApiGatewayOp[Unit]] =
     for {
       sfRequests <- sfRequests
+      fields <- GetSFContactSyncCheckFields(sfRequests).apply(sFContactId)
+    } yield for {
       standardRecordType <- standardRecordTypeForStage(stage)
-      fields <- GetSFContactSyncCheckFields(sfRequests).apply(sFContactId).value
-        .toApiGatewayOp("get contact from salesforce")
       syncable <- SyncableSFToIdentity(standardRecordType)(fields)(sFContactId)
     } yield syncable
 
   def updateSalesforceIdentityId(
-    sfRequests: ApiGatewayOp[HttpOp[PatchRequest, Unit]]
+    sfRequests: LazyClientFailableOp[HttpOp[PatchRequest, Unit]]
   )(
     sFContactId: SFContactId,
     identityId: IdentityId
   ): ApiGatewayOp[Unit] =
     for {
-      sfRequests <- sfRequests
+      sfRequests <- sfRequests.value.toApiGatewayOp("Failed to authenticate with Salesforce")
       _ <- UpdateSalesforceIdentityId(sfRequests).runRequestMultiArg(sFContactId, identityId)
         .toApiGatewayOp("update identity id in salesforce")
     } yield ()
@@ -127,13 +131,13 @@ object Healthcheck {
   def apply(
     getByEmail: EmailAddress => \/[GetByEmail.ApiError, IdentityId],
     countZuoraAccountsForIdentityId: IdentityId => ClientFailableOp[Int],
-    sfAuth: => ApiGatewayOp[Any]
+    sfAuth: LazyClientFailableOp[Any]
   ): ApiResponse =
     (for {
       identityId <- getByEmail(EmailAddress("john.duffell@guardian.co.uk"))
         .toApiGatewayOp("problem with email").withLogging("healthcheck getByEmail")
       _ <- countZuoraAccountsForIdentityId(identityId).toApiGatewayOp("get zuora accounts for identity id")
-      _ <- sfAuth
+      _ <- sfAuth.value.toApiGatewayOp("Failed to authenticate with Salesforce")
     } yield ApiGatewayResponse.successfulExecution).apiResponse
 
 }
