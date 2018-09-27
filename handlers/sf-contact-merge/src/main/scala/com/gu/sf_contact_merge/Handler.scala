@@ -98,7 +98,8 @@ object DomainSteps {
         .toApiGatewayOp("get salesforce addresses")
       _ <- ValidateNoLosingDigitalVoucher(winningAndOtherContact.others.map(_.map(_.isDigitalVoucherUser)))
       oldContact = accountAndEmails.find(_.identityId.isDefined).map(_.sfContactId).map(OldSFContact.apply)
-      linksFromZuora = LinksFromZuora(mergeRequest.sfContactId, mergeRequest.crmAccountId, maybeIdentityId)
+      linksFromZuora = LinksFromZuora(mergeRequest.sfContactId, mergeRequest.crmAccountId, maybeIdentityId, None /*TODO*/ )
+      // TODO next pr will fill in the None above with the non "+gnm" email address, there are any +gnm addresses at all.
       _ <- mergeRequest.zuoraAccountIds.traverseU(updateAccountSFLinks(linksFromZuora))
         .toApiGatewayOp("update accounts with winning details")
       _ <- updateSFContacts(mergeRequest.sfContactId, maybeIdentityId, oldContact, firstNameToUse, maybeSFAddressOverride, None /*TODO*/ )

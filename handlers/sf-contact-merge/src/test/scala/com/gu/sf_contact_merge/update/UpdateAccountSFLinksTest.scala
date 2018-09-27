@@ -3,6 +3,7 @@ package com.gu.sf_contact_merge.update
 import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId.IdentityId
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.sf_contact_merge.getaccounts.GetContacts.AccountId
+import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.EmailAddress
 import com.gu.sf_contact_merge.update.UpdateAccountSFLinks.{CRMAccountId, LinksFromZuora}
 import com.gu.util.resthttp.RestRequestMaker.{PutRequest, RelativePath}
 import org.scalatest.{FlatSpec, Matchers}
@@ -27,6 +28,7 @@ class UpdateAccountSFLinksTest extends FlatSpec with Matchers {
       LinksFromZuora(
         SFContactId("johnjohn_c"),
         CRMAccountId("crmIdjohn"),
+        None,
         None
       )
     )(
@@ -46,7 +48,8 @@ class UpdateAccountSFLinksTest extends FlatSpec with Matchers {
         |{
         |    "sfContactId__c": "johnjohn_c",
         |    "crmId": "crmIdjohn",
-        |    "IdentityId__c": "identity"
+        |    "IdentityId__c": "identity",
+        |    "billToContact": {"workEmail": "email@email.com"}
         |    }
       """.stripMargin
     )
@@ -55,7 +58,8 @@ class UpdateAccountSFLinksTest extends FlatSpec with Matchers {
       LinksFromZuora(
         SFContactId("johnjohn_c"),
         CRMAccountId("crmIdjohn"),
-        Some(IdentityId("identity"))
+        Some(IdentityId("identity")),
+        Some(EmailAddress("email@email.com"))
       )
     )(
         AccountId("1234")
