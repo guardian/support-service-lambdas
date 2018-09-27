@@ -4,9 +4,9 @@ import java.io.{InputStream, OutputStream}
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
-import com.gu.salesforce.{JsonHttp, SalesforceClient}
-import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
+import com.gu.salesforce.TypesForSFEffectsData.SFContactId
+import com.gu.salesforce.{JsonHttp, SalesforceClient}
 import com.gu.sf_contact_merge.TypeConvert._
 import com.gu.sf_contact_merge.WireRequestToDomainObject.MergeRequest
 import com.gu.sf_contact_merge.getaccounts.GetContacts.AccountId
@@ -86,6 +86,7 @@ object DomainSteps {
     (for {
       accountAndEmails <- getIdentityAndZuoraEmailsForAccounts(mergeRequest.zuoraAccountIds)
         .toApiGatewayOp("getIdentityAndZuoraEmailsForAccounts")
+      _ <- AnyContactsToChange(mergeRequest.sfContactId, accountAndEmails.map(_.sfContactId))
       _ <- validateEmails(accountAndEmails.map(_.emailAddress))
       maybeIdentityId <- validateIdentityIds(accountAndEmails.map(_.identityId))
         .toApiGatewayOp(ApiGatewayResponse.notFound _)
