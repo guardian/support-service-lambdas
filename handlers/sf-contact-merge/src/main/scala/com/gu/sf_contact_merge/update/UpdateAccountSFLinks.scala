@@ -6,7 +6,7 @@ import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.EmailAddress
 import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId.IdentityId
 import com.gu.util.resthttp.RestRequestMaker.{JsonResponse, PutRequest, RelativePath}
 import com.gu.util.resthttp.Types.ClientFailableOp
-import play.api.libs.json.{JsSuccess, Json, Reads}
+import play.api.libs.json.Json
 
 object UpdateAccountSFLinks {
 
@@ -21,7 +21,6 @@ object UpdateAccountSFLinks {
   )
   implicit val writesC = Json.writes[WireZuoraContact]
   implicit val writesA = Json.writes[WireZuoraAccount]
-  implicit val unitReads: Reads[Unit] = Reads(_ => JsSuccess(()))
 
   case class LinksFromZuora(
     sfContactId: SFContactId,
