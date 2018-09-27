@@ -4,9 +4,9 @@ import java.io.{InputStream, OutputStream}
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
-import com.gu.salesforce.{JsonHttp, SalesforceClient}
-import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
+import com.gu.salesforce.TypesForSFEffectsData.SFContactId
+import com.gu.salesforce.{JsonHttp, SalesforceClient}
 import com.gu.sf_contact_merge.TypeConvert._
 import com.gu.sf_contact_merge.WireRequestToDomainObject.MergeRequest
 import com.gu.sf_contact_merge.getaccounts.GetContacts.AccountId
@@ -86,6 +86,7 @@ object DomainSteps {
     (for {
       accountAndEmails <- getIdentityAndZuoraEmailsForAccounts(mergeRequest.zuoraAccountIds)
         .toApiGatewayOp("getIdentityAndZuoraEmailsForAccounts")
+      _ <- AnyContactsToChange(mergeRequest.sfContactId, accountAndEmails.map(_.sfContactId))
       _ <- validateEmails(accountAndEmails.map(_.emailAddress))
       maybeIdentityId <- validateIdentityIds(accountAndEmails.map(_.identityId))
         .toApiGatewayOp(ApiGatewayResponse.notFound _)
@@ -100,7 +101,8 @@ object DomainSteps {
       linksFromZuora = LinksFromZuora(mergeRequest.sfContactId, mergeRequest.crmAccountId, maybeIdentityId)
       _ <- mergeRequest.zuoraAccountIds.traverseU(updateAccountSFLinks(linksFromZuora))
         .toApiGatewayOp("update accounts with winning details")
-      _ <- updateSFContacts(mergeRequest.sfContactId, maybeIdentityId, oldContact, firstNameToUse, maybeSFAddressOverride)
+      _ <- updateSFContacts(mergeRequest.sfContactId, maybeIdentityId, oldContact, firstNameToUse, maybeSFAddressOverride, None /*TODO*/ )
+        // TODO next pr will fill in the None above with the non "+gnm" email address, if the winner is a +gnm.
         .toApiGatewayOp("update sf contact(s) to force a sync")
     } yield ApiGatewayResponse.successfulExecution).apiResponse
 }

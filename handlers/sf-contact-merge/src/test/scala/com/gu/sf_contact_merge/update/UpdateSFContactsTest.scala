@@ -1,7 +1,7 @@
 package com.gu.sf_contact_merge.update
 
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
-import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.FirstName
+import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.{EmailAddress, FirstName}
 import com.gu.sf_contact_merge.getsfcontacts.GetSfAddress.SFAddress
 import com.gu.sf_contact_merge.getsfcontacts.GetSfAddress.SFAddressFields._
 import com.gu.sf_contact_merge.getsfcontacts.GetSfAddressOverride.{DontOverrideAddress, OverrideAddressWith}
@@ -19,12 +19,12 @@ class UpdateSFContactsTest extends FlatSpec with Matchers {
 
     def apply(sfContactId: SFContactId, sfUpdateRequest: SFContactUpdate): Types.ClientFailableOp[Unit] = {
       invocationLog = invocationLog ++ List(sfUpdateRequest match {
-        case SFContactUpdate(None, setname, DontOverrideAddress) =>
-          s"clear ${sfContactId.value} setname: $setname"
-        case SFContactUpdate(None, setname, OverrideAddressWith(a)) =>
-          s"clear ${sfContactId.value} setname: $setname, setaddress"
-        case SFContactUpdate(Some(IdentityId("newIdentityId")), SetFirstName(FirstName(name)), OverrideAddressWith(a)) =>
-          s"addidentity ${sfContactId.value} setname $name, setaddress"
+        case SFContactUpdate(None, setname, DontOverrideAddress, email) =>
+          s"clear ${sfContactId.value} setname: $setname" + email.map(email => s", setemail ${email.value}").getOrElse("")
+        case SFContactUpdate(None, setname, OverrideAddressWith(a), email) =>
+          s"clear ${sfContactId.value} setname: $setname, setaddress" + email.map(email => s", setemail ${email.value}").getOrElse("")
+        case SFContactUpdate(Some(IdentityId("newIdentityId")), SetFirstName(FirstName(name)), OverrideAddressWith(a), email) =>
+          s"addidentity ${sfContactId.value} setname $name, setaddress" + email.map(email => s", setemail ${email.value}").getOrElse("")
         case other =>
           s"try to set identity id to: <$other>"
       })
@@ -45,10 +45,14 @@ class UpdateSFContactsTest extends FlatSpec with Matchers {
       maybeIdentityId,
       maybeContactId,
       Some(FirstName("hello")),
-      DontOverrideAddress
+      DontOverrideAddress,
+      None
     )
 
-    val expectedOrder = List("clear contold setname: DontChangeFirstName", "clear contnew setname: SetFirstName(FirstName(hello))")
+    val expectedOrder = List(
+      "clear contold setname: DontChangeFirstName",
+      "clear contnew setname: SetFirstName(FirstName(hello))"
+    )
     invocationLog.invocationLog should be(expectedOrder)
     actual should be(ClientSuccess(()))
   }
@@ -73,10 +77,14 @@ class UpdateSFContactsTest extends FlatSpec with Matchers {
         Some(SFPostalCode("post1")),
         SFCountry("country1"),
         Some(SFPhone("phone1"))
-      ))
+      )),
+      Some(EmailAddress("email@email.com"))
     )
 
-    val expectedOrder = List("clear contold setname: DontChangeFirstName", "addidentity contnew setname hello, setaddress")
+    val expectedOrder = List(
+      "clear contold setname: DontChangeFirstName",
+      "addidentity contnew setname hello, setaddress, setemail email@email.com"
+    )
     mockSetOrClearIdentityId.invocationLog should be(expectedOrder)
     actual should be(ClientSuccess(()))
   }
@@ -94,10 +102,13 @@ class UpdateSFContactsTest extends FlatSpec with Matchers {
       maybeIdentityId,
       maybeContactId,
       Some(FirstName("hello")),
-      DontOverrideAddress
+      DontOverrideAddress,
+      None
     )
 
-    val expectedOrder = List("clear contnew setname: SetFirstName(FirstName(hello))")
+    val expectedOrder = List(
+      "clear contnew setname: SetFirstName(FirstName(hello))"
+    )
     mockSetOrClearIdentityId.invocationLog should be(expectedOrder)
     actual should be(ClientSuccess(()))
   }
