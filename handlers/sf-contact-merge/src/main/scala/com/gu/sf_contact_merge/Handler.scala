@@ -101,7 +101,8 @@ object DomainSteps {
       linksFromZuora = LinksFromZuora(mergeRequest.sfContactId, mergeRequest.crmAccountId, maybeIdentityId)
       _ <- mergeRequest.zuoraAccountIds.traverseU(updateAccountSFLinks(linksFromZuora))
         .toApiGatewayOp("update accounts with winning details")
-      _ <- updateSFContacts(mergeRequest.sfContactId, maybeIdentityId, oldContact, firstNameToUse, maybeSFAddressOverride)
+      _ <- updateSFContacts(mergeRequest.sfContactId, maybeIdentityId, oldContact, firstNameToUse, maybeSFAddressOverride, None /*TODO*/ )
+        // TODO next pr will fill in the None above with the non "+gnm" email address, if the winner is a +gnm.
         .toApiGatewayOp("update sf contact(s) to force a sync")
     } yield ApiGatewayResponse.successfulExecution).apiResponse
 }

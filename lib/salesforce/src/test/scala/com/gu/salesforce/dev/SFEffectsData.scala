@@ -9,6 +9,6 @@ object SFEffectsData {
   val testContactHasNamePhoneOtherAddress = SFContactId("0036E00000NLzPkQAL")
 
   // this contact we can update the identity id freely
-  val updateIdentityIdAndFirstNameContact = SFContactId("0036E00000Ho05i")
+  val updateIdentityIdEmailAndFirstNameContact = SFContactId("0036E00000Ho05i")
 
 }

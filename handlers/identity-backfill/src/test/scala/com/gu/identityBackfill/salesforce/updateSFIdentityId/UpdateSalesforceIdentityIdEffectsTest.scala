@@ -18,7 +18,7 @@ class UpdateSalesforceIdentityIdEffectsTest extends FlatSpec with Matchers {
   it should "get auth SF correctly" taggedAs EffectsTest in {
 
     val unique = s"${Random.nextInt(10000)}"
-    val testContact = SFEffectsData.updateIdentityIdAndFirstNameContact
+    val testContact = SFEffectsData.updateIdentityIdEmailAndFirstNameContact
 
     val actual = for {
       sfConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[SFAuthConfig]

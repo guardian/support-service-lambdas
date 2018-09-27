@@ -1,7 +1,7 @@
 package com.gu.sf_contact_merge.update
 
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
-import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.FirstName
+import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.{EmailAddress, FirstName}
 import com.gu.sf_contact_merge.getsfcontacts.GetSfAddressOverride.SFAddressOverride
 import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId.SFContactUpdate
 import com.gu.util.resthttp.HttpOp
@@ -19,7 +19,8 @@ object UpdateSalesforceIdentityId {
     OtherState: Option[String],
     OtherPostalCode: Option[String],
     OtherCountry: Option[String],
-    Phone: Option[String]
+    Phone: Option[String],
+    Email: Option[String]
   )
   implicit val writes = Json.writes[WireRequest]
 
@@ -29,7 +30,12 @@ object UpdateSalesforceIdentityId {
   case class SetFirstName(firstName: FirstName) extends UpdateFirstName
   case object DummyFirstName extends UpdateFirstName
   case object DontChangeFirstName extends UpdateFirstName
-  case class SFContactUpdate(identityId: Option[IdentityId], firstName: UpdateFirstName, maybeNewAddress: SFAddressOverride)
+  case class SFContactUpdate(
+    identityId: Option[IdentityId],
+    firstName: UpdateFirstName,
+    maybeNewAddress: SFAddressOverride,
+    maybeOverwriteEmailAddress: Option[EmailAddress]
+  )
 
   def apply(patchOp: HttpOp[PatchRequest, Unit]): SetOrClearIdentityId =
     SetOrClearIdentityId(patchOp.setupRequestMultiArg(toRequest _).runRequestMultiArg)
@@ -50,7 +56,8 @@ object UpdateSalesforceIdentityId {
       contactUpdate.maybeNewAddress.toOption.flatMap(_.OtherState.map(_.value)),
       contactUpdate.maybeNewAddress.toOption.flatMap(_.OtherPostalCode.map(_.value)),
       contactUpdate.maybeNewAddress.toOption.map(_.OtherCountry.value),
-      contactUpdate.maybeNewAddress.toOption.flatMap(_.Phone.map(_.value))
+      contactUpdate.maybeNewAddress.toOption.flatMap(_.Phone.map(_.value)),
+      contactUpdate.maybeOverwriteEmailAddress.map(_.value)
     )
 
     val relativePath = RelativePath(s"/services/data/v43.0/sobjects/Contact/${sFContactId.value}")
