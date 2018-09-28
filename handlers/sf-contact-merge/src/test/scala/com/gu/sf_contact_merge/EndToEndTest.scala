@@ -123,7 +123,7 @@ object EndToEndTest {
 
   val sfAuthResponse = """{"access_token":"aaaccess", "instance_url":"https://iinstance"}"""
 
-  val updateAccountRequestBody = """{"crmId":"sfacc","sfContactId__c":"newSFCont","IdentityId__c":"identest"}"""
+  val updateAccountRequestBody = """{"crmId":"sfacc","sfContactId__c":"newSFCont","IdentityId__c":"sflosingiden","billToContact":{"workEmail":"hello@email.com"}}"""
   val removeIdentityBody = """{"IdentityID__c":""}"""
   val addIdentityBody = """{"IdentityID__c":"identest","FirstName":"peppa"}"""
 
@@ -132,7 +132,7 @@ object EndToEndTest {
   val newSFContResponse =
     """{
       |    "LastName": "lastlast",
-      |    "FirstName": "firstfirst",
+      |    "FirstName": "firstfirst",com.gu.sf_contact_merge.getsfcontacts.GetSfAddressEffectsTest
       |    "OtherStreet": "street1",
       |    "OtherCity": null,
       |    "OtherState": null,
@@ -140,8 +140,9 @@ object EndToEndTest {
       |    "OtherCountry": "country1",
       |    "OtherAddress": null,
       |    "Phone": null,
-      |    "IdentityID__c": "12121",
-      |    "Digital_Voucher_User__c": true
+      |    "IdentityID__c": null,
+      |    "Digital_Voucher_User__c": true,
+      |    "Email": "hello+gnm1@email.com"
       |}""".stripMargin.replaceAll("""\n""", "")
 
   val oldSFContResponse =
@@ -155,8 +156,9 @@ object EndToEndTest {
       |    "OtherCountry": "country1",
       |    "OtherAddress": null,
       |    "Phone": null,
-      |    "IdentityID__c": "12121",
-      |    "Digital_Voucher_User__c": false
+      |    "IdentityID__c": "sflosingiden",
+      |    "Digital_Voucher_User__c": false,
+      |    "Email": "hello@email.com"
       |}""".stripMargin.replaceAll("""\n""", "")
 
   val mock = new TestingRawEffects(

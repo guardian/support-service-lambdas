@@ -12,6 +12,9 @@ object GetZuoraContactDetails {
   case class ContactId(value: String) extends AnyVal
 
   case class EmailAddress(value: String) extends AnyVal
+  object EmailAddress {
+    def apply(value: String) = new EmailAddress(value.toLowerCase)
+  }
   case class FirstName(value: String) extends AnyVal
   case class LastName(value: String) extends AnyVal
   case class ZuoraContactDetails(emailAddress: Option[EmailAddress], firstName: Option[FirstName], lastName: LastName)

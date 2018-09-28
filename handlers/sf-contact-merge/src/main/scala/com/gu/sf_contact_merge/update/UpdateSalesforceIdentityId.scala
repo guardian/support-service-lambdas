@@ -1,6 +1,7 @@
 package com.gu.sf_contact_merge.update
 
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
+import com.gu.sf_contact_merge.Types.IdentityId
 import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.{EmailAddress, FirstName}
 import com.gu.sf_contact_merge.getsfcontacts.GetSfAddressOverride.SFAddressOverride
 import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId.SFContactUpdate
@@ -23,8 +24,6 @@ object UpdateSalesforceIdentityId {
     Email: Option[String]
   )
   implicit val writes = Json.writes[WireRequest]
-
-  case class IdentityId(value: String) extends AnyVal
 
   sealed trait UpdateFirstName
   case class SetFirstName(firstName: FirstName) extends UpdateFirstName

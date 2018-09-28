@@ -1,14 +1,16 @@
 package com.gu.sf_contact_merge.getsfcontacts
 
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
-import com.gu.sf_contact_merge.getsfcontacts.GetSfAddress.SFAddressFields._
-import com.gu.sf_contact_merge.getsfcontacts.GetSfAddress.SFContact
+import com.gu.sf_contact_merge.Types.IdentityId
+import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.EmailAddress
+import com.gu.sf_contact_merge.getsfcontacts.GetSfContact.SFAddressFields._
+import com.gu.sf_contact_merge.getsfcontacts.GetSfContact.SFContact
 import com.gu.util.resthttp.RestOp.HttpOpParseOp
 import com.gu.util.resthttp.RestRequestMaker.{GetRequest, RelativePath}
 import com.gu.util.resthttp.{HttpOp, LazyClientFailableOp}
 import play.api.libs.json.{JsValue, Json}
 
-object GetSfAddress {
+object GetSfContact {
 
   object SFAddressFields {
 
@@ -30,6 +32,8 @@ object GetSfAddress {
     Phone: Option[SFPhone]
   )
 
+  case class EmailIdentity(address: EmailAddress, identityId: Option[IdentityId])
+
   case class WireResult(
     OtherStreet: Option[String], // billing
     OtherCity: Option[String],
@@ -37,17 +41,20 @@ object GetSfAddress {
     OtherPostalCode: Option[String],
     OtherCountry: Option[String],
     Phone: Option[String],
-    Digital_Voucher_User__c: Boolean
+    Digital_Voucher_User__c: Boolean,
+    Email: String,
+    IdentityID__c: Option[String]
   )
   implicit val wireResultReads = Json.reads[WireResult]
 
-  def apply(getOp: HttpOp[GetRequest, JsValue]): GetSfAddress =
-    new GetSfAddress(getOp.setupRequest(toRequest).parse[WireResult].map(toResponse).runRequestLazy)
+  def apply(getOp: HttpOp[GetRequest, JsValue]): GetSfContact =
+    new GetSfContact(getOp.setupRequest(toRequest).parse[WireResult].map(toResponse).runRequestLazy)
 
   def toResponse(wireResult: WireResult): SFContact =
     SFContact(
       toMaybeAddress(wireResult),
-      IsDigitalVoucherUser(wireResult.Digital_Voucher_User__c)
+      IsDigitalVoucherUser(wireResult.Digital_Voucher_User__c),
+      EmailIdentity(EmailAddress(wireResult.Email), wireResult.IdentityID__c.map(IdentityId))
     )
 
   def toMaybeAddress(wireResult: WireResult): SFMaybeAddress = {
@@ -71,7 +78,8 @@ object GetSfAddress {
 
   case class SFContact(
     SFMaybeAddress: SFMaybeAddress,
-    isDigitalVoucherUser: IsDigitalVoucherUser
+    isDigitalVoucherUser: IsDigitalVoucherUser,
+    emailIdentity: EmailIdentity
   )
 
   case class IsDigitalVoucherUser(value: Boolean) extends AnyVal
@@ -84,4 +92,4 @@ object GetSfAddress {
 
 }
 
-case class GetSfAddress(apply: SFContactId => LazyClientFailableOp[SFContact])
+case class GetSfContact(apply: SFContactId => LazyClientFailableOp[SFContact])

@@ -1,9 +1,10 @@
 package com.gu.sf_contact_merge.update
 
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
+import com.gu.sf_contact_merge.Types.IdentityId
 import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.{EmailAddress, FirstName}
 import com.gu.sf_contact_merge.getsfcontacts.GetSfAddressOverride.{DontOverrideAddress, SFAddressOverride}
-import com.gu.sf_contact_merge.update.UpdateSFContacts.OldSFContact
+import com.gu.sf_contact_merge.update.UpdateSFContacts.IdentityIdMoveData
 import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId._
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess}
 
@@ -13,14 +14,13 @@ object UpdateSFContacts {
     setOrClearIdentityId: SetOrClearIdentityId
   ): UpdateSFContacts = (
     sfContactId: SFContactId,
-    identityId: Option[IdentityId],
-    maybeOldContactId: Option[OldSFContact],
+    maybeMoveIdentityIdData: Option[IdentityIdMoveData],
     firstName: Option[FirstName],
     maybeSFAddressOverride: SFAddressOverride,
     maybeOverwriteEmailAddress: Option[EmailAddress]
   ) =>
     for {
-      _ <- maybeOldContactId match {
+      _ <- maybeMoveIdentityIdData.map(_.oldSFContact) match {
         case Some(oldContactId) => {
           val sFContactUpdate = SFContactUpdate(None, DontChangeFirstName, DontOverrideAddress, None)
           setOrClearIdentityId.apply(oldContactId.sfContactId, sFContactUpdate)
@@ -29,7 +29,7 @@ object UpdateSFContacts {
       }
       _ <- {
         val sFContactUpdate = SFContactUpdate(
-          identityId,
+          maybeMoveIdentityIdData.map(_.identityIdUpdate.value),
           firstName.map(SetFirstName.apply).getOrElse(DummyFirstName),
           maybeSFAddressOverride,
           maybeOverwriteEmailAddress
@@ -40,14 +40,16 @@ object UpdateSFContacts {
 
   case class OldSFContact(sfContactId: SFContactId)
 
+  case class IdentityIdToUse(value: IdentityId)
+  case class IdentityIdMoveData(oldSFContact: OldSFContact, identityIdUpdate: IdentityIdToUse)
+
 }
 
 trait UpdateSFContacts {
 
   def apply(
     sfContactId: SFContactId,
-    identityId: Option[IdentityId],
-    maybeOldContactId: Option[OldSFContact],
+    maybeMoveIdentityIdData: Option[IdentityIdMoveData],
     firstNameToUse: Option[FirstName],
     maybeSFAddressOverride: SFAddressOverride,
     maybeOverwriteEmailAddress: Option[EmailAddress]

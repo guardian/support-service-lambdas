@@ -1,7 +1,7 @@
 package com.gu.sf_contact_merge.getaccounts
 
-import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId.IdentityId
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
+import com.gu.sf_contact_merge.Types.IdentityId
 import com.gu.sf_contact_merge.getaccounts.GetContacts.{AccountId, IdentityAndSFContact}
 import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.ContactId
 import com.gu.util.resthttp.Types.ClientSuccess

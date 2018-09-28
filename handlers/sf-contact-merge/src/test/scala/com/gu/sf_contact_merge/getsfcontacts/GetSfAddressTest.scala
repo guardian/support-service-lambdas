@@ -1,15 +1,17 @@
 package com.gu.sf_contact_merge.getsfcontacts
 
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
-import com.gu.sf_contact_merge.getsfcontacts.GetSfAddress.SFAddressFields._
-import com.gu.sf_contact_merge.getsfcontacts.GetSfAddress.{IsDigitalVoucherUser, SFAddress, SFMaybeAddress, UnusableContactAddress, UsableContactAddress, WireResult}
+import com.gu.sf_contact_merge.Types.IdentityId
+import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.EmailAddress
+import com.gu.sf_contact_merge.getsfcontacts.GetSfContact.SFAddressFields._
+import com.gu.sf_contact_merge.getsfcontacts.GetSfContact.{EmailIdentity, IsDigitalVoucherUser, SFAddress, SFMaybeAddress, UnusableContactAddress, UsableContactAddress, WireResult}
 import com.gu.util.resthttp.RestRequestMaker.{GetRequest, RelativePath}
 import org.scalatest.{FlatSpec, Matchers}
 
 class GetSfAddressTest extends FlatSpec with Matchers {
 
   "toRequest" should "compose a correct GET request" in {
-    val actual = GetSfAddress.toRequest(SFContactId("testcont"))
+    val actual = GetSfContact.toRequest(SFContactId("testcont"))
     actual should be(GetRequest(RelativePath("/services/data/v43.0/sobjects/Contact/testcont")))
   }
 
@@ -21,9 +23,11 @@ class GetSfAddressTest extends FlatSpec with Matchers {
       OtherPostalCode = Some("postalcode1"),
       OtherCountry = Some("country1"),
       Phone = Some("phone1"),
-      Digital_Voucher_User__c = false
+      Digital_Voucher_User__c = false,
+      Email = "a@b.com",
+      IdentityID__c = None
     )
-    val actual: SFMaybeAddress = GetSfAddress.toMaybeAddress(wireResult)
+    val actual: SFMaybeAddress = GetSfContact.toMaybeAddress(wireResult)
 
     val expected = SFAddress(
       SFStreet("street1"),
@@ -45,9 +49,11 @@ class GetSfAddressTest extends FlatSpec with Matchers {
       OtherPostalCode = None,
       OtherCountry = Some("country1"),
       Phone = None,
-      Digital_Voucher_User__c = false
+      Digital_Voucher_User__c = false,
+      Email = "a@b.com",
+      IdentityID__c = None
     )
-    val actual: SFMaybeAddress = GetSfAddress.toMaybeAddress(wireResult)
+    val actual: SFMaybeAddress = GetSfContact.toMaybeAddress(wireResult)
 
     val expected = SFAddress(
       SFStreet("street1"),
@@ -69,9 +75,11 @@ class GetSfAddressTest extends FlatSpec with Matchers {
       OtherPostalCode = Some("postalcode1"),
       OtherCountry = Some("country1"),
       Phone = Some("phone1"),
-      Digital_Voucher_User__c = false
+      Digital_Voucher_User__c = false,
+      Email = "a@b.com",
+      IdentityID__c = None
     )
-    val actual: SFMaybeAddress = GetSfAddress.toMaybeAddress(wireResult)
+    val actual: SFMaybeAddress = GetSfContact.toMaybeAddress(wireResult)
 
     actual should be(UnusableContactAddress)
   }
@@ -84,9 +92,11 @@ class GetSfAddressTest extends FlatSpec with Matchers {
       OtherPostalCode = Some("postalcode1"),
       OtherCountry = Some("country1"),
       Phone = Some("phone1"),
-      Digital_Voucher_User__c = false
+      Digital_Voucher_User__c = false,
+      Email = "a@b.com",
+      IdentityID__c = None
     )
-    val actual: SFMaybeAddress = GetSfAddress.toMaybeAddress(wireResult)
+    val actual: SFMaybeAddress = GetSfContact.toMaybeAddress(wireResult)
 
     actual should be(UnusableContactAddress)
   }
@@ -99,9 +109,11 @@ class GetSfAddressTest extends FlatSpec with Matchers {
       OtherPostalCode = Some("postalcode1"),
       OtherCountry = Some("country1"),
       Phone = Some("phone1"),
-      Digital_Voucher_User__c = false
+      Digital_Voucher_User__c = false,
+      Email = "a@b.com",
+      IdentityID__c = None
     )
-    val actual: SFMaybeAddress = GetSfAddress.toMaybeAddress(wireResult)
+    val actual: SFMaybeAddress = GetSfContact.toMaybeAddress(wireResult)
 
     actual should be(UnusableContactAddress)
   }
@@ -114,9 +126,11 @@ class GetSfAddressTest extends FlatSpec with Matchers {
       OtherPostalCode = Some("postalcode1"),
       OtherCountry = None,
       Phone = Some("phone1"),
-      Digital_Voucher_User__c = false
+      Digital_Voucher_User__c = false,
+      Email = "a@b.com",
+      IdentityID__c = None
     )
-    val actual: SFMaybeAddress = GetSfAddress.toMaybeAddress(wireResult)
+    val actual: SFMaybeAddress = GetSfContact.toMaybeAddress(wireResult)
 
     actual should be(UnusableContactAddress)
   }
@@ -129,11 +143,17 @@ class GetSfAddressTest extends FlatSpec with Matchers {
       OtherPostalCode = None,
       OtherCountry = None,
       Phone = None,
-      Digital_Voucher_User__c = false
+      Digital_Voucher_User__c = false,
+      Email = "a@b.com",
+      IdentityID__c = Some("1234")
     )
-    val actual: GetSfAddress.IsDigitalVoucherUser = GetSfAddress.toResponse(wireResult).isDigitalVoucherUser
+    val actual: GetSfContact.IsDigitalVoucherUser = GetSfContact.toResponse(wireResult).isDigitalVoucherUser
 
     actual should be(IsDigitalVoucherUser(false))
+
+    val actual2: GetSfContact.EmailIdentity = GetSfContact.toResponse(wireResult).emailIdentity
+
+    actual2 should be(EmailIdentity(EmailAddress("a@b.com"), Some(IdentityId("1234"))))
   }
 
   "toResponse" should "return true if a digital voucher" in {
@@ -144,11 +164,16 @@ class GetSfAddressTest extends FlatSpec with Matchers {
       OtherPostalCode = None,
       OtherCountry = None,
       Phone = None,
-      Digital_Voucher_User__c = true
+      Digital_Voucher_User__c = true,
+      Email = "a@b.com",
+      IdentityID__c = None
     )
-    val actual: GetSfAddress.IsDigitalVoucherUser = GetSfAddress.toResponse(wireResult).isDigitalVoucherUser
+    val actual: GetSfContact.IsDigitalVoucherUser = GetSfContact.toResponse(wireResult).isDigitalVoucherUser
 
     actual should be(IsDigitalVoucherUser(true))
+    val actual2: GetSfContact.EmailIdentity = GetSfContact.toResponse(wireResult).emailIdentity
+
+    actual2 should be(EmailIdentity(EmailAddress("a@b.com"), None))
   }
 
 }

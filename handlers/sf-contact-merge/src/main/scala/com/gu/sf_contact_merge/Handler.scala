@@ -7,6 +7,7 @@ import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.salesforce.{JsonHttp, SalesforceClient}
+import com.gu.sf_contact_merge.GetSFIdentityIdMoveData.SFContactIdEmailIdentity
 import com.gu.sf_contact_merge.TypeConvert._
 import com.gu.sf_contact_merge.WireRequestToDomainObject.MergeRequest
 import com.gu.sf_contact_merge.getaccounts.GetContacts.AccountId
@@ -14,16 +15,19 @@ import com.gu.sf_contact_merge.getaccounts.GetIdentityAndZuoraEmailsForAccountsS
 import com.gu.sf_contact_merge.getaccounts.GetIdentityAndZuoraEmailsForAccountsSteps.IdentityAndSFContactAndEmail
 import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.{EmailAddress, LastName}
 import com.gu.sf_contact_merge.getsfcontacts.DedupSfContacts.SFContactsForMerge
-import com.gu.sf_contact_merge.getsfcontacts.{DedupSfContacts, GetSfAddress, GetSfAddressOverride}
+import com.gu.sf_contact_merge.getsfcontacts.GetSfContact.SFContact
+import com.gu.sf_contact_merge.getsfcontacts.{DedupSfContacts, GetSfAddressOverride, GetSfContact}
 import com.gu.sf_contact_merge.update.UpdateAccountSFLinks.{CRMAccountId, LinksFromZuora}
-import com.gu.sf_contact_merge.update.UpdateSFContacts.OldSFContact
 import com.gu.sf_contact_merge.update.{UpdateAccountSFLinks, UpdateSFContacts, UpdateSalesforceIdentityId}
+import com.gu.sf_contact_merge.validate.AssertSame.{Differing, HasAllowableVariations, HasNoVariations}
 import com.gu.sf_contact_merge.validate._
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, ApiGatewayResponse, ResponseModels}
 import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config.{LoadConfigModule, Stage}
+import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.reader.Types._
+import com.gu.util.resthttp.LazyClientFailableOp
 import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.zuora.SafeQueryBuilder.MaybeNonEmptyList
 import com.gu.util.zuora.{ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
@@ -57,12 +61,11 @@ object Handler {
           GetIdentityAndZuoraEmailsForAccountsSteps(zuoraQuerier, _),
           AssertSame.emailAddress,
           AssertSame.lastName,
-          EnsureNoAccountWithWrongIdentityId.apply,
           UpdateSFContacts(UpdateSalesforceIdentityId(sfAuth.wrap(JsonHttp.patch))),
           UpdateAccountSFLinks(requests.put),
           GetSfAddressOverride.apply,
           DedupSfContacts.apply,
-          GetSfAddress(sfAuth.wrap(JsonHttp.get))
+          GetSfContact(sfAuth.wrap(JsonHttp.get))
         )
       }
     }
@@ -74,38 +77,54 @@ object DomainSteps {
 
   def apply(
     getIdentityAndZuoraEmailsForAccounts: NonEmptyList[AccountId] => ClientFailableOp[List[IdentityAndSFContactAndEmail]],
-    validateEmails: AssertSame[Option[EmailAddress]],
+    validateEmails: AssertSame[EmailAddress],
     validateLastNames: AssertSame[LastName],
-    validateIdentityIds: EnsureNoAccountWithWrongIdentityId,
     updateSFContacts: UpdateSFContacts,
     updateAccountSFLinks: LinksFromZuora => AccountId => ClientFailableOp[Unit],
     getSfAddressOverride: GetSfAddressOverride,
     dedupSfContacts: DedupSfContacts,
-    getSfAddress: GetSfAddress
+    getSfContact: GetSfContact
   )(mergeRequest: MergeRequest): ResponseModels.ApiResponse =
     (for {
-      accountAndEmails <- getIdentityAndZuoraEmailsForAccounts(mergeRequest.zuoraAccountIds)
+      zuoraAccountAndEmails <- getIdentityAndZuoraEmailsForAccounts(mergeRequest.zuoraAccountIds)
         .toApiGatewayOp("getIdentityAndZuoraEmailsForAccounts")
-      _ <- AnyContactsToChange(mergeRequest.sfContactId, accountAndEmails.map(_.sfContactId))
-      _ <- validateEmails(accountAndEmails.map(_.emailAddress))
-      maybeIdentityId <- validateIdentityIds(accountAndEmails.map(_.identityId))
-        .toApiGatewayOp(ApiGatewayResponse.notFound _)
-      _ <- validateLastNames(accountAndEmails.map(_.lastName))
-      firstNameToUse <- GetFirstNameToUse(mergeRequest.sfContactId, accountAndEmails)
-      rawSFContactIds = SFContactsForMerge(mergeRequest.sfContactId, accountAndEmails.map(_.sfContactId))
-      winningAndOtherContact = dedupSfContacts.apply(rawSFContactIds).map(getSfAddress.apply)
-      maybeSFAddressOverride <- getSfAddressOverride(winningAndOtherContact.map(_.map(_.SFMaybeAddress)))
+      _ <- StopIfNoContactsToChange(mergeRequest.sfContactId, zuoraAccountAndEmails.map(_.sfContactId))
+      _ <- validateLastNames(zuoraAccountAndEmails.map(_.lastName)) match {
+        case Differing(elements) => ReturnWithResponse(ApiGatewayResponse.notFound(s"those zuora accounts had differing lastname: $elements"))
+        case _ => ContinueProcessing(())
+      }
+      firstNameToUse <- GetFirstNameToUse(mergeRequest.sfContactId, zuoraAccountAndEmails)
+      allSFContactIds = SFContactsForMerge(mergeRequest.sfContactId, zuoraAccountAndEmails.map(_.sfContactId))
+      dedupedContactIds = dedupSfContacts.apply(allSFContactIds)
+      sfContacts = dedupedContactIds.map(id => getSfContact.apply(id).map(contact => IdWithContact(id, contact)))
+      maybeSFAddressOverride <- getSfAddressOverride(sfContacts.map(_.value.map(_.contact.SFMaybeAddress)))
         .toApiGatewayOp("get salesforce addresses")
-      _ <- ValidateNoLosingDigitalVoucher(winningAndOtherContact.others.map(_.map(_.isDigitalVoucherUser)))
-      oldContact = accountAndEmails.find(_.identityId.isDefined).map(_.sfContactId).map(OldSFContact.apply)
-      linksFromZuora = LinksFromZuora(mergeRequest.sfContactId, mergeRequest.crmAccountId, maybeIdentityId, None /*TODO*/ )
-      // TODO next pr will fill in the None above with the non "+gnm" email address, there are any +gnm addresses at all.
+      _ <- ValidateNoLosingDigitalVoucher(sfContacts.others.map(_.map(_.contact.isDigitalVoucherUser)))
+      sss <- toAAA(sfContacts).toApiGatewayOp("get contacts from SF")
+      emailOverrides <- validateEmails(sss.map(_.emailIdentity.address)) match {
+        case Differing(elements) => ReturnWithResponse(ApiGatewayResponse.notFound(s"those zuora accounts had differing emails: $elements"))
+        case HasNoVariations(canonical) => ContinueProcessing(ZZZ(canonical, needToOverwriteWith = None))
+        case HasAllowableVariations(canonical) => ContinueProcessing(ZZZ(canonical, needToOverwriteWith = Some(canonical)))
+      }
+      sfIdentityIdMoveData <- GetSFIdentityIdMoveData(emailOverrides.canonicalEmail, sss)
+        .toApiGatewayOp(ApiGatewayResponse.notFound _)
+      linksFromZuora = LinksFromZuora(mergeRequest.sfContactId, mergeRequest.crmAccountId, sfIdentityIdMoveData.map(_.identityIdUpdate), emailOverrides.needToOverwriteWith)
       _ <- mergeRequest.zuoraAccountIds.traverseU(updateAccountSFLinks(linksFromZuora))
         .toApiGatewayOp("update accounts with winning details")
-      _ <- updateSFContacts(mergeRequest.sfContactId, maybeIdentityId, oldContact, firstNameToUse, maybeSFAddressOverride, None /*TODO*/ )
-        // TODO next pr will fill in the None above with the non "+gnm" email address, if the winner is a +gnm.
+      _ <- updateSFContacts(mergeRequest.sfContactId, sfIdentityIdMoveData, firstNameToUse, maybeSFAddressOverride, emailOverrides.needToOverwriteWith)
         .toApiGatewayOp("update sf contact(s) to force a sync")
     } yield ApiGatewayResponse.successfulExecution).apiResponse
+
+  def toAAA(sfContacts: SFContactsForMerge[LazyClientFailableOp[IdWithContact]]): ClientFailableOp[List[SFContactIdEmailIdentity]] = {
+    val contactsList = NonEmptyList(sfContacts.winner, sfContacts.others: _*)
+    val lazyContactsEmailIdentity = contactsList.map(_.map(idWithContact => SFContactIdEmailIdentity(idWithContact.id, idWithContact.contact.emailIdentity)))
+    lazyContactsEmailIdentity.traverseU(_.value).map(_.list.toList)
+  }
+
+  case class IdWithContact(id: SFContactId, contact: SFContact)
+
+  case class ZZZ(canonicalEmail: EmailAddress, needToOverwriteWith: Option[EmailAddress])
+
 }
 
 object WireRequestToDomainObject {

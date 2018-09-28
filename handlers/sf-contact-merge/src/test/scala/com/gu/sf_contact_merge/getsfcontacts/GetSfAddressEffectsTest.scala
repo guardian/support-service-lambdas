@@ -4,8 +4,10 @@ import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.salesforce.{JsonHttp, SalesforceClient}
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.dev.SFEffectsData
-import com.gu.sf_contact_merge.getsfcontacts.GetSfAddress.SFAddressFields._
-import com.gu.sf_contact_merge.getsfcontacts.GetSfAddress.{IsDigitalVoucherUser, SFAddress, SFContact, UsableContactAddress}
+import com.gu.sf_contact_merge.Types.IdentityId
+import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.EmailAddress
+import com.gu.sf_contact_merge.getsfcontacts.GetSfContact.SFAddressFields._
+import com.gu.sf_contact_merge.getsfcontacts.GetSfContact.{EmailIdentity, IsDigitalVoucherUser, SFAddress, SFContact, UsableContactAddress}
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
 import org.scalatest.{FlatSpec, Matchers}
@@ -22,7 +24,7 @@ class GetSfAddressEffectsTest extends FlatSpec with Matchers {
       response = RawEffects.response
       sfAuth <- SalesforceClient(response, sfConfig).value.toDisjunction
       get = sfAuth.wrap(JsonHttp.get)
-      getSfAddress = GetSfAddress(get)
+      getSfAddress = GetSfContact(get)
       address <- getSfAddress.apply(testContact).value.toDisjunction
     } yield address
 
@@ -35,7 +37,8 @@ class GetSfAddressEffectsTest extends FlatSpec with Matchers {
         SFCountry("Afghanistan"),
         Some(SFPhone("012345"))
       )),
-      IsDigitalVoucherUser(false)
+      IsDigitalVoucherUser(false),
+      EmailIdentity(EmailAddress("dayone@gu.com"), Some(IdentityId("100000932")))
     )
 
     actual should be(\/-(expected))

@@ -1,28 +1,39 @@
 package com.gu.sf_contact_merge.validate
 
 import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.{EmailAddress, LastName}
-import com.gu.util.apigateway.ApiGatewayResponse
-import com.gu.util.reader.Types.ApiGatewayOp
-import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
+import com.gu.sf_contact_merge.validate.AssertSame.Variations
 
 object AssertSame {
 
-  def apply[Element](message: String, transform: Element => Any = identity[Element] _): AssertSame[Element] = (elements: List[Element]) =>
-    if (elements.map(transform).distinct.size == 1) ContinueProcessing(())
-    else ReturnWithResponse(ApiGatewayResponse.notFound(s"those zuora accounts had differing $message: $elements"))
+  sealed trait Variations[+Element]
+  case class HasNoVariations[Element](canonical: Element) extends Variations[Element]
+  case class Differing[Element](variants: List[Element]) extends Variations[Element]
+  case class HasAllowableVariations[Element](canonical: Element) extends Variations[Element]
+
+  def apply[Element](message: String, transform: Element => Element): AssertSame[Element] = (elements: List[Element]) => {
+    val originalVariations = elements.distinct
+    val normalisedVariations = originalVariations.map(transform).distinct
+    (originalVariations, normalisedVariations) match {
+      case (a :: Nil, unique :: Nil) => HasNoVariations(unique)
+      case (_, unique :: Nil) => HasAllowableVariations(unique)
+      case (orig, _) => Differing(orig)
+    }
+  }
 
   val lastName: AssertSame[LastName] = apply[LastName](
     "last names",
-    _.value.toLowerCase // some seem to be entered entirely lower case, but this isn't a significant difference, so ignore
+    lastName => LastName(lastName.value.toLowerCase)
+  // some seem to be entered entirely lower case, but this isn't a significant difference, so ignore
   )
 
-  val emailAddress: AssertSame[Option[EmailAddress]] = AssertSame[Option[EmailAddress]](
+  val emailAddress: AssertSame[EmailAddress] = AssertSame[EmailAddress](
     "emails",
-    _.map(_.value.toLowerCase) // although emails are technically case sensitive on the first part, it's usually just a typing in difference
+    emailAddress => EmailAddress(emailAddress.value.replaceFirst("""\+gnm[0-9]?@""", "@"))
+  // lowercasing is handled when it's constructed, as it's a fundamental thing (in our world) rather than just our interpretation
   )
 
 }
 
 trait AssertSame[Element] {
-  def apply(emailAddresses: List[Element]): ApiGatewayOp[Unit]
+  def apply(emailAddresses: List[Element]): Variations[Element]
 }

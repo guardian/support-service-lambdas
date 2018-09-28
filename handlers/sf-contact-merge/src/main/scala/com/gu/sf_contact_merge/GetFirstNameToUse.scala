@@ -1,9 +1,9 @@
 package com.gu.sf_contact_merge
 
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
+import com.gu.sf_contact_merge.Types.IdentityId
 import com.gu.sf_contact_merge.getaccounts.GetIdentityAndZuoraEmailsForAccountsSteps.IdentityAndSFContactAndEmail
 import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.FirstName
-import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId.IdentityId
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types.{ApiGatewayOp, _}
 

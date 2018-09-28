@@ -1,6 +1,6 @@
 package com.gu.sf_contact_merge.validate
 
-import com.gu.sf_contact_merge.getsfcontacts.GetSfAddress.IsDigitalVoucherUser
+import com.gu.sf_contact_merge.getsfcontacts.GetSfContact.IsDigitalVoucherUser
 import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
 import com.gu.util.resthttp.LazyClientFailableOp
 import com.gu.util.resthttp.Types.{ClientSuccess, GenericError}
