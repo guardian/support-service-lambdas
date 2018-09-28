@@ -21,7 +21,7 @@ object JsonHttp {
   val post =
     new HttpWrapper[PostRequest, StringHttpRequest, BodyAsString, JsValue] {
       override def fromNewParam(postRequest: PostRequest): StringHttpRequest =
-        StringHttpRequest(postRequest.path, PostMethod(BodyAsString(Json.stringify(postRequest.body))))
+        StringHttpRequest(postRequest.path, PostMethod(BodyAsString(Json.stringify(postRequest.body))), postRequest.headers)
 
       override def toNewResponse(response: BodyAsString): ClientFailableOp[JsValue] =
         Try(Json.parse(response.value)) match {
