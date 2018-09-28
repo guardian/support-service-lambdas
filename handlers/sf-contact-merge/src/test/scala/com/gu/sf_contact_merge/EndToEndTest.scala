@@ -132,7 +132,7 @@ object EndToEndTest {
   val newSFContResponse =
     """{
       |    "LastName": "lastlast",
-      |    "FirstName": "firstfirst",com.gu.sf_contact_merge.getsfcontacts.GetSfAddressEffectsTest
+      |    "FirstName": "firstfirst",
       |    "OtherStreet": "street1",
       |    "OtherCity": null,
       |    "OtherState": null,

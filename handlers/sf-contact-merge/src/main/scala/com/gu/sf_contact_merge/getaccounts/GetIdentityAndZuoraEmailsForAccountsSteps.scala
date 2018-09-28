@@ -3,6 +3,7 @@ package com.gu.sf_contact_merge.getaccounts
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.sf_contact_merge.Types.IdentityId
 import com.gu.sf_contact_merge.getaccounts.GetContacts.AccountId
+import com.gu.sf_contact_merge.getaccounts.GetIdentityAndZuoraEmailsForAccountsSteps.IdentityAndSFContactAndEmail
 import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.{EmailAddress, FirstName, LastName}
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess}
 import com.gu.util.zuora.SafeQueryBuilder.MaybeNonEmptyList
@@ -19,7 +20,7 @@ object GetIdentityAndZuoraEmailsForAccountsSteps {
     lastName: LastName
   )
 
-  def apply(zuoraQuerier: ZuoraQuerier, accountIds: NonEmptyList[AccountId]): ClientFailableOp[List[IdentityAndSFContactAndEmail]] = {
+  def apply(zuoraQuerier: ZuoraQuerier): GetIdentityAndZuoraEmailsForAccountsSteps = { accountIds =>
 
     val getZuoraContactDetails: GetZuoraContactDetails = GetZuoraContactDetails(zuoraQuerier)
     val getContacts: NonEmptyList[AccountId] => ClientFailableOp[Map[GetZuoraContactDetails.ContactId, GetContacts.IdentityAndSFContact]] =
@@ -46,4 +47,7 @@ object GetIdentityAndZuoraEmailsForAccountsSteps {
     }
   }
 
+}
+trait GetIdentityAndZuoraEmailsForAccountsSteps {
+  def apply(accountIds: NonEmptyList[AccountId]): ClientFailableOp[List[IdentityAndSFContactAndEmail]]
 }

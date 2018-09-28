@@ -2,6 +2,7 @@ package com.gu.sf_contact_merge.update
 
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.sf_contact_merge.Types.IdentityId
+import com.gu.sf_contact_merge.Types.WinningSFContact
 import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.{EmailAddress, FirstName}
 import com.gu.sf_contact_merge.getsfcontacts.GetSfAddressOverride.{DontOverrideAddress, SFAddressOverride}
 import com.gu.sf_contact_merge.update.UpdateSFContacts.IdentityIdMoveData
@@ -13,7 +14,7 @@ object UpdateSFContacts {
   def apply(
     setOrClearIdentityId: SetOrClearIdentityId
   ): UpdateSFContacts = (
-    sfContactId: SFContactId,
+    sfContactId: WinningSFContact,
     maybeMoveIdentityIdData: Option[IdentityIdMoveData],
     firstName: Option[FirstName],
     maybeSFAddressOverride: SFAddressOverride,
@@ -34,7 +35,7 @@ object UpdateSFContacts {
           maybeSFAddressOverride,
           maybeOverwriteEmailAddress
         )
-        setOrClearIdentityId.apply(sfContactId, sFContactUpdate) // this causes the sync to identity and zuora
+        setOrClearIdentityId.apply(sfContactId.id, sFContactUpdate) // this causes the sync to identity and zuora
       }
     } yield ()
 
@@ -48,7 +49,7 @@ object UpdateSFContacts {
 trait UpdateSFContacts {
 
   def apply(
-    sfContactId: SFContactId,
+    sfContactId: WinningSFContact,
     maybeMoveIdentityIdData: Option[IdentityIdMoveData],
     firstNameToUse: Option[FirstName],
     maybeSFAddressOverride: SFAddressOverride,

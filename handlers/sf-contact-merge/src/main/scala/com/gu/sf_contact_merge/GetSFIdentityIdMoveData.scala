@@ -9,6 +9,7 @@ import scalaz.{-\/, \/, \/-}
 object GetSFIdentityIdMoveData {
 
   case class SFContactIdEmailIdentity(contactId: SFContactId, emailIdentity: EmailIdentity)
+
   def apply(canonicalEmail: EmailAddress, contactEmailIdentities: List[SFContactIdEmailIdentity]): String \/ Option[IdentityIdMoveData] = {
     val identityIdsForTargetEmail = contactEmailIdentities.filter(_.emailIdentity.address == canonicalEmail)
     val identityIdMoves = identityIdsForTargetEmail.collect({

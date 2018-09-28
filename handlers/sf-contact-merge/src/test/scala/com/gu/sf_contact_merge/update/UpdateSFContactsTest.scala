@@ -1,7 +1,7 @@
 package com.gu.sf_contact_merge.update
 
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
-import com.gu.sf_contact_merge.Types.IdentityId
+import com.gu.sf_contact_merge.Types.{IdentityId, WinningSFContact}
 import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.{EmailAddress, FirstName}
 import com.gu.sf_contact_merge.getsfcontacts.GetSfAddressOverride.{DontOverrideAddress, OverrideAddressWith}
 import com.gu.sf_contact_merge.getsfcontacts.GetSfContact.SFAddress
@@ -44,7 +44,7 @@ class UpdateSFContactsTest extends FlatSpec with Matchers {
     ))
 
     val actual = UpdateSFContacts(SetOrClearIdentityId(mockSetOrClearIdentityId.apply))(
-      SFContactId("contnew"),
+      WinningSFContact(SFContactId("contnew")),
       maybeIdentityId,
       Some(FirstName("hello")),
       OverrideAddressWith(SFAddress(
@@ -71,7 +71,7 @@ class UpdateSFContactsTest extends FlatSpec with Matchers {
     val mockSetOrClearIdentityId = new MockSetOrClearIdentityId()
 
     val actual = UpdateSFContacts(SetOrClearIdentityId(mockSetOrClearIdentityId.apply))(
-      SFContactId("contnew"),
+      WinningSFContact(SFContactId("contnew")),
       None,
       Some(FirstName("hello")),
       DontOverrideAddress,
