@@ -17,7 +17,7 @@ object GetBatchResultId {
 
   def apply(post: HttpOp[StringHttpRequest, BodyAsString]): GetBatchResultRequest => ClientFailableOp[BatchResultId] =
     post.setupRequest[GetBatchResultRequest] { request: GetBatchResultRequest =>
-      val jobIdString = request.jobId.id
+      val jobIdString = request.jobId.value
       val batchIdString = request.batchId.value
       val relativePath = RelativePath(s"/services/async/44.0/job/$jobIdString/batch/$batchIdString/result")
       StringHttpRequest(relativePath, GetMethod)

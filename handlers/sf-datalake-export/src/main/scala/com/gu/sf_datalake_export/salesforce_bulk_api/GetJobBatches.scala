@@ -77,7 +77,7 @@ object GetJobBatches {
 
   def apply(post: HttpOp[StringHttpRequest, BodyAsString]): JobId => ClientFailableOp[Seq[BatchInfo]] =
     post.setupRequest[JobId] { jobId: JobId =>
-      val relativePath = RelativePath(s"/services/async/44.0/job/${jobId.id}/batch")
+      val relativePath = RelativePath(s"/services/async/44.0/job/${jobId.value}/batch")
       StringHttpRequest(relativePath, GetMethod)
     }.flatMap { response =>
       println("GOT RESPONSE")

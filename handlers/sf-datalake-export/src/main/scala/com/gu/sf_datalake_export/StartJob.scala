@@ -1,7 +1,7 @@
 package com.gu.sf_datalake_export
 
 import java.io.{InputStream, OutputStream}
-
+import com.gu.sf_datalake_export.salesforce_bulk_api.CreateJob._
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
@@ -22,13 +22,28 @@ import scalaz.{-\/, \/, \/-}
 import scalaz.Scalaz._
 import salesforce_bulk_api.CreateJob.SfContact
 import AddQueryToJob.{AddQueryRequest, Query}
-case class StartJobRequest(something: String)
-
-object StartJobRequest {
-  implicit val reads: Reads[StartJobRequest] = Json.reads[StartJobRequest]
-}
 
 object StartJob {
+
+  case class WireRequest(
+    jobName: String,
+    query: String,
+    objectType: String
+  )
+
+  object WireRequest {
+    implicit val reads: Reads[WireRequest] = Json.reads[WireRequest]
+  }
+
+  case class WireResponse(
+    jobId: String,
+    jobName: String
+  )
+
+  object WireResponse {
+    implicit val writes = Json.writes[WireResponse]
+  }
+
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
     val lambdaIO = LambdaIO(inputStream, outputStream, context)
     steps(
@@ -50,19 +65,22 @@ object StartJob {
 
     //todo add proper error handling
     val lambdaResponse = for {
-      request <- ParseRequest[StartJobRequest](lambdaIO.inputStream).toEither.disjunction.leftMap(failure => failure.getMessage)
+      request <- ParseRequest[WireRequest](lambdaIO.inputStream).toEither.disjunction.leftMap(failure => failure.getMessage)
+      objectType <- SfObjectType.fromString(request.objectType).toDisjunction.leftMap(failure => failure.message)
       sfConfig <- loadConfig[SFAuthConfig].leftMap(failure => failure.error)
       //fix auth so that it doesn't return apigatewayop
       sfClient <- SalesforceClient(getResponse, sfConfig).value.toDisjunction.leftMap(failure => failure.message)
       createJobOp = CreateJob(sfClient.wrap(JsonHttp.post))
+
       jobId <- createJobOp(SfContact).toDisjunction.leftMap(failure => failure.message)
       addQueryToJobOp = AddQueryToJob(sfClient)
       addQueryRequest = AddQueryRequest(
-        Query("SELECT id, Name FROM Contact  where LastName = 'bla'"),
+        Query(request.query),
         jobId
       )
       _ <- addQueryToJobOp(addQueryRequest).toDisjunction.leftMap(failure => failure.message)
-    } yield jobId
+
+    } yield WireResponse(jobId.value, request.jobName)
 
     lambdaResponse match {
       case -\/(error) => {

@@ -9,7 +9,9 @@ import play.api.libs.json.{JsString, Json}
 object StartJobManualTest extends App {
   val request =
     """{
-      |"something" : "bla"
+      |"objectType" : "Contact",
+      |"query" : "SELECT id, Name FROM Contact  where LastName = 'bla'",
+      |"jobName" : "contacts"
       |}
     """.stripMargin
 

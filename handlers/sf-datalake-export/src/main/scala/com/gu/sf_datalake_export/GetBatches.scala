@@ -20,7 +20,10 @@ import scalaz.{-\/, \/-}
 
 object GetBatches {
 
-  case class WireRequest(jobId: String)
+  case class WireRequest(
+    jobId: String,
+    jobName:String
+  )
 
   object WireRequest {
     implicit val reads = Json.reads[WireRequest]

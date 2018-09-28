@@ -18,7 +18,7 @@ object AddQueryToJob {
   //TODO MAYBE PARSE XML LATER?
   def apply(post: HttpOp[StringHttpRequest, BodyAsString]): AddQueryRequest => ClientFailableOp[Unit] =
     post.setupRequest[AddQueryRequest] { addQueryRequest =>
-      val jobIdStr = addQueryRequest.jobId.id
+      val jobIdStr = addQueryRequest.jobId.value
       val queryStr = addQueryRequest.query.value
       //do this the right way, and if there is no right way define plain post requests somewhere
       val relativePath = RelativePath(s"/services/async/44.0/job/$jobIdStr/batch")
