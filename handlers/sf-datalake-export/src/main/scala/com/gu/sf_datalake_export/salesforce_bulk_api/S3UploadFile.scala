@@ -12,13 +12,13 @@ import scala.util.Try
 //todo maybe this is becoming a little bit too close to a generic s3 uploader and could be extracted to dedup with catalog service
 object S3UploadFile extends Logging {
 
-  case class FileContent(value:String) extends AnyVal
-  case class FileName(value:String) extends AnyVal
-  case class File(fileName:FileName, content:FileContent)
+  case class FileContent(value: String) extends AnyVal
+  case class FileName(value: String) extends AnyVal
+  case class File(fileName: FileName, content: FileContent)
   def apply(
-    stage:Stage,
+    stage: Stage,
     s3Write: PutObjectRequest => Try[PutObjectResult],
-    file:File
+    file: File
   ): String \/ PutObjectResult = {
     logger.info(s"Uploading ${file.fileName.value} to S3...")
     logger.info("file content:S")

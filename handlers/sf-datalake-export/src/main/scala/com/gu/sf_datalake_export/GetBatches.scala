@@ -22,7 +22,7 @@ object GetBatches {
 
   case class WireRequest(
     jobId: String,
-    jobName:String
+    jobName: String
   )
 
   object WireRequest {

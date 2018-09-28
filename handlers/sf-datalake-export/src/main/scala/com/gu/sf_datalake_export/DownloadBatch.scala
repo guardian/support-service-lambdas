@@ -32,7 +32,7 @@ object DownloadBatch {
   implicit val writes = Json.writes[temp]
 
   case class WireRequest(
-    jobName:String,
+    jobName: String,
     jobId: String,
     batchId: String
   )

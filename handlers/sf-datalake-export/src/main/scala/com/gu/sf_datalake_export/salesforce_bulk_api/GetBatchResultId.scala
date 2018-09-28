@@ -29,7 +29,7 @@ object GetBatchResultId {
       //todo do this in a better way
       if (resultId.isEmpty)
         GenericError("no result id found in response")
-       else
+      else
         ClientSuccess(BatchResultId(resultId))
 
     }.runRequest

@@ -1,6 +1,5 @@
 package com.gu.sf_datalake_export.salesforce_bulk_api
 
-import com.gu.sf_datalake_export.StartJob.WireResponse
 import com.gu.util.resthttp.{HttpOp, RestRequestMaker}
 import com.gu.util.resthttp.RestRequestMaker._
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError}
