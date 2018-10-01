@@ -10,8 +10,10 @@ object GetSFIdentityIdMoveData {
 
   case class SFContactIdEmailIdentity(contactId: SFContactId, emailIdentity: EmailIdentity)
 
-  def apply(canonicalEmail: EmailAddress, contactEmailIdentities: List[SFContactIdEmailIdentity]): String \/ Option[IdentityIdMoveData] = {
-    val identityIdsForTargetEmail = contactEmailIdentities.filter(_.emailIdentity.address == canonicalEmail)
+  case class CanonicalEmail(emailAddress: EmailAddress)
+
+  def apply(canonicalEmail: CanonicalEmail, contactEmailIdentities: List[SFContactIdEmailIdentity]): String \/ Option[IdentityIdMoveData] = {
+    val identityIdsForTargetEmail = contactEmailIdentities.filter(_.emailIdentity.address == canonicalEmail.emailAddress)
     val identityIdMoves = identityIdsForTargetEmail.collect({
       case SFContactIdEmailIdentity(contactId, EmailIdentity(address, Some(identity))) =>
         IdentityIdMoveData(OldSFContact(contactId), IdentityIdToUse(identity))

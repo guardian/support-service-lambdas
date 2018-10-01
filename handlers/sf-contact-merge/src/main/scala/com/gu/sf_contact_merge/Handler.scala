@@ -7,7 +7,7 @@ import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.salesforce.{JsonHttp, SalesforceClient}
-import com.gu.sf_contact_merge.GetSFIdentityIdMoveData.SFContactIdEmailIdentity
+import com.gu.sf_contact_merge.GetSFIdentityIdMoveData.{CanonicalEmail, SFContactIdEmailIdentity}
 import com.gu.sf_contact_merge.SFSteps.SFData
 import com.gu.sf_contact_merge.TypeConvert._
 import com.gu.sf_contact_merge.Types.WinningSFContact
@@ -124,9 +124,12 @@ object SFSteps {
       _ <- ValidateNoLosingDigitalVoucher(sfContacts.others.map(_.map(_.contact.isDigitalVoucherUser)))
       contacts <- flattenContactData(sfContacts).toApiGatewayOp("get contacts from SF")
       emailOverrides <- validateEmails(contacts.map(_.emailIdentity.address)) match {
-        case Differing(elements) => ReturnWithResponse(ApiGatewayResponse.notFound(s"those zuora accounts had differing emails: $elements"))
-        case HasNoVariations(canonical) => ContinueProcessing(CanonicalEmailAndOverwriteEmail(canonical, needToOverwriteWith = None))
-        case HasAllowableVariations(canonical) => ContinueProcessing(CanonicalEmailAndOverwriteEmail(canonical, needToOverwriteWith = Some(canonical)))
+        case Differing(elements) =>
+          ReturnWithResponse(ApiGatewayResponse.notFound(s"those zuora accounts had differing emails: $elements"))
+        case HasNoVariations(canonical) =>
+          ContinueProcessing(CanonicalEmailAndOverwriteEmail(CanonicalEmail(canonical), needToOverwriteWith = None))
+        case HasAllowableVariations(canonical) =>
+          ContinueProcessing(CanonicalEmailAndOverwriteEmail(CanonicalEmail(canonical), needToOverwriteWith = Some(canonical)))
       }
       sfIdentityIdMoveData <- GetSFIdentityIdMoveData(emailOverrides.canonicalEmail, contacts)
         .toApiGatewayOp(ApiGatewayResponse.notFound _)
@@ -135,13 +138,14 @@ object SFSteps {
 
   def flattenContactData(sfContacts: SFContactsForMerge[LazyClientFailableOp[IdWithContact]]): ClientFailableOp[List[SFContactIdEmailIdentity]] = {
     val contactsList = NonEmptyList(sfContacts.winner, sfContacts.others: _*)
-    val lazyContactsEmailIdentity = contactsList.map(_.map(idWithContact => SFContactIdEmailIdentity(idWithContact.id, idWithContact.contact.emailIdentity)))
+    val lazyContactsEmailIdentity = contactsList.map(_.map(idWithContact =>
+      SFContactIdEmailIdentity(idWithContact.id, idWithContact.contact.emailIdentity)))
     lazyContactsEmailIdentity.traverseU(_.value).map(_.list.toList)
   }
 
   case class IdWithContact(id: SFContactId, contact: SFContact)
 
-  case class CanonicalEmailAndOverwriteEmail(canonicalEmail: EmailAddress, needToOverwriteWith: Option[EmailAddress])
+  case class CanonicalEmailAndOverwriteEmail(canonicalEmail: CanonicalEmail, needToOverwriteWith: Option[EmailAddress])
 
   case class SFData(
     sfIdentityIdMoveData: Option[UpdateSFContacts.IdentityIdMoveData],
