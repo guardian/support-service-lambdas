@@ -8,13 +8,14 @@ import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.SalesforceClient
 import com.gu.sf_datalake_export.salesforce_bulk_api.CreateJob.JobId
 import com.gu.sf_datalake_export.salesforce_bulk_api.GetJobBatches
+import com.gu.sf_datalake_export.salesforce_bulk_api.GetJobBatches._
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.handlers.{ParseRequest, SerialiseResponse}
 import com.gu.util.reader.Types._
 import okhttp3.{Request, Response}
-import play.api.libs.json.Json
+import play.api.libs.json.{JsString, Json, Writes}
 import scalaz.Scalaz._
 import scalaz.{-\/, \/-}
 
@@ -27,6 +28,34 @@ object GetBatches {
 
   object WireRequest {
     implicit val reads = Json.reads[WireRequest]
+  }
+
+  trait JobStatus {
+    def name: String
+  }
+
+  object PendingJob extends JobStatus {
+    override val name = "Pending"
+  }
+
+  object FailedJob extends JobStatus {
+    override val name = "Failed"
+  }
+
+  object CompletedJob extends JobStatus {
+    override val name = "Completed"
+  }
+
+  case class WireResponse(
+    jobId: String,
+    jobName: String,
+    jobStatus: String,
+    //todo make a wire version of batchInfo
+    batches: Seq[BatchInfo]
+  )
+
+  object WireResponse {
+    implicit val writes = Json.writes[WireResponse]
   }
 
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
@@ -46,6 +75,16 @@ object GetBatches {
     getResponse: Request => Response
   ): Unit = {
 
+
+    def getStatus(batches: Seq[BatchInfo]): JobStatus = batches.map(_.state).foldRight(CompletedJob: JobStatus) {
+      case (Failed, _) => FailedJob
+      case (_, FailedJob) => FailedJob
+      case (Queued, _) => PendingJob
+      case (InProgress, _) => PendingJob
+      case (Completed, currentStatus) => currentStatus
+      case (NotProcessed, currentStatus) => currentStatus
+    }
+
     val loadConfig = LoadConfigModule(stage, fetchString)
 
     //todo add proper error handling
@@ -57,7 +96,13 @@ object GetBatches {
       sfClient <- SalesforceClient(getResponse, sfConfig).value.toDisjunction.leftMap(failure => failure.message)
       getJobBatchesOp = GetJobBatches(sfClient)
       batches <- getJobBatchesOp(jobId).toDisjunction.leftMap(failure => failure.message)
-    } yield batches
+      status = getStatus(batches)
+    } yield WireResponse(
+      jobId = request.jobId,
+      jobName = request.jobName,
+      jobStatus = status.name,
+      batches = batches
+    )
 
     lambdaResponse match {
       case -\/(error) => {

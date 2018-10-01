@@ -22,7 +22,11 @@ object GetJobBatches {
   }
 
   object BatchState {
+    //https://developer.salesforce.com/docs/atlas.en-us.api_asynch.meta/api_asynch/asynch_api_batches_interpret_status.htm
     val allStates = List(Queued, InProgress, Completed, Failed, NotProcessed)
+    val pendingStates = List(InProgress, Queued)
+    // when pk chunking is enabled the original batch is not processed
+    val doneStates = List(Completed, NotProcessed)
     implicit val writes: Writes[BatchState] = (state: BatchState) => JsString(state.name)
 
     def fromStringState(state: String): ClientFailableOp[BatchState] = allStates.find(_.name == state).map {
@@ -52,7 +56,7 @@ object GetJobBatches {
 
   case class BatchInfo(
     batchId: BatchId,
-    status: BatchState
+    state: BatchState
   )
 
   object BatchInfo {
@@ -80,8 +84,6 @@ object GetJobBatches {
       val relativePath = RelativePath(s"/services/async/44.0/job/${jobId.value}/batch")
       StringHttpRequest(relativePath, GetMethod)
     }.flatMap { response =>
-      println("GOT RESPONSE")
-      println(response.value)
       val xml: Elem = scala.xml.XML.loadString(response.value)
       parseBatches(xml)
     }.runRequest

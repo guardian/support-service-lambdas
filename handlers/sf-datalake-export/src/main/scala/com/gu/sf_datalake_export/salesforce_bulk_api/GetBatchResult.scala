@@ -9,7 +9,7 @@ import com.gu.util.resthttp.HttpOp
 import com.gu.util.resthttp.RestRequestMaker.{BodyAsString, RelativePath}
 import com.gu.util.resthttp.Types.ClientFailableOp
 
-object DownloadResult {
+object GetBatchResult {
 
   case class JobName(value: String) extends AnyVal
 
