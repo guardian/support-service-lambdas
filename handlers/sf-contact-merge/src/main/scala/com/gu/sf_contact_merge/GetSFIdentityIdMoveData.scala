@@ -2,7 +2,7 @@ package com.gu.sf_contact_merge
 
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.EmailAddress
-import com.gu.sf_contact_merge.getsfcontacts.GetSfContact.EmailIdentity
+import com.gu.sf_contact_merge.getsfcontacts.WireContactToSfContact.Types.EmailIdentity
 import com.gu.sf_contact_merge.update.UpdateSFContacts.{IdentityIdMoveData, IdentityIdToUse, OldSFContact}
 import scalaz.{-\/, \/, \/-}
 
@@ -12,7 +12,10 @@ object GetSFIdentityIdMoveData {
 
   case class CanonicalEmail(emailAddress: EmailAddress)
 
-  def apply(canonicalEmail: CanonicalEmail, contactEmailIdentities: List[SFContactIdEmailIdentity]): String \/ Option[IdentityIdMoveData] = {
+  def apply(
+    canonicalEmail: CanonicalEmail,
+    contactEmailIdentities: List[SFContactIdEmailIdentity]
+  ): String \/ Option[IdentityIdMoveData] = {
     val identityIdsForTargetEmail = contactEmailIdentities.filter(_.emailIdentity.address == canonicalEmail.emailAddress)
     val identityIdMoves = identityIdsForTargetEmail.collect({
       case SFContactIdEmailIdentity(contactId, EmailIdentity(address, Some(identity))) =>

@@ -4,7 +4,7 @@ import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.sf_contact_merge.GetSFIdentityIdMoveData.{CanonicalEmail, SFContactIdEmailIdentity}
 import com.gu.sf_contact_merge.Types.IdentityId
 import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.EmailAddress
-import com.gu.sf_contact_merge.getsfcontacts.GetSfContact.EmailIdentity
+import com.gu.sf_contact_merge.getsfcontacts.WireContactToSfContact.Types.EmailIdentity
 import com.gu.sf_contact_merge.update.UpdateSFContacts.{IdentityIdMoveData, IdentityIdToUse, OldSFContact}
 import org.scalatest.{FlatSpec, Matchers}
 import scalaz.{-\/, \/-}
@@ -74,7 +74,7 @@ class GetSFIdentityIdMoveDataTest extends FlatSpec with Matchers {
 
     val canonicalEmail = CanonicalEmail(EmailAddress("hi@email.com"))
     val contactEmailIdentities: List[SFContactIdEmailIdentity] = List(
-      SFContactIdEmailIdentity(SFContactId("con1"), EmailIdentity(EmailAddress("hi+gnm9@email.com"), identityId = Some(IdentityId("11234")))),
+      SFContactIdEmailIdentity(SFContactId("con1"), EmailIdentity(EmailAddress("hi+gnm9@email.com"), identityId = Some(IdentityId("14")))),
       SFContactIdEmailIdentity(SFContactId("con2"), EmailIdentity(canonicalEmail.emailAddress, identityId = Some(IdentityId("1234"))))
     )
 
@@ -90,7 +90,7 @@ class GetSFIdentityIdMoveDataTest extends FlatSpec with Matchers {
 
     val canonicalEmail = CanonicalEmail(EmailAddress("hi@email.com"))
     val contactEmailIdentities: List[SFContactIdEmailIdentity] = List(
-      SFContactIdEmailIdentity(SFContactId("con1"), EmailIdentity(canonicalEmail.emailAddress, identityId = Some(IdentityId("11234")))),
+      SFContactIdEmailIdentity(SFContactId("con1"), EmailIdentity(canonicalEmail.emailAddress, identityId = Some(IdentityId("14")))),
       SFContactIdEmailIdentity(SFContactId("con2"), EmailIdentity(canonicalEmail.emailAddress, identityId = Some(IdentityId("1234"))))
     )
 

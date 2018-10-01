@@ -8,8 +8,7 @@ import com.gu.salesforce.{JsonHttp, SalesforceClient}
 import com.gu.sf_contact_merge.Types.IdentityId
 import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.{EmailAddress, FirstName}
 import com.gu.sf_contact_merge.getsfcontacts.GetSfAddressOverride.OverrideAddressWith
-import com.gu.sf_contact_merge.getsfcontacts.GetSfContact.SFAddress
-import com.gu.sf_contact_merge.getsfcontacts.GetSfContact.SFAddressFields._
+import com.gu.sf_contact_merge.getsfcontacts.WireContactToSfContact.Types._
 import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId
 import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId.{SFContactUpdate, SetFirstName}
 import com.gu.sf_contact_merge.update.updateSFIdentityId.GetSalesforceIdentityId.WireResult

@@ -2,8 +2,7 @@ package com.gu.sf_contact_merge.getsfcontacts
 
 import com.gu.sf_contact_merge.getsfcontacts.DedupSfContacts.SFContactsForMerge
 import com.gu.sf_contact_merge.getsfcontacts.GetSfAddressOverride.{DontOverrideAddress, OverrideAddressWith}
-import com.gu.sf_contact_merge.getsfcontacts.GetSfContact.SFAddressFields._
-import com.gu.sf_contact_merge.getsfcontacts.GetSfContact.{SFAddress, UnusableContactAddress, UsableContactAddress}
+import com.gu.sf_contact_merge.getsfcontacts.WireContactToSfContact.Types._
 import com.gu.util.resthttp.Types.ClientSuccess
 import org.scalatest.{FlatSpec, Matchers}
 

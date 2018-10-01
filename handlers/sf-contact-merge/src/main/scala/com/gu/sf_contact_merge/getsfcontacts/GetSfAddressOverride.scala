@@ -2,7 +2,7 @@ package com.gu.sf_contact_merge.getsfcontacts
 
 import com.gu.sf_contact_merge.getsfcontacts.DedupSfContacts.SFContactsForMerge
 import com.gu.sf_contact_merge.getsfcontacts.GetSfAddressOverride.SFAddressOverride
-import com.gu.sf_contact_merge.getsfcontacts.GetSfContact.{SFAddress, SFMaybeAddress, UnusableContactAddress, UsableContactAddress}
+import com.gu.sf_contact_merge.getsfcontacts.WireContactToSfContact.Types.{SFAddress, SFMaybeAddress, UnusableContactAddress, UsableContactAddress}
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientFailure, ClientSuccess}
 
 object GetSfAddressOverride {

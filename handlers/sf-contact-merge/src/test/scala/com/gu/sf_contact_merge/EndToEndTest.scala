@@ -123,7 +123,8 @@ object EndToEndTest {
 
   val sfAuthResponse = """{"access_token":"aaaccess", "instance_url":"https://iinstance"}"""
 
-  val updateAccountRequestBody = """{"crmId":"sfacc","sfContactId__c":"newSFCont","IdentityId__c":"sflosingiden","billToContact":{"workEmail":"hello@email.com"}}"""
+  val updateAccountRequestBody =
+    """{"crmId":"sfacc","sfContactId__c":"newSFCont","IdentityId__c":"sflosingiden","billToContact":{"workEmail":"hello@email.com"}}"""
   val removeIdentityBody = """{"IdentityID__c":""}"""
   val addIdentityBody = """{"IdentityID__c":"identest","FirstName":"peppa"}"""
 

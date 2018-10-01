@@ -4,8 +4,7 @@ import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.sf_contact_merge.Types.{IdentityId, WinningSFContact}
 import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.{EmailAddress, FirstName}
 import com.gu.sf_contact_merge.getsfcontacts.GetSfAddressOverride.{DontOverrideAddress, OverrideAddressWith}
-import com.gu.sf_contact_merge.getsfcontacts.GetSfContact.SFAddress
-import com.gu.sf_contact_merge.getsfcontacts.GetSfContact.SFAddressFields._
+import com.gu.sf_contact_merge.getsfcontacts.WireContactToSfContact.Types._
 import com.gu.sf_contact_merge.update.UpdateSFContacts.{IdentityIdMoveData, IdentityIdToUse, OldSFContact}
 import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId.{SFContactUpdate, SetFirstName}
 import com.gu.util.resthttp.Types

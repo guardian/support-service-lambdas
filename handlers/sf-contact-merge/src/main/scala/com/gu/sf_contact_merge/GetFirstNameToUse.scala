@@ -19,11 +19,13 @@ object GetFirstNameToUse {
 
   case class NameForContactId(sfContactId: SFContactId, firstName: Option[FirstName])
 
-  def firstNameForSFContact(newSFContactId: WinningSFContact, namesForContactIds: List[NameForContactId]): ApiGatewayOp[Option[FirstName]] = {
+  def firstNameForSFContact(
+    newSFContactId: WinningSFContact,
+    namesForContactIds: List[NameForContactId]
+  ): ApiGatewayOp[Option[FirstName]] =
     namesForContactIds.find(_.sfContactId == newSFContactId.id)
       .toApiGatewayContinueProcessing(ApiGatewayResponse.notFound("winning contact id wasn't in any zuora account"))
       .map(_.firstName)
-  }
 
   def apply(sfContactId: WinningSFContact, accountAndEmails: List[IdentityAndSFContactAndEmail]): ApiGatewayOp[Option[FirstName]] = {
     val nameForIdentityIds = accountAndEmails.map { info => NameForIdentityId(info.identityId, info.firstName) }
