@@ -51,14 +51,14 @@ object DomainSteps {
           sfData.maybeEmailOverride
         )
         mergeRequest.zuoraAccountIds.traverseU(updateAccountSFLinks(linksFromZuora, _))
-      }.toApiGatewayOp("update accounts with winning details")
+      }.toApiGatewayOp("update zuora accounts with winning details")
       _ <- updateSFContacts(
         mergeRequest.winningSFContact,
         sfData.sfIdentityIdMoveData,
         zuoraData.firstNameToUse,
         sfData.maybeSFAddressOverride,
         sfData.maybeEmailOverride
-      ).toApiGatewayOp("update sf contact(s) to force a sync")
+      ).toApiGatewayOp("update sf contact(s) to get identity id and winning details in the right contact")
     } yield ApiGatewayResponse.successfulExecution).apiResponse
 
 }
