@@ -16,4 +16,6 @@ deployments:
       prefixStack: false
       functionNames:
       - sf-start-export-job-
+      - sf-get-batch-state-
+      - sf-download-batch-
     dependencies: [cfn]

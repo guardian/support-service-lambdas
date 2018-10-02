@@ -5,7 +5,7 @@ import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 import com.gu.sf_datalake_export.{GetBatches, StartJob}
 
 //This is just a way to locally run the addSubscription lambda in dev
-object StartJobManualTest extends App {
+object GetJobBatchesManualTest extends App {
   val request =
     """{
       |"jobId" : "7506E000003wKwwQAE",

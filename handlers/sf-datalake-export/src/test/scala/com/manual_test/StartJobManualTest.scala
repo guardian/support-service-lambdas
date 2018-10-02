@@ -10,7 +10,7 @@ object StartJobManualTest extends App {
   val request =
     """{
       |"objectType" : "Contact",
-      |"query" : "SELECT id, Name FROM Contact  where LastName = 'bla'",
+      |"query" : "SELECT id, Name FROM Contact limit 20",
       |"jobName" : "contacts"
       |}
     """.stripMargin

@@ -46,12 +46,19 @@ object GetBatches {
     override val name = "Completed"
   }
 
+  case class WireBatch(batchId: String, state: String)
+
+  object WireBatch {
+    implicit val writes = Json.writes[WireBatch]
+
+    def fromBatch(batchInfo: BatchInfo) = WireBatch(batchInfo.batchId.value, batchInfo.state.name)
+  }
+
   case class WireResponse(
     jobId: String,
     jobName: String,
     jobStatus: String,
-    //todo make a wire version of batchInfo
-    batches: Seq[BatchInfo]
+    batches: Seq[WireBatch]
   )
 
   object WireResponse {
@@ -101,7 +108,7 @@ object GetBatches {
       jobId = request.jobId,
       jobName = request.jobName,
       jobStatus = status.name,
-      batches = batches
+      batches = batches.map(WireBatch.fromBatch)
     )
 
     lambdaResponse match {

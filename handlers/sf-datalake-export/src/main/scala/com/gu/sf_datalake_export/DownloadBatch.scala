@@ -27,7 +27,7 @@ import scalaz.{-\/, IList, \/-}
 import scalaz.syntax.traverse.ToTraverseOps
 
 import scala.util.Try
-
+//TODO THIS SHOULD ONLY DOWNLOAD BATCHES WITH AT LEAST ONE ROW IN THE RESULT IF WE ENABLE PK CHUNKING
 object DownloadBatches {
 
   case class WireBatch(
@@ -115,7 +115,7 @@ object DownloadBatches {
         resultId <- getBatchResultId(getIdRequest)
         downloadRequest = DownloadResultsRequest(jobId, batchId, resultId)
         fileContent <- getBatchResult(downloadRequest)
-        fileName = FileName(s"${jobName}-${jobId}-${resultId.id}.csv")
+        fileName = FileName(s"${jobName.value}-${jobId.value}-${resultId.id}.csv")
         file = File(fileName, fileContent)
         //todo see how to conver this properly
         uploadtoS3Op <- S3UploadFile(stage, s3Write, file) match {
