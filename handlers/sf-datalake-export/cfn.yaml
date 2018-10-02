@@ -178,35 +178,35 @@ Resources:
       Timeout: 300
     DependsOn:
     - DownloadBatchRole
-EndJobRole:
-  Type: AWS::IAM::Role
-  Properties:
-    AssumeRolePolicyDocument:
-      Statement:
-      - Effect: Allow
-        Principal:
-          Service:
-          - lambda.amazonaws.com
-        Action:
-        - sts:AssumeRole
-    Path: /
-    Policies:
-    - PolicyName: LambdaPolicy
-      PolicyDocument:
+  EndJobRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
         Statement:
         - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
           Action:
-          - logs:CreateLogGroup
-          - logs:CreateLogStream
-          - logs:PutLogEvents
-          - lambda:InvokeFunction
-          Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/sf-end-export-job-${Stage}:log-stream:*"
-    - PolicyName: ReadPrivateCredentials
-      PolicyDocument:
-        Statement:
-        - Effect: Allow
-          Action: s3:GetObject
-          Resource: !Sub "arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/sfAuth-${Stage}*.json"
+          - sts:AssumeRole
+      Path: /
+      Policies:
+      - PolicyName: LambdaPolicy
+        PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            - lambda:InvokeFunction
+            Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/sf-end-export-job-${Stage}:log-stream:*"
+      - PolicyName: ReadPrivateCredentials
+        PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action: s3:GetObject
+            Resource: !Sub "arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/sfAuth-${Stage}*.json"
   EndJob:
     Type: AWS::Lambda::Function
     Properties:
