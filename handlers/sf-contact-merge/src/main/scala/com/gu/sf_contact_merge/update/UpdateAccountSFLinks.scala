@@ -1,9 +1,10 @@
 package com.gu.sf_contact_merge.update
 
-import com.gu.salesforce.TypesForSFEffectsData.SFContactId
+import com.gu.sf_contact_merge.Types.WinningSFContact
 import com.gu.sf_contact_merge.getaccounts.GetContacts.AccountId
 import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.EmailAddress
-import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId.IdentityId
+import com.gu.sf_contact_merge.update.UpdateAccountSFLinks.ZuoraFieldUpdates
+import com.gu.sf_contact_merge.update.UpdateSFContacts.IdentityIdToUse
 import com.gu.util.resthttp.RestRequestMaker.{JsonResponse, PutRequest, RelativePath}
 import com.gu.util.resthttp.Types.ClientFailableOp
 import play.api.libs.json.Json
@@ -22,27 +23,31 @@ object UpdateAccountSFLinks {
   implicit val writesC = Json.writes[WireZuoraContact]
   implicit val writesA = Json.writes[WireZuoraAccount]
 
-  case class LinksFromZuora(
-    sfContactId: SFContactId,
+  case class ZuoraFieldUpdates(
+    sfContactId: WinningSFContact,
     crmAccountId: CRMAccountId,
-    identityId: Option[IdentityId],
-    maybeEmail: Option[EmailAddress]
+    identityId: Option[IdentityIdToUse],
+    refreshEmailWith: Option[EmailAddress]
   )
 
   case class CRMAccountId(value: String) extends AnyVal
 
-  def apply(put: PutRequest => ClientFailableOp[JsonResponse]): LinksFromZuora => AccountId => ClientFailableOp[Unit] =
-    (toRequest _).andThen(_.andThen(put).andThen(_.map(_ => ())))
+  def apply(put: PutRequest => ClientFailableOp[JsonResponse]): UpdateAccountSFLinks =
+    (zuoraFieldUpdates: ZuoraFieldUpdates, accountId: AccountId) =>
+      put(toRequest(zuoraFieldUpdates, accountId)).map(_ => ())
 
-  def toRequest(sFPointer: LinksFromZuora)(account: AccountId): PutRequest = {
+  def toRequest(sFPointer: ZuoraFieldUpdates, account: AccountId): PutRequest = {
     val request = WireZuoraAccount(
       sFPointer.crmAccountId.value,
-      sFPointer.sfContactId.value,
-      sFPointer.identityId.map(_.value),
-      sFPointer.maybeEmail.map(e => WireZuoraContact(e.value))
+      sFPointer.sfContactId.id.value,
+      sFPointer.identityId.map(_.value.value),
+      sFPointer.refreshEmailWith.map(e => WireZuoraContact(e.value))
     )
     val path = RelativePath(s"accounts/${account.value}") // TODO danger - we shoudn't go building urls with string concatenation!
     PutRequest(request, path)
   }
 
+}
+trait UpdateAccountSFLinks {
+  def apply(zuoraFieldUpdates: ZuoraFieldUpdates, accountId: AccountId): ClientFailableOp[Unit]
 }
