@@ -1,1 +1,68 @@
-TODO
+AWSTemplateFormatVersion: "2010-09-09"
+Description: export salesforce data to the data lake
+
+Parameters:
+  Stage:
+    Description: Stage name
+    Type: String
+    AllowedValues:
+    - CODE
+    - PROD
+    Default: CODE
+Mappings:
+  #TODO get access to write in the real bucket in the ophan account
+  StageVariables:
+    CODE:
+      datalakeRawBucket: "gu-salesforce-export-test"
+    PROD:
+      datalakeRawBucket: "gu-salesforce-export-test-PROD"
+Resources:
+  StartJobRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: /
+      Policies:
+      - PolicyName: LambdaPolicy
+        PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            - lambda:InvokeFunction
+            Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/sf-start-export-job-${Stage}:log-stream:*"
+      - PolicyName: ReadPrivateCredentials
+        PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action: s3:GetObject
+            Resource: !Sub "arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/sfAuth-${Stage}*.json"
+  StartJob:
+  Type: AWS::Lambda::Function
+  Properties:
+    Description: start a sf export job
+    FunctionName:
+      !Sub sf-start-export-job-${Stage}
+    Code:
+      S3Bucket: membership-dist
+      S3Key: !Sub membership/${Stage}/sf-datalake-export/sf-start-export-job.jar
+    Handler: com.gu.sf_datalake_export.StartJob::apply
+    Environment:
+      Variables:
+        Stage: !Ref Stage
+    Role:
+      !GetAtt StartJobRole.Arn
+    MemorySize: 1536
+    Runtime: java8
+    Timeout: 300
+  DependsOn:
+  - StartJobRole
