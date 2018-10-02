@@ -2,67 +2,32 @@ package com.gu.sf_datalake_export
 
 import java.io.{InputStream, OutputStream}
 
+import com.gu.sf_datalake_export.salesforce_bulk_api.CreateJob._
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
-import com.gu.salesforce.SalesforceClient
-import com.gu.sf_datalake_export.salesforce_bulk_api.CreateJob.JobId
-import com.gu.sf_datalake_export.salesforce_bulk_api.GetJobBatches
-import com.gu.sf_datalake_export.salesforce_bulk_api.GetJobBatches._
+import com.gu.salesforce.{JsonHttp, SalesforceClient}
+import com.gu.sf_datalake_export.salesforce_bulk_api.{AddQueryToJob, CloseJob, CreateJob}
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.handlers.{ParseRequest, SerialiseResponse}
 import com.gu.util.reader.Types._
 import okhttp3.{Request, Response}
-import play.api.libs.json.{JsString, Json, Writes}
+import play.api.libs.json._
+import scalaz.{-\/, \/, \/-}
 import scalaz.Scalaz._
-import scalaz.{-\/, \/-}
-//TODO IGNORE BATCHES WITH NO ROWS (FOR THE PK CHUNKING CASE)
-object GetBatches {
+import salesforce_bulk_api.CreateJob.SfContact
+import AddQueryToJob.{AddQueryRequest, Query}
+
+object EndJob {
 
   case class WireRequest(
-    jobId: String,
-    jobName: String
+    jobId: String
   )
 
   object WireRequest {
-    implicit val reads = Json.reads[WireRequest]
-  }
-
-  trait JobStatus {
-    def name: String
-  }
-
-  object PendingJob extends JobStatus {
-    override val name = "Pending"
-  }
-
-  object FailedJob extends JobStatus {
-    override val name = "Failed"
-  }
-
-  object CompletedJob extends JobStatus {
-    override val name = "Completed"
-  }
-
-  case class WireBatch(batchId: String, state: String)
-
-  object WireBatch {
-    implicit val writes = Json.writes[WireBatch]
-
-    def fromBatch(batchInfo: BatchInfo) = WireBatch(batchInfo.batchId.value, batchInfo.state.name)
-  }
-
-  case class WireResponse(
-    jobId: String,
-    jobName: String,
-    jobStatus: String,
-    batches: Seq[WireBatch]
-  )
-
-  object WireResponse {
-    implicit val writes = Json.writes[WireResponse]
+    implicit val reads: Reads[WireRequest] = Json.reads[WireRequest]
   }
 
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
@@ -75,22 +40,18 @@ object GetBatches {
     )
   }
 
+  case class WireResponse(jobId: String, state: String = "Closed")
+
+  object WireResponse {
+    implicit val writes = Json.writes[WireResponse]
+  }
+
   def steps(
     lambdaIO: LambdaIO,
     stage: Stage,
     fetchString: StringFromS3,
     getResponse: Request => Response
   ): Unit = {
-
-
-    def getStatus(batches: Seq[BatchInfo]): JobStatus = batches.map(_.state).foldRight(CompletedJob: JobStatus) {
-      case (Failed, _) => FailedJob
-      case (_, FailedJob) => FailedJob
-      case (Queued, _) => PendingJob
-      case (InProgress, _) => PendingJob
-      case (Completed, currentStatus) => currentStatus
-      case (NotProcessed, currentStatus) => currentStatus
-    }
 
     val loadConfig = LoadConfigModule(stage, fetchString)
 
@@ -101,14 +62,10 @@ object GetBatches {
       sfConfig <- loadConfig[SFAuthConfig].leftMap(failure => failure.error)
       //fix auth so that it doesn't return apigatewayop
       sfClient <- SalesforceClient(getResponse, sfConfig).value.toDisjunction.leftMap(failure => failure.message)
-      getJobBatchesOp = GetJobBatches(sfClient)
-      batches <- getJobBatchesOp(jobId).toDisjunction.leftMap(failure => failure.message)
-      status = getStatus(batches)
+      wiredCloseJob = CloseJob(sfClient.wrap(JsonHttp.post))
+      _ <- wiredCloseJob(jobId).toDisjunction.leftMap(failure => failure.message)
     } yield WireResponse(
-      jobId = request.jobId,
-      jobName = request.jobName,
-      jobStatus = status.name,
-      batches = batches.map(WireBatch.fromBatch)
+      jobId = request.jobId
     )
 
     lambdaResponse match {

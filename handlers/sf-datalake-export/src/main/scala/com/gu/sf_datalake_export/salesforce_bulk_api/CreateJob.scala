@@ -31,7 +31,6 @@ object CreateJob {
   }
 
   implicit val writes = Json.writes[WireRequest]
-  implicit val unitReads: Reads[Unit] = Reads(_ => JsSuccess(()))
 
   case class JobId(value: String) extends AnyVal
 

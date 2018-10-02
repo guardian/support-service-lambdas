@@ -27,7 +27,6 @@ import scalaz.{-\/, IList, \/-}
 import scalaz.syntax.traverse.ToTraverseOps
 
 import scala.util.Try
-//TODO THIS SHOULD ONLY DOWNLOAD BATCHES WITH AT LEAST ONE ROW IN THE RESULT IF WE ENABLE PK CHUNKING
 object DownloadBatches {
 
   case class WireBatch(

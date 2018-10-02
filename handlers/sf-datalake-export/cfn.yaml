@@ -178,7 +178,55 @@ Resources:
       Timeout: 300
     DependsOn:
     - DownloadBatchRole
-
+EndJobRole:
+  Type: AWS::IAM::Role
+  Properties:
+    AssumeRolePolicyDocument:
+      Statement:
+      - Effect: Allow
+        Principal:
+          Service:
+          - lambda.amazonaws.com
+        Action:
+        - sts:AssumeRole
+    Path: /
+    Policies:
+    - PolicyName: LambdaPolicy
+      PolicyDocument:
+        Statement:
+        - Effect: Allow
+          Action:
+          - logs:CreateLogGroup
+          - logs:CreateLogStream
+          - logs:PutLogEvents
+          - lambda:InvokeFunction
+          Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/sf-end-export-job-${Stage}:log-stream:*"
+    - PolicyName: ReadPrivateCredentials
+      PolicyDocument:
+        Statement:
+        - Effect: Allow
+          Action: s3:GetObject
+          Resource: !Sub "arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/sfAuth-${Stage}*.json"
+  EndJob:
+    Type: AWS::Lambda::Function
+    Properties:
+      Description: close a sf export job
+      FunctionName:
+        !Sub sf-end-export-job-${Stage}
+      Code:
+        S3Bucket: zuora-auto-cancel-dist
+        S3Key: !Sub membership/${Stage}/sf-datalake-export/sf-datalake-export.jar
+      Handler: com.gu.sf_datalake_export.EndJob::apply
+      Environment:
+        Variables:
+          Stage: !Ref Stage
+      Role:
+        !GetAtt EndJobRole.Arn
+      MemorySize: 1536
+      Runtime: java8
+      Timeout: 300
+    DependsOn:
+    - EndJobRole
   StatesExecutionRole:
     Type: 'AWS::IAM::Role'
     Properties:
@@ -208,72 +256,81 @@ Resources:
       - Arn
       DefinitionString: !Sub
       - |-
-          {
-            "StartAt": "StartJob",
-            "States": {
-              "StartJob": {
-                "Type": "Task",
-                "Resource": "${startJobArn}",
-                "Next": "WaitSomeTime",
-                "Retry": [{
-                            "ErrorEquals": ["States.ALL"],
-                            "IntervalSeconds": 30,
-                            "MaxAttempts": 3
-                          }]
-              },
-              "WaitSomeTime": {
-                "Type": "Wait",
-                "Seconds": 5,
-                "Next": "getBatchState"
-              },
-              "getBatchState": {
-                "Type": "Task",
-                "Resource": "${batchStateArn}",
-                "Next": "checkPendingBatches",
-                "Retry": [{
-                            "ErrorEquals": ["States.ALL"],
-                            "IntervalSeconds": 30,
-                            "MaxAttempts": 3
-                          }]
-              },
-              "checkPendingBatches": {
-                "Type": "Choice",
-                "Choices": [{
-                              "Variable": "$.jobStatus",
-                              "StringEquals": "Completed",
-                              "Next": "downloadBatch"
-                            }],
-                "Default": "WaitSomeTime"
-              },
-              "downloadBatch": {
-                "Type": "Task",
-                "Resource": "${downloadBatchArn}",
-                "Next": "CheckPendingDownloads",
-                "Retry": [{
-                            "ErrorEquals": ["States.ALL"],
-                            "IntervalSeconds": 30,
-                            "MaxAttempts": 3
-                          }]
-              },
-              "CheckPendingDownloads": {
-                "Type": "Choice",
-                "Choices": [{
-                              "Variable": "$.done",
-                              "BooleanEquals": true,
-                              "Next": "done"
-                            }],
-                "Default": "downloadBatch"
-              },
-              "done": {
-                "Type": "Pass",
-                "End": true
+            {
+              "StartAt": "StartJob",
+              "States": {
+                "StartJob": {
+                  "Type": "Task",
+                  "Resource": "${startJobArn}",
+                  "Next": "WaitSomeTime",
+                  "Retry": [{
+                              "ErrorEquals": ["States.ALL"],
+                              "IntervalSeconds": 30,
+                              "MaxAttempts": 3
+                            }]
+                },
+                "WaitSomeTime": {
+                  "Type": "Wait",
+                  "Seconds": 5,
+                  "Next": "getBatchState"
+                },
+                "getBatchState": {
+                  "Type": "Task",
+                  "Resource": "${batchStateArn}",
+                  "Next": "checkPendingBatches",
+                  "Retry": [{
+                              "ErrorEquals": ["States.ALL"],
+                              "IntervalSeconds": 30,
+                              "MaxAttempts": 3
+                            }]
+                },
+                "checkPendingBatches": {
+                  "Type": "Choice",
+                  "Choices": [{
+                                "Variable": "$.jobStatus",
+                                "StringEquals": "Completed",
+                                "Next": "downloadBatch"
+                              }],
+                  "Default": "WaitSomeTime"
+                },
+                "downloadBatch": {
+                  "Type": "Task",
+                  "Resource": "${downloadBatchArn}",
+                  "Next": "CheckPendingDownloads",
+                  "Retry": [{
+                              "ErrorEquals": ["States.ALL"],
+                              "IntervalSeconds": 30,
+                              "MaxAttempts": 3
+                            }]
+                },
+                "CheckPendingDownloads": {
+                  "Type": "Choice",
+                  "Choices": [{
+                                "Variable": "$.done",
+                                "BooleanEquals": true,
+                                "Next": "endJob"
+                              }],
+                  "Default": "downloadBatch"
+                },
+                "endJob": {
+                  "Type": "Task",
+                  "Resource": "${endJobArn}",
+                  "Next": "done",
+                  "Retry": [{
+                              "ErrorEquals": ["States.ALL"],
+                              "IntervalSeconds": 30,
+                              "MaxAttempts": 3
+                            }]
+                },
+                "done": {
+                  "Type": "Pass",
+                  "End": true
+                }
               }
             }
-          }
       - {
         startJobArn: !GetAtt [ StartJob, Arn ],
         batchStateArn: !GetAtt [ BatchStateLambda, Arn ],
-        downloadBatchArn: !GetAtt [ DownloadBatch, Arn ]
-
-
+        downloadBatchArn: !GetAtt [ DownloadBatch, Arn ],
+        endJobArn: !GetAtt [ EndJob, Arn ]
       }
