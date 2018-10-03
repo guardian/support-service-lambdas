@@ -1,6 +1,6 @@
 # zuora-auto-cancel [![Codacy Badge](https://api.codacy.com/project/badge/Coverage/02af78419f69421396f090fea607ac3c)](https://www.codacy.com/app/johnduffell/zuora-auto-cancel?utm_source=github.com&utm_medium=referral&utm_content=guardian/zuora-auto-cancel&utm_campaign=Badge_Coverage) [![Coverage Status](https://coveralls.io/repos/github/guardian/zuora-auto-cancel/badge.svg?branch=master)](https://coveralls.io/github/guardian/zuora-auto-cancel?branch=master) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/df83c14325bc4c29aeae7e529f49f8a9)](https://app.codacy.com/app/johnduffell/zuora-auto-cancel?utm_source=github.com&utm_medium=referral&utm_content=guardian/zuora-auto-cancel&utm_campaign=badger)
 
-This is the reader revenue lambda API/orchestration layer.  But it has a bad name so far - TODO fix this. 
+This is the reader revenue lambda API/orchestration layer.  But it has a bad name so far - TODO fix this. For tech debt look in [the google doc](https://docs.google.com/document/d/1A4IyEWhABoGUw01fiuS0JtuuYn2IfQFZdTA5mtrcNho/edit?usp=sharing), although it should probably be a trellow column.
 
 Please keep all the various README in this project up to date, and improve them!
 There should be one in each project and anywhere else you think it's would help.
