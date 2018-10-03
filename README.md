@@ -33,6 +33,8 @@ If there's any code in either that you feel could be unit tested, it should prob
 - **one jar per lambda** - minimise the size of the deployment artifact
 - **minimise dependencies (aka liabilities)** on external libraries as we have to keep them up to date, also they increase the size of the artifact
 
+See also [this slideshow](https://docs.google.com/presentation/d/1W9bTr69QKwDRlxtjwP_TMzdpR85diUtndgJPh2H6LTo/edit?usp=sharing), which shows the original motivation.
+
 ---
 
 ## Quality matters
