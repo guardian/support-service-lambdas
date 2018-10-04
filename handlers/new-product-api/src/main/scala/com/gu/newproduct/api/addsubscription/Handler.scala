@@ -1,7 +1,7 @@
 package com.gu.newproduct.api.addsubscription
 
 import java.io.{InputStream, OutputStream}
-import java.time.LocalDate
+import java.time.{LocalDate, LocalDateTime}
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.sqs.AwsSQSSend
@@ -50,7 +50,7 @@ object Handler extends Logging {
   // Referenced in Cloudformation
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
     ApiGatewayHandler(LambdaIO(inputStream, outputStream, context)) {
-      Steps.operationForEffects(RawEffects.response, RawEffects.stage, GetFromS3.fetchString, AwsSQSSend.apply)
+      Steps.operationForEffects(RawEffects.response, RawEffects.stage, GetFromS3.fetchString, AwsSQSSend.apply, RawEffects.now)
     }
 }
 
@@ -61,14 +61,13 @@ object Steps {
     chargeOverride: Option[ChargeOverride],
     productRatePlanId: ProductRatePlanId
   ) = ZuoraCreateSubRequest(
-    productRatePlanId,
-    request.zuoraAccountId,
-    chargeOverride,
-    request.startDate,
-    acceptanceDate,
-    request.acquisitionCase,
-    request.acquisitionSource,
-    request.createdByCSR
+    productRatePlanId = productRatePlanId,
+    accountId = request.zuoraAccountId,
+    maybeChargeOverride = chargeOverride,
+    acceptanceDate = acceptanceDate,
+    acquisitionCase = request.acquisitionCase,
+    acquisitionSource = request.acquisitionSource,
+    createdByCSR = request.createdByCSR
   )
 
   def paymentDelayFor(paymentMethod: PaymentMethod): Long = paymentMethod match {
@@ -138,7 +137,12 @@ object Steps {
     _ <- validateStartDate(request.planId, request.startDate).toApiGatewayOp.toAsync
     customerData <- getCustomerData(request.zuoraAccountId).toAsync
     zuoraRatePlanId <- getZuoraRateplanId(request.planId).toApiGatewayContinueProcessing(internalServerError(s"no Zuora id for ${request.planId}!")).toAsync
-    createSubRequest = createZuoraSubRequest(request, request.startDate, None, zuoraRatePlanId)
+    createSubRequest = createZuoraSubRequest(
+      request = request,
+      acceptanceDate = request.startDate,
+      chargeOverride = None,
+      productRatePlanId = zuoraRatePlanId
+    )
     subscriptionName <- createSubscription(createSubRequest).toAsyncApiGatewayOp("create voucher subscription")
     plan = getPlan(request.planId)
     voucherEmailData = VoucherEmailData(
@@ -156,7 +160,8 @@ object Steps {
     response: Request => Response,
     stage: Stage,
     fetchString: StringFromS3,
-    awsSQSSend: QueueName => AwsSQSSend.Payload => Future[Unit]
+    awsSQSSend: QueueName => AwsSQSSend.Payload => Future[Unit],
+    currentDatetime: () => LocalDateTime
   ): ApiGatewayOp[Operation] =
     for {
       zuoraIds <- ZuoraIds.zuoraIdsForStage(stage)
@@ -181,8 +186,8 @@ object Steps {
           StartDateValidator.fromRule(validatorFor, plan.startDateRules)
         }
       )
-
-      createSubscription = CreateSubscription(zuoraClient.post[WireCreateRequest, WireSubscription]) _
+      currentDate = () => currentDatetime().toLocalDate
+      createSubscription = CreateSubscription(zuoraClient.post[WireCreateRequest, WireSubscription], currentDate) _
       contributionIds = List(zuoraIds.contributionsZuoraIds.monthly.productRatePlanId, zuoraIds.contributionsZuoraIds.annual.productRatePlanId)
       getCustomerData = getValidatedContributionCustomerData(zuoraClient, contributionIds)
       isValidContributionStartDate = isValidStartDateForPlan(MonthlyContribution, _: LocalDate)

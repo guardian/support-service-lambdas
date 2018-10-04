@@ -43,7 +43,6 @@ class ContributionStepsTest extends FlatSpec with Matchers {
         AmountMinorUnits(123),
         planAndCharge.productRatePlanChargeId
       )),
-      LocalDate.of(2018, 7, 18),
       LocalDate.of(2018, 7, 28),
       CaseId("case"),
       AcquisitionSource("CSR"),

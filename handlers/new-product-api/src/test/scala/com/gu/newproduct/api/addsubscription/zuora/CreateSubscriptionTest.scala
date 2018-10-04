@@ -13,6 +13,7 @@ import org.scalatest.{FlatSpec, Matchers}
 
 class CreateSubscriptionTest extends FlatSpec with Matchers {
 
+  def currentDate = () => LocalDate.of(2018, 7, 2)
   it should "get account as object" in {
 
     val ids = PlanAndCharge(
@@ -22,7 +23,7 @@ class CreateSubscriptionTest extends FlatSpec with Matchers {
     val expectedReq = WireCreateRequest(
       accountKey = "zac",
       autoRenew = true,
-      contractEffectiveDate = "2018-07-17",
+      contractEffectiveDate = "2018-07-02",
       customerAcceptanceDate = "2018-07-27",
       termType = "TERMED",
       renewalTerm = 12,
@@ -50,13 +51,12 @@ class CreateSubscriptionTest extends FlatSpec with Matchers {
         ids.productRatePlanChargeId
       )),
 
-      effectiveDate = LocalDate.of(2018, 7, 17),
       acceptanceDate = LocalDate.of(2018, 7, 27),
       acquisitionCase = CaseId("casecase"),
       acquisitionSource = AcquisitionSource("sourcesource"),
       createdByCSR = CreatedByCSR("csrcsr")
     )
-    val actual = CreateSubscription(accF)(createReq)
+    val actual = CreateSubscription(accF, currentDate)(createReq)
     actual shouldBe ClientSuccess(SubscriptionName("a-s123"))
   }
 }

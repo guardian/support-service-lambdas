@@ -52,11 +52,11 @@ object CreateSubscription {
 
   import WireModel._
 
-  def createRequest(createSubscription: ZuoraCreateSubRequest): WireCreateRequest = {
+  def createRequest(currentDate: LocalDate, createSubscription: ZuoraCreateSubRequest): WireCreateRequest = {
     import createSubscription._
     WireCreateRequest(
       accountKey = accountId.value,
-      contractEffectiveDate = effectiveDate.format(DateTimeFormatter.ISO_LOCAL_DATE),
+      contractEffectiveDate = currentDate.format(DateTimeFormatter.ISO_LOCAL_DATE),
       customerAcceptanceDate = acceptanceDate.format(DateTimeFormatter.ISO_LOCAL_DATE),
       AcquisitionCase__c = acquisitionCase.value,
       AcquisitionSource__c = acquisitionSource.value,
@@ -82,7 +82,6 @@ object CreateSubscription {
     productRatePlanId: ProductRatePlanId,
     accountId: ZuoraAccountId,
     maybeChargeOverride: Option[ChargeOverride],
-    effectiveDate: LocalDate,
     acceptanceDate: LocalDate,
     acquisitionCase: CaseId,
     acquisitionSource: AcquisitionSource,
@@ -92,9 +91,10 @@ object CreateSubscription {
   case class SubscriptionName(value: String) extends AnyVal
 
   def apply(
-    post: RequestsPost[WireCreateRequest, WireSubscription]
+    post: RequestsPost[WireCreateRequest, WireSubscription],
+    currentDate: () => LocalDate
   )(createSubscription: ZuoraCreateSubRequest): ClientFailableOp[SubscriptionName] = {
-    val maybeWireSubscription = post(createRequest(createSubscription), s"subscriptions", WithCheck)
+    val maybeWireSubscription = post(createRequest(currentDate(), createSubscription), s"subscriptions", WithCheck)
     maybeWireSubscription.map { wireSubscription =>
       SubscriptionName(wireSubscription.subscriptionNumber)
     }.withLogging("created subscription")
