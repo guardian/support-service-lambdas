@@ -12,7 +12,7 @@ import com.gu.sf_contact_merge.getaccounts.{GetIdentityAndZuoraEmailsForAccounts
 import com.gu.sf_contact_merge.getsfcontacts.DedupSfContacts.SFContactsForMerge
 import com.gu.sf_contact_merge.getsfcontacts.WireContactToSfContact.Types.SFContact
 import com.gu.sf_contact_merge.getsfcontacts.{DedupSfContacts, GetSfAddressOverride}
-import com.gu.sf_contact_merge.update.UpdateAccountSFLinks.{CRMAccountId, ZuoraFieldUpdates}
+import com.gu.sf_contact_merge.update.UpdateAccountSFLinks.{CRMAccountId, ClearZuoraIdentityId, ReplaceZuoraIdentityId, ZuoraFieldUpdates}
 import com.gu.sf_contact_merge.update.{UpdateAccountSFLinks, UpdateSFContacts}
 import com.gu.sf_contact_merge.validate.GetVariations.{Differing, HasAllowableVariations, HasNoVariations, Variations}
 import com.gu.sf_contact_merge.validate.{GetVariations, ValidateNoLosingDigitalVoucher}
@@ -47,7 +47,10 @@ object DomainSteps {
         val linksFromZuora = ZuoraFieldUpdates(
           mergeRequest.winningSFContact,
           mergeRequest.crmAccountId,
-          sfData.sfIdentityIdMoveData.map(_.identityIdUpdate),
+          sfData.sfIdentityIdMoveData.map(_.identityIdUpdate) match {
+            case Some(identityIdToUse) => ReplaceZuoraIdentityId(identityIdToUse.value)
+            case None => ClearZuoraIdentityId
+          },
           sfData.maybeEmailOverride
         )
         mergeRequest.zuoraAccountIds.traverseU(updateAccountSFLinks(linksFromZuora, _))
