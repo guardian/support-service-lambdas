@@ -3,7 +3,6 @@ package com.gu.identity
 import com.gu.identity.GetByEmail.RawWireModel.{User, UserResponse}
 import com.gu.identityBackfill.Types.EmailAddress
 import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
-import com.gu.util.config.ConfigLocation
 import com.gu.util.resthttp.HttpOp.HttpOpWrapper
 import com.gu.util.resthttp.RestRequestMaker
 import com.gu.util.resthttp.RestRequestMaker.{GetRequestWithParams, RelativePath, UrlParams}
@@ -41,7 +40,7 @@ object GetByEmail {
       case _ => GenericError("not an OK response from api")
     }
 
-  def toResponse(userResponse: UserResponse) = {
+  def toResponse(userResponse: UserResponse): ClientFailableOp[MaybeValidatedEmail] = {
     for {
       user <- userFromResponse(userResponse)
       identityId = if (user.statusFields.userEmailValidated) ValidatedEmail(IdentityId(user.id)) else NotValidated
@@ -49,14 +48,4 @@ object GetByEmail {
 
   }
 
-}
-
-case class IdentityConfig(
-  baseUrl: String,
-  apiToken: String
-)
-
-object IdentityConfig {
-  implicit val reads: Reads[IdentityConfig] = Json.reads[IdentityConfig]
-  implicit val location = ConfigLocation[IdentityConfig](path = "identity", version = 1)
 }
