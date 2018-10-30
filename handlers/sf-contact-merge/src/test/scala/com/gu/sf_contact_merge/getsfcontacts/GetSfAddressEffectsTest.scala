@@ -24,7 +24,7 @@ class GetSfAddressEffectsTest extends FlatSpec with Matchers {
       sfConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[SFAuthConfig]
       response = RawEffects.response
       sfAuth <- SalesforceClient(response, sfConfig).value.toDisjunction
-      getSfContact = sfAuth.wrap(JsonHttp.get).setupRequest(ToSfContactRequest.apply).parse[WireResult].map(WireContactToSfContact.apply)
+      getSfContact = sfAuth.wrapWith(JsonHttp.get).setupRequest(ToSfContactRequest.apply).parse[WireResult].map(WireContactToSfContact.apply)
       address <- getSfContact.runRequest(testContact).toDisjunction
     } yield address
 

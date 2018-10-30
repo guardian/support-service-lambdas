@@ -160,11 +160,11 @@ object Handler extends Logging {
       (for {
         identityAndSfRequests <- sfBackendForIdentityCookieHeader(apiGatewayRequest.headers)
         raiseCaseDetail <- apiGatewayRequest.bodyAsCaseClass[RaiseCaseDetail]()
-        lookupByIdOp = SalesforceGenericIdLookup(identityAndSfRequests.sfClient.wrap(JsonHttp.get))
-        mostRecentCaseOp = SalesforceCase.GetMostRecentCaseByContactId(identityAndSfRequests.sfClient.wrap(JsonHttp.get))
-        createCaseOp = SalesforceCase.Create(identityAndSfRequests.sfClient.wrap(JsonHttp.post))
+        lookupByIdOp = SalesforceGenericIdLookup(identityAndSfRequests.sfClient.wrapWith(JsonHttp.get))
+        mostRecentCaseOp = SalesforceCase.GetMostRecentCaseByContactId(identityAndSfRequests.sfClient.wrapWith(JsonHttp.get))
+        createCaseOp = SalesforceCase.Create(identityAndSfRequests.sfClient.wrapWith(JsonHttp.post))
         wiredCreateCaseOp = buildWireNewCaseForSalesforce.tupled andThen createCaseOp
-        sfUpdateOp = SalesforceCase.Update(identityAndSfRequests.sfClient.wrap(JsonHttp.patch))
+        sfUpdateOp = SalesforceCase.Update(identityAndSfRequests.sfClient.wrapWith(JsonHttp.patch))
         updateReasonOnRecentCaseOp = updateCaseReason(sfUpdateOp)_
         newOrResumeCaseOp = newOrResumeCase(wiredCreateCaseOp, updateReasonOnRecentCaseOp, raiseCaseDetail)_
         wiredRaiseCase = raiseCase(lookupByIdOp, mostRecentCaseOp, newOrResumeCaseOp)_
@@ -214,11 +214,11 @@ object Handler extends Logging {
       (for {
         identityAndSfRequests <- sfBackendForIdentityCookieHeader(apiGatewayRequest.headers)
         pathParams <- apiGatewayRequest.pathParamsAsCaseClass[CasePathParams]()
-        lookupByIdOp = SalesforceGenericIdLookup(identityAndSfRequests.sfClient.wrap(JsonHttp.get))
-        getCaseByIdOp = SalesforceCase.GetById[CaseWithContactId](identityAndSfRequests.sfClient.wrap(JsonHttp.get))_
+        lookupByIdOp = SalesforceGenericIdLookup(identityAndSfRequests.sfClient.wrapWith(JsonHttp.get))
+        getCaseByIdOp = SalesforceCase.GetById[CaseWithContactId](identityAndSfRequests.sfClient.wrapWith(JsonHttp.get))_
         _ <- verifyCaseBelongsToUser(lookupByIdOp, getCaseByIdOp)(identityAndSfRequests.identityUser.id, pathParams.caseId)
         requestBody <- apiGatewayRequest.bodyAsCaseClass[JsValue]()
-        sfUpdateOp = SalesforceCase.Update(identityAndSfRequests.sfClient.wrap(JsonHttp.patch))
+        sfUpdateOp = SalesforceCase.Update(identityAndSfRequests.sfClient.wrapWith(JsonHttp.patch))
         _ <- sfUpdateOp(pathParams.caseId, requestBody).toApiGatewayOp("update case")
       } yield ApiGatewayResponse.successfulExecution).apiResponse
 

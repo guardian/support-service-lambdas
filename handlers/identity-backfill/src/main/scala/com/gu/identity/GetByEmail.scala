@@ -4,17 +4,17 @@ import com.gu.identity.GetByEmail.RawWireModel.{User, UserResponse}
 import com.gu.identityBackfill.Types.EmailAddress
 import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
 import com.gu.util.config.ConfigLocation
-import okhttp3.{HttpUrl, Request, Response}
-import play.api.libs.json.{Json, Reads}
-import scalaz.syntax.std.either._
-import scalaz.{-\/, \/, \/-}
+import com.gu.util.resthttp.HttpOp.HttpOpWrapper
+import com.gu.util.resthttp.RestRequestMaker
+import com.gu.util.resthttp.RestRequestMaker.{GetRequestWithParams, RelativePath, UrlParams}
+import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError}
+import play.api.libs.json.{JsValue, Json, Reads}
 
 object GetByEmail {
 
-  sealed trait ApiError
-  case class OtherError(message: String) extends ApiError
-  case object NotFound extends ApiError
-  case object NotValidated extends ApiError
+  sealed trait MaybeValidatedEmail
+  case class ValidatedEmail(identityId: IdentityId) extends MaybeValidatedEmail
+  case object NotValidated extends MaybeValidatedEmail
 
   object RawWireModel {
 
@@ -29,31 +29,22 @@ object GetByEmail {
 
   }
 
-  def identityIdFromUser(user: User) =
-    IdentityId(user.id)
+  val wrapper: HttpOpWrapper[EmailAddress, GetRequestWithParams, JsValue, MaybeValidatedEmail] =
+    HttpOpWrapper[EmailAddress, GetRequestWithParams, JsValue, MaybeValidatedEmail](
+      emailAddress => GetRequestWithParams(RelativePath(s"/user"), UrlParams(Map("emailAddress" -> emailAddress.value))),
+      RestRequestMaker.toResult[UserResponse](_).flatMap(toResponse)
+    )
 
-  def userFromResponse(userResponse: UserResponse): ApiError \/ User =
+  def userFromResponse(userResponse: UserResponse): ClientFailableOp[User] =
     userResponse match {
-      case UserResponse("ok", user) => \/-(user)
-      case _ => -\/(OtherError("not an OK response from api"))
+      case UserResponse("ok", user) => ClientSuccess(user)
+      case _ => GenericError("not an OK response from api")
     }
 
-  def apply(getResponse: Request => Response, identityConfig: IdentityConfig)(email: EmailAddress): ApiError \/ IdentityId = {
-
-    val url = HttpUrl.parse(identityConfig.baseUrl + "/user").newBuilder().addQueryParameter("emailAddress", email.value).build()
-    val response = getResponse(new Request.Builder().url(url).addHeader("X-GU-ID-Client-Access-Token", "Bearer " + identityConfig.apiToken).build())
-
+  def toResponse(userResponse: UserResponse) = {
     for {
-      _ <- response.code match {
-        case 200 => \/-(())
-        case 404 => -\/(NotFound)
-        case code => -\/(OtherError(s"failed http with ${code}"))
-      }
-      body = response.body.byteStream
-      userResponse <- Json.parse(body).validate[UserResponse].asEither.disjunction.leftMap(err => OtherError(err.mkString(", ")))
       user <- userFromResponse(userResponse)
-      _ <- if (user.statusFields.userEmailValidated) \/-(()) else -\/(NotValidated)
-      identityId = identityIdFromUser(user)
+      identityId = if (user.statusFields.userEmailValidated) ValidatedEmail(IdentityId(user.id)) else NotValidated
     } yield identityId
 
   }

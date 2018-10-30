@@ -66,8 +66,15 @@ object RestRequestMaker extends Logging {
 
   case class GetRequest(path: RelativePath)
 
+  case class GetRequestWithParams(path: RelativePath, urlParams: UrlParams)
+
   case class JsonResponse(bodyAsJson: JsValue) {
     def value[RESP: Reads] = toResult[RESP](bodyAsJson)
+  }
+
+  case class UrlParams(value: Map[String, String])
+  object UrlParams {
+    val empty = UrlParams(Map.empty)
   }
 
   class Requests(

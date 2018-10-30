@@ -1,7 +1,7 @@
 package com.gu.salesforce
 
 import com.gu.salesforce.SalesforceAuthenticate.{SFAuthConfig, SalesforceAuth}
-import com.gu.util.resthttp.RestRequestMaker.{BodyAsString, RelativePath, createBodyFromString, toClientFailableOp}
+import com.gu.util.resthttp.RestRequestMaker._
 import com.gu.util.resthttp.{HttpOp, LazyClientFailableOp}
 import okhttp3.{Request, Response}
 
@@ -39,6 +39,6 @@ object SalesforceClient {
     override def builder: Request.Builder = new Request.Builder().get()
   }
 
-  case class StringHttpRequest(relativePath: RelativePath, requestMethod: RequestMethod)
+  case class StringHttpRequest(requestMethod: RequestMethod, relativePath: RelativePath, urlParams: UrlParams)
 
 }

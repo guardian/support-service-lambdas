@@ -1,6 +1,6 @@
 package com.gu.util.resthttp
 
-import com.gu.util.resthttp.HttpOp.HttpWrapper
+import com.gu.util.resthttp.HttpOp.HttpOpWrapper
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess}
 import okhttp3.{Request, Response}
 import play.api.libs.json.{JsValue, Reads}
@@ -17,7 +17,7 @@ case class HttpOp[PARAM, RESPONSE](
   def flatMap[NEWRESPONSE](toNewResponse: RESPONSE => ClientFailableOp[NEWRESPONSE]): HttpOp[PARAM, NEWRESPONSE] =
     HttpOp(inputToRequest, effect, responseToOutput.andThen(_.flatMap(toNewResponse)))
 
-  def wrap[UPDATEDPARAM, NEWRESPONSE](both: HttpWrapper[UPDATEDPARAM, PARAM, RESPONSE, NEWRESPONSE]): HttpOp[UPDATEDPARAM, NEWRESPONSE] =
+  def wrapWith[UPDATEDPARAM, NEWRESPONSE](both: HttpOpWrapper[UPDATEDPARAM, PARAM, RESPONSE, NEWRESPONSE]): HttpOp[UPDATEDPARAM, NEWRESPONSE] =
     setupRequest(both.fromNewParam).flatMap(both.toNewResponse)
 
   def runRequest(in: PARAM): ClientFailableOp[RESPONSE] =
@@ -35,10 +35,16 @@ case class HttpOp[PARAM, RESPONSE](
 
 object HttpOp {
 
-  trait HttpWrapper[UPDATEDPARAM, PARAM, RESPONSE, NEWRESPONSE] {
-    def fromNewParam(updatedParam: UPDATEDPARAM): PARAM
+  case class HttpOpWrapper[UPDATEDPARAM, PARAM, RESPONSE, NEWRESPONSE](
+    fromNewParam: UPDATEDPARAM => PARAM,
+    toNewResponse: RESPONSE => ClientFailableOp[NEWRESPONSE]
+  ) {
 
-    def toNewResponse(response: RESPONSE): ClientFailableOp[NEWRESPONSE]
+    def wrapWith[MOREUPDATEDPARAM, MORENEWRESPONSE](
+      wrapper: HttpOpWrapper[MOREUPDATEDPARAM, UPDATEDPARAM, NEWRESPONSE, MORENEWRESPONSE]
+    ): HttpOpWrapper[MOREUPDATEDPARAM, PARAM, RESPONSE, MORENEWRESPONSE] =
+      HttpOpWrapper(wrapper.fromNewParam.andThen(fromNewParam), toNewResponse.andThen(_.flatMap(wrapper.toNewResponse)))
+
   }
 
   def apply(getResponse: Request => Response): HttpOp[Request, Response] =

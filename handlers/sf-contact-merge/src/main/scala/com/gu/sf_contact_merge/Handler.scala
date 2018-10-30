@@ -49,11 +49,11 @@ object Handler {
 
     } yield Operation.noHealthcheck {
       WireRequestToDomainObject {
-        val sfGet = sfAuth.wrap(JsonHttp.get)
+        val sfGet = sfAuth.wrapWith(JsonHttp.get)
         val getSfContact = GetSfContact(sfGet.setupRequest(ToSfContactRequest.apply).parse[WireResult].map(WireContactToSfContact.apply))
         DomainSteps(
           ZuoraSteps(GetIdentityAndZuoraEmailsForAccountsSteps(zuoraQuerier)),
-          UpdateSFContacts(UpdateSalesforceIdentityId(sfAuth.wrap(JsonHttp.patch))),
+          UpdateSFContacts(UpdateSalesforceIdentityId(sfAuth.wrapWith(JsonHttp.patch))),
           UpdateAccountSFLinks(requests.put),
           SFSteps(getSfContact)
         )

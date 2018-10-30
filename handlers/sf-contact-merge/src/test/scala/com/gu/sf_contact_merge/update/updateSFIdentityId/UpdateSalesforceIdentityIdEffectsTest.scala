@@ -47,7 +47,7 @@ class UpdateSalesforceIdentityIdEffectsTest extends FlatSpec with Matchers {
       sfConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[SFAuthConfig]
       response = RawEffects.response
       sfClient <- SalesforceClient(response, sfConfig).value.toDisjunction
-      patch = sfClient.wrap(JsonHttp.patch)
+      patch = sfClient.wrapWith(JsonHttp.patch)
       updateSalesforceIdentityId = UpdateSalesforceIdentityId(patch)
       sFContactUpdate = SFContactUpdate(
         Some(testIdentityId),
@@ -56,7 +56,7 @@ class UpdateSalesforceIdentityIdEffectsTest extends FlatSpec with Matchers {
         Some(testEmail)
       )
       _ <- updateSalesforceIdentityId.apply(testContact, sFContactUpdate).toDisjunction
-      getSalesforceIdentityId = GetSalesforceIdentityId(sfClient.wrap(JsonHttp.get)) _
+      getSalesforceIdentityId = GetSalesforceIdentityId(sfClient.wrapWith(JsonHttp.get)) _
       updatedIdentityId <- getSalesforceIdentityId(testContact).toDisjunction
     } yield updatedIdentityId
 
