@@ -17,10 +17,10 @@ object RestRequestMaker extends Logging {
       val body = response.body.string
 
       val truncated = body.take(500) + (if (body.length > 500) "..." else "")
-      logger.error(s"Request to Zuora was unsuccessful, response status was ${response.code}, response body: \n $response\n$truncated")
+      logger.error(s"HTTP request was unsuccessful, response status was ${response.code}, response body: \n $response\n$truncated")
       if (response.code == 404) {
         NotFound(response.message)
-      } else GenericError("Request to Zuora was unsuccessful")
+      } else GenericError("HTTP request was unsuccessful")
     }
   }
 
@@ -29,8 +29,8 @@ object RestRequestMaker extends Logging {
       case success: JsSuccess[T] =>
         ClientSuccess(success.get)
       case error: JsError => {
-        logger.error(s"Failed to convert Zuora response to case case $error. Response body was: \n $bodyAsJson")
-        GenericError(s"Error when converting Zuora response to case class: $error")
+        logger.error(s"Failed to convert JSON response to case case $error. Response body was: \n $bodyAsJson")
+        GenericError(s"Error when converting JSON response to case class: $error")
       }
     }
   }
