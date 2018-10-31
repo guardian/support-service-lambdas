@@ -1,7 +1,7 @@
 package com.gu.identity
 
 import com.gu.effects.{GetFromS3, RawEffects}
-import com.gu.identity.GetByEmail.ValidatedEmail
+import com.gu.identity.GetByEmail.IdentityAccountWithValidatedEmail
 import com.gu.identityBackfill.Types.EmailAddress
 import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
 import com.gu.test.EffectsTest
@@ -23,7 +23,7 @@ class GetByEmailEffectsTest extends FlatSpec with Matchers {
       getByEmail = identityClient.wrapWith(JsonHttp.getWithParams).wrapWith(GetByEmail.wrapper)
       identityId <- getByEmail.runRequest(EmailAddress("john.duffell@guardian.co.uk")).toDisjunction
     } yield identityId
-    actual should be(\/-(ValidatedEmail(IdentityId("21814163"))))
+    actual should be(\/-(IdentityAccountWithValidatedEmail(IdentityId("21814163"))))
 
   }
 

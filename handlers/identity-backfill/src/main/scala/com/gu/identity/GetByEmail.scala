@@ -11,9 +11,9 @@ import play.api.libs.json.{JsValue, Json, Reads}
 
 object GetByEmail {
 
-  sealed trait MaybeValidatedEmail
-  case class ValidatedEmail(identityId: IdentityId) extends MaybeValidatedEmail
-  case object NotValidated extends MaybeValidatedEmail
+  sealed trait IdentityAccount
+  case class IdentityAccountWithValidatedEmail(identityId: IdentityId) extends IdentityAccount
+  case object IdentityAccountWithUnvalidatedEmail extends IdentityAccount
 
   object RawWireModel {
 
@@ -28,8 +28,8 @@ object GetByEmail {
 
   }
 
-  val wrapper: HttpOpWrapper[EmailAddress, GetRequestWithParams, JsValue, MaybeValidatedEmail] =
-    HttpOpWrapper[EmailAddress, GetRequestWithParams, JsValue, MaybeValidatedEmail](
+  val wrapper: HttpOpWrapper[EmailAddress, GetRequestWithParams, JsValue, IdentityAccount] =
+    HttpOpWrapper[EmailAddress, GetRequestWithParams, JsValue, IdentityAccount](
       emailAddress => GetRequestWithParams(RelativePath(s"/user"), UrlParams(Map("emailAddress" -> emailAddress.value))),
       RestRequestMaker.toResult[UserResponse](_).flatMap(toResponse)
     )
@@ -37,13 +37,13 @@ object GetByEmail {
   def userFromResponse(userResponse: UserResponse): ClientFailableOp[User] =
     userResponse match {
       case UserResponse("ok", user) => ClientSuccess(user)
-      case _ => GenericError("not an OK response from api")
+      case error => GenericError(s"not an OK response from api: $error")
     }
 
-  def toResponse(userResponse: UserResponse): ClientFailableOp[MaybeValidatedEmail] = {
+  def toResponse(userResponse: UserResponse): ClientFailableOp[IdentityAccount] = {
     for {
       user <- userFromResponse(userResponse)
-      identityId = if (user.statusFields.userEmailValidated) ValidatedEmail(IdentityId(user.id)) else NotValidated
+      identityId = if (user.statusFields.userEmailValidated) IdentityAccountWithValidatedEmail(IdentityId(user.id)) else IdentityAccountWithUnvalidatedEmail
     } yield identityId
 
   }

@@ -1,7 +1,7 @@
 package com.gu.identityBackfill
 
 import com.gu.identity.GetByEmail
-import com.gu.identity.GetByEmail.{NotValidated, ValidatedEmail}
+import com.gu.identity.GetByEmail.{IdentityAccountWithUnvalidatedEmail, IdentityAccountWithValidatedEmail}
 import com.gu.identityBackfill.PreReqCheck.PreReqResult
 import com.gu.identityBackfill.Types._
 import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
@@ -19,7 +19,7 @@ class PreReqCheckTest extends FlatSpec with Matchers {
 
     val result =
       PreReqCheck(
-        email => ClientSuccess(ValidatedEmail(IdentityId("asdf"))),
+        email => ClientSuccess(IdentityAccountWithValidatedEmail(IdentityId("asdf"))),
         email => ContinueProcessing(ZuoraAccountIdentitySFContact(AccountId("acc"), None, SFContactId("sf"))),
         identityId => ContinueProcessing(()),
         _ => ContinueProcessing(()),
@@ -83,13 +83,13 @@ class PreReqCheckTest extends FlatSpec with Matchers {
 
   it should "stop processing if it finds a non validated identity account" in {
 
-    val result = emailCheckFailure(ClientSuccess(NotValidated))
+    val result = emailCheckFailure(ClientSuccess(IdentityAccountWithUnvalidatedEmail))
 
     val expectedResult = ReturnWithResponse(ApiGatewayResponse.notFound("identity email not validated"))
     result should be(expectedResult)
   }
 
-  private def emailCheckFailure(identityError: ClientFailableOp[GetByEmail.MaybeValidatedEmail]) = {
+  private def emailCheckFailure(identityError: ClientFailableOp[GetByEmail.IdentityAccount]) = {
     PreReqCheck(
       email => identityError,
       email => fail("shouldn't be called 1"),

@@ -134,7 +134,7 @@ object Handler {
 
 object Healthcheck {
   def apply(
-    getByEmail: HttpOp[EmailAddress, GetByEmail.MaybeValidatedEmail],
+    getByEmail: HttpOp[EmailAddress, GetByEmail.IdentityAccount],
     countZuoraAccountsForIdentityId: IdentityId => ClientFailableOp[Int],
     sfAuth: LazyClientFailableOp[Any]
   ): ApiResponse =
@@ -142,7 +142,7 @@ object Healthcheck {
       maybeIdentityId <- getByEmail.runRequest(EmailAddress("john.duffell@guardian.co.uk"))
         .toApiGatewayOp("problem with email").withLogging("healthcheck getByEmail")
       identityId <- maybeIdentityId match {
-        case GetByEmail.ValidatedEmail(identityId) => ContinueProcessing(identityId)
+        case GetByEmail.IdentityAccountWithValidatedEmail(identityId) => ContinueProcessing(identityId)
         case other =>
           logger.error(s"failed healthcheck with $other")
           ReturnWithResponse(ApiGatewayResponse.internalServerError("test identity id was not present"))

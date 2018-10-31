@@ -1,7 +1,7 @@
 package com.gu.identityBackfill
 
 import com.gu.identity.GetByEmail
-import com.gu.identity.GetByEmail.NotValidated
+import com.gu.identity.GetByEmail.IdentityAccountWithUnvalidatedEmail
 import com.gu.identityBackfill.TypeConvert._
 import com.gu.identityBackfill.Types._
 import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
@@ -19,7 +19,7 @@ object PreReqCheck {
   case class PreReqResult(zuoraAccountId: Types.AccountId, sFContactId: SFContactId, existingIdentityId: Option[IdentityId])
 
   def apply(
-    getByEmail: EmailAddress => ClientFailableOp[GetByEmail.MaybeValidatedEmail],
+    getByEmail: EmailAddress => ClientFailableOp[GetByEmail.IdentityAccount],
     getSingleZuoraAccountForEmail: EmailAddress => ApiGatewayOp[ZuoraAccountIdentitySFContact],
     noZuoraAccountsForIdentityId: IdentityId => ApiGatewayOp[Unit],
     zuoraSubType: AccountId => ApiGatewayOp[Unit],
@@ -27,9 +27,9 @@ object PreReqCheck {
   )(emailAddress: EmailAddress): ApiGatewayOp[PreReqResult] = {
     for {
       maybeExistingIdentityId <- (getByEmail(emailAddress) match {
-        case ClientSuccess(GetByEmail.ValidatedEmail(identityId)) => ContinueProcessing(Some(identityId))
+        case ClientSuccess(GetByEmail.IdentityAccountWithValidatedEmail(identityId)) => ContinueProcessing(Some(identityId))
         case NotFound(_) => ContinueProcessing(None)
-        case ClientSuccess(NotValidated) => ReturnWithResponse(ApiGatewayResponse.notFound("identity email not validated"))
+        case ClientSuccess(IdentityAccountWithUnvalidatedEmail) => ReturnWithResponse(ApiGatewayResponse.notFound("identity email not validated"))
         case other: ClientFailure => ReturnWithResponse(ApiGatewayResponse.internalServerError(other.toString))
       }).withLogging("GetByEmail")
       zuoraAccountForEmail <- getSingleZuoraAccountForEmail(emailAddress)
