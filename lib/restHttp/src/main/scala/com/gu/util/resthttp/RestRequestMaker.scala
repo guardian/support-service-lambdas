@@ -29,7 +29,7 @@ object RestRequestMaker extends Logging {
       case success: JsSuccess[T] =>
         ClientSuccess(success.get)
       case error: JsError => {
-        logger.error(s"Failed to convert JSON response to case case $error. Response body was: \n $bodyAsJson")
+        logger.error(s"Failed to convert JSON response to case class $error. Response body was: \n $bodyAsJson")
         GenericError(s"Error when converting JSON response to case class: $error")
       }
     }
