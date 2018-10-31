@@ -28,11 +28,10 @@ object GetByEmail {
 
   }
 
-  val wrapper: HttpOpWrapper[EmailAddress, GetRequestWithParams, JsValue, IdentityAccount] =
-    HttpOpWrapper[EmailAddress, GetRequestWithParams, JsValue, IdentityAccount](
-      emailAddress => GetRequestWithParams(RelativePath(s"/user"), UrlParams(Map("emailAddress" -> emailAddress.value))),
-      RestRequestMaker.toResult[UserResponse](_).flatMap(toResponse)
-    )
+  def emailAddressToParams(emailAddress: EmailAddress): GetRequestWithParams =
+    GetRequestWithParams(RelativePath(s"/user"), UrlParams(Map("emailAddress" -> emailAddress.value)))
+
+  val jsToWireModel: JsValue => ClientFailableOp[UserResponse] = RestRequestMaker.toResult[UserResponse]
 
   def userFromResponse(userResponse: UserResponse): ClientFailableOp[User] =
     userResponse match {
@@ -40,12 +39,18 @@ object GetByEmail {
       case error => GenericError(s"not an OK response from api: $error")
     }
 
-  def toResponse(userResponse: UserResponse): ClientFailableOp[IdentityAccount] = {
+  def wireToDomainModel(userResponse: UserResponse): ClientFailableOp[IdentityAccount] = {
     for {
       user <- userFromResponse(userResponse)
       identityId = if (user.statusFields.userEmailValidated) IdentityAccountWithValidatedEmail(IdentityId(user.id)) else IdentityAccountWithUnvalidatedEmail
     } yield identityId
 
   }
+
+  val wrapper: HttpOpWrapper[EmailAddress, GetRequestWithParams, JsValue, IdentityAccount] =
+    HttpOpWrapper[EmailAddress, GetRequestWithParams, JsValue, IdentityAccount](
+      fromNewParam = emailAddressToParams,
+      toNewResponse = jsToWireModel.andThen(_.flatMap(wireToDomainModel))
+    )
 
 }

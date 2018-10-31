@@ -9,11 +9,11 @@ import okhttp3.{Request, Response}
 object SalesforceClient {
 
   def apply(
-    response: Request => Response,
+    getResponse: Request => Response,
     config: SFAuthConfig
   ): LazyClientFailableOp[HttpOp[StringHttpRequest, BodyAsString]] =
-    SalesforceAuthenticate(response)(config).map { sfAuth =>
-      HttpOp(response).flatMap {
+    SalesforceAuthenticate(getResponse)(config).map { sfAuth =>
+      HttpOp(getResponse).flatMap {
         toClientFailableOp
       }.setupRequest[StringHttpRequest] {
         withAuth(sfAuth)
