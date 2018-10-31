@@ -1,14 +1,29 @@
-package com.gu.salesforce
+package com.gu.util.resthttp
 
-import com.gu.salesforce.SalesforceClient._
 import com.gu.util.resthttp.HttpOp.HttpOpWrapper
 import com.gu.util.resthttp.RestRequestMaker._
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError}
+import okhttp3.Request
 import play.api.libs.json.{JsValue, Json}
 
 import scala.util.Try
 
 object JsonHttp {
+
+  sealed trait RequestMethod {
+    def builder: Request.Builder
+  }
+  case class PostMethod(body: BodyAsString) extends RequestMethod {
+    override def builder: Request.Builder = new Request.Builder().post(createBodyFromString(body))
+  }
+  case class PatchMethod(body: BodyAsString) extends RequestMethod {
+    override def builder: Request.Builder = new Request.Builder().patch(createBodyFromString(body))
+  }
+  case object GetMethod extends RequestMethod {
+    override def builder: Request.Builder = new Request.Builder().get()
+  }
+
+  case class StringHttpRequest(requestMethod: RequestMethod, relativePath: RelativePath, urlParams: UrlParams)
 
   val patch =
     HttpOpWrapper[PatchRequest, StringHttpRequest, BodyAsString, Unit](

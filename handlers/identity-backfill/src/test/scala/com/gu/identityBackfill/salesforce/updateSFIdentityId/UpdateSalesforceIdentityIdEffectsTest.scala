@@ -3,11 +3,12 @@ package com.gu.identityBackfill.salesforce.updateSFIdentityId
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId
 import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
-import com.gu.salesforce.{JsonHttp, SalesforceClient}
+import com.gu.salesforce.SalesforceClient
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.dev.SFEffectsData
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
+import com.gu.util.resthttp.JsonHttp
 import org.scalatest.{FlatSpec, Matchers}
 import scalaz.\/-
 

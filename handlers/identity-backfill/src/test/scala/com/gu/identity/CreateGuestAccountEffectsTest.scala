@@ -3,11 +3,10 @@ package com.gu.identity
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.identityBackfill.Types.EmailAddress
 import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
-import com.gu.salesforce.JsonHttp
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.resthttp.HttpOp.HttpOpWrapper
-import com.gu.util.resthttp.RestRequestMaker
+import com.gu.util.resthttp.{JsonHttp, RestRequestMaker}
 import com.gu.util.resthttp.RestRequestMaker.{GetRequestWithParams, RelativePath, UrlParams}
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.{JsValue, Json, Reads}

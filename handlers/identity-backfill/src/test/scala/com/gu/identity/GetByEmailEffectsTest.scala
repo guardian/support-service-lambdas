@@ -4,9 +4,9 @@ import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.identity.GetByEmail.ValidatedEmail
 import com.gu.identityBackfill.Types.EmailAddress
 import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
-import com.gu.salesforce.JsonHttp
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
+import com.gu.util.resthttp.JsonHttp
 import org.scalatest.{FlatSpec, Matchers}
 import scalaz.\/-
 

@@ -1,8 +1,8 @@
 package com.gu.identity
 
-import com.gu.salesforce.SalesforceClient.StringHttpRequest
 import com.gu.util.config.ConfigLocation
 import com.gu.util.resthttp.HttpOp
+import com.gu.util.resthttp.JsonHttp.StringHttpRequest
 import com.gu.util.resthttp.RestRequestMaker.{BodyAsString, toClientFailableOp}
 import okhttp3.{HttpUrl, Request, Response}
 import play.api.libs.json.{Json, Reads}

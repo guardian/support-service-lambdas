@@ -6,7 +6,7 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
-import com.gu.salesforce.{JsonHttp, SalesforceClient}
+import com.gu.salesforce.SalesforceClient
 import com.gu.sf_contact_merge.DomainSteps.MergeRequest
 import com.gu.sf_contact_merge.SFSteps.GetSfContact
 import com.gu.sf_contact_merge.TypeConvert._
@@ -22,6 +22,7 @@ import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, ApiGatewayR
 import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.reader.Types._
+import com.gu.util.resthttp.JsonHttp
 import com.gu.util.resthttp.RestOp.HttpOpParseOp
 import com.gu.util.zuora.SafeQueryBuilder.MaybeNonEmptyList
 import com.gu.util.zuora.{ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
