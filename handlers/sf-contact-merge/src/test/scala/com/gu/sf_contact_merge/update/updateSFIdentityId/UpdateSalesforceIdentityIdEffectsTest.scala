@@ -4,7 +4,7 @@ import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.salesforce.dev.SFEffectsData
-import com.gu.salesforce.{JsonHttp, SalesforceClient}
+import com.gu.salesforce.SalesforceClient
 import com.gu.sf_contact_merge.Types.IdentityId
 import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.{EmailAddress, FirstName}
 import com.gu.sf_contact_merge.getsfcontacts.GetSfAddressOverride.OverrideAddressWith
@@ -14,7 +14,7 @@ import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId.{SFContactUpdat
 import com.gu.sf_contact_merge.update.updateSFIdentityId.GetSalesforceIdentityId.WireResult
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
-import com.gu.util.resthttp.HttpOp
+import com.gu.util.resthttp.{HttpOp, JsonHttp}
 import com.gu.util.resthttp.RestOp.HttpOpParseOp
 import com.gu.util.resthttp.RestRequestMaker.{GetRequest, RelativePath}
 import com.gu.util.resthttp.Types.ClientFailableOp
@@ -47,7 +47,7 @@ class UpdateSalesforceIdentityIdEffectsTest extends FlatSpec with Matchers {
       sfConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[SFAuthConfig]
       response = RawEffects.response
       sfClient <- SalesforceClient(response, sfConfig).value.toDisjunction
-      patch = sfClient.wrap(JsonHttp.patch)
+      patch = sfClient.wrapWith(JsonHttp.patch)
       updateSalesforceIdentityId = UpdateSalesforceIdentityId(patch)
       sFContactUpdate = SFContactUpdate(
         Some(testIdentityId),
@@ -56,7 +56,7 @@ class UpdateSalesforceIdentityIdEffectsTest extends FlatSpec with Matchers {
         Some(testEmail)
       )
       _ <- updateSalesforceIdentityId.apply(testContact, sFContactUpdate).toDisjunction
-      getSalesforceIdentityId = GetSalesforceIdentityId(sfClient.wrap(JsonHttp.get)) _
+      getSalesforceIdentityId = GetSalesforceIdentityId(sfClient.wrapWith(JsonHttp.get)) _
       updatedIdentityId <- getSalesforceIdentityId(testContact).toDisjunction
     } yield updatedIdentityId
 

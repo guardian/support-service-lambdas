@@ -3,18 +3,17 @@ package com.gu.identity
 import com.gu.identity.GetByEmail.RawWireModel.{User, UserResponse}
 import com.gu.identityBackfill.Types.EmailAddress
 import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
-import com.gu.util.config.ConfigLocation
-import okhttp3.{HttpUrl, Request, Response}
-import play.api.libs.json.{Json, Reads}
-import scalaz.syntax.std.either._
-import scalaz.{-\/, \/, \/-}
+import com.gu.util.resthttp.HttpOp.HttpOpWrapper
+import com.gu.util.resthttp.RestRequestMaker
+import com.gu.util.resthttp.RestRequestMaker.{GetRequestWithParams, RelativePath, UrlParams}
+import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError}
+import play.api.libs.json.{JsValue, Json, Reads}
 
 object GetByEmail {
 
-  sealed trait ApiError
-  case class OtherError(message: String) extends ApiError
-  case object NotFound extends ApiError
-  case object NotValidated extends ApiError
+  sealed trait IdentityAccount
+  case class IdentityAccountWithValidatedEmail(identityId: IdentityId) extends IdentityAccount
+  case object IdentityAccountWithUnvalidatedEmail extends IdentityAccount
 
   object RawWireModel {
 
@@ -29,43 +28,29 @@ object GetByEmail {
 
   }
 
-  def identityIdFromUser(user: User) =
-    IdentityId(user.id)
+  def emailAddressToParams(emailAddress: EmailAddress): GetRequestWithParams =
+    GetRequestWithParams(RelativePath(s"/user"), UrlParams(Map("emailAddress" -> emailAddress.value)))
 
-  def userFromResponse(userResponse: UserResponse): ApiError \/ User =
+  val jsToWireModel: JsValue => ClientFailableOp[UserResponse] = RestRequestMaker.toResult[UserResponse]
+
+  def userFromResponse(userResponse: UserResponse): ClientFailableOp[User] =
     userResponse match {
-      case UserResponse("ok", user) => \/-(user)
-      case _ => -\/(OtherError("not an OK response from api"))
+      case UserResponse("ok", user) => ClientSuccess(user)
+      case error => GenericError(s"not an OK response from api: $error")
     }
 
-  def apply(getResponse: Request => Response, identityConfig: IdentityConfig)(email: EmailAddress): ApiError \/ IdentityId = {
-
-    val url = HttpUrl.parse(identityConfig.baseUrl + "/user").newBuilder().addQueryParameter("emailAddress", email.value).build()
-    val response = getResponse(new Request.Builder().url(url).addHeader("X-GU-ID-Client-Access-Token", "Bearer " + identityConfig.apiToken).build())
-
+  def wireToDomainModel(userResponse: UserResponse): ClientFailableOp[IdentityAccount] = {
     for {
-      _ <- response.code match {
-        case 200 => \/-(())
-        case 404 => -\/(NotFound)
-        case code => -\/(OtherError(s"failed http with ${code}"))
-      }
-      body = response.body.byteStream
-      userResponse <- Json.parse(body).validate[UserResponse].asEither.disjunction.leftMap(err => OtherError(err.mkString(", ")))
       user <- userFromResponse(userResponse)
-      _ <- if (user.statusFields.userEmailValidated) \/-(()) else -\/(NotValidated)
-      identityId = identityIdFromUser(user)
+      identityId = if (user.statusFields.userEmailValidated) IdentityAccountWithValidatedEmail(IdentityId(user.id)) else IdentityAccountWithUnvalidatedEmail
     } yield identityId
 
   }
 
-}
+  val wrapper: HttpOpWrapper[EmailAddress, GetRequestWithParams, JsValue, IdentityAccount] =
+    HttpOpWrapper[EmailAddress, GetRequestWithParams, JsValue, IdentityAccount](
+      fromNewParam = emailAddressToParams,
+      toNewResponse = jsToWireModel.andThen(_.flatMap(wireToDomainModel))
+    )
 
-case class IdentityConfig(
-  baseUrl: String,
-  apiToken: String
-)
-
-object IdentityConfig {
-  implicit val reads: Reads[IdentityConfig] = Json.reads[IdentityConfig]
-  implicit val location = ConfigLocation[IdentityConfig](path = "identity", version = 1)
 }
