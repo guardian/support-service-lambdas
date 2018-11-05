@@ -1,27 +1,23 @@
 package com.gu.sf_datalake_export
 
 import java.io.{InputStream, OutputStream}
-import com.gu.sf_datalake_export.salesforce_bulk_api.CreateJob._
+
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
-import com.gu.salesforce.SalesforceClient.{PostMethod, StringHttpRequest}
 import com.gu.salesforce.{JsonHttp, SalesforceClient}
+import com.gu.sf_datalake_export.salesforce_bulk_api.AddQueryToJob.{AddQueryRequest, Query}
+import com.gu.sf_datalake_export.salesforce_bulk_api.CreateJob.{SfContact, _}
 import com.gu.sf_datalake_export.salesforce_bulk_api.{AddQueryToJob, CreateJob}
-import com.gu.sf_datalake_export.salesforce_bulk_api.CreateJob.SfContact
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.handlers.{ParseRequest, SerialiseResponse}
 import com.gu.util.reader.Types._
-import com.gu.util.resthttp.HttpOp
-import com.gu.util.resthttp.RestRequestMaker.{BodyAsString, PostRequest}
 import okhttp3.{Request, Response}
 import play.api.libs.json.{Json, Reads}
-import scalaz.{-\/, \/, \/-}
 import scalaz.Scalaz._
-import salesforce_bulk_api.CreateJob.SfContact
-import AddQueryToJob.{AddQueryRequest, Query}
+import scalaz.{-\/, \/-}
 
 object StartJob {
 
