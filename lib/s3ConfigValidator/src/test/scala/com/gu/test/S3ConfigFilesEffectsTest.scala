@@ -39,11 +39,11 @@ class S3ConfigFilesEffectsTest extends FlatSpec with Matchers {
   }
 
   it should "successfully parse CODE ExactTarget config" taggedAs EffectsTest in {
-    validate[ETConfig](CODE)
+    validate[EmailConfig](CODE)
   }
 
   it should "successfully parse PROD ExactTarget config" taggedAs EffectsTest in {
-    validate[ETConfig](PROD)
+    validate[EmailConfig](PROD)
   }
 
   it should "successfully parse CODE Salesforce NORMAL config" taggedAs EffectsTest in {

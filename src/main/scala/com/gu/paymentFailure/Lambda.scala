@@ -1,16 +1,17 @@
 package com.gu.paymentFailure
 
 import java.io.{InputStream, OutputStream}
-
 import com.amazonaws.services.lambda.runtime.Context
+import com.gu.effects.sqs.AwsSQSSend
+import com.gu.effects.sqs.AwsSQSSend.QueueName
 import com.gu.effects.{GetFromS3, RawEffects}
-import com.gu.util.apigateway.{ApiGatewayHandler, Auth}
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import com.gu.util.apigateway.Auth.TrustedApiConfig
+import com.gu.util.apigateway.{ApiGatewayHandler, Auth}
 import com.gu.util.config.ConfigReads.ConfigFailure
 import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config._
-import com.gu.util.exacttarget.{ETClient, EmailSendSteps, FilterEmail}
+import com.gu.util.email.EmailSendSteps
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.{ZuoraGetInvoiceTransactions, ZuoraRestConfig, ZuoraRestRequestMaker}
 import okhttp3.{Request, Response}
@@ -38,18 +39,23 @@ object Lambda {
   def wiredOperation(stage: Stage, response: Request => Response, loadConfigModule: LoadConfigModule.PartialApply): ApiGatewayOp[ApiGatewayHandler.Operation] = {
     for {
       zuoraRestConfig <- loadConfigModule[ZuoraRestConfig].toApiGatewayOp("load zuora config")
-      etConfig <- loadConfigModule[ETConfig].toApiGatewayOp("load et config")
+      etConfig <- loadConfigModule[EmailConfig].toApiGatewayOp("load et config")
       // we probably shouldn't combine zuora tenant ids and auth keys into the same secrets file, are tenant ids even secret?
       trustedApiConfig <- loadConfigModule[TrustedApiConfig].toApiGatewayOp("load trusted Api config")
 
     } yield PaymentFailureSteps(
       ZuoraEmailSteps.sendEmailRegardingAccount(
-        EmailSendSteps(ETClient.sendEmail(response, etConfig), FilterEmail(stage)),
+        EmailSendSteps(AwsSQSSend.sendSync(emailQueueFor(stage))),
         ZuoraGetInvoiceTransactions(ZuoraRestRequestMaker(response, zuoraRestConfig))
       ),
-      etConfig.etSendIDs,
+      etConfig.emailSendIds,
       trustedApiConfig
     )
+  }
+
+  def emailQueueFor(stage: Stage): QueueName = stage match {
+    case Stage("PROD") => QueueName("contributions-thanks")
+    case _ => QueueName("contributions-thanks-dev")
   }
 
   // this is the entry point

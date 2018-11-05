@@ -2,8 +2,8 @@ package manualTest
 
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.util.Logging
-import com.gu.util.config.ETConfig.ETSendIds
-import com.gu.util.config.{ETConfig, LoadConfigModule, Stage}
+import com.gu.util.config.EmailConfig.EmailSendIds
+import com.gu.util.config.{EmailConfig, LoadConfigModule, Stage}
 import com.gu.util.exacttarget._
 
 import scala.util.Random
@@ -36,7 +36,7 @@ object EmailClientSystemTest extends App with Logging {
     )
   )
 
-  def five(etSendIds: ETSendIds, product: String) =
+  def five(etSendIds: EmailSendIds, product: String) =
     Seq(
       etSendIds.pf1 -> message(s"$product-pf1", PaymentId(s"paymentId$unique"), product),
       etSendIds.pf2 -> message(s"$product-pf2", PaymentId(s"paymentId$unique"), product),
@@ -46,9 +46,9 @@ object EmailClientSystemTest extends App with Logging {
     )
 
   for {
-    etConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ETConfig]
+    etConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[EmailConfig]
     send = EmailSendSteps(ETClient.sendEmail(RawEffects.response, etConfig), FilterEmail(Stage("CODE")))_
-    etSendIds = etConfig.etSendIDs
+    etSendIds = etConfig.emailSendIds
   } yield Seq(
     "Supporter",
     "Digital Pack",

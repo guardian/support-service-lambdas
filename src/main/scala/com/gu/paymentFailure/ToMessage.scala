@@ -1,18 +1,19 @@
 package com.gu.paymentFailure
 
 import java.text.DecimalFormat
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 import com.gu.autoCancel.AutoCancelCallout
 import com.gu.paymentFailure.GetPaymentData.PaymentFailureInformation
-import com.gu.util.exacttarget._
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
+import com.gu.util.config.EmailConfig.EmailSendId
+import com.gu.util.email._
 
 import scala.math.BigDecimal.decimal
 
 object ToMessage {
 
-  def apply(paymentFailureCallout: PaymentFailureCallout, paymentFailureInformation: PaymentFailureInformation) = Message(
+  def apply(paymentFailureCallout: PaymentFailureCallout, paymentFailureInformation: PaymentFailureInformation, sendId: EmailSendId) = EmailMessage(
     To = ToDef(
       Address = paymentFailureCallout.email,
       SubscriberKey = paymentFailureCallout.email,
@@ -38,10 +39,11 @@ object ToMessage {
           title = paymentFailureCallout.title
         )
       )
-    )
+    ),
+    DataExtensionName = sendId.id
   )
 
-  def apply(callout: AutoCancelCallout, paymentFailureInformation: PaymentFailureInformation) = Message(
+  def apply(callout: AutoCancelCallout, paymentFailureInformation: PaymentFailureInformation, sendId: EmailSendId) = EmailMessage(
     To = ToDef(
       Address = callout.email,
       SubscriberKey = callout.email,
@@ -60,7 +62,8 @@ object ToMessage {
           serviceEndDate = serviceDateFormat(paymentFailureInformation.serviceEndDate)
         )
       )
-    )
+    ),
+    DataExtensionName = sendId.id
   )
 
   val currencySymbol = Map("GBP" -> "£", "AUD" -> "$", "EUR" -> "€", "USD" -> "$", "CAD" -> "$", "NZD" -> "$")

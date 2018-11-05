@@ -6,7 +6,7 @@ import com.gu.TestData
 import com.gu.TestData._
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayResponse}
-import com.gu.util.config.ETConfig.ETSendId
+import com.gu.util.config.EmailConfig.EmailSendId
 import com.gu.util.config.Stage
 import com.gu.util.exacttarget._
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
@@ -76,7 +76,7 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
     val responseString = new String(os.toByteArray, "UTF-8")
 
     val expectedMessage = EmailRequest(
-      etSendId = ETSendId("11"),
+      etSendId = EmailSendId("11"),
       Message(
         To = ToDef(
           Address = "test.user123@guardian.co.uk",

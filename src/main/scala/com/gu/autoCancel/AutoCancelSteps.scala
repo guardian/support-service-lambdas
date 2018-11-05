@@ -3,13 +3,13 @@ package com.gu.autoCancel
 import com.gu.autoCancel.AutoCancel.AutoCancelRequest
 import com.gu.paymentFailure.GetPaymentData.PaymentFailureInformation
 import com.gu.paymentFailure.ToMessage
-import com.gu.util.config.ETConfig.ETSendIds
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.Operation
 import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
-import com.gu.util.exacttarget.EmailRequest
+import com.gu.util.config.EmailConfig.EmailSendIds
+import com.gu.util.email.EmailMessage
+import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
 import com.gu.util.reader.Types._
-import ApiGatewayOp.ContinueProcessing
 import play.api.libs.json._
 object AutoCancelSteps extends Logging {
 
@@ -28,8 +28,8 @@ object AutoCancelSteps extends Logging {
   def apply(
     autoCancel: AutoCancelRequest => ApiGatewayOp[Unit],
     autoCancelFilter: AutoCancelCallout => ApiGatewayOp[AutoCancelRequest],
-    etSendIds: ETSendIds,
-    sendEmailRegardingAccount: (String, PaymentFailureInformation => EmailRequest) => ApiGatewayOp[Unit]
+    etSendIds: EmailSendIds,
+    sendEmailRegardingAccount: (String, PaymentFailureInformation => EmailMessage) => ApiGatewayOp[Unit]
   ): Operation = Operation.noHealthcheck({ apiGatewayRequest: ApiGatewayRequest =>
     (for {
       autoCancelCallout <- apiGatewayRequest.bodyAsCaseClass[AutoCancelCallout]()
@@ -42,8 +42,8 @@ object AutoCancelSteps extends Logging {
     } yield ApiGatewayResponse.successfulExecution).apiResponse
   })
 
-  def makeRequest(etSendIds: ETSendIds, autoCancelCallout: AutoCancelCallout): ApiGatewayOp[PaymentFailureInformation => EmailRequest] = {
-    ContinueProcessing({ pFI: PaymentFailureInformation => EmailRequest(etSendIds.cancelled, ToMessage(autoCancelCallout, pFI)) })
+  def makeRequest(emailSendIds: EmailSendIds, autoCancelCallout: AutoCancelCallout): ApiGatewayOp[PaymentFailureInformation => EmailMessage] = {
+    ContinueProcessing({ pFI: PaymentFailureInformation => ToMessage(autoCancelCallout, pFI, emailSendIds.cancelled) })
 
   }
 

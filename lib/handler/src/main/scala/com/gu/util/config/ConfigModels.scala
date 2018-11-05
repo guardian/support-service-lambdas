@@ -4,42 +4,36 @@ import com.gu.util.Logging
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
-case class ETConfig(
-  etSendIDs: ETConfig.ETSendIds,
-  clientId: String,
-  clientSecret: String
+case class EmailConfig(
+  emailSendIds: EmailConfig.EmailSendIds
 )
 
-object ETConfig {
-  implicit val location = ConfigLocation[ETConfig](path = "exactTarget", version = 1)
+object EmailConfig {
+  implicit val location = ConfigLocation[EmailConfig](path = "email", version = 1)
 
-  implicit val idReads: Reads[ETSendId] = JsPath.read[String].map(ETSendId.apply)
+  implicit val idReads: Reads[EmailSendId] = JsPath.read[String].map(EmailSendId.apply)
 
-  implicit val idsReads: Reads[ETSendIds] = Json.reads[ETSendIds]
+  implicit val idsReads: Reads[EmailSendIds] = Json.reads[EmailSendIds]
 
-  case class ETSendId(id: String) extends AnyVal
+  case class EmailSendId(id: String) extends AnyVal
 
-  case class ETSendIds(
-    pf1: ETSendId,
-    pf2: ETSendId,
-    pf3: ETSendId,
-    pf4: ETSendId,
-    cancelled: ETSendId
+  case class EmailSendIds(
+    pf1: EmailSendId,
+    pf2: EmailSendId,
+    pf3: EmailSendId,
+    pf4: EmailSendId,
+    cancelled: EmailSendId
   ) {
-    def find(attempt: Int): Option[ETSendId] = Some(attempt match {
+    def find(attempt: Int): Option[EmailSendId] = Some(attempt match {
       case 1 => pf1
       case 2 => pf2
       case 3 => pf3
       case 4 => pf4
-      case _ => ETSendId("")
+      case _ => EmailSendId("")
     }).filter(_.id != "")
   }
 
-  implicit val zuoraConfigReads: Reads[ETConfig] = (
-    (JsPath \ "etSendIDs").read[ETSendIds] and
-    (JsPath \ "clientId").read[String] and
-    (JsPath \ "clientSecret").read[String]
-  )(ETConfig.apply _)
+  implicit val etConfigReads: Reads[EmailConfig] = Json.reads[EmailConfig]
 }
 
 case class StripeSecretKey(key: String) extends AnyVal

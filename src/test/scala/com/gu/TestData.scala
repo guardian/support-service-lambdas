@@ -5,7 +5,7 @@ import java.time.LocalDate
 import com.gu.effects.TestingRawEffects
 import com.gu.stripeCustomerSourceUpdated.{StripeDeps, StripeSignatureChecker}
 import com.gu.util.apigateway.Auth.TrustedApiConfig
-import com.gu.util.config.ETConfig.{ETSendId, ETSendIds}
+import com.gu.util.config.EmailConfig.{EmailSendId, EmailSendIds}
 import com.gu.util.config._
 import com.gu.util.zuora.ZuoraGetInvoiceTransactions.{InvoiceItem, InvoiceTransactionSummary, ItemisedInvoice}
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
@@ -27,7 +27,7 @@ object TestData extends Matchers {
 
   val fakeApiConfig = TrustedApiConfig("validApiToken", "testEnvTenantId")
   val fakeZuoraConfig = ZuoraRestConfig("https://ddd", "fakeUser", "fakePass")
-  val fakeETSendIds = ETSendIds(ETSendId("11"), ETSendId("22"), ETSendId("33"), ETSendId("44"), ETSendId("can"))
+  val fakeETSendIds = EmailSendIds(EmailSendId("11"), EmailSendId("22"), EmailSendId("33"), EmailSendId("44"), EmailSendId("can"))
   val fakeETConfig = ETConfig(etSendIDs = fakeETSendIds, "fakeClientId", "fakeClientSecret")
   val fakeStripeConfig = StripeConfig(customerSourceUpdatedWebhook = StripeWebhook(StripeSecretKey("ukCustomerSourceUpdatedSecretKey"), StripeSecretKey("auCustomerSourceUpdatedStripeSecretKey")), true)
 

@@ -1,6 +1,6 @@
 package com.gu.util.exacttarget
 
-import com.gu.util.config.ETConfig.ETSendId
+import com.gu.util.config.EmailConfig.EmailSendId
 import com.gu.util.config.Stage
 import org.scalatest.{FlatSpec, Matchers}
 import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
@@ -37,7 +37,7 @@ class EmailSendStepsTest extends FlatSpec with Matchers {
   def tryEmail(isProd: Boolean, email: String, expectedEmail: Boolean) = {
 
     val req = EmailRequest(
-      etSendId = ETSendId("etSendId"),
+      etSendId = EmailSendId("etSendId"),
       makeMessage(email)
     )
 
