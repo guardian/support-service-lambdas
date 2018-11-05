@@ -12,7 +12,6 @@ object EndJobManualTest extends App {
       |}
     """.stripMargin
 
-
   println(s"sending request..")
   println(request)
 

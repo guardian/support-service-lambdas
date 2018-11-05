@@ -37,7 +37,7 @@ object GetZuoraContactDetailsTest {
     """{
       |    "records": [
       |        {
-      |            "WorkEmail": "peppa.pig@guardian.co.uk",
+      |            "WorkEmail": "peppa.pig@GUARDIAN.co.uk",
       |            "Id": "cid1",
       |            "FirstName": "peppa",
       |            "LastName": "pig"

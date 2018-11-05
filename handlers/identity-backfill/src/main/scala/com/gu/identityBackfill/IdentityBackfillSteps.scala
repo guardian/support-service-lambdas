@@ -1,57 +1,49 @@
 package com.gu.identityBackfill
 
-import com.gu.identityBackfill.IdentityBackfillSteps.WireModel.IdentityBackfillRequest
 import com.gu.identityBackfill.PreReqCheck.PreReqResult
 import com.gu.identityBackfill.TypeConvert._
 import com.gu.identityBackfill.Types._
 import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.util.Logging
+import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.apigateway.ResponseModels.ApiResponse
-import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.reader.Types.ApiGatewayOp._
 import com.gu.util.reader.Types._
-import com.gu.util.resthttp.Types.ClientFailableOp
-import play.api.libs.json.{Json, Reads}
+import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess}
 
 object IdentityBackfillSteps extends Logging {
 
-  object WireModel {
-
-    case class IdentityBackfillRequest(
-      emailAddress: String,
-      dryRun: Boolean
-    )
-    implicit val identityBackfillRequest: Reads[IdentityBackfillRequest] = Json.reads[IdentityBackfillRequest]
-
-  }
-
-  def fromRequest(identityBackfillRequest: IdentityBackfillRequest): EmailAddress = {
-    EmailAddress(identityBackfillRequest.emailAddress)
-  }
+  case class DomainRequest(
+    emailAddress: EmailAddress,
+    dryRun: Boolean
+  )
 
   def apply(
     preReqCheck: EmailAddress => ApiGatewayOp[PreReqResult],
+    createGuestAccount: EmailAddress => ClientFailableOp[IdentityId],
     updateZuoraIdentityId: (AccountId, IdentityId) => ClientFailableOp[Unit],
     updateSalesforceIdentityId: (SFContactId, IdentityId) => ApiGatewayOp[Unit]
-  )(apiGatewayRequest: ApiGatewayRequest): ApiResponse = {
+  )(request: DomainRequest): ApiResponse = {
 
     (for {
-      request <- apiGatewayRequest.bodyAsCaseClass[IdentityBackfillRequest]()
-      preReq <- preReqCheck(fromRequest(request))
+      preReq <- preReqCheck(request.emailAddress)
       _ <- dryRunAbort(request).withLogging("dryrun aborter")
-      _ <- updateZuoraIdentityId(preReq.zuoraAccountId, preReq.requiredIdentityId).toApiGatewayOp("update zuora identity id field")
-      _ <- updateSalesforceIdentityId(preReq.sFContactId, preReq.requiredIdentityId)
+      requiredIdentityId <- (preReq.existingIdentityId match {
+        case Some(existingIdentityId) => ClientSuccess(existingIdentityId)
+        case None => createGuestAccount(request.emailAddress)
+      }).toApiGatewayOp("create guest identity account")
+      _ <- updateZuoraIdentityId(preReq.zuoraAccountId, requiredIdentityId).toApiGatewayOp("update zuora identity id field")
+      _ <- updateSalesforceIdentityId(preReq.sFContactId, requiredIdentityId)
       // need to remember which ones we updated?
     } yield ApiGatewayResponse.successfulExecution).apiResponse
 
   }
 
-  def dryRunAbort(request: IdentityBackfillRequest): ApiGatewayOp[Unit] =
+  def dryRunAbort(request: DomainRequest): ApiGatewayOp[Unit] =
     if (request.dryRun)
       ReturnWithResponse(ApiGatewayResponse.noActionRequired("DRY RUN requested! skipping to the end"))
     else
       ContinueProcessing(())
 
 }
-

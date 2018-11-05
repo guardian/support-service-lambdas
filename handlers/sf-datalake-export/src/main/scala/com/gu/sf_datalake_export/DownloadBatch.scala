@@ -7,13 +7,12 @@ import com.amazonaws.services.s3.model.{PutObjectRequest, PutObjectResult}
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.SalesforceClient
-import com.gu.sf_datalake_export.GetBatches.PendingJob
 import com.gu.sf_datalake_export.salesforce_bulk_api.CreateJob.JobId
 import com.gu.sf_datalake_export.salesforce_bulk_api.GetBatchResult.{DownloadResultsRequest, JobName}
 import com.gu.sf_datalake_export.salesforce_bulk_api.GetBatchResultId.{BatchResultId, GetBatchResultRequest}
-import com.gu.sf_datalake_export.salesforce_bulk_api.{GetBatchResult, GetBatchResultId, S3UploadFile}
 import com.gu.sf_datalake_export.salesforce_bulk_api.GetJobBatches._
 import com.gu.sf_datalake_export.salesforce_bulk_api.S3UploadFile.{File, FileContent, FileName}
+import com.gu.sf_datalake_export.salesforce_bulk_api.{GetBatchResult, GetBatchResultId, S3UploadFile}
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config.{LoadConfigModule, Stage}
@@ -23,8 +22,8 @@ import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError
 import okhttp3.{Request, Response}
 import play.api.libs.json.Json
 import scalaz.Scalaz._
-import scalaz.{-\/, IList, \/-}
 import scalaz.syntax.traverse.ToTraverseOps
+import scalaz.{-\/, IList, \/-}
 
 import scala.util.Try
 object DownloadBatches {
@@ -70,7 +69,6 @@ object DownloadBatches {
     )
   }
 
-
   def steps(
     lambdaIO: LambdaIO,
     stage: Stage,
@@ -82,15 +80,19 @@ object DownloadBatches {
     def downloadFirst(
       downloadBatch: BatchId => ClientFailableOp[Unit],
       jobId: JobId,
-      jobName: JobName)(
-      pendingBatches: List[BatchInfo]): ClientFailableOp[WireIO] = pendingBatches match {
+      jobName: JobName
+    )(
+      pendingBatches: List[BatchInfo]
+    ): ClientFailableOp[WireIO] = pendingBatches match {
 
       case Nil => ClientSuccess(
         WireIO(
           jobId = jobId.value,
           jobName = jobName.value,
           batches = Nil,
-          done = true))
+          done = true
+        )
+      )
 
       case pendingJob :: tail => downloadBatch(pendingJob.batchId).map { _ =>
         WireIO(
@@ -137,10 +139,10 @@ object DownloadBatches {
       sfClient <- SalesforceClient(getResponse, sfConfig).value.toDisjunction.leftMap(failure => failure.message)
       wiredGetBatchResultId = GetBatchResultId(sfClient)
       wiredGetBatchResult = GetBatchResult(sfClient)
-      jobId =  JobId(request.jobId)
+      jobId = JobId(request.jobId)
       jobName = JobName(request.jobName)
-      wiredDownloadBatch = downloadBatch(wiredGetBatchResultId, wiredGetBatchResult,jobName, jobId ) _
-      response <- downloadFirst(wiredDownloadBatch, jobId, jobName) (pendingBatches).toDisjunction.leftMap(failure => failure.message)
+      wiredDownloadBatch = downloadBatch(wiredGetBatchResultId, wiredGetBatchResult, jobName, jobId) _
+      response <- downloadFirst(wiredDownloadBatch, jobId, jobName)(pendingBatches).toDisjunction.leftMap(failure => failure.message)
     } yield response
     lambdaResponse match {
       case -\/(error) => {
@@ -154,6 +156,4 @@ object DownloadBatches {
   class LambdaException(msg: String) extends RuntimeException(msg) // todo this is repeated all over the place
 
 }
-
-
 

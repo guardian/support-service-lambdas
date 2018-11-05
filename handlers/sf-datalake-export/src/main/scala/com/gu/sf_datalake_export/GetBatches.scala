@@ -15,7 +15,7 @@ import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.handlers.{ParseRequest, SerialiseResponse}
 import com.gu.util.reader.Types._
 import okhttp3.{Request, Response}
-import play.api.libs.json.{JsString, Json, Writes}
+import play.api.libs.json.Json
 import scalaz.Scalaz._
 import scalaz.{-\/, \/-}
 //TODO IGNORE BATCHES WITH NO ROWS (FOR THE PK CHUNKING CASE)
@@ -81,7 +81,6 @@ object GetBatches {
     fetchString: StringFromS3,
     getResponse: Request => Response
   ): Unit = {
-
 
     def getStatus(batches: Seq[BatchInfo]): JobStatus = batches.map(_.state).foldRight(CompletedJob: JobStatus) {
       case (Failed, _) => FailedJob

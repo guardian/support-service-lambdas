@@ -2,23 +2,22 @@ package com.gu.sf_datalake_export
 
 import java.io.{InputStream, OutputStream}
 
-import com.gu.sf_datalake_export.salesforce_bulk_api.CreateJob._
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
-import com.gu.salesforce.{JsonHttp, SalesforceClient}
-import com.gu.sf_datalake_export.salesforce_bulk_api.{AddQueryToJob, CloseJob, CreateJob}
+import com.gu.salesforce.SalesforceClient
+import com.gu.sf_datalake_export.salesforce_bulk_api.CloseJob
+import com.gu.sf_datalake_export.salesforce_bulk_api.CreateJob._
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.handlers.{ParseRequest, SerialiseResponse}
 import com.gu.util.reader.Types._
+import com.gu.util.resthttp.JsonHttp
 import okhttp3.{Request, Response}
 import play.api.libs.json._
-import scalaz.{-\/, \/, \/-}
 import scalaz.Scalaz._
-import salesforce_bulk_api.CreateJob.SfContact
-import AddQueryToJob.{AddQueryRequest, Query}
+import scalaz.{-\/, \/-}
 
 object EndJob {
 
@@ -62,7 +61,7 @@ object EndJob {
       sfConfig <- loadConfig[SFAuthConfig].leftMap(failure => failure.error)
       //fix auth so that it doesn't return apigatewayop
       sfClient <- SalesforceClient(getResponse, sfConfig).value.toDisjunction.leftMap(failure => failure.message)
-      wiredCloseJob = CloseJob(sfClient.wrap(JsonHttp.post))
+      wiredCloseJob = CloseJob(sfClient.wrapWith(JsonHttp.post))
       _ <- wiredCloseJob(jobId).toDisjunction.leftMap(failure => failure.message)
     } yield WireResponse(
       jobId = request.jobId

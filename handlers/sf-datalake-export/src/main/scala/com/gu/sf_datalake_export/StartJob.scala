@@ -5,7 +5,7 @@ import java.io.{InputStream, OutputStream}
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
-import com.gu.salesforce.{JsonHttp, SalesforceClient}
+import com.gu.salesforce.SalesforceClient
 import com.gu.sf_datalake_export.salesforce_bulk_api.AddQueryToJob.{AddQueryRequest, Query}
 import com.gu.sf_datalake_export.salesforce_bulk_api.CreateJob.{SfContact, _}
 import com.gu.sf_datalake_export.salesforce_bulk_api.{AddQueryToJob, CreateJob}
@@ -14,6 +14,7 @@ import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.handlers.{ParseRequest, SerialiseResponse}
 import com.gu.util.reader.Types._
+import com.gu.util.resthttp.JsonHttp
 import okhttp3.{Request, Response}
 import play.api.libs.json.{Json, Reads}
 import scalaz.Scalaz._
@@ -66,7 +67,7 @@ object StartJob {
       sfConfig <- loadConfig[SFAuthConfig].leftMap(failure => failure.error)
       //fix auth so that it doesn't return apigatewayop
       sfClient <- SalesforceClient(getResponse, sfConfig).value.toDisjunction.leftMap(failure => failure.message)
-      createJobOp = CreateJob(sfClient.wrap(JsonHttp.post))
+      createJobOp = CreateJob(sfClient.wrapWith(JsonHttp.post))
 
       jobId <- createJobOp(SfContact).toDisjunction.leftMap(failure => failure.message)
       addQueryToJobOp = AddQueryToJob(sfClient)

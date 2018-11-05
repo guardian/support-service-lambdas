@@ -4,7 +4,7 @@ import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
 import com.gu.effects.TestingRawEffects.{BasicRequest, HTTPResponse, POSTRequest}
 import com.gu.effects.{FakeFetchString, TestingRawEffects}
-import com.gu.identity.GetByEmailTest
+import com.gu.identity.GetByEmailTest.TestData.dummyIdentityResponse
 import com.gu.identityBackfill.EndToEndData._
 import com.gu.identityBackfill.Runner._
 import com.gu.identityBackfill.salesforce.getContact.GetSFContactSyncCheckFieldsTest
@@ -109,8 +109,12 @@ object EndToEndData {
     )
   }
 
+  def GetByEmailTestresponses: Map[String, HTTPResponse] = Map(
+    "/user?emailAddress=email@address" -> HTTPResponse(200, dummyIdentityResponse)
+  )
+
   def responses: Map[String, HTTPResponse] =
-    GetByEmailTest.TestData.responses ++ responsesGetSFContactSyncCheckFieldsTest
+    GetByEmailTestresponses ++ responsesGetSFContactSyncCheckFieldsTest
   def postResponses: Map[POSTRequest, HTTPResponse] =
     GetZuoraAccountsForEmailData.postResponses(false) ++
       CountZuoraAccountsForIdentityIdData.postResponses(false) ++

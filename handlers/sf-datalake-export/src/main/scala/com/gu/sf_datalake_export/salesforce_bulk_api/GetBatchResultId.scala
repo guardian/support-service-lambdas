@@ -1,10 +1,10 @@
 package com.gu.sf_datalake_export.salesforce_bulk_api
 
-import com.gu.salesforce.SalesforceClient.{GetMethod, StringHttpRequest}
 import com.gu.sf_datalake_export.salesforce_bulk_api.CreateJob.JobId
 import com.gu.sf_datalake_export.salesforce_bulk_api.GetJobBatches.BatchId
 import com.gu.util.resthttp.HttpOp
-import com.gu.util.resthttp.RestRequestMaker.{BodyAsString, RelativePath}
+import com.gu.util.resthttp.JsonHttp.{GetMethod, StringHttpRequest}
+import com.gu.util.resthttp.RestRequestMaker.{BodyAsString, RelativePath, UrlParams}
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError}
 
 import scala.xml.Elem
@@ -20,7 +20,7 @@ object GetBatchResultId {
       val jobIdString = request.jobId.value
       val batchIdString = request.batchId.value
       val relativePath = RelativePath(s"/services/async/44.0/job/$jobIdString/batch/$batchIdString/result")
-      StringHttpRequest(relativePath, GetMethod)
+      StringHttpRequest(GetMethod, relativePath, UrlParams.empty)
     }.flatMap { response =>
 
       println(response.value)

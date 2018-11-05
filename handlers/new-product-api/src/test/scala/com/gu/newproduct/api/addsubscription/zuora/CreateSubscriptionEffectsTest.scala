@@ -19,6 +19,7 @@ class CreateSubscriptionEffectsTest extends FlatSpec with Matchers {
 
   import ZuoraDevContributions._
 
+  def currentDate = () => LocalDate.of(2018, 2, 10)
   it should "create subscription in account" taggedAs EffectsTest in {
     val validCaseIdToAvoidCausingSFErrors = CaseId("5006E000005b5cf")
     val request = CreateSubscription.ZuoraCreateSubRequest(
@@ -28,7 +29,6 @@ class CreateSubscriptionEffectsTest extends FlatSpec with Matchers {
         AmountMinorUnits(100),
         monthlyContribution.productRatePlanChargeId
       )),
-      LocalDate.now,
       LocalDate.now.plusDays(2),
       validCaseIdToAvoidCausingSFErrors,
       AcquisitionSource("sourcesource"),
@@ -38,7 +38,7 @@ class CreateSubscriptionEffectsTest extends FlatSpec with Matchers {
       zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig]
       zuoraDeps = ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig)
       post: RequestsPost[WireCreateRequest, WireSubscription] = zuoraDeps.post[WireCreateRequest, WireSubscription]
-      res <- CreateSubscription(post)(request).toDisjunction
+      res <- CreateSubscription(post, currentDate)(request).toDisjunction
     } yield res
     withClue(actual) {
       actual.map(_.value.substring(0, 3)) shouldBe \/-("A-S")

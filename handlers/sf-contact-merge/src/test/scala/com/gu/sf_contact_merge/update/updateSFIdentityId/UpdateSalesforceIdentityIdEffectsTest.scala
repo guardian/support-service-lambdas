@@ -1,20 +1,20 @@
 package com.gu.sf_contact_merge.update.updateSFIdentityId
 
 import com.gu.effects.{GetFromS3, RawEffects}
-import com.gu.salesforce.{JsonHttp, SalesforceClient}
-import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
+import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.salesforce.dev.SFEffectsData
-import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.FirstName
-import com.gu.sf_contact_merge.getsfcontacts.GetSfAddress.SFAddress
-import com.gu.sf_contact_merge.getsfcontacts.GetSfAddress.SFAddressFields._
+import com.gu.salesforce.SalesforceClient
+import com.gu.sf_contact_merge.Types.IdentityId
+import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.{EmailAddress, FirstName}
 import com.gu.sf_contact_merge.getsfcontacts.GetSfAddressOverride.OverrideAddressWith
+import com.gu.sf_contact_merge.getsfcontacts.WireContactToSfContact.Types._
 import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId
-import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId.{IdentityId, SFContactUpdate, SetFirstName}
+import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId.{SFContactUpdate, SetFirstName}
 import com.gu.sf_contact_merge.update.updateSFIdentityId.GetSalesforceIdentityId.WireResult
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
-import com.gu.util.resthttp.HttpOp
+import com.gu.util.resthttp.{HttpOp, JsonHttp}
 import com.gu.util.resthttp.RestOp.HttpOpParseOp
 import com.gu.util.resthttp.RestRequestMaker.{GetRequest, RelativePath}
 import com.gu.util.resthttp.Types.ClientFailableOp
@@ -29,7 +29,7 @@ class UpdateSalesforceIdentityIdEffectsTest extends FlatSpec with Matchers {
   it should "get auth SF correctly" taggedAs EffectsTest in {
 
     val unique = s"${Random.nextInt(10000)}"
-    val testContact = SFEffectsData.updateIdentityIdAndFirstNameContact
+    val testContact = SFEffectsData.updateIdentityIdEmailAndFirstNameContact
 
     val testIdentityId = IdentityId(s"iden$unique")
     val testFirstName = FirstName(s"name$unique")
@@ -41,16 +41,22 @@ class UpdateSalesforceIdentityIdEffectsTest extends FlatSpec with Matchers {
       SFCountry(s"country$unique"),
       Some(SFPhone(s"phone$unique"))
     )
+    val testEmail = EmailAddress(s"fulfilment.dev+$unique@guardian.co.uk")
 
     val actual = for {
       sfConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[SFAuthConfig]
       response = RawEffects.response
       sfClient <- SalesforceClient(response, sfConfig).value.toDisjunction
-      patch = sfClient.wrap(JsonHttp.patch)
+      patch = sfClient.wrapWith(JsonHttp.patch)
       updateSalesforceIdentityId = UpdateSalesforceIdentityId(patch)
-      sFContactUpdate = SFContactUpdate(Some(testIdentityId), SetFirstName(testFirstName), OverrideAddressWith(testAddress))
+      sFContactUpdate = SFContactUpdate(
+        Some(testIdentityId),
+        SetFirstName(testFirstName),
+        OverrideAddressWith(testAddress),
+        Some(testEmail)
+      )
       _ <- updateSalesforceIdentityId.apply(testContact, sFContactUpdate).toDisjunction
-      getSalesforceIdentityId = GetSalesforceIdentityId(sfClient.wrap(JsonHttp.get)) _
+      getSalesforceIdentityId = GetSalesforceIdentityId(sfClient.wrapWith(JsonHttp.get)) _
       updatedIdentityId <- getSalesforceIdentityId(testContact).toDisjunction
     } yield updatedIdentityId
 
@@ -62,7 +68,8 @@ class UpdateSalesforceIdentityIdEffectsTest extends FlatSpec with Matchers {
       s"state$unique",
       s"post$unique",
       s"country$unique",
-      s"phone$unique"
+      s"phone$unique",
+      s"fulfilment.dev+$unique@guardian.co.uk"
     )))
 
   }
@@ -79,7 +86,8 @@ object GetSalesforceIdentityId {
     OtherState: String,
     OtherPostalCode: String,
     OtherCountry: String,
-    Phone: String
+    Phone: String,
+    Email: String
   )
 
   object WireResult {

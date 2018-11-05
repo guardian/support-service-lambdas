@@ -1,10 +1,12 @@
 package com.gu.identity
 
 import com.gu.effects.{GetFromS3, RawEffects}
+import com.gu.identity.GetByEmail.IdentityAccountWithValidatedEmail
 import com.gu.identityBackfill.Types.EmailAddress
 import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
+import com.gu.util.resthttp.JsonHttp
 import org.scalatest.{FlatSpec, Matchers}
 import scalaz.\/-
 
@@ -15,11 +17,13 @@ class GetByEmailEffectsTest extends FlatSpec with Matchers {
 
     val actual = for {
       identityConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[IdentityConfig]
-      identityId <- GetByEmail(RawEffects.response, identityConfig)(EmailAddress("john.duffell@guardian.co.uk"))
-    } yield {
-      identityId
-    }
-    actual should be(\/-(IdentityId("21814163")))
+
+      response = RawEffects.response
+      identityClient = IdentityClient(response, identityConfig)
+      getByEmail = identityClient.wrapWith(JsonHttp.getWithParams).wrapWith(GetByEmail.wrapper)
+      identityId <- getByEmail.runRequest(EmailAddress("john.duffell@guardian.co.uk")).toDisjunction
+    } yield identityId
+    actual should be(\/-(IdentityAccountWithValidatedEmail(IdentityId("21814163"))))
 
   }
 

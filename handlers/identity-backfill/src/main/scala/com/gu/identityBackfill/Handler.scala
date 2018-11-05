@@ -4,30 +4,32 @@ import java.io.{InputStream, OutputStream}
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
-import com.gu.identity.{GetByEmail, IdentityConfig}
+import com.gu.identity.{CreateGuestAccount, GetByEmail, IdentityClient, IdentityConfig}
+import com.gu.identityBackfill.IdentityBackfillSteps.DomainRequest
 import com.gu.identityBackfill.TypeConvert._
 import com.gu.identityBackfill.Types.EmailAddress
+import com.gu.identityBackfill.WireRequestToDomainObject.WireModel.IdentityBackfillRequest
 import com.gu.identityBackfill.salesforce.ContactSyncCheck.RecordTypeId
 import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
 import com.gu.identityBackfill.salesforce._
 import com.gu.identityBackfill.zuora.{AddIdentityIdToAccount, CountZuoraAccountsForIdentityId, GetZuoraAccountsForEmail, GetZuoraSubTypeForAccount}
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
-import com.gu.salesforce.SalesforceClient.StringHttpRequest
+import com.gu.salesforce.SalesforceClient
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
-import com.gu.salesforce.{JsonHttp, SalesforceClient}
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
-import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayResponse}
+import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, ApiGatewayResponse, ResponseModels}
 import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config.{LoadConfigModule, Stage}
+import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.reader.Types._
+import com.gu.util.resthttp.JsonHttp.StringHttpRequest
 import com.gu.util.resthttp.RestRequestMaker.{GetRequest, PatchRequest}
 import com.gu.util.resthttp.Types.ClientFailableOp
-import com.gu.util.resthttp.{HttpOp, LazyClientFailableOp, RestRequestMaker}
+import com.gu.util.resthttp.{HttpOp, JsonHttp, LazyClientFailableOp, RestRequestMaker}
 import com.gu.util.zuora.{ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
 import okhttp3.{Request, Response}
-import play.api.libs.json.JsValue
-import scalaz.\/
+import play.api.libs.json.{JsValue, Json, Reads}
 
 object Handler {
 
@@ -53,25 +55,28 @@ object Handler {
     ) = {
       val zuoraRequests = ZuoraRestRequestMaker(response, zuoraRestConfig)
       val zuoraQuerier = ZuoraQuery(zuoraRequests)
-      val getByEmail: EmailAddress => GetByEmail.ApiError \/ IdentityId = GetByEmail(response, identityConfig)
+      val identityClient = IdentityClient(response, identityConfig)
+      val createGuestAccount = identityClient.wrapWith(JsonHttp.post).wrapWith(CreateGuestAccount.wrapper)
+      val getByEmail = identityClient.wrapWith(JsonHttp.getWithParams).wrapWith(GetByEmail.wrapper)
       val countZuoraAccounts: IdentityId => ClientFailableOp[Int] = CountZuoraAccountsForIdentityId(zuoraQuerier)
 
       lazy val sfAuth: LazyClientFailableOp[HttpOp[StringHttpRequest, RestRequestMaker.BodyAsString]] = SalesforceClient(response, sfConfig)
-      lazy val sfPatch = sfAuth.map(_.wrap(JsonHttp.patch))
-      lazy val sfGet = sfAuth.map(_.wrap(JsonHttp.get))
+      lazy val sfPatch = sfAuth.map(_.wrapWith(JsonHttp.patch))
+      lazy val sfGet = sfAuth.map(_.wrapWith(JsonHttp.get))
 
       Operation(
-        steps = IdentityBackfillSteps(
+        steps = WireRequestToDomainObject(IdentityBackfillSteps(
           PreReqCheck(
-            getByEmail,
+            getByEmail.runRequest,
             GetZuoraAccountsForEmail(zuoraQuerier) _ andThen PreReqCheck.getSingleZuoraAccountForEmail,
             countZuoraAccounts andThen PreReqCheck.noZuoraAccountsForIdentityId,
             GetZuoraSubTypeForAccount(zuoraQuerier) _ andThen PreReqCheck.acceptableReaderType,
             syncableSFToIdentity(sfGet, stage)
           ),
+          createGuestAccount.runRequest,
           AddIdentityIdToAccount(zuoraRequests),
           updateSalesforceIdentityId(sfPatch)
-        ),
+        )),
         healthcheck = () => Healthcheck(
           getByEmail,
           countZuoraAccounts,
@@ -129,15 +134,49 @@ object Handler {
 
 object Healthcheck {
   def apply(
-    getByEmail: EmailAddress => \/[GetByEmail.ApiError, IdentityId],
+    getByEmail: HttpOp[EmailAddress, GetByEmail.IdentityAccount],
     countZuoraAccountsForIdentityId: IdentityId => ClientFailableOp[Int],
     sfAuth: LazyClientFailableOp[Any]
   ): ApiResponse =
     (for {
-      identityId <- getByEmail(EmailAddress("john.duffell@guardian.co.uk"))
+      maybeIdentityId <- getByEmail.runRequest(EmailAddress("john.duffell@guardian.co.uk"))
         .toApiGatewayOp("problem with email").withLogging("healthcheck getByEmail")
+      identityId <- maybeIdentityId match {
+        case GetByEmail.IdentityAccountWithValidatedEmail(identityId) => ContinueProcessing(identityId)
+        case other =>
+          logger.error(s"failed healthcheck with $other")
+          ReturnWithResponse(ApiGatewayResponse.internalServerError("test identity id was not present"))
+      }
       _ <- countZuoraAccountsForIdentityId(identityId).toApiGatewayOp("get zuora accounts for identity id")
       _ <- sfAuth.value.toApiGatewayOp("Failed to authenticate with Salesforce")
     } yield ApiGatewayResponse.successfulExecution).apiResponse
+
+}
+
+object WireRequestToDomainObject {
+
+  object WireModel {
+
+    case class IdentityBackfillRequest(
+      emailAddress: String,
+      dryRun: Boolean
+    )
+    implicit val identityBackfillRequest: Reads[IdentityBackfillRequest] = Json.reads[IdentityBackfillRequest]
+
+  }
+
+  def apply(
+    steps: DomainRequest => ResponseModels.ApiResponse
+  ): ApiGatewayRequest => ResponseModels.ApiResponse = req =>
+    (for {
+      wireInput <- req.bodyAsCaseClass[IdentityBackfillRequest]()
+      mergeRequest = toDomainRequest(wireInput)
+    } yield steps(mergeRequest)).apiResponse
+
+  def toDomainRequest(request: IdentityBackfillRequest): DomainRequest =
+    DomainRequest(
+      EmailAddress(request.emailAddress),
+      request.dryRun
+    )
 
 }

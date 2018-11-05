@@ -55,7 +55,6 @@ class VoucherStepsTest extends FlatSpec with Matchers {
       ZuoraAccountId("acccc"),
       None,
       LocalDate.of(2018, 7, 18),
-      LocalDate.of(2018, 7, 18),
       CaseId("case"),
       AcquisitionSource("CSR"),
       CreatedByCSR("bob")

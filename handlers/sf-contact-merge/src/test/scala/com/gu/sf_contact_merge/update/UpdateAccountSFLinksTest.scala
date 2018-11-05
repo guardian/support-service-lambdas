@@ -1,16 +1,17 @@
 package com.gu.sf_contact_merge.update
 
-import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId.IdentityId
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
+import com.gu.sf_contact_merge.Types.{IdentityId, WinningSFContact}
 import com.gu.sf_contact_merge.getaccounts.GetContacts.AccountId
-import com.gu.sf_contact_merge.update.UpdateAccountSFLinks.{CRMAccountId, LinksFromZuora}
+import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.EmailAddress
+import com.gu.sf_contact_merge.update.UpdateAccountSFLinks.{CRMAccountId, ClearZuoraIdentityId, ReplaceZuoraIdentityId, ZuoraFieldUpdates}
 import com.gu.util.resthttp.RestRequestMaker.{PutRequest, RelativePath}
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json._
 
 class UpdateAccountSFLinksTest extends FlatSpec with Matchers {
 
-  it should "handle updating an SF account with no identity to add" in {
+  it should "clear the identity id if the winning account didn't have one" in {
 
     val expectedUrl = """accounts/1234"""
 
@@ -18,20 +19,21 @@ class UpdateAccountSFLinksTest extends FlatSpec with Matchers {
       """
         |{
         |    "sfContactId__c": "johnjohn_c",
-        |    "crmId": "crmIdjohn"
+        |    "crmId": "crmIdjohn",
+        |    "IdentityId__c": ""
         |    }
       """.stripMargin
     )
 
     val actual = UpdateAccountSFLinks.toRequest(
-      LinksFromZuora(
-        SFContactId("johnjohn_c"),
+      ZuoraFieldUpdates(
+        WinningSFContact(SFContactId("johnjohn_c")),
         CRMAccountId("crmIdjohn"),
+        ClearZuoraIdentityId,
         None
-      )
-    )(
-        AccountId("1234")
-      )
+      ),
+      AccountId("1234")
+    )
 
     actual should be(PutRequest(expectedInput, RelativePath(expectedUrl)))
 
@@ -46,20 +48,21 @@ class UpdateAccountSFLinksTest extends FlatSpec with Matchers {
         |{
         |    "sfContactId__c": "johnjohn_c",
         |    "crmId": "crmIdjohn",
-        |    "IdentityId__c": "identity"
+        |    "IdentityId__c": "identity",
+        |    "billToContact": {"workEmail": "email@email.com"}
         |    }
       """.stripMargin
     )
 
     val actual = UpdateAccountSFLinks.toRequest(
-      LinksFromZuora(
-        SFContactId("johnjohn_c"),
+      ZuoraFieldUpdates(
+        WinningSFContact(SFContactId("johnjohn_c")),
         CRMAccountId("crmIdjohn"),
-        Some(IdentityId("identity"))
-      )
-    )(
-        AccountId("1234")
-      )
+        ReplaceZuoraIdentityId(IdentityId("identity")),
+        Some(EmailAddress("email@email.com"))
+      ),
+      AccountId("1234")
+    )
 
     actual should be(PutRequest(expectedInput, RelativePath(expectedUrl)))
 

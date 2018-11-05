@@ -1,38 +1,32 @@
 package com.gu.identity
 
-import com.gu.effects.TestingRawEffects
-import com.gu.effects.TestingRawEffects.HTTPResponse
-import com.gu.identity.GetByEmail.{NotFound, NotValidated}
-import com.gu.identity.GetByEmailTest.{NotFoundTestData, NotValidatedTestData, TestData}
+import com.gu.identity.GetByEmail.{IdentityAccountWithUnvalidatedEmail, IdentityAccountWithValidatedEmail}
+import com.gu.identity.GetByEmailTest.{NotValidatedTestData, TestData}
 import com.gu.identityBackfill.Types.EmailAddress
 import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
+import com.gu.util.resthttp.RestRequestMaker.{GetRequestWithParams, RelativePath, UrlParams}
+import com.gu.util.resthttp.Types.ClientSuccess
 import org.scalatest.{FlatSpec, Matchers}
-import scalaz.{-\/, \/, \/-}
+import play.api.libs.json.Json
 
 class GetByEmailTest extends FlatSpec with Matchers {
 
-  it should "get successful ok" in {
-    val actual = geyByEmailFromResponses(TestData.responses)
+  it should "formulate a request" in {
+    val actual = GetByEmail.wrapper.fromNewParam(EmailAddress("email@address"))
 
-    actual should be(\/-(IdentityId("1234")))
+    actual should be(GetRequestWithParams(RelativePath("/user"), UrlParams(Map("emailAddress" -> "email@address"))))
+  }
+
+  it should "get successful ok" in {
+    val actual = GetByEmail.wrapper.toNewResponse(Json.parse(TestData.dummyIdentityResponse))
+
+    actual should be(ClientSuccess(IdentityAccountWithValidatedEmail(IdentityId("1234"))))
   }
 
   it should "get not validated with an error" in {
-    val actual = geyByEmailFromResponses(NotValidatedTestData.responses)
+    val actual = GetByEmail.wrapper.toNewResponse(Json.parse(NotValidatedTestData.dummyIdentityResponse))
 
-    actual should be(-\/(NotValidated))
-  }
-
-  it should "get not found" in {
-    val actual = geyByEmailFromResponses(NotFoundTestData.responses)
-
-    actual should be(-\/(NotFound))
-  }
-
-  private def geyByEmailFromResponses(responses: Map[String, HTTPResponse]): GetByEmail.ApiError \/ IdentityId = {
-    val testingRawEffects = new TestingRawEffects(responses = responses)
-
-    GetByEmail(testingRawEffects.response, IdentityConfig("http://baseurl", "apitoken"))(EmailAddress("email@address"))
+    actual should be(ClientSuccess(IdentityAccountWithUnvalidatedEmail))
   }
 
 }
@@ -40,10 +34,6 @@ class GetByEmailTest extends FlatSpec with Matchers {
 object GetByEmailTest {
 
   object TestData {
-
-    def responses: Map[String, HTTPResponse] = Map(
-      "/user?emailAddress=email@address" -> HTTPResponse(200, dummyIdentityResponse)
-    )
 
     val dummyIdentityResponse: String =
       """
@@ -73,10 +63,6 @@ object GetByEmailTest {
 
   object NotValidatedTestData {
 
-    def responses: Map[String, HTTPResponse] = Map(
-      "/user?emailAddress=email@address" -> HTTPResponse(200, dummyIdentityResponse)
-    )
-
     val dummyIdentityResponse: String =
       """
         |{
@@ -98,26 +84,6 @@ object GetByEmailTest {
         |        "primaryEmailAddress": "john.duffell@guardian.co.uk",
         |        "id": "1234"
         |    }
-        |}
-      """.stripMargin
-
-  }
-
-  object NotFoundTestData {
-
-    def responses: Map[String, HTTPResponse] = Map(
-      "/user?emailAddress=email@address" -> HTTPResponse(404, dummyIdentityResponse)
-    )
-    val dummyIdentityResponse: String =
-      """
-        |{
-        |    "status": "error",
-        |    "errors": [
-        |        {
-        |            "message": "Not found",
-        |            "description": "Resource not found"
-        |        }
-        |    ]
         |}
       """.stripMargin
 

@@ -1,7 +1,7 @@
 package com.gu.identityBackfill
 
 import com.gu.identity.GetByEmail
-import com.gu.identity.GetByEmail.{NotFound, NotValidated}
+import com.gu.identity.GetByEmail.{IdentityAccountWithUnvalidatedEmail, IdentityAccountWithValidatedEmail}
 import com.gu.identityBackfill.PreReqCheck.PreReqResult
 import com.gu.identityBackfill.Types._
 import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
@@ -10,7 +10,7 @@ import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.resthttp.LazyClientFailableOp
-import com.gu.util.resthttp.Types.ClientSuccess
+import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, NotFound}
 import org.scalatest.{FlatSpec, Matchers}
 
 class PreReqCheckTest extends FlatSpec with Matchers {
@@ -19,14 +19,29 @@ class PreReqCheckTest extends FlatSpec with Matchers {
 
     val result =
       PreReqCheck(
-        email => scalaz.\/-(IdentityId("asdf")),
+        email => ClientSuccess(IdentityAccountWithValidatedEmail(IdentityId("asdf"))),
         email => ContinueProcessing(ZuoraAccountIdentitySFContact(AccountId("acc"), None, SFContactId("sf"))),
         identityId => ContinueProcessing(()),
         _ => ContinueProcessing(()),
         _ => LazyClientFailableOp(() => ClientSuccess(ContinueProcessing(())))
       )(EmailAddress("email@address"))
 
-    val expectedResult = ContinueProcessing(PreReqResult(AccountId("acc"), SFContactId("sf"), IdentityId("asdf")))
+    val expectedResult = ContinueProcessing(PreReqResult(AccountId("acc"), SFContactId("sf"), Some(IdentityId("asdf"))))
+    result should be(expectedResult)
+  }
+
+  it should "go through a happy case with no existing identity" in {
+
+    val result =
+      PreReqCheck(
+        email => NotFound("so we will return None"),
+        email => ContinueProcessing(ZuoraAccountIdentitySFContact(AccountId("acc"), None, SFContactId("sf"))),
+        identityId => ContinueProcessing(()),
+        _ => ContinueProcessing(()),
+        _ => LazyClientFailableOp(() => ClientSuccess(ContinueProcessing(())))
+      )(EmailAddress("email@address"))
+
+    val expectedResult = ContinueProcessing(PreReqResult(AccountId("acc"), SFContactId("sf"), None))
     result should be(expectedResult)
   }
 
@@ -66,25 +81,17 @@ class PreReqCheckTest extends FlatSpec with Matchers {
     result should be(expectedResult)
   }
 
-  it should "stop processing if it can't find an identity id for the required email" in {
-
-    val result = emailCheckFailure(NotFound)
-
-    val expectedResult = ReturnWithResponse(ApiGatewayResponse.notFound("user doesn't have identity"))
-    result should be(expectedResult)
-  }
-
   it should "stop processing if it finds a non validated identity account" in {
 
-    val result = emailCheckFailure(NotValidated)
+    val result = emailCheckFailure(ClientSuccess(IdentityAccountWithUnvalidatedEmail))
 
     val expectedResult = ReturnWithResponse(ApiGatewayResponse.notFound("identity email not validated"))
     result should be(expectedResult)
   }
 
-  private def emailCheckFailure(identityError: GetByEmail.ApiError) = {
+  private def emailCheckFailure(identityError: ClientFailableOp[GetByEmail.IdentityAccount]) = {
     PreReqCheck(
-      email => scalaz.-\/(identityError),
+      email => identityError,
       email => fail("shouldn't be called 1"),
       identityId => fail("shouldn't be called 2"),
       _ => fail("shouldn't be called 3"),

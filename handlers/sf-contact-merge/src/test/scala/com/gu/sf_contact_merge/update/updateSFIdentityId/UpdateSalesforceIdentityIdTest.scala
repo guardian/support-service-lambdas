@@ -1,10 +1,10 @@
 package com.gu.sf_contact_merge.update.updateSFIdentityId
 
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
-import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.FirstName
-import com.gu.sf_contact_merge.getsfcontacts.GetSfAddress.SFAddress
-import com.gu.sf_contact_merge.getsfcontacts.GetSfAddress.SFAddressFields._
+import com.gu.sf_contact_merge.Types.IdentityId
+import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.{EmailAddress, FirstName}
 import com.gu.sf_contact_merge.getsfcontacts.GetSfAddressOverride.{DontOverrideAddress, OverrideAddressWith}
+import com.gu.sf_contact_merge.getsfcontacts.WireContactToSfContact.Types._
 import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId
 import com.gu.sf_contact_merge.update.UpdateSalesforceIdentityId._
 import com.gu.util.resthttp.RestRequestMaker.{PatchRequest, RelativePath}
@@ -27,7 +27,8 @@ class UpdateSalesforceIdentityIdTest extends FlatSpec with Matchers {
           Some(SFPostalCode("post1")),
           SFCountry("country1"),
           Some(SFPhone("phone1"))
-        ))
+        )),
+        Some(EmailAddress("emailemail"))
       )
     )
     val expectedJson = JsObject(Seq(
@@ -38,7 +39,8 @@ class UpdateSalesforceIdentityIdTest extends FlatSpec with Matchers {
       "OtherState" -> JsString("state2"),
       "OtherPostalCode" -> JsString("post1"),
       "OtherCountry" -> JsString("country1"),
-      "Phone" -> JsString("phone1")
+      "Phone" -> JsString("phone1"),
+      "Email" -> JsString("emailemail")
     ))
     val expected = new PatchRequest(expectedJson, RelativePath("/services/data/v43.0/sobjects/Contact/contactsf"))
     actual should be(expected)
@@ -52,7 +54,8 @@ class UpdateSalesforceIdentityIdTest extends FlatSpec with Matchers {
       SFContactUpdate(
         Some(IdentityId("identityid")),
         DummyFirstName,
-        DontOverrideAddress
+        DontOverrideAddress,
+        None
       )
     )
     val expectedJson = JsObject(Seq(
@@ -71,7 +74,8 @@ class UpdateSalesforceIdentityIdTest extends FlatSpec with Matchers {
       SFContactUpdate(
         Some(IdentityId("identityid")),
         DontChangeFirstName,
-        DontOverrideAddress
+        DontOverrideAddress,
+        None
       )
     )
     val expectedJson = JsObject(Seq(
@@ -89,7 +93,8 @@ class UpdateSalesforceIdentityIdTest extends FlatSpec with Matchers {
       SFContactUpdate(
         None,
         DontChangeFirstName,
-        DontOverrideAddress
+        DontOverrideAddress,
+        None
       )
     )
     val expectedJson = JsObject(Seq(
