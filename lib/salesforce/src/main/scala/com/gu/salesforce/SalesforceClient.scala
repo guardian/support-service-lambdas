@@ -28,8 +28,11 @@ object SalesforceClient {
     )
     val headersWithAuth: List[Header] = requestInfo.headers ++ authHeaders
 
-    val authedBuilder = builder.addHeader("Authorization", s"Bearer ${sfAuth.access_token}")
+    val builderWithHeaders = headersWithAuth.foldLeft(builder)((builder: Request.Builder, header: Header) => {
+      builder.addHeader(header.name, header.value)
+    })
+
     val url = sfAuth.instance_url + requestInfo.relativePath.value
-    authedBuilder.url(url).build()
+    builderWithHeaders.url(url).build()
   }
 }
