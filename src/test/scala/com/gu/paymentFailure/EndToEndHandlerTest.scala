@@ -9,6 +9,7 @@ import com.gu.effects.sqs.AwsSQSSend.{Payload, QueueName}
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import com.gu.util.config.Stage
 import org.scalatest.{FlatSpec, Matchers}
+import scala.util.{Success, Try}
 
 class EndToEndHandlerTest extends FlatSpec with Matchers {
 
@@ -25,7 +26,7 @@ class EndToEndHandlerTest extends FlatSpec with Matchers {
     val config = new TestingRawEffects(200, EndToEndData.responses)
     var capturedPayload: Option[Payload] = None
 
-    def sqsSend(queueName: QueueName)(payload: Payload): Unit = capturedPayload = Some(payload)
+    def sqsSend(queueName: QueueName)(payload: Payload): Try[Unit] = Success { capturedPayload = Some(payload) }
 
     //execute
     Lambda.runForLegacyTestsSeeTestingMd(

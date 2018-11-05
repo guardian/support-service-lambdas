@@ -1,6 +1,7 @@
 package com.gu.paymentFailure
 
 import java.io.{InputStream, OutputStream}
+
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.sqs.AwsSQSSend
 import com.gu.effects.sqs.AwsSQSSend.{Payload, QueueName}
@@ -16,6 +17,7 @@ import com.gu.util.reader.Types._
 import com.gu.util.zuora.{ZuoraGetInvoiceTransactions, ZuoraRestConfig, ZuoraRestRequestMaker}
 import okhttp3.{Request, Response}
 import scalaz.\/
+import scala.util.Try
 
 object Lambda {
 
@@ -24,7 +26,7 @@ object Lambda {
     fetchString: StringFromS3,
     response: Request => Response,
     lambdaIO: LambdaIO,
-    sqsSend: QueueName => Payload => Unit
+    sqsSend: QueueName => Payload => Try[Unit]
   ): Unit = {
     val loadConfigModule = LoadConfigModule(stage, fetchString)
     ApiGatewayHandler(lambdaIO)(operationForEffects(loadConfigModule[TrustedApiConfig], wiredOperation(stage, response, loadConfigModule, sqsSend)))
@@ -41,7 +43,7 @@ object Lambda {
     stage: Stage,
     response: Request => Response,
     loadConfigModule: LoadConfigModule.PartialApply,
-    sqsSend: QueueName => Payload => Unit
+    sqsSend: QueueName => Payload => Try[Unit]
   ): ApiGatewayOp[ApiGatewayHandler.Operation] = {
     for {
       zuoraRestConfig <- loadConfigModule[ZuoraRestConfig].toApiGatewayOp("load zuora config")

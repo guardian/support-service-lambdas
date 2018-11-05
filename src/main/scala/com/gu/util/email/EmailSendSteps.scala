@@ -1,9 +1,11 @@
 package com.gu.util.email
 
 import com.gu.effects.sqs.AwsSQSSend.Payload
-import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
+import com.gu.util.apigateway.ResponseModels.ApiResponse
+import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.reader.Types._
 import play.api.libs.json.{Json, Writes, _}
+import scala.util.{Failure, Success, Try}
 
 case class ContactAttributesDef(SubscriberAttributes: SubscriberAttributesDef)
 
@@ -91,7 +93,14 @@ trait EmailSqsSerialisation {
 }
 
 object EmailSendSteps extends EmailSqsSerialisation {
-  def apply(sqsSend: Payload => Unit)(emailRequest: EmailMessage): ApiGatewayOp[Unit] =
-    ContinueProcessing(sqsSend(Payload(Json.toJson(emailRequest).toString)))
+  def apply(sqsSend: Payload => Try[Unit])(emailRequest: EmailMessage): ApiGatewayOp[Unit] = {
+    sqsSend(Payload(Json.toJson(emailRequest).toString)) match {
+      case Success(_) =>
+        ContinueProcessing(())
+      case Failure(_) =>
+        logger.error(s"failed to send $emailRequest to sqs queue")
+        ReturnWithResponse(ApiResponse("500", "failure trigger email"))
+    }
+  }
 
 }
