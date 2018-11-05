@@ -6,11 +6,8 @@ import com.gu.TestData
 import com.gu.TestData._
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayResponse}
-import com.gu.util.config.EmailConfig.EmailSendId
-import com.gu.util.config.Stage
-import com.gu.util.exacttarget._
+import com.gu.util.email._
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
-import com.gu.util.reader.Types._
 import com.gu.util.resthttp.Types.ClientSuccess
 import com.gu.util.zuora.ZuoraGetInvoiceTransactions.InvoiceTransactionSummary
 import org.scalatest.{FlatSpec, Matchers}
@@ -47,26 +44,19 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
   "lambda" should "enqueue email and return success for a valid request" in {
     //set up
     val stream = getClass.getResourceAsStream("/paymentFailure/validRequest.json")
-    var storedReq: Option[EmailRequest] = None
+    var storedReq: Option[EmailMessage] = None
 
     val os = new ByteArrayOutputStream()
     //execute
     def configToFunction: Operation = {
       PaymentFailureSteps.apply(
         ZuoraEmailSteps.sendEmailRegardingAccount(
-
-          EmailSendSteps.apply(
-
-            req => {
-              storedReq = Some(req)
-              ContinueProcessing(()): ApiGatewayOp[Unit]
-            }, FilterEmail(Stage("PROD"))
-
-          ),
+          { message =>
+            storedReq = Some(message)
+            ContinueProcessing(())
+          },
           a => ClientSuccess(basicInvoiceTransactionSummary)
-
         ),
-        TestData.fakeETSendIds,
         TestData.fakeApiConfig
       )
     }
@@ -75,29 +65,27 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
     //verify
     val responseString = new String(os.toByteArray, "UTF-8")
 
-    val expectedMessage = EmailRequest(
-      etSendId = EmailSendId("11"),
-      Message(
-        To = ToDef(
-          Address = "test.user123@guardian.co.uk",
-          SubscriberKey = "test.user123@guardian.co.uk",
-          ContactAttributes = ContactAttributesDef(
-            SubscriberAttributes = SubscriberAttributesDef(
-              subscriber_id = "A-S123",
-              product = "Supporter",
-              payment_method = "CreditCard",
-              card_type = "Visa",
-              card_expiry_date = "12/2017",
-              first_name = "Test",
-              last_name = "User",
-              primaryKey = PaymentId("somePaymentId"),
-              price = "£49.00",
-              serviceStartDate = "21 November 2016",
-              serviceEndDate = "21 December 2016"
-            )
+    val expectedMessage = EmailMessage(
+      To = ToDef(
+        Address = "test.user123@guardian.co.uk",
+        SubscriberKey = "test.user123@guardian.co.uk",
+        ContactAttributes = ContactAttributesDef(
+          SubscriberAttributes = SubscriberAttributesDef(
+            subscriber_id = "A-S123",
+            product = "Supporter",
+            payment_method = "CreditCard",
+            card_type = "Visa",
+            card_expiry_date = "12/2017",
+            first_name = "Test",
+            last_name = "User",
+            primaryKey = PaymentId("somePaymentId"),
+            price = "£49.00",
+            serviceStartDate = "21 November 2016",
+            serviceEndDate = "21 December 2016"
           )
         )
-      )
+      ),
+      "first-failed-payment-email"
     )
 
     storedReq should be(Some(expectedMessage))
@@ -130,7 +118,6 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
         sendEmail = _ => ReturnWithResponse(ApiGatewayResponse.internalServerError("something failed!")),
         getInvoiceTransactions = _ => ClientSuccess(fakeInvoiceTransactionSummary)
       ),
-      TestData.fakeETSendIds,
       TestData.fakeApiConfig
     )
   }
@@ -139,22 +126,19 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
     //set up
     val stream = getClass.getResourceAsStream("/paymentFailure/validRequest.json")
 
-    var storedReq: Option[EmailRequest] = None
+    var storedReq: Option[EmailMessage] = None
     val os = new ByteArrayOutputStream()
 
     //execute
     def configToFunction: Operation = {
       PaymentFailureSteps.apply(
         ZuoraEmailSteps.sendEmailRegardingAccount(
-          EmailSendSteps.apply(
-            req => {
-              storedReq = Some(req)
-              ReturnWithResponse(ApiGatewayResponse.internalServerError("something failed!")): ApiGatewayOp[Unit]
-            }, FilterEmail(Stage("PROD"))
-          ),
-          a => ClientSuccess(basicInvoiceTransactionSummary)
+          { emailMessage =>
+            storedReq = Some(emailMessage)
+            ReturnWithResponse(ApiGatewayResponse.internalServerError("something failed!"))
+          },
+          _ => ClientSuccess(basicInvoiceTransactionSummary)
         ),
-        TestData.fakeETSendIds,
         TestData.fakeApiConfig
       )
     }

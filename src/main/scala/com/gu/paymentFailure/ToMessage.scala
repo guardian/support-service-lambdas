@@ -3,17 +3,14 @@ package com.gu.paymentFailure
 import java.text.DecimalFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-
 import com.gu.autoCancel.AutoCancelCallout
 import com.gu.paymentFailure.GetPaymentData.PaymentFailureInformation
-import com.gu.util.config.EmailConfig.EmailSendId
 import com.gu.util.email._
-
 import scala.math.BigDecimal.decimal
 
 object ToMessage {
 
-  def apply(paymentFailureCallout: PaymentFailureCallout, paymentFailureInformation: PaymentFailureInformation, sendId: EmailSendId) = EmailMessage(
+  def apply(paymentFailureCallout: PaymentFailureCallout, paymentFailureInformation: PaymentFailureInformation, sendId: EmailId) = EmailMessage(
     To = ToDef(
       Address = paymentFailureCallout.email,
       SubscriberKey = paymentFailureCallout.email,
@@ -43,7 +40,7 @@ object ToMessage {
     DataExtensionName = sendId.id
   )
 
-  def apply(callout: AutoCancelCallout, paymentFailureInformation: PaymentFailureInformation, sendId: EmailSendId) = EmailMessage(
+  def apply(callout: AutoCancelCallout, paymentFailureInformation: PaymentFailureInformation, sendId: EmailId) = EmailMessage(
     To = ToDef(
       Address = callout.email,
       SubscriberKey = callout.email,

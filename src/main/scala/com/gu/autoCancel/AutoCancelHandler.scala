@@ -29,13 +29,11 @@ object AutoCancelHandler extends App with Logging {
     val loadConfigModule = LoadConfigModule(stage, fetchString)
     for {
       zuoraRestConfig <- loadConfigModule[ZuoraRestConfig].toApiGatewayOp("load zuora config")
-      etConfig <- loadConfigModule[EmailConfig].toApiGatewayOp("load et config")
     } yield {
       val zuoraRequests = ZuoraRestRequestMaker(response, zuoraRestConfig)
       AutoCancelSteps(
         AutoCancel.apply(zuoraRequests),
         AutoCancelDataCollectionFilter.apply(now().toLocalDate, ZuoraGetAccountSummary(zuoraRequests)),
-        etConfig.emailSendIds,
         ZuoraEmailSteps.sendEmailRegardingAccount(
           EmailSendSteps(AwsSQSSend.sendSync(emailQueueFor(stage))),
           ZuoraGetInvoiceTransactions(ZuoraRestRequestMaker(response, zuoraRestConfig))

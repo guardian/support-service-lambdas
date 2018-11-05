@@ -7,8 +7,7 @@ import com.gu.util.apigateway.ApiGatewayHandler.Operation
 import com.gu.util.apigateway.ApiGatewayResponse.{ResponseBody, toJsonBody, unauthorized}
 import com.gu.util.apigateway.Auth.{TrustedApiConfig, validTenant}
 import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
-import com.gu.util.config.EmailConfig.EmailSendIds
-import com.gu.util.email.EmailMessage
+import com.gu.util.email.{EmailId, EmailMessage}
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.Types.ClientFailableOp
@@ -22,23 +21,21 @@ object PaymentFailureSteps extends Logging {
 
   def apply(
     sendEmailRegardingAccount: (String, PaymentFailureInformation => EmailMessage) => ApiGatewayOp[Unit],
-    etSendIDs: EmailSendIds,
     trustedApiConfig: TrustedApiConfig
   ): Operation = Operation.noHealthcheck({ apiGatewayRequest: ApiGatewayRequest =>
     (for {
       paymentFailureCallout <- apiGatewayRequest.bodyAsCaseClass[PaymentFailureCallout]()
       _ = logger.info(s"received ${loggableData(paymentFailureCallout)}")
       _ <- validateTenantCallout(trustedApiConfig)(paymentFailureCallout.tenantId)
-      request <- makeRequest(etSendIDs, paymentFailureCallout)
+      request <- makeRequest(paymentFailureCallout)
       _ <- sendEmailRegardingAccount(paymentFailureCallout.accountId, request)
     } yield ApiGatewayResponse.successfulExecution).apiResponse
   })
 
   def makeRequest(
-    emailSendIds: EmailSendIds,
     paymentFailureCallout: PaymentFailureCallout
   ): ApiGatewayOp[PaymentFailureInformation => EmailMessage] = {
-    val maybeEmailSendId = emailSendIds.find(paymentFailureCallout.failureNumber)
+    val maybeEmailSendId = EmailId.paymentFailureId(paymentFailureCallout.failureNumber)
     maybeEmailSendId.map { emailSendId => pFI: PaymentFailureInformation =>
       ToMessage(paymentFailureCallout, pFI, emailSendId)
     }.toApiGatewayContinueProcessing(

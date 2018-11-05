@@ -5,6 +5,7 @@ import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 import com.gu.TestData._
 import com.gu.effects.{FakeFetchString, TestingRawEffects}
 import com.gu.effects.TestingRawEffects.HTTPResponse
+import com.gu.effects.sqs.AwsSQSSend.{Payload, QueueName}
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import com.gu.util.config.Stage
 import org.scalatest.{FlatSpec, Matchers}
@@ -22,15 +23,20 @@ class EndToEndHandlerTest extends FlatSpec with Matchers {
     val stream = new ByteArrayInputStream(endToEndData.zuoraCalloutJson.getBytes(java.nio.charset.StandardCharsets.UTF_8))
     val os = new ByteArrayOutputStream()
     val config = new TestingRawEffects(200, EndToEndData.responses)
+    var capturedPayload: Option[Payload] = None
+
+    def sqsSend(queueName: QueueName)(payload: Payload): Unit = capturedPayload = Some(payload)
+
     //execute
     Lambda.runForLegacyTestsSeeTestingMd(
       Stage("DEV"),
       FakeFetchString.fetchString,
       config.response,
-      LambdaIO(stream, os, null)
+      LambdaIO(stream, os, null),
+      sqsSend
     )
 
-    config.resultMap(("POST", "/messaging/v1/messageDefinitionSends/111/send")).get jsonMatches endToEndData.expectedEmailSend // TODO check the body too
+    capturedPayload.get.value jsonMatches endToEndData.expectedEmailSend
 
     val responseString = new String(os.toByteArray(), "UTF-8")
 
@@ -141,7 +147,7 @@ trait EndtoEndBaseData {
 }
 
 object EndToEndDataWithBillingDetails extends EndtoEndBaseData {
-  override val expectedEmailSend = """{"To":{"Address":"john.duffell@guardian.co.uk","SubscriberKey":"john.duffell@guardian.co.uk","ContactAttributes":{"SubscriberAttributes":{"subscriber_id":"A-S00071536","product":"Supporter","payment_method":"CreditCardReferenceTransaction","card_type":"Visa","card_expiry_date":"12/2019","first_name":"eSAFaBwm4WJZNg5xhIc","last_name":"eSAFaBwm4WJZNg5xhIc","paymentId":"2c92c0f95fc912eb015fcb2a481720e6","price":"$49.00","serviceStartDate":"17 November 2017","serviceEndDate":"16 November 2018", "billing_address1": "billingAddress1Value", "billing_address2": "billingAddress2Value", "billing_postcode": "billingPostcodeValue", "billing_city": "billingCityValue", "billing_state": "billingStateValue", "billing_country" : "billingCountryValue", "title" : "billingTitleValue"}}}}"""
+  override val expectedEmailSend = """{"DataExtensionName":"first-failed-payment-email", "To":{"Address":"john.duffell@guardian.co.uk","SubscriberKey":"john.duffell@guardian.co.uk","ContactAttributes":{"SubscriberAttributes":{"subscriber_id":"A-S00071536","product":"Supporter","payment_method":"CreditCardReferenceTransaction","card_type":"Visa","card_expiry_date":"12/2019","first_name":"eSAFaBwm4WJZNg5xhIc","last_name":"eSAFaBwm4WJZNg5xhIc","paymentId":"2c92c0f95fc912eb015fcb2a481720e6","price":"$49.00","serviceStartDate":"17 November 2017","serviceEndDate":"16 November 2018", "billing_address1": "billingAddress1Value", "billing_address2": "billingAddress2Value", "billing_postcode": "billingPostcodeValue", "billing_city": "billingCityValue", "billing_state": "billingStateValue", "billing_country" : "billingCountryValue", "title" : "billingTitleValue"}}}}"""
   override val zuoraCalloutJson =
     """
       |{
@@ -203,7 +209,7 @@ object EndToEndDataWithBillingDetails extends EndtoEndBaseData {
 object EndToEndData extends EndtoEndBaseData {
 
   override val expectedEmailSend =
-    """{"To":{"Address":"john.duffell@guardian.co.uk","SubscriberKey":"john.duffell@guardian.co.uk","ContactAttributes":{"SubscriberAttributes":{"subscriber_id":"A-S00071536","product":"Supporter","payment_method":"CreditCardReferenceTransaction","card_type":"Visa","card_expiry_date":"12/2019","first_name":"eSAFaBwm4WJZNg5xhIc","last_name":"eSAFaBwm4WJZNg5xhIc","paymentId":"2c92c0f95fc912eb015fcb2a481720e6","price":"$49.00","serviceStartDate":"17 November 2017","serviceEndDate":"16 November 2018"}}}}"""
+    """{"DataExtensionName":"first-failed-payment-email", "To":{"Address":"john.duffell@guardian.co.uk","SubscriberKey":"john.duffell@guardian.co.uk","ContactAttributes":{"SubscriberAttributes":{"subscriber_id":"A-S00071536","product":"Supporter","payment_method":"CreditCardReferenceTransaction","card_type":"Visa","card_expiry_date":"12/2019","first_name":"eSAFaBwm4WJZNg5xhIc","last_name":"eSAFaBwm4WJZNg5xhIc","paymentId":"2c92c0f95fc912eb015fcb2a481720e6","price":"$49.00","serviceStartDate":"17 November 2017","serviceEndDate":"16 November 2018"}}}}"""
 
   override val zuoraCalloutJson =
     """

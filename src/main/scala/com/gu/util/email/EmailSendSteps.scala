@@ -35,6 +35,20 @@ sealed trait PrimaryKey {
 case class PaymentId(id: String) extends PrimaryKey
 case class InvoiceId(id: String) extends PrimaryKey
 case class ToDef(Address: String, SubscriberKey: String, ContactAttributes: ContactAttributesDef)
+
+case class EmailId(id: String) extends AnyVal
+
+object EmailId {
+  def paymentFailureId(i: Int) = i match {
+    case 1 => Some(EmailId("first-failed-payment-email"))
+    case 2 => Some(EmailId("second-failed-payment-email"))
+    case 3 => Some(EmailId("third-failed-payment-email"))
+    case 4 => Some(EmailId("fourth-failed-payment-email"))
+    case _ => None
+  }
+  val cancelledId = EmailId("cancelled-payment-email")
+}
+
 case class EmailMessage(To: ToDef, DataExtensionName: String)
 
 trait EmailSqsSerialisation {

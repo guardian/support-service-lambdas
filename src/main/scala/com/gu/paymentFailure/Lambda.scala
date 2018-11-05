@@ -3,7 +3,7 @@ package com.gu.paymentFailure
 import java.io.{InputStream, OutputStream}
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.sqs.AwsSQSSend
-import com.gu.effects.sqs.AwsSQSSend.QueueName
+import com.gu.effects.sqs.AwsSQSSend.{Payload, QueueName}
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import com.gu.util.apigateway.Auth.TrustedApiConfig
@@ -23,10 +23,11 @@ object Lambda {
     stage: Stage,
     fetchString: StringFromS3,
     response: Request => Response,
-    lambdaIO: LambdaIO
+    lambdaIO: LambdaIO,
+    sqsSend: QueueName => Payload => Unit
   ): Unit = {
     val loadConfigModule = LoadConfigModule(stage, fetchString)
-    ApiGatewayHandler(lambdaIO)(operationForEffects(loadConfigModule[TrustedApiConfig], wiredOperation(stage, response, loadConfigModule)))
+    ApiGatewayHandler(lambdaIO)(operationForEffects(loadConfigModule[TrustedApiConfig], wiredOperation(stage, response, loadConfigModule, sqsSend)))
   }
 
   def operationForEffects(
@@ -36,19 +37,22 @@ object Lambda {
     wiredOperation.map(_.prependRequestValidationToSteps(Auth(loadConfigModule)))
   }
 
-  def wiredOperation(stage: Stage, response: Request => Response, loadConfigModule: LoadConfigModule.PartialApply): ApiGatewayOp[ApiGatewayHandler.Operation] = {
+  def wiredOperation(
+    stage: Stage,
+    response: Request => Response,
+    loadConfigModule: LoadConfigModule.PartialApply,
+    sqsSend: QueueName => Payload => Unit
+  ): ApiGatewayOp[ApiGatewayHandler.Operation] = {
     for {
       zuoraRestConfig <- loadConfigModule[ZuoraRestConfig].toApiGatewayOp("load zuora config")
-      etConfig <- loadConfigModule[EmailConfig].toApiGatewayOp("load et config")
       // we probably shouldn't combine zuora tenant ids and auth keys into the same secrets file, are tenant ids even secret?
       trustedApiConfig <- loadConfigModule[TrustedApiConfig].toApiGatewayOp("load trusted Api config")
 
     } yield PaymentFailureSteps(
       ZuoraEmailSteps.sendEmailRegardingAccount(
-        EmailSendSteps(AwsSQSSend.sendSync(emailQueueFor(stage))),
+        EmailSendSteps(sqsSend(emailQueueFor(stage))),
         ZuoraGetInvoiceTransactions(ZuoraRestRequestMaker(response, zuoraRestConfig))
       ),
-      etConfig.emailSendIds,
       trustedApiConfig
     )
   }
@@ -61,7 +65,14 @@ object Lambda {
   // this is the entry point
   // it's referenced by the cloudformation so make sure you keep it in step
   // it's the only part you can't test of the handler
-  def handleRequest(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
-    runForLegacyTestsSeeTestingMd(RawEffects.stage, GetFromS3.fetchString, RawEffects.response, LambdaIO(inputStream, outputStream, context))
+  def handleRequest(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
+    runForLegacyTestsSeeTestingMd(
+      RawEffects.stage,
+      GetFromS3.fetchString,
+      RawEffects.response,
+      LambdaIO(inputStream, outputStream, context),
+      AwsSQSSend.sendSync
+    )
+  }
 
 }
