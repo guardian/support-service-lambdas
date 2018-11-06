@@ -1,0 +1,95 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Polls GoCardless for direct debit mandate updates and pushes into SalesForce
+
+Parameters:
+    Stage:
+        Description: Stage name
+        Type: String
+        AllowedValues:
+            - PROD
+            - CODE
+        Default: CODE
+
+Conditions:
+  CreateProdMonitoring: !Equals [ !Ref Stage, PROD ]
+
+Resources:
+    GoCardlessSalesForceSyncRole:
+        Type: AWS::IAM::Role
+        Properties:
+            AssumeRolePolicyDocument:
+                Statement:
+                    - Effect: Allow
+                      Principal:
+                          Service:
+                             - lambda.amazonaws.com
+                      Action:
+                          - sts:AssumeRole
+            Path: /
+            Policies:
+                - PolicyName: LambdaPolicy
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                            - logs:CreateLogGroup
+                            - logs:CreateLogStream
+                            - logs:PutLogEvents
+                            - lambda:InvokeFunction
+                            Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/sf-gocardless-sync-${Stage}:log-stream:*"
+                - PolicyName: ReadPrivateCredentials
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action: s3:GetObject
+                            Resource:
+                            - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/goCardless-${Stage}.*.json
+                            - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/trustedApi-${Stage}.*.json
+                            - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/sfAuth-${Stage}.*.json
+
+    GoCardlessSalesForceSyncLambda:
+        Type: AWS::Lambda::Function
+        Properties:
+            Description: Polls GoCardless for direct debit mandate updates and pushes into SalesForce
+            FunctionName:
+                !Sub sf-gocardless-sync-${Stage}
+            Code:
+                S3Bucket: zuora-auto-cancel-dist
+                S3Key: !Sub membership/${Stage}/sf-gocardless-sync/sf-gocardless-sync.jar
+            Handler: com.gu.sf_gocardless_sync.Handler::apply
+            Environment:
+                Variables:
+                  Stage: !Ref Stage
+            Role:
+                Fn::GetAtt:
+                - "GoCardlessSalesForceSyncRole"
+                - Arn
+            MemorySize: 1536 # TODO review this amount of memory is required
+            Runtime: java8
+            Timeout: 300
+        DependsOn:
+        - "GoCardlessSalesForceSyncRole"
+
+    GoCardlessSalesForceSyncScheduleRule:
+      Type: AWS::Events::Rule
+      Properties:
+        Description: "Trigger the GoCardlessSalesForceSync every 5 mins"
+        ScheduleExpression: "cron(0/5 * * * ? *)" # TODO consider more sophisticated cron schedule (to reduce api calls, e.g. overnight)
+        State: "ENABLED"
+        Targets:
+        -
+          Id: !Sub 'trigger_GoCardlessSalesForceSync-${Stage}'
+          Arn:
+            Fn::GetAtt:
+            - "GoCardlessSalesForceSyncLambda"
+            - Arn
+
+    InvokeGoCardlessSalesForceSyncLambdaPermission:
+      Type: AWS::Lambda::Permission
+      Properties:
+        FunctionName: !Ref GoCardlessSalesForceSyncLambda
+        Action: lambda:InvokeFunction
+        Principal: events.amazonaws.com
+        SourceArn: !GetAtt [GoCardlessSalesForceSyncScheduleRule, Arn]
+
+# TODO add some alarms
