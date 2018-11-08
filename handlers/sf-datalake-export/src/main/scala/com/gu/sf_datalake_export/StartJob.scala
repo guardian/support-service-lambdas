@@ -7,7 +7,7 @@ import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.SalesforceClient
 import com.gu.sf_datalake_export.salesforce_bulk_api.AddQueryToJob.{AddQueryRequest, Query}
-import com.gu.sf_datalake_export.salesforce_bulk_api.CreateJob.{SfContact, _}
+import com.gu.sf_datalake_export.salesforce_bulk_api.CreateJob._
 import com.gu.sf_datalake_export.salesforce_bulk_api.{AddQueryToJob, CreateJob}
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import com.gu.util.config.LoadConfigModule.StringFromS3
@@ -18,14 +18,15 @@ import com.gu.util.resthttp.JsonHttp
 import okhttp3.{Request, Response}
 import play.api.libs.json.{Json, Reads}
 import scalaz.Scalaz._
-import scalaz.{-\/, \/-}
+import scalaz.{-\/, \/, \/-}
 
 object StartJob {
 
   case class WireRequest(
     jobName: String,
     query: String,
-    objectType: String
+    objectType: String,
+    chunkSize: Option[Int]
   )
 
   object WireRequest {
@@ -60,20 +61,24 @@ object StartJob {
 
     val loadConfig = LoadConfigModule(stage, fetchString)
 
+    def validateChunkSize(maybeChunkSize: Option[Int]): \/[String, Unit] = maybeChunkSize match {
+      case Some(size) if (size < 100000) => -\/("chunk size must be at least 100,000. Sf has a limited amount of batches per day")
+      case _ => \/-(())
+    }
     //todo add proper error handling
     val lambdaResponse = for {
       request <- ParseRequest[WireRequest](lambdaIO.inputStream).toEither.disjunction.leftMap(failure => failure.getMessage)
-      objectType <- SfObjectType.fromString(request.objectType).toDisjunction.leftMap(failure => failure.message)
+      _ <- validateChunkSize(request.chunkSize)
       sfConfig <- loadConfig[SFAuthConfig].leftMap(failure => failure.error)
       //fix auth so that it doesn't return apigatewayop
       sfClient <- SalesforceClient(getResponse, sfConfig).value.toDisjunction.leftMap(failure => failure.message)
       createJobOp = CreateJob(sfClient.wrapWith(JsonHttp.post))
-
-      jobId <- createJobOp(SfContact).toDisjunction.leftMap(failure => failure.message)
+      createJobRequest = CreateJobRequest(request.objectType, request.chunkSize)
+      jobId <- createJobOp(createJobRequest).toDisjunction.leftMap(failure => failure.message)
       addQueryToJobOp = AddQueryToJob(sfClient)
       addQueryRequest = AddQueryRequest(
         Query(request.query),
-        jobId
+        jobId,
       )
       _ <- addQueryToJobOp(addQueryRequest).toDisjunction.leftMap(failure => failure.message)
 

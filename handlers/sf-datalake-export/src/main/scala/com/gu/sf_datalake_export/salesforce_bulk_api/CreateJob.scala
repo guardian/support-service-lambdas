@@ -42,22 +42,21 @@ object CreateJob {
     def name: String
   }
 
-  object SfObjectType {
-    val allTypes = List(SfContact)
+  case class CreateJobRequest(
+    objectType : String,
+    maybeChunkSize: Option[Int]
+  )
 
-    def fromString(typeName: String) = allTypes.find(_.name.equalsIgnoreCase(typeName)).map(ClientSuccess(_)).getOrElse(GenericError(s"invalid sf object type $typeName"))
 
-  }
 
-  object SfContact extends SfObjectType {
-    override def name = "Contact"
-  }
+  def apply(post: HttpOp[RestRequestMaker.PostRequest, JsValue]): CreateJobRequest => ClientFailableOp[JobId] =
+    post.setupRequest[CreateJobRequest] {request:CreateJobRequest =>
+      val wireRequest = WireRequest(request.objectType)
 
-  def apply(post: HttpOp[RestRequestMaker.PostRequest, JsValue]): SfObjectType => ClientFailableOp[JobId] =
-    post.setupRequest[SfObjectType] { objectType: SfObjectType =>
-      val wireRequest = WireRequest(objectType.name)
-      // val headers = List(Header("Sforce-Enable-PKChunking", "chunkSize=100000")) //figure out what the chunk size should be (depends on the query so maybe it should be a param)
-      val headers = List.empty //do not enable chuncking for now to avoid executing to many batches
+      val maybeChunkingHeader = request.maybeChunkSize.map { chunkSize =>
+        Header(name = "Sforce-Enable-PKChunking", value = s"chunkSize=$chunkSize")
+      }
+     val headers = maybeChunkingHeader.toList
     val relativePath = RelativePath("/services/async/44.0/job")
       PostRequest(wireRequest, relativePath, headers)
     }.parse[WireResponse].map { wireResponse => JobId(wireResponse.id) }.runRequest

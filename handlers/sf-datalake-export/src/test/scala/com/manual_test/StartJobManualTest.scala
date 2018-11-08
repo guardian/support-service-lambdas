@@ -10,8 +10,9 @@ object StartJobManualTest extends App {
   val request =
     """{
       |"objectType" : "Contact",
-      |"query" : "SELECT id, Name FROM Contact limit 20",
-      |"jobName" : "contacts"
+      |"query" : "SELECT id, Name FROM Contact",
+      |"jobName" : "contacts",
+      |"chunkSize" : 200000
       |}
     """.stripMargin
 

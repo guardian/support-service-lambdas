@@ -10,7 +10,7 @@ object AddQueryToJob {
 
   case class AddQueryRequest(
     query: Query,
-    jobId: JobId
+    jobId: JobId,
   )
 
   case class Query(value: String) extends AnyVal
@@ -20,11 +20,12 @@ object AddQueryToJob {
     post.setupRequest[AddQueryRequest] { addQueryRequest =>
       val jobIdStr = addQueryRequest.jobId.value
       val queryStr = addQueryRequest.query.value
+
       //do this the right way, and if there is no right way define plain post requests somewhere
       val relativePath = RelativePath(s"/services/async/44.0/job/$jobIdStr/batch")
       val postMethod = PostMethod(BodyAsString(queryStr), ContentType("text/csv"))
-      val contentTypeHeader = Header(name = "content-type", value = "text/csv") // this header seems to be useless
-      StringHttpRequest(postMethod, relativePath, UrlParams.empty, headers = List(contentTypeHeader))
+
+      StringHttpRequest(postMethod, relativePath, UrlParams.empty)
     }.map(_ => ()).runRequest
 
 }
