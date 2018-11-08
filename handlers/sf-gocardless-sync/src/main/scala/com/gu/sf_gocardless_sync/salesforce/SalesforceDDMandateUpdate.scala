@@ -36,8 +36,6 @@ object SalesforceDDMandateUpdate extends Logging {
         PostRequest(newMandateUpdate, RelativePath(mandateSfObjectsBaseUrl))
       }.parse[MandateUpdateWithSfId].runRequest
 
-    //TODO handle duplicate (extract the ID from message body and return, but log so alarm can be created)
-
   }
 
   object GetGoCardlessIdOfLastProcessed {

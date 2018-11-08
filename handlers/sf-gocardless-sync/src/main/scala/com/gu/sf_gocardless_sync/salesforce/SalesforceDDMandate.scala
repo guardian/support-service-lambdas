@@ -48,8 +48,6 @@ object SalesforceDDMandate extends Logging {
         PostRequest(newMandateUpdate, RelativePath(mandateSfObjectsBaseUrl))
       }.parse[MandateWithSfLowercaseId].map(withLowercaseId => MandateWithSfId(withLowercaseId.id)).runRequest
 
-    //TODO handle duplicate (extract the ID from message body and return, but log so alarm can be created)
-
   }
 
   object Update {
