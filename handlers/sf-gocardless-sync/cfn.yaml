@@ -44,7 +44,6 @@ Resources:
                             Action: s3:GetObject
                             Resource:
                             - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/goCardless-${Stage}.*.json
-                            - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/trustedApi-${Stage}.*.json
                             - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/sfAuth-${Stage}.*.json
 
     GoCardlessSalesForceSyncLambda:
@@ -66,7 +65,7 @@ Resources:
                 - Arn
             MemorySize: 1536 # TODO review this amount of memory is required
             Runtime: java8
-            Timeout: 300
+            Timeout: 240 # kills if still running after 4mins to avoid clashes with next run
         DependsOn:
         - "GoCardlessSalesForceSyncRole"
 
@@ -74,7 +73,7 @@ Resources:
       Type: AWS::Events::Rule
       Properties:
         Description: "Trigger the GoCardlessSalesForceSync every 5 mins"
-        ScheduleExpression: "cron(0/5 * * * ? *)" # TODO consider more sophisticated cron schedule (to reduce api calls, e.g. overnight)
+        ScheduleExpression: "rate(5 minutes)" # TODO consider more sophisticated cron schedule (to reduce api calls, e.g. overnight)
         State: "ENABLED"
         Targets:
         -
