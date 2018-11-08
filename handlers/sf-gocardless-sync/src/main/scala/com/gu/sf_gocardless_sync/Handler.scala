@@ -6,7 +6,7 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.SalesforceClient
-import com.gu.sf_gocardless_sync.SyncSharedObjects.{GoCardlessMandateID, GoCardlessMandateUpdateID, Reference}
+import com.gu.sf_gocardless_sync.SyncSharedObjects.{GoCardlessMandateUpdateID, Reference}
 import com.gu.sf_gocardless_sync.gocardless.GoCardlessDDMandateUpdate.GetEventsSince.{GoCardlessMandateUpdate, MandateUpdateWithMandateDetail}
 import com.gu.sf_gocardless_sync.gocardless.{GoCardlessClient, GoCardlessConfig, GoCardlessDDMandateUpdate}
 import com.gu.sf_gocardless_sync.salesforce.SalesforceDDMandate.Create.WireNewMandate
@@ -19,7 +19,7 @@ import com.gu.sf_gocardless_sync.salesforce.SalesforceSharedObjects.{MandateSfId
 import com.gu.sf_gocardless_sync.salesforce.{SalesforceDDMandate, SalesforceDDMandateUpdate}
 import com.gu.util.Logging
 import com.gu.util.config.LoadConfigModule
-import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError, NotFound}
+import com.gu.util.resthttp.Types.{ClientFailableOp, ClientFailure, ClientSuccess}
 import com.gu.util.resthttp.{HttpOp, JsonHttp, RestRequestMaker}
 
 object Handler extends Logging {
@@ -67,7 +67,7 @@ object Handler extends Logging {
     forEachMandateUpdate(goCardless, sf, existingSfMandates, relatedPaymentMethodAndBillingAccountIDs)
   ) collectFirst {
       // stop processing stream on any ClientFailure
-      case GenericError(_) | NotFound(_) => ()
+      case failure: ClientFailure => failure
     }
 
   def forEachMandateUpdate(
