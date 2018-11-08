@@ -11,7 +11,7 @@ import com.gu.sf_gocardless_sync.gocardless.GoCardlessDDMandateUpdate.GetEventsS
 import com.gu.sf_gocardless_sync.gocardless.{GoCardlessClient, GoCardlessConfig, GoCardlessDDMandateUpdate}
 import com.gu.sf_gocardless_sync.salesforce.SalesforceDDMandate.Create.WireNewMandate
 import com.gu.sf_gocardless_sync.salesforce.SalesforceDDMandate.GetAllPaymentMethodWithBillingAccountGivenGoCardlessReference.SfPaymentMethodDetail
-import com.gu.sf_gocardless_sync.salesforce.SalesforceDDMandate.LookupAll.MandateLookupDetail
+import com.gu.sf_gocardless_sync.salesforce.SalesforceDDMandate.LookupAll.{ExistingMandateMutableMap, MandateLookupDetail}
 import com.gu.sf_gocardless_sync.salesforce.SalesforceDDMandate.MandateWithSfId
 import com.gu.sf_gocardless_sync.salesforce.SalesforceDDMandate.Update.WirePatchMandate
 import com.gu.sf_gocardless_sync.salesforce.SalesforceDDMandateUpdate.Create.WireNewMandateUpdate
@@ -73,13 +73,20 @@ object Handler extends Logging {
   def forEachMandateUpdate(
     goCardless: GcClient,
     sf: SfClient,
-    existingSfMandates: Map[GoCardlessMandateID, MandateLookupDetail],
+    existingSfMandates: ExistingMandateMutableMap,
     relatedPaymentMethodAndBillingAccountIDs: Map[Reference, SfPaymentMethodDetail]
   )(
     gcMandateUpdateWithDetail: MandateUpdateWithMandateDetail
   ): ClientFailableOp[Unit] = for {
     sfMandate <- existingSfMandates.get(gcMandateUpdateWithDetail.event.links.mandate) match {
-      case None => createMandateInSf(goCardless, sf)(gcMandateUpdateWithDetail, relatedPaymentMethodAndBillingAccountIDs.get(gcMandateUpdateWithDetail.mandate.reference))
+      case None => createMandateInSf(
+        goCardless,
+        sf,
+        existingSfMandates
+      )(
+        gcMandateUpdateWithDetail,
+        relatedPaymentMethodAndBillingAccountIDs.get(gcMandateUpdateWithDetail.mandate.reference)
+      )
       case Some(existingSfMandate) => ClientSuccess(existingSfMandate)
     }
     newMandateUpdateOp = SalesforceDDMandateUpdate.Create(sf.client.wrapWith(JsonHttp.post))
@@ -102,7 +109,8 @@ object Handler extends Logging {
 
   def createMandateInSf(
     goCardless: GcClient,
-    sf: SfClient
+    sf: SfClient,
+    existingSfMandates: ExistingMandateMutableMap
   )(
     gcMandateUpdateWithDetail: MandateUpdateWithMandateDetail,
     sfPaymentMethodDetailOption: Option[SfPaymentMethodDetail]
@@ -116,6 +124,12 @@ object Handler extends Logging {
       Billing_Account__c = sfPaymentMethodDetailOption.map(_.Zuora__BillingAccount__c),
       Bank_Name__c = bankDetail.bank_name,
       Account_Number_Ending__c = bankDetail.account_number_ending
+    ))
+    _ = existingSfMandates.put(gcMandateUpdateWithDetail.mandate.id, MandateLookupDetail(
+      Id = newSfMandate.Id,
+      GoCardless_Mandate_ID__c = gcMandateUpdateWithDetail.mandate.id,
+      Last_Mandate_Update__c = MandateUpdateSfId(""),
+      Status_Changed_At__c = UpdateHappenedAt("")
     ))
   } yield newSfMandate
 

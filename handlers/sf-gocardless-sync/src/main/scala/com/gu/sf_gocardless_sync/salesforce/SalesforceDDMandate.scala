@@ -81,7 +81,9 @@ object SalesforceDDMandate extends Logging {
     private case class MandateSearchQueryResponse(records: List[MandateLookupDetail])
     private implicit val readsIds = Json.reads[MandateSearchQueryResponse]
 
-    def apply(sfGet: HttpOp[RestRequestMaker.GetRequest, JsValue]): List[GoCardlessMandateID] => ClientFailableOp[Map[GoCardlessMandateID, MandateLookupDetail]] =
+    type ExistingMandateMutableMap = scala.collection.mutable.Map[GoCardlessMandateID, MandateLookupDetail];
+
+    def apply(sfGet: HttpOp[RestRequestMaker.GetRequest, JsValue]): List[GoCardlessMandateID] => ClientFailableOp[ExistingMandateMutableMap] =
       sfGet.setupRequest(toRequest).parse[MandateSearchQueryResponse].map(toResponse).runRequest
 
     def toRequest(mandateIDs: List[GoCardlessMandateID]) = {
@@ -92,9 +94,10 @@ object SalesforceDDMandate extends Logging {
       RestRequestMaker.GetRequest(RelativePath(s"$soqlQueryBaseUrl$soqlQuery"))
     }
 
-    def toResponse(mandateSearchQueryResponse: MandateSearchQueryResponse): Map[GoCardlessMandateID, MandateLookupDetail] =
-      mandateSearchQueryResponse.records.map(mandateLookupDetail =>
-        mandateLookupDetail.GoCardless_Mandate_ID__c -> mandateLookupDetail).toMap
+    def toResponse(mandateSearchQueryResponse: MandateSearchQueryResponse): ExistingMandateMutableMap =
+      scala.collection.mutable.Map() ++ mandateSearchQueryResponse.records.map(
+        mandateLookupDetail => mandateLookupDetail.GoCardless_Mandate_ID__c -> mandateLookupDetail
+      ).toMap
 
   }
 
