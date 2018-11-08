@@ -12,14 +12,14 @@ import com.gu.sf_gocardless_sync.gocardless.{GoCardlessClient, GoCardlessConfig,
 import com.gu.sf_gocardless_sync.salesforce.SalesforceDDMandate.Create.WireNewMandate
 import com.gu.sf_gocardless_sync.salesforce.SalesforceDDMandate.GetAllPaymentMethodWithBillingAccountGivenGoCardlessReference.SfPaymentMethodDetail
 import com.gu.sf_gocardless_sync.salesforce.SalesforceDDMandate.LookupAll.MandateLookupDetail
-import com.gu.sf_gocardless_sync.salesforce.SalesforceDDMandate.{BillingAccountSfId, MandateWithSfId, PaymentMethodSfId}
+import com.gu.sf_gocardless_sync.salesforce.SalesforceDDMandate.MandateWithSfId
 import com.gu.sf_gocardless_sync.salesforce.SalesforceDDMandate.Update.WirePatchMandate
 import com.gu.sf_gocardless_sync.salesforce.SalesforceDDMandateUpdate.Create.WireNewMandateUpdate
 import com.gu.sf_gocardless_sync.salesforce.SalesforceSharedObjects.{MandateSfId, MandateUpdateSfId, UpdateHappenedAt}
 import com.gu.sf_gocardless_sync.salesforce.{SalesforceDDMandate, SalesforceDDMandateUpdate}
 import com.gu.util.Logging
 import com.gu.util.config.LoadConfigModule
-import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess}
+import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError, NotFound}
 import com.gu.util.resthttp.{HttpOp, JsonHttp, RestRequestMaker}
 
 object Handler extends Logging {
@@ -63,9 +63,12 @@ object Handler extends Logging {
     existingSfMandates <- SalesforceDDMandate.LookupAll(sf.client.wrapWith(JsonHttp.get))(updatesSinceLastProcessed.map(gcMandateUpdate => gcMandateUpdate.mandate.id)).toDisjunction
     fetchRelatedPaymentMethodAndBillingAccountIDs = SalesforceDDMandate.GetAllPaymentMethodWithBillingAccountGivenGoCardlessReference(sf.client.wrapWith(JsonHttp.get))
     relatedPaymentMethodAndBillingAccountIDs <- fetchRelatedPaymentMethodAndBillingAccountIDs(updatesSinceLastProcessed.map(gcMandateUpdate => gcMandateUpdate.mandate.reference)).toDisjunction
-  } yield updatesSinceLastProcessed.reverse.foreach(
+  } yield updatesSinceLastProcessed.reverse.toStream.map(
     forEachMandateUpdate(goCardless, sf, existingSfMandates, relatedPaymentMethodAndBillingAccountIDs)
-  )
+  ) collectFirst {
+      // stop processing stream on any ClientFailure
+      case GenericError(_) | NotFound(_) => ()
+    }
 
   def forEachMandateUpdate(
     goCardless: GcClient,
@@ -74,7 +77,7 @@ object Handler extends Logging {
     relatedPaymentMethodAndBillingAccountIDs: Map[Reference, SfPaymentMethodDetail]
   )(
     gcMandateUpdateWithDetail: MandateUpdateWithMandateDetail
-  ) = for {
+  ): ClientFailableOp[Unit] = for {
     sfMandate <- existingSfMandates.get(gcMandateUpdateWithDetail.event.links.mandate) match {
       case None => createMandateInSf(goCardless, sf)(gcMandateUpdateWithDetail, relatedPaymentMethodAndBillingAccountIDs.get(gcMandateUpdateWithDetail.mandate.reference))
       case Some(existingSfMandate) => ClientSuccess(existingSfMandate)
