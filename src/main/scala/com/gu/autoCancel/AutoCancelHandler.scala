@@ -4,7 +4,7 @@ import java.io.{InputStream, OutputStream}
 import java.time.LocalDateTime
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.sqs.AwsSQSSend
-import com.gu.effects.sqs.AwsSQSSend.QueueName
+import com.gu.effects.sqs.AwsSQSSend.{Payload, QueueName}
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.paymentFailure.ZuoraEmailSteps
 import com.gu.util.Logging
@@ -17,6 +17,7 @@ import com.gu.util.email.EmailSendSteps
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.{ZuoraGetAccountSummary, ZuoraGetInvoiceTransactions, ZuoraRestConfig, ZuoraRestRequestMaker}
 import okhttp3.{Request, Response}
+import scala.util.Try
 
 object AutoCancelHandler extends App with Logging {
 
@@ -24,7 +25,8 @@ object AutoCancelHandler extends App with Logging {
     stage: Stage,
     fetchString: StringFromS3,
     response: Request => Response,
-    now: () => LocalDateTime
+    now: () => LocalDateTime,
+    awsSQSSend: QueueName => Payload => Try[Unit]
   ): ApiGatewayOp[ApiGatewayHandler.Operation] = {
     val loadConfigModule = LoadConfigModule(stage, fetchString)
     for {
@@ -35,7 +37,7 @@ object AutoCancelHandler extends App with Logging {
         AutoCancel.apply(zuoraRequests),
         AutoCancelDataCollectionFilter.apply(now().toLocalDate, ZuoraGetAccountSummary(zuoraRequests)),
         ZuoraEmailSteps.sendEmailRegardingAccount(
-          EmailSendSteps(AwsSQSSend.sendSync(emailQueueFor(stage))),
+          EmailSendSteps(awsSQSSend(emailQueueFor(stage))),
           ZuoraGetInvoiceTransactions(ZuoraRestRequestMaker(response, zuoraRestConfig))
         )
       ).prependRequestValidationToSteps(Auth(loadConfigModule[TrustedApiConfig]))
@@ -47,7 +49,7 @@ object AutoCancelHandler extends App with Logging {
   // it's the only part you can't test of the handler
   def handleRequest(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
     ApiGatewayHandler(LambdaIO(inputStream, outputStream, context)) {
-      operationForEffects(RawEffects.stage, GetFromS3.fetchString, RawEffects.response, RawEffects.now)
+      operationForEffects(RawEffects.stage, GetFromS3.fetchString, RawEffects.response, RawEffects.now, AwsSQSSend.sendSync)
     }
 
   def emailQueueFor(stage: Stage): QueueName = stage match {
