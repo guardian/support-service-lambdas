@@ -261,7 +261,7 @@ object EndToEndData extends EndtoEndBaseData {
       |      }
       |    }
       |  }
-      |}"""
+      |}""".stripMargin
 
   override val zuoraCalloutJson =
     """
