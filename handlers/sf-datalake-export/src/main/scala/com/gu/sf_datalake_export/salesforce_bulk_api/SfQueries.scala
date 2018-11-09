@@ -273,7 +273,6 @@ object SfQueries {
       |Card_Expiry__c
     """.stripMargin
 
-  ////////EVERYTHING ABOVE THIS HAS BEEN TESTED AND THE PERMISSIONS FIXED IN PROD
   val cases =
     """
       |select
@@ -338,6 +337,7 @@ object SfQueries {
       |Case
     """.stripMargin
 
+
   val caseComment =
     """
       |select
@@ -355,13 +355,13 @@ object SfQueries {
       |CaseComment
     """.stripMargin
 
+  //Date_Submitted__c, doesnt seem to exist
   val csSurvey =
     """select
       |Case_Contact_Email__c,
       |Name,
       |CreatedById,
       |CreatedDate,
-      |Date_Submitted__c,
       |IsDeleted,
       |LastActivityDate,
       |LastModifiedById,
@@ -440,6 +440,7 @@ object SfQueries {
       |Fulfilment_Process_Information__c
     """.stripMargin
 
+
   //the object Imovo_Contract__c doesn't seem to exist
   val imovoContract =
     """
@@ -467,6 +468,7 @@ object SfQueries {
       |from
       |Imovo_Contract__c
     """.stripMargin
+
 
   val paymentCard =
     """
