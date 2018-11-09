@@ -71,7 +71,7 @@ class EmailSendStepsTest extends FlatSpec with Matchers {
   "EmailSendSteps" should "return with response on failure" in {
     def sqsSend(payload: Payload): Try[Unit] = Failure(new RuntimeException("foo"))
 
-    EmailSendSteps(sqsSend)(makeMessage("james@jameson.com")) shouldBe ReturnWithResponse(ApiResponse("500", "failure trigger email"))
+    EmailSendSteps(sqsSend)(makeMessage("james@jameson.com")) shouldBe ReturnWithResponse(ApiResponse("500", "failure to send email payload to sqs"))
   }
 
 }
