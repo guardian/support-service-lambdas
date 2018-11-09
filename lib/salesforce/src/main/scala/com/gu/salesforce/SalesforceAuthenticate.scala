@@ -30,6 +30,10 @@ object SalesforceAuthenticate extends Logging {
     implicit val location = ConfigLocation[SFAuthConfig](path = "TEST/sfAuth", version = 1)
   }
 
+  object SFExportAuthConfig {
+    val location = ConfigLocation[SFAuthConfig](path = "sfExportAuth", version = 1)
+  }
+
   // the WireResponse model is the same as the domain model, so keep a friendly name
   case class SalesforceAuth(access_token: String, instance_url: String)
 

@@ -5,7 +5,7 @@ import java.io.{InputStream, OutputStream}
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.s3.model.{PutObjectRequest, PutObjectResult}
 import com.gu.effects.{GetFromS3, RawEffects}
-import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
+import com.gu.salesforce.SalesforceAuthenticate.{SFAuthConfig, SFExportAuthConfig}
 import com.gu.salesforce.SalesforceClient
 import com.gu.sf_datalake_export.salesforce_bulk_api.CreateJob.JobId
 import com.gu.sf_datalake_export.salesforce_bulk_api.GetBatchResult.{DownloadResultsRequest, JobName}
@@ -133,8 +133,7 @@ object DownloadBatches {
       request <- ParseRequest[WireIO](lambdaIO.inputStream).toEither.disjunction.leftMap(failure => failure.getMessage)
       batches <- IList(request.batches: _*).traverse(WireBatch.toBatch).map(_.toList).toDisjunction.leftMap(failure => failure.message)
       pendingBatches = batches.filter(b => b.state == Completed)
-      sfConfig <- loadConfig[SFAuthConfig].leftMap(failure => failure.error)
-      //fix auth so that it doesn't return apigatewayop
+      sfConfig <- loadConfig[SFAuthConfig](SFExportAuthConfig.location, SFAuthConfig.reads).leftMap(failure => failure.error) //fix auth so that it doesn't return apigatewayop
       //todo fix so that getting the sf token doesn't happen until we decided that we actually have stuff to do
       sfClient <- SalesforceClient(getResponse, sfConfig).value.toDisjunction.leftMap(failure => failure.message)
       wiredGetBatchResultId = GetBatchResultId(sfClient)

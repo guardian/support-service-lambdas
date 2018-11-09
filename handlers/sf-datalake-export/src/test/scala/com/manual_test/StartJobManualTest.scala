@@ -3,16 +3,20 @@ package manualTest
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
 import com.gu.sf_datalake_export.StartJob
+import com.gu.sf_datalake_export.salesforce_bulk_api.SfQueries
 import play.api.libs.json.{JsString, Json}
 
 //This is just a way to locally run the addSubscription lambda in dev
 object StartJobManualTest extends App {
+
+  val queryStr = SfQueries.cardExpiry.replace("\n", " ")
+
   val request =
-    """{
-      |"objectType" : "Contact",
-      |"query" : "SELECT id, Name FROM Contact",
-      |"jobName" : "contacts",
-      |"chunkSize" : 200000
+    s"""{
+      |"objectType" : "Card_Expiry__c",
+      |"query" : "$queryStr",
+      |"jobName" : "SF",
+      |"chunkSize" : 250000
       |}
     """.stripMargin
 

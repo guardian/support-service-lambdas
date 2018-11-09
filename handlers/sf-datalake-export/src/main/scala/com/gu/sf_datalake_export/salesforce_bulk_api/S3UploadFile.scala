@@ -21,8 +21,6 @@ object S3UploadFile extends Logging {
     file: File
   ): String \/ PutObjectResult = {
     logger.info(s"Uploading ${file.fileName.value} to S3...")
-    logger.info("file content:S")
-    logger.info(file.content.value)
     val stream: InputStream = new ByteArrayInputStream(file.content.value.getBytes(java.nio.charset.StandardCharsets.UTF_8.name))
     val bytes = IOUtils.toByteArray(stream)
     val uploadMetadata = new ObjectMetadata()

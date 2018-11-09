@@ -9,10 +9,10 @@ object DownloadBatchManualTest extends App {
   //todo see how to make "done" optional
   val request =
     """{
-      |"jobId" : "7506E000003wKwwQAE",
-      |"jobName" : "testJob",
+      |"jobId" : "7500J00000DxRZrQAN",
+      |"jobName" : "sfSubscriptions",
       |"batches" : [{
-      | "batchId" : "7516E000002y6GNQAY",
+      | "batchId" : "7510J00000JRXHVQA5",
       | "state" : "Completed"
       | }
       | ]

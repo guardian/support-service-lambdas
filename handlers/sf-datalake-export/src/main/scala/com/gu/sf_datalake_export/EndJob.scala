@@ -4,7 +4,7 @@ import java.io.{InputStream, OutputStream}
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
-import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
+import com.gu.salesforce.SalesforceAuthenticate.{SFAuthConfig, SFExportAuthConfig}
 import com.gu.salesforce.SalesforceClient
 import com.gu.sf_datalake_export.salesforce_bulk_api.CloseJob
 import com.gu.sf_datalake_export.salesforce_bulk_api.CreateJob._
@@ -58,8 +58,7 @@ object EndJob {
     val lambdaResponse = for {
       request <- ParseRequest[WireRequest](lambdaIO.inputStream).toEither.disjunction.leftMap(failure => failure.getMessage)
       jobId = JobId(request.jobId)
-      sfConfig <- loadConfig[SFAuthConfig].leftMap(failure => failure.error)
-      //fix auth so that it doesn't return apigatewayop
+      sfConfig <- loadConfig[SFAuthConfig](SFExportAuthConfig.location, SFAuthConfig.reads).leftMap(failure => failure.error) //fix auth so that it doesn't return apigatewayop
       sfClient <- SalesforceClient(getResponse, sfConfig).value.toDisjunction.leftMap(failure => failure.message)
       wiredCloseJob = CloseJob(sfClient.wrapWith(JsonHttp.post))
       _ <- wiredCloseJob(jobId).toDisjunction.leftMap(failure => failure.message)

@@ -8,8 +8,8 @@ import com.gu.sf_datalake_export.{GetBatches, StartJob}
 object GetJobBatchesManualTest extends App {
   val request =
     """{
-      |"jobId" : "7506E000003wKwwQAE",
-      |"jobName" : "contacts"
+      |"jobId" : "7500J00000DxRZrQAN",
+      |"jobName" : "sfSubs"
       |}
     """.stripMargin
 
