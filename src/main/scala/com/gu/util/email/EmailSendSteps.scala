@@ -99,7 +99,7 @@ object EmailSendSteps extends EmailSqsSerialisation {
         ContinueProcessing(())
       case Failure(_) =>
         logger.error(s"failed to send $emailRequest to sqs queue")
-        ReturnWithResponse(ApiResponse("500", "failure trigger email"))
+        ReturnWithResponse(ApiResponse("500", "failure to send email payload to sqs"))
     }
   }
 
