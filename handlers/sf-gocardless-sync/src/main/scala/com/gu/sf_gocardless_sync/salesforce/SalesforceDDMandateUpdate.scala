@@ -53,7 +53,7 @@ object SalesforceDDMandateUpdate extends Logging {
       val soqlQuery = s"SELECT GoCardless_Mandate_Update_ID__c " +
         s"FROM DD_Mandate_Update__c " +
         s"WHERE Update_Happened_At__c != null " +
-        s"ORDER BY Update_Happened_At__c DESC, LastModifiedDate, Name DESC " +
+        s"ORDER BY Name DESC " +
         s"LIMIT 1"
       logger.info(s"using SF query : $soqlQuery")
       RestRequestMaker.GetRequest(RelativePath(s"$soqlQueryBaseUrl$soqlQuery"))
