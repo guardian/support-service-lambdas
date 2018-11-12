@@ -137,8 +137,8 @@ object SfQueries {
     |
   """.stripMargin
 
-//removed compund ShippingAddress,BillingAddress
-//TODO BillingAccount__c doesn't exist ?
+  //removed compund ShippingAddress,BillingAddress
+  //TODO BillingAccount__c doesn't exist ?
   val accounts =
     """
     select
@@ -337,7 +337,6 @@ object SfQueries {
       |Case
     """.stripMargin
 
-
   val caseComment =
     """
       |select
@@ -440,7 +439,6 @@ object SfQueries {
       |Fulfilment_Process_Information__c
     """.stripMargin
 
-
   //the object Imovo_Contract__c doesn't seem to exist
   val imovoContract =
     """
@@ -468,7 +466,6 @@ object SfQueries {
       |from
       |Imovo_Contract__c
     """.stripMargin
-
 
   val paymentCard =
     """

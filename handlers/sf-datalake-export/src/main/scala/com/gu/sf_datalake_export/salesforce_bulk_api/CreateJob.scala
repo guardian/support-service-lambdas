@@ -1,5 +1,6 @@
 package com.gu.sf_datalake_export.salesforce_bulk_api
 
+import com.gu.util.resthttp.HttpOp.HttpOpWrapper
 import com.gu.util.resthttp.RestOp._
 import com.gu.util.resthttp.RestRequestMaker._
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError}
@@ -38,27 +39,23 @@ object CreateJob {
     implicit val format = Json.format[JobId]
   }
 
-  trait SfObjectType {
-    def name: String
-  }
-
   case class CreateJobRequest(
     objectType : String,
     maybeChunkSize: Option[Int]
   )
 
-
-
-  def apply(post: HttpOp[RestRequestMaker.PostRequest, JsValue]): CreateJobRequest => ClientFailableOp[JobId] =
-    post.setupRequest[CreateJobRequest] {request:CreateJobRequest =>
+  def toRequest(request:CreateJobRequest):PostRequest = {
       val wireRequest = WireRequest(request.objectType)
-
       val maybeChunkingHeader = request.maybeChunkSize.map { chunkSize =>
         Header(name = "Sforce-Enable-PKChunking", value = s"chunkSize=$chunkSize")
       }
-     val headers = maybeChunkingHeader.toList
-    val relativePath = RelativePath("/services/async/44.0/job")
+      val headers = maybeChunkingHeader.toList
+      val relativePath = RelativePath("/services/async/44.0/job")
       PostRequest(wireRequest, relativePath, headers)
-    }.parse[WireResponse].map { wireResponse => JobId(wireResponse.id) }.runRequest
+  }
+  def toResponse(wireResponse: WireResponse) : JobId =  JobId(wireResponse.id)
+
+  val wrapper: HttpOpWrapper[CreateJobRequest, PostRequest, JsValue, JobId] =
+    HttpOpWrapper[CreateJobRequest, PostRequest, JsValue, JobId](toRequest, RestRequestMaker.toResult[WireResponse](_).map(toResponse))
 
 }
