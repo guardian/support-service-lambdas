@@ -18,4 +18,5 @@ deployments:
       - sf-start-export-job-
       - sf-get-batch-state-
       - sf-download-batch-
+      - sf-end-export-job-
     dependencies: [cfn]
