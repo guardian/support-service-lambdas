@@ -104,6 +104,8 @@ object GoCardlessDDMandateUpdate extends Logging {
 
   object GetBankDetail {
 
+    type GetBankDetailOp = GoCardlessCustomerBankAccountID => ClientFailableOp[GoCardlessCustomerBankDetail]
+
     private val gcCustomerBankAccountsBaseUrl = "/customer_bank_accounts"
 
     case class GoCardlessCustomerBankDetail(
@@ -115,7 +117,7 @@ object GoCardlessDDMandateUpdate extends Logging {
     private case class GoCardlessCustomerBankDetailResponse(customer_bank_accounts: GoCardlessCustomerBankDetail)
     private implicit val responseReads = Json.reads[GoCardlessCustomerBankDetailResponse]
 
-    def apply(gcGet: HttpOp[RestRequestMaker.GetRequest, JsValue]): GoCardlessCustomerBankAccountID => ClientFailableOp[GoCardlessCustomerBankDetail] =
+    def apply(gcGet: HttpOp[RestRequestMaker.GetRequest, JsValue]): GetBankDetailOp =
       gcGet.setupRequest[GoCardlessCustomerBankAccountID] { goCardlessCustomerBankAccountID =>
         RestRequestMaker.GetRequest(RelativePath(
           s"$gcCustomerBankAccountsBaseUrl/${goCardlessCustomerBankAccountID.value}"

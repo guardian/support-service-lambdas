@@ -79,9 +79,9 @@ object SalesforceDDMandate extends Logging {
     private case class MandateSearchQueryResponse(records: List[MandateLookupDetail])
     private implicit val readsIds = Json.reads[MandateSearchQueryResponse]
 
-    type ExistingMandateMutableMap = scala.collection.mutable.Map[GoCardlessMandateID, MandateLookupDetail];
+    type SfMandateMap = Map[GoCardlessMandateID, MandateLookupDetail];
 
-    def apply(sfGet: HttpOp[RestRequestMaker.GetRequest, JsValue]): List[GoCardlessMandateID] => ClientFailableOp[ExistingMandateMutableMap] =
+    def apply(sfGet: HttpOp[RestRequestMaker.GetRequest, JsValue]): List[GoCardlessMandateID] => ClientFailableOp[SfMandateMap] =
       sfGet.setupRequest(toRequest).parse[MandateSearchQueryResponse].map(toResponse).runRequest
 
     def toRequest(mandateIDs: List[GoCardlessMandateID]) = {
@@ -92,14 +92,14 @@ object SalesforceDDMandate extends Logging {
       RestRequestMaker.GetRequest(RelativePath(s"$soqlQueryBaseUrl$soqlQuery"))
     }
 
-    def toResponse(mandateSearchQueryResponse: MandateSearchQueryResponse): ExistingMandateMutableMap =
-      scala.collection.mutable.Map() ++ mandateSearchQueryResponse.records.map(
+    def toResponse(mandateSearchQueryResponse: MandateSearchQueryResponse): SfMandateMap =
+      mandateSearchQueryResponse.records.map(
         mandateLookupDetail => mandateLookupDetail.GoCardless_Mandate_ID__c -> mandateLookupDetail
       ).toMap
 
   }
 
-  object GetAllPaymentMethodWithBillingAccountGivenGoCardlessReference {
+  object GetPaymentMethodsEtc {
 
     case class SfPaymentMethodDetail(
       Zuora__MandateID__c: Reference,

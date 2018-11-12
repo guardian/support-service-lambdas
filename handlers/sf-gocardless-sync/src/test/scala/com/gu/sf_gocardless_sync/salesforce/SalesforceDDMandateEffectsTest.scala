@@ -65,7 +65,7 @@ class SalesforceDDMandateEffectsTest extends FlatSpec with Matchers {
       sfConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[SFAuthConfig]
       response = RawEffects.response
       sfAuth <- SalesforceClient(response, sfConfig).value.toDisjunction
-      wiredOp = SalesforceDDMandate.GetAllPaymentMethodWithBillingAccountGivenGoCardlessReference(sfAuth.wrapWith(JsonHttp.get))
+      wiredOp = SalesforceDDMandate.GetPaymentMethodsEtc(sfAuth.wrapWith(JsonHttp.get))
       shouldBeFound = wiredOp(List(Reference("9RNF2YN")))
       shouldBeNotFound = wiredOp(List(Reference("idontexist")))
     } yield (shouldBeFound, shouldBeNotFound)
