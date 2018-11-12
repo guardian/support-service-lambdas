@@ -60,15 +60,16 @@ object StartJob {
         _ <- validateChunkSize(request.chunkSize)
         sfConfig <- loadConfig[SFAuthConfig](SFExportAuthConfig.location, SFAuthConfig.reads).leftMap(_.error).toTry
         sfClient <- SalesforceClient(getResponse, sfConfig).value.toTry
+        sfPost = sfClient.wrapWith(JsonHttp.post)
         createJobOp = sfClient.wrapWith(JsonHttp.post).wrapWith(CreateJob.wrapper)
         createJobRequest = CreateJobRequest(request.objectType, request.chunkSize)
         jobId <- createJobOp.runRequest(createJobRequest).toTry
-        addQueryToJobOp = AddQueryToJob(sfClient)
+        addQueryToJobOp = sfClient.wrapWith(AddQueryToJob.wrapper)
         addQueryRequest = AddQueryRequest(
           Query(request.query),
           jobId,
         )
-        _ <- addQueryToJobOp(addQueryRequest).toTry
+        _ <- addQueryToJobOp.runRequest(addQueryRequest).toTry
 
       } yield WireResponse(jobId.value, request.jobName)
     }

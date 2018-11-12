@@ -1,10 +1,10 @@
 package com.gu.sf_datalake_export.salesforce_bulk_api
 
 import com.gu.sf_datalake_export.salesforce_bulk_api.CreateJob.JobId
-import com.gu.util.resthttp.HttpOp
+import com.gu.util.resthttp.HttpOp.HttpOpWrapper
 import com.gu.util.resthttp.JsonHttp.{PostMethod, StringHttpRequest}
 import com.gu.util.resthttp.RestRequestMaker._
-import com.gu.util.resthttp.Types.ClientFailableOp
+import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess}
 
 object AddQueryToJob {
 
@@ -25,8 +25,9 @@ object AddQueryToJob {
     StringHttpRequest(postMethod, relativePath, UrlParams.empty)
   }
 
+  def toResponse(postResponse:BodyAsString):ClientFailableOp[Unit] = ClientSuccess(())
 
-  def apply(post: HttpOp[StringHttpRequest, BodyAsString]): AddQueryRequest => ClientFailableOp[Unit] =
-    post.setupRequest[AddQueryRequest](toRequest).map(_ => ()).runRequest
+  val wrapper =  HttpOpWrapper[AddQueryRequest, StringHttpRequest, BodyAsString, Unit](toRequest, toResponse )
+
 
 }
