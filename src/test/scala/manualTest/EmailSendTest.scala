@@ -31,7 +31,8 @@ object EmailSendTest extends App with Logging {
         )
       )
     ),
-    DataExtensionName = dataExtensionName
+    DataExtensionName = dataExtensionName,
+    IdentityUserId = "18328400"
   )
 
   val emailNames: Seq[EmailId] = (1 to 4)

@@ -41,7 +41,8 @@ case class PaymentFailureCallout(
   currency: String,
   tenantId: String,
   title: Option[String],
-  billingDetails: BillingDetails
+  billingDetails: BillingDetails,
+  identityId: String
 )
 
 object PaymentFailureCallout {
@@ -61,7 +62,8 @@ object PaymentFailureCallout {
       (JsPath \ "currency").read[String] and
       (JsPath \ "tenantId").read[String] and
       (JsPath \ "title").readNullable[String] and
-      (JsPath).read[BillingDetails]
+      JsPath.read[BillingDetails] and
+      (JsPath \ "identityId").read[String]
     ).apply(PaymentFailureCallout.apply _)
   }
 }

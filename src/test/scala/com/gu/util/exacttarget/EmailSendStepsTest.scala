@@ -31,7 +31,8 @@ class EmailSendStepsTest extends FlatSpec with Matchers {
           )
         )
       ),
-      "dataExtensionName"
+      "dataExtensionName",
+      IdentityUserId = "1000000"
     )
   }
 
@@ -62,7 +63,8 @@ class EmailSendStepsTest extends FlatSpec with Matchers {
         |      }
         |    }
         |  },
-        |  "DataExtensionName": "dataExtensionName"
+        |  "DataExtensionName": "dataExtensionName",
+        |  "IdentityUserId": "1000000"
         |}
       """.stripMargin
     )

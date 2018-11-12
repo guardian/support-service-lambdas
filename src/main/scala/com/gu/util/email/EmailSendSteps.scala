@@ -51,7 +51,7 @@ object EmailId {
   val cancelledId = EmailId("cancelled-payment-email")
 }
 
-case class EmailMessage(To: ToDef, DataExtensionName: String)
+case class EmailMessage(To: ToDef, DataExtensionName: String, IdentityUserId: String)
 
 trait EmailSqsSerialisation {
   implicit val subscriberAttributesWrites = new Writes[SubscriberAttributesDef] {
