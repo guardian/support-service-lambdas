@@ -93,7 +93,7 @@ Resources:
           Statement:
           - Effect: Allow
             Action: s3:GetObject
-            Resource: !Sub "arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/sfAuth-${Stage}*.json"
+            Resource: !Sub "arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/sfExportAuth-${Stage}*.json"
   BatchStateLambda:
     Type: AWS::Lambda::Function
     Properties:
@@ -142,7 +142,7 @@ Resources:
           Statement:
           - Effect: Allow
             Action: s3:GetObject
-            Resource: !Sub "arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/sfAuth-${Stage}*.json"
+            Resource: !Sub "arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/sfExportAuth-${Stage}*.json"
       - PolicyName: DestBucket
         PolicyDocument:
           Statement:
@@ -206,7 +206,7 @@ Resources:
           Statement:
           - Effect: Allow
             Action: s3:GetObject
-            Resource: !Sub "arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/sfAuth-${Stage}*.json"
+            Resource: !Sub "arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/sfExportAuth-${Stage}*.json"
   EndJob:
     Type: AWS::Lambda::Function
     Properties:
