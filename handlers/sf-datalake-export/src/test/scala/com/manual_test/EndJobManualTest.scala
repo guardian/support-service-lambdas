@@ -2,13 +2,13 @@ package com.manual_test
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
-import com.gu.sf_datalake_export.{EndJob, StartJob}
+import com.gu.sf_datalake_export.EndJob
 
-//This is just a way to locally run the addSubscription lambda in dev
+//This is just a way to locally run the lambda in dev
 object EndJobManualTest extends App {
   val request =
     """{
-      | "jobId" : "7506E000003wkxRQAQ"
+      | "jobId" : "7506E000004Eq7hQAC"
       |}
     """.stripMargin
 

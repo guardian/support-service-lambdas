@@ -4,19 +4,17 @@ import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
 import com.gu.sf_datalake_export.StartJob
 import com.gu.sf_datalake_export.salesforce_bulk_api.SfQueries
-import play.api.libs.json.{JsString, Json}
 
-//This is just a way to locally run the addSubscription lambda in dev
+//This is just a way to locally run the lambda in dev
 object StartJobManualTest extends App {
 
-  val queryStr = SfQueries.cardExpiry.replace("\n", " ")
+  val queryStr = SfQueries.contactQuery.replace("\n", " ")
 
   val request =
     s"""{
-      |"objectType" : "Card_Expiry__c",
+      |"objectType" : "Contact",
       |"query" : "$queryStr",
-      |"jobName" : "SF",
-      |"chunkSize" : 250000
+      |"jobName" : "SF"
       |}
     """.stripMargin
 
