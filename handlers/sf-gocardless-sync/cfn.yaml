@@ -46,6 +46,12 @@ Resources:
                             - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/goCardless-${Stage}.*.json
                             - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/sfAuth-${Stage}.*.json
 
+    GoCardlessSalesForceSyncLogGroup:
+      Type: AWS::Logs::LogGroup
+      Properties:
+        LogGroupName: !Sub "/aws/lambda/sf-gocardless-sync-${Stage}"
+        RetentionInDays: 14
+
     GoCardlessSalesForceSyncLambda:
         Type: AWS::Lambda::Function
         Properties:
