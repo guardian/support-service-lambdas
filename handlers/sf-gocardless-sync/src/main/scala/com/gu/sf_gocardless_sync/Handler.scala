@@ -7,7 +7,7 @@ import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.SalesforceClient
 import com.gu.sf_gocardless_sync.SyncSharedObjects.{GoCardlessMandateUpdateID, Reference}
-import com.gu.sf_gocardless_sync.gocardless.GoCardlessDDMandateUpdate.GetEventsSince.{GoCardlessMandateUpdate, MandateUpdateWithMandateDetail}
+import com.gu.sf_gocardless_sync.gocardless.GoCardlessDDMandateUpdate.GetEventsSince._
 import com.gu.sf_gocardless_sync.gocardless.{GoCardlessClient, GoCardlessConfig, GoCardlessDDMandateUpdate}
 import com.gu.sf_gocardless_sync.salesforce.SalesforceDDMandate.Create.WireNewMandate
 import com.gu.sf_gocardless_sync.salesforce.SalesforceDDMandate.GetPaymentMethodsEtc.SfPaymentMethodDetail
@@ -21,6 +21,7 @@ import com.gu.util.Logging
 import com.gu.util.config.LoadConfigModule
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientFailure, ClientSuccess, GenericError}
 import com.gu.util.resthttp.{HttpOp, JsonHttp, RestRequestMaker}
+import play.api.libs.json.JsValue
 
 import scala.annotation.tailrec
 
@@ -29,18 +30,23 @@ object Handler extends Logging {
   type WiredClient = HttpOp[JsonHttp.StringHttpRequest, RestRequestMaker.BodyAsString]
 
   case class SfClient(client: WiredClient) extends AnyVal
-  case class GcClient(client: WiredClient) extends AnyVal
+  case class GcGet(get: HttpOp[RestRequestMaker.GetRequest, JsValue]) extends AnyVal
 
-  def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
-    for {
-      goCardlessConfig <- LoadConfigModule(RawEffects.stage, GetFromS3.fetchString)[GoCardlessConfig]
-      goCardlessClient = GoCardlessClient(RawEffects.response, goCardlessConfig)
-      sfClient <- prepareSfClient
-      lastUpdateProcessedOption <- SalesforceDDMandateUpdate.GetGoCardlessIdOfLastProcessed(sfClient.wrapWith(JsonHttp.get))().toDisjunction
-      startingEventID <- GoCardlessDDMandateUpdate.GetEventsSince.GetAlternateStartEvent(goCardlessClient.wrapWith(JsonHttp.get))(lastUpdateProcessedOption).toDisjunction
-      updatesSinceLastProcessed <- GoCardlessDDMandateUpdate.GetEventsSince(goCardlessClient.wrapWith(JsonHttp.get), goCardlessConfig.batchSize)(startingEventID).toDisjunction
-    } yield if (updatesSinceLastProcessed.nonEmpty) processUpdateEvents(GcClient(goCardlessClient), SfClient(sfClient), updatesSinceLastProcessed)
-    else logger.info("No mandate events to process")
+  def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = for {
+    goCardlessConfig <- LoadConfigModule(RawEffects.stage, GetFromS3.fetchString)[GoCardlessConfig]
+    goCardlessClient = GoCardlessClient(RawEffects.response, goCardlessConfig)
+    sfClient <- prepareSfClient
+    sfGet = sfClient.wrapWith(JsonHttp.get)
+    gcGet = goCardlessClient.wrapWith(JsonHttp.get)
+    lastUpdateProcessedOption <- SalesforceDDMandateUpdate.GetGoCardlessIdOfLastProcessed(sfGet)().toDisjunction
+    getStartingEventIdOp = GoCardlessDDMandateUpdate.GetEventsSince.GetAlternateStartEvent(gcGet)_
+    startingEventID <- getStartingEventIdOp(lastUpdateProcessedOption).toDisjunction
+    getNextBatchOfMandateUpdatesOp = GoCardlessDDMandateUpdate.GetEventsSince(gcGet, goCardlessConfig.batchSize)
+    updatesSinceLastProcessed <- getNextBatchOfMandateUpdatesOp(startingEventID).toDisjunction
+  } yield if (updatesSinceLastProcessed.nonEmpty)
+    processUpdateEvents(GcGet(gcGet), SfClient(sfClient), updatesSinceLastProcessed)
+  else
+    logger.info("No mandate events to process")
 
   def prepareSfClient = for {
     sfConfig <- LoadConfigModule(RawEffects.stage, GetFromS3.fetchString)[SFAuthConfig]
@@ -58,7 +64,7 @@ object Handler extends Logging {
   )
 
   def processUpdateEvents(
-    goCardless: GcClient,
+    goCardless: GcGet,
     sf: SfClient,
     updatesSinceLastProcessed: List[MandateUpdateWithMandateDetail]
   ) = {
@@ -91,7 +97,7 @@ object Handler extends Logging {
   }
 
   def processEachMandate(
-    goCardless: GcClient,
+    goCardless: GcGet,
     sf: SfClient,
     relatedPaymentMethodEtc: Map[Reference, SfPaymentMethodDetail]
   )(
@@ -116,7 +122,7 @@ object Handler extends Logging {
   ))
 
   def getOrCreateMandateInSf(
-    goCardless: GcClient,
+    goCardless: GcGet,
     sf: SfClient,
     sfMandateMap: SfMandateMap,
     gcMandateUpdateDetail: MandateUpdateWithMandateDetail,
@@ -134,14 +140,14 @@ object Handler extends Logging {
   }
 
   def createMandateInSf(
-    goCardless: GcClient,
+    goCardless: GcGet,
     sf: SfClient,
     existingSfMandates: SfMandateMap
   )(
     gcMandateUpdateWithDetail: MandateUpdateWithMandateDetail,
     sfPaymentMethodDetailOption: Option[SfPaymentMethodDetail]
   ): ClientFailableOp[SalesforceDDMandate.MandateWithSfId] = {
-    val getBankDetailOp = GoCardlessDDMandateUpdate.GetBankDetail(goCardless.client.wrapWith(JsonHttp.get))
+    val getBankDetailOp = GoCardlessDDMandateUpdate.GetBankDetail(goCardless.get)
     for {
       bankDetail <- getBankDetailOp(gcMandateUpdateWithDetail.mandate.links.customer_bank_account)
       newSfMandate <- SalesforceDDMandate.Create(sf.client.wrapWith(JsonHttp.post))(WireNewMandate(
