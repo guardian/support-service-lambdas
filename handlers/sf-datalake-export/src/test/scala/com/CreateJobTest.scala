@@ -20,8 +20,7 @@ class CreateJobTest extends FlatSpec with Matchers {
       "concurrencyMode" -> JsString("Parallel"),
       "contentType" -> JsString("CSV"),
       "object" -> JsString("Contact")
-    )
-    )
+    ))
     val expected = new PostRequest(expectedBody, RelativePath("/services/async/44.0/job"), List(Header("Sforce-Enable-PKChunking", "chunkSize=250000")))
     actual should be(expected)
   }

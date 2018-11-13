@@ -8,16 +8,16 @@ import com.gu.salesforce.SalesforceAuthenticate.{SFAuthConfig, SFExportAuthConfi
 import com.gu.salesforce.SalesforceClient
 import com.gu.sf_datalake_export.salesforce_bulk_api.CloseJob
 import com.gu.sf_datalake_export.salesforce_bulk_api.CreateJob._
+import com.gu.sf_datalake_export.util.TryOps._
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config.{LoadConfigModule, Stage}
-import com.gu.util.handlers.{ParseRequest, SerialiseResponse}
-import com.gu.util.reader.Types._
+import com.gu.util.handlers.JsonHandler
 import com.gu.util.resthttp.JsonHttp
 import okhttp3.{Request, Response}
 import play.api.libs.json._
-import scalaz.Scalaz._
-import scalaz.{-\/, \/-}
+
+import scala.util.Try
 
 object EndJob {
 
@@ -29,53 +29,38 @@ object EndJob {
     implicit val reads: Reads[WireRequest] = Json.reads[WireRequest]
   }
 
-  def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
-    val lambdaIO = LambdaIO(inputStream, outputStream, context)
-    steps(
-      lambdaIO,
-      RawEffects.stage,
-      GetFromS3.fetchString,
-      RawEffects.response
-    )
-  }
-
   case class WireResponse(jobId: String, state: String = "Closed")
 
   object WireResponse {
     implicit val writes = Json.writes[WireResponse]
   }
 
-  def steps(
-    lambdaIO: LambdaIO,
+  def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
+    JsonHandler(
+      lambdaIO = LambdaIO(inputStream, outputStream, context),
+      operation = operation(RawEffects.stage, GetFromS3.fetchString, RawEffects.response)
+    )
+  }
+
+  def operation(
     stage: Stage,
     fetchString: StringFromS3,
     getResponse: Request => Response
-  ): Unit = {
+  )(request: WireRequest): Try[WireResponse] = {
 
     val loadConfig = LoadConfigModule(stage, fetchString)
+    val jobId = JobId(request.jobId)
 
-    //todo add proper error handling
-    val lambdaResponse = for {
-      request <- ParseRequest[WireRequest](lambdaIO.inputStream).toEither.disjunction.leftMap(failure => failure.getMessage)
-      jobId = JobId(request.jobId)
-      sfConfig <- loadConfig[SFAuthConfig](SFExportAuthConfig.location, SFAuthConfig.reads).leftMap(failure => failure.error) //fix auth so that it doesn't return apigatewayop
-      sfClient <- SalesforceClient(getResponse, sfConfig).value.toDisjunction.leftMap(failure => failure.message)
-      wiredCloseJob = CloseJob(sfClient.wrapWith(JsonHttp.post))
-      _ <- wiredCloseJob(jobId).toDisjunction.leftMap(failure => failure.message)
+    for {
+      sfConfig <- loadConfig[SFAuthConfig](SFExportAuthConfig.location, SFAuthConfig.reads).leftMap(_.error).toTry
+      sfClient <- SalesforceClient(getResponse, sfConfig).value.toTry
+      wiredCloseJob = sfClient.wrapWith(JsonHttp.post).wrapWith(CloseJob.wrapper)
+      _ <- wiredCloseJob.runRequest(jobId).toTry
     } yield WireResponse(
       jobId = request.jobId
     )
 
-    lambdaResponse match {
-      case -\/(error) => {
-        logger.error(s"terminating lambda with error $error")
-        throw new LambdaException(error)
-      }
-      case \/-(successResponse) => SerialiseResponse(lambdaIO.outputStream, successResponse)
-    }
   }
-
-  class LambdaException(msg: String) extends RuntimeException(msg)
 
 }
 

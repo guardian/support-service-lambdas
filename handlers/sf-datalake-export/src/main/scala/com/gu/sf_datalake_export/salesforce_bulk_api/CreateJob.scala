@@ -1,10 +1,8 @@
 package com.gu.sf_datalake_export.salesforce_bulk_api
 
 import com.gu.util.resthttp.HttpOp.HttpOpWrapper
-import com.gu.util.resthttp.RestOp._
+import com.gu.util.resthttp.RestRequestMaker
 import com.gu.util.resthttp.RestRequestMaker._
-import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError}
-import com.gu.util.resthttp.{HttpOp, RestRequestMaker}
 import play.api.libs.json.{JsValue, Json}
 
 object CreateJob {
