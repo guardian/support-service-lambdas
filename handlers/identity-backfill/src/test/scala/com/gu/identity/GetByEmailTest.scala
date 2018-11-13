@@ -26,7 +26,7 @@ class GetByEmailTest extends FlatSpec with Matchers {
   it should "get not validated with an error" in {
     val actual = GetByEmail.wrapper.toNewResponse(Json.parse(NotValidatedTestData.dummyIdentityResponse))
 
-    actual should be(ClientSuccess(IdentityAccountWithUnvalidatedEmail))
+    actual should be(ClientSuccess(IdentityAccountWithUnvalidatedEmail(IdentityId("1234"))))
   }
 
 }

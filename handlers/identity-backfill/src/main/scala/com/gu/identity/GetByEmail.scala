@@ -13,7 +13,7 @@ object GetByEmail {
 
   sealed trait IdentityAccount
   case class IdentityAccountWithValidatedEmail(identityId: IdentityId) extends IdentityAccount
-  case object IdentityAccountWithUnvalidatedEmail extends IdentityAccount
+  case class IdentityAccountWithUnvalidatedEmail(identityId: IdentityId) extends IdentityAccount
 
   object RawWireModel {
 
@@ -42,7 +42,7 @@ object GetByEmail {
   def wireToDomainModel(userResponse: UserResponse): ClientFailableOp[IdentityAccount] = {
     for {
       user <- userFromResponse(userResponse)
-      identityId = if (user.statusFields.userEmailValidated) IdentityAccountWithValidatedEmail(IdentityId(user.id)) else IdentityAccountWithUnvalidatedEmail
+      identityId = if (user.statusFields.userEmailValidated) IdentityAccountWithValidatedEmail(IdentityId(user.id)) else IdentityAccountWithUnvalidatedEmail(IdentityId(user.id))
     } yield identityId
 
   }

@@ -1,7 +1,8 @@
 package com.gu.identityBackfill
 
-import com.gu.identity.GetByEmail
+import com.gu.identity.{GetByEmail, GetByIdentityId}
 import com.gu.identity.GetByEmail.IdentityAccountWithUnvalidatedEmail
+import com.gu.identity.GetByIdentityId.IdentityUser
 import com.gu.identityBackfill.TypeConvert._
 import com.gu.identityBackfill.Types._
 import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
@@ -20,22 +21,41 @@ object PreReqCheck {
 
   def apply(
     getByEmail: EmailAddress => ClientFailableOp[GetByEmail.IdentityAccount],
+    getByIdentityId: IdentityId => ClientFailableOp[GetByIdentityId.IdentityUser],
     getSingleZuoraAccountForEmail: EmailAddress => ApiGatewayOp[ZuoraAccountIdentitySFContact],
     noZuoraAccountsForIdentityId: IdentityId => ApiGatewayOp[Unit],
     zuoraSubType: AccountId => ApiGatewayOp[Unit],
     syncableSFToIdentity: SFContactId => LazyClientFailableOp[ApiGatewayOp[Unit]]
   )(emailAddress: EmailAddress): ApiGatewayOp[PreReqResult] = {
     for {
-      maybeExistingIdentityId <- (getByEmail(emailAddress) match {
-        case ClientSuccess(GetByEmail.IdentityAccountWithValidatedEmail(identityId)) => ContinueProcessing(Some(identityId))
-        case NotFound(_) => ContinueProcessing(None)
-        case ClientSuccess(IdentityAccountWithUnvalidatedEmail) => ReturnWithResponse(ApiGatewayResponse.notFound("identity email not validated"))
-        case other: ClientFailure => ReturnWithResponse(ApiGatewayResponse.internalServerError(other.toString))
-      }).withLogging("GetByEmail")
+      maybeExistingIdentityId <- findExistingIdentityId(getByEmail, getByIdentityId, emailAddress)
       zuoraAccountForEmail <- getSingleZuoraAccountForEmail(emailAddress)
       _ <- maybeExistingIdentityId.map(noZuoraAccountsForIdentityId).getOrElse(ContinueProcessing(()))
       _ <- syncableSFToIdentity(zuoraAccountForEmail.sfContactId).value.toApiGatewayOp("load SF contact").flatMap(identity)
     } yield PreReqResult(zuoraAccountForEmail.accountId, zuoraAccountForEmail.sfContactId, maybeExistingIdentityId)
+  }
+
+  def findExistingIdentityId(
+    getByEmail: EmailAddress => ClientFailableOp[GetByEmail.IdentityAccount],
+    getByIdentityId: IdentityId => ClientFailableOp[GetByIdentityId.IdentityUser],
+    emailAddress: EmailAddress
+  ): ApiGatewayOp[Option[IdentityId]] = {
+
+    def continueIfNoPassword(identityId: IdentityId) = {
+      getByIdentityId(identityId) match {
+        case ClientSuccess(IdentityUser(_, false)) => ContinueProcessing(Some(identityId))
+        case _ => ReturnWithResponse(ApiGatewayResponse.notFound(s"identity email not validated but password is set $identityId"))
+      }
+    }
+
+    val result = getByEmail(emailAddress) match {
+      case ClientSuccess(GetByEmail.IdentityAccountWithValidatedEmail(identityId)) => ContinueProcessing(Some(identityId))
+      case ClientSuccess(IdentityAccountWithUnvalidatedEmail(identityId)) => continueIfNoPassword(identityId)
+      case NotFound(_) => ContinueProcessing(None)
+      case other: ClientFailure => ReturnWithResponse(ApiGatewayResponse.internalServerError(other.toString))
+    }
+
+    result.withLogging("GetByEmail")
   }
 
   def noZuoraAccountsForIdentityId(

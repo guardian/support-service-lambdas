@@ -2,6 +2,7 @@ package com.gu.identityBackfill
 
 import com.gu.identity.GetByEmail
 import com.gu.identity.GetByEmail.{IdentityAccountWithUnvalidatedEmail, IdentityAccountWithValidatedEmail}
+import com.gu.identity.GetByIdentityId.IdentityUser
 import com.gu.identityBackfill.PreReqCheck.PreReqResult
 import com.gu.identityBackfill.Types._
 import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
@@ -20,6 +21,23 @@ class PreReqCheckTest extends FlatSpec with Matchers {
     val result =
       PreReqCheck(
         email => ClientSuccess(IdentityAccountWithValidatedEmail(IdentityId("asdf"))),
+        _ => fail("shouldn't be called"),
+        email => ContinueProcessing(ZuoraAccountIdentitySFContact(AccountId("acc"), None, SFContactId("sf"))),
+        identityId => ContinueProcessing(()),
+        _ => ContinueProcessing(()),
+        _ => LazyClientFailableOp(() => ClientSuccess(ContinueProcessing(())))
+      )(EmailAddress("email@address"))
+
+    val expectedResult = ContinueProcessing(PreReqResult(AccountId("acc"), SFContactId("sf"), Some(IdentityId("asdf"))))
+    result should be(expectedResult)
+  }
+
+  it should "go through a happy case if account unvalidated and account has no password" in {
+
+    val result =
+      PreReqCheck(
+        email => ClientSuccess(IdentityAccountWithValidatedEmail(IdentityId("asdf"))),
+        identityId => ClientSuccess(IdentityUser(IdentityId("asdf"), hasPassword = false)),
         email => ContinueProcessing(ZuoraAccountIdentitySFContact(AccountId("acc"), None, SFContactId("sf"))),
         identityId => ContinueProcessing(()),
         _ => ContinueProcessing(()),
@@ -35,6 +53,7 @@ class PreReqCheckTest extends FlatSpec with Matchers {
     val result =
       PreReqCheck(
         email => NotFound("so we will return None"),
+        _ => fail("shouldn't be called"),
         email => ContinueProcessing(ZuoraAccountIdentitySFContact(AccountId("acc"), None, SFContactId("sf"))),
         identityId => ContinueProcessing(()),
         _ => ContinueProcessing(()),
@@ -83,15 +102,16 @@ class PreReqCheckTest extends FlatSpec with Matchers {
 
   it should "stop processing if it finds a non validated identity account" in {
 
-    val result = emailCheckFailure(ClientSuccess(IdentityAccountWithUnvalidatedEmail))
+    val result = emailCheckFailure(ClientSuccess(IdentityAccountWithUnvalidatedEmail(IdentityId("asdf"))))
 
-    val expectedResult = ReturnWithResponse(ApiGatewayResponse.notFound("identity email not validated"))
+    val expectedResult = ReturnWithResponse(ApiGatewayResponse.notFound("identity email not validated but password is set IdentityId(asdf)"))
     result should be(expectedResult)
   }
 
   private def emailCheckFailure(identityError: ClientFailableOp[GetByEmail.IdentityAccount]) = {
     PreReqCheck(
       email => identityError,
+      identityId => ClientSuccess(IdentityUser(IdentityId("asdf"), hasPassword = true)),
       email => fail("shouldn't be called 1"),
       identityId => fail("shouldn't be called 2"),
       _ => fail("shouldn't be called 3"),

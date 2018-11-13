@@ -4,7 +4,7 @@ import java.io.{InputStream, OutputStream}
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
-import com.gu.identity.{CreateGuestAccount, GetByEmail, IdentityClient, IdentityConfig}
+import com.gu.identity._
 import com.gu.identityBackfill.IdentityBackfillSteps.DomainRequest
 import com.gu.identityBackfill.TypeConvert._
 import com.gu.identityBackfill.Types.EmailAddress
@@ -58,6 +58,8 @@ object Handler {
       val identityClient = IdentityClient(response, identityConfig)
       val createGuestAccount = identityClient.wrapWith(JsonHttp.post).wrapWith(CreateGuestAccount.wrapper)
       val getByEmail = identityClient.wrapWith(JsonHttp.getWithParams).wrapWith(GetByEmail.wrapper)
+      val getById = identityClient.wrapWith(JsonHttp.get).wrapWith(GetByIdentityId.wrapper)
+
       val countZuoraAccounts: IdentityId => ClientFailableOp[Int] = CountZuoraAccountsForIdentityId(zuoraQuerier)
 
       lazy val sfAuth: LazyClientFailableOp[HttpOp[StringHttpRequest, RestRequestMaker.BodyAsString]] = SalesforceClient(response, sfConfig)
@@ -68,6 +70,7 @@ object Handler {
         steps = WireRequestToDomainObject(IdentityBackfillSteps(
           PreReqCheck(
             getByEmail.runRequest,
+            getById.runRequest,
             GetZuoraAccountsForEmail(zuoraQuerier) _ andThen PreReqCheck.getSingleZuoraAccountForEmail,
             countZuoraAccounts andThen PreReqCheck.noZuoraAccountsForIdentityId,
             GetZuoraSubTypeForAccount(zuoraQuerier) _ andThen PreReqCheck.acceptableReaderType,
