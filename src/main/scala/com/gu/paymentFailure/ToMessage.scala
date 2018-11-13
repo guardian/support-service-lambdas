@@ -38,7 +38,7 @@ object ToMessage {
       )
     ),
     DataExtensionName = sendId.id,
-    IdentityUserId = paymentFailureCallout.identityId
+    SfContactId = paymentFailureCallout.sfContactId
   )
 
   def apply(callout: AutoCancelCallout, paymentFailureInformation: PaymentFailureInformation, sendId: EmailId) = EmailMessage(
@@ -62,7 +62,7 @@ object ToMessage {
       )
     ),
     DataExtensionName = sendId.id,
-    IdentityUserId = callout.identityId
+    SfContactId = callout.sfContactId
   )
 
   val currencySymbol = Map("GBP" -> "£", "AUD" -> "$", "EUR" -> "€", "USD" -> "$", "CAD" -> "$", "NZD" -> "$")

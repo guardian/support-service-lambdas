@@ -14,7 +14,7 @@ case class AutoCancelCallout(
   creditCardExpirationYear: String,
   invoiceId: String,
   currency: String,
-  identityId: String
+  sfContactId: String
 ) {
   def isAutoPay = autoPay == "true"
   def nonDirectDebit = paymentMethodType != "BankTransfer"

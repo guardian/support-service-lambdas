@@ -177,7 +177,7 @@ object EndToEndDataWithBillingDetails extends EndtoEndBaseData {
       |      }
       |    }
       |  },
-      |  "IdentityUserId": "1000000"
+      |  "SfContactId": "1000000"
       |}""".stripMargin
 
   override val zuoraCalloutJson =
@@ -233,7 +233,7 @@ object EndToEndDataWithBillingDetails extends EndtoEndBaseData {
       |        "httpMethod": "POST",
       |        "apiId": "11111"
       |    },
-      |    "body": "{\"accountId\":\"2c92c0f85fc90734015fca884c3f04cf\",\"firstName\":\"eSAFaBwm4WJZNg5xhIc\",\"lastName\":\"eSAFaBwm4WJZNg5xhIc\",\"creditCardExpirationMonth\":\"12\",\"creditCardExpirationYear\":\"2019\",\"paymentId\":\"2c92c0f95fc912eb015fcb2a481720e6\",\"tenantId\":\"c\",\"currency\":\"USD\",\"creditCardType\":\"Visa\",\"paymentMethodType\":\"CreditCardReferenceTransaction\",\"email\":\"john.duffell@guardian.co.uk\",\"failureNumber\":\"1\",\"billToContactAddress2\":\"billingAddress2Value\",\"billToContactCity\":\"billingCityValue\",\"billToContactAddress1\":\"billingAddress1Value\",\"billToContactState\":\"billingStateValue\",\"billToContactCountry\":\"billingCountryValue\",\"billToContactPostalCode\":\"billingPostcodeValue\",\"title\":\"billingTitleValue\", \"identityId\": \"1000000\"}",
+      |    "body": "{\"accountId\":\"2c92c0f85fc90734015fca884c3f04cf\",\"firstName\":\"eSAFaBwm4WJZNg5xhIc\",\"lastName\":\"eSAFaBwm4WJZNg5xhIc\",\"creditCardExpirationMonth\":\"12\",\"creditCardExpirationYear\":\"2019\",\"paymentId\":\"2c92c0f95fc912eb015fcb2a481720e6\",\"tenantId\":\"c\",\"currency\":\"USD\",\"creditCardType\":\"Visa\",\"paymentMethodType\":\"CreditCardReferenceTransaction\",\"email\":\"john.duffell@guardian.co.uk\",\"failureNumber\":\"1\",\"billToContactAddress2\":\"billingAddress2Value\",\"billToContactCity\":\"billingCityValue\",\"billToContactAddress1\":\"billingAddress1Value\",\"billToContactState\":\"billingStateValue\",\"billToContactCountry\":\"billingCountryValue\",\"billToContactPostalCode\":\"billingPostcodeValue\",\"title\":\"billingTitleValue\", \"sfContactId\": \"1000000\"}",
       |    "isBase64Encoded": false
       |}
     """.stripMargin
@@ -262,7 +262,7 @@ object EndToEndData extends EndtoEndBaseData {
       |      }
       |    }
       |  },
-      |  "IdentityUserId": "1000000"
+      |  "SfContactId": "1000000"
       |}""".stripMargin
 
   override val zuoraCalloutJson =
@@ -318,7 +318,7 @@ object EndToEndData extends EndtoEndBaseData {
       |        "httpMethod": "POST",
       |        "apiId": "11111"
       |    },
-      |    "body": "{\"accountId\":\"2c92c0f85fc90734015fca884c3f04cf\",\"firstName\":\"eSAFaBwm4WJZNg5xhIc\",\"lastName\":\"eSAFaBwm4WJZNg5xhIc\",\"creditCardExpirationMonth\":\"12\",\"creditCardExpirationYear\":\"2019\",\"paymentId\":\"2c92c0f95fc912eb015fcb2a481720e6\",\"tenantId\":\"c\",\"currency\":\"USD\",\"creditCardType\":\"Visa\",\"paymentMethodType\":\"CreditCardReferenceTransaction\",\"email\":\"john.duffell@guardian.co.uk\",\"failureNumber\":\"1\", \"identityId\": \"1000000\"}",
+      |    "body": "{\"accountId\":\"2c92c0f85fc90734015fca884c3f04cf\",\"firstName\":\"eSAFaBwm4WJZNg5xhIc\",\"lastName\":\"eSAFaBwm4WJZNg5xhIc\",\"creditCardExpirationMonth\":\"12\",\"creditCardExpirationYear\":\"2019\",\"paymentId\":\"2c92c0f95fc912eb015fcb2a481720e6\",\"tenantId\":\"c\",\"currency\":\"USD\",\"creditCardType\":\"Visa\",\"paymentMethodType\":\"CreditCardReferenceTransaction\",\"email\":\"john.duffell@guardian.co.uk\",\"failureNumber\":\"1\", \"sfContactId\": \"1000000\"}",
       |    "isBase64Encoded": false
       |}
     """.stripMargin

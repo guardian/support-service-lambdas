@@ -42,7 +42,7 @@ case class PaymentFailureCallout(
   tenantId: String,
   title: Option[String],
   billingDetails: BillingDetails,
-  identityId: String
+  sfContactId: String
 )
 
 object PaymentFailureCallout {
@@ -63,7 +63,7 @@ object PaymentFailureCallout {
       (JsPath \ "tenantId").read[String] and
       (JsPath \ "title").readNullable[String] and
       JsPath.read[BillingDetails] and
-      (JsPath \ "identityId").read[String]
+      (JsPath \ "sfContactId").read[String]
     ).apply(PaymentFailureCallout.apply _)
   }
 }

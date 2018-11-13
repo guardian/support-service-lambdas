@@ -29,7 +29,7 @@ class MessageWritesTest extends FlatSpec with EmailSqsSerialisation {
         )
       ),
       DataExtensionName = "extensionName",
-      IdentityUserId = "1000000"
+      SfContactId = "1000000"
     )
 
     val expectedJson =
@@ -55,7 +55,7 @@ class MessageWritesTest extends FlatSpec with EmailSqsSerialisation {
         |    }
         |  },
         |  "DataExtensionName": "extensionName",
-        |  "IdentityUserId": "1000000"
+        |  "SfContactId": "1000000"
         |}
       """.stripMargin
 
@@ -84,7 +84,7 @@ class MessageWritesTest extends FlatSpec with EmailSqsSerialisation {
         )
       ),
       DataExtensionName = "extensionName",
-      IdentityUserId = "1000000"
+      SfContactId = "1000000"
     )
 
     val expectedJson =
@@ -110,7 +110,7 @@ class MessageWritesTest extends FlatSpec with EmailSqsSerialisation {
         |    }
         |  },
         |  "DataExtensionName": "extensionName",
-        |  "IdentityUserId": "1000000"
+        |  "SfContactId": "1000000"
         |}
       """.stripMargin
 

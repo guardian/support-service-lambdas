@@ -86,7 +86,7 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
         )
       ),
       DataExtensionName = "first-failed-payment-email",
-      IdentityUserId = "1000000"
+      SfContactId = "1000000"
     )
 
     storedReq should be(Some(expectedMessage))
