@@ -1,14 +1,17 @@
 package com.gu.util.exacttarget
 
-import com.gu.util.config.ETConfig.ETSendId
-import com.gu.util.config.Stage
+import com.gu.effects.sqs.AwsSQSSend.Payload
+import com.gu.util.apigateway.ResponseModels.ApiResponse
+import com.gu.util.email._
+import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import org.scalatest.{FlatSpec, Matchers}
-import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
+import play.api.libs.json.Json
+import scala.util.{Failure, Success, Try}
 
 class EmailSendStepsTest extends FlatSpec with Matchers {
 
-  def makeMessage(recipient: String): Message = {
-    Message(
+  def makeMessage(recipient: String): EmailMessage = {
+    EmailMessage(
       To = ToDef(
         Address = recipient,
         SubscriberKey = recipient,
@@ -27,42 +30,50 @@ class EmailSendStepsTest extends FlatSpec with Matchers {
             serviceEndDate = "31 January 2017"
           )
         )
-      )
+      ),
+      "dataExtensionName",
+      SfContactId = "1000000"
     )
   }
 
-  private val guardian = "john.duffell@guardian.co.uk"
-  private val public = "john.duffell@gutools.co.uk" // non gu
+  "EmailSendSteps" should "serialise and send an email" in {
+    var capturedPayload: Option[Payload] = None
+    def sqsSend(payload: Payload): Try[Unit] = Success { capturedPayload = Some(payload) }
 
-  def tryEmail(isProd: Boolean, email: String, expectedEmail: Boolean) = {
-
-    val req = EmailRequest(
-      etSendId = ETSendId("etSendId"),
-      makeMessage(email)
+    EmailSendSteps(sqsSend)(makeMessage("james@jameson.com")) shouldBe ContinueProcessing(())
+    Json.parse(capturedPayload.get.value) shouldBe Json.parse(
+      """
+        |{
+        |  "To": {
+        |    "Address": "james@jameson.com",
+        |    "SubscriberKey": "james@jameson.com",
+        |    "ContactAttributes": {
+        |      "SubscriberAttributes": {
+        |        "serviceEndDate": "31 January 2017",
+        |        "first_name": "firstNameValue",
+        |        "paymentId": "paymentId",
+        |        "price": "49.0 GBP",
+        |        "serviceStartDate": "31 January 2016",
+        |        "subscriber_id": "subIdValue",
+        |        "card_expiry_date": "cardExpiryValue",
+        |        "payment_method": "paymentMethodValue",
+        |        "last_name": "lastNameValue",
+        |        "card_type": "cardTypeValue",
+        |        "product": "productValue"
+        |      }
+        |    }
+        |  },
+        |  "DataExtensionName": "dataExtensionName",
+        |  "SfContactId": "1000000"
+        |}
+      """.stripMargin
     )
-
-    val stage = Stage(if (isProd) "PROD" else "CODE")
-
-    var varAttempted: Boolean = false
-
-    val send = EmailSendSteps(
-      sendEmail = req => {
-        varAttempted = true
-        ContinueProcessing(()) // always success
-      },
-      filterEmail = FilterEmail.apply(stage)
-    )_
-
-    send(req)
-
-    varAttempted should be(expectedEmail)
   }
 
-  "emailer" should "send an email to any address in prod" in {
+  "EmailSendSteps" should "return with response on failure" in {
+    def sqsSend(payload: Payload): Try[Unit] = Failure(new RuntimeException("foo"))
 
-    tryEmail(isProd = true, email = public, expectedEmail = true)
-    tryEmail(isProd = false, email = public, expectedEmail = false)
-    tryEmail(isProd = false, email = guardian, expectedEmail = true)
+    EmailSendSteps(sqsSend)(makeMessage("james@jameson.com")) shouldBe ReturnWithResponse(ApiResponse("500", "failure to send email payload to sqs"))
   }
 
 }

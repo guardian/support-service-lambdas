@@ -1,14 +1,14 @@
 package com.gu.paymentFailure
 
-import com.gu.util.exacttarget._
+import com.gu.util.email._
 import org.scalatest.FlatSpec
 import org.scalatest.Matchers._
 import play.api.libs.json.Json
 
-class MessageWritesTest extends FlatSpec {
+class MessageWritesTest extends FlatSpec with EmailSqsSerialisation {
 
   "Message" should "serialize to the correct json format with payment id" in {
-    val message = Message(
+    val message = EmailMessage(
       To = ToDef(
         Address = "fake@email.com",
         SubscriberKey = "subkeyValue",
@@ -27,7 +27,9 @@ class MessageWritesTest extends FlatSpec {
             serviceEndDate = "31 January 2017"
           )
         )
-      )
+      ),
+      DataExtensionName = "extensionName",
+      SfContactId = "1000000"
     )
 
     val expectedJson =
@@ -51,7 +53,9 @@ class MessageWritesTest extends FlatSpec {
         |        "serviceEndDate" : "31 January 2017"
         |      }
         |    }
-        |  }
+        |  },
+        |  "DataExtensionName": "extensionName",
+        |  "SfContactId": "1000000"
         |}
       """.stripMargin
 
@@ -59,7 +63,7 @@ class MessageWritesTest extends FlatSpec {
   }
 
   it should "serialize to the correct json format with invoice id" in {
-    val message = Message(
+    val message = EmailMessage(
       To = ToDef(
         Address = "fake@email.com",
         SubscriberKey = "subkeyValue",
@@ -78,7 +82,9 @@ class MessageWritesTest extends FlatSpec {
             serviceEndDate = "31 January 2017"
           )
         )
-      )
+      ),
+      DataExtensionName = "extensionName",
+      SfContactId = "1000000"
     )
 
     val expectedJson =
@@ -102,7 +108,9 @@ class MessageWritesTest extends FlatSpec {
         |        "serviceEndDate" : "31 January 2017"
         |      }
         |    }
-        |  }
+        |  },
+        |  "DataExtensionName": "extensionName",
+        |  "SfContactId": "1000000"
         |}
       """.stripMargin
 

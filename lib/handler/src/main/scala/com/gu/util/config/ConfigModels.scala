@@ -4,44 +4,6 @@ import com.gu.util.Logging
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
-case class ETConfig(
-  etSendIDs: ETConfig.ETSendIds,
-  clientId: String,
-  clientSecret: String
-)
-
-object ETConfig {
-  implicit val location = ConfigLocation[ETConfig](path = "exactTarget", version = 1)
-
-  implicit val idReads: Reads[ETSendId] = JsPath.read[String].map(ETSendId.apply)
-
-  implicit val idsReads: Reads[ETSendIds] = Json.reads[ETSendIds]
-
-  case class ETSendId(id: String) extends AnyVal
-
-  case class ETSendIds(
-    pf1: ETSendId,
-    pf2: ETSendId,
-    pf3: ETSendId,
-    pf4: ETSendId,
-    cancelled: ETSendId
-  ) {
-    def find(attempt: Int): Option[ETSendId] = Some(attempt match {
-      case 1 => pf1
-      case 2 => pf2
-      case 3 => pf3
-      case 4 => pf4
-      case _ => ETSendId("")
-    }).filter(_.id != "")
-  }
-
-  implicit val zuoraConfigReads: Reads[ETConfig] = (
-    (JsPath \ "etSendIDs").read[ETSendIds] and
-    (JsPath \ "clientId").read[String] and
-    (JsPath \ "clientSecret").read[String]
-  )(ETConfig.apply _)
-}
-
 case class StripeSecretKey(key: String) extends AnyVal
 
 object StripeSecretKey {

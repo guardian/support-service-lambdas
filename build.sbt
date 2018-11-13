@@ -162,7 +162,7 @@ lazy val root = all(project in file(".")).enablePlugins(RiffRaffArtifact).aggreg
   `effects-sqs`,
   `effects-ses`,
   `sf-datalake-export`
-).dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
+).dependsOn(zuora, handler, effectsDepIncludingTestFolder, `effects-sqs`, testDep)
 
 lazy val `identity-backfill` = all(project in file("handlers/identity-backfill")) // when using the "project identity-backfill" command it uses the lazy val name
   .enablePlugins(RiffRaffArtifact)

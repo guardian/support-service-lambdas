@@ -7,8 +7,7 @@ import com.gu.util.apigateway.ApiGatewayHandler.Operation
 import com.gu.util.apigateway.ApiGatewayResponse.{ResponseBody, toJsonBody, unauthorized}
 import com.gu.util.apigateway.Auth.{TrustedApiConfig, validTenant}
 import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
-import com.gu.util.config.ETConfig.ETSendIds
-import com.gu.util.exacttarget.EmailRequest
+import com.gu.util.email.{EmailId, EmailMessage}
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.Types.ClientFailableOp
@@ -21,26 +20,24 @@ object PaymentFailureSteps extends Logging {
   }
 
   def apply(
-    sendEmailRegardingAccount: (String, PaymentFailureInformation => EmailRequest) => ApiGatewayOp[Unit],
-    etSendIDs: ETSendIds,
+    sendEmailRegardingAccount: (String, PaymentFailureInformation => EmailMessage) => ApiGatewayOp[Unit],
     trustedApiConfig: TrustedApiConfig
   ): Operation = Operation.noHealthcheck({ apiGatewayRequest: ApiGatewayRequest =>
     (for {
       paymentFailureCallout <- apiGatewayRequest.bodyAsCaseClass[PaymentFailureCallout]()
       _ = logger.info(s"received ${loggableData(paymentFailureCallout)}")
       _ <- validateTenantCallout(trustedApiConfig)(paymentFailureCallout.tenantId)
-      request <- makeRequest(etSendIDs, paymentFailureCallout)
+      request <- makeRequest(paymentFailureCallout)
       _ <- sendEmailRegardingAccount(paymentFailureCallout.accountId, request)
     } yield ApiGatewayResponse.successfulExecution).apiResponse
   })
 
   def makeRequest(
-    etSendIds: ETSendIds,
     paymentFailureCallout: PaymentFailureCallout
-  ): ApiGatewayOp[PaymentFailureInformation => EmailRequest] = {
-    val maybeETSendId = etSendIds.find(paymentFailureCallout.failureNumber)
-    maybeETSendId.map { etId => pFI: PaymentFailureInformation =>
-      EmailRequest(etId, ToMessage(paymentFailureCallout, pFI))
+  ): ApiGatewayOp[PaymentFailureInformation => EmailMessage] = {
+    val maybeEmailSendId = EmailId.paymentFailureId(paymentFailureCallout.failureNumber)
+    maybeEmailSendId.map { emailSendId => pFI: PaymentFailureInformation =>
+      ToMessage(paymentFailureCallout, pFI, emailSendId)
     }.toApiGatewayContinueProcessing(
       ApiGatewayResponse.internalServerError(s"no ET id configured for failure number: ${paymentFailureCallout.failureNumber}")
     )
@@ -55,9 +52,9 @@ object PaymentFailureSteps extends Logging {
 object ZuoraEmailSteps {
 
   def sendEmailRegardingAccount(
-    sendEmail: EmailRequest => ApiGatewayOp[Unit],
+    sendEmail: EmailMessage => ApiGatewayOp[Unit],
     getInvoiceTransactions: String => ClientFailableOp[InvoiceTransactionSummary]
-  )(accountId: String, toMessage: PaymentFailureInformation => EmailRequest): ApiGatewayOp[Unit] = {
+  )(accountId: String, toMessage: PaymentFailureInformation => EmailMessage): ApiGatewayOp[Unit] = {
     for {
       invoiceTransactionSummary <- getInvoiceTransactions(accountId).toApiGatewayOp("getInvoiceTransactions failed")
       paymentInformation <- GetPaymentData(accountId)(invoiceTransactionSummary)
