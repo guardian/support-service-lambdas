@@ -93,47 +93,45 @@ object Handler extends Logging {
   def processEachMandate(
     goCardless: GcClient,
     sf: SfClient,
-    relatedPaymentMethodAndBillingAccountIDs: Map[Reference, SfPaymentMethodDetail]
+    relatedPaymentMethodEtc: Map[Reference, SfPaymentMethodDetail]
   )(
     sfMandateMap: SfMandateMap,
     gcMandateUpdateDetail: MandateUpdateWithMandateDetail
   ): ClientFailableOp[SfMandateMap] = for {
-    sfMandate <- sfMandateMap.get(gcMandateUpdateDetail.event.links.mandate) match {
-      case None => createMandateInSf(
-        goCardless,
-        sf,
-        sfMandateMap
-      )(
-        gcMandateUpdateDetail,
-        relatedPaymentMethodAndBillingAccountIDs.get(gcMandateUpdateDetail.mandate.reference)
-      )
-      case Some(existingSfMandate) => ClientSuccess(existingSfMandate)
-    }
+    sfMandate <- getOrCreateMandateInSf(goCardless, sf, sfMandateMap, gcMandateUpdateDetail, relatedPaymentMethodEtc)
     newMandateUpdateOp = SalesforceDDMandateUpdate.Create(sf.client.wrapWith(JsonHttp.post))
     newMandateWithUpdateId <- newMandateUpdateOp(toSfMandateUpdate(gcMandateUpdateDetail.event, sfMandate.Id))
     patchMandateOp <- patchLastMandateUpdateOnMandate(
       sf,
       newMandateWithUpdateId.id,
       sfMandate.Id,
+      relatedPaymentMethodEtc.get(gcMandateUpdateDetail.mandate.reference)
+    )
+    _ = patchMandateIfNecessary(gcMandateUpdateDetail, sfMandate, patchMandateOp)
+  } yield sfMandateMap + (gcMandateUpdateDetail.mandate.id -> MandateLookupDetail(
+    Id = sfMandate.Id,
+    GoCardless_Mandate_ID__c = gcMandateUpdateDetail.mandate.id,
+    Last_Mandate_Update__c = newMandateWithUpdateId.id,
+    Status_Changed_At__c = UpdateHappenedAt(gcMandateUpdateDetail.event.created_at)
+  ))
+
+  def getOrCreateMandateInSf(
+    goCardless: GcClient,
+    sf: SfClient,
+    sfMandateMap: SfMandateMap,
+    gcMandateUpdateDetail: MandateUpdateWithMandateDetail,
+    relatedPaymentMethodAndBillingAccountIDs: Map[Reference, SfPaymentMethodDetail]
+  ) = sfMandateMap.get(gcMandateUpdateDetail.event.links.mandate) match {
+    case None => createMandateInSf(
+      goCardless,
+      sf,
+      sfMandateMap
+    )(
+      gcMandateUpdateDetail,
       relatedPaymentMethodAndBillingAccountIDs.get(gcMandateUpdateDetail.mandate.reference)
     )
-    _ = sfMandate match {
-      // if mandate already existed in SF then only patch the 'Last Update' if it's more recent
-      case MandateLookupDetail(_, _, _, lastUpdated) if lastUpdated.value < gcMandateUpdateDetail.event.created_at =>
-        patchMandateOp
-      // if mandate had to be created in SF then always patch the 'Last Update'
-      case MandateWithSfId(_) =>
-        patchMandateOp
-      case other =>
-        () => GenericError(s"\n\njust created an out of order event \n\t${gcMandateUpdateDetail.event}\n\t$other\n\n")
-    }
-    newMapEntry = gcMandateUpdateDetail.mandate.id -> MandateLookupDetail(
-      Id = sfMandate.Id,
-      GoCardless_Mandate_ID__c = gcMandateUpdateDetail.mandate.id,
-      Last_Mandate_Update__c = newMandateWithUpdateId.id,
-      Status_Changed_At__c = UpdateHappenedAt(gcMandateUpdateDetail.event.created_at)
-    )
-  } yield sfMandateMap + newMapEntry
+    case Some(existingSfMandate) => ClientSuccess(existingSfMandate)
+  }
 
   def createMandateInSf(
     goCardless: GcClient,
@@ -156,6 +154,23 @@ object Handler extends Logging {
         Account_Number_Ending__c = bankDetail.account_number_ending
       ))
     } yield newSfMandate
+  }
+
+  def patchMandateIfNecessary(
+    gcMandateUpdateDetail: MandateUpdateWithMandateDetail,
+    sfMandate: SalesforceDDMandate.WithMandateSfId,
+    patchMandateOp: Unit
+  ) = {
+    sfMandate match {
+      // if mandate already existed in SF then only patch the 'Last Update' if it's more recent
+      case MandateLookupDetail(_, _, _, lastUpdated) if lastUpdated.value < gcMandateUpdateDetail.event.created_at =>
+        patchMandateOp
+      // if mandate had to be created in SF then always patch the 'Last Update'
+      case MandateWithSfId(_) =>
+        patchMandateOp
+      case other =>
+        () => GenericError(s"\n\njust created an out of order event \n\t${gcMandateUpdateDetail.event}\n\t$other\n\n")
+    }
   }
 
   def patchLastMandateUpdateOnMandate(
