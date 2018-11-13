@@ -4,15 +4,14 @@ import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
 import com.gu.sf_datalake_export.DownloadBatches
 
-//This is just a way to locally run the addSubscription lambda in dev
+//This is just a way to locally run the lambda in dev
 object DownloadBatchManualTest extends App {
-  //todo see how to make "done" optional
   val request =
     """{
-      |"jobId" : "7500J00000DxRZrQAN",
+      |"jobId" : "7506E000004EnRoQAK",
       |"jobName" : "sfSubscriptions",
       |"batches" : [{
-      | "batchId" : "7510J00000JRXHVQA5",
+      | "batchId" : "7516E000003DjZnQAK",
       | "state" : "Completed"
       | }
       | ]

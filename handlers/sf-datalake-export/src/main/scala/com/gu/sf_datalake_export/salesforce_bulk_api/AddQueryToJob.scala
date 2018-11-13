@@ -15,7 +15,7 @@ object AddQueryToJob {
 
   case class Query(value: String) extends AnyVal
 
-  def toRequest(addQueryRequest: AddQueryRequest) = {
+  def toRequest(addQueryRequest: AddQueryRequest) : StringHttpRequest = {
     val jobIdStr = addQueryRequest.jobId.value
     val queryStr = addQueryRequest.query.value
 

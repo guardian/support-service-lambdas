@@ -14,7 +14,6 @@ class AddQueryToJobTest extends FlatSpec with Matchers {
       query = Query("Select something from somewhere"),
       jobId = JobId("someId")
     )
-    val actual = AddQueryToJob.toRequest(addQueryRequest)
 
     val expectedBody = BodyAsString("Select something from somewhere")
 
@@ -29,7 +28,9 @@ class AddQueryToJobTest extends FlatSpec with Matchers {
 
     )
 
+    val actual = AddQueryToJob.toRequest(addQueryRequest)
+
     actual should be(expected)
   }
-  
+
 }

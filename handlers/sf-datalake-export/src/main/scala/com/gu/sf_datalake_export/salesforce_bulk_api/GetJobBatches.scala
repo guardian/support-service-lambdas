@@ -2,6 +2,7 @@ package com.gu.sf_datalake_export.salesforce_bulk_api
 
 import com.gu.sf_datalake_export.salesforce_bulk_api.CreateJob.JobId
 import com.gu.util.resthttp.HttpOp
+import com.gu.util.resthttp.HttpOp.HttpOpWrapper
 import com.gu.util.resthttp.JsonHttp.{GetMethod, StringHttpRequest}
 import com.gu.util.resthttp.RestRequestMaker.{BodyAsString, RelativePath, UrlParams}
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientFailure, ClientSuccess, GenericError}
@@ -80,13 +81,16 @@ object GetJobBatches {
     }
   }
 
-  def apply(post: HttpOp[StringHttpRequest, BodyAsString]): JobId => ClientFailableOp[Seq[BatchInfo]] =
-    post.setupRequest[JobId] { jobId: JobId =>
-      val relativePath = RelativePath(s"/services/async/44.0/job/${jobId.value}/batch")
-      StringHttpRequest(GetMethod, relativePath, UrlParams.empty)
-    }.flatMap { response =>
-      val xml: Elem = scala.xml.XML.loadString(response.value)
-      parseBatches(xml)
-    }.runRequest
+  def toRequest(jobId: JobId): StringHttpRequest = {
+    val relativePath = RelativePath(s"/services/async/44.0/job/${jobId.value}/batch")
+    StringHttpRequest(GetMethod, relativePath, UrlParams.empty)
+  }
+
+  def toResponse(bodyAsString: BodyAsString): ClientFailableOp[Seq[BatchInfo]] = {
+    val xml: Elem = scala.xml.XML.loadString(bodyAsString.value)
+    parseBatches(xml)
+  }
+
+  val wrapper = HttpOpWrapper[JobId, StringHttpRequest, BodyAsString, Seq[BatchInfo]](toRequest, toResponse)
 
 }

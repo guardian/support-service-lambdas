@@ -9,15 +9,16 @@ import com.gu.salesforce.SalesforceClient
 import com.gu.sf_datalake_export.salesforce_bulk_api.CreateJob.JobId
 import com.gu.sf_datalake_export.salesforce_bulk_api.GetJobBatches
 import com.gu.sf_datalake_export.salesforce_bulk_api.GetJobBatches._
+import com.gu.sf_datalake_export.util.TryOps._
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config.{LoadConfigModule, Stage}
-import com.gu.util.handlers.{ParseRequest, SerialiseResponse}
-import com.gu.util.reader.Types._
+import com.gu.util.handlers.JsonHandler
 import okhttp3.{Request, Response}
 import play.api.libs.json.Json
-import scalaz.Scalaz._
-import scalaz.{-\/, \/-}
+
+import scala.util.Try
+
 //TODO IGNORE BATCHES WITH NO ROWS (FOR THE PK CHUNKING CASE)
 object GetBatches {
 
@@ -66,59 +67,46 @@ object GetBatches {
   }
 
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
-    val lambdaIO = LambdaIO(inputStream, outputStream, context)
-    steps(
-      lambdaIO,
-      RawEffects.stage,
-      GetFromS3.fetchString,
-      RawEffects.response
+    JsonHandler(
+      lambdaIO = LambdaIO(inputStream, outputStream, context),
+      operation = operation(RawEffects.stage, GetFromS3.fetchString, RawEffects.response)
     )
   }
 
-  def steps(
-    lambdaIO: LambdaIO,
+  def getJobStatus(batches: Seq[BatchInfo]): JobStatus = {
+
+    def fromStatusList(remainingBatchStates: Seq[BatchState], jobStatusSoFar: JobStatus): JobStatus = remainingBatchStates match {
+      case Nil => jobStatusSoFar
+      case Failed :: _ => FailedJob
+      case Queued :: tail => fromStatusList(tail, PendingJob)
+      case InProgress :: tail => fromStatusList(tail, PendingJob)
+      case Completed :: tail => fromStatusList(tail, jobStatusSoFar)
+      case NotProcessed :: tail => fromStatusList(tail, jobStatusSoFar)
+    }
+
+    fromStatusList(batches.map(_.state), CompletedJob)
+  }
+
+  def operation(
     stage: Stage,
     fetchString: StringFromS3,
     getResponse: Request => Response
-  ): Unit = {
-
-    def getStatus(batches: Seq[BatchInfo]): JobStatus = batches.map(_.state).foldRight(CompletedJob: JobStatus) {
-      case (Failed, _) => FailedJob
-      case (_, FailedJob) => FailedJob
-      case (Queued, _) => PendingJob
-      case (InProgress, _) => PendingJob
-      case (Completed, currentStatus) => currentStatus
-      case (NotProcessed, currentStatus) => currentStatus
-    }
+  )(request: WireRequest): Try[WireResponse] = {
 
     val loadConfig = LoadConfigModule(stage, fetchString)
+    val jobId = JobId(request.jobId)
 
-    //todo add proper error handling
-    val lambdaResponse = for {
-      request <- ParseRequest[WireRequest](lambdaIO.inputStream).toEither.disjunction.leftMap(failure => failure.getMessage)
-      jobId = JobId(request.jobId)
-      sfConfig <- loadConfig[SFAuthConfig](SFExportAuthConfig.location, SFAuthConfig.reads).leftMap(failure => failure.error) //fix auth so that it doesn't return apigatewayop
-      sfClient <- SalesforceClient(getResponse, sfConfig).value.toDisjunction.leftMap(failure => failure.message)
-      getJobBatchesOp = GetJobBatches(sfClient)
-      batches <- getJobBatchesOp(jobId).toDisjunction.leftMap(failure => failure.message)
-      status = getStatus(batches)
+    for {
+      sfConfig <- loadConfig[SFAuthConfig](SFExportAuthConfig.location, SFAuthConfig.reads).leftMap(failure => failure.error).toTry
+      sfClient <- SalesforceClient(getResponse, sfConfig).value.toTry
+      getJobBatchesOp = sfClient.wrapWith(GetJobBatches.wrapper)
+      batches <- getJobBatchesOp.runRequest(jobId).toTry
+      status = getJobStatus(batches)
     } yield WireResponse(
       jobId = request.jobId,
       jobName = request.jobName,
       jobStatus = status.name,
       batches = batches.map(WireBatch.fromBatch)
     )
-
-    lambdaResponse match {
-      case -\/(error) => {
-        logger.error(s"terminating lambda with error $error")
-        throw new LambdaException(error)
-      }
-      case \/-(successResponse) => SerialiseResponse(lambdaIO.outputStream, successResponse)
-    }
   }
-
-  class LambdaException(msg: String) extends RuntimeException(msg)
-
 }
-

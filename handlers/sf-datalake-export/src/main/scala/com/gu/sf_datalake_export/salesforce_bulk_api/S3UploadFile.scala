@@ -19,7 +19,7 @@ object S3UploadFile extends Logging {
     stage: Stage,
     s3Write: PutObjectRequest => Try[PutObjectResult],
     file: File
-  ): String \/ PutObjectResult = {
+  ): Try[PutObjectResult] = {
     logger.info(s"Uploading ${file.fileName.value} to S3...")
     val stream: InputStream = new ByteArrayInputStream(file.content.value.getBytes(java.nio.charset.StandardCharsets.UTF_8.name))
     val bytes = IOUtils.toByteArray(stream)
@@ -31,21 +31,9 @@ object S3UploadFile extends Logging {
       new ByteArrayInputStream(bytes),
       uploadMetadata
     )
-    val uploadAttempt = for {
-      result <- s3Write(putRequest)
-    } yield {
-      result
-    }
-    uploadAttempt.fold(
-      ex => {
-        logger.error(s"Upload failed due to $ex")
-        -\/(s"Upload failed due to $ex")
-      },
-      result => {
-        logger.info(s"Successfully uploaded to S3: $result")
-        \/-(result)
-      }
-    )
+
+    s3Write(putRequest)
+
   }
 
 }

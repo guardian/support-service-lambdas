@@ -8,15 +8,15 @@ import scala.util.{Failure, Success, Try}
 
 object TryOps {
 
-  implicit class ClientFailableOpsOp[Success](clientFailable: ClientFailableOp[Success]) {
-    def toTry: Try[Success] = clientFailable.toDisjunction match {
+  implicit class ClientFailableOpsOp[SuccessType](clientFailable: ClientFailableOp[SuccessType]) {
+    def toTry: Try[SuccessType] = clientFailable.toDisjunction match {
       case \/-(result) => Success(result)
       case -\/(error) => Failure(LambdaException(error.message))
     }
   }
 
-  implicit class DisjunctionOps[Success](disjunction: String \/ Success) {
-    def toTry: Try[Success] = disjunction match {
+  implicit class DisjunctionOps[SuccessType](disjunction: String \/ SuccessType) {
+    def toTry: Try[SuccessType] = disjunction match {
       case \/-(result) => Success(result)
       case -\/(error) => Failure(LambdaException(error))
     }
