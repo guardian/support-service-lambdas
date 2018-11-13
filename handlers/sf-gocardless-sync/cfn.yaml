@@ -2,99 +2,135 @@ AWSTemplateFormatVersion: "2010-09-09"
 Description: Polls GoCardless for direct debit mandate updates and pushes into SalesForce
 
 Parameters:
-    Stage:
-        Description: Stage name
-        Type: String
-        AllowedValues:
-            - PROD
-            - CODE
-        Default: CODE
+  Stage:
+    Description: Stage name
+    Type: String
+    AllowedValues:
+    - PROD
+    - CODE
+    Default: CODE
+  LogGroupNamePrefix:
+    Description: The full log group name (-${Stage} will be appended)
+    Type: String
+    Default: "/aws/lambda/sf-gocardless-sync"
 
 Conditions:
   CreateProdMonitoring: !Equals [ !Ref Stage, PROD ]
 
 Resources:
-    GoCardlessSalesForceSyncRole:
-        Type: AWS::IAM::Role
-        Properties:
-            AssumeRolePolicyDocument:
-                Statement:
-                    - Effect: Allow
-                      Principal:
-                          Service:
-                             - lambda.amazonaws.com
-                      Action:
-                          - sts:AssumeRole
-            Path: /
-            Policies:
-                - PolicyName: LambdaPolicy
-                  PolicyDocument:
-                      Statement:
-                          - Effect: Allow
-                            Action:
-                            - logs:CreateLogGroup
-                            - logs:CreateLogStream
-                            - logs:PutLogEvents
-                            - lambda:InvokeFunction
-                            Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/sf-gocardless-sync-${Stage}:log-stream:*"
-                - PolicyName: ReadPrivateCredentials
-                  PolicyDocument:
-                      Statement:
-                          - Effect: Allow
-                            Action: s3:GetObject
-                            Resource:
-                            - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/goCardless-${Stage}.*.json
-                            - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/sfAuth-${Stage}.*.json
+  GoCardlessSalesForceSyncRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: /
+      Policies:
+      - PolicyName: LambdaPolicy
+        PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            - lambda:InvokeFunction
+            Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:${LogGroupNamePrefix}-${Stage}:log-stream:*"
+      - PolicyName: ReadPrivateCredentials
+        PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action: s3:GetObject
+            Resource:
+            - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/goCardless-${Stage}.*.json
+            - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/sfAuth-${Stage}.*.json
 
-    GoCardlessSalesForceSyncLogGroup:
-      Type: AWS::Logs::LogGroup
-      Properties:
-        LogGroupName: !Sub "/aws/lambda/sf-gocardless-sync-${Stage}"
-        RetentionInDays: 14
+  GoCardlessSalesForceSyncLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "${LogGroupNamePrefix}-${Stage}"
+      RetentionInDays: 14
 
-    GoCardlessSalesForceSyncLambda:
-        Type: AWS::Lambda::Function
-        Properties:
-            Description: Polls GoCardless for direct debit mandate updates and pushes into SalesForce
-            FunctionName:
-                !Sub sf-gocardless-sync-${Stage}
-            Code:
-                S3Bucket: zuora-auto-cancel-dist
-                S3Key: !Sub membership/${Stage}/sf-gocardless-sync/sf-gocardless-sync.jar
-            Handler: com.gu.sf_gocardless_sync.Handler::apply
-            Environment:
-                Variables:
-                  Stage: !Ref Stage
-            Role:
-                Fn::GetAtt:
-                - "GoCardlessSalesForceSyncRole"
-                - Arn
-            MemorySize: 1536 # TODO review this amount of memory is required
-            Runtime: java8
-            Timeout: 240 # kills if still running after 4mins to avoid clashes with next run
-        DependsOn:
+  GoCardlessSalesForceSyncLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      Description: Polls GoCardless for direct debit mandate updates and pushes into SalesForce
+      FunctionName:
+        !Sub sf-gocardless-sync-${Stage}
+      Code:
+        S3Bucket: zuora-auto-cancel-dist
+        S3Key: !Sub membership/${Stage}/sf-gocardless-sync/sf-gocardless-sync.jar
+      Handler: com.gu.sf_gocardless_sync.Handler::apply
+      Environment:
+        Variables:
+          Stage: !Ref Stage
+      Role:
+        Fn::GetAtt:
         - "GoCardlessSalesForceSyncRole"
+        - Arn
+      MemorySize: 1536 # TODO review this amount of memory is required
+      Runtime: java8
+      Timeout: 240 # kills if still running after 4mins to avoid clashes with next run
+    DependsOn:
+    - "GoCardlessSalesForceSyncRole"
 
-    GoCardlessSalesForceSyncScheduleRule:
-      Type: AWS::Events::Rule
-      Properties:
-        Description: "Trigger the GoCardlessSalesForceSync every 5 mins"
-        ScheduleExpression: "rate(5 minutes)" # TODO consider more sophisticated cron schedule (to reduce api calls, e.g. overnight)
-        State: "ENABLED"
-        Targets:
-        -
-          Id: !Sub 'trigger_GoCardlessSalesForceSync-${Stage}'
-          Arn:
-            Fn::GetAtt:
-            - "GoCardlessSalesForceSyncLambda"
-            - Arn
+  GoCardlessSalesForceSyncScheduleRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Description: "Trigger the GoCardlessSalesForceSync every 5 mins"
+      ScheduleExpression: "rate(5 minutes)" # TODO consider more sophisticated cron schedule (to reduce api calls)
+      State: "ENABLED"
+      Targets:
+      -
+        Id: !Sub 'trigger_GoCardlessSalesForceSync-${Stage}'
+        Arn:
+          Fn::GetAtt:
+          - "GoCardlessSalesForceSyncLambda"
+          - Arn
 
-    InvokeGoCardlessSalesForceSyncLambdaPermission:
-      Type: AWS::Lambda::Permission
-      Properties:
-        FunctionName: !Ref GoCardlessSalesForceSyncLambda
-        Action: lambda:InvokeFunction
-        Principal: events.amazonaws.com
-        SourceArn: !GetAtt [GoCardlessSalesForceSyncScheduleRule, Arn]
+  InvokeGoCardlessSalesForceSyncLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref GoCardlessSalesForceSyncLambda
+      Action: lambda:InvokeFunction
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt [GoCardlessSalesForceSyncScheduleRule, Arn]
 
-# TODO add some alarms
+  GenericErrorMetricFilter:
+    Type: AWS::Logs::MetricFilter
+    Properties:
+      FilterPattern: "GenericError"
+      LogGroupName: !Sub "${LogGroupNamePrefix}-${Stage}"
+      MetricTransformations:
+      -
+        MetricValue: "1"
+        MetricNamespace: "GoCardlessSalesForceSync"
+        MetricName: "GenericError Count"
+
+  GenericErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: CreateProdMonitoring
+    Properties:
+      AlarmActions: !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:subscriptions_dev
+      AlarmName: !Sub "GenericError observed on ${LogGroupNamePrefix}-${Stage}"
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: LogGroup
+          Value: !Sub "${LogGroupNamePrefix}-${Stage}"
+        - Name: Stage
+          Value: !Sub ${Stage}
+      EvaluationPeriods: 1
+      MetricName: "GenericError Count"
+      Namespace: "GoCardlessSalesForceSync"
+      Period: 3600
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
+
+# TODO add 'StoppedRunning' alarm based on existing Invocations metric
+
