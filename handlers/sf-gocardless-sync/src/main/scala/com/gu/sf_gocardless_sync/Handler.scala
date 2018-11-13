@@ -101,7 +101,7 @@ object Handler extends Logging {
     sfMandate <- getOrCreateMandateInSf(goCardless, sf, sfMandateMap, gcMandateUpdateDetail, relatedPaymentMethodEtc)
     newMandateUpdateOp = SalesforceDDMandateUpdate.Create(sf.client.wrapWith(JsonHttp.post))
     newMandateWithUpdateId <- newMandateUpdateOp(toSfMandateUpdate(gcMandateUpdateDetail.event, sfMandate.Id))
-    patchMandateOp <- patchLastMandateUpdateOnMandate(
+    patchMandateOp <- patchLastStatusEventOnMandate(
       sf,
       newMandateWithUpdateId.id,
       sfMandate.Id,
@@ -173,7 +173,7 @@ object Handler extends Logging {
     }
   }
 
-  def patchLastMandateUpdateOnMandate(
+  def patchLastStatusEventOnMandate(
     sf: SfClient,
     newMandateUpdateId: MandateUpdateSfId,
     mandateSfId: MandateSfId,
