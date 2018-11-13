@@ -5,9 +5,11 @@ import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 import com.gu.TestData._
 import com.gu.effects.{FakeFetchString, TestingRawEffects}
 import com.gu.effects.TestingRawEffects.HTTPResponse
+import com.gu.effects.sqs.AwsSQSSend.{Payload, QueueName}
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import com.gu.util.config.Stage
 import org.scalatest.{FlatSpec, Matchers}
+import scala.util.{Success, Try}
 
 class EndToEndHandlerTest extends FlatSpec with Matchers {
 
@@ -22,15 +24,20 @@ class EndToEndHandlerTest extends FlatSpec with Matchers {
     val stream = new ByteArrayInputStream(endToEndData.zuoraCalloutJson.getBytes(java.nio.charset.StandardCharsets.UTF_8))
     val os = new ByteArrayOutputStream()
     val config = new TestingRawEffects(200, EndToEndData.responses)
+    var capturedPayload: Option[Payload] = None
+
+    def sqsSend(queueName: QueueName)(payload: Payload): Try[Unit] = Success { capturedPayload = Some(payload) }
+
     //execute
     Lambda.runForLegacyTestsSeeTestingMd(
       Stage("DEV"),
       FakeFetchString.fetchString,
       config.response,
-      LambdaIO(stream, os, null)
+      LambdaIO(stream, os, null),
+      sqsSend
     )
 
-    config.resultMap(("POST", "/messaging/v1/messageDefinitionSends/111/send")).get jsonMatches endToEndData.expectedEmailSend // TODO check the body too
+    capturedPayload.get.value jsonMatches endToEndData.expectedEmailSend
 
     val responseString = new String(os.toByteArray(), "UTF-8")
 
@@ -141,7 +148,38 @@ trait EndtoEndBaseData {
 }
 
 object EndToEndDataWithBillingDetails extends EndtoEndBaseData {
-  override val expectedEmailSend = """{"To":{"Address":"john.duffell@guardian.co.uk","SubscriberKey":"john.duffell@guardian.co.uk","ContactAttributes":{"SubscriberAttributes":{"subscriber_id":"A-S00071536","product":"Supporter","payment_method":"CreditCardReferenceTransaction","card_type":"Visa","card_expiry_date":"12/2019","first_name":"eSAFaBwm4WJZNg5xhIc","last_name":"eSAFaBwm4WJZNg5xhIc","paymentId":"2c92c0f95fc912eb015fcb2a481720e6","price":"$49.00","serviceStartDate":"17 November 2017","serviceEndDate":"16 November 2018", "billing_address1": "billingAddress1Value", "billing_address2": "billingAddress2Value", "billing_postcode": "billingPostcodeValue", "billing_city": "billingCityValue", "billing_state": "billingStateValue", "billing_country" : "billingCountryValue", "title" : "billingTitleValue"}}}}"""
+  override val expectedEmailSend =
+    """{
+      |  "DataExtensionName": "first-failed-payment-email",
+      |  "To": {
+      |    "Address": "john.duffell@guardian.co.uk",
+      |    "SubscriberKey": "john.duffell@guardian.co.uk",
+      |    "ContactAttributes": {
+      |      "SubscriberAttributes": {
+      |        "subscriber_id": "A-S00071536",
+      |        "product": "Supporter",
+      |        "payment_method": "CreditCardReferenceTransaction",
+      |        "card_type": "Visa",
+      |        "card_expiry_date": "12/2019",
+      |        "first_name": "eSAFaBwm4WJZNg5xhIc",
+      |        "last_name": "eSAFaBwm4WJZNg5xhIc",
+      |        "paymentId": "2c92c0f95fc912eb015fcb2a481720e6",
+      |        "price": "$49.00",
+      |        "serviceStartDate": "17 November 2017",
+      |        "serviceEndDate": "16 November 2018",
+      |        "billing_address1": "billingAddress1Value",
+      |        "billing_address2": "billingAddress2Value",
+      |        "billing_postcode": "billingPostcodeValue",
+      |        "billing_city": "billingCityValue",
+      |        "billing_state": "billingStateValue",
+      |        "billing_country": "billingCountryValue",
+      |        "title": "billingTitleValue"
+      |      }
+      |    }
+      |  },
+      |  "SfContactId": "1000000"
+      |}""".stripMargin
+
   override val zuoraCalloutJson =
     """
       |{
@@ -195,7 +233,7 @@ object EndToEndDataWithBillingDetails extends EndtoEndBaseData {
       |        "httpMethod": "POST",
       |        "apiId": "11111"
       |    },
-      |    "body": "{\"accountId\":\"2c92c0f85fc90734015fca884c3f04cf\",\"firstName\":\"eSAFaBwm4WJZNg5xhIc\",\"lastName\":\"eSAFaBwm4WJZNg5xhIc\",\"creditCardExpirationMonth\":\"12\",\"creditCardExpirationYear\":\"2019\",\"paymentId\":\"2c92c0f95fc912eb015fcb2a481720e6\",\"tenantId\":\"c\",\"currency\":\"USD\",\"creditCardType\":\"Visa\",\"paymentMethodType\":\"CreditCardReferenceTransaction\",\"email\":\"john.duffell@guardian.co.uk\",\"failureNumber\":\"1\",\"billToContactAddress2\":\"billingAddress2Value\",\"billToContactCity\":\"billingCityValue\",\"billToContactAddress1\":\"billingAddress1Value\",\"billToContactState\":\"billingStateValue\",\"billToContactCountry\":\"billingCountryValue\",\"billToContactPostalCode\":\"billingPostcodeValue\",\"title\":\"billingTitleValue\"}",
+      |    "body": "{\"accountId\":\"2c92c0f85fc90734015fca884c3f04cf\",\"firstName\":\"eSAFaBwm4WJZNg5xhIc\",\"lastName\":\"eSAFaBwm4WJZNg5xhIc\",\"creditCardExpirationMonth\":\"12\",\"creditCardExpirationYear\":\"2019\",\"paymentId\":\"2c92c0f95fc912eb015fcb2a481720e6\",\"tenantId\":\"c\",\"currency\":\"USD\",\"creditCardType\":\"Visa\",\"paymentMethodType\":\"CreditCardReferenceTransaction\",\"email\":\"john.duffell@guardian.co.uk\",\"failureNumber\":\"1\",\"billToContactAddress2\":\"billingAddress2Value\",\"billToContactCity\":\"billingCityValue\",\"billToContactAddress1\":\"billingAddress1Value\",\"billToContactState\":\"billingStateValue\",\"billToContactCountry\":\"billingCountryValue\",\"billToContactPostalCode\":\"billingPostcodeValue\",\"title\":\"billingTitleValue\", \"sfContactId\": \"1000000\"}",
       |    "isBase64Encoded": false
       |}
     """.stripMargin
@@ -203,7 +241,29 @@ object EndToEndDataWithBillingDetails extends EndtoEndBaseData {
 object EndToEndData extends EndtoEndBaseData {
 
   override val expectedEmailSend =
-    """{"To":{"Address":"john.duffell@guardian.co.uk","SubscriberKey":"john.duffell@guardian.co.uk","ContactAttributes":{"SubscriberAttributes":{"subscriber_id":"A-S00071536","product":"Supporter","payment_method":"CreditCardReferenceTransaction","card_type":"Visa","card_expiry_date":"12/2019","first_name":"eSAFaBwm4WJZNg5xhIc","last_name":"eSAFaBwm4WJZNg5xhIc","paymentId":"2c92c0f95fc912eb015fcb2a481720e6","price":"$49.00","serviceStartDate":"17 November 2017","serviceEndDate":"16 November 2018"}}}}"""
+    """{
+      |  "DataExtensionName": "first-failed-payment-email",
+      |  "To": {
+      |    "Address": "john.duffell@guardian.co.uk",
+      |    "SubscriberKey": "john.duffell@guardian.co.uk",
+      |    "ContactAttributes": {
+      |      "SubscriberAttributes": {
+      |        "subscriber_id": "A-S00071536",
+      |        "product": "Supporter",
+      |        "payment_method": "CreditCardReferenceTransaction",
+      |        "card_type": "Visa",
+      |        "card_expiry_date": "12/2019",
+      |        "first_name": "eSAFaBwm4WJZNg5xhIc",
+      |        "last_name": "eSAFaBwm4WJZNg5xhIc",
+      |        "paymentId": "2c92c0f95fc912eb015fcb2a481720e6",
+      |        "price": "$49.00",
+      |        "serviceStartDate": "17 November 2017",
+      |        "serviceEndDate": "16 November 2018"
+      |      }
+      |    }
+      |  },
+      |  "SfContactId": "1000000"
+      |}""".stripMargin
 
   override val zuoraCalloutJson =
     """
@@ -258,7 +318,7 @@ object EndToEndData extends EndtoEndBaseData {
       |        "httpMethod": "POST",
       |        "apiId": "11111"
       |    },
-      |    "body": "{\"accountId\":\"2c92c0f85fc90734015fca884c3f04cf\",\"firstName\":\"eSAFaBwm4WJZNg5xhIc\",\"lastName\":\"eSAFaBwm4WJZNg5xhIc\",\"creditCardExpirationMonth\":\"12\",\"creditCardExpirationYear\":\"2019\",\"paymentId\":\"2c92c0f95fc912eb015fcb2a481720e6\",\"tenantId\":\"c\",\"currency\":\"USD\",\"creditCardType\":\"Visa\",\"paymentMethodType\":\"CreditCardReferenceTransaction\",\"email\":\"john.duffell@guardian.co.uk\",\"failureNumber\":\"1\"}",
+      |    "body": "{\"accountId\":\"2c92c0f85fc90734015fca884c3f04cf\",\"firstName\":\"eSAFaBwm4WJZNg5xhIc\",\"lastName\":\"eSAFaBwm4WJZNg5xhIc\",\"creditCardExpirationMonth\":\"12\",\"creditCardExpirationYear\":\"2019\",\"paymentId\":\"2c92c0f95fc912eb015fcb2a481720e6\",\"tenantId\":\"c\",\"currency\":\"USD\",\"creditCardType\":\"Visa\",\"paymentMethodType\":\"CreditCardReferenceTransaction\",\"email\":\"john.duffell@guardian.co.uk\",\"failureNumber\":\"1\", \"sfContactId\": \"1000000\"}",
       |    "isBase64Encoded": false
       |}
     """.stripMargin
