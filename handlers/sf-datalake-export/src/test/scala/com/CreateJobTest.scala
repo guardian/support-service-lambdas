@@ -1,5 +1,6 @@
 package com
 
+import com.gu.sf_datalake_export.salesforce_bulk_api.BulkApiParams.{BatchSize, SfObjectName}
 import com.gu.sf_datalake_export.salesforce_bulk_api.CreateJob
 import com.gu.sf_datalake_export.salesforce_bulk_api.CreateJob.{CreateJobRequest, JobId, WireResponse}
 import com.gu.util.resthttp.RestRequestMaker.{Header, PostRequest, RelativePath}
@@ -10,8 +11,8 @@ class CreateJobTest extends FlatSpec with Matchers {
 
   it should "create a request ok" in {
     val createJobRequest = CreateJobRequest(
-      objectType = "Contact",
-      maybeChunkSize = Some(250000)
+      objectType = SfObjectName("Contact"),
+      maybeChunkSize = Some(BatchSize(250000))
     )
     val actual = CreateJob.toRequest(createJobRequest)
 

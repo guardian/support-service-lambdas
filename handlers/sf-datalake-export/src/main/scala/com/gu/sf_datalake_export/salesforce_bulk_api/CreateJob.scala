@@ -1,5 +1,6 @@
 package com.gu.sf_datalake_export.salesforce_bulk_api
 
+import com.gu.sf_datalake_export.salesforce_bulk_api.BulkApiParams.{BatchSize, SfObjectName}
 import com.gu.util.resthttp.HttpOp.HttpOpWrapper
 import com.gu.util.resthttp.RestRequestMaker
 import com.gu.util.resthttp.RestRequestMaker._
@@ -38,14 +39,14 @@ object CreateJob {
   }
 
   case class CreateJobRequest(
-    objectType : String,
-    maybeChunkSize: Option[Int]
+    objectType : SfObjectName,
+    maybeChunkSize: Option[BatchSize]
   )
 
   def toRequest(request:CreateJobRequest):PostRequest = {
-      val wireRequest = WireRequest(request.objectType)
+      val wireRequest = WireRequest(request.objectType.value)
       val maybeChunkingHeader = request.maybeChunkSize.map { chunkSize =>
-        Header(name = "Sforce-Enable-PKChunking", value = s"chunkSize=$chunkSize")
+        Header(name = "Sforce-Enable-PKChunking", value = s"chunkSize=${chunkSize.value}")
       }
       val headers = maybeChunkingHeader.toList
       val relativePath = RelativePath("/services/async/44.0/job")

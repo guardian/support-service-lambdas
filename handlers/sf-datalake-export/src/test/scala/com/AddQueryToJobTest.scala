@@ -1,6 +1,7 @@
 package com
 
-import com.gu.sf_datalake_export.salesforce_bulk_api.AddQueryToJob.{AddQueryRequest, Query}
+import com.gu.sf_datalake_export.salesforce_bulk_api.AddQueryToJob.AddQueryRequest
+import com.gu.sf_datalake_export.salesforce_bulk_api.BulkApiParams.Soql
 import com.gu.sf_datalake_export.salesforce_bulk_api.{AddQueryToJob, CreateJob}
 import com.gu.sf_datalake_export.salesforce_bulk_api.CreateJob.{CreateJobRequest, JobId, WireResponse}
 import com.gu.util.resthttp.JsonHttp.{PostMethod, StringHttpRequest}
@@ -11,7 +12,7 @@ class AddQueryToJobTest extends FlatSpec with Matchers {
 
   it should "create a request ok" in {
     val addQueryRequest = AddQueryRequest(
-      query = Query("Select something from somewhere"),
+      query = Soql("Select something from somewhere"),
       jobId = JobId("someId")
     )
 

@@ -1,5 +1,6 @@
 package com.gu.sf_datalake_export.salesforce_bulk_api
 
+import com.gu.sf_datalake_export.salesforce_bulk_api.BulkApiParams.Soql
 import com.gu.sf_datalake_export.salesforce_bulk_api.CreateJob.JobId
 import com.gu.util.resthttp.HttpOp.HttpOpWrapper
 import com.gu.util.resthttp.JsonHttp.{PostMethod, StringHttpRequest}
@@ -9,11 +10,9 @@ import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess}
 object AddQueryToJob {
 
   case class AddQueryRequest(
-    query: Query,
+    query: Soql,
     jobId: JobId,
   )
-
-  case class Query(value: String) extends AnyVal
 
   def toRequest(addQueryRequest: AddQueryRequest) : StringHttpRequest = {
     val jobIdStr = addQueryRequest.jobId.value

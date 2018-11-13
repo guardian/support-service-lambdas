@@ -12,9 +12,7 @@ object StartJobManualTest extends App {
 
   val request =
     s"""{
-      |"objectType" : "Contact",
-      |"query" : "$queryStr",
-      |"jobName" : "SF"
+      |"objectName" : "Contact"
       |}
     """.stripMargin
 

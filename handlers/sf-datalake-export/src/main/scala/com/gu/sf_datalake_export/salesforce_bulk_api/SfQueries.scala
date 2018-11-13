@@ -1,7 +1,52 @@
 package com.gu.sf_datalake_export.salesforce_bulk_api
 
-object SfQueries {
+object BulkApiParams {
 
+  case class Soql(value: String) extends AnyVal
+
+  case class ObjectName(value: String) extends AnyVal
+
+  case class SfObjectName(value: String) extends AnyVal
+
+  case class BatchSize(value: Int) extends AnyVal
+
+  val maxBatchSize = BatchSize(250000)
+  val minBatchSize = BatchSize(100000)
+
+  case class SfQueryInfo(soql: Soql, objectName: ObjectName, sfObjectName: SfObjectName, batchSize: Option[BatchSize] = Some(maxBatchSize))
+
+  val contact = SfQueryInfo(Soql(SfQueries.contactQuery), ObjectName("Contact"), SfObjectName("Contact"))
+  val subscription = SfQueryInfo(Soql(SfQueries.subscriptionsQuery), ObjectName("Subscription"), SfObjectName("SF_Subscription__c"))
+  val account = SfQueryInfo(Soql(SfQueries.accounts), ObjectName("Account"), SfObjectName("Account"))
+  val cancellationSurvey = SfQueryInfo(Soql(SfQueries.cancellationSurvey), ObjectName("CancellationSurvey"), SfObjectName("Cancellation_Survey_Voluntary__c"))
+  val cardExpiry = SfQueryInfo(Soql(SfQueries.cardExpiry), ObjectName("CardExpiry"), SfObjectName("Card_Expiry__c"))
+  val cases = SfQueryInfo(Soql(SfQueries.cases), ObjectName("Case"), SfObjectName("Case"))
+  val caseComment = SfQueryInfo(Soql(SfQueries.caseComment), ObjectName("CaseComment"), SfObjectName("CaseComment"))
+  val csSurvey = SfQueryInfo(Soql(SfQueries.csSurvey), ObjectName("CsSurvey"), SfObjectName("CS_Survey__c"))
+  val discount = SfQueryInfo(Soql(SfQueries.discount), ObjectName("CsSurvey"), SfObjectName("Discount__c"))
+  val fulfilmentProcessInformation = SfQueryInfo(Soql(SfQueries.fulfilmentProcessInformation), ObjectName("FulfilmentProcessInformation"), SfObjectName("Fulfilment_Process_Information__c"))
+  val imovoContract = SfQueryInfo(Soql(SfQueries.imovoContract), ObjectName("ImovoContract"), SfObjectName("Imovo_Contract__c"))
+  val paymentCard = SfQueryInfo(Soql(SfQueries.paymentCard), ObjectName("PaymentCard"), SfObjectName("Payment_Card__c"))
+  val paymentFailure = SfQueryInfo(Soql(SfQueries.paymentCard), ObjectName("PaymentFailure"), SfObjectName("paymentFailure"))
+
+  val all = List(
+    contact,
+    subscription,
+    account,
+    cancellationSurvey,
+    cardExpiry,
+    cases,
+    caseComment,
+    csSurvey,
+    discount,
+    fulfilmentProcessInformation,
+    imovoContract,
+    paymentCard,
+    paymentFailure
+  )
+}
+
+object SfQueries {
   val contactQuery =
     """select
       |AccountId,
@@ -64,83 +109,83 @@ object SfQueries {
 
   val subscriptionsQuery =
     """
-    |select
-    |Acquisition_Date__c,
-    |Acquisition_Source__c,
-    |Autopay__c,
-    |Autorenew__c,
-    |Bill_Cycle_Day__c,
-    |Zuora_Billing_account__c,
-    |Buyer__c,
-    |Promo_Campaign__c,
-    |Cancellation_Effective_Date__c,
-    |Cancellation_Reason__c,
-    |Cancellation_Request_Date__c,
-    |Cancellation_Source__c,
-    |Cancellation_Survey_Voluntary__c,
-    |Cancellation_Survey_URL__c,
-    |Cancelled_At__c,
-    |Cancelled_By__c,
-    |Case_Number__c,
-    |Promotion_Channel__c,
-    |Promotion_Code__c,
-    |Created_By_CSR__c,
-    |CreatedById,
-    |CreatedDate,
-    |Currency__c,
-    |Default_Payment_Method__c,
-    |Default_Payment_Method_Type__c,
-    |IsDeleted,
-    |Promo_Description__c,
-    |Digi_Print__c,
-    |Promotion_Discount_Duration__c,
-    |First_Invoice__c,
-    |First_Invoice_Date__c,
-    |Fulfilment_Start_Date__c,
-    |LastActivityDate,
-    |LastModifiedById,
-    |LastModifiedDate,
-    |LastReferencedDate,
-    |LastViewedDate,
-    |Migrated_Sub__c,
-    |Last_Invoice__c,
-    |Last_Invoice_Date__c,
-    |Next_Charge_Date__c,
-    |Payment_Failure_Record__c,
-    |Payment_Term__c,
-    |Primary_Reason__c,
-    |Product__c,
-    |Product_Name__c,
-    |Product_Type__c,
-    |Promotion_Code_Lookup__c,
-    |Promotion_Discount__c,
-    |Quoted_Refund_Amount__c,
-    |Rate_Plan_Name__c,
-    |Reason_for_Cancellation__c,
-    |Recipient__c,
-    |Id,
-    |RecordTypeId,
-    |SF_Status__c,
-    |Sub_Reason__c,
-    |Subscription_End_Date__c,
-    |Survey_Sent__c,
-    |SystemModstamp,
-    |Term_End_Date__c,
-    |Term_Start_Date__c,
-    |Promo_Type__c,
-    |User_Cancellation_Reason__c,
-    |Version__c,
-    |Zuora_Id__c,
-    |Zuora_Subscription_Salesforce_ID__c,
-    |Zuora_Subscription_Name__c
-    |from SF_Subscription__c
-    |
+      |select
+      |Acquisition_Date__c,
+      |Acquisition_Source__c,
+      |Autopay__c,
+      |Autorenew__c,
+      |Bill_Cycle_Day__c,
+      |Zuora_Billing_account__c,
+      |Buyer__c,
+      |Promo_Campaign__c,
+      |Cancellation_Effective_Date__c,
+      |Cancellation_Reason__c,
+      |Cancellation_Request_Date__c,
+      |Cancellation_Source__c,
+      |Cancellation_Survey_Voluntary__c,
+      |Cancellation_Survey_URL__c,
+      |Cancelled_At__c,
+      |Cancelled_By__c,
+      |Case_Number__c,
+      |Promotion_Channel__c,
+      |Promotion_Code__c,
+      |Created_By_CSR__c,
+      |CreatedById,
+      |CreatedDate,
+      |Currency__c,
+      |Default_Payment_Method__c,
+      |Default_Payment_Method_Type__c,
+      |IsDeleted,
+      |Promo_Description__c,
+      |Digi_Print__c,
+      |Promotion_Discount_Duration__c,
+      |First_Invoice__c,
+      |First_Invoice_Date__c,
+      |Fulfilment_Start_Date__c,
+      |LastActivityDate,
+      |LastModifiedById,
+      |LastModifiedDate,
+      |LastReferencedDate,
+      |LastViewedDate,
+      |Migrated_Sub__c,
+      |Last_Invoice__c,
+      |Last_Invoice_Date__c,
+      |Next_Charge_Date__c,
+      |Payment_Failure_Record__c,
+      |Payment_Term__c,
+      |Primary_Reason__c,
+      |Product__c,
+      |Product_Name__c,
+      |Product_Type__c,
+      |Promotion_Code_Lookup__c,
+      |Promotion_Discount__c,
+      |Quoted_Refund_Amount__c,
+      |Rate_Plan_Name__c,
+      |Reason_for_Cancellation__c,
+      |Recipient__c,
+      |Id,
+      |RecordTypeId,
+      |SF_Status__c,
+      |Sub_Reason__c,
+      |Subscription_End_Date__c,
+      |Survey_Sent__c,
+      |SystemModstamp,
+      |Term_End_Date__c,
+      |Term_Start_Date__c,
+      |Promo_Type__c,
+      |User_Cancellation_Reason__c,
+      |Version__c,
+      |Zuora_Id__c,
+      |Zuora_Subscription_Salesforce_ID__c,
+      |Zuora_Subscription_Name__c
+      |from SF_Subscription__c
+      |
   """.stripMargin
 
   //removed compund ShippingAddress,BillingAddress
   //TODO BillingAccount__c doesn't exist ?
   val accounts =
-    """
+  """
     select
    |Description,
    |Fax,
