@@ -1,7 +1,7 @@
 package com.gu.identityBackfill
 
+import com.gu.identity.GetByEmail.IdentityAccount
 import com.gu.identity.{GetByEmail, GetByIdentityId}
-import com.gu.identity.GetByEmail.IdentityAccountWithUnvalidatedEmail
 import com.gu.identity.GetByIdentityId.IdentityUser
 import com.gu.identityBackfill.TypeConvert._
 import com.gu.identityBackfill.Types._
@@ -20,15 +20,14 @@ object PreReqCheck {
   case class PreReqResult(zuoraAccountId: Types.AccountId, sFContactId: SFContactId, existingIdentityId: Option[IdentityId])
 
   def apply(
-    getByEmail: EmailAddress => ClientFailableOp[GetByEmail.IdentityAccount],
-    getByIdentityId: IdentityId => ClientFailableOp[GetByIdentityId.IdentityUser],
+    findExistingIdentityId: EmailAddress => ApiGatewayOp[Option[IdentityId]],
     getSingleZuoraAccountForEmail: EmailAddress => ApiGatewayOp[ZuoraAccountIdentitySFContact],
     noZuoraAccountsForIdentityId: IdentityId => ApiGatewayOp[Unit],
     zuoraSubType: AccountId => ApiGatewayOp[Unit],
     syncableSFToIdentity: SFContactId => LazyClientFailableOp[ApiGatewayOp[Unit]]
   )(emailAddress: EmailAddress): ApiGatewayOp[PreReqResult] = {
     for {
-      maybeExistingIdentityId <- findExistingIdentityId(getByEmail, getByIdentityId, emailAddress)
+      maybeExistingIdentityId <- findExistingIdentityId(emailAddress)
       zuoraAccountForEmail <- getSingleZuoraAccountForEmail(emailAddress)
       _ <- maybeExistingIdentityId.map(noZuoraAccountsForIdentityId).getOrElse(ContinueProcessing(()))
       _ <- syncableSFToIdentity(zuoraAccountForEmail.sfContactId).value.toApiGatewayOp("load SF contact").flatMap(identity)
@@ -37,9 +36,8 @@ object PreReqCheck {
 
   def findExistingIdentityId(
     getByEmail: EmailAddress => ClientFailableOp[GetByEmail.IdentityAccount],
-    getByIdentityId: IdentityId => ClientFailableOp[GetByIdentityId.IdentityUser],
-    emailAddress: EmailAddress
-  ): ApiGatewayOp[Option[IdentityId]] = {
+    getByIdentityId: IdentityId => ClientFailableOp[GetByIdentityId.IdentityUser]
+  )(emailAddress: EmailAddress): ApiGatewayOp[Option[IdentityId]] = {
 
     def continueIfNoPassword(identityId: IdentityId) = {
       getByIdentityId(identityId) match {
@@ -49,8 +47,8 @@ object PreReqCheck {
     }
 
     val result = getByEmail(emailAddress) match {
-      case ClientSuccess(GetByEmail.IdentityAccountWithValidatedEmail(identityId)) => ContinueProcessing(Some(identityId))
-      case ClientSuccess(IdentityAccountWithUnvalidatedEmail(identityId)) => continueIfNoPassword(identityId)
+      case ClientSuccess(IdentityAccount(identityId, true)) => ContinueProcessing(Some(identityId))
+      case ClientSuccess(IdentityAccount(identityId, false)) => continueIfNoPassword(identityId)
       case NotFound(_) => ContinueProcessing(None)
       case other: ClientFailure => ReturnWithResponse(ApiGatewayResponse.internalServerError(other.toString))
     }

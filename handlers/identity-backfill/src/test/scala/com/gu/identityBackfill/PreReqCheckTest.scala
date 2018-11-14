@@ -1,7 +1,7 @@
 package com.gu.identityBackfill
 
 import com.gu.identity.GetByEmail
-import com.gu.identity.GetByEmail.{IdentityAccountWithUnvalidatedEmail, IdentityAccountWithValidatedEmail}
+import com.gu.identity.GetByEmail.IdentityAccount
 import com.gu.identity.GetByIdentityId.IdentityUser
 import com.gu.identityBackfill.PreReqCheck.PreReqResult
 import com.gu.identityBackfill.Types._
@@ -11,7 +11,7 @@ import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.resthttp.LazyClientFailableOp
-import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, NotFound}
+import com.gu.util.resthttp.Types.{ClientFailableOp, ClientFailure, ClientSuccess, GenericError, NotFound}
 import org.scalatest.{FlatSpec, Matchers}
 
 class PreReqCheckTest extends FlatSpec with Matchers {
@@ -20,24 +20,7 @@ class PreReqCheckTest extends FlatSpec with Matchers {
 
     val result =
       PreReqCheck(
-        email => ClientSuccess(IdentityAccountWithValidatedEmail(IdentityId("asdf"))),
-        _ => fail("shouldn't be called"),
-        email => ContinueProcessing(ZuoraAccountIdentitySFContact(AccountId("acc"), None, SFContactId("sf"))),
-        identityId => ContinueProcessing(()),
-        _ => ContinueProcessing(()),
-        _ => LazyClientFailableOp(() => ClientSuccess(ContinueProcessing(())))
-      )(EmailAddress("email@address"))
-
-    val expectedResult = ContinueProcessing(PreReqResult(AccountId("acc"), SFContactId("sf"), Some(IdentityId("asdf"))))
-    result should be(expectedResult)
-  }
-
-  it should "go through a happy case if account unvalidated and account has no password" in {
-
-    val result =
-      PreReqCheck(
-        email => ClientSuccess(IdentityAccountWithValidatedEmail(IdentityId("asdf"))),
-        identityId => ClientSuccess(IdentityUser(IdentityId("asdf"), hasPassword = false)),
+        _ => ContinueProcessing(Some(IdentityId("asdf"))),
         email => ContinueProcessing(ZuoraAccountIdentitySFContact(AccountId("acc"), None, SFContactId("sf"))),
         identityId => ContinueProcessing(()),
         _ => ContinueProcessing(()),
@@ -52,8 +35,7 @@ class PreReqCheckTest extends FlatSpec with Matchers {
 
     val result =
       PreReqCheck(
-        email => NotFound("so we will return None"),
-        _ => fail("shouldn't be called"),
+        _ => ContinueProcessing(None),
         email => ContinueProcessing(ZuoraAccountIdentitySFContact(AccountId("acc"), None, SFContactId("sf"))),
         identityId => ContinueProcessing(()),
         _ => ContinueProcessing(()),
@@ -102,16 +84,15 @@ class PreReqCheckTest extends FlatSpec with Matchers {
 
   it should "stop processing if it finds a non validated identity account" in {
 
-    val result = emailCheckFailure(ClientSuccess(IdentityAccountWithUnvalidatedEmail(IdentityId("asdf"))))
+    val result = emailCheckFailure(ClientSuccess(IdentityAccount(IdentityId("asdf"), isUserEmailValidated = false)))
 
-    val expectedResult = ReturnWithResponse(ApiGatewayResponse.notFound("identity email not validated but password is set IdentityId(asdf)"))
+    val expectedResult = ReturnWithResponse(ApiGatewayResponse.internalServerError("identity error"))
     result should be(expectedResult)
   }
 
   private def emailCheckFailure(identityError: ClientFailableOp[GetByEmail.IdentityAccount]) = {
     PreReqCheck(
-      email => identityError,
-      identityId => ClientSuccess(IdentityUser(IdentityId("asdf"), hasPassword = true)),
+      _ => ReturnWithResponse(ApiGatewayResponse.internalServerError("identity error")),
       email => fail("shouldn't be called 1"),
       identityId => fail("shouldn't be called 2"),
       _ => fail("shouldn't be called 3"),
@@ -150,4 +131,45 @@ class PreReqCheckTest extends FlatSpec with Matchers {
     PreReqCheck.acceptableReaderType(ClientSuccess(readerTypes)).toDisjunction.leftMap(_.statusCode) should be(scalaz.-\/("404"))
   }
 
+  "findExistingIdentityId" should "continue processing with identity id for existing validated account" in {
+    PreReqCheck.findExistingIdentityId(
+      _ => ClientSuccess(IdentityAccount(IdentityId("100"), isUserEmailValidated = true)),
+      _ => fail("Should not be called")
+    )(EmailAddress("email@email.email")) should be(ContinueProcessing(Some(IdentityId("100"))))
+  }
+
+  "findExistingIdentityId" should "continue processing with identity id for existing unvalidated account with no password" in {
+    PreReqCheck.findExistingIdentityId(
+      _ => ClientSuccess(IdentityAccount(IdentityId("100"), isUserEmailValidated = false)),
+      _ => ClientSuccess(IdentityUser(IdentityId("100"), hasPassword = false))
+    )(EmailAddress("email@email.email")) should be(ContinueProcessing(Some(IdentityId("100"))))
+  }
+
+  "findExistingIdentityId" should "continue processing for not found identity user" in {
+    PreReqCheck.findExistingIdentityId(
+      _ => NotFound("not found"),
+      _ => fail("should not be called")
+    )(EmailAddress("email@email.email")) should be(ContinueProcessing(None))
+  }
+
+  "findExistingIdentityId" should "ReturnWithResponse for unvalidated account with password" in {
+    PreReqCheck.findExistingIdentityId(
+      _ => ClientSuccess(IdentityAccount(IdentityId("100"), isUserEmailValidated = false)),
+      _ => ClientSuccess(IdentityUser(IdentityId("100"), hasPassword = true))
+    )(EmailAddress("email@email.email")) should be(ReturnWithResponse(ApiGatewayResponse.notFound(s"identity email not validated but password is set IdentityId(100)")))
+  }
+
+  "findExistingIdentityId" should "ReturnWithResponse for unexpected identity response" in {
+    PreReqCheck.findExistingIdentityId(
+      _ => GenericError("error"),
+      _ => fail("should not be called")
+    )(EmailAddress("email@email.email")) should be(ReturnWithResponse(ApiGatewayResponse.internalServerError("error")))
+  }
+
+  "findExistingIdentityId" should "ReturnWithResponse for unexpected identity response for get by id" in {
+    PreReqCheck.findExistingIdentityId(
+      _ => ClientSuccess(IdentityAccount(IdentityId("100"), isUserEmailValidated = false)),
+      _ => GenericError("error"),
+    )(EmailAddress("email@email.email")) should be(ReturnWithResponse(ApiGatewayResponse.notFound(s"identity email not validated but password is set IdentityId(100)")))
+  }
 }

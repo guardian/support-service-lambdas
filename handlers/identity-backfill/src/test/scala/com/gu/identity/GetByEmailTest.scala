@@ -1,6 +1,6 @@
 package com.gu.identity
 
-import com.gu.identity.GetByEmail.{IdentityAccountWithUnvalidatedEmail, IdentityAccountWithValidatedEmail}
+import com.gu.identity.GetByEmail.IdentityAccount
 import com.gu.identity.GetByEmailTest.{NotValidatedTestData, TestData}
 import com.gu.identityBackfill.Types.EmailAddress
 import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
@@ -20,18 +20,18 @@ class GetByEmailTest extends FlatSpec with Matchers {
   it should "get successful ok" in {
     val actual = GetByEmail.wrapper.toNewResponse(Json.parse(TestData.dummyIdentityResponse))
 
-    actual should be(ClientSuccess(IdentityAccountWithValidatedEmail(IdentityId("1234"))))
+    actual should be(ClientSuccess(IdentityAccount(IdentityId("1234"), isUserEmailValidated = true)))
   }
 
   it should "get not validated with an error" in {
     val actual = GetByEmail.wrapper.toNewResponse(Json.parse(NotValidatedTestData.dummyIdentityResponse))
 
-    actual should be(ClientSuccess(IdentityAccountWithUnvalidatedEmail(IdentityId("1234"))))
+    actual should be(ClientSuccess(IdentityAccount(IdentityId("1234"), isUserEmailValidated = false)))
   }
 
   it should "get not validated if the response has no statusFields" in {
     val actual = GetByEmail.wrapper.toNewResponse(Json.parse(NotValidatedTestData.identityResponseWithoutStatus))
-    actual should be(ClientSuccess(IdentityAccountWithUnvalidatedEmail(IdentityId("1234"))))
+    actual should be(ClientSuccess(IdentityAccount(IdentityId("1234"), isUserEmailValidated = false)))
   }
 }
 
