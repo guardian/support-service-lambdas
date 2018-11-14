@@ -19,7 +19,6 @@ import play.api.libs.json.Json
 
 import scala.util.Try
 
-//TODO IGNORE BATCHES WITH NO ROWS (FOR THE PK CHUNKING CASE)
 object GetBatches {
 
   case class WireRequest(
