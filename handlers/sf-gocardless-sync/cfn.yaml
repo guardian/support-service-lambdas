@@ -128,7 +128,8 @@ Resources:
     - GoCardlessSalesForceSyncLogGroup
     Condition: CreateProdMonitoring
     Properties:
-      AlarmActions: !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:subscriptions_dev
+      AlarmActions:
+      - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:subscriptions_dev
       AlarmName: !Sub "GenericError observed on ${LogGroupNamePrefix}-${Stage}"
       ComparisonOperator: GreaterThanThreshold
       Dimensions:
