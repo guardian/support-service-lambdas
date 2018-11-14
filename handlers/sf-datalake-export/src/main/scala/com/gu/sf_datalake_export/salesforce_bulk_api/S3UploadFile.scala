@@ -5,11 +5,9 @@ import java.io.{ByteArrayInputStream, InputStream}
 import com.amazonaws.services.s3.model.{ObjectMetadata, PutObjectRequest, PutObjectResult}
 import com.amazonaws.util.IOUtils
 import com.gu.util.Logging
-import com.gu.util.config.{Stage, ZuoraEnvironment}
-import scalaz.{-\/, \/, \/-}
+import com.gu.util.config.Stage
 
 import scala.util.Try
-//todo maybe this is becoming a little bit too close to a generic s3 uploader and could be extracted to dedup with catalog service
 object S3UploadFile extends Logging {
 
   case class FileContent(value: String) extends AnyVal
