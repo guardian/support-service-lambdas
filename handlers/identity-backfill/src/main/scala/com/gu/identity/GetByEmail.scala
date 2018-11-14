@@ -20,7 +20,10 @@ object GetByEmail {
     case class StatusFields(userEmailValidated: Boolean)
     implicit val statusFieldsReads: Reads[StatusFields] = Json.reads[StatusFields]
 
-    case class User(id: String, statusFields: StatusFields)
+    case class User(id: String, statusFields: Option[StatusFields]) {
+      val isUserEmailValidated: Boolean = statusFields.exists(_.userEmailValidated)
+    }
+
     implicit val userReads: Reads[User] = Json.reads[User]
 
     case class UserResponse(status: String, user: User)
@@ -42,7 +45,7 @@ object GetByEmail {
   def wireToDomainModel(userResponse: UserResponse): ClientFailableOp[IdentityAccount] = {
     for {
       user <- userFromResponse(userResponse)
-      identityId = if (user.statusFields.userEmailValidated) IdentityAccountWithValidatedEmail(IdentityId(user.id)) else IdentityAccountWithUnvalidatedEmail(IdentityId(user.id))
+      identityId = if (user.isUserEmailValidated) IdentityAccountWithValidatedEmail(IdentityId(user.id)) else IdentityAccountWithUnvalidatedEmail(IdentityId(user.id))
     } yield identityId
 
   }

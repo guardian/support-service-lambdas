@@ -29,6 +29,10 @@ class GetByEmailTest extends FlatSpec with Matchers {
     actual should be(ClientSuccess(IdentityAccountWithUnvalidatedEmail(IdentityId("1234"))))
   }
 
+  it should "get not validated if the response has no statusFields" in {
+    val actual = GetByEmail.wrapper.toNewResponse(Json.parse(NotValidatedTestData.identityResponseWithoutStatus))
+    actual should be(ClientSuccess(IdentityAccountWithUnvalidatedEmail(IdentityId("1234"))))
+  }
 }
 
 object GetByEmailTest {
@@ -82,6 +86,16 @@ object GetByEmailTest {
         |            "userEmailValidated": false
         |        },
         |        "primaryEmailAddress": "john.duffell@guardian.co.uk",
+        |        "id": "1234"
+        |    }
+        |}
+      """.stripMargin
+
+    val identityResponseWithoutStatus: String =
+      """
+        |{
+        |    "status": "ok",
+        |    "user": {
         |        "id": "1234"
         |    }
         |}
