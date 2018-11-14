@@ -105,6 +105,8 @@ object SfQueries {
       |Voucher_Fulfilment_Cut_Off_Date__c,
       |Voucher_Start_Date__c
       |from Contact
+      |where
+      |Account.GDPR_Deletion_Pending__c = false
     """.stripMargin
 
   val subscriptionsQuery =
@@ -240,6 +242,8 @@ object SfQueries {
    |Website
    |from
    |Account
+   |where
+   |GDPR_Deletion_Pending__c = false
     """.stripMargin
 
   val cancellationSurvey =
