@@ -18,8 +18,16 @@ Conditions:
   CreateProdMonitoring: !Equals [ !Ref Stage, PROD ]
 
 Resources:
+
+  GoCardlessSalesForceSyncLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "${LogGroupNamePrefix}-${Stage}"
+      RetentionInDays: 14
+
   GoCardlessSalesForceSyncRole:
     Type: AWS::IAM::Role
+    DependsOn: GoCardlessSalesForceSyncLogGroup
     Properties:
       AssumeRolePolicyDocument:
         Statement:
@@ -50,14 +58,12 @@ Resources:
             - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/goCardless-${Stage}.*.json
             - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/sfAuth-${Stage}.*.json
 
-  GoCardlessSalesForceSyncLogGroup:
-    Type: AWS::Logs::LogGroup
-    Properties:
-      LogGroupName: !Sub "${LogGroupNamePrefix}-${Stage}"
-      RetentionInDays: 14
 
   GoCardlessSalesForceSyncLambda:
     Type: AWS::Lambda::Function
+    DependsOn:
+    - GoCardlessSalesForceSyncRole
+    - GoCardlessSalesForceSyncLogGroup
     Properties:
       Description: Polls GoCardless for direct debit mandate updates and pushes into SalesForce
       FunctionName:
@@ -76,11 +82,13 @@ Resources:
       MemorySize: 1536 # TODO review this amount of memory is required
       Runtime: java8
       Timeout: 240 # kills if still running after 4mins to avoid clashes with next run
-    DependsOn:
-    - "GoCardlessSalesForceSyncRole"
+
 
   GoCardlessSalesForceSyncScheduleRule:
     Type: AWS::Events::Rule
+    DependsOn:
+    - GoCardlessSalesForceSyncLambda
+    - GoCardlessSalesForceSyncLogGroup
     Properties:
       Description: "Trigger the GoCardlessSalesForceSync every 5 mins"
       ScheduleExpression: "rate(5 minutes)" # TODO consider more sophisticated cron schedule (to reduce api calls)
@@ -103,6 +111,7 @@ Resources:
 
   GenericErrorMetricFilter:
     Type: AWS::Logs::MetricFilter
+    DependsOn: GoCardlessSalesForceSyncLogGroup
     Properties:
       FilterPattern: "GenericError"
       LogGroupName: !Sub "${LogGroupNamePrefix}-${Stage}"
@@ -114,6 +123,9 @@ Resources:
 
   GenericErrorAlarm:
     Type: AWS::CloudWatch::Alarm
+    DependsOn:
+    - GenericErrorMetricFilter
+    - GoCardlessSalesForceSyncLogGroup
     Condition: CreateProdMonitoring
     Properties:
       AlarmActions: !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:subscriptions_dev
