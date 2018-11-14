@@ -92,7 +92,7 @@ object GoCardlessDDMandateUpdate extends Logging {
 
       def createRequest() =
         RestRequestMaker.GetRequest(RelativePath(
-          s"$gcEventsBaseUrl&limit=1&created_at[lte]=2016-11-02T00:00:00.000Z" //TODO consider changing to date from config
+          s"$gcEventsBaseUrl&limit=1&created_at[lte]=2015-01-01T00:00:00.000Z"
         ))
 
       def toResponse(mandateUpdateEventsResponse: MandateUpdateEventsResponse) = {
