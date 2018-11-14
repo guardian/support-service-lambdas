@@ -1,9 +1,9 @@
-package com
+package com.com.gu.sf_datalake_export.salesforce_bulk_api
 
 import com.gu.sf_datalake_export.salesforce_bulk_api.CreateJob.JobId
 import com.gu.sf_datalake_export.salesforce_bulk_api.GetJobBatches
 import com.gu.sf_datalake_export.salesforce_bulk_api.GetJobBatches.{BatchId, BatchInfo, Completed, InProgress}
-import com.gu.util.resthttp.JsonHttp.{GetMethod, PostMethod, StringHttpRequest}
+import com.gu.util.resthttp.JsonHttp.{GetMethod, StringHttpRequest}
 import com.gu.util.resthttp.RestRequestMaker._
 import com.gu.util.resthttp.Types.ClientSuccess
 import org.scalatest.{FlatSpec, Matchers}

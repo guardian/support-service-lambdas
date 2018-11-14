@@ -1,4 +1,4 @@
-package com
+package com.com.gu.sf_datalake_export.salesforce_bulk_api
 
 import com.gu.sf_datalake_export.GetBatches
 import com.gu.sf_datalake_export.GetBatches.{CompletedJob, FailedJob, PendingJob}

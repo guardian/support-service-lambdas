@@ -187,7 +187,7 @@ object SfQueries {
   //removed compund ShippingAddress,BillingAddress
   //TODO BillingAccount__c doesn't exist ?
   val accounts =
-  """
+    """
     select
    |Description,
    |Fax,

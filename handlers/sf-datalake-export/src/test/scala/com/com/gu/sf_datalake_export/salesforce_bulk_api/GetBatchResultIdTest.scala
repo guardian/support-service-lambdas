@@ -1,4 +1,4 @@
-package com
+package com.com.gu.sf_datalake_export.salesforce_bulk_api
 
 import com.gu.sf_datalake_export.salesforce_bulk_api.CreateJob.JobId
 import com.gu.sf_datalake_export.salesforce_bulk_api.GetBatchResultId
