@@ -272,7 +272,7 @@ Resources:
                 "WaitSomeTime": {
                   "Type": "Wait",
                   "Seconds": 5,
-                  "Next": "getBatchState"
+                  "Next": "getBatches"
                 },
                 "getBatches": {
                   "Type": "Task",
