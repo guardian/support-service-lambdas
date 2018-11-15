@@ -15,7 +15,8 @@ object S3UploadFile extends Logging {
   case class File(fileName: FileName, content: FileContent)
   def apply(
     stage: Stage,
-    s3Write: PutObjectRequest => Try[PutObjectResult],
+    s3Write: PutObjectRequest => Try[PutObjectResult]
+  )(
     file: File
   ): Try[PutObjectResult] = {
     logger.info(s"Uploading ${file.fileName.value} to S3...")

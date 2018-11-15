@@ -23,8 +23,10 @@ import okhttp3.{Request, Response}
 import play.api.libs.json.Json
 import scalaz.IList
 import scalaz.syntax.traverse.ToTraverseOps
+import com.gu.sf_datalake_export.util.TryOps.{ClientFailableOpsOp, DisjunctionOps}
 
 import scala.util.{Success, Try}
+
 object DownloadBatches {
 
   case class WireBatch(
@@ -60,15 +62,36 @@ object DownloadBatches {
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
     JsonHandler(
       lambdaIO = LambdaIO(inputStream, outputStream, context),
-      operation = operation(RawEffects.stage, GetFromS3.fetchString, RawEffects.response, RawEffects.s3Write)
+      operation = wireOperation(RawEffects.stage, GetFromS3.fetchString, RawEffects.response, RawEffects.s3Write)
     )
   }
 
-  def downloadFirst(
-    downloadBatch: BatchId => Try[Unit],
-    jobId: JobId,
-    jobName: JobName
+
+  def downloadBatch
+  (
+    uploadFile: File => Try[_],
+    getBatchResultId: GetBatchResultRequest => ClientFailableOp[BatchResultId],
+    getBatchResult: DownloadResultsRequest => ClientFailableOp[FileContent],
   )(
+    jobName: JobName,
+    jobId: JobId,
+    batchId: BatchId): Try[Unit] = {
+    val getIdRequest = GetBatchResultRequest(jobId, batchId)
+    logger.info(s"downloading $getIdRequest")
+    for {
+      resultId <- getBatchResultId(getIdRequest).toTry
+      downloadRequest = DownloadResultsRequest(jobId, batchId, resultId)
+      fileContent <- getBatchResult(downloadRequest).toTry
+      fileName = FileName(s"${jobName.value}-${jobId.value}-${resultId.id}.csv")
+      file = File(fileName, fileContent)
+      _ <- uploadFile(file)
+    } yield ()
+  }
+
+
+  def downloadFirst(downloadBatch: (JobName, JobId, BatchId) => Try[Unit])(
+    jobId: JobId,
+    jobName: JobName,
     pendingBatches: List[BatchInfo]
   ): Try[WireIO] = pendingBatches match {
 
@@ -81,7 +104,7 @@ object DownloadBatches {
       )
     )
 
-    case pendingJob :: tail => downloadBatch(pendingJob.batchId).map { _ =>
+    case pendingJob :: tail => downloadBatch(jobName, jobId, pendingJob.batchId).map { _ =>
       WireIO(
         jobId = jobId.value,
         jobName = jobName.value,
@@ -91,48 +114,37 @@ object DownloadBatches {
     }
   }
 
-  def operation(
+  def steps(
+    downloadBatch: (JobName, JobId, BatchId) => Try[Unit]
+  )(request: WireIO): Try[WireIO] = for {
+    batches <- IList(request.batches: _*).traverse(WireBatch.toBatch).map(_.toList).toTry
+    pendingBatches = batches.filter(b => b.state == Completed)
+    jobId = JobId(request.jobId)
+    jobName = JobName(request.jobName)
+    response <- downloadFirst(downloadBatch)(jobId, jobName, pendingBatches)
+  } yield response
+
+  def wireOperation(
     stage: Stage,
     fetchString: StringFromS3,
     getResponse: Request => Response,
-    s3Write: PutObjectRequest => Try[PutObjectResult]
+    s3Write: PutObjectRequest => Try[PutObjectResult],
+
   )(request: WireIO): Try[WireIO] = {
-
-    import com.gu.sf_datalake_export.util.TryOps.{ClientFailableOpsOp, DisjunctionOps}
-
-    def downloadBatch(
-      getBatchResultId: GetBatchResultRequest => ClientFailableOp[BatchResultId],
-      getBatchResult: DownloadResultsRequest => ClientFailableOp[FileContent],
-      jobName: JobName,
-      jobId: JobId
-    )(batchId: BatchId): Try[Unit] = {
-      val getIdRequest = GetBatchResultRequest(jobId, batchId)
-      logger.info(s"downloading $getIdRequest")
-      for {
-        resultId <- getBatchResultId(getIdRequest).toTry
-        downloadRequest = DownloadResultsRequest(jobId, batchId, resultId)
-        fileContent <- getBatchResult(downloadRequest).toTry
-        fileName = FileName(s"${jobName.value}-${jobId.value}-${resultId.id}.csv")
-        file = File(fileName, fileContent)
-        _ <- S3UploadFile(stage, s3Write, file)
-      } yield ()
-    }
-
     val loadConfig = LoadConfigModule(stage, fetchString)
     for {
-      batches <- IList(request.batches: _*).traverse(WireBatch.toBatch).map(_.toList).toTry
-      pendingBatches = batches.filter(b => b.state == Completed)
       sfConfig <- loadConfig[SFAuthConfig](SFExportAuthConfig.location, SFAuthConfig.reads).leftMap(_.error).toTry
       sfClient <- SalesforceClient(getResponse, sfConfig).value.toTry
       wiredGetBatchResultId = sfClient.wrapWith(GetBatchResultId.wrapper).runRequest _
       wiredGetBatchResult = sfClient.wrapWith(GetBatchResult.wrapper).runRequest _
-      jobId = JobId(request.jobId)
-      jobName = JobName(request.jobName)
-      wiredDownloadBatch = downloadBatch(wiredGetBatchResultId, wiredGetBatchResult, jobName, jobId) _
-      response <- downloadFirst(wiredDownloadBatch, jobId, jobName)(pendingBatches)
+      uploadFile = S3UploadFile(stage, s3Write) _
+      wiredDownloadBatch = downloadBatch(uploadFile, wiredGetBatchResultId, wiredGetBatchResult) _
+      response <- steps(wiredDownloadBatch)(request)
+
     } yield response
 
   }
+
 
 }
 
