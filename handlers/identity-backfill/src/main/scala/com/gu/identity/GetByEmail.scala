@@ -11,16 +11,15 @@ import play.api.libs.json.{JsValue, Json, Reads}
 
 object GetByEmail {
 
-  sealed trait IdentityAccount
-  case class IdentityAccountWithValidatedEmail(identityId: IdentityId) extends IdentityAccount
-  case object IdentityAccountWithUnvalidatedEmail extends IdentityAccount
+  case class IdentityAccount(identityId: IdentityId, isUserEmailValidated: Boolean)
 
   object RawWireModel {
 
     case class StatusFields(userEmailValidated: Boolean)
     implicit val statusFieldsReads: Reads[StatusFields] = Json.reads[StatusFields]
 
-    case class User(id: String, statusFields: StatusFields)
+    case class User(id: String, statusFields: Option[StatusFields])
+
     implicit val userReads: Reads[User] = Json.reads[User]
 
     case class UserResponse(status: String, user: User)
@@ -40,10 +39,17 @@ object GetByEmail {
     }
 
   def wireToDomainModel(userResponse: UserResponse): ClientFailableOp[IdentityAccount] = {
+
     for {
       user <- userFromResponse(userResponse)
-      identityId = if (user.statusFields.userEmailValidated) IdentityAccountWithValidatedEmail(IdentityId(user.id)) else IdentityAccountWithUnvalidatedEmail
-    } yield identityId
+    } yield {
+      val isUserEmailValidated: Boolean = userResponse
+        .user
+        .statusFields
+        .exists(_.userEmailValidated)
+
+      IdentityAccount(IdentityId(user.id), isUserEmailValidated)
+    }
 
   }
 

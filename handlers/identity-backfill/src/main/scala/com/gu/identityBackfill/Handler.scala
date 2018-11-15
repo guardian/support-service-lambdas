@@ -1,10 +1,9 @@
 package com.gu.identityBackfill
 
 import java.io.{InputStream, OutputStream}
-
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
-import com.gu.identity.{CreateGuestAccount, GetByEmail, IdentityClient, IdentityConfig}
+import com.gu.identity._
 import com.gu.identityBackfill.IdentityBackfillSteps.DomainRequest
 import com.gu.identityBackfill.TypeConvert._
 import com.gu.identityBackfill.Types.EmailAddress
@@ -21,7 +20,6 @@ import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, ApiGatewayResponse, ResponseModels}
 import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config.{LoadConfigModule, Stage}
-import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.JsonHttp.StringHttpRequest
 import com.gu.util.resthttp.RestRequestMaker.{GetRequest, PatchRequest}
@@ -58,6 +56,9 @@ object Handler {
       val identityClient = IdentityClient(response, identityConfig)
       val createGuestAccount = identityClient.wrapWith(JsonHttp.post).wrapWith(CreateGuestAccount.wrapper)
       val getByEmail = identityClient.wrapWith(JsonHttp.getWithParams).wrapWith(GetByEmail.wrapper)
+      val getById = identityClient.wrapWith(JsonHttp.get).wrapWith(GetByIdentityId.wrapper)
+      val findExistingIdentityId = FindExistingIdentityId(getByEmail.runRequest, getById.runRequest) _
+
       val countZuoraAccounts: IdentityId => ClientFailableOp[Int] = CountZuoraAccountsForIdentityId(zuoraQuerier)
 
       lazy val sfAuth: LazyClientFailableOp[HttpOp[StringHttpRequest, RestRequestMaker.BodyAsString]] = SalesforceClient(response, sfConfig)
@@ -67,7 +68,7 @@ object Handler {
       Operation(
         steps = WireRequestToDomainObject(IdentityBackfillSteps(
           PreReqCheck(
-            getByEmail.runRequest,
+            findExistingIdentityId,
             GetZuoraAccountsForEmail(zuoraQuerier) _ andThen PreReqCheck.getSingleZuoraAccountForEmail,
             countZuoraAccounts andThen PreReqCheck.noZuoraAccountsForIdentityId,
             GetZuoraSubTypeForAccount(zuoraQuerier) _ andThen PreReqCheck.acceptableReaderType,
@@ -139,15 +140,12 @@ object Healthcheck {
     sfAuth: LazyClientFailableOp[Any]
   ): ApiResponse =
     (for {
-      maybeIdentityId <- getByEmail.runRequest(EmailAddress("john.duffell@guardian.co.uk"))
-        .toApiGatewayOp("problem with email").withLogging("healthcheck getByEmail")
-      identityId <- maybeIdentityId match {
-        case GetByEmail.IdentityAccountWithValidatedEmail(identityId) => ContinueProcessing(identityId)
-        case other =>
-          logger.error(s"failed healthcheck with $other")
-          ReturnWithResponse(ApiGatewayResponse.internalServerError("test identity id was not present"))
-      }
-      _ <- countZuoraAccountsForIdentityId(identityId).toApiGatewayOp("get zuora accounts for identity id")
+      identityAccount <- getByEmail
+        .runRequest(EmailAddress("john.duffell@guardian.co.uk"))
+        .toApiGatewayOp("problem with email")
+        .withLogging("healthcheck getByEmail")
+
+      _ <- countZuoraAccountsForIdentityId(identityAccount.identityId).toApiGatewayOp("get zuora accounts for identity id")
       _ <- sfAuth.value.toApiGatewayOp("Failed to authenticate with Salesforce")
     } yield ApiGatewayResponse.successfulExecution).apiResponse
 

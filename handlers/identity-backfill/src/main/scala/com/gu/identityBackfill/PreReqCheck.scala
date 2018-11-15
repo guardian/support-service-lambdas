@@ -1,7 +1,5 @@
 package com.gu.identityBackfill
 
-import com.gu.identity.GetByEmail
-import com.gu.identity.GetByEmail.IdentityAccountWithUnvalidatedEmail
 import com.gu.identityBackfill.TypeConvert._
 import com.gu.identityBackfill.Types._
 import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
@@ -12,26 +10,21 @@ import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types.ApiGatewayOp._
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.LazyClientFailableOp
-import com.gu.util.resthttp.Types.{ClientFailableOp, ClientFailure, ClientSuccess, NotFound}
+import com.gu.util.resthttp.Types.ClientFailableOp
 
 object PreReqCheck {
 
   case class PreReqResult(zuoraAccountId: Types.AccountId, sFContactId: SFContactId, existingIdentityId: Option[IdentityId])
 
   def apply(
-    getByEmail: EmailAddress => ClientFailableOp[GetByEmail.IdentityAccount],
+    findExistingIdentityId: EmailAddress => ApiGatewayOp[Option[IdentityId]],
     getSingleZuoraAccountForEmail: EmailAddress => ApiGatewayOp[ZuoraAccountIdentitySFContact],
     noZuoraAccountsForIdentityId: IdentityId => ApiGatewayOp[Unit],
     zuoraSubType: AccountId => ApiGatewayOp[Unit],
     syncableSFToIdentity: SFContactId => LazyClientFailableOp[ApiGatewayOp[Unit]]
   )(emailAddress: EmailAddress): ApiGatewayOp[PreReqResult] = {
     for {
-      maybeExistingIdentityId <- (getByEmail(emailAddress) match {
-        case ClientSuccess(GetByEmail.IdentityAccountWithValidatedEmail(identityId)) => ContinueProcessing(Some(identityId))
-        case NotFound(_) => ContinueProcessing(None)
-        case ClientSuccess(IdentityAccountWithUnvalidatedEmail) => ReturnWithResponse(ApiGatewayResponse.notFound("identity email not validated"))
-        case other: ClientFailure => ReturnWithResponse(ApiGatewayResponse.internalServerError(other.toString))
-      }).withLogging("GetByEmail")
+      maybeExistingIdentityId <- findExistingIdentityId(emailAddress)
       zuoraAccountForEmail <- getSingleZuoraAccountForEmail(emailAddress)
       _ <- maybeExistingIdentityId.map(noZuoraAccountsForIdentityId).getOrElse(ContinueProcessing(()))
       _ <- syncableSFToIdentity(zuoraAccountForEmail.sfContactId).value.toApiGatewayOp("load SF contact").flatMap(identity)

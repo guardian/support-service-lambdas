@@ -1,8 +1,7 @@
 package com.gu.identity
 
 import com.gu.effects.{GetFromS3, RawEffects}
-import com.gu.identity.GetByEmail.IdentityAccount
-import com.gu.identityBackfill.Types.EmailAddress
+import com.gu.identity.GetByIdentityId.IdentityUser
 import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
@@ -11,7 +10,7 @@ import org.scalatest.{FlatSpec, Matchers}
 import scalaz.\/-
 
 // run this manually
-class GetByEmailEffectsTest extends FlatSpec with Matchers {
+class GetByIdentityIdEffectsTest extends FlatSpec with Matchers {
 
   it should "successfull run the health check using the local code against real backend" taggedAs EffectsTest in {
 
@@ -20,10 +19,10 @@ class GetByEmailEffectsTest extends FlatSpec with Matchers {
 
       response = RawEffects.response
       identityClient = IdentityClient(response, identityConfig)
-      getByEmail = identityClient.wrapWith(JsonHttp.getWithParams).wrapWith(GetByEmail.wrapper)
-      identityId <- getByEmail.runRequest(EmailAddress("john.duffell@guardian.co.uk")).toDisjunction
+      getByIdentityId = identityClient.wrapWith(JsonHttp.get).wrapWith(GetByIdentityId.wrapper)
+      identityId <- getByIdentityId.runRequest(IdentityId("21814163")).toDisjunction
     } yield identityId
-    actual should be(\/-(IdentityAccount(IdentityId("21814163"), isUserEmailValidated = true)))
+    actual should be(\/-(IdentityUser(IdentityId("21814163"), hasPassword = true)))
 
   }
 
