@@ -113,7 +113,7 @@ Resources:
     Type: AWS::Logs::MetricFilter
     DependsOn: GoCardlessSalesForceSyncLogGroup
     Properties:
-      FilterPattern: "GenericError"
+      FilterPattern: "HTTP request was unsuccessful"
       LogGroupName: !Sub "${LogGroupNamePrefix}-${Stage}"
       MetricTransformations:
       -
