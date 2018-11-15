@@ -57,7 +57,7 @@ object Handler {
       val createGuestAccount = identityClient.wrapWith(JsonHttp.post).wrapWith(CreateGuestAccount.wrapper)
       val getByEmail = identityClient.wrapWith(JsonHttp.getWithParams).wrapWith(GetByEmail.wrapper)
       val getById = identityClient.wrapWith(JsonHttp.get).wrapWith(GetByIdentityId.wrapper)
-      val findExistingIdentityId = PreReqCheck.findExistingIdentityId(getByEmail.runRequest, getById.runRequest) _
+      val findExistingIdentityId = FindExistingIdentityId(getByEmail.runRequest, getById.runRequest) _
 
       val countZuoraAccounts: IdentityId => ClientFailableOp[Int] = CountZuoraAccountsForIdentityId(zuoraQuerier)
 
