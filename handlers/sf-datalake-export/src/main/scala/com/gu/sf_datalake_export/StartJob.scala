@@ -8,20 +8,19 @@ import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.salesforce.SalesforceAuthenticate.{SFAuthConfig, SFExportAuthConfig}
 import com.gu.salesforce.SalesforceClient
 import com.gu.sf_datalake_export.salesforce_bulk_api.AddQueryToJob.AddQueryRequest
-import com.gu.sf_datalake_export.salesforce_bulk_api.BulkApiParams.SfQueryInfo
 import com.gu.sf_datalake_export.salesforce_bulk_api.CreateJob._
 import com.gu.sf_datalake_export.salesforce_bulk_api.{AddQueryToJob, BulkApiParams, CreateJob}
 import com.gu.sf_datalake_export.util.TryOps._
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config.{LoadConfigModule, Stage}
-import com.gu.util.handlers.{JsonHandler, LambdaException}
+import com.gu.util.handlers.JsonHandler
 import com.gu.util.resthttp.JsonHttp
 import com.gu.util.resthttp.Types.ClientFailableOp
 import okhttp3.{Request, Response}
 import play.api.libs.json.{Json, Reads}
 
-import scala.util.{Failure, Success, Try}
+import scala.util.Try
 
 object StartJob {
 
@@ -42,18 +41,13 @@ object StartJob {
     implicit val writes = Json.writes[WireResponse]
   }
 
-  def sfQueryInfoFor(objectName: String): Try[SfQueryInfo] = BulkApiParams.all.find(_.objectName.value == objectName) match {
-    case Some(sfQueryInfo) => Success(sfQueryInfo)
-    case None => Failure(LambdaException(s"invalid object name $objectName"))
-  }
-
   def steps(
     getCurrentDate: () => LocalDate,
     createJob: CreateJobRequest => ClientFailableOp[JobId],
     addQuery: AddQueryRequest => ClientFailableOp[Unit]
   )(request: WireRequest): Try[WireResponse] = {
     for {
-      sfQueryInfo <- sfQueryInfoFor(request.objectName)
+      sfQueryInfo <- BulkApiParams.findByName(request.objectName).toTry(noneErrorMessage = s"invalid object name ${request.objectName}")
       createJobRequest = CreateJobRequest(sfQueryInfo.sfObjectName, sfQueryInfo.batchSize)
       jobId <- createJob(createJobRequest).toTry
       addQueryRequest = AddQueryRequest(sfQueryInfo.soql, jobId)

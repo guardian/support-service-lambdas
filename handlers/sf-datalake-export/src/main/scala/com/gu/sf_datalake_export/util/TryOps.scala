@@ -22,4 +22,11 @@ object TryOps {
     }
   }
 
+  implicit class OptionOps[SuccessType](option: Option[SuccessType]) {
+    def toTry(noneErrorMessage: String): Try[SuccessType] = option match {
+      case Some(successValue) => Success(successValue)
+      case None => Failure(LambdaException(noneErrorMessage))
+    }
+  }
+
 }

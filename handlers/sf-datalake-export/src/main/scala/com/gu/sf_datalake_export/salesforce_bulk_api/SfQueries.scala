@@ -44,6 +44,10 @@ object BulkApiParams {
     paymentCard,
     paymentFailure
   )
+
+  val byName = all.map(obj => obj.objectName -> obj).toMap
+
+  def findByName(stringName: String): Option[SfQueryInfo] = byName.get(ObjectName(stringName))
 }
 
 object SfQueries {
