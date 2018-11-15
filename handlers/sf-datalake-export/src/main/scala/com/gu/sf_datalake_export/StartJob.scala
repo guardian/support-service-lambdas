@@ -8,6 +8,7 @@ import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.salesforce.SalesforceAuthenticate.{SFAuthConfig, SFExportAuthConfig}
 import com.gu.salesforce.SalesforceClient
 import com.gu.sf_datalake_export.salesforce_bulk_api.AddQueryToJob.AddQueryRequest
+import com.gu.sf_datalake_export.salesforce_bulk_api.BulkApiParams.ObjectName
 import com.gu.sf_datalake_export.salesforce_bulk_api.CreateJob._
 import com.gu.sf_datalake_export.salesforce_bulk_api.{AddQueryToJob, BulkApiParams, CreateJob}
 import com.gu.sf_datalake_export.util.TryOps._
@@ -45,9 +46,9 @@ object StartJob {
     getCurrentDate: () => LocalDate,
     createJob: CreateJobRequest => ClientFailableOp[JobId],
     addQuery: AddQueryRequest => ClientFailableOp[Unit]
-  )(request: WireRequest): Try[WireResponse] = {
+  )(objectName: ObjectName): Try[WireResponse] = {
     for {
-      sfQueryInfo <- BulkApiParams.findByName(request.objectName).toTry(noneErrorMessage = s"invalid object name ${request.objectName}")
+      sfQueryInfo <- BulkApiParams.byName.get(objectName).toTry(noneErrorMessage = s"invalid object name ${objectName.value}")
       createJobRequest = CreateJobRequest(sfQueryInfo.sfObjectName, sfQueryInfo.batchSize)
       jobId <- createJob(createJobRequest).toTry
       addQueryRequest = AddQueryRequest(sfQueryInfo.soql, jobId)
@@ -69,7 +70,7 @@ object StartJob {
       createJobOp = sfClient.wrapWith(JsonHttp.post).wrapWith(CreateJob.wrapper).runRequest _
       addQueryToJobOp = sfClient.wrapWith(AddQueryToJob.wrapper).runRequest _
       wiredSteps = steps(getCurrentDate, createJobOp, addQueryToJobOp) _
-      response <- wiredSteps(request)
+      response <- wiredSteps(ObjectName(request.objectName))
     } yield response
   }
 

@@ -3,9 +3,9 @@ package com.com.gu.sf_datalake_export
 import java.time.LocalDate
 
 import com.gu.sf_datalake_export.StartJob
-import com.gu.sf_datalake_export.StartJob.{WireRequest, WireResponse}
+import com.gu.sf_datalake_export.StartJob.WireResponse
 import com.gu.sf_datalake_export.salesforce_bulk_api.AddQueryToJob.AddQueryRequest
-import com.gu.sf_datalake_export.salesforce_bulk_api.BulkApiParams.{BatchSize, SfObjectName, Soql}
+import com.gu.sf_datalake_export.salesforce_bulk_api.BulkApiParams.{BatchSize, ObjectName, SfObjectName, Soql}
 import com.gu.sf_datalake_export.salesforce_bulk_api.CreateJob.{CreateJobRequest, JobId}
 import com.gu.sf_datalake_export.salesforce_bulk_api.SfQueries
 import com.gu.util.handlers.LambdaException
@@ -39,11 +39,11 @@ class StartJobStepTest extends FlatSpec with Matchers {
       jobId = "someJobId",
       jobName = "Contact_2018-10-22"
     )
-    testSteps(WireRequest("Contact")) shouldBe Success(expectedResponse)
+    testSteps(ObjectName("Contact")) shouldBe Success(expectedResponse)
   }
 
   it should "return failure if object in request is unknown" in {
-    testSteps(WireRequest("unknownObject")) shouldBe Failure(LambdaException("invalid object name unknownObject"))
+    testSteps(ObjectName("unknownObject")) shouldBe Failure(LambdaException("invalid object name unknownObject"))
   }
 
 

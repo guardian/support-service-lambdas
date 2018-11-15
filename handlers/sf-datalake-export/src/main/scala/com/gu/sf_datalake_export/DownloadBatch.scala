@@ -66,7 +66,6 @@ object DownloadBatches {
     )
   }
 
-
   def downloadBatch
   (
     uploadFile: File => Try[_],
@@ -87,7 +86,6 @@ object DownloadBatches {
       _ <- uploadFile(file)
     } yield ()
   }
-
 
   def downloadFirst(downloadBatch: (JobName, JobId, BatchId) => Try[Unit])(
     jobId: JobId,
@@ -144,7 +142,4 @@ object DownloadBatches {
     } yield response
 
   }
-
-
 }
-
