@@ -48,15 +48,15 @@ object DownloadBatches {
     )
   }
 
-  case class WireIO(
+  case class WireState(
     jobName: String,
     jobId: String,
     batches: List[WireBatch],
     done: Boolean = false
   )
 
-  object WireIO {
-    implicit val format = Json.using[Json.WithDefaultValues].format[WireIO]
+  object WireState {
+    implicit val format = Json.using[Json.WithDefaultValues].format[WireState]
   }
 
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
@@ -93,10 +93,10 @@ object DownloadBatches {
     jobId: JobId,
     jobName: JobName,
     pendingBatches: List[BatchInfo]
-  ): Try[WireIO] = pendingBatches match {
+  ): Try[WireState] = pendingBatches match {
 
     case Nil => Success(
-      WireIO(
+      WireState(
         jobId = jobId.value,
         jobName = jobName.value,
         batches = Nil,
@@ -105,7 +105,7 @@ object DownloadBatches {
     )
 
     case pendingJob :: tail => downloadBatch(jobName, jobId, pendingJob.batchId).map { _ =>
-      WireIO(
+      WireState(
         jobId = jobId.value,
         jobName = jobName.value,
         batches = tail.map(WireBatch.fromBatch),
@@ -116,7 +116,7 @@ object DownloadBatches {
 
   def steps(
     downloadBatch: (JobName, JobId, BatchId) => Try[Unit]
-  )(request: WireIO): Try[WireIO] = for {
+  )(request: WireState): Try[WireState] = for {
     batches <- IList(request.batches: _*).traverse(WireBatch.toBatch).map(_.toList).toTry
     pendingBatches = batches.filter(b => b.state == Completed)
     jobId = JobId(request.jobId)
@@ -130,7 +130,7 @@ object DownloadBatches {
     getResponse: Request => Response,
     s3Write: PutObjectRequest => Try[PutObjectResult],
 
-  )(request: WireIO): Try[WireIO] = {
+  )(request: WireState): Try[WireState] = {
     val loadConfig = LoadConfigModule(stage, fetchString)
     for {
       sfConfig <- loadConfig[SFAuthConfig](SFExportAuthConfig.location, SFAuthConfig.reads).leftMap(_.error).toTry

@@ -1,7 +1,7 @@
 package com.com.gu.sf_datalake_export
 
 import com.gu.sf_datalake_export.DownloadBatches
-import com.gu.sf_datalake_export.DownloadBatches.{WireBatch, WireIO}
+import com.gu.sf_datalake_export.DownloadBatches.{WireBatch, WireState}
 import com.gu.sf_datalake_export.salesforce_bulk_api.CreateJob.JobId
 import com.gu.sf_datalake_export.salesforce_bulk_api.GetBatchResult.{DownloadResultsRequest, JobName}
 import com.gu.sf_datalake_export.salesforce_bulk_api.GetBatchResultId.{BatchResultId, GetBatchResultRequest}
@@ -24,29 +24,29 @@ class DownloadBatchTest extends FlatSpec with Matchers {
   val wireBatch1 = WireBatch(batchId = "batch1", state = "Completed")
   val wireBatch2 = WireBatch(batchId = "batch2", state = "Completed")
 
-  val twoBatchRequest = WireIO(
+  val twoBatchState = WireState(
     jobName = "someJobName",
     jobId = "someJobId",
     batches = List(wireBatch1, wireBatch2)
   )
 
   "DownloadBatches.steps" should "download first batch in request and remove it from response " in {
-    val requestWithoutBatch1 = twoBatchRequest.copy(batches = List(wireBatch2))
-    DownloadBatches.steps(fakeDownloadBatch)(twoBatchRequest) shouldBe Success(requestWithoutBatch1)
+    val requestWithoutBatch1 = twoBatchState.copy(batches = List(wireBatch2))
+    DownloadBatches.steps(fakeDownloadBatch)(twoBatchState) shouldBe Success(requestWithoutBatch1)
   }
 
   it should "set done to true if downloading last batch" in {
-    val oneBatchRequest = twoBatchRequest.copy(batches = List(wireBatch1))
-    val doneResponse = oneBatchRequest.copy(batches = List.empty, done = true)
+    val oneBatchState = twoBatchState.copy(batches = List(wireBatch1))
+    val doneResponse = oneBatchState.copy(batches = List.empty, done = true)
 
-    DownloadBatches.steps(fakeDownloadBatch)(oneBatchRequest) shouldBe Success(doneResponse)
+    DownloadBatches.steps(fakeDownloadBatch)(oneBatchState) shouldBe Success(doneResponse)
   }
 
   it should "set done to true if there are no batches to download" in {
-    val noBatchRequest = twoBatchRequest.copy(batches = List.empty)
-    val doneResponse = noBatchRequest.copy(done = true)
+    val noBatchState = twoBatchState.copy(batches = List.empty)
+    val doneResponse = noBatchState.copy(done = true)
 
-    DownloadBatches.steps(fakeDownloadBatch)(noBatchRequest) shouldBe Success(doneResponse)
+    DownloadBatches.steps(fakeDownloadBatch)(noBatchState) shouldBe Success(doneResponse)
   }
 
 
