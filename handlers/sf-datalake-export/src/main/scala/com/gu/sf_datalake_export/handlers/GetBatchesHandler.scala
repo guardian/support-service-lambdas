@@ -1,4 +1,4 @@
-package com.gu.sf_datalake_export
+package com.gu.sf_datalake_export.handlers
 
 import java.io.{InputStream, OutputStream}
 
@@ -9,17 +9,16 @@ import com.gu.salesforce.SalesforceClient
 import com.gu.sf_datalake_export.salesforce_bulk_api.CreateJob.JobId
 import com.gu.sf_datalake_export.salesforce_bulk_api.GetJobBatches
 import com.gu.sf_datalake_export.salesforce_bulk_api.GetJobBatches._
-import com.gu.sf_datalake_export.util.TryOps._
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.handlers.JsonHandler
 import okhttp3.{Request, Response}
 import play.api.libs.json.Json
-
+import com.gu.sf_datalake_export.util.TryOps._
 import scala.util.Try
 
-object GetBatches {
+object GetBatchesHandler {
 
   case class WireRequest(
     jobId: String,

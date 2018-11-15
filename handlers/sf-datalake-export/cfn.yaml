@@ -54,7 +54,7 @@ Resources:
       Code:
         S3Bucket: zuora-auto-cancel-dist
         S3Key: !Sub membership/${Stage}/sf-datalake-export/sf-datalake-export.jar
-      Handler: com.gu.sf_datalake_export.StartJob::apply
+      Handler: com.gu.sf_datalake_export.handlers.StartJobHandler::apply
       Environment:
         Variables:
           Stage: !Ref Stage
@@ -103,7 +103,7 @@ Resources:
       Code:
         S3Bucket: zuora-auto-cancel-dist
         S3Key: !Sub membership/${Stage}/sf-datalake-export/sf-datalake-export.jar
-      Handler: com.gu.sf_datalake_export.GetBatches::apply
+      Handler: com.gu.sf_datalake_export.handlers.GetBatchesHandler::apply
       Environment:
         Variables:
           Stage: !Ref Stage
@@ -167,7 +167,7 @@ Resources:
       Code:
         S3Bucket: zuora-auto-cancel-dist
         S3Key: !Sub membership/${Stage}/sf-datalake-export/sf-datalake-export.jar
-      Handler: com.gu.sf_datalake_export.DownloadBatches::apply
+      Handler: com.gu.sf_datalake_export.handlers.DownloadBatchHandler::apply
       Environment:
         Variables:
           Stage: !Ref Stage
@@ -216,7 +216,7 @@ Resources:
       Code:
         S3Bucket: zuora-auto-cancel-dist
         S3Key: !Sub membership/${Stage}/sf-datalake-export/sf-datalake-export.jar
-      Handler: com.gu.sf_datalake_export.EndJob::apply
+      Handler: com.gu.sf_datalake_export.handlers.EndJobHandler::apply
       Environment:
         Variables:
           Stage: !Ref Stage

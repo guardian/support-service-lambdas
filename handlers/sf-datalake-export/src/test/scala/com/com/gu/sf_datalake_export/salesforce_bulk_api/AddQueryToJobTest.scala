@@ -16,8 +16,6 @@ class AddQueryToJobTest extends FlatSpec with Matchers {
       jobId = JobId("someId")
     )
 
-    val expectedBody = BodyAsString("Select something from somewhere")
-
     val expectedMethod = PostMethod(
       body = BodyAsString("Select something from somewhere"),
       contentType = ContentType("text/csv")
@@ -26,7 +24,7 @@ class AddQueryToJobTest extends FlatSpec with Matchers {
     val expected = new StringHttpRequest(
       requestMethod = expectedMethod,
       relativePath = RelativePath("/services/async/44.0/job/someId/batch"),
-      urlParams = UrlParams.empty,
+      urlParams = UrlParams.empty
     )
 
     val actual = AddQueryToJob.toRequest(addQueryRequest)

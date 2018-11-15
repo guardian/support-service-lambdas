@@ -1,4 +1,4 @@
-package com.gu.sf_datalake_export
+package com.gu.sf_datalake_export.handlers
 
 import java.io.{InputStream, OutputStream}
 
@@ -13,6 +13,7 @@ import com.gu.sf_datalake_export.salesforce_bulk_api.GetBatchResultId.{BatchResu
 import com.gu.sf_datalake_export.salesforce_bulk_api.GetJobBatches._
 import com.gu.sf_datalake_export.salesforce_bulk_api.S3UploadFile.{File, FileContent, FileName}
 import com.gu.sf_datalake_export.salesforce_bulk_api.{GetBatchResult, GetBatchResultId, S3UploadFile}
+import com.gu.sf_datalake_export.util.TryOps.{ClientFailableOpsOp, DisjunctionOps}
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config.{LoadConfigModule, Stage}
@@ -23,11 +24,10 @@ import okhttp3.{Request, Response}
 import play.api.libs.json.Json
 import scalaz.IList
 import scalaz.syntax.traverse.ToTraverseOps
-import com.gu.sf_datalake_export.util.TryOps.{ClientFailableOpsOp, DisjunctionOps}
-
 import scala.util.{Success, Try}
 
-object DownloadBatches {
+object DownloadBatch {
+  import com.gu.sf_datalake_export.util.TryOps._
 
   case class WireBatch(
     batchId: String,
@@ -66,15 +66,15 @@ object DownloadBatches {
     )
   }
 
-  def downloadBatch
-  (
+  def download(
     uploadFile: File => Try[_],
     getBatchResultId: GetBatchResultRequest => ClientFailableOp[BatchResultId],
-    getBatchResult: DownloadResultsRequest => ClientFailableOp[FileContent],
+    getBatchResult: DownloadResultsRequest => ClientFailableOp[FileContent]
   )(
     jobName: JobName,
     jobId: JobId,
-    batchId: BatchId): Try[Unit] = {
+    batchId: BatchId
+  ): Try[Unit] = {
     val getIdRequest = GetBatchResultRequest(jobId, batchId)
     logger.info(s"downloading $getIdRequest")
     for {
@@ -126,8 +126,7 @@ object DownloadBatches {
     stage: Stage,
     fetchString: StringFromS3,
     getResponse: Request => Response,
-    s3Write: PutObjectRequest => Try[PutObjectResult],
-
+    s3Write: PutObjectRequest => Try[PutObjectResult]
   )(request: WireState): Try[WireState] = {
     val loadConfig = LoadConfigModule(stage, fetchString)
     for {
@@ -136,7 +135,7 @@ object DownloadBatches {
       wiredGetBatchResultId = sfClient.wrapWith(GetBatchResultId.wrapper).runRequest _
       wiredGetBatchResult = sfClient.wrapWith(GetBatchResult.wrapper).runRequest _
       uploadFile = S3UploadFile(stage, s3Write) _
-      wiredDownloadBatch = downloadBatch(uploadFile, wiredGetBatchResultId, wiredGetBatchResult) _
+      wiredDownloadBatch = download(uploadFile, wiredGetBatchResultId, wiredGetBatchResult) _
       response <- steps(wiredDownloadBatch)(request)
 
     } yield response

@@ -2,7 +2,7 @@ package com.manual_test
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
-import com.gu.sf_datalake_export.DownloadBatches
+import com.gu.sf_datalake_export.handlers.DownloadBatch
 
 //This is just a way to locally run the lambda in dev
 object DownloadBatchManualTest extends App {
@@ -23,7 +23,7 @@ object DownloadBatchManualTest extends App {
 
   val testInputStream = new ByteArrayInputStream(request.getBytes)
   val testOutput = new ByteArrayOutputStream()
-  DownloadBatches(testInputStream, testOutput, null)
+  DownloadBatch(testInputStream, testOutput, null)
 
   val response = new String(testOutput.toByteArray)
   println(response)

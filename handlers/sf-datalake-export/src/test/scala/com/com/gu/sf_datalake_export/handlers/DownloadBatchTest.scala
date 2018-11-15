@@ -1,7 +1,7 @@
-package com.com.gu.sf_datalake_export
+package com.com.gu.sf_datalake_export.handlers
 
-import com.gu.sf_datalake_export.DownloadBatches
-import com.gu.sf_datalake_export.DownloadBatches.{WireBatch, WireState}
+import com.gu.sf_datalake_export.handlers.DownloadBatch
+import com.gu.sf_datalake_export.handlers.DownloadBatch.{WireBatch, WireState}
 import com.gu.sf_datalake_export.salesforce_bulk_api.CreateJob.JobId
 import com.gu.sf_datalake_export.salesforce_bulk_api.GetBatchResult.{DownloadResultsRequest, JobName}
 import com.gu.sf_datalake_export.salesforce_bulk_api.GetBatchResultId.{BatchResultId, GetBatchResultRequest}
@@ -32,23 +32,22 @@ class DownloadBatchTest extends FlatSpec with Matchers {
 
   "DownloadBatches.steps" should "download first batch in request and remove it from response " in {
     val requestWithoutBatch1 = twoBatchState.copy(batches = List(wireBatch2))
-    DownloadBatches.steps(fakeDownloadBatch)(twoBatchState) shouldBe Success(requestWithoutBatch1)
+    DownloadBatch.steps(fakeDownloadBatch)(twoBatchState) shouldBe Success(requestWithoutBatch1)
   }
 
   it should "set done to true if downloading last batch" in {
     val oneBatchState = twoBatchState.copy(batches = List(wireBatch1))
     val doneResponse = oneBatchState.copy(batches = List.empty, done = true)
 
-    DownloadBatches.steps(fakeDownloadBatch)(oneBatchState) shouldBe Success(doneResponse)
+    DownloadBatch.steps(fakeDownloadBatch)(oneBatchState) shouldBe Success(doneResponse)
   }
 
   it should "set done to true if there are no batches to download" in {
     val noBatchState = twoBatchState.copy(batches = List.empty)
     val doneResponse = noBatchState.copy(done = true)
 
-    DownloadBatches.steps(fakeDownloadBatch)(noBatchState) shouldBe Success(doneResponse)
+    DownloadBatch.steps(fakeDownloadBatch)(noBatchState) shouldBe Success(doneResponse)
   }
-
 
   "DownloadBatches.downloadBatch" should "download file contents and upload to s3 " in {
     def validatingUploadFile(file: File): Try[Unit] = {
@@ -73,7 +72,7 @@ class DownloadBatchTest extends FlatSpec with Matchers {
       ClientSuccess(FileContent("someFileContent"))
     }
 
-    val wiredDownloadBatch = DownloadBatches.downloadBatch(validatingUploadFile, validatingGetBatchResultId, validatingGetBatchResult) _
+    val wiredDownloadBatch = DownloadBatch.download(validatingUploadFile, validatingGetBatchResultId, validatingGetBatchResult) _
 
     wiredDownloadBatch(JobName("someJobName"), JobId("someJobId"), BatchId("someBatchId")) shouldBe Success(())
   }

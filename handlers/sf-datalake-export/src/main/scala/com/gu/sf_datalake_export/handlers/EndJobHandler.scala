@@ -1,4 +1,4 @@
-package com.gu.sf_datalake_export
+package com.gu.sf_datalake_export.handlers
 
 import java.io.{InputStream, OutputStream}
 
@@ -7,19 +7,18 @@ import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.salesforce.SalesforceAuthenticate.{SFAuthConfig, SFExportAuthConfig}
 import com.gu.salesforce.SalesforceClient
 import com.gu.sf_datalake_export.salesforce_bulk_api.CloseJob
-import com.gu.sf_datalake_export.salesforce_bulk_api.CreateJob._
-import com.gu.sf_datalake_export.util.TryOps._
+import com.gu.sf_datalake_export.salesforce_bulk_api.CreateJob.JobId
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.handlers.JsonHandler
 import com.gu.util.resthttp.JsonHttp
 import okhttp3.{Request, Response}
-import play.api.libs.json._
-
+import play.api.libs.json.{Json, Reads}
+import com.gu.sf_datalake_export.util.TryOps._
 import scala.util.Try
 
-object EndJob {
+object EndJobHandler {
 
   case class WireRequest(
     jobId: String
@@ -63,4 +62,3 @@ object EndJob {
   }
 
 }
-

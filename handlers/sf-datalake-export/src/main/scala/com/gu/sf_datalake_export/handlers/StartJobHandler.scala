@@ -1,17 +1,16 @@
-package com.gu.sf_datalake_export
+package com.gu.sf_datalake_export.handlers
 
 import java.io.{InputStream, OutputStream}
 import java.time.LocalDate
-
+import com.gu.sf_datalake_export.util.TryOps._
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.salesforce.SalesforceAuthenticate.{SFAuthConfig, SFExportAuthConfig}
 import com.gu.salesforce.SalesforceClient
 import com.gu.sf_datalake_export.salesforce_bulk_api.AddQueryToJob.AddQueryRequest
 import com.gu.sf_datalake_export.salesforce_bulk_api.BulkApiParams.ObjectName
-import com.gu.sf_datalake_export.salesforce_bulk_api.CreateJob._
+import com.gu.sf_datalake_export.salesforce_bulk_api.CreateJob.{CreateJobRequest, JobId}
 import com.gu.sf_datalake_export.salesforce_bulk_api.{AddQueryToJob, BulkApiParams, CreateJob}
-import com.gu.sf_datalake_export.util.TryOps._
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config.{LoadConfigModule, Stage}
@@ -23,7 +22,7 @@ import play.api.libs.json.{Json, Reads}
 
 import scala.util.Try
 
-object StartJob {
+object StartJobHandler {
 
   case class WireRequest(
     objectName: String
@@ -85,4 +84,3 @@ object StartJob {
   }
 
 }
-

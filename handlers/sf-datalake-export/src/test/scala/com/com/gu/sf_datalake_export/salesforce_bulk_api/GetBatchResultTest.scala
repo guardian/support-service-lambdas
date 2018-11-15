@@ -18,12 +18,10 @@ class GetBatchResultTest extends FlatSpec with Matchers {
     val request = DownloadResultsRequest(JobId("someJobId"), BatchId("someBatchId"), BatchResultId("someBatchResultId"))
     val actual = GetBatchResult.toRequest(request)
 
-
     val expected = new StringHttpRequest(
       requestMethod = GetMethod,
       relativePath = RelativePath("/services/async/44.0/job/someJobId/batch/someBatchId/result/someBatchResultId"),
-      urlParams = UrlParams.empty,
-
+      urlParams = UrlParams.empty
     )
 
     actual should be(expected)

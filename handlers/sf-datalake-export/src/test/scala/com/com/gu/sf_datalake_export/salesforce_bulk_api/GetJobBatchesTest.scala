@@ -14,20 +14,17 @@ class GetJobBatchesTest extends FlatSpec with Matchers {
 
     val actual = GetJobBatches.toRequest(JobId("someId"))
 
-    val expectedBody = BodyAsString("Select something from somewhere")
-
     val expected = new StringHttpRequest(
       requestMethod = GetMethod,
       relativePath = RelativePath("/services/async/44.0/job/someId/batch"),
-      urlParams = UrlParams.empty,
-
+      urlParams = UrlParams.empty
     )
 
     actual should be(expected)
   }
 
   it should "create response" in {
-    val sfResponse =  """<?xml version="1.0" encoding="UTF-8"?>
+    val sfResponse = """<?xml version="1.0" encoding="UTF-8"?>
         |<batchInfoList
         |   xmlns="http://www.force.com/2009/06/asyncapi/dataload">
         | <batchInfo>
