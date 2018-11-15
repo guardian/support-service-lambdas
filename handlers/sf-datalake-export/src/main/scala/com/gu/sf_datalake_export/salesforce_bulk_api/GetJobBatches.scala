@@ -1,7 +1,6 @@
 package com.gu.sf_datalake_export.salesforce_bulk_api
 
 import com.gu.sf_datalake_export.salesforce_bulk_api.CreateJob.JobId
-import com.gu.util.resthttp.HttpOp
 import com.gu.util.resthttp.HttpOp.HttpOpWrapper
 import com.gu.util.resthttp.JsonHttp.{GetMethod, StringHttpRequest}
 import com.gu.util.resthttp.RestRequestMaker.{BodyAsString, RelativePath, UrlParams}

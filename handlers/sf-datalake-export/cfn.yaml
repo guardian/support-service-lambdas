@@ -94,7 +94,7 @@ Resources:
           - Effect: Allow
             Action: s3:GetObject
             Resource: !Sub "arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/sfExportAuth-${Stage}*.json"
-  BatchStateLambda:
+  GetBatchesLambda:
     Type: AWS::Lambda::Function
     Properties:
       Description: get state of batches related to an salesforce bulk api query
@@ -274,9 +274,9 @@ Resources:
                   "Seconds": 5,
                   "Next": "getBatchState"
                 },
-                "getBatchState": {
+                "getBatches": {
                   "Type": "Task",
-                  "Resource": "${batchStateArn}",
+                  "Resource": "${getBatchesArn}",
                   "Next": "checkPendingBatches",
                   "Retry": [{
                               "ErrorEquals": ["States.ALL"],
@@ -330,7 +330,7 @@ Resources:
             }
       - {
         startJobArn: !GetAtt [ StartJob, Arn ],
-        batchStateArn: !GetAtt [ BatchStateLambda, Arn ],
+        getBatchesArn: !GetAtt [ GetBatchesLambda, Arn ],
         downloadBatchArn: !GetAtt [ DownloadBatch, Arn ],
         endJobArn: !GetAtt [ EndJob, Arn ]
       }
