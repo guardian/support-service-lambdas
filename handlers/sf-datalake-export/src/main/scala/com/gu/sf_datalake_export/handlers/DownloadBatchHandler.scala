@@ -26,7 +26,7 @@ import scalaz.IList
 import scalaz.syntax.traverse.ToTraverseOps
 import scala.util.{Success, Try}
 
-object DownloadBatch {
+object DownloadBatchHandler {
   import com.gu.sf_datalake_export.util.TryOps._
 
   case class WireBatch(
