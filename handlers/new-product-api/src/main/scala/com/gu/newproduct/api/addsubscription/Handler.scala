@@ -27,7 +27,7 @@ import com.gu.newproduct.api.addsubscription.zuora.GetContacts.BillToContact
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.WireModel.GetContactsResponse
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{DirectDebit, PaymentMethod, PaymentMethodWire}
 import com.gu.newproduct.api.addsubscription.zuora.{GetContacts, _}
-import com.gu.newproduct.api.productcatalog.PlanId.MonthlyContribution
+import com.gu.newproduct.api.productcatalog.PlanId.{AnnualContribution, MonthlyContribution}
 import com.gu.newproduct.api.productcatalog.ZuoraIds.{PlanAndCharge, ProductRatePlanId}
 import com.gu.newproduct.api.productcatalog._
 import com.gu.util.Logging
@@ -100,7 +100,7 @@ object Steps {
   ): Future[ApiResponse] = (for {
     request <- apiGatewayRequest.bodyAsCaseClass[AddSubscriptionRequest]().withLogging("parsed request").toAsync
     subscriptionName <- request.planId match {
-      case MonthlyContribution => addContribution(request)
+      case MonthlyContribution | AnnualContribution => addContribution(request)
       case _ => addVoucher(request)
     }
   } yield ApiGatewayResponse(body = AddedSubscription(subscriptionName.value), statusCode = "200")).apiResponse

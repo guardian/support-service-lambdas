@@ -119,7 +119,8 @@ object WireModel {
       val contributionProduct = WireProduct(
         label = "Contribution",
         plans = List(
-          WirePlanInfo.fromPlan(catalog.monthlyContribution)
+          WirePlanInfo.fromPlan(catalog.monthlyContribution),
+          WirePlanInfo.fromPlan(catalog.annualContribution)
         )
       )
       WireCatalog(List(contributionProduct, voucherProduct))

@@ -29,7 +29,7 @@ object NewProductApi {
       maybeCutOffDay = None,
       maybeStartDelay = None
     )
-    val monthlyContributionRules = StartDateRules(windowRule = Some(monthlyContributionWindow))
+    val contributionRules = StartDateRules(windowRule = Some(monthlyContributionWindow))
 
     def planWithPayment(
       planId: PlanId,
@@ -48,7 +48,8 @@ object NewProductApi {
       voucherSaturdayPlus = planWithPayment(VoucherSaturdayPlus, PlanDescription("Saturday+"), voucherSaturdayDateRules),
       voucherSunday = planWithPayment(VoucherSunday, PlanDescription("Sunday"), voucherSundayDateRules),
       voucherSundayPlus = planWithPayment(VoucherSundayPlus, PlanDescription("Sunday+"), voucherSundayDateRules),
-      monthlyContribution = planWithPayment(MonthlyContribution, PlanDescription("Monthly"), monthlyContributionRules)
+      monthlyContribution = planWithPayment(MonthlyContribution, PlanDescription("Monthly"), contributionRules),
+      annualContribution = planWithPayment(AnnualContribution, PlanDescription("Annual"), contributionRules),
     )
   }
 
