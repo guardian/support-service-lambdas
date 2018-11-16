@@ -107,7 +107,9 @@ object SfQueries {
       |Salutation,
       |Title,
       |Voucher_Fulfilment_Cut_Off_Date__c,
-      |Voucher_Start_Date__c
+      |Voucher_Start_Date__c,
+      |RecordType.Name,
+      |LastName
       |from Contact
       |where
       |Account.GDPR_Deletion_Pending__c = false
@@ -185,6 +187,7 @@ object SfQueries {
       |Zuora_Subscription_Salesforce_ID__c,
       |Zuora_Subscription_Name__c
       |from SF_Subscription__c
+      |where Buyer__r.Account.GDPR_Deletion_Pending__c = false
       |
   """.stripMargin
 
@@ -274,6 +277,8 @@ object SfQueries {
       |SystemModstamp
       |from
       |Cancellation_Survey_Voluntary__c
+      |where Contact__r.Account.GDPR_Deletion_Pending__c = false
+      |
     """.stripMargin
 
   val cardExpiry =
@@ -324,6 +329,7 @@ object SfQueries {
       |Term_End_Date__c
       |from
       |Card_Expiry__c
+      |where Contact__r.Account.GDPR_Deletion_Pending__c = false
     """.stripMargin
 
   val cases =
@@ -388,6 +394,7 @@ object SfQueries {
       |WinBack_Email__c
       |from
       |Case
+      |where Account.GDPR_Deletion_Pending__c = false
     """.stripMargin
 
   val caseComment =
@@ -431,6 +438,7 @@ object SfQueries {
       |SystemModstamp
       |from
       |CS_Survey__c
+      |where Related_to_Contact__r.Account.GDPR_Deletion_Pending__c = false
     """.stripMargin
 
   val discount =
@@ -462,6 +470,7 @@ object SfQueries {
       |SystemModstamp
       |from
       |Discount__c
+      |where Contact__r.Account.GDPR_Deletion_Pending__c = false
     """.stripMargin
 
   val fulfilmentProcessInformation =
@@ -490,8 +499,10 @@ object SfQueries {
       |SystemModstamp
       |from
       |Fulfilment_Process_Information__c
+      |where Contact__r.Account.GDPR_Deletion_Pending__c =false
     """.stripMargin
 
+  //TODO do we need to do gdpr exclusions on this ? how?
   //the object Imovo_Contract__c doesn't seem to exist
   val imovoContract =
     """
@@ -520,6 +531,7 @@ object SfQueries {
       |Imovo_Contract__c
     """.stripMargin
 
+  //TODO IS THIS THE CORRECT WAY TO DO GDPR EXCLUSION ? IM USING THE ZUORA FIELD INSTEAD OF THE ACCOUNT BOOLEAN
   val paymentCard =
     """
       |select
@@ -551,6 +563,7 @@ object SfQueries {
       |Zuora_ReferenceId__c
       |from
       |Payment_Card__c
+      |where Zuora_BillingAccount__r.ProcessingAdvice__c != 'DoNotProcess'
     """.stripMargin
 
   //Last_Attempt_Error_Code__c doesnt seem to exist
@@ -618,5 +631,6 @@ object SfQueries {
       |SystemModstamp
       |from
       |Payment_Failure__c
+      |where Contact__r.Account.GDPR_Deletion_Pending__c = false
     """.stripMargin
 }

@@ -9,12 +9,12 @@ import com.gu.util.config.Stage
 
 import scala.util.Try
 object S3UploadFile extends Logging {
-
+  case class BasePath(value: String) extends AnyVal
   case class FileContent(value: String) extends AnyVal
   case class FileName(value: String) extends AnyVal
   case class File(fileName: FileName, content: FileContent)
   def apply(
-    stage: Stage,
+    basePath: BasePath,
     s3Write: PutObjectRequest => Try[PutObjectResult]
   )(
     file: File
@@ -25,7 +25,8 @@ object S3UploadFile extends Logging {
     val uploadMetadata = new ObjectMetadata()
     uploadMetadata.setContentLength(bytes.length.toLong)
     val putRequest = new PutObjectRequest(
-      s"gu-salesforce-export-test/${stage.value}/raw",
+
+      basePath.value,
       file.fileName.value,
       new ByteArrayInputStream(bytes),
       uploadMetadata

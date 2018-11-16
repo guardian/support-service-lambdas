@@ -11,9 +11,8 @@ import com.gu.sf_datalake_export.salesforce_bulk_api.CreateJob.JobId
 import com.gu.sf_datalake_export.salesforce_bulk_api.GetBatchResult.{DownloadResultsRequest, JobName}
 import com.gu.sf_datalake_export.salesforce_bulk_api.GetBatchResultId.{BatchResultId, GetBatchResultRequest}
 import com.gu.sf_datalake_export.salesforce_bulk_api.GetJobBatches._
-import com.gu.sf_datalake_export.salesforce_bulk_api.S3UploadFile.{File, FileContent, FileName}
+import com.gu.sf_datalake_export.salesforce_bulk_api.S3UploadFile.{BasePath, File, FileContent, FileName}
 import com.gu.sf_datalake_export.salesforce_bulk_api.{GetBatchResult, GetBatchResultId, S3UploadFile}
-import com.gu.sf_datalake_export.util.TryOps.{ClientFailableOpsOp, DisjunctionOps}
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config.{LoadConfigModule, Stage}
@@ -24,6 +23,7 @@ import okhttp3.{Request, Response}
 import play.api.libs.json.Json
 import scalaz.IList
 import scalaz.syntax.traverse.ToTraverseOps
+
 import scala.util.{Success, Try}
 
 object DownloadBatchHandler {
@@ -67,7 +67,7 @@ object DownloadBatchHandler {
   }
 
   def download(
-    uploadFile: File => Try[_],
+    uploadFile: (File) => Try[_],
     getBatchResultId: GetBatchResultRequest => ClientFailableOp[BatchResultId],
     getBatchResult: DownloadResultsRequest => ClientFailableOp[FileContent]
   )(
@@ -85,6 +85,11 @@ object DownloadBatchHandler {
       file = File(fileName, fileContent)
       _ <- uploadFile(file)
     } yield ()
+  }
+
+  def uploadBasePath(stage: Stage) = stage match {
+    case Stage("PROD") => BasePath(s"gu-salesforce-export-test/PROD/raw")
+    case Stage(stageName) => BasePath(s"gu-salesforce-export-test/$stageName/raw")
   }
 
   def downloadFirst(downloadBatch: (JobName, JobId, BatchId) => Try[Unit])(
@@ -134,7 +139,7 @@ object DownloadBatchHandler {
       sfClient <- SalesforceClient(getResponse, sfConfig).value.toTry
       wiredGetBatchResultId = sfClient.wrapWith(GetBatchResultId.wrapper).runRequest _
       wiredGetBatchResult = sfClient.wrapWith(GetBatchResult.wrapper).runRequest _
-      uploadFile = S3UploadFile(stage, s3Write) _
+      uploadFile = S3UploadFile(uploadBasePath(stage), s3Write) _
       wiredDownloadBatch = download(uploadFile, wiredGetBatchResultId, wiredGetBatchResult) _
       response <- steps(wiredDownloadBatch)(request)
 
