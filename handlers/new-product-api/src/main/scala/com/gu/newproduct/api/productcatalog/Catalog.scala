@@ -63,6 +63,7 @@ object PlanId {
 
   val supported = List(
     MonthlyContribution,
+    AnnualContribution,
     VoucherWeekend,
     VoucherEveryDay,
     VoucherSixDay,
