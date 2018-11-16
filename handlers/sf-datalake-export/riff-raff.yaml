@@ -1,0 +1,22 @@
+stacks:
+- membership
+regions:
+- eu-west-1
+deployments:
+  cfn:
+    type: cloud-formation
+    app: sf-datalake-export
+    parameters:
+      templatePath: cfn.yaml
+  sf-datalake-export:
+    type: aws-lambda
+    parameters:
+      fileName: sf-datalake-export.jar
+      bucket: zuora-auto-cancel-dist
+      prefixStack: false
+      functionNames:
+      - sf-start-export-job-
+      - sf-get-batch-state-
+      - sf-download-batch-
+      - sf-end-export-job-
+    dependencies: [cfn]

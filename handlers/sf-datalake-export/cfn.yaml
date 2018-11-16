@@ -1,0 +1,336 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: export salesforce data to the data lake
+
+Parameters:
+  Stage:
+    Description: Stage name
+    Type: String
+    AllowedValues:
+    - CODE
+    - PROD
+    Default: CODE
+Mappings:
+  StageMap:
+    CODE: #we should write into a bucket in the ophan account really
+      destBucketArn: "arn:aws:s3:::gu-salesforce-export-test/*"
+    PROD:
+      destBucketArn: "arn:aws:s3:::gu-salesforce-export-test/*"
+Resources:
+  StartJobRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: /
+      Policies:
+      - PolicyName: LambdaPolicy
+        PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            - lambda:InvokeFunction
+            Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/sf-start-export-job-${Stage}:log-stream:*"
+      - PolicyName: ReadPrivateCredentials
+        PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action: s3:GetObject
+            Resource: !Sub "arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/sfExportAuth-${Stage}*.json"
+  StartJob:
+    Type: AWS::Lambda::Function
+    Properties:
+      Description: start a sf export job
+      FunctionName:
+        !Sub sf-start-export-job-${Stage}
+      Code:
+        S3Bucket: zuora-auto-cancel-dist
+        S3Key: !Sub membership/${Stage}/sf-datalake-export/sf-datalake-export.jar
+      Handler: com.gu.sf_datalake_export.handlers.StartJobHandler::apply
+      Environment:
+        Variables:
+          Stage: !Ref Stage
+      Role:
+        !GetAtt StartJobRole.Arn
+      MemorySize: 1536
+      Runtime: java8
+      Timeout: 300
+    DependsOn:
+    - StartJobRole
+  BatchStateRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: /
+      Policies:
+      - PolicyName: LambdaPolicy
+        PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            - lambda:InvokeFunction
+            Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/sf-get-batch-state-${Stage}:log-stream:*"
+      - PolicyName: ReadPrivateCredentials
+        PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action: s3:GetObject
+            Resource: !Sub "arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/sfExportAuth-${Stage}*.json"
+  GetBatchesLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      Description: get state of batches related to an salesforce bulk api query
+      FunctionName:
+        !Sub sf-get-batch-state-${Stage}
+      Code:
+        S3Bucket: zuora-auto-cancel-dist
+        S3Key: !Sub membership/${Stage}/sf-datalake-export/sf-datalake-export.jar
+      Handler: com.gu.sf_datalake_export.handlers.GetBatchesHandler::apply
+      Environment:
+        Variables:
+          Stage: !Ref Stage
+      Role:
+        !GetAtt BatchStateRole.Arn
+      MemorySize: 1536
+      Runtime: java8
+      Timeout: 300
+    DependsOn:
+    - BatchStateRole
+  DownloadBatchRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: /
+      Policies:
+      - PolicyName: LambdaPolicy
+        PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            - lambda:InvokeFunction
+            Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/sf-get-batch-state-${Stage}:log-stream:*"
+      - PolicyName: ReadPrivateCredentials
+        PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action: s3:GetObject
+            Resource: !Sub "arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/sfExportAuth-${Stage}*.json"
+      - PolicyName: DestBucket
+        PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action:
+            - s3:AbortMultipartUpload
+            - s3:DeleteObject
+            - s3:GetObject
+            - s3:GetObjectAcl
+            - s3:GetBucketAcl
+            - s3:ListBucket
+            - s3:PutObject
+            - s3:GetObjectVersion
+            - s3:DeleteObjectVersion
+            Resource: !FindInMap [StageMap, !Ref Stage, destBucketArn]
+  DownloadBatch:
+    Type: AWS::Lambda::Function
+    Properties:
+      Description: download result of completed bulk api batches into s3
+      FunctionName:
+        !Sub sf-download-batch-${Stage}
+      Code:
+        S3Bucket: zuora-auto-cancel-dist
+        S3Key: !Sub membership/${Stage}/sf-datalake-export/sf-datalake-export.jar
+      Handler: com.gu.sf_datalake_export.handlers.DownloadBatchHandler::apply
+      Environment:
+        Variables:
+          Stage: !Ref Stage
+      Role:
+        !GetAtt DownloadBatchRole.Arn
+      MemorySize: 1536
+      Runtime: java8
+      Timeout: 900
+    DependsOn:
+    - DownloadBatchRole
+  EndJobRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: /
+      Policies:
+      - PolicyName: LambdaPolicy
+        PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            - lambda:InvokeFunction
+            Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/sf-end-export-job-${Stage}:log-stream:*"
+      - PolicyName: ReadPrivateCredentials
+        PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action: s3:GetObject
+            Resource: !Sub "arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/sfExportAuth-${Stage}*.json"
+  EndJob:
+    Type: AWS::Lambda::Function
+    Properties:
+      Description: close a sf export job
+      FunctionName:
+        !Sub sf-end-export-job-${Stage}
+      Code:
+        S3Bucket: zuora-auto-cancel-dist
+        S3Key: !Sub membership/${Stage}/sf-datalake-export/sf-datalake-export.jar
+      Handler: com.gu.sf_datalake_export.handlers.EndJobHandler::apply
+      Environment:
+        Variables:
+          Stage: !Ref Stage
+      Role:
+        !GetAtt EndJobRole.Arn
+      MemorySize: 1536
+      Runtime: java8
+      Timeout: 300
+    DependsOn:
+    - EndJobRole
+  StatesExecutionRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          Effect: Allow
+          Principal:
+            Service: !Sub 'states.${AWS::Region}.amazonaws.com'
+          Action: 'sts:AssumeRole'
+      Path: /
+      Policies:
+      - PolicyName: StatesExecutionPolicy
+        PolicyDocument:
+          Version: 2012-10-17
+          Statement:
+          - Effect: Allow
+            Action:
+            - 'lambda:InvokeFunction'
+            Resource: '*'
+  StateMachine:
+    Type: 'AWS::StepFunctions::StateMachine'
+    Properties:
+      StateMachineName: !Sub 'salesforce-export-${Stage}'
+      RoleArn: !GetAtt
+      - StatesExecutionRole
+      - Arn
+      DefinitionString: !Sub
+      - |-
+            {
+              "StartAt": "StartJob",
+              "States": {
+                "StartJob": {
+                  "Type": "Task",
+                  "Resource": "${startJobArn}",
+                  "Next": "WaitSomeTime",
+                  "Retry": [{
+                              "ErrorEquals": ["States.ALL"],
+                              "IntervalSeconds": 30,
+                              "MaxAttempts": 3
+                            }]
+                },
+                "WaitSomeTime": {
+                  "Type": "Wait",
+                  "Seconds": 5,
+                  "Next": "getBatches"
+                },
+                "getBatches": {
+                  "Type": "Task",
+                  "Resource": "${getBatchesArn}",
+                  "Next": "checkPendingBatches",
+                  "Retry": [{
+                              "ErrorEquals": ["States.ALL"],
+                              "IntervalSeconds": 30,
+                              "MaxAttempts": 3
+                            }]
+                },
+                "checkPendingBatches": {
+                  "Type": "Choice",
+                  "Choices": [{
+                                "Variable": "$.jobStatus",
+                                "StringEquals": "Completed",
+                                "Next": "downloadBatch"
+                              }],
+                  "Default": "WaitSomeTime"
+                },
+                "downloadBatch": {
+                  "Type": "Task",
+                  "Resource": "${downloadBatchArn}",
+                  "Next": "CheckPendingDownloads",
+                  "Retry": [{
+                              "ErrorEquals": ["States.ALL"],
+                              "IntervalSeconds": 30,
+                              "MaxAttempts": 3
+                            }]
+                },
+                "CheckPendingDownloads": {
+                  "Type": "Choice",
+                  "Choices": [{
+                                "Variable": "$.done",
+                                "BooleanEquals": true,
+                                "Next": "endJob"
+                              }],
+                  "Default": "downloadBatch"
+                },
+                "endJob": {
+                  "Type": "Task",
+                  "Resource": "${endJobArn}",
+                  "Next": "done",
+                  "Retry": [{
+                              "ErrorEquals": ["States.ALL"],
+                              "IntervalSeconds": 30,
+                              "MaxAttempts": 3
+                            }]
+                },
+                "done": {
+                  "Type": "Pass",
+                  "End": true
+                }
+              }
+            }
+      - {
+        startJobArn: !GetAtt [ StartJob, Arn ],
+        getBatchesArn: !GetAtt [ GetBatchesLambda, Arn ],
+        downloadBatchArn: !GetAtt [ DownloadBatch, Arn ],
+        endJobArn: !GetAtt [ EndJob, Arn ]
+      }

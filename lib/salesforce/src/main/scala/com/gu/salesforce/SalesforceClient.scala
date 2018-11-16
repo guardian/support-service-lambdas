@@ -22,9 +22,17 @@ object SalesforceClient {
 
   def withAuth(sfAuth: SalesforceAuth)(requestInfo: StringHttpRequest): Request = {
     val builder = requestInfo.requestMethod.builder
-    val authedBuilder = builder.addHeader("Authorization", s"Bearer ${sfAuth.access_token}")
-    val url = sfAuth.instance_url + requestInfo.relativePath.value
-    authedBuilder.url(url).build()
-  }
+    val authHeaders = List(
+      Header(name = "Authorization", value = s"Bearer ${sfAuth.access_token}"),
+      Header(name = "X-SFDC-Session", value = sfAuth.access_token)
+    )
+    val headersWithAuth: List[Header] = requestInfo.headers ++ authHeaders
 
+    val builderWithHeaders = headersWithAuth.foldLeft(builder)((builder: Request.Builder, header: Header) => {
+      builder.addHeader(header.name, header.value)
+    })
+
+    val url = sfAuth.instance_url + requestInfo.relativePath.value
+    builderWithHeaders.url(url).build()
+  }
 }

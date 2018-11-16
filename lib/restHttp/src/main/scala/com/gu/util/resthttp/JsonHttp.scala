@@ -13,8 +13,8 @@ object JsonHttp {
   sealed trait RequestMethod {
     def builder: Request.Builder
   }
-  case class PostMethod(body: BodyAsString) extends RequestMethod {
-    override def builder: Request.Builder = new Request.Builder().post(createBodyFromString(body))
+  case class PostMethod(body: BodyAsString, contentType: ContentType = JsonContentType) extends RequestMethod {
+    override def builder: Request.Builder = new Request.Builder().post(createBodyFromString(body, contentType))
   }
   case class PatchMethod(body: BodyAsString) extends RequestMethod {
     override def builder: Request.Builder = new Request.Builder().patch(createBodyFromString(body))
@@ -23,7 +23,7 @@ object JsonHttp {
     override def builder: Request.Builder = new Request.Builder().get()
   }
 
-  case class StringHttpRequest(requestMethod: RequestMethod, relativePath: RelativePath, urlParams: UrlParams)
+  case class StringHttpRequest(requestMethod: RequestMethod, relativePath: RelativePath, urlParams: UrlParams, headers: List[Header] = List.empty)
 
   val patch =
     HttpOpWrapper[PatchRequest, StringHttpRequest, BodyAsString, Unit](
@@ -38,6 +38,13 @@ object JsonHttp {
       (postRequest: PostRequest) =>
         StringHttpRequest(PostMethod(BodyAsString(Json.stringify(postRequest.body))), postRequest.path, UrlParams.empty),
 
+      deserialiseJsonResponse
+    )
+
+  val postWithHeaders =
+    HttpOpWrapper[PostRequestWithHeaders, StringHttpRequest, BodyAsString, JsValue](
+      (postRequest: PostRequestWithHeaders) =>
+        StringHttpRequest(PostMethod(BodyAsString(Json.stringify(postRequest.body))), postRequest.path, UrlParams.empty, postRequest.headers),
       deserialiseJsonResponse
     )
 

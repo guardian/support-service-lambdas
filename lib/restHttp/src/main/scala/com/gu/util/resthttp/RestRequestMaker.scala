@@ -49,6 +49,8 @@ object RestRequestMaker extends Logging {
 
   case class RelativePath(value: String) extends AnyVal
 
+  case class Header(name: String, value: String)
+
   case class PutRequest(body: JsValue, path: RelativePath)
   object PutRequest {
     def apply[REQ: Writes](body: REQ, path: RelativePath): PutRequest = new PutRequest(Json.toJson(body), path)
@@ -60,8 +62,15 @@ object RestRequestMaker extends Logging {
   }
 
   case class PostRequest(body: JsValue, path: RelativePath)
+
   object PostRequest {
     def apply[REQ: Writes](body: REQ, path: RelativePath): PostRequest = new PostRequest(Json.toJson(body), path)
+  }
+
+  case class PostRequestWithHeaders(body: JsValue, path: RelativePath, headers: List[Header])
+
+  object PostRequestWithHeaders {
+    def apply[REQ: Writes](body: REQ, path: RelativePath, headers: List[Header] = List.empty): PostRequestWithHeaders = new PostRequestWithHeaders(Json.toJson(body), path, headers)
   }
 
   case class GetRequest(path: RelativePath)
@@ -180,7 +189,10 @@ object RestRequestMaker extends Logging {
     createBodyFromString(bodyAsString)
   }
 
-  def createBodyFromString(bodyAsString: BodyAsString): RequestBody = {
-    RequestBody.create(MediaType.parse("application/json"), bodyAsString.value)
+  case class ContentType(value: String) extends AnyVal
+  val JsonContentType = ContentType("application/json")
+  //todo see how to fix this correctly
+  def createBodyFromString(bodyAsString: BodyAsString, contentType: ContentType = JsonContentType): RequestBody = {
+    RequestBody.create(MediaType.parse(contentType.value), bodyAsString.value)
   }
 }
