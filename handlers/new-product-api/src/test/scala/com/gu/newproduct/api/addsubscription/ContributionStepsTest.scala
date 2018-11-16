@@ -10,7 +10,7 @@ import com.gu.newproduct.api.addsubscription.validation.{Failed, Passed}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{ChargeOverride, SubscriptionName, ZuoraCreateSubRequest}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
-import com.gu.newproduct.api.productcatalog.AmountMinorUnits
+import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, PlanId}
 import com.gu.newproduct.api.productcatalog.ZuoraIds.{PlanAndCharge, ProductRatePlanChargeId, ProductRatePlanId}
 import com.gu.test.JsonMatchers.JsonMatcher
 import com.gu.util.apigateway.ApiGatewayRequest
@@ -35,6 +35,8 @@ class ContributionStepsTest extends FlatSpec with Matchers {
       ProductRatePlanId("ratePlanId"),
       ProductRatePlanChargeId("ratePlanChargeId")
     )
+
+    def getPlanAndCharge(planId: PlanId) = Some(planAndCharge)
 
     val expectedIn = ZuoraCreateSubRequest(
       planAndCharge.productRatePlanId,
@@ -79,7 +81,7 @@ class ContributionStepsTest extends FlatSpec with Matchers {
     val expectedOutput = ExpectedOut("well done")
 
     val fakeAddContributionSteps = Steps.addContributionSteps(
-      planAndCharge,
+      getPlanAndCharge,
       fakeGetCustomerData,
       fakeValidateRequest,
       fakeCreate,
