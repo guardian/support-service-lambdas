@@ -12,7 +12,7 @@ class CreateGuestAccountTest extends FlatSpec with Matchers {
   it should "create a request ok" in {
     val actual = CreateGuestAccount.toRequest(EmailAddress("hello@gu.com"))
 
-    val expected = new PostRequest(JsObject(List("primaryEmailAddress" -> JsString("hello@gu.com"))), RelativePath("/guest"), List.empty)
+    val expected = new PostRequest(JsObject(List("primaryEmailAddress" -> JsString("hello@gu.com"))), RelativePath("/guest"))
     actual should be(expected)
   }
 

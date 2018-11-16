@@ -16,7 +16,7 @@ class CloseJobTest extends FlatSpec with Matchers {
       "state" -> JsString("Closed"),
 
     ))
-    val expected = new PostRequest(expectedBody, RelativePath("/services/async/44.0/job/someJobId"), List.empty)
+    val expected = new PostRequest(expectedBody, RelativePath("/services/async/44.0/job/someJobId"))
     actual should be(expected)
   }
 

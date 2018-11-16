@@ -66,7 +66,7 @@ object StartJobHandler {
     for {
       sfConfig <- loadConfig[SFAuthConfig](SFExportAuthConfig.location, SFAuthConfig.reads).leftMap(_.error).toTry
       sfClient <- SalesforceClient(getResponse, sfConfig).value.toTry
-      createJobOp = sfClient.wrapWith(JsonHttp.post).wrapWith(CreateJob.wrapper).runRequest _
+      createJobOp = sfClient.wrapWith(JsonHttp.postWithHeaders).wrapWith(CreateJob.wrapper).runRequest _
       addQueryToJobOp = sfClient.wrapWith(AddQueryToJob.wrapper).runRequest _
       wiredSteps = steps(getCurrentDate, createJobOp, addQueryToJobOp) _
       response <- wiredSteps(ObjectName(request.objectName))

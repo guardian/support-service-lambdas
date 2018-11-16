@@ -36,8 +36,15 @@ object JsonHttp {
   val post =
     HttpOpWrapper[PostRequest, StringHttpRequest, BodyAsString, JsValue](
       (postRequest: PostRequest) =>
-        StringHttpRequest(PostMethod(BodyAsString(Json.stringify(postRequest.body))), postRequest.path, UrlParams.empty, postRequest.headers),
+        StringHttpRequest(PostMethod(BodyAsString(Json.stringify(postRequest.body))), postRequest.path, UrlParams.empty),
 
+      deserialiseJsonResponse
+    )
+
+  val postWithHeaders =
+    HttpOpWrapper[PostRequestWithHeaders, StringHttpRequest, BodyAsString, JsValue](
+      (postRequest: PostRequestWithHeaders) =>
+        StringHttpRequest(PostMethod(BodyAsString(Json.stringify(postRequest.body))), postRequest.path, UrlParams.empty, postRequest.headers),
       deserialiseJsonResponse
     )
 

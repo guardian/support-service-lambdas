@@ -61,10 +61,16 @@ object RestRequestMaker extends Logging {
     def apply[REQ: Writes](body: REQ, path: RelativePath): PatchRequest = new PatchRequest(Json.toJson(body), path)
   }
 
-  case class PostRequest(body: JsValue, path: RelativePath, headers: List[Header])
+  case class PostRequest(body: JsValue, path: RelativePath)
+
   object PostRequest {
-    //TODO REMOVE DEFAULT EMPTY HEADERS?
-    def apply[REQ: Writes](body: REQ, path: RelativePath, headers: List[Header] = List.empty): PostRequest = new PostRequest(Json.toJson(body), path, headers)
+    def apply[REQ: Writes](body: REQ, path: RelativePath): PostRequest = new PostRequest(Json.toJson(body), path)
+  }
+
+  case class PostRequestWithHeaders(body: JsValue, path: RelativePath, headers: List[Header])
+
+  object PostRequestWithHeaders {
+    def apply[REQ: Writes](body: REQ, path: RelativePath, headers: List[Header] = List.empty): PostRequestWithHeaders = new PostRequestWithHeaders(Json.toJson(body), path, headers)
   }
 
   case class GetRequest(path: RelativePath)

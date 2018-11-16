@@ -39,22 +39,23 @@ object CreateJob {
   }
 
   case class CreateJobRequest(
-    objectType : SfObjectName,
+    objectType: SfObjectName,
     maybeChunkSize: Option[BatchSize]
   )
 
-  def toRequest(request:CreateJobRequest):PostRequest = {
-      val wireRequest = WireRequest(request.objectType.value)
-      val maybeChunkingHeader = request.maybeChunkSize.map { chunkSize =>
-        Header(name = "Sforce-Enable-PKChunking", value = s"chunkSize=${chunkSize.value}")
-      }
-      val headers = maybeChunkingHeader.toList
-      val relativePath = RelativePath("/services/async/44.0/job")
-      PostRequest(wireRequest, relativePath, headers)
+  def toRequest(request: CreateJobRequest): PostRequestWithHeaders = {
+    val wireRequest = WireRequest(request.objectType.value)
+    val maybeChunkingHeader = request.maybeChunkSize.map { chunkSize =>
+      Header(name = "Sforce-Enable-PKChunking", value = s"chunkSize=${chunkSize.value}")
+    }
+    val headers = maybeChunkingHeader.toList
+    val relativePath = RelativePath("/services/async/44.0/job")
+    PostRequestWithHeaders(wireRequest, relativePath, headers)
   }
-  def toResponse(wireResponse: WireResponse) : JobId =  JobId(wireResponse.id)
 
-  val wrapper: HttpOpWrapper[CreateJobRequest, PostRequest, JsValue, JobId] =
-    HttpOpWrapper[CreateJobRequest, PostRequest, JsValue, JobId](toRequest, RestRequestMaker.toResult[WireResponse](_).map(toResponse))
+  def toResponse(wireResponse: WireResponse): JobId = JobId(wireResponse.id)
+
+  val wrapper: HttpOpWrapper[CreateJobRequest, PostRequestWithHeaders, JsValue, JobId] =
+    HttpOpWrapper[CreateJobRequest, PostRequestWithHeaders, JsValue, JobId](toRequest, RestRequestMaker.toResult[WireResponse](_).map(toResponse))
 
 }

@@ -3,7 +3,7 @@ package com.com.gu.sf_datalake_export.salesforce_bulk_api
 import com.gu.sf_datalake_export.salesforce_bulk_api.BulkApiParams.{BatchSize, SfObjectName}
 import com.gu.sf_datalake_export.salesforce_bulk_api.CreateJob
 import com.gu.sf_datalake_export.salesforce_bulk_api.CreateJob.{CreateJobRequest, JobId, WireResponse}
-import com.gu.util.resthttp.RestRequestMaker.{Header, PostRequest, RelativePath}
+import com.gu.util.resthttp.RestRequestMaker.{Header, PostRequestWithHeaders, RelativePath}
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.{JsObject, JsString}
 
@@ -22,7 +22,7 @@ class CreateJobTest extends FlatSpec with Matchers {
       "contentType" -> JsString("CSV"),
       "object" -> JsString("Contact")
     ))
-    val expected = new PostRequest(expectedBody, RelativePath("/services/async/44.0/job"), List(Header("Sforce-Enable-PKChunking", "chunkSize=250000")))
+    val expected = new PostRequestWithHeaders(expectedBody, RelativePath("/services/async/44.0/job"), List(Header("Sforce-Enable-PKChunking", "chunkSize=250000")))
     actual should be(expected)
   }
 
