@@ -67,7 +67,7 @@ object DownloadBatchHandler {
   }
 
   def download(
-    uploadFile: (File) => Try[_],
+    uploadFile: File => Try[_],
     getBatchResultId: GetBatchResultRequest => ClientFailableOp[BatchResultId],
     getBatchResult: DownloadResultsRequest => ClientFailableOp[FileContent]
   )(

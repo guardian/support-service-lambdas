@@ -23,11 +23,11 @@ object BulkApiParams {
   val cases = SfQueryInfo(Soql(SfQueries.cases), ObjectName("Case"), SfObjectName("Case"))
   val caseComment = SfQueryInfo(Soql(SfQueries.caseComment), ObjectName("CaseComment"), SfObjectName("CaseComment"))
   val csSurvey = SfQueryInfo(Soql(SfQueries.csSurvey), ObjectName("CsSurvey"), SfObjectName("CS_Survey__c"))
-  val discount = SfQueryInfo(Soql(SfQueries.discount), ObjectName("CsSurvey"), SfObjectName("Discount__c"))
+  val discount = SfQueryInfo(Soql(SfQueries.discount), ObjectName("Discount"), SfObjectName("Discount__c"))
   val fulfilmentProcessInformation = SfQueryInfo(Soql(SfQueries.fulfilmentProcessInformation), ObjectName("FulfilmentProcessInformation"), SfObjectName("Fulfilment_Process_Information__c"))
   val imovoContract = SfQueryInfo(Soql(SfQueries.imovoContract), ObjectName("ImovoContract"), SfObjectName("Imovo_Contract__c"))
   val paymentCard = SfQueryInfo(Soql(SfQueries.paymentCard), ObjectName("PaymentCard"), SfObjectName("Payment_Card__c"))
-  val paymentFailure = SfQueryInfo(Soql(SfQueries.paymentCard), ObjectName("PaymentFailure"), SfObjectName("paymentFailure"))
+  val paymentFailure = SfQueryInfo(Soql(SfQueries.paymentFailure), ObjectName("PaymentFailure"), SfObjectName("Payment_Failure__c"))
 
   val all = List(
     contact,
@@ -109,7 +109,8 @@ object SfQueries {
       |Voucher_Fulfilment_Cut_Off_Date__c,
       |Voucher_Start_Date__c,
       |RecordType.Name,
-      |LastName
+      |LastName,
+      |Membership_Tier__c
       |from Contact
       |where
       |Account.GDPR_Deletion_Pending__c = false
@@ -191,7 +192,6 @@ object SfQueries {
       |
   """.stripMargin
 
-  //removed compund ShippingAddress,BillingAddress
   //TODO BillingAccount__c doesn't exist ?
   val accounts =
     """
