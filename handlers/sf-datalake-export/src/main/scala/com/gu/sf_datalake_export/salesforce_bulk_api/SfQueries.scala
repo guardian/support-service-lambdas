@@ -502,7 +502,6 @@ object SfQueries {
       |where Contact__r.Account.GDPR_Deletion_Pending__c =false
     """.stripMargin
 
-  //TODO do we need to do gdpr exclusions on this ? how?
   //the object Imovo_Contract__c doesn't seem to exist
   val imovoContract =
     """
@@ -529,9 +528,9 @@ object SfQueries {
       |SystemModstamp
       |from
       |Imovo_Contract__c
+      |where Contact__r.Account.GDPR_Deletion_Pending__c = false
     """.stripMargin
 
-  //TODO IS THIS THE CORRECT WAY TO DO GDPR EXCLUSION ? IM USING THE ZUORA FIELD INSTEAD OF THE ACCOUNT BOOLEAN
   val paymentCard =
     """
       |select
@@ -563,7 +562,7 @@ object SfQueries {
       |Zuora_ReferenceId__c
       |from
       |Payment_Card__c
-      |where Zuora_BillingAccount__r.ProcessingAdvice__c != 'DoNotProcess'
+      |where AccountID__r.GDPR_Deletion_Pending__c = false
     """.stripMargin
 
   //Last_Attempt_Error_Code__c doesnt seem to exist
