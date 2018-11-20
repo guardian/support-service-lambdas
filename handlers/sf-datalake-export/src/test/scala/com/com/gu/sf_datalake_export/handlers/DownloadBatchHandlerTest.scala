@@ -2,11 +2,12 @@ package com.com.gu.sf_datalake_export.handlers
 
 import com.gu.sf_datalake_export.handlers.DownloadBatchHandler
 import com.gu.sf_datalake_export.handlers.DownloadBatchHandler.{WireBatch, WireState}
+import com.gu.sf_datalake_export.salesforce_bulk_api.BulkApiParams.ObjectName
 import com.gu.sf_datalake_export.salesforce_bulk_api.CreateJob.JobId
 import com.gu.sf_datalake_export.salesforce_bulk_api.GetBatchResult.{DownloadResultsRequest, JobName}
 import com.gu.sf_datalake_export.salesforce_bulk_api.GetBatchResultId.{BatchResultId, GetBatchResultRequest}
 import com.gu.sf_datalake_export.salesforce_bulk_api.GetJobBatches.BatchId
-import com.gu.sf_datalake_export.salesforce_bulk_api.S3UploadFile.{File, FileContent, FileName}
+import com.gu.sf_datalake_export.salesforce_bulk_api.S3UploadFile.{BasePath, File, FileContent, FileName}
 import com.gu.util.resthttp.Types.ClientSuccess
 import org.scalatest.{FlatSpec, Matchers}
 
@@ -14,10 +15,11 @@ import scala.util.{Success, Try}
 
 class DownloadBatchHandlerTest extends FlatSpec with Matchers {
 
-  def fakeDownloadBatch(jobName: JobName, jobId: JobId, batchId: BatchId): Try[Unit] = {
+  def fakeDownloadBatch(jobName: JobName, objectName: ObjectName, jobId: JobId, batchId: BatchId): Try[Unit] = {
     jobName.value shouldBe "someJobName"
     jobId.value shouldBe "someJobId"
     batchId.value shouldBe "batch1"
+    objectName.value shouldBe "someObjectName"
     Success(())
   }
 
@@ -26,6 +28,7 @@ class DownloadBatchHandlerTest extends FlatSpec with Matchers {
 
   val twoBatchState = WireState(
     jobName = "someJobName",
+    objectName= "SomeObjectName",
     jobId = "someJobId",
     batches = List(wireBatch1, wireBatch2)
   )
@@ -50,7 +53,8 @@ class DownloadBatchHandlerTest extends FlatSpec with Matchers {
   }
 
   "DownloadBatches.downloadBatch" should "download file contents and upload to s3 " in {
-    def validatingUploadFile(file: File): Try[Unit] = {
+    def validatingUploadFile(basePath: BasePath, file: File): Try[Unit] = {
+      basePath shouldBe BasePath("someBasePath")
       file.fileName shouldBe FileName("someJobName-someJobId-someResultId.csv")
       file.content shouldBe FileContent("someFileContent")
 
@@ -72,8 +76,13 @@ class DownloadBatchHandlerTest extends FlatSpec with Matchers {
       ClientSuccess(FileContent("someFileContent"))
     }
 
-    val wiredDownloadBatch = DownloadBatchHandler.download(validatingUploadFile, validatingGetBatchResultId, validatingGetBatchResult) _
+    def basePathFor(objectName: ObjectName) = {
+      objectName shouldBe ObjectName("someObjectName")
+      BasePath(s"someBasePath")
+    }
 
-    wiredDownloadBatch(JobName("someJobName"), JobId("someJobId"), BatchId("someBatchId")) shouldBe Success(())
+    val wiredDownloadBatch = DownloadBatchHandler.download(basePathFor, validatingUploadFile, validatingGetBatchResultId, validatingGetBatchResult) _
+
+    wiredDownloadBatch(JobName("someJobName"), ObjectName("someObjectName"), JobId("someJobId"), BatchId("someBatchId")) shouldBe Success(())
   }
 }

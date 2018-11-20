@@ -4,8 +4,8 @@ import java.io.{ByteArrayInputStream, InputStream}
 
 import com.amazonaws.services.s3.model.{ObjectMetadata, PutObjectRequest, PutObjectResult}
 import com.amazonaws.util.IOUtils
+import com.gu.sf_datalake_export.salesforce_bulk_api.BulkApiParams.ObjectName
 import com.gu.util.Logging
-import com.gu.util.config.Stage
 
 import scala.util.Try
 object S3UploadFile extends Logging {
@@ -14,9 +14,9 @@ object S3UploadFile extends Logging {
   case class FileName(value: String) extends AnyVal
   case class File(fileName: FileName, content: FileContent)
   def apply(
-    basePath: BasePath,
     s3Write: PutObjectRequest => Try[PutObjectResult]
   )(
+    basePath: BasePath,
     file: File
   ): Try[PutObjectResult] = {
     logger.info(s"Uploading ${file.fileName.value} to S3...")

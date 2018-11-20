@@ -8,10 +8,11 @@ import com.gu.sf_datalake_export.handlers.DownloadBatchHandler
 object DownloadBatchManualTest extends App {
   val request =
     """{
-      |"jobId" : "7506E000004EnRoQAK",
-      |"jobName" : "sfSubscriptions",
+      |"jobId" : "7506E000004FloxQAC",
+      |"jobName" : "Contact_2018-11-20",
+      |"objectName" : "Contact",
       |"batches" : [{
-      | "batchId" : "7516E000003DjZnQAK",
+      | "batchId" : "7516E000003E9ejQAC",
       | "state" : "Completed"
       | }
       | ]

@@ -36,6 +36,7 @@ class StartJobStepTest extends FlatSpec with Matchers {
 
     val expectedResponse = WireResponse(
       jobId = "someJobId",
+      objectName = "Contact",
       jobName = "Contact_2018-10-22"
     )
     testSteps(ObjectName("Contact")) shouldBe Success(expectedResponse)

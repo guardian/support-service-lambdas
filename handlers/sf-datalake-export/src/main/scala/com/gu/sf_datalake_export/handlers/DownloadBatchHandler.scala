@@ -7,6 +7,7 @@ import com.amazonaws.services.s3.model.{PutObjectRequest, PutObjectResult}
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.salesforce.SalesforceAuthenticate.{SFAuthConfig, SFExportAuthConfig}
 import com.gu.salesforce.SalesforceClient
+import com.gu.sf_datalake_export.salesforce_bulk_api.BulkApiParams.{ObjectName, SfObjectName}
 import com.gu.sf_datalake_export.salesforce_bulk_api.CreateJob.JobId
 import com.gu.sf_datalake_export.salesforce_bulk_api.GetBatchResult.{DownloadResultsRequest, JobName}
 import com.gu.sf_datalake_export.salesforce_bulk_api.GetBatchResultId.{BatchResultId, GetBatchResultRequest}
@@ -50,6 +51,7 @@ object DownloadBatchHandler {
 
   case class WireState(
     jobName: String,
+    objectName: String,
     jobId: String,
     batches: List[WireBatch],
     done: Boolean = false
@@ -67,11 +69,13 @@ object DownloadBatchHandler {
   }
 
   def download(
-    uploadFile: File => Try[_],
+    basePathFor: ObjectName => BasePath,
+    uploadFile: (BasePath, File) => Try[_],
     getBatchResultId: GetBatchResultRequest => ClientFailableOp[BatchResultId],
     getBatchResult: DownloadResultsRequest => ClientFailableOp[FileContent]
   )(
     jobName: JobName,
+    objectName: ObjectName,
     jobId: JobId,
     batchId: BatchId
   ): Try[Unit] = {
@@ -83,18 +87,23 @@ object DownloadBatchHandler {
       fileContent <- getBatchResult(downloadRequest).toTry
       fileName = FileName(s"${jobName.value}-${jobId.value}-${resultId.id}.csv")
       file = File(fileName, fileContent)
-      _ <- uploadFile(file)
+      basePath = basePathFor(objectName)
+      _ <- uploadFile(basePath, file)
     } yield ()
   }
 
-  def uploadBasePath(stage: Stage) = stage match {
-    case Stage("PROD") => BasePath(s"gu-salesforce-export-test/PROD/raw")
+  def uploadBasePath(stage: Stage)(objectName: ObjectName) = stage match {
+    case Stage("PROD") => {
+      BasePath(s"gu-salesforce-export-test/PROD/raw")
+      //TODO when we have the permissions set up this should be something like ophan-raw-salesforce-${objectName.value}
+    }
     case Stage(stageName) => BasePath(s"gu-salesforce-export-test/$stageName/raw")
   }
 
-  def downloadFirst(downloadBatch: (JobName, JobId, BatchId) => Try[Unit])(
+  def downloadFirst(downloadBatch: (JobName, ObjectName, JobId, BatchId) => Try[Unit])(
     jobId: JobId,
     jobName: JobName,
+    objectName: ObjectName,
     pendingBatches: List[BatchInfo]
   ): Try[WireState] = pendingBatches match {
 
@@ -102,15 +111,17 @@ object DownloadBatchHandler {
       WireState(
         jobId = jobId.value,
         jobName = jobName.value,
+        objectName = objectName.value,
         batches = Nil,
         done = true
       )
     )
 
-    case pendingJob :: tail => downloadBatch(jobName, jobId, pendingJob.batchId).map { _ =>
+    case pendingJob :: tail => downloadBatch(jobName, objectName, jobId, pendingJob.batchId).map { _ =>
       WireState(
         jobId = jobId.value,
         jobName = jobName.value,
+        objectName = objectName.value,
         batches = tail.map(WireBatch.fromBatch),
         done = tail.isEmpty
       )
@@ -118,13 +129,14 @@ object DownloadBatchHandler {
   }
 
   def steps(
-    downloadBatch: (JobName, JobId, BatchId) => Try[Unit]
+    downloadBatch: (JobName,ObjectName, JobId, BatchId) => Try[Unit]
   )(request: WireState): Try[WireState] = for {
     batches <- IList(request.batches: _*).traverse(WireBatch.toBatch).map(_.toList).toTry
     pendingBatches = batches.filter(b => b.state == Completed)
     jobId = JobId(request.jobId)
     jobName = JobName(request.jobName)
-    response <- downloadFirst(downloadBatch)(jobId, jobName, pendingBatches)
+    objectName = ObjectName(request.objectName)
+    response <- downloadFirst(downloadBatch)(jobId, jobName, objectName, pendingBatches)
   } yield response
 
   def wireOperation(
@@ -139,8 +151,9 @@ object DownloadBatchHandler {
       sfClient <- SalesforceClient(getResponse, sfConfig).value.toTry
       wiredGetBatchResultId = sfClient.wrapWith(GetBatchResultId.wrapper).runRequest _
       wiredGetBatchResult = sfClient.wrapWith(GetBatchResult.wrapper).runRequest _
-      uploadFile = S3UploadFile(uploadBasePath(stage), s3Write) _
-      wiredDownloadBatch = download(uploadFile, wiredGetBatchResultId, wiredGetBatchResult) _
+      uploadFile = S3UploadFile(s3Write) _
+      wiredBasePathFor = uploadBasePath(stage) _
+      wiredDownloadBatch = download(wiredBasePathFor, uploadFile, wiredGetBatchResultId, wiredGetBatchResult) _
       response <- steps(wiredDownloadBatch)(request)
 
     } yield response

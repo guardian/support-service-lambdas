@@ -3,16 +3,17 @@ package manualTest
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
 import com.gu.sf_datalake_export.handlers.StartJobHandler
-import com.gu.sf_datalake_export.salesforce_bulk_api.SfQueries
+import com.gu.sf_datalake_export.salesforce_bulk_api.{BulkApiParams, SfQueries}
 
 //This is just a way to locally run the lambda in dev
 object StartJobManualTest extends App {
 
-  val queryStr = SfQueries.contactQuery.replace("\n", " ")
+  val sfObject = BulkApiParams.contact
+  val queryStr = sfObject.soql.value.replace("\n", " ")
 
   val request =
     s"""{
-      |"objectName" : "Contact"
+      |"objectName" : "${sfObject.objectName.value}"
       |}
     """.stripMargin
 

@@ -34,7 +34,8 @@ object StartJobHandler {
 
   case class WireResponse(
     jobId: String,
-    jobName: String
+    jobName: String,
+    objectName: String
   )
 
   object WireResponse {
@@ -52,8 +53,8 @@ object StartJobHandler {
       jobId <- createJob(createJobRequest).toTry
       addQueryRequest = AddQueryRequest(sfQueryInfo.soql, jobId)
       _ <- addQuery(addQueryRequest).toTry
-      jobName = s"${sfQueryInfo.objectName.value}_${getCurrentDate()}"
-    } yield WireResponse(jobId.value, jobName)
+      jobName = s"${objectName.value}_${getCurrentDate()}"
+    } yield WireResponse(jobId.value, jobName, objectName.value)
   }
 
   def operation(

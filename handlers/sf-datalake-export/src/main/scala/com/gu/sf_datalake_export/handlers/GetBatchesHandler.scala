@@ -22,7 +22,8 @@ object GetBatchesHandler {
 
   case class WireRequest(
     jobId: String,
-    jobName: String
+    jobName: String,
+    objectName: String
   )
 
   object WireRequest {
@@ -56,6 +57,7 @@ object GetBatchesHandler {
   case class WireResponse(
     jobId: String,
     jobName: String,
+    objectName: String,
     jobStatus: String,
     batches: Seq[WireBatch]
   )
@@ -103,6 +105,7 @@ object GetBatchesHandler {
     } yield WireResponse(
       jobId = request.jobId,
       jobName = request.jobName,
+      objectName = request.objectName,
       jobStatus = status.name,
       batches = batches.map(WireBatch.fromBatch)
     )
