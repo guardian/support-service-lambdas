@@ -129,7 +129,7 @@ object DownloadBatchHandler {
   }
 
   def steps(
-    downloadBatch: (JobName,ObjectName, JobId, BatchId) => Try[Unit]
+    downloadBatch: (JobName, ObjectName, JobId, BatchId) => Try[Unit]
   )(request: WireState): Try[WireState] = for {
     batches <- IList(request.batches: _*).traverse(WireBatch.toBatch).map(_.toList).toTry
     pendingBatches = batches.filter(b => b.state == Completed)

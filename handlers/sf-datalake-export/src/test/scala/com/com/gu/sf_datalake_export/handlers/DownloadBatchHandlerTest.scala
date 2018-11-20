@@ -28,7 +28,7 @@ class DownloadBatchHandlerTest extends FlatSpec with Matchers {
 
   val twoBatchState = WireState(
     jobName = "someJobName",
-    objectName= "SomeObjectName",
+    objectName = "someObjectName",
     jobId = "someJobId",
     batches = List(wireBatch1, wireBatch2)
   )
