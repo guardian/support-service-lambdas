@@ -412,6 +412,7 @@ object SfQueries {
       |SystemModstamp
       |from
       |CaseComment
+      |where Parent.Account.GDPR_Deletion_Pending__c = false
     """.stripMargin
 
   //Date_Submitted__c, doesnt seem to exist

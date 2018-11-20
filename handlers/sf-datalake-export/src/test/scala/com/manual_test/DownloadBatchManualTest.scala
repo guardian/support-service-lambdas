@@ -11,6 +11,7 @@ object DownloadBatchManualTest extends App {
       |"jobId" : "7506E000004FloxQAC",
       |"jobName" : "Contact_2018-11-20",
       |"objectName" : "Contact",
+      |"uploadToDataLake" : false,
       |"batches" : [{
       | "batchId" : "7516E000003E9ejQAC",
       | "state" : "Completed"

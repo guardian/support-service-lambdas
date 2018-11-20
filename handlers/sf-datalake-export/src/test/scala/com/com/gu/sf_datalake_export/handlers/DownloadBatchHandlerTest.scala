@@ -2,12 +2,15 @@ package com.com.gu.sf_datalake_export.handlers
 
 import com.gu.sf_datalake_export.handlers.DownloadBatchHandler
 import com.gu.sf_datalake_export.handlers.DownloadBatchHandler.{WireBatch, WireState}
-import com.gu.sf_datalake_export.salesforce_bulk_api.BulkApiParams.ObjectName
+import com.gu.sf_datalake_export.handlers.StartJobHandler.UploadToDataLake
+import com.gu.sf_datalake_export.salesforce_bulk_api.BulkApiParams
+import com.gu.sf_datalake_export.salesforce_bulk_api.BulkApiParams.{ObjectName, SfQueryInfo}
 import com.gu.sf_datalake_export.salesforce_bulk_api.CreateJob.JobId
 import com.gu.sf_datalake_export.salesforce_bulk_api.GetBatchResult.{DownloadResultsRequest, JobName}
 import com.gu.sf_datalake_export.salesforce_bulk_api.GetBatchResultId.{BatchResultId, GetBatchResultRequest}
 import com.gu.sf_datalake_export.salesforce_bulk_api.GetJobBatches.BatchId
 import com.gu.sf_datalake_export.salesforce_bulk_api.S3UploadFile.{BasePath, File, FileContent, FileName}
+import com.gu.util.config.Stage
 import com.gu.util.resthttp.Types.ClientSuccess
 import org.scalatest.{FlatSpec, Matchers}
 
@@ -30,6 +33,7 @@ class DownloadBatchHandlerTest extends FlatSpec with Matchers {
     jobName = "someJobName",
     objectName = "someObjectName",
     jobId = "someJobId",
+    uploadToDataLake = false,
     batches = List(wireBatch1, wireBatch2)
   )
 
@@ -76,13 +80,26 @@ class DownloadBatchHandlerTest extends FlatSpec with Matchers {
       ClientSuccess(FileContent("someFileContent"))
     }
 
-    def basePathFor(objectName: ObjectName) = {
+    def basePathFor(objectName: ObjectName, uploadToDataLake: UploadToDataLake) = {
+      uploadToDataLake shouldBe UploadToDataLake(false)
       objectName shouldBe ObjectName("someObjectName")
       BasePath(s"someBasePath")
     }
 
-    val wiredDownloadBatch = DownloadBatchHandler.download(basePathFor, validatingUploadFile, validatingGetBatchResultId, validatingGetBatchResult) _
+    val wiredDownloadBatch = DownloadBatchHandler.download(
+      UploadToDataLake(false),
+      basePathFor,
+      validatingUploadFile,
+      validatingGetBatchResultId,
+      validatingGetBatchResult
+    ) _
 
     wiredDownloadBatch(JobName("someJobName"), ObjectName("someObjectName"), JobId("someJobId"), BatchId("someBatchId")) shouldBe Success(())
+  }
+
+  "uploadBasePath" should "return test basePath for PROD requests with uploadToDataLake enabled" in {
+    val contactName = BulkApiParams.contact.objectName
+    val actualBasePath = DownloadBatchHandler.uploadBasePath(Stage("PROD"))(contactName, UploadToDataLake(true))
+    actualBasePath shouldBe BasePath("gu-salesforce-export-test/PROD/raw/Datalake/opan-raw-salesforce-contact")
   }
 }

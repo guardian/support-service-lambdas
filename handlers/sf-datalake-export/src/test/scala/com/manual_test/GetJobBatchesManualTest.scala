@@ -10,7 +10,8 @@ object GetJobBatchesManualTest extends App {
     """{
       |"jobId" : "7506E000004FloxQAC",
       |"jobName" : "Contact_2018-11-20",
-      |"objectName" : "Contact"
+      |"objectName" : "Contact",
+      |"uploadToDataLake" : false
       |}
     """.stripMargin
 

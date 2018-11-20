@@ -23,7 +23,8 @@ object GetBatchesHandler {
   case class WireRequest(
     jobId: String,
     jobName: String,
-    objectName: String
+    objectName: String,
+    uploadToDataLake: Boolean
   )
 
   object WireRequest {
@@ -59,7 +60,8 @@ object GetBatchesHandler {
     jobName: String,
     objectName: String,
     jobStatus: String,
-    batches: Seq[WireBatch]
+    batches: Seq[WireBatch],
+    uploadToDataLake: Boolean
   )
 
   object WireResponse {
@@ -107,6 +109,7 @@ object GetBatchesHandler {
       jobName = request.jobName,
       objectName = request.objectName,
       jobStatus = status.name,
+      uploadToDataLake = request.uploadToDataLake,
       batches = batches.map(WireBatch.fromBatch)
     )
   }
