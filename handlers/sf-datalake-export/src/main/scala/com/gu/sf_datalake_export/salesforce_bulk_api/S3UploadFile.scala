@@ -2,7 +2,7 @@ package com.gu.sf_datalake_export.salesforce_bulk_api
 
 import java.io.{ByteArrayInputStream, InputStream}
 
-import com.amazonaws.services.s3.model.{ObjectMetadata, PutObjectRequest, PutObjectResult}
+import com.amazonaws.services.s3.model.{CannedAccessControlList, ObjectMetadata, PutObjectRequest, PutObjectResult}
 import com.amazonaws.util.IOUtils
 import com.gu.sf_datalake_export.salesforce_bulk_api.BulkApiParams.ObjectName
 import com.gu.util.Logging
@@ -25,12 +25,11 @@ object S3UploadFile extends Logging {
     val uploadMetadata = new ObjectMetadata()
     uploadMetadata.setContentLength(bytes.length.toLong)
     val putRequest = new PutObjectRequest(
-
       basePath.value,
       file.fileName.value,
       new ByteArrayInputStream(bytes),
       uploadMetadata
-    )
+    ).withCannedAcl(CannedAccessControlList.BucketOwnerRead)
 
     s3Write(putRequest)
 

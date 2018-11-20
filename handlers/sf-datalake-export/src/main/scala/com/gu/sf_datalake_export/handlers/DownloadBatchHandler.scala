@@ -89,7 +89,7 @@ object DownloadBatchHandler {
       resultId <- getBatchResultId(getIdRequest).toTry
       downloadRequest = DownloadResultsRequest(jobId, batchId, resultId)
       fileContent <- getBatchResult(downloadRequest).toTry
-      fileName = FileName(s"${jobName.value}-${jobId.value}-${resultId.id}.csv")
+      fileName = FileName(s"${jobName.value}_${jobId.value}_${resultId.id}.csv")
       file = File(fileName, fileContent)
       basePath = basePathFor(objectName, uploadToDataLake)
       _ <- uploadFile(basePath, file)
@@ -97,11 +97,8 @@ object DownloadBatchHandler {
   }
 
   def uploadBasePath(stage: Stage)(objectName: ObjectName, uploadToDataLake: UploadToDataLake) = stage match {
-    case Stage("PROD") if uploadToDataLake.value => {
-      //todo actually upload to the bucket when we are ready
-      val bucketName = s"opan-raw-salesforce-${objectName.value.toLowerCase}"
-      BasePath(s"gu-salesforce-export-test/PROD/raw/Datalake/$bucketName")
-    }
+    case Stage("PROD") if uploadToDataLake.value =>  BasePath(s"ophan-raw-salesforce-${objectName.value.toLowerCase}")
+
     case Stage(stageName) => BasePath(s"gu-salesforce-export-test/$stageName/raw")
   }
 
