@@ -4,7 +4,6 @@ import java.io.{ByteArrayInputStream, InputStream}
 
 import com.amazonaws.services.s3.model.{CannedAccessControlList, ObjectMetadata, PutObjectRequest, PutObjectResult}
 import com.amazonaws.util.IOUtils
-import com.gu.sf_datalake_export.salesforce_bulk_api.BulkApiParams.ObjectName
 import com.gu.util.Logging
 
 import scala.util.Try

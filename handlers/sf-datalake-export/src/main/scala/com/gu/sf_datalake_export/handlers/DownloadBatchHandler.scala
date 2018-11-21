@@ -97,7 +97,7 @@ object DownloadBatchHandler {
   }
 
   def uploadBasePath(stage: Stage)(objectName: ObjectName, uploadToDataLake: UploadToDataLake) = stage match {
-    case Stage("PROD") if uploadToDataLake.value =>  BasePath(s"ophan-raw-salesforce-${objectName.value.toLowerCase}")
+    case Stage("PROD") if uploadToDataLake.value => BasePath(s"ophan-raw-salesforce-customer-data-${objectName.value.toLowerCase}")
 
     case Stage(stageName) => BasePath(s"gu-salesforce-export-test/$stageName/raw")
   }
