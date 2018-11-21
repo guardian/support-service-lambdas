@@ -2,6 +2,7 @@ package com.gu.sf_datalake_export.handlers
 
 import java.io.{InputStream, OutputStream}
 import java.time.LocalDate
+
 import com.gu.sf_datalake_export.util.TryOps._
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
@@ -14,18 +15,19 @@ import com.gu.sf_datalake_export.salesforce_bulk_api.{AddQueryToJob, BulkApiPara
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config.{LoadConfigModule, Stage}
-import com.gu.util.handlers.JsonHandler
+import com.gu.util.handlers.{JsonHandler, LambdaException}
 import com.gu.util.resthttp.JsonHttp
 import com.gu.util.resthttp.Types.ClientFailableOp
 import okhttp3.{Request, Response}
 import play.api.libs.json.{Json, Reads}
 
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 object StartJobHandler {
 
   case class WireRequest(
-    objectName: String
+    objectName: String,
+    uploadToDataLake: Option[Boolean]
   )
 
   object WireRequest {
@@ -34,26 +36,42 @@ object StartJobHandler {
 
   case class WireResponse(
     jobId: String,
-    jobName: String
+    jobName: String,
+    objectName: String,
+    uploadToDataLake: Boolean
   )
 
   object WireResponse {
     implicit val writes = Json.writes[WireResponse]
   }
 
+  case class ShouldUploadToDataLake(value: Boolean) extends AnyVal
+
+  object ShouldUploadToDataLake {
+    def apply(requestValue: Option[Boolean], stage: Stage): Try[ShouldUploadToDataLake] = (requestValue, stage) match {
+      case (Some(booleanValue), Stage("PROD")) => Success(ShouldUploadToDataLake(booleanValue))
+      case (None, Stage("PROD")) => Success(ShouldUploadToDataLake(true))
+      case (Some(true), _) => Failure(LambdaException("uploadToDatalake can only be enabled in PROD"))
+      case _ => Success(ShouldUploadToDataLake(false))
+    }
+  }
+
   def steps(
     getCurrentDate: () => LocalDate,
     createJob: CreateJobRequest => ClientFailableOp[JobId],
     addQuery: AddQueryRequest => ClientFailableOp[Unit]
-  )(objectName: ObjectName): Try[WireResponse] = {
+  )(
+    objectName: ObjectName,
+    shouldUploadToDataLake: ShouldUploadToDataLake
+  ): Try[WireResponse] = {
     for {
       sfQueryInfo <- BulkApiParams.byName.get(objectName).toTry(noneErrorMessage = s"invalid object name ${objectName.value}")
       createJobRequest = CreateJobRequest(sfQueryInfo.sfObjectName, sfQueryInfo.batchSize)
       jobId <- createJob(createJobRequest).toTry
       addQueryRequest = AddQueryRequest(sfQueryInfo.soql, jobId)
       _ <- addQuery(addQueryRequest).toTry
-      jobName = s"${sfQueryInfo.objectName.value}_${getCurrentDate()}"
-    } yield WireResponse(jobId.value, jobName)
+      jobName = s"${objectName.value}_${getCurrentDate()}"
+    } yield WireResponse(jobId.value, jobName, objectName.value, shouldUploadToDataLake.value)
   }
 
   def operation(
@@ -69,7 +87,8 @@ object StartJobHandler {
       createJobOp = sfClient.wrapWith(JsonHttp.postWithHeaders).wrapWith(CreateJob.wrapper).runRequest _
       addQueryToJobOp = sfClient.wrapWith(AddQueryToJob.wrapper).runRequest _
       wiredSteps = steps(getCurrentDate, createJobOp, addQueryToJobOp) _
-      response <- wiredSteps(ObjectName(request.objectName))
+      shouldUploadToDataLake <- ShouldUploadToDataLake(request.uploadToDataLake, stage)
+      response <- wiredSteps(ObjectName(request.objectName), shouldUploadToDataLake)
     } yield response
   }
 

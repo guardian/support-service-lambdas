@@ -8,7 +8,7 @@ import com.gu.sf_datalake_export.handlers.EndJobHandler
 object EndJobManualTest extends App {
   val request =
     """{
-      | "jobId" : "7506E000004Eq7hQAC"
+      | "jobId" : "7506E000004FloxQAC"
       |}
     """.stripMargin
 

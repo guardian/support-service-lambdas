@@ -23,11 +23,11 @@ object BulkApiParams {
   val cases = SfQueryInfo(Soql(SfQueries.cases), ObjectName("Case"), SfObjectName("Case"))
   val caseComment = SfQueryInfo(Soql(SfQueries.caseComment), ObjectName("CaseComment"), SfObjectName("CaseComment"))
   val csSurvey = SfQueryInfo(Soql(SfQueries.csSurvey), ObjectName("CsSurvey"), SfObjectName("CS_Survey__c"))
-  val discount = SfQueryInfo(Soql(SfQueries.discount), ObjectName("CsSurvey"), SfObjectName("Discount__c"))
+  val discount = SfQueryInfo(Soql(SfQueries.discount), ObjectName("Discount"), SfObjectName("Discount__c"))
   val fulfilmentProcessInformation = SfQueryInfo(Soql(SfQueries.fulfilmentProcessInformation), ObjectName("FulfilmentProcessInformation"), SfObjectName("Fulfilment_Process_Information__c"))
   val imovoContract = SfQueryInfo(Soql(SfQueries.imovoContract), ObjectName("ImovoContract"), SfObjectName("Imovo_Contract__c"))
   val paymentCard = SfQueryInfo(Soql(SfQueries.paymentCard), ObjectName("PaymentCard"), SfObjectName("Payment_Card__c"))
-  val paymentFailure = SfQueryInfo(Soql(SfQueries.paymentCard), ObjectName("PaymentFailure"), SfObjectName("paymentFailure"))
+  val paymentFailure = SfQueryInfo(Soql(SfQueries.paymentFailure), ObjectName("PaymentFailure"), SfObjectName("Payment_Failure__c"))
 
   val all = List(
     contact,
@@ -107,7 +107,10 @@ object SfQueries {
       |Salutation,
       |Title,
       |Voucher_Fulfilment_Cut_Off_Date__c,
-      |Voucher_Start_Date__c
+      |Voucher_Start_Date__c,
+      |RecordType.Name,
+      |LastName,
+      |Membership_Tier__c
       |from Contact
       |where
       |Account.GDPR_Deletion_Pending__c = false
@@ -185,10 +188,10 @@ object SfQueries {
       |Zuora_Subscription_Salesforce_ID__c,
       |Zuora_Subscription_Name__c
       |from SF_Subscription__c
+      |where Buyer__r.Account.GDPR_Deletion_Pending__c = false
       |
   """.stripMargin
 
-  //removed compund ShippingAddress,BillingAddress
   //TODO BillingAccount__c doesn't exist ?
   val accounts =
     """
@@ -274,6 +277,8 @@ object SfQueries {
       |SystemModstamp
       |from
       |Cancellation_Survey_Voluntary__c
+      |where Contact__r.Account.GDPR_Deletion_Pending__c = false
+      |
     """.stripMargin
 
   val cardExpiry =
@@ -324,6 +329,7 @@ object SfQueries {
       |Term_End_Date__c
       |from
       |Card_Expiry__c
+      |where Contact__r.Account.GDPR_Deletion_Pending__c = false
     """.stripMargin
 
   val cases =
@@ -388,6 +394,7 @@ object SfQueries {
       |WinBack_Email__c
       |from
       |Case
+      |where Account.GDPR_Deletion_Pending__c = false
     """.stripMargin
 
   val caseComment =
@@ -405,6 +412,7 @@ object SfQueries {
       |SystemModstamp
       |from
       |CaseComment
+      |where Parent.Account.GDPR_Deletion_Pending__c = false
     """.stripMargin
 
   //Date_Submitted__c, doesnt seem to exist
@@ -431,6 +439,7 @@ object SfQueries {
       |SystemModstamp
       |from
       |CS_Survey__c
+      |where Related_to_Contact__r.Account.GDPR_Deletion_Pending__c = false
     """.stripMargin
 
   val discount =
@@ -462,6 +471,7 @@ object SfQueries {
       |SystemModstamp
       |from
       |Discount__c
+      |where Contact__r.Account.GDPR_Deletion_Pending__c = false
     """.stripMargin
 
   val fulfilmentProcessInformation =
@@ -490,6 +500,7 @@ object SfQueries {
       |SystemModstamp
       |from
       |Fulfilment_Process_Information__c
+      |where Contact__r.Account.GDPR_Deletion_Pending__c =false
     """.stripMargin
 
   //the object Imovo_Contract__c doesn't seem to exist
@@ -518,6 +529,7 @@ object SfQueries {
       |SystemModstamp
       |from
       |Imovo_Contract__c
+      |where Contact__r.Account.GDPR_Deletion_Pending__c = false
     """.stripMargin
 
   val paymentCard =
@@ -551,6 +563,7 @@ object SfQueries {
       |Zuora_ReferenceId__c
       |from
       |Payment_Card__c
+      |where AccountID__r.GDPR_Deletion_Pending__c = false
     """.stripMargin
 
   //Last_Attempt_Error_Code__c doesnt seem to exist
@@ -618,5 +631,6 @@ object SfQueries {
       |SystemModstamp
       |from
       |Payment_Failure__c
+      |where Contact__r.Account.GDPR_Deletion_Pending__c = false
     """.stripMargin
 }
