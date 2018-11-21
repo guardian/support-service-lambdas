@@ -14,7 +14,7 @@ Mappings:
     CODE:
       destBuckets: "arn:aws:s3:::gu-salesforce-export-test/CODE/*"
     PROD:
-      destBuckets: ["arn:aws:s3:::gu-salesforce-export-test/PROD/*", "arn:aws:s3:::ophan-clean-salesforce-customer-data-*"]
+      destBuckets: ["arn:aws:s3:::gu-salesforce-export-test/PROD/*", "arn:aws:s3:::ophan-raw-salesforce-customer-data-*"]
 
 Resources:
   StartJobRole:
