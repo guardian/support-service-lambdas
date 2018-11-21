@@ -45,14 +45,14 @@ object StartJobHandler {
     implicit val writes = Json.writes[WireResponse]
   }
 
-  case class UploadToDataLake(value: Boolean) extends AnyVal
+  case class ShouldUploadToDataLake(value: Boolean) extends AnyVal
 
-  object UploadToDataLake {
-    def apply(requestValue: Option[Boolean], stage: Stage): Try[UploadToDataLake] = (requestValue, stage) match {
-      case (Some(booleanValue), Stage("PROD")) => Success(UploadToDataLake(booleanValue))
-      case (None, Stage("PROD")) => Success(UploadToDataLake(true))
+  object ShouldUploadToDataLake {
+    def apply(requestValue: Option[Boolean], stage: Stage): Try[ShouldUploadToDataLake] = (requestValue, stage) match {
+      case (Some(booleanValue), Stage("PROD")) => Success(ShouldUploadToDataLake(booleanValue))
+      case (None, Stage("PROD")) => Success(ShouldUploadToDataLake(true))
       case (Some(true), _) => Failure(LambdaException("uploadToDatalake can only be enabled in PROD"))
-      case _ => Success(UploadToDataLake(false))
+      case _ => Success(ShouldUploadToDataLake(false))
     }
   }
 
@@ -62,7 +62,7 @@ object StartJobHandler {
     addQuery: AddQueryRequest => ClientFailableOp[Unit]
   )(
     objectName: ObjectName,
-    uploadToDataLake: UploadToDataLake
+    shouldUploadToDataLake: ShouldUploadToDataLake
   ): Try[WireResponse] = {
     for {
       sfQueryInfo <- BulkApiParams.byName.get(objectName).toTry(noneErrorMessage = s"invalid object name ${objectName.value}")
@@ -71,7 +71,7 @@ object StartJobHandler {
       addQueryRequest = AddQueryRequest(sfQueryInfo.soql, jobId)
       _ <- addQuery(addQueryRequest).toTry
       jobName = s"${objectName.value}_${getCurrentDate()}"
-    } yield WireResponse(jobId.value, jobName, objectName.value, uploadToDataLake.value)
+    } yield WireResponse(jobId.value, jobName, objectName.value, shouldUploadToDataLake.value)
   }
 
   def operation(
@@ -87,8 +87,8 @@ object StartJobHandler {
       createJobOp = sfClient.wrapWith(JsonHttp.postWithHeaders).wrapWith(CreateJob.wrapper).runRequest _
       addQueryToJobOp = sfClient.wrapWith(AddQueryToJob.wrapper).runRequest _
       wiredSteps = steps(getCurrentDate, createJobOp, addQueryToJobOp) _
-      uploadToDataLake <- UploadToDataLake(request.uploadToDataLake, stage)
-      response <- wiredSteps(ObjectName(request.objectName), uploadToDataLake)
+      shouldUploadToDataLake <- ShouldUploadToDataLake(request.uploadToDataLake, stage)
+      response <- wiredSteps(ObjectName(request.objectName), shouldUploadToDataLake)
     } yield response
   }
 

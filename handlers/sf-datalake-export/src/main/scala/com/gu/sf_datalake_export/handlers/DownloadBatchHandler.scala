@@ -7,7 +7,7 @@ import com.amazonaws.services.s3.model.{PutObjectRequest, PutObjectResult}
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.salesforce.SalesforceAuthenticate.{SFAuthConfig, SFExportAuthConfig}
 import com.gu.salesforce.SalesforceClient
-import com.gu.sf_datalake_export.handlers.StartJobHandler.UploadToDataLake
+import com.gu.sf_datalake_export.handlers.StartJobHandler.ShouldUploadToDataLake
 import com.gu.sf_datalake_export.salesforce_bulk_api.BulkApiParams.ObjectName
 import com.gu.sf_datalake_export.salesforce_bulk_api.CreateJob.JobId
 import com.gu.sf_datalake_export.salesforce_bulk_api.GetBatchResult.{DownloadResultsRequest, JobName}
@@ -72,8 +72,8 @@ object DownloadBatchHandler {
   }
 
   def download(
-    uploadToDataLake: UploadToDataLake,
-    basePathFor: (ObjectName, UploadToDataLake) => BasePath,
+    shouldUploadToDataLake: ShouldUploadToDataLake,
+    basePathFor: (ObjectName, ShouldUploadToDataLake) => BasePath,
     uploadFile: (BasePath, File) => Try[_],
     getBatchResultId: GetBatchResultRequest => ClientFailableOp[BatchResultId],
     getBatchResult: DownloadResultsRequest => ClientFailableOp[FileContent]
@@ -91,12 +91,12 @@ object DownloadBatchHandler {
       fileContent <- getBatchResult(downloadRequest).toTry
       fileName = FileName(s"${jobName.value}_${jobId.value}_${resultId.id}.csv")
       file = File(fileName, fileContent)
-      basePath = basePathFor(objectName, uploadToDataLake)
+      basePath = basePathFor(objectName, shouldUploadToDataLake)
       _ <- uploadFile(basePath, file)
     } yield ()
   }
 
-  def uploadBasePath(stage: Stage)(objectName: ObjectName, uploadToDataLake: UploadToDataLake) = stage match {
+  def uploadBasePath(stage: Stage)(objectName: ObjectName, uploadToDataLake: ShouldUploadToDataLake) = stage match {
     case Stage("PROD") if uploadToDataLake.value => BasePath(s"ophan-raw-salesforce-customer-data-${objectName.value.toLowerCase}")
 
     case Stage(stageName) => BasePath(s"gu-salesforce-export-test/$stageName/raw")
@@ -108,7 +108,7 @@ object DownloadBatchHandler {
     jobId: JobId,
     jobName: JobName,
     objectName: ObjectName,
-    uploadToDataLake: UploadToDataLake,
+    shouldUploadToDataLake: ShouldUploadToDataLake,
     pendingBatches: List[BatchInfo]
   ): Try[WireState] = pendingBatches match {
 
@@ -119,7 +119,7 @@ object DownloadBatchHandler {
         objectName = objectName.value,
         batches = Nil,
         done = true,
-        uploadToDataLake = uploadToDataLake.value
+        uploadToDataLake = shouldUploadToDataLake.value
       )
     )
 
@@ -130,7 +130,7 @@ object DownloadBatchHandler {
         objectName = objectName.value,
         batches = tail.map(WireBatch.fromBatch),
         done = tail.isEmpty,
-        uploadToDataLake = uploadToDataLake.value
+        uploadToDataLake = shouldUploadToDataLake.value
       )
     }
   }
@@ -143,8 +143,8 @@ object DownloadBatchHandler {
     jobId = JobId(request.jobId)
     jobName = JobName(request.jobName)
     objectName = ObjectName(request.objectName)
-    uploadToDataLake = UploadToDataLake(request.uploadToDataLake)
-    response <- downloadFirst(downloadBatch)(jobId, jobName, objectName, uploadToDataLake, pendingBatches)
+    shouldUploadToDataLake = ShouldUploadToDataLake(request.uploadToDataLake)
+    response <- downloadFirst(downloadBatch)(jobId, jobName, objectName, shouldUploadToDataLake, pendingBatches)
   } yield response
 
   def wireOperation(
@@ -157,14 +157,14 @@ object DownloadBatchHandler {
     for {
       sfConfig <- loadConfig[SFAuthConfig](SFExportAuthConfig.location, SFAuthConfig.reads).leftMap(_.error).toTry
       sfClient <- SalesforceClient(getResponse, sfConfig).value.toTry
-      uploadToDataLake <- UploadToDataLake(Some(request.uploadToDataLake), stage)
+      shouldUploadToDataLake <- ShouldUploadToDataLake(Some(request.uploadToDataLake), stage)
       wiredGetBatchResultId = sfClient.wrapWith(GetBatchResultId.wrapper).runRequest _
       wiredGetBatchResult = sfClient.wrapWith(GetBatchResult.wrapper).runRequest _
       uploadFile = S3UploadFile(s3Write) _
       wiredBasePathFor = uploadBasePath(stage) _
 
       wiredDownloadBatch = download(
-        uploadToDataLake,
+        shouldUploadToDataLake,
         wiredBasePathFor,
         uploadFile,
         wiredGetBatchResultId,

@@ -2,7 +2,7 @@ package com.com.gu.sf_datalake_export.handlers
 
 import com.gu.sf_datalake_export.handlers.DownloadBatchHandler
 import com.gu.sf_datalake_export.handlers.DownloadBatchHandler.{WireBatch, WireState}
-import com.gu.sf_datalake_export.handlers.StartJobHandler.UploadToDataLake
+import com.gu.sf_datalake_export.handlers.StartJobHandler.ShouldUploadToDataLake
 import com.gu.sf_datalake_export.salesforce_bulk_api.BulkApiParams
 import com.gu.sf_datalake_export.salesforce_bulk_api.BulkApiParams.ObjectName
 import com.gu.sf_datalake_export.salesforce_bulk_api.CreateJob.JobId
@@ -80,14 +80,14 @@ class DownloadBatchHandlerTest extends FlatSpec with Matchers {
       ClientSuccess(FileContent("someFileContent"))
     }
 
-    def basePathFor(objectName: ObjectName, uploadToDataLake: UploadToDataLake) = {
-      uploadToDataLake shouldBe UploadToDataLake(false)
+    def basePathFor(objectName: ObjectName, shouldUploadtoDataLake: ShouldUploadToDataLake) = {
+      shouldUploadtoDataLake shouldBe ShouldUploadToDataLake(false)
       objectName shouldBe ObjectName("someObjectName")
       BasePath(s"someBasePath")
     }
 
     val wiredDownloadBatch = DownloadBatchHandler.download(
-      UploadToDataLake(false),
+      ShouldUploadToDataLake(false),
       basePathFor,
       validatingUploadFile,
       validatingGetBatchResultId,
@@ -99,20 +99,20 @@ class DownloadBatchHandlerTest extends FlatSpec with Matchers {
 
   "uploadBasePath" should "return ophan bucket basepath for PROD requests with uploadToDataLake enabled" in {
     val contactName = BulkApiParams.contact.objectName
-    val actualBasePath = DownloadBatchHandler.uploadBasePath(Stage("PROD"))(contactName, UploadToDataLake(true))
+    val actualBasePath = DownloadBatchHandler.uploadBasePath(Stage("PROD"))(contactName, ShouldUploadToDataLake(true))
     actualBasePath shouldBe BasePath("ophan-raw-salesforce-customer-data-contact")
   }
 
   it should "return test bucket basepath for PROD requests with uploadToDataLake disabled" in {
     val contactName = BulkApiParams.contact.objectName
-    val actualBasePath = DownloadBatchHandler.uploadBasePath(Stage("PROD"))(contactName, UploadToDataLake(false))
+    val actualBasePath = DownloadBatchHandler.uploadBasePath(Stage("PROD"))(contactName, ShouldUploadToDataLake(false))
     actualBasePath shouldBe BasePath("gu-salesforce-export-test/PROD/raw")
   }
 
   it should "return test bucket basepath for non PROD requests regardless of the uploadToDataLake param" in {
     val contactName = BulkApiParams.contact.objectName
-    val codeBasePath = DownloadBatchHandler.uploadBasePath(Stage("CODE"))(contactName, UploadToDataLake(false))
-    val codeBasePathUploadToDl = DownloadBatchHandler.uploadBasePath(Stage("CODE"))(contactName, UploadToDataLake(false))
+    val codeBasePath = DownloadBatchHandler.uploadBasePath(Stage("CODE"))(contactName, ShouldUploadToDataLake(false))
+    val codeBasePathUploadToDl = DownloadBatchHandler.uploadBasePath(Stage("CODE"))(contactName, ShouldUploadToDataLake(false))
     List(codeBasePath, codeBasePathUploadToDl).distinct shouldBe List(BasePath("gu-salesforce-export-test/CODE/raw"))
   }
 }
