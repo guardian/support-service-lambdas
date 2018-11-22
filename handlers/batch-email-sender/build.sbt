@@ -2,7 +2,7 @@
 // https://www.scala-sbt.org/0.13/docs/Multi-Project.html
 import Dependencies._
 
-name := "new-product-api"
+name := "batch-email-sender"
 description:= "Receive batches of emails to be sent, munge them into an appropriate formate and put them on the email sending queue."
 
 scalacOptions += "-Ypartial-unification"
