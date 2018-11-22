@@ -10,17 +10,8 @@ Parameters:
       - CODE
     Default: CODE
 
-Mappings:
-  StageMap:
-    CODE:
-      ApiName: batch-email-sender-CODE
-      EmailSendingQueue: contributions-thanks-dev
-    PROD:
-      ApiName: batch-email-sender-PROD
-      EmailSendingQueue: contributions-thanks
-
 Resources:
-  LogAndWriteToEmailQueueRole:
+  LogRole:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
@@ -44,17 +35,6 @@ Resources:
                 - lambda:InvokeFunction
                 Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/batch-email-sender-${Stage}:log-stream:*"
 
-        - PolicyName: SQSAddEmailRequest
-          PolicyDocument:
-            Statement:
-              - Effect: Allow
-                Action:
-                - sqs:GetQueueUrl
-                - sqs:SendMessage
-                Resource:
-                  - !Sub "arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:contributions-thanks"
-                  - !Sub "arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:contributions-thanks-dev"
-
   BatchEmailSenderLambda:
     Type: AWS::Lambda::Function
     Properties:
@@ -70,13 +50,13 @@ Resources:
           Stage: !Ref Stage
       Role:
         Fn::GetAtt:
-        - "LogAndWriteToEmailQueueRole"
+        - "LogRole"
         - Arn
       MemorySize: 1536
       Runtime: java8
       Timeout: 300
     DependsOn:
-    - "LogAndWriteToEmailQueueRole"
+    - "LogRole"
 
   BatchEmailSenderApiPermission:
     Type: AWS::Lambda::Permission
