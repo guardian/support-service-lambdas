@@ -91,7 +91,7 @@ Resources:
     Properties:
       ParentId: !GetAtt [BatchEmailSenderApi, RootResourceId]
       PathPart: email-batch
-      RestApiId: !Ref AddToBatchQueueApi
+      RestApiId: !Ref BatchEmailSenderApi
 
   AddToBatchQueueApi:
     Type: AWS::ApiGateway::RestApi
@@ -145,7 +145,7 @@ Resources:
       Enabled: true
       Name: !Sub batch-email-sender-api-key-${Stage}
       StageKeys:
-        - RestApiId: !Ref NewProductApi
+        - RestApiId: !Ref BatchEmailSenderApi
           StageName: !Sub ${Stage}
     DependsOn:
     - BatchEmailSenderApi
