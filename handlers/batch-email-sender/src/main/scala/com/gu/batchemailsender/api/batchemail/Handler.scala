@@ -1,4 +1,4 @@
-package com.gu.newproduct.api.productcatalog
+package com.gu.batchemailsender.api.batchemail
 
 import java.io.{InputStream, OutputStream}
 

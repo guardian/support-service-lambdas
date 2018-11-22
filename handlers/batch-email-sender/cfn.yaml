@@ -93,11 +93,6 @@ Resources:
       PathPart: email-batch
       RestApiId: !Ref BatchEmailSenderApi
 
-  AddToBatchQueueApi:
-    Type: AWS::ApiGateway::RestApi
-    Properties:
-      Name: !Sub BatchEmailSender-${Stage}
-
   BatchEmailMethod:
     Type: AWS::ApiGateway::Method
     Properties:
@@ -111,7 +106,7 @@ Resources:
         IntegrationHttpMethod: POST
         Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${BatchEmailSenderLambda.Arn}/invocations
     DependsOn:
-    - AddToBatchQueueApi
+    - BatchEmailSenderApi
     - BatchEmailSenderLambda
     - BatchEmailSenderApiGateway
 
