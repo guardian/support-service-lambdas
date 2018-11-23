@@ -7,11 +7,13 @@ object Types {
 
   case class EmailAddress(value: String)
   case class AccountId(value: String)
+  case class CrmId(value: String)
 
   case class ZuoraAccountIdentitySFContact(
     accountId: AccountId,
     identityId: Option[IdentityId],
-    sfContactId: SFContactId
+    sfContactId: SFContactId,
+    crmId: CrmId
   )
 
 }

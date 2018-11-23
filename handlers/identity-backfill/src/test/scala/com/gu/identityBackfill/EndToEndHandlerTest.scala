@@ -34,7 +34,7 @@ class EndToEndHandlerTest extends FlatSpec with Matchers {
       BasicRequest("GET", "/services/data/v43.0/sobjects/Contact/00110000011AABBAAB", ""),
       BasicRequest("POST", "/services/oauth2/token", """client_id=clientsfclient&client_secret=clientsecretsfsecret&username=usernamesf&password=passSFpasswordtokentokenSFtoken&grant_type=password"""),
       BasicRequest("POST", "/action/query", """{"queryString":"SELECT Id FROM Account where IdentityId__c='1234'"}"""),
-      BasicRequest("POST", "/action/query", """{"queryString":"SELECT Id, IdentityId__c, sfContactId__c FROM Account where BillToId='2c92a0fb4a38064e014a3f48f1713ada'"}"""),
+      BasicRequest("POST", "/action/query", """{"queryString":"SELECT Id, IdentityId__c, sfContactId__c, CrmId FROM Account where BillToId='2c92a0fb4a38064e014a3f48f1713ada'"}"""),
       BasicRequest("POST", "/action/query", """{"queryString":"SELECT Id FROM Contact where WorkEmail='email@address'"}"""),
       BasicRequest("GET", "/user?emailAddress=email@address", "")
     ))
@@ -59,7 +59,7 @@ class EndToEndHandlerTest extends FlatSpec with Matchers {
       BasicRequest("GET", "/services/data/v43.0/sobjects/Contact/00110000011AABBAAB", ""),
       BasicRequest("POST", "/services/oauth2/token", """client_id=clientsfclient&client_secret=clientsecretsfsecret&username=usernamesf&password=passSFpasswordtokentokenSFtoken&grant_type=password"""),
       BasicRequest("POST", "/action/query", """{"queryString":"SELECT Id FROM Account where IdentityId__c='1234'"}"""),
-      BasicRequest("POST", "/action/query", """{"queryString":"SELECT Id, IdentityId__c, sfContactId__c FROM Account where BillToId='2c92a0fb4a38064e014a3f48f1713ada'"}"""),
+      BasicRequest("POST", "/action/query", """{"queryString":"SELECT Id, IdentityId__c, sfContactId__c, CrmId FROM Account where BillToId='2c92a0fb4a38064e014a3f48f1713ada'"}"""),
       BasicRequest("POST", "/action/query", """{"queryString":"SELECT Id FROM Contact where WorkEmail='email@address'"}"""),
       BasicRequest("GET", "/user?emailAddress=email@address", "")
     ))

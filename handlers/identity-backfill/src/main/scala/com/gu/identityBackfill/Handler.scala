@@ -1,12 +1,13 @@
 package com.gu.identityBackfill
 
 import java.io.{InputStream, OutputStream}
+
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.identity._
 import com.gu.identityBackfill.IdentityBackfillSteps.DomainRequest
 import com.gu.identityBackfill.TypeConvert._
-import com.gu.identityBackfill.Types.EmailAddress
+import com.gu.identityBackfill.Types.{EmailAddress, ZuoraAccountIdentitySFContact}
 import com.gu.identityBackfill.WireRequestToDomainObject.WireModel.IdentityBackfillRequest
 import com.gu.identityBackfill.salesforce.ContactSyncCheck.RecordTypeId
 import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
@@ -25,6 +26,7 @@ import com.gu.util.resthttp.JsonHttp.StringHttpRequest
 import com.gu.util.resthttp.RestRequestMaker.{GetRequest, PatchRequest}
 import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.resthttp.{HttpOp, JsonHttp, LazyClientFailableOp, RestRequestMaker}
+import com.gu.util.zuora.ZuoraQuery.ZuoraQuerier
 import com.gu.util.zuora.{ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
 import okhttp3.{Request, Response}
 import play.api.libs.json.{JsValue, Json, Reads}
@@ -60,23 +62,29 @@ object Handler {
       val findExistingIdentityId = FindExistingIdentityId(getByEmail.runRequest, getById.runRequest) _
 
       val countZuoraAccounts: IdentityId => ClientFailableOp[Int] = CountZuoraAccountsForIdentityId(zuoraQuerier)
+      val updateZuoraAccounts = IdentityBackfillSteps.updateZuoraAccounts(AddIdentityIdToAccount(zuoraRequests))(_, _)
 
       lazy val sfAuth: LazyClientFailableOp[HttpOp[StringHttpRequest, RestRequestMaker.BodyAsString]] = SalesforceClient(response, sfConfig)
       lazy val sfPatch = sfAuth.map(_.wrapWith(JsonHttp.patch))
       lazy val sfGet = sfAuth.map(_.wrapWith(JsonHttp.get))
+      lazy val checkSfContactsSyncable = PreReqCheck.checkSfContactsSyncable(syncableSFToIdentity(sfGet, stage)) _
+      lazy val updateSalesforceAccounts = IdentityBackfillSteps.updateSalesforceAccounts(updateSalesforceContactsWithIdentityId(sfPatch)) _
+
+      def findAndValidateZuoraAccounts(zuoraQuerier: ZuoraQuerier)(emailAddress: EmailAddress): ApiGatewayOp[List[ZuoraAccountIdentitySFContact]] =
+        PreReqCheck.validateZuoraAccountsFound(GetZuoraAccountsForEmail(zuoraQuerier)(emailAddress))(emailAddress)
 
       Operation(
         steps = WireRequestToDomainObject(IdentityBackfillSteps(
           PreReqCheck(
             findExistingIdentityId,
-            GetZuoraAccountsForEmail(zuoraQuerier) _ andThen PreReqCheck.getSingleZuoraAccountForEmail,
+            findAndValidateZuoraAccounts(zuoraQuerier),
             countZuoraAccounts andThen PreReqCheck.noZuoraAccountsForIdentityId,
             GetZuoraSubTypeForAccount(zuoraQuerier) _ andThen PreReqCheck.acceptableReaderType,
-            syncableSFToIdentity(sfGet, stage)
+            checkSfContactsSyncable
           ),
           createGuestAccount.runRequest,
-          AddIdentityIdToAccount(zuoraRequests),
-          updateSalesforceIdentityId(sfPatch)
+          updateZuoraAccounts,
+          updateSalesforceAccounts
         )),
         healthcheck = () => Healthcheck(
           getByEmail,
@@ -110,8 +118,8 @@ object Handler {
   def syncableSFToIdentity(
     sfRequests: LazyClientFailableOp[HttpOp[GetRequest, JsValue]],
     stage: Stage
-  )(sFContactId: SFContactId): LazyClientFailableOp[ApiGatewayOp[Unit]] =
-    for {
+  )(sFContactId: SFContactId): ApiGatewayOp[Unit] = {
+    val result = for {
       sfRequests <- sfRequests
       fields <- GetSFContactSyncCheckFields(sfRequests).apply(sFContactId)
     } yield for {
@@ -119,7 +127,13 @@ object Handler {
       syncable <- SyncableSFToIdentity(standardRecordType)(fields)(sFContactId)
     } yield syncable
 
-  def updateSalesforceIdentityId(
+    result
+      .value
+      .toApiGatewayOp("load SF contact")
+      .flatMap(identity)
+  }
+
+  def updateSalesforceContactsWithIdentityId(
     sfRequests: LazyClientFailableOp[HttpOp[PatchRequest, Unit]]
   )(
     sFContactId: SFContactId,

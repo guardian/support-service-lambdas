@@ -10,7 +10,7 @@ import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.reader.Types.ApiGatewayOp._
 import com.gu.util.reader.Types._
-import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess}
+import com.gu.util.resthttp.Types.{ClientFailableOp, ClientFailure, ClientSuccess}
 
 object IdentityBackfillSteps extends Logging {
 
@@ -22,8 +22,8 @@ object IdentityBackfillSteps extends Logging {
   def apply(
     preReqCheck: EmailAddress => ApiGatewayOp[PreReqResult],
     createGuestAccount: EmailAddress => ClientFailableOp[IdentityId],
-    updateZuoraIdentityId: (AccountId, IdentityId) => ClientFailableOp[Unit],
-    updateSalesforceIdentityId: (SFContactId, IdentityId) => ApiGatewayOp[Unit]
+    updateZuoraAccounts: (Set[AccountId], IdentityId) => ApiGatewayOp[Unit],
+    updateSalesforceAccounts: (Set[SFContactId], IdentityId) => ApiGatewayOp[Unit]
   )(request: DomainRequest): ApiResponse = {
 
     (for {
@@ -33,8 +33,8 @@ object IdentityBackfillSteps extends Logging {
         case Some(existingIdentityId) => ClientSuccess(existingIdentityId)
         case None => createGuestAccount(request.emailAddress)
       }).toApiGatewayOp("create guest identity account")
-      _ <- updateZuoraIdentityId(preReq.zuoraAccountId, requiredIdentityId).toApiGatewayOp("update zuora identity id field")
-      _ <- updateSalesforceIdentityId(preReq.sFContactId, requiredIdentityId)
+      _ <- updateZuoraAccounts(preReq.zuoraAccountIds, requiredIdentityId)
+      _ <- updateSalesforceAccounts(preReq.sFContactIds, requiredIdentityId)
       // need to remember which ones we updated?
     } yield ApiGatewayResponse.successfulExecution).apiResponse
 
@@ -46,4 +46,32 @@ object IdentityBackfillSteps extends Logging {
     else
       ContinueProcessing(())
 
+  def updateSalesforceAccounts(updateSalesforceAccounts: (SFContactId, IdentityId) => ApiGatewayOp[Unit])(sfContactIds: Set[SFContactId], identityId: IdentityId): ApiGatewayOp[Unit] = {
+
+    val failures = sfContactIds
+      .map(updateSalesforceAccounts(_, identityId))
+      .collect {
+        case returnWithResponse: ReturnWithResponse => returnWithResponse
+      }
+
+    if (failures.isEmpty)
+      ContinueProcessing(())
+    else
+      ReturnWithResponse(ApiGatewayResponse.badRequest("updateSalesforceAccounts multiple errors: " + failures.map(_.resp.body).mkString(", ")))
+
+  }
+
+  def updateZuoraAccounts(updateZuoraIdentityId: (AccountId, IdentityId) => ClientFailableOp[Unit])(accountIds: Set[AccountId], identityId: IdentityId): ApiGatewayOp[Unit] = {
+
+    val failures = accountIds
+      .map(updateZuoraIdentityId(_, identityId))
+      .collect {
+        case clientFailure: ClientFailure => clientFailure
+      }
+
+    if (failures.isEmpty)
+      ContinueProcessing(())
+    else
+      ReturnWithResponse(ApiGatewayResponse.badRequest("updateZuoraAccounts mutiple errors: " + failures.map(_.message).mkString(", ")))
+  }
 }
