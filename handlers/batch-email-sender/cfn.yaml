@@ -1,0 +1,165 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: API to receive email batches from Salesforce and add the items to the queue.
+
+Parameters:
+  Stage:
+    Description: Stage name
+    Type: String
+    AllowedValues:
+      - PROD
+      - CODE
+    Default: CODE
+  EmailSendingQueueName:
+    Description: Name of the the queue that sends emails that the lambda will push to.
+    Type: String
+    AllowedValues:
+      - contributions-thanks-dev
+      - contributions-thanks
+    Default: contributions-thanks-dev
+
+Resources:
+  LogAndWriteToEmailQueueRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+                Service:
+                   - lambda.amazonaws.com
+            Action:
+                - sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: LambdaPolicy
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                - logs:CreateLogGroup
+                - logs:CreateLogStream
+                - logs:PutLogEvents
+                - lambda:InvokeFunction
+                Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/batch-email-sender-${Stage}:log-stream:*"
+
+        - PolicyName: SQSAddEmailRequest
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                - sqs:GetQueueUrl
+                - sqs:SendMessage
+                Resource:
+                  - !Sub "arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${EmailSendingQueueName}"
+
+  BatchEmailSenderLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      Description: Receives calls from Salesforce containing batches of emails to be added to the email sending queue.
+      FunctionName:
+        !Sub batch-email-sender-${Stage}
+      Code:
+        S3Bucket: zuora-auto-cancel-dist
+        S3Key: !Sub membership/${Stage}/batch-email-sender/batch-email-sender.jar
+      Handler: com.gu.batchemailsender.api.batchemail.Handler::apply
+      Environment:
+        Variables:
+          Stage: !Ref Stage
+      Role:
+        Fn::GetAtt:
+        - "LogAndWriteToEmailQueueRole"
+        - Arn
+      MemorySize: 1536
+      Runtime: java8
+      Timeout: 300
+    DependsOn:
+    - "LogAndWriteToEmailQueueRole"
+
+  BatchEmailSenderApiPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:invokeFunction
+      FunctionName: !Sub batch-email-sender-${Stage}
+      Principal: apigateway.amazonaws.com
+    DependsOn: BatchEmailSenderLambda
+
+  BatchEmailSenderApiGateway:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !GetAtt [BatchEmailSenderApi, RootResourceId]
+      PathPart: email-batch
+      RestApiId: !Ref BatchEmailSenderApi
+
+  BatchEmailMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE
+      ApiKeyRequired: true
+      RestApiId: !Ref BatchEmailSenderApi
+      ResourceId: !Ref BatchEmailSenderApiGateway
+      HttpMethod: POST
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${BatchEmailSenderLambda.Arn}/invocations
+    DependsOn:
+    - BatchEmailSenderApi
+    - BatchEmailSenderLambda
+    - BatchEmailSenderApiGateway
+
+  BatchEmailSenderApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: !Sub BatchEmailSender-${Stage}
+
+  BatchEmailSenderApiStage:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      Description: Stage for batch email sender api
+      RestApiId: !Ref BatchEmailSenderApi
+      DeploymentId: !Ref BatchEmailSenderApiDeployment
+      StageName: !Sub ${Stage}
+    DependsOn:
+      - BatchEmailMethod
+
+  BatchEmailSenderApiDeployment:
+    Type: AWS::ApiGateway::Deployment
+    Properties:
+      Description: Deploys batch-email-sender into an environment/stage
+      RestApiId: !Ref BatchEmailSenderApi
+    DependsOn:
+      - BatchEmailMethod
+
+  BatchEmailSenderApiKey:
+    Type: AWS::ApiGateway::ApiKey
+    Properties:
+      Description: Key required to call batch email sender API
+      Enabled: true
+      Name: !Sub batch-email-sender-api-key-${Stage}
+      StageKeys:
+        - RestApiId: !Ref BatchEmailSenderApi
+          StageName: !Sub ${Stage}
+    DependsOn:
+    - BatchEmailSenderApi
+    - BatchEmailSenderApiStage
+
+  BatchEmailSenderUsagePlan:
+    Type: "AWS::ApiGateway::UsagePlan"
+    Properties:
+      UsagePlanName: !Sub batch-email-sender-api-usage-plan-${Stage}
+      ApiStages:
+      - ApiId: !Ref BatchEmailSenderApi
+        Stage: !Ref BatchEmailSenderApiStage
+    DependsOn:
+    - BatchEmailSenderApi
+    - BatchEmailSenderApiStage
+
+  BatchEmailSenderUsagePlanKey:
+    Type: "AWS::ApiGateway::UsagePlanKey"
+    Properties:
+      KeyId: !Ref BatchEmailSenderApiKey
+      KeyType: API_KEY
+      UsagePlanId: !Ref BatchEmailSenderUsagePlan
+    DependsOn:
+    - BatchEmailSenderApiKey
+    - BatchEmailSenderUsagePlan

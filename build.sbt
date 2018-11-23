@@ -161,7 +161,8 @@ lazy val root = all(project in file(".")).enablePlugins(RiffRaffArtifact).aggreg
   `new-product-api`,
   `effects-sqs`,
   `effects-ses`,
-  `sf-datalake-export`
+  `sf-datalake-export`,
+  `batch-email-sender`
 ).dependsOn(zuora, handler, effectsDepIncludingTestFolder, `effects-sqs`, testDep)
 
 lazy val `identity-backfill` = all(project in file("handlers/identity-backfill")) // when using the "project identity-backfill" command it uses the lazy val name
@@ -205,6 +206,10 @@ lazy val `cancellation-sf-cases` = all(project in file("handlers/cancellation-sf
 lazy val `sf-datalake-export` = all(project in file("handlers/sf-datalake-export"))
   .enablePlugins(RiffRaffArtifact)
   .dependsOn(salesforce, handler, effectsDepIncludingTestFolder, testDep)
+
+lazy val `batch-email-sender` = all(project in file("handlers/batch-email-sender"))
+  .enablePlugins(RiffRaffArtifact)
+  .dependsOn(handler, `effects-sqs`, effectsDepIncludingTestFolder, testDep)
 
 // ==== END handlers ====
 

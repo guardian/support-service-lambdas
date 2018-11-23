@@ -1,0 +1,21 @@
+stacks:
+- membership
+regions:
+- eu-west-1
+deployments:
+
+  cfn:
+    type: cloud-formation
+    app: batch-email-sender
+    parameters:
+      templatePath: cfn.yaml
+
+  batch-email-sender:
+    type: aws-lambda
+    parameters:
+      fileName: batch-email-sender.jar
+      bucket: zuora-auto-cancel-dist
+      prefixStack: false
+      functionNames:
+      - batch-email-sender-
+    dependencies: [cfn]
