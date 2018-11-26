@@ -49,6 +49,7 @@ object IdentityBackfillSteps extends Logging {
   def updateSalesforceAccounts(updateSalesforceAccounts: (SFContactId, IdentityId) => ApiGatewayOp[Unit])(sfContactIds: Set[SFContactId], identityId: IdentityId): ApiGatewayOp[Unit] = {
 
     val failures = sfContactIds
+      .toSeq
       .map(updateSalesforceAccounts(_, identityId))
       .collect {
         case returnWithResponse: ReturnWithResponse => returnWithResponse
@@ -64,6 +65,7 @@ object IdentityBackfillSteps extends Logging {
   def updateZuoraAccounts(updateZuoraIdentityId: (AccountId, IdentityId) => ClientFailableOp[Unit])(accountIds: Set[AccountId], identityId: IdentityId): ApiGatewayOp[Unit] = {
 
     val failures = accountIds
+      .toSeq
       .map(updateZuoraIdentityId(_, identityId))
       .collect {
         case clientFailure: ClientFailure => clientFailure
@@ -72,6 +74,6 @@ object IdentityBackfillSteps extends Logging {
     if (failures.isEmpty)
       ContinueProcessing(())
     else
-      ReturnWithResponse(ApiGatewayResponse.badRequest("updateZuoraAccounts mutiple errors: " + failures.map(_.message).mkString(", ")))
+      ReturnWithResponse(ApiGatewayResponse.badRequest("updateZuoraAccounts multiple errors: " + failures.map(_.message).mkString(", ")))
   }
 }

@@ -71,7 +71,16 @@ class PreReqCheckTest extends FlatSpec with Matchers {
     result should be(expectedResult)
   }
 
-  // TODO more tests required here
+  "checkSfContactsSyncable" should "ReturnWithResponse if contacts not syncable" in {
+    PreReqCheck.checkSfContactsSyncable(_ =>
+      ReturnWithResponse(ApiGatewayResponse.badRequest("bad request")))(List(SFContactId("sfContactId"))) shouldBe ReturnWithResponse(ApiGatewayResponse.badRequest("bad request"))
+  }
+
+  "checkSfContactsSyncable" should "continue processing if syncable" in {
+    PreReqCheck.checkSfContactsSyncable(_ =>
+      ContinueProcessing(()))(List(SFContactId("sfContactId"))) shouldBe ContinueProcessing(())
+  }
+
   "validateZuoraAccountsFound" should "stop processing if the zuora account for the given email already has an identity id" in {
 
     val ReturnWithResponse(result) = PreReqCheck.validateZuoraAccountsFound(
@@ -89,6 +98,41 @@ class PreReqCheckTest extends FlatSpec with Matchers {
 
     result.statusCode shouldBe "400"
     result.body should include("identity ids found in zuora")
+
+  }
+
+  "validateZuoraAccountsFound" should "stop processing if multiple crm ids are found" in {
+
+    val ReturnWithResponse(result) = PreReqCheck.validateZuoraAccountsFound(
+      ClientSuccess(
+        List(
+          ZuoraAccountIdentitySFContact(
+            AccountId("acc"),
+            None,
+            SFContactId("sf"),
+            CrmId("CrmId")
+          ),
+          ZuoraAccountIdentitySFContact(
+            AccountId("acc2"),
+            None,
+            SFContactId("sf2"),
+            CrmId("CrmId2")
+          )
+        )
+      )
+    )(EmailAddress("email@gu.com"))
+
+    result.statusCode shouldBe "400"
+    result.body should include("multiple CRM ids found for")
+
+  }
+
+  "validateZuoraAccountsFound" should "stop processing if no zuora accounts found" in {
+
+    val ReturnWithResponse(result) = PreReqCheck.validateZuoraAccountsFound(ClientSuccess(Nil))(EmailAddress("email@gu.com"))
+
+    result.statusCode shouldBe "400"
+    result.body should include("no zuora accounts found for")
 
   }
 
