@@ -7,7 +7,7 @@ import com.gu.sf_gocardless_sync.SyncSharedObjects.{BankAccountNumberEnding, Ban
 import com.gu.sf_gocardless_sync.salesforce.SalesforceDDMandate.Create.WireNewMandate
 import com.gu.sf_gocardless_sync.salesforce.SalesforceDDMandate.Update.WirePatchMandate
 import com.gu.sf_gocardless_sync.salesforce.SalesforceDDMandate.{BillingAccountSfId, PaymentMethodSfId}
-import com.gu.sf_gocardless_sync.salesforce.SalesforceSharedObjects.{MandateSfId, MandateUpdateSfId}
+import com.gu.sf_gocardless_sync.salesforce.SalesforceSharedObjects.{MandateSfId, MandateEventSfId}
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.resthttp.JsonHttp
@@ -39,7 +39,7 @@ class SalesforceDDMandateEffectsTest extends FlatSpec with Matchers {
 
   }
 
-  it should "update an existing 'DD Mandate' in salesforce" taggedAs EffectsTest in {
+  it should "event an existing 'DD Mandate' in salesforce" taggedAs EffectsTest in {
 
     val actual = for {
       sfConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[SFAuthConfig]
@@ -47,7 +47,7 @@ class SalesforceDDMandateEffectsTest extends FlatSpec with Matchers {
       sfAuth <- SalesforceClient(response, sfConfig).value.toDisjunction
       wiredOp = SalesforceDDMandate.Update(sfAuth.wrapWith(JsonHttp.patch))(MandateSfId("a2q6E0000007XgS"))
       result = wiredOp(WirePatchMandate(
-        Last_Mandate_Update__c = MandateUpdateSfId("a2r6E000000754r"),
+        Last_Mandate_Event__c = MandateEventSfId("a2r6E000000754r"),
         Payment_Method__c = None,
         Billing_Account__c = None
       ))

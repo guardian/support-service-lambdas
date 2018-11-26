@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: Polls GoCardless for direct debit mandate updates and pushes into SalesForce
+Description: Polls GoCardless for direct debit mandate events and pushes into SalesForce
 
 Parameters:
   Stage:
@@ -65,7 +65,7 @@ Resources:
     - GoCardlessSalesForceSyncRole
     - GoCardlessSalesForceSyncLogGroup
     Properties:
-      Description: Polls GoCardless for direct debit mandate updates and pushes into SalesForce
+      Description: Polls GoCardless for direct debit mandate events and pushes into SalesForce
       FunctionName:
         !Sub sf-gocardless-sync-${Stage}
       Code:

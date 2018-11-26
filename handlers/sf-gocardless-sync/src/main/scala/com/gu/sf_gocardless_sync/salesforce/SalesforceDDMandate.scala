@@ -2,7 +2,7 @@ package com.gu.sf_gocardless_sync.salesforce
 
 import ai.x.play.json.Jsonx
 import com.gu.sf_gocardless_sync.SyncSharedObjects.{BankAccountNumberEnding, BankName, GoCardlessMandateID, MandateCreatedAt, Reference}
-import com.gu.sf_gocardless_sync.salesforce.SalesforceSharedObjects.{MandateSfId, MandateUpdateSfId, UpdateHappenedAt}
+import com.gu.sf_gocardless_sync.salesforce.SalesforceSharedObjects.{MandateSfId, MandateEventSfId, EventHappenedAt}
 import com.gu.util.Logging
 import com.gu.util.resthttp.RestOp._
 import com.gu.util.resthttp.RestRequestMaker._
@@ -44,8 +44,8 @@ object SalesforceDDMandate extends Logging {
     implicit val mandateSfLowercaseIdReads = Json.reads[MandateWithSfLowercaseId]
 
     def apply(sfPost: HttpOp[RestRequestMaker.PostRequest, JsValue]): WireNewMandate => ClientFailableOp[MandateWithSfId] =
-      sfPost.setupRequest[WireNewMandate] { newMandateUpdate =>
-        PostRequest(newMandateUpdate, RelativePath(mandateSfObjectsBaseUrl))
+      sfPost.setupRequest[WireNewMandate] { newMandateEvent =>
+        PostRequest(newMandateEvent, RelativePath(mandateSfObjectsBaseUrl))
       }.parse[MandateWithSfLowercaseId].map(withLowercaseId => MandateWithSfId(withLowercaseId.id)).runRequest
 
   }
@@ -53,15 +53,15 @@ object SalesforceDDMandate extends Logging {
   object Update {
 
     case class WirePatchMandate(
-      Last_Mandate_Update__c: MandateUpdateSfId,
+      Last_Mandate_Event__c: MandateEventSfId,
       Billing_Account__c: Option[BillingAccountSfId],
       Payment_Method__c: Option[PaymentMethodSfId]
     )
     implicit val writesWirePatchMandate = Json.writes[WirePatchMandate]
 
     def apply(sfPatch: HttpOp[RestRequestMaker.PatchRequest, Unit])(mandateSfId: MandateSfId): WirePatchMandate => ClientFailableOp[Unit] =
-      sfPatch.setupRequest[WirePatchMandate] { newMandateUpdate =>
-        PatchRequest(newMandateUpdate, RelativePath(s"$mandateSfObjectsBaseUrl/${mandateSfId.value}"))
+      sfPatch.setupRequest[WirePatchMandate] { newMandateEvent =>
+        PatchRequest(newMandateEvent, RelativePath(s"$mandateSfObjectsBaseUrl/${mandateSfId.value}"))
       }.runRequest
 
   }
@@ -71,8 +71,8 @@ object SalesforceDDMandate extends Logging {
     case class MandateLookupDetail(
       Id: MandateSfId,
       GoCardless_Mandate_ID__c: GoCardlessMandateID,
-      Last_Mandate_Update__c: MandateUpdateSfId,
-      Status_Changed_At__c: UpdateHappenedAt
+      Last_Mandate_Event__c: MandateEventSfId,
+      Status_Changed_At__c: EventHappenedAt
     ) extends WithMandateSfId
     implicit val reads = Json.reads[MandateLookupDetail]
 
@@ -85,7 +85,7 @@ object SalesforceDDMandate extends Logging {
       sfGet.setupRequest(toRequest).parse[MandateSearchQueryResponse].map(toResponse).runRequest
 
     def toRequest(mandateIDs: List[GoCardlessMandateID]) = {
-      val soqlQuery = s"SELECT Id, GoCardless_Mandate_ID__c, Last_Mandate_Update__c, Status_Changed_At__c " +
+      val soqlQuery = s"SELECT Id, GoCardless_Mandate_ID__c, Last_Mandate_Event__c, Status_Changed_At__c " +
         s"FROM DD_Mandate__c " +
         s"WHERE GoCardless_Mandate_ID__c IN (${mandateIDs.map(mandateID => s"'${mandateID.value}'").mkString(", ")})"
       logger.info(s"using SF query : $soqlQuery")

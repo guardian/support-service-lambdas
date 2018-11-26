@@ -7,10 +7,10 @@ object SalesforceSharedObjects {
   case class MandateSfId(value: String) extends AnyVal
   implicit val formatMandateSfID = Jsonx.formatInline[MandateSfId]
 
-  case class MandateUpdateSfId(value: String) extends AnyVal
-  implicit val formatMandateUpdateSfId = Jsonx.formatInline[MandateUpdateSfId]
+  case class MandateEventSfId(value: String) extends AnyVal
+  implicit val formatMandateEventSfId = Jsonx.formatInline[MandateEventSfId]
 
-  case class UpdateHappenedAt(value: String) extends AnyVal
-  implicit val formatUpdateHappenedAt = Jsonx.formatInline[UpdateHappenedAt]
+  case class EventHappenedAt(value: String) extends AnyVal
+  implicit val formatEventHappenedAt = Jsonx.formatInline[EventHappenedAt]
 
 }

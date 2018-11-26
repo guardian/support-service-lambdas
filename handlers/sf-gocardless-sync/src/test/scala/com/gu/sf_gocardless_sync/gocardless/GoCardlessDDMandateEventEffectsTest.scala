@@ -1,10 +1,10 @@
 package com.gu.sf_gocardless_sync.gocardless
 
 import com.gu.effects.{GetFromS3, RawEffects}
-import com.gu.sf_gocardless_sync.SyncSharedObjects.{BankAccountNumberEnding, BankName, Cause, Description, GoCardlessMandateID, GoCardlessMandateUpdateID, MandateCreatedAt, Reference, Status}
-import com.gu.sf_gocardless_sync.gocardless.GoCardlessDDMandateUpdate.GetBankDetail.GoCardlessCustomerBankDetail
-import com.gu.sf_gocardless_sync.gocardless.GoCardlessDDMandateUpdate.GetEventsSince.{GoCardlessEventDetails, GoCardlessEventLinks, GoCardlessMandateUpdate, MandateUpdateWithMandateDetail}
-import com.gu.sf_gocardless_sync.gocardless.GoCardlessDDMandateUpdate.{GetBankDetail, GetEventsSince, GoCardlessCustomerBankAccountID, GoCardlessMandateDetail, GoCardlessMandateLinks}
+import com.gu.sf_gocardless_sync.SyncSharedObjects.{BankAccountNumberEnding, BankName, Cause, Description, GoCardlessMandateID, GoCardlessMandateEventID, MandateCreatedAt, Reference, Status}
+import com.gu.sf_gocardless_sync.gocardless.GoCardlessDDMandateEvent.GetBankDetail.GoCardlessCustomerBankDetail
+import com.gu.sf_gocardless_sync.gocardless.GoCardlessDDMandateEvent.GetEventsSince.{GoCardlessEventDetails, GoCardlessEventLinks, GoCardlessMandateEvent, MandateEventWithMandateDetail}
+import com.gu.sf_gocardless_sync.gocardless.GoCardlessDDMandateEvent.{GetBankDetail, GetEventsSince, GoCardlessCustomerBankAccountID, GoCardlessMandateDetail, GoCardlessMandateLinks}
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.resthttp.JsonHttp
@@ -12,7 +12,7 @@ import com.gu.util.resthttp.Types.ClientSuccess
 import org.scalatest.{FlatSpec, Matchers}
 import scalaz.\/-
 
-class GoCardlessDDMandateUpdateEffectsTest extends FlatSpec with Matchers {
+class GoCardlessDDMandateEventEffectsTest extends FlatSpec with Matchers {
 
   it should "fetch a set of mandate events from GoCardless, with accompanying mandate detail" taggedAs EffectsTest in {
 
@@ -20,13 +20,13 @@ class GoCardlessDDMandateUpdateEffectsTest extends FlatSpec with Matchers {
       goCardlessConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[GoCardlessConfig]
       goCardlessClient = GoCardlessClient(RawEffects.response, goCardlessConfig)
       wiredOp = GetEventsSince(goCardlessClient.wrapWith(JsonHttp.get), 2)
-    } yield wiredOp(GoCardlessMandateUpdateID("EV002140EW1YFZ"))
+    } yield wiredOp(GoCardlessMandateEventID("EV002140EW1YFZ"))
 
     actual shouldBe \/-(ClientSuccess(
       List(
-        MandateUpdateWithMandateDetail(
-          GoCardlessMandateUpdate(
-            GoCardlessMandateUpdateID("EV00214371W8Q5"),
+        MandateEventWithMandateDetail(
+          GoCardlessMandateEvent(
+            GoCardlessMandateEventID("EV00214371W8Q5"),
             "2018-11-02T11:03:50.652Z",
             Status("active"),
             GoCardlessEventLinks(GoCardlessMandateID("MD0004EMSRVH12")),
@@ -44,9 +44,9 @@ class GoCardlessDDMandateUpdateEffectsTest extends FlatSpec with Matchers {
             GoCardlessMandateLinks(GoCardlessCustomerBankAccountID("BA0004CDWM71MX"))
           )
         ),
-        MandateUpdateWithMandateDetail(
-          GoCardlessMandateUpdate(
-            GoCardlessMandateUpdateID("EV002142VDRGB1"),
+        MandateEventWithMandateDetail(
+          GoCardlessMandateEvent(
+            GoCardlessMandateEventID("EV002142VDRGB1"),
             "2018-11-02T11:03:43.908Z",
             Status("active"),
             GoCardlessEventLinks(GoCardlessMandateID("MD0004ENP8MFV9")),

@@ -10,8 +10,8 @@ object SyncSharedObjects {
   case class Reference(value: String) extends AnyVal
   implicit val formatReference = Jsonx.formatInline[Reference]
 
-  case class GoCardlessMandateUpdateID(value: String) extends AnyVal
-  implicit val formatMandateUpdateID = Jsonx.formatInline[GoCardlessMandateUpdateID]
+  case class GoCardlessMandateEventID(value: String) extends AnyVal
+  implicit val formatMandateEventID = Jsonx.formatInline[GoCardlessMandateEventID]
 
   case class MandateCreatedAt(value: String) extends AnyVal
   implicit val formatMandateCreatedAt = Jsonx.formatInline[MandateCreatedAt]

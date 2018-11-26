@@ -1,7 +1,7 @@
 package com.gu.sf_gocardless_sync.gocardless
 
 import ai.x.play.json.Jsonx
-import com.gu.sf_gocardless_sync.SyncSharedObjects.{BankAccountNumberEnding, BankName, Cause, Description, GoCardlessMandateID, GoCardlessMandateUpdateID, MandateCreatedAt, ReasonCode, Reference, Status}
+import com.gu.sf_gocardless_sync.SyncSharedObjects.{BankAccountNumberEnding, BankName, Cause, Description, GoCardlessMandateID, GoCardlessMandateEventID, MandateCreatedAt, ReasonCode, Reference, Status}
 import com.gu.util.Logging
 import com.gu.util.resthttp.RestOp._
 import com.gu.util.resthttp.RestRequestMaker._
@@ -9,7 +9,7 @@ import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess}
 import com.gu.util.resthttp.{HttpOp, RestRequestMaker}
 import play.api.libs.json.{JsValue, Json}
 
-object GoCardlessDDMandateUpdate extends Logging {
+object GoCardlessDDMandateEvent extends Logging {
 
   case class GoCardlessCustomerBankAccountID(value: String) extends AnyVal
   implicit val formatCustomerBankAccountID = Jsonx.formatInline[GoCardlessCustomerBankAccountID]
@@ -41,42 +41,42 @@ object GoCardlessDDMandateUpdate extends Logging {
     )
     implicit val detailsReads = Json.reads[GoCardlessEventDetails]
 
-    case class GoCardlessMandateUpdate(
-      id: GoCardlessMandateUpdateID,
+    case class GoCardlessMandateEvent(
+      id: GoCardlessMandateEventID,
       created_at: String,
       action: Status,
       links: GoCardlessEventLinks,
       details: GoCardlessEventDetails
     )
-    implicit val reads = Json.reads[GoCardlessMandateUpdate]
+    implicit val reads = Json.reads[GoCardlessMandateEvent]
 
     case class GoCardlessLinkedMandates(
       mandates: List[GoCardlessMandateDetail]
     )
     implicit val readsLinked = Json.reads[GoCardlessLinkedMandates]
 
-    private case class MandateUpdateEventsResponse(
-      events: List[GoCardlessMandateUpdate],
+    private case class MandateEventsResponse(
+      events: List[GoCardlessMandateEvent],
       linked: GoCardlessLinkedMandates
     )
-    private implicit val readsUpdates = Json.reads[MandateUpdateEventsResponse]
+    private implicit val readsEvents = Json.reads[MandateEventsResponse]
 
-    case class MandateUpdateWithMandateDetail(
-      event: GoCardlessMandateUpdate,
+    case class MandateEventWithMandateDetail(
+      event: GoCardlessMandateEvent,
       mandate: GoCardlessMandateDetail
     )
 
-    def apply(gcGet: HttpOp[RestRequestMaker.GetRequest, JsValue], batchSize: Int): GoCardlessMandateUpdateID => ClientFailableOp[List[MandateUpdateWithMandateDetail]] =
-      gcGet.setupRequest(toRequest(batchSize)).parse[MandateUpdateEventsResponse].map(toResponse).runRequest
+    def apply(gcGet: HttpOp[RestRequestMaker.GetRequest, JsValue], batchSize: Int): GoCardlessMandateEventID => ClientFailableOp[List[MandateEventWithMandateDetail]] =
+      gcGet.setupRequest(toRequest(batchSize)).parse[MandateEventsResponse].map(toResponse).runRequest
 
-    def toRequest(batchSize: Int)(lastProcessedEventID: GoCardlessMandateUpdateID) =
+    def toRequest(batchSize: Int)(lastProcessedEventID: GoCardlessMandateEventID) =
       RestRequestMaker.GetRequest(RelativePath(
         s"$gcEventsBaseUrl&limit=${Math.min(batchSize, 200)}&before=${lastProcessedEventID.value}"
       ))
 
-    def toResponse(mandateUpdateEventsResponse: MandateUpdateEventsResponse) = {
-      val mandatesMap = mandateUpdateEventsResponse.linked.mandates.map(mandate => mandate.id -> mandate).toMap
-      mandateUpdateEventsResponse.events.map(event => MandateUpdateWithMandateDetail(event, mandatesMap(event.links.mandate)))
+    def toResponse(mandateEventsResponse: MandateEventsResponse) = {
+      val mandatesMap = mandateEventsResponse.linked.mandates.map(mandate => mandate.id -> mandate).toMap
+      mandateEventsResponse.events.map(event => MandateEventWithMandateDetail(event, mandatesMap(event.links.mandate)))
     }
 
     object GetAlternateStartEvent {
@@ -84,10 +84,10 @@ object GoCardlessDDMandateUpdate extends Logging {
       def apply(
         gcGet: HttpOp[RestRequestMaker.GetRequest, JsValue]
       )(
-        defaultUpdateID: Option[GoCardlessMandateUpdateID]
-      ): ClientFailableOp[GoCardlessMandateUpdateID] = defaultUpdateID match {
-        case Some(lastUpdateProcessed) => ClientSuccess(lastUpdateProcessed)
-        case None => gcGet.parse[MandateUpdateEventsResponse].map(toResponse).runRequest(createRequest())
+        defaultEventID: Option[GoCardlessMandateEventID]
+      ): ClientFailableOp[GoCardlessMandateEventID] = defaultEventID match {
+        case Some(lastEventProcessed) => ClientSuccess(lastEventProcessed)
+        case None => gcGet.parse[MandateEventsResponse].map(toResponse).runRequest(createRequest())
       }
 
       def createRequest() =
@@ -95,8 +95,8 @@ object GoCardlessDDMandateUpdate extends Logging {
           s"$gcEventsBaseUrl&limit=1&created_at[lte]=2015-08-25T13:13:56.000Z" // TODO make this timestamp configurable
         ))
 
-      def toResponse(mandateUpdateEventsResponse: MandateUpdateEventsResponse) = {
-        mandateUpdateEventsResponse.events.head.id
+      def toResponse(mandateEventsResponse: MandateEventsResponse) = {
+        mandateEventsResponse.events.head.id
       }
     }
 
