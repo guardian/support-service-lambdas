@@ -1,70 +1,99 @@
 package com.gu.batchemailsender.api.batchemail.model
-
-import play.api.libs.json._
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
+import play.api.libs.json.{JsSuccess, JsValue, Json, Reads}
 
 import scala.util.{Failure, Success, Try}
 
-case class SubscriberId(value: String) extends AnyVal
-case class SfContactId(value: String) extends AnyVal
-case class IdentityUserId(value: String) extends AnyVal
-case class EmailBatchItemId(value: String) extends AnyVal
-
-case class EmailBatch(emailBatchItems: List[EmailBatchItem])
-case class EmailBatchItem(payload: EmailBatchItemPayload, object_name: String)
-case class EmailBatchItemPayload(
-  record_id: EmailBatchItemId,
-  to_address: String,
-  subscriber_id: SubscriberId,
-  sf_contact_id: SfContactId,
-  product: String,
-  next_charge_date: String,
-  last_name: String,
-  identity_id: Option[IdentityUserId],
-  first_name: String,
-  email_stage: String
-)
-
 object EmailBatch {
 
-  implicit val identityIdReader = Json.reads[IdentityUserId]
-  implicit val sfContactIdReader = Json.reads[SfContactId]
-  implicit val subscriptionNameReader = Json.reads[SubscriberId]
+  object WireModel {
 
-  implicit val emailBatchItemPayloadReader = new Reads[EmailBatchItemPayload] {
-    override def reads(json: JsValue) = JsSuccess(EmailBatchItemPayload(
-      record_id = EmailBatchItemId((json \ "record_id").as[String]),
-      to_address = (json \ "to_address").as[String],
-      subscriber_id = SubscriberId((json \ "subscriber_id").as[String]),
-      sf_contact_id = SfContactId((json \ "sf_contact_id").as[String]),
-      product = (json \ "product").as[String],
-      next_charge_date = fromSfDateToDisplayDate((json \ "next_charge_date").as[String]),
-      last_name = (json \ "last_name").as[String],
-      identity_id = (json \ "identity_id").asOpt[String].map(IdentityUserId.apply),
-      first_name = (json \ "first_name").as[String],
-      email_stage = (json \ "email_stage").as[String]
-    ))
-  }
+    case class WireEmailBatch(emailBatchItems: List[WireEmailBatchItem])
+    case class WireEmailBatchItem(payload: WireEmailBatchItemPayload, object_name: String)
+    case class WireEmailBatchItemPayload(record_id: String,
+                                         to_address: String,
+                                         subscriber_id: String,
+                                         sf_contact_id: String,
+                                         product: String,
+                                         next_charge_date: String,
+                                         last_name: String,
+                                         identity_id: Option[String],
+                                         first_name: String,
+                                         email_stage: String)
 
-  implicit val emailBatchItemReader = Json.reads[EmailBatchItem]
 
-  implicit val emailBatchReader = new Reads[EmailBatch] {
-    override def reads(json: JsValue) = JsSuccess(EmailBatch(
-      emailBatchItems = json.as[List[EmailBatchItem]]
-    ))
-  }
+    implicit val emailBatchItemPayloadReads = Json.reads[WireEmailBatchItemPayload]
+    implicit val emailBatchItemReads = Json.reads[WireEmailBatchItem]
+//    implicit val emailBatch = Json.reads[WireEmailBatch]
 
-  def fromSfDateToDisplayDate(sfDate: String): String = {
-    val formattedDate: Try[String] = Try {
-      val asDateTime = DateTime.parse(sfDate, DateTimeFormat.forPattern("yyyy-MM-dd"))
-      asDateTime.toString(DateTimeFormat.forPattern("d MMMM yyyy"))
+    implicit val emailBatchReader = new Reads[WireEmailBatch] {
+      override def reads(json: JsValue) = JsSuccess(WireEmailBatch(
+        emailBatchItems = json.as[List[WireEmailBatchItem]]
+      ))
     }
 
-    formattedDate match {
-      case Success(date) => date
-      case Failure(_) => sfDate
+    def fromSfDateToDisplayDate(sfDate: String): String = {
+      val formattedDate: Try[String] = Try {
+        val asDateTime = DateTime.parse(sfDate, DateTimeFormat.forPattern("yyyy-MM-dd"))
+        asDateTime.toString(DateTimeFormat.forPattern("d MMMM yyyy"))
+      }
+
+      formattedDate match {
+        case Success(date) => date
+        case Failure(_) => sfDate
+      }
     }
+
+    def fromWire(wireEmailBatch: WireEmailBatch): EmailBatch = {
+      val items = wireEmailBatch.emailBatchItems.map(fromWire(_))
+      EmailBatch(
+        emailBatchItems = items
+      )
+    }
+
+    private def fromWire(wireEmailBatchItem: WireEmailBatchItem): EmailBatchItem = {
+      val emailBatchPayload = wireEmailBatchItem.payload
+
+      EmailBatchItem(
+        payload = EmailBatchItemPayload(
+          EmailBatchItemId(emailBatchPayload.record_id),
+          emailBatchPayload.to_address,
+          SubscriberId(emailBatchPayload.subscriber_id),
+          SfContactId(emailBatchPayload.sf_contact_id),
+          emailBatchPayload.product,
+          fromSfDateToDisplayDate(emailBatchPayload.next_charge_date),
+          emailBatchPayload.last_name,
+          emailBatchPayload.identity_id.map(IdentityUserId),
+          emailBatchPayload.first_name,
+          emailBatchPayload.email_stage
+        ),
+          object_name = wireEmailBatchItem.object_name
+      )
+    }
+    
+    }
+
   }
 
-}
+  import com.gu.batchemailsender.api.batchemail.model.EmailBatch.WireModel._
+
+  case class SubscriberId(value: String) extends AnyVal
+  case class SfContactId(value: String) extends AnyVal
+  case class IdentityUserId(value: String) extends AnyVal
+  case class EmailBatchItemId(value: String) extends AnyVal
+
+  case class EmailBatchItemPayload(record_id: EmailBatchItemId,
+                                   to_address: String,
+                                   subscriber_id: SubscriberId,
+                                   sf_contact_id: SfContactId,
+                                   product: String,
+                                   next_charge_date: String,
+                                   last_name: String,
+                                   identity_id: Option[IdentityUserId],
+                                   first_name: String,
+                                   email_stage: String)
+
+  case class EmailBatchItem(payload: EmailBatchItemPayload, object_name: String)
+  case class EmailBatch(emailBatchItems: List[EmailBatchItem])
+

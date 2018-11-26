@@ -12,7 +12,7 @@ class EmailToSendTest extends FlatSpec {
         to_address = email,
         subscriber_id = SubscriberId("A-S00044748"),
         sf_contact_id = SfContactId("0036E00000KtDaHQAV"),
-        product = "Membership",
+        product = "Supporter",
         next_charge_date = "3 September 2018",
         last_name = "bla",
         identity_id = Some(IdentityUserId("30002177")),
@@ -29,9 +29,10 @@ class EmailToSendTest extends FlatSpec {
         ContactAttributes = EmailPayloadContactAttributes(
           SubscriberAttributes = Map(
             "first_name" -> "something",
-            "last_name" -> "bla",
             "subscriber_id" -> "A-S00044748",
-            "next_charge_date" -> "3 September 2018"
+            "last_name" -> "bla",
+            "next_charge_date" -> "3 September 2018",
+            "product" -> "Supporter"
           )
         )
       ),

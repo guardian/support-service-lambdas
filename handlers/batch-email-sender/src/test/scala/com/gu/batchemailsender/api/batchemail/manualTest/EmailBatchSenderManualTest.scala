@@ -5,7 +5,7 @@ import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 import com.gu.batchemailsender.api.batchemail.Handler
 import play.api.libs.json.{JsString, Json}
 
-//This is just a way to locally run the addSubscription lambda in dev
+//This is just a way to locally run the emailBatchSender lambda in dev
 object EmailBatchSenderManualTest extends App {
   val requestBody =
     """
@@ -16,7 +16,7 @@ object EmailBatchSenderManualTest extends App {
       |         "to_address":"leigh-anne.mathieson@theguardian.com",
       |         "subscriber_id":"A-S00044748",
       |         "sf_contact_id":"0036E00000KtDaHQAV",
-      |         "product":"Membership",
+      |         "product":"Supporter",
       |         "next_charge_date":"2018-09-03",
       |         "last_name":"bla",
       |         "identity_id":"30002177",
