@@ -26,10 +26,9 @@ class SqsSendBatchTest extends FlatSpec {
 object SqsSendBatchTestData {
 
   def sqsSendStub(payload: Payload): Try[Unit] = {
-    if (payload.value.contains("fail-a2E6E000000aBxr")){
+    if (payload.value.contains("fail-a2E6E000000aBxr")) {
       Failure(new Exception("something went wrong!"))
-    }
-    else
+    } else
       Success(())
   }
 

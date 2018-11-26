@@ -18,7 +18,7 @@ object SqsSendBatch extends Logging {
     }
 
     emailBatchItems flatMap { emailBatchItem: EmailBatchItem =>
-      val brazeCampaignId: Option[String] = DataExtensionMap.getDataExtension(emailBatchItem.object_name) //TODO make this configurable
+      val brazeCampaignId: Option[String] = DataExtensionMap.getDataExtension(emailBatchItem.object_name) //TODO use this rather than expired-card every time
       logger.info(s"found campaign id ${brazeCampaignId}")
       val emailToSend = EmailToSend.fromEmailBatchItem(emailBatchItem, "expired-card")
       val payloadString = Json.prettyPrint(Json.toJson(emailToSend))
