@@ -19,7 +19,8 @@ object EmailToSend {
       "first_name" -> emailBatchItem.payload.first_name,
       "last_name" -> emailBatchItem.payload.last_name,
       "subscriber_id" -> emailBatchItem.payload.subscriber_id.value,
-      "next_charge_date" -> emailBatchItem.payload.next_charge_date
+      "next_charge_date" -> emailBatchItem.payload.next_charge_date,
+      "product" -> emailBatchItem.payload.product
     )
 
     val emailPayloadTo = EmailPayloadTo(
