@@ -3,7 +3,7 @@ package com.gu.batchemailsender.api.batchemail
 import java.io.{InputStream, OutputStream}
 
 import com.amazonaws.services.lambda.runtime.Context
-import com.gu.batchemailsender.api.batchemail.model.{EmailBatch, EmailBatchItemId}
+import com.gu.batchemailsender.api.batchemail.model.{EmailBatch, EmailBatchItemId, EmailBatchSenderResponses}
 import com.gu.effects.sqs.AwsSQSSend
 import com.gu.effects.sqs.AwsSQSSend.{Payload, QueueName}
 import com.gu.util.Logging
@@ -20,18 +20,13 @@ object Handler extends Logging {
   def operationWithEffects(sqsSend: Payload => Try[Unit]) = {
 
     def operation(apiGatewayRequest: ApiGatewayRequest) = {
-      val what: ApiGatewayOp[ApiResponse] = apiGatewayRequest.bodyAsCaseClass[EmailBatch]() map { emailBatch =>
-        SqsSendBatch.sendBatchSync(sqsSend)(emailBatch.emailBatchItems)
-        ApiGatewayResponse.successfulExecution
+      val apiGatewayOp = apiGatewayRequest.bodyAsCaseClass[EmailBatch](Some(EmailBatchSenderResponses.badRequest)) map { emailBatch: EmailBatch =>
+        SqsSendBatch.sendBatchSync(sqsSend)(emailBatch.emailBatchItems) match {
+          case Nil => ApiGatewayResponse.successfulExecution
+          case idList => EmailBatchSenderResponses.someItemsFailed(idList.map(_.value).toList)
+        }
       }
-
-      what.apiResponse
-
-      //      val what2: ApiGatewayOp[Nothing] = (for {
-      //        requestBody <- apiGatewayRequest.bodyAsCaseClass[EmailBatch]()
-      //        failedIds <- SqsSendBatch.sendBatchSync(sqsSend)(requestBody.emailBatchItems)
-      //      } yield failedIds)
-      //        what2.apiResponse
+      apiGatewayOp.apiResponse
     }
 
     ContinueProcessing(Operation.noHealthcheck(steps = operation))
@@ -43,22 +38,5 @@ object Handler extends Logging {
     ApiGatewayHandler(LambdaIO(inputStream, outputStream, context))(operationWithEffects(sqsfunction))
   }
 
-  //    ApiGatewayHandler(LambdaIO(inputStream, outputStream, context)) {
-  //      ContinueProcessing(
-  //        Operation.noHealthcheck {
-  //          req: ApiGatewayRequest =>
-  //            {
-  //
-  //              val blah: Types.ApiGatewayOp[EmailBatch] = for {
-  //                requestBody <- req.bodyAsCaseClass[EmailBatch]()
-  //              } yield requestBody
-  //                blah
-  //
-  //                ApiGatewayResponse.messageResponse("200", "hello")
-  //
-  //            }
-  //        }
-  //      )
-  //    }
 
 }
