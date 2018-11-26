@@ -3,7 +3,7 @@ package com.gu.batchemailsender.api.batchemail
 import java.io.{InputStream, OutputStream}
 
 import com.amazonaws.services.lambda.runtime.Context
-import com.gu.batchemailsender.api.batchemail.model.{EmailBatch, EmailBatchItemId, EmailBatchSenderResponses}
+import com.gu.batchemailsender.api.batchemail.model.{EmailBatch, EmailBatchSenderResponses}
 import com.gu.effects.sqs.AwsSQSSend
 import com.gu.effects.sqs.AwsSQSSend.{Payload, QueueName}
 import com.gu.util.Logging
@@ -19,8 +19,8 @@ object Handler extends Logging {
 
   def operationWithEffects(sqsSend: Payload => Try[Unit]) = {
 
-    def operation(apiGatewayRequest: ApiGatewayRequest) = {
-      val apiGatewayOp = apiGatewayRequest.bodyAsCaseClass[EmailBatch](Some(EmailBatchSenderResponses.badRequest)) map { emailBatch: EmailBatch =>
+    def operation(apiGatewayRequest: ApiGatewayRequest): ApiResponse = {
+      val apiGatewayOp: ApiGatewayOp[ApiResponse] = apiGatewayRequest.bodyAsCaseClass[EmailBatch](Some(EmailBatchSenderResponses.badRequest)) map { emailBatch: EmailBatch =>
         SqsSendBatch.sendBatchSync(sqsSend)(emailBatch.emailBatchItems) match {
           case Nil => ApiGatewayResponse.successfulExecution
           case idList => EmailBatchSenderResponses.someItemsFailed(idList.map(_.value).toList)

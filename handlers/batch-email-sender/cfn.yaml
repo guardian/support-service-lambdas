@@ -9,14 +9,13 @@ Parameters:
       - PROD
       - CODE
     Default: CODE
-  EmailSendingQueueName:
-    Description: Name of the the queue that sends emails that the lambda will push to.
-    Type: String
-    AllowedValues:
-      - contributions-thanks-dev
-      - contributions-thanks
-    Default: contributions-thanks-dev
 
+Mappings:
+    StageMap:
+        CODE:
+            EmailSendingQueueName: contributions-thanks-dev
+        PROD:
+            EmailSendingQueueName: contributions-thanks
 Resources:
   LogAndWriteToEmailQueueRole:
     Type: AWS::IAM::Role
@@ -49,8 +48,9 @@ Resources:
                 Action:
                 - sqs:GetQueueUrl
                 - sqs:SendMessage
-                Resource:
-                  - !Sub "arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${EmailSendingQueueName}"
+                Resource: !Sub
+                  - "arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${QueueName}"
+                  - { QueueName: !FindInMap [ StageMap, !Ref Stage, EmailSendingQueueName ]}
 
   BatchEmailSenderLambda:
     Type: AWS::Lambda::Function
