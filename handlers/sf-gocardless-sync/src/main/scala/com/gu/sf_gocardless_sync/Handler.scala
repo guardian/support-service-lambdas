@@ -87,13 +87,12 @@ object Handler extends Logging {
     processEachMandateOp: (SfMandateMap, MandateUpdateWithMandateDetail) => ClientFailableOp[SfMandateMap]
   ): ClientFailableOp[Unit] = mandateUpdateEvents match {
     case Nil => ClientSuccess(())
-    case head :: tail => {
+    case head :: tail =>
       processEachMandateOp(sfMandateMap, head) match {
         case err: ClientFailure => err // stops processing events on any ClientFailure
         case ClientSuccess(latestSfMandateMap) =>
           recursivelyProcessMandateUpdates(latestSfMandateMap, tail, processEachMandateOp)
       }
-    }
   }
 
   def processEachMandate(

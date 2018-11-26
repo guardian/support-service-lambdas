@@ -147,3 +147,5 @@ Resources:
 
 # TODO add 'StoppedRunning' alarm based on existing Invocations metric
 
+# TODO add a 'SocketTimeoutException' alarm if occurs more than 3 times in a row
+
