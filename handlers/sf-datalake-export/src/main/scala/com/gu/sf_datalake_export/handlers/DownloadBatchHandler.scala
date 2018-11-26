@@ -4,7 +4,7 @@ import java.io.{InputStream, OutputStream}
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.s3.model.{PutObjectRequest, PutObjectResult}
-import com.gu.effects.{GetFromS3, RawEffects}
+import com.gu.effects._
 import com.gu.salesforce.SalesforceAuthenticate.{SFAuthConfig, SFExportAuthConfig}
 import com.gu.salesforce.SalesforceClient
 import com.gu.sf_datalake_export.handlers.StartJobHandler.ShouldUploadToDataLake
@@ -31,21 +31,19 @@ import scala.util.{Success, Try}
 object DownloadBatchHandler {
 
   import com.gu.sf_datalake_export.util.TryOps._
-
-  case class WireBatch(
+  case class WireBatchInfo(
     batchId: String,
     state: String
   )
+  object WireBatchInfo {
+    implicit val format = Json.format[WireBatchInfo]
 
-  object WireBatch {
-    implicit val format = Json.format[WireBatch]
-
-    def toBatch(wire: WireBatch): ClientFailableOp[BatchInfo] =
+    def toBatch(wire: WireBatchInfo): ClientFailableOp[BatchInfo] =
       BatchState.fromStringState(wire.state).map { state =>
         BatchInfo(batchId = BatchId(wire.batchId), state = state)
       }
 
-    def fromBatch(batch: BatchInfo) = WireBatch(
+    def fromBatch(batch: BatchInfo) = WireBatchInfo(
       batchId = batch.batchId.value,
       state = batch.state.name
     )
@@ -55,14 +53,50 @@ object DownloadBatchHandler {
     jobName: String,
     objectName: String,
     jobId: String,
-    batches: List[WireBatch],
+    batches: List[WireBatchInfo],
     uploadToDataLake: Boolean,
-    done: Boolean = false
+    done: Boolean = false,
+    shouldCleanBucket: Boolean = true
   )
 
   object WireState {
     implicit val format = Json.using[Json.WithDefaultValues].format[WireState]
+
+    def toState(wire: WireState): Try[State] = IList(wire.batches: _*).traverse(WireBatchInfo.toBatch).map(_.toList).toTry map {
+      batches =>
+        State(
+          JobId(wire.jobId),
+          JobName(wire.jobName),
+          ObjectName(wire.objectName),
+          batches,
+          ShouldUploadToDataLake(wire.uploadToDataLake),
+          ShouldCleanBucket(wire.shouldCleanBucket),
+          IsDone(wire.done)
+        )
+    }
+
+    def fromState(state: State) = WireState(
+      jobName = state.jobName.value,
+      objectName = state.objectName.value,
+      jobId = state.jobId.value,
+      batches = state.batches.map(WireBatchInfo.fromBatch),
+      uploadToDataLake = state.shouldUploadToDataLake.value,
+      done = state.isDone.value,
+      shouldCleanBucket = state.shouldCleanBucket.value
+    )
+
   }
+
+  case class IsDone(value: Boolean) extends AnyVal
+  case class State(
+    jobId: JobId,
+    jobName: JobName,
+    objectName: ObjectName,
+    batches: List[BatchInfo],
+    shouldUploadToDataLake: ShouldUploadToDataLake,
+    shouldCleanBucket: ShouldCleanBucket,
+    isDone: IsDone
+  )
 
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
     JsonHandler(
@@ -71,81 +105,80 @@ object DownloadBatchHandler {
     )
   }
 
+  def cleanBucket(
+    listObjectsWithPrefix: (BucketName, Prefix) => Try[List[Key]]
+  )(
+    bucketName: BucketName, prefix: Prefix
+  ): Try[Unit] = {
+    println(s"cleaning bucket $bucketName with prefix $prefix")
+    for {
+      keysToDelete <- listObjectsWithPrefix(bucketName, prefix)
+      _ = print(keysToDelete)
+    } yield keysToDelete
+  }
+
   def download(
-    shouldUploadToDataLake: ShouldUploadToDataLake,
-    basePathFor: (ObjectName, ShouldUploadToDataLake) => BasePath,
     uploadFile: (BasePath, File) => Try[_],
     getBatchResultId: GetBatchResultRequest => ClientFailableOp[BatchResultId],
     getBatchResult: DownloadResultsRequest => ClientFailableOp[FileContent]
   )(
     jobName: JobName,
-    objectName: ObjectName,
     jobId: JobId,
-    batchId: BatchId
+    batchToDownload: BatchId,
+    uploadBasePath: BasePath
   ): Try[Unit] = {
-    val getIdRequest = GetBatchResultRequest(jobId, batchId)
+    val getIdRequest = GetBatchResultRequest(jobId, batchToDownload)
     logger.info(s"downloading $getIdRequest")
     for {
       resultId <- getBatchResultId(getIdRequest).toTry
-      downloadRequest = DownloadResultsRequest(jobId, batchId, resultId)
+      downloadRequest = DownloadResultsRequest(jobId, batchToDownload, resultId)
       fileContent <- getBatchResult(downloadRequest).toTry
       fileName = FileName(s"${jobName.value}_${jobId.value}_${resultId.id}.csv")
       file = File(fileName, fileContent)
-      basePath = basePathFor(objectName, shouldUploadToDataLake)
-      _ <- uploadFile(basePath, file)
+      _ <- uploadFile(uploadBasePath, file)
     } yield ()
   }
 
   def uploadBasePath(stage: Stage)(objectName: ObjectName, uploadToDataLake: ShouldUploadToDataLake) = stage match {
-    case Stage("PROD") if uploadToDataLake.value => BasePath(s"ophan-raw-salesforce-customer-data-${objectName.value.toLowerCase}")
-
-    case Stage(stageName) => BasePath(s"gu-salesforce-export-test/$stageName/raw")
-  }
-
-  def downloadFirst(
-    downloadBatch: (JobName, ObjectName, JobId, BatchId) => Try[Unit]
-  )(
-    jobId: JobId,
-    jobName: JobName,
-    objectName: ObjectName,
-    shouldUploadToDataLake: ShouldUploadToDataLake,
-    pendingBatches: List[BatchInfo]
-  ): Try[WireState] = pendingBatches match {
-
-    case Nil => Success(
-      WireState(
-        jobId = jobId.value,
-        jobName = jobName.value,
-        objectName = objectName.value,
-        batches = Nil,
-        done = true,
-        uploadToDataLake = shouldUploadToDataLake.value
-      )
+    case Stage("PROD") if uploadToDataLake.value => BasePath(
+      BucketName(s"ophan-raw-salesforce-customer-data-${objectName.value.toLowerCase}"),
+      Key("")
     )
 
-    case pendingJob :: tail => downloadBatch(jobName, objectName, jobId, pendingJob.batchId).map { _ =>
-      WireState(
-        jobId = jobId.value,
-        jobName = jobName.value,
-        objectName = objectName.value,
-        batches = tail.map(WireBatch.fromBatch),
-        done = tail.isEmpty,
-        uploadToDataLake = shouldUploadToDataLake.value
-      )
-    }
+    case Stage(stageName) => BasePath(
+      BucketName("gu-salesforce-export-test"),
+      Key(s"$stageName/raw")
+    )
   }
 
+  case class ShouldCleanBucket(value: Boolean) extends AnyVal
+
   def steps(
-    downloadBatch: (JobName, ObjectName, JobId, BatchId) => Try[Unit]
-  )(request: WireState): Try[WireState] = for {
-    batches <- IList(request.batches: _*).traverse(WireBatch.toBatch).map(_.toList).toTry
-    pendingBatches = batches.filter(b => b.state == Completed)
-    jobId = JobId(request.jobId)
-    jobName = JobName(request.jobName)
-    objectName = ObjectName(request.objectName)
-    shouldUploadToDataLake = ShouldUploadToDataLake(request.uploadToDataLake)
-    response <- downloadFirst(downloadBatch)(jobId, jobName, objectName, shouldUploadToDataLake, pendingBatches)
-  } yield response
+    getUploadPath: (ObjectName, ShouldUploadToDataLake) => BasePath,
+    cleanBucket: (BucketName, Prefix) => Try[Unit],
+    downloadBatch: (JobName, JobId, BatchId, BasePath) => Try[Unit]
+  )(currentState: State): Try[State] = {
+    //todo see how to refactor this
+    def downloadFirstBatch(uploadBasePath: BasePath) = {
+      val downloadableBatches = currentState.batches.filter(_.state == Completed)
+      downloadableBatches match {
+        case Nil => Success(currentState.copy(isDone = IsDone(true)))
+
+        case pendingBatch :: tail => downloadBatch(currentState.jobName, currentState.jobId, pendingBatch.batchId, uploadBasePath).map { _ =>
+          currentState.copy(isDone = IsDone(tail.isEmpty), batches = tail)
+        }
+      }
+    }
+    for {
+      uploadPath <- Success(getUploadPath(currentState.objectName, currentState.shouldUploadToDataLake))
+      bucketName = uploadPath.bucketName
+      prefixstr = (uploadPath.keyPrefix.value + "/" + currentState.jobName.value).dropWhile(_ == "/") // todo see how to handle the case where there is no base key better
+      prefix = Prefix(prefixstr)
+      _ <- if (currentState.shouldCleanBucket.value) cleanBucket(bucketName, prefix) else Success(())
+      newState <- downloadFirstBatch(uploadPath)
+    } yield newState
+
+  }
 
   def wireOperation(
     stage: Stage,
@@ -157,23 +190,22 @@ object DownloadBatchHandler {
     for {
       sfConfig <- loadConfig[SFAuthConfig](SFExportAuthConfig.location, SFAuthConfig.reads).leftMap(_.error).toTry
       sfClient <- SalesforceClient(getResponse, sfConfig).value.toTry
-      shouldUploadToDataLake <- ShouldUploadToDataLake(Some(request.uploadToDataLake), stage)
       wiredGetBatchResultId = sfClient.wrapWith(GetBatchResultId.wrapper).runRequest _
       wiredGetBatchResult = sfClient.wrapWith(GetBatchResult.wrapper).runRequest _
       uploadFile = S3UploadFile(s3Write) _
       wiredBasePathFor = uploadBasePath(stage) _
-
+      wiredCleanBucket = cleanBucket(ListS3Objects.listObjectsWithPrefix) _
       wiredDownloadBatch = download(
-        shouldUploadToDataLake,
-        wiredBasePathFor,
         uploadFile,
         wiredGetBatchResultId,
         wiredGetBatchResult
       ) _
 
-      response <- steps(wiredDownloadBatch)(request)
+      wiredSteps = steps(wiredBasePathFor, wiredCleanBucket, wiredDownloadBatch) _
+      state <- WireState.toState(request)
+      response <- wiredSteps(state)
 
-    } yield response
+    } yield WireState.fromState(response)
 
   }
 }

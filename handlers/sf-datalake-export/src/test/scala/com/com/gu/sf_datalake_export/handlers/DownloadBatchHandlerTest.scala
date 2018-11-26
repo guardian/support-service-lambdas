@@ -1,64 +1,78 @@
 package com.com.gu.sf_datalake_export.handlers
 
+import com.gu.effects.{BucketName, Key, Prefix}
 import com.gu.sf_datalake_export.handlers.DownloadBatchHandler
-import com.gu.sf_datalake_export.handlers.DownloadBatchHandler.{WireBatch, WireState}
+import com.gu.sf_datalake_export.handlers.DownloadBatchHandler._
 import com.gu.sf_datalake_export.handlers.StartJobHandler.ShouldUploadToDataLake
 import com.gu.sf_datalake_export.salesforce_bulk_api.BulkApiParams
 import com.gu.sf_datalake_export.salesforce_bulk_api.BulkApiParams.ObjectName
 import com.gu.sf_datalake_export.salesforce_bulk_api.CreateJob.JobId
 import com.gu.sf_datalake_export.salesforce_bulk_api.GetBatchResult.{DownloadResultsRequest, JobName}
 import com.gu.sf_datalake_export.salesforce_bulk_api.GetBatchResultId.{BatchResultId, GetBatchResultRequest}
-import com.gu.sf_datalake_export.salesforce_bulk_api.GetJobBatches.BatchId
+import com.gu.sf_datalake_export.salesforce_bulk_api.GetJobBatches.{BatchId, BatchInfo, Completed}
 import com.gu.sf_datalake_export.salesforce_bulk_api.S3UploadFile.{BasePath, File, FileContent, FileName}
 import com.gu.util.config.Stage
 import com.gu.util.resthttp.Types.ClientSuccess
 import org.scalatest.{FlatSpec, Matchers}
+import play.api.libs.json.Json
 
 import scala.util.{Success, Try}
 
 class DownloadBatchHandlerTest extends FlatSpec with Matchers {
 
-  def fakeDownloadBatch(jobName: JobName, objectName: ObjectName, jobId: JobId, batchId: BatchId): Try[Unit] = {
+  def fakeDownloadBatch(jobName:JobName, jobId:JobId, batchId: BatchId, basePath: BasePath): Try[Unit] = {
     jobName.value shouldBe "someJobName"
     jobId.value shouldBe "someJobId"
     batchId.value shouldBe "batch1"
-    objectName.value shouldBe "someObjectName"
+
+    basePath shouldBe BasePath(BucketName("someBasePathBucket"),Key("someBasePathKey"))
     Success(())
   }
 
-  val wireBatch1 = WireBatch(batchId = "batch1", state = "Completed")
-  val wireBatch2 = WireBatch(batchId = "batch2", state = "Completed")
+  val testBasePath = BasePath(BucketName("someBasePathBucket"), Key("someBasePathKey"))
+  //todo add assertions to these two functions
+  def fakeGetUploadPath(objectName: ObjectName, shouldUploadToDataLake: ShouldUploadToDataLake) = testBasePath
 
-  val twoBatchState = WireState(
-    jobName = "someJobName",
-    objectName = "someObjectName",
-    jobId = "someJobId",
-    uploadToDataLake = false,
-    batches = List(wireBatch1, wireBatch2)
+  def fakeCleanBucket(bucketName:BucketName,prefix: Prefix) = Success(())
+
+  val stepsWithFakeDeps = DownloadBatchHandler.steps(fakeGetUploadPath,fakeCleanBucket,  fakeDownloadBatch) _
+
+  val batch1 = BatchInfo(BatchId("batch1"), Completed)
+  val batch2 = BatchInfo(BatchId("batch2"), Completed)
+
+  val twoBatchState = State(
+    JobId("someJobId"),
+    JobName("someJobName"),
+    ObjectName("someObjectName"),
+    List(batch1, batch2),
+    ShouldUploadToDataLake(false),
+    ShouldCleanBucket(false),
+    IsDone(false)
+
   )
 
   "DownloadBatches.steps" should "download first batch in request and remove it from response " in {
-    val requestWithoutBatch1 = twoBatchState.copy(batches = List(wireBatch2))
-    DownloadBatchHandler.steps(fakeDownloadBatch)(twoBatchState) shouldBe Success(requestWithoutBatch1)
+    val requestWithoutBatch1 = twoBatchState.copy(batches = List(batch2))
+    stepsWithFakeDeps(twoBatchState) shouldBe Success(requestWithoutBatch1)
   }
 
   it should "set done to true if downloading last batch" in {
-    val oneBatchState = twoBatchState.copy(batches = List(wireBatch1))
-    val doneResponse = oneBatchState.copy(batches = List.empty, done = true)
+    val oneBatchState = twoBatchState.copy(batches = List(batch1))
+    val doneResponse = oneBatchState.copy(batches = List.empty, isDone = IsDone(true))
 
-    DownloadBatchHandler.steps(fakeDownloadBatch)(oneBatchState) shouldBe Success(doneResponse)
+    stepsWithFakeDeps(oneBatchState) shouldBe Success(doneResponse)
   }
 
   it should "set done to true if there are no batches to download" in {
     val noBatchState = twoBatchState.copy(batches = List.empty)
-    val doneResponse = noBatchState.copy(done = true)
+    val doneResponse = noBatchState.copy(isDone = IsDone(true))
 
-    DownloadBatchHandler.steps(fakeDownloadBatch)(noBatchState) shouldBe Success(doneResponse)
+    stepsWithFakeDeps(noBatchState) shouldBe Success(doneResponse)
   }
 
   "DownloadBatches.downloadBatch" should "download file contents and upload to s3 " in {
     def validatingUploadFile(basePath: BasePath, file: File): Try[Unit] = {
-      basePath shouldBe BasePath("someBasePath")
+      basePath shouldBe testBasePath
       file.fileName shouldBe FileName("someJobName_someJobId_someResultId.csv")
       file.content shouldBe FileContent("someFileContent")
 
@@ -80,39 +94,87 @@ class DownloadBatchHandlerTest extends FlatSpec with Matchers {
       ClientSuccess(FileContent("someFileContent"))
     }
 
-    def basePathFor(objectName: ObjectName, shouldUploadtoDataLake: ShouldUploadToDataLake) = {
-      shouldUploadtoDataLake shouldBe ShouldUploadToDataLake(false)
-      objectName shouldBe ObjectName("someObjectName")
-      BasePath(s"someBasePath")
-    }
+    def listObjectsWithPrefix(bucketName: BucketName, prefix: Prefix): Try[List[Key]] = Success(List(Key("someKey")))
+
+    //todo see if we still need this
+//    def basePathFor(objectName: ObjectName, shouldUploadtoDataLake: ShouldUploadToDataLake) = {
+//      shouldUploadtoDataLake shouldBe ShouldUploadToDataLake(false)
+//      objectName shouldBe ObjectName("someObjectName")
+//      BasePath(s"someBasePath")
+//    }
 
     val wiredDownloadBatch = DownloadBatchHandler.download(
-      ShouldUploadToDataLake(false),
-      basePathFor,
       validatingUploadFile,
       validatingGetBatchResultId,
       validatingGetBatchResult
     ) _
 
-    wiredDownloadBatch(JobName("someJobName"), ObjectName("someObjectName"), JobId("someJobId"), BatchId("someBatchId")) shouldBe Success(())
+    wiredDownloadBatch(JobName("someJobName"),JobId("someJobId"), BatchId("someBatchId"), testBasePath) shouldBe Success(())
   }
 
   "uploadBasePath" should "return ophan bucket basepath for PROD requests with uploadToDataLake enabled" in {
     val contactName = BulkApiParams.contact.objectName
     val actualBasePath = DownloadBatchHandler.uploadBasePath(Stage("PROD"))(contactName, ShouldUploadToDataLake(true))
-    actualBasePath shouldBe BasePath("ophan-raw-salesforce-customer-data-contact")
+    actualBasePath shouldBe BasePath(BucketName("ophan-raw-salesforce-customer-data-contact"), Key(""))
   }
 
   it should "return test bucket basepath for PROD requests with uploadToDataLake disabled" in {
     val contactName = BulkApiParams.contact.objectName
     val actualBasePath = DownloadBatchHandler.uploadBasePath(Stage("PROD"))(contactName, ShouldUploadToDataLake(false))
-    actualBasePath shouldBe BasePath("gu-salesforce-export-test/PROD/raw")
+    actualBasePath shouldBe BasePath(BucketName("gu-salesforce-export-test"), Key("PROD/raw"))
   }
 
   it should "return test bucket basepath for non PROD requests regardless of the uploadToDataLake param" in {
     val contactName = BulkApiParams.contact.objectName
     val codeBasePath = DownloadBatchHandler.uploadBasePath(Stage("CODE"))(contactName, ShouldUploadToDataLake(false))
     val codeBasePathUploadToDl = DownloadBatchHandler.uploadBasePath(Stage("CODE"))(contactName, ShouldUploadToDataLake(false))
-    List(codeBasePath, codeBasePathUploadToDl).distinct shouldBe List(BasePath("gu-salesforce-export-test/CODE/raw"))
+    List(codeBasePath, codeBasePathUploadToDl).distinct shouldBe List(BasePath(BucketName("gu-salesforce-export-test"), Key("CODE/raw")))
+  }
+
+  val wireBatch1 = WireBatchInfo(batchId = "batch1", state = "Completed")
+  val wireBatch2 = WireBatchInfo(batchId = "batch2", state = "Completed")
+
+  val twoBatchWirestate = WireState(
+    jobName = "someJobName",
+    objectName = "someObjectName",
+    jobId = "someJobId",
+    uploadToDataLake = false,
+    batches = List(wireBatch1, wireBatch2),
+    shouldCleanBucket = false
+  )
+
+  val twoBatchJson =
+    """{
+      |"jobName" : "someJobName",
+      |"objectName" : "someObjectName",
+      |"jobId" : "someJobId",
+      |"uploadToDataLake" : false,
+      |"batches" : [{
+      | "batchId" : "batch1",
+      | "state" : "Completed"
+      | },{
+      | "batchId" : "batch2",
+      | "state" : "Completed"
+      | }
+      | ],
+      | "shouldCleanBucket" : false,
+      | "done" : false
+      |}
+    """.stripMargin
+  "WireState" should "convert from WireState to State correctly " in {
+    WireState.toState(twoBatchWirestate) shouldBe Success(twoBatchState)
+
+  }
+  it should "convert from State to WireState correctly" in {
+    WireState.fromState(twoBatchState) shouldBe twoBatchWirestate
+  }
+  it should "deserialise correctly" in {
+
+    Json.parse(twoBatchJson).as[WireState] shouldBe twoBatchWirestate
+  }
+
+  it should "serialise correctly" in {
+    Json.toJson(twoBatchWirestate) shouldBe Json.parse(twoBatchJson)
   }
 }
+

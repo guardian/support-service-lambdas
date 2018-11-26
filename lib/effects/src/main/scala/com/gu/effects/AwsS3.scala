@@ -3,10 +3,10 @@ package com.gu.effects
 import com.amazonaws.auth._
 import com.amazonaws.auth.profile.ProfileCredentialsProvider
 import com.amazonaws.services.s3.AmazonS3Client
-import com.amazonaws.services.s3.model.{GetObjectRequest, PutObjectRequest, PutObjectResult, S3ObjectInputStream}
+import com.amazonaws.services.s3.model._
 import com.gu.util.Logging
 import com.gu.util.config.LoadConfigModule.S3Location
-
+import scala.collection.JavaConverters._
 import scala.io.Source
 import scala.util.{Failure, Try}
 
@@ -47,6 +47,20 @@ object UploadToS3 extends Logging {
 
 }
 
+case class BucketName(value: String) extends AnyVal
+case class Prefix(value: String) extends AnyVal
+case class Key(value: String) extends AnyVal
+
+object ListS3Objects extends Logging {
+
+  def listObjectsWithPrefix(bucket: BucketName, prefix: Prefix): Try[List[Key]] = {
+    Try {
+      val response = AwsS3.client.listObjects(bucket.value, prefix.value)
+      val objSummaries = response.getObjectSummaries.asScala.toList
+      objSummaries.map(objSummary => Key(objSummary.getKey))
+    }
+  }
+}
 object AwsS3 {
 
   val client = AmazonS3Client.builder.withCredentials(aws.CredentialsProvider).build()
