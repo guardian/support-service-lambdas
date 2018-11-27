@@ -143,9 +143,9 @@ object DownloadBatchHandler {
     } yield ()
   }
 
-  def uploadBasePath(stage: Stage)(objectName: ObjectName, uploadToDataLake: ShouldUploadToDataLake): S3Path = stage match {
+  def s3PathFor(stage: Stage)(objectName: ObjectName, uploadToDataLake: ShouldUploadToDataLake): S3Path = stage match {
     case Stage("PROD") if uploadToDataLake.value => S3Path(BucketName(s"ophan-raw-salesforce-customer-data-${objectName.value.toLowerCase}"), None)
-    case Stage(stageName) => S3Path(BucketName("gu-salesforce-export-test"), Some(Key(s"$stageName/raw/")))
+    case Stage(stageName) => S3Path(BucketName(s"gu-salesforce-export-${stageName.toLowerCase}"), None)
   }
 
   case class ShouldCleanBucket(value: Boolean) extends AnyVal

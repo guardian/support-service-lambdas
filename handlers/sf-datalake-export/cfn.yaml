@@ -12,11 +12,29 @@ Parameters:
 Mappings:
   StageMap:
     CODE:
-      destBuckets: "arn:aws:s3:::gu-salesforce-export-test/CODE/*"
-    PROD:
-      destBuckets: ["arn:aws:s3:::gu-salesforce-export-test/PROD/*", "arn:aws:s3:::ophan-raw-salesforce-customer-data-*"]
+      destBuckets: "arn:aws:s3:::gu-salesforce-export-code"
+      localbucketName : "gu-salesforce-export-code"
 
+
+    PROD:
+      destBuckets: ["arn:aws:s3:::gu-salesforce-export-prod", "arn:aws:s3:::ophan-raw-salesforce-customer-data-*"]
+      localbucketName: "gu-salesforce-export-prod"
 Resources:
+  localBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !FindInMap [StageMap, !Ref Stage, localbucketName]
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      LifecycleConfiguration:
+        Rules:
+          - TagFilters:
+              - Key: housekeeping
+                Value: delete
+            ExpirationInDays: 2
+            Status: Enabled
   StartJobRole:
     Type: AWS::IAM::Role
     Properties:
@@ -188,6 +206,7 @@ Resources:
                   - s3:GetObjectVersion
                   - s3:DeleteObjectVersion
                 Resource: !FindInMap [StageMap, !Ref Stage, destBuckets]
+
   DownloadBatch:
     Type: AWS::Lambda::Function
     Properties:
