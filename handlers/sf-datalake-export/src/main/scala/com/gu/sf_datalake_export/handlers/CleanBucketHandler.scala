@@ -15,8 +15,7 @@ import com.gu.util.handlers.JsonHandler
 
 import scala.util.{Success, Try}
 
-object CleanBucketHandler extends Logging{
-
+object CleanBucketHandler extends Logging {
 
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
 
@@ -29,10 +28,12 @@ object CleanBucketHandler extends Logging{
       cleanBucket(
         wiredS3PathFor,
         ListS3Objects.listObjectsWithPrefix,
-        DeleteS3Objects.deleteObjects)(
-        objectName,
-        jobName,
-        shouldUploadToDataLake) map (_ => state)
+        DeleteS3Objects.deleteObjects
+      )(
+          objectName,
+          jobName,
+          shouldUploadToDataLake
+        ) map (_ => state)
     }
 
     JsonHandler(
@@ -55,22 +56,21 @@ object CleanBucketHandler extends Logging{
     val prefixPath = S3Path.appendToPrefix(basePath, jobName.value)
     for {
       keysWithPrefix <- listObjectsWithPrefix(prefixPath)
-            _ <- keysWithPrefix match {
+      _ <- keysWithPrefix match {
         case Nil =>
           logger.info("nothing to delete")
           Success(())
-        case nonEmptyKeyList  =>
+        case nonEmptyKeyList =>
           logger.info(s"deleting $nonEmptyKeyList")
           deleteObjects(prefixPath.bucketName, nonEmptyKeyList)
       }
     } yield ()
   }
 
-//TODO THIS CODE IS DUPLICATED HERE AND IN THE DOWNLOADER!!
+  //TODO THIS CODE IS DUPLICATED HERE AND IN THE DOWNLOADER!!
   def s3PathFor(stage: Stage)(objectName: ObjectName, uploadToDataLake: ShouldUploadToDataLake): S3Path = stage match {
     case Stage("PROD") if uploadToDataLake.value => S3Path(BucketName(s"ophan-raw-salesforce-customer-data-${objectName.value.toLowerCase}"), None)
     case Stage(stageName) => S3Path(BucketName(s"gu-salesforce-export-${stageName.toLowerCase}"), None)
   }
-
 
 }
