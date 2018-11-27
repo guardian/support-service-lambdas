@@ -1,6 +1,6 @@
 package com.com.gu.sf_datalake_export.handlers
 
-import com.gu.effects.{BucketName, Key, Prefix}
+import com.gu.effects.{BucketName, Key, S3Path}
 import com.gu.sf_datalake_export.handlers.DownloadBatchHandler
 import com.gu.sf_datalake_export.handlers.DownloadBatchHandler._
 import com.gu.sf_datalake_export.handlers.StartJobHandler.ShouldUploadToDataLake
@@ -10,7 +10,7 @@ import com.gu.sf_datalake_export.salesforce_bulk_api.CreateJob.JobId
 import com.gu.sf_datalake_export.salesforce_bulk_api.GetBatchResult.{DownloadResultsRequest, JobName}
 import com.gu.sf_datalake_export.salesforce_bulk_api.GetBatchResultId.{BatchResultId, GetBatchResultRequest}
 import com.gu.sf_datalake_export.salesforce_bulk_api.GetJobBatches.{BatchId, BatchInfo, Completed}
-import com.gu.sf_datalake_export.salesforce_bulk_api.S3UploadFile.{BasePath, File, FileContent, FileName}
+import com.gu.sf_datalake_export.salesforce_bulk_api.S3UploadFile.{File, FileContent, FileName}
 import com.gu.util.config.Stage
 import com.gu.util.resthttp.Types.ClientSuccess
 import org.scalatest.{FlatSpec, Matchers}
@@ -20,22 +20,24 @@ import scala.util.{Success, Try}
 
 class DownloadBatchHandlerTest extends FlatSpec with Matchers {
 
-  def fakeDownloadBatch(jobName:JobName, jobId:JobId, batchId: BatchId, basePath: BasePath): Try[Unit] = {
+  def fakeDownloadBatch(jobName: JobName, jobId: JobId, batchId: BatchId, basePath: S3Path): Try[Unit] = {
     jobName.value shouldBe "someJobName"
     jobId.value shouldBe "someJobId"
     batchId.value shouldBe "batch1"
 
-    basePath shouldBe BasePath(BucketName("someBasePathBucket"),Key("someBasePathKey"))
+    basePath shouldBe S3Path(BucketName("someBasePathBucket"), Some(Key("someBasePathKey")))
     Success(())
   }
 
-  val testBasePath = BasePath(BucketName("someBasePathBucket"), Key("someBasePathKey"))
-  //todo add assertions to these two functions
-  def fakeGetUploadPath(objectName: ObjectName, shouldUploadToDataLake: ShouldUploadToDataLake) = testBasePath
+  val testBasePath = S3Path(BucketName("someBasePathBucket"), Some(Key("someBasePathKey")))
 
-  def fakeCleanBucket(bucketName:BucketName,prefix: Prefix) = Success(())
+  def fakeGetUploadPath(objectName: ObjectName, shouldUploadtoDataLake: ShouldUploadToDataLake) = {
+    shouldUploadtoDataLake shouldBe ShouldUploadToDataLake(false)
+    objectName shouldBe ObjectName("someObjectName")
+    testBasePath
+  }
 
-  val stepsWithFakeDeps = DownloadBatchHandler.steps(fakeGetUploadPath,fakeCleanBucket,  fakeDownloadBatch) _
+  val stepsWithFakeDeps = DownloadBatchHandler.steps(fakeGetUploadPath, fakeDownloadBatch) _
 
   val batch1 = BatchInfo(BatchId("batch1"), Completed)
   val batch2 = BatchInfo(BatchId("batch2"), Completed)
@@ -46,7 +48,6 @@ class DownloadBatchHandlerTest extends FlatSpec with Matchers {
     ObjectName("someObjectName"),
     List(batch1, batch2),
     ShouldUploadToDataLake(false),
-    ShouldCleanBucket(false),
     IsDone(false)
 
   )
@@ -71,7 +72,7 @@ class DownloadBatchHandlerTest extends FlatSpec with Matchers {
   }
 
   "DownloadBatches.downloadBatch" should "download file contents and upload to s3 " in {
-    def validatingUploadFile(basePath: BasePath, file: File): Try[Unit] = {
+    def validatingUploadFile(basePath: S3Path, file: File): Try[Unit] = {
       basePath shouldBe testBasePath
       file.fileName shouldBe FileName("someJobName_someJobId_someResultId.csv")
       file.content shouldBe FileContent("someFileContent")
@@ -94,14 +95,6 @@ class DownloadBatchHandlerTest extends FlatSpec with Matchers {
       ClientSuccess(FileContent("someFileContent"))
     }
 
-    def listObjectsWithPrefix(bucketName: BucketName, prefix: Prefix): Try[List[Key]] = Success(List(Key("someKey")))
-
-    //todo see if we still need this
-//    def basePathFor(objectName: ObjectName, shouldUploadtoDataLake: ShouldUploadToDataLake) = {
-//      shouldUploadtoDataLake shouldBe ShouldUploadToDataLake(false)
-//      objectName shouldBe ObjectName("someObjectName")
-//      BasePath(s"someBasePath")
-//    }
 
     val wiredDownloadBatch = DownloadBatchHandler.download(
       validatingUploadFile,
@@ -109,26 +102,26 @@ class DownloadBatchHandlerTest extends FlatSpec with Matchers {
       validatingGetBatchResult
     ) _
 
-    wiredDownloadBatch(JobName("someJobName"),JobId("someJobId"), BatchId("someBatchId"), testBasePath) shouldBe Success(())
+    wiredDownloadBatch(JobName("someJobName"), JobId("someJobId"), BatchId("someBatchId"), testBasePath) shouldBe Success(())
   }
 
   "uploadBasePath" should "return ophan bucket basepath for PROD requests with uploadToDataLake enabled" in {
     val contactName = BulkApiParams.contact.objectName
     val actualBasePath = DownloadBatchHandler.uploadBasePath(Stage("PROD"))(contactName, ShouldUploadToDataLake(true))
-    actualBasePath shouldBe BasePath(BucketName("ophan-raw-salesforce-customer-data-contact"), Key(""))
+    actualBasePath shouldBe S3Path(BucketName("ophan-raw-salesforce-customer-data-contact"), None)
   }
 
   it should "return test bucket basepath for PROD requests with uploadToDataLake disabled" in {
     val contactName = BulkApiParams.contact.objectName
     val actualBasePath = DownloadBatchHandler.uploadBasePath(Stage("PROD"))(contactName, ShouldUploadToDataLake(false))
-    actualBasePath shouldBe BasePath(BucketName("gu-salesforce-export-test"), Key("PROD/raw"))
+    actualBasePath shouldBe S3Path(BucketName("gu-salesforce-export-test"), Some(Key("PROD/raw/")))
   }
 
   it should "return test bucket basepath for non PROD requests regardless of the uploadToDataLake param" in {
     val contactName = BulkApiParams.contact.objectName
     val codeBasePath = DownloadBatchHandler.uploadBasePath(Stage("CODE"))(contactName, ShouldUploadToDataLake(false))
     val codeBasePathUploadToDl = DownloadBatchHandler.uploadBasePath(Stage("CODE"))(contactName, ShouldUploadToDataLake(false))
-    List(codeBasePath, codeBasePathUploadToDl).distinct shouldBe List(BasePath(BucketName("gu-salesforce-export-test"), Key("CODE/raw")))
+    List(codeBasePath, codeBasePathUploadToDl).distinct shouldBe List(S3Path(BucketName("gu-salesforce-export-test"), Some(Key("CODE/raw/"))))
   }
 
   val wireBatch1 = WireBatchInfo(batchId = "batch1", state = "Completed")
@@ -139,8 +132,7 @@ class DownloadBatchHandlerTest extends FlatSpec with Matchers {
     objectName = "someObjectName",
     jobId = "someJobId",
     uploadToDataLake = false,
-    batches = List(wireBatch1, wireBatch2),
-    shouldCleanBucket = false
+    batches = List(wireBatch1, wireBatch2)
   )
 
   val twoBatchJson =
@@ -157,7 +149,6 @@ class DownloadBatchHandlerTest extends FlatSpec with Matchers {
       | "state" : "Completed"
       | }
       | ],
-      | "shouldCleanBucket" : false,
       | "done" : false
       |}
     """.stripMargin

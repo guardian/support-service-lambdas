@@ -149,17 +149,45 @@ Resources:
           Statement:
           - Effect: Allow
             Action:
-            - s3:AbortMultipartUpload
-            - s3:DeleteObject
-            - s3:GetObject
-            - s3:GetObjectAcl
-            - s3:GetBucketAcl
-            - s3:ListBucket
             - s3:PutObject
-            - s3:GetObjectVersion
-            - s3:DeleteObjectVersion
             - s3:PutObjectAcl
             Resource: !FindInMap [StageMap, !Ref Stage, destBuckets]
+    CleanBucketRole:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument:
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+              Action:
+                - sts:AssumeRole
+        Path: /
+        Policies:
+          - PolicyName: LambdaPolicy
+            PolicyDocument:
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - logs:CreateLogGroup
+                    - logs:CreateLogStream
+                    - logs:PutLogEvents
+                    - lambda:InvokeFunction
+                  Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/sf-export-clean-bucket-${Stage}:log-stream:*"
+          - PolicyName: DestBucket
+            PolicyDocument:
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - s3:DeleteObject
+                    - s3:GetObject
+                    - s3:GetObjectAcl
+                    - s3:GetBucketAcl
+                    - s3:ListBucket
+                    - s3:GetObjectVersion
+                    - s3:DeleteObjectVersion
+                  Resource: !FindInMap [StageMap, !Ref Stage, destBuckets]
   DownloadBatch:
     Type: AWS::Lambda::Function
     Properties:
@@ -209,6 +237,26 @@ Resources:
           - Effect: Allow
             Action: s3:GetObject
             Resource: !Sub "arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/sfExportAuth-${Stage}*.json"
+  CleanBucket:
+    Type: AWS::Lambda::Function
+    Properties:
+      Description: clean old results from bucket before uploading new ones
+      FunctionName:
+        !Sub sf-export-clean-bucket-${Stage}
+      Code:
+        S3Bucket: zuora-auto-cancel-dist
+        S3Key: !Sub membership/${Stage}/sf-datalake-export/sf-datalake-export.jar
+      Handler: com.gu.sf_datalake_export.handlers.CleanBucketHandler::apply
+      Environment:
+        Variables:
+          Stage: !Ref Stage
+      Role:
+        !GetAtt CleanBucketRole.Arn
+      MemorySize: 1536
+      Runtime: java8
+      Timeout: 900
+    DependsOn:
+      - CleanBucketRole
   EndJob:
     Type: AWS::Lambda::Function
     Properties:
@@ -291,9 +339,19 @@ Resources:
                   "Choices": [{
                                 "Variable": "$.jobStatus",
                                 "StringEquals": "Completed",
-                                "Next": "downloadBatch"
+                                "Next": "cleanBucket"
                               }],
                   "Default": "WaitSomeTime"
+                },
+                "cleanBucket": {
+                "Type": "Task",
+                "Resource": "${cleanBucketArn}",
+                "Next": "downloadBatch",
+                "Retry": [{
+                      "ErrorEquals": ["States.ALL"],
+                      "IntervalSeconds": 30,
+                      "MaxAttempts": 3
+                    }]
                 },
                 "downloadBatch": {
                   "Type": "Task",
@@ -335,4 +393,6 @@ Resources:
         getBatchesArn: !GetAtt [ GetBatchesLambda, Arn ],
         downloadBatchArn: !GetAtt [ DownloadBatch, Arn ],
         endJobArn: !GetAtt [ EndJob, Arn ]
+        cleanBucketArn: !GetAtt [ CleanBucket, Arn ]
+
       }

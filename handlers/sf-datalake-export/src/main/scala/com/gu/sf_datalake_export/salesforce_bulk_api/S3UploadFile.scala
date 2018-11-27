@@ -4,13 +4,11 @@ import java.io.{ByteArrayInputStream, InputStream}
 
 import com.amazonaws.services.s3.model._
 import com.amazonaws.util.IOUtils
-import com.gu.effects.{BucketName, Key}
+import com.gu.effects.S3Path
 import com.gu.util.Logging
 
 import scala.util.Try
 object S3UploadFile extends Logging {
-//TODO MAYBE KEYS COULD BE OPTIONS INSTEAD OF EMPTY STRINGS WHEN THEY ARE NOT NEEDED
-  case class BasePath(bucketName: BucketName, keyPrefix: Key)
 
   case class FileContent(value: String) extends AnyVal
   case class FileName(value: String) extends AnyVal
@@ -18,7 +16,7 @@ object S3UploadFile extends Logging {
   def apply(
     s3Write: PutObjectRequest => Try[PutObjectResult]
   )(
-    basePath: BasePath,
+    basePath: S3Path,
     file: File
   ): Try[PutObjectResult] = {
     logger.info(s"Uploading ${file.fileName.value} to S3...")
@@ -26,9 +24,10 @@ object S3UploadFile extends Logging {
     val bytes = IOUtils.toByteArray(stream)
     val uploadMetadata = new ObjectMetadata()
     uploadMetadata.setContentLength(bytes.length.toLong)
+    val fullPath = S3Path.appendToPrefix(basePath, file.fileName.value)
     val putRequest = new PutObjectRequest(
-      basePath.bucketName.value,
-      basePath.keyPrefix + "/ " + file.fileName.value, //TODO VERIFY THAT THIS WORKS WITH EMPTY KEYS
+      fullPath.bucketName.value,
+      fullPath.key.map(_.value).getOrElse(""),
       new ByteArrayInputStream(bytes),
       uploadMetadata
     ).withCannedAcl(CannedAccessControlList.BucketOwnerRead)

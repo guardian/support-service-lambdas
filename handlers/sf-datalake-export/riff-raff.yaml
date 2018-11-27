@@ -19,4 +19,5 @@ deployments:
       - sf-get-batch-state-
       - sf-download-batch-
       - sf-end-export-job-
+      - sf-export-clean-bucket-
     dependencies: [cfn]
