@@ -72,8 +72,10 @@ class PreReqCheckTest extends FlatSpec with Matchers {
   }
 
   "checkSfContactsSyncable" should "ReturnWithResponse if contacts not syncable" in {
-    PreReqCheck.checkSfContactsSyncable(_ =>
-      ReturnWithResponse(ApiGatewayResponse.badRequest("bad request")))(List(SFContactId("sfContactId"))) shouldBe ReturnWithResponse(ApiGatewayResponse.badRequest("bad request"))
+    val ReturnWithResponse(result) = PreReqCheck
+      .checkSfContactsSyncable(_ => ReturnWithResponse(ApiGatewayResponse.badRequest("bad request")))(List(SFContactId("sfContactId")))
+
+    result.body should include("Bad request: multiple contacts are not syncable")
   }
 
   "checkSfContactsSyncable" should "continue processing if syncable" in {

@@ -31,12 +31,17 @@ object PreReqCheck {
   }
 
   def checkSfContactsSyncable(syncableSFToIdentity: SFContactId => ApiGatewayOp[Unit])(sFContactIds: List[SFContactId]): ApiGatewayOp[Unit] = {
-    sFContactIds
+    val failures = sFContactIds
       .map(syncableSFToIdentity)
-      .collectFirst {
-        case returnWithResponse: ReturnWithResponse => returnWithResponse
+      .zip(sFContactIds)
+      .collect {
+        case (returnWithResponse: ReturnWithResponse, sfContactId) => (sfContactId -> returnWithResponse.resp.body).toString
       }
-      .getOrElse(ContinueProcessing(()))
+
+    if (failures.isEmpty)
+      ContinueProcessing(())
+    else
+      ReturnWithResponse(ApiGatewayResponse.badRequest(s"multiple contacts are not syncable ${failures.mkString(", ")}"))
   }
 
   def noZuoraAccountsForIdentityId(

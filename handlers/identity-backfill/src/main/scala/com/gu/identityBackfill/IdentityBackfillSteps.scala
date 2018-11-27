@@ -46,34 +46,23 @@ object IdentityBackfillSteps extends Logging {
     else
       ContinueProcessing(())
 
-  def updateSalesforceAccounts(updateSalesforceAccounts: (SFContactId, IdentityId) => ApiGatewayOp[Unit])(sfContactIds: Set[SFContactId], identityId: IdentityId): ApiGatewayOp[Unit] = {
+  def updateAccountsWithIdentityId[A](
+    updateAccountsWithIdentityId: (A, IdentityId) => ClientFailableOp[Unit]
+  )(ids: Set[A], identityId: IdentityId): ApiGatewayOp[Unit] = {
 
-    val failures = sfContactIds
+    val failures = ids
       .toSeq
-      .map(updateSalesforceAccounts(_, identityId))
+      .map(updateAccountsWithIdentityId(_, identityId))
+      .zip(ids.toSeq)
       .collect {
-        case returnWithResponse: ReturnWithResponse => returnWithResponse
+        case (clientFailure: ClientFailure, id) => (id -> clientFailure.message).toString
       }
 
     if (failures.isEmpty)
       ContinueProcessing(())
     else
-      ReturnWithResponse(ApiGatewayResponse.badRequest("updateSalesforceAccounts multiple errors: " + failures.map(_.resp.body).mkString(", ")))
+      ReturnWithResponse(ApiGatewayResponse.badRequest("updateAccountsWithIdentityId multiple errors: " + failures.mkString(", ")))
 
   }
 
-  def updateZuoraAccounts(updateZuoraIdentityId: (AccountId, IdentityId) => ClientFailableOp[Unit])(accountIds: Set[AccountId], identityId: IdentityId): ApiGatewayOp[Unit] = {
-
-    val failures = accountIds
-      .toSeq
-      .map(updateZuoraIdentityId(_, identityId))
-      .collect {
-        case clientFailure: ClientFailure => clientFailure
-      }
-
-    if (failures.isEmpty)
-      ContinueProcessing(())
-    else
-      ReturnWithResponse(ApiGatewayResponse.badRequest("updateZuoraAccounts multiple errors: " + failures.map(_.message).mkString(", ")))
-  }
 }

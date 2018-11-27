@@ -62,13 +62,13 @@ object Handler {
       val findExistingIdentityId = FindExistingIdentityId(getByEmail.runRequest, getById.runRequest) _
 
       val countZuoraAccounts: IdentityId => ClientFailableOp[Int] = CountZuoraAccountsForIdentityId(zuoraQuerier)
-      val updateZuoraAccounts = IdentityBackfillSteps.updateZuoraAccounts(AddIdentityIdToAccount(zuoraRequests))(_, _)
+      val updateZuoraAccounts = IdentityBackfillSteps.updateAccountsWithIdentityId(AddIdentityIdToAccount(zuoraRequests))(_, _)
 
       lazy val sfAuth: LazyClientFailableOp[HttpOp[StringHttpRequest, RestRequestMaker.BodyAsString]] = SalesforceClient(response, sfConfig)
       lazy val sfPatch = sfAuth.map(_.wrapWith(JsonHttp.patch))
       lazy val sfGet = sfAuth.map(_.wrapWith(JsonHttp.get))
       lazy val checkSfContactsSyncable = PreReqCheck.checkSfContactsSyncable(syncableSFToIdentity(sfGet, stage)) _
-      lazy val updateSalesforceAccounts = IdentityBackfillSteps.updateSalesforceAccounts(updateSalesforceContactsWithIdentityId(sfPatch)) _
+      lazy val updateSalesforceAccounts = IdentityBackfillSteps.updateAccountsWithIdentityId(updateSalesforceContactsWithIdentityId(sfPatch)) _
 
       def findAndValidateZuoraAccounts(zuoraQuerier: ZuoraQuerier)(emailAddress: EmailAddress): ApiGatewayOp[List[ZuoraAccountIdentitySFContact]] =
         PreReqCheck.validateZuoraAccountsFound(GetZuoraAccountsForEmail(zuoraQuerier)(emailAddress))(emailAddress)
@@ -138,11 +138,10 @@ object Handler {
   )(
     sFContactId: SFContactId,
     identityId: IdentityId
-  ): ApiGatewayOp[Unit] =
+  ): ClientFailableOp[Unit] =
     for {
-      sfRequests <- sfRequests.value.toApiGatewayOp("Failed to authenticate with Salesforce")
+      sfRequests <- sfRequests.value
       _ <- UpdateSalesforceIdentityId(sfRequests).runRequestMultiArg(sFContactId, identityId)
-        .toApiGatewayOp("update identity id in salesforce")
     } yield ()
 
 }

@@ -34,33 +34,17 @@ class IdentityBackfillStepsTest extends FlatSpec with Matchers {
     statusCode shouldBe "400"
   }
 
-  "updateSalesforceAccounts" should "update salesforce accounts successfully" in {
-    val result = IdentityBackfillSteps.updateSalesforceAccounts(
-      (_, _) => ContinueProcessing(())
-    )(
-        Set(SFContactId("sfContactId1"), SFContactId("sfContactId2")), IdentityId("123")
-      )
+  "updateAccountsWithIdentityId" should "update salesforce accounts successfully" in {
+    val result = IdentityBackfillSteps
+      .updateAccountsWithIdentityId[AccountId]((_, _) => ClientSuccess(()))(Set(AccountId("accountId1"), AccountId("accountId2")), IdentityId("123"))
 
-    result shouldBe ContinueProcessing(())
-  }
-
-  "updateSalesforceAccounts" should "propagate errors" in {
-    val ReturnWithResponse(result) = IdentityBackfillSteps.updateSalesforceAccounts(
-      (_, _) => ReturnWithResponse(ApiResponse("400", "error"))
-    )(
-        Set(SFContactId("sfContactId1"), SFContactId("sfContactId2")), IdentityId("123")
-      )
-
-    result.body should include("updateSalesforceAccounts multiple errors: error, error")
-  }
-
-  "updateZuoraAccounts" should "update salesforce accounts successfully" in {
-    val result = IdentityBackfillSteps.updateZuoraAccounts((_, _) => ClientSuccess(()))(Set(AccountId("accountId1"), AccountId("accountId2")), IdentityId("123"))
     result shouldBe ContinueProcessing(())
   }
 
   "updateZuoraAccounts" should "propagate errors" in {
-    val ReturnWithResponse(result) = IdentityBackfillSteps.updateZuoraAccounts((_, _) => GenericError("error"))(Set(AccountId("accountId1"), AccountId("accountId2")), IdentityId("123"))
-    result.body should include("updateZuoraAccounts multiple errors: error, error")
+    val ReturnWithResponse(result) = IdentityBackfillSteps
+      .updateAccountsWithIdentityId[AccountId]((_, _) => GenericError("error"))(Set(AccountId("accountId1"), AccountId("accountId2")), IdentityId("123"))
+
+    result.body should include("updateAccountsWithIdentityId multiple errors")
   }
 }
