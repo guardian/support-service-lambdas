@@ -35,9 +35,14 @@ class IdentityBackfillStepsTest extends FlatSpec with Matchers {
   }
 
   "updateAccountsWithIdentityId" should "update salesforce accounts successfully" in {
-    val result = IdentityBackfillSteps
-      .updateAccountsWithIdentityId[AccountId]((_, _) => ClientSuccess(()))(Set(AccountId("accountId1"), AccountId("accountId2")), IdentityId("123"))
+    var updated: List[(AccountId, IdentityId)] = Nil
 
+    val result = IdentityBackfillSteps.updateAccountsWithIdentityId[AccountId] { (accountId, identityId) =>
+      updated = accountId -> identityId :: updated
+      ClientSuccess(())
+    }(Set(AccountId("accountId1"), AccountId("accountId2")), IdentityId("123"))
+
+    updated shouldBe AccountId("accountId2") -> IdentityId("123") :: AccountId("accountId1") -> IdentityId("123") :: Nil
     result shouldBe ContinueProcessing(())
   }
 
