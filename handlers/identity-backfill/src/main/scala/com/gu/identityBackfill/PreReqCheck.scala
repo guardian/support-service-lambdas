@@ -53,16 +53,15 @@ object PreReqCheck {
     } yield ()
   }
 
-  def validateZuoraAccountsFound(getZuoraAccountsForEmail: ClientFailableOp[List[ZuoraAccountIdentitySFContact]])(emailAddress: EmailAddress): ApiGatewayOp[List[ZuoraAccountIdentitySFContact]] = {
-
-    def validateNotEmpty(zuoraAccountsForEmail: List[ZuoraAccountIdentitySFContact]): ApiGatewayOp[Unit] = zuoraAccountsForEmail match {
-      case Nil => ReturnWithResponse(ApiGatewayResponse.badRequest(s"no zuora accounts found for $emailAddress"))
-      case _ => ContinueProcessing(())
-    }
+  def validateZuoraAccountsFound(zuoraAccountsRetrieved: ClientFailableOp[List[ZuoraAccountIdentitySFContact]])(emailAddress: EmailAddress): ApiGatewayOp[List[ZuoraAccountIdentitySFContact]] = {
 
     def validateOneCrmId(zuoraAccountsForEmail: List[ZuoraAccountIdentitySFContact]) = {
-      if (zuoraAccountsForEmail.headOption.forall(head => zuoraAccountsForEmail.forall(_.crmId == head.crmId)))
+      val uniqueCrmIds = zuoraAccountsForEmail.map(_.crmId).distinct.size
+
+      if (uniqueCrmIds == 1)
         ContinueProcessing(())
+      else if (uniqueCrmIds == 0)
+        ReturnWithResponse(ApiGatewayResponse.badRequest(s"no zuora accounts found for $emailAddress"))
       else
         ReturnWithResponse(ApiGatewayResponse.badRequest(s"multiple CRM ids found for $emailAddress $zuoraAccountsForEmail"))
     }
@@ -75,8 +74,7 @@ object PreReqCheck {
     }
 
     for {
-      zuoraAccountsForEmail <- getZuoraAccountsForEmail.toApiGatewayOp(s"get zuora accounts for $emailAddress")
-      _ <- validateNotEmpty(zuoraAccountsForEmail)
+      zuoraAccountsForEmail <- zuoraAccountsRetrieved.toApiGatewayOp(s"get zuora accounts for $emailAddress")
       _ <- validateOneCrmId(zuoraAccountsForEmail)
       _ <- validateNoIdentityIdsForEmail(zuoraAccountsForEmail)
     } yield zuoraAccountsForEmail
