@@ -104,25 +104,6 @@ class DownloadBatchHandlerTest extends FlatSpec with Matchers {
     wiredDownloadBatch(JobName("someJobName"), JobId("someJobId"), BatchId("someBatchId"), testBasePath) shouldBe Success(())
   }
 
-  "uploadBasePath" should "return ophan bucket basepath for PROD requests with uploadToDataLake enabled" in {
-    val contactName = BulkApiParams.contact.objectName
-    val actualBasePath = DownloadBatchHandler.uploadBasePath(Stage("PROD"))(contactName, ShouldUploadToDataLake(true))
-    actualBasePath shouldBe S3Path(BucketName("ophan-raw-salesforce-customer-data-contact"), None)
-  }
-
-  it should "return test bucket basepath for PROD requests with uploadToDataLake disabled" in {
-    val contactName = BulkApiParams.contact.objectName
-    val actualBasePath = DownloadBatchHandler.uploadBasePath(Stage("PROD"))(contactName, ShouldUploadToDataLake(false))
-    actualBasePath shouldBe S3Path(BucketName("gu-salesforce-export-prod"), None)
-  }
-
-  it should "return test bucket basepath for non PROD requests regardless of the uploadToDataLake param" in {
-    val contactName = BulkApiParams.contact.objectName
-    val codeBasePath = DownloadBatchHandler.uploadBasePath(Stage("CODE"))(contactName, ShouldUploadToDataLake(false))
-    val codeBasePathUploadToDl = DownloadBatchHandler.uploadBasePath(Stage("CODE"))(contactName, ShouldUploadToDataLake(false))
-    List(codeBasePath, codeBasePathUploadToDl).distinct shouldBe List(S3Path(BucketName("gu-salesforce-export-code"), None))
-  }
-
   val wireBatch1 = WireBatchInfo(batchId = "batch1", state = "Completed")
   val wireBatch2 = WireBatchInfo(batchId = "batch2", state = "Completed")
 

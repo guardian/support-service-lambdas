@@ -1,6 +1,7 @@
 package com.gu.sf_datalake_export.handlers
 
 import java.io.{InputStream, OutputStream}
+
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects._
 import com.gu.salesforce.SalesforceAuthenticate.{SFAuthConfig, SFExportAuthConfig}
@@ -13,6 +14,7 @@ import com.gu.sf_datalake_export.salesforce_bulk_api.GetBatchResultId.{BatchResu
 import com.gu.sf_datalake_export.salesforce_bulk_api.GetJobBatches._
 import com.gu.sf_datalake_export.salesforce_bulk_api.S3UploadFile.{File, FileContent, FileName}
 import com.gu.sf_datalake_export.salesforce_bulk_api.{GetBatchResult, GetBatchResultId, S3UploadFile}
+import com.gu.sf_datalake_export.util.ExportS3Path
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.handlers.JsonHandler
@@ -100,7 +102,7 @@ object DownloadBatchHandler {
       wiredGetBatchResultId = sfClient.wrapWith(GetBatchResultId.wrapper).runRequest _
       wiredGetBatchResult = sfClient.wrapWith(GetBatchResult.wrapper).runRequest _
       uploadFile = S3UploadFile(RawEffects.s3Write) _
-      wiredBasePathFor = uploadBasePath(stage) _
+      wiredBasePathFor = ExportS3Path(stage) _
       wiredDownloadBatch = download(
         uploadFile,
         wiredGetBatchResultId,
@@ -143,10 +145,7 @@ object DownloadBatchHandler {
     } yield ()
   }
 
-  def uploadBasePath(stage: Stage)(objectName: ObjectName, uploadToDataLake: ShouldUploadToDataLake): S3Path = stage match {
-    case Stage("PROD") if uploadToDataLake.value => S3Path(BucketName(s"ophan-raw-salesforce-customer-data-${objectName.value.toLowerCase}"), None)
-    case Stage(stageName) => S3Path(BucketName(s"gu-salesforce-export-${stageName.toLowerCase}"), None)
-  }
+
 
   case class ShouldCleanBucket(value: Boolean) extends AnyVal
 
