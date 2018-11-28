@@ -10,23 +10,26 @@ class EmailBatchTest extends FlatSpec {
   "EmailBatch.fromWire" should "deserialise an email batch" in {
     val sampleBatch =
       """
-        |[
-        |   {
-        |      "payload":{
-        |         "record_id":"a2E6E000000aBxr",
-        |         "to_address":"dlasdj@dasd.com",
-        |         "subscriber_id":"A-S00044748",
-        |         "sf_contact_id":"0036E00000KtDaHQAV",
-        |         "product":"Membership",
-        |         "next_charge_date":"2018-09-03",
-        |         "last_name":"bla",
-        |         "identity_id":"30002177",
-        |         "first_name":"something",
-        |         "email_stage":"MBv1 - 1"
-        |      },
-        |      "object_name":"Card_Expiry__c"
-        |   }
-        |]
+        |{
+        |   "batch_items":
+        |   [
+        |       {
+        |         "payload":{
+        |             "record_id":"a2E6E000000aBxr",
+        |             "to_address":"dlasdj@dasd.com",
+        |             "subscriber_id":"A-S00044748",
+        |             "sf_contact_id":"0036E00000KtDaHQAV",
+        |             "product":"Membership",
+        |             "next_charge_date":"2018-09-03",
+        |             "last_name":"bla",
+        |             "identity_id":"30002177",
+        |             "first_name":"something",
+        |             "email_stage":"MBv1 - 1"
+        |         },
+        |         "object_name":"Card_Expiry__c"
+        |       }
+        |   ]
+        |}
       """.stripMargin
 
     val expected = EmailBatch(
@@ -55,24 +58,27 @@ class EmailBatchTest extends FlatSpec {
   }
 
   "EmailBatch.fromWire" should "throw a jsresult exception when a required field is missing" in {
-    val sampleBatch =
+     val sampleBatch =
       """
-        |[
-        |   {
-        |      "payload":{
-        |         "record_id":"a2E6E000000aBxr",
-        |         "to_address":"dlasdj@dasd.com",
-        |         "subscriber_id":"A-S00044748",
-        |         "product":"Membership",
-        |         "next_charge_date":"2018-09-03",
-        |         "last_name":"bla",
-        |         "identity_id":"30002177",
-        |         "first_name":"something",
-        |         "email_stage":"MBv1 - 1"
-        |      },
-        |      "object_name":"Card_Expiry__c"
-        |   }
-        |]
+        |{
+        |     "batch_items":
+        |   [
+        |       {
+        |         "payload":{
+        |             "record_id":"a2E6E000000aBxr",
+        |             "to_address":"dlasdj@dasd.com",
+        |             "subscriber_id":"A-S00044748",
+        |             "product":"Membership",
+        |             "next_charge_date":"2018-09-03",
+        |             "last_name":"bla",
+        |             "identity_id":"30002177",
+        |             "first_name":"something",
+        |             "email_stage":"MBv1 - 1"
+        |         },
+        |         "object_name":"Card_Expiry__c"
+        |       }
+        |   ]
+        |}
       """.stripMargin
 
     intercept[JsResultException] {
@@ -84,22 +90,25 @@ class EmailBatchTest extends FlatSpec {
   "EmailBatch.fromWire" should "not blow up when optional fields are missing" in {
     val sampleBatch =
       """
-        |[
-        |   {
-        |      "payload":{
-        |         "record_id":"a2E6E000000aBxr",
-        |         "to_address":"dlasdj@dasd.com",
-        |         "subscriber_id":"A-S00044748",
-        |         "sf_contact_id":"0036E00000KtDaHQAV",
-        |         "product":"Membership",
-        |         "next_charge_date":"2018-09-03",
-        |         "last_name":"bla",
-        |         "first_name":"something",
-        |         "email_stage":"MBv1 - 1"
-        |      },
-        |      "object_name":"Card_Expiry__c"
-        |   }
-        |]
+        |{
+        |     "batch_items":
+        |   [
+        |       {
+        |         "payload":{
+        |             "record_id":"a2E6E000000aBxr",
+        |             "to_address":"dlasdj@dasd.com",
+        |             "subscriber_id":"A-S00044748",
+        |             "sf_contact_id":"0036E00000KtDaHQAV",
+        |             "product":"Membership",
+        |             "next_charge_date":"2018-09-03",
+        |             "last_name":"bla",
+        |             "first_name":"something",
+        |             "email_stage":"MBv1 - 1"
+        |         },
+        |         "object_name":"Card_Expiry__c"
+        |       }
+        |   ]
+        |}
       """.stripMargin
 
     val expected = EmailBatch(

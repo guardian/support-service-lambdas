@@ -1,7 +1,7 @@
 package com.gu.batchemailsender.api.batchemail.model
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
-import play.api.libs.json.{JsSuccess, JsValue, Json, Reads}
+import play.api.libs.json.Json
 
 import scala.util.{Failure, Success, Try}
 
@@ -9,7 +9,7 @@ object EmailBatch {
 
   object WireModel {
 
-    case class WireEmailBatch(emailBatchItems: List[WireEmailBatchItem])
+    case class WireEmailBatch(batch_items: List[WireEmailBatchItem])
     case class WireEmailBatchItem(payload: WireEmailBatchItemPayload, object_name: String)
     case class WireEmailBatchItemPayload(
       record_id: String,
@@ -26,13 +26,7 @@ object EmailBatch {
 
     implicit val emailBatchItemPayloadReads = Json.reads[WireEmailBatchItemPayload]
     implicit val emailBatchItemReads = Json.reads[WireEmailBatchItem]
-    //    implicit val emailBatch = Json.reads[WireEmailBatch]
-
-    implicit val emailBatchReader = new Reads[WireEmailBatch] {
-      override def reads(json: JsValue) = JsSuccess(WireEmailBatch(
-        emailBatchItems = json.as[List[WireEmailBatchItem]]
-      ))
-    }
+    implicit val emailBatch = Json.reads[WireEmailBatch]
 
     def fromSfDateToDisplayDate(sfDate: String): String = {
       val formattedDate: Try[String] = Try {
@@ -47,7 +41,7 @@ object EmailBatch {
     }
 
     def fromWire(wireEmailBatch: WireEmailBatch): EmailBatch = {
-      val items = wireEmailBatch.emailBatchItems.map(fromWire(_))
+      val items = wireEmailBatch.batch_items.map(fromWire(_))
       EmailBatch(
         emailBatchItems = items
       )
