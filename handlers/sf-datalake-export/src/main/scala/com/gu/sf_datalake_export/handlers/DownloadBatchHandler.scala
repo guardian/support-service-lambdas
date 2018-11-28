@@ -53,7 +53,7 @@ object DownloadBatchHandler {
     jobId: String,
     batches: List[WireBatchInfo],
     uploadToDataLake: Boolean,
-    done: Boolean = false,
+    done: Boolean = false
   )
 
   object WireState {
@@ -153,7 +153,7 @@ object DownloadBatchHandler {
     getUploadPath: (ObjectName, ShouldUploadToDataLake) => S3Path,
     downloadBatch: (JobName, JobId, BatchId, S3Path) => Try[Unit]
   )(currentState: State): Try[State] = {
-    //todo see how to refactor this
+
     def downloadFirstBatch(uploadBasePath: S3Path) = {
       val downloadableBatches = currentState.batches.filter(_.state == Completed)
       downloadableBatches match {
