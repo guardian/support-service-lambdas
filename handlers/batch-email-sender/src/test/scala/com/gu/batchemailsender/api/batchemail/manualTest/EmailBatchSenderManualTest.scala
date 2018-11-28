@@ -7,25 +7,29 @@ import play.api.libs.json.{JsString, Json}
 
 //This is just a way to locally run the emailBatchSender lambda in dev
 object EmailBatchSenderManualTest extends App {
+
   val requestBody =
     """
-      |[
-      |   {
-      |      "payload":{
-      |      	 "record_id": "abcd",
-      |         "to_address":"leigh-anne.mathieson@theguardian.com",
-      |         "subscriber_id":"A-S00044748",
-      |         "sf_contact_id":"0036E00000KtDaHQAV",
-      |         "product":"Supporter",
-      |         "next_charge_date":"2018-09-03",
-      |         "last_name":"bla",
-      |         "identity_id":"30002177",
-      |         "first_name":"something",
-      |         "email_stage":"MBv1 - 1"
-      |      },
-      |      "object_name":"Card_Expiry__c"
-      |   }
-      |]
+      |{
+      |   "batch_items":
+      |   [
+      |       {
+      |         "payload":{
+      |             "record_id":"a2E6E000000aBxr",
+      |             "to_address":"leigh-anne.mathieson@theguardian.com",
+      |             "subscriber_id":"A-S00044748",
+      |             "sf_contact_id":"0036E00000KtDaHQAV",
+      |             "product":"Supporter",
+      |             "next_charge_date":"2018-09-03",
+      |             "last_name":"bla",
+      |             "identity_id":"30002177",
+      |             "first_name":"something",
+      |             "email_stage":"MBv1 - 1"
+      |         },
+      |         "object_name":"Card_Expiry__c"
+      |       }
+      |   ]
+      |}
     """.stripMargin
 
   val bodyAsJsString = JsString(requestBody)

@@ -12,6 +12,10 @@ object FailureResponse {
 }
 
 object EmailBatchSenderResponses {
-  def someItemsFailed(failedIds: List[String]) = ApiGatewayResponse("502", FailureResponse("There were items that were not added to the queue.", 502, Some(failedIds)))
+  def someItemsFailed(failedIds: List[String]) =
+    ApiGatewayResponse(
+      statusCode = "502",
+      body = FailureResponse("There were items that were not added to the queue.", 502, Some(failedIds))
+    )
 }
 

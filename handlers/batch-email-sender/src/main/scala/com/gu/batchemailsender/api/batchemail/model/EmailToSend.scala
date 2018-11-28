@@ -3,8 +3,7 @@ package com.gu.batchemailsender.api.batchemail.model
 import play.api.libs.json.Json
 
 case class EmailPayloadContactAttributes(SubscriberAttributes: Map[String, String])
-case class EmailPayloadTo(Address: String, SubscriberKey: String, ContactAttributes: EmailPayloadContactAttributes) {
-}
+case class EmailPayloadTo(Address: String, SubscriberKey: String, ContactAttributes: EmailPayloadContactAttributes)
 case class EmailToSend(To: EmailPayloadTo, DataExtensionName: String, SfContactId: Option[String], IdentityUserId: Option[String])
 
 object EmailToSend {
