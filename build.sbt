@@ -209,7 +209,7 @@ lazy val `sf-datalake-export` = all(project in file("handlers/sf-datalake-export
 
 lazy val `batch-email-sender` = all(project in file("handlers/batch-email-sender"))
   .enablePlugins(RiffRaffArtifact)
-  .dependsOn(handler, effectsDepIncludingTestFolder, testDep)
+  .dependsOn(handler, `effects-sqs`, effectsDepIncludingTestFolder, testDep)
 
 // ==== END handlers ====
 
