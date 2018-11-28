@@ -16,36 +16,39 @@ Content-Type: application-json
 x-api-key: {the api key}
 ```
 body:
-```[  
-   {  
-      "payload":{  
-         "to_address":"dlasdj@dasd.com",
-         "subscriber_id":"A-S00044748",
-         "sf_contact_id":"0036E00000KtDaHQAV",
-         "product":"Membership",
-         "next_charge_date":"2018-09-03",
-         "last_name":"bla",
-         "identity_id":"30002177",
-         "first_name":"something",
-         "email_stage":"MBv1 - 1"
-      },
-      "object_name":"Card_Expiry__c"
-   },
-   {  
-      "payload":{  
-         "to_address":"dlasdj@dasd.com",
-         "subscriber_id":"A-S00044748",
-         "sf_contact_id":"0036E00000KtDaHQAV",
-         "product":"Membership",
-         "next_charge_date":"2018-09-03",
-         "last_name":"bla",
-         "identity_id":"30002177",
-         "first_name":"something",
-         "email_stage":"MBv1 - 1"
-      },
-      "object_name":"Card_Expiry__c"
-   }
-]
+```
+{
+    "batch_items": [  
+       {  
+          "payload":{  
+             "to_address":"dlasdj@dasd.com",
+             "subscriber_id":"A-S00044748",
+             "sf_contact_id":"0036E00000KtDaHQAV",
+             "product":"Membership",
+             "next_charge_date":"2018-09-03",
+             "last_name":"bla",
+             "identity_id":"30002177",
+             "first_name":"something",
+             "email_stage":"MBv1 - 1"
+          },
+          "object_name":"Card_Expiry__c"
+       },
+       {  
+          "payload":{  
+             "to_address":"dlasdj@dasd.com",
+             "subscriber_id":"A-S00044748",
+             "sf_contact_id":"0036E00000KtDaHQAV",
+             "product":"Membership",
+             "next_charge_date":"2018-09-03",
+             "last_name":"bla",
+             "identity_id":"30002177",
+             "first_name":"something",
+             "email_stage":"MBv1 - 1"
+          },
+          "object_name":"Card_Expiry__c"
+       }
+    ]
+}
 ```
 
 ### Responses
