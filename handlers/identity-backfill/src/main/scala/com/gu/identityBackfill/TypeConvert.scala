@@ -10,8 +10,8 @@ object TypeConvert {
     def toApiGatewayOp(action: String): ApiGatewayOp[A] = clientOp.toDisjunction.toApiGatewayOp { error =>
       logger.error(s"Failed to $action: $error")
       messageResponse(
-        s"Failed to execute lambda - unable to $action, $error",
-        action
+        "500",
+        s"Failed to execute lambda - unable to $action, $error"
       )
     }
   }
