@@ -19,7 +19,8 @@ class GetZuoraAccountsForEmailTest extends FlatSpec with Matchers {
       ZuoraAccountIdentitySFContact(
         AccountId("2c92a0fb4a38064e014a3f48f1663ad8"),
         Some(IdentityId("10101010")),
-        SFContactId("00110000011AABBAAB")
+        SFContactId("00110000011AABBAAB"),
+        CrmId("crmId")
       )
     ))
     contacts should be(expected)
@@ -30,7 +31,7 @@ class GetZuoraAccountsForEmailTest extends FlatSpec with Matchers {
     val requestMaker = ZuoraRestRequestMaker(effects.response, ZuoraRestConfig("https://zuora", "user", "pass"))
     val contacts = GetZuoraAccountsForEmail(ZuoraQuery(requestMaker))(EmailAddress("email@address"))
     val expected = ClientSuccess(List(
-      ZuoraAccountIdentitySFContact(AccountId("2c92a0fb4a38064e014a3f48f1663ad8"), None, SFContactId("00110000011AABBAAB"))
+      ZuoraAccountIdentitySFContact(AccountId("2c92a0fb4a38064e014a3f48f1663ad8"), None, SFContactId("00110000011AABBAAB"), CrmId("crmId"))
     ))
     contacts should be(expected)
   }
@@ -42,7 +43,7 @@ object GetZuoraAccountsForEmailData {
   def postResponses(withIdentity: Boolean): Map[POSTRequest, HTTPResponse] = Map(
     POSTRequest("/action/query", """{"queryString":"SELECT Id FROM Contact where WorkEmail='email@address'"}""")
       -> HTTPResponse(200, contactQueryResponse),
-    POSTRequest("/action/query", """{"queryString":"SELECT Id, IdentityId__c, sfContactId__c FROM Account where BillToId='2c92a0fb4a38064e014a3f48f1713ada'"}""")
+    POSTRequest("/action/query", """{"queryString":"SELECT Id, IdentityId__c, sfContactId__c, CrmId FROM Account where BillToId='2c92a0fb4a38064e014a3f48f1713ada'"}""")
       -> HTTPResponse(200, accountQueryResponse(withIdentity))
   )
 
@@ -56,6 +57,7 @@ object GetZuoraAccountsForEmailData {
       else ""
     }
        |            "sfContactId__c": "00110000011AABBAAB",
+       |            "CrmId": "crmId",
        |            "Id": "2c92a0fb4a38064e014a3f48f1663ad8"
        |        }
        |    ],

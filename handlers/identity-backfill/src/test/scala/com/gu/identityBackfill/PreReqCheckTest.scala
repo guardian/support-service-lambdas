@@ -9,24 +9,34 @@ import com.gu.identityBackfill.zuora.GetZuoraSubTypeForAccount.ReaderType
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
-import com.gu.util.resthttp.LazyClientFailableOp
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess}
 import org.scalatest.{FlatSpec, Matchers}
 
 class PreReqCheckTest extends FlatSpec with Matchers {
 
-  it should "go through a happy case" in {
+  val zuoraResult = List(
+    ZuoraAccountIdentitySFContact(AccountId("acc"), None, SFContactId("sf"), CrmId("crmId")),
+    ZuoraAccountIdentitySFContact(AccountId("acc2"), None, SFContactId("sf2"), CrmId("crmId"))
+  )
 
+  it should "go through a happy case" in {
     val result =
       PreReqCheck(
         _ => ContinueProcessing(Some(IdentityId("asdf"))),
-        email => ContinueProcessing(ZuoraAccountIdentitySFContact(AccountId("acc"), None, SFContactId("sf"))),
-        identityId => ContinueProcessing(()),
+        _ => ContinueProcessing(zuoraResult),
         _ => ContinueProcessing(()),
-        _ => LazyClientFailableOp(() => ClientSuccess(ContinueProcessing(())))
+        _ => ContinueProcessing(()),
+        _ => ContinueProcessing(())
       )(EmailAddress("email@address"))
 
-    val expectedResult = ContinueProcessing(PreReqResult(AccountId("acc"), SFContactId("sf"), Some(IdentityId("asdf"))))
+    val expectedResult = ContinueProcessing(
+      PreReqResult(
+        Set(AccountId("acc"), AccountId("acc2")),
+        Set(SFContactId("sf"), SFContactId("sf2")),
+        Some(IdentityId("asdf"))
+      )
+    )
+
     result should be(expectedResult)
   }
 
@@ -35,13 +45,20 @@ class PreReqCheckTest extends FlatSpec with Matchers {
     val result =
       PreReqCheck(
         _ => ContinueProcessing(None),
-        email => ContinueProcessing(ZuoraAccountIdentitySFContact(AccountId("acc"), None, SFContactId("sf"))),
-        identityId => ContinueProcessing(()),
+        _ => ContinueProcessing(zuoraResult),
         _ => ContinueProcessing(()),
-        _ => LazyClientFailableOp(() => ClientSuccess(ContinueProcessing(())))
+        _ => ContinueProcessing(()),
+        _ => ContinueProcessing(())
       )(EmailAddress("email@address"))
 
-    val expectedResult = ContinueProcessing(PreReqResult(AccountId("acc"), SFContactId("sf"), None))
+    val expectedResult = ContinueProcessing(
+      PreReqResult(
+        Set(AccountId("acc"), AccountId("acc2")),
+        Set(SFContactId("sf"), SFContactId("sf2")),
+        None
+      )
+    )
+
     result should be(expectedResult)
   }
 
@@ -54,31 +71,71 @@ class PreReqCheckTest extends FlatSpec with Matchers {
     result should be(expectedResult)
   }
 
-  it should "stop processing if the zuora account for the given email already has an identity id" in {
+  "checkSfContactsSyncable" should "ReturnWithResponse if contacts not syncable" in {
+    val ReturnWithResponse(result) = PreReqCheck
+      .checkSfContactsSyncable(_ => ReturnWithResponse(ApiGatewayResponse.badRequest("bad request")))(List(SFContactId("sfContactId")))
 
-    val result =
-      PreReqCheck.getSingleZuoraAccountForEmail(
-        ClientSuccess(List(ZuoraAccountIdentitySFContact(
-          AccountId("acc"),
-          Some(IdentityId("haha")),
-          SFContactId("sf")
-        )))
-      )
-
-    val expectedResult = ReturnWithResponse(ApiGatewayResponse.notFound("the account we found was already populated with an identity id"))
-    result should be(expectedResult)
+    result.body should include("Bad request: multiple contacts are not syncable")
   }
 
-  it should "stop processing if there are multiple zuora accounts with the same email address" in {
+  "checkSfContactsSyncable" should "continue processing if syncable" in {
+    PreReqCheck.checkSfContactsSyncable(_ =>
+      ContinueProcessing(()))(List(SFContactId("sfContactId"))) shouldBe ContinueProcessing(())
+  }
 
-    val result =
-      PreReqCheck.getSingleZuoraAccountForEmail({
-        val contactWithoutIdentity = ZuoraAccountIdentitySFContact(AccountId("acc"), None, SFContactId("sf"))
-        ClientSuccess(List(contactWithoutIdentity, contactWithoutIdentity))
-      })
+  "validateZuoraAccountsFound" should "stop processing if the zuora account for the given email already has an identity id" in {
 
-    val expectedResult = ReturnWithResponse(ApiGatewayResponse.notFound("should have exactly one zuora account per email at this stage"))
-    result should be(expectedResult)
+    val ReturnWithResponse(result) = PreReqCheck.validateZuoraAccountsFound(
+      ClientSuccess(
+        List(
+          ZuoraAccountIdentitySFContact(
+            AccountId("acc"),
+            Some(IdentityId("haha")),
+            SFContactId("sf"),
+            CrmId("asf")
+          )
+        )
+      )
+    )(EmailAddress("email@gu.com"))
+
+    result.statusCode shouldBe "400"
+    result.body should include("identity ids found in zuora")
+
+  }
+
+  "validateZuoraAccountsFound" should "stop processing if multiple crm ids are found" in {
+
+    val ReturnWithResponse(result) = PreReqCheck.validateZuoraAccountsFound(
+      ClientSuccess(
+        List(
+          ZuoraAccountIdentitySFContact(
+            AccountId("acc"),
+            None,
+            SFContactId("sf"),
+            CrmId("CrmId")
+          ),
+          ZuoraAccountIdentitySFContact(
+            AccountId("acc2"),
+            None,
+            SFContactId("sf2"),
+            CrmId("CrmId2")
+          )
+        )
+      )
+    )(EmailAddress("email@gu.com"))
+
+    result.statusCode shouldBe "400"
+    result.body should include("multiple CRM ids found for")
+
+  }
+
+  "validateZuoraAccountsFound" should "stop processing if no zuora accounts found" in {
+
+    val ReturnWithResponse(result) = PreReqCheck.validateZuoraAccountsFound(ClientSuccess(Nil))(EmailAddress("email@gu.com"))
+
+    result.statusCode shouldBe "400"
+    result.body should include("no zuora accounts found for")
+
   }
 
   it should "stop processing if it finds a non validated identity account" in {

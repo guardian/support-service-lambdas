@@ -66,7 +66,7 @@ object ApiGatewayResponse extends Logging {
 
   def badRequest(reason: String) = messageResponse(
     "400",
-    s"Failure to parse JSON successfully: $reason"
+    s"Bad request: $reason"
   )
 
   val unauthorized = messageResponse(
