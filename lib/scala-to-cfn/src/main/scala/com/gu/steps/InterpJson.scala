@@ -2,14 +2,14 @@ package com.gu.steps
 
 import play.api.libs.json.{JsValue, _}
 
-sealed trait InterpJson[STEP <: StepsAlg[_]] {
+sealed trait InterpJson[STEP <: StepsAlg] {
   type FINAL
   def run(step: STEP): (List[JsValue => Option[JsValue]], JsValue => Option[FINAL])
 }
 object InterpJson {
 
   def apply[FROM: Writes] = new {
-    def apply[REST <: StepsAlg[FROM]](
+    def apply[REST <: StepsAlg](
       steps: REST
     )(implicit canRun: InterpJson[REST]): CompiledSteps[FROM, canRun.FINAL] = {
       val (runs, finalReads) = canRun.run(steps)
@@ -38,7 +38,7 @@ object InterpJson {
 
     }
 
-  implicit def canRunTaskStepJson[FROM: Reads, TO: Writes, REST <: StepsAlg[TO]](
+  implicit def canRunTaskStepJson[FROM: Reads, TO: Writes, REST <: StepsAlg](
     implicit
     canRunRest: InterpJson[REST]
   ): InterpJson[TaskStep[FROM, TO, REST]] =
@@ -54,6 +54,19 @@ object InterpJson {
         }
         val (restFunctions, readFinal) = canRunRest.run(step.rest)
         (fn :: restFunctions, readFinal)
+      }
+
+    }
+
+  implicit def canRunWaitStepJson[REST <: StepsAlg](
+    implicit
+    canRunRest: InterpJson[REST]
+  ): InterpJson[WaitStep[REST]] =
+    new InterpJson[WaitStep[REST]] {
+      override type FINAL = canRunRest.FINAL
+
+      override def run(step: WaitStep[REST]): (List[JsValue => Option[JsValue]], JsValue => Option[FINAL]) = {
+        canRunRest.run(step.rest) // FIXME actually remember we need a delay?
       }
 
     }
