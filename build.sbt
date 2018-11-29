@@ -214,7 +214,7 @@ lazy val `batch-email-sender` = all(project in file("handlers/batch-email-sender
 
 lazy val `sf-export-dsl` = all(project in file("handlers/sf-export-dsl"))
   .enablePlugins(RiffRaffArtifact)
-  .dependsOn(handler, effectsDepIncludingTestFolder, testDep, `scala-to-cfn`)
+  .dependsOn(salesforce, handler, effectsDepIncludingTestFolder, testDep, `scala-to-cfn`)
 
 // ==== END handlers ====
 
