@@ -135,6 +135,7 @@ val effectsDepIncludingTestFolder: ClasspathDependency = effects % "compile->com
 lazy val `zuora-reports` = all(project in file("lib/zuora-reports"))
   .dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
 
+lazy val `scala-to-cfn` = all(project in file("lib/scala-to-cfn"))
 
 // ==== END libraries ====
 
@@ -210,6 +211,10 @@ lazy val `sf-datalake-export` = all(project in file("handlers/sf-datalake-export
 lazy val `batch-email-sender` = all(project in file("handlers/batch-email-sender"))
   .enablePlugins(RiffRaffArtifact)
   .dependsOn(handler, `effects-sqs`, effectsDepIncludingTestFolder, testDep)
+
+lazy val `sf-export-dsl` = all(project in file("handlers/sf-export-dsl"))
+  .enablePlugins(RiffRaffArtifact)
+  .dependsOn(handler, effectsDepIncludingTestFolder, testDep, `scala-to-cfn`)
 
 // ==== END handlers ====
 
