@@ -64,8 +64,9 @@ object CompiledSteps {
     val role = (roleName, WireResource("AWS::IAM::Role", WireRoleProps(WireCFN.assumeLambda, None, None)))
     val roleState = (statesRoleName, WireResource("AWS::IAM::Role", WireRoleProps(WireCFN.assumeStatesExecution, Some("/"), Some(WireCFN.policyStatesExecution))))
     val nonTerminalstates = lambdas.sliding(2).toList.map({
-      case (stepData :: next :: Nil) =>
+      case stepData :: next :: Nil =>
         (stepData.logicalName, WireState(stepData.logicalName, Some(next.logicalName)))
+      case _: List[StepData] => ??? // NOT POSSIBLE - sliding only returns 2s
     })
     val terminalState = lambdas.lastOption.map(stepData => (stepData.logicalName, WireState(stepData.logicalName, None)))
     val wireStateMachine = WireStateMachine(lambdas.head.logicalName, (nonTerminalstates ++ terminalState).toMap)

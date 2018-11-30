@@ -10,7 +10,7 @@ import play.api.libs.json.{JsValue, Json, OFormat}
 
 import scala.util.{Failure, Success, Try}
 
-object Handler extends App {
+object DemoHandler {
 
   case class Initial(data: String)
   case class NextState(moreData: String)
@@ -34,9 +34,9 @@ object Handler extends App {
   implicit lazy val nF: OFormat[NextState] = Json.format[NextState]
   implicit lazy val fF: OFormat[FinalState] = Json.format[FinalState]
 
-  lazy val interpretedViaJson = InterpJson[Initial].apply(program)
+  lazy val interpretedViaJson = InterpJson[Initial](iF).apply(program)
 
-  override def main(args: Array[String]): Unit = {
+  def main(args: Array[String]): Unit = {
 
     val interpretedDirectly = InterpLocal(Initial("hello"), program)
     println(s"interpretedDirectly: $interpretedDirectly")
@@ -50,7 +50,8 @@ object Handler extends App {
     val cfn = CompiledSteps.toCFN(interpretedViaJson, handlerFunctionName, ENV_VAR)
     println(s"CFN: $cfn")
     val cfnRaw = Json.prettyPrint(Json.toJson(cfn))
-    Files.write(Paths.get("target/generated.cfn.json"), cfnRaw.getBytes(StandardCharsets.UTF_8))
+    val path = Files.write(Paths.get("target/generated.cfn.json"), cfnRaw.getBytes(StandardCharsets.UTF_8))
+    println(s"path: $path")
   }
 
   lazy val ENV_VAR: String = "LAMBDA_ID"

@@ -1,12 +1,12 @@
 package com.gu.steps
 
-trait InterpLocal[FROM, STEP <: StepsAlg[FROM]] {
+trait InterpLocal[FROM, STEP <: StepsAlg] {
   type FINAL
   def run(step: STEP, from: FROM): FINAL
 }
 object InterpLocal {
 
-  def apply[FROM, REST <: StepsAlg[FROM]](
+  def apply[FROM, REST <: StepsAlg](
     input: FROM,
     steps: REST
   )(implicit canRun: InterpLocal[FROM, REST]): canRun.FINAL =
@@ -21,7 +21,7 @@ object InterpLocal {
 
     }
 
-  implicit def canRunTaskStep[FROM, TO, REST <: StepsAlg[TO]](
+  implicit def canRunTaskStep[FROM, TO, REST <: StepsAlg](
     implicit
     canRunRest: InterpLocal[TO, REST]
   ): InterpLocal[FROM, TaskStep[FROM, TO, REST]] =
@@ -30,6 +30,20 @@ object InterpLocal {
 
       override def run(step: TaskStep[FROM, TO, REST], from: FROM): FINAL = {
         canRunRest.run(step.rest, step.lambda(from))
+      }
+
+    }
+
+  implicit def canRunWaitState[IOTYPE, REST <: StepsAlg](
+    implicit
+    canRunRest: InterpLocal[IOTYPE, REST]
+  ): InterpLocal[IOTYPE, WaitStep[REST]] =
+    new InterpLocal[IOTYPE, WaitStep[REST]] {
+      override type FINAL = canRunRest.FINAL
+
+      override def run(step: WaitStep[REST], from: IOTYPE): FINAL = {
+        Thread.sleep(step.time.value.toLong * 1000L)
+        canRunRest.run(step.rest, from)
       }
 
     }

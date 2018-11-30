@@ -10,7 +10,7 @@ import play.api.libs.json.{JsValue, Json, OFormat}
 
 import scala.util.{Failure, Success, Try}
 
-object Handler extends App {
+object Handler {
 
   case class Initial(data: String)
   case class NextState(moreData: String)
@@ -28,7 +28,7 @@ object Handler extends App {
 
   // see the s-w tests for a nicer way to compose:
   // https://github.com/guardian/support-workers/blob/7faa9f7709d007bb027ae450526193687e401b92/src/test/scala/com/gu/support/workers/EndToEndSpec.scala#L26
-  lazy val program = TaskStep(step1, EndStep(step2))
+  lazy val program: TaskStep[Initial, NextState, WaitStep[EndStep[NextState, FinalState]]] = TaskStep(step1, WaitStep(Time(3), EndStep(step2)))
 
   implicit lazy val iF: OFormat[Initial] = Json.format[Initial]
   implicit lazy val nF: OFormat[NextState] = Json.format[NextState]
@@ -36,7 +36,7 @@ object Handler extends App {
 
   lazy val interpretedViaJson = InterpJson[Initial].apply(program)
 
-  override def main(args: Array[String]): Unit = {
+  def main(args: Array[String]): Unit = {
 
     val interpretedDirectly = InterpLocal(Initial("hello"), program)
     println(s"interpretedDirectly: $interpretedDirectly")
@@ -50,7 +50,8 @@ object Handler extends App {
     val cfn = CompiledSteps.toCFN(interpretedViaJson, handlerFunctionName, ENV_VAR)
     println(s"CFN: $cfn")
     val cfnRaw = Json.prettyPrint(Json.toJson(cfn))
-    Files.write(Paths.get("target/generated.cfn.json"), cfnRaw.getBytes(StandardCharsets.UTF_8))
+    val path = Files.write(Paths.get("target/generated.cfn.json"), cfnRaw.getBytes(StandardCharsets.UTF_8))
+    println(s"path: $path")
   }
 
   lazy val ENV_VAR: String = "LAMBDA_ID"
