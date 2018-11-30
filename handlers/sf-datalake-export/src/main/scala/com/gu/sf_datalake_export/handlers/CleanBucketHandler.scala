@@ -4,6 +4,7 @@ import java.io.{InputStream, OutputStream}
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects._
+import com.gu.sf_datalake_export.handlers.CleanBucketHandler.cleanBucket
 import com.gu.sf_datalake_export.handlers.DownloadBatchHandler.WireState
 import com.gu.sf_datalake_export.handlers.StartJobHandler.ShouldUploadToDataLake
 import com.gu.sf_datalake_export.salesforce_bulk_api.BulkApiParams.ObjectName
@@ -25,16 +26,12 @@ object CleanBucketHandler extends Logging {
       val jobName = JobName(state.jobName)
       val shouldUploadToDataLake = ShouldUploadToDataLake(state.uploadToDataLake)
       val wiredS3PathFor = ExportS3Path(RawEffects.stage) _
-
-      cleanBucket(
+      val wiredCleanBucket = cleanBucket(
         wiredS3PathFor,
         ListS3Objects.listObjectsWithPrefix,
         DeleteS3Objects.deleteObjects
-      )(
-          objectName,
-          jobName,
-          shouldUploadToDataLake
-        ) map (_ => state)
+      ) _
+      handleCleanBucket(wiredCleanBucket)(state)
     }
 
     JsonHandler(
@@ -42,6 +39,21 @@ object CleanBucketHandler extends Logging {
       operation = wiredOperation
     )
   }
+
+  def handleCleanBucket(
+    cleanBucketOp: (ObjectName, JobName, ShouldUploadToDataLake) => Try[Unit]
+  )(state: WireState): Try[WireState] = {
+    val objectName = ObjectName(state.objectName)
+    val jobName = JobName(state.jobName)
+    val shouldUploadToDataLake = ShouldUploadToDataLake(state.uploadToDataLake)
+    val wiredS3PathFor = ExportS3Path(RawEffects.stage) _
+    cleanBucketOp(
+      objectName,
+      jobName,
+      shouldUploadToDataLake
+    ) map (_ => state)
+  }
+
 
   def cleanBucket(
     basePathFor: (ObjectName, ShouldUploadToDataLake) => S3Path,
