@@ -14,6 +14,7 @@ import com.gu.newproduct.api.addsubscription.zuora.{PaymentMethodStatus, Payment
 import com.gu.newproduct.api.addsubscription.ZuoraAccountId
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.productcatalog.AmountMinorUnits
+import com.gu.newproduct.api.productcatalog.PlanId.MonthlyContribution
 import com.gu.util.config.Stage
 
 import scala.concurrent.Await
@@ -42,7 +43,8 @@ object SendConfirmationEmailsManualTest {
     NonDirectDebitMethod(PaymentMethodStatus.ActivePaymentMethod, PaymentMethodType.PayPal),
     AmountMinorUnits(123),
     LocalDate.of(2018, 9, 1),
-    billtoContact
+    billtoContact,
+    MonthlyContribution
   )
 
   val fakeDate = LocalDate.of(2018, 8, 10)

@@ -89,7 +89,8 @@ object Steps {
       paymentMethod = paymentMethod,
       amountMinorUnits = amountMinorUnits,
       firstPaymentDate = firstPaymentDate,
-      billTo = billToContact
+      billTo = billToContact,
+      planId = request.planId
     )
 
   def handleRequest(

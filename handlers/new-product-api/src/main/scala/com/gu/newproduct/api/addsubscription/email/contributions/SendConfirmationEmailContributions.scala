@@ -14,7 +14,8 @@ import com.gu.util.reader.AsyncTypes._
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.newproduct.api.addsubscription.Formatters._
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
-import com.gu.newproduct.api.productcatalog.AmountMinorUnits
+import com.gu.newproduct.api.productcatalog.PlanId.{AnnualContribution, MonthlyContribution}
+import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, PlanId}
 
 import scala.concurrent.Future
 
@@ -26,7 +27,8 @@ object SendConfirmationEmailContributions extends Logging {
     paymentMethod: PaymentMethod,
     amountMinorUnits: AmountMinorUnits,
     firstPaymentDate: LocalDate,
-    billTo: BillToContact
+    billTo: BillToContact,
+    planId: PlanId
   )
 
   def apply(
@@ -60,6 +62,11 @@ object SendConfirmationEmailContributions extends Logging {
 
   def toContributionFields(currentDate: LocalDate, data: ContributionsEmailData): Option[ContributionFields] = {
 
+    val productId = data.planId match {
+      case AnnualContribution => "annual-contribution"
+      case MonthlyContribution => "monthly-contribution"
+      case other => other.name
+    }
     val maybeDirectDebit = data.paymentMethod match {
       case d: DirectDebit => Some(d)
       case _ => None
@@ -72,7 +79,7 @@ object SendConfirmationEmailContributions extends Logging {
         currency = data.currency.glyph,
         edition = data.billTo.address.country.map(_.alpha2).getOrElse(""),
         name = data.billTo.firstName.value,
-        product = "monthly-contribution",
+        product = productId,
         `account name` = maybeDirectDebit.map(_.accountName.value),
         `account number` = maybeDirectDebit.map(_.accountNumberMask.value),
         `sort code` = maybeDirectDebit.map(_.sortCode.hyphenated),
