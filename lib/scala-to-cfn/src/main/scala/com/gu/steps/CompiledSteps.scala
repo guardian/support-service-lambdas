@@ -1,8 +1,13 @@
 package com.gu.steps
 
-import com.gu.steps.WireCFN.{WireCode, WireEnvironment, WireFnGetAtt, WireFnSub, WireLambdaFunctionProperties, WireProps, WireResource, WireRoleProps, WireStateMachineProps}
+import com.gu.gaia.Template
+import com.gu.gaia.aws.iam.role.{Policy, Role}
+import com.gu.gaia.aws.lambda.function.{Code, Environment, Function}
+import com.gu.gaia.aws.stepfunctions.statemachine.StateMachine
+import com.gu.gaia.primitives.{Expression, GetAtt, Sub}
 import com.gu.steps.WireStateMachine.{WireState, smW}
 import play.api.libs.json._
+import com.gu.gaia.syntax._
 
 import scala.util.Try
 
@@ -38,47 +43,41 @@ object CompiledSteps {
     compiledSteps: CompiledSteps[FROM, FINAL],
     handler: String,
     envVar: String
-  ): WireCFN = {
+  ): Template = {
     val ids = compiledSteps.steps.zipWithIndex.map({ case (_, num) => LambdaId(num) })
     val roleName = "TheRole"
     val statesRoleName = "TheStatesRole"
     val stateMachineName = "TheStateMachine"
     val lambdas = ids.map { lambdaId =>
-      val fn = WireResource(
-        "AWS::Lambda::Function",
-        Properties = WireLambdaFunctionProperties(
-          Description = s"auto generated lambda ${lambdaId.value}",
-          Code = WireCode(
-            "johnd-dist",
-            "step.jar"
-          ),
-          Handler = handler,
-          Environment = WireEnvironment(
-            Map(envVar -> s"${lambdaId.value}")
-          ),
-          Role = WireFnGetAtt(roleName, "Arn")
-        )
-      )
-      StepData(s"GeneratedLambda${lambdaId.value}", fn)
+      Function(
+        resourceName = s"GeneratedLambda${lambdaId.value}",
+        role = roleName,
+        handler = handler,
+        code = Code().withS3Bucket("johnd-dist").withS3Key("step.jar"),
+        runtime = "java8"
+      ).withEnvironment(Environment(Some(Map(envVar -> lambdaId.value.toString))))
     }
-    val role = (roleName, WireResource("AWS::IAM::Role", WireRoleProps(WireCFN.assumeLambda, None, None)))
-    val roleState = (statesRoleName, WireResource("AWS::IAM::Role", WireRoleProps(WireCFN.assumeStatesExecution, Some("/"), Some(WireCFN.policyStatesExecution))))
-    val nonTerminalstates = lambdas.sliding(2).toList.map({
-      case stepData :: next :: Nil =>
-        (stepData.logicalName, WireState(stepData.logicalName, Some(next.logicalName)))
-      case _: List[StepData] => ??? // NOT POSSIBLE - sliding only returns 2s
-    })
-    val terminalState = lambdas.lastOption.map(stepData => (stepData.logicalName, WireState(stepData.logicalName, None)))
-    val wireStateMachine = WireStateMachine(lambdas.head.logicalName, (nonTerminalstates ++ terminalState).toMap)
-    val labelToLogicalName = lambdas.map(aaa => (aaa.logicalName, aaa.logicalName)).toMap
-    val subStateMachine = WireFnSub(Json.stringify(Json.toJsObject(wireStateMachine)(smW)), labelToLogicalName)
-    val stateMachine = (stateMachineName, WireResource("AWS::StepFunctions::StateMachine", WireStateMachineProps(subStateMachine, WireFnGetAtt(statesRoleName, "Arn"))))
-    WireCFN(
-      Resources = (role :: roleState :: stateMachine :: lambdas.map(aaa => (aaa.logicalName, aaa.res))).toMap
-    )
-  }
 
-  case class StepData(logicalName: String, res: WireResource[WireLambdaFunctionProperties])
+    val role = Role(roleName, WireCFN.assumeLambda)
+    val roleState = Role(statesRoleName, WireCFN.assumeStatesExecution, Some("/"), Some(List(Policy(WireCFN.policyStatesExecution, "StatesExecutionPolicy"))))
+    val nonTerminalstates = lambdas.sliding(2).toList.map({
+      case lambda :: next :: Nil =>
+        (lambda.resourceName, WireState(lambda.resourceName, Some(next.resourceName)))
+      case _: List[Function] => ??? // NOT POSSIBLE - sliding only returns 2s
+    })
+    val terminalState = lambdas.lastOption.map(fun => (fun.resourceName, WireState(fun.resourceName, None)))
+    val wireStateMachine = WireStateMachine(lambdas.head.resourceName, (nonTerminalstates ++ terminalState).toMap)
+    val labelToLogicalName: Map[String, Expression[String]] = lambdas.map(aaa => aaa.resourceName -> Expression(aaa.resourceName)).toMap
+    val subStateMachine = Sub(Json.stringify(Json.toJsObject(wireStateMachine)(smW)), labelToLogicalName)
+    val stateMachine = StateMachine(stateMachineName, subStateMachine, GetAtt(statesRoleName, "Arn"))
+
+    Template()
+      .withDescription("Auto generated Lambda state machine")
+      .withResource(role)
+      .withResource(roleState)
+      .withResource(stateMachine)
+      .withResources(lambdas)
+  }
 
   def runSingle[FROM, FINAL](
     compiledSteps: CompiledSteps[FROM, FINAL],
@@ -90,95 +89,6 @@ object CompiledSteps {
 
 }
 object WireCFN {
-
-  /*
-{ "Fn::GetAtt" : [ "logicalNameOfResource", "attributeName" ] }
- */
-  case class WireFnGetAtt(`Fn::GetAtt`: List[String])
-  object WireFnGetAtt {
-    def apply(logicalNameOfResource: String, attributeName: String): WireFnGetAtt =
-      new WireFnGetAtt(List(logicalNameOfResource, attributeName))
-  }
-  implicit val fnGetAttW = Json.writes[WireFnGetAtt]
-
-  /*
-  {
-                    "Fn::Sub": [
-                        "{\n  \"Comment\": \"A Hello World AWL example using an AWS Lambda function\",\n  \"StartAt\": \"HelloWorld\",\n  \"States\": {\n    \"HelloWorld\": {\n      \"Type\": \"Task\",\n      \"Resource\": \"${lambdaArn}\",\n      \"End\": true\n    }\n  }\n}",
-                        {
-                            "lambdaArn": {
-                                "Fn::GetAtt": [
-                                    "MyLambdaFunction",
-                                    "Arn"
-                                ]
-                            }
-                        }
-                    ]
-                }
-   */
-  case class WireFnSub(`Fn::Sub`: JsArray)
-  object WireFnSub {
-    def apply(template: String, map: Map[String, String]): WireFnSub =
-      new WireFnSub(JsArray(List(JsString(template), Json.toJsObject(map.mapValues(functionLogicalName => WireFnGetAtt(functionLogicalName, "Arn"))))))
-  }
-  implicit val fnSubW = Json.writes[WireFnSub]
-
-  /*
-{
-  "Type" : "AWS::Lambda::Function",
-  "Properties" : {
-    "Code" : Code,
-    "DeadLetterConfig" : DeadLetterConfig,
-    "Description" : String,
-    "Environment" : Environment,
-    "FunctionName" : String,
-    "Handler" : String,
-    "KmsKeyArn" : String,
-    "MemorySize" : Integer,
-    "ReservedConcurrentExecutions" : Integer,
-    "Role" : String,
-    "Runtime" : String,
-    "Timeout" : Integer,
-    "TracingConfig" : TracingConfig,
-    "VpcConfig" : VPCConfig,
-    "Tags" : [ Resource Tag, ... ]
-  }
-}
- */
-  case class WireEnvironment(Variables: Map[String, String])
-  implicit val envW = Json.writes[WireEnvironment]
-
-  /*
-{
-  "S3Bucket" : String,
-  "S3Key" : String,
-  "S3ObjectVersion" : String,
-  "ZipFile" : String
-}
- */
-  case class WireCode(
-    S3Bucket: String,
-    S3Key: String
-  )
-  implicit val codeW = Json.writes[WireCode]
-
-  case class WireLambdaFunctionProperties(
-    Description: String,
-    Code: WireCode,
-    Handler: String,
-    Environment: WireEnvironment,
-    Role: WireFnGetAtt,
-    MemorySize: Int = 1536,
-    Runtime: String = "java8",
-    Timeout: Int = 300
-  ) extends WireProps
-  implicit val fPropW = Json.writes[WireLambdaFunctionProperties]
-
-  case class WireResource[+PROPS](
-    Type: String,
-    Properties: PROPS
-  )
-  implicit def funW[PROPS: Writes] = Json.writes[WireResource[PROPS]]
 
   /*
   "LambdaExecutionRole": {
@@ -199,24 +109,18 @@ object WireCFN {
             }
         }
    */
-  val assumeLambda: Map[String, JsValue] = Map(
-    "Version" -> JsString("2012-10-17"),
-    "Statement" -> JsArray(List(
-      JsObject(Map(
-        "Effect" -> JsString("Allow"),
-        "Principal" -> JsObject(Map(
-          "Service" -> JsString("lambda.amazonaws.com")
-        )),
-        "Action" -> JsString("sts:AssumeRole")
-      ))
-    ))
+  val assumeLambda: Map[String, AnyRef] = Map(
+    "Version" -> "2012-10-17",
+    "Statement" -> List(
+      Map(
+        "Effect" -> "Allow",
+        "Principal" -> Map(
+          "Service" -> "lambda.amazonaws.com"
+        ),
+        "Action" -> "sts:AssumeRole"
+      )
+    )
   )
-  case class WireRoleProps(
-    AssumeRolePolicyDocument: Map[String, JsValue],
-    Path: Option[String],
-    Policies: Option[JsArray]
-  ) extends WireProps
-  implicit val roleW = Json.writes[WireRoleProps]
 
   /*
 
@@ -260,84 +164,32 @@ object WireCFN {
             }
         }
    */
-  val assumeStatesExecution: Map[String, JsValue] = Map(
-    "Version" -> JsString("2012-10-17"),
-    "Statement" -> JsArray(List(
-      JsObject(Map(
-        "Effect" -> JsString("Allow"),
-        "Principal" -> JsObject(Map(
-          "Service" -> JsString("states.eu-west-1.amazonaws.com")
-        )),
-        "Action" -> JsString("sts:AssumeRole")
-      ))
-    ))
+  val assumeStatesExecution: Map[String, AnyRef] = Map(
+    "Version" -> "2012-10-17",
+    "Statement" -> List(
+      Map(
+        "Effect" -> "Allow",
+        "Principal" -> Map(
+          "Service" -> "states.eu-west-1.amazonaws.com"
+        ),
+        "Action" -> "sts:AssumeRole"
+      )
+    )
   )
-  val policyStatesExecution: JsArray = JsArray(List(
-    JsObject(Map(
-      "PolicyName" -> JsString("StatesExecutionPolicy"),
-      "PolicyDocument" -> JsObject(Map(
-        "Version" -> JsString("2012-10-17"),
-        "Statement" -> JsArray(List(
-          JsObject(Map(
-            "Effect" -> JsString("Allow"),
-            "Action" -> JsArray(List(
-              JsString("lambda:InvokeFunction")
-            )),
-            "Resource" -> JsString("*")
-          ))
-        ))
-      ))
-    ))
-  ))
-
-  /*
-
-        "MyStateMachine": {
-            "Type": "AWS::StepFunctions::StateMachine",
-            "Properties": {
-                "DefinitionString": {
-                    "Fn::Sub": [
-                        "{\n  \"Comment\": \"A Hello World AWL example using an AWS Lambda function\",\n  \"StartAt\": \"HelloWorld\",\n  \"States\": {\n    \"HelloWorld\": {\n      \"Type\": \"Task\",\n      \"Resource\": \"${lambdaArn}\",\n      \"End\": true\n    }\n  }\n}",
-                        {
-                            "lambdaArn": {
-                                "Fn::GetAtt": [
-                                    "MyLambdaFunction",
-                                    "Arn"
-                                ]
-                            }
-                        }
-                    ]
-                },
-                "RoleArn": {
-                    "Fn::GetAtt": [
-                        "StatesExecutionRole",
-                        "Arn"
-                    ]
-                }
-            }
-        }
-   */
-  case class WireStateMachineProps(
-    DefinitionString: WireFnSub,
-    RoleArn: WireFnGetAtt
-  ) extends WireProps
-  implicit val statePropsW = Json.writes[WireStateMachineProps]
-
-  sealed trait WireProps
-  implicit val resW: OWrites[WireProps] = {
-    case p: WireLambdaFunctionProperties => Json.toJsObject(p)(fPropW) // explicit needed to avoid infinite recursion
-    case p: WireRoleProps => Json.toJsObject(p)(roleW)
-    case p: WireStateMachineProps => Json.toJsObject(p)(statePropsW)
-  }
-
-  implicit val cfnW = Json.writes[WireCFN]
+  val policyStatesExecution: AnyRef = Map(
+    "Version" -> "2012-10-17",
+    "Statement" -> List(
+      Map(
+        "Effect" -> "Allow",
+        "Action" -> List(
+          "lambda:InvokeFunction"
+        ),
+        "Resource" -> "*"
+      )
+    )
+  )
 
 }
-case class WireCFN(
-  AWSTemplateFormatVersion: String = "2010-09-09",
-  Description: String = "Auto generated Lambda state machine",
-  Resources: Map[String, WireResource[WireProps]]
-)
 
 object WireStateMachine {
   /*
