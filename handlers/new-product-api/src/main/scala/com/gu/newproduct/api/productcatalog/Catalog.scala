@@ -13,7 +13,8 @@ case class Catalog(
   voucherSundayPlus: Plan,
   voucherEveryDayPlus: Plan,
   voucherSixDayPlus: Plan,
-  monthlyContribution: Plan
+  monthlyContribution: Plan,
+  annualContribution: Plan
 ) {
   val allPlans = List(
     voucherWeekend,
@@ -26,7 +27,8 @@ case class Catalog(
     voucherSundayPlus,
     voucherEveryDayPlus,
     voucherSixDayPlus,
-    monthlyContribution
+    monthlyContribution,
+    annualContribution
   )
 
   val planForId: Map[PlanId, Plan] = allPlans.map(x => x.id -> x).toMap
@@ -35,6 +37,7 @@ case class Catalog(
 sealed abstract class PlanId(val name: String)
 
 object PlanId {
+  case object AnnualContribution extends PlanId("annual_contribution")
 
   case object MonthlyContribution extends PlanId("monthly_contribution")
 
@@ -60,6 +63,7 @@ object PlanId {
 
   val supported = List(
     MonthlyContribution,
+    AnnualContribution,
     VoucherWeekend,
     VoucherEveryDay,
     VoucherSixDay,

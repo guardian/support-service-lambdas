@@ -27,7 +27,7 @@ import com.gu.newproduct.api.addsubscription.zuora.GetContacts.BillToContact
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.WireModel.GetContactsResponse
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{DirectDebit, PaymentMethod, PaymentMethodWire}
 import com.gu.newproduct.api.addsubscription.zuora.{GetContacts, _}
-import com.gu.newproduct.api.productcatalog.PlanId.MonthlyContribution
+import com.gu.newproduct.api.productcatalog.PlanId.{AnnualContribution, MonthlyContribution}
 import com.gu.newproduct.api.productcatalog.ZuoraIds.{PlanAndCharge, ProductRatePlanId}
 import com.gu.newproduct.api.productcatalog._
 import com.gu.util.Logging
@@ -89,7 +89,8 @@ object Steps {
       paymentMethod = paymentMethod,
       amountMinorUnits = amountMinorUnits,
       firstPaymentDate = firstPaymentDate,
-      billTo = billToContact
+      billTo = billToContact,
+      planId = request.planId
     )
 
   def handleRequest(
@@ -100,13 +101,13 @@ object Steps {
   ): Future[ApiResponse] = (for {
     request <- apiGatewayRequest.bodyAsCaseClass[AddSubscriptionRequest]().withLogging("parsed request").toAsync
     subscriptionName <- request.planId match {
-      case MonthlyContribution => addContribution(request)
+      case MonthlyContribution | AnnualContribution => addContribution(request)
       case _ => addVoucher(request)
     }
   } yield ApiGatewayResponse(body = AddedSubscription(subscriptionName.value), statusCode = "200")).apiResponse
 
   def addContributionSteps(
-    contributionZuoraIds: PlanAndCharge,
+    getPlanAndCharge: PlanId => Option[PlanAndCharge],
     getCustomerData: ZuoraAccountId => ApiGatewayOp[ContributionCustomerData],
     contributionValidations: (ValidatableFields, Currency) => ValidationResult[AmountMinorUnits],
     createSubscription: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName],
@@ -118,8 +119,9 @@ object Steps {
       validatableFields = ValidatableFields(request.amountMinorUnits, request.startDate)
       amountMinorUnits <- contributionValidations(validatableFields, account.currency).toApiGatewayOp.toAsync
       acceptanceDate = request.startDate.plusDays(paymentDelayFor(paymentMethod))
-      chargeOverride = ChargeOverride(amountMinorUnits, contributionZuoraIds.productRatePlanChargeId)
-      zuoraCreateSubRequest = createZuoraSubRequest(request, acceptanceDate, Some(chargeOverride), contributionZuoraIds.productRatePlanId)
+      planAndCharge <- getPlanAndCharge(request.planId).toApiGatewayContinueProcessing(internalServerError(s"no Zuora id for ${request.planId}!")).toAsync
+      chargeOverride = ChargeOverride(amountMinorUnits, planAndCharge.productRatePlanChargeId)
+      zuoraCreateSubRequest = createZuoraSubRequest(request, acceptanceDate, Some(chargeOverride), planAndCharge.productRatePlanId)
       subscriptionName <- createSubscription(zuoraCreateSubRequest).toAsyncApiGatewayOp("create monthly contribution")
       contributionEmailData = toContributionEmailData(request, account.currency, paymentMethod, acceptanceDate, contacts.billTo, amountMinorUnits)
       _ <- sendConfirmationEmail(account.sfContactId, contributionEmailData).recoverAndLog("send contribution confirmation email")
@@ -194,7 +196,8 @@ object Steps {
       validateRequest = ContributionValidations(isValidContributionStartDate, AmountLimits.limitsFor) _
 
       sendConfirmationEmail = SendConfirmationEmailContributions(contributionEtSqsSend, getCurrentDate) _
-      contributionSteps = addContributionSteps(zuoraIds.contributionsZuoraIds.monthly, getCustomerData, validateRequest, createSubscription, sendConfirmationEmail) _
+      planAndChargeForContributionPlanId = zuoraIds.contributionsZuoraIds.byApiPlanId.get _
+      contributionSteps = addContributionSteps(planAndChargeForContributionPlanId, getCustomerData, validateRequest, createSubscription, sendConfirmationEmail) _
       voucherSqsSend = awsSQSSend(queueNames.voucher)
       voucherEtSqsSend = EtSqsSend[VoucherEmailData](voucherSqsSend) _
       sendVoucherEmail = SendConfirmationEmailVoucher(voucherEtSqsSend, getCurrentDate) _

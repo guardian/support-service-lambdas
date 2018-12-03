@@ -12,7 +12,12 @@ object ZuoraIds {
 
   case class PlanAndCharge(productRatePlanId: ProductRatePlanId, productRatePlanChargeId: ProductRatePlanChargeId)
 
-  case class ContributionsZuoraIds(monthly: PlanAndCharge, annual: PlanAndCharge)
+  case class ContributionsZuoraIds(monthly: PlanAndCharge, annual: PlanAndCharge) {
+    val byApiPlanId: Map[PlanId, PlanAndCharge] = Map(
+      MonthlyContribution -> monthly,
+      AnnualContribution -> annual
+    )
+  }
 
   case class VoucherZuoraIds(
     everyday: ProductRatePlanId,

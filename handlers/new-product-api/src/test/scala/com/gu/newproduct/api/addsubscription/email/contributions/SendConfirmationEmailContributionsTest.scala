@@ -12,10 +12,12 @@ import com.gu.newproduct.api.addsubscription.zuora.GetContacts._
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{BankAccountName, BankAccountNumberMask, DirectDebit, MandateId, NonDirectDebitMethod, SortCode}
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.ActivePaymentMethod
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType.CreditCard
-import com.gu.newproduct.api.productcatalog.AmountMinorUnits
+import com.gu.newproduct.api.productcatalog.PlanId.{AnnualContribution, MonthlyContribution}
+import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, PlanId}
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import org.scalatest.{AsyncFlatSpec, Matchers}
+
 import scala.concurrent.Future
 
 class SendConfirmationEmailContributionsTest extends AsyncFlatSpec with Matchers {
@@ -51,7 +53,8 @@ class SendConfirmationEmailContributionsTest extends AsyncFlatSpec with Matchers
     paymentMethod = directDebit,
     amountMinorUnits = AmountMinorUnits(1234),
     firstPaymentDate = LocalDate.of(2018, 8, 9),
-    billTo = testContact
+    billTo = testContact,
+    planId = MonthlyContribution
   )
 
   val sfContactId = Some(SfContactId("sfContactId"))

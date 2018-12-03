@@ -22,6 +22,15 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "sizeInDays": 1
         |            }
         |          }
+        |        },
+        |        {
+        |          "id": "annual_contribution",
+        |          "label": "Annual",
+        |          "startDateRules": {
+        |            "selectableWindow": {
+        |              "sizeInDays": 1
+        |            }
+        |          }
         |        }
         |      ]
         |    },
@@ -196,6 +205,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
       case VoucherSixDay => Some(AmountMinorUnits(4112))
       case VoucherSixDayPlus => Some(AmountMinorUnits(4762))
       case MonthlyContribution => None
+      case AnnualContribution => None
     }
 
     val wireCatalog = WireCatalog.fromCatalog(NewProductApi.catalog(fakePricesFor))
