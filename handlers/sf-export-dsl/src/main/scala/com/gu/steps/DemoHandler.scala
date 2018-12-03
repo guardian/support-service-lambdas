@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Paths}
 
 import com.amazonaws.services.lambda.runtime.Context
+import com.gu.gaia.Template
 import com.gu.steps.CompiledSteps.LambdaId
 import play.api.libs.json.{JsValue, Json, OFormat}
 
@@ -48,9 +49,10 @@ object DemoHandler {
 
     val handlerFunctionName = this.getClass.getCanonicalName.replaceAll("""\$$""", "") + "::apply"
     val cfn = CompiledSteps.toCFN(interpretedViaJson, handlerFunctionName, ENV_VAR)
+
     println(s"CFN: $cfn")
-    val cfnRaw = Json.prettyPrint(Json.toJson(cfn))
-    val path = Files.write(Paths.get("target/generated.cfn.json"), cfnRaw.getBytes(StandardCharsets.UTF_8))
+    val cfnRaw = Template.render(cfn)
+    val path = Files.write(Paths.get("target/generated.cfn.yaml"), cfnRaw.getBytes(StandardCharsets.UTF_8))
     println(s"path: $path")
   }
 
