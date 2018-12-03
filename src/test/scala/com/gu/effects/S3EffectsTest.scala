@@ -4,11 +4,13 @@ import java.io.{ByteArrayInputStream, InputStream}
 
 import com.amazonaws.services.s3.model.{CannedAccessControlList, ObjectMetadata, PutObjectRequest}
 import com.amazonaws.util.IOUtils
-import org.scalatest.{AsyncFlatSpec, BeforeAndAfterAll, Matchers}
+import com.gu.test.EffectsTest
+import org.scalatest.{AsyncFlatSpec, BeforeAndAfterAll, Ignore, Matchers}
 
 import scala.util.Success
+//Todo this test should be in the effects project but we need to refactor to be able to access the effectsTest tag from there
 
-class S3EffectsTest extends AsyncFlatSpec with Matchers with BeforeAndAfterAll {
+class S3EffectsTest extends AsyncFlatSpec with Matchers {
   val testBucket = BucketName("support-service-lambdas-test")
 
   def put(key: String, content: String) = {
@@ -26,15 +28,17 @@ class S3EffectsTest extends AsyncFlatSpec with Matchers with BeforeAndAfterAll {
     RawEffects.s3Write(putRequest)
   }
 
-
-  override def beforeAll() = {
+  def initialiseTestBucket: Unit = {
     //put test data in
     put("S3EffectsTest/test-prefix-file1", "this is file1")
     put("S3EffectsTest/test-prefix-file2", "this is file2")
     put("S3EffectsTest/ignored-prefix-file3", "this is file3")
   }
 
-  it should "list bucket and delete" in {
+  it should "list bucket and delete" taggedAs EffectsTest in {
+
+    initialiseTestBucket
+
     val testPath = S3Path(testBucket, Some(Key("S3EffectsTest/test-prefix")))
 
     val expectedObjectsWithPrefix = List(
@@ -58,5 +62,4 @@ class S3EffectsTest extends AsyncFlatSpec with Matchers with BeforeAndAfterAll {
     }
   }
 }
-
 
