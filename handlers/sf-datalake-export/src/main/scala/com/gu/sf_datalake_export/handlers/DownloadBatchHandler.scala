@@ -3,7 +3,8 @@ package com.gu.sf_datalake_export.handlers
 import java.io.{InputStream, OutputStream}
 
 import com.amazonaws.services.lambda.runtime.Context
-import com.gu.effects._
+import com.amazonaws.services.s3.model.{PutObjectRequest, PutObjectResult}
+import com.gu.effects.{RawEffects, _}
 import com.gu.salesforce.SalesforceAuthenticate.{SFAuthConfig, SFExportAuthConfig}
 import com.gu.salesforce.SalesforceClient
 import com.gu.sf_datalake_export.handlers.StartJobHandler.ShouldUploadToDataLake
@@ -16,10 +17,12 @@ import com.gu.sf_datalake_export.salesforce_bulk_api.S3UploadFile.{File, FileCon
 import com.gu.sf_datalake_export.salesforce_bulk_api.{GetBatchResult, GetBatchResultId, S3UploadFile}
 import com.gu.sf_datalake_export.util.ExportS3Path
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
+import com.gu.util.config.LoadConfigModule.S3Location
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.handlers.JsonHandler
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.Types.ClientFailableOp
+import okhttp3.{Request, Response}
 import play.api.libs.json.Json
 import scalaz.IList
 import scalaz.syntax.traverse.ToTraverseOps
@@ -92,16 +95,20 @@ object DownloadBatchHandler {
     isDone: IsDone
   )
 
-  def wiredOperation(request: WireState): Try[WireState] = {
-    val stage = RawEffects.stage
-    val loadConfig = LoadConfigModule(stage, GetFromS3.fetchString)
-
+  def wireOperation
+  ( stage: Stage,
+    getFromS3 : S3Location => Try[String],
+    getResponse: Request => Response,
+    s3Write: PutObjectRequest => Try[PutObjectResult]
+  )
+  (request: WireState): Try[WireState] = {
+    val loadConfig = LoadConfigModule(stage, getFromS3)
     for {
       sfConfig <- loadConfig[SFAuthConfig](SFExportAuthConfig.location, SFAuthConfig.reads).leftMap(_.error).toTry
-      sfClient <- SalesforceClient(RawEffects.response, sfConfig).value.toTry
+      sfClient <- SalesforceClient(getResponse, sfConfig).value.toTry
       wiredGetBatchResultId = sfClient.wrapWith(GetBatchResultId.wrapper).runRequest _
       wiredGetBatchResult = sfClient.wrapWith(GetBatchResult.wrapper).runRequest _
-      uploadFile = S3UploadFile(RawEffects.s3Write) _
+      uploadFile = S3UploadFile(s3Write) _
       wiredBasePathFor = ExportS3Path(stage) _
       wiredDownloadBatch = download(
         uploadFile,
@@ -117,10 +124,18 @@ object DownloadBatchHandler {
 
   }
 
-  def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = JsonHandler(
+  def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
+    val wiredOperation: WireState => Try[WireState] = wireOperation(RawEffects.stage,
+      GetFromS3.fetchString _,
+      RawEffects.response,
+      RawEffects.s3Write
+    )
+
+    JsonHandler(
       lambdaIO = LambdaIO(inputStream, outputStream, context),
       operation = wiredOperation
     )
+  }
 
 
   def download(
