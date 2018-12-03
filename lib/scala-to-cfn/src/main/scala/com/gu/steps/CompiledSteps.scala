@@ -55,7 +55,10 @@ object CompiledSteps {
         handler = handler,
         code = Code().withS3Bucket("johnd-dist").withS3Key("step.jar"),
         runtime = "java8"
-      ).withEnvironment(Environment(Some(Map(envVar -> lambdaId.value.toString))))
+      )
+        .withEnvironment(Environment(Some(Map(envVar -> lambdaId.value.toString))))
+        .withMemorySize(1536)
+        .withTimeout(300)
     }
 
     val role = Role(roleName, WireCFN.assumeLambda)
