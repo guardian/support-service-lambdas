@@ -12,10 +12,10 @@ class S3UploadFileTest extends FlatSpec with Matchers{
   val testPath = S3Path(BucketName("someBucket"), None)
   val testFile = File(FileName("someName"), FileContent("these are the file contents"))
   val successS3Result = Success(new PutObjectResult())
-  var s3WriteCalled = false
+  var numberOfS3Writes = 0
 
   def fakeS3Write(putRequest: PutObjectRequest): Try[PutObjectResult] = {
-    s3WriteCalled = true
+    numberOfS3Writes = numberOfS3Writes + 1
     putRequest.getBucketName shouldBe testPath.bucketName.value
     putRequest.getCannedAcl shouldBe CannedAccessControlList.BucketOwnerRead
     val fileContent = scala.io.Source.fromInputStream(putRequest.getInputStream).mkString
@@ -26,7 +26,7 @@ class S3UploadFileTest extends FlatSpec with Matchers{
 
   it should "upload file" in {
     S3UploadFile(fakeS3Write)(testPath, testFile) shouldBe successS3Result
-    s3WriteCalled shouldBe true
+    numberOfS3Writes shouldBe 1
   }
 
 }
