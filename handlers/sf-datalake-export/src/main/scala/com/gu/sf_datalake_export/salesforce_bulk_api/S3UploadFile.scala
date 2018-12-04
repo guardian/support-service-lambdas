@@ -2,20 +2,21 @@ package com.gu.sf_datalake_export.salesforce_bulk_api
 
 import java.io.{ByteArrayInputStream, InputStream}
 
-import com.amazonaws.services.s3.model.{CannedAccessControlList, ObjectMetadata, PutObjectRequest, PutObjectResult}
+import com.amazonaws.services.s3.model._
 import com.amazonaws.util.IOUtils
+import com.gu.effects.S3Path
 import com.gu.util.Logging
 
 import scala.util.Try
 object S3UploadFile extends Logging {
-  case class BasePath(value: String) extends AnyVal
+
   case class FileContent(value: String) extends AnyVal
   case class FileName(value: String) extends AnyVal
   case class File(fileName: FileName, content: FileContent)
   def apply(
     s3Write: PutObjectRequest => Try[PutObjectResult]
   )(
-    basePath: BasePath,
+    basePath: S3Path,
     file: File
   ): Try[PutObjectResult] = {
     logger.info(s"Uploading ${file.fileName.value} to S3...")
@@ -23,9 +24,10 @@ object S3UploadFile extends Logging {
     val bytes = IOUtils.toByteArray(stream)
     val uploadMetadata = new ObjectMetadata()
     uploadMetadata.setContentLength(bytes.length.toLong)
+    val fullPath = S3Path.appendToPrefix(basePath, file.fileName.value)
     val putRequest = new PutObjectRequest(
-      basePath.value,
-      file.fileName.value,
+      fullPath.bucketName.value,
+      fullPath.key.map(_.value).getOrElse(""),
       new ByteArrayInputStream(bytes),
       uploadMetadata
     ).withCannedAcl(CannedAccessControlList.BucketOwnerRead)

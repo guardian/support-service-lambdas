@@ -3,10 +3,11 @@ package com.gu.effects
 import com.amazonaws.auth._
 import com.amazonaws.auth.profile.ProfileCredentialsProvider
 import com.amazonaws.services.s3.AmazonS3Client
-import com.amazonaws.services.s3.model.{GetObjectRequest, PutObjectRequest, PutObjectResult, S3ObjectInputStream}
+import com.amazonaws.services.s3.model._
 import com.gu.util.Logging
 import com.gu.util.config.LoadConfigModule.S3Location
 
+import scala.collection.JavaConverters._
 import scala.io.Source
 import scala.util.{Failure, Try}
 
@@ -46,7 +47,40 @@ object UploadToS3 extends Logging {
   }
 
 }
+case class S3Path(bucketName: BucketName, key: Option[Key])
+object S3Path {
+  def appendToPrefix(basePath: S3Path, suffix: String) = {
+    val existingPrefixString = basePath.key.map(_.value).getOrElse("")
+    val newPrefix = Key(s"${existingPrefixString}${suffix}")
+    basePath.copy(key = Some(newPrefix))
+  }
+}
+case class BucketName(value: String) extends AnyVal
+case class Key(value: String) extends AnyVal
 
+object ListS3Objects extends Logging {
+
+  def listObjectsWithPrefix(prefix: S3Path): Try[List[Key]] = {
+    Try {
+      val response = AwsS3.client.listObjects(prefix.bucketName.value, prefix.key.map(_.value).getOrElse(""))
+      val objSummaries = response.getObjectSummaries.asScala.toList
+      objSummaries.map(objSummary => Key(objSummary.getKey))
+    }
+  }
+}
+
+object DeleteS3Objects extends Logging {
+
+  def deleteObjects(bucketName: BucketName, keysToDelete: List[Key]): Try[Unit] = {
+    Try {
+      val s3Keys = keysToDelete.map(_.value)
+      val req = new DeleteObjectsRequest(bucketName.value)
+        .withKeys(s3Keys: _*)
+        .withQuiet(false)
+      AwsS3.client.deleteObjects(req)
+    }
+  }
+}
 object AwsS3 {
 
   val client = AmazonS3Client.builder.withCredentials(aws.CredentialsProvider).build()
