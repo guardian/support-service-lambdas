@@ -9,13 +9,13 @@ Parameters:
     - CODE
     - PROD
     Default: CODE
+Conditions:
+  IsProd: !Equals [!Ref "Stage", "PROD"]
 Mappings:
   StageMap:
     CODE:
       destBuckets: "arn:aws:s3:::gu-salesforce-export-code*"
       localbucketName : "gu-salesforce-export-code"
-
-
     PROD:
       destBuckets: ["arn:aws:s3:::gu-salesforce-export-prod*", "arn:aws:s3:::ophan-raw-salesforce-customer-data-*"]
       localbucketName: "gu-salesforce-export-prod"
@@ -415,3 +415,41 @@ Resources:
         cleanBucketArn: !GetAtt [ CleanBucket, Arn ]
 
       }
+
+  TriggerRole:
+    Type: AWS::IAM::Role
+    Condition: IsProd
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - events.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Policies:
+        - PolicyName: TriggerStateMchine
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - states:StartExecution
+                Resource: !Ref StateMachine
+  ScheduleRule:
+    Type: "AWS::Events::Rule"
+    Condition: IsProd
+    Properties:
+      Description: "trigger salesforce export every day at 01:00 GMT"
+      ScheduleExpression: "cron(0 1 ? * * *)"
+      State: "ENABLED"
+      Targets:
+        -
+          Arn: !Ref StateMachine
+          Id: !Sub trigger_sf_export-${Stage}
+          Input: |
+            {
+             "objectName": "Contact"
+            }
+          RoleArn: !GetAtt [ TriggerRole, Arn ]
