@@ -73,8 +73,11 @@ object SfQueries {
       |MailingStreet,
       |MailingPostalCode,
       |Salutation,
-      |RecordType.Name,
-      |LastName
+      |tp_Contact_Type__c,
+      |LastName,
+      |Digital_Voucher_User__c,
+      |Voucher_Fulfilment_Cut_Off_Date__c,
+      |Voucher_Start_Date__c
       |from Contact
       |where
       |Account.GDPR_Deletion_Pending__c = false
@@ -83,6 +86,7 @@ object SfQueries {
   val subscriptionsQuery =
     """
       |select
+      |AcquisitionCase__c,
       |Acquisition_Date__c,
       |Acquisition_Source__c,
       |Autopay__c,
@@ -96,37 +100,25 @@ object SfQueries {
       |Cancellation_Request_Date__c,
       |Cancellation_Source__c,
       |Cancellation_Survey_Voluntary__c,
-      |Cancellation_Survey_URL__c,
       |Cancelled_At__c,
       |Cancelled_By__c,
       |Case_Number__c,
       |Promotion_Channel__c,
       |Promotion_Code__c,
-      |Created_By_CSR__c,
-      |CreatedById,
-      |CreatedDate,
       |Currency__c,
       |Default_Payment_Method__c,
       |Default_Payment_Method_Type__c,
-      |IsDeleted,
       |Promo_Description__c,
       |Digi_Print__c,
       |Promotion_Discount_Duration__c,
       |First_Invoice__c,
       |First_Invoice_Date__c,
       |Fulfilment_Start_Date__c,
-      |LastActivityDate,
-      |LastModifiedById,
-      |LastModifiedDate,
-      |LastReferencedDate,
-      |LastViewedDate,
-      |Migrated_Sub__c,
       |Last_Invoice__c,
       |Last_Invoice_Date__c,
       |Next_Charge_Date__c,
       |Payment_Failure_Record__c,
       |Payment_Term__c,
-      |Primary_Reason__c,
       |Product__c,
       |Product_Name__c,
       |Product_Type__c,
@@ -136,21 +128,17 @@ object SfQueries {
       |Rate_Plan_Name__c,
       |Reason_for_Cancellation__c,
       |Recipient__c,
-      |Id,
       |RecordTypeId,
       |SF_Status__c,
+      |Name,
+      |Status__c,
       |Sub_Reason__c,
-      |Subscription_End_Date__c,
       |Survey_Sent__c,
-      |SystemModstamp,
       |Term_End_Date__c,
       |Term_Start_Date__c,
       |Promo_Type__c,
-      |User_Cancellation_Reason__c,
       |Version__c,
-      |Zuora_Id__c,
-      |Zuora_Subscription_Salesforce_ID__c,
-      |Zuora_Subscription_Name__c
+      |Zuora_Id__c
       |from SF_Subscription__c
       |where Buyer__r.Account.GDPR_Deletion_Pending__c = false
       |
