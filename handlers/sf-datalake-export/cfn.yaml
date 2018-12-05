@@ -441,8 +441,8 @@ Resources:
     Type: "AWS::Events::Rule"
     Condition: IsProd
     Properties:
-      Description: "trigger salesforce export"
-      ScheduleExpression: "cron(00 1 ? * * *)"
+      Description: "trigger salesforce export every day at 01:00 GMT"
+      ScheduleExpression: "cron(0 1 ? * * *)"
       State: "ENABLED"
       Targets:
         -
