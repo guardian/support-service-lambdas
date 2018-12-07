@@ -70,7 +70,8 @@ object StartJobHandler {
       jobId <- createJob(createJobRequest).toTry
       addQueryRequest = AddQueryRequest(sfQueryInfo.soql, jobId)
       _ <- addQuery(addQueryRequest).toTry
-      jobName = s"${objectName.value}_${getCurrentDate()}"
+      yesterdaysDate = getCurrentDate().minusDays(1)
+      jobName = s"${objectName.value}_${yesterdaysDate}"
     } yield WireResponse(jobId.value, jobName, objectName.value, shouldUploadToDataLake.value)
   }
 
