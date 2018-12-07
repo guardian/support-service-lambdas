@@ -12,8 +12,6 @@ import com.gu.util.config.Stage
 import com.gu.util.handlers.LambdaException
 import com.gu.util.resthttp.Types.ClientSuccess
 import org.scalatest.{FlatSpec, Matchers}
-
-import scala.util.parsing.combinator.Parsers
 import scala.util.{Failure, Success}
 
 class StartJobStepTest extends FlatSpec with Matchers {
@@ -34,12 +32,12 @@ class StartJobStepTest extends FlatSpec with Matchers {
 
   val testSteps = StartJobHandler.steps(today, createJob, addQuery) _
 
-  "startJob.steps" should "create a job and add the correct query" in {
+  "startJob.steps" should "create a job with yesterdays date and add the correct query" in {
 
     val expectedResponse = WireResponse(
       jobId = "someJobId",
       objectName = "Contact",
-      jobName = "Contact_2018-10-22",
+      jobName = "Contact_2018-10-21",
       uploadToDataLake = false
     )
     testSteps(ObjectName("Contact"), ShouldUploadToDataLake(false)) shouldBe Success(expectedResponse)
