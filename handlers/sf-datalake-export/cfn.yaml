@@ -447,9 +447,17 @@ Resources:
       Targets:
         -
           Arn: !Ref StateMachine
-          Id: !Sub trigger_sf_export-${Stage}
+          Id: !Sub trigger_sf_export-Contact-${Stage}
           Input: |
             {
              "objectName": "Contact"
+            }
+          RoleArn: !GetAtt [ TriggerRole, Arn ]
+        -
+          Arn: !Ref StateMachine
+          Id: !Sub trigger_sf_export-Subscription-${Stage}
+          Input: |
+            {
+             "objectName": "Subscription"
             }
           RoleArn: !GetAtt [ TriggerRole, Arn ]
