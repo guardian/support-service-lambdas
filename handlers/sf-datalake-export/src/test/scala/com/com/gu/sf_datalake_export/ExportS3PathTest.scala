@@ -11,7 +11,7 @@ class ExportS3PathTest extends FlatSpec with Matchers {
   "uploadBasePath" should "return ophan bucket basepath for PROD requests with uploadToDataLake enabled" in {
     val contactName = BulkApiParams.contact.objectName
     val actualBasePath = ExportS3Path(Stage("PROD"))(contactName, ShouldUploadToDataLake(true))
-    actualBasePath shouldBe S3Path(BucketName("ophan-raw-salesforce-customer-data-contact"), None)
+    actualBasePath shouldBe S3Path(BucketName("ophan-raw-salesforce-contact"), None)
   }
 
   it should "return test bucket basepath for PROD requests with uploadToDataLake disabled" in {
