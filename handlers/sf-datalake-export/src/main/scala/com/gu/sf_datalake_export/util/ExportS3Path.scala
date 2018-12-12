@@ -7,7 +7,7 @@ import com.gu.util.config.Stage
 
 object ExportS3Path {
   def apply(stage: Stage)(objectName: ObjectName, uploadToDataLake: ShouldUploadToDataLake): S3Path = stage match {
-    case Stage("PROD") if uploadToDataLake.value => S3Path(BucketName(s"ophan-raw-salesforce-customer-data-${objectName.value.toLowerCase}"), None)
+    case Stage("PROD") if uploadToDataLake.value => S3Path(BucketName(s"ophan-raw-salesforce-${objectName.value.toLowerCase}"), None)
     case Stage(stageName) => S3Path(BucketName(s"gu-salesforce-export-${stageName.toLowerCase}"), None)
   }
 }
