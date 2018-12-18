@@ -461,3 +461,11 @@ Resources:
              "objectName": "Subscription"
             }
           RoleArn: !GetAtt [ TriggerRole, Arn ]
+        -
+          Arn: !Ref StateMachine
+          Id: !Sub trigger_sf_export-Case-${Stage}
+          Input: |
+            {
+             "objectName": "Case"
+            }
+          RoleArn: !GetAtt [ TriggerRole, Arn ]
