@@ -363,28 +363,13 @@ object SfQueries {
       |select
       |Case_Number__c,
       |Contact__c,
-      |Contact_Name__c,
-      |CreatedById,
-      |CreatedDate,
-      |CSR__c,
-      |IsDeleted,
-      |Name,
-      |Duration__c,
       |Effective_End_Date__c,
       |Effective_Start_Date__c,
       |Estimated_Forecasted_Discount_Value__c,
-      |LastActivityDate,
-      |LastModifiedById,
-      |LastModifiedDate,
-      |LastReferencedDate,
-      |LastViewedDate,
-      |OwnerId,
       |Percentage_Applied__c,
-      |Product__c,
-      |Id,
       |SF_Subscription__c,
       |Status__c,
-      |SystemModstamp
+      |CreatedDate
       |from
       |Discount__c
       |where Contact__r.Account.GDPR_Deletion_Pending__c = false
