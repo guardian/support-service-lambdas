@@ -77,7 +77,9 @@ object SfQueries {
       |LastName,
       |Digital_Voucher_User__c,
       |Voucher_Fulfilment_Cut_Off_Date__c,
-      |Voucher_Start_Date__c
+      |Voucher_Start_Date__c,
+      |In_Payment_Failure__c,
+      |In_CC_Expiry__c
       |from Contact
       |where
       |Account.GDPR_Deletion_Pending__c = false
