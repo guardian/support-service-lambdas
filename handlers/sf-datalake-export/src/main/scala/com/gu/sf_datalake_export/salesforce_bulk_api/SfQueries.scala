@@ -252,7 +252,8 @@ object SfQueries {
       |Outcome__c  ,
       |Initial_Payment_Method__c ,
       |Latest_Payment_Method_Created_By__c ,
-      |SF_Subscription__c
+      |SF_Subscription__c,
+      |CreatedDate
       |from
       |Card_Expiry__c
       |where Contact__r.Account.GDPR_Deletion_Pending__c = false
