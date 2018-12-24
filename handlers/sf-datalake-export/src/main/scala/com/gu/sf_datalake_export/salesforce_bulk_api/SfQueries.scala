@@ -238,6 +238,7 @@ object SfQueries {
   val cardExpiry =
     """
       |select
+      |Id,
       |Billing_Account__c  ,
       |Billing_Account_Zuora_Id__c ,
       |Initial_Card_Expiry_Month__c  ,
