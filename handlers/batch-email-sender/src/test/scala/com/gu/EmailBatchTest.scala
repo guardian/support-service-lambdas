@@ -58,7 +58,7 @@ class EmailBatchTest extends FlatSpec {
   }
 
   "EmailBatch.fromWire" should "throw a jsresult exception when a required field is missing" in {
-    val sampleBatch =
+     val sampleBatch =
       """
         |{
         |     "batch_items":
