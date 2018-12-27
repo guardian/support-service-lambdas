@@ -7,7 +7,7 @@ import com.gu.util.config.Stage
 
 object ExportS3Path {
 
-  def camelToHyphenCase(camelCaseString:String): String = {
+  def camelToHyphenCase(camelCaseString: String): String = {
     val beforeUpperCase = "(?=[A-Z])"
     camelCaseString.split(beforeUpperCase).mkString("-").toLowerCase()
   }
