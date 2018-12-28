@@ -26,4 +26,11 @@ class ExportS3PathTest extends FlatSpec with Matchers {
     val codeBasePathUploadToDl = ExportS3Path(Stage("CODE"))(contactName, ShouldUploadToDataLake(false))
     List(codeBasePath, codeBasePathUploadToDl).distinct shouldBe List(S3Path(BucketName("gu-salesforce-export-code"), None))
   }
+
+  it should "convert object name to hyphen case in ophan raw bucket name if object name is camel case" in {
+    val cardExpiryName = BulkApiParams.cardExpiry.objectName
+    val actualBasePath = ExportS3Path(Stage("PROD"))(cardExpiryName, ShouldUploadToDataLake(true))
+    actualBasePath shouldBe S3Path(BucketName("ophan-raw-salesforce-card-expiry"), None)
+  }
+
 }
