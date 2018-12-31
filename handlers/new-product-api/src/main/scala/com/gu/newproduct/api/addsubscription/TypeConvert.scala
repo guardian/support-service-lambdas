@@ -7,7 +7,7 @@ import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.reader.AsyncTypes._
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.reader.Types._
-import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError, NotFound}
+import com.gu.util.resthttp.Types.{ClientFailableOp, ClientFailure, ClientSuccess, GenericError, NotFound, PaymentError}
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
@@ -15,7 +15,13 @@ import scala.util.{Failure, Success, Try}
 object TypeConvert {
 
   implicit class TypeConvertClientOp[A](clientOp: ClientFailableOp[A]) {
-    def toApiGatewayOp(action: String): ApiGatewayOp[A] = clientOp.toDisjunction.toApiGatewayOp(action)
+
+    def failureHandler(clientFailure: ClientFailure) = clientFailure match {
+      case PaymentError(_) => ApiGatewayResponse.paymentRequired
+      case _ => ApiGatewayResponse.internalServerError(s"unknown error: ${clientFailure.message}")
+    }
+
+    def toApiGatewayOp(action: String): ApiGatewayOp[A] = clientOp.toDisjunction.toApiGatewayOp(failureHandler(_))
   }
 
   implicit class TypeConvertClientOpAsync[A](clientOp: ClientFailableOp[A]) {
