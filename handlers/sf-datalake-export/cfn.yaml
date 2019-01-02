@@ -477,3 +477,11 @@ Resources:
              "objectName": "Discount"
             }
           RoleArn: !GetAtt [ TriggerRole, Arn ]
+        -
+          Arn: !Ref StateMachine
+          Id: !Sub trigger_sf_export-CardExpiry-${Stage}
+          Input: |
+            {
+             "objectName": "CardExpiry"
+            }
+          RoleArn: !GetAtt [ TriggerRole, Arn ]
