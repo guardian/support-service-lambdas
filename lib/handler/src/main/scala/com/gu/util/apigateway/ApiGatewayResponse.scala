@@ -74,6 +74,11 @@ object ApiGatewayResponse extends Logging {
     "Credentials are missing or invalid"
   )
 
+  val paymentRequired = messageResponse(
+    "402",
+    "Payment was declined"
+  )
+
   def forbidden(message: String) = messageResponse(
     "403",
     message

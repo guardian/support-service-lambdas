@@ -16,6 +16,8 @@ object Types {
 
   case class GenericError(message: String) extends ClientFailure
 
+  case class PaymentError(message: String) extends ClientFailure
+
   case class ClientSuccess[A](value: A) extends ClientFailableOp[A] {
     val isFailure = false
     override def toDisjunction: ClientFailure \/ A = \/-(value)
