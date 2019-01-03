@@ -79,7 +79,14 @@ object SfQueries {
       |Voucher_Fulfilment_Cut_Off_Date__c,
       |Voucher_Start_Date__c,
       |In_Payment_Failure__c,
-      |In_CC_Expiry__c
+      |In_CC_Expiry__c,
+      |Opted_in_to_call__c,
+      |Opted_In_To_Marketing__c,
+      |Payment_Amount__c,
+      |Payment_benefits_waive__c,
+      |Payment_Currency__c,
+      |Payment_Type__c ,
+      |Stripe_Product_ID__c
       |from Contact
       |where
       |Account.GDPR_Deletion_Pending__c = false
