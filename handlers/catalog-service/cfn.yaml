@@ -212,7 +212,7 @@ Resources:
         AlarmActions:
         - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:subscriptions_dev
         AlarmName: High error rate when fetching PROD Zuora Catalog
-        ComparisonOperator: GreaterThanThreshold
+        ComparisonOperator: GreaterThanOrEqualToThreshold
         Dimensions:
           - Name: FunctionName
             Value: !Ref PRODCatalogServiceLambda
@@ -231,7 +231,7 @@ Resources:
         AlarmActions:
         - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:subscriptions_dev
         AlarmName: High error rate when fetching UAT Zuora Catalog
-        ComparisonOperator: GreaterThanThreshold
+        ComparisonOperator: GreaterThanOrEqualToThreshold
         Dimensions:
           - Name: FunctionName
             Value: !Ref UATCatalogServiceLambda
@@ -250,7 +250,7 @@ Resources:
         AlarmActions:
         - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:subscriptions_dev
         AlarmName: High error rate when fetching DEV Zuora Catalog
-        ComparisonOperator: GreaterThanThreshold
+        ComparisonOperator: GreaterThanOrEqualToThreshold
         Dimensions:
           - Name: FunctionName
             Value: !Ref DEVCatalogServiceLambda
