@@ -216,10 +216,10 @@ Resources:
         Dimensions:
           - Name: FunctionName
             Value: !Ref PRODCatalogServiceLambda
-        EvaluationPeriods: 9
+        EvaluationPeriods: 18
         MetricName: Errors
         Namespace: AWS/Lambda
-        Period: 600
+        Period: 300
         Statistic: Sum
         Threshold: 1
         TreatMissingData: notBreaching
@@ -235,10 +235,10 @@ Resources:
         Dimensions:
           - Name: FunctionName
             Value: !Ref UATCatalogServiceLambda
-        EvaluationPeriods: 18
+        EvaluationPeriods: 36
         MetricName: Errors
         Namespace: AWS/Lambda
-        Period: 600
+        Period: 300
         Statistic: Sum
         Threshold: 1
         TreatMissingData: notBreaching
@@ -254,10 +254,10 @@ Resources:
         Dimensions:
           - Name: FunctionName
             Value: !Ref DEVCatalogServiceLambda
-        EvaluationPeriods: 36
+        EvaluationPeriods: 72
         MetricName: Errors
         Namespace: AWS/Lambda
-        Period: 600
+        Period: 300
         Statistic: Sum
         Threshold: 1
         TreatMissingData: notBreaching
