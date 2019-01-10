@@ -9,9 +9,11 @@ import okio.Buffer
 
 object Http extends Logging {
 
-  val response: Request => Response = {
+  val response: Request => Response = responseWithTimeout(15)
+
+  def responseWithTimeout(timeout: Int): Request => Response = {
     val restClient = new OkHttpClient().newBuilder()
-      .readTimeout(15, TimeUnit.SECONDS)
+      .readTimeout(timeout, TimeUnit.SECONDS)
       .build()
 
     def bodySummary(requestBody: RequestBody) = {

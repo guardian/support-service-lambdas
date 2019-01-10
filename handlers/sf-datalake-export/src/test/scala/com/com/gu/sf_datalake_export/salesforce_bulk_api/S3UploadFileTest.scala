@@ -8,7 +8,7 @@ import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.{Success, Try}
 
-class S3UploadFileTest extends FlatSpec with Matchers{
+class S3UploadFileTest extends FlatSpec with Matchers {
   val testPath = S3Path(BucketName("someBucket"), None)
   val testFile = File(FileName("someName"), FileContent("these are the file contents"))
   val successS3Result = Success(new PutObjectResult())
