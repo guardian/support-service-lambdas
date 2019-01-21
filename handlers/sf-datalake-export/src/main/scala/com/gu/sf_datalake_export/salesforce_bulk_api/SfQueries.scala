@@ -105,7 +105,6 @@ object SfQueries {
       |Buyer__c,
       |Promo_Campaign__c,
       |Cancellation_Effective_Date__c,
-      |Cancellation_Reason__c,
       |Cancellation_Request_Date__c,
       |Cancellation_Source__c,
       |Cancellation_Survey_Voluntary__c,
