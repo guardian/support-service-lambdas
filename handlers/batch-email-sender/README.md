@@ -4,9 +4,20 @@ There is work done in Salesforce that, on a schedule, generates information abou
 This lambda receives a call from Salesforce with a batch of emails to be sent and adds items to the 
 contributions-thanks queue so that the email will be sent 
 
+![sequence_diagram](https://user-images.githubusercontent.com/13835317/51552742-2a349800-1e69-11e9-8df4-55eec10b649d.png)
+
+Braze `Template API Identifiers` are stored in `membership-workflow.private.conf` under `braze.campaigns` 
+
+## How to add new email?
+
+1. Update SF trigger to post new `object_name` and `email_stage` 
+1. Update `EmailToSend.brazeCampaignId` match statement to handle the new case
+1. Add new email to `membership-workflow` [EmailName.EmailNamesByName](https://github.com/guardian/membership-workflow/blob/2e354b81888f6d222d9de0b4c2eda8e0f2b14729/app/model/EmailName.scala#L99)
+1. Add new Braze Template API Identifiers to `membership-workflow.private.conf` under `braze.campaigns`
+1. If you wish to add Identity magic link, then add email to [IdentityProxyBrazeClient.defaultProxiedEmailNames](https://github.com/guardian/membership-workflow/blob/2e354b81888f6d222d9de0b4c2eda8e0f2b14729/app/services/IdentityProxyBrazeClient.scala#L51)
 
 
-### Sample request 
+## Sample request 
 
 `POST {url}/{CODE or PROD}/email-batch`
 
