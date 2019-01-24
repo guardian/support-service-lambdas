@@ -1,6 +1,6 @@
 # batch-email-sender
 
-This lambda is responsible for handling the following _service_ emails (non-marketing):
+This lambda is responsible for handling the following _service_ emails (non-marketing) via [Braze API Triggered Campaigns](https://www.braze.com/docs/user_guide/engagement_tools/campaigns/scheduling_and_organizing/scheduling_your_campaign/#api-triggered-campaigns-server-triggered-campaigns):
 
 | Service email                  | Salesforce `object_name` | Salesforce `email_stage` | Braze Campaign Name    |
 | ------------------------------ | ------------------------ | ------------------------ | ---------------------- |
