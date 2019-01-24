@@ -19,6 +19,7 @@ This lambda is responsible for handling the following _service_ emails (non-mark
 1. `batch-email-sender` puts messages on the `contributions-thanks` SQS queue
 1. [`membership-workflow`](https://github.com/guardian/membership-workflow) processes the queue
 1. `membership-workflow` either [hits Braze](https://www.braze.com/docs/developer_guide/rest_api/messaging/#sending-messages-via-api-triggered-delivery) directly or delegates to Identity `payment-failure` to embed magic link
+1. `membership-workflow` publishes SNS message to `identity-payment-failure-PROD` topic
 1. [`payment-failure`](https://github.com/guardian/identity-processes/tree/master/payment-failure) embeds magic link and hists Braze
 1. [Braze](https://dashboard-01.braze.eu) schedules a campaign message send via [API Triggered Delivery](https://www.braze.com/docs/developer_guide/rest_api/messaging/#sending-messages-via-api-triggered-delivery)
 
