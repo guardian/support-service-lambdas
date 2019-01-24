@@ -39,8 +39,19 @@ Braze [`Campaign API Identifiers`](https://www.braze.com/docs/developer_guide/re
 If you wish to add Identity magic link, then add Campaign ID to [IdentityProxyBrazeClient.defaultProxiedEmailNames](https://github.com/guardian/membership-workflow/blob/2e354b81888f6d222d9de0b4c2eda8e0f2b14729/app/services/IdentityProxyBrazeClient.scala#L51).
 In this case `membership-workflow` will delegate Braze request to Identity [`payment-failure`](https://github.com/guardian/identity-processes/tree/master/payment-failure) lambda.
 
+## How to add personalisation fields to email templates?
 
+[Using the Templated Content Included With an API request](https://www.braze.com/docs/user_guide/engagement_tools/campaigns/scheduling_and_organizing/scheduling_your_campaign/#using-the-templated-content-included-with-an-api-request) 
 
+`trigger_properties` fields in body of `POST campaigns/trigger/send` can be referenced in email template `{{ api_trigger_properties.${ my_field }}}`
+
+**Example:**
+
+`Braze dashboard | Engagement | Campaigns | Direct Debit - Email 1 | Edit Campaign | Edit Email Body`:
+
+```
+Hi {{api_trigger_properties.${first_name}}} {{api_trigger_properties.${last_name}}},<br>
+```
 
 ## Example request 
 
