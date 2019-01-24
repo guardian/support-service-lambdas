@@ -19,8 +19,7 @@ object SqsSendBatch extends Logging {
     }
 
     emailBatchItems flatMap { emailBatchItem: EmailBatchItem =>
-
-      val emailToSend = EmailToSend.fromEmailBatchItem(emailBatchItem, "expired-card")
+      val emailToSend = EmailToSend.fromEmailBatchItem(emailBatchItem)
       val payloadString = Json.prettyPrint(Json.toJson(emailToSend))
 
       sendAndRetainItemIdOnFailure(Payload(payloadString), emailBatchItem.payload.record_id)

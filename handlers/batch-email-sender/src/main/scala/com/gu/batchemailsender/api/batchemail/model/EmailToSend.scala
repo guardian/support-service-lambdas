@@ -12,7 +12,7 @@ object EmailToSend {
   implicit val emailPayloadToWriter = Json.writes[EmailPayloadTo]
   implicit val emailToSendWriter = Json.writes[EmailToSend]
 
-  def fromEmailBatchItem(emailBatchItem: EmailBatchItem, brazeCampaignId: String): EmailToSend = {
+  def fromEmailBatchItem(emailBatchItem: EmailBatchItem): EmailToSend = {
 
     val customFields: Map[String, String] = Map(
       "first_name" -> emailBatchItem.payload.first_name,
@@ -32,11 +32,24 @@ object EmailToSend {
 
     EmailToSend(
       To = emailPayloadTo,
-      DataExtensionName = brazeCampaignId,
+      DataExtensionName = brazeCampaignId(emailBatchItem),
       SfContactId = Some(emailBatchItem.payload.sf_contact_id.value),
       IdentityUserId = emailBatchItem.payload.identity_id.map(_.value)
     )
   }
 
+  // This is mapped to Braze Template API Identifier by membership-workflow
+  // https://github.com/guardian/membership-workflow/blob/2e354b81888f6d222d9de0b4c2eda8e0f2b14729/app/services/BrazeTemplateLookupService.scala#L13
+  private def brazeCampaignId(emailBatchItem: EmailBatchItem): String =
+    (emailBatchItem.object_name, emailBatchItem.payload.email_stage) match {
+      case ("Card_Expiry__c", _) => "expired-card"
+      case ("DD_Mandate_Failure__c", "MF1") => "dd-mandate-failure-1"
+      case ("DD_Mandate_Failure__c", "MF2") => "dd-mandate-failure-2"
+      case ("DD_Mandate_Failure__c", "MF3") => "dd-mandate-failure-3"
+      case ("DD_Mandate_Failure__c", "MF4") => "dd-mandate-failure-4"
+      case ("DD_Mandate_Failure__c", "MF5") => "dd-mandate-failure-5"
+      case ("DD_Mandate_Failure__c", "MF6") => "dd-mandate-failure-6"
+      case (objectName, emailStage) => throw new RuntimeException(s"Unrecognized (object_name, email_stage) = ($objectName, $emailStage). Please fix SF trigger.")
+    }
 }
 
