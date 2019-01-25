@@ -6,7 +6,7 @@ import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.{ActivePa
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType._
 import com.gu.test.EffectsTest
 import com.gu.util.resthttp.RestRequestMaker.IsCheckNeeded
-import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError}
+import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError, PaymentError}
 import org.scalatest.{FlatSpec, Matchers}
 
 class GetPaymentMethodTest extends FlatSpec with Matchers {
@@ -30,7 +30,7 @@ class GetPaymentMethodTest extends FlatSpec with Matchers {
     actual shouldBe GenericError("something failed!")
   }
 
-  "paymentMethodWires.toPayMentMethod" should "convert PayPal payment" in {
+  "paymentMethodWires.toPaymentMethod" should "convert PayPal payment" in {
     PaymentMethodWire("Active", "PayPal").toPaymentMethod shouldBe ClientSuccess(NonDirectDebitMethod(ActivePaymentMethod, PayPal))
   }
   it should "convert credit card payment" in {
@@ -54,19 +54,19 @@ class GetPaymentMethodTest extends FlatSpec with Matchers {
 
   it should "return error if missing mandate Id in direct debit payment method" in {
     val noMandateMethod = validDirectDebitWire.copy(MandateID = None)
-    noMandateMethod.toPaymentMethod shouldBe GenericError("no MandateID in zuora direct debit")
+    noMandateMethod.toPaymentMethod shouldBe PaymentError("no MandateID in zuora direct debit")
   }
   it should "return error if missing account number mask in direct debit payment method" in {
     val noAccountNumberPaymentMethod = validDirectDebitWire.copy(BankTransferAccountNumberMask = None)
-    noAccountNumberPaymentMethod.toPaymentMethod shouldBe GenericError("no account number mask in zuora direct debit")
+    noAccountNumberPaymentMethod.toPaymentMethod shouldBe PaymentError("no account number mask in zuora direct debit")
   }
   it should "return error if missing account name in direct debit payment method" in {
     val noAccountNamePaymentMethod = validDirectDebitWire.copy(BankTransferAccountName = None)
-    noAccountNamePaymentMethod.toPaymentMethod shouldBe GenericError("no account name in zuora direct debit")
+    noAccountNamePaymentMethod.toPaymentMethod shouldBe PaymentError("no account name in zuora direct debit")
   }
   it should "return error if missing sort code in direct debit payment method" in {
     val noSortCodePaymentMethod = validDirectDebitWire.copy(BankCode = None)
-    noSortCodePaymentMethod.toPaymentMethod shouldBe GenericError("no bank code in zuora direct debit")
+    noSortCodePaymentMethod.toPaymentMethod shouldBe PaymentError("no bank code in zuora direct debit")
   }
   it should "convert any other payment type to 'Other'" in {
     val wire = PaymentMethodWire("Active", "some other payment method")

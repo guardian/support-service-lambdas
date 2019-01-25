@@ -32,10 +32,10 @@ object GetPaymentMethod {
     }
 
     private def toDirectDebit: ClientFailableOp[DirectDebit] = for {
-      mandateId <- MandateID.toClientFailable("no MandateID in zuora direct debit")
-      accountName <- BankTransferAccountName.toClientFailable("no account name in zuora direct debit")
-      accountNumberMask <- BankTransferAccountNumberMask.toClientFailable("no account number mask in zuora direct debit")
-      sortCode <- BankCode.toClientFailable("no bank code in zuora direct debit")
+      mandateId <- MandateID.toClientFailable("no MandateID in zuora direct debit", acceptablePaymentMethod = false)
+      accountName <- BankTransferAccountName.toClientFailable("no account name in zuora direct debit", acceptablePaymentMethod = false)
+      accountNumberMask <- BankTransferAccountNumberMask.toClientFailable("no account number mask in zuora direct debit", acceptablePaymentMethod = false)
+      sortCode <- BankCode.toClientFailable("no bank code in zuora direct debit", acceptablePaymentMethod = false)
     } yield DirectDebit(
       toStatus(PaymentMethodStatus),
       BankAccountName(accountName),
