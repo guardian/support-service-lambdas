@@ -50,7 +50,8 @@ object TypeConvert {
   }
 
   implicit class OptionToClientFailableOp[A](option: Option[A]) {
-    def toClientFailable(errorMessage: String) = option match {
+    def toClientFailable(errorMessage: String, acceptablePaymentMethod: Boolean = true) = option match {
+      case None if !acceptablePaymentMethod => PaymentError(errorMessage)
       case None => GenericError(errorMessage)
       case Some(value) => ClientSuccess(value)
     }
