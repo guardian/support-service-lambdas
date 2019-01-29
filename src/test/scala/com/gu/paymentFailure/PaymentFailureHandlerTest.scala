@@ -24,7 +24,7 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
     responseString jsonMatches missingCredentialsResponse
   }
 
-  "lambda" should "return error if credentials don't match" in {
+  it should "return error if credentials don't match" in {
     val stream = getClass.getResourceAsStream("/paymentFailure/invalidCredentials.json")
     val os = new ByteArrayOutputStream()
     val op = Lambda.operationForEffects(\/-(TestData.fakeApiConfig), ContinueProcessing(basicOp()))
@@ -33,7 +33,7 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
     responseString jsonMatches missingCredentialsResponse
   }
 
-  "lambda" should "return an error if tenant id doesn't match" in {
+  it should "return an error if tenant id doesn't match" in {
     val stream = getClass.getResourceAsStream("/paymentFailure/invalidTenant.json")
     val os = new ByteArrayOutputStream()
     apiGatewayHandler(basicOp(), LambdaIO(stream, os, null))
@@ -41,7 +41,7 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
     responseString jsonMatches missingCredentialsResponse
   }
 
-  "lambda" should "enqueue email and return success for a valid request" in {
+  it should "enqueue email and return success for a valid request" in {
     //set up
     val stream = getClass.getResourceAsStream("/paymentFailure/validRequest.json")
     var storedReq: Option[EmailMessage] = None
@@ -93,7 +93,33 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
     responseString jsonMatches successfulResponse
   }
 
-  "lambda" should "return error if no additional data is found in zuora" in {
+
+  it should "return error if no email is provided" in {
+    //set up
+    val stream = getClass.getResourceAsStream("/paymentFailure/missingEmail.json")
+    var storedReq: Option[EmailMessage] = None
+
+    val os = new ByteArrayOutputStream()
+    //execute
+    def configToFunction: Operation = {
+      PaymentFailureSteps.apply(
+        ZuoraEmailSteps.sendEmailRegardingAccount(
+          { message =>
+            storedReq = Some(message)
+            ContinueProcessing(())
+          },
+          a => ClientSuccess(basicInvoiceTransactionSummary)
+        ),
+        TestData.fakeApiConfig
+      )
+    }
+    apiGatewayHandler(configToFunction, LambdaIO(stream, os, null))
+
+    //verify
+    val responseString = new String(os.toByteArray, "UTF-8")
+    responseString jsonMatches internalServerErrorResponse  }
+
+  it should "return error if no additional data is found in zuora" in {
     //set up
     val stream = getClass.getResourceAsStream("/paymentFailure/validRequest.json")
     val invoiceTransactionSummary = InvoiceTransactionSummary(List())
@@ -123,7 +149,7 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
     )
   }
 
-  "lambda" should "return error if message can't be queued" in {
+  it should "return error if message can't be queued" in {
     //set up
     val stream = getClass.getResourceAsStream("/paymentFailure/validRequest.json")
 
