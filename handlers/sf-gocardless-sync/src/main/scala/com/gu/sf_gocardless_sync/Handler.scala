@@ -6,7 +6,7 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.SalesforceClient
-import com.gu.sf_gocardless_sync.SyncSharedObjects.{GoCardlessMandateEventID, Reference}
+import com.gu.sf_gocardless_sync.SyncSharedObjects.{Description, GoCardlessMandateEventID, Reference}
 import com.gu.sf_gocardless_sync.gocardless.GoCardlessDDMandateEvent.GetEventsSince._
 import com.gu.sf_gocardless_sync.gocardless.{GoCardlessClient, GoCardlessConfig, GoCardlessDDMandateEvent}
 import com.gu.sf_gocardless_sync.salesforce.SalesforceDDMandate.Create.WireNewMandate
@@ -15,7 +15,7 @@ import com.gu.sf_gocardless_sync.salesforce.SalesforceDDMandate.LookupAll.{Manda
 import com.gu.sf_gocardless_sync.salesforce.SalesforceDDMandate.MandateWithSfId
 import com.gu.sf_gocardless_sync.salesforce.SalesforceDDMandate.Update.WirePatchMandate
 import com.gu.sf_gocardless_sync.salesforce.SalesforceDDMandateEvent.Create.WireNewMandateEvent
-import com.gu.sf_gocardless_sync.salesforce.SalesforceSharedObjects.{MandateSfId, MandateEventSfId, EventHappenedAt}
+import com.gu.sf_gocardless_sync.salesforce.SalesforceSharedObjects.{EventHappenedAt, MandateEventSfId, MandateSfId}
 import com.gu.sf_gocardless_sync.salesforce.{SalesforceDDMandate, SalesforceDDMandateEvent}
 import com.gu.util.Logging
 import com.gu.util.config.LoadConfigModule
@@ -59,7 +59,7 @@ object Handler extends Logging {
     Event_Happened_At__c = EventHappenedAt(gcMandateEvent.created_at),
     Status__c = gcMandateEvent.action,
     Cause__c = gcMandateEvent.details.cause,
-    Description__c = gcMandateEvent.details.description,
+    Description__c = Description(gcMandateEvent.details.description.value.take(255)), // SF field limit
     Reason_Code__c = gcMandateEvent.details.reason_code
   )
 

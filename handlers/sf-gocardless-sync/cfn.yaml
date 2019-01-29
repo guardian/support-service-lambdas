@@ -145,6 +145,8 @@ Resources:
       Threshold: 1
       TreatMissingData: notBreaching
 
+# TODO add metric events processed filter and mandate records created filter
+
 # TODO add 'StoppedRunning' alarm based on existing Invocations metric
 
 # TODO add a 'SocketTimeoutException' alarm if occurs more than 3 times in a row
