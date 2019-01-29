@@ -12,6 +12,7 @@ import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResp
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.zuora.ZuoraGetInvoiceTransactions.InvoiceTransactionSummary
+import scalaz.\/
 
 object PaymentFailureSteps extends Logging {
 
@@ -20,28 +21,24 @@ object PaymentFailureSteps extends Logging {
   }
 
   def apply(
-    sendEmailRegardingAccount: (String, PaymentFailureInformation => EmailMessage) => ApiGatewayOp[Unit],
+    sendEmailRegardingAccount: (String, PaymentFailureInformation => String \/ EmailMessage) => ApiGatewayOp[Unit],
     trustedApiConfig: TrustedApiConfig
   ): Operation = Operation.noHealthcheck({ apiGatewayRequest: ApiGatewayRequest =>
     (for {
       paymentFailureCallout <- apiGatewayRequest.bodyAsCaseClass[PaymentFailureCallout]()
       _ = logger.info(s"received ${loggableData(paymentFailureCallout)}")
       _ <- validateTenantCallout(trustedApiConfig)(paymentFailureCallout.tenantId)
-      request <- makeRequest(paymentFailureCallout)
-      _ <- sendEmailRegardingAccount(paymentFailureCallout.accountId, request)
+      paymentFailureInformationToEmail = makeEmailMessage(paymentFailureCallout) _
+      _ <- sendEmailRegardingAccount(paymentFailureCallout.accountId, paymentFailureInformationToEmail)
     } yield ApiGatewayResponse.successfulExecution).apiResponse
   })
 
-  def makeRequest(
+  def makeEmailMessage(
     paymentFailureCallout: PaymentFailureCallout
-  ): ApiGatewayOp[PaymentFailureInformation => EmailMessage] = {
-    val maybeEmailSendId = EmailId.paymentFailureId(paymentFailureCallout.failureNumber)
-    maybeEmailSendId.map { emailSendId => pFI: PaymentFailureInformation =>
-      ToMessage(paymentFailureCallout, pFI, emailSendId)
-    }.toApiGatewayContinueProcessing(
-      ApiGatewayResponse.internalServerError(s"no ET id configured for failure number: ${paymentFailureCallout.failureNumber}")
-    )
-  }
+  )(pFI: PaymentFailureInformation): String \/ EmailMessage = for {
+    emailSendId <- EmailId.paymentFailureId(paymentFailureCallout.failureNumber)
+    emailMessage <- ToMessage(paymentFailureCallout, pFI, emailSendId)
+  } yield emailMessage
 
   def validateTenantCallout(trustedApiConfig: TrustedApiConfig)(calloutTenantId: String): ApiGatewayOp[Unit] = {
     if (validTenant(trustedApiConfig, calloutTenantId)) ContinueProcessing(()) else ReturnWithResponse(unauthorized)
@@ -54,11 +51,11 @@ object ZuoraEmailSteps {
   def sendEmailRegardingAccount(
     sendEmail: EmailMessage => ApiGatewayOp[Unit],
     getInvoiceTransactions: String => ClientFailableOp[InvoiceTransactionSummary]
-  )(accountId: String, toMessage: PaymentFailureInformation => EmailMessage): ApiGatewayOp[Unit] = {
+  )(accountId: String, toMessage: PaymentFailureInformation => String \/ EmailMessage): ApiGatewayOp[Unit] = {
     for {
       invoiceTransactionSummary <- getInvoiceTransactions(accountId).toApiGatewayOp("getInvoiceTransactions failed")
       paymentInformation <- GetPaymentData(accountId)(invoiceTransactionSummary)
-      message = toMessage(paymentInformation)
+      message <- toMessage(paymentInformation).toApiGatewayOp("get email message from paymentInformation")
       _ <- sendEmail(message).mapResponse(resp =>
         resp.copy(body = toJsonBody(ResponseBody(s"email not sent for account ${accountId}"))))
     } yield ()

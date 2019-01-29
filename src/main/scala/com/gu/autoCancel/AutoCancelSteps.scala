@@ -7,9 +7,9 @@ import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.Operation
 import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.email.{EmailId, EmailMessage}
-import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
 import com.gu.util.reader.Types._
 import play.api.libs.json._
+import scalaz.\/
 
 object AutoCancelSteps extends Logging {
 
@@ -28,7 +28,7 @@ object AutoCancelSteps extends Logging {
   def apply(
     autoCancel: AutoCancelRequest => ApiGatewayOp[Unit],
     autoCancelFilter: AutoCancelCallout => ApiGatewayOp[AutoCancelRequest],
-    sendEmailRegardingAccount: (String, PaymentFailureInformation => EmailMessage) => ApiGatewayOp[Unit]
+    sendEmailRegardingAccount: (String, PaymentFailureInformation => String \/ EmailMessage) => ApiGatewayOp[Unit]
   ): Operation = Operation.noHealthcheck({ apiGatewayRequest: ApiGatewayRequest =>
     (for {
       autoCancelCallout <- apiGatewayRequest.bodyAsCaseClass[AutoCancelCallout]()
@@ -36,14 +36,11 @@ object AutoCancelSteps extends Logging {
       _ <- AutoCancelInputFilter(autoCancelCallout, onlyCancelDirectDebit = urlParams.onlyCancelDirectDebit)
       acRequest <- autoCancelFilter(autoCancelCallout).withLogging(s"auto-cancellation filter for ${autoCancelCallout.accountId}")
       _ <- autoCancel(acRequest).withLogging(s"auto-cancellation for ${autoCancelCallout.accountId}")
-      request <- makeRequest(autoCancelCallout)
+      request = makeRequest(autoCancelCallout) _
       _ <- sendEmailRegardingAccount(autoCancelCallout.accountId, request)
     } yield ApiGatewayResponse.successfulExecution).apiResponse
   })
 
-  def makeRequest(autoCancelCallout: AutoCancelCallout): ApiGatewayOp[PaymentFailureInformation => EmailMessage] = {
-    ContinueProcessing({ pFI: PaymentFailureInformation => ToMessage(autoCancelCallout, pFI, EmailId.cancelledId) })
-
-  }
-
+  def makeRequest(autoCancelCallout: AutoCancelCallout)(pFI: PaymentFailureInformation): String \/ EmailMessage =
+    ToMessage(autoCancelCallout, pFI, EmailId.cancelledId)
 }

@@ -29,7 +29,7 @@ object BillingDetails {
 }
 case class PaymentFailureCallout(
   accountId: String,
-  email: String,
+  email: Option[String],
   failureNumber: Int,
   firstName: String,
   lastName: String,
@@ -50,7 +50,7 @@ object PaymentFailureCallout {
   implicit val jf: Reads[PaymentFailureCallout] = {
     (
       (JsPath \ "accountId").read[String] and
-      (JsPath \ "email").read[String] and
+      (JsPath \ "email").readNullable[String] and
       (JsPath \ "failureNumber").read[String].map(str => Try { Integer.parseInt(str) }).collect(JsonValidationError("int wasn't parsable"))({ case scala.util.Success(num) => num }) and
       (JsPath \ "firstName").read[String] and
       (JsPath \ "lastName").read[String] and
