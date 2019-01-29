@@ -35,7 +35,13 @@ object TestData extends Matchers {
        |"body":"{\n  \"message\" : \"Credentials are missing or invalid\"\n}"
        |}
        |""".stripMargin
-
+  val missingEmailResponse =
+    """{
+      |"statusCode":"400",
+      |"headers":{"Content-Type":"application/json"},
+      |"body":"{\n  \"message\" : \"Bad request: request body couldn't be parsed: List((/email,List(JsonValidationError(List(error.minLength),WrappedArray(1)))))\"\n}"
+      |}
+      |""".stripMargin
   val successfulResponse =
     """{
        |"statusCode":"200",

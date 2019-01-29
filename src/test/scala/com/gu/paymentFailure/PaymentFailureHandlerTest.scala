@@ -41,6 +41,15 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
     responseString jsonMatches missingCredentialsResponse
   }
 
+  "lambda" should "return error if missing email" in {
+    val stream = getClass.getResourceAsStream("/paymentFailure/missingEmail.json")
+    val os = new ByteArrayOutputStream()
+    val op = Lambda.operationForEffects(\/-(TestData.fakeApiConfig), ContinueProcessing(basicOp()))
+    ApiGatewayHandler(LambdaIO(stream, os, null))(op)
+    val responseString = new String(os.toByteArray(), "UTF-8")
+    responseString jsonMatches missingEmailResponse
+  }
+
   "lambda" should "enqueue email and return success for a valid request" in {
     //set up
     val stream = getClass.getResourceAsStream("/paymentFailure/validRequest.json")

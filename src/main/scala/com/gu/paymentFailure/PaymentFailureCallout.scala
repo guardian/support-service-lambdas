@@ -2,7 +2,7 @@ package com.gu.paymentFailure
 
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
-
+import play.api.libs.json.Reads._
 import scala.util.Try
 
 case class BillingDetails(
@@ -50,7 +50,7 @@ object PaymentFailureCallout {
   implicit val jf: Reads[PaymentFailureCallout] = {
     (
       (JsPath \ "accountId").read[String] and
-      (JsPath \ "email").read[String] and
+      (JsPath \ "email").read(minLength[String](1)) and
       (JsPath \ "failureNumber").read[String].map(str => Try { Integer.parseInt(str) }).collect(JsonValidationError("int wasn't parsable"))({ case scala.util.Success(num) => num }) and
       (JsPath \ "firstName").read[String] and
       (JsPath \ "lastName").read[String] and
