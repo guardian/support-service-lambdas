@@ -1,11 +1,11 @@
 package com.gu.util.exacttarget
 
 import com.gu.effects.sqs.AwsSQSSend.Payload
-import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.email._
-import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
+import com.gu.util.resthttp.Types.{ClientSuccess, GenericError}
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
+
 import scala.util.{Failure, Success, Try}
 
 class EmailSendStepsTest extends FlatSpec with Matchers {
@@ -40,7 +40,7 @@ class EmailSendStepsTest extends FlatSpec with Matchers {
     var capturedPayload: Option[Payload] = None
     def sqsSend(payload: Payload): Try[Unit] = Success { capturedPayload = Some(payload) }
 
-    EmailSendSteps(sqsSend)(makeMessage("james@jameson.com")) shouldBe ContinueProcessing(())
+    EmailSendSteps(sqsSend)(makeMessage("james@jameson.com")) shouldBe ClientSuccess(())
     Json.parse(capturedPayload.get.value) shouldBe Json.parse(
       """
         |{
@@ -73,7 +73,7 @@ class EmailSendStepsTest extends FlatSpec with Matchers {
   "EmailSendSteps" should "return with response on failure" in {
     def sqsSend(payload: Payload): Try[Unit] = Failure(new RuntimeException("foo"))
 
-    EmailSendSteps(sqsSend)(makeMessage("james@jameson.com")) shouldBe ReturnWithResponse(ApiResponse("500", "failure to send email payload to sqs"))
+    EmailSendSteps(sqsSend)(makeMessage("james@jameson.com")) shouldBe GenericError("failure to send email payload to sqs")
   }
 
 }

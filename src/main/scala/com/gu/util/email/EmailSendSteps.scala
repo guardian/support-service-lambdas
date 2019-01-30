@@ -4,6 +4,7 @@ import com.gu.effects.sqs.AwsSQSSend.Payload
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.reader.Types._
+import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError}
 import play.api.libs.json.{Json, Writes, _}
 import scalaz.{-\/, \/, \/-}
 
@@ -95,13 +96,13 @@ trait EmailSqsSerialisation {
 }
 
 object EmailSendSteps extends EmailSqsSerialisation {
-  def apply(sqsSend: Payload => Try[Unit])(emailRequest: EmailMessage): ApiGatewayOp[Unit] = {
+  def apply(sqsSend: Payload => Try[Unit])(emailRequest: EmailMessage): ClientFailableOp[Unit] = {
     sqsSend(Payload(Json.toJson(emailRequest).toString)) match {
       case Success(_) =>
-        ContinueProcessing(())
-      case Failure(_) =>
-        logger.error(s"failed to send $emailRequest to sqs queue")
-        ReturnWithResponse(ApiResponse("500", "failure to send email payload to sqs"))
+        ClientSuccess(())
+      case Failure(error) =>
+        logger.error(s"failed to send $emailRequest to sqs queue: ${error.getMessage}")
+        GenericError(s"failure to send email payload to sqs")
     }
   }
 

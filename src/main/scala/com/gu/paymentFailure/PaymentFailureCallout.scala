@@ -47,10 +47,15 @@ case class PaymentFailureCallout(
 
 object PaymentFailureCallout {
 
+  def emptyStringToNone(maybeString: Option[String]) = maybeString match {
+    case Some("") => None
+    case otherCase => otherCase
+  }
+
   implicit val jf: Reads[PaymentFailureCallout] = {
     (
       (JsPath \ "accountId").read[String] and
-      (JsPath \ "email").readNullable[String] and
+      (JsPath \ "email").readNullable[String].map(emptyStringToNone) and
       (JsPath \ "failureNumber").read[String].map(str => Try { Integer.parseInt(str) }).collect(JsonValidationError("int wasn't parsable"))({ case scala.util.Success(num) => num }) and
       (JsPath \ "firstName").read[String] and
       (JsPath \ "lastName").read[String] and

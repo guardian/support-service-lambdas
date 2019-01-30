@@ -7,6 +7,8 @@ import java.time.format.DateTimeFormatter
 import com.gu.autoCancel.AutoCancelCallout
 import com.gu.paymentFailure.GetPaymentData.PaymentFailureInformation
 import com.gu.util.email._
+import scalaz.{\/, \/-}
+
 import scalaz.{-\/, \/, \/-}
 
 import scala.math.BigDecimal.decimal
@@ -46,33 +48,32 @@ object ToMessage {
         DataExtensionName = sendId.id,
         SfContactId = paymentFailureCallout.sfContactId
       ))
-
     }
 
-  //todo handle missing email case ?
-  def apply(callout: AutoCancelCallout, paymentFailureInformation: PaymentFailureInformation, sendId: EmailId): String \/ EmailMessage = \/-(EmailMessage(
-    To = ToDef(
-      Address = callout.email,
-      SubscriberKey = callout.email,
-      ContactAttributes = ContactAttributesDef(
-        SubscriberAttributes = SubscriberAttributesDef(
-          subscriber_id = paymentFailureInformation.subscriptionName,
-          product = paymentFailureInformation.product,
-          payment_method = callout.paymentMethodType,
-          card_type = callout.creditCardType,
-          card_expiry_date = callout.creditCardExpirationMonth + "/" + callout.creditCardExpirationYear,
-          first_name = callout.firstName,
-          last_name = callout.lastName,
-          primaryKey = InvoiceId(callout.invoiceId),
-          price = price(paymentFailureInformation.amount, callout.currency),
-          serviceStartDate = serviceDateFormat(paymentFailureInformation.serviceStartDate),
-          serviceEndDate = serviceDateFormat(paymentFailureInformation.serviceEndDate)
+  def apply(callout: AutoCancelCallout, paymentFailureInformation: PaymentFailureInformation, sendId: EmailId): String \/ EmailMessage =
+    \/-(EmailMessage(
+      To = ToDef(
+        Address = callout.email.get,
+        SubscriberKey = callout.email.get,
+        ContactAttributes = ContactAttributesDef(
+          SubscriberAttributes = SubscriberAttributesDef(
+            subscriber_id = paymentFailureInformation.subscriptionName,
+            product = paymentFailureInformation.product,
+            payment_method = callout.paymentMethodType,
+            card_type = callout.creditCardType,
+            card_expiry_date = callout.creditCardExpirationMonth + "/" + callout.creditCardExpirationYear,
+            first_name = callout.firstName,
+            last_name = callout.lastName,
+            primaryKey = InvoiceId(callout.invoiceId),
+            price = price(paymentFailureInformation.amount, callout.currency),
+            serviceStartDate = serviceDateFormat(paymentFailureInformation.serviceStartDate),
+            serviceEndDate = serviceDateFormat(paymentFailureInformation.serviceEndDate)
+          )
         )
-      )
-    ),
-    DataExtensionName = sendId.id,
-    SfContactId = callout.sfContactId
-  ))
+      ),
+      DataExtensionName = sendId.id,
+      SfContactId = callout.sfContactId
+    ))
 
   val currencySymbol = Map("GBP" -> "£", "AUD" -> "$", "EUR" -> "€", "USD" -> "$", "CAD" -> "$", "NZD" -> "$")
 
