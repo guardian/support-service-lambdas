@@ -4,7 +4,7 @@ import java.time.LocalDate
 
 import com.gu.effects.sqs.AwsSQSSend
 import com.gu.i18n.Country
-import com.gu.newproduct.api.addsubscription.Steps.emailQueuesFor
+import com.gu.newproduct.api.EmailQueueNames.emailQueuesFor
 import com.gu.newproduct.api.addsubscription.email.EtSqsSend
 import com.gu.newproduct.api.addsubscription.email.voucher.{SendConfirmationEmailVoucher, VoucherEmailData}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.SubscriptionName

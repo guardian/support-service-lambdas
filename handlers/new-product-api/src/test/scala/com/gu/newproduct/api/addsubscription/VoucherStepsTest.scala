@@ -25,74 +25,74 @@ import scala.language.postfixOps
 
 class VoucherStepsTest extends FlatSpec with Matchers {
 
-  case class ExpectedOut(subscriptionNumber: String)
-
-  it should "run end to end with fakes" in {
-    val ratePlanId = ProductRatePlanId("ratePlanId")
-
-    def fakeGetVoucherCustomerData(zuoraAccountId: ZuoraAccountId) = ContinueProcessing(TestData.voucherCustomerData)
-
-    val requestInput = JsObject(Map(
-      "acquisitionCase" -> JsString("case"),
-      "amountMinorUnits" -> JsNumber(123),
-      "startDate" -> JsString("2018-07-18"),
-      "zuoraAccountId" -> JsString("acccc"),
-      "acquisitionSource" -> JsString("CSR"),
-      "createdByCSR" -> JsString("bob"),
-      "planId" -> JsString("voucher_everyday")
-
-    ))
-
-    implicit val format: OFormat[ExpectedOut] = Json.format[ExpectedOut]
-    val expectedOutput = ExpectedOut("well done")
-
-    val dummyContributionSteps = (req: AddSubscriptionRequest) => {
-      fail("unexpected execution of contribution steps while processing voucher request!")
-    }
-
-    val expectedIn = ZuoraCreateSubRequest(
-      ratePlanId,
-      ZuoraAccountId("acccc"),
-      None,
-      LocalDate.of(2018, 7, 18),
-      CaseId("case"),
-      AcquisitionSource("CSR"),
-      CreatedByCSR("bob")
-    )
-
-    def fakeCreate(in: CreateSubscription.ZuoraCreateSubRequest): Types.ClientFailableOp[CreateSubscription.SubscriptionName] = {
-      in shouldBe expectedIn
-      ClientSuccess(SubscriptionName("well done"))
-    }
-
-    val fakeGetZuoraId = (planId: PlanId) => {
-      planId shouldBe VoucherEveryDay
-      Some(ratePlanId)
-    }
-
-    //todo maybe add assertions on the input params for these two
-    def fakeValidateVoucherStartDate(id: PlanId, d: LocalDate) = Passed(())
-
-    def fakeSendEmail(sfContactId: Option[SfContactId], voucherEmailData: VoucherEmailData) = ContinueProcessing(()).toAsync
-
-    def fakeGetPlan(planId: PlanId) = Plan(VoucherEveryDay, PlanDescription("Everyday"))
-    val fakeAddVoucherSteps = Steps.addVoucherSteps(
-      fakeGetPlan,
-      fakeGetZuoraId,
-      fakeGetVoucherCustomerData,
-      fakeValidateVoucherStartDate,
-      fakeCreate,
-      fakeSendEmail
-    ) _
-
-    val futureActual = Steps.handleRequest(
-      addContribution = dummyContributionSteps,
-      addVoucher = fakeAddVoucherSteps
-    )(ApiGatewayRequest(None, Some(Json.stringify(requestInput)), None, None))
-
-    val actual = Await.result(futureActual, 30 seconds)
-    actual.statusCode should be("200")
-    actual.body jsonMatchesFormat expectedOutput
-  }
+//  case class ExpectedOut(subscriptionNumber: String)
+//
+//  it should "run end to end with fakes" in {
+//    val ratePlanId = ProductRatePlanId("ratePlanId")
+//
+//    def fakeGetVoucherCustomerData(zuoraAccountId: ZuoraAccountId) = ContinueProcessing(TestData.voucherCustomerData)
+//
+//    val requestInput = JsObject(Map(
+//      "acquisitionCase" -> JsString("case"),
+//      "amountMinorUnits" -> JsNumber(123),
+//      "startDate" -> JsString("2018-07-18"),
+//      "zuoraAccountId" -> JsString("acccc"),
+//      "acquisitionSource" -> JsString("CSR"),
+//      "createdByCSR" -> JsString("bob"),
+//      "planId" -> JsString("voucher_everyday")
+//
+//    ))
+//
+//    implicit val format: OFormat[ExpectedOut] = Json.format[ExpectedOut]
+//    val expectedOutput = ExpectedOut("well done")
+//
+//    val dummyContributionSteps = (req: AddSubscriptionRequest) => {
+//      fail("unexpected execution of contribution steps while processing voucher request!")
+//    }
+//
+//    val expectedIn = ZuoraCreateSubRequest(
+//      ratePlanId,
+//      ZuoraAccountId("acccc"),
+//      None,
+//      LocalDate.of(2018, 7, 18),
+//      CaseId("case"),
+//      AcquisitionSource("CSR"),
+//      CreatedByCSR("bob")
+//    )
+//
+//    def fakeCreate(in: CreateSubscription.ZuoraCreateSubRequest): Types.ClientFailableOp[CreateSubscription.SubscriptionName] = {
+//      in shouldBe expectedIn
+//      ClientSuccess(SubscriptionName("well done"))
+//    }
+//
+//    val fakeGetZuoraId = (planId: PlanId) => {
+//      planId shouldBe VoucherEveryDay
+//      Some(ratePlanId)
+//    }
+//
+//    //todo maybe add assertions on the input params for these two
+//    def fakeValidateVoucherStartDate(id: PlanId, d: LocalDate) = Passed(())
+//
+//    def fakeSendEmail(sfContactId: Option[SfContactId], voucherEmailData: VoucherEmailData) = ContinueProcessing(()).toAsync
+//
+//    def fakeGetPlan(planId: PlanId) = Plan(VoucherEveryDay, PlanDescription("Everyday"))
+//    val fakeAddVoucherSteps = Steps.addVoucherSteps(
+//      fakeGetPlan,
+//      fakeGetZuoraId,
+//      fakeGetVoucherCustomerData,
+//      fakeValidateVoucherStartDate,
+//      fakeCreate,
+//      fakeSendEmail
+//    ) _
+//
+//    val futureActual = Steps.handleRequest(
+//      addContribution = dummyContributionSteps,
+//      addVoucher = fakeAddVoucherSteps
+//    )(ApiGatewayRequest(None, Some(Json.stringify(requestInput)), None, None))
+//
+//    val actual = Await.result(futureActual, 30 seconds)
+//    actual.statusCode should be("200")
+//    actual.body jsonMatchesFormat expectedOutput
+//  }
 
 }

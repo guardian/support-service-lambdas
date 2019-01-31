@@ -4,7 +4,6 @@ import java.time.LocalDate
 
 import com.gu.effects.sqs.AwsSQSSend
 import com.gu.i18n.{Country, Currency}
-import com.gu.newproduct.api.addsubscription.Steps.emailQueuesFor
 import com.gu.newproduct.api.addsubscription.email.EtSqsSend
 import com.gu.newproduct.api.addsubscription.email.contributions.SendConfirmationEmailContributions.ContributionsEmailData
 import com.gu.newproduct.api.addsubscription.email.contributions.{ContributionFields, SendConfirmationEmailContributions}
@@ -16,7 +15,7 @@ import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.productcatalog.AmountMinorUnits
 import com.gu.newproduct.api.productcatalog.PlanId.MonthlyContribution
 import com.gu.util.config.Stage
-
+import com.gu.newproduct.api.EmailQueueNames.emailQueuesFor
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
