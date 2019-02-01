@@ -13,7 +13,7 @@ object AddSubscriptionManualTest extends App {
       |   "startDate":"2019-02-01",
       |   "acquisitionSource":"CSR",
       |   "createdByCSR":"CSRName",
-      |   "amountMinorUnits": 520,
+      |   "amountMinorUnits": 300000,
       |   "acquisitionCase": "caseID",
       |   "planId": "annual_contribution"
       |}

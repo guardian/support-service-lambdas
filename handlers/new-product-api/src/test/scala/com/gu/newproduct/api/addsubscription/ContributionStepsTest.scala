@@ -60,7 +60,7 @@ class ContributionStepsTest extends FlatSpec with Matchers {
       ContinueProcessing(()).toAsync
     }
 
-    def fakeValidateRequest(fields: ValidatableFields, currency: Currency) = {
+    def fakeValidateRequest(fields: ValidatableFields, planId: PlanId, currency: Currency) = {
       fields.amountMinorUnits.map(Passed(_)).getOrElse(Failed("missing amount"))
     }
 

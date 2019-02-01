@@ -11,7 +11,7 @@ import com.gu.newproduct.api.addsubscription.email.voucher.{SendConfirmationEmai
 import com.gu.newproduct.api.addsubscription.validation.Validation._
 import com.gu.newproduct.api.addsubscription.validation.voucher.{GetVoucherCustomerData, ValidateContactsForVoucher, VoucherAccountValidation, VoucherCustomerData}
 import com.gu.newproduct.api.addsubscription.validation.{ValidateAccount, ValidatePaymentMethod, ValidationResult}
-import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{ChargeOverride, SubscriptionName, ZuoraCreateSubRequest}
+import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{SubscriptionName, ZuoraCreateSubRequest}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAccount
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.WireModel.GetContactsResponse
