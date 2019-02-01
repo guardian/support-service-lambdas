@@ -32,7 +32,7 @@ import com.gu.util.resthttp.RestRequestMaker.Requests
 import com.gu.util.resthttp.Types.ClientFailableOp
 
 import scala.concurrent.Future
-object Contributions {
+object AddContribution {
   def steps(
     getPlanAndCharge: PlanId => Option[PlanAndCharge],
     getCustomerData: ZuoraAccountId => ApiGatewayOp[ContributionCustomerData],
@@ -48,7 +48,7 @@ object Contributions {
       acceptanceDate = request.startDate.plusDays(paymentDelayFor(paymentMethod))
       planAndCharge <- getPlanAndCharge(request.planId).toApiGatewayContinueProcessing(internalServerError(s"no Zuora id for ${request.planId}!")).toAsync
       chargeOverride = ChargeOverride(amountMinorUnits, planAndCharge.productRatePlanChargeId)
-      zuoraCreateSubRequest = createZuoraSubRequest(request, acceptanceDate, Some(chargeOverride), planAndCharge.productRatePlanId)
+      zuoraCreateSubRequest = ZuoraCreateSubRequest(request, acceptanceDate, Some(chargeOverride), planAndCharge.productRatePlanId)
       subscriptionName <- createSubscription(zuoraCreateSubRequest).toAsyncApiGatewayOp("create monthly contribution")
       contributionEmailData = toContributionEmailData(request, account.currency, paymentMethod, acceptanceDate, contacts.billTo, amountMinorUnits)
       _ <- sendConfirmationEmail(account.sfContactId, contributionEmailData).recoverAndLog("send contribution confirmation email")
@@ -57,13 +57,13 @@ object Contributions {
 
   def wireSteps(
     zuoraIds: ZuoraIds,
-    zuoraClient:Requests,
+    zuoraClient: Requests,
     isValidStartDateForPlan: (PlanId, LocalDate) => ValidationResult[Unit],
     createSubscription: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName],
     awsSQSSend: QueueName => AwsSQSSend.Payload => Future[Unit],
     emailQueueNames: EmailQueueNames,
     currentDate: () => LocalDate
-  ) :AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName] = {
+  ): AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName] = {
 
     val planAndChargeForContributionPlanId = zuoraIds.contributionsZuoraIds.byApiPlanId.get _
     val contributionIds = List(zuoraIds.contributionsZuoraIds.monthly.productRatePlanId, zuoraIds.contributionsZuoraIds.annual.productRatePlanId)
@@ -74,25 +74,9 @@ object Contributions {
     val contributionEtSqsSend = EtSqsSend[ContributionFields](contributionSqsSend) _
     val sendConfirmationEmail = SendConfirmationEmailContributions(contributionEtSqsSend, currentDate) _
 
-    Contributions.steps(planAndChargeForContributionPlanId, getCustomerData, validateRequest, createSubscription, sendConfirmationEmail) _
+    AddContribution.steps(planAndChargeForContributionPlanId, getCustomerData, validateRequest, createSubscription, sendConfirmationEmail) _
 
   }
-
-  //TODO DUPLICATION HERE
-  def createZuoraSubRequest(
-    request: AddSubscriptionRequest,
-    acceptanceDate: LocalDate,
-    chargeOverride: Option[ChargeOverride],
-    productRatePlanId: ProductRatePlanId
-  ) = ZuoraCreateSubRequest(
-    productRatePlanId = productRatePlanId,
-    accountId = request.zuoraAccountId,
-    maybeChargeOverride = chargeOverride,
-    acceptanceDate = acceptanceDate,
-    acquisitionCase = request.acquisitionCase,
-    acquisitionSource = request.acquisitionSource,
-    createdByCSR = request.createdByCSR
-  )
 
   def paymentDelayFor(paymentMethod: PaymentMethod): Long = paymentMethod match {
     case d: DirectDebit => 10l

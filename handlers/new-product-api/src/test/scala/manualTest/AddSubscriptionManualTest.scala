@@ -10,12 +10,12 @@ object AddSubscriptionManualTest extends App {
   val requestBody =
     """{
       |   "zuoraAccountId":"2c92c0f967640caa016764f73a0d22d3",
-      |   "startDate":"2019-02-25",
+      |   "startDate":"2019-02-01",
       |   "acquisitionSource":"CSR",
       |   "createdByCSR":"CSRName",
       |   "amountMinorUnits": 520,
       |   "acquisitionCase": "caseID",
-      |   "planId": "voucher_everyday"
+      |   "planId": "annual_contribution"
       |}
     """.stripMargin
 

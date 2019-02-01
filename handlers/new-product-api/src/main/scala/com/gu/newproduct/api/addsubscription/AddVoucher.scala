@@ -27,7 +27,7 @@ import com.gu.util.resthttp.Types.ClientFailableOp
 
 import scala.concurrent.Future
 
-object Vouchers {
+object AddVoucher {
   def steps(
     getPlan: PlanId => Plan,
     getZuoraRateplanId: PlanId => Option[ProductRatePlanId],
@@ -39,7 +39,7 @@ object Vouchers {
     _ <- validateStartDate(request.planId, request.startDate).toApiGatewayOp.toAsync
     customerData <- getCustomerData(request.zuoraAccountId).toAsync
     zuoraRatePlanId <- getZuoraRateplanId(request.planId).toApiGatewayContinueProcessing(internalServerError(s"no Zuora id for ${request.planId}!")).toAsync
-    createSubRequest = createZuoraSubRequest(
+    createSubRequest = ZuoraCreateSubRequest(
       request = request,
       acceptanceDate = request.startDate,
       chargeOverride = None,
@@ -58,7 +58,6 @@ object Vouchers {
     _ <- sendConfirmationEmail(customerData.account.sfContactId, voucherEmailData).recoverAndLog("send voucher confirmation email")
   } yield subscriptionName
 
-
   def wireSteps(
     catalog: Catalog,
     zuoraIds: ZuoraIds,
@@ -72,8 +71,8 @@ object Vouchers {
     val voucherSqsSend = awsSQSSend(emailQueueNames.voucher)
     val voucherEtSqsSend = EtSqsSend[VoucherEmailData](voucherSqsSend) _
     val sendVoucherEmail = SendConfirmationEmailVoucher(voucherEtSqsSend, currentDate) _
-    val  getZuoraIdForVoucherPlan = zuoraIds.voucherZuoraIds.byApiPlanId.get _
-    val  getVoucherData = getValidatedVoucherCustomerData(zuoraClient)
+    val getZuoraIdForVoucherPlan = zuoraIds.voucherZuoraIds.byApiPlanId.get _
+    val getVoucherData = getValidatedVoucherCustomerData(zuoraClient)
     steps(
       catalog.planForId,
       getZuoraIdForVoucherPlan,
@@ -102,19 +101,4 @@ object Vouchers {
     )
   }
 
-//TODO DUPLICATION HERE
-  def createZuoraSubRequest(
-    request: AddSubscriptionRequest,
-    acceptanceDate: LocalDate,
-    chargeOverride: Option[ChargeOverride],
-    productRatePlanId: ProductRatePlanId
-  ) = ZuoraCreateSubRequest(
-    productRatePlanId = productRatePlanId,
-    accountId = request.zuoraAccountId,
-    maybeChargeOverride = chargeOverride,
-    acceptanceDate = acceptanceDate,
-    acquisitionCase = request.acquisitionCase,
-    acquisitionSource = request.acquisitionSource,
-    createdByCSR = request.createdByCSR
-  )
 }

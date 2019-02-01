@@ -61,7 +61,6 @@ object Steps {
     }
   } yield ApiGatewayResponse(body = AddedSubscription(subscriptionName.value), statusCode = "200")).apiResponse
 
-
   def operationForEffects(
     response: Request => Response,
     stage: Stage,
@@ -95,8 +94,8 @@ object Steps {
       )
       createSubscription = CreateSubscription(zuoraClient.post[WireCreateRequest, WireSubscription], currentDate) _
 
-
-      contributionSteps = Contributions.wireSteps(zuoraIds,
+      contributionSteps = AddContribution.wireSteps(
+        zuoraIds,
         zuoraClient,
         isValidStartDateForPlan,
         createSubscription,
@@ -105,7 +104,7 @@ object Steps {
         currentDate
       )
 
-        voucherSteps = Vouchers.wireSteps(
+      voucherSteps = AddVoucher.wireSteps(
         catalog,
         zuoraIds,
         zuoraClient,
