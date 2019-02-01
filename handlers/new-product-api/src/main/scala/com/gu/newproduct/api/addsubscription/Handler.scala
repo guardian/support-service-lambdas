@@ -109,7 +109,7 @@ object Steps {
   def addContributionSteps(
     getPlanAndCharge: PlanId => Option[PlanAndCharge],
     getCustomerData: ZuoraAccountId => ApiGatewayOp[ContributionCustomerData],
-    contributionValidations: (ValidatableFields, Currency) => ValidationResult[AmountMinorUnits],
+    contributionValidations: (ValidatableFields, PlanId, Currency) => ValidationResult[AmountMinorUnits],
     createSubscription: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName],
     sendConfirmationEmail: (Option[SfContactId], ContributionsEmailData) => AsyncApiGatewayOp[Unit]
   )(request: AddSubscriptionRequest): AsyncApiGatewayOp[SubscriptionName] = {
@@ -117,7 +117,7 @@ object Steps {
       customerData <- getCustomerData(request.zuoraAccountId).toAsync
       ContributionCustomerData(account, paymentMethod, subscriptions, contacts) = customerData
       validatableFields = ValidatableFields(request.amountMinorUnits, request.startDate)
-      amountMinorUnits <- contributionValidations(validatableFields, account.currency).toApiGatewayOp.toAsync
+      amountMinorUnits <- contributionValidations(validatableFields, request.planId, account.currency).toApiGatewayOp.toAsync
       acceptanceDate = request.startDate.plusDays(paymentDelayFor(paymentMethod))
       planAndCharge <- getPlanAndCharge(request.planId).toApiGatewayContinueProcessing(internalServerError(s"no Zuora id for ${request.planId}!")).toAsync
       chargeOverride = ChargeOverride(amountMinorUnits, planAndCharge.productRatePlanChargeId)
