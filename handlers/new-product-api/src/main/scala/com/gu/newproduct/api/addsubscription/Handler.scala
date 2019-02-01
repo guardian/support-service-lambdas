@@ -1,7 +1,7 @@
 package com.gu.newproduct.api.addsubscription
 
 import java.io.{InputStream, OutputStream}
-import java.time.{LocalDate, LocalDateTime}
+import java.time.LocalDateTime
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.sqs.AwsSQSSend
@@ -9,16 +9,12 @@ import com.gu.effects.sqs.AwsSQSSend.QueueName
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.newproduct.api.EmailQueueNames.emailQueuesFor
 import com.gu.newproduct.api.addsubscription.TypeConvert._
-import com.gu.newproduct.api.addsubscription.email.EtSqsSend
-import com.gu.newproduct.api.addsubscription.email.contributions.ContributionFields
 import com.gu.newproduct.api.addsubscription.validation._
+import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.SubscriptionName
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.WireModel.{WireCreateRequest, WireSubscription}
-import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{ChargeOverride, SubscriptionName, ZuoraCreateSubRequest}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAccount
-import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{DirectDebit, PaymentMethod}
 import com.gu.newproduct.api.addsubscription.zuora._
 import com.gu.newproduct.api.productcatalog.PlanId.{AnnualContribution, MonthlyContribution}
-import com.gu.newproduct.api.productcatalog.ZuoraIds.ProductRatePlanId
 import com.gu.newproduct.api.productcatalog._
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
@@ -42,11 +38,6 @@ object Handler extends Logging {
 }
 
 object Steps {
-
-  def paymentDelayFor(paymentMethod: PaymentMethod): Long = paymentMethod match {
-    case d: DirectDebit => 10l
-    case _ => 0l
-  }
 
   def handleRequest(
     addContribution: AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName],
@@ -76,9 +67,6 @@ object Steps {
       }
       zuoraClient = ZuoraRestRequestMaker(response, zuoraConfig)
       queueNames = emailQueuesFor(stage)
-
-      contributionSqsSend = awsSQSSend(queueNames.contributions)
-      contributionEtSqsSend = EtSqsSend[ContributionFields](contributionSqsSend) _
       currentDate = () => currentDatetime().toLocalDate
 
       validatorFor = DateValidator.validatorFor(currentDate, _: DateRule)
