@@ -1,6 +1,7 @@
 package com.gu.newproduct.api.addsubscription.email.voucher
 
 import java.time.LocalDate
+
 import com.gu.newproduct.TestData
 import com.gu.newproduct.api.addsubscription.email.{DataExtensionName, ETPayload}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.SubscriptionName
@@ -10,6 +11,7 @@ import com.gu.newproduct.api.productcatalog.{Plan, PlanDescription}
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import org.scalatest.{AsyncFlatSpec, Matchers}
+
 import scala.concurrent.Future
 
 class SendConfirmationEmailVoucherTest extends AsyncFlatSpec with Matchers {
@@ -19,7 +21,7 @@ class SendConfirmationEmailVoucherTest extends AsyncFlatSpec with Matchers {
       ()
     }
 
-    val send = SendConfirmationEmailVoucher(sqsSend, today) _
+    val send = SendConfirmationEmailVoucher(sqsSend) _
     send(Some(SfContactId("sfContactId")), testVoucherData).underlying map {
       result => result shouldBe ContinueProcessing(())
     }
@@ -33,7 +35,7 @@ class SendConfirmationEmailVoucherTest extends AsyncFlatSpec with Matchers {
 
     def sqsSend(payload: ETPayload[VoucherEmailData]): Future[Unit] = Future.successful(())
 
-    val send = SendConfirmationEmailVoucher(sqsSend, today) _
+    val send = SendConfirmationEmailVoucher(sqsSend) _
     send(Some(SfContactId("sfContactId")), noSoldToEmailVoucherData).underlying map {
       result => result shouldBe ReturnWithResponse(ApiGatewayResponse.internalServerError("some error"))
     }
@@ -43,14 +45,12 @@ class SendConfirmationEmailVoucherTest extends AsyncFlatSpec with Matchers {
 
     def sqsSend(payload: ETPayload[VoucherEmailData]): Future[Unit] = Future.failed(new RuntimeException("sqs error"))
 
-    val send = SendConfirmationEmailVoucher(sqsSend, today) _
+    val send = SendConfirmationEmailVoucher(sqsSend) _
 
     send(Some(SfContactId("sfContactId")), testVoucherData).underlying map {
       result => result shouldBe ReturnWithResponse(ApiGatewayResponse.internalServerError("some error"))
     }
   }
-
-  def today = () => LocalDate.of(2018, 8, 24)
 
   val testVoucherData = VoucherEmailData(
     plan = Plan(VoucherSunday, PlanDescription("Sunday")),

@@ -1,7 +1,5 @@
 package com.gu.newproduct.api.addsubscription.email.voucher
 
-import java.time.LocalDate
-
 import com.gu.newproduct.api.addsubscription.email.{DataExtensionName, ETPayload}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.util.Logging
@@ -15,7 +13,8 @@ import scala.concurrent.Future
 object SendConfirmationEmailVoucher extends Logging {
 
   def apply(
-    etSqsSend: ETPayload[VoucherEmailData] => Future[Unit])(
+    etSqsSend: ETPayload[VoucherEmailData] => Future[Unit]
+  )(
     sfContactId: Option[SfContactId],
     data: VoucherEmailData
   ): AsyncApiGatewayOp[Unit] = for {
