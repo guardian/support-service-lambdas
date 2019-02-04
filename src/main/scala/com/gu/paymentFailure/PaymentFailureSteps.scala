@@ -4,14 +4,15 @@ import com.gu.paymentFailure.GetPaymentData.PaymentFailureInformation
 import com.gu.stripeCustomerSourceUpdated.TypeConvert._
 import com.gu.util._
 import com.gu.util.apigateway.ApiGatewayHandler.Operation
-import com.gu.util.apigateway.ApiGatewayResponse.{ResponseBody, toJsonBody, unauthorized}
+import com.gu.util.apigateway.ApiGatewayResponse.unauthorized
 import com.gu.util.apigateway.Auth.{TrustedApiConfig, validTenant}
 import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.email.{EmailId, EmailMessage}
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.reader.Types._
-import com.gu.util.resthttp.Types.ClientFailableOp
+import com.gu.util.resthttp.Types.{ClientFailableOp, GenericError, UnderlyingOps}
 import com.gu.util.zuora.ZuoraGetInvoiceTransactions.InvoiceTransactionSummary
+import scalaz.\/
 
 object PaymentFailureSteps extends Logging {
 
@@ -20,28 +21,25 @@ object PaymentFailureSteps extends Logging {
   }
 
   def apply(
-    sendEmailRegardingAccount: (String, PaymentFailureInformation => EmailMessage) => ApiGatewayOp[Unit],
+    sendEmailRegardingAccount: (String, PaymentFailureInformation => String \/ EmailMessage) => ClientFailableOp[Unit],
     trustedApiConfig: TrustedApiConfig
   ): Operation = Operation.noHealthcheck({ apiGatewayRequest: ApiGatewayRequest =>
     (for {
       paymentFailureCallout <- apiGatewayRequest.bodyAsCaseClass[PaymentFailureCallout]()
+      _ <- paymentFailureCallout.email.toApiGatewayContinueProcessing(ApiGatewayResponse.badRequest("No email address provided"))
       _ = logger.info(s"received ${loggableData(paymentFailureCallout)}")
       _ <- validateTenantCallout(trustedApiConfig)(paymentFailureCallout.tenantId)
-      request <- makeRequest(paymentFailureCallout)
-      _ <- sendEmailRegardingAccount(paymentFailureCallout.accountId, request)
+      paymentFailureInformationToEmail = makeEmailMessage(paymentFailureCallout) _
+      _ <- sendEmailRegardingAccount(paymentFailureCallout.accountId, paymentFailureInformationToEmail).toApiGatewayOp(error => ApiGatewayResponse.messageResponse("500", error.message))
     } yield ApiGatewayResponse.successfulExecution).apiResponse
   })
 
-  def makeRequest(
+  def makeEmailMessage(
     paymentFailureCallout: PaymentFailureCallout
-  ): ApiGatewayOp[PaymentFailureInformation => EmailMessage] = {
-    val maybeEmailSendId = EmailId.paymentFailureId(paymentFailureCallout.failureNumber)
-    maybeEmailSendId.map { emailSendId => pFI: PaymentFailureInformation =>
-      ToMessage(paymentFailureCallout, pFI, emailSendId)
-    }.toApiGatewayContinueProcessing(
-      ApiGatewayResponse.internalServerError(s"no ET id configured for failure number: ${paymentFailureCallout.failureNumber}")
-    )
-  }
+  )(pFI: PaymentFailureInformation): String \/ EmailMessage = for {
+    emailSendId <- EmailId.paymentFailureId(paymentFailureCallout.failureNumber)
+    emailMessage <- ToMessage(paymentFailureCallout, pFI, emailSendId)
+  } yield emailMessage
 
   def validateTenantCallout(trustedApiConfig: TrustedApiConfig)(calloutTenantId: String): ApiGatewayOp[Unit] = {
     if (validTenant(trustedApiConfig, calloutTenantId)) ContinueProcessing(()) else ReturnWithResponse(unauthorized)
@@ -52,15 +50,14 @@ object PaymentFailureSteps extends Logging {
 object ZuoraEmailSteps {
 
   def sendEmailRegardingAccount(
-    sendEmail: EmailMessage => ApiGatewayOp[Unit],
+    sendEmail: EmailMessage => ClientFailableOp[Unit],
     getInvoiceTransactions: String => ClientFailableOp[InvoiceTransactionSummary]
-  )(accountId: String, toMessage: PaymentFailureInformation => EmailMessage): ApiGatewayOp[Unit] = {
+  )(accountId: String, toMessage: PaymentFailureInformation => String \/ EmailMessage): ClientFailableOp[Unit] = {
     for {
-      invoiceTransactionSummary <- getInvoiceTransactions(accountId).toApiGatewayOp("getInvoiceTransactions failed")
-      paymentInformation <- GetPaymentData(accountId)(invoiceTransactionSummary)
-      message = toMessage(paymentInformation)
-      _ <- sendEmail(message).mapResponse(resp =>
-        resp.copy(body = toJsonBody(ResponseBody(s"email not sent for account ${accountId}"))))
+      invoiceTransactionSummary <- getInvoiceTransactions(accountId)
+      paymentInformation <- GetPaymentData(accountId)(invoiceTransactionSummary).leftMap(GenericError(_)).toClientFailableOp
+      message <- toMessage(paymentInformation).leftMap(GenericError(_)).toClientFailableOp
+      _ <- sendEmail(message).withAmendedError(oldError => GenericError(s"email not sent for account ${accountId}, error: ${oldError.message}"))
     } yield ()
   }
 

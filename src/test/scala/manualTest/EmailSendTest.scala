@@ -1,10 +1,12 @@
 package manualTest
 
 import java.util.UUID
+
 import com.gu.effects.sqs.AwsSQSSend
 import com.gu.effects.sqs.AwsSQSSend.QueueName
 import com.gu.util.Logging
 import com.gu.util.email._
+import scalaz.\/-
 
 // run this to send a one off email to yourself.  the email will take a few mins to arrive, but it proves the ET logic works
 object EmailSendTest extends App with Logging {
@@ -38,7 +40,7 @@ object EmailSendTest extends App with Logging {
   val emailNames: Seq[EmailId] = (1 to 4)
     .map(EmailId.paymentFailureId)
     .collect {
-      case Some(emailName) => emailName
+      case \/-(emailName) => emailName
     }
     .:+(EmailId.cancelledId)
 

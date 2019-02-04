@@ -4,7 +4,10 @@ import com.gu.effects.sqs.AwsSQSSend.Payload
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.reader.Types._
+import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError}
 import play.api.libs.json.{Json, Writes, _}
+import scalaz.{-\/, \/, \/-}
+
 import scala.util.{Failure, Success, Try}
 
 case class ContactAttributesDef(SubscriberAttributes: SubscriberAttributesDef)
@@ -41,12 +44,12 @@ case class ToDef(Address: String, SubscriberKey: String, ContactAttributes: Cont
 case class EmailId(id: String) extends AnyVal
 
 object EmailId {
-  def paymentFailureId(i: Int) = i match {
-    case 1 => Some(EmailId("first-failed-payment-email"))
-    case 2 => Some(EmailId("second-failed-payment-email"))
-    case 3 => Some(EmailId("third-failed-payment-email"))
-    case 4 => Some(EmailId("fourth-failed-payment-email"))
-    case _ => None
+  def paymentFailureId(failureNumber: Int): String \/ EmailId = failureNumber match {
+    case 1 => \/-(EmailId("first-failed-payment-email"))
+    case 2 => \/-(EmailId("second-failed-payment-email"))
+    case 3 => \/-(EmailId("third-failed-payment-email"))
+    case 4 => \/-(EmailId("fourth-failed-payment-email"))
+    case _ => -\/(s"no Braze id configured for failure number: $failureNumber")
   }
   val cancelledId = EmailId("cancelled-payment-email")
 }
@@ -93,13 +96,13 @@ trait EmailSqsSerialisation {
 }
 
 object EmailSendSteps extends EmailSqsSerialisation {
-  def apply(sqsSend: Payload => Try[Unit])(emailRequest: EmailMessage): ApiGatewayOp[Unit] = {
+  def apply(sqsSend: Payload => Try[Unit])(emailRequest: EmailMessage): ClientFailableOp[Unit] = {
     sqsSend(Payload(Json.toJson(emailRequest).toString)) match {
       case Success(_) =>
-        ContinueProcessing(())
-      case Failure(_) =>
-        logger.error(s"failed to send $emailRequest to sqs queue")
-        ReturnWithResponse(ApiResponse("500", "failure to send email payload to sqs"))
+        ClientSuccess(())
+      case Failure(error) =>
+        logger.error(s"failed to send $emailRequest to sqs queue: ${error.getMessage}")
+        GenericError(s"failure to send email payload to sqs")
     }
   }
 

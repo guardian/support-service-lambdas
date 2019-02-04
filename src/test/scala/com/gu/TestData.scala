@@ -44,22 +44,6 @@ object TestData extends Matchers {
        |}
        |""".stripMargin
 
-  val internalServerErrorResponse =
-    """{
-       |"statusCode":"500",
-       |"headers":{"Content-Type":"application/json"},
-       |"body":"{\n  \"message\" : \"Internal server error\"\n}"
-       |}
-       |""".stripMargin
-
-  val emailFailureResponse =
-    """{
-      |"statusCode":"500",
-      |"headers":{"Content-Type":"application/json"},
-      |"body":"{\n  \"message\" : \"email not sent for account accountId\"\n}"
-      |}
-      |""".stripMargin
-
   implicit class JsonMatcher(private val actual: String) {
     def jsonMatches(expected: String) = {
       val expectedJson = Json.parse(expected)
