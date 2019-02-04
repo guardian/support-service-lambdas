@@ -4,11 +4,11 @@ import java.io.ByteArrayOutputStream
 
 import com.gu.TestData
 import com.gu.TestData._
+import com.gu.util.apigateway.ApiGatewayHandler
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
-import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayResponse}
 import com.gu.util.email._
-import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
-import com.gu.util.resthttp.Types.ClientSuccess
+import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
+import com.gu.util.resthttp.Types.{ClientSuccess, GenericError}
 import com.gu.util.zuora.ZuoraGetInvoiceTransactions.InvoiceTransactionSummary
 import org.scalatest.{FlatSpec, Matchers}
 import scalaz.\/-
@@ -24,7 +24,7 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
     responseString jsonMatches missingCredentialsResponse
   }
 
-  "lambda" should "return error if credentials don't match" in {
+  it should "return error if credentials don't match" in {
     val stream = getClass.getResourceAsStream("/paymentFailure/invalidCredentials.json")
     val os = new ByteArrayOutputStream()
     val op = Lambda.operationForEffects(\/-(TestData.fakeApiConfig), ContinueProcessing(basicOp()))
@@ -33,7 +33,7 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
     responseString jsonMatches missingCredentialsResponse
   }
 
-  "lambda" should "return an error if tenant id doesn't match" in {
+  it should "return an error if tenant id doesn't match" in {
     val stream = getClass.getResourceAsStream("/paymentFailure/invalidTenant.json")
     val os = new ByteArrayOutputStream()
     apiGatewayHandler(basicOp(), LambdaIO(stream, os, null))
@@ -41,7 +41,7 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
     responseString jsonMatches missingCredentialsResponse
   }
 
-  "lambda" should "enqueue email and return success for a valid request" in {
+  it should "enqueue email and return success for a valid request" in {
     //set up
     val stream = getClass.getResourceAsStream("/paymentFailure/validRequest.json")
     var storedReq: Option[EmailMessage] = None
@@ -53,7 +53,7 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
         ZuoraEmailSteps.sendEmailRegardingAccount(
           { message =>
             storedReq = Some(message)
-            ContinueProcessing(())
+            ClientSuccess(())
           },
           a => ClientSuccess(basicInvoiceTransactionSummary)
         ),
@@ -93,7 +93,33 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
     responseString jsonMatches successfulResponse
   }
 
-  "lambda" should "return error if no additional data is found in zuora" in {
+  it should "return error if no email is provided" in {
+    //set up
+    val stream = getClass.getResourceAsStream("/paymentFailure/missingEmail.json")
+    var storedReq: Option[EmailMessage] = None
+
+    val os = new ByteArrayOutputStream()
+    //execute
+    def configToFunction: Operation = {
+      PaymentFailureSteps.apply(
+        ZuoraEmailSteps.sendEmailRegardingAccount(
+          { message =>
+            storedReq = Some(message)
+            ClientSuccess(())
+          },
+          a => ClientSuccess(basicInvoiceTransactionSummary)
+        ),
+        TestData.fakeApiConfig
+      )
+    }
+    apiGatewayHandler(configToFunction, LambdaIO(stream, os, null))
+
+    //verify
+    val responseString = new String(os.toByteArray, "UTF-8")
+    responseString jsonMatches missingEmailResponse
+  }
+
+  it should "return error if no additional data is found in zuora" in {
     //set up
     val stream = getClass.getResourceAsStream("/paymentFailure/validRequest.json")
     val invoiceTransactionSummary = InvoiceTransactionSummary(List())
@@ -106,7 +132,7 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
     //verify
     val responseString = new String(os.toByteArray(), "UTF-8")
 
-    responseString jsonMatches internalServerErrorResponse
+    responseString jsonMatches couldNotFindDataForAccountResponse
   }
 
   def apiGatewayHandler: (Operation, LambdaIO) => Unit = {
@@ -116,14 +142,14 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
   def basicOp(fakeInvoiceTransactionSummary: InvoiceTransactionSummary = basicInvoiceTransactionSummary) = {
     PaymentFailureSteps.apply(
       ZuoraEmailSteps.sendEmailRegardingAccount(
-        sendEmail = _ => ReturnWithResponse(ApiGatewayResponse.internalServerError("something failed!")),
+        sendEmail = _ => GenericError("something failed!"),
         getInvoiceTransactions = _ => ClientSuccess(fakeInvoiceTransactionSummary)
       ),
       TestData.fakeApiConfig
     )
   }
 
-  "lambda" should "return error if message can't be queued" in {
+  it should "return error if message can't be queued" in {
     //set up
     val stream = getClass.getResourceAsStream("/paymentFailure/validRequest.json")
 
@@ -136,7 +162,7 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
         ZuoraEmailSteps.sendEmailRegardingAccount(
           { emailMessage =>
             storedReq = Some(emailMessage)
-            ReturnWithResponse(ApiGatewayResponse.internalServerError("something failed!"))
+            GenericError("something failed!")
           },
           _ => ClientSuccess(basicInvoiceTransactionSummary)
         ),
@@ -153,5 +179,29 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
 
     responseString jsonMatches emailFailureResponse
   }
+
+  val couldNotFindDataForAccountResponse =
+    """{
+      |"statusCode":"500",
+      |"headers":{"Content-Type":"application/json"},
+      |"body":"{\n  \"message\" : \"Could not retrieve additional data for account accountId\"\n}"
+      |}
+      |""".stripMargin
+
+  val missingEmailResponse =
+    """{
+      |"statusCode":"400",
+      |"headers":{"Content-Type":"application/json"},
+      |"body":"{\n  \"message\" : \"Bad request: No email address provided\"\n}"
+      |}
+      |""".stripMargin
+
+  val emailFailureResponse =
+    """{
+      |"statusCode":"500",
+      |"headers":{"Content-Type":"application/json"},
+      |"body":"{\n  \"message\" : \"email not sent for account accountId, error: something failed!\"\n}"
+      |}
+      |""".stripMargin
 
 }

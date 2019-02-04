@@ -1,11 +1,11 @@
 package com.gu.autoCancel
 
-import play.api.libs.json.Json
+import play.api.libs.json.{JsResult, JsValue, Json, Reads}
 
 case class AutoCancelCallout(
   accountId: String,
   autoPay: String,
-  email: String,
+  email: Option[String],
   firstName: String,
   lastName: String,
   paymentMethodType: String,
@@ -21,5 +21,17 @@ case class AutoCancelCallout(
 }
 
 object AutoCancelCallout {
-  implicit val jf = Json.reads[AutoCancelCallout]
+
+  implicit val NoneForEmptyStringEMailReads: Reads[AutoCancelCallout] = new Reads[AutoCancelCallout] {
+
+    val standardReads = Json.reads[AutoCancelCallout]
+
+    override def reads(json: JsValue): JsResult[AutoCancelCallout] = standardReads.reads(json).map {
+      parsedCallout =>
+        parsedCallout.email match {
+          case Some("") => parsedCallout.copy(email = None)
+          case _ => parsedCallout
+        }
+    }
+  }
 }
