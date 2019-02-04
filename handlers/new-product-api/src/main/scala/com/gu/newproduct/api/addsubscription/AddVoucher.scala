@@ -65,12 +65,10 @@ object AddVoucher {
     isValidStartDateForPlan: (PlanId, LocalDate) => ValidationResult[Unit],
     createSubscription: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName],
     awsSQSSend: QueueName => AwsSQSSend.Payload => Future[Unit],
-    emailQueueNames: EmailQueueNames,
-    currentDate: () => LocalDate
-  ): AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName] = {
+    emailQueueNames: EmailQueueNames): AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName] = {
     val voucherSqsSend = awsSQSSend(emailQueueNames.voucher)
     val voucherEtSqsSend = EtSqsSend[VoucherEmailData](voucherSqsSend) _
-    val sendVoucherEmail = SendConfirmationEmailVoucher(voucherEtSqsSend, currentDate) _
+    val sendVoucherEmail = SendConfirmationEmailVoucher(voucherEtSqsSend) _
     val getZuoraIdForVoucherPlan = zuoraIds.voucherZuoraIds.byApiPlanId.get _
     val getVoucherData = getValidatedVoucherCustomerData(zuoraClient)
     steps(

@@ -99,8 +99,7 @@ object Steps {
         isValidStartDateForPlan,
         createSubscription,
         awsSQSSend,
-        queueNames,
-        currentDate
+        queueNames
       )
 
       addSubSteps = handleRequest(

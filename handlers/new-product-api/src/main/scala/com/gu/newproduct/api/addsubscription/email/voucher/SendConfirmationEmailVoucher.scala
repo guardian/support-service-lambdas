@@ -15,9 +15,7 @@ import scala.concurrent.Future
 object SendConfirmationEmailVoucher extends Logging {
 
   def apply(
-    etSqsSend: ETPayload[VoucherEmailData] => Future[Unit],
-    getCurrentDate: () => LocalDate
-  )(
+    etSqsSend: ETPayload[VoucherEmailData] => Future[Unit])(
     sfContactId: Option[SfContactId],
     data: VoucherEmailData
   ): AsyncApiGatewayOp[Unit] = for {
