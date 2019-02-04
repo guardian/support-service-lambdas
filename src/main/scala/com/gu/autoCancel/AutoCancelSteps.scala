@@ -40,14 +40,14 @@ object AutoCancelSteps extends Logging {
       acRequest <- autoCancelFilter(autoCancelCallout).withLogging(s"auto-cancellation filter for ${autoCancelCallout.accountId}")
       _ <- autoCancel(acRequest).withLogging(s"auto-cancellation for ${autoCancelCallout.accountId}")
       request = makeRequest(autoCancelCallout) _
-      _ <- toSuccessApiResponse(sendEmailRegardingAccount(autoCancelCallout.accountId, request))
+      _ <- logErrorsAndContinueProcessing(sendEmailRegardingAccount(autoCancelCallout.accountId, request))
     } yield ApiGatewayResponse.successfulExecution).apiResponse
   })
 
-  def makeRequest(autoCancelCallout: AutoCancelCallout)(pFI: PaymentFailureInformation): String \/ EmailMessage =
-    ToMessage(autoCancelCallout, pFI, EmailId.cancelledId)
+  def makeRequest(autoCancelCallout: AutoCancelCallout)(paymentFailureInformation: PaymentFailureInformation): String \/ EmailMessage =
+    ToMessage(autoCancelCallout, paymentFailureInformation, EmailId.cancelledId)
 
-  def toSuccessApiResponse(clientFailableOp: ClientFailableOp[Unit]): ContinueProcessing[Unit] = clientFailableOp match {
+  def logErrorsAndContinueProcessing(clientFailableOp: ClientFailableOp[Unit]): ContinueProcessing[Unit] = clientFailableOp match {
     case e: ClientFailure =>
       logger.warn(s"ignored error: ${e.message}")
       ContinueProcessing(())
