@@ -1,9 +1,11 @@
 package com.gu.newproduct.api.productcatalog
 
 import java.time.DayOfWeek
-import java.time.DayOfWeek.{MONDAY, SATURDAY, SUNDAY}
+import java.time.DayOfWeek.{_}
+
 import com.gu.newproduct.api.addsubscription.Formatters._
 import com.gu.newproduct.api.productcatalog.PlanId._
+import com.gu.newproduct.api.productcatalog.WireModel.Tuesday
 
 object NewProductApi {
   def catalog(priceFor: PlanId => Option[AmountMinorUnits]): Catalog = {
@@ -24,6 +26,26 @@ object NewProductApi {
     val voucherSundayDateRules = voucherDateRules(List(SUNDAY))
     val voucherSaturdayDateRules = voucherDateRules(List(SATURDAY))
 
+    val homeDeliveryWindowRule = WindowRule(
+      maybeCutOffDay = None,
+      maybeStartDelay = Some(DelayDays(3)),
+      maybeSize = Some(WindowSizeDays(28))
+    )
+
+    def homeDeliveryDateRules(allowedDays: Option[List[DayOfWeek]]) = StartDateRules(allowedDays.map(DaysOfWeekRule), Some(homeDeliveryWindowRule))
+
+    val homeDeliveryEveryDayRules = homeDeliveryDateRules(None)
+    val weekDays = List(
+      MONDAY,
+      TUESDAY,
+      WEDNESDAY,
+      THURSDAY,
+      FRIDAY
+    )
+
+    val homeDeliverySixDayRules = homeDeliveryDateRules(Some(weekDays ++ List(SATURDAY)))
+    val homeDeliverySundayDateRules = homeDeliveryDateRules(Some(List(SUNDAY)))
+    val homeDeliveryWeekendRules = homeDeliveryDateRules(Some(List(SATURDAY, SUNDAY)))
     val monthlyContributionWindow = WindowRule(
       maybeSize = Some(WindowSizeDays(1)),
       maybeCutOffDay = None,
@@ -50,6 +72,11 @@ object NewProductApi {
       voucherSundayPlus = planWithPayment(VoucherSundayPlus, PlanDescription("Sunday+"), voucherSundayDateRules),
       monthlyContribution = planWithPayment(MonthlyContribution, PlanDescription("Monthly"), contributionRules),
       annualContribution = planWithPayment(AnnualContribution, PlanDescription("Annual"), contributionRules),
+
+      homeDeliveryEveryDay = planWithPayment(HomeDeliveryEveryDay, PlanDescription("Everyday"), homeDeliveryEveryDayRules),
+      homeDeliverySunday = planWithPayment(HomeDeliverySunday, PlanDescription("Sunday"), homeDeliverySundayDateRules),
+      homeDeliverySixDay = planWithPayment(HomeDeliverySixday, PlanDescription("Sixday"), homeDeliverySixDayRules),
+      homeDeliveryWeekend = planWithPayment(HomeDeliveryWeekend, PlanDescription("Weekend"), homeDeliveryWeekendRules),
     )
   }
 

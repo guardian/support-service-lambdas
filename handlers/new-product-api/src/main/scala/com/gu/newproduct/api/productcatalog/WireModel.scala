@@ -123,7 +123,17 @@ object WireModel {
           WirePlanInfo.fromPlan(catalog.annualContribution)
         )
       )
-      WireCatalog(List(contributionProduct, voucherProduct))
+
+      val homeDeliveryProduct = WireProduct(
+        label = "Home delivery",
+        plans = List(
+          WirePlanInfo.fromPlan(catalog.homeDeliveryEveryDay),
+          WirePlanInfo.fromPlan(catalog.homeDeliverySixDay),
+          WirePlanInfo.fromPlan(catalog.homeDeliverySunday),
+          WirePlanInfo.fromPlan(catalog.homeDeliveryWeekend)
+        )
+      )
+      WireCatalog(List(contributionProduct, voucherProduct, homeDeliveryProduct))
     }
   }
 
