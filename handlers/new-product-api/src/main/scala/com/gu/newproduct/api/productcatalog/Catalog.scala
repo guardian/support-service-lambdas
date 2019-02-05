@@ -73,7 +73,7 @@ object PlanId {
 
   case object HomeDeliveryEveryDay extends PlanId("home_delivery_everyday") with HomeDeliveryPlanId
 
-  case object HomeDeliverySixday extends PlanId("home_delivery_sixday") with HomeDeliveryPlanId
+  case object HomeDeliverySixDay extends PlanId("home_delivery_sixday") with HomeDeliveryPlanId
 
   case object HomeDeliveryWeekend extends PlanId("home_delivery_weekend") with HomeDeliveryPlanId
 
@@ -93,7 +93,7 @@ object PlanId {
     VoucherSaturdayPlus,
     VoucherSundayPlus,
     HomeDeliveryEveryDay,
-    HomeDeliverySixday,
+    HomeDeliverySixDay,
     HomeDeliveryWeekend,
     HomeDeliverySunday
   )

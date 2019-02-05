@@ -4,6 +4,7 @@ import com.gu.newproduct.api.productcatalog.PlanId._
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.config.Stage
 import com.gu.util.reader.Types.{ApiGatewayOp, OptionOps}
+
 object ZuoraIds {
 
   case class ProductRatePlanId(value: String) extends AnyVal
@@ -48,7 +49,24 @@ object ZuoraIds {
 
   }
 
-  case class ZuoraIds(contributionsZuoraIds: ContributionsZuoraIds, voucherZuoraIds: VoucherZuoraIds)
+  case class HomeDeliveryZuoraIds(
+    everyday: ProductRatePlanId,
+    sunday: ProductRatePlanId,
+    weekend: ProductRatePlanId,
+    sixDay: ProductRatePlanId
+  ) {
+    val byApiPlanId: Map[PlanId, ProductRatePlanId] = Map(
+      HomeDeliveryEveryDay -> everyday,
+      HomeDeliveryWeekend -> weekend,
+      HomeDeliverySixDay -> sixDay,
+      HomeDeliverySunday -> sunday,
+    )
+
+    val zuoraIdToPlanid = byApiPlanId.map(_.swap)
+
+  }
+
+  case class ZuoraIds(contributionsZuoraIds: ContributionsZuoraIds, voucherZuoraIds: VoucherZuoraIds, homeDeliveryZuoraIds: HomeDeliveryZuoraIds)
 
   def zuoraIdsForStage(stage: Stage): ApiGatewayOp[ZuoraIds] = {
     val mappings = Map(
@@ -75,6 +93,17 @@ object ZuoraIds {
           saturdayPlus = ProductRatePlanId("2c92a0fd6205707201621fa1350710e3"),
           weekendPlus = ProductRatePlanId("2c92a0fd56fe26b60157040cdd323f76"),
           sixDayPlus = ProductRatePlanId("2c92a0fc56fe26ba0157040c5ea17f6a")
+        ),
+        HomeDeliveryZuoraIds(
+          everyday = ProductRatePlanId("2c92a0fd560d13880156136b72e50f0c"),
+          sixDay = ProductRatePlanId("2c92a0ff560d311b0156136f2afe5315"),
+          weekend = ProductRatePlanId("2c92a0fd5614305c01561dc88f3275be"),
+          sunday = ProductRatePlanId("2c92a0ff5af9b657015b0fea5b653f81")
+
+          //sunday+ 2c92a0fd560d13880156136b8e490f8b
+          //weekend+ 2c92a0ff560d311b0156136b9f5c3968
+          //sixday+ 2c92a0ff560d311b0156136b697438a9
+          //everyday+ 2c92a0fd560d132301560e43cf041a3c
         )
       ),
       Stage("CODE") -> ZuoraIds(
@@ -99,6 +128,17 @@ object ZuoraIds {
           saturdayPlus = ProductRatePlanId("2c92c0f961f9cf350161fc0454283f3e"),
           weekendPlus = ProductRatePlanId("2c92c0f855c9f4b20155d9f1dd0651ab"),
           sixDayPlus = ProductRatePlanId("2c92c0f855c9f4540155da2607db6402")
+        ),
+        HomeDeliveryZuoraIds(
+          everyday = ProductRatePlanId("2c92c0f955ca02900155da27f55b2d5f"),
+          sixDay = ProductRatePlanId("2c92c0f955ca02900155da27ff142e01"),
+          weekend = ProductRatePlanId("2c92c0f955ca02900155da27f83c2d9b"),
+          sunday = ProductRatePlanId("2c92c0f95aff3b54015b0ede33bc04f2")
+
+          //sunday+ 2c92c0f955ca02900155da27f4872d4d
+          //weekend+ 2c92c0f955ca02900155da27f9402dad
+          //sixday+ 2c92c0f955ca02900155da27f29e2d13
+          //everyday+ 2c92c0f955ca02900155da2803b02e33
         )
       ),
       Stage("DEV") -> ZuoraIds(
@@ -123,7 +163,17 @@ object ZuoraIds {
           saturdayPlus = ProductRatePlanId("2c92c0f961f9cf300161fc44f2661258"),
           weekendPlus = ProductRatePlanId("2c92c0f95aff3b54015b1047efaa2ac3"),
           sixDayPlus = ProductRatePlanId("2c92c0f855c3b8190155c585a95e6f5a")
+        ),
+        HomeDeliveryZuoraIds(
+          everyday = ProductRatePlanId("2c92c0f955c3cf0f0155c5d9e2493c43"),
+          sixDay = ProductRatePlanId("2c92c0f955c3cf0f0155c5d9ddf13bc5"),
+          weekend = ProductRatePlanId("2c92c0f955c3cf0f0155c5d9df433bf7"),
+          sunday = ProductRatePlanId("2c92c0f85aff3453015b1041dfd2317f")
 
+          //sunday+ 2c92c0f955c3cf0f0155c5d9e83a3cb7
+          //weekend+ 2c92c0f95aff3b56015b104aa9a13ea5
+          //sixday+ 2c92c0f85aff33ff015b1042d4ba0a05
+          //everyday+ 2c92c0f85aff3453015b10496b5e3d17
         )
       )
     )

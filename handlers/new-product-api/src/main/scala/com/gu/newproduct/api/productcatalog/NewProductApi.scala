@@ -75,7 +75,7 @@ object NewProductApi {
 
       homeDeliveryEveryDay = planWithPayment(HomeDeliveryEveryDay, PlanDescription("Everyday"), homeDeliveryEveryDayRules),
       homeDeliverySunday = planWithPayment(HomeDeliverySunday, PlanDescription("Sunday"), homeDeliverySundayDateRules),
-      homeDeliverySixDay = planWithPayment(HomeDeliverySixday, PlanDescription("Sixday"), homeDeliverySixDayRules),
+      homeDeliverySixDay = planWithPayment(HomeDeliverySixDay, PlanDescription("Sixday"), homeDeliverySixDayRules),
       homeDeliveryWeekend = planWithPayment(HomeDeliveryWeekend, PlanDescription("Weekend"), homeDeliveryWeekendRules),
     )
   }

@@ -272,7 +272,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
       case AnnualContribution => None
       case HomeDeliveryEveryDay => Some(AmountMinorUnits(123))
       case HomeDeliverySunday => Some(AmountMinorUnits(321))
-      case HomeDeliverySixday => Some(AmountMinorUnits(777))
+      case HomeDeliverySixDay => Some(AmountMinorUnits(777))
       case HomeDeliveryWeekend => Some(AmountMinorUnits(888))
     }
 
