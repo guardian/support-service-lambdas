@@ -11,6 +11,7 @@ import com.gu.util.email.{EmailId, EmailMessage}
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.Types.{ClientFailableOp, GenericError, UnderlyingOps}
+import com.gu.util.zuora.ZuoraGetAccountSummary.ZuoraAccount.AccountId
 import com.gu.util.zuora.ZuoraGetInvoiceTransactions.InvoiceTransactionSummary
 import scalaz.\/
 
@@ -24,9 +25,10 @@ object PaymentFailureSteps extends Logging {
     sendEmailRegardingAccount: (String, PaymentFailureInformation => String \/ EmailMessage) => ClientFailableOp[Unit],
     trustedApiConfig: TrustedApiConfig
   ): Operation = Operation.noHealthcheck({ apiGatewayRequest: ApiGatewayRequest =>
+
     (for {
       paymentFailureCallout <- apiGatewayRequest.bodyAsCaseClass[PaymentFailureCallout]()
-      _ <- paymentFailureCallout.email.toApiGatewayContinueProcessing(ApiGatewayResponse.badRequest("No email address provided"))
+      _ <- paymentFailureCallout.email.toApiGatewayContinueProcessing(noEmailResponse(paymentFailureCallout.accountId))
       _ = logger.info(s"received ${loggableData(paymentFailureCallout)}")
       _ <- validateTenantCallout(trustedApiConfig)(paymentFailureCallout.tenantId)
       paymentFailureInformationToEmail = makeEmailMessage(paymentFailureCallout) _
@@ -45,6 +47,10 @@ object PaymentFailureSteps extends Logging {
     if (validTenant(trustedApiConfig, calloutTenantId)) ContinueProcessing(()) else ReturnWithResponse(unauthorized)
   }
 
+  def noEmailResponse(accountId: String) = {
+    logger.warn(s"No email address provided for account $accountId, skipping execution and returning success")
+    ApiGatewayResponse.messageResponse("200", "Email address not provided, email will not be sent")
+  }
 }
 
 object ZuoraEmailSteps {

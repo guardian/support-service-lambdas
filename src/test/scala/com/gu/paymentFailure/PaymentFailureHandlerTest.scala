@@ -93,7 +93,7 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
     responseString jsonMatches successfulResponse
   }
 
-  it should "return error if no email is provided" in {
+  it should "return 200 response with warning message if no email is provided" in {
     //set up
     val stream = getClass.getResourceAsStream("/paymentFailure/missingEmail.json")
     var storedReq: Option[EmailMessage] = None
@@ -190,9 +190,9 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
 
   val missingEmailResponse =
     """{
-      |"statusCode":"400",
+      |"statusCode":"200",
       |"headers":{"Content-Type":"application/json"},
-      |"body":"{\n  \"message\" : \"Bad request: No email address provided\"\n}"
+      |"body":"{\n  \"message\" : \"Email address not provided, email will not be sent\"\n}"
       |}
       |""".stripMargin
 
