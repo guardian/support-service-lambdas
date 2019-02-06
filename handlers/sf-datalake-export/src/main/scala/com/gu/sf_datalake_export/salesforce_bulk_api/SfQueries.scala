@@ -155,7 +155,7 @@ object SfQueries {
   //TODO BillingAccount__c doesn't exist ?
   val accounts =
     """
-    select
+   |SELECT
    |Description,
    |Fax,
    |Id,
@@ -165,51 +165,29 @@ object SfQueries {
    |Zuora__Active__c,
    |BillingCity,
    |BillingCountry,
-   |BillingGeocodeAccuracy,
    |BillingLatitude,
    |BillingLongitude,
    |BillingState,
    |BillingStreet,
    |BillingPostalCode,
+   |BillingAccount__c,
    |CreatedById,
    |CreatedDate,
    |Zuora__CustomerPriority__c,
    |IsDeleted,
-   |NumberOfEmployees,
-   |Industry,
-   |JigsawCompanyId,
-   |LastActivityDate,
-   |LastModifiedById,
-   |LastModifiedDate,
-   |LastReferencedDate,
-   |LastViewedDate,
-   |MasterRecordId,
-   |Zuora__NumberofLocations__c,
    |OwnerId,
    |ParentId,
    |Person_Contact__c,
-   |PhotoUrl,
-   |RecordTypeId,
    |ShippingCity,
    |ShippingCountry,
-   |ShippingGeocodeAccuracy,
    |ShippingLatitude,
    |ShippingLongitude,
    |ShippingState,
    |ShippingStreet,
-   |ShippingPostalCode,
-   |Zuora__SLA__c,
-   |Zuora__SLAExpirationDate__c,
-   |Zuora__SLASerialNumber__c,
-   |SYS_LastName__c,
-   |SYS_Auto_Created__c,
-   |SYS_FirstName__c,
-   |SystemModstamp,
-   |Zuora__UpsellOpportunity__c,
-   |Website
-   |from
+   |ShippingPostalCode
+   |FROM
    |Account
-   |where
+   |WHERE
    |GDPR_Deletion_Pending__c = false
     """.stripMargin
 
