@@ -5,7 +5,6 @@ import java.time.DayOfWeek.{_}
 
 import com.gu.newproduct.api.addsubscription.Formatters._
 import com.gu.newproduct.api.productcatalog.PlanId._
-import com.gu.newproduct.api.productcatalog.WireModel.Tuesday
 
 object NewProductApi {
   def catalog(priceFor: PlanId => Option[AmountMinorUnits]): Catalog = {
@@ -72,11 +71,14 @@ object NewProductApi {
       voucherSundayPlus = planWithPayment(VoucherSundayPlus, PlanDescription("Sunday+"), voucherSundayDateRules),
       monthlyContribution = planWithPayment(MonthlyContribution, PlanDescription("Monthly"), contributionRules),
       annualContribution = planWithPayment(AnnualContribution, PlanDescription("Annual"), contributionRules),
-
       homeDeliveryEveryDay = planWithPayment(HomeDeliveryEveryDay, PlanDescription("Everyday"), homeDeliveryEveryDayRules),
       homeDeliverySunday = planWithPayment(HomeDeliverySunday, PlanDescription("Sunday"), homeDeliverySundayDateRules),
       homeDeliverySixDay = planWithPayment(HomeDeliverySixDay, PlanDescription("Sixday"), homeDeliverySixDayRules),
       homeDeliveryWeekend = planWithPayment(HomeDeliveryWeekend, PlanDescription("Weekend"), homeDeliveryWeekendRules),
+      homeDeliveryEveryDayPlus = planWithPayment(HomeDeliveryEveryDay, PlanDescription("Everyday+"), homeDeliveryEveryDayRules),
+      homeDeliverySundayPlus = planWithPayment(HomeDeliverySunday, PlanDescription("Sunday+"), homeDeliverySundayDateRules),
+      homeDeliverySixDayPlus = planWithPayment(HomeDeliverySixDay, PlanDescription("Sixday+"), homeDeliverySixDayRules),
+      homeDeliveryWeekendPlus = planWithPayment(HomeDeliveryWeekend, PlanDescription("Weekend+"), homeDeliveryWeekendRules)
     )
   }
 
