@@ -130,7 +130,11 @@ object WireModel {
           WirePlanInfo.fromPlan(catalog.homeDeliveryEveryDay),
           WirePlanInfo.fromPlan(catalog.homeDeliverySixDay),
           WirePlanInfo.fromPlan(catalog.homeDeliverySunday),
-          WirePlanInfo.fromPlan(catalog.homeDeliveryWeekend)
+          WirePlanInfo.fromPlan(catalog.homeDeliveryWeekend),
+          WirePlanInfo.fromPlan(catalog.homeDeliveryEveryDayPlus),
+          WirePlanInfo.fromPlan(catalog.homeDeliverySixDayPlus),
+          WirePlanInfo.fromPlan(catalog.homeDeliverySundayPlus),
+          WirePlanInfo.fromPlan(catalog.homeDeliverySundayPlus)
         )
       )
       WireCatalog(List(contributionProduct, voucherProduct, homeDeliveryProduct))
