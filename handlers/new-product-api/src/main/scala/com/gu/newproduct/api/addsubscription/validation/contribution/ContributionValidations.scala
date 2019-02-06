@@ -18,7 +18,7 @@ object ContributionValidations {
     limitsFor: (PlanId, Currency) => AmountLimits
   )(
     validatableFields: ValidatableFields,
-    planId:PlanId,
+    planId: PlanId,
     currency: Currency
   ): ValidationResult[AmountMinorUnits] =
     for {

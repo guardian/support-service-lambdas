@@ -60,7 +60,7 @@ class ContributionStepsTest extends FlatSpec with Matchers {
       ContinueProcessing(()).toAsync
     }
 
-    def fakeValidateRequest(fields: ValidatableFields, planId:PlanId, currency: Currency) = {
+    def fakeValidateRequest(fields: ValidatableFields, planId: PlanId, currency: Currency) = {
       fields.amountMinorUnits.map(Passed(_)).getOrElse(Failed("missing amount"))
     }
 
@@ -80,7 +80,7 @@ class ContributionStepsTest extends FlatSpec with Matchers {
     implicit val format: OFormat[ExpectedOut] = Json.format[ExpectedOut]
     val expectedOutput = ExpectedOut("well done")
 
-    val fakeAddContributionSteps = Steps.addContributionSteps(
+    val fakeAddContributionSteps = AddContribution.steps(
       getPlanAndCharge,
       fakeGetCustomerData,
       fakeValidateRequest,

@@ -76,7 +76,7 @@ class VoucherStepsTest extends FlatSpec with Matchers {
     def fakeSendEmail(sfContactId: Option[SfContactId], voucherEmailData: VoucherEmailData) = ContinueProcessing(()).toAsync
 
     def fakeGetPlan(planId: PlanId) = Plan(VoucherEveryDay, PlanDescription("Everyday"))
-    val fakeAddVoucherSteps = Steps.addVoucherSteps(
+    val fakeAddVoucherSteps = AddVoucher.steps(
       fakeGetPlan,
       fakeGetZuoraId,
       fakeGetVoucherCustomerData,

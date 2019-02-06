@@ -78,7 +78,6 @@ object ToMessage {
       case None => -\/(s"Cannot create email message: no email address associated with accountId: ${callout.accountId} and sfContactId: ${callout.sfContactId}")
     }
 
-
   val currencySymbol = Map("GBP" -> "£", "AUD" -> "$", "EUR" -> "€", "USD" -> "$", "CAD" -> "$", "NZD" -> "$")
 
   val decimalFormat = new DecimalFormat("###,###.00")

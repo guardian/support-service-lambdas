@@ -4,7 +4,7 @@ import java.time.LocalDate
 
 import com.gu.effects.sqs.AwsSQSSend
 import com.gu.i18n.Country
-import com.gu.newproduct.api.addsubscription.Steps.emailQueuesFor
+import com.gu.newproduct.api.EmailQueueNames.emailQueuesFor
 import com.gu.newproduct.api.addsubscription.email.EtSqsSend
 import com.gu.newproduct.api.addsubscription.email.voucher.{SendConfirmationEmailVoucher, VoucherEmailData}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.SubscriptionName
@@ -73,15 +73,13 @@ object SendVoucherEmailsManualTest {
     )
   }
 
-  val fakeDate = LocalDate.of(2018, 8, 10)
-
   def main(args: Array[String]): Unit = {
     val result = for {
       email <- args.headOption.map(Email.apply)
       queueName = emailQueuesFor(Stage("PROD")).voucher
       sqsSend = AwsSQSSend(queueName) _
       voucherSqsSend = EtSqsSend[VoucherEmailData](sqsSend) _
-      sendConfirmationEmail = SendConfirmationEmailVoucher(voucherSqsSend, () => fakeDate) _
+      sendConfirmationEmail = SendConfirmationEmailVoucher(voucherSqsSend) _
       data = fakeVoucherEmailData(email)
       sendResult = sendConfirmationEmail(Some(SfContactId("sfContactId")), fakeVoucherEmailData(email))
     } yield sendResult
