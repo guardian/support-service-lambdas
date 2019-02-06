@@ -14,8 +14,7 @@ import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.Subscripti
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.WireModel.{WireCreateRequest, WireSubscription}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAccount
 import com.gu.newproduct.api.addsubscription.zuora._
-import com.gu.newproduct.api.productcatalog.PlanId.{AnnualContribution, MonthlyContribution}
-import com.gu.newproduct.api.productcatalog._
+import com.gu.newproduct.api.productcatalog.{ContributionPlanId, _}
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
@@ -38,17 +37,17 @@ object Handler extends Logging {
 }
 
 object Steps {
-
   def handleRequest(
     addContribution: AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName],
-    addVoucher: AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName]
+    addPaperSub: AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName]
   )(
     apiGatewayRequest: ApiGatewayRequest
   ): Future[ApiResponse] = (for {
     request <- apiGatewayRequest.bodyAsCaseClass[AddSubscriptionRequest]().withLogging("parsed request").toAsync
     subscriptionName <- request.planId match {
-      case MonthlyContribution | AnnualContribution => addContribution(request)
-      case _ => addVoucher(request)
+      case _: ContributionPlanId => addContribution(request)
+      case _: VoucherPlanId  => addPaperSub(request)
+      case _: HomeDeliveryPlanId => addPaperSub(request)
     }
   } yield ApiGatewayResponse(body = AddedSubscription(subscriptionName.value), statusCode = "200")).apiResponse
 
@@ -70,7 +69,7 @@ object Steps {
       currentDate = () => currentDatetime().toLocalDate
 
       validatorFor = DateValidator.validatorFor(currentDate, _: DateRule)
-      zuoraToPlanId = zuoraIds.voucherZuoraIds.zuoraIdToPlanid.get _
+      zuoraToPlanId = (zuoraIds.voucherZuoraIds.zuoraIdToPlanid ++ zuoraIds.homeDeliveryZuoraIds.zuoraIdToPlanid).get _
       zuoraEnv = ZuoraEnvironment.EnvForStage(stage)
       plansWithPrice <- PricesFromZuoraCatalog(zuoraEnv, fetchString, zuoraToPlanId).toApiGatewayOp("get prices from zuora catalog")
       catalog = NewProductApi.catalog(plansWithPrice.get)
@@ -92,7 +91,7 @@ object Steps {
         currentDate
       )
 
-      voucherSteps = AddVoucher.wireSteps(
+      paperSteps = AddPaperSub.wireSteps(
         catalog,
         zuoraIds,
         zuoraClient,
@@ -104,7 +103,7 @@ object Steps {
 
       addSubSteps = handleRequest(
         addContribution = contributionSteps,
-        addVoucher = voucherSteps
+        addPaperSub = paperSteps
       ) _
 
       configuredOp = Operation.async(

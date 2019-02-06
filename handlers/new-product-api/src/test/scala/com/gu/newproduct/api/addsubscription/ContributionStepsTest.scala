@@ -88,12 +88,12 @@ class ContributionStepsTest extends FlatSpec with Matchers {
       fakeSendEmails
     ) _
 
-    val dummyVoucherSteps = (req: AddSubscriptionRequest) => {
+    val dummyPaperSteps = (req: AddSubscriptionRequest) => {
       fail("unexpected execution of voucher steps while processing contribution request!")
     }
     val futureActual = Steps.handleRequest(
       addContribution = fakeAddContributionSteps,
-      addVoucher = dummyVoucherSteps
+      addPaperSub = dummyPaperSteps
     )(ApiGatewayRequest(None, Some(Json.stringify(requestInput)), None, None))
 
     val actual = Await.result(futureActual, 30 seconds)
