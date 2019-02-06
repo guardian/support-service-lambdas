@@ -1,10 +1,10 @@
-package com.gu.newproduct.api.addsubscription.validation.voucher
+package com.gu.newproduct.api.addsubscription.validation.paper
 
 import com.gu.i18n.Country
 import com.gu.newproduct.api.addsubscription.validation.{Failed, Passed, ValidationResult}
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.Contacts
 
-object ValidateContactsForVoucher {
+object ValidateContactsForPaper {
   def apply(contacts: Contacts): ValidationResult[Contacts] = {
     if (contacts.soldTo.address.country == Country.UK)
       Passed(contacts)

@@ -8,7 +8,7 @@ import play.api.libs.json.Json
 class CatalogWireTest extends FlatSpec with Matchers {
   it should "serialise catalog" in {
     val expected =
-          """
+      """
           {
      |  "products": [
      |    {

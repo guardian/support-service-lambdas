@@ -10,7 +10,7 @@ import Scalaz._
 import scala.util.Try
 
 case class ZuoraAccountId(value: String) extends AnyVal
-
+//todo this should have an optional delivery instructions field for use with home delivery
 case class AddSubscriptionRequest(
   zuoraAccountId: ZuoraAccountId,
   startDate: LocalDate,

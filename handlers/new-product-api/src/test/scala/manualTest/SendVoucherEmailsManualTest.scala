@@ -6,7 +6,7 @@ import com.gu.effects.sqs.AwsSQSSend
 import com.gu.i18n.Country
 import com.gu.newproduct.api.EmailQueueNames.emailQueuesFor
 import com.gu.newproduct.api.addsubscription.email.EtSqsSend
-import com.gu.newproduct.api.addsubscription.email.voucher.{SendConfirmationEmailVoucher, VoucherEmailData}
+import com.gu.newproduct.api.addsubscription.email.paper.{SendPaperConfirmationEmail, PaperEmailData}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.SubscriptionName
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts._
@@ -57,7 +57,7 @@ object SendVoucherEmailsManualTest {
 
     val randomSubName = "T-" + Random.alphanumeric.take(10).mkString
 
-    VoucherEmailData(
+    PaperEmailData(
       plan = Plan(VoucherEveryDayPlus, PlanDescription("Everyday+"), StartDateRules(), Some(PaymentPlan("GBP 32.12 every month"))),
       firstPaymentDate = LocalDate.of(2018, 12, 12),
       firstPaperDate = LocalDate.of(2018, 11, 12),
@@ -76,10 +76,10 @@ object SendVoucherEmailsManualTest {
   def main(args: Array[String]): Unit = {
     val result = for {
       email <- args.headOption.map(Email.apply)
-      queueName = emailQueuesFor(Stage("PROD")).voucher
+      queueName = emailQueuesFor(Stage("PROD")).paper
       sqsSend = AwsSQSSend(queueName) _
-      voucherSqsSend = EtSqsSend[VoucherEmailData](sqsSend) _
-      sendConfirmationEmail = SendConfirmationEmailVoucher(voucherSqsSend) _
+      voucherSqsSend = EtSqsSend[PaperEmailData](sqsSend) _
+      sendConfirmationEmail = SendPaperConfirmationEmail(voucherSqsSend) _
       data = fakeVoucherEmailData(email)
       sendResult = sendConfirmationEmail(Some(SfContactId("sfContactId")), fakeVoucherEmailData(email))
     } yield sendResult

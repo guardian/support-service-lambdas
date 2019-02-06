@@ -1,4 +1,4 @@
-package com.gu.newproduct.api.addsubscription.email.voucher
+package com.gu.newproduct.api.addsubscription.email.paper
 
 import java.time.LocalDate
 
@@ -14,14 +14,14 @@ import org.scalatest.{AsyncFlatSpec, Matchers}
 
 import scala.concurrent.Future
 
-class SendConfirmationEmailVoucherTest extends AsyncFlatSpec with Matchers {
+class SendPaperConfirmationEmailTest extends AsyncFlatSpec with Matchers {
   it should "send voucher confirmation email" in {
-    def sqsSend(payload: ETPayload[VoucherEmailData]): Future[Unit] = Future {
+    def sqsSend(payload: ETPayload[PaperEmailData]): Future[Unit] = Future {
       payload shouldBe ETPayload("soldToEmail@mail.com", testVoucherData, DataExtensionName("paper-voucher"), Some("sfContactId"))
       ()
     }
 
-    val send = SendConfirmationEmailVoucher(sqsSend) _
+    val send = SendPaperConfirmationEmail(sqsSend) _
     send(Some(SfContactId("sfContactId")), testVoucherData).underlying map {
       result => result shouldBe ContinueProcessing(())
     }
@@ -33,9 +33,9 @@ class SendConfirmationEmailVoucherTest extends AsyncFlatSpec with Matchers {
     val noSoldToEmailContacts = testVoucherData.contacts.copy(soldTo = noEmailSoldTo)
     val noSoldToEmailVoucherData = testVoucherData.copy(contacts = noSoldToEmailContacts)
 
-    def sqsSend(payload: ETPayload[VoucherEmailData]): Future[Unit] = Future.successful(())
+    def sqsSend(payload: ETPayload[PaperEmailData]): Future[Unit] = Future.successful(())
 
-    val send = SendConfirmationEmailVoucher(sqsSend) _
+    val send = SendPaperConfirmationEmail(sqsSend) _
     send(Some(SfContactId("sfContactId")), noSoldToEmailVoucherData).underlying map {
       result => result shouldBe ReturnWithResponse(ApiGatewayResponse.internalServerError("some error"))
     }
@@ -43,16 +43,16 @@ class SendConfirmationEmailVoucherTest extends AsyncFlatSpec with Matchers {
 
   it should "return error if sqs send fails" in {
 
-    def sqsSend(payload: ETPayload[VoucherEmailData]): Future[Unit] = Future.failed(new RuntimeException("sqs error"))
+    def sqsSend(payload: ETPayload[PaperEmailData]): Future[Unit] = Future.failed(new RuntimeException("sqs error"))
 
-    val send = SendConfirmationEmailVoucher(sqsSend) _
+    val send = SendPaperConfirmationEmail(sqsSend) _
 
     send(Some(SfContactId("sfContactId")), testVoucherData).underlying map {
       result => result shouldBe ReturnWithResponse(ApiGatewayResponse.internalServerError("some error"))
     }
   }
 
-  val testVoucherData = VoucherEmailData(
+  val testVoucherData = PaperEmailData(
     plan = Plan(VoucherSunday, PlanDescription("Sunday")),
     firstPaymentDate = LocalDate.of(2018, 9, 24),
     firstPaperDate = LocalDate.of(2018, 9, 23),

@@ -1,4 +1,4 @@
-package com.gu.newproduct.api.addsubscription.email.voucher
+package com.gu.newproduct.api.addsubscription.email.paper
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -13,29 +13,29 @@ import com.gu.newproduct.api.productcatalog.Plan
 import com.gu.newproduct.api.productcatalog.PlanId._
 import play.api.libs.json.{Json, Writes}
 
-case class VoucherEmailData(
+case class PaperEmailData(
   plan: Plan,
   firstPaymentDate: LocalDate,
   firstPaperDate: LocalDate,
   subscriptionName: SubscriptionName,
   contacts: Contacts,
-  paymentMethod: PaymentMethod
+  paymentMethod: PaymentMethod,
 )
 
-object VoucherEmailData {
-  implicit val writes: Writes[VoucherEmailData] = (data: VoucherEmailData) => {
-    val fields: Map[String, String] = VoucherEmailFields(data)
+object PaperEmailData {
+  implicit val writes: Writes[PaperEmailData] = (data: PaperEmailData) => {
+    val fields: Map[String, String] = PaperEmailFields(data)
     Json.toJson(fields)
   }
 }
 
-object VoucherEmailFields {
+object PaperEmailFields {
 
   val digipackPlans = List(VoucherWeekendPlus, VoucherEveryDayPlus, VoucherSixDayPlus, VoucherSundayPlus, VoucherSaturdayPlus)
   val dateformat = DateTimeFormatter.ofPattern("d MMMM yyyy")
 
   def apply(
-    data: VoucherEmailData
+    data: PaperEmailData
   ) = {
     Map(
       "ZuoraSubscriberId" -> data.subscriptionName.value,

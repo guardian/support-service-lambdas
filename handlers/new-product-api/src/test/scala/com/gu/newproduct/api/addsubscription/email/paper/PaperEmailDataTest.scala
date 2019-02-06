@@ -1,4 +1,4 @@
-package com.gu.newproduct.api.addsubscription.email.voucher
+package com.gu.newproduct.api.addsubscription.email.paper
 
 import java.time.LocalDate
 
@@ -13,7 +13,7 @@ import com.gu.newproduct.api.productcatalog.PlanId._
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
 
-class VoucherEmailDataTest extends FlatSpec with Matchers {
+class PaperEmailDataTest extends FlatSpec with Matchers {
 
   val billto = BillToContact(
     None,
@@ -46,7 +46,7 @@ class VoucherEmailDataTest extends FlatSpec with Matchers {
   )
   val contacts = Contacts(billto, soldto)
 
-  val directDebitVoucherData = VoucherEmailData(
+  val directDebitVoucherData = PaperEmailData(
     plan = Plan(
       id = VoucherEveryDayPlus,
       description = PlanDescription("Everyday+"),
@@ -114,14 +114,14 @@ class VoucherEmailDataTest extends FlatSpec with Matchers {
 
     val directDebitFieldNames = List("bank_account_no", "bank_sort_code", "account_holder", "mandate_id")
 
-    VoucherEmailFields(cardVoucherData).keySet.filter(directDebitFieldNames.contains(_)) shouldBe Set.empty
+    PaperEmailFields(cardVoucherData).keySet.filter(directDebitFieldNames.contains(_)) shouldBe Set.empty
   }
 
   def fieldsForPlanIds(ids: List[PlanId]): List[Map[String, String]] = {
     val allPlansVoucherData = ids.map(
       planId => directDebitVoucherData.copy(plan = Plan(planId, PlanDescription("test plan")))
     )
-    allPlansVoucherData.map(VoucherEmailFields(_))
+    allPlansVoucherData.map(PaperEmailFields(_))
   }
 
   it should "IncludesDigipack should be false for non plus plans " in {
