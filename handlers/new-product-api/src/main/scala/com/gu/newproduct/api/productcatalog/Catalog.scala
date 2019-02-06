@@ -111,7 +111,11 @@ object PlanId {
     HomeDeliveryEveryDay,
     HomeDeliverySixDay,
     HomeDeliveryWeekend,
-    HomeDeliverySunday
+    HomeDeliverySunday,
+    HomeDeliveryEveryDayPlus,
+    HomeDeliverySixDayPlus,
+    HomeDeliveryWeekendPlus,
+    HomeDeliverySundayPlus
   )
 
   def fromName(name: String): Option[PlanId] = supported.find(_.name == name)

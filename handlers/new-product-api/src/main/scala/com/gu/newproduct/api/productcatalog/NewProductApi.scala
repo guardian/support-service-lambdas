@@ -75,10 +75,10 @@ object NewProductApi {
       homeDeliverySunday = planWithPayment(HomeDeliverySunday, PlanDescription("Sunday"), homeDeliverySundayDateRules),
       homeDeliverySixDay = planWithPayment(HomeDeliverySixDay, PlanDescription("Sixday"), homeDeliverySixDayRules),
       homeDeliveryWeekend = planWithPayment(HomeDeliveryWeekend, PlanDescription("Weekend"), homeDeliveryWeekendRules),
-      homeDeliveryEveryDayPlus = planWithPayment(HomeDeliveryEveryDay, PlanDescription("Everyday+"), homeDeliveryEveryDayRules),
-      homeDeliverySundayPlus = planWithPayment(HomeDeliverySunday, PlanDescription("Sunday+"), homeDeliverySundayDateRules),
-      homeDeliverySixDayPlus = planWithPayment(HomeDeliverySixDay, PlanDescription("Sixday+"), homeDeliverySixDayRules),
-      homeDeliveryWeekendPlus = planWithPayment(HomeDeliveryWeekend, PlanDescription("Weekend+"), homeDeliveryWeekendRules)
+      homeDeliveryEveryDayPlus = planWithPayment(HomeDeliveryEveryDayPlus, PlanDescription("Everyday+"), homeDeliveryEveryDayRules),
+      homeDeliverySundayPlus = planWithPayment(HomeDeliverySundayPlus, PlanDescription("Sunday+"), homeDeliverySundayDateRules),
+      homeDeliverySixDayPlus = planWithPayment(HomeDeliverySixDayPlus, PlanDescription("Sixday+"), homeDeliverySixDayRules),
+      homeDeliveryWeekendPlus = planWithPayment(HomeDeliveryWeekendPlus, PlanDescription("Weekend+"), homeDeliveryWeekendRules)
     )
   }
 
