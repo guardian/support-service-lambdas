@@ -10,7 +10,7 @@ import com.gu.newproduct.api.addsubscription.email.EtSqsSend
 import com.gu.newproduct.api.addsubscription.email.paper.{SendPaperConfirmationEmail, PaperEmailData}
 import com.gu.newproduct.api.addsubscription.validation.Validation._
 import com.gu.newproduct.api.addsubscription.validation.paper.{GetPaperCustomerData, PaperCustomerData, ValidateContactsForPaper}
-import com.gu.newproduct.api.addsubscription.validation.voucher.VoucherAccountValidation
+import com.gu.newproduct.api.addsubscription.validation.voucher.PaperAccountValidation
 import com.gu.newproduct.api.addsubscription.validation.{ValidateAccount, ValidatePaymentMethod, ValidationResult}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{SubscriptionName, ZuoraCreateSubRequest}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
@@ -68,24 +68,24 @@ object AddPaperSub {
     awsSQSSend: QueueName => AwsSQSSend.Payload => Future[Unit],
     emailQueueNames: EmailQueueNames
   ): AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName] = {
-    val voucherSqsSend = awsSQSSend(emailQueueNames.paper)
-    val voucherEtSqsSend = EtSqsSend[PaperEmailData](voucherSqsSend) _
-    val sendVoucherEmail = SendPaperConfirmationEmail(voucherEtSqsSend) _
-    val getZuoraIdForVoucherPlan = (zuoraIds.voucherZuoraIds.byApiPlanId ++ zuoraIds.homeDeliveryZuoraIds.byApiPlanId).get _
-    val getVoucherData = getValidatedVoucherCustomerData(zuoraClient)
+    val paperSqsQueueSend = awsSQSSend(emailQueueNames.paper)
+    val paperBrazeConfirmationSqsSend = EtSqsSend[PaperEmailData](paperSqsQueueSend) _
+    val sendConfirmationEmail = SendPaperConfirmationEmail(paperBrazeConfirmationSqsSend) _
+    val getZuoraIdForPaperPlan = (zuoraIds.voucherZuoraIds.byApiPlanId ++ zuoraIds.homeDeliveryZuoraIds.byApiPlanId).get _
+    val validatedCustomerData = getValidatedCustomerData(zuoraClient)
     steps(
       catalog.planForId,
-      getZuoraIdForVoucherPlan,
-      getVoucherData,
+      getZuoraIdForPaperPlan,
+      validatedCustomerData,
       isValidStartDateForPlan,
       createSubscription,
-      sendVoucherEmail
+      sendConfirmationEmail
     )
   }
 
-  def getValidatedVoucherCustomerData(zuoraClient: Requests): ZuoraAccountId => ApiGatewayOp[PaperCustomerData] = {
+  def getValidatedCustomerData(zuoraClient: Requests): ZuoraAccountId => ApiGatewayOp[PaperCustomerData] = {
 
-    val validateAccount = ValidateAccount.apply _ thenValidate VoucherAccountValidation.apply _
+    val validateAccount = ValidateAccount.apply _ thenValidate PaperAccountValidation.apply _
     val getValidatedAccount = GetAccount(zuoraClient.get[ZuoraAccount]) _ andValidateWith (
       validate = validateAccount,
       ifNotFoundReturn = Some("Zuora account id is not valid")

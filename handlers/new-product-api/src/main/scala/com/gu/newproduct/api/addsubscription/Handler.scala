@@ -46,7 +46,7 @@ object Steps {
     request <- apiGatewayRequest.bodyAsCaseClass[AddSubscriptionRequest]().withLogging("parsed request").toAsync
     subscriptionName <- request.planId match {
       case _: ContributionPlanId => addContribution(request)
-      case _: VoucherPlanId  => addPaperSub(request)
+      case _: VoucherPlanId => addPaperSub(request)
       case _: HomeDeliveryPlanId => addPaperSub(request)
     }
   } yield ApiGatewayResponse(body = AddedSubscription(subscriptionName.value), statusCode = "200")).apiResponse
