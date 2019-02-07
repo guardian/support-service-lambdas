@@ -71,7 +71,6 @@ object AddPaperSub {
     val voucherSqsSend = awsSQSSend(emailQueueNames.paper)
     val voucherEtSqsSend = EtSqsSend[PaperEmailData](voucherSqsSend) _
     val sendVoucherEmail = SendPaperConfirmationEmail(voucherEtSqsSend) _
-    //todo remove this duplication !
     val getZuoraIdForVoucherPlan = (zuoraIds.voucherZuoraIds.byApiPlanId ++ zuoraIds.homeDeliveryZuoraIds.byApiPlanId).get _
     val getVoucherData = getValidatedVoucherCustomerData(zuoraClient)
     steps(
