@@ -38,7 +38,7 @@ class DigitalSubscriptionExpiryHandlerEffectsTest extends FlatSpec with Matchers
 
     val expectedResponse =
       """
-        |{"statusCode":"200","headers":{"Content-Type":"application/json"},"body":"{\n  \"expiry\" : {\n    \"expiryDate\" : \"2018-11-30\",\n    \"expiryType\" : \"sub\",\n    \"content\" : \"SevenDay\"\n  }\n}"}
+        |{"statusCode":"200","headers":{"Content-Type":"application/json"},"body":"{\n  \"expiry\" : {\n    \"expiryDate\" : \"2019-11-30\",\n    \"expiryType\" : \"sub\",\n    \"content\" : \"SevenDay\"\n  }\n}"}
         |""".stripMargin
     responseString jsonMatches expectedResponse
   }

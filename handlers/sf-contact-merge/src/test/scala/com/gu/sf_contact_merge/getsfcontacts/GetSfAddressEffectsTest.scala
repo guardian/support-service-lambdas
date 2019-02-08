@@ -34,12 +34,12 @@ class GetSfAddressEffectsTest extends FlatSpec with Matchers {
         SFStreet("123 dayone street"),
         Some(SFCity("city1")),
         Some(SFState("state1")),
-        Some(SFPostalCode("postal1")),
+        Some(SFPostalCode("POSTAL1")),
         SFCountry("Afghanistan"),
         Some(SFPhone("012345"))
       )),
       IsDigitalVoucherUser(false),
-      EmailIdentity(EmailAddress("dayone@gu.com"), Some(IdentityId("100000932")))
+      EmailIdentity(EmailAddress("effecttests@gu.com"), Some(IdentityId("100003915")))
     )
 
     actual should be(\/-(expected))

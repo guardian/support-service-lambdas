@@ -23,7 +23,7 @@ class GetSFContactSyncCheckFieldsEffectsTest extends FlatSpec with Matchers {
       result <- GetSFContactSyncCheckFields(getOp).apply(SFEffectsData.testContactHasNamePhoneOtherAddress).value.toDisjunction
     } yield result
 
-    actual should be(\/-(ContactSyncCheckFields(None, "One", "Day", Some("Afghanistan"))))
+    actual should be(\/-(ContactSyncCheckFields(Some("01220000000VB52AAG"), "testerson", "test", Some("Afghanistan"))))
 
   }
 
