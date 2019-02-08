@@ -69,9 +69,8 @@ object Steps {
       currentDate = () => currentDatetime().toLocalDate
 
       validatorFor = DateValidator.validatorFor(currentDate, _: DateRule)
-      zuoraToPlanId = (zuoraIds.voucherZuoraIds.zuoraIdToPlanid ++ zuoraIds.homeDeliveryZuoraIds.zuoraIdToPlanid).get _
       zuoraEnv = ZuoraEnvironment.EnvForStage(stage)
-      plansWithPrice <- PricesFromZuoraCatalog(zuoraEnv, fetchString, zuoraToPlanId).toApiGatewayOp("get prices from zuora catalog")
+      plansWithPrice <- PricesFromZuoraCatalog(zuoraEnv, fetchString, zuoraIds.rateplanIdToApiId.get).toApiGatewayOp("get prices from zuora catalog")
       catalog = NewProductApi.catalog(plansWithPrice.get)
 
       isValidStartDateForPlan = Function.uncurried(

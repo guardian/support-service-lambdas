@@ -71,11 +71,10 @@ object AddPaperSub {
     val paperSqsQueueSend = awsSQSSend(emailQueueNames.paper)
     val paperBrazeConfirmationSqsSend = EtSqsSend[PaperEmailData](paperSqsQueueSend) _
     val sendConfirmationEmail = SendPaperConfirmationEmail(paperBrazeConfirmationSqsSend) _
-    val getZuoraIdForPaperPlan = (zuoraIds.voucherZuoraIds.byApiPlanId ++ zuoraIds.homeDeliveryZuoraIds.byApiPlanId).get _
     val validatedCustomerData = getValidatedCustomerData(zuoraClient)
     steps(
       catalog.planForId,
-      getZuoraIdForPaperPlan,
+      zuoraIds.apiIdToRateplanId.get,
       validatedCustomerData,
       isValidStartDateForPlan,
       createSubscription,

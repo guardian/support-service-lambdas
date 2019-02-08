@@ -74,7 +74,10 @@ object ZuoraIds {
 
   }
 
-  case class ZuoraIds(contributionsZuoraIds: ContributionsZuoraIds, voucherZuoraIds: VoucherZuoraIds, homeDeliveryZuoraIds: HomeDeliveryZuoraIds)
+  case class ZuoraIds(contributionsZuoraIds: ContributionsZuoraIds, voucherZuoraIds: VoucherZuoraIds, homeDeliveryZuoraIds: HomeDeliveryZuoraIds) {
+    def apiIdToRateplanId: Map[PlanId, ProductRatePlanId] =  contributionsZuoraIds.byApiPlanId.mapValues(_.productRatePlanId) ++ voucherZuoraIds.byApiPlanId ++ homeDeliveryZuoraIds.byApiPlanId
+    val rateplanIdToApiId: Map[ProductRatePlanId, PlanId] = apiIdToRateplanId.map(_.swap)
+  }
 
   def zuoraIdsForStage(stage: Stage): ApiGatewayOp[ZuoraIds] = {
     val mappings = Map(

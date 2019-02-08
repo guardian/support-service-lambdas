@@ -23,8 +23,7 @@ object Handler extends Logging {
 
   def runWithEffects(lambdaIO: LambdaIO, stage: Stage, fetchString: StringFromS3): ApiGatewayOp[Operation] = for {
     zuoraIds <- ZuoraIds.zuoraIdsForStage(stage)
-    allPaidPlansById = zuoraIds.voucherZuoraIds.zuoraIdToPlanid ++ zuoraIds.homeDeliveryZuoraIds.zuoraIdToPlanid
-    zuoraToPlanId = allPaidPlansById.get _
+    zuoraToPlanId = zuoraIds.rateplanIdToApiId.get _
     zuoraEnv = ZuoraEnvironment.EnvForStage(stage)
     plansWithPrice <- PricesFromZuoraCatalog(zuoraEnv, fetchString, zuoraToPlanId).toApiGatewayOp("get prices from zuora catalog")
     catalog = NewProductApi.catalog(plansWithPrice.get)
