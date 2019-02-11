@@ -30,6 +30,7 @@ object BulkApiParams {
   val paymentFailure = SfQueryInfo(Soql(SfQueries.paymentFailure), ObjectName("PaymentFailure"), SfObjectName("Payment_Failure__c"))
   val directDebitMandateFailure = SfQueryInfo(Soql(SfQueries.directDebitMandateFailure), ObjectName("DirectDebitMandateFailure"), SfObjectName("DD_Mandate_Failure__c"))
   val directDebitMandate = SfQueryInfo(Soql(SfQueries.directDebitMandate), ObjectName("DirectDebitMandate"), SfObjectName("DD_Mandate__c"))
+  val directDebitMandateEvent = SfQueryInfo(Soql(SfQueries.directDebitMandateEvent), ObjectName("DirectDebitMandateEvent"), SfObjectName("DD_Mandate_Event__c"))
 
   val all = List(
     contact,
@@ -46,7 +47,8 @@ object BulkApiParams {
     paymentCard,
     paymentFailure,
     directDebitMandateFailure,
-    directDebitMandate
+    directDebitMandate,
+    directDebitMandateEvent
   )
 
   val byName = all.map(obj => obj.objectName -> obj).toMap
@@ -569,5 +571,24 @@ object SfQueries {
       |
       |WHERE
       |Billing_Account__r.Contact__r.Account.GDPR_Deletion_Pending__c = false
+    """.stripMargin
+
+  val directDebitMandateEvent =
+    """
+      |SELECT
+      |Cause__c,
+      |DD_Mandate__c,
+      |Description__c,
+      |Event_Happened_At__c,
+      |GoCardless_Mandate_Event_ID__c,
+      |Reason_Code__c,
+      |Status__c,
+      |Status_Icon__c
+      |
+      |FROM
+      |DD_Mandate_Event__c
+      |
+      |WHERE
+      |DD_Mandate__r.Billing_Account__r.Contact__r.Account.GDPR_Deletion_Pending__c = false
     """.stripMargin
 }
