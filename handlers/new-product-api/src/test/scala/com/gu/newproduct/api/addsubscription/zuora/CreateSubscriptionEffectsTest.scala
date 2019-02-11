@@ -29,7 +29,7 @@ class CreateSubscriptionEffectsTest extends FlatSpec with Matchers {
         AmountMinorUnits(100),
         monthlyContribution.productRatePlanChargeId
       )),
-      LocalDate.now.plusDays(2),
+      currentDate().plusDays(2),
       validCaseIdToAvoidCausingSFErrors,
       AcquisitionSource("sourcesource"),
       CreatedByCSR("csrcsr")
