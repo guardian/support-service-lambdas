@@ -29,6 +29,7 @@ object BulkApiParams {
   val paymentCard = SfQueryInfo(Soql(SfQueries.paymentCard), ObjectName("PaymentCard"), SfObjectName("Payment_Card__c"))
   val paymentFailure = SfQueryInfo(Soql(SfQueries.paymentFailure), ObjectName("PaymentFailure"), SfObjectName("Payment_Failure__c"))
   val directDebitMandateFailure = SfQueryInfo(Soql(SfQueries.directDebitMandateFailure), ObjectName("DirectDebitMandateFailure"), SfObjectName("DD_Mandate_Failure__c"))
+  val directDebitMandate = SfQueryInfo(Soql(SfQueries.directDebitMandate), ObjectName("DirectDebitMandate"), SfObjectName("DD_Mandate__c"))
 
   val all = List(
     contact,
@@ -44,7 +45,8 @@ object BulkApiParams {
     imovoContract,
     paymentCard,
     paymentFailure,
-    directDebitMandateFailure
+    directDebitMandateFailure,
+    directDebitMandate
   )
 
   val byName = all.map(obj => obj.objectName -> obj).toMap
@@ -543,4 +545,29 @@ object SfQueries {
       |Billing_Account__r.Contact__r.GDPR_Deletion_Pending__c = false
     """.stripMargin
 
+
+  val directDebitMandate =
+    """
+      |SELECT
+      |Account_Number_Ending__c,
+      |Bank_Name__c,
+      |Billing_Account__c,
+      |Cause__c,
+      |Description__c,
+      |GoCardless_Mandate_ID__c,
+      |Last_Mandate_Event__c,
+      |Mandate_Created_At__c,
+      |Payment_Method__c,
+      |Reason_Code__c,
+      |Reference__c,
+      |Status__c,
+      |Status_Changed_At__c,
+      |Status_Icon__c
+      |
+      |FROM
+      |DD_Mandate__c
+      |
+      |WHERE
+      |Billing_Account__r.Contact__r.Account.GDPR_Deletion_Pending__c = false
+    """.stripMargin
 }
