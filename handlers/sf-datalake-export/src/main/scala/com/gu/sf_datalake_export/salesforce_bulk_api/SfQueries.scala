@@ -518,7 +518,6 @@ object SfQueries {
       |Invoice_Total_Amount__c,
       |Journey_Length__c,
       |Last_Attempt_Type__c,
-      |Latest_Email_Stage_Received_by_Braze__c,
       |Latest_Payment_Method__c,
       |Latest_Payment_Method_Created__c,
       |Next_Invoice_Date__c,
