@@ -28,6 +28,7 @@ object BulkApiParams {
   val imovoContract = SfQueryInfo(Soql(SfQueries.imovoContract), ObjectName("ImovoContract"), SfObjectName("Imovo_Contract__c"))
   val paymentCard = SfQueryInfo(Soql(SfQueries.paymentCard), ObjectName("PaymentCard"), SfObjectName("Payment_Card__c"))
   val paymentFailure = SfQueryInfo(Soql(SfQueries.paymentFailure), ObjectName("PaymentFailure"), SfObjectName("Payment_Failure__c"))
+  val directDebitMandateFailure = SfQueryInfo(Soql(SfQueries.directDebitMandateFailure), ObjectName("DirectDebitMandateFailure"), SfObjectName("DD_Mandate_Failure__c"))
 
   val all = List(
     contact,
@@ -42,7 +43,8 @@ object BulkApiParams {
     fulfilmentProcessInformation,
     imovoContract,
     paymentCard,
-    paymentFailure
+    paymentFailure,
+    directDebitMandateFailure
   )
 
   val byName = all.map(obj => obj.objectName -> obj).toMap
@@ -488,4 +490,58 @@ object SfQueries {
       |Payment_Failure__c
       |where Contact__r.Account.GDPR_Deletion_Pending__c = false
     """.stripMargin
+
+  val directDebitMandateFailure =
+    """
+      |SELECT
+      |Accounting_Code__c,
+      |Auto_Cancellation_Date__c,
+      |Autopay__c,
+      |Balance__c,
+      |Billing_Account__c,
+      |Buyer__c,
+      |DD_Mandate_Cause__c,
+      |Comms_Journey_Active__c,
+      |Currency__c,
+      |Invoice_Days_Since_Creation__c,
+      |Days_Until_Auto_Cancellation__c,
+      |DD_Mandate__c,
+      |DD_Mandate_Description__c,
+      |Email_Stage__c,
+      |Failed_Payment_Method__c,
+      |Gateway_Response_Code__c,
+      |Gateway_State__c,
+      |Invoice__c,
+      |Invoice_Generated_On__c,
+      |Invoice_Number__c,
+      |Invoice_Overdue__c,
+      |Invoice_Total_Amount__c,
+      |Journey_Length__c,
+      |Last_Attempt_Type__c,
+      |Latest_Email_Stage_Received_by_Braze__c,
+      |Latest_Payment_Method__c,
+      |Latest_Payment_Method_Created__c,
+      |Next_Invoice_Date__c,
+      |Outcome__c,
+      |Latest_Payment_On_Invoice__c,
+      |Payment_Generated_On__c,
+      |Payment_Method_Type__c,
+      |Payment_Number__c,
+      |Payment_Status__c,
+      |Payment_Type__c,
+      |Ready_for_Send_to_Braze__c,
+      |DD_Mandate_Reason_Code__c,
+      |Recent_Acquisition__c,
+      |Recovery_Method__c,
+      |SF_Subscription__c,
+      |SF_Subscription_Name__c,
+      |SF_Sub_Status__c,
+      |DD_Mandate_Status__c,
+      |Status_Changed_At__c
+      |FROM
+      |DD_Mandate_Failure__c
+      |WHERE
+      |Billing_Account__r.Contact__r.GDPR_Deletion_Pending__c = false
+    """.stripMargin
+
 }
