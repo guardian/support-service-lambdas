@@ -485,3 +485,27 @@ Resources:
              "objectName": "CardExpiry"
             }
           RoleArn: !GetAtt [ TriggerRole, Arn ]
+        -
+          Arn: !Ref StateMachine
+          Id: !Sub trigger_sf_export-Account-${Stage}
+          Input: |
+            {
+             "objectName": "Account"
+            }
+          RoleArn: !GetAtt [ TriggerRole, Arn ]
+        -
+          Arn: !Ref StateMachine
+          Id: !Sub trigger_sf_export-DirectDebitMandateFailure-${Stage}
+          Input: |
+            {
+             "objectName": "DirectDebitMandateFailure"
+            }
+          RoleArn: !GetAtt [ TriggerRole, Arn ]
+        -
+          Arn: !Ref StateMachine
+          Id: !Sub trigger_sf_export-DirectDebitMandate-${Stage}
+          Input: |
+            {
+             "objectName": "DirectDebitMandate"
+            }
+          RoleArn: !GetAtt [ TriggerRole, Arn ]
