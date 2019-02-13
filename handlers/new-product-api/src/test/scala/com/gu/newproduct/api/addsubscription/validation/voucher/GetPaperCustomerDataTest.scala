@@ -10,12 +10,13 @@ import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.PaymentMetho
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types.ApiGatewayOp
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
+import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError}
 import org.scalatest.{FlatSpec, Matchers}
 
-class GetVoucherCustomerDataTest extends FlatSpec with Matchers {
+class GetPaperCustomerDataTest extends FlatSpec with Matchers {
 
   "GetVoucherCustomerData" should "return data succesfully" in {
-    val actual = getVoucherCustomerData(
+    val actual = getPaperCustomerData(
       accountId = ZuoraAccountId("TestAccountId")
     )
 
@@ -28,7 +29,7 @@ class GetVoucherCustomerDataTest extends FlatSpec with Matchers {
 
   it should "return error if get account fails" in {
 
-    val actual = getVoucherCustomerData(
+    val actual = getPaperCustomerData(
       getAccount = failedCall,
       accountId = ZuoraAccountId("TestAccountId")
     )
@@ -37,7 +38,7 @@ class GetVoucherCustomerDataTest extends FlatSpec with Matchers {
 
   it should "return error if get payment method fails" in {
 
-    val actual = getVoucherCustomerData(
+    val actual = getPaperCustomerData(
       getPaymentMethod = failedPaymentMethodCall,
       accountId = ZuoraAccountId("TestAccountId")
     )
@@ -46,8 +47,8 @@ class GetVoucherCustomerDataTest extends FlatSpec with Matchers {
 
   it should "return error if get contacts fails" in {
 
-    val actual = getVoucherCustomerData(
-      getContacts = failedCall,
+    val actual = getPaperCustomerData(
+      getContacts = _ => GenericError("something failed!"),
       accountId = ZuoraAccountId("TestAccountId")
     )
     actual shouldBe errorResponse
@@ -74,13 +75,13 @@ class GetVoucherCustomerDataTest extends FlatSpec with Matchers {
 
   def getContactsSuccess(accountId: ZuoraAccountId) = {
     accountId shouldBe ZuoraAccountId("TestAccountId")
-    ContinueProcessing(TestData.contacts)
+    ClientSuccess(TestData.contacts)
   }
 
-  def getVoucherCustomerData(
+  def getPaperCustomerData(
     getAccount: ZuoraAccountId => ApiGatewayOp[ValidatedAccount] = getAccountSuccess,
     getPaymentMethod: PaymentMethodId => ApiGatewayOp[PaymentMethod] = getPaymentMethodSuccess,
-    getContacts: ZuoraAccountId => ApiGatewayOp[Contacts] = getContactsSuccess,
+    getContacts: ZuoraAccountId => ClientFailableOp[Contacts] = getContactsSuccess,
     accountId: ZuoraAccountId
   ) = GetPaperCustomerData(
     getAccount,

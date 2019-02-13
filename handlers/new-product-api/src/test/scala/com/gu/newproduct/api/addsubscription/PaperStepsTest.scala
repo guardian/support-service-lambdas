@@ -8,6 +8,7 @@ import com.gu.newproduct.api.addsubscription.validation._
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{SubscriptionName, ZuoraCreateSubRequest}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
+import com.gu.newproduct.api.addsubscription.zuora.GetContacts.SoldToAddress
 import com.gu.newproduct.api.productcatalog.PlanId.VoucherEveryDay
 import com.gu.newproduct.api.productcatalog.{Plan, PlanDescription, PlanId}
 import com.gu.newproduct.api.productcatalog.ZuoraIds.ProductRatePlanId
@@ -71,8 +72,9 @@ class PaperStepsTest extends FlatSpec with Matchers {
       Some(ratePlanId)
     }
 
-    //todo maybe add assertions on the input params for these two
-    def fakeValidateVoucherStartDate(id: PlanId, d: LocalDate) = Passed(())
+    def fakeValidateStartDate(id: PlanId, d: LocalDate) = Passed(())
+
+    def fakeValidateAddress(id: PlanId, a: SoldToAddress) = Passed(())
 
     def fakeSendEmail(sfContactId: Option[SfContactId], paperData: PaperEmailData) = ContinueProcessing(()).toAsync
 
@@ -81,7 +83,8 @@ class PaperStepsTest extends FlatSpec with Matchers {
       fakeGetPlan,
       fakeGetZuoraId,
       fakeGetVoucherCustomerData,
-      fakeValidateVoucherStartDate,
+      fakeValidateStartDate,
+      fakeValidateAddress,
       fakeCreate,
       fakeSendEmail
     ) _

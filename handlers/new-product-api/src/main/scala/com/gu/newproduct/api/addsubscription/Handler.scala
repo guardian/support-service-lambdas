@@ -10,6 +10,7 @@ import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.newproduct.api.EmailQueueNames.emailQueuesFor
 import com.gu.newproduct.api.addsubscription.TypeConvert._
 import com.gu.newproduct.api.addsubscription.validation._
+import com.gu.newproduct.api.addsubscription.validation.paper.PaperAddressValidator
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.SubscriptionName
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.WireModel.{WireCreateRequest, WireSubscription}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAccount
@@ -95,6 +96,7 @@ object Steps {
         zuoraIds,
         zuoraClient,
         isValidStartDateForPlan,
+        PaperAddressValidator.apply,
         createSubscription,
         awsSQSSend,
         queueNames
