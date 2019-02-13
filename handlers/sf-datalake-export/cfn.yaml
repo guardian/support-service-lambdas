@@ -437,7 +437,7 @@ Resources:
                 Action:
                   - states:StartExecution
                 Resource: !Ref StateMachine
-  ScheduleRule:
+  ScheduleRule1:
     Type: "AWS::Events::Rule"
     Condition: IsProd
     Properties:
@@ -485,6 +485,14 @@ Resources:
              "objectName": "CardExpiry"
             }
           RoleArn: !GetAtt [ TriggerRole, Arn ]
+  ScheduleRule2:
+    Type: "AWS::Events::Rule"
+    Condition: IsProd
+    Properties:
+      Description: "trigger salesforce export every day at 01:00 GMT"
+      ScheduleExpression: "cron(0 1 ? * * *)"
+      State: "ENABLED"
+      Targets:
         -
           Arn: !Ref StateMachine
           Id: !Sub trigger_sf_export-Account-${Stage}
