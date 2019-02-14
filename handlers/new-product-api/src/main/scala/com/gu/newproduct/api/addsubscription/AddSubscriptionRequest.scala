@@ -56,7 +56,7 @@ object AddSubscriptionRequest {
 
     }
     def invalidPlanError = {
-      val validValues = PlanId.supported.map(_.name).mkString(",")
+      val validValues = PlanId.supportedPlans.map(_.name).mkString(",")
       s"unsupported plan: allowed values are $validValues"
     }
   }

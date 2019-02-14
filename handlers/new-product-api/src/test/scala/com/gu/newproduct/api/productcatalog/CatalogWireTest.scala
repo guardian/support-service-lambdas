@@ -204,6 +204,17 @@ class CatalogWireTest extends FlatSpec with Matchers {
      |          "paymentPlan": "GBP 1.23 every month"
      |        },
      |        {
+     |          "id": "home_delivery_everyday_plus",
+     |          "label": "Everyday+",
+     |          "startDateRules": {
+     |            "selectableWindow": {
+     |              "startDaysAfterCutOff": 3,
+     |              "sizeInDays": 28
+     |            }
+     |          },
+     |          "paymentPlan": "GBP 9.99 every month"
+     |        },
+     |        {
      |          "id": "home_delivery_sixday",
      |          "label": "Sixday",
      |          "startDateRules": {
@@ -221,46 +232,6 @@ class CatalogWireTest extends FlatSpec with Matchers {
      |            }
      |          },
      |          "paymentPlan": "GBP 7.77 every month"
-     |        },
-     |        {
-     |          "id": "home_delivery_sunday",
-     |          "label": "Sunday",
-     |          "startDateRules": {
-     |            "daysOfWeek": [
-     |              "Sunday"
-     |            ],
-     |            "selectableWindow": {
-     |              "startDaysAfterCutOff": 3,
-     |              "sizeInDays": 28
-     |            }
-     |          },
-     |          "paymentPlan": "GBP 3.21 every month"
-     |        },
-     |        {
-     |          "id": "home_delivery_weekend",
-     |          "label": "Weekend",
-     |          "startDateRules": {
-     |            "daysOfWeek": [
-     |              "Saturday",
-     |              "Sunday"
-     |            ],
-     |            "selectableWindow": {
-     |              "startDaysAfterCutOff": 3,
-     |              "sizeInDays": 28
-     |            }
-     |          },
-     |          "paymentPlan": "GBP 8.88 every month"
-     |        },
-     |        {
-     |          "id": "home_delivery_everyday_plus",
-     |          "label": "Everyday+",
-     |          "startDateRules": {
-     |            "selectableWindow": {
-     |              "startDaysAfterCutOff": 3,
-     |              "sizeInDays": 28
-     |            }
-     |          },
-     |          "paymentPlan": "GBP 9.99 every month"
      |        },
      |        {
      |          "id": "home_delivery_sixday_plus",
@@ -281,6 +252,21 @@ class CatalogWireTest extends FlatSpec with Matchers {
      |          },
      |          "paymentPlan": "GBP 11.11 every month"
      |        },
+     |
+     |        {
+     |          "id": "home_delivery_sunday",
+     |          "label": "Sunday",
+     |          "startDateRules": {
+     |            "daysOfWeek": [
+     |              "Sunday"
+     |            ],
+     |            "selectableWindow": {
+     |              "startDaysAfterCutOff": 3,
+     |              "sizeInDays": 28
+     |            }
+     |          },
+     |          "paymentPlan": "GBP 3.21 every month"
+     |        },
      |        {
      |          "id": "home_delivery_sunday_plus",
      |          "label": "Sunday+",
@@ -296,10 +282,11 @@ class CatalogWireTest extends FlatSpec with Matchers {
      |          "paymentPlan": "GBP 10.10 every month"
      |        },
      |        {
-     |          "id": "home_delivery_sunday_plus",
-     |          "label": "Sunday+",
+     |          "id": "home_delivery_weekend",
+     |          "label": "Weekend",
      |          "startDateRules": {
      |            "daysOfWeek": [
+     |              "Saturday",
      |              "Sunday"
      |            ],
      |            "selectableWindow": {
@@ -307,7 +294,22 @@ class CatalogWireTest extends FlatSpec with Matchers {
      |              "sizeInDays": 28
      |            }
      |          },
-     |          "paymentPlan": "GBP 10.10 every month"
+     |          "paymentPlan": "GBP 8.88 every month"
+     |        },
+     |        {
+     |          "id": "home_delivery_weekend_plus",
+     |          "label": "Weekend+",
+     |          "startDateRules": {
+     |            "daysOfWeek": [
+      |            "Saturday",
+     |              "Sunday"
+     |            ],
+     |            "selectableWindow": {
+     |              "startDaysAfterCutOff": 3,
+     |              "sizeInDays": 28
+     |            }
+     |          },
+     |          "paymentPlan": "GBP 22.22 every month"
      |        }
      |      ]
      |    }

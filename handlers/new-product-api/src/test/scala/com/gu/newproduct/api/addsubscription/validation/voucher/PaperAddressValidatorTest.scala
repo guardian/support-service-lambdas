@@ -9,7 +9,7 @@ import org.scalatest.{FlatSpec, Matchers}
 
 class PaperAddressValidatorTest extends FlatSpec with Matchers {
 
-  val testAddress =       SoldToAddress(
+  val testAddress = SoldToAddress(
     Some(Address1("soldToAddress1")),
     Some(Address2("soldToAddress2")),
     Some(City("soldToCity")),

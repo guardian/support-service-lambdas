@@ -67,7 +67,7 @@ class AddSubscriptionRequestTest extends FlatSpec with Matchers {
         |}
       """.stripMargin
 
-    val supportedPlansStr = PlanId.supported.map(_.name).mkString(",")
+    val supportedPlansStr = PlanId.supportedPlans.map(_.name).mkString(",")
     Json.parse(input).validate[AddSubscriptionRequest] shouldBe JsError(s"unsupported plan: allowed values are $supportedPlansStr")
   }
 }

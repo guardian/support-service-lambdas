@@ -95,30 +95,35 @@ object PlanId {
 
   case object HomeDeliverySundayPlus extends PlanId("home_delivery_sunday_plus") with HomeDeliveryPlanId
 
-  val supported = List(
-    MonthlyContribution,
-    AnnualContribution,
-    VoucherWeekend,
+  val enabledVoucherPlans = List(
     VoucherEveryDay,
-    VoucherSixDay,
-    VoucherSaturday,
-    VoucherSunday,
-    VoucherWeekendPlus,
     VoucherEveryDayPlus,
-    VoucherSixDayPlus,
+    VoucherSaturday,
     VoucherSaturdayPlus,
+    VoucherSixDay,
+    VoucherSixDayPlus,
+    VoucherSunday,
     VoucherSundayPlus,
+    VoucherWeekend,
+    VoucherWeekendPlus
+  )
+  val enabledContributionPlans = List(
+    MonthlyContribution,
+    AnnualContribution
+  )
+  val enabledHomeDeliveryPlans = List(
     HomeDeliveryEveryDay,
-    HomeDeliverySixDay,
-    HomeDeliveryWeekend,
-    HomeDeliverySunday,
     HomeDeliveryEveryDayPlus,
+    HomeDeliverySixDay,
     HomeDeliverySixDayPlus,
-    HomeDeliveryWeekendPlus,
-    HomeDeliverySundayPlus
+    HomeDeliverySunday,
+    HomeDeliverySundayPlus,
+    HomeDeliveryWeekend,
+    HomeDeliveryWeekendPlus
   )
 
-  def fromName(name: String): Option[PlanId] = supported.find(_.name == name)
+  val supportedPlans: List[PlanId] = enabledVoucherPlans ++ enabledContributionPlans ++ enabledHomeDeliveryPlans
+  def fromName(name: String): Option[PlanId] = supportedPlans.find(_.name == name)
 }
 
 case class Plan(id: PlanId, description: PlanDescription, startDateRules: StartDateRules = StartDateRules(), paymentPlan: Option[PaymentPlan] = None)
