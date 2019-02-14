@@ -3,7 +3,7 @@ package com.gu.newproduct.api.addsubscription.validation.voucher
 import com.gu.i18n.Currency.GBP
 import com.gu.newproduct.api.addsubscription.validation.{Failed, Passed, ValidatedAccount, ValidationResult}
 
-object VoucherAccountValidation {
+object PaperAccountValidation {
   def apply(
     account: ValidatedAccount
   ): ValidationResult[ValidatedAccount] = {

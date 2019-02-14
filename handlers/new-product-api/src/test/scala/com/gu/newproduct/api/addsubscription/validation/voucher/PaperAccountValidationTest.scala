@@ -5,7 +5,7 @@ import com.gu.newproduct.api.addsubscription.validation.{Failed, Passed, Validat
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.{AccountBalanceMinorUnits, AutoPay, PaymentMethodId, SfContactId}
 import org.scalatest.{FlatSpec, Matchers}
 
-class VoucherAccountValidationTest extends FlatSpec with Matchers {
+class PaperAccountValidationTest extends FlatSpec with Matchers {
   val account = ValidatedAccount(
     identityId = None,
     sfContactId = Some(SfContactId("sfContactId")),
@@ -15,11 +15,11 @@ class VoucherAccountValidationTest extends FlatSpec with Matchers {
     currency = GBP
   )
   it should "pass if currency in account is GBP " in {
-    VoucherAccountValidation(account) shouldBe Passed(account)
+    PaperAccountValidation(account) shouldBe Passed(account)
   }
 
   it should "fail if currency in account is not GBP " in {
     val dollarAccount = account.copy(currency = USD)
-    VoucherAccountValidation(dollarAccount) shouldBe Failed("Invalid currency in Zuora account: USD. Only GBP is allowed for voucher plans")
+    PaperAccountValidation(dollarAccount) shouldBe Failed("Invalid currency in Zuora account: USD. Only GBP is allowed for voucher plans")
   }
 }

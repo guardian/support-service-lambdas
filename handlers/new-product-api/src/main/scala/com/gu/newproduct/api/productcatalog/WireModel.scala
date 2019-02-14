@@ -101,29 +101,30 @@ object WireModel {
     implicit val writes = Json.writes[WireCatalog]
 
     def fromCatalog(catalog: Catalog) = {
+
+      def wirePlanForPlanId(planId: PlanId): WirePlanInfo = {
+        val plan = catalog.planForId(planId)
+        WirePlanInfo.fromPlan(plan)
+      }
+
       val voucherProduct = WireProduct(
         label = "Voucher",
-        plans = List(
-          WirePlanInfo.fromPlan(catalog.voucherEveryDay),
-          WirePlanInfo.fromPlan(catalog.voucherEveryDayPlus),
-          WirePlanInfo.fromPlan(catalog.voucherSaturday),
-          WirePlanInfo.fromPlan(catalog.voucherSaturdayPlus),
-          WirePlanInfo.fromPlan(catalog.voucherSixDay),
-          WirePlanInfo.fromPlan(catalog.voucherSixDayPlus),
-          WirePlanInfo.fromPlan(catalog.voucherSunday),
-          WirePlanInfo.fromPlan(catalog.voucherSundayPlus),
-          WirePlanInfo.fromPlan(catalog.voucherWeekend),
-          WirePlanInfo.fromPlan(catalog.voucherWeekendPlus)
-        )
+        plans = PlanId.enabledVoucherPlans.map(wirePlanForPlanId)
       )
+
       val contributionProduct = WireProduct(
         label = "Contribution",
-        plans = List(
-          WirePlanInfo.fromPlan(catalog.monthlyContribution),
-          WirePlanInfo.fromPlan(catalog.annualContribution)
-        )
+        plans = PlanId.enabledContributionPlans.map(wirePlanForPlanId)
       )
-      WireCatalog(List(contributionProduct, voucherProduct))
+
+      val homeDeliveryProduct = WireProduct(
+        label = "Home delivery",
+        plans = PlanId.enabledHomeDeliveryPlans.map(wirePlanForPlanId)
+      )
+
+      val availableProductsAndPlans = List(contributionProduct, voucherProduct, homeDeliveryProduct).filterNot(_.plans.isEmpty)
+
+      WireCatalog(availableProductsAndPlans)
     }
   }
 

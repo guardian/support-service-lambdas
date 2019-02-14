@@ -3,11 +3,12 @@ package com.gu.newproduct.api.addsubscription
 import java.time.LocalDate
 
 import com.gu.newproduct.TestData
-import com.gu.newproduct.api.addsubscription.email.voucher.VoucherEmailData
+import com.gu.newproduct.api.addsubscription.email.paper.PaperEmailData
 import com.gu.newproduct.api.addsubscription.validation._
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{SubscriptionName, ZuoraCreateSubRequest}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
+import com.gu.newproduct.api.addsubscription.zuora.GetContacts.SoldToAddress
 import com.gu.newproduct.api.productcatalog.PlanId.VoucherEveryDay
 import com.gu.newproduct.api.productcatalog.{Plan, PlanDescription, PlanId}
 import com.gu.newproduct.api.productcatalog.ZuoraIds.ProductRatePlanId
@@ -19,11 +20,12 @@ import com.gu.util.resthttp.Types.ClientSuccess
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json._
 import com.gu.util.reader.AsyncTypes._
+
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
-class VoucherStepsTest extends FlatSpec with Matchers {
+class PaperStepsTest extends FlatSpec with Matchers {
 
   case class ExpectedOut(subscriptionNumber: String)
 
@@ -70,24 +72,26 @@ class VoucherStepsTest extends FlatSpec with Matchers {
       Some(ratePlanId)
     }
 
-    //todo maybe add assertions on the input params for these two
-    def fakeValidateVoucherStartDate(id: PlanId, d: LocalDate) = Passed(())
+    def fakeValidateStartDate(id: PlanId, d: LocalDate) = Passed(())
 
-    def fakeSendEmail(sfContactId: Option[SfContactId], voucherEmailData: VoucherEmailData) = ContinueProcessing(()).toAsync
+    def fakeValidateAddress(id: PlanId, a: SoldToAddress) = Passed(())
+
+    def fakeSendEmail(sfContactId: Option[SfContactId], paperData: PaperEmailData) = ContinueProcessing(()).toAsync
 
     def fakeGetPlan(planId: PlanId) = Plan(VoucherEveryDay, PlanDescription("Everyday"))
-    val fakeAddVoucherSteps = AddVoucher.steps(
+    val fakeAddVoucherSteps = AddPaperSub.steps(
       fakeGetPlan,
       fakeGetZuoraId,
       fakeGetVoucherCustomerData,
-      fakeValidateVoucherStartDate,
+      fakeValidateStartDate,
+      fakeValidateAddress,
       fakeCreate,
       fakeSendEmail
     ) _
 
     val futureActual = Steps.handleRequest(
       addContribution = dummyContributionSteps,
-      addVoucher = fakeAddVoucherSteps
+      addPaperSub = fakeAddVoucherSteps
     )(ApiGatewayRequest(None, Some(Json.stringify(requestInput)), None, None))
 
     val actual = Await.result(futureActual, 30 seconds)

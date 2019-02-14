@@ -10,7 +10,6 @@ import Scalaz._
 import scala.util.Try
 
 case class ZuoraAccountId(value: String) extends AnyVal
-
 case class AddSubscriptionRequest(
   zuoraAccountId: ZuoraAccountId,
   startDate: LocalDate,
@@ -57,7 +56,7 @@ object AddSubscriptionRequest {
 
     }
     def invalidPlanError = {
-      val validValues = PlanId.supported.map(_.name).mkString(",")
+      val validValues = PlanId.supportedPlans.map(_.name).mkString(",")
       s"unsupported plan: allowed values are $validValues"
     }
   }

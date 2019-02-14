@@ -4,7 +4,7 @@ import com.gu.i18n.Country
 import com.gu.i18n.Currency.GBP
 import com.gu.newproduct.api.addsubscription.validation.ValidatedAccount
 import com.gu.newproduct.api.addsubscription.validation.contribution.ContributionCustomerData
-import com.gu.newproduct.api.addsubscription.validation.voucher.VoucherCustomerData
+import com.gu.newproduct.api.addsubscription.validation.paper.PaperCustomerData
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.{AccountBalanceMinorUnits, AutoPay, IdentityId, PaymentMethodId, SfContactId}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.{Active, Subscription}
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts._
@@ -74,7 +74,7 @@ object TestData {
     contacts = contacts
   )
 
-  val voucherCustomerData = VoucherCustomerData(
+  val voucherCustomerData = PaperCustomerData(
     account = validatedAccount,
     paymentMethod = directDebitPaymentMethod,
     contacts = contacts
