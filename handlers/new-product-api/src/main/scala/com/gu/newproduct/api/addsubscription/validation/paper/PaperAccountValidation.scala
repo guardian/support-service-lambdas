@@ -1,4 +1,4 @@
-package com.gu.newproduct.api.addsubscription.validation.voucher
+package com.gu.newproduct.api.addsubscription.validation.paper
 
 import com.gu.i18n.Currency.GBP
 import com.gu.newproduct.api.addsubscription.validation.{Failed, Passed, ValidatedAccount, ValidationResult}
