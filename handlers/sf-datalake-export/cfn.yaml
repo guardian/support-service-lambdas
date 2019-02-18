@@ -517,3 +517,11 @@ Resources:
              "objectName": "DirectDebitMandate"
             }
           RoleArn: !GetAtt [ TriggerRole, Arn ]
+        -
+          Arn: !Ref StateMachine
+          Id: !Sub trigger_sf_export-DirectDebitMandateEvent-${Stage}
+          Input: |
+            {
+             "objectName": "DirectDebitMandateEvent"
+            }
+          RoleArn: !GetAtt [ TriggerRole, Arn ]
