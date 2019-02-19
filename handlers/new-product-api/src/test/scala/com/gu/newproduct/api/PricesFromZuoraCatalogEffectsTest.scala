@@ -17,6 +17,7 @@ class PricesFromZuoraCatalogEffectsTest extends FlatSpec with Matchers {
       response <- PricesFromZuoraCatalog(ZuoraEnvironment("DEV"), GetFromS3.fetchString, zuoraIds.rateplanIdToApiId.get).toDisjunction
     } yield response
     //the prices might change but at least we can assert that we got some price for each product
+    println(actual)
     actual.map(_.keySet) shouldBe \/-(
       Set(
         VoucherSaturdayPlus,
@@ -38,7 +39,9 @@ class PricesFromZuoraCatalogEffectsTest extends FlatSpec with Matchers {
         HomeDeliveryEveryDayPlus,
         HomeDeliverySixDayPlus,
         MonthlyContribution,
-        AnnualContribution
+        AnnualContribution,
+        DigipackAnnual,
+        DigipackMonthly
       )
     )
   }

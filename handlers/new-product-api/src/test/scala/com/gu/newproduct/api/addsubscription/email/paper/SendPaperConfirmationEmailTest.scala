@@ -2,6 +2,7 @@ package com.gu.newproduct.api.addsubscription.email.paper
 
 import java.time.LocalDate
 
+import com.gu.i18n.Currency.GBP
 import com.gu.newproduct.TestData
 import com.gu.newproduct.api.addsubscription.email.{DataExtensionName, ETPayload}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.SubscriptionName
@@ -58,7 +59,8 @@ class SendPaperConfirmationEmailTest extends AsyncFlatSpec with Matchers {
     firstPaperDate = LocalDate.of(2018, 9, 23),
     subscriptionName = SubscriptionName("subName"),
     contacts = TestData.contacts,
-    paymentMethod = TestData.directDebitPaymentMethod
+    paymentMethod = TestData.directDebitPaymentMethod,
+    currency = GBP
   )
 
 }

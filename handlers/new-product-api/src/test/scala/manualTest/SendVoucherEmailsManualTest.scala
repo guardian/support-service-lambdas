@@ -4,9 +4,10 @@ import java.time.LocalDate
 
 import com.gu.effects.sqs.AwsSQSSend
 import com.gu.i18n.Country
+import com.gu.i18n.Currency.GBP
 import com.gu.newproduct.api.EmailQueueNames.emailQueuesFor
 import com.gu.newproduct.api.addsubscription.email.EtSqsSend
-import com.gu.newproduct.api.addsubscription.email.paper.{SendPaperConfirmationEmail, PaperEmailData}
+import com.gu.newproduct.api.addsubscription.email.paper.{PaperEmailData, SendPaperConfirmationEmail}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.SubscriptionName
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts._
@@ -58,7 +59,7 @@ object SendVoucherEmailsManualTest {
     val randomSubName = "T-" + Random.alphanumeric.take(10).mkString
 
     PaperEmailData(
-      plan = Plan(VoucherEveryDayPlus, PlanDescription("Everyday+"), StartDateRules(), Some(PaymentPlan("GBP 32.12 every month"))),
+      plan = Plan(VoucherEveryDayPlus, PlanDescription("Everyday+"), StartDateRules(), Map(GBP -> PaymentPlan("GBP 32.12 every month"))),
       firstPaymentDate = LocalDate.of(2018, 12, 12),
       firstPaperDate = LocalDate.of(2018, 11, 12),
       subscriptionName = SubscriptionName(randomSubName),
@@ -69,7 +70,8 @@ object SendVoucherEmailsManualTest {
         BankAccountNumberMask("********1234"),
         SortCode("123456"),
         MandateId("MandateId")
-      )
+      ),
+      currency = GBP
     )
   }
 

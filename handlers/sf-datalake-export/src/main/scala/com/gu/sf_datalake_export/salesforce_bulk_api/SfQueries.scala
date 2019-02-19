@@ -545,7 +545,6 @@ object SfQueries {
       |Billing_Account__r.Contact__r.GDPR_Deletion_Pending__c = false
     """.stripMargin
 
-
   val directDebitMandate =
     """
       |SELECT

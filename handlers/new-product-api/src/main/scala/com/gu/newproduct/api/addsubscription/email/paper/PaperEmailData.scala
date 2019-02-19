@@ -3,6 +3,7 @@ package com.gu.newproduct.api.addsubscription.email.paper
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+import com.gu.i18n.Currency
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{DirectDebit, NonDirectDebitMethod, PaymentMethod}
 import com.gu.newproduct.api.addsubscription.Formatters._
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.SubscriptionName
@@ -20,6 +21,7 @@ case class PaperEmailData(
   subscriptionName: SubscriptionName,
   contacts: Contacts,
   paymentMethod: PaymentMethod,
+  currency: Currency
 )
 
 object PaperEmailData {
@@ -45,7 +47,7 @@ object PaperEmailFields {
       "date_of_first_paper" -> data.firstPaperDate.format(dateformat),
       "date_of_first_payment" -> data.firstPaymentDate.format(dateformat),
       "package" -> data.plan.description.value,
-      "subscription_rate" -> data.plan.paymentPlan.map(_.value).getOrElse("")
+      "subscription_rate" -> data.plan.paymentPlans.get(data.currency).map(_.value).getOrElse("")
     ) ++ paymentMethodFields(data.paymentMethod) ++ addressFields(data.contacts)
 
   }

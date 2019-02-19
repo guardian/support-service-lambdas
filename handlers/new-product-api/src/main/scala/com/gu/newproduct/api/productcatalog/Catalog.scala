@@ -2,6 +2,8 @@ package com.gu.newproduct.api.productcatalog
 
 import java.time.DayOfWeek
 
+import com.gu.i18n.Currency
+
 case class Catalog(
   voucherWeekend: Plan,
   voucherSaturday: Plan,
@@ -22,7 +24,9 @@ case class Catalog(
   homeDeliveryEveryDayPlus: Plan,
   homeDeliverySixDayPlus: Plan,
   homeDeliveryWeekendPlus: Plan,
-  homeDeliverySundayPlus: Plan
+  homeDeliverySundayPlus: Plan,
+  digipackAnnual: Plan,
+  digipackMonthly: Plan
 ) {
   val allPlans = List(
     voucherWeekend,
@@ -44,7 +48,10 @@ case class Catalog(
     homeDeliveryEveryDayPlus,
     homeDeliverySixDayPlus,
     homeDeliveryWeekendPlus,
-    homeDeliverySundayPlus
+    homeDeliverySundayPlus,
+    digipackAnnual,
+    digipackMonthly
+
   )
 
   val planForId: Map[PlanId, Plan] = allPlans.map(x => x.id -> x).toMap
@@ -52,6 +59,7 @@ case class Catalog(
 sealed trait VoucherPlanId
 sealed trait ContributionPlanId
 sealed trait HomeDeliveryPlanId
+sealed trait DigipackPlanId
 sealed abstract class PlanId(val name: String)
 
 object PlanId {
@@ -95,6 +103,10 @@ object PlanId {
 
   case object HomeDeliverySundayPlus extends PlanId("home_delivery_sunday_plus") with HomeDeliveryPlanId
 
+  case object DigipackMonthly extends PlanId("digipack_monthly") with DigipackPlanId
+
+  case object DigipackAnnual extends PlanId("digipack_annual") with DigipackPlanId
+
   val enabledVoucherPlans = List(
     VoucherEveryDay,
     VoucherEveryDayPlus,
@@ -113,12 +125,18 @@ object PlanId {
   )
   val enabledHomeDeliveryPlans = List.empty
 
-  val supportedPlans: List[PlanId] = enabledVoucherPlans ++ enabledContributionPlans ++ enabledHomeDeliveryPlans
+  val enabledDigipackPlans = List(
+    DigipackAnnual,
+    DigipackMonthly
+  )
+
+  val supportedPlans: List[PlanId] = enabledVoucherPlans ++ enabledContributionPlans ++ enabledHomeDeliveryPlans ++ enabledDigipackPlans
   def fromName(name: String): Option[PlanId] = supportedPlans.find(_.name == name)
 }
 
-case class Plan(id: PlanId, description: PlanDescription, startDateRules: StartDateRules = StartDateRules(), paymentPlan: Option[PaymentPlan] = None)
+case class Plan(id: PlanId, description: PlanDescription, startDateRules: StartDateRules = StartDateRules(), paymentPlans: Map[Currency, PaymentPlan] = Map.empty)
 
+//todo rename to payment description or something
 case class PaymentPlan(value: String) extends AnyVal
 
 case class PlanDescription(value: String) extends AnyVal
@@ -136,3 +154,4 @@ case class DaysOfWeekRule(allowedDays: List[DayOfWeek]) extends DateRule
 case class WindowRule(maybeCutOffDay: Option[DayOfWeek], maybeStartDelay: Option[DelayDays], maybeSize: Option[WindowSizeDays]) extends DateRule
 
 case class AmountMinorUnits(value: Int) extends AnyVal
+

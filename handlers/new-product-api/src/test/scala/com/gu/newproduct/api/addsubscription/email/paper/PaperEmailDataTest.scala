@@ -3,6 +3,7 @@ package com.gu.newproduct.api.addsubscription.email.paper
 import java.time.LocalDate
 
 import com.gu.i18n.Country
+import com.gu.i18n.Currency.GBP
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.SubscriptionName
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.{BillToContact, _}
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{BankAccountName, BankAccountNumberMask, DirectDebit, MandateId, NonDirectDebitMethod, SortCode}
@@ -50,7 +51,7 @@ class PaperEmailDataTest extends FlatSpec with Matchers {
     plan = Plan(
       id = VoucherEveryDayPlus,
       description = PlanDescription("Everyday+"),
-      paymentPlan = Some(PaymentPlan("GBP 12.25 every month"))
+      paymentPlans = Map(GBP -> PaymentPlan("GBP 12.25 every month"))
     ),
     firstPaymentDate = LocalDate.of(2018, 12, 1),
     firstPaperDate = LocalDate.of(2018, 11, 1),
@@ -62,7 +63,8 @@ class PaperEmailDataTest extends FlatSpec with Matchers {
       BankAccountNumberMask("*****mask"),
       SortCode("123456"),
       MandateId("MandateId")
-    )
+    ),
+    currency = GBP
   )
   it should "generate json payload for voucher data with direct debit fields" in {
 

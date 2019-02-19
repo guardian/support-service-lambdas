@@ -57,7 +57,8 @@ object AddPaperSub {
       firstPaperDate = request.startDate,
       subscriptionName = subscriptionName,
       contacts = customerData.contacts,
-      paymentMethod = customerData.paymentMethod
+      paymentMethod = customerData.paymentMethod,
+      currency = customerData.account.currency
     )
     _ <- sendConfirmationEmail(customerData.account.sfContactId, voucherEmailData).recoverAndLog("send voucher confirmation email")
   } yield subscriptionName

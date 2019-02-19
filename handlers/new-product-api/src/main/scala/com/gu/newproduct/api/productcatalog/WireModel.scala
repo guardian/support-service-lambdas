@@ -2,7 +2,10 @@ package com.gu.newproduct.api.productcatalog
 
 import java.time.DayOfWeek
 
+import com.gu.i18n.Currency
 import play.api.libs.json.{JsString, Json, Writes}
+
+import scala.collection.immutable.Map
 
 object WireModel {
 
@@ -26,7 +29,7 @@ object WireModel {
     id: String,
     label: String,
     startDateRules: Option[WireStartDateRules] = None,
-    paymentPlan: Option[String] = None
+    paymentPlans: Option[Map[String, String]] = None
   )
 
   case class WireSelectableWindow(
@@ -84,11 +87,16 @@ object WireModel {
       if (startDateRules == StartDateRules()) None else Some(WireStartDateRules.fromStartDateRules(startDateRules))
 
     def fromPlan(plan: Plan) = {
+
+      val paymentPlans = plan.paymentPlans.map {
+        case (currency: Currency, paymentPlan: PaymentPlan) => (currency.iso, paymentPlan.value)
+      }
+
       WirePlanInfo(
         id = plan.id.name,
         label = plan.description.value,
         startDateRules = toOptionalWireRules(plan.startDateRules),
-        paymentPlan = plan.paymentPlan.map(_.value)
+        paymentPlans = if (paymentPlans.isEmpty) None else Some(paymentPlans)
       )
     }
   }
@@ -122,7 +130,12 @@ object WireModel {
         plans = PlanId.enabledHomeDeliveryPlans.map(wirePlanForPlanId)
       )
 
-      val availableProductsAndPlans = List(contributionProduct, voucherProduct, homeDeliveryProduct).filterNot(_.plans.isEmpty)
+      val digipackProduct = WireProduct(
+        label = "Digital pack",
+        plans = PlanId.enabledDigipackPlans.map(wirePlanForPlanId)
+      )
+
+      val availableProductsAndPlans = List(contributionProduct, voucherProduct, homeDeliveryProduct, digipackProduct).filterNot(_.plans.isEmpty)
 
       WireCatalog(availableProductsAndPlans)
     }

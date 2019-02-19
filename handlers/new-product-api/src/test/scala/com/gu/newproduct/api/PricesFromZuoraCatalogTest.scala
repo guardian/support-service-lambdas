@@ -1,5 +1,6 @@
 package com.gu.newproduct.api
 
+import com.gu.i18n.Currency.{EUR, GBP, USD}
 import com.gu.newproduct.api.productcatalog.PlanId._
 import com.gu.newproduct.api.productcatalog.ZuoraIds.ProductRatePlanId
 import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, PricesFromZuoraCatalog}
@@ -7,6 +8,7 @@ import com.gu.util.config.LoadConfigModule.{S3Location, StringFromS3}
 import com.gu.util.config.ZuoraEnvironment
 import com.gu.util.resthttp.Types.ClientSuccess
 import org.scalatest.{FlatSpec, Matchers}
+
 import scala.util.Try
 
 class PricesFromZuoraCatalogTest extends FlatSpec with Matchers {
@@ -25,11 +27,11 @@ class PricesFromZuoraCatalogTest extends FlatSpec with Matchers {
         |          "productRatePlanCharges": [
         |            {
         |              "name": "Saturday",
-        |              "pricing": [ { "currency": "GBP", "price": 10.36 } ]
+        |              "pricing": [ { "currency": "GBP", "price": 10.36 }, { "currency": "EUR", "price": 10.26 }, { "currency": "USD", "price": 10.46 } ]
         |            },
         |            {
         |              "name": "Digital Pack",
-        |              "pricing": [ { "currency": "GBP", "price": 11.26 } ]
+        |              "pricing": [ { "currency": "GBP", "price": 11.26 }, { "currency": "USD", "price": 11.46 }, { "currency": "EUR", "price": 11.26 } ]
         |            }
         |          ]
         |        },
@@ -69,8 +71,14 @@ class PricesFromZuoraCatalogTest extends FlatSpec with Matchers {
     )
     actual shouldBe ClientSuccess(
       Map(
-        VoucherSaturdayPlus -> AmountMinorUnits(2161),
-        VoucherSundayPlus -> AmountMinorUnits(2206)
+        VoucherSaturdayPlus -> Map(
+          GBP -> AmountMinorUnits(2162),
+          USD -> AmountMinorUnits(2192),
+          EUR -> AmountMinorUnits(2152)
+        ),
+        VoucherSundayPlus -> Map(
+          GBP -> AmountMinorUnits(2206)
+        )
       )
     )
   }

@@ -1,5 +1,6 @@
 package com.gu.newproduct.api.productcatalog
 
+import com.gu.i18n.Currency
 import com.gu.newproduct.api.productcatalog.PlanId._
 import com.gu.newproduct.api.productcatalog.WireModel._
 import org.scalatest.{FlatSpec, Matchers}
@@ -50,7 +51,9 @@ class CatalogWireTest extends FlatSpec with Matchers {
      |              "sizeInDays": 35
      |            }
      |          },
-     |          "paymentPlan": "GBP 47.62 every month"
+     |          "paymentPlans": {
+     |          "GBP": "GBP 47.62 every month"
+     |          }
      |        },
      |        {
      |          "id": "voucher_everyday_plus",
@@ -65,7 +68,9 @@ class CatalogWireTest extends FlatSpec with Matchers {
      |              "sizeInDays": 35
      |            }
      |          },
-     |          "paymentPlan": "GBP 51.96 every month"
+     |          "paymentPlans": {
+     |          "GBP": "GBP 51.96 every month"
+     |          }
      |        },
      |        {
      |          "id": "voucher_saturday",
@@ -80,7 +85,9 @@ class CatalogWireTest extends FlatSpec with Matchers {
      |              "sizeInDays": 35
      |            }
      |          },
-     |          "paymentPlan": "GBP 10.36 every month"
+     |          "paymentPlans": {
+     |          "GBP": "GBP 10.36 every month"
+     |          }
      |        },
      |        {
      |          "id": "voucher_saturday_plus",
@@ -95,7 +102,9 @@ class CatalogWireTest extends FlatSpec with Matchers {
      |              "sizeInDays": 35
      |            }
      |          },
-     |          "paymentPlan": "GBP 21.62 every month"
+     |          "paymentPlans": {
+     |          "GBP": "GBP 21.62 every month"
+     |          }
      |        },
      |        {
      |          "id": "voucher_sixday",
@@ -110,7 +119,9 @@ class CatalogWireTest extends FlatSpec with Matchers {
      |              "sizeInDays": 35
      |            }
      |          },
-     |          "paymentPlan": "GBP 41.12 every month"
+     |          "paymentPlans": {
+     |          "GBP": "GBP 41.12 every month"
+     |          }
      |        },
      |        {
      |          "id": "voucher_sixday_plus",
@@ -125,7 +136,9 @@ class CatalogWireTest extends FlatSpec with Matchers {
      |              "sizeInDays": 35
      |            }
      |          },
-     |          "paymentPlan": "GBP 47.62 every month"
+     |          "paymentPlans": {
+     |          "GBP": "GBP 47.62 every month"
+     |          }
      |        },
      |        {
      |          "id": "voucher_sunday",
@@ -140,7 +153,9 @@ class CatalogWireTest extends FlatSpec with Matchers {
      |              "sizeInDays": 35
      |            }
      |          },
-     |          "paymentPlan": "GBP 10.79 every month"
+     |          "paymentPlans": {
+     |          "GBP": "GBP 10.79 every month"
+     |          }
      |        },
      |        {
      |          "id": "voucher_sunday_plus",
@@ -155,7 +170,9 @@ class CatalogWireTest extends FlatSpec with Matchers {
      |              "sizeInDays": 35
      |            }
      |          },
-     |          "paymentPlan": "GBP 22.06 every month"
+     |          "paymentPlans": {
+     |          "GBP": "GBP 22.06 every month"
+     |          }
      |        },
      |        {
      |          "id": "voucher_weekend",
@@ -170,7 +187,9 @@ class CatalogWireTest extends FlatSpec with Matchers {
      |              "sizeInDays": 35
      |            }
      |          },
-     |          "paymentPlan": "GBP 20.76 every month"
+     |          "paymentPlans": {
+     |          "GBP": "GBP 20.76 every month"
+     |          }
      |        },
      |        {
      |          "id": "voucher_weekend_plus",
@@ -185,7 +204,40 @@ class CatalogWireTest extends FlatSpec with Matchers {
      |              "sizeInDays": 35
      |            }
      |          },
-     |          "paymentPlan": "GBP 29.42 every month"
+     |          "paymentPlans": {
+     |          "GBP": "GBP 29.42 every month"
+     |          }
+     |        }
+     |      ]
+     |    },
+     |        {
+     |      "label": "Digital pack",
+     |      "plans": [
+     |        {
+     |          "id": "digipack_annual",
+     |          "label": "Annual",
+     |          "startDateRules": {
+     |            "selectableWindow": {
+     |              "sizeInDays": 1
+     |            }
+     |          },
+     |          "paymentPlans": {
+     |          "GBP": "GBP 666.66 every 12 months",
+     |          "USD": "USD 666.65 every 12 months"
+     |          }
+     |        },
+     |        {
+     |          "id": "digipack_monthly",
+     |          "label": "Monthly",
+     |          "startDateRules": {
+     |            "selectableWindow": {
+     |              "sizeInDays": 1
+     |            }
+     |          },
+     |          "paymentPlans": {
+     |          "GBP": "GBP 55.55 every month",
+     |          "USD": "USD 55.54 every month"
+     |          }
      |        }
      |      ]
      |    }
@@ -193,27 +245,38 @@ class CatalogWireTest extends FlatSpec with Matchers {
      |}
       """.stripMargin
 
-    def fakePricesFor(planId: PlanId): Option[AmountMinorUnits] = planId match {
-      case VoucherWeekendPlus => Some(AmountMinorUnits(2942))
-      case VoucherWeekend => Some(AmountMinorUnits(2076))
-      case VoucherSunday => Some(AmountMinorUnits(1079))
-      case VoucherSundayPlus => Some(AmountMinorUnits(2206))
-      case VoucherSaturday => Some(AmountMinorUnits(1036))
-      case VoucherSaturdayPlus => Some(AmountMinorUnits(2162))
-      case VoucherEveryDay => Some(AmountMinorUnits(4762))
-      case VoucherEveryDayPlus => Some(AmountMinorUnits(5196))
-      case VoucherSixDay => Some(AmountMinorUnits(4112))
-      case VoucherSixDayPlus => Some(AmountMinorUnits(4762))
-      case MonthlyContribution => None
-      case AnnualContribution => None
-      case HomeDeliveryEveryDay => Some(AmountMinorUnits(123))
-      case HomeDeliverySunday => Some(AmountMinorUnits(321))
-      case HomeDeliverySixDay => Some(AmountMinorUnits(777))
-      case HomeDeliveryWeekend => Some(AmountMinorUnits(888))
-      case HomeDeliveryEveryDayPlus => Some(AmountMinorUnits(999))
-      case HomeDeliverySundayPlus => Some(AmountMinorUnits(1010))
-      case HomeDeliverySixDayPlus => Some(AmountMinorUnits(1111))
-      case HomeDeliveryWeekendPlus => Some(AmountMinorUnits(2222))
+    def gbpPrice(amount: Int): Map[Currency, AmountMinorUnits] = Map(
+      Currency.GBP -> AmountMinorUnits(amount)
+    )
+    def fakePricesFor(planId: PlanId): Map[Currency, AmountMinorUnits] = planId match {
+      case VoucherWeekendPlus => gbpPrice(2942)
+      case VoucherWeekend => gbpPrice(2076)
+      case VoucherSunday => gbpPrice(1079)
+      case VoucherSundayPlus => gbpPrice(2206)
+      case VoucherSaturday => gbpPrice(1036)
+      case VoucherSaturdayPlus => gbpPrice(2162)
+      case VoucherEveryDay => gbpPrice(4762)
+      case VoucherEveryDayPlus => gbpPrice(5196)
+      case VoucherSixDay => gbpPrice(4112)
+      case VoucherSixDayPlus => gbpPrice(4762)
+      case MonthlyContribution => Map.empty
+      case AnnualContribution => Map.empty
+      case HomeDeliveryEveryDay => gbpPrice(123)
+      case HomeDeliverySunday => gbpPrice(321)
+      case HomeDeliverySixDay => gbpPrice(777)
+      case HomeDeliveryWeekend => gbpPrice(888)
+      case HomeDeliveryEveryDayPlus => gbpPrice(999)
+      case HomeDeliverySundayPlus => gbpPrice(1010)
+      case HomeDeliverySixDayPlus => gbpPrice(1111)
+      case HomeDeliveryWeekendPlus => gbpPrice(2222)
+      case DigipackMonthly => Map(
+        Currency.GBP -> AmountMinorUnits(5555),
+        Currency.USD -> AmountMinorUnits(5554)
+      )
+      case DigipackAnnual => Map(
+        Currency.GBP -> AmountMinorUnits(66666),
+        Currency.USD -> AmountMinorUnits(66665),
+      )
     }
 
     val wireCatalog = WireCatalog.fromCatalog(NewProductApi.catalog(fakePricesFor))
