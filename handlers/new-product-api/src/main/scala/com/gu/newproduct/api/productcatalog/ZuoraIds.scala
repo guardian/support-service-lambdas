@@ -166,7 +166,7 @@ object ZuoraIds {
           everydayPlus = ProductRatePlanId("2c92c0f955ca02900155da2803b02e33")
         ),
         DigipackZuoraIds(
-          monthly = ProductRatePlanId("2c92c0f94f2acf73014f2c91940a166d"),
+          monthly = ProductRatePlanId("2c92c0f94f2acf73014f2c908f671591"),
           annual = ProductRatePlanId("2c92c0f84f2ac59d014f2c94aea9199e"),
         )
       ),
