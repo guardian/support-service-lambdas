@@ -10,239 +10,283 @@ class CatalogWireTest extends FlatSpec with Matchers {
   it should "serialise catalog" in {
     val expected =
       """
-          {
-     |  "products": [
-     |    {
-     |      "label": "Contribution",
-     |      "plans": [
-     |        {
-     |          "id": "monthly_contribution",
-     |          "label": "Monthly",
-     |          "startDateRules": {
-     |            "selectableWindow": {
-     |              "sizeInDays": 1
-     |            }
-     |          }
-     |        },
-     |        {
-     |          "id": "annual_contribution",
-     |          "label": "Annual",
-     |          "startDateRules": {
-     |            "selectableWindow": {
-     |              "sizeInDays": 1
-     |            }
-     |          }
-     |        }
-     |      ]
-     |    },
-     |    {
-     |      "label": "Voucher",
-     |      "plans": [
-     |        {
-     |          "id": "voucher_everyday",
-     |          "label": "Everyday",
-     |          "startDateRules": {
-     |            "daysOfWeek": [
-     |              "Monday"
-     |            ],
-     |            "selectableWindow": {
-     |              "cutOffDayInclusive": "Tuesday",
-     |              "startDaysAfterCutOff": 20,
-     |              "sizeInDays": 35
-     |            }
-     |          },
-     |          "paymentPlans": {
-     |          "GBP": "GBP 47.62 every month"
-     |          }
-     |        },
-     |        {
-     |          "id": "voucher_everyday_plus",
-     |          "label": "Everyday+",
-     |          "startDateRules": {
-     |            "daysOfWeek": [
-     |              "Monday"
-     |            ],
-     |            "selectableWindow": {
-     |              "cutOffDayInclusive": "Tuesday",
-     |              "startDaysAfterCutOff": 20,
-     |              "sizeInDays": 35
-     |            }
-     |          },
-     |          "paymentPlans": {
-     |          "GBP": "GBP 51.96 every month"
-     |          }
-     |        },
-     |        {
-     |          "id": "voucher_saturday",
-     |          "label": "Saturday",
-     |          "startDateRules": {
-     |            "daysOfWeek": [
-     |              "Saturday"
-     |            ],
-     |            "selectableWindow": {
-     |              "cutOffDayInclusive": "Tuesday",
-     |              "startDaysAfterCutOff": 20,
-     |              "sizeInDays": 35
-     |            }
-     |          },
-     |          "paymentPlans": {
-     |          "GBP": "GBP 10.36 every month"
-     |          }
-     |        },
-     |        {
-     |          "id": "voucher_saturday_plus",
-     |          "label": "Saturday+",
-     |          "startDateRules": {
-     |            "daysOfWeek": [
-     |              "Saturday"
-     |            ],
-     |            "selectableWindow": {
-     |              "cutOffDayInclusive": "Tuesday",
-     |              "startDaysAfterCutOff": 20,
-     |              "sizeInDays": 35
-     |            }
-     |          },
-     |          "paymentPlans": {
-     |          "GBP": "GBP 21.62 every month"
-     |          }
-     |        },
-     |        {
-     |          "id": "voucher_sixday",
-     |          "label": "Sixday",
-     |          "startDateRules": {
-     |            "daysOfWeek": [
-     |              "Monday"
-     |            ],
-     |            "selectableWindow": {
-     |              "cutOffDayInclusive": "Tuesday",
-     |              "startDaysAfterCutOff": 20,
-     |              "sizeInDays": 35
-     |            }
-     |          },
-     |          "paymentPlans": {
-     |          "GBP": "GBP 41.12 every month"
-     |          }
-     |        },
-     |        {
-     |          "id": "voucher_sixday_plus",
-     |          "label": "Sixday+",
-     |          "startDateRules": {
-     |            "daysOfWeek": [
-     |              "Monday"
-     |            ],
-     |            "selectableWindow": {
-     |              "cutOffDayInclusive": "Tuesday",
-     |              "startDaysAfterCutOff": 20,
-     |              "sizeInDays": 35
-     |            }
-     |          },
-     |          "paymentPlans": {
-     |          "GBP": "GBP 47.62 every month"
-     |          }
-     |        },
-     |        {
-     |          "id": "voucher_sunday",
-     |          "label": "Sunday",
-     |          "startDateRules": {
-     |            "daysOfWeek": [
-     |              "Sunday"
-     |            ],
-     |            "selectableWindow": {
-     |              "cutOffDayInclusive": "Tuesday",
-     |              "startDaysAfterCutOff": 20,
-     |              "sizeInDays": 35
-     |            }
-     |          },
-     |          "paymentPlans": {
-     |          "GBP": "GBP 10.79 every month"
-     |          }
-     |        },
-     |        {
-     |          "id": "voucher_sunday_plus",
-     |          "label": "Sunday+",
-     |          "startDateRules": {
-     |            "daysOfWeek": [
-     |              "Sunday"
-     |            ],
-     |            "selectableWindow": {
-     |              "cutOffDayInclusive": "Tuesday",
-     |              "startDaysAfterCutOff": 20,
-     |              "sizeInDays": 35
-     |            }
-     |          },
-     |          "paymentPlans": {
-     |          "GBP": "GBP 22.06 every month"
-     |          }
-     |        },
-     |        {
-     |          "id": "voucher_weekend",
-     |          "label": "Weekend",
-     |          "startDateRules": {
-     |            "daysOfWeek": [
-     |              "Saturday"
-     |            ],
-     |            "selectableWindow": {
-     |              "cutOffDayInclusive": "Tuesday",
-     |              "startDaysAfterCutOff": 20,
-     |              "sizeInDays": 35
-     |            }
-     |          },
-     |          "paymentPlans": {
-     |          "GBP": "GBP 20.76 every month"
-     |          }
-     |        },
-     |        {
-     |          "id": "voucher_weekend_plus",
-     |          "label": "Weekend+",
-     |          "startDateRules": {
-     |            "daysOfWeek": [
-     |              "Saturday"
-     |            ],
-     |            "selectableWindow": {
-     |              "cutOffDayInclusive": "Tuesday",
-     |              "startDaysAfterCutOff": 20,
-     |              "sizeInDays": 35
-     |            }
-     |          },
-     |          "paymentPlans": {
-     |          "GBP": "GBP 29.42 every month"
-     |          }
-     |        }
-     |      ]
-     |    },
-     |        {
-     |      "label": "Digital pack",
-     |      "plans": [
-     |        {
-     |          "id": "digipack_annual",
-     |          "label": "Annual",
-     |          "startDateRules": {
-     |            "selectableWindow": {
-     |              "sizeInDays": 1
-     |            }
-     |          },
-     |          "paymentPlans": {
-     |          "GBP": "GBP 666.66 every 12 months",
-     |          "USD": "USD 666.65 every 12 months"
-     |          }
-     |        },
-     |        {
-     |          "id": "digipack_monthly",
-     |          "label": "Monthly",
-     |          "startDateRules": {
-     |            "selectableWindow": {
-     |              "sizeInDays": 1
-     |            }
-     |          },
-     |          "paymentPlans": {
-     |          "GBP": "GBP 55.55 every month",
-     |          "USD": "USD 55.54 every month"
-     |          }
-     |        }
-     |      ]
-     |    }
-     |  ]
-     |}
+        |{
+        |  "products": [
+        |    {
+        |      "label": "Contribution",
+        |      "plans": [
+        |        {
+        |          "id": "monthly_contribution",
+        |          "label": "Monthly",
+        |          "startDateRules": {
+        |            "selectableWindow": {
+        |              "sizeInDays": 1
+        |            }
+        |          },
+        |          "paymentPlans": []
+        |        },
+        |        {
+        |          "id": "annual_contribution",
+        |          "label": "Annual",
+        |          "startDateRules": {
+        |            "selectableWindow": {
+        |              "sizeInDays": 1
+        |            }
+        |          },
+        |          "paymentPlans": []
+        |        }
+        |      ]
+        |    },
+        |    {
+        |      "label": "Voucher",
+        |      "plans": [
+        |        {
+        |          "id": "voucher_everyday",
+        |          "label": "Everyday",
+        |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Monday"
+        |            ],
+        |            "selectableWindow": {
+        |              "cutOffDayInclusive": "Tuesday",
+        |              "startDaysAfterCutOff": 20,
+        |              "sizeInDays": 35
+        |            }
+        |          },
+        |          "paymentPlans": [
+        |            {
+        |              "currencyCode": "GBP",
+        |              "description": "GBP 47.62 every month"
+        |            }
+        |          ]
+        |        },
+        |        {
+        |          "id": "voucher_everyday_plus",
+        |          "label": "Everyday+",
+        |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Monday"
+        |            ],
+        |            "selectableWindow": {
+        |              "cutOffDayInclusive": "Tuesday",
+        |              "startDaysAfterCutOff": 20,
+        |              "sizeInDays": 35
+        |            }
+        |          },
+        |          "paymentPlans": [
+        |            {
+        |              "currencyCode": "GBP",
+        |              "description": "GBP 51.96 every month"
+        |            }
+        |          ]
+        |        },
+        |        {
+        |          "id": "voucher_saturday",
+        |          "label": "Saturday",
+        |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Saturday"
+        |            ],
+        |            "selectableWindow": {
+        |              "cutOffDayInclusive": "Tuesday",
+        |              "startDaysAfterCutOff": 20,
+        |              "sizeInDays": 35
+        |            }
+        |          },
+        |          "paymentPlans": [
+        |            {
+        |              "currencyCode": "GBP",
+        |              "description": "GBP 10.36 every month"
+        |            }
+        |          ]
+        |        },
+        |        {
+        |          "id": "voucher_saturday_plus",
+        |          "label": "Saturday+",
+        |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Saturday"
+        |            ],
+        |            "selectableWindow": {
+        |              "cutOffDayInclusive": "Tuesday",
+        |              "startDaysAfterCutOff": 20,
+        |              "sizeInDays": 35
+        |            }
+        |          },
+        |          "paymentPlans": [
+        |            {
+        |              "currencyCode": "GBP",
+        |              "description": "GBP 21.62 every month"
+        |            }
+        |          ]
+        |        },
+        |        {
+        |          "id": "voucher_sixday",
+        |          "label": "Sixday",
+        |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Monday"
+        |            ],
+        |            "selectableWindow": {
+        |              "cutOffDayInclusive": "Tuesday",
+        |              "startDaysAfterCutOff": 20,
+        |              "sizeInDays": 35
+        |            }
+        |          },
+        |          "paymentPlans": [
+        |            {
+        |              "currencyCode": "GBP",
+        |              "description": "GBP 41.12 every month"
+        |            }
+        |          ]
+        |        },
+        |        {
+        |          "id": "voucher_sixday_plus",
+        |          "label": "Sixday+",
+        |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Monday"
+        |            ],
+        |            "selectableWindow": {
+        |              "cutOffDayInclusive": "Tuesday",
+        |              "startDaysAfterCutOff": 20,
+        |              "sizeInDays": 35
+        |            }
+        |          },
+        |          "paymentPlans": [
+        |            {
+        |              "currencyCode": "GBP",
+        |              "description": "GBP 47.62 every month"
+        |            }
+        |          ]
+        |        },
+        |        {
+        |          "id": "voucher_sunday",
+        |          "label": "Sunday",
+        |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Sunday"
+        |            ],
+        |            "selectableWindow": {
+        |              "cutOffDayInclusive": "Tuesday",
+        |              "startDaysAfterCutOff": 20,
+        |              "sizeInDays": 35
+        |            }
+        |          },
+        |          "paymentPlans": [
+        |            {
+        |              "currencyCode": "GBP",
+        |              "description": "GBP 10.79 every month"
+        |            }
+        |          ]
+        |        },
+        |        {
+        |          "id": "voucher_sunday_plus",
+        |          "label": "Sunday+",
+        |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Sunday"
+        |            ],
+        |            "selectableWindow": {
+        |              "cutOffDayInclusive": "Tuesday",
+        |              "startDaysAfterCutOff": 20,
+        |              "sizeInDays": 35
+        |            }
+        |          },
+        |          "paymentPlans": [
+        |            {
+        |              "currencyCode": "GBP",
+        |              "description": "GBP 22.06 every month"
+        |            }
+        |          ]
+        |        },
+        |        {
+        |          "id": "voucher_weekend",
+        |          "label": "Weekend",
+        |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Saturday"
+        |            ],
+        |            "selectableWindow": {
+        |              "cutOffDayInclusive": "Tuesday",
+        |              "startDaysAfterCutOff": 20,
+        |              "sizeInDays": 35
+        |            }
+        |          },
+        |          "paymentPlans": [
+        |            {
+        |              "currencyCode": "GBP",
+        |              "description": "GBP 20.76 every month"
+        |            }
+        |          ]
+        |        },
+        |        {
+        |          "id": "voucher_weekend_plus",
+        |          "label": "Weekend+",
+        |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Saturday"
+        |            ],
+        |            "selectableWindow": {
+        |              "cutOffDayInclusive": "Tuesday",
+        |              "startDaysAfterCutOff": 20,
+        |              "sizeInDays": 35
+        |            }
+        |          },
+        |          "paymentPlans": [
+        |            {
+        |              "currencyCode": "GBP",
+        |              "description": "GBP 29.42 every month"
+        |            }
+        |          ]
+        |        }
+        |      ]
+        |    },
+        |    {
+        |      "label": "Digital pack",
+        |      "plans": [
+        |        {
+        |          "id": "digipack_annual",
+        |          "label": "Annual",
+        |          "startDateRules": {
+        |            "selectableWindow": {
+        |              "sizeInDays": 1
+        |            }
+        |          },
+        |          "paymentPlans": [
+        |            {
+        |              "currencyCode": "GBP",
+        |              "description": "GBP 666.66 every 12 months"
+        |            },
+        |            {
+        |              "currencyCode": "USD",
+        |              "description": "USD 666.65 every 12 months"
+        |            }
+        |          ]
+        |        },
+        |        {
+        |          "id": "digipack_monthly",
+        |          "label": "Monthly",
+        |          "startDateRules": {
+        |            "selectableWindow": {
+        |              "sizeInDays": 1
+        |            }
+        |          },
+        |          "paymentPlans": [
+        |            {
+        |              "currencyCode": "GBP",
+        |              "description": "GBP 55.55 every month"
+        |            },
+        |            {
+        |              "currencyCode": "USD",
+        |              "description": "USD 55.54 every month"
+        |            }
+        |          ]
+        |        }
+        |      ]
+        |    }
+        |  ]
+        |}
       """.stripMargin
 
     def gbpPrice(amount: Int): Map[Currency, AmountMinorUnits] = Map(

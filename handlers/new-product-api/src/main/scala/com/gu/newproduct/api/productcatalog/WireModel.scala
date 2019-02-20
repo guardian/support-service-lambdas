@@ -29,8 +29,14 @@ object WireModel {
     id: String,
     label: String,
     startDateRules: Option[WireStartDateRules] = None,
-    paymentPlans: Option[Map[String, String]] = None
+    paymentPlans: List[WirePaymentPlan]
   )
+
+  case class WirePaymentPlan(currencyCode: String, description: String)
+  object WirePaymentPlan {
+    implicit val writes = Json.writes[WirePaymentPlan]
+
+  }
 
   case class WireSelectableWindow(
     cutOffDayInclusive: Option[WireDayOfWeek] = None,
@@ -89,14 +95,14 @@ object WireModel {
     def fromPlan(plan: Plan) = {
 
       val paymentPlans = plan.paymentPlans.map {
-        case (currency: Currency, paymentPlan: PaymentPlan) => (currency.iso, paymentPlan.value)
+        case (currency: Currency, paymentPlan: PaymentPlan) => WirePaymentPlan(currency.iso, paymentPlan.value)
       }
 
       WirePlanInfo(
         id = plan.id.name,
         label = plan.description.value,
         startDateRules = toOptionalWireRules(plan.startDateRules),
-        paymentPlans = if (paymentPlans.isEmpty) None else Some(paymentPlans)
+        paymentPlans = paymentPlans.toList
       )
     }
   }
