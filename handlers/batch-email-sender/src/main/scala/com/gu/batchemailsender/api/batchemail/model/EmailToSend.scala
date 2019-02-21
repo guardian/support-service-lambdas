@@ -49,6 +49,8 @@ object EmailToSend {
       case ("DD_Mandate_Failure__c", "MF4") => "dd-mandate-failure-4"
       case ("DD_Mandate_Failure__c", "MF5") => "dd-mandate-failure-5"
       case ("DD_Mandate_Failure__c", "MF6") => "dd-mandate-failure-6"
+      case ("DD_Mandate_Failure__c", "MF7") => "dd-mandate-failure-7"
+      case ("DD_Mandate_Failure__c", "MF8") => "dd-mandate-failure-8"
       case (objectName, emailStage) => throw new RuntimeException(s"Unrecognized (object_name, email_stage) = ($objectName, $emailStage). Please fix SF trigger.")
     }
 }
