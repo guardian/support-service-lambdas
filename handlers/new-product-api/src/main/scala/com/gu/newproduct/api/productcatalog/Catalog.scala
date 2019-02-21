@@ -19,10 +19,12 @@ case class Catalog(
   homeDeliverySixDay: Plan,
   homeDeliveryWeekend: Plan,
   homeDeliverySunday: Plan,
+  homeDeliverySaturday: Plan,
   homeDeliveryEveryDayPlus: Plan,
   homeDeliverySixDayPlus: Plan,
   homeDeliveryWeekendPlus: Plan,
-  homeDeliverySundayPlus: Plan
+  homeDeliverySundayPlus: Plan,
+  homeDeliverySaturdayPlus: Plan
 ) {
   val allPlans = List(
     voucherWeekend,
@@ -40,11 +42,13 @@ case class Catalog(
     homeDeliveryEveryDay,
     homeDeliverySixDay,
     homeDeliverySunday,
+    homeDeliverySaturday,
     homeDeliveryWeekend,
     homeDeliveryEveryDayPlus,
     homeDeliverySixDayPlus,
     homeDeliveryWeekendPlus,
-    homeDeliverySundayPlus
+    homeDeliverySundayPlus,
+    homeDeliverySaturdayPlus
   )
 
   val planForId: Map[PlanId, Plan] = allPlans.map(x => x.id -> x).toMap
@@ -95,6 +99,10 @@ object PlanId {
 
   case object HomeDeliverySundayPlus extends PlanId("home_delivery_sunday_plus") with HomeDeliveryPlanId
 
+  case object HomeDeliverySaturday extends PlanId("home_delivery_saturday") with HomeDeliveryPlanId
+
+  case object HomeDeliverySaturdayPlus extends PlanId("home_delivery_saturday_plus") with HomeDeliveryPlanId
+
   val enabledVoucherPlans = List(
     VoucherEveryDay,
     VoucherEveryDayPlus,
@@ -114,6 +122,8 @@ object PlanId {
   val enabledHomeDeliveryPlans = List(
     HomeDeliveryEveryDay,
     HomeDeliveryEveryDayPlus,
+    HomeDeliverySaturday,
+    HomeDeliverySaturdayPlus,
     HomeDeliverySixDay,
     HomeDeliverySixDayPlus,
     HomeDeliverySunday,

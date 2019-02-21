@@ -215,6 +215,34 @@ class CatalogWireTest extends FlatSpec with Matchers {
      |          "paymentPlan": "GBP 9.99 every month"
      |        },
      |        {
+     |          "id": "home_delivery_saturday",
+     |          "label": "Saturday",
+     |          "startDateRules": {
+     |            "daysOfWeek": [
+     |              "Saturday"
+     |            ],
+     |            "selectableWindow": {
+     |              "startDaysAfterCutOff": 3,
+     |              "sizeInDays": 28
+     |            }
+     |          },
+     |          "paymentPlan": "GBP 333.33 every month"
+     |        },
+     |        {
+     |          "id": "home_delivery_saturday_plus",
+     |          "label": "Saturday+",
+     |          "startDateRules": {
+     |            "daysOfWeek": [
+     |              "Saturday"
+     |            ],
+     |            "selectableWindow": {
+     |              "startDaysAfterCutOff": 3,
+     |              "sizeInDays": 28
+     |            }
+     |          },
+     |          "paymentPlan": "GBP 444.44 every month"
+     |        },
+     |        {
      |          "id": "home_delivery_sixday",
      |          "label": "Sixday",
      |          "startDateRules": {
@@ -338,6 +366,8 @@ class CatalogWireTest extends FlatSpec with Matchers {
       case HomeDeliverySundayPlus => Some(AmountMinorUnits(1010))
       case HomeDeliverySixDayPlus => Some(AmountMinorUnits(1111))
       case HomeDeliveryWeekendPlus => Some(AmountMinorUnits(2222))
+      case HomeDeliverySaturday => Some(AmountMinorUnits(33333))
+      case HomeDeliverySaturdayPlus => Some(AmountMinorUnits(44444))
     }
 
     val wireCatalog = WireCatalog.fromCatalog(NewProductApi.catalog(fakePricesFor))
