@@ -119,7 +119,18 @@ object PlanId {
     MonthlyContribution,
     AnnualContribution
   )
-  val enabledHomeDeliveryPlans = List.empty
+  val enabledHomeDeliveryPlans = List(
+    HomeDeliveryEveryDay,
+    HomeDeliveryEveryDayPlus,
+    HomeDeliverySaturday,
+    HomeDeliverySaturdayPlus,
+    HomeDeliverySixDay,
+    HomeDeliverySixDayPlus,
+    HomeDeliverySunday,
+    HomeDeliverySundayPlus,
+    HomeDeliveryWeekend,
+    HomeDeliveryWeekendPlus
+  )
 
   val supportedPlans: List[PlanId] = enabledVoucherPlans ++ enabledContributionPlans ++ enabledHomeDeliveryPlans
   def fromName(name: String): Option[PlanId] = supportedPlans.find(_.name == name)
