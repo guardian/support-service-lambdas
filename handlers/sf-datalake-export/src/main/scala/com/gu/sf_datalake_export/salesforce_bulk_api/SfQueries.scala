@@ -151,7 +151,8 @@ object SfQueries {
       |Term_Start_Date__c,
       |Promo_Type__c,
       |Version__c,
-      |Zuora_Id__c
+      |Zuora_Id__c,
+      |ReaderType__c
       |from SF_Subscription__c
       |where Buyer__r.Account.GDPR_Deletion_Pending__c = false
       |
