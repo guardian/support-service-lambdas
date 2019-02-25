@@ -214,6 +214,8 @@ class CatalogWireTest extends FlatSpec with Matchers {
       case HomeDeliverySundayPlus => Some(AmountMinorUnits(1010))
       case HomeDeliverySixDayPlus => Some(AmountMinorUnits(1111))
       case HomeDeliveryWeekendPlus => Some(AmountMinorUnits(2222))
+      case HomeDeliverySaturday => Some(AmountMinorUnits(33333))
+      case HomeDeliverySaturdayPlus => Some(AmountMinorUnits(44444))
     }
 
     val wireCatalog = WireCatalog.fromCatalog(NewProductApi.catalog(fakePricesFor))

@@ -44,6 +44,7 @@ object NewProductApi {
 
     val homeDeliverySixDayRules = homeDeliveryDateRules(Some(weekDays ++ List(SATURDAY)))
     val homeDeliverySundayDateRules = homeDeliveryDateRules(Some(List(SUNDAY)))
+    val homeDeliverySaturdayDateRules = homeDeliveryDateRules(Some(List(SATURDAY)))
     val homeDeliveryWeekendRules = homeDeliveryDateRules(Some(List(SATURDAY, SUNDAY)))
     val monthlyContributionWindow = WindowRule(
       maybeSize = Some(WindowSizeDays(1)),
@@ -78,7 +79,9 @@ object NewProductApi {
       homeDeliveryEveryDayPlus = planWithPayment(HomeDeliveryEveryDayPlus, PlanDescription("Everyday+"), homeDeliveryEveryDayRules),
       homeDeliverySundayPlus = planWithPayment(HomeDeliverySundayPlus, PlanDescription("Sunday+"), homeDeliverySundayDateRules),
       homeDeliverySixDayPlus = planWithPayment(HomeDeliverySixDayPlus, PlanDescription("Sixday+"), homeDeliverySixDayRules),
-      homeDeliveryWeekendPlus = planWithPayment(HomeDeliveryWeekendPlus, PlanDescription("Weekend+"), homeDeliveryWeekendRules)
+      homeDeliveryWeekendPlus = planWithPayment(HomeDeliveryWeekendPlus, PlanDescription("Weekend+"), homeDeliveryWeekendRules),
+      homeDeliverySaturday = planWithPayment(HomeDeliverySaturday, PlanDescription("Saturday"), homeDeliverySaturdayDateRules),
+      homeDeliverySaturdayPlus = planWithPayment(HomeDeliverySaturdayPlus, PlanDescription("Saturday+"), homeDeliverySaturdayDateRules),
     )
   }
 
