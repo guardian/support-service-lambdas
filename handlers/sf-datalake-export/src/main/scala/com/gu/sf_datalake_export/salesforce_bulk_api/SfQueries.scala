@@ -135,7 +135,6 @@ object SfQueries {
       |Payment_Term__c,
       |Product__c,
       |Product_Name__c,
-      |Product_Type__c,
       |Promotion_Code_Lookup__c,
       |Promotion_Discount__c,
       |Quoted_Refund_Amount__c,
@@ -546,7 +545,6 @@ object SfQueries {
       |WHERE
       |Billing_Account__r.Contact__r.GDPR_Deletion_Pending__c = false
     """.stripMargin
-
 
   val directDebitMandate =
     """
