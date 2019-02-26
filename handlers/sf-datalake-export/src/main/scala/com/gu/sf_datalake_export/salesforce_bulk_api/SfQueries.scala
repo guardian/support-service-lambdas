@@ -135,7 +135,6 @@ object SfQueries {
       |Payment_Term__c,
       |Product__c,
       |Product_Name__c,
-      |Product_Type__c,
       |Promotion_Code_Lookup__c,
       |Promotion_Discount__c,
       |Quoted_Refund_Amount__c,
@@ -152,7 +151,8 @@ object SfQueries {
       |Term_Start_Date__c,
       |Promo_Type__c,
       |Version__c,
-      |Zuora_Id__c
+      |Zuora_Id__c,
+      |ReaderType__c
       |from SF_Subscription__c
       |where Buyer__r.Account.GDPR_Deletion_Pending__c = false
       |
@@ -546,7 +546,6 @@ object SfQueries {
       |WHERE
       |Billing_Account__r.Contact__r.GDPR_Deletion_Pending__c = false
     """.stripMargin
-
 
   val directDebitMandate =
     """
