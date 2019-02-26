@@ -21,10 +21,12 @@ case class Catalog(
   homeDeliverySixDay: Plan,
   homeDeliveryWeekend: Plan,
   homeDeliverySunday: Plan,
+  homeDeliverySaturday: Plan,
   homeDeliveryEveryDayPlus: Plan,
   homeDeliverySixDayPlus: Plan,
   homeDeliveryWeekendPlus: Plan,
   homeDeliverySundayPlus: Plan,
+  homeDeliverySaturdayPlus: Plan,
   digipackAnnual: Plan,
   digipackMonthly: Plan
 ) {
@@ -44,11 +46,13 @@ case class Catalog(
     homeDeliveryEveryDay,
     homeDeliverySixDay,
     homeDeliverySunday,
+    homeDeliverySaturday,
     homeDeliveryWeekend,
     homeDeliveryEveryDayPlus,
     homeDeliverySixDayPlus,
     homeDeliveryWeekendPlus,
     homeDeliverySundayPlus,
+    homeDeliverySaturdayPlus,
     digipackAnnual,
     digipackMonthly
 
@@ -102,6 +106,10 @@ object PlanId {
   case object HomeDeliveryWeekendPlus extends PlanId("home_delivery_weekend_plus") with HomeDeliveryPlanId
 
   case object HomeDeliverySundayPlus extends PlanId("home_delivery_sunday_plus") with HomeDeliveryPlanId
+
+  case object HomeDeliverySaturday extends PlanId("home_delivery_saturday") with HomeDeliveryPlanId
+
+  case object HomeDeliverySaturdayPlus extends PlanId("home_delivery_saturday_plus") with HomeDeliveryPlanId
 
   case object DigipackMonthly extends PlanId("digipack_monthly") with DigipackPlanId
 

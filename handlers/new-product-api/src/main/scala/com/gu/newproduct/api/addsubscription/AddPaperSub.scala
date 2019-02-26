@@ -49,9 +49,9 @@ object AddPaperSub {
       chargeOverride = None,
       productRatePlanId = zuoraRatePlanId
     )
-    subscriptionName <- createSubscription(createSubRequest).toAsyncApiGatewayOp("create voucher subscription")
+    subscriptionName <- createSubscription(createSubRequest).toAsyncApiGatewayOp("create paper subscription")
     plan = getPlan(request.planId)
-    voucherEmailData = PaperEmailData(
+    paperEmailData = PaperEmailData(
       plan = plan,
       firstPaymentDate = request.startDate,
       firstPaperDate = request.startDate,
@@ -60,7 +60,7 @@ object AddPaperSub {
       paymentMethod = customerData.paymentMethod,
       currency = customerData.account.currency
     )
-    _ <- sendConfirmationEmail(customerData.account.sfContactId, voucherEmailData).recoverAndLog("send voucher confirmation email")
+    _ <- sendConfirmationEmail(customerData.account.sfContactId, paperEmailData).recoverAndLog("send paper confirmation email")
   } yield subscriptionName
 
   def wireSteps(

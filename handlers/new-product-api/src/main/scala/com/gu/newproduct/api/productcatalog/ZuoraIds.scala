@@ -52,6 +52,8 @@ object ZuoraIds {
   case class HomeDeliveryZuoraIds(
     everyday: ProductRatePlanId,
     everydayPlus: ProductRatePlanId,
+    saturday:ProductRatePlanId,
+    saturdayPlus:ProductRatePlanId,
     sunday: ProductRatePlanId,
     sundayPlus: ProductRatePlanId,
     weekend: ProductRatePlanId,
@@ -63,6 +65,8 @@ object ZuoraIds {
       HomeDeliveryEveryDay -> everyday,
       HomeDeliveryWeekend -> weekend,
       HomeDeliverySixDay -> sixDay,
+      HomeDeliverySaturday -> saturday,
+      HomeDeliverySaturdayPlus -> saturdayPlus,
       HomeDeliverySunday -> sunday,
       HomeDeliveryEveryDayPlus -> everydayPlus,
       HomeDeliveryWeekendPlus -> weekendPlus,
@@ -122,6 +126,8 @@ object ZuoraIds {
           sixDay = ProductRatePlanId("2c92a0ff560d311b0156136f2afe5315"),
           weekend = ProductRatePlanId("2c92a0fd5614305c01561dc88f3275be"),
           sunday = ProductRatePlanId("2c92a0ff5af9b657015b0fea5b653f81"),
+          saturday = ProductRatePlanId("2c92a0fd5e1dcf0d015e3cb39d0a7ddb"),
+          saturdayPlus= ProductRatePlanId("2c92a0ff6205708e01622484bb2c4613"),
           sundayPlus = ProductRatePlanId("2c92a0fd560d13880156136b8e490f8b"),
           weekendPlus = ProductRatePlanId("2c92a0ff560d311b0156136b9f5c3968"),
           sixDayPlus = ProductRatePlanId("2c92a0ff560d311b0156136b697438a9"),
@@ -161,13 +167,15 @@ object ZuoraIds {
           weekend = ProductRatePlanId("2c92c0f955ca02900155da27f83c2d9b"),
           sunday = ProductRatePlanId("2c92c0f95aff3b54015b0ede33bc04f2"),
           sundayPlus = ProductRatePlanId("2c92c0f955ca02900155da27f4872d4d"),
+          saturday = ProductRatePlanId("2c92c0f85b8fa30e015b9108a83253c7"),
+          saturdayPlus = ProductRatePlanId("2c92c0f961f9cf300161fbfa943b6f54"),
           weekendPlus = ProductRatePlanId("2c92c0f955ca02900155da27f9402dad"),
           sixDayPlus = ProductRatePlanId("2c92c0f955ca02900155da27f29e2d13"),
           everydayPlus = ProductRatePlanId("2c92c0f955ca02900155da2803b02e33")
         ),
         DigipackZuoraIds(
           monthly = ProductRatePlanId("2c92c0f94f2acf73014f2c908f671591"),
-          annual = ProductRatePlanId("2c92c0f84f2ac59d014f2c94aea9199e"),
+          annual = ProductRatePlanId("2c92c0f84f2ac59d014f2c94aea9199e")
         )
       ),
       Stage("DEV") -> ZuoraIds(
@@ -199,13 +207,15 @@ object ZuoraIds {
           weekend = ProductRatePlanId("2c92c0f955c3cf0f0155c5d9df433bf7"),
           sunday = ProductRatePlanId("2c92c0f85aff3453015b1041dfd2317f"),
           sundayPlus = ProductRatePlanId("2c92c0f955c3cf0f0155c5d9e83a3cb7"),
+          saturday = ProductRatePlanId("2c92c0f961f9cf300161fc4d2e3e3664"),
+          saturdayPlus = ProductRatePlanId("2c92c0f961f9cf300161fc4f71473a34"),
           weekendPlus = ProductRatePlanId("2c92c0f95aff3b56015b104aa9a13ea5"),
           sixDayPlus = ProductRatePlanId("2c92c0f85aff33ff015b1042d4ba0a05"),
           everydayPlus = ProductRatePlanId("2c92c0f85aff3453015b10496b5e3d17")
         ),
         DigipackZuoraIds(
           monthly = ProductRatePlanId("2c92c0f84bbfec8b014bc655f4852d9d"),
-          annual = ProductRatePlanId("2c92c0f94bbffaaa014bc6a4212e205b"),
+          annual = ProductRatePlanId("2c92c0f94bbffaaa014bc6a4212e205b")
         )
       )
     )
