@@ -243,6 +243,207 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |      ]
         |    },
         |    {
+        |      "label": "Home delivery",
+        |      "plans": [
+        |        {
+        |          "id": "home_delivery_everyday",
+        |          "label": "Everyday",
+        |          "startDateRules": {
+        |            "selectableWindow": {
+        |              "startDaysAfterCutOff": 3,
+        |              "sizeInDays": 28
+        |            }
+        |          },
+        |          "paymentPlans": [
+        |            {
+        |              "currencyCode": "GBP",
+        |              "description": "GBP 1.23 every month"
+        |            }
+        |          ]
+        |        },
+        |        {
+        |          "id": "home_delivery_everyday_plus",
+        |          "label": "Everyday+",
+        |          "startDateRules": {
+        |            "selectableWindow": {
+        |              "startDaysAfterCutOff": 3,
+        |              "sizeInDays": 28
+        |            }
+        |          },
+        |          "paymentPlans": [
+        |            {
+        |              "currencyCode": "GBP",
+        |              "description": "GBP 9.99 every month"
+        |            }
+        |          ]
+        |        },
+        |        {
+        |          "id": "home_delivery_saturday",
+        |          "label": "Saturday",
+        |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Saturday"
+        |            ],
+        |            "selectableWindow": {
+        |              "startDaysAfterCutOff": 3,
+        |              "sizeInDays": 28
+        |            }
+        |          },
+        |          "paymentPlans": [
+        |            {
+        |              "currencyCode": "GBP",
+        |              "description": "GBP 4.56 every month"
+        |            }
+        |          ]
+        |        },
+        |        {
+        |          "id": "home_delivery_saturday_plus",
+        |          "label": "Saturday+",
+        |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Saturday"
+        |            ],
+        |            "selectableWindow": {
+        |              "startDaysAfterCutOff": 3,
+        |              "sizeInDays": 28
+        |            }
+        |          },
+        |          "paymentPlans": [
+        |            {
+        |              "currencyCode": "GBP",
+        |              "description": "GBP 6.78 every month"
+        |            }
+        |          ]
+        |        },
+        |        {
+        |          "id": "home_delivery_sixday",
+        |          "label": "Sixday",
+        |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Monday",
+        |              "Tuesday",
+        |              "Wednesday",
+        |              "Thursday",
+        |              "Friday",
+        |              "Saturday"
+        |            ],
+        |            "selectableWindow": {
+        |              "startDaysAfterCutOff": 3,
+        |              "sizeInDays": 28
+        |            }
+        |          },
+        |          "paymentPlans": [
+        |            {
+        |              "currencyCode": "GBP",
+        |              "description": "GBP 7.77 every month"
+        |            }
+        |          ]
+        |        },
+        |        {
+        |          "id": "home_delivery_sixday_plus",
+        |          "label": "Sixday+",
+        |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Monday",
+        |              "Tuesday",
+        |              "Wednesday",
+        |              "Thursday",
+        |              "Friday",
+        |              "Saturday"
+        |            ],
+        |            "selectableWindow": {
+        |              "startDaysAfterCutOff": 3,
+        |              "sizeInDays": 28
+        |            }
+        |          },
+        |          "paymentPlans": [
+        |            {
+        |              "currencyCode": "GBP",
+        |              "description": "GBP 11.11 every month"
+        |            }
+        |          ]
+        |        },
+        |        {
+        |          "id": "home_delivery_sunday",
+        |          "label": "Sunday",
+        |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Sunday"
+        |            ],
+        |            "selectableWindow": {
+        |              "startDaysAfterCutOff": 3,
+        |              "sizeInDays": 28
+        |            }
+        |          },
+        |          "paymentPlans": [
+        |            {
+        |              "currencyCode": "GBP",
+        |              "description": "GBP 3.21 every month"
+        |            }
+        |          ]
+        |        },
+        |        {
+        |          "id": "home_delivery_sunday_plus",
+        |          "label": "Sunday+",
+        |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Sunday"
+        |            ],
+        |            "selectableWindow": {
+        |              "startDaysAfterCutOff": 3,
+        |              "sizeInDays": 28
+        |            }
+        |          },
+        |          "paymentPlans": [
+        |            {
+        |              "currencyCode": "GBP",
+        |              "description": "GBP 10.10 every month"
+        |            }
+        |          ]
+        |        },
+        |        {
+        |          "id": "home_delivery_weekend",
+        |          "label": "Weekend",
+        |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Saturday",
+        |              "Sunday"
+        |            ],
+        |            "selectableWindow": {
+        |              "startDaysAfterCutOff": 3,
+        |              "sizeInDays": 28
+        |            }
+        |          },
+        |          "paymentPlans": [
+        |            {
+        |              "currencyCode": "GBP",
+        |              "description": "GBP 8.88 every month"
+        |            }
+        |          ]
+        |        },
+        |        {
+        |          "id": "home_delivery_weekend_plus",
+        |          "label": "Weekend+",
+        |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Saturday",
+        |              "Sunday"
+        |            ],
+        |            "selectableWindow": {
+        |              "startDaysAfterCutOff": 3,
+        |              "sizeInDays": 28
+        |            }
+        |          },
+        |          "paymentPlans": [
+        |            {
+        |              "currencyCode": "GBP",
+        |              "description": "GBP 22.22 every month"
+        |            }
+        |          ]
+        |        }
+        |      ]
+        |    },
+        |    {
         |      "label": "Digital pack",
         |      "plans": [
         |        {
@@ -306,10 +507,12 @@ class CatalogWireTest extends FlatSpec with Matchers {
       case MonthlyContribution => Map.empty
       case AnnualContribution => Map.empty
       case HomeDeliveryEveryDay => gbpPrice(123)
+      case HomeDeliverySaturday => gbpPrice(456)
       case HomeDeliverySunday => gbpPrice(321)
       case HomeDeliverySixDay => gbpPrice(777)
       case HomeDeliveryWeekend => gbpPrice(888)
       case HomeDeliveryEveryDayPlus => gbpPrice(999)
+      case HomeDeliverySaturdayPlus => gbpPrice(678)
       case HomeDeliverySundayPlus => gbpPrice(1010)
       case HomeDeliverySixDayPlus => gbpPrice(1111)
       case HomeDeliveryWeekendPlus => gbpPrice(2222)

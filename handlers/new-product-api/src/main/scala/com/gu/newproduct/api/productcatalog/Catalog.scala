@@ -131,7 +131,18 @@ object PlanId {
     MonthlyContribution,
     AnnualContribution
   )
-  val enabledHomeDeliveryPlans = List.empty
+  val enabledHomeDeliveryPlans = List(
+    HomeDeliveryEveryDay,
+    HomeDeliveryEveryDayPlus,
+    HomeDeliverySaturday,
+    HomeDeliverySaturdayPlus,
+    HomeDeliverySixDay,
+    HomeDeliverySixDayPlus,
+    HomeDeliverySunday,
+    HomeDeliverySundayPlus,
+    HomeDeliveryWeekend,
+    HomeDeliveryWeekendPlus
+  )
 
   val enabledDigipackPlans = List(
     DigipackAnnual,

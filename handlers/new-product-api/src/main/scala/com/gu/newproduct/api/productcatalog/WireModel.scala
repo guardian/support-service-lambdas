@@ -5,8 +5,6 @@ import java.time.DayOfWeek
 import com.gu.i18n.Currency
 import play.api.libs.json.{JsString, Json, Writes}
 
-import scala.collection.immutable.Map
-
 object WireModel {
 
   sealed trait WireDayOfWeek
