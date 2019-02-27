@@ -10,11 +10,11 @@ object AddSubscriptionManualTest extends App {
   val requestBody =
     """{
       |   "zuoraAccountId":"2c92c0f967640caa016764f73a0d22d3",
-      |   "startDate":"2019-03-04",
+      |   "startDate":"2019-03-15",
       |   "acquisitionSource":"CSR",
       |   "createdByCSR":"someone testingsadasd",
       |   "acquisitionCase": "caseID",
-      |   "planId": "voucher_everyday"
+      |   "planId": "digipack_monthly"
       |}
     """.stripMargin
 

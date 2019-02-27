@@ -14,6 +14,7 @@ import com.gu.newproduct.api.addsubscription.validation.paper.PaperAddressValida
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.SubscriptionName
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.WireModel.{WireCreateRequest, WireSubscription}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAccount
+import com.gu.newproduct.api.addsubscription.zuora.GetContacts.BillToAddress
 import com.gu.newproduct.api.addsubscription.zuora._
 import com.gu.newproduct.api.productcatalog.{ContributionPlanId, _}
 import com.gu.util.Logging
@@ -40,7 +41,8 @@ object Handler extends Logging {
 object Steps {
   def handleRequest(
     addContribution: AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName],
-    addPaperSub: AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName]
+    addPaperSub: AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName],
+    addDigipackSub: AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName]
   )(
     apiGatewayRequest: ApiGatewayRequest
   ): Future[ApiResponse] = (for {
@@ -49,7 +51,7 @@ object Steps {
       case _: ContributionPlanId => addContribution(request)
       case _: VoucherPlanId => addPaperSub(request)
       case _: HomeDeliveryPlanId => addPaperSub(request)
-      case _: DigipackPlanId => addPaperSub(request)
+      case _: DigipackPlanId => addDigipackSub(request)
     }
   } yield ApiGatewayResponse(body = AddedSubscription(subscriptionName.value), statusCode = "200")).apiResponse
 
@@ -104,9 +106,21 @@ object Steps {
         queueNames
       )
 
+      digipackSteps = AddDigipackSub.wireSteps(
+        catalog,
+        zuoraIds,
+        zuoraClient,
+        isValidStartDateForPlan,
+        BillToAddress => Passed(()), //todo fix validation here
+        createSubscription,
+        awsSQSSend,
+        queueNames
+      )
+
       addSubSteps = handleRequest(
         addContribution = contributionSteps,
-        addPaperSub = paperSteps
+        addPaperSub = paperSteps,
+        addDigipackSub = digipackSteps
       ) _
 
       configuredOp = Operation.async(
