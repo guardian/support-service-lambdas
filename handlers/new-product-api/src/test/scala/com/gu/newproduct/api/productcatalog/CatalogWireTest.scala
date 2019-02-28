@@ -215,6 +215,15 @@ class CatalogWireTest extends FlatSpec with Matchers {
      |          "id": "home_delivery_everyday",
      |          "label": "Everyday",
      |          "startDateRules": {
+     |             "daysOfWeek": [
+     |                "Monday",
+     |                "Tuesday",
+     |                "Wednesday",
+     |                "Thursday",
+     |                "Friday",
+     |                "Saturday",
+     |                "Sunday"
+     |              ],
      |            "selectableWindow": {
      |              "startDaysAfterCutOff": 3,
      |              "sizeInDays": 28
@@ -226,6 +235,15 @@ class CatalogWireTest extends FlatSpec with Matchers {
      |          "id": "home_delivery_everyday_plus",
      |          "label": "Everyday+",
      |          "startDateRules": {
+     |             "daysOfWeek": [
+     |                "Monday",
+     |                "Tuesday",
+     |                "Wednesday",
+     |                "Thursday",
+     |                "Friday",
+     |                "Saturday",
+     |                "Sunday"
+     |              ],
      |            "selectableWindow": {
      |              "startDaysAfterCutOff": 3,
      |              "sizeInDays": 28
