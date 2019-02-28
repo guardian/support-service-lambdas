@@ -19,7 +19,7 @@ object NewProductApi {
       maybeSize = Some(WindowSizeDays(35))
     )
 
-    def voucherDateRules(allowedDays: List[DayOfWeek]) = StartDateRules(Some(DaysOfWeekRule(allowedDays)), Some(voucherWindowRule))
+    def voucherDateRules(allowedDays: List[DayOfWeek]) = StartDateRules((DaysOfWeekRule(allowedDays)), Some(voucherWindowRule))
 
     val voucherMondayRules = voucherDateRules(List(MONDAY))
     val voucherSundayDateRules = voucherDateRules(List(SUNDAY))
@@ -31,9 +31,9 @@ object NewProductApi {
       maybeSize = Some(WindowSizeDays(28))
     )
 
-    def homeDeliveryDateRules(allowedDays: Option[List[DayOfWeek]]) = StartDateRules(allowedDays.map(DaysOfWeekRule), Some(homeDeliveryWindowRule))
+    def homeDeliveryDateRules(allowedDays: List[DayOfWeek]) = StartDateRules(DaysOfWeekRule(allowedDays), Some(homeDeliveryWindowRule))
 
-    val homeDeliveryEveryDayRules = homeDeliveryDateRules(None)
+
     val weekDays = List(
       MONDAY,
       TUESDAY,
@@ -42,10 +42,18 @@ object NewProductApi {
       FRIDAY
     )
 
-    val homeDeliverySixDayRules = homeDeliveryDateRules(Some(weekDays ++ List(SATURDAY)))
-    val homeDeliverySundayDateRules = homeDeliveryDateRules(Some(List(SUNDAY)))
-    val homeDeliverySaturdayDateRules = homeDeliveryDateRules(Some(List(SATURDAY)))
-    val homeDeliveryWeekendRules = homeDeliveryDateRules(Some(List(SATURDAY, SUNDAY)))
+    val weekendDays = List(
+      SATURDAY,
+      SUNDAY
+    )
+
+    val everyDay = weekDays ++ weekendDays
+
+    val homeDeliveryEveryDayRules = homeDeliveryDateRules(everyDay)
+    val homeDeliverySixDayRules = homeDeliveryDateRules(weekDays ++ List(SATURDAY))
+    val homeDeliverySundayDateRules = homeDeliveryDateRules(List(SUNDAY))
+    val homeDeliverySaturdayDateRules = homeDeliveryDateRules(List(SATURDAY))
+    val homeDeliveryWeekendRules = homeDeliveryDateRules(weekendDays)
     val monthlyContributionWindow = WindowRule(
       maybeSize = Some(WindowSizeDays(1)),
       maybeCutOffDay = None,

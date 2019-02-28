@@ -1,7 +1,6 @@
 package com.gu.newproduct.api.productcatalog
 
 import java.time.DayOfWeek
-
 case class Catalog(
   voucherWeekend: Plan,
   voucherSaturday: Plan,
@@ -137,10 +136,11 @@ case class WindowSizeDays(value: Int) extends AnyVal
 
 sealed trait DateRule
 
-case class StartDateRules(daysOfWeekRule: Option[DaysOfWeekRule] = None, windowRule: Option[WindowRule] = None)
+case class StartDateRules(daysOfWeekRule: DaysOfWeekRule = DaysOfWeekRule(DayOfWeek.values.toList), windowRule: Option[WindowRule] = None)
 
 case class DaysOfWeekRule(allowedDays: List[DayOfWeek]) extends DateRule
 
 case class WindowRule(maybeCutOffDay: Option[DayOfWeek], maybeStartDelay: Option[DelayDays], maybeSize: Option[WindowSizeDays]) extends DateRule
 
 case class AmountMinorUnits(value: Int) extends AnyVal
+

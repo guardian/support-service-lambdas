@@ -51,9 +51,9 @@ object StartDateValidator {
     validatorFor: DateRule => LocalDate => ValidationResult[Unit],
     startDateRules: StartDateRules
   ): LocalDate => ValidationResult[Unit] = {
-    val maybeDaysValidation = startDateRules.daysOfWeekRule.map(validatorFor)
+    val daysValidation = validatorFor(startDateRules.daysOfWeekRule)
     val maybeWindowValidation = startDateRules.windowRule.map(validatorFor)
-    StartDateValidator(maybeDaysValidation orPass, maybeWindowValidation orPass, _)
+    StartDateValidator(daysValidation, maybeWindowValidation orPass, _)
   }
 
   implicit class OptionalRuleOps(maybeRule: Option[LocalDate => ValidationResult[Unit]]) {
