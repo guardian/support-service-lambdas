@@ -18,15 +18,34 @@ class CatalogWireTest extends FlatSpec with Matchers {
      |          "id": "monthly_contribution",
      |          "label": "Monthly",
      |          "startDateRules": {
+     |           "daysOfWeek": [
+     |                "Monday",
+     |                "Tuesday",
+     |                "Wednesday",
+     |                "Thursday",
+     |                "Friday",
+     |                "Saturday",
+     |                "Sunday"
+     |              ],
      |            "selectableWindow": {
      |              "sizeInDays": 1
      |            }
+     |
      |          }
      |        },
      |        {
      |          "id": "annual_contribution",
      |          "label": "Annual",
      |          "startDateRules": {
+     |           "daysOfWeek": [
+     |                "Monday",
+     |                "Tuesday",
+     |                "Wednesday",
+     |                "Thursday",
+     |                "Friday",
+     |                "Saturday",
+     |                "Sunday"
+     |              ],
      |            "selectableWindow": {
      |              "sizeInDays": 1
      |            }
