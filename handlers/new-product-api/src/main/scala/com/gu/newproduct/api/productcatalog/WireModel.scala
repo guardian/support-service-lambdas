@@ -36,7 +36,7 @@ object WireModel {
   )
 
   case class WireStartDateRules(
-    daysOfWeek: Option[List[WireDayOfWeek]] = None,
+    daysOfWeek: List[WireDayOfWeek],
     selectableWindow: Option[WireSelectableWindow] = None
   )
 
@@ -71,9 +71,11 @@ object WireModel {
     implicit val writes = Json.writes[WireStartDateRules]
 
     def fromStartDateRules(rule: StartDateRules): WireStartDateRules = {
-      val maybeWireAllowedDaysOfWeek = rule.daysOfWeekRule.map(_.allowedDays.map(WireDayOfWeek.fromDayOfWeek))
+
+      val allowedDays = rule.daysOfWeekRule.map(_.allowedDays) getOrElse DayOfWeek.values.toList
+      val wireAllowedDaysOfWeek = allowedDays.map(WireDayOfWeek.fromDayOfWeek)
       val maybeWireWindowRules = rule.windowRule.map(WireSelectableWindow.fromWindowRule(_))
-      WireStartDateRules(maybeWireAllowedDaysOfWeek, maybeWireWindowRules)
+      WireStartDateRules(wireAllowedDaysOfWeek, maybeWireWindowRules)
     }
   }
 
