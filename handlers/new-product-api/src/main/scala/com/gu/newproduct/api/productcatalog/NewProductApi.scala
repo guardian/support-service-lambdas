@@ -68,14 +68,14 @@ object NewProductApi {
       ))
     )
 
-    val windowStartingIn2Weeks =  WindowRule(
+    val windowOf30daysStartingIn2Weeks =  WindowRule(
       maybeCutOffDay = None,
       maybeStartDelay = Some(DelayDays(14)),
-      maybeSize =None
+      maybeSize = Some(WindowSizeDays(30))
     )
 
-    val startsin2WeeksAtLeast = StartDateRules(
-      windowRule = Some(windowStartingIn2Weeks)
+    val digipackStartRules = StartDateRules(
+      windowRule = Some(windowOf30daysStartingIn2Weeks)
     )
 
     def planWithPayment(
@@ -108,8 +108,8 @@ object NewProductApi {
       homeDeliverySundayPlus = planWithPayment(HomeDeliverySundayPlus, PlanDescription("Sunday+"), homeDeliverySundayDateRules, Monthly),
       homeDeliverySixDayPlus = planWithPayment(HomeDeliverySixDayPlus, PlanDescription("Sixday+"), homeDeliverySixDayRules, Monthly),
       homeDeliveryWeekendPlus = planWithPayment(HomeDeliveryWeekendPlus, PlanDescription("Weekend+"), homeDeliveryWeekendRules, Monthly),
-      digipackAnnual = planWithPayment(DigipackAnnual, PlanDescription("Annual"), startsin2WeeksAtLeast, Annual),
-      digipackMonthly = planWithPayment(DigipackMonthly, PlanDescription("Monthly"), startsin2WeeksAtLeast, Monthly),
+      digipackAnnual = planWithPayment(DigipackAnnual, PlanDescription("Annual"), digipackStartRules, Annual),
+      digipackMonthly = planWithPayment(DigipackMonthly, PlanDescription("Monthly"), digipackStartRules, Monthly),
     )
   }
 

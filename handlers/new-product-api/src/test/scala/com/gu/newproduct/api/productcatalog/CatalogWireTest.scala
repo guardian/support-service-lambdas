@@ -496,7 +496,8 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Sunday"
         |            ],
         |            "selectableWindow": {
-        |              "startDaysAfterCutOff": 14
+        |              "startDaysAfterCutOff": 14,
+        |              "sizeInDays":30
         |            }
         |          },
         |          "paymentPlans": [
@@ -524,7 +525,8 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Sunday"
         |            ],
         |            "selectableWindow": {
-        |              "startDaysAfterCutOff": 14
+        |              "startDaysAfterCutOff": 14,
+        |              "sizeInDays":30
         |            }
         |          },
         |          "paymentPlans": [
