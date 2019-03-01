@@ -68,14 +68,14 @@ object NewProductApi {
       ))
     )
 
-    val windowOf30daysStartingIn2Weeks =  WindowRule(
+    val windowOf90daysStartingIn2Weeks =  WindowRule(
       maybeCutOffDay = None,
       maybeStartDelay = Some(DelayDays(14)),
-      maybeSize = Some(WindowSizeDays(30))
+      maybeSize = Some(WindowSizeDays(90))
     )
 
     val digipackStartRules = StartDateRules(
-      windowRule = Some(windowOf30daysStartingIn2Weeks)
+      windowRule = Some(windowOf90daysStartingIn2Weeks)
     )
 
     def planWithPayment(
