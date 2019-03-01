@@ -19,6 +19,15 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |          "id": "monthly_contribution",
         |          "label": "Monthly",
         |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Monday",
+        |              "Tuesday",
+        |              "Wednesday",
+        |              "Thursday",
+        |              "Friday",
+        |              "Saturday",
+        |              "Sunday"
+        |            ],
         |            "selectableWindow": {
         |              "sizeInDays": 1
         |            }
@@ -29,6 +38,15 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |          "id": "annual_contribution",
         |          "label": "Annual",
         |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Monday",
+        |              "Tuesday",
+        |              "Wednesday",
+        |              "Thursday",
+        |              "Friday",
+        |              "Saturday",
+        |              "Sunday"
+        |            ],
         |            "selectableWindow": {
         |              "sizeInDays": 1
         |            }
@@ -249,6 +267,15 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |          "id": "home_delivery_everyday",
         |          "label": "Everyday",
         |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Monday",
+        |              "Tuesday",
+        |              "Wednesday",
+        |              "Thursday",
+        |              "Friday",
+        |              "Saturday",
+        |              "Sunday"
+        |            ],
         |            "selectableWindow": {
         |              "startDaysAfterCutOff": 3,
         |              "sizeInDays": 28
@@ -265,6 +292,15 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |          "id": "home_delivery_everyday_plus",
         |          "label": "Everyday+",
         |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Monday",
+        |              "Tuesday",
+        |              "Wednesday",
+        |              "Thursday",
+        |              "Friday",
+        |              "Saturday",
+        |              "Sunday"
+        |            ],
         |            "selectableWindow": {
         |              "startDaysAfterCutOff": 3,
         |              "sizeInDays": 28
@@ -450,8 +486,17 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |          "id": "digipack_annual",
         |          "label": "Annual",
         |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Monday",
+        |              "Tuesday",
+        |              "Wednesday",
+        |              "Thursday",
+        |              "Friday",
+        |              "Saturday",
+        |              "Sunday"
+        |            ],
         |            "selectableWindow": {
-        |              "sizeInDays": 1
+        |              "startDaysAfterCutOff": 14
         |            }
         |          },
         |          "paymentPlans": [
@@ -469,8 +514,17 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |          "id": "digipack_monthly",
         |          "label": "Monthly",
         |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Monday",
+        |              "Tuesday",
+        |              "Wednesday",
+        |              "Thursday",
+        |              "Friday",
+        |              "Saturday",
+        |              "Sunday"
+        |            ],
         |            "selectableWindow": {
-        |              "sizeInDays": 1
+        |              "startDaysAfterCutOff": 14
         |            }
         |          },
         |          "paymentPlans": [

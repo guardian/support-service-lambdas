@@ -7,7 +7,7 @@ import com.gu.effects.sqs.AwsSQSSend.QueueName
 import com.gu.newproduct.api.EmailQueueNames
 import com.gu.newproduct.api.addsubscription.TypeConvert._
 import com.gu.newproduct.api.addsubscription.email.EtSqsSend
-import com.gu.newproduct.api.addsubscription.email.digipack.{DigipackEmailData, SendDigipackConfirmationEmail}
+import com.gu.newproduct.api.addsubscription.email.digipack.{DigipackEmailData, SendDigipackConfirmationEmail, TrialPeriod, ValidatedAddress}
 import com.gu.newproduct.api.addsubscription.validation.Validation._
 import com.gu.newproduct.api.addsubscription.validation.paper.{GetPaperCustomerData, PaperAccountValidation, PaperCustomerData}
 import com.gu.newproduct.api.addsubscription.validation.{ValidateAccount, ValidatePaymentMethod, ValidationResult}
@@ -27,21 +27,22 @@ import com.gu.util.resthttp.RestRequestMaker.Requests
 import com.gu.util.resthttp.Types.ClientFailableOp
 
 import scala.concurrent.Future
-
+import java.time.temporal.ChronoUnit.DAYS
 object AddDigipackSub {
   def steps(
+    currentDate: () => LocalDate,
     getPlan: PlanId => Plan,
     getZuoraRateplanId: PlanId => Option[ProductRatePlanId],
     getCustomerData: ZuoraAccountId => ApiGatewayOp[PaperCustomerData],
     isValidStartDateForPlan: (PlanId, LocalDate) => ValidationResult[Unit],
-    validateAddress: BillToAddress => ValidationResult[Unit],
+    validateAddress: BillToAddress => ValidationResult[ValidatedAddress],
     createSubscription: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName],
     sendConfirmationEmail: (Option[SfContactId], DigipackEmailData) => AsyncApiGatewayOp[Unit]
   )(request: AddSubscriptionRequest): AsyncApiGatewayOp[SubscriptionName] = for {
     _ <- isValidStartDateForPlan(request.planId, request.startDate).toApiGatewayOp.toAsync
 
     customerData <- getCustomerData(request.zuoraAccountId).toAsync
-    _ <- validateAddress(customerData.contacts.billTo.address).toApiGatewayOp.toAsync
+    _ <- validateAddress(customerData.contacts.billTo.address).toApiGatewayOp.toAsync //todo refactor to use the validated version of the address ?
     zuoraRatePlanId <- getZuoraRateplanId(request.planId).toApiGatewayContinueProcessing(internalServerError(s"no Zuora id for ${request.planId}!")).toAsync
     createSubRequest = ZuoraCreateSubRequest(
       request = request,
@@ -51,6 +52,7 @@ object AddDigipackSub {
     )
     subscriptionName <- createSubscription(createSubRequest).toAsyncApiGatewayOp("create digiPack subscription")
     plan = getPlan(request.planId)
+    trialPeriodDays = DAYS.between(currentDate(), request.startDate).toInt
     paperEmailData = DigipackEmailData(
       plan = plan,
       firstPaymentDate = request.startDate,
@@ -58,7 +60,8 @@ object AddDigipackSub {
       subscriptionName = subscriptionName,
       contacts = customerData.contacts,
       paymentMethod = customerData.paymentMethod,
-      currency = customerData.account.currency
+      currency = customerData.account.currency,
+      trialPeriod = TrialPeriod(days = trialPeriodDays)
     )
     _ <- sendConfirmationEmail(customerData.account.sfContactId, paperEmailData).recoverAndLog("send digiPack confirmation email")
   } yield subscriptionName
@@ -68,16 +71,18 @@ object AddDigipackSub {
     zuoraIds: ZuoraIds,
     zuoraClient: Requests,
     isValidStartDateForPlan: (PlanId, LocalDate) => ValidationResult[Unit],
-    isValidAddress: BillToAddress => ValidationResult[Unit],
+    isValidAddress: BillToAddress => ValidationResult[ValidatedAddress],
     createSubscription: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName],
     awsSQSSend: QueueName => AwsSQSSend.Payload => Future[Unit],
-    emailQueueNames: EmailQueueNames
+    emailQueueNames: EmailQueueNames,
+    currentDate: () => LocalDate
   ): AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName] = {
     val digipackSqsSend = awsSQSSend(emailQueueNames.paper)
     val digiPackBrazeConfirmationSqsSend = EtSqsSend[DigipackEmailData](digipackSqsSend) _
     val sendConfirmationEmail = SendDigipackConfirmationEmail(digiPackBrazeConfirmationSqsSend) _
     val validatedCustomerData = getValidatedCustomerData(zuoraClient)
     steps(
+      currentDate,
       catalog.planForId,
       zuoraIds.apiIdToRateplanId.get,
       validatedCustomerData,

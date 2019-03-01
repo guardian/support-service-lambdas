@@ -45,7 +45,7 @@ object SendDigipackConfirmationEmail extends Logging {
   def dataExtensionFor(plan: Plan) = DataExtensionName(
     plan.id match {
       case _: VoucherPlanId => "paper-voucher"
-      case _:DigipackPlanId => "digipack"
+      case _: DigipackPlanId => "digipack"
       case _ => "paper-delivery"
 
     }

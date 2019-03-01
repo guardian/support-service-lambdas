@@ -9,6 +9,7 @@ import com.gu.effects.sqs.AwsSQSSend.QueueName
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.newproduct.api.EmailQueueNames.emailQueuesFor
 import com.gu.newproduct.api.addsubscription.TypeConvert._
+import com.gu.newproduct.api.addsubscription.email.digipack.DigipackAddressValidator
 import com.gu.newproduct.api.addsubscription.validation._
 import com.gu.newproduct.api.addsubscription.validation.paper.PaperAddressValidator
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.SubscriptionName
@@ -111,10 +112,11 @@ object Steps {
         zuoraIds,
         zuoraClient,
         isValidStartDateForPlan,
-        BillToAddress => Passed(()), //todo fix validation here
+        DigipackAddressValidator.apply,
         createSubscription,
         awsSQSSend,
-        queueNames
+        queueNames,
+        currentDate
       )
 
       addSubSteps = handleRequest(

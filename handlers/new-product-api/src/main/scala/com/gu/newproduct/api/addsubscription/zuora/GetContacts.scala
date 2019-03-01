@@ -108,23 +108,27 @@ object GetContacts {
 
   import WireModel._
 
-  case class FirstName(value: String) extends AnyVal
+  trait AddressField {
+    def value: String
+  }
 
-  case class LastName(value: String) extends AnyVal
+  case class FirstName(value: String) extends AddressField
 
-  case class Email(value: String) extends AnyVal
+  case class LastName(value: String) extends AddressField
 
-  case class Title(value: String) extends AnyVal
+  case class Email(value: String) extends AddressField
 
-  case class Address1(value: String) extends AnyVal
+  case class Title(value: String) extends AddressField
 
-  case class Address2(value: String) extends AnyVal
+  case class Address1(value: String) extends AddressField
 
-  case class City(value: String) extends AnyVal
+  case class Address2(value: String) extends AddressField
 
-  case class State(value: String) extends AnyVal
+  case class City(value: String) extends AddressField
 
-  case class Postcode(value: String) extends AnyVal
+  case class State(value: String) extends AddressField
+
+  case class Postcode(value: String) extends AddressField
 
   case class SoldToAddress(
     address1: Option[Address1],
