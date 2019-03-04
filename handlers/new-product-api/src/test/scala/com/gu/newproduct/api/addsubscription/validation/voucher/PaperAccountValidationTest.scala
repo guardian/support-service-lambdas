@@ -21,6 +21,6 @@ class PaperAccountValidationTest extends FlatSpec with Matchers {
 
   it should "fail if currency in account is not GBP " in {
     val dollarAccount = account.copy(currency = USD)
-    PaperAccountValidation(dollarAccount) shouldBe Failed("Invalid currency in Zuora account: USD. Only GBP is allowed for voucher plans")
+    PaperAccountValidation(dollarAccount) shouldBe Failed("Invalid currency in Zuora account: USD. Only GBP is allowed for the selected plan")
   }
 }

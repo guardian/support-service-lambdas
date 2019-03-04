@@ -20,7 +20,7 @@ object ZuoraIds {
     )
   }
 
-  case class VoucherZuoraIds(
+    case class VoucherZuoraIds(
     everyday: ProductRatePlanId,
     saturday: ProductRatePlanId,
     sunday: ProductRatePlanId,
@@ -32,7 +32,8 @@ object ZuoraIds {
     weekendPlus: ProductRatePlanId,
     sixDayPlus: ProductRatePlanId
   ) {
-    val byApiPlanId: Map[PlanId, ProductRatePlanId] = Map(
+
+      val byApiPlanId: Map[PlanId, ProductRatePlanId] = Map(
       VoucherEveryDay -> everyday,
       VoucherWeekend -> weekend,
       VoucherSixDay -> sixDay,
@@ -45,6 +46,9 @@ object ZuoraIds {
       VoucherSaturdayPlus -> saturdayPlus
     )
 
+    val plansWithDigipack = List(
+      everydayPlus, weekendPlus, sixDayPlus, sundayPlus, saturdayPlus
+    )
     val zuoraIdToPlanid = byApiPlanId.map(_.swap)
 
   }
@@ -76,6 +80,9 @@ object ZuoraIds {
 
     val zuoraIdToPlanid = byApiPlanId.map(_.swap)
 
+    val plansWithDigipack = List(
+      everydayPlus, weekendPlus, sixDayPlus, sundayPlus, saturdayPlus
+    )
   }
 
   case class DigipackZuoraIds(

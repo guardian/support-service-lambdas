@@ -142,7 +142,7 @@ object WireModel {
       )
 
       val digipackProduct = WireProduct(
-        label = "Digital pack",
+        label = "Digital Pack",
         plans = PlanId.enabledDigipackPlans.map(wirePlanForPlanId)
       )
 

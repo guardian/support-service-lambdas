@@ -10,16 +10,17 @@ import com.gu.newproduct.api.addsubscription.TypeConvert._
 import com.gu.newproduct.api.addsubscription.email.EtSqsSend
 import com.gu.newproduct.api.addsubscription.email.digipack.{DigipackEmailData, SendDigipackConfirmationEmail, TrialPeriod, ValidatedAddress}
 import com.gu.newproduct.api.addsubscription.validation.Validation._
-import com.gu.newproduct.api.addsubscription.validation.digipack.DigipackAccountValidation
+import com.gu.newproduct.api.addsubscription.validation.digipack.{DigipackAccountValidation, DigipackCustomerData, GetDigipackCustomerData}
 import com.gu.newproduct.api.addsubscription.validation.paper.{GetPaperCustomerData, PaperCustomerData}
-import com.gu.newproduct.api.addsubscription.validation.{ValidateAccount, ValidatePaymentMethod, ValidationResult}
+import com.gu.newproduct.api.addsubscription.validation.{ValidateAccount, ValidatePaymentMethod, ValidateSubscriptions, ValidationResult}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{SubscriptionName, ZuoraCreateSubRequest}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAccount
+import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.WireModel.ZuoraSubscriptionsResponse
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.BillToAddress
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.WireModel.GetContactsResponse
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.PaymentMethodWire
-import com.gu.newproduct.api.addsubscription.zuora.{GetAccount, GetContacts, GetPaymentMethod}
+import com.gu.newproduct.api.addsubscription.zuora.{GetAccount, GetAccountSubscriptions, GetContacts, GetPaymentMethod}
 import com.gu.newproduct.api.productcatalog.ZuoraIds.{ProductRatePlanId, ZuoraIds}
 import com.gu.newproduct.api.productcatalog.{Catalog, Plan, PlanId}
 import com.gu.util.apigateway.ApiGatewayResponse.internalServerError
@@ -34,7 +35,7 @@ object AddDigipackSub {
     currentDate: () => LocalDate,
     getPlan: PlanId => Plan,
     getZuoraRateplanId: PlanId => Option[ProductRatePlanId],
-    getCustomerData: ZuoraAccountId => ApiGatewayOp[PaperCustomerData],
+    getCustomerData: ZuoraAccountId => ApiGatewayOp[DigipackCustomerData],
     isValidStartDateForPlan: (PlanId, LocalDate) => ValidationResult[Unit],
     validateAddress: BillToAddress => ValidationResult[ValidatedAddress],
     createSubscription: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName],
@@ -78,10 +79,12 @@ object AddDigipackSub {
     emailQueueNames: EmailQueueNames,
     currentDate: () => LocalDate
   ): AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName] = {
+
+    val digipackPlanIds = zuoraIds.digitalPackIds.byApiPlanId.values.toList 
     val digipackSqsSend = awsSQSSend(emailQueueNames.paper)
     val digiPackBrazeConfirmationSqsSend = EtSqsSend[DigipackEmailData](digipackSqsSend) _
     val sendConfirmationEmail = SendDigipackConfirmationEmail(digiPackBrazeConfirmationSqsSend) _
-    val validatedCustomerData = getValidatedCustomerData(zuoraClient)
+    val validatedCustomerData = getValidatedCustomerData(zuoraClient, digipackPlanIds)
     steps(
       currentDate,
       catalog.planForId,
@@ -94,7 +97,7 @@ object AddDigipackSub {
     )
   }
 
-  def getValidatedCustomerData(zuoraClient: Requests): ZuoraAccountId => ApiGatewayOp[PaperCustomerData] = {
+  def getValidatedCustomerData(zuoraClient: Requests, plansWithDigipack: List[ProductRatePlanId]): ZuoraAccountId => ApiGatewayOp[DigipackCustomerData] = {
 
     val validateAccount = ValidateAccount.apply _ thenValidate DigipackAccountValidation.apply _
     val getValidatedAccount = GetAccount(zuoraClient.get[ZuoraAccount]) _ andValidateWith (
@@ -103,8 +106,12 @@ object AddDigipackSub {
     )
     val getValidatedPaymentMethod = GetPaymentMethod(zuoraClient.get[PaymentMethodWire]) _ andValidateWith ValidatePaymentMethod.apply _
     val getContacts: ZuoraAccountId => ClientFailableOp[GetContacts.Contacts] = GetContacts(zuoraClient.get[GetContactsResponse]) _
-    GetPaperCustomerData(
+    val validateSubs = ValidateSubscriptions(plansWithDigipack, "Zuora account already has an active subscription with a Digital Pack benefit") _
+    val getValidatedSubs = GetAccountSubscriptions(zuoraClient.get[ZuoraSubscriptionsResponse]) _ andValidateWith validateSubs
+
+    GetDigipackCustomerData(
       getAccount = getValidatedAccount,
+      getAccountSubscriptions = getValidatedSubs,
       getPaymentMethod = getValidatedPaymentMethod,
       getContacts = getContacts,
       _
