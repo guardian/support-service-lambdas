@@ -145,7 +145,7 @@ Resources:
       Threshold: 1
       TreatMissingData: notBreaching
 
-# TODO add metric events processed filter and mandate records created filter
+# TODO add metric events processed filter and mandate records created filter (with alarm if this drops below certain threshold per 12 hours)
 
 # TODO add 'StoppedRunning' alarm based on existing Invocations metric
 
