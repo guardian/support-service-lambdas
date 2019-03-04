@@ -104,4 +104,6 @@ The main project aggregates all the sub projects from handlers and lib, so we ca
 |  [identity-backfill](handlers/identity-backfill)                     | Add identity accounts to Zuora and Salesforce |
 |  [identity-retention](handlers/identity-retention)                   | Is user recurring?                            |
 |  [zuora-retention](handlers/zuora-retention)                         | Exclude long cancelled subscriptions from DL  |
+|  [sf-gocardless-sync](handlers/sf-gocardless-sync)                   | Polling lambda keeping SalesForce in sync with GoCardless  |
+|  [cancellation-sf-cases](handlers/cancellation-sf-cases)             | API for creating Cases in SalesForce to track self-service cancellation |
 |  [lib](lib)                                                          | Shared code                                   |
