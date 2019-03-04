@@ -76,7 +76,8 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "currencyCode": "GBP",
         |              "description": "GBP 47.62 every month"
         |            }
-        |          ]
+        |          ],
+        |          "paymentPlan": "GBP 47.62 every month"
         |        },
         |        {
         |          "id": "voucher_everyday_plus",
@@ -96,7 +97,8 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "currencyCode": "GBP",
         |              "description": "GBP 51.96 every month"
         |            }
-        |          ]
+        |          ],
+        |          "paymentPlan": "GBP 51.96 every month"
         |        },
         |        {
         |          "id": "voucher_saturday",
@@ -116,7 +118,8 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "currencyCode": "GBP",
         |              "description": "GBP 10.36 every month"
         |            }
-        |          ]
+        |          ],
+        |          "paymentPlan": "GBP 10.36 every month"
         |        },
         |        {
         |          "id": "voucher_saturday_plus",
@@ -136,7 +139,8 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "currencyCode": "GBP",
         |              "description": "GBP 21.62 every month"
         |            }
-        |          ]
+        |          ],
+        |           "paymentPlan": "GBP 21.62 every month"
         |        },
         |        {
         |          "id": "voucher_sixday",
@@ -156,7 +160,8 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "currencyCode": "GBP",
         |              "description": "GBP 41.12 every month"
         |            }
-        |          ]
+        |          ],
+        |          "paymentPlan": "GBP 41.12 every month"
         |        },
         |        {
         |          "id": "voucher_sixday_plus",
@@ -176,7 +181,8 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "currencyCode": "GBP",
         |              "description": "GBP 47.62 every month"
         |            }
-        |          ]
+        |          ],
+        |          "paymentPlan": "GBP 47.62 every month"
         |        },
         |        {
         |          "id": "voucher_sunday",
@@ -196,7 +202,8 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "currencyCode": "GBP",
         |              "description": "GBP 10.79 every month"
         |            }
-        |          ]
+        |          ],
+        |          "paymentPlan": "GBP 10.79 every month"
         |        },
         |        {
         |          "id": "voucher_sunday_plus",
@@ -216,7 +223,8 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "currencyCode": "GBP",
         |              "description": "GBP 22.06 every month"
         |            }
-        |          ]
+        |          ],
+        |          "paymentPlan": "GBP 22.06 every month"
         |        },
         |        {
         |          "id": "voucher_weekend",
@@ -236,7 +244,8 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "currencyCode": "GBP",
         |              "description": "GBP 20.76 every month"
         |            }
-        |          ]
+        |          ],
+        |          "paymentPlan": "GBP 20.76 every month"
         |        },
         |        {
         |          "id": "voucher_weekend_plus",
@@ -256,7 +265,8 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "currencyCode": "GBP",
         |              "description": "GBP 29.42 every month"
         |            }
-        |          ]
+        |          ],
+        |          "paymentPlan": "GBP 29.42 every month"
         |        }
         |      ]
         |    },
@@ -286,7 +296,8 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "currencyCode": "GBP",
         |              "description": "GBP 1.23 every month"
         |            }
-        |          ]
+        |          ],
+        |          "paymentPlan": "GBP 1.23 every month"
         |        },
         |        {
         |          "id": "home_delivery_everyday_plus",
@@ -311,7 +322,8 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "currencyCode": "GBP",
         |              "description": "GBP 9.99 every month"
         |            }
-        |          ]
+        |          ],
+        |          "paymentPlan": "GBP 9.99 every month"
         |        },
         |        {
         |          "id": "home_delivery_saturday",
@@ -330,7 +342,8 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "currencyCode": "GBP",
         |              "description": "GBP 4.56 every month"
         |            }
-        |          ]
+        |          ],
+        |          "paymentPlan": "GBP 4.56 every month"
         |        },
         |        {
         |          "id": "home_delivery_saturday_plus",
@@ -349,7 +362,8 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "currencyCode": "GBP",
         |              "description": "GBP 6.78 every month"
         |            }
-        |          ]
+        |          ],
+        |           "paymentPlan": "GBP 6.78 every month"
         |        },
         |        {
         |          "id": "home_delivery_sixday",
@@ -373,7 +387,8 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "currencyCode": "GBP",
         |              "description": "GBP 7.77 every month"
         |            }
-        |          ]
+        |          ],
+        |          "paymentPlan": "GBP 7.77 every month"
         |        },
         |        {
         |          "id": "home_delivery_sixday_plus",
@@ -397,7 +412,8 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "currencyCode": "GBP",
         |              "description": "GBP 11.11 every month"
         |            }
-        |          ]
+        |          ],
+        |          "paymentPlan": "GBP 11.11 every month"
         |        },
         |        {
         |          "id": "home_delivery_sunday",
@@ -416,7 +432,8 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "currencyCode": "GBP",
         |              "description": "GBP 3.21 every month"
         |            }
-        |          ]
+        |          ],
+        |          "paymentPlan": "GBP 3.21 every month"
         |        },
         |        {
         |          "id": "home_delivery_sunday_plus",
@@ -435,7 +452,8 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "currencyCode": "GBP",
         |              "description": "GBP 10.10 every month"
         |            }
-        |          ]
+        |          ],
+        |          "paymentPlan": "GBP 10.10 every month"
         |        },
         |        {
         |          "id": "home_delivery_weekend",
@@ -455,7 +473,8 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "currencyCode": "GBP",
         |              "description": "GBP 8.88 every month"
         |            }
-        |          ]
+        |          ],
+        |           "paymentPlan": "GBP 8.88 every month"
         |        },
         |        {
         |          "id": "home_delivery_weekend_plus",
@@ -475,7 +494,8 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "currencyCode": "GBP",
         |              "description": "GBP 22.22 every month"
         |            }
-        |          ]
+        |          ],
+        |           "paymentPlan": "GBP 22.22 every month"
         |        }
         |      ]
         |    },
@@ -509,7 +529,8 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "currencyCode": "USD",
         |              "description": "USD 666.65 every 12 months"
         |            }
-        |          ]
+        |          ],
+        |          "paymentPlan": "GBP 666.66 every 12 months"
         |        },
         |        {
         |          "id": "digipack_monthly",
@@ -538,7 +559,8 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "currencyCode": "USD",
         |              "description": "USD 55.54 every month"
         |            }
-        |          ]
+        |          ],
+        |          "paymentPlan": "GBP 55.55 every month"
         |        }
         |      ]
         |    }

@@ -3,6 +3,7 @@ package com.gu.newproduct.api.productcatalog
 import java.time.DayOfWeek
 
 import com.gu.i18n.Currency
+import com.gu.i18n.Currency.GBP
 import play.api.libs.json.{JsString, Json, Writes}
 
 object WireModel {
@@ -27,7 +28,8 @@ object WireModel {
     id: String,
     label: String,
     startDateRules: Option[WireStartDateRules] = None,
-    paymentPlans: List[WirePaymentPlan]
+    paymentPlans: List[WirePaymentPlan],
+    paymentPlan: Option[String] //todo legacy field, remove once salesforce is reading from paymentPlans
   )
 
   case class WirePaymentPlan(currencyCode: String, description: String)
@@ -98,11 +100,14 @@ object WireModel {
         case (currency: Currency, paymentPlan: PaymentPlan) => WirePaymentPlan(currency.iso, paymentPlan.value)
       }
 
+      val legacyPaymentPlan = plan.paymentPlans.get(GBP).map(_.value)
+
       WirePlanInfo(
         id = plan.id.name,
         label = plan.description.value,
         startDateRules = toOptionalWireRules(plan.startDateRules),
-        paymentPlans = paymentPlans.toList
+        paymentPlans = paymentPlans.toList,
+        paymentPlan = legacyPaymentPlan
       )
     }
   }
