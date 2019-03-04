@@ -101,7 +101,8 @@ lazy val s3ConfigValidator = all(project in file("lib/s3ConfigValidator"))
     `digital-subscription-expiry`,
     `identity-backfill`,
     effectsDepIncludingTestFolder,
-    `cancellation-sf-cases`
+    `cancellation-sf-cases`,
+    `sf-gocardless-sync`
   )
   .settings(
     libraryDependencies ++= Seq(scalatest)
@@ -151,6 +152,7 @@ lazy val root = all(project in file(".")).enablePlugins(RiffRaffArtifact).aggreg
   `zuora-retention`,
   `sf-contact-merge`,
   `cancellation-sf-cases`,
+  `sf-gocardless-sync`,
   effects,
   handler,
   restHttp,
@@ -200,6 +202,10 @@ lazy val `sf-contact-merge` = all(project in file("handlers/sf-contact-merge"))
   .dependsOn(zuora, salesforce % "compile->compile;test->test", handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `cancellation-sf-cases` = all(project in file("handlers/cancellation-sf-cases"))
+  .enablePlugins(RiffRaffArtifact)
+  .dependsOn(salesforce, handler, effectsDepIncludingTestFolder, testDep)
+
+lazy val `sf-gocardless-sync` = all(project in file("handlers/sf-gocardless-sync"))
   .enablePlugins(RiffRaffArtifact)
   .dependsOn(salesforce, handler, effectsDepIncludingTestFolder, testDep)
 

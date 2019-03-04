@@ -92,7 +92,10 @@ object SfQueries {
       |Payment_benefits_waive__c,
       |Payment_Currency__c,
       |Payment_Type__c ,
-      |Stripe_Product_ID__c
+      |Stripe_Product_ID__c,
+      |DateOfPatronAcquisition__c,
+      |PatronEndDate__c,
+      |PayingPatron__c
       |from Contact
       |where
       |Account.GDPR_Deletion_Pending__c = false
