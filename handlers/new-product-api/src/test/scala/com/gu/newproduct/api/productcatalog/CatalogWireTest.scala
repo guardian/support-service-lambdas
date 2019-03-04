@@ -209,7 +209,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
      |      ]
      |    },
      |    {
-     |      "label": "Home delivery",
+     |      "label": "Home Delivery",
      |      "plans": [
      |        {
      |          "id": "home_delivery_everyday",
