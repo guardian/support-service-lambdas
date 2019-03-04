@@ -1,6 +1,7 @@
 package com.gu.newproduct.api.addsubscription
 
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit.DAYS
 
 import com.gu.effects.sqs.AwsSQSSend
 import com.gu.effects.sqs.AwsSQSSend.QueueName
@@ -9,7 +10,8 @@ import com.gu.newproduct.api.addsubscription.TypeConvert._
 import com.gu.newproduct.api.addsubscription.email.EtSqsSend
 import com.gu.newproduct.api.addsubscription.email.digipack.{DigipackEmailData, SendDigipackConfirmationEmail, TrialPeriod, ValidatedAddress}
 import com.gu.newproduct.api.addsubscription.validation.Validation._
-import com.gu.newproduct.api.addsubscription.validation.paper.{GetPaperCustomerData, PaperAccountValidation, PaperCustomerData}
+import com.gu.newproduct.api.addsubscription.validation.digipack.DigipackAccountValidation
+import com.gu.newproduct.api.addsubscription.validation.paper.{GetPaperCustomerData, PaperCustomerData}
 import com.gu.newproduct.api.addsubscription.validation.{ValidateAccount, ValidatePaymentMethod, ValidationResult}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{SubscriptionName, ZuoraCreateSubRequest}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
@@ -27,7 +29,6 @@ import com.gu.util.resthttp.RestRequestMaker.Requests
 import com.gu.util.resthttp.Types.ClientFailableOp
 
 import scala.concurrent.Future
-import java.time.temporal.ChronoUnit.DAYS
 object AddDigipackSub {
   def steps(
     currentDate: () => LocalDate,
@@ -95,7 +96,7 @@ object AddDigipackSub {
 
   def getValidatedCustomerData(zuoraClient: Requests): ZuoraAccountId => ApiGatewayOp[PaperCustomerData] = {
 
-    val validateAccount = ValidateAccount.apply _ thenValidate PaperAccountValidation.apply _
+    val validateAccount = ValidateAccount.apply _ thenValidate DigipackAccountValidation.apply _
     val getValidatedAccount = GetAccount(zuoraClient.get[ZuoraAccount]) _ andValidateWith (
       validate = validateAccount,
       ifNotFoundReturn = Some("Zuora account id is not valid")

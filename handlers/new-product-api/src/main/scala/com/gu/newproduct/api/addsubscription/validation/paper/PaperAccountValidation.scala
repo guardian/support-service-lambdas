@@ -9,7 +9,7 @@ object PaperAccountValidation {
   ): ValidationResult[ValidatedAccount] = {
     account.currency match {
       case GBP => Passed(account)
-      case other => Failed(s"Invalid currency in Zuora account: $other. Only GBP is allowed for voucher plans")
+      case other => Failed(s"Invalid currency in Zuora account: $other. Only GBP is allowed for the selected plan")
     }
   }
 }
