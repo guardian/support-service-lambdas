@@ -137,7 +137,7 @@ object WireModel {
       )
 
       val homeDeliveryProduct = WireProduct(
-        label = "Home delivery",
+        label = "Home Delivery",
         plans = PlanId.enabledHomeDeliveryPlans.map(wirePlanForPlanId)
       )
 

@@ -1,0 +1,22 @@
+stacks:
+- membership
+regions:
+- eu-west-1
+deployments:
+
+  cfn:
+    type: cloud-formation
+    app: sf-gocardless-sync
+    parameters:
+      templatePath: cfn.yaml
+
+
+  sf-gocardless-sync:
+    type: aws-lambda
+    parameters:
+      fileName: sf-gocardless-sync.jar
+      bucket: zuora-auto-cancel-dist
+      prefixStack: false
+      functionNames:
+      - sf-gocardless-sync-
+    dependencies: [cfn]
