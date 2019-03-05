@@ -5,10 +5,22 @@ import com.gu.util.config.Stage
 
 case class EmailQueueNames(contributions: QueueName, paper: QueueName, digipack: QueueName)
 
-///todo check what queue is used for digital pack
 object EmailQueueNames {
+  val defaultDevQueue = QueueName("subs-welcome-email-dev")
+  val defaultProdQueue = QueueName("subs-welcome-email")
+
   def emailQueuesFor(stage: Stage) = stage match {
-    case Stage("PROD") | Stage("CODE") => EmailQueueNames(contributions = QueueName("contributions-thanks"), paper = QueueName("subs-welcome-email"), digipack = QueueName("subs-welcome-email"))
-    case _ => EmailQueueNames(contributions = QueueName("contributions-thanks-dev"), paper = QueueName("subs-welcome-email-dev"), digipack = QueueName("subs-welcome-email-dev"))
+
+    case Stage("PROD") | Stage("CODE") => EmailQueueNames(
+      contributions = QueueName("contributions-thanks"),
+      paper = defaultProdQueue,
+      digipack = defaultProdQueue
+    )
+      
+    case _ => EmailQueueNames(
+      contributions = QueueName("contributions-thanks-dev"),
+      paper = defaultDevQueue,
+      digipack = defaultDevQueue
+    )
   }
 }
