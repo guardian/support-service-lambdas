@@ -144,7 +144,10 @@ object PlanId {
     HomeDeliveryWeekendPlus
   )
 
-  val enabledDigipackPlans = List.empty
+  val enabledDigipackPlans = List(
+    DigipackAnnual,
+    DigipackMonthly
+  )
   val supportedPlans: List[PlanId] = enabledVoucherPlans ++ enabledContributionPlans ++ enabledHomeDeliveryPlans ++ enabledDigipackPlans
   def fromName(name: String): Option[PlanId] = supportedPlans.find(_.name == name)
 }
