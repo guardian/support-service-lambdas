@@ -105,7 +105,7 @@ object AddDigipackSub {
     )
     val getValidatedPaymentMethod = GetPaymentMethod(zuoraClient.get[PaymentMethodWire]) _ andValidateWith ValidatePaymentMethod.apply _
     val getContacts: ZuoraAccountId => ClientFailableOp[GetContacts.Contacts] = GetContacts(zuoraClient.get[GetContactsResponse]) _
-    val validateSubs = ValidateSubscriptions(plansWithDigipack, "Zuora account already has an active subscription with a Digital Pack benefit") _
+    val validateSubs = ValidateSubscriptions(plansWithDigipack, "Zuora account already has an active Digital Pack subscription") _
     val getValidatedSubs = GetAccountSubscriptions(zuoraClient.get[ZuoraSubscriptionsResponse]) _ andValidateWith validateSubs
 
     GetDigipackCustomerData(
