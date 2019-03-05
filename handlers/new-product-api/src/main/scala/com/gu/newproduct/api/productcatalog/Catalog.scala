@@ -151,8 +151,11 @@ object PlanId {
 
 case class Plan(id: PlanId, description: PlanDescription, startDateRules: StartDateRules = StartDateRules(), paymentPlans: Map[Currency, PaymentPlan] = Map.empty)
 
-//todo rename to payment description or something
-case class PaymentPlan(value: String) extends AnyVal
+sealed trait BillingPeriod
+object Monthly extends BillingPeriod
+object Annual extends BillingPeriod
+
+case class PaymentPlan(currency: Currency, amountMinorUnits: AmountMinorUnits, billingPeriod: BillingPeriod, description: String)
 
 case class PlanDescription(value: String) extends AnyVal
 

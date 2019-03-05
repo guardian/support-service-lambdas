@@ -7,21 +7,26 @@ import com.gu.i18n.Currency
 import com.gu.newproduct.api.addsubscription.Formatters._
 import com.gu.newproduct.api.productcatalog.PlanId._
 
-sealed trait BillingPeriod
-object Monthly extends BillingPeriod
-object Annual extends BillingPeriod
+
 
 object NewProductApi {
   def catalog(pricingFor: PlanId => Map[Currency, AmountMinorUnits]): Catalog = {
 
-    def paymentPlansFor(planid:PlanId, billingPeriod: BillingPeriod): Map[Currency, PaymentPlan] = {
+    def paymentPlansFor(planid: PlanId, billingPeriod: BillingPeriod): Map[Currency, PaymentPlan] = {
       val pricesByCurrency: Map[Currency, AmountMinorUnits] = pricingFor(planid)
 
       val billingPeriodDescription = billingPeriod match {
         case Monthly => "every month"
         case Annual => "every 12 months"
       }
-      pricesByCurrency.map{ case (currency, amount) => (currency, PaymentPlan(s"${currency.iso} ${amount.formatted} $billingPeriodDescription"))}
+      pricesByCurrency.map { case (currency, amount) => (currency, PaymentPlan(
+        currency = currency,
+        amountMinorUnits = amount,
+        billingPeriod = billingPeriod,
+        description = s"${currency.iso} ${amount.formatted} $billingPeriodDescription"
+      )
+      )
+      }
     }
 
 

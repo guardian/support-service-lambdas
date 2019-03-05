@@ -97,10 +97,10 @@ object WireModel {
     def fromPlan(plan: Plan) = {
 
       val paymentPlans = plan.paymentPlans.map {
-        case (currency: Currency, paymentPlan: PaymentPlan) => WirePaymentPlan(currency.iso, paymentPlan.value)
+        case (currency: Currency, paymentPlan: PaymentPlan) => WirePaymentPlan(currency.iso, paymentPlan.description)
       }
 
-      val legacyPaymentPlan = plan.paymentPlans.get(GBP).map(_.value)
+      val legacyPaymentPlan = plan.paymentPlans.get(GBP).map(_.description)
 
       WirePlanInfo(
         id = plan.id.name,

@@ -11,7 +11,7 @@ import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{BankAccount
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.ActivePaymentMethod
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType.CreditCard
 import com.gu.newproduct.api.productcatalog.PlanId._
-import com.gu.newproduct.api.productcatalog.{PaymentPlan, Plan, PlanDescription, PlanId}
+import com.gu.newproduct.api.productcatalog._
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
 import DigipackEmailDataSerialiser._
@@ -52,7 +52,7 @@ class DigipackEmailDataTest extends FlatSpec with Matchers {
     plan = Plan(
       id = VoucherEveryDayPlus,
       description = PlanDescription("Everyday+"),
-      paymentPlans = Map(GBP -> PaymentPlan("GBP 12.25 every month"))
+      paymentPlans = Map(GBP -> PaymentPlan(GBP, AmountMinorUnits(1225), Monthly, "GBP 12.25 every month"))
     ),
     firstPaymentDate = LocalDate.of(2018, 12, 1),
     subscriptionName = SubscriptionName("A-S000SubId"),
@@ -85,11 +85,14 @@ class DigipackEmailDataTest extends FlatSpec with Matchers {
         |  "SubscriberKey": "bill@contact.com",
         |  "Account Name": "someAccountName",
         |  "Default payment method": "Direct Debit",
+        |  "Currency" : "£",
         |  "Post Code": "billToPostcode",
+        |  "Subscription term" : "month",
         |  "City": "billToCity",
         |  "Subscription details": "GBP 12.25 every month",
         |  "MandateID": "MandateId",
         |  "EmailAddress": "bill@contact.com",
+        |  "Payment amount" : "12.25",
         |  "Address 1": "billToAddress1",
         |  "Sort Code": "12-34-56"
         |}
@@ -113,6 +116,5 @@ class DigipackEmailDataTest extends FlatSpec with Matchers {
     )
     allPlansVoucherData.map(DigipackEmailFields(_))
   }
-
 
 }

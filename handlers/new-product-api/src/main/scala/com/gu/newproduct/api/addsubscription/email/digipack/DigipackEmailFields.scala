@@ -8,8 +8,10 @@ import com.gu.newproduct.api.addsubscription.zuora.GetContacts.BillToContact
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{DirectDebit, NonDirectDebitMethod, PaymentMethod}
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType._
+import com.gu.newproduct.api.productcatalog.{Annual, BillingPeriod, Monthly}
 import com.gu.newproduct.api.productcatalog.PlanId._
 import play.api.libs.json.{Json, Writes}
+
 
 object DigipackEmailDataSerialiser {
   implicit val writes: Writes[DigipackEmailData] = (data: DigipackEmailData) => {
@@ -23,22 +25,26 @@ object DigipackEmailFields {
   val digipackPlans = List(VoucherWeekendPlus, VoucherEveryDayPlus, VoucherSixDayPlus, VoucherSundayPlus, VoucherSaturdayPlus)
   val dateformat = DateTimeFormatter.ofPattern("d MMMM yyyy")
 
+  def nounFor(billingPeriod: BillingPeriod) = billingPeriod match {
+    case Monthly => "month"
+    case Annual => "year"
+  }
   def apply(
     data: DigipackEmailData
   ): Map[String, String] = {
 
     val emailAddress = data.contacts.billTo.email.map(_.value).getOrElse("")
-
+    val paymentPLan = data.plan.paymentPlans.get(data.currency)
 
     Map(
       "ZuoraSubscriberId" -> data.subscriptionName.value,
       "SubscriberKey" -> emailAddress,
-      //  "Subscription term" -> "something else",//todo (year or month)   looks like it is not used ?
-      //"Payment amount" -> "16", // todo amount seems to not be used
+      "Subscription term" -> paymentPLan.map(plan => nounFor(plan.billingPeriod)).getOrElse(""),
+      "Payment amount" -> paymentPLan.map(_.amountMinorUnits.formatted).getOrElse(""),
       "Date of first payment" -> data.firstPaymentDate.format(dateformat),
-      // "Currency" -> data.currency.glyph, //todo looks like it is not used ?
+       "Currency" -> data.currency.glyph,
       "Trial period" -> data.trialPeriod.days.toString,
-      "Subscription details" -> data.plan.paymentPlans.get(data.currency).map(_.value).getOrElse("")
+      "Subscription details" -> paymentPLan.map(_.description).getOrElse("")
     ) ++ paymentMethodFields(data.paymentMethod) ++ addressFields(data.contacts.billTo)
 
   }
