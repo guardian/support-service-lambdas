@@ -31,7 +31,6 @@ object SendConfirmationEmail extends Logging {
           dataExtensionFor(emailData.plan),
           sfContactId.map(_.value)
         )
-        println("send using new stuff!!")
         ContinueProcessing(payload)
       case None =>
         val errorLogMessage = "No email address in zuora contact, skipping confirmation email"
