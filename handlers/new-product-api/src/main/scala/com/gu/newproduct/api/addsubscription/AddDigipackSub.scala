@@ -7,11 +7,11 @@ import com.gu.effects.sqs.AwsSQSSend
 import com.gu.effects.sqs.AwsSQSSend.QueueName
 import com.gu.newproduct.api.EmailQueueNames
 import com.gu.newproduct.api.addsubscription.TypeConvert._
-import com.gu.newproduct.api.addsubscription.email.EtSqsSend
-import com.gu.newproduct.api.addsubscription.email.digipack.{DigipackEmailData, SendDigipackConfirmationEmail, TrialPeriod, ValidatedAddress}
+import com.gu.newproduct.api.addsubscription.email.digipack.DigipackEmailDataSerialiser._
+import com.gu.newproduct.api.addsubscription.email.digipack.ValidatedAddress
+import com.gu.newproduct.api.addsubscription.email.{DigipackEmailData, EtSqsSend, SendConfirmationEmail, TrialPeriod}
 import com.gu.newproduct.api.addsubscription.validation.Validation._
 import com.gu.newproduct.api.addsubscription.validation.digipack.{DigipackAccountValidation, DigipackCustomerData, GetDigipackCustomerData}
-import com.gu.newproduct.api.addsubscription.validation.paper.{GetPaperCustomerData, PaperCustomerData}
 import com.gu.newproduct.api.addsubscription.validation.{ValidateAccount, ValidatePaymentMethod, ValidateSubscriptions, ValidationResult}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{SubscriptionName, ZuoraCreateSubRequest}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
@@ -55,17 +55,16 @@ object AddDigipackSub {
     subscriptionName <- createSubscription(createSubRequest).toAsyncApiGatewayOp("create digiPack subscription")
     plan = getPlan(request.planId)
     trialPeriodDays = DAYS.between(currentDate(), request.startDate).toInt
-    paperEmailData = DigipackEmailData(
+    emailData = DigipackEmailData(
       plan = plan,
       firstPaymentDate = request.startDate,
-      firstPaperDate = request.startDate,
       subscriptionName = subscriptionName,
       contacts = customerData.contacts,
       paymentMethod = customerData.paymentMethod,
       currency = customerData.account.currency,
       trialPeriod = TrialPeriod(days = trialPeriodDays)
     )
-    _ <- sendConfirmationEmail(customerData.account.sfContactId, paperEmailData).recoverAndLog("send digiPack confirmation email")
+    _ <- sendConfirmationEmail(customerData.account.sfContactId, emailData).recoverAndLog("send digiPack confirmation email")
   } yield subscriptionName
 
   def wireSteps(
@@ -80,10 +79,10 @@ object AddDigipackSub {
     currentDate: () => LocalDate
   ): AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName] = {
 
-    val digipackPlanIds = zuoraIds.digitalPackIds.byApiPlanId.values.toList 
-    val digipackSqsSend = awsSQSSend(emailQueueNames.paper)
+    val digipackPlanIds = zuoraIds.digitalPackIds.byApiPlanId.values.toList
+    val digipackSqsSend = awsSQSSend(emailQueueNames.digipack)
     val digiPackBrazeConfirmationSqsSend = EtSqsSend[DigipackEmailData](digipackSqsSend) _
-    val sendConfirmationEmail = SendDigipackConfirmationEmail(digiPackBrazeConfirmationSqsSend) _
+    val sendConfirmationEmail = SendConfirmationEmail(digiPackBrazeConfirmationSqsSend) _
     val validatedCustomerData = getValidatedCustomerData(zuoraClient, digipackPlanIds)
     steps(
       currentDate,

@@ -1,39 +1,24 @@
 package com.gu.newproduct.api.addsubscription.email.digipack
 
-import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-import com.gu.i18n.Currency
 import com.gu.newproduct.api.addsubscription.Formatters._
-import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.SubscriptionName
-import com.gu.newproduct.api.addsubscription.zuora.GetContacts.{BillToContact, Contacts}
+import com.gu.newproduct.api.addsubscription.email.DigipackEmailData
+import com.gu.newproduct.api.addsubscription.zuora.GetContacts.BillToContact
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{DirectDebit, NonDirectDebitMethod, PaymentMethod}
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType._
-import com.gu.newproduct.api.productcatalog.Plan
 import com.gu.newproduct.api.productcatalog.PlanId._
 import play.api.libs.json.{Json, Writes}
 
-case class TrialPeriod(days:Int)
-case class DigipackEmailData(
-  plan: Plan,
-  firstPaymentDate: LocalDate,
-  firstPaperDate: LocalDate,
-  subscriptionName: SubscriptionName,
-  contacts: Contacts,
-  paymentMethod: PaymentMethod,
-  currency: Currency,
-  trialPeriod: TrialPeriod
-)
-
-object DigipackEmailData {
+object DigipackEmailDataSerialiser {
   implicit val writes: Writes[DigipackEmailData] = (data: DigipackEmailData) => {
-    val fields: Map[String, String] = PaperEmailFields(data)
+    val fields: Map[String, String] = DigipackEmailFields(data)
     Json.toJson(fields)
   }
 }
 
-object PaperEmailFields {
+object DigipackEmailFields {
 
   val digipackPlans = List(VoucherWeekendPlus, VoucherEveryDayPlus, VoucherSixDayPlus, VoucherSundayPlus, VoucherSaturdayPlus)
   val dateformat = DateTimeFormatter.ofPattern("d MMMM yyyy")
@@ -45,16 +30,16 @@ object PaperEmailFields {
     val emailAddress = data.contacts.billTo.email.map(_.value).getOrElse("")
 
 
-  Map(
-    "ZuoraSubscriberId" -> data.subscriptionName.value,
-    "SubscriberKey" -> emailAddress,
-  //  "Subscription term" -> "something else",//todo (year or month)   looks like it is not used ?
-    //"Payment amount" -> "16", // todo amount seems to not be used
-    "Date of first payment" -> data.firstPaymentDate.format(dateformat),
-   // "Currency" -> data.currency.glyph, //todo looks like it is not used ?
-    "Trial period" -> data.trialPeriod.days.toString,
-    "Subscription details" -> data.plan.paymentPlans.get(data.currency).map(_.value).getOrElse("")
-  )++ paymentMethodFields(data.paymentMethod) ++ addressFields(data.contacts.billTo)
+    Map(
+      "ZuoraSubscriberId" -> data.subscriptionName.value,
+      "SubscriberKey" -> emailAddress,
+      //  "Subscription term" -> "something else",//todo (year or month)   looks like it is not used ?
+      //"Payment amount" -> "16", // todo amount seems to not be used
+      "Date of first payment" -> data.firstPaymentDate.format(dateformat),
+      // "Currency" -> data.currency.glyph, //todo looks like it is not used ?
+      "Trial period" -> data.trialPeriod.days.toString,
+      "Subscription details" -> data.plan.paymentPlans.get(data.currency).map(_.value).getOrElse("")
+    ) ++ paymentMethodFields(data.paymentMethod) ++ addressFields(data.contacts.billTo)
 
   }
 
@@ -78,7 +63,7 @@ object PaperEmailFields {
     )
   }
 
-  def addressFields(contact:BillToContact) = {
+  def addressFields(contact: BillToContact) = {
     val address = contact.address
     Map(
       "First Name" -> contact.firstName.value,

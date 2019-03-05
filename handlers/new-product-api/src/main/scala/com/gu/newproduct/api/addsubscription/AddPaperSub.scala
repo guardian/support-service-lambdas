@@ -6,8 +6,7 @@ import com.gu.effects.sqs.AwsSQSSend
 import com.gu.effects.sqs.AwsSQSSend.QueueName
 import com.gu.newproduct.api.EmailQueueNames
 import com.gu.newproduct.api.addsubscription.TypeConvert._
-import com.gu.newproduct.api.addsubscription.email.EtSqsSend
-import com.gu.newproduct.api.addsubscription.email.paper.{PaperEmailData, SendPaperConfirmationEmail}
+import com.gu.newproduct.api.addsubscription.email.{EtSqsSend, PaperEmailData, SendConfirmationEmail}
 import com.gu.newproduct.api.addsubscription.validation.Validation._
 import com.gu.newproduct.api.addsubscription.validation.paper.{GetPaperCustomerData, PaperAccountValidation, PaperCustomerData}
 import com.gu.newproduct.api.addsubscription.validation.{ValidateAccount, ValidatePaymentMethod, ValidationResult}
@@ -25,6 +24,7 @@ import com.gu.util.reader.AsyncTypes.{AsyncApiGatewayOp, _}
 import com.gu.util.reader.Types.{ApiGatewayOp, OptionOps}
 import com.gu.util.resthttp.RestRequestMaker.Requests
 import com.gu.util.resthttp.Types.ClientFailableOp
+import com.gu.newproduct.api.addsubscription.email.paper.PaperEmailDataSerialiser._
 
 import scala.concurrent.Future
 
@@ -75,7 +75,7 @@ object AddPaperSub {
   ): AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName] = {
     val paperSqsQueueSend = awsSQSSend(emailQueueNames.paper)
     val paperBrazeConfirmationSqsSend = EtSqsSend[PaperEmailData](paperSqsQueueSend) _
-    val sendConfirmationEmail = SendPaperConfirmationEmail(paperBrazeConfirmationSqsSend) _
+    val sendConfirmationEmail = SendConfirmationEmail(paperBrazeConfirmationSqsSend) _
     val validatedCustomerData = getValidatedCustomerData(zuoraClient)
     steps(
       catalog.planForId,

@@ -1,30 +1,17 @@
 package com.gu.newproduct.api.addsubscription.email.paper
 
-import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-import com.gu.i18n.Currency
-import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{DirectDebit, NonDirectDebitMethod, PaymentMethod}
 import com.gu.newproduct.api.addsubscription.Formatters._
-import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.SubscriptionName
+import com.gu.newproduct.api.addsubscription.email.PaperEmailData
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.Contacts
+import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{DirectDebit, NonDirectDebitMethod, PaymentMethod}
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType._
-import com.gu.newproduct.api.productcatalog.Plan
 import com.gu.newproduct.api.productcatalog.PlanId._
 import play.api.libs.json.{Json, Writes}
 
-case class PaperEmailData(
-  plan: Plan,
-  firstPaymentDate: LocalDate,
-  firstPaperDate: LocalDate,
-  subscriptionName: SubscriptionName,
-  contacts: Contacts,
-  paymentMethod: PaymentMethod,
-  currency: Currency
-)
-
-object PaperEmailData {
+object PaperEmailDataSerialiser {
   implicit val writes: Writes[PaperEmailData] = (data: PaperEmailData) => {
     val fields: Map[String, String] = PaperEmailFields(data)
     Json.toJson(fields)

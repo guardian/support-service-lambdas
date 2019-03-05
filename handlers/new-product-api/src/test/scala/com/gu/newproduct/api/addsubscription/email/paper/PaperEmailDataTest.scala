@@ -4,6 +4,7 @@ import java.time.LocalDate
 
 import com.gu.i18n.Country
 import com.gu.i18n.Currency.GBP
+import com.gu.newproduct.api.addsubscription.email.PaperEmailData
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.SubscriptionName
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.{BillToContact, _}
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{BankAccountName, BankAccountNumberMask, DirectDebit, MandateId, NonDirectDebitMethod, SortCode}
@@ -13,7 +14,7 @@ import com.gu.newproduct.api.productcatalog.{PaymentPlan, Plan, PlanDescription,
 import com.gu.newproduct.api.productcatalog.PlanId._
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
-
+import PaperEmailDataSerialiser._
 class PaperEmailDataTest extends FlatSpec with Matchers {
 
   val billto = BillToContact(
