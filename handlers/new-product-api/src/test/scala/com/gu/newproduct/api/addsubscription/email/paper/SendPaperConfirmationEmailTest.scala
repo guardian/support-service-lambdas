@@ -17,7 +17,7 @@ import scala.concurrent.Future
 class SendPaperConfirmationEmailTest extends AsyncFlatSpec with Matchers {
   it should "send voucher confirmation email" in {
     def sqsSend(payload: ETPayload[PaperEmailData]): Future[Unit] = Future {
-      payload shouldBe ETPayload("soldToEmail@mail.com", testVoucherData, DataExtensionName("paper-voucher"), Some("sfContactId"))
+      payload shouldBe ETPayload("billToEmail@mail.com", testVoucherData, DataExtensionName("paper-voucher"), Some("sfContactId"))
       ()
     }
 
@@ -29,14 +29,14 @@ class SendPaperConfirmationEmailTest extends AsyncFlatSpec with Matchers {
 
   it should "return error if contact has no email" in {
 
-    val noEmailSoldTo = testVoucherData.contacts.soldTo.copy(email = None)
-    val noSoldToEmailContacts = testVoucherData.contacts.copy(soldTo = noEmailSoldTo)
-    val noSoldToEmailVoucherData = testVoucherData.copy(contacts = noSoldToEmailContacts)
+    val noEmailBillTo = testVoucherData.contacts.billTo.copy(email = None)
+    val noBillToEmailContacts = testVoucherData.contacts.copy(billTo = noEmailBillTo)
+    val noBillToToEmailVoucherData = testVoucherData.copy(contacts = noBillToEmailContacts)
 
     def sqsSend(payload: ETPayload[PaperEmailData]): Future[Unit] = Future.successful(())
 
     val send = SendPaperConfirmationEmail(sqsSend) _
-    send(Some(SfContactId("sfContactId")), noSoldToEmailVoucherData).underlying map {
+    send(Some(SfContactId("sfContactId")), noBillToToEmailVoucherData).underlying map {
       result => result shouldBe ReturnWithResponse(ApiGatewayResponse.internalServerError("some error"))
     }
   }
