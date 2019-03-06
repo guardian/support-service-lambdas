@@ -3,10 +3,11 @@ package com.gu.newproduct.api.addsubscription.email
 import java.time.LocalDate
 
 import com.gu.i18n.Currency
+import com.gu.newproduct.api.addsubscription.ZuoraAccountId
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.SubscriptionName
-import com.gu.newproduct.api.addsubscription.zuora.GetContacts.{Contacts, Email}
+import com.gu.newproduct.api.addsubscription.zuora.GetContacts.{BillToContact, Contacts, Email}
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.PaymentMethod
-import com.gu.newproduct.api.productcatalog.Plan
+import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, Plan, PlanId}
 
 sealed trait EmailData {
   def plan: Plan
@@ -35,3 +36,13 @@ case class DigipackEmailData(
   trialPeriod: TrialPeriod
 ) extends EmailData
 
+case class ContributionsEmailData(
+  accountId: ZuoraAccountId,
+  currency: Currency,
+  paymentMethod: PaymentMethod,
+  amountMinorUnits: AmountMinorUnits,
+  firstPaymentDate: LocalDate,
+  plan: Plan,
+  contacts: Contacts,
+  created: LocalDate
+) extends EmailData

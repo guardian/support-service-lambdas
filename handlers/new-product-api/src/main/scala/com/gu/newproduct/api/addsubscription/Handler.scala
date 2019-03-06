@@ -87,6 +87,7 @@ object Steps {
       createSubscription = CreateSubscription(zuoraClient.post[WireCreateRequest, WireSubscription], currentDate) _
 
       contributionSteps = AddContribution.wireSteps(
+        catalog,
         zuoraIds,
         zuoraClient,
         isValidStartDateForPlan,
