@@ -17,7 +17,7 @@ import scala.concurrent.Future
 class SendConfirmationEmailTest extends AsyncFlatSpec with Matchers {
   it should "send voucher confirmation email" in {
     def sqsSend(payload: ETPayload[PaperEmailData]): Future[Unit] = Future {
-      payload shouldBe ETPayload("soldToEmail@mail.com", testVoucherData, DataExtensionName("paper-voucher"), Some("sfContactId"))
+      payload shouldBe ETPayload("billToEmail@mail.com", testVoucherData, DataExtensionName("paper-voucher"), Some("sfContactId"))
       ()
     }
 
