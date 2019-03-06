@@ -72,7 +72,7 @@ class PaperEmailDataTest extends FlatSpec with Matchers {
       """
         |{
         |  "ZuoraSubscriberId" : "A-S000SubId",
-        |  "SubscriberKey" : "sold@contact.com",
+        |  "SubscriberKey" : "bill@contact.com",
         |  "subscriber_id" : "A-S000SubId",
         |  "IncludesDigipack" : "true",
         |  "date_of_first_paper" : "1 November 2018",
@@ -87,7 +87,7 @@ class PaperEmailDataTest extends FlatSpec with Matchers {
         |  "title" : "SoldToTitle",
         |  "first_name" : "FirstSold",
         |  "last_name" : "lastSold",
-        |  "EmailAddress" : "sold@contact.com",
+        |  "EmailAddress" : "bill@contact.com",
         |  
         |  "billing_address_line_1" : "billToAddress1",
         |  "billing_address_line_2" : "billToAddress2",
