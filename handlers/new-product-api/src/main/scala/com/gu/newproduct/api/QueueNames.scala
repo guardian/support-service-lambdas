@@ -16,7 +16,7 @@ object EmailQueueNames {
       paper = defaultProdQueue,
       digipack = defaultProdQueue
     )
-      
+
     case _ => EmailQueueNames(
       contributions = QueueName("contributions-thanks-dev"),
       paper = defaultDevQueue,

@@ -10,7 +10,7 @@ import com.gu.newproduct.api.productcatalog.Plan
 
 sealed trait EmailData {
   def plan: Plan
-  def destinationEmail: Option[Email]
+  def contacts: Contacts
 }
 
 case class PaperEmailData(
@@ -21,9 +21,7 @@ case class PaperEmailData(
   contacts: Contacts,
   paymentMethod: PaymentMethod,
   currency: Currency
-) extends EmailData {
-  override def destinationEmail: Option[Email] = contacts.soldTo.email
-}
+) extends EmailData
 
 case class TrialPeriod(days: Int)
 
@@ -35,7 +33,5 @@ case class DigipackEmailData(
   paymentMethod: PaymentMethod,
   currency: Currency,
   trialPeriod: TrialPeriod
-) extends EmailData {
-  override def destinationEmail = contacts.billTo.email
-}
+) extends EmailData
 

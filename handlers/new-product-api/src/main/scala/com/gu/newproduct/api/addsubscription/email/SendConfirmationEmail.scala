@@ -23,7 +23,7 @@ object SendConfirmationEmail extends Logging {
   } yield sendMessageResult
 
   def toPayload[DATA <: EmailData](sfContactId: Option[SfContactId], emailData: DATA): ApiGatewayOp[ETPayload[DATA]] =
-    emailData.destinationEmail match {
+    emailData.contacts.billTo.email match {
       case Some(email) =>
         val payload = ETPayload(
           email = email.value,
