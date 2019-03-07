@@ -12,8 +12,8 @@ import com.gu.newproduct.api.productcatalog.PlanId._
 object NewProductApi {
   def catalog(pricingFor: PlanId => Map[Currency, AmountMinorUnits]): Catalog = {
 
-    def paymentPlansFor(planid: PlanId, billingPeriod: BillingPeriod): Map[Currency, PaymentPlan] = {
-      val pricesByCurrency: Map[Currency, AmountMinorUnits] = pricingFor(planid)
+    def paymentPlansFor(planId: PlanId, billingPeriod: BillingPeriod): Map[Currency, PaymentPlan] = {
+      val pricesByCurrency: Map[Currency, AmountMinorUnits] = pricingFor(planId)
 
       val billingPeriodDescription = billingPeriod match {
         case Monthly => "every month"

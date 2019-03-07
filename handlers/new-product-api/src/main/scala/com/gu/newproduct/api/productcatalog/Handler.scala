@@ -26,7 +26,7 @@ object Handler extends Logging {
     zuoraToPlanId = zuoraIds.rateplanIdToApiId.get _
     zuoraEnv = ZuoraEnvironment.EnvForStage(stage)
     plansWithPrice <- PricesFromZuoraCatalog(zuoraEnv, fetchString, zuoraToPlanId).toApiGatewayOp("get prices from zuora catalog")
-    getPricesForPlan = (planId: PlanId) => plansWithPrice.get(planId).getOrElse(Map.empty)
+    getPricesForPlan = (planId: PlanId) => plansWithPrice.getOrElse(planId, Map.empty)
     catalog = NewProductApi.catalog(getPricesForPlan)
     wireCatalog = WireCatalog.fromCatalog(catalog)
   } yield Operation.noHealthcheck {

@@ -20,7 +20,7 @@ object ZuoraIds {
     )
   }
 
-    case class VoucherZuoraIds(
+  case class VoucherZuoraIds(
     everyday: ProductRatePlanId,
     saturday: ProductRatePlanId,
     sunday: ProductRatePlanId,
@@ -33,7 +33,7 @@ object ZuoraIds {
     sixDayPlus: ProductRatePlanId
   ) {
 
-      val byApiPlanId: Map[PlanId, ProductRatePlanId] = Map(
+    val byApiPlanId: Map[PlanId, ProductRatePlanId] = Map(
       VoucherEveryDay -> everyday,
       VoucherWeekend -> weekend,
       VoucherSixDay -> sixDay,
@@ -56,8 +56,8 @@ object ZuoraIds {
   case class HomeDeliveryZuoraIds(
     everyday: ProductRatePlanId,
     everydayPlus: ProductRatePlanId,
-    saturday:ProductRatePlanId,
-    saturdayPlus:ProductRatePlanId,
+    saturday: ProductRatePlanId,
+    saturdayPlus: ProductRatePlanId,
     sunday: ProductRatePlanId,
     sundayPlus: ProductRatePlanId,
     weekend: ProductRatePlanId,
@@ -134,7 +134,7 @@ object ZuoraIds {
           weekend = ProductRatePlanId("2c92a0fd5614305c01561dc88f3275be"),
           sunday = ProductRatePlanId("2c92a0ff5af9b657015b0fea5b653f81"),
           saturday = ProductRatePlanId("2c92a0fd5e1dcf0d015e3cb39d0a7ddb"),
-          saturdayPlus= ProductRatePlanId("2c92a0ff6205708e01622484bb2c4613"),
+          saturdayPlus = ProductRatePlanId("2c92a0ff6205708e01622484bb2c4613"),
           sundayPlus = ProductRatePlanId("2c92a0fd560d13880156136b8e490f8b"),
           weekendPlus = ProductRatePlanId("2c92a0ff560d311b0156136b9f5c3968"),
           sixDayPlus = ProductRatePlanId("2c92a0ff560d311b0156136b697438a9"),

@@ -108,7 +108,7 @@ object GetContacts {
 
   import WireModel._
 
-  trait AddressField {
+  sealed trait AddressField {
     def value: String
   }
 

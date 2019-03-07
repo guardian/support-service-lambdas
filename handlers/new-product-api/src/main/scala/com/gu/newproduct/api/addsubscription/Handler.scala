@@ -76,7 +76,7 @@ object Steps {
       validatorFor = DateValidator.validatorFor(currentDate, _: DateRule)
       zuoraEnv = ZuoraEnvironment.EnvForStage(stage)
       plansWithPrice <- PricesFromZuoraCatalog(zuoraEnv, fetchString, zuoraIds.rateplanIdToApiId.get).toApiGatewayOp("get prices from zuora catalog")
-      getPricesForPlan = (planId: PlanId) => plansWithPrice.get(planId).getOrElse(Map.empty)
+      getPricesForPlan = (planId: PlanId) => plansWithPrice.getOrElse(planId, Map.empty)
       catalog = NewProductApi.catalog(getPricesForPlan)
 
       isValidStartDateForPlan = Function.uncurried(
