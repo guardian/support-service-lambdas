@@ -15,7 +15,7 @@ import com.gu.identityBackfill.salesforce._
 import com.gu.identityBackfill.zuora.{AddIdentityIdToAccount, CountZuoraAccountsForIdentityId, GetZuoraAccountsForEmail, GetZuoraSubTypeForAccount}
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.SalesforceClient
-import com.gu.salesforce.TypesForSFEffectsData.SFContactId
+import com.gu.salesforce.TypesForSFEffectsData.{SFAccountId, SFContactId}
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, ApiGatewayResponse, ResponseModels}
@@ -68,24 +68,26 @@ object Handler {
       lazy val sfPatch = sfAuth.map(_.wrapWith(JsonHttp.patch))
       lazy val sfGet = sfAuth.map(_.wrapWith(JsonHttp.get))
       lazy val checkSfContactsSyncable = PreReqCheck.checkSfContactsSyncable(syncableSFToIdentity(sfGet, stage)) _
-      lazy val updateSalesforceAccounts = IdentityBackfillSteps.updateAccountsWithIdentityId(updateSalesforceContactsWithIdentityId(sfPatch)) _
+      lazy val updateSalesforceAccount = IdentityBackfillSteps.updateAccountsWithIdentityId(updateSalesforceContactsWithIdentityId(sfPatch)) _
 
       def findAndValidateZuoraAccounts(zuoraQuerier: ZuoraQuerier)(emailAddress: EmailAddress): ApiGatewayOp[List[ZuoraAccountIdentitySFContact]] =
         PreReqCheck.validateZuoraAccountsFound(GetZuoraAccountsForEmail(zuoraQuerier)(emailAddress))(emailAddress)
 
       Operation(
-        steps = WireRequestToDomainObject(IdentityBackfillSteps(
-          PreReqCheck(
-            findExistingIdentityId,
-            findAndValidateZuoraAccounts(zuoraQuerier),
-            countZuoraAccounts andThen PreReqCheck.noZuoraAccountsForIdentityId,
-            GetZuoraSubTypeForAccount(zuoraQuerier) _ andThen PreReqCheck.acceptableReaderType,
-            checkSfContactsSyncable
-          ),
-          createGuestAccount.runRequest,
-          updateZuoraAccounts,
-          updateSalesforceAccounts
-        )),
+        steps = WireRequestToDomainObject(
+          IdentityBackfillSteps(
+            PreReqCheck(
+              findExistingIdentityId,
+              findAndValidateZuoraAccounts(zuoraQuerier),
+              countZuoraAccounts andThen PreReqCheck.noZuoraAccountsForIdentityId,
+              GetZuoraSubTypeForAccount(zuoraQuerier) _ andThen PreReqCheck.acceptableReaderType,
+              checkSfContactsSyncable
+            ),
+            createGuestAccount.runRequest,
+            updateZuoraAccounts,
+            updateSalesforceAccount
+          )
+        ),
         healthcheck = () => Healthcheck(
           getByEmail,
           countZuoraAccounts,
@@ -118,13 +120,13 @@ object Handler {
   def syncableSFToIdentity(
     sfRequests: LazyClientFailableOp[HttpOp[GetRequest, JsValue]],
     stage: Stage
-  )(sFContactId: SFContactId): ApiGatewayOp[Unit] = {
+  )(sfAccountId: SFAccountId): ApiGatewayOp[Set[SFContactId]] = {
     val result = for {
       sfRequests <- sfRequests
-      fields <- GetSFContactSyncCheckFields(sfRequests).apply(sFContactId)
+      fields <- GetSFContactSyncCheckFields(sfRequests).apply(sfAccountId)
     } yield for {
       standardRecordType <- standardRecordTypeForStage(stage)
-      syncable <- SyncableSFToIdentity(standardRecordType)(fields)(sFContactId)
+      syncable <- SyncableSFToIdentity(standardRecordType)(fields)
     } yield syncable
 
     result

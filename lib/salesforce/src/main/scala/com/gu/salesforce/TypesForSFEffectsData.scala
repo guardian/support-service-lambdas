@@ -13,5 +13,6 @@ object TypesForSFEffectsData {
   // various effects tests that use those.  Therefore they need a shared type for the benefit of the compiler.
 
   case class SFContactId(value: String) extends AnyVal
+  case class SFAccountId(value: String) extends AnyVal
 
 }

@@ -23,7 +23,7 @@ object IdentityBackfillSteps extends Logging {
     preReqCheck: EmailAddress => ApiGatewayOp[PreReqResult],
     createGuestAccount: EmailAddress => ClientFailableOp[IdentityId],
     updateZuoraAccounts: (Set[AccountId], IdentityId) => ApiGatewayOp[Unit],
-    updateSalesforceAccounts: (Set[SFContactId], IdentityId) => ApiGatewayOp[Unit]
+    updateSalesforceAccount: (Set[SFContactId], IdentityId) => ApiGatewayOp[Unit]
   )(request: DomainRequest): ApiResponse = {
 
     (for {
@@ -34,7 +34,7 @@ object IdentityBackfillSteps extends Logging {
         case None => createGuestAccount(request.emailAddress)
       }).toApiGatewayOp("create guest identity account")
       _ <- updateZuoraAccounts(preReq.zuoraAccountIds, requiredIdentityId)
-      _ <- updateSalesforceAccounts(preReq.sFContactIds, requiredIdentityId)
+      _ <- updateSalesforceAccount(preReq.maybeBuyerSFContactId, requiredIdentityId)
       // need to remember which ones we updated?
     } yield ApiGatewayResponse.successfulExecution).apiResponse
 

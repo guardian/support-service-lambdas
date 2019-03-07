@@ -6,7 +6,7 @@ import com.gu.identityBackfill.PreReqCheck.PreReqResult
 import com.gu.identityBackfill.Types._
 import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
 import com.gu.identityBackfill.zuora.GetZuoraSubTypeForAccount.ReaderType
-import com.gu.salesforce.TypesForSFEffectsData.SFContactId
+import com.gu.salesforce.TypesForSFEffectsData.{SFAccountId, SFContactId}
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess}
@@ -14,9 +14,13 @@ import org.scalatest.{FlatSpec, Matchers}
 
 class PreReqCheckTest extends FlatSpec with Matchers {
 
+  val personContact = SFContactId("sf")
+
+  val salesforceResult = Set(personContact)
+
   val zuoraResult = List(
-    ZuoraAccountIdentitySFContact(AccountId("acc"), None, SFContactId("sf"), CrmId("crmId")),
-    ZuoraAccountIdentitySFContact(AccountId("acc2"), None, SFContactId("sf2"), CrmId("crmId"))
+    ZuoraAccountIdentitySFContact(AccountId("acc"), None, personContact, CrmId("crmId")),       // customer's direct sub
+    ZuoraAccountIdentitySFContact(AccountId("acc2"), None, SFContactId("sf2"), CrmId("crmId"))  // same customer's gift sub
   )
 
   it should "go through a happy case" in {
@@ -26,13 +30,13 @@ class PreReqCheckTest extends FlatSpec with Matchers {
         _ => ContinueProcessing(zuoraResult),
         _ => ContinueProcessing(()),
         _ => ContinueProcessing(()),
-        _ => ContinueProcessing(())
+        _ => ContinueProcessing(salesforceResult)
       )(EmailAddress("email@address"))
 
     val expectedResult = ContinueProcessing(
       PreReqResult(
         Set(AccountId("acc"), AccountId("acc2")),
-        Set(SFContactId("sf"), SFContactId("sf2")),
+        Set(personContact),
         Some(IdentityId("asdf"))
       )
     )
@@ -48,13 +52,13 @@ class PreReqCheckTest extends FlatSpec with Matchers {
         _ => ContinueProcessing(zuoraResult),
         _ => ContinueProcessing(()),
         _ => ContinueProcessing(()),
-        _ => ContinueProcessing(())
+        _ => ContinueProcessing(salesforceResult)
       )(EmailAddress("email@address"))
 
     val expectedResult = ContinueProcessing(
       PreReqResult(
         Set(AccountId("acc"), AccountId("acc2")),
-        Set(SFContactId("sf"), SFContactId("sf2")),
+        Set(personContact),
         None
       )
     )
@@ -72,15 +76,23 @@ class PreReqCheckTest extends FlatSpec with Matchers {
   }
 
   "checkSfContactsSyncable" should "ReturnWithResponse if contacts not syncable" in {
+    val errorResponse = ApiGatewayResponse.badRequest("foo")
     val ReturnWithResponse(result) = PreReqCheck
-      .checkSfContactsSyncable(_ => ReturnWithResponse(ApiGatewayResponse.badRequest("bad request")))(List(SFContactId("sfContactId")))
+      .checkSfContactsSyncable(_ => ReturnWithResponse(errorResponse))(Set(SFAccountId("crmId")))
 
-    result.body should include("Bad request: multiple contacts are not syncable")
+    result.body should include("Bad request: foo")
+    result shouldNot be(errorResponse)
+    result.body should include("is not syncable for the following reasons:")
+  }
+
+  "checkSfContactsSyncable" should "ReturnWithResponse if more than one CRM account" in {
+    val ReturnWithResponse(result) = PreReqCheck.checkSfContactsSyncable(_ => ???)(Set(SFAccountId("crmId1"), SFAccountId("crmId2")))
+    result.body should include("more than one CRM account")
   }
 
   "checkSfContactsSyncable" should "continue processing if syncable" in {
-    PreReqCheck.checkSfContactsSyncable(_ =>
-      ContinueProcessing(()))(List(SFContactId("sfContactId"))) shouldBe ContinueProcessing(())
+    val ContinueProcessing(result) = PreReqCheck.checkSfContactsSyncable(_ => ContinueProcessing(salesforceResult))(Set(SFAccountId("crmId")))
+    result shouldBe salesforceResult
   }
 
   "validateZuoraAccountsFound" should "stop processing if the zuora account for the given email already has an identity id" in {
