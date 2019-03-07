@@ -1,7 +1,7 @@
 package com.gu.newproduct.api.addsubscription.email
 
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
-import com.gu.newproduct.api.productcatalog.{ContributionPlanId, DigipackPlanId, Plan, VoucherPlanId}
+import com.gu.newproduct.api.productcatalog._
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.AsyncTypes.{AsyncApiGatewayOp, _}
@@ -44,7 +44,7 @@ object SendConfirmationEmail extends Logging {
       case _: VoucherPlanId => "paper-voucher"
       case _: DigipackPlanId => "digipack"
       case _: ContributionPlanId => "regular-contribution-thank-you"
-      case _ => "paper-delivery"
+      case _: HomeDeliveryPlanId => "paper-delivery"
     }
   )
 }
