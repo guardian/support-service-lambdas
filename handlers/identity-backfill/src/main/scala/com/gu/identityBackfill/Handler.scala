@@ -68,7 +68,7 @@ object Handler {
       lazy val sfPatch = sfAuth.map(_.wrapWith(JsonHttp.patch))
       lazy val sfGet = sfAuth.map(_.wrapWith(JsonHttp.get))
       lazy val checkSfContactsSyncable = PreReqCheck.checkSfContactsSyncable(syncableSFToIdentity(sfGet, stage)) _
-      lazy val updateSalesforceAccount = IdentityBackfillSteps.updateAccountsWithIdentityId(updateSalesforceContactsWithIdentityId(sfPatch)) _
+      lazy val updateSalesforceAccount = IdentityBackfillSteps.updateAccountWithIdentityId(updateSalesforceContactsWithIdentityId(sfPatch)) _
 
       def findAndValidateZuoraAccounts(zuoraQuerier: ZuoraQuerier)(emailAddress: EmailAddress): ApiGatewayOp[List[ZuoraAccountIdentitySFContact]] =
         PreReqCheck.validateZuoraAccountsFound(GetZuoraAccountsForEmail(zuoraQuerier)(emailAddress))(emailAddress)
@@ -120,7 +120,7 @@ object Handler {
   def syncableSFToIdentity(
     sfRequests: LazyClientFailableOp[HttpOp[GetRequest, JsValue]],
     stage: Stage
-  )(sfAccountId: SFAccountId): ApiGatewayOp[Set[SFContactId]] = {
+  )(sfAccountId: SFAccountId): ApiGatewayOp[Option[SFContactId]] = {
     val result = for {
       sfRequests <- sfRequests
       fields <- GetSFContactSyncCheckFields(sfRequests).apply(sfAccountId)

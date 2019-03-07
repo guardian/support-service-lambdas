@@ -23,7 +23,7 @@ object IdentityBackfillSteps extends Logging {
     preReqCheck: EmailAddress => ApiGatewayOp[PreReqResult],
     createGuestAccount: EmailAddress => ClientFailableOp[IdentityId],
     updateZuoraAccounts: (Set[AccountId], IdentityId) => ApiGatewayOp[Unit],
-    updateSalesforceAccount: (Set[SFContactId], IdentityId) => ApiGatewayOp[Unit]
+    updateSalesforceAccount: (Option[SFContactId], IdentityId) => ApiGatewayOp[Unit]
   )(request: DomainRequest): ApiResponse = {
 
     (for {
@@ -45,6 +45,25 @@ object IdentityBackfillSteps extends Logging {
       ReturnWithResponse(ApiGatewayResponse.noActionRequired("DRY RUN requested! skipping to the end"))
     else
       ContinueProcessing(())
+
+  def updateAccountWithIdentityId[A](
+    updateAccountWithIdentityId: (A, IdentityId) => ClientFailableOp[Unit]
+  )(ids: Option[A], identityId: IdentityId): ApiGatewayOp[Unit] = {
+
+    val failures = ids
+      .toSeq
+      .map(updateAccountWithIdentityId(_, identityId))
+      .zip(ids.toSeq)
+      .collect {
+        case (clientFailure: ClientFailure, id) => (id -> clientFailure.message).toString
+      }
+
+    if (failures.isEmpty)
+      ContinueProcessing(())
+    else
+      ReturnWithResponse(ApiGatewayResponse.badRequest("updateAccountsWithIdentityId multiple errors: " + failures.mkString(", ")))
+
+  }
 
   def updateAccountsWithIdentityId[A](
     updateAccountsWithIdentityId: (A, IdentityId) => ClientFailableOp[Unit]

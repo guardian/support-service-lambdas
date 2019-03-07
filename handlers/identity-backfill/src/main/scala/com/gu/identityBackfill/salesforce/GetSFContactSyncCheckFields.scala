@@ -80,9 +80,9 @@ object SyncableSFToIdentity {
     standardRecordType: RecordTypeId
   )(
     fields: ContactsByAccountIdQueryResponse
-  ): Types.ApiGatewayOp[Set[SFContactId]] = {
+  ): Types.ApiGatewayOp[Option[SFContactId]] = {
     val maybeSyncableContact = ContactSyncCheck(standardRecordType)(fields)
-    if (maybeSyncableContact.nonEmpty) ContinueProcessing(maybeSyncableContact.toSet) else {
+    if (maybeSyncableContact.nonEmpty) ContinueProcessing(maybeSyncableContact) else {
       ReturnWithResponse(ApiGatewayResponse.notFound("this sf contact can't be synced back to zuora/identity"))
     }
   }

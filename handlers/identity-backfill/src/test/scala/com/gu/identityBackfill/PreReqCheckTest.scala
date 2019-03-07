@@ -16,7 +16,7 @@ class PreReqCheckTest extends FlatSpec with Matchers {
 
   val personContact = SFContactId("sf")
 
-  val salesforceResult = Set(personContact)
+  val salesforceResult = Some(personContact)
 
   val zuoraResult = List(
     ZuoraAccountIdentitySFContact(AccountId("acc"), None, personContact, CrmId("crmId")),       // customer's direct sub
@@ -36,7 +36,7 @@ class PreReqCheckTest extends FlatSpec with Matchers {
     val expectedResult = ContinueProcessing(
       PreReqResult(
         Set(AccountId("acc"), AccountId("acc2")),
-        Set(personContact),
+        Some(personContact),
         Some(IdentityId("asdf"))
       )
     )
@@ -58,7 +58,7 @@ class PreReqCheckTest extends FlatSpec with Matchers {
     val expectedResult = ContinueProcessing(
       PreReqResult(
         Set(AccountId("acc"), AccountId("acc2")),
-        Set(personContact),
+        Some(personContact),
         None
       )
     )

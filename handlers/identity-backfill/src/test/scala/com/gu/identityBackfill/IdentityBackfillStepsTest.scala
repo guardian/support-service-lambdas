@@ -14,7 +14,7 @@ class IdentityBackfillStepsTest extends FlatSpec with Matchers {
 
   it should "backfill identity ids successfully" in {
     val ApiResponse(statusCode, _, _) = IdentityBackfillSteps.apply(
-      _ => ContinueProcessing(PreReqResult(Set(AccountId("accountId")), Set(SFContactId("sfContactId")), None)),
+      _ => ContinueProcessing(PreReqResult(Set(AccountId("accountId")), Option(SFContactId("sfContactId")), None)),
       _ => ClientSuccess(IdentityId("123")),
       (_, _) => ContinueProcessing(()),
       (_, _) => ContinueProcessing(())

@@ -13,14 +13,14 @@ import com.gu.util.resthttp.Types.ClientFailableOp
 
 object PreReqCheck {
 
-  case class PreReqResult(zuoraAccountIds: Set[Types.AccountId], maybeBuyerSFContactId: Set[SFContactId], existingIdentityId: Option[IdentityId])
+  case class PreReqResult(zuoraAccountIds: Set[Types.AccountId], maybeBuyerSFContactId: Option[SFContactId], existingIdentityId: Option[IdentityId])
 
   def apply(
     findExistingIdentityId: EmailAddress => ApiGatewayOp[Option[IdentityId]],
     findAndValidateZuoraAccounts: EmailAddress => ApiGatewayOp[List[ZuoraAccountIdentitySFContact]],
     noZuoraAccountsForIdentityId: IdentityId => ApiGatewayOp[Unit],
     zuoraSubType: AccountId => ApiGatewayOp[Unit],
-    syncableSFToIdentity: Set[SFAccountId] => ApiGatewayOp[Set[SFContactId]]
+    syncableSFToIdentity: Set[SFAccountId] => ApiGatewayOp[Option[SFContactId]]
   )(emailAddress: EmailAddress): ApiGatewayOp[PreReqResult] = {
     for {
       maybeExistingIdentityId <- findExistingIdentityId(emailAddress)
@@ -30,7 +30,7 @@ object PreReqCheck {
     } yield PreReqResult(zuoraAccounts.map(_.accountId).toSet, maybeBuyerSFContactId, maybeExistingIdentityId)
   }
 
-  def checkSfContactsSyncable(syncableSFToIdentity: SFAccountId => ApiGatewayOp[Set[SFContactId]])(crmIds: Set[SFAccountId]): ApiGatewayOp[Set[SFContactId]] = {
+  def checkSfContactsSyncable(syncableSFToIdentity: SFAccountId => ApiGatewayOp[Option[SFContactId]])(crmIds: Set[SFAccountId]): ApiGatewayOp[Option[SFContactId]] = {
     crmIds.toList match {
       case Nil => ReturnWithResponse(ApiGatewayResponse.badRequest(s"No Salesforce Accounts referenced in all of the customer's Zuora Billing Accounts"))
       case crmId :: Nil => syncableSFToIdentity(crmId) mapResponse { errorResponse =>
