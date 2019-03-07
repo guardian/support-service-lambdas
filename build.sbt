@@ -164,6 +164,7 @@ lazy val root = all(project in file(".")).enablePlugins(RiffRaffArtifact).aggreg
   `effects-sqs`,
   `effects-ses`,
   `sf-datalake-export`,
+  `zuora-datalake-export`,
   `batch-email-sender`
 ).dependsOn(zuora, handler, effectsDepIncludingTestFolder, `effects-sqs`, testDep)
 
@@ -212,6 +213,9 @@ lazy val `sf-gocardless-sync` = all(project in file("handlers/sf-gocardless-sync
 lazy val `sf-datalake-export` = all(project in file("handlers/sf-datalake-export"))
   .enablePlugins(RiffRaffArtifact)
   .dependsOn(salesforce, handler, effectsDepIncludingTestFolder, testDep)
+
+lazy val `zuora-datalake-export` = all(project in file("handlers/zuora-datalake-export"))
+  .enablePlugins(RiffRaffArtifact)
 
 lazy val `batch-email-sender` = all(project in file("handlers/batch-email-sender"))
   .enablePlugins(RiffRaffArtifact)

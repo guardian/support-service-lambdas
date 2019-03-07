@@ -1,0 +1,93 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: Zuora to Datalake export
+
+Parameters:
+    Stage:
+        Description: Stage name
+        Type: String
+        AllowedValues:
+            - CODE
+            - PROD
+        Default: CODE
+
+Mappings:
+  StageVariables:
+    CODE:
+      datalakeBucketName : "zuora-datalake-export-code"
+    PROD:
+      datalakeBucketName : "zuora-datalake-export-prod"
+
+Resources:
+    DatalakeBucket:
+        Type: "AWS::S3::Bucket"
+        Properties:
+          BucketName:
+            Fn::FindInMap:
+              - StageVariables
+              - Ref: Stage
+              - "datalakeBucketName"
+          AccessControl: Private
+          BucketEncryption:
+            ServerSideEncryptionConfiguration:
+              - ServerSideEncryptionByDefault:
+                  SSEAlgorithm: AES256
+          LifecycleConfiguration:
+            Rules:
+              - Id: DeleteOldFiles
+                Prefix: ""
+                Status: Enabled
+                ExpirationInDays: 1
+
+    StartExportJobRole:
+        Type: AWS::IAM::Role
+        Properties:
+            AssumeRolePolicyDocument:
+                Statement:
+                    - Effect: Allow
+                      Principal:
+                          Service:
+                             - lambda.amazonaws.com
+                      Action:
+                          - sts:AssumeRole
+            Path: /
+            Policies:
+                - PolicyName: LambdaPolicy
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                            - logs:CreateLogGroup
+                            - logs:CreateLogStream
+                            - logs:PutLogEvents
+                            - lambda:InvokeFunction
+                            Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/StartExportJobHandler-${Stage}:log-stream:*"
+
+                - PolicyName: ReadPrivateCredentials
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action: s3:GetObject
+                            Resource: !Sub "arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/zuoraRest-${Stage}*.json"
+
+    StartExportJobLambda:
+        Type: AWS::Lambda::Function
+        Properties:
+            Description: Start Zuora to Datalake AQuA job
+            FunctionName:
+                !Sub zuora-datalake-export-StartExportJob-${Stage}
+            Code:
+                S3Bucket: zuora-auto-cancel-dist
+                S3Key: !Sub membership/${Stage}/zuora-datalake-export/zuora-datalake-export.jar
+            Handler: com.gu.zuora.datalake.export.StartExportJob::handle
+            Environment:
+                Variables:
+                  Stage: !Ref Stage
+            Role:
+                !GetAtt StartExportJobRole.Arn
+            MemorySize: 1536
+            Runtime: java8
+            Timeout: 300
+        DependsOn:
+        - StartExportJobRole
+

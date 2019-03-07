@@ -1,0 +1,19 @@
+stacks:
+- membership
+regions:
+- eu-west-1
+deployments:
+  cfn:
+    type: cloud-formation
+    app: zuora-datalake-export
+    parameters:
+      templatePath: cfn.yaml
+  zuora-datalake-export:
+    type: aws-lambda
+    parameters:
+      fileName: zuora-datalake-export.jar
+      bucket: zuora-auto-cancel-dist
+      prefixStack: false
+      functionNames:
+      - zuora-datalake-export-StartExportJob-
+    dependencies: [cfn]
