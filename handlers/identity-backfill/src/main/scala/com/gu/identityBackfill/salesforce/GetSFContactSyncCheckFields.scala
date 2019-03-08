@@ -2,7 +2,7 @@ package com.gu.identityBackfill.salesforce
 
 import com.gu.i18n.CountryGroup
 import com.gu.identityBackfill.salesforce.ContactSyncCheck.RecordTypeId
-import com.gu.identityBackfill.salesforce.GetSFContactSyncCheckFields.{ContactSyncCheckFields, ContactsByAccountIdQueryResponse}
+import com.gu.identityBackfill.salesforce.GetSFContactSyncCheckFields.ContactSyncCheckFields
 import com.gu.salesforce.TypesForSFEffectsData.{SFAccountId, SFContactId}
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types
@@ -33,7 +33,7 @@ object GetSFContactSyncCheckFields {
   implicit val readQuery = Json.reads[ContactsByAccountIdQueryResponse]
 
   def apply(getOp: HttpOp[GetRequest, JsValue]): GetSFContactSyncCheckFields = {
-    new GetSFContactSyncCheckFields(getOp.setupRequest(toRequest).parse[ContactsByAccountIdQueryResponse].runRequestLazy)
+    new GetSFContactSyncCheckFields(getOp.setupRequest(toRequest).parse[ContactsByAccountIdQueryResponse].map(_.records).runRequestLazy)
   }
 
   def toRequest(sfAccountId: SFAccountId) =
@@ -45,7 +45,7 @@ object GetSFContactSyncCheckFields {
 
 }
 
-case class GetSFContactSyncCheckFields(apply: SFAccountId => LazyClientFailableOp[ContactsByAccountIdQueryResponse])
+case class GetSFContactSyncCheckFields(apply: SFAccountId => LazyClientFailableOp[List[ContactSyncCheckFields]])
 
 object ContactSyncCheck {
 
@@ -54,20 +54,18 @@ object ContactSyncCheck {
   def apply(
     standardRecordType: RecordTypeId
   )(
-    queryResponse: GetSFContactSyncCheckFields.ContactsByAccountIdQueryResponse
+    contactSyncCheckFields: List[GetSFContactSyncCheckFields.ContactSyncCheckFields]
   ): Option[SFContactId] = {
 
-    def correctRecordType(fields: ContactSyncCheckFields) = fields.RecordTypeId.contains(standardRecordType.value)
-
-    queryResponse.records.filter(correctRecordType) match {
-      case List(contactSyncCheckFields) => {
-        val hasFirstName = contactSyncCheckFields.FirstName.trim != ""
-        val hasLastName = contactSyncCheckFields.LastName.trim != ""
-        val email = contactSyncCheckFields.Email.getOrElse("").trim
+    contactSyncCheckFields.filter(_.RecordTypeId.contains(standardRecordType.value)) match {
+      case onlyBillingContactFields::Nil => {
+        val hasFirstName = onlyBillingContactFields.FirstName.trim != ""
+        val hasLastName = onlyBillingContactFields.LastName.trim != ""
+        val email = onlyBillingContactFields.Email.getOrElse("").trim
         val emailIsValid = email.length > 3 && email.contains("@")
-        val country = contactSyncCheckFields.OtherCountry.getOrElse("")
+        val country = onlyBillingContactFields.OtherCountry.getOrElse("")
         val countryIsValid = country.trim != "" && CountryGroup.byOptimisticCountryNameOrCode(country).isDefined
-        if (hasFirstName && hasLastName && emailIsValid && countryIsValid) Some(SFContactId(contactSyncCheckFields.Id)) else None
+        if (hasFirstName && hasLastName && emailIsValid && countryIsValid) Some(SFContactId(onlyBillingContactFields.Id)) else None
       }
       case _ => None
     }
@@ -75,11 +73,11 @@ object ContactSyncCheck {
 
 }
 
-object SyncableSFToIdentity {
+object GetSFBillingContactIfSyncable {
   def apply(
     standardRecordType: RecordTypeId
   )(
-    fields: ContactsByAccountIdQueryResponse
+    fields: List[ContactSyncCheckFields]
   ): Types.ApiGatewayOp[Option[SFContactId]] = {
     val maybeSyncableContact = ContactSyncCheck(standardRecordType)(fields)
     if (maybeSyncableContact.nonEmpty) ContinueProcessing(maybeSyncableContact) else {

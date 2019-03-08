@@ -37,7 +37,7 @@ class IdentityBackfillStepsTest extends FlatSpec with Matchers {
   "updateAccountsWithIdentityId" should "update salesforce accounts successfully" in {
     var updated: List[(AccountId, IdentityId)] = Nil
 
-    val result = IdentityBackfillSteps.updateAccountsWithIdentityId[AccountId] { (accountId, identityId) =>
+    val result = IdentityBackfillSteps.updateZuoraBillingAccountsIdentityId[AccountId] { (accountId, identityId) =>
       updated = accountId -> identityId :: updated
       ClientSuccess(())
     }(Set(AccountId("accountId1"), AccountId("accountId2")), IdentityId("123"))
@@ -48,7 +48,7 @@ class IdentityBackfillStepsTest extends FlatSpec with Matchers {
 
   "updateZuoraAccounts" should "propagate errors" in {
     val ReturnWithResponse(result) = IdentityBackfillSteps
-      .updateAccountsWithIdentityId[AccountId]((_, _) => GenericError("error"))(Set(AccountId("accountId1"), AccountId("accountId2")), IdentityId("123"))
+      .updateZuoraBillingAccountsIdentityId[AccountId]((_, _) => GenericError("error"))(Set(AccountId("accountId1"), AccountId("accountId2")), IdentityId("123"))
 
     result.body should include("updateAccountsWithIdentityId multiple errors")
   }

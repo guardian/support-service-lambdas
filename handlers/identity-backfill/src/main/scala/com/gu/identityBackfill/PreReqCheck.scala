@@ -26,14 +26,14 @@ object PreReqCheck {
       maybeExistingIdentityId <- findExistingIdentityId(emailAddress)
       zuoraAccounts <- findAndValidateZuoraAccounts(emailAddress)
       _ <- maybeExistingIdentityId.map(noZuoraAccountsForIdentityId).getOrElse(ContinueProcessing(()))
-      maybeBuyerSFContactId <- syncableSFToIdentity(zuoraAccounts.map(_.crmId.asSFAccountId).toSet)
-    } yield PreReqResult(zuoraAccounts.map(_.accountId).toSet, maybeBuyerSFContactId, maybeExistingIdentityId)
+      maybeBuyer <- syncableSFToIdentity(zuoraAccounts.map(_.crmId.asSFAccountId).toSet)
+    } yield PreReqResult(zuoraAccounts.map(_.accountId).toSet, maybeBuyer, maybeExistingIdentityId)
   }
 
-  def checkSfContactsSyncable(syncableSFToIdentity: SFAccountId => ApiGatewayOp[Option[SFContactId]])(crmIds: Set[SFAccountId]): ApiGatewayOp[Option[SFContactId]] = {
+  def checkSfContactsSyncable(salesforceAccountLookup: SFAccountId => ApiGatewayOp[Option[SFContactId]])(crmIds: Set[SFAccountId]): ApiGatewayOp[Option[SFContactId]] = {
     crmIds.toList match {
       case Nil => ReturnWithResponse(ApiGatewayResponse.badRequest(s"No Salesforce Accounts referenced in all of the customer's Zuora Billing Accounts"))
-      case crmId :: Nil => syncableSFToIdentity(crmId) mapResponse { errorResponse =>
+      case crmId :: Nil => salesforceAccountLookup(crmId) mapResponse { errorResponse =>
         ApiGatewayResponse.badRequest(s"Salesforce Contact for Account ID: ${crmId} is not syncable for the following reasons: ${errorResponse.body}")
       }
       case _ => ReturnWithResponse(ApiGatewayResponse.badRequest(s"Customer not yet linkable, as they have a set of Zuora Billing Accounts linked across more than one CRM account: ${crmIds.mkString(", ")}"))
