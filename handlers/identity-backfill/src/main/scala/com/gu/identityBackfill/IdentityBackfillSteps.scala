@@ -48,20 +48,19 @@ object IdentityBackfillSteps extends Logging {
 
   def updateBuyersIdentityId(
     updateSalesforceContactIdentityId: (SFContactId, IdentityId) => ClientFailableOp[Unit]
-  )(ids: Option[SFContactId], identityId: IdentityId): ApiGatewayOp[Unit] = {
+  )(maybeBuyerContactId: Option[SFContactId], identityId: IdentityId): ApiGatewayOp[Unit] = {
 
-    val failures = ids
-      .toSeq
+    val failures = maybeBuyerContactId
       .map(updateSalesforceContactIdentityId(_, identityId))
-      .zip(ids.toSeq)
+      .zip(maybeBuyerContactId)
       .collect {
-        case (clientFailure: ClientFailure, id) => (id -> clientFailure.message).toString
+        case (clientFailure: ClientFailure, id) => (id.value -> clientFailure.message).toString
       }
 
     if (failures.isEmpty)
       ContinueProcessing(())
     else
-      ReturnWithResponse(ApiGatewayResponse.badRequest("updateBuyersIdentityId multiple errors: " + failures.mkString(", ")))
+      ReturnWithResponse(ApiGatewayResponse.badRequest(s"updateBuyersIdentityId multiple errors updating ${identityId.value}: ${failures.mkString(", ")}"))
 
   }
 
@@ -69,18 +68,18 @@ object IdentityBackfillSteps extends Logging {
     updateAccountsWithIdentityId: (AccountId, IdentityId) => ClientFailableOp[Unit]
   )(ids: Set[AccountId], identityId: IdentityId): ApiGatewayOp[Unit] = {
 
-    val failures = ids
-      .toSeq
+    val idsOrdered = ids.toSeq
+    val failures = idsOrdered
       .map(updateAccountsWithIdentityId(_, identityId))
-      .zip(ids.toSeq)
+      .zip(idsOrdered)
       .collect {
-        case (clientFailure: ClientFailure, id) => (id -> clientFailure.message).toString
+        case (clientFailure: ClientFailure, id) => (id.value -> clientFailure.message).toString
       }
 
     if (failures.isEmpty)
       ContinueProcessing(())
     else
-      ReturnWithResponse(ApiGatewayResponse.badRequest("updateAccountsWithIdentityId multiple errors: " + failures.mkString(", ")))
+      ReturnWithResponse(ApiGatewayResponse.badRequest(s"updateZuoraBillingAccountsIdentityId multiple errors updating ${identityId.value}: ${failures.mkString(", ")}"))
 
   }
 
