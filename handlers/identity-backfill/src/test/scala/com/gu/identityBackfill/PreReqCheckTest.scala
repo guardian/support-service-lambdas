@@ -86,8 +86,11 @@ class PreReqCheckTest extends FlatSpec with Matchers {
   }
 
   "checkSfContactsSyncable" should "ReturnWithResponse if more than one CRM account" in {
-    val ReturnWithResponse(result) = PreReqCheck.checkSfContactsSyncable(_ => ???)(Set(SFAccountId("crmId1"), SFAccountId("crmId2")))
+    val errorResponse = ApiGatewayResponse.badRequest("foo")
+    val ReturnWithResponse(result) = PreReqCheck
+      .checkSfContactsSyncable(_ => ReturnWithResponse(errorResponse))(Set(SFAccountId("crmId1"), SFAccountId("crmId2")))
     result.body should include("more than one CRM account")
+    result.body shouldNot include("foo")
   }
 
   "checkSfContactsSyncable" should "continue processing if syncable" in {

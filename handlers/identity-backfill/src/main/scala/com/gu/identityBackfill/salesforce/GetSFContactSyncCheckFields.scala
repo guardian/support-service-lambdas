@@ -39,7 +39,8 @@ object GetSFContactSyncCheckFields {
   def toRequest(sfAccountId: SFAccountId) =
     GetRequest(
       RelativePath(
-        s"/services/data/v43.0/query?q=SELECT Id, RecordTypeId, LastName, FirstName, OtherCountry, Email FROM Contact WHERE AccountId = '${sfAccountId.value}'"
+        s"/services/data/v43.0/query?q=SELECT Id, RecordTypeId, LastName, FirstName, OtherCountry, Email FROM Contact " +
+          s"WHERE AccountId = '${sfAccountId.value}'"
       )
     )
 

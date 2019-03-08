@@ -13,7 +13,8 @@ class GetSFContactSyncCheckFieldsTest extends FlatSpec with Matchers {
     val actual = GetSFContactSyncCheckFields.toRequest(SFAccountId("001g000000XrQcaAAF"))
     val expected = GetRequest(
       RelativePath(
-        "/services/data/v43.0/query?q=SELECT Id, RecordTypeId, LastName, FirstName, OtherCountry, Email FROM Contact WHERE AccountId = '001g000000XrQcaAAF'"
+        "/services/data/v43.0/query?q=SELECT Id, RecordTypeId, LastName, FirstName, OtherCountry, Email FROM Contact " +
+          "WHERE AccountId = '001g000000XrQcaAAF'"
       )
     )
     actual should be(expected)
@@ -25,7 +26,11 @@ class GetSFContactSyncCheckFieldsTest extends FlatSpec with Matchers {
       ContactsByAccountIdQueryResponse(
         totalSize = 1,
         done = true,
-        records = List(ContactSyncCheckFields("00110000011AABBAAB", Some("STANDARD_TEST_DUMMY"), "123", "Testing", Some("United Kingdom"), Some("testing123@g.com")))
+        records = List(
+          ContactSyncCheckFields(
+            "00110000011AABBAAB", Some("STANDARD_TEST_DUMMY"), "123", "Testing", Some("United Kingdom"), Some("testing123@g.com")
+          )
+        )
       )
     )
     actual should be(expected)

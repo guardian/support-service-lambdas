@@ -34,7 +34,7 @@ object IdentityBackfillSteps extends Logging {
         case None => createGuestAccount(request.emailAddress)
       }).toApiGatewayOp("create guest identity account")
       _ <- updateZuoraAccounts(preReq.zuoraAccountIds, requiredIdentityId)
-      _ <- updateSalesforceAccount(preReq.maybeBuyerSFContactId, requiredIdentityId)
+      _ <- updateSalesforceAccount(preReq.maybeBuyer, requiredIdentityId)
       // need to remember which ones we updated?
     } yield ApiGatewayResponse.successfulExecution).apiResponse
 

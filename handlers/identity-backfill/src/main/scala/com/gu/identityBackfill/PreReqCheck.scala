@@ -13,7 +13,7 @@ import com.gu.util.resthttp.Types.ClientFailableOp
 
 object PreReqCheck {
 
-  case class PreReqResult(zuoraAccountIds: Set[Types.AccountId], maybeBuyerSFContactId: Option[SFContactId], existingIdentityId: Option[IdentityId])
+  case class PreReqResult(zuoraAccountIds: Set[Types.AccountId], maybeBuyer: Option[SFContactId], existingIdentityId: Option[IdentityId])
 
   def apply(
     findExistingIdentityId: EmailAddress => ApiGatewayOp[Option[IdentityId]],
@@ -30,13 +30,25 @@ object PreReqCheck {
     } yield PreReqResult(zuoraAccounts.map(_.accountId).toSet, maybeBuyer, maybeExistingIdentityId)
   }
 
-  def checkSfContactsSyncable(salesforceAccountLookup: SFAccountId => ApiGatewayOp[Option[SFContactId]])(crmIds: Set[SFAccountId]): ApiGatewayOp[Option[SFContactId]] = {
+  def checkSfContactsSyncable(salesforceAccountLookup: SFAccountId => ApiGatewayOp[Option[SFContactId]])
+    (crmIds: Set[SFAccountId]): ApiGatewayOp[Option[SFContactId]] = {
     crmIds.toList match {
-      case Nil => ReturnWithResponse(ApiGatewayResponse.badRequest(s"No Salesforce Accounts referenced in all of the customer's Zuora Billing Accounts"))
+      case Nil => ReturnWithResponse(
+        ApiGatewayResponse.badRequest(
+          s"No Salesforce Accounts referenced in all of the customer's Zuora Billing Accounts"
+        )
+      )
       case crmId :: Nil => salesforceAccountLookup(crmId) mapResponse { errorResponse =>
-        ApiGatewayResponse.badRequest(s"Salesforce Contact for Account ID: ${crmId} is not syncable for the following reasons: ${errorResponse.body}")
+        ApiGatewayResponse.badRequest(
+          s"Salesforce Contact for Account ID: ${crmId} is not syncable for the following reasons: ${errorResponse.body}"
+        )
       }
-      case _ => ReturnWithResponse(ApiGatewayResponse.badRequest(s"Customer not yet linkable, as they have a set of Zuora Billing Accounts linked across more than one CRM account: ${crmIds.mkString(", ")}"))
+      case _ => ReturnWithResponse(
+        ApiGatewayResponse.badRequest(
+          s"Customer not yet linkable, because they have multipe Zuora Billing Accounts " +
+            s"referencing more than one CRM account: ${crmIds.mkString(", ")}"
+        )
+      )
     }
   }
 
@@ -49,7 +61,8 @@ object PreReqCheck {
     } yield ()
   }
 
-  def validateZuoraAccountsFound(zuoraAccountsRetrieved: ClientFailableOp[List[ZuoraAccountIdentitySFContact]])(emailAddress: EmailAddress): ApiGatewayOp[List[ZuoraAccountIdentitySFContact]] = {
+  def validateZuoraAccountsFound(zuoraAccountsRetrieved: ClientFailableOp[List[ZuoraAccountIdentitySFContact]])
+    (emailAddress: EmailAddress): ApiGatewayOp[List[ZuoraAccountIdentitySFContact]] = {
 
     def validateOneCrmId(zuoraAccountsForEmail: List[ZuoraAccountIdentitySFContact]) = {
       val uniqueCrmIds = zuoraAccountsForEmail.map(_.crmId).distinct.size
@@ -82,8 +95,9 @@ object PreReqCheck {
       incorrectReaderTypes = readerTypes.collect {
         case ReaderTypeValue(readerType) if readerType != "Direct" => readerType // it's bad
       }
-      _ <- incorrectReaderTypes.isEmpty
-        .toApiGatewayContinueProcessing(ApiGatewayResponse.notFound(s"had an incorrect reader type(s): ${incorrectReaderTypes.mkString(",")}"))
+      _ <- incorrectReaderTypes.isEmpty.toApiGatewayContinueProcessing(
+        ApiGatewayResponse.notFound(s"had an incorrect reader type(s): ${incorrectReaderTypes.mkString(",")}")
+      )
     } yield ()
   }
 
