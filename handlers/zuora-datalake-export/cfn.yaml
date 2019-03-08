@@ -61,7 +61,7 @@ Resources:
                             - logs:CreateLogStream
                             - logs:PutLogEvents
                             - lambda:InvokeFunction
-                            Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/StartExportJobHandler-${Stage}:log-stream:*"
+                            Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/zuora-datalake-export-StartExportJob-${Stage}:log-stream:*"
 
                 - PolicyName: ReadPrivateCredentials
                   PolicyDocument:
