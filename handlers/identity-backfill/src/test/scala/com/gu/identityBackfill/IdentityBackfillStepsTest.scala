@@ -14,7 +14,7 @@ class IdentityBackfillStepsTest extends FlatSpec with Matchers {
 
   it should "backfill identity ids successfully" in {
     val ApiResponse(statusCode, _, _) = IdentityBackfillSteps.apply(
-      _ => ContinueProcessing(PreReqResult(Set(AccountId("accountId")), Set(SFContactId("sfContactId")), None)),
+      _ => ContinueProcessing(PreReqResult(Set(AccountId("accountId")), Option(SFContactId("sfContactId")), None)),
       _ => ClientSuccess(IdentityId("123")),
       (_, _) => ContinueProcessing(()),
       (_, _) => ContinueProcessing(())
@@ -37,7 +37,7 @@ class IdentityBackfillStepsTest extends FlatSpec with Matchers {
   "updateAccountsWithIdentityId" should "update salesforce accounts successfully" in {
     var updated: List[(AccountId, IdentityId)] = Nil
 
-    val result = IdentityBackfillSteps.updateAccountsWithIdentityId[AccountId] { (accountId, identityId) =>
+    val result = IdentityBackfillSteps.updateZuoraBillingAccountsIdentityId { (accountId, identityId) =>
       updated = accountId -> identityId :: updated
       ClientSuccess(())
     }(Set(AccountId("accountId1"), AccountId("accountId2")), IdentityId("123"))
@@ -46,10 +46,19 @@ class IdentityBackfillStepsTest extends FlatSpec with Matchers {
     result shouldBe ContinueProcessing(())
   }
 
-  "updateZuoraAccounts" should "propagate errors" in {
-    val ReturnWithResponse(result) = IdentityBackfillSteps
-      .updateAccountsWithIdentityId[AccountId]((_, _) => GenericError("error"))(Set(AccountId("accountId1"), AccountId("accountId2")), IdentityId("123"))
+  "updateBuyersIdentityId" should "propagate errors" in {
+    val ReturnWithResponse(result) = IdentityBackfillSteps.updateBuyersIdentityId {
+      (_, _) => GenericError("error")
+    }(Option(SFContactId("sfContactId")), IdentityId("123"))
 
-    result.body should include("updateAccountsWithIdentityId multiple errors")
+    result.body should include("updateBuyersIdentityId multiple errors updating 123: (sfContactId,error)")
+  }
+
+  "updateZuoraBillingAccountsIdentityId" should "propagate errors" in {
+    val ReturnWithResponse(result) = IdentityBackfillSteps.updateZuoraBillingAccountsIdentityId {
+      (_, _) => GenericError("error")
+    }(Set(AccountId("accountId1"), AccountId("accountId2")), IdentityId("123"))
+
+    result.body should include("updateZuoraBillingAccountsIdentityId multiple errors updating 123: (accountId1,error), (accountId2,error)")
   }
 }

@@ -16,16 +16,16 @@ class StepsTest extends FlatSpec with Matchers {
   class StepsWithMocks {
 
     var zuoraUpdate: Option[(Set[AccountId], IdentityId)] = None // !!
-    var salesforceUpdate: Option[(Set[SFContactId], IdentityId)] = None // !!
+    var salesforceUpdate: Option[(Option[SFContactId], IdentityId)] = None // !!
     var emailToCheck: Option[EmailAddress] = None // !!
 
     def getSteps(succeed: Boolean = true): DomainRequest => ApiResponse = {
       val preReqCheck: EmailAddress => ApiGatewayOp[PreReqCheck.PreReqResult] = { email =>
         emailToCheck = Some(email)
         if (succeed)
-          ContinueProcessing(PreReqCheck.PreReqResult(Set(AccountId("acc")), Set(SFContactId("sf")), Some(IdentityId("existing"))))
+          ContinueProcessing(PreReqCheck.PreReqResult(Set(AccountId("acc")), Some(SFContactId("sf")), Some(IdentityId("existing"))))
         else
-          ContinueProcessing(PreReqCheck.PreReqResult(Set(AccountId("acc")), Set(SFContactId("sf")), None))
+          ContinueProcessing(PreReqCheck.PreReqResult(Set(AccountId("acc")), Some(SFContactId("sf")), None))
       }
       IdentityBackfillSteps(
         preReqCheck,
@@ -34,7 +34,7 @@ class StepsTest extends FlatSpec with Matchers {
           zuoraUpdate = Some((accountIds, idenitytId))
           ContinueProcessing(())
         },
-        updateSalesforceAccounts = (sFContactId, identityId) => {
+        updateSalesforceAccount = (sFContactId, identityId) => {
           salesforceUpdate = Some((sFContactId, identityId))
           ContinueProcessing(())
         }
@@ -54,7 +54,7 @@ class StepsTest extends FlatSpec with Matchers {
     val expectedResult = ApiGatewayResponse.successfulExecution
     result should be(expectedResult)
     zuoraUpdate should be(Some((Set(AccountId("acc")), IdentityId("existing"))))
-    salesforceUpdate should be(Some((Set(SFContactId("sf")), IdentityId("existing"))))
+    salesforceUpdate should be(Some((Some(SFContactId("sf")), IdentityId("existing"))))
     emailToCheck should be(Some(EmailAddress("email@address")))
   }
 
@@ -84,7 +84,7 @@ class StepsTest extends FlatSpec with Matchers {
     val expectedResult = ApiGatewayResponse.successfulExecution
     result should be(expectedResult)
     zuoraUpdate should be(Some((Set(AccountId("acc")), IdentityId("created"))))
-    salesforceUpdate should be(Some((Set(SFContactId("sf")), IdentityId("created"))))
+    salesforceUpdate should be(Some((Some(SFContactId("sf")), IdentityId("created"))))
     emailToCheck should be(Some(EmailAddress("email@address")))
   }
 

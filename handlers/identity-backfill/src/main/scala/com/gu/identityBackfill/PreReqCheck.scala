@@ -5,43 +5,51 @@ import com.gu.identityBackfill.Types._
 import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
 import com.gu.identityBackfill.zuora.GetZuoraSubTypeForAccount
 import com.gu.identityBackfill.zuora.GetZuoraSubTypeForAccount.ReaderType.ReaderTypeValue
-import com.gu.salesforce.TypesForSFEffectsData.SFContactId
+import com.gu.salesforce.TypesForSFEffectsData.{SFAccountId, SFContactId}
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types.ApiGatewayOp._
-import com.gu.util.reader.Types._
+import com.gu.util.reader.Types.{ApiGatewayOp, _}
 import com.gu.util.resthttp.Types.ClientFailableOp
 
 object PreReqCheck {
 
-  case class PreReqResult(zuoraAccountIds: Set[Types.AccountId], sFContactIds: Set[SFContactId], existingIdentityId: Option[IdentityId])
+  case class PreReqResult(zuoraAccountIds: Set[Types.AccountId], maybeBuyer: Option[SFContactId], existingIdentityId: Option[IdentityId])
 
   def apply(
     findExistingIdentityId: EmailAddress => ApiGatewayOp[Option[IdentityId]],
     findAndValidateZuoraAccounts: EmailAddress => ApiGatewayOp[List[ZuoraAccountIdentitySFContact]],
     noZuoraAccountsForIdentityId: IdentityId => ApiGatewayOp[Unit],
     zuoraSubType: AccountId => ApiGatewayOp[Unit],
-    syncableSFToIdentity: List[SFContactId] => ApiGatewayOp[Unit]
+    syncableSFToIdentity: Set[SFAccountId] => ApiGatewayOp[Option[SFContactId]]
   )(emailAddress: EmailAddress): ApiGatewayOp[PreReqResult] = {
     for {
       maybeExistingIdentityId <- findExistingIdentityId(emailAddress)
       zuoraAccounts <- findAndValidateZuoraAccounts(emailAddress)
       _ <- maybeExistingIdentityId.map(noZuoraAccountsForIdentityId).getOrElse(ContinueProcessing(()))
-      _ <- syncableSFToIdentity(zuoraAccounts.map(_.sfContactId))
-    } yield PreReqResult(zuoraAccounts.map(_.accountId).toSet, zuoraAccounts.map(_.sfContactId).toSet, maybeExistingIdentityId)
+      maybeBuyer <- syncableSFToIdentity(zuoraAccounts.map(_.crmId.asSFAccountId).toSet)
+    } yield PreReqResult(zuoraAccounts.map(_.accountId).toSet, maybeBuyer, maybeExistingIdentityId)
   }
 
-  def checkSfContactsSyncable(syncableSFToIdentity: SFContactId => ApiGatewayOp[Unit])(sFContactIds: List[SFContactId]): ApiGatewayOp[Unit] = {
-    val failures = sFContactIds
-      .map(syncableSFToIdentity)
-      .zip(sFContactIds)
-      .collect {
-        case (returnWithResponse: ReturnWithResponse, sfContactId) => (sfContactId -> returnWithResponse.resp.body).toString
+  def checkSfContactsSyncable(salesforceAccountLookup: SFAccountId => ApiGatewayOp[Option[SFContactId]])
+    (crmIds: Set[SFAccountId]): ApiGatewayOp[Option[SFContactId]] = {
+    crmIds.toList match {
+      case Nil => ReturnWithResponse(
+        ApiGatewayResponse.badRequest(
+          s"No Salesforce Accounts referenced in all of the customer's Zuora Billing Accounts"
+        )
+      )
+      case crmId :: Nil => salesforceAccountLookup(crmId) mapResponse { errorResponse =>
+        ApiGatewayResponse.badRequest(
+          s"Salesforce Contact for Account ID: ${crmId} is not syncable for the following reasons: ${errorResponse.body}"
+        )
       }
-
-    if (failures.isEmpty)
-      ContinueProcessing(())
-    else
-      ReturnWithResponse(ApiGatewayResponse.badRequest(s"multiple contacts are not syncable ${failures.mkString(", ")}"))
+      case _ => ReturnWithResponse(
+        ApiGatewayResponse.badRequest(
+          s"Customer not yet linkable, because they have multipe Zuora Billing Accounts " +
+            s"referencing more than one CRM account: ${crmIds.mkString(", ")}"
+        )
+      )
+    }
   }
 
   def noZuoraAccountsForIdentityId(
@@ -53,7 +61,8 @@ object PreReqCheck {
     } yield ()
   }
 
-  def validateZuoraAccountsFound(zuoraAccountsRetrieved: ClientFailableOp[List[ZuoraAccountIdentitySFContact]])(emailAddress: EmailAddress): ApiGatewayOp[List[ZuoraAccountIdentitySFContact]] = {
+  def validateZuoraAccountsFound(zuoraAccountsRetrieved: ClientFailableOp[List[ZuoraAccountIdentitySFContact]])
+    (emailAddress: EmailAddress): ApiGatewayOp[List[ZuoraAccountIdentitySFContact]] = {
 
     def validateOneCrmId(zuoraAccountsForEmail: List[ZuoraAccountIdentitySFContact]) = {
       val uniqueCrmIds = zuoraAccountsForEmail.map(_.crmId).distinct.size
@@ -86,8 +95,9 @@ object PreReqCheck {
       incorrectReaderTypes = readerTypes.collect {
         case ReaderTypeValue(readerType) if readerType != "Direct" => readerType // it's bad
       }
-      _ <- incorrectReaderTypes.isEmpty
-        .toApiGatewayContinueProcessing(ApiGatewayResponse.notFound(s"had an incorrect reader type(s): ${incorrectReaderTypes.mkString(",")}"))
+      _ <- incorrectReaderTypes.isEmpty.toApiGatewayContinueProcessing(
+        ApiGatewayResponse.notFound(s"had an incorrect reader type(s): ${incorrectReaderTypes.mkString(",")}")
+      )
     } yield ()
   }
 
