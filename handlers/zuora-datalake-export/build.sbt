@@ -9,5 +9,6 @@ riffRaffManifestProjectName := "MemSub::Membership Admin::Zuora Data Lake Export
 riffRaffArtifactResources += (file("handlers/zuora-datalake-export/cfn.yaml"), "cfn/cfn.yaml")
 libraryDependencies ++= Seq(
   "io.github.mkotsur" %% "aws-lambda-scala" % "0.1.1",
-  "org.scalaj" %% "scalaj-http" % "2.4.1"
+  "org.scalaj" %% "scalaj-http" % "2.4.1",
+  Dependencies.awsS3
 )

@@ -12,7 +12,7 @@ Parameters:
         Default: CODE
 
 Mappings:
-  StageVariables:
+  BucketMap:
     CODE:
       datalakeBucketName : "zuora-datalake-export-code"
     PROD:
@@ -24,7 +24,7 @@ Resources:
         Properties:
           BucketName:
             Fn::FindInMap:
-              - StageVariables
+              - BucketMap
               - Ref: Stage
               - "datalakeBucketName"
           AccessControl: Private
@@ -69,6 +69,21 @@ Resources:
                           - Effect: Allow
                             Action: s3:GetObject
                             Resource: !Sub "arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/zuoraRest-${Stage}*.json"
+
+                - PolicyName: TargetCsvBucket
+                  PolicyDocument:
+                    Statement:
+                      - Effect: Allow
+                        Action:
+                          - s3:DeleteObject
+                          - s3:GetObject
+                          - s3:GetObjectAcl
+                          - s3:GetBucketAcl
+                          - s3:ListBucket
+                          - s3:GetObjectVersion
+                          - s3:DeleteObjectVersion
+                        Resource: !FindInMap [BucketMap, !Ref Stage, datalakeBucketName]
+
 
     StartExportJobLambda:
         Type: AWS::Lambda::Function
