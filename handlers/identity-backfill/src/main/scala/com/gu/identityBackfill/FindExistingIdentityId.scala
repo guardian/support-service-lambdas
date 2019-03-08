@@ -20,7 +20,7 @@ object FindExistingIdentityId {
     def continueIfNoPassword(identityId: IdentityId) = {
       getByIdentityId(identityId) match {
         case ClientSuccess(IdentityUser(_, false)) => ContinueProcessing(Some(identityId))
-        case _ => ReturnWithResponse(ApiGatewayResponse.notFound(s"identity email not validated but password is set $identityId"))
+        case _ => ReturnWithResponse(ApiGatewayResponse.notFound(s"Identity account not validated but password is set: ${identityId.value}"))
       }
     }
 
