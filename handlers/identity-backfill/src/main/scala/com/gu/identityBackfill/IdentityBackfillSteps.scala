@@ -65,7 +65,7 @@ object IdentityBackfillSteps extends Logging {
 
   }
 
-  def updateZuoraBillingAccountsIdentityId[AccountId](
+  def updateZuoraBillingAccountsIdentityId(
     updateAccountsWithIdentityId: (AccountId, IdentityId) => ClientFailableOp[Unit]
   )(ids: Set[AccountId], identityId: IdentityId): ApiGatewayOp[Unit] = {
 

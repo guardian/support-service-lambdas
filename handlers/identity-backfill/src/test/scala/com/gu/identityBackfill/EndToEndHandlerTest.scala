@@ -32,10 +32,13 @@ class EndToEndHandlerTest extends FlatSpec with Matchers {
     responseString jsonMatches expectedResponse
 
     requests should be(List(
-      BasicRequest("GET", "/services/data/v43.0/query?q=SELECT Id, RecordTypeId, LastName, FirstName, OtherCountry, Email FROM Contact WHERE AccountId = %27crmId%27".replace(" ", "%20"), ""),
-      BasicRequest("POST", "/services/oauth2/token", """client_id=clientsfclient&client_secret=clientsecretsfsecret&username=usernamesf&password=passSFpasswordtokentokenSFtoken&grant_type=password"""),
+      BasicRequest("GET", ("/services/data/v43.0/query?q=SELECT Id, RecordTypeId, LastName, FirstName, OtherCountry, Email FROM Contact " +
+        "WHERE AccountId = %27crmId%27").replace(" ", "%20"), ""),
+      BasicRequest("POST", "/services/oauth2/token", "client_id=clientsfclient&client_secret=clientsecretsfsecret&username=usernamesf" +
+          "&password=passSFpasswordtokentokenSFtoken&grant_type=password"),
       BasicRequest("POST", "/action/query", """{"queryString":"SELECT Id FROM Account where IdentityId__c='1234'"}"""),
-      BasicRequest("POST", "/action/query", """{"queryString":"SELECT Id, IdentityId__c, sfContactId__c, CrmId FROM Account where BillToId='2c92a0fb4a38064e014a3f48f1713ada'"}"""),
+      BasicRequest("POST", "/action/query",
+        """{"queryString":"SELECT Id, IdentityId__c, sfContactId__c, CrmId FROM Account where BillToId='2c92a0fb4a38064e014a3f48f1713ada'"}"""),
       BasicRequest("POST", "/action/query", """{"queryString":"SELECT Id FROM Contact where WorkEmail='email@address'"}"""),
       BasicRequest("GET", "/user?emailAddress=email@address", "")
     ))
@@ -58,10 +61,13 @@ class EndToEndHandlerTest extends FlatSpec with Matchers {
     requests should be(List(
       BasicRequest("PATCH", "/services/data/v20.0/sobjects/Contact/00110000011AABBAAB", """{"IdentityID__c":"1234"}"""),
       BasicRequest("PUT", "/accounts/2c92a0fb4a38064e014a3f48f1663ad8", """{"IdentityId__c":"1234"}"""),
-      BasicRequest("GET", "/services/data/v43.0/query?q=SELECT Id, RecordTypeId, LastName, FirstName, OtherCountry, Email FROM Contact WHERE AccountId = %27crmId%27".replace(" ", "%20"), ""),
-      BasicRequest("POST", "/services/oauth2/token", """client_id=clientsfclient&client_secret=clientsecretsfsecret&username=usernamesf&password=passSFpasswordtokentokenSFtoken&grant_type=password"""),
+      BasicRequest("GET", ("/services/data/v43.0/query?q=SELECT Id, RecordTypeId, LastName, FirstName, OtherCountry, Email FROM Contact " +
+        "WHERE AccountId = %27crmId%27").replace(" ", "%20"), ""),
+      BasicRequest("POST", "/services/oauth2/token", "client_id=clientsfclient&client_secret=clientsecretsfsecret&username=usernamesf" +
+        "&password=passSFpasswordtokentokenSFtoken&grant_type=password"),
       BasicRequest("POST", "/action/query", """{"queryString":"SELECT Id FROM Account where IdentityId__c='1234'"}"""),
-      BasicRequest("POST", "/action/query", """{"queryString":"SELECT Id, IdentityId__c, sfContactId__c, CrmId FROM Account where BillToId='2c92a0fb4a38064e014a3f48f1713ada'"}"""),
+      BasicRequest("POST", "/action/query",
+        """{"queryString":"SELECT Id, IdentityId__c, sfContactId__c, CrmId FROM Account where BillToId='2c92a0fb4a38064e014a3f48f1713ada'"}"""),
       BasicRequest("POST", "/action/query", """{"queryString":"SELECT Id FROM Contact where WorkEmail='email@address'"}"""),
       BasicRequest("GET", "/user?emailAddress=email@address", "")
     ))
@@ -104,7 +110,8 @@ object EndToEndData {
   def responsesGetSFContactSyncCheckFieldsTest: Map[String, HTTPResponse] = {
 
     Map(
-      "/services/data/v43.0/query?q=SELECT Id, RecordTypeId, LastName, FirstName, OtherCountry, Email FROM Contact WHERE AccountId = %27crmId%27".replace(" ", "%20") ->
+      ("/services/data/v43.0/query?q=SELECT Id, RecordTypeId, LastName, FirstName, OtherCountry, Email FROM Contact " +
+        "WHERE AccountId = %27crmId%27").replace(" ", "%20") ->
         HTTPResponse(200, GetSFContactSyncCheckFieldsTest.dummyContact)
     )
   }
@@ -136,7 +143,7 @@ object EndToEndData {
       |        "Content-Type": "application/json; charset=utf-8",
       |        "Host": "hosthosthost",
       |        "User-Agent": "Amazon CloudFront",
-      |        "Via": "1.1 c154e1d9f76106d9025a8ffb4f4831ae.cloudfront.net (CloudFront), 1.1 11b20299329437ea4e28ea2b556ea990.cloudfront.net (CloudFront)",
+      |        "Via": "1.1 c154e1d9f76106d9025a8ffb4f4831ae.cloudfront.net, 1.1 11b20299329437ea4e28ea2b556ea990.cloudfront.net",
       |        "X-Amz-Cf-Id": "hihi",
       |        "X-Amzn-Trace-Id": "Root=1-5a0f2574-4cb4d1534b9f321a3b777624",
       |        "X-Forwarded-For": "1.1.1.1, 1.1.1.1",

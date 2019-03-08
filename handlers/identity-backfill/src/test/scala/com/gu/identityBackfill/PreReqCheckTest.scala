@@ -94,7 +94,8 @@ class PreReqCheckTest extends FlatSpec with Matchers {
   }
 
   "checkSfContactsSyncable" should "continue processing if syncable" in {
-    val ContinueProcessing(result) = PreReqCheck.checkSfContactsSyncable(_ => ContinueProcessing(salesforceResult))(Set(SFAccountId("crmId")))
+    val ContinueProcessing(result) = PreReqCheck
+      .checkSfContactsSyncable(_ => ContinueProcessing(salesforceResult))(Set(SFAccountId("crmId")))
     result shouldBe salesforceResult
   }
 
