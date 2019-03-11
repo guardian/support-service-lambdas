@@ -20,14 +20,13 @@ Mappings:
 
 Resources:
     DatalakeBucket:
-        Type: "AWS::S3::Bucket"
+        Type: AWS::S3::Bucket
         Properties:
           BucketName:
             Fn::FindInMap:
               - BucketMap
               - Ref: Stage
               - "datalakeBucketName"
-          AccessControl: Private
           BucketEncryption:
             ServerSideEncryptionConfiguration:
               - ServerSideEncryptionByDefault:
@@ -75,14 +74,13 @@ Resources:
                     Statement:
                       - Effect: Allow
                         Action:
-                          - s3:DeleteObject
-                          - s3:GetObject
-                          - s3:GetObjectAcl
-                          - s3:GetBucketAcl
-                          - s3:ListBucket
-                          - s3:GetObjectVersion
-                          - s3:DeleteObjectVersion
-                        Resource: !FindInMap [BucketMap, !Ref Stage, datalakeBucketName]
+                          - s3:*
+                        Resource:
+                          !Sub
+                          - "arn:aws:s3:::${targetBucket}"
+                          - { targetBucket: !FindInMap [BucketMap, !Ref Stage, datalakeBucketName] }
+
+
 
 
     StartExportJobLambda:
@@ -105,4 +103,5 @@ Resources:
             Timeout: 300
         DependsOn:
         - StartExportJobRole
+        - DatalakeBucket
 
