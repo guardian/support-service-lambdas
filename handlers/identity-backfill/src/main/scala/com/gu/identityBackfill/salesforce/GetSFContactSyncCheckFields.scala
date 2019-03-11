@@ -63,15 +63,13 @@ object ContactSyncCheck {
 
     contactSyncCheckFields.filter(isStandardContact) match {
       case fields :: Nil => {
-        val hasFirstName = fields.FirstName.trim != ""
-        val hasLastName = fields.LastName.trim != ""
         val email = fields.Email.getOrElse("")
         val emailIsValid = email.length > 3 && email.contains("@")
         val country = fields.OtherCountry.getOrElse("").trim
-        val countryIsValid = country != "" && CountryGroup.byOptimisticCountryNameOrCode(country).isDefined
-        if (!hasFirstName) {
+        val countryIsValid = country.nonEmpty && CountryGroup.byOptimisticCountryNameOrCode(country).isDefined
+        if (fields.FirstName.trim.isEmpty) {
           \/.left(s"Contact ${fields.Id} is not syncable - does not have a first name")
-        } else if (!hasLastName) {
+        } else if (fields.LastName.trim.isEmpty) {
           \/.left(s"Contact ${fields.Id} is not syncable - does not have a last name")
         } else if (!emailIsValid) {
           \/.left(s"Contact ${fields.Id} is not syncable - does not have a valid email address: $email")

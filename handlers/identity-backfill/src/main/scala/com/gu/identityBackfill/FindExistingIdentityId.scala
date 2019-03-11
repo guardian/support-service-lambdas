@@ -6,6 +6,7 @@ import com.gu.identity.GetByIdentityId.IdentityUser
 import com.gu.identityBackfill.Types.EmailAddress
 import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
 import com.gu.util.apigateway.ApiGatewayResponse
+import com.gu.util.apigateway.ApiGatewayResponse.notFound
 import com.gu.util.reader.Types.ApiGatewayOp
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientFailure, ClientSuccess, NotFound}
@@ -20,7 +21,7 @@ object FindExistingIdentityId {
     def continueIfNoPassword(identityId: IdentityId) = {
       getByIdentityId(identityId) match {
         case ClientSuccess(IdentityUser(_, false)) => ContinueProcessing(Some(identityId))
-        case _ => ReturnWithResponse(ApiGatewayResponse.notFound(s"Identity account not validated but password is set: ${identityId.value}"))
+        case _ => ReturnWithResponse(notFound(s"Identity account not validated but password is set: ${identityId.value}"))
       }
     }
 
