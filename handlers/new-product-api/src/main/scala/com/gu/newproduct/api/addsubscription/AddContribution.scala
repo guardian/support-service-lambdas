@@ -112,7 +112,7 @@ object AddContribution {
       ifNotFoundReturn = Some("Zuora account id is not valid")
     )
     val getValidatedPaymentMethod = GetPaymentMethod(zuoraClient.get[PaymentMethodWire]) _ andValidateWith ValidatePaymentMethod.apply _
-    val validateSubs = ValidateSubscriptions(contributionPlanIds) _
+    val validateSubs = ValidateSubscriptions(contributionPlanIds, "Zuora account already has an active recurring contribution subscription") _
     val getValidatedSubs = GetAccountSubscriptions(zuoraClient.get[ZuoraSubscriptionsResponse]) _ andValidateWith validateSubs
     val getContactsFromZuora = GetContacts(zuoraClient.get[GetContactsResponse]) _
     val getUnvalidatedContacts = getContactsFromZuora.andThen(_.toApiGatewayOp("getting contacts from Zuora"))

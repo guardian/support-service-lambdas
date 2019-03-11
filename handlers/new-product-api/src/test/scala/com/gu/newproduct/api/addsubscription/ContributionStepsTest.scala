@@ -87,13 +87,15 @@ class ContributionStepsTest extends FlatSpec with Matchers {
       fakeCreate,
       fakeSendEmails
     ) _
+    //todo separate the tests properly so that we don't need this anymore (and the same in the PaperStepsTest)
 
-    val dummyPaperSteps = (req: AddSubscriptionRequest) => {
+    val dummySteps = (req: AddSubscriptionRequest) => {
       fail("unexpected execution of voucher steps while processing contribution request!")
     }
     val futureActual = Steps.handleRequest(
       addContribution = fakeAddContributionSteps,
-      addPaperSub = dummyPaperSteps
+      addPaperSub = dummySteps,
+      addDigipackSub = dummySteps
     )(ApiGatewayRequest(None, Some(Json.stringify(requestInput)), None, None))
 
     val actual = Await.result(futureActual, 30 seconds)

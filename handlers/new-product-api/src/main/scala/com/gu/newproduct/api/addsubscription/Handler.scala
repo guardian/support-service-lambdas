@@ -9,11 +9,13 @@ import com.gu.effects.sqs.AwsSQSSend.QueueName
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.newproduct.api.EmailQueueNames.emailQueuesFor
 import com.gu.newproduct.api.addsubscription.TypeConvert._
+import com.gu.newproduct.api.addsubscription.email.digipack.DigipackAddressValidator
 import com.gu.newproduct.api.addsubscription.validation._
 import com.gu.newproduct.api.addsubscription.validation.paper.PaperAddressValidator
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.SubscriptionName
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.WireModel.{WireCreateRequest, WireSubscription}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAccount
+import com.gu.newproduct.api.addsubscription.zuora.GetContacts.BillToAddress
 import com.gu.newproduct.api.addsubscription.zuora._
 import com.gu.newproduct.api.productcatalog.{ContributionPlanId, _}
 import com.gu.util.Logging
@@ -40,7 +42,8 @@ object Handler extends Logging {
 object Steps {
   def handleRequest(
     addContribution: AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName],
-    addPaperSub: AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName]
+    addPaperSub: AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName],
+    addDigipackSub: AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName]
   )(
     apiGatewayRequest: ApiGatewayRequest
   ): Future[ApiResponse] = (for {
@@ -49,6 +52,7 @@ object Steps {
       case _: ContributionPlanId => addContribution(request)
       case _: VoucherPlanId => addPaperSub(request)
       case _: HomeDeliveryPlanId => addPaperSub(request)
+      case _: DigipackPlanId => addDigipackSub(request)
     }
   } yield ApiGatewayResponse(body = AddedSubscription(subscriptionName.value), statusCode = "200")).apiResponse
 
@@ -72,7 +76,8 @@ object Steps {
       validatorFor = DateValidator.validatorFor(currentDate, _: DateRule)
       zuoraEnv = ZuoraEnvironment.EnvForStage(stage)
       plansWithPrice <- PricesFromZuoraCatalog(zuoraEnv, fetchString, zuoraIds.rateplanIdToApiId.get).toApiGatewayOp("get prices from zuora catalog")
-      catalog = NewProductApi.catalog(plansWithPrice.get)
+      getPricesForPlan = (planId: PlanId) => plansWithPrice.getOrElse(planId, Map.empty)
+      catalog = NewProductApi.catalog(getPricesForPlan)
 
       isValidStartDateForPlan = Function.uncurried(
         catalog.planForId andThen { plan =>
@@ -102,9 +107,22 @@ object Steps {
         queueNames
       )
 
+      digipackSteps = AddDigipackSub.wireSteps(
+        catalog,
+        zuoraIds,
+        zuoraClient,
+        isValidStartDateForPlan,
+        DigipackAddressValidator.apply,
+        createSubscription,
+        awsSQSSend,
+        queueNames,
+        currentDate
+      )
+
       addSubSteps = handleRequest(
         addContribution = contributionSteps,
-        addPaperSub = paperSteps
+        addPaperSub = paperSteps,
+        addDigipackSub = digipackSteps
       ) _
 
       configuredOp = Operation.async(

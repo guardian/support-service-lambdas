@@ -3,7 +3,7 @@ package com.gu.newproduct.api.addsubscription
 import java.time.LocalDate
 
 import com.gu.newproduct.TestData
-import com.gu.newproduct.api.addsubscription.email.paper.PaperEmailData
+import com.gu.newproduct.api.addsubscription.email.PaperEmailData
 import com.gu.newproduct.api.addsubscription.validation._
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{SubscriptionName, ZuoraCreateSubRequest}
@@ -48,7 +48,8 @@ class PaperStepsTest extends FlatSpec with Matchers {
     implicit val format: OFormat[ExpectedOut] = Json.format[ExpectedOut]
     val expectedOutput = ExpectedOut("well done")
 
-    val dummyContributionSteps = (req: AddSubscriptionRequest) => {
+    //todo separate the tests properly so that we don't need this anymore (and the same in the contributionStepsTest)
+    val dummySteps = (req: AddSubscriptionRequest) => {
       fail("unexpected execution of contribution steps while processing voucher request!")
     }
 
@@ -90,8 +91,9 @@ class PaperStepsTest extends FlatSpec with Matchers {
     ) _
 
     val futureActual = Steps.handleRequest(
-      addContribution = dummyContributionSteps,
-      addPaperSub = fakeAddVoucherSteps
+      addContribution = dummySteps,
+      addPaperSub = fakeAddVoucherSteps,
+      addDigipackSub = dummySteps
     )(ApiGatewayRequest(None, Some(Json.stringify(requestInput)), None, None))
 
     val actual = Await.result(futureActual, 30 seconds)

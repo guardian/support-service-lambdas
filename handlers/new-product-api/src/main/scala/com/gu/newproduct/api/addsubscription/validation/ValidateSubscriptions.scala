@@ -5,10 +5,10 @@ import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.{Acti
 import com.gu.newproduct.api.productcatalog.ZuoraIds.ProductRatePlanId
 
 object ValidateSubscriptions {
-  def apply(contributionRatePlanIds: List[ProductRatePlanId])(subscriptions: List[Subscription]): ValidationResult[List[Subscription]] = {
-    def hasActiveContributions = hasActiveRateplans(contributionRatePlanIds) _
+  def apply(bannedRateplans: List[ProductRatePlanId], validationFailedMessage: String)(subscriptions: List[Subscription]): ValidationResult[List[Subscription]] = {
+    def hasActiveBannedPlan = hasActiveRateplans(bannedRateplans) _
 
-    val validationResult = !subscriptions.exists(hasActiveContributions) orFailWith "Zuora account already has an active recurring contribution subscription"
+    val validationResult = !subscriptions.exists(hasActiveBannedPlan) orFailWith validationFailedMessage
 
     validationResult.map(_ => subscriptions)
   }

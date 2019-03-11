@@ -40,7 +40,9 @@ class PricesFromZuoraCatalogEffectsTest extends FlatSpec with Matchers {
         MonthlyContribution,
         AnnualContribution,
         HomeDeliverySaturday,
-        HomeDeliverySaturdayPlus
+        HomeDeliverySaturdayPlus,
+        DigipackAnnual,
+        DigipackMonthly
       )
     )
   }

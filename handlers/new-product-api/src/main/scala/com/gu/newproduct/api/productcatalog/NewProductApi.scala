@@ -1,17 +1,35 @@
 package com.gu.newproduct.api.productcatalog
 
 import java.time.DayOfWeek
-import java.time.DayOfWeek.{_}
+import java.time.DayOfWeek._
 
+import com.gu.i18n.Currency
 import com.gu.newproduct.api.addsubscription.Formatters._
 import com.gu.newproduct.api.productcatalog.PlanId._
 
-object NewProductApi {
-  def catalog(priceFor: PlanId => Option[AmountMinorUnits]): Catalog = {
 
-    def paymentPlanFor = priceFor andThen { maybeAmount =>
-      maybeAmount.map(amount => PaymentPlan(s"GBP ${amount.formatted} every month"))
+
+object NewProductApi {
+  def catalog(pricingFor: PlanId => Map[Currency, AmountMinorUnits]): Catalog = {
+
+    def paymentPlansFor(planId: PlanId, billingPeriod: BillingPeriod): Map[Currency, PaymentPlan] = {
+      val pricesByCurrency: Map[Currency, AmountMinorUnits] = pricingFor(planId)
+
+      val billingPeriodDescription = billingPeriod match {
+        case Monthly => "every month"
+        case Annual => "every 12 months"
+      }
+      pricesByCurrency.map { case (currency, amount) => (currency, PaymentPlan(
+        currency = currency,
+        amountMinorUnits = amount,
+        billingPeriod = billingPeriod,
+        description = s"${currency.iso} ${amount.formatted} $billingPeriodDescription"
+      )
+      )
+      }
     }
+
+
 
     val voucherWindowRule = WindowRule(
       maybeCutOffDay = Some(DayOfWeek.TUESDAY),
@@ -46,42 +64,57 @@ object NewProductApi {
     val homeDeliverySundayDateRules = homeDeliveryDateRules(Some(List(SUNDAY)))
     val homeDeliverySaturdayDateRules = homeDeliveryDateRules(Some(List(SATURDAY)))
     val homeDeliveryWeekendRules = homeDeliveryDateRules(Some(List(SATURDAY, SUNDAY)))
-    val monthlyContributionWindow = WindowRule(
-      maybeSize = Some(WindowSizeDays(1)),
-      maybeCutOffDay = None,
-      maybeStartDelay = None
+
+    val todayOnlyRule = StartDateRules(
+      windowRule = Some(WindowRule(
+        maybeSize = Some(WindowSizeDays(1)),
+        maybeCutOffDay = None,
+        maybeStartDelay = None
+      ))
     )
-    val contributionRules = StartDateRules(windowRule = Some(monthlyContributionWindow))
+
+    val windowOf90daysStartingIn2Weeks =  WindowRule(
+      maybeCutOffDay = None,
+      maybeStartDelay = Some(DelayDays(14)),
+      maybeSize = Some(WindowSizeDays(90))
+    )
+
+    val digipackStartRules = StartDateRules(
+      windowRule = Some(windowOf90daysStartingIn2Weeks)
+    )
 
     def planWithPayment(
       planId: PlanId,
       planDescription: PlanDescription,
-      startDateRules: StartDateRules
-    ) = Plan(planId, planDescription, startDateRules, paymentPlanFor(planId))
+      startDateRules: StartDateRules,
+      billingPeriod: BillingPeriod
+    ) = Plan(planId, planDescription, startDateRules, paymentPlansFor(planId, billingPeriod))
 
     Catalog(
-      voucherWeekendPlus = planWithPayment(VoucherWeekendPlus, PlanDescription("Weekend+"), voucherSaturdayDateRules),
-      voucherWeekend = planWithPayment(VoucherWeekend, PlanDescription("Weekend"), voucherSaturdayDateRules),
-      voucherSixDay = planWithPayment(VoucherSixDay, PlanDescription("Sixday"), voucherMondayRules),
-      voucherSixDayPlus = planWithPayment(VoucherSixDayPlus, PlanDescription("Sixday+"), voucherMondayRules),
-      voucherEveryDay = planWithPayment(VoucherEveryDay, PlanDescription("Everyday"), voucherMondayRules),
-      voucherEveryDayPlus = planWithPayment(VoucherEveryDayPlus, PlanDescription("Everyday+"), voucherMondayRules),
-      voucherSaturday = planWithPayment(VoucherSaturday, PlanDescription("Saturday"), voucherSaturdayDateRules),
-      voucherSaturdayPlus = planWithPayment(VoucherSaturdayPlus, PlanDescription("Saturday+"), voucherSaturdayDateRules),
-      voucherSunday = planWithPayment(VoucherSunday, PlanDescription("Sunday"), voucherSundayDateRules),
-      voucherSundayPlus = planWithPayment(VoucherSundayPlus, PlanDescription("Sunday+"), voucherSundayDateRules),
-      monthlyContribution = planWithPayment(MonthlyContribution, PlanDescription("Monthly"), contributionRules),
-      annualContribution = planWithPayment(AnnualContribution, PlanDescription("Annual"), contributionRules),
-      homeDeliveryEveryDay = planWithPayment(HomeDeliveryEveryDay, PlanDescription("Everyday"), homeDeliveryEveryDayRules),
-      homeDeliverySunday = planWithPayment(HomeDeliverySunday, PlanDescription("Sunday"), homeDeliverySundayDateRules),
-      homeDeliverySixDay = planWithPayment(HomeDeliverySixDay, PlanDescription("Sixday"), homeDeliverySixDayRules),
-      homeDeliveryWeekend = planWithPayment(HomeDeliveryWeekend, PlanDescription("Weekend"), homeDeliveryWeekendRules),
-      homeDeliveryEveryDayPlus = planWithPayment(HomeDeliveryEveryDayPlus, PlanDescription("Everyday+"), homeDeliveryEveryDayRules),
-      homeDeliverySundayPlus = planWithPayment(HomeDeliverySundayPlus, PlanDescription("Sunday+"), homeDeliverySundayDateRules),
-      homeDeliverySixDayPlus = planWithPayment(HomeDeliverySixDayPlus, PlanDescription("Sixday+"), homeDeliverySixDayRules),
-      homeDeliveryWeekendPlus = planWithPayment(HomeDeliveryWeekendPlus, PlanDescription("Weekend+"), homeDeliveryWeekendRules),
-      homeDeliverySaturday = planWithPayment(HomeDeliverySaturday, PlanDescription("Saturday"), homeDeliverySaturdayDateRules),
-      homeDeliverySaturdayPlus = planWithPayment(HomeDeliverySaturdayPlus, PlanDescription("Saturday+"), homeDeliverySaturdayDateRules),
+      voucherWeekendPlus = planWithPayment(VoucherWeekendPlus, PlanDescription("Weekend+"), voucherSaturdayDateRules, Monthly),
+      voucherWeekend = planWithPayment(VoucherWeekend, PlanDescription("Weekend"), voucherSaturdayDateRules, Monthly),
+      voucherSixDay = planWithPayment(VoucherSixDay, PlanDescription("Sixday"), voucherMondayRules, Monthly),
+      voucherSixDayPlus = planWithPayment(VoucherSixDayPlus, PlanDescription("Sixday+"), voucherMondayRules, Monthly),
+      voucherEveryDay = planWithPayment(VoucherEveryDay, PlanDescription("Everyday"), voucherMondayRules, Monthly),
+      voucherEveryDayPlus = planWithPayment(VoucherEveryDayPlus, PlanDescription("Everyday+"), voucherMondayRules, Monthly),
+      voucherSaturday = planWithPayment(VoucherSaturday, PlanDescription("Saturday"), voucherSaturdayDateRules, Monthly),
+      voucherSaturdayPlus = planWithPayment(VoucherSaturdayPlus, PlanDescription("Saturday+"), voucherSaturdayDateRules, Monthly),
+      voucherSunday = planWithPayment(VoucherSunday, PlanDescription("Sunday"), voucherSundayDateRules, Monthly),
+      voucherSundayPlus = planWithPayment(VoucherSundayPlus, PlanDescription("Sunday+"), voucherSundayDateRules, Monthly),
+      monthlyContribution = planWithPayment(MonthlyContribution, PlanDescription("Monthly"), todayOnlyRule, Monthly),
+      annualContribution = planWithPayment(AnnualContribution, PlanDescription("Annual"), todayOnlyRule, Monthly),
+      homeDeliveryEveryDay = planWithPayment(HomeDeliveryEveryDay, PlanDescription("Everyday"), homeDeliveryEveryDayRules, Monthly),
+      homeDeliverySaturday = planWithPayment(HomeDeliverySaturday, PlanDescription("Saturday"), homeDeliverySaturdayDateRules, Monthly),
+      homeDeliverySunday = planWithPayment(HomeDeliverySunday, PlanDescription("Sunday"), homeDeliverySundayDateRules, Monthly),
+      homeDeliverySixDay = planWithPayment(HomeDeliverySixDay, PlanDescription("Sixday"), homeDeliverySixDayRules, Monthly),
+      homeDeliveryWeekend = planWithPayment(HomeDeliveryWeekend, PlanDescription("Weekend"), homeDeliveryWeekendRules, Monthly),
+      homeDeliveryEveryDayPlus = planWithPayment(HomeDeliveryEveryDayPlus, PlanDescription("Everyday+"), homeDeliveryEveryDayRules, Monthly),
+      homeDeliverySaturdayPlus = planWithPayment(HomeDeliverySaturdayPlus, PlanDescription("Saturday+"), homeDeliverySaturdayDateRules, Monthly),
+      homeDeliverySundayPlus = planWithPayment(HomeDeliverySundayPlus, PlanDescription("Sunday+"), homeDeliverySundayDateRules, Monthly),
+      homeDeliverySixDayPlus = planWithPayment(HomeDeliverySixDayPlus, PlanDescription("Sixday+"), homeDeliverySixDayRules, Monthly),
+      homeDeliveryWeekendPlus = planWithPayment(HomeDeliveryWeekendPlus, PlanDescription("Weekend+"), homeDeliveryWeekendRules, Monthly),
+      digipackAnnual = planWithPayment(DigipackAnnual, PlanDescription("Annual"), digipackStartRules, Annual),
+      digipackMonthly = planWithPayment(DigipackMonthly, PlanDescription("Monthly"), digipackStartRules, Monthly),
     )
   }
 

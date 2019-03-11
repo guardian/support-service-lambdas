@@ -2,6 +2,8 @@ package com.gu.newproduct.api.productcatalog
 
 import java.time.DayOfWeek
 
+import com.gu.i18n.Currency
+import com.gu.i18n.Currency.GBP
 import play.api.libs.json.{JsString, Json, Writes}
 
 object WireModel {
@@ -26,8 +28,15 @@ object WireModel {
     id: String,
     label: String,
     startDateRules: Option[WireStartDateRules] = None,
-    paymentPlan: Option[String] = None
+    paymentPlans: List[WirePaymentPlan],
+    paymentPlan: Option[String] //todo legacy field, remove once salesforce is reading from paymentPlans
   )
+
+  case class WirePaymentPlan(currencyCode: String, description: String)
+  object WirePaymentPlan {
+    implicit val writes = Json.writes[WirePaymentPlan]
+
+  }
 
   case class WireSelectableWindow(
     cutOffDayInclusive: Option[WireDayOfWeek] = None,
@@ -86,11 +95,19 @@ object WireModel {
       if (startDateRules == StartDateRules()) None else Some(WireStartDateRules.fromStartDateRules(startDateRules))
 
     def fromPlan(plan: Plan) = {
+
+      val paymentPlans = plan.paymentPlans.map {
+        case (currency: Currency, paymentPlan: PaymentPlan) => WirePaymentPlan(currency.iso, paymentPlan.description)
+      }
+
+      val legacyPaymentPlan = plan.paymentPlans.get(GBP).map(_.description)
+
       WirePlanInfo(
         id = plan.id.name,
         label = plan.description.value,
         startDateRules = toOptionalWireRules(plan.startDateRules),
-        paymentPlan = plan.paymentPlan.map(_.value)
+        paymentPlans = paymentPlans.toList,
+        paymentPlan = legacyPaymentPlan
       )
     }
   }
@@ -124,7 +141,12 @@ object WireModel {
         plans = PlanId.enabledHomeDeliveryPlans.map(wirePlanForPlanId)
       )
 
-      val availableProductsAndPlans = List(contributionProduct, voucherProduct, homeDeliveryProduct).filterNot(_.plans.isEmpty)
+      val digipackProduct = WireProduct(
+        label = "Digital Pack",
+        plans = PlanId.enabledDigipackPlans.map(wirePlanForPlanId)
+      )
+
+      val availableProductsAndPlans = List(contributionProduct, voucherProduct, homeDeliveryProduct, digipackProduct).filterNot(_.plans.isEmpty)
 
       WireCatalog(availableProductsAndPlans)
     }

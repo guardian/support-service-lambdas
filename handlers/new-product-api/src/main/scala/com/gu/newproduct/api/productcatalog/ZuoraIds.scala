@@ -32,6 +32,7 @@ object ZuoraIds {
     weekendPlus: ProductRatePlanId,
     sixDayPlus: ProductRatePlanId
   ) {
+
     val byApiPlanId: Map[PlanId, ProductRatePlanId] = Map(
       VoucherEveryDay -> everyday,
       VoucherWeekend -> weekend,
@@ -45,6 +46,9 @@ object ZuoraIds {
       VoucherSaturdayPlus -> saturdayPlus
     )
 
+    val plansWithDigipack = List(
+      everydayPlus, weekendPlus, sixDayPlus, sundayPlus, saturdayPlus
+    )
     val zuoraIdToPlanid = byApiPlanId.map(_.swap)
 
   }
@@ -52,8 +56,8 @@ object ZuoraIds {
   case class HomeDeliveryZuoraIds(
     everyday: ProductRatePlanId,
     everydayPlus: ProductRatePlanId,
-    saturday:ProductRatePlanId,
-    saturdayPlus:ProductRatePlanId,
+    saturday: ProductRatePlanId,
+    saturdayPlus: ProductRatePlanId,
     sunday: ProductRatePlanId,
     sundayPlus: ProductRatePlanId,
     weekend: ProductRatePlanId,
@@ -76,10 +80,25 @@ object ZuoraIds {
 
     val zuoraIdToPlanid = byApiPlanId.map(_.swap)
 
+    val plansWithDigipack = List(
+      everydayPlus, weekendPlus, sixDayPlus, sundayPlus, saturdayPlus
+    )
   }
 
-  case class ZuoraIds(contributionsZuoraIds: ContributionsZuoraIds, voucherZuoraIds: VoucherZuoraIds, homeDeliveryZuoraIds: HomeDeliveryZuoraIds) {
-    def apiIdToRateplanId: Map[PlanId, ProductRatePlanId] =  contributionsZuoraIds.byApiPlanId.mapValues(_.productRatePlanId) ++ voucherZuoraIds.byApiPlanId ++ homeDeliveryZuoraIds.byApiPlanId
+  case class DigipackZuoraIds(
+    monthly: ProductRatePlanId,
+    annual: ProductRatePlanId
+  ) {
+    val byApiPlanId = Map(
+      DigipackAnnual -> annual,
+      DigipackMonthly -> monthly
+    )
+    val zuoraIdToPlanid = byApiPlanId.map(_.swap)
+  }
+
+  case class ZuoraIds(contributionsZuoraIds: ContributionsZuoraIds, voucherZuoraIds: VoucherZuoraIds, homeDeliveryZuoraIds: HomeDeliveryZuoraIds, digitalPackIds: DigipackZuoraIds) {
+    def apiIdToRateplanId: Map[PlanId, ProductRatePlanId] = contributionsZuoraIds.byApiPlanId.mapValues(_.productRatePlanId) ++ voucherZuoraIds.byApiPlanId ++ homeDeliveryZuoraIds.byApiPlanId ++ digitalPackIds.byApiPlanId
+
     val rateplanIdToApiId: Map[ProductRatePlanId, PlanId] = apiIdToRateplanId.map(_.swap)
   }
 
@@ -115,11 +134,15 @@ object ZuoraIds {
           weekend = ProductRatePlanId("2c92a0fd5614305c01561dc88f3275be"),
           sunday = ProductRatePlanId("2c92a0ff5af9b657015b0fea5b653f81"),
           saturday = ProductRatePlanId("2c92a0fd5e1dcf0d015e3cb39d0a7ddb"),
-          saturdayPlus= ProductRatePlanId("2c92a0ff6205708e01622484bb2c4613"),
+          saturdayPlus = ProductRatePlanId("2c92a0ff6205708e01622484bb2c4613"),
           sundayPlus = ProductRatePlanId("2c92a0fd560d13880156136b8e490f8b"),
           weekendPlus = ProductRatePlanId("2c92a0ff560d311b0156136b9f5c3968"),
           sixDayPlus = ProductRatePlanId("2c92a0ff560d311b0156136b697438a9"),
-          everydayPlus= ProductRatePlanId("2c92a0fd560d132301560e43cf041a3c")
+          everydayPlus = ProductRatePlanId("2c92a0fd560d132301560e43cf041a3c")
+        ),
+        DigipackZuoraIds(
+          monthly = ProductRatePlanId("2c92a0fb4edd70c8014edeaa4eae220a"),
+          annual = ProductRatePlanId("2c92a0fb4edd70c8014edeaa4e972204"),
         )
       ),
       Stage("CODE") -> ZuoraIds(
@@ -150,12 +173,16 @@ object ZuoraIds {
           sixDay = ProductRatePlanId("2c92c0f955ca02900155da27ff142e01"),
           weekend = ProductRatePlanId("2c92c0f955ca02900155da27f83c2d9b"),
           sunday = ProductRatePlanId("2c92c0f95aff3b54015b0ede33bc04f2"),
-          sundayPlus= ProductRatePlanId("2c92c0f955ca02900155da27f4872d4d"),
+          sundayPlus = ProductRatePlanId("2c92c0f955ca02900155da27f4872d4d"),
           saturday = ProductRatePlanId("2c92c0f85b8fa30e015b9108a83253c7"),
           saturdayPlus = ProductRatePlanId("2c92c0f961f9cf300161fbfa943b6f54"),
-          weekendPlus=ProductRatePlanId("2c92c0f955ca02900155da27f9402dad"),
-         sixDayPlus= ProductRatePlanId("2c92c0f955ca02900155da27f29e2d13"),
-         everydayPlus= ProductRatePlanId("2c92c0f955ca02900155da2803b02e33")
+          weekendPlus = ProductRatePlanId("2c92c0f955ca02900155da27f9402dad"),
+          sixDayPlus = ProductRatePlanId("2c92c0f955ca02900155da27f29e2d13"),
+          everydayPlus = ProductRatePlanId("2c92c0f955ca02900155da2803b02e33")
+        ),
+        DigipackZuoraIds(
+          monthly = ProductRatePlanId("2c92c0f94f2acf73014f2c908f671591"),
+          annual = ProductRatePlanId("2c92c0f84f2ac59d014f2c94aea9199e")
         )
       ),
       Stage("DEV") -> ZuoraIds(
@@ -192,6 +219,10 @@ object ZuoraIds {
           weekendPlus = ProductRatePlanId("2c92c0f95aff3b56015b104aa9a13ea5"),
           sixDayPlus = ProductRatePlanId("2c92c0f85aff33ff015b1042d4ba0a05"),
           everydayPlus = ProductRatePlanId("2c92c0f85aff3453015b10496b5e3d17")
+        ),
+        DigipackZuoraIds(
+          monthly = ProductRatePlanId("2c92c0f84bbfec8b014bc655f4852d9d"),
+          annual = ProductRatePlanId("2c92c0f94bbffaaa014bc6a4212e205b")
         )
       )
     )

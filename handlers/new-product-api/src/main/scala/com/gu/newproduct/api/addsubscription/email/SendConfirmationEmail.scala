@@ -1,8 +1,7 @@
-package com.gu.newproduct.api.addsubscription.email.paper
+package com.gu.newproduct.api.addsubscription.email
 
-import com.gu.newproduct.api.addsubscription.email.{DataExtensionName, ETPayload}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
-import com.gu.newproduct.api.productcatalog.{Plan, VoucherPlanId}
+import com.gu.newproduct.api.productcatalog.{DigipackPlanId, Plan, VoucherPlanId}
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.AsyncTypes.{AsyncApiGatewayOp, _}
@@ -11,39 +10,39 @@ import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResp
 
 import scala.concurrent.Future
 
-object SendPaperConfirmationEmail extends Logging {
+object SendConfirmationEmail extends Logging {
 
-  def apply(
-    etSqsSend: ETPayload[PaperEmailData] => Future[Unit]
+  def apply[DATA <: EmailData](
+    etSqsSend: ETPayload[DATA] => Future[Unit]
   )(
     sfContactId: Option[SfContactId],
-    data: PaperEmailData
+    data: DATA
   ): AsyncApiGatewayOp[Unit] = for {
     etPayload <- toPayload(sfContactId, data).toAsync
-    sendMessageResult <- etSqsSend(etPayload).toAsyncApiGatewayOp("sending paper email sqs message")
+    sendMessageResult <- etSqsSend(etPayload).toAsyncApiGatewayOp("sending email sqs message")
   } yield sendMessageResult
 
-  def toPayload(sfContactId: Option[SfContactId], voucherEmailData: PaperEmailData): ApiGatewayOp[ETPayload[PaperEmailData]] =
-    voucherEmailData.contacts.billTo.email match {
+  def toPayload[DATA <: EmailData](sfContactId: Option[SfContactId], emailData: DATA): ApiGatewayOp[ETPayload[DATA]] =
+    emailData.contacts.billTo.email match {
       case Some(email) =>
         val payload = ETPayload(
           email = email.value,
-          fields = voucherEmailData,
-          dataExtensionFor(voucherEmailData.plan),
+          fields = emailData,
+          dataExtensionFor(emailData.plan),
           sfContactId.map(_.value)
         )
         ContinueProcessing(payload)
       case None =>
-        val errorLogMessage = "No email address in zuora sold to contact, skipping paper email thank you email"
+        val errorLogMessage = "No email address in zuora contact, skipping confirmation email"
         logger.warn(errorLogMessage)
         val response = ApiGatewayResponse.messageResponse("500", "Internal server error")
         ReturnWithResponse(response)
     }
 
-  //todo see if we can pass something like a PaperPlanId here so we can match more specifically
   def dataExtensionFor(plan: Plan) = DataExtensionName(
     plan.id match {
       case _: VoucherPlanId => "paper-voucher"
+      case _: DigipackPlanId => "digipack"
       case _ => "paper-delivery"
     }
   )
