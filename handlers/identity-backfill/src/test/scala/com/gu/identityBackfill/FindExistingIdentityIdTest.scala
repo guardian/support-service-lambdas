@@ -35,7 +35,7 @@ class FindExistingIdentityIdTest extends FlatSpec with Matchers {
     FindExistingIdentityId(
       _ => ClientSuccess(IdentityAccount(IdentityId("100"), isUserEmailValidated = false)),
       _ => ClientSuccess(IdentityUser(IdentityId("100"), hasPassword = true))
-    )(EmailAddress("email@email.email")) should be(ReturnWithResponse(ApiGatewayResponse.notFound(s"identity email not validated but password is set IdentityId(100)")))
+    )(EmailAddress("email@email.email")) should be(ReturnWithResponse(ApiGatewayResponse.notFound(s"Identity account not validated but password is set: 100")))
   }
 
   "findExistingIdentityId" should "ReturnWithResponse for unexpected identity response" in {
@@ -49,6 +49,6 @@ class FindExistingIdentityIdTest extends FlatSpec with Matchers {
     FindExistingIdentityId(
       _ => ClientSuccess(IdentityAccount(IdentityId("100"), isUserEmailValidated = false)),
       _ => GenericError("error"),
-    )(EmailAddress("email@email.email")) should be(ReturnWithResponse(ApiGatewayResponse.notFound(s"identity email not validated but password is set IdentityId(100)")))
+    )(EmailAddress("email@email.email")) should be(ReturnWithResponse(ApiGatewayResponse.notFound(s"Identity account not validated but password is set: 100")))
   }
 }
