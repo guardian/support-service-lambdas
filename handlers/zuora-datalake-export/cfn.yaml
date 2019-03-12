@@ -77,7 +77,7 @@ Resources:
                           - s3:*
                         Resource:
                           !Sub
-                          - "arn:aws:s3:::${targetBucket}"
+                          - "arn:aws:s3:::${targetBucket}/*"
                           - { targetBucket: !FindInMap [BucketMap, !Ref Stage, datalakeBucketName] }
 
 
