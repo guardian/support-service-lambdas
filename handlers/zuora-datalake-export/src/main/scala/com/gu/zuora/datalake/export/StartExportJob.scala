@@ -52,6 +52,18 @@ object ZuoraApiHost {
   }
 }
 
+case class ZuoraAquaStatefulApi(
+  version: String = "1.2",
+  project: String = "zuora-datalake-export",
+  partner: String
+)
+object ZuoraAquaStatefulApi {
+  def apply(): ZuoraAquaStatefulApi = System.getenv("Stage") match {
+    case "CODE" => ZuoraAquaStatefulApi(partner = "guardian-12357")
+    case "PROD" => throw new NotImplementedError("Contact zuora support to request PROD AQuA Stateful partner ID")
+  }
+}
+
 object ReadConfig {
   def apply(): Config = {
     val stage = System.getenv("Stage")
@@ -95,13 +107,13 @@ object StartAquaJob {
       s"""
         |{
         |	"format" : "csv",
-        |	"version" : "1.2",
+        |	"version" : "${ZuoraAquaStatefulApi().version}",
         |	"name" : "zuora-datalake-export",
         |	"encrypted" : "none",
         |	"useQueryLabels" : "true",
         |	"dateTimeUtc" : "true",
-        |	"partner": "guardian-12357",
-        |	"project": "zuora-datalake-export",
+        |	"partner": "${ZuoraAquaStatefulApi().partner}",
+        |	"project": "${ZuoraAquaStatefulApi().project}",
         |	"incrementalTime": "2019-02-20 00:00:00",
         |	"queries" : [
         |		{
