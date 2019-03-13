@@ -7,35 +7,25 @@ import io.github.mkotsur.aws.handler.Lambda
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.s3.AmazonS3Client
 import scalaj.http.Http
-
 import scala.io.Source
+import scala.concurrent.duration._
 
 case class Oauth(clientId: String, clientSecret: String)
 case class ZuoraDatalakeExport(oauth: Oauth)
 case class Config(stage: String, baseUrl: String, zuoraDatalakeExport: ZuoraDatalakeExport)
 case class AccessToken(access_token: String)
 case class QueryResponse(id: String)
-case class Batch(fileId: String, batchId: String, status: String, name: String)
+case class Batch(fileId: String, batchId: String, status: String, name: String, message: Option[String])
 case class JobResults(status: String, id: String, batches: List[Batch])
 
 class StartExportJob extends Lambda[None.type, String] {
   override def handle(none: None.type, context: Context) = {
-    println(s"hello world")
-
     val jobId = StartAquaJob()
-    println(s"jobId = ${jobId}")
-
-    Thread.sleep(5000)
-
     val status = GetJobResult(jobId)
-    println(s"job result: $status")
-
-    val batch = status.batches.head
+    val batch = status.batches.head // FIXME: iterate when more than one query
     val csvFile = GetResultsFile(batch.fileId)
-
     SaveCsvToBucket(csvFile, batch.name)
-
-    Right(s"Successfully exported Zuora to Datalake $jobId")
+    Right(s"Successfully exported Zuora to Datalake jobId = $jobId")
   }
 }
 
@@ -142,20 +132,33 @@ object StartAquaJob {
   }
 }
 /**
+ * Poll job status recursively until all queries have completed.
+ *
  * https://knowledgecenter.zuora.com/DC_Developers/AB_Aggregate_Query_API/C_Get_Job_ID
  */
 object GetJobResult {
-  def apply(jobId: String) = {
+  def apply(jobId: String): JobResults = {
     val response = Http(s"${ZuoraApiHost()}/v1/batch-query/jobs/$jobId")
       .header("Authorization", s"Bearer ${AccessToken()}")
       .header("Content-Type", "application/json")
       .asString
 
     response.code match {
-      case 200 => decode[JobResults](response.body).getOrElse(throw new RuntimeException(s"Failed to parse GetJobResult response: ${response}"))
-      case _ => throw new RuntimeException(s"Failed to execute request GetJobResult: ${response}")
-    }
+      case 200 =>
+        val jobResults = decode[JobResults](response.body).getOrElse(throw new RuntimeException(s"Failed to parse GetJobResult response: ${response}"))
 
+        jobResults.batches.find(_.status == "aborted").map { abortedBatch =>
+          throw new RuntimeException(s"Failed to complete query: $abortedBatch")
+        }
+
+        if (jobResults.batches.forall(_.status == "completed"))
+          jobResults
+        else {
+          Thread.sleep(1.minute.toMillis)
+          apply(jobId) // Keep trying until lambda timeout
+        }
+      case _ => throw new RuntimeException(s"Failed to execute request GetJobResult: $response")
+    }
   }
 }
 
@@ -172,7 +175,6 @@ object GetResultsFile {
       case 200 => response.body
       case _ => throw new RuntimeException(s"Failed to execute request GetResultsFile: ${response}")
     }
-
   }
 }
 
