@@ -157,8 +157,10 @@ object GetResultsFile {
 object SaveCsvToBucket {
   def apply(csvContent: String, fileName: String) = {
     val s3Client = AmazonS3Client.builder.build()
-    val bucketName = "zuora-datalake-export-code"
-    val key = s"$fileName.csv"
+    // val bucketName = "zuora-datalake-export-code"
+    // val key = s"$fileName.csv"
+    val bucketName = "ophan-temp-schema"
+    val key = s"marioTest/raw/zuora/increment/$fileName.csv"
     s3Client.putObject(bucketName, key, csvContent)
   }
 }

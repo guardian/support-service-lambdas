@@ -80,6 +80,14 @@ Resources:
                           - "arn:aws:s3:::${targetBucket}/*"
                           - { targetBucket: !FindInMap [BucketMap, !Ref Stage, datalakeBucketName] }
 
+                - PolicyName: OphanTargetCsvBucket
+                  PolicyDocument:
+                    Statement:
+                      - Effect: Allow
+                        Action:
+                          - s3:*
+                        Resource: "arn:aws:s3:::ophan-temp-schema/marioTest/raw/zuora/increment/*"
+
 
 
 
