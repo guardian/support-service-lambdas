@@ -10,8 +10,6 @@ import scalaj.http.Http
 
 import scala.io.Source
 
-case class Ping(inputMsg: String)
-case class Pong(outputMsg: String)
 case class Oauth(clientId: String, clientSecret: String)
 case class ZuoraDatalakeExport(oauth: Oauth)
 case class Config(stage: String, baseUrl: String, zuoraDatalakeExport: ZuoraDatalakeExport)
@@ -20,8 +18,8 @@ case class QueryResponse(id: String)
 case class Batch(fileId: String, batchId: String, status: String, name: String)
 case class JobResults(status: String, id: String, batches: List[Batch])
 
-class StartExportJob extends Lambda[Ping, Pong] {
-  override def handle(ping: Ping, context: Context) = {
+class StartExportJob extends Lambda[None.type, String] {
+  override def handle(none: None.type, context: Context) = {
     println(s"hello world")
 
     val jobId = StartAquaJob()
@@ -37,7 +35,7 @@ class StartExportJob extends Lambda[Ping, Pong] {
 
     SaveCsvToBucket(csvFile, batch.name)
 
-    Right(Pong(ping.inputMsg.reverse))
+    Right(s"Successfully exported Zuora to Datalake $jobId")
   }
 }
 
