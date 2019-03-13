@@ -88,9 +88,6 @@ Resources:
                           - s3:*
                         Resource: "arn:aws:s3:::ophan-temp-schema/marioTest/raw/zuora/increment/*"
 
-
-
-
     StartExportJobLambda:
         Type: AWS::Lambda::Function
         Properties:
@@ -112,4 +109,24 @@ Resources:
         DependsOn:
         - StartExportJobRole
         - DatalakeBucket
+
+    TriggerStartExportJobRule:
+      Type: "AWS::Events::Rule"
+      Properties:
+        Description: Trigger Zuora-to-Datalake export
+        ScheduleExpression: rate(2 minutes)
+        State: ENABLED
+        Targets:
+          - Arn: !Sub ${StartExportJobLambda.Arn}
+            Id: TriggerLambda
+            Input: |
+              null
+
+    TriggerStartExportJobPermission:
+      Type: "AWS::Lambda::Permission"
+      Properties:
+        Action: 'lambda:InvokeFunction'
+        FunctionName: !Sub ${StartExportJobLambda.Arn}
+        Principal: 'events.amazonaws.com'
+        SourceArn: !Sub ${TriggerStartExportJobRule.Arn}
 

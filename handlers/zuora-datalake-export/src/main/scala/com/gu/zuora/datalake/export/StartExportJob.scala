@@ -15,7 +15,7 @@ case class ZuoraDatalakeExport(oauth: Oauth)
 case class Config(stage: String, baseUrl: String, zuoraDatalakeExport: ZuoraDatalakeExport)
 case class AccessToken(access_token: String)
 case class QueryResponse(id: String)
-case class Batch(fileId: String, batchId: String, status: String, name: String, message: Option[String])
+case class Batch(fileId: Option[String], batchId: String, status: String, name: String, message: Option[String])
 case class JobResults(status: String, id: String, batches: List[Batch])
 
 class StartExportJob extends Lambda[None.type, String] {
@@ -23,8 +23,8 @@ class StartExportJob extends Lambda[None.type, String] {
     val jobId = StartAquaJob()
     val status = GetJobResult(jobId)
     val batch = status.batches.head // FIXME: iterate when more than one query
-    val csvFile = GetResultsFile(batch.fileId)
-    SaveCsvToBucket(csvFile, batch.name)
+    val csvFile = GetResultsFile(batch)
+    SaveCsvToBucket(csvFile, batch)
     Right(s"Successfully exported Zuora to Datalake jobId = $jobId")
   }
 }
@@ -166,8 +166,9 @@ object GetJobResult {
  * https://knowledgecenter.zuora.com/DC_Developers/AB_Aggregate_Query_API/D_Get_File_Download
  */
 object GetResultsFile {
-  def apply(fileId: String) = {
-    val response = Http(s"${ZuoraApiHost()}/v1/file/${fileId}")
+  def apply(batch: Batch) = {
+    val fileId = batch.fileId.getOrElse(throw new RuntimeException("Failed to get csv file due to missing fileId"))
+    val response = Http(s"${ZuoraApiHost()}/v1/file/$fileId")
       .header("Authorization", s"Bearer ${AccessToken()}")
       .asString
 
@@ -179,11 +180,11 @@ object GetResultsFile {
 }
 
 object SaveCsvToBucket {
-  def apply(csvContent: String, batchName: String) = {
+  def apply(csvContent: String, batch: Batch) = {
     val s3Client = AmazonS3Client.builder.build()
     System.getenv("Stage") match {
-      case "CODE" => s3Client.putObject("zuora-datalake-export-code", Query(batchName).s3Key, csvContent)
-      case "PROD" => s3Client.putObject(Query(batchName).s3Bucket, Query(batchName).s3Key, csvContent)
+      case "CODE" => s3Client.putObject("zuora-datalake-export-code", Query(batch.name).s3Key, csvContent)
+      case "PROD" => s3Client.putObject(Query(batch.name).s3Bucket, Query(batch.name).s3Key, csvContent)
     }
   }
 }
