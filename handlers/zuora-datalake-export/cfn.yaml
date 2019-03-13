@@ -130,3 +130,22 @@ Resources:
         Principal: 'events.amazonaws.com'
         SourceArn: !Sub ${TriggerStartExportJobRule.Arn}
 
+    FailedExportAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Properties:
+        AlarmName: zuora-datalake-export
+        AlarmDescription: Failed to export Zuora to Datalake
+        AlarmActions:
+          - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:MarioTest
+        ComparisonOperator: GreaterThanOrEqualToThreshold
+        Dimensions:
+          - Name: FunctionName
+            Value: !Ref StartExportJobLambda
+        EvaluationPeriods: 1
+        MetricName: Errors
+        Namespace: AWS/Lambda
+        Period: 300
+        Statistic: Sum
+        Threshold: 1
+        TreatMissingData: missing
+
