@@ -22,7 +22,7 @@ case class JobResults(status: String, id: String, batches: List[Batch])
 
 class StartExportJob extends Lambda[Ping, Pong] {
   override def handle(ping: Ping, context: Context) = {
-    println("hello world")
+    println(s"hello world")
 
     val jobId = Query()
     println(s"jobId = ${jobId}")
@@ -30,7 +30,7 @@ class StartExportJob extends Lambda[Ping, Pong] {
     Thread.sleep(5000)
 
     val status = GetJobResult(jobId)
-    println(status)
+    println(s"job result: $status")
 
     val tmpBatch = status.batches.head
     val csvFile = GetResultsFile(tmpBatch.fileId)
@@ -41,11 +41,21 @@ class StartExportJob extends Lambda[Ping, Pong] {
   }
 }
 
+object ZuoraApiHost {
+  def apply(): String = {
+    System.getenv("Stage") match {
+      case "CODE" => "https://rest.apisandbox.zuora.com"
+      case "PROD" => "https://rest.zuora.com"
+    }
+  }
+}
+
 object ReadConfig {
   def apply(): Config = {
+    val stage = System.getenv("Stage")
     val s3Client = AmazonS3Client.builder.build()
     val bucketName = "gu-reader-revenue-private"
-    val key = "membership/support-service-lambdas/CODE/zuoraRest-CODE.v1.json"
+    val key = s"membership/support-service-lambdas/$stage/zuoraRest-$stage.v1.json"
     val inputStream = s3Client.getObject(bucketName, key).getObjectContent
     val rawJson = Source.fromInputStream(inputStream).mkString
     decode[Config](rawJson) match {
@@ -59,7 +69,7 @@ object AccessToken {
   def apply(): String = {
     val config = ReadConfig()
     val oauthConfig = config.zuoraDatalakeExport.oauth
-    val response = Http(s"https://rest.apisandbox.zuora.com/oauth/token")
+    val response = Http(s"${ZuoraApiHost()}/oauth/token")
       .postForm(Seq(
         "client_id" -> oauthConfig.clientId,
         "client_secret" -> oauthConfig.clientSecret,
@@ -105,7 +115,7 @@ object Query {
         |}
       """.stripMargin
 
-    val response = Http(s"https://rest.apisandbox.zuora.com/v1/batch-query/")
+    val response = Http(s"${ZuoraApiHost()}/v1/batch-query/")
       .header("Authorization", s"Bearer ${AccessToken()}")
       .header("Content-Type", "application/json")
       .postData(body)
@@ -124,7 +134,7 @@ object Query {
  */
 object GetJobResult {
   def apply(jobId: String) = {
-    val response = Http(s"https://rest.apisandbox.zuora.com/v1/batch-query/jobs/$jobId")
+    val response = Http(s"${ZuoraApiHost()}/v1/batch-query/jobs/$jobId")
       .header("Authorization", s"Bearer ${AccessToken()}")
       .header("Content-Type", "application/json")
       .asString
@@ -142,7 +152,7 @@ object GetJobResult {
  */
 object GetResultsFile {
   def apply(fileId: String) = {
-    val response = Http(s"https://rest.apisandbox.zuora.com/v1/file/${fileId}")
+    val response = Http(s"${ZuoraApiHost()}/v1/file/${fileId}")
       .header("Authorization", s"Bearer ${AccessToken()}")
       .asString
 
@@ -160,7 +170,7 @@ object SaveCsvToBucket {
     // val bucketName = "zuora-datalake-export-code"
     // val key = s"$fileName.csv"
     val bucketName = "ophan-temp-schema"
-    val key = s"marioTest/raw/zuora/increment/$fileName.csv"
+    val key = s"marioTest/raw/zuora/increment/$fileName.csv" // FIXME: Set proper ophan buckets
     s3Client.putObject(bucketName, key, csvContent)
   }
 }
