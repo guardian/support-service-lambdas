@@ -24,7 +24,7 @@ class StartExportJob extends Lambda[Ping, Pong] {
   override def handle(ping: Ping, context: Context) = {
     println(s"hello world")
 
-    val jobId = Query()
+    val jobId = StartAquaJob()
     println(s"jobId = ${jobId}")
 
     Thread.sleep(5000)
@@ -32,12 +32,26 @@ class StartExportJob extends Lambda[Ping, Pong] {
     val status = GetJobResult(jobId)
     println(s"job result: $status")
 
-    val tmpBatch = status.batches.head
-    val csvFile = GetResultsFile(tmpBatch.fileId)
+    val batch = status.batches.head
+    val csvFile = GetResultsFile(batch.fileId)
 
-    SaveCsvToBucket(csvFile, tmpBatch.name)
+    SaveCsvToBucket(csvFile, batch.name)
 
     Right(Pong(ping.inputMsg.reverse))
+  }
+}
+
+sealed abstract case class Query(batchName: String, zoql: String, s3Bucket: String, s3Key: String)
+object AccountQuery extends Query(
+  "Account",
+  "SELECT Account.Balance,Account.AutoPay,Account.Currency,Account.ID,Account.IdentityId__c,Account.LastInvoiceDate,Account.sfContactId__c,Account.MRR FROM Account WHERE Status != 'Canceled' AND (ProcessingAdvice__c != 'DoNotProcess' OR ProcessingAdvice__c IS NULL)",
+  "ophan-temp-schema", // FIXME: Give proper ophan buckets
+  "marioTest/raw/zuora/increment/Account.csv" // FIXME: Account.csv
+)
+object Query {
+  def apply(batchName: String): Query = batchName match {
+    case AccountQuery.batchName => AccountQuery
+    case _ => throw new RuntimeException(s"Failed to create Query object due to unexpected batch name: $batchName")
   }
 }
 
@@ -87,10 +101,10 @@ object AccessToken {
 /**
  * https://knowledgecenter.zuora.com/DC_Developers/AB_Aggregate_Query_API/BA_Stateless_and_Stateful_Modes#Automatic_Switch_Between_Full_Load_and_Incremental_Load
  */
-object Query {
+object StartAquaJob {
   def apply() = {
     val body =
-      """
+      s"""
         |{
         |	"format" : "csv",
         |	"version" : "1.2",
@@ -103,8 +117,8 @@ object Query {
         |	"incrementalTime": "2019-02-20 00:00:00",
         |	"queries" : [
         |		{
-        |			"name" : "Account",
-        |			"query" : "SELECT Account.Balance,Account.AutoPay,Account.Currency,Account.ID,Account.IdentityId__c,Account.LastInvoiceDate,Account.sfContactId__c,Account.MRR FROM Account WHERE Status != 'Canceled' AND (ProcessingAdvice__c != 'DoNotProcess' OR ProcessingAdvice__c IS NULL)",
+        |			"name" : "${AccountQuery.batchName}",
+        |			"query" : "${AccountQuery.zoql}",
         |			"type" : "zoqlexport",
         |			"deleted" : {
         |                 "column" : "IsDeleted",
@@ -165,12 +179,11 @@ object GetResultsFile {
 }
 
 object SaveCsvToBucket {
-  def apply(csvContent: String, fileName: String) = {
+  def apply(csvContent: String, batchName: String) = {
     val s3Client = AmazonS3Client.builder.build()
-    // val bucketName = "zuora-datalake-export-code"
-    // val key = s"$fileName.csv"
-    val bucketName = "ophan-temp-schema"
-    val key = s"marioTest/raw/zuora/increment/$fileName.csv" // FIXME: Set proper ophan buckets
-    s3Client.putObject(bucketName, key, csvContent)
+    System.getenv("Stage") match {
+      case "CODE" => s3Client.putObject("zuora-datalake-export-code", Query(batchName).s3Key, csvContent)
+      case "PROD" => s3Client.putObject(Query(batchName).s3Bucket, Query(batchName).s3Key, csvContent)
+    }
   }
 }
