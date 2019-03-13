@@ -4,7 +4,7 @@ import java.time.LocalDate
 
 import com.gu.i18n.Country
 import com.gu.i18n.Currency.GBP
-import com.gu.newproduct.api.addsubscription.email.{DigipackEmailData, PaperEmailData, TrialPeriod}
+import com.gu.newproduct.api.addsubscription.email.{DigipackEmailData, TrialPeriod}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.SubscriptionName
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.{BillToContact, _}
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{BankAccountName, BankAccountNumberMask, DirectDebit, MandateId, NonDirectDebitMethod, SortCode}

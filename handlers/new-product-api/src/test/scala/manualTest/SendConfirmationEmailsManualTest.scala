@@ -4,46 +4,65 @@ import java.time.LocalDate
 
 import com.gu.effects.sqs.AwsSQSSend
 import com.gu.i18n.{Country, Currency}
-import com.gu.newproduct.api.addsubscription.email.EtSqsSend
-import com.gu.newproduct.api.addsubscription.email.contributions.SendConfirmationEmailContributions.ContributionsEmailData
-import com.gu.newproduct.api.addsubscription.email.contributions.{ContributionFields, SendConfirmationEmailContributions}
+import com.gu.newproduct.api.addsubscription.email.{ContributionsEmailData, EtSqsSend, SendConfirmationEmail}
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts._
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.NonDirectDebitMethod
 import com.gu.newproduct.api.addsubscription.zuora.{PaymentMethodStatus, PaymentMethodType}
 import com.gu.newproduct.api.addsubscription.ZuoraAccountId
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
-import com.gu.newproduct.api.productcatalog.AmountMinorUnits
+import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, NewProductApi, Plan, PlanDescription}
 import com.gu.newproduct.api.productcatalog.PlanId.MonthlyContribution
 import com.gu.util.config.Stage
 import com.gu.newproduct.api.EmailQueueNames.emailQueuesFor
+import com.gu.newproduct.api.addsubscription.email.contributions.ContributionEmailDataSerialiser._
+
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
 object SendConfirmationEmailsManualTest {
 
-  def fakeContact(email: Email) = BillToContact(
-    title = None,
-    firstName = FirstName("john"),
-    lastName = LastName("bloggs"),
-    email = Some(email),
-    address = BillToAddress(
-      address1 = None,
-      address2 = None,
-      city = None,
-      state = None,
-      country = Some(Country.UK),
-      postcode = None
+  def fakeContacts(billToEmail: Email) = {
+    val soldTo = SoldToContact(
+      title = None,
+      firstName = FirstName("john1"),
+      lastName = LastName("bloggs1"),
+      email = Some(Email("sellto@email.com")),
+      address = SoldToAddress(
+        address1 = None,
+        address2 = None,
+        city = None,
+        state = None,
+        country = Country.US,
+        postcode = None
+      )
     )
-  )
 
-  def contributionsEmailData(billtoContact: BillToContact) = ContributionsEmailData(
+    val billto = BillToContact(
+      title = None,
+      firstName = FirstName("john"),
+      lastName = LastName("bloggs"),
+      email = Some(billToEmail),
+      address = BillToAddress(
+        address1 = None,
+        address2 = None,
+        city = None,
+        state = None,
+        country = Some(Country.UK),
+        postcode = None
+      )
+    )
+    Contacts(billto, soldTo)
+  }
+
+  def contributionsEmailData(contacts: Contacts) = ContributionsEmailData(
     ZuoraAccountId("oops"),
     Currency.GBP,
     NonDirectDebitMethod(PaymentMethodStatus.ActivePaymentMethod, PaymentMethodType.PayPal),
     AmountMinorUnits(123),
     LocalDate.of(2018, 9, 1),
-    billtoContact,
-    MonthlyContribution
+    Plan(MonthlyContribution, PlanDescription("some plan")),
+    contacts,
+    LocalDate.of(2018, 8, 1)
   )
 
   val fakeDate = LocalDate.of(2018, 8, 10)
@@ -51,11 +70,11 @@ object SendConfirmationEmailsManualTest {
   def main(args: Array[String]): Unit = {
     val result = for {
       email <- args.headOption.map(Email.apply)
-      queueName = emailQueuesFor(Stage("PROD")).contributions
+      queueName = emailQueuesFor(Stage("DEV")).contributions
       sqsSend = AwsSQSSend(queueName) _
-      contributionsSqsSend = EtSqsSend[ContributionFields](sqsSend) _
-      sendConfirmationEmail = SendConfirmationEmailContributions(contributionsSqsSend, () => fakeDate) _
-      sendResult = sendConfirmationEmail(Some(SfContactId("sfContactId")), contributionsEmailData(fakeContact(email)))
+      contributionsSqsSend = EtSqsSend[ContributionsEmailData](sqsSend) _
+      sendConfirmationEmail = SendConfirmationEmail[ContributionsEmailData](contributionsSqsSend)_
+      sendResult = sendConfirmationEmail(Some(SfContactId("sfContactId")), contributionsEmailData(fakeContacts(email)))
     } yield sendResult
     result match {
       case None =>

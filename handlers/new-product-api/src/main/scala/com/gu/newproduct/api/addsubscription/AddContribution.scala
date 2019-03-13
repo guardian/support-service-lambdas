@@ -7,9 +7,7 @@ import com.gu.effects.sqs.AwsSQSSend.QueueName
 import com.gu.i18n.Currency
 import com.gu.newproduct.api.EmailQueueNames
 import com.gu.newproduct.api.addsubscription.TypeConvert._
-import com.gu.newproduct.api.addsubscription.email.EtSqsSend
-import com.gu.newproduct.api.addsubscription.email.contributions.SendConfirmationEmailContributions.ContributionsEmailData
-import com.gu.newproduct.api.addsubscription.email.contributions.{ContributionFields, SendConfirmationEmailContributions}
+import com.gu.newproduct.api.addsubscription.email.{ContributionsEmailData, EtSqsSend, SendConfirmationEmail}
 import com.gu.newproduct.api.addsubscription.validation.Validation._
 import com.gu.newproduct.api.addsubscription.validation._
 import com.gu.newproduct.api.addsubscription.validation.contribution.ContributionValidations.ValidatableFields
@@ -18,22 +16,25 @@ import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{ChargeOve
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAccount
 import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.WireModel.ZuoraSubscriptionsResponse
-import com.gu.newproduct.api.addsubscription.zuora.GetContacts.BillToContact
+import com.gu.newproduct.api.addsubscription.zuora.GetContacts.Contacts
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.WireModel.GetContactsResponse
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{DirectDebit, PaymentMethod, PaymentMethodWire}
 import com.gu.newproduct.api.addsubscription.zuora.{GetAccount, GetAccountSubscriptions, GetContacts, GetPaymentMethod}
 import com.gu.newproduct.api.productcatalog.PlanId.MonthlyContribution
 import com.gu.newproduct.api.productcatalog.ZuoraIds.{PlanAndCharge, ProductRatePlanId, ZuoraIds}
-import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, PlanId}
+import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, Catalog, Plan, PlanId}
 import com.gu.util.apigateway.ApiGatewayResponse.internalServerError
 import com.gu.util.reader.AsyncTypes.{AsyncApiGatewayOp, _}
 import com.gu.util.reader.Types.{ApiGatewayOp, OptionOps}
 import com.gu.util.resthttp.RestRequestMaker.Requests
 import com.gu.util.resthttp.Types.ClientFailableOp
-
+import com.gu.newproduct.api.addsubscription.email.contributions.ContributionEmailDataSerialiser._
 import scala.concurrent.Future
+
 object AddContribution {
   def steps(
+    getPlan: PlanId => Plan,
+    getCurrentDate: () => LocalDate,
     getPlanAndCharge: PlanId => Option[PlanAndCharge],
     getCustomerData: ZuoraAccountId => ApiGatewayOp[ContributionCustomerData],
     contributionValidations: (ValidatableFields, PlanId, Currency) => ValidationResult[AmountMinorUnits],
@@ -50,12 +51,22 @@ object AddContribution {
       chargeOverride = ChargeOverride(amountMinorUnits, planAndCharge.productRatePlanChargeId)
       zuoraCreateSubRequest = ZuoraCreateSubRequest(request, acceptanceDate, Some(chargeOverride), planAndCharge.productRatePlanId)
       subscriptionName <- createSubscription(zuoraCreateSubRequest).toAsyncApiGatewayOp("create monthly contribution")
-      contributionEmailData = toContributionEmailData(request, account.currency, paymentMethod, acceptanceDate, contacts.billTo, amountMinorUnits)
+      contributionEmailData = toContributionEmailData(
+        request = request,
+        currency = account.currency,
+        paymentMethod = paymentMethod,
+        firstPaymentDate = acceptanceDate,
+        contacts = contacts,
+        amountMinorUnits = amountMinorUnits,
+        plan = getPlan(request.planId),
+        currentDate = getCurrentDate()
+      )
       _ <- sendConfirmationEmail(account.sfContactId, contributionEmailData).recoverAndLog("send contribution confirmation email")
     } yield subscriptionName
   }
 
   def wireSteps(
+    catalog: Catalog,
     zuoraIds: ZuoraIds,
     zuoraClient: Requests,
     isValidStartDateForPlan: (PlanId, LocalDate) => ValidationResult[Unit],
@@ -71,10 +82,20 @@ object AddContribution {
     val isValidContributionStartDate = isValidStartDateForPlan(MonthlyContribution, _: LocalDate)
     val validateRequest = ContributionValidations(isValidContributionStartDate, AmountLimits.limitsFor) _
     val contributionSqsSend = awsSQSSend(emailQueueNames.contributions)
-    val contributionEtSqsSend = EtSqsSend[ContributionFields](contributionSqsSend) _
-    val sendConfirmationEmail = SendConfirmationEmailContributions(contributionEtSqsSend, currentDate) _
 
-    AddContribution.steps(planAndChargeForContributionPlanId, getCustomerData, validateRequest, createSubscription, sendConfirmationEmail) _
+    val contributionsSqsSend = awsSQSSend(emailQueueNames.contributions)
+    val contributionsBrazeConfirmationSqsSend = EtSqsSend[ContributionsEmailData](contributionSqsSend) _
+    val sendConfirmationEmail = SendConfirmationEmail(contributionsBrazeConfirmationSqsSend) _
+
+    AddContribution.steps(
+      getPlan = catalog.planForId,
+      getCurrentDate = currentDate,
+      getPlanAndCharge = planAndChargeForContributionPlanId,
+      getCustomerData = getCustomerData,
+      contributionValidations = validateRequest,
+      createSubscription = createSubscription,
+      sendConfirmationEmail = sendConfirmationEmail
+    ) _
 
   }
 
@@ -85,20 +106,23 @@ object AddContribution {
 
   def toContributionEmailData(
     request: AddSubscriptionRequest,
+    plan: Plan,
     currency: Currency,
     paymentMethod: PaymentMethod,
     firstPaymentDate: LocalDate,
-    billToContact: BillToContact,
-    amountMinorUnits: AmountMinorUnits
+    contacts: Contacts,
+    amountMinorUnits: AmountMinorUnits,
+    currentDate: LocalDate
   ) =
     ContributionsEmailData(
       accountId = request.zuoraAccountId,
       currency = currency,
+      plan = plan,
       paymentMethod = paymentMethod,
       amountMinorUnits = amountMinorUnits,
       firstPaymentDate = firstPaymentDate,
-      billTo = billToContact,
-      planId = request.planId
+      contacts = contacts,
+      created = currentDate
     )
 
   def getValidatedContributionCustomerData(
