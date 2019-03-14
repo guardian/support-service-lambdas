@@ -15,5 +15,5 @@ deployments:
       bucket: zuora-auto-cancel-dist
       prefixStack: false
       functionNames:
-      - zuora-datalake-export-StartExportJob-
+      - zuora-datalake-export-
     dependencies: [cfn]
