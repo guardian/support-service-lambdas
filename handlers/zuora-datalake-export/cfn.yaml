@@ -11,22 +11,11 @@ Parameters:
             - PROD
         Default: CODE
 
-Mappings:
-  BucketMap:
-    CODE:
-      datalakeBucketName : "zuora-datalake-export-code"
-    PROD:
-      datalakeBucketName : "zuora-datalake-export-prod"
-
 Resources:
-    DatalakeBucket:
+    LocalTargetCsvBucket:
         Type: AWS::S3::Bucket
         Properties:
-          BucketName:
-            Fn::FindInMap:
-              - BucketMap
-              - Ref: Stage
-              - "datalakeBucketName"
+          BucketName: zuora-datalake-export-code
           BucketEncryption:
             ServerSideEncryptionConfiguration:
               - ServerSideEncryptionByDefault:
@@ -69,16 +58,13 @@ Resources:
                             Action: s3:GetObject
                             Resource: !Sub "arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/zuoraRest-${Stage}*.json"
 
-                - PolicyName: TargetCsvBucket
+                - PolicyName: LocalTargetCsvBucket
                   PolicyDocument:
                     Statement:
                       - Effect: Allow
                         Action:
                           - s3:*
-                        Resource:
-                          !Sub
-                          - "arn:aws:s3:::${targetBucket}/*"
-                          - { targetBucket: !FindInMap [BucketMap, !Ref Stage, datalakeBucketName] }
+                        Resource: !Sub "${LocalTargetCsvBucket.Arn}/*"
 
                 - PolicyName: OphanTargetCsvBucket
                   PolicyDocument:
@@ -86,7 +72,9 @@ Resources:
                       - Effect: Allow
                         Action:
                           - s3:*
-                        Resource: "arn:aws:s3:::ophan-temp-schema/marioTest/raw/zuora/increment/*"
+                        Resource:
+                          - "arn:aws:s3:::ophan-temp-schema/marioTest/raw/zuora/increment/*"
+                          - "arn:aws:s3:::ophan-raw-zuora-increment*"
 
     StartExportJobLambda:
         Type: AWS::Lambda::Function
@@ -108,7 +96,7 @@ Resources:
             Timeout: 900
         DependsOn:
         - StartExportJobRole
-        - DatalakeBucket
+        - LocalTargetCsvBucket
 
     TriggerStartExportJobRule:
       Type: "AWS::Events::Rule"
