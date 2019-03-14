@@ -1,5 +1,7 @@
 package com.gu.zuora.datalake.export
 
+import java.sql.Date
+
 import io.circe.generic.auto._
 import io.circe.parser._
 import io.github.mkotsur.aws.handler.Lambda._
@@ -7,6 +9,7 @@ import io.github.mkotsur.aws.handler.Lambda
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.s3.AmazonS3Client
 import scalaj.http.Http
+
 import scala.io.Source
 import scala.concurrent.duration._
 
@@ -18,9 +21,9 @@ case class QueryResponse(id: String)
 case class Batch(fileId: Option[String], batchId: String, status: String, name: String, message: Option[String])
 case class JobResults(status: String, id: String, batches: List[Batch])
 
-class ExportLambda extends Lambda[None.type, String] {
-  override def handle(none: None.type, context: Context) = {
-    val jobId = StartAquaJob()
+class ExportLambda extends Lambda[Option[String], String] {
+  override def handle(incrementalDate: Option[String], context: Context) = {
+    val jobId = StartAquaJob(incrementalDate)
     val status = GetJobResult(jobId)
     val batch = status.batches.head // FIXME: iterate when more than one query
     val csvFile = GetResultsFile(batch)
@@ -99,10 +102,24 @@ object AccessToken {
 }
 
 /**
+ * https://knowledgecenter.zuora.com/DC_Developers/AB_Aggregate_Query_API/B_Submit_Query/e_Post_Query_with_Retrieval_Time
+ */
+object IncrementalTime {
+  def apply(incrementalDate: Option[String]): String = incrementalDate match {
+    case Some(date) =>
+      s"""
+           |"incrementalTime": "$date 00:00:00",
+         """.stripMargin
+
+    case None => ""
+  }
+}
+
+/**
  * https://knowledgecenter.zuora.com/DC_Developers/AB_Aggregate_Query_API/BA_Stateless_and_Stateful_Modes#Automatic_Switch_Between_Full_Load_and_Incremental_Load
  */
 object StartAquaJob {
-  def apply() = {
+  def apply(incrementalDate: Option[String]) = {
     val body =
       s"""
         |{
@@ -114,7 +131,7 @@ object StartAquaJob {
         |	"dateTimeUtc" : "true",
         |	"partner": "${ZuoraAquaStatefulApi().partner}",
         |	"project": "${ZuoraAquaStatefulApi().project}",
-        |	"incrementalTime": "2019-02-20 00:00:00",
+        |	${IncrementalTime(incrementalDate)}
         |	"queries" : [
         |		{
         |			"name" : "${AccountQuery.batchName}",
