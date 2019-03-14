@@ -1,7 +1,7 @@
 package com.gu.zuora.datalake.export
 
-import java.sql.Date
-
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import io.circe.generic.auto._
 import io.circe.parser._
 import io.github.mkotsur.aws.handler.Lambda._
@@ -9,9 +9,9 @@ import io.github.mkotsur.aws.handler.Lambda
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.s3.AmazonS3Client
 import scalaj.http.Http
-
 import scala.io.Source
 import scala.concurrent.duration._
+import scala.util.Try
 
 case class Oauth(clientId: String, clientSecret: String)
 case class ZuoraDatalakeExport(oauth: Oauth)
@@ -102,16 +102,29 @@ object AccessToken {
 }
 
 /**
+ * WARNING: Incremental time should be used only optionally when fixing failed exports.
+ * This specifies from which date to export incremental changes.
+ *
+ * Provide plain date string to lambda input as "2019-01-20".
+ *
  * https://knowledgecenter.zuora.com/DC_Developers/AB_Aggregate_Query_API/B_Submit_Query/e_Post_Query_with_Retrieval_Time
  */
 object IncrementalTime {
   def apply(incrementalDate: Option[String]): String = incrementalDate match {
     case Some(date) =>
+      validate(date)
       s"""
            |"incrementalTime": "$date 00:00:00",
          """.stripMargin
 
     case None => ""
+  }
+
+  private def validate(date: String) = {
+    val requiredFormat = "yyyy-MM-dd"
+    Try(
+      LocalDate.parse(date, DateTimeFormatter.ofPattern(requiredFormat))
+    ).getOrElse(throw new RuntimeException(s"Failed to parse incremental date: $date. The format should be $requiredFormat."))
   }
 }
 
