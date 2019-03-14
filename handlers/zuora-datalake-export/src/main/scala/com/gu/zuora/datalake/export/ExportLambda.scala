@@ -18,7 +18,7 @@ case class QueryResponse(id: String)
 case class Batch(fileId: Option[String], batchId: String, status: String, name: String, message: Option[String])
 case class JobResults(status: String, id: String, batches: List[Batch])
 
-class StartExportJob extends Lambda[None.type, String] {
+class ExportLambda extends Lambda[None.type, String] {
   override def handle(none: None.type, context: Context) = {
     val jobId = StartAquaJob()
     val status = GetJobResult(jobId)

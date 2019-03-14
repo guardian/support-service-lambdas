@@ -27,7 +27,7 @@ Resources:
                 Status: Enabled
                 ExpirationInDays: 1
 
-    StartExportJobRole:
+    ExportLambdaRole:
         Type: AWS::IAM::Role
         Properties:
             AssumeRolePolicyDocument:
@@ -76,36 +76,35 @@ Resources:
                           - arn:aws:s3:::ophan-temp-schema/marioTest/raw/zuora/increment/*
                           - arn:aws:s3:::ophan-raw-zuora-increment*
 
-    StartExportJobLambda:
+    ExportLambda:
         Type: AWS::Lambda::Function
         Properties:
-            Description: Start Zuora to Datalake AQuA job
+            Description: Export Zuora to Datalake via AQuA Stateful API
             FunctionName:
-                !Sub zuora-datalake-export-StartExportJob-${Stage}
+                !Sub zuora-datalake-export-${Stage}
             Code:
                 S3Bucket: zuora-auto-cancel-dist
                 S3Key: !Sub membership/${Stage}/zuora-datalake-export/zuora-datalake-export.jar
-            Handler: com.gu.zuora.datalake.export.StartExportJob::handle
+            Handler: com.gu.zuora.datalake.export.ExportLambda::handle
             Environment:
                 Variables:
                   Stage: !Ref Stage
-            Role:
-                !GetAtt StartExportJobRole.Arn
+            Role: !GetAtt ExportLambdaRole.Arn
             MemorySize: 1536
             Runtime: java8
             Timeout: 900
         DependsOn:
-        - StartExportJobRole
+        - ExportLambdaRole
         - LocalTargetCsvBucket
 
-    TriggerStartExportJobRule:
+    ExportLambdaTriggerRule:
       Type: AWS::Events::Rule
       Properties:
         Description: Trigger Zuora-to-Datalake export
         ScheduleExpression: rate(2 minutes)
         State: ENABLED
         Targets:
-          - Arn: !Sub ${StartExportJobLambda.Arn}
+          - Arn: !Sub ${ExportLambda.Arn}
             Id: TriggerLambda
             Input: |
               null
@@ -114,9 +113,9 @@ Resources:
       Type: AWS::Lambda::Permission
       Properties:
         Action: lambda:InvokeFunction
-        FunctionName: !Sub ${StartExportJobLambda.Arn}
+        FunctionName: !Sub ${ExportLambda.Arn}
         Principal: events.amazonaws.com
-        SourceArn: !Sub ${TriggerStartExportJobRule.Arn}
+        SourceArn: !Sub ${ExportLambdaTriggerRule.Arn}
 
     FailedExportAlarm:
       Type: AWS::CloudWatch::Alarm
@@ -128,7 +127,7 @@ Resources:
         ComparisonOperator: GreaterThanOrEqualToThreshold
         Dimensions:
           - Name: FunctionName
-            Value: !Ref StartExportJobLambda
+            Value: !Ref ExportLambda
         EvaluationPeriods: 1
         MetricName: Errors
         Namespace: AWS/Lambda
