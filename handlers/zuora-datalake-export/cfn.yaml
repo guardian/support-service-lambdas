@@ -49,14 +49,14 @@ Resources:
                             - logs:CreateLogStream
                             - logs:PutLogEvents
                             - lambda:InvokeFunction
-                            Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/zuora-datalake-export-StartExportJob-${Stage}:log-stream:*"
+                            Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/zuora-datalake-export-StartExportJob-${Stage}:log-stream:*
 
                 - PolicyName: ReadPrivateCredentials
                   PolicyDocument:
                       Statement:
                           - Effect: Allow
                             Action: s3:GetObject
-                            Resource: !Sub "arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/zuoraRest-${Stage}*.json"
+                            Resource: !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/zuoraRest-${Stage}*.json
 
                 - PolicyName: LocalTargetCsvBucket
                   PolicyDocument:
@@ -64,7 +64,7 @@ Resources:
                       - Effect: Allow
                         Action:
                           - s3:*
-                        Resource: !Sub "${LocalTargetCsvBucket.Arn}/*"
+                        Resource: !Sub ${LocalTargetCsvBucket.Arn}/*
 
                 - PolicyName: OphanTargetCsvBucket
                   PolicyDocument:
@@ -73,8 +73,8 @@ Resources:
                         Action:
                           - s3:*
                         Resource:
-                          - "arn:aws:s3:::ophan-temp-schema/marioTest/raw/zuora/increment/*"
-                          - "arn:aws:s3:::ophan-raw-zuora-increment*"
+                          - arn:aws:s3:::ophan-temp-schema/marioTest/raw/zuora/increment/*
+                          - arn:aws:s3:::ophan-raw-zuora-increment*
 
     StartExportJobLambda:
         Type: AWS::Lambda::Function
@@ -99,7 +99,7 @@ Resources:
         - LocalTargetCsvBucket
 
     TriggerStartExportJobRule:
-      Type: "AWS::Events::Rule"
+      Type: AWS::Events::Rule
       Properties:
         Description: Trigger Zuora-to-Datalake export
         ScheduleExpression: rate(2 minutes)
@@ -111,11 +111,11 @@ Resources:
               null
 
     TriggerStartExportJobPermission:
-      Type: "AWS::Lambda::Permission"
+      Type: AWS::Lambda::Permission
       Properties:
-        Action: 'lambda:InvokeFunction'
+        Action: lambda:InvokeFunction
         FunctionName: !Sub ${StartExportJobLambda.Arn}
-        Principal: 'events.amazonaws.com'
+        Principal: events.amazonaws.com
         SourceArn: !Sub ${TriggerStartExportJobRule.Arn}
 
     FailedExportAlarm:
