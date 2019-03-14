@@ -19,8 +19,8 @@ case class ZuoraDatalakeExport(oauth: Oauth)
 case class Config(stage: String, baseUrl: String, zuoraDatalakeExport: ZuoraDatalakeExport)
 case class AccessToken(access_token: String)
 case class QueryResponse(id: String)
-case class Batch(fileId: Option[String], batchId: String, status: String, name: String, message: Option[String])
-case class JobResults(status: String, id: String, batches: List[Batch])
+case class Batch(fileId: Option[String], batchId: String, status: String, name: String, message: Option[String], recordCount: Option[Int])
+case class JobResults(status: String, id: String, batches: List[Batch], incrementalTime: String)
 
 /**
  * Exports incremental changeset from Zuora to Datalake S3 raw buckets in CSV format via
@@ -31,8 +31,8 @@ case class JobResults(status: String, id: String, batches: List[Batch])
  */
 class ExportLambda extends Lambda[Option[String], String] with LazyLogging {
   override def handle(incrementalDateOverrideOpt: Option[String], context: Context) = {
-    val incrementalTime = IncrementalTime(incrementalDateOverrideOpt)
-    val jobId = StartAquaJob(incrementalTime)
+    val incrementalDate = IncrementalDate(incrementalDateOverrideOpt)
+    val jobId = StartAquaJob(incrementalDate)
     val jobResult = GetJobResult(jobId)
     val batch = jobResult.batches.head // FIXME: iterate when more than one query
     val csvFile = GetResultsFile(batch)
@@ -47,7 +47,18 @@ object Postconditions extends LazyLogging {
     assert(jobResult.status == "completed", "Job should have completed")
     assert(jobResult.batches.forall(_.status == "completed"), "All queries should have completed successfully")
     jobResult.batches.foreach { batch =>
-      logger.info(s"Successfully exported ${batch.name} to ${Query(batch.name).targetBucket} within jobId ${jobResult.id}")
+      val details =
+        s"""
+           |  Name: ${batch.name}
+           |  Change size: ${batch.recordCount}
+           |  Changes since: ${jobResult.incrementalTime}
+           |  Target S3 bucket: ${Query(batch.name).targetBucket}
+           |  Job ID: ${jobResult.id}
+           |  File ID: ${batch.fileId}
+           |
+         """.stripMargin
+
+      logger.info(s"Successfully exported ${batch.name} changes since ${jobResult.incrementalTime}: $details")
     }
   }
 }
@@ -133,17 +144,16 @@ object AccessToken {
  *
  * https://knowledgecenter.zuora.com/DC_Developers/AB_Aggregate_Query_API/B_Submit_Query/e_Post_Query_with_Retrieval_Time
  */
-object IncrementalTime {
+object IncrementalDate {
   def apply(maybeDateOverride: Option[String]): String =
     maybeDateOverride match {
       case Some(dateOverride) =>
         validate(dateOverride)
-        s"$dateOverride 00:00:00"
+        dateOverride
 
       case None =>
-        val yesterdayDate = LocalDate.now.minusDays(1)
-        val yesterday = yesterdayDate.format(DateTimeFormatter.ofPattern(requiredFormat))
-        s"$yesterday 00:00:00"
+        val yesterday = LocalDate.now.minusDays(1)
+        yesterday.format(DateTimeFormatter.ofPattern(requiredFormat))
     }
 
   private val requiredFormat = "yyyy-MM-dd"
@@ -160,7 +170,7 @@ object IncrementalTime {
  * https://knowledgecenter.zuora.com/DC_Developers/AB_Aggregate_Query_API/BA_Stateless_and_Stateful_Modes#Automatic_Switch_Between_Full_Load_and_Incremental_Load
  */
 object StartAquaJob {
-  def apply(incrementalTime: String) = {
+  def apply(incrementalDate: String) = {
     val body =
       s"""
         |{
@@ -172,7 +182,7 @@ object StartAquaJob {
         |	"dateTimeUtc" : "true",
         |	"partner": "${ZuoraAquaStatefulApi().partner}",
         |	"project": "${ZuoraAquaStatefulApi().project}",
-        | "incrementalTime": "$incrementalTime",
+        | "incrementalTime": "$incrementalDate 00:00:00",
         |	"queries" : [
         |		{
         |			"name" : "${AccountQuery.batchName}",
