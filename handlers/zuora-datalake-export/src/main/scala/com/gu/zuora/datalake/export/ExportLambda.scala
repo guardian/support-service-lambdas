@@ -8,6 +8,7 @@ import io.github.mkotsur.aws.handler.Lambda._
 import io.github.mkotsur.aws.handler.Lambda
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.s3.AmazonS3Client
+import com.typesafe.scalalogging.LazyLogging
 import scalaj.http.Http
 import scala.io.Source
 import scala.concurrent.duration._
@@ -21,18 +22,39 @@ case class QueryResponse(id: String)
 case class Batch(fileId: Option[String], batchId: String, status: String, name: String, message: Option[String])
 case class JobResults(status: String, id: String, batches: List[Batch])
 
-class ExportLambda extends Lambda[Option[String], String] {
-  override def handle(incrementalDate: Option[String], context: Context) = {
-    val jobId = StartAquaJob(incrementalDate)
-    val status = GetJobResult(jobId)
-    val batch = status.batches.head // FIXME: iterate when more than one query
+/**
+ * Exports incremental changeset from Zuora to Datalake S3 raw buckets in CSV format via
+ * AQuA Stateful API:
+ *   - "2019-01-20" input to lambda will export incremental changes since 2019-01-20
+ *   - null input to lambda will export incremental changes since yesterday
+ *   - Export is idempotent, i.e., re-running it will export the same increment
+ */
+class ExportLambda extends Lambda[Option[String], String] with LazyLogging {
+  override def handle(incrementalDateOverrideOpt: Option[String], context: Context) = {
+    val incrementalTime = IncrementalTime(incrementalDateOverrideOpt)
+    val jobId = StartAquaJob(incrementalTime)
+    val jobResult = GetJobResult(jobId)
+    val batch = jobResult.batches.head // FIXME: iterate when more than one query
     val csvFile = GetResultsFile(batch)
     SaveCsvToBucket(csvFile, batch)
+    Postconditions(jobResult)
     Right(s"Successfully exported Zuora to Datalake jobId = $jobId")
   }
 }
 
-sealed abstract case class Query(batchName: String, zoql: String, s3Bucket: String, s3Key: String)
+object Postconditions extends LazyLogging {
+  def apply(jobResult: JobResults): Unit = {
+    assert(jobResult.status == "completed", "Job should have completed")
+    assert(jobResult.batches.forall(_.status == "completed"), "All queries should have completed successfully")
+    jobResult.batches.foreach { batch =>
+      logger.info(s"Successfully exported ${batch.name} to ${Query(batch.name).targetBucket} within jobId ${jobResult.id}")
+    }
+  }
+}
+
+sealed abstract case class Query(batchName: String, zoql: String, s3Bucket: String, s3Key: String) {
+  def targetBucket = s"s3://$s3Bucket/$s3Key"
+}
 object AccountQuery extends Query(
   "Account",
   "SELECT Account.Balance,Account.AutoPay,Account.Currency,Account.ID,Account.IdentityId__c,Account.LastInvoiceDate,Account.sfContactId__c,Account.MRR FROM Account WHERE Status != 'Canceled' AND (ProcessingAdvice__c != 'DoNotProcess' OR ProcessingAdvice__c IS NULL)",
@@ -102,26 +124,31 @@ object AccessToken {
 }
 
 /**
- * WARNING: Incremental time should be used only optionally when fixing failed exports.
- * This specifies from which date to export incremental changes.
+ * Zuora AQuA stateful API will return changed records since IncrementalTime.
+ * If the user does not provide manual override date to lambda, then get changes since yesterday.
+ * This makes the export idempotent, that is, re-running the lambda number of times within the same day
+ * returns the same incremental changeset.
  *
- * Provide plain date string to lambda input as "2019-01-20".
+ * Manual date override is useful for fixing failed exports.
  *
  * https://knowledgecenter.zuora.com/DC_Developers/AB_Aggregate_Query_API/B_Submit_Query/e_Post_Query_with_Retrieval_Time
  */
 object IncrementalTime {
-  def apply(incrementalDate: Option[String]): String = incrementalDate match {
-    case Some(date) =>
-      validate(date)
-      s"""
-           |"incrementalTime": "$date 00:00:00",
-         """.stripMargin
+  def apply(maybeDateOverride: Option[String]): String =
+    maybeDateOverride match {
+      case Some(dateOverride) =>
+        validate(dateOverride)
+        s"$dateOverride 00:00:00"
 
-    case None => ""
-  }
+      case None =>
+        val yesterdayDate = LocalDate.now.minusDays(1)
+        val yesterday = yesterdayDate.format(DateTimeFormatter.ofPattern(requiredFormat))
+        s"$yesterday 00:00:00"
+    }
+
+  private val requiredFormat = "yyyy-MM-dd"
 
   private def validate(date: String) = {
-    val requiredFormat = "yyyy-MM-dd"
     Try(
       LocalDate.parse(date, DateTimeFormatter.ofPattern(requiredFormat))
     ).getOrElse(throw new RuntimeException(s"Failed to parse incremental date: $date. The format should be $requiredFormat."))
@@ -129,10 +156,11 @@ object IncrementalTime {
 }
 
 /**
+ * https://knowledgecenter.zuora.com/DC_Developers/AB_Aggregate_Query_API/B_Submit_Query
  * https://knowledgecenter.zuora.com/DC_Developers/AB_Aggregate_Query_API/BA_Stateless_and_Stateful_Modes#Automatic_Switch_Between_Full_Load_and_Incremental_Load
  */
 object StartAquaJob {
-  def apply(incrementalDate: Option[String]) = {
+  def apply(incrementalTime: String) = {
     val body =
       s"""
         |{
@@ -144,7 +172,7 @@ object StartAquaJob {
         |	"dateTimeUtc" : "true",
         |	"partner": "${ZuoraAquaStatefulApi().partner}",
         |	"project": "${ZuoraAquaStatefulApi().project}",
-        |	${IncrementalTime(incrementalDate)}
+        | "incrementalTime": "$incrementalTime",
         |	"queries" : [
         |		{
         |			"name" : "${AccountQuery.batchName}",
