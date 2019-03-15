@@ -74,7 +74,7 @@ Resources:
                           - s3:*
                         Resource:
                           - arn:aws:s3:::ophan-temp-schema/marioTest/raw/zuora/increment/*
-                          - arn:aws:s3:::ophan-raw-zuora-increment*
+                          - arn:aws:s3:::ophan-raw-zuora-increment-*
 
     ExportLambda:
         Type: AWS::Lambda::Function
@@ -100,8 +100,8 @@ Resources:
     ExportLambdaTriggerRule:
       Type: AWS::Events::Rule
       Properties:
-        Description: Trigger Zuora-to-Datalake export
-        ScheduleExpression: rate(2 minutes)
+        Description: Trigger Zuora-to-Datalake export every day at 00:30 AM UTC
+        ScheduleExpression: cron(30 0 * * ? *)
         State: ENABLED
         Targets:
           - Arn: !Sub ${ExportLambda.Arn}
