@@ -96,7 +96,7 @@ case class ZuoraAquaStatefulApi(
 object ZuoraAquaStatefulApi {
   def apply(): ZuoraAquaStatefulApi = System.getenv("Stage") match {
     case "CODE" => ZuoraAquaStatefulApi(partner = "guardian-12357")
-    case "PROD" => throw new NotImplementedError("Contact zuora support to request PROD AQuA Stateful partner ID")
+    case "PROD" => ZuoraAquaStatefulApi(partner = "GuardianNews4398")
   }
 }
 
