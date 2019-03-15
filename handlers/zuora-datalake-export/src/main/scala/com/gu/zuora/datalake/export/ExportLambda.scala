@@ -69,8 +69,8 @@ sealed abstract case class Query(batchName: String, zoql: String, s3Bucket: Stri
 object AccountQuery extends Query(
   "Account",
   "SELECT Account.Balance,Account.AutoPay,Account.Currency,Account.ID,Account.IdentityId__c,Account.LastInvoiceDate,Account.sfContactId__c,Account.MRR FROM Account WHERE Status != 'Canceled' AND (ProcessingAdvice__c != 'DoNotProcess' OR ProcessingAdvice__c IS NULL)",
-  "ophan-temp-schema", // FIXME: Give proper ophan buckets
-  "marioTest/raw/zuora/increment/Account.csv" // FIXME: Account.csv
+  "ophan-raw-zuora-increment-account",
+  "Account.csv"
 )
 object Query {
   def apply(batchName: String): Query = batchName match {
