@@ -134,5 +134,5 @@ Resources:
         Period: 300
         Statistic: Sum
         Threshold: 1
-        TreatMissingData: missing
+        TreatMissingData: notBreaching
 
