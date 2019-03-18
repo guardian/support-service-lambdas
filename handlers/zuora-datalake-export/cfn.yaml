@@ -63,7 +63,8 @@ Resources:
                     Statement:
                       - Effect: Allow
                         Action:
-                          - s3:*
+                          - s3:PutObject
+                          - s3:PutObjectAcl
                         Resource: !Sub ${LocalTargetCsvBucket.Arn}/*
 
                 - PolicyName: OphanTargetCsvBucket
@@ -71,7 +72,8 @@ Resources:
                     Statement:
                       - Effect: Allow
                         Action:
-                          - s3:*
+                          - s3:PutObject
+                          - s3:PutObjectAcl
                         Resource:
                           - arn:aws:s3:::ophan-temp-schema/marioTest/raw/zuora/increment/*
                           - arn:aws:s3:::ophan-raw-zuora-increment-*
