@@ -1,5 +1,7 @@
 package com.gu.zuora.datalake.export
 
+import java.io.ByteArrayInputStream
+import java.nio.charset.StandardCharsets
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import io.circe.generic.auto._
@@ -8,6 +10,7 @@ import io.github.mkotsur.aws.handler.Lambda._
 import io.github.mkotsur.aws.handler.Lambda
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.s3.AmazonS3Client
+import com.amazonaws.services.s3.model.{CannedAccessControlList, ObjectMetadata, PutObjectRequest}
 import com.typesafe.scalalogging.LazyLogging
 import scalaj.http.Http
 import scala.io.Source
@@ -263,8 +266,22 @@ object SaveCsvToBucket {
   def apply(csvContent: String, batch: Batch) = {
     val s3Client = AmazonS3Client.builder.build()
     System.getenv("Stage") match {
-      case "CODE" => s3Client.putObject("zuora-datalake-export-code", Query(batch.name).s3Key, csvContent)
-      case "PROD" => s3Client.putObject(Query(batch.name).s3Bucket, Query(batch.name).s3Key, csvContent)
+      case "CODE" =>
+        val requestWithAcl = putRequestWithAcl("zuora-datalake-export-code", Query(batch.name).s3Key, csvContent)
+        s3Client.putObject(requestWithAcl)
+
+      case "PROD" =>
+        val requestWithAcl = putRequestWithAcl(Query(batch.name).s3Bucket, Query(batch.name).s3Key, csvContent)
+        s3Client.putObject(requestWithAcl)
     }
   }
+
+  private def putRequestWithAcl(bucketName: String, key: String, content: String): PutObjectRequest =
+    new PutObjectRequest(
+      bucketName,
+      key,
+      new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8)),
+      new ObjectMetadata()
+    ).withCannedAcl(CannedAccessControlList.BucketOwnerRead)
+
 }
