@@ -51,20 +51,21 @@ For example, executing on 2019-01-20, will set `"incrementalTime": "2019-01-19 0
 
 Passing `null` to lambda will export changes since yesterday. 
 
-## How to trigger it manually?
+## Debugging
 
-Pass date as string in the following format `"2019-01-20"` to export lambda. This will export changes since 2019-01-19.
-
-## Is it safe to re-run the export?
-
-Yes, the export lambda is idempotent. As long as `incrementalTime` is kept the same in the body of AQuA request, it 
-can be re-run safely.
-
-## How do we know when it fails?
+### How do we know when it fails?
 
 Cloudwatch Alert email is sent to SX mailing list.
 
-## How to debug failures?
+### How to retry the export manually?
+
+* To manually re-run the export, pass date as string in the following format `"2019-01-20"` to export lambda. 
+This will export changes since 2019-01-19.
+* The export lambda is **idempotent**. As long as `incrementalTime` is kept the same in the body of AQuA request, it 
+can be re-run safely.
+* Make sure to set the input date to lambda to the day on which the failure happened for the first time. 
+For example, if the failure happened on 2019-01-19, but it was noticed for the first time a week later on 2019-01-26,
+then input should be `2019-01-19`.
 
 ### Job ID and File ID
 
