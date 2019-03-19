@@ -12,21 +12,6 @@ Parameters:
         Default: CODE
 
 Resources:
-    LocalTargetCsvBucket:
-        Type: AWS::S3::Bucket
-        Properties:
-          BucketName: zuora-datalake-export-code
-          BucketEncryption:
-            ServerSideEncryptionConfiguration:
-              - ServerSideEncryptionByDefault:
-                  SSEAlgorithm: AES256
-          LifecycleConfiguration:
-            Rules:
-              - Id: DeleteOldFiles
-                Prefix: ""
-                Status: Enabled
-                ExpirationInDays: 1
-
     ExportLambdaRole:
         Type: AWS::IAM::Role
         Properties:
@@ -58,15 +43,6 @@ Resources:
                             Action: s3:GetObject
                             Resource: !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/zuoraRest-${Stage}*.json
 
-                - PolicyName: LocalTargetCsvBucket
-                  PolicyDocument:
-                    Statement:
-                      - Effect: Allow
-                        Action:
-                          - s3:PutObject
-                          - s3:PutObjectAcl
-                        Resource: !Sub ${LocalTargetCsvBucket.Arn}/*
-
                 - PolicyName: OphanTargetCsvBucket
                   PolicyDocument:
                     Statement:
@@ -75,7 +51,6 @@ Resources:
                           - s3:PutObject
                           - s3:PutObjectAcl
                         Resource:
-                          - arn:aws:s3:::ophan-temp-schema/marioTest/raw/zuora/increment/*
                           - arn:aws:s3:::ophan-raw-zuora-increment-*
 
     ExportLambda:
@@ -97,7 +72,6 @@ Resources:
             Timeout: 900
         DependsOn:
         - ExportLambdaRole
-        - LocalTargetCsvBucket
 
     ExportLambdaTriggerRule:
       Type: AWS::Events::Rule

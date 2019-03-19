@@ -266,9 +266,7 @@ object SaveCsvToBucket {
   def apply(csvContent: String, batch: Batch) = {
     val s3Client = AmazonS3Client.builder.build()
     System.getenv("Stage") match {
-      case "CODE" =>
-        val requestWithAcl = putRequestWithAcl("zuora-datalake-export-code", Query(batch.name).s3Key, csvContent)
-        s3Client.putObject(requestWithAcl)
+      case "CODE" => // do nothing
 
       case "PROD" =>
         val requestWithAcl = putRequestWithAcl(Query(batch.name).s3Bucket, Query(batch.name).s3Key, csvContent)
