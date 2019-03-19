@@ -1,0 +1,140 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: Zuora to Datalake export
+
+Parameters:
+    Stage:
+        Description: Stage name
+        Type: String
+        AllowedValues:
+            - CODE
+            - PROD
+        Default: CODE
+
+Resources:
+    LocalTargetCsvBucket:
+        Type: AWS::S3::Bucket
+        Properties:
+          BucketName: zuora-datalake-export-code
+          BucketEncryption:
+            ServerSideEncryptionConfiguration:
+              - ServerSideEncryptionByDefault:
+                  SSEAlgorithm: AES256
+          LifecycleConfiguration:
+            Rules:
+              - Id: DeleteOldFiles
+                Prefix: ""
+                Status: Enabled
+                ExpirationInDays: 1
+
+    ExportLambdaRole:
+        Type: AWS::IAM::Role
+        Properties:
+            AssumeRolePolicyDocument:
+                Statement:
+                    - Effect: Allow
+                      Principal:
+                          Service:
+                             - lambda.amazonaws.com
+                      Action:
+                          - sts:AssumeRole
+            Path: /
+            Policies:
+                - PolicyName: LambdaPolicy
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                            - logs:CreateLogGroup
+                            - logs:CreateLogStream
+                            - logs:PutLogEvents
+                            - lambda:InvokeFunction
+                            Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/zuora-datalake-export-${Stage}:log-stream:*
+
+                - PolicyName: ReadPrivateCredentials
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action: s3:GetObject
+                            Resource: !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/zuoraRest-${Stage}*.json
+
+                - PolicyName: LocalTargetCsvBucket
+                  PolicyDocument:
+                    Statement:
+                      - Effect: Allow
+                        Action:
+                          - s3:PutObject
+                          - s3:PutObjectAcl
+                        Resource: !Sub ${LocalTargetCsvBucket.Arn}/*
+
+                - PolicyName: OphanTargetCsvBucket
+                  PolicyDocument:
+                    Statement:
+                      - Effect: Allow
+                        Action:
+                          - s3:PutObject
+                          - s3:PutObjectAcl
+                        Resource:
+                          - arn:aws:s3:::ophan-temp-schema/marioTest/raw/zuora/increment/*
+                          - arn:aws:s3:::ophan-raw-zuora-increment-*
+
+    ExportLambda:
+        Type: AWS::Lambda::Function
+        Properties:
+            Description: Export Zuora to Datalake via AQuA Stateful API
+            FunctionName:
+                !Sub zuora-datalake-export-${Stage}
+            Code:
+                S3Bucket: zuora-auto-cancel-dist
+                S3Key: !Sub membership/${Stage}/zuora-datalake-export/zuora-datalake-export.jar
+            Handler: com.gu.zuora.datalake.export.ExportLambda::handle
+            Environment:
+                Variables:
+                  Stage: !Ref Stage
+            Role: !GetAtt ExportLambdaRole.Arn
+            MemorySize: 1536
+            Runtime: java8
+            Timeout: 900
+        DependsOn:
+        - ExportLambdaRole
+        - LocalTargetCsvBucket
+
+    ExportLambdaTriggerRule:
+      Type: AWS::Events::Rule
+      Properties:
+        Description: Trigger Zuora-to-Datalake export every day at 00:30 AM UTC
+        ScheduleExpression: cron(30 0 * * ? *)
+        State: ENABLED
+        Targets:
+          - Arn: !Sub ${ExportLambda.Arn}
+            Id: TriggerLambda
+            Input: |
+              null
+
+    TriggerStartExportJobPermission:
+      Type: AWS::Lambda::Permission
+      Properties:
+        Action: lambda:InvokeFunction
+        FunctionName: !Sub ${ExportLambda.Arn}
+        Principal: events.amazonaws.com
+        SourceArn: !Sub ${ExportLambdaTriggerRule.Arn}
+
+    FailedExportAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Properties:
+        AlarmName: zuora-datalake-export
+        AlarmDescription: Failed to export Zuora to Datalake. Corresponding Ophan clean tables, such as clean.zuora_account, will go out-of-date. Refer to https://github.com/guardian/zuora-auto-cancel/blob/master/handlers/sf-datalake-export/README.md on how to debug and retry.
+        AlarmActions:
+          - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:MarioTest
+        ComparisonOperator: GreaterThanOrEqualToThreshold
+        Dimensions:
+          - Name: FunctionName
+            Value: !Ref ExportLambda
+        EvaluationPeriods: 1
+        MetricName: Errors
+        Namespace: AWS/Lambda
+        Period: 300
+        Statistic: Sum
+        Threshold: 1
+        TreatMissingData: notBreaching
+
