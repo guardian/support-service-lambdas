@@ -73,11 +73,17 @@ then input should be `2019-01-19`.
 
 ## How to extract a full load?
 
-
 * Passing _beginning of unix time_, that is, `1970-01-01` will in effect represent full load
 * Note lambda has a hard timeout of 15 min, so if the export takes longer that than, then use postman, and manually copy
 the CSV file over to Ophan bucket. Make sure to use the exact same `partner` and `project` values as in lambda.
 * [Switch Between Full Load and Incremental Load](https://knowledgecenter.zuora.com/DC_Developers/AB_Aggregate_Query_API/BA_Stateless_and_Stateful_Modes#Automatic_Switch_Between_Full_Load_and_Incremental_Load)
+
+## Which Zuora API User is used for extract?
+
+There is a dedicated [OAuth client](https://knowledgecenter.zuora.com/CF_Users_and_Administrators/A_Administrator_Settings/Manage_Users#Create_an_OAuth_Client_for_a_User) for user `zuora-datalake-export`:
+
+* [DEV](https://apisandbox.zuora.com/apps/UserLogin.do?method=view&id=2c92c0f869580afa01695cf6dba35141)
+* [PROD](https://www.zuora.com/apps/UserLogin.do?method=view&id=2c92a00869767b1801698119c1103653)
 
 ## Job ID and File ID
 
