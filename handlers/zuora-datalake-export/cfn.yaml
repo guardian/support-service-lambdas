@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: "2010-09-09"
 
-Description: Zuora to Datalake export
+Description: Zuora to Datalake export https://github.com/guardian/zuora-auto-cancel/tree/master/handlers/zuora-datalake-export
 
 Parameters:
     Stage:
@@ -10,6 +10,9 @@ Parameters:
             - CODE
             - PROD
         Default: CODE
+
+Conditions:
+  IsProd: !Equals [!Ref "Stage", "PROD"]
 
 Resources:
     ExportLambdaRole:
@@ -75,6 +78,7 @@ Resources:
 
     ExportLambdaTriggerRule:
       Type: AWS::Events::Rule
+      Condition: IsProd
       Properties:
         Description: Trigger Zuora-to-Datalake export every day at 00:30 AM UTC
         ScheduleExpression: cron(30 0 * * ? *)
@@ -87,6 +91,7 @@ Resources:
 
     TriggerStartExportJobPermission:
       Type: AWS::Lambda::Permission
+      Condition: IsProd
       Properties:
         Action: lambda:InvokeFunction
         FunctionName: !Sub ${ExportLambda.Arn}
@@ -95,6 +100,7 @@ Resources:
 
     FailedExportAlarm:
       Type: AWS::CloudWatch::Alarm
+      Condition: IsProd
       Properties:
         AlarmName: zuora-datalake-export
         AlarmDescription: Failed to export Zuora to Datalake. Corresponding Ophan clean tables, such as clean.zuora_account, will go out-of-date. Refer to https://github.com/guardian/zuora-auto-cancel/blob/master/handlers/sf-datalake-export/README.md on how to debug and retry.
