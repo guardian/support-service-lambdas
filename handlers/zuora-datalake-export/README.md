@@ -51,13 +51,11 @@ For example, executing on 2019-01-20, will set `"incrementalTime": "2019-01-19 0
 
 Passing `null` to lambda will export changes since yesterday. 
 
-## Debugging
-
-### How do we know when it fails?
+## How do we know when it fails?
 
 Cloudwatch Alert email is sent to SX mailing list.
 
-### How to retry the export manually?
+## How to retry the export manually?
 
 * To manually re-run the export, pass date as string in the following format `"2019-01-20"` to export lambda. 
 This will export changes since 2019-01-19.
@@ -67,7 +65,21 @@ can be re-run safely.
 For example, if the failure happened on 2019-01-19, but it was noticed for the first time a week later on 2019-01-26,
 then input should be `2019-01-19`.
 
-### Job ID and File ID
+| Load changes since... |      lambda input     |
+|-----------------------|:---------------------:|
+| Since yesterday       | `null`                |
+| Since particular date | `yyyy-MM-dd`          |
+| Full load             | `1970-01-01`          |
+
+## How to extract a full load?
+
+
+* Passing _beginning of unix time_, that is, `1970-01-01` will in effect represent full load
+* Note lambda has a hard timeout of 15 min, so if the export takes longer that than, then use postman, and manually copy
+the CSV file over to Ophan bucket. Make sure to use the exact same `partner` and `project` values as in lambda.
+* [Switch Between Full Load and Incremental Load](https://knowledgecenter.zuora.com/DC_Developers/AB_Aggregate_Query_API/BA_Stateless_and_Stateful_Modes#Automatic_Switch_Between_Full_Load_and_Incremental_Load)
+
+## Job ID and File ID
 
 On success we log:
 
@@ -83,7 +95,7 @@ File ID: Some(2c92c094697a209f01697cc0b6c65f09)
 
 Notice `Job ID` and `File ID` can be used to get more information via Postman.
 
-### Get Job Results
+## Get Job Results
 
 ```http request
 GET /v1/batch-query/jobs/{{jobId}}
@@ -93,14 +105,14 @@ Content-Type: application/json
 Authorization: Bearer ************
 ```
 
-### Get CSV content
+## Get CSV content
 ```http request
 GET /apps/api/file/{{fileId}}
 Host: apisandbox.zuora.com
 Authorization: Bearer ***********
 ```
 
-### View Jobs in Zuora UI
+## View Jobs in Zuora UI
 
 https://apisandbox.zuora.com/apps/BatchQuery.do
 
