@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: "2010-09-09"
 
-Description: Zuora to Datalake export
+Description: Zuora to Datalake export https://github.com/guardian/zuora-auto-cancel/tree/master/handlers/zuora-datalake-export
 
 Parameters:
     Stage:
@@ -11,22 +11,10 @@ Parameters:
             - PROD
         Default: CODE
 
-Resources:
-    LocalTargetCsvBucket:
-        Type: AWS::S3::Bucket
-        Properties:
-          BucketName: zuora-datalake-export-code
-          BucketEncryption:
-            ServerSideEncryptionConfiguration:
-              - ServerSideEncryptionByDefault:
-                  SSEAlgorithm: AES256
-          LifecycleConfiguration:
-            Rules:
-              - Id: DeleteOldFiles
-                Prefix: ""
-                Status: Enabled
-                ExpirationInDays: 1
+Conditions:
+  IsProd: !Equals [!Ref "Stage", "PROD"]
 
+Resources:
     ExportLambdaRole:
         Type: AWS::IAM::Role
         Properties:
@@ -58,15 +46,6 @@ Resources:
                             Action: s3:GetObject
                             Resource: !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/zuoraRest-${Stage}*.json
 
-                - PolicyName: LocalTargetCsvBucket
-                  PolicyDocument:
-                    Statement:
-                      - Effect: Allow
-                        Action:
-                          - s3:PutObject
-                          - s3:PutObjectAcl
-                        Resource: !Sub ${LocalTargetCsvBucket.Arn}/*
-
                 - PolicyName: OphanTargetCsvBucket
                   PolicyDocument:
                     Statement:
@@ -75,7 +54,6 @@ Resources:
                           - s3:PutObject
                           - s3:PutObjectAcl
                         Resource:
-                          - arn:aws:s3:::ophan-temp-schema/marioTest/raw/zuora/increment/*
                           - arn:aws:s3:::ophan-raw-zuora-increment-*
 
     ExportLambda:
@@ -97,10 +75,10 @@ Resources:
             Timeout: 900
         DependsOn:
         - ExportLambdaRole
-        - LocalTargetCsvBucket
 
     ExportLambdaTriggerRule:
       Type: AWS::Events::Rule
+      Condition: IsProd
       Properties:
         Description: Trigger Zuora-to-Datalake export every day at 00:30 AM UTC
         ScheduleExpression: cron(30 0 * * ? *)
@@ -113,6 +91,7 @@ Resources:
 
     TriggerStartExportJobPermission:
       Type: AWS::Lambda::Permission
+      Condition: IsProd
       Properties:
         Action: lambda:InvokeFunction
         FunctionName: !Sub ${ExportLambda.Arn}
@@ -121,6 +100,7 @@ Resources:
 
     FailedExportAlarm:
       Type: AWS::CloudWatch::Alarm
+      Condition: IsProd
       Properties:
         AlarmName: zuora-datalake-export
         AlarmDescription: Failed to export Zuora to Datalake. Corresponding Ophan clean tables, such as clean.zuora_account, will go out-of-date. Refer to https://github.com/guardian/zuora-auto-cancel/blob/master/handlers/sf-datalake-export/README.md on how to debug and retry.
