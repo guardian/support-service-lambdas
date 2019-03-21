@@ -1,0 +1,81 @@
+Description: When braze uploads file to S3 bucket, trigger a Lambda event which uploads file to Salesforce
+
+Parameters:
+  BucketName:
+    Description: S3 Bucket name
+    Type: String
+
+  Stage:
+    Description: Stage name
+    Type: String
+    AllowedValues:
+      - CODE
+      - PROD
+    Default: CODE
+
+Resources:
+  Bucket:
+    Type: AWS::S3::Bucket
+    DependsOn: BucketPermission
+    Properties:
+      BucketName: !Ref BucketName
+      NotificationConfiguration:
+        LambdaConfigurations:
+          - Event: 's3:ObjectCreated:*'
+            Function: !GetAtt BucketWatcher.Arn
+
+  BucketPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: 'lambda:InvokeFunction'
+      FunctionName: !Ref BucketWatcher
+      Principal: s3.amazonaws.com
+      SourceAccount: !Ref "AWS::AccountId"
+      SourceArn: !Sub "arn:aws:s3:::${BucketName}"
+
+  BucketWatcher:
+    Type: AWS::Lambda::Function
+    Properties:
+      Description: Upload file to Salesforce
+      FunctionName: !Sub braze-to-salesforce-file-upload-${Stage}
+      Code:
+        S3Bucket: zuora-auto-cancel-dist
+        S3Key: !Sub membership/${Stage}/braze-to-salesforce-file-upload/braze-to-salesforce-file-upload.jar
+      Handler: com.gu.salesforce.braze.upload.UploadFileToSalesforceLambda::handle
+      Environment:
+        Variables:
+          Stage: !Ref Stage
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Runtime: java8
+      MemorySize: 1536
+      Timeout: 60
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: {Service: [lambda.amazonaws.com]}
+            Action: ['sts:AssumeRole']
+      Path: /
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+      Policies:
+        - PolicyName: S3Policy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                Resource: !Sub "arn:aws:s3:::${BucketName}/*"
+
+        - PolicyName: ReadPrivateCredentials
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action: s3:GetObject
+                Resource: !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/zuoraRest-${Stage}*.json
+
