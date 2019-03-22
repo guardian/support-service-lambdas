@@ -80,12 +80,21 @@ case class UploadFileToSalesforceResponse(id: String, success: Boolean)
 
 class UploadFileToSalesforceLambda extends Lambda[Event, String] with LazyLogging {
   override def handle(event: Event, context: Context) = {
-    val config = ReadConfig()
-    val filename = event.Records.head.s3.`object`.key
-    val csvContent = ReadCsvFileFromS3Bucket(filename)
-    UploadFileToSalesforce(config, csvContent, filename).toString
-    Right(s"Successfully uploaded file to Salesforce: $filename")
+    FilesFromBraze(event).foreach { filename =>
+      val config = ReadConfig()
+      val csvContent = ReadCsvFileFromS3Bucket(filename)
+      UploadFileToSalesforce(config, csvContent, filename).toString
+    }
+
+    val successMessage = s"Successfully uploaded files to Salesforce: ${FilesFromBraze(event)}"
+    logger.info(successMessage)
+    Right(successMessage)
   }
+
+}
+
+object FilesFromBraze {
+  def apply(event: Event): List[String] = event.Records.map(_.s3.`object`.key)
 }
 
 object ReadConfig {
