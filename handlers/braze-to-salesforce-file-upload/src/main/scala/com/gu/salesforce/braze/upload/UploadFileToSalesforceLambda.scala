@@ -184,7 +184,7 @@ object UploadFileToSalesforce {
         |{
         |    "Description" : "Braze to Salesforce upload of Guardian Weekly price rise letters for Latcham Direct: $filename",
         |    "Keywords" : "Guardian Weekly,price rise,letters, latcham",
-        |    "FolderId" : "00l25000000FITF",
+        |    "FolderId" : "${SalesforceDocumentFolderId()}",
         |    "Name" : "$filename",
         |    "Type" : "csv"
         |}
@@ -224,5 +224,14 @@ object ReadCsvFileFromS3Bucket {
   def apply(key: String): String = {
     val inputStream = AmazonS3Client.builder.build().getObject(BucketName(), key).getObjectContent
     Source.fromInputStream(inputStream).mkString
+  }
+}
+
+object SalesforceDocumentFolderId {
+  def apply(): String = {
+    System.getenv("Stage") match {
+      case "CODE" => "00l25000000FITF"
+      case "PROD" => throw new RuntimeException("Not yet implemented")
+    }
   }
 }
