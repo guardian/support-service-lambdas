@@ -81,10 +81,12 @@ case class Config(
   token: String
 )
 
+case class AccessToken(access_token: String, instance_url: String)
+
 class UploadFileToSalesforceLambda extends Lambda[Event, String] with LazyLogging {
   override def handle(event: Event, context: Context) = {
     logger.info(event.toString)
-    logger.info(ReadConfig().toString)
+    logger.info(AccessToken().toString)
     Right(s"Successfully uploaded file to Salesforce")
   }
 }
@@ -98,5 +100,25 @@ object ReadConfig {
     val rawJson = Source.fromInputStream(inputStream).mkString
     decode[Config](rawJson)
       .getOrElse(throw new RuntimeException(s"Could not read secret config file from S3://$bucketName/$key"))
+  }
+}
+
+object AccessToken {
+  def apply(): AccessToken = {
+    val config = ReadConfig()
+    val response = Http(s"${config.url}/services/oauth2/token")
+      .postForm(Seq(
+        "grant_type" -> "password",
+        "client_id" -> config.client_id,
+        "client_secret" -> config.client_secret,
+        "username" -> config.username,
+        "password" -> s"${config.password}${config.token}"
+      ))
+      .asString
+
+    response.code match {
+      case 200 => decode[AccessToken](response.body).getOrElse(throw new RuntimeException(s"Failed to decode oauth response: ${response}"))
+      case _ => throw new RuntimeException(s"Failed to generate oauth token: ${response}")
+    }
   }
 }
