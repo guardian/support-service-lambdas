@@ -88,10 +88,10 @@ case class AccessToken(access_token: String, instance_url: String)
 class UploadFileToSalesforceLambda extends Lambda[Event, String] with LazyLogging {
   override def handle(event: Event, context: Context) = {
     val config = ReadConfig()
-    logger.info(event.toString)
-    logger.info(AccessToken(config).toString)
-    logger.info(UploadFileToSalesforce(config).toString)
-    Right(s"Successfully uploaded file to Salesforce")
+    val filename = event.Records.head.s3.`object`.key
+    val csvContent = ReadCsvFileFromS3Bucket(filename)
+    UploadFileToSalesforce(config, csvContent, filename).toString
+    Right(s"Successfully uploaded file to Salesforce: $filename")
   }
 }
 
@@ -112,6 +112,15 @@ object SalesforceApiHost {
     System.getenv("Stage") match {
       case "CODE" => "https://test.salesforce.com"
       case "PROD" => throw new RuntimeException("No host for this stage yet")
+    }
+  }
+}
+
+object BucketName {
+  def apply(): String = {
+    System.getenv("Stage") match {
+      case "CODE" => "braze-to-salesforce-file-upload-code"
+      case "PROD" => "braze-to-salesforce-file-upload-prod"
     }
   }
 }
@@ -163,27 +172,26 @@ c21,c22,c23
 --boundary--
  */
 object UploadFileToSalesforce {
-  def apply(config: Config) = {
+  def apply(config: Config, csvContent: String, filename: String) = {
     val body =
-      """
+      s"""
         |--boundary
         |Content-Disposition: form-data; name="entity_document";
         |Content-Type: application/json
         |
         |{
-        |    "Description" : "Braze to Salesforce upload",
-        |    "Keywords" : "marketing,sales,update",
+        |    "Description" : "Braze to Salesforce upload of Guardian Weekly price rise letters for Latcham Direct: $filename",
+        |    "Keywords" : "Guardian Weekly,price rise,letters, latcham",
         |    "FolderId" : "00l25000000FITF",
-        |    "Name" : "Account test",
+        |    "Name" : "$filename",
         |    "Type" : "csv"
         |}
         |
         |--boundary
         |Content-Type: application/csv
-        |Content-Disposition: form-data; name="Body"; filename="Account.csv"
+        |Content-Disposition: form-data; name="Body"; filename="$filename"
         |
-        |c11,c12,c13
-        |c21,c22,c23
+        |$csvContent
         |
         |--boundary--
       """.stripMargin
@@ -198,7 +206,14 @@ object UploadFileToSalesforce {
 
     response.code match {
       case 201 => response.body
-      case _ => throw new RuntimeException(s"Failed to execute request UploadFiletoSalesforce: ${response}")
+      case _ => throw new RuntimeException(s"Failed to execute request UploadFileToSalesforce: ${response}")
     }
+  }
+}
+
+object ReadCsvFileFromS3Bucket {
+  def apply(key: String): String = {
+    val inputStream = AmazonS3Client.builder.build().getObject(BucketName(), key).getObjectContent
+    Source.fromInputStream(inputStream).mkString
   }
 }
