@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream
 import java.nio.charset.StandardCharsets
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+
 import io.circe.generic.auto._
 import io.circe.parser._
 import io.github.mkotsur.aws.handler.Lambda._
@@ -12,7 +13,8 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.s3.model.{CannedAccessControlList, ObjectMetadata, PutObjectRequest}
 import com.typesafe.scalalogging.LazyLogging
-import scalaj.http.Http
+import scalaj.http.{Http, MultiPart}
+
 import scala.io.Source
 import scala.concurrent.duration._
 import scala.util.Try
@@ -85,8 +87,10 @@ case class AccessToken(access_token: String, instance_url: String)
 
 class UploadFileToSalesforceLambda extends Lambda[Event, String] with LazyLogging {
   override def handle(event: Event, context: Context) = {
+    val config = ReadConfig()
     logger.info(event.toString)
-    logger.info(AccessToken().toString)
+    logger.info(AccessToken(config).toString)
+    logger.info(UploadFileToSalesforce(config).toString)
     Right(s"Successfully uploaded file to Salesforce")
   }
 }
@@ -103,10 +107,18 @@ object ReadConfig {
   }
 }
 
+object SalesforceApiHost {
+  def apply(): String = {
+    System.getenv("Stage") match {
+      case "CODE" => "https://test.salesforce.com"
+      case "PROD" => throw new RuntimeException("No host for this stage yet")
+    }
+  }
+}
+
 object AccessToken {
-  def apply(): AccessToken = {
-    val config = ReadConfig()
-    val response = Http(s"${config.url}/services/oauth2/token")
+  def apply(config: Config): AccessToken = {
+    val response = Http(s"${SalesforceApiHost()}/services/oauth2/token")
       .postForm(Seq(
         "grant_type" -> "password",
         "client_id" -> config.client_id,
@@ -119,6 +131,74 @@ object AccessToken {
     response.code match {
       case 200 => decode[AccessToken](response.body).getOrElse(throw new RuntimeException(s"Failed to decode oauth response: ${response}"))
       case _ => throw new RuntimeException(s"Failed to generate oauth token: ${response}")
+    }
+  }
+}
+
+/*
+POST /services/data/v29.0/sobjects/Document/ HTTP/1.1
+Host: gnmtouchpoint--GNMUAT.cs80.my.salesforce.com
+Authorization: Bearer *************
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="entity_document";
+Content-Type: application/json
+
+{
+    "Description" : "Braze to Salesforce upload",
+    "Keywords" : "marketing,sales,update",
+    "FolderId" : "00l25000000FITF",
+    "Name" : "Account test",
+    "Type" : "csv"
+}
+
+--boundary
+Content-Type: application/csv
+Content-Disposition: form-data; name="Body"; filename="Account.csv"
+
+c11,c12,c13
+c21,c22,c23
+
+--boundary--
+ */
+object UploadFileToSalesforce {
+  def apply(config: Config) = {
+    val body =
+      """
+        |--boundary
+        |Content-Disposition: form-data; name="entity_document";
+        |Content-Type: application/json
+        |
+        |{
+        |    "Description" : "Braze to Salesforce upload",
+        |    "Keywords" : "marketing,sales,update",
+        |    "FolderId" : "00l25000000FITF",
+        |    "Name" : "Account test",
+        |    "Type" : "csv"
+        |}
+        |
+        |--boundary
+        |Content-Type: application/csv
+        |Content-Disposition: form-data; name="Body"; filename="Account.csv"
+        |
+        |c11,c12,c13
+        |c21,c22,c23
+        |
+        |--boundary--
+      """.stripMargin
+
+    val accessToken = AccessToken(config)
+    val response = Http(s"${accessToken.instance_url}/services/data/v29.0/sobjects/Document/")
+      .header("Authorization", s"Bearer ${accessToken.access_token}")
+      .header("Content-Type", "multipart/form-data; boundary=boundary")
+      .postData(body)
+      .method("POST")
+      .asString
+
+    response.code match {
+      case 201 => response.body
+      case _ => throw new RuntimeException(s"Failed to execute request UploadFiletoSalesforce: ${response}")
     }
   }
 }
