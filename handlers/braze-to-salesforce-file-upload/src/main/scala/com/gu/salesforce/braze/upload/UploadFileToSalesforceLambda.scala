@@ -1,23 +1,14 @@
 package com.gu.salesforce.braze.upload
 
-import java.io.ByteArrayInputStream
-import java.nio.charset.StandardCharsets
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-
 import io.circe.generic.auto._
 import io.circe.parser._
 import io.github.mkotsur.aws.handler.Lambda._
 import io.github.mkotsur.aws.handler.Lambda
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.s3.AmazonS3Client
-import com.amazonaws.services.s3.model.{CannedAccessControlList, ObjectMetadata, PutObjectRequest}
 import com.typesafe.scalalogging.LazyLogging
-import scalaj.http.{Http, MultiPart}
-
+import scalaj.http.Http
 import scala.io.Source
-import scala.concurrent.duration._
-import scala.util.Try
 
 /*
 {
@@ -84,6 +75,8 @@ case class Config(
 )
 
 case class AccessToken(access_token: String, instance_url: String)
+
+case class UploadFileToSalesforceResponse(id: String, success: Boolean)
 
 class UploadFileToSalesforceLambda extends Lambda[Event, String] with LazyLogging {
   override def handle(event: Event, context: Context) = {
@@ -205,8 +198,15 @@ object UploadFileToSalesforce {
       .asString
 
     response.code match {
-      case 201 => response.body
-      case _ => throw new RuntimeException(s"Failed to execute request UploadFileToSalesforce: ${response}")
+      case 201 =>
+        val uploadResponse =
+          decode[UploadFileToSalesforceResponse](response.body)
+            .getOrElse(throw new RuntimeException(s"Failed to decode UploadFileToSalesforceResponse: $response"))
+
+        assert(uploadResponse.success, s"$filename should be uploaded to Salesforce document: $uploadResponse")
+
+      case _ =>
+        throw new RuntimeException(s"Failed to execute request UploadFileToSalesforce: ${response}")
     }
   }
 }
