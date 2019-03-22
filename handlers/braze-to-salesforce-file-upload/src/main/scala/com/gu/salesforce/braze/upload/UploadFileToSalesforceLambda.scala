@@ -17,7 +17,6 @@ import scala.io.Source
 import scala.concurrent.duration._
 import scala.util.Try
 
-
 /*
 {
     "Records": [
@@ -72,10 +71,32 @@ case class Event(Records: List[Record])
 //  }
 //}])
 
+case class Config(
+  stage: String,
+  url: String,
+  client_id: String,
+  client_secret: String,
+  username: String,
+  password: String,
+  token: String
+)
+
 class UploadFileToSalesforceLambda extends Lambda[Event, String] with LazyLogging {
   override def handle(event: Event, context: Context) = {
     logger.info(event.toString)
+    logger.info(ReadConfig().toString)
     Right(s"Successfully uploaded file to Salesforce")
   }
 }
 
+object ReadConfig {
+  def apply(): Config = {
+    val stage = System.getenv("Stage")
+    val bucketName = "gu-reader-revenue-private"
+    val key = s"membership/support-service-lambdas/$stage/sfAuth-$stage.v1.json"
+    val inputStream = AmazonS3Client.builder.build().getObject(bucketName, key).getObjectContent
+    val rawJson = Source.fromInputStream(inputStream).mkString
+    decode[Config](rawJson)
+      .getOrElse(throw new RuntimeException(s"Could not read secret config file from S3://$bucketName/$key"))
+  }
+}
