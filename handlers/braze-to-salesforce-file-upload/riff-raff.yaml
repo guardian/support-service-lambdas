@@ -8,7 +8,7 @@ deployments:
     app: braze-to-salesforce-file-upload
     parameters:
       templatePath: cfn.yaml
-  zuora-datalake-export:
+  braze-to-salesforce-file-upload:
     type: aws-lambda
     parameters:
       fileName: braze-to-salesforce-file-upload.jar
