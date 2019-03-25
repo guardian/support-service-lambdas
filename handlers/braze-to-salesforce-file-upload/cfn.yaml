@@ -9,6 +9,9 @@ Parameters:
       - PROD
     Default: CODE
 
+Conditions:
+  IsProd: !Equals [!Ref "Stage", "PROD"]
+
 Mappings:
   BucketNameByStageMap:
     CODE:
@@ -85,4 +88,28 @@ Resources:
               - Effect: Allow
                 Action: s3:GetObject
                 Resource: !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/sfAuth-${Stage}*.json
+
+  FailedUploadAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
+    Properties:
+      AlarmName: braze-to-salesforce-file-upload
+      AlarmDescription: >
+        Failed to upload file from braze to Salesforce.
+        Latcham will not be able to send physical letters.
+        Refer to https://github.com/guardian/zuora-auto-cancel/blob/master/handlers/braze-to-salesforce-file-upload/README.md
+        on how to debug and retry.
+      AlarmActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:MarioTest
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref BucketWatcher
+      EvaluationPeriods: 1
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Period: 300
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
 
