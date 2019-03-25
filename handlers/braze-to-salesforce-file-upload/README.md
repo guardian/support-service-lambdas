@@ -18,7 +18,3 @@ After successful upload to Salesforce, files are deleted from S3 bucket. Therefo
 1. check what files are still in the S3 bucket,
 1. Download these files locally
 1. Re-upload them to S3 bucket
-
-
-
-

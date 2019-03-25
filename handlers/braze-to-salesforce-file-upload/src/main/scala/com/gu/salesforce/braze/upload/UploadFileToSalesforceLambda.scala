@@ -32,17 +32,19 @@ case class UploadFileToSalesforceResponse(id: String, success: Boolean)
 
 class UploadFileToSalesforceLambda extends Lambda[Event, String] with LazyLogging {
   override def handle(event: Event, context: Context) = {
-    CheckPreconditions(event)
+    Preconditions(event)
+    Program(event)
+    Postconditions(event)
+  }
+}
 
+object Program {
+  def apply(event: Event): Unit =
     FilesFromBraze(event).foreach { filename =>
       val csvContent = ReadCsvFileFromS3Bucket(filename)
       UploadFileToSalesforce(csvContent, filename)
       DeleteCsvFileFromS3Bucket(filename)
     }
-
-    CheckPostconditions(event)
-    SuccessResponse(event)
-  }
 }
 
 object SuccessResponse extends LazyLogging {
@@ -53,13 +55,14 @@ object SuccessResponse extends LazyLogging {
   }
 }
 
-object CheckPostconditions {
-  def apply(event: Event): Any = {
+object Postconditions {
+  def apply(event: Event) = {
     S3BucketShouldBeEmpty()
+    SuccessResponse(event)
   }
 }
 
-object CheckPreconditions {
+object Preconditions {
   def apply(event: Event): Any = {
     assert(event.Records.forall(_.eventName == "ObjectCreated:Put"), "Only creation events should be handled")
     S3BucketShouldBeEmpty()
