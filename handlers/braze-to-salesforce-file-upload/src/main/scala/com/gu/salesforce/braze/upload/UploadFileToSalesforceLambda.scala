@@ -34,6 +34,7 @@ class UploadFileToSalesforceLambda extends Lambda[Event, String] with LazyLoggin
     FilesFromBraze(event).foreach { filename =>
       val csvContent = ReadCsvFileFromS3Bucket(filename)
       UploadFileToSalesforce(csvContent, filename)
+      DeleteCsvFileFromS3Bucket(filename)
     }
     val successMessage = s"Successfully uploaded files to Salesforce: ${FilesFromBraze(event)}"
     logger.info(successMessage)
@@ -137,6 +138,16 @@ object ReadCsvFileFromS3Bucket {
     }
     val inputStream = AmazonS3Client.builder.build().getObject(bucketName, key).getObjectContent
     Source.fromInputStream(inputStream).mkString
+  }
+}
+
+object DeleteCsvFileFromS3Bucket {
+  def apply(key: String) = {
+    val bucketName = System.getenv("Stage") match {
+      case "CODE" => "braze-to-salesforce-file-upload-code"
+      case "PROD" => "braze-to-salesforce-file-upload-prod"
+    }
+    AmazonS3Client.builder.build().deleteObject(bucketName, key)
   }
 }
 
