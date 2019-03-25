@@ -75,14 +75,12 @@ class UploadFileToSalesforceLambda extends Lambda[Event, String] with LazyLoggin
     FilesFromBraze(event).foreach { filename =>
       val config = ReadConfig()
       val csvContent = ReadCsvFileFromS3Bucket(filename)
-      UploadFileToSalesforce(config, csvContent, filename).toString
+      UploadFileToSalesforce(config, csvContent, filename)
     }
-
     val successMessage = s"Successfully uploaded files to Salesforce: ${FilesFromBraze(event)}"
     logger.info(successMessage)
     Right(successMessage)
   }
-
 }
 
 object FilesFromBraze {
@@ -101,15 +99,6 @@ object ReadConfig {
   }
 }
 
-object SalesforceApiHost {
-  def apply(): String = {
-    System.getenv("Stage") match {
-      case "CODE" => "https://test.salesforce.com"
-      case "PROD" => throw new RuntimeException("No host for this stage yet")
-    }
-  }
-}
-
 object BucketName {
   def apply(): String = {
     System.getenv("Stage") match {
@@ -121,7 +110,11 @@ object BucketName {
 
 object AccessToken {
   def apply(config: Config): AccessToken = {
-    val response = Http(s"${SalesforceApiHost()}/services/oauth2/token")
+    val authHost = System.getenv("Stage") match {
+        case "CODE" => "https://test.salesforce.com"
+        case "PROD" => "https://login.salesforce.com"
+      }
+    val response = Http(s"$authHost/services/oauth2/token")
       .postForm(Seq(
         "grant_type" -> "password",
         "client_id" -> config.client_id,
@@ -196,8 +189,8 @@ object ReadCsvFileFromS3Bucket {
 object SalesforceDocumentFolderId {
   def apply(): String = {
     System.getenv("Stage") match {
-      case "CODE" => "00l25000000FITF"
-      case "PROD" => throw new RuntimeException("Not yet implemented")
+      case "CODE" => "00l25000000FITF" // marioTest
+      case "PROD" => "00l0J000002DA3K" // FIXME: currently marioTest, so use `Guardian Weekly Price Rise Letters 2019` b00l0J000002DA22
     }
   }
 }
