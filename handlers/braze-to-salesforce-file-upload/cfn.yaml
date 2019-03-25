@@ -79,9 +79,14 @@ Resources:
                 Action:
                   - s3:GetObject
                   - s3:DeleteObject
-                Resource: !Sub
-                  - "arn:aws:s3:::${BucketName}/*"
-                  - {BucketName: !FindInMap [BucketNameByStageMap, !Ref Stage, bucketName]}
+                  - s3:ListBucket
+                Resource:
+                  - !Sub
+                    - "arn:aws:s3:::${BucketName}"
+                    - {BucketName: !FindInMap [BucketNameByStageMap, !Ref Stage, bucketName]}
+                  - !Sub
+                    - "arn:aws:s3:::${BucketName}/*"
+                    - {BucketName: !FindInMap [BucketNameByStageMap, !Ref Stage, bucketName]}
 
         - PolicyName: ReadPrivateCredentials
           PolicyDocument:

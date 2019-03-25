@@ -36,9 +36,23 @@ class UploadFileToSalesforceLambda extends Lambda[Event, String] with LazyLoggin
       UploadFileToSalesforce(csvContent, filename)
       DeleteCsvFileFromS3Bucket(filename)
     }
+
+    CheckPostconditions(event)
+    SuccessResponse(event)
+  }
+}
+
+object SuccessResponse extends LazyLogging {
+  def apply(event: Event) = {
     val successMessage = s"Successfully uploaded files to Salesforce: ${FilesFromBraze(event)}"
     logger.info(successMessage)
     Right(successMessage)
+  }
+}
+
+object CheckPostconditions {
+  def apply(event: Event): Any = {
+    S3BucketIsEmpty()
   }
 }
 
@@ -130,24 +144,33 @@ object UploadFileToSalesforce {
   }
 }
 
-object ReadCsvFileFromS3Bucket {
-  def apply(key: String): String = {
-    val bucketName = System.getenv("Stage") match {
+object BucketName {
+  def apply(): String =
+    System.getenv("Stage") match {
       case "CODE" => "braze-to-salesforce-file-upload-code"
       case "PROD" => "braze-to-salesforce-file-upload-prod"
     }
-    val inputStream = AmazonS3Client.builder.build().getObject(bucketName, key).getObjectContent
+}
+
+object ReadCsvFileFromS3Bucket {
+  def apply(key: String): String = {
+    val inputStream = AmazonS3Client.builder.build().getObject(BucketName(), key).getObjectContent
     Source.fromInputStream(inputStream).mkString
   }
 }
 
 object DeleteCsvFileFromS3Bucket {
   def apply(key: String) = {
-    val bucketName = System.getenv("Stage") match {
-      case "CODE" => "braze-to-salesforce-file-upload-code"
-      case "PROD" => "braze-to-salesforce-file-upload-prod"
-    }
-    AmazonS3Client.builder.build().deleteObject(bucketName, key)
+    AmazonS3Client.builder.build().deleteObject(BucketName(), key)
+  }
+}
+
+object S3BucketIsEmpty {
+  def apply() = {
+    assert(
+      AmazonS3Client.builder.build().listObjects(BucketName()).getObjectSummaries.size() == 0,
+      "Bucket must be empty after upload to salesforce"
+    )
   }
 }
 
