@@ -11,8 +11,9 @@ import scalaj.http.Http
 import scala.io.Source
 
 case class S3EventObject(key: String)
-case class S3Event(`object`: S3EventObject)
-case class Record(s3: S3Event)
+case class S3EventBucket(name: String)
+case class S3Event(`object`: S3EventObject, bucket: S3EventBucket)
+case class Record(s3: S3Event, eventName: String)
 case class Event(Records: List[Record])
 
 case class Config(
@@ -31,6 +32,8 @@ case class UploadFileToSalesforceResponse(id: String, success: Boolean)
 
 class UploadFileToSalesforceLambda extends Lambda[Event, String] with LazyLogging {
   override def handle(event: Event, context: Context) = {
+    CheckPreconditions(event)
+
     FilesFromBraze(event).foreach { filename =>
       val csvContent = ReadCsvFileFromS3Bucket(filename)
       UploadFileToSalesforce(csvContent, filename)
@@ -52,7 +55,16 @@ object SuccessResponse extends LazyLogging {
 
 object CheckPostconditions {
   def apply(event: Event): Any = {
-    S3BucketIsEmpty()
+    S3BucketShouldBeEmpty()
+  }
+}
+
+object CheckPreconditions {
+  def apply(event: Event): Any = {
+    assert(event.Records.forall(_.eventName == "ObjectCreated:Put"), "Only creation events should be handled")
+    S3BucketShouldBeEmpty()
+    assert(FilesFromBraze(event).nonEmpty, "Braze should write at least one file to S3 bucket")
+    assert(FilesFromBraze(event).forall(_.contains("*.csv")), "Braze should write only CSV files to S3 bucket")
   }
 }
 
@@ -165,11 +177,11 @@ object DeleteCsvFileFromS3Bucket {
   }
 }
 
-object S3BucketIsEmpty {
+object S3BucketShouldBeEmpty {
   def apply() = {
     assert(
       AmazonS3Client.builder.build().listObjects(BucketName()).getObjectSummaries.size() == 0,
-      "Bucket must be empty after upload to salesforce"
+      "Bucket must be empty before and after upload to salesforce"
     )
   }
 }
