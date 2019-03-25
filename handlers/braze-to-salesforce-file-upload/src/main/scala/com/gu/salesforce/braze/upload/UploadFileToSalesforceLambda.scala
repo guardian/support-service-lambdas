@@ -56,14 +56,6 @@ case class S3Event(`object`: S3EventObject)
 case class Record(s3: S3Event)
 case class Event(Records: List[Record])
 
-//case class Event(Records: List[{
-//  val s3: {
-//    val `object`: {
-//      val key: String
-//    }
-//  }
-//}])
-
 case class Config(
   stage: String,
   url: String,
@@ -146,33 +138,7 @@ object AccessToken {
   }
 }
 
-/*
-POST /services/data/v29.0/sobjects/Document/ HTTP/1.1
-Host: gnmtouchpoint--GNMUAT.cs80.my.salesforce.com
-Authorization: Bearer *************
-Content-Type: multipart/form-data; boundary=boundary
-
---boundary
-Content-Disposition: form-data; name="entity_document";
-Content-Type: application/json
-
-{
-    "Description" : "Braze to Salesforce upload",
-    "Keywords" : "marketing,sales,update",
-    "FolderId" : "00l25000000FITF",
-    "Name" : "Account test",
-    "Type" : "csv"
-}
-
---boundary
-Content-Type: application/csv
-Content-Disposition: form-data; name="Body"; filename="Account.csv"
-
-c11,c12,c13
-c21,c22,c23
-
---boundary--
- */
+// https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_sobject_insert_update_blob.htm
 object UploadFileToSalesforce {
   def apply(config: Config, csvContent: String, filename: String) = {
     val body =
