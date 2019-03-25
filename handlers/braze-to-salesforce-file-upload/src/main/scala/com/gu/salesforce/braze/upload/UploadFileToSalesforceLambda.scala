@@ -73,9 +73,8 @@ case class UploadFileToSalesforceResponse(id: String, success: Boolean)
 class UploadFileToSalesforceLambda extends Lambda[Event, String] with LazyLogging {
   override def handle(event: Event, context: Context) = {
     FilesFromBraze(event).foreach { filename =>
-      val config = ReadConfig()
       val csvContent = ReadCsvFileFromS3Bucket(filename)
-      UploadFileToSalesforce(config, csvContent, filename)
+      UploadFileToSalesforce(csvContent, filename)
     }
     val successMessage = s"Successfully uploaded files to Salesforce: ${FilesFromBraze(event)}"
     logger.info(successMessage)
@@ -99,21 +98,13 @@ object ReadConfig {
   }
 }
 
-object BucketName {
-  def apply(): String = {
-    System.getenv("Stage") match {
-      case "CODE" => "braze-to-salesforce-file-upload-code"
-      case "PROD" => "braze-to-salesforce-file-upload-prod"
-    }
-  }
-}
-
 object AccessToken {
-  def apply(config: Config): AccessToken = {
+  def apply(): AccessToken = {
+    val config = ReadConfig()
     val authHost = System.getenv("Stage") match {
-        case "CODE" => "https://test.salesforce.com"
-        case "PROD" => "https://login.salesforce.com"
-      }
+      case "CODE" => "https://test.salesforce.com"
+      case "PROD" => "https://login.salesforce.com"
+    }
     val response = Http(s"$authHost/services/oauth2/token")
       .postForm(Seq(
         "grant_type" -> "password",
@@ -133,7 +124,7 @@ object AccessToken {
 
 // https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_sobject_insert_update_blob.htm
 object UploadFileToSalesforce {
-  def apply(config: Config, csvContent: String, filename: String) = {
+  def apply(csvContent: String, filename: String): Unit = {
     val body =
       s"""
         |--boundary
@@ -157,7 +148,7 @@ object UploadFileToSalesforce {
         |--boundary--
       """.stripMargin
 
-    val accessToken = AccessToken(config)
+    val accessToken = AccessToken()
     val response = Http(s"${accessToken.instance_url}/services/data/v29.0/sobjects/Document/")
       .header("Authorization", s"Bearer ${accessToken.access_token}")
       .header("Content-Type", "multipart/form-data; boundary=boundary")
@@ -181,7 +172,11 @@ object UploadFileToSalesforce {
 
 object ReadCsvFileFromS3Bucket {
   def apply(key: String): String = {
-    val inputStream = AmazonS3Client.builder.build().getObject(BucketName(), key).getObjectContent
+    val bucketName = System.getenv("Stage") match {
+      case "CODE" => "braze-to-salesforce-file-upload-code"
+      case "PROD" => "braze-to-salesforce-file-upload-prod"
+    }
+    val inputStream = AmazonS3Client.builder.build().getObject(bucketName, key).getObjectContent
     Source.fromInputStream(inputStream).mkString
   }
 }
