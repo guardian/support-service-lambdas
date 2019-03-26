@@ -1,13 +1,24 @@
 package com.gu.salesforce.braze.upload
 
+import java.nio.file.Paths
+
+import better.files.File
+import better.files._
+import File._
+import better.files.Dsl._
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
+
 import io.circe.generic.auto._
 import io.circe.parser._
 import io.github.mkotsur.aws.handler.Lambda._
 import io.github.mkotsur.aws.handler.Lambda
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.s3.AmazonS3Client
+import com.amazonaws.services.s3.model.S3ObjectInputStream
 import com.typesafe.scalalogging.LazyLogging
 import scalaj.http.Http
+
 import scala.io.Source
 
 case class S3EventObject(key: String)
@@ -42,7 +53,7 @@ object Program {
   def apply(event: Event): Unit =
     FilesFromBraze(event).foreach { filename =>
       val csvContent = ReadCsvFileFromS3Bucket(filename)
-      UploadFileToSalesforce(csvContent, filename)
+      UploadFileToSalesforce(csvContent, filename.dropRight(4))
       DeleteCsvFileFromS3Bucket(filename)
     }
 }
@@ -57,7 +68,7 @@ object SuccessResponse extends LazyLogging {
 
 object Postconditions {
   def apply(event: Event) = {
-    S3BucketShouldBeEmpty()
+    assert(S3BucketIsEmpty(), "Bucket should be empty after upload to Salesforce")
     SuccessResponse(event)
   }
 }
@@ -65,9 +76,9 @@ object Postconditions {
 object Preconditions {
   def apply(event: Event): Any = {
     assert(event.Records.forall(_.eventName == "ObjectCreated:Put"), "Only creation events should be handled")
-    S3BucketShouldBeEmpty()
+    assert(!S3BucketIsEmpty(), "Bucket should not be empty before the upload to Salesforce")
     assert(FilesFromBraze(event).nonEmpty, "Braze should write at least one file to S3 bucket")
-    assert(FilesFromBraze(event).forall(_.contains("*.csv")), "Braze should write only CSV files to S3 bucket")
+    assert(FilesFromBraze(event).forall(_.contains(".zip")), "Braze should write only ZIP files to S3 bucket")
   }
 }
 
@@ -170,7 +181,16 @@ object BucketName {
 object ReadCsvFileFromS3Bucket {
   def apply(key: String): String = {
     val inputStream = AmazonS3Client.builder.build().getObject(BucketName(), key).getObjectContent
-    Source.fromInputStream(inputStream).mkString
+    ZipToString(inputStream, key)
+  }
+}
+
+object ZipToString {
+  def apply(inputStream: S3ObjectInputStream, filename: String): String = {
+    Files.copy(inputStream, Paths.get(s"/tmp/$filename"), StandardCopyOption.REPLACE_EXISTING)
+    val zipFile: File = file"/tmp/$filename"
+    val rawCsv: File = zipFile.unzipTo(root / "tmp")
+    (root / "tmp" / s"${filename.dropRight(4)}").contentAsString
   }
 }
 
@@ -180,13 +200,9 @@ object DeleteCsvFileFromS3Bucket {
   }
 }
 
-object S3BucketShouldBeEmpty {
-  def apply() = {
-    assert(
-      AmazonS3Client.builder.build().listObjects(BucketName()).getObjectSummaries.size() == 0,
-      "Bucket must be empty before and after upload to salesforce"
-    )
-  }
+object S3BucketIsEmpty {
+  def apply(): Boolean =
+    AmazonS3Client.builder.build().listObjects(BucketName()).getObjectSummaries.size() == 0
 }
 
 object SalesforceDocumentFolderId {
