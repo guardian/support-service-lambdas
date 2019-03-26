@@ -2,7 +2,7 @@
 
 ## How does it work?
 
-1. Braze writes a zipped CSV file to S3 bucket `braze-to-salesforce-file-upload` in `membership` AWS account
+1. Braze [writes](https://www.braze.com/docs/developer_guide/rest_api/export/#users-by-segment-endpoint) a zipped CSV file to S3 bucket `braze-to-salesforce-file-upload` in `membership` AWS account
 1. Lambda `braze-to-salesforce-file-upload` is triggered by an event message which contains the filenames
 1. Unzip to get raw CSV file
 1. Salesforce REST API uploads CSV to Salesforce Documents
