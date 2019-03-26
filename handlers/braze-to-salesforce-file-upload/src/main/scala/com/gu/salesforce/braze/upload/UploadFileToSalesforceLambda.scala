@@ -1,14 +1,11 @@
 package com.gu.salesforce.braze.upload
 
 import java.nio.file.Paths
-
 import better.files.File
 import better.files._
 import File._
-import better.files.Dsl._
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
-
 import io.circe.generic.auto._
 import io.circe.parser._
 import io.github.mkotsur.aws.handler.Lambda._
@@ -18,7 +15,6 @@ import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.s3.model.S3ObjectInputStream
 import com.typesafe.scalalogging.LazyLogging
 import scalaj.http.Http
-
 import scala.io.Source
 
 case class S3EventObject(key: String)
@@ -52,15 +48,16 @@ class UploadFileToSalesforceLambda extends Lambda[Event, String] with LazyLoggin
 object Program {
   def apply(event: Event): Unit =
     FilesFromBraze(event).foreach { filename =>
-      val csvContent = ReadCsvFileFromS3Bucket(filename)
-      UploadFileToSalesforce(csvContent, DropZipSuffix(filename))
+      val zippedCsv = ReadZippedFileFromS3Bucket(filename)
+      val csv = ZipToString(zippedCsv, filename)
+      UploadFileToSalesforce(csv, DropZipSuffix(filename))
       DeleteCsvFileFromS3Bucket(filename)
     }
 }
 
 object SuccessResponse extends LazyLogging {
   def apply(event: Event) = {
-    val successMessage = s"Successfully uploaded files to Salesforce: ${FilesFromBraze(event)}"
+    val successMessage = s"Successfully uploaded files to Salesforce: ${FilesFromBraze(event).map(DropZipSuffix(_))}"
     logger.info(successMessage)
     Right(successMessage)
   }
@@ -178,18 +175,16 @@ object BucketName {
     }
 }
 
-object ReadCsvFileFromS3Bucket {
-  def apply(key: String): String = {
-    val inputStream = AmazonS3Client.builder.build().getObject(BucketName(), key).getObjectContent
-    ZipToString(inputStream, key)
-  }
+object ReadZippedFileFromS3Bucket {
+  def apply(key: String): S3ObjectInputStream =
+    AmazonS3Client.builder.build().getObject(BucketName(), key).getObjectContent
 }
 
 // https://github.com/pathikrit/better-files
 object ZipToString {
   def apply(inputStream: S3ObjectInputStream, filename: String): String = {
     Files.copy(inputStream, Paths.get(s"/tmp/$filename"), StandardCopyOption.REPLACE_EXISTING)
-    val rawCsv: File = file"/tmp/$filename".unzipTo(root / "tmp")
+    file"/tmp/$filename".unzipTo(root / "tmp")
     (root / "tmp" / s"${DropZipSuffix(filename)}").contentAsString
   }
 }
