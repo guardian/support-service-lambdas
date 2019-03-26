@@ -48,10 +48,10 @@ class UploadFileToSalesforceLambda extends Lambda[Event, String] with LazyLoggin
 object Program {
   def apply(event: Event): Unit =
     FilesFromBraze(event).foreach { filename =>
-      val zippedCsv = ReadZippedFileFromS3Bucket(filename)
-      val csv = ZipToString(zippedCsv, filename)
-      UploadFileToSalesforce(csv, DropZipSuffix(filename))
-      DeleteCsvFileFromS3Bucket(filename)
+      val csvZip = ReadZippedFileFromS3Bucket(filename)
+      val csv = UnzipToString(csvZip, filename)
+      UploadCsvFileToSalesforce(csv, DropZipSuffix(filename))
+      DeleteZippedFileFromS3Bucket(filename)
     }
 }
 
@@ -120,7 +120,7 @@ object AccessToken {
 }
 
 // https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_sobject_insert_update_blob.htm
-object UploadFileToSalesforce {
+object UploadCsvFileToSalesforce {
   def apply(csvContent: String, filename: String): Unit = {
     val body =
       s"""
@@ -181,7 +181,7 @@ object ReadZippedFileFromS3Bucket {
 }
 
 // https://github.com/pathikrit/better-files
-object ZipToString {
+object UnzipToString {
   def apply(inputStream: S3ObjectInputStream, filename: String): String = {
     Files.copy(inputStream, Paths.get(s"/tmp/$filename"), StandardCopyOption.REPLACE_EXISTING)
     file"/tmp/$filename".unzipTo(root / "tmp")
@@ -193,7 +193,7 @@ object DropZipSuffix {
   def apply(filename: String): String = filename.dropRight(4) // drop .zip
 }
 
-object DeleteCsvFileFromS3Bucket {
+object DeleteZippedFileFromS3Bucket {
   def apply(key: String) = {
     AmazonS3Client.builder.build().deleteObject(BucketName(), key)
   }
