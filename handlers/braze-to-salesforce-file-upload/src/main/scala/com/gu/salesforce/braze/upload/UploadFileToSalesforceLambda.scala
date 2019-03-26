@@ -53,7 +53,7 @@ object Program {
   def apply(event: Event): Unit =
     FilesFromBraze(event).foreach { filename =>
       val csvContent = ReadCsvFileFromS3Bucket(filename)
-      UploadFileToSalesforce(csvContent, filename.dropRight(4))
+      UploadFileToSalesforce(csvContent, DropZipSuffix(filename))
       DeleteCsvFileFromS3Bucket(filename)
     }
 }
@@ -185,13 +185,17 @@ object ReadCsvFileFromS3Bucket {
   }
 }
 
+// https://github.com/pathikrit/better-files
 object ZipToString {
   def apply(inputStream: S3ObjectInputStream, filename: String): String = {
     Files.copy(inputStream, Paths.get(s"/tmp/$filename"), StandardCopyOption.REPLACE_EXISTING)
-    val zipFile: File = file"/tmp/$filename"
-    val rawCsv: File = zipFile.unzipTo(root / "tmp")
-    (root / "tmp" / s"${filename.dropRight(4)}").contentAsString
+    val rawCsv: File = file"/tmp/$filename".unzipTo(root / "tmp")
+    (root / "tmp" / s"${DropZipSuffix(filename)}").contentAsString
   }
+}
+
+object DropZipSuffix {
+  def apply(filename: String): String = filename.dropRight(4) // drop .zip
 }
 
 object DeleteCsvFileFromS3Bucket {
