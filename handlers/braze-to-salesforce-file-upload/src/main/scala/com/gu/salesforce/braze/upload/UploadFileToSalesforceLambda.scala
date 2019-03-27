@@ -50,6 +50,7 @@ object Program {
     FilesFromBraze(event).foreach { filename =>
       val csvZip = ReadZippedFileFromS3Bucket(filename)
       val csv = UnzipToString(csvZip, filename)
+      CsvConditions(csv)
       UploadCsvFileToSalesforce(csv, DropZipSuffix(filename))
       DeleteZippedFileFromS3Bucket(filename)
     }
@@ -60,6 +61,25 @@ object SuccessResponse extends LazyLogging {
     val successMessage = s"Successfully uploaded files to Salesforce: ${FilesFromBraze(event).map(DropZipSuffix(_))}"
     logger.info(successMessage)
     Right(successMessage)
+  }
+}
+
+object CsvConditions {
+  def apply(rawCsv: String) = {
+    val rows = rawCsv.split('\n')
+    val consents = Consents(rows)
+
+    // assert(rows.nonEmpty, "CSV should not be empty") // FIXME: Do we upload empty CSV files?
+    assert(consents.forall(_.nonEmpty), "dm_consent CSV column must be populated")
+  }
+}
+
+// subscription_name,identity_id,Renewal_Cycle,title,first_name,last_name,address1,address2,city,state,country,postcode,dm_consent,Guardian_Weekly_New_Price,currency,Frequency,Next_Payment_Date
+object Consents {
+  def apply(rows: Array[String]): Array[String] = {
+    val consentColumnIndex = 12
+    val columnsByRow = rows.map(_.split(','))
+    columnsByRow.map(columns => columns(consentColumnIndex))
   }
 }
 
