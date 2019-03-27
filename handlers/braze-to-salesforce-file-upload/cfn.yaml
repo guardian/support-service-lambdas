@@ -119,3 +119,43 @@ Resources:
       Threshold: 1
       TreatMissingData: notBreaching
 
+  BrazeUser:
+    Type: AWS::IAM::User
+    Properties:
+      Path: "/"
+  BrazeUserKeys:
+    Type: AWS::IAM::AccessKey
+    Properties:
+      Serial: 1
+      UserName: !Ref BrazeUser
+  BrazeUserPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      Users:
+        - !Ref BrazeUser
+      PolicyName: BrazeToSalesforceFileUploadPolicy
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - s3:ListBucket
+              - s3:GetBucketLocation
+            Resource: !Sub
+              - "arn:aws:s3:::${BucketName}"
+              - {BucketName: !FindInMap [BucketNameByStageMap, !Ref Stage, bucketName]}
+          - Effect: Allow
+            Action:
+              - s3:PutObject
+            Resource: !Sub
+              - "arn:aws:s3:::${BucketName}/*"
+              - {BucketName: !FindInMap [BucketNameByStageMap, !Ref Stage, bucketName]}
+
+Outputs:
+  BrazeAwsAccessId:
+    Value: !Ref BrazeUserKeys
+  BrazeAwsSecretAccessKey:
+    Value: !GetAtt BrazeUserKeys.SecretAccessKey
+  BrazeAwsS3BucketName:
+    Value: !FindInMap [BucketNameByStageMap, !Ref Stage, bucketName]
+
