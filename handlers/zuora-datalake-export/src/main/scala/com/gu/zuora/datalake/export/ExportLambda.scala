@@ -78,7 +78,7 @@ object AccountQuery extends Query(
 )
 object RatePlanChargeQuery extends Query(
   "RatePlanCharge",
-  "SELECT RatePlanCharge.EffectiveStartDate,RatePlanCharge.EffectiveEndDate,RatePlanCharge.HolidayStart__c,RatePlanCharge.HolidayEnd__c,RatePlanCharge.ID,RatePlanCharge.MRR,RatePlanCharge.Name,RatePlanCharge.TCV,RatePlanCharge.Version,RatePlanCharge.BillingPeriod,RatePlanCharge.ProcessedThroughDate,RatePlanCharge.ChargedThroughDate,Product.Name,RatePlan.ID,RatePlan.Name,Subscription.ID,ProductRatePlanCharge.BillingPeriod FROM RatePlanCharge WHERE Account.Status != 'Canceled' AND (Account.ProcessingAdvice__c != 'DoNotProcess' OR Account.ProcessingAdvice__c IS NULL)",
+  "SELECT Account.ID,RatePlanCharge.EffectiveStartDate,RatePlanCharge.EffectiveEndDate,RatePlanCharge.HolidayStart__c,RatePlanCharge.HolidayEnd__c,RatePlanCharge.ID,RatePlanCharge.MRR,RatePlanCharge.Name,RatePlanCharge.TCV,RatePlanCharge.Version,RatePlanCharge.BillingPeriod,RatePlanCharge.ProcessedThroughDate,RatePlanCharge.ChargedThroughDate,Product.Name,RatePlan.ID,RatePlan.Name,Subscription.ID,ProductRatePlanCharge.BillingPeriod FROM RatePlanCharge WHERE Account.Status != 'Canceled' AND (Account.ProcessingAdvice__c != 'DoNotProcess' OR Account.ProcessingAdvice__c IS NULL)",
   "ophan-raw-zuora-increment-rateplancharge",
   "RatePlanCharge.csv"
 )
