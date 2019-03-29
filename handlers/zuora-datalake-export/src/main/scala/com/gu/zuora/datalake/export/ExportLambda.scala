@@ -37,9 +37,10 @@ class ExportLambda extends Lambda[Option[String], String] with LazyLogging {
     val incrementalDate = IncrementalDate(incrementalDateOverrideOpt)
     val jobId = StartAquaJob(incrementalDate)
     val jobResult = GetJobResult(jobId)
-    val batch = jobResult.batches.head // FIXME: iterate when more than one query
-    val csvFile = GetResultsFile(batch)
-    SaveCsvToBucket(csvFile, batch)
+    jobResult.batches.foreach { batch =>
+      val csvFile = GetResultsFile(batch)
+      SaveCsvToBucket(csvFile, batch)
+    }
     Postconditions(jobResult)
     Right(s"Successfully exported Zuora to Datalake jobId = $jobId")
   }
@@ -75,9 +76,16 @@ object AccountQuery extends Query(
   "ophan-raw-zuora-increment-account",
   "Account.csv"
 )
+object RatePlanChargeQuery extends Query(
+  "RatePlanCharge",
+  "SELECT RatePlanCharge.EffectiveStartDate,RatePlanCharge.EffectiveEndDate,RatePlanCharge.HolidayStart__c,RatePlanCharge.HolidayEnd__c,RatePlanCharge.ID,RatePlanCharge.MRR,RatePlanCharge.Name,RatePlanCharge.TCV,RatePlanCharge.Version,RatePlanCharge.BillingPeriod,RatePlanCharge.ProcessedThroughDate,RatePlanCharge.ChargedThroughDate,Product.Name,RatePlan.ID,RatePlan.Name,Subscription.ID,ProductRatePlanCharge.BillingPeriod FROM RatePlanCharge WHERE Account.Status != 'Canceled' AND (Account.ProcessingAdvice__c != 'DoNotProcess' OR Account.ProcessingAdvice__c IS NULL)",
+  "ophan-raw-zuora-increment-rateplancharge",
+  "RatePlanCharge.csv"
+)
 object Query {
   def apply(batchName: String): Query = batchName match {
     case AccountQuery.batchName => AccountQuery
+    case RatePlanChargeQuery.batchName => RatePlanChargeQuery
     case _ => throw new RuntimeException(s"Failed to create Query object due to unexpected batch name: $batchName")
   }
 }
@@ -101,6 +109,16 @@ object ZuoraAquaStatefulApi {
     case "CODE" => ZuoraAquaStatefulApi(partner = "guardian-12357") // https://support.zuora.com/hc/en-us/requests/175239
     case "PROD" => ZuoraAquaStatefulApi(partner = "GuardianNews4398") // https://support.zuora.com/hc/en-us/requests/177970
   }
+}
+
+object DeletedColumn {
+  def apply(): String =
+    """
+      |{
+      |  "column" : "IsDeleted",
+      |  "format"  : "Boolean"
+      |}
+    """.stripMargin
 }
 
 object ReadConfig {
@@ -191,10 +209,13 @@ object StartAquaJob {
         |			"name" : "${AccountQuery.batchName}",
         |			"query" : "${AccountQuery.zoql}",
         |			"type" : "zoqlexport",
-        |			"deleted" : {
-        |                 "column" : "IsDeleted",
-        |                 "format"  : "Boolean"
-        |            }
+        |			"deleted" : ${DeletedColumn()}
+        |		},
+        |		{
+        |			"name" : "${RatePlanChargeQuery.batchName}",
+        |			"query" : "${RatePlanChargeQuery.zoql}",
+        |			"type" : "zoqlexport",
+        |			"deleted" : ${DeletedColumn()}
         |		}
         |	]
         |}
@@ -249,7 +270,7 @@ object GetJobResult {
  * https://knowledgecenter.zuora.com/DC_Developers/AB_Aggregate_Query_API/D_Get_File_Download
  */
 object GetResultsFile {
-  def apply(batch: Batch) = {
+  def apply(batch: Batch): String = {
     val fileId = batch.fileId.getOrElse(throw new RuntimeException("Failed to get csv file due to missing fileId"))
     val response = Http(s"${ZuoraApiHost()}/v1/file/$fileId")
       .header("Authorization", s"Bearer ${AccessToken()}")
