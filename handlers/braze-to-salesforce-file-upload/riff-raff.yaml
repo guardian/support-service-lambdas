@@ -1,0 +1,19 @@
+stacks:
+- membership
+regions:
+- eu-west-1
+deployments:
+  cfn:
+    type: cloud-formation
+    app: braze-to-salesforce-file-upload
+    parameters:
+      templatePath: cfn.yaml
+  braze-to-salesforce-file-upload:
+    type: aws-lambda
+    parameters:
+      fileName: braze-to-salesforce-file-upload.jar
+      bucket: zuora-auto-cancel-dist
+      prefixStack: false
+      functionNames:
+      - braze-to-salesforce-file-upload-
+    dependencies: [cfn]
