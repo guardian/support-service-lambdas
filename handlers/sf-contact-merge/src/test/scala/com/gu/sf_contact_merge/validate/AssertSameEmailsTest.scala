@@ -42,10 +42,9 @@ class AssertSameEmailsTest extends FlatSpec with Matchers {
   }
 
   it should "be happy that superficially different items are the same if they are transformed" in {
-    val testData = List("JOHN", "john").map(LastName.apply)
+    val testData = List("JOHN", "JOHN.", "john", "john ", " john").map(LastName.apply)
 
     GetVariations.forLastName.apply(testData) should be(HasAllowableVariations(LastName("john")))
-
   }
 
   it should "be happy that actually different items are the still different if they are transformed" in {

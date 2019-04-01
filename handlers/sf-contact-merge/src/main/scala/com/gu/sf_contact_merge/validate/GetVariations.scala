@@ -22,8 +22,8 @@ object GetVariations {
 
   val forLastName: GetVariations[LastName] = apply[LastName](
     "last names",
-    lastName => LastName(lastName.value.toLowerCase)
-  // some seem to be entered entirely lower case, but this isn't a significant difference, so ignore
+    lastName => LastName(lastName.value.toLowerCase.filter(_.isLetterOrDigit))
+  // some seem to be entered entirely lower case, and have trailing punctuation, but these aren't significant differences, so ignore
   )
 
   val forEmailAddress: GetVariations[EmailAddress] = GetVariations[EmailAddress](
