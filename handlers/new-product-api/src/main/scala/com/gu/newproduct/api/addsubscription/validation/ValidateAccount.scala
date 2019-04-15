@@ -17,7 +17,6 @@ object ValidateAccount {
   def apply(account: Account): ValidationResult[ValidatedAccount] = {
     for {
       _ <- account.autoPay.value orFailWith "Zuora account has autopay disabled"
-      _ <- (account.accountBalanceMinorUnits.value == 0) orFailWith "Zuora account balance is not zero"
       paymentMethodId <- account.paymentMethodId getOrFailWith "Zuora account has no default payment method"
     } yield ValidatedAccount(
       account.identityId,

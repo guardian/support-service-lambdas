@@ -40,9 +40,5 @@ class ValidateAccountTest extends FlatSpec with Matchers {
     val noAutoPayAccount = validAccount.copy(autoPay = AutoPay(false))
     ValidateAccount(noAutoPayAccount) shouldBe Failed("Zuora account has autopay disabled")
   }
-  it should "fail if account balance is not zero" in {
-    val balanceNotZeroAccount = validAccount.copy(accountBalanceMinorUnits = AccountBalanceMinorUnits(1000))
-    ValidateAccount(balanceNotZeroAccount) shouldBe Failed("Zuora account balance is not zero")
-  }
 
 }
