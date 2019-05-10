@@ -1,9 +1,9 @@
 // this is stuff for the root handlers, which will be moved to handlers/root at some point
 
-name := "zuora-auto-cancel"
+name := "support-service-lambdas"
 description:= "Handles auto-cancellations for membership and subscriptions"
 
-assemblyJarName := "zuora-auto-cancel.jar"
+assemblyJarName := "support-service-lambdas.jar"
 riffRaffPackageType := assembly.value
 riffRaffUploadArtifactBucket := Option("riffraff-artifact")
 riffRaffUploadManifestBucket := Option("riffraff-builds")

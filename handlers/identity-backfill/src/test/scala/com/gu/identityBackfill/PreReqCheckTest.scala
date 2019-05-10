@@ -19,8 +19,8 @@ class PreReqCheckTest extends FlatSpec with Matchers {
   val salesforceResult = Some(personContact)
 
   val zuoraResult = List(
-    ZuoraAccountIdentitySFContact(AccountId("acc"), None, personContact, CrmId("crmId")),       // customer's direct sub
-    ZuoraAccountIdentitySFContact(AccountId("acc2"), None, SFContactId("sf2"), CrmId("crmId"))  // same customer's gift sub
+    ZuoraAccountIdentitySFContact(AccountId("acc"), None, personContact, CrmId("crmId")), // customer's direct sub
+    ZuoraAccountIdentitySFContact(AccountId("acc2"), None, SFContactId("sf2"), CrmId("crmId")) // same customer's gift sub
   )
 
   it should "go through a happy case" in {

@@ -3,11 +3,11 @@ stacks:
 regions:
 - eu-west-1
 deployments:
-  zuora-auto-cancel:
+  support-service-lambdas:
     type: aws-lambda
     parameters:
-      fileName: zuora-auto-cancel.jar
-      bucket: zuora-auto-cancel-dist
+      fileName: support-service-lambdas.jar
+      bucket: support-service-lambdas-dist
       prefixStack: false
       functionNames:
       - zuora-auto-cancel-

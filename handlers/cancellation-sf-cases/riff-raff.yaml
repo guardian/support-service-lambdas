@@ -14,7 +14,7 @@ deployments:
     type: aws-lambda
     parameters:
       fileName: cancellation-sf-cases.jar
-      bucket: zuora-auto-cancel-dist
+      bucket: support-service-lambdas-dist
       prefixStack: false
       functionNames:
       - cancellation-sf-cases-raise-

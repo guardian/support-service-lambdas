@@ -69,7 +69,7 @@ Resources:
       FunctionName:
         !Sub sf-gocardless-sync-${Stage}
       Code:
-        S3Bucket: zuora-auto-cancel-dist
+        S3Bucket: support-service-lambdas-dist
         S3Key: !Sub membership/${Stage}/sf-gocardless-sync/sf-gocardless-sync.jar
       Handler: com.gu.sf_gocardless_sync.Handler::apply
       Environment:

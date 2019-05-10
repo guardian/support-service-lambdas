@@ -81,7 +81,7 @@ Resources:
             FunctionName:
                 !Sub cancellation-sf-cases-raise-${Stage}
             Code:
-                S3Bucket: zuora-auto-cancel-dist
+                S3Bucket: support-service-lambdas-dist
                 S3Key: !Sub subscriptions/${Stage}/cancellation-sf-cases/cancellation-sf-cases.jar
             Handler: com.gu.cancellation.sf_cases.Handler::raiseCase
             Environment:
@@ -137,7 +137,7 @@ Resources:
             FunctionName:
                 !Sub cancellation-sf-cases-update-${Stage}
             Code:
-                S3Bucket: zuora-auto-cancel-dist
+                S3Bucket: support-service-lambdas-dist
                 S3Key: !Sub subscriptions/${Stage}/cancellation-sf-cases/cancellation-sf-cases.jar
             Handler: com.gu.cancellation.sf_cases.Handler::updateCase
             Environment:

@@ -12,7 +12,7 @@ deployments:
     type: aws-lambda
     parameters:
       fileName: braze-to-salesforce-file-upload.jar
-      bucket: zuora-auto-cancel-dist
+      bucket: support-service-lambdas-dist
       prefixStack: false
       functionNames:
       - braze-to-salesforce-file-upload-

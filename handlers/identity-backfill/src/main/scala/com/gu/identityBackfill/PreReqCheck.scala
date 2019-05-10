@@ -30,8 +30,7 @@ object PreReqCheck {
     } yield PreReqResult(zuoraAccounts.map(_.accountId).toSet, maybeBuyer, maybeExistingIdentityId)
   }
 
-  def checkSfContactsSyncable(salesforceAccountLookup: SFAccountId => ApiGatewayOp[Option[SFContactId]])
-    (crmIds: Set[SFAccountId]): ApiGatewayOp[Option[SFContactId]] = {
+  def checkSfContactsSyncable(salesforceAccountLookup: SFAccountId => ApiGatewayOp[Option[SFContactId]])(crmIds: Set[SFAccountId]): ApiGatewayOp[Option[SFContactId]] = {
     crmIds.toList match {
       case Nil => ReturnWithResponse(
         ApiGatewayResponse.badRequest(
@@ -61,8 +60,7 @@ object PreReqCheck {
     } yield ()
   }
 
-  def validateZuoraAccountsFound(zuoraAccountsRetrieved: ClientFailableOp[List[ZuoraAccountIdentitySFContact]])
-    (emailAddress: EmailAddress): ApiGatewayOp[List[ZuoraAccountIdentitySFContact]] = {
+  def validateZuoraAccountsFound(zuoraAccountsRetrieved: ClientFailableOp[List[ZuoraAccountIdentitySFContact]])(emailAddress: EmailAddress): ApiGatewayOp[List[ZuoraAccountIdentitySFContact]] = {
 
     def validateOneCrmId(zuoraAccountsForEmail: List[ZuoraAccountIdentitySFContact]) = {
       val uniqueCrmIds = zuoraAccountsForEmail.map(_.crmId).distinct.size

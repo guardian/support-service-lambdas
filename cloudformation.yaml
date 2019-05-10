@@ -77,8 +77,8 @@ Resources:
             FunctionName:
                 !Sub zuora-auto-cancel-${Stage}
             Code:
-                S3Bucket: zuora-auto-cancel-dist
-                S3Key: !Sub membership/${Stage}/zuora-auto-cancel/zuora-auto-cancel.jar
+                S3Bucket: support-service-lambdas-dist
+                S3Key: !Sub membership/${Stage}/support-service-lambdas/support-service-lambdas.jar
             Handler: com.gu.autoCancel.AutoCancelHandler::handleRequest
             Environment:
                 Variables:
@@ -100,8 +100,8 @@ Resources:
             FunctionName:
                 !Sub payment-failure-${Stage}
             Code:
-                S3Bucket: zuora-auto-cancel-dist
-                S3Key: !Sub membership/${Stage}/zuora-auto-cancel/zuora-auto-cancel.jar
+                S3Bucket: support-service-lambdas-dist
+                S3Key: !Sub membership/${Stage}/support-service-lambdas/support-service-lambdas.jar
             Environment:
                 Variables:
                   Stage: !Ref Stage
@@ -194,8 +194,8 @@ Resources:
             FunctionName:
                 !Sub stripe-customer-source-updated-${Stage}
             Code:
-                S3Bucket: zuora-auto-cancel-dist
-                S3Key: !Sub membership/${Stage}/zuora-auto-cancel/zuora-auto-cancel.jar
+                S3Bucket: support-service-lambdas-dist
+                S3Key: !Sub membership/${Stage}/support-service-lambdas/support-service-lambdas.jar
             Handler: com.gu.stripeCustomerSourceUpdated.Lambda::apply
             Environment:
                 Variables:

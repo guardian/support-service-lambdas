@@ -66,7 +66,7 @@ Resources:
             FunctionName:
                 !Sub identity-retention-${Stage}
             Code:
-                S3Bucket: zuora-auto-cancel-dist
+                S3Bucket: support-service-lambdas-dist
                 S3Key: !Sub membership/${Stage}/identity-retention/identity-retention.jar
             Handler: com.gu.identityRetention.Handler::apply
             Environment:

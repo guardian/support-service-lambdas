@@ -71,7 +71,7 @@ Resources:
       FunctionName:
         !Sub sf-start-export-job-${Stage}
       Code:
-        S3Bucket: zuora-auto-cancel-dist
+        S3Bucket: support-service-lambdas-dist
         S3Key: !Sub membership/${Stage}/sf-datalake-export/sf-datalake-export.jar
       Handler: com.gu.sf_datalake_export.handlers.StartJobHandler::apply
       Environment:
@@ -120,7 +120,7 @@ Resources:
       FunctionName:
         !Sub sf-get-batch-state-${Stage}
       Code:
-        S3Bucket: zuora-auto-cancel-dist
+        S3Bucket: support-service-lambdas-dist
         S3Key: !Sub membership/${Stage}/sf-datalake-export/sf-datalake-export.jar
       Handler: com.gu.sf_datalake_export.handlers.GetBatchesHandler::apply
       Environment:
@@ -214,7 +214,7 @@ Resources:
       FunctionName:
         !Sub sf-download-batch-${Stage}
       Code:
-        S3Bucket: zuora-auto-cancel-dist
+        S3Bucket: support-service-lambdas-dist
         S3Key: !Sub membership/${Stage}/sf-datalake-export/sf-datalake-export.jar
       Handler: com.gu.sf_datalake_export.handlers.DownloadBatchHandler::apply
       Environment:
@@ -263,7 +263,7 @@ Resources:
       FunctionName:
         !Sub sf-export-clean-bucket-${Stage}
       Code:
-        S3Bucket: zuora-auto-cancel-dist
+        S3Bucket: support-service-lambdas-dist
         S3Key: !Sub membership/${Stage}/sf-datalake-export/sf-datalake-export.jar
       Handler: com.gu.sf_datalake_export.handlers.CleanBucketHandler::apply
       Environment:
@@ -283,7 +283,7 @@ Resources:
       FunctionName:
         !Sub sf-end-export-job-${Stage}
       Code:
-        S3Bucket: zuora-auto-cancel-dist
+        S3Bucket: support-service-lambdas-dist
         S3Key: !Sub membership/${Stage}/sf-datalake-export/sf-datalake-export.jar
       Handler: com.gu.sf_datalake_export.handlers.EndJobHandler::apply
       Environment:
