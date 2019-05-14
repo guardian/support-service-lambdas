@@ -61,7 +61,7 @@ Resources:
             FunctionName:
                 !Sub identity-backfill-${Stage}
             Code:
-                S3Bucket: zuora-auto-cancel-dist
+                S3Bucket: support-service-lambdas-dist
                 S3Key: !Sub membership/${Stage}/identity-backfill/identity-backfill.jar
             Handler: com.gu.identityBackfill.Handler::apply
             Environment:

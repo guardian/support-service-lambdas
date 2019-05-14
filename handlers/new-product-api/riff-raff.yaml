@@ -14,7 +14,7 @@ deployments:
     type: aws-lambda
     parameters:
       fileName: new-product-api.jar
-      bucket: zuora-auto-cancel-dist
+      bucket: support-service-lambdas-dist
       prefixStack: false
       functionNames:
       - add-subscription-

@@ -15,7 +15,7 @@ deployments:
     type: aws-lambda
     parameters:
       fileName: sf-gocardless-sync.jar
-      bucket: zuora-auto-cancel-dist
+      bucket: support-service-lambdas-dist
       prefixStack: false
       functionNames:
       - sf-gocardless-sync-

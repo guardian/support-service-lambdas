@@ -59,7 +59,7 @@ Resources:
       FunctionName:
         !Sub batch-email-sender-${Stage}
       Code:
-        S3Bucket: zuora-auto-cancel-dist
+        S3Bucket: support-service-lambdas-dist
         S3Key: !Sub membership/${Stage}/batch-email-sender/batch-email-sender.jar
       Handler: com.gu.batchemailsender.api.batchemail.Handler::apply
       Environment:

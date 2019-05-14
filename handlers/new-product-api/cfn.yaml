@@ -109,7 +109,7 @@ Resources:
             FunctionName:
                 !Sub add-subscription-${Stage}
             Code:
-                S3Bucket: zuora-auto-cancel-dist
+                S3Bucket: support-service-lambdas-dist
                 S3Key: !Sub membership/${Stage}/new-product-api/new-product-api.jar
             Handler: com.gu.newproduct.api.addsubscription.Handler::apply
             Environment:
@@ -164,7 +164,7 @@ Resources:
         FunctionName:
           !Sub product-catalog-${Stage}
         Code:
-          S3Bucket: zuora-auto-cancel-dist
+          S3Bucket: support-service-lambdas-dist
           S3Key: !Sub membership/${Stage}/new-product-api/new-product-api.jar
         Handler: com.gu.newproduct.api.productcatalog.Handler::apply
         Environment:

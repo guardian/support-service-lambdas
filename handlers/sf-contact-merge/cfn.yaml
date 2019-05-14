@@ -64,7 +64,7 @@ Resources:
             FunctionName:
                 !Sub sf-contact-merge-${Stage}
             Code:
-                S3Bucket: zuora-auto-cancel-dist
+                S3Bucket: support-service-lambdas-dist
                 S3Key: !Sub membership/${Stage}/sf-contact-merge/sf-contact-merge.jar
             Handler: com.gu.sf_contact_merge.Handler::apply
             Environment:

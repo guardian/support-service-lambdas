@@ -12,7 +12,7 @@ deployments:
     type: aws-lambda
     parameters:
       fileName: zuora-datalake-export.jar
-      bucket: zuora-auto-cancel-dist
+      bucket: support-service-lambdas-dist
       prefixStack: false
       functionNames:
       - zuora-datalake-export-
