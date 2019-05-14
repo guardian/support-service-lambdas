@@ -12,5 +12,6 @@ libraryDependencies ++= Seq(
   "com.softwaremill.sttp" %% "core" % sttpVersion,
   "com.softwaremill.sttp" %% "circe" % sttpVersion,
   "io.circe" %% "circe-generic" % "0.11.0",
+  "com.amazonaws" % "aws-java-sdk-s3" % "1.11.550",
   "org.scalatest" %% "scalatest" % "3.0.7" % Test
 )

@@ -13,25 +13,25 @@ object Zuora {
       result: Either[E, R]
   ): Either[String, R] = result.left.map(_.getMessage)
 
-  def subscriptionGetResponse(zuoraUrl: String, bearerToken: String)(
-      subscriptionName: String
-  ): Either[String, Subscription] = {
+  def subscriptionGetResponse(
+    zuoraAccess: ZuoraAccess
+  )(subscriptionName: String): Either[String, Subscription] = {
     val request = sttp.auth
-      .bearer(bearerToken)
-      .get(uri"$zuoraUrl/v1/subscriptions/$subscriptionName")
+      .basic(zuoraAccess.username, zuoraAccess.password)
+      .get(uri"${zuoraAccess.baseUrl}/subscriptions/$subscriptionName")
     val response = request.send()
     response.body.right flatMap { body =>
       normalised(decode[Subscription](body))
     }
   }
 
-  def subscriptionUpdateResponse(zuoraUrl: String, bearerToken: String)(
-      subscriptionName: String,
-      subscriptionUpdate: SubscriptionUpdate
+  def subscriptionUpdateResponse(zuoraAccess: ZuoraAccess)(
+    subscriptionName: String,
+    subscriptionUpdate: SubscriptionUpdate
   ): Either[String, ZuoraStatusResponse] = {
     val request = sttp.auth
-      .bearer(bearerToken)
-      .put(uri"$zuoraUrl/v1/subscriptions/$subscriptionName")
+      .basic(zuoraAccess.username, zuoraAccess.password)
+      .put(uri"${zuoraAccess.baseUrl}/subscriptions/$subscriptionName")
       .body(subscriptionUpdate)
     val response = request.send()
     response.body.right flatMap { body =>

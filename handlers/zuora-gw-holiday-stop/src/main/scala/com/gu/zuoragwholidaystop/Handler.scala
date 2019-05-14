@@ -8,26 +8,16 @@ import io.github.mkotsur.aws.handler.Lambda._
 object Handler extends Lambda[HolidayStop, String] {
 
   override protected def handle(
-      holidayStop: HolidayStop,
-      context: Context
+    holidayStop: HolidayStop,
+    context: Context
   ): Either[Throwable, String] = {
-
-    // todo from S3
-    val zuoraUrl = ???
-    val bearerToken = ???
-    val holidayCreditProductRatePlanId = ???
-    val holidayCreditProductRatePlanChargeId = ???
-
-    val processed = HolidayStopProcess(
-      zuoraUrl,
-      bearerToken,
-      holidayCreditProductRatePlanId,
-      holidayCreditProductRatePlanChargeId
-    ) _
-
-    processed(holidayStop) match {
-      case Left(msg) => Left(new RuntimeException(msg))
-      case Right(r)  => Right(r.toString)
+    Config() match {
+      case Left(msg) => Left(new RuntimeException(s"Config failure: $msg"))
+      case Right(config) =>
+        HolidayStopProcess(config)(holidayStop) match {
+          case Left(msg) => Left(new RuntimeException(msg))
+          case Right(r) => Right(r.toString)
+        }
     }
   }
 }

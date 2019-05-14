@@ -3,27 +3,23 @@ package com.gu.zuoragwholidaystop
 object HolidayStopProcess {
 
   def apply(
-      zuoraUrl: String,
-      bearerToken: String,
-      holidayCreditProductRatePlanId: String,
-      holidayCreditProductRatePlanChargeId: String
+    config: Config
   )(stop: HolidayStop): Either[String, ZuoraStatusResponse] = {
 
     val subscriptionDetails =
-      Zuora.subscriptionGetResponse(zuoraUrl, bearerToken) _
+      Zuora.subscriptionGetResponse(config.zuoraAccess) _
 
     val updatedSubscription =
-      Zuora.subscriptionUpdateResponse(zuoraUrl, bearerToken) _
+      Zuora.subscriptionUpdateResponse(config.zuoraAccess) _
 
-    val holidayCreditToAdd = SubscriptionUpdate.holidayCreditToAdd(
-      holidayCreditProductRatePlanId,
-      holidayCreditProductRatePlanChargeId
-    ) _
+    val holidayCreditToAdd = SubscriptionUpdate.holidayCreditToAdd(config) _
 
     subscriptionDetails(stop.subscriptionName).right flatMap { subscription =>
-      val subscriptionUpdate =
-        holidayCreditToAdd(subscription, stop.stoppedPublicationDate)
-      updatedSubscription(stop.subscriptionName, subscriptionUpdate)
+      if (subscription.autoRenew) {
+        val subscriptionUpdate =
+          holidayCreditToAdd(subscription, stop.stoppedPublicationDate)
+        updatedSubscription(stop.subscriptionName, subscriptionUpdate)
+      } else Left("Cannot currently process non-auto-renewing subscription")
     }
   }
 }

@@ -8,25 +8,22 @@ case class SubscriptionUpdate(add: Seq[Add])
 
 object SubscriptionUpdate {
 
-  def holidayCreditToAdd(
-      productRatePlanId: String,
-      productRatePlanChargeId: String
-  )(
-      subscription: Subscription,
-      stoppedPublicationDate: LocalDate
+  def holidayCreditToAdd(config: Config)(
+    subscription: Subscription,
+    stoppedPublicationDate: LocalDate
   ): SubscriptionUpdate = {
     val credit =
       autoRenewingHolidayCredit(subscription)
     SubscriptionUpdate(
       Seq(
         Add(
-          productRatePlanId,
+          config.holidayCreditProductRatePlanId,
           contractEffectiveDate = stoppedPublicationDate,
           customerAcceptanceDate = stoppedPublicationDate,
           serviceActivationDate = stoppedPublicationDate,
           chargeOverrides = Seq(
             ChargeOverride(
-              productRatePlanChargeId,
+              config.holidayCreditProductRatePlanChargeId,
               HolidayStart__c = stoppedPublicationDate,
               HolidayEnd__c = stoppedPublicationDate,
               price = credit

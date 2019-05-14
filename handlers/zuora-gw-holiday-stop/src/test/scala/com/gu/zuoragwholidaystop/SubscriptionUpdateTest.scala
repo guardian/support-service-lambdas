@@ -8,7 +8,12 @@ import org.scalatest.{FlatSpec, Matchers}
 class SubscriptionUpdateTest extends FlatSpec with Matchers {
 
   "holidayCreditToAdd" should "calculate credit correctly" in {
-    val update = holidayCreditToAdd("ratePlanId", "ratePlanChargeId")(
+    val config = Config(
+      zuoraAccess = ZuoraAccess(baseUrl = "", username = "", password = ""),
+      holidayCreditProductRatePlanId = "ratePlanId",
+      holidayCreditProductRatePlanChargeId = "ratePlanChargeId"
+    )
+    val update = holidayCreditToAdd(config)(
       subscription = Fixtures.mkSubscription(42.1, "Quarter"),
       stoppedPublicationDate = LocalDate.of(2019, 5, 18)
     )
