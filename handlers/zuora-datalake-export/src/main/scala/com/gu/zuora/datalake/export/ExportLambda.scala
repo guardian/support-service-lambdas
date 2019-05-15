@@ -82,14 +82,18 @@ object RatePlanChargeQuery extends Query(
   "ophan-raw-zuora-increment-rateplancharge",
   "RatePlanCharge.csv"
 )
+// https://knowledgecenter.zuora.com/CD_Reporting/D_Data_Sources_and_Exports/C_Data_Source_Reference/Rate_Plan_Charge_Tier_Data_Source
 object RatePlanChargeTierQuery extends Query(
   "RatePlanChargeTier",
   """
     |SELECT
     |  RatePlanChargeTier.Price,
+    |  RatePlanChargeTier.Currency,
     |  RatePlanChargeTier.DiscountAmount,
     |  RatePlanChargeTier.DiscountPercentage,
-    |  RatePlanCharge.ID
+    |  RatePlanChargeTier.ID,
+    |  RatePlanCharge.ID,
+    |  Subscription.ID
     |FROM
     |  RatePlanChargeTier
   """.stripMargin,
