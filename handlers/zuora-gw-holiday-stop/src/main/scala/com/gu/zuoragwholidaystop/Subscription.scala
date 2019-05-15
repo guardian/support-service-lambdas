@@ -16,7 +16,7 @@ case class RatePlanCharge(price: Double, billingPeriod: String) {
     // inexact values
     billingPeriod match {
       case "Month" => 4
-      case "Quarter" => 12
+      case "Quarter" => 13
       case "Annual" => 52
     }
   }
