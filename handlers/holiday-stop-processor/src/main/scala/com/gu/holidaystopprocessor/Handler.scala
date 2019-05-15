@@ -1,4 +1,4 @@
-package com.gu.zuoragwholidaystop
+package com.gu.holidaystopprocessor
 
 import com.amazonaws.services.lambda.runtime.Context
 import io.circe.generic.auto._

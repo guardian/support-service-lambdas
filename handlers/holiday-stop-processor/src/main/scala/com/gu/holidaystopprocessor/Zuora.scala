@@ -1,4 +1,4 @@
-package com.gu.zuoragwholidaystop
+package com.gu.holidaystopprocessor
 
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._

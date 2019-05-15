@@ -1,4 +1,4 @@
-package com.gu.zuoragwholidaystop
+package com.gu.holidaystopprocessor
 
 import com.amazonaws.auth.profile.ProfileCredentialsProvider
 import com.amazonaws.regions.Regions.EU_WEST_1

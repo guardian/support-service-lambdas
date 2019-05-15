@@ -1,6 +1,6 @@
-package com.gu.zuoragwholidaystop
+package com.gu.holidaystopprocessor
 
-import com.gu.zuoragwholidaystop.Fixtures.mkSubscription
+import com.gu.holidaystopprocessor.Fixtures.mkSubscription
 import org.scalatest.{FlatSpec, Matchers}
 
 class CreditTest extends FlatSpec with Matchers {

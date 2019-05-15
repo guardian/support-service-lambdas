@@ -1,4 +1,4 @@
-package com.gu.zuoragwholidaystop
+package com.gu.holidaystopprocessor
 
 import scala.math.BigDecimal.RoundingMode
 

@@ -1,4 +1,4 @@
-package com.gu.zuoragwholidaystop
+package com.gu.holidaystopprocessor
 
 case class ZuoraStatusResponse(
   success: Boolean,

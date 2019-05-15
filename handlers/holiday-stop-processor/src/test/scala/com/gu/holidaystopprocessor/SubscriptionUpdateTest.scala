@@ -1,8 +1,8 @@
-package com.gu.zuoragwholidaystop
+package com.gu.holidaystopprocessor
 
 import java.time.LocalDate
 
-import com.gu.zuoragwholidaystop.SubscriptionUpdate.holidayCreditToAdd
+import com.gu.holidaystopprocessor.SubscriptionUpdate.holidayCreditToAdd
 import org.scalatest.{FlatSpec, Matchers}
 
 class SubscriptionUpdateTest extends FlatSpec with Matchers {
