@@ -2,8 +2,6 @@ package com.gu.zuoragwholidaystop
 
 import java.time.LocalDate
 
-import com.gu.zuoragwholidaystop.Credit.autoRenewingHolidayCredit
-
 case class SubscriptionUpdate(add: Seq[Add])
 
 object SubscriptionUpdate {
@@ -12,8 +10,7 @@ object SubscriptionUpdate {
     subscription: Subscription,
     stoppedPublicationDate: LocalDate
   ): SubscriptionUpdate = {
-    val credit =
-      autoRenewingHolidayCredit(subscription)
+    val credit = Credit.autoRenewingHolidayAmount(subscription)
     SubscriptionUpdate(
       Seq(
         Add(

@@ -4,7 +4,7 @@ import scala.math.BigDecimal.RoundingMode
 
 object Credit {
 
-  def autoRenewingHolidayCredit(subscription: Subscription): Double = {
+  def autoRenewingHolidayAmount(subscription: Subscription): Double = {
     def roundUp(d: Double): Double =
       BigDecimal(d).setScale(2, RoundingMode.UP).toDouble
     val credit = for {
