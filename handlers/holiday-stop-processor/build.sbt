@@ -1,4 +1,4 @@
-name := "zuora-gw-holiday-stop"
+name := "holiday-stop-processor"
 description := "Add a holiday credit amendment to a subscription."
 version := "0.1.0-SNAPSHOT"
 
