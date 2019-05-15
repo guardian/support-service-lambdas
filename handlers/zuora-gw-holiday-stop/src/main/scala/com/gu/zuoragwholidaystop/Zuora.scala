@@ -10,7 +10,7 @@ object Zuora {
   implicit val backend: SttpBackend[Id, Nothing] = HttpURLConnectionBackend()
 
   private def normalised[E <: io.circe.Error, R](
-      result: Either[E, R]
+    result: Either[E, R]
   ): Either[String, R] = result.left.map(_.getMessage)
 
   def subscriptionGetResponse(

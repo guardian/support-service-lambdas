@@ -36,16 +36,16 @@ object SubscriptionUpdate {
 }
 
 case class Add(
-    productRatePlanId: String,
-    contractEffectiveDate: LocalDate,
-    customerAcceptanceDate: LocalDate,
-    serviceActivationDate: LocalDate,
-    chargeOverrides: Seq[ChargeOverride]
+  productRatePlanId: String,
+  contractEffectiveDate: LocalDate,
+  customerAcceptanceDate: LocalDate,
+  serviceActivationDate: LocalDate,
+  chargeOverrides: Seq[ChargeOverride]
 )
 
 case class ChargeOverride(
-    productRatePlanChargeId: String,
-    HolidayStart__c: LocalDate,
-    HolidayEnd__c: LocalDate,
-    price: Double
+  productRatePlanChargeId: String,
+  HolidayStart__c: LocalDate,
+  HolidayEnd__c: LocalDate,
+  price: Double
 )
