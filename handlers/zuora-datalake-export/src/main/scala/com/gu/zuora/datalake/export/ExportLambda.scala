@@ -82,10 +82,25 @@ object RatePlanChargeQuery extends Query(
   "ophan-raw-zuora-increment-rateplancharge",
   "RatePlanCharge.csv"
 )
+object RatePlanChargeTierQuery extends Query(
+  "RatePlanChargeTier",
+  """
+    |SELECT
+    |  RatePlanChargeTier.Price,
+    |  RatePlanChargeTier.DiscountAmount,
+    |  RatePlanChargeTier.DiscountPercentage,
+    |  RatePlanCharge.ID
+    |FROM
+    |  RatePlanChargeTier
+  """.stripMargin,
+  "ophan-raw-zuora-increment-rateplanchargetier",
+  "RatePlanChargeTier.csv"
+)
 object Query {
   def apply(batchName: String): Query = batchName match {
     case AccountQuery.batchName => AccountQuery
     case RatePlanChargeQuery.batchName => RatePlanChargeQuery
+    case RatePlanChargeTierQuery.batchName => RatePlanChargeTierQuery
     case _ => throw new RuntimeException(s"Failed to create Query object due to unexpected batch name: $batchName")
   }
 }
@@ -216,7 +231,13 @@ object StartAquaJob {
         |			"query" : "${RatePlanChargeQuery.zoql}",
         |			"type" : "zoqlexport",
         |			"deleted" : ${DeletedColumn()}
-        |		}
+        |		},
+        |		{
+        |			"name" : "${RatePlanChargeTierQuery.batchName}",
+        |			"query" : "${RatePlanChargeTierQuery.zoql}",
+        |			"type" : "zoqlexport",
+        |			"deleted" : ${DeletedColumn()}
+        |		},
         |	]
         |}
       """.stripMargin
