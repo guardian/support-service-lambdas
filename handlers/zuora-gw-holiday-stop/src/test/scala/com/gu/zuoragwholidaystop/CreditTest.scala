@@ -8,13 +8,13 @@ class CreditTest extends FlatSpec with Matchers {
   "autoRenewingHolidayCredit" should "be correct for a quarterly billing period" in {
     val subscription = mkSubscription(price = 30, billingPeriod = "Quarter")
     val credit = Credit.autoRenewingHolidayAmount(subscription)
-    credit shouldBe -2.5
+    credit shouldBe -2.31
   }
 
   "autoRenewingHolidayCredit" should "be correct for another quarterly billing period" in {
     val subscription = mkSubscription(price = 37.5, billingPeriod = "Quarter")
     val credit = Credit.autoRenewingHolidayAmount(subscription)
-    credit shouldBe -3.13
+    credit shouldBe -2.89
   }
 
   "autoRenewingHolidayCredit" should "be correct for an annual billing period" in {

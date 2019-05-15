@@ -29,7 +29,7 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers {
               productRatePlanChargeId = "ratePlanChargeId",
               HolidayStart__c = LocalDate.of(2019, 5, 18),
               HolidayEnd__c = LocalDate.of(2019, 5, 18),
-              price = -3.51
+              price = -3.24
             )
           )
         )
