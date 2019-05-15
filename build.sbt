@@ -77,7 +77,7 @@ lazy val zuora = all(project in file("lib/zuora"))
     libraryDependencies ++= Seq(okhttp3, logging, scalaz, playJson, scalatest, jacksonDatabind)
   )
 
-lazy val salesforce = all(project in file("lib/salesforce"))
+lazy val `sf-core` = all(project in file("lib/salesforce/sf-core"))
   .dependsOn(
     restHttp,
     handler,// % "test->test" TODO make this dep only in test - SF client shouldn't depends on ApiGateway
@@ -87,6 +87,14 @@ lazy val salesforce = all(project in file("lib/salesforce"))
   .settings(
     libraryDependencies ++= Seq(okhttp3, logging, scalaz, playJson, scalatest)
   )
+
+lazy val `sf-holiday-stops` = all(project in file("lib/salesforce/sf-holiday-stops"))
+  .dependsOn(
+    `sf-core`
+  )
+  .settings(
+    libraryDependencies ++= Seq(okhttp3, logging, scalaz, playJson, scalatest)
+)
 
 lazy val restHttp = all(project in file("lib/restHttp"))
   .settings(
@@ -158,7 +166,8 @@ lazy val root = all(project in file(".")).enablePlugins(RiffRaffArtifact).aggreg
   restHttp,
   zuora,
   `zuora-reports`,
-  salesforce,
+  `sf-core`,
+  `sf-holiday-stops`,
   s3ConfigValidator,
   `new-product-api`,
   `effects-sqs`,
@@ -173,7 +182,7 @@ lazy val `identity-backfill` = all(project in file("handlers/identity-backfill")
   .enablePlugins(RiffRaffArtifact)
   .dependsOn(
     zuora,
-    salesforce % "compile->compile;test->test",
+    `sf-core` % "compile->compile;test->test",
     handler,
     effectsDepIncludingTestFolder,
     testDep
@@ -201,19 +210,19 @@ lazy val `zuora-retention` = all(project in file("handlers/zuora-retention"))
 
 lazy val `sf-contact-merge` = all(project in file("handlers/sf-contact-merge"))
   .enablePlugins(RiffRaffArtifact)
-  .dependsOn(zuora, salesforce % "compile->compile;test->test", handler, effectsDepIncludingTestFolder, testDep)
+  .dependsOn(zuora, `sf-core` % "compile->compile;test->test", handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `cancellation-sf-cases` = all(project in file("handlers/cancellation-sf-cases"))
   .enablePlugins(RiffRaffArtifact)
-  .dependsOn(salesforce, handler, effectsDepIncludingTestFolder, testDep)
+  .dependsOn(`sf-core`, handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `sf-gocardless-sync` = all(project in file("handlers/sf-gocardless-sync"))
   .enablePlugins(RiffRaffArtifact)
-  .dependsOn(salesforce, handler, effectsDepIncludingTestFolder, testDep)
+  .dependsOn(`sf-core`, handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `sf-datalake-export` = all(project in file("handlers/sf-datalake-export"))
   .enablePlugins(RiffRaffArtifact)
-  .dependsOn(salesforce, handler, effectsDepIncludingTestFolder, testDep)
+  .dependsOn(`sf-core`, handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `zuora-datalake-export` = all(project in file("handlers/zuora-datalake-export"))
   .enablePlugins(RiffRaffArtifact)
