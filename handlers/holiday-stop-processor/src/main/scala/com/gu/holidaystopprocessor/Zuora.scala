@@ -10,8 +10,8 @@ object Zuora {
   implicit val backend: SttpBackend[Id, Nothing] = HttpURLConnectionBackend()
 
   private def normalised[E <: io.circe.Error, R](
-    result: Either[E, R]
-  ): Either[String, R] = result.left.map(_.getMessage)
+    body: String, result: String => Either[E, R]
+  ): Either[String, R] = result(body).left.map(e => s"Failed to decode '$body': ${e.toString}")
 
   def subscriptionGetResponse(
     zuoraAccess: ZuoraAccess
@@ -21,7 +21,7 @@ object Zuora {
       .get(uri"${zuoraAccess.baseUrl}/subscriptions/$subscriptionName")
     val response = request.send()
     response.body.right flatMap { body =>
-      normalised(decode[Subscription](body))
+      normalised(body, decode[Subscription])
     }
   }
 
@@ -35,7 +35,12 @@ object Zuora {
       .body(subscriptionUpdate)
     val response = request.send()
     response.body.right flatMap { body =>
-      normalised(decode[ZuoraStatusResponse](body))
+      normalised(body, decode[ZuoraStatusResponse]) match {
+        case Left(e) => Left(e)
+        case Right(status) =>
+          if (!status.success) Left(status.reasons.map(_.mkString).getOrElse(""))
+          else Right(status)
+      }
     }
   }
 }

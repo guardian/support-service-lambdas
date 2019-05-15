@@ -7,12 +7,10 @@ object Credit {
   def autoRenewingHolidayAmount(subscription: Subscription): Double = {
     def roundUp(d: Double): Double =
       BigDecimal(d).setScale(2, RoundingMode.UP).toDouble
-    val credit = for {
-      ratePlan <- subscription.ratePlans.lastOption
-      charge <- ratePlan.ratePlanCharges.headOption
-      recurringPayment = charge.price
-      numPublicationsInPeriod = charge.weekCount
-    } yield -roundUp(recurringPayment / numPublicationsInPeriod)
-    credit getOrElse 0
+    subscription.originalRatePlanCharge map { charge =>
+      val recurringPayment = charge.price
+      val numPublicationsInPeriod = charge.weekCount
+      -roundUp(recurringPayment / numPublicationsInPeriod)
+    } getOrElse 0
   }
 }

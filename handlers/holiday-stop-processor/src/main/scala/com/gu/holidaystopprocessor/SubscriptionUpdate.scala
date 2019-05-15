@@ -2,7 +2,7 @@ package com.gu.holidaystopprocessor
 
 import java.time.LocalDate
 
-case class SubscriptionUpdate(add: Seq[Add])
+case class SubscriptionUpdate(currentTerm: Option[Int], add: Seq[Add])
 
 object SubscriptionUpdate {
 
@@ -11,13 +11,24 @@ object SubscriptionUpdate {
     stoppedPublicationDate: LocalDate
   ): SubscriptionUpdate = {
     val credit = Credit.autoRenewingHolidayAmount(subscription)
+    val effectiveDate = subscription.originalRatePlanCharge map {
+      _.effectiveEndDate.plusDays(1)
+    } getOrElse stoppedPublicationDate
+    val currentTerm =
+      if (effectiveDate.isAfter(subscription.termEndDate)) {
+        subscription.currentTermPeriodType match {
+          case "Month" => Some(24)
+          case _ => None
+        }
+      } else None
     SubscriptionUpdate(
+      currentTerm,
       Seq(
         Add(
-          config.holidayCreditProductRatePlanId,
-          contractEffectiveDate = stoppedPublicationDate,
-          customerAcceptanceDate = stoppedPublicationDate,
-          serviceActivationDate = stoppedPublicationDate,
+          productRatePlanId = config.holidayCreditProductRatePlanId,
+          contractEffectiveDate = effectiveDate,
+          customerAcceptanceDate = effectiveDate,
+          serviceActivationDate = effectiveDate,
           chargeOverrides = Seq(
             ChargeOverride(
               config.holidayCreditProductRatePlanChargeId,
