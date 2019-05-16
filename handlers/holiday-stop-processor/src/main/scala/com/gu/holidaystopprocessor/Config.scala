@@ -48,6 +48,7 @@ object Config {
           Config(
             secretConfig,
             holidayCreditProductRatePlanId = "2c92a0fc5b42d2c9015b6259f7f40040",
+            // todo
             holidayCreditProductRatePlanChargeId = "2c92a0ff5b42e3ad015b627c142f072a"
           )
         }
@@ -56,7 +57,7 @@ object Config {
           Config(
             secretConfig,
             holidayCreditProductRatePlanId = "2c92c0f96abaa1b5016abac99075461f",
-            holidayCreditProductRatePlanChargeId = "2c92c0f96abaa1b5016abacbcb2a59f7"
+            holidayCreditProductRatePlanChargeId = "2c92c0f96abc17d2016ac0da404d456c"
           )
         }
       case "DEV" =>
@@ -64,8 +65,7 @@ object Config {
           Config(
             secretConfig,
             holidayCreditProductRatePlanId = "2c92c0f9671686a201671d14b5e5771e",
-            holidayCreditProductRatePlanChargeId =
-              "2c92c0f9671686ae01671d16ff8f6cd2"
+            holidayCreditProductRatePlanChargeId = "2c92c0f96abb85c3016abbe5771b04cc"
           )
         }
     }
