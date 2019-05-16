@@ -85,18 +85,7 @@ object RatePlanChargeQuery extends Query(
 // https://knowledgecenter.zuora.com/CD_Reporting/D_Data_Sources_and_Exports/C_Data_Source_Reference/Rate_Plan_Charge_Tier_Data_Source
 object RatePlanChargeTierQuery extends Query(
   "RatePlanChargeTier",
-  """
-    |SELECT
-    |  RatePlanChargeTier.Price,
-    |  RatePlanChargeTier.Currency,
-    |  RatePlanChargeTier.DiscountAmount,
-    |  RatePlanChargeTier.DiscountPercentage,
-    |  RatePlanChargeTier.ID,
-    |  RatePlanCharge.ID,
-    |  Subscription.ID
-    |FROM
-    |  RatePlanChargeTier
-  """.stripMargin,
+  "SELECT RatePlanChargeTier.Price, RatePlanChargeTier.Currency, RatePlanChargeTier.DiscountAmount, RatePlanChargeTier.DiscountPercentage, RatePlanChargeTier.ID, RatePlanCharge.ID, Subscription.ID FROM RatePlanChargeTier",
   "ophan-raw-zuora-increment-rateplanchargetier",
   "RatePlanChargeTier.csv"
 )
@@ -241,7 +230,7 @@ object StartAquaJob {
         |			"query" : "${RatePlanChargeTierQuery.zoql}",
         |			"type" : "zoqlexport",
         |			"deleted" : ${DeletedColumn()}
-        |		},
+        |		}
         |	]
         |}
       """.stripMargin
