@@ -16,6 +16,7 @@ import scalaj.http.Http
 import scala.io.Source
 import scala.concurrent.duration._
 import scala.util.Try
+import enumeratum._
 
 case class Oauth(clientId: String, clientSecret: String)
 case class ZuoraDatalakeExport(oauth: Oauth)
@@ -56,7 +57,7 @@ object Postconditions extends LazyLogging {
            |  Name: ${batch.name}
            |  Change size: ${batch.recordCount}
            |  Changes since: ${jobResult.incrementalTime}
-           |  Target S3 bucket: ${Query(batch.name).targetBucket}
+           |  Target S3 bucket: ${Query.withName(batch.name).targetBucket}
            |  Job ID: ${jobResult.id}
            |  File ID: ${batch.fileId}
            |
@@ -67,35 +68,31 @@ object Postconditions extends LazyLogging {
   }
 }
 
-sealed abstract case class Query(batchName: String, zoql: String, s3Bucket: String, s3Key: String) {
+sealed abstract class Query(val batchName: String, val zoql: String, val s3Bucket: String, val s3Key: String) extends EnumEntry {
   def targetBucket = s"s3://$s3Bucket/$s3Key"
 }
-object AccountQuery extends Query(
-  "Account",
-  "SELECT Account.Balance,Account.AutoPay,Account.Currency,Account.ID,Account.IdentityId__c,Account.LastInvoiceDate,Account.sfContactId__c,Account.MRR FROM Account WHERE Status != 'Canceled' AND (ProcessingAdvice__c != 'DoNotProcess' OR ProcessingAdvice__c IS NULL)",
-  "ophan-raw-zuora-increment-account",
-  "Account.csv"
-)
-object RatePlanChargeQuery extends Query(
-  "RatePlanCharge",
-  "SELECT Account.ID,RatePlanCharge.EffectiveStartDate,RatePlanCharge.EffectiveEndDate,RatePlanCharge.HolidayStart__c,RatePlanCharge.HolidayEnd__c,RatePlanCharge.ID,RatePlanCharge.MRR,RatePlanCharge.Name,RatePlanCharge.TCV,RatePlanCharge.Version,RatePlanCharge.BillingPeriod,RatePlanCharge.ProcessedThroughDate,RatePlanCharge.ChargedThroughDate,Product.Name,RatePlan.ID,RatePlan.Name,Subscription.ID,ProductRatePlanCharge.BillingPeriod FROM RatePlanCharge WHERE Account.Status != 'Canceled' AND (Account.ProcessingAdvice__c != 'DoNotProcess' OR Account.ProcessingAdvice__c IS NULL)",
-  "ophan-raw-zuora-increment-rateplancharge",
-  "RatePlanCharge.csv"
-)
-// https://knowledgecenter.zuora.com/CD_Reporting/D_Data_Sources_and_Exports/C_Data_Source_Reference/Rate_Plan_Charge_Tier_Data_Source
-object RatePlanChargeTierQuery extends Query(
-  "RatePlanChargeTier",
-  "SELECT RatePlanChargeTier.Price, RatePlanChargeTier.Currency, RatePlanChargeTier.DiscountAmount, RatePlanChargeTier.DiscountPercentage, RatePlanChargeTier.ID, RatePlanCharge.ID, Subscription.ID FROM RatePlanChargeTier",
-  "ophan-raw-zuora-increment-rateplanchargetier",
-  "RatePlanChargeTier.csv"
-)
-object Query {
-  def apply(batchName: String): Query = batchName match {
-    case AccountQuery.batchName => AccountQuery
-    case RatePlanChargeQuery.batchName => RatePlanChargeQuery
-    case RatePlanChargeTierQuery.batchName => RatePlanChargeTierQuery
-    case _ => throw new RuntimeException(s"Failed to create Query object due to unexpected batch name: $batchName")
-  }
+object Query extends Enum[Query] {
+  val values = findValues
+
+  case object Account extends Query(
+    "Account",
+    "SELECT Account.Balance,Account.AutoPay,Account.Currency,Account.ID,Account.IdentityId__c,Account.LastInvoiceDate,Account.sfContactId__c,Account.MRR FROM Account WHERE Status != 'Canceled' AND (ProcessingAdvice__c != 'DoNotProcess' OR ProcessingAdvice__c IS NULL)",
+    "ophan-raw-zuora-increment-account",
+    "Account.csv"
+  )
+  case object RatePlanCharge extends Query(
+    "RatePlanCharge",
+    "SELECT Account.ID,RatePlanCharge.EffectiveStartDate,RatePlanCharge.EffectiveEndDate,RatePlanCharge.HolidayStart__c,RatePlanCharge.HolidayEnd__c,RatePlanCharge.ID,RatePlanCharge.MRR,RatePlanCharge.Name,RatePlanCharge.TCV,RatePlanCharge.Version,RatePlanCharge.BillingPeriod,RatePlanCharge.ProcessedThroughDate,RatePlanCharge.ChargedThroughDate,Product.Name,RatePlan.ID,RatePlan.Name,Subscription.ID,ProductRatePlanCharge.BillingPeriod FROM RatePlanCharge WHERE Account.Status != 'Canceled' AND (Account.ProcessingAdvice__c != 'DoNotProcess' OR Account.ProcessingAdvice__c IS NULL)",
+    "ophan-raw-zuora-increment-rateplancharge",
+    "RatePlanCharge.csv"
+  )
+  // https://knowledgecenter.zuora.com/CD_Reporting/D_Data_Sources_and_Exports/C_Data_Source_Reference/Rate_Plan_Charge_Tier_Data_Source
+  case object RatePlanChargeTier extends Query(
+    "RatePlanChargeTier",
+    "SELECT RatePlanChargeTier.Price, RatePlanChargeTier.Currency, RatePlanChargeTier.DiscountAmount, RatePlanChargeTier.DiscountPercentage, RatePlanChargeTier.ID, RatePlanCharge.ID, Subscription.ID FROM RatePlanChargeTier",
+    "ophan-raw-zuora-increment-rateplanchargetier",
+    "RatePlanChargeTier.csv"
+  )
 }
 
 object ZuoraApiHost {
@@ -200,6 +197,7 @@ object IncrementalDate {
  */
 object StartAquaJob {
   def apply(incrementalDate: String) = {
+    import Query._
     val body =
       s"""
         |{
@@ -214,20 +212,20 @@ object StartAquaJob {
         | "incrementalTime": "$incrementalDate 00:00:00",
         |	"queries" : [
         |		{
-        |			"name" : "${AccountQuery.batchName}",
-        |			"query" : "${AccountQuery.zoql}",
+        |			"name" : "${Account.batchName}",
+        |			"query" : "${Account.zoql}",
         |			"type" : "zoqlexport",
         |			"deleted" : ${DeletedColumn()}
         |		},
         |		{
-        |			"name" : "${RatePlanChargeQuery.batchName}",
-        |			"query" : "${RatePlanChargeQuery.zoql}",
+        |			"name" : "${RatePlanCharge.batchName}",
+        |			"query" : "${RatePlanCharge.zoql}",
         |			"type" : "zoqlexport",
         |			"deleted" : ${DeletedColumn()}
         |		},
         |		{
-        |			"name" : "${RatePlanChargeTierQuery.batchName}",
-        |			"query" : "${RatePlanChargeTierQuery.zoql}",
+        |			"name" : "${RatePlanChargeTier.batchName}",
+        |			"query" : "${RatePlanChargeTier.zoql}",
         |			"type" : "zoqlexport",
         |			"deleted" : ${DeletedColumn()}
         |		}
@@ -304,7 +302,7 @@ object SaveCsvToBucket {
       case "CODE" => // do nothing
 
       case "PROD" =>
-        val requestWithAcl = putRequestWithAcl(Query(batch.name).s3Bucket, Query(batch.name).s3Key, csvContent)
+        val requestWithAcl = putRequestWithAcl(Query.withName(batch.name).s3Bucket, Query.withName(batch.name).s3Key, csvContent)
         s3Client.putObject(requestWithAcl)
     }
   }
