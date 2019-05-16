@@ -82,10 +82,29 @@ object RatePlanChargeQuery extends Query(
   "ophan-raw-zuora-increment-rateplancharge",
   "RatePlanCharge.csv"
 )
+// https://knowledgecenter.zuora.com/CD_Reporting/D_Data_Sources_and_Exports/C_Data_Source_Reference/Rate_Plan_Charge_Tier_Data_Source
+object RatePlanChargeTierQuery extends Query(
+  "RatePlanChargeTier",
+  """
+    |SELECT
+    |  RatePlanChargeTier.Price,
+    |  RatePlanChargeTier.Currency,
+    |  RatePlanChargeTier.DiscountAmount,
+    |  RatePlanChargeTier.DiscountPercentage,
+    |  RatePlanChargeTier.ID,
+    |  RatePlanCharge.ID,
+    |  Subscription.ID
+    |FROM
+    |  RatePlanChargeTier
+  """.stripMargin,
+  "ophan-raw-zuora-increment-rateplanchargetier",
+  "RatePlanChargeTier.csv"
+)
 object Query {
   def apply(batchName: String): Query = batchName match {
     case AccountQuery.batchName => AccountQuery
     case RatePlanChargeQuery.batchName => RatePlanChargeQuery
+    case RatePlanChargeTierQuery.batchName => RatePlanChargeTierQuery
     case _ => throw new RuntimeException(s"Failed to create Query object due to unexpected batch name: $batchName")
   }
 }
@@ -216,7 +235,13 @@ object StartAquaJob {
         |			"query" : "${RatePlanChargeQuery.zoql}",
         |			"type" : "zoqlexport",
         |			"deleted" : ${DeletedColumn()}
-        |		}
+        |		},
+        |		{
+        |			"name" : "${RatePlanChargeTierQuery.batchName}",
+        |			"query" : "${RatePlanChargeTierQuery.zoql}",
+        |			"type" : "zoqlexport",
+        |			"deleted" : ${DeletedColumn()}
+        |		},
         |	]
         |}
       """.stripMargin
