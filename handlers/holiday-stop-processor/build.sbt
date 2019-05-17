@@ -5,6 +5,13 @@ version := "0.1.0-SNAPSHOT"
 scalaVersion := "2.12.8"
 scalacOptions += "-Ypartial-unification"
 
+assemblyJarName := s"${name.value}.jar"
+riffRaffPackageType := assembly.value
+riffRaffUploadArtifactBucket := Option("riffraff-artifact")
+riffRaffUploadManifestBucket := Option("riffraff-builds")
+riffRaffManifestProjectName := s"MemSub::Membership Admin::${name.value}"
+riffRaffArtifactResources += (file(s"handlers/${name.value}/cfn.yaml"), "cfn/cfn.yaml")
+
 val sttpVersion = "1.5.15"
 
 libraryDependencies ++= Seq(
