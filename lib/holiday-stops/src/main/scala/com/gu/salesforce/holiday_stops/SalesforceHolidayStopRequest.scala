@@ -14,8 +14,7 @@ object SalesforceHolidayStopRequest extends Logging {
   val SALESFORCE_DATE_FORMAT = "yyyy-MM-dd"
 
   private val sfApiBaseUrl = "/services/data/v29.0"
-  //  private val mandateSfObjectsBaseUrl = sfApiBaseUrl + "/sobjects/Holiday_Stop_Request__c"
-  private val soqlQueryBaseUrl = sfApiBaseUrl + "/query/?q="
+  private val soqlQueryBaseUrl = RelativePath(sfApiBaseUrl + "/query/")
 
   case class HolidayStopRequestId(value: String) extends AnyVal
   implicit val formaHolidayStopRequestId = Jsonx.formatInline[HolidayStopRequestId]
@@ -29,11 +28,14 @@ object SalesforceHolidayStopRequest extends Logging {
   case class HolidayStopRequestActionedCount(value: Int) extends AnyVal
   implicit val formatHolidayStopRequestActionedCount = Jsonx.formatInline[HolidayStopRequestActionedCount]
 
-  case class HolidayStopRequestSubscriptionName(value: String) extends AnyVal
-  implicit val formatHolidayStopRequestSubscriptionName = Jsonx.formatInline[HolidayStopRequestSubscriptionName]
+  case class SubscriptionName(value: String) extends AnyVal
+  implicit val formatSubscriptionName = Jsonx.formatInline[SubscriptionName]
+
+  case class ProductName(value: String) extends AnyVal
+  implicit val formatProductName = Jsonx.formatInline[ProductName]
 
   val HOLIDAY_STOP_REQUEST_SOQL_PREFIX =
-    s"SELECT Id, Start_Date__c, End_Date__c, Actioned_Count__c, Subscription_Name__c " +
+    s"SELECT Id, Start_Date__c, End_Date__c, Actioned_Count__c, Subscription_Name__c, Product_Name__c " +
       s"FROM Holiday_Stop_Request__c "
 
   case class HolidayStopRequest(
@@ -41,38 +43,41 @@ object SalesforceHolidayStopRequest extends Logging {
     Start_Date__c: HolidayStopRequestStartDate,
     End_Date__c: HolidayStopRequestEndDate,
     Actioned_Count__c: HolidayStopRequestActionedCount,
-    Subscription_Name__c: HolidayStopRequestSubscriptionName
+    Subscription_Name__c: SubscriptionName,
+    Product_Name__c: ProductName
   )
   implicit val reads = Json.reads[HolidayStopRequest]
 
   private case class HolidayStopRequestSearchQueryResponse(records: List[HolidayStopRequest])
   private implicit val readsIds = Json.reads[HolidayStopRequestSearchQueryResponse]
 
-  object LookupByDate { //TODO perhaps also should filter on product type (would need another formula field
+  object LookupByDateAndProductNamePrefix {
 
-    def apply(sfGet: HttpOp[RestRequestMaker.GetRequest, JsValue]): LocalDate => ClientFailableOp[List[HolidayStopRequest]] =
-      sfGet.setupRequest(toRequest).parse[HolidayStopRequestSearchQueryResponse].map(_.records).runRequest
+    def apply(sfGet: HttpOp[RestRequestMaker.GetRequestWithParams, JsValue]): (LocalDate, ProductName) => ClientFailableOp[List[HolidayStopRequest]] =
+      sfGet.setupRequestMultiArg(toRequest _).parse[HolidayStopRequestSearchQueryResponse].map(_.records).runRequestMultiArg
 
-    def toRequest(date: LocalDate) = {
+    def toRequest(date: LocalDate, productNamePrefix: ProductName) = {
       val dateInSalesForceFormat = date.toString(SALESFORCE_DATE_FORMAT)
       val soqlQuery = HOLIDAY_STOP_REQUEST_SOQL_PREFIX +
-        s"WHERE Start_Date__c <= $dateInSalesForceFormat AND End_Date__c >= $dateInSalesForceFormat"
+        s"WHERE Product_Name__c LIKE '${productNamePrefix.value}%' " +
+        s"AND Start_Date__c <= $dateInSalesForceFormat " +
+        s"AND End_Date__c >= $dateInSalesForceFormat"
       logger.info(s"using SF query : $soqlQuery")
-      RestRequestMaker.GetRequest(RelativePath(s"$soqlQueryBaseUrl$soqlQuery"))
+      RestRequestMaker.GetRequestWithParams(soqlQueryBaseUrl, UrlParams(Map("q" -> soqlQuery)))
     }
 
   }
 
   object LookupByIdentityId {
 
-    def apply(sfGet: HttpOp[RestRequestMaker.GetRequest, JsValue]): String => ClientFailableOp[List[HolidayStopRequest]] =
+    def apply(sfGet: HttpOp[RestRequestMaker.GetRequestWithParams, JsValue]): String => ClientFailableOp[List[HolidayStopRequest]] =
       sfGet.setupRequest(toRequest).parse[HolidayStopRequestSearchQueryResponse].map(_.records).runRequest
 
     def toRequest(identityId: String) = {
       val soqlQuery = HOLIDAY_STOP_REQUEST_SOQL_PREFIX +
         s"WHERE IdentityID__c = $identityId"
       logger.info(s"using SF query : $soqlQuery")
-      RestRequestMaker.GetRequest(RelativePath(s"$soqlQueryBaseUrl$soqlQuery"))
+      RestRequestMaker.GetRequestWithParams(soqlQueryBaseUrl, UrlParams(Map("q" -> soqlQuery)))
     }
 
   }
