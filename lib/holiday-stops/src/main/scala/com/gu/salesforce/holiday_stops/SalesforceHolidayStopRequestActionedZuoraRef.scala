@@ -23,7 +23,7 @@ object SalesforceHolidayStopRequestActionedZuoraRef extends Logging {
   case class HolidayStopRequestActionedZuoraRef(
     Holiday_Stop_Request__c: HolidayStopRequestId,
     Amendment_Code__c: HolidayStopRequestActionedZuoraAmendmentCode,
-    Price__c: Option[HolidayStopRequestActionedZuoraAmendmentPrice] = None //TODO make non-optional
+    Price__c: HolidayStopRequestActionedZuoraAmendmentPrice
   )
   implicit val writes = Json.writes[HolidayStopRequestActionedZuoraRef]
 

@@ -22,6 +22,9 @@ object JsonHttp {
   case object GetMethod extends RequestMethod {
     override def builder: Request.Builder = new Request.Builder().get()
   }
+  case object DeleteMethod extends RequestMethod {
+    override def builder: Request.Builder = new Request.Builder().delete()
+  }
 
   case class StringHttpRequest(requestMethod: RequestMethod, relativePath: RelativePath, urlParams: UrlParams, headers: List[Header] = List.empty)
 
@@ -30,7 +33,7 @@ object JsonHttp {
       (patchRequest: PatchRequest) =>
         StringHttpRequest(PatchMethod(BodyAsString(Json.stringify(patchRequest.body))), patchRequest.path, UrlParams.empty),
 
-      (response: BodyAsString) => ClientSuccess(())
+      _ => ClientSuccess(())
     )
 
   val post =
@@ -66,9 +69,28 @@ object JsonHttp {
     )
   }
 
+  val delete = {
+    HttpOpWrapper[DeleteRequest, StringHttpRequest, BodyAsString, JsValue](
+      (deleteRequest: DeleteRequest) =>
+        StringHttpRequest(DeleteMethod, deleteRequest.path, UrlParams.empty),
+
+      deserialiseJsonResponse
+    )
+  }
+
+  val deleteWithStringResponse = {
+    HttpOpWrapper[DeleteRequest, StringHttpRequest, BodyAsString, String](
+      (deleteRequest: DeleteRequest) =>
+        StringHttpRequest(DeleteMethod, deleteRequest.path, UrlParams.empty),
+
+      (response: BodyAsString) => ClientSuccess(response.value)
+    )
+  }
+
   def deserialiseJsonResponse(response: BodyAsString): ClientFailableOp[JsValue] =
     Try(Json.parse(response.value)) match {
       case scala.util.Success(value) => ClientSuccess(value)
       case scala.util.Failure(exception) => GenericError(s"could not deserialise json $response: $exception")
     }
+
 }

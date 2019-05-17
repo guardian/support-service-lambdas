@@ -7,7 +7,8 @@ import com.gu.util.resthttp.RestRequestMaker._
 import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.resthttp.{HttpOp, RestRequestMaker}
 import org.joda.time.LocalDate
-import play.api.libs.json.{JsValue, Json}
+import org.joda.time.format.DateTimeFormat
+import play.api.libs.json.{Format, JsResult, JsString, JsValue, Json}
 
 object SalesforceHolidayStopRequest extends Logging {
 
@@ -16,13 +17,23 @@ object SalesforceHolidayStopRequest extends Logging {
   private val sfApiBaseUrl = "/services/data/v29.0"
   private val soqlQueryBaseUrl = RelativePath(sfApiBaseUrl + "/query/")
 
+  private val holidayStopRequestSfObjectRef = "Holiday_Stop_Request__c"
+  private val holidayStopRequestSfObjectsBaseUrl = sfApiBaseUrl + "/sobjects/" + holidayStopRequestSfObjectRef
+
+  implicit val formatLocalDateAsSalesforceDate: Format[LocalDate] = new Format[LocalDate] {
+    override def reads(jsValue: JsValue): JsResult[LocalDate] =
+      jsValue.validate[String].map(sfDate => LocalDate.parse(sfDate, DateTimeFormat.forPattern(SALESFORCE_DATE_FORMAT)))
+
+    override def writes(date: LocalDate): JsValue = JsString(date.toString(SALESFORCE_DATE_FORMAT))
+  }
+
   case class HolidayStopRequestId(value: String) extends AnyVal
   implicit val formaHolidayStopRequestId = Jsonx.formatInline[HolidayStopRequestId]
 
-  case class HolidayStopRequestStartDate(value: String) extends AnyVal
+  case class HolidayStopRequestStartDate(value: LocalDate) extends AnyVal
   implicit val formatHolidayStopRequestStartDate = Jsonx.formatInline[HolidayStopRequestStartDate]
 
-  case class HolidayStopRequestEndDate(value: String) extends AnyVal
+  case class HolidayStopRequestEndDate(value: LocalDate) extends AnyVal
   implicit val formatHolidayStopRequestEndDate = Jsonx.formatInline[HolidayStopRequestEndDate]
 
   case class HolidayStopRequestActionedCount(value: Int) extends AnyVal
@@ -36,7 +47,7 @@ object SalesforceHolidayStopRequest extends Logging {
 
   val HOLIDAY_STOP_REQUEST_SOQL_PREFIX =
     s"SELECT Id, Start_Date__c, End_Date__c, Actioned_Count__c, Subscription_Name__c, Product_Name__c " +
-      s"FROM Holiday_Stop_Request__c "
+      s"FROM $holidayStopRequestSfObjectRef "
 
   case class HolidayStopRequest(
     Id: HolidayStopRequestId,
@@ -57,11 +68,11 @@ object SalesforceHolidayStopRequest extends Logging {
       sfGet.setupRequestMultiArg(toRequest _).parse[HolidayStopRequestSearchQueryResponse].map(_.records).runRequestMultiArg
 
     def toRequest(date: LocalDate, productNamePrefix: ProductName) = {
-      val dateInSalesForceFormat = date.toString(SALESFORCE_DATE_FORMAT)
+      val sfDate = date.toString(SALESFORCE_DATE_FORMAT)
       val soqlQuery = HOLIDAY_STOP_REQUEST_SOQL_PREFIX +
         s"WHERE Product_Name__c LIKE '${productNamePrefix.value}%' " +
-        s"AND Start_Date__c <= $dateInSalesForceFormat " +
-        s"AND End_Date__c >= $dateInSalesForceFormat"
+        s"AND Start_Date__c <= $sfDate " +
+        s"AND End_Date__c >= $sfDate"
       logger.info(s"using SF query : $soqlQuery")
       RestRequestMaker.GetRequestWithParams(soqlQueryBaseUrl, UrlParams(Map("q" -> soqlQuery)))
     }
@@ -79,6 +90,37 @@ object SalesforceHolidayStopRequest extends Logging {
       logger.info(s"using SF query : $soqlQuery")
       RestRequestMaker.GetRequestWithParams(soqlQueryBaseUrl, UrlParams(Map("q" -> soqlQuery)))
     }
+
+  }
+
+  case class SubscriptionNameLookup(Name: SubscriptionName)
+  implicit val writesSubNameLookup = Json.writes[SubscriptionNameLookup]
+
+  case class NewHolidayStopRequest(
+    Start_Date__c: HolidayStopRequestStartDate,
+    End_Date__c: HolidayStopRequestEndDate,
+    SF_Subscription__r: SubscriptionNameLookup
+  )
+  implicit val writes = Json.writes[NewHolidayStopRequest]
+
+  object CreateHolidayStopRequest {
+
+    case class CreateHolidayStopRequestResult(id: HolidayStopRequestId)
+    implicit val reads = Json.reads[CreateHolidayStopRequestResult]
+
+    def apply(sfPost: HttpOp[RestRequestMaker.PostRequest, JsValue]): NewHolidayStopRequest => ClientFailableOp[HolidayStopRequestId] =
+      sfPost.setupRequest[NewHolidayStopRequest] { newHolidayStopRequest =>
+        PostRequest(newHolidayStopRequest, RelativePath(holidayStopRequestSfObjectsBaseUrl))
+      }.parse[CreateHolidayStopRequestResult].map(_.id).runRequest
+
+  }
+
+  object DeleteHolidayStopRequest {
+
+    def apply(sfDelete: HttpOp[RestRequestMaker.DeleteRequest, String]): HolidayStopRequestId => ClientFailableOp[String] =
+      sfDelete.setupRequest[HolidayStopRequestId] { holidayStopRequestId =>
+        DeleteRequest(RelativePath(s"$holidayStopRequestSfObjectsBaseUrl/${holidayStopRequestId.value}"))
+      }.runRequest
 
   }
 

@@ -219,7 +219,7 @@ lazy val `sf-contact-merge` = all(project in file("handlers/sf-contact-merge"))
 
 lazy val `cancellation-sf-cases` = all(project in file("handlers/cancellation-sf-cases"))
   .enablePlugins(RiffRaffArtifact)
-  .dependsOn(`sf-core`, handler, effectsDepIncludingTestFolder, testDep)
+  .dependsOn(salesforce, handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `sf-gocardless-sync` = all(project in file("handlers/sf-gocardless-sync"))
   .enablePlugins(RiffRaffArtifact)

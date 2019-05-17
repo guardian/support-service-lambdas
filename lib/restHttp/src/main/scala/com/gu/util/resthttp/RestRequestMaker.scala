@@ -77,6 +77,8 @@ object RestRequestMaker extends Logging {
 
   case class GetRequestWithParams(path: RelativePath, urlParams: UrlParams)
 
+  case class DeleteRequest(path: RelativePath)
+
   case class JsonResponse(bodyAsJson: JsValue) {
     def value[RESP: Reads] = toResult[RESP](bodyAsJson)
   }
@@ -141,6 +143,13 @@ object RestRequestMaker extends Logging {
         _ <- sendRequest(buildRequest(headers, baseUrl + path, _.patch(body)), getResponse)
       } yield ()
     }
+
+    def delete[RESP: Reads](path: String, skipCheck: IsCheckNeeded = WithCheck): ClientFailableOp[RESP] =
+      for {
+        bodyAsJson <- sendRequest(buildRequest(headers, baseUrl + path, _.delete()), getResponse).map(Json.parse)
+        _ <- if (skipCheck == WithoutCheck) ClientSuccess(()) else jsonIsSuccessful(bodyAsJson)
+        respModel <- toResult[RESP](bodyAsJson)
+      } yield respModel
 
     private def extractContentLength(response: Response) = {
       Try(response.header("content-length").toLong) match {
