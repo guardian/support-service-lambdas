@@ -42,9 +42,10 @@ object Config {
 
   def apply(): Either[String, Config] = {
     val stage = Option(System.getenv("Stage")).getOrElse("DEV")
+    val s3Config = configFromS3(stage)
     stage match {
       case "PROD" =>
-        configFromS3("PROD") map { secretConfig =>
+        s3Config map { secretConfig =>
           Config(
             secretConfig,
             holidayCreditProductRatePlanId = "2c92a0fc5b42d2c9015b6259f7f40040",
@@ -52,8 +53,8 @@ object Config {
             holidayCreditProductRatePlanChargeId = "2c92a0ff5b42e3ad015b627c142f072a"
           )
         }
-      case "UAT" =>
-        configFromS3("CODE") map { secretConfig =>
+      case "CODE" =>
+        s3Config map { secretConfig =>
           Config(
             secretConfig,
             holidayCreditProductRatePlanId = "2c92c0f96abaa1b5016abac99075461f",
@@ -61,7 +62,7 @@ object Config {
           )
         }
       case "DEV" =>
-        configFromS3("DEV") map { secretConfig =>
+        s3Config map { secretConfig =>
           Config(
             secretConfig,
             holidayCreditProductRatePlanId = "2c92c0f9671686a201671d14b5e5771e",
