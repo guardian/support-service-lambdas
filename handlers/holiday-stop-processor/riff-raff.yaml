@@ -8,7 +8,7 @@ deployments:
     app: holiday-stop-processor
     parameters:
       templatePath: cfn.yaml
-  zuora-datalake-export:
+  holiday-stop-processor:
     type: aws-lambda
     parameters:
       fileName: holiday-stop-processor.jar
