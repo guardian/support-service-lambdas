@@ -112,7 +112,8 @@ lazy val s3ConfigValidator = all(project in file("lib/s3ConfigValidator"))
     `identity-backfill`,
     effectsDepIncludingTestFolder,
     `cancellation-sf-cases`,
-    `sf-gocardless-sync`
+    `sf-gocardless-sync`,
+    `holiday-stop-api`
   )
   .settings(
     libraryDependencies ++= Seq(scalatest)
@@ -163,6 +164,7 @@ lazy val root = all(project in file(".")).enablePlugins(RiffRaffArtifact).aggreg
   `sf-contact-merge`,
   `cancellation-sf-cases`,
   `sf-gocardless-sync`,
+  `holiday-stop-api`,
   effects,
   handler,
   restHttp,
@@ -222,6 +224,10 @@ lazy val `cancellation-sf-cases` = all(project in file("handlers/cancellation-sf
 lazy val `sf-gocardless-sync` = all(project in file("handlers/sf-gocardless-sync"))
   .enablePlugins(RiffRaffArtifact)
   .dependsOn(salesforce, handler, effectsDepIncludingTestFolder, testDep)
+
+lazy val `holiday-stop-api` = all(project in file("handlers/holiday-stop-api"))
+  .enablePlugins(RiffRaffArtifact)
+  .dependsOn(`holiday-stops`, handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `sf-datalake-export` = all(project in file("handlers/sf-datalake-export"))
   .enablePlugins(RiffRaffArtifact)

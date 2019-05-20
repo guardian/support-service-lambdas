@@ -1,0 +1,21 @@
+stacks:
+- membership
+regions:
+- eu-west-1
+deployments:
+
+  cfn:
+    type: cloud-formation
+    app: holiday-stop-api
+    parameters:
+      templatePath: cfn.yaml
+
+  holiday-stop-api:
+    type: aws-lambda
+    parameters:
+      fileName: holiday-stop-api.jar
+      bucket: support-service-lambdas-dist
+      prefixStack: false
+      functionNames:
+      - holiday-stop-api-
+    dependencies: [cfn]
