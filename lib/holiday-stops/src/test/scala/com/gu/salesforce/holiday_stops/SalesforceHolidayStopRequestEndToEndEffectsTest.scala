@@ -3,8 +3,8 @@ package com.gu.salesforce.holiday_stops
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.SalesforceClient
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.{HolidayStopRequestEndDate, HolidayStopRequestId, HolidayStopRequestStartDate, NewHolidayStopRequest, ProductName, SubscriptionName, SubscriptionNameLookup}
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestActionedZuoraRef.{HolidayStopRequestActionedZuoraAmendmentCode, HolidayStopRequestActionedZuoraAmendmentPrice, HolidayStopRequestActionedZuoraRef}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestActionedZuoraRef._
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.resthttp.JsonHttp
