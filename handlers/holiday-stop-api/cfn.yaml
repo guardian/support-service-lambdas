@@ -91,6 +91,38 @@ Resources:
         DependsOn:
         - HolidayStopApiRole
 
+    HolidayStopApiUsagePlan:
+      Type: AWS::ApiGateway::UsagePlan
+      Properties:
+        UsagePlanName: holiday-stop-api
+        ApiStages:
+          - ApiId: !Ref HolidayStopApi
+            Stage: !Ref Stage
+      DependsOn:
+        - HolidayStopApi
+
+    HolidayStopApiKey:
+      Type: AWS::ApiGateway::ApiKey
+      Properties:
+        Description: Used by manage-frontend
+        Enabled: true
+        Name: !Sub holiday-stop-api-key-${Stage}
+        StageKeys:
+          - RestApiId: !Ref HolidayStopApi
+            StageName: !Ref Stage
+      DependsOn:
+        - HolidayStopApi
+
+    HolidayStopApiUsagePlanKey:
+      Type: AWS::ApiGateway::UsagePlanKey
+      Properties:
+        KeyId: !Ref HolidayStopApiKey
+        KeyType: API_KEY
+        UsagePlanId: !Ref HolidayStopApiUsagePlan
+      DependsOn:
+        - HolidayStopApiKey
+        - HolidayStopApiUsagePlan
+
     HolidayStopApiGetProxyResource:
         Type: AWS::ApiGateway::Resource
         Properties:
@@ -103,7 +135,7 @@ Resources:
         Type: AWS::ApiGateway::Method
         Properties:
             AuthorizationType: NONE
-            ApiKeyRequired: false
+            ApiKeyRequired: true
             RestApiId: !Ref HolidayStopApi
             ResourceId: !Ref HolidayStopApiGetProxyResource
             HttpMethod: GET
