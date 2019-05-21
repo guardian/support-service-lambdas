@@ -49,8 +49,7 @@ object Config {
           Config(
             secretConfig,
             holidayCreditProductRatePlanId = "2c92a0fc5b42d2c9015b6259f7f40040",
-            // todo
-            holidayCreditProductRatePlanChargeId = "2c92a0ff5b42e3ad015b627c142f072a"
+            holidayCreditProductRatePlanChargeId = "2c92a00e6ad50f58016ad9ca59962c8c"
           )
         }
       case "CODE" =>
