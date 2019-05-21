@@ -105,6 +105,16 @@ object Types extends Logging {
 
   implicit class OptionOps[A](theOption: Option[A]) {
 
+    def toApiGatewayOp(error5xx: String): ApiGatewayOp[A] = {
+      theOption match {
+        case Some(value) => ContinueProcessing(value)
+        case None => {
+          logger.error(s"None for $error5xx")
+          ReturnWithResponse(ApiGatewayResponse.internalServerError(error5xx))
+        }
+      }
+    }
+
     def toApiGatewayContinueProcessing(NoneResponse: => ApiResponse): ApiGatewayOp[A] =
       theOption match {
         case Some(value) => ContinueProcessing(value)

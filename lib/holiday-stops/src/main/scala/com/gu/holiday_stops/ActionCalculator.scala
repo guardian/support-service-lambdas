@@ -10,6 +10,8 @@ object ActionCalculator {
     case s if s.startsWith("Guardian Weekly") => DateTimeConstants.FRIDAY
   }
 
+  def firstAvailableDate(productNamePrefix: ProductName) = "TODO"
+
   def publicationDatesToBeStopped(hsr: HolidayStopRequest): List[LocalDate] = {
 
     def applicableDates(
