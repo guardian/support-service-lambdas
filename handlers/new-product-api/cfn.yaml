@@ -151,7 +151,7 @@ Resources:
             HttpMethod: POST
             Integration:
               Type: AWS_PROXY
-              IntegrationHttpMethod: POST
+              IntegrationHttpMethod: POST # this for the interaction between API Gateway and Lambda and MUST be POST
               Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AddSubscriptionLambda.Arn}/invocations
         DependsOn:
         - NewProductApi
@@ -205,7 +205,7 @@ Resources:
         HttpMethod: GET
         Integration:
           Type: AWS_PROXY
-          IntegrationHttpMethod: POST
+          IntegrationHttpMethod: POST # this for the interaction between API Gateway and Lambda and MUST be POST
           Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ProductCatalogLambda.Arn}/invocations
       DependsOn:
             - NewProductApi
