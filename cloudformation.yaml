@@ -160,7 +160,7 @@ Resources:
               method.request.querystring.apiToken: true
             Integration:
               Type: AWS_PROXY
-              IntegrationHttpMethod: POST
+              IntegrationHttpMethod: POST # this for the interaction between API Gateway and Lambda and MUST be POST
               Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ZuoraAutoCancelLambda.Arn}/invocations
         DependsOn:
         - ZuoraAutoCancelAPI
@@ -179,7 +179,7 @@ Resources:
               method.request.querystring.apiToken: true
             Integration:
               Type: AWS_PROXY
-              IntegrationHttpMethod: POST
+              IntegrationHttpMethod: POST # this for the interaction between API Gateway and Lambda and MUST be POST
               Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PaymentFailureLambda.Arn}/invocations
         DependsOn:
         - ZuoraAutoCancelAPI
@@ -237,7 +237,7 @@ Resources:
               method.request.querystring.apiToken: true
             Integration:
               Type: AWS_PROXY
-              IntegrationHttpMethod: POST
+              IntegrationHttpMethod: POST # this for the interaction between API Gateway and Lambda and MUST be POST
               Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${StripeCustomerSourceUpdatedLambda.Arn}/invocations
         DependsOn:
         - ZuoraAutoCancelAPI
