@@ -2,6 +2,7 @@ package com.gu.holidaystopprocessor
 
 import java.time.LocalDate
 
+// This is just for functional testing locally.
 object StandaloneApp extends App {
 
   val subscriptionName = "A-S00050605"
