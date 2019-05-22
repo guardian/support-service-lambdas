@@ -4,8 +4,9 @@ import java.time.LocalDate
 
 import org.scalacheck.Prop.forAll
 import org.scalacheck._
+import org.scalatest.OptionValues
 
-object HolidayCreditSpec extends Properties("HolidayCredit") {
+object HolidayCreditSpec extends Properties("HolidayCredit") with OptionValues {
 
   private val subscriptionGen = for {
     price <- Gen.choose(0.01, 10000)
@@ -22,6 +23,6 @@ object HolidayCreditSpec extends Properties("HolidayCredit") {
   }
 
   property("should never be overwhelmingly negative") = forAll(subscriptionGen) { subscription: Subscription =>
-    HolidayCredit(subscription) > -subscription.originalRatePlanCharge.get.price
+    HolidayCredit(subscription) > -subscription.originalRatePlanCharge.value.price
   }
 }
