@@ -20,4 +20,8 @@ object HolidayCreditSpec extends Properties("HolidayCredit") {
   property("should never be positive") = forAll(subscriptionGen) { subscription: Subscription =>
     HolidayCredit(subscription) <= 0
   }
+
+  property("should never be overwhelmingly negative") = forAll(subscriptionGen) { subscription: Subscription =>
+    HolidayCredit(subscription) > -subscription.originalRatePlanCharge.get.price
+  }
 }
