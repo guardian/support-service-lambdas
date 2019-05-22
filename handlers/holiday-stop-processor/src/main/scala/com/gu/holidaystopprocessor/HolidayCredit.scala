@@ -2,9 +2,9 @@ package com.gu.holidaystopprocessor
 
 import scala.math.BigDecimal.RoundingMode
 
-object Credit {
+object HolidayCredit {
 
-  def autoRenewingHolidayAmount(subscription: Subscription): Double = {
+  def apply(subscription: Subscription): Double = {
     def roundUp(d: Double): Double =
       BigDecimal(d).setScale(2, RoundingMode.UP).toDouble
     subscription.originalRatePlanCharge map { charge =>

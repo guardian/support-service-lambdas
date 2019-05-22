@@ -10,7 +10,6 @@ object SubscriptionUpdate {
     subscription: Subscription,
     stoppedPublicationDate: LocalDate
   ): SubscriptionUpdate = {
-    val credit = Credit.autoRenewingHolidayAmount(subscription)
     val effectiveDate = subscription.originalRatePlanCharge map {
       _.effectiveEndDate.plusDays(1)
     } getOrElse stoppedPublicationDate
@@ -34,7 +33,7 @@ object SubscriptionUpdate {
               config.holidayCreditProductRatePlanChargeId,
               HolidayStart__c = stoppedPublicationDate,
               HolidayEnd__c = stoppedPublicationDate,
-              price = credit
+              price = HolidayCredit(subscription)
             )
           )
         )
