@@ -25,8 +25,7 @@ case class RatePlanCharge(
   billingPeriod: Option[String],
   effectiveEndDate: LocalDate
 ) {
-  val weekCount: Int = {
-    // inexact values
+  val weekCountApprox: Int = {
     billingPeriod map {
       case "Month" => 4
       case "Quarter" => 13

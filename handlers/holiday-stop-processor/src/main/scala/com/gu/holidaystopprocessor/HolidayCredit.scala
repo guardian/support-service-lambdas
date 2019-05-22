@@ -9,7 +9,7 @@ object HolidayCredit {
       BigDecimal(d).setScale(2, RoundingMode.UP).toDouble
     subscription.originalRatePlanCharge map { charge =>
       val recurringPayment = charge.price
-      val numPublicationsInPeriod = charge.weekCount
+      val numPublicationsInPeriod = charge.weekCountApprox
       -roundUp(recurringPayment / numPublicationsInPeriod)
     } getOrElse 0
   }
