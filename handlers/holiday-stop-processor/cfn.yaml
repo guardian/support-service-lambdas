@@ -1,0 +1,64 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Updates subscriptions with outstanding holiday stops.
+
+Parameters:
+
+  Stage:
+    Description: Stage name
+    Type: String
+    AllowedValues:
+      - CODE
+      - PROD
+    Default: CODE
+
+Resources:
+
+  HolidayStopProcessorRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: HolidayStopProcessorPolicy
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - lambda:InvokeFunction
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/holiday-stop-processor-${Stage}:log-stream:*
+        - PolicyName: ReadPrivateCredentials
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action: s3:GetObject
+                Resource: !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/zuoraRest-${Stage}*.json
+
+  HolidayStopProcessor:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName:
+        !Sub holiday-stop-processor-${Stage}
+      Code:
+        S3Bucket: support-service-lambdas-dist
+        S3Key: !Sub membership/${Stage}/holiday-stop-processor/holiday-stop-processor.jar
+      Handler: com.gu.holidaystopprocessor.Handler::handle
+      Environment:
+        Variables:
+          Stage: !Ref Stage
+      Role:
+        !GetAtt HolidayStopProcessorRole.Arn
+      MemorySize: 256
+      Runtime: java8
+      Timeout: 30
+    DependsOn:
+      - HolidayStopProcessorRole
