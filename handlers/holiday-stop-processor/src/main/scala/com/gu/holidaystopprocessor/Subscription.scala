@@ -9,10 +9,16 @@ case class Subscription(
   autoRenew: Boolean,
   ratePlans: Seq[RatePlan]
 ) {
-  val originalRatePlanCharge: Option[RatePlanCharge] = for {
-    ratePlan <- ratePlans.lastOption
-    charge <- ratePlan.ratePlanCharges.headOption
-  } yield charge
+
+  val originalRatePlanCharge: Option[RatePlanCharge] = {
+    val chronologicallyOrderedRatePlans = ratePlans.sortBy { plan =>
+      plan.ratePlanCharges.map(_.effectiveStartDate.toString).headOption.getOrElse("")
+    }
+    for {
+      ratePlan <- chronologicallyOrderedRatePlans.headOption
+      charge <- ratePlan.ratePlanCharges.headOption
+    } yield charge
+  }
 }
 
 case class RatePlan(
@@ -23,6 +29,7 @@ case class RatePlan(
 case class RatePlanCharge(
   price: Double,
   billingPeriod: Option[String],
+  effectiveStartDate: LocalDate,
   effectiveEndDate: LocalDate
 ) {
   val weekCountApprox: Int = {

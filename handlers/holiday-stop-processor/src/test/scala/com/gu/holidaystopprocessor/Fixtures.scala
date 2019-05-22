@@ -19,7 +19,7 @@ object Fixtures {
         RatePlan(
           productName = "Guardian Weekly",
           ratePlanCharges =
-            Seq(RatePlanCharge(price, Some(billingPeriod), effectiveEndDate))
+            Seq(RatePlanCharge(price, Some(billingPeriod), LocalDate.of(2019, 1, 1), effectiveEndDate))
         )
       )
     )
