@@ -20,7 +20,7 @@ object Zuora {
       .basic(zuoraAccess.username, zuoraAccess.password)
       .get(uri"${zuoraAccess.baseUrl}/subscriptions/$subscriptionName")
     val response = request.send()
-    response.body.right flatMap { body =>
+    response.body flatMap { body =>
       normalised(body, decode[Subscription])
     }
   }
@@ -34,7 +34,7 @@ object Zuora {
       .put(uri"${zuoraAccess.baseUrl}/subscriptions/$subscriptionName")
       .body(subscriptionUpdate)
     val response = request.send()
-    response.body.right flatMap { body =>
+    response.body flatMap { body =>
       normalised(body, decode[ZuoraStatusResponse]) match {
         case Left(e) => Left(e)
         case Right(status) =>

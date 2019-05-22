@@ -14,7 +14,7 @@ object HolidayStopProcess {
 
     val holidayCreditToAdd = SubscriptionUpdate.holidayCreditToAdd(config) _
 
-    subscriptionDetails(stop.subscriptionName).right flatMap { subscription =>
+    subscriptionDetails(stop.subscriptionName) flatMap { subscription =>
       if (subscription.autoRenew) {
         val subscriptionUpdate =
           holidayCreditToAdd(subscription, stop.stoppedPublicationDate)
