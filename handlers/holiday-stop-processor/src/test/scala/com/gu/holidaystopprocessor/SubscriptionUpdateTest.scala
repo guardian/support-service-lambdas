@@ -44,7 +44,7 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers {
     )
   }
 
-  "holidayCreditToAdd" should "generate update correctly when current term too short" in {
+  it should "generate update correctly when current term too short" in {
     val update = holidayCreditToAdd(config)(
       subscription = Fixtures.mkSubscription(
         termEndDate = LocalDate.of(2019, 12, 1),
