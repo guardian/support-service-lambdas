@@ -6,6 +6,15 @@ case class SubscriptionUpdate(currentTerm: Option[Int], add: Seq[Add])
 
 object SubscriptionUpdate {
 
+  // In Zuora, the current term has to be extended beyond the effective date of any update
+  private def extendedTerm(subscription: Subscription, effectiveDate: LocalDate): Option[Int] =
+    if (effectiveDate.isAfter(subscription.termEndDate)) {
+      subscription.currentTermPeriodType match {
+        case "Month" => Some(24)
+        case _ => None
+      }
+    } else None
+
   def holidayCreditToAdd(config: Config)(
     subscription: Subscription,
     stoppedPublicationDate: LocalDate
@@ -13,15 +22,8 @@ object SubscriptionUpdate {
     val effectiveDate = subscription.originalRatePlanCharge map {
       _.effectiveEndDate.plusDays(1)
     } getOrElse stoppedPublicationDate
-    val currentTerm =
-      if (effectiveDate.isAfter(subscription.termEndDate)) {
-        subscription.currentTermPeriodType match {
-          case "Month" => Some(24)
-          case _ => None
-        }
-      } else None
     SubscriptionUpdate(
-      currentTerm,
+      currentTerm = extendedTerm(subscription, effectiveDate),
       Seq(
         Add(
           productRatePlanId = config.holidayCreditProductRatePlanId,
