@@ -35,10 +35,12 @@ object Zuora {
       .body(subscriptionUpdate)
     val response = request.send()
     response.body flatMap { body =>
+      def failureMsg(wrappedMsg:String) = s"Update '$subscriptionUpdate' to subscription '$subscriptionName' failed: $wrappedMsg"
       normalised(body, decode[ZuoraStatusResponse]) match {
-        case Left(e) => Left(e)
+        case Left(e) => Left(failureMsg(e))
         case Right(status) =>
-          if (!status.success) Left(status.reasons.map(_.mkString).getOrElse(""))
+          if (!status.success)
+            Left(failureMsg(status.reasons.map(_.mkString).getOrElse("")))
           else Right(status)
       }
     }
