@@ -93,6 +93,12 @@ object Query extends Enum[Query] {
     "ophan-raw-zuora-increment-rateplanchargetier",
     "RatePlanChargeTier.csv"
   )
+  case object RatePlan extends Query(
+    "RatePlan",
+    "SELECT RatePlan.ID, RatePlan.Name, RatePlan.AmendmentType, RatePlan.CreatedDate, RatePlan.UpdatedDate, Subscription.ID, Product.ID, Account.ID, Amendment.ID FROM RatePlan",
+    "ophan-raw-zuora-increment-rateplan",
+    "RatePlan.csv"
+  )
 }
 
 object ZuoraApiHost {
@@ -196,8 +202,7 @@ object IncrementalDate {
  * https://knowledgecenter.zuora.com/DC_Developers/AB_Aggregate_Query_API/BA_Stateless_and_Stateful_Modes#Automatic_Switch_Between_Full_Load_and_Incremental_Load
  */
 object StartAquaJob {
-  def apply(incrementalDate: String) = {
-    import Query._
+  def apply(incrementalDate: String): String = {
     val body =
       s"""
         |{
@@ -210,26 +215,19 @@ object StartAquaJob {
         |	"partner": "${ZuoraAquaStatefulApi().partner}",
         |	"project": "${ZuoraAquaStatefulApi().project}",
         | "incrementalTime": "$incrementalDate 00:00:00",
-        |	"queries" : [
-        |		{
-        |			"name" : "${Account.batchName}",
-        |			"query" : "${Account.zoql}",
-        |			"type" : "zoqlexport",
-        |			"deleted" : ${DeletedColumn()}
-        |		},
-        |		{
-        |			"name" : "${RatePlanCharge.batchName}",
-        |			"query" : "${RatePlanCharge.zoql}",
-        |			"type" : "zoqlexport",
-        |			"deleted" : ${DeletedColumn()}
-        |		},
-        |		{
-        |			"name" : "${RatePlanChargeTier.batchName}",
-        |			"query" : "${RatePlanChargeTier.zoql}",
-        |			"type" : "zoqlexport",
-        |			"deleted" : ${DeletedColumn()}
-        |		}
-        |	]
+        |	"queries" :
+        |   ${
+        Query.values.map { query =>
+          s"""
+                   |{
+                   |	 "name" : "${query.batchName}",
+                   |	 "query" : "${query.zoql}",
+                   |	 "type" : "zoqlexport",
+                   |	 "deleted" : ${DeletedColumn()}
+                   |}
+                """.stripMargin
+        }.mkString("[", ",", "]")
+      }
         |}
       """.stripMargin
 
