@@ -11,6 +11,7 @@ object Fixtures {
     effectiveEndDate: LocalDate
   ) =
     Subscription(
+      subscriptionNumber = "S1",
       termEndDate,
       currentTerm = 12,
       currentTermPeriodType = "Month",

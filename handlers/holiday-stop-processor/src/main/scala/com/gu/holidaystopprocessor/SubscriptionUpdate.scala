@@ -2,7 +2,9 @@ package com.gu.holidaystopprocessor
 
 import java.time.LocalDate
 
-case class SubscriptionUpdate(currentTerm: Option[Int], add: Seq[Add])
+case class SubscriptionUpdate(currentTerm: Option[Int], add: Seq[Add]) {
+  val price: Double = add.headOption.map(_.chargeOverrides.headOption.map(_.price).getOrElse(0d)).getOrElse(0d)
+}
 
 object SubscriptionUpdate {
 
@@ -15,7 +17,9 @@ object SubscriptionUpdate {
       }
     } else None
 
-  def holidayCreditToAdd(config: Config)(
+  def holidayCreditToAdd(
+    holidayCreditProductRatePlanId: String,
+    holidayCreditProductRatePlanChargeId: String,
     subscription: Subscription,
     stoppedPublicationDate: LocalDate
   ): SubscriptionUpdate = {
@@ -26,13 +30,13 @@ object SubscriptionUpdate {
       currentTerm = extendedTerm(subscription, effectiveDate),
       Seq(
         Add(
-          productRatePlanId = config.holidayCreditProductRatePlanId,
+          productRatePlanId = holidayCreditProductRatePlanId,
           contractEffectiveDate = effectiveDate,
           customerAcceptanceDate = effectiveDate,
           serviceActivationDate = effectiveDate,
           chargeOverrides = Seq(
             ChargeOverride(
-              config.holidayCreditProductRatePlanChargeId,
+              holidayCreditProductRatePlanChargeId,
               HolidayStart__c = stoppedPublicationDate,
               HolidayEnd__c = stoppedPublicationDate,
               price = HolidayCredit(subscription)

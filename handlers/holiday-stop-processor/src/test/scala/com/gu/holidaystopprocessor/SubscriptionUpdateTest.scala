@@ -7,14 +7,10 @@ import org.scalatest.{FlatSpec, Matchers}
 
 class SubscriptionUpdateTest extends FlatSpec with Matchers {
 
-  private val config = Config(
-    zuoraAccess = ZuoraAccess(baseUrl = "b", username = "u", password = "p"),
-    holidayCreditProductRatePlanId = "ratePlanId",
-    holidayCreditProductRatePlanChargeId = "ratePlanChargeId"
-  )
-
   "holidayCreditToAdd" should "generate update correctly" in {
-    val update = holidayCreditToAdd(config)(
+    val update = holidayCreditToAdd(
+      "ratePlanId",
+      "ratePlanChargeId",
       subscription = Fixtures.mkSubscription(
         termEndDate = LocalDate.of(2020, 7, 12),
         price = 42.1,
@@ -45,7 +41,9 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers {
   }
 
   it should "generate update correctly when current term too short" in {
-    val update = holidayCreditToAdd(config)(
+    val update = holidayCreditToAdd(
+      "ratePlanId",
+      "ratePlanChargeId",
       subscription = Fixtures.mkSubscription(
         termEndDate = LocalDate.of(2019, 12, 1),
         price = 42.1,

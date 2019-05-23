@@ -3,6 +3,7 @@ package com.gu.holidaystopprocessor
 import java.time.LocalDate
 
 case class Subscription(
+  subscriptionNumber: String,
   termEndDate: LocalDate,
   currentTerm: Int,
   currentTermPeriodType: String,
@@ -32,6 +33,7 @@ case class RatePlanCharge(
   effectiveStartDate: LocalDate,
   effectiveEndDate: LocalDate
 ) {
+
   val weekCountApprox: Int = {
     billingPeriod map {
       case "Month" => 4
