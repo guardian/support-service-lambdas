@@ -24,7 +24,7 @@ object SubscriptionUpdate {
     stoppedPublicationDate: LocalDate
   ): SubscriptionUpdate = {
     val effectiveDate = subscription.originalRatePlanCharge map {
-      _.effectiveEndDate.plusDays(1)
+      _.effectiveEndDate
     } getOrElse stoppedPublicationDate
     SubscriptionUpdate(
       currentTerm = extendedTerm(subscription, effectiveDate),
