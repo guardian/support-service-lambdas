@@ -43,12 +43,12 @@ class ExportLambda extends Lambda[ExportFromDate, String] with LazyLogging {
 
 object Preconditions extends (ExportFromDate => String) {
   def apply(incrementalDate: ExportFromDate): String =
-    incrementalDate match {
-      case ExportFromDate("yesterday" | "Yesterday" | "YESTERDAY") => "yesterday"
-      case ExportFromDate("beginning" | "Beginning" | "BEGINNING") => "beginning"
-      case ExportFromDate(particularDate) =>
-        validateDateFormat(particularDate)
-        particularDate
+    incrementalDate.exportFromDate.toLowerCase() match {
+      case "yesterday" => "yesterday"
+      case "beginning" => "beginning"
+      case yyyyMMdd =>
+        validateDateFormat(yyyyMMdd)
+        yyyyMMdd
     }
 
   private val requiredFormat = "yyyy-MM-dd"
