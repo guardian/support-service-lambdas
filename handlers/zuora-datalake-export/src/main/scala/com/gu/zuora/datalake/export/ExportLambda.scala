@@ -18,6 +18,7 @@ import scala.concurrent.duration._
 import scala.util.Try
 import enumeratum._
 
+case class ExportFromDate(exportFromDate: String)
 case class Oauth(clientId: String, clientSecret: String)
 case class ZuoraDatalakeExport(oauth: Oauth)
 case class Config(stage: String, baseUrl: String, zuoraDatalakeExport: ZuoraDatalakeExport)
@@ -29,26 +30,50 @@ case class JobResults(status: String, id: String, batches: List[Batch], incremen
 /**
  * Exports incremental changeset from Zuora to Datalake S3 raw buckets in CSV format via
  * AQuA Stateful API:
- *   - "2019-01-20" input to lambda will export incremental changes since 2019-01-20
- *   - null input to lambda will export incremental changes since yesterday
+ *   - {"exportFromDate": "2019-01-20"} input to lambda will export incremental changes since 2019-01-20
+ *   - {"exportFromDate": "yesterday"} input to lambda will export incremental changes since yesterday
+ *   - {"exportFromDate": "beginning"} input to lambda will export incremental changes since yesterday
  *   - Export is idempotent, i.e., re-running it will export the same increment
  */
-class ExportLambda extends Lambda[Option[String], String] with LazyLogging {
-  override def handle(incrementalDateOverrideOpt: Option[String], context: Context) = {
-    val incrementalDate = IncrementalDate(incrementalDateOverrideOpt)
-    val jobId = StartAquaJob(incrementalDate)
+class ExportLambda extends Lambda[ExportFromDate, String] with LazyLogging {
+  override def handle(exportFromDate: ExportFromDate, context: Context) = {
+    (Preconditions andThen Program andThen Postconditions)(exportFromDate)
+  }
+}
+
+object Preconditions extends (ExportFromDate => String) {
+  def apply(incrementalDate: ExportFromDate): String =
+    incrementalDate.exportFromDate.toLowerCase() match {
+      case "yesterday" => "yesterday"
+      case "beginning" => "beginning"
+      case yyyyMMdd =>
+        validateDateFormat(yyyyMMdd)
+        yyyyMMdd
+    }
+
+  private val requiredFormat = "yyyy-MM-dd"
+  private def validateDateFormat(incrementalDate: String) = {
+    Try(
+      LocalDate.parse(incrementalDate, DateTimeFormatter.ofPattern(requiredFormat))
+    ).getOrElse(throw new RuntimeException(s"Failed to parse incremental date: $incrementalDate. The format should be $requiredFormat."))
+  }
+}
+
+object Program extends (String => JobResults) {
+  def apply(incrementalDate: String): JobResults = {
+    val date = IncrementalDate(incrementalDate)
+    val jobId = StartAquaJob(date)
     val jobResult = GetJobResult(jobId)
     jobResult.batches.foreach { batch =>
       val csvFile = GetResultsFile(batch)
       SaveCsvToBucket(csvFile, batch)
     }
-    Postconditions(jobResult)
-    Right(s"Successfully exported Zuora to Datalake jobId = $jobId")
+    jobResult
   }
 }
 
-object Postconditions extends LazyLogging {
-  def apply(jobResult: JobResults): Unit = {
+object Postconditions extends (JobResults => Either[Throwable, String]) with LazyLogging {
+  def apply(jobResult: JobResults): Either[Throwable, String] = {
     assert(jobResult.status == "completed", "Job should have completed")
     assert(jobResult.batches.forall(_.status == "completed"), "All queries should have completed successfully")
     jobResult.batches.foreach { batch =>
@@ -65,6 +90,7 @@ object Postconditions extends LazyLogging {
 
       logger.info(s"Successfully exported ${batch.name} changes since ${jobResult.incrementalTime}: $details")
     }
+    Right(s"Successfully exported Zuora to Datalake jobId = ${jobResult.id}")
   }
 }
 
@@ -92,6 +118,12 @@ object Query extends Enum[Query] {
     "SELECT RatePlanChargeTier.Price, RatePlanChargeTier.Currency, RatePlanChargeTier.DiscountAmount, RatePlanChargeTier.DiscountPercentage, RatePlanChargeTier.ID, RatePlanCharge.ID, Subscription.ID FROM RatePlanChargeTier",
     "ophan-raw-zuora-increment-rateplanchargetier",
     "RatePlanChargeTier.csv"
+  )
+  case object RatePlan extends Query(
+    "RatePlan",
+    "SELECT RatePlan.Name, RatePlan.AmendmentType, RatePlan.CreatedDate, RatePlan.UpdatedDate, RatePlan.ID, Subscription.ID, Product.ID, Amendment.ID, Account.ID FROM RatePlan",
+    "ophan-raw-zuora-increment-rateplan",
+    "RatePlan.csv"
   )
 }
 
@@ -171,24 +203,16 @@ object AccessToken {
  * https://knowledgecenter.zuora.com/DC_Developers/AB_Aggregate_Query_API/B_Submit_Query/e_Post_Query_with_Retrieval_Time
  */
 object IncrementalDate {
-  def apply(maybeDateOverride: Option[String]): String =
-    maybeDateOverride match {
-      case Some(dateOverride) =>
-        validate(dateOverride)
-        dateOverride
-
-      case None =>
+  def apply(incrementalDate: String): String =
+    incrementalDate match {
+      case "yesterday" =>
         val yesterday = LocalDate.now.minusDays(1)
-        yesterday.format(DateTimeFormatter.ofPattern(requiredFormat))
+        yesterday.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+
+      case "beginning" => "1970-01-01"
+
+      case particularDate => particularDate
     }
-
-  private val requiredFormat = "yyyy-MM-dd"
-
-  private def validate(date: String) = {
-    Try(
-      LocalDate.parse(date, DateTimeFormatter.ofPattern(requiredFormat))
-    ).getOrElse(throw new RuntimeException(s"Failed to parse incremental date: $date. The format should be $requiredFormat."))
-  }
 }
 
 /**
@@ -196,8 +220,7 @@ object IncrementalDate {
  * https://knowledgecenter.zuora.com/DC_Developers/AB_Aggregate_Query_API/BA_Stateless_and_Stateful_Modes#Automatic_Switch_Between_Full_Load_and_Incremental_Load
  */
 object StartAquaJob {
-  def apply(incrementalDate: String) = {
-    import Query._
+  def apply(incrementalDate: String): String = {
     val body =
       s"""
         |{
@@ -210,26 +233,19 @@ object StartAquaJob {
         |	"partner": "${ZuoraAquaStatefulApi().partner}",
         |	"project": "${ZuoraAquaStatefulApi().project}",
         | "incrementalTime": "$incrementalDate 00:00:00",
-        |	"queries" : [
-        |		{
-        |			"name" : "${Account.batchName}",
-        |			"query" : "${Account.zoql}",
-        |			"type" : "zoqlexport",
-        |			"deleted" : ${DeletedColumn()}
-        |		},
-        |		{
-        |			"name" : "${RatePlanCharge.batchName}",
-        |			"query" : "${RatePlanCharge.zoql}",
-        |			"type" : "zoqlexport",
-        |			"deleted" : ${DeletedColumn()}
-        |		},
-        |		{
-        |			"name" : "${RatePlanChargeTier.batchName}",
-        |			"query" : "${RatePlanChargeTier.zoql}",
-        |			"type" : "zoqlexport",
-        |			"deleted" : ${DeletedColumn()}
-        |		}
-        |	]
+        |	"queries" :
+        |   ${
+        Query.values.map { query =>
+          s"""
+                   |{
+                   |	 "name" : "${query.batchName}",
+                   |	 "query" : "${query.zoql}",
+                   |	 "type" : "zoqlexport",
+                   |	 "deleted" : ${DeletedColumn()}
+                   |}
+                """.stripMargin
+        }.mkString("[", ",", "]")
+      }
         |}
       """.stripMargin
 

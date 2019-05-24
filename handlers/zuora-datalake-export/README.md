@@ -49,7 +49,7 @@ object AccountQuery extends Query(
 AWS Cloudwatch Event Rule triggers the export lambda once per day. Each execution exports changes since yesterday. 
 For example, executing on 2019-01-20, will set `"incrementalTime": "2019-01-19 00:00:00"` in the body of AQuA request.
 
-Passing `null` to lambda will export changes since yesterday. 
+Passing `{"exportFromDate": "yesterday"}` to lambda will export changes since yesterday. 
 
 ## How do we know when it fails?
 
@@ -65,11 +65,11 @@ can be re-run safely.
 For example, if the failure happened on 2019-01-19, but it was noticed for the first time a week later on 2019-01-26,
 then input should be `2019-01-19`.
 
-| Load changes since... |      lambda input     |
-|-----------------------|:---------------------:|
-| Since yesterday       | `null`                |
-| Since particular date | `yyyy-MM-dd`          |
-| Full load             | `1970-01-01`          |
+| Load changes since... |      lambda input                    |
+|-----------------------|:------------------------------------:|
+| Since yesterday       | `{"exportFromDate": "yesterday"}`    |
+| Since particular date | `{"exportFromDate": "2020-01-20"}`   |
+| Full load             | `{"exportFromDate": "beginning"}`    |
 
 ## How to extract a full load?
 
