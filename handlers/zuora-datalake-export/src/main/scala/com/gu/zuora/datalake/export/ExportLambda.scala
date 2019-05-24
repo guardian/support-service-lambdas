@@ -125,6 +125,7 @@ object Query extends Enum[Query] {
     "ophan-raw-zuora-increment-rateplan",
     "RatePlan.csv"
   )
+
 }
 
 object ZuoraApiHost {
