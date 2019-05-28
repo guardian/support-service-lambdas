@@ -17,25 +17,33 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues {
 
   private val holidayStop = HolidayStop("", LocalDate.of(2019, 1, 1))
 
-  private def mkConfig(
-    subscriptionGet: Either[String, Subscription],
-    subscriptionUpdate: Either[String, Unit],
-    amendmentGet: Either[String, Amendment]
-  ) = Config(
-    getSubscription = { _ =>
-      subscriptionGet
-    },
-    updateSubscription = { case (_, _) => subscriptionUpdate },
-    getLastAmendment = { _ =>
-      amendmentGet
-    },
+  private val config = Config(
+    zuoraAccess = ZuoraAccess(baseUrl = "", username = "", password = ""),
     holidayCreditProductRatePlanId = "",
     holidayCreditProductRatePlanChargeId = ""
   )
+  private def getSubscription(subscriptionGet: Either[String, Subscription]) = {
+    _: String =>
+      subscriptionGet
+  }
+  private def updateSubscription(
+    subscriptionUpdate: Either[String, Unit]
+  ): (Subscription, SubscriptionUpdate) => Either[String, Unit] = {
+    case (_, _) => subscriptionUpdate
+  }
+  private def getLastAmendment(amendmentGet: Either[String, Amendment]) = {
+    _: Subscription =>
+      amendmentGet
+  }
 
   "HolidayStopProcess" should "give correct amendment" in {
-    val config = mkConfig(Right(subscription), Right(Unit), Right(amendment))
-    val response = HolidayStopProcess(config, holidayStop)
+    val response = HolidayStopProcess.process(
+      config,
+      getSubscription(Right(subscription)),
+      updateSubscription(Right(Unit)),
+      getLastAmendment(Right(amendment)),
+      holidayStop
+    )
     response.right.value shouldBe HolidayStopResponse(
       code = "A1",
       price = -5.81
@@ -43,29 +51,46 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues {
   }
 
   it should "give an exception message if update fails" in {
-    val config =
-      mkConfig(Right(subscription), Left("update went wrong"), Right(amendment))
-    val response = HolidayStopProcess(config, holidayStop)
+    val response = HolidayStopProcess.process(
+      config,
+      getSubscription(Right(subscription)),
+      updateSubscription(Left("update went wrong")),
+      getLastAmendment(Right(amendment)),
+      holidayStop
+    )
     response.left.value shouldBe "update went wrong"
   }
 
   it should "give an exception message if getting subscription details fails" in {
-    val config = mkConfig(Left("get went wrong"), Right(Unit), Right(amendment))
-    val response = HolidayStopProcess(config, holidayStop)
+    val response = HolidayStopProcess.process(
+      config,
+      getSubscription(Left("get went wrong")),
+      updateSubscription(Right(Unit)),
+      getLastAmendment(Right(amendment)),
+      holidayStop
+    )
     response.left.value shouldBe "get went wrong"
   }
 
   it should "give an exception message if getting amendment code fails" in {
-    val config =
-      mkConfig(Right(subscription), Right(Unit), Left("amendment gone bad"))
-    val response = HolidayStopProcess(config, holidayStop)
+    val response = HolidayStopProcess.process(
+      config,
+      getSubscription(Right(subscription)),
+      updateSubscription(Right(Unit)),
+      getLastAmendment(Left("amendment gone bad")),
+      holidayStop
+    )
     response.left.value shouldBe "amendment gone bad"
   }
 
   it should "give an exception message if subscription isn't auto-renewing" in {
-    val config =
-      mkConfig(Right(subscription.copy(autoRenew = false)), Right(Unit), Right(amendment))
-    val response = HolidayStopProcess(config, holidayStop)
+    val response = HolidayStopProcess.process(
+      config,
+      getSubscription(Right(subscription.copy(autoRenew = false))),
+      updateSubscription(Right(Unit)),
+      getLastAmendment(Right(amendment)),
+      holidayStop
+    )
     response.left.value shouldBe "Cannot currently process non-auto-renewing subscription"
   }
 }

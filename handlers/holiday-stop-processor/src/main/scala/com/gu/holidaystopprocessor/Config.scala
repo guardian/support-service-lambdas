@@ -9,9 +9,7 @@ import io.circe.parser.decode
 import scala.io.Source
 
 case class Config(
-  getSubscription: String => Either[String, Subscription],
-  updateSubscription: (Subscription, SubscriptionUpdate) => Either[String, Unit],
-  getLastAmendment: Subscription => Either[String, Amendment],
+  zuoraAccess: ZuoraAccess,
   holidayCreditProductRatePlanId: String,
   holidayCreditProductRatePlanChargeId: String
 )
@@ -43,33 +41,24 @@ object Config {
   def apply(): Either[String, Config] = {
     val stage = Option(System.getenv("Stage")).getOrElse("DEV")
     configFromS3(stage) map { secretConfig =>
-      val getSubscription = Zuora.subscriptionGetResponse(secretConfig) _
-      val updateSubscription = Zuora.subscriptionUpdateResponse(secretConfig) _
-      val getAmendment = Zuora.lastAmendmentGetResponse(secretConfig) _
       stage match {
         case "PROD" =>
           Config(
-            getSubscription,
-            updateSubscription,
-            getAmendment,
+            secretConfig,
             holidayCreditProductRatePlanId = "2c92a0fc5b42d2c9015b6259f7f40040",
             holidayCreditProductRatePlanChargeId =
               "2c92a00e6ad50f58016ad9ca59962c8c"
           )
         case "CODE" =>
           Config(
-            getSubscription,
-            updateSubscription,
-            getAmendment,
+            secretConfig,
             holidayCreditProductRatePlanId = "2c92c0f96abaa1b5016abac99075461f",
             holidayCreditProductRatePlanChargeId =
               "2c92c0f96abc17d2016ac0da404d456c"
           )
         case "DEV" =>
           Config(
-            getSubscription,
-            updateSubscription,
-            getAmendment,
+            secretConfig,
             holidayCreditProductRatePlanId = "2c92c0f9671686a201671d14b5e5771e",
             holidayCreditProductRatePlanChargeId =
               "2c92c0f96abb85c3016abbe5771b04cc"
