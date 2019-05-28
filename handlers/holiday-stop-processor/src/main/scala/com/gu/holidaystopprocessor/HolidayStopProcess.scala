@@ -28,8 +28,7 @@ object HolidayStopProcess {
       subscription: Subscription
     ): Either[String, HolidayStopResponse] = {
       val update = SubscriptionUpdate.holidayCreditToAdd(
-        config.holidayCreditProductRatePlanId,
-        config.holidayCreditProductRatePlanChargeId,
+        config,
         subscription,
         stop.stoppedPublicationDate
       )

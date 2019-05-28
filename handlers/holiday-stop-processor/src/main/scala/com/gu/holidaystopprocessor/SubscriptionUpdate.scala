@@ -25,8 +25,7 @@ object SubscriptionUpdate {
     } else None
 
   def holidayCreditToAdd(
-    holidayCreditProductRatePlanId: String,
-    holidayCreditProductRatePlanChargeId: String,
+    config: Config,
     subscription: Subscription,
     stoppedPublicationDate: LocalDate
   ): SubscriptionUpdate = {
@@ -37,13 +36,13 @@ object SubscriptionUpdate {
       currentTerm = extendedTerm(subscription, effectiveDate),
       Seq(
         Add(
-          productRatePlanId = holidayCreditProductRatePlanId,
+          productRatePlanId = config.holidayCreditProductRatePlanId,
           contractEffectiveDate = effectiveDate,
           customerAcceptanceDate = effectiveDate,
           serviceActivationDate = effectiveDate,
           chargeOverrides = Seq(
             ChargeOverride(
-              holidayCreditProductRatePlanChargeId,
+              productRatePlanChargeId = config.holidayCreditProductRatePlanChargeId,
               HolidayStart__c = stoppedPublicationDate,
               HolidayEnd__c = stoppedPublicationDate,
               price = HolidayCredit(subscription)
