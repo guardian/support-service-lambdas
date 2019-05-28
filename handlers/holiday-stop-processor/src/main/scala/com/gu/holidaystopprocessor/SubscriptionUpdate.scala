@@ -3,7 +3,14 @@ package com.gu.holidaystopprocessor
 import java.time.LocalDate
 
 case class SubscriptionUpdate(currentTerm: Option[Int], add: Seq[Add]) {
-  val price: Double = add.headOption.map(_.chargeOverrides.headOption.map(_.price).getOrElse(0d)).getOrElse(0d)
+
+  val price: Double = {
+    val optPrice = for {
+      firstAdd <- add.headOption
+      charge <- firstAdd.chargeOverrides.headOption
+    } yield charge.price
+    optPrice.getOrElse(0)
+  }
 }
 
 object SubscriptionUpdate {
