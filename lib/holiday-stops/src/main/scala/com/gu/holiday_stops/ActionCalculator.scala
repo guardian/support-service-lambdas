@@ -7,11 +7,12 @@ import scala.annotation.tailrec
 
 object ActionCalculator {
 
+  // TODO this will likely need to change to return an array of days of week (when we support more than just GW)
   def productNameToDayOfWeek(productName: ProductName): Int = productName.value match {
-    case s if s.startsWith("Guardian Weekly") => DateTimeConstants.THURSDAY
+    case s if s.startsWith("Guardian Weekly") => DateTimeConstants.FRIDAY
   }
 
-  def calculateActionDatesForGivenHolidayStopRequest(hsr: HolidayStopRequest): List[LocalDate] = {
+  def publicationDatesToBeStopped(hsr: HolidayStopRequest): List[LocalDate] = {
 
     val dayOfWeekForProduct = productNameToDayOfWeek(hsr.Product_Name__c)
 

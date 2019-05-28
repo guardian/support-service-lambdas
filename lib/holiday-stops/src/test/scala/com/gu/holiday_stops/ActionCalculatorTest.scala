@@ -1,7 +1,7 @@
 package com.gu.holiday_stops
 
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
-import org.joda.time.LocalDate
+import org.joda.time.{DateTimeConstants, LocalDate}
 import org.scalatest.{FlatSpec, Matchers}
 
 class ActionCalculatorTest extends FlatSpec with Matchers {
@@ -10,7 +10,7 @@ class ActionCalculatorTest extends FlatSpec with Matchers {
 
   it should "convert ProductName to a day of the week" in {
 
-    ActionCalculator.productNameToDayOfWeek(gwProductName) shouldEqual 4
+    ActionCalculator.productNameToDayOfWeek(gwProductName) shouldEqual DateTimeConstants.FRIDAY
 
     assertThrows[MatchError] {
       ActionCalculator.productNameToDayOfWeek(ProductName("blah"))
@@ -20,38 +20,38 @@ class ActionCalculatorTest extends FlatSpec with Matchers {
 
   it should "correctly list the action dates for given Holiday Stop Request" in {
 
-    ActionCalculator.calculateActionDatesForGivenHolidayStopRequest(
+    ActionCalculator.publicationDatesToBeStopped(
       HolidayStopRequest(
         HolidayStopRequestId(""),
-        HolidayStopRequestStartDate(new LocalDate(2019, 5, 17)),
-        HolidayStopRequestEndDate(new LocalDate(2019, 6, 19)),
-        HolidayStopRequestActionedCount(0),
-        SubscriptionName(""),
-        gwProductName
-      )
-    ) shouldEqual List(
-        new LocalDate(2019, 5, 23),
-        new LocalDate(2019, 5, 30),
-        new LocalDate(2019, 6, 6),
-        new LocalDate(2019, 6, 13)
-      )
-
-    ActionCalculator.calculateActionDatesForGivenHolidayStopRequest(
-      HolidayStopRequest(
-        HolidayStopRequestId(""),
-        HolidayStopRequestStartDate(new LocalDate(2019, 5, 17)),
+        HolidayStopRequestStartDate(new LocalDate(2019, 5, 18)),
         HolidayStopRequestEndDate(new LocalDate(2019, 6, 20)),
         HolidayStopRequestActionedCount(0),
         SubscriptionName(""),
         gwProductName
       )
     ) shouldEqual List(
-        new LocalDate(2019, 5, 23),
-        new LocalDate(2019, 5, 30),
-        new LocalDate(2019, 6, 6),
-        new LocalDate(2019, 6, 13),
-        new LocalDate(2019, 6, 20)
+      new LocalDate(2019, 5, 24),
+      new LocalDate(2019, 5, 31),
+      new LocalDate(2019, 6, 7),
+      new LocalDate(2019, 6, 14)
+    )
+
+    ActionCalculator.publicationDatesToBeStopped(
+      HolidayStopRequest(
+        HolidayStopRequestId(""),
+        HolidayStopRequestStartDate(new LocalDate(2019, 5, 18)),
+        HolidayStopRequestEndDate(new LocalDate(2019, 6, 21)),
+        HolidayStopRequestActionedCount(0),
+        SubscriptionName(""),
+        gwProductName
       )
+    ) shouldEqual List(
+      new LocalDate(2019, 5, 24),
+      new LocalDate(2019, 5, 31),
+      new LocalDate(2019, 6, 7),
+      new LocalDate(2019, 6, 14),
+      new LocalDate(2019, 6, 21)
+    )
 
   }
 
