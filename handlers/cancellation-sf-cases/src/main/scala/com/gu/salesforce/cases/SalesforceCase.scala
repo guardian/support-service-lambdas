@@ -1,20 +1,19 @@
 package com.gu.salesforce.cases
 
 import ai.x.play.json.Jsonx
+import com.gu.salesforce.SalesforceConstants._
 import com.gu.util.Logging
-import com.gu.util.resthttp.{HttpOp, RestRequestMaker}
 import com.gu.util.resthttp.RestOp._
 import com.gu.util.resthttp.RestRequestMaker._
 import com.gu.util.resthttp.Types.ClientFailableOp
+import com.gu.util.resthttp.{HttpOp, RestRequestMaker}
 import play.api.libs.json.{JsValue, Json, Reads}
 
 object SalesforceCase extends Logging {
 
   private val CASE_ORIGIN = "Self Service"
 
-  private val caseBaseUrl = "/services/data/v29.0"
-  private val caseSObjectsBaseUrl = caseBaseUrl + "/sobjects/Case"
-  private val caseSoqlQueryBaseUrl = caseBaseUrl + "/query/?q="
+  private val caseSObjectsBaseUrl = sfObjectsBaseUrl + "Case"
 
   case class CaseId(value: String) extends AnyVal
   implicit val formatCaseId = Jsonx.formatInline[CaseId]
@@ -103,7 +102,7 @@ object SalesforceCase extends Logging {
         s"ORDER BY CreatedDate DESC " +
         s"LIMIT 1"
       logger.info(s"using SF query : $soqlQuery")
-      RestRequestMaker.GetRequest(RelativePath(s"$caseSoqlQueryBaseUrl$soqlQuery"))
+      RestRequestMaker.GetRequest(RelativePath(s"$soqlQueryBaseUrl?q=$soqlQuery"))
     }
 
     def toResponse(caseQueryResponse: CaseQueryResponse): Option[CaseWithId] = {

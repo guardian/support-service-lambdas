@@ -1,7 +1,8 @@
 package com.gu.sf_gocardless_sync.salesforce
 
+import com.gu.salesforce.SalesforceConstants._
 import com.gu.sf_gocardless_sync.SyncSharedObjects.{Cause, Description, GoCardlessMandateEventID, ReasonCode, Status}
-import com.gu.sf_gocardless_sync.salesforce.SalesforceSharedObjects.{MandateSfId, MandateEventSfId, EventHappenedAt}
+import com.gu.sf_gocardless_sync.salesforce.SalesforceSharedObjects.{EventHappenedAt, MandateEventSfId, MandateSfId}
 import com.gu.util.Logging
 import com.gu.util.resthttp.RestOp._
 import com.gu.util.resthttp.RestRequestMaker._
@@ -9,11 +10,10 @@ import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.resthttp.{HttpOp, RestRequestMaker}
 import play.api.libs.json.{JsValue, Json}
 
+
 object SalesforceDDMandateEvent extends Logging {
 
-  private val sfApiBaseUrl = "/services/data/v29.0"
-  private val mandateSfObjectsBaseUrl = sfApiBaseUrl + "/sobjects/DD_Mandate_Event__c"
-  private val soqlQueryBaseUrl = sfApiBaseUrl + "/query/?q="
+  private val mandateSfObjectsBaseUrl = sfObjectsBaseUrl + "DD_Mandate_Event__c"
 
   object Create {
 
@@ -56,7 +56,7 @@ object SalesforceDDMandateEvent extends Logging {
         s"ORDER BY Name DESC " +
         s"LIMIT 1"
       logger.info(s"using SF query : $soqlQuery")
-      RestRequestMaker.GetRequest(RelativePath(s"$soqlQueryBaseUrl$soqlQuery"))
+      RestRequestMaker.GetRequest(RelativePath(s"$soqlQueryBaseUrl?q=$soqlQuery"))
     }
 
     def toResponse(mandateEventsQueryResponse: MandateEventsQueryResponse): Option[GoCardlessMandateEventID] = {

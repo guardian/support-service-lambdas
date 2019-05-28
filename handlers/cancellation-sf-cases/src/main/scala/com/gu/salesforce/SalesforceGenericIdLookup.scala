@@ -1,6 +1,7 @@
 package com.gu.salesforce
 
 import ai.x.play.json.Jsonx
+import com.gu.salesforce.SalesforceConstants._
 import com.gu.util.resthttp.HttpOp._
 import com.gu.util.resthttp.RestOp._
 import com.gu.util.resthttp.RestRequestMaker.{GetRequest, RelativePath}
@@ -33,7 +34,7 @@ object SalesforceGenericIdLookup {
     lookupValue: LookupValue
   ): GetRequest =
     RestRequestMaker.GetRequest(
-      RelativePath(s"/services/data/v29.0/sobjects/${sfObjectType.value}/${fieldName.value}/${lookupValue.value}")
+      RelativePath(s"${sfObjectsBaseUrl}${sfObjectType.value}/${fieldName.value}/${lookupValue.value}")
     )
 
 }
