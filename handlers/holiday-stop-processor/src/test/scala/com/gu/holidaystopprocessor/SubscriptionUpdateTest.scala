@@ -25,9 +25,9 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers {
       Seq(
         Add(
           productRatePlanId = "ratePlanId",
-          contractEffectiveDate = LocalDate.of(2020, 5, 3),
-          customerAcceptanceDate = LocalDate.of(2020, 5, 3),
-          serviceActivationDate = LocalDate.of(2020, 5, 3),
+          contractEffectiveDate = LocalDate.of(2020, 5, 4),
+          customerAcceptanceDate = LocalDate.of(2020, 5, 4),
+          serviceActivationDate = LocalDate.of(2020, 5, 4),
           chargeOverrides = Seq(
             ChargeOverride(
               productRatePlanChargeId = "ratePlanChargeId",
@@ -57,9 +57,9 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers {
       Seq(
         Add(
           productRatePlanId = "ratePlanId",
-          contractEffectiveDate = LocalDate.of(2020, 5, 3),
-          customerAcceptanceDate = LocalDate.of(2020, 5, 3),
-          serviceActivationDate = LocalDate.of(2020, 5, 3),
+          contractEffectiveDate = LocalDate.of(2020, 5, 4),
+          customerAcceptanceDate = LocalDate.of(2020, 5, 4),
+          serviceActivationDate = LocalDate.of(2020, 5, 4),
           chargeOverrides = Seq(
             ChargeOverride(
               productRatePlanChargeId = "ratePlanChargeId",
