@@ -91,11 +91,8 @@ lazy val salesforce = all(project in file("lib/salesforce"))
 lazy val `holiday-stops` = all(project in file("lib/holiday-stops"))
   .dependsOn(
     salesforce,
-    restHttp,
-    handler,// % "test->test" TODO make this dep only in test - SF client shouldn't depends on ApiGateway
     effects % "test->test",
     testDep
-
   )
   .settings(
     libraryDependencies ++= Seq(okhttp3, logging, scalaz, playJson, scalatest, playJsonExtensions)
