@@ -23,19 +23,25 @@ object HolidayStopProcess {
     getLastAmendment: Subscription => Either[String, Amendment],
     stop: HolidayStop
   ): Either[String, HolidayStopResponse] = {
+
+    def applyStop(
+      subscription: Subscription
+    ): Either[String, HolidayStopResponse] = {
+      val update = SubscriptionUpdate.holidayCreditToAdd(
+        config.holidayCreditProductRatePlanId,
+        config.holidayCreditProductRatePlanChargeId,
+        subscription,
+        stop.stoppedPublicationDate
+      )
+      for {
+        _ <- updateSubscription(subscription, update)
+        amendment <- getLastAmendment(subscription)
+      } yield HolidayStopResponse(amendment.code, update.price)
+    }
+
     getSubscription(stop.subscriptionName) flatMap { subscription =>
       if (subscription.autoRenew) {
-        val update = SubscriptionUpdate.holidayCreditToAdd(
-          config.holidayCreditProductRatePlanId,
-          config.holidayCreditProductRatePlanChargeId,
-          subscription,
-          stop.stoppedPublicationDate
-        )
-        updateSubscription(subscription, update) flatMap { _ =>
-          getLastAmendment(subscription) map { amendment =>
-            HolidayStopResponse(amendment.code, update.price)
-          }
-        }
+        applyStop(subscription)
       } else Left("Cannot currently process non-auto-renewing subscription")
     }
   }
