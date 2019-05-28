@@ -26,23 +26,33 @@ object Zuora {
   }
 
   def subscriptionUpdateResponse(zuoraAccess: ZuoraAccess)(
-    subscriptionName: String,
-    subscriptionUpdate: SubscriptionUpdate
-  ): Either[String, ZuoraStatusResponse] = {
+    subscription: Subscription,
+    update: SubscriptionUpdate
+  ): Either[String, Unit] = {
     val request = sttp.auth
       .basic(zuoraAccess.username, zuoraAccess.password)
-      .put(uri"${zuoraAccess.baseUrl}/subscriptions/$subscriptionName")
-      .body(subscriptionUpdate)
+      .put(uri"${zuoraAccess.baseUrl}/subscriptions/${subscription.subscriptionNumber}")
+      .body(update)
     val response = request.send()
     response.body flatMap { body =>
-      def failureMsg(wrappedMsg:String) = s"Update '$subscriptionUpdate' to subscription '$subscriptionName' failed: $wrappedMsg"
+      def failureMsg(wrappedMsg: String) = s"Update '$update' to subscription '${subscription.subscriptionNumber}' failed: $wrappedMsg"
       normalised(body, decode[ZuoraStatusResponse]) match {
         case Left(e) => Left(failureMsg(e))
         case Right(status) =>
           if (!status.success)
             Left(failureMsg(status.reasons.map(_.mkString).getOrElse("")))
-          else Right(status)
+          else Right(Unit)
       }
+    }
+  }
+
+  def lastAmendmentGetResponse(zuoraAccess: ZuoraAccess)(subscription: Subscription): Either[String, Amendment] = {
+    val request = sttp.auth
+      .basic(zuoraAccess.username, zuoraAccess.password)
+      .get(uri"${zuoraAccess.baseUrl}/amendments/subscriptions/${subscription.subscriptionNumber}")
+    val response = request.send()
+    response.body flatMap { body =>
+      normalised(body, decode[Amendment])
     }
   }
 }

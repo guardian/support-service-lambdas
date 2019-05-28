@@ -3,22 +3,44 @@ package com.gu.holidaystopprocessor
 object HolidayStopProcess {
 
   def apply(
-    config: Config
-  )(stop: HolidayStop): Either[String, ZuoraStatusResponse] = {
+    config: Config,
+    stop: HolidayStop
+  ): Either[String, HolidayStopResponse] = {
+    val secretConfig = config.zuoraAccess
+    process(
+      config,
+      getSubscription = Zuora.subscriptionGetResponse(secretConfig),
+      updateSubscription = Zuora.subscriptionUpdateResponse(secretConfig),
+      getLastAmendment = Zuora.lastAmendmentGetResponse(secretConfig),
+      stop
+    )
+  }
 
-    val subscriptionDetails =
-      Zuora.subscriptionGetResponse(config.zuoraAccess) _
+  def process(
+    config: Config,
+    getSubscription: String => Either[String, Subscription],
+    updateSubscription: (Subscription, SubscriptionUpdate) => Either[String, Unit],
+    getLastAmendment: Subscription => Either[String, Amendment],
+    stop: HolidayStop
+  ): Either[String, HolidayStopResponse] = {
 
-    val updatedSubscription =
-      Zuora.subscriptionUpdateResponse(config.zuoraAccess) _
+    def applyStop(
+      subscription: Subscription
+    ): Either[String, HolidayStopResponse] = {
+      val update = SubscriptionUpdate.holidayCreditToAdd(
+        config,
+        subscription,
+        stop.stoppedPublicationDate
+      )
+      for {
+        _ <- updateSubscription(subscription, update)
+        amendment <- getLastAmendment(subscription)
+      } yield HolidayStopResponse(amendment.code, update.price)
+    }
 
-    val holidayCreditToAdd = SubscriptionUpdate.holidayCreditToAdd(config) _
-
-    subscriptionDetails(stop.subscriptionName) flatMap { subscription =>
+    getSubscription(stop.subscriptionName) flatMap { subscription =>
       if (subscription.autoRenew) {
-        val subscriptionUpdate =
-          holidayCreditToAdd(subscription, stop.stoppedPublicationDate)
-        updatedSubscription(stop.subscriptionName, subscriptionUpdate)
+        applyStop(subscription)
       } else Left("Cannot currently process non-auto-renewing subscription")
     }
   }
