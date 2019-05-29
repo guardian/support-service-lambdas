@@ -73,7 +73,7 @@ object SalesforceHolidayStopRequest extends Logging {
         s"AND Start_Date__c <= $sfDate " +
         s"AND End_Date__c >= $sfDate"
       logger.info(s"using SF query : $soqlQuery")
-      RestRequestMaker.GetRequestWithParams(soqlQueryBaseUrl, UrlParams(Map("q" -> soqlQuery)))
+      RestRequestMaker.GetRequestWithParams(RelativePath(soqlQueryBaseUrl), UrlParams(Map("q" -> soqlQuery)))
     }
 
   }
@@ -87,7 +87,7 @@ object SalesforceHolidayStopRequest extends Logging {
       val soqlQuery = getHolidayStopRequestPrefixSOQL(productNamePrefix) +
         s"AND IdentityID__c = '$identityId'"
       logger.info(s"using SF query : $soqlQuery")
-      RestRequestMaker.GetRequestWithParams(soqlQueryBaseUrl, UrlParams(Map("q" -> soqlQuery)))
+      RestRequestMaker.GetRequestWithParams(RelativePath(soqlQueryBaseUrl), UrlParams(Map("q" -> soqlQuery)))
     }
 
   }
