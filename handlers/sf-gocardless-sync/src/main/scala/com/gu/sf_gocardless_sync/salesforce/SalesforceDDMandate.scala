@@ -1,8 +1,9 @@
 package com.gu.sf_gocardless_sync.salesforce
 
 import ai.x.play.json.Jsonx
+import com.gu.salesforce.SalesforceConstants._
 import com.gu.sf_gocardless_sync.SyncSharedObjects.{BankAccountNumberEnding, BankName, GoCardlessMandateID, MandateCreatedAt, Reference}
-import com.gu.sf_gocardless_sync.salesforce.SalesforceSharedObjects.{MandateSfId, MandateEventSfId, EventHappenedAt}
+import com.gu.sf_gocardless_sync.salesforce.SalesforceSharedObjects.{EventHappenedAt, MandateEventSfId, MandateSfId}
 import com.gu.util.Logging
 import com.gu.util.resthttp.RestOp._
 import com.gu.util.resthttp.RestRequestMaker._
@@ -12,9 +13,7 @@ import play.api.libs.json.{JsValue, Json}
 
 object SalesforceDDMandate extends Logging {
 
-  private val sfApiBaseUrl = "/services/data/v29.0"
-  private val mandateSfObjectsBaseUrl = sfApiBaseUrl + "/sobjects/DD_Mandate__c"
-  private val soqlQueryBaseUrl = sfApiBaseUrl + "/query/?q="
+  private val mandateSfObjectsBaseUrl = sfApiBaseUrl + "DD_Mandate__c"
 
   case class BillingAccountSfId(value: String) extends AnyVal
   implicit val formatBillingAccountSfId = Jsonx.formatInline[BillingAccountSfId]
@@ -89,7 +88,7 @@ object SalesforceDDMandate extends Logging {
         s"FROM DD_Mandate__c " +
         s"WHERE GoCardless_Mandate_ID__c IN (${mandateIDs.map(mandateID => s"'${mandateID.value}'").mkString(", ")})"
       logger.info(s"using SF query : $soqlQuery")
-      RestRequestMaker.GetRequest(RelativePath(s"$soqlQueryBaseUrl$soqlQuery"))
+      RestRequestMaker.GetRequest(RelativePath(s"$soqlQueryBaseUrl?q=$soqlQuery"))
     }
 
     def toResponse(mandateSearchQueryResponse: MandateSearchQueryResponse): SfMandateMap =
@@ -120,7 +119,7 @@ object SalesforceDDMandate extends Logging {
         s"FROM Zuora__PaymentMethod__c " +
         s"WHERE Zuora__MandateID__c IN (${references.map(ref => s"'${ref.value}'").mkString(", ")})"
       logger.info(s"using SF query : $soqlQuery")
-      RestRequestMaker.GetRequest(RelativePath(s"$soqlQueryBaseUrl$soqlQuery"))
+      RestRequestMaker.GetRequest(RelativePath(s"$soqlQueryBaseUrl?q=$soqlQuery"))
     }
 
     def toResponse(referenceSearchQueryResponse: ReferenceSearchQueryResponse): Map[Reference, SfPaymentMethodDetail] =

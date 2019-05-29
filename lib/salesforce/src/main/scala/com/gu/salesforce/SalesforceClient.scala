@@ -4,7 +4,7 @@ import com.gu.salesforce.SalesforceAuthenticate.{SFAuthConfig, SalesforceAuth}
 import com.gu.util.resthttp.JsonHttp.StringHttpRequest
 import com.gu.util.resthttp.RestRequestMaker._
 import com.gu.util.resthttp.{HttpOp, LazyClientFailableOp}
-import okhttp3.{Request, Response}
+import okhttp3.{HttpUrl, Request, Response}
 
 object SalesforceClient {
 
@@ -32,7 +32,9 @@ object SalesforceClient {
       builder.addHeader(header.name, header.value)
     })
 
-    val url = sfAuth.instance_url + requestInfo.relativePath.value
+    val url = requestInfo.urlParams.value.foldLeft(HttpUrl.parse(sfAuth.instance_url + requestInfo.relativePath.value).newBuilder()) {
+      case (nextBuilder, (key, value)) => nextBuilder.addQueryParameter(key, value)
+    }.build()
     builderWithHeaders.url(url).build()
   }
 }

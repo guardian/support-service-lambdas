@@ -88,6 +88,16 @@ lazy val salesforce = all(project in file("lib/salesforce"))
     libraryDependencies ++= Seq(okhttp3, logging, scalaz, playJson, scalatest)
   )
 
+lazy val `holiday-stops` = all(project in file("lib/holiday-stops"))
+  .dependsOn(
+    salesforce,
+    effects % "test->test",
+    testDep
+  )
+  .settings(
+    libraryDependencies ++= Seq(okhttp3, logging, scalaz, playJson, scalatest, playJsonExtensions)
+)
+
 lazy val restHttp = all(project in file("lib/restHttp"))
   .settings(
     libraryDependencies ++= Seq(okhttp3, logging, scalaz, playJson, scalatest)
@@ -159,6 +169,7 @@ lazy val root = all(project in file(".")).enablePlugins(RiffRaffArtifact).aggreg
   zuora,
   `zuora-reports`,
   salesforce,
+  `holiday-stops`,
   s3ConfigValidator,
   `new-product-api`,
   `effects-sqs`,

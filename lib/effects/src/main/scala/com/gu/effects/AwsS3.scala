@@ -2,6 +2,7 @@ package com.gu.effects
 
 import com.amazonaws.auth._
 import com.amazonaws.auth.profile.ProfileCredentialsProvider
+import com.amazonaws.regions.Regions
 import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.s3.model._
 import com.gu.util.Logging
@@ -83,7 +84,10 @@ object DeleteS3Objects extends Logging {
 }
 object AwsS3 {
 
-  val client = AmazonS3Client.builder.withCredentials(aws.CredentialsProvider).build()
+  val client = AmazonS3Client.builder
+    .withCredentials(aws.CredentialsProvider)
+    .withRegion(Regions.EU_WEST_1)
+    .build()
 
 }
 
