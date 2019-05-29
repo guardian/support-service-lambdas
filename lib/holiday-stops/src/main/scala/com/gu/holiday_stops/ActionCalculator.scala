@@ -1,9 +1,10 @@
 package com.gu.holiday_stops
 
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.{HolidayStopRequest, ProductName}
-import org.joda.time.{DateTimeConstants, LocalDate}
-
-import scala.annotation.tailrec
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.{
+  HolidayStopRequest,
+  ProductName
+}
+import org.joda.time.{DateTimeConstants, Days, LocalDate}
 
 object ActionCalculator {
 
@@ -14,21 +15,23 @@ object ActionCalculator {
 
   def publicationDatesToBeStopped(hsr: HolidayStopRequest): List[LocalDate] = {
 
+    def applicableDates(
+      from: LocalDate,
+      to: LocalDate,
+      p: LocalDate => Boolean
+    ): List[LocalDate] = {
+      val dateRange = 0 to Days.daysBetween(from, to).getDays
+      dateRange.foldLeft(List.empty[LocalDate]) { (acc, i) =>
+        val d = from.plusDays(i)
+        if (p(d)) acc :+ d
+        else acc
+      }
+    }
+
+    val from = hsr.Start_Date__c.value
+    val to = hsr.End_Date__c.value
     val dayOfWeekForProduct = productNameToDayOfWeek(hsr.Product_Name__c)
-
-    val stopRecursionAt = hsr.End_Date__c.value.plusDays(1)
-
-    @tailrec
-    def processNextDay(listSoFar: List[LocalDate], date: LocalDate): List[LocalDate] =
-      if (date == stopRecursionAt)
-        listSoFar
-      else if (date.getDayOfWeek == dayOfWeekForProduct)
-        processNextDay(date :: listSoFar, date.plusDays(1))
-      else
-        processNextDay(listSoFar, date.plusDays(1))
-
-    processNextDay(List(), hsr.Start_Date__c.value).reverse
-
+    applicableDates(from, to, { _.dayOfWeek.get == dayOfWeekForProduct })
   }
 
 }
