@@ -77,7 +77,7 @@ Resources:
             Code:
                 S3Bucket: support-service-lambdas-dist
                 S3Key: !Sub membership/${Stage}/holiday-stop-api/holiday-stop-api.jar
-            Handler: com.gu.holiday_stops.Handler::GET
+            Handler: com.gu.holiday_stops.Handler::apply
             Environment:
                 Variables:
                   Stage: !Ref Stage
@@ -123,7 +123,7 @@ Resources:
         - HolidayStopApiKey
         - HolidayStopApiUsagePlan
 
-    HolidayStopApiGetProxyResource:
+    HolidayStopApiGetAndCreateProxyResource:
         Type: AWS::ApiGateway::Resource
         Properties:
             RestApiId: !Ref HolidayStopApi
@@ -137,7 +137,7 @@ Resources:
             AuthorizationType: NONE
             ApiKeyRequired: true
             RestApiId: !Ref HolidayStopApi
-            ResourceId: !Ref HolidayStopApiGetProxyResource
+            ResourceId: !Ref HolidayStopApiGetAndCreateProxyResource
             HttpMethod: GET
             Integration:
               Type: AWS_PROXY
@@ -146,7 +146,24 @@ Resources:
         DependsOn:
         - HolidayStopApi
         - HolidayStopApiLambda
-        - HolidayStopApiGetProxyResource
+        - HolidayStopApiGetAndCreateProxyResource
+
+    HolidayStopApiCreateMethod:
+      Type: AWS::ApiGateway::Method
+      Properties:
+        AuthorizationType: NONE
+        ApiKeyRequired: true
+        RestApiId: !Ref HolidayStopApi
+        ResourceId: !Ref HolidayStopApiGetAndCreateProxyResource
+        HttpMethod: POST
+        Integration:
+          Type: AWS_PROXY
+          IntegrationHttpMethod: POST # this for the interaction between API Gateway and Lambda and MUST be POST
+          Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${HolidayStopApiLambda.Arn}/invocations
+      DependsOn:
+        - HolidayStopApi
+        - HolidayStopApiLambda
+        - HolidayStopApiGetAndCreateProxyResource
 
     HolidayStopApiStage:
         Type: AWS::ApiGateway::Stage
@@ -157,6 +174,7 @@ Resources:
             StageName: !Sub ${Stage}
         DependsOn:
         - HolidayStopApiGetMethod
+        - HolidayStopApiCreateMethod
 
     HolidayStopApiDeployment:
         Type: AWS::ApiGateway::Deployment
@@ -165,6 +183,7 @@ Resources:
             RestApiId: !Ref HolidayStopApi
         DependsOn:
         - HolidayStopApiGetMethod
+        - HolidayStopApiCreateMethod
 
     5xxApiAlarm:
       Type: AWS::CloudWatch::Alarm

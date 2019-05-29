@@ -15,17 +15,17 @@ import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, ApiGatewayR
 import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config._
 import com.gu.util.reader.Types._
-import com.gu.util.resthttp.{HttpOp, JsonHttp}
 import com.gu.util.resthttp.JsonHttp.StringHttpRequest
 import com.gu.util.resthttp.RestRequestMaker.BodyAsString
+import com.gu.util.resthttp.{HttpOp, JsonHttp}
 import okhttp3.{Request, Response}
-import play.api.libs.json.{Json, OWrites}
+import play.api.libs.json.{Json, OWrites, Reads}
 
 object Handler extends Logging {
 
   type SfClient = HttpOp[StringHttpRequest, BodyAsString]
 
-  def generic(sfSteps: SfClient => ApiGatewayRequest => ApiResponse)(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
+  def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
     ApiGatewayHandler(
       LambdaIO(
         inputStream,
@@ -33,19 +33,17 @@ object Handler extends Logging {
         context
       )
     )(
-        operationForEffects(
-          RawEffects.response,
-          RawEffects.stage,
-          GetFromS3.fetchString,
-          sfSteps
-        )
+      operationForEffects(
+        RawEffects.response,
+        RawEffects.stage,
+        GetFromS3.fetchString
       )
+    )
 
   def operationForEffects(
     response: Request => Response,
     stage: Stage,
     fetchString: StringFromS3,
-    sfSteps: SfClient => ApiGatewayRequest => ApiResponse
   ): ApiGatewayOp[Operation] = {
 
     val loadConfig = LoadConfigModule(stage, fetchString)
@@ -53,18 +51,20 @@ object Handler extends Logging {
     for {
       sfAuthConfig <- loadConfig[SFAuthConfig].toApiGatewayOp("load sfAuth config")
       sfClient <- SalesforceClient(response, sfAuthConfig).value.toDisjunction.toApiGatewayOp("authenticate with SalesForce")
-    } yield Operation.noHealthcheck(sfSteps(sfClient)) //TODO add healthcheck
+    } yield Operation.noHealthcheck( //TODO add healthcheck (probably just check connectivity to SF)
+      request => (request.httpMethod match { // TODO will need to match against path params too to support edit endpoint
+        case Some("GET") => stepsGET _
+        case Some("POST") => stepsCREATE _
+        case _ => stepsUNSUPPORTED _
+      })(request, sfClient))
 
   }
 
-  def GET(inputStream: InputStream, outputStream: OutputStream, context: Context) =
-    generic(stepsGET)(inputStream, outputStream, context)
-
-  def stepsGET(sfClient: HttpOp[StringHttpRequest, BodyAsString])(req: ApiGatewayRequest): ApiResponse = {
+  def stepsGET(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
 
     val lookupOp = SalesforceHolidayStopRequest.LookupByIdentityIdAndProductNamePrefix(sfClient.wrapWith(JsonHttp.getWithParams))
 
-    implicit val writesHolidayStopRequestGET: OWrites[HolidayStopRequestGET] = Json.writes[HolidayStopRequestGET]
+    implicit val writesHolidayStopRequestGET: OWrites[HolidayStopRequestEXTERNAL] = Json.writes[HolidayStopRequestEXTERNAL]
     implicit val writesHolidayStopRequestsGET: OWrites[HolidayStopRequestsGET] = Json.writes[HolidayStopRequestsGET]
 
     (for {
@@ -76,4 +76,23 @@ object Handler extends Logging {
       HolidayStopRequestsGET(usersHolidayStopRequests, productNamePrefix)
     )).apiResponse
   }
+
+  def stepsCREATE(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
+
+    val createOp = SalesforceHolidayStopRequest.CreateHolidayStopRequest(sfClient.wrapWith(JsonHttp.post))
+
+    implicit val readsHolidayStopRequestEXTERNAL: Reads[HolidayStopRequestEXTERNAL] = Json.reads[HolidayStopRequestEXTERNAL]
+
+    (for {
+      requestBody <- req.bodyAsCaseClass[HolidayStopRequestEXTERNAL]()
+      identityId <- req.headers.flatMap(_.get("x-identity-id")).toApiGatewayOp("identityID header")
+      // TODO verify identity ID can create holiday stop for given sub
+      _ <- createOp(HolidayStopRequestEXTERNAL.toSF(requestBody)).toDisjunction.toApiGatewayOp(s"create new Holiday Stop Request for subscription ${requestBody.subscriptionName} (identity $identityId)")
+      // TODO handle 'FIELD_CUSTOM_VALIDATION_EXCEPTION' etc back from SF and place in response
+    } yield ApiGatewayResponse.successfulExecution).apiResponse
+  }
+
+  def stepsUNSUPPORTED(req: ApiGatewayRequest, sfClient: HttpOp[StringHttpRequest, BodyAsString]): ApiResponse =
+    ApiGatewayResponse.badRequest("UNSUPPORTED HTTP METHOD")
+
 }
