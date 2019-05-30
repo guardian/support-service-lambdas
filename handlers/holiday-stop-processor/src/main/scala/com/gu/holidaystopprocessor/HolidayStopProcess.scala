@@ -2,27 +2,26 @@ package com.gu.holidaystopprocessor
 
 object HolidayStopProcess {
 
-  def apply(
-    config: Config,
-    stop: HolidayStop
-  ): Either[String, HolidayStopResponse] = {
-    val secretConfig = config.zuoraAccess
-    process(
+  def apply(config: Config): Seq[Either[String, HolidayStopResponse]] = {
+    val zuoraCredentials = config.zuoraCredentials
+    val response = processHolidayStop(
       config,
-      getSubscription = Zuora.subscriptionGetResponse(secretConfig),
-      updateSubscription = Zuora.subscriptionUpdateResponse(secretConfig),
-      getLastAmendment = Zuora.lastAmendmentGetResponse(secretConfig),
-      stop
-    )
+      getSubscription = Zuora.subscriptionGetResponse(zuoraCredentials),
+      updateSubscription = Zuora.subscriptionUpdateResponse(zuoraCredentials),
+      getLastAmendment = Zuora.lastAmendmentGetResponse(zuoraCredentials)
+    ) _
+    HolidayStop.holidayStopsToApply(config) match {
+      case Left(msg) => Seq(Left(msg))
+      case Right(holidayStops) => holidayStops map response
+    }
   }
 
-  def process(
+  def processHolidayStop(
     config: Config,
     getSubscription: String => Either[String, Subscription],
     updateSubscription: (Subscription, SubscriptionUpdate) => Either[String, Unit],
-    getLastAmendment: Subscription => Either[String, Amendment],
-    stop: HolidayStop
-  ): Either[String, HolidayStopResponse] = {
+    getLastAmendment: Subscription => Either[String, Amendment]
+  )(stop: HolidayStop): Either[String, HolidayStopResponse] = {
 
     def applyStop(
       subscription: Subscription

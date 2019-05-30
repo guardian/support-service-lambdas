@@ -2,6 +2,8 @@ package com.gu.holidaystopprocessor
 
 import java.time.LocalDate
 
+import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
+
 object Fixtures {
 
   def mkSubscription(
@@ -24,4 +26,11 @@ object Fixtures {
         )
       )
     )
+
+  val config = Config(
+    zuoraCredentials = ZuoraAccess(baseUrl = "", username = "", password = ""),
+    sfCredentials = SFAuthConfig("", "", "", "", "", ""),
+    holidayCreditProductRatePlanId = "ratePlanId",
+    holidayCreditProductRatePlanChargeId = "ratePlanChargeId"
+  )
 }

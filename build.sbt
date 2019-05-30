@@ -239,6 +239,7 @@ lazy val `braze-to-salesforce-file-upload` = all(project in file("handlers/braze
 
 lazy val `holiday-stop-processor` = all(project in file("handlers/holiday-stop-processor"))
   .enablePlugins(RiffRaffArtifact)
+  .dependsOn(`holiday-stops`, effects)
   
 // ==== END handlers ====
 
