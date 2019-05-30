@@ -100,6 +100,7 @@ Resources:
             Stage: !Ref Stage
       DependsOn:
         - HolidayStopApi
+        - HolidayStopApiStage
 
     HolidayStopApiKey:
       Type: AWS::ApiGateway::ApiKey
@@ -112,6 +113,7 @@ Resources:
             StageName: !Ref Stage
       DependsOn:
         - HolidayStopApi
+        - HolidayStopApiStage
 
     HolidayStopApiUsagePlanKey:
       Type: AWS::ApiGateway::UsagePlanKey
