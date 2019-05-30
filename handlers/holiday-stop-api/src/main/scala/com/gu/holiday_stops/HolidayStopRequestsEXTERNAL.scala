@@ -29,7 +29,8 @@ object HolidayStopRequestEXTERNAL {
     start = sfHSR.Start_Date__c.value.toString(),
     end = sfHSR.End_Date__c.value.toString(),
     subscriptionName = sfHSR.Subscription_Name__c.value
-  //    TODO calculate first editable date within this period (using ActionCalculator and actioned count in sfHSR)
+  // TODO calculate first editable date within this period (using ActionCalculator and actioned count in sfHSR)
+  // TODO booleans for partially editable and completely locked
   )
 
   def toSF(externalHSR: HolidayStopRequestEXTERNAL): NewHolidayStopRequest = NewHolidayStopRequest(

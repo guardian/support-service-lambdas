@@ -7,7 +7,7 @@ import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.SalesforceClient
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.{ProductName, SubscriptionName}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.{HolidayStopRequestId, ProductName, SubscriptionName}
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
@@ -56,13 +56,13 @@ object Handler extends Logging {
       request => (request.httpMethod match { // TODO will need to match against path params too to support edit endpoint
         case Some("GET") => stepsGET _
         case Some("POST") => stepsCREATE _
+        case Some("DELETE") => stepsDELETE _
         case _ => stepsUNSUPPORTED _
       })(request, sfClient))
 
   }
 
-  case class PathParams(subscriptionName: Option[SubscriptionName])
-
+  case class GetPathParams(subscriptionName: Option[SubscriptionName])
   def stepsGET(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
 
     val lookupOp = SalesforceHolidayStopRequest.LookupByIdentityIdAndOptionalSubscriptionName(sfClient.wrapWith(JsonHttp.getWithParams))
@@ -71,7 +71,7 @@ object Handler extends Logging {
     implicit val writesHolidayStopRequestsGET: OWrites[HolidayStopRequestsGET] = Json.writes[HolidayStopRequestsGET]
 
     val extractOptionalSubNameOp: ApiGatewayOp[Option[SubscriptionName]] = req.pathParameters match {
-      case Some(_) => req.pathParamsAsCaseClass[PathParams]()(Json.reads[PathParams]).map(_.subscriptionName)
+      case Some(_) => req.pathParamsAsCaseClass[GetPathParams]()(Json.reads[GetPathParams]).map(_.subscriptionName)
       case None => ContinueProcessing(None)
     }
 
@@ -98,6 +98,20 @@ object Handler extends Logging {
       // TODO verify identity ID can create holiday stop for given sub
       _ <- createOp(HolidayStopRequestEXTERNAL.toSF(requestBody)).toDisjunction.toApiGatewayOp(s"create new Holiday Stop Request for subscription ${requestBody.subscriptionName} (identity $identityId)")
       // TODO handle 'FIELD_CUSTOM_VALIDATION_EXCEPTION' etc back from SF and place in response
+    } yield ApiGatewayResponse.successfulExecution).apiResponse
+  }
+
+  case class DeletePathParams(subscriptionName: SubscriptionName, holidayStopRequestId: HolidayStopRequestId)
+  def stepsDELETE(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
+
+    val deleteOp = SalesforceHolidayStopRequest.DeleteHolidayStopRequest(sfClient.wrapWith(JsonHttp.deleteWithStringResponse))
+
+    (for {
+      identityId <- req.headers.flatMap(_.get("x-identity-id")).toApiGatewayOp("identityID header")
+      // TODO verify identity ID can delete holiday stop for given sub
+      pathParams <- req.pathParamsAsCaseClass[DeletePathParams]()(Json.reads[DeletePathParams])
+      // TODO ensure zero 'actioned count' (perhaps via validation rule in SalesForce)
+      _ <- deleteOp(pathParams.holidayStopRequestId).toDisjunction.toApiGatewayOp(s"delete Holiday Stop Request for subscription ${pathParams.subscriptionName.value} identity $identityId")
     } yield ApiGatewayResponse.successfulExecution).apiResponse
   }
 

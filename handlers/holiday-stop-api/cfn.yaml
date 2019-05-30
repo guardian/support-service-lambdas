@@ -148,35 +148,6 @@ Resources:
         - HolidayStopApiLambda
         - HolidayStopApiGetAllAndCreateProxyResource
 
-    HolidayStopApiGetBySubscriptionNameProxyResource:
-      Type: AWS::ApiGateway::Resource
-      Properties:
-        RestApiId: !Ref HolidayStopApi
-        ParentId: !Ref HolidayStopApiGetAllAndCreateProxyResource
-        PathPart: "{subscriptionName}"
-      DependsOn:
-      - HolidayStopApi
-      - HolidayStopApiGetAllAndCreateProxyResource
-
-    HolidayStopApiGetBySubscriptionNameMethod:
-      Type: AWS::ApiGateway::Method
-      Properties:
-        AuthorizationType: NONE
-        ApiKeyRequired: true
-        RestApiId: !Ref HolidayStopApi
-        ResourceId: !Ref HolidayStopApiGetBySubscriptionNameProxyResource
-        HttpMethod: GET
-        RequestParameters:
-          method.request.path.subscriptionName: true
-        Integration:
-          Type: AWS_PROXY
-          IntegrationHttpMethod: POST # this for the interaction between API Gateway and Lambda and MUST be POST
-          Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${HolidayStopApiLambda.Arn}/invocations
-      DependsOn:
-        - HolidayStopApi
-        - HolidayStopApiLambda
-        - HolidayStopApiGetBySubscriptionNameProxyResource
-
     HolidayStopApiCreateMethod:
       Type: AWS::ApiGateway::Method
       Properties:
@@ -193,7 +164,68 @@ Resources:
         - HolidayStopApi
         - HolidayStopApiLambda
         - HolidayStopApiGetAllAndCreateProxyResource
+          
+    HolidayStopApiBySubscriptionNameProxyResource:
+      Type: AWS::ApiGateway::Resource
+      Properties:
+        RestApiId: !Ref HolidayStopApi
+        ParentId: !Ref HolidayStopApiGetAllAndCreateProxyResource
+        PathPart: "{subscriptionName}"
+      DependsOn:
+      - HolidayStopApi
+      - HolidayStopApiGetAllAndCreateProxyResource
 
+    HolidayStopApiGetBySubscriptionNameMethod:
+      Type: AWS::ApiGateway::Method
+      Properties:
+        AuthorizationType: NONE
+        ApiKeyRequired: true
+        RestApiId: !Ref HolidayStopApi
+        ResourceId: !Ref HolidayStopApiBySubscriptionNameProxyResource
+        HttpMethod: GET
+        RequestParameters:
+          method.request.path.subscriptionName: true
+        Integration:
+          Type: AWS_PROXY
+          IntegrationHttpMethod: POST # this for the interaction between API Gateway and Lambda and MUST be POST
+          Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${HolidayStopApiLambda.Arn}/invocations
+      DependsOn:
+        - HolidayStopApi
+        - HolidayStopApiLambda
+        - HolidayStopApiBySubscriptionNameProxyResource
+    
+    HolidayStopApiDeleteAndEditResource:
+      Type: AWS::ApiGateway::Resource
+      Properties:
+        RestApiId: !Ref HolidayStopApi
+        ParentId: !Ref HolidayStopApiBySubscriptionNameProxyResource
+        PathPart: "{holidayStopRequestId}"
+      DependsOn:
+        - HolidayStopApi
+        - HolidayStopApiBySubscriptionNameProxyResource
+
+    HolidayStopApiDeleteMethod:
+      Type: AWS::ApiGateway::Method
+      Properties:
+        AuthorizationType: NONE
+        ApiKeyRequired: true
+        RestApiId: !Ref HolidayStopApi
+        ResourceId: !Ref HolidayStopApiDeleteAndEditResource
+        HttpMethod: DELETE
+        RequestParameters:
+          method.request.path.subscriptionName: true
+          method.request.path.holidayStopRequestId: true
+        Integration:
+          Type: AWS_PROXY
+          IntegrationHttpMethod: POST # this for the interaction between API Gateway and Lambda and MUST be POST
+          Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${HolidayStopApiLambda.Arn}/invocations
+      DependsOn:
+        - HolidayStopApi
+        - HolidayStopApiLambda
+        - HolidayStopApiDeleteAndEditResource
+
+    # TODO HolidayStopApiEditMethod
+    
     HolidayStopApiStage:
         Type: AWS::ApiGateway::Stage
         Properties:
@@ -203,7 +235,9 @@ Resources:
             StageName: !Sub ${Stage}
         DependsOn:
         - HolidayStopApiGetAllMethod
+        - HolidayStopApiGetBySubscriptionNameMethod
         - HolidayStopApiCreateMethod
+        - HolidayStopApiDeleteMethod
 
     HolidayStopApiDeployment:
         Type: AWS::ApiGateway::Deployment
@@ -212,7 +246,9 @@ Resources:
             RestApiId: !Ref HolidayStopApi
         DependsOn:
         - HolidayStopApiGetAllMethod
+        - HolidayStopApiGetBySubscriptionNameMethod
         - HolidayStopApiCreateMethod
+        - HolidayStopApiDeleteMethod
 
     5xxApiAlarm:
       Type: AWS::CloudWatch::Alarm
