@@ -4,14 +4,14 @@ import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.{HolidayStop
 import org.joda.time.LocalDate
 
 case class HolidayStopRequestsGET(
-  firstAvailableDate: String,
+  firstAvailableDate: Option[String],
   existing: List[HolidayStopRequestEXTERNAL]
 )
 
 object HolidayStopRequestsGET {
 
-  def apply(sfHSRs: List[HolidayStopRequest], productNamePrefix: ProductName): HolidayStopRequestsGET = HolidayStopRequestsGET(
-    ActionCalculator.firstAvailableDate(productNamePrefix),
+  def apply(sfHSRs: List[HolidayStopRequest], optionalProductNamePrefix: Option[ProductName]): HolidayStopRequestsGET = HolidayStopRequestsGET(
+    optionalProductNamePrefix.map(ActionCalculator.firstAvailableDate),
     sfHSRs.map(HolidayStopRequestEXTERNAL.fromSF)
   )
 
@@ -29,7 +29,7 @@ object HolidayStopRequestEXTERNAL {
     start = sfHSR.Start_Date__c.value.toString(),
     end = sfHSR.End_Date__c.value.toString(),
     subscriptionName = sfHSR.Subscription_Name__c.value
-//    TODO calculate first editable date within this period (using ActionCalculator and actioned count in sfHSR)
+  //    TODO calculate first editable date within this period (using ActionCalculator and actioned count in sfHSR)
   )
 
   def toSF(externalHSR: HolidayStopRequestEXTERNAL): NewHolidayStopRequest = NewHolidayStopRequest(

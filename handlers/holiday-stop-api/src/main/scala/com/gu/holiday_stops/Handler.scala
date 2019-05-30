@@ -7,13 +7,14 @@ import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.SalesforceClient
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.ProductName
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.{ProductName, SubscriptionName}
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config._
+import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.JsonHttp.StringHttpRequest
 import com.gu.util.resthttp.RestRequestMaker.BodyAsString
@@ -60,20 +61,28 @@ object Handler extends Logging {
 
   }
 
+  case class PathParams(subscriptionName: Option[SubscriptionName])
+
   def stepsGET(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
 
-    val lookupOp = SalesforceHolidayStopRequest.LookupByIdentityIdAndProductNamePrefix(sfClient.wrapWith(JsonHttp.getWithParams))
+    val lookupOp = SalesforceHolidayStopRequest.LookupByIdentityIdAndOptionalSubscriptionName(sfClient.wrapWith(JsonHttp.getWithParams))
 
     implicit val writesHolidayStopRequestGET: OWrites[HolidayStopRequestEXTERNAL] = Json.writes[HolidayStopRequestEXTERNAL]
     implicit val writesHolidayStopRequestsGET: OWrites[HolidayStopRequestsGET] = Json.writes[HolidayStopRequestsGET]
 
+    val extractOptionalSubNameOp: ApiGatewayOp[Option[SubscriptionName]] = req.pathParameters match {
+      case Some(_) => req.pathParamsAsCaseClass[PathParams]()(Json.reads[PathParams]).map(_.subscriptionName)
+      case None => ContinueProcessing(None)
+    }
+
     (for {
       identityId <- req.headers.flatMap(_.get("x-identity-id")).toApiGatewayOp("identityID header")
-      productNamePrefix <- req.headers.flatMap(_.get("x-product-name-prefix").map(ProductName.apply)).toApiGatewayOp("product name header")
-      usersHolidayStopRequests <- lookupOp(identityId, productNamePrefix).toDisjunction.toApiGatewayOp(s"lookup Holiday Stop Requests for identity $identityId")
+      optionalSubName <- extractOptionalSubNameOp
+      optionalProductNamePrefix = req.headers.flatMap(_.get("x-product-name-prefix").map(ProductName.apply))
+      usersHolidayStopRequests <- lookupOp(identityId, optionalSubName).toDisjunction.toApiGatewayOp(s"lookup Holiday Stop Requests for identity $identityId")
     } yield ApiGatewayResponse(
       "200",
-      HolidayStopRequestsGET(usersHolidayStopRequests, productNamePrefix)
+      HolidayStopRequestsGET(usersHolidayStopRequests, optionalProductNamePrefix)
     )).apiResponse
   }
 
