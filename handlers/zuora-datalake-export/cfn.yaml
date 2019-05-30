@@ -87,7 +87,7 @@ Resources:
           - Arn: !Sub ${ExportLambda.Arn}
             Id: TriggerLambda
             Input: |
-              null
+              {"exportFromDate": "yesterday"}
 
     TriggerStartExportJobPermission:
       Type: AWS::Lambda::Permission
