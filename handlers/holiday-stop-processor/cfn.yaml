@@ -48,6 +48,7 @@ Resources:
     Properties:
       FunctionName:
         !Sub holiday-stop-processor-${Stage}
+      Description: Updates subscriptions with outstanding holiday stops. Source - https://github.com/guardian/support-service-lambdas/tree/master/handlers/holiday-stop-processor
       Code:
         S3Bucket: support-service-lambdas-dist
         S3Key: !Sub membership/${Stage}/holiday-stop-processor/holiday-stop-processor.jar
