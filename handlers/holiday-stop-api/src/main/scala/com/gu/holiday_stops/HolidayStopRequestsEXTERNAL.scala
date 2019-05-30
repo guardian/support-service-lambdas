@@ -18,6 +18,7 @@ object HolidayStopRequestsGET {
 }
 
 case class HolidayStopRequestEXTERNAL(
+  id: Option[String],
   start: String,
   end: String,
   subscriptionName: String
@@ -26,6 +27,7 @@ case class HolidayStopRequestEXTERNAL(
 object HolidayStopRequestEXTERNAL {
 
   def fromSF(sfHSR: HolidayStopRequest): HolidayStopRequestEXTERNAL = HolidayStopRequestEXTERNAL(
+    id = Some(sfHSR.Id.value),
     start = sfHSR.Start_Date__c.value.toString(),
     end = sfHSR.End_Date__c.value.toString(),
     subscriptionName = sfHSR.Subscription_Name__c.value
