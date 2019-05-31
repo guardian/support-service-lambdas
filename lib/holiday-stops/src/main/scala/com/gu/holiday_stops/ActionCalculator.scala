@@ -28,7 +28,7 @@ object ActionCalculator {
     val from = hsr.Start_Date__c.value
     val to = hsr.End_Date__c.value
     val dayOfWeekForProduct = productNameToDayOfWeek(hsr.Product_Name__c)
-    applicableDates(from, to, { _.dayOfWeek.get == dayOfWeekForProduct })
+    applicableDates(from, to, { _.getDayOfWeek == dayOfWeekForProduct })
   }
 
 }
