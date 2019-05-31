@@ -133,7 +133,7 @@ object Query extends Enum[Query] {
   )
   case object Contact extends Query(
     "Contact",
-    "SELECT City, Country, ID, State, PostalCode, Address1, Address2, ID, AccountID FROM Contact",
+    "SELECT City, Country, State, PostalCode, Address1, Address2, ID, AccountID FROM Contact",
     "ophan-raw-zuora-increment-contact",
     "Contact.csv"
   )
