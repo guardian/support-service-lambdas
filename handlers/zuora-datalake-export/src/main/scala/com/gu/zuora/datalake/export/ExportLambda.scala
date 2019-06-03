@@ -125,6 +125,18 @@ object Query extends Enum[Query] {
     "ophan-raw-zuora-increment-rateplan",
     "RatePlan.csv"
   )
+  case object Subscription extends Query(
+    "Subscription",
+    "SELECT AutoRenew, CancellationReason__c, ContractAcceptanceDate, ContractEffectiveDate, IPCountry__c, CreatedDate, Name, InitialPromotionCode__c, PromotionCode__c, ReaderType__c, Status, TermEndDate, TermStartDate, Version, ID, BillToContact.ID, SoldToContact.ID, SubscriptionVersionAmendment.ID, Account.ID FROM Subscription",
+    "ophan-raw-zuora-increment-subscription",
+    "Subscription.csv"
+  )
+  case object Contact extends Query(
+    "Contact",
+    "SELECT City, Country, State, PostalCode, Address1, Address2, ID, AccountID FROM Contact",
+    "ophan-raw-zuora-increment-contact",
+    "Contact.csv"
+  )
 }
 
 object ZuoraApiHost {
