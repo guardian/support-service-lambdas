@@ -41,7 +41,7 @@ object Zuora {
         case Right(status) =>
           if (!status.success)
             Left(failureMsg(status.reasons.map(_.mkString).getOrElse("")))
-          else Right(Unit)
+          else Right(())
       }
     }
   }

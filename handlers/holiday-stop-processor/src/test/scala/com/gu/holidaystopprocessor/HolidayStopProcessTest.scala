@@ -36,7 +36,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues {
     val response = HolidayStopProcess.processHolidayStop(
       config,
       getSubscription(Right(subscription)),
-      updateSubscription(Right(Unit)),
+      updateSubscription(Right(())),
       getLastAmendment(Right(amendment))
     )(holidayStop)
     response.right.value shouldBe HolidayStopResponse(
@@ -59,7 +59,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues {
     val response = HolidayStopProcess.processHolidayStop(
       config,
       getSubscription(Left("get went wrong")),
-      updateSubscription(Right(Unit)),
+      updateSubscription(Right(())),
       getLastAmendment(Right(amendment))
     )(holidayStop)
     response.left.value shouldBe "get went wrong"
@@ -69,7 +69,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues {
     val response = HolidayStopProcess.processHolidayStop(
       config,
       getSubscription(Right(subscription)),
-      updateSubscription(Right(Unit)),
+      updateSubscription(Right(())),
       getLastAmendment(Left("amendment gone bad"))
     )(holidayStop)
     response.left.value shouldBe "amendment gone bad"
@@ -79,7 +79,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues {
     val response = HolidayStopProcess.processHolidayStop(
       config,
       getSubscription(Right(subscription.copy(autoRenew = false))),
-      updateSubscription(Right(Unit)),
+      updateSubscription(Right(())),
       getLastAmendment(Right(amendment))
     )(holidayStop)
     response.left.value shouldBe "Cannot currently process non-auto-renewing subscription"
