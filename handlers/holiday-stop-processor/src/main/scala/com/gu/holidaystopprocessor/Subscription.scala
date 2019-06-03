@@ -35,10 +35,12 @@ case class RatePlanCharge(
 ) {
 
   val weekCountApprox: Int = {
+    val default = 52
     billingPeriod map {
       case "Month" => 4
       case "Quarter" => 13
       case "Annual" => 52
-    } getOrElse 52
+      case _ => default
+    } getOrElse default
   }
 }

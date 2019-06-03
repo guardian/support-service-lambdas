@@ -2,12 +2,11 @@ package com.gu.holidaystopprocessor
 
 import java.time.LocalDate
 
+import com.gu.holidaystopprocessor.Fixtures.config
 import com.gu.holidaystopprocessor.SubscriptionUpdate.holidayCreditToAdd
 import org.scalatest.{FlatSpec, Matchers}
 
 class SubscriptionUpdateTest extends FlatSpec with Matchers {
-
-  private val config = Config(ZuoraAccess("", "", ""), "ratePlanId", "ratePlanChargeId")
 
   "holidayCreditToAdd" should "generate update correctly" in {
     val update = holidayCreditToAdd(
