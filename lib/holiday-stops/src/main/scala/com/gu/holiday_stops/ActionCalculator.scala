@@ -13,22 +13,24 @@ object ActionCalculator {
   def publicationDatesToBeStopped(hsr: HolidayStopRequest): List[LocalDate] = {
 
     def applicableDates(
-      from: LocalDate,
-      to: LocalDate,
+      fromInclusive: LocalDate,
+      toInclusive: LocalDate,
       p: LocalDate => Boolean
     ): List[LocalDate] = {
-      val dateRange = 0 to Days.daysBetween(from, to).getDays
+      val dateRange = 0 to Days.daysBetween(fromInclusive, toInclusive).getDays
       dateRange.foldLeft(List.empty[LocalDate]) { (acc, i) =>
-        val d = from.plusDays(i)
+        val d = fromInclusive.plusDays(i)
         if (p(d)) acc :+ d
         else acc
       }
     }
 
-    val from = hsr.Start_Date__c.value
-    val to = hsr.End_Date__c.value
     val dayOfWeekForProduct = productNameToDayOfWeek(hsr.Product_Name__c)
-    applicableDates(from, to, { _.getDayOfWeek == dayOfWeekForProduct })
+    applicableDates(
+      fromInclusive = hsr.Start_Date__c.value,
+      toInclusive = hsr.End_Date__c.value,
+      { _.getDayOfWeek == dayOfWeekForProduct }
+    )
   }
 
 }
