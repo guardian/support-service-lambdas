@@ -1,5 +1,6 @@
 package com.gu.holidaystopprocessor
 
+import cats.implicits._
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.util.Logging
 import io.circe.generic.auto._
@@ -25,10 +26,7 @@ object Handler
           case Right(response) => logger.info(response)
         }
 
-        responses collectFirst {
-          case Left(msg) => Left(new RuntimeException(msg))
-        } getOrElse
-          Right(responses collect { case Right(response) => response })
+        responses.toList.sequence.leftMap(new RuntimeException(_))
     }
   }
 }
