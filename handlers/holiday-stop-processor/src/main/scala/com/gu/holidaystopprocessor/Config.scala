@@ -45,23 +45,23 @@ object Config {
         case "PROD" =>
           Config(
             secretConfig,
-            holidayCreditProductRatePlanId = "2c92a0fc5b42d2c9015b6259f7f40040",
+            holidayCreditProductRatePlanId = "2c92a0076ae9189c016b080c930a6186",
             holidayCreditProductRatePlanChargeId =
-              "2c92a00e6ad50f58016ad9ca59962c8c"
+              "2c92a0086ae928d7016b080f638477a6"
           )
         case "CODE" =>
           Config(
             secretConfig,
-            holidayCreditProductRatePlanId = "2c92c0f96abaa1b5016abac99075461f",
+            holidayCreditProductRatePlanId = "2c92c0f86b0378b0016b08112e870d0a",
             holidayCreditProductRatePlanChargeId =
-              "2c92c0f96abc17d2016ac0da404d456c"
+              "2c92c0f86b0378b0016b08112ec70d14"
           )
         case "DEV" =>
           Config(
             secretConfig,
-            holidayCreditProductRatePlanId = "2c92c0f9671686a201671d14b5e5771e",
+            holidayCreditProductRatePlanId = "2c92c0f96b03800b016b081fc04f1ba2",
             holidayCreditProductRatePlanChargeId =
-              "2c92c0f96abb85c3016abbe5771b04cc"
+              "2c92c0f96b03800b016b081fc0f41bb4"
           )
       }
     }
