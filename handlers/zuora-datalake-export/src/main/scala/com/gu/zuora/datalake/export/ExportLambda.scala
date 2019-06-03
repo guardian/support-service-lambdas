@@ -143,6 +143,12 @@ object Query extends Enum[Query] {
     "ophan-raw-zuora-increment-paymentmethod",
     "PaymentMethod.csv"
   )
+  case object Amendment extends Query(
+    "Amendment",
+    "SELECT CreatedDate, Status, SubscriptionID, ID FROM Amendment",
+    "ophan-raw-zuora-increment-amendment",
+    "Amendment.csv"
+  )
 }
 
 object ZuoraApiHost {
