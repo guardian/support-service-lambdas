@@ -149,6 +149,12 @@ object Query extends Enum[Query] {
     "ophan-raw-zuora-increment-amendment",
     "Amendment.csv"
   )
+  case object Invoice extends Query(
+    "Invoice",
+    "SELECT AdjustmentAmount, Amount, AmountWithoutTax, AutoPay, Balance, Comments, CreatedByID, CreatedDate, CreditBalanceAdjustmentAmount, DueDate, IncludesOneTime, IncludesRecurring, IncludesUsage, InvoiceDate, InvoiceNumber, LastEmailSentDate, PaymentAmount, PostedBy, PostedDate, RefundAmount, Source, SourceID, Status, TargetDate, TaxAmount, TaxExemptAmount, TransferredToAccounting, UpdatedByID, UpdatedDate, ID, Account.ID FROM Invoice",
+    "ophan-raw-zuora-increment-invoice",
+    "Invoice.csv"
+  )
 }
 
 object ZuoraApiHost {
