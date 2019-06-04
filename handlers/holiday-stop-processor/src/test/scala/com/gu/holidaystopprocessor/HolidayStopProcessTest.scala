@@ -3,9 +3,11 @@ package com.gu.holidaystopprocessor
 import java.time.LocalDate
 
 import com.gu.holidaystopprocessor.Fixtures.{config, mkSubscription}
-import org.scalatest.{EitherValues, FlatSpec, Matchers}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.{HolidayStopRequest, HolidayStopRequestId}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestActionedZuoraRef.{HolidayStopRequestActionedZuoraAmendmentCode, HolidayStopRequestActionedZuoraAmendmentPrice}
+import org.scalatest.{EitherValues, FlatSpec, Matchers, OptionValues}
 
-class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues {
+class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues with OptionValues {
 
   private val subscription = mkSubscription(
     LocalDate.of(2019, 1, 1),
@@ -16,8 +18,15 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues {
 
   private val amendment = Amendment("A1")
 
-  private val holidayStop = HolidayStop("", LocalDate.of(2019, 1, 1))
+  private val holidayStop = HolidayStop(
+    HolidayStopRequestId(""),
+    "subscriptionName",
+    LocalDate.of(2019, 1, 1)
+  )
 
+  private def getRequests(requestsGet: Either[String, Seq[HolidayStopRequest]]) = {
+    _: String => requestsGet
+  }
   private def getSubscription(subscriptionGet: Either[String, Subscription]) = {
     _: String =>
       subscriptionGet
@@ -31,6 +40,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues {
     _: Subscription =>
       amendmentGet
   }
+  private def exportAmendments(amendmentExport: Either[String, Unit]) = { _: Seq[HolidayStopResponse] => amendmentExport }
 
   "HolidayStopProcess" should "give correct amendment" in {
     val response = HolidayStopProcess.processHolidayStop(
@@ -40,8 +50,9 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues {
       getLastAmendment(Right(amendment))
     )(holidayStop)
     response.right.value shouldBe HolidayStopResponse(
-      code = "A1",
-      price = -5.81
+      requestId = HolidayStopRequestId(""),
+      amendmentCode = HolidayStopRequestActionedZuoraAmendmentCode("A1"),
+      price = HolidayStopRequestActionedZuoraAmendmentPrice(-5.81)
     )
   }
 
@@ -83,5 +94,46 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues {
       getLastAmendment(Right(amendment))
     )(holidayStop)
     response.left.value shouldBe "Cannot currently process non-auto-renewing subscription"
+  }
+
+  "processHolidayStops" should "give correct amendments" in {
+    val responses = HolidayStopProcess.processHolidayStops(
+      config,
+      getRequests(Right(Seq(
+        Fixtures.mkHolidayStopRequest("r1"),
+        Fixtures.mkHolidayStopRequest("r2"),
+        Fixtures.mkHolidayStopRequest("r3")
+      ))),
+      getSubscription(Right(subscription)),
+      updateSubscription(Right(())),
+      getLastAmendment(Right(amendment)),
+      exportAmendments(Right(()))
+    )
+    responses.headOption.value.right.value shouldBe HolidayStopResponse(
+      requestId = HolidayStopRequestId("r1"),
+      amendmentCode = HolidayStopRequestActionedZuoraAmendmentCode("A1"),
+      price = HolidayStopRequestActionedZuoraAmendmentPrice(-5.81)
+    )
+    responses.lastOption.value.right.value shouldBe HolidayStopResponse(
+      requestId = HolidayStopRequestId("r3"),
+      amendmentCode = HolidayStopRequestActionedZuoraAmendmentCode("A1"),
+      price = HolidayStopRequestActionedZuoraAmendmentPrice(-5.81)
+    )
+  }
+
+  it should "give an exception message if exporting results fails" in {
+    val responses = HolidayStopProcess.processHolidayStops(
+      config,
+      getRequests(Right(Seq(
+        Fixtures.mkHolidayStopRequest("r1"),
+        Fixtures.mkHolidayStopRequest("r2"),
+        Fixtures.mkHolidayStopRequest("r3")
+      ))),
+      getSubscription(Right(subscription)),
+      updateSubscription(Right(())),
+      getLastAmendment(Right(amendment)),
+      exportAmendments(Left("Export failed"))
+    )
+    responses.headOption.value.left.value shouldBe "Export failed"
   }
 }
