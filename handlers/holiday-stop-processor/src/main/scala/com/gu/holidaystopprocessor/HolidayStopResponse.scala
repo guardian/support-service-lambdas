@@ -1,3 +1,10 @@
 package com.gu.holidaystopprocessor
 
-case class HolidayStopResponse(code: String, price: Double)
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.HolidayStopRequestId
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestActionedZuoraRef.{HolidayStopRequestActionedZuoraAmendmentCode, HolidayStopRequestActionedZuoraAmendmentPrice}
+
+case class HolidayStopResponse(
+  requestId: HolidayStopRequestId,
+  amendmentCode: HolidayStopRequestActionedZuoraAmendmentCode,
+  price: HolidayStopRequestActionedZuoraAmendmentPrice
+)
