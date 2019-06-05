@@ -13,7 +13,7 @@ case class HolidayStop(
 
 object HolidayStop {
 
-  def holidayStopsToApply(getRequests: String => Either[String, Seq[HolidayStopRequest]]): Either[String, Seq[HolidayStop]] =
+  def holidayStopsToApply(getRequests: String => Either[OverallFailure, Seq[HolidayStopRequest]]): Either[OverallFailure, Seq[HolidayStop]] =
     getRequests("Guardian Weekly") map {
       _ flatMap toHolidayStops
     }

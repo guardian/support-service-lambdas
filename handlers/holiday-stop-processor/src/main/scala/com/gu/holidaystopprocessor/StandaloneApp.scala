@@ -6,8 +6,12 @@ object StandaloneApp extends App {
   Config() match {
     case Left(msg) => println(s"Config failure: $msg")
     case Right(config) =>
-      HolidayStopProcess(config) foreach {
-        case Left(msg) => println(s"Failed: $msg")
+      val processResult = HolidayStopProcess(config)
+      processResult.overallFailure foreach { failure =>
+        println(s"Overall failure: ${failure.reason}")
+      }
+      processResult.holidayStopResults foreach {
+        case Left(failure) => println(s"Failed: ${failure.reason}")
         case Right(response) => println(s"Success: $response")
       }
   }

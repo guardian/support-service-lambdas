@@ -24,23 +24,25 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
     LocalDate.of(2019, 1, 1)
   )
 
-  private def getRequests(requestsGet: Either[String, Seq[HolidayStopRequest]]) = {
+  private def getRequests(requestsGet: Either[OverallFailure, Seq[HolidayStopRequest]]) = {
     _: String => requestsGet
   }
-  private def getSubscription(subscriptionGet: Either[String, Subscription]) = {
+  private def getSubscription(subscriptionGet: Either[HolidayStopFailure, Subscription]) = {
     _: String =>
       subscriptionGet
   }
   private def updateSubscription(
-    subscriptionUpdate: Either[String, Unit]
-  ): (Subscription, SubscriptionUpdate) => Either[String, Unit] = {
+    subscriptionUpdate: Either[HolidayStopFailure, Unit]
+  ): (Subscription, SubscriptionUpdate) => Either[HolidayStopFailure, Unit] = {
     case (_, _) => subscriptionUpdate
   }
-  private def getLastAmendment(amendmentGet: Either[String, Amendment]) = {
+  private def getLastAmendment(amendmentGet: Either[HolidayStopFailure, Amendment]) = {
     _: Subscription =>
       amendmentGet
   }
-  private def exportAmendments(amendmentExport: Either[String, Unit]) = { _: Seq[HolidayStopResponse] => amendmentExport }
+  private def exportAmendments(amendmentExport: Either[OverallFailure, Unit]) = {
+    _: Seq[HolidayStopResponse] => amendmentExport
+  }
 
   "HolidayStopProcess" should "give correct amendment" in {
     val response = HolidayStopProcess.processHolidayStop(
@@ -60,20 +62,20 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
     val response = HolidayStopProcess.processHolidayStop(
       config,
       getSubscription(Right(subscription)),
-      updateSubscription(Left("update went wrong")),
+      updateSubscription(Left(HolidayStopFailure("update went wrong"))),
       getLastAmendment(Right(amendment))
     )(holidayStop)
-    response.left.value shouldBe "update went wrong"
+    response.left.value shouldBe HolidayStopFailure("update went wrong")
   }
 
   it should "give an exception message if getting subscription details fails" in {
     val response = HolidayStopProcess.processHolidayStop(
       config,
-      getSubscription(Left("get went wrong")),
+      getSubscription(Left(HolidayStopFailure("get went wrong"))),
       updateSubscription(Right(())),
       getLastAmendment(Right(amendment))
     )(holidayStop)
-    response.left.value shouldBe "get went wrong"
+    response.left.value shouldBe HolidayStopFailure("get went wrong")
   }
 
   it should "give an exception message if getting amendment code fails" in {
@@ -81,9 +83,9 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
       config,
       getSubscription(Right(subscription)),
       updateSubscription(Right(())),
-      getLastAmendment(Left("amendment gone bad"))
+      getLastAmendment(Left(HolidayStopFailure("amendment gone bad")))
     )(holidayStop)
-    response.left.value shouldBe "amendment gone bad"
+    response.left.value shouldBe HolidayStopFailure("amendment gone bad")
   }
 
   it should "give an exception message if subscription isn't auto-renewing" in {
@@ -93,7 +95,8 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
       updateSubscription(Right(())),
       getLastAmendment(Right(amendment))
     )(holidayStop)
-    response.left.value shouldBe "Cannot currently process non-auto-renewing subscription"
+    response.left.value shouldBe
+      HolidayStopFailure("Cannot currently process non-auto-renewing subscription")
   }
 
   "processHolidayStops" should "give correct amendments" in {
@@ -109,12 +112,12 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
       getLastAmendment(Right(amendment)),
       exportAmendments(Right(()))
     )
-    responses.headOption.value.right.value shouldBe HolidayStopResponse(
+    responses.holidayStopResults.headOption.value.right.value shouldBe HolidayStopResponse(
       requestId = HolidayStopRequestId("r1"),
       amendmentCode = HolidayStopRequestActionedZuoraAmendmentCode("A1"),
       price = HolidayStopRequestActionedZuoraAmendmentPrice(-5.81)
     )
-    responses.lastOption.value.right.value shouldBe HolidayStopResponse(
+    responses.holidayStopResults.lastOption.value.right.value shouldBe HolidayStopResponse(
       requestId = HolidayStopRequestId("r3"),
       amendmentCode = HolidayStopRequestActionedZuoraAmendmentCode("A1"),
       price = HolidayStopRequestActionedZuoraAmendmentPrice(-5.81)
@@ -132,8 +135,8 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
       getSubscription(Right(subscription)),
       updateSubscription(Right(())),
       getLastAmendment(Right(amendment)),
-      exportAmendments(Left("Export failed"))
+      exportAmendments(Left(OverallFailure("Export failed")))
     )
-    responses.headOption.value.left.value shouldBe "Export failed"
+    responses.overallFailure.value shouldBe OverallFailure("Export failed")
   }
 }

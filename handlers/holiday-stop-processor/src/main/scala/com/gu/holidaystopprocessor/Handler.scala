@@ -19,14 +19,19 @@ object Handler
     Config() match {
       case Left(msg) => Left(new RuntimeException(s"Config failure: $msg"))
       case Right(config) =>
-        val responses = HolidayStopProcess(config)
+        val processResult = HolidayStopProcess(config)
 
-        responses foreach {
-          case Left(msg) => logger.error(msg)
+        processResult.holidayStopResults foreach {
+          case Left(failure) => logger.error(failure.reason)
           case Right(response) => logger.info(response)
         }
 
-        responses.toList.sequence.leftMap(new RuntimeException(_))
+        processResult.overallFailure map
+          { failure => Left(new RuntimeException(failure.reason)) } getOrElse
+          {
+            processResult.holidayStopResults.toList.sequence
+              .leftMap { failure => new RuntimeException(failure.reason) }
+          }
     }
   }
 }

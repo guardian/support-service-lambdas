@@ -11,16 +11,17 @@ object Zuora {
 
   private def normalised[E <: io.circe.Error, R](
     body: String, result: String => Either[E, R]
-  ): Either[String, R] = result(body).left.map(e => s"Failed to decode '$body': ${e.toString}")
+  ): Either[HolidayStopFailure, R] =
+    result(body).left.map(e => HolidayStopFailure(s"Failed to decode '$body': ${e.toString}"))
 
   def subscriptionGetResponse(
     zuoraAccess: ZuoraAccess
-  )(subscriptionName: String): Either[String, Subscription] = {
+  )(subscriptionName: String): Either[HolidayStopFailure, Subscription] = {
     val request = sttp.auth
       .basic(zuoraAccess.username, zuoraAccess.password)
       .get(uri"${zuoraAccess.baseUrl}/subscriptions/$subscriptionName")
     val response = request.send()
-    response.body flatMap { body =>
+    response.body.left map { e => HolidayStopFailure(e) } flatMap { body =>
       normalised(body, decode[Subscription])
     }
   }
@@ -28,30 +29,31 @@ object Zuora {
   def subscriptionUpdateResponse(zuoraAccess: ZuoraAccess)(
     subscription: Subscription,
     update: SubscriptionUpdate
-  ): Either[String, Unit] = {
+  ): Either[HolidayStopFailure, Unit] = {
     val request = sttp.auth
       .basic(zuoraAccess.username, zuoraAccess.password)
       .put(uri"${zuoraAccess.baseUrl}/subscriptions/${subscription.subscriptionNumber}")
       .body(update)
     val response = request.send()
-    response.body flatMap { body =>
-      def failureMsg(wrappedMsg: String) = s"Update '$update' to subscription '${subscription.subscriptionNumber}' failed: $wrappedMsg"
+    response.body.left map { e => HolidayStopFailure(e) } flatMap { body =>
+      def failureMsg(wrappedMsg: String) =
+        s"Update '$update' to subscription '${subscription.subscriptionNumber}' failed: $wrappedMsg"
       normalised(body, decode[ZuoraStatusResponse]) match {
-        case Left(e) => Left(failureMsg(e))
+        case Left(e) => Left(HolidayStopFailure(failureMsg(e.reason)))
         case Right(status) =>
           if (!status.success)
-            Left(failureMsg(status.reasons.map(_.mkString).getOrElse("")))
+            Left(HolidayStopFailure(failureMsg(status.reasons.map(_.mkString).getOrElse(""))))
           else Right(())
       }
     }
   }
 
-  def lastAmendmentGetResponse(zuoraAccess: ZuoraAccess)(subscription: Subscription): Either[String, Amendment] = {
+  def lastAmendmentGetResponse(zuoraAccess: ZuoraAccess)(subscription: Subscription): Either[HolidayStopFailure, Amendment] = {
     val request = sttp.auth
       .basic(zuoraAccess.username, zuoraAccess.password)
       .get(uri"${zuoraAccess.baseUrl}/amendments/subscriptions/${subscription.subscriptionNumber}")
     val response = request.send()
-    response.body flatMap { body =>
+    response.body.left map { e => HolidayStopFailure(e) } flatMap { body =>
       normalised(body, decode[Amendment])
     }
   }

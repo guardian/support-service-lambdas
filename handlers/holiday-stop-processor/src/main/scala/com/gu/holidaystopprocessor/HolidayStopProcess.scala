@@ -5,7 +5,7 @@ import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestActionedZuora
 
 object HolidayStopProcess {
 
-  def apply(config: Config): Seq[Either[String, HolidayStopResponse]] = {
+  def apply(config: Config): ProcessResult = {
     val sfCredentials = config.sfCredentials
     val zuoraCredentials = config.zuoraCredentials
     processHolidayStops(
@@ -20,12 +20,12 @@ object HolidayStopProcess {
 
   def processHolidayStops(
     config: Config,
-    getRequests: String => Either[String, Seq[HolidayStopRequest]],
-    getSubscription: String => Either[String, Subscription],
-    updateSubscription: (Subscription, SubscriptionUpdate) => Either[String, Unit],
-    getLastAmendment: Subscription => Either[String, Amendment],
-    exportAmendments: Seq[HolidayStopResponse] => Either[String, Unit]
-  ): Seq[Either[String, HolidayStopResponse]] = {
+    getRequests: String => Either[OverallFailure, Seq[HolidayStopRequest]],
+    getSubscription: String => Either[HolidayStopFailure, Subscription],
+    updateSubscription: (Subscription, SubscriptionUpdate) => Either[HolidayStopFailure, Unit],
+    getLastAmendment: Subscription => Either[HolidayStopFailure, Amendment],
+    exportAmendments: Seq[HolidayStopResponse] => Either[OverallFailure, Unit]
+  ): ProcessResult = {
     val response = processHolidayStop(
       config,
       getSubscription,
@@ -33,26 +33,26 @@ object HolidayStopProcess {
       getLastAmendment
     ) _
     HolidayStop.holidayStopsToApply(getRequests) match {
-      case Left(msg) => Seq(Left(msg))
+      case Left(failure) => ProcessResult(Some(failure), holidayStopResults = Nil)
       case Right(holidayStops) =>
         val responses = holidayStops.map(response)
         val exportResult = exportAmendments(responses.collect { case Right(successes) => successes })
         exportResult match {
-          case Left(msg) => Seq(Left(msg))
-          case _ => responses
+          case Left(failure) => ProcessResult(Some(failure), responses)
+          case _ => ProcessResult(None, responses)
         }
     }
   }
 
   def processHolidayStop(
     config: Config,
-    getSubscription: String => Either[String, Subscription],
-    updateSubscription: (Subscription, SubscriptionUpdate) => Either[String, Unit],
-    getLastAmendment: Subscription => Either[String, Amendment]
-  )(stop: HolidayStop): Either[String, HolidayStopResponse] =
+    getSubscription: String => Either[HolidayStopFailure, Subscription],
+    updateSubscription: (Subscription, SubscriptionUpdate) => Either[HolidayStopFailure, Unit],
+    getLastAmendment: Subscription => Either[HolidayStopFailure, Amendment]
+  )(stop: HolidayStop): Either[HolidayStopFailure, HolidayStopResponse] =
     for {
       subscription <- getSubscription(stop.subscriptionName)
-      _ <- if (subscription.autoRenew) Right(()) else Left("Cannot currently process non-auto-renewing subscription")
+      _ <- if (subscription.autoRenew) Right(()) else Left(HolidayStopFailure("Cannot currently process non-auto-renewing subscription"))
       update <- Right(SubscriptionUpdate.holidayCreditToAdd(config, subscription, stop.stoppedPublicationDate))
       _ <- updateSubscription(subscription, update)
       amendment <- getLastAmendment(subscription)
