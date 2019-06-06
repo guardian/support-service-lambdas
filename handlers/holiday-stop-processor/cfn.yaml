@@ -36,12 +36,18 @@ Resources:
                   - logs:CreateLogStream
                   - logs:PutLogEvents
                 Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/holiday-stop-processor-${Stage}:log-stream:*
-        - PolicyName: ReadPrivateCredentials
+        - PolicyName: ReadZuoraCredentials
           PolicyDocument:
             Statement:
               - Effect: Allow
                 Action: s3:GetObject
                 Resource: !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/zuoraRest-${Stage}*.json
+        - PolicyName: ReadSalesforceCredentials
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action: s3:GetObject
+                Resource: !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/sfAuth-${Stage}*.json
 
   HolidayStopProcessor:
     Type: AWS::Lambda::Function
