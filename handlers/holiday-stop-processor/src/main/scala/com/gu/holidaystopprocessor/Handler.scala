@@ -2,12 +2,12 @@ package com.gu.holidaystopprocessor
 
 import cats.implicits._
 import com.amazonaws.services.lambda.runtime.Context
-import com.gu.util.Logging
+import com.typesafe.scalalogging.LazyLogging
 import io.circe.generic.auto._
 import io.github.mkotsur.aws.handler.Lambda
 import io.github.mkotsur.aws.handler.Lambda._
 
-object Handler extends Lambda[None.type, Seq[HolidayStopResponse]] with Logging {
+object Handler extends Lambda[None.type, Seq[HolidayStopResponse]] with LazyLogging {
 
   override protected def handle(
     `_`: None.type,
