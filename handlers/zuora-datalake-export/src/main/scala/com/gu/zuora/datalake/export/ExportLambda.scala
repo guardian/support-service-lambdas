@@ -12,7 +12,8 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.s3.model.{CannedAccessControlList, ObjectMetadata, PutObjectRequest}
 import com.typesafe.scalalogging.LazyLogging
-import scalaj.http.Http
+import scalaj.http.{BaseHttp, HttpOptions}
+
 import scala.io.Source
 import scala.concurrent.duration._
 import scala.util.Try
@@ -231,7 +232,7 @@ object AccessToken {
   def apply(): String = {
     val config = ReadConfig()
     val oauthConfig = config.zuoraDatalakeExport.oauth
-    val response = Http(s"${ZuoraApiHost()}/oauth/token")
+    val response = HttpWithLongTimeout(s"${ZuoraApiHost()}/oauth/token")
       .postForm(Seq(
         "client_id" -> oauthConfig.clientId,
         "client_secret" -> oauthConfig.clientSecret,
@@ -303,7 +304,7 @@ object StartAquaJob {
         |}
       """.stripMargin
 
-    val response = Http(s"${ZuoraApiHost()}/v1/batch-query/")
+    val response = HttpWithLongTimeout(s"${ZuoraApiHost()}/v1/batch-query/")
       .header("Authorization", s"Bearer ${AccessToken()}")
       .header("Content-Type", "application/json")
       .postData(body)
@@ -324,7 +325,7 @@ object StartAquaJob {
  */
 object GetJobResult {
   def apply(jobId: String): JobResults = {
-    val response = Http(s"${ZuoraApiHost()}/v1/batch-query/jobs/$jobId")
+    val response = HttpWithLongTimeout(s"${ZuoraApiHost()}/v1/batch-query/jobs/$jobId")
       .header("Authorization", s"Bearer ${AccessToken()}")
       .header("Content-Type", "application/json")
       .asString
@@ -354,7 +355,7 @@ object GetJobResult {
 object GetResultsFile {
   def apply(batch: Batch): String = {
     val fileId = batch.fileId.getOrElse(throw new RuntimeException("Failed to get csv file due to missing fileId"))
-    val response = Http(s"${ZuoraApiHost()}/v1/file/$fileId")
+    val response = HttpWithLongTimeout(s"${ZuoraApiHost()}/v1/file/$fileId")
       .header("Authorization", s"Bearer ${AccessToken()}")
       .asString
 
@@ -386,3 +387,11 @@ object SaveCsvToBucket {
     ).withCannedAcl(CannedAccessControlList.BucketOwnerRead)
 
 }
+
+object HttpWithLongTimeout extends BaseHttp(
+  options = Seq(
+    HttpOptions.connTimeout(5000),
+    HttpOptions.readTimeout(5 * 60 * 1000),
+    HttpOptions.followRedirects(false)
+  )
+)
