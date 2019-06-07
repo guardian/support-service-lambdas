@@ -26,21 +26,30 @@ object HolidayStopProcess {
     getLastAmendment: Subscription => Either[HolidayStopFailure, Amendment],
     exportAmendments: Seq[HolidayStopResponse] => Either[OverallFailure, Unit]
   ): ProcessResult = {
-    val response = processHolidayStop(
-      config,
-      getSubscription,
-      updateSubscription,
-      getLastAmendment
-    ) _
     HolidayStop.holidayStopsToApply(getRequests) match {
-      case Left(failure) => ProcessResult(Some(failure), holidayStopResults = Nil)
+      case Left(failure) => ProcessResult(
+        holidayStopsToApply = Nil,
+        holidayStopResults = Nil,
+        overallFailure = Some(failure)
+      )
       case Right(holidayStops) =>
-        val responses = holidayStops.map(response)
-        val exportResult = exportAmendments(responses.collect { case Right(successes) => successes })
-        exportResult match {
-          case Left(failure) => ProcessResult(Some(failure), responses)
-          case _ => ProcessResult(None, responses)
+        val responses = holidayStops map {
+          processHolidayStop(
+            config,
+            getSubscription,
+            updateSubscription,
+            getLastAmendment
+          )
         }
+        val exportResult = exportAmendments(responses.collect {
+          case Right(successes) =>
+            successes
+        })
+        ProcessResult(
+          holidayStopsToApply = holidayStops,
+          holidayStopResults = responses,
+          overallFailure = exportResult.left.toOption
+        )
     }
   }
 

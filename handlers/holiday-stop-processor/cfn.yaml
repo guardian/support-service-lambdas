@@ -64,7 +64,7 @@ Resources:
           Stage: !Ref Stage
       Role:
         !GetAtt HolidayStopProcessorRole.Arn
-      MemorySize: 256
+      MemorySize: 512
       Runtime: java8
       Timeout: 60
     DependsOn:
