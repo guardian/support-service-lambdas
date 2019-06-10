@@ -31,7 +31,7 @@ case class RatePlanCharge(
   price: Double,
   billingPeriod: Option[String],
   effectiveStartDate: LocalDate,
-  effectiveEndDate: LocalDate
+  chargedThroughDate: Option[LocalDate]
 ) {
 
   val weekCountApprox: Int = {

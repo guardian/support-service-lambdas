@@ -10,10 +10,10 @@ import org.scalatest.{EitherValues, FlatSpec, Matchers, OptionValues}
 class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues with OptionValues {
 
   private val subscription = mkSubscription(
-    LocalDate.of(2019, 1, 1),
-    75.5,
-    "Quarter",
-    LocalDate.of(2020, 1, 1)
+    termEndDate = LocalDate.of(2019, 1, 1),
+    price = 75.5,
+    billingPeriod = "Quarter",
+    chargedThroughDate = Some(LocalDate.of(2019, 8, 11))
   )
 
   private val amendment = Amendment("A1")
