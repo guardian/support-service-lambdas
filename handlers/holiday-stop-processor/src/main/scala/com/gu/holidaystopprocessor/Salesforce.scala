@@ -14,7 +14,7 @@ import scalaz.{-\/, \/-}
 
 object Salesforce {
 
-  private def thresholdDate: LocalDate = LocalDate.now.plusDays(14)
+  private def thresholdDate: LocalDate = LocalDate.now.plusDays(Config.daysInAdvance)
 
   def holidayStopRequests(sfCredentials: SFAuthConfig)(productNamePrefix: String): Either[OverallFailure, Seq[HolidayStopRequest]] =
     SalesforceClient(RawEffects.response, sfCredentials).value.flatMap { sfAuth =>
