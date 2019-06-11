@@ -7,11 +7,22 @@ import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
 
 object Fixtures {
 
+  def mkRatePlanCharge(
+    price: Double,
+    billingPeriod: String,
+    chargedThroughDate: Option[LocalDate] = Some(LocalDate.of(2019, 9, 2))
+  ) = RatePlanCharge(
+    price,
+    Some(billingPeriod),
+    effectiveStartDate = LocalDate.of(2019, 6, 10),
+    chargedThroughDate
+  )
+
   def mkSubscription(
     termEndDate: LocalDate,
     price: Double,
     billingPeriod: String,
-    effectiveEndDate: LocalDate
+    chargedThroughDate: Option[LocalDate]
   ) =
     Subscription(
       subscriptionNumber = "S1",
@@ -22,8 +33,7 @@ object Fixtures {
       ratePlans = Seq(
         RatePlan(
           productName = "Guardian Weekly",
-          ratePlanCharges =
-            Seq(RatePlanCharge(price, Some(billingPeriod), LocalDate.of(2019, 1, 1), effectiveEndDate))
+          ratePlanCharges = Seq(mkRatePlanCharge(price, billingPeriod, chargedThroughDate))
         )
       )
     )

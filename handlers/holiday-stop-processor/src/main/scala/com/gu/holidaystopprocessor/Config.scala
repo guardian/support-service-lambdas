@@ -19,6 +19,11 @@ case class Config(
 
 object Config {
 
+  /**
+   * Min number of days ahead that a holiday stop can be applied
+   */
+  val daysInAdvance = 14
+
   private def zuoraCredentials(stage: String): Either[String, ZuoraAccess] =
     credentials[ZuoraAccess](stage, "zuoraRest")
 

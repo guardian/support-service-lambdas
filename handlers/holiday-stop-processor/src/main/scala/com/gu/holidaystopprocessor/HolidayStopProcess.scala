@@ -62,7 +62,7 @@ object HolidayStopProcess {
     for {
       subscription <- getSubscription(stop.subscriptionName)
       _ <- if (subscription.autoRenew) Right(()) else Left(HolidayStopFailure("Cannot currently process non-auto-renewing subscription"))
-      update <- Right(SubscriptionUpdate.holidayCreditToAdd(config, subscription, stop.stoppedPublicationDate))
+      update <- SubscriptionUpdate.holidayCreditToAdd(config, subscription, stop.stoppedPublicationDate)
       _ <- updateSubscription(subscription, update)
       amendment <- getLastAmendment(subscription)
     } yield HolidayStopResponse(
