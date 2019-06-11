@@ -13,8 +13,7 @@ object HolidayStopProcess {
       getRequests = Salesforce.holidayStopRequests(sfCredentials),
       getSubscription = Zuora.subscriptionGetResponse(zuoraCredentials),
       updateSubscription = Zuora.subscriptionUpdateResponse(zuoraCredentials),
-      getLastAmendment = Zuora.lastAmendmentGetResponse(zuoraCredentials),
-      exportAmendments = Salesforce.holidayStopUpdateResponse(sfCredentials)
+      exportAddedCharges = Salesforce.holidayStopUpdateResponse(sfCredentials)
     )
   }
 
@@ -23,8 +22,7 @@ object HolidayStopProcess {
     getRequests: String => Either[OverallFailure, Seq[HolidayStopRequest]],
     getSubscription: String => Either[HolidayStopFailure, Subscription],
     updateSubscription: (Subscription, SubscriptionUpdate) => Either[HolidayStopFailure, Unit],
-    getLastAmendment: Subscription => Either[HolidayStopFailure, Amendment],
-    exportAmendments: Seq[HolidayStopResponse] => Either[OverallFailure, Unit]
+    exportAddedCharges: Seq[HolidayStopResponse] => Either[OverallFailure, Unit]
   ): ProcessResult = {
     HolidayStop.holidayStopsToApply(getRequests) match {
       case Left(failure) => ProcessResult(
@@ -38,13 +36,11 @@ object HolidayStopProcess {
             config,
             getSubscription,
             updateSubscription,
-            getLastAmendment
           )
         }
-        val exportResult = exportAmendments(responses.collect {
-          case Right(successes) =>
-            successes
-        })
+        val exportResult = exportAddedCharges(
+          responses.collect { case Right(successes) => successes }
+        )
         ProcessResult(
           holidayStopsToApply = holidayStops,
           holidayStopResults = responses,
@@ -57,17 +53,19 @@ object HolidayStopProcess {
     config: Config,
     getSubscription: String => Either[HolidayStopFailure, Subscription],
     updateSubscription: (Subscription, SubscriptionUpdate) => Either[HolidayStopFailure, Unit],
-    getLastAmendment: Subscription => Either[HolidayStopFailure, Amendment]
   )(stop: HolidayStop): Either[HolidayStopFailure, HolidayStopResponse] =
     for {
       subscription <- getSubscription(stop.subscriptionName)
       _ <- if (subscription.autoRenew) Right(()) else Left(HolidayStopFailure("Cannot currently process non-auto-renewing subscription"))
       update <- SubscriptionUpdate.holidayCreditToAdd(config, subscription, stop.stoppedPublicationDate)
-      _ <- updateSubscription(subscription, update)
-      amendment <- getLastAmendment(subscription)
-    } yield HolidayStopResponse(
-      stop.requestId,
-      HolidayStopRequestActionedZuoraAmendmentCode(amendment.code),
-      HolidayStopRequestActionedZuoraAmendmentPrice(update.price)
-    )
+      _ <- if (subscription.hasHolidayStop(stop)) Right(()) else updateSubscription(subscription, update)
+      updatedSubscription <- getSubscription(stop.subscriptionName)
+      addedCharge <- updatedSubscription.ratePlanCharge(stop).toRight(HolidayStopFailure("Failed to add charge to subscription"))
+    } yield {
+      HolidayStopResponse(
+        stop.requestId,
+        HolidayStopRequestActionedZuoraAmendmentCode(addedCharge.number),
+        HolidayStopRequestActionedZuoraAmendmentPrice(addedCharge.price)
+      )
+    }
 }

@@ -47,14 +47,4 @@ object Zuora {
       }
     }
   }
-
-  def lastAmendmentGetResponse(zuoraAccess: ZuoraAccess)(subscription: Subscription): Either[HolidayStopFailure, Amendment] = {
-    val request = sttp.auth
-      .basic(zuoraAccess.username, zuoraAccess.password)
-      .get(uri"${zuoraAccess.baseUrl}/amendments/subscriptions/${subscription.subscriptionNumber}")
-    val response = request.send()
-    response.body.left map { e => HolidayStopFailure(e) } flatMap { body =>
-      normalised(body, decode[Amendment])
-    }
-  }
 }
