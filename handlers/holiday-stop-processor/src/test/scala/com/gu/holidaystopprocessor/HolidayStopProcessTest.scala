@@ -16,45 +16,41 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
     chargedThroughDate = Some(LocalDate.of(2019, 8, 11))
   )
 
-  private val amendment = Amendment("A1")
-
   private val holidayStop = HolidayStop(
-    HolidayStopRequestId(""),
+    HolidayStopRequestId("HSR1"),
     "subscriptionName",
-    LocalDate.of(2019, 1, 1)
+    LocalDate.of(2019, 8, 9)
   )
 
-  private def getRequests(requestsGet: Either[OverallFailure, Seq[HolidayStopRequest]]) = {
-    _: String => requestsGet
+  private def getRequests(requestsGet: Either[OverallFailure, Seq[HolidayStopRequest]]): String
+    => Either[OverallFailure, Seq[HolidayStopRequest]] =
+    _ => requestsGet
+
+  private def getSubscription(subscriptionGet: Either[HolidayStopFailure, Subscription]): String
+    => Either[HolidayStopFailure, Subscription] = {
+    _ => subscriptionGet
   }
-  private def getSubscription(subscriptionGet: Either[HolidayStopFailure, Subscription]) = {
-    _: String =>
-      subscriptionGet
-  }
+
   private def updateSubscription(
     subscriptionUpdate: Either[HolidayStopFailure, Unit]
   ): (Subscription, SubscriptionUpdate) => Either[HolidayStopFailure, Unit] = {
     case (_, _) => subscriptionUpdate
   }
-  private def getLastAmendment(amendmentGet: Either[HolidayStopFailure, Amendment]) = {
-    _: Subscription =>
-      amendmentGet
-  }
-  private def exportAmendments(amendmentExport: Either[OverallFailure, Unit]) = {
-    _: Seq[HolidayStopResponse] => amendmentExport
-  }
 
-  "HolidayStopProcess" should "give correct amendment" in {
+  private def exportAmendments(amendmentExport: Either[OverallFailure, Unit])
+  : Seq[HolidayStopResponse] => Either[OverallFailure, Unit] =
+    _ => amendmentExport
+
+  "HolidayStopProcess" should "give correct added charge" in {
     val response = HolidayStopProcess.processHolidayStop(
       config,
-      getSubscription(Right(subscription)),
+      getSubscription(Right(Fixtures.mkSubscriptionWithHolidayStops())),
       updateSubscription(Right(())),
-      getLastAmendment(Right(amendment))
     )(holidayStop)
     response.right.value shouldBe HolidayStopResponse(
-      requestId = HolidayStopRequestId(""),
-      amendmentCode = HolidayStopRequestActionedZuoraAmendmentCode("A1"),
-      price = HolidayStopRequestActionedZuoraAmendmentPrice(-5.81)
+      requestId = HolidayStopRequestId("HSR1"),
+      amendmentCode = HolidayStopRequestActionedZuoraAmendmentCode("C2"),
+      price = HolidayStopRequestActionedZuoraAmendmentPrice(-3.27)
     )
   }
 
@@ -63,7 +59,6 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
       config,
       getSubscription(Right(subscription)),
       updateSubscription(Left(HolidayStopFailure("update went wrong"))),
-      getLastAmendment(Right(amendment))
     )(holidayStop)
     response.left.value shouldBe HolidayStopFailure("update went wrong")
   }
@@ -73,19 +68,8 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
       config,
       getSubscription(Left(HolidayStopFailure("get went wrong"))),
       updateSubscription(Right(())),
-      getLastAmendment(Right(amendment))
     )(holidayStop)
     response.left.value shouldBe HolidayStopFailure("get went wrong")
-  }
-
-  it should "give an exception message if getting amendment code fails" in {
-    val response = HolidayStopProcess.processHolidayStop(
-      config,
-      getSubscription(Right(subscription)),
-      updateSubscription(Right(())),
-      getLastAmendment(Left(HolidayStopFailure("amendment gone bad")))
-    )(holidayStop)
-    response.left.value shouldBe HolidayStopFailure("amendment gone bad")
   }
 
   it should "give an exception message if subscription isn't auto-renewing" in {
@@ -93,34 +77,54 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
       config,
       getSubscription(Right(subscription.copy(autoRenew = false))),
       updateSubscription(Right(())),
-      getLastAmendment(Right(amendment))
     )(holidayStop)
     response.left.value shouldBe
       HolidayStopFailure("Cannot currently process non-auto-renewing subscription")
   }
 
-  "processHolidayStops" should "give correct amendments" in {
+  it should "just give charge added without applying an update if holiday stop has already been applied" in {
+    val response = HolidayStopProcess.processHolidayStop(
+      config,
+      getSubscription(Right(Fixtures.mkSubscriptionWithHolidayStops())),
+      updateSubscription(Left(HolidayStopFailure("shouldn't need to apply an update"))),
+    )(holidayStop)
+    response.right.value shouldBe HolidayStopResponse(
+      requestId = HolidayStopRequestId("HSR1"),
+      amendmentCode = HolidayStopRequestActionedZuoraAmendmentCode("C2"),
+      price = HolidayStopRequestActionedZuoraAmendmentPrice(-3.27)
+    )
+  }
+
+  it should "give a failure if subscription has no added charge" in {
+    val response = HolidayStopProcess.processHolidayStop(
+      config,
+      getSubscription(Right(subscription)),
+      updateSubscription(Left(HolidayStopFailure("shouldn't need to apply an update"))),
+    )(holidayStop)
+    response.left.value shouldBe HolidayStopFailure("shouldn't need to apply an update")
+  }
+
+  "processHolidayStops" should "give correct charges added" in {
     val responses = HolidayStopProcess.processHolidayStops(
       config,
       getRequests(Right(Seq(
-        Fixtures.mkHolidayStopRequest("r1"),
-        Fixtures.mkHolidayStopRequest("r2"),
-        Fixtures.mkHolidayStopRequest("r3")
+        Fixtures.mkHolidayStopRequest("R1", LocalDate.of(2019,8,2)),
+        Fixtures.mkHolidayStopRequest("R2", LocalDate.of(2019,9,1)),
+        Fixtures.mkHolidayStopRequest("R3", LocalDate.of(2019,8,9))
       ))),
-      getSubscription(Right(subscription)),
+      getSubscription(Right(Fixtures.mkSubscriptionWithHolidayStops())),
       updateSubscription(Right(())),
-      getLastAmendment(Right(amendment)),
       exportAmendments(Right(()))
     )
     responses.holidayStopResults.headOption.value.right.value shouldBe HolidayStopResponse(
-      requestId = HolidayStopRequestId("r1"),
-      amendmentCode = HolidayStopRequestActionedZuoraAmendmentCode("A1"),
+      requestId = HolidayStopRequestId("R1"),
+      amendmentCode = HolidayStopRequestActionedZuoraAmendmentCode("C3"),
       price = HolidayStopRequestActionedZuoraAmendmentPrice(-5.81)
     )
     responses.holidayStopResults.lastOption.value.right.value shouldBe HolidayStopResponse(
-      requestId = HolidayStopRequestId("r3"),
-      amendmentCode = HolidayStopRequestActionedZuoraAmendmentCode("A1"),
-      price = HolidayStopRequestActionedZuoraAmendmentPrice(-5.81)
+      requestId = HolidayStopRequestId("R3"),
+      amendmentCode = HolidayStopRequestActionedZuoraAmendmentCode("C2"),
+      price = HolidayStopRequestActionedZuoraAmendmentPrice(-3.27)
     )
   }
 
@@ -134,7 +138,6 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
       ))),
       getSubscription(Right(subscription)),
       updateSubscription(Right(())),
-      getLastAmendment(Right(amendment)),
       exportAmendments(Left(OverallFailure("Export failed")))
     )
     responses.overallFailure.value shouldBe OverallFailure("Export failed")
