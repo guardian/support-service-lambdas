@@ -525,3 +525,11 @@ Resources:
              "objectName": "DirectDebitMandateEvent"
             }
           RoleArn: !GetAtt [ TriggerRole, Arn ]
+        -
+          Arn: !Ref StateMachine
+          Id: !Sub trigger_sf_export-CancellationSurvey-${Stage}
+          Input: |
+            {
+             "objectName": "CancellationSurvey"
+            }
+          RoleArn: !GetAtt [ TriggerRole, Arn ]
