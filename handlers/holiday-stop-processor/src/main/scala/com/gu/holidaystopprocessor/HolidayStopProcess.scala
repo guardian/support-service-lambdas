@@ -5,17 +5,16 @@ import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestActionedZuora
 
 object HolidayStopProcess {
 
-  def apply(config: Config): ProcessResult = {
-    val sfCredentials = config.sfCredentials
-    val zuoraCredentials = config.zuoraCredentials
-    processHolidayStops(
-      config,
-      getRequests = Salesforce.holidayStopRequests(sfCredentials),
-      getSubscription = Zuora.subscriptionGetResponse(zuoraCredentials),
-      updateSubscription = Zuora.subscriptionUpdateResponse(zuoraCredentials),
-      exportAddedCharges = Salesforce.holidayStopUpdateResponse(sfCredentials)
-    )
-  }
+  def apply(config: Config): ProcessResult =
+    Zuora.accessTokenGetResponse(config.zuoraConfig) map { zuoraAccessToken =>
+      processHolidayStops(
+        config,
+        getRequests = Salesforce.holidayStopRequests(config.sfConfig),
+        getSubscription = Zuora.subscriptionGetResponse(config, zuoraAccessToken),
+        updateSubscription = Zuora.subscriptionUpdateResponse(config, zuoraAccessToken),
+        exportAddedCharges = Salesforce.holidayStopUpdateResponse(config.sfConfig)
+      )
+    } fold (ProcessResult.fromOverallFailure, identity)
 
   def processHolidayStops(
     config: Config,
@@ -35,7 +34,7 @@ object HolidayStopProcess {
           processHolidayStop(
             config,
             getSubscription,
-            updateSubscription,
+            updateSubscription
           )
         }
         val exportResult = exportAddedCharges(
@@ -52,7 +51,7 @@ object HolidayStopProcess {
   def processHolidayStop(
     config: Config,
     getSubscription: String => Either[HolidayStopFailure, Subscription],
-    updateSubscription: (Subscription, SubscriptionUpdate) => Either[HolidayStopFailure, Unit],
+    updateSubscription: (Subscription, SubscriptionUpdate) => Either[HolidayStopFailure, Unit]
   )(stop: HolidayStop): Either[HolidayStopFailure, HolidayStopResponse] =
     for {
       subscription <- getSubscription(stop.subscriptionName)

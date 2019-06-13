@@ -22,12 +22,10 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
     LocalDate.of(2019, 8, 9)
   )
 
-  private def getRequests(requestsGet: Either[OverallFailure, Seq[HolidayStopRequest]]): String
-    => Either[OverallFailure, Seq[HolidayStopRequest]] =
+  private def getRequests(requestsGet: Either[OverallFailure, Seq[HolidayStopRequest]]): String => Either[OverallFailure, Seq[HolidayStopRequest]] =
     _ => requestsGet
 
-  private def getSubscription(subscriptionGet: Either[HolidayStopFailure, Subscription]): String
-    => Either[HolidayStopFailure, Subscription] = {
+  private def getSubscription(subscriptionGet: Either[HolidayStopFailure, Subscription]): String => Either[HolidayStopFailure, Subscription] = {
     _ => subscriptionGet
   }
 
@@ -37,15 +35,14 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
     case (_, _) => subscriptionUpdate
   }
 
-  private def exportAmendments(amendmentExport: Either[OverallFailure, Unit])
-  : Seq[HolidayStopResponse] => Either[OverallFailure, Unit] =
+  private def exportAmendments(amendmentExport: Either[OverallFailure, Unit]): Seq[HolidayStopResponse] => Either[OverallFailure, Unit] =
     _ => amendmentExport
 
   "HolidayStopProcess" should "give correct added charge" in {
     val response = HolidayStopProcess.processHolidayStop(
       config,
       getSubscription(Right(Fixtures.mkSubscriptionWithHolidayStops())),
-      updateSubscription(Right(())),
+      updateSubscription(Right(()))
     )(holidayStop)
     response.right.value shouldBe HolidayStopResponse(
       requestId = HolidayStopRequestId("HSR1"),
@@ -58,7 +55,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
     val response = HolidayStopProcess.processHolidayStop(
       config,
       getSubscription(Right(subscription)),
-      updateSubscription(Left(HolidayStopFailure("update went wrong"))),
+      updateSubscription(Left(HolidayStopFailure("update went wrong")))
     )(holidayStop)
     response.left.value shouldBe HolidayStopFailure("update went wrong")
   }
@@ -67,7 +64,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
     val response = HolidayStopProcess.processHolidayStop(
       config,
       getSubscription(Left(HolidayStopFailure("get went wrong"))),
-      updateSubscription(Right(())),
+      updateSubscription(Right(()))
     )(holidayStop)
     response.left.value shouldBe HolidayStopFailure("get went wrong")
   }
@@ -76,7 +73,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
     val response = HolidayStopProcess.processHolidayStop(
       config,
       getSubscription(Right(subscription.copy(autoRenew = false))),
-      updateSubscription(Right(())),
+      updateSubscription(Right(()))
     )(holidayStop)
     response.left.value shouldBe
       HolidayStopFailure("Cannot currently process non-auto-renewing subscription")
@@ -86,7 +83,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
     val response = HolidayStopProcess.processHolidayStop(
       config,
       getSubscription(Right(Fixtures.mkSubscriptionWithHolidayStops())),
-      updateSubscription(Left(HolidayStopFailure("shouldn't need to apply an update"))),
+      updateSubscription(Left(HolidayStopFailure("shouldn't need to apply an update")))
     )(holidayStop)
     response.right.value shouldBe HolidayStopResponse(
       requestId = HolidayStopRequestId("HSR1"),
@@ -99,7 +96,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
     val response = HolidayStopProcess.processHolidayStop(
       config,
       getSubscription(Right(subscription)),
-      updateSubscription(Left(HolidayStopFailure("shouldn't need to apply an update"))),
+      updateSubscription(Left(HolidayStopFailure("shouldn't need to apply an update")))
     )(holidayStop)
     response.left.value shouldBe HolidayStopFailure("shouldn't need to apply an update")
   }
@@ -108,9 +105,9 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
     val responses = HolidayStopProcess.processHolidayStops(
       config,
       getRequests(Right(Seq(
-        Fixtures.mkHolidayStopRequest("R1", LocalDate.of(2019,8,2)),
-        Fixtures.mkHolidayStopRequest("R2", LocalDate.of(2019,9,1)),
-        Fixtures.mkHolidayStopRequest("R3", LocalDate.of(2019,8,9))
+        Fixtures.mkHolidayStopRequest("R1", LocalDate.of(2019, 8, 2)),
+        Fixtures.mkHolidayStopRequest("R2", LocalDate.of(2019, 9, 1)),
+        Fixtures.mkHolidayStopRequest("R3", LocalDate.of(2019, 8, 9))
       ))),
       getSubscription(Right(Fixtures.mkSubscriptionWithHolidayStops())),
       updateSubscription(Right(())),

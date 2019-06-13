@@ -5,3 +5,7 @@ case class ProcessResult(
   holidayStopResults: Seq[Either[HolidayStopFailure, HolidayStopResponse]],
   overallFailure: Option[OverallFailure]
 )
+
+object ProcessResult {
+  def fromOverallFailure(failure: OverallFailure) = ProcessResult(Nil, Nil, Some(failure))
+}
