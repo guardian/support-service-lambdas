@@ -67,6 +67,7 @@ object Handler extends Logging {
 
     val lookupOp = SalesforceHolidayStopRequest.LookupByIdentityIdAndOptionalSubscriptionName(sfClient.wrapWith(JsonHttp.getWithParams))
 
+    implicit val writesMutabilityFlags: OWrites[MutabilityFlags] = Json.writes[MutabilityFlags]
     implicit val writesHolidayStopRequestGET: OWrites[HolidayStopRequestEXTERNAL] = Json.writes[HolidayStopRequestEXTERNAL]
     import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.formatLocalDateAsSalesforceDate
     implicit val writesProductSpecifics: OWrites[ProductSpecifics] = Json.writes[ProductSpecifics]
@@ -92,6 +93,7 @@ object Handler extends Logging {
 
     val createOp = SalesforceHolidayStopRequest.CreateHolidayStopRequest(sfClient.wrapWith(JsonHttp.post))
 
+    implicit val readsMutabilityFlags: Reads[MutabilityFlags] = Json.reads[MutabilityFlags] //TODO refactor HolidayStopRequestEXTERNAL into an incoming and outgoing form to eliminate this line
     implicit val readsHolidayStopRequestEXTERNAL: Reads[HolidayStopRequestEXTERNAL] = Json.reads[HolidayStopRequestEXTERNAL]
 
     (for {

@@ -10,29 +10,44 @@ case class HolidayStopRequestsGET(
 
 object HolidayStopRequestsGET {
 
-  def apply(sfHSRs: List[HolidayStopRequest], optionalProductNamePrefix: Option[ProductName]): HolidayStopRequestsGET = HolidayStopRequestsGET(
-    optionalProductNamePrefix.map(productNamePrefix => ActionCalculator.getProductSpecifics(productNamePrefix)),
-    sfHSRs.map(HolidayStopRequestEXTERNAL.fromSF)
-  )
+  def apply(sfHSRs: List[HolidayStopRequest], optionalProductNamePrefix: Option[ProductName]): HolidayStopRequestsGET = {
+    val optionalProductSpecifics = optionalProductNamePrefix.map(
+      productNamePrefix => ActionCalculator.getProductSpecifics(productNamePrefix)
+    )
+    HolidayStopRequestsGET(
+      optionalProductSpecifics,
+      sfHSRs.map(HolidayStopRequestEXTERNAL.fromSF(optionalProductSpecifics.map(_.firstAvailableDate)))
+    )
+  }
 
 }
+
+case class MutabilityFlags(
+  isDeletable: Boolean,
+  isEditable: Boolean
+)
 
 case class HolidayStopRequestEXTERNAL(
   id: Option[String],
   start: String,
   end: String,
   subscriptionName: String,
-  actionedCount: Int
+  mutabilityFlags: Option[MutabilityFlags]
 )
 
 object HolidayStopRequestEXTERNAL {
 
-  def fromSF(sfHSR: HolidayStopRequest): HolidayStopRequestEXTERNAL = HolidayStopRequestEXTERNAL(
+  def fromSF(firstAvailableDateOption: Option[LocalDate])(sfHSR: HolidayStopRequest): HolidayStopRequestEXTERNAL = HolidayStopRequestEXTERNAL(
     id = Some(sfHSR.Id.value),
     start = sfHSR.Start_Date__c.value.toString(),
     end = sfHSR.End_Date__c.value.toString(),
     subscriptionName = sfHSR.Subscription_Name__c.value,
-    actionedCount = sfHSR.Actioned_Count__c.value
+    mutabilityFlags = firstAvailableDateOption.map(
+      calculateMutabilityFlags(
+        sfHSR.Actioned_Count__c.value,
+        sfHSR.End_Date__c.value
+      )
+    )
   )
 
   def toSF(externalHSR: HolidayStopRequestEXTERNAL): NewHolidayStopRequest = NewHolidayStopRequest(
@@ -40,6 +55,17 @@ object HolidayStopRequestEXTERNAL {
     End_Date__c = HolidayStopRequestEndDate(LocalDate.parse(externalHSR.end)),
     SF_Subscription__r = SubscriptionNameLookup(SubscriptionName(externalHSR.subscriptionName))
   )
+
+  def calculateMutabilityFlags(actionedCount: Int, endDate: LocalDate)(firstAvailableDate: LocalDate): MutabilityFlags = {
+    if (actionedCount == 0 && firstAvailableDate.isAfter(LocalDate.now())) {
+      // TODO log warning (with CloudWatch alert) as indicates processing of holiday stop is well overdue
+    }
+    // TODO perhaps also check that actioned count is expected value and alert if not
+    MutabilityFlags(
+      isDeletable = actionedCount == 0,
+      isEditable = firstAvailableDate.isBefore(endDate)
+    )
+  }
 
 }
 
