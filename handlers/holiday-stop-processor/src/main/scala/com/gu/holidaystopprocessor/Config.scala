@@ -11,11 +11,20 @@ import io.circe.parser.decode
 import scala.io.Source
 
 case class Config(
-  zuoraCredentials: ZuoraAccess,
-  sfCredentials: SFAuthConfig,
+  zuoraConfig: ZuoraConfig,
+  sfConfig: SFAuthConfig,
   holidayCreditProductRatePlanId: String,
   holidayCreditProductRatePlanChargeId: String
 )
+
+case class ZuoraConfig(
+  baseUrl: String,
+  holidayStopProcessor: HolidayStopProcessor
+)
+
+case class HolidayStopProcessor(oauth: Oauth)
+
+case class Oauth(clientId: String, clientSecret: String)
 
 object Config {
 
@@ -24,13 +33,13 @@ object Config {
    */
   val daysInAdvance = 14
 
-  private def zuoraCredentials(stage: String): Either[String, ZuoraAccess] =
-    credentials[ZuoraAccess](stage, "zuoraRest")
+  private def zuoraCredentials(stage: String): Either[OverallFailure, ZuoraConfig] =
+    credentials[ZuoraConfig](stage, "zuoraRest")
 
-  private def salesforceCredentials(stage: String): Either[String, SFAuthConfig] =
+  private def salesforceCredentials(stage: String): Either[OverallFailure, SFAuthConfig] =
     credentials[SFAuthConfig](stage, "sfAuth")
 
-  private def credentials[T](stage: String, filePrefix: String)(implicit evidence: Decoder[T]): Either[String, T] = {
+  private def credentials[T](stage: String, filePrefix: String)(implicit evidence: Decoder[T]): Either[OverallFailure, T] = {
     val profileName = "membership"
     val bucketName = "gu-reader-revenue-private"
     val key =
@@ -48,37 +57,37 @@ object Config {
       builder.build().getObject(bucketName, key).getObjectContent
     val rawJson = Source.fromInputStream(inputStream).mkString
     decode[T](rawJson).left map { e =>
-      s"Could not read secret config file from S3://$bucketName/$key: ${e.toString}"
+      OverallFailure(s"Could not read secret config file from S3://$bucketName/$key: ${e.toString}")
     }
   }
 
-  def apply(): Either[String, Config] = {
+  def apply(): Either[OverallFailure, Config] = {
     val stage = Option(System.getenv("Stage")).getOrElse("DEV")
     for {
-      zuoraCreds <- zuoraCredentials(stage)
-      sfCreds <- salesforceCredentials(stage)
+      zuoraConfig <- zuoraCredentials(stage)
+      sfConfig <- salesforceCredentials(stage)
     } yield {
       stage match {
         case "PROD" =>
           Config(
-            zuoraCreds,
-            sfCreds,
+            zuoraConfig,
+            sfConfig,
             holidayCreditProductRatePlanId = "2c92a0076ae9189c016b080c930a6186",
             holidayCreditProductRatePlanChargeId =
               "2c92a0086ae928d7016b080f638477a6"
           )
         case "CODE" =>
           Config(
-            zuoraCreds,
-            sfCreds,
+            zuoraConfig,
+            sfConfig,
             holidayCreditProductRatePlanId = "2c92c0f86b0378b0016b08112e870d0a",
             holidayCreditProductRatePlanChargeId =
               "2c92c0f86b0378b0016b08112ec70d14"
           )
         case "DEV" =>
           Config(
-            zuoraCreds,
-            sfCreds,
+            zuoraConfig,
+            sfConfig,
             holidayCreditProductRatePlanId = "2c92c0f96b03800b016b081fc04f1ba2",
             holidayCreditProductRatePlanChargeId =
               "2c92c0f96b03800b016b081fc0f41bb4"
