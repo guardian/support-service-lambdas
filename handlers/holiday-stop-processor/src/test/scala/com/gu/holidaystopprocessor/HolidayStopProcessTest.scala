@@ -46,7 +46,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
     )(holidayStop)
     response.right.value shouldBe HolidayStopResponse(
       requestId = HolidayStopRequestId("HSR1"),
-      amendmentCode = HolidayStopRequestActionedZuoraChargeCode("C2"),
+      chargeCode = HolidayStopRequestActionedZuoraChargeCode("C2"),
       price = HolidayStopRequestActionedZuoraChargePrice(-3.27),
       pubDate = StoppedPublicationDate(LocalDate.of(2019, 8, 9))
     )
@@ -88,7 +88,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
     )(holidayStop)
     response.right.value shouldBe HolidayStopResponse(
       requestId = HolidayStopRequestId("HSR1"),
-      amendmentCode = HolidayStopRequestActionedZuoraChargeCode("C2"),
+      chargeCode = HolidayStopRequestActionedZuoraChargeCode("C2"),
       price = HolidayStopRequestActionedZuoraChargePrice(-3.27),
       pubDate = StoppedPublicationDate(LocalDate.of(2019, 8, 9))
     )
@@ -117,13 +117,13 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
     )
     responses.holidayStopResults.headOption.value.right.value shouldBe HolidayStopResponse(
       requestId = HolidayStopRequestId("R1"),
-      amendmentCode = HolidayStopRequestActionedZuoraChargeCode("C3"),
+      chargeCode = HolidayStopRequestActionedZuoraChargeCode("C3"),
       price = HolidayStopRequestActionedZuoraChargePrice(-5.81),
       pubDate = StoppedPublicationDate(LocalDate.of(2019, 8, 2))
     )
     responses.holidayStopResults.lastOption.value.right.value shouldBe HolidayStopResponse(
       requestId = HolidayStopRequestId("R3"),
-      amendmentCode = HolidayStopRequestActionedZuoraChargeCode("C2"),
+      chargeCode = HolidayStopRequestActionedZuoraChargeCode("C2"),
       price = HolidayStopRequestActionedZuoraChargePrice(-3.27),
       pubDate = StoppedPublicationDate(LocalDate.of(2019, 8, 9))
     )

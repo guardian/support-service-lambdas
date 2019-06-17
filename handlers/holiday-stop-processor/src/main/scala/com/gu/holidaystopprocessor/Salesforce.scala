@@ -34,7 +34,7 @@ object Salesforce {
       sendOp(
         HolidayStopRequestActionedZuoraRef(
           response.requestId,
-          response.amendmentCode,
+          response.chargeCode,
           response.price,
           response.pubDate
         )

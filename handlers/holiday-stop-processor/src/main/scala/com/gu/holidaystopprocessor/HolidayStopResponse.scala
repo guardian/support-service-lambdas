@@ -5,7 +5,7 @@ import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestActionedZuora
 
 case class HolidayStopResponse(
   requestId: HolidayStopRequestId,
-  amendmentCode: HolidayStopRequestActionedZuoraChargeCode,
+  chargeCode: HolidayStopRequestActionedZuoraChargeCode,
   price: HolidayStopRequestActionedZuoraChargePrice,
   pubDate: StoppedPublicationDate
 )
