@@ -1,5 +1,7 @@
 package com.gu.salesforce.holiday_stops
 
+import java.time.LocalDate
+
 import ai.x.play.json.Jsonx
 import com.gu.salesforce.SalesforceConstants._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.HolidayStopRequestId
@@ -20,10 +22,14 @@ object SalesforceHolidayStopRequestActionedZuoraRef extends Logging {
   case class HolidayStopRequestActionedZuoraAmendmentPrice(value: Double) extends AnyVal
   implicit val formatHolidayStopRequestActionedZuoraAmendmentPrice = Jsonx.formatInline[HolidayStopRequestActionedZuoraAmendmentPrice]
 
+  case class StoppedPublicationDate(value: LocalDate) extends AnyVal
+  implicit val formatStoppedPublicationDate = Jsonx.formatInline[StoppedPublicationDate]
+
   case class HolidayStopRequestActionedZuoraRef(
     Holiday_Stop_Request__c: HolidayStopRequestId,
     Amendment_Code__c: HolidayStopRequestActionedZuoraAmendmentCode,
-    Price__c: HolidayStopRequestActionedZuoraAmendmentPrice
+    Price__c: HolidayStopRequestActionedZuoraAmendmentPrice,
+    Stopped_Publication_Date__c: StoppedPublicationDate
   )
   implicit val writes = Json.writes[HolidayStopRequestActionedZuoraRef]
 
