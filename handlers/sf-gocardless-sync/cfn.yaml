@@ -132,11 +132,6 @@ Resources:
       - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:subscriptions_dev
       AlarmName: !Sub "GenericError observed on ${LogGroupNamePrefix}-${Stage}"
       ComparisonOperator: GreaterThanOrEqualToThreshold
-      Dimensions:
-        - Name: LogGroup
-          Value: !Sub "${LogGroupNamePrefix}-${Stage}"
-        - Name: Stage
-          Value: !Sub ${Stage}
       EvaluationPeriods: 1
       MetricName: "GenericError Count"
       Namespace: "GoCardlessSalesForceSync"
