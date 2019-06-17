@@ -33,11 +33,8 @@ object Zuora {
   def subscriptionGetResponse(config: Config, accessToken: AccessToken)(subscriptionName: String): Either[HolidayStopFailure, Subscription] = {
     val url = uri"${config.zuoraConfig.baseUrl}/subscriptions/$subscriptionName"
     val request = sttp.get(url)
-      .header("Authorization", s"Bearer $accessToken")
+      .header("Authorization", s"Bearer ${accessToken.access_token}")
     val response = request.send()
-    response.body.left map { e => HolidayStopFailure(e) } flatMap { body =>
-      normalised(body, decode[Subscription]).left.map(HolidayStopFailure)
-    }
     for {
       body <- response.body.left.map(HolidayStopFailure)
       subscription <- normalised(body, decode[Subscription]).left.map(HolidayStopFailure)
@@ -47,7 +44,7 @@ object Zuora {
   def subscriptionUpdateResponse(config: Config, accessToken: AccessToken)(subscription: Subscription, update: SubscriptionUpdate): Either[HolidayStopFailure, Unit] = {
     val url = uri"${config.zuoraConfig.baseUrl}/subscriptions/${subscription.subscriptionNumber}"
     val request = sttp.put(url)
-      .header("Authorization", s"Bearer $accessToken")
+      .header("Authorization", s"Bearer ${accessToken.access_token}")
       .body(update)
     val response = request.send()
     response.body.left map { e => HolidayStopFailure(e) } flatMap { body =>
