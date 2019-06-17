@@ -4,7 +4,7 @@ import java.time.LocalDate
 
 import com.gu.holidaystopprocessor.Fixtures.{config, mkSubscription}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.{HolidayStopRequest, HolidayStopRequestId}
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestActionedZuoraRef.{HolidayStopRequestActionedZuoraAmendmentCode, HolidayStopRequestActionedZuoraAmendmentPrice, StoppedPublicationDate}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestActionedZuoraRef.{HolidayStopRequestActionedZuoraChargeCode, HolidayStopRequestActionedZuoraChargePrice, StoppedPublicationDate}
 import org.scalatest.{EitherValues, FlatSpec, Matchers, OptionValues}
 
 class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues with OptionValues {
@@ -46,8 +46,8 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
     )(holidayStop)
     response.right.value shouldBe HolidayStopResponse(
       requestId = HolidayStopRequestId("HSR1"),
-      amendmentCode = HolidayStopRequestActionedZuoraAmendmentCode("C2"),
-      price = HolidayStopRequestActionedZuoraAmendmentPrice(-3.27),
+      amendmentCode = HolidayStopRequestActionedZuoraChargeCode("C2"),
+      price = HolidayStopRequestActionedZuoraChargePrice(-3.27),
       pubDate = StoppedPublicationDate(LocalDate.of(2019, 8, 9))
     )
   }
@@ -88,8 +88,8 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
     )(holidayStop)
     response.right.value shouldBe HolidayStopResponse(
       requestId = HolidayStopRequestId("HSR1"),
-      amendmentCode = HolidayStopRequestActionedZuoraAmendmentCode("C2"),
-      price = HolidayStopRequestActionedZuoraAmendmentPrice(-3.27),
+      amendmentCode = HolidayStopRequestActionedZuoraChargeCode("C2"),
+      price = HolidayStopRequestActionedZuoraChargePrice(-3.27),
       pubDate = StoppedPublicationDate(LocalDate.of(2019, 8, 9))
     )
   }
@@ -117,14 +117,14 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
     )
     responses.holidayStopResults.headOption.value.right.value shouldBe HolidayStopResponse(
       requestId = HolidayStopRequestId("R1"),
-      amendmentCode = HolidayStopRequestActionedZuoraAmendmentCode("C3"),
-      price = HolidayStopRequestActionedZuoraAmendmentPrice(-5.81),
+      amendmentCode = HolidayStopRequestActionedZuoraChargeCode("C3"),
+      price = HolidayStopRequestActionedZuoraChargePrice(-5.81),
       pubDate = StoppedPublicationDate(LocalDate.of(2019, 8, 2))
     )
     responses.holidayStopResults.lastOption.value.right.value shouldBe HolidayStopResponse(
       requestId = HolidayStopRequestId("R3"),
-      amendmentCode = HolidayStopRequestActionedZuoraAmendmentCode("C2"),
-      price = HolidayStopRequestActionedZuoraAmendmentPrice(-3.27),
+      amendmentCode = HolidayStopRequestActionedZuoraChargeCode("C2"),
+      price = HolidayStopRequestActionedZuoraChargePrice(-3.27),
       pubDate = StoppedPublicationDate(LocalDate.of(2019, 8, 9))
     )
   }

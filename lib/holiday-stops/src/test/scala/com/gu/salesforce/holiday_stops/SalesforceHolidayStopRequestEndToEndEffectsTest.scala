@@ -51,8 +51,8 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends FlatSpec with Matc
       )
       processedResult <- processOp(HolidayStopRequestActionedZuoraRef(
         Holiday_Stop_Request__c = createResult,
-        HolidayStopRequestActionedZuoraAmendmentCode("AM1234567"),
-        HolidayStopRequestActionedZuoraAmendmentPrice(-12.34),
+        HolidayStopRequestActionedZuoraChargeCode("C-1234567"),
+        HolidayStopRequestActionedZuoraChargePrice(-12.34),
         StoppedPublicationDate(Time.toJavaDate(LocalDate.now))
       )).toDisjunction
 
