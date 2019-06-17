@@ -13,7 +13,7 @@ import play.api.libs.json.{JsValue, Json}
 
 object SalesforceDDMandate extends Logging {
 
-  private val mandateSfObjectsBaseUrl = sfApiBaseUrl + "DD_Mandate__c"
+  private val mandateSfObjectsBaseUrl = sfObjectsBaseUrl + "DD_Mandate__c"
 
   case class BillingAccountSfId(value: String) extends AnyVal
   implicit val formatBillingAccountSfId = Jsonx.formatInline[BillingAccountSfId]
