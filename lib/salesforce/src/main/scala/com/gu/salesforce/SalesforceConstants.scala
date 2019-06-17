@@ -2,10 +2,10 @@ package com.gu.salesforce
 
 object SalesforceConstants {
 
-  val sfApiBaseUrl = "/services/data/v29.0"
+  private val sfApiBaseUrl = "/services/data/v29.0"
 
-  val soqlQueryBaseUrl = sfApiBaseUrl + "/query/"
+  val soqlQueryBaseUrl: String = sfApiBaseUrl + "/query/"
 
-  val sfObjectsBaseUrl = sfApiBaseUrl + "/sobjects/"
+  val sfObjectsBaseUrl: String = sfApiBaseUrl + "/sobjects/"
 
 }
