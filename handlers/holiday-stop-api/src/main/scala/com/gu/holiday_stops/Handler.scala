@@ -99,7 +99,7 @@ object Handler extends Logging {
     (for {
       requestBody <- req.bodyAsCaseClass[HolidayStopRequestEXTERNAL]()
       identityId <- req.headers.flatMap(_.get("x-identity-id")).toApiGatewayOp("identityID header")
-      // TODO verify identity ID can create holiday stop for given sub
+      // TODO verify identity ID can create holiday stop for given sub (must do a query first)
       _ <- createOp(HolidayStopRequestEXTERNAL.toSF(requestBody)).toDisjunction.toApiGatewayOp(s"create new Holiday Stop Request for subscription ${requestBody.subscriptionName} (identity $identityId)")
       // TODO handle 'FIELD_CUSTOM_VALIDATION_EXCEPTION' etc back from SF and place in response
     } yield ApiGatewayResponse.successfulExecution).apiResponse
@@ -108,13 +108,14 @@ object Handler extends Logging {
   case class DeletePathParams(subscriptionName: SubscriptionName, holidayStopRequestId: HolidayStopRequestId)
   def stepsDELETE(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
 
+    val lookupOp = SalesforceHolidayStopRequest.LookupByIdentityIdAndOptionalSubscriptionName(sfClient.wrapWith(JsonHttp.getWithParams))
     val deleteOp = SalesforceHolidayStopRequest.DeleteHolidayStopRequest(sfClient.wrapWith(JsonHttp.deleteWithStringResponse))
 
     (for {
       identityId <- req.headers.flatMap(_.get("x-identity-id")).toApiGatewayOp("identityID header")
-      // TODO verify identity ID can delete holiday stop for given sub
       pathParams <- req.pathParamsAsCaseClass[DeletePathParams]()(Json.reads[DeletePathParams])
-      // TODO ensure zero 'actioned count' (perhaps via validation rule in SalesForce)
+      existingForUser <- lookupOp(identityId, None).toDisjunction.toApiGatewayOp(s"lookup Holiday Stop Requests for identity $identityId")
+      _ = existingForUser.exists(_.Id == pathParams.holidayStopRequestId).toApiGatewayContinueProcessing(ApiGatewayResponse.forbidden("not your holiday stop"))
       _ <- deleteOp(pathParams.holidayStopRequestId).toDisjunction.toApiGatewayOp(s"delete Holiday Stop Request for subscription ${pathParams.subscriptionName.value} identity $identityId")
     } yield ApiGatewayResponse.successfulExecution).apiResponse
   }
