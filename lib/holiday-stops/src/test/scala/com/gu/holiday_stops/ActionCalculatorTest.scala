@@ -30,11 +30,11 @@ class ActionCalculatorTest extends FlatSpec with Matchers {
         gwProductName
       )
     ) shouldEqual List(
-      new LocalDate(2019, 5, 24),
-      new LocalDate(2019, 5, 31),
-      new LocalDate(2019, 6, 7),
-      new LocalDate(2019, 6, 14)
-    )
+        new LocalDate(2019, 5, 24),
+        new LocalDate(2019, 5, 31),
+        new LocalDate(2019, 6, 7),
+        new LocalDate(2019, 6, 14)
+      )
 
     ActionCalculator.publicationDatesToBeStopped(
       HolidayStopRequest(
@@ -46,12 +46,12 @@ class ActionCalculatorTest extends FlatSpec with Matchers {
         gwProductName
       )
     ) shouldEqual List(
-      new LocalDate(2019, 5, 24),
-      new LocalDate(2019, 5, 31),
-      new LocalDate(2019, 6, 7),
-      new LocalDate(2019, 6, 14),
-      new LocalDate(2019, 6, 21)
-    )
+        new LocalDate(2019, 5, 24),
+        new LocalDate(2019, 5, 31),
+        new LocalDate(2019, 6, 7),
+        new LocalDate(2019, 6, 14),
+        new LocalDate(2019, 6, 21)
+      )
 
   }
 

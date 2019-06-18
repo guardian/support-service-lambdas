@@ -1,4 +1,4 @@
-package com.gu.holidaystopprocessor
+package com.gu.util
 
 import java.time.LocalDate
 

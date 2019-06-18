@@ -6,6 +6,7 @@ import com.gu.salesforce.SalesforceClient
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestActionedZuoraRef._
 import com.gu.test.EffectsTest
+import com.gu.util.Time
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.resthttp.JsonHttp
 import org.joda.time.LocalDate
@@ -39,7 +40,7 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends FlatSpec with Matc
       createResult <- createOp(NewHolidayStopRequest(
         startDate,
         endDate,
-        SubscriptionNameLookup(SubscriptionName("A-S00044269")) // must exist in DEV SalesForce
+        SubscriptionNameLookup(SubscriptionName("A-S00050817")) // must exist in DEV SalesForce
       )).toDisjunction
 
       fetchOp = SalesforceHolidayStopRequest.LookupByDateAndProductNamePrefix(sfAuth.wrapWith(JsonHttp.getWithParams))
@@ -50,8 +51,9 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends FlatSpec with Matc
       )
       processedResult <- processOp(HolidayStopRequestActionedZuoraRef(
         Holiday_Stop_Request__c = createResult,
-        HolidayStopRequestActionedZuoraAmendmentCode("AM1234567"),
-        HolidayStopRequestActionedZuoraAmendmentPrice(-12.34)
+        HolidayStopRequestActionedZuoraChargeCode("C-1234567"),
+        HolidayStopRequestActionedZuoraChargePrice(-12.34),
+        StoppedPublicationDate(Time.toJavaDate(LocalDate.now))
       )).toDisjunction
 
       postProcessingFetchResult <- fetchOp(lookupDate, productName).toDisjunction

@@ -4,6 +4,7 @@ import java.time.LocalDate
 
 import com.gu.holiday_stops.ActionCalculator
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.{HolidayStopRequest, HolidayStopRequestId}
+import com.gu.util.Time
 
 case class HolidayStop(
   requestId: HolidayStopRequestId,

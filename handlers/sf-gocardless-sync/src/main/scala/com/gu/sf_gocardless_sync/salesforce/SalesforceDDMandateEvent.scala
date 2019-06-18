@@ -10,7 +10,6 @@ import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.resthttp.{HttpOp, RestRequestMaker}
 import play.api.libs.json.{JsValue, Json}
 
-
 object SalesforceDDMandateEvent extends Logging {
 
   private val mandateSfObjectsBaseUrl = sfObjectsBaseUrl + "DD_Mandate_Event__c"
