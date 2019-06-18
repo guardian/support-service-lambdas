@@ -146,7 +146,7 @@ object Query extends Enum[Query] {
   )
   case object Amendment extends Query(
     "Amendment",
-    "SELECT CreatedDate, Status, SubscriptionID, ID FROM Amendment",
+    "SELECT autoRenew, code, createdById, createdDate, currentTerm, currentTermPeriodType, customerAcceptanceDate, description, effectiveDate, id, name, renewalSetting, renewalTerm, renewalTermPeriodType, resumeDate, serviceActivationDate, specificUpdateDate, status, subscriptionId, suspendDate, termStartDate, termType, type, updatedById, updatedDate  FROM Amendment",
     "ophan-raw-zuora-increment-amendment",
     "Amendment.csv"
   )
