@@ -40,7 +40,7 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends FlatSpec with Matc
       createResult <- createOp(NewHolidayStopRequest(
         startDate,
         endDate,
-        SubscriptionNameLookup(SubscriptionName("A-S00044269")) // must exist in DEV SalesForce
+        SubscriptionNameLookup(SubscriptionName("A-S00050817")) // must exist in DEV SalesForce
       )).toDisjunction
 
       fetchOp = SalesforceHolidayStopRequest.LookupByDateAndProductNamePrefix(sfAuth.wrapWith(JsonHttp.getWithParams))
