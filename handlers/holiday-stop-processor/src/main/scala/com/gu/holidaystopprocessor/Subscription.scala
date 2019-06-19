@@ -27,8 +27,12 @@ case class Subscription(
 
     def isMatchingCharge(charge: RatePlanCharge): Boolean =
       charge.name == "Holiday Credit" &&
-        charge.HolidayStart__c.contains(stop.stoppedPublicationDate) &&
-        charge.HolidayEnd__c.contains(stop.stoppedPublicationDate)
+        charge.HolidayStart__c.exists { start =>
+          start.isEqual(stop.stoppedPublicationDate) || start.isBefore(stop.stoppedPublicationDate)
+        } &&
+        charge.HolidayEnd__c.exists { end =>
+          end.isEqual(stop.stoppedPublicationDate) || end.isAfter(stop.stoppedPublicationDate)
+        }
 
     val charges = for {
       plan <- ratePlans if isMatchingPlan(plan)

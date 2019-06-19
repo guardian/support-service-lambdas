@@ -64,4 +64,19 @@ class SubscriptionTest extends FlatSpec with Matchers with OptionValues {
     val stop = Fixtures.mkHolidayStop(LocalDate.of(2019, 8, 11))
     subscription.ratePlanCharge(stop) shouldBe None
   }
+
+  it should "give RatePlanCharge when dates overlap but don't match precisely" in {
+    val subscription = Fixtures.mkSubscriptionWithHolidayStops()
+    val stop = Fixtures.mkHolidayStop(LocalDate.of(2018, 12, 22))
+    subscription.ratePlanCharge(stop).value shouldBe RatePlanCharge(
+      name = "Holiday Credit",
+      number = "C987",
+      price = -4.92,
+      billingPeriod = None,
+      effectiveStartDate = LocalDate.of(2018, 11, 16),
+      chargedThroughDate = None,
+      HolidayStart__c = Some(LocalDate.of(2018, 11, 16)),
+      HolidayEnd__c = Some(LocalDate.of(2019, 1, 4))
+    )
+  }
 }
