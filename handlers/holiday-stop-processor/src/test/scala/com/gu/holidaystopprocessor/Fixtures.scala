@@ -17,7 +17,7 @@ object Fixtures {
     number = "C1",
     price,
     Some(billingPeriod),
-    effectiveStartDate = LocalDate.of(2019, 6, 10),
+    effectiveStartDate = LocalDate.of(2018, 6, 10),
     chargedThroughDate,
     HolidayStart__c = None,
     HolidayEnd__c = None
@@ -105,6 +105,19 @@ object Fixtures {
           chargedThroughDate = None,
           HolidayStart__c = Some(LocalDate.of(2019, 8, 2)),
           HolidayEnd__c = Some(LocalDate.of(2019, 8, 2))
+        ))
+      ),
+      RatePlan(
+        productName = "Discounts",
+        ratePlanCharges = Seq(RatePlanCharge(
+          name = "Holiday Credit",
+          number = "C987",
+          price = -4.92,
+          billingPeriod = None,
+          effectiveStartDate = LocalDate.of(2018, 11, 16),
+          chargedThroughDate = None,
+          HolidayStart__c = Some(LocalDate.of(2018, 11, 16)),
+          HolidayEnd__c = Some(LocalDate.of(2019, 1, 4))
         ))
       ),
       RatePlan(
