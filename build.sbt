@@ -141,6 +141,12 @@ lazy val `effects-ses` = all(project in file("lib/effects-ses"))
     libraryDependencies ++= Seq(logging, awsSES)
   )
 
+lazy val `effects-cloudwatch` = all(project in file("lib/effects-cloudwatch"))
+  .dependsOn(testDep)
+  .settings(
+    libraryDependencies ++= Seq(logging, awsCloudwatch)
+  )
+
 val effectsDepIncludingTestFolder: ClasspathDependency = effects % "compile->compile;test->test"
 
 lazy val `zuora-reports` = all(project in file("lib/zuora-reports"))
@@ -174,11 +180,13 @@ lazy val root = all(project in file(".")).enablePlugins(RiffRaffArtifact).aggreg
   `new-product-api`,
   `effects-sqs`,
   `effects-ses`,
+  `effects-cloudwatch`,
   `sf-datalake-export`,
   `zuora-datalake-export`,
   `batch-email-sender`,
   `braze-to-salesforce-file-upload`,
   `holiday-stop-processor`,
+  `metric-push-api`
 ).dependsOn(zuora, handler, effectsDepIncludingTestFolder, `effects-sqs`, testDep)
 
 lazy val `identity-backfill` = all(project in file("handlers/identity-backfill")) // when using the "project identity-backfill" command it uses the lazy val name
@@ -240,7 +248,11 @@ lazy val `braze-to-salesforce-file-upload` = all(project in file("handlers/braze
 lazy val `holiday-stop-processor` = all(project in file("handlers/holiday-stop-processor"))
   .enablePlugins(RiffRaffArtifact)
   .dependsOn(`holiday-stops`, effects)
-  
+
+lazy val `metric-push-api` = all(project in file("handlers/metric-push-api"))
+  .enablePlugins(RiffRaffArtifact)
+  .dependsOn(effects, `effects-cloudwatch`, testDep)
+
 // ==== END handlers ====
 
 initialize := {

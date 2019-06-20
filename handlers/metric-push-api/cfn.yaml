@@ -1,0 +1,217 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: HTTP API to push a metric to cloudwatch so we can alarm on errors
+
+Parameters:
+    Stage:
+        Description: Stage name
+        Type: String
+        AllowedValues:
+            - PROD
+            - CODE
+        Default: CODE
+
+Conditions:
+  CreateProdMonitoring: !Equals [ !Ref Stage, PROD ]
+
+Mappings:
+    StageMap:
+        CODE:
+            ApiName: metric-push-api-api-CODE
+            DomainName: metric-push-api-code.membership.guardianapis.com
+        PROD:
+            ApiName: metric-push-api-api-PROD
+            DomainName: metric-push-api-prod.membership.guardianapis.com
+
+Resources:
+    MetricPushRole:
+        Type: AWS::IAM::Role
+        Properties:
+            AssumeRolePolicyDocument:
+                Statement:
+                    - Effect: Allow
+                      Principal:
+                          Service:
+                             - lambda.amazonaws.com
+                      Action:
+                          - sts:AssumeRole
+            Path: /
+            Policies:
+                - PolicyName: LambdaPolicy
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                            - logs:CreateLogGroup
+                            - logs:CreateLogStream
+                            - logs:PutLogEvents
+                            - lambda:InvokeFunction
+                            Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/metric-push-api-${Stage}:log-stream:*"
+    MetricPushLambda:
+        Type: AWS::Lambda::Function
+        Properties:
+            Description: Push a metric to cloudwatch so we can alarm on errors
+            FunctionName:
+                !Sub metric-push-api-${Stage}
+            Code:
+                S3Bucket: support-service-lambdas-dist
+                S3Key: !Sub membership/${Stage}/metric-push-api/metric-push-api.jar
+            Handler: Handler::apply
+            Environment:
+                Variables:
+                  Stage: !Ref Stage
+            Role:
+                !GetAtt MetricPushRole.Arn
+            MemorySize: 1536
+            Runtime: java8
+            Timeout: 300
+        DependsOn:
+        - "MetricPushRole"
+
+    MetricPushAPIPermission:
+        Type: AWS::Lambda::Permission
+        Properties:
+            Action: lambda:invokeFunction
+            FunctionName: !Sub metric-push-api-${Stage}
+            Principal: apigateway.amazonaws.com
+        DependsOn: MetricPushLambda
+
+    MetricPushProxyResource:
+        Type: AWS::ApiGateway::Resource
+        Properties:
+            RestApiId: !Ref MetricPushAPI
+            ParentId: !GetAtt [MetricPushAPI, RootResourceId]
+            PathPart: metric-push-api
+        DependsOn: MetricPushAPI
+
+    MetricPushMethod:
+        Type: AWS::ApiGateway::Method
+        Properties:
+            AuthorizationType: NONE
+            ApiKeyRequired: true
+            RestApiId: !Ref MetricPushAPI
+            ResourceId: !Ref MetricPushProxyResource
+            HttpMethod: POST
+            RequestParameters:
+              method.request.querystring.identityId: true
+            Integration:
+              Type: AWS_PROXY
+              IntegrationHttpMethod: POST
+              Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MetricPushLambda.Arn}/invocations
+        DependsOn:
+        - MetricPushAPI
+        - MetricPushLambda
+        - MetricPushProxyResource
+
+    MetricPushAPI:
+        Type: "AWS::ApiGateway::RestApi"
+        Properties:
+            Description: This called when we have a set of SF accounts that all belong to one person (email) to merge them
+            Name: !FindInMap [StageMap, !Ref Stage, ApiName]
+
+    MetricPushAPIStage:
+        Type: AWS::ApiGateway::Stage
+        Properties:
+            Description: Stage for metric-push-api-api
+            RestApiId: !Ref MetricPushAPI
+            DeploymentId: !Ref MetricPushAPIDeployment
+            StageName: !Sub ${Stage}
+        DependsOn: MetricPushMethod
+
+    MetricPushAPIDeployment:
+        Type: AWS::ApiGateway::Deployment
+        Properties:
+            Description: Deploys metric-push-api-api into an environment/stage
+            RestApiId: !Ref MetricPushAPI
+        DependsOn: MetricPushMethod
+
+    MetricPushAPIKey:
+      Type: AWS::ApiGateway::ApiKey
+      Properties:
+        Description: Key required to call contact merge API
+        Enabled: true
+        Name: !Sub metric-push-api-api-key-${Stage}
+        StageKeys:
+          - RestApiId: !Ref MetricPushAPI
+            StageName: !Sub ${Stage}
+      DependsOn:
+      - MetricPushAPI
+      - MetricPushAPIStage
+
+    MetricPushUsagePlan:
+      Type: "AWS::ApiGateway::UsagePlan"
+      Properties:
+        UsagePlanName: !Sub metric-push-api-api-usage-plan-${Stage}
+        ApiStages:
+        - ApiId: !Ref MetricPushAPI
+          Stage: !Ref MetricPushAPIStage
+      DependsOn:
+      - MetricPushAPI
+      - MetricPushAPIStage
+
+    MetricPushUsagePlanKey:
+      Type: "AWS::ApiGateway::UsagePlanKey"
+      Properties:
+        KeyId: !Ref MetricPushAPIKey
+        KeyType: API_KEY
+        UsagePlanId: !Ref MetricPushUsagePlan
+      DependsOn:
+      - MetricPushAPIKey
+      - MetricPushUsagePlan
+
+    MetricPushDomainName:
+      Type: "AWS::ApiGateway::DomainName"
+      Properties:
+        RegionalCertificateArn: # only for *.membership.guardianapis.com
+          !Sub arn:aws:acm:${AWS::Region}:${AWS::AccountId}:certificate/c1efc564-9ff8-4a03-be48-d1990a3d79d2
+        DomainName: !FindInMap [ StageMap, !Ref Stage, DomainName ]
+        EndpointConfiguration:
+          Types:
+            - REGIONAL
+
+    MetricPushBasePathMapping:
+      Type: "AWS::ApiGateway::BasePathMapping"
+      Properties:
+        RestApiId: !Ref MetricPushAPI
+        DomainName: !Ref MetricPushDomainName
+        Stage: !Sub ${Stage}
+      DependsOn:
+      - MetricPushAPI
+      - MetricPushAPIStage
+      - MetricPushDomainName
+
+    MetricPushDNSRecord:
+      Type: AWS::Route53::RecordSet
+      Properties:
+        HostedZoneName: membership.guardianapis.com.
+        Name: !FindInMap [ StageMap, !Ref Stage, DomainName ]
+        Comment: !Sub CNAME for metric-push-api API ${Stage}
+        Type: CNAME
+        TTL: '120'
+        ResourceRecords:
+        - !GetAtt [ MetricPushDomainName, RegionalDomainName ]
+      DependsOn:
+        - MetricPushDomainName
+
+    5xxApiAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Condition: CreateProdMonitoring
+      Properties:
+        AlarmActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:subscriptions_dev
+        AlarmName:
+          !Sub
+            - 5XX rate from ${ApiName}
+            - { ApiName: !FindInMap [StageMap, !Ref Stage, ApiName] }
+        ComparisonOperator: GreaterThanThreshold
+        Dimensions:
+          - Name: ApiName
+            Value: !FindInMap [StageMap, !Ref Stage, ApiName]
+          - Name: Stage
+            Value: !Sub ${Stage}
+        EvaluationPeriods: 1
+        MetricName: 5XXError
+        Namespace: AWS/ApiGateway
+        Period: 3600
+        Statistic: Sum
+        Threshold: 5
+        TreatMissingData: notBreaching
