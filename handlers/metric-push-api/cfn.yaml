@@ -55,7 +55,7 @@ Resources:
             Code:
                 S3Bucket: support-service-lambdas-dist
                 S3Key: !Sub membership/${Stage}/metric-push-api/metric-push-api.jar
-            Handler: Handler::apply
+            Handler: com.gu.metric_push_api.Handler::apply
             Environment:
                 Variables:
                   Stage: !Ref Stage
@@ -87,10 +87,10 @@ Resources:
         Type: AWS::ApiGateway::Method
         Properties:
             AuthorizationType: NONE
-            ApiKeyRequired: true
+            ApiKeyRequired: false
             RestApiId: !Ref MetricPushAPI
             ResourceId: !Ref MetricPushProxyResource
-            HttpMethod: POST
+            HttpMethod: GET
             RequestParameters:
               method.request.querystring.identityId: true
             Integration:
@@ -123,40 +123,6 @@ Resources:
             Description: Deploys metric-push-api-api into an environment/stage
             RestApiId: !Ref MetricPushAPI
         DependsOn: MetricPushMethod
-
-    MetricPushAPIKey:
-      Type: AWS::ApiGateway::ApiKey
-      Properties:
-        Description: Key required to call contact merge API
-        Enabled: true
-        Name: !Sub metric-push-api-api-key-${Stage}
-        StageKeys:
-          - RestApiId: !Ref MetricPushAPI
-            StageName: !Sub ${Stage}
-      DependsOn:
-      - MetricPushAPI
-      - MetricPushAPIStage
-
-    MetricPushUsagePlan:
-      Type: "AWS::ApiGateway::UsagePlan"
-      Properties:
-        UsagePlanName: !Sub metric-push-api-api-usage-plan-${Stage}
-        ApiStages:
-        - ApiId: !Ref MetricPushAPI
-          Stage: !Ref MetricPushAPIStage
-      DependsOn:
-      - MetricPushAPI
-      - MetricPushAPIStage
-
-    MetricPushUsagePlanKey:
-      Type: "AWS::ApiGateway::UsagePlanKey"
-      Properties:
-        KeyId: !Ref MetricPushAPIKey
-        KeyType: API_KEY
-        UsagePlanId: !Ref MetricPushUsagePlan
-      DependsOn:
-      - MetricPushAPIKey
-      - MetricPushUsagePlan
 
     MetricPushDomainName:
       Type: "AWS::ApiGateway::DomainName"

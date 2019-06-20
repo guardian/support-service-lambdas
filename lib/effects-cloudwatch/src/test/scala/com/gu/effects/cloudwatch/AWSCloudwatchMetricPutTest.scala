@@ -19,7 +19,8 @@ class AWSCloudwatchMetricPutTest extends FlatSpec with Matchers {
     )
 
     AwsCloudWatchMetricPut(metricRequest) match {
-      case Success(value) => println("no checking possible, but hopefully it went into cloudwatch alright")
+      case Success(value) =>
+        println("no checking possible, but hopefully it went into cloudwatch alright")
         println("see https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#metricsV2:graph=~(view~'timeSeries~stacked~false~metrics~(~(~'support-service-lambdas~'EffectsTest~'Stage~'DEV))~region~'eu-west-1);query=~'*7bsupport-service-lambdas*2cStage*7d")
       case Failure(exception) => fail("could not send metric to cloudwatch", exception)
     }
