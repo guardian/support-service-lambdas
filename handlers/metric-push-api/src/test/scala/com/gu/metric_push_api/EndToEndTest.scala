@@ -2,7 +2,7 @@ package com.gu.metric_push_api
 
 import com.gu.effects.cloudwatch.AwsCloudWatchMetricPut.{MetricDimensionName, MetricDimensionValue, MetricName, MetricNamespace, MetricRequest}
 import com.gu.util.apigateway.ApiGatewayRequest
-import com.gu.util.apigateway.ResponseModels.{ApiResponse, Headers}
+import com.gu.util.apigateway.ResponseModels.{ApiResponse, CacheNoCache, Headers}
 import com.gu.util.config.Stage
 import org.scalatest.{FlatSpec, Matchers}
 
@@ -27,7 +27,7 @@ class EndToEndTest extends FlatSpec with Matchers {
 
     val responseString = Handler.operationForEffects(Stage("DEV"), putEffect.call).map(_.steps(input)).apiResponse
 
-    responseString.copy(body = responseString.body.replaceFirst(""": List.*"""", """"""")) should be(expected)
+    responseString.copy(body = responseString.body.map(_.replaceFirst(""": List.*"""", """""""))) should be(expected)
     putEffect.requests.toList should be(Nil)
 
   }
@@ -57,12 +57,9 @@ class EndToEndTest extends FlatSpec with Matchers {
   it should "succeed" in {
 
     val expected = ApiResponse(
-      statusCode = "200",
-      body =
-        """{
-          |  "message" : "Success"
-          |}""".stripMargin,
-      headers = Headers()
+      statusCode = "204",
+      body = None,
+      headers = Headers(contentType = None, cache = CacheNoCache)
     )
     val expectedRequest = MetricRequest(
       MetricNamespace("support-service-lambdas"),

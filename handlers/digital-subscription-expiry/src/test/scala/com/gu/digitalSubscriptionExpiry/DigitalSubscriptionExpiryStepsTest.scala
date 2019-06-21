@@ -205,8 +205,8 @@ class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
 
   def verifyResponse(actualResponse: ApiResponse, expectedStatus: String, expectedBody: String) = {
     val expectedReponseBodyJson = Json.parse(expectedBody)
-    val actualResponseBodyJson = Json.parse(actualResponse.body)
-    (actualResponse.statusCode, actualResponseBodyJson).shouldBe((expectedStatus, expectedReponseBodyJson))
+    val actualResponseBodyJson = actualResponse.body.map(Json.parse)
+    (actualResponse.statusCode, actualResponseBodyJson).shouldBe((expectedStatus, Some(expectedReponseBodyJson)))
   }
 
   val expectedBadRequestResponseBody =

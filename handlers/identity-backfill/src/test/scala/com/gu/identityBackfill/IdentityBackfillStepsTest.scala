@@ -51,7 +51,7 @@ class IdentityBackfillStepsTest extends FlatSpec with Matchers {
       (_, _) => GenericError("error")
     }(Option(SFContactId("sfContactId")), IdentityId("123"))
 
-    result.body should include("updateBuyersIdentityId multiple errors updating 123: (sfContactId,error)")
+    result.body.get should include("updateBuyersIdentityId multiple errors updating 123: (sfContactId,error)")
   }
 
   "updateZuoraBillingAccountsIdentityId" should "propagate errors" in {
@@ -59,6 +59,6 @@ class IdentityBackfillStepsTest extends FlatSpec with Matchers {
       (_, _) => GenericError("error")
     }(Set(AccountId("accountId1"), AccountId("accountId2")), IdentityId("123"))
 
-    result.body should include("updateZuoraBillingAccountsIdentityId multiple errors updating 123: (accountId1,error), (accountId2,error)")
+    result.body.get should include("updateZuoraBillingAccountsIdentityId multiple errors updating 123: (accountId1,error), (accountId2,error)")
   }
 }

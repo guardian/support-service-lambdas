@@ -4,7 +4,7 @@ import com.gu.effects.RawEffects
 import com.gu.effects.cloudwatch.AwsCloudWatchMetricPut
 import com.gu.test.EffectsTest
 import com.gu.util.apigateway.ApiGatewayRequest
-import com.gu.util.apigateway.ResponseModels.{ApiResponse, Headers}
+import com.gu.util.apigateway.ResponseModels.{ApiResponse, CacheNoCache, Headers}
 import org.scalatest.{FlatSpec, Matchers}
 
 class HandlerEffectsTest extends FlatSpec with Matchers {
@@ -12,12 +12,9 @@ class HandlerEffectsTest extends FlatSpec with Matchers {
   it should "not throw an error when trying to put a metric" taggedAs EffectsTest in {
 
     val expected = ApiResponse(
-      statusCode = "200",
-      body =
-        """{
-          |  "message" : "Success"
-          |}""".stripMargin,
-      headers = Headers()
+      statusCode = "204",
+      body = None,
+      headers = Headers(contentType = None, cache = CacheNoCache)
     )
 
     val input = ApiGatewayRequest(Some(Map("metricName" -> "ClientSideRenderError")), None, None, None)

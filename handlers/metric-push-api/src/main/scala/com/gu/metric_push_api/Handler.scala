@@ -8,7 +8,7 @@ import com.gu.effects.cloudwatch.AwsCloudWatchMetricPut
 import com.gu.effects.cloudwatch.AwsCloudWatchMetricPut._
 import com.gu.metric_push_api.WireRequestToDomainObject.MetricPushRequest
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
-import com.gu.util.apigateway.ResponseModels.ApiResponse
+import com.gu.util.apigateway.ResponseModels.{ApiResponse, CacheNoCache, Headers}
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, ApiGatewayResponse, ResponseModels}
 import com.gu.util.config.Stage
 import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
@@ -42,7 +42,7 @@ object Handler {
         MetricDimensionName("Stage") -> MetricDimensionValue(stage.toString)
       )
     ))
-    requested.toApiGatewayOp("put health check cloudwatch metric").map(_ => ApiGatewayResponse.successfulExecution).apiResponse
+    requested.toApiGatewayOp("put health check cloudwatch metric").map(_ => noContent()).apiResponse
   }
 
   def operationForEffects(stage: Stage, putEffect: MetricRequest => Try[Unit]): ApiGatewayOp[Operation] = {
@@ -84,6 +84,11 @@ object WireRequestToDomainObject {
       wireUrlParams <- req.queryParamsAsCaseClass[WireUrlParams]()
       metricPushRequest <- toUrlParams(wireUrlParams).toApiGatewayOp(ApiGatewayResponse.notFound _)
       stepsResult <- steps(metricPushRequest).toApiGatewayOp("failed to put cloudwatch metric")
-    } yield ApiGatewayResponse.successfulExecution).apiResponse
+    } yield noContent()).apiResponse
 
+}
+
+object noContent {
+  def apply(): ResponseModels.ApiResponse =
+    ApiResponse("204", None, Headers(contentType = None, cache = CacheNoCache))
 }
