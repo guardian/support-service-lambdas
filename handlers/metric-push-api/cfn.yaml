@@ -46,6 +46,13 @@ Resources:
                             - logs:PutLogEvents
                             - lambda:InvokeFunction
                             Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/metric-push-api-${Stage}:log-stream:*"
+                - PolicyName: CloudwatchMetricPolicy
+                  PolicyDocument:
+                    Statement:
+                      - Effect: Allow
+                        Action: cloudwatch:PutMetricData
+                        Resource: "*"
+
     MetricPushLambda:
         Type: AWS::Lambda::Function
         Properties:
