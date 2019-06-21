@@ -32,7 +32,8 @@ case class HolidayStopRequestEXTERNAL(
   start: String,
   end: String,
   subscriptionName: String,
-  mutabilityFlags: Option[MutabilityFlags]
+  mutabilityFlags: Option[MutabilityFlags],
+  publicationDatesToBeStopped: Option[List[LocalDate]]
 )
 
 object HolidayStopRequestEXTERNAL {
@@ -47,7 +48,8 @@ object HolidayStopRequestEXTERNAL {
         sfHSR.Actioned_Count__c.value,
         sfHSR.End_Date__c.value
       )
-    )
+    ),
+    publicationDatesToBeStopped = Some(ActionCalculator.publicationDatesToBeStopped(sfHSR))
   )
 
   def toSF(externalHSR: HolidayStopRequestEXTERNAL): NewHolidayStopRequest = NewHolidayStopRequest(
