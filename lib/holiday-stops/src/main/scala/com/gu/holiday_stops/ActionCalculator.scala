@@ -47,27 +47,36 @@ object ActionCalculator {
     )
   }
 
-  def publicationDatesToBeStopped(hsr: HolidayStopRequest): List[LocalDate] = {
+  def publicationDatesToBeStopped(hsr: HolidayStopRequest): List[LocalDate] = publicationDatesToBeStopped(
+    hsr.Start_Date__c.value,
+    hsr.End_Date__c.value,
+    hsr.Product_Name__c
+  )
 
-    def applicableDates(
-      fromInclusive: LocalDate,
-      toInclusive: LocalDate,
-      p: LocalDate => Boolean
-    ): List[LocalDate] = {
-      val dateRange = 0 to Days.daysBetween(fromInclusive, toInclusive).getDays
-      dateRange.foldLeft(List.empty[LocalDate]) { (acc, i) =>
-        val d = fromInclusive.plusDays(i)
-        if (p(d)) acc :+ d
-        else acc
-      }
-    }
-
-    val dayOfWeekForProduct = productNameToSuspensionConstants(hsr.Product_Name__c).issueDayOfWeek
+  def publicationDatesToBeStopped(
+    fromInclusive: LocalDate,
+    toInclusive: LocalDate,
+    productName: ProductName
+  ): List[LocalDate] = {
+    val dayOfWeekForProduct = productNameToSuspensionConstants(productName).issueDayOfWeek
     applicableDates(
-      fromInclusive = hsr.Start_Date__c.value,
-      toInclusive = hsr.End_Date__c.value,
+      fromInclusive,
+      toInclusive,
       { _.getDayOfWeek == dayOfWeekForProduct }
     )
+  }
+
+  private def applicableDates(
+    fromInclusive: LocalDate,
+    toInclusive: LocalDate,
+    p: LocalDate => Boolean
+  ): List[LocalDate] = {
+    val dateRange = 0 to Days.daysBetween(fromInclusive, toInclusive).getDays
+    dateRange.foldLeft(List.empty[LocalDate]) { (acc, i) =>
+      val d = fromInclusive.plusDays(i)
+      if (p(d)) acc :+ d
+      else acc
+    }
   }
 
 }
