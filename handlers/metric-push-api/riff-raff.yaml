@@ -9,13 +9,3 @@ deployments:
     app: metric-push-api
     parameters:
       templatePath: cfn.yaml
-
-  metric-push-api:
-    type: aws-lambda
-    parameters:
-      fileName: metric-push-api.jar
-      bucket: support-service-lambdas-dist
-      prefixStack: false
-      functionNames:
-      - metric-push-api-
-    dependencies: [cfn]

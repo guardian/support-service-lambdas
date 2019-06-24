@@ -251,7 +251,7 @@ lazy val `holiday-stop-processor` = all(project in file("handlers/holiday-stop-p
 
 lazy val `metric-push-api` = all(project in file("handlers/metric-push-api"))
   .enablePlugins(RiffRaffArtifact)
-  .dependsOn(effects, `effects-cloudwatch`, testDep)
+  .dependsOn()
 
 // ==== END handlers ====
 

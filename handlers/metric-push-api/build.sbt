@@ -3,13 +3,8 @@
 name := "metric-push-api"
 description:= "HTTP API to push a metric to cloudwatch so we can alarm on errors"
 
-scalacOptions += "-Ypartial-unification"
-
-assemblyJarName := "metric-push-api.jar"
 riffRaffPackageType := assembly.value
 riffRaffUploadArtifactBucket := Option("riffraff-artifact")
 riffRaffUploadManifestBucket := Option("riffraff-builds")
 riffRaffManifestProjectName := "MemSub::Membership Admin::Metric Push API"
 riffRaffArtifactResources += (file("handlers/metric-push-api/cfn.yaml"), "cfn/cfn.yaml")
-
-libraryDependencies ++= Seq()
