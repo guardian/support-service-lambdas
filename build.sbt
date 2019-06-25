@@ -141,12 +141,6 @@ lazy val `effects-ses` = all(project in file("lib/effects-ses"))
     libraryDependencies ++= Seq(logging, awsSES)
   )
 
-lazy val `effects-cloudwatch` = all(project in file("lib/effects-cloudwatch"))
-  .dependsOn(testDep)
-  .settings(
-    libraryDependencies ++= Seq(logging, awsCloudwatch)
-  )
-
 val effectsDepIncludingTestFolder: ClasspathDependency = effects % "compile->compile;test->test"
 
 lazy val `zuora-reports` = all(project in file("lib/zuora-reports"))
@@ -180,7 +174,6 @@ lazy val root = all(project in file(".")).enablePlugins(RiffRaffArtifact).aggreg
   `new-product-api`,
   `effects-sqs`,
   `effects-ses`,
-  `effects-cloudwatch`,
   `sf-datalake-export`,
   `zuora-datalake-export`,
   `batch-email-sender`,

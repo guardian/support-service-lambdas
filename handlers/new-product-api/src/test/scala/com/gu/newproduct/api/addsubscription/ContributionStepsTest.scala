@@ -107,7 +107,7 @@ class ContributionStepsTest extends FlatSpec with Matchers {
 
     val actual = Await.result(futureActual, 30 seconds)
     actual.statusCode should be("200")
-    actual.body.get jsonMatchesFormat expectedOutput
+    actual.body jsonMatchesFormat expectedOutput
   }
 
 }

@@ -80,17 +80,17 @@ class PreReqCheckTest extends FlatSpec with Matchers {
     val ReturnWithResponse(result) = PreReqCheck
       .checkSfContactsSyncable(_ => ReturnWithResponse(errorResponse))(Set(SFAccountId("crmId")))
 
-    result.body.get should include("Bad request: foo")
+    result.body should include("Bad request: foo")
     result shouldNot be(errorResponse)
-    result.body.get should include("is not syncable for the following reasons:")
+    result.body should include("is not syncable for the following reasons:")
   }
 
   "checkSfContactsSyncable" should "ReturnWithResponse if more than one CRM account" in {
     val errorResponse = ApiGatewayResponse.badRequest("foo")
     val ReturnWithResponse(result) = PreReqCheck
       .checkSfContactsSyncable(_ => ReturnWithResponse(errorResponse))(Set(SFAccountId("crmId1"), SFAccountId("crmId2")))
-    result.body.get should include("more than one CRM account")
-    result.body.get shouldNot include("foo")
+    result.body should include("more than one CRM account")
+    result.body shouldNot include("foo")
   }
 
   "checkSfContactsSyncable" should "continue processing if syncable" in {
@@ -115,7 +115,7 @@ class PreReqCheckTest extends FlatSpec with Matchers {
     )(EmailAddress("email@gu.com"))
 
     result.statusCode shouldBe "400"
-    result.body.get should include("identity ids found in zuora")
+    result.body should include("identity ids found in zuora")
 
   }
 
@@ -141,7 +141,7 @@ class PreReqCheckTest extends FlatSpec with Matchers {
     )(EmailAddress("email@gu.com"))
 
     result.statusCode shouldBe "400"
-    result.body.get should include("multiple CRM ids found for")
+    result.body should include("multiple CRM ids found for")
 
   }
 
@@ -150,7 +150,7 @@ class PreReqCheckTest extends FlatSpec with Matchers {
     val ReturnWithResponse(result) = PreReqCheck.validateZuoraAccountsFound(ClientSuccess(Nil))(EmailAddress("email@gu.com"))
 
     result.statusCode shouldBe "400"
-    result.body.get should include("no zuora accounts found for")
+    result.body should include("no zuora accounts found for")
 
   }
 

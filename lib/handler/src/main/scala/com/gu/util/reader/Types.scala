@@ -7,7 +7,6 @@ import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
 import play.api.libs.json.{JsError, JsResult, JsSuccess}
 import scalaz.{-\/, Monad, \/, \/-}
-import scalaz.syntax.std.either._
 
 import scala.util.{Failure, Success, Try}
 
@@ -168,16 +167,6 @@ object Types extends Logging {
         case scalaz.\/-(success) => ContinueProcessing(success)
         case scalaz.-\/(error) => ReturnWithResponse(toApiResponse(error))
       }
-
-  }
-
-  implicit class EitherOps[L, A](theEither: Either[L, A]) {
-
-    def toApiGatewayOp(action: String): ApiGatewayOp[A] =
-      theEither.disjunction.toApiGatewayOp(action)
-
-    def toApiGatewayOp(toApiResponse: L => ApiResponse): ApiGatewayOp[A] =
-      theEither.disjunction.toApiGatewayOp(toApiResponse)
 
   }
 

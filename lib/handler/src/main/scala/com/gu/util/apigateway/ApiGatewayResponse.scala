@@ -5,34 +5,22 @@ import java.io.{OutputStream, OutputStreamWriter}
 import com.gu.util.Logging
 import com.gu.util.apigateway.ResponseModels.{ApiResponse, Headers}
 import com.gu.util.apigateway.ResponseWriters._
-import play.api.libs.json.Json.JsValueWrapper
 import play.api.libs.json.{Json, Writes}
 
 object ResponseModels {
 
-  sealed abstract class CacheHeader(val keyValues: List[(String, JsValueWrapper)])
-  case object CacheDefault extends CacheHeader(List.empty)
-  case object CacheNoCache extends CacheHeader(List(
-    // this forces revalidation, but doesn't prevent storing. Use Private & NoStore
-    "Cache-control" -> "no-store"
-  ))
-  case class Headers(contentType: Option[String] = Some("application/json"), cache: CacheHeader = CacheDefault)
+  case class Headers(contentType: String = "application/json")
 
-  case class ApiResponse(statusCode: String, body: Option[String], headers: Headers)
-  object ApiResponse {
-    def apply(statusCode: String, body: String, headers: Headers = new Headers): ApiResponse = new ApiResponse(statusCode, Some(body), headers)
-  }
+  case class ApiResponse(statusCode: String, body: String, headers: Headers = new Headers)
 
 }
 
 object ResponseWriters {
 
   implicit val headersWrites = new Writes[Headers] {
-    def writes(headers: Headers) = {
-      val keyValues = headers.contentType.map(contentType =>
-        "Content-Type" -> (contentType: JsValueWrapper)).toList ++ headers.cache.keyValues
-      Json.obj(keyValues: _*)
-    }
+    def writes(headers: Headers) = Json.obj(
+      "Content-Type" -> headers.contentType
+    )
   }
 
   implicit val responseWrites = new Writes[ApiResponse] {
