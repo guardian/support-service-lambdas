@@ -42,6 +42,8 @@ Resources:
             HttpMethod: GET
             Integration:
               Type: MOCK
+              RequestTemplates:
+                application/json: '{"statusCode": 200}'
               IntegrationResponses:
                 - StatusCode: 204
                   ResponseParameters:
