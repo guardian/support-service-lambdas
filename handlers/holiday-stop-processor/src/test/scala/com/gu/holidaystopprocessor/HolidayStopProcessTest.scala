@@ -3,7 +3,7 @@ package com.gu.holidaystopprocessor
 import java.time.LocalDate
 
 import com.gu.holidaystopprocessor.Fixtures.{config, mkSubscription}
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.{HolidayStopRequest, HolidayStopRequestId}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.{HolidayStopRequest, HolidayStopRequestId, ProductName, SubscriptionName}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestActionedZuoraRef.{HolidayStopRequestActionedZuoraChargeCode, HolidayStopRequestActionedZuoraChargePrice, StoppedPublicationDate}
 import org.scalatest.{EitherValues, FlatSpec, Matchers, OptionValues}
 
@@ -18,14 +18,14 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
 
   private val holidayStop = HolidayStop(
     HolidayStopRequestId("HSR1"),
-    "subscriptionName",
+    SubscriptionName("subscriptionName"),
     LocalDate.of(2019, 8, 9)
   )
 
-  private def getRequests(requestsGet: Either[OverallFailure, Seq[HolidayStopRequest]]): String => Either[OverallFailure, Seq[HolidayStopRequest]] =
+  private def getRequests(requestsGet: Either[OverallFailure, Seq[HolidayStopRequest]]): ProductName => Either[OverallFailure, Seq[HolidayStopRequest]] =
     _ => requestsGet
 
-  private def getSubscription(subscriptionGet: Either[HolidayStopFailure, Subscription]): String => Either[HolidayStopFailure, Subscription] = {
+  private def getSubscription(subscriptionGet: Either[HolidayStopFailure, Subscription]): SubscriptionName => Either[HolidayStopFailure, Subscription] = {
     _ => subscriptionGet
   }
 

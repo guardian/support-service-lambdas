@@ -145,7 +145,7 @@ object Fixtures {
 
   def mkHolidayStop(date: LocalDate) = HolidayStop(
     requestId = HolidayStopRequestId("R1"),
-    subscriptionName = "S1",
+    subscriptionName = SubscriptionName("S1"),
     stoppedPublicationDate = date
   )
 

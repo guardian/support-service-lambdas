@@ -2,7 +2,7 @@ package com.gu.holidaystopprocessor
 
 import java.time.LocalDate
 
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.HolidayStopRequest
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.{HolidayStopRequest, ProductName, SubscriptionName}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestActionedZuoraRef.{HolidayStopRequestActionedZuoraChargeCode, HolidayStopRequestActionedZuoraChargePrice, StoppedPublicationDate}
 
 object HolidayStopProcess {
@@ -20,8 +20,8 @@ object HolidayStopProcess {
 
   def processHolidayStops(
     config: Config,
-    getRequests: String => Either[OverallFailure, Seq[HolidayStopRequest]],
-    getSubscription: String => Either[HolidayStopFailure, Subscription],
+    getRequests: ProductName => Either[OverallFailure, Seq[HolidayStopRequest]],
+    getSubscription: SubscriptionName => Either[HolidayStopFailure, Subscription],
     updateSubscription: (Subscription, SubscriptionUpdate) => Either[HolidayStopFailure, Unit],
     exportAddedCharges: Seq[HolidayStopResponse] => Either[OverallFailure, Unit]
   ): ProcessResult = {
@@ -52,7 +52,7 @@ object HolidayStopProcess {
 
   def processHolidayStop(
     config: Config,
-    getSubscription: String => Either[HolidayStopFailure, Subscription],
+    getSubscription: SubscriptionName => Either[HolidayStopFailure, Subscription],
     updateSubscription: (Subscription, SubscriptionUpdate) => Either[HolidayStopFailure, Unit]
   )(stop: HolidayStop): Either[HolidayStopFailure, HolidayStopResponse] =
     for {

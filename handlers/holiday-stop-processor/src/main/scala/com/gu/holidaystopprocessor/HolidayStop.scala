@@ -3,19 +3,19 @@ package com.gu.holidaystopprocessor
 import java.time.LocalDate
 
 import com.gu.holiday_stops.ActionCalculator
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.{HolidayStopRequest, HolidayStopRequestId}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.{HolidayStopRequest, HolidayStopRequestId, ProductName, SubscriptionName}
 import com.gu.util.Time
 
 case class HolidayStop(
   requestId: HolidayStopRequestId,
-  subscriptionName: String,
+  subscriptionName: SubscriptionName,
   stoppedPublicationDate: LocalDate
 )
 
 object HolidayStop {
 
-  def holidayStopsToApply(getRequests: String => Either[OverallFailure, Seq[HolidayStopRequest]]): Either[OverallFailure, Seq[HolidayStop]] =
-    getRequests("Guardian Weekly") map {
+  def holidayStopsToApply(getRequests: ProductName => Either[OverallFailure, Seq[HolidayStopRequest]]): Either[OverallFailure, Seq[HolidayStop]] =
+    getRequests(ProductName("Guardian Weekly")) map {
       _ flatMap toHolidayStops
     }
 
@@ -23,7 +23,7 @@ object HolidayStop {
     ActionCalculator.publicationDatesToBeStopped(request) map { date =>
       HolidayStop(
         requestId = request.Id,
-        subscriptionName = request.Subscription_Name__c.value,
+        subscriptionName = request.Subscription_Name__c,
         stoppedPublicationDate = Time.toJavaDate(date)
       )
     }
