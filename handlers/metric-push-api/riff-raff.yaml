@@ -1,0 +1,11 @@
+stacks:
+- membership
+regions:
+- eu-west-1
+deployments:
+
+  cfn:
+    type: cloud-formation
+    app: metric-push-api
+    parameters:
+      templatePath: cfn.yaml
