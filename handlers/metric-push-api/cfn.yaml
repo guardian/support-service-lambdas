@@ -146,8 +146,9 @@ Resources:
         Threshold: 2
         TreatMissingData: notBreaching
 
-    HighELB5XXRateAlarm:
+    HighClientSideErrorRateAlarm:
       Type: AWS::CloudWatch::Alarm
+      Condition: CreateProdMonitoring
       Properties:
         AlarmActions:
           - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:reader-revenue-dev
