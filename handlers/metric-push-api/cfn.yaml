@@ -173,5 +173,6 @@ Resources:
         Period: 60
         EvaluationPeriods: 5
         Statistic: Sum
+        TreatMissingData: notBreaching
       DependsOn:
         - MetricPushAPI
