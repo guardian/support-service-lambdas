@@ -16,8 +16,8 @@ case class ZuoraHolidayStop(subscriptionName: String, chargeNumber: String, star
 
 object ZuoraHolidayStop {
 
-  def holidayStopsAlreadyInZuora(queryResponse: String => Response[String])(startThreshold: LocalDate, endThreshold: Option[LocalDate]): Either[ZuoraFetchFailure, Seq[ZuoraHolidayStop]] = {
-    val response = queryResponse(Queries.preexistingHolidayStopQuery(startThreshold, endThreshold.getOrElse(LocalDate.MAX)))
+  def holidayStopsAlreadyInZuora(queryResponse: String => Response[String])(start: LocalDate, end: Option[LocalDate]): Either[ZuoraFetchFailure, Seq[ZuoraHolidayStop]] = {
+    val response = queryResponse(Queries.preexistingHolidayStopQuery(start, end.getOrElse(LocalDate.MAX)))
     def decodeMultiline(s: String): Either[ZuoraFetchFailure, Seq[ZuoraHolidayStop]] = {
       val failureOrList = s.split('\n').map { line =>
         decode[ZuoraHolidayStop](line).left.map(e => ZuoraFetchFailure(e.getMessage))
@@ -33,8 +33,8 @@ object ZuoraHolidayStop {
 
 object SalesforceHolidayStop {
 
-  def holidayStopsAlreadyInSalesforce(sfCredentials: SFAuthConfig)(startThreshold: LocalDate, endThreshold: Option[LocalDate]): Either[SalesforceFetchFailure, Seq[HolidayStopRequestDetails]] = {
-    Salesforce.holidayStopRequestDetails(sfCredentials)(ProductName("Guardian Weekly"), startThreshold, endThreshold.getOrElse(LocalDate.MAX))
+  def holidayStopsAlreadyInSalesforce(sfCredentials: SFAuthConfig)(start: LocalDate, end: Option[LocalDate]): Either[SalesforceFetchFailure, Seq[HolidayStopRequestDetails]] = {
+    Salesforce.holidayStopRequestDetails(sfCredentials)(ProductName("Guardian Weekly"), start, end.getOrElse(LocalDate.MAX))
   }
 
   def holidayStopRequestsToBeBackfilled(inZuora: Seq[ZuoraHolidayStop], inSalesforce: Seq[HolidayStopRequestDetails]): Seq[NewHolidayStopRequest] = {
