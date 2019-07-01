@@ -54,7 +54,7 @@ object Config {
     }
   }
 
-  def build(): Either[ConfigFailure, Config] = {
+  def apply(): Either[ConfigFailure, Config] = {
     val stage = Option(System.getenv("Stage")).getOrElse("DEV")
     for {
       zuoraConfig <- zuoraCredentials(stage)

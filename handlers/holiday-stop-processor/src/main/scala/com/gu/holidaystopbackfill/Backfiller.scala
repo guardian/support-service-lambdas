@@ -15,7 +15,7 @@ object Backfiller {
    */
   def backfill(startThreshold: LocalDate, endThreshold: Option[LocalDate], dryRun: Boolean): Either[BackfillFailure, Unit] = {
     for {
-      config <- Config.build()
+      config <- Config()
       accessToken <- fromZuoraResponse(Zuora.accessTokenGetResponse(config.zuoraConfig))
       stopsInZuora1 <- holidayStopsAlreadyInZuora(Zuora.queryGetResponse(config.zuoraConfig, accessToken))(startThreshold, endThreshold)
       stopsInSf1 <- holidayStopsAlreadyInSalesforce(config.sfConfig)(startThreshold, endThreshold)
