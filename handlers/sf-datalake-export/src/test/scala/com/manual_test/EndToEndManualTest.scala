@@ -2,7 +2,7 @@ package com.manual_test
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
-import com.gu.sf_datalake_export.handlers.{GetBatchesHandler, StartJobHandler}
+import com.gu.sf_datalake_export.handlers.{DownloadBatchHandler, GetBatchesHandler, StartJobHandler}
 import com.gu.sf_datalake_export.salesforce_bulk_api.BulkApiParams
 import com.gu.sf_datalake_export.salesforce_bulk_api.BulkApiParams.SfQueryInfo
 import play.api.libs.json._
@@ -13,7 +13,7 @@ object EndToEndManualTest extends App {
 
   case class Batch(batchId: String, state: String)
 
-  case class Batches(jobId: String, jobName: String, objectName: String, jobStatus: String, batches: Seq[Batch]) {
+  case class Batches(jobId: String, jobName: String, objectName: String, jobStatus: String, batches: Seq[Batch], uploadToDataLake: Boolean) {
     def isCompleted = jobStatus == "Completed"
   }
 
@@ -25,6 +25,7 @@ object EndToEndManualTest extends App {
   msg(job)
   val batches = waitBatchesToComplete(job)
   msg(batches)
+  downloadBatches(batches)
 
   def startJob(sfObject: SfQueryInfo): Job = {
 
@@ -60,6 +61,20 @@ object EndToEndManualTest extends App {
     GetBatchesHandler(testInputStream, testOutput, null)
 
     Json.parse(testOutput.toByteArray).as[Batches]
+  }
+
+  def downloadBatches(batches: Batches) = {
+    val request = Json.prettyPrint(Json.toJson(batches))
+
+    msg(request)
+
+    val testInputStream = new ByteArrayInputStream(request.getBytes)
+    val testOutput = new ByteArrayOutputStream()
+    DownloadBatchHandler(testInputStream, testOutput, null)
+
+    val response = new String(testOutput.toByteArray)
+    println(response)
+
   }
 
   def msg(s: Any): Unit = {
