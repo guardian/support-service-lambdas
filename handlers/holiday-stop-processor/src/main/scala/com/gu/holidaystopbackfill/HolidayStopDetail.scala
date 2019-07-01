@@ -16,8 +16,22 @@ case class ZuoraHolidayStop(subscriptionName: String, chargeNumber: String, star
 
 object ZuoraHolidayStop {
 
+  private def preexistingHolidayStopQuery(startThreshold: LocalDate, endThreshold: LocalDate): String = s"""
+    | select s.name subscriptionName, c.chargeNumber, c.holidaystart__c startDate,
+    |   c.holidayend__c endDate, t.price creditPrice
+    | from rateplanchargetier t
+    | join rateplancharge c on t.rateplanchargeid = c.id
+    | join rateplan p on c.rateplanid = p.id
+    | join subscription s on p.subscriptionid = s.id
+    | where c.name = 'Holiday Credit'
+    | and c.holidaystart__c >= '${startThreshold.toString}'
+    | and c.holidaystart__c <= '${endThreshold.toString}'
+    | and p.name = 'Guardian Weekly Holiday Credit'
+    | order by s.name, c.chargenumber
+  """.stripMargin
+
   def holidayStopsAlreadyInZuora(queryResponse: String => Response[String])(start: LocalDate, end: Option[LocalDate]): Either[ZuoraFetchFailure, Seq[ZuoraHolidayStop]] = {
-    val response = queryResponse(Queries.preexistingHolidayStopQuery(start, end.getOrElse(LocalDate.MAX)))
+    val response = queryResponse(preexistingHolidayStopQuery(start, end.getOrElse(LocalDate.MAX)))
     def decodeMultiline(s: String): Either[ZuoraFetchFailure, Seq[ZuoraHolidayStop]] = {
       val failureOrList = s.split('\n').map { line =>
         decode[ZuoraHolidayStop](line).left.map(e => ZuoraFetchFailure(e.getMessage))
