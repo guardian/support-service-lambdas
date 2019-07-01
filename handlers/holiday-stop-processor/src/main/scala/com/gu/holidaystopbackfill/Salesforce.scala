@@ -24,6 +24,16 @@ object Salesforce {
       case \/-(requests) => Right(requests)
     }
 
+  def holidayStopRequestsByProductAndDateRange(sfCredentials: SFAuthConfig)(productNamePrefix: ProductName, start: LocalDate, end: LocalDate): Either[SalesforceFetchFailure, Seq[HolidayStopRequest]] =
+    SalesforceClient(RawEffects.response, sfCredentials).value.flatMap { sfAuth =>
+      val sfGet = sfAuth.wrapWith(JsonHttp.getWithParams)
+      val fetchOp = SalesforceHolidayStopRequest.LookupByDateRangeAndProductNamePrefix(sfGet)
+      fetchOp(Time.toJodaDate(start), Time.toJodaDate(end), productNamePrefix)
+    }.toDisjunction match {
+      case -\/(failure) => Left(SalesforceFetchFailure(failure.toString))
+      case \/-(requests) => Right(requests)
+    }
+
   def holidayStopRequestDetails(sfCredentials: SFAuthConfig)(productNamePrefix: ProductName, startThreshold: LocalDate, endThreshold: LocalDate): Either[SalesforceFetchFailure, Seq[HolidayStopRequestDetails]] =
     SalesforceClient(RawEffects.response, sfCredentials).value.flatMap { sfAuth =>
       val sfGet = sfAuth.wrapWith(JsonHttp.getWithParams)

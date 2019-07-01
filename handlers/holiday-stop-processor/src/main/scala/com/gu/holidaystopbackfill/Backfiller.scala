@@ -3,7 +3,7 @@ package com.gu.holidaystopbackfill
 import java.time.LocalDate
 
 import com.gu.holidaystopbackfill.AccessToken.fromZuoraResponse
-import com.gu.holidaystopbackfill.SalesforceHolidayStop.holidayStopsAlreadyInSalesforce
+import com.gu.holidaystopbackfill.SalesforceHolidayStop.{holidayStopRequestsAddedToSalesforce, holidayStopRequestsAlreadyInSalesforce, holidayStopRequestsToBeBackfilled, zuoraRefsAlreadyInSalesforce, zuoraRefsAddedToSalesforce, zuoraRefsToBeBackfilled}
 import com.gu.holidaystopbackfill.ZuoraHolidayStop.holidayStopsAlreadyInZuora
 
 object Backfiller {
@@ -17,14 +17,13 @@ object Backfiller {
     for {
       config <- Config()
       accessToken <- fromZuoraResponse(Zuora.accessTokenGetResponse(config.zuoraConfig))
-      stopsInZuora1 <- holidayStopsAlreadyInZuora(Zuora.queryGetResponse(config.zuoraConfig, accessToken))(startThreshold, endThreshold)
-      stopsInSf1 <- holidayStopsAlreadyInSalesforce(config.sfConfig)(startThreshold, endThreshold)
-      requestsToAddToSf = SalesforceHolidayStop.holidayStopRequestsToBeBackfilled(stopsInZuora1, stopsInSf1)
-      _ <- SalesforceHolidayStop.holidayStopRequestsAddedToSalesforce(config.sfConfig, dryRun)(requestsToAddToSf)
-      stopsInZuora2 <- holidayStopsAlreadyInZuora(Zuora.queryGetResponse(config.zuoraConfig, accessToken))(startThreshold, endThreshold)
-      stopsInSf2 <- holidayStopsAlreadyInSalesforce(config.sfConfig)(startThreshold, endThreshold)
-      zuoraRefsToAddToSf = SalesforceHolidayStop.zuoraRefsToBeBackfilled(stopsInZuora2, stopsInSf2)
-      _ <- SalesforceHolidayStop.zuoraRefsAddedToSalesforce(config.sfConfig, dryRun)(zuoraRefsToAddToSf)
+      stopsInZuora <- holidayStopsAlreadyInZuora(Zuora.queryGetResponse(config.zuoraConfig, accessToken))(startThreshold, endThreshold)
+      requestsInSf <- holidayStopRequestsAlreadyInSalesforce(config.sfConfig)(startThreshold, endThreshold)
+      requestsToAddToSf = holidayStopRequestsToBeBackfilled(stopsInZuora, requestsInSf)
+      _ <- holidayStopRequestsAddedToSalesforce(config.sfConfig, dryRun)(requestsToAddToSf)
+      zuoraRefsInSf <- zuoraRefsAlreadyInSalesforce(config.sfConfig)(startThreshold, endThreshold)
+      zuoraRefsToAddToSf = zuoraRefsToBeBackfilled(stopsInZuora, zuoraRefsInSf)
+      _ <- zuoraRefsAddedToSalesforce(config.sfConfig, dryRun)(zuoraRefsToAddToSf)
     } yield BackfillResult(requestsToAddToSf, zuoraRefsToAddToSf)
   }
 }

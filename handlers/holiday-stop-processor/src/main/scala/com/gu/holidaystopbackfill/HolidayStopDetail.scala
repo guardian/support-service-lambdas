@@ -5,7 +5,7 @@ import java.time.{DayOfWeek, LocalDate}
 
 import cats.implicits._
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.{HolidayStopRequestEndDate, HolidayStopRequestStartDate, NewHolidayStopRequest, ProductName, SubscriptionName, SubscriptionNameLookup}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.{HolidayStopRequest, HolidayStopRequestEndDate, HolidayStopRequestStartDate, NewHolidayStopRequest, ProductName, SubscriptionName, SubscriptionNameLookup}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestActionedZuoraRef.{HolidayStopRequestActionedZuoraChargeCode, HolidayStopRequestActionedZuoraChargePrice, HolidayStopRequestActionedZuoraRef, HolidayStopRequestDetails, StoppedPublicationDate}
 import com.gu.util.Time
 import com.softwaremill.sttp.Response
@@ -47,18 +47,23 @@ object ZuoraHolidayStop {
 
 object SalesforceHolidayStop {
 
-  def holidayStopsAlreadyInSalesforce(sfCredentials: SFAuthConfig)(start: LocalDate, end: Option[LocalDate]): Either[SalesforceFetchFailure, Seq[HolidayStopRequestDetails]] = {
+  def holidayStopRequestsAlreadyInSalesforce(sfCredentials: SFAuthConfig)(start: LocalDate, end: Option[LocalDate]): Either[SalesforceFetchFailure, Seq[HolidayStopRequest]] = {
+    Salesforce.holidayStopRequestsByProductAndDateRange(sfCredentials)(ProductName("Guardian Weekly"), start, end.getOrElse(LocalDate.MAX))
+  }
+
+  def zuoraRefsAlreadyInSalesforce(sfCredentials: SFAuthConfig)(start: LocalDate, end: Option[LocalDate]): Either[SalesforceFetchFailure, Seq[HolidayStopRequestDetails]] = {
     Salesforce.holidayStopRequestDetails(sfCredentials)(ProductName("Guardian Weekly"), start, end.getOrElse(LocalDate.MAX))
   }
 
-  def holidayStopRequestsToBeBackfilled(inZuora: Seq[ZuoraHolidayStop], inSalesforce: Seq[HolidayStopRequestDetails]): Seq[NewHolidayStopRequest] = {
+  def holidayStopRequestsToBeBackfilled(inZuora: Seq[ZuoraHolidayStop], inSalesforce: Seq[HolidayStopRequest]): Seq[NewHolidayStopRequest] = {
 
-    val salesforceSubscriptionNames = inSalesforce.map(_.subscriptionName.value)
+    def isSame(z: ZuoraHolidayStop, sf: HolidayStopRequest): Boolean =
+      z.subscriptionName == sf.Subscription_Name__c.value &&
+        z.startDate == Time.toJavaDate(sf.Start_Date__c.value) &&
+        z.endDate == Time.toJavaDate(sf.End_Date__c.value)
 
     inZuora
-      .filterNot { zuoraStop =>
-        salesforceSubscriptionNames.contains(zuoraStop.subscriptionName)
-      }
+      .filterNot { zuoraStop => inSalesforce.exists { sfStop => isSame(zuoraStop, sfStop) } }
       .map { zuoraStop =>
         NewHolidayStopRequest(
           HolidayStopRequestStartDate(Time.toJodaDate(zuoraStop.startDate)),
@@ -69,20 +74,20 @@ object SalesforceHolidayStop {
       .distinct
   }
 
-  def zuoraRefsToBeBackfilled(inZuora: Seq[ZuoraHolidayStop], inSalesforce: Seq[HolidayStopRequestDetails]): Seq[HolidayStopRequestActionedZuoraRef] = {
-
-    def applicableDates(
-      fromInclusive: LocalDate,
-      toInclusive: LocalDate,
-      p: LocalDate => Boolean
-    ): List[LocalDate] = {
-      val dateRange = 0 to ChronoUnit.DAYS.between(fromInclusive, toInclusive).toInt
-      dateRange.foldLeft(List.empty[LocalDate]) { (acc, i) =>
-        val d = fromInclusive.plusDays(i)
-        if (p(d)) acc :+ d
-        else acc
-      }
+  def applicableDates(
+    fromInclusive: LocalDate,
+    toInclusive: LocalDate,
+    p: LocalDate => Boolean
+  ): List[LocalDate] = {
+    val dateRange = 0 to ChronoUnit.DAYS.between(fromInclusive, toInclusive).toInt
+    dateRange.foldLeft(List.empty[LocalDate]) { (acc, i) =>
+      val d = fromInclusive.plusDays(i)
+      if (p(d)) acc :+ d
+      else acc
     }
+  }
+
+  def zuoraRefsToBeBackfilled(inZuora: Seq[ZuoraHolidayStop], inSalesforce: Seq[HolidayStopRequestDetails]): Seq[HolidayStopRequestActionedZuoraRef] = {
 
     /*
      * We take legacy holiday stops that have a range of dates
