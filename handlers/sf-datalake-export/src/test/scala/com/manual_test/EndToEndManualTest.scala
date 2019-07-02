@@ -7,6 +7,13 @@ import com.gu.sf_datalake_export.salesforce_bulk_api.BulkApiParams
 import com.gu.sf_datalake_export.salesforce_bulk_api.BulkApiParams.SfQueryInfo
 import play.api.libs.json._
 
+/**
+  * Run a query as a salesforce job, wait for it to complete and copy the results to s3.
+  *
+  * See a log entry like
+  * "Copying file to S3. Bucket: gu-salesforce-export-dev | Key: ImovoContract_2019-07-01_7503E0000063xJmQAI_7523E0000029Hyi.csv"
+  * at the end of the execution.
+  */
 object EndToEndManualTest extends App {
 
   case class Job(jobId: String, jobName: String, objectName: String, uploadToDataLake: Boolean)
@@ -15,13 +22,15 @@ object EndToEndManualTest extends App {
 
   case class Batches(jobId: String, jobName: String, objectName: String, jobStatus: String, batches: Seq[Batch], uploadToDataLake: Boolean) {
     def isCompleted = jobStatus == "Completed"
+
+    def isFailed = jobStatus == "Failed"
   }
 
   implicit val jobFormat = Json.format[Job]
   implicit val batchFormat = Json.format[Batch]
   implicit val batchesWrites = Json.format[Batches]
 
-  val job = startJob(BulkApiParams.contact)
+  val job = startJob(BulkApiParams.imovoContract)
   msg(job)
   val batches = waitBatchesToComplete(job)
   msg(batches)
@@ -45,7 +54,10 @@ object EndToEndManualTest extends App {
   def waitBatchesToComplete(job: Job): Batches = {
     val batches = getBatches(job)
 
-    if (batches.isCompleted) batches else {
+    if (batches.isCompleted) batches
+    else if (batches.isFailed)
+      throw new IllegalStateException(s"Batch failed: $batches")
+    else {
       println("Batches not complete: " + batches)
 
       Thread.sleep(2000)
@@ -71,10 +83,6 @@ object EndToEndManualTest extends App {
     val testInputStream = new ByteArrayInputStream(request.getBytes)
     val testOutput = new ByteArrayOutputStream()
     DownloadBatchHandler(testInputStream, testOutput, null)
-
-    val response = new String(testOutput.toByteArray)
-    println(response)
-
   }
 
   def msg(s: Any): Unit = {
