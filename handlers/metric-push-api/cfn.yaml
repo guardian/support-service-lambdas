@@ -168,9 +168,11 @@ Resources:
           - Name: ApiName
             Value: !FindInMap [StageMap, !Ref Stage, ApiName]
         ComparisonOperator: GreaterThanOrEqualToThreshold
-        Threshold: 3
+        Threshold: 2
+        DatapointsToAlarm: 3
         Period: 60
-        EvaluationPeriods: 1
+        EvaluationPeriods: 5
         Statistic: Sum
+        TreatMissingData: notBreaching
       DependsOn:
         - MetricPushAPI
