@@ -15,12 +15,13 @@ class AccountSummaryResultDeserialiseTest extends FlatSpec {
         billToLastName = "billingLastName",
         billToPostcode = None,
         soldToLastName = "soldToLastName",
-        soldToPostcode = None
+        soldToPostcode = None,
+        identityId = Some("12344")
       )
 
     )
 
-    val testAccount = getTestAccount(None, None)
+    val testAccount = getTestAccount(None, None, Some("12344"))
     val event: JsResult[AccountSummaryResult] = Json.parse(testAccount).validate[AccountSummaryResult]
 
     event should be(expected)
@@ -34,12 +35,13 @@ class AccountSummaryResultDeserialiseTest extends FlatSpec {
         billToLastName = "billingLastName",
         billToPostcode = Some(""),
         soldToLastName = "soldToLastName",
-        soldToPostcode = Some("")
+        soldToPostcode = Some(""),
+        identityId = Some("12344")
       )
 
     )
 
-    val testAccount = getTestAccount(Some(""), Some(""))
+    val testAccount = getTestAccount(Some(""), Some(""), Some("12344"))
     val event: JsResult[AccountSummaryResult] = Json.parse(testAccount).validate[AccountSummaryResult]
 
     event should be(expected)
@@ -53,21 +55,75 @@ class AccountSummaryResultDeserialiseTest extends FlatSpec {
         billToLastName = "billingLastName",
         billToPostcode = Some("billtoPostcodeValue"),
         soldToLastName = "soldToLastName",
-        soldToPostcode = Some("SoldToPostcodeValue")
+        soldToPostcode = Some("SoldToPostcodeValue"),
+        identityId = Some("12344")
       )
 
     )
 
     val testAccount = getTestAccount(
       billToPostcode = Some("billtoPostcodeValue"),
-      soldToPostcode = Some("SoldToPostcodeValue")
+      soldToPostcode = Some("SoldToPostcodeValue"),
+      identityId = Some("12344")
     )
     val event: JsResult[AccountSummaryResult] = Json.parse(testAccount).validate[AccountSummaryResult]
 
     event should be(expected)
   }
 
-  def getTestAccount(billToPostcode: Option[String] = None, soldToPostcode: Option[String]) = {
+  it should "deserialise correctly Account without identityId" in {
+
+    val expected: JsResult[AccountSummaryResult] = JsSuccess(
+      AccountSummaryResult(
+        accountId = AccountId("testId"),
+        billToLastName = "billingLastName",
+        billToPostcode = Some("billtoPostcodeValue"),
+        soldToLastName = "soldToLastName",
+        soldToPostcode = Some("SoldToPostcodeValue"),
+        identityId = None
+      )
+
+    )
+
+    val testAccount = getTestAccount(
+      billToPostcode = Some("billtoPostcodeValue"),
+      soldToPostcode = Some("SoldToPostcodeValue"),
+      identityId = None
+    )
+    val event: JsResult[AccountSummaryResult] = Json.parse(testAccount).validate[AccountSummaryResult]
+
+    event should be(expected)
+  }
+
+  it should "deserialise correctly Account with identityId" in {
+
+    val expected: JsResult[AccountSummaryResult] = JsSuccess(
+      AccountSummaryResult(
+        accountId = AccountId("testId"),
+        billToLastName = "billingLastName",
+        billToPostcode = Some("billtoPostcodeValue"),
+        soldToLastName = "soldToLastName",
+        soldToPostcode = Some("SoldToPostcodeValue"),
+        identityId = Some("12344")
+      )
+
+    )
+
+    val testAccount = getTestAccount(
+      billToPostcode = Some("billtoPostcodeValue"),
+      soldToPostcode = Some("SoldToPostcodeValue"),
+      identityId = Some("12344")
+    )
+    val event: JsResult[AccountSummaryResult] = Json.parse(testAccount).validate[AccountSummaryResult]
+
+    event should be(expected)
+  }
+
+  def getTestAccount(
+    billToPostcode: Option[String] = None,
+    soldToPostcode: Option[String],
+    identityId: Option[String]
+  ) = {
     def toFieldValue(o: Option[String]) = o.map(s => '"' + s + '"').getOrElse("null")
 
     s"""
@@ -82,7 +138,7 @@ class AccountSummaryResultDeserialiseTest extends FlatSpec {
        |        "batch": "Batch1",
        |        "invoiceTemplateId": "templateID",
        |        "communicationProfileId": null,
-       |        "IdentityId__c": "12344",
+       |        "IdentityId__c": ${toFieldValue(identityId)},
        |        "sfContactId__c": "00xdxE00000NKaRgQAL",
        |        "CCURN__c": null,
        |        "NonStandardDataReason__c": null,
