@@ -485,6 +485,13 @@ Resources:
              "objectName": "CardExpiry"
             }
           RoleArn: !GetAtt [ TriggerRole, Arn ]
+        - Arn: !Ref StateMachine
+          Id: !Sub trigger_sf_export-ImovoContract-${Stage}
+          Input: |
+            {
+             "objectName": "ImovoContract"
+            }
+          RoleArn: !GetAtt [ TriggerRole, Arn ]
   ScheduleRule2:
     Type: "AWS::Events::Rule"
     Condition: IsProd
