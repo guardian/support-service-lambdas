@@ -21,7 +21,7 @@ object SubscriptionUpdate {
     stoppedPublicationDate: LocalDate
   ): Either[HolidayStopFailure, SubscriptionUpdate] = {
     subscription.originalRatePlanCharge.flatMap(_.chargedThroughDate)
-      .toRight(HolidayStopFailure("No effective date for amendment")).map { effectiveDate =>
+      .toRight(HolidayStopFailure("Original rate plan charge has no charged through date.  A bill run is needed to fix this.")).map { effectiveDate =>
         SubscriptionUpdate(
           Seq(
             Add(
