@@ -50,6 +50,6 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers {
       ),
       stoppedPublicationDate = LocalDate.of(2019, 5, 18)
     )
-    update shouldBe Left(HolidayStopFailure("No effective date for amendment"))
+    update shouldBe Left(HolidayStopFailure("Original rate plan charge has no charged through date.  A bill run is needed to fix this."))
   }
 }
