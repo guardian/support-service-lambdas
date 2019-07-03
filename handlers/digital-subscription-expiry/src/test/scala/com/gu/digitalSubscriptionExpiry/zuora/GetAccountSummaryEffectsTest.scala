@@ -28,7 +28,8 @@ class GetAccountSummaryEffectsTest extends FlatSpec with Matchers {
       billToLastName = "Brown",
       billToPostcode = Some("SW13 8EB"),
       soldToLastName = "Brown",
-      soldToPostcode = Some("SW13 8EB")
+      soldToPostcode = Some("SW13 8EB"),
+      identityId = None
     )
 
     actual should be(ContinueProcessing(expected))

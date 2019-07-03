@@ -47,7 +47,7 @@ class DigitalSubscriptionExpiryHandlerEffectsTest extends FlatSpec with Matchers
     val request: String =
       """
         |{
-        |    "body": "{\"subscriberId\" : \"A-S00045009\",\"password\" : \"testerson\"}"
+        |    "body": "{\"subscriberId\" : \"A-S00050908\",\"password\" : \"testerson\"}"
         |}
       """.stripMargin
 
