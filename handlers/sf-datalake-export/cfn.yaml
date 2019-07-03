@@ -533,3 +533,18 @@ Resources:
              "objectName": "CancellationSurvey"
             }
           RoleArn: !GetAtt [ TriggerRole, Arn ]
+  ScheduleRule3:
+    Type: "AWS::Events::Rule"
+    Condition: IsProd
+    Properties:
+      Description: "trigger salesforce export every day at 01:00 GMT"
+      ScheduleExpression: "cron(0 1 ? * * *)"
+      State: "ENABLED"
+      Targets:
+        - Arn: !Ref StateMachine
+          Id: !Sub trigger_sf_export-ImovoContract-${Stage}
+          Input: |
+            {
+             "objectName": "ImovoContract"
+            }
+          RoleArn: !GetAtt [ TriggerRole, Arn ]
