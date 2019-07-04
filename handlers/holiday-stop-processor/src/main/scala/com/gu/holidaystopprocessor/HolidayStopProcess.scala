@@ -2,8 +2,8 @@ package com.gu.holidaystopprocessor
 
 import java.time.LocalDate
 
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.HolidayStopRequest
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestActionedZuoraRef.{HolidayStopRequestActionedZuoraChargeCode, HolidayStopRequestActionedZuoraChargePrice, StoppedPublicationDate}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.ProductName
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestActionedZuoraRef.{HolidayStopRequestActionedZuoraChargeCode, HolidayStopRequestActionedZuoraChargePrice, HolidayStopRequestDetails, StoppedPublicationDate}
 
 object HolidayStopProcess {
 
@@ -20,34 +20,36 @@ object HolidayStopProcess {
 
   def processHolidayStops(
     config: Config,
-    getRequests: String => Either[OverallFailure, Seq[HolidayStopRequest]],
+    getRequests: ProductName => Either[OverallFailure, Seq[HolidayStopRequestDetails]],
     getSubscription: String => Either[HolidayStopFailure, Subscription],
     updateSubscription: (Subscription, SubscriptionUpdate) => Either[HolidayStopFailure, Unit],
     exportAddedCharges: Seq[HolidayStopResponse] => Either[OverallFailure, Unit]
   ): ProcessResult = {
-    HolidayStop.holidayStopsToApply(getRequests) match {
-      case Left(failure) => ProcessResult(
-        holidayStopsToApply = Nil,
-        holidayStopResults = Nil,
-        overallFailure = Some(failure)
+    val result = for {
+      requests <- getRequests(ProductName("Guardian Weekly"))
+      holidayStops <- Right(requests.map(_.request).distinct.flatMap(HolidayStop.toHolidayStop))
+      alreadyExportedChargeCodes <- Right(requests.map(_.chargeCode).distinct)
+    } yield {
+      val responses = holidayStops map {
+        processHolidayStop(
+          config,
+          getSubscription,
+          updateSubscription
+        )
+      }
+      val toExport = responses collect {
+        case Right(success) if !alreadyExportedChargeCodes.contains(success.chargeCode) =>
+          success
+      }
+      val exportResult = exportAddedCharges(toExport)
+      ProcessResult(
+        holidayStopsToApply = holidayStops,
+        holidayStopResults = responses,
+        resultsToExport = toExport,
+        overallFailure = exportResult.left.toOption
       )
-      case Right(holidayStops) =>
-        val responses = holidayStops map {
-          processHolidayStop(
-            config,
-            getSubscription,
-            updateSubscription
-          )
-        }
-        val exportResult = exportAddedCharges(
-          responses.collect { case Right(successes) => successes }
-        )
-        ProcessResult(
-          holidayStopsToApply = holidayStops,
-          holidayStopResults = responses,
-          overallFailure = exportResult.left.toOption
-        )
     }
+    result.left.map(ProcessResult.fromOverallFailure).merge
   }
 
   def processHolidayStop(
