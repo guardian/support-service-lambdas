@@ -14,7 +14,7 @@ case class HolidayStop(
 
 object HolidayStop {
 
-  def toHolidayStop(request: HolidayStopRequest): Seq[HolidayStop] =
+  def apply(request: HolidayStopRequest): Seq[HolidayStop] =
     ActionCalculator.publicationDatesToBeStopped(request) map { date =>
       HolidayStop(
         requestId = request.Id,
