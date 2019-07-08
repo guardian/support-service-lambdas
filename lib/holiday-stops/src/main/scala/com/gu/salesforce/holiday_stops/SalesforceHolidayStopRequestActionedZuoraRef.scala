@@ -72,8 +72,8 @@ object SalesforceHolidayStopRequestActionedZuoraRef extends Logging {
           |  Charge_Code__c, Stopped_Publication_Date__c
           |from $holidayStopRequestActionedZuoraRefSfObjectRef
           |where Holiday_Stop_Request__r.Product_Name__c LIKE '${productNamePrefix.value}%'
-          |and Holiday_Stop_Request__r.Start_Date__c >= ${date.toString}
           |and Holiday_Stop_Request__r.Start_Date__c <= ${date.toString}
+          |and Holiday_Stop_Request__r.End_Date__c >= ${date.toString}
         """.stripMargin
       logger.info(s"using SF query : $soqlQuery")
       RestRequestMaker.GetRequestWithParams(RelativePath(soqlQueryBaseUrl), UrlParams(Map("q" -> soqlQuery)))
