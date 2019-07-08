@@ -3,8 +3,8 @@ package com.gu.holidaystopprocessor
 import java.time.LocalDate
 
 import com.gu.holidaystopprocessor.Fixtures.{config, mkSubscription}
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.{HolidayStopRequest, HolidayStopRequestId}
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestActionedZuoraRef.{HolidayStopRequestActionedZuoraChargeCode, HolidayStopRequestActionedZuoraChargePrice, StoppedPublicationDate}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.{HolidayStopRequestId, ProductName}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestActionedZuoraRef.{HolidayStopRequestActionedZuoraChargeCode, HolidayStopRequestActionedZuoraChargePrice, HolidayStopRequestDetails, StoppedPublicationDate}
 import org.scalatest.{EitherValues, FlatSpec, Matchers, OptionValues}
 
 class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues with OptionValues {
@@ -22,7 +22,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
     LocalDate.of(2019, 8, 9)
   )
 
-  private def getRequests(requestsGet: Either[OverallFailure, Seq[HolidayStopRequest]]): String => Either[OverallFailure, Seq[HolidayStopRequest]] =
+  private def getRequests(requestsGet: Either[OverallFailure, Seq[HolidayStopRequestDetails]]): ProductName => Either[OverallFailure, Seq[HolidayStopRequestDetails]] =
     _ => requestsGet
 
   private def getSubscription(subscriptionGet: Either[HolidayStopFailure, Subscription]): String => Either[HolidayStopFailure, Subscription] = {
@@ -107,9 +107,9 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
     val responses = HolidayStopProcess.processHolidayStops(
       config,
       getRequests(Right(Seq(
-        Fixtures.mkHolidayStopRequest("R1", LocalDate.of(2019, 8, 2)),
-        Fixtures.mkHolidayStopRequest("R2", LocalDate.of(2019, 9, 1)),
-        Fixtures.mkHolidayStopRequest("R3", LocalDate.of(2019, 8, 9))
+        Fixtures.mkHolidayStopRequestDetails(Fixtures.mkHolidayStopRequest("R1", LocalDate.of(2019, 8, 2)), "C1"),
+        Fixtures.mkHolidayStopRequestDetails(Fixtures.mkHolidayStopRequest("R2", LocalDate.of(2019, 9, 1)), "C3"),
+        Fixtures.mkHolidayStopRequestDetails(Fixtures.mkHolidayStopRequest("R3", LocalDate.of(2019, 8, 9)), "C4")
       ))),
       getSubscription(Right(Fixtures.mkSubscriptionWithHolidayStops())),
       updateSubscription(Right(())),
@@ -129,13 +129,35 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
     )
   }
 
+  it should "only export results that haven't already been exported" in {
+    val responses = HolidayStopProcess.processHolidayStops(
+      config,
+      getRequests(Right(Seq(
+        Fixtures.mkHolidayStopRequestDetails(Fixtures.mkHolidayStopRequest("R1", LocalDate.of(2019, 8, 2)), "C2"),
+        Fixtures.mkHolidayStopRequestDetails(Fixtures.mkHolidayStopRequest("R2", LocalDate.of(2019, 9, 1)), "C5"),
+        Fixtures.mkHolidayStopRequestDetails(Fixtures.mkHolidayStopRequest("R3", LocalDate.of(2019, 8, 9)), "C6")
+      ))),
+      getSubscription(Right(Fixtures.mkSubscriptionWithHolidayStops())),
+      updateSubscription(Right(())),
+      exportAmendments(Right(()))
+    )
+    responses.resultsToExport shouldBe Seq(
+      HolidayStopResponse(
+        HolidayStopRequestId("R1"),
+        HolidayStopRequestActionedZuoraChargeCode("C3"),
+        HolidayStopRequestActionedZuoraChargePrice(-5.81),
+        StoppedPublicationDate(LocalDate.of(2019, 8, 2))
+      )
+    )
+  }
+
   it should "give an exception message if exporting results fails" in {
     val responses = HolidayStopProcess.processHolidayStops(
       config,
       getRequests(Right(Seq(
-        Fixtures.mkHolidayStopRequest("r1"),
-        Fixtures.mkHolidayStopRequest("r2"),
-        Fixtures.mkHolidayStopRequest("r3")
+        Fixtures.mkHolidayStopRequestDetails(Fixtures.mkHolidayStopRequest("r1"), ""),
+        Fixtures.mkHolidayStopRequestDetails(Fixtures.mkHolidayStopRequest("r2"), ""),
+        Fixtures.mkHolidayStopRequestDetails(Fixtures.mkHolidayStopRequest("r3"), "")
       ))),
       getSubscription(Right(subscription)),
       updateSubscription(Right(())),

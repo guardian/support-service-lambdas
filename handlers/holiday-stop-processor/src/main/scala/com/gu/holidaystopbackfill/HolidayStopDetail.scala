@@ -108,7 +108,7 @@ object SalesforceHolidayStop {
      * is actually the same as a Zuora ref recorded in Salesforce.
      */
     def isSame(z: ZuoraHolidayStop, sf: HolidayStopRequestDetails): Boolean =
-      z.subscriptionName == sf.subscriptionName.value &&
+      z.subscriptionName == sf.request.Subscription_Name__c.value &&
         z.chargeNumber == sf.chargeCode.value &&
         z.startDate == sf.stoppedPublicationDate.value
 
@@ -118,7 +118,7 @@ object SalesforceHolidayStop {
      * as in the first pass the parent holiday requests will have been populated.
      */
     val sfRequestIds = inSalesforce
-      .map { sfStop => (sfStop.subscriptionName, sfStop.stoppedPublicationDate) -> sfStop.requestId }
+      .map { sfStop => (sfStop.request.Subscription_Name__c, sfStop.stoppedPublicationDate) -> sfStop.request.Id }
       .toMap
 
     stoppedPublications
