@@ -4,7 +4,7 @@ import java.time.LocalDate
 
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestActionedZuoraRef.{HolidayStopRequestActionedZuoraChargeCode, HolidayStopRequestDetails, StoppedPublicationDate}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestActionedZuoraRef.{ZuoraRef, HolidayStopRequestActionedZuoraChargeCode, HolidayStopRequestDetails, StoppedPublicationDate}
 import com.gu.util.Time
 
 object Fixtures {
@@ -146,8 +146,10 @@ object Fixtures {
 
   def mkHolidayStopRequestDetails(request: HolidayStopRequest, chargeCode: String) = HolidayStopRequestDetails(
     request,
-    chargeCode = HolidayStopRequestActionedZuoraChargeCode(chargeCode),
-    stoppedPublicationDate = StoppedPublicationDate(Time.toJavaDate(request.Start_Date__c.value))
+    zuoraRefs = Some(Seq(ZuoraRef(
+      chargeCode = HolidayStopRequestActionedZuoraChargeCode(chargeCode),
+      stoppedPublicationDate = StoppedPublicationDate(Time.toJavaDate(request.Start_Date__c.value))
+    )))
   )
 
   def mkHolidayStop(date: LocalDate) = HolidayStop(
