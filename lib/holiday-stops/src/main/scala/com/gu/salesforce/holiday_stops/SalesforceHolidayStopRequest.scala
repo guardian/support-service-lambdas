@@ -15,7 +15,7 @@ object SalesforceHolidayStopRequest extends Logging {
 
   val SALESFORCE_DATE_FORMAT = "yyyy-MM-dd"
 
-  private val holidayStopRequestSfObjectRef = "Holiday_Stop_Request__c"
+  val holidayStopRequestSfObjectRef = "Holiday_Stop_Request__c"
   private val holidayStopRequestSfObjectsBaseUrl = sfObjectsBaseUrl + holidayStopRequestSfObjectRef
 
   implicit val formatLocalDateAsSalesforceDate: Format[LocalDate] = new Format[LocalDate] {
