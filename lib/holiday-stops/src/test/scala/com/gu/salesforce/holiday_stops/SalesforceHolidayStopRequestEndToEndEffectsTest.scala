@@ -5,6 +5,7 @@ import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.SalesforceClient
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestActionedZuoraRef._
+import com.gu.salesforce.holiday_stops.SalesforceSFSubscription.SubscriptionName
 import com.gu.test.EffectsTest
 import com.gu.util.Time
 import com.gu.util.config.{LoadConfigModule, Stage}
@@ -15,6 +16,8 @@ import play.api.libs.json.JsValue
 import scalaz.{-\/, \/-}
 
 class SalesforceHolidayStopRequestEndToEndEffectsTest extends FlatSpec with Matchers {
+
+  val SUBSCRIPTION_NAME = SubscriptionName("A-S00050817") // must exist in DEV SalesForce
 
   case class EndToEndResults(
     createResult: HolidayStopRequestId,
@@ -40,7 +43,7 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends FlatSpec with Matc
       createResult <- createOp(NewHolidayStopRequest(
         startDate,
         endDate,
-        SubscriptionNameLookup(SubscriptionName("A-S00050817")) // must exist in DEV SalesForce
+        SubscriptionNameLookup(SUBSCRIPTION_NAME)
       )).toDisjunction
 
       fetchOp = SalesforceHolidayStopRequest.LookupByDateAndProductNamePrefix(sfAuth.wrapWith(JsonHttp.getWithParams))
@@ -82,6 +85,28 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends FlatSpec with Matc
         }
     }
 
+  }
+
+  it should "verify user owns subscription (via SalesForce)" taggedAs EffectsTest in {
+
+    val actual = for {
+      sfConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[SFAuthConfig]
+      response = RawEffects.response
+      sfAuth <- SalesforceClient(response, sfConfig).value.toDisjunction
+
+      verifyIdentityIdOwnsSubOp = SalesforceSFSubscription.CheckForSubscriptionGivenNameAndIdentityID(sfAuth.wrapWith(JsonHttp.getWithParams))
+      shouldBeSome <- verifyIdentityIdOwnsSubOp(SUBSCRIPTION_NAME, "100003511").toDisjunction
+      shouldBeNone <- verifyIdentityIdOwnsSubOp(SUBSCRIPTION_NAME, "some_other_identity_id").toDisjunction
+    } yield (shouldBeSome, shouldBeNone)
+
+    actual match {
+
+      case \/-((Some(_), None)) => println("identity ID verification worked")
+
+      case -\/(failure) => fail(failure.toString)
+
+      case _ => fail("didn't verify the identity ID")
+    }
   }
 
 }

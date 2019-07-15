@@ -1,6 +1,7 @@
 package com.gu.holiday_stops
 
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.{HolidayStopRequest, HolidayStopRequestEndDate, HolidayStopRequestStartDate, NewHolidayStopRequest, ProductName, SubscriptionName, SubscriptionNameLookup}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.{HolidayStopRequest, HolidayStopRequestEndDate, HolidayStopRequestStartDate, NewHolidayStopRequest, ProductName, SubscriptionNameLookup}
+import com.gu.salesforce.holiday_stops.SalesforceSFSubscription.SubscriptionName
 import org.joda.time.LocalDate
 
 case class HolidayStopRequestsGET(
@@ -31,7 +32,7 @@ case class HolidayStopRequestEXTERNAL(
   id: Option[String],
   start: String,
   end: String,
-  subscriptionName: String,
+  subscriptionName: SubscriptionName,
   mutabilityFlags: Option[MutabilityFlags],
   publicationDatesToBeStopped: Option[List[LocalDate]]
 )
@@ -42,7 +43,7 @@ object HolidayStopRequestEXTERNAL {
     id = Some(sfHSR.Id.value),
     start = sfHSR.Start_Date__c.value.toString(),
     end = sfHSR.End_Date__c.value.toString(),
-    subscriptionName = sfHSR.Subscription_Name__c.value,
+    subscriptionName = sfHSR.Subscription_Name__c,
     mutabilityFlags = firstAvailableDateOption.map(
       calculateMutabilityFlags(
         sfHSR.Actioned_Count__c.value,
@@ -55,7 +56,7 @@ object HolidayStopRequestEXTERNAL {
   def toSF(externalHSR: HolidayStopRequestEXTERNAL): NewHolidayStopRequest = NewHolidayStopRequest(
     Start_Date__c = HolidayStopRequestStartDate(LocalDate.parse(externalHSR.start)),
     End_Date__c = HolidayStopRequestEndDate(LocalDate.parse(externalHSR.end)),
-    SF_Subscription__r = SubscriptionNameLookup(SubscriptionName(externalHSR.subscriptionName))
+    SF_Subscription__r = SubscriptionNameLookup(externalHSR.subscriptionName)
   )
 
   def calculateMutabilityFlags(actionedCount: Int, endDate: LocalDate)(firstAvailableDate: LocalDate): MutabilityFlags = {

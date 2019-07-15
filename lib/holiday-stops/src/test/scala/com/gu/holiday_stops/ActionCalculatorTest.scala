@@ -1,6 +1,7 @@
 package com.gu.holiday_stops
 
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
+import com.gu.salesforce.holiday_stops.SalesforceSFSubscription.SubscriptionName
 import org.joda.time.{DateTimeConstants, LocalDate}
 import org.scalatest.{FlatSpec, Matchers}
 

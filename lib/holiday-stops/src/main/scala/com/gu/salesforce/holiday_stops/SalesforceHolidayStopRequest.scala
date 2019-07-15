@@ -2,6 +2,7 @@ package com.gu.salesforce.holiday_stops
 
 import ai.x.play.json.Jsonx
 import com.gu.salesforce.SalesforceConstants._
+import com.gu.salesforce.holiday_stops.SalesforceSFSubscription.SubscriptionName
 import com.gu.util.Logging
 import com.gu.util.resthttp.RestOp._
 import com.gu.util.resthttp.RestRequestMaker._
@@ -36,9 +37,6 @@ object SalesforceHolidayStopRequest extends Logging {
 
   case class HolidayStopRequestActionedCount(value: Int) extends AnyVal
   implicit val formatHolidayStopRequestActionedCount = Jsonx.formatInline[HolidayStopRequestActionedCount]
-
-  case class SubscriptionName(value: String) extends AnyVal
-  implicit val formatSubscriptionName = Jsonx.formatInline[SubscriptionName]
 
   case class ProductName(value: String) extends AnyVal
   implicit val formatProductName = Jsonx.formatInline[ProductName]

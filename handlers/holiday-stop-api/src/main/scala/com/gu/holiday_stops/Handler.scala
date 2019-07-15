@@ -6,8 +6,9 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.SalesforceClient
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.{HolidayStopRequestId, ProductName, SubscriptionName}
+import com.gu.salesforce.holiday_stops.{SalesforceHolidayStopRequest, SalesforceSFSubscription}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.{HolidayStopRequestId, ProductName}
+import com.gu.salesforce.holiday_stops.SalesforceSFSubscription.SubscriptionName
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
@@ -112,6 +113,7 @@ object Handler extends Logging {
 
   def stepsToCreate(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
 
+    val verifyIdentityIdOwnsSubOp = SalesforceSFSubscription.CheckForSubscriptionGivenNameAndIdentityID(sfClient.wrapWith(JsonHttp.getWithParams))
     val createOp = SalesforceHolidayStopRequest.CreateHolidayStopRequest(sfClient.wrapWith(JsonHttp.post))
 
     //TODO refactor HolidayStopRequestEXTERNAL into an incoming and outgoing form to eliminate this line
@@ -122,9 +124,9 @@ object Handler extends Logging {
     (for {
       requestBody <- req.bodyAsCaseClass[HolidayStopRequestEXTERNAL]()
       identityId <- req.headers.flatMap(_.get(HEADER_IDENTITY_ID)).toApiGatewayOp("identityID header")
-      // TODO verify identity ID can create holiday stop for given sub (must do a query first)
+      _ <- verifyIdentityIdOwnsSubOp(requestBody.subscriptionName, identityId).toDisjunction.toApiGatewayOp(s"user identityID $identityId does not own ${requestBody.subscriptionName.value}")
       _ <- createOp(HolidayStopRequestEXTERNAL.toSF(requestBody)).toDisjunction.toApiGatewayOp(s"create new Holiday Stop Request for subscription ${requestBody.subscriptionName} (identity $identityId)")
-      // TODO handle 'FIELD_CUSTOM_VALIDATION_EXCEPTION' etc back from SF and place in response
+      // TODO nice to have - handle 'FIELD_CUSTOM_VALIDATION_EXCEPTION' etc back from SF and place in response
     } yield ApiGatewayResponse.successfulExecution).apiResponse
   }
 

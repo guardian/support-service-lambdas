@@ -4,6 +4,7 @@ import java.time.LocalDate
 
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
+import com.gu.salesforce.holiday_stops.SalesforceSFSubscription.SubscriptionName
 import com.gu.util.Time
 
 object Fixtures {
