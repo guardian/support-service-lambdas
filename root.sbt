@@ -14,6 +14,7 @@ addCommandAlias("dist", ";riffRaffArtifact")
 libraryDependencies ++= Seq(
   ("com.amazonaws" % "aws-lambda-java-log4j" % "1.0.0").exclude("log4j", "log4j"),
   "org.slf4j" % "log4j-over-slf4j" % "1.7.26",
+  "ch.qos.logback" % "logback-classic" % "1.2.3",
   "com.amazonaws" % "aws-lambda-java-core" % "1.2.0",
   "com.squareup.okhttp3" % "okhttp" % "3.9.1",
   "org.scalaz" %% "scalaz-core" % "7.2.18",
