@@ -4,10 +4,11 @@ import java.io.ByteArrayInputStream
 
 import com.amazonaws.services.s3.model.{ObjectMetadata, PutObjectRequest, PutObjectResult}
 import com.gu.zuora.reports.S3ReportUpload.logger
+import com.typesafe.scalalogging.LazyLogging
 
 import scala.util.Try
 
-object UploadToS3 {
+object UploadToS3 extends LazyLogging {
 
   def apply(
     s3Write: PutObjectRequest => Try[PutObjectResult],

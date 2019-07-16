@@ -3,12 +3,13 @@ package com.gu.util.resthttp
 import java.io.InputStream
 
 import com.gu.util.resthttp.Types._
+import com.typesafe.scalalogging.LazyLogging
 import okhttp3.{MediaType, Request, RequestBody, Response}
 import play.api.libs.json._
 
 import scala.util.{Failure, Success, Try}
 
-object RestRequestMaker extends Logging {
+object RestRequestMaker extends LazyLogging {
 
   def httpIsSuccessful(response: Response): ClientFailableOp[Unit] = {
     if (response.isSuccessful) {

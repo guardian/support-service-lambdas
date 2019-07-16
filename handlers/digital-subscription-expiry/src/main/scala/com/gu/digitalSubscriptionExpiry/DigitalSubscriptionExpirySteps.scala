@@ -44,7 +44,7 @@ object DigitalSubscriptionExpirySteps extends Logging {
           setActivationDate(subscriptionResult.id)
         accountSummary <- getAccountSummary(subscriptionResult.accountId)
         _ = {
-          if(accountSummary.identityId.isDefined) {
+          if (accountSummary.identityId.isDefined) {
             logger.info("User has identityId")
           } else {
             logger.info("User doesn't have a linked identityId")

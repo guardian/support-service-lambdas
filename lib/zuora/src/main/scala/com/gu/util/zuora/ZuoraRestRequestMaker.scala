@@ -1,13 +1,14 @@
 package com.gu.util.zuora
 
-import com.gu.util.resthttp.{Logging, RestRequestMaker}
+import com.gu.util.resthttp.RestRequestMaker
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError, NotFound, PaymentError}
 import com.gu.util.zuora.ZuoraModels._
 import com.gu.util.zuora.ZuoraReaders._
+import com.typesafe.scalalogging.LazyLogging
 import okhttp3.{Request, Response}
 import play.api.libs.json._
 
-object ZuoraRestRequestMaker extends Logging {
+object ZuoraRestRequestMaker extends LazyLogging {
 
   def apply(response: Request => Response, config: ZuoraRestConfig): RestRequestMaker.Requests = {
     new RestRequestMaker.Requests(

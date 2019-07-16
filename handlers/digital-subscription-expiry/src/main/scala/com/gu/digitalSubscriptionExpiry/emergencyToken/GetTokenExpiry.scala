@@ -3,16 +3,16 @@ package com.gu.digitalSubscriptionExpiry.emergencyToken
 import java.time.LocalDate
 
 import com.gu.cas.Valid
-import com.gu.digitalSubscriptionExpiry.DigitalSubscriptionExpirySteps.logger
 import TokenPayloadImplicits._
 import com.gu.util.reader.Types.ApiGatewayOp
 import ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.digitalSubscriptionExpiry.responses.{Expiry, ExpiryType, SuccessResponse}
 import com.gu.util.apigateway.ApiGatewayResponse
+import com.typesafe.scalalogging.LazyLogging
 
 import scala.util.{Success, Try}
 
-object GetTokenExpiry {
+object GetTokenExpiry extends LazyLogging {
   def apply(emergencyTokens: EmergencyTokens, today: () => LocalDate)(subscriberId: String): ApiGatewayOp[Unit] = {
 
     val upperCaseSubId = subscriberId.toUpperCase
