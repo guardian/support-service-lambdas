@@ -5,7 +5,7 @@ import com.amazonaws.auth.profile.ProfileCredentialsProvider
 import com.amazonaws.regions.Regions
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceAsyncClientBuilder
 import com.amazonaws.services.simpleemail.model._
-import org.apache.log4j.Logger
+import org.slf4j.LoggerFactory
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -13,7 +13,7 @@ import scala.util.{Failure, Success}
 
 object AwsSESSend {
 
-  val logger = Logger.getLogger(getClass.getName)
+  val logger = LoggerFactory.getLogger(getClass)
 
   case class EmailAddress(value: String) extends AnyVal
 

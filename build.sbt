@@ -19,7 +19,8 @@ val scalaSettings = Seq(
     "-Ywarn-numeric-widen",
     "-Ywarn-value-discard"
   ),
-  javaOptions in Test += s"""-Dlog4j.configuration=file:${new File(".").getCanonicalPath}/test_log4j.properties""",
+  
+  javaOptions in Test += s"""-Dlogback.configurationFile=${new File(".").getCanonicalPath}/logback-test.xml""",
   fork in Test := true,
   {
     import scalariform.formatter.preferences._

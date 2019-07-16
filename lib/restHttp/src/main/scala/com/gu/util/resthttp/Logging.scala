@@ -1,9 +1,9 @@
 package com.gu.util.resthttp
 
-import org.apache.log4j.Logger
+import org.slf4j.LoggerFactory
 
 trait Logging { // in future maybe put logging into a context so the messages stack together like a stack trace
 
-  val logger = Logger.getLogger(getClass.getName)
+  val logger = LoggerFactory.getLogger(getClass)
 
 }

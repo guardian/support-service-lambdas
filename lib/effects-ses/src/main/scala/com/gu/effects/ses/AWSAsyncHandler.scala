@@ -4,14 +4,14 @@ import java.util.concurrent.{Future => JFuture}
 
 import com.amazonaws.AmazonWebServiceRequest
 import com.amazonaws.handlers.AsyncHandler
-import org.apache.log4j.Logger
+import org.slf4j.LoggerFactory
 
 import scala.concurrent.{Future, Promise}
 
 class AwsAsyncHandler[Request <: AmazonWebServiceRequest, Response](f: (Request, AsyncHandler[Request, Response]) => JFuture[Response], request: Request)
   extends AsyncHandler[Request, Response] {
 
-  val logger = Logger.getLogger(getClass.getName)
+  val logger = LoggerFactory.getLogger(getClass)
 
   f(request, this)
 

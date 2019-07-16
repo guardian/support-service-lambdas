@@ -1,9 +1,9 @@
 package com.gu.util
 
-import org.apache.log4j.Logger
+import org.slf4j.LoggerFactory
 
 trait Logging {
 
-  val logger = Logger.getLogger(getClass.getName)
+  val logger = LoggerFactory.getLogger(getClass)
 
 }

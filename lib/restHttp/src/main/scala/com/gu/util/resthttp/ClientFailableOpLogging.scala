@@ -1,11 +1,11 @@
 package com.gu.util.resthttp
 
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientFailure, ClientSuccess}
-import org.apache.log4j.Logger
+import org.slf4j.LoggerFactory
 
 object ClientFailableOpLogging { // in future maybe put logging into a context so the messages stack together like a stack trace
 
-  val logger = Logger.getLogger(getClass.getName)
+  val logger = LoggerFactory.getLogger(getClass.getName)
 
   implicit class LogImplicit2[A](apiGatewayOp: ClientFailableOp[A]) {
 
