@@ -13,9 +13,9 @@ object Backfiller {
    * If any call fails it should leave Salesforce in a consistent state.
    * First, the holiday request table is updated, and then the zuora refs child table.
    */
-  def backfill(src: File, startThreshold: LocalDate, endThreshold: Option[LocalDate], dryRun: Boolean): Either[BackfillFailure, BackfillResult] = {
+  def backfill(src: File, startThreshold: LocalDate, endThreshold: Option[LocalDate], dryRun: Boolean, stage: String): Either[BackfillFailure, BackfillResult] = {
     for {
-      config <- Config()
+      config <- Config(stage)
       stopsInZuora <- Right(holidayStopsAlreadyInZuora(src))
       requestsInSf <- holidayStopRequestsAlreadyInSalesforce(config)(startThreshold, endThreshold)
       requestsToAddToSf = holidayStopRequestsToBeBackfilled(stopsInZuora, requestsInSf)
