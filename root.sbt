@@ -12,9 +12,9 @@ riffRaffManifestProjectName := "MemSub::Membership Admin::Zuora Auto Cancel"
 addCommandAlias("dist", ";riffRaffArtifact")
 
 libraryDependencies ++= Seq(
-  "com.amazonaws" % "aws-lambda-java-log4j" % "1.0.0",
+  "ch.qos.logback" % "logback-classic" % "1.2.3",
+  "com.typesafe.scala-logging" %% "scala-logging" % "3.9.2",
   "com.amazonaws" % "aws-lambda-java-core" % "1.2.0",
-  "log4j" % "log4j" % "1.2.17",
   "com.squareup.okhttp3" % "okhttp" % "3.9.1",
   "org.scalaz" %% "scalaz-core" % "7.2.18",
   "com.typesafe.play" %% "play-json" % "2.6.9",

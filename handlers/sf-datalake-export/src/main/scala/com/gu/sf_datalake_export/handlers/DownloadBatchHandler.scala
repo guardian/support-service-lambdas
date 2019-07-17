@@ -22,6 +22,7 @@ import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.handlers.JsonHandler
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.Types.ClientFailableOp
+import com.typesafe.scalalogging.LazyLogging
 import okhttp3.{Request, Response}
 import play.api.libs.json.Json
 import scalaz.IList
@@ -29,7 +30,7 @@ import scalaz.syntax.traverse.ToTraverseOps
 
 import scala.util.{Success, Try}
 
-object DownloadBatchHandler {
+object DownloadBatchHandler extends LazyLogging {
 
   import com.gu.sf_datalake_export.util.TryOps._
   case class WireBatchInfo(

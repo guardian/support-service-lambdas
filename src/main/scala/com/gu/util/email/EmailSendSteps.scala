@@ -5,6 +5,7 @@ import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError}
+import com.typesafe.scalalogging.LazyLogging
 import play.api.libs.json.{Json, Writes, _}
 import scalaz.{-\/, \/, \/-}
 
@@ -95,7 +96,7 @@ trait EmailSqsSerialisation {
   implicit val emailMessageWrites = Json.writes[EmailMessage]
 }
 
-object EmailSendSteps extends EmailSqsSerialisation {
+object EmailSendSteps extends EmailSqsSerialisation with LazyLogging {
   def apply(sqsSend: Payload => Try[Unit])(emailRequest: EmailMessage): ClientFailableOp[Unit] = {
     sqsSend(Payload(Json.toJson(emailRequest).toString)) match {
       case Success(_) =>

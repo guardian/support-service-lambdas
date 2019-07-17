@@ -19,7 +19,6 @@ val scalaSettings = Seq(
     "-Ywarn-numeric-widen",
     "-Ywarn-value-discard"
   ),
-  javaOptions in Test += s"""-Dlog4j.configuration=file:${new File(".").getCanonicalPath}/test_log4j.properties""",
   fork in Test := true,
   {
     import scalariform.formatter.preferences._
@@ -74,7 +73,7 @@ lazy val zuora = all(project in file("lib/zuora"))
     effects % "test->test"
   )
   .settings(
-    libraryDependencies ++= Seq(okhttp3, logging, scalaz, playJson, scalatest, jacksonDatabind)
+    libraryDependencies ++= Seq(okhttp3, scalaz, playJson, scalatest, jacksonDatabind) ++ logging
   )
 
 lazy val salesforce = all(project in file("lib/salesforce"))
@@ -85,7 +84,7 @@ lazy val salesforce = all(project in file("lib/salesforce"))
     testDep
   )
   .settings(
-    libraryDependencies ++= Seq(okhttp3, logging, scalaz, playJson, scalatest)
+    libraryDependencies ++= Seq(okhttp3, scalaz, playJson, scalatest) ++ logging
   )
 
 lazy val `holiday-stops` = all(project in file("lib/holiday-stops"))
@@ -95,12 +94,12 @@ lazy val `holiday-stops` = all(project in file("lib/holiday-stops"))
     testDep
   )
   .settings(
-    libraryDependencies ++= Seq(okhttp3, logging, scalaz, playJson, scalatest, playJsonExtensions)
+    libraryDependencies ++= Seq(okhttp3, scalaz, playJson, scalatest, playJsonExtensions) ++ logging
 )
 
 lazy val restHttp = all(project in file("lib/restHttp"))
   .settings(
-    libraryDependencies ++= Seq(okhttp3, logging, scalaz, playJson, scalatest)
+    libraryDependencies ++= Seq(okhttp3, scalaz, playJson, scalatest) ++ logging
   )
 
 lazy val s3ConfigValidator = all(project in file("lib/s3ConfigValidator"))
@@ -120,25 +119,25 @@ lazy val s3ConfigValidator = all(project in file("lib/s3ConfigValidator"))
 
 lazy val handler = all(project in file("lib/handler"))
   .settings(
-    libraryDependencies ++= Seq(okhttp3, logging, scalaz, playJson, scalatest, awsLambda, awsS3)
+    libraryDependencies ++= Seq(okhttp3, scalaz, playJson, scalatest, awsLambda, awsS3) ++ logging
   )
 
 // to aid testability, only the actual handlers called as a lambda can depend on this
 lazy val effects = all(project in file("lib/effects"))
   .dependsOn(handler)
   .settings(
-    libraryDependencies ++= Seq(okhttp3, logging, scalaz, playJson, scalatest, awsS3, jacksonDatabind)
+    libraryDependencies ++= Seq(okhttp3, scalaz, playJson, scalatest, awsS3, jacksonDatabind) ++ logging
   )
 lazy val `effects-sqs` = all(project in file("lib/effects-sqs"))
   .dependsOn(testDep)
   .settings(
-    libraryDependencies ++= Seq(logging, awsSQS)
+    libraryDependencies ++= Seq(awsSQS) ++ logging
   )
 
 lazy val `effects-ses` = all(project in file("lib/effects-ses"))
   .dependsOn(testDep)
   .settings(
-    libraryDependencies ++= Seq(logging, awsSES)
+    libraryDependencies ++= Seq(awsSES) ++ logging
   )
 
 val effectsDepIncludingTestFolder: ClasspathDependency = effects % "compile->compile;test->test"

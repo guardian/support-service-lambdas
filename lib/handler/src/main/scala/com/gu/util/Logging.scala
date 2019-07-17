@@ -1,9 +1,5 @@
 package com.gu.util
 
-import org.apache.log4j.Logger
+import com.typesafe.scalalogging.LazyLogging
 
-trait Logging {
-
-  val logger = Logger.getLogger(getClass.getName)
-
-}
+trait Logging extends LazyLogging

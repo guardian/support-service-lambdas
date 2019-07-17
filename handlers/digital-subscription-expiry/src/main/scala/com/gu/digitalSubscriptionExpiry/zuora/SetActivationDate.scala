@@ -4,12 +4,12 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME
 
 import com.gu.digitalSubscriptionExpiry.zuora.GetSubscription.SubscriptionId
-import com.gu.util.resthttp.Logging
 import com.gu.util.resthttp.RestRequestMaker.Requests
 import com.gu.util.resthttp.Types.ClientFailableOp
+import com.typesafe.scalalogging.LazyLogging
 import play.api.libs.json.{JsSuccess, Json, Reads}
 
-object SetActivationDate extends Logging {
+object SetActivationDate extends LazyLogging {
 
   case class UpdateRequestBody(ActivationDate__c: String)
 

@@ -3,12 +3,13 @@ package com.gu.zuora.reports.aqua
 import java.util.Base64
 
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError}
-import com.gu.util.resthttp.{Logging, RestRequestMaker}
+import com.gu.util.resthttp.RestRequestMaker
 import com.gu.util.zuora.ZuoraRestConfig
+import com.typesafe.scalalogging.LazyLogging
 import okhttp3.{Request, Response}
 import play.api.libs.json._
 
-object ZuoraAquaRequestMaker extends Logging {
+object ZuoraAquaRequestMaker extends LazyLogging {
 
   case class ZuoraAquaResponse(
     status: String,

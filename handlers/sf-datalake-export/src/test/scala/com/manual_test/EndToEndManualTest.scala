@@ -8,12 +8,12 @@ import com.gu.sf_datalake_export.salesforce_bulk_api.BulkApiParams.SfQueryInfo
 import play.api.libs.json._
 
 /**
-  * Run a query as a salesforce job, wait for it to complete and copy the results to s3.
-  *
-  * See a log entry like
-  * "Copying file to S3. Bucket: gu-salesforce-export-dev | Key: ImovoContract_2019-07-01_7503E0000063xJmQAI_7523E0000029Hyi.csv"
-  * at the end of the execution.
-  */
+ * Run a query as a salesforce job, wait for it to complete and copy the results to s3.
+ *
+ * See a log entry like
+ * "Copying file to S3. Bucket: gu-salesforce-export-dev | Key: ImovoContract_2019-07-01_7503E0000063xJmQAI_7523E0000029Hyi.csv"
+ * at the end of the execution.
+ */
 object EndToEndManualTest extends App {
 
   case class Job(jobId: String, jobName: String, objectName: String, uploadToDataLake: Boolean)
@@ -91,6 +91,7 @@ object EndToEndManualTest extends App {
          |----------------------------------------------------------------------
          |$s
          |----------------------------------------------------------------------
-      """.stripMargin)
+      """.stripMargin
+    )
   }
 }

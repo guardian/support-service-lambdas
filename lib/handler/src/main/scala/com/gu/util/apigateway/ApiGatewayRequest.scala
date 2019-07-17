@@ -3,6 +3,7 @@ package com.gu.util.apigateway
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.reader.Types._
 import ApiGatewayOp._
+import com.typesafe.scalalogging.LazyLogging
 import play.api.libs.json._
 
 import scala.util.{Failure, Success, Try}
@@ -15,7 +16,7 @@ case class ApiGatewayRequest(
   body: Option[String],
   headers: Option[Map[String, String]],
   pathParameters: Option[JsValue] = None
-) {
+) extends LazyLogging {
 
   def queryParamsAsCaseClass[A]()(implicit reads: Reads[A]): ApiGatewayOp[A] = {
     val paramsMap = queryStringParameters.getOrElse(Map.empty)
