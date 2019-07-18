@@ -2,8 +2,7 @@ package com.gu.holidaystopprocessor
 
 import java.time.LocalDate
 
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.ProductName
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestsDetailChargeCode, HolidayStopRequestsDetailChargePrice, HolidayStopRequestDetails, StoppedPublicationDate}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestsDetail, HolidayStopRequestsDetailChargeCode, HolidayStopRequestsDetailChargePrice, ProductName, StoppedPublicationDate, SubscriptionName}
 
 object HolidayStopProcess {
 
@@ -20,15 +19,15 @@ object HolidayStopProcess {
 
   def processHolidayStops(
     config: Config,
-    getRequests: ProductName => Either[OverallFailure, Seq[HolidayStopRequestDetails]],
-    getSubscription: String => Either[HolidayStopFailure, Subscription],
+    getRequests: ProductName => Either[OverallFailure, Seq[HolidayStopRequestsDetail]],
+    getSubscription: SubscriptionName => Either[HolidayStopFailure, Subscription],
     updateSubscription: (Subscription, SubscriptionUpdate) => Either[HolidayStopFailure, Unit],
     exportAddedCharges: Seq[HolidayStopResponse] => Either[OverallFailure, Unit]
   ): ProcessResult = {
     val result = for {
       requests <- getRequests(ProductName("Guardian Weekly"))
-      holidayStops <- Right(requests.map(_.request).distinct.flatMap(HolidayStops(_)))
-      alreadyExportedChargeCodes <- Right(requests.flatMap(_.zuoraRefs.getOrElse(Nil).map(_.chargeCode)).distinct)
+      holidayStops <- Right(requests.distinct.map(HolidayStops(_)))
+      alreadyExportedChargeCodes <- Right(requests.flatMap(_.Charge_Code__c).distinct)
     } yield {
       val responses = holidayStops map {
         processHolidayStop(
@@ -54,7 +53,7 @@ object HolidayStopProcess {
 
   def processHolidayStop(
     config: Config,
-    getSubscription: String => Either[HolidayStopFailure, Subscription],
+    getSubscription: SubscriptionName => Either[HolidayStopFailure, Subscription],
     updateSubscription: (Subscription, SubscriptionUpdate) => Either[HolidayStopFailure, Unit]
   )(stop: HolidayStop): Either[HolidayStopFailure, HolidayStopResponse] =
     for {
@@ -67,7 +66,10 @@ object HolidayStopProcess {
     } yield {
       HolidayStopResponse(
         stop.requestId,
+        stop.subscriptionName,
+        stop.productName,
         HolidayStopRequestsDetailChargeCode(addedCharge.number),
+        stop.estimatedCharge,
         HolidayStopRequestsDetailChargePrice(addedCharge.price),
         StoppedPublicationDate(addedCharge.HolidayStart__c.getOrElse(LocalDate.MIN))
       )

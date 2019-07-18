@@ -1,11 +1,13 @@
 package com.gu.holidaystopprocessor
 
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.HolidayStopRequestId
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestsDetailChargeCode, HolidayStopRequestsDetailChargePrice, StoppedPublicationDate}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestsDetailChargeCode, HolidayStopRequestsDetailChargePrice, HolidayStopRequestsDetailId, ProductName, StoppedPublicationDate, SubscriptionName}
 
 case class HolidayStopResponse(
-  requestId: HolidayStopRequestId,
+  requestId: HolidayStopRequestsDetailId,
+  subscriptionName: SubscriptionName,
+  productName: ProductName,
   chargeCode: HolidayStopRequestsDetailChargeCode,
-  price: HolidayStopRequestsDetailChargePrice,
+  estimatedPrice: Option[HolidayStopRequestsDetailChargePrice],
+  actualPrice: HolidayStopRequestsDetailChargePrice,
   pubDate: StoppedPublicationDate
 )

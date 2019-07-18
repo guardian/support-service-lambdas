@@ -1,12 +1,12 @@
 package com.gu.holidaystopbackfill
 
 import java.io.File
+import java.time.LocalDate
 import java.time.temporal.ChronoUnit
-import java.time.{DayOfWeek, LocalDate}
 
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.{HolidayStopRequest, HolidayStopRequestEndDate, HolidayStopRequestStartDate, NewHolidayStopRequest, ProductName, SubscriptionName, SubscriptionNameLookup}
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestsDetailChargeCode, HolidayStopRequestsDetailChargePrice, HolidayStopRequestsDetail, HolidayStopRequestDetails, StoppedPublicationDate}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.{HolidayStopRequest, HolidayStopRequestEndDate, HolidayStopRequestStartDate, NewHolidayStopRequest, SubscriptionNameLookup}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestsDetail, ProductName, SubscriptionName}
 import com.gu.util.Time
 
 import scala.io.Source
@@ -49,7 +49,7 @@ object SalesforceHolidayStop {
     Salesforce.holidayStopRequestsByProductAndDateRange(sfCredentials)(ProductName("Guardian Weekly"), start, end.getOrElse(LocalDate.MAX))
   }
 
-  def zuoraRefsAlreadyInSalesforce(sfCredentials: SFAuthConfig)(start: LocalDate, end: Option[LocalDate]): Either[SalesforceFetchFailure, Seq[HolidayStopRequestDetails]] = {
+  def zuoraRefsAlreadyInSalesforce(sfCredentials: SFAuthConfig)(start: LocalDate, end: Option[LocalDate]): Either[SalesforceFetchFailure, Seq[HolidayStopRequestsDetail]] = {
     Salesforce.holidayStopRequestDetails(sfCredentials)(ProductName("Guardian Weekly"), start, end.getOrElse(LocalDate.MAX))
   }
 
@@ -85,7 +85,9 @@ object SalesforceHolidayStop {
     }
   }
 
-  def zuoraRefsToBeBackfilled(inZuora: Seq[ZuoraHolidayStop], inSalesforce: Seq[HolidayStopRequestDetails]): Seq[HolidayStopRequestsDetail] = {
+  def zuoraRefsToBeBackfilled(inZuora: Seq[ZuoraHolidayStop], inSalesforce: Seq[HolidayStopRequestsDetail]): Seq[HolidayStopRequestsDetail] = {
+
+    ???
 
     /*
      * We take legacy holiday stops that have a range of dates
@@ -93,54 +95,54 @@ object SalesforceHolidayStop {
      * that falls into that date range.
      * Then we divide the credit price equally into each of the new holiday stops.
      */
-    val stoppedPublications = inZuora.foldLeft(Seq.empty[ZuoraHolidayStop]) { (acc, stop) =>
-      val stopDates = applicableDates(stop.startDate, stop.endDate, { _.getDayOfWeek == DayOfWeek.FRIDAY })
-      val stops = stopDates map { date =>
-        ZuoraHolidayStop(stop.subscriptionName, stop.chargeNumber, date, date, stop.creditPrice / stopDates.length)
-      }
-      acc ++ stops
-    }
+    //    val stoppedPublications = inZuora.foldLeft(Seq.empty[ZuoraHolidayStop]) { (acc, stop) =>
+    //      val stopDates = applicableDates(stop.startDate, stop.endDate, { _.getDayOfWeek == DayOfWeek.FRIDAY })
+    //      val stops = stopDates map { date =>
+    //        ZuoraHolidayStop(stop.subscriptionName, stop.chargeNumber, date, date, stop.creditPrice / stopDates.length)
+    //      }
+    //      acc ++ stops
+    //    }
 
     /*
      * These are our criteria for determining if a legacy holiday stop in Zuora
      * is actually the same as a Zuora ref recorded in Salesforce.
      */
-    def isSame(z: ZuoraHolidayStop, sf: HolidayStopRequestDetails): Boolean =
-      z.subscriptionName == sf.request.Subscription_Name__c.value &&
-        (sf.zuoraRefs exists { zuoraRefs =>
-          zuoraRefs exists { zuoraRef =>
-            z.chargeNumber == zuoraRef.chargeCode.value &&
-              z.startDate == zuoraRef.stoppedPublicationDate.value
-          }
-        })
+    //    def isSame(z: ZuoraHolidayStop, sf: HolidayStopRequestsDetail): Boolean = ???
+    //      z.subscriptionName == sf.Subscription_Name__c.value &&
+    //        (sf.zuoraRefs exists { zuoraRefs =>
+    //          zuoraRefs exists { zuoraRef =>
+    //            z.chargeNumber == zuoraRef.chargeCode.value &&
+    //              z.startDate == zuoraRef.stoppedPublicationDate.value
+    //          }
+    //        })
 
     /*
      * This is used to find the corresponding request ID for the subscription in Salesforce.
      * There should be a request ID available for each subscription and stopped publication date
      * as in the first pass the parent holiday requests will have been populated.
      */
-    def correspondingRequest(stop: ZuoraHolidayStop): Option[HolidayStopRequest] =
-      inSalesforce find { sfStop =>
-        val startDate = Time.toJavaDate(sfStop.request.Start_Date__c.value)
-        val endDate = Time.toJavaDate(sfStop.request.End_Date__c.value)
-        sfStop.request.Subscription_Name__c.value == stop.subscriptionName &&
-          (startDate.isBefore(stop.startDate) || startDate.isEqual(stop.startDate)) &&
-          (endDate.isEqual(stop.endDate) || endDate.isAfter(stop.endDate))
-      } map { _.request }
+    //    def correspondingRequest(stop: ZuoraHolidayStop): Option[HolidayStopRequest] = ???
+    //      inSalesforce find { sfStop =>
+    //        val startDate = Time.toJavaDate(sfStop.request.Start_Date__c.value)
+    //        val endDate = Time.toJavaDate(sfStop.request.End_Date__c.value)
+    //        sfStop.request.Subscription_Name__c.value == stop.subscriptionName &&
+    //          (startDate.isBefore(stop.startDate) || startDate.isEqual(stop.startDate)) &&
+    //          (endDate.isEqual(stop.endDate) || endDate.isAfter(stop.endDate))
+    //      } map { _.request }
 
-    val zuoraRefs = for {
-      stop <- stoppedPublications.filterNot(zuoraStop => inSalesforce.exists(sfStop => isSame(zuoraStop, sfStop)))
-      sfRequest <- correspondingRequest(stop)
-    } yield {
-      HolidayStopRequestsDetail(
-        sfRequest.Id,
-        HolidayStopRequestsDetailChargeCode(stop.chargeNumber),
-        HolidayStopRequestsDetailChargePrice(stop.creditPrice),
-        StoppedPublicationDate(stop.startDate)
-      )
-    }
+    //    val zuoraRefs = for {
+    //      stop <- stoppedPublications.filterNot(zuoraStop => inSalesforce.exists(sfStop => isSame(zuoraStop, sfStop)))
+    //      sfRequest <- correspondingRequest(stop)
+    //    } yield {
+    //      HolidayStopRequestsDetail(
+    //        sfRequest.Id,
+    //        HolidayStopRequestsDetailChargeCode(stop.chargeNumber),
+    //        HolidayStopRequestsDetailChargePrice(stop.creditPrice),
+    //        StoppedPublicationDate(stop.startDate)
+    //      )
+    //    }
 
-    zuoraRefs.distinct
+    //   zuoraRefs.distinct
   }
 
   def holidayStopRequestsAddedToSalesforce(sfCredentials: SFAuthConfig, dryRun: Boolean)(requests: Seq[NewHolidayStopRequest]): Either[SalesforceUpdateFailure, Unit] =

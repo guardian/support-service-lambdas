@@ -48,9 +48,11 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends FlatSpec with Matc
       fetchOp = SalesforceHolidayStopRequest.LookupByDateAndProductNamePrefix(sfAuth.wrapWith(JsonHttp.getWithParams))
       preProcessingFetchResult <- fetchOp(lookupDate, productName).toDisjunction
 
+      id: HolidayStopRequestsDetailId = preProcessingFetchResult.find(_.Id == createResult).get.Holiday_Stop_Request_Detail__r
+                                        .head.Id
       processOp = SalesforceHolidayStopRequestsDetail.ActionSalesforceHolidayStopRequestsDetail(
         sfAuth.wrapWith(JsonHttp.patch)
-      )(preProcessingFetchResult.find(_.Id == createResult).get.Holiday_Stop_Request_Detail__r.head.Id)
+      )(id)
       processedResult <- processOp(HolidayStopRequestsDetailActioned(
         HolidayStopRequestsDetailChargeCode("C-1234567"),
         HolidayStopRequestsDetailChargePrice(-12.34)

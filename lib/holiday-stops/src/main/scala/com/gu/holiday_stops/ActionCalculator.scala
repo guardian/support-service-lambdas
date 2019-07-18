@@ -1,6 +1,7 @@
 package com.gu.holiday_stops
 
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.{HolidayStopRequest, ProductName}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.HolidayStopRequest
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.ProductName
 import org.joda.time.{DateTimeConstants, Days, LocalDate}
 
 object ActionCalculator {

@@ -21,6 +21,12 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
   case class HolidayStopRequestId(value: String) extends AnyVal
   implicit val formatHolidayStopRequestId = Jsonx.formatInline[HolidayStopRequestId]
 
+  case class SubscriptionName(value: String) extends AnyVal
+  implicit val formatSubscriptionName = Jsonx.formatInline[SubscriptionName]
+
+  case class ProductName(value: String) extends AnyVal
+  implicit val formatProductName = Jsonx.formatInline[ProductName]
+
   case class HolidayStopRequestsDetailChargeCode(value: String) extends AnyVal
   implicit val formatHolidayStopRequestsDetailChargeCode = Jsonx.formatInline[HolidayStopRequestsDetailChargeCode]
 
@@ -88,39 +94,44 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
 
   case class HolidayStopRequestsDetail(
     Id: HolidayStopRequestsDetailId,
+    Subscription_Name__c: SubscriptionName,
+    Product_Name__c: ProductName,
     Stopped_Publication_Date__c: StoppedPublicationDate,
     Estimated_Price__c: Option[HolidayStopRequestsDetailChargePrice],
     Charge_Code__c: Option[HolidayStopRequestsDetailChargeCode],
     Actual_Price__c: Option[HolidayStopRequestsDetailChargePrice]
   )
+  implicit val formattHolidayStopRequestsDetail = Json.format[HolidayStopRequestsDetail]
 
-  val SOQL_SELECT_CLAUSE = "SELECT Id, Stopped_Publication_Date__c, " +
-    "Estimated_Price__c, Charge_Code__c, Actual_Price__c"
+  case class HolidayStopRequestsDetailSearchQueryResponse(records: List[HolidayStopRequestsDetail])
+  implicit val readsIds = Json.reads[HolidayStopRequestsDetailSearchQueryResponse]
+
+  val SOQL_SELECT_CLAUSE = """
+                            | SELECT Id, Subscription_Name__c, Product_Name__c,
+                            | Stopped_Publication_Date__c, Estimated_Price__c, Charge_Code__c,
+                            | Actual_Price__c
+                            | """.stripMargin
 
   val SOQL_ORDER_BY_CLAUSE = "ORDER BY Stopped_Publication_Date__c ASC"
 
-  //  object LookupByProductNamePrefixAndDate {
-  //
-  //    def apply(sfGet: HttpOp[RestRequestMaker.GetRequestWithParams, JsValue]): (ProductName, LocalDate) => ClientFailableOp[List[HolidayStopRequestDetails]] =
-  //      sfGet.setupRequestMultiArg(toRequest _).parse[HolidayStopRequestActionedZuoraRefSearchQueryResponse].map(_.records).runRequestMultiArg
-  //
-  //    def toRequest(productNamePrefix: ProductName, date: LocalDate): GetRequestWithParams = {
-  //      val soqlQuery = s"""
-  //        |SELECT h.Id, h.Start_Date__c, h.End_Date__c, h.Actioned_Count__c, h.Subscription_Name__c,
-  //        |  h.Product_Name__c, (
-  //        |    SELECT a.Charge_Code__c, a.Stopped_Publication_Date__c
-  //        |    FROM Holiday_Stop_Request_Actioned_Zuora_Refs__r a
-  //        |  )
-  //        |FROM ${SalesforceHolidayStopRequest.holidayStopRequestSfObjectRef} h
-  //        |WHERE h.Product_Name__c LIKE '${productNamePrefix.value}%'
-  //        |AND h.Start_Date__c <= ${date.toString}
-  //        |AND h.End_Date__c >= ${date.toString}
-  //        |""".stripMargin
-  //      logger.info(s"using SF query : $soqlQuery")
-  //      RestRequestMaker.GetRequestWithParams(RelativePath(soqlQueryBaseUrl), UrlParams(Map("q" -> soqlQuery)))
-  //    }
-  //  }
-  //
+  object LookupPendingByProductNamePrefixAndDate {
+
+    def apply(sfGet: HttpOp[RestRequestMaker.GetRequestWithParams, JsValue]): (ProductName, LocalDate) => ClientFailableOp[List[HolidayStopRequestsDetail]] =
+      sfGet.setupRequestMultiArg(toRequest _).parse[HolidayStopRequestsDetailSearchQueryResponse].map(_.records).runRequestMultiArg
+
+    def toRequest(productNamePrefix: ProductName, date: LocalDate): GetRequestWithParams = {
+      val soqlQuery = s"""
+          | $SOQL_SELECT_CLAUSE
+          | FROM $holidayStopRequestsDetailSfObjectRef
+          | WHERE Product_Name__c LIKE '${productNamePrefix.value}%'
+          | AND Stopped_Publication_Date__c = ${date.toString}
+          | AND Is_Actioned__c = false
+          | """.stripMargin
+      logger.info(s"using SF query : $soqlQuery")
+      RestRequestMaker.GetRequestWithParams(RelativePath(soqlQueryBaseUrl), UrlParams(Map("q" -> soqlQuery)))
+    }
+  }
+
   //  object LookupByProductNamePrefixAndDateRange {
   //
   //    def apply(sfGet: HttpOp[RestRequestMaker.GetRequestWithParams, JsValue]): (ProductName, LocalDate, LocalDate) => ClientFailableOp[List[HolidayStopRequestDetails]] =

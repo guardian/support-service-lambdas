@@ -1,5 +1,6 @@
 package com.gu.holidaystopprocessor
 
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.SubscriptionName
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
 import io.circe.generic.auto._
@@ -30,7 +31,7 @@ object Zuora {
     } yield token
   }
 
-  def subscriptionGetResponse(config: Config, accessToken: AccessToken)(subscriptionName: String): Either[HolidayStopFailure, Subscription] = {
+  def subscriptionGetResponse(config: Config, accessToken: AccessToken)(subscriptionName: SubscriptionName): Either[HolidayStopFailure, Subscription] = {
     val url = uri"${config.zuoraConfig.baseUrl}/subscriptions/$subscriptionName"
     val request = sttp.get(url)
       .header("Authorization", s"Bearer ${accessToken.access_token}")
