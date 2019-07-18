@@ -26,8 +26,11 @@ class ActionCalculatorTest extends FlatSpec with Matchers {
         HolidayStopRequestStartDate(new LocalDate(2019, 5, 18)),
         HolidayStopRequestEndDate(new LocalDate(2019, 6, 20)),
         HolidayStopRequestActionedCount(0),
+        Pending_Count__c = 0,
+        Total_Issues_Publications_Impacted_Count__c = 0,
         SubscriptionName(""),
-        gwProductName
+        gwProductName,
+        Holiday_Stop_Request_Detail__r = List()
       )
     ) shouldEqual List(
         new LocalDate(2019, 5, 24),
@@ -42,8 +45,11 @@ class ActionCalculatorTest extends FlatSpec with Matchers {
         HolidayStopRequestStartDate(new LocalDate(2019, 5, 18)),
         HolidayStopRequestEndDate(new LocalDate(2019, 6, 21)),
         HolidayStopRequestActionedCount(0),
+        Pending_Count__c = 0,
+        Total_Issues_Publications_Impacted_Count__c = 0,
         SubscriptionName(""),
-        gwProductName
+        gwProductName,
+        Holiday_Stop_Request_Detail__r = List()
       )
     ) shouldEqual List(
         new LocalDate(2019, 5, 24),

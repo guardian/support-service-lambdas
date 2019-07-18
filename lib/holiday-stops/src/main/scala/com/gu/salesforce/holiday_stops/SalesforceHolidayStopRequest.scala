@@ -2,6 +2,7 @@ package com.gu.salesforce.holiday_stops
 
 import ai.x.play.json.Jsonx
 import com.gu.salesforce.SalesforceConstants._
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.HolidayStopRequestsDetail
 import com.gu.util.Logging
 import com.gu.util.resthttp.RestOp._
 import com.gu.util.resthttp.RestRequestMaker._
@@ -44,7 +45,12 @@ object SalesforceHolidayStopRequest extends Logging {
   implicit val formatProductName = Jsonx.formatInline[ProductName]
 
   def getHolidayStopRequestPrefixSOQL(productNamePrefix: ProductName) =
-    s"SELECT Id, Start_Date__c, End_Date__c, Actioned_Count__c, Subscription_Name__c, Product_Name__c " +
+    s"SELECT Id, Start_Date__c, End_Date__c, Subscription_Name__c, Product_Name__c, " +
+      s"Actioned_Count__c, Pending_Count__c, Total_Issues_Publications_Impacted_Count__c, (" +
+      s" ${SalesforceHolidayStopRequestsDetail.SOQL_SELECT_CLAUSE}" +
+      s" FROM Holiday_Stop_Request_Detail__r" +
+      s" ${SalesforceHolidayStopRequestsDetail.SOQL_ORDER_BY_CLAUSE} " +
+      s") " +
       s"FROM $holidayStopRequestSfObjectRef " +
       s"WHERE Product_Name__c LIKE '${productNamePrefix.value}%' "
 
@@ -53,9 +59,13 @@ object SalesforceHolidayStopRequest extends Logging {
     Start_Date__c: HolidayStopRequestStartDate,
     End_Date__c: HolidayStopRequestEndDate,
     Actioned_Count__c: HolidayStopRequestActionedCount,
+    Pending_Count__c: Int,
+    Total_Issues_Publications_Impacted_Count__c: Int,
     Subscription_Name__c: SubscriptionName,
-    Product_Name__c: ProductName
+    Product_Name__c: ProductName,
+    Holiday_Stop_Request_Detail__r: List[HolidayStopRequestsDetail]
   )
+  implicit val formattHolidayStopRequestsDetail = Json.format[HolidayStopRequestsDetail]
   implicit val reads = Json.reads[HolidayStopRequest]
   implicit val writes = Json.writes[HolidayStopRequest]
 

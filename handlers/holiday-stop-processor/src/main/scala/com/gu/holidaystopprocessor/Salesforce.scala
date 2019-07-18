@@ -6,8 +6,8 @@ import com.gu.effects.RawEffects
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.SalesforceClient
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.ProductName
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestActionedZuoraRef
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestActionedZuoraRef._
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
 import com.gu.util.resthttp.JsonHttp
 import com.gu.util.resthttp.Types.ClientFailableOp
 import play.api.libs.json.JsValue
@@ -20,7 +20,7 @@ object Salesforce {
   def holidayStopRequests(sfCredentials: SFAuthConfig)(productNamePrefix: ProductName): Either[OverallFailure, Seq[HolidayStopRequestDetails]] =
     SalesforceClient(RawEffects.response, sfCredentials).value.flatMap { sfAuth =>
       val sfGet = sfAuth.wrapWith(JsonHttp.getWithParams)
-      val fetchOp = SalesforceHolidayStopRequestActionedZuoraRef.LookupByProductNamePrefixAndDate(sfGet)
+      val fetchOp = SalesforceHolidayStopRequestsDetail.LookupByProductNamePrefixAndDate(sfGet)
       fetchOp(productNamePrefix, thresholdDate)
     }.toDisjunction match {
       case -\/(failure) => Left(OverallFailure(failure.toString))
@@ -30,10 +30,10 @@ object Salesforce {
   def holidayStopUpdateResponse(sfCredentials: SFAuthConfig)(responses: Seq[HolidayStopResponse]): Either[OverallFailure, Unit] = {
 
     def send(
-      sendOp: HolidayStopRequestActionedZuoraRef => ClientFailableOp[JsValue]
+      sendOp: HolidayStopRequestsDetail => ClientFailableOp[JsValue]
     )(response: HolidayStopResponse): ClientFailableOp[JsValue] =
       sendOp(
-        HolidayStopRequestActionedZuoraRef(
+        HolidayStopRequestsDetail(
           response.requestId,
           response.chargeCode,
           response.price,
@@ -43,7 +43,7 @@ object Salesforce {
 
     SalesforceClient(RawEffects.response, sfCredentials).value.map { sfAuth =>
       val sfGet = sfAuth.wrapWith(JsonHttp.post)
-      val sendOp = CreateHolidayStopRequestActionedZuoraRef(sfGet)
+      val sendOp = CreatePendingSalesforceHolidayStopRequestsDetail(sfGet)
       responses.map(send(sendOp)).find(_.isFailure)
     }.toDisjunction match {
       case -\/(failure) => Left(OverallFailure(failure.toString))

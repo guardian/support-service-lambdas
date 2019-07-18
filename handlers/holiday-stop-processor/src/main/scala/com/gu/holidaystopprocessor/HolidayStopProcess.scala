@@ -3,7 +3,7 @@ package com.gu.holidaystopprocessor
 import java.time.LocalDate
 
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.ProductName
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestActionedZuoraRef.{HolidayStopRequestActionedZuoraChargeCode, HolidayStopRequestActionedZuoraChargePrice, HolidayStopRequestDetails, StoppedPublicationDate}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestsDetailChargeCode, HolidayStopRequestsDetailChargePrice, HolidayStopRequestDetails, StoppedPublicationDate}
 
 object HolidayStopProcess {
 
@@ -67,8 +67,8 @@ object HolidayStopProcess {
     } yield {
       HolidayStopResponse(
         stop.requestId,
-        HolidayStopRequestActionedZuoraChargeCode(addedCharge.number),
-        HolidayStopRequestActionedZuoraChargePrice(addedCharge.price),
+        HolidayStopRequestsDetailChargeCode(addedCharge.number),
+        HolidayStopRequestsDetailChargePrice(addedCharge.price),
         StoppedPublicationDate(addedCharge.HolidayStart__c.getOrElse(LocalDate.MIN))
       )
     }

@@ -6,7 +6,7 @@ import java.time.{DayOfWeek, LocalDate}
 
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.{HolidayStopRequest, HolidayStopRequestEndDate, HolidayStopRequestStartDate, NewHolidayStopRequest, ProductName, SubscriptionName, SubscriptionNameLookup}
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestActionedZuoraRef.{HolidayStopRequestActionedZuoraChargeCode, HolidayStopRequestActionedZuoraChargePrice, HolidayStopRequestActionedZuoraRef, HolidayStopRequestDetails, StoppedPublicationDate}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestsDetailChargeCode, HolidayStopRequestsDetailChargePrice, HolidayStopRequestsDetail, HolidayStopRequestDetails, StoppedPublicationDate}
 import com.gu.util.Time
 
 import scala.io.Source
@@ -85,7 +85,7 @@ object SalesforceHolidayStop {
     }
   }
 
-  def zuoraRefsToBeBackfilled(inZuora: Seq[ZuoraHolidayStop], inSalesforce: Seq[HolidayStopRequestDetails]): Seq[HolidayStopRequestActionedZuoraRef] = {
+  def zuoraRefsToBeBackfilled(inZuora: Seq[ZuoraHolidayStop], inSalesforce: Seq[HolidayStopRequestDetails]): Seq[HolidayStopRequestsDetail] = {
 
     /*
      * We take legacy holiday stops that have a range of dates
@@ -132,10 +132,10 @@ object SalesforceHolidayStop {
       stop <- stoppedPublications.filterNot(zuoraStop => inSalesforce.exists(sfStop => isSame(zuoraStop, sfStop)))
       sfRequest <- correspondingRequest(stop)
     } yield {
-      HolidayStopRequestActionedZuoraRef(
+      HolidayStopRequestsDetail(
         sfRequest.Id,
-        HolidayStopRequestActionedZuoraChargeCode(stop.chargeNumber),
-        HolidayStopRequestActionedZuoraChargePrice(stop.creditPrice),
+        HolidayStopRequestsDetailChargeCode(stop.chargeNumber),
+        HolidayStopRequestsDetailChargePrice(stop.creditPrice),
         StoppedPublicationDate(stop.startDate)
       )
     }
@@ -151,7 +151,7 @@ object SalesforceHolidayStop {
       Right(())
     } else Salesforce.holidayStopCreateResponse(sfCredentials)(requests)
 
-  def zuoraRefsAddedToSalesforce(sfCredentials: SFAuthConfig, dryRun: Boolean)(zuoraRefs: Seq[HolidayStopRequestActionedZuoraRef]): Either[SalesforceUpdateFailure, Unit] =
+  def zuoraRefsAddedToSalesforce(sfCredentials: SFAuthConfig, dryRun: Boolean)(zuoraRefs: Seq[HolidayStopRequestsDetail]): Either[SalesforceUpdateFailure, Unit] =
     if (dryRun) {
       println("-----------------------------")
       zuoraRefs.foreach(println)
