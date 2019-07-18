@@ -32,6 +32,8 @@ It applies an amendment to relevant subscriptions in Zuora,
 
 #### Salesforce
 It writes holiday request details back to Salesforce, when those details have not already been written to Salesforce.  
+* The Prod holiday stop requests table is [here](https://eu7.salesforce.com/a2k).
+* The Prod holiday stop details table is [here](https://eu7.salesforce.com/a2j). 
 
 #### S3
 The indirect effect of the lambda is to add entries to the daily updated weekly stops CSV report in [S3](https://s3.console.aws.amazon.com/s3/buckets/fulfilment-export-prod/zuoraExport).
