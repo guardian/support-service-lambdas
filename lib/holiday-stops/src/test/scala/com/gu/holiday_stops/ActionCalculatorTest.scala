@@ -10,10 +10,10 @@ class ActionCalculatorTest extends FlatSpec with Matchers {
 
   it should "convert ProductName to a day of the week" in {
 
-    ActionCalculator.productNameToDayOfWeek(gwProductName) shouldEqual DateTimeConstants.FRIDAY
+    ActionCalculator.dayOfPublicationByProduct(gwProductName) shouldEqual DateTimeConstants.FRIDAY
 
     assertThrows[MatchError] {
-      ActionCalculator.productNameToDayOfWeek(ProductName("blah"))
+      ActionCalculator.dayOfPublicationByProduct(ProductName("blah"))
     }
 
   }
