@@ -27,7 +27,7 @@ object HolidayStopProcess {
   ): ProcessResult = {
     val result = for {
       requests <- getRequests(ProductName("Guardian Weekly"))
-      holidayStops <- Right(requests.map(_.request).distinct.flatMap(HolidayStop(_)))
+      holidayStops <- Right(requests.map(_.request).distinct.flatMap(HolidayStops(_)))
       alreadyExportedChargeCodes <- Right(requests.flatMap(_.zuoraRefs.getOrElse(Nil).map(_.chargeCode)).distinct)
     } yield {
       val responses = holidayStops map {
