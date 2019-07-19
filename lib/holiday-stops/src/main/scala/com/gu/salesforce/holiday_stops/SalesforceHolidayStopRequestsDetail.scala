@@ -60,10 +60,10 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
 
   object ActionSalesforceHolidayStopRequestsDetail {
 
-    def apply(sfPatch: HttpOp[RestRequestMaker.PatchRequest, JsValue])(detailSfId: HolidayStopRequestsDetailId): HolidayStopRequestsDetailActioned => ClientFailableOp[JsValue] =
+    def apply(sfPatch: HttpOp[RestRequestMaker.PatchRequest, Unit])(detailSfId: HolidayStopRequestsDetailId): HolidayStopRequestsDetailActioned => ClientFailableOp[Unit] =
       sfPatch.setupRequest[HolidayStopRequestsDetailActioned] { actionedInfo =>
         PatchRequest(actionedInfo, RelativePath(s"$sfObjectsBaseUrl$holidayStopRequestsDetailSfObjectRef/${detailSfId.value}"))
-      }.parse[JsValue].runRequest
+      }.runRequest
 
   }
 

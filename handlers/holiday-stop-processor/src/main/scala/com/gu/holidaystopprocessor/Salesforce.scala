@@ -7,10 +7,7 @@ import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.SalesforceClient
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
-import com.gu.util.resthttp.RestRequestMaker.PatchRequest
-import com.gu.util.resthttp.{HttpOp, JsonHttp}
-import com.gu.util.resthttp.Types.ClientFailableOp
-import play.api.libs.json.JsValue
+import com.gu.util.resthttp.JsonHttp
 import scalaz.{-\/, \/-}
 
 object Salesforce {
@@ -27,33 +24,16 @@ object Salesforce {
       case \/-(details) => Right(details)
     }
 
-  def holidayStopUpdateResponse(sfCredentials: SFAuthConfig)(responses: Seq[HolidayStopResponse]): Either[OverallFailure, Unit] = {
-
-    ???
-
-    //    def send(
-    //      sendOp: HolidayStopRequestsDetailActioned => ClientFailableOp[JsValue]
-    //    )(response: HolidayStopResponse): ClientFailableOp[JsValue] =
-    //      sendOp(
-    //        HolidayStopRequestsDetail(
-    //          response.requestId,
-    //          response.subscriptionName,
-    //          response.productName,
-    //          response.pubDate,
-    //          response.estimatedPrice,
-    //          Some(response.chargeCode),
-    //          Some(response.actualPrice)
-    //        )
-    //      )
-    //
-    //    SalesforceClient(RawEffects.response, sfCredentials).value.map { sfAuth =>
-    //      val id: HolidayStopRequestsDetailId = ???
-    //      val sfPatch: HttpOp[PatchRequest, JsValue] = sfAuth.wrapWith(JsonHttp.patch)
-    //      val sendOp = ActionSalesforceHolidayStopRequestsDetail(sfPatch)(id)
-    //      responses.map(r => send(sendOp(_)(r)).find(_.isFailure)
-    //    }.toDisjunction match {
-    //      case -\/(failure) => Left(OverallFailure(failure.toString))
-    //      case _ => Right(())
-    //    }
-  }
+  def holidayStopUpdateResponse(sfCredentials: SFAuthConfig)(responses: Seq[HolidayStopResponse]): Either[OverallFailure, Unit] =
+    SalesforceClient(RawEffects.response, sfCredentials).value.map { sfAuth =>
+      val patch = sfAuth.wrapWith(JsonHttp.patch)
+      val sendOp = ActionSalesforceHolidayStopRequestsDetail(patch) _
+      responses map { response =>
+        val actioned = HolidayStopRequestsDetailActioned(response.chargeCode, response.actualPrice)
+        sendOp(response.requestId)(actioned)
+      }
+    }.toDisjunction match {
+      case -\/(failure) => Left(OverallFailure(failure.toString))
+      case _ => Right(())
+    }
 }

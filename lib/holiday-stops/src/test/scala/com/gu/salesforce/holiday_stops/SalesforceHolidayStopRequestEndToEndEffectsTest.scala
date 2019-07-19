@@ -49,7 +49,7 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends FlatSpec with Matc
       preProcessingFetchResult <- fetchOp(lookupDate, productName).toDisjunction
 
       id: HolidayStopRequestsDetailId = preProcessingFetchResult.find(_.Id == createResult).get.Holiday_Stop_Request_Detail__r
-                                        .head.Id
+        .head.Id
       processOp = SalesforceHolidayStopRequestsDetail.ActionSalesforceHolidayStopRequestsDetail(
         sfAuth.wrapWith(JsonHttp.patch)
       )(id)
