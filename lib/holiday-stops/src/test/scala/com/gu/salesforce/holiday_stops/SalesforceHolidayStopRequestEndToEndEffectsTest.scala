@@ -10,7 +10,6 @@ import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.resthttp.JsonHttp
 import org.joda.time.LocalDate
 import org.scalatest.{FlatSpec, Matchers}
-import play.api.libs.json.JsValue
 import scalaz.{-\/, \/-}
 
 class SalesforceHolidayStopRequestEndToEndEffectsTest extends FlatSpec with Matchers {
@@ -18,7 +17,6 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends FlatSpec with Matc
   case class EndToEndResults(
     createResult: SalesforceHolidayStopRequest.HolidayStopRequestId,
     preProcessingFetchResult: List[SalesforceHolidayStopRequest.HolidayStopRequest],
-    processedResult: JsValue,
     postProcessingFetchResult: List[SalesforceHolidayStopRequest.HolidayStopRequest],
     deleteResult: String
   )
@@ -53,7 +51,7 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends FlatSpec with Matc
       processOp = SalesforceHolidayStopRequestsDetail.ActionSalesforceHolidayStopRequestsDetail(
         sfAuth.wrapWith(JsonHttp.patch)
       )(id)
-      processedResult <- processOp(HolidayStopRequestsDetailActioned(
+      _ <- processOp(HolidayStopRequestsDetailActioned(
         HolidayStopRequestsDetailChargeCode("C-1234567"),
         HolidayStopRequestsDetailChargePrice(-12.34)
       )).toDisjunction
@@ -63,13 +61,13 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends FlatSpec with Matc
       deleteOp = SalesforceHolidayStopRequest.DeleteHolidayStopRequest(sfAuth.wrapWith(JsonHttp.deleteWithStringResponse))
       deleteResult <- deleteOp(createResult).toDisjunction
 
-    } yield EndToEndResults(createResult, preProcessingFetchResult, processedResult, postProcessingFetchResult, deleteResult)
+    } yield EndToEndResults(createResult, preProcessingFetchResult, postProcessingFetchResult, deleteResult)
 
     actual match {
 
       case -\/(failure) => fail(failure.toString)
 
-      case \/-(EndToEndResults(createResult, preProcessingFetchResult, _, postProcessingFetchResult, _)) =>
+      case \/-(EndToEndResults(createResult, preProcessingFetchResult, postProcessingFetchResult, _)) =>
 
         withClue("should be able to find the freshly created Holiday Stop Request and its Actioned Count should be ZERO") {
           preProcessingFetchResult

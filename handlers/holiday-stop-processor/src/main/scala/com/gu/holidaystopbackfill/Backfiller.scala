@@ -20,9 +20,9 @@ object Backfiller {
       requestsInSf <- holidayStopRequestsAlreadyInSalesforce(config)(startThreshold, endThreshold)
       requestsToAddToSf = holidayStopRequestsToBeBackfilled(stopsInZuora, requestsInSf)
       _ <- holidayStopRequestsAddedToSalesforce(config, dryRun)(requestsToAddToSf)
-      zuoraRefsInSf <- zuoraRefsAlreadyInSalesforce(config)(startThreshold, endThreshold)
-      zuoraRefsToAddToSf = zuoraRefsToBeBackfilled(stopsInZuora, zuoraRefsInSf)
-      _ <- zuoraRefsAddedToSalesforce(config, dryRun)(zuoraRefsToAddToSf)
-    } yield BackfillResult(requestsToAddToSf, zuoraRefsToAddToSf)
+      detailsInSf <- detailsAlreadyInSalesforce(config)(startThreshold, endThreshold)
+      detailsToAddToSf = detailsToBeBackfilled(stopsInZuora, detailsInSf)
+      _ <- detailsAddedToSalesforce(config, dryRun)(detailsToAddToSf)
+    } yield BackfillResult(requestsToAddToSf, detailsToAddToSf)
   }
 }
