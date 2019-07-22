@@ -10,7 +10,7 @@ import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.resthttp.{HttpOp, RestRequestMaker}
 import org.joda.time.LocalDate
 import org.joda.time.format.DateTimeFormat
-import play.api.libs.json.{Format, JsResult, JsString, JsValue, Json}
+import play.api.libs.json._
 
 object SalesforceHolidayStopRequest extends Logging {
 
@@ -57,7 +57,7 @@ object SalesforceHolidayStopRequest extends Logging {
     Total_Issues_Publications_Impacted_Count__c: Int,
     Subscription_Name__c: SubscriptionName,
     Product_Name__c: ProductName,
-    Holiday_Stop_Request_Detail__r: List[HolidayStopRequestsDetail]
+    Holiday_Stop_Request_Detail__r: Option[List[HolidayStopRequestsDetail]]
   )
   implicit val reads = Json.reads[HolidayStopRequest]
   implicit val writes = Json.writes[HolidayStopRequest]

@@ -31,7 +31,7 @@ class ActionCalculatorTest extends FlatSpec with Matchers {
         Total_Issues_Publications_Impacted_Count__c = 0,
         SubscriptionName(""),
         gwProductName,
-        Holiday_Stop_Request_Detail__r = List()
+        Holiday_Stop_Request_Detail__r = None
       )
     ) shouldEqual List(
         new LocalDate(2019, 5, 24),
@@ -50,7 +50,7 @@ class ActionCalculatorTest extends FlatSpec with Matchers {
         Total_Issues_Publications_Impacted_Count__c = 0,
         SubscriptionName(""),
         gwProductName,
-        Holiday_Stop_Request_Detail__r = List()
+        Holiday_Stop_Request_Detail__r = None
       )
     ) shouldEqual List(
         new LocalDate(2019, 5, 24),
