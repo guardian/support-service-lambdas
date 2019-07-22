@@ -12,7 +12,7 @@ case class HolidayStop(
   estimatedCharge: Option[HolidayStopRequestsDetailChargePrice]
 )
 
-object HolidayStops {
+object HolidayStop {
 
   def apply(request: HolidayStopRequestsDetail): HolidayStop =
     HolidayStop(

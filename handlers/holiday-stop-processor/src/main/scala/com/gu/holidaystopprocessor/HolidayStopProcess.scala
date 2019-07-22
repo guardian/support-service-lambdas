@@ -26,7 +26,7 @@ object HolidayStopProcess {
   ): ProcessResult = {
     val result = for {
       requests <- getRequests(ProductName("Guardian Weekly"))
-      holidayStops <- Right(requests.distinct.map(HolidayStops(_)))
+      holidayStops <- Right(requests.distinct.map(HolidayStop(_)))
       alreadyExportedChargeCodes <- Right(requests.flatMap(_.Charge_Code__c).distinct)
     } yield {
       val responses = holidayStops map {
