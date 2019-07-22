@@ -2,6 +2,7 @@ package com.gu.salesforce.holiday_stops
 
 import ai.x.play.json.Jsonx
 import com.gu.salesforce.SalesforceConstants._
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestsDetailSearchQueryResponse, ProductName, SubscriptionName}
 import com.gu.util.Logging
 import com.gu.util.resthttp.RestOp._
 import com.gu.util.resthttp.RestRequestMaker._
@@ -9,7 +10,7 @@ import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.resthttp.{HttpOp, RestRequestMaker}
 import org.joda.time.LocalDate
 import org.joda.time.format.DateTimeFormat
-import play.api.libs.json.{Format, JsResult, JsString, JsValue, Json}
+import play.api.libs.json._
 
 object SalesforceHolidayStopRequest extends Logging {
 
@@ -37,27 +38,29 @@ object SalesforceHolidayStopRequest extends Logging {
   case class HolidayStopRequestActionedCount(value: Int) extends AnyVal
   implicit val formatHolidayStopRequestActionedCount = Jsonx.formatInline[HolidayStopRequestActionedCount]
 
-  case class SubscriptionName(value: String) extends AnyVal
-  implicit val formatSubscriptionName = Jsonx.formatInline[SubscriptionName]
-
-  case class ProductName(value: String) extends AnyVal
-  implicit val formatProductName = Jsonx.formatInline[ProductName]
-
-  def getHolidayStopRequestPrefixSOQL(productNamePrefix: ProductName) =
-    s"SELECT Id, Start_Date__c, End_Date__c, Actioned_Count__c, Subscription_Name__c, Product_Name__c " +
-      s"FROM $holidayStopRequestSfObjectRef " +
-      s"WHERE Product_Name__c LIKE '${productNamePrefix.value}%' "
+  def getHolidayStopRequestPrefixSOQL(productNamePrefix: ProductName) = s"""
+      | SELECT Id, Start_Date__c, End_Date__c, Subscription_Name__c, Product_Name__c,
+      | Actioned_Count__c, Pending_Count__c, Total_Issues_Publications_Impacted_Count__c, (
+      |   ${SalesforceHolidayStopRequestsDetail.SOQL_SELECT_CLAUSE}
+      |   FROM Holiday_Stop_Request_Detail__r
+      |   ${SalesforceHolidayStopRequestsDetail.SOQL_ORDER_BY_CLAUSE}
+      | )
+      | FROM $holidayStopRequestSfObjectRef
+      | WHERE Product_Name__c LIKE '${productNamePrefix.value}%'
+      |""".stripMargin
 
   case class HolidayStopRequest(
     Id: HolidayStopRequestId,
     Start_Date__c: HolidayStopRequestStartDate,
     End_Date__c: HolidayStopRequestEndDate,
     Actioned_Count__c: HolidayStopRequestActionedCount,
+    Pending_Count__c: Int,
+    Total_Issues_Publications_Impacted_Count__c: Int,
     Subscription_Name__c: SubscriptionName,
-    Product_Name__c: ProductName
+    Product_Name__c: ProductName,
+    Holiday_Stop_Request_Detail__r: Option[HolidayStopRequestsDetailSearchQueryResponse]
   )
   implicit val reads = Json.reads[HolidayStopRequest]
-  implicit val writes = Json.writes[HolidayStopRequest]
 
   private case class HolidayStopRequestSearchQueryResponse(records: List[HolidayStopRequest])
   private implicit val readsIds = Json.reads[HolidayStopRequestSearchQueryResponse]

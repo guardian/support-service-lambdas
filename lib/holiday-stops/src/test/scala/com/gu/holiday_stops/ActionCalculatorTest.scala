@@ -1,6 +1,7 @@
 package com.gu.holiday_stops
 
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{ProductName, SubscriptionName}
 import org.joda.time.{DateTimeConstants, LocalDate}
 import org.scalatest.{FlatSpec, Matchers}
 
@@ -26,8 +27,11 @@ class ActionCalculatorTest extends FlatSpec with Matchers {
         HolidayStopRequestStartDate(new LocalDate(2019, 5, 18)),
         HolidayStopRequestEndDate(new LocalDate(2019, 6, 20)),
         HolidayStopRequestActionedCount(0),
+        Pending_Count__c = 0,
+        Total_Issues_Publications_Impacted_Count__c = 0,
         SubscriptionName(""),
-        gwProductName
+        gwProductName,
+        Holiday_Stop_Request_Detail__r = None
       )
     ) shouldEqual List(
         new LocalDate(2019, 5, 24),
@@ -42,8 +46,11 @@ class ActionCalculatorTest extends FlatSpec with Matchers {
         HolidayStopRequestStartDate(new LocalDate(2019, 5, 18)),
         HolidayStopRequestEndDate(new LocalDate(2019, 6, 21)),
         HolidayStopRequestActionedCount(0),
+        Pending_Count__c = 0,
+        Total_Issues_Publications_Impacted_Count__c = 0,
         SubscriptionName(""),
-        gwProductName
+        gwProductName,
+        Holiday_Stop_Request_Detail__r = None
       )
     ) shouldEqual List(
         new LocalDate(2019, 5, 24),
