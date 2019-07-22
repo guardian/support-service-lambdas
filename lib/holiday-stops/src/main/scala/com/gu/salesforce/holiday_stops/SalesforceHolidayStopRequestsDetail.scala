@@ -107,7 +107,7 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
     }
   }
 
-  object LookupActualByProductNamePrefixAndDateRange {
+  object LookupActionedByProductNamePrefixAndDateRange {
 
     def apply(sfGet: HttpOp[RestRequestMaker.GetRequestWithParams, JsValue]): (ProductName, LocalDate, LocalDate) => ClientFailableOp[List[HolidayStopRequestsDetail]] =
       sfGet.setupRequestMultiArg(toRequest _).parse[HolidayStopRequestsDetailSearchQueryResponse].map(_.records).runRequestMultiArg

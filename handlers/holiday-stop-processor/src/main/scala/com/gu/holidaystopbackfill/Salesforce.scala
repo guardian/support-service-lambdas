@@ -27,7 +27,7 @@ object Salesforce {
   def holidayStopRequestDetails(sfCredentials: SFAuthConfig)(productNamePrefix: ProductName, startThreshold: LocalDate, endThreshold: LocalDate): Either[SalesforceFetchFailure, Seq[HolidayStopRequestsDetail]] =
     SalesforceClient(RawEffects.response, sfCredentials).value.flatMap { sfAuth =>
       val sfGet = sfAuth.wrapWith(JsonHttp.getWithParams)
-      val fetchOp = SalesforceHolidayStopRequestsDetail.LookupActualByProductNamePrefixAndDateRange(sfGet)
+      val fetchOp = SalesforceHolidayStopRequestsDetail.LookupActionedByProductNamePrefixAndDateRange(sfGet)
       fetchOp(productNamePrefix, startThreshold, endThreshold)
     }.toDisjunction match {
       case -\/(failure) => Left(SalesforceFetchFailure(failure.toString))
