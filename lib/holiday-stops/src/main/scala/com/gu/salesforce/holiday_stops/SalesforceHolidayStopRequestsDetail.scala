@@ -76,7 +76,7 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
     Charge_Code__c: Option[HolidayStopRequestsDetailChargeCode],
     Actual_Price__c: Option[HolidayStopRequestsDetailChargePrice]
   )
-  implicit val formatHolidayStopRequestsDetail = Json.format[HolidayStopRequestsDetail]
+  implicit val readsHolidayStopRequestsDetail = Json.reads[HolidayStopRequestsDetail]
 
   case class HolidayStopRequestsDetailSearchQueryResponse(records: List[HolidayStopRequestsDetail])
   implicit val readsIds = Json.reads[HolidayStopRequestsDetailSearchQueryResponse]

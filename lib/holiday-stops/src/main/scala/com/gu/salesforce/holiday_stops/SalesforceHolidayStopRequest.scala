@@ -2,7 +2,7 @@ package com.gu.salesforce.holiday_stops
 
 import ai.x.play.json.Jsonx
 import com.gu.salesforce.SalesforceConstants._
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestsDetail, ProductName, SubscriptionName}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestsDetailSearchQueryResponse, ProductName, SubscriptionName}
 import com.gu.util.Logging
 import com.gu.util.resthttp.RestOp._
 import com.gu.util.resthttp.RestRequestMaker._
@@ -57,10 +57,9 @@ object SalesforceHolidayStopRequest extends Logging {
     Total_Issues_Publications_Impacted_Count__c: Int,
     Subscription_Name__c: SubscriptionName,
     Product_Name__c: ProductName,
-    Holiday_Stop_Request_Detail__r: Option[List[HolidayStopRequestsDetail]]
+    Holiday_Stop_Request_Detail__r: Option[HolidayStopRequestsDetailSearchQueryResponse]
   )
   implicit val reads = Json.reads[HolidayStopRequest]
-  implicit val writes = Json.writes[HolidayStopRequest]
 
   private case class HolidayStopRequestSearchQueryResponse(records: List[HolidayStopRequest])
   private implicit val readsIds = Json.reads[HolidayStopRequestSearchQueryResponse]

@@ -144,7 +144,7 @@ object Fixtures {
     Total_Issues_Publications_Impacted_Count__c = 7,
     Subscription_Name__c = SubscriptionName("S1"),
     Product_Name__c = ProductName("Gu Weekly"),
-    Holiday_Stop_Request_Detail__r = Nil
+    Holiday_Stop_Request_Detail__r = None
   )
 
   def mkHolidayStopRequestDetails(request: HolidayStopRequest, chargeCode: String) = HolidayStopRequestsDetail(

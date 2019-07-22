@@ -4,8 +4,9 @@ import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.SalesforceClient
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestId, _}
 import com.gu.test.EffectsTest
+import com.gu.util.Time
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.resthttp.JsonHttp
 import org.joda.time.LocalDate
@@ -40,14 +41,21 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends FlatSpec with Matc
         SubscriptionNameLookup(SubscriptionName("A-S00050817")) // must exist in DEV SalesForce
       )).toDisjunction
 
+      // TODO
       // Salesforce Trigger SHOULD have called out to a service layer endpoint to enumerate the detail entries by this point
       // (this endpoint ultimately uses SalesforceHolidayStopRequestsDetail.CreatePendingSalesforceHolidayStopRequestsDetail)
+      // In the meantime doing this manually here to keep test passing:
+      createDetailOp = SalesforceHolidayStopRequestsDetail.CreatePendingSalesforceHolidayStopRequestsDetail(sfAuth.wrapWith(JsonHttp.post))
+      _ <- createDetailOp(HolidayStopRequestsDetailPending(
+        HolidayStopRequestId(createResult.value),
+        StoppedPublicationDate(Time.toJavaDate(LocalDate.now.plusDays(11)))
+      )).toDisjunction
 
       fetchOp = SalesforceHolidayStopRequest.LookupByDateAndProductNamePrefix(sfAuth.wrapWith(JsonHttp.getWithParams))
       preProcessingFetchResult <- fetchOp(lookupDate, productName).toDisjunction
 
       id: HolidayStopRequestsDetailId = preProcessingFetchResult.find(_.Id == createResult).get
-        .Holiday_Stop_Request_Detail__r.get
+        .Holiday_Stop_Request_Detail__r.get.records
         .head.Id
       processOp = SalesforceHolidayStopRequestsDetail.ActionSalesforceHolidayStopRequestsDetail(
         sfAuth.wrapWith(JsonHttp.patch)
