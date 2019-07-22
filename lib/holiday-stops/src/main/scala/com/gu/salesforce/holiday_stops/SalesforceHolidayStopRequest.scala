@@ -38,15 +38,16 @@ object SalesforceHolidayStopRequest extends Logging {
   case class HolidayStopRequestActionedCount(value: Int) extends AnyVal
   implicit val formatHolidayStopRequestActionedCount = Jsonx.formatInline[HolidayStopRequestActionedCount]
 
-  def getHolidayStopRequestPrefixSOQL(productNamePrefix: ProductName) =
-    s"SELECT Id, Start_Date__c, End_Date__c, Subscription_Name__c, Product_Name__c, " +
-      s"Actioned_Count__c, Pending_Count__c, Total_Issues_Publications_Impacted_Count__c, (" +
-      s" ${SalesforceHolidayStopRequestsDetail.SOQL_SELECT_CLAUSE}" +
-      s" FROM Holiday_Stop_Request_Detail__r" +
-      s" ${SalesforceHolidayStopRequestsDetail.SOQL_ORDER_BY_CLAUSE} " +
-      s") " +
-      s"FROM $holidayStopRequestSfObjectRef " +
-      s"WHERE Product_Name__c LIKE '${productNamePrefix.value}%' "
+  def getHolidayStopRequestPrefixSOQL(productNamePrefix: ProductName) = s"""
+      | SELECT Id, Start_Date__c, End_Date__c, Subscription_Name__c, Product_Name__c,
+      | Actioned_Count__c, Pending_Count__c, Total_Issues_Publications_Impacted_Count__c, (
+      |   ${SalesforceHolidayStopRequestsDetail.SOQL_SELECT_CLAUSE}
+      |   FROM Holiday_Stop_Request_Detail__r
+      |   ${SalesforceHolidayStopRequestsDetail.SOQL_ORDER_BY_CLAUSE}
+      | )
+      | FROM $holidayStopRequestSfObjectRef
+      | WHERE Product_Name__c LIKE '${productNamePrefix.value}%'
+      |""".stripMargin
 
   case class HolidayStopRequest(
     Id: HolidayStopRequestId,

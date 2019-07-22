@@ -100,6 +100,7 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
           | WHERE Product_Name__c LIKE '${productNamePrefix.value}%'
           | AND Stopped_Publication_Date__c = ${date.toString}
           | AND Is_Actioned__c = false
+          | $SOQL_ORDER_BY_CLAUSE
           |""".stripMargin
       logger.info(s"using SF query : $soqlQuery")
       RestRequestMaker.GetRequestWithParams(RelativePath(soqlQueryBaseUrl), UrlParams(Map("q" -> soqlQuery)))
@@ -119,6 +120,7 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
           | AND Stopped_Publication_Date__c >= ${startThreshold.toString}
           | AND Stopped_Publication_Date__c <= ${endThreshold.toString}
           | AND Is_Actioned__c = true
+          | $SOQL_ORDER_BY_CLAUSE
           |""".stripMargin
       logger.info(s"using SF query : $soqlQuery")
       RestRequestMaker.GetRequestWithParams(RelativePath(soqlQueryBaseUrl), UrlParams(Map("q" -> soqlQuery)))
