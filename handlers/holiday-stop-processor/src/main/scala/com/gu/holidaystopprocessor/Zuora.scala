@@ -32,7 +32,7 @@ object Zuora {
   }
 
   def subscriptionGetResponse(config: Config, accessToken: AccessToken)(subscriptionName: SubscriptionName): Either[HolidayStopFailure, Subscription] = {
-    val url = uri"${config.zuoraConfig.baseUrl}/subscriptions/$subscriptionName"
+    val url = uri"${config.zuoraConfig.baseUrl}/subscriptions/${subscriptionName.value}"
     val request = sttp.get(url)
       .header("Authorization", s"Bearer ${accessToken.access_token}")
     val response = request.send()
