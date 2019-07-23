@@ -18,6 +18,7 @@ import java.time.LocalDate
  *     <li>Credit price.</ol></li>
  *   <li>Earliest date of start of holiday-stops to find.</li>
  *   <li>Latest date of end of holiday-stops to find.</li>
+ *   <li>Salesforce stage to backfill.  Defaults to DEV.</li>
  * </ol>
  * </p>
  */
@@ -27,8 +28,9 @@ object BackfillingApp extends App {
   val src = new File(args(1))
   val start = LocalDate.parse(args(2))
   val end = args.lift(3).map(LocalDate.parse)
+  val stage = args.lift(4).getOrElse("DEV")
 
-  Backfiller.backfill(src, start, end, dryRun) match {
+  Backfiller.backfill(src, start, end, dryRun, stage) match {
     case Left(failure) => println(s"Failed: $failure")
     case Right(result) =>
       println("Success!")

@@ -20,11 +20,9 @@ object Config {
       else
         s"membership/support-service-lambdas/$stage/sfAuth-$stage.v1.json"
     val builder =
-      if (stage == "DEV")
-        AmazonS3Client.builder
-          .withCredentials(new ProfileCredentialsProvider(profileName))
-          .withRegion(EU_WEST_1)
-      else AmazonS3Client.builder
+      AmazonS3Client.builder
+        .withCredentials(new ProfileCredentialsProvider(profileName))
+        .withRegion(EU_WEST_1)
     val inputStream =
       builder.build().getObject(bucketName, key).getObjectContent
     val rawJson = Source.fromInputStream(inputStream).mkString
@@ -33,10 +31,5 @@ object Config {
     }
   }
 
-  def apply(): Either[ConfigFailure, SFAuthConfig] = {
-    val stage = Option(System.getenv("Stage")).getOrElse("DEV")
-    for {
-      sfConfig <- salesforceCredentials(stage)
-    } yield sfConfig
-  }
+  def apply(stage: String): Either[ConfigFailure, SFAuthConfig] = salesforceCredentials(stage)
 }
