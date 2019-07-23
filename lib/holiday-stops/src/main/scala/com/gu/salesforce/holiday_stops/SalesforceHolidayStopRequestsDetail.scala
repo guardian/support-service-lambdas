@@ -107,23 +107,21 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
     }
   }
 
-  object LookupActionedByProductNamePrefixAndDateRange {
+  case class ActionedHolidayStopRequestsDetailToBackfill(
+    Holiday_Stop_Request__c: HolidayStopRequestId,
+    Stopped_Publication_Date__c: StoppedPublicationDate,
+    Estimated_Price__c: Option[HolidayStopRequestsDetailChargePrice],
+    Charge_Code__c: Option[HolidayStopRequestsDetailChargeCode],
+    Actual_Price__c: Option[HolidayStopRequestsDetailChargePrice]
+  )
+  implicit val writesHolidayStopRequestsDetail = Json.writes[ActionedHolidayStopRequestsDetailToBackfill]
 
-    def apply(sfGet: HttpOp[RestRequestMaker.GetRequestWithParams, JsValue]): (ProductName, LocalDate, LocalDate) => ClientFailableOp[List[HolidayStopRequestsDetail]] =
-      sfGet.setupRequestMultiArg(toRequest _).parse[HolidayStopRequestsDetailSearchQueryResponse].map(_.records).runRequestMultiArg
+  object BackfillActionedSalesforceHolidayStopRequestsDetail {
 
-    def toRequest(productNamePrefix: ProductName, startThreshold: LocalDate, endThreshold: LocalDate): GetRequestWithParams = {
-      val soqlQuery = s"""
-          | $SOQL_SELECT_CLAUSE
-          | FROM $holidayStopRequestsDetailSfObjectRef
-          | WHERE Product_Name__c LIKE '${productNamePrefix.value}%'
-          | AND Stopped_Publication_Date__c >= ${startThreshold.toString}
-          | AND Stopped_Publication_Date__c <= ${endThreshold.toString}
-          | AND Is_Actioned__c = true
-          | $SOQL_ORDER_BY_CLAUSE
-          |""".stripMargin
-      logger.info(s"using SF query : $soqlQuery")
-      RestRequestMaker.GetRequestWithParams(RelativePath(soqlQueryBaseUrl), UrlParams(Map("q" -> soqlQuery)))
-    }
+    def apply(sfPost: HttpOp[RestRequestMaker.PostRequest, JsValue]): ActionedHolidayStopRequestsDetailToBackfill => ClientFailableOp[JsValue] =
+      sfPost.setupRequest[ActionedHolidayStopRequestsDetailToBackfill] { toCreate =>
+        PostRequest(toCreate, RelativePath(sfObjectsBaseUrl + holidayStopRequestsDetailSfObjectRef))
+      }.parse[JsValue].runRequest
+
   }
 }

@@ -2,7 +2,7 @@ package com.gu.salesforce.holiday_stops
 
 import ai.x.play.json.Jsonx
 import com.gu.salesforce.SalesforceConstants._
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestsDetailSearchQueryResponse, ProductName, SubscriptionName}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestId, HolidayStopRequestsDetailSearchQueryResponse, ProductName, SubscriptionName}
 import com.gu.util.Logging
 import com.gu.util.resthttp.RestOp._
 import com.gu.util.resthttp.RestRequestMaker._
@@ -25,9 +25,6 @@ object SalesforceHolidayStopRequest extends Logging {
 
     override def writes(date: LocalDate): JsValue = JsString(date.toString(SALESFORCE_DATE_FORMAT))
   }
-
-  case class HolidayStopRequestId(value: String) extends AnyVal
-  implicit val formatHolidayStopRequestId = Jsonx.formatInline[HolidayStopRequestId]
 
   case class HolidayStopRequestStartDate(value: LocalDate) extends AnyVal
   implicit val formatHolidayStopRequestStartDate = Jsonx.formatInline[HolidayStopRequestStartDate]
@@ -81,17 +78,13 @@ object SalesforceHolidayStopRequest extends Logging {
 
   }
 
-  object LookupByDateRangeAndProductNamePrefix {
+  object LookupByProductNamePrefix {
 
-    def apply(sfGet: HttpOp[RestRequestMaker.GetRequestWithParams, JsValue]): (LocalDate, LocalDate, ProductName) => ClientFailableOp[List[HolidayStopRequest]] =
-      sfGet.setupRequestMultiArg(toRequest _).parse[HolidayStopRequestSearchQueryResponse].map(_.records).runRequestMultiArg
+    def apply(sfGet: HttpOp[RestRequestMaker.GetRequestWithParams, JsValue]): ProductName => ClientFailableOp[List[HolidayStopRequest]] =
+      sfGet.setupRequest(toRequest).parse[HolidayStopRequestSearchQueryResponse].map(_.records).runRequest
 
-    def toRequest(start: LocalDate, end: LocalDate, productNamePrefix: ProductName) = {
-      val sfStart = start.toString(SALESFORCE_DATE_FORMAT)
-      val sfEnd = end.toString(SALESFORCE_DATE_FORMAT)
-      val soqlQuery = getHolidayStopRequestPrefixSOQL(productNamePrefix) +
-        s"AND Start_Date__c >= $sfStart " +
-        s"AND Start_Date__c <= $sfEnd "
+    def toRequest(productNamePrefix: ProductName) = {
+      val soqlQuery = getHolidayStopRequestPrefixSOQL(productNamePrefix)
       logger.info(s"using SF query : $soqlQuery")
       RestRequestMaker.GetRequestWithParams(RelativePath(soqlQueryBaseUrl), UrlParams(Map("q" -> soqlQuery)))
     }

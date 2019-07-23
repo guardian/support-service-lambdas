@@ -1,6 +1,9 @@
 package com.gu.holidaystopbackfill
 
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.NewHolidayStopRequest
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.HolidayStopRequestsDetailPending
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.ActionedHolidayStopRequestsDetailToBackfill
 
-case class BackfillResult(requests: Seq[NewHolidayStopRequest], zuoraRefs: Seq[HolidayStopRequestsDetailPending])
+case class BackfillResult(
+  requests: Seq[NewHolidayStopRequest],
+  zuoraRefs: Seq[ActionedHolidayStopRequestsDetailToBackfill]
+)
