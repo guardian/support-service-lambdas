@@ -1,6 +1,7 @@
 package com.gu.holidaystopprocessor
 
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit.DAYS
 
 case class SubscriptionUpdate(
   currentTerm: Option[Int],
@@ -31,8 +32,12 @@ object SubscriptionUpdate {
       .toRight(HolidayStopFailure("Original rate plan charge has no charged through date.  A bill run is needed to fix this.")).map { effectiveDate =>
 
         val extendedTerm: Option[ExtendedTerm] =
-          if (effectiveDate.isAfter(subscription.termEndDate)) Some(ExtendedTerm(366, "Day"))
-          else None
+          if (effectiveDate.isAfter(subscription.termEndDate)) {
+            Some(ExtendedTerm(
+              length = DAYS.between(subscription.termStartDate, effectiveDate).toInt,
+              unit = "Day"
+            ))
+          } else None
 
         SubscriptionUpdate(
           currentTerm = extendedTerm.map(_.length),

@@ -12,6 +12,7 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers {
     val update = holidayCreditToAdd(
       config,
       subscription = Fixtures.mkSubscription(
+        termStartDate = LocalDate.of(2019, 7, 12),
         termEndDate = LocalDate.of(2020, 7, 12),
         price = 42.1,
         billingPeriod = "Quarter",
@@ -45,6 +46,7 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers {
     val update = holidayCreditToAdd(
       config,
       subscription = Fixtures.mkSubscription(
+        termStartDate = LocalDate.of(2019, 7, 12),
         termEndDate = LocalDate.of(2020, 7, 12),
         price = 42.1,
         billingPeriod = "Quarter",
@@ -61,6 +63,7 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers {
     val update = holidayCreditToAdd(
       config,
       subscription = Fixtures.mkSubscription(
+        termStartDate = LocalDate.of(2019, 7, 23),
         termEndDate = LocalDate.of(2020, 7, 23),
         price = 150,
         billingPeriod = "Annual",
@@ -69,7 +72,7 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers {
       stoppedPublicationDate = LocalDate.of(2019, 8, 6)
     )
     update shouldBe Right(SubscriptionUpdate(
-      currentTerm = Some(366),
+      currentTerm = Some(376),
       currentTermPeriodType = Some("Day"),
       List(Add(
         productRatePlanId = "ratePlanId",
@@ -92,6 +95,7 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers {
     val update = holidayCreditToAdd(
       config,
       subscription = Fixtures.mkSubscription(
+        termStartDate = LocalDate.of(2019, 7, 23),
         termEndDate = LocalDate.of(2020, 7, 23),
         price = 150,
         billingPeriod = "Annual",

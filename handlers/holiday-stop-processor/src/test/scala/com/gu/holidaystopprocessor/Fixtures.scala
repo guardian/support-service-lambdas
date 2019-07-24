@@ -25,6 +25,7 @@ object Fixtures {
   )
 
   def mkSubscription(
+    termStartDate: LocalDate,
     termEndDate: LocalDate,
     price: Double,
     billingPeriod: String,
@@ -32,6 +33,7 @@ object Fixtures {
   ) =
     Subscription(
       subscriptionNumber = "S1",
+      termStartDate,
       termEndDate,
       currentTerm = 12,
       currentTermPeriodType = "Month",
@@ -51,6 +53,7 @@ object Fixtures {
 
   def mkSubscriptionWithHolidayStops() = Subscription(
     subscriptionNumber = "S1",
+    termStartDate = LocalDate.of(2019, 3, 1),
     termEndDate = LocalDate.of(2020, 3, 1),
     currentTerm = 12,
     currentTermPeriodType = "Month",
