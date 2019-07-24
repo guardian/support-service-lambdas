@@ -1,7 +1,6 @@
 package com.gu.holidaystopprocessor
 
 import java.time.LocalDate
-import java.time.temporal.ChronoUnit.DAYS
 
 case class SubscriptionUpdate(
   currentTerm: Option[Int],
@@ -26,28 +25,21 @@ object SubscriptionUpdate {
     stoppedPublicationDate: LocalDate
   ): Either[HolidayStopFailure, SubscriptionUpdate] = {
 
-    case class ExtendedTerm(length: Int, unit: String)
-
-    subscription.originalRatePlanCharge.flatMap(_.chargedThroughDate)
-      .toRight(HolidayStopFailure("Original rate plan charge has no charged through date.  A bill run is needed to fix this.")).map { effectiveDate =>
-
-        val extendedTerm: Option[ExtendedTerm] =
-          if (effectiveDate.isAfter(subscription.termEndDate)) {
-            Some(ExtendedTerm(
-              length = DAYS.between(subscription.termStartDate, effectiveDate).toInt,
-              unit = "Day"
-            ))
-          } else None
-
+    subscription
+      .originalRatePlanCharge
+      .flatMap(_.chargedThroughDate)
+      .toRight(HolidayStopFailure("Original rate plan charge has no charged through date.  A bill run is needed to fix this."))
+      .map { chargedThroughDate =>
+        val extendedTerm = ExtendedTerm(chargedThroughDate, subscription)
         SubscriptionUpdate(
           currentTerm = extendedTerm.map(_.length),
           currentTermPeriodType = extendedTerm.map(_.unit),
           Seq(
             Add(
               productRatePlanId = config.holidayCreditProductRatePlanId,
-              contractEffectiveDate = effectiveDate,
-              customerAcceptanceDate = effectiveDate,
-              serviceActivationDate = effectiveDate,
+              contractEffectiveDate = chargedThroughDate,
+              customerAcceptanceDate = chargedThroughDate,
+              serviceActivationDate = chargedThroughDate,
               chargeOverrides = Seq(
                 ChargeOverride(
                   productRatePlanChargeId = config.holidayCreditProductRatePlanChargeId,
