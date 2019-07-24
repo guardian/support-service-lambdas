@@ -20,6 +20,8 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers {
       stoppedPublicationDate = LocalDate.of(2019, 5, 18)
     )
     update shouldBe Right(SubscriptionUpdate(
+      currentTerm = None,
+      currentTermPeriodType = None,
       Seq(
         Add(
           productRatePlanId = "ratePlanId",
@@ -50,6 +52,70 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers {
       ),
       stoppedPublicationDate = LocalDate.of(2019, 5, 18)
     )
-    update shouldBe Left(HolidayStopFailure("Original rate plan charge has no charged through date.  A bill run is needed to fix this."))
+    update shouldBe Left(HolidayStopFailure(
+      "Original rate plan charge has no charged through date.  A bill run is needed to fix this."
+    ))
+  }
+
+  it should "generate an update with an extended term when charged-through date of subscription is after its term-end date" in {
+    val update = holidayCreditToAdd(
+      config,
+      subscription = Fixtures.mkSubscription(
+        termEndDate = LocalDate.of(2020, 7, 23),
+        price = 150,
+        billingPeriod = "Annual",
+        chargedThroughDate = Some(LocalDate.of(2020, 8, 2))
+      ),
+      stoppedPublicationDate = LocalDate.of(2019, 8, 6)
+    )
+    update shouldBe Right(SubscriptionUpdate(
+      currentTerm = Some(366),
+      currentTermPeriodType = Some("Day"),
+      List(Add(
+        productRatePlanId = "ratePlanId",
+        contractEffectiveDate = LocalDate.of(2020, 8, 2),
+        customerAcceptanceDate = LocalDate.of(2020, 8, 2),
+        serviceActivationDate = LocalDate.of(2020, 8, 2),
+        chargeOverrides = List(
+          ChargeOverride(
+            productRatePlanChargeId = "ratePlanChargeId",
+            HolidayStart__c = LocalDate.of(2019, 8, 6),
+            HolidayEnd__c = LocalDate.of(2019, 8, 6),
+            price = -2.89
+          )
+        )
+      ))
+    ))
+  }
+
+  it should "generate an update without an extended term when charged-through date of subscription is on its term-end date" in {
+    val update = holidayCreditToAdd(
+      config,
+      subscription = Fixtures.mkSubscription(
+        termEndDate = LocalDate.of(2020, 7, 23),
+        price = 150,
+        billingPeriod = "Annual",
+        chargedThroughDate = Some(LocalDate.of(2020, 7, 23))
+      ),
+      stoppedPublicationDate = LocalDate.of(2019, 8, 6)
+    )
+    update shouldBe Right(SubscriptionUpdate(
+      currentTerm = None,
+      currentTermPeriodType = None,
+      List(Add(
+        productRatePlanId = "ratePlanId",
+        contractEffectiveDate = LocalDate.of(2020, 7, 23),
+        customerAcceptanceDate = LocalDate.of(2020, 7, 23),
+        serviceActivationDate = LocalDate.of(2020, 7, 23),
+        chargeOverrides = List(
+          ChargeOverride(
+            productRatePlanChargeId = "ratePlanChargeId",
+            HolidayStart__c = LocalDate.of(2019, 8, 6),
+            HolidayEnd__c = LocalDate.of(2019, 8, 6),
+            price = -2.89
+          )
+        )
+      ))
+    ))
   }
 }
