@@ -2,7 +2,7 @@ package com.gu.holidaystopprocessor
 
 import scala.math.BigDecimal.RoundingMode
 
-object HolidayCreditAmount {
+object HolidayCredit {
 
   def apply(charge: RatePlanCharge): Double = {
     def roundUp(d: Double): Double = BigDecimal(d).setScale(2, RoundingMode.UP).toDouble

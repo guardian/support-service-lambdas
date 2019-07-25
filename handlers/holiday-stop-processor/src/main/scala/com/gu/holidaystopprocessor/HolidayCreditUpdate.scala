@@ -39,7 +39,7 @@ object HolidayCreditUpdate {
                   productRatePlanChargeId = config.holidayCreditProductRatePlanChargeId,
                   HolidayStart__c = stoppedPublicationDate,
                   HolidayEnd__c = stoppedPublicationDate,
-                  price = subscription.originalRatePlanCharge.map(HolidayCreditAmount(_)).getOrElse(0)
+                  price = subscription.originalRatePlanCharge.map(HolidayCredit(_)).getOrElse(0)
                 )
               )
             )
