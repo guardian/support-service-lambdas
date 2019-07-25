@@ -3,13 +3,12 @@ package com.gu.holidaystopprocessor
 import java.time.LocalDate
 
 import com.gu.holidaystopprocessor.Fixtures.config
-import com.gu.holidaystopprocessor.SubscriptionUpdate.holidayCreditToAdd
 import org.scalatest.{FlatSpec, Matchers}
 
 class SubscriptionUpdateTest extends FlatSpec with Matchers {
 
   "holidayCreditToAdd" should "generate update correctly" in {
-    val update = holidayCreditToAdd(
+    val update = HolidayCreditUpdate(
       config,
       subscription = Fixtures.mkSubscription(
         termStartDate = LocalDate.of(2019, 7, 12),
@@ -20,7 +19,7 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers {
       ),
       stoppedPublicationDate = LocalDate.of(2019, 5, 18)
     )
-    update shouldBe Right(SubscriptionUpdate(
+    update shouldBe Right(HolidayCreditUpdate(
       currentTerm = None,
       currentTermPeriodType = None,
       Seq(
@@ -43,7 +42,7 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers {
   }
 
   it should "fail to generate an update when there's no charged-through date" in {
-    val update = holidayCreditToAdd(
+    val update = HolidayCreditUpdate(
       config,
       subscription = Fixtures.mkSubscription(
         termStartDate = LocalDate.of(2019, 7, 12),
@@ -60,7 +59,7 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers {
   }
 
   it should "generate an update with an extended term when charged-through date of subscription is after its term-end date" in {
-    val update = holidayCreditToAdd(
+    val update = HolidayCreditUpdate(
       config,
       subscription = Fixtures.mkSubscription(
         termStartDate = LocalDate.of(2019, 7, 23),
@@ -71,7 +70,7 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers {
       ),
       stoppedPublicationDate = LocalDate.of(2019, 8, 6)
     )
-    update shouldBe Right(SubscriptionUpdate(
+    update shouldBe Right(HolidayCreditUpdate(
       currentTerm = Some(376),
       currentTermPeriodType = Some("Day"),
       List(Add(
@@ -92,7 +91,7 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers {
   }
 
   it should "generate an update without an extended term when charged-through date of subscription is on its term-end date" in {
-    val update = holidayCreditToAdd(
+    val update = HolidayCreditUpdate(
       config,
       subscription = Fixtures.mkSubscription(
         termStartDate = LocalDate.of(2019, 7, 23),
@@ -103,7 +102,7 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers {
       ),
       stoppedPublicationDate = LocalDate.of(2019, 8, 6)
     )
-    update shouldBe Right(SubscriptionUpdate(
+    update shouldBe Right(HolidayCreditUpdate(
       currentTerm = None,
       currentTermPeriodType = None,
       List(Add(
