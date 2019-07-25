@@ -2,7 +2,11 @@ package com.gu.holidaystopprocessor
 
 import java.time.LocalDate
 
-case class SubscriptionUpdate(add: Seq[Add]) {
+case class SubscriptionUpdate(
+  currentTerm: Option[Int],
+  currentTermPeriodType: Option[String],
+  add: Seq[Add]
+) {
 
   val price: Double = {
     val optPrice = for {
@@ -20,15 +24,22 @@ object SubscriptionUpdate {
     subscription: Subscription,
     stoppedPublicationDate: LocalDate
   ): Either[HolidayStopFailure, SubscriptionUpdate] = {
-    subscription.originalRatePlanCharge.flatMap(_.chargedThroughDate)
-      .toRight(HolidayStopFailure("Original rate plan charge has no charged through date.  A bill run is needed to fix this.")).map { effectiveDate =>
+
+    subscription
+      .originalRatePlanCharge
+      .flatMap(_.chargedThroughDate)
+      .toRight(HolidayStopFailure("Original rate plan charge has no charged through date.  A bill run is needed to fix this."))
+      .map { chargedThroughDate =>
+        val extendedTerm = ExtendedTerm(chargedThroughDate, subscription)
         SubscriptionUpdate(
+          currentTerm = extendedTerm.map(_.length),
+          currentTermPeriodType = extendedTerm.map(_.unit),
           Seq(
             Add(
               productRatePlanId = config.holidayCreditProductRatePlanId,
-              contractEffectiveDate = effectiveDate,
-              customerAcceptanceDate = effectiveDate,
-              serviceActivationDate = effectiveDate,
+              contractEffectiveDate = chargedThroughDate,
+              customerAcceptanceDate = chargedThroughDate,
+              serviceActivationDate = chargedThroughDate,
               chargeOverrides = Seq(
                 ChargeOverride(
                   productRatePlanChargeId = config.holidayCreditProductRatePlanChargeId,

@@ -4,6 +4,7 @@ import java.time.LocalDate
 
 case class Subscription(
   subscriptionNumber: String,
+  termStartDate: LocalDate,
   termEndDate: LocalDate,
   currentTerm: Int,
   currentTermPeriodType: String,
