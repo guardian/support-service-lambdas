@@ -16,7 +16,7 @@ import scalaz.{-\/, \/-}
 class SalesforceHolidayStopRequestEndToEndEffectsTest extends FlatSpec with Matchers {
 
   case class EndToEndResults(
-    createResult: SalesforceHolidayStopRequest.HolidayStopRequestId,
+    createResult: HolidayStopRequestId,
     preProcessingFetchResult: List[SalesforceHolidayStopRequest.HolidayStopRequest],
     postProcessingFetchResult: List[SalesforceHolidayStopRequest.HolidayStopRequest],
     deleteResult: String

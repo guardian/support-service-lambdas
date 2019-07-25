@@ -3,8 +3,8 @@ package com.gu.holidaystopprocessor
 import java.time.LocalDate
 
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.{HolidayStopRequest, HolidayStopRequestActionedCount, HolidayStopRequestEndDate, HolidayStopRequestId, HolidayStopRequestStartDate}
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestsDetail, HolidayStopRequestsDetailChargeCode, HolidayStopRequestsDetailId, ProductName, StoppedPublicationDate, SubscriptionName}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.{HolidayStopRequest, HolidayStopRequestActionedCount, HolidayStopRequestEndDate, HolidayStopRequestStartDate}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestId, HolidayStopRequestsDetail, HolidayStopRequestsDetailChargeCode, HolidayStopRequestsDetailId, ProductName, StoppedPublicationDate, SubscriptionName}
 import com.gu.util.Time
 
 object Fixtures {

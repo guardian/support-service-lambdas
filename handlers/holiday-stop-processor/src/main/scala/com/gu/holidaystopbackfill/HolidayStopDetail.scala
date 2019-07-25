@@ -6,7 +6,7 @@ import java.time.{DayOfWeek, LocalDate}
 
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.{HolidayStopRequest, HolidayStopRequestEndDate, HolidayStopRequestStartDate, NewHolidayStopRequest, SubscriptionNameLookup}
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestId, HolidayStopRequestsDetail, HolidayStopRequestsDetailChargeCode, HolidayStopRequestsDetailChargePrice, HolidayStopRequestsDetailPending, ProductName, StoppedPublicationDate, SubscriptionName}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
 import com.gu.util.Time
 
 import scala.io.Source
@@ -42,15 +42,8 @@ object ZuoraHolidayStop {
 
 object SalesforceHolidayStop {
 
-  def holidayStopRequestsAlreadyInSalesforce(sfCredentials: SFAuthConfig)(
-    start: LocalDate,
-    end: Option[LocalDate]
-  ): Either[SalesforceFetchFailure, Seq[HolidayStopRequest]] = {
-    Salesforce.holidayStopRequestsByProductAndDateRange(sfCredentials)(ProductName("Guardian Weekly"), start, end.getOrElse(LocalDate.MAX))
-  }
-
-  def detailsAlreadyInSalesforce(sfCredentials: SFAuthConfig)(start: LocalDate, end: Option[LocalDate]): Either[SalesforceFetchFailure, Seq[HolidayStopRequestsDetail]] = {
-    Salesforce.holidayStopRequestDetails(sfCredentials)(ProductName("Guardian Weekly"), start, end.getOrElse(LocalDate.MAX))
+  def holidayStopRequestsAlreadyInSalesforce(sfCredentials: SFAuthConfig): Either[SalesforceFetchFailure, Seq[HolidayStopRequest]] = {
+    Salesforce.holidayStopRequestsByProduct(sfCredentials)(ProductName("Guardian Weekly"))
   }
 
   def holidayStopRequestsToBeBackfilled(inZuora: Seq[ZuoraHolidayStop], inSalesforce: Seq[HolidayStopRequest]): Seq[NewHolidayStopRequest] = {
@@ -85,7 +78,7 @@ object SalesforceHolidayStop {
     }
   }
 
-  def detailsToBeBackfilled(inZuora: Seq[ZuoraHolidayStop], inSalesforce: Seq[HolidayStopRequestsDetail]): Seq[HolidayStopRequestsDetailPending] = {
+  def detailsToBeBackfilled(inZuora: Seq[ZuoraHolidayStop], inSalesforce: Seq[HolidayStopRequest]): Seq[ActionedHolidayStopRequestsDetailToBackfill] = {
 
     /*
      * We take legacy holiday stops that have a range of dates
@@ -115,16 +108,35 @@ object SalesforceHolidayStop {
      * There should be a request ID available for each subscription and stopped publication date
      * as in the first pass the parent holiday requests will have been populated.
      */
-    def correspondingRequestId(zStop: ZuoraHolidayStop): Option[HolidayStopRequestId] = None
+    def correspondingRequest(zStop: ZuoraHolidayStop): Option[HolidayStopRequest] = {
+      inSalesforce find { sfStop =>
+        val startDate = Time.toJavaDate(sfStop.Start_Date__c.value)
+        val endDate = Time.toJavaDate(sfStop.End_Date__c.value)
+        sfStop.Subscription_Name__c == zStop.subscriptionName &&
+          (startDate.isBefore(zStop.startDate) || startDate.isEqual(zStop.startDate)) &&
+          (endDate.isEqual(zStop.endDate) || endDate.isAfter(zStop.endDate))
+      }
+    }
+
+    def alreadyBackfilled(zuoraStop: ZuoraHolidayStop): Boolean =
+      inSalesforce.exists {
+        _.Holiday_Stop_Request_Detail__r.exists {
+          _.records.exists { sfDetail =>
+            isSame(zuoraStop, sfDetail)
+          }
+        }
+      }
 
     val details = for {
-      stop <- stoppedPublications.filterNot(zuoraStop => inSalesforce.exists(sfStop => isSame(zuoraStop, sfStop)))
-      sfRequestId <- correspondingRequestId(stop)
+      zStop <- stoppedPublications.filterNot(alreadyBackfilled)
+      sfRequest <- correspondingRequest(zStop)
     } yield {
-      HolidayStopRequestsDetailPending(
-        sfRequestId,
-        StoppedPublicationDate(stop.startDate),
-        Some(HolidayStopRequestsDetailChargePrice(stop.creditPrice))
+      ActionedHolidayStopRequestsDetailToBackfill(
+        sfRequest.Id,
+        StoppedPublicationDate(zStop.startDate),
+        Some(HolidayStopRequestsDetailChargePrice(zStop.creditPrice)),
+        Some(zStop.chargeNumber),
+        Some(HolidayStopRequestsDetailChargePrice(zStop.creditPrice))
       )
     }
 
@@ -139,7 +151,7 @@ object SalesforceHolidayStop {
       Right(())
     } else Salesforce.holidayStopCreateResponse(sfCredentials)(requests)
 
-  def detailsAddedToSalesforce(sfCredentials: SFAuthConfig, dryRun: Boolean)(details: Seq[HolidayStopRequestsDetailPending]): Either[SalesforceUpdateFailure, Unit] =
+  def detailsAddedToSalesforce(sfCredentials: SFAuthConfig, dryRun: Boolean)(details: Seq[ActionedHolidayStopRequestsDetailToBackfill]): Either[SalesforceUpdateFailure, Unit] =
     if (dryRun) {
       println("-----------------------------")
       details.foreach(println)

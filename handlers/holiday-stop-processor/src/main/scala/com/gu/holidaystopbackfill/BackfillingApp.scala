@@ -1,7 +1,6 @@
 package com.gu.holidaystopbackfill
 
 import java.io.File
-import java.time.LocalDate
 
 /**
  * <p>Backfill app, to be run from a dev machine.</p>
@@ -16,8 +15,6 @@ import java.time.LocalDate
  *     <li>Holiday start date.</li>
  *     <li>Holiday end date.</li>
  *     <li>Credit price.</ol></li>
- *   <li>Earliest date of start of holiday-stops to find.</li>
- *   <li>Latest date of end of holiday-stops to find.</li>
  *   <li>Salesforce stage to backfill.  Defaults to DEV.</li>
  * </ol>
  * </p>
@@ -26,11 +23,9 @@ object BackfillingApp extends App {
 
   val dryRun = args(0).toBoolean
   val src = new File(args(1))
-  val start = LocalDate.parse(args(2))
-  val end = args.lift(3).map(LocalDate.parse)
-  val stage = args.lift(4).getOrElse("DEV")
+  val stage = args.lift(2).getOrElse("DEV")
 
-  Backfiller.backfill(src, start, end, dryRun, stage) match {
+  Backfiller.backfill(src, dryRun, stage) match {
     case Left(failure) => println(s"Failed: $failure")
     case Right(result) =>
       println("Success!")
