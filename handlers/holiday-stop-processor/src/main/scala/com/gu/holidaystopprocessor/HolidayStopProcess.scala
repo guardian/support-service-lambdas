@@ -51,6 +51,9 @@ object HolidayStopProcess {
     result.left.map(ProcessResult.fromOverallFailure).merge
   }
 
+  /**
+   * This is the main business logic
+   */
   def processHolidayStop(
     config: Config,
     getSubscription: SubscriptionName => Either[HolidayStopFailure, Subscription],
@@ -59,7 +62,9 @@ object HolidayStopProcess {
     for {
       subscription <- getSubscription(stop.subscriptionName)
       _ <- if (subscription.autoRenew) Right(()) else Left(HolidayStopFailure("Cannot currently process non-auto-renewing subscription"))
-      holidayCreditUpdate <- HolidayCreditUpdate(config, subscription, stop.stoppedPublicationDate)
+      nextInvoiceStartDate <- NextInvoiceStartDate(subscription)
+      maybeExtendedTerm = ExtendedTerm(nextInvoiceStartDate, subscription)
+      holidayCreditUpdate <- HolidayCreditUpdate(config, subscription, stop.stoppedPublicationDate, nextInvoiceStartDate, maybeExtendedTerm)
       _ <- if (subscription.hasHolidayStop(stop)) Right(()) else updateSubscription(subscription, holidayCreditUpdate)
       updatedSubscription <- getSubscription(stop.subscriptionName)
       addedCharge <- updatedSubscription.ratePlanCharge(stop).toRight(HolidayStopFailure("Failed to add charge to subscription"))

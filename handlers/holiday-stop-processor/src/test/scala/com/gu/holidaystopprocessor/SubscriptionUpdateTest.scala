@@ -8,16 +8,22 @@ import org.scalatest.{FlatSpec, Matchers}
 class SubscriptionUpdateTest extends FlatSpec with Matchers {
 
   "holidayCreditToAdd" should "generate update correctly" in {
+    val subscription = Fixtures.mkSubscription(
+      termStartDate = LocalDate.of(2019, 7, 12),
+      termEndDate = LocalDate.of(2020, 7, 12),
+      price = 42.1,
+      billingPeriod = "Quarter",
+      chargedThroughDate = Some(LocalDate.of(2019, 9, 12))
+    )
+    val nextInvoiceStartDate = NextInvoiceStartDate(subscription)
+    val maybeExtendedTerm = ExtendedTerm(nextInvoiceStartDate.right.get, subscription)
+
     val update = HolidayCreditUpdate(
       config,
-      subscription = Fixtures.mkSubscription(
-        termStartDate = LocalDate.of(2019, 7, 12),
-        termEndDate = LocalDate.of(2020, 7, 12),
-        price = 42.1,
-        billingPeriod = "Quarter",
-        chargedThroughDate = Some(LocalDate.of(2019, 9, 12))
-      ),
-      stoppedPublicationDate = LocalDate.of(2019, 5, 18)
+      subscription = subscription,
+      stoppedPublicationDate = LocalDate.of(2019, 5, 18),
+      nextInvoiceStartDate = nextInvoiceStartDate.right.get,
+      maybeExtendedTerm = maybeExtendedTerm
     )
     update shouldBe Right(HolidayCreditUpdate(
       currentTerm = None,
@@ -42,33 +48,35 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers {
   }
 
   it should "fail to generate an update when there's no charged-through date" in {
-    val update = HolidayCreditUpdate(
-      config,
-      subscription = Fixtures.mkSubscription(
-        termStartDate = LocalDate.of(2019, 7, 12),
-        termEndDate = LocalDate.of(2020, 7, 12),
-        price = 42.1,
-        billingPeriod = "Quarter",
-        chargedThroughDate = None
-      ),
-      stoppedPublicationDate = LocalDate.of(2019, 5, 18)
+    val subscription = Fixtures.mkSubscription(
+      termStartDate = LocalDate.of(2019, 7, 12),
+      termEndDate = LocalDate.of(2020, 7, 12),
+      price = 42.1,
+      billingPeriod = "Quarter",
+      chargedThroughDate = None
     )
-    update shouldBe Left(HolidayStopFailure(
-      "Original rate plan charge has no charged through date.  A bill run is needed to fix this."
+    val nextInvoiceStartDate = NextInvoiceStartDate(subscription)
+    nextInvoiceStartDate shouldBe Left(HolidayStopFailure(
+      "Original rate plan charge has no charged through date. A bill run is needed to fix this."
     ))
   }
 
   it should "generate an update with an extended term when charged-through date of subscription is after its term-end date" in {
+    val subscription = Fixtures.mkSubscription(
+      termStartDate = LocalDate.of(2019, 7, 23),
+      termEndDate = LocalDate.of(2020, 7, 23),
+      price = 150,
+      billingPeriod = "Annual",
+      chargedThroughDate = Some(LocalDate.of(2020, 8, 2))
+    )
+    val nextInvoiceStartDate = NextInvoiceStartDate(subscription)
+    val maybeExtendedTerm = ExtendedTerm(nextInvoiceStartDate.right.get, subscription)
     val update = HolidayCreditUpdate(
       config,
-      subscription = Fixtures.mkSubscription(
-        termStartDate = LocalDate.of(2019, 7, 23),
-        termEndDate = LocalDate.of(2020, 7, 23),
-        price = 150,
-        billingPeriod = "Annual",
-        chargedThroughDate = Some(LocalDate.of(2020, 8, 2))
-      ),
-      stoppedPublicationDate = LocalDate.of(2019, 8, 6)
+      subscription = subscription,
+      stoppedPublicationDate = LocalDate.of(2019, 8, 6),
+      nextInvoiceStartDate = nextInvoiceStartDate.right.get,
+      maybeExtendedTerm = maybeExtendedTerm
     )
     update shouldBe Right(HolidayCreditUpdate(
       currentTerm = Some(376),
@@ -91,16 +99,21 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers {
   }
 
   it should "generate an update without an extended term when charged-through date of subscription is on its term-end date" in {
+    val subscription = Fixtures.mkSubscription(
+      termStartDate = LocalDate.of(2019, 7, 23),
+      termEndDate = LocalDate.of(2020, 7, 23),
+      price = 150,
+      billingPeriod = "Annual",
+      chargedThroughDate = Some(LocalDate.of(2020, 7, 23))
+    )
+    val nextInvoiceStartDate = NextInvoiceStartDate(subscription)
+    val maybeExtendedTerm = ExtendedTerm(nextInvoiceStartDate.right.get, subscription)
     val update = HolidayCreditUpdate(
       config,
-      subscription = Fixtures.mkSubscription(
-        termStartDate = LocalDate.of(2019, 7, 23),
-        termEndDate = LocalDate.of(2020, 7, 23),
-        price = 150,
-        billingPeriod = "Annual",
-        chargedThroughDate = Some(LocalDate.of(2020, 7, 23))
-      ),
-      stoppedPublicationDate = LocalDate.of(2019, 8, 6)
+      subscription = subscription,
+      stoppedPublicationDate = LocalDate.of(2019, 8, 6),
+      nextInvoiceStartDate = nextInvoiceStartDate.right.get,
+      maybeExtendedTerm = maybeExtendedTerm
     )
     update shouldBe Right(HolidayCreditUpdate(
       currentTerm = None,
