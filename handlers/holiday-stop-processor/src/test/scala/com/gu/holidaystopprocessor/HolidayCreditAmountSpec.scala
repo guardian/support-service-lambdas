@@ -6,7 +6,7 @@ import org.scalacheck.Prop.forAll
 import org.scalacheck._
 import org.scalatest.OptionValues
 
-object HolidayCreditSpec extends Properties("HolidayCredit") with OptionValues {
+object HolidayCreditAmountSpec extends Properties("HolidayCreditAmount") with OptionValues {
 
   private val ratePlanChargeGen = for {
     price <- Gen.choose(0.01, 10000)
@@ -23,10 +23,10 @@ object HolidayCreditSpec extends Properties("HolidayCredit") with OptionValues {
   )
 
   property("should never be positive") = forAll(ratePlanChargeGen) { charge: RatePlanCharge =>
-    HolidayCredit(charge) <= 0
+    HolidayCreditAmount(charge) <= 0
   }
 
   property("should never be overwhelmingly negative") = forAll(ratePlanChargeGen) { charge: RatePlanCharge =>
-    HolidayCredit(charge) > -charge.price
+    HolidayCreditAmount(charge) > -charge.price
   }
 }

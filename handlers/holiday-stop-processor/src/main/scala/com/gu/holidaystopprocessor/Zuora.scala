@@ -33,7 +33,7 @@ object Zuora {
       .joinRight
   }
 
-  def subscriptionUpdateResponse(config: Config, accessToken: AccessToken)(subscription: Subscription, update: SubscriptionUpdate): Either[HolidayStopFailure, Unit] = {
+  def subscriptionUpdateResponse(config: Config, accessToken: AccessToken)(subscription: Subscription, update: HolidayCreditUpdate): Either[HolidayStopFailure, Unit] = {
     val errMsg = (reason: String) => s"Failed to update subscription '${subscription.subscriptionNumber}' with $update. Reason: $reason"
     sttp.put(uri"${config.zuoraConfig.baseUrl}/subscriptions/${subscription.subscriptionNumber}")
       .header("Authorization", s"Bearer ${accessToken.access_token}")

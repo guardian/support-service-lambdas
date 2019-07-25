@@ -2,28 +2,22 @@ package com.gu.holidaystopprocessor
 
 import java.time.LocalDate
 
-case class SubscriptionUpdate(
+case class HolidayCreditUpdate(
   currentTerm: Option[Int],
   currentTermPeriodType: Option[String],
   add: Seq[Add]
-) {
+)
 
-  val price: Double = {
-    val optPrice = for {
-      firstAdd <- add.headOption
-      charge <- firstAdd.chargeOverrides.headOption
-    } yield charge.price
-    optPrice.getOrElse(0)
-  }
-}
+/**
+ * This builds the actual request body to add Holiday Credit RatePlanCharge in Zuora
+ */
+object HolidayCreditUpdate {
 
-object SubscriptionUpdate {
-
-  def holidayCreditToAdd(
+  def apply(
     config: Config,
     subscription: Subscription,
     stoppedPublicationDate: LocalDate
-  ): Either[HolidayStopFailure, SubscriptionUpdate] = {
+  ): Either[HolidayStopFailure, HolidayCreditUpdate] = {
 
     subscription
       .originalRatePlanCharge
@@ -31,7 +25,7 @@ object SubscriptionUpdate {
       .toRight(HolidayStopFailure("Original rate plan charge has no charged through date.  A bill run is needed to fix this."))
       .map { chargedThroughDate =>
         val extendedTerm = ExtendedTerm(chargedThroughDate, subscription)
-        SubscriptionUpdate(
+        HolidayCreditUpdate(
           currentTerm = extendedTerm.map(_.length),
           currentTermPeriodType = extendedTerm.map(_.unit),
           Seq(
@@ -45,7 +39,7 @@ object SubscriptionUpdate {
                   productRatePlanChargeId = config.holidayCreditProductRatePlanChargeId,
                   HolidayStart__c = stoppedPublicationDate,
                   HolidayEnd__c = stoppedPublicationDate,
-                  price = subscription.originalRatePlanCharge.map(HolidayCredit(_)).getOrElse(0)
+                  price = subscription.originalRatePlanCharge.map(HolidayCreditAmount(_)).getOrElse(0)
                 )
               )
             )

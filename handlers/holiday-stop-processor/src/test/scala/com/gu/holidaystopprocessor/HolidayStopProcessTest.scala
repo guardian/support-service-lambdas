@@ -33,7 +33,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
 
   private def updateSubscription(
     subscriptionUpdate: Either[HolidayStopFailure, Unit]
-  ): (Subscription, SubscriptionUpdate) => Either[HolidayStopFailure, Unit] = {
+  ): (Subscription, HolidayCreditUpdate) => Either[HolidayStopFailure, Unit] = {
     case (_, _) => subscriptionUpdate
   }
 

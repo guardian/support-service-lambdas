@@ -21,7 +21,7 @@ object HolidayStopProcess {
     config: Config,
     getRequests: ProductName => Either[OverallFailure, Seq[HolidayStopRequestsDetail]],
     getSubscription: SubscriptionName => Either[HolidayStopFailure, Subscription],
-    updateSubscription: (Subscription, SubscriptionUpdate) => Either[HolidayStopFailure, Unit],
+    updateSubscription: (Subscription, HolidayCreditUpdate) => Either[HolidayStopFailure, Unit],
     exportAddedCharges: Seq[HolidayStopResponse] => Either[OverallFailure, Unit]
   ): ProcessResult = {
     val result = for {
@@ -54,13 +54,13 @@ object HolidayStopProcess {
   def processHolidayStop(
     config: Config,
     getSubscription: SubscriptionName => Either[HolidayStopFailure, Subscription],
-    updateSubscription: (Subscription, SubscriptionUpdate) => Either[HolidayStopFailure, Unit]
+    updateSubscription: (Subscription, HolidayCreditUpdate) => Either[HolidayStopFailure, Unit]
   )(stop: HolidayStop): Either[HolidayStopFailure, HolidayStopResponse] =
     for {
       subscription <- getSubscription(stop.subscriptionName)
       _ <- if (subscription.autoRenew) Right(()) else Left(HolidayStopFailure("Cannot currently process non-auto-renewing subscription"))
-      update <- SubscriptionUpdate.holidayCreditToAdd(config, subscription, stop.stoppedPublicationDate)
-      _ <- if (subscription.hasHolidayStop(stop)) Right(()) else updateSubscription(subscription, update)
+      holidayCreditUpdate <- HolidayCreditUpdate(config, subscription, stop.stoppedPublicationDate)
+      _ <- if (subscription.hasHolidayStop(stop)) Right(()) else updateSubscription(subscription, holidayCreditUpdate)
       updatedSubscription <- getSubscription(stop.subscriptionName)
       addedCharge <- updatedSubscription.ratePlanCharge(stop).toRight(HolidayStopFailure("Failed to add charge to subscription"))
     } yield {
