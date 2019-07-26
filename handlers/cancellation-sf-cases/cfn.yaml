@@ -11,6 +11,8 @@ Parameters:
             - DEV
         Default: CODE
     IdentityApiServerAccessToken:
+        Description: server access token for identity API
+        Type: String
 
 Conditions:
   CreateProdMonitoring: !Equals [ !Ref Stage, PROD ]
