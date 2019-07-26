@@ -14,11 +14,7 @@ object Config {
   private def salesforceCredentials(stage: String): Either[ConfigFailure, SFAuthConfig] = {
     val profileName = "membership"
     val bucketName = "gu-reader-revenue-private"
-    val key =
-      if (stage == "DEV")
-        s"membership/support-service-lambdas/$stage/sfAuth-$stage.json"
-      else
-        s"membership/support-service-lambdas/$stage/sfAuth-$stage.v1.json"
+    val key = s"membership/support-service-lambdas/$stage/sfHolidayStopBackfillAuth-$stage.json"
     val builder =
       AmazonS3Client.builder
         .withCredentials(new ProfileCredentialsProvider(profileName))
