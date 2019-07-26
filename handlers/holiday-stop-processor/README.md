@@ -47,5 +47,4 @@ that's a thin wrapper around the processor to enable it to be tested functionall
 To test the lambda in the Code environment you can run the `assembly` task and then deploy the resulting artefact by means of the AWS UI.  Alternatively Riff Raff has been configured to deploy any branch that has successfully passed through TeamCity.  That will take longer than assembling locally but will be independent of the idiosyncracies of any particular dev environment.
 
 ## Backfilling Salesforce
-This project also includes a script that will backfill Salesforce with pre-existing holiday stops that CSRs have already applied manually in Zuora.  
-The script will write the holiday stop into the Salesforce holiday stop requests table with the same dates that were added manually to Zuora, and it will write individual entries into the holiday stop request details table for each stopped publication in the date range of the holiday stop.
+See the [readme](src/main/scala/com/gu/README.md).
