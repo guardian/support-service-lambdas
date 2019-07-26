@@ -10,6 +10,7 @@ Parameters:
             - CODE
             - DEV
         Default: CODE
+    IdentityApiServerAccessToken:
 
 Conditions:
   CreateProdMonitoring: !Equals [ !Ref Stage, PROD ]
@@ -87,6 +88,7 @@ Resources:
             Environment:
                 Variables:
                   Stage: !Ref Stage
+                  IdentityApiServerAccessToken: !Ref IdentityApiServerAccessToken
             Role:
                 Fn::GetAtt:
                 - "CancellationSFCasesRole"

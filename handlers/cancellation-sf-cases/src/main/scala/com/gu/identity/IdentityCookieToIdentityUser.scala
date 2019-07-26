@@ -1,13 +1,14 @@
 package com.gu.identity
 
-import com.gu.identity.cookie.{IdentityCookieDecoder, PreProductionKeys, ProductionKeys}
+import com.gu.identity.auth.{IdentityAuthService, UserCredentials}
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayResponse._
 import com.gu.util.reader.Types._
+import org.http4s.Uri
 
 object IdentityCookieToIdentityUser extends Logging {
 
-  type CookieValuesToIdentityUser = (String, String) => Option[IdentityUser]
+  type CookieValuesToIdentityUser = String => Option[IdentityUser]
 
   final case class IdentityId(value: String) extends AnyVal
 
@@ -22,8 +23,7 @@ object IdentityCookieToIdentityUser extends Logging {
       headers <- headersOption.toApiGatewayContinueProcessing(badRequest("no headers"))
       cookieHeader <- headers.get("Cookie").toApiGatewayContinueProcessing(badRequest("no cookie"))
       scGuU <- extractCookieHeaderValue(cookieHeader, "SC_GU_U")
-      guU <- extractCookieHeaderValue(cookieHeader, "GU_U")
-      identityUser <- cookiesToIdentityUser(scGuU, guU).toApiGatewayContinueProcessing(unauthorized)
+      identityUser <- cookiesToIdentityUser(scGuU).toApiGatewayContinueProcessing(unauthorized)
     } yield identityUser
 
   private def extractCookieHeaderValue(cookieHeader: String, specificCookieName: String): ApiGatewayOp[String] = {
@@ -35,14 +35,34 @@ object IdentityCookieToIdentityUser extends Logging {
     specificCookieValueOption.toApiGatewayContinueProcessing(badRequest(specificCookieName + " cookie is missing"))
   }
 
-  def defaultCookiesToIdentityUser(isProd: Boolean)(scGuU: String, guU: String) = {
-    val keys = if (isProd) new ProductionKeys else new PreProductionKeys
-    val cookieDecoder = new IdentityCookieDecoder(keys)
-    for {
-      userFromScGuU <- cookieDecoder.getUserDataForScGuU(scGuU)
-      userFromGuU <- cookieDecoder.getUserDataForGuU(guU)
-      displayName = if (userFromScGuU.id equals userFromGuU.getUser.id) userFromGuU.getUser.publicFields.displayName else None
-    } yield IdentityUser(IdentityId(userFromScGuU.id), displayName)
+  private def getIdentityApiUri(isProd: Boolean): Uri = {
+    val raw = if (isProd) "https://idapi.theguardian.com" else "https://idap.code.dev-theguardian.com"
+    Uri.unsafeFromString(raw)
   }
 
+  private def serverAccessToken: String =
+    Option(System.getenv("IdentityApiServerAccessToken"))
+      // TODO: is throwing an execption ok?
+      .getOrElse(throw new RuntimeException("environment variable IdentityApiServerAccessToken not exported."))
+
+  def defaultCookiesToIdentityUser(isProd: Boolean)(scGuU: String): Option[IdentityUser] = {
+    val uri = getIdentityApiUri(isProd)
+
+    val identityAuthService = {
+      import scala.concurrent.ExecutionContext.Implicits.global
+      IdentityAuthService.unsafeInit(uri, serverAccessToken)
+    }
+
+    identityAuthService.getUserFromCredentials(UserCredentials.SCGUUCookie(scGuU))
+      .map(user => IdentityUser(IdentityId(user.id), user.publicFields.displayName))
+      .attempt
+      .unsafeRunSync()
+      .fold(
+        err => {
+          logger.error("unable to authenticate user", err)
+          None
+        },
+        user => Some(user)
+      )
+  }
 }

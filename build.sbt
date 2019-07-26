@@ -1,5 +1,7 @@
 import Dependencies._
 
+updateOptions := updateOptions.value.withCachedResolution(true)
+
 val scalaSettings = Seq(
   scalaVersion := "2.12.6",
   version      := "0.0.1",

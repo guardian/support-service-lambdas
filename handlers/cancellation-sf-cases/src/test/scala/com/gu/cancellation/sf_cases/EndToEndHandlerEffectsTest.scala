@@ -72,9 +72,8 @@ class EndToEndHandlerEffectsTest extends FlatSpec with Matchers {
 
 object Runner extends Matchers {
 
-  def fakeCookiesToIdentityUser(scGuU: String, guU: String) = {
+  def fakeCookiesToIdentityUser(scGuU: String) = {
     scGuU shouldEqual EndToEndData.scGuU
-    guU shouldEqual EndToEndData.guU
     Some(IdentityUser(IdentityId("100000932"), None))
   }
 
@@ -114,7 +113,6 @@ object Runner extends Matchers {
 object EndToEndData {
 
   val scGuU: String = "scGuU"
-  val guU: String = "guU"
 
   private def ApiGatewayRequestPayloadBuilder(
     httpMethod: String,
@@ -128,7 +126,7 @@ object EndToEndData {
        |    "path": "/case${pathSuffix}",
        |    "httpMethod": "${httpMethod}",
        |    "headers": {
-       |        "Cookie":"SC_GU_U=${scGuU};GU_U=${guU}"
+       |        "Cookie":"SC_GU_U=${scGuU}"
        |    },
        |    "queryStringParameters": null,
        |    "pathParameters": ${pathParameters},
