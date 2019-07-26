@@ -15,7 +15,7 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers {
       billingPeriod = "Quarter",
       chargedThroughDate = Some(LocalDate.of(2019, 9, 12))
     )
-    val nextInvoiceStartDate = NextInvoiceStartDate(subscription)
+    val nextInvoiceStartDate = NextBillingPeriodStartDate(subscription)
     val maybeExtendedTerm = ExtendedTerm(nextInvoiceStartDate.right.get, subscription)
 
     val update = HolidayCreditUpdate(
@@ -55,7 +55,7 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers {
       billingPeriod = "Quarter",
       chargedThroughDate = None
     )
-    val nextInvoiceStartDate = NextInvoiceStartDate(subscription)
+    val nextInvoiceStartDate = NextBillingPeriodStartDate(subscription)
     nextInvoiceStartDate shouldBe Left(HolidayStopFailure(
       "Original rate plan charge has no charged through date. A bill run is needed to fix this."
     ))
@@ -69,7 +69,7 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers {
       billingPeriod = "Annual",
       chargedThroughDate = Some(LocalDate.of(2020, 8, 2))
     )
-    val nextInvoiceStartDate = NextInvoiceStartDate(subscription)
+    val nextInvoiceStartDate = NextBillingPeriodStartDate(subscription)
     val maybeExtendedTerm = ExtendedTerm(nextInvoiceStartDate.right.get, subscription)
     val update = HolidayCreditUpdate(
       config,
@@ -106,7 +106,7 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers {
       billingPeriod = "Annual",
       chargedThroughDate = Some(LocalDate.of(2020, 7, 23))
     )
-    val nextInvoiceStartDate = NextInvoiceStartDate(subscription)
+    val nextInvoiceStartDate = NextBillingPeriodStartDate(subscription)
     val maybeExtendedTerm = ExtendedTerm(nextInvoiceStartDate.right.get, subscription)
     val update = HolidayCreditUpdate(
       config,

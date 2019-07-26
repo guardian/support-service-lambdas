@@ -62,7 +62,7 @@ object HolidayStopProcess {
     for {
       subscription <- getSubscription(stop.subscriptionName)
       _ <- if (subscription.autoRenew) Right(()) else Left(HolidayStopFailure("Cannot currently process non-auto-renewing subscription"))
-      nextInvoiceStartDate <- NextInvoiceStartDate(subscription)
+      nextInvoiceStartDate <- NextBillingPeriodStartDate(subscription)
       maybeExtendedTerm = ExtendedTerm(nextInvoiceStartDate, subscription)
       holidayCreditUpdate <- HolidayCreditUpdate(config, subscription, stop.stoppedPublicationDate, nextInvoiceStartDate, maybeExtendedTerm)
       _ <- if (subscription.hasHolidayStop(stop)) Right(()) else updateSubscription(subscription, holidayCreditUpdate)
