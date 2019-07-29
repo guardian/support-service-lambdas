@@ -13,7 +13,7 @@ object HolidayStopProcess {
         getRequests = Salesforce.holidayStopRequests(config.sfConfig),
         getSubscription = Zuora.subscriptionGetResponse(config, zuoraAccessToken),
         updateSubscription = Zuora.subscriptionUpdateResponse(config, zuoraAccessToken),
-        exportAddedCharges = Salesforce.holidayStopUpdateResponse(config.sfConfig)
+        writeHolidayStopsToSalesforce = Salesforce.holidayStopUpdateResponse(config.sfConfig)
       )
     } fold (ProcessResult.fromOverallFailure, identity)
 
@@ -22,39 +22,24 @@ object HolidayStopProcess {
     getRequests: ProductName => Either[OverallFailure, Seq[HolidayStopRequestsDetail]],
     getSubscription: SubscriptionName => Either[HolidayStopFailure, Subscription],
     updateSubscription: (Subscription, HolidayCreditUpdate) => Either[HolidayStopFailure, Unit],
-    exportAddedCharges: Seq[HolidayStopResponse] => Either[OverallFailure, Unit]
+    writeHolidayStopsToSalesforce: Seq[HolidayStopResponse] => Either[OverallFailure, Unit]
   ): ProcessResult = {
-    val result = for {
+    (for {
       requests <- getRequests(ProductName("Guardian Weekly"))
       holidayStops <- Right(requests.distinct.map(HolidayStop(_)))
       alreadyExportedChargeCodes <- Right(requests.flatMap(_.Charge_Code__c).distinct)
     } yield {
-      val responses = holidayStops map {
-        processHolidayStop(
-          config,
-          getSubscription,
-          updateSubscription
-        )
-      }
-      val toExport = responses collect {
-        case Right(success) if !alreadyExportedChargeCodes.contains(success.chargeCode) =>
-          success
-      }
-      val exportResult = exportAddedCharges(toExport)
-      ProcessResult(
-        holidayStopsToApply = holidayStops,
-        holidayStopResults = responses,
-        resultsToExport = toExport,
-        overallFailure = exportResult.left.toOption
-      )
-    }
-    result.left.map(ProcessResult.fromOverallFailure).merge
+      val allZuoraHolidayStopResponses = holidayStops.map(writeHolidayStopToZuora(config, getSubscription, updateSubscription))
+      val successfulZuoraResponses = allZuoraHolidayStopResponses collect { case Right(success) if !alreadyExportedChargeCodes.contains(success.chargeCode) => success } // FIXME: We should make it clearer we are discarding failures.
+      val salesforceExportResult = writeHolidayStopsToSalesforce(successfulZuoraResponses).left.toOption
+      ProcessResult(holidayStops, allZuoraHolidayStopResponses, successfulZuoraResponses, salesforceExportResult)
+    }).left.map(ProcessResult.fromOverallFailure).merge
   }
 
   /**
-   * This is the main business logic
+   * This is the main business logic for writing holiday stop to Zuora
    */
-  def processHolidayStop(
+  def writeHolidayStopToZuora(
     config: Config,
     getSubscription: SubscriptionName => Either[HolidayStopFailure, Subscription],
     updateSubscription: (Subscription, HolidayCreditUpdate) => Either[HolidayStopFailure, Unit]
