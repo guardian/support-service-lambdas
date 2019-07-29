@@ -9,7 +9,9 @@ case class HolidayCreditUpdate(
 )
 
 /**
- * This builds the actual request body to add Holiday Credit RatePlanCharge in Zuora
+ * This builds the actual request body to add Holiday Credit RatePlanCharge in Zuora.
+ * It should not contain business logic. Any business logic should be moved out to the
+ * main for-comprehension.
  */
 object HolidayCreditUpdate {
 
@@ -18,7 +20,8 @@ object HolidayCreditUpdate {
     subscription: Subscription,
     stoppedPublicationDate: LocalDate,
     nextInvoiceStartDate: LocalDate,
-    maybeExtendedTerm: Option[ExtendedTerm]
+    maybeExtendedTerm: Option[ExtendedTerm],
+    holidayCredit: Double
   ): Either[HolidayStopFailure, HolidayCreditUpdate] = {
     Right(
       HolidayCreditUpdate(
@@ -35,7 +38,7 @@ object HolidayCreditUpdate {
                 productRatePlanChargeId = config.holidayCreditProductRatePlanChargeId,
                 HolidayStart__c = stoppedPublicationDate,
                 HolidayEnd__c = stoppedPublicationDate,
-                price = subscription.originalRatePlanCharge.map(HolidayCredit(_)).getOrElse(0)
+                price = holidayCredit
               )
             )
           )
