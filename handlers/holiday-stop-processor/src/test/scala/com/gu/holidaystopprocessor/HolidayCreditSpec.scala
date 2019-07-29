@@ -22,11 +22,15 @@ object HolidayCreditSpec extends Properties("HolidayCreditAmount") with OptionVa
     HolidayEnd__c = None
   )
 
+  val subscription = Fixtures.mkSubscription()
+
   property("should never be positive") = forAll(ratePlanChargeGen) { charge: RatePlanCharge =>
-    HolidayCredit(charge) <= 0
+    val ratePlans = Seq(RatePlan("", Seq(charge)))
+    HolidayCredit(subscription.copy(ratePlans = ratePlans)) <= 0
   }
 
   property("should never be overwhelmingly negative") = forAll(ratePlanChargeGen) { charge: RatePlanCharge =>
-    HolidayCredit(charge) > -charge.price
+    val ratePlans = Seq(RatePlan("", Seq(charge)))
+    HolidayCredit(subscription.copy(ratePlans = ratePlans)) > -charge.price
   }
 }
