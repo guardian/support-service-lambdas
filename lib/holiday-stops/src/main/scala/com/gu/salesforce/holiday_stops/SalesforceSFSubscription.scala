@@ -1,7 +1,7 @@
 package com.gu.salesforce.holiday_stops
 
-import ai.x.play.json.Jsonx
 import com.gu.salesforce.SalesforceConstants._
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.SubscriptionName // TODO refactor all these value classes out so they can be re-used without this nasty package tangle
 import com.gu.util.Logging
 import com.gu.util.resthttp.RestOp._
 import com.gu.util.resthttp.RestRequestMaker._
@@ -12,9 +12,6 @@ import play.api.libs.json.{JsValue, Json}
 object SalesforceSFSubscription extends Logging {
 
   private val sfSubscriptionsSfObjectRef = "SF_Subscription__c"
-
-  case class SubscriptionName(value: String) extends AnyVal
-  implicit val formatSubscriptionName = Jsonx.formatInline[SubscriptionName]
 
   object CheckForSubscriptionGivenNameAndIdentityID {
 

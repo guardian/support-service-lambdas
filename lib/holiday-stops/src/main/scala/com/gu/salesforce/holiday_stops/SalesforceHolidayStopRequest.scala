@@ -2,7 +2,7 @@ package com.gu.salesforce.holiday_stops
 
 import ai.x.play.json.Jsonx
 import com.gu.salesforce.SalesforceConstants._
-import com.gu.salesforce.holiday_stops.SalesforceSFSubscription.SubscriptionName
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestId, HolidayStopRequestsDetailSearchQueryResponse, ProductName, SubscriptionName}
 import com.gu.util.Logging
 import com.gu.util.resthttp.RestOp._
 import com.gu.util.resthttp.RestRequestMaker._
@@ -10,13 +10,13 @@ import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.resthttp.{HttpOp, RestRequestMaker}
 import org.joda.time.LocalDate
 import org.joda.time.format.DateTimeFormat
-import play.api.libs.json.{Format, JsResult, JsString, JsValue, Json}
+import play.api.libs.json._
 
 object SalesforceHolidayStopRequest extends Logging {
 
   val SALESFORCE_DATE_FORMAT = "yyyy-MM-dd"
 
-  private val holidayStopRequestSfObjectRef = "Holiday_Stop_Request__c"
+  val holidayStopRequestSfObjectRef = "Holiday_Stop_Request__c"
   private val holidayStopRequestSfObjectsBaseUrl = sfObjectsBaseUrl + holidayStopRequestSfObjectRef
 
   implicit val formatLocalDateAsSalesforceDate: Format[LocalDate] = new Format[LocalDate] {
@@ -25,9 +25,6 @@ object SalesforceHolidayStopRequest extends Logging {
 
     override def writes(date: LocalDate): JsValue = JsString(date.toString(SALESFORCE_DATE_FORMAT))
   }
-
-  case class HolidayStopRequestId(value: String) extends AnyVal
-  implicit val formatHolidayStopRequestId = Jsonx.formatInline[HolidayStopRequestId]
 
   case class HolidayStopRequestStartDate(value: LocalDate) extends AnyVal
   implicit val formatHolidayStopRequestStartDate = Jsonx.formatInline[HolidayStopRequestStartDate]
@@ -38,23 +35,29 @@ object SalesforceHolidayStopRequest extends Logging {
   case class HolidayStopRequestActionedCount(value: Int) extends AnyVal
   implicit val formatHolidayStopRequestActionedCount = Jsonx.formatInline[HolidayStopRequestActionedCount]
 
-  case class ProductName(value: String) extends AnyVal
-  implicit val formatProductName = Jsonx.formatInline[ProductName]
-
-  val holidayStopRequestPrefixSOQL =
-    s"SELECT Id, Start_Date__c, End_Date__c, Actioned_Count__c, Subscription_Name__c, Product_Name__c " +
-      s"FROM $holidayStopRequestSfObjectRef "
+  def getHolidayStopRequestPrefixSOQL(productNamePrefixOption: Option[ProductName] = None) = s"""
+      | SELECT Id, Start_Date__c, End_Date__c, Subscription_Name__c, Product_Name__c,
+      | Actioned_Count__c, Pending_Count__c, Total_Issues_Publications_Impacted_Count__c, (
+      |   ${SalesforceHolidayStopRequestsDetail.SOQL_SELECT_CLAUSE}
+      |   FROM Holiday_Stop_Request_Detail__r
+      |   ${SalesforceHolidayStopRequestsDetail.SOQL_ORDER_BY_CLAUSE}
+      | )
+      | FROM $holidayStopRequestSfObjectRef
+      | ${productNamePrefixOption.map(pn => s"WHERE Product_Name__c LIKE '${pn.value}%'").getOrElse("")}
+      |""".stripMargin
 
   case class HolidayStopRequest(
     Id: HolidayStopRequestId,
     Start_Date__c: HolidayStopRequestStartDate,
     End_Date__c: HolidayStopRequestEndDate,
     Actioned_Count__c: HolidayStopRequestActionedCount,
+    Pending_Count__c: Int,
+    Total_Issues_Publications_Impacted_Count__c: Int,
     Subscription_Name__c: SubscriptionName,
-    Product_Name__c: ProductName
+    Product_Name__c: ProductName,
+    Holiday_Stop_Request_Detail__r: Option[HolidayStopRequestsDetailSearchQueryResponse]
   )
   implicit val reads = Json.reads[HolidayStopRequest]
-  implicit val writes = Json.writes[HolidayStopRequest]
 
   private case class HolidayStopRequestSearchQueryResponse(records: List[HolidayStopRequest])
   private implicit val readsIds = Json.reads[HolidayStopRequestSearchQueryResponse]
@@ -66,8 +69,7 @@ object SalesforceHolidayStopRequest extends Logging {
 
     def toRequest(date: LocalDate, productNamePrefix: ProductName) = {
       val sfDate = date.toString(SALESFORCE_DATE_FORMAT)
-      val soqlQuery = holidayStopRequestPrefixSOQL +
-        s"WHERE Product_Name__c LIKE '${productNamePrefix.value}%' " +
+      val soqlQuery = getHolidayStopRequestPrefixSOQL(Some(productNamePrefix)) +
         s"AND Start_Date__c <= $sfDate " +
         s"AND End_Date__c >= $sfDate"
       logger.info(s"using SF query : $soqlQuery")
@@ -76,13 +78,25 @@ object SalesforceHolidayStopRequest extends Logging {
 
   }
 
+  object LookupByProductNamePrefix {
+
+    def apply(sfGet: HttpOp[RestRequestMaker.GetRequestWithParams, JsValue]): ProductName => ClientFailableOp[List[HolidayStopRequest]] =
+      sfGet.setupRequest(toRequest).parse[HolidayStopRequestSearchQueryResponse].map(_.records).runRequest
+
+    def toRequest(productNamePrefix: ProductName) = {
+      val soqlQuery = getHolidayStopRequestPrefixSOQL(Some(productNamePrefix))
+      logger.info(s"using SF query : $soqlQuery")
+      RestRequestMaker.GetRequestWithParams(RelativePath(soqlQueryBaseUrl), UrlParams(Map("q" -> soqlQuery)))
+    }
+  }
+
   object LookupByIdentityIdAndOptionalSubscriptionName {
 
     def apply(sfGet: HttpOp[RestRequestMaker.GetRequestWithParams, JsValue]): (String, Option[SubscriptionName]) => ClientFailableOp[List[HolidayStopRequest]] =
       sfGet.setupRequestMultiArg(toRequest _).parse[HolidayStopRequestSearchQueryResponse].map(_.records).runRequestMultiArg
 
     def toRequest(identityId: String, optionalSubscriptionName: Option[SubscriptionName]) = {
-      val soqlQuery = holidayStopRequestPrefixSOQL +
+      val soqlQuery = getHolidayStopRequestPrefixSOQL() +
         s"WHERE IdentityID__c = '$identityId'" +
         optionalSubscriptionName.map(subName => s" AND Subscription_Name__c = '${subName.value}'").getOrElse("")
       logger.info(s"using SF query : $soqlQuery")

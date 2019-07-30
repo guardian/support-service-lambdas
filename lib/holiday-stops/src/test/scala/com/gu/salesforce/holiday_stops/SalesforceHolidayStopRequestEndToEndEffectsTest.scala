@@ -4,25 +4,20 @@ import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.SalesforceClient
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestActionedZuoraRef._
-import com.gu.salesforce.holiday_stops.SalesforceSFSubscription.SubscriptionName
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestId, _}
 import com.gu.test.EffectsTest
 import com.gu.util.Time
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.resthttp.JsonHttp
 import org.joda.time.LocalDate
 import org.scalatest.{FlatSpec, Matchers}
-import play.api.libs.json.JsValue
 import scalaz.{-\/, \/-}
 
 class SalesforceHolidayStopRequestEndToEndEffectsTest extends FlatSpec with Matchers {
 
-  val SUBSCRIPTION_NAME = SubscriptionName("A-S00050817") // must exist in DEV SalesForce
-
   case class EndToEndResults(
     createResult: HolidayStopRequestId,
     preProcessingFetchResult: List[SalesforceHolidayStopRequest.HolidayStopRequest],
-    processedResult: JsValue,
     postProcessingFetchResult: List[SalesforceHolidayStopRequest.HolidayStopRequest],
     deleteResult: String
   )
@@ -43,34 +38,47 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends FlatSpec with Matc
       createResult <- createOp(NewHolidayStopRequest(
         startDate,
         endDate,
-        SubscriptionNameLookup(SUBSCRIPTION_NAME)
+        SubscriptionNameLookup(SubscriptionName("A-S00050817")) // must exist in DEV SalesForce
+      )).toDisjunction
+
+      // TODO remove this once its done as part of the createOp
+      createDetailOp = SalesforceHolidayStopRequestsDetail.CreatePendingSalesforceHolidayStopRequestsDetail(sfAuth.wrapWith(JsonHttp.post))
+      _ <- createDetailOp(HolidayStopRequestsDetailPending(
+        HolidayStopRequestId(createResult.value),
+        StoppedPublicationDate(Time.toJavaDate(LocalDate.now.plusDays(11)))
       )).toDisjunction
 
       fetchOp = SalesforceHolidayStopRequest.LookupByDateAndProductNamePrefix(sfAuth.wrapWith(JsonHttp.getWithParams))
       preProcessingFetchResult <- fetchOp(lookupDate, productName).toDisjunction
 
-      processOp = SalesforceHolidayStopRequestActionedZuoraRef.CreateHolidayStopRequestActionedZuoraRef(
-        sfAuth.wrapWith(JsonHttp.post)
-      )
-      processedResult <- processOp(HolidayStopRequestActionedZuoraRef(
-        Holiday_Stop_Request__c = createResult,
-        HolidayStopRequestActionedZuoraChargeCode("C-1234567"),
-        HolidayStopRequestActionedZuoraChargePrice(-12.34),
-        StoppedPublicationDate(Time.toJavaDate(LocalDate.now))
+      id: HolidayStopRequestsDetailId = preProcessingFetchResult.find(_.Id == createResult).get
+        .Holiday_Stop_Request_Detail__r.get.records
+        .head.Id
+      processOp = SalesforceHolidayStopRequestsDetail.ActionSalesforceHolidayStopRequestsDetail(
+        sfAuth.wrapWith(JsonHttp.patch)
+      )(id)
+      _ <- processOp(HolidayStopRequestsDetailActioned(
+        HolidayStopRequestsDetailChargeCode("C-1234567"),
+        HolidayStopRequestsDetailChargePrice(-12.34)
       )).toDisjunction
 
       postProcessingFetchResult <- fetchOp(lookupDate, productName).toDisjunction
 
+      _ <- processOp(HolidayStopRequestsDetailActioned(
+        HolidayStopRequestsDetailChargeCode(""),
+        HolidayStopRequestsDetailChargePrice(0)
+      )).toDisjunction // need to UN-ACTION in order to delete the parent
+
       deleteOp = SalesforceHolidayStopRequest.DeleteHolidayStopRequest(sfAuth.wrapWith(JsonHttp.deleteWithStringResponse))
       deleteResult <- deleteOp(createResult).toDisjunction
 
-    } yield EndToEndResults(createResult, preProcessingFetchResult, processedResult, postProcessingFetchResult, deleteResult)
+    } yield EndToEndResults(createResult, preProcessingFetchResult, postProcessingFetchResult, deleteResult)
 
     actual match {
 
       case -\/(failure) => fail(failure.toString)
 
-      case \/-(EndToEndResults(createResult, preProcessingFetchResult, _, postProcessingFetchResult, _)) =>
+      case \/-(EndToEndResults(createResult, preProcessingFetchResult, postProcessingFetchResult, _)) =>
 
         withClue("should be able to find the freshly created Holiday Stop Request and its Actioned Count should be ZERO") {
           preProcessingFetchResult
@@ -85,28 +93,6 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends FlatSpec with Matc
         }
     }
 
-  }
-
-  it should "verify user owns subscription (via SalesForce)" taggedAs EffectsTest in {
-
-    val actual = for {
-      sfConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[SFAuthConfig]
-      response = RawEffects.response
-      sfAuth <- SalesforceClient(response, sfConfig).value.toDisjunction
-
-      verifyIdentityIdOwnsSubOp = SalesforceSFSubscription.CheckForSubscriptionGivenNameAndIdentityID(sfAuth.wrapWith(JsonHttp.getWithParams))
-      shouldBeSome <- verifyIdentityIdOwnsSubOp(SUBSCRIPTION_NAME, "100003511").toDisjunction
-      shouldBeNone <- verifyIdentityIdOwnsSubOp(SUBSCRIPTION_NAME, "some_other_identity_id").toDisjunction
-    } yield (shouldBeSome, shouldBeNone)
-
-    actual match {
-
-      case \/-((Some(_), None)) => println("identity ID verification worked")
-
-      case -\/(failure) => fail(failure.toString)
-
-      case _ => fail("didn't verify the identity ID")
-    }
   }
 
 }

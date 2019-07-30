@@ -1,7 +1,7 @@
 package com.gu.holiday_stops
 
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
-import com.gu.salesforce.holiday_stops.SalesforceSFSubscription.SubscriptionName
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestId, ProductName, SubscriptionName}
 import org.joda.time.{DateTimeConstants, LocalDate}
 import org.scalatest.{FlatSpec, Matchers}
 
@@ -11,14 +11,14 @@ class ActionCalculatorTest extends FlatSpec with Matchers {
 
   it should "convert ProductName to a set of constants for that product" in {
 
-    val suspensionConstants = ActionCalculator.productNameToSuspensionConstants(gwProductName)
+    val suspensionConstants = ActionCalculator.suspensionConstantsByProduct(gwProductName)
 
     suspensionConstants.issueDayOfWeek shouldEqual DateTimeConstants.FRIDAY
     suspensionConstants.annualIssueLimit shouldEqual 6
     suspensionConstants.minLeadTimeDays shouldEqual 9
 
     assertThrows[MatchError] {
-      ActionCalculator.productNameToSuspensionConstants(ProductName("blah"))
+      ActionCalculator.suspensionConstantsByProduct(ProductName("blah"))
     }
 
   }
@@ -68,8 +68,11 @@ class ActionCalculatorTest extends FlatSpec with Matchers {
         HolidayStopRequestStartDate(new LocalDate(2019, 5, 18)),
         HolidayStopRequestEndDate(new LocalDate(2019, 6, 20)),
         HolidayStopRequestActionedCount(0),
+        Pending_Count__c = 0,
+        Total_Issues_Publications_Impacted_Count__c = 0,
         SubscriptionName(""),
-        gwProductName
+        gwProductName,
+        Holiday_Stop_Request_Detail__r = None
       )
     ) shouldEqual List(
         new LocalDate(2019, 5, 24),
@@ -84,8 +87,11 @@ class ActionCalculatorTest extends FlatSpec with Matchers {
         HolidayStopRequestStartDate(new LocalDate(2019, 5, 18)),
         HolidayStopRequestEndDate(new LocalDate(2019, 6, 21)),
         HolidayStopRequestActionedCount(0),
+        Pending_Count__c = 0,
+        Total_Issues_Publications_Impacted_Count__c = 0,
         SubscriptionName(""),
-        gwProductName
+        gwProductName,
+        Holiday_Stop_Request_Detail__r = None
       )
     ) shouldEqual List(
         new LocalDate(2019, 5, 24),

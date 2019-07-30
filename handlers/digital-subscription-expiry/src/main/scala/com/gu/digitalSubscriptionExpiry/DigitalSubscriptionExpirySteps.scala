@@ -43,6 +43,13 @@ object DigitalSubscriptionExpirySteps extends Logging {
         else
           setActivationDate(subscriptionResult.id)
         accountSummary <- getAccountSummary(subscriptionResult.accountId)
+        _ = {
+          if (accountSummary.identityId.isDefined) {
+            logger.info("User has identityId")
+          } else {
+            logger.info("User doesn't have a linked identityId")
+          }
+        }
         password <- expiryRequest.password.toApiGatewayContinueProcessing(DigitalSubscriptionApiResponses.notFoundResponse)
         subscriptionEndDate = getSubscriptionExpiry(password, subscriptionResult, accountSummary)
       } yield subscriptionEndDate).apiResponse

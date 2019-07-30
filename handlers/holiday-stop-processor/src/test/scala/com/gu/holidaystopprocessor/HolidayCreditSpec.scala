@@ -6,7 +6,7 @@ import org.scalacheck.Prop.forAll
 import org.scalacheck._
 import org.scalatest.OptionValues
 
-object HolidayCreditSpec extends Properties("HolidayCredit") with OptionValues {
+object HolidayCreditSpec extends Properties("HolidayCreditAmount") with OptionValues {
 
   private val ratePlanChargeGen = for {
     price <- Gen.choose(0.01, 10000)

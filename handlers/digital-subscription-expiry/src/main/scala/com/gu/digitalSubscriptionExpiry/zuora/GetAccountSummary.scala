@@ -14,7 +14,8 @@ object GetAccountSummary {
     billToLastName: String,
     billToPostcode: Option[String],
     soldToLastName: String,
-    soldToPostcode: Option[String]
+    soldToPostcode: Option[String],
+    identityId: Option[String]
   )
 
   implicit val reads: Reads[AccountSummaryResult] =
@@ -23,7 +24,8 @@ object GetAccountSummary {
       (__ \ "billToContact" \ "lastName").read[String] and
       (__ \ "billToContact" \ "zipCode").readNullable[String] and
       (__ \ "soldToContact" \ "lastName").read[String] and
-      (__ \ "soldToContact" \ "zipCode").readNullable[String]
+      (__ \ "soldToContact" \ "zipCode").readNullable[String] and
+      (__ \ "basicInfo" \ "IdentityId__c").readNullable[String]
     )(AccountSummaryResult.apply _)
 
   def apply(requests: Requests)(accountId: AccountId): ClientFailableOp[AccountSummaryResult] =

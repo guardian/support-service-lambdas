@@ -3,13 +3,13 @@ package com.gu.holidaystopprocessor
 import java.time.LocalDate
 
 import com.gu.holidaystopprocessor.Fixtures.{config, mkSubscription}
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.{HolidayStopRequest, HolidayStopRequestId}
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestActionedZuoraRef.{HolidayStopRequestActionedZuoraChargeCode, HolidayStopRequestActionedZuoraChargePrice, StoppedPublicationDate}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestsDetail, HolidayStopRequestsDetailChargeCode, HolidayStopRequestsDetailChargePrice, HolidayStopRequestsDetailId, ProductName, StoppedPublicationDate, SubscriptionName}
 import org.scalatest.{EitherValues, FlatSpec, Matchers, OptionValues}
 
 class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues with OptionValues {
 
   private val subscription = mkSubscription(
+    termStartDate = LocalDate.of(2018, 1, 1),
     termEndDate = LocalDate.of(2019, 1, 1),
     price = 75.5,
     billingPeriod = "Quarter",
@@ -17,21 +17,23 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
   )
 
   private val holidayStop = HolidayStop(
-    HolidayStopRequestId("HSR1"),
-    "subscriptionName",
-    LocalDate.of(2019, 8, 9)
+    HolidayStopRequestsDetailId("HSR1"),
+    SubscriptionName("S1"),
+    ProductName("Gu Weekly"),
+    LocalDate.of(2019, 8, 9),
+    None
   )
 
-  private def getRequests(requestsGet: Either[OverallFailure, Seq[HolidayStopRequest]]): String => Either[OverallFailure, Seq[HolidayStopRequest]] =
+  private def getRequests(requestsGet: Either[OverallFailure, Seq[HolidayStopRequestsDetail]]): ProductName => Either[OverallFailure, Seq[HolidayStopRequestsDetail]] =
     _ => requestsGet
 
-  private def getSubscription(subscriptionGet: Either[HolidayStopFailure, Subscription]): String => Either[HolidayStopFailure, Subscription] = {
+  private def getSubscription(subscriptionGet: Either[HolidayStopFailure, Subscription]): SubscriptionName => Either[HolidayStopFailure, Subscription] = {
     _ => subscriptionGet
   }
 
   private def updateSubscription(
     subscriptionUpdate: Either[HolidayStopFailure, Unit]
-  ): (Subscription, SubscriptionUpdate) => Either[HolidayStopFailure, Unit] = {
+  ): (Subscription, HolidayCreditUpdate) => Either[HolidayStopFailure, Unit] = {
     case (_, _) => subscriptionUpdate
   }
 
@@ -45,9 +47,12 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
       updateSubscription(Right(()))
     )(holidayStop)
     response.right.value shouldBe HolidayStopResponse(
-      requestId = HolidayStopRequestId("HSR1"),
-      chargeCode = HolidayStopRequestActionedZuoraChargeCode("C2"),
-      price = HolidayStopRequestActionedZuoraChargePrice(-3.27),
+      requestId = HolidayStopRequestsDetailId("HSR1"),
+      subscriptionName = SubscriptionName("S1"),
+      productName = ProductName("Gu Weekly"),
+      chargeCode = HolidayStopRequestsDetailChargeCode("C2"),
+      estimatedPrice = None,
+      actualPrice = HolidayStopRequestsDetailChargePrice(-3.27),
       pubDate = StoppedPublicationDate(LocalDate.of(2019, 8, 9))
     )
   }
@@ -87,9 +92,12 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
       updateSubscription(Left(HolidayStopFailure("shouldn't need to apply an update")))
     )(holidayStop)
     response.right.value shouldBe HolidayStopResponse(
-      requestId = HolidayStopRequestId("HSR1"),
-      chargeCode = HolidayStopRequestActionedZuoraChargeCode("C2"),
-      price = HolidayStopRequestActionedZuoraChargePrice(-3.27),
+      requestId = HolidayStopRequestsDetailId("HSR1"),
+      subscriptionName = SubscriptionName("S1"),
+      productName = ProductName("Gu Weekly"),
+      chargeCode = HolidayStopRequestsDetailChargeCode("C2"),
+      estimatedPrice = None,
+      actualPrice = HolidayStopRequestsDetailChargePrice(-3.27),
       pubDate = StoppedPublicationDate(LocalDate.of(2019, 8, 9))
     )
   }
@@ -107,25 +115,56 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
     val responses = HolidayStopProcess.processHolidayStops(
       config,
       getRequests(Right(Seq(
-        Fixtures.mkHolidayStopRequest("R1", LocalDate.of(2019, 8, 2)),
-        Fixtures.mkHolidayStopRequest("R2", LocalDate.of(2019, 9, 1)),
-        Fixtures.mkHolidayStopRequest("R3", LocalDate.of(2019, 8, 9))
+        Fixtures.mkHolidayStopRequestDetails(Fixtures.mkHolidayStopRequest("R1", LocalDate.of(2019, 8, 2)), "C1"),
+        Fixtures.mkHolidayStopRequestDetails(Fixtures.mkHolidayStopRequest("R2", LocalDate.of(2019, 9, 1)), "C3"),
+        Fixtures.mkHolidayStopRequestDetails(Fixtures.mkHolidayStopRequest("R3", LocalDate.of(2019, 8, 9)), "C4")
       ))),
       getSubscription(Right(Fixtures.mkSubscriptionWithHolidayStops())),
       updateSubscription(Right(())),
       exportAmendments(Right(()))
     )
     responses.holidayStopResults.headOption.value.right.value shouldBe HolidayStopResponse(
-      requestId = HolidayStopRequestId("R1"),
-      chargeCode = HolidayStopRequestActionedZuoraChargeCode("C3"),
-      price = HolidayStopRequestActionedZuoraChargePrice(-5.81),
+      requestId = HolidayStopRequestsDetailId("R1"),
+      subscriptionName = SubscriptionName("S1"),
+      productName = ProductName("Gu Weekly"),
+      chargeCode = HolidayStopRequestsDetailChargeCode("C3"),
+      estimatedPrice = None,
+      actualPrice = HolidayStopRequestsDetailChargePrice(-5.81),
       pubDate = StoppedPublicationDate(LocalDate.of(2019, 8, 2))
     )
     responses.holidayStopResults.lastOption.value.right.value shouldBe HolidayStopResponse(
-      requestId = HolidayStopRequestId("R3"),
-      chargeCode = HolidayStopRequestActionedZuoraChargeCode("C2"),
-      price = HolidayStopRequestActionedZuoraChargePrice(-3.27),
+      requestId = HolidayStopRequestsDetailId("R3"),
+      subscriptionName = SubscriptionName("S1"),
+      productName = ProductName("Gu Weekly"),
+      chargeCode = HolidayStopRequestsDetailChargeCode("C2"),
+      estimatedPrice = None,
+      actualPrice = HolidayStopRequestsDetailChargePrice(-3.27),
       pubDate = StoppedPublicationDate(LocalDate.of(2019, 8, 9))
+    )
+  }
+
+  it should "only export results that haven't already been exported" in {
+    val responses = HolidayStopProcess.processHolidayStops(
+      config,
+      getRequests(Right(Seq(
+        Fixtures.mkHolidayStopRequestDetails(Fixtures.mkHolidayStopRequest("R1", LocalDate.of(2019, 8, 2)), "C2"),
+        Fixtures.mkHolidayStopRequestDetails(Fixtures.mkHolidayStopRequest("R2", LocalDate.of(2019, 9, 1)), "C5"),
+        Fixtures.mkHolidayStopRequestDetails(Fixtures.mkHolidayStopRequest("R3", LocalDate.of(2019, 8, 9)), "C6")
+      ))),
+      getSubscription(Right(Fixtures.mkSubscriptionWithHolidayStops())),
+      updateSubscription(Right(())),
+      exportAmendments(Right(()))
+    )
+    responses.resultsToExport shouldBe Seq(
+      HolidayStopResponse(
+        HolidayStopRequestsDetailId("R1"),
+        subscriptionName = SubscriptionName("S1"),
+        productName = ProductName("Gu Weekly"),
+        HolidayStopRequestsDetailChargeCode("C3"),
+        None,
+        HolidayStopRequestsDetailChargePrice(-5.81),
+        StoppedPublicationDate(LocalDate.of(2019, 8, 2))
+      )
     )
   }
 
@@ -133,9 +172,9 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
     val responses = HolidayStopProcess.processHolidayStops(
       config,
       getRequests(Right(Seq(
-        Fixtures.mkHolidayStopRequest("r1"),
-        Fixtures.mkHolidayStopRequest("r2"),
-        Fixtures.mkHolidayStopRequest("r3")
+        Fixtures.mkHolidayStopRequestDetails(Fixtures.mkHolidayStopRequest("r1"), ""),
+        Fixtures.mkHolidayStopRequestDetails(Fixtures.mkHolidayStopRequest("r2"), ""),
+        Fixtures.mkHolidayStopRequestDetails(Fixtures.mkHolidayStopRequest("r3"), "")
       ))),
       getSubscription(Right(subscription)),
       updateSubscription(Right(())),

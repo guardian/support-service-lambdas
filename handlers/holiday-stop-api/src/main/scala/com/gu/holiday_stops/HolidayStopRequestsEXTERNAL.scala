@@ -1,7 +1,7 @@
 package com.gu.holiday_stops
 
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.{HolidayStopRequest, HolidayStopRequestEndDate, HolidayStopRequestStartDate, NewHolidayStopRequest, ProductName, SubscriptionNameLookup}
-import com.gu.salesforce.holiday_stops.SalesforceSFSubscription.SubscriptionName
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.{HolidayStopRequest, HolidayStopRequestEndDate, HolidayStopRequestStartDate, NewHolidayStopRequest, SubscriptionNameLookup}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{ProductName, SubscriptionName}
 import org.joda.time.LocalDate
 
 case class HolidayStopRequestsGET(
@@ -50,7 +50,9 @@ object HolidayStopRequestEXTERNAL {
         sfHSR.End_Date__c.value
       )
     ),
-    publicationDatesToBeStopped = Some(ActionCalculator.publicationDatesToBeStopped(sfHSR))
+    publicationDatesToBeStopped = Some(
+      ActionCalculator.publicationDatesToBeStopped(sfHSR) //.groupBy(publicationDateToThisYearOrNextString(renewalDate))
+    )
   )
 
   def toSF(externalHSR: HolidayStopRequestEXTERNAL): NewHolidayStopRequest = NewHolidayStopRequest(

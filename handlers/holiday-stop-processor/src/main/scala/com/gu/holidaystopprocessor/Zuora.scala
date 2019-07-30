@@ -1,62 +1,52 @@
 package com.gu.holidaystopprocessor
 
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.SubscriptionName
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
 import io.circe.generic.auto._
-import io.circe.parser._
 
 object Zuora {
 
   implicit val backend: SttpBackend[Id, Nothing] = HttpURLConnectionBackend()
 
-  private def normalised[E <: io.circe.Error, R](
-    body: String, result: String => Either[E, R]
-  ): Either[String, R] =
-    result(body).left.map(e => s"Failed to decode '$body': ${e.toString}")
-
   def accessTokenGetResponse(config: ZuoraConfig): Either[OverallFailure, AccessToken] = {
-    val authBaseUrl = config.baseUrl.stripSuffix("/v1")
-    val url = uri"$authBaseUrl/oauth/token"
-    val request = sttp.post(url)
+    sttp.post(uri"${config.baseUrl.stripSuffix("/v1")}/oauth/token")
       .body(
         "grant_type" -> "client_credentials",
         "client_id" -> s"${config.holidayStopProcessor.oauth.clientId}",
         "client_secret" -> s"${config.holidayStopProcessor.oauth.clientSecret}"
       )
-    val response = request.send()
-    for {
-      body <- response.body.left.map(OverallFailure)
-      token <- normalised(body, decode[AccessToken]).left.map(OverallFailure)
-    } yield token
+      .response(asJson[AccessToken])
+      .mapResponse(_.left.map(e => OverallFailure(e.message)))
+      .send()
+      .body.left.map(OverallFailure)
+      .joinRight
   }
 
-  def subscriptionGetResponse(config: Config, accessToken: AccessToken)(subscriptionName: String): Either[HolidayStopFailure, Subscription] = {
-    val url = uri"${config.zuoraConfig.baseUrl}/subscriptions/$subscriptionName"
-    val request = sttp.get(url)
+  def subscriptionGetResponse(config: Config, accessToken: AccessToken)(subscriptionName: SubscriptionName): Either[HolidayStopFailure, Subscription] = {
+    sttp.get(uri"${config.zuoraConfig.baseUrl}/subscriptions/${subscriptionName.value}")
       .header("Authorization", s"Bearer ${accessToken.access_token}")
-    val response = request.send()
-    for {
-      body <- response.body.left.map(HolidayStopFailure)
-      subscription <- normalised(body, decode[Subscription]).left.map(HolidayStopFailure)
-    } yield subscription
+      .response(asJson[Subscription])
+      .mapResponse(_.left.map(e => HolidayStopFailure(e.message)))
+      .send()
+      .body.left.map(HolidayStopFailure)
+      .joinRight
   }
 
-  def subscriptionUpdateResponse(config: Config, accessToken: AccessToken)(subscription: Subscription, update: SubscriptionUpdate): Either[HolidayStopFailure, Unit] = {
-    val url = uri"${config.zuoraConfig.baseUrl}/subscriptions/${subscription.subscriptionNumber}"
-    val request = sttp.put(url)
+  def subscriptionUpdateResponse(config: Config, accessToken: AccessToken)(subscription: Subscription, update: HolidayCreditUpdate): Either[HolidayStopFailure, Unit] = {
+    val errMsg = (reason: String) => s"Failed to update subscription '${subscription.subscriptionNumber}' with $update. Reason: $reason"
+    sttp.put(uri"${config.zuoraConfig.baseUrl}/subscriptions/${subscription.subscriptionNumber}")
       .header("Authorization", s"Bearer ${accessToken.access_token}")
       .body(update)
-    val response = request.send()
-    response.body.left map { e => HolidayStopFailure(e) } flatMap { body =>
-      def failureMsg(wrappedMsg: String) =
-        s"Update '$update' to subscription '${subscription.subscriptionNumber}' failed: $wrappedMsg"
-      normalised(body, decode[ZuoraStatusResponse]) match {
-        case Left(e) => Left(HolidayStopFailure(failureMsg(e)))
+      .response(asJson[ZuoraStatusResponse])
+      .mapResponse {
+        case Left(e) => Left(HolidayStopFailure(errMsg(e.message)))
         case Right(status) =>
-          if (!status.success)
-            Left(HolidayStopFailure(failureMsg(status.reasons.map(_.mkString).getOrElse(""))))
-          else Right(())
+          if (status.success) Right(())
+          else Left(HolidayStopFailure(errMsg(status.reasons.map(_.mkString).getOrElse(""))))
       }
-    }
+      .send()
+      .body.left.map(reason => HolidayStopFailure(errMsg(reason)))
+      .joinRight
   }
 }

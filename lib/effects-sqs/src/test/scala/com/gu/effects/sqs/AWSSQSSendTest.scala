@@ -5,7 +5,7 @@ import com.amazonaws.services.sqs.AmazonSQSAsyncClientBuilder
 import com.amazonaws.services.sqs.model.ReceiveMessageRequest
 import com.gu.effects.sqs.AwsSQSSend.{Payload, QueueName}
 import com.gu.test.EffectsTest
-import org.apache.log4j.Logger
+import com.typesafe.scalalogging.LazyLogging
 import org.scalatest.{AsyncFlatSpec, Matchers}
 
 import scala.collection.JavaConverters._
@@ -31,9 +31,7 @@ class AWSSQSSendTest extends AsyncFlatSpec with Matchers {
 
 }
 
-object SQSRead {
-
-  val logger = Logger.getLogger(getClass.getName)
+object SQSRead extends LazyLogging {
 
   def apply(queueName: AwsSQSSend.QueueName): List[String] = {
     val sqsClient = AmazonSQSAsyncClientBuilder

@@ -3,8 +3,8 @@ package com.gu.holidaystopprocessor
 import java.time.LocalDate
 
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
-import com.gu.salesforce.holiday_stops.SalesforceSFSubscription.SubscriptionName
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.{HolidayStopRequest, HolidayStopRequestActionedCount, HolidayStopRequestEndDate, HolidayStopRequestStartDate}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestId, HolidayStopRequestsDetail, HolidayStopRequestsDetailChargeCode, HolidayStopRequestsDetailId, ProductName, StoppedPublicationDate, SubscriptionName}
 import com.gu.util.Time
 
 object Fixtures {
@@ -25,6 +25,7 @@ object Fixtures {
   )
 
   def mkSubscription(
+    termStartDate: LocalDate,
     termEndDate: LocalDate,
     price: Double,
     billingPeriod: String,
@@ -32,6 +33,7 @@ object Fixtures {
   ) =
     Subscription(
       subscriptionNumber = "S1",
+      termStartDate,
       termEndDate,
       currentTerm = 12,
       currentTermPeriodType = "Month",
@@ -51,6 +53,7 @@ object Fixtures {
 
   def mkSubscriptionWithHolidayStops() = Subscription(
     subscriptionNumber = "S1",
+    termStartDate = LocalDate.of(2019, 3, 1),
     termEndDate = LocalDate.of(2020, 3, 1),
     currentTerm = 12,
     currentTermPeriodType = "Month",
@@ -140,14 +143,29 @@ object Fixtures {
     Start_Date__c = HolidayStopRequestStartDate(Time.toJodaDate(stopDate)),
     End_Date__c = HolidayStopRequestEndDate(Time.toJodaDate(stopDate)),
     Actioned_Count__c = HolidayStopRequestActionedCount(3),
-    Subscription_Name__c = SubscriptionName("subName"),
-    Product_Name__c = ProductName("Guardian Weekly")
+    Pending_Count__c = 4,
+    Total_Issues_Publications_Impacted_Count__c = 7,
+    Subscription_Name__c = SubscriptionName("S1"),
+    Product_Name__c = ProductName("Gu Weekly"),
+    Holiday_Stop_Request_Detail__r = None
+  )
+
+  def mkHolidayStopRequestDetails(request: HolidayStopRequest, chargeCode: String) = HolidayStopRequestsDetail(
+    Id = HolidayStopRequestsDetailId(request.Id.value),
+    Subscription_Name__c = request.Subscription_Name__c,
+    Product_Name__c = request.Product_Name__c,
+    Stopped_Publication_Date__c = StoppedPublicationDate(Time.toJavaDate(request.Start_Date__c.value)),
+    Estimated_Price__c = None,
+    Charge_Code__c = Some(HolidayStopRequestsDetailChargeCode(chargeCode)),
+    Actual_Price__c = None
   )
 
   def mkHolidayStop(date: LocalDate) = HolidayStop(
-    requestId = HolidayStopRequestId("R1"),
-    subscriptionName = "S1",
-    stoppedPublicationDate = date
+    requestId = HolidayStopRequestsDetailId("R1"),
+    subscriptionName = SubscriptionName("S1"),
+    productName = ProductName("Gu Weekly"),
+    stoppedPublicationDate = date,
+    estimatedCharge = None
   )
 
   val config = Config(

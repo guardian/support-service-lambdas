@@ -53,7 +53,8 @@ class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
         billToLastName = "someBillToLastName",
         billToPostcode = Some("someBilltoPostCode"),
         soldToLastName = "someSoldToLastName",
-        soldToPostcode = Some("someSoldtoPostCode")
+        soldToPostcode = Some("someSoldtoPostCode"),
+        identityId = Some("12344")
       )
       ContinueProcessing(summary)
     }

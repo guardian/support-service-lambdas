@@ -5,14 +5,13 @@ import com.amazonaws.auth.profile.ProfileCredentialsProvider
 import com.amazonaws.regions.Regions
 import com.amazonaws.services.sqs.{AmazonSQSAsync, AmazonSQSAsyncClientBuilder}
 import com.amazonaws.services.sqs.model.{SendMessageRequest, SendMessageResult}
-import org.apache.log4j.Logger
+import com.typesafe.scalalogging.LazyLogging
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
-object AwsSQSSend {
-
-  val logger = Logger.getLogger(getClass.getName)
+object AwsSQSSend extends LazyLogging {
 
   case class QueueName(value: String) extends AnyVal
 

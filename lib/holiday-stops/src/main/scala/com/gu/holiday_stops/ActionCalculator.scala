@@ -1,6 +1,7 @@
 package com.gu.holiday_stops
 
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.{HolidayStopRequest, ProductName}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.HolidayStopRequest
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.ProductName
 import org.joda.time.{DateTimeConstants, Days, LocalDate}
 
 case class ProductSpecifics(
@@ -19,7 +20,7 @@ object ActionCalculator {
   )
 
   // TODO this will likely need to change to return an array of days of week (when we support more than just GW)
-  def productNameToSuspensionConstants(productName: ProductName): ProductSuspensionConstants = productName.value match {
+  def suspensionConstantsByProduct(productName: ProductName): ProductSuspensionConstants = productName.value match {
     case s if s.startsWith("Guardian Weekly") => ProductSuspensionConstants(
       issueDayOfWeek = DateTimeConstants.FRIDAY,
       minLeadTimeDays = 9, //i.e. the thursday of the week before the Friday issue day,
@@ -35,7 +36,7 @@ object ActionCalculator {
       start.withDayOfWeek(targetDayOfWeek)
 
   def getProductSpecifics(productNamePrefix: ProductName, today: LocalDate = LocalDate.now()) = {
-    val productSuspensionConstants = productNameToSuspensionConstants(productNamePrefix)
+    val productSuspensionConstants = suspensionConstantsByProduct(productNamePrefix)
     val issueDayOfWeek = productSuspensionConstants.issueDayOfWeek
     val todayPlusMinLeadTime = today.plusDays(productSuspensionConstants.minLeadTimeDays)
     val nextIssueDayAfterTodayPlusMinLeadTime = findNextTargetDayOfWeek(todayPlusMinLeadTime, issueDayOfWeek)
@@ -58,25 +59,11 @@ object ActionCalculator {
     toInclusive: LocalDate,
     productName: ProductName
   ): List[LocalDate] = {
-    val dayOfWeekForProduct = productNameToSuspensionConstants(productName).issueDayOfWeek
-    applicableDates(
-      fromInclusive,
-      toInclusive,
-      { _.getDayOfWeek == dayOfWeekForProduct }
-    )
-  }
-
-  private def applicableDates(
-    fromInclusive: LocalDate,
-    toInclusive: LocalDate,
-    p: LocalDate => Boolean
-  ): List[LocalDate] = {
-    val dateRange = 0 to Days.daysBetween(fromInclusive, toInclusive).getDays
-    dateRange.foldLeft(List.empty[LocalDate]) { (acc, i) =>
-      val d = fromInclusive.plusDays(i)
-      if (p(d)) acc :+ d
-      else acc
-    }
+    val dayOfPublication = suspensionConstantsByProduct(productName).issueDayOfWeek
+    def isPublicationDay(currentDayWithinHoliday: Int) = fromInclusive.plusDays(currentDayWithinHoliday).getDayOfWeek == dayOfPublication
+    def stoppedDate(currentDayWithinHoliday: Int) = fromInclusive.plusDays(currentDayWithinHoliday)
+    val holidayLengthInDays = 0 to Days.daysBetween(fromInclusive, toInclusive).getDays
+    holidayLengthInDays.toList.collect { case day if isPublicationDay(day) => stoppedDate(day) }
   }
 
 }
