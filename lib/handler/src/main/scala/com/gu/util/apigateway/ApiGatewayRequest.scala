@@ -12,6 +12,7 @@ import scala.util.{Failure, Success, Try}
   header, and API Gateway does not support this header (returns x-amzn-Remapped-WWW-Authenticate instead)
   */
 case class ApiGatewayRequest(
+  httpMethod: Option[String],
   queryStringParameters: Option[Map[String, String]],
   body: Option[String],
   headers: Option[Map[String, String]],

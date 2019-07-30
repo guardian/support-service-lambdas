@@ -103,7 +103,7 @@ class ContributionStepsTest extends FlatSpec with Matchers {
       addContribution = fakeAddContributionSteps,
       addPaperSub = dummySteps,
       addDigipackSub = dummySteps
-    )(ApiGatewayRequest(None, Some(Json.stringify(requestInput)), None, None))
+    )(ApiGatewayRequest(None, None, Some(Json.stringify(requestInput)), None, None))
 
     val actual = Await.result(futureActual, 30 seconds)
     actual.statusCode should be("200")
