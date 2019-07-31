@@ -63,7 +63,7 @@ Resources:
     CancellationSFCasesAPI:
         Type: "AWS::ApiGateway::RestApi"
         Properties:
-            Description: account-frontend uses to create/update SalesForce cases for self service cancellation tracking
+            Description: manage-frontend uses to create/update SalesForce cases for self service cancellation tracking
             Name: !FindInMap [StageMap, !Ref Stage, ApiName]
 
     CancellationSFRaiseCasePermission:
@@ -77,7 +77,7 @@ Resources:
     CancellationSFRaiseCaseLambda:
         Type: AWS::Lambda::Function
         Properties:
-            Description: account-frontend used to create SalesForce cases for self service cancellation tracking
+            Description: manage-frontend used to create SalesForce cases for self service cancellation tracking
             FunctionName:
                 !Sub cancellation-sf-cases-raise-${Stage}
             Code:
@@ -133,7 +133,7 @@ Resources:
     CancellationSFUpdateCaseLambda:
         Type: AWS::Lambda::Function
         Properties:
-            Description: account-frontend used to update SalesForce cases for self service cancellation tracking
+            Description: manage-frontend used to update SalesForce cases for self service cancellation tracking
             FunctionName:
                 !Sub cancellation-sf-cases-update-${Stage}
             Code:
