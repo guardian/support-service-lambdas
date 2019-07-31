@@ -17,13 +17,15 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers {
     )
     val nextInvoiceStartDate = NextBillingPeriodStartDate(subscription)
     val maybeExtendedTerm = ExtendedTerm(nextInvoiceStartDate.right.get, subscription)
+    val holidayCredit = HolidayCredit(subscription)
 
     val update = HolidayCreditUpdate(
       config,
       subscription = subscription,
       stoppedPublicationDate = LocalDate.of(2019, 5, 18),
       nextInvoiceStartDate = nextInvoiceStartDate.right.get,
-      maybeExtendedTerm = maybeExtendedTerm
+      maybeExtendedTerm = maybeExtendedTerm,
+      holidayCredit
     )
     update shouldBe Right(HolidayCreditUpdate(
       currentTerm = None,
@@ -71,12 +73,14 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers {
     )
     val nextInvoiceStartDate = NextBillingPeriodStartDate(subscription)
     val maybeExtendedTerm = ExtendedTerm(nextInvoiceStartDate.right.get, subscription)
+    val holidayCredit = HolidayCredit(subscription)
     val update = HolidayCreditUpdate(
       config,
       subscription = subscription,
       stoppedPublicationDate = LocalDate.of(2019, 8, 6),
       nextInvoiceStartDate = nextInvoiceStartDate.right.get,
-      maybeExtendedTerm = maybeExtendedTerm
+      maybeExtendedTerm = maybeExtendedTerm,
+      holidayCredit
     )
     update shouldBe Right(HolidayCreditUpdate(
       currentTerm = Some(376),
@@ -108,12 +112,14 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers {
     )
     val nextInvoiceStartDate = NextBillingPeriodStartDate(subscription)
     val maybeExtendedTerm = ExtendedTerm(nextInvoiceStartDate.right.get, subscription)
+    val holidayCredit = HolidayCredit(subscription)
     val update = HolidayCreditUpdate(
       config,
       subscription = subscription,
       stoppedPublicationDate = LocalDate.of(2019, 8, 6),
       nextInvoiceStartDate = nextInvoiceStartDate.right.get,
-      maybeExtendedTerm = maybeExtendedTerm
+      maybeExtendedTerm = maybeExtendedTerm,
+      holidayCredit
     )
     update shouldBe Right(HolidayCreditUpdate(
       currentTerm = None,

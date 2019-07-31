@@ -41,7 +41,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
     _ => amendmentExport
 
   "HolidayStopProcess" should "give correct added charge" in {
-    val response = HolidayStopProcess.processHolidayStop(
+    val response = HolidayStopProcess.writeHolidayStopToZuora(
       config,
       getSubscription(Right(Fixtures.mkSubscriptionWithHolidayStops())),
       updateSubscription(Right(()))
@@ -58,7 +58,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
   }
 
   it should "give an exception message if update fails" in {
-    val response = HolidayStopProcess.processHolidayStop(
+    val response = HolidayStopProcess.writeHolidayStopToZuora(
       config,
       getSubscription(Right(subscription)),
       updateSubscription(Left(HolidayStopFailure("update went wrong")))
@@ -67,7 +67,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
   }
 
   it should "give an exception message if getting subscription details fails" in {
-    val response = HolidayStopProcess.processHolidayStop(
+    val response = HolidayStopProcess.writeHolidayStopToZuora(
       config,
       getSubscription(Left(HolidayStopFailure("get went wrong"))),
       updateSubscription(Right(()))
@@ -76,7 +76,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
   }
 
   it should "give an exception message if subscription isn't auto-renewing" in {
-    val response = HolidayStopProcess.processHolidayStop(
+    val response = HolidayStopProcess.writeHolidayStopToZuora(
       config,
       getSubscription(Right(subscription.copy(autoRenew = false))),
       updateSubscription(Right(()))
@@ -86,7 +86,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
   }
 
   it should "just give charge added without applying an update if holiday stop has already been applied" in {
-    val response = HolidayStopProcess.processHolidayStop(
+    val response = HolidayStopProcess.writeHolidayStopToZuora(
       config,
       getSubscription(Right(Fixtures.mkSubscriptionWithHolidayStops())),
       updateSubscription(Left(HolidayStopFailure("shouldn't need to apply an update")))
@@ -103,7 +103,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
   }
 
   it should "give a failure if subscription has no added charge" in {
-    val response = HolidayStopProcess.processHolidayStop(
+    val response = HolidayStopProcess.writeHolidayStopToZuora(
       config,
       getSubscription(Right(subscription)),
       updateSubscription(Left(HolidayStopFailure("shouldn't need to apply an update")))

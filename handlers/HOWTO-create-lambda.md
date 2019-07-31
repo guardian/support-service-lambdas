@@ -16,7 +16,9 @@ Hopefully we can make this process easier in future (code generation or ideally 
 1. follow the steps after "deploy to code" again in order to update the PROD domain name.
 1. set up a health check job in Runscope (optional)
 
-NOTE: If you make subsequent configuration changes to the API Gateway (even via CloudFormation) you may need to manually 'Deploy API' which can be done via the AWS Console (API Gateway > _{gateway in question}_ > Resources > Actions ▼ > Deploy API)
+**IMPORTANT:** The `IntegrationHttpMethod` (between API Gateway with Lambda) needs to always be `POST` - see https://stackoverflow.com/a/55457240/5205022 for more information
+
+**NOTE:** If you make subsequent configuration changes to the API Gateway (even via CloudFormation) you may need to manually 'Deploy API' which can be done via the AWS Console (API Gateway > _{gateway in question}_ > Resources > Actions ▼ > Deploy API)
 
 ## Deploying a lambda with riffraff for the first time
 1. preview the deploy using riffraff and only tick the "copy file to s3" step before hitting deploy

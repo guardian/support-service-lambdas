@@ -24,11 +24,11 @@ object Fixtures {
   )
 
   def mkSubscription(
-    termStartDate: LocalDate,
-    termEndDate: LocalDate,
-    price: Double,
-    billingPeriod: String,
-    chargedThroughDate: Option[LocalDate]
+    termStartDate: LocalDate = LocalDate.now(),
+    termEndDate: LocalDate = LocalDate.now(),
+    price: Double = -1.0,
+    billingPeriod: String = "Quarterly",
+    chargedThroughDate: Option[LocalDate] = None
   ) =
     Subscription(
       subscriptionNumber = "S1",
