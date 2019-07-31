@@ -2,20 +2,24 @@ package com.gu.holidaystopprocessor
 
 import java.time.LocalDate
 
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestsDetail, HolidayStopRequestsDetailChargeCode, HolidayStopRequestsDetailChargePrice, ProductName, StoppedPublicationDate, SubscriptionName}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
 
 object HolidayStopProcess {
 
   def apply(config: Config): ProcessResult =
-    Zuora.accessTokenGetResponse(config.zuoraConfig) map { zuoraAccessToken =>
-      processHolidayStops(
-        config,
-        getHolidayStopRequestsFromSalesforce = Salesforce.holidayStopRequests(config.sfConfig),
-        getSubscription = Zuora.subscriptionGetResponse(config, zuoraAccessToken),
-        updateSubscription = Zuora.subscriptionUpdateResponse(config, zuoraAccessToken),
-        writeHolidayStopsToSalesforce = Salesforce.holidayStopUpdateResponse(config.sfConfig)
-      )
-    } fold (ProcessResult.fromOverallFailure, identity)
+    Zuora.accessTokenGetResponse(config.zuoraConfig) match {
+      case Left(overallFailure) =>
+        ProcessResult(overallFailure)
+
+      case Right(zuoraAccessToken) =>
+        processHolidayStops(
+          config,
+          getHolidayStopRequestsFromSalesforce = Salesforce.holidayStopRequests(config.sfConfig),
+          getSubscription = Zuora.subscriptionGetResponse(config, zuoraAccessToken),
+          updateSubscription = Zuora.subscriptionUpdateResponse(config, zuoraAccessToken),
+          writeHolidayStopsToSalesforce = Salesforce.holidayStopUpdateResponse(config.sfConfig)
+        )
+    }
 
   def processHolidayStops(
     config: Config,
@@ -24,17 +28,19 @@ object HolidayStopProcess {
     updateSubscription: (Subscription, HolidayCreditUpdate) => Either[HolidayStopFailure, Unit],
     writeHolidayStopsToSalesforce: Seq[HolidayStopResponse] => Either[OverallFailure, Unit]
   ): ProcessResult = {
-    (for {
-      holidayStopRequestsFromSalesforce <- getHolidayStopRequestsFromSalesforce(ProductName("Guardian Weekly"))
-      holidayStops <- Right(holidayStopRequestsFromSalesforce.distinct.map(HolidayStop(_)))
-      alreadyActionedHolidayStops <- Right(holidayStopRequestsFromSalesforce.flatMap(_.Charge_Code__c).distinct)
-    } yield {
-      val allZuoraHolidayStopResponses = holidayStops.map(writeHolidayStopToZuora(config, getSubscription, updateSubscription))
-      val successfulZuoraResponses = allZuoraHolidayStopResponses collect { case Right(v) => v } // FIXME: What happens with failures?
-      val notAlreadyActionedHolidays = successfulZuoraResponses.filterNot(v => alreadyActionedHolidayStops.contains(v.chargeCode))
-      val salesforceExportResult = writeHolidayStopsToSalesforce(notAlreadyActionedHolidays).left.toOption
-      ProcessResult(holidayStops, allZuoraHolidayStopResponses, notAlreadyActionedHolidays, salesforceExportResult)
-    }).left.map(ProcessResult.fromOverallFailure).merge
+    getHolidayStopRequestsFromSalesforce(ProductName("Guardian Weekly")) match {
+      case Left(overallFailure) =>
+        ProcessResult(overallFailure)
+
+      case Right(holidayStopRequestsFromSalesforce) =>
+        val holidayStops = holidayStopRequestsFromSalesforce.distinct.map(HolidayStop(_))
+        val alreadyActionedHolidayStops = holidayStopRequestsFromSalesforce.flatMap(_.Charge_Code__c).distinct
+        val allZuoraHolidayStopResponses = holidayStops.map(writeHolidayStopToZuora(config, getSubscription, updateSubscription))
+        val successfulZuoraResponses = allZuoraHolidayStopResponses collect { case Right(v) => v } // FIXME: What happens with failures?
+        val notAlreadyActionedHolidays = successfulZuoraResponses.filterNot(v => alreadyActionedHolidayStops.contains(v.chargeCode))
+        val salesforceExportResult = writeHolidayStopsToSalesforce(notAlreadyActionedHolidays).left.toOption
+        ProcessResult(holidayStops, allZuoraHolidayStopResponses, notAlreadyActionedHolidays, salesforceExportResult)
+    }
   }
 
   /**

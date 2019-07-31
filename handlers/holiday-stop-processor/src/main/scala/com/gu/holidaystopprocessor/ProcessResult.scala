@@ -10,7 +10,8 @@ case class ProcessResult(
 )
 
 object ProcessResult extends LazyLogging {
-  def fromOverallFailure(failure: OverallFailure) = ProcessResult(Nil, Nil, Nil, Some(failure))
+  def apply(failure: OverallFailure): ProcessResult =
+    ProcessResult(Nil, Nil, Nil, Some(failure))
 
   def log(processResult: ProcessResult): Unit = {
     import processResult._
