@@ -24,7 +24,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
     None
   )
 
-  private def getRequests(requestsGet: Either[OverallFailure, Seq[HolidayStopRequestsDetail]]): ProductName => Either[OverallFailure, Seq[HolidayStopRequestsDetail]] =
+  private def getRequests(requestsGet: Either[OverallFailure, List[HolidayStopRequestsDetail]]): ProductName => Either[OverallFailure, List[HolidayStopRequestsDetail]] =
     _ => requestsGet
 
   private def getSubscription(subscriptionGet: Either[HolidayStopFailure, Subscription]): SubscriptionName => Either[HolidayStopFailure, Subscription] = {
@@ -37,7 +37,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
     case (_, _) => subscriptionUpdate
   }
 
-  private def exportAmendments(amendmentExport: Either[OverallFailure, Unit]): Seq[HolidayStopResponse] => Either[OverallFailure, Unit] =
+  private def exportAmendments(amendmentExport: Either[OverallFailure, Unit]): List[HolidayStopResponse] => Either[OverallFailure, Unit] =
     _ => amendmentExport
 
   "HolidayStopProcess" should "give correct added charge" in {
@@ -114,7 +114,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
   "processHolidayStops" should "give correct charges added" in {
     val responses = HolidayStopProcess.processHolidayStops(
       config.holidayCreditProduct,
-      getRequests(Right(Seq(
+      getRequests(Right(List(
         Fixtures.mkHolidayStopRequestDetails(Fixtures.mkHolidayStopRequest("R1", LocalDate.of(2019, 8, 2)), "C1"),
         Fixtures.mkHolidayStopRequestDetails(Fixtures.mkHolidayStopRequest("R2", LocalDate.of(2019, 9, 1)), "C3"),
         Fixtures.mkHolidayStopRequestDetails(Fixtures.mkHolidayStopRequest("R3", LocalDate.of(2019, 8, 9)), "C4")
@@ -146,7 +146,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
   it should "only export results that haven't already been exported" in {
     val responses = HolidayStopProcess.processHolidayStops(
       config.holidayCreditProduct,
-      getRequests(Right(Seq(
+      getRequests(Right(List(
         Fixtures.mkHolidayStopRequestDetails(Fixtures.mkHolidayStopRequest("R1", LocalDate.of(2019, 8, 2)), "C2"),
         Fixtures.mkHolidayStopRequestDetails(Fixtures.mkHolidayStopRequest("R2", LocalDate.of(2019, 9, 1)), "C5"),
         Fixtures.mkHolidayStopRequestDetails(Fixtures.mkHolidayStopRequest("R3", LocalDate.of(2019, 8, 9)), "C6")
@@ -155,7 +155,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
       updateSubscription(Right(())),
       exportAmendments(Right(()))
     )
-    responses.resultsToExport shouldBe Seq(
+    responses.resultsToExport shouldBe List(
       HolidayStopResponse(
         HolidayStopRequestsDetailId("R1"),
         subscriptionName = SubscriptionName("S1"),
@@ -171,7 +171,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
   it should "give an exception message if exporting results fails" in {
     val responses = HolidayStopProcess.processHolidayStops(
       config.holidayCreditProduct,
-      getRequests(Right(Seq(
+      getRequests(Right(List(
         Fixtures.mkHolidayStopRequestDetails(Fixtures.mkHolidayStopRequest("r1"), ""),
         Fixtures.mkHolidayStopRequestDetails(Fixtures.mkHolidayStopRequest("r2"), ""),
         Fixtures.mkHolidayStopRequestDetails(Fixtures.mkHolidayStopRequest("r3"), "")

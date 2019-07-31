@@ -30,13 +30,13 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers {
     update shouldBe Right(HolidayCreditUpdate(
       currentTerm = None,
       currentTermPeriodType = None,
-      Seq(
+      List(
         Add(
           productRatePlanId = "ratePlanId",
           contractEffectiveDate = LocalDate.of(2019, 9, 12),
           customerAcceptanceDate = LocalDate.of(2019, 9, 12),
           serviceActivationDate = LocalDate.of(2019, 9, 12),
-          chargeOverrides = Seq(
+          chargeOverrides = List(
             ChargeOverride(
               productRatePlanChargeId = "ratePlanChargeId",
               HolidayStart__c = LocalDate.of(2019, 5, 18),

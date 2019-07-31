@@ -23,10 +23,10 @@ object HolidayStopProcess {
 
   def processHolidayStops(
     holidayCreditProduct: HolidayCreditProduct,
-    getHolidayStopRequestsFromSalesforce: ProductName => Either[OverallFailure, Seq[HolidayStopRequestsDetail]],
+    getHolidayStopRequestsFromSalesforce: ProductName => Either[OverallFailure, List[HolidayStopRequestsDetail]],
     getSubscription: SubscriptionName => Either[HolidayStopFailure, Subscription],
     updateSubscription: (Subscription, HolidayCreditUpdate) => Either[HolidayStopFailure, Unit],
-    writeHolidayStopsToSalesforce: Seq[HolidayStopResponse] => Either[OverallFailure, Unit]
+    writeHolidayStopsToSalesforce: List[HolidayStopResponse] => Either[OverallFailure, Unit]
   ): ProcessResult = {
     getHolidayStopRequestsFromSalesforce(ProductName("Guardian Weekly")) match {
       case Left(overallFailure) =>

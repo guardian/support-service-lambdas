@@ -10,7 +10,7 @@ object HolidayCreditSpec extends Properties("HolidayCreditAmount") with OptionVa
 
   private val ratePlanChargeGen = for {
     price <- Gen.choose(0.01, 10000)
-    billingPeriod <- Gen.oneOf(Seq("Month", "Quarter", "Annual"))
+    billingPeriod <- Gen.oneOf(List("Month", "Quarter", "Annual"))
   } yield RatePlanCharge(
     name = "GW",
     number = "C5",
@@ -25,12 +25,12 @@ object HolidayCreditSpec extends Properties("HolidayCreditAmount") with OptionVa
   val subscription = Fixtures.mkSubscription()
 
   property("should never be positive") = forAll(ratePlanChargeGen) { charge: RatePlanCharge =>
-    val ratePlans = Seq(RatePlan("", Seq(charge)))
+    val ratePlans = List(RatePlan("", List(charge)))
     HolidayCredit(subscription.copy(ratePlans = ratePlans)) <= 0
   }
 
   property("should never be overwhelmingly negative") = forAll(ratePlanChargeGen) { charge: RatePlanCharge =>
-    val ratePlans = Seq(RatePlan("", Seq(charge)))
+    val ratePlans = List(RatePlan("", List(charge)))
     HolidayCredit(subscription.copy(ratePlans = ratePlans)) > -charge.price
   }
 }

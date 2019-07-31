@@ -14,7 +14,7 @@ object Salesforce {
 
   private def thresholdDate: LocalDate = LocalDate.now.plusDays(Config.daysInAdvance)
 
-  def holidayStopRequests(sfCredentials: SFAuthConfig)(productNamePrefix: ProductName): Either[OverallFailure, Seq[HolidayStopRequestsDetail]] =
+  def holidayStopRequests(sfCredentials: SFAuthConfig)(productNamePrefix: ProductName): Either[OverallFailure, List[HolidayStopRequestsDetail]] =
     SalesforceClient(RawEffects.response, sfCredentials).value.flatMap { sfAuth =>
       val sfGet = sfAuth.wrapWith(JsonHttp.getWithParams)
       val fetchOp = SalesforceHolidayStopRequestsDetail.LookupPendingByProductNamePrefixAndDate(sfGet)
@@ -24,7 +24,7 @@ object Salesforce {
       case \/-(details) => Right(details)
     }
 
-  def holidayStopUpdateResponse(sfCredentials: SFAuthConfig)(responses: Seq[HolidayStopResponse]): Either[OverallFailure, Unit] =
+  def holidayStopUpdateResponse(sfCredentials: SFAuthConfig)(responses: List[HolidayStopResponse]): Either[OverallFailure, Unit] =
     SalesforceClient(RawEffects.response, sfCredentials).value.map { sfAuth =>
       val patch = sfAuth.wrapWith(JsonHttp.patch)
       val sendOp = ActionSalesforceHolidayStopRequestsDetail(patch) _
