@@ -10,7 +10,7 @@ object HolidayStopProcess {
     Zuora.accessTokenGetResponse(config.zuoraConfig) map { zuoraAccessToken =>
       processHolidayStops(
         config,
-        getRequests = Salesforce.holidayStopRequests(config.sfConfig),
+        getHolidayStopRequestsFromSalesforce = Salesforce.holidayStopRequests(config.sfConfig),
         getSubscription = Zuora.subscriptionGetResponse(config, zuoraAccessToken),
         updateSubscription = Zuora.subscriptionUpdateResponse(config, zuoraAccessToken),
         writeHolidayStopsToSalesforce = Salesforce.holidayStopUpdateResponse(config.sfConfig)
@@ -19,15 +19,15 @@ object HolidayStopProcess {
 
   def processHolidayStops(
     config: Config,
-    getRequests: ProductName => Either[OverallFailure, Seq[HolidayStopRequestsDetail]],
+    getHolidayStopRequestsFromSalesforce: ProductName => Either[OverallFailure, Seq[HolidayStopRequestsDetail]],
     getSubscription: SubscriptionName => Either[HolidayStopFailure, Subscription],
     updateSubscription: (Subscription, HolidayCreditUpdate) => Either[HolidayStopFailure, Unit],
     writeHolidayStopsToSalesforce: Seq[HolidayStopResponse] => Either[OverallFailure, Unit]
   ): ProcessResult = {
     (for {
-      requests <- getRequests(ProductName("Guardian Weekly"))
-      holidayStops <- Right(requests.distinct.map(HolidayStop(_)))
-      alreadyActionedHolidayStops <- Right(requests.flatMap(_.Charge_Code__c).distinct)
+      holidayStopRequestsFromSalesforce <- getHolidayStopRequestsFromSalesforce(ProductName("Guardian Weekly"))
+      holidayStops <- Right(holidayStopRequestsFromSalesforce.distinct.map(HolidayStop(_)))
+      alreadyActionedHolidayStops <- Right(holidayStopRequestsFromSalesforce.flatMap(_.Charge_Code__c).distinct)
     } yield {
       val allZuoraHolidayStopResponses = holidayStops.map(writeHolidayStopToZuora(config, getSubscription, updateSubscription))
       val successfulZuoraResponses = allZuoraHolidayStopResponses collect { case Right(v) => v } // FIXME: What happens with failures?
