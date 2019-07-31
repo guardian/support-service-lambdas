@@ -27,12 +27,13 @@ object HolidayStopProcess {
     (for {
       requests <- getRequests(ProductName("Guardian Weekly"))
       holidayStops <- Right(requests.distinct.map(HolidayStop(_)))
-      alreadyExportedChargeCodes <- Right(requests.flatMap(_.Charge_Code__c).distinct)
+      alreadyActionedHolidayStops <- Right(requests.flatMap(_.Charge_Code__c).distinct)
     } yield {
       val allZuoraHolidayStopResponses = holidayStops.map(writeHolidayStopToZuora(config, getSubscription, updateSubscription))
-      val successfulZuoraResponses = allZuoraHolidayStopResponses collect { case Right(success) if !alreadyExportedChargeCodes.contains(success.chargeCode) => success } // FIXME: We should make it clearer we are discarding failures.
-      val salesforceExportResult = writeHolidayStopsToSalesforce(successfulZuoraResponses).left.toOption
-      ProcessResult(holidayStops, allZuoraHolidayStopResponses, successfulZuoraResponses, salesforceExportResult)
+      val successfulZuoraResponses = allZuoraHolidayStopResponses collect { case Right(v) => v } // FIXME: What happens with failures?
+      val notAlreadyActionedHolidays = successfulZuoraResponses.filterNot(v => alreadyActionedHolidayStops.contains(v.chargeCode))
+      val salesforceExportResult = writeHolidayStopsToSalesforce(notAlreadyActionedHolidays).left.toOption
+      ProcessResult(holidayStops, allZuoraHolidayStopResponses, notAlreadyActionedHolidays, salesforceExportResult)
     }).left.map(ProcessResult.fromOverallFailure).merge
   }
 
