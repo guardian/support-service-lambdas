@@ -100,7 +100,7 @@ Resources:
       HttpMethod: POST
       Integration:
         Type: AWS_PROXY
-        IntegrationHttpMethod: POST
+        IntegrationHttpMethod: POST # this for the interaction between API Gateway and Lambda and MUST be POST
         Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${BatchEmailSenderLambda.Arn}/invocations
     DependsOn:
     - BatchEmailSenderApi
