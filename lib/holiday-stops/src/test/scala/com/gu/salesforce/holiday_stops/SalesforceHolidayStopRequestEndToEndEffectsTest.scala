@@ -6,10 +6,9 @@ import com.gu.salesforce.SalesforceClient
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestId, _}
 import com.gu.test.EffectsTest
-import com.gu.util.Time
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.resthttp.JsonHttp
-import org.joda.time.LocalDate
+import java.time.LocalDate
 import org.scalatest.{FlatSpec, Matchers}
 import scalaz.{-\/, \/-}
 
@@ -34,6 +33,8 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends FlatSpec with Matc
       response = RawEffects.response
       sfAuth <- SalesforceClient(response, sfConfig).value.toDisjunction
 
+      //TODO test the 'owner of the sub' validation
+
       createOp = SalesforceHolidayStopRequest.CreateHolidayStopRequest(sfAuth.wrapWith(JsonHttp.post))
       createResult <- createOp(NewHolidayStopRequest(
         startDate,
@@ -45,7 +46,7 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends FlatSpec with Matc
       createDetailOp = SalesforceHolidayStopRequestsDetail.CreatePendingSalesforceHolidayStopRequestsDetail(sfAuth.wrapWith(JsonHttp.post))
       _ <- createDetailOp(HolidayStopRequestsDetailPending(
         HolidayStopRequestId(createResult.value),
-        StoppedPublicationDate(Time.toJavaDate(LocalDate.now.plusDays(11)))
+        StoppedPublicationDate(LocalDate.now.plusDays(11))
       )).toDisjunction
 
       fetchOp = SalesforceHolidayStopRequest.LookupByDateAndProductNamePrefix(sfAuth.wrapWith(JsonHttp.getWithParams))

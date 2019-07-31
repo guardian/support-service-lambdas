@@ -20,8 +20,8 @@ import com.gu.util.resthttp.JsonHttp.StringHttpRequest
 import com.gu.util.resthttp.RestRequestMaker.BodyAsString
 import com.gu.util.resthttp.{HttpOp, JsonHttp}
 import okhttp3.{Request, Response}
-import org.joda.time.LocalDate
-import play.api.libs.json.{Format, Json, OWrites, Reads}
+import java.time.LocalDate
+import play.api.libs.json.{Format, Json, Reads}
 
 object Handler extends Logging {
 
@@ -88,25 +88,20 @@ object Handler extends Logging {
 
     val lookupOp = SalesforceHolidayStopRequest.LookupByIdentityIdAndOptionalSubscriptionName(sfClient.wrapWith(JsonHttp.getWithParams))
 
-    implicit val writesMutabilityFlags: OWrites[MutabilityFlags] = Json.writes[MutabilityFlags]
-    implicit val formatLocalDateAsSalesforceDate: Format[LocalDate] = SalesforceHolidayStopRequest.formatLocalDateAsSalesforceDate
-    implicit val writesHolidayStopRequestGET: OWrites[HolidayStopRequestEXTERNAL] = Json.writes[HolidayStopRequestEXTERNAL]
-    implicit val writesProductSpecifics: OWrites[ProductSpecifics] = Json.writes[ProductSpecifics]
-    implicit val writesHolidayStopRequestsGET: OWrites[HolidayStopRequestsGET] = Json.writes[HolidayStopRequestsGET]
-
     val extractOptionalSubNameOp: ApiGatewayOp[Option[SubscriptionName]] = req.pathParameters match {
       case Some(_) => req.pathParamsAsCaseClass[GetPathParams]()(Json.reads[GetPathParams]).map(_.subscriptionName)
       case None => ContinueProcessing(None)
     }
 
+    val optionalProductNamePrefix = req.headers.flatMap(_.get(HEADER_PRODUCT_NAME_PREFIX).map(ProductName.apply))
+
     (for {
       identityId <- req.headers.flatMap(_.get(HEADER_IDENTITY_ID)).toApiGatewayOp("identityID header")
       optionalSubName <- extractOptionalSubNameOp
-      optionalProductNamePrefix = req.headers.flatMap(_.get(HEADER_PRODUCT_NAME_PREFIX).map(ProductName.apply))
       usersHolidayStopRequests <- lookupOp(identityId, optionalSubName).toDisjunction.toApiGatewayOp(s"lookup Holiday Stop Requests for identity $identityId")
     } yield ApiGatewayResponse(
       "200",
-      HolidayStopRequestsGET(usersHolidayStopRequests, optionalProductNamePrefix)
+      GetHolidayStopRequests(usersHolidayStopRequests, optionalProductNamePrefix)
     )).apiResponse
   }
 
@@ -115,16 +110,11 @@ object Handler extends Logging {
     val verifyIdentityIdOwnsSubOp = SalesforceSFSubscription.CheckForSubscriptionGivenNameAndIdentityID(sfClient.wrapWith(JsonHttp.getWithParams))
     val createOp = SalesforceHolidayStopRequest.CreateHolidayStopRequest(sfClient.wrapWith(JsonHttp.post))
 
-    //TODO refactor HolidayStopRequestEXTERNAL into an incoming and outgoing form to eliminate this line
-    implicit val readsMutabilityFlags: Reads[MutabilityFlags] = Json.reads[MutabilityFlags]
-    implicit val formatLocalDateAsSalesforceDate: Format[LocalDate] = SalesforceHolidayStopRequest.formatLocalDateAsSalesforceDate
-    implicit val readsHolidayStopRequestEXTERNAL: Reads[HolidayStopRequestEXTERNAL] = Json.reads[HolidayStopRequestEXTERNAL]
-
     (for {
-      requestBody <- req.bodyAsCaseClass[HolidayStopRequestEXTERNAL]()
+      requestBody <- req.bodyAsCaseClass[HolidayStopRequestPartial]()
       identityId <- req.headers.flatMap(_.get(HEADER_IDENTITY_ID)).toApiGatewayOp("identityID header")
       _ <- verifyIdentityIdOwnsSubOp(requestBody.subscriptionName, identityId).toDisjunction.toApiGatewayOp(s"user identityID $identityId does not own ${requestBody.subscriptionName.value}")
-      _ <- createOp(HolidayStopRequestEXTERNAL.toSF(requestBody)).toDisjunction.toApiGatewayOp(s"create new Holiday Stop Request for subscription ${requestBody.subscriptionName} (identity $identityId)")
+      _ <- createOp(WireHolidayStopRequest.toSF(requestBody)).toDisjunction.toApiGatewayOp(s"create new Holiday Stop Request for subscription ${requestBody.subscriptionName} (identity $identityId)")
       // TODO create child entries for publicationDatesImpacted
       // TODO nice to have - handle 'FIELD_CUSTOM_VALIDATION_EXCEPTION' etc back from SF and place in response
     } yield ApiGatewayResponse.successfulExecution).apiResponse

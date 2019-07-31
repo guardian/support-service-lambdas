@@ -8,22 +8,22 @@ import com.gu.util.resthttp.RestOp._
 import com.gu.util.resthttp.RestRequestMaker._
 import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.resthttp.{HttpOp, RestRequestMaker}
-import org.joda.time.LocalDate
-import org.joda.time.format.DateTimeFormat
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import play.api.libs.json._
 
 object SalesforceHolidayStopRequest extends Logging {
 
-  val SALESFORCE_DATE_FORMAT = "yyyy-MM-dd"
+  val SALESFORCE_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
   val holidayStopRequestSfObjectRef = "Holiday_Stop_Request__c"
   private val holidayStopRequestSfObjectsBaseUrl = sfObjectsBaseUrl + holidayStopRequestSfObjectRef
 
   implicit val formatLocalDateAsSalesforceDate: Format[LocalDate] = new Format[LocalDate] {
     override def reads(jsValue: JsValue): JsResult[LocalDate] =
-      jsValue.validate[String].map(sfDate => LocalDate.parse(sfDate, DateTimeFormat.forPattern(SALESFORCE_DATE_FORMAT)))
+      jsValue.validate[String].map(sfDate => LocalDate.parse(sfDate, SALESFORCE_DATE_FORMATTER))
 
-    override def writes(date: LocalDate): JsValue = JsString(date.toString(SALESFORCE_DATE_FORMAT))
+    override def writes(date: LocalDate): JsValue = JsString(date.format(SALESFORCE_DATE_FORMATTER))
   }
 
   case class HolidayStopRequestStartDate(value: LocalDate) extends AnyVal
@@ -68,7 +68,7 @@ object SalesforceHolidayStopRequest extends Logging {
       sfGet.setupRequestMultiArg(toRequest _).parse[HolidayStopRequestSearchQueryResponse].map(_.records).runRequestMultiArg
 
     def toRequest(date: LocalDate, productNamePrefix: ProductName) = {
-      val sfDate = date.toString(SALESFORCE_DATE_FORMAT)
+      val sfDate = date.format(SALESFORCE_DATE_FORMATTER)
       val soqlQuery = getHolidayStopRequestPrefixSOQL(Some(productNamePrefix)) +
         s"AND Start_Date__c <= $sfDate " +
         s"AND End_Date__c >= $sfDate"

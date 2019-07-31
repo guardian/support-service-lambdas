@@ -7,7 +7,6 @@ import java.time.{DayOfWeek, LocalDate}
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.{HolidayStopRequest, HolidayStopRequestEndDate, HolidayStopRequestStartDate, NewHolidayStopRequest, SubscriptionNameLookup}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
-import com.gu.util.Time
 
 import scala.io.Source
 import scala.util.Try
@@ -50,15 +49,15 @@ object SalesforceHolidayStop {
 
     def isSame(z: ZuoraHolidayStop, sf: HolidayStopRequest): Boolean =
       z.subscriptionName == sf.Subscription_Name__c &&
-        z.startDate == Time.toJavaDate(sf.Start_Date__c.value) &&
-        z.endDate == Time.toJavaDate(sf.End_Date__c.value)
+        z.startDate == sf.Start_Date__c.value &&
+        z.endDate == sf.End_Date__c.value
 
     inZuora
       .filterNot { zuoraStop => inSalesforce.exists { sfStop => isSame(zuoraStop, sfStop) } }
       .map { zuoraStop =>
         NewHolidayStopRequest(
-          HolidayStopRequestStartDate(Time.toJodaDate(zuoraStop.startDate)),
-          HolidayStopRequestEndDate(Time.toJodaDate(zuoraStop.endDate)),
+          HolidayStopRequestStartDate(zuoraStop.startDate),
+          HolidayStopRequestEndDate(zuoraStop.endDate),
           SubscriptionNameLookup(zuoraStop.subscriptionName)
         )
       }
@@ -110,8 +109,8 @@ object SalesforceHolidayStop {
      */
     def correspondingRequest(zStop: ZuoraHolidayStop): Option[HolidayStopRequest] = {
       inSalesforce find { sfStop =>
-        val startDate = Time.toJavaDate(sfStop.Start_Date__c.value)
-        val endDate = Time.toJavaDate(sfStop.End_Date__c.value)
+        val startDate = sfStop.Start_Date__c.value
+        val endDate = sfStop.End_Date__c.value
         sfStop.Subscription_Name__c == zStop.subscriptionName &&
           (startDate.isBefore(zStop.startDate) || startDate.isEqual(zStop.startDate)) &&
           (endDate.isEqual(zStop.endDate) || endDate.isAfter(zStop.endDate))
