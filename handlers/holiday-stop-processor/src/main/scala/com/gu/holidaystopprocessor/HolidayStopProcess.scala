@@ -13,7 +13,7 @@ object HolidayStopProcess {
 
       case Right(zuoraAccessToken) =>
         processHolidayStops(
-          config,
+          config.holidayCreditProduct,
           getHolidayStopRequestsFromSalesforce = Salesforce.holidayStopRequests(config.sfConfig),
           getSubscription = Zuora.subscriptionGetResponse(config, zuoraAccessToken),
           updateSubscription = Zuora.subscriptionUpdateResponse(config, zuoraAccessToken),
@@ -22,7 +22,7 @@ object HolidayStopProcess {
     }
 
   def processHolidayStops(
-    config: Config,
+    holidayCreditProduct: HolidayCreditProduct,
     getHolidayStopRequestsFromSalesforce: ProductName => Either[OverallFailure, Seq[HolidayStopRequestsDetail]],
     getSubscription: SubscriptionName => Either[HolidayStopFailure, Subscription],
     updateSubscription: (Subscription, HolidayCreditUpdate) => Either[HolidayStopFailure, Unit],
@@ -35,7 +35,7 @@ object HolidayStopProcess {
       case Right(holidayStopRequestsFromSalesforce) =>
         val holidayStops = holidayStopRequestsFromSalesforce.distinct.map(HolidayStop(_))
         val alreadyActionedHolidayStops = holidayStopRequestsFromSalesforce.flatMap(_.Charge_Code__c).distinct
-        val allZuoraHolidayStopResponses = holidayStops.map(writeHolidayStopToZuora(config, getSubscription, updateSubscription))
+        val allZuoraHolidayStopResponses = holidayStops.map(writeHolidayStopToZuora(holidayCreditProduct, getSubscription, updateSubscription))
         val successfulZuoraResponses = allZuoraHolidayStopResponses collect { case Right(v) => v } // FIXME: What happens with failures?
         val notAlreadyActionedHolidays = successfulZuoraResponses.filterNot(v => alreadyActionedHolidayStops.contains(v.chargeCode))
         val salesforceExportResult = writeHolidayStopsToSalesforce(notAlreadyActionedHolidays).left.toOption
@@ -47,7 +47,7 @@ object HolidayStopProcess {
    * This is the main business logic for writing holiday stop to Zuora
    */
   def writeHolidayStopToZuora(
-    config: Config,
+    holidayCreditProduct: HolidayCreditProduct,
     getSubscription: SubscriptionName => Either[HolidayStopFailure, Subscription],
     updateSubscription: (Subscription, HolidayCreditUpdate) => Either[HolidayStopFailure, Unit]
   )(stop: HolidayStop): Either[HolidayStopFailure, HolidayStopResponse] =
@@ -57,7 +57,7 @@ object HolidayStopProcess {
       nextInvoiceStartDate <- NextBillingPeriodStartDate(subscription)
       maybeExtendedTerm = ExtendedTerm(nextInvoiceStartDate, subscription)
       holidayCredit = HolidayCredit(subscription)
-      holidayCreditUpdate <- HolidayCreditUpdate(config, subscription, stop.stoppedPublicationDate, nextInvoiceStartDate, maybeExtendedTerm, holidayCredit)
+      holidayCreditUpdate <- HolidayCreditUpdate(holidayCreditProduct, subscription, stop.stoppedPublicationDate, nextInvoiceStartDate, maybeExtendedTerm, holidayCredit)
       _ <- if (subscription.hasHolidayStop(stop)) Right(()) else updateSubscription(subscription, holidayCreditUpdate)
       updatedSubscription <- getSubscription(stop.subscriptionName)
       addedCharge <- updatedSubscription.ratePlanCharge(stop).toRight(HolidayStopFailure("Failed to add charge to subscription"))

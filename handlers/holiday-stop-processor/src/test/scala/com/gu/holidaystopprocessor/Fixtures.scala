@@ -171,7 +171,9 @@ object Fixtures {
   val config = Config(
     zuoraConfig = ZuoraConfig(baseUrl = "", holidayStopProcessor = HolidayStopProcessor(Oauth(clientId = "", clientSecret = ""))),
     sfConfig = SFAuthConfig("", "", "", "", "", ""),
-    holidayCreditProductRatePlanId = "ratePlanId",
-    holidayCreditProductRatePlanChargeId = "ratePlanChargeId"
+    HolidayCreditProduct(
+      productRatePlanId = "ratePlanId",
+      productRatePlanChargeId = "ratePlanChargeId"
+    )
   )
 }

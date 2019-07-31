@@ -16,7 +16,7 @@ case class HolidayCreditUpdate(
 object HolidayCreditUpdate {
 
   def apply(
-    config: Config,
+    holidayCreditProduct: HolidayCreditProduct,
     subscription: Subscription,
     stoppedPublicationDate: LocalDate,
     nextInvoiceStartDate: LocalDate,
@@ -29,13 +29,13 @@ object HolidayCreditUpdate {
         currentTermPeriodType = maybeExtendedTerm.map(_.unit),
         Seq(
           Add(
-            productRatePlanId = config.holidayCreditProductRatePlanId,
+            productRatePlanId = holidayCreditProduct.productRatePlanId,
             contractEffectiveDate = nextInvoiceStartDate,
             customerAcceptanceDate = nextInvoiceStartDate,
             serviceActivationDate = nextInvoiceStartDate,
             chargeOverrides = Seq(
               ChargeOverride(
-                productRatePlanChargeId = config.holidayCreditProductRatePlanChargeId,
+                productRatePlanChargeId = holidayCreditProduct.productRatePlanChargeId,
                 HolidayStart__c = stoppedPublicationDate,
                 HolidayEnd__c = stoppedPublicationDate,
                 price = holidayCredit
