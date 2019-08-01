@@ -55,7 +55,7 @@ object Handler extends Logging {
     for {
       sfAuthConfig <- loadConfig[SFAuthConfig].toApiGatewayOp("load sfAuth config")
       sfClient <- SalesforceClient(response, sfAuthConfig).value.toDisjunction.toApiGatewayOp("authenticate with SalesForce")
-    } yield Operation.noHealthcheck( //TODO add healthcheck (probably just check connectivity to SF)
+    } yield Operation.noHealthcheck( // checking connectivity to SF is sufficient healthcheck so no special steps required
       request => (request.httpMethod match { // TODO will need to match against path params too to support edit endpoint
         case Some("GET") => request.queryStringParameters match {
           case Some(_) => stepsForPotentialHolidayStop _
