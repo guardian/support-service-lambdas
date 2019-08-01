@@ -1,7 +1,9 @@
 package com.gu.salesforce.holiday_stops
 
+import ai.x.play.json.Jsonx
+import com.gu.salesforce.RecordsWrapperCaseClass
 import com.gu.salesforce.SalesforceConstants._
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.SubscriptionName // TODO refactor all these value classes out so they can be re-used without this nasty package tangle
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{ProductName, SubscriptionName}
 import com.gu.util.Logging
 import com.gu.util.resthttp.RestOp._
 import com.gu.util.resthttp.RestRequestMaker._
@@ -13,17 +15,24 @@ object SalesforceSFSubscription extends Logging {
 
   private val sfSubscriptionsSfObjectRef = "SF_Subscription__c"
 
-  object CheckForSubscriptionGivenNameAndIdentityID {
+  object SubscriptionForSubscriptionNameAndIdentityID {
 
-    case class MatchingRecord(Name: SubscriptionName)
-    implicit val readsMatchingRecord = Json.reads[MatchingRecord]
-    case class LookupResponse(records: List[MatchingRecord])
+    case class SFSubscriptionId(value: String) extends AnyVal
+    implicit val formatHolidayStopRequestId = Jsonx.formatInline[SFSubscriptionId]
 
-    def apply(sfGet: HttpOp[RestRequestMaker.GetRequestWithParams, JsValue]): (SubscriptionName, String) => ClientFailableOp[Option[MatchingRecord]] =
-      sfGet.setupRequestMultiArg(toRequest _).parse[LookupResponse](Json.reads[LookupResponse]).map(_.records.headOption).runRequestMultiArg
+    case class MatchingSubscription(
+      Id: SFSubscriptionId,
+      Name: SubscriptionName,
+      Product_Name__c: ProductName,
+    )
+    implicit val readsMatchingSubscription = Json.reads[MatchingSubscription]
+    implicit val readsResults = Json.reads[RecordsWrapperCaseClass[MatchingSubscription]]
+
+    def apply(sfGet: HttpOp[RestRequestMaker.GetRequestWithParams, JsValue]): (SubscriptionName, String) => ClientFailableOp[Option[MatchingSubscription]] =
+      sfGet.setupRequestMultiArg(toRequest _).parse[RecordsWrapperCaseClass[MatchingSubscription]].map(_.records.headOption).runRequestMultiArg
 
     def toRequest(subscriptionName: SubscriptionName, identityID: String) = {
-      val soqlQuery = s"SELECT Name " +
+      val soqlQuery = s"SELECT Id, Name, Product_Name__c " +
         s"FROM $sfSubscriptionsSfObjectRef " +
         s"WHERE Name = '${subscriptionName.value}' " +
         s"AND Buyer__r.IdentityID__c = '$identityID' "

@@ -2,7 +2,7 @@ package com.gu.salesforce.holiday_stops
 
 import ai.x.play.json.Jsonx
 import com.gu.salesforce.SalesforceConstants._
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestId, HolidayStopRequestsDetailSearchQueryResponse, ProductName, SubscriptionName}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
 import com.gu.util.Logging
 import com.gu.util.resthttp.RestOp._
 import com.gu.util.resthttp.RestRequestMaker._
@@ -10,6 +10,11 @@ import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.resthttp.{HttpOp, RestRequestMaker}
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.util.UUID
+
+import com.gu.holiday_stops.ActionCalculator
+import com.gu.salesforce.RecordsWrapperCaseClass
+import com.gu.salesforce.holiday_stops.SalesforceSFSubscription.SubscriptionForSubscriptionNameAndIdentityID.{MatchingSubscription, SFSubscriptionId}
 import play.api.libs.json._
 
 object SalesforceHolidayStopRequest extends Logging {
@@ -18,6 +23,7 @@ object SalesforceHolidayStopRequest extends Logging {
 
   val holidayStopRequestSfObjectRef = "Holiday_Stop_Request__c"
   private val holidayStopRequestSfObjectsBaseUrl = sfObjectsBaseUrl + holidayStopRequestSfObjectRef
+  private val holidayStopRequestCompositeTreeBaseUrl = compositeTreeBaseUrl + holidayStopRequestSfObjectRef
 
   implicit val formatLocalDateAsSalesforceDate: Format[LocalDate] = new Format[LocalDate] {
     override def reads(jsValue: JsValue): JsResult[LocalDate] =
@@ -55,17 +61,20 @@ object SalesforceHolidayStopRequest extends Logging {
     Total_Issues_Publications_Impacted_Count__c: Int,
     Subscription_Name__c: SubscriptionName,
     Product_Name__c: ProductName,
-    Holiday_Stop_Request_Detail__r: Option[HolidayStopRequestsDetailSearchQueryResponse]
+    Holiday_Stop_Request_Detail__r: Option[RecordsWrapperCaseClass[HolidayStopRequestsDetail]]
   )
   implicit val reads = Json.reads[HolidayStopRequest]
 
-  private case class HolidayStopRequestSearchQueryResponse(records: List[HolidayStopRequest])
-  private implicit val readsIds = Json.reads[HolidayStopRequestSearchQueryResponse]
+  private implicit val readsIds = Json.reads[RecordsWrapperCaseClass[HolidayStopRequest]]
 
   object LookupByDateAndProductNamePrefix {
 
     def apply(sfGet: HttpOp[RestRequestMaker.GetRequestWithParams, JsValue]): (LocalDate, ProductName) => ClientFailableOp[List[HolidayStopRequest]] =
-      sfGet.setupRequestMultiArg(toRequest _).parse[HolidayStopRequestSearchQueryResponse].map(_.records).runRequestMultiArg
+      sfGet
+        .setupRequestMultiArg(toRequest _)
+        .parse[RecordsWrapperCaseClass[HolidayStopRequest]](Json.reads[RecordsWrapperCaseClass[HolidayStopRequest]])
+        .map(_.records)
+        .runRequestMultiArg
 
     def toRequest(date: LocalDate, productNamePrefix: ProductName) = {
       val sfDate = date.format(SALESFORCE_DATE_FORMATTER)
@@ -81,7 +90,11 @@ object SalesforceHolidayStopRequest extends Logging {
   object LookupByProductNamePrefix {
 
     def apply(sfGet: HttpOp[RestRequestMaker.GetRequestWithParams, JsValue]): ProductName => ClientFailableOp[List[HolidayStopRequest]] =
-      sfGet.setupRequest(toRequest).parse[HolidayStopRequestSearchQueryResponse].map(_.records).runRequest
+      sfGet
+        .setupRequest(toRequest)
+        .parse[RecordsWrapperCaseClass[HolidayStopRequest]]
+        .map(_.records)
+        .runRequest
 
     def toRequest(productNamePrefix: ProductName) = {
       val soqlQuery = getHolidayStopRequestPrefixSOQL(Some(productNamePrefix))
@@ -93,7 +106,7 @@ object SalesforceHolidayStopRequest extends Logging {
   object LookupByIdentityIdAndOptionalSubscriptionName {
 
     def apply(sfGet: HttpOp[RestRequestMaker.GetRequestWithParams, JsValue]): (String, Option[SubscriptionName]) => ClientFailableOp[List[HolidayStopRequest]] =
-      sfGet.setupRequestMultiArg(toRequest _).parse[HolidayStopRequestSearchQueryResponse].map(_.records).runRequestMultiArg
+      sfGet.setupRequestMultiArg(toRequest _).parse[RecordsWrapperCaseClass[HolidayStopRequest]].map(_.records).runRequestMultiArg
 
     def toRequest(identityId: String, optionalSubscriptionName: Option[SubscriptionName]) = {
       val soqlQuery = getHolidayStopRequestPrefixSOQL() +
@@ -108,22 +121,64 @@ object SalesforceHolidayStopRequest extends Logging {
   case class SubscriptionNameLookup(Name: SubscriptionName)
   implicit val writesSubNameLookup = Json.writes[SubscriptionNameLookup]
 
-  case class NewHolidayStopRequest(
+  case class CompositeAttributes(
+    `type`: String,
+    referenceId: String
+  )
+  implicit val writesCompositeAttributes = Json.writes[CompositeAttributes]
+
+  case class CompositeTreeHolidayStopRequestsDetail(
+    Stopped_Publication_Date__c: LocalDate,
+    attributes: CompositeAttributes = CompositeAttributes(
+      SalesforceHolidayStopRequestsDetail.holidayStopRequestsDetailSfObjectRef,
+      UUID.randomUUID().toString
+    )
+  )
+  implicit val writesCompositeTreeHolidayStopRequestsDetail = Json.writes[CompositeTreeHolidayStopRequestsDetail]
+
+  case class CompositeTreeHolidayStopRequest(
     Start_Date__c: HolidayStopRequestStartDate,
     End_Date__c: HolidayStopRequestEndDate,
-    SF_Subscription__r: SubscriptionNameLookup
+    SF_Subscription__c: SFSubscriptionId, // TODO attempt to reinstate the __r with SubscriptionNameLookup approach (so it can be reused in back-fill without sep. lookup call first
+    Holiday_Stop_Request_Detail__r: RecordsWrapperCaseClass[CompositeTreeHolidayStopRequestsDetail],
+    attributes: CompositeAttributes = CompositeAttributes(holidayStopRequestSfObjectRef, holidayStopRequestSfObjectRef)
   )
-  implicit val writesNew = Json.writes[NewHolidayStopRequest]
+  implicit val writesNewHolidayStopRequestsDetail = Json.writes[RecordsWrapperCaseClass[CompositeTreeHolidayStopRequestsDetail]]
+  implicit val writesCompositeTreeHolidayStopRequest = Json.writes[CompositeTreeHolidayStopRequest]
+  implicit val writesNewHolidayStopRequest = Json.writes[RecordsWrapperCaseClass[CompositeTreeHolidayStopRequest]]
 
-  object CreateHolidayStopRequest {
+  object CreateHolidayStopRequestWithDetail {
 
-    case class CreateHolidayStopRequestResult(id: HolidayStopRequestId)
+    case class CreateHolidayStopRequestResultIdWrapper(
+      id: HolidayStopRequestId,
+      referenceId: String
+    )
+    implicit val readsCreateHolidayStopRequestResultIdWrapper = Json.reads[CreateHolidayStopRequestResultIdWrapper]
+    case class CreateHolidayStopRequestResult(results: List[CreateHolidayStopRequestResultIdWrapper])
     implicit val reads = Json.reads[CreateHolidayStopRequestResult]
 
-    def apply(sfPost: HttpOp[RestRequestMaker.PostRequest, JsValue]): NewHolidayStopRequest => ClientFailableOp[HolidayStopRequestId] =
-      sfPost.setupRequest[NewHolidayStopRequest] { newHolidayStopRequest =>
-        PostRequest(newHolidayStopRequest, RelativePath(holidayStopRequestSfObjectsBaseUrl))
-      }.parse[CreateHolidayStopRequestResult].map(_.id).runRequest
+    def apply(sfPost: HttpOp[RestRequestMaker.PostRequest, JsValue]): RecordsWrapperCaseClass[CompositeTreeHolidayStopRequest] => ClientFailableOp[HolidayStopRequestId] =
+      sfPost.setupRequest[RecordsWrapperCaseClass[CompositeTreeHolidayStopRequest]] { createHolidayStopRequestWithDetail =>
+        PostRequest(createHolidayStopRequestWithDetail, RelativePath(holidayStopRequestCompositeTreeBaseUrl))
+      }
+        .parse[CreateHolidayStopRequestResult]
+        .map(_.results.find(_.referenceId == holidayStopRequestSfObjectRef).map(_.id).get) //FIXME refactor this to map None to ClientFailure rather than nasty .get
+        .runRequest
+
+    def buildBody(start: LocalDate, end: LocalDate, subscription: MatchingSubscription) = RecordsWrapperCaseClass(List(
+      CompositeTreeHolidayStopRequest(
+        Start_Date__c = HolidayStopRequestStartDate(start),
+        End_Date__c = HolidayStopRequestEndDate(end),
+        SF_Subscription__c = subscription.Id,
+        Holiday_Stop_Request_Detail__r = RecordsWrapperCaseClass(
+          ActionCalculator.publicationDatesToBeStopped(
+            start,
+            end,
+            subscription.Product_Name__c
+          ).map(CompositeTreeHolidayStopRequestsDetail(_))
+        )
+      )
+    ))
 
   }
 
@@ -133,6 +188,31 @@ object SalesforceHolidayStopRequest extends Logging {
       sfDelete.setupRequest[HolidayStopRequestId] { holidayStopRequestId =>
         DeleteRequest(RelativePath(s"$holidayStopRequestSfObjectsBaseUrl/${holidayStopRequestId.value}"))
       }.runRequest
+
+  }
+
+  //
+  // TODO refactor these out by reworking back-fill to to use composite tree approach above (but also passing in the Charge_Code__c & Actual_Price__c for the inner records)
+  //
+
+  @Deprecated
+  case class NewHolidayStopRequest(
+    Start_Date__c: HolidayStopRequestStartDate,
+    End_Date__c: HolidayStopRequestEndDate,
+    SF_Subscription__r: SubscriptionNameLookup
+  )
+  implicit val writesNew = Json.writes[NewHolidayStopRequest]
+
+  @Deprecated
+  object CreateHolidayStopRequest {
+
+    case class CreateHolidayStopRequestResult(id: HolidayStopRequestId)
+    implicit val reads = Json.reads[CreateHolidayStopRequestResult]
+
+    def apply(sfPost: HttpOp[RestRequestMaker.PostRequest, JsValue]): NewHolidayStopRequest => ClientFailableOp[HolidayStopRequestId] =
+      sfPost.setupRequest[NewHolidayStopRequest] { newHolidayStopRequest =>
+        PostRequest(newHolidayStopRequest, RelativePath(holidayStopRequestSfObjectsBaseUrl))
+      }.parse[CreateHolidayStopRequestResult].map(_.id).runRequest
 
   }
 

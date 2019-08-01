@@ -8,7 +8,7 @@ import play.api.libs.json.{Json, OWrites, Reads}
 
 object WireHolidayStopRequest {
 
-  def fromSF(sfHolidayStopRequest: HolidayStopRequest): HolidayStopRequestFull = HolidayStopRequestFull(
+  def apply(sfHolidayStopRequest: HolidayStopRequest): HolidayStopRequestFull = HolidayStopRequestFull(
     id = sfHolidayStopRequest.Id.value,
     start = sfHolidayStopRequest.Start_Date__c.value,
     end = sfHolidayStopRequest.End_Date__c.value,
@@ -21,12 +21,6 @@ object WireHolidayStopRequest {
     publicationsImpacted = sfHolidayStopRequest.Holiday_Stop_Request_Detail__r.map(_.records.map(detail => HolidayStopRequestsDetail(
       publicationDate = detail.Stopped_Publication_Date__c.value
     ))).getOrElse(List())
-  )
-
-  def toSF(holidayStopRequest: HolidayStopRequestPartial): NewHolidayStopRequest = NewHolidayStopRequest(
-    Start_Date__c = HolidayStopRequestStartDate(holidayStopRequest.start),
-    End_Date__c = HolidayStopRequestEndDate(holidayStopRequest.end),
-    SF_Subscription__r = SubscriptionNameLookup(holidayStopRequest.subscriptionName)
   )
 
   def calculateMutabilityFlags(firstAvailableDate: LocalDate, actionedCount: Int, endDate: LocalDate): MutabilityFlags = {
@@ -43,47 +37,47 @@ object WireHolidayStopRequest {
 }
 
 case class MutabilityFlags(
-                            isDeletable: Boolean,
-                            isEditable: Boolean
-                          )
+  isDeletable: Boolean,
+  isEditable: Boolean
+)
 object MutabilityFlags {
   implicit val writes: OWrites[MutabilityFlags] = Json.writes[MutabilityFlags]
 }
 
 
 case class HolidayStopRequestsDetail(
-                                      publicationDate: LocalDate,
-                                      // TODO add other fields
-                                    )
+  publicationDate: LocalDate,
+  // TODO add other fields
+)
 object HolidayStopRequestsDetail{
   implicit val writes: OWrites[HolidayStopRequestsDetail] = Json.writes[HolidayStopRequestsDetail]
 }
 
 case class HolidayStopRequestPartial(
-                                      start: LocalDate,
-                                      end: LocalDate,
-                                      subscriptionName: SubscriptionName
-                                    )
+  start: LocalDate,
+  end: LocalDate,
+  subscriptionName: SubscriptionName
+)
 object HolidayStopRequestPartial{
   implicit val reads: Reads[HolidayStopRequestPartial] = Json.reads[HolidayStopRequestPartial]
 }
 
 case class HolidayStopRequestFull(
-                                   id: String,
-                                   start: LocalDate,
-                                   end: LocalDate,
-                                   subscriptionName: SubscriptionName,
-                                   mutabilityFlags: MutabilityFlags,
-                                   publicationsImpacted: List[HolidayStopRequestsDetail]
-                                 )
+  id: String,
+  start: LocalDate,
+  end: LocalDate,
+  subscriptionName: SubscriptionName,
+  mutabilityFlags: MutabilityFlags,
+  publicationsImpacted: List[HolidayStopRequestsDetail]
+)
 object HolidayStopRequestFull{
   implicit val writes: OWrites[HolidayStopRequestFull] = Json.writes[HolidayStopRequestFull]
 }
 
 case class GetHolidayStopRequests(
-                                   productSpecifics: Option[ProductSpecifics],
-                                   existing: List[HolidayStopRequestFull]
-                                 )
+  productSpecifics: Option[ProductSpecifics],
+  existing: List[HolidayStopRequestFull]
+)
 object GetHolidayStopRequests {
 
   def apply(holidayStopRequests: List[HolidayStopRequest], optionalProductNamePrefix: Option[ProductName]): GetHolidayStopRequests = {
@@ -92,7 +86,7 @@ object GetHolidayStopRequests {
     )
     GetHolidayStopRequests(
       optionalProductSpecifics,
-      holidayStopRequests.map(WireHolidayStopRequest.fromSF)
+      holidayStopRequests.map(WireHolidayStopRequest.apply)
     )
   }
 

@@ -2,7 +2,6 @@ package com.gu.holiday_stops
 
 import java.time.temporal.ChronoUnit
 
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.HolidayStopRequest
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.ProductName
 import java.time.{DayOfWeek, LocalDate}
 
@@ -10,7 +9,6 @@ case class ProductSpecifics(
   firstAvailableDate: LocalDate,
   issueDayOfWeek: Int,
   annualIssueLimit: Int
-// TODO consider adding 'perIssueCost' (would need to be Zuora amendment preview to be accurate)
 )
 
 object ActionCalculator {
@@ -49,12 +47,6 @@ object ActionCalculator {
       productSuspensionConstants.annualIssueLimit
     )
   }
-
-  def publicationDatesToBeStopped(hsr: HolidayStopRequest): List[LocalDate] = publicationDatesToBeStopped(
-    hsr.Start_Date__c.value,
-    hsr.End_Date__c.value,
-    hsr.Product_Name__c
-  )
 
   def publicationDatesToBeStopped(
     fromInclusive: LocalDate,

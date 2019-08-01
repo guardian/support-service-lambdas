@@ -1,9 +1,8 @@
 package com.gu.holiday_stops
 
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestId, HolidayStopRequestsDetailSearchQueryResponse, ProductName, SubscriptionName}
 import java.time.{DayOfWeek, LocalDate}
 
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.ProductName
 import org.scalatest.{FlatSpec, Matchers}
 
 class ActionCalculatorTest extends FlatSpec with Matchers {
