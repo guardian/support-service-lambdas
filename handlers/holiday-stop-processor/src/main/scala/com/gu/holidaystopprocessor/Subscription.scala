@@ -9,7 +9,7 @@ case class Subscription(
   currentTerm: Int,
   currentTermPeriodType: String,
   autoRenew: Boolean,
-  ratePlans: Seq[RatePlan]
+  ratePlans: List[RatePlan]
 ) {
 
   val originalRatePlanCharge: Option[RatePlanCharge] = {
@@ -47,7 +47,7 @@ case class Subscription(
 
 case class RatePlan(
   productName: String,
-  ratePlanCharges: Seq[RatePlanCharge]
+  ratePlanCharges: List[RatePlanCharge]
 )
 
 case class RatePlanCharge(

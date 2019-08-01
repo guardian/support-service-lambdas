@@ -6,12 +6,12 @@ import io.circe.generic.auto._
 import io.github.mkotsur.aws.handler.Lambda
 import io.github.mkotsur.aws.handler.Lambda._
 
-object Handler extends Lambda[None.type, Seq[HolidayStopResponse]] {
+object Handler extends Lambda[None.type, List[HolidayStopResponse]] {
 
   override protected def handle(
     `_`: None.type,
     context: Context
-  ): Either[Throwable, Seq[HolidayStopResponse]] = {
+  ): Either[Throwable, List[HolidayStopResponse]] = {
     Config() match {
       case Left(msg) => Left(new RuntimeException(s"Config failure: $msg"))
       case Right(config) =>

@@ -4,6 +4,6 @@ import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.NewHolidaySt
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.ActionedHolidayStopRequestsDetailToBackfill
 
 case class BackfillResult(
-  requests: Seq[NewHolidayStopRequest],
-  zuoraRefs: Seq[ActionedHolidayStopRequestsDetailToBackfill]
+  requests: List[NewHolidayStopRequest],
+  zuoraRefs: List[ActionedHolidayStopRequestsDetailToBackfill]
 )

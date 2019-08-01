@@ -5,7 +5,7 @@ import java.time.LocalDate
 case class HolidayCreditUpdate(
   currentTerm: Option[Int],
   currentTermPeriodType: Option[String],
-  add: Seq[Add]
+  add: List[Add]
 )
 
 /**
@@ -27,13 +27,13 @@ object HolidayCreditUpdate {
       HolidayCreditUpdate(
         currentTerm = maybeExtendedTerm.map(_.length),
         currentTermPeriodType = maybeExtendedTerm.map(_.unit),
-        Seq(
+        List(
           Add(
             productRatePlanId = holidayCreditProduct.productRatePlanId,
             contractEffectiveDate = nextInvoiceStartDate,
             customerAcceptanceDate = nextInvoiceStartDate,
             serviceActivationDate = nextInvoiceStartDate,
-            chargeOverrides = Seq(
+            chargeOverrides = List(
               ChargeOverride(
                 productRatePlanChargeId = holidayCreditProduct.productRatePlanChargeId,
                 HolidayStart__c = stoppedPublicationDate,
@@ -53,7 +53,7 @@ case class Add(
   contractEffectiveDate: LocalDate,
   customerAcceptanceDate: LocalDate,
   serviceActivationDate: LocalDate,
-  chargeOverrides: Seq[ChargeOverride]
+  chargeOverrides: List[ChargeOverride]
 )
 
 case class ChargeOverride(

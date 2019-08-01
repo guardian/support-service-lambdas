@@ -16,7 +16,7 @@ case class ZuoraHolidayStop(subscriptionName: SubscriptionName, chargeNumber: Ho
 
 object ZuoraHolidayStop {
 
-  def holidayStopsAlreadyInZuora(src: File): Seq[ZuoraHolidayStop] = {
+  def holidayStopsAlreadyInZuora(src: File): List[ZuoraHolidayStop] = {
     val source = Source.fromFile(src, "UTF-16")
     val stops = for {
       line <- source.getLines.drop(1).toList
@@ -42,11 +42,11 @@ object ZuoraHolidayStop {
 
 object SalesforceHolidayStop {
 
-  def holidayStopRequestsAlreadyInSalesforce(sfCredentials: SFAuthConfig): Either[SalesforceFetchFailure, Seq[HolidayStopRequest]] = {
+  def holidayStopRequestsAlreadyInSalesforce(sfCredentials: SFAuthConfig): Either[SalesforceFetchFailure, List[HolidayStopRequest]] = {
     Salesforce.holidayStopRequestsByProduct(sfCredentials)(ProductName("Guardian Weekly"))
   }
 
-  def holidayStopRequestsToBeBackfilled(inZuora: Seq[ZuoraHolidayStop], inSalesforce: Seq[HolidayStopRequest]): Seq[NewHolidayStopRequest] = {
+  def holidayStopRequestsToBeBackfilled(inZuora: List[ZuoraHolidayStop], inSalesforce: List[HolidayStopRequest]): List[NewHolidayStopRequest] = {
 
     def isSame(z: ZuoraHolidayStop, sf: HolidayStopRequest): Boolean =
       z.subscriptionName == sf.Subscription_Name__c &&
@@ -78,7 +78,7 @@ object SalesforceHolidayStop {
     }
   }
 
-  def detailsToBeBackfilled(inZuora: Seq[ZuoraHolidayStop], inSalesforce: Seq[HolidayStopRequest]): Seq[ActionedHolidayStopRequestsDetailToBackfill] = {
+  def detailsToBeBackfilled(inZuora: List[ZuoraHolidayStop], inSalesforce: List[HolidayStopRequest]): List[ActionedHolidayStopRequestsDetailToBackfill] = {
 
     /*
      * We take legacy holiday stops that have a range of dates
@@ -86,7 +86,7 @@ object SalesforceHolidayStop {
      * that falls into that date range.
      * Then we divide the credit price equally into each of the new holiday stops.
      */
-    val stoppedPublications = inZuora.foldLeft(Seq.empty[ZuoraHolidayStop]) { (acc, stop) =>
+    val stoppedPublications = inZuora.foldLeft(List.empty[ZuoraHolidayStop]) { (acc, stop) =>
       val stopDates = applicableDates(stop.startDate, stop.endDate, { _.getDayOfWeek == DayOfWeek.FRIDAY })
       val stops = stopDates map { date =>
         ZuoraHolidayStop(stop.subscriptionName, stop.chargeNumber, date, date, stop.creditPrice / stopDates.length)
@@ -143,7 +143,7 @@ object SalesforceHolidayStop {
     details.distinct
   }
 
-  def holidayStopRequestsAddedToSalesforce(sfCredentials: SFAuthConfig, dryRun: Boolean)(requests: Seq[NewHolidayStopRequest]): Either[SalesforceUpdateFailure, Unit] =
+  def holidayStopRequestsAddedToSalesforce(sfCredentials: SFAuthConfig, dryRun: Boolean)(requests: List[NewHolidayStopRequest]): Either[SalesforceUpdateFailure, Unit] =
     if (dryRun) {
       println("++++++++++++++++++++++++++++++")
       requests.foreach(println)
@@ -151,7 +151,7 @@ object SalesforceHolidayStop {
       Right(())
     } else Salesforce.holidayStopCreateResponse(sfCredentials)(requests)
 
-  def detailsAddedToSalesforce(sfCredentials: SFAuthConfig, dryRun: Boolean)(details: Seq[ActionedHolidayStopRequestsDetailToBackfill]): Either[SalesforceUpdateFailure, Unit] =
+  def detailsAddedToSalesforce(sfCredentials: SFAuthConfig, dryRun: Boolean)(details: List[ActionedHolidayStopRequestsDetailToBackfill]): Either[SalesforceUpdateFailure, Unit] =
     if (dryRun) {
       println("-----------------------------")
       details.foreach(println)

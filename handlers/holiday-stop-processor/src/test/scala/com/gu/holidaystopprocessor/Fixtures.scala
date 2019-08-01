@@ -38,11 +38,11 @@ object Fixtures {
       currentTerm = 12,
       currentTermPeriodType = "Month",
       autoRenew = true,
-      ratePlans = Seq(
+      ratePlans = List(
         RatePlan(
           productName = "Guardian Weekly",
           ratePlanCharges =
-            Seq(mkRatePlanCharge(
+            List(mkRatePlanCharge(
               price,
               billingPeriod,
               chargedThroughDate
@@ -58,10 +58,10 @@ object Fixtures {
     currentTerm = 12,
     currentTermPeriodType = "Month",
     autoRenew = true,
-    ratePlans = Seq(
+    ratePlans = List(
       RatePlan(
         productName = "Discounts",
-        ratePlanCharges = Seq(RatePlanCharge(
+        ratePlanCharges = List(RatePlanCharge(
           name = "Holiday Credit",
           number = "C2",
           price = -3.27,
@@ -74,7 +74,7 @@ object Fixtures {
       ),
       RatePlan(
         productName = "Not a discount",
-        ratePlanCharges = Seq(RatePlanCharge(
+        ratePlanCharges = List(RatePlanCharge(
           name = "Holiday Credit",
           number = "C29",
           price = -3.27,
@@ -87,7 +87,7 @@ object Fixtures {
       ),
       RatePlan(
         productName = "Discounts",
-        ratePlanCharges = Seq(RatePlanCharge(
+        ratePlanCharges = List(RatePlanCharge(
           name = "Some other discount",
           number = "C73",
           price = -5.81,
@@ -100,7 +100,7 @@ object Fixtures {
       ),
       RatePlan(
         productName = "Discounts",
-        ratePlanCharges = Seq(RatePlanCharge(
+        ratePlanCharges = List(RatePlanCharge(
           name = "Holiday Credit",
           number = "C3",
           price = -5.81,
@@ -113,7 +113,7 @@ object Fixtures {
       ),
       RatePlan(
         productName = "Discounts",
-        ratePlanCharges = Seq(RatePlanCharge(
+        ratePlanCharges = List(RatePlanCharge(
           name = "Holiday Credit",
           number = "C987",
           price = -4.92,
@@ -126,7 +126,7 @@ object Fixtures {
       ),
       RatePlan(
         productName = "Guardian Weekly",
-        ratePlanCharges = Seq(mkRatePlanCharge(
+        ratePlanCharges = List(mkRatePlanCharge(
           price = 42.7,
           billingPeriod = "Quarter",
           chargedThroughDate = Some(LocalDate.of(2019, 9, 7))

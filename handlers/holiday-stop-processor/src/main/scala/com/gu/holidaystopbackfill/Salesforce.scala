@@ -11,7 +11,7 @@ import scalaz.{-\/, \/-}
 
 object Salesforce {
 
-  def holidayStopRequestsByProduct(sfCredentials: SFAuthConfig)(productNamePrefix: ProductName): Either[SalesforceFetchFailure, Seq[HolidayStopRequest]] =
+  def holidayStopRequestsByProduct(sfCredentials: SFAuthConfig)(productNamePrefix: ProductName): Either[SalesforceFetchFailure, List[HolidayStopRequest]] =
     SalesforceClient(RawEffects.response, sfCredentials).value.flatMap { sfAuth =>
       val sfGet = sfAuth.wrapWith(JsonHttp.getWithParams)
       val fetchOp = SalesforceHolidayStopRequest.LookupByProductNamePrefix(sfGet)
@@ -21,7 +21,7 @@ object Salesforce {
       case \/-(requests) => Right(requests)
     }
 
-  def holidayStopDetailsCreateResponse(sfCredentials: SFAuthConfig)(details: Seq[ActionedHolidayStopRequestsDetailToBackfill]): Either[SalesforceUpdateFailure, Unit] =
+  def holidayStopDetailsCreateResponse(sfCredentials: SFAuthConfig)(details: List[ActionedHolidayStopRequestsDetailToBackfill]): Either[SalesforceUpdateFailure, Unit] =
     SalesforceClient(RawEffects.response, sfCredentials).value.map { sfAuth =>
       val sfPost = sfAuth.wrapWith(JsonHttp.post)
       val sendOp = SalesforceHolidayStopRequestsDetail.BackfillActionedSalesforceHolidayStopRequestsDetail(sfPost)
@@ -31,7 +31,7 @@ object Salesforce {
       case _ => Right(())
     }
 
-  def holidayStopCreateResponse(sfCredentials: SFAuthConfig)(requests: Seq[NewHolidayStopRequest]): Either[SalesforceUpdateFailure, Unit] =
+  def holidayStopCreateResponse(sfCredentials: SFAuthConfig)(requests: List[NewHolidayStopRequest]): Either[SalesforceUpdateFailure, Unit] =
     SalesforceClient(RawEffects.response, sfCredentials).value.map { sfAuth =>
       val sfGet = sfAuth.wrapWith(JsonHttp.post)
       val createOp = CreateHolidayStopRequest(sfGet)
