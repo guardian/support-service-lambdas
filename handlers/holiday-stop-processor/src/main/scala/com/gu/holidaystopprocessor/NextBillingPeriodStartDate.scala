@@ -21,10 +21,10 @@ import java.time.LocalDate
  * or billingPeriodStartDay (1st of month).
  */
 object NextBillingPeriodStartDate {
-  def apply(subscription: Subscription): Either[HolidayStopFailure, LocalDate] = {
+  def apply(subscription: Subscription): Either[ZuoraHolidayWriteError, LocalDate] = {
     subscription
       .originalRatePlanCharge
       .flatMap(_.chargedThroughDate)
-      .toRight(HolidayStopFailure("Original rate plan charge has no charged through date. A bill run is needed to fix this."))
+      .toRight(ZuoraHolidayWriteError("Original rate plan charge has no charged through date. A bill run is needed to fix this."))
   }
 }

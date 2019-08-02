@@ -2,7 +2,7 @@ package com.gu.holidaystopprocessor
 
 import com.typesafe.scalalogging.LazyLogging
 
-case class ProcessResult(holidayStopsToApply: List[HolidayStop], holidayStopResults: List[Either[HolidayStopFailure, HolidayStopResponse]], resultsToExport: List[HolidayStopResponse], overallFailure: Option[OverallFailure])
+case class ProcessResult(holidayStopsToApply: List[HolidayStop], holidayStopResults: List[Either[ZuoraHolidayWriteError, HolidayStopResponse]], resultsToExport: List[HolidayStopResponse], overallFailure: Option[OverallFailure])
 
 object ProcessResult extends LazyLogging {
   def apply(failure: OverallFailure): ProcessResult =

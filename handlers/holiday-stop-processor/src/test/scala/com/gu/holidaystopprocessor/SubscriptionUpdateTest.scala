@@ -58,7 +58,7 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers {
       chargedThroughDate = None
     )
     val nextInvoiceStartDate = NextBillingPeriodStartDate(subscription)
-    nextInvoiceStartDate shouldBe Left(HolidayStopFailure(
+    nextInvoiceStartDate shouldBe Left(ZuoraHolidayWriteError(
       "Original rate plan charge has no charged through date. A bill run is needed to fix this."
     ))
   }
