@@ -22,7 +22,7 @@ object HolidayCreditUpdate {
     nextInvoiceStartDate: LocalDate,
     maybeExtendedTerm: Option[ExtendedTerm],
     holidayCredit: Double
-  ): Either[HolidayStopFailure, HolidayCreditUpdate] = {
+  ): Either[ZuoraHolidayWriteError, HolidayCreditUpdate] = {
     Right(
       HolidayCreditUpdate(
         currentTerm = maybeExtendedTerm.map(_.length),

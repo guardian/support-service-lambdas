@@ -19,34 +19,34 @@ object Zuora {
       .response(asJson[AccessToken])
       .mapResponse(_.left.map(e => OverallFailure(e.message)))
       .send()
-      .body.left.map(OverallFailure)
+      .body.left.map(e => OverallFailure(e))
       .joinRight
   }
 
-  def subscriptionGetResponse(config: Config, accessToken: AccessToken)(subscriptionName: SubscriptionName): Either[HolidayStopFailure, Subscription] = {
+  def subscriptionGetResponse(config: Config, accessToken: AccessToken)(subscriptionName: SubscriptionName): Either[ZuoraHolidayWriteError, Subscription] = {
     sttp.get(uri"${config.zuoraConfig.baseUrl}/subscriptions/${subscriptionName.value}")
       .header("Authorization", s"Bearer ${accessToken.access_token}")
       .response(asJson[Subscription])
-      .mapResponse(_.left.map(e => HolidayStopFailure(e.message)))
+      .mapResponse(_.left.map(e => ZuoraHolidayWriteError(e.message)))
       .send()
-      .body.left.map(HolidayStopFailure)
+      .body.left.map(ZuoraHolidayWriteError)
       .joinRight
   }
 
-  def subscriptionUpdateResponse(config: Config, accessToken: AccessToken)(subscription: Subscription, update: HolidayCreditUpdate): Either[HolidayStopFailure, Unit] = {
+  def subscriptionUpdateResponse(config: Config, accessToken: AccessToken)(subscription: Subscription, update: HolidayCreditUpdate): Either[ZuoraHolidayWriteError, Unit] = {
     val errMsg = (reason: String) => s"Failed to update subscription '${subscription.subscriptionNumber}' with $update. Reason: $reason"
     sttp.put(uri"${config.zuoraConfig.baseUrl}/subscriptions/${subscription.subscriptionNumber}")
       .header("Authorization", s"Bearer ${accessToken.access_token}")
       .body(update)
       .response(asJson[ZuoraStatusResponse])
       .mapResponse {
-        case Left(e) => Left(HolidayStopFailure(errMsg(e.message)))
+        case Left(e) => Left(ZuoraHolidayWriteError(errMsg(e.message)))
         case Right(status) =>
           if (status.success) Right(())
-          else Left(HolidayStopFailure(errMsg(status.reasons.map(_.mkString).getOrElse(""))))
+          else Left(ZuoraHolidayWriteError(errMsg(status.reasons.map(_.mkString).getOrElse(""))))
       }
       .send()
-      .body.left.map(reason => HolidayStopFailure(errMsg(reason)))
+      .body.left.map(reason => ZuoraHolidayWriteError(errMsg(reason)))
       .joinRight
   }
 }

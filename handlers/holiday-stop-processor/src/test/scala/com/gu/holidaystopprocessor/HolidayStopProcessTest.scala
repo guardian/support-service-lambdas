@@ -27,17 +27,17 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
   private def getRequests(requestsGet: Either[OverallFailure, List[HolidayStopRequestsDetail]]): ProductName => Either[OverallFailure, List[HolidayStopRequestsDetail]] =
     _ => requestsGet
 
-  private def getSubscription(subscriptionGet: Either[HolidayStopFailure, Subscription]): SubscriptionName => Either[HolidayStopFailure, Subscription] = {
+  private def getSubscription(subscriptionGet: Either[ZuoraHolidayWriteError, Subscription]): SubscriptionName => Either[ZuoraHolidayWriteError, Subscription] = {
     _ => subscriptionGet
   }
 
   private def updateSubscription(
-    subscriptionUpdate: Either[HolidayStopFailure, Unit]
-  ): (Subscription, HolidayCreditUpdate) => Either[HolidayStopFailure, Unit] = {
+    subscriptionUpdate: Either[ZuoraHolidayWriteError, Unit]
+  ): (Subscription, HolidayCreditUpdate) => Either[ZuoraHolidayWriteError, Unit] = {
     case (_, _) => subscriptionUpdate
   }
 
-  private def exportAmendments(amendmentExport: Either[OverallFailure, Unit]): List[HolidayStopResponse] => Either[OverallFailure, Unit] =
+  private def exportAmendments(amendmentExport: Either[SalesforceHolidayWriteError, Unit]): List[HolidayStopResponse] => Either[SalesforceHolidayWriteError, Unit] =
     _ => amendmentExport
 
   "HolidayStopProcess" should "give correct added charge" in {
@@ -61,18 +61,18 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
     val response = HolidayStopProcess.writeHolidayStopToZuora(
       config.holidayCreditProduct,
       getSubscription(Right(subscription)),
-      updateSubscription(Left(HolidayStopFailure("update went wrong")))
+      updateSubscription(Left(ZuoraHolidayWriteError("update went wrong")))
     )(holidayStop)
-    response.left.value shouldBe HolidayStopFailure("update went wrong")
+    response.left.value shouldBe ZuoraHolidayWriteError("update went wrong")
   }
 
   it should "give an exception message if getting subscription details fails" in {
     val response = HolidayStopProcess.writeHolidayStopToZuora(
       config.holidayCreditProduct,
-      getSubscription(Left(HolidayStopFailure("get went wrong"))),
+      getSubscription(Left(ZuoraHolidayWriteError("get went wrong"))),
       updateSubscription(Right(()))
     )(holidayStop)
-    response.left.value shouldBe HolidayStopFailure("get went wrong")
+    response.left.value shouldBe ZuoraHolidayWriteError("get went wrong")
   }
 
   it should "give an exception message if subscription isn't auto-renewing" in {
@@ -82,14 +82,14 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
       updateSubscription(Right(()))
     )(holidayStop)
     response.left.value shouldBe
-      HolidayStopFailure("Cannot currently process non-auto-renewing subscription")
+      ZuoraHolidayWriteError("Cannot currently process non-auto-renewing subscription")
   }
 
   it should "just give charge added without applying an update if holiday stop has already been applied" in {
     val response = HolidayStopProcess.writeHolidayStopToZuora(
       config.holidayCreditProduct,
       getSubscription(Right(Fixtures.mkSubscriptionWithHolidayStops())),
-      updateSubscription(Left(HolidayStopFailure("shouldn't need to apply an update")))
+      updateSubscription(Left(ZuoraHolidayWriteError("shouldn't need to apply an update")))
     )(holidayStop)
     response.right.value shouldBe HolidayStopResponse(
       requestId = HolidayStopRequestsDetailId("HSR1"),
@@ -106,9 +106,9 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
     val response = HolidayStopProcess.writeHolidayStopToZuora(
       config.holidayCreditProduct,
       getSubscription(Right(subscription)),
-      updateSubscription(Left(HolidayStopFailure("shouldn't need to apply an update")))
+      updateSubscription(Left(ZuoraHolidayWriteError("shouldn't need to apply an update")))
     )(holidayStop)
-    response.left.value shouldBe HolidayStopFailure("shouldn't need to apply an update")
+    response.left.value shouldBe ZuoraHolidayWriteError("shouldn't need to apply an update")
   }
 
   "processHolidayStops" should "give correct charges added" in {
@@ -178,7 +178,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
       ))),
       getSubscription(Right(subscription)),
       updateSubscription(Right(())),
-      exportAmendments(Left(OverallFailure("Export failed")))
+      exportAmendments(Left(SalesforceHolidayWriteError("Export failed")))
     )
     responses.overallFailure.value shouldBe OverallFailure("Export failed")
   }

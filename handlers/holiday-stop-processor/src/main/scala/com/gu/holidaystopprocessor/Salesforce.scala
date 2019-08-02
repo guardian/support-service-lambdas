@@ -24,7 +24,7 @@ object Salesforce {
       case \/-(details) => Right(details)
     }
 
-  def holidayStopUpdateResponse(sfCredentials: SFAuthConfig)(responses: List[HolidayStopResponse]): Either[OverallFailure, Unit] =
+  def holidayStopUpdateResponse(sfCredentials: SFAuthConfig)(responses: List[HolidayStopResponse]): Either[SalesforceHolidayWriteError, Unit] =
     SalesforceClient(RawEffects.response, sfCredentials).value.map { sfAuth =>
       val patch = sfAuth.wrapWith(JsonHttp.patch)
       val sendOp = ActionSalesforceHolidayStopRequestsDetail(patch) _
@@ -33,7 +33,7 @@ object Salesforce {
         sendOp(response.requestId)(actioned)
       }
     }.toDisjunction match {
-      case -\/(failure) => Left(OverallFailure(failure.toString))
+      case -\/(failure) => Left(SalesforceHolidayWriteError(failure.toString))
       case _ => Right(())
     }
 }
