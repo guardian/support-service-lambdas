@@ -21,7 +21,7 @@ object Handler extends Lambda[None.type, List[HolidayStopResponse]] {
           .overallFailure
           .map(failure => Left(new RuntimeException(failure.reason)))
           .getOrElse {
-            result.holidayStopResults.toList.sequence
+            result.holidayStopResults.sequence
               .leftMap { failure => new RuntimeException(failure.reason) }
           }
     }

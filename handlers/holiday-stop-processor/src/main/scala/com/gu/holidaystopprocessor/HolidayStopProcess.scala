@@ -1,7 +1,7 @@
 package com.gu.holidaystopprocessor
 
 import java.time.LocalDate
-
+import cats.implicits._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
 
 object HolidayStopProcess {
@@ -36,7 +36,7 @@ object HolidayStopProcess {
         val holidayStops = holidayStopRequestsFromSalesforce.distinct.map(HolidayStop(_))
         val alreadyActionedHolidayStops = holidayStopRequestsFromSalesforce.flatMap(_.Charge_Code__c).distinct
         val allZuoraHolidayStopResponses = holidayStops.map(writeHolidayStopToZuora(holidayCreditProduct, getSubscription, updateSubscription))
-        val successfulZuoraResponses = allZuoraHolidayStopResponses collect { case Right(v) => v } // FIXME: What happens with failures?
+        val (_, successfulZuoraResponses) = allZuoraHolidayStopResponses.separate // FIXME: What happens with failures?
         val notAlreadyActionedHolidays = successfulZuoraResponses.filterNot(v => alreadyActionedHolidayStops.contains(v.chargeCode))
         val salesforceExportResult = writeHolidayStopsToSalesforce(notAlreadyActionedHolidays).left.toOption
         ProcessResult(holidayStops, allZuoraHolidayStopResponses, notAlreadyActionedHolidays, salesforceExportResult)
