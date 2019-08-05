@@ -1,15 +1,15 @@
 package com.gu.salesforce.holiday_stops
 
+import java.time.LocalDate
+
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.SalesforceClient
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestId, _}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
 import com.gu.test.EffectsTest
-import com.gu.util.Time
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.resthttp.JsonHttp
-import org.joda.time.LocalDate
 import org.scalatest.{FlatSpec, Matchers}
 import scalaz.{-\/, \/-}
 
@@ -24,8 +24,8 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends FlatSpec with Matc
 
   it should "Salesforce Holiday Stop Requests should work end to end" taggedAs EffectsTest in {
 
-    val startDate = HolidayStopRequestStartDate(LocalDate.now().plusDays(10))
-    val endDate = HolidayStopRequestEndDate(LocalDate.now().plusDays(15))
+    val startDate = LocalDate.now().plusDays(10)
+    val endDate = LocalDate.now().plusDays(15)
     val lookupDate = LocalDate.now().plusDays(12)
     val productName = ProductName("Guardian Weekly")
 
@@ -34,21 +34,17 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends FlatSpec with Matc
       response = RawEffects.response
       sfAuth <- SalesforceClient(response, sfConfig).value.toDisjunction
 
-      createOp = SalesforceHolidayStopRequest.CreateHolidayStopRequest(sfAuth.wrapWith(JsonHttp.post))
-      createResult <- createOp(NewHolidayStopRequest(
+      verifySubOwnerOp = SalesforceSFSubscription.SubscriptionForSubscriptionNameAndIdentityID(sfAuth.wrapWith(JsonHttp.getWithParams))
+      maybeMatchingSubscription <- verifySubOwnerOp(
+        SubscriptionName("A-S00050817"), // must exist in DEV SalesForce
+        "100004814"
+      ).toDisjunction
+
+      createOp = SalesforceHolidayStopRequest.CreateHolidayStopRequestWithDetail(sfAuth.wrapWith(JsonHttp.post))
+      createResult <- createOp(CreateHolidayStopRequestWithDetail.buildBody(
         startDate,
         endDate,
-        SubscriptionNameLookup(SubscriptionName("A-S00050817")) // must exist in DEV SalesForce
-      )).toDisjunction
-
-      // TODO
-      // Salesforce Trigger SHOULD have called out to a service layer endpoint to enumerate the detail entries by this point
-      // (this endpoint ultimately uses SalesforceHolidayStopRequestsDetail.CreatePendingSalesforceHolidayStopRequestsDetail)
-      // In the meantime doing this manually here to keep test passing:
-      createDetailOp = SalesforceHolidayStopRequestsDetail.CreatePendingSalesforceHolidayStopRequestsDetail(sfAuth.wrapWith(JsonHttp.post))
-      _ <- createDetailOp(HolidayStopRequestsDetailPending(
-        HolidayStopRequestId(createResult.value),
-        StoppedPublicationDate(Time.toJavaDate(LocalDate.now.plusDays(11)))
+        maybeMatchingSubscription.get
       )).toDisjunction
 
       fetchOp = SalesforceHolidayStopRequest.LookupByDateAndProductNamePrefix(sfAuth.wrapWith(JsonHttp.getWithParams))
@@ -66,6 +62,12 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends FlatSpec with Matc
       )).toDisjunction
 
       postProcessingFetchResult <- fetchOp(lookupDate, productName).toDisjunction
+
+      // UN-ACTION in order to delete the parent
+      _ <- processOp(HolidayStopRequestsDetailActioned(
+        HolidayStopRequestsDetailChargeCode(""),
+        HolidayStopRequestsDetailChargePrice(0)
+      )).toDisjunction
 
       deleteOp = SalesforceHolidayStopRequest.DeleteHolidayStopRequest(sfAuth.wrapWith(JsonHttp.deleteWithStringResponse))
       deleteResult <- deleteOp(createResult).toDisjunction

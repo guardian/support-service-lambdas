@@ -3,9 +3,8 @@ package com.gu.holidaystopprocessor
 import java.time.LocalDate
 
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.{HolidayStopRequest, HolidayStopRequestActionedCount, HolidayStopRequestEndDate, HolidayStopRequestStartDate}
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestId, HolidayStopRequestsDetail, HolidayStopRequestsDetailChargeCode, HolidayStopRequestsDetailId, ProductName, StoppedPublicationDate, SubscriptionName}
-import com.gu.util.Time
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
 
 object Fixtures {
 
@@ -140,8 +139,8 @@ object Fixtures {
     stopDate: LocalDate = LocalDate.of(2019, 1, 1)
   ) = HolidayStopRequest(
     Id = HolidayStopRequestId(id),
-    Start_Date__c = HolidayStopRequestStartDate(Time.toJodaDate(stopDate)),
-    End_Date__c = HolidayStopRequestEndDate(Time.toJodaDate(stopDate)),
+    Start_Date__c = HolidayStopRequestStartDate(stopDate),
+    End_Date__c = HolidayStopRequestEndDate(stopDate),
     Actioned_Count__c = HolidayStopRequestActionedCount(3),
     Pending_Count__c = 4,
     Total_Issues_Publications_Impacted_Count__c = 7,
@@ -154,7 +153,7 @@ object Fixtures {
     Id = HolidayStopRequestsDetailId(request.Id.value),
     Subscription_Name__c = request.Subscription_Name__c,
     Product_Name__c = request.Product_Name__c,
-    Stopped_Publication_Date__c = StoppedPublicationDate(Time.toJavaDate(request.Start_Date__c.value)),
+    Stopped_Publication_Date__c = StoppedPublicationDate(request.Start_Date__c.value),
     Estimated_Price__c = None,
     Charge_Code__c = Some(HolidayStopRequestsDetailChargeCode(chargeCode)),
     Actual_Price__c = None

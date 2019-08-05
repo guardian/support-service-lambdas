@@ -8,4 +8,6 @@ object SalesforceConstants {
 
   val sfObjectsBaseUrl: String = sfApiBaseUrl + "/sobjects/"
 
+  val compositeTreeBaseUrl: String = "/services/data/v38.0/composite/tree/"
+
 }

@@ -1,0 +1,303 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: CRUD API for Holiday Stop Requests (stored in SalesForce)
+
+Parameters:
+    Stage:
+        Description: Stage name
+        Type: String
+        AllowedValues:
+            - PROD
+            - CODE
+            - DEV
+        Default: CODE
+
+Conditions:
+  CreateProdMonitoring: !Equals [ !Ref Stage, PROD ]
+
+Mappings:
+    StageMap:
+        DEV:
+            ApiName: holiday-stop-api-DEV
+        CODE:
+            ApiName: holiday-stop-api-CODE
+        PROD:
+            ApiName: holiday-stop-api-PROD
+
+Resources:
+    HolidayStopApiRole:
+        Type: AWS::IAM::Role
+        Properties:
+            AssumeRolePolicyDocument:
+                Statement:
+                    - Effect: Allow
+                      Principal:
+                          Service:
+                             - lambda.amazonaws.com
+                      Action:
+                          - sts:AssumeRole
+            Path: /
+            Policies:
+                - PolicyName: LambdaPolicy
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                            - logs:CreateLogGroup
+                            - logs:CreateLogStream
+                            - logs:PutLogEvents
+                            - lambda:InvokeFunction
+                            Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/holiday-stop-api-${Stage}:log-stream:*"
+                - PolicyName: ReadPrivateCredentials
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action: s3:GetObject
+                            Resource: !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/*
+
+    HolidayStopApi:
+        Type: "AWS::ApiGateway::RestApi"
+        Properties:
+            Description: manage-frontend (self-service MMA) uses to create/update/delete Holiday Stop Requests (stored in SalesForce)
+            Name: !FindInMap [StageMap, !Ref Stage, ApiName]
+
+    HolidayStopApiPermission:
+        Type: AWS::Lambda::Permission
+        Properties:
+            Action: lambda:invokeFunction
+            FunctionName: !Sub holiday-stop-api-${Stage}
+            Principal: apigateway.amazonaws.com
+        DependsOn: HolidayStopApiLambda
+
+    HolidayStopApiLambda:
+        Type: AWS::Lambda::Function
+        Properties:
+            Description: manage-frontend (self-service MMA) uses to create/update/delete Holiday Stop Requests (stored in SalesForce)
+            FunctionName:
+                !Sub holiday-stop-api-${Stage}
+            Code:
+                S3Bucket: support-service-lambdas-dist
+                S3Key: !Sub membership/${Stage}/holiday-stop-api/holiday-stop-api.jar
+            Handler: com.gu.holiday_stops.Handler::apply
+            Environment:
+                Variables:
+                  Stage: !Ref Stage
+            Role:
+                Fn::GetAtt:
+                - HolidayStopApiRole
+                - Arn
+            MemorySize: 1536
+            Runtime: java8
+            Timeout: 300
+        DependsOn:
+        - HolidayStopApiRole
+
+    HolidayStopApiUsagePlan:
+      Type: AWS::ApiGateway::UsagePlan
+      Properties:
+        UsagePlanName: holiday-stop-api
+        ApiStages:
+          - ApiId: !Ref HolidayStopApi
+            Stage: !Ref Stage
+      DependsOn:
+        - HolidayStopApi
+        - HolidayStopApiStage
+
+    HolidayStopApiKey:
+      Type: AWS::ApiGateway::ApiKey
+      Properties:
+        Description: Used by manage-frontend
+        Enabled: true
+        Name: !Sub holiday-stop-api-key-${Stage}
+        StageKeys:
+          - RestApiId: !Ref HolidayStopApi
+            StageName: !Ref Stage
+      DependsOn:
+        - HolidayStopApi
+        - HolidayStopApiStage
+
+    HolidayStopApiUsagePlanKey:
+      Type: AWS::ApiGateway::UsagePlanKey
+      Properties:
+        KeyId: !Ref HolidayStopApiKey
+        KeyType: API_KEY
+        UsagePlanId: !Ref HolidayStopApiUsagePlan
+      DependsOn:
+        - HolidayStopApiKey
+        - HolidayStopApiUsagePlan
+
+    HolidayStopApiPotentialProxyResource:
+        Type: AWS::ApiGateway::Resource
+        Properties:
+            RestApiId: !Ref HolidayStopApi
+            ParentId: !GetAtt [HolidayStopApi, RootResourceId]
+            PathPart: "potential"
+        DependsOn: HolidayStopApi
+
+    HolidayStopApiPotentialMethod:
+        Type: AWS::ApiGateway::Method
+        Properties:
+            AuthorizationType: NONE
+            ApiKeyRequired: true
+            RestApiId: !Ref HolidayStopApi
+            ResourceId: !Ref HolidayStopApiPotentialProxyResource
+            HttpMethod: GET
+            Integration:
+              Type: AWS_PROXY
+              IntegrationHttpMethod: POST # this for the interaction between API Gateway and Lambda and MUST be POST
+              Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${HolidayStopApiLambda.Arn}/invocations
+        DependsOn:
+        - HolidayStopApi
+        - HolidayStopApiLambda
+        - HolidayStopApiPotentialProxyResource
+
+    HolidayStopApiGetAllAndCreateProxyResource:
+        Type: AWS::ApiGateway::Resource
+        Properties:
+            RestApiId: !Ref HolidayStopApi
+            ParentId: !GetAtt [HolidayStopApi, RootResourceId]
+            PathPart: "hsr"
+        DependsOn: HolidayStopApi
+
+    HolidayStopApiGetAllMethod:
+        Type: AWS::ApiGateway::Method
+        Properties:
+            AuthorizationType: NONE
+            ApiKeyRequired: true
+            RestApiId: !Ref HolidayStopApi
+            ResourceId: !Ref HolidayStopApiGetAllAndCreateProxyResource
+            HttpMethod: GET
+            Integration:
+              Type: AWS_PROXY
+              IntegrationHttpMethod: POST # this for the interaction between API Gateway and Lambda and MUST be POST
+              Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${HolidayStopApiLambda.Arn}/invocations
+        DependsOn:
+        - HolidayStopApi
+        - HolidayStopApiLambda
+        - HolidayStopApiGetAllAndCreateProxyResource
+
+    HolidayStopApiCreateMethod:
+      Type: AWS::ApiGateway::Method
+      Properties:
+        AuthorizationType: NONE
+        ApiKeyRequired: true
+        RestApiId: !Ref HolidayStopApi
+        ResourceId: !Ref HolidayStopApiGetAllAndCreateProxyResource
+        HttpMethod: POST
+        Integration:
+          Type: AWS_PROXY
+          IntegrationHttpMethod: POST # this for the interaction between API Gateway and Lambda and MUST be POST
+          Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${HolidayStopApiLambda.Arn}/invocations
+      DependsOn:
+        - HolidayStopApi
+        - HolidayStopApiLambda
+        - HolidayStopApiGetAllAndCreateProxyResource
+          
+    HolidayStopApiBySubscriptionNameProxyResource:
+      Type: AWS::ApiGateway::Resource
+      Properties:
+        RestApiId: !Ref HolidayStopApi
+        ParentId: !Ref HolidayStopApiGetAllAndCreateProxyResource
+        PathPart: "{subscriptionName}"
+      DependsOn:
+      - HolidayStopApi
+      - HolidayStopApiGetAllAndCreateProxyResource
+
+    HolidayStopApiGetBySubscriptionNameMethod:
+      Type: AWS::ApiGateway::Method
+      Properties:
+        AuthorizationType: NONE
+        ApiKeyRequired: true
+        RestApiId: !Ref HolidayStopApi
+        ResourceId: !Ref HolidayStopApiBySubscriptionNameProxyResource
+        HttpMethod: GET
+        RequestParameters:
+          method.request.path.subscriptionName: true
+        Integration:
+          Type: AWS_PROXY
+          IntegrationHttpMethod: POST # this for the interaction between API Gateway and Lambda and MUST be POST
+          Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${HolidayStopApiLambda.Arn}/invocations
+      DependsOn:
+        - HolidayStopApi
+        - HolidayStopApiLambda
+        - HolidayStopApiBySubscriptionNameProxyResource
+    
+    HolidayStopApiDeleteAndEditResource:
+      Type: AWS::ApiGateway::Resource
+      Properties:
+        RestApiId: !Ref HolidayStopApi
+        ParentId: !Ref HolidayStopApiBySubscriptionNameProxyResource
+        PathPart: "{holidayStopRequestId}"
+      DependsOn:
+        - HolidayStopApi
+        - HolidayStopApiBySubscriptionNameProxyResource
+
+    HolidayStopApiDeleteMethod:
+      Type: AWS::ApiGateway::Method
+      Properties:
+        AuthorizationType: NONE
+        ApiKeyRequired: true
+        RestApiId: !Ref HolidayStopApi
+        ResourceId: !Ref HolidayStopApiDeleteAndEditResource
+        HttpMethod: DELETE
+        RequestParameters:
+          method.request.path.subscriptionName: true
+          method.request.path.holidayStopRequestId: true
+        Integration:
+          Type: AWS_PROXY
+          IntegrationHttpMethod: POST # this for the interaction between API Gateway and Lambda and MUST be POST
+          Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${HolidayStopApiLambda.Arn}/invocations
+      DependsOn:
+        - HolidayStopApi
+        - HolidayStopApiLambda
+        - HolidayStopApiDeleteAndEditResource
+
+    # TODO HolidayStopApiEditMethod
+    
+    HolidayStopApiStage:
+        Type: AWS::ApiGateway::Stage
+        Properties:
+            Description: Stage for holiday-stop-api
+            RestApiId: !Ref HolidayStopApi
+            DeploymentId: !Ref HolidayStopApiDeployment
+            StageName: !Sub ${Stage}
+        DependsOn:
+        - HolidayStopApiGetAllMethod
+        - HolidayStopApiGetBySubscriptionNameMethod
+        - HolidayStopApiCreateMethod
+        - HolidayStopApiDeleteMethod
+
+    HolidayStopApiDeployment:
+        Type: AWS::ApiGateway::Deployment
+        Properties:
+            Description: Deploys holiday-stop-api into an environment/stage
+            RestApiId: !Ref HolidayStopApi
+        DependsOn:
+        - HolidayStopApiPotentialMethod
+        - HolidayStopApiGetAllMethod
+        - HolidayStopApiGetBySubscriptionNameMethod
+        - HolidayStopApiCreateMethod
+        - HolidayStopApiDeleteMethod
+
+    5xxApiAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Condition: CreateProdMonitoring
+      Properties:
+        AlarmActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:subscriptions_dev
+        AlarmName:
+          !Sub
+            - 5XX rate from ${ApiName}
+            - { ApiName: !FindInMap [StageMap, !Ref Stage, ApiName] }
+        ComparisonOperator: GreaterThanThreshold
+        Dimensions:
+          - Name: ApiName
+            Value: !FindInMap [StageMap, !Ref Stage, ApiName]
+          - Name: Stage
+            Value: !Sub ${Stage}
+        EvaluationPeriods: 1
+        MetricName: 5XXError
+        Namespace: AWS/ApiGateway
+        Period: 3600
+        Statistic: Sum
+        Threshold: 5
+        TreatMissingData: notBreaching

@@ -3,6 +3,7 @@ package com.gu.salesforce.holiday_stops
 import java.time.LocalDate
 
 import ai.x.play.json.Jsonx
+import com.gu.salesforce.RecordsWrapperCaseClass
 import com.gu.salesforce.SalesforceConstants._
 import com.gu.util.Logging
 import com.gu.util.resthttp.RestOp._
@@ -13,7 +14,7 @@ import play.api.libs.json.{JsValue, Json}
 
 object SalesforceHolidayStopRequestsDetail extends Logging {
 
-  private val holidayStopRequestsDetailSfObjectRef = "Holiday_Stop_Requests_Detail__c"
+  val holidayStopRequestsDetailSfObjectRef = "Holiday_Stop_Requests_Detail__c"
 
   case class HolidayStopRequestsDetailId(value: String) extends AnyVal
   implicit val formatHolidayStopRequestsDetailId = Jsonx.formatInline[HolidayStopRequestsDetailId]
@@ -35,22 +36,6 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
 
   case class StoppedPublicationDate(value: LocalDate) extends AnyVal
   implicit val formatStoppedPublicationDate = Jsonx.formatInline[StoppedPublicationDate]
-
-  case class HolidayStopRequestsDetailPending(
-    Holiday_Stop_Request__c: HolidayStopRequestId,
-    Stopped_Publication_Date__c: StoppedPublicationDate,
-    Estimated_Price__c: Option[HolidayStopRequestsDetailChargePrice] = None
-  )
-  implicit val writesPending = Json.writes[HolidayStopRequestsDetailPending]
-
-  object CreatePendingSalesforceHolidayStopRequestsDetail {
-
-    def apply(sfPost: HttpOp[RestRequestMaker.PostRequest, JsValue]): HolidayStopRequestsDetailPending => ClientFailableOp[JsValue] =
-      sfPost.setupRequest[HolidayStopRequestsDetailPending] { newDetail =>
-        PostRequest(newDetail, RelativePath(sfObjectsBaseUrl + holidayStopRequestsDetailSfObjectRef))
-      }.parse[JsValue].runRequest
-
-  }
 
   case class HolidayStopRequestsDetailActioned(
     Charge_Code__c: HolidayStopRequestsDetailChargeCode,
@@ -78,8 +63,7 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
   )
   implicit val readsHolidayStopRequestsDetail = Json.reads[HolidayStopRequestsDetail]
 
-  case class HolidayStopRequestsDetailSearchQueryResponse(records: List[HolidayStopRequestsDetail])
-  implicit val readsIds = Json.reads[HolidayStopRequestsDetailSearchQueryResponse]
+  implicit val readsIds = Json.reads[RecordsWrapperCaseClass[HolidayStopRequestsDetail]]
 
   val SOQL_SELECT_CLAUSE = """
       | SELECT Id, Subscription_Name__c, Product_Name__c, Stopped_Publication_Date__c,
@@ -91,7 +75,11 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
   object LookupPendingByProductNamePrefixAndDate {
 
     def apply(sfGet: HttpOp[RestRequestMaker.GetRequestWithParams, JsValue]): (ProductName, LocalDate) => ClientFailableOp[List[HolidayStopRequestsDetail]] =
-      sfGet.setupRequestMultiArg(toRequest _).parse[HolidayStopRequestsDetailSearchQueryResponse].map(_.records).runRequestMultiArg
+      sfGet
+        .setupRequestMultiArg(toRequest _)
+        .parse[RecordsWrapperCaseClass[HolidayStopRequestsDetail]]
+        .map(_.records)
+        .runRequestMultiArg
 
     def toRequest(productNamePrefix: ProductName, date: LocalDate): GetRequestWithParams = {
       val soqlQuery = s"""
