@@ -98,7 +98,8 @@ object CurrentGuardianWeeklySubscription {
   def apply(subscription: Subscription, guardianWeeklyProductRatePlanIds: List[String]): CurrentGuardianWeeklySubscription =
     subscription
       .ratePlans
-      .find { ratePlan => List(
+      .find { ratePlan =>
+        List(
           RatePlanIsGuardianWeekly(ratePlan, guardianWeeklyProductRatePlanIds),
           RatePlanHasExactlyOneCharge(ratePlan),
           RatePlanHasBeenInvoiced(ratePlan),

@@ -21,12 +21,10 @@ import java.time.LocalDate
  * or billingPeriodStartDay (1st of month).
  */
 
-// FIXME: This should be function of CurrentGuardianWeeklySubscription
 object NextBillingPeriodStartDate {
-  def apply(subscription: Subscription): Either[ZuoraHolidayWriteError, LocalDate] = {
-    subscription
-      .originalRatePlanCharge
-      .flatMap(_.chargedThroughDate)
-      .toRight(ZuoraHolidayWriteError("Original rate plan charge has no charged through date. A bill run is needed to fix this."))
+  def apply(subscription: Subscription, guardianWeeklyProductRatePlanIds: List[String]): Either[ZuoraHolidayWriteError, LocalDate] = {
+    Right(CurrentGuardianWeeklySubscription(subscription, guardianWeeklyProductRatePlanIds)
+      .invoicedPeriod
+      .endDateExcluding)
   }
 }
