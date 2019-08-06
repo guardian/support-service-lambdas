@@ -1,12 +1,16 @@
 package com.gu.holidaystopprocessor
 
+import java.time.LocalDate
+
 // This is just for functional testing locally.
 object StandaloneApp extends App {
+
+  val stopDate = args.headOption.map(LocalDate.parse)
 
   Config() match {
     case Left(msg) => println(s"Config failure: $msg")
     case Right(config) =>
-      val processResult = HolidayStopProcess(config)
+      val processResult = HolidayStopProcess(config, stopDate)
 
       println(processResult.holidayStopsToApply.size)
 
