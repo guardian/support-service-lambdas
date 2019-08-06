@@ -9,8 +9,7 @@ import scala.math.BigDecimal.RoundingMode
  * FIXME: Discounts should be taken into account?
  */
 object HolidayCredit {
-  def apply(subscription: Subscription, guardianWeeklyProductRatePlanIds: List[String]): Double = {
-    val currentGuardianWeeklySubscription = CurrentGuardianWeeklySubscription(subscription, guardianWeeklyProductRatePlanIds)
+  def apply(currentGuardianWeeklySubscription: CurrentGuardianWeeklySubscription): Double = {
     val recurringPrice = currentGuardianWeeklySubscription.price
     val numPublicationsInPeriod = BillingPeriodToApproxWeekCount(currentGuardianWeeklySubscription)
     def roundUp(d: Double): Double = BigDecimal(d).setScale(2, RoundingMode.UP).toDouble

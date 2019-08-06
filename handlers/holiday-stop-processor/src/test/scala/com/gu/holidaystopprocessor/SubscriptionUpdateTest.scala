@@ -19,15 +19,16 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers {
       billingPeriod = "Quarter",
       chargedThroughDate = Some(LocalDate.of(2019, 9, 12))
     )
-    val nextInvoiceStartDate = NextBillingPeriodStartDate(subscription, guardianWeeklyProductRatePlanIds)
-    val maybeExtendedTerm = ExtendedTerm(nextInvoiceStartDate.right.get, subscription)
-    val holidayCredit = HolidayCredit(subscription, guardianWeeklyProductRatePlanIds)
+    val currentGuardianWeeklySubscription = CurrentGuardianWeeklySubscription(subscription, guardianWeeklyProductRatePlanIds)
+    val nextInvoiceStartDate = NextBillingPeriodStartDate(currentGuardianWeeklySubscription)
+    val maybeExtendedTerm = ExtendedTerm(nextInvoiceStartDate, subscription)
+    val holidayCredit = HolidayCredit(currentGuardianWeeklySubscription)
 
     val update = HolidayCreditUpdate(
       config.holidayCreditProduct,
       subscription = subscription,
       stoppedPublicationDate = LocalDate.of(2019, 5, 18),
-      nextInvoiceStartDate = nextInvoiceStartDate.right.get,
+      nextInvoiceStartDate = nextInvoiceStartDate,
       maybeExtendedTerm = maybeExtendedTerm,
       holidayCredit
     )
@@ -61,7 +62,7 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers {
       billingPeriod = "Quarter",
       chargedThroughDate = None
     )
-    Try(NextBillingPeriodStartDate(subscription, guardianWeeklyProductRatePlanIds)).isFailure shouldBe true
+    Try(CurrentGuardianWeeklySubscription(subscription, guardianWeeklyProductRatePlanIds)).isFailure shouldBe true
   }
 
   it should "generate an update with an extended term when charged-through date of subscription is after its term-end date" in {
@@ -72,14 +73,15 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers {
       billingPeriod = "Annual",
       chargedThroughDate = Some(LocalDate.of(2020, 8, 2))
     )
-    val nextInvoiceStartDate = NextBillingPeriodStartDate(subscription, guardianWeeklyProductRatePlanIds)
-    val maybeExtendedTerm = ExtendedTerm(nextInvoiceStartDate.right.get, subscription)
-    val holidayCredit = HolidayCredit(subscription, guardianWeeklyProductRatePlanIds)
+    val currentGuardianWeeklySubscription = CurrentGuardianWeeklySubscription(subscription, guardianWeeklyProductRatePlanIds)
+    val nextInvoiceStartDate = NextBillingPeriodStartDate(currentGuardianWeeklySubscription)
+    val maybeExtendedTerm = ExtendedTerm(nextInvoiceStartDate, subscription)
+    val holidayCredit = HolidayCredit(currentGuardianWeeklySubscription)
     val update = HolidayCreditUpdate(
       config.holidayCreditProduct,
       subscription = subscription,
       stoppedPublicationDate = LocalDate.of(2019, 8, 6),
-      nextInvoiceStartDate = nextInvoiceStartDate.right.get,
+      nextInvoiceStartDate = nextInvoiceStartDate,
       maybeExtendedTerm = maybeExtendedTerm,
       holidayCredit
     )
@@ -111,14 +113,15 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers {
       billingPeriod = "Annual",
       chargedThroughDate = Some(LocalDate.of(2020, 7, 23))
     )
-    val nextInvoiceStartDate = NextBillingPeriodStartDate(subscription, guardianWeeklyProductRatePlanIds)
-    val maybeExtendedTerm = ExtendedTerm(nextInvoiceStartDate.right.get, subscription)
-    val holidayCredit = HolidayCredit(subscription, guardianWeeklyProductRatePlanIds)
+    val currentGuardianWeeklySubscription = CurrentGuardianWeeklySubscription(subscription, guardianWeeklyProductRatePlanIds)
+    val nextInvoiceStartDate = NextBillingPeriodStartDate(currentGuardianWeeklySubscription)
+    val maybeExtendedTerm = ExtendedTerm(nextInvoiceStartDate, subscription)
+    val holidayCredit = HolidayCredit(currentGuardianWeeklySubscription)
     val update = HolidayCreditUpdate(
       config.holidayCreditProduct,
       subscription = subscription,
       stoppedPublicationDate = LocalDate.of(2019, 8, 6),
-      nextInvoiceStartDate = nextInvoiceStartDate.right.get,
+      nextInvoiceStartDate = nextInvoiceStartDate,
       maybeExtendedTerm = maybeExtendedTerm,
       holidayCredit
     )

@@ -22,9 +22,9 @@ import java.time.LocalDate
  */
 
 object NextBillingPeriodStartDate {
-  def apply(subscription: Subscription, guardianWeeklyProductRatePlanIds: List[String]): Either[ZuoraHolidayWriteError, LocalDate] = {
-    Right(CurrentGuardianWeeklySubscription(subscription, guardianWeeklyProductRatePlanIds)
+  def apply(currentGuardianWeeklySubscription: CurrentGuardianWeeklySubscription): LocalDate = {
+    currentGuardianWeeklySubscription
       .invoicedPeriod
-      .endDateExcluding)
+      .endDateExcluding
   }
 }

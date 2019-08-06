@@ -62,9 +62,10 @@ object HolidayStopProcess {
     for {
       subscription <- getSubscription(stop.subscriptionName)
       _ <- if (subscription.autoRenew) Right(()) else Left(ZuoraHolidayWriteError("Cannot currently process non-auto-renewing subscription"))
-      nextInvoiceStartDate <- NextBillingPeriodStartDate(subscription, guardianWeeklyProductRatePlanIds)
+      currentGuardianWeeklySubscription = CurrentGuardianWeeklySubscription(subscription, guardianWeeklyProductRatePlanIds)
+      nextInvoiceStartDate = NextBillingPeriodStartDate(currentGuardianWeeklySubscription)
       maybeExtendedTerm = ExtendedTerm(nextInvoiceStartDate, subscription)
-      holidayCredit = HolidayCredit(subscription, guardianWeeklyProductRatePlanIds)
+      holidayCredit = HolidayCredit(currentGuardianWeeklySubscription)
       holidayCreditUpdate <- HolidayCreditUpdate(holidayCreditProduct, subscription, stop.stoppedPublicationDate, nextInvoiceStartDate, maybeExtendedTerm, holidayCredit)
       _ <- if (subscription.hasHolidayStop(stop)) Right(()) else updateSubscription(subscription, holidayCreditUpdate)
       updatedSubscription <- getSubscription(stop.subscriptionName)
