@@ -94,13 +94,14 @@ object CurrentGuardianWeeklySubscription {
         ).forall(_._2)
       }
       .map { currentGuardianWeeklyRatePlan => // these ugly gets are safe due to above conditions
+        val currentGuardianWeeklyRatePlanCharge = currentGuardianWeeklyRatePlan.ratePlanCharges.head
         new CurrentGuardianWeeklySubscription(
           subscriptionNumber = subscription.subscriptionNumber,
-          billingPeriod = currentGuardianWeeklyRatePlan.ratePlanCharges.head.billingPeriod.get,
-          price = currentGuardianWeeklyRatePlan.ratePlanCharges.head.price,
+          billingPeriod = currentGuardianWeeklyRatePlanCharge.billingPeriod.get,
+          price = currentGuardianWeeklyRatePlanCharge.price,
           invoicedPeriod = CurrentInvoicedPeriod(
-            startDateIncluding = currentGuardianWeeklyRatePlan.ratePlanCharges.head.processedThroughDate.get,
-            endDateExcluding = currentGuardianWeeklyRatePlan.ratePlanCharges.head.chargedThroughDate.get
+            startDateIncluding = currentGuardianWeeklyRatePlanCharge.processedThroughDate.get,
+            endDateExcluding = currentGuardianWeeklyRatePlanCharge.chargedThroughDate.get
           ),
           ratePlanId = currentGuardianWeeklyRatePlan.id,
           productRatePlanId = currentGuardianWeeklyRatePlan.productRatePlanId
