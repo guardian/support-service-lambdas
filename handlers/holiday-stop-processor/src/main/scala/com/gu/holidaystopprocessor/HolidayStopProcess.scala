@@ -14,6 +14,7 @@ object HolidayStopProcess {
       case Right(zuoraAccessToken) =>
         processHolidayStops(
           config.holidayCreditProduct,
+          guardianWeeklyProductRatePlanIds = config.guardianWeeklyProductRatePlanIds,
           getHolidayStopRequestsFromSalesforce = Salesforce.holidayStopRequests(config.sfConfig, stopDate),
           getSubscription = Zuora.subscriptionGetResponse(config, zuoraAccessToken),
           updateSubscription = Zuora.subscriptionUpdateResponse(config, zuoraAccessToken),
@@ -23,6 +24,7 @@ object HolidayStopProcess {
 
   def processHolidayStops(
     holidayCreditProduct: HolidayCreditProduct,
+    guardianWeeklyProductRatePlanIds: List[String],
     getHolidayStopRequestsFromSalesforce: ProductName => Either[OverallFailure, List[HolidayStopRequestsDetail]],
     getSubscription: SubscriptionName => Either[ZuoraHolidayWriteError, Subscription],
     updateSubscription: (Subscription, HolidayCreditUpdate) => Either[ZuoraHolidayWriteError, Unit],
@@ -35,7 +37,7 @@ object HolidayStopProcess {
       case Right(holidayStopRequestsFromSalesforce) =>
         val holidayStops = holidayStopRequestsFromSalesforce.distinct.map(HolidayStop(_))
         val alreadyActionedHolidayStops = holidayStopRequestsFromSalesforce.flatMap(_.Charge_Code__c).distinct
-        val allZuoraHolidayStopResponses = holidayStops.map(writeHolidayStopToZuora(holidayCreditProduct, getSubscription, updateSubscription))
+        val allZuoraHolidayStopResponses = holidayStops.map(writeHolidayStopToZuora(holidayCreditProduct, guardianWeeklyProductRatePlanIds, getSubscription, updateSubscription))
         val (failedZuoraResponses, successfulZuoraResponses) = allZuoraHolidayStopResponses.separate
         val notAlreadyActionedHolidays = successfulZuoraResponses.filterNot(v => alreadyActionedHolidayStops.contains(v.chargeCode))
         val salesforceExportResult = writeHolidayStopsToSalesforce(notAlreadyActionedHolidays)
@@ -53,15 +55,16 @@ object HolidayStopProcess {
    */
   def writeHolidayStopToZuora(
     holidayCreditProduct: HolidayCreditProduct,
+    guardianWeeklyProductRatePlanIds: List[String],
     getSubscription: SubscriptionName => Either[ZuoraHolidayWriteError, Subscription],
     updateSubscription: (Subscription, HolidayCreditUpdate) => Either[ZuoraHolidayWriteError, Unit]
   )(stop: HolidayStop): Either[ZuoraHolidayWriteError, HolidayStopResponse] =
     for {
       subscription <- getSubscription(stop.subscriptionName)
       _ <- if (subscription.autoRenew) Right(()) else Left(ZuoraHolidayWriteError("Cannot currently process non-auto-renewing subscription"))
-      nextInvoiceStartDate <- NextBillingPeriodStartDate(subscription)
+      nextInvoiceStartDate <- NextBillingPeriodStartDate(subscription, guardianWeeklyProductRatePlanIds)
       maybeExtendedTerm = ExtendedTerm(nextInvoiceStartDate, subscription)
-      holidayCredit = HolidayCredit(subscription)
+      holidayCredit = HolidayCredit(subscription, guardianWeeklyProductRatePlanIds)
       holidayCreditUpdate <- HolidayCreditUpdate(holidayCreditProduct, subscription, stop.stoppedPublicationDate, nextInvoiceStartDate, maybeExtendedTerm, holidayCredit)
       _ <- if (subscription.hasHolidayStop(stop)) Right(()) else updateSubscription(subscription, holidayCreditUpdate)
       updatedSubscription <- getSubscription(stop.subscriptionName)

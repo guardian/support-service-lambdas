@@ -47,7 +47,9 @@ case class Subscription(
 
 case class RatePlan(
   productName: String,
-  ratePlanCharges: List[RatePlanCharge]
+  ratePlanCharges: List[RatePlanCharge],
+  productRatePlanId: String,
+  id: String
 )
 
 case class RatePlanCharge(
@@ -58,16 +60,8 @@ case class RatePlanCharge(
   effectiveStartDate: LocalDate,
   chargedThroughDate: Option[LocalDate],
   HolidayStart__c: Option[LocalDate],
-  HolidayEnd__c: Option[LocalDate]
-) {
+  HolidayEnd__c: Option[LocalDate],
+  processedThroughDate: Option[LocalDate],
+)
 
-  val weekCountApprox: Int = {
-    val default = 52
-    billingPeriod map {
-      case "Month" => 4
-      case "Quarter" => 13
-      case "Annual" => 52
-      case _ => default
-    } getOrElse default
-  }
-}
+
