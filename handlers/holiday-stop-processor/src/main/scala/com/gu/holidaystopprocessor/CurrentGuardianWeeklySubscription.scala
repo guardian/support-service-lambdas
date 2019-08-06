@@ -46,7 +46,7 @@ object PeriodContainsDate extends ((LocalDate, LocalDate, LocalDate) => Boolean)
  * the customer has been billed. Today must be within this period.
  *
  * @param startDateIncluding service active on startDateIncluding; corresponds to processedThroughDate
- * @param endDateExcluding service stops one endDateExcluding; corresponds to chargedThroughDate
+ * @param endDateExcluding service ends on endDateExcluding; corresponds to chargedThroughDate
  */
 case class CurrentInvoicedPeriod(
   startDateIncluding: LocalDate,
