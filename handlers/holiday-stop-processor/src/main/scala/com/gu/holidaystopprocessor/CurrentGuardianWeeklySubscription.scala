@@ -90,7 +90,7 @@ object CurrentGuardianWeeklySubscription {
           ChargeIsQuarterlyOrAnnual -> Try(List("Annual", "Quarter").contains(ratePlan.ratePlanCharges.head.billingPeriod.get)).getOrElse(false)
         ).forall(_._2)
       }
-      .map { currentGuardianWeeklyRatePlan =>
+      .map { currentGuardianWeeklyRatePlan => // these ugly gets are safe due to above conditions
         new CurrentGuardianWeeklySubscription(
           subscriptionNumber = subscription.subscriptionNumber,
           billingPeriod = currentGuardianWeeklyRatePlan.ratePlanCharges.head.billingPeriod.get,
