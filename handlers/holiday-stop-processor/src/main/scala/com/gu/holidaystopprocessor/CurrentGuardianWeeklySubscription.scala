@@ -8,7 +8,8 @@ import scala.util.Try
  */
 sealed trait CurrentGuardianWeeklyRatePlanCondition
 case object RatePlanIsGuardianWeekly extends CurrentGuardianWeeklyRatePlanCondition
-case object TodayHasBeenInvoiced extends CurrentGuardianWeeklyRatePlanCondition
+// case object TodayHasBeenInvoiced extends CurrentGuardianWeeklyRatePlanCondition // FIXME: This is a stronger check than RatePlanHasBeenInvoiced but requires significant refactoring of tests
+case object RatePlanHasBeenInvoiced extends CurrentGuardianWeeklyRatePlanCondition
 case object RatePlanHasACharge extends CurrentGuardianWeeklyRatePlanCondition
 case object RatePlanHasOnlyOneCharge extends CurrentGuardianWeeklyRatePlanCondition
 case object ChargeIsQuarterlyOrAnnual extends CurrentGuardianWeeklyRatePlanCondition
@@ -56,6 +57,7 @@ case class CurrentInvoicedPeriod(
     endPeriodExcluding = endDateExcluding,
     date = LocalDate.now()
   )
+  // FIXME: Enable this after test refactoring
   //  require(todayIsWithinCurrentInvoicedPeriod, "Today should be within [startDateIncluding, endDateExcluding)")
 }
 
@@ -75,6 +77,7 @@ object CurrentGuardianWeeklySubscription {
           RatePlanIsGuardianWeekly -> guardianWeeklyProductRatePlanIds.contains(ratePlan.productRatePlanId),
           RatePlanHasACharge -> ratePlan.ratePlanCharges.nonEmpty,
           RatePlanHasOnlyOneCharge -> (ratePlan.ratePlanCharges.size == 1),
+          // FIXME: Enable this after test refactoring - the problem is LocalDate.now() call
           //          TodayHasBeenInvoiced ->
           //            Try {
           //              PeriodContainsDate(
@@ -83,6 +86,7 @@ object CurrentGuardianWeeklySubscription {
           //                date = LocalDate.now()
           //              )
           //            }.getOrElse(false),
+          RatePlanHasBeenInvoiced -> (ratePlan.ratePlanCharges.head.processedThroughDate.isDefined && ratePlan.ratePlanCharges.head.chargedThroughDate.isDefined),
           ChargeIsQuarterlyOrAnnual -> Try(List("Annual", "Quarter").contains(ratePlan.ratePlanCharges.head.billingPeriod.get)).getOrElse(false)
         ).forall(_._2)
       }
