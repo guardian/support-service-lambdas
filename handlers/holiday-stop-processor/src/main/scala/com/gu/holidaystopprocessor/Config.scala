@@ -112,11 +112,6 @@ object Config {
     "2c92c0f858aa38af0158da325d2f0b3d", // "name":"Guardian Weekly Annual"
   )
 
-  /**
-   * Min number of days ahead that a holiday stop can be applied
-   */
-  val daysInAdvance = 14
-
   private def zuoraCredentials(stage: String): Either[OverallFailure, ZuoraConfig] =
     credentials[ZuoraConfig](stage, "zuoraRest")
 
