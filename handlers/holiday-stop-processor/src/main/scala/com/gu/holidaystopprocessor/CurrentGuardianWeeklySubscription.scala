@@ -7,11 +7,38 @@ import scala.util.Try
  * Conditions defining what Guardian Weekly subscription the customer has today.
  */
 sealed trait CurrentGuardianWeeklyRatePlanCondition
-case object RatePlanIsGuardianWeekly extends CurrentGuardianWeeklyRatePlanCondition
-// case object TodayHasBeenInvoiced extends CurrentGuardianWeeklyRatePlanCondition // FIXME: This is a stronger check than RatePlanHasBeenInvoiced but requires significant refactoring of tests
-case object RatePlanHasBeenInvoiced extends CurrentGuardianWeeklyRatePlanCondition
-case object RatePlanHasExactlyOneCharge extends CurrentGuardianWeeklyRatePlanCondition
-case object ChargeIsQuarterlyOrAnnual extends CurrentGuardianWeeklyRatePlanCondition
+case object RatePlanIsGuardianWeekly extends CurrentGuardianWeeklyRatePlanCondition {
+  def apply(ratePlan: RatePlan, guardianWeeklyProductRatePlanIds: List[String]): Boolean =
+    guardianWeeklyProductRatePlanIds.contains(ratePlan.productRatePlanId)
+}
+case object RatePlanHasBeenInvoiced extends CurrentGuardianWeeklyRatePlanCondition {
+  def apply(ratePlan: RatePlan): Boolean = {
+    Try {
+      val fromInclusive = ratePlan.ratePlanCharges.head.processedThroughDate.get
+      val toExclusive = ratePlan.ratePlanCharges.head.chargedThroughDate.get
+      toExclusive.isAfter(fromInclusive)
+    }.getOrElse(false)
+  }
+}
+case object RatePlanHasExactlyOneCharge extends CurrentGuardianWeeklyRatePlanCondition {
+  def apply(ratePlan: RatePlan): Boolean = (ratePlan.ratePlanCharges.size == 1)
+}
+case object ChargeIsQuarterlyOrAnnual extends CurrentGuardianWeeklyRatePlanCondition {
+  def apply(ratePlan: RatePlan): Boolean =
+    Try {
+      List("Annual", "Quarter").contains(ratePlan.ratePlanCharges.head.billingPeriod.get)
+    }.getOrElse(false)
+}
+//case object TodayHasBeenInvoiced extends CurrentGuardianWeeklyRatePlanCondition { // FIXME: This is a stronger check than RatePlanHasBeenInvoiced but requires significant refactoring of tests
+//  def apply(ratePlan: RatePlan): Boolean =
+//    Try {
+//      PeriodContainsDate(
+//        startPeriodInclusive = ratePlan.ratePlanCharges.head.processedThroughDate.get,
+//        endPeriodExcluding = ratePlan.ratePlanCharges.head.chargedThroughDate.get,
+//        date = LocalDate.now()
+//      )
+//    }.getOrElse(false)
+//}
 
 /**
  * Model representing 'What Guardian Weekly does the customer have today?'
@@ -71,27 +98,12 @@ object CurrentGuardianWeeklySubscription {
   def apply(subscription: Subscription, guardianWeeklyProductRatePlanIds: List[String]): CurrentGuardianWeeklySubscription =
     subscription
       .ratePlans
-      .find { ratePlan =>
-        List[(CurrentGuardianWeeklyRatePlanCondition, Boolean)](
-          RatePlanIsGuardianWeekly -> guardianWeeklyProductRatePlanIds.contains(ratePlan.productRatePlanId),
-          //          RatePlanHasACharge -> ratePlan.ratePlanCharges.nonEmpty,
-          RatePlanHasExactlyOneCharge -> (ratePlan.ratePlanCharges.size == 1),
-          // FIXME: Enable this after test refactoring - the problem is LocalDate.now() call
-          //          TodayHasBeenInvoiced ->
-          //            Try {
-          //              PeriodContainsDate(
-          //                startPeriodInclusive = ratePlan.ratePlanCharges.head.processedThroughDate.get,
-          //                endPeriodExcluding = ratePlan.ratePlanCharges.head.chargedThroughDate.get,
-          //                date = LocalDate.now()
-          //              )
-          //            }.getOrElse(false),
-          RatePlanHasBeenInvoiced -> Try {
-            val fromInclusive = ratePlan.ratePlanCharges.head.processedThroughDate.get
-            val toExclusive = ratePlan.ratePlanCharges.head.chargedThroughDate.get
-            toExclusive.isAfter(fromInclusive)
-          }.getOrElse(false),
-          ChargeIsQuarterlyOrAnnual -> Try(List("Annual", "Quarter").contains(ratePlan.ratePlanCharges.head.billingPeriod.get)).getOrElse(false)
-        ).forall(_._2)
+      .find { ratePlan => List(
+          RatePlanIsGuardianWeekly(ratePlan, guardianWeeklyProductRatePlanIds),
+          RatePlanHasExactlyOneCharge(ratePlan),
+          RatePlanHasBeenInvoiced(ratePlan),
+          ChargeIsQuarterlyOrAnnual(ratePlan)
+        ).forall(_ == true)
       }
       .map { currentGuardianWeeklyRatePlan => // these ugly gets are safe due to above conditions
         val currentGuardianWeeklyRatePlanCharge = currentGuardianWeeklyRatePlan.ratePlanCharges.head
