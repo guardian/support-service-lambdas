@@ -10,8 +10,7 @@ sealed trait CurrentGuardianWeeklyRatePlanCondition
 case object RatePlanIsGuardianWeekly extends CurrentGuardianWeeklyRatePlanCondition
 // case object TodayHasBeenInvoiced extends CurrentGuardianWeeklyRatePlanCondition // FIXME: This is a stronger check than RatePlanHasBeenInvoiced but requires significant refactoring of tests
 case object RatePlanHasBeenInvoiced extends CurrentGuardianWeeklyRatePlanCondition
-case object RatePlanHasACharge extends CurrentGuardianWeeklyRatePlanCondition
-case object RatePlanHasOnlyOneCharge extends CurrentGuardianWeeklyRatePlanCondition
+case object RatePlanHasExactlyOneCharge extends CurrentGuardianWeeklyRatePlanCondition
 case object ChargeIsQuarterlyOrAnnual extends CurrentGuardianWeeklyRatePlanCondition
 
 /**
@@ -75,8 +74,8 @@ object CurrentGuardianWeeklySubscription {
       .find { ratePlan =>
         List[(CurrentGuardianWeeklyRatePlanCondition, Boolean)](
           RatePlanIsGuardianWeekly -> guardianWeeklyProductRatePlanIds.contains(ratePlan.productRatePlanId),
-          RatePlanHasACharge -> ratePlan.ratePlanCharges.nonEmpty,
-          RatePlanHasOnlyOneCharge -> (ratePlan.ratePlanCharges.size == 1),
+          //          RatePlanHasACharge -> ratePlan.ratePlanCharges.nonEmpty,
+          RatePlanHasExactlyOneCharge -> (ratePlan.ratePlanCharges.size == 1),
           // FIXME: Enable this after test refactoring - the problem is LocalDate.now() call
           //          TodayHasBeenInvoiced ->
           //            Try {
