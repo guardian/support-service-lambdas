@@ -17,7 +17,7 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers {
     )
     val nextInvoiceStartDate = NextBillingPeriodStartDate(subscription)
     val maybeExtendedTerm = ExtendedTerm(nextInvoiceStartDate.right.get, subscription)
-    val holidayCredit = HolidayCredit(subscription)
+    val holidayCredit = HolidayCredit(subscription, Fixtures.config.guardianWeeklyProductRatePlanIds)
 
     val update = HolidayCreditUpdate(
       config.holidayCreditProduct,
@@ -73,7 +73,7 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers {
     )
     val nextInvoiceStartDate = NextBillingPeriodStartDate(subscription)
     val maybeExtendedTerm = ExtendedTerm(nextInvoiceStartDate.right.get, subscription)
-    val holidayCredit = HolidayCredit(subscription)
+    val holidayCredit = HolidayCredit(subscription, Fixtures.config.guardianWeeklyProductRatePlanIds)
     val update = HolidayCreditUpdate(
       config.holidayCreditProduct,
       subscription = subscription,
@@ -112,7 +112,7 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers {
     )
     val nextInvoiceStartDate = NextBillingPeriodStartDate(subscription)
     val maybeExtendedTerm = ExtendedTerm(nextInvoiceStartDate.right.get, subscription)
-    val holidayCredit = HolidayCredit(subscription)
+    val holidayCredit = HolidayCredit(subscription, Fixtures.config.guardianWeeklyProductRatePlanIds)
     val update = HolidayCreditUpdate(
       config.holidayCreditProduct,
       subscription = subscription,

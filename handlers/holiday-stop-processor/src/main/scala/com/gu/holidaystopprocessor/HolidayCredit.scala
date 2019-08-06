@@ -2,18 +2,28 @@ package com.gu.holidaystopprocessor
 
 import scala.math.BigDecimal.RoundingMode
 
+/**
+ * Replicating manual calculation found in
+ * https://docs.google.com/document/d/1N671Ei_nbln4ObZOWKvQZHnNkTgIx8EvdVJg1dHo_ak
+ *
+ * FIXME: Discounts should be taken into account?
+ */
 object HolidayCredit {
-  def apply(subscription: Subscription): Double = {
-    subscription
-      .originalRatePlanCharge
-      .map(calculateAmount)
-      .getOrElse(0) // FIXME: Should we throw instead? Is it possible RPC does not exist?
-  }
-
-  def calculateAmount(charge: RatePlanCharge): Double = {
+  def apply(subscription: Subscription, guardianWeeklyProductRatePlanIds: List[String]): Double = {
+    val currentGuardianWeeklySubscription = CurrentGuardianWeeklySubscription(subscription, guardianWeeklyProductRatePlanIds)
+    val recurringPrice = currentGuardianWeeklySubscription.price
+    val numPublicationsInPeriod = BillingPeriodToApproxWeekCount(currentGuardianWeeklySubscription.billingPeriod)
     def roundUp(d: Double): Double = BigDecimal(d).setScale(2, RoundingMode.UP).toDouble
-    val recurringPayment = charge.price
-    val numPublicationsInPeriod = charge.weekCountApprox
-    -roundUp(recurringPayment / numPublicationsInPeriod)
+    -roundUp(recurringPrice / numPublicationsInPeriod)
   }
+}
+
+// FIXME: Is this assumption safe?
+object BillingPeriodToApproxWeekCount {
+  def apply(billingPeriod: String): Int =
+    billingPeriod match {
+      case "Quarter" => 13
+      case "Annual" => 52
+      case _ => 52
+    }
 }

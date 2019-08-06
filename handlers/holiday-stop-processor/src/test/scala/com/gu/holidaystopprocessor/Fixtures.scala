@@ -9,6 +9,11 @@ import com.gu.util.Time
 
 object Fixtures {
 
+  def billingPeriodToMonths(billingPeriod: String): Int = billingPeriod match {
+    case "Quarter" => 3
+    case "Annual" => 12
+  }
+
   def mkRatePlanCharge(
     price: Double,
     billingPeriod: String,
@@ -21,14 +26,15 @@ object Fixtures {
     effectiveStartDate = LocalDate.of(2018, 6, 10),
     chargedThroughDate,
     HolidayStart__c = None,
-    HolidayEnd__c = None
+    HolidayEnd__c = None,
+    processedThroughDate = chargedThroughDate.map(_.minusMonths(billingPeriodToMonths(billingPeriod)))
   )
 
   def mkSubscription(
     termStartDate: LocalDate = LocalDate.now(),
     termEndDate: LocalDate = LocalDate.now(),
     price: Double = -1.0,
-    billingPeriod: String = "Quarterly",
+    billingPeriod: String = "Quarter",
     chargedThroughDate: Option[LocalDate] = None
   ) =
     Subscription(
@@ -46,7 +52,9 @@ object Fixtures {
               price,
               billingPeriod,
               chargedThroughDate
-            ))
+            )),
+          Fixtures.config.guardianWeeklyProductRatePlanIds.head,
+          ""
         )
       )
     )
@@ -69,8 +77,11 @@ object Fixtures {
           effectiveStartDate = LocalDate.of(2019, 9, 7),
           chargedThroughDate = None,
           HolidayStart__c = Some(LocalDate.of(2019, 8, 9)),
-          HolidayEnd__c = Some(LocalDate.of(2019, 8, 9))
-        ))
+          HolidayEnd__c = Some(LocalDate.of(2019, 8, 9)),
+          processedThroughDate = None
+        )),
+        Fixtures.config.guardianWeeklyProductRatePlanIds.head,
+        ""
       ),
       RatePlan(
         productName = "Not a discount",
@@ -82,8 +93,11 @@ object Fixtures {
           effectiveStartDate = LocalDate.of(2019, 9, 7),
           chargedThroughDate = None,
           HolidayStart__c = Some(LocalDate.of(2019, 8, 11)),
-          HolidayEnd__c = Some(LocalDate.of(2019, 8, 11))
-        ))
+          HolidayEnd__c = Some(LocalDate.of(2019, 8, 11)),
+          processedThroughDate = None
+        )),
+        Fixtures.config.guardianWeeklyProductRatePlanIds.head,
+        ""
       ),
       RatePlan(
         productName = "Discounts",
@@ -95,8 +109,11 @@ object Fixtures {
           effectiveStartDate = LocalDate.of(2019, 9, 7),
           chargedThroughDate = None,
           HolidayStart__c = Some(LocalDate.of(2019, 8, 19)),
-          HolidayEnd__c = Some(LocalDate.of(2019, 8, 19))
-        ))
+          HolidayEnd__c = Some(LocalDate.of(2019, 8, 19)),
+          processedThroughDate = None
+        )),
+        "",
+        ""
       ),
       RatePlan(
         productName = "Discounts",
@@ -108,8 +125,11 @@ object Fixtures {
           effectiveStartDate = LocalDate.of(2019, 9, 7),
           chargedThroughDate = None,
           HolidayStart__c = Some(LocalDate.of(2019, 8, 2)),
-          HolidayEnd__c = Some(LocalDate.of(2019, 8, 2))
-        ))
+          HolidayEnd__c = Some(LocalDate.of(2019, 8, 2)),
+          processedThroughDate = None
+        )),
+        Fixtures.config.guardianWeeklyProductRatePlanIds.head,
+        ""
       ),
       RatePlan(
         productName = "Discounts",
@@ -121,8 +141,11 @@ object Fixtures {
           effectiveStartDate = LocalDate.of(2018, 11, 16),
           chargedThroughDate = None,
           HolidayStart__c = Some(LocalDate.of(2018, 11, 16)),
-          HolidayEnd__c = Some(LocalDate.of(2019, 1, 4))
-        ))
+          HolidayEnd__c = Some(LocalDate.of(2019, 1, 4)),
+          processedThroughDate = None
+        )),
+        Fixtures.config.guardianWeeklyProductRatePlanIds.head,
+        ""
       ),
       RatePlan(
         productName = "Guardian Weekly",
@@ -130,7 +153,9 @@ object Fixtures {
           price = 42.7,
           billingPeriod = "Quarter",
           chargedThroughDate = Some(LocalDate.of(2019, 9, 7))
-        ))
+        )),
+        Fixtures.config.guardianWeeklyProductRatePlanIds.head,
+        ""
       )
     )
   )
@@ -174,6 +199,7 @@ object Fixtures {
     HolidayCreditProduct(
       productRatePlanId = "ratePlanId",
       productRatePlanChargeId = "ratePlanChargeId"
-    )
+    ),
+    Config.guardianWeeklyProductRatePlanIdsPROD // FIXME
   )
 }
