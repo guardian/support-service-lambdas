@@ -14,11 +14,11 @@ object Salesforce {
 
   private def thresholdDate: LocalDate = LocalDate.now.plusDays(Config.daysInAdvance)
 
-  def holidayStopRequests(sfCredentials: SFAuthConfig)(productNamePrefix: ProductName): Either[OverallFailure, List[HolidayStopRequestsDetail]] =
+  def holidayStopRequests(sfCredentials: SFAuthConfig, stopDate: Option[LocalDate])(productNamePrefix: ProductName): Either[OverallFailure, List[HolidayStopRequestsDetail]] =
     SalesforceClient(RawEffects.response, sfCredentials).value.flatMap { sfAuth =>
       val sfGet = sfAuth.wrapWith(JsonHttp.getWithParams)
       val fetchOp = SalesforceHolidayStopRequestsDetail.LookupPendingByProductNamePrefixAndDate(sfGet)
-      fetchOp(productNamePrefix, thresholdDate)
+      fetchOp(productNamePrefix, stopDate.getOrElse(thresholdDate))
     }.toDisjunction match {
       case -\/(failure) => Left(OverallFailure(failure.toString))
       case \/-(details) => Right(details)

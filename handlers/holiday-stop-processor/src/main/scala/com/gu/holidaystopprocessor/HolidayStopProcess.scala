@@ -6,7 +6,7 @@ import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
 
 object HolidayStopProcess {
 
-  def apply(config: Config): ProcessResult =
+  def apply(config: Config, stopDate: Option[LocalDate]): ProcessResult =
     Zuora.accessTokenGetResponse(config.zuoraConfig) match {
       case Left(overallFailure) =>
         ProcessResult(overallFailure)
@@ -15,7 +15,7 @@ object HolidayStopProcess {
         processHolidayStops(
           config.holidayCreditProduct,
           guardianWeeklyProductRatePlanIds = config.guardianWeeklyProductRatePlanIds,
-          getHolidayStopRequestsFromSalesforce = Salesforce.holidayStopRequests(config.sfConfig),
+          getHolidayStopRequestsFromSalesforce = Salesforce.holidayStopRequests(config.sfConfig, stopDate),
           getSubscription = Zuora.subscriptionGetResponse(config, zuoraAccessToken),
           updateSubscription = Zuora.subscriptionUpdateResponse(config, zuoraAccessToken),
           writeHolidayStopsToSalesforce = Salesforce.holidayStopUpdateResponse(config.sfConfig)
