@@ -86,7 +86,11 @@ object CurrentGuardianWeeklySubscription {
           //                date = LocalDate.now()
           //              )
           //            }.getOrElse(false),
-          RatePlanHasBeenInvoiced -> (ratePlan.ratePlanCharges.head.processedThroughDate.isDefined && ratePlan.ratePlanCharges.head.chargedThroughDate.isDefined),
+          RatePlanHasBeenInvoiced -> Try {
+            val fromInclusive = ratePlan.ratePlanCharges.head.processedThroughDate.get
+            val toExclusive = ratePlan.ratePlanCharges.head.chargedThroughDate.get
+            toExclusive.isAfter(fromInclusive)
+          }.getOrElse(false),
           ChargeIsQuarterlyOrAnnual -> Try(List("Annual", "Quarter").contains(ratePlan.ratePlanCharges.head.billingPeriod.get)).getOrElse(false)
         ).forall(_._2)
       }
