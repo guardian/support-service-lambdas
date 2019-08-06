@@ -15,7 +15,7 @@ class ActionCalculatorTest extends FlatSpec with Matchers {
 
     suspensionConstants.issueDayOfWeek shouldEqual DayOfWeek.FRIDAY
     suspensionConstants.annualIssueLimit shouldEqual 6
-    suspensionConstants.minLeadTimeDays shouldEqual 9
+    suspensionConstants.fulfillmentLeadTimeDays shouldEqual 8
 
     assertThrows[MatchError] {
       ActionCalculator.suspensionConstantsByProduct(ProductName("blah"))

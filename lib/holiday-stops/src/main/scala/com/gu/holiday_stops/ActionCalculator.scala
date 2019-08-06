@@ -15,7 +15,7 @@ object ActionCalculator {
 
   case class ProductSuspensionConstants(
     issueDayOfWeek: DayOfWeek,
-    minLeadTimeDays: Int,
+    fulfillmentLeadTimeDays: Int,
     annualIssueLimit: Int
   )
 
@@ -23,7 +23,7 @@ object ActionCalculator {
   def suspensionConstantsByProduct(productName: ProductName): ProductSuspensionConstants = productName.value match {
     case s if s.startsWith("Guardian Weekly") => ProductSuspensionConstants(
       issueDayOfWeek = DayOfWeek.FRIDAY,
-      minLeadTimeDays = 9, //i.e. the thursday of the week before the Friday issue day,
+      fulfillmentLeadTimeDays = 8, //i.e. the thursday of the week before the Friday issue day,
       annualIssueLimit = 6
     )
     //TODO handle default case (perhaps throw error)
@@ -35,12 +35,12 @@ object ActionCalculator {
     else
       start `with` targetDayOfWeek
 
-  def getProductSpecifics(productNamePrefix: ProductName, today: LocalDate = LocalDate.now()) = {
+  def getProductSpecifics(productNamePrefix: ProductName, today: LocalDate = LocalDate.now()): ProductSpecifics = {
     val productSuspensionConstants = suspensionConstantsByProduct(productNamePrefix)
     val issueDayOfWeek = productSuspensionConstants.issueDayOfWeek
-    val todayPlusMinLeadTime = today.plusDays(productSuspensionConstants.minLeadTimeDays)
-    val nextIssueDayAfterTodayPlusMinLeadTime = findNextTargetDayOfWeek(todayPlusMinLeadTime, issueDayOfWeek)
-    val dayAfterNextPreventableIssue = nextIssueDayAfterTodayPlusMinLeadTime.minusWeeks(1).plusDays(1)
+    val cutoffDate = today.plusDays(productSuspensionConstants.fulfillmentLeadTimeDays + 1)
+    val nextIssueDayAfterCutoffDate = findNextTargetDayOfWeek(cutoffDate, issueDayOfWeek)
+    val dayAfterNextPreventableIssue = nextIssueDayAfterCutoffDate.minusWeeks(1).plusDays(1)
     ProductSpecifics(
       firstAvailableDate = dayAfterNextPreventableIssue,
       issueDayOfWeek.getValue,
