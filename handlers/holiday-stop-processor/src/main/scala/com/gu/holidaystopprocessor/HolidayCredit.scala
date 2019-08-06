@@ -12,7 +12,7 @@ object HolidayCredit {
   def apply(subscription: Subscription, guardianWeeklyProductRatePlanIds: List[String]): Double = {
     val currentGuardianWeeklySubscription = CurrentGuardianWeeklySubscription(subscription, guardianWeeklyProductRatePlanIds)
     val recurringPrice = currentGuardianWeeklySubscription.price
-    val numPublicationsInPeriod = BillingPeriodToApproxWeekCount(currentGuardianWeeklySubscription.billingPeriod)
+    val numPublicationsInPeriod = BillingPeriodToApproxWeekCount(currentGuardianWeeklySubscription)
     def roundUp(d: Double): Double = BigDecimal(d).setScale(2, RoundingMode.UP).toDouble
     -roundUp(recurringPrice / numPublicationsInPeriod)
   }
@@ -20,10 +20,10 @@ object HolidayCredit {
 
 // FIXME: Is this assumption safe?
 object BillingPeriodToApproxWeekCount {
-  def apply(billingPeriod: String): Int =
-    billingPeriod match {
+  def apply(currentGuardianWeeklySubscription: CurrentGuardianWeeklySubscription): Int =
+    currentGuardianWeeklySubscription.billingPeriod match {
       case "Quarter" => 13
       case "Annual" => 52
-      case _ => 52
+      case _ => throw new RuntimeException(s"Failed to convert billing period to weeks because unexpected billing period: $currentGuardianWeeklySubscription")
     }
 }
