@@ -20,6 +20,8 @@ import java.time.LocalDate
  * Note nextBillingPeriodStartDate represents a specific date yyyy-mm-dd unlike billingPeriod (quarterly)
  * or billingPeriodStartDay (1st of month).
  */
+
+// FIXME: This should be function of CurrentGuardianWeeklySubscription
 object NextBillingPeriodStartDate {
   def apply(subscription: Subscription): Either[ZuoraHolidayWriteError, LocalDate] = {
     subscription

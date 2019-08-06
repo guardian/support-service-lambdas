@@ -10,27 +10,30 @@ object HolidayCreditSpec extends Properties("HolidayCreditAmount") with OptionVa
 
   private val ratePlanChargeGen = for {
     price <- Gen.choose(0.01, 10000)
-    billingPeriod <- Gen.oneOf(List("Month", "Quarter", "Annual"))
+    billingPeriod <- Gen.oneOf(List("Quarter", "Annual"))
+    chargedThroughDate = Some(LocalDate.of(2020, 1, 1))
   } yield RatePlanCharge(
     name = "GW",
     number = "C5",
     price,
     Some(billingPeriod),
     effectiveStartDate = LocalDate.of(2019, 7, 10),
-    chargedThroughDate = Some(LocalDate.of(2020, 1, 1)),
+    chargedThroughDate = chargedThroughDate,
     HolidayStart__c = None,
-    HolidayEnd__c = None
+    HolidayEnd__c = None,
+    processedThroughDate = chargedThroughDate.map(_.minusMonths(Fixtures.billingPeriodToMonths(billingPeriod)))
+
   )
 
   val subscription = Fixtures.mkSubscription()
 
   property("should never be positive") = forAll(ratePlanChargeGen) { charge: RatePlanCharge =>
-    val ratePlans = List(RatePlan("", List(charge)))
-    HolidayCredit(subscription.copy(ratePlans = ratePlans)) <= 0
+    val ratePlans = List(RatePlan("", List(charge), Config.guardianWeeklyProductRatePlanIdsPROD.head, ""))
+    HolidayCredit(subscription.copy(ratePlans = ratePlans), Fixtures.config.guardianWeeklyProductRatePlanIds) <= 0
   }
 
   property("should never be overwhelmingly negative") = forAll(ratePlanChargeGen) { charge: RatePlanCharge =>
-    val ratePlans = List(RatePlan("", List(charge)))
-    HolidayCredit(subscription.copy(ratePlans = ratePlans)) > -charge.price
+    val ratePlans = List(RatePlan("", List(charge), Config.guardianWeeklyProductRatePlanIdsPROD.head, ""))
+    HolidayCredit(subscription.copy(ratePlans = ratePlans), Fixtures.config.guardianWeeklyProductRatePlanIds) > -charge.price
   }
 }
