@@ -15,7 +15,7 @@ object Salesforce {
 
   def holidayStopRequests(sfCredentials: SFAuthConfig, processDateOverride: Option[LocalDate])(productNamePrefix: ProductName): Either[OverallFailure, List[HolidayStopRequestsDetail]] = {
     val processDate = LocalDate.now.plusDays(
-      suspensionConstantsByProduct(productNamePrefix).fulfillmentLeadTimeDays
+      suspensionConstantsByProduct(productNamePrefix).processorRunLeadTimeDays
     )
 
     SalesforceClient(RawEffects.response, sfCredentials).value.flatMap { sfAuth =>
