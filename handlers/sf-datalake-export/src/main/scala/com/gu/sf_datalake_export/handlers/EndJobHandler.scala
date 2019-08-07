@@ -3,7 +3,6 @@ package com.gu.sf_datalake_export.handlers
 import java.io.{InputStream, OutputStream}
 
 import com.amazonaws.services.lambda.runtime.Context
-import com.amazonaws.services.s3.model.{PutObjectRequest, PutObjectResult}
 import com.gu.effects.{GetFromS3, RawEffects, S3Path}
 import com.gu.salesforce.SalesforceAuthenticate.{SFAuthConfig, SFExportAuthConfig}
 import com.gu.salesforce.SalesforceClient
@@ -46,34 +45,43 @@ object EndJobHandler {
 
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
     val uploadFile = S3UploadFile(RawEffects.s3Write) _
+    val uploadSuccessFile = uploadDummySuccessFileToTriggerOphanJob(RawEffects.stage, uploadFile) _
+
     JsonHandler(
       lambdaIO = LambdaIO(inputStream, outputStream, context),
-      operation = operation(RawEffects.stage, GetFromS3.fetchString, uploadFile, RawEffects.response)
+      operation = operation(RawEffects.stage, GetFromS3.fetchString, uploadSuccessFile, RawEffects.response)
     )
   }
 
-  def operation(
-    stage: Stage,
-    fetchString: StringFromS3,
-    uploadFile: (S3Path, File) => Try[_],
-    getResponse: Request => Response
-  )(request: WireRequest): Try[WireResponse] = {
+  /**
+   * Upload a dummy success file to indicate all raw files are uploaded and ready to be processed.
+   * The ETL job will be triggered once this file is seen in S3
+   */
+  def uploadDummySuccessFileToTriggerOphanJob(stage: Stage, uploadFile: (S3Path, File) => Try[_])(request: WireRequest): Try[_] = {
 
-    val loadConfig = LoadConfigModule(stage, fetchString)
-    val jobId = JobId(request.jobId)
     val shouldUploadToDataLake = ShouldUploadToDataLake(request.uploadToDataLake)
     val jobName = JobName(request.jobName)
     val objectName = ObjectName(request.objectName)
-
     val uploadPath: S3Path = ExportS3Path(stage)(objectName, shouldUploadToDataLake)
 
     val successFile = {
       val fileName = FileName(s"_SUCCESS_${jobName.value}")
       File(fileName, FileContent(""))
     }
+    uploadFile(uploadPath, successFile)
+  }
+  def operation(
+    stage: Stage,
+    fetchString: StringFromS3,
+    uploadDummySuccessFileToTriggerOphanJob: WireRequest => Try[_],
+    getResponse: Request => Response
+  )(request: WireRequest): Try[WireResponse] = {
+
+    val loadConfig = LoadConfigModule(stage, fetchString)
+    val jobId = JobId(request.jobId)
 
     for {
-      _ <- uploadFile(uploadPath, successFile)
+      _ <- uploadDummySuccessFileToTriggerOphanJob(request)
       sfConfig <- loadConfig[SFAuthConfig](SFExportAuthConfig.location, SFAuthConfig.reads).leftMap(_.error).toTry
       sfClient <- SalesforceClient(getResponse, sfConfig).value.toTry
       wiredCloseJob = sfClient.wrapWith(JsonHttp.post).wrapWith(CloseJob.wrapper)
