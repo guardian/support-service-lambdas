@@ -256,6 +256,14 @@ Resources:
           - Effect: Allow
             Action: s3:GetObject
             Resource: !Sub "arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/sfExportAuth-${Stage}*.json"
+      - PolicyName: DestBuckets
+        PolicyDocument:
+          Statement:
+            - Effect: Allow
+              Action:
+                - s3:PutObject
+                - s3:PutObjectAcl
+              Resource: !FindInMap [StageMap, !Ref Stage, destBuckets]
   CleanBucket:
     Type: AWS::Lambda::Function
     Properties:
