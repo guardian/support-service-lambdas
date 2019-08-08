@@ -36,20 +36,41 @@ object ActionCalculator {
    *                                 One safety-day before fulfilment day. Safety day gives us an opportunity to fix issues before fulfilment runs.
    * @param annualIssueLimit
    */
-  case class ProductSuspensionConstants(
-    issueDayOfWeek: DayOfWeek,
-    processorRunLeadTimeDays: Int,
-    annualIssueLimit: Int
-  )
+  sealed abstract class ProductSuspensionConstants(
+    val issueDayOfWeek: DayOfWeek,
+    val processorRunLeadTimeDays: Int,
+    val annualIssueLimit: Int,
+    val minDaysBetweenTodayAndFirstAvailableDate: Int,
+    val maxDaysBetweenTodayAndFirstAvailableDate: Int,
+    val firstAvailableDateDayOfWeek: DayOfWeek
+  ) {
+    def verify(firstAvailableDate: LocalDate, today: LocalDate): Unit
+  }
+
+  case object GuardianWeeklySuspensionConstants extends ProductSuspensionConstants(
+    issueDayOfWeek = DayOfWeek.FRIDAY,
+    processorRunLeadTimeDays = 8 + (1 /* safety-day */ ), //one (safety) day before the Thursday of the week before the Friday issue day
+    annualIssueLimit = 6,
+    minDaysBetweenTodayAndFirstAvailableDate = 5,
+    maxDaysBetweenTodayAndFirstAvailableDate = 11,
+    firstAvailableDateDayOfWeek = DayOfWeek.SATURDAY
+  ) {
+
+    def verify(firstAvailableDate: LocalDate, today: LocalDate): Unit = {
+      val daysBetweenTodayAndFirstAvailableDate = ChronoUnit.DAYS.between(today, firstAvailableDate)
+      require(
+        (daysBetweenTodayAndFirstAvailableDate >= minDaysBetweenTodayAndFirstAvailableDate) &&
+          (daysBetweenTodayAndFirstAvailableDate <= maxDaysBetweenTodayAndFirstAvailableDate),
+        "Guardian Weekly first available date should be between 5 and 11 days from today"
+      )
+      require(firstAvailableDate.getDayOfWeek == firstAvailableDateDayOfWeek, "Guardian Weekly first available date should fall on Saturday")
+    }
+  }
 
   // TODO this will likely need to change to return an array of days of week (when we support more than just GW)
   def suspensionConstantsByProduct(productName: ProductName): ProductSuspensionConstants = productName.value match {
-    case s if s.startsWith("Guardian Weekly") => ProductSuspensionConstants(
-      issueDayOfWeek = DayOfWeek.FRIDAY,
-      processorRunLeadTimeDays = 8 + (1 /* safety-day */ ), //one (safety) day before the Thursday of the week before the Friday issue day
-      annualIssueLimit = 6
-    )
-    //TODO handle default case (perhaps throw error)
+    case s if s.startsWith("Guardian Weekly") => GuardianWeeklySuspensionConstants
+    case _ => throw new RuntimeException(s"Failed to determine ProductSuspensionConstants because of unexpected productName: $productName ")
   }
 
   def findNextTargetDayOfWeek(start: LocalDate, targetDayOfWeek: DayOfWeek): LocalDate =
@@ -58,8 +79,18 @@ object ActionCalculator {
     else
       start `with` targetDayOfWeek
 
-  // first available date calculation
-  def getProductSpecifics(productNamePrefix: ProductName, today: LocalDate = LocalDate.now()): ProductSpecifics = {
+  /**
+   * Main business logic for calculating first available date per product.
+   *
+   * WARNING: Refactor with care. When adding a new product set debug flag to determine constants such as
+   * daysBetweenTodayAndFirstAvailableDate, firstAvailableDate.getDayOfWeek, etc.
+   */
+  def getProductSpecifics(
+    productNamePrefix: ProductName,
+    today: LocalDate = LocalDate.now(),
+    debug: Boolean = false // flag used to learn how the algorithm works and determine constants for new products
+  ): ProductSpecifics = {
+
     val productSuspensionConstants = suspensionConstantsByProduct(productNamePrefix)
     val issueDayOfWeek = productSuspensionConstants.issueDayOfWeek // Friday for GW
     val timezoneBluntAdjustmentDays = 1 // Salesforce and client-side might be in different timezones than AWS
@@ -67,12 +98,17 @@ object ActionCalculator {
     val nextIssueDayAfterCutoffDate = findNextTargetDayOfWeek(cutoffDate, issueDayOfWeek)
     val firstAvailableDate = nextIssueDayAfterCutoffDate.minusWeeks(1).plusDays(1) // dayAfterNextPreventableIssue
 
-    //    require(cutoffDate.getDayOfWeek == DayOfWeek.TUESDAY)
-    val daysBetweenTodayAndFirstAvailableDate = ChronoUnit.DAYS.between(today, firstAvailableDate)
-    //    println(s"today=$today ==> cutoffdate=$cutoffDate")
-    println(s"nextIssueDayAfterCutoffDate=$nextIssueDayAfterCutoffDate")
-    require((daysBetweenTodayAndFirstAvailableDate >= 5) && (daysBetweenTodayAndFirstAvailableDate <= 11))
-    require(firstAvailableDate.getDayOfWeek == DayOfWeek.SATURDAY)
+    productSuspensionConstants.verify(firstAvailableDate, today)
+
+    if (debug) {
+      println()
+      println(s"today=$today")
+      println(s"cutoffDate=$cutoffDate")
+      println(s"nextIssueDayAfterCutoffDate=$nextIssueDayAfterCutoffDate")
+      println(s"firstAvailableDate=$firstAvailableDate")
+      val daysBetweenTodayAndFirstAvailableDate = ChronoUnit.DAYS.between(today, firstAvailableDate)
+      println(s"daysBetweenTodayAndFirstAvailableDate=$daysBetweenTodayAndFirstAvailableDate")
+    }
 
     ProductSpecifics(
       firstAvailableDate = firstAvailableDate,

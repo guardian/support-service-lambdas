@@ -19,7 +19,7 @@ class ActionCalculatorTest extends FlatSpec with Matchers {
     suspensionConstants.annualIssueLimit shouldEqual 6
     suspensionConstants.processorRunLeadTimeDays shouldEqual 9
 
-    assertThrows[MatchError] {
+    assertThrows[RuntimeException] {
       ActionCalculator.suspensionConstantsByProduct(ProductName("blah"))
     }
 
@@ -67,7 +67,9 @@ class ActionCalculatorTest extends FlatSpec with Matchers {
 
     gwTodayToFirstAvailableDate foreach {
       case (today, expected) =>
-        ActionCalculator.getProductSpecifics(gwProductName, today).firstAvailableDate shouldEqual expected
+        ActionCalculator
+          .getProductSpecifics(gwProductName, today, debug = false)
+          .firstAvailableDate shouldEqual expected
     }
 
   }
