@@ -73,17 +73,6 @@ Resources:
     DependsOn:
       - HolidayStopProcessorRole
 
-  HolidayStopProcessorFailureTopic:
-    Type: AWS::SNS::Topic
-    Condition: IsProd
-    Properties:
-      Subscription:
-        - Endpoint: kelvin.chappell@guardian.co.uk
-          Protocol: email
-      TopicName: holiday-stop-processor-failure-topic
-    DependsOn:
-      - HolidayStopProcessor
-
   HolidayStopProcessorFailureAlarm:
     Type: AWS::CloudWatch::Alarm
     Condition: IsProd
@@ -106,4 +95,3 @@ Resources:
       TreatMissingData: notBreaching
     DependsOn:
       - HolidayStopProcessor
-      - HolidayStopProcessorFailureTopic
