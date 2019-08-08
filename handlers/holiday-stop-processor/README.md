@@ -4,7 +4,8 @@ This lambda updates subscriptions in Zuora with holiday stop amendments.
 
 On a regular schedule it:
 1. reads holiday stop requests from Salesforce,
-1. for each request, it adds `Discount | Guardian Weekly Holiday Credit` rate plan to the appropriate subscription in Zuora on the first day of the next billing period
+1. for each request, it adds `Discount | DO NOT USE MANUALLY: Guardian Weekly Holiday Credit - automated` rate plan 
+to the appropriate subscription in Zuora on the first day of the next billing period for that subscription
 1. writes back to Salesforce details of the amendments made.
 
 The requests fetched from Salesforce depend on the type of product that the request affects.  There's a set of rules for each publication.  It's a just-in-time process so that amendments are only applied at the last moment before the fulfilment of that publication can be altered.  Every publication has a lead time for its fulfilment during which it cannot be altered: typically this is a period of 10 to 14 days.
@@ -52,7 +53,7 @@ that's a thin wrapper around the processor to enable it to be tested functionall
 1. Copy magic string
 1. Acquire via https://support.code.dev-theguardian.com/uk/subscribe/weekly
 1. If test user was used correctly, subscription will end up in UAT Zuora and UAT Salesforce
-1. In Zuora crate the invoice for the first billing period by setting bill run target date as the `customerAcceptanceDate`
+1. In Zuora create the invoice for the first billing period by setting bill run target date as the `customerAcceptanceDate`
 1. In Salesforce navigate to subscription 
 1. Use the `Salesforce Inspector | Show all data` extension to set value `Guardian Weekly` to `Product__c` and `Product_Type__c` fields
 1. Create holiday request
