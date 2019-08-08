@@ -11,6 +11,9 @@ Parameters:
       - PROD
     Default: CODE
 
+Conditions:
+  IsProd: !Equals [!Ref "Stage", "PROD"]
+
 Resources:
 
   HolidayStopProcessorRole:
@@ -69,3 +72,38 @@ Resources:
       Timeout: 60
     DependsOn:
       - HolidayStopProcessorRole
+
+  HolidayStopProcessorFailureTopic:
+    Type: AWS::SNS::Topic
+    Condition: IsProd
+    Properties:
+      Subscription:
+        - Endpoint: kelvin.chappell@guardian.co.uk
+          Protocol: email
+      TopicName: holiday-stop-processor-failure-topic
+    DependsOn:
+      - HolidayStopProcessor
+
+  HolidayStopProcessorFailureAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
+    Properties:
+      AlarmName: holiday-stop-processor-failure-alarm
+      AlarmDescription:
+        Failed to process holiday stops.
+      AlarmActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:holiday-stop-processor-failure-topic
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref HolidayStopProcessor
+      EvaluationPeriods: 1
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Period: 300
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
+    DependsOn:
+      - HolidayStopProcessor
+      - HolidayStopProcessorFailureTopic
