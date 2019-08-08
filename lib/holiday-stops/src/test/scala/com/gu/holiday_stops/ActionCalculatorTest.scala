@@ -5,6 +5,8 @@ import java.time.{DayOfWeek, LocalDate}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.ProductName
 import org.scalatest.{FlatSpec, Matchers}
 
+import scala.collection.immutable.ListMap
+
 class ActionCalculatorTest extends FlatSpec with Matchers {
 
   val gwProductName = ProductName("Guardian Weekly Zone A")
@@ -23,22 +25,47 @@ class ActionCalculatorTest extends FlatSpec with Matchers {
 
   }
 
-  it should "calculate the first available date based on ProductName" in {
+  it should "calculate first available date for Guardian Weekly" in {
 
-    val gwInputsAndExpected = Map(
-      LocalDate.of(2019, 6, 10) -> LocalDate.of(2019, 6, 15),
-      LocalDate.of(2019, 6, 11) -> LocalDate.of(2019, 6, 15),
-      LocalDate.of(2019, 6, 12) -> LocalDate.of(2019, 6, 22),
-      LocalDate.of(2019, 6, 13) -> LocalDate.of(2019, 6, 22),
-      LocalDate.of(2019, 6, 14) -> LocalDate.of(2019, 6, 22),
-      LocalDate.of(2019, 6, 15) -> LocalDate.of(2019, 6, 22),
-      LocalDate.of(2019, 6, 16) -> LocalDate.of(2019, 6, 22),
-      LocalDate.of(2019, 6, 17) -> LocalDate.of(2019, 6, 22),
-      LocalDate.of(2019, 6, 18) -> LocalDate.of(2019, 6, 22),
-      LocalDate.of(2019, 6, 19) -> LocalDate.of(2019, 6, 29),
+    type Today = LocalDate
+    type FirstAvailableDate = LocalDate
+    val gwTodayToFirstAvailableDate = ListMap[Today, FirstAvailableDate](
+      LocalDate.of(2019, 6,  1) -> LocalDate.of(2019, 6,  8), // first available on Sun
+      LocalDate.of(2019, 6,  2) -> LocalDate.of(2019, 6,  8), // first available on Sun
+      LocalDate.of(2019, 6,  3) -> LocalDate.of(2019, 6,  8), // first available on Sun
+      LocalDate.of(2019, 6,  4) -> LocalDate.of(2019, 6, 15), // jump on Tue, a day before processor run
+      LocalDate.of(2019, 6,  5) -> LocalDate.of(2019, 6, 15), // first available on Sun
+      LocalDate.of(2019, 6,  6) -> LocalDate.of(2019, 6, 15), // first available on Sun
+      LocalDate.of(2019, 6,  7) -> LocalDate.of(2019, 6, 15), // first available on Sun
+      LocalDate.of(2019, 6,  8) -> LocalDate.of(2019, 6, 15), // first available on Sun
+      LocalDate.of(2019, 6,  9) -> LocalDate.of(2019, 6, 15), // first available on Sun
+      LocalDate.of(2019, 6, 10) -> LocalDate.of(2019, 6, 15), // first available on Sun
+      LocalDate.of(2019, 6, 11) -> LocalDate.of(2019, 6, 22), // jump on Tue, a day before processor run
+      LocalDate.of(2019, 6, 12) -> LocalDate.of(2019, 6, 22), // first available on Sun
+      LocalDate.of(2019, 6, 13) -> LocalDate.of(2019, 6, 22), // first available on Sun
+      LocalDate.of(2019, 6, 14) -> LocalDate.of(2019, 6, 22), // first available on Sun
+      LocalDate.of(2019, 6, 15) -> LocalDate.of(2019, 6, 22), // first available on Sun
+      LocalDate.of(2019, 6, 16) -> LocalDate.of(2019, 6, 22), // first available on Sun
+      LocalDate.of(2019, 6, 17) -> LocalDate.of(2019, 6, 22), // first available on Sun
+      LocalDate.of(2019, 6, 18) -> LocalDate.of(2019, 6, 29), // jump on Tue, a day before processor run
+      LocalDate.of(2019, 6, 19) -> LocalDate.of(2019, 6, 29), // first available on Sun
+      LocalDate.of(2019, 6, 20) -> LocalDate.of(2019, 6, 29), // first available on Sun
+      LocalDate.of(2019, 6, 21) -> LocalDate.of(2019, 6, 29), // first available on Sun
+      LocalDate.of(2019, 6, 22) -> LocalDate.of(2019, 6, 29), // first available on Sun
+      LocalDate.of(2019, 6, 23) -> LocalDate.of(2019, 6, 29), // first available on Sun
+      LocalDate.of(2019, 6, 24) -> LocalDate.of(2019, 6, 29), // first available on Sun
+      LocalDate.of(2019, 6, 25) -> LocalDate.of(2019, 7,  6), // jump on Tue, a day before processor run
+      LocalDate.of(2019, 6, 26) -> LocalDate.of(2019, 7,  6), // first available on Sun
+      LocalDate.of(2019, 6, 27) -> LocalDate.of(2019, 7,  6), // first available on Sun
+      LocalDate.of(2019, 6, 28) -> LocalDate.of(2019, 7,  6), // first available on Sun
+      LocalDate.of(2019, 6, 29) -> LocalDate.of(2019, 7,  6), // first available on Sun
+      LocalDate.of(2019, 6, 30) -> LocalDate.of(2019, 7,  6), // first available on Sun
+      LocalDate.of(2019, 7,  1) -> LocalDate.of(2019, 7,  6), // first available on Sun
+      LocalDate.of(2019, 7,  2) -> LocalDate.of(2019, 7, 13) // jump on Tue, a day before processor run
+
     )
 
-    gwInputsAndExpected foreach {
+    gwTodayToFirstAvailableDate foreach {
       case (today, expected) =>
         ActionCalculator.getProductSpecifics(gwProductName, today).firstAvailableDate shouldEqual expected
     }

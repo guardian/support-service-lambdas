@@ -46,7 +46,7 @@ object ActionCalculator {
   def suspensionConstantsByProduct(productName: ProductName): ProductSuspensionConstants = productName.value match {
     case s if s.startsWith("Guardian Weekly") => ProductSuspensionConstants(
       issueDayOfWeek = DayOfWeek.FRIDAY,
-      processorRunLeadTimeDays = 8 + (1 /* safety-day */), //one (safety) day before the Thursday of the week before the Friday issue day
+      processorRunLeadTimeDays = 8 + (1 /* safety-day */ ), //one (safety) day before the Thursday of the week before the Friday issue day
       annualIssueLimit = 6
     )
     //TODO handle default case (perhaps throw error)
@@ -62,11 +62,20 @@ object ActionCalculator {
   def getProductSpecifics(productNamePrefix: ProductName, today: LocalDate = LocalDate.now()): ProductSpecifics = {
     val productSuspensionConstants = suspensionConstantsByProduct(productNamePrefix)
     val issueDayOfWeek = productSuspensionConstants.issueDayOfWeek // Friday for GW
-    val cutoffDate = today.plusDays(productSuspensionConstants.processorRunLeadTimeDays)
+    val timezoneBluntAdjustmentDays = 1 // Salesforce and client-side might be in different timezones than AWS
+    val cutoffDate = today.plusDays(productSuspensionConstants.processorRunLeadTimeDays + timezoneBluntAdjustmentDays)
     val nextIssueDayAfterCutoffDate = findNextTargetDayOfWeek(cutoffDate, issueDayOfWeek)
-    val dayAfterNextPreventableIssue = nextIssueDayAfterCutoffDate.minusWeeks(1).plusDays(1)
+    val firstAvailableDate = nextIssueDayAfterCutoffDate.minusWeeks(1).plusDays(1) // dayAfterNextPreventableIssue
+
+    //    require(cutoffDate.getDayOfWeek == DayOfWeek.TUESDAY)
+    val daysBetweenTodayAndFirstAvailableDate = ChronoUnit.DAYS.between(today, firstAvailableDate)
+    //    println(s"today=$today ==> cutoffdate=$cutoffDate")
+    println(s"nextIssueDayAfterCutoffDate=$nextIssueDayAfterCutoffDate")
+    require((daysBetweenTodayAndFirstAvailableDate >= 5) && (daysBetweenTodayAndFirstAvailableDate <= 11))
+    require(firstAvailableDate.getDayOfWeek == DayOfWeek.SATURDAY)
+
     ProductSpecifics(
-      firstAvailableDate = dayAfterNextPreventableIssue,
+      firstAvailableDate = firstAvailableDate,
       issueDayOfWeek.getValue,
       productSuspensionConstants.annualIssueLimit
     )

@@ -36,7 +36,7 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends FlatSpec with Matc
 
       verifySubOwnerOp = SalesforceSFSubscription.SubscriptionForSubscriptionNameAndIdentityID(sfAuth.wrapWith(JsonHttp.getWithParams))
       maybeMatchingSubscription <- verifySubOwnerOp(
-        SubscriptionName("A-S00050817"), // must exist in DEV SalesForce
+        SubscriptionName("A-S00050817"), // must exist in DEV Scalculate the first available date basedalesForce
         "100004814"
       ).toDisjunction
 
