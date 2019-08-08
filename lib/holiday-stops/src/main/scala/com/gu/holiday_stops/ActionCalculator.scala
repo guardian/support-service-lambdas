@@ -1,9 +1,10 @@
 package com.gu.holiday_stops
 
-import java.time.temporal.ChronoUnit
+import java.time.temporal.{ChronoUnit, TemporalAdjusters}
 
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.ProductName
 import java.time.{DayOfWeek, LocalDate}
+import java.time.temporal.ChronoUnit.DAYS
 
 case class ProductSpecifics(
   firstAvailableDate: LocalDate,
@@ -44,7 +45,7 @@ object ActionCalculator {
     val maxDaysBetweenTodayAndFirstAvailableDate: Int,
     val firstAvailableDateDayOfWeek: DayOfWeek
   ) {
-    def verify(firstAvailableDate: LocalDate, today: LocalDate): Unit
+    def firstAvailableDate(today: LocalDate): LocalDate
   }
 
   case object GuardianWeeklySuspensionConstants extends ProductSuspensionConstants(
@@ -56,7 +57,24 @@ object ActionCalculator {
     firstAvailableDateDayOfWeek = DayOfWeek.SATURDAY
   ) {
 
-    def verify(firstAvailableDate: LocalDate, today: LocalDate): Unit = {
+    /**
+     * If there are less than 5 days between today and the day after next publication day,
+     * then Saturday after next (i.e., next-next Saturday),
+     * otherwise next Saturday
+     */
+    def firstAvailableDate(today: LocalDate): LocalDate = {
+      val dayAfterNextPublicationDay = TemporalAdjusters.next(issueDayOfWeek.plus(1)) // Saturday because GW is published on Friday, https://stackoverflow.com/a/29010338/5205022
+      val firstAvailableDate =
+        if (DAYS.between(today, today `with` dayAfterNextPublicationDay) < minDaysBetweenTodayAndFirstAvailableDate)
+          (today `with` dayAfterNextPublicationDay `with` dayAfterNextPublicationDay) // Saturday after next
+        else
+          (today `with` dayAfterNextPublicationDay) // next Saturday
+
+      verify(firstAvailableDate, today)
+      firstAvailableDate
+    }
+
+    private def verify(firstAvailableDate: LocalDate, today: LocalDate): Unit = {
       val daysBetweenTodayAndFirstAvailableDate = ChronoUnit.DAYS.between(today, firstAvailableDate)
       require(
         (daysBetweenTodayAndFirstAvailableDate >= minDaysBetweenTodayAndFirstAvailableDate) &&
@@ -73,48 +91,10 @@ object ActionCalculator {
     case _ => throw new RuntimeException(s"Failed to determine ProductSuspensionConstants because of unexpected productName: $productName ")
   }
 
-  def findNextTargetDayOfWeek(start: LocalDate, targetDayOfWeek: DayOfWeek): LocalDate =
-    if (start.getDayOfWeek.getValue >= targetDayOfWeek.getValue)
-      start.plusWeeks(1) `with` targetDayOfWeek
-    else
-      start `with` targetDayOfWeek
-
-  /**
-   * Main business logic for calculating first available date per product.
-   *
-   * WARNING: Refactor with care. When adding a new product set debug flag to determine constants such as
-   * daysBetweenTodayAndFirstAvailableDate, firstAvailableDate.getDayOfWeek, etc.
-   */
-  def getProductSpecifics(
-    productNamePrefix: ProductName,
-    today: LocalDate = LocalDate.now(),
-    debug: Boolean = false // flag used to learn how the algorithm works and determine constants for new products
-  ): ProductSpecifics = {
-
+  def getProductSpecifics(productNamePrefix: ProductName, today: LocalDate = LocalDate.now()): ProductSpecifics = {
     val productSuspensionConstants = suspensionConstantsByProduct(productNamePrefix)
-    val issueDayOfWeek = productSuspensionConstants.issueDayOfWeek // Friday for GW
-    val timezoneBluntAdjustmentDays = 1 // Salesforce and client-side might be in different timezones than AWS
-    val cutoffDate = today.plusDays(productSuspensionConstants.processorRunLeadTimeDays + timezoneBluntAdjustmentDays)
-    val nextIssueDayAfterCutoffDate = findNextTargetDayOfWeek(cutoffDate, issueDayOfWeek)
-    val firstAvailableDate = nextIssueDayAfterCutoffDate.minusWeeks(1).plusDays(1) // dayAfterNextPreventableIssue
-
-    productSuspensionConstants.verify(firstAvailableDate, today)
-
-    if (debug) {
-      println()
-      println(s"today=$today")
-      println(s"cutoffDate=$cutoffDate")
-      println(s"nextIssueDayAfterCutoffDate=$nextIssueDayAfterCutoffDate")
-      println(s"firstAvailableDate=$firstAvailableDate")
-      val daysBetweenTodayAndFirstAvailableDate = ChronoUnit.DAYS.between(today, firstAvailableDate)
-      println(s"daysBetweenTodayAndFirstAvailableDate=$daysBetweenTodayAndFirstAvailableDate")
-    }
-
-    ProductSpecifics(
-      firstAvailableDate = firstAvailableDate,
-      issueDayOfWeek.getValue,
-      productSuspensionConstants.annualIssueLimit
-    )
+    import productSuspensionConstants._
+    ProductSpecifics(firstAvailableDate(today), issueDayOfWeek.getValue, annualIssueLimit)
   }
 
   def publicationDatesToBeStopped(
