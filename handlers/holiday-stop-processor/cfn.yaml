@@ -95,3 +95,18 @@ Resources:
       TreatMissingData: notBreaching
     DependsOn:
       - HolidayStopProcessor
+
+  HolidayStopProcessorScheduleRule:
+    Type: AWS::Events::Rule
+    Condition: IsProd
+    Properties:
+      Description: Trigger processing of holiday stops every hour (to give 24 attempts a day)
+      Name: holiday-stop-processor-schedule
+      ScheduleExpression: "cron(0 * ? * * *)"
+      # TODO enable
+      State: DISABLED
+      Targets:
+        - Arn: !GetAtt HolidayStopProcessor.Arn
+          Id: !Ref HolidayStopProcessor
+    DependsOn:
+      - HolidayStopProcessor
