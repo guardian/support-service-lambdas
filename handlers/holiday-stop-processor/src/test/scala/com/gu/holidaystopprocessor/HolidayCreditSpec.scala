@@ -4,9 +4,9 @@ import java.time.LocalDate
 
 import org.scalacheck.Prop.forAll
 import org.scalacheck._
-import org.scalatest.OptionValues
+import org.scalatest.{EitherValues, OptionValues}
 
-object HolidayCreditSpec extends Properties("HolidayCreditAmount") with OptionValues {
+object HolidayCreditSpec extends Properties("HolidayCreditAmount") with OptionValues with EitherValues {
 
   private val ratePlanChargeGen = for {
     price <- Gen.choose(0.01, 10000)
@@ -30,12 +30,12 @@ object HolidayCreditSpec extends Properties("HolidayCreditAmount") with OptionVa
   property("should be negative") = forAll(ratePlanChargeGen) { charge: RatePlanCharge =>
     val ratePlans = List(RatePlan("", List(charge), Config.guardianWeeklyProductRatePlanIdsPROD.head, ""))
     val currentGuardianWeeklySubscription = CurrentGuardianWeeklySubscription(subscription.copy(ratePlans = ratePlans), Fixtures.config.guardianWeeklyProductRatePlanIds)
-    HolidayCredit(currentGuardianWeeklySubscription) < 0
+    HolidayCredit(currentGuardianWeeklySubscription.right.value) < 0
   }
 
   property("should never be overwhelmingly negative") = forAll(ratePlanChargeGen) { charge: RatePlanCharge =>
     val ratePlans = List(RatePlan("", List(charge), Config.guardianWeeklyProductRatePlanIdsPROD.head, ""))
     val currentGuardianWeeklySubscription = CurrentGuardianWeeklySubscription(subscription.copy(ratePlans = ratePlans), Fixtures.config.guardianWeeklyProductRatePlanIds)
-    HolidayCredit(currentGuardianWeeklySubscription) > -charge.price
+    HolidayCredit(currentGuardianWeeklySubscription.right.value) > -charge.price
   }
 }
