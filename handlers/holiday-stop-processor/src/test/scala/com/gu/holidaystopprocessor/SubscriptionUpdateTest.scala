@@ -3,11 +3,9 @@ package com.gu.holidaystopprocessor
 import java.time.LocalDate
 
 import com.gu.holidaystopprocessor.Fixtures.config
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.{EitherValues, FlatSpec, Matchers}
 
-import scala.util.Try
-
-class SubscriptionUpdateTest extends FlatSpec with Matchers {
+class SubscriptionUpdateTest extends FlatSpec with Matchers with EitherValues {
 
   val guardianWeeklyProductRatePlanIds = Fixtures.config.guardianWeeklyProductRatePlanIds
 
@@ -20,9 +18,9 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers {
       chargedThroughDate = Some(LocalDate.of(2019, 9, 12))
     )
     val currentGuardianWeeklySubscription = CurrentGuardianWeeklySubscription(subscription, guardianWeeklyProductRatePlanIds)
-    val nextInvoiceStartDate = NextBillingPeriodStartDate(currentGuardianWeeklySubscription)
+    val nextInvoiceStartDate = NextBillingPeriodStartDate(currentGuardianWeeklySubscription.right.value)
     val maybeExtendedTerm = ExtendedTerm(nextInvoiceStartDate, subscription)
-    val holidayCredit = HolidayCredit(currentGuardianWeeklySubscription)
+    val holidayCredit = HolidayCredit(currentGuardianWeeklySubscription.right.value)
 
     val update = HolidayCreditUpdate(
       config.holidayCreditProduct,
@@ -54,7 +52,7 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers {
     ))
   }
 
-  it should "fail to generate an update when there's no charged-through date" in {
+  it should "fail to generate an update when there's no chargedThroughDate, i.e., no invoice has been generated" in {
     val subscription = Fixtures.mkSubscription(
       termStartDate = LocalDate.of(2019, 7, 12),
       termEndDate = LocalDate.of(2020, 7, 12),
@@ -62,7 +60,7 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers {
       billingPeriod = "Quarter",
       chargedThroughDate = None
     )
-    Try(CurrentGuardianWeeklySubscription(subscription, guardianWeeklyProductRatePlanIds)).isFailure shouldBe true
+    CurrentGuardianWeeklySubscription(subscription, guardianWeeklyProductRatePlanIds).left.value shouldBe a[ZuoraHolidayWriteError]
   }
 
   it should "generate an update with an extended term when charged-through date of subscription is after its term-end date" in {
@@ -74,9 +72,9 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers {
       chargedThroughDate = Some(LocalDate.of(2020, 8, 2))
     )
     val currentGuardianWeeklySubscription = CurrentGuardianWeeklySubscription(subscription, guardianWeeklyProductRatePlanIds)
-    val nextInvoiceStartDate = NextBillingPeriodStartDate(currentGuardianWeeklySubscription)
+    val nextInvoiceStartDate = NextBillingPeriodStartDate(currentGuardianWeeklySubscription.right.value)
     val maybeExtendedTerm = ExtendedTerm(nextInvoiceStartDate, subscription)
-    val holidayCredit = HolidayCredit(currentGuardianWeeklySubscription)
+    val holidayCredit = HolidayCredit(currentGuardianWeeklySubscription.right.value)
     val update = HolidayCreditUpdate(
       config.holidayCreditProduct,
       subscription = subscription,
@@ -114,9 +112,9 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers {
       chargedThroughDate = Some(LocalDate.of(2020, 7, 23))
     )
     val currentGuardianWeeklySubscription = CurrentGuardianWeeklySubscription(subscription, guardianWeeklyProductRatePlanIds)
-    val nextInvoiceStartDate = NextBillingPeriodStartDate(currentGuardianWeeklySubscription)
+    val nextInvoiceStartDate = NextBillingPeriodStartDate(currentGuardianWeeklySubscription.right.value)
     val maybeExtendedTerm = ExtendedTerm(nextInvoiceStartDate, subscription)
-    val holidayCredit = HolidayCredit(currentGuardianWeeklySubscription)
+    val holidayCredit = HolidayCredit(currentGuardianWeeklySubscription.right.value)
     val update = HolidayCreditUpdate(
       config.holidayCreditProduct,
       subscription = subscription,

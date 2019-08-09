@@ -83,6 +83,22 @@ object Fixtures {
         ""
       ),
       RatePlan(
+        productName = "Discounts",
+        ratePlanCharges = List(RatePlanCharge(
+          name = "Holiday Credit",
+          number = "C5",
+          price = -3.27,
+          billingPeriod = None,
+          effectiveStartDate = LocalDate.of(2019, 9, 7),
+          chargedThroughDate = None,
+          HolidayStart__c = Some(LocalDate.of(2019, 9, 1)),
+          HolidayEnd__c = Some(LocalDate.of(2019, 9, 1)),
+          processedThroughDate = None
+        )),
+        Fixtures.config.guardianWeeklyProductRatePlanIds.head,
+        ""
+      ),
+      RatePlan(
         productName = "Not a discount",
         ratePlanCharges = List(RatePlanCharge(
           name = "Holiday Credit",
@@ -161,7 +177,8 @@ object Fixtures {
 
   def mkHolidayStopRequest(
     id: String,
-    stopDate: LocalDate = LocalDate.of(2019, 1, 1)
+    stopDate: LocalDate = LocalDate.of(2019, 1, 1),
+    subscriptionName: SubscriptionName = SubscriptionName("S1")
   ) = HolidayStopRequest(
     Id = HolidayStopRequestId(id),
     Start_Date__c = HolidayStopRequestStartDate(stopDate),
@@ -169,7 +186,7 @@ object Fixtures {
     Actioned_Count__c = HolidayStopRequestActionedCount(3),
     Pending_Count__c = 4,
     Total_Issues_Publications_Impacted_Count__c = 7,
-    Subscription_Name__c = SubscriptionName("S1"),
+    Subscription_Name__c = subscriptionName,
     Product_Name__c = ProductName("Gu Weekly"),
     Holiday_Stop_Request_Detail__r = None
   )

@@ -95,7 +95,7 @@ case class CurrentInvoicedPeriod(
  * attached to Guardian Weekly product that satisfies all of the CurrentGuardianWeeklyRatePlanPredicates.
  */
 object CurrentGuardianWeeklySubscription {
-  def apply(subscription: Subscription, guardianWeeklyProductRatePlanIds: List[String]): CurrentGuardianWeeklySubscription =
+  def apply(subscription: Subscription, guardianWeeklyProductRatePlanIds: List[String]): Either[ZuoraHolidayWriteError, CurrentGuardianWeeklySubscription] =
     subscription
       .ratePlans
       .find { ratePlan =>
@@ -119,5 +119,5 @@ object CurrentGuardianWeeklySubscription {
           ratePlanId = currentGuardianWeeklyRatePlan.id,
           productRatePlanId = currentGuardianWeeklyRatePlan.productRatePlanId
         )
-      }.getOrElse(throw new RuntimeException(s"Subscription does not have a current Guardian Weekly rate plan: ${subscription}"))
+      }.toRight(ZuoraHolidayWriteError(s"Subscription does not have a current Guardian Weekly rate plan: ${subscription}"))
 }
