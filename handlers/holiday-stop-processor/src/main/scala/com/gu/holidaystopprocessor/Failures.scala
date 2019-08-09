@@ -10,11 +10,6 @@ case class OverallFailure(reason: String) extends HolidayError
 /**
  * FIXME: Current implementation is not atomic, so how should we handle inconsistent state cleanup?
  * FIXME: Improve error logging so we know which of the scenarios below is the case.
- *
- * The error scenarios we need to consider are
- *   - Some writes to Zuora fail (but others succeed), and Salesforce write succeed
- *   - Some writes to Zuora fail (but others succeed), and Salesforce write fails
- *   - All writes to Zuora fail
  */
 object OverallFailure {
   def apply(
