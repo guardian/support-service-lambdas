@@ -16,8 +16,8 @@ object Backfiller {
     for {
       config <- Config(stage)
       stopsInZuora <- Right(holidayStopsAlreadyInZuora(src))
-      minStartDate = stopsInZuora.map(_.startDate).minBy(_.toEpochDay)
-      maxEndDate = stopsInZuora.map(_.endDate).maxBy(_.toEpochDay)
+      minStartDate = stopsInZuora.map(_.startDate).minBy(_.value.toEpochDay)
+      maxEndDate = stopsInZuora.map(_.endDate).maxBy(_.value.toEpochDay)
       requestsInSfBeforeWritingRequests <- holidayStopRequestsAlreadyInSalesforce(config)(minStartDate, maxEndDate)
       requestsToAddToSf = holidayStopRequestsToBeBackfilled(stopsInZuora, requestsInSfBeforeWritingRequests)
       _ <- holidayStopRequestsAddedToSalesforce(config, dryRun)(requestsToAddToSf)

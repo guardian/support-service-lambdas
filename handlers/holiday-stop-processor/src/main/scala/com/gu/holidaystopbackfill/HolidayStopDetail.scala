@@ -11,7 +11,7 @@ import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
 import scala.io.Source
 import scala.util.Try
 
-case class ZuoraHolidayStop(subscriptionName: SubscriptionName, chargeNumber: HolidayStopRequestsDetailChargeCode, startDate: LocalDate, endDate: LocalDate, creditPrice: Double)
+case class ZuoraHolidayStop(subscriptionName: SubscriptionName, chargeNumber: HolidayStopRequestsDetailChargeCode, startDate: HolidayStopRequestStartDate, endDate: HolidayStopRequestEndDate, creditPrice: Double)
 
 object ZuoraHolidayStop {
 
@@ -22,8 +22,8 @@ object ZuoraHolidayStop {
       fields = line.split('\t')
       subscriptionName = fields(0)
       chargeNumber = fields(1)
-      startDate <- Try(LocalDate.parse(fields(2))).toOption.toSeq
-      endDate <- Try(LocalDate.parse(fields(3))).toOption.toSeq
+      startDate <- Try(HolidayStopRequestStartDate(LocalDate.parse(fields(2)))).toOption.toSeq
+      endDate <- Try(HolidayStopRequestEndDate(LocalDate.parse(fields(3)))).toOption.toSeq
       creditPrice = fields(4).toDouble
     } yield {
       ZuoraHolidayStop(
@@ -41,7 +41,7 @@ object ZuoraHolidayStop {
 
 object SalesforceHolidayStop {
 
-  def holidayStopRequestsAlreadyInSalesforce(sfCredentials: SFAuthConfig)(startDate: LocalDate, endDate: LocalDate): Either[SalesforceFetchFailure, List[HolidayStopRequest]] = {
+  def holidayStopRequestsAlreadyInSalesforce(sfCredentials: SFAuthConfig)(startDate: HolidayStopRequestStartDate, endDate: HolidayStopRequestEndDate): Either[SalesforceFetchFailure, List[HolidayStopRequest]] = {
     val result = Salesforce.holidayStopRequestsByDateRangeAndProduct(sfCredentials)(startDate, endDate, ProductName("Guardian Weekly"))
     result foreach { requests =>
       println(s"Fetched ${requests.length} requests from Salesforce")
@@ -53,15 +53,15 @@ object SalesforceHolidayStop {
 
     def isSame(z: ZuoraHolidayStop, sf: HolidayStopRequest): Boolean =
       z.subscriptionName == sf.Subscription_Name__c &&
-        z.startDate == sf.Start_Date__c.value &&
-        z.endDate == sf.End_Date__c.value
+        z.startDate == sf.Start_Date__c &&
+        z.endDate == sf.End_Date__c
 
     inZuora
       .filterNot { zuoraStop => inSalesforce.exists { sfStop => isSame(zuoraStop, sfStop) } }
       .map { zuoraStop =>
         NewHolidayStopRequest(
-          HolidayStopRequestStartDate(zuoraStop.startDate),
-          HolidayStopRequestEndDate(zuoraStop.endDate),
+          zuoraStop.startDate,
+          zuoraStop.endDate,
           SubscriptionNameLookup(zuoraStop.subscriptionName)
         )
       }
@@ -90,9 +90,9 @@ object SalesforceHolidayStop {
      * Then we divide the credit price equally into each of the new holiday stops.
      */
     val stoppedPublications = inZuora.foldLeft(List.empty[ZuoraHolidayStop]) { (acc, stop) =>
-      val stopDates = applicableDates(stop.startDate, stop.endDate, { _.getDayOfWeek == DayOfWeek.FRIDAY })
+      val stopDates = applicableDates(stop.startDate.value, stop.endDate.value, { _.getDayOfWeek == DayOfWeek.FRIDAY })
       val stops = stopDates map { date =>
-        ZuoraHolidayStop(stop.subscriptionName, stop.chargeNumber, date, date, stop.creditPrice / stopDates.length)
+        ZuoraHolidayStop(stop.subscriptionName, stop.chargeNumber, HolidayStopRequestStartDate(date), HolidayStopRequestEndDate(date), stop.creditPrice / stopDates.length)
       }
       acc ++ stops
     }
@@ -104,7 +104,7 @@ object SalesforceHolidayStop {
     def isSame(z: ZuoraHolidayStop, sf: HolidayStopRequestsDetail): Boolean =
       z.subscriptionName == sf.Subscription_Name__c &&
         sf.Charge_Code__c.contains(z.chargeNumber) &&
-        z.startDate == sf.Stopped_Publication_Date__c.value
+        z.startDate.value == sf.Stopped_Publication_Date__c.value
 
     /*
      * This is used to find the corresponding request ID for the subscription in Salesforce.
@@ -116,8 +116,8 @@ object SalesforceHolidayStop {
         val startDate = sfStop.Start_Date__c.value
         val endDate = sfStop.End_Date__c.value
         sfStop.Subscription_Name__c == zStop.subscriptionName &&
-          (startDate.isBefore(zStop.startDate) || startDate.isEqual(zStop.startDate)) &&
-          (endDate.isEqual(zStop.endDate) || endDate.isAfter(zStop.endDate))
+          (startDate.isBefore(zStop.startDate.value) || startDate.isEqual(zStop.startDate.value)) &&
+          (endDate.isEqual(zStop.endDate.value) || endDate.isAfter(zStop.endDate.value))
       }
     }
 
@@ -136,7 +136,7 @@ object SalesforceHolidayStop {
     } yield {
       ActionedHolidayStopRequestsDetailToBackfill(
         sfRequest.Id,
-        StoppedPublicationDate(zStop.startDate),
+        StoppedPublicationDate(zStop.startDate.value),
         Some(HolidayStopRequestsDetailChargePrice(zStop.creditPrice)),
         Some(zStop.chargeNumber),
         Some(HolidayStopRequestsDetailChargePrice(zStop.creditPrice))
