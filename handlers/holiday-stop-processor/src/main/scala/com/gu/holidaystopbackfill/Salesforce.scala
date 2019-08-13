@@ -3,7 +3,7 @@ package com.gu.holidaystopbackfill
 import com.gu.effects.RawEffects
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.SalesforceClient
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.{CreateHolidayStopRequest, HolidayStopRequest, NewHolidayStopRequest}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.{CreateHolidayStopRequest, HolidayStopRequest, HolidayStopRequestEndDate, HolidayStopRequestStartDate, NewHolidayStopRequest}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{ActionedHolidayStopRequestsDetailToBackfill, ProductName}
 import com.gu.salesforce.holiday_stops.{SalesforceHolidayStopRequest, SalesforceHolidayStopRequestsDetail}
 import com.gu.util.resthttp.JsonHttp
@@ -11,11 +11,11 @@ import scalaz.{-\/, \/-}
 
 object Salesforce {
 
-  def holidayStopRequestsByProduct(sfCredentials: SFAuthConfig)(productNamePrefix: ProductName): Either[SalesforceFetchFailure, List[HolidayStopRequest]] =
+  def holidayStopRequestsByDateRangeAndProduct(sfCredentials: SFAuthConfig)(startDate: HolidayStopRequestStartDate, endDate: HolidayStopRequestEndDate, productNamePrefix: ProductName): Either[SalesforceFetchFailure, List[HolidayStopRequest]] =
     SalesforceClient(RawEffects.response, sfCredentials).value.flatMap { sfAuth =>
       val sfGet = sfAuth.wrapWith(JsonHttp.getWithParams)
-      val fetchOp = SalesforceHolidayStopRequest.LookupByProductNamePrefix(sfGet)
-      fetchOp(productNamePrefix)
+      val fetchOp = SalesforceHolidayStopRequest.LookupByDateRangeAndProductNamePrefix(sfGet)
+      fetchOp(startDate, endDate, productNamePrefix)
     }.toDisjunction match {
       case -\/(failure) => Left(SalesforceFetchFailure(failure.toString))
       case \/-(requests) => Right(requests)
