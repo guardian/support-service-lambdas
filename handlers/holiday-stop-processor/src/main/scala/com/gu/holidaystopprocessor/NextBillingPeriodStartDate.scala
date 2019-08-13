@@ -2,6 +2,8 @@ package com.gu.holidaystopprocessor
 
 import java.time.LocalDate
 
+import com.gu.holiday_stops.CurrentGuardianWeeklySubscription
+
 /**
  * Holiday credit is applied to the next invoice on the first day of the next billing period.
  *

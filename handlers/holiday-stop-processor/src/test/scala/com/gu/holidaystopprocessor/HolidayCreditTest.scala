@@ -1,5 +1,6 @@
 package com.gu.holidaystopprocessor
 
+import com.gu.holiday_stops.{CurrentGuardianWeeklySubscription, HolidayCredit, RatePlan}
 import org.scalatest.{EitherValues, FlatSpec, Matchers}
 
 class HolidayCreditTest extends FlatSpec with Matchers with EitherValues {

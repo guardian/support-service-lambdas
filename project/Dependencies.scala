@@ -4,6 +4,9 @@ object Dependencies {
   
   val awsVersion = "1.11.574"
 
+  val circeVersion = "0.11.1"
+  val sttpVersion = "1.5.17"
+
   val okhttp3 = "com.squareup.okhttp3" % "okhttp" % "3.9.1"
   val logging = Seq(
     "ch.qos.logback" % "logback-classic" % "1.2.3",
@@ -19,4 +22,8 @@ object Dependencies {
   val awsSES = "com.amazonaws" % "aws-java-sdk-ses" % awsVersion
   val awsLambda = "com.amazonaws" % "aws-lambda-java-core" % "1.2.0"
   val supportInternationalisation = "com.gu" %% "support-internationalisation" % "0.9"
+  val circe = "io.circe" %% "circe-generic" % circeVersion
+  val circeParser = "io.circe" %% "circe-parser" % circeVersion
+  val sttp = "com.softwaremill.sttp" %% "core" % sttpVersion
+  val sttpCirce = "com.softwaremill.sttp" %% "circe" % sttpVersion
 }

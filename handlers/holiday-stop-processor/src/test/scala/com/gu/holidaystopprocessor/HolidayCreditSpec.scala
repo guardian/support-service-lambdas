@@ -2,6 +2,7 @@ package com.gu.holidaystopprocessor
 
 import java.time.LocalDate
 
+import com.gu.holiday_stops.{Config, CurrentGuardianWeeklySubscription, HolidayCredit, RatePlan, RatePlanCharge}
 import org.scalacheck.Prop.forAll
 import org.scalacheck._
 import org.scalatest.{EitherValues, OptionValues}

@@ -94,8 +94,18 @@ lazy val `holiday-stops` = all(project in file("lib/holiday-stops"))
     testDep
   )
   .settings(
-    libraryDependencies ++= Seq(okhttp3, scalaz, playJson, scalatest, playJsonExtensions) ++ logging
-)
+    libraryDependencies ++= Seq(
+      okhttp3,
+      scalaz,
+      playJson,
+      scalatest,
+      playJsonExtensions,
+      circe,
+      circeParser,
+      sttp,
+      sttpCirce
+    ) ++ logging
+  )
 
 lazy val restHttp = all(project in file("lib/restHttp"))
   .settings(

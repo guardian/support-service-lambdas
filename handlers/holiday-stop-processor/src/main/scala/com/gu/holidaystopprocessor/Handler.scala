@@ -4,6 +4,7 @@ import java.time.LocalDate
 
 import cats.implicits._
 import com.amazonaws.services.lambda.runtime.Context
+import com.gu.holiday_stops.Config
 import io.circe.generic.auto._
 import io.github.mkotsur.aws.handler.Lambda
 import io.github.mkotsur.aws.handler.Lambda._

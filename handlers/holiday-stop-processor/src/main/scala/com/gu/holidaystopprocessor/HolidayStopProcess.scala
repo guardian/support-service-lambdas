@@ -1,7 +1,9 @@
 package com.gu.holidaystopprocessor
 
 import java.time.LocalDate
+
 import cats.implicits._
+import com.gu.holiday_stops._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
 
 object HolidayStopProcess {
@@ -65,7 +67,7 @@ object HolidayStopProcess {
       currentGuardianWeeklySubscription <- CurrentGuardianWeeklySubscription(subscription, guardianWeeklyProductRatePlanIds)
       nextInvoiceStartDate = NextBillingPeriodStartDate(currentGuardianWeeklySubscription)
       maybeExtendedTerm = ExtendedTerm(nextInvoiceStartDate, subscription)
-      holidayCredit = HolidayCredit(currentGuardianWeeklySubscription)
+      holidayCredit <- CreditCalculator.guardianWeeklyCredit(guardianWeeklyProductRatePlanIds)(subscription)
       holidayCreditUpdate <- HolidayCreditUpdate(holidayCreditProduct, subscription, stop.stoppedPublicationDate, nextInvoiceStartDate, maybeExtendedTerm, holidayCredit)
       _ <- if (subscription.hasHolidayStop(stop)) Right(()) else updateSubscription(subscription, holidayCreditUpdate)
       updatedSubscription <- getSubscription(stop.subscriptionName)

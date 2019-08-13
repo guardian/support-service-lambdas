@@ -2,6 +2,7 @@ package com.gu.holidaystopprocessor
 
 import java.time.LocalDate
 
+import com.gu.holiday_stops.{HolidayCreditUpdate, HolidayStop, OverallFailure, SalesforceHolidayWriteError, Subscription, ZuoraHolidayWriteError}
 import com.gu.holidaystopprocessor.Fixtures.{config, mkSubscription}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestsDetail, HolidayStopRequestsDetailChargeCode, HolidayStopRequestsDetailChargePrice, HolidayStopRequestsDetailId, ProductName, StoppedPublicationDate, SubscriptionName}
 import org.scalatest.{EitherValues, FlatSpec, Matchers, OptionValues}

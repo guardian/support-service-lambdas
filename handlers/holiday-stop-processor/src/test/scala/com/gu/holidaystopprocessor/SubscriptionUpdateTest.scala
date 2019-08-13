@@ -2,6 +2,7 @@ package com.gu.holidaystopprocessor
 
 import java.time.LocalDate
 
+import com.gu.holiday_stops.{Add, ChargeOverride, CurrentGuardianWeeklySubscription, ExtendedTerm, HolidayCredit, HolidayCreditUpdate, ZuoraHolidayWriteError}
 import com.gu.holidaystopprocessor.Fixtures.config
 import org.scalatest.{EitherValues, FlatSpec, Matchers}
 

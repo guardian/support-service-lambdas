@@ -1,6 +1,7 @@
-package com.gu.holidaystopprocessor
+package com.gu.holiday_stops
 
 import java.time.LocalDate
+
 import scala.util.Try
 
 /**
@@ -95,6 +96,7 @@ case class CurrentInvoicedPeriod(
  * attached to Guardian Weekly product that satisfies all of the CurrentGuardianWeeklyRatePlanPredicates.
  */
 object CurrentGuardianWeeklySubscription {
+
   def apply(subscription: Subscription, guardianWeeklyProductRatePlanIds: List[String]): Either[ZuoraHolidayWriteError, CurrentGuardianWeeklySubscription] =
     subscription
       .ratePlans
