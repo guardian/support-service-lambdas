@@ -1,5 +1,7 @@
 package com.gu.holidaystopbackfill
 
+import java.time.LocalDate
+
 import com.gu.effects.RawEffects
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.SalesforceClient
@@ -11,11 +13,11 @@ import scalaz.{-\/, \/-}
 
 object Salesforce {
 
-  def holidayStopRequestsByProduct(sfCredentials: SFAuthConfig)(productNamePrefix: ProductName): Either[SalesforceFetchFailure, List[HolidayStopRequest]] =
+  def holidayStopRequestsByDateRangeAndProduct(sfCredentials: SFAuthConfig)(startDate: LocalDate, endDate: LocalDate, productNamePrefix: ProductName): Either[SalesforceFetchFailure, List[HolidayStopRequest]] =
     SalesforceClient(RawEffects.response, sfCredentials).value.flatMap { sfAuth =>
       val sfGet = sfAuth.wrapWith(JsonHttp.getWithParams)
-      val fetchOp = SalesforceHolidayStopRequest.LookupByProductNamePrefix(sfGet)
-      fetchOp(productNamePrefix)
+      val fetchOp = SalesforceHolidayStopRequest.LookupByDateRangeAndProductNamePrefix(sfGet)
+      fetchOp(startDate, endDate, productNamePrefix)
     }.toDisjunction match {
       case -\/(failure) => Left(SalesforceFetchFailure(failure.toString))
       case \/-(requests) => Right(requests)

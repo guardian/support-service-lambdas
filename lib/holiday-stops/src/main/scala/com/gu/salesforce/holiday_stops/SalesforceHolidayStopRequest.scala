@@ -87,17 +87,21 @@ object SalesforceHolidayStopRequest extends Logging {
 
   }
 
-  object LookupByProductNamePrefix {
+  object LookupByDateRangeAndProductNamePrefix {
 
-    def apply(sfGet: HttpOp[RestRequestMaker.GetRequestWithParams, JsValue]): ProductName => ClientFailableOp[List[HolidayStopRequest]] =
+    def apply(sfGet: HttpOp[RestRequestMaker.GetRequestWithParams, JsValue]): (LocalDate, LocalDate, ProductName) => ClientFailableOp[List[HolidayStopRequest]] =
       sfGet
-        .setupRequest(toRequest)
-        .parse[RecordsWrapperCaseClass[HolidayStopRequest]]
+        .setupRequestMultiArg(toRequest _)
+        .parse[RecordsWrapperCaseClass[HolidayStopRequest]](Json.reads[RecordsWrapperCaseClass[HolidayStopRequest]])
         .map(_.records)
-        .runRequest
+        .runRequestMultiArg
 
-    def toRequest(productNamePrefix: ProductName) = {
-      val soqlQuery = getHolidayStopRequestPrefixSOQL(Some(productNamePrefix))
+    def toRequest(startDate: LocalDate, endDate: LocalDate, productNamePrefix: ProductName) = {
+      val soqlQuery = s"""
+        | ${getHolidayStopRequestPrefixSOQL(Some(productNamePrefix))}
+        | AND Start_Date__c >= ${startDate.format(SALESFORCE_DATE_FORMATTER)}
+        | AND End_Date__c <= ${endDate.format(SALESFORCE_DATE_FORMATTER)}
+        | """.stripMargin
       logger.info(s"using SF query : $soqlQuery")
       RestRequestMaker.GetRequestWithParams(RelativePath(soqlQueryBaseUrl), UrlParams(Map("q" -> soqlQuery)))
     }

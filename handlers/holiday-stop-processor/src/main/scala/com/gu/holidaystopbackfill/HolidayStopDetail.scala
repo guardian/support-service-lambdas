@@ -41,8 +41,12 @@ object ZuoraHolidayStop {
 
 object SalesforceHolidayStop {
 
-  def holidayStopRequestsAlreadyInSalesforce(sfCredentials: SFAuthConfig): Either[SalesforceFetchFailure, List[HolidayStopRequest]] = {
-    Salesforce.holidayStopRequestsByProduct(sfCredentials)(ProductName("Guardian Weekly"))
+  def holidayStopRequestsAlreadyInSalesforce(sfCredentials: SFAuthConfig)(startDate: LocalDate, endDate: LocalDate): Either[SalesforceFetchFailure, List[HolidayStopRequest]] = {
+    val result = Salesforce.holidayStopRequestsByDateRangeAndProduct(sfCredentials)(startDate, endDate, ProductName("Guardian Weekly"))
+    result foreach { requests =>
+      println(s"Fetched ${requests.length} requests from Salesforce")
+    }
+    result
   }
 
   def holidayStopRequestsToBeBackfilled(inZuora: List[ZuoraHolidayStop], inSalesforce: List[HolidayStopRequest]): List[NewHolidayStopRequest] = {
