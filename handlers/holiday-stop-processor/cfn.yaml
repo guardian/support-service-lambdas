@@ -107,5 +107,18 @@ Resources:
       Targets:
         - Arn: !GetAtt HolidayStopProcessor.Arn
           Id: !Ref HolidayStopProcessor
+          Input: "null"
     DependsOn:
       - HolidayStopProcessor
+
+  HolidayStopProcessorLambdaInvokePermission:
+    Type: AWS::Lambda::Permission
+    Condition: IsProd
+    Properties:
+      Action: lambda:invokeFunction
+      FunctionName: !Ref HolidayStopProcessor
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt HolidayStopProcessorScheduleRule.Arn
+    DependsOn:
+      - HolidayStopProcessor
+      - HolidayStopProcessorScheduleRule
