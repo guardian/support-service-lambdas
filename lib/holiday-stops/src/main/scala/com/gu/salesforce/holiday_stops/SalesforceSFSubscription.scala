@@ -15,7 +15,7 @@ object SalesforceSFSubscription extends Logging {
 
   private val sfSubscriptionsSfObjectRef = "SF_Subscription__c"
 
-  object SubscriptionForSubscriptionNameAndIdentityID {
+  object SubscriptionForSubscriptionNameAndContact {
 
     case class SFSubscriptionId(value: String) extends AnyVal
     implicit val formatHolidayStopRequestId = Jsonx.formatInline[SFSubscriptionId]
@@ -28,14 +28,22 @@ object SalesforceSFSubscription extends Logging {
     implicit val readsMatchingSubscription = Json.reads[MatchingSubscription]
     implicit val readsResults = Json.reads[RecordsWrapperCaseClass[MatchingSubscription]]
 
-    def apply(sfGet: HttpOp[RestRequestMaker.GetRequestWithParams, JsValue]): (SubscriptionName, String) => ClientFailableOp[Option[MatchingSubscription]] =
+    case class IdentityId(value: String) extends AnyVal
+    case class SalesforceContactId(value: String) extends AnyVal
+    type Contact = Either[IdentityId, SalesforceContactId]
+    def contactToWhereClausePart(contact: Contact) = contact match {
+      case Left(IdentityId(identityId)) => s"Buyer__r.IdentityID__c = '$identityId'"
+      case Right(SalesforceContactId(sfContactId)) => s"Buyer__r.Id = '$sfContactId'"
+    }
+
+    def apply(sfGet: HttpOp[RestRequestMaker.GetRequestWithParams, JsValue]): (SubscriptionName, Contact) => ClientFailableOp[Option[MatchingSubscription]] =
       sfGet.setupRequestMultiArg(toRequest _).parse[RecordsWrapperCaseClass[MatchingSubscription]].map(_.records.headOption).runRequestMultiArg
 
-    def toRequest(subscriptionName: SubscriptionName, identityID: String) = {
+    def toRequest(subscriptionName: SubscriptionName, contact: Contact) = {
       val soqlQuery = s"SELECT Id, Name, Product_Name__c " +
         s"FROM $sfSubscriptionsSfObjectRef " +
         s"WHERE Name = '${subscriptionName.value}' " +
-        s"AND Buyer__r.IdentityID__c = '$identityID' "
+        s"AND ${contactToWhereClausePart(contact)} "
       logger.info(s"using SF query : $soqlQuery")
       RestRequestMaker.GetRequestWithParams(RelativePath(soqlQueryBaseUrl), UrlParams(Map("q" -> soqlQuery)))
     }

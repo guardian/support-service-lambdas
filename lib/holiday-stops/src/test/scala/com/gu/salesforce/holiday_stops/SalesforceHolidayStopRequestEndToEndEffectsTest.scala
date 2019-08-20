@@ -7,6 +7,7 @@ import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.SalesforceClient
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
+import com.gu.salesforce.holiday_stops.SalesforceSFSubscription.SubscriptionForSubscriptionNameAndContact.IdentityId
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.resthttp.JsonHttp
@@ -34,10 +35,10 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends FlatSpec with Matc
       response = RawEffects.response
       sfAuth <- SalesforceClient(response, sfConfig).value.toDisjunction
 
-      verifySubOwnerOp = SalesforceSFSubscription.SubscriptionForSubscriptionNameAndIdentityID(sfAuth.wrapWith(JsonHttp.getWithParams))
+      verifySubOwnerOp = SalesforceSFSubscription.SubscriptionForSubscriptionNameAndContact(sfAuth.wrapWith(JsonHttp.getWithParams))
       maybeMatchingSubscription <- verifySubOwnerOp(
         SubscriptionName("A-S00050817"), // must exist in DEV Scalculate the first available date basedalesForce
-        "100004814"
+        Left(IdentityId("100004814"))
       ).toDisjunction
 
       createOp = SalesforceHolidayStopRequest.CreateHolidayStopRequestWithDetail(sfAuth.wrapWith(JsonHttp.post))
