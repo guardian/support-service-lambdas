@@ -14,7 +14,7 @@ import java.util.UUID
 
 import com.gu.holiday_stops.ActionCalculator
 import com.gu.salesforce.RecordsWrapperCaseClass
-import com.gu.salesforce.holiday_stops.SalesforceSFSubscription.SubscriptionForSubscriptionNameAndIdentityID.{MatchingSubscription, SFSubscriptionId}
+import com.gu.salesforce.holiday_stops.SalesforceSFSubscription.SubscriptionForSubscriptionNameAndContact._
 import play.api.libs.json._
 
 object SalesforceHolidayStopRequest extends Logging {
@@ -107,14 +107,14 @@ object SalesforceHolidayStopRequest extends Logging {
     }
   }
 
-  object LookupByIdentityIdAndOptionalSubscriptionName {
+  object LookupByContactAndOptionalSubscriptionName {
 
-    def apply(sfGet: HttpOp[RestRequestMaker.GetRequestWithParams, JsValue]): (String, Option[SubscriptionName]) => ClientFailableOp[List[HolidayStopRequest]] =
+    def apply(sfGet: HttpOp[RestRequestMaker.GetRequestWithParams, JsValue]): (Contact, Option[SubscriptionName]) => ClientFailableOp[List[HolidayStopRequest]] =
       sfGet.setupRequestMultiArg(toRequest _).parse[RecordsWrapperCaseClass[HolidayStopRequest]].map(_.records).runRequestMultiArg
 
-    def toRequest(identityId: String, optionalSubscriptionName: Option[SubscriptionName]) = {
+    def toRequest(contact: Contact, optionalSubscriptionName: Option[SubscriptionName]) = {
       val soqlQuery = getHolidayStopRequestPrefixSOQL() +
-        s"WHERE IdentityID__c = '$identityId'" +
+        s"WHERE SF_Subscription__r.${contactToWhereClausePart(contact)}" +
         optionalSubscriptionName.map(subName => s" AND Subscription_Name__c = '${subName.value}'").getOrElse("")
       logger.info(s"using SF query : $soqlQuery")
       RestRequestMaker.GetRequestWithParams(RelativePath(soqlQueryBaseUrl), UrlParams(Map("q" -> soqlQuery)))

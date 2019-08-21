@@ -7,6 +7,8 @@ import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.SalesforceClient
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestId, ProductName, SubscriptionName}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
+import com.gu.salesforce.holiday_stops.SalesforceSFSubscription.SubscriptionForSubscriptionNameAndContact._
 import com.gu.salesforce.holiday_stops.{SalesforceHolidayStopRequest, SalesforceSFSubscription}
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
@@ -22,7 +24,6 @@ import com.gu.util.resthttp.{HttpOp, JsonHttp}
 import okhttp3.{Request, Response}
 import java.time.LocalDate
 
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.CreateHolidayStopRequestWithDetail
 import play.api.libs.json.{Format, Json, Reads}
 
 object Handler extends Logging {
@@ -68,8 +69,14 @@ object Handler extends Logging {
 
   }
 
-  private val HEADER_IDENTITY_ID = "x-identity-id"
-  private val HEADER_PRODUCT_NAME_PREFIX = "x-product-name-prefix"
+  val HEADER_IDENTITY_ID = "x-identity-id"
+  val HEADER_SALESFORCE_CONTACT_ID = "x-salesforce-contact-id"
+  val HEADER_PRODUCT_NAME_PREFIX = "x-product-name-prefix"
+
+  def extractContactFromHeaders(headers: Option[Map[String, String]]): ApiGatewayOp[Contact] = headers.flatMap(_.toList.collectFirst {
+    case (HEADER_SALESFORCE_CONTACT_ID, sfContactId) => Right(SalesforceContactId(sfContactId))
+    case (HEADER_IDENTITY_ID, identityId) => Left(IdentityId(identityId))
+  }).toApiGatewayOp(s"either '$HEADER_IDENTITY_ID' header OR '$HEADER_SALESFORCE_CONTACT_ID' (one is required)")
 
   case class PotentialHolidayStopParams(startDate: LocalDate, endDate: LocalDate)
   def stepsForPotentialHolidayStop(req: ApiGatewayRequest, unused: SfClient): ApiResponse = {
@@ -88,7 +95,7 @@ object Handler extends Logging {
 
   def stepsToListExisting(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
 
-    val lookupOp = SalesforceHolidayStopRequest.LookupByIdentityIdAndOptionalSubscriptionName(sfClient.wrapWith(JsonHttp.getWithParams))
+    val lookupOp = SalesforceHolidayStopRequest.LookupByContactAndOptionalSubscriptionName(sfClient.wrapWith(JsonHttp.getWithParams))
 
     val extractOptionalSubNameOp: ApiGatewayOp[Option[SubscriptionName]] = req.pathParameters match {
       case Some(_) => req.pathParamsAsCaseClass[GetPathParams]()(Json.reads[GetPathParams]).map(_.subscriptionName)
@@ -98,9 +105,9 @@ object Handler extends Logging {
     val optionalProductNamePrefix = req.headers.flatMap(_.get(HEADER_PRODUCT_NAME_PREFIX).map(ProductName.apply))
 
     (for {
-      identityId <- req.headers.flatMap(_.get(HEADER_IDENTITY_ID)).toApiGatewayOp("identityID header")
+      contact <- extractContactFromHeaders(req.headers)
       optionalSubName <- extractOptionalSubNameOp
-      usersHolidayStopRequests <- lookupOp(identityId, optionalSubName).toDisjunction.toApiGatewayOp(s"lookup Holiday Stop Requests for identity $identityId")
+      usersHolidayStopRequests <- lookupOp(contact, optionalSubName).toDisjunction.toApiGatewayOp(s"lookup Holiday Stop Requests for contact $contact")
     } yield ApiGatewayResponse(
       "200",
       GetHolidayStopRequests(usersHolidayStopRequests, optionalProductNamePrefix)
@@ -109,15 +116,15 @@ object Handler extends Logging {
 
   def stepsToCreate(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
 
-    val verifyIdentityIdOwnsSubOp = SalesforceSFSubscription.SubscriptionForSubscriptionNameAndIdentityID(sfClient.wrapWith(JsonHttp.getWithParams))
+    val verifyContactOwnsSubOp = SalesforceSFSubscription.SubscriptionForSubscriptionNameAndContact(sfClient.wrapWith(JsonHttp.getWithParams))
     val createOp = SalesforceHolidayStopRequest.CreateHolidayStopRequestWithDetail(sfClient.wrapWith(JsonHttp.post))
 
     (for {
       requestBody <- req.bodyAsCaseClass[HolidayStopRequestPartial]()
-      identityId <- req.headers.flatMap(_.get(HEADER_IDENTITY_ID)).toApiGatewayOp("identityID header")
-      maybeMatchingSub <- verifyIdentityIdOwnsSubOp(requestBody.subscriptionName, identityId).toDisjunction.toApiGatewayOp(s"fetching subscriptions for user with identityID $identityId")
-      matchingSub <- maybeMatchingSub.toApiGatewayOp(s"user with identityID $identityId does not own ${requestBody.subscriptionName.value}")
-      _ <- createOp(CreateHolidayStopRequestWithDetail.buildBody(requestBody.start, requestBody.end, matchingSub)).toDisjunction.toApiGatewayOp(s"create new Holiday Stop Request for subscription ${requestBody.subscriptionName} (identity $identityId)")
+      contact <- extractContactFromHeaders(req.headers)
+      maybeMatchingSub <- verifyContactOwnsSubOp(requestBody.subscriptionName, contact).toDisjunction.toApiGatewayOp(s"fetching subscriptions for contact $contact")
+      matchingSub <- maybeMatchingSub.toApiGatewayOp(s"contact $contact does not own ${requestBody.subscriptionName.value}")
+      _ <- createOp(CreateHolidayStopRequestWithDetail.buildBody(requestBody.start, requestBody.end, matchingSub)).toDisjunction.toApiGatewayOp(s"create new Holiday Stop Request for subscription ${requestBody.subscriptionName} (contact $contact)")
       // TODO nice to have - handle 'FIELD_CUSTOM_VALIDATION_EXCEPTION' etc back from SF and place in response
     } yield ApiGatewayResponse.successfulExecution).apiResponse
   }
@@ -125,15 +132,15 @@ object Handler extends Logging {
   case class DeletePathParams(subscriptionName: SubscriptionName, holidayStopRequestId: HolidayStopRequestId)
   def stepsToDelete(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
 
-    val lookupOp = SalesforceHolidayStopRequest.LookupByIdentityIdAndOptionalSubscriptionName(sfClient.wrapWith(JsonHttp.getWithParams))
+    val lookupOp = SalesforceHolidayStopRequest.LookupByContactAndOptionalSubscriptionName(sfClient.wrapWith(JsonHttp.getWithParams))
     val deleteOp = SalesforceHolidayStopRequest.DeleteHolidayStopRequest(sfClient.wrapWith(JsonHttp.deleteWithStringResponse))
 
     (for {
-      identityId <- req.headers.flatMap(_.get(HEADER_IDENTITY_ID)).toApiGatewayOp("identityID header")
+      contact <- extractContactFromHeaders(req.headers)
       pathParams <- req.pathParamsAsCaseClass[DeletePathParams]()(Json.reads[DeletePathParams])
-      existingForUser <- lookupOp(identityId, None).toDisjunction.toApiGatewayOp(s"lookup Holiday Stop Requests for identity $identityId")
+      existingForUser <- lookupOp(contact, None).toDisjunction.toApiGatewayOp(s"lookup Holiday Stop Requests for contact $contact")
       _ = existingForUser.exists(_.Id == pathParams.holidayStopRequestId).toApiGatewayContinueProcessing(ApiGatewayResponse.forbidden("not your holiday stop"))
-      _ <- deleteOp(pathParams.holidayStopRequestId).toDisjunction.toApiGatewayOp(s"delete Holiday Stop Request for subscription ${pathParams.subscriptionName.value} identity $identityId")
+      _ <- deleteOp(pathParams.holidayStopRequestId).toDisjunction.toApiGatewayOp(s"delete Holiday Stop Request for subscription ${pathParams.subscriptionName.value} of contact $contact")
     } yield ApiGatewayResponse.successfulExecution).apiResponse
   }
 
