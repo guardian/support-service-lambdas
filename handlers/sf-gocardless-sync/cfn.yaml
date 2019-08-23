@@ -129,7 +129,7 @@ Resources:
     Condition: CreateProdMonitoring
     Properties:
       AlarmActions:
-      - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:subscriptions_dev
+      - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:fulfilment-dev
       AlarmName: !Sub "GenericError observed on ${LogGroupNamePrefix}-${Stage}"
       ComparisonOperator: GreaterThanOrEqualToThreshold
       EvaluationPeriods: 1
