@@ -2,6 +2,8 @@ package com.gu.holidaystopprocessor
 
 import java.time.LocalDate
 
+import com.gu.holiday_stops.Config
+
 // This is just for functional testing locally.
 object StandaloneApp extends App {
 

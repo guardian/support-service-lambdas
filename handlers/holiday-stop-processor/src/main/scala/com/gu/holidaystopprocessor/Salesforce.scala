@@ -10,6 +10,7 @@ import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
 import com.gu.util.resthttp.JsonHttp
 import scalaz.{-\/, \/-}
 import com.gu.holiday_stops.ActionCalculator.suspensionConstantsByProduct
+import com.gu.holiday_stops.{OverallFailure, SalesforceHolidayWriteError}
 
 object Salesforce {
 

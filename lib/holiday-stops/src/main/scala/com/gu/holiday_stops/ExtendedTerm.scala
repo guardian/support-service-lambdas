@@ -1,4 +1,4 @@
-package com.gu.holidaystopprocessor
+package com.gu.holiday_stops
 
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit.DAYS

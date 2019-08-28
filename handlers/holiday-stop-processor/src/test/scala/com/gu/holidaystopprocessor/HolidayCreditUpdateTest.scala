@@ -2,10 +2,11 @@ package com.gu.holidaystopprocessor
 
 import java.time.LocalDate
 
-import com.gu.holidaystopprocessor.Fixtures.config
+import com.gu.holiday_stops.Fixtures.config
+import com.gu.holiday_stops._
 import org.scalatest.{EitherValues, FlatSpec, Matchers}
 
-class SubscriptionUpdateTest extends FlatSpec with Matchers with EitherValues {
+class HolidayCreditUpdateTest extends FlatSpec with Matchers with EitherValues {
 
   val guardianWeeklyProductRatePlanIds = Fixtures.config.guardianWeeklyProductRatePlanIds
 

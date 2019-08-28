@@ -1,8 +1,9 @@
-package com.gu.holidaystopprocessor
+package com.gu.holiday_stops
 
 import com.amazonaws.auth.profile.ProfileCredentialsProvider
 import com.amazonaws.regions.Regions.EU_WEST_1
 import com.amazonaws.services.s3.AmazonS3Client
+import com.gu.holiday_stops.OverallFailure
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
 import io.circe.Decoder
 import io.circe.generic.auto._

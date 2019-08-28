@@ -1,8 +1,10 @@
 package com.gu.holidaystopprocessor
 
 import java.time.LocalDate
+
 import cats.implicits._
-import com.gu.holidaystopprocessor.Fixtures._
+import com.gu.holiday_stops.Fixtures._
+import com.gu.holiday_stops._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestsDetail, ProductName, SubscriptionName}
 import org.scalatest._
 

@@ -1,9 +1,9 @@
-package com.gu.holidaystopprocessor
+package com.gu.holiday_stops
 
 import java.time.LocalDate
 
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.{HolidayStopRequest, HolidayStopRequestActionedCount, HolidayStopRequestEndDate, HolidayStopRequestStartDate}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
 
 object Fixtures {

@@ -1,4 +1,4 @@
-package com.gu.holidaystopprocessor
+package com.gu.holiday_stops
 
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.SubscriptionName
 import com.softwaremill.sttp._

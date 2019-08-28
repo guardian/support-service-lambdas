@@ -1,4 +1,4 @@
-package com.gu.holidaystopprocessor
+package com.gu.holiday_stops
 
 sealed trait HolidayError {
   val reason: String
