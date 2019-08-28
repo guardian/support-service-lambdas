@@ -27,7 +27,7 @@ case class Subscription(
 
     val charges = for {
       plan <- ratePlans if isMatchingPlan(plan)
-        charge <- plan.ratePlanCharges.find(isMatchingCharge)
+      charge <- plan.ratePlanCharges.find(isMatchingCharge)
     } yield charge
     charges.headOption
   }
