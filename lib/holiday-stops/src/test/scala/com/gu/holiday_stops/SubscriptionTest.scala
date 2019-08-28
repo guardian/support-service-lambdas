@@ -1,8 +1,7 @@
-package com.gu.holidaystopprocessor
+package com.gu.holiday_stops
 
 import java.time.LocalDate
 
-import com.gu.holiday_stops.RatePlanCharge
 import org.scalatest.{FlatSpec, Matchers, OptionValues}
 
 class SubscriptionTest extends FlatSpec with Matchers with OptionValues {

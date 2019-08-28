@@ -15,7 +15,8 @@ object Dependencies {
   val scalaz = "org.scalaz" %% "scalaz-core" % "7.2.18"
   val playJson = "com.typesafe.play" %% "play-json" % "2.6.9"
   val playJsonExtensions = "ai.x" %% "play-json-extensions" % "0.30.1"
-  val scalatest = "org.scalatest" %% "scalatest" % "3.0.1" % "test"
+  val scalatest = "org.scalatest" %% "scalatest" % "3.0.1" % Test
+  val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.14.0" % Test
   val jacksonDatabind = "com.fasterxml.jackson.core" % "jackson-databind" % "2.8.11.1"
   val awsS3 = "com.amazonaws" % "aws-java-sdk-s3" % awsVersion
   val awsSQS = "com.amazonaws" % "aws-java-sdk-sqs" % awsVersion

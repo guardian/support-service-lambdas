@@ -99,6 +99,7 @@ lazy val `holiday-stops` = all(project in file("lib/holiday-stops"))
       scalaz,
       playJson,
       scalatest,
+      scalaCheck,
       playJsonExtensions,
       circe,
       circeParser,
@@ -255,7 +256,10 @@ lazy val `braze-to-salesforce-file-upload` = all(project in file("handlers/braze
 
 lazy val `holiday-stop-processor` = all(project in file("handlers/holiday-stop-processor"))
   .enablePlugins(RiffRaffArtifact)
-  .dependsOn(`holiday-stops`, effects)
+  .dependsOn(
+    `holiday-stops` % "compile->compile;test->test",
+    effects
+  )
 
 lazy val `metric-push-api` = all(project in file("handlers/metric-push-api"))
   .enablePlugins(RiffRaffArtifact)
