@@ -94,7 +94,7 @@ class PaperStepsTest extends FlatSpec with Matchers {
       addContribution = dummySteps,
       addPaperSub = fakeAddVoucherSteps,
       addDigipackSub = dummySteps
-    )(ApiGatewayRequest(None, None, Some(Json.stringify(requestInput)), None, None))
+    )(ApiGatewayRequest(None, None, Some(Json.stringify(requestInput)), None, None, None))
 
     val actual = Await.result(futureActual, 30 seconds)
     actual.statusCode should be("200")

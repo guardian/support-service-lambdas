@@ -16,7 +16,8 @@ case class ApiGatewayRequest(
   queryStringParameters: Option[Map[String, String]],
   body: Option[String],
   headers: Option[Map[String, String]],
-  pathParameters: Option[JsValue] = None
+  pathParameters: Option[JsValue] = None,
+  path: Option[String]
 ) extends LazyLogging {
 
   def queryParamsAsCaseClass[A]()(implicit reads: Reads[A]): ApiGatewayOp[A] = {
