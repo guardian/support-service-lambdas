@@ -35,7 +35,7 @@ class HandlerTest extends FlatSpec with Matchers {
         FakeFetchString.fetchString
       ).map { operation =>
         operation
-          .steps(potentialIssueDateRequests("Guardian Weekly xxx", "2019-01-01", "2019-02-01"))
+          .steps(potentialIssueDateRequest("Guardian Weekly xxx", "2019-01-01", "2019-02-01"))
       }
     ) {
       case ContinueProcessing(response) =>
@@ -49,7 +49,7 @@ class HandlerTest extends FlatSpec with Matchers {
     }
   }
 
-  private def potentialIssueDateRequests(productPrefix: String, startDate: String, endDate: String) = {
+  private def potentialIssueDateRequest(productPrefix: String, startDate: String, endDate: String) = {
     ApiGatewayRequest(
       Some("GET"),
       Some(Map("startDate" -> startDate, "endDate" -> endDate)),

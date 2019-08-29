@@ -20,8 +20,7 @@ object SFTestEffects {
   val authSuccess = (
     POSTRequest(
       "/services/oauth2/token",
-      """client_id=clientsfclient&client_secret=clientsecretsfsecret&username=usernamesf&password=passSFpasswordtokentokenSFtoken&
-        |grant_type=password""".stripMargin
+      """client_id=clientsfclient&client_secret=clientsecretsfsecret&username=usernamesf&password=passSFpasswordtokentokenSFtoken&grant_type=password""".stripMargin
     ),
     HTTPResponse(200, authSuccessResponseBody)
   )
