@@ -5,7 +5,7 @@ import java.io.{InputStream, OutputStream}
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
-import com.gu.salesforce.SalesforceClient
+import com.gu.salesforce.{RecordsWrapperCaseClass, SalesforceClient}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestId, ProductName, SubscriptionName}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
 import com.gu.salesforce.holiday_stops.SalesforceSFSubscription.SubscriptionForSubscriptionNameAndContact._
@@ -20,7 +20,7 @@ import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.JsonHttp.StringHttpRequest
 import com.gu.util.resthttp.RestRequestMaker.BodyAsString
-import com.gu.util.resthttp.{HttpOp, JsonHttp}
+import com.gu.util.resthttp.{HttpOp, JsonHttp, Types}
 import okhttp3.{Request, Response}
 import java.time.LocalDate
 
@@ -45,6 +45,9 @@ object Handler extends Logging {
       )
     )
 
+  val POTENTIAL_PROXY_RESOURCE_PATH = "/potential"
+  val GET_ALL_AND_CREATE_PROXY_RESOURCE_REGEX = """/hsr.*""".r
+
   def operationForEffects(
     response: Request => Response,
     stage: Stage,
@@ -57,16 +60,14 @@ object Handler extends Logging {
       sfAuthConfig <- loadConfig[SFAuthConfig].toApiGatewayOp("load sfAuth config")
       sfClient <- SalesforceClient(response, sfAuthConfig).value.toDisjunction.toApiGatewayOp("authenticate with SalesForce")
     } yield Operation.noHealthcheck( // checking connectivity to SF is sufficient healthcheck so no special steps required
-      request => (request.httpMethod match { // TODO will need to match against path params too to support edit endpoint
-        case Some("GET") => request.queryStringParameters match {
-          case Some(_) => stepsForPotentialHolidayStop _
-          case None => stepsToListExisting _
-        }
-        case Some("POST") => stepsToCreate _
-        case Some("DELETE") => stepsToDelete _
+      request => ((request.httpMethod,
+                   request.path) match { // TODO will need to match against path params too to support edit endpoint
+        case (Some("GET"), Some(POTENTIAL_PROXY_RESOURCE_PATH)) => stepsForPotentialHolidayStop _
+        case (Some("GET"), Some(GET_ALL_AND_CREATE_PROXY_RESOURCE_REGEX())) => stepsToListExisting _
+        case (Some("POST"), Some(GET_ALL_AND_CREATE_PROXY_RESOURCE_REGEX())) => stepsToCreate _
+        case (Some("DELETE"), Some(GET_ALL_AND_CREATE_PROXY_RESOURCE_REGEX())) => stepsToDelete _
         case _ => unsupported _
       })(request, sfClient))
-
   }
 
   val HEADER_IDENTITY_ID = "x-identity-id"
@@ -116,8 +117,8 @@ object Handler extends Logging {
 
   def stepsToCreate(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
 
-    val verifyContactOwnsSubOp = SalesforceSFSubscription.SubscriptionForSubscriptionNameAndContact(sfClient.wrapWith(JsonHttp.getWithParams))
-    val createOp = SalesforceHolidayStopRequest.CreateHolidayStopRequestWithDetail(sfClient.wrapWith(JsonHttp.post))
+    val verifyContactOwnsSubOp: (SubscriptionName, Contact) => Types.ClientFailableOp[Option[MatchingSubscription]] = SalesforceSFSubscription.SubscriptionForSubscriptionNameAndContact(sfClient.wrapWith(JsonHttp.getWithParams))
+    val createOp: RecordsWrapperCaseClass[CompositeTreeHolidayStopRequest] => Types.ClientFailableOp[HolidayStopRequestId] = SalesforceHolidayStopRequest.CreateHolidayStopRequestWithDetail(sfClient.wrapWith(JsonHttp.post))
 
     (for {
       requestBody <- req.bodyAsCaseClass[HolidayStopRequestPartial]()
