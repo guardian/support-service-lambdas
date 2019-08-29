@@ -66,8 +66,7 @@ case class JobResults(status: String, id: String, batches: List[Batch], incremen
  *   - {"exportFromDate": "2019-01-20"} input to lambda will export incremental changes since 2019-01-20
  *   - {"exportFromDate": "afterLastIncrement"} input to lambda will export incremental changes since last time export was run
  *   - {"exportFromDate": "beginning"} input to lambda will export incremental changes since beginning of time
- *   - Export is idempotent, i.e., re-running it will export the same increment
- *
+ *   - Export is NOT idempotent, i.e., lake must ingest the increment before re-running the export
  */
 class ExportLambda extends Lambda[ExportFromDate, String] with LazyLogging {
   override def handle(exportFromDate: ExportFromDate, context: Context) = {
