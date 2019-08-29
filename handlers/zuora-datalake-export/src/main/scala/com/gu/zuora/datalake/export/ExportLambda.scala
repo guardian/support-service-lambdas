@@ -19,6 +19,38 @@ import scala.concurrent.duration._
 import scala.util.Try
 import enumeratum._
 
+/**
+ * https://knowledgecenter.zuora.com/DC_Developers/AB_Aggregate_Query_API/BA_Stateless_and_Stateful_Modes:
+ *
+ *   In Stateful mode, AQuA establishes a continuous session across a series of requests.
+ *   AQuA queries are executed in Stateful mode when the version is 1.1 or 1.2, and both Partner and Project are not null.
+ *   You can specify a combination of Partner and Project as a unique identifier of a continuous AQUA session.
+ *   Once the Partner and Project pair are supplied in the AQuA input, AQuA records the state of each AQUA call request.
+ *   The first request executes queries against all data in the database, and returns all data that satisfies the query criteria.
+ *   Subsequent requests execute the queries against incremental data created or updated since the last AQuA session.
+ *   Each request returns incremental data for only the object specified in the FROM clauses of the queries;
+ *   changes made to joined objects are not returned.
+ *   The Job ID and Transaction Start Date are recorded with the AQuA request.  Each subsequent AQuA request with
+ *   the same Partner ID and Project ID returns the data that satisfies the query criteria created or updated after
+ *   the Transaction Start Date in the previous AQuA request.
+ *   Stateful AQuA is best used for continuous data integration between Zuora and a target system.
+ *   AQuA sessions with the same Tenant ID, Partner ID, and Project ID cannot run in parallel.
+ *   When this occurs, they are executed sequentially in the order in which they were received.
+ *   For example, if an AQuA job is running, and another AQuA job with same Tenant ID, Partner ID, and Project ID
+ *   is submitted, the second job will not be executed until the first job is complete.
+ *
+ *  https://knowledgecenter.zuora.com/DC_Developers/AB_Aggregate_Query_API/B_Submit_Query/e_Post_Query_with_Retrieval_Time
+ *
+ *    Allows you to override the time from which a Stateful AQuA job incrementally retrieves records that have been
+ *    created or modified, using the incrementalTime parameter. For example, if you set incrementalTime = 2015-01-21 10:30:01,
+ *    AQuA will retrieve records that have created or modified beginning at 10:30:02. If this parameter is not set,
+ *    AQuA continues to use the Start Time of the last AQuA session to retrieve records incrementally.
+ *
+ *    The incrementalTime field does not support time zones, and it is always handled as in Pacific time zone.
+ *    If in other time zones, convert the incrementalTime to Pacific time zone and then set the incrementalTime
+ *    in AQuA request explicitly.
+ */
+
 case class ExportFromDate(exportFromDate: String)
 case class Oauth(clientId: String, clientSecret: String)
 case class ZuoraDatalakeExport(oauth: Oauth)
@@ -26,15 +58,16 @@ case class Config(stage: String, baseUrl: String, zuoraDatalakeExport: ZuoraData
 case class AccessToken(access_token: String)
 case class QueryResponse(id: String)
 case class Batch(fileId: Option[String], batchId: String, status: String, name: String, message: Option[String], recordCount: Option[Int])
-case class JobResults(status: String, id: String, batches: List[Batch], incrementalTime: String)
+case class JobResults(status: String, id: String, batches: List[Batch], incrementalTime: Option[String])
 
 /**
  * Exports incremental changeset from Zuora to Datalake S3 raw buckets in CSV format via
  * AQuA Stateful API:
  *   - {"exportFromDate": "2019-01-20"} input to lambda will export incremental changes since 2019-01-20
- *   - {"exportFromDate": "yesterday"} input to lambda will export incremental changes since yesterday
- *   - {"exportFromDate": "beginning"} input to lambda will export incremental changes since yesterday
+ *   - {"exportFromDate": "afterLastIncrement"} input to lambda will export incremental changes since last time export was run
+ *   - {"exportFromDate": "beginning"} input to lambda will export incremental changes since beginning of time
  *   - Export is idempotent, i.e., re-running it will export the same increment
+ *
  */
 class ExportLambda extends Lambda[ExportFromDate, String] with LazyLogging {
   override def handle(exportFromDate: ExportFromDate, context: Context) = {
@@ -44,8 +77,8 @@ class ExportLambda extends Lambda[ExportFromDate, String] with LazyLogging {
 
 object Preconditions extends (ExportFromDate => String) {
   def apply(incrementalDate: ExportFromDate): String =
-    incrementalDate.exportFromDate.toLowerCase() match {
-      case "yesterday" => "yesterday"
+    incrementalDate.exportFromDate match {
+      case "afterLastIncrement" => "afterLastIncrement"
       case "beginning" => "beginning"
       case yyyyMMdd =>
         validateDateFormat(yyyyMMdd)
@@ -103,26 +136,26 @@ object Query extends Enum[Query] {
 
   case object Account extends Query(
     "Account",
-    "SELECT Account.Balance,Account.AutoPay,Account.Currency,Account.ID,Account.IdentityId__c,Account.LastInvoiceDate,Account.sfContactId__c,Account.MRR,Account.CrmId FROM Account WHERE Status != 'Canceled' AND (ProcessingAdvice__c != 'DoNotProcess' OR ProcessingAdvice__c IS NULL)",
+    "SELECT Balance, AutoPay, Currency, ID, IdentityId__c, LastInvoiceDate, sfContactId__c, MRR, CrmId FROM Account WHERE Status != 'Canceled' AND (ProcessingAdvice__c != 'DoNotProcess' OR ProcessingAdvice__c IS NULL)",
     "ophan-raw-zuora-increment-account",
     "Account.csv"
   )
   case object RatePlanCharge extends Query(
     "RatePlanCharge",
-    "SELECT Account.ID,RatePlanCharge.EffectiveStartDate,RatePlanCharge.EffectiveEndDate,RatePlanCharge.HolidayStart__c,RatePlanCharge.HolidayEnd__c,RatePlanCharge.ID,RatePlanCharge.MRR,RatePlanCharge.Name,RatePlanCharge.TCV,RatePlanCharge.Version,RatePlanCharge.BillingPeriod,RatePlanCharge.ProcessedThroughDate,RatePlanCharge.ChargedThroughDate,Product.Name,RatePlan.ID,RatePlan.Name,Subscription.ID,ProductRatePlanCharge.BillingPeriod FROM RatePlanCharge WHERE Account.Status != 'Canceled' AND (Account.ProcessingAdvice__c != 'DoNotProcess' OR Account.ProcessingAdvice__c IS NULL)",
+    "SELECT Account.ID, EffectiveStartDate, EffectiveEndDate, HolidayStart__c, HolidayEnd__c, ID, MRR,Name, TCV, Version, BillingPeriod, ProcessedThroughDate, ChargedThroughDate, Product.Name, RatePlan.ID, RatePlan.Name, Subscription.ID, ProductRatePlanCharge.BillingPeriod FROM RatePlanCharge",
     "ophan-raw-zuora-increment-rateplancharge",
     "RatePlanCharge.csv"
   )
   // https://knowledgecenter.zuora.com/CD_Reporting/D_Data_Sources_and_Exports/C_Data_Source_Reference/Rate_Plan_Charge_Tier_Data_Source
   case object RatePlanChargeTier extends Query(
     "RatePlanChargeTier",
-    "SELECT RatePlanChargeTier.Price, RatePlanChargeTier.Currency, RatePlanChargeTier.DiscountAmount, RatePlanChargeTier.DiscountPercentage, RatePlanChargeTier.ID, RatePlanCharge.ID, Subscription.ID FROM RatePlanChargeTier",
+    "SELECT Price, Currency, DiscountAmount, DiscountPercentage, ID, RatePlanCharge.ID, Subscription.ID FROM RatePlanChargeTier",
     "ophan-raw-zuora-increment-rateplanchargetier",
     "RatePlanChargeTier.csv"
   )
   case object RatePlan extends Query(
     "RatePlan",
-    "SELECT RatePlan.Name, RatePlan.AmendmentType, RatePlan.CreatedDate, RatePlan.UpdatedDate, RatePlan.ID, Subscription.ID, Product.ID, Amendment.ID, Account.ID FROM RatePlan",
+    "SELECT Name, AmendmentType, CreatedDate, UpdatedDate, ID, Subscription.ID, Product.ID, Amendment.ID, Account.ID FROM RatePlan",
     "ophan-raw-zuora-increment-rateplan",
     "RatePlan.csv"
   )
@@ -174,9 +207,11 @@ object Query extends Enum[Query] {
     "ophan-raw-zuora-increment-refund",
     "Refund.csv"
   )
+
+  //  FIXME: Zuora is not capable of doing a full export of InvoiceItem hence the WHERE clause: https://support.zuora.com/hc/en-us/requests/186104
   case object InvoiceItem extends Query(
     "InvoiceItem",
-    "SELECT accountingCode, appliedToInvoiceItemId, chargeAmount, chargeDate, chargeName, createdById, createdDate, invoice.Id, processingType, product.Description, product.Id, product.Name, productRatePlanCharge.Id, quantity, ratePlanCharge.Id, revRecStartDate, serviceEndDate, serviceStartDate, sku, subscriptionId, taxAmount, taxCode, taxExemptAmount, taxMode, unitPrice, uom, updatedById, updatedDate, id, account.Id FROM InvoiceItem",
+    "SELECT accountingCode, appliedToInvoiceItemId, chargeAmount, chargeDate, chargeName, createdById, createdDate, invoice.Id, processingType, product.Description, product.Id, product.Name, productRatePlanCharge.Id, quantity, ratePlanCharge.Id, revRecStartDate, serviceEndDate, serviceStartDate, sku, subscriptionId, taxAmount, taxCode, taxExemptAmount, taxMode, unitPrice, uom, updatedById, updatedDate, id, account.Id FROM InvoiceItem  WHERE (CreatedDate >= '2019-08-28T00:00:00') AND (CreatedDate <= '2099-01-01T00:00:00')",
     "ophan-raw-zuora-increment-invoiceitem",
     "InvoiceItem.csv"
   )
@@ -193,7 +228,7 @@ object ZuoraApiHost {
 
 case class ZuoraAquaStatefulApi(
   version: String = "1.2",
-  project: String = "zuora-datalake-export",
+  project: String = "zuora-datalake-export-1", // Changing this will result in new stateful session which means full load
   partner: String
 )
 object ZuoraAquaStatefulApi {
@@ -248,25 +283,16 @@ object AccessToken {
 }
 
 /**
- * Zuora AQuA stateful API will return changed records since IncrementalTime.
- * If the user does not provide manual override date to lambda, then get changes since yesterday.
- * This makes the export idempotent, that is, re-running the lambda number of times within the same day
- * returns the same incremental changeset.
- *
- * Manual date override is useful for fixing failed exports.
+ * Get all changes since start time of last incremental export job, or since specified incrementalTime
  *
  * https://knowledgecenter.zuora.com/DC_Developers/AB_Aggregate_Query_API/B_Submit_Query/e_Post_Query_with_Retrieval_Time
  */
 object IncrementalDate {
-  def apply(incrementalDate: String): String =
+  def apply(incrementalDate: String): Option[String] =
     incrementalDate match {
-      case "yesterday" =>
-        val yesterday = LocalDate.now.minusDays(1)
-        yesterday.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-
-      case "beginning" => "1970-01-01"
-
-      case particularDate => particularDate
+      case "afterLastIncrement" => None // Get all changes since last export
+      case "beginning" => Some("1970-01-01")
+      case particularDate => Some(particularDate)
     }
 }
 
@@ -275,7 +301,7 @@ object IncrementalDate {
  * https://knowledgecenter.zuora.com/DC_Developers/AB_Aggregate_Query_API/BA_Stateless_and_Stateful_Modes#Automatic_Switch_Between_Full_Load_and_Incremental_Load
  */
 object StartAquaJob {
-  def apply(incrementalDate: String): String = {
+  def apply(incrementalDateMaybe: Option[String]): String = {
     val body =
       s"""
         |{
@@ -287,7 +313,7 @@ object StartAquaJob {
         |	"dateTimeUtc" : "true",
         |	"partner": "${ZuoraAquaStatefulApi().partner}",
         |	"project": "${ZuoraAquaStatefulApi().project}",
-        | "incrementalTime": "$incrementalDate 00:00:00",
+        | ${incrementalDateMaybe.map(incrementalDate => s""""incrementalTime": "$incrementalDate 00:00:00",""").getOrElse("")}
         |	"queries" :
         |   ${
         Query.values.map { query =>
