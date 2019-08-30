@@ -45,9 +45,6 @@ object Handler extends Logging {
       )
     )
 
-  val POTENTIAL_PROXY_RESOURCE_PATH = "/potential"
-  val GET_ALL_AND_CREATE_PROXY_RESOURCE_REGEX = """/hsr.*""".r
-
   def operationForEffects(
     response: Request => Response,
     stage: Stage,
@@ -60,14 +57,22 @@ object Handler extends Logging {
       sfAuthConfig <- loadConfig[SFAuthConfig].toApiGatewayOp("load sfAuth config")
       sfClient <- SalesforceClient(response, sfAuthConfig).value.toDisjunction.toApiGatewayOp("authenticate with SalesForce")
     } yield Operation.noHealthcheck( // checking connectivity to SF is sufficient healthcheck so no special steps required
-      request => ((request.httpMethod,
-                   request.path) match { // TODO will need to match against path params too to support edit endpoint
-        case (Some("GET"), Some(POTENTIAL_PROXY_RESOURCE_PATH)) => stepsForPotentialHolidayStop _
-        case (Some("GET"), Some(GET_ALL_AND_CREATE_PROXY_RESOURCE_REGEX())) => stepsToListExisting _
-        case (Some("POST"), Some(GET_ALL_AND_CREATE_PROXY_RESOURCE_REGEX())) => stepsToCreate _
-        case (Some("DELETE"), Some(GET_ALL_AND_CREATE_PROXY_RESOURCE_REGEX())) => stepsToDelete _
+      request => ((request.httpMethod, splitPath(request.path)) match { // TODO will need to match against path params too to support edit endpoint
+        case (Some("GET"), "potential" :: Nil) => stepsForPotentialHolidayStop _
+        case (Some("GET"), "hsr" :: Nil) => stepsToListExisting _
+        case (Some("GET"), "hsr" :: _ :: Nil) => stepsToListExisting _
+        case (Some("POST"), "hsr" :: Nil) => stepsToCreate _
+        case (Some("DELETE"), "hsr" :: _ :: Nil) => stepsToDelete _
         case _ => unsupported _
       })(request, sfClient))
+  }
+
+  def splitPath(pathString: Option[String]): List[String] = {
+    pathString.map(_.split('/').toList) match {
+      case Some("" :: tail) => tail
+      case Some(noLeadingSlash) => noLeadingSlash
+      case None => Nil
+    }
   }
 
   val HEADER_IDENTITY_ID = "x-identity-id"
