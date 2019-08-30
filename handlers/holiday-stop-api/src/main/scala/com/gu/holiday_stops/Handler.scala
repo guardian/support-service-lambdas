@@ -117,8 +117,8 @@ object Handler extends Logging {
 
   def stepsToCreate(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
 
-    val verifyContactOwnsSubOp: (SubscriptionName, Contact) => Types.ClientFailableOp[Option[MatchingSubscription]] = SalesforceSFSubscription.SubscriptionForSubscriptionNameAndContact(sfClient.wrapWith(JsonHttp.getWithParams))
-    val createOp: RecordsWrapperCaseClass[CompositeTreeHolidayStopRequest] => Types.ClientFailableOp[HolidayStopRequestId] = SalesforceHolidayStopRequest.CreateHolidayStopRequestWithDetail(sfClient.wrapWith(JsonHttp.post))
+    val verifyContactOwnsSubOp = SalesforceSFSubscription.SubscriptionForSubscriptionNameAndContact(sfClient.wrapWith(JsonHttp.getWithParams))
+    val createOp = SalesforceHolidayStopRequest.CreateHolidayStopRequestWithDetail(sfClient.wrapWith(JsonHttp.post))
 
     (for {
       requestBody <- req.bodyAsCaseClass[HolidayStopRequestPartial]()
