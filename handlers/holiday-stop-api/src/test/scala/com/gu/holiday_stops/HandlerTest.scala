@@ -34,19 +34,19 @@ class HandlerTest extends FlatSpec with Matchers {
         Stage("DEV"),
         FakeFetchString.fetchString
       ).map { operation =>
-        operation
-          .steps(potentialIssueDateRequest("Guardian Weekly xxx", "2019-01-01", "2019-02-01"))
-      }
-    ) {
-      case ContinueProcessing(response) =>
-        response.statusCode should equal("200")
-        inside(Json.fromJson[Array[String]](Json.parse(response.body))) {
-          case JsSuccess(dates, _) =>
-            dates should contain inOrderOnly(
-              "2019-01-04", "2019-01-11", "2019-01-18", "2019-01-25", "2019-02-01"
-            )
+          operation
+            .steps(potentialIssueDateRequest("Guardian Weekly xxx", "2019-01-01", "2019-02-01"))
         }
-    }
+    ) {
+        case ContinueProcessing(response) =>
+          response.statusCode should equal("200")
+          inside(Json.fromJson[Array[String]](Json.parse(response.body))) {
+            case JsSuccess(dates, _) =>
+              dates should contain inOrderOnly (
+                "2019-01-04", "2019-01-11", "2019-01-18", "2019-01-25", "2019-02-01"
+              )
+          }
+      }
   }
 
   private def potentialIssueDateRequest(productPrefix: String, startDate: String, endDate: String) = {
@@ -56,7 +56,8 @@ class HandlerTest extends FlatSpec with Matchers {
       None,
       Some(Map("x-product-name-prefix" -> productPrefix)),
       None,
-      Some("/potential"))
+      Some("/potential")
+    )
   }
 
   val testEffects = new TestingRawEffects(
