@@ -1,15 +1,16 @@
 package com.gu.holiday_stops
 
 import java.io.{InputStream, OutputStream}
+import java.time.LocalDate
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
-import com.gu.salesforce.{RecordsWrapperCaseClass, SalesforceClient}
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestId, ProductName, SubscriptionName}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestId, ProductName, SubscriptionName}
 import com.gu.salesforce.holiday_stops.SalesforceSFSubscription.SubscriptionForSubscriptionNameAndContact._
 import com.gu.salesforce.holiday_stops.{SalesforceHolidayStopRequest, SalesforceSFSubscription}
+import com.gu.salesforce.{RecordsWrapperCaseClass, SalesforceClient}
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
@@ -22,8 +23,6 @@ import com.gu.util.resthttp.JsonHttp.StringHttpRequest
 import com.gu.util.resthttp.RestRequestMaker.BodyAsString
 import com.gu.util.resthttp.{HttpOp, JsonHttp, Types}
 import okhttp3.{Request, Response}
-import java.time.LocalDate
-
 import play.api.libs.json.{Format, Json, Reads}
 
 object Handler extends Logging {
@@ -58,14 +57,14 @@ object Handler extends Logging {
       sfClient <- SalesforceClient(response, sfAuthConfig).value.toDisjunction.toApiGatewayOp("authenticate with SalesForce")
     } yield Operation.noHealthcheck( // checking connectivity to SF is sufficient healthcheck so no special steps required
       request => ((request.httpMethod, splitPath(request.path)) match {
-        case (Some("GET"), "potential" :: Nil) => stepsForPotentialHolidayStop _
         case (Some("GET"), "potential" :: _ :: Nil) => stepsForPotentialHolidayStopV2 _
-        case (Some("GET"), "hsr" :: Nil) => stepsToListExisting _
+        case (Some("GET"), "potential" :: Nil) => stepsForPotentialHolidayStop _
         case (Some("GET"), "hsr" :: _ :: Nil) => stepsToListExisting _
+        case (Some("GET"), "hsr" :: Nil) => stepsToListExisting _
         case (Some("POST"), "hsr" :: Nil) => stepsToCreate _
         case (Some("DELETE"), "hsr" :: _ :: Nil) => stepsToDelete _
         case _ => unsupported _
-      })(request, sfClient))
+      }) (request, sfClient))
   }
 
   def splitPath(pathString: Option[String]): List[String] = {
@@ -86,6 +85,7 @@ object Handler extends Logging {
   }).toApiGatewayOp(s"either '$HEADER_IDENTITY_ID' header OR '$HEADER_SALESFORCE_CONTACT_ID' (one is required)")
 
   case class PotentialHolidayStopParams(startDate: LocalDate, endDate: LocalDate)
+
   def stepsForPotentialHolidayStop(req: ApiGatewayRequest, unused: SfClient): ApiResponse = {
     implicit val formatLocalDateAsSalesforceDate: Format[LocalDate] = SalesforceHolidayStopRequest.formatLocalDateAsSalesforceDate
     implicit val readsPotentialHolidayStopParams: Reads[PotentialHolidayStopParams] = Json.reads[PotentialHolidayStopParams]
@@ -99,18 +99,18 @@ object Handler extends Logging {
   }
 
   case class PotentialHolidayStopsV2PathParams(subscriptionName: Option[SubscriptionName])
+
   def stepsForPotentialHolidayStopV2(req: ApiGatewayRequest, unused: SfClient): ApiResponse = {
-    import PotentialHolidayStopsResponse.reads
     (for {
       _ <- req.pathParamsAsCaseClass[PotentialHolidayStopsV2PathParams]()(Json.reads[PotentialHolidayStopsV2PathParams])
       productNamePrefix <- req.headers.flatMap(_.get(HEADER_PRODUCT_NAME_PREFIX)).toApiGatewayOp("identityID header")
       params <- req.queryParamsAsCaseClass[PotentialHolidayStopParamsV2]()
-      price  = if(params.estmimatePrice.getOrElse(false)) Some(1.23) else None
+      price = if (params.estimatePrice == Some("true")) Some(1.23) else None
     } yield ApiGatewayResponse(
       "200",
       PotentialHolidayStopsResponse(
         ActionCalculator.publicationDatesToBeStopped(params.startDate, params.endDate, ProductName(productNamePrefix))
-                        .map(PotentialHolidayStop(_, price))
+          .map(PotentialHolidayStop(_, price))
       )
     )).apiResponse
   }
@@ -154,6 +154,7 @@ object Handler extends Logging {
   }
 
   case class DeletePathParams(subscriptionName: SubscriptionName, holidayStopRequestId: HolidayStopRequestId)
+
   def stepsToDelete(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
 
     val lookupOp = SalesforceHolidayStopRequest.LookupByContactAndOptionalSubscriptionName(sfClient.wrapWith(JsonHttp.getWithParams))
