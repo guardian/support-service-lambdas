@@ -100,9 +100,11 @@ Resources:
     Type: AWS::Events::Rule
     Condition: IsProd
     Properties:
-      Description: Trigger processing of holiday stops every hour (to give 24 attempts a day)
+      Description: >-
+        Trigger processing of holiday stops every hour on Wednesdays (to give 24 attempts a day).
+        This will change to every hour every day when processing other products apart from GW.
       Name: holiday-stop-processor-schedule
-      ScheduleExpression: "cron(0 * ? * * *)"
+      ScheduleExpression: "cron(0 * ? * WED *)"
       State: ENABLED
       Targets:
         - Arn: !GetAtt HolidayStopProcessor.Arn
