@@ -57,8 +57,9 @@ object Handler extends Logging {
       sfAuthConfig <- loadConfig[SFAuthConfig].toApiGatewayOp("load sfAuth config")
       sfClient <- SalesforceClient(response, sfAuthConfig).value.toDisjunction.toApiGatewayOp("authenticate with SalesForce")
     } yield Operation.noHealthcheck( // checking connectivity to SF is sufficient healthcheck so no special steps required
-      request => ((request.httpMethod, splitPath(request.path)) match { // TODO will need to match against path params too to support edit endpoint
+      request => ((request.httpMethod, splitPath(request.path)) match {
         case (Some("GET"), "potential" :: Nil) => stepsForPotentialHolidayStop _
+        case (Some("GET"), "potential" :: _ :: Nil) => stepsForPotentialHolidayStopV2 _
         case (Some("GET"), "hsr" :: Nil) => stepsToListExisting _
         case (Some("GET"), "hsr" :: _ :: Nil) => stepsToListExisting _
         case (Some("POST"), "hsr" :: Nil) => stepsToCreate _
@@ -97,14 +98,31 @@ object Handler extends Logging {
     )).apiResponse
   }
 
-  case class GetPathParams(subscriptionName: Option[SubscriptionName])
+  case class PotentialHolidayStopsV2PathParams(subscriptionName: Option[SubscriptionName])
+  def stepsForPotentialHolidayStopV2(req: ApiGatewayRequest, unused: SfClient): ApiResponse = {
+    import PotentialHolidayStopsResponse.reads
+    (for {
+      _ <- req.pathParamsAsCaseClass[PotentialHolidayStopsV2PathParams]()(Json.reads[PotentialHolidayStopsV2PathParams])
+      productNamePrefix <- req.headers.flatMap(_.get(HEADER_PRODUCT_NAME_PREFIX)).toApiGatewayOp("identityID header")
+      params <- req.queryParamsAsCaseClass[PotentialHolidayStopParamsV2]()
+      price  = if(params.estmimatePrice.getOrElse(false)) Some(1.23) else None
+    } yield ApiGatewayResponse(
+      "200",
+      PotentialHolidayStopsResponse(
+        ActionCalculator.publicationDatesToBeStopped(params.startDate, params.endDate, ProductName(productNamePrefix))
+                        .map(PotentialHolidayStop(_, price))
+      )
+    )).apiResponse
+  }
+
+  case class ListExistingPathParams(subscriptionName: Option[SubscriptionName])
 
   def stepsToListExisting(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
 
     val lookupOp = SalesforceHolidayStopRequest.LookupByContactAndOptionalSubscriptionName(sfClient.wrapWith(JsonHttp.getWithParams))
 
     val extractOptionalSubNameOp: ApiGatewayOp[Option[SubscriptionName]] = req.pathParameters match {
-      case Some(_) => req.pathParamsAsCaseClass[GetPathParams]()(Json.reads[GetPathParams]).map(_.subscriptionName)
+      case Some(_) => req.pathParamsAsCaseClass[ListExistingPathParams]()(Json.reads[ListExistingPathParams]).map(_.subscriptionName)
       case None => ContinueProcessing(None)
     }
 
