@@ -46,37 +46,54 @@ object AccountQuery extends Query(
 
 ## How does it get triggered?
 
-AWS Cloudwatch Event Rule triggers the export lambda once per day. Each execution exports changes since yesterday. 
-For example, executing on 2019-01-20, will set `"incrementalTime": "2019-01-19 00:00:00"` in the body of AQuA request.
-
-Passing `{"exportFromDate": "yesterday"}` to lambda will export changes since yesterday. 
+AWS Cloudwatch Event Rule triggers the export lambda once per day. Each execution exports changes 
+since last time export ran. Rule passes `{"exportFromDate": "afterLastIncrement"}` to lambda.
 
 ## How do we know when it fails?
 
-Cloudwatch Alert email is sent to SX mailing list.
+* Cloudwatch Alert email is sent to SX mailing list.
+* Ophan alerts if it detects out-of-date CSV in raw buckets.
 
-## How to retry the export manually?
+## How to retry the export manually (via incrementalTime)?
+
+Export is **NOT** idempotent. Do not blindly re-run the export. Lake must ingest the latest increment before 
+lambda can be executed again with `{"exportFromDate": "afterLastIncrement"}`. If the lambda is executed before
+lake ingests the latest increment, then the increment is lost. (If this happens use `incrementalTime` method \
+described below to retrieve the lost increment.) 
+
+However it seems to be safe to re-run the export with `incrementalTime` provided. This will get the changes since
+`incrementalTime` but it will not modify the session so when lambda runs again with `{"exportFromDate": "afterLastIncrement"}` 
+it will pick up from the last time it ran:
 
 * To manually re-run the export, pass date as string in the following format `"2019-01-20"` to export lambda. 
 This will export changes since 2019-01-19.
-* The export lambda is **idempotent**. As long as `incrementalTime` is kept the same in the body of AQuA request, it 
-can be re-run safely.
-* Make sure to set the input date to lambda to the day on which the failure happened for the first time. 
-For example, if the failure happened on 2019-01-19, but it was noticed for the first time a week later on 2019-01-26,
-then input should be `2019-01-19`.
+* The export lambda is **idempotent** as long as `incrementalTime` is present.
 
-| Load changes since... |      lambda input                    |
-|-----------------------|:------------------------------------:|
-| Since yesterday       | `{"exportFromDate": "yesterday"}`    |
-| Since particular date | `{"exportFromDate": "2020-01-20"}`   |
-| Full load             | `{"exportFromDate": "beginning"}`    |
+| Load changes since...   |      lambda input                             |
+|-------------------------|:---------------------------------------------:|
+| Continue session        | `{"exportFromDate": "afterLastIncrement"}`    |
+| Since particular date   | `{"exportFromDate": "2020-01-20"}`            |
+| Since beginning of time | `{"exportFromDate": "beginning"}`             |
 
-## How to extract a full load?
+If extracting via postman make sure to use the **exact same** `partner` and `project` values as in lambda.
 
-* Passing _beginning of unix time_, that is, `1970-01-01` will in effect represent full load
-* Note lambda has a hard timeout of 15 min, so if the export takes longer that than, then use postman, and manually copy
-the CSV file over to Ophan bucket. Make sure to use the exact same `partner` and `project` values as in lambda.
+
+## How to extract a full load of all objects (except `InvoiceItem`)?
+
+* Do **NOT** use `{"exportFromDate": "beginning"}` to achieve full export. 
+* Any modification to the query (adding/removing/renaming fields or filters) will result in full export for that one 
+object
+* Changing the `project` fields from say `zuora-datalake-export-1` to `zuora-datalake-export-1` will result in full
+export of all objects
+* Note lambda has a hard timeout of 15 min, so if the export takes longer 
+  - use postman, and manually copy the CSV file over to Ophan bucket. Make sure to use the **exact same** `partner` and `project` values as in lambda.
+  - trigger the export via lambda and let it fail. Then manually copy the CSV files over to Ophan buckets.
 * [Switch Between Full Load and Incremental Load](https://knowledgecenter.zuora.com/DC_Developers/AB_Aggregate_Query_API/BA_Stateless_and_Stateful_Modes#Automatic_Switch_Between_Full_Load_and_Incremental_Load)
+* `InvoiceItem` is not full-exportable: https://support.zuora.com/hc/en-us/requests/186104
+
+## How to extract a full load of `InvoiceItem`?
+
+TODO.
 
 ## Which Zuora API User is used for extract?
 
