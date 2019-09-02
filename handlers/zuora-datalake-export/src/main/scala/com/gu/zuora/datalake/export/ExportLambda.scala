@@ -135,7 +135,7 @@ object Query extends Enum[Query] {
 
   case object Account extends Query(
     "Account",
-    "SELECT Balance, AutoPay, Currency, ID, IdentityId__c, LastInvoiceDate, sfContactId__c, MRR, CrmId FROM Account WHERE Status != 'Canceled' AND (ProcessingAdvice__c != 'DoNotProcess' OR ProcessingAdvice__c IS NULL)",
+    "SELECT Balance, AutoPay, Currency, ID, IdentityId__c, LastInvoiceDate, sfContactId__c, MRR, CrmId, Status, ProcessingAdvice__c FROM Account",
     "ophan-raw-zuora-increment-account",
     "Account.csv"
   )
