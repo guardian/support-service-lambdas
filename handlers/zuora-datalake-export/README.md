@@ -47,7 +47,7 @@ object AccountQuery extends Query(
 ## How does it get triggered?
 
 AWS Cloudwatch Event Rule triggers the export lambda once per day. Each execution exports changes 
-since last time export run. Rule passes `{"exportFromDate": "afterLastIncrement"}` to lambda.
+since last time export ran. Rule passes `{"exportFromDate": "afterLastIncrement"}` to lambda.
 
 ## How do we know when it fails?
 
@@ -58,8 +58,8 @@ since last time export run. Rule passes `{"exportFromDate": "afterLastIncrement"
 
 Export is **NOT** idempotent. Do not blindly re-run the export. Lake must ingest the latest increment before 
 lambda can be executed again with `{"exportFromDate": "afterLastIncrement"}`. If the lambda is executed before
-lake ingest the latest increment, then the increment is lost. (If this happens use `incrementalTime` method \
-described bellow to retrieve the lost increment.) 
+lake ingests the latest increment, then the increment is lost. (If this happens use `incrementalTime` method \
+described below to retrieve the lost increment.) 
 
 However it seems to be safe to re-run the export with `incrementalTime` provided. This will get the changes since
 `incrementalTime` but it will not modify the session so when lambda runs again with `{"exportFromDate": "afterLastIncrement"}` 
