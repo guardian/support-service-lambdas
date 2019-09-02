@@ -48,8 +48,11 @@ object Handler extends Logging {
   val POTENTIAL_PROXY_RESOURCE_PATH = "/potential"
   val GET_ALL_AND_CREATE_PROXY_RESOURCE_REGEX = """/hsr.*""".r
 
-  def operationForEffects(response: Request => Response, stage: Stage,
-                          fetchString: StringFromS3): ApiGatewayOp[Operation] = {
+  def operationForEffects(
+    response: Request => Response,
+    stage: Stage,
+    fetchString: StringFromS3
+  ): ApiGatewayOp[Operation] = {
 
     val loadConfig = LoadConfigModule(stage, fetchString)
 
