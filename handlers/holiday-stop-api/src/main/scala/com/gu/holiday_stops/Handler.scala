@@ -56,8 +56,7 @@ object Handler extends Logging {
       sfAuthConfig <- loadConfig[SFAuthConfig].toApiGatewayOp("load sfAuth config")
       sfClient <- SalesforceClient(response, sfAuthConfig).value.toDisjunction.toApiGatewayOp("authenticate with SalesForce")
     } yield Operation.noHealthcheck(request => // checking connectivity to SF is sufficient healthcheck so no special steps required
-      validateRequestAndCreateSteps(request)(request, sfClient)
-    )
+      validateRequestAndCreateSteps(request)(request, sfClient))
   }
 
   private def validateRequestAndCreateSteps(request: ApiGatewayRequest) = {
