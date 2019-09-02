@@ -115,6 +115,32 @@ class HandlerTest extends FlatSpec with Matchers {
         }
     }
   }
+  it should "return bad request if method is missing" in {
+    inside(
+      Handler.operationForEffects(testEffects.response, Stage("DEV"), FakeFetchString.fetchString)
+        .map(_.steps(ApiGatewayRequest(None, None, None, None, None, None)))
+    ) {
+      case ContinueProcessing(response) =>
+        response.statusCode should equal("400")
+        response.body should equal(
+          """{
+            |  "message" : "Bad request: Http method is required"
+            |}""".stripMargin)
+    }
+  }
+  it should "return bad request if path is missing" in {
+    inside(
+      Handler.operationForEffects(testEffects.response, Stage("DEV"), FakeFetchString.fetchString)
+        .map(_.steps(ApiGatewayRequest(Some("GET"), None, None, None, None, None)))
+    ) {
+      case ContinueProcessing(response) =>
+        response.statusCode should equal("400")
+        response.body should equal(
+          """{
+            |  "message" : "Bad request: Path is required"
+            |}""".stripMargin)
+    }
+  }
 
   private def potentialIssueDateV1Request(productPrefix: String, startDate: String, endDate: String) = {
     ApiGatewayRequest(
@@ -123,7 +149,8 @@ class HandlerTest extends FlatSpec with Matchers {
       None,
       Some(Map("x-product-name-prefix" -> productPrefix)),
       None,
-      Some("/potential"))
+      Some("/potential")
+    )
   }
 
   private def potentialIssueDateV2Request(productPrefix: String, startDate: String, endDate: String,
@@ -137,7 +164,8 @@ class HandlerTest extends FlatSpec with Matchers {
       None,
       Some(Map("x-product-name-prefix" -> productPrefix)),
       Some(JsObject(Seq("subscriptionName" -> JsString(subscriptionName)))),
-      Some(s"/potential/$subscriptionName"))
+      Some(s"/potential/$subscriptionName ")
+    )
   }
 
   val testEffects = new TestingRawEffects(

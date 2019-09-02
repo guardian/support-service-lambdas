@@ -6,11 +6,11 @@ import java.time.LocalDate
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
+import com.gu.salesforce.SalesforceClient
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestId, ProductName, SubscriptionName}
 import com.gu.salesforce.holiday_stops.SalesforceSFSubscription.SubscriptionForSubscriptionNameAndContact._
 import com.gu.salesforce.holiday_stops.{SalesforceHolidayStopRequest, SalesforceSFSubscription}
-import com.gu.salesforce.{RecordsWrapperCaseClass, SalesforceClient}
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
@@ -21,9 +21,10 @@ import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.JsonHttp.StringHttpRequest
 import com.gu.util.resthttp.RestRequestMaker.BodyAsString
-import com.gu.util.resthttp.{HttpOp, JsonHttp, Types}
+import com.gu.util.resthttp.{HttpOp, JsonHttp}
 import okhttp3.{Request, Response}
 import play.api.libs.json.{Format, Json, Reads}
+import scalaz.{-\/, \/, \/-}
 
 object Handler extends Logging {
 
@@ -47,31 +48,72 @@ object Handler extends Logging {
   def operationForEffects(
     response: Request => Response,
     stage: Stage,
-    fetchString: StringFromS3,
+    fetchString: StringFromS3
   ): ApiGatewayOp[Operation] = {
-
     val loadConfig = LoadConfigModule(stage, fetchString)
 
     for {
       sfAuthConfig <- loadConfig[SFAuthConfig].toApiGatewayOp("load sfAuth config")
       sfClient <- SalesforceClient(response, sfAuthConfig).value.toDisjunction.toApiGatewayOp("authenticate with SalesForce")
-    } yield Operation.noHealthcheck( // checking connectivity to SF is sufficient healthcheck so no special steps required
-      request => ((request.httpMethod, splitPath(request.path)) match {
-        case (Some("GET"), "potential" :: _ :: Nil) => stepsForPotentialHolidayStopV2 _
-        case (Some("GET"), "potential" :: Nil) => stepsForPotentialHolidayStop _
-        case (Some("GET"), "hsr" :: _ :: Nil) => stepsToListExisting _
-        case (Some("GET"), "hsr" :: Nil) => stepsToListExisting _
-        case (Some("POST"), "hsr" :: Nil) => stepsToCreate _
-        case (Some("DELETE"), "hsr" :: _ :: Nil) => stepsToDelete _
-        case _ => unsupported _
-      }) (request, sfClient))
+    } yield Operation.noHealthcheck(request => // checking connectivity to SF is sufficient healthcheck so no special steps required
+      validateRequestAndCreateSteps(request)(request, sfClient)
+    )
   }
 
-  def splitPath(pathString: Option[String]): List[String] = {
-    pathString.map(_.split('/').toList) match {
-      case Some("" :: tail) => tail
-      case Some(noLeadingSlash) => noLeadingSlash
-      case None => Nil
+  private def validateRequestAndCreateSteps(request: ApiGatewayRequest) = {
+    (for {
+      httpMethod <- validateMethod(request.httpMethod)
+      path <- validatePath(request.path)
+    } yield createSteps(httpMethod, splitPath(path))).fold(
+      { errorMessage: String =>
+        badrequest(errorMessage) _
+      },
+      identity
+    )
+  }
+
+  private def validateMethod(method: Option[String]): String \/ String = {
+    method match {
+      case Some(method) => \/-(method)
+      case None => -\/("Http method is required")
+    }
+  }
+
+  private def validatePath(path: Option[String]): String \/ String = {
+    path match {
+      case Some(method) => \/-(method)
+      case None => -\/("Path is required")
+    }
+  }
+
+  private def createSteps(httpMethod: String, path: List[String]) = {
+    path match {
+      case "potential" :: Nil =>
+        httpMethod match {
+          case "GET" => stepsForPotentialHolidayStopV1 _
+          case _ => unsupported _
+        }
+      case "potential" :: _ :: Nil =>
+        httpMethod match {
+          case "GET" => stepsForPotentialHolidayStopV2 _
+          case _ => unsupported _
+        }
+      case "hsr" :: Nil | "hsr" :: _ :: Nil =>
+        httpMethod match {
+          case "GET" => stepsToListExisting _
+          case "POST" => stepsToCreate _
+          case "DELETE" => stepsToDelete _
+          case _ => unsupported _
+        }
+      case _ =>
+        notfound _
+    }
+  }
+
+  def splitPath(pathString: String): List[String] = {
+    pathString.split('/').toList match {
+      case "" :: tail => tail
+      case noLeadingSlash => noLeadingSlash
     }
   }
 
@@ -86,7 +128,7 @@ object Handler extends Logging {
 
   case class PotentialHolidayStopParams(startDate: LocalDate, endDate: LocalDate)
 
-  def stepsForPotentialHolidayStop(req: ApiGatewayRequest, unused: SfClient): ApiResponse = {
+  def stepsForPotentialHolidayStopV1(req: ApiGatewayRequest, unused: SfClient): ApiResponse = {
     implicit val formatLocalDateAsSalesforceDate: Format[LocalDate] = SalesforceHolidayStopRequest.formatLocalDateAsSalesforceDate
     implicit val readsPotentialHolidayStopParams: Reads[PotentialHolidayStopParams] = Json.reads[PotentialHolidayStopParams]
     (for {
@@ -131,7 +173,7 @@ object Handler extends Logging {
     (for {
       contact <- extractContactFromHeaders(req.headers)
       optionalSubName <- extractOptionalSubNameOp
-      usersHolidayStopRequests <- lookupOp(contact, optionalSubName).toDisjunction.toApiGatewayOp(s"lookup Holiday Stop Requests for contact $contact")
+      usersHolidayStopRequests <- lookupOp(contact, optionalSubName).toDisjunction.toApiGatewayOp(s"lookup Holiday Stop Requests for contact $contact ")
     } yield ApiGatewayResponse(
       "200",
       GetHolidayStopRequests(usersHolidayStopRequests, optionalProductNamePrefix)
@@ -140,15 +182,19 @@ object Handler extends Logging {
 
   def stepsToCreate(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
 
-    val verifyContactOwnsSubOp: (SubscriptionName, Contact) => Types.ClientFailableOp[Option[MatchingSubscription]] = SalesforceSFSubscription.SubscriptionForSubscriptionNameAndContact(sfClient.wrapWith(JsonHttp.getWithParams))
-    val createOp: RecordsWrapperCaseClass[CompositeTreeHolidayStopRequest] => Types.ClientFailableOp[HolidayStopRequestId] = SalesforceHolidayStopRequest.CreateHolidayStopRequestWithDetail(sfClient.wrapWith(JsonHttp.post))
+    val verifyContactOwnsSubOp = SalesforceSFSubscription.SubscriptionForSubscriptionNameAndContact(sfClient.wrapWith(JsonHttp.getWithParams))
+    val createOp = SalesforceHolidayStopRequest.CreateHolidayStopRequestWithDetail(sfClient.wrapWith(JsonHttp.post))
 
     (for {
       requestBody <- req.bodyAsCaseClass[HolidayStopRequestPartial]()
       contact <- extractContactFromHeaders(req.headers)
-      maybeMatchingSub <- verifyContactOwnsSubOp(requestBody.subscriptionName, contact).toDisjunction.toApiGatewayOp(s"fetching subscriptions for contact $contact")
-      matchingSub <- maybeMatchingSub.toApiGatewayOp(s"contact $contact does not own ${requestBody.subscriptionName.value}")
-      _ <- createOp(CreateHolidayStopRequestWithDetail.buildBody(requestBody.start, requestBody.end, matchingSub)).toDisjunction.toApiGatewayOp(s"create new Holiday Stop Request for subscription ${requestBody.subscriptionName} (contact $contact)")
+      maybeMatchingSub <- verifyContactOwnsSubOp(requestBody.subscriptionName, contact).toDisjunction.toApiGatewayOp(s"fetching subscriptions for contact $contact ")
+      matchingSub <- maybeMatchingSub.toApiGatewayOp(s"contact $contact does not own ${
+        requestBody.subscriptionName.value
+      } ")
+      _ <- createOp(CreateHolidayStopRequestWithDetail.buildBody(requestBody.start, requestBody.end, matchingSub)).toDisjunction.toApiGatewayOp(s"create new Holiday Stop Request for subscription ${
+        requestBody.subscriptionName
+      } (contact $contact)")
       // TODO nice to have - handle 'FIELD_CUSTOM_VALIDATION_EXCEPTION' etc back from SF and place in response
     } yield ApiGatewayResponse.successfulExecution).apiResponse
   }
@@ -163,13 +209,20 @@ object Handler extends Logging {
     (for {
       contact <- extractContactFromHeaders(req.headers)
       pathParams <- req.pathParamsAsCaseClass[DeletePathParams]()(Json.reads[DeletePathParams])
-      existingForUser <- lookupOp(contact, None).toDisjunction.toApiGatewayOp(s"lookup Holiday Stop Requests for contact $contact")
+      existingForUser <- lookupOp(contact, None).toDisjunction.toApiGatewayOp(s"lookup Holiday Stop Requests for contact $contact ")
       _ = existingForUser.exists(_.Id == pathParams.holidayStopRequestId).toApiGatewayContinueProcessing(ApiGatewayResponse.forbidden("not your holiday stop"))
-      _ <- deleteOp(pathParams.holidayStopRequestId).toDisjunction.toApiGatewayOp(s"delete Holiday Stop Request for subscription ${pathParams.subscriptionName.value} of contact $contact")
+      _ <- deleteOp(pathParams.holidayStopRequestId).toDisjunction.toApiGatewayOp(s"delete Holiday Stop Request for subscription ${
+        pathParams.subscriptionName.value
+      } of contact $contact ")
     } yield ApiGatewayResponse.successfulExecution).apiResponse
   }
 
   def unsupported(req: ApiGatewayRequest, sfClient: HttpOp[StringHttpRequest, BodyAsString]): ApiResponse =
     ApiGatewayResponse.badRequest("UNSUPPORTED HTTP METHOD")
 
+  def notfound(req: ApiGatewayRequest, sfClient: HttpOp[StringHttpRequest, BodyAsString]): ApiResponse =
+    ApiGatewayResponse.notFound("Not Found")
+
+  def badrequest(message: String)(req: ApiGatewayRequest, sfClient: HttpOp[StringHttpRequest, BodyAsString]): ApiResponse =
+    ApiGatewayResponse.badRequest(message)
 }
