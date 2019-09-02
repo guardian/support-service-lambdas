@@ -1,9 +1,14 @@
 package com.gu.holiday_stops
 
-import org.scalatest.{FlatSpec, Matchers}
+import com.gu.effects.{FakeFetchString, SFTestEffects, TestingRawEffects}
 import com.gu.holiday_stops.Handler._
 import com.gu.salesforce.holiday_stops.SalesforceSFSubscription.SubscriptionForSubscriptionNameAndContact._
+import com.gu.util.apigateway.ApiGatewayRequest
+import com.gu.util.config.Stage
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
+import org.scalatest.Inside.inside
+import org.scalatest.{FlatSpec, Matchers}
+import play.api.libs.json.{JsSuccess, Json}
 
 class HandlerTest extends FlatSpec with Matchers {
 
@@ -21,7 +26,67 @@ class HandlerTest extends FlatSpec with Matchers {
     Handler.extractContactFromHeaders(Some(Map(
       HEADER_SALESFORCE_CONTACT_ID -> expectedSfContactIdCoreValue
     ))) shouldBe ContinueProcessing(Right(SalesforceContactId(expectedSfContactIdCoreValue)))
-
+  }
+  it should "calculate potential holiday stop dates" in {
+    inside(
+      Handler.operationForEffects(
+        testEffects.response,
+        Stage("DEV"),
+        FakeFetchString.fetchString
+      ).map { operation =>
+          operation
+            .steps(potentialIssueDateRequest("Guardian Weekly xxx", "2019-01-01", "2019-02-01"))
+        }
+    ) {
+        case ContinueProcessing(response) =>
+          response.statusCode should equal("200")
+          inside(Json.fromJson[Array[String]](Json.parse(response.body))) {
+            case JsSuccess(dates, _) =>
+              dates should contain inOrderOnly (
+                "2019-01-04", "2019-01-11", "2019-01-18", "2019-01-25", "2019-02-01"
+              )
+          }
+      }
+  }
+  it should "return bad request if method is missing" in {
+    inside(
+      Handler.operationForEffects(testEffects.response, Stage("DEV"), FakeFetchString.fetchString)
+        .map(_.steps(ApiGatewayRequest(None, None, None, None, None, None)))
+    ) {
+        case ContinueProcessing(response) =>
+          response.statusCode should equal("400")
+          response.body should equal("""{
+                                       |  "message" : "Bad request: Http method is required"
+                                       |}""".stripMargin)
+      }
+  }
+  it should "return bad request if path is missing" in {
+    inside(
+      Handler.operationForEffects(testEffects.response, Stage("DEV"), FakeFetchString.fetchString)
+        .map(_.steps(ApiGatewayRequest(Some("GET"), None, None, None, None, None)))
+    ) {
+        case ContinueProcessing(response) =>
+          response.statusCode should equal("400")
+          response.body should equal("""{
+                                       |  "message" : "Bad request: Path is required"
+                                       |}""".stripMargin)
+      }
   }
 
+  private def potentialIssueDateRequest(productPrefix: String, startDate: String, endDate: String) = {
+    ApiGatewayRequest(
+      Some("GET"),
+      Some(Map("startDate" -> startDate, "endDate" -> endDate)),
+      None,
+      Some(Map("x-product-name-prefix" -> productPrefix)),
+      None,
+      Some("/potential")
+    )
+  }
+
+  val testEffects = new TestingRawEffects(
+    postResponses = Map(
+      SFTestEffects.authSuccess
+    )
+  )
 }

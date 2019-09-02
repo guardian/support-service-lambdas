@@ -1,13 +1,14 @@
 package com.gu.holiday_stops
 
 import java.io.{InputStream, OutputStream}
+import java.time.LocalDate
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.SalesforceClient
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestId, ProductName, SubscriptionName}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestId, ProductName, SubscriptionName}
 import com.gu.salesforce.holiday_stops.SalesforceSFSubscription.SubscriptionForSubscriptionNameAndContact._
 import com.gu.salesforce.holiday_stops.{SalesforceHolidayStopRequest, SalesforceSFSubscription}
 import com.gu.util.Logging
@@ -22,9 +23,8 @@ import com.gu.util.resthttp.JsonHttp.StringHttpRequest
 import com.gu.util.resthttp.RestRequestMaker.BodyAsString
 import com.gu.util.resthttp.{HttpOp, JsonHttp}
 import okhttp3.{Request, Response}
-import java.time.LocalDate
-
 import play.api.libs.json.{Format, Json, Reads}
+import scalaz.{-\/, \/, \/-}
 
 object Handler extends Logging {
 
@@ -45,10 +45,13 @@ object Handler extends Logging {
       )
     )
 
+  val POTENTIAL_PROXY_RESOURCE_PATH = "/potential"
+  val GET_ALL_AND_CREATE_PROXY_RESOURCE_REGEX = """/hsr.*""".r
+
   def operationForEffects(
     response: Request => Response,
     stage: Stage,
-    fetchString: StringFromS3,
+    fetchString: StringFromS3
   ): ApiGatewayOp[Operation] = {
 
     val loadConfig = LoadConfigModule(stage, fetchString)
@@ -57,16 +60,53 @@ object Handler extends Logging {
       sfAuthConfig <- loadConfig[SFAuthConfig].toApiGatewayOp("load sfAuth config")
       sfClient <- SalesforceClient(response, sfAuthConfig).value.toDisjunction.toApiGatewayOp("authenticate with SalesForce")
     } yield Operation.noHealthcheck( // checking connectivity to SF is sufficient healthcheck so no special steps required
-      request => (request.httpMethod match { // TODO will need to match against path params too to support edit endpoint
-        case Some("GET") => request.queryStringParameters match {
-          case Some(_) => stepsForPotentialHolidayStop _
-          case None => stepsToListExisting _
-        }
-        case Some("POST") => stepsToCreate _
-        case Some("DELETE") => stepsToDelete _
-        case _ => unsupported _
-      })(request, sfClient))
+      request => validateRequestAndCreateSteps(request)(request, sfClient)
+    )
+  }
 
+  private def validateRequestAndCreateSteps(request: ApiGatewayRequest) = {
+    (for {
+      httpMethod <- validateMethod(request.httpMethod)
+      path <- validatePath(request.path)
+    } yield createSteps(httpMethod, path)).fold(
+      { errorMessage: String =>
+        badrequest(errorMessage) _
+      },
+      identity
+    )
+  }
+
+  private def createSteps(httpMethod: String, path: String) = {
+    path match {
+      case POTENTIAL_PROXY_RESOURCE_PATH =>
+        httpMethod match {
+          case "GET" => stepsForPotentialHolidayStop _
+          case _ => unsupported _
+        }
+      case GET_ALL_AND_CREATE_PROXY_RESOURCE_REGEX() =>
+        httpMethod match {
+          case "GET" => stepsToListExisting _
+          case "POST" => stepsToCreate _
+          case "DELETE" => stepsToDelete _
+          case _ => unsupported _
+        }
+      case _ =>
+        notfound _
+    }
+  }
+
+  private def validateMethod(method: Option[String]): String \/ String = {
+    method match {
+      case Some(method) => \/-(method)
+      case None => -\/("Http method is required")
+    }
+  }
+
+  private def validatePath(path: Option[String]): String \/ String = {
+    path match {
+      case Some(method) => \/-(method)
+      case None => -\/("Path is required")
+    }
   }
 
   val HEADER_IDENTITY_ID = "x-identity-id"
@@ -79,6 +119,7 @@ object Handler extends Logging {
   }).toApiGatewayOp(s"either '$HEADER_IDENTITY_ID' header OR '$HEADER_SALESFORCE_CONTACT_ID' (one is required)")
 
   case class PotentialHolidayStopParams(startDate: LocalDate, endDate: LocalDate)
+
   def stepsForPotentialHolidayStop(req: ApiGatewayRequest, unused: SfClient): ApiResponse = {
     implicit val formatLocalDateAsSalesforceDate: Format[LocalDate] = SalesforceHolidayStopRequest.formatLocalDateAsSalesforceDate
     implicit val readsPotentialHolidayStopParams: Reads[PotentialHolidayStopParams] = Json.reads[PotentialHolidayStopParams]
@@ -130,6 +171,7 @@ object Handler extends Logging {
   }
 
   case class DeletePathParams(subscriptionName: SubscriptionName, holidayStopRequestId: HolidayStopRequestId)
+
   def stepsToDelete(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
 
     val lookupOp = SalesforceHolidayStopRequest.LookupByContactAndOptionalSubscriptionName(sfClient.wrapWith(JsonHttp.getWithParams))
@@ -147,4 +189,9 @@ object Handler extends Logging {
   def unsupported(req: ApiGatewayRequest, sfClient: HttpOp[StringHttpRequest, BodyAsString]): ApiResponse =
     ApiGatewayResponse.badRequest("UNSUPPORTED HTTP METHOD")
 
+  def notfound(req: ApiGatewayRequest, sfClient: HttpOp[StringHttpRequest, BodyAsString]): ApiResponse =
+    ApiGatewayResponse.notFound("Not Found")
+
+  def badrequest(message: String)(req: ApiGatewayRequest, sfClient: HttpOp[StringHttpRequest, BodyAsString]): ApiResponse =
+    ApiGatewayResponse.badRequest(message)
 }
