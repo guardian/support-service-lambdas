@@ -93,7 +93,36 @@ export of all objects
 
 ## How to extract a full load of `InvoiceItem`?
 
-TODO.
+1. Zuora is not capable of doing a full export of InvoiceItem hence the WHERE clause: https://support.zuora.com/hc/en-us/requests/186104
+
+    ```
+     WHERE (CreatedDate >= '2019-08-28T00:00:00') AND (CreatedDate <= '2099-01-01T00:00:00')
+    ```
+1. Manually, using postman perform year by year exports:
+
+    ```
+    WHERE (CreatedDate >= '2014-01-01T00:00:00') AND (CreatedDate <= '2015-01-01T00:00:00')
+    WHERE (CreatedDate >= '2015-01-01T00:00:00') AND (CreatedDate <= '2016-01-01T00:00:00')
+    ...
+    ```
+1. Download locally CSVs from https://www.zuora.com/apps/BatchQuery.do
+1. Concatenate all the CSV
+    
+    ```
+    cat InvoiceItem-1.csv > InvoiceItem.csv
+    tail -n +2 InvoiceItem-2.csv >> InvoiceItem.csv
+    tail -n +2 InvoiceItem-3.csv >> InvoiceItem.csv
+    ...
+1. Resulting InvoiceItem.csv should be >6GB and have >12M records
+1. Perform some sanity checks, for example, `wc -l`
+1. Manually upload resulting CSV to bucket `https://s3.console.aws.amazon.com/s3/buckets/ophan-clean-zuora-increment-invoiceitem` 
+1. Run ophnan job
+1. Adjust to filter from yesterday, so if yesterday is 2020-12-20, then 
+   
+    ```
+    WHERE (CreatedDate >= '2020-12-20T00:00:00') AND (CreatedDate <= '2099-01-01T00:00:00')
+    ``` 
+1. Deploy updated lambda 
 
 ## Which Zuora API User is used for extract?
 
