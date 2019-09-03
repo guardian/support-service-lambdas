@@ -4,8 +4,13 @@ import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.Subsc
 
 object CreditCalculator {
 
-  def guardianWeeklyCredit(config: Config, subscriptionName: SubscriptionName): Either[HolidayError, Double] =
+  /*
+   * This is an effectful high-level function, so seems safe to fetch Config as part of it.
+   * Assuming client will cache results and not need to make more use of Zuora in the same session.
+   */
+  def guardianWeeklyEstimatedCredit(subscriptionName: SubscriptionName): Either[HolidayError, Double] =
     for {
+      config <- Config()
       accessToken <- Zuora.accessTokenGetResponse(config.zuoraConfig)
       subscription <- Zuora.subscriptionGetResponse(config, accessToken)(subscriptionName)
       credit <- guardianWeeklyCredit(config.guardianWeeklyProductRatePlanIds)(subscription)
