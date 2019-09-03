@@ -90,6 +90,7 @@ lazy val salesforce = all(project in file("lib/salesforce"))
 lazy val `holiday-stops` = all(project in file("lib/holiday-stops"))
   .dependsOn(
     salesforce,
+    effects,
     effects % "test->test",
     testDep
   )
