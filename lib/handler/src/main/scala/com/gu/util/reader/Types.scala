@@ -180,6 +180,24 @@ object Types extends Logging {
 
   }
 
+  implicit class EitherOps[L, A](theEither: Either[L, A]) {
+
+    def toApiGatewayOp(action: String): ApiGatewayOp[A] =
+      theEither match {
+        case Right(success) => ContinueProcessing(success)
+        case Left(error) =>
+          logger.error(s"Failed to $action: $error")
+          ReturnWithResponse(internalServerError(s"Failed to execute lambda - unable to $action"))
+      }
+
+    def toApiGatewayOp(toApiResponse: L => ApiResponse): ApiGatewayOp[A] =
+      theEither match {
+        case Right(success) => ContinueProcessing(success)
+        case Left(error) => ReturnWithResponse(toApiResponse(error))
+      }
+
+  }
+
   implicit class LogImplicit[A](op: A) {
 
     // this is just a handy method to add logging to the end of any for comprehension
