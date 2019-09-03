@@ -146,7 +146,7 @@ object Handler extends Logging {
       _ <- req.pathParamsAsCaseClass[PotentialHolidayStopsV2PathParams]()(Json.reads[PotentialHolidayStopsV2PathParams])
       productNamePrefix <- req.headers.flatMap(_.get(HEADER_PRODUCT_NAME_PREFIX)).toApiGatewayOp(s"missing '$HEADER_PRODUCT_NAME_PREFIX' header")
       params <- req.queryParamsAsCaseClass[PotentialHolidayStopParamsV2]()
-      credit = if (params.estimateCredit == Some("true")) Some(1.23) else None
+      credit = if (params.estimateCredit == Some("true")) Some(-1.23) else None
     } yield ApiGatewayResponse(
       "200",
       PotentialHolidayStopsResponse(
