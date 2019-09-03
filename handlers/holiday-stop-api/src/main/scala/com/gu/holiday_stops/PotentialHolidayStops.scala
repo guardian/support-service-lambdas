@@ -16,7 +16,7 @@ object PotentialHolidayStopsResponse {
   implicit val reads: Format[PotentialHolidayStopsResponse] = Json.format[PotentialHolidayStopsResponse]
 }
 
-case class PotentialHolidayStopParamsV2(startDate: LocalDate, endDate: LocalDate, estimatePrice: Option[String])
+case class PotentialHolidayStopParamsV2(startDate: LocalDate, endDate: LocalDate, estimateCredit: Option[String])
 
 object PotentialHolidayStopParamsV2 {
   implicit val reads: Reads[PotentialHolidayStopParamsV2] = Json.reads[PotentialHolidayStopParamsV2]

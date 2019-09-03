@@ -47,7 +47,7 @@ class HandlerTest extends FlatSpec with Matchers {
         }
     }
   }
-  "GET /potential/<<sub name>>?startDate=...&endDate=...&estimatePrice=false endpoint" should
+  "GET /potential/<<sub name>>?startDate=...&endDate=...&estimateCredit=false endpoint" should
     "calculate potential holiday stop dates" in {
     inside(
       Handler.operationForEffects(
@@ -61,7 +61,7 @@ class HandlerTest extends FlatSpec with Matchers {
             startDate = "2019-01-01",
             endDate = "2019-01-15",
             subscriptionName = "Sub12344",
-            estimatePrice = false
+            estimateCredit = false
           ))
       }
     ) {
@@ -81,7 +81,7 @@ class HandlerTest extends FlatSpec with Matchers {
         }
     }
   }
-  "GET /potential/<<sub name>>?startDate=...&endDate=...&estimatePrice=true endpoint" should
+  "GET /potential/<<sub name>>?startDate=...&endDate=...&estimateCredit=true endpoint" should
     "calculate potential holiday stop dates" in {
     inside(
       Handler.operationForEffects(
@@ -95,7 +95,7 @@ class HandlerTest extends FlatSpec with Matchers {
             startDate = "2019-01-01",
             endDate = "2019-01-15",
             subscriptionName = "Sub12344",
-            estimatePrice = true
+            estimateCredit = true
           ))
       }
     ) {
@@ -154,13 +154,13 @@ class HandlerTest extends FlatSpec with Matchers {
   }
 
   private def potentialIssueDateV2Request(productPrefix: String, startDate: String, endDate: String,
-                                          subscriptionName: String, estimatePrice: Boolean) = {
+                                          subscriptionName: String, estimateCredit: Boolean) = {
     ApiGatewayRequest(
       Some("GET"),
       Some(Map(
         "startDate" -> startDate,
         "endDate" -> endDate,
-        "estimatePrice" -> (if (estimatePrice) "true" else "false"))),
+        "estimateCredit" -> (if (estimateCredit) "true" else "false"))),
       None,
       Some(Map("x-product-name-prefix" -> productPrefix)),
       Some(JsObject(Seq("subscriptionName" -> JsString(subscriptionName)))),

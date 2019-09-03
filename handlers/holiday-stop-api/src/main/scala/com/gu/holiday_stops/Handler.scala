@@ -131,7 +131,7 @@ object Handler extends Logging {
     implicit val formatLocalDateAsSalesforceDate: Format[LocalDate] = SalesforceHolidayStopRequest.formatLocalDateAsSalesforceDate
     implicit val readsPotentialHolidayStopParams: Reads[PotentialHolidayStopParams] = Json.reads[PotentialHolidayStopParams]
     (for {
-      productNamePrefix <- req.headers.flatMap(_.get(HEADER_PRODUCT_NAME_PREFIX)).toApiGatewayOp("identityID header")
+      productNamePrefix <- req.headers.flatMap(_.get(HEADER_PRODUCT_NAME_PREFIX)).toApiGatewayOp(s"missing '$HEADER_PRODUCT_NAME_PREFIX' header")
       params <- req.queryParamsAsCaseClass[PotentialHolidayStopParams]()
     } yield ApiGatewayResponse(
       "200",
@@ -144,9 +144,9 @@ object Handler extends Logging {
   def stepsForPotentialHolidayStopV2(req: ApiGatewayRequest, unused: SfClient): ApiResponse = {
     (for {
       _ <- req.pathParamsAsCaseClass[PotentialHolidayStopsV2PathParams]()(Json.reads[PotentialHolidayStopsV2PathParams])
-      productNamePrefix <- req.headers.flatMap(_.get(HEADER_PRODUCT_NAME_PREFIX)).toApiGatewayOp("identityID header")
+      productNamePrefix <- req.headers.flatMap(_.get(HEADER_PRODUCT_NAME_PREFIX)).toApiGatewayOp(s"missing '$HEADER_PRODUCT_NAME_PREFIX' header")
       params <- req.queryParamsAsCaseClass[PotentialHolidayStopParamsV2]()
-      price = if (params.estimatePrice == Some("true")) Some(1.23) else None
+      price = if (params.estimateCredit == Some("true")) Some(1.23) else None
     } yield ApiGatewayResponse(
       "200",
       PotentialHolidayStopsResponse(
