@@ -4,7 +4,7 @@ import java.time.LocalDate
 
 import play.api.libs.json.{Format, Json, Reads}
 
-case class PotentialHolidayStop(publicationDate: LocalDate, price: Option[Double])
+case class PotentialHolidayStop(publicationDate: LocalDate, credit: Option[Double])
 
 object PotentialHolidayStop {
   implicit val reads: Format[PotentialHolidayStop] = Json.format[PotentialHolidayStop]
