@@ -1,9 +1,8 @@
 package com.gu.holiday_stops
 
-import com.amazonaws.auth.profile.ProfileCredentialsProvider
 import com.amazonaws.regions.Regions.EU_WEST_1
 import com.amazonaws.services.s3.AmazonS3Client
-import com.gu.holiday_stops.OverallFailure
+import com.gu.effects.aws
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
 import io.circe.Decoder
 import io.circe.generic.auto._
@@ -120,7 +119,6 @@ object Config {
     credentials[SFAuthConfig](stage, "sfAuth")
 
   private def credentials[T](stage: String, filePrefix: String)(implicit evidence: Decoder[T]): Either[OverallFailure, T] = {
-    val profileName = "membership"
     val bucketName = "gu-reader-revenue-private"
     val key =
       if (stage == "DEV")
@@ -130,7 +128,7 @@ object Config {
     val builder =
       if (stage == "DEV")
         AmazonS3Client.builder
-          .withCredentials(new ProfileCredentialsProvider(profileName))
+          .withCredentials(aws.CredentialsProvider)
           .withRegion(EU_WEST_1)
       else AmazonS3Client.builder
     val inputStream =
