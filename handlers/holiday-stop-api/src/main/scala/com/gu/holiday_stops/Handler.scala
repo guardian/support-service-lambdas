@@ -50,7 +50,7 @@ object Handler extends Logging {
     fetchString: StringFromS3
   ): ApiGatewayOp[Operation] = {
     for {
-      config <- Config().toApiGatewayOp("Failed to load config")
+      config <- Config(fetchString).toApiGatewayOp("Failed to load config")
       sfClient <- SalesforceClient(response, config.sfConfig).value.toDisjunction.toApiGatewayOp("authenticate with SalesForce")
     } yield Operation.noHealthcheck(request => // checking connectivity to SF is sufficient healthcheck so no special steps required
       validateRequestAndCreateSteps(request, config)(request, sfClient))

@@ -2,6 +2,7 @@ package com.gu.holidaystopprocessor
 
 import java.time.LocalDate
 
+import com.gu.effects.GetFromS3
 import com.gu.holiday_stops.Config
 
 // This is just for functional testing locally.
@@ -9,7 +10,7 @@ object StandaloneApp extends App {
 
   val stopDate = args.headOption.map(LocalDate.parse)
 
-  Config() match {
+  Config(GetFromS3.fetchString) match {
     case Left(msg) => println(s"Config failure: $msg")
     case Right(config) =>
       val processResult = HolidayStopProcess(config, stopDate)
