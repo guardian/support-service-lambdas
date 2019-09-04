@@ -9,10 +9,16 @@ object FakeFetchString {
   val zuoraRestTestConfig =
     """
        {
-       |"stage" : "DEV",
-       |"baseUrl": "https://ddd",
+       | "stage" : "DEV",
+       | "baseUrl": "https://ddd",
        | "username": "e@f.com",
-       | "password": "ggg"
+       | "password": "ggg",
+       | "holidayStopProcessor": {
+       |  "oauth": {
+       |   "clientId": "hsrclientid",
+       |   "clientSecret": "hsrclientsecret"
+       |  }
+       | }
        |}
       """.stripMargin
 
