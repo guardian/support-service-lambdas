@@ -87,7 +87,10 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
           | FROM $holidayStopRequestsDetailSfObjectRef
           | WHERE Product_Name__c LIKE '${productNamePrefix.value}%'
           | AND Stopped_Publication_Date__c = ${date.toString}
-          | AND Subscription_Status__c != 'Cancelled'
+          | AND (
+          |   Subscription_Cancellation_Effective_Date__c = null
+          |   OR Subscription_Cancellation_Effective_Date__c > ${date.toString}
+          | )
           | AND Is_Actioned__c = false
           | $SOQL_ORDER_BY_CLAUSE
           |""".stripMargin
