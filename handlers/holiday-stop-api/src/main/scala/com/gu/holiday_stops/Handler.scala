@@ -199,7 +199,7 @@ object Handler extends Logging {
     (for {
       contact <- extractContactFromHeaders(req.headers)
       optionalSubName <- extractOptionalSubNameOp
-      usersHolidayStopRequests <- lookupOp(contact, optionalSubName).toDisjunction.toApiGatewayOp(s"lookup Holiday Stop Requests for contact $contact ")
+      usersHolidayStopRequests <- lookupOp(contact, optionalSubName).toDisjunction.toApiGatewayOp(s"lookup Holiday Stop Requests for contact $contact")
     } yield ApiGatewayResponse(
       "200",
       GetHolidayStopRequests(usersHolidayStopRequests, optionalProductNamePrefix)
@@ -214,13 +214,9 @@ object Handler extends Logging {
     (for {
       requestBody <- req.bodyAsCaseClass[HolidayStopRequestPartial]()
       contact <- extractContactFromHeaders(req.headers)
-      maybeMatchingSub <- verifyContactOwnsSubOp(requestBody.subscriptionName, contact).toDisjunction.toApiGatewayOp(s"fetching subscriptions for contact $contact ")
-      matchingSub <- maybeMatchingSub.toApiGatewayOp(s"contact $contact does not own ${
-        requestBody.subscriptionName.value
-      } ")
-      _ <- createOp(CreateHolidayStopRequestWithDetail.buildBody(requestBody.start, requestBody.end, matchingSub)).toDisjunction.toApiGatewayOp(s"create new Holiday Stop Request for subscription ${
-        requestBody.subscriptionName
-      } (contact $contact)")
+      maybeMatchingSub <- verifyContactOwnsSubOp(requestBody.subscriptionName, contact).toDisjunction.toApiGatewayOp(s"fetching subscriptions for contact $contact")
+      matchingSub <- maybeMatchingSub.toApiGatewayOp(s"contact $contact does not own ${requestBody.subscriptionName.value}")
+      _ <- createOp(CreateHolidayStopRequestWithDetail.buildBody(requestBody.start, requestBody.end, matchingSub)).toDisjunction.toApiGatewayOp(s"create new Holiday Stop Request for subscription ${requestBody.subscriptionName} (contact $contact)")
       // TODO nice to have - handle 'FIELD_CUSTOM_VALIDATION_EXCEPTION' etc back from SF and place in response
     } yield ApiGatewayResponse.successfulExecution).apiResponse
   }
@@ -235,11 +231,9 @@ object Handler extends Logging {
     (for {
       contact <- extractContactFromHeaders(req.headers)
       pathParams <- req.pathParamsAsCaseClass[DeletePathParams]()(Json.reads[DeletePathParams])
-      existingForUser <- lookupOp(contact, None).toDisjunction.toApiGatewayOp(s"lookup Holiday Stop Requests for contact $contact ")
+      existingForUser <- lookupOp(contact, None).toDisjunction.toApiGatewayOp(s"lookup Holiday Stop Requests for contact $contact")
       _ = existingForUser.exists(_.Id == pathParams.holidayStopRequestId).toApiGatewayContinueProcessing(ApiGatewayResponse.forbidden("not your holiday stop"))
-      _ <- deleteOp(pathParams.holidayStopRequestId).toDisjunction.toApiGatewayOp(s"delete Holiday Stop Request for subscription ${
-        pathParams.subscriptionName.value
-      } of contact $contact ")
+      _ <- deleteOp(pathParams.holidayStopRequestId).toDisjunction.toApiGatewayOp(s"delete Holiday Stop Request for subscription ${pathParams.subscriptionName.value} of contact $contact")
     } yield ApiGatewayResponse.successfulExecution).apiResponse
   }
 

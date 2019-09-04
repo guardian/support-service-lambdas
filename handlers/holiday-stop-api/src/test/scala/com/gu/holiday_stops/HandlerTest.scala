@@ -92,7 +92,7 @@ class HandlerTest extends FlatSpec with Matchers {
     }
   }
   "GET /potential/<<sub name>>?startDate=...&endDate=...&estimateCredit=true endpoint" should
-    "calculate potential holiday stop dates" in {
+    "calculate potential holiday stop dates and estimated credit" in {
     val subscriptionName = "Sub12344"
 
     val startDate = LocalDate.of(2018, 1, 1)
