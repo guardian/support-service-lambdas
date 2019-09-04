@@ -6,12 +6,12 @@ import cats.implicits._
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.GetFromS3
 import com.gu.holiday_stops.Config
+import com.softwaremill.sttp.{HttpURLConnectionBackend, Id, SttpBackend}
 import io.circe.generic.auto._
 import io.github.mkotsur.aws.handler.Lambda
 import io.github.mkotsur.aws.handler.Lambda._
 
 object Handler extends Lambda[Option[LocalDate], List[HolidayStopResponse]] {
-
   /**
    * @param processDateOverride
    *             The date for which relevant holiday stop requests will be processed.
@@ -24,7 +24,7 @@ object Handler extends Lambda[Option[LocalDate], List[HolidayStopResponse]] {
         Left(new RuntimeException(s"Config failure: $msg"))
 
       case Right(config) =>
-        val result = HolidayStopProcess(config, processDateOverride)
+        val result = HolidayStopProcess(config, processDateOverride, HttpURLConnectionBackend())
         ProcessResult.log(result)
         result.overallFailure match {
           case Some(failure) =>

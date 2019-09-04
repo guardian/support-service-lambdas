@@ -21,6 +21,7 @@ import com.gu.util.reader.Types._
 import com.gu.util.resthttp.JsonHttp.StringHttpRequest
 import com.gu.util.resthttp.RestRequestMaker.BodyAsString
 import com.gu.util.resthttp.{HttpOp, JsonHttp}
+import com.softwaremill.sttp.{HttpURLConnectionBackend, Id, SttpBackend}
 import okhttp3.{Request, Response}
 import play.api.libs.json.Json
 import scalaz.{-\/, \/, \/-}
@@ -29,7 +30,7 @@ object Handler extends Logging {
 
   type SfClient = HttpOp[StringHttpRequest, BodyAsString]
 
-  def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
+  def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
     ApiGatewayHandler(
       LambdaIO(
         inputStream,
@@ -40,27 +41,34 @@ object Handler extends Logging {
       operationForEffects(
         RawEffects.response,
         RawEffects.stage,
-        GetFromS3.fetchString
+        GetFromS3.fetchString,
+        HttpURLConnectionBackend()
       )
     )
+  }
 
   def operationForEffects(
     response: Request => Response,
     stage: Stage,
-    fetchString: StringFromS3
+    fetchString: StringFromS3,
+    backend: SttpBackend[Id, Nothing]
   ): ApiGatewayOp[Operation] = {
     for {
       config <- Config(fetchString).toApiGatewayOp("Failed to load config")
       sfClient <- SalesforceClient(response, config.sfConfig).value.toDisjunction.toApiGatewayOp("authenticate with SalesForce")
     } yield Operation.noHealthcheck(request => // checking connectivity to SF is sufficient healthcheck so no special steps required
-      validateRequestAndCreateSteps(request, config)(request, sfClient))
+      validateRequestAndCreateSteps(request, config, backend)(request, sfClient))
   }
 
-  private def validateRequestAndCreateSteps(request: ApiGatewayRequest, config: Config) = {
+  private def validateRequestAndCreateSteps(
+    request: ApiGatewayRequest,
+    config: Config,
+    backend: SttpBackend[Id, Nothing]
+  ) = {
     (for {
       httpMethod <- validateMethod(request.httpMethod)
       path <- validatePath(request.path)
-    } yield createSteps(httpMethod, splitPath(path), config)).fold(
+    } yield createSteps(httpMethod, splitPath(path), config, backend)).fold(
       { errorMessage: String =>
         badrequest(errorMessage) _
       },
@@ -82,7 +90,12 @@ object Handler extends Logging {
     }
   }
 
-  private def createSteps(httpMethod: String, path: List[String], config: Config) = {
+  private def createSteps(
+    httpMethod: String,
+    path: List[String],
+    config: Config,
+    backend: SttpBackend[Id, Nothing]
+  ) = {
     path match {
       case "potential" :: Nil =>
         httpMethod match {
@@ -91,7 +104,7 @@ object Handler extends Logging {
         }
       case "potential" :: _ :: Nil =>
         httpMethod match {
-          case "GET" => stepsForPotentialHolidayStopV2(config) _
+          case "GET" => stepsForPotentialHolidayStopV2(config, backend) _
           case _ => unsupported _
         }
       case "hsr" :: Nil | "hsr" :: _ :: Nil =>
@@ -138,12 +151,13 @@ object Handler extends Logging {
 
   case class PotentialHolidayStopsV2PathParams(subscriptionName: SubscriptionName)
 
-  def stepsForPotentialHolidayStopV2(config: Config)(req: ApiGatewayRequest, unused: SfClient): ApiResponse = {
+  def stepsForPotentialHolidayStopV2(config: Config, backend: SttpBackend[Id, Nothing])
+                                    (req: ApiGatewayRequest, unused: SfClient): ApiResponse = {
     (for {
       pathParams <- req.pathParamsAsCaseClass[PotentialHolidayStopsV2PathParams]()(Json.reads[PotentialHolidayStopsV2PathParams])
       productNamePrefix <- req.headers.flatMap(_.get(HEADER_PRODUCT_NAME_PREFIX)).toApiGatewayOp(s"missing '$HEADER_PRODUCT_NAME_PREFIX' header")
       queryParams <- req.queryParamsAsCaseClass[PotentialHolidayStopsV2QueryParams]()
-      credit <- estimateCredit(queryParams, pathParams, config)
+      credit <- estimateCredit(queryParams, pathParams, config, backend)
     } yield ApiGatewayResponse(
       "200",
       PotentialHolidayStopsResponse(
@@ -156,11 +170,11 @@ object Handler extends Logging {
   def estimateCredit(
     queryParams: PotentialHolidayStopsV2QueryParams,
     pathParams: PotentialHolidayStopsV2PathParams,
-    config: Config
-  ): ApiGatewayOp[Option[Double]] = {
+    config: Config,
+    backend: SttpBackend[Id, Nothing]): ApiGatewayOp[Option[Double]] = {
     if (queryParams.estimateCredit == Some("true")) {
       CreditCalculator
-        .guardianWeeklyCredit(config, pathParams.subscriptionName)
+        .guardianWeeklyCredit(config, pathParams.subscriptionName, backend)
         .toApiGatewayOp("Failed to calculate credit")
         .map(Some(_))
     } else {

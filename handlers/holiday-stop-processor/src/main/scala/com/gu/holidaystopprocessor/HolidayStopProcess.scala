@@ -5,11 +5,12 @@ import java.time.LocalDate
 import cats.implicits._
 import com.gu.holiday_stops._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
+import com.softwaremill.sttp.{Id, SttpBackend}
 
 object HolidayStopProcess {
 
-  def apply(config: Config, processDateOverride: Option[LocalDate]): ProcessResult =
-    Zuora.accessTokenGetResponse(config.zuoraConfig) match {
+  def apply(config: Config, processDateOverride: Option[LocalDate], backend: SttpBackend[Id, Nothing]): ProcessResult =
+    Zuora.accessTokenGetResponse(config.zuoraConfig, backend) match {
       case Left(overallFailure) =>
         ProcessResult(overallFailure)
 
@@ -18,8 +19,8 @@ object HolidayStopProcess {
           config.holidayCreditProduct,
           guardianWeeklyProductRatePlanIds = config.guardianWeeklyProductRatePlanIds,
           getHolidayStopRequestsFromSalesforce = Salesforce.holidayStopRequests(config.sfConfig, processDateOverride),
-          getSubscription = Zuora.subscriptionGetResponse(config, zuoraAccessToken),
-          updateSubscription = Zuora.subscriptionUpdateResponse(config, zuoraAccessToken),
+          getSubscription = Zuora.subscriptionGetResponse(config, zuoraAccessToken, backend),
+          updateSubscription = Zuora.subscriptionUpdateResponse(config, zuoraAccessToken, backend),
           writeHolidayStopsToSalesforce = Salesforce.holidayStopUpdateResponse(config.sfConfig)
         )
     }
