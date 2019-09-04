@@ -174,7 +174,7 @@ object CurrentGuardianWeeklySubscription {
       }
 
   // Regular GW plan where there also exists N-for-N (for example, GW Oct 18 - Six for Six - Domestic)
-  private def findGuardianWeeklyWithNForNRatePlan(subscription: Subscription, guardianWeeklyProductRatePlanIds: List[String]): Option[RatePlan] =
+  private def findGuardianWeeklyWithNForNRatePlan(subscription: Subscription, guardianWeeklyProductRatePlanIds: List[String], gwNforNProductRatePlanIds: List[String]): Option[RatePlan] =
     subscription
       .ratePlans
       .find { ratePlan =>
@@ -182,8 +182,8 @@ object CurrentGuardianWeeklySubscription {
           RatePlanIsGuardianWeekly(ratePlan, guardianWeeklyProductRatePlanIds),
           RatePlanHasExactlyOneCharge(ratePlan),
           RatePlanHasNotBeenInvoiced(ratePlan),
-          RatePlanHasNForNGuardianWeeklyIntroPlan(subscription.ratePlans, /* FIXME */ guardianWeeklyProductRatePlanIds),
-          GuradianWeeklyNForNHasBeenInvoiced(subscription.ratePlans, /* FIXME */ guardianWeeklyProductRatePlanIds),
+          RatePlanHasNForNGuardianWeeklyIntroPlan(subscription.ratePlans, gwNforNProductRatePlanIds),
+          GuradianWeeklyNForNHasBeenInvoiced(subscription.ratePlans, gwNforNProductRatePlanIds),
           ChargeIsQuarterlyOrAnnual(ratePlan)
         ).forall(_ == true)
       }
@@ -192,9 +192,13 @@ object CurrentGuardianWeeklySubscription {
     subscription
       .ratePlans
       .find(ratePlan => guardianWeeklyNForNProductRatePlanIds.contains(ratePlan.productRatePlanId))
-  //      .getOrElse(throw new Error("Failed to find Guardian Weekly N for N intro plan"))
 
-  def apply(subscription: Subscription, guardianWeeklyProductRatePlanIds: List[String]): Either[ZuoraHolidayWriteError, CurrentGuardianWeeklySubscription] = {
+  def apply(
+    subscription: Subscription,
+    guardianWeeklyProductRatePlanIds: List[String],
+    gwNforNProductRatePlanIds: List[String]
+  ): Either[ZuoraHolidayWriteError, CurrentGuardianWeeklySubscription] = {
+
     val maybeRegularGw =
       findGuardianWeeklyRatePlan(subscription, guardianWeeklyProductRatePlanIds)
         .map { currentGuardianWeeklyRatePlan => // these ugly gets are safe due to above conditions
@@ -214,8 +218,8 @@ object CurrentGuardianWeeklySubscription {
 
     lazy val maybeGwWithIntro = // do not remove lazy
       for {
-        currentGuardianWeeklyWithoutInvoice <- findGuardianWeeklyWithNForNRatePlan(subscription, /* FIXME */ guardianWeeklyProductRatePlanIds)
-        gwNForNwRatePlan <- gwNForNRatePlan(subscription, /* FIXME */ guardianWeeklyProductRatePlanIds)
+        currentGuardianWeeklyWithoutInvoice <- findGuardianWeeklyWithNForNRatePlan(subscription, guardianWeeklyProductRatePlanIds, gwNforNProductRatePlanIds)
+        gwNForNwRatePlan <- gwNForNRatePlan(subscription, gwNforNProductRatePlanIds)
         predictedInvoicePeriod <- PredictedInvoicedPeriod(currentGuardianWeeklyWithoutInvoice, gwNForNwRatePlan)
       } yield { // // these ugly gets are safe due to above conditions
         val currentGuardianWeeklyRatePlanCharge = currentGuardianWeeklyWithoutInvoice.ratePlanCharges.head
