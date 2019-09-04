@@ -4,7 +4,6 @@ import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.Subsc
 import com.softwaremill.sttp.{Id, SttpBackend}
 
 object CreditCalculator {
-
   def guardianWeeklyCredit(
     config: Config,
     subscriptionName: SubscriptionName,
