@@ -90,7 +90,6 @@ lazy val salesforce = all(project in file("lib/salesforce"))
 lazy val `holiday-stops` = all(project in file("lib/holiday-stops"))
   .dependsOn(
     salesforce,
-    effects,
     effects % "test->test",
     testDep
   )
@@ -239,7 +238,7 @@ lazy val `sf-gocardless-sync` = all(project in file("handlers/sf-gocardless-sync
 
 lazy val `holiday-stop-api` = all(project in file("handlers/holiday-stop-api"))
   .enablePlugins(RiffRaffArtifact)
-  .dependsOn(`holiday-stops`, handler, effectsDepIncludingTestFolder, testDep)
+  .dependsOn(`holiday-stops` % "compile->compile;test->test", handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `sf-datalake-export` = all(project in file("handlers/sf-datalake-export"))
   .enablePlugins(RiffRaffArtifact)

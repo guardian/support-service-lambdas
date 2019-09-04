@@ -10,13 +10,13 @@ object ZuoraSttpEffects {
   implicit class ZuoraSttpEffectsOps(sttpStub: SttpBackendStub[Id, Nothing]) {
     def stubZuoraAuthCall(): SttpBackendStub[Id, Nothing] = {
       sttpStub.whenRequestMatchesPartial {
-        case request if (request.uri.toString() == s"$zuoraTestBaseUrl/oauth/token")  =>
+        case request if (request.uri.toString() == s"$zuoraTestBaseUrl/oauth/token") =>
           Response.ok(Right(AccessToken(accessToken)))
       }
     }
     def stubZuoraSubscription(subscriptionName: String, subscription: Subscription): SttpBackendStub[Id, Nothing] = {
       sttpStub.whenRequestMatchesPartial {
-        case request if (request.uri.toString() == s"$zuoraTestBaseUrl/subscriptions/$subscriptionName")  =>
+        case request if (request.uri.toString() == s"$zuoraTestBaseUrl/subscriptions/$subscriptionName") =>
           Response.ok(Right(subscription))
       }
     }

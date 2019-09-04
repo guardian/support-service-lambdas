@@ -171,7 +171,8 @@ object Handler extends Logging {
     queryParams: PotentialHolidayStopsV2QueryParams,
     pathParams: PotentialHolidayStopsV2PathParams,
     config: Config,
-    backend: SttpBackend[Id, Nothing]): ApiGatewayOp[Option[Double]] = {
+    backend: SttpBackend[Id, Nothing]
+  ): ApiGatewayOp[Option[Double]] = {
     if (queryParams.estimateCredit == Some("true")) {
       CreditCalculator
         .guardianWeeklyCredit(config, pathParams.subscriptionName, backend)
