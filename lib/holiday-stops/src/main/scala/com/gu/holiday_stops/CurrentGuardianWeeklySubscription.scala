@@ -67,8 +67,9 @@ case object GuradianWeeklyNForNHasBeenInvoiced extends CurrentGuardianWeeklyRate
       .find(ratePlan => guardianWeeklyNForNProductRatePlanIds.contains(ratePlan.productRatePlanId))
       .flatMap { gwNForN =>
         for {
-          fromInclusive <- gwNForN.ratePlanCharges.head.processedThroughDate
-          toExclusive <- gwNForN.ratePlanCharges.head.chargedThroughDate
+          rpc <- Try(gwNForN.ratePlanCharges.head).toOption
+          fromInclusive <- rpc.processedThroughDate
+          toExclusive <- rpc.chargedThroughDate
         } yield toExclusive isAfter fromInclusive
       }.getOrElse(false)
   }
@@ -128,8 +129,10 @@ case class CurrentInvoicedPeriod(
 object PredictedInvoicedPeriod extends LazyLogging {
   def apply(guardianWeeklyWithoutInvoice: RatePlan, gwNForN: RatePlan): Option[CurrentInvoicedPeriod] =
     for {
-      billingPeriod <- guardianWeeklyWithoutInvoice.ratePlanCharges.head.billingPeriod
-      from <- gwNForN.ratePlanCharges.head.chargedThroughDate
+      guardianWeeklyWithoutInvoiceRpc <- Try(guardianWeeklyWithoutInvoice.ratePlanCharges.head).toOption
+      gwNForNRpc <- Try(gwNForN.ratePlanCharges.head).toOption
+      billingPeriod <- guardianWeeklyWithoutInvoiceRpc.billingPeriod
+      from <- gwNForNRpc.chargedThroughDate
       to <- predictedChargedThroughDate(billingPeriod, from)
     } yield {
       CurrentInvoicedPeriod(from, to)
