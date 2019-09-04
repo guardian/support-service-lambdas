@@ -135,7 +135,7 @@ object PredictedInvoicedPeriod extends LazyLogging {
       CurrentInvoicedPeriod(from, to)
     }
 
-  def predictedChargedThroughDate(billingPeriod: String, gwNForNChargedThroughDate: LocalDate): Option[LocalDate] =
+  private def predictedChargedThroughDate(billingPeriod: String, gwNForNChargedThroughDate: LocalDate): Option[LocalDate] =
     billingPeriod match {
       case "Quarter" => Some(gwNForNChargedThroughDate.plusMonths(3))
       case "Annual" => Some(gwNForNChargedThroughDate.plusYears(1))
