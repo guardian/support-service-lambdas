@@ -41,6 +41,42 @@ case object ChargeIsQuarterlyOrAnnual extends CurrentGuardianWeeklyRatePlanCondi
 //    }.getOrElse(false)
 //}
 
+case object RatePlanHasNotBeenInvoiced extends CurrentGuardianWeeklyRatePlanCondition {
+  def apply(ratePlan: RatePlan): Boolean = {
+    Try {
+      val fromIsNull = ratePlan.ratePlanCharges.head.processedThroughDate.isEmpty
+      val toIsNull = ratePlan.ratePlanCharges.head.chargedThroughDate.isEmpty
+      fromIsNull && toIsNull
+    }.getOrElse(false)
+  }
+}
+
+case object RatePlanHasNForNGuardianWeeklyIntroPlan extends CurrentGuardianWeeklyRatePlanCondition {
+  def apply(ratePlans: List[RatePlan], guardianWeeklyNForNProductRatePlanIds: List[String]): Boolean =
+    ratePlans.exists(ratePlan => guardianWeeklyNForNProductRatePlanIds.contains(ratePlan.productRatePlanId))
+}
+
+case object GuradianWeeklyNForNHasBeenInvoiced extends CurrentGuardianWeeklyRatePlanCondition {
+  def apply(ratePlans: List[RatePlan], guardianWeeklyNForNProductRatePlanIds: List[String]): Boolean = {
+    ratePlans
+      .find(ratePlan => guardianWeeklyNForNProductRatePlanIds.contains(ratePlan.productRatePlanId))
+      .map { gwNForN =>
+        Try {
+          val fromInclusive = gwNForN.ratePlanCharges.head.processedThroughDate.get
+          val toExclusive = gwNForN.ratePlanCharges.head.chargedThroughDate.get
+          toExclusive.isAfter(fromInclusive)
+        }.getOrElse(false)
+      }.getOrElse(false)
+  }
+}
+
+object GuardianWeeklyNForNRatePlan extends CurrentGuardianWeeklyRatePlanCondition {
+  def apply(ratePlans: List[RatePlan], guardianWeeklyNForNProductRatePlanIds: List[String]): RatePlan =
+    ratePlans
+      .find(ratePlan => guardianWeeklyNForNProductRatePlanIds.contains(ratePlan.productRatePlanId))
+      .getOrElse(throw new Error("Failed to find Guardian Weekly N for N intro plan"))
+}
+
 /**
  * Model representing 'What Guardian Weekly does the customer have today?'
  *
@@ -88,6 +124,19 @@ case class CurrentInvoicedPeriod(
   //  require(todayIsWithinCurrentInvoicedPeriod, "Today should be within [startDateIncluding, endDateExcluding)")
 }
 
+object PredictedGwWithNForNInvoicedPeriod {
+  def apply(guardianWeeklyWithoutInvoice: RatePlan, gwNForN: RatePlan): CurrentInvoicedPeriod = {
+    val billingPeriod = guardianWeeklyWithoutInvoice.ratePlanCharges.head.billingPeriod.get
+    val from = gwNForN.ratePlanCharges.head.chargedThroughDate.get
+    val to = billingPeriod match {
+      case "Quarter" => from.plusMonths(3)
+      case "Annual" => from.plusYears(1)
+      case _ => throw new RuntimeException(s"Failed to calculate predicted invoice period because of unknown billing period $billingPeriod. Fix ASAP!")
+    }
+    CurrentInvoicedPeriod(from, to)
+  }
+}
+
 /**
  * What Guardian Weekly does the customer have today?
  *
@@ -97,29 +146,63 @@ case class CurrentInvoicedPeriod(
  */
 object CurrentGuardianWeeklySubscription {
 
-  def apply(subscription: Subscription, guardianWeeklyProductRatePlanIds: List[String]): Either[ZuoraHolidayWriteError, CurrentGuardianWeeklySubscription] =
-    subscription
-      .ratePlans
-      .find { ratePlan =>
-        List(
-          RatePlanIsGuardianWeekly(ratePlan, guardianWeeklyProductRatePlanIds),
-          RatePlanHasExactlyOneCharge(ratePlan),
-          RatePlanHasBeenInvoiced(ratePlan),
-          ChargeIsQuarterlyOrAnnual(ratePlan)
-        ).forall(_ == true)
-      }
-      .map { currentGuardianWeeklyRatePlan => // these ugly gets are safe due to above conditions
-        val currentGuardianWeeklyRatePlanCharge = currentGuardianWeeklyRatePlan.ratePlanCharges.head
-        new CurrentGuardianWeeklySubscription(
-          subscriptionNumber = subscription.subscriptionNumber,
-          billingPeriod = currentGuardianWeeklyRatePlanCharge.billingPeriod.get,
-          price = currentGuardianWeeklyRatePlanCharge.price,
-          invoicedPeriod = CurrentInvoicedPeriod(
-            startDateIncluding = currentGuardianWeeklyRatePlanCharge.processedThroughDate.get,
-            endDateExcluding = currentGuardianWeeklyRatePlanCharge.chargedThroughDate.get
-          ),
-          ratePlanId = currentGuardianWeeklyRatePlan.id,
-          productRatePlanId = currentGuardianWeeklyRatePlan.productRatePlanId
-        )
-      }.toRight(ZuoraHolidayWriteError(s"Subscription does not have a current Guardian Weekly rate plan: ${subscription}"))
+  def apply(subscription: Subscription, guardianWeeklyProductRatePlanIds: List[String]): Either[ZuoraHolidayWriteError, CurrentGuardianWeeklySubscription] = {
+    val maybeRegularGw =
+      subscription
+        .ratePlans
+        .find { ratePlan =>
+          List(
+            RatePlanIsGuardianWeekly(ratePlan, guardianWeeklyProductRatePlanIds),
+            RatePlanHasExactlyOneCharge(ratePlan),
+            RatePlanHasBeenInvoiced(ratePlan),
+            ChargeIsQuarterlyOrAnnual(ratePlan)
+          ).forall(_ == true)
+        }
+        .map { currentGuardianWeeklyRatePlan => // these ugly gets are safe due to above conditions
+          val currentGuardianWeeklyRatePlanCharge = currentGuardianWeeklyRatePlan.ratePlanCharges.head
+          new CurrentGuardianWeeklySubscription(
+            subscriptionNumber = subscription.subscriptionNumber,
+            billingPeriod = currentGuardianWeeklyRatePlanCharge.billingPeriod.get,
+            price = currentGuardianWeeklyRatePlanCharge.price,
+            invoicedPeriod = CurrentInvoicedPeriod(
+              startDateIncluding = currentGuardianWeeklyRatePlanCharge.processedThroughDate.get,
+              endDateExcluding = currentGuardianWeeklyRatePlanCharge.chargedThroughDate.get
+            ),
+            ratePlanId = currentGuardianWeeklyRatePlan.id,
+            productRatePlanId = currentGuardianWeeklyRatePlan.productRatePlanId
+          )
+        }
+
+    def maybeGwWithIntro: Option[CurrentGuardianWeeklySubscription] = {
+      subscription
+        .ratePlans
+        .find { ratePlan =>
+          List(
+            RatePlanIsGuardianWeekly(ratePlan, guardianWeeklyProductRatePlanIds),
+            RatePlanHasExactlyOneCharge(ratePlan),
+            RatePlanHasNotBeenInvoiced(ratePlan),
+            RatePlanHasNForNGuardianWeeklyIntroPlan(subscription.ratePlans, /* FIXME */ guardianWeeklyProductRatePlanIds),
+            GuradianWeeklyNForNHasBeenInvoiced(subscription.ratePlans, /* FIXME */ guardianWeeklyProductRatePlanIds),
+            ChargeIsQuarterlyOrAnnual(ratePlan)
+          ).forall(_ == true)
+        }
+        .map { currentGuardianWeeklyWithoutInvoice => // these ugly gets are safe due to above conditions
+
+          val gwNForNwRatePlan = GuardianWeeklyNForNRatePlan(subscription.ratePlans, /* FIXME */ guardianWeeklyProductRatePlanIds)
+          val currentGuardianWeeklyRatePlanCharge = currentGuardianWeeklyWithoutInvoice.ratePlanCharges.head
+          new CurrentGuardianWeeklySubscription(
+            subscriptionNumber = subscription.subscriptionNumber,
+            billingPeriod = currentGuardianWeeklyRatePlanCharge.billingPeriod.get,
+            price = currentGuardianWeeklyRatePlanCharge.price,
+            invoicedPeriod = PredictedGwWithNForNInvoicedPeriod(currentGuardianWeeklyWithoutInvoice, gwNForNwRatePlan),
+            ratePlanId = currentGuardianWeeklyWithoutInvoice.id,
+            productRatePlanId = currentGuardianWeeklyWithoutInvoice.productRatePlanId
+          )
+        }
+    }
+
+    (maybeRegularGw orElse maybeGwWithIntro)
+      .toRight(ZuoraHolidayWriteError(s"Subscription does not have a current Guardian Weekly rate plan: ${subscription}"))
+
+  }
 }
