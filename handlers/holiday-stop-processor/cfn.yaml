@@ -81,7 +81,7 @@ Resources:
       AlarmDescription:
         Failed to process holiday stops.
       AlarmActions:
-        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:holiday-stop-processor-failure-topic
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:fulfilment-dev
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
         - Name: FunctionName
