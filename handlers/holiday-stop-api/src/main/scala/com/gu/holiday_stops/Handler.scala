@@ -23,7 +23,7 @@ import com.gu.util.resthttp.RestRequestMaker.BodyAsString
 import com.gu.util.resthttp.{HttpOp, JsonHttp}
 import com.softwaremill.sttp.{HttpURLConnectionBackend, Id, SttpBackend}
 import okhttp3.{Request, Response}
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, Reads}
 import scalaz.{-\/, \/, \/-}
 
 object Handler extends Logging {
@@ -38,13 +38,13 @@ object Handler extends Logging {
         context
       )
     )(
-      operationForEffects(
-        RawEffects.response,
-        RawEffects.stage,
-        GetFromS3.fetchString,
-        HttpURLConnectionBackend()
+        operationForEffects(
+          RawEffects.response,
+          RawEffects.stage,
+          GetFromS3.fetchString,
+          HttpURLConnectionBackend()
+        )
       )
-    )
   }
 
   def operationForEffects(
@@ -159,9 +159,10 @@ object Handler extends Logging {
   }
 
   case class PotentialHolidayStopsV2PathParams(subscriptionName: SubscriptionName)
+  case class PotentialHolidayStopsV2QueryParams(startDate: LocalDate, endDate: LocalDate, estimateCredit: Option[String])
 
-  def stepsForPotentialHolidayStopV2(config: Config, backend: SttpBackend[Id, Nothing])
-                                    (req: ApiGatewayRequest, unused: SfClient): ApiResponse = {
+  def stepsForPotentialHolidayStopV2(config: Config, backend: SttpBackend[Id, Nothing])(req: ApiGatewayRequest, unused: SfClient): ApiResponse = {
+    implicit val reads: Reads[PotentialHolidayStopsV2QueryParams] = Json.reads[PotentialHolidayStopsV2QueryParams]
     (for {
       pathParams <- req.pathParamsAsCaseClass[PotentialHolidayStopsV2PathParams]()(Json.reads[PotentialHolidayStopsV2PathParams])
       productNamePrefix <- req.headers.flatMap(_.get(HEADER_PRODUCT_NAME_PREFIX)).toApiGatewayOp(s"missing '$HEADER_PRODUCT_NAME_PREFIX' header")
