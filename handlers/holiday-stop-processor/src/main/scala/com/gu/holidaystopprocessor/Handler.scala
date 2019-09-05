@@ -6,7 +6,7 @@ import cats.implicits._
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.GetFromS3
 import com.gu.holiday_stops.Config
-import com.softwaremill.sttp.{HttpURLConnectionBackend, Id, SttpBackend}
+import com.softwaremill.sttp.HttpURLConnectionBackend
 import io.circe.generic.auto._
 import io.github.mkotsur.aws.handler.Lambda
 import io.github.mkotsur.aws.handler.Lambda._
