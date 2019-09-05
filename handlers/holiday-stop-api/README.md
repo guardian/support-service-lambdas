@@ -9,12 +9,12 @@ All endpoints require...
 | Method | Endpoint | Description |
 | --- | --- | --- | 
 | GET | `/{STAGE}/potential?startDate={yyyy-MM-dd}&endDate={yyyy-MM-dd}`  (with `x-product-name-prefix` header set)  | [DEPRECATED]returns an array of dates for each issue impacted between the dates for the given product |
-| GET | `/{STAGE}/potential /{SUBSCRIPTION_NAME}?startDate={yyyy-MM-dd}&endDate={yyyy-MM-dd}&estimateCredit={true`&#124;`false}`  (with `x-product-name-prefix` header set)  | returns a response containing dates for each issue impacted between the dates for the given product. Optionally the estimated credit can be calculated for each issue. |
+| GET | `/{STAGE}/potential/{SUBSCRIPTION_NAME}?startDate={yyyy-MM-dd}&endDate={yyyy-MM-dd}&estimateCredit={true`&#124;`false}`  (with `x-product-name-prefix` header set)  | returns a response containing dates for each issue impacted between the dates for the given product. Optionally the estimated credit can be calculated for each issue. |
 | GET | `/{STAGE}/hsr` | returns all holiday stops (past & present) for the user |
 | GET | `/{STAGE}/hsr` (with `x-product-name-prefix` header set) | returns all holiday stops (past & present) but including a calculated 'first available date' based on the type of product |
-| GET | `/{STAGE}/hsr /{SUBSCRIPTION_NAME}` (with `x-product-name-prefix` header set) | returns all holiday stops (past & present) for the user filtered on the specified subscription also including a calculated 'first available date' based on the type of product |
+| GET | `/{STAGE}/hsr/{SUBSCRIPTION_NAME}` (with `x-product-name-prefix` header set) | returns all holiday stops (past & present) for the user filtered on the specified subscription also including a calculated 'first available date' based on the type of product |
 | POST | `/{STAGE}/hsr` | creates a new all holiday stop, example body `{ "start": "2023-06-10", "end": "2024-06-14", "subscriptionName": "A-S00071783" }`|
-| DELETE | `/{STAGE}/hsr /{SUBSCRIPTION_NAME} /{SF_ID}` | deletes the holiday stop request from SalesForce (with Id matching `{SF_ID}`) |
+| DELETE | `/{STAGE}/hsr/{SUBSCRIPTION_NAME} /{SF_ID}` | deletes the holiday stop request from SalesForce (with Id matching `{SF_ID}`) |
 
 
 ### Handling Multiple Environments
