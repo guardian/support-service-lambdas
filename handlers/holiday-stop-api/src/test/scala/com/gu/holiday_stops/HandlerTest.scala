@@ -66,13 +66,15 @@ class HandlerTest extends FlatSpec with Matchers {
         SttpBackendStub.synchronous
       ).map { operation =>
         operation
-          .steps(potentialIssueDateV2Request(
-            productPrefix = "Guardian Weekly xxx",
-            startDate = "2019-01-01",
-            endDate = "2019-01-15",
-            subscriptionName = "Sub12344",
-            estimateCredit = false
-          ))
+          .steps(
+            potentialIssueDateV2Request(
+              productPrefix = "Guardian Weekly xxx",
+              startDate = "2019-01-01",
+              endDate = "2019-01-15",
+              subscriptionName = "Sub12344",
+              estimateCredit = false
+            )
+          )
       }
     ) {
       case ContinueProcessing(response) =>
@@ -180,7 +182,8 @@ class HandlerTest extends FlatSpec with Matchers {
         response.body should equal(
           """{
             |  "message" : "Bad request: Http method is required"
-            |}""".stripMargin)
+            |}""".stripMargin
+        )
     }
   }
   it should "return bad request if path is missing" in {
@@ -199,7 +202,8 @@ class HandlerTest extends FlatSpec with Matchers {
         response.body should equal(
           """{
             |  "message" : "Bad request: Path is required"
-            |}""".stripMargin)
+            |}""".stripMargin
+        )
     }
   }
 

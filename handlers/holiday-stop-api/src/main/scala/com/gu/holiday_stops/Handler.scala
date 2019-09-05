@@ -107,10 +107,19 @@ object Handler extends Logging {
           case "GET" => stepsForPotentialHolidayStopV2(config, backend) _
           case _ => unsupported _
         }
-      case "hsr" :: Nil | "hsr" :: _ :: Nil =>
+      case "hsr" :: Nil =>
         httpMethod match {
           case "GET" => stepsToListExisting _
           case "POST" => stepsToCreate _
+          case _ => unsupported _
+        }
+      case "hsr" :: _ :: Nil =>
+        httpMethod match {
+          case "GET" => stepsToListExisting _
+          case _ => unsupported _
+        }
+      case "hsr" :: _ :: _ :: Nil =>
+        httpMethod match {
           case "DELETE" => stepsToDelete _
           case _ => unsupported _
         }
