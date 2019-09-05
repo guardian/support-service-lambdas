@@ -88,7 +88,8 @@ case class CurrentGuardianWeeklySubscription(
   price: Double,
   invoicedPeriod: CurrentInvoicedPeriod,
   ratePlanId: String,
-  productRatePlanId: String
+  productRatePlanId: String,
+  introNforNMode: Boolean = false // Is this GW+N-for-N scenario?
 )
 
 /**
@@ -232,7 +233,8 @@ object CurrentGuardianWeeklySubscription {
           price = currentGuardianWeeklyRatePlanCharge.price,
           invoicedPeriod = predictedInvoicePeriod,
           ratePlanId = currentGuardianWeeklyWithoutInvoice.id,
-          productRatePlanId = currentGuardianWeeklyWithoutInvoice.productRatePlanId
+          productRatePlanId = currentGuardianWeeklyWithoutInvoice.productRatePlanId,
+          introNforNMode = true
         )
       }
 
