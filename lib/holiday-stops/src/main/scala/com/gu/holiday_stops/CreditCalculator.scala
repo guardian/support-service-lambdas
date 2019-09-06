@@ -12,9 +12,9 @@ object CreditCalculator {
     for {
       accessToken <- Zuora.accessTokenGetResponse(config.zuoraConfig, backend)
       subscription <- Zuora.subscriptionGetResponse(config, accessToken, backend)(subscriptionName)
-      credit <- guardianWeeklyCredit(config.guardianWeeklyProductRatePlanIds)(subscription)
+      credit <- guardianWeeklyCredit(config.guardianWeeklyProductRatePlanIds, config.gwNforNProductRatePlanIds)(subscription)
     } yield credit
 
-  def guardianWeeklyCredit(guardianWeeklyProductRatePlanIds: List[String])(subscription: Subscription): Either[ZuoraHolidayWriteError, Double] =
-    CurrentGuardianWeeklySubscription(subscription, guardianWeeklyProductRatePlanIds).map(HolidayCredit(_))
+  def guardianWeeklyCredit(guardianWeeklyProductRatePlanIds: List[String], gwNforNProductRatePlanIds: List[String])(subscription: Subscription): Either[ZuoraHolidayWriteError, Double] =
+    CurrentGuardianWeeklySubscription(subscription, guardianWeeklyProductRatePlanIds, gwNforNProductRatePlanIds).map(HolidayCredit(_))
 }

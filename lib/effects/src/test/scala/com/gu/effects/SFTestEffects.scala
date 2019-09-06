@@ -23,6 +23,6 @@ object SFTestEffects {
       "client_id=clientsfclient&client_secret=clientsecretsfsecret&username=usernamesf" +
         "&password=passSFpasswordtokentokenSFtoken&grant_type=password"
     ),
-    HTTPResponse(200, authSuccessResponseBody)
+      HTTPResponse(200, authSuccessResponseBody)
   )
 }

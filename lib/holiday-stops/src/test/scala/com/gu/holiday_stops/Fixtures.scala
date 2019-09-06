@@ -216,6 +216,7 @@ object Fixtures {
       productRatePlanId = "ratePlanId",
       productRatePlanChargeId = "ratePlanChargeId"
     ),
-    Config.guardianWeeklyProductRatePlanIdsPROD // FIXME
+    Config.guardianWeeklyProductRatePlanIdsPROD, // FIXME
+    Config.gwNforNProductRatePlanIdsPROD
   )
 }

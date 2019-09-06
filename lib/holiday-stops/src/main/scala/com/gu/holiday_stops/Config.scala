@@ -9,7 +9,8 @@ case class Config(
   zuoraConfig: ZuoraConfig,
   sfConfig: SFAuthConfig,
   holidayCreditProduct: HolidayCreditProduct,
-  guardianWeeklyProductRatePlanIds: List[String]
+  guardianWeeklyProductRatePlanIds: List[String],
+  gwNforNProductRatePlanIds: List[String]
 )
 
 /**
@@ -107,6 +108,45 @@ object Config {
     "2c92c0f858aa38af0158da325d2f0b3d", // "name":"Guardian Weekly Annual"
   )
 
+  val gwNforNProductRatePlanIdsDEV = List(
+    "2c92c0f85a2190ae015a22bbb6194518", // "name":"Guardian Weekly 6 Issues"}
+    "2c92c0f85a6b1352015a80a093f21fe0", // "name":"Guardian Weekly 12 Issues"}
+    "2c92c0f95a246217015a388eaa8c2e2d", // "name":"Guardian Weekly 6 Issues"}
+    "2c92c0f95a4b4895015a5b02241d6a0b", // "name":"Guardian Weekly 12 Issues"}
+    "2c92c0f95a4b4895015a5bafe0427948", // "name":"Guardian Weekly 12 Issues"}
+    "2c92c0f95a4b489a015a5b85958b348f", // "name":"Guardian Weekly 6 Issues"}
+
+    "2c92c0f965f212210165f69b94c92d66", // "name":"GW Oct 18 - Six for Six - Domestic"}
+    "2c92c0f965f2122101660fbc75a16c38", // "name":"GW Oct 18 - Six for Six - ROW"}
+  )
+
+
+  val gwNforNProductRatePlanIdsUAT = List(
+    "2c92c0f858aa39000158bf48c5147ddd", // "name":"6 for 6 Issues - OLD"}
+    "2c92c0f85a4b3a23015a5bd1923d4396", // "name":"Guardian Weekly 12 Issues"}
+    "2c92c0f85a4b3a7b015a5be6e4e93937", // "name":"Guardian Weekly 6 Issues"}
+    "2c92c0f85a6b139f015a80a6d5ed2fcd", // "name":"Guardian Weekly 12 Issues"}
+    "2c92c0f95a24621b015a3d6ce9e32057", // "name":"Guardian Weekly 6 Issues"}
+    "2c92c0f95a246220015a3d680fe1680d", // "name":"Guardian Weekly 6 Issues"}
+    "2c92c0f95a4b489a015a5be867ae7445", // "name":"Guardian Weekly 12 Issues"}
+
+    "2c92c0f8660fb5dd016610858eb90658", // "name":"GW Oct 18 - Six for Six - Domestic"}
+    "2c92c0f9660fc4c70166109dfd08092c", // "name":"GW Oct 18 - Six for Six - ROW"}
+
+  )
+
+  val gwNforNProductRatePlanIdsPROD = List(
+    "2c92a0fc5a2a49f0015a41f473da233a", // "name":"Guardian Weekly 6 Issues"}
+    "2c92a0fd5a5adc8b015a5c690d0d1ec6", // "name":"Guardian Weekly 12 Issues"}
+    "2c92a0fe5a5ad344015a5c67b1144250", // "name":"Guardian Weekly 6 Issues"}
+    "2c92a0ff59d9d540015a41a40b3e07d3", // "name":"Guardian Weekly 6 Issues"}
+    "2c92a0ff5a4b85e7015a4cf95d352a07", // "name":"Guardian Weekly 12 Issues"}
+    "2c92a0ff5a84040f015a855a7afa3f5c", // "name":"Guardian Weekly 12 Issues"}
+
+    "2c92a0086619bf8901661aaac94257fe", // "name":"GW Oct 18 - Six for Six - Domestic"}
+    "2c92a0086619bf8901661ab545f51b21", // "name":"GW Oct 18 - Six for Six - ROW"}
+  )
+
   implicit val oAuthØReads = Json.reads[Oauth]
   implicit val holidayStopProcessorReads = Json.reads[HolidayStopProcessor]
   implicit val sfAuthConfigReads = Json.reads[SFAuthConfig]
@@ -143,7 +183,8 @@ object Config {
               productRatePlanId = "2c92a0076ae9189c016b080c930a6186",
               productRatePlanChargeId = "2c92a0086ae928d7016b080f638477a6"
             ),
-            guardianWeeklyProductRatePlanIdsPROD
+            guardianWeeklyProductRatePlanIdsPROD,
+            gwNforNProductRatePlanIdsPROD,
           )
         case "CODE" =>
           Config(
@@ -153,7 +194,8 @@ object Config {
               productRatePlanId = "2c92c0f86b0378b0016b08112e870d0a",
               productRatePlanChargeId = "2c92c0f86b0378b0016b08112ec70d14"
             ),
-            guardianWeeklyProductRatePlanIdsUAT
+            guardianWeeklyProductRatePlanIdsUAT,
+            gwNforNProductRatePlanIdsUAT
           )
         case "DEV" =>
           Config(
@@ -163,7 +205,8 @@ object Config {
               productRatePlanId = "2c92c0f96b03800b016b081fc04f1ba2",
               productRatePlanChargeId = "2c92c0f96b03800b016b081fc0f41bb4"
             ),
-            guardianWeeklyProductRatePlanIdsDEV
+            guardianWeeklyProductRatePlanIdsDEV,
+            gwNforNProductRatePlanIdsDEV
           )
       }
     }

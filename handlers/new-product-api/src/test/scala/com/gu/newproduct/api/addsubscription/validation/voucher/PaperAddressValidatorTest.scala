@@ -22,6 +22,10 @@ class PaperAddressValidatorTest extends FlatSpec with Matchers {
     PaperAddressValidator(VoucherEveryDay, testAddress) shouldBe Passed(())
   }
 
+  it should "succeed if address in UK for one of the new postcodes in the M25" in {
+    PaperAddressValidator(VoucherEveryDay, testAddress.copy(postcode = Some(Postcode("TN16 1QA")))) shouldBe Passed(())
+  }
+
   it should "fail if sold to contact is not uk" in {
     val australianAddress = testAddress.copy(country = Country.Australia)
     PaperAddressValidator(VoucherEveryDay, australianAddress) shouldBe Failed("Invalid country: Australia, only UK addresses are allowed")
