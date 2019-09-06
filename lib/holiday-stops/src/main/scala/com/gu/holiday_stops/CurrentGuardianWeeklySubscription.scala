@@ -61,7 +61,7 @@ case object RatePlanHasNForNGuardianWeeklyIntroPlan extends CurrentGuardianWeekl
     ratePlans.exists(ratePlan => guardianWeeklyNForNProductRatePlanIds.contains(ratePlan.productRatePlanId))
 }
 
-case object GuradianWeeklyNForNHasBeenInvoiced extends CurrentGuardianWeeklyRatePlanCondition {
+case object GuardianWeeklyNForNHasBeenInvoiced extends CurrentGuardianWeeklyRatePlanCondition {
   def apply(ratePlans: List[RatePlan], guardianWeeklyNForNProductRatePlanIds: List[String]): Boolean = {
     ratePlans
       .find(ratePlan => guardianWeeklyNForNProductRatePlanIds.contains(ratePlan.productRatePlanId))
@@ -187,7 +187,7 @@ object CurrentGuardianWeeklySubscription {
           RatePlanHasExactlyOneCharge(ratePlan),
           RatePlanHasNotBeenInvoiced(ratePlan),
           RatePlanHasNForNGuardianWeeklyIntroPlan(subscription.ratePlans, gwNforNProductRatePlanIds),
-          GuradianWeeklyNForNHasBeenInvoiced(subscription.ratePlans, gwNforNProductRatePlanIds),
+          GuardianWeeklyNForNHasBeenInvoiced(subscription.ratePlans, gwNforNProductRatePlanIds),
           ChargeIsQuarterlyOrAnnual(ratePlan)
         ).forall(_ == true)
       }
