@@ -21,12 +21,23 @@ import com.gu.holiday_stops.CurrentGuardianWeeklySubscription
  *
  * Note nextBillingPeriodStartDate represents a specific date yyyy-mm-dd unlike billingPeriod (quarterly)
  * or billingPeriodStartDay (1st of month).
+ *
+ * There is a complication when reader has N-for-N intro plan (for example, GW Oct 18 - Six for Six - Domestic).
+ * If the holiday falls within N-for-N then credit should be applied on the first regular invoice, not the next billing
+ * period of GW regular plan.
  */
 
 object NextBillingPeriodStartDate {
-  def apply(currentGuardianWeeklySubscription: CurrentGuardianWeeklySubscription): LocalDate = {
-    currentGuardianWeeklySubscription
-      .invoicedPeriod
-      .endDateExcluding
+  def apply(currentGuardianWeeklySubscription: CurrentGuardianWeeklySubscription, stoppedPublicationDate: LocalDate): LocalDate = {
+    currentGuardianWeeklySubscription.introNforNMode match {
+      case Some(introPlan) =>
+        if (stoppedPublicationDate.isBefore(currentGuardianWeeklySubscription.invoicedPeriod.startDateIncluding))
+          introPlan.invoicedPeriod.endDateExcluding
+        else
+          currentGuardianWeeklySubscription.invoicedPeriod.endDateExcluding
+
+      case None /* regular plan */ =>
+        currentGuardianWeeklySubscription.invoicedPeriod.endDateExcluding
+    }
   }
 }
