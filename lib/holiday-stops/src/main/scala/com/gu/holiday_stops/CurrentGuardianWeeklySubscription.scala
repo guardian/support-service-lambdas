@@ -89,7 +89,18 @@ case class CurrentGuardianWeeklySubscription(
   invoicedPeriod: CurrentInvoicedPeriod,
   ratePlanId: String,
   productRatePlanId: String,
-  introNforNMode: Boolean = false // Is this GW+N-for-N scenario?
+  introNforNMode: Option[IntroNForNMode] = None // Is this GW+N-for-N scenario?
+)
+
+/**
+ * N-for-N part of the Guardian Weekly + N-for-N scenario
+ */
+case class IntroNForNMode(
+  billingPeriod: String,
+  price: Double,
+  invoicedPeriod: CurrentInvoicedPeriod,
+  ratePlanId: String,
+  productRatePlanId: String,
 )
 
 /**
@@ -149,6 +160,8 @@ object PredictedInvoicedPeriod extends LazyLogging {
     }
 
 }
+
+
 
 /**
  * What Guardian Weekly does the customer have today?
@@ -234,7 +247,16 @@ object CurrentGuardianWeeklySubscription {
           invoicedPeriod = predictedInvoicePeriod,
           ratePlanId = currentGuardianWeeklyWithoutInvoice.id,
           productRatePlanId = currentGuardianWeeklyWithoutInvoice.productRatePlanId,
-          introNforNMode = true
+          introNforNMode = Some(IntroNForNMode(
+            billingPeriod = gwNForNwRatePlan.ratePlanCharges.head.billingPeriod.get,
+            price = gwNForNwRatePlan.ratePlanCharges.head.price,
+            invoicedPeriod = CurrentInvoicedPeriod(
+              startDateIncluding = gwNForNwRatePlan.ratePlanCharges.head.processedThroughDate.get,
+              endDateExcluding = gwNForNwRatePlan.ratePlanCharges.head.chargedThroughDate.get
+            ),
+            ratePlanId = gwNForNwRatePlan.id,
+            productRatePlanId = gwNForNwRatePlan.productRatePlanId
+          ))
         )
       }
 

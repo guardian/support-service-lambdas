@@ -1,5 +1,7 @@
 package com.gu.holiday_stops
 
+import java.time.LocalDate
+
 import org.scalatest.{EitherValues, FlatSpec, Matchers}
 
 class HolidayCreditTest extends FlatSpec with Matchers with EitherValues {
@@ -9,7 +11,7 @@ class HolidayCreditTest extends FlatSpec with Matchers with EitherValues {
     val ratePlans = List(RatePlan("", List(charge), Fixtures.config.guardianWeeklyProductRatePlanIds.head, ""))
     val subscription = Fixtures.mkSubscription().copy(ratePlans = ratePlans)
     val currentGuardianWeeklySubscription = CurrentGuardianWeeklySubscription(subscription, Fixtures.config.guardianWeeklyProductRatePlanIds, Nil)
-    val credit = HolidayCredit(currentGuardianWeeklySubscription.right.value)
+    val credit = HolidayCredit(currentGuardianWeeklySubscription.right.value, LocalDate.now)
     credit shouldBe -2.31
   }
 
@@ -18,7 +20,7 @@ class HolidayCreditTest extends FlatSpec with Matchers with EitherValues {
     val ratePlans = List(RatePlan("", List(charge), Fixtures.config.guardianWeeklyProductRatePlanIds.head, ""))
     val subscription = Fixtures.mkSubscription().copy(ratePlans = ratePlans)
     val currentGuardianWeeklySubscription = CurrentGuardianWeeklySubscription(subscription, Fixtures.config.guardianWeeklyProductRatePlanIds, Nil)
-    val credit = HolidayCredit(currentGuardianWeeklySubscription.right.value)
+    val credit = HolidayCredit(currentGuardianWeeklySubscription.right.value, LocalDate.now)
     credit shouldBe -2.89
   }
 
@@ -27,7 +29,7 @@ class HolidayCreditTest extends FlatSpec with Matchers with EitherValues {
     val ratePlans = List(RatePlan("", List(charge), Fixtures.config.guardianWeeklyProductRatePlanIds.head, ""))
     val subscription = Fixtures.mkSubscription().copy(ratePlans = ratePlans)
     val currentGuardianWeeklySubscription = CurrentGuardianWeeklySubscription(subscription, Fixtures.config.guardianWeeklyProductRatePlanIds, Nil)
-    val credit = HolidayCredit(currentGuardianWeeklySubscription.right.value)
+    val credit = HolidayCredit(currentGuardianWeeklySubscription.right.value, LocalDate.now)
     credit shouldBe -2.31
   }
 }

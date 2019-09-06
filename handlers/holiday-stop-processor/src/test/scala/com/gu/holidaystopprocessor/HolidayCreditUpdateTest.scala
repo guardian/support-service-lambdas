@@ -21,7 +21,7 @@ class HolidayCreditUpdateTest extends FlatSpec with Matchers with EitherValues {
     val currentGuardianWeeklySubscription = CurrentGuardianWeeklySubscription(subscription, guardianWeeklyProductRatePlanIds, Nil)
     val nextInvoiceStartDate = NextBillingPeriodStartDate(currentGuardianWeeklySubscription.right.value)
     val maybeExtendedTerm = ExtendedTerm(nextInvoiceStartDate, subscription)
-    val holidayCredit = HolidayCredit(currentGuardianWeeklySubscription.right.value)
+    val holidayCredit = HolidayCredit(currentGuardianWeeklySubscription.right.value, LocalDate.now)
 
     val update = HolidayCreditUpdate(
       config.holidayCreditProduct,
@@ -75,7 +75,7 @@ class HolidayCreditUpdateTest extends FlatSpec with Matchers with EitherValues {
     val currentGuardianWeeklySubscription = CurrentGuardianWeeklySubscription(subscription, guardianWeeklyProductRatePlanIds, Nil)
     val nextInvoiceStartDate = NextBillingPeriodStartDate(currentGuardianWeeklySubscription.right.value)
     val maybeExtendedTerm = ExtendedTerm(nextInvoiceStartDate, subscription)
-    val holidayCredit = HolidayCredit(currentGuardianWeeklySubscription.right.value)
+    val holidayCredit = HolidayCredit(currentGuardianWeeklySubscription.right.value, LocalDate.now)
     val update = HolidayCreditUpdate(
       config.holidayCreditProduct,
       subscription = subscription,
@@ -115,7 +115,7 @@ class HolidayCreditUpdateTest extends FlatSpec with Matchers with EitherValues {
     val currentGuardianWeeklySubscription = CurrentGuardianWeeklySubscription(subscription, guardianWeeklyProductRatePlanIds, Nil)
     val nextInvoiceStartDate = NextBillingPeriodStartDate(currentGuardianWeeklySubscription.right.value)
     val maybeExtendedTerm = ExtendedTerm(nextInvoiceStartDate, subscription)
-    val holidayCredit = HolidayCredit(currentGuardianWeeklySubscription.right.value)
+    val holidayCredit = HolidayCredit(currentGuardianWeeklySubscription.right.value, LocalDate.now)
     val update = HolidayCreditUpdate(
       config.holidayCreditProduct,
       subscription = subscription,
