@@ -185,7 +185,7 @@ object Handler extends Logging {
   ): ApiGatewayOp[Option[Double]] = {
     if (queryParams.estimateCredit == Some("true")) {
       CreditCalculator
-        .guardianWeeklyCredit(config, pathParams.subscriptionName, backend)
+        .guardianWeeklyCredit(config, pathParams.subscriptionName, backend, /* FIXME: estimation for N-for-N will be wrong */ LocalDate.now)
         .toApiGatewayOp("Failed to calculate credit")
         .map(Some(_))
     } else {
