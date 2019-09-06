@@ -17,6 +17,7 @@ object HolidayStopProcess {
         processHolidayStops(
           config.holidayCreditProduct,
           guardianWeeklyProductRatePlanIds = config.guardianWeeklyProductRatePlanIds,
+          gwNforNProductRatePlanIds = config.gwNforNProductRatePlanIds,
           getHolidayStopRequestsFromSalesforce = Salesforce.holidayStopRequests(config.sfConfig, processDateOverride),
           getSubscription = Zuora.subscriptionGetResponse(config, zuoraAccessToken),
           updateSubscription = Zuora.subscriptionUpdateResponse(config, zuoraAccessToken),
@@ -27,6 +28,7 @@ object HolidayStopProcess {
   def processHolidayStops(
     holidayCreditProduct: HolidayCreditProduct,
     guardianWeeklyProductRatePlanIds: List[String],
+    gwNforNProductRatePlanIds: List[String],
     getHolidayStopRequestsFromSalesforce: ProductName => Either[OverallFailure, List[HolidayStopRequestsDetail]],
     getSubscription: SubscriptionName => Either[ZuoraHolidayWriteError, Subscription],
     updateSubscription: (Subscription, HolidayCreditUpdate) => Either[ZuoraHolidayWriteError, Unit],
@@ -39,7 +41,7 @@ object HolidayStopProcess {
       case Right(holidayStopRequestsFromSalesforce) =>
         val holidayStops = holidayStopRequestsFromSalesforce.distinct.map(HolidayStop(_))
         val alreadyActionedHolidayStops = holidayStopRequestsFromSalesforce.flatMap(_.Charge_Code__c).distinct
-        val allZuoraHolidayStopResponses = holidayStops.map(writeHolidayStopToZuora(holidayCreditProduct, guardianWeeklyProductRatePlanIds, getSubscription, updateSubscription))
+        val allZuoraHolidayStopResponses = holidayStops.map(writeHolidayStopToZuora(holidayCreditProduct, guardianWeeklyProductRatePlanIds, gwNforNProductRatePlanIds, getSubscription, updateSubscription))
         val (failedZuoraResponses, successfulZuoraResponses) = allZuoraHolidayStopResponses.separate
         val notAlreadyActionedHolidays = successfulZuoraResponses.filterNot(v => alreadyActionedHolidayStops.contains(v.chargeCode))
         val salesforceExportResult = writeHolidayStopsToSalesforce(notAlreadyActionedHolidays)
@@ -58,16 +60,18 @@ object HolidayStopProcess {
   def writeHolidayStopToZuora(
     holidayCreditProduct: HolidayCreditProduct,
     guardianWeeklyProductRatePlanIds: List[String],
+    gwNforNProductRatePlanIds: List[String],
     getSubscription: SubscriptionName => Either[ZuoraHolidayWriteError, Subscription],
     updateSubscription: (Subscription, HolidayCreditUpdate) => Either[ZuoraHolidayWriteError, Unit]
   )(stop: HolidayStop): Either[ZuoraHolidayWriteError, HolidayStopResponse] =
     for {
       subscription <- getSubscription(stop.subscriptionName)
       _ <- if (subscription.autoRenew) Right(()) else Left(ZuoraHolidayWriteError("Cannot currently process non-auto-renewing subscription"))
-      currentGuardianWeeklySubscription <- CurrentGuardianWeeklySubscription(subscription, guardianWeeklyProductRatePlanIds)
+      currentGuardianWeeklySubscription <- CurrentGuardianWeeklySubscription(subscription, guardianWeeklyProductRatePlanIds, gwNforNProductRatePlanIds)
+      _ <- if (currentGuardianWeeklySubscription.introNforNMode && stop.stoppedPublicationDate.isBefore(currentGuardianWeeklySubscription.invoicedPeriod.startDateIncluding)) Left(ZuoraHolidayWriteError("Holiday within intro N-for-N plan is not currently supported.")) else Right(())
       nextInvoiceStartDate = NextBillingPeriodStartDate(currentGuardianWeeklySubscription)
       maybeExtendedTerm = ExtendedTerm(nextInvoiceStartDate, subscription)
-      holidayCredit <- CreditCalculator.guardianWeeklyCredit(guardianWeeklyProductRatePlanIds)(subscription)
+      holidayCredit <- CreditCalculator.guardianWeeklyCredit(guardianWeeklyProductRatePlanIds, gwNforNProductRatePlanIds)(subscription)
       holidayCreditUpdate <- HolidayCreditUpdate(holidayCreditProduct, subscription, stop.stoppedPublicationDate, nextInvoiceStartDate, maybeExtendedTerm, holidayCredit)
       _ <- if (subscription.hasHolidayStop(stop)) Right(()) else updateSubscription(subscription, holidayCreditUpdate)
       updatedSubscription <- getSubscription(stop.subscriptionName)
