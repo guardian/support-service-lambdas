@@ -1,15 +1,9 @@
 package com.gu.holiday_stops
 
-import com.amazonaws.auth.profile.ProfileCredentialsProvider
-import com.amazonaws.regions.Regions.EU_WEST_1
-import com.amazonaws.services.s3.AmazonS3Client
-import com.gu.holiday_stops.OverallFailure
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
-import io.circe.Decoder
-import io.circe.generic.auto._
-import io.circe.parser.decode
-
-import scala.io.Source
+import com.gu.util.config.LoadConfigModule.StringFromS3
+import com.gu.util.config.{ConfigLocation, LoadConfigModule, Stage}
+import play.api.libs.json.{Json, Reads}
 
 case class Config(
   zuoraConfig: ZuoraConfig,
@@ -153,39 +147,32 @@ object Config {
     "2c92a0086619bf8901661ab545f51b21", // "name":"GW Oct 18 - Six for Six - ROW"}
   )
 
-  private def zuoraCredentials(stage: String): Either[OverallFailure, ZuoraConfig] =
-    credentials[ZuoraConfig](stage, "zuoraRest")
+  implicit val oAuthØReads = Json.reads[Oauth]
+  implicit val holidayStopProcessorReads = Json.reads[HolidayStopProcessor]
+  implicit val sfAuthConfigReads = Json.reads[SFAuthConfig]
+  implicit val zuoraConfigReads = Json.reads[ZuoraConfig]
 
-  private def salesforceCredentials(stage: String): Either[OverallFailure, SFAuthConfig] =
-    credentials[SFAuthConfig](stage, "sfAuth")
-
-  private def credentials[T](stage: String, filePrefix: String)(implicit evidence: Decoder[T]): Either[OverallFailure, T] = {
-    val profileName = "membership"
-    val bucketName = "gu-reader-revenue-private"
-    val key =
-      if (stage == "DEV")
-        s"membership/support-service-lambdas/$stage/$filePrefix-$stage.json"
-      else
-        s"membership/support-service-lambdas/$stage/$filePrefix-$stage.v1.json"
-    val builder =
-      if (stage == "DEV")
-        AmazonS3Client.builder
-          .withCredentials(new ProfileCredentialsProvider(profileName))
-          .withRegion(EU_WEST_1)
-      else AmazonS3Client.builder
-    val inputStream =
-      builder.build().getObject(bucketName, key).getObjectContent
-    val rawJson = Source.fromInputStream(inputStream).mkString
-    decode[T](rawJson).left map { e =>
-      OverallFailure(s"Could not read secret config file from S3://$bucketName/$key: ${e.toString}")
-    }
+  private def zuoraCredentials(stage: String, fetchString: StringFromS3): Either[OverallFailure, ZuoraConfig] = {
+    credentials[ZuoraConfig](stage, "zuoraRest", fetchString)
   }
 
-  def apply(): Either[OverallFailure, Config] = {
+  private def salesforceCredentials(stage: String, fetchString: StringFromS3): Either[OverallFailure, SFAuthConfig] = {
+    credentials[SFAuthConfig](stage, "sfAuth", fetchString)
+  }
+
+  private def credentials[T](stage: String, filePrefix: String, fetchString: StringFromS3)(implicit reads: Reads[T]): Either[OverallFailure, T] = {
+    val loadConfigModule = LoadConfigModule(Stage(stage), fetchString)
+    loadConfigModule
+      .apply[T](ConfigLocation(filePrefix, 1), reads)
+      .leftMap(failure => OverallFailure(failure.error))
+      .toEither
+  }
+
+  def apply(fetchString: StringFromS3): Either[OverallFailure, Config] = {
     val stage = Option(System.getenv("Stage")).getOrElse("DEV")
     for {
-      zuoraConfig <- zuoraCredentials(stage)
-      sfConfig <- salesforceCredentials(stage)
+      zuoraConfig <- zuoraCredentials(stage, fetchString)
+      sfConfig <- salesforceCredentials(stage, fetchString)
     } yield {
       stage match {
         case "PROD" =>

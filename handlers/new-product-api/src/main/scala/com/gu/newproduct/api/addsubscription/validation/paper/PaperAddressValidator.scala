@@ -34,7 +34,7 @@ object PaperAddressValidator {
     "CR0", "CR2", "CR3", "CR4", "CR5", "CR6", "CR7", "CR8", "CR9",
     "DA1", "DA14", "DA15", "DA16", "DA18", "DA5", "DA7", "DA8", "DA17",
     "E1", "E10", "E11", "E12", "E13", "E14", "E15", "E16", "E17", "E18", "E20", "E1W", "E2", "E3", "E4", "E5", "E6", "E7", "E8", "E9", "E98",
-    "EC1A", "EC1M", "EC1N", "EC1R", "EC1V", "EC1Y", "EC2A", "EC2M", "EC2N", "EC2R", "EC2V", "EC2Y", "EC3A", "EC3M", "EC3N", "EC3P", "EC3R", "EC3V", "EC4A", "EC4M", "EC4N", "EC4P", "EC4R", "EC4V","EC4Y",
+    "EC1A", "EC1M", "EC1N", "EC1R", "EC1V", "EC1Y", "EC2A", "EC2M", "EC2N", "EC2R", "EC2V", "EC2Y", "EC3A", "EC3M", "EC3N", "EC3P", "EC3R", "EC3V", "EC4A", "EC4M", "EC4N", "EC4P", "EC4R", "EC4V", "EC4Y",
     "EN1", "EN2", "EN3", "EN4", "EN5",
     "HA0", "HA1", "HA2", "HA3", "HA4", "HA5", "HA6", "HA7", "HA8", "HA9",
     "IG1", "IG10", "IG11", "IG2", "IG3", "IG5", "IG6", "IG7", "IG8", "IG9",

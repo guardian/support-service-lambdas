@@ -6,10 +6,11 @@ import com.softwaremill.sttp.circe._
 import io.circe.generic.auto._
 
 object Zuora {
-
-  implicit val backend: SttpBackend[Id, Nothing] = HttpURLConnectionBackend()
-
-  def accessTokenGetResponse(config: ZuoraConfig): Either[OverallFailure, AccessToken] = {
+  def accessTokenGetResponse(
+    config: ZuoraConfig,
+    backend: SttpBackend[Id, Nothing]
+  ): Either[OverallFailure, AccessToken] = {
+    implicit val b = backend
     sttp.post(uri"${config.baseUrl.stripSuffix("/v1")}/oauth/token")
       .body(
         "grant_type" -> "client_credentials",
@@ -23,7 +24,8 @@ object Zuora {
       .joinRight
   }
 
-  def subscriptionGetResponse(config: Config, accessToken: AccessToken)(subscriptionName: SubscriptionName): Either[ZuoraHolidayWriteError, Subscription] = {
+  def subscriptionGetResponse(config: Config, accessToken: AccessToken, backend: SttpBackend[Id, Nothing])(subscriptionName: SubscriptionName): Either[ZuoraHolidayWriteError, Subscription] = {
+    implicit val b = backend
     sttp.get(uri"${config.zuoraConfig.baseUrl}/subscriptions/${subscriptionName.value}")
       .header("Authorization", s"Bearer ${accessToken.access_token}")
       .response(asJson[Subscription])
@@ -33,7 +35,8 @@ object Zuora {
       .joinRight
   }
 
-  def subscriptionUpdateResponse(config: Config, accessToken: AccessToken)(subscription: Subscription, update: HolidayCreditUpdate): Either[ZuoraHolidayWriteError, Unit] = {
+  def subscriptionUpdateResponse(config: Config, accessToken: AccessToken, backend: SttpBackend[Id, Nothing])(subscription: Subscription, update: HolidayCreditUpdate): Either[ZuoraHolidayWriteError, Unit] = {
+    implicit val b = backend
     val errMsg = (reason: String) => s"Failed to update subscription '${subscription.subscriptionNumber}' with $update. Reason: $reason"
     sttp.put(uri"${config.zuoraConfig.baseUrl}/subscriptions/${subscription.subscriptionNumber}")
       .header("Authorization", s"Bearer ${accessToken.access_token}")

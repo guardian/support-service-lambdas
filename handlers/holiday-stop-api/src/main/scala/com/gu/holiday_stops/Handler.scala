@@ -5,7 +5,6 @@ import java.time.LocalDate
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
-import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.SalesforceClient
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestId, ProductName, SubscriptionName}
@@ -22,15 +21,16 @@ import com.gu.util.reader.Types._
 import com.gu.util.resthttp.JsonHttp.StringHttpRequest
 import com.gu.util.resthttp.RestRequestMaker.BodyAsString
 import com.gu.util.resthttp.{HttpOp, JsonHttp}
+import com.softwaremill.sttp.{HttpURLConnectionBackend, Id, SttpBackend}
 import okhttp3.{Request, Response}
-import play.api.libs.json.{Format, Json, Reads}
+import play.api.libs.json.{Json, Reads}
 import scalaz.{-\/, \/, \/-}
 
 object Handler extends Logging {
 
   type SfClient = HttpOp[StringHttpRequest, BodyAsString]
 
-  def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
+  def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
     ApiGatewayHandler(
       LambdaIO(
         inputStream,
@@ -38,61 +38,42 @@ object Handler extends Logging {
         context
       )
     )(
-      operationForEffects(
-        RawEffects.response,
-        RawEffects.stage,
-        GetFromS3.fetchString
+        operationForEffects(
+          RawEffects.response,
+          RawEffects.stage,
+          GetFromS3.fetchString,
+          HttpURLConnectionBackend()
+        )
       )
-    )
-
-  val POTENTIAL_PROXY_RESOURCE_PATH = "/potential"
-  val GET_ALL_AND_CREATE_PROXY_RESOURCE_REGEX = """/hsr.*""".r
+  }
 
   def operationForEffects(
     response: Request => Response,
     stage: Stage,
-    fetchString: StringFromS3
+    fetchString: StringFromS3,
+    backend: SttpBackend[Id, Nothing]
   ): ApiGatewayOp[Operation] = {
-
-    val loadConfig = LoadConfigModule(stage, fetchString)
-
     for {
-      sfAuthConfig <- loadConfig[SFAuthConfig].toApiGatewayOp("load sfAuth config")
-      sfClient <- SalesforceClient(response, sfAuthConfig).value.toDisjunction.toApiGatewayOp("authenticate with SalesForce")
-    } yield Operation.noHealthcheck( // checking connectivity to SF is sufficient healthcheck so no special steps required
-      request => validateRequestAndCreateSteps(request)(request, sfClient)
-    )
+      config <- Config(fetchString).toApiGatewayOp("Failed to load config")
+      sfClient <- SalesforceClient(response, config.sfConfig).value.toDisjunction.toApiGatewayOp("authenticate with SalesForce")
+    } yield Operation.noHealthcheck(request => // checking connectivity to SF is sufficient healthcheck so no special steps required
+      validateRequestAndCreateSteps(request, config, backend)(request, sfClient))
   }
 
-  private def validateRequestAndCreateSteps(request: ApiGatewayRequest) = {
+  private def validateRequestAndCreateSteps(
+    request: ApiGatewayRequest,
+    config: Config,
+    backend: SttpBackend[Id, Nothing]
+  ) = {
     (for {
       httpMethod <- validateMethod(request.httpMethod)
       path <- validatePath(request.path)
-    } yield createSteps(httpMethod, path)).fold(
+    } yield createSteps(httpMethod, splitPath(path), config, backend)).fold(
       { errorMessage: String =>
         badrequest(errorMessage) _
       },
       identity
     )
-  }
-
-  private def createSteps(httpMethod: String, path: String) = {
-    path match {
-      case POTENTIAL_PROXY_RESOURCE_PATH =>
-        httpMethod match {
-          case "GET" => stepsForPotentialHolidayStop _
-          case _ => unsupported _
-        }
-      case GET_ALL_AND_CREATE_PROXY_RESOURCE_REGEX() =>
-        httpMethod match {
-          case "GET" => stepsToListExisting _
-          case "POST" => stepsToCreate _
-          case "DELETE" => stepsToDelete _
-          case _ => unsupported _
-        }
-      case _ =>
-        notfound _
-    }
   }
 
   private def validateMethod(method: Option[String]): String \/ String = {
@@ -109,6 +90,51 @@ object Handler extends Logging {
     }
   }
 
+  private def createSteps(
+    httpMethod: String,
+    path: List[String],
+    config: Config,
+    backend: SttpBackend[Id, Nothing]
+  ) = {
+    path match {
+      case "potential" :: Nil =>
+        httpMethod match {
+          case "GET" => stepsForPotentialHolidayStopV1 _
+          case _ => unsupported _
+        }
+      case "potential" :: _ :: Nil =>
+        httpMethod match {
+          case "GET" => stepsForPotentialHolidayStopV2(config, backend) _
+          case _ => unsupported _
+        }
+      case "hsr" :: Nil =>
+        httpMethod match {
+          case "GET" => stepsToListExisting _
+          case "POST" => stepsToCreate _
+          case _ => unsupported _
+        }
+      case "hsr" :: _ :: Nil =>
+        httpMethod match {
+          case "GET" => stepsToListExisting _
+          case _ => unsupported _
+        }
+      case "hsr" :: _ :: _ :: Nil =>
+        httpMethod match {
+          case "DELETE" => stepsToDelete _
+          case _ => unsupported _
+        }
+      case _ =>
+        notfound _
+    }
+  }
+
+  def splitPath(pathString: String): List[String] = {
+    pathString.split('/').toList match {
+      case "" :: tail => tail
+      case noLeadingSlash => noLeadingSlash
+    }
+  }
+
   val HEADER_IDENTITY_ID = "x-identity-id"
   val HEADER_SALESFORCE_CONTACT_ID = "x-salesforce-contact-id"
   val HEADER_PRODUCT_NAME_PREFIX = "x-product-name-prefix"
@@ -118,28 +144,63 @@ object Handler extends Logging {
     case (HEADER_IDENTITY_ID, identityId) => Left(IdentityId(identityId))
   }).toApiGatewayOp(s"either '$HEADER_IDENTITY_ID' header OR '$HEADER_SALESFORCE_CONTACT_ID' (one is required)")
 
-  case class PotentialHolidayStopParams(startDate: LocalDate, endDate: LocalDate)
+  case class PotentialHolidayStopsV1PathParams(startDate: LocalDate, endDate: LocalDate)
 
-  def stepsForPotentialHolidayStop(req: ApiGatewayRequest, unused: SfClient): ApiResponse = {
-    implicit val formatLocalDateAsSalesforceDate: Format[LocalDate] = SalesforceHolidayStopRequest.formatLocalDateAsSalesforceDate
-    implicit val readsPotentialHolidayStopParams: Reads[PotentialHolidayStopParams] = Json.reads[PotentialHolidayStopParams]
+  def stepsForPotentialHolidayStopV1(req: ApiGatewayRequest, unused: SfClient): ApiResponse = {
+    implicit val formatLocalDateAsSalesforceDate = SalesforceHolidayStopRequest.formatLocalDateAsSalesforceDate
+    implicit val readsPotentialHolidayStopParams = Json.reads[PotentialHolidayStopsV1PathParams]
     (for {
-      productNamePrefix <- req.headers.flatMap(_.get(HEADER_PRODUCT_NAME_PREFIX)).toApiGatewayOp("identityID header")
-      params <- req.queryParamsAsCaseClass[PotentialHolidayStopParams]()
+      productNamePrefix <- req.headers.flatMap(_.get(HEADER_PRODUCT_NAME_PREFIX)).toApiGatewayOp(s"missing '$HEADER_PRODUCT_NAME_PREFIX' header")
+      params <- req.queryParamsAsCaseClass[PotentialHolidayStopsV1PathParams]()
     } yield ApiGatewayResponse(
       "200",
       ActionCalculator.publicationDatesToBeStopped(params.startDate, params.endDate, ProductName(productNamePrefix))
     )).apiResponse
   }
 
-  case class GetPathParams(subscriptionName: Option[SubscriptionName])
+  case class PotentialHolidayStopsV2PathParams(subscriptionName: SubscriptionName)
+  case class PotentialHolidayStopsV2QueryParams(startDate: LocalDate, endDate: LocalDate, estimateCredit: Option[String])
+
+  def stepsForPotentialHolidayStopV2(config: Config, backend: SttpBackend[Id, Nothing])(req: ApiGatewayRequest, unused: SfClient): ApiResponse = {
+    implicit val reads: Reads[PotentialHolidayStopsV2QueryParams] = Json.reads[PotentialHolidayStopsV2QueryParams]
+    (for {
+      pathParams <- req.pathParamsAsCaseClass[PotentialHolidayStopsV2PathParams]()(Json.reads[PotentialHolidayStopsV2PathParams])
+      productNamePrefix <- req.headers.flatMap(_.get(HEADER_PRODUCT_NAME_PREFIX)).toApiGatewayOp(s"missing '$HEADER_PRODUCT_NAME_PREFIX' header")
+      queryParams <- req.queryParamsAsCaseClass[PotentialHolidayStopsV2QueryParams]()
+      credit <- estimateCredit(queryParams, pathParams, config, backend)
+    } yield ApiGatewayResponse(
+      "200",
+      PotentialHolidayStopsResponse(
+        ActionCalculator.publicationDatesToBeStopped(queryParams.startDate, queryParams.endDate, ProductName(productNamePrefix))
+          .map(PotentialHolidayStop(_, credit))
+      )
+    )).apiResponse
+  }
+
+  def estimateCredit(
+    queryParams: PotentialHolidayStopsV2QueryParams,
+    pathParams: PotentialHolidayStopsV2PathParams,
+    config: Config,
+    backend: SttpBackend[Id, Nothing]
+  ): ApiGatewayOp[Option[Double]] = {
+    if (queryParams.estimateCredit == Some("true")) {
+      CreditCalculator
+        .guardianWeeklyCredit(config, pathParams.subscriptionName, backend)
+        .toApiGatewayOp("Failed to calculate credit")
+        .map(Some(_))
+    } else {
+      ContinueProcessing(None)
+    }
+  }
+
+  case class ListExistingPathParams(subscriptionName: Option[SubscriptionName])
 
   def stepsToListExisting(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
 
     val lookupOp = SalesforceHolidayStopRequest.LookupByContactAndOptionalSubscriptionName(sfClient.wrapWith(JsonHttp.getWithParams))
 
     val extractOptionalSubNameOp: ApiGatewayOp[Option[SubscriptionName]] = req.pathParameters match {
-      case Some(_) => req.pathParamsAsCaseClass[GetPathParams]()(Json.reads[GetPathParams]).map(_.subscriptionName)
+      case Some(_) => req.pathParamsAsCaseClass[ListExistingPathParams]()(Json.reads[ListExistingPathParams]).map(_.subscriptionName)
       case None => ContinueProcessing(None)
     }
 
