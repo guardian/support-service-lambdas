@@ -1,5 +1,7 @@
 package com.gu.holiday_stops
 
+import java.time.LocalDate
+
 import scala.math.BigDecimal.RoundingMode
 
 /**
@@ -9,12 +11,17 @@ import scala.math.BigDecimal.RoundingMode
  * FIXME: Discounts should be taken into account?
  */
 object HolidayCredit {
-  def apply(currentGuardianWeeklySubscription: CurrentGuardianWeeklySubscription): Double = {
-    val recurringPrice = currentGuardianWeeklySubscription.price
-    val numPublicationsInPeriod = BillingPeriodToApproxWeekCount(currentGuardianWeeklySubscription)
-    def roundUp(d: Double): Double = BigDecimal(d).setScale(2, RoundingMode.UP).toDouble
-    -roundUp(recurringPrice / numPublicationsInPeriod)
+  def apply(currentGuardianWeeklySubscription: CurrentGuardianWeeklySubscription, stoppedPublicationDate: LocalDate): Double = {
+    if (currentGuardianWeeklySubscription.introNforNMode.isDefined && stoppedPublicationDate.isBefore(currentGuardianWeeklySubscription.invoicedPeriod.startDateIncluding)) {
+      -roundUp(1) // hardcoded because N-for-N means 1 currency unit per issue
+    } else {
+      val recurringPrice = currentGuardianWeeklySubscription.price
+      val numPublicationsInPeriod = BillingPeriodToApproxWeekCount(currentGuardianWeeklySubscription)
+      -roundUp(recurringPrice / numPublicationsInPeriod)
+    }
   }
+
+  private def roundUp(d: Double): Double = BigDecimal(d).setScale(2, RoundingMode.UP).toDouble
 }
 
 // FIXME: Is this assumption safe?
