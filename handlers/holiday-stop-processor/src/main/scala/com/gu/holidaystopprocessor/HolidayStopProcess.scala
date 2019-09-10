@@ -9,21 +9,24 @@ import com.softwaremill.sttp.{Id, SttpBackend}
 
 object HolidayStopProcess {
 
-  def apply(config: Config, processDateOverride: Option[LocalDate], backend: SttpBackend[Id, Nothing]): ProcessResult =
+  def apply(config: Config, processDateOverride: Option[LocalDate], backend: SttpBackend[Id, Nothing]): List[ProcessResult] =
     Zuora.accessTokenGetResponse(config.zuoraConfig, backend) match {
       case Left(overallFailure) =>
-        ProcessResult(overallFailure)
+        List(ProcessResult(overallFailure))
 
       case Right(zuoraAccessToken) =>
-        processHolidayStops(
-          config.holidayCreditProduct,
-          guardianWeeklyProductRatePlanIds = config.guardianWeeklyProductRatePlanIds,
-          gwNforNProductRatePlanIds = config.gwNforNProductRatePlanIds,
-          getHolidayStopRequestsFromSalesforce = Salesforce.holidayStopRequests(config.sfConfig, processDateOverride),
-          getSubscription = Zuora.subscriptionGetResponse(config, zuoraAccessToken, backend),
-          updateSubscription = Zuora.subscriptionUpdateResponse(config, zuoraAccessToken, backend),
-          writeHolidayStopsToSalesforce = Salesforce.holidayStopUpdateResponse(config.sfConfig)
-        )
+        config.supportedProductConfig.map {
+          case gwConfig: GuardianWeeklyHolidayStopConfig =>
+            processHolidayStops(
+              gwConfig.holidayCreditProduct,
+              guardianWeeklyProductRatePlanIds = gwConfig.guardianWeeklyProductRatePlanIds,
+              gwNforNProductRatePlanIds = gwConfig.gwNforNProductRatePlanIds,
+              getHolidayStopRequestsFromSalesforce = Salesforce.holidayStopRequests(config.sfConfig, processDateOverride),
+              getSubscription = Zuora.subscriptionGetResponse(config, zuoraAccessToken, backend),
+              updateSubscription = Zuora.subscriptionUpdateResponse(config, zuoraAccessToken, backend),
+              writeHolidayStopsToSalesforce = Salesforce.holidayStopUpdateResponse(config.sfConfig)
+            )
+        }
     }
 
   def processHolidayStops(

@@ -39,8 +39,8 @@ class ErrorHandlingSpec extends FlatSpec with Matchers with OptionValues {
     }
 
     val result = HolidayStopProcess.processHolidayStops(
-      config.holidayCreditProduct,
-      config.guardianWeeklyProductRatePlanIds,
+      guardianWeeklyConfig.holidayCreditProduct,
+      guardianWeeklyConfig.guardianWeeklyProductRatePlanIds,
       Nil,
       getHolidayStopRequestsFromSalesforce,
       getSubscription,
@@ -67,8 +67,8 @@ class ErrorHandlingSpec extends FlatSpec with Matchers with OptionValues {
     }
 
     val result = HolidayStopProcess.processHolidayStops(
-      config.holidayCreditProduct,
-      config.guardianWeeklyProductRatePlanIds,
+      guardianWeeklyConfig.holidayCreditProduct,
+      guardianWeeklyConfig.guardianWeeklyProductRatePlanIds,
       Nil,
       getHolidayStopRequestsFromSalesforce,
       getSubscription,
@@ -96,8 +96,8 @@ class ErrorHandlingSpec extends FlatSpec with Matchers with OptionValues {
     }
 
     val result = HolidayStopProcess.processHolidayStops(
-      config.holidayCreditProduct,
-      config.guardianWeeklyProductRatePlanIds,
+      guardianWeeklyConfig.holidayCreditProduct,
+      guardianWeeklyConfig.guardianWeeklyProductRatePlanIds,
       Nil,
       getHolidayStopRequestsFromSalesforce,
       getSubscription,
@@ -124,8 +124,8 @@ class ErrorHandlingSpec extends FlatSpec with Matchers with OptionValues {
     }
 
     val result = HolidayStopProcess.processHolidayStops(
-      config.holidayCreditProduct,
-      config.guardianWeeklyProductRatePlanIds,
+      guardianWeeklyConfig.holidayCreditProduct,
+      guardianWeeklyConfig.guardianWeeklyProductRatePlanIds,
       Nil,
       getHolidayStopRequestsFromSalesforce,
       getSubscription,

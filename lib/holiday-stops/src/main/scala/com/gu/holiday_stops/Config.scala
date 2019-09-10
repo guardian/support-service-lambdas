@@ -8,9 +8,7 @@ import play.api.libs.json.{Json, Reads}
 case class Config(
   zuoraConfig: ZuoraConfig,
   sfConfig: SFAuthConfig,
-  holidayCreditProduct: HolidayCreditProduct,
-  guardianWeeklyProductRatePlanIds: List[String],
-  gwNforNProductRatePlanIds: List[String]
+  supportedProductConfig: List[ProductHolidayStopConfig]
 )
 
 /**
@@ -30,6 +28,14 @@ case class ZuoraConfig(
 case class HolidayStopProcessor(oauth: Oauth)
 
 case class Oauth(clientId: String, clientSecret: String)
+
+sealed trait ProductHolidayStopConfig
+
+case class GuardianWeeklyHolidayStopConfig(
+  holidayCreditProduct: HolidayCreditProduct,
+  guardianWeeklyProductRatePlanIds: List[String],
+  gwNforNProductRatePlanIds: List[String]
+) extends ProductHolidayStopConfig
 
 object Config {
 
@@ -179,34 +185,46 @@ object Config {
           Config(
             zuoraConfig,
             sfConfig,
-            HolidayCreditProduct(
-              productRatePlanId = "2c92a0076ae9189c016b080c930a6186",
-              productRatePlanChargeId = "2c92a0086ae928d7016b080f638477a6"
-            ),
-            guardianWeeklyProductRatePlanIdsPROD,
-            gwNforNProductRatePlanIdsPROD,
+            List(
+              GuardianWeeklyHolidayStopConfig(
+                HolidayCreditProduct(
+                  productRatePlanId = "2c92a0076ae9189c016b080c930a6186",
+                  productRatePlanChargeId = "2c92a0086ae928d7016b080f638477a6"
+                ),
+                guardianWeeklyProductRatePlanIdsPROD,
+                gwNforNProductRatePlanIdsPROD,
+              )
+            )
           )
         case "CODE" =>
           Config(
             zuoraConfig,
             sfConfig,
-            HolidayCreditProduct(
-              productRatePlanId = "2c92c0f86b0378b0016b08112e870d0a",
-              productRatePlanChargeId = "2c92c0f86b0378b0016b08112ec70d14"
-            ),
-            guardianWeeklyProductRatePlanIdsUAT,
-            gwNforNProductRatePlanIdsUAT
+            List(
+              GuardianWeeklyHolidayStopConfig(
+                HolidayCreditProduct(
+                  productRatePlanId = "2c92c0f86b0378b0016b08112e870d0a",
+                  productRatePlanChargeId = "2c92c0f86b0378b0016b08112ec70d14"
+                ),
+                guardianWeeklyProductRatePlanIdsUAT,
+                gwNforNProductRatePlanIdsUAT
+              )
+            )
           )
         case "DEV" =>
           Config(
             zuoraConfig,
             sfConfig,
-            HolidayCreditProduct(
-              productRatePlanId = "2c92c0f96b03800b016b081fc04f1ba2",
-              productRatePlanChargeId = "2c92c0f96b03800b016b081fc0f41bb4"
-            ),
-            guardianWeeklyProductRatePlanIdsDEV,
-            gwNforNProductRatePlanIdsDEV
+            List(
+              GuardianWeeklyHolidayStopConfig(
+                HolidayCreditProduct(
+                  productRatePlanId = "2c92c0f96b03800b016b081fc04f1ba2",
+                  productRatePlanChargeId = "2c92c0f96b03800b016b081fc0f41bb4"
+                ),
+                guardianWeeklyProductRatePlanIdsDEV,
+                gwNforNProductRatePlanIdsDEV
+              )
+            )
           )
       }
     }
