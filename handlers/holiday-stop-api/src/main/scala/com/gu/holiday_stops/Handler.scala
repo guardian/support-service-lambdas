@@ -167,30 +167,18 @@ object Handler extends Logging {
       pathParams <- req.pathParamsAsCaseClass[PotentialHolidayStopsV2PathParams]()(Json.reads[PotentialHolidayStopsV2PathParams])
       productNamePrefix <- req.headers.flatMap(_.get(HEADER_PRODUCT_NAME_PREFIX)).toApiGatewayOp(s"missing '$HEADER_PRODUCT_NAME_PREFIX' header")
       queryParams <- req.queryParamsAsCaseClass[PotentialHolidayStopsV2QueryParams]()
-      credit <- estimateCredit(queryParams, pathParams, config, backend)
-    } yield ApiGatewayResponse(
-      "200",
-      PotentialHolidayStopsResponse(
-        ActionCalculator.publicationDatesToBeStopped(queryParams.startDate, queryParams.endDate, ProductName(productNamePrefix))
-          .map(PotentialHolidayStop(_, credit))
-      )
-    )).apiResponse
-  }
-
-  def estimateCredit(
-    queryParams: PotentialHolidayStopsV2QueryParams,
-    pathParams: PotentialHolidayStopsV2PathParams,
-    config: Config,
-    backend: SttpBackend[Id, Nothing]
-  ): ApiGatewayOp[Option[Double]] = {
-    if (queryParams.estimateCredit == Some("true")) {
-      CreditCalculator
-        .guardianWeeklyCredit(config, pathParams.subscriptionName, backend, /* FIXME: estimation for N-for-N will be wrong */ LocalDate.now)
-        .toApiGatewayOp("Failed to calculate credit")
-        .map(Some(_))
-    } else {
-      ContinueProcessing(None)
-    }
+    } yield {
+      val potentialHolidayStops =
+        ActionCalculator
+          .publicationDatesToBeStopped(queryParams.startDate, queryParams.endDate, ProductName(productNamePrefix))
+          .map { stoppedPublicationDate => // unfortunately necessary due to GW N-for-N requiring stoppedPublicationDate to calculate correct credit estimation
+            if (queryParams.estimateCredit.contains("true"))
+              PotentialHolidayStop(stoppedPublicationDate, CreditCalculator(config, pathParams.subscriptionName, backend, stoppedPublicationDate).toOption)
+            else
+              PotentialHolidayStop(stoppedPublicationDate, None)
+          }
+      ApiGatewayResponse("200", PotentialHolidayStopsResponse(potentialHolidayStops))
+    }).apiResponse
   }
 
   case class ListExistingPathParams(subscriptionName: Option[SubscriptionName])
