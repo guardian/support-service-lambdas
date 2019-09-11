@@ -13,15 +13,14 @@ object HolidayStopProcess {
         List(ProcessResult(overallFailure))
 
       case Right(zuoraAccessToken) =>
-        config.supportedProductConfig.map {
-          case gwConfig: GuardianWeeklyHolidayStopConfig =>
-            GuardianWeeklyHolidayStopProcess.processHolidayStops(
-              config = gwConfig,
-              getHolidayStopRequestsFromSalesforce = Salesforce.holidayStopRequests(config.sfConfig, processDateOverride),
-              getSubscription = Zuora.subscriptionGetResponse(config, zuoraAccessToken, backend),
-              updateSubscription = Zuora.subscriptionUpdateResponse(config, zuoraAccessToken, backend),
-              writeHolidayStopsToSalesforce = Salesforce.holidayStopUpdateResponse(config.sfConfig)
-            )
-        }
+        List(
+          GuardianWeeklyHolidayStopProcess.processHolidayStops(
+            config = config.guardianWeeklyConfig,
+            getHolidayStopRequestsFromSalesforce = Salesforce.holidayStopRequests(config.sfConfig, processDateOverride),
+            getSubscription = Zuora.subscriptionGetResponse(config, zuoraAccessToken, backend),
+            updateSubscription = Zuora.subscriptionUpdateResponse(config, zuoraAccessToken, backend),
+            writeHolidayStopsToSalesforce = Salesforce.holidayStopUpdateResponse(config.sfConfig)
+          )
+        )
     }
 }

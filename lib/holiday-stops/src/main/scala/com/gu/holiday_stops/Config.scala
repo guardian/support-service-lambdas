@@ -8,7 +8,8 @@ import play.api.libs.json.{Json, Reads}
 case class Config(
   zuoraConfig: ZuoraConfig,
   sfConfig: SFAuthConfig,
-  supportedProductConfig: List[GuardianWeeklyHolidayStopConfig]
+  guardianWeeklyConfig: GuardianWeeklyHolidayStopConfig,
+  sundayConfig: SundayHolidayStopConfig
 )
 
 case class ZuoraConfig(
@@ -19,10 +20,6 @@ case class ZuoraConfig(
 case class HolidayStopProcessor(oauth: Oauth)
 
 case class Oauth(clientId: String, clientSecret: String)
-
-case class SundaysHolidayStopConfig(
-  holidayCreditProduct: HolidayCreditProduct,
-)
 
 object Config {
 
@@ -58,25 +55,22 @@ object Config {
           Config(
             zuoraConfig,
             sfConfig,
-            List(
-              GuardianWeeklyHolidayStopConfig.ProdConfig
-            )
+            GuardianWeeklyHolidayStopConfig.Prod,
+            SundayHolidayStopConfig.Prod
           )
         case "CODE" =>
           Config(
             zuoraConfig,
             sfConfig,
-            List(
-              GuardianWeeklyHolidayStopConfig.CodeConfig
-            )
+            GuardianWeeklyHolidayStopConfig.Code,
+            SundayHolidayStopConfig.Code
           )
         case "DEV" =>
           Config(
             zuoraConfig,
             sfConfig,
-            List(
-              GuardianWeeklyHolidayStopConfig.DevConfig
-            )
+            GuardianWeeklyHolidayStopConfig.Dev,
+            SundayHolidayStopConfig.Dev
           )
       }
     }

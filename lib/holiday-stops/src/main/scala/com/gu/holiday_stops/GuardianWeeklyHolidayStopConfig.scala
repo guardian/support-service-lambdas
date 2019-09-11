@@ -121,7 +121,7 @@ object GuardianWeeklyHolidayStopConfig {
     "2c92a0086619bf8901661ab545f51b21", // "name":"GW Oct 18 - Six for Six - ROW"}
   )
 
-  lazy val ProdConfig =
+  lazy val Prod =
     GuardianWeeklyHolidayStopConfig(
       HolidayCreditProduct(
         productRatePlanId = "2c92a0076ae9189c016b080c930a6186",
@@ -131,7 +131,7 @@ object GuardianWeeklyHolidayStopConfig {
       gwNforNProductRatePlanIdsPROD,
     )
 
-  lazy val CodeConfig =
+  lazy val Code =
     GuardianWeeklyHolidayStopConfig(
       HolidayCreditProduct(
         productRatePlanId = "2c92c0f86b0378b0016b08112e870d0a",
@@ -141,7 +141,7 @@ object GuardianWeeklyHolidayStopConfig {
       gwNforNProductRatePlanIdsUAT
     )
 
-  lazy val DevConfig =
+  lazy val Dev =
     GuardianWeeklyHolidayStopConfig(
       HolidayCreditProduct(
         productRatePlanId = "2c92c0f96b03800b016b081fc04f1ba2",

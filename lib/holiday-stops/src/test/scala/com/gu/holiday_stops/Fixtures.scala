@@ -218,11 +218,12 @@ object Fixtures {
     GuardianWeeklyHolidayStopConfig.gwNforNProductRatePlanIdsPROD
   )
 
+  val sundayHolidayStopConfig = SundayHolidayStopConfig()
+
   val config = Config(
     zuoraConfig = ZuoraConfig(baseUrl = "", holidayStopProcessor = HolidayStopProcessor(Oauth(clientId = "", clientSecret = ""))),
     sfConfig = SFAuthConfig("", "", "", "", "", ""),
-    List(
-      guardianWeeklyConfig
-    )
+    guardianWeeklyConfig = guardianWeeklyConfig,
+    sundayConfig = sundayHolidayStopConfig
   )
 }

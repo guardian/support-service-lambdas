@@ -15,20 +15,12 @@ object CreditCalculator {
     for {
       accessToken <- Zuora.accessTokenGetResponse(config.zuoraConfig, backend)
       subscription <- Zuora.subscriptionGetResponse(config, accessToken, backend)(subscriptionName)
-      gwConfig <- guardianWeeklyConfig(config)
-      credit <- guardianWeeklyCredit(gwConfig.guardianWeeklyProductRatePlanIds, gwConfig.gwNforNProductRatePlanIds, stoppedPublicationDate)(subscription)
+      credit <- guardianWeeklyCredit(
+        config.guardianWeeklyConfig.guardianWeeklyProductRatePlanIds,
+        config.guardianWeeklyConfig.gwNforNProductRatePlanIds,
+        stoppedPublicationDate
+      )(subscription)
     } yield credit
-
-  def guardianWeeklyConfig(config: Config): Either[HolidayError, GuardianWeeklyHolidayStopConfig] =
-    config
-      .supportedProductConfig
-      .map {
-        case gwConfig: GuardianWeeklyHolidayStopConfig => Some(gwConfig)
-        case _ => None
-      }
-      .find(_.isDefined)
-      .flatten
-      .toRight(OverallFailure("No guardian weekly config available"))
 
   def guardianWeeklyCredit(guardianWeeklyProductRatePlanIds: List[String], gwNforNProductRatePlanIds: List[String], stoppedPublicationDate: LocalDate)(subscription: Subscription): Either[ZuoraHolidayWriteError, Double] =
     CurrentGuardianWeeklySubscription(subscription, guardianWeeklyProductRatePlanIds, gwNforNProductRatePlanIds)
