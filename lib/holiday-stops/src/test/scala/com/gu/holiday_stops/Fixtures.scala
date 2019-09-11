@@ -214,16 +214,16 @@ object Fixtures {
       productRatePlanId = "ratePlanId",
       productRatePlanChargeId = "ratePlanChargeId"
     ),
-    GuardianWeeklyHolidayStopConfig.guardianWeeklyProductRatePlanIdsPROD, // FIXME
-    GuardianWeeklyHolidayStopConfig.gwNforNProductRatePlanIdsPROD
+    GuardianWeeklyHolidayStopConfig.Prod.guardianWeeklyProductRatePlanIds, // FIXME
+    GuardianWeeklyHolidayStopConfig.Prod.gwNforNProductRatePlanIds
   )
 
-  val sundayHolidayStopConfig = SundayHolidayStopConfig()
+  val sundayVoucherHolidayStopConfig = SundayVoucherHolidayStopConfig()
 
   val config = Config(
     zuoraConfig = ZuoraConfig(baseUrl = "", holidayStopProcessor = HolidayStopProcessor(Oauth(clientId = "", clientSecret = ""))),
     sfConfig = SFAuthConfig("", "", "", "", "", ""),
     guardianWeeklyConfig = guardianWeeklyConfig,
-    sundayConfig = sundayHolidayStopConfig
+    sundayVoucherConfig = sundayVoucherHolidayStopConfig
   )
 }

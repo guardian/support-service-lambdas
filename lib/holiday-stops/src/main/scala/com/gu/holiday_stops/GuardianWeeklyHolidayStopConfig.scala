@@ -22,7 +22,7 @@ object GuardianWeeklyHolidayStopConfig {
    * }
    * }
    */
-  val guardianWeeklyProductRatePlanIdsPROD = List(
+  private val guardianWeeklyProductRatePlanIdsPROD = List(
     // Product: {"id":"2c92a0ff-6619-bf89-0166-1aa3247c4b1d", "name":"Guardian Weekly - Domestic"}
     "2c92a0fe6619b4b901661aa8e66c1692", // "name": "GW Oct 18 - Annual - Domestic"
     "2c92a0fe6619b4b301661aa494392ee2", // "name": "GW Oct 18 - Quarterly - Domestic"
@@ -44,7 +44,7 @@ object GuardianWeeklyHolidayStopConfig {
     "2c92a0ff58bdf4eb0158f307eccf02af" // "name":"Guardian Weekly Annual"
   )
 
-  val guardianWeeklyProductRatePlanIdsUAT = List(
+  private val guardianWeeklyProductRatePlanIdsUAT = List(
     // Product: {"id":"2c92a0ff-6619-bf89-0166-1aa3247c4b1d", "name":"Guardian Weekly - Domestic"}
     "2c92c0f9660fc4d70166107fa5412641", // "name": "GW Oct 18 - Annual - Domestic"
     "2c92c0f8660fb5d601661081ea010391", // "name": "GW Oct 18 - Quarterly - Domestic"
@@ -63,7 +63,7 @@ object GuardianWeeklyHolidayStopConfig {
     "2c92c0f958aa45650158da23e5ab29c9" // "name":"Guardian Weekly Annual"
   )
 
-  val guardianWeeklyProductRatePlanIdsDEV = List(
+  private val guardianWeeklyProductRatePlanIdsDEV = List(
     // Product: {"id":"2c92c0f8-65d2-72ef-0165-f14cc19d238a", "name":"Guardian Weekly - Domestic"}
     "2c92c0f965d280590165f16b1b9946c2", // "name": "GW Oct 18 - Annual - Domestic"
     "2c92c0f965dc30640165f150c0956859", // "name": "GW Oct 18 - Quarterly - Domestic"
@@ -82,7 +82,7 @@ object GuardianWeeklyHolidayStopConfig {
     "2c92c0f858aa38af0158da325d2f0b3d", // "name":"Guardian Weekly Annual"
   )
 
-  val gwNforNProductRatePlanIdsDEV = List(
+  private val gwNforNProductRatePlanIdsDEV = List(
     "2c92c0f85a2190ae015a22bbb6194518", // "name":"Guardian Weekly 6 Issues"}
     "2c92c0f85a6b1352015a80a093f21fe0", // "name":"Guardian Weekly 12 Issues"}
     "2c92c0f95a246217015a388eaa8c2e2d", // "name":"Guardian Weekly 6 Issues"}
@@ -95,7 +95,7 @@ object GuardianWeeklyHolidayStopConfig {
   )
 
 
-  val gwNforNProductRatePlanIdsUAT = List(
+  private val gwNforNProductRatePlanIdsUAT = List(
     "2c92c0f858aa39000158bf48c5147ddd", // "name":"6 for 6 Issues - OLD"}
     "2c92c0f85a4b3a23015a5bd1923d4396", // "name":"Guardian Weekly 12 Issues"}
     "2c92c0f85a4b3a7b015a5be6e4e93937", // "name":"Guardian Weekly 6 Issues"}
@@ -109,7 +109,7 @@ object GuardianWeeklyHolidayStopConfig {
 
   )
 
-  val gwNforNProductRatePlanIdsPROD = List(
+  private val gwNforNProductRatePlanIdsPROD = List(
     "2c92a0fc5a2a49f0015a41f473da233a", // "name":"Guardian Weekly 6 Issues"}
     "2c92a0fd5a5adc8b015a5c690d0d1ec6", // "name":"Guardian Weekly 12 Issues"}
     "2c92a0fe5a5ad344015a5c67b1144250", // "name":"Guardian Weekly 6 Issues"}

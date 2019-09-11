@@ -3,9 +3,9 @@ package com.gu.holidaystopprocessor
 import com.gu.holiday_stops._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestsDetail, ProductName, SubscriptionName}
 
-object SundayHolidayStopProcessor {
+object SundayVoucherHolidayStopProcessor {
   def processHolidayStops(
-    config: SundayHolidayStopConfig,
+    config: SundayVoucherHolidayStopConfig,
     getHolidayStopRequestsFromSalesforce: ProductName => Either[OverallFailure, List[HolidayStopRequestsDetail]],
     getSubscription: SubscriptionName => Either[ZuoraHolidayWriteError, Subscription],
     updateSubscription: (Subscription, HolidayCreditUpdate) => Either[ZuoraHolidayWriteError, Unit],
