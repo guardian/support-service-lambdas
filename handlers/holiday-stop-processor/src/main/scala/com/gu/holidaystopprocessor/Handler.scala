@@ -26,13 +26,13 @@ object Handler extends Lambda[Option[LocalDate], List[HolidayStopResponse]] {
       case Right(config) =>
         val results = HolidayStopProcess(config, processDateOverride, HttpURLConnectionBackend())
         results.foreach(result => ProcessResult.log(result))
-        results.map(_.overallFailure).sequence match {
-          case Some(failures) =>
-            Left(new RuntimeException(failures.map(_.reason).mkString("; ")))
-
-          case None =>
+        results.flatMap(_.overallFailure.toList) match {
+          case Nil =>
             val (_, successfulZuoraResponses) = results.flatMap(_.holidayStopResults).separate
             Right(successfulZuoraResponses)
+          case failures =>
+            Left(new RuntimeException(failures.map(_.reason).mkString("; ")))
+
         }
     }
   }
