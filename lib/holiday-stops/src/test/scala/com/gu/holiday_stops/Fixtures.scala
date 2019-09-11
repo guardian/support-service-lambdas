@@ -214,8 +214,8 @@ object Fixtures {
       productRatePlanId = "ratePlanId",
       productRatePlanChargeId = "ratePlanChargeId"
     ),
-    Config.guardianWeeklyProductRatePlanIdsPROD, // FIXME
-    Config.gwNforNProductRatePlanIdsPROD
+    GuardianWeeklyHolidayStopConfig.guardianWeeklyProductRatePlanIdsPROD, // FIXME
+    GuardianWeeklyHolidayStopConfig.gwNforNProductRatePlanIdsPROD
   )
 
   val config = Config(
