@@ -16,8 +16,8 @@ object CreditCalculator {
       accessToken <- Zuora.accessTokenGetResponse(config.zuoraConfig, backend)
       subscription <- Zuora.subscriptionGetResponse(config, accessToken, backend)(subscriptionName)
       credit <- guardianWeeklyCredit(
-        config.guardianWeeklyConfig.guardianWeeklyProductRatePlanIds,
-        config.guardianWeeklyConfig.gwNforNProductRatePlanIds,
+        config.guardianWeeklyConfig.productRatePlanIds,
+        config.guardianWeeklyConfig.nForNProductRatePlanIds,
         stoppedPublicationDate
       )(subscription)
     } yield credit

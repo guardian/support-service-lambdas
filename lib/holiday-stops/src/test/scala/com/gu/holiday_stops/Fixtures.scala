@@ -52,7 +52,7 @@ object Fixtures {
               billingPeriod,
               chargedThroughDate
             )),
-          Fixtures.guardianWeeklyConfig.guardianWeeklyProductRatePlanIds.head,
+          Fixtures.guardianWeeklyConfig.productRatePlanIds.head,
           ""
         )
       )
@@ -79,7 +79,7 @@ object Fixtures {
           HolidayEnd__c = Some(LocalDate.of(2019, 8, 9)),
           processedThroughDate = None
         )),
-        Fixtures.guardianWeeklyConfig.guardianWeeklyProductRatePlanIds.head,
+        Fixtures.guardianWeeklyConfig.productRatePlanIds.head,
         ""
       ),
       RatePlan(
@@ -95,7 +95,7 @@ object Fixtures {
           HolidayEnd__c = Some(LocalDate.of(2019, 9, 1)),
           processedThroughDate = None
         )),
-        Fixtures.guardianWeeklyConfig.guardianWeeklyProductRatePlanIds.head,
+        Fixtures.guardianWeeklyConfig.productRatePlanIds.head,
         ""
       ),
       RatePlan(
@@ -111,7 +111,7 @@ object Fixtures {
           HolidayEnd__c = Some(LocalDate.of(2019, 8, 11)),
           processedThroughDate = None
         )),
-        Fixtures.guardianWeeklyConfig.guardianWeeklyProductRatePlanIds.head,
+        Fixtures.guardianWeeklyConfig.productRatePlanIds.head,
         ""
       ),
       RatePlan(
@@ -143,7 +143,7 @@ object Fixtures {
           HolidayEnd__c = Some(LocalDate.of(2019, 8, 2)),
           processedThroughDate = None
         )),
-        Fixtures.guardianWeeklyConfig.guardianWeeklyProductRatePlanIds.head,
+        Fixtures.guardianWeeklyConfig.productRatePlanIds.head,
         ""
       ),
       RatePlan(
@@ -159,7 +159,7 @@ object Fixtures {
           HolidayEnd__c = Some(LocalDate.of(2019, 1, 4)),
           processedThroughDate = None
         )),
-        Fixtures.guardianWeeklyConfig.guardianWeeklyProductRatePlanIds.head,
+        Fixtures.guardianWeeklyConfig.productRatePlanIds.head,
         ""
       ),
       RatePlan(
@@ -169,7 +169,7 @@ object Fixtures {
           billingPeriod = "Quarter",
           chargedThroughDate = Some(LocalDate.of(2019, 9, 7))
         )),
-        Fixtures.guardianWeeklyConfig.guardianWeeklyProductRatePlanIds.head,
+        Fixtures.guardianWeeklyConfig.productRatePlanIds.head,
         ""
       )
     )
@@ -214,8 +214,8 @@ object Fixtures {
       productRatePlanId = "ratePlanId",
       productRatePlanChargeId = "ratePlanChargeId"
     ),
-    GuardianWeeklyHolidayStopConfig.Prod.guardianWeeklyProductRatePlanIds, // FIXME
-    GuardianWeeklyHolidayStopConfig.Prod.gwNforNProductRatePlanIds
+    GuardianWeeklyHolidayStopConfig.Prod.productRatePlanIds, // FIXME
+    GuardianWeeklyHolidayStopConfig.Prod.nForNProductRatePlanIds
   )
 
   val sundayVoucherHolidayStopConfig = SundayVoucherHolidayStopConfig()

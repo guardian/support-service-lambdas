@@ -25,8 +25,8 @@ object GuardianWeeklyHolidayStopProcess {
           holidayStops.map(
             writeHolidayStopToZuora(
               config.holidayCreditProduct,
-              config.guardianWeeklyProductRatePlanIds,
-              config.gwNforNProductRatePlanIds,
+              config.productRatePlanIds,
+              config.nForNProductRatePlanIds,
               getSubscription,
               updateSubscription
             )

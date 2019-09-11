@@ -44,7 +44,7 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
   "HolidayStopProcess" should "give correct added charge" in {
     val response = GuardianWeeklyHolidayStopProcess.writeHolidayStopToZuora(
       guardianWeeklyConfig.holidayCreditProduct,
-      guardianWeeklyConfig.guardianWeeklyProductRatePlanIds,
+      guardianWeeklyConfig.productRatePlanIds,
       Nil,
       getSubscription(Right(Fixtures.mkSubscriptionWithHolidayStops())),
       updateSubscription(Right(()))
@@ -63,7 +63,7 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
   it should "give an exception message if update fails" in {
     val response = GuardianWeeklyHolidayStopProcess.writeHolidayStopToZuora(
       guardianWeeklyConfig.holidayCreditProduct,
-      guardianWeeklyConfig.guardianWeeklyProductRatePlanIds,
+      guardianWeeklyConfig.productRatePlanIds,
       Nil,
       getSubscription(Right(subscription)),
       updateSubscription(Left(ZuoraHolidayWriteError("update went wrong")))
@@ -74,7 +74,7 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
   it should "give an exception message if getting subscription details fails" in {
     val response = GuardianWeeklyHolidayStopProcess.writeHolidayStopToZuora(
       guardianWeeklyConfig.holidayCreditProduct,
-      guardianWeeklyConfig.guardianWeeklyProductRatePlanIds,
+      guardianWeeklyConfig.productRatePlanIds,
       Nil,
       getSubscription(Left(ZuoraHolidayWriteError("get went wrong"))),
       updateSubscription(Right(()))
@@ -85,7 +85,7 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
   it should "give an exception message if subscription isn't auto-renewing" in {
     val response = GuardianWeeklyHolidayStopProcess.writeHolidayStopToZuora(
       guardianWeeklyConfig.holidayCreditProduct,
-      guardianWeeklyConfig.guardianWeeklyProductRatePlanIds,
+      guardianWeeklyConfig.productRatePlanIds,
       Nil,
       getSubscription(Right(subscription.copy(autoRenew = false))),
       updateSubscription(Right(()))
@@ -97,7 +97,7 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
   it should "just give charge added without applying an update if holiday stop has already been applied" in {
     val response = GuardianWeeklyHolidayStopProcess.writeHolidayStopToZuora(
       guardianWeeklyConfig.holidayCreditProduct,
-      guardianWeeklyConfig.guardianWeeklyProductRatePlanIds,
+      guardianWeeklyConfig.productRatePlanIds,
       Nil,
       getSubscription(Right(Fixtures.mkSubscriptionWithHolidayStops())),
       updateSubscription(Left(ZuoraHolidayWriteError("shouldn't need to apply an update")))
@@ -116,7 +116,7 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
   it should "give a failure if subscription has no added charge" in {
     val response = GuardianWeeklyHolidayStopProcess.writeHolidayStopToZuora(
       guardianWeeklyConfig.holidayCreditProduct,
-      guardianWeeklyConfig.guardianWeeklyProductRatePlanIds,
+      guardianWeeklyConfig.productRatePlanIds,
       Nil,
       getSubscription(Right(subscription)),
       updateSubscription(Left(ZuoraHolidayWriteError("shouldn't need to apply an update")))

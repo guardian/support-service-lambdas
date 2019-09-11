@@ -2,8 +2,8 @@ package com.gu.holiday_stops
 
 case class GuardianWeeklyHolidayStopConfig(
   holidayCreditProduct: HolidayCreditProduct,
-  guardianWeeklyProductRatePlanIds: List[String],
-  gwNforNProductRatePlanIds: List[String]
+  productRatePlanIds: List[String],
+  nForNProductRatePlanIds: List[String]
 )
 
 object GuardianWeeklyHolidayStopConfig {

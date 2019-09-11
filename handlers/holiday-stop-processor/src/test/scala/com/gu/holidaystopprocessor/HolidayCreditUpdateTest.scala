@@ -8,7 +8,7 @@ import org.scalatest.{EitherValues, FlatSpec, Matchers}
 
 class HolidayCreditUpdateTest extends FlatSpec with Matchers with EitherValues {
 
-  val guardianWeeklyProductRatePlanIds = Fixtures.guardianWeeklyConfig.guardianWeeklyProductRatePlanIds
+  val guardianWeeklyProductRatePlanIds = Fixtures.guardianWeeklyConfig.productRatePlanIds
 
   "holidayCreditToAdd" should "generate update correctly" in {
     val subscription = Fixtures.mkSubscription(
