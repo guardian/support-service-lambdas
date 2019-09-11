@@ -2,6 +2,7 @@ package com.gu.holidaystopprocessor
 
 import java.time.LocalDate
 
+import com.gu.holiday_stops.ActionCalculator.GuardianWeeklySuspensionConstants
 import com.gu.holiday_stops.Fixtures.{guardianWeeklyConfig, mkSubscription}
 import com.gu.holiday_stops._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
@@ -195,6 +196,39 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
       updateSubscription(Right(())),
       exportAmendments(Left(SalesforceHolidayWriteError("Export failed"))),
       None
+    )
+    responses.overallFailure.value shouldBe OverallFailure("Export failed")
+  }
+  it should "calculate process date correctly" in {
+    def verifyProcessDate(productName: ProductName, processDate: LocalDate): Either[OverallFailure, List[HolidayStopRequestsDetail]] = {
+      processDate should equal(LocalDate.now().plusDays(GuardianWeeklySuspensionConstants.processorRunLeadTimeDays))
+      Right(Nil)
+    }
+
+    val responses = GuardianWeeklyHolidayStopProcess.processHolidayStops(
+      guardianWeeklyConfig,
+      verifyProcessDate,
+      getSubscription(Right(subscription)),
+      updateSubscription(Right(())),
+      exportAmendments(Left(SalesforceHolidayWriteError("Export failed"))),
+      None
+    )
+    responses.overallFailure.value shouldBe OverallFailure("Export failed")
+  }
+  it should "use process date override" in {
+    val processOverrideDate  = LocalDate.now().plusDays(123)
+    def verifyProcessDate(productName: ProductName, processDate: LocalDate): Either[OverallFailure, List[HolidayStopRequestsDetail]] = {
+      processDate should equal(processOverrideDate)
+      Right(Nil)
+    }
+
+    val responses = GuardianWeeklyHolidayStopProcess.processHolidayStops(
+      guardianWeeklyConfig,
+      verifyProcessDate,
+      getSubscription(Right(subscription)),
+      updateSubscription(Right(())),
+      exportAmendments(Left(SalesforceHolidayWriteError("Export failed"))),
+      Some(processOverrideDate)
     )
     responses.overallFailure.value shouldBe OverallFailure("Export failed")
   }
