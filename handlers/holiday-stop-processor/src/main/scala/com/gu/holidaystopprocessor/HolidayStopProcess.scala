@@ -16,17 +16,19 @@ object HolidayStopProcess {
         List(
           GuardianWeeklyHolidayStopProcess.processHolidayStops(
             config = config.guardianWeeklyConfig,
-            getHolidayStopRequestsFromSalesforce = Salesforce.holidayStopRequests(config.sfConfig, processDateOverride),
+            getHolidayStopRequestsFromSalesforce = Salesforce.holidayStopRequests(config.sfConfig),
             getSubscription = Zuora.subscriptionGetResponse(config, zuoraAccessToken, backend),
             updateSubscription = Zuora.subscriptionUpdateResponse(config, zuoraAccessToken, backend),
-            writeHolidayStopsToSalesforce = Salesforce.holidayStopUpdateResponse(config.sfConfig)
+            writeHolidayStopsToSalesforce = Salesforce.holidayStopUpdateResponse(config.sfConfig),
+            processDateOverride
           ),
           SundayVoucherHolidayStopProcessor.processHolidayStops(
             config = config.sundayVoucherConfig,
-            getHolidayStopRequestsFromSalesforce = Salesforce.holidayStopRequests(config.sfConfig, processDateOverride),
+            getHolidayStopRequestsFromSalesforce = Salesforce.holidayStopRequests(config.sfConfig),
             getSubscription = Zuora.subscriptionGetResponse(config, zuoraAccessToken, backend),
             updateSubscription = Zuora.subscriptionUpdateResponse(config, zuoraAccessToken, backend),
-            writeHolidayStopsToSalesforce = Salesforce.holidayStopUpdateResponse(config.sfConfig)
+            writeHolidayStopsToSalesforce = Salesforce.holidayStopUpdateResponse(config.sfConfig),
+            processDateOverride
           )
         )
     }

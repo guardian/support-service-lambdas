@@ -5,16 +5,18 @@ import java.time.LocalDate
 import com.gu.holiday_stops.{CreditCalculator, CurrentGuardianWeeklySubscription, ExtendedTerm, GuardianWeeklyHolidayStopConfig, HolidayCreditProduct, HolidayCreditUpdate, HolidayStop, OverallFailure, SalesforceHolidayWriteError, Subscription, ZuoraHolidayWriteError}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestsDetail, HolidayStopRequestsDetailChargeCode, HolidayStopRequestsDetailChargePrice, ProductName, StoppedPublicationDate, SubscriptionName}
 import cats.implicits._
+import com.gu.holiday_stops.ActionCalculator.{GuardianWeeklySuspensionConstants, suspensionConstantsByProduct}
 
 object GuardianWeeklyHolidayStopProcess {
   def processHolidayStops(
     config: GuardianWeeklyHolidayStopConfig,
-    getHolidayStopRequestsFromSalesforce: ProductName => Either[OverallFailure, List[HolidayStopRequestsDetail]],
+    getHolidayStopRequestsFromSalesforce: (ProductName, LocalDate) => Either[OverallFailure, List[HolidayStopRequestsDetail]],
     getSubscription: SubscriptionName => Either[ZuoraHolidayWriteError, Subscription],
     updateSubscription: (Subscription, HolidayCreditUpdate) => Either[ZuoraHolidayWriteError, Unit],
-    writeHolidayStopsToSalesforce: List[HolidayStopResponse] => Either[SalesforceHolidayWriteError, Unit]
+    writeHolidayStopsToSalesforce: List[HolidayStopResponse] => Either[SalesforceHolidayWriteError, Unit],
+    processDateOverride: Option[LocalDate]
   ): ProcessResult = {
-    getHolidayStopRequestsFromSalesforce(ProductName("Guardian Weekly")) match {
+    getHolidayStopRequestsFromSalesforce(ProductName("Guardian Weekly"), calculateProcessDate(processDateOverride)) match {
       case Left(overallFailure) =>
         ProcessResult(overallFailure)
 
@@ -41,6 +43,10 @@ object GuardianWeeklyHolidayStopProcess {
           OverallFailure(failedZuoraResponses, salesforceExportResult)
         )
     }
+  }
+
+  private def calculateProcessDate(processDateOverride: Option[LocalDate]) = {
+    processDateOverride.getOrElse(LocalDate.now.plusDays(GuardianWeeklySuspensionConstants.processorRunLeadTimeDays))
   }
 
   /**

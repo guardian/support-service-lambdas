@@ -13,8 +13,8 @@ import org.scalatest._
  * Make sure short-circuiting does not happen.
  */
 class GuardianWeeklyErrorHandlingSpec extends FlatSpec with Matchers with OptionValues {
-  val getHolidayStopRequestsFromSalesforce: ProductName => Either[OverallFailure, List[HolidayStopRequestsDetail]] = {
-    _ =>
+  val getHolidayStopRequestsFromSalesforce: (ProductName, LocalDate) => Either[OverallFailure, List[HolidayStopRequestsDetail]] = {
+    (_, _) =>
       Right(List(
         mkHolidayStopRequestDetails(mkHolidayStopRequest("R1", LocalDate.of(2019, 8, 2), SubscriptionName("A-S1")), "C1"),
         mkHolidayStopRequestDetails(mkHolidayStopRequest("R2", LocalDate.of(2019, 9, 1), SubscriptionName("A-S2")), "C3"),
@@ -44,7 +44,8 @@ class GuardianWeeklyErrorHandlingSpec extends FlatSpec with Matchers with Option
       getHolidayStopRequestsFromSalesforce,
       getSubscription,
       updateSubscription,
-      writeHolidayStopsToSalesforce
+      writeHolidayStopsToSalesforce,
+      None
     )
 
     val (failedZuoraResponses, successfulZuoraResponses) = result.holidayStopResults.separate
@@ -70,7 +71,8 @@ class GuardianWeeklyErrorHandlingSpec extends FlatSpec with Matchers with Option
       getHolidayStopRequestsFromSalesforce,
       getSubscription,
       updateSubscription,
-      writeHolidayStopsToSalesforce
+      writeHolidayStopsToSalesforce,
+      None
     )
 
     val (failedZuoraResponses, successfulZuoraResponses) = result.holidayStopResults.separate
@@ -97,7 +99,8 @@ class GuardianWeeklyErrorHandlingSpec extends FlatSpec with Matchers with Option
       getHolidayStopRequestsFromSalesforce,
       getSubscription,
       updateSubscription,
-      writeHolidayStopsToSalesforce
+      writeHolidayStopsToSalesforce,
+      None
     )
 
     val (failedZuoraResponses, successfulZuoraResponses) = result.holidayStopResults.separate
@@ -123,7 +126,8 @@ class GuardianWeeklyErrorHandlingSpec extends FlatSpec with Matchers with Option
       getHolidayStopRequestsFromSalesforce,
       getSubscription,
       updateSubscription,
-      writeHolidayStopsToSalesforce
+      writeHolidayStopsToSalesforce,
+      None
     )
 
     val (failedZuoraResponses, successfulZuoraResponses) = result.holidayStopResults.separate

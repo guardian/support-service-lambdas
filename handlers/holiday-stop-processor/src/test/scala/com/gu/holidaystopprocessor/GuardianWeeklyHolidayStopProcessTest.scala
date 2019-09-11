@@ -25,8 +25,8 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
     None
   )
 
-  private def getHolidayStopRequestsFromSalesforce(requestsGet: Either[OverallFailure, List[HolidayStopRequestsDetail]]): ProductName => Either[OverallFailure, List[HolidayStopRequestsDetail]] =
-    _ => requestsGet
+  private def getHolidayStopRequestsFromSalesforce(requestsGet: Either[OverallFailure, List[HolidayStopRequestsDetail]]): (ProductName, LocalDate) => Either[OverallFailure, List[HolidayStopRequestsDetail]] =
+    (_, _) => requestsGet
 
   private def getSubscription(subscriptionGet: Either[ZuoraHolidayWriteError, Subscription]): SubscriptionName => Either[ZuoraHolidayWriteError, Subscription] = {
     _ => subscriptionGet
@@ -134,7 +134,8 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
       ))),
       getSubscription(Right(Fixtures.mkSubscriptionWithHolidayStops())),
       updateSubscription(Right(())),
-      exportAmendments(Right(()))
+      exportAmendments(Right(())),
+      None
     )
     responses.holidayStopResults.headOption.value.right.value shouldBe HolidayStopResponse(
       requestId = HolidayStopRequestsDetailId("R1"),
@@ -166,7 +167,8 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
       ))),
       getSubscription(Right(Fixtures.mkSubscriptionWithHolidayStops())),
       updateSubscription(Right(())),
-      exportAmendments(Right(()))
+      exportAmendments(Right(())),
+      None
     )
     responses.resultsToExport shouldBe List(
       HolidayStopResponse(
@@ -191,7 +193,8 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
       ))),
       getSubscription(Right(subscription)),
       updateSubscription(Right(())),
-      exportAmendments(Left(SalesforceHolidayWriteError("Export failed")))
+      exportAmendments(Left(SalesforceHolidayWriteError("Export failed"))),
+      None
     )
     responses.overallFailure.value shouldBe OverallFailure("Export failed")
   }
