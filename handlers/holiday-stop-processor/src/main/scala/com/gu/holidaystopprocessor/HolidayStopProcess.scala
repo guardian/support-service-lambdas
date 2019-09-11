@@ -20,6 +20,13 @@ object HolidayStopProcess {
             getSubscription = Zuora.subscriptionGetResponse(config, zuoraAccessToken, backend),
             updateSubscription = Zuora.subscriptionUpdateResponse(config, zuoraAccessToken, backend),
             writeHolidayStopsToSalesforce = Salesforce.holidayStopUpdateResponse(config.sfConfig)
+          ),
+          SundayHolidayStopProcessor.processHolidayStops(
+            config = config.sundayConfig,
+            getHolidayStopRequestsFromSalesforce = Salesforce.holidayStopRequests(config.sfConfig, processDateOverride),
+            getSubscription = Zuora.subscriptionGetResponse(config, zuoraAccessToken, backend),
+            updateSubscription = Zuora.subscriptionUpdateResponse(config, zuoraAccessToken, backend),
+            writeHolidayStopsToSalesforce = Salesforce.holidayStopUpdateResponse(config.sfConfig)
           )
         )
     }
