@@ -7,7 +7,7 @@ import com.gu.holiday_stops._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
 import org.scalatest.{EitherValues, FlatSpec, Matchers, OptionValues}
 
-class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues with OptionValues {
+class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with EitherValues with OptionValues {
 
   private val subscription = mkSubscription(
     termStartDate = LocalDate.of(2018, 1, 1),
@@ -42,7 +42,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
     _ => amendmentExport
 
   "HolidayStopProcess" should "give correct added charge" in {
-    val response = HolidayStopProcess.writeHolidayStopToZuora(
+    val response = GuardianWeeklyHolidayStopProcess.writeHolidayStopToZuora(
       guardianWeeklyConfig.holidayCreditProduct,
       guardianWeeklyConfig.guardianWeeklyProductRatePlanIds,
       Nil,
@@ -61,7 +61,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
   }
 
   it should "give an exception message if update fails" in {
-    val response = HolidayStopProcess.writeHolidayStopToZuora(
+    val response = GuardianWeeklyHolidayStopProcess.writeHolidayStopToZuora(
       guardianWeeklyConfig.holidayCreditProduct,
       guardianWeeklyConfig.guardianWeeklyProductRatePlanIds,
       Nil,
@@ -72,7 +72,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
   }
 
   it should "give an exception message if getting subscription details fails" in {
-    val response = HolidayStopProcess.writeHolidayStopToZuora(
+    val response = GuardianWeeklyHolidayStopProcess.writeHolidayStopToZuora(
       guardianWeeklyConfig.holidayCreditProduct,
       guardianWeeklyConfig.guardianWeeklyProductRatePlanIds,
       Nil,
@@ -83,7 +83,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
   }
 
   it should "give an exception message if subscription isn't auto-renewing" in {
-    val response = HolidayStopProcess.writeHolidayStopToZuora(
+    val response = GuardianWeeklyHolidayStopProcess.writeHolidayStopToZuora(
       guardianWeeklyConfig.holidayCreditProduct,
       guardianWeeklyConfig.guardianWeeklyProductRatePlanIds,
       Nil,
@@ -95,7 +95,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
   }
 
   it should "just give charge added without applying an update if holiday stop has already been applied" in {
-    val response = HolidayStopProcess.writeHolidayStopToZuora(
+    val response = GuardianWeeklyHolidayStopProcess.writeHolidayStopToZuora(
       guardianWeeklyConfig.holidayCreditProduct,
       guardianWeeklyConfig.guardianWeeklyProductRatePlanIds,
       Nil,
@@ -114,7 +114,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
   }
 
   it should "give a failure if subscription has no added charge" in {
-    val response = HolidayStopProcess.writeHolidayStopToZuora(
+    val response = GuardianWeeklyHolidayStopProcess.writeHolidayStopToZuora(
       guardianWeeklyConfig.holidayCreditProduct,
       guardianWeeklyConfig.guardianWeeklyProductRatePlanIds,
       Nil,
@@ -125,7 +125,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
   }
 
   "processHolidayStops" should "give correct charges added" in {
-    val responses = HolidayStopProcess.processHolidayStops(
+    val responses = GuardianWeeklyHolidayStopProcess.processHolidayStops(
       guardianWeeklyConfig.holidayCreditProduct,
       guardianWeeklyConfig.guardianWeeklyProductRatePlanIds,
       Nil,
@@ -159,7 +159,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
   }
 
   it should "only export results that haven't already been exported" in {
-    val responses = HolidayStopProcess.processHolidayStops(
+    val responses = GuardianWeeklyHolidayStopProcess.processHolidayStops(
       guardianWeeklyConfig.holidayCreditProduct,
       guardianWeeklyConfig.guardianWeeklyProductRatePlanIds,
       Nil,
@@ -186,7 +186,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
   }
 
   it should "give an exception message if exporting results fails" in {
-    val responses = HolidayStopProcess.processHolidayStops(
+    val responses = GuardianWeeklyHolidayStopProcess.processHolidayStops(
       guardianWeeklyConfig.holidayCreditProduct,
       guardianWeeklyConfig.guardianWeeklyProductRatePlanIds,
       Nil,

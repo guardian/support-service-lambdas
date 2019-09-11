@@ -1,17 +1,18 @@
-package com.gu.holidaystopprocessor
+package com.gu.GuardianWeeklyHolidayStopProcessor
 
 import java.time.LocalDate
 
 import cats.implicits._
 import com.gu.holiday_stops.Fixtures._
 import com.gu.holiday_stops._
+import com.gu.holidaystopprocessor.{GuardianWeeklyHolidayStopProcess, HolidayStopResponse}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestsDetail, ProductName, SubscriptionName}
 import org.scalatest._
 
 /**
  * Make sure short-circuiting does not happen.
  */
-class ErrorHandlingSpec extends FlatSpec with Matchers with OptionValues {
+class GuardianWeeklyErrorHandlingSpec extends FlatSpec with Matchers with OptionValues {
   val getHolidayStopRequestsFromSalesforce: ProductName => Either[OverallFailure, List[HolidayStopRequestsDetail]] = {
     _ =>
       Right(List(
@@ -38,7 +39,7 @@ class ErrorHandlingSpec extends FlatSpec with Matchers with OptionValues {
       case _ => Right(())
     }
 
-    val result = HolidayStopProcess.processHolidayStops(
+    val result = GuardianWeeklyHolidayStopProcess.processHolidayStops(
       guardianWeeklyConfig.holidayCreditProduct,
       guardianWeeklyConfig.guardianWeeklyProductRatePlanIds,
       Nil,
@@ -66,7 +67,7 @@ class ErrorHandlingSpec extends FlatSpec with Matchers with OptionValues {
       case _ => Left(SalesforceHolidayWriteError("salesforce boom")) // NOTE: this line is key to the test
     }
 
-    val result = HolidayStopProcess.processHolidayStops(
+    val result = GuardianWeeklyHolidayStopProcess.processHolidayStops(
       guardianWeeklyConfig.holidayCreditProduct,
       guardianWeeklyConfig.guardianWeeklyProductRatePlanIds,
       Nil,
@@ -95,7 +96,7 @@ class ErrorHandlingSpec extends FlatSpec with Matchers with OptionValues {
       case _ => Right(())
     }
 
-    val result = HolidayStopProcess.processHolidayStops(
+    val result = GuardianWeeklyHolidayStopProcess.processHolidayStops(
       guardianWeeklyConfig.holidayCreditProduct,
       guardianWeeklyConfig.guardianWeeklyProductRatePlanIds,
       Nil,
@@ -123,7 +124,7 @@ class ErrorHandlingSpec extends FlatSpec with Matchers with OptionValues {
       case _ => Right(())
     }
 
-    val result = HolidayStopProcess.processHolidayStops(
+    val result = GuardianWeeklyHolidayStopProcess.processHolidayStops(
       guardianWeeklyConfig.holidayCreditProduct,
       guardianWeeklyConfig.guardianWeeklyProductRatePlanIds,
       Nil,
@@ -139,5 +140,4 @@ class ErrorHandlingSpec extends FlatSpec with Matchers with OptionValues {
     (failedZuoraResponses.size + successfulZuoraResponses.size) shouldBe 3
     result.overallFailure should be(None)
   }
-
 }
