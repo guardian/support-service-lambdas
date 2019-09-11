@@ -16,9 +16,7 @@ object HolidayStopProcess {
         config.supportedProductConfig.map {
           case gwConfig: GuardianWeeklyHolidayStopConfig =>
             GuardianWeeklyHolidayStopProcess.processHolidayStops(
-              gwConfig.holidayCreditProduct,
-              guardianWeeklyProductRatePlanIds = gwConfig.guardianWeeklyProductRatePlanIds,
-              gwNforNProductRatePlanIds = gwConfig.gwNforNProductRatePlanIds,
+              config = gwConfig,
               getHolidayStopRequestsFromSalesforce = Salesforce.holidayStopRequests(config.sfConfig, processDateOverride),
               getSubscription = Zuora.subscriptionGetResponse(config, zuoraAccessToken, backend),
               updateSubscription = Zuora.subscriptionUpdateResponse(config, zuoraAccessToken, backend),

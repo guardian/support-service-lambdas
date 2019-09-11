@@ -126,9 +126,7 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
 
   "processHolidayStops" should "give correct charges added" in {
     val responses = GuardianWeeklyHolidayStopProcess.processHolidayStops(
-      guardianWeeklyConfig.holidayCreditProduct,
-      guardianWeeklyConfig.guardianWeeklyProductRatePlanIds,
-      Nil,
+      guardianWeeklyConfig,
       getHolidayStopRequestsFromSalesforce(Right(List(
         Fixtures.mkHolidayStopRequestDetails(Fixtures.mkHolidayStopRequest("R1", LocalDate.of(2019, 8, 2)), "C1"),
         Fixtures.mkHolidayStopRequestDetails(Fixtures.mkHolidayStopRequest("R2", LocalDate.of(2019, 9, 1)), "C3"),
@@ -160,9 +158,7 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
 
   it should "only export results that haven't already been exported" in {
     val responses = GuardianWeeklyHolidayStopProcess.processHolidayStops(
-      guardianWeeklyConfig.holidayCreditProduct,
-      guardianWeeklyConfig.guardianWeeklyProductRatePlanIds,
-      Nil,
+      guardianWeeklyConfig,
       getHolidayStopRequestsFromSalesforce(Right(List(
         Fixtures.mkHolidayStopRequestDetails(Fixtures.mkHolidayStopRequest("R1", LocalDate.of(2019, 8, 2)), "C2"),
         Fixtures.mkHolidayStopRequestDetails(Fixtures.mkHolidayStopRequest("R2", LocalDate.of(2019, 9, 1)), "C5"),
@@ -187,9 +183,7 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
 
   it should "give an exception message if exporting results fails" in {
     val responses = GuardianWeeklyHolidayStopProcess.processHolidayStops(
-      guardianWeeklyConfig.holidayCreditProduct,
-      guardianWeeklyConfig.guardianWeeklyProductRatePlanIds,
-      Nil,
+      guardianWeeklyConfig,
       getHolidayStopRequestsFromSalesforce(Right(List(
         Fixtures.mkHolidayStopRequestDetails(Fixtures.mkHolidayStopRequest("r1"), ""),
         Fixtures.mkHolidayStopRequestDetails(Fixtures.mkHolidayStopRequest("r2"), ""),

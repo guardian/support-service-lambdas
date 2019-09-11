@@ -2,15 +2,13 @@ package com.gu.holidaystopprocessor
 
 import java.time.LocalDate
 
-import com.gu.holiday_stops.{CreditCalculator, CurrentGuardianWeeklySubscription, ExtendedTerm, HolidayCreditProduct, HolidayCreditUpdate, HolidayStop, OverallFailure, SalesforceHolidayWriteError, Subscription, ZuoraHolidayWriteError}
+import com.gu.holiday_stops.{CreditCalculator, CurrentGuardianWeeklySubscription, ExtendedTerm, GuardianWeeklyHolidayStopConfig, HolidayCreditProduct, HolidayCreditUpdate, HolidayStop, OverallFailure, SalesforceHolidayWriteError, Subscription, ZuoraHolidayWriteError}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestsDetail, HolidayStopRequestsDetailChargeCode, HolidayStopRequestsDetailChargePrice, ProductName, StoppedPublicationDate, SubscriptionName}
 import cats.implicits._
 
 object GuardianWeeklyHolidayStopProcess {
   def processHolidayStops(
-    holidayCreditProduct: HolidayCreditProduct,
-    guardianWeeklyProductRatePlanIds: List[String],
-    gwNforNProductRatePlanIds: List[String],
+    config: GuardianWeeklyHolidayStopConfig,
     getHolidayStopRequestsFromSalesforce: ProductName => Either[OverallFailure, List[HolidayStopRequestsDetail]],
     getSubscription: SubscriptionName => Either[ZuoraHolidayWriteError, Subscription],
     updateSubscription: (Subscription, HolidayCreditUpdate) => Either[ZuoraHolidayWriteError, Unit],
@@ -23,7 +21,16 @@ object GuardianWeeklyHolidayStopProcess {
       case Right(holidayStopRequestsFromSalesforce) =>
         val holidayStops = holidayStopRequestsFromSalesforce.distinct.map(HolidayStop(_))
         val alreadyActionedHolidayStops = holidayStopRequestsFromSalesforce.flatMap(_.Charge_Code__c).distinct
-        val allZuoraHolidayStopResponses = holidayStops.map(writeHolidayStopToZuora(holidayCreditProduct, guardianWeeklyProductRatePlanIds, gwNforNProductRatePlanIds, getSubscription, updateSubscription))
+        val allZuoraHolidayStopResponses =
+          holidayStops.map(
+            writeHolidayStopToZuora(
+              config.holidayCreditProduct,
+              config.guardianWeeklyProductRatePlanIds,
+              config.gwNforNProductRatePlanIds,
+              getSubscription,
+              updateSubscription
+            )
+          )
         val (failedZuoraResponses, successfulZuoraResponses) = allZuoraHolidayStopResponses.separate
         val notAlreadyActionedHolidays = successfulZuoraResponses.filterNot(v => alreadyActionedHolidayStops.contains(v.chargeCode))
         val salesforceExportResult = writeHolidayStopsToSalesforce(notAlreadyActionedHolidays)
