@@ -392,7 +392,7 @@ class SourceUpdatedStepsApplyTest extends FlatSpec with Matchers {
         |}
       """.stripMargin
 
-    val testGatewayRequest = ApiGatewayRequest(None, None, Some(body.toString), Some(badHeaders), None, None)
+    val testGatewayRequest = ApiGatewayRequest(None, None, None, Some(body.toString), Some(badHeaders), None, None)
 
     val actual = sourceUpdatedSteps.steps(testGatewayRequest)
 

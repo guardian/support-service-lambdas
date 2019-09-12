@@ -216,7 +216,7 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
     responses.overallFailure.value shouldBe OverallFailure("Export failed")
   }
   it should "use process date override" in {
-    val processOverrideDate  = LocalDate.now().plusDays(123)
+    val processOverrideDate = LocalDate.now().plusDays(123)
     def verifyProcessDate(productName: ProductName, processDate: LocalDate): Either[OverallFailure, List[HolidayStopRequestsDetail]] = {
       processDate should equal(processOverrideDate)
       Right(Nil)

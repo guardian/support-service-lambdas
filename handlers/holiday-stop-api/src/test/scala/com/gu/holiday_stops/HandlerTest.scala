@@ -175,7 +175,7 @@ class HandlerTest extends FlatSpec with Matchers {
           FakeFetchString.fetchString,
           SttpBackendStub.synchronous
         )
-        .map(_.steps(ApiGatewayRequest(None, None, None, None, None, None)))
+        .map(_.steps(ApiGatewayRequest(None, None, None, None, None, None, None)))
     ) {
       case ContinueProcessing(response) =>
         response.statusCode should equal("400")
@@ -195,7 +195,7 @@ class HandlerTest extends FlatSpec with Matchers {
           FakeFetchString.fetchString,
           SttpBackendStub.synchronous
         )
-        .map(_.steps(ApiGatewayRequest(Some("GET"), None, None, None, None, None)))
+        .map(_.steps(ApiGatewayRequest(Some("GET"), None, None, None, None, None, None)))
     ) {
       case ContinueProcessing(response) =>
         response.statusCode should equal("400")
@@ -212,6 +212,7 @@ class HandlerTest extends FlatSpec with Matchers {
       Some("GET"),
       Some(Map("startDate" -> startDate, "endDate" -> endDate)),
       None,
+      None,
       Some(Map("x-product-name-prefix" -> productPrefix)),
       None,
       Some("/potential")
@@ -226,6 +227,7 @@ class HandlerTest extends FlatSpec with Matchers {
         "startDate" -> startDate,
         "endDate" -> endDate,
         "estimateCredit" -> (if (estimateCredit) "true" else "false"))),
+      None,
       None,
       Some(Map("x-product-name-prefix" -> productPrefix)),
       Some(JsObject(Seq("subscriptionName" -> JsString(subscriptionName)))),

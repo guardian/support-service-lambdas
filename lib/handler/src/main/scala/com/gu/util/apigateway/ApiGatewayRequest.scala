@@ -14,6 +14,7 @@ import scala.util.{Failure, Success, Try}
 case class ApiGatewayRequest(
   httpMethod: Option[String],
   queryStringParameters: Option[Map[String, String]],
+  multiValueQueryStringParameters: Option[Map[String, List[String]]],
   body: Option[String],
   headers: Option[Map[String, String]],
   pathParameters: Option[JsValue] = None,
