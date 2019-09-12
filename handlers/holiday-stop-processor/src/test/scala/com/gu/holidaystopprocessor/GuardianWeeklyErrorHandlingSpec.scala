@@ -1,19 +1,20 @@
-package com.gu.holidaystopprocessor
+package com.gu.GuardianWeeklyHolidayStopProcessor
 
 import java.time.LocalDate
 
 import cats.implicits._
 import com.gu.holiday_stops.Fixtures._
 import com.gu.holiday_stops._
+import com.gu.holidaystopprocessor.{GuardianWeeklyHolidayStopProcess, HolidayStopResponse}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestsDetail, ProductName, SubscriptionName}
 import org.scalatest._
 
 /**
  * Make sure short-circuiting does not happen.
  */
-class ErrorHandlingSpec extends FlatSpec with Matchers with OptionValues {
-  val getHolidayStopRequestsFromSalesforce: ProductName => Either[OverallFailure, List[HolidayStopRequestsDetail]] = {
-    _ =>
+class GuardianWeeklyErrorHandlingSpec extends FlatSpec with Matchers with OptionValues {
+  val getHolidayStopRequestsFromSalesforce: (ProductName, LocalDate) => Either[OverallFailure, List[HolidayStopRequestsDetail]] = {
+    (_, _) =>
       Right(List(
         mkHolidayStopRequestDetails(mkHolidayStopRequest("R1", LocalDate.of(2019, 8, 2), SubscriptionName("A-S1")), "C1"),
         mkHolidayStopRequestDetails(mkHolidayStopRequest("R2", LocalDate.of(2019, 9, 1), SubscriptionName("A-S2")), "C3"),
@@ -38,14 +39,13 @@ class ErrorHandlingSpec extends FlatSpec with Matchers with OptionValues {
       case _ => Right(())
     }
 
-    val result = HolidayStopProcess.processHolidayStops(
-      config.holidayCreditProduct,
-      config.guardianWeeklyProductRatePlanIds,
-      Nil,
+    val result = GuardianWeeklyHolidayStopProcess.processHolidayStops(
+      guardianWeeklyConfig,
       getHolidayStopRequestsFromSalesforce,
       getSubscription,
       updateSubscription,
-      writeHolidayStopsToSalesforce
+      writeHolidayStopsToSalesforce,
+      None
     )
 
     val (failedZuoraResponses, successfulZuoraResponses) = result.holidayStopResults.separate
@@ -66,14 +66,13 @@ class ErrorHandlingSpec extends FlatSpec with Matchers with OptionValues {
       case _ => Left(SalesforceHolidayWriteError("salesforce boom")) // NOTE: this line is key to the test
     }
 
-    val result = HolidayStopProcess.processHolidayStops(
-      config.holidayCreditProduct,
-      config.guardianWeeklyProductRatePlanIds,
-      Nil,
+    val result = GuardianWeeklyHolidayStopProcess.processHolidayStops(
+      guardianWeeklyConfig,
       getHolidayStopRequestsFromSalesforce,
       getSubscription,
       updateSubscription,
-      writeHolidayStopsToSalesforce
+      writeHolidayStopsToSalesforce,
+      None
     )
 
     val (failedZuoraResponses, successfulZuoraResponses) = result.holidayStopResults.separate
@@ -95,14 +94,13 @@ class ErrorHandlingSpec extends FlatSpec with Matchers with OptionValues {
       case _ => Right(())
     }
 
-    val result = HolidayStopProcess.processHolidayStops(
-      config.holidayCreditProduct,
-      config.guardianWeeklyProductRatePlanIds,
-      Nil,
+    val result = GuardianWeeklyHolidayStopProcess.processHolidayStops(
+      guardianWeeklyConfig,
       getHolidayStopRequestsFromSalesforce,
       getSubscription,
       updateSubscription,
-      writeHolidayStopsToSalesforce
+      writeHolidayStopsToSalesforce,
+      None
     )
 
     val (failedZuoraResponses, successfulZuoraResponses) = result.holidayStopResults.separate
@@ -123,14 +121,13 @@ class ErrorHandlingSpec extends FlatSpec with Matchers with OptionValues {
       case _ => Right(())
     }
 
-    val result = HolidayStopProcess.processHolidayStops(
-      config.holidayCreditProduct,
-      config.guardianWeeklyProductRatePlanIds,
-      Nil,
+    val result = GuardianWeeklyHolidayStopProcess.processHolidayStops(
+      guardianWeeklyConfig,
       getHolidayStopRequestsFromSalesforce,
       getSubscription,
       updateSubscription,
-      writeHolidayStopsToSalesforce
+      writeHolidayStopsToSalesforce,
+      None
     )
 
     val (failedZuoraResponses, successfulZuoraResponses) = result.holidayStopResults.separate
@@ -139,5 +136,4 @@ class ErrorHandlingSpec extends FlatSpec with Matchers with OptionValues {
     (failedZuoraResponses.size + successfulZuoraResponses.size) shouldBe 3
     result.overallFailure should be(None)
   }
-
 }

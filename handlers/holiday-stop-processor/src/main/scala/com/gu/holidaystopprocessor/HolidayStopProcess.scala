@@ -2,89 +2,34 @@ package com.gu.holidaystopprocessor
 
 import java.time.LocalDate
 
-import cats.implicits._
 import com.gu.holiday_stops._
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
 import com.softwaremill.sttp.{Id, SttpBackend}
 
 object HolidayStopProcess {
 
-  def apply(config: Config, processDateOverride: Option[LocalDate], backend: SttpBackend[Id, Nothing]): ProcessResult =
+  def apply(config: Config, processDateOverride: Option[LocalDate], backend: SttpBackend[Id, Nothing]): List[ProcessResult] =
     Zuora.accessTokenGetResponse(config.zuoraConfig, backend) match {
       case Left(overallFailure) =>
-        ProcessResult(overallFailure)
+        List(ProcessResult(overallFailure))
 
       case Right(zuoraAccessToken) =>
-        processHolidayStops(
-          config.holidayCreditProduct,
-          guardianWeeklyProductRatePlanIds = config.guardianWeeklyProductRatePlanIds,
-          gwNforNProductRatePlanIds = config.gwNforNProductRatePlanIds,
-          getHolidayStopRequestsFromSalesforce = Salesforce.holidayStopRequests(config.sfConfig, processDateOverride),
-          getSubscription = Zuora.subscriptionGetResponse(config, zuoraAccessToken, backend),
-          updateSubscription = Zuora.subscriptionUpdateResponse(config, zuoraAccessToken, backend),
-          writeHolidayStopsToSalesforce = Salesforce.holidayStopUpdateResponse(config.sfConfig)
+        List(
+          GuardianWeeklyHolidayStopProcess.processHolidayStops(
+            config = config.guardianWeeklyConfig,
+            getHolidayStopRequestsFromSalesforce = Salesforce.holidayStopRequests(config.sfConfig),
+            getSubscription = Zuora.subscriptionGetResponse(config, zuoraAccessToken, backend),
+            updateSubscription = Zuora.subscriptionUpdateResponse(config, zuoraAccessToken, backend),
+            writeHolidayStopsToSalesforce = Salesforce.holidayStopUpdateResponse(config.sfConfig),
+            processDateOverride
+          ),
+          SundayVoucherHolidayStopProcessor.processHolidayStops(
+            config = config.sundayVoucherConfig,
+            getHolidayStopRequestsFromSalesforce = Salesforce.holidayStopRequests(config.sfConfig),
+            getSubscription = Zuora.subscriptionGetResponse(config, zuoraAccessToken, backend),
+            updateSubscription = Zuora.subscriptionUpdateResponse(config, zuoraAccessToken, backend),
+            writeHolidayStopsToSalesforce = Salesforce.holidayStopUpdateResponse(config.sfConfig),
+            processDateOverride
+          )
         )
-    }
-
-  def processHolidayStops(
-    holidayCreditProduct: HolidayCreditProduct,
-    guardianWeeklyProductRatePlanIds: List[String],
-    gwNforNProductRatePlanIds: List[String],
-    getHolidayStopRequestsFromSalesforce: ProductName => Either[OverallFailure, List[HolidayStopRequestsDetail]],
-    getSubscription: SubscriptionName => Either[ZuoraHolidayWriteError, Subscription],
-    updateSubscription: (Subscription, HolidayCreditUpdate) => Either[ZuoraHolidayWriteError, Unit],
-    writeHolidayStopsToSalesforce: List[HolidayStopResponse] => Either[SalesforceHolidayWriteError, Unit]
-  ): ProcessResult = {
-    getHolidayStopRequestsFromSalesforce(ProductName("Guardian Weekly")) match {
-      case Left(overallFailure) =>
-        ProcessResult(overallFailure)
-
-      case Right(holidayStopRequestsFromSalesforce) =>
-        val holidayStops = holidayStopRequestsFromSalesforce.distinct.map(HolidayStop(_))
-        val alreadyActionedHolidayStops = holidayStopRequestsFromSalesforce.flatMap(_.Charge_Code__c).distinct
-        val allZuoraHolidayStopResponses = holidayStops.map(writeHolidayStopToZuora(holidayCreditProduct, guardianWeeklyProductRatePlanIds, gwNforNProductRatePlanIds, getSubscription, updateSubscription))
-        val (failedZuoraResponses, successfulZuoraResponses) = allZuoraHolidayStopResponses.separate
-        val notAlreadyActionedHolidays = successfulZuoraResponses.filterNot(v => alreadyActionedHolidayStops.contains(v.chargeCode))
-        val salesforceExportResult = writeHolidayStopsToSalesforce(notAlreadyActionedHolidays)
-        ProcessResult(
-          holidayStops,
-          allZuoraHolidayStopResponses,
-          notAlreadyActionedHolidays,
-          OverallFailure(failedZuoraResponses, salesforceExportResult)
-        )
-    }
-  }
-
-  /**
-   * This is the main business logic for writing holiday stop to Zuora
-   */
-  def writeHolidayStopToZuora(
-    holidayCreditProduct: HolidayCreditProduct,
-    guardianWeeklyProductRatePlanIds: List[String],
-    gwNforNProductRatePlanIds: List[String],
-    getSubscription: SubscriptionName => Either[ZuoraHolidayWriteError, Subscription],
-    updateSubscription: (Subscription, HolidayCreditUpdate) => Either[ZuoraHolidayWriteError, Unit]
-  )(stop: HolidayStop): Either[ZuoraHolidayWriteError, HolidayStopResponse] =
-    for {
-      subscription <- getSubscription(stop.subscriptionName)
-      _ <- if (subscription.autoRenew) Right(()) else Left(ZuoraHolidayWriteError("Cannot currently process non-auto-renewing subscription"))
-      currentGuardianWeeklySubscription <- CurrentGuardianWeeklySubscription(subscription, guardianWeeklyProductRatePlanIds, gwNforNProductRatePlanIds)
-      nextInvoiceStartDate = NextBillingPeriodStartDate(currentGuardianWeeklySubscription, stop.stoppedPublicationDate)
-      maybeExtendedTerm = ExtendedTerm(nextInvoiceStartDate, subscription)
-      holidayCredit <- CreditCalculator.guardianWeeklyCredit(guardianWeeklyProductRatePlanIds, gwNforNProductRatePlanIds, stop.stoppedPublicationDate)(subscription)
-      holidayCreditUpdate <- HolidayCreditUpdate(holidayCreditProduct, subscription, stop.stoppedPublicationDate, nextInvoiceStartDate, maybeExtendedTerm, holidayCredit)
-      _ <- if (subscription.hasHolidayStop(stop)) Right(()) else updateSubscription(subscription, holidayCreditUpdate)
-      updatedSubscription <- getSubscription(stop.subscriptionName)
-      addedCharge <- updatedSubscription.ratePlanCharge(stop).toRight(ZuoraHolidayWriteError("Failed to add charge to subscription"))
-    } yield {
-      HolidayStopResponse(
-        stop.requestId,
-        stop.subscriptionName,
-        stop.productName,
-        HolidayStopRequestsDetailChargeCode(addedCharge.number),
-        stop.estimatedCharge,
-        HolidayStopRequestsDetailChargePrice(addedCharge.price),
-        StoppedPublicationDate(addedCharge.HolidayStart__c.getOrElse(LocalDate.MIN))
-      )
     }
 }

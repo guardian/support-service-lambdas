@@ -16,12 +16,12 @@ object StandaloneApp extends App {
     case Right(config) =>
       val processResult = HolidayStopProcess(config, stopDate, HttpURLConnectionBackend())
 
-      println(processResult.holidayStopsToApply.size)
+      println(processResult.flatMap(_.holidayStopsToApply).size)
 
-      processResult.overallFailure foreach { failure =>
+      processResult.flatMap(_.overallFailure) foreach { failure =>
         println(s"Overall failure: ${failure.reason}")
       }
-      processResult.holidayStopResults foreach {
+      processResult.flatMap(_.holidayStopResults) foreach {
         case Left(failure) => println(s"Failed: ${failure.reason}")
         case Right(response) => println(s"Success: $response")
       }

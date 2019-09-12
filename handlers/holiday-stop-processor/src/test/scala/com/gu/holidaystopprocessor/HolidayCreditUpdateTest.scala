@@ -2,13 +2,13 @@ package com.gu.holidaystopprocessor
 
 import java.time.LocalDate
 
-import com.gu.holiday_stops.Fixtures.config
+import com.gu.holiday_stops.Fixtures.guardianWeeklyConfig
 import com.gu.holiday_stops._
 import org.scalatest.{EitherValues, FlatSpec, Matchers}
 
 class HolidayCreditUpdateTest extends FlatSpec with Matchers with EitherValues {
 
-  val guardianWeeklyProductRatePlanIds = Fixtures.config.guardianWeeklyProductRatePlanIds
+  val guardianWeeklyProductRatePlanIds = Fixtures.guardianWeeklyConfig.productRatePlanIds
 
   "holidayCreditToAdd" should "generate update correctly" in {
     val subscription = Fixtures.mkSubscription(
@@ -24,7 +24,7 @@ class HolidayCreditUpdateTest extends FlatSpec with Matchers with EitherValues {
     val holidayCredit = HolidayCredit(currentGuardianWeeklySubscription.right.value, LocalDate.now)
 
     val update = HolidayCreditUpdate(
-      config.holidayCreditProduct,
+      guardianWeeklyConfig.holidayCreditProduct,
       subscription = subscription,
       stoppedPublicationDate = LocalDate.of(2019, 5, 18),
       nextInvoiceStartDate = nextInvoiceStartDate,
@@ -77,7 +77,7 @@ class HolidayCreditUpdateTest extends FlatSpec with Matchers with EitherValues {
     val maybeExtendedTerm = ExtendedTerm(nextInvoiceStartDate, subscription)
     val holidayCredit = HolidayCredit(currentGuardianWeeklySubscription.right.value, LocalDate.now)
     val update = HolidayCreditUpdate(
-      config.holidayCreditProduct,
+      guardianWeeklyConfig.holidayCreditProduct,
       subscription = subscription,
       stoppedPublicationDate = LocalDate.of(2019, 8, 6),
       nextInvoiceStartDate = nextInvoiceStartDate,
@@ -117,7 +117,7 @@ class HolidayCreditUpdateTest extends FlatSpec with Matchers with EitherValues {
     val maybeExtendedTerm = ExtendedTerm(nextInvoiceStartDate, subscription)
     val holidayCredit = HolidayCredit(currentGuardianWeeklySubscription.right.value, LocalDate.now)
     val update = HolidayCreditUpdate(
-      config.holidayCreditProduct,
+      guardianWeeklyConfig.holidayCreditProduct,
       subscription = subscription,
       stoppedPublicationDate = LocalDate.of(2019, 8, 6),
       nextInvoiceStartDate = nextInvoiceStartDate,

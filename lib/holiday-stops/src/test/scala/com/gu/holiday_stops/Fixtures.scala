@@ -52,7 +52,7 @@ object Fixtures {
               billingPeriod,
               chargedThroughDate
             )),
-          Fixtures.config.guardianWeeklyProductRatePlanIds.head,
+          Fixtures.guardianWeeklyConfig.productRatePlanIds.head,
           ""
         )
       )
@@ -79,7 +79,7 @@ object Fixtures {
           HolidayEnd__c = Some(LocalDate.of(2019, 8, 9)),
           processedThroughDate = None
         )),
-        Fixtures.config.guardianWeeklyProductRatePlanIds.head,
+        Fixtures.guardianWeeklyConfig.productRatePlanIds.head,
         ""
       ),
       RatePlan(
@@ -95,7 +95,7 @@ object Fixtures {
           HolidayEnd__c = Some(LocalDate.of(2019, 9, 1)),
           processedThroughDate = None
         )),
-        Fixtures.config.guardianWeeklyProductRatePlanIds.head,
+        Fixtures.guardianWeeklyConfig.productRatePlanIds.head,
         ""
       ),
       RatePlan(
@@ -111,7 +111,7 @@ object Fixtures {
           HolidayEnd__c = Some(LocalDate.of(2019, 8, 11)),
           processedThroughDate = None
         )),
-        Fixtures.config.guardianWeeklyProductRatePlanIds.head,
+        Fixtures.guardianWeeklyConfig.productRatePlanIds.head,
         ""
       ),
       RatePlan(
@@ -143,7 +143,7 @@ object Fixtures {
           HolidayEnd__c = Some(LocalDate.of(2019, 8, 2)),
           processedThroughDate = None
         )),
-        Fixtures.config.guardianWeeklyProductRatePlanIds.head,
+        Fixtures.guardianWeeklyConfig.productRatePlanIds.head,
         ""
       ),
       RatePlan(
@@ -159,7 +159,7 @@ object Fixtures {
           HolidayEnd__c = Some(LocalDate.of(2019, 1, 4)),
           processedThroughDate = None
         )),
-        Fixtures.config.guardianWeeklyProductRatePlanIds.head,
+        Fixtures.guardianWeeklyConfig.productRatePlanIds.head,
         ""
       ),
       RatePlan(
@@ -169,7 +169,7 @@ object Fixtures {
           billingPeriod = "Quarter",
           chargedThroughDate = Some(LocalDate.of(2019, 9, 7))
         )),
-        Fixtures.config.guardianWeeklyProductRatePlanIds.head,
+        Fixtures.guardianWeeklyConfig.productRatePlanIds.head,
         ""
       )
     )
@@ -209,14 +209,21 @@ object Fixtures {
     estimatedCharge = None
   )
 
-  val config = Config(
-    zuoraConfig = ZuoraConfig(baseUrl = "", holidayStopProcessor = HolidayStopProcessor(Oauth(clientId = "", clientSecret = ""))),
-    sfConfig = SFAuthConfig("", "", "", "", "", ""),
+  val guardianWeeklyConfig = GuardianWeeklyHolidayStopConfig(
     HolidayCreditProduct(
       productRatePlanId = "ratePlanId",
       productRatePlanChargeId = "ratePlanChargeId"
     ),
-    Config.guardianWeeklyProductRatePlanIdsPROD, // FIXME
-    Config.gwNforNProductRatePlanIdsPROD
+    GuardianWeeklyHolidayStopConfig.Prod.productRatePlanIds, // FIXME
+    GuardianWeeklyHolidayStopConfig.Prod.nForNProductRatePlanIds
+  )
+
+  val sundayVoucherHolidayStopConfig = SundayVoucherHolidayStopConfig()
+
+  val config = Config(
+    zuoraConfig = ZuoraConfig(baseUrl = "", holidayStopProcessor = HolidayStopProcessor(Oauth(clientId = "", clientSecret = ""))),
+    sfConfig = SFAuthConfig("", "", "", "", "", ""),
+    guardianWeeklyConfig = guardianWeeklyConfig,
+    sundayVoucherConfig = sundayVoucherHolidayStopConfig
   )
 }
