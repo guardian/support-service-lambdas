@@ -19,7 +19,9 @@ object WireHolidayStopRequest {
       sfHolidayStopRequest.End_Date__c.value
     ),
     publicationsImpacted = sfHolidayStopRequest.Holiday_Stop_Request_Detail__r.map(_.records.map(detail => HolidayStopRequestsDetail(
-      publicationDate = detail.Stopped_Publication_Date__c.value
+      publicationDate = detail.Stopped_Publication_Date__c.value,
+      estimatedPrice = detail.Estimated_Price__c.map(_.value),
+      actualPrice = detail.Actual_Price__c.map(_.value)
     ))).getOrElse(List())
   )
 
@@ -47,7 +49,8 @@ object MutabilityFlags {
 
 case class HolidayStopRequestsDetail(
   publicationDate: LocalDate,
-  // TODO add other fields
+  estimatedPrice: Option[Double],
+  actualPrice: Option[Double]
 )
 object HolidayStopRequestsDetail{
   implicit val writes: OWrites[HolidayStopRequestsDetail] = Json.writes[HolidayStopRequestsDetail]
