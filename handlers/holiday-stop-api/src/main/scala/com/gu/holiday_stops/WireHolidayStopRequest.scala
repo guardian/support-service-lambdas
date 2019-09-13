@@ -2,8 +2,9 @@ package com.gu.holiday_stops
 
 import java.time.LocalDate
 
+import cats.implicits._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{ProductName, SubscriptionName}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{ProductName, ProductRatePlanKey, SubscriptionName}
 import play.api.libs.json.{Json, OWrites, Reads}
 
 object WireHolidayStopRequest {
@@ -40,6 +41,7 @@ case class MutabilityFlags(
   isDeletable: Boolean,
   isEditable: Boolean
 )
+
 object MutabilityFlags {
   implicit val writes: OWrites[MutabilityFlags] = Json.writes[MutabilityFlags]
 }
@@ -49,7 +51,8 @@ case class HolidayStopRequestsDetail(
   publicationDate: LocalDate,
   // TODO add other fields
 )
-object HolidayStopRequestsDetail{
+
+object HolidayStopRequestsDetail {
   implicit val writes: OWrites[HolidayStopRequestsDetail] = Json.writes[HolidayStopRequestsDetail]
 }
 
@@ -58,7 +61,8 @@ case class HolidayStopRequestPartial(
   end: LocalDate,
   subscriptionName: SubscriptionName
 )
-object HolidayStopRequestPartial{
+
+object HolidayStopRequestPartial {
   implicit val reads: Reads[HolidayStopRequestPartial] = Json.reads[HolidayStopRequestPartial]
 }
 
@@ -70,27 +74,42 @@ case class HolidayStopRequestFull(
   mutabilityFlags: MutabilityFlags,
   publicationsImpacted: List[HolidayStopRequestsDetail]
 )
-object HolidayStopRequestFull{
+
+object HolidayStopRequestFull {
   implicit val writes: OWrites[HolidayStopRequestFull] = Json.writes[HolidayStopRequestFull]
 }
 
 case class GetHolidayStopRequests(
   productSpecifics: Option[ProductSpecifics],
-  existing: List[HolidayStopRequestFull]
+  existing: List[HolidayStopRequestFull],
+  productRatePlanChargeSpecifics: List[ProductSpecifics]
 )
+
 object GetHolidayStopRequests {
 
-  def apply(holidayStopRequests: List[HolidayStopRequest], optionalProductNamePrefix: Option[ProductName]): GetHolidayStopRequests = {
-    val optionalProductSpecifics = optionalProductNamePrefix.map(
-      productNamePrefix => ActionCalculator.getProductSpecifics(productNamePrefix)
-    )
-    GetHolidayStopRequests(
-      optionalProductSpecifics,
-      holidayStopRequests.map(WireHolidayStopRequest.apply)
+  def apply(holidayStopRequests: List[HolidayStopRequest],
+            optionalProductNamePrefix: Option[ProductName],
+            optionalProductRatePlanKey: Option[ProductRatePlanKey]): Either[GetHolidayStopRequestsError, GetHolidayStopRequests] = {
+    for {
+      optionalProductSpecificForProductPrefix <- optionalProductNamePrefix.map(
+        productNamePrefix => ActionCalculator.getProductSpecifics(productNamePrefix)
+      ).asRight[GetHolidayStopRequestsError]
+
+      optionalProductSpecificForProductNameRatePlanName <- optionalProductRatePlanKey.traverse(
+        productNamePrefix =>
+          ActionCalculator
+            .getProductSpecificsByProductNameProductRatePlanName(productNamePrefix)
+            .leftMap(error => GetHolidayStopRequestsError(s"Failed to get product specfics for $productNamePrefix: $error"))
+      )
+    } yield GetHolidayStopRequests(
+      optionalProductSpecificForProductPrefix,
+      holidayStopRequests.map(WireHolidayStopRequest.apply),
+      optionalProductSpecificForProductNameRatePlanName.getOrElse(Nil)
     )
   }
 
   implicit val writesProductSpecifics: OWrites[ProductSpecifics] = Json.writes[ProductSpecifics]
   implicit val writes: OWrites[GetHolidayStopRequests] = Json.writes[GetHolidayStopRequests]
-
 }
+
+case class GetHolidayStopRequestsError(message: String)
