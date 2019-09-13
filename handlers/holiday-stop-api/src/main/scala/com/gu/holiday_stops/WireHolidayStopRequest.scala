@@ -98,7 +98,7 @@ object GetHolidayStopRequests {
       optionalProductSpecificForProductNameRatePlanName <- optionalProductRatePlanKey.traverse(
         productNamePrefix =>
           ActionCalculator
-            .getProductSpecificsByProductNameProductRatePlanName(productNamePrefix)
+            .getProductSpecificsByProductRatePlanKey(productNamePrefix)
             .leftMap(error => GetHolidayStopRequestsError(s"Failed to get product specfics for $productNamePrefix: $error"))
       )
     } yield GetHolidayStopRequests(

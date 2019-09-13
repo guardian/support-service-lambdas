@@ -2,14 +2,24 @@ package com.gu.holiday_stops
 
 import java.time.{DayOfWeek, LocalDate}
 
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.ProductName
-import org.scalatest.{FlatSpec, Matchers}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{ProductName, ProductRatePlanKey, ProductRatePlanName, ProductType}
+import org.scalatest.Inside.inside
+import org.scalatest.{EitherValues, FlatSpec, Matchers}
 
 import scala.collection.immutable.ListMap
+import scala.util.Random
 
-class ActionCalculatorTest extends FlatSpec with Matchers {
+class ActionCalculatorTest extends FlatSpec with Matchers with EitherValues {
 
   val gwProductName = ProductName("Guardian Weekly Zone A")
+  val gwProductType = ProductType("Guardian Weekly")
+
+  val sundayProductRatePlanName = ProductRatePlanName("Sunday")
+  val vouchersProductType = ProductType("Newspaper - Voucher Book")
+
+  type Today = LocalDate
+  type FirstAvailableDate = LocalDate
+
 
   it should "convert ProductName to a set of constants for that product" in {
 
@@ -26,9 +36,6 @@ class ActionCalculatorTest extends FlatSpec with Matchers {
   }
 
   it should "calculate first available date for Guardian Weekly" in {
-
-    type Today = LocalDate
-    type FirstAvailableDate = LocalDate
     val gwTodayToFirstAvailableDate = ListMap[Today, FirstAvailableDate](
       LocalDate.of(2019, 6, 1) -> LocalDate.of(2019, 6, 8), // first available on Sun
       LocalDate.of(2019, 6, 2) -> LocalDate.of(2019, 6, 8), // first available on Sun
@@ -62,7 +69,6 @@ class ActionCalculatorTest extends FlatSpec with Matchers {
       LocalDate.of(2019, 6, 30) -> LocalDate.of(2019, 7, 6), // first available on Sun
       LocalDate.of(2019, 7, 1) -> LocalDate.of(2019, 7, 6), // first available on Sun
       LocalDate.of(2019, 7, 2) -> LocalDate.of(2019, 7, 13) // jump on Tue, a day before processor run
-
     )
 
     gwTodayToFirstAvailableDate foreach {
@@ -70,8 +76,15 @@ class ActionCalculatorTest extends FlatSpec with Matchers {
         ActionCalculator
           .getProductSpecifics(gwProductName, today)
           .firstAvailableDate shouldEqual expected
-    }
 
+        inside(ActionCalculator
+          .getProductSpecificsByProductRatePlanKey(
+            ProductRatePlanKey(gwProductType, ProductRatePlanName(Random.nextString(10))),
+            today
+          )) {
+          case Right(List(productSpecifics)) => productSpecifics.firstAvailableDate shouldEqual expected
+        }
+    }
   }
 
   it should "correctly list the action dates for given Holiday Stop Request" in {
@@ -81,24 +94,45 @@ class ActionCalculatorTest extends FlatSpec with Matchers {
       toInclusive = LocalDate.of(2019, 6, 20),
       productName = gwProductName
     ) shouldEqual List(
-        LocalDate.of(2019, 5, 24),
-        LocalDate.of(2019, 5, 31),
-        LocalDate.of(2019, 6, 7),
-        LocalDate.of(2019, 6, 14)
-      )
+      LocalDate.of(2019, 5, 24),
+      LocalDate.of(2019, 5, 31),
+      LocalDate.of(2019, 6, 7),
+      LocalDate.of(2019, 6, 14)
+    )
 
     ActionCalculator.publicationDatesToBeStopped(
       fromInclusive = LocalDate.of(2019, 5, 18),
       toInclusive = LocalDate.of(2019, 6, 21),
       productName = gwProductName
     ) shouldEqual List(
-        LocalDate.of(2019, 5, 24),
-        LocalDate.of(2019, 5, 31),
-        LocalDate.of(2019, 6, 7),
-        LocalDate.of(2019, 6, 14),
-        LocalDate.of(2019, 6, 21)
-      )
-
+      LocalDate.of(2019, 5, 24),
+      LocalDate.of(2019, 5, 31),
+      LocalDate.of(2019, 6, 7),
+      LocalDate.of(2019, 6, 14),
+      LocalDate.of(2019, 6, 21)
+    )
   }
-
+  it should "calculate first available date for Sunday Voucher" in {
+    val gwTodayToFirstAvailableDate = ListMap[Today, FirstAvailableDate](
+      LocalDate.of(2019, 9, 9) -> LocalDate.of(2019, 9, 15), // first available on Sun
+      LocalDate.of(2019, 9, 10) -> LocalDate.of(2019, 9, 15), // first available on Sun
+      LocalDate.of(2019, 9, 11) -> LocalDate.of(2019, 9, 15), // first available on Sun
+      LocalDate.of(2019, 9, 12) -> LocalDate.of(2019, 9, 15), // first available on Sun
+      LocalDate.of(2019, 9, 13) -> LocalDate.of(2019, 9, 15), // first available on Sun
+      LocalDate.of(2019, 9, 14) -> LocalDate.of(2019, 9, 22), // first available on Sun
+      LocalDate.of(2019, 9, 15) -> LocalDate.of(2019, 9, 22), // first available on Sun
+    )
+    gwTodayToFirstAvailableDate foreach {
+      case (today, expected) =>
+        inside(
+          ActionCalculator
+            .getProductSpecificsByProductRatePlanKey(
+              ProductRatePlanKey(vouchersProductType, sundayProductRatePlanName),
+              today
+            )
+        ) {
+          case Right(List(productSpecifics)) => productSpecifics.firstAvailableDate shouldEqual expected
+        }
+    }
+  }
 }

@@ -118,7 +118,7 @@ object ActionCalculator {
     ProductSpecifics(firstAvailableDate(today), issueDayOfWeek.getValue, annualIssueLimit)
   }
 
-  def getProductSpecificsByProductNameProductRatePlanName(
+  def getProductSpecificsByProductRatePlanKey(
     productRatePlanChargeId: ProductRatePlanKey,
     today: LocalDate = LocalDate.now()
   ): Either[ActionCalculatorError, List[ProductSpecifics]] = {
