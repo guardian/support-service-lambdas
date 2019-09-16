@@ -46,13 +46,12 @@ object MutabilityFlags {
   implicit val writes: OWrites[MutabilityFlags] = Json.writes[MutabilityFlags]
 }
 
-
 case class HolidayStopRequestsDetail(
   publicationDate: LocalDate,
   estimatedPrice: Option[Double],
   actualPrice: Option[Double]
 )
-object HolidayStopRequestsDetail{
+object HolidayStopRequestsDetail {
   implicit val writes: OWrites[HolidayStopRequestsDetail] = Json.writes[HolidayStopRequestsDetail]
 }
 
@@ -61,7 +60,7 @@ case class HolidayStopRequestPartial(
   end: LocalDate,
   subscriptionName: SubscriptionName
 )
-object HolidayStopRequestPartial{
+object HolidayStopRequestPartial {
   implicit val reads: Reads[HolidayStopRequestPartial] = Json.reads[HolidayStopRequestPartial]
 }
 
@@ -73,7 +72,7 @@ case class HolidayStopRequestFull(
   mutabilityFlags: MutabilityFlags,
   publicationsImpacted: List[HolidayStopRequestsDetail]
 )
-object HolidayStopRequestFull{
+object HolidayStopRequestFull {
   implicit val writes: OWrites[HolidayStopRequestFull] = Json.writes[HolidayStopRequestFull]
 }
 
