@@ -217,8 +217,6 @@ class HandlerTest extends FlatSpec with Matchers {
     val contactId = "Contact1234"
     val holidayStopRequestsDetail = Fixtures.mkHolidayStopRequestDetails()
 
-    val expectedFirstAvailableDate = SundayVoucherSuspensionConstants.firstAvailableDate(LocalDate.now())
-
     val holidayStopRequest = Fixtures.mkHolidayStopRequest(
       id = "holidayStopId",
       subscriptionName = SubscriptionName(subscriptionName),
@@ -267,7 +265,14 @@ class HandlerTest extends FlatSpec with Matchers {
                     List(toHolidayStopRequestDetail(holidayStopRequestsDetail))
                   )
                 ),
-                List(ProductSpecifics(expectedFirstAvailableDate, 7, 6)))
+                List(
+                  ProductSpecifics(
+                    SundayVoucherSuspensionConstants.firstAvailableDate(LocalDate.now()),
+                    SundayVoucherSuspensionConstants.issueDayOfWeek.getValue,
+                    SundayVoucherSuspensionConstants.annualIssueLimit
+                  )
+                )
+              )
             )
         }
     }
@@ -279,8 +284,6 @@ class HandlerTest extends FlatSpec with Matchers {
     val subscriptionName = "Sub12344"
     val contactId = "Contact1234"
     val holidayStopRequestsDetail = Fixtures.mkHolidayStopRequestDetails()
-
-    val expectedFirstAvailableDate = GuardianWeeklySuspensionConstants.firstAvailableDate(LocalDate.now())
 
     val holidayStopRequest = Fixtures.mkHolidayStopRequest(
       id = "holidayStopId",
@@ -319,7 +322,13 @@ class HandlerTest extends FlatSpec with Matchers {
           case JsSuccess(response, _) =>
             response should equal(
               GetHolidayStopRequests(
-                Some(ProductSpecifics(expectedFirstAvailableDate, 5, 6)),
+                Some(
+                  ProductSpecifics(
+                    GuardianWeeklySuspensionConstants.firstAvailableDate(LocalDate.now()),
+                    GuardianWeeklySuspensionConstants.issueDayOfWeek.getValue,
+                    GuardianWeeklySuspensionConstants.annualIssueLimit
+                  )
+                ),
                 List(
                   HolidayStopRequestFull(
                     holidayStopRequest.Id.value,
