@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
 import com.gu.effects.{FakeFetchString, SFTestEffects, TestingRawEffects}
-import com.gu.holiday_stops.ActionCalculator.SundayVoucherSuspensionConstants
+import com.gu.holiday_stops.ActionCalculator.{GuardianWeeklySuspensionConstants, SundayVoucherSuspensionConstants}
 import com.gu.holiday_stops.Handler._
 import com.gu.holiday_stops.ZuoraSttpEffects.ZuoraSttpEffectsOps
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.SubscriptionName
@@ -210,7 +210,7 @@ class HandlerTest extends FlatSpec with Matchers {
     }
   }
   "GET /hsr/<<sub name>>?productType=...&ratePlanName=... endpoint" should
-    "get subscription and calculate product specifics" in {
+    "get subscription and calculate product specifics for product type and rate plan name query params" in {
     val testBackend = SttpBackendStub.synchronous
 
     val subscriptionName = "Sub12344"
@@ -221,7 +221,7 @@ class HandlerTest extends FlatSpec with Matchers {
 
     val holidayStopRequest = Fixtures.mkHolidayStopRequest(
       id = "holidayStopId",
-      subscriptionName = SubscriptionName("Newspaper Voucher"),
+      subscriptionName = SubscriptionName(subscriptionName),
       requestDetail = List(holidayStopRequestsDetail)
     )
 
@@ -272,6 +272,69 @@ class HandlerTest extends FlatSpec with Matchers {
         }
     }
   }
+  "GET /hsr/<<sub name>> endpoint" should
+    "get subscription and calculate product specifics for product name prefix header" in {
+    val testBackend = SttpBackendStub.synchronous
+
+    val subscriptionName = "Sub12344"
+    val contactId = "Contact1234"
+    val holidayStopRequestsDetail = Fixtures.mkHolidayStopRequestDetails()
+
+    val expectedFirstAvailableDate = GuardianWeeklySuspensionConstants.firstAvailableDate(LocalDate.now())
+
+    val holidayStopRequest = Fixtures.mkHolidayStopRequest(
+      id = "holidayStopId",
+      subscriptionName = SubscriptionName(subscriptionName),
+      requestDetail = List(holidayStopRequestsDetail)
+    )
+
+    inside(
+      Handler.operationForEffects(
+        new TestingRawEffects(
+          responses = Map(
+            SalesForceHolidayStopsEffects.listHolidayStops(contactId, subscriptionName, List(holidayStopRequest))
+          ),
+          postResponses = Map(
+            SFTestEffects.authSuccess,
+          )
+        ).response,
+        Stage("DEV"),
+        FakeFetchString.fetchString,
+        testBackend
+      ).map { operation =>
+        operation
+          .steps(
+            legacyExistingHolidayStopsRequest(
+              subscriptionName,
+              contactId,
+              "Guardian Weekly"
+            )
+          )
+      }
+    ) {
+      case ContinueProcessing(response) =>
+        response.statusCode should equal("200")
+        val parsedResponseBody = Json.fromJson[GetHolidayStopRequests](Json.parse(response.body))
+        inside(parsedResponseBody) {
+          case JsSuccess(response, _) =>
+            response should equal(
+              GetHolidayStopRequests(
+                Some(ProductSpecifics(expectedFirstAvailableDate, 5, 6)),
+                List(
+                  HolidayStopRequestFull(
+                    holidayStopRequest.Id.value,
+                    holidayStopRequest.Start_Date__c.value,
+                    holidayStopRequest.End_Date__c.value,
+                    holidayStopRequest.Subscription_Name__c,
+                    List(toHolidayStopRequestDetail(holidayStopRequestsDetail))
+                  )
+                ),
+                List()
+              )
+            )
+        }
+    }
+  }
 
   private def toHolidayStopRequestDetail(holidayStop: SalesforceHolidayStopRequestsDetail.HolidayStopRequestsDetail) = {
     HolidayStopRequestsDetail(holidayStop.Stopped_Publication_Date__c.value)
@@ -315,6 +378,23 @@ class HandlerTest extends FlatSpec with Matchers {
       None,
       None,
       Some(Map("x-salesforce-contact-id" -> sfContactId)),
+      Some(JsObject(Seq("subscriptionName" -> JsString(subscriptionName)))),
+      Some(s"/hsr/$subscriptionName ")
+    )
+  }
+
+  private def legacyExistingHolidayStopsRequest(subscriptionName: String, sfContactId: String, productNamePrefix: String) = {
+    ApiGatewayRequest(
+      Some("GET"),
+      None,
+      None,
+      None,
+      Some(
+        Map(
+          "x-salesforce-contact-id" -> sfContactId,
+          "x-product-name-prefix" -> productNamePrefix
+        )
+      ),
       Some(JsObject(Seq("subscriptionName" -> JsString(subscriptionName)))),
       Some(s"/hsr/$subscriptionName ")
     )
