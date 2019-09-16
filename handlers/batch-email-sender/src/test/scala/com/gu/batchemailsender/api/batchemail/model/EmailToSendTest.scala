@@ -64,7 +64,7 @@ class EmailToSendTest extends FlatSpec {
   it should "create holiday-stop confirmation email to send" in {
     val emailBatchItem = emailBatchItemStub.copy(
       object_name = "Holiday_Stop_Request__c",
-      payload = emailBatchItemPayloadStub.copy(email_stage = "confirm")
+      payload = emailBatchItemPayloadStub.copy(email_stage = "create")
     )
     val expected = expectedStub.copy(DataExtensionName = "SV_HolidayStopConfirmation")
     assert(EmailToSend.fromEmailBatchItem(emailBatchItem) == expected)
