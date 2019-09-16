@@ -178,7 +178,7 @@ class HandlerTest extends FlatSpec with Matchers {
           FakeFetchString.fetchString,
           SttpBackendStub.synchronous
         )
-        .map(_.steps(ApiGatewayRequest(None, None, None, None, None, None, None)))
+        .map(_.steps(ApiGatewayRequest(None, None, None, None, None, None)))
     ) {
       case ContinueProcessing(response) =>
         response.statusCode should equal("400")
@@ -198,7 +198,7 @@ class HandlerTest extends FlatSpec with Matchers {
           FakeFetchString.fetchString,
           SttpBackendStub.synchronous
         )
-        .map(_.steps(ApiGatewayRequest(Some("GET"), None, None, None, None, None, None)))
+        .map(_.steps(ApiGatewayRequest(Some("GET"), None, None, None, None, None)))
     ) {
       case ContinueProcessing(response) =>
         response.statusCode should equal("400")
@@ -354,7 +354,6 @@ class HandlerTest extends FlatSpec with Matchers {
       Some("GET"),
       Some(Map("startDate" -> startDate, "endDate" -> endDate)),
       None,
-      None,
       Some(Map("x-product-name-prefix" -> productPrefix)),
       None,
       Some("/potential")
@@ -370,7 +369,6 @@ class HandlerTest extends FlatSpec with Matchers {
         "endDate" -> endDate,
         "estimateCredit" -> (if (estimateCredit) "true" else "false"))),
       None,
-      None,
       Some(Map("x-product-name-prefix" -> productPrefix)),
       Some(JsObject(Seq("subscriptionName" -> JsString(subscriptionName)))),
       Some(s"/potential/$subscriptionName ")
@@ -385,7 +383,6 @@ class HandlerTest extends FlatSpec with Matchers {
         "productRatePlanName" -> produtRatePlanName
       )),
       None,
-      None,
       Some(Map("x-salesforce-contact-id" -> sfContactId)),
       Some(JsObject(Seq("subscriptionName" -> JsString(subscriptionName)))),
       Some(s"/hsr/$subscriptionName ")
@@ -395,7 +392,6 @@ class HandlerTest extends FlatSpec with Matchers {
   private def legacyExistingHolidayStopsRequest(subscriptionName: String, sfContactId: String, productNamePrefix: String) = {
     ApiGatewayRequest(
       Some("GET"),
-      None,
       None,
       None,
       Some(

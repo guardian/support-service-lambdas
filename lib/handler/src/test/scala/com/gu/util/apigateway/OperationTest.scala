@@ -10,7 +10,7 @@ class OperationTest extends FlatSpec with Matchers {
 
     val operation = Operation(_ => ApiGatewayResponse("200", "blah"), () => ApiGatewayResponse("0", "blah"))
     val newOperation = operation.prependRequestValidationToSteps(req => ContinueProcessing(()))
-    val actual = newOperation.steps(ApiGatewayRequest(None, None, None, None, None, None, None))
+    val actual = newOperation.steps(ApiGatewayRequest(None, None, None, None, None, None))
     actual.statusCode should be("200")
 
   }
@@ -19,7 +19,7 @@ class OperationTest extends FlatSpec with Matchers {
 
     val operation = Operation(_ => ApiGatewayResponse("200", "blah"), () => ApiGatewayResponse("0", "blah"))
     val newOperation = operation.prependRequestValidationToSteps(req => ReturnWithResponse(ApiGatewayResponse("401", "blah")))
-    val actual = newOperation.steps(ApiGatewayRequest(None, None, None, None, None, None, None))
+    val actual = newOperation.steps(ApiGatewayRequest(None, None, None, None, None, None))
     actual.statusCode should be("401")
 
   }

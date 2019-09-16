@@ -94,7 +94,7 @@ class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
 
   """.stripMargin
 
-    val actual = digitalSubscriptionExpirySteps.steps(ApiGatewayRequest(None, None, None, Some(request), None, None, None))
+    val actual = digitalSubscriptionExpirySteps.steps(ApiGatewayRequest(None, None, Some(request), None, None, None))
 
     actual.shouldBe(successfulResponseFromZuora)
   }
@@ -107,7 +107,7 @@ class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
 
   """.stripMargin
 
-    val actual = digitalSubscriptionExpirySteps.steps(ApiGatewayRequest(None, None, None, Some(request), None, None, None))
+    val actual = digitalSubscriptionExpirySteps.steps(ApiGatewayRequest(None, None, Some(request), None, None, None))
 
     verifyResponse(
       actualResponse = actual,
@@ -125,7 +125,7 @@ class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
 
   """.stripMargin
 
-    val actual = digitalSubscriptionExpirySteps.steps(ApiGatewayRequest(None, None, None, Some(request), None, None, None))
+    val actual = digitalSubscriptionExpirySteps.steps(ApiGatewayRequest(None, None, Some(request), None, None, None))
 
     val expectedResponseBody =
       """{
@@ -155,7 +155,7 @@ class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
 
   """.stripMargin
 
-    val actual = digitalSubscriptionExpirySteps.steps(ApiGatewayRequest(None, None, None, Some(request), None, None, None))
+    val actual = digitalSubscriptionExpirySteps.steps(ApiGatewayRequest(None, None, Some(request), None, None, None))
 
     verifyResponse(
       actualResponse = actual,
@@ -168,7 +168,7 @@ class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
 
     val request = "{}"
 
-    val actual = digitalSubscriptionExpirySteps.steps(ApiGatewayRequest(None, None, None, Some(request), None, None, None))
+    val actual = digitalSubscriptionExpirySteps.steps(ApiGatewayRequest(None, None, Some(request), None, None, None))
 
     verifyResponse(
       actualResponse = actual,
@@ -186,7 +186,7 @@ class DigitalSubscriptionExpiryStepsTest extends FlatSpec with Matchers {
 
   """.stripMargin
 
-    val actual = digitalSubscriptionExpirySteps.steps(ApiGatewayRequest(None, None, None, Some(request), None, None, None))
+    val actual = digitalSubscriptionExpirySteps.steps(ApiGatewayRequest(None, None, Some(request), None, None, None))
 
     val expectedResponseBody =
       """{

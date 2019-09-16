@@ -30,16 +30,7 @@ class ApiGatewayHandlerReadsTest extends FlatSpec {
          |    },
          |    "queryStringParameters":  {
          |        "apiToken": "someToken",
-         |        "isHealthcheck" : "true",
-         |        "multiValueQueryKey": "multiValue1"
-         |    },
-         |    "multiValueQueryStringParameters": {
-         |        "apiToken": [ "someToken" ],
-         |        "isHealthcheck" : [ "true" ],
-         |        "multiValueQueryKey": [
-         |            "multiValue1",
-         |            "multiValue2"
-         |        ]
+         |        "isHealthcheck" : "true"
          |    },
          |    "pathParameters": null,
          |    "stageVariables": null,
@@ -76,21 +67,13 @@ class ApiGatewayHandlerReadsTest extends FlatSpec {
 
     val queryStringParameters = Map(
       "apiToken" -> "someToken",
-      "isHealthcheck" -> "true",
-      "multiValueQueryKey" -> "multiValue1"
-    )
-
-    val multiValueQueryStringParameters = Map(
-      "apiToken" -> List("someToken"),
-      "isHealthcheck" -> List("true"),
-      "multiValueQueryKey" -> List("multiValue1", "multiValue2")
+      "isHealthcheck" -> "true"
     )
 
     val expected: JsResult[ApiGatewayRequest] = JsSuccess(
       ApiGatewayRequest(
         httpMethod = Some("POST"),
         queryStringParameters = Some(queryStringParameters),
-        multiValueQueryStringParameters = Some(multiValueQueryStringParameters),
         body = Some(eventBodySimple),
         headers = Some(eventHeaders),
         path = Some("/stripe-customer-source-updated")
@@ -110,8 +93,7 @@ class ApiGatewayHandlerReadsTest extends FlatSpec {
   it should "deserialise empty query string to case class" in {
 
     val noQueryParamsRequest = ApiGatewayRequest(
-      httpMethod = None, queryStringParameters = None, multiValueQueryStringParameters = None, body = None,
-      headers = None, path = None
+      httpMethod = None, queryStringParameters = None, body = None, headers = None, path = None
     )
 
     noQueryParamsRequest.queryParamsAsCaseClass[TestParams]() shouldBe ContinueProcessing(TestParams(None))
@@ -123,8 +105,7 @@ class ApiGatewayHandlerReadsTest extends FlatSpec {
       "testQueryParam" -> "testValue"
     ))
     val noQueryParamsRequest = ApiGatewayRequest(
-      httpMethod = None, queryStringParameters = queryParams, multiValueQueryStringParameters = None, body = None,
-      headers = None, path = None
+      httpMethod = None, queryStringParameters = queryParams, body = None, headers = None, path = None
     )
     noQueryParamsRequest.queryParamsAsCaseClass[TestParams]() shouldBe ContinueProcessing(TestParams(Some("testValue")))
   }
@@ -139,8 +120,7 @@ class ApiGatewayHandlerReadsTest extends FlatSpec {
       "wrongParamName" -> "someValue"
     ))
     val noQueryParamsRequest = ApiGatewayRequest(
-      httpMethod = None, queryStringParameters = queryParams, multiValueQueryStringParameters = None, body = None,
-      headers = None, path = None
+      httpMethod = None, queryStringParameters = queryParams, body = None, headers = None, path = None
     )
     val actual = noQueryParamsRequest.queryParamsAsCaseClass[NonOptionalParams]()
     val expected = -\/("400")
@@ -152,8 +132,7 @@ class ApiGatewayHandlerReadsTest extends FlatSpec {
       "testQueryParam" -> "someValue"
     ))
     val noQueryParamsRequest = ApiGatewayRequest(
-      httpMethod = None, queryStringParameters = queryParams, multiValueQueryStringParameters = None, body = None,
-      headers = None, path = None
+      httpMethod = None, queryStringParameters = queryParams, body = None, headers = None, path = None
     )
     val actual = noQueryParamsRequest.queryParamsAsCaseClass[NonOptionalParams]()
     val expected = ContinueProcessing(NonOptionalParams("someValue"))
@@ -166,8 +145,7 @@ class ApiGatewayHandlerReadsTest extends FlatSpec {
       "another" -> "someOtherValue"
     ))
     val noQueryParamsRequest = ApiGatewayRequest(
-      httpMethod = None, queryStringParameters = queryParams, multiValueQueryStringParameters = None, body = None,
-      headers = None, path = None
+      httpMethod = None, queryStringParameters = queryParams, body = None, headers = None, path = None
     )
     val actual = noQueryParamsRequest.queryParamsAsCaseClass[NonOptionalParams]()
     val expected = ContinueProcessing(NonOptionalParams("someValue"))
