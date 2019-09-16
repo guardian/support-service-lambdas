@@ -5,7 +5,7 @@ import java.time.LocalDate
 import cats.implicits._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{ProductName, ProductRatePlanKey, SubscriptionName}
-import play.api.libs.json.{Json, OWrites, Reads}
+import play.api.libs.json.{Json, OFormat}
 
 object WireHolidayStopRequest {
 
@@ -14,11 +14,6 @@ object WireHolidayStopRequest {
     start = sfHolidayStopRequest.Start_Date__c.value,
     end = sfHolidayStopRequest.End_Date__c.value,
     subscriptionName = sfHolidayStopRequest.Subscription_Name__c,
-    mutabilityFlags = calculateMutabilityFlags(
-      ActionCalculator.getProductSpecifics(sfHolidayStopRequest.Product_Name__c).firstAvailableDate,
-      sfHolidayStopRequest.Actioned_Count__c.value,
-      sfHolidayStopRequest.End_Date__c.value
-    ),
     publicationsImpacted = sfHolidayStopRequest.Holiday_Stop_Request_Detail__r.map(_.records.map(detail => HolidayStopRequestsDetail(
       publicationDate = detail.Stopped_Publication_Date__c.value
     ))).getOrElse(List())
@@ -43,7 +38,7 @@ case class MutabilityFlags(
 )
 
 object MutabilityFlags {
-  implicit val writes: OWrites[MutabilityFlags] = Json.writes[MutabilityFlags]
+  implicit val format: OFormat[MutabilityFlags] = Json.format[MutabilityFlags]
 }
 
 
@@ -53,7 +48,7 @@ case class HolidayStopRequestsDetail(
 )
 
 object HolidayStopRequestsDetail {
-  implicit val writes: OWrites[HolidayStopRequestsDetail] = Json.writes[HolidayStopRequestsDetail]
+  implicit val format: OFormat[HolidayStopRequestsDetail] = Json.format[HolidayStopRequestsDetail]
 }
 
 case class HolidayStopRequestPartial(
@@ -63,7 +58,7 @@ case class HolidayStopRequestPartial(
 )
 
 object HolidayStopRequestPartial {
-  implicit val reads: Reads[HolidayStopRequestPartial] = Json.reads[HolidayStopRequestPartial]
+  implicit val format: OFormat[HolidayStopRequestPartial] = Json.format[HolidayStopRequestPartial]
 }
 
 case class HolidayStopRequestFull(
@@ -71,12 +66,11 @@ case class HolidayStopRequestFull(
   start: LocalDate,
   end: LocalDate,
   subscriptionName: SubscriptionName,
-  mutabilityFlags: MutabilityFlags,
   publicationsImpacted: List[HolidayStopRequestsDetail]
 )
 
 object HolidayStopRequestFull {
-  implicit val writes: OWrites[HolidayStopRequestFull] = Json.writes[HolidayStopRequestFull]
+  implicit val format: OFormat[HolidayStopRequestFull] = Json.format[HolidayStopRequestFull]
 }
 
 case class GetHolidayStopRequests(
@@ -108,8 +102,8 @@ object GetHolidayStopRequests {
     )
   }
 
-  implicit val writesProductSpecifics: OWrites[ProductSpecifics] = Json.writes[ProductSpecifics]
-  implicit val writes: OWrites[GetHolidayStopRequests] = Json.writes[GetHolidayStopRequests]
+  implicit val writesProductSpecifics: OFormat[ProductSpecifics] = Json.format[ProductSpecifics]
+  implicit val writes: OFormat[GetHolidayStopRequests] = Json.format[GetHolidayStopRequests]
 }
 
 case class GetHolidayStopRequestsError(message: String)

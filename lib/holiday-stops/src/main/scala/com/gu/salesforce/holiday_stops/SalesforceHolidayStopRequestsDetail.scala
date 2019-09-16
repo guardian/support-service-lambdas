@@ -49,7 +49,7 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
     Charge_Code__c: HolidayStopRequestsDetailChargeCode,
     Actual_Price__c: HolidayStopRequestsDetailChargePrice
   )
-  implicit val writesActioned = Json.writes[HolidayStopRequestsDetailActioned]
+  implicit val formatActioned = Json.format[HolidayStopRequestsDetailActioned]
 
   object ActionSalesforceHolidayStopRequestsDetail {
 
@@ -69,9 +69,9 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
     Charge_Code__c: Option[HolidayStopRequestsDetailChargeCode],
     Actual_Price__c: Option[HolidayStopRequestsDetailChargePrice]
   )
-  implicit val readsHolidayStopRequestsDetail = Json.reads[HolidayStopRequestsDetail]
+  implicit val formatHolidayStopRequestsDetail = Json.format[HolidayStopRequestsDetail]
 
-  implicit val readsIds = Json.reads[RecordsWrapperCaseClass[HolidayStopRequestsDetail]]
+  implicit val formatIds = Json.format[RecordsWrapperCaseClass[HolidayStopRequestsDetail]]
 
   val SOQL_SELECT_CLAUSE = """
       | SELECT Id, Subscription_Name__c, Product_Name__c, Stopped_Publication_Date__c,
@@ -114,7 +114,7 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
     Charge_Code__c: Option[HolidayStopRequestsDetailChargeCode],
     Actual_Price__c: Option[HolidayStopRequestsDetailChargePrice]
   )
-  implicit val writesHolidayStopRequestsDetail = Json.writes[ActionedHolidayStopRequestsDetailToBackfill]
+  implicit val formatActionedHolidayStopRequestsDetail = Json.format[ActionedHolidayStopRequestsDetailToBackfill]
 
   object BackfillActionedSalesforceHolidayStopRequestsDetail {
 

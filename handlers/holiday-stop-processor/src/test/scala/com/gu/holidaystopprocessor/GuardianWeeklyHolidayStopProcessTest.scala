@@ -129,9 +129,9 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
     val responses = GuardianWeeklyHolidayStopProcess.processHolidayStops(
       guardianWeeklyConfig,
       getHolidayStopRequestsFromSalesforce(Right(List(
-        Fixtures.mkHolidayStopRequestDetails(Fixtures.mkHolidayStopRequest("R1", LocalDate.of(2019, 8, 2)), "C1"),
-        Fixtures.mkHolidayStopRequestDetails(Fixtures.mkHolidayStopRequest("R2", LocalDate.of(2019, 9, 1)), "C3"),
-        Fixtures.mkHolidayStopRequestDetails(Fixtures.mkHolidayStopRequest("R3", LocalDate.of(2019, 8, 9)), "C4")
+        Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(Fixtures.mkHolidayStopRequest("R1", LocalDate.of(2019, 8, 2)), "C1"),
+        Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(Fixtures.mkHolidayStopRequest("R2", LocalDate.of(2019, 9, 1)), "C3"),
+        Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(Fixtures.mkHolidayStopRequest("R3", LocalDate.of(2019, 8, 9)), "C4")
       ))),
       getSubscription(Right(Fixtures.mkSubscriptionWithHolidayStops())),
       updateSubscription(Right(())),
@@ -162,9 +162,9 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
     val responses = GuardianWeeklyHolidayStopProcess.processHolidayStops(
       guardianWeeklyConfig,
       getHolidayStopRequestsFromSalesforce(Right(List(
-        Fixtures.mkHolidayStopRequestDetails(Fixtures.mkHolidayStopRequest("R1", LocalDate.of(2019, 8, 2)), "C2"),
-        Fixtures.mkHolidayStopRequestDetails(Fixtures.mkHolidayStopRequest("R2", LocalDate.of(2019, 9, 1)), "C5"),
-        Fixtures.mkHolidayStopRequestDetails(Fixtures.mkHolidayStopRequest("R3", LocalDate.of(2019, 8, 9)), "C6")
+        Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(Fixtures.mkHolidayStopRequest("R1", LocalDate.of(2019, 8, 2)), "C2"),
+        Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(Fixtures.mkHolidayStopRequest("R2", LocalDate.of(2019, 9, 1)), "C5"),
+        Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(Fixtures.mkHolidayStopRequest("R3", LocalDate.of(2019, 8, 9)), "C6")
       ))),
       getSubscription(Right(Fixtures.mkSubscriptionWithHolidayStops())),
       updateSubscription(Right(())),
@@ -188,9 +188,9 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
     val responses = GuardianWeeklyHolidayStopProcess.processHolidayStops(
       guardianWeeklyConfig,
       getHolidayStopRequestsFromSalesforce(Right(List(
-        Fixtures.mkHolidayStopRequestDetails(Fixtures.mkHolidayStopRequest("r1"), ""),
-        Fixtures.mkHolidayStopRequestDetails(Fixtures.mkHolidayStopRequest("r2"), ""),
-        Fixtures.mkHolidayStopRequestDetails(Fixtures.mkHolidayStopRequest("r3"), "")
+        Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(Fixtures.mkHolidayStopRequest("r1"), ""),
+        Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(Fixtures.mkHolidayStopRequest("r2"), ""),
+        Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(Fixtures.mkHolidayStopRequest("r3"), "")
       ))),
       getSubscription(Right(subscription)),
       updateSubscription(Right(())),

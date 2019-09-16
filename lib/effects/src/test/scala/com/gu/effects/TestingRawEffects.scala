@@ -141,5 +141,4 @@ object TestingRawEffects {
   val failedS3Upload = {
     fakeRequest: PutObjectRequest => Failure(new AmazonServiceException("failure"))
   }
-
 }

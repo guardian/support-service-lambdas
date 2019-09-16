@@ -2,6 +2,7 @@ package com.gu.holiday_stops
 
 import java.time.LocalDate
 
+import com.gu.salesforce.RecordsWrapperCaseClass
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.{HolidayStopRequest, HolidayStopRequestActionedCount, HolidayStopRequestEndDate, HolidayStopRequestStartDate}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
@@ -178,7 +179,8 @@ object Fixtures {
   def mkHolidayStopRequest(
     id: String,
     stopDate: LocalDate = LocalDate.of(2019, 1, 1),
-    subscriptionName: SubscriptionName = SubscriptionName("S1")
+    subscriptionName: SubscriptionName = SubscriptionName("S1"),
+    requestDetail: List[HolidayStopRequestsDetail] = Nil
   ) = HolidayStopRequest(
     Id = HolidayStopRequestId(id),
     Start_Date__c = HolidayStopRequestStartDate(stopDate),
@@ -188,10 +190,10 @@ object Fixtures {
     Total_Issues_Publications_Impacted_Count__c = 7,
     Subscription_Name__c = subscriptionName,
     Product_Name__c = ProductName("Gu Weekly"),
-    Holiday_Stop_Request_Detail__r = None
+    Holiday_Stop_Request_Detail__r = Some(RecordsWrapperCaseClass(requestDetail))
   )
 
-  def mkHolidayStopRequestDetails(request: HolidayStopRequest, chargeCode: String) = HolidayStopRequestsDetail(
+  def mkHolidayStopRequestDetailsFromHolidayStopRequest(request: HolidayStopRequest, chargeCode: String) = HolidayStopRequestsDetail(
     Id = HolidayStopRequestsDetailId(request.Id.value),
     Subscription_Name__c = request.Subscription_Name__c,
     Product_Name__c = request.Product_Name__c,
@@ -200,6 +202,26 @@ object Fixtures {
     Charge_Code__c = Some(HolidayStopRequestsDetailChargeCode(chargeCode)),
     Actual_Price__c = None
   )
+
+  def mkHolidayStopRequestDetails(
+    id: String = "HSD-1",
+    subscriptionName: String = "Subscription 1",
+    productName: String = "Product 1",
+    stopDate: LocalDate = LocalDate.of(2019, 1, 1),
+    chargeCode: String = "Charge code 1",
+    estimatedPrice:  Option[Double] = None,
+    actualPrice:  Option[Double] = None,
+  ) = {
+    HolidayStopRequestsDetail(
+      Id = HolidayStopRequestsDetailId(id),
+      Subscription_Name__c = SubscriptionName(subscriptionName),
+      Product_Name__c = ProductName(productName),
+      Stopped_Publication_Date__c = StoppedPublicationDate(stopDate),
+      Estimated_Price__c = estimatedPrice.map(HolidayStopRequestsDetailChargePrice.apply),
+      Charge_Code__c = Some(HolidayStopRequestsDetailChargeCode(chargeCode)),
+      Actual_Price__c = actualPrice.map(HolidayStopRequestsDetailChargePrice.apply)
+    )
+  }
 
   def mkHolidayStop(date: LocalDate) = HolidayStop(
     requestId = HolidayStopRequestsDetailId("R1"),
