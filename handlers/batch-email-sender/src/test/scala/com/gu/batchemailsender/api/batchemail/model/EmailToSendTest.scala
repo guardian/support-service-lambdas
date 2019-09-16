@@ -61,6 +61,15 @@ class EmailToSendTest extends FlatSpec {
     assert(EmailToSend.fromEmailBatchItem(emailBatchItemDD) == expectedDD)
   }
 
+  it should "create holiday-stop confirmation email to send" in {
+    val emailBatchItem = emailBatchItemStub.copy(
+      object_name = "Holiday_Stop_Request__c",
+      payload = emailBatchItemPayloadStub.copy(email_stage = "default")
+    )
+    val expected = expectedStub.copy(DataExtensionName = "SV_HolidayStopConfirmation")
+    assert(EmailToSend.fromEmailBatchItem(emailBatchItem) == expected)
+  }
+
   it should "throw exception if it cannot recognize object_name" in {
     val emailBatchItemUnrecognized = emailBatchItemStub.copy(object_name = "unrecognized_object_name")
     assertThrows[RuntimeException](EmailToSend.fromEmailBatchItem(emailBatchItemUnrecognized))
