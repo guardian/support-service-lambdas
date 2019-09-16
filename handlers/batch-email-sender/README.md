@@ -11,7 +11,7 @@ This lambda is responsible for handling the following _service_ emails (non-mark
 | Direct Debit Mandate failure 4 | `DD_Mandate_Failure__c`      | `MF4`                     | Direct Debit - Email 4        |
 | Direct Debit Mandate failure 5 | `DD_Mandate_Failure__c`      | `MF5`                     | Direct Debit - Email 5        |
 | Direct Debit Mandate failure 6 | `DD_Mandate_Failure__c`      | `MF6`                     | Direct Debit - Email 6        |
-| Holiday-stop confirmation      | `Holiday_Stop_Request__c`    |                           | SV_HolidayStopConfirmation    |
+| Holiday-stop confirmation      | `Holiday_Stop_Request__c`    | `confirm`                 | SV_HolidayStopConfirmation    |
 
 ## How it works?
 
