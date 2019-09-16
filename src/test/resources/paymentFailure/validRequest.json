@@ -24,8 +24,7 @@
   },
   "queryStringParameters": {
     "apiClientId": "validApiClientId",
-    "apiToken": "validApiToken",
-    "mulitiValueQueryKey": "multiValue1"
+    "apiToken": "validApiToken"
   },
   "pathParameters": null,
   "stageVariables": null,

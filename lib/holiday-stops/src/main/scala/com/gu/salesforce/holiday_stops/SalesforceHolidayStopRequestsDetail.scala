@@ -28,9 +28,6 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
   case class ProductName(value: String) extends AnyVal
   implicit val formatProductName = Jsonx.formatInline[ProductName]
 
-  case class ProductRatePlanChargeId(value: String) extends AnyVal
-  implicit val formatProductRatePlanChargeIdName = Jsonx.formatInline[ProductRatePlanChargeId]
-
   case class ProductRatePlanName(value: String) extends AnyVal
   case class ProductType(value: String) extends AnyVal
 

@@ -102,8 +102,8 @@ object GetHolidayStopRequests {
     )
   }
 
-  implicit val writesProductSpecifics: OFormat[ProductSpecifics] = Json.format[ProductSpecifics]
-  implicit val writes: OFormat[GetHolidayStopRequests] = Json.format[GetHolidayStopRequests]
+  implicit val formatProductSpecifics: OFormat[ProductSpecifics] = Json.format[ProductSpecifics]
+  implicit val format: OFormat[GetHolidayStopRequests] = Json.format[GetHolidayStopRequests]
 }
 
 case class GetHolidayStopRequestsError(message: String)
