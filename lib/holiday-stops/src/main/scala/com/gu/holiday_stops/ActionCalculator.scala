@@ -60,6 +60,10 @@ object ActionCalculator {
     val issueDayOfWeek: DayOfWeek,
     val processorRunLeadTimeDays: Int,
   ) {
+    /**
+     * The first date a holiday can started on for this issue when creating a stop on the supplied date
+     * @param today          Date the holiday is being created on
+     */
     def firstAvailableDate(today: LocalDate): LocalDate
   }
 
@@ -108,7 +112,7 @@ object ActionCalculator {
     processorRunLeadTimeDays = 1,
   ) {
     def firstAvailableDate(today: LocalDate): LocalDate = {
-      today.plus(processorRunLeadTimeDays.toLong, ChronoUnit.DAYS).`with`(TemporalAdjusters.next(DayOfWeek.SUNDAY))
+      today.plus(processorRunLeadTimeDays.toLong, ChronoUnit.DAYS)
     }
   }
 
