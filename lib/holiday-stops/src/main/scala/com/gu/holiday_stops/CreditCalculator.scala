@@ -6,10 +6,14 @@ import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.Subsc
 import com.softwaremill.sttp.{Id, SttpBackend}
 
 object CreditCalculator {
+
+  type PartiallyWiredCreditCalculator = (SubscriptionName, LocalDate) => Either[HolidayError, Double]
+
   def apply(
     config: Config,
+    backend: SttpBackend[Id, Nothing]
+  )(
     subscriptionName: SubscriptionName,
-    backend: SttpBackend[Id, Nothing],
     stoppedPublicationDate: LocalDate
   ): Either[HolidayError, Double] =
     for {
@@ -20,7 +24,7 @@ object CreditCalculator {
         config.guardianWeeklyConfig.nForNProductRatePlanIds,
         stoppedPublicationDate
       )(subscription)
-    } yield credit
+    } yield credit //TODO log failures
 
   def guardianWeeklyCredit(guardianWeeklyProductRatePlanIds: List[String], gwNforNProductRatePlanIds: List[String], stoppedPublicationDate: LocalDate)(subscription: Subscription): Either[ZuoraHolidayWriteError, Double] =
     CurrentGuardianWeeklySubscription(subscription, guardianWeeklyProductRatePlanIds, gwNforNProductRatePlanIds)

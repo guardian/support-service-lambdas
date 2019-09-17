@@ -32,30 +32,6 @@ class HandlerTest extends FlatSpec with Matchers {
       HEADER_SALESFORCE_CONTACT_ID -> expectedSfContactIdCoreValue
     ))) shouldBe ContinueProcessing(Right(SalesforceContactId(expectedSfContactIdCoreValue)))
   }
-  "GET /potential?startDate=...&endDate=... endpoint" should "calculate potential holiday stop dates" in {
-    val testBackend =
-      SttpBackendStub
-        .synchronous
-        .stubZuoraAuthCall()
-    inside(
-      Handler
-        .operationForEffects(testEffects.response, Stage("DEV"), FakeFetchString.fetchString, testBackend)
-        .map { operation =>
-          operation.steps(potentialIssueDateV1Request(
-            productPrefix = "Guardian Weekly xxx",
-            startDate = "2019-01-01",
-            endDate = "2019-01-15"
-          ))
-        }
-    ) {
-      case ContinueProcessing(response) =>
-        response.statusCode should equal("200")
-        inside(Json.fromJson[Array[String]](Json.parse(response.body))) {
-          case JsSuccess(dates, _) =>
-            dates should contain inOrderOnly("2019-01-04", "2019-01-11")
-        }
-    }
-  }
   "GET /potential/<<sub name>>?startDate=...&endDate=...&estimateCredit=false endpoint" should
     "calculate potential holiday stop dates" in {
     inside(
@@ -67,7 +43,7 @@ class HandlerTest extends FlatSpec with Matchers {
       ).map { operation =>
         operation
           .steps(
-            potentialIssueDateV2Request(
+            potentialIssueDateRequest(
               productPrefix = "Guardian Weekly xxx",
               startDate = "2019-01-01",
               endDate = "2019-01-15",
@@ -141,7 +117,7 @@ class HandlerTest extends FlatSpec with Matchers {
         testBackend
       ).map { operation =>
         operation
-          .steps(potentialIssueDateV2Request(
+          .steps(potentialIssueDateRequest(
             productPrefix = "Guardian Weekly xxx",
             startDate = "2019-01-01",
             endDate = "2019-01-15",
@@ -207,19 +183,8 @@ class HandlerTest extends FlatSpec with Matchers {
     }
   }
 
-  private def potentialIssueDateV1Request(productPrefix: String, startDate: String, endDate: String) = {
-    ApiGatewayRequest(
-      Some("GET"),
-      Some(Map("startDate" -> startDate, "endDate" -> endDate)),
-      None,
-      Some(Map("x-product-name-prefix" -> productPrefix)),
-      None,
-      Some("/potential")
-    )
-  }
-
-  private def potentialIssueDateV2Request(productPrefix: String, startDate: String, endDate: String,
-                                          subscriptionName: String, estimateCredit: Boolean) = {
+  private def potentialIssueDateRequest(productPrefix: String, startDate: String, endDate: String,
+                                        subscriptionName: String, estimateCredit: Boolean) = {
     ApiGatewayRequest(
       Some("GET"),
       Some(Map(
