@@ -324,7 +324,11 @@ class HandlerTest extends FlatSpec with Matchers {
   }
 
   private def toHolidayStopRequestDetail(holidayStop: SalesforceHolidayStopRequestsDetail.HolidayStopRequestsDetail) = {
-    HolidayStopRequestsDetail(holidayStop.Stopped_Publication_Date__c.value)
+    HolidayStopRequestsDetail(
+      holidayStop.Stopped_Publication_Date__c.value,
+      holidayStop.Estimated_Price__c.map(_.value),
+      holidayStop.Actual_Price__c.map(_.value),
+    )
   }
 
   private def potentialIssueDateRequest(productPrefix: String, startDate: String, endDate: String,

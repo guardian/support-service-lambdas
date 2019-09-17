@@ -86,9 +86,11 @@ case class GetHolidayStopRequests(
 
 object GetHolidayStopRequests {
 
-  def apply(holidayStopRequests: List[HolidayStopRequest],
-            optionalProductNamePrefix: Option[ProductName],
-            optionalProductRatePlanKey: Option[ProductRatePlanKey]): Either[GetHolidayStopRequestsError, GetHolidayStopRequests] = {
+  def apply(
+    holidayStopRequests: List[HolidayStopRequest],
+    optionalProductNamePrefix: Option[ProductName],
+    optionalProductRatePlanKey: Option[ProductRatePlanKey]
+  ): Either[GetHolidayStopRequestsError, GetHolidayStopRequests] = {
     for {
       optionalProductSpecificForProductPrefix <- optionalProductNamePrefix.map(
         productNamePrefix => ActionCalculator.getProductSpecifics(productNamePrefix)
