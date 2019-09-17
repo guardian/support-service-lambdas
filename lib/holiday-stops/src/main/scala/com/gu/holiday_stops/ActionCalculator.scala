@@ -67,7 +67,10 @@ object ActionCalculator {
     def firstAvailableDate(today: LocalDate): LocalDate
   }
 
-  val GuardianWeeklySuspensionConstants = SuspensionConstants(6, List(GuardianWeeklyIssueSuspensionConstants))
+  val GuardianWeeklySuspensionConstants = SuspensionConstants(
+    annualIssueLimit = 6,
+    issueConstants = List(GuardianWeeklyIssueSuspensionConstants)
+  )
 
   case object GuardianWeeklyIssueSuspensionConstants extends IssueSuspensionConstants(
     issueDayOfWeek = DayOfWeek.FRIDAY,
@@ -105,7 +108,10 @@ object ActionCalculator {
     }
   }
 
-  val SundayVoucherSuspensionConstants = SuspensionConstants(6, List(SundayVoucherIssueSuspensionConstants))
+  val SundayVoucherSuspensionConstants = SuspensionConstants(
+    annualIssueLimit = 6,
+    issueConstants = List(SundayVoucherIssueSuspensionConstants)
+  )
 
   case object SundayVoucherIssueSuspensionConstants extends IssueSuspensionConstants(
     issueDayOfWeek = DayOfWeek.SUNDAY,
