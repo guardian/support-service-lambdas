@@ -75,8 +75,6 @@ object HolidayStopRequestFull {
   implicit val format: OFormat[HolidayStopRequestFull] = Json.format[HolidayStopRequestFull]
 }
 
-case class IssueSpecifics(firstAvailableDate: LocalDate, issueDayOfWeek: Int)
-
 case class GetHolidayStopRequests(
   productSpecifics: Option[LegacyProductSpecifics],
   existing: List[HolidayStopRequestFull],
