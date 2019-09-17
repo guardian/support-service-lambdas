@@ -2,15 +2,16 @@
 
 This lambda is responsible for handling the following _service_ emails (non-marketing) via [Braze API Triggered Campaigns](https://www.braze.com/docs/user_guide/engagement_tools/campaigns/scheduling_and_organizing/scheduling_your_campaign/#api-triggered-campaigns-server-triggered-campaigns):
 
-| Service email                  | Salesforce `object_name` | Salesforce `email_stage` | Braze Campaign Name    |
-| ------------------------------ | ------------------------ | ------------------------ | ---------------------- |
-| Credit Card Expiry             | `Card_Expiry__c`        |                           | CC Expiry              |
-| Direct Debit Mandate failure 1 | `DD_Mandate_Failure__c` | `MF1`                     | Direct Debit - Email 1 |
-| Direct Debit Mandate failure 2 | `DD_Mandate_Failure__c` | `MF2`                     | Direct Debit - Email 2 |
-| Direct Debit Mandate failure 3 | `DD_Mandate_Failure__c` | `MF3`                     | Direct Debit - Email 3 |
-| Direct Debit Mandate failure 4 | `DD_Mandate_Failure__c` | `MF4`                     | Direct Debit - Email 4 |
-| Direct Debit Mandate failure 5 | `DD_Mandate_Failure__c` | `MF5`                     | Direct Debit - Email 5 |
-| Direct Debit Mandate failure 6 | `DD_Mandate_Failure__c` | `MF6`                     | Direct Debit - Email 6 |
+| Service email                  | Salesforce `object_name`     | Salesforce `email_stage`  | Braze Campaign Name           |
+| ------------------------------ | ---------------------------- | ------------------------- | ----------------------------- |
+| Credit Card Expiry             | `Card_Expiry__c`             |                           | CC Expiry                     |
+| Direct Debit Mandate failure 1 | `DD_Mandate_Failure__c`      | `MF1`                     | Direct Debit - Email 1        |
+| Direct Debit Mandate failure 2 | `DD_Mandate_Failure__c`      | `MF2`                     | Direct Debit - Email 2        |
+| Direct Debit Mandate failure 3 | `DD_Mandate_Failure__c`      | `MF3`                     | Direct Debit - Email 3        |
+| Direct Debit Mandate failure 4 | `DD_Mandate_Failure__c`      | `MF4`                     | Direct Debit - Email 4        |
+| Direct Debit Mandate failure 5 | `DD_Mandate_Failure__c`      | `MF5`                     | Direct Debit - Email 5        |
+| Direct Debit Mandate failure 6 | `DD_Mandate_Failure__c`      | `MF6`                     | Direct Debit - Email 6        |
+| Holiday-stop confirmation      | `Holiday_Stop_Request__c`    | `create`                  | SV_HolidayStopConfirmation    |
 
 ## How it works?
 

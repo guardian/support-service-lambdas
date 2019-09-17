@@ -15,7 +15,9 @@ object WireHolidayStopRequest {
     end = sfHolidayStopRequest.End_Date__c.value,
     subscriptionName = sfHolidayStopRequest.Subscription_Name__c,
     publicationsImpacted = sfHolidayStopRequest.Holiday_Stop_Request_Detail__r.map(_.records.map(detail => HolidayStopRequestsDetail(
-      publicationDate = detail.Stopped_Publication_Date__c.value
+      publicationDate = detail.Stopped_Publication_Date__c.value,
+      estimatedPrice = detail.Estimated_Price__c.map(_.value),
+      actualPrice = detail.Actual_Price__c.map(_.value)
     ))).getOrElse(List())
   )
 
@@ -41,10 +43,10 @@ object MutabilityFlags {
   implicit val format: OFormat[MutabilityFlags] = Json.format[MutabilityFlags]
 }
 
-
 case class HolidayStopRequestsDetail(
   publicationDate: LocalDate,
-  // TODO add other fields
+  estimatedPrice: Option[Double],
+  actualPrice: Option[Double]
 )
 
 object HolidayStopRequestsDetail {

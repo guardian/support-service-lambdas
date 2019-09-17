@@ -8,7 +8,6 @@ All endpoints require...
 
 | Method | Endpoint | Description |
 | --- | --- | --- | 
-| GET | `/{STAGE}/potential?startDate={yyyy-MM-dd}&endDate={yyyy-MM-dd}`  (with `x-product-name-prefix` header set)  | [DEPRECATED]returns an array of dates for each issue impacted between the dates for the given product |
 | GET | `/{STAGE}/potential/{SUBSCRIPTION_NAME}?startDate={yyyy-MM-dd}&endDate={yyyy-MM-dd}&estimateCredit={true`&#124;`false}`  (with `x-product-name-prefix` header set)  | returns a response containing dates for each issue impacted between the dates for the given product. Optionally the estimated credit can be calculated for each issue. |
 | GET | `/{STAGE}/hsr` | returns all holiday stops (past & present) for the user |
 | GET | `/{STAGE}/hsr` (with `x-product-name-prefix` header set) | returns all holiday stops (past & present) but including a calculated 'first available date' based on the type of product |

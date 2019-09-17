@@ -14,13 +14,21 @@ object EmailToSend {
 
   def fromEmailBatchItem(emailBatchItem: EmailBatchItem): EmailToSend = {
 
+    def optional(fldName: String, fldValue: Option[String]): Seq[(String, String)] =
+      fldValue.map(v => Seq(fldName -> v)).getOrElse(Nil)
+
     val customFields: Map[String, String] = Map(
       "first_name" -> emailBatchItem.payload.first_name,
       "last_name" -> emailBatchItem.payload.last_name,
       "subscriber_id" -> emailBatchItem.payload.subscriber_id.value,
       "next_charge_date" -> emailBatchItem.payload.next_charge_date,
       "product" -> emailBatchItem.payload.product
-    )
+    ) ++
+      optional("holiday_start_date", emailBatchItem.payload.holiday_start_date.map(_.value)) ++
+      optional("holiday_end_date", emailBatchItem.payload.holiday_end_date.map(_.value)) ++
+      optional("stopped_credit_sum", emailBatchItem.payload.stopped_credit_sum.map(_.value)) ++
+      optional("currency_symbol", emailBatchItem.payload.currency_symbol.map(_.value)) ++
+      optional("stopped_issue_count", emailBatchItem.payload.stopped_issue_count.map(_.value))
 
     val emailPayloadTo = EmailPayloadTo(
       Address = emailBatchItem.payload.to_address,
@@ -55,7 +63,7 @@ object EmailToSend {
       case ("Payment_Failure__c", "DD_PF2") => "SV_DDpaymentfailure2"
       case ("Payment_Failure__c", "DD_PF3") => "SV_DDpaymentfailure3"
       case ("Payment_Failure__c", "DD_PF4") => "SV_DDpaymentfailure4"
+      case ("Holiday_Stop_Request__c", "create") => "SV_HolidayStopConfirmation"
       case (objectName, emailStage) => throw new RuntimeException(s"Unrecognized (object_name, email_stage) = ($objectName, $emailStage). Please fix SF trigger.")
     }
 }
-

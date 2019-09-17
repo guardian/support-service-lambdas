@@ -15,6 +15,14 @@ import com.gu.util.resthttp.RestOp._
 import com.gu.util.resthttp.RestRequestMaker._
 import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.resthttp.{HttpOp, RestRequestMaker}
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.UUID
+
+import com.gu.holiday_stops.ActionCalculator
+import com.gu.holiday_stops.CreditCalculator.PartiallyWiredCreditCalculator
+import com.gu.salesforce.RecordsWrapperCaseClass
+import com.gu.salesforce.holiday_stops.SalesforceSFSubscription.SubscriptionForSubscriptionNameAndContact._
 import play.api.libs.json._
 
 object SalesforceHolidayStopRequest extends Logging {
@@ -133,6 +141,7 @@ object SalesforceHolidayStopRequest extends Logging {
 
   case class CompositeTreeHolidayStopRequestsDetail(
     Stopped_Publication_Date__c: LocalDate,
+    Estimated_Price__c: Option[HolidayStopRequestsDetailChargePrice],
     attributes: CompositeAttributes = CompositeAttributes(
       SalesforceHolidayStopRequestsDetail.holidayStopRequestsDetailSfObjectRef,
       UUID.randomUUID().toString
@@ -169,20 +178,26 @@ object SalesforceHolidayStopRequest extends Logging {
         .map(_.results.find(_.referenceId == holidayStopRequestSfObjectRef).map(_.id).get) //FIXME refactor this to map None to ClientFailure rather than nasty .get
         .runRequest
 
-    def buildBody(start: LocalDate, end: LocalDate, subscription: MatchingSubscription) = RecordsWrapperCaseClass(List(
-      CompositeTreeHolidayStopRequest(
-        Start_Date__c = HolidayStopRequestStartDate(start),
-        End_Date__c = HolidayStopRequestEndDate(end),
-        SF_Subscription__c = subscription.Id,
-        Holiday_Stop_Request_Detail__r = RecordsWrapperCaseClass(
-          ActionCalculator.publicationDatesToBeStopped(
-            start,
-            end,
-            subscription.Product_Name__c
-          ).map(CompositeTreeHolidayStopRequestsDetail(_))
+    def buildBody(creditCalculator: PartiallyWiredCreditCalculator)(start: LocalDate, end: LocalDate, subscription: MatchingSubscription) =
+      RecordsWrapperCaseClass(List(
+        CompositeTreeHolidayStopRequest(
+          Start_Date__c = HolidayStopRequestStartDate(start),
+          End_Date__c = HolidayStopRequestEndDate(end),
+          SF_Subscription__c = subscription.Id,
+          Holiday_Stop_Request_Detail__r = RecordsWrapperCaseClass(
+            ActionCalculator.publicationDatesToBeStopped(
+              start,
+              end,
+              subscription.Product_Name__c
+            ).map { stoppedPublicationDate =>
+                CompositeTreeHolidayStopRequestsDetail(
+                  stoppedPublicationDate,
+                  creditCalculator(subscription.Name, stoppedPublicationDate).toOption.map(HolidayStopRequestsDetailChargePrice)
+                )
+              }
+          )
         )
-      )
-    ))
+      ))
 
   }
 
