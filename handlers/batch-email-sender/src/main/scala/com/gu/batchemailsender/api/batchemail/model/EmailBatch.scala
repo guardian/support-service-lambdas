@@ -21,9 +21,18 @@ object EmailBatch {
       last_name: String,
       identity_id: Option[String],
       first_name: String,
-      email_stage: String
+      email_stage: String,
+      holiday_stop_request: Option[WireHolidayStopRequest]
+    )
+    case class WireHolidayStopRequest(
+      holiday_start_date: String,
+      holiday_end_date: String,
+      stopped_credit_sum: String,
+      currency_symbol: String,
+      stopped_issue_count: String
     )
 
+    implicit val holidayStopRequestReads = Json.reads[WireHolidayStopRequest]
     implicit val emailBatchItemPayloadReads = Json.reads[WireEmailBatchItemPayload]
     implicit val emailBatchItemReads = Json.reads[WireEmailBatchItem]
     implicit val emailBatch = Json.reads[WireEmailBatch]
@@ -52,16 +61,26 @@ object EmailBatch {
 
       EmailBatchItem(
         payload = EmailBatchItemPayload(
-          EmailBatchItemId(emailBatchPayload.record_id),
-          emailBatchPayload.to_address,
-          SubscriberId(emailBatchPayload.subscriber_id),
-          SfContactId(emailBatchPayload.sf_contact_id),
-          emailBatchPayload.product,
-          fromSfDateToDisplayDate(emailBatchPayload.next_charge_date),
-          emailBatchPayload.last_name,
-          emailBatchPayload.identity_id.map(IdentityUserId),
-          emailBatchPayload.first_name,
-          emailBatchPayload.email_stage
+          record_id = EmailBatchItemId(emailBatchPayload.record_id),
+          to_address = emailBatchPayload.to_address,
+          subscriber_id = SubscriberId(emailBatchPayload.subscriber_id),
+          sf_contact_id = SfContactId(emailBatchPayload.sf_contact_id),
+          product = emailBatchPayload.product,
+          next_charge_date = fromSfDateToDisplayDate(emailBatchPayload.next_charge_date),
+          last_name = emailBatchPayload.last_name,
+          identity_id = emailBatchPayload.identity_id.map(IdentityUserId),
+          first_name = emailBatchPayload.first_name,
+          email_stage = emailBatchPayload.email_stage,
+          holiday_start_date = emailBatchPayload.holiday_stop_request.map(stop =>
+            HolidayStartDate(fromSfDateToDisplayDate(stop.holiday_start_date))),
+          holiday_end_date = emailBatchPayload.holiday_stop_request.map(stop =>
+            HolidayEndDate(fromSfDateToDisplayDate(stop.holiday_end_date))),
+          stopped_credit_sum = emailBatchPayload.holiday_stop_request.map(stop =>
+            StoppedCreditSum(stop.stopped_credit_sum)),
+          currency_symbol = emailBatchPayload.holiday_stop_request.map(stop =>
+            CurrencySymbol(stop.currency_symbol)),
+          stopped_issue_count = emailBatchPayload.holiday_stop_request.map(stop =>
+            StoppedIssueCount(stop.stopped_issue_count))
         ),
         object_name = wireEmailBatchItem.object_name
       )
@@ -75,6 +94,11 @@ case class SubscriberId(value: String) extends AnyVal
 case class SfContactId(value: String) extends AnyVal
 case class IdentityUserId(value: String) extends AnyVal
 case class EmailBatchItemId(value: String) extends AnyVal
+case class HolidayStartDate(value: String) extends AnyVal
+case class HolidayEndDate(value: String) extends AnyVal
+case class StoppedCreditSum(value: String) extends AnyVal
+case class CurrencySymbol(value: String) extends AnyVal
+case class StoppedIssueCount(value: String) extends AnyVal
 
 case class EmailBatchItemPayload(
   record_id: EmailBatchItemId,
@@ -86,9 +110,13 @@ case class EmailBatchItemPayload(
   last_name: String,
   identity_id: Option[IdentityUserId],
   first_name: String,
-  email_stage: String
+  email_stage: String,
+  holiday_start_date: Option[HolidayStartDate],
+  holiday_end_date: Option[HolidayEndDate],
+  stopped_credit_sum: Option[StoppedCreditSum],
+  currency_symbol: Option[CurrencySymbol],
+  stopped_issue_count: Option[StoppedIssueCount]
 )
 
 case class EmailBatchItem(payload: EmailBatchItemPayload, object_name: String)
 case class EmailBatch(emailBatchItems: List[EmailBatchItem])
-

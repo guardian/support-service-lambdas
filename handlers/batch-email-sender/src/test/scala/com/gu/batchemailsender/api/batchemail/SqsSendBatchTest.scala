@@ -43,7 +43,12 @@ object SqsSendBatchTestData {
       last_name = "bla",
       identity_id = Some(IdentityUserId("30002177")),
       first_name = "something",
-      email_stage = "MBv1 - 1"
+      email_stage = "MBv1 - 1",
+      holiday_start_date = None,
+      holiday_end_date = None,
+      stopped_credit_sum = None,
+      currency_symbol = None,
+      stopped_issue_count = None
     ),
     object_name = "Card_Expiry__c"
   )
@@ -59,7 +64,12 @@ object SqsSendBatchTestData {
       last_name = "bla",
       identity_id = Some(IdentityUserId("30002178")),
       first_name = "something",
-      email_stage = "MBv1 - 1"
+      email_stage = "MBv1 - 1",
+      holiday_start_date = None,
+      holiday_end_date = None,
+      stopped_credit_sum = None,
+      currency_symbol = None,
+      stopped_issue_count = None
     ),
     object_name = "Card_Expiry__c"
   )

@@ -16,7 +16,12 @@ class EmailToSendTest extends FlatSpec {
       last_name = "bla",
       identity_id = Some(IdentityUserId("30002177")),
       first_name = "something",
-      email_stage = "MBv1 - 1"
+      email_stage = "MBv1 - 1",
+      holiday_start_date = None,
+      holiday_end_date = None,
+      stopped_credit_sum = None,
+      currency_symbol = None,
+      stopped_issue_count = None
     )
 
   val emailBatchItemStub = EmailBatchItem(
@@ -64,9 +69,29 @@ class EmailToSendTest extends FlatSpec {
   it should "create holiday-stop confirmation email to send" in {
     val emailBatchItem = emailBatchItemStub.copy(
       object_name = "Holiday_Stop_Request__c",
-      payload = emailBatchItemPayloadStub.copy(email_stage = "create")
+      payload = emailBatchItemPayloadStub.copy(
+        email_stage = "create",
+        holiday_start_date = Some(HolidayStartDate("2019-11-01")),
+        holiday_end_date = Some(HolidayEndDate("2019-11-17")),
+        stopped_credit_sum = Some(StoppedCreditSum("11.24")),
+        currency_symbol = Some(CurrencySymbol("&pound;")),
+        stopped_issue_count = Some(StoppedIssueCount("2"))
+      )
     )
-    val expected = expectedStub.copy(DataExtensionName = "SV_HolidayStopConfirmation")
+    val expected = expectedStub.copy(
+      To = expectedStub.To.copy(
+        ContactAttributes = expectedStub.To.ContactAttributes.copy(
+          expectedStub.To.ContactAttributes.SubscriberAttributes ++ Map(
+            "holiday_start_date" -> "2019-11-01",
+            "holiday_end_date" -> "2019-11-17",
+            "stopped_credit_sum" -> "11.24",
+            "currency_symbol" -> "&pound;",
+            "stopped_issue_count" -> "2"
+          )
+        )
+      ),
+      DataExtensionName = "SV_HolidayStopConfirmation"
+    )
     assert(EmailToSend.fromEmailBatchItem(emailBatchItem) == expected)
   }
 
