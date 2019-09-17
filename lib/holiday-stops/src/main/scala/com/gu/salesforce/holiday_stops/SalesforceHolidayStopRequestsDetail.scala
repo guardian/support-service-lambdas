@@ -31,6 +31,19 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
   case class ProductRatePlanName(value: String) extends AnyVal
   case class ProductType(value: String) extends AnyVal
 
+  /**
+   * This will uniquely identify a "product rate plan" in Zuora. This can loosely be seen as the 'type' of a particular
+   * subscription. Eg:
+   * ------------------------------------------------------------
+   * |Product Type             | Rate Plan Name                 |
+   * |----------------------------------------------------------|
+   * |Guardian Weekly          | GW Oct 18 - 1 Year - Domestic  |
+   * |Newspaper - Voucher Book | Weekend                        |
+   * |----------------------------------------------------------|
+   *
+   * @param productType    Identifies the group of products the rate plan is part of
+   * @param ratePlanName   The name of the rateplan
+   */
   case class ProductRatePlanKey(productType: ProductType, ratePlanName: ProductRatePlanName)
 
   case class HolidayStopRequestsDetailChargeCode(value: String) extends AnyVal
