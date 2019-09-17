@@ -163,11 +163,14 @@ class EmailBatchTest extends FlatSpec {
         |             "last_name":"bla",
         |             "first_name":"something",
         |             "email_stage":"create",
-        |             "holiday_start_date": "2019-09-27",
-        |             "holiday_end_date": "2019-10-12",
-        |             "stopped_credit_sum": "97.42",
-        |             "currency_symbol": "&pound;",
-        |             "stopped_issue_count": "3"
+        |             "holiday_stop_request":
+        |             {
+        |               "holiday_start_date": "2019-09-27",
+        |               "holiday_end_date": "2019-10-12",
+        |               "stopped_credit_sum": "97.42",
+        |               "currency_symbol": "&pound;",
+        |               "stopped_issue_count": "3"
+        |             }
         |         },
         |         "object_name":"Holiday_Stop_Request__c"
         |       }

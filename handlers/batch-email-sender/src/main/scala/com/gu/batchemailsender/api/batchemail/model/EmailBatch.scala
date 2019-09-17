@@ -22,13 +22,17 @@ object EmailBatch {
       identity_id: Option[String],
       first_name: String,
       email_stage: String,
-      holiday_start_date: Option[String],
-      holiday_end_date: Option[String],
-      stopped_credit_sum: Option[String],
-      currency_symbol: Option[String],
-      stopped_issue_count: Option[String]
+      holiday_stop_request: Option[WireHolidayStopRequest]
+    )
+    case class WireHolidayStopRequest(
+      holiday_start_date: String,
+      holiday_end_date: String,
+      stopped_credit_sum: String,
+      currency_symbol: String,
+      stopped_issue_count: String
     )
 
+    implicit val holidayStopRequestReads = Json.reads[WireHolidayStopRequest]
     implicit val emailBatchItemPayloadReads = Json.reads[WireEmailBatchItemPayload]
     implicit val emailBatchItemReads = Json.reads[WireEmailBatchItem]
     implicit val emailBatch = Json.reads[WireEmailBatch]
@@ -67,13 +71,16 @@ object EmailBatch {
           identity_id = emailBatchPayload.identity_id.map(IdentityUserId),
           first_name = emailBatchPayload.first_name,
           email_stage = emailBatchPayload.email_stage,
-          holiday_start_date = emailBatchPayload.holiday_start_date.map(d =>
-            HolidayStartDate(fromSfDateToDisplayDate(d))),
-          holiday_end_date = emailBatchPayload.holiday_end_date.map(d =>
-            HolidayEndDate(fromSfDateToDisplayDate(d))),
-          stopped_credit_sum = emailBatchPayload.stopped_credit_sum.map(StoppedCreditSum(_)),
-          currency_symbol = emailBatchPayload.currency_symbol.map(CurrencySymbol(_)),
-          stopped_issue_count = emailBatchPayload.stopped_issue_count.map(StoppedIssueCount(_))
+          holiday_start_date = emailBatchPayload.holiday_stop_request.map(stop =>
+            HolidayStartDate(fromSfDateToDisplayDate(stop.holiday_start_date))),
+          holiday_end_date = emailBatchPayload.holiday_stop_request.map(stop =>
+            HolidayEndDate(fromSfDateToDisplayDate(stop.holiday_end_date))),
+          stopped_credit_sum = emailBatchPayload.holiday_stop_request.map(stop =>
+            StoppedCreditSum(stop.stopped_credit_sum)),
+          currency_symbol = emailBatchPayload.holiday_stop_request.map(stop =>
+            CurrencySymbol(stop.currency_symbol)),
+          stopped_issue_count = emailBatchPayload.holiday_stop_request.map(stop =>
+            StoppedIssueCount(stop.stopped_issue_count))
         ),
         object_name = wireEmailBatchItem.object_name
       )
