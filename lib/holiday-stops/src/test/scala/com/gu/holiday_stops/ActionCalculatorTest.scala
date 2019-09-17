@@ -2,6 +2,7 @@ package com.gu.holiday_stops
 
 import java.time.{DayOfWeek, LocalDate}
 
+import com.gu.holiday_stops.ActionCalculator.SuspensionConstants
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{ProductName, ProductRatePlanKey, ProductRatePlanName, ProductType}
 import org.scalatest.Inside.inside
 import org.scalatest.{EitherValues, FlatSpec, Matchers}
@@ -23,16 +24,16 @@ class ActionCalculatorTest extends FlatSpec with Matchers with EitherValues {
 
   it should "convert ProductName to a set of constants for that product" in {
 
-    val suspensionConstants = ActionCalculator.suspensionConstantsByProduct(gwProductName)
-
-    suspensionConstants.issueDayOfWeek shouldEqual DayOfWeek.FRIDAY
-    suspensionConstants.annualIssueLimit shouldEqual 6
-    suspensionConstants.processorRunLeadTimeDays shouldEqual 9
+    inside(ActionCalculator.suspensionConstantsByProduct(gwProductName)) {
+      case SuspensionConstants(annualIssueLimit, List(issues)) =>
+        annualIssueLimit shouldEqual 6
+        issues.issueDayOfWeek shouldEqual DayOfWeek.FRIDAY
+        issues.processorRunLeadTimeDays shouldEqual 9
+    }
 
     assertThrows[RuntimeException] {
       ActionCalculator.suspensionConstantsByProduct(ProductName("blah"))
     }
-
   }
 
   it should "calculate first available date for Guardian Weekly" in {
@@ -82,7 +83,7 @@ class ActionCalculatorTest extends FlatSpec with Matchers with EitherValues {
             ProductRatePlanKey(gwProductType, ProductRatePlanName(Random.nextString(10))),
             today
           )) {
-          case Right(List(productSpecifics)) => productSpecifics.firstAvailableDate shouldEqual expected
+          case Right(ProductSpecifics(_, List(issueSpecifics))) => issueSpecifics.firstAvailableDate shouldEqual expected
         }
     }
   }
@@ -131,7 +132,8 @@ class ActionCalculatorTest extends FlatSpec with Matchers with EitherValues {
               today
             )
         ) {
-          case Right(List(productSpecifics)) => productSpecifics.firstAvailableDate shouldEqual expected
+          case Right(ProductSpecifics(_, List(issueSpecifics))) =>
+            issueSpecifics.firstAvailableDate shouldEqual expected
         }
     }
   }

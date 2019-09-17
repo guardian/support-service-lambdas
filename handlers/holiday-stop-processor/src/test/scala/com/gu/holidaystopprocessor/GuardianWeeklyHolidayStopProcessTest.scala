@@ -2,7 +2,7 @@ package com.gu.holidaystopprocessor
 
 import java.time.LocalDate
 
-import com.gu.holiday_stops.ActionCalculator.GuardianWeeklySuspensionConstants
+import com.gu.holiday_stops.ActionCalculator.GuardianWeeklyIssueSuspensionConstants
 import com.gu.holiday_stops.Fixtures.{guardianWeeklyConfig, mkSubscription}
 import com.gu.holiday_stops._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
@@ -201,7 +201,7 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
   }
   it should "calculate process date correctly" in {
     def verifyProcessDate(productName: ProductName, processDate: LocalDate): Either[OverallFailure, List[HolidayStopRequestsDetail]] = {
-      processDate should equal(LocalDate.now().plusDays(GuardianWeeklySuspensionConstants.processorRunLeadTimeDays))
+      processDate should equal(LocalDate.now().plusDays(GuardianWeeklyIssueSuspensionConstants.processorRunLeadTimeDays))
       Right(Nil)
     }
 

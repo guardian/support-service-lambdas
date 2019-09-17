@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
 import com.gu.effects.{FakeFetchString, SFTestEffects, TestingRawEffects}
-import com.gu.holiday_stops.ActionCalculator.{GuardianWeeklySuspensionConstants, SundayVoucherSuspensionConstants}
+import com.gu.holiday_stops.ActionCalculator._
 import com.gu.holiday_stops.Handler._
 import com.gu.holiday_stops.ZuoraSttpEffects.ZuoraSttpEffectsOps
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.SubscriptionName
@@ -266,14 +266,15 @@ class HandlerTest extends FlatSpec with Matchers {
                   )
                 ),
                 List(
-                  ProductSpecifics(
-                    SundayVoucherSuspensionConstants.firstAvailableDate(LocalDate.now()),
-                    SundayVoucherSuspensionConstants.issueDayOfWeek.getValue,
-                    SundayVoucherSuspensionConstants.annualIssueLimit
+                  IssueSpecifics(
+                    SundayVoucherIssueSuspensionConstants.firstAvailableDate(LocalDate.now()),
+                    SundayVoucherIssueSuspensionConstants.issueDayOfWeek.getValue
                   )
-                )
+                ),
+                Some(SundayVoucherSuspensionConstants.annualIssueLimit)
               )
             )
+
         }
     }
   }
@@ -323,9 +324,9 @@ class HandlerTest extends FlatSpec with Matchers {
             response should equal(
               GetHolidayStopRequests(
                 Some(
-                  ProductSpecifics(
-                    GuardianWeeklySuspensionConstants.firstAvailableDate(LocalDate.now()),
-                    GuardianWeeklySuspensionConstants.issueDayOfWeek.getValue,
+                  LegacyProductSpecifics(
+                    GuardianWeeklyIssueSuspensionConstants.firstAvailableDate(LocalDate.now()),
+                    GuardianWeeklyIssueSuspensionConstants.issueDayOfWeek.getValue,
                     GuardianWeeklySuspensionConstants.annualIssueLimit
                   )
                 ),
@@ -338,7 +339,8 @@ class HandlerTest extends FlatSpec with Matchers {
                     List(toHolidayStopRequestDetail(holidayStopRequestsDetail))
                   )
                 ),
-                List()
+                List(),
+                None
               )
             )
         }

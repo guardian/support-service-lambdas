@@ -73,10 +73,13 @@ object HolidayStopRequestFull {
   implicit val format: OFormat[HolidayStopRequestFull] = Json.format[HolidayStopRequestFull]
 }
 
+case class IssueSpecifics(firstAvailableDate: LocalDate, issueDayOfWeek: Int)
+
 case class GetHolidayStopRequests(
-  productSpecifics: Option[ProductSpecifics],
+  productSpecifics: Option[LegacyProductSpecifics],
   existing: List[HolidayStopRequestFull],
-  productRatePlanChargeSpecifics: List[ProductSpecifics]
+  issueSpecifics: List[IssueSpecifics],
+  annualIssueLimit: Option[Int]
 )
 
 object GetHolidayStopRequests {
@@ -98,11 +101,14 @@ object GetHolidayStopRequests {
     } yield GetHolidayStopRequests(
       optionalProductSpecificForProductPrefix,
       holidayStopRequests.map(WireHolidayStopRequest.apply),
-      optionalProductSpecificForProductNameRatePlanName.getOrElse(Nil)
+      optionalProductSpecificForProductNameRatePlanName.map(_.issueSpecifics).getOrElse(Nil),
+      optionalProductSpecificForProductNameRatePlanName.map(_.annualIssueLimit)
     )
   }
 
+  implicit val formatIssueSpecifics: OFormat[IssueSpecifics] = Json.format[IssueSpecifics]
   implicit val formatProductSpecifics: OFormat[ProductSpecifics] = Json.format[ProductSpecifics]
+  implicit val formatLegacyProductSpecifics: OFormat[LegacyProductSpecifics] = Json.format[LegacyProductSpecifics]
   implicit val format: OFormat[GetHolidayStopRequests] = Json.format[GetHolidayStopRequests]
 }
 

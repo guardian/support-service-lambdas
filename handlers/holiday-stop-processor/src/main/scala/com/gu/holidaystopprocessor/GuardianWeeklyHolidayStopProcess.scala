@@ -5,7 +5,7 @@ import java.time.LocalDate
 import com.gu.holiday_stops.{CreditCalculator, CurrentGuardianWeeklySubscription, ExtendedTerm, GuardianWeeklyHolidayStopConfig, HolidayCreditProduct, HolidayCreditUpdate, HolidayStop, OverallFailure, SalesforceHolidayWriteError, Subscription, ZuoraHolidayWriteError}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestsDetail, HolidayStopRequestsDetailChargeCode, HolidayStopRequestsDetailChargePrice, ProductName, StoppedPublicationDate, SubscriptionName}
 import cats.implicits._
-import com.gu.holiday_stops.ActionCalculator.{GuardianWeeklySuspensionConstants, suspensionConstantsByProduct}
+import com.gu.holiday_stops.ActionCalculator.{GuardianWeeklyIssueSuspensionConstants, suspensionConstantsByProduct}
 
 object GuardianWeeklyHolidayStopProcess {
   def processHolidayStops(
@@ -46,7 +46,7 @@ object GuardianWeeklyHolidayStopProcess {
   }
 
   private def calculateProcessDate(processDateOverride: Option[LocalDate]) = {
-    processDateOverride.getOrElse(LocalDate.now.plusDays(GuardianWeeklySuspensionConstants.processorRunLeadTimeDays))
+    processDateOverride.getOrElse(LocalDate.now.plusDays(GuardianWeeklyIssueSuspensionConstants.processorRunLeadTimeDays))
   }
 
   /**
