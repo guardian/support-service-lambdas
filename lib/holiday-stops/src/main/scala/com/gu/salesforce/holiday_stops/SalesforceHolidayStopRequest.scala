@@ -1,8 +1,15 @@
 package com.gu.salesforce.holiday_stops
 
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.UUID
+
 import ai.x.play.json.Jsonx
+import com.gu.holiday_stops.ActionCalculator
+import com.gu.salesforce.RecordsWrapperCaseClass
 import com.gu.salesforce.SalesforceConstants._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
+import com.gu.salesforce.holiday_stops.SalesforceSFSubscription.SubscriptionForSubscriptionNameAndContact._
 import com.gu.util.Logging
 import com.gu.util.resthttp.RestOp._
 import com.gu.util.resthttp.RestRequestMaker._
@@ -64,9 +71,9 @@ object SalesforceHolidayStopRequest extends Logging {
     Product_Name__c: ProductName,
     Holiday_Stop_Request_Detail__r: Option[RecordsWrapperCaseClass[HolidayStopRequestsDetail]]
   )
-  implicit val reads = Json.reads[HolidayStopRequest]
+  implicit val format = Json.format[HolidayStopRequest]
 
-  private implicit val readsIds = Json.reads[RecordsWrapperCaseClass[HolidayStopRequest]]
+  implicit val formatIds = Json.format[RecordsWrapperCaseClass[HolidayStopRequest]]
 
   object LookupByDateAndProductNamePrefix {
 
@@ -124,13 +131,13 @@ object SalesforceHolidayStopRequest extends Logging {
   }
 
   case class SubscriptionNameLookup(Name: SubscriptionName)
-  implicit val writesSubNameLookup = Json.writes[SubscriptionNameLookup]
+  implicit val formatSubNameLookup = Json.format[SubscriptionNameLookup]
 
   case class CompositeAttributes(
     `type`: String,
     referenceId: String
   )
-  implicit val writesCompositeAttributes = Json.writes[CompositeAttributes]
+  implicit val formatCompositeAttributes = Json.format[CompositeAttributes]
 
   case class CompositeTreeHolidayStopRequestsDetail(
     Stopped_Publication_Date__c: LocalDate,
@@ -140,7 +147,7 @@ object SalesforceHolidayStopRequest extends Logging {
       UUID.randomUUID().toString
     )
   )
-  implicit val writesCompositeTreeHolidayStopRequestsDetail = Json.writes[CompositeTreeHolidayStopRequestsDetail]
+  implicit val formatCompositeTreeHolidayStopRequestsDetail = Json.format[CompositeTreeHolidayStopRequestsDetail]
 
   case class CompositeTreeHolidayStopRequest(
     Start_Date__c: HolidayStopRequestStartDate,
@@ -149,9 +156,9 @@ object SalesforceHolidayStopRequest extends Logging {
     Holiday_Stop_Request_Detail__r: RecordsWrapperCaseClass[CompositeTreeHolidayStopRequestsDetail],
     attributes: CompositeAttributes = CompositeAttributes(holidayStopRequestSfObjectRef, holidayStopRequestSfObjectRef)
   )
-  implicit val writesNewHolidayStopRequestsDetail = Json.writes[RecordsWrapperCaseClass[CompositeTreeHolidayStopRequestsDetail]]
-  implicit val writesCompositeTreeHolidayStopRequest = Json.writes[CompositeTreeHolidayStopRequest]
-  implicit val writesNewHolidayStopRequest = Json.writes[RecordsWrapperCaseClass[CompositeTreeHolidayStopRequest]]
+  implicit val formatNewHolidayStopRequestsDetail = Json.format[RecordsWrapperCaseClass[CompositeTreeHolidayStopRequestsDetail]]
+  implicit val formatCompositeTreeHolidayStopRequest = Json.format[CompositeTreeHolidayStopRequest]
+  implicit val formatNewHolidayStopRequest = Json.format[RecordsWrapperCaseClass[CompositeTreeHolidayStopRequest]]
 
   object CreateHolidayStopRequestWithDetail {
 
@@ -159,9 +166,9 @@ object SalesforceHolidayStopRequest extends Logging {
       id: HolidayStopRequestId,
       referenceId: String
     )
-    implicit val readsCreateHolidayStopRequestResultIdWrapper = Json.reads[CreateHolidayStopRequestResultIdWrapper]
+    implicit val formatCreateHolidayStopRequestResultIdWrapper = Json.format[CreateHolidayStopRequestResultIdWrapper]
     case class CreateHolidayStopRequestResult(results: List[CreateHolidayStopRequestResultIdWrapper])
-    implicit val reads = Json.reads[CreateHolidayStopRequestResult]
+    implicit val format = Json.format[CreateHolidayStopRequestResult]
 
     def apply(sfPost: HttpOp[RestRequestMaker.PostRequest, JsValue]): RecordsWrapperCaseClass[CompositeTreeHolidayStopRequest] => ClientFailableOp[HolidayStopRequestId] =
       sfPost.setupRequest[RecordsWrapperCaseClass[CompositeTreeHolidayStopRequest]] { createHolidayStopRequestWithDetail =>
@@ -213,7 +220,7 @@ object SalesforceHolidayStopRequest extends Logging {
     End_Date__c: HolidayStopRequestEndDate,
     SF_Subscription__r: SubscriptionNameLookup
   )
-  implicit val writesNew = Json.writes[NewHolidayStopRequest]
+  implicit val formatNew = Json.format[NewHolidayStopRequest]
 
   @Deprecated
   object CreateHolidayStopRequest {

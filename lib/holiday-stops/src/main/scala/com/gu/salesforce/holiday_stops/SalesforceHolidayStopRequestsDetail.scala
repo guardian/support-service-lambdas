@@ -28,6 +28,24 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
   case class ProductName(value: String) extends AnyVal
   implicit val formatProductName = Jsonx.formatInline[ProductName]
 
+  case class ProductRatePlanName(value: String) extends AnyVal
+  case class ProductType(value: String) extends AnyVal
+
+  /**
+   * This will uniquely identify a "product rate plan" in Zuora. This can loosely be seen as the 'type' of a particular
+   * subscription. Eg:
+   * ------------------------------------------------------------
+   * |Product Type             | Rate Plan Name                 |
+   * |----------------------------------------------------------|
+   * |Guardian Weekly          | GW Oct 18 - 1 Year - Domestic  |
+   * |Newspaper - Voucher Book | Weekend                        |
+   * |----------------------------------------------------------|
+   *
+   * @param productType    Identifies the group of products the rate plan is part of
+   * @param ratePlanName   The name of the rateplan
+   */
+  case class ProductRatePlanKey(productType: ProductType, ratePlanName: ProductRatePlanName)
+
   case class HolidayStopRequestsDetailChargeCode(value: String) extends AnyVal
   implicit val formatHolidayStopRequestsDetailChargeCode = Jsonx.formatInline[HolidayStopRequestsDetailChargeCode]
 
@@ -41,7 +59,7 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
     Charge_Code__c: HolidayStopRequestsDetailChargeCode,
     Actual_Price__c: HolidayStopRequestsDetailChargePrice
   )
-  implicit val writesActioned = Json.writes[HolidayStopRequestsDetailActioned]
+  implicit val formatActioned = Json.format[HolidayStopRequestsDetailActioned]
 
   object ActionSalesforceHolidayStopRequestsDetail {
 
@@ -61,9 +79,9 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
     Charge_Code__c: Option[HolidayStopRequestsDetailChargeCode],
     Actual_Price__c: Option[HolidayStopRequestsDetailChargePrice]
   )
-  implicit val readsHolidayStopRequestsDetail = Json.reads[HolidayStopRequestsDetail]
+  implicit val formatHolidayStopRequestsDetail = Json.format[HolidayStopRequestsDetail]
 
-  implicit val readsIds = Json.reads[RecordsWrapperCaseClass[HolidayStopRequestsDetail]]
+  implicit val formatIds = Json.format[RecordsWrapperCaseClass[HolidayStopRequestsDetail]]
 
   val SOQL_SELECT_CLAUSE = """
       | SELECT Id, Subscription_Name__c, Product_Name__c, Stopped_Publication_Date__c,
@@ -106,7 +124,7 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
     Charge_Code__c: Option[HolidayStopRequestsDetailChargeCode],
     Actual_Price__c: Option[HolidayStopRequestsDetailChargePrice]
   )
-  implicit val writesHolidayStopRequestsDetail = Json.writes[ActionedHolidayStopRequestsDetailToBackfill]
+  implicit val formatActionedHolidayStopRequestsDetail = Json.format[ActionedHolidayStopRequestsDetailToBackfill]
 
   object BackfillActionedSalesforceHolidayStopRequestsDetail {
 

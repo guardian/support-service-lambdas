@@ -8,7 +8,7 @@ import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.holiday_stops.CreditCalculator.PartiallyWiredCreditCalculator
 import com.gu.salesforce.SalesforceClient
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestId, ProductName, SubscriptionName}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestId, ProductName, ProductRatePlanKey, ProductRatePlanName, ProductType, SubscriptionName}
 import com.gu.salesforce.holiday_stops.SalesforceSFSubscription.SubscriptionForSubscriptionNameAndContact._
 import com.gu.salesforce.holiday_stops.{SalesforceHolidayStopRequest, SalesforceSFSubscription}
 import com.gu.util.Logging
@@ -132,6 +132,8 @@ object Handler extends Logging {
   val HEADER_IDENTITY_ID = "x-identity-id"
   val HEADER_SALESFORCE_CONTACT_ID = "x-salesforce-contact-id"
   val HEADER_PRODUCT_NAME_PREFIX = "x-product-name-prefix"
+  val PRODUCT_TYPE_QUERY_STRING_KEY = "productType"
+  val PRODUCT_RATE_PLAN_NAME_QUERY_STRING_KEY = "productRatePlanName"
 
   def extractContactFromHeaders(headers: Option[Map[String, String]]): ApiGatewayOp[Contact] = headers.flatMap(_.toList.collectFirst {
     case (HEADER_SALESFORCE_CONTACT_ID, sfContactId) => Right(SalesforceContactId(sfContactId))
@@ -174,14 +176,28 @@ object Handler extends Logging {
 
     val optionalProductNamePrefix = req.headers.flatMap(_.get(HEADER_PRODUCT_NAME_PREFIX).map(ProductName.apply))
 
+    val productRatePlanKey = getProductRatePlanKey(req)
+
     (for {
       contact <- extractContactFromHeaders(req.headers)
       optionalSubName <- extractOptionalSubNameOp
-      usersHolidayStopRequests <- lookupOp(contact, optionalSubName).toDisjunction.toApiGatewayOp(s"lookup Holiday Stop Requests for contact $contact")
-    } yield ApiGatewayResponse(
-      "200",
-      GetHolidayStopRequests(usersHolidayStopRequests, optionalProductNamePrefix)
-    )).apiResponse
+      usersHolidayStopRequests <- lookupOp(contact, optionalSubName)
+        .toDisjunction
+        .toApiGatewayOp(s"lookup Holiday Stop Requests for contact $contact")
+      response <- GetHolidayStopRequests(usersHolidayStopRequests, optionalProductNamePrefix, productRatePlanKey)
+        .toApiGatewayOp("calculate holidays stops specifics")
+    } yield ApiGatewayResponse("200", response)).apiResponse
+  }
+
+  private def getProductRatePlanKey(req: ApiGatewayRequest): Option[ProductRatePlanKey] = {
+    (
+      req.queryStringParameters.flatMap(_.get(PRODUCT_TYPE_QUERY_STRING_KEY)),
+      req.queryStringParameters.flatMap(_.get(PRODUCT_RATE_PLAN_NAME_QUERY_STRING_KEY))
+    ) match {
+        case (Some(productType), Some(ratePlanName)) =>
+          Some(ProductRatePlanKey(ProductType(productType), ProductRatePlanName(ratePlanName)))
+        case _ => None
+      }
   }
 
   def stepsToCreate(creditCalculator: PartiallyWiredCreditCalculator)(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {

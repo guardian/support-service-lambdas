@@ -1,15 +1,25 @@
 package com.gu.holiday_stops
 
-import java.time.temporal.{ChronoUnit, TemporalAdjusters}
-
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.ProductName
-import java.time.{DayOfWeek, LocalDate}
 import java.time.temporal.ChronoUnit.DAYS
+import java.time.temporal.{ChronoUnit, TemporalAdjusters}
+import java.time.{DayOfWeek, LocalDate}
 
-case class ProductSpecifics(
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{ProductName, ProductRatePlanKey, ProductRatePlanName, ProductType}
+
+case class LegacyProductSpecifics(
   firstAvailableDate: LocalDate,
   issueDayOfWeek: Int,
   annualIssueLimit: Int
+)
+
+case class ProductSpecifics(
+  annualIssueLimit: Int,
+  issueSpecifics: List[IssueSpecifics]
+)
+
+case class IssueSpecifics(
+  firstAvailableDate: LocalDate,
+  issueDayOfWeek: Int,
 )
 
 /**
@@ -31,31 +41,41 @@ case class ProductSpecifics(
  */
 object ActionCalculator {
 
+
   /**
-   * @param issueDayOfWeek Weekday corresponding to publication issue date printed on the paper, for example, Friday for GW
+   * @param annualIssueLimit         Maximum number of days holidays that can be taken annually for a subscription
+   * @param issueConstants           Constants specific to the issues covered by the type of subscription
+   */
+  case class SuspensionConstants(
+    annualIssueLimit: Int,
+    issueConstants: List[IssueSuspensionConstants]
+  )
+
+  /**
+   * @param issueDayOfWeek           Weekday corresponding to publication issue date printed on the paper, for example, Friday for GW
    * @param processorRunLeadTimeDays Number of days (including one safety-net day) before publication issue date when the holiday processor runs.
    *                                 One safety-day before fulfilment day. Safety day gives us an opportunity to fix issues before fulfilment runs.
-   * @param annualIssueLimit
    */
-  sealed abstract class ProductSuspensionConstants(
+  sealed abstract class IssueSuspensionConstants(
     val issueDayOfWeek: DayOfWeek,
     val processorRunLeadTimeDays: Int,
-    val annualIssueLimit: Int,
-    val minDaysBetweenTodayAndFirstAvailableDate: Int,
-    val maxDaysBetweenTodayAndFirstAvailableDate: Int,
-    val firstAvailableDateDayOfWeek: DayOfWeek
   ) {
+    /**
+     * The first date a holiday can started on for this issue when creating a stop on the supplied date
+     * @param today          Date the holiday is being created on
+     */
     def firstAvailableDate(today: LocalDate): LocalDate
   }
 
-  case object GuardianWeeklySuspensionConstants extends ProductSuspensionConstants(
+  val GuardianWeeklySuspensionConstants = SuspensionConstants(6, List(GuardianWeeklyIssueSuspensionConstants))
+
+  case object GuardianWeeklyIssueSuspensionConstants extends IssueSuspensionConstants(
     issueDayOfWeek = DayOfWeek.FRIDAY,
     processorRunLeadTimeDays = 8 + (1 /* safety-day */ ), //one (safety) day before the Thursday of the week before the Friday issue day
-    annualIssueLimit = 6,
-    minDaysBetweenTodayAndFirstAvailableDate = 5,
-    maxDaysBetweenTodayAndFirstAvailableDate = 11,
-    firstAvailableDateDayOfWeek = DayOfWeek.SATURDAY
   ) {
+    val minDaysBetweenTodayAndFirstAvailableDate = 5
+    val maxDaysBetweenTodayAndFirstAvailableDate = 11
+    val firstAvailableDateDayOfWeek = DayOfWeek.SATURDAY
 
     /**
      * If there are less than 5 days between today and the day after next publication day,
@@ -85,16 +105,63 @@ object ActionCalculator {
     }
   }
 
-  // TODO this will likely need to change to return an array of days of week (when we support more than just GW)
-  def suspensionConstantsByProduct(productName: ProductName): ProductSuspensionConstants = productName.value match {
-    case s if s.startsWith("Guardian Weekly") => GuardianWeeklySuspensionConstants
-    case _ => throw new RuntimeException(s"Failed to determine ProductSuspensionConstants because of unexpected productName: $productName ")
+  val SundayVoucherSuspensionConstants = SuspensionConstants(6, List(SundayVoucherIssueSuspensionConstants))
+
+  case object SundayVoucherIssueSuspensionConstants extends IssueSuspensionConstants(
+    issueDayOfWeek = DayOfWeek.SUNDAY,
+    processorRunLeadTimeDays = 1,
+  ) {
+    def firstAvailableDate(today: LocalDate): LocalDate = {
+      today.plus(processorRunLeadTimeDays.toLong, ChronoUnit.DAYS)
+    }
   }
 
-  def getProductSpecifics(productNamePrefix: ProductName, today: LocalDate = LocalDate.now()): ProductSpecifics = {
+  // TODO this will likely need to change to return an array of days of week (when we support more than just GW)
+  def suspensionConstantsByProduct(productNamePrefix: ProductName): SuspensionConstants =
+    productNamePrefix.value match {
+      case s if s.startsWith("Guardian Weekly") => GuardianWeeklySuspensionConstants
+      case _ => throw new RuntimeException(
+        s"Failed to determine ProductSuspensionConstants because of unexpected productName: $productNamePrefix "
+      )
+    }
+
+  def suspensionConstantsByProductRatePlanKey(
+    productKey: ProductRatePlanKey
+  ): Either[ActionCalculatorError, SuspensionConstants] = productKey match {
+    case ProductRatePlanKey(ProductType("Newspaper - Voucher Book"), ProductRatePlanName("Sunday")) =>
+      Right(SundayVoucherSuspensionConstants)
+    case ProductRatePlanKey(ProductType("Guardian Weekly"), _) =>
+      Right(GuardianWeeklySuspensionConstants)
+    case _ =>
+      Left(ActionCalculatorError(s"ProductRatePlan $productKey is not supported"))
+  }
+
+  def getProductSpecifics(productNamePrefix: ProductName, today: LocalDate = LocalDate.now()): LegacyProductSpecifics = {
     val productSuspensionConstants = suspensionConstantsByProduct(productNamePrefix)
-    import productSuspensionConstants._
-    ProductSpecifics(firstAvailableDate(today), issueDayOfWeek.getValue, annualIssueLimit)
+    val firstIssueConstants = productSuspensionConstants.issueConstants(0)
+    LegacyProductSpecifics(
+      firstIssueConstants.firstAvailableDate(today),
+      firstIssueConstants.issueDayOfWeek.getValue,
+      productSuspensionConstants.annualIssueLimit
+    )
+  }
+
+  def getProductSpecificsByProductRatePlanKey(
+    productRatePlanChargeId: ProductRatePlanKey,
+    today: LocalDate = LocalDate.now()
+  ): Either[ActionCalculatorError, ProductSpecifics] = {
+    suspensionConstantsByProductRatePlanKey(productRatePlanChargeId)
+      .map { constants =>
+          ProductSpecifics(
+            constants.annualIssueLimit,
+            constants.issueConstants.map { issueConstants =>
+              IssueSpecifics(
+                issueConstants.firstAvailableDate(today),
+                issueConstants.issueDayOfWeek.getValue
+              )
+            }
+          )
+      }
   }
 
   def publicationDatesToBeStopped(
@@ -102,11 +169,17 @@ object ActionCalculator {
     toInclusive: LocalDate,
     productName: ProductName
   ): List[LocalDate] = {
-    val dayOfPublication = suspensionConstantsByProduct(productName).issueDayOfWeek
+    val firstIssue = suspensionConstantsByProduct(productName).issueConstants(0)
+    val dayOfPublication = firstIssue.issueDayOfWeek
+
     def isPublicationDay(currentDayWithinHoliday: Long) = fromInclusive.plusDays(currentDayWithinHoliday).getDayOfWeek == dayOfPublication
+
     def stoppedDate(currentDayWithinHoliday: Long) = fromInclusive.plusDays(currentDayWithinHoliday)
+
     val holidayLengthInDays = 0 to ChronoUnit.DAYS.between(fromInclusive, toInclusive).toInt
-    holidayLengthInDays.toList.collect { case day if isPublicationDay(day) => stoppedDate(day) }
+    holidayLengthInDays.toList.collect { case day if isPublicationDay(day.toLong) => stoppedDate(day.toLong) }
   }
 
 }
+
+case class ActionCalculatorError(message: String)
