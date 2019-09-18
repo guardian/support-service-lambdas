@@ -13,11 +13,12 @@ import com.gu.salesforce.holiday_stops.SalesforceSFSubscription.SubscriptionForS
 import com.gu.salesforce.holiday_stops.{SalesforceHolidayStopRequest, SalesforceSFSubscription}
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
+import com.gu.util.apigateway.ApiGatewayResponse.internalServerError
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config._
-import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
+import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.JsonHttp.StringHttpRequest
 import com.gu.util.resthttp.RestRequestMaker.BodyAsString
@@ -141,26 +142,54 @@ object Handler extends Logging {
   }).toApiGatewayOp(s"either '$HEADER_IDENTITY_ID' header OR '$HEADER_SALESFORCE_CONTACT_ID' (one is required)")
 
   case class PotentialHolidayStopsPathParams(subscriptionName: SubscriptionName)
-  case class PotentialHolidayStopsQueryParams(startDate: LocalDate, endDate: LocalDate, estimateCredit: Option[String])
+
+  case class PotentialHolidayStopsQueryParams(startDate: LocalDate, endDate: LocalDate, estimateCredit: Option[String],
+    productType: Option[String], productRatePlanName: Option[String])
 
   def stepsForPotentialHolidayStop(creditCalculator: PartiallyWiredCreditCalculator)(req: ApiGatewayRequest, unused: SfClient): ApiResponse = {
     implicit val reads: Reads[PotentialHolidayStopsQueryParams] = Json.reads[PotentialHolidayStopsQueryParams]
     (for {
       pathParams <- req.pathParamsAsCaseClass[PotentialHolidayStopsPathParams]()(Json.reads[PotentialHolidayStopsPathParams])
-      productNamePrefix <- req.headers.flatMap(_.get(HEADER_PRODUCT_NAME_PREFIX)).toApiGatewayOp(s"missing '$HEADER_PRODUCT_NAME_PREFIX' header")
+      productNamePrefix = req
+        .headers
+        .flatMap(_.get(HEADER_PRODUCT_NAME_PREFIX))
       queryParams <- req.queryParamsAsCaseClass[PotentialHolidayStopsQueryParams]()
-    } yield {
-      val potentialHolidayStops =
+      potentialHolidayStopDates <- getPublicationDatesToBeStopped(productNamePrefix, queryParams)
+      potentialHolidayStops = potentialHolidayStopDates.map { stoppedPublicationDate => // unfortunately necessary due to GW N-for-N requiring stoppedPublicationDate to calculate correct credit estimation
+        if (queryParams.estimateCredit.contains("true"))
+          PotentialHolidayStop(stoppedPublicationDate, creditCalculator(pathParams.subscriptionName, stoppedPublicationDate).toOption)
+        else
+          PotentialHolidayStop(stoppedPublicationDate, None)
+      }
+    } yield ApiGatewayResponse("200", PotentialHolidayStopsResponse(potentialHolidayStops))).apiResponse
+  }
+
+  private def getPublicationDatesToBeStopped(productNamePrefixOption: Option[String], queryParams: PotentialHolidayStopsQueryParams) = {
+    queryParams match {
+      case PotentialHolidayStopsQueryParams(startDate, endDate, _, Some(productType), Some(productRatePlanName)) =>
         ActionCalculator
-          .publicationDatesToBeStopped(queryParams.startDate, queryParams.endDate, ProductName(productNamePrefix))
-          .map { stoppedPublicationDate => // unfortunately necessary due to GW N-for-N requiring stoppedPublicationDate to calculate correct credit estimation
-            if (queryParams.estimateCredit.contains("true"))
-              PotentialHolidayStop(stoppedPublicationDate, creditCalculator(pathParams.subscriptionName, stoppedPublicationDate).toOption)
-            else
-              PotentialHolidayStop(stoppedPublicationDate, None)
-          }
-      ApiGatewayResponse("200", PotentialHolidayStopsResponse(potentialHolidayStops))
-    }).apiResponse
+          .publicationDatesToBeStopped(
+            startDate,
+            endDate,
+            ProductRatePlanKey(ProductType(productType), ProductRatePlanName(productRatePlanName))
+          )
+          .toApiGatewayOp(s"calculating publication dates")
+      case PotentialHolidayStopsQueryParams(startDate, endDate, _, _, _) =>
+        productNamePrefixOption match {
+          case Some(productNamePrefix) =>
+            ContinueProcessing(
+              ActionCalculator
+                .publicationDatesToBeStopped(startDate, endDate, ProductName(productNamePrefix))
+            )
+          case None =>
+            ReturnWithResponse(
+              internalServerError(
+                s"Either a '$HEADER_PRODUCT_NAME_PREFIX' header or '$PRODUCT_TYPE_QUERY_STRING_KEY'" +
+                  s" and '$PRODUCT_RATE_PLAN_NAME_QUERY_STRING_KEY' query string parameters are required."
+              )
+            )
+        }
+    }
   }
 
   case class ListExistingPathParams(subscriptionName: Option[SubscriptionName])

@@ -46,7 +46,7 @@ class HandlerTest extends FlatSpec with Matchers {
       ).map { operation =>
         operation
           .steps(
-            potentialIssueDateRequest(
+            legacyPotentialIssueDateRequest(
               productPrefix = "Guardian Weekly xxx",
               startDate = "2019-01-01",
               endDate = "2019-01-15",
@@ -66,6 +66,45 @@ class HandlerTest extends FlatSpec with Matchers {
                 List(
                   PotentialHolidayStop(LocalDate.of(2019, 1, 4), None),
                   PotentialHolidayStop(LocalDate.of(2019, 1, 11), None),
+                )
+              )
+            )
+        }
+    }
+  }
+  "GET /potential/<<sub name>>?startDate=...&endDate=...&estimateCredit=false&productType=..." +
+    "&productRatePlanName=... endpoint" should
+    "calculate potential holiday stop dates" in {
+    inside(
+      Handler.operationForEffects(
+        defaultTestEffects.response,
+        Stage("DEV"),
+        FakeFetchString.fetchString,
+        SttpBackendStub.synchronous
+      ).map { operation =>
+        operation
+          .steps(
+            potentialIssueDateRequest(
+              productType = "Newspaper - Voucher Book",
+              productRatePlanName = "Sunday",
+              startDate = "2019-01-01",
+              endDate = "2019-01-15",
+              subscriptionName = "Sub12344",
+              estimateCredit = false
+            )
+          )
+      }
+    ) {
+      case ContinueProcessing(response) =>
+        response.statusCode should equal("200")
+        val parsedResponseBody = Json.fromJson[PotentialHolidayStopsResponse](Json.parse(response.body))
+        inside(parsedResponseBody) {
+          case JsSuccess(response, _) =>
+            response should equal(
+              PotentialHolidayStopsResponse(
+                List(
+                  PotentialHolidayStop(LocalDate.of(2019, 1, 6), None),
+                  PotentialHolidayStop(LocalDate.of(2019, 1, 13), None),
                 )
               )
             )
@@ -120,7 +159,7 @@ class HandlerTest extends FlatSpec with Matchers {
         testBackend
       ).map { operation =>
         operation
-          .steps(potentialIssueDateRequest(
+          .steps(legacyPotentialIssueDateRequest(
             productPrefix = "Guardian Weekly xxx",
             startDate = "2019-01-01",
             endDate = "2019-01-15",
@@ -331,7 +370,7 @@ class HandlerTest extends FlatSpec with Matchers {
     )
   }
 
-  private def potentialIssueDateRequest(productPrefix: String, startDate: String, endDate: String,
+  private def legacyPotentialIssueDateRequest(productPrefix: String, startDate: String, endDate: String,
                                         subscriptionName: String, estimateCredit: Boolean) = {
     ApiGatewayRequest(
       Some("GET"),
@@ -341,6 +380,24 @@ class HandlerTest extends FlatSpec with Matchers {
         "estimateCredit" -> (if (estimateCredit) "true" else "false"))),
       None,
       Some(Map("x-product-name-prefix" -> productPrefix)),
+      Some(JsObject(Seq("subscriptionName" -> JsString(subscriptionName)))),
+      Some(s"/potential/$subscriptionName ")
+    )
+  }
+
+  private def potentialIssueDateRequest(productType: String, productRatePlanName: String, startDate: String,
+                                        endDate: String, subscriptionName: String, estimateCredit: Boolean) = {
+    ApiGatewayRequest(
+      Some("GET"),
+      Some(Map(
+        "startDate" -> startDate,
+        "endDate" -> endDate,
+        "estimateCredit" -> (if (estimateCredit) "true" else "false"),
+        "productType" -> productType,
+        "productRatePlanName" -> productRatePlanName
+      )),
+      None,
+      None,
       Some(JsObject(Seq("subscriptionName" -> JsString(subscriptionName)))),
       Some(s"/potential/$subscriptionName ")
     )
