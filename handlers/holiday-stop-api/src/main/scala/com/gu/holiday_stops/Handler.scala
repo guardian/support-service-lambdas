@@ -143,16 +143,19 @@ object Handler extends Logging {
 
   case class PotentialHolidayStopsPathParams(subscriptionName: SubscriptionName)
 
-  case class PotentialHolidayStopsQueryParams(startDate: LocalDate, endDate: LocalDate, estimateCredit: Option[String],
-    productType: Option[String], productRatePlanName: Option[String])
+  case class PotentialHolidayStopsQueryParams(
+    startDate: LocalDate,
+    endDate: LocalDate,
+    estimateCredit: Option[String],
+    productType: Option[String],
+    productRatePlanName: Option[String]
+  )
 
   def stepsForPotentialHolidayStop(creditCalculator: PartiallyWiredCreditCalculator)(req: ApiGatewayRequest, unused: SfClient): ApiResponse = {
     implicit val reads: Reads[PotentialHolidayStopsQueryParams] = Json.reads[PotentialHolidayStopsQueryParams]
     (for {
       pathParams <- req.pathParamsAsCaseClass[PotentialHolidayStopsPathParams]()(Json.reads[PotentialHolidayStopsPathParams])
-      productNamePrefix = req
-        .headers
-        .flatMap(_.get(HEADER_PRODUCT_NAME_PREFIX))
+      productNamePrefix = req.headers.flatMap(_.get(HEADER_PRODUCT_NAME_PREFIX))
       queryParams <- req.queryParamsAsCaseClass[PotentialHolidayStopsQueryParams]()
       potentialHolidayStopDates <- getPublicationDatesToBeStopped(productNamePrefix, queryParams)
       potentialHolidayStops = potentialHolidayStopDates.map { stoppedPublicationDate => // unfortunately necessary due to GW N-for-N requiring stoppedPublicationDate to calculate correct credit estimation
