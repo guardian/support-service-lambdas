@@ -117,6 +117,34 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
     }
   }
 
+  object FetchSundayVoucherHolidayStopRequestsDetails {
+
+    def apply(sfGet: HttpOp[RestRequestMaker.GetRequestWithParams, JsValue]): (ProductName, ProductRatePlanName, LocalDate) => ClientFailableOp[List[HolidayStopRequestsDetail]] =
+      sfGet
+        .setupRequestMultiArg(toRequest _)
+        .parse[RecordsWrapperCaseClass[HolidayStopRequestsDetail]]
+        .map(_.records)
+        .runRequestMultiArg
+
+    def toRequest(productNamePrefix: ProductName, ratePlanName: ProductRatePlanName, date: LocalDate): GetRequestWithParams = {
+      val soqlQuery = s"""
+                         | $SOQL_SELECT_CLAUSE
+                         | FROM $holidayStopRequestsDetailSfObjectRef
+                         | WHERE Product_Name__c LIKE '${productNamePrefix.value}%'
+                         | AND Holiday_Stop_Request__r.SF_Subscription__r.Rate_Plan_Name__c = '${ratePlanName.value}'
+                         | AND Stopped_Publication_Date__c = ${date.toString}
+                         | AND (
+                         |   Subscription_Cancellation_Effective_Date__c = null
+                         |   OR Subscription_Cancellation_Effective_Date__c > ${date.toString}
+                         | )
+                         | AND Is_Actioned__c = false
+                         | $SOQL_ORDER_BY_CLAUSE
+                         |""".stripMargin
+      logger.info(s"using SF query : $soqlQuery")
+      RestRequestMaker.GetRequestWithParams(RelativePath(soqlQueryBaseUrl), UrlParams(Map("q" -> soqlQuery)))
+    }
+  }
+
   case class ActionedHolidayStopRequestsDetailToBackfill(
     Holiday_Stop_Request__c: HolidayStopRequestId,
     Stopped_Publication_Date__c: StoppedPublicationDate,

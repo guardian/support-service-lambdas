@@ -24,6 +24,17 @@ object Salesforce {
     }
   }
 
+  def sundayVoucherHolidayStopRequests(sfCredentials: SFAuthConfig)(productNamePrefix: ProductName, ratePlanName: ProductRatePlanName, processDate: LocalDate): Either[OverallFailure, List[HolidayStopRequestsDetail]] = {
+    SalesforceClient(RawEffects.response, sfCredentials).value.flatMap { sfAuth =>
+      val sfGet = sfAuth.wrapWith(JsonHttp.getWithParams)
+      val fetchOp = SalesforceHolidayStopRequestsDetail.FetchSundayVoucherHolidayStopRequestsDetails(sfGet)
+      fetchOp(productNamePrefix, ratePlanName, processDate)
+    }.toDisjunction match {
+      case -\/(failure) => Left(OverallFailure(failure.toString))
+      case \/-(details) => Right(details)
+    }
+  }
+
   def holidayStopUpdateResponse(sfCredentials: SFAuthConfig)(responses: List[HolidayStopResponse]): Either[SalesforceHolidayWriteError, Unit] =
     SalesforceClient(RawEffects.response, sfCredentials).value.map { sfAuth =>
       val patch = sfAuth.wrapWith(JsonHttp.patch)
