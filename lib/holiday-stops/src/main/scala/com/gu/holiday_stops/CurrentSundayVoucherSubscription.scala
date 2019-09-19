@@ -1,5 +1,7 @@
 package com.gu.holiday_stops
 
+import java.time.temporal.ChronoUnit
+
 import scala.util.Try
 
 sealed trait CurrentSundayVoucherSubscriptionPredicate
@@ -9,12 +11,12 @@ case object RatePlanIsSundayVoucher extends CurrentSundayVoucherSubscriptionPred
       sundayVoucherProductRatePlanChargeId == ratePlanCharge.productRatePlanChargeId
     }
 }
-case object SundayVoucherRatePlanHasBeenInvoiced extends CurrentSundayVoucherSubscriptionPredicate {
+case object SundayVoucherRatePlanHasBeenInvoicedForOneMonth extends CurrentSundayVoucherSubscriptionPredicate {
   def apply(ratePlan: RatePlan): Boolean = {
     Try {
       val fromInclusive = ratePlan.ratePlanCharges.head.processedThroughDate.get
       val toExclusive = ratePlan.ratePlanCharges.head.chargedThroughDate.get
-      toExclusive.isAfter(fromInclusive)
+      toExclusive.isAfter(fromInclusive) && ChronoUnit.MONTHS.between(fromInclusive, toExclusive) == 1
     }.getOrElse(false)
   }
 }
@@ -35,7 +37,7 @@ case class CurrentSundayVoucherSubscription(
   invoicedPeriod: CurrentInvoicedPeriod,
   ratePlanId: String,
   productRatePlanId: String,
-  productRatePlanChargeId: String
+  productRatePlanChargeId: String // unique identifier of product
 )
 
 object CurrentSundayVoucherSubscription {
@@ -47,7 +49,7 @@ object CurrentSundayVoucherSubscription {
         List(
           SundayVoucherRatePlanHasExactlyOneCharge(ratePlan),
           RatePlanIsSundayVoucher(ratePlan, sundayVoucherProductRatePlanChargeId),
-          SundayVoucherRatePlanHasBeenInvoiced(ratePlan),
+          SundayVoucherRatePlanHasBeenInvoicedForOneMonth(ratePlan),
           ChargeIsMonthly(ratePlan)
         ).forall(_ == true)
       }
