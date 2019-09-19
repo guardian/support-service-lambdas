@@ -16,9 +16,7 @@ object SundayVoucherHolidayStopProcessor {
     writeHolidayStopsToSalesforce: List[HolidayStopResponse] => Either[SalesforceHolidayWriteError, Unit],
     processDateOverride: Option[LocalDate]
   ): ProcessResult = {
-    //  case ProductRatePlanKey(ProductType("Newspaper - Voucher Book"), ProductRatePlanName("Sunday")) =>
-    val processOverrideDate = LocalDate.of(2019, 9, 22)
-    getHolidayStopRequestsFromSalesforce(ProductName("Newspaper Voucher"), ProductRatePlanName("Sunday"), calculateProcessDate(Some(processOverrideDate))) match {
+    getHolidayStopRequestsFromSalesforce(ProductName("Newspaper Voucher"), ProductRatePlanName("Sunday"), calculateProcessDate(processDateOverride)) match {
       case Left(overallFailure) =>
         ProcessResult(overallFailure)
 
@@ -26,7 +24,6 @@ object SundayVoucherHolidayStopProcessor {
         val holidayStops = holidayStopRequestsFromSalesforce.distinct.map(HolidayStop(_))
         val alreadyActionedHolidayStops = holidayStopRequestsFromSalesforce.flatMap(_.Charge_Code__c).distinct
         // val allZuoraHolidayStopResponses = holidayStops.map(writeHolidayStopToZuora( ))
-        println(holidayStops)
         ProcessResult(Nil, Nil, Nil, None)
     }
   }
