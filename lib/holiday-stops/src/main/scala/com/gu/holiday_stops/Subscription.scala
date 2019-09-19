@@ -52,4 +52,5 @@ case class RatePlanCharge(
   HolidayStart__c: Option[LocalDate],
   HolidayEnd__c: Option[LocalDate],
   processedThroughDate: Option[LocalDate],
+  productRatePlanChargeId: String,
 )
