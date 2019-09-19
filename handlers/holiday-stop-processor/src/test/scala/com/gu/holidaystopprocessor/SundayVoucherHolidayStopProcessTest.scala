@@ -7,7 +7,7 @@ class SundayVoucherHolidayStopProcessTest extends FlatSpec with Matchers {
   "SundayVoucherHolidayStopProcess" should "not process anything" in {
     SundayVoucherHolidayStopProcessor.processHolidayStops(
       Fixtures.sundayVoucherHolidayStopConfig,
-      (_, _) => Right(Nil),
+      (_, _, _) => Right(Nil),
       _ => throw new RuntimeException(),
       (_, _) => throw new RuntimeException(),
       _ => throw new RuntimeException(),
