@@ -152,13 +152,13 @@ class ActionCalculatorTest extends FlatSpec with Matchers with EitherValues {
     ))
   }
   it should "return an error for an unsupported product rate plan" in {
-    val unsuportedProductRatePlanKey =
+    val unsupportedProductRatePlanKey =
       ProductRatePlanKey(ProductType("not supported"), ProductRatePlanName("not supported"))
 
     ActionCalculator.publicationDatesToBeStopped(
       fromInclusive = LocalDate.of(2019, 5, 20),
       toInclusive = LocalDate.of(2019, 6, 22),
-      productRatePlanKey = unsuportedProductRatePlanKey
+      productRatePlanKey = unsupportedProductRatePlanKey
     ) should be ('left)
   }
 }
