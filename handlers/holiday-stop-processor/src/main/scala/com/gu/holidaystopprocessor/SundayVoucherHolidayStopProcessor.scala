@@ -14,10 +14,6 @@ object SundayVoucherHolidayStopProcessor {
     writeHolidayStopsToSalesforce: List[HolidayStopResponse] => Either[SalesforceHolidayWriteError, Unit],
     processDateOverride: Option[LocalDate]
   ): ProcessResult = {
-    // FIXME:
-    val subscription = getSubscription(SubscriptionName("A-S00051570"))
-    val result = CurrentSundayVoucherSubscription(subscription.right.get, SundayVoucherHolidayStopConfig.Dev.productRatePlanChargeId)
-    println(result)
     ProcessResult(Nil, Nil, Nil, None)
   }
 }
