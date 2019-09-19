@@ -4,19 +4,19 @@ import java.time.LocalDate
 
 import com.gu.holiday_stops.ActionCalculator.SundayVoucherIssueSuspensionConstants
 import com.gu.holiday_stops._
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestsDetail, ProductName, ProductRatePlanName, SubscriptionName}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestsDetail, ProductName, ProductRatePlanKey, ProductRatePlanName, ProductType, SubscriptionName}
 
 object SundayVoucherHolidayStopProcessor {
 
   def processHolidayStops(
     config: SundayVoucherHolidayStopConfig,
-    getHolidayStopRequestsFromSalesforce: (ProductName, ProductRatePlanName, LocalDate) => Either[OverallFailure, List[HolidayStopRequestsDetail]],
+    getHolidayStopRequestsFromSalesforce: (ProductRatePlanKey, LocalDate) => Either[OverallFailure, List[HolidayStopRequestsDetail]],
     getSubscription: SubscriptionName => Either[ZuoraHolidayWriteError, Subscription],
     updateSubscription: (Subscription, HolidayCreditUpdate) => Either[ZuoraHolidayWriteError, Unit],
     writeHolidayStopsToSalesforce: List[HolidayStopResponse] => Either[SalesforceHolidayWriteError, Unit],
     processDateOverride: Option[LocalDate]
   ): ProcessResult = {
-    getHolidayStopRequestsFromSalesforce(ProductName("Newspaper Voucher"), ProductRatePlanName("Sunday"), calculateProcessDate(processDateOverride)) match {
+    getHolidayStopRequestsFromSalesforce(ProductRatePlanKey(ProductType("Newspaper Voucher"), ProductRatePlanName("Sunday")), calculateProcessDate(processDateOverride)) match {
       case Left(overallFailure) =>
         ProcessResult(overallFailure)
 

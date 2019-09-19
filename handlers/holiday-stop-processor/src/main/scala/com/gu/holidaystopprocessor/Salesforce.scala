@@ -6,7 +6,7 @@ import com.gu.effects.RawEffects
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.SalesforceClient
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{ProductRatePlanKey, _}
 import com.gu.util.resthttp.JsonHttp
 import scalaz.{-\/, \/-}
 import com.gu.holiday_stops.{OverallFailure, SalesforceHolidayWriteError}
@@ -24,11 +24,11 @@ object Salesforce {
     }
   }
 
-  def sundayVoucherHolidayStopRequests(sfCredentials: SFAuthConfig)(productNamePrefix: ProductName, ratePlanName: ProductRatePlanName, processDate: LocalDate): Either[OverallFailure, List[HolidayStopRequestsDetail]] = {
+  def sundayVoucherHolidayStopRequests(sfCredentials: SFAuthConfig)(productKey: ProductRatePlanKey, processDate: LocalDate): Either[OverallFailure, List[HolidayStopRequestsDetail]] = {
     SalesforceClient(RawEffects.response, sfCredentials).value.flatMap { sfAuth =>
       val sfGet = sfAuth.wrapWith(JsonHttp.getWithParams)
       val fetchOp = SalesforceHolidayStopRequestsDetail.FetchSundayVoucherHolidayStopRequestsDetails(sfGet)
-      fetchOp(productNamePrefix, ratePlanName, processDate)
+      fetchOp(productKey, processDate)
     }.toDisjunction match {
       case -\/(failure) => Left(OverallFailure(failure.toString))
       case \/-(details) => Right(details)
