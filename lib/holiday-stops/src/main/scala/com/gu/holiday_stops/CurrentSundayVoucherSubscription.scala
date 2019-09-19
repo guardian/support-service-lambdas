@@ -4,31 +4,28 @@ import java.time.temporal.ChronoUnit
 
 import scala.util.Try
 
-sealed trait CurrentSundayVoucherSubscriptionPredicate
-case object RatePlanIsSundayVoucher extends CurrentSundayVoucherSubscriptionPredicate {
-  def apply(ratePlan: RatePlan, sundayVoucherProductRatePlanChargeId: String): Boolean =
+object CurrentSundayVoucherSubscriptionPredicate {
+  def ratePlanIsSundayVoucher(ratePlan: RatePlan, sundayVoucherProductRatePlanChargeId: String): Boolean =
     ratePlan.ratePlanCharges.headOption.exists { ratePlanCharge => // by SundayVoucherRatePlanHasExactlyOneCharge
       sundayVoucherProductRatePlanChargeId == ratePlanCharge.productRatePlanChargeId
     }
-}
-case object SundayVoucherRatePlanHasBeenInvoicedForOneMonth extends CurrentSundayVoucherSubscriptionPredicate {
-  def apply(ratePlan: RatePlan): Boolean = {
+
+  def sundayVoucherRatePlanHasBeenInvoicedForOneMonth(ratePlan: RatePlan): Boolean = {
     Try {
       val fromInclusive = ratePlan.ratePlanCharges.head.processedThroughDate.get
       val toExclusive = ratePlan.ratePlanCharges.head.chargedThroughDate.get
       toExclusive.isAfter(fromInclusive) && ChronoUnit.MONTHS.between(fromInclusive, toExclusive) == 1
     }.getOrElse(false)
   }
-}
-case object SundayVoucherRatePlanHasExactlyOneCharge extends CurrentSundayVoucherSubscriptionPredicate {
-  def apply(ratePlan: RatePlan): Boolean = (ratePlan.ratePlanCharges.size == 1)
-}
-case object ChargeIsMonthly extends CurrentSundayVoucherSubscriptionPredicate {
-  def apply(ratePlan: RatePlan): Boolean =
+
+  def sundayVoucherRatePlanHasExactlyOneCharge(ratePlan: RatePlan): Boolean = (ratePlan.ratePlanCharges.size == 1)
+
+  def chargeIsMonthly(ratePlan: RatePlan): Boolean =
     (for {
       ratePlanCharge <- ratePlan.ratePlanCharges.headOption
       billingPeriod <- ratePlanCharge.billingPeriod
     } yield billingPeriod == "Month").getOrElse(false)
+
 }
 
 case class CurrentSundayVoucherSubscription(
@@ -47,11 +44,12 @@ object CurrentSundayVoucherSubscription {
     subscription
       .ratePlans
       .find { ratePlan =>
+        import CurrentSundayVoucherSubscriptionPredicate._
         List(
-          SundayVoucherRatePlanHasExactlyOneCharge(ratePlan),
-          RatePlanIsSundayVoucher(ratePlan, sundayVoucherProductRatePlanChargeId),
-          SundayVoucherRatePlanHasBeenInvoicedForOneMonth(ratePlan),
-          ChargeIsMonthly(ratePlan)
+          sundayVoucherRatePlanHasExactlyOneCharge(ratePlan),
+          ratePlanIsSundayVoucher(ratePlan, sundayVoucherProductRatePlanChargeId),
+          sundayVoucherRatePlanHasBeenInvoicedForOneMonth(ratePlan),
+          chargeIsMonthly(ratePlan)
         ).forall(_ == true)
       }
 
