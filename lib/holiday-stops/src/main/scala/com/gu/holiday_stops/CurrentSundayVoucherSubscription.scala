@@ -25,9 +25,10 @@ case object SundayVoucherRatePlanHasExactlyOneCharge extends CurrentSundayVouche
 }
 case object ChargeIsMonthly extends CurrentSundayVoucherSubscriptionPredicate {
   def apply(ratePlan: RatePlan): Boolean =
-    Try {
-      List("Month").contains(ratePlan.ratePlanCharges.head.billingPeriod.get)
-    }.getOrElse(false)
+    (for {
+      ratePlanCharge <- ratePlan.ratePlanCharges.headOption
+      billingPeriod <- ratePlanCharge.billingPeriod
+    } yield billingPeriod == "Month").getOrElse(false)
 }
 
 case class CurrentSundayVoucherSubscription(
