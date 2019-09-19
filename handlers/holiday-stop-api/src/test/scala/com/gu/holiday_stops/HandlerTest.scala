@@ -99,7 +99,8 @@ class HandlerTest extends FlatSpec with Matchers {
               chargedThroughDate = Some(endDate.plus(1, ChronoUnit.DAYS)),
               HolidayStart__c = None,
               HolidayEnd__c = None,
-              processedThroughDate = Some(endDate.plus(1, ChronoUnit.DAYS).minus(3, ChronoUnit.MONTHS))
+              processedThroughDate = Some(endDate.plus(1, ChronoUnit.DAYS).minus(3, ChronoUnit.MONTHS)),
+              ""
             )),
           GuardianWeeklyHolidayStopConfig.Dev.productRatePlanIds.head,
           ""

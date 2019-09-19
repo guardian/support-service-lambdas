@@ -18,7 +18,8 @@ class SubscriptionTest extends FlatSpec with Matchers with OptionValues {
       chargedThroughDate = None,
       HolidayStart__c = Some(LocalDate.of(2019, 8, 9)),
       HolidayEnd__c = Some(LocalDate.of(2019, 8, 9)),
-      processedThroughDate = None
+      processedThroughDate = None,
+      productRatePlanChargeId = ""
     )
   }
 
@@ -34,7 +35,8 @@ class SubscriptionTest extends FlatSpec with Matchers with OptionValues {
       chargedThroughDate = None,
       HolidayStart__c = Some(LocalDate.of(2019, 8, 2)),
       HolidayEnd__c = Some(LocalDate.of(2019, 8, 2)),
-      processedThroughDate = None
+      processedThroughDate = None,
+      productRatePlanChargeId = ""
     )
   }
 
@@ -80,7 +82,8 @@ class SubscriptionTest extends FlatSpec with Matchers with OptionValues {
       chargedThroughDate = None,
       HolidayStart__c = Some(LocalDate.of(2018, 11, 16)),
       HolidayEnd__c = Some(LocalDate.of(2019, 1, 4)),
-      processedThroughDate = None
+      processedThroughDate = None,
+      productRatePlanChargeId = ""
     )
   }
 }

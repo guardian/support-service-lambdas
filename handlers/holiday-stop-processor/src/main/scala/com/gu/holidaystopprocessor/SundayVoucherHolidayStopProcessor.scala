@@ -13,6 +13,7 @@ object SundayVoucherHolidayStopProcessor {
     updateSubscription: (Subscription, HolidayCreditUpdate) => Either[ZuoraHolidayWriteError, Unit],
     writeHolidayStopsToSalesforce: List[HolidayStopResponse] => Either[SalesforceHolidayWriteError, Unit],
     processDateOverride: Option[LocalDate]
-  ): ProcessResult =
+  ): ProcessResult = {
     ProcessResult(Nil, Nil, Nil, None)
+  }
 }
