@@ -21,7 +21,8 @@ object HolidayCreditSpec extends Properties("HolidayCreditAmount") with OptionVa
     chargedThroughDate = chargedThroughDate,
     HolidayStart__c = None,
     HolidayEnd__c = None,
-    processedThroughDate = chargedThroughDate.map(_.minusMonths(Fixtures.billingPeriodToMonths(billingPeriod)))
+    processedThroughDate = chargedThroughDate.map(_.minusMonths(Fixtures.billingPeriodToMonths(billingPeriod))),
+    productRatePlanChargeId = ""
 
   )
 

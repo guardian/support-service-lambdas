@@ -27,7 +27,8 @@ object Fixtures {
     chargedThroughDate,
     HolidayStart__c = None,
     HolidayEnd__c = None,
-    processedThroughDate = chargedThroughDate.map(_.minusMonths(billingPeriodToMonths(billingPeriod)))
+    processedThroughDate = chargedThroughDate.map(_.minusMonths(billingPeriodToMonths(billingPeriod))),
+    productRatePlanChargeId = ""
   )
 
   def mkSubscription(
@@ -78,7 +79,8 @@ object Fixtures {
           chargedThroughDate = None,
           HolidayStart__c = Some(LocalDate.of(2019, 8, 9)),
           HolidayEnd__c = Some(LocalDate.of(2019, 8, 9)),
-          processedThroughDate = None
+          processedThroughDate = None,
+          productRatePlanChargeId = ""
         )),
         Fixtures.guardianWeeklyConfig.productRatePlanIds.head,
         ""
@@ -94,7 +96,8 @@ object Fixtures {
           chargedThroughDate = None,
           HolidayStart__c = Some(LocalDate.of(2019, 9, 1)),
           HolidayEnd__c = Some(LocalDate.of(2019, 9, 1)),
-          processedThroughDate = None
+          processedThroughDate = None,
+          productRatePlanChargeId = ""
         )),
         Fixtures.guardianWeeklyConfig.productRatePlanIds.head,
         ""
@@ -110,7 +113,8 @@ object Fixtures {
           chargedThroughDate = None,
           HolidayStart__c = Some(LocalDate.of(2019, 8, 11)),
           HolidayEnd__c = Some(LocalDate.of(2019, 8, 11)),
-          processedThroughDate = None
+          processedThroughDate = None,
+          productRatePlanChargeId = ""
         )),
         Fixtures.guardianWeeklyConfig.productRatePlanIds.head,
         ""
@@ -126,7 +130,8 @@ object Fixtures {
           chargedThroughDate = None,
           HolidayStart__c = Some(LocalDate.of(2019, 8, 19)),
           HolidayEnd__c = Some(LocalDate.of(2019, 8, 19)),
-          processedThroughDate = None
+          processedThroughDate = None,
+          productRatePlanChargeId = ""
         )),
         "",
         ""
@@ -142,7 +147,8 @@ object Fixtures {
           chargedThroughDate = None,
           HolidayStart__c = Some(LocalDate.of(2019, 8, 2)),
           HolidayEnd__c = Some(LocalDate.of(2019, 8, 2)),
-          processedThroughDate = None
+          processedThroughDate = None,
+          productRatePlanChargeId = ""
         )),
         Fixtures.guardianWeeklyConfig.productRatePlanIds.head,
         ""
@@ -158,7 +164,8 @@ object Fixtures {
           chargedThroughDate = None,
           HolidayStart__c = Some(LocalDate.of(2018, 11, 16)),
           HolidayEnd__c = Some(LocalDate.of(2019, 1, 4)),
-          processedThroughDate = None
+          processedThroughDate = None,
+          productRatePlanChargeId = ""
         )),
         Fixtures.guardianWeeklyConfig.productRatePlanIds.head,
         ""
@@ -240,7 +247,7 @@ object Fixtures {
     GuardianWeeklyHolidayStopConfig.Prod.nForNProductRatePlanIds
   )
 
-  val sundayVoucherHolidayStopConfig = SundayVoucherHolidayStopConfig()
+  val sundayVoucherHolidayStopConfig = SundayVoucherHolidayStopConfig("")
 
   val config = Config(
     zuoraConfig = ZuoraConfig(baseUrl = "", holidayStopProcessor = HolidayStopProcessor(Oauth(clientId = "", clientSecret = ""))),

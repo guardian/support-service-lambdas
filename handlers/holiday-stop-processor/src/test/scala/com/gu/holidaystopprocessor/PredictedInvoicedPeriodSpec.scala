@@ -16,7 +16,8 @@ class PredictedInvoicedPeriodSpec extends FlatSpec with Matchers with OptionValu
     chargedThroughDate = None,
     HolidayStart__c = None,
     HolidayEnd__c = None,
-    processedThroughDate = None
+    processedThroughDate = None,
+    productRatePlanChargeId = ""
   )
 
   val gwNForNRatePlanCharge = RatePlanCharge(
@@ -28,7 +29,8 @@ class PredictedInvoicedPeriodSpec extends FlatSpec with Matchers with OptionValu
     chargedThroughDate = Some(LocalDate.of(2019, 9, 13)),
     HolidayStart__c = None,
     HolidayEnd__c = None,
-    processedThroughDate = Some(LocalDate.of(2019, 8, 2))
+    processedThroughDate = Some(LocalDate.of(2019, 8, 2)),
+    productRatePlanChargeId = ""
   )
 
   val guardianWeeklyWithoutInvoice = RatePlan(
