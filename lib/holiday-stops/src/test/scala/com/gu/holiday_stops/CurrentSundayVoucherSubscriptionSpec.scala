@@ -7,7 +7,7 @@ import io.circe.generic.auto._
 
 class CurrentSundayVoucherSubscriptionSpec extends FlatSpec with Matchers with EitherValues {
   "CurrentSundayVoucherSubscription" should "satisfy all the predicates" in {
-    val subscripitonRaw = Source.fromURL(getClass.getResource("/SundayVoucherSubscription.json")).mkString
+    val subscriptionRaw = Source.fromURL(getClass.getResource("/SundayVoucherSubscription.json")).mkString
     val subscription = decode[Subscription](subscripitonRaw).getOrElse(fail("Could not decode CurrentSundayVoucherSubscription"))
     val currentSundayVoucherSubscription = CurrentSundayVoucherSubscription(subscription, SundayVoucherHolidayStopConfig.Dev.productRatePlanChargeId)
     currentSundayVoucherSubscription.right.value.productRatePlanChargeId should be("2c92c0f95aff3b56015b1045fba832d4")
