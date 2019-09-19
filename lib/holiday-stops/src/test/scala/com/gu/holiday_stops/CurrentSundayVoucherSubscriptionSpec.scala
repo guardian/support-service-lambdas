@@ -14,7 +14,7 @@ class CurrentSundayVoucherSubscriptionSpec extends FlatSpec with Matchers with E
   }
 
   it should "fail on missing invoice" in {
-    val subscripitonRaw = Source.fromURL(getClass.getResource("/SundayVoucherSubscriptionMissingInvoice.json")).mkString
+    val subscriptionRaw = Source.fromURL(getClass.getResource("/SundayVoucherSubscriptionMissingInvoice.json")).mkString
     val subscription = decode[Subscription](subscripitonRaw).getOrElse(fail("Could not decode CurrentSundayVoucherSubscription"))
     val currentSundayVoucherSubscription = CurrentSundayVoucherSubscription(subscription, SundayVoucherHolidayStopConfig.Dev.productRatePlanChargeId)
     currentSundayVoucherSubscription.isLeft should be(true)
