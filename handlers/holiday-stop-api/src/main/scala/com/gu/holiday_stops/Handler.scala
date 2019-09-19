@@ -162,7 +162,7 @@ object Handler extends Logging {
         if (queryParams.estimateCredit.contains("true"))
           PotentialHolidayStop(stoppedPublicationDate, creditCalculator(pathParams.subscriptionName, stoppedPublicationDate).toOption)
         else
-          PotentialHolidayStop(stoppedPublicationDate, creditCalculator(pathParams.subscriptionName, stoppedPublicationDate).toOption)
+          PotentialHolidayStop(stoppedPublicationDate, None)
       }
     } yield ApiGatewayResponse("200", PotentialHolidayStopsResponse(potentialHolidayStops))).apiResponse
   }
