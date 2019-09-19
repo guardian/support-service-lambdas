@@ -67,7 +67,10 @@ object ActionCalculator {
     def firstAvailableDate(today: LocalDate): LocalDate
   }
 
-  val GuardianWeeklySuspensionConstants = SuspensionConstants(6, List(GuardianWeeklyIssueSuspensionConstants))
+  val GuardianWeeklySuspensionConstants = SuspensionConstants(
+    annualIssueLimit = 6,
+    issueConstants = List(GuardianWeeklyIssueSuspensionConstants)
+  )
 
   case object GuardianWeeklyIssueSuspensionConstants extends IssueSuspensionConstants(
     issueDayOfWeek = DayOfWeek.FRIDAY,
@@ -105,7 +108,10 @@ object ActionCalculator {
     }
   }
 
-  val SundayVoucherSuspensionConstants = SuspensionConstants(6, List(SundayVoucherIssueSuspensionConstants))
+  val SundayVoucherSuspensionConstants = SuspensionConstants(
+    annualIssueLimit = 6,
+    issueConstants = List(SundayVoucherIssueSuspensionConstants)
+  )
 
   case object SundayVoucherIssueSuspensionConstants extends IssueSuspensionConstants(
     issueDayOfWeek = DayOfWeek.SUNDAY,
@@ -178,6 +184,24 @@ object ActionCalculator {
 
     val holidayLengthInDays = 0 to ChronoUnit.DAYS.between(fromInclusive, toInclusive).toInt
     holidayLengthInDays.toList.collect { case day if isPublicationDay(day.toLong) => stoppedDate(day.toLong) }
+  }
+
+  def publicationDatesToBeStopped(
+    fromInclusive: LocalDate,
+    toInclusive: LocalDate,
+    productRatePlanKey: ProductRatePlanKey): Either[ActionCalculatorError, List[LocalDate]] = {
+
+    suspensionConstantsByProductRatePlanKey(productRatePlanKey).map { suspensionConstants =>
+      val daysOfPublication = suspensionConstants.issueConstants.map(_.issueDayOfWeek)
+
+      def isPublicationDay(currentDayWithinHoliday: Long) =
+        daysOfPublication.contains(fromInclusive.plusDays(currentDayWithinHoliday).getDayOfWeek)
+
+      def stoppedDate(currentDayWithinHoliday: Long) = fromInclusive.plusDays(currentDayWithinHoliday)
+
+      val holidayLengthInDays = 0 to ChronoUnit.DAYS.between(fromInclusive, toInclusive).toInt
+      holidayLengthInDays.toList.collect { case day if isPublicationDay(day.toLong) => stoppedDate(day.toLong) }
+    }
   }
 
 }
