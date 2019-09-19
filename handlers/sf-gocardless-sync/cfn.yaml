@@ -130,14 +130,15 @@ Resources:
     Properties:
       AlarmActions:
       - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:fulfilment-dev
-      AlarmName: !Sub "GenericError observed on ${LogGroupNamePrefix}-${Stage}"
+      AlarmName: !Sub "URGENT 9-5 - ${Stage} ${LogGroupNamePrefix} - sustained errors observed"
+      AlarmDescription: "IMPACT: If this goes unaddressed CSRs won't be able to see Direct Debit Mandate failures AND no DD failure emails will go out to customers. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit"
       ComparisonOperator: GreaterThanOrEqualToThreshold
       EvaluationPeriods: 1
       MetricName: "GenericError Count"
       Namespace: "GoCardlessSalesForceSync"
-      Period: 3600
+      Period: 7200
       Statistic: Sum
-      Threshold: 1
+      Threshold: 20 # currently runs every five mins (so 24 runs every two hours)
       TreatMissingData: notBreaching
 
 # TODO add metric events processed filter and mandate records created filter (with alarm if this drops below certain threshold per 12 hours)
