@@ -21,7 +21,7 @@ class HolidayCreditUpdateTest extends FlatSpec with Matchers with EitherValues {
     val currentGuardianWeeklySubscription = CurrentGuardianWeeklySubscription(subscription, guardianWeeklyProductRatePlanIds, Nil)
     val nextInvoiceStartDate = NextBillingPeriodStartDate(currentGuardianWeeklySubscription.right.value, LocalDate.now)
     val maybeExtendedTerm = ExtendedTerm(nextInvoiceStartDate, subscription)
-    val holidayCredit = HolidayCredit(currentGuardianWeeklySubscription.right.value, LocalDate.now)
+    val holidayCredit = GuardianWeeklyHolidayCredit(currentGuardianWeeklySubscription.right.value, LocalDate.now)
 
     val update = HolidayCreditUpdate(
       guardianWeeklyConfig.holidayCreditProduct,
@@ -75,7 +75,7 @@ class HolidayCreditUpdateTest extends FlatSpec with Matchers with EitherValues {
     val currentGuardianWeeklySubscription = CurrentGuardianWeeklySubscription(subscription, guardianWeeklyProductRatePlanIds, Nil)
     val nextInvoiceStartDate = NextBillingPeriodStartDate(currentGuardianWeeklySubscription.right.value, LocalDate.now)
     val maybeExtendedTerm = ExtendedTerm(nextInvoiceStartDate, subscription)
-    val holidayCredit = HolidayCredit(currentGuardianWeeklySubscription.right.value, LocalDate.now)
+    val holidayCredit = GuardianWeeklyHolidayCredit(currentGuardianWeeklySubscription.right.value, LocalDate.now)
     val update = HolidayCreditUpdate(
       guardianWeeklyConfig.holidayCreditProduct,
       subscription = subscription,
@@ -115,7 +115,7 @@ class HolidayCreditUpdateTest extends FlatSpec with Matchers with EitherValues {
     val currentGuardianWeeklySubscription = CurrentGuardianWeeklySubscription(subscription, guardianWeeklyProductRatePlanIds, Nil)
     val nextInvoiceStartDate = NextBillingPeriodStartDate(currentGuardianWeeklySubscription.right.value, LocalDate.now)
     val maybeExtendedTerm = ExtendedTerm(nextInvoiceStartDate, subscription)
-    val holidayCredit = HolidayCredit(currentGuardianWeeklySubscription.right.value, LocalDate.now)
+    val holidayCredit = GuardianWeeklyHolidayCredit(currentGuardianWeeklySubscription.right.value, LocalDate.now)
     val update = HolidayCreditUpdate(
       guardianWeeklyConfig.holidayCreditProduct,
       subscription = subscription,
