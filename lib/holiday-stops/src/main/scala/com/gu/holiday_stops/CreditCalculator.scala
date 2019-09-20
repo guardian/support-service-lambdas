@@ -41,7 +41,10 @@ object CreditCalculator {
         gwNforNProductRatePlanIds,
         stoppedPublicationDate
       ) _,
-      sundayVoucherCredit(sundayVoucherRatePlanId) _
+      sundayVoucherCredit(
+        sundayVoucherRatePlanId,
+        stoppedPublicationDate
+      ) _
     )
 
     //Returns the result of the first function that returns a right
@@ -58,7 +61,8 @@ object CreditCalculator {
     CurrentGuardianWeeklySubscription(subscription, guardianWeeklyProductRatePlanIds, gwNforNProductRatePlanIds)
       .map(GuardianWeeklyHolidayCredit(_, stoppedPublicationDate))
 
-  def sundayVoucherCredit(sundayVoucherRatePlanId: String)(subscription: Subscription) = {
-    CurrentSundayVoucherSubscription(subscription, sundayVoucherRatePlanId).map(_ => 1.23)
+  def sundayVoucherCredit(sundayVoucherRatePlanId: String, stoppedPublicationDate: LocalDate)(subscription: Subscription) = {
+    CurrentSundayVoucherSubscription(subscription, sundayVoucherRatePlanId)
+      .map(SundayVoucherHolidayCredit(_, stoppedPublicationDate))
   }
 }
