@@ -23,11 +23,11 @@ object SundayVoucherHolidayStopProcessor {
       case Right(holidayStopRequestsFromSalesforce) =>
         val holidayStops = holidayStopRequestsFromSalesforce.distinct.map(HolidayStop(_))
         val alreadyActionedHolidayStops = holidayStopRequestsFromSalesforce.flatMap(_.Charge_Code__c).distinct
-//        val allZuoraHolidayStopResponses = holidayStops.map(writeHolidayStopToZuora(
-//          config.holidayCreditProduct,
-//          getSubscription,
-//          updateSubscription: (Subscription, HolidayCreditUpdate) => Either[ZuoraHolidayWriteError, Unit]
-//        ))
+        //        val allZuoraHolidayStopResponses = holidayStops.map(writeHolidayStopToZuora(
+        //          config.holidayCreditProduct,
+        //          getSubscription,
+        //          updateSubscription: (Subscription, HolidayCreditUpdate) => Either[ZuoraHolidayWriteError, Unit]
+        //        ))
         ProcessResult(Nil, Nil, Nil, None)
     }
   }

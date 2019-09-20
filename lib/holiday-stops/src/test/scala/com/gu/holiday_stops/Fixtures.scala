@@ -247,7 +247,7 @@ object Fixtures {
     GuardianWeeklyHolidayStopConfig.Prod.nForNProductRatePlanIds
   )
 
-  val sundayVoucherHolidayStopConfig = SundayVoucherHolidayStopConfig("")
+  val sundayVoucherHolidayStopConfig = SundayVoucherHolidayStopConfig(HolidayCreditProduct("", ""), "")
 
   val config = Config(
     zuoraConfig = ZuoraConfig(baseUrl = "", holidayStopProcessor = HolidayStopProcessor(Oauth(clientId = "", clientSecret = ""))),
