@@ -55,6 +55,9 @@ object CreditCalculator {
           case _ => creditCalculatorFunction(subscription)
         }
       }
+      .leftMap { _ =>
+        ZuoraHolidayWriteError(s"Could not calculate credit for subscription: ${subscription.subscriptionNumber}")
+      }
   }
 
   def guardianWeeklyCredit(guardianWeeklyProductRatePlanIds: List[String], gwNforNProductRatePlanIds: List[String], stoppedPublicationDate: LocalDate)(subscription: Subscription): Either[ZuoraHolidayWriteError, Double] =

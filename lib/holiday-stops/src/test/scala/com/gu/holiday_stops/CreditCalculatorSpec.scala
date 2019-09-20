@@ -13,21 +13,21 @@ class CreditCalculatorSpec extends FlatSpec with Matchers with EitherValues {
     checkCreditCalculation(
       zuoraSubscriptionData = "SundayVoucherSubscription.json",
       stopDate = LocalDate.of(2019, 11, 3),
-      expectedCredit =  -2.70
+      expectedCredit = -2.70
     )
   }
   it should "calculate credit for guardian weekly in 6 for 6 period" in {
     checkCreditCalculation(
       zuoraSubscriptionData = "GuardianWeeklyWith6For6.json",
       stopDate = LocalDate.of(2019, 11, 8),
-      expectedCredit =  -1
+      expectedCredit = -1
     )
   }
   it should "calculate credit for guardian weekly in 'normal' period" in {
     checkCreditCalculation(
       zuoraSubscriptionData = "GuardianWeeklyWith6For6.json",
       stopDate = LocalDate.of(2019, 11, 15),
-      expectedCredit =  -2.89
+      expectedCredit = -2.89
     )
   }
 
