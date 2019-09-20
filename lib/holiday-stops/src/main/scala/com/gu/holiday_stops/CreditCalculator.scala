@@ -6,8 +6,10 @@ import cats.data.NonEmptyList
 import cats.syntax.either._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.SubscriptionName
 import com.softwaremill.sttp.{Id, SttpBackend}
+import com.typesafe.scalalogging.LazyLogging
+import mouse.all._
 
-object CreditCalculator {
+object CreditCalculator extends LazyLogging {
 
   type PartiallyWiredCreditCalculator = (SubscriptionName, LocalDate) => Either[HolidayError, Double]
 
@@ -18,7 +20,7 @@ object CreditCalculator {
     subscriptionName: SubscriptionName,
     stoppedPublicationDate: LocalDate
   ): Either[HolidayError, Double] =
-    for {
+    (for {
       accessToken <- Zuora.accessTokenGetResponse(config.zuoraConfig, backend)
       subscription <- Zuora.subscriptionGetResponse(config, accessToken, backend)(subscriptionName)
       credit <- calculateCredit(
@@ -27,7 +29,7 @@ object CreditCalculator {
         config.sundayVoucherConfig.productRatePlanChargeId,
         stoppedPublicationDate
       )(subscription)
-    } yield credit //TODO log failures
+    } yield credit) <| (logger.error("Failed to calculate holiday stop credits", _))
 
   def calculateCredit(
     guardianWeeklyProductRatePlanIds: List[String],

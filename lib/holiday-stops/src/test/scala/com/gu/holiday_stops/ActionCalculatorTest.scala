@@ -133,23 +133,23 @@ class ActionCalculatorTest extends FlatSpec with Matchers with EitherValues {
       toInclusive = LocalDate.of(2019, 6, 22),
       productRatePlanKey = sundayVoucherProductRatePlanKey
     ) shouldEqual Right(List(
-      LocalDate.of(2019, 5, 26),
-      LocalDate.of(2019, 6, 2),
-      LocalDate.of(2019, 6, 9),
-      LocalDate.of(2019, 6, 16)
-    ))
+        LocalDate.of(2019, 5, 26),
+        LocalDate.of(2019, 6, 2),
+        LocalDate.of(2019, 6, 9),
+        LocalDate.of(2019, 6, 16)
+      ))
 
     ActionCalculator.publicationDatesToBeStopped(
       fromInclusive = LocalDate.of(2019, 5, 20),
       toInclusive = LocalDate.of(2019, 6, 23),
       productRatePlanKey = sundayVoucherProductRatePlanKey
     ) shouldEqual Right(List(
-      LocalDate.of(2019, 5, 26),
-      LocalDate.of(2019, 6, 2),
-      LocalDate.of(2019, 6, 9),
-      LocalDate.of(2019, 6, 16),
-      LocalDate.of(2019, 6, 23)
-    ))
+        LocalDate.of(2019, 5, 26),
+        LocalDate.of(2019, 6, 2),
+        LocalDate.of(2019, 6, 9),
+        LocalDate.of(2019, 6, 16),
+        LocalDate.of(2019, 6, 23)
+      ))
   }
   it should "return an error for an unsupported product rate plan" in {
     val unsupportedProductRatePlanKey =
@@ -159,6 +159,6 @@ class ActionCalculatorTest extends FlatSpec with Matchers with EitherValues {
       fromInclusive = LocalDate.of(2019, 5, 20),
       toInclusive = LocalDate.of(2019, 6, 22),
       productRatePlanKey = unsupportedProductRatePlanKey
-    ) should be ('left)
+    ) should be('left)
   }
 }
