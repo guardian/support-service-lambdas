@@ -54,7 +54,7 @@ object SundayVoucherHolidayStopProcessor {
     for {
       subscription <- getSubscription(stop.subscriptionName)
       _ <- if (subscription.autoRenew) Right(()) else Left(ZuoraHolidayWriteError("Cannot currently process non-auto-renewing subscription"))
-      currentSundayVoucherSubscription <- CurrentSundayVoucherSubscription(subscription, SundayVoucherHolidayStopConfig.Dev.productRatePlanChargeId)
+      currentSundayVoucherSubscription <- CurrentSundayVoucherSubscription(subscription, sundayVoucherProductRatePlanChargeId)
       nextInvoiceStartDate = SundayVoucherNextBillingPeriodStartDate(currentSundayVoucherSubscription)
       maybeExtendedTerm = ExtendedTerm(nextInvoiceStartDate, subscription)
       holidayCredit <- CreditCalculator.sundayVoucherCredit(sundayVoucherProductRatePlanChargeId, stop.stoppedPublicationDate)(subscription)
