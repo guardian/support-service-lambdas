@@ -10,7 +10,7 @@ class SundayVoucherHolidayStopProcessTest extends FlatSpec with Matchers {
       (_, _) => Right(Nil),
       _ => throw new RuntimeException(),
       (_, _) => throw new RuntimeException(),
-      _ => throw new RuntimeException(),
+      _ => Right(()),
       None
     ) should equal(ProcessResult(Nil, Nil, Nil, None))
   }
