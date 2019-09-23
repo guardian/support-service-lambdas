@@ -42,9 +42,9 @@ object NextBillingPeriodStartDate {
   }
 }
 
-object SundayVoucherNextBellingPeriodStartDate {
-  def apply(currentGuardianWeeklySubscription: CurrentSundayVoucherSubscription): LocalDate = {
-    currentGuardianWeeklySubscription.invoicedPeriod.endDateExcluding
+object SundayVoucherNextBillingPeriodStartDate {
+  def apply(currentSundayVoucherSubscription: CurrentSundayVoucherSubscription): LocalDate = {
+    currentSundayVoucherSubscription.invoicedPeriod.endDateExcluding
   }
 }
 

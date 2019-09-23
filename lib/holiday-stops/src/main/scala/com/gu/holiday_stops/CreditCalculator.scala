@@ -2,7 +2,6 @@ package com.gu.holiday_stops
 
 import java.time.LocalDate
 
-import cats.data.NonEmptyList
 import cats.syntax.either._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.SubscriptionName
 import com.softwaremill.sttp.{Id, SttpBackend}
@@ -36,30 +35,19 @@ object CreditCalculator extends LazyLogging {
     gwNforNProductRatePlanIds: List[String],
     sundayVoucherRatePlanId: String,
     stoppedPublicationDate: LocalDate
-  )(subscription: Subscription) = {
-    val creditCalculatorFunctions = NonEmptyList.of(
-      guardianWeeklyCredit(
-        guardianWeeklyProductRatePlanIds,
-        gwNforNProductRatePlanIds,
-        stoppedPublicationDate
-      ) _,
+  )(subscription: Subscription): Either[ZuoraHolidayWriteError, Double] = {
+    guardianWeeklyCredit(
+      guardianWeeklyProductRatePlanIds,
+      gwNforNProductRatePlanIds,
+      stoppedPublicationDate
+    )(subscription) orElse {
       sundayVoucherCredit(
         sundayVoucherRatePlanId,
         stoppedPublicationDate
-      ) _
-    )
-
-    //Returns the result of the first function that returns a right
-    creditCalculatorFunctions
-      .tail
-      .foldRight(creditCalculatorFunctions.head(subscription)) { (creditCalculatorFunction, result) =>
-        result.recoverWith {
-          case _ => creditCalculatorFunction(subscription)
-        }
-      }
-      .leftMap { _ =>
-        ZuoraHolidayWriteError(s"Could not calculate credit for subscription: ${subscription.subscriptionNumber}")
-      }
+      )(subscription)
+    } orElse {
+      Left(ZuoraHolidayWriteError(s"Could not calculate credit for subscription: ${subscription.subscriptionNumber}"))
+    }
   }
 
   def guardianWeeklyCredit(guardianWeeklyProductRatePlanIds: List[String], gwNforNProductRatePlanIds: List[String], stoppedPublicationDate: LocalDate)(subscription: Subscription): Either[ZuoraHolidayWriteError, Double] =
