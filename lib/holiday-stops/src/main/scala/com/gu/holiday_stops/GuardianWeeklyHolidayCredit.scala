@@ -10,26 +10,20 @@ import scala.math.BigDecimal.RoundingMode
  *
  * FIXME: Discounts should be taken into account?
  */
-object HolidayCredit {
+object GuardianWeeklyHolidayCredit {
   def apply(currentGuardianWeeklySubscription: CurrentGuardianWeeklySubscription, stoppedPublicationDate: LocalDate): Double = {
     if (currentGuardianWeeklySubscription.introNforNMode.isDefined && stoppedPublicationDate.isBefore(currentGuardianWeeklySubscription.invoicedPeriod.startDateIncluding)) {
       -roundUp(1) // hardcoded because N-for-N means 1 currency unit per issue
     } else {
       val recurringPrice = currentGuardianWeeklySubscription.price
-      val numPublicationsInPeriod = BillingPeriodToApproxWeekCount(currentGuardianWeeklySubscription)
+      val numPublicationsInPeriod =
+        BillingPeriodToApproxWeekCount(
+          subscriptionNumber = currentGuardianWeeklySubscription.subscriptionNumber,
+          billingPeriod = currentGuardianWeeklySubscription.billingPeriod
+        )
       -roundUp(recurringPrice / numPublicationsInPeriod)
     }
   }
 
   private def roundUp(d: Double): Double = BigDecimal(d).setScale(2, RoundingMode.UP).toDouble
-}
-
-// FIXME: Is this assumption safe?
-object BillingPeriodToApproxWeekCount {
-  def apply(currentGuardianWeeklySubscription: CurrentGuardianWeeklySubscription): Int =
-    currentGuardianWeeklySubscription.billingPeriod match {
-      case "Quarter" => 13
-      case "Annual" => 52
-      case _ => throw new RuntimeException(s"Failed to convert billing period to weeks because unexpected billing period: $currentGuardianWeeklySubscription")
-    }
 }

@@ -11,7 +11,7 @@ class HolidayCreditTest extends FlatSpec with Matchers with EitherValues {
     val ratePlans = List(RatePlan("", List(charge), Fixtures.guardianWeeklyConfig.productRatePlanIds.head, ""))
     val subscription = Fixtures.mkSubscription().copy(ratePlans = ratePlans)
     val currentGuardianWeeklySubscription = CurrentGuardianWeeklySubscription(subscription, Fixtures.guardianWeeklyConfig.productRatePlanIds, Nil)
-    val credit = HolidayCredit(currentGuardianWeeklySubscription.right.value, LocalDate.now)
+    val credit = GuardianWeeklyHolidayCredit(currentGuardianWeeklySubscription.right.value, LocalDate.now)
     credit shouldBe -2.31
   }
 
@@ -20,7 +20,7 @@ class HolidayCreditTest extends FlatSpec with Matchers with EitherValues {
     val ratePlans = List(RatePlan("", List(charge), Fixtures.guardianWeeklyConfig.productRatePlanIds.head, ""))
     val subscription = Fixtures.mkSubscription().copy(ratePlans = ratePlans)
     val currentGuardianWeeklySubscription = CurrentGuardianWeeklySubscription(subscription, Fixtures.guardianWeeklyConfig.productRatePlanIds, Nil)
-    val credit = HolidayCredit(currentGuardianWeeklySubscription.right.value, LocalDate.now)
+    val credit = GuardianWeeklyHolidayCredit(currentGuardianWeeklySubscription.right.value, LocalDate.now)
     credit shouldBe -2.89
   }
 
@@ -29,7 +29,7 @@ class HolidayCreditTest extends FlatSpec with Matchers with EitherValues {
     val ratePlans = List(RatePlan("", List(charge), Fixtures.guardianWeeklyConfig.productRatePlanIds.head, ""))
     val subscription = Fixtures.mkSubscription().copy(ratePlans = ratePlans)
     val currentGuardianWeeklySubscription = CurrentGuardianWeeklySubscription(subscription, Fixtures.guardianWeeklyConfig.productRatePlanIds, Nil)
-    val credit = HolidayCredit(currentGuardianWeeklySubscription.right.value, LocalDate.now)
+    val credit = GuardianWeeklyHolidayCredit(currentGuardianWeeklySubscription.right.value, LocalDate.now)
     credit shouldBe -2.31
   }
 }

@@ -6,7 +6,7 @@ import org.scalacheck.Prop.forAll
 import org.scalacheck._
 import org.scalatest.{EitherValues, OptionValues}
 
-object HolidayCreditSpec extends Properties("HolidayCreditAmount") with OptionValues with EitherValues {
+object GuardianWeeklyHolidayCreditSpec extends Properties("HolidayCreditAmount") with OptionValues with EitherValues {
 
   private val ratePlanChargeGen = for {
     price <- Gen.choose(0.01, 10000)
@@ -23,7 +23,6 @@ object HolidayCreditSpec extends Properties("HolidayCreditAmount") with OptionVa
     HolidayEnd__c = None,
     processedThroughDate = chargedThroughDate.map(_.minusMonths(Fixtures.billingPeriodToMonths(billingPeriod))),
     productRatePlanChargeId = ""
-
   )
 
   val subscription = Fixtures.mkSubscription()
@@ -31,12 +30,12 @@ object HolidayCreditSpec extends Properties("HolidayCreditAmount") with OptionVa
   property("should be negative") = forAll(ratePlanChargeGen) { charge: RatePlanCharge =>
     val ratePlans = List(RatePlan("", List(charge), GuardianWeeklyHolidayStopConfig.Prod.productRatePlanIds.head, ""))
     val currentGuardianWeeklySubscription = CurrentGuardianWeeklySubscription(subscription.copy(ratePlans = ratePlans), Fixtures.guardianWeeklyConfig.productRatePlanIds, Nil)
-    HolidayCredit(currentGuardianWeeklySubscription.right.value, LocalDate.now) < 0
+    GuardianWeeklyHolidayCredit(currentGuardianWeeklySubscription.right.value, LocalDate.now) < 0
   }
 
   property("should never be overwhelmingly negative") = forAll(ratePlanChargeGen) { charge: RatePlanCharge =>
     val ratePlans = List(RatePlan("", List(charge), GuardianWeeklyHolidayStopConfig.Prod.productRatePlanIds.head, ""))
     val currentGuardianWeeklySubscription = CurrentGuardianWeeklySubscription(subscription.copy(ratePlans = ratePlans), Fixtures.guardianWeeklyConfig.productRatePlanIds, Nil)
-    HolidayCredit(currentGuardianWeeklySubscription.right.value, LocalDate.now) > -charge.price
+    GuardianWeeklyHolidayCredit(currentGuardianWeeklySubscription.right.value, LocalDate.now) > -charge.price
   }
 }
