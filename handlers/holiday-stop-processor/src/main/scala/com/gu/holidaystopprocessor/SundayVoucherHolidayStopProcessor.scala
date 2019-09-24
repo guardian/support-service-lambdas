@@ -63,6 +63,8 @@ object SundayVoucherHolidayStopProcessor {
       updatedSubscription <- getSubscription(stop.subscriptionName)
       addedCharge <- updatedSubscription.ratePlanCharge(stop).toRight(ZuoraHolidayWriteError(s"Failed to write holiday stop to Zuora: $stop"))
     } yield {
+      println("woohoo")
+      println(holidayCreditUpdate)
       HolidayStopResponse(
         stop.requestId,
         stop.subscriptionName,

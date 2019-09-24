@@ -2,8 +2,8 @@ package com.gu.holidaystopprocessor
 
 import java.time.LocalDate
 
-import com.gu.holiday_stops.{Fixtures, HolidayStop, OverallFailure, RatePlan, RatePlanCharge, Subscription}
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestsDetail, HolidayStopRequestsDetailChargeCode, HolidayStopRequestsDetailChargePrice, HolidayStopRequestsDetailId, ProductName, StoppedPublicationDate, SubscriptionName}
+import com.gu.holiday_stops._
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.collection.mutable
@@ -166,12 +166,40 @@ class SundayVoucherHolidayStopProcessTest extends FlatSpec with Matchers {
     OverallFailure(failedZuoraResponses, salesforceExportResult)
   )
 
-  "SundayVoucherHolidayStopProcess" should "process Sunday Voucher holiday stop" in {
+
+
+  "SundayVoucherHolidayStopProcess" should "pass in correct HolidayCreditUpdate request to zuora updateSubscription call" in {
+    val exptedStoppedPublicationDate = LocalDate.parse("2019-10-20")
+    val expectedCustomerAcceptanceDateForHolidayStop = LocalDate.parse("2019-11-20")
+    val expectedCredit = -2.7
+    val ExpectedHolidayCreditUpdate = HolidayCreditUpdate(
+      None,
+      None,
+      List(
+        Add(
+          "2c92c0f96b03800b016b081fc04f1ba2",
+          expectedCustomerAcceptanceDateForHolidayStop,
+          expectedCustomerAcceptanceDateForHolidayStop,
+          expectedCustomerAcceptanceDateForHolidayStop,
+          List(
+            ChargeOverride(
+              SundayVoucherHolidayStopConfig.Dev.holidayCreditProduct.productRatePlanChargeId,
+              exptedStoppedPublicationDate,
+              exptedStoppedPublicationDate,
+              expectedCredit
+            )
+          )
+        )
+      )
+    )
+
+    val SubscriptionMock = subscription
+
     SundayVoucherHolidayStopProcessor.processHolidayStops(
       Fixtures.sundayVoucherHolidayStopConfig,
       (_, _) => Right(holidayStopRequestsFromSalesforce),
-      _ => Right(getSubscriptionMock()),
-      (_, _) => Right(()),
+      getSubscription = _ => Right(getSubscriptionMock()),
+      updateSubscription = { case (SubscriptionMock, ExpectedHolidayCreditUpdate) => Right(()) }, // here is main logic of test
       _ => Right(()),
       None
     ) should equal(processResult)
