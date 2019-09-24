@@ -39,7 +39,7 @@ class CreditCalculatorSpec extends FlatSpec with Matchers with EitherValues {
       GuardianWeeklyHolidayStopConfig.Dev.productRatePlanIds,
       GuardianWeeklyHolidayStopConfig.Dev.nForNProductRatePlanIds,
       SundayVoucherHolidayStopConfig.Dev.productRatePlanChargeId,
-      stopDate
-    )(subscription) should equal(Right(expectedCredit))
+      subscription
+    )(stopDate) should equal(Right(expectedCredit))
   }
 }

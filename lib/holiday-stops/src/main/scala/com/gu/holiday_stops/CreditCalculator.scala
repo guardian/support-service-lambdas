@@ -10,32 +10,32 @@ import mouse.all._
 
 object CreditCalculator extends LazyLogging {
 
-  type PartiallyWiredCreditCalculator = (SubscriptionName, LocalDate) => Either[HolidayError, Double]
+  type PartiallyWiredCreditCalculator = (LocalDate) => Either[ZuoraHolidayWriteError, Double]
+  type PartiallyWiredCreditCalculatorFactory = (SubscriptionName) => Either[HolidayError, PartiallyWiredCreditCalculator]
 
   def apply(
     config: Config,
     backend: SttpBackend[Id, Nothing]
-  )(
-    subscriptionName: SubscriptionName,
-    stoppedPublicationDate: LocalDate
-  ): Either[HolidayError, Double] =
-    (for {
-      accessToken <- Zuora.accessTokenGetResponse(config.zuoraConfig, backend)
-      subscription <- Zuora.subscriptionGetResponse(config, accessToken, backend)(subscriptionName)
-      credit <- calculateCredit(
+  )(subscriptionName: SubscriptionName): Either[HolidayError, (LocalDate) => Either[ZuoraHolidayWriteError, Double]] = {
+    {
+      for {
+        accessToken <- Zuora.accessTokenGetResponse(config.zuoraConfig, backend)
+        subscription <- Zuora.subscriptionGetResponse(config, accessToken, backend)(subscriptionName)
+      } yield calculateCredit(
         config.guardianWeeklyConfig.productRatePlanIds,
         config.guardianWeeklyConfig.nForNProductRatePlanIds,
         config.sundayVoucherConfig.productRatePlanChargeId,
-        stoppedPublicationDate
-      )(subscription)
-    } yield credit) <| (logger.error("Failed to calculate holiday stop credits", _))
+        subscription
+      ) _ <| (logger.error(s"Failed to calculate credits for subscription $subscription", _))
+    } <| (logger.error(s"Failed to get subscription $subscriptionName from zuora", _))
+  }
 
   def calculateCredit(
     guardianWeeklyProductRatePlanIds: List[String],
     gwNforNProductRatePlanIds: List[String],
     sundayVoucherRatePlanId: String,
-    stoppedPublicationDate: LocalDate
-  )(subscription: Subscription): Either[ZuoraHolidayWriteError, Double] = {
+    subscription: Subscription
+  )(stoppedPublicationDate: LocalDate): Either[ZuoraHolidayWriteError, Double] = {
     guardianWeeklyCredit(
       guardianWeeklyProductRatePlanIds,
       gwNforNProductRatePlanIds,

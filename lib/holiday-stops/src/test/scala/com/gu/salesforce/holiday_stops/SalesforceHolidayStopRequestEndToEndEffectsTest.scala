@@ -12,7 +12,7 @@ import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.resthttp.JsonHttp
 import org.scalatest.{FlatSpec, Matchers}
-import scalaz.{-\/, \/-}
+import scalaz.{-\/, \/, \/-}
 
 class SalesforceHolidayStopRequestEndToEndEffectsTest extends FlatSpec with Matchers {
 
@@ -42,13 +42,14 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends FlatSpec with Matc
       ).toDisjunction
 
       createOp = SalesforceHolidayStopRequest.CreateHolidayStopRequestWithDetail(sfAuth.wrapWith(JsonHttp.post))
-      createResult <- createOp(CreateHolidayStopRequestWithDetail.buildBody(
-        (_, _) => Right(0.0) // fake PartiallyWiredCreditCalculator
+      body <- \/.fromEither(CreateHolidayStopRequestWithDetail.buildBody(
+        (_) => Right(_ => Right(0.0)) // fake PartiallyWiredCreditCalculator
       )(
           startDate,
           endDate,
           maybeMatchingSubscription.get
-        )).toDisjunction
+        ))
+      createResult <- createOp(body).toDisjunction
 
       fetchOp = SalesforceHolidayStopRequest.LookupByDateAndProductNamePrefix(sfAuth.wrapWith(JsonHttp.getWithParams))
       preProcessingFetchResult <- fetchOp(lookupDate, productName).toDisjunction

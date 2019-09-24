@@ -6,6 +6,7 @@ import java.util.UUID
 
 import ai.x.play.json.Jsonx
 import com.gu.holiday_stops.ActionCalculator
+import com.gu.holiday_stops.CreditCalculator.PartiallyWiredCreditCalculatorFactory
 import com.gu.salesforce.RecordsWrapperCaseClass
 import com.gu.salesforce.SalesforceConstants._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
@@ -15,14 +16,6 @@ import com.gu.util.resthttp.RestOp._
 import com.gu.util.resthttp.RestRequestMaker._
 import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.resthttp.{HttpOp, RestRequestMaker}
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.util.UUID
-
-import com.gu.holiday_stops.ActionCalculator
-import com.gu.holiday_stops.CreditCalculator.PartiallyWiredCreditCalculator
-import com.gu.salesforce.RecordsWrapperCaseClass
-import com.gu.salesforce.holiday_stops.SalesforceSFSubscription.SubscriptionForSubscriptionNameAndContact._
 import play.api.libs.json._
 
 object SalesforceHolidayStopRequest extends Logging {
@@ -178,8 +171,10 @@ object SalesforceHolidayStopRequest extends Logging {
         .map(_.results.find(_.referenceId == holidayStopRequestSfObjectRef).map(_.id).get) //FIXME refactor this to map None to ClientFailure rather than nasty .get
         .runRequest
 
-    def buildBody(creditCalculator: PartiallyWiredCreditCalculator)(start: LocalDate, end: LocalDate, subscription: MatchingSubscription) =
-      RecordsWrapperCaseClass(List(
+    def buildBody(creditCalculatorFactory: PartiallyWiredCreditCalculatorFactory)(start: LocalDate, end: LocalDate, subscription: MatchingSubscription) = {
+      for {
+        creditCalculator <- creditCalculatorFactory(subscription.Name)
+      } yield RecordsWrapperCaseClass(List(
         CompositeTreeHolidayStopRequest(
           Start_Date__c = HolidayStopRequestStartDate(start),
           End_Date__c = HolidayStopRequestEndDate(end),
@@ -192,12 +187,14 @@ object SalesforceHolidayStopRequest extends Logging {
             ).map { stoppedPublicationDate =>
                 CompositeTreeHolidayStopRequestsDetail(
                   stoppedPublicationDate,
-                  creditCalculator(subscription.Name, stoppedPublicationDate).toOption.map(HolidayStopRequestsDetailChargePrice)
+                  creditCalculator(stoppedPublicationDate).toOption.map(HolidayStopRequestsDetailChargePrice)
                 )
               }
           )
         )
       ))
+
+    }
 
   }
 
