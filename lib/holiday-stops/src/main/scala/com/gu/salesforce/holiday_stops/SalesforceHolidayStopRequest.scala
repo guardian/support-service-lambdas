@@ -6,7 +6,7 @@ import java.util.UUID
 
 import ai.x.play.json.Jsonx
 import com.gu.holiday_stops.ActionCalculator
-import com.gu.holiday_stops.CreditCalculator.PartiallyWiredCreditCalculatorFactory
+import com.gu.holiday_stops.CreditCalculator.{PartiallyWiredCreditCalculator, PartiallyWiredCreditCalculatorFactory}
 import com.gu.salesforce.RecordsWrapperCaseClass
 import com.gu.salesforce.SalesforceConstants._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
@@ -34,12 +34,15 @@ object SalesforceHolidayStopRequest extends Logging {
   }
 
   case class HolidayStopRequestStartDate(value: LocalDate) extends AnyVal
+
   implicit val formatHolidayStopRequestStartDate = Jsonx.formatInline[HolidayStopRequestStartDate]
 
   case class HolidayStopRequestEndDate(value: LocalDate) extends AnyVal
+
   implicit val formatHolidayStopRequestEndDate = Jsonx.formatInline[HolidayStopRequestEndDate]
 
   case class HolidayStopRequestActionedCount(value: Int) extends AnyVal
+
   implicit val formatHolidayStopRequestActionedCount = Jsonx.formatInline[HolidayStopRequestActionedCount]
 
   def getHolidayStopRequestPrefixSOQL(productNamePrefixOption: Option[ProductName] = None) = s"""
@@ -64,6 +67,7 @@ object SalesforceHolidayStopRequest extends Logging {
     Product_Name__c: ProductName,
     Holiday_Stop_Request_Detail__r: Option[RecordsWrapperCaseClass[HolidayStopRequestsDetail]]
   )
+
   implicit val format = Json.format[HolidayStopRequest]
 
   implicit val formatIds = Json.format[RecordsWrapperCaseClass[HolidayStopRequest]]
@@ -124,12 +128,14 @@ object SalesforceHolidayStopRequest extends Logging {
   }
 
   case class SubscriptionNameLookup(Name: SubscriptionName)
+
   implicit val formatSubNameLookup = Json.format[SubscriptionNameLookup]
 
   case class CompositeAttributes(
     `type`: String,
     referenceId: String
   )
+
   implicit val formatCompositeAttributes = Json.format[CompositeAttributes]
 
   case class CompositeTreeHolidayStopRequestsDetail(
@@ -140,6 +146,7 @@ object SalesforceHolidayStopRequest extends Logging {
       UUID.randomUUID().toString
     )
   )
+
   implicit val formatCompositeTreeHolidayStopRequestsDetail = Json.format[CompositeTreeHolidayStopRequestsDetail]
 
   case class CompositeTreeHolidayStopRequest(
@@ -149,6 +156,7 @@ object SalesforceHolidayStopRequest extends Logging {
     Holiday_Stop_Request_Detail__r: RecordsWrapperCaseClass[CompositeTreeHolidayStopRequestsDetail],
     attributes: CompositeAttributes = CompositeAttributes(holidayStopRequestSfObjectRef, holidayStopRequestSfObjectRef)
   )
+
   implicit val formatNewHolidayStopRequestsDetail = Json.format[RecordsWrapperCaseClass[CompositeTreeHolidayStopRequestsDetail]]
   implicit val formatCompositeTreeHolidayStopRequest = Json.format[CompositeTreeHolidayStopRequest]
   implicit val formatNewHolidayStopRequest = Json.format[RecordsWrapperCaseClass[CompositeTreeHolidayStopRequest]]
@@ -159,8 +167,11 @@ object SalesforceHolidayStopRequest extends Logging {
       id: HolidayStopRequestId,
       referenceId: String
     )
+
     implicit val formatCreateHolidayStopRequestResultIdWrapper = Json.format[CreateHolidayStopRequestResultIdWrapper]
+
     case class CreateHolidayStopRequestResult(results: List[CreateHolidayStopRequestResultIdWrapper])
+
     implicit val format = Json.format[CreateHolidayStopRequestResult]
 
     def apply(sfPost: HttpOp[RestRequestMaker.PostRequest, JsValue]): RecordsWrapperCaseClass[CompositeTreeHolidayStopRequest] => ClientFailableOp[HolidayStopRequestId] =
@@ -172,30 +183,30 @@ object SalesforceHolidayStopRequest extends Logging {
         .runRequest
 
     def buildBody(creditCalculatorFactory: PartiallyWiredCreditCalculatorFactory)(start: LocalDate, end: LocalDate, subscription: MatchingSubscription) = {
-      for {
-        creditCalculator <- creditCalculatorFactory(subscription.Name)
-      } yield RecordsWrapperCaseClass(List(
-        CompositeTreeHolidayStopRequest(
-          Start_Date__c = HolidayStopRequestStartDate(start),
-          End_Date__c = HolidayStopRequestEndDate(end),
-          SF_Subscription__c = subscription.Id,
-          Holiday_Stop_Request_Detail__r = RecordsWrapperCaseClass(
-            ActionCalculator.publicationDatesToBeStopped(
-              start,
-              end,
-              subscription.Product_Name__c
-            ).map { stoppedPublicationDate =>
-                CompositeTreeHolidayStopRequestsDetail(
-                  stoppedPublicationDate,
-                  creditCalculator(stoppedPublicationDate).toOption.map(HolidayStopRequestsDetailChargePrice)
-                )
-              }
+      val creditCalculator = creditCalculatorFactory(subscription.Name)
+        .fold[PartiallyWiredCreditCalculator](error => _ => Left(error), identity)
+      RecordsWrapperCaseClass(
+        List(
+          CompositeTreeHolidayStopRequest(
+            Start_Date__c = HolidayStopRequestStartDate(start),
+            End_Date__c = HolidayStopRequestEndDate(end),
+            SF_Subscription__c = subscription.Id,
+            Holiday_Stop_Request_Detail__r = RecordsWrapperCaseClass(
+              ActionCalculator.publicationDatesToBeStopped(
+                start,
+                end,
+                subscription.Product_Name__c
+              ).map { stoppedPublicationDate =>
+                  CompositeTreeHolidayStopRequestsDetail(
+                    stoppedPublicationDate,
+                    creditCalculator(stoppedPublicationDate).toOption.map(HolidayStopRequestsDetailChargePrice)
+                  )
+                }
+            )
           )
         )
-      ))
-
+      )
     }
-
   }
 
   object DeleteHolidayStopRequest {
@@ -217,12 +228,14 @@ object SalesforceHolidayStopRequest extends Logging {
     End_Date__c: HolidayStopRequestEndDate,
     SF_Subscription__r: SubscriptionNameLookup
   )
+
   implicit val formatNew = Json.format[NewHolidayStopRequest]
 
   @Deprecated
   object CreateHolidayStopRequest {
 
     case class CreateHolidayStopRequestResult(id: HolidayStopRequestId)
+
     implicit val reads = Json.reads[CreateHolidayStopRequestResult]
 
     def apply(sfPost: HttpOp[RestRequestMaker.PostRequest, JsValue]): NewHolidayStopRequest => ClientFailableOp[HolidayStopRequestId] =

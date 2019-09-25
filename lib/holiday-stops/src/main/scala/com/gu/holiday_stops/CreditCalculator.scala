@@ -10,7 +10,7 @@ import mouse.all._
 
 object CreditCalculator extends LazyLogging {
 
-  type PartiallyWiredCreditCalculator = (LocalDate) => Either[ZuoraHolidayWriteError, Double]
+  type PartiallyWiredCreditCalculator = (LocalDate) => Either[HolidayError, Double]
   type PartiallyWiredCreditCalculatorFactory = (SubscriptionName) => Either[HolidayError, PartiallyWiredCreditCalculator]
 
   def apply(

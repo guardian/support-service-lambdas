@@ -5,7 +5,7 @@ import java.time.LocalDate
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
-import com.gu.holiday_stops.CreditCalculator.PartiallyWiredCreditCalculatorFactory
+import com.gu.holiday_stops.CreditCalculator.{PartiallyWiredCreditCalculator, PartiallyWiredCreditCalculatorFactory}
 import com.gu.salesforce.SalesforceClient
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestId, ProductName, ProductRatePlanKey, ProductRatePlanName, ProductType, SubscriptionName}
@@ -158,12 +158,11 @@ object Handler extends Logging {
       productNamePrefix = req.headers.flatMap(_.get(HEADER_PRODUCT_NAME_PREFIX))
       queryParams <- req.queryParamsAsCaseClass[PotentialHolidayStopsQueryParams]()
       potentialHolidayStopDates <- getPublicationDatesToBeStopped(productNamePrefix, queryParams)
-      creditCalculator <- if (queryParams.estimateCredit.contains("true"))
-        creditCalculatorFactory(pathParams.subscriptionName)
-          .map(_.andThen(_.toOption))
-          .toApiGatewayOp("Failed to create credit calculator")
+      creditCalculator = if (queryParams.estimateCredit.contains("true"))
+        creditCalculatorWithFallback(creditCalculatorFactory, pathParams.subscriptionName)
+          .andThen(_.toOption)
       else
-        ContinueProcessing[LocalDate => Option[Double]](_ => None)
+        (_: LocalDate) => None
 
       potentialHolidayStops = potentialHolidayStopDates.map { stoppedPublicationDate => // unfortunately necessary due to GW N-for-N requiring stoppedPublicationDate to calculate correct credit estimation
         PotentialHolidayStop(stoppedPublicationDate, creditCalculator(stoppedPublicationDate))
@@ -246,7 +245,7 @@ object Handler extends Logging {
       contact <- extractContactFromHeaders(req.headers)
       maybeMatchingSub <- verifyContactOwnsSubOp(requestBody.subscriptionName, contact).toDisjunction.toApiGatewayOp(s"fetching subscriptions for contact $contact")
       matchingSub <- maybeMatchingSub.toApiGatewayOp(s"contact $contact does not own ${requestBody.subscriptionName.value}")
-      createBody <- CreateHolidayStopRequestWithDetail.buildBody(creditCalculator)(requestBody.start, requestBody.end, matchingSub).toApiGatewayOp("todo")
+      createBody = CreateHolidayStopRequestWithDetail.buildBody(creditCalculator)(requestBody.start, requestBody.end, matchingSub)
       _ <- createOp(createBody).toDisjunction.toApiGatewayOp(s"create new Holiday Stop Request for subscription ${requestBody.subscriptionName} (contact $contact)")
       // TODO nice to have - handle 'FIELD_CUSTOM_VALIDATION_EXCEPTION' etc back from SF and place in response
     } yield ApiGatewayResponse.successfulExecution).apiResponse
@@ -266,6 +265,14 @@ object Handler extends Logging {
       _ = existingForUser.exists(_.Id == pathParams.holidayStopRequestId).toApiGatewayContinueProcessing(ApiGatewayResponse.forbidden("not your holiday stop"))
       _ <- deleteOp(pathParams.holidayStopRequestId).toDisjunction.toApiGatewayOp(s"delete Holiday Stop Request for subscription ${pathParams.subscriptionName.value} of contact $contact")
     } yield ApiGatewayResponse.successfulExecution).apiResponse
+  }
+
+  def creditCalculatorWithFallback(creditCalculatorFactory: PartiallyWiredCreditCalculatorFactory, subscriptionName: SubscriptionName): PartiallyWiredCreditCalculator = {
+    creditCalculatorFactory(subscriptionName)
+      .fold(
+        error => _ => Left(error),
+        identity
+      )
   }
 
   def unsupported(req: ApiGatewayRequest, sfClient: HttpOp[StringHttpRequest, BodyAsString]): ApiResponse =
