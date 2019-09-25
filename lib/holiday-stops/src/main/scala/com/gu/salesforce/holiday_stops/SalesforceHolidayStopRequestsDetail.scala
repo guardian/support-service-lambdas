@@ -29,7 +29,10 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
   implicit val formatProductName = Jsonx.formatInline[ProductName]
 
   case class ProductRatePlanName(value: String) extends AnyVal
+  implicit val formatProductRatePlanName = Jsonx.formatInline[ProductRatePlanName]
+
   case class ProductType(value: String) extends AnyVal
+  implicit val formatProductType = Jsonx.formatInline[ProductType]
 
   /**
    * This will uniquely identify a "product rate plan" in Zuora. This can loosely be seen as the 'type' of a particular
@@ -42,9 +45,10 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
    * |----------------------------------------------------------|
    *
    * @param productType    Identifies the group of products the rate plan is part of
-   * @param ratePlanName   The name of the rateplan
+   * @param productRatePlanName   The name of the rateplan
    */
-  case class ProductRatePlanKey(productType: ProductType, ratePlanName: ProductRatePlanName)
+  case class ProductRatePlanKey(productType: ProductType, productRatePlanName: ProductRatePlanName)
+  implicit val formatProductRatePlanKey = Json.reads[ProductRatePlanKey]
 
   case class HolidayStopRequestsDetailChargeCode(value: String) extends AnyVal
   implicit val formatHolidayStopRequestsDetailChargeCode = Jsonx.formatInline[HolidayStopRequestsDetailChargeCode]
@@ -131,7 +135,7 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
                          | $SOQL_SELECT_CLAUSE
                          | FROM $holidayStopRequestsDetailSfObjectRef
                          | WHERE Product_Name__c LIKE '${productKey.productType.value}%'
-                         | AND Holiday_Stop_Request__r.SF_Subscription__r.Rate_Plan_Name__c = '${productKey.ratePlanName.value}'
+                         | AND Holiday_Stop_Request__r.SF_Subscription__r.Rate_Plan_Name__c = '${productKey.productRatePlanName.value}'
                          | AND Stopped_Publication_Date__c = ${date.toString}
                          | AND (
                          |   Subscription_Cancellation_Effective_Date__c = null

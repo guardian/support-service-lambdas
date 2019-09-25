@@ -6,12 +6,6 @@ import java.time.{DayOfWeek, LocalDate}
 
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{ProductName, ProductRatePlanKey, ProductRatePlanName, ProductType}
 
-case class LegacyProductSpecifics(
-  firstAvailableDate: LocalDate,
-  issueDayOfWeek: Int,
-  annualIssueLimit: Int
-)
-
 case class ProductSpecifics(
   annualIssueLimit: Int,
   issueSpecifics: List[IssueSpecifics]
@@ -140,16 +134,6 @@ object ActionCalculator {
       Right(GuardianWeeklySuspensionConstants)
     case _ =>
       Left(ActionCalculatorError(s"ProductRatePlan $productKey is not supported"))
-  }
-
-  def getProductSpecifics(productNamePrefix: ProductName, today: LocalDate = LocalDate.now()): LegacyProductSpecifics = {
-    val productSuspensionConstants = suspensionConstantsByProduct(productNamePrefix)
-    val firstIssueConstants = productSuspensionConstants.issueConstants(0)
-    LegacyProductSpecifics(
-      firstIssueConstants.firstAvailableDate(today),
-      firstIssueConstants.issueDayOfWeek.getValue,
-      productSuspensionConstants.annualIssueLimit
-    )
   }
 
   def getProductSpecificsByProductRatePlanKey(

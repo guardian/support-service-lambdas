@@ -73,10 +73,6 @@ class ActionCalculatorTest extends FlatSpec with Matchers with EitherValues {
 
     gwTodayToFirstAvailableDate foreach {
       case (today, expected) =>
-        ActionCalculator
-          .getProductSpecifics(gwProductName, today)
-          .firstAvailableDate shouldEqual expected
-
         inside(ActionCalculator
           .getProductSpecificsByProductRatePlanKey(
             ProductRatePlanKey(gwProductType, ProductRatePlanName(Random.nextString(10))),
