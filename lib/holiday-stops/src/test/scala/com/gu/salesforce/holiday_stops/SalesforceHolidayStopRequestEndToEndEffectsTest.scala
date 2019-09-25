@@ -42,14 +42,13 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends FlatSpec with Matc
       ).toDisjunction
 
       createOp = SalesforceHolidayStopRequest.CreateHolidayStopRequestWithDetail(sfAuth.wrapWith(JsonHttp.post))
-      body = CreateHolidayStopRequestWithDetail.buildBody(
+      createResult <- createOp(CreateHolidayStopRequestWithDetail.buildBody(
         _ => Right(_ => Right(0.0)) // fake PartiallyWiredCreditCalculator
       )(
           startDate,
           endDate,
           maybeMatchingSubscription.get
-        )
-      createResult <- createOp(body).toDisjunction
+        )).toDisjunction
 
       fetchOp = SalesforceHolidayStopRequest.LookupByDateAndProductNamePrefix(sfAuth.wrapWith(JsonHttp.getWithParams))
       preProcessingFetchResult <- fetchOp(lookupDate, productName).toDisjunction

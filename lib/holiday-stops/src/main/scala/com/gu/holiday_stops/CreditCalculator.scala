@@ -16,8 +16,8 @@ object CreditCalculator extends LazyLogging {
   def apply(
     config: Config,
     backend: SttpBackend[Id, Nothing]
-  )(subscriptionName: SubscriptionName): Either[HolidayError, (LocalDate) => Either[ZuoraHolidayWriteError, Double]] = {
-    {
+  ): PartiallyWiredCreditCalculatorFactory =
+    (subscriptionName: SubscriptionName) => {
       for {
         accessToken <- Zuora.accessTokenGetResponse(config.zuoraConfig, backend)
         subscription <- Zuora.subscriptionGetResponse(config, accessToken, backend)(subscriptionName)
@@ -28,7 +28,6 @@ object CreditCalculator extends LazyLogging {
         subscription
       ) _ <| (logger.error(s"Failed to calculate credits for subscription $subscription", _))
     } <| (logger.error(s"Failed to get subscription $subscriptionName from zuora", _))
-  }
 
   def calculateCredit(
     guardianWeeklyProductRatePlanIds: List[String],
