@@ -40,13 +40,13 @@ object Handler extends Logging {
         context
       )
     )(
-      operationForEffects(
-        RawEffects.response,
-        RawEffects.stage,
-        GetFromS3.fetchString,
-        HttpURLConnectionBackend()
+        operationForEffects(
+          RawEffects.response,
+          RawEffects.stage,
+          GetFromS3.fetchString,
+          HttpURLConnectionBackend()
+        )
       )
-    )
   }
 
   def operationForEffects(
@@ -158,13 +158,12 @@ object Handler extends Logging {
       productNamePrefix = req.headers.flatMap(_.get(HEADER_PRODUCT_NAME_PREFIX))
       queryParams <- req.queryParamsAsCaseClass[PotentialHolidayStopsQueryParams]()
       potentialHolidayStopDates <- getPublicationDatesToBeStopped(productNamePrefix, queryParams)
-      creditCalculator <-
-        if (queryParams.estimateCredit.contains("true"))
-          creditCalculatorFactory(pathParams.subscriptionName)
-            .map(_.andThen(_.toOption))
-            .toApiGatewayOp("")
-        else
-          ContinueProcessing[LocalDate => Option[Double]](_ => None)
+      creditCalculator <- if (queryParams.estimateCredit.contains("true"))
+        creditCalculatorFactory(pathParams.subscriptionName)
+          .map(_.andThen(_.toOption))
+          .toApiGatewayOp("Failed to create credit calculator")
+      else
+        ContinueProcessing[LocalDate => Option[Double]](_ => None)
 
       potentialHolidayStops = potentialHolidayStopDates.map { stoppedPublicationDate => // unfortunately necessary due to GW N-for-N requiring stoppedPublicationDate to calculate correct credit estimation
         PotentialHolidayStop(stoppedPublicationDate, creditCalculator(stoppedPublicationDate))
@@ -231,10 +230,10 @@ object Handler extends Logging {
       req.queryStringParameters.flatMap(_.get(PRODUCT_TYPE_QUERY_STRING_KEY)),
       req.queryStringParameters.flatMap(_.get(PRODUCT_RATE_PLAN_NAME_QUERY_STRING_KEY))
     ) match {
-      case (Some(productType), Some(ratePlanName)) =>
-        Some(ProductRatePlanKey(ProductType(productType), ProductRatePlanName(ratePlanName)))
-      case _ => None
-    }
+        case (Some(productType), Some(ratePlanName)) =>
+          Some(ProductRatePlanKey(ProductType(productType), ProductRatePlanName(ratePlanName)))
+        case _ => None
+      }
   }
 
   def stepsToCreate(creditCalculator: PartiallyWiredCreditCalculatorFactory)(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
