@@ -151,6 +151,42 @@ class ActionCalculatorTest extends FlatSpec with Matchers with EitherValues {
         LocalDate.of(2019, 6, 23)
       ))
   }
+  it should "correctly list the action dates for Weekend Voucher" in {
+    val weekendVoucherProductRatePlanKey =
+      ProductRatePlanKey(ProductType("Newspaper - Voucher Book"), ProductRatePlanName("Weekend"))
+
+    ActionCalculator.publicationDatesToBeStopped(
+      fromInclusive = LocalDate.of(2019, 5, 20),
+      toInclusive = LocalDate.of(2019, 6, 21),
+      productRatePlanKey = weekendVoucherProductRatePlanKey
+    ) shouldEqual Right(List(
+        LocalDate.of(2019, 5, 25),
+        LocalDate.of(2019, 5, 26),
+        LocalDate.of(2019, 6, 1),
+        LocalDate.of(2019, 6, 2),
+        LocalDate.of(2019, 6, 8),
+        LocalDate.of(2019, 6, 9),
+        LocalDate.of(2019, 6, 15),
+        LocalDate.of(2019, 6, 16)
+      ))
+
+    ActionCalculator.publicationDatesToBeStopped(
+      fromInclusive = LocalDate.of(2019, 5, 20),
+      toInclusive = LocalDate.of(2019, 6, 23),
+      productRatePlanKey = weekendVoucherProductRatePlanKey
+    ) shouldEqual Right(List(
+        LocalDate.of(2019, 5, 25),
+        LocalDate.of(2019, 5, 26),
+        LocalDate.of(2019, 6, 1),
+        LocalDate.of(2019, 6, 2),
+        LocalDate.of(2019, 6, 8),
+        LocalDate.of(2019, 6, 9),
+        LocalDate.of(2019, 6, 15),
+        LocalDate.of(2019, 6, 16),
+        LocalDate.of(2019, 6, 22),
+        LocalDate.of(2019, 6, 23)
+      ))
+  }
   it should "return an error for an unsupported product rate plan" in {
     val unsupportedProductRatePlanKey =
       ProductRatePlanKey(ProductType("not supported"), ProductRatePlanName("not supported"))
