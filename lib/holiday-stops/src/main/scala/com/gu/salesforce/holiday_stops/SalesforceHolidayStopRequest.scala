@@ -5,7 +5,7 @@ import java.time.format.DateTimeFormatter
 import java.util.UUID
 
 import ai.x.play.json.Jsonx
-import com.gu.holiday_stops.ActionCalculator
+import com.gu.holiday_stops.{ActionCalculator, Subscription}
 import com.gu.holiday_stops.CreditCalculator.PartiallyWiredCreditCalculator
 import com.gu.salesforce.RecordsWrapperCaseClass
 import com.gu.salesforce.SalesforceConstants._
@@ -171,27 +171,27 @@ object SalesforceHolidayStopRequest extends Logging {
         .map(_.results.find(_.referenceId == holidayStopRequestSfObjectRef).map(_.id).get) //FIXME refactor this to map None to ClientFailure rather than nasty .get
         .runRequest
 
-    def buildBody(creditCalculator: PartiallyWiredCreditCalculator)(start: LocalDate, end: LocalDate, subscription: MatchingSubscription) =
+    def buildBody(creditCalculator: PartiallyWiredCreditCalculator)(start: LocalDate, end: LocalDate, matchingSubscription: MatchingSubscription, subscription: Subscription) = {
       RecordsWrapperCaseClass(List(
         CompositeTreeHolidayStopRequest(
           Start_Date__c = HolidayStopRequestStartDate(start),
           End_Date__c = HolidayStopRequestEndDate(end),
-          SF_Subscription__c = subscription.Id,
+          SF_Subscription__c = matchingSubscription.Id,
           Holiday_Stop_Request_Detail__r = RecordsWrapperCaseClass(
             ActionCalculator.publicationDatesToBeStopped(
               start,
               end,
-              subscription.Product_Name__c
+              matchingSubscription.Product_Name__c
             ).map { stoppedPublicationDate =>
                 CompositeTreeHolidayStopRequestsDetail(
                   stoppedPublicationDate,
-                  creditCalculator(subscription.Name, stoppedPublicationDate).toOption.map(HolidayStopRequestsDetailChargePrice)
+                  creditCalculator(stoppedPublicationDate, subscription).toOption.map(HolidayStopRequestsDetailChargePrice)
                 )
               }
           )
         )
       ))
-
+    }
   }
 
   object DeleteHolidayStopRequest {

@@ -105,7 +105,8 @@ lazy val `holiday-stops` = all(project in file("lib/holiday-stops"))
       circeParser,
       sttp,
       sttpCirce,
-      mouse
+      mouse,
+      enumeratum
     ) ++ logging
   )
 

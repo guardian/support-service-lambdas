@@ -3,39 +3,18 @@ package com.gu.holiday_stops
 import java.time.LocalDate
 
 import cats.syntax.either._
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.SubscriptionName
-import com.softwaremill.sttp.{Id, SttpBackend}
 import com.typesafe.scalalogging.LazyLogging
 import mouse.all._
 
 object CreditCalculator extends LazyLogging {
 
-  type PartiallyWiredCreditCalculator = (SubscriptionName, LocalDate) => Either[HolidayError, Double]
-
-  def apply(
-    config: Config,
-    backend: SttpBackend[Id, Nothing]
-  )(
-    subscriptionName: SubscriptionName,
-    stoppedPublicationDate: LocalDate
-  ): Either[HolidayError, Double] =
-    (for {
-      accessToken <- Zuora.accessTokenGetResponse(config.zuoraConfig, backend)
-      subscription <- Zuora.subscriptionGetResponse(config, accessToken, backend)(subscriptionName)
-      credit <- calculateCredit(
-        config.guardianWeeklyConfig.productRatePlanIds,
-        config.guardianWeeklyConfig.nForNProductRatePlanIds,
-        config.sundayVoucherConfig.productRatePlanChargeId,
-        stoppedPublicationDate
-      )(subscription)
-    } yield credit) <| (logger.error("Failed to calculate holiday stop credits", _))
+  type PartiallyWiredCreditCalculator = (LocalDate, Subscription) => Either[HolidayError, Double]
 
   def calculateCredit(
     guardianWeeklyProductRatePlanIds: List[String],
     gwNforNProductRatePlanIds: List[String],
-    sundayVoucherRatePlanId: String,
-    stoppedPublicationDate: LocalDate
-  )(subscription: Subscription): Either[ZuoraHolidayWriteError, Double] = {
+    sundayVoucherRatePlanId: String
+  )(stoppedPublicationDate: LocalDate, subscription: Subscription): Either[ZuoraHolidayWriteError, Double] = {
     guardianWeeklyCredit(
       guardianWeeklyProductRatePlanIds,
       gwNforNProductRatePlanIds,
@@ -48,7 +27,7 @@ object CreditCalculator extends LazyLogging {
     } orElse {
       Left(ZuoraHolidayWriteError(s"Could not calculate credit for subscription: ${subscription.subscriptionNumber}"))
     }
-  }
+  } <| (logger.error("Failed to calculate holiday stop credits", _))
 
   def guardianWeeklyCredit(guardianWeeklyProductRatePlanIds: List[String], gwNforNProductRatePlanIds: List[String], stoppedPublicationDate: LocalDate)(subscription: Subscription): Either[ZuoraHolidayWriteError, Double] =
     CurrentGuardianWeeklySubscription(subscription, guardianWeeklyProductRatePlanIds, gwNforNProductRatePlanIds)
