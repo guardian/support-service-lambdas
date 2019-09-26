@@ -4,6 +4,7 @@ import java.time.LocalDate
 
 import cats.syntax.either._
 import com.gu.holiday_stops._
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.StoppedPublicationDate
 import com.typesafe.scalalogging.LazyLogging
 import mouse.all._
 
@@ -26,6 +27,11 @@ object CreditCalculator extends LazyLogging {
         stoppedPublicationDate
       )(subscription)
     } orElse {
+      weekendVoucherCredit(
+        sundayVoucherRatePlanId,
+        stoppedPublicationDate
+      )(subscription)
+    } orElse {
       Left(ZuoraHolidayWriteError(s"Could not calculate credit for subscription: ${subscription.subscriptionNumber}"))
     }
   } <| (logger.error("Failed to calculate holiday stop credits", _))
@@ -36,6 +42,14 @@ object CreditCalculator extends LazyLogging {
 
   def sundayVoucherCredit(sundayVoucherRatePlanId: String, stoppedPublicationDate: LocalDate)(subscription: Subscription) = {
     CurrentSundayVoucherSubscription(subscription, sundayVoucherRatePlanId)
-      .map(SundayVoucherHolidayCredit(_, stoppedPublicationDate))
+      .map(VoucherHolidayCredit(_))
+  }
+
+  def weekendVoucherCredit(sundayVoucherRatePlanId: String, stoppedPublicationDate: LocalDate)(subscription: Subscription) = {
+    CurrentWeekendVoucherSubscription(
+      subscription,
+      sundayVoucherRatePlanId,
+      StoppedPublicationDate(stoppedPublicationDate)
+    ).map(VoucherHolidayCredit(_))
   }
 }

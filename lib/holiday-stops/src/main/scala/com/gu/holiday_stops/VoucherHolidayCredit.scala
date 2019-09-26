@@ -1,6 +1,5 @@
 package com.gu.holiday_stops.subscription
 
-
 import com.gu.holiday_stops.{BillingPeriodToApproxWeekCount, CurrentVoucherSubscription}
 
 import scala.math.BigDecimal.RoundingMode

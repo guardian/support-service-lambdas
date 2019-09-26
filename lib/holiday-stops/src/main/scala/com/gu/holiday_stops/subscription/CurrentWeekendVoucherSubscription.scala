@@ -37,7 +37,7 @@ object CurrentWeekendVoucherSubscriptionPredicates {
  *
  * @param dayOfWeek Saturday or Sunday
  */
-case class CurrentWeekendVoucherSubscription(
+case class CurrentWeekendVoucherSubscription (
   subscriptionNumber: String,
   billingPeriod: String,
   price: Double,
@@ -45,7 +45,7 @@ case class CurrentWeekendVoucherSubscription(
   ratePlanId: String,
   productRatePlanId: String,
   dayOfWeek: VoucherDayOfWeek
-)
+) extends CurrentVoucherSubscription
 
 
 sealed trait VoucherDayOfWeek extends EnumEntry

@@ -38,7 +38,7 @@ case class CurrentSundayVoucherSubscription(
   ratePlanId: String,
   productRatePlanId: String,
   productRatePlanChargeId: String // unique identifier of product
-)
+) extends CurrentVoucherSubscription
 
 object CurrentSundayVoucherSubscription {
 
