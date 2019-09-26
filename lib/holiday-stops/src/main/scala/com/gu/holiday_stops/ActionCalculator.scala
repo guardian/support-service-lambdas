@@ -108,23 +108,26 @@ object ActionCalculator {
     }
   }
 
-  val SundayVoucherSuspensionConstants = SuspensionConstants(
-    annualIssueLimit = 6,
-    issueConstants = List(voucherIssueSuspensionConstants(DayOfWeek.SUNDAY))
+  val SundayVoucherSuspensionConstants = voucherSuspensionConstans(
+    List(voucherIssueSuspensionConstants(DayOfWeek.SUNDAY))
   )
 
-  val WeekendVoucherSuspensionConstants = SuspensionConstants(
-    annualIssueLimit = 6,
-    issueConstants = List(
+  val WeekendVoucherSuspensionConstants = voucherSuspensionConstans(
+    List(
       voucherIssueSuspensionConstants(DayOfWeek.SATURDAY),
       voucherIssueSuspensionConstants(DayOfWeek.SUNDAY)
     )
   )
 
+  def voucherSuspensionConstans(issueSuspensionConstants: List[IssueSuspensionConstants]) =
+    SuspensionConstants(issueSuspensionConstants.size * 6, issueSuspensionConstants)
+
+  val VoucherProcessorLeadTime = 1
+
   def voucherIssueSuspensionConstants(dayOfWeek: DayOfWeek): IssueSuspensionConstants =
     new IssueSuspensionConstants(
       issueDayOfWeek = dayOfWeek,
-      processorRunLeadTimeDays = 1,
+      processorRunLeadTimeDays = VoucherProcessorLeadTime,
     ) {
       def firstAvailableDate(today: LocalDate): LocalDate = {
         today.plus(processorRunLeadTimeDays.toLong, ChronoUnit.DAYS)

@@ -2,7 +2,7 @@ package com.gu.holidaystopprocessor
 
 import java.time.LocalDate
 
-import com.gu.holiday_stops.ActionCalculator.SundayVoucherIssueSuspensionConstants
+import com.gu.holiday_stops.ActionCalculator.VoucherProcessorLeadTime
 import com.gu.holiday_stops._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestsDetail, HolidayStopRequestsDetailChargeCode, HolidayStopRequestsDetailChargePrice, ProductName, ProductRatePlanKey, ProductRatePlanName, ProductType, StoppedPublicationDate, SubscriptionName}
 import cats.implicits._
@@ -42,7 +42,7 @@ object SundayVoucherHolidayStopProcessor {
     }
   }
   private def calculateProcessDate(processDateOverride: Option[LocalDate]) = {
-    processDateOverride.getOrElse(LocalDate.now.plusDays(SundayVoucherIssueSuspensionConstants.processorRunLeadTimeDays))
+    processDateOverride.getOrElse(LocalDate.now.plusDays(VoucherProcessorLeadTime))
   }
 
   private def writeHolidayStopToZuora(
