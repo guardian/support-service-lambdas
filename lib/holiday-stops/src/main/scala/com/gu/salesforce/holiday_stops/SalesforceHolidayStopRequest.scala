@@ -202,30 +202,4 @@ object SalesforceHolidayStopRequest extends Logging {
       }.runRequest
 
   }
-
-  //
-  // TODO refactor these out by reworking back-fill to to use composite tree approach above (but also passing in the Charge_Code__c & Actual_Price__c for the inner records)
-  //
-
-  @Deprecated
-  case class NewHolidayStopRequest(
-    Start_Date__c: HolidayStopRequestStartDate,
-    End_Date__c: HolidayStopRequestEndDate,
-    SF_Subscription__r: SubscriptionNameLookup
-  )
-  implicit val formatNew = Json.format[NewHolidayStopRequest]
-
-  @Deprecated
-  object CreateHolidayStopRequest {
-
-    case class CreateHolidayStopRequestResult(id: HolidayStopRequestId)
-    implicit val reads = Json.reads[CreateHolidayStopRequestResult]
-
-    def apply(sfPost: HttpOp[RestRequestMaker.PostRequest, JsValue]): NewHolidayStopRequest => ClientFailableOp[HolidayStopRequestId] =
-      sfPost.setupRequest[NewHolidayStopRequest] { newHolidayStopRequest =>
-        PostRequest(newHolidayStopRequest, RelativePath(holidayStopRequestSfObjectsBaseUrl))
-      }.parse[CreateHolidayStopRequestResult].map(_.id).runRequest
-
-  }
-
 }

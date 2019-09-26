@@ -56,7 +56,9 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
   case class HolidayStopRequestsDetailChargePrice(value: Double) extends AnyVal
   implicit val formatHolidayStopRequestsDetailChargePrice = Jsonx.formatInline[HolidayStopRequestsDetailChargePrice]
 
-  case class StoppedPublicationDate(value: LocalDate) extends AnyVal
+  case class StoppedPublicationDate(value: LocalDate) extends AnyVal {
+    def getDayOfWeek: String = value.getDayOfWeek.toString.toLowerCase.capitalize
+  }
   implicit val formatStoppedPublicationDate = Jsonx.formatInline[StoppedPublicationDate]
 
   case class HolidayStopRequestsDetailActioned(
