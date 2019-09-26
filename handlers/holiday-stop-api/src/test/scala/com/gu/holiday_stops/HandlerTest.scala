@@ -4,10 +4,10 @@ import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
 import com.gu.effects.{FakeFetchString, SFTestEffects, TestingRawEffects}
-import com.gu.holiday_stops.subscription.ActionCalculator._
+import com.gu.holiday_stops.ActionCalculator._
 import com.gu.holiday_stops.Handler._
 import com.gu.holiday_stops.ZuoraSttpEffects.ZuoraSttpEffectsOps
-import com.gu.holiday_stops.subscription.{IssueSpecifics, LegacyProductSpecifics, RatePlan, RatePlanCharge, Subscription}
+import com.gu.holiday_stops.subscription.{RatePlan, RatePlanCharge, Subscription}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.SubscriptionName
 import com.gu.salesforce.holiday_stops.SalesforceSFSubscription.SubscriptionForSubscriptionNameAndContact._
 import com.gu.salesforce.holiday_stops.{SalesForceHolidayStopsEffects, SalesforceHolidayStopRequestsDetail}
