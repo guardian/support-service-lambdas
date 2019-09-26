@@ -37,7 +37,7 @@ object Fixtures {
     price: Double = -1.0,
     billingPeriod: String = "Quarter",
     chargedThroughDate: Option[LocalDate] = None
-  ) =
+  ): Subscription =
     Subscription(
       subscriptionNumber = "S1",
       termStartDate,
