@@ -6,6 +6,7 @@ import java.util.UUID
 
 import ai.x.play.json.Jsonx
 import com.gu.holiday_stops.ActionCalculator
+import com.gu.holiday_stops.CreditCalculator.PartiallyWiredCreditCalculator
 import com.gu.salesforce.RecordsWrapperCaseClass
 import com.gu.salesforce.SalesforceConstants._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
@@ -15,14 +16,6 @@ import com.gu.util.resthttp.RestOp._
 import com.gu.util.resthttp.RestRequestMaker._
 import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.resthttp.{HttpOp, RestRequestMaker}
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.util.UUID
-
-import com.gu.holiday_stops.ActionCalculator
-import com.gu.holiday_stops.CreditCalculator.PartiallyWiredCreditCalculator
-import com.gu.salesforce.RecordsWrapperCaseClass
-import com.gu.salesforce.holiday_stops.SalesforceSFSubscription.SubscriptionForSubscriptionNameAndContact._
 import play.api.libs.json._
 
 object SalesforceHolidayStopRequest extends Logging {
@@ -209,30 +202,4 @@ object SalesforceHolidayStopRequest extends Logging {
       }.runRequest
 
   }
-
-  //
-  // TODO refactor these out by reworking back-fill to to use composite tree approach above (but also passing in the Charge_Code__c & Actual_Price__c for the inner records)
-  //
-
-  @Deprecated
-  case class NewHolidayStopRequest(
-    Start_Date__c: HolidayStopRequestStartDate,
-    End_Date__c: HolidayStopRequestEndDate,
-    SF_Subscription__r: SubscriptionNameLookup
-  )
-  implicit val formatNew = Json.format[NewHolidayStopRequest]
-
-  @Deprecated
-  object CreateHolidayStopRequest {
-
-    case class CreateHolidayStopRequestResult(id: HolidayStopRequestId)
-    implicit val reads = Json.reads[CreateHolidayStopRequestResult]
-
-    def apply(sfPost: HttpOp[RestRequestMaker.PostRequest, JsValue]): NewHolidayStopRequest => ClientFailableOp[HolidayStopRequestId] =
-      sfPost.setupRequest[NewHolidayStopRequest] { newHolidayStopRequest =>
-        PostRequest(newHolidayStopRequest, RelativePath(holidayStopRequestSfObjectsBaseUrl))
-      }.parse[CreateHolidayStopRequestResult].map(_.id).runRequest
-
-  }
-
 }
