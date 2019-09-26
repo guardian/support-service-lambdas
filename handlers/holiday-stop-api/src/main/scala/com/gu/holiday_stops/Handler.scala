@@ -176,16 +176,6 @@ object Handler extends Logging {
     } yield ApiGatewayResponse("200", PotentialHolidayStopsResponse(potentialHolidayStops))).apiResponse
   }
 
-  private def getPublicationDatesToBeStopped(queryParams: PotentialHolidayStopsQueryParams) = {
-    ActionCalculator
-      .publicationDatesToBeStopped(
-        queryParams.startDate,
-        queryParams.endDate,
-        ProductRatePlanKey(ProductType(queryParams.productType), ProductRatePlanName(queryParams.productRatePlanName))
-      )
-      .toApiGatewayOp(s"calculating publication dates")
-  }
-
   private def getSubscriptionIfRequired(
     getSubscription: SubscriptionName => Either[HolidayError, Subscription],
     pathParams: PotentialHolidayStopsPathParams,
@@ -197,6 +187,16 @@ object Handler extends Logging {
         .toApiGatewayOp(s"get subscription ${pathParams.subscriptionName}")
     else
       ContinueProcessing(None)
+  }
+
+  private def getPublicationDatesToBeStopped(queryParams: PotentialHolidayStopsQueryParams) = {
+    ActionCalculator
+      .publicationDatesToBeStopped(
+        queryParams.startDate,
+        queryParams.endDate,
+        ProductRatePlanKey(ProductType(queryParams.productType), ProductRatePlanName(queryParams.productRatePlanName))
+      )
+      .toApiGatewayOp(s"calculating publication dates")
   }
 
   case class ListExistingPathParams(subscriptionName: Option[SubscriptionName])
