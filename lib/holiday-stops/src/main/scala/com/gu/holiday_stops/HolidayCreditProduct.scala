@@ -1,8 +1,10 @@
 package com.gu.holiday_stops
 
 /**
- * Same Discount product is reused for all products, namely:
+ * Same Discount holiday stop product is reused for all products, namely:
  *   'DO NOT USE MANUALLY: Holiday Credit - automated'
+ *
+ *   https://www.zuora.com/apps/Product.do?method=view&id=2c92a0ff5345f9200153559c6d2a3385#ST_DO%20NOT%20USE%20MANUALLY:%20Holiday%20Credit%20-%20automated
  */
 case class HolidayCreditProduct(
   productRatePlanId: String,

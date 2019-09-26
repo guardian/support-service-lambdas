@@ -123,30 +123,21 @@ object GuardianWeeklyHolidayStopConfig {
 
   lazy val Prod =
     GuardianWeeklyHolidayStopConfig(
-      HolidayCreditProduct(
-        productRatePlanId = "2c92a0076ae9189c016b080c930a6186",
-        productRatePlanChargeId = "2c92a0086ae928d7016b080f638477a6"
-      ),
+      HolidayCreditProduct.Prod,
       guardianWeeklyProductRatePlanIdsPROD,
       gwNforNProductRatePlanIdsPROD,
     )
 
   lazy val Code =
     GuardianWeeklyHolidayStopConfig(
-      HolidayCreditProduct(
-        productRatePlanId = "2c92c0f86b0378b0016b08112e870d0a",
-        productRatePlanChargeId = "2c92c0f86b0378b0016b08112ec70d14"
-      ),
+      HolidayCreditProduct.Code,
       guardianWeeklyProductRatePlanIdsUAT,
       gwNforNProductRatePlanIdsUAT
     )
 
   lazy val Dev =
     GuardianWeeklyHolidayStopConfig(
-      HolidayCreditProduct(
-        productRatePlanId = "2c92c0f96b03800b016b081fc04f1ba2",
-        productRatePlanChargeId = "2c92c0f96b03800b016b081fc0f41bb4"
-      ),
+      HolidayCreditProduct.Dev,
       guardianWeeklyProductRatePlanIdsDEV,
       gwNforNProductRatePlanIdsDEV
     )
