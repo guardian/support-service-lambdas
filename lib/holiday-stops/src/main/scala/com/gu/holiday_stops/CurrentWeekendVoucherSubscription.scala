@@ -6,6 +6,9 @@ object CurrentWeekendVoucherSubscriptionPredicates {
   def ratePlanIsWeekendVoucher(ratePlan: RatePlan, weekendVoucherProductRatePlanId: String): Boolean =
     ratePlan.productRatePlanId == weekendVoucherProductRatePlanId
 
+  def stoppedPublicationDateFallsOnWeekend(stoppedPublicationDate: StoppedPublicationDate): Boolean =
+    List("Saturday", "Sunday").contains(stoppedPublicationDate.getDayOfWeek)
+
   def ratePlanHasBeenInvoicedForAllCharges(ratePlan: RatePlan): Boolean = {
     ratePlan.ratePlanCharges.forall { ratePlanCharge =>
       (for {
@@ -49,27 +52,33 @@ case class CurrentWeekendVoucherSubscription(
 )
 
 object CurrentWeekendVoucherSubscription {
-  private def findWeekendVoucherRatePlan(subscription: Subscription, weekendVoucherProductRatePlanId: String): Option[RatePlan] =
+  private def findWeekendVoucherRatePlan(
+      subscription: Subscription,
+      weekendVoucherProductRatePlanId: String,
+      stoppedPublicationDate: StoppedPublicationDate): Option[RatePlan] = {
+
     subscription
       .ratePlans
       .find { ratePlan =>
         import CurrentWeekendVoucherSubscriptionPredicates._
         List(
+          stoppedPublicationDateFallsOnWeekend(stoppedPublicationDate),
           ratePlanIsWeekendVoucher(ratePlan, weekendVoucherProductRatePlanId),
           ratePlanHasBeenInvoicedForAllCharges(ratePlan),
           weekendVoucherRatePlanHasExactlyTwoCharges(ratePlan),
           billingPeriodIsAnnualOrMonthOrQuarterOrSemiAnnual(ratePlan),
         ).forall(_ == true)
       }
+  }
 
   def apply(
     subscription: Subscription,
     weekendVoucherProductRatePlanId: String,
     stoppedPublicationDate: StoppedPublicationDate
   ): Either[ZuoraHolidayWriteError, CurrentWeekendVoucherSubscription] = {
-    findWeekendVoucherRatePlan(subscription, weekendVoucherProductRatePlanId).flatMap { currentWeekendVoucherRatePlan =>
+    findWeekendVoucherRatePlan(subscription, weekendVoucherProductRatePlanId, stoppedPublicationDate).flatMap { currentWeekendVoucherRatePlan =>
       for {
-        rpc <- currentWeekendVoucherRatePlan.ratePlanCharges.find(_.name == stoppedPublicationDate.getDayOfWeek) // finds particular RPC, Saturday or Sunday
+        rpc <- currentWeekendVoucherRatePlan.ratePlanCharges.find(_.name == stoppedPublicationDate.getDayOfWeek) // find particular RPC, Saturday or Sunday
         billingPeriod <- rpc.billingPeriod
         startDateIncluding <- rpc.processedThroughDate
         endDateExcluding <- rpc.chargedThroughDate

@@ -23,6 +23,6 @@ class CurrentWeekendVoucherSubscriptionSpec extends FlatSpec with Matchers with 
     val subscriptionRaw = Source.fromResource("WeekendVoucherSubscription.json").mkString
     val subscription = decode[Subscription](subscriptionRaw).getOrElse(fail("Could not decode CurrentWeekendVoucherSubscription"))
     val model = CurrentWeekendVoucherSubscription(subscription, WeekendVoucherHolidayStopConfig.Dev.productRatePlanId, StoppedPublicationDate(LocalDate.parse("2019-09-27")))
-    model.isLeft should be(false)
+    model.isLeft should be(true)
   }
 }
