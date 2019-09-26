@@ -148,22 +148,4 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
       RestRequestMaker.GetRequestWithParams(RelativePath(soqlQueryBaseUrl), UrlParams(Map("q" -> soqlQuery)))
     }
   }
-
-  case class ActionedHolidayStopRequestsDetailToBackfill(
-    Holiday_Stop_Request__c: HolidayStopRequestId,
-    Stopped_Publication_Date__c: StoppedPublicationDate,
-    Estimated_Price__c: Option[HolidayStopRequestsDetailChargePrice],
-    Charge_Code__c: Option[HolidayStopRequestsDetailChargeCode],
-    Actual_Price__c: Option[HolidayStopRequestsDetailChargePrice]
-  )
-  implicit val formatActionedHolidayStopRequestsDetail = Json.format[ActionedHolidayStopRequestsDetailToBackfill]
-
-  object BackfillActionedSalesforceHolidayStopRequestsDetail {
-
-    def apply(sfPost: HttpOp[RestRequestMaker.PostRequest, JsValue]): ActionedHolidayStopRequestsDetailToBackfill => ClientFailableOp[JsValue] =
-      sfPost.setupRequest[ActionedHolidayStopRequestsDetailToBackfill] { toCreate =>
-        PostRequest(toCreate, RelativePath(sfObjectsBaseUrl + holidayStopRequestsDetailSfObjectRef))
-      }.parse[JsValue].runRequest
-
-  }
 }

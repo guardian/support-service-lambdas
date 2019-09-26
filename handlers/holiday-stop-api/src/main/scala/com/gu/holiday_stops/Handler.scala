@@ -8,7 +8,7 @@ import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.holiday_stops.CreditCalculator.PartiallyWiredCreditCalculator
 import com.gu.salesforce.SalesforceClient
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestId, ProductName, ProductRatePlanKey, ProductRatePlanName, ProductType, SubscriptionName}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestId, ProductRatePlanKey, ProductRatePlanName, ProductType, SubscriptionName}
 import com.gu.salesforce.holiday_stops.SalesforceSFSubscription.SubscriptionForSubscriptionNameAndContact._
 import com.gu.salesforce.holiday_stops.{SalesforceHolidayStopRequest, SalesforceSFSubscription}
 import com.gu.util.Logging
@@ -17,7 +17,7 @@ import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config._
-import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing}
+import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.JsonHttp.StringHttpRequest
 import com.gu.util.resthttp.RestRequestMaker.BodyAsString
@@ -58,17 +58,26 @@ object Handler extends Logging {
       config <- Config(fetchString).toApiGatewayOp("Failed to load config")
       sfClient <- SalesforceClient(response, config.sfConfig).value.toDisjunction.toApiGatewayOp("authenticate with SalesForce")
     } yield Operation.noHealthcheck(request => // checking connectivity to SF is sufficient healthcheck so no special steps required
-      validateRequestAndCreateSteps(request, CreditCalculator(config, backend))(request, sfClient))
+      validateRequestAndCreateSteps(
+        request,
+        CreditCalculator.calculateCredit(
+          config.guardianWeeklyConfig.productRatePlanIds,
+          config.guardianWeeklyConfig.nForNProductRatePlanIds,
+          config.sundayVoucherConfig.productRatePlanChargeId
+        ),
+        getSubscriptionFromZuora(config, backend)
+      )(request, sfClient))
   }
 
   private def validateRequestAndCreateSteps(
     request: ApiGatewayRequest,
-    creditCalculator: PartiallyWiredCreditCalculator
+    creditCalculator: PartiallyWiredCreditCalculator,
+    getSubscription: SubscriptionName => Either[HolidayError, Subscription]
   ) = {
     (for {
       httpMethod <- validateMethod(request.httpMethod)
       path <- validatePath(request.path)
-    } yield createSteps(httpMethod, splitPath(path), creditCalculator)).fold(
+    } yield createSteps(httpMethod, splitPath(path), creditCalculator, getSubscription)).fold(
       { errorMessage: String =>
         badrequest(errorMessage) _
       },
@@ -93,18 +102,19 @@ object Handler extends Logging {
   private def createSteps(
     httpMethod: String,
     path: List[String],
-    creditCalculator: PartiallyWiredCreditCalculator
+    creditCalculator: PartiallyWiredCreditCalculator,
+    getSubscription: SubscriptionName => Either[HolidayError, Subscription]
   ) = {
     path match {
       case "potential" :: _ :: Nil =>
         httpMethod match {
-          case "GET" => stepsForPotentialHolidayStop(creditCalculator) _
+          case "GET" => stepsForPotentialHolidayStop(creditCalculator, getSubscription) _
           case _ => unsupported _
         }
       case "hsr" :: Nil =>
         httpMethod match {
           case "GET" => stepsToListExisting _
-          case "POST" => stepsToCreate(creditCalculator) _
+          case "POST" => stepsToCreate(creditCalculator, getSubscription) _
           case _ => unsupported _
         }
       case "hsr" :: _ :: Nil =>
@@ -150,17 +160,18 @@ object Handler extends Logging {
     productRatePlanName: String
   )
 
-  def stepsForPotentialHolidayStop(creditCalculator: PartiallyWiredCreditCalculator)(req: ApiGatewayRequest, unused: SfClient): ApiResponse = {
+  def stepsForPotentialHolidayStop(
+    creditCalculator: PartiallyWiredCreditCalculator,
+    getSubscription: SubscriptionName => Either[HolidayError, Subscription]
+  )(req: ApiGatewayRequest, unused: SfClient): ApiResponse = {
     implicit val reads: Reads[PotentialHolidayStopsQueryParams] = Json.reads[PotentialHolidayStopsQueryParams]
     (for {
       pathParams <- req.pathParamsAsCaseClass[PotentialHolidayStopsPathParams]()(Json.reads[PotentialHolidayStopsPathParams])
       queryParams <- req.queryParamsAsCaseClass[PotentialHolidayStopsQueryParams]()
       potentialHolidayStopDates <- getPublicationDatesToBeStopped(queryParams)
+      optionalSubscription <- getSubscriptionIfRequired(getSubscription, pathParams, queryParams)
       potentialHolidayStops = potentialHolidayStopDates.map { stoppedPublicationDate => // unfortunately necessary due to GW N-for-N requiring stoppedPublicationDate to calculate correct credit estimation
-        if (queryParams.estimateCredit.contains("true"))
-          PotentialHolidayStop(stoppedPublicationDate, creditCalculator(pathParams.subscriptionName, stoppedPublicationDate).toOption)
-        else
-          PotentialHolidayStop(stoppedPublicationDate, None)
+        PotentialHolidayStop(stoppedPublicationDate, optionalSubscription.flatMap(creditCalculator(stoppedPublicationDate, _).toOption))
       }
     } yield ApiGatewayResponse("200", PotentialHolidayStopsResponse(potentialHolidayStops))).apiResponse
   }
@@ -173,6 +184,19 @@ object Handler extends Logging {
         ProductRatePlanKey(ProductType(queryParams.productType), ProductRatePlanName(queryParams.productRatePlanName))
       )
       .toApiGatewayOp(s"calculating publication dates")
+  }
+
+  private def getSubscriptionIfRequired(
+    getSubscription: SubscriptionName => Either[HolidayError, Subscription],
+    pathParams: PotentialHolidayStopsPathParams,
+    queryParams: PotentialHolidayStopsQueryParams
+  ): ApiGatewayOp[Option[Subscription]] = {
+    if (queryParams.estimateCredit.contains("true"))
+      getSubscription(pathParams.subscriptionName)
+        .map(Some(_))
+        .toApiGatewayOp(s"get subscription ${pathParams.subscriptionName}")
+    else
+      ContinueProcessing(None)
   }
 
   case class ListExistingPathParams(subscriptionName: Option[SubscriptionName])
@@ -198,7 +222,10 @@ object Handler extends Logging {
     } yield ApiGatewayResponse("200", response)).apiResponse
   }
 
-  def stepsToCreate(creditCalculator: PartiallyWiredCreditCalculator)(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
+  def stepsToCreate(
+    creditCalculator: PartiallyWiredCreditCalculator,
+    getSubscription: SubscriptionName => Either[HolidayError, Subscription]
+  )(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
 
     val verifyContactOwnsSubOp = SalesforceSFSubscription.SubscriptionForSubscriptionNameAndContact(sfClient.wrapWith(JsonHttp.getWithParams))
     val createOp = SalesforceHolidayStopRequest.CreateHolidayStopRequestWithDetail(sfClient.wrapWith(JsonHttp.post))
@@ -208,11 +235,23 @@ object Handler extends Logging {
       contact <- extractContactFromHeaders(req.headers)
       maybeMatchingSub <- verifyContactOwnsSubOp(requestBody.subscriptionName, contact).toDisjunction.toApiGatewayOp(s"fetching subscriptions for contact $contact")
       matchingSub <- maybeMatchingSub.toApiGatewayOp(s"contact $contact does not own ${requestBody.subscriptionName.value}")
-      createBody = CreateHolidayStopRequestWithDetail.buildBody(creditCalculator)(requestBody.start, requestBody.end, matchingSub)
+      zuoraSubscription <- getSubscription(requestBody.subscriptionName).toApiGatewayOp("get subscription from zuora")
+      createBody = CreateHolidayStopRequestWithDetail.buildBody(creditCalculator)(requestBody.start, requestBody.end, matchingSub, zuoraSubscription)
       _ <- createOp(createBody).toDisjunction.toApiGatewayOp(s"create new Holiday Stop Request for subscription ${requestBody.subscriptionName} (contact $contact)")
       // TODO nice to have - handle 'FIELD_CUSTOM_VALIDATION_EXCEPTION' etc back from SF and place in response
     } yield ApiGatewayResponse.successfulExecution).apiResponse
   }
+
+  def getSubscriptionFromZuora(
+    config: Config,
+    backend: SttpBackend[Id, Nothing]
+  )(
+    subscriptionName: SubscriptionName
+  ): Either[HolidayError, Subscription] =
+    for {
+      accessToken <- Zuora.accessTokenGetResponse(config.zuoraConfig, backend)
+      subscription <- Zuora.subscriptionGetResponse(config, accessToken, backend)(subscriptionName)
+    } yield subscription
 
   case class DeletePathParams(subscriptionName: SubscriptionName, holidayStopRequestId: HolidayStopRequestId)
 
