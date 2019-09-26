@@ -2,9 +2,10 @@ package com.gu.holidaystopprocessor
 
 import java.time.LocalDate
 
-import com.gu.holiday_stops.ActionCalculator.GuardianWeeklyIssueSuspensionConstants
+import com.gu.holiday_stops.subscription.ActionCalculator.GuardianWeeklyIssueSuspensionConstants
 import com.gu.holiday_stops.Fixtures.{guardianWeeklyConfig, mkSubscription}
 import com.gu.holiday_stops._
+import com.gu.holiday_stops.subscription.{HolidayCreditUpdate, Subscription}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
 import org.scalatest.{EitherValues, FlatSpec, Matchers, OptionValues}
 

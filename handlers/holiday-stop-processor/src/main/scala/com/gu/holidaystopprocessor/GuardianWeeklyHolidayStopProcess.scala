@@ -2,10 +2,11 @@ package com.gu.holidaystopprocessor
 
 import java.time.LocalDate
 
-import com.gu.holiday_stops.{CreditCalculator, CurrentGuardianWeeklySubscription, ExtendedTerm, GuardianWeeklyHolidayStopConfig, HolidayCreditProduct, HolidayCreditUpdate, HolidayStop, OverallFailure, SalesforceHolidayWriteError, Subscription, ZuoraHolidayWriteError}
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestsDetail, HolidayStopRequestsDetailChargeCode, HolidayStopRequestsDetailChargePrice, ProductName, StoppedPublicationDate, SubscriptionName}
 import cats.implicits._
-import com.gu.holiday_stops.ActionCalculator.{GuardianWeeklyIssueSuspensionConstants, suspensionConstantsByProduct}
+import com.gu.holiday_stops.ActionCalculator.GuardianWeeklyIssueSuspensionConstants
+import com.gu.holiday_stops._
+import com.gu.holiday_stops.subscription._
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestsDetail, HolidayStopRequestsDetailChargeCode, HolidayStopRequestsDetailChargePrice, ProductName, StoppedPublicationDate, SubscriptionName}
 
 object GuardianWeeklyHolidayStopProcess {
   def processHolidayStops(

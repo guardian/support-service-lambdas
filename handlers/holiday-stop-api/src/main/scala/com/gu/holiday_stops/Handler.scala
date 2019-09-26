@@ -5,7 +5,8 @@ import java.time.LocalDate
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
-import com.gu.holiday_stops.CreditCalculator.PartiallyWiredCreditCalculator
+import com.gu.holiday_stops.subscription.CreditCalculator.PartiallyWiredCreditCalculator
+import com.gu.holiday_stops.subscription.{ActionCalculator, CreditCalculator, Subscription}
 import com.gu.salesforce.SalesforceClient
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestId, ProductName, ProductRatePlanKey, ProductRatePlanName, ProductType, SubscriptionName}

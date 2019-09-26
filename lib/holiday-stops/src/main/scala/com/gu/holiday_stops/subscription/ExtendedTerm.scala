@@ -1,4 +1,4 @@
-package com.gu.holiday_stops
+package com.gu.holiday_stops.subscription
 
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit.DAYS

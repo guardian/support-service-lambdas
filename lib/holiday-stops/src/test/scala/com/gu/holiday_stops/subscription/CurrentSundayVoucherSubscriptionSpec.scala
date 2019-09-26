@@ -1,9 +1,11 @@
-package com.gu.holiday_stops
+package com.gu.holiday_stops.subscription
 
-import org.scalatest._
-import scala.io.Source
-import io.circe.parser.decode
+import com.gu.holiday_stops.SundayVoucherHolidayStopConfig
 import io.circe.generic.auto._
+import io.circe.parser.decode
+import org.scalatest._
+
+import scala.io.Source
 
 class CurrentSundayVoucherSubscriptionSpec extends FlatSpec with Matchers with EitherValues {
   "CurrentSundayVoucherSubscription" should "satisfy all the predicates" in {

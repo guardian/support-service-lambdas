@@ -3,6 +3,7 @@ package com.gu.holiday_stops
 import java.time.LocalDate
 
 import cats.implicits._
+import com.gu.holiday_stops.subscription.{ActionCalculator, IssueSpecifics, LegacyProductSpecifics, ProductSpecifics}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{ProductName, ProductRatePlanKey, SubscriptionName}
 import play.api.libs.json.{Json, OFormat}

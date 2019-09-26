@@ -2,6 +2,7 @@ package com.gu.holiday_stops
 
 import java.time.LocalDate
 
+import com.gu.holiday_stops.subscription.{CurrentGuardianWeeklySubscription, GuardianWeeklyHolidayCredit, RatePlan}
 import org.scalatest.{EitherValues, FlatSpec, Matchers}
 
 class HolidayCreditTest extends FlatSpec with Matchers with EitherValues {
