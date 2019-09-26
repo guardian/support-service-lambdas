@@ -58,6 +58,3 @@ that's a thin wrapper around the processor to enable it to be tested functionall
 1. Use the `Salesforce Inspector | Show all data` extension to set value `Guardian Weekly` to `Product__c` and `Product_Type__c` fields
 1. Create holiday request
 1. Run processor lambda with `Stopped Publication Date` value as input, for example "2019-08-14" if `Stopped Publication Date = 14/08/2020` 
-
-## Backfilling Salesforce
-See the [readme](src/main/scala/com/gu/README.md).
