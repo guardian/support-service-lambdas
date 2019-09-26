@@ -3,6 +3,8 @@ package com.gu.salesforce.holiday_stops
 import java.time.LocalDate
 
 import com.gu.effects.{GetFromS3, RawEffects}
+import com.gu.holiday_stops.CreditCalculator.PartiallyWiredCreditCalculator
+import com.gu.holiday_stops.{Fixtures, Subscription}
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.SalesforceClient
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
@@ -41,14 +43,18 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends FlatSpec with Matc
         Left(IdentityId("100004814"))
       ).toDisjunction
 
+      fakePartiallyWiredCreditCalculator: PartiallyWiredCreditCalculator = (_, _) => Right(0.0)
+      fakeSubscription: Subscription = Fixtures.mkSubscription()
+
       createOp = SalesforceHolidayStopRequest.CreateHolidayStopRequestWithDetail(sfAuth.wrapWith(JsonHttp.post))
       createResult <- createOp(CreateHolidayStopRequestWithDetail.buildBody(
-        _ => Right(_ => Right(0.0)) // fake PartiallyWiredCreditCalculator
+        fakePartiallyWiredCreditCalculator
       )(
-          startDate,
-          endDate,
-          maybeMatchingSubscription.get
-        )).toDisjunction
+        startDate,
+        endDate,
+        maybeMatchingSubscription.get,
+        fakeSubscription
+      )).toDisjunction
 
       fetchOp = SalesforceHolidayStopRequest.LookupByDateAndProductNamePrefix(sfAuth.wrapWith(JsonHttp.getWithParams))
       preProcessingFetchResult <- fetchOp(lookupDate, productName).toDisjunction
