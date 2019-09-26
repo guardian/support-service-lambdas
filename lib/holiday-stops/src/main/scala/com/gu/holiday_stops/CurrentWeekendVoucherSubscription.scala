@@ -1,5 +1,6 @@
 package com.gu.holiday_stops
 
+import enumeratum._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.StoppedPublicationDate
 
 object CurrentWeekendVoucherSubscriptionPredicates {
@@ -48,8 +49,23 @@ case class CurrentWeekendVoucherSubscription(
   invoicedPeriod: CurrentInvoicedPeriod,
   ratePlanId: String,
   productRatePlanId: String,
-  dayOfWeek: String
+  dayOfWeek: DayOfWeek
 )
+
+
+sealed trait DayOfWeek extends EnumEntry
+
+object VoucherDayOfWeek extends Enum[DayOfWeek] {
+  val values = findValues
+
+  case object Monday   extends DayOfWeek
+  case object Tuesday extends DayOfWeek
+  case object Wednesday     extends DayOfWeek
+  case object Thursday     extends DayOfWeek
+  case object Friday extends DayOfWeek
+  case object Saturday extends DayOfWeek
+  case object Sunday extends DayOfWeek
+}
 
 object CurrentWeekendVoucherSubscription {
   private def findWeekendVoucherRatePlan(
@@ -92,7 +108,7 @@ object CurrentWeekendVoucherSubscription {
         ),
         ratePlanId = currentWeekendVoucherRatePlan.id,
         productRatePlanId = currentWeekendVoucherRatePlan.productRatePlanId,
-        dayOfWeek = stoppedPublicationDate.getDayOfWeek
+        dayOfWeek = VoucherDayOfWeek.withName(stoppedPublicationDate.getDayOfWeek)
       )
     }.toRight(ZuoraHolidayWriteError(s"Failed to determine Weekend Voucher Newspaper Guardian rate plan: $subscription"))
   }
