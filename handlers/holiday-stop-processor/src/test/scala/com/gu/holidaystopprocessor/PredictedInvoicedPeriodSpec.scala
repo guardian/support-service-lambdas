@@ -3,6 +3,7 @@ package com.gu.holidaystopprocessor
 import java.time.LocalDate
 
 import com.gu.holiday_stops._
+import com.gu.holiday_stops.subscription.{CurrentInvoicedPeriod, PredictedInvoicedPeriod, RatePlan, RatePlanCharge}
 import org.scalatest._
 
 class PredictedInvoicedPeriodSpec extends FlatSpec with Matchers with OptionValues {

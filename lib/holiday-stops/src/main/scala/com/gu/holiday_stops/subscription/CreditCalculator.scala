@@ -1,8 +1,9 @@
-package com.gu.holiday_stops
+package com.gu.holiday_stops.subscription
 
 import java.time.LocalDate
 
 import cats.syntax.either._
+import com.gu.holiday_stops._
 import com.typesafe.scalalogging.LazyLogging
 import mouse.all._
 

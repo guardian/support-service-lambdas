@@ -1,6 +1,8 @@
-package com.gu.holiday_stops
+package com.gu.holiday_stops.subscription
 
 import java.time.LocalDate
+
+import com.gu.holiday_stops.HolidayStop
 
 case class Subscription(
   subscriptionNumber: String,

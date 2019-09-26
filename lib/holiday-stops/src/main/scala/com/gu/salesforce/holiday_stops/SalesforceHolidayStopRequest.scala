@@ -5,8 +5,9 @@ import java.time.format.DateTimeFormatter
 import java.util.UUID
 
 import ai.x.play.json.Jsonx
-import com.gu.holiday_stops.{ActionCalculator, Subscription}
-import com.gu.holiday_stops.CreditCalculator.PartiallyWiredCreditCalculator
+import com.gu.holiday_stops.ActionCalculator
+import com.gu.holiday_stops.subscription.CreditCalculator.PartiallyWiredCreditCalculator
+import com.gu.holiday_stops.subscription.Subscription
 import com.gu.salesforce.RecordsWrapperCaseClass
 import com.gu.salesforce.SalesforceConstants._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._

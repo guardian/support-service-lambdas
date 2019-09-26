@@ -1,7 +1,8 @@
-package com.gu.holiday_stops
+package com.gu.holiday_stops.subscription
 
-import enumeratum._
+import com.gu.holiday_stops.ZuoraHolidayWriteError
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.StoppedPublicationDate
+import enumeratum._
 
 object CurrentWeekendVoucherSubscriptionPredicates {
   def ratePlanIsWeekendVoucher(ratePlan: RatePlan, weekendVoucherProductRatePlanId: String): Boolean =

@@ -2,7 +2,8 @@ package com.gu.holidaystopprocessor
 
 import java.time.LocalDate
 
-import com.gu.holiday_stops.{CurrentSundayVoucherSubscription, Subscription, SundayVoucherHolidayStopConfig}
+import com.gu.holiday_stops.subscription.{CurrentSundayVoucherSubscription, Subscription}
+import com.gu.holiday_stops.SundayVoucherHolidayStopConfig
 import org.scalatest._
 
 import scala.io.Source

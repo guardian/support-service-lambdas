@@ -1,5 +1,6 @@
 package com.gu.holiday_stops
 
+import com.gu.holiday_stops.subscription.Subscription
 import com.softwaremill.sttp.testing.SttpBackendStub
 import com.softwaremill.sttp.{Id, Response}
 

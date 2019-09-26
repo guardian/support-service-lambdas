@@ -1,7 +1,9 @@
-package com.gu.holiday_stops
+package com.gu.holiday_stops.subscription
 
 import java.time.temporal.ChronoUnit
+
 import cats.implicits._
+import com.gu.holiday_stops.ZuoraHolidayWriteError
 
 object CurrentSundayVoucherSubscriptionPredicate {
   def ratePlanIsSundayVoucher(ratePlan: RatePlan, sundayVoucherProductRatePlanChargeId: String): Boolean =

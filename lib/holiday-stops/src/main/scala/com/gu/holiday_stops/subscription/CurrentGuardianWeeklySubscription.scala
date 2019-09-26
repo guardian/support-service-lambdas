@@ -1,7 +1,8 @@
-package com.gu.holiday_stops
+package com.gu.holiday_stops.subscription
 
 import java.time.LocalDate
 
+import com.gu.holiday_stops.ZuoraHolidayWriteError
 import com.typesafe.scalalogging.LazyLogging
 
 import scala.util.Try

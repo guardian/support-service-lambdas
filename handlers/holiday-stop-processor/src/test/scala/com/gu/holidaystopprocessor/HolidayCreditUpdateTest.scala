@@ -4,6 +4,7 @@ import java.time.LocalDate
 
 import com.gu.holiday_stops.Fixtures.guardianWeeklyConfig
 import com.gu.holiday_stops._
+import com.gu.holiday_stops.subscription._
 import org.scalatest.{EitherValues, FlatSpec, Matchers}
 
 class HolidayCreditUpdateTest extends FlatSpec with Matchers with EitherValues {
