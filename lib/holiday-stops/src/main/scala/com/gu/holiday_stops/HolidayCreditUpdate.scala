@@ -2,8 +2,6 @@ package com.gu.holiday_stops
 
 import java.time.LocalDate
 
-import com.gu.holiday_stops
-
 case class HolidayCreditUpdate(
   currentTerm: Option[Int],
   currentTermPeriodType: Option[String],

@@ -29,12 +29,6 @@ object CurrentWeekendVoucherSubscriptionPredicates {
     val expectedBillingPeriod = billingPeriods.forall(List(Some("Annual"), Some("Month"), Some("Quarter"), Some("Semi-Annual")).contains)
     allPeriodsAreTheSame && expectedBillingPeriod
   }
-
-  def totalPriceShouldBe(price: Double = 20.76)(ratePlan: RatePlan): Boolean = {
-    println(ratePlan.ratePlanCharges.map(_.price).sum)
-    println(price)
-    ratePlan.ratePlanCharges.map(_.price).sum == price
-  }
 }
 
 /**
@@ -49,22 +43,22 @@ case class CurrentWeekendVoucherSubscription(
   invoicedPeriod: CurrentInvoicedPeriod,
   ratePlanId: String,
   productRatePlanId: String,
-  dayOfWeek: DayOfWeek
+  dayOfWeek: VoucherDayOfWeek
 )
 
 
-sealed trait DayOfWeek extends EnumEntry
+sealed trait VoucherDayOfWeek extends EnumEntry
 
-object VoucherDayOfWeek extends Enum[DayOfWeek] {
+object VoucherDayOfWeek extends Enum[VoucherDayOfWeek] {
   val values = findValues
 
-  case object Monday   extends DayOfWeek
-  case object Tuesday extends DayOfWeek
-  case object Wednesday     extends DayOfWeek
-  case object Thursday     extends DayOfWeek
-  case object Friday extends DayOfWeek
-  case object Saturday extends DayOfWeek
-  case object Sunday extends DayOfWeek
+  case object Monday extends VoucherDayOfWeek
+  case object Tuesday extends VoucherDayOfWeek
+  case object Wednesday extends VoucherDayOfWeek
+  case object Thursday extends VoucherDayOfWeek
+  case object Friday extends VoucherDayOfWeek
+  case object Saturday extends VoucherDayOfWeek
+  case object Sunday extends VoucherDayOfWeek
 }
 
 object CurrentWeekendVoucherSubscription {
