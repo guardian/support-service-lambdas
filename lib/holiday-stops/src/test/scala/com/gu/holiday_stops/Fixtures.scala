@@ -251,8 +251,8 @@ object Fixtures {
       productRatePlanId = "ratePlanId",
       productRatePlanChargeId = "ratePlanChargeId"
     ),
-    GuardianWeeklyHolidayStopConfig.Prod.productRatePlanIds, // FIXME
-    GuardianWeeklyHolidayStopConfig.Prod.nForNProductRatePlanIds
+    GuardianWeeklyHolidayStopConfig.Dev.productRatePlanIds,
+    GuardianWeeklyHolidayStopConfig.Dev.nForNProductRatePlanIds
   )
 
 //  val sundayVoucherHolidayStopConfig = SundayVoucherHolidayStopConfig(HolidayCreditProduct("", ""), "")
