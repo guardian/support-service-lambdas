@@ -1,8 +1,8 @@
 package com.gu.holidaystopprocessor
 
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestsDetailChargeCode, HolidayStopRequestsDetailChargePrice, HolidayStopRequestsDetailId, ProductName, StoppedPublicationDate, SubscriptionName}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
 
-case class HolidayStopResponse(
+case class ZuoraHolidayWriteResult(
   requestId: HolidayStopRequestsDetailId,
   subscriptionName: SubscriptionName,
   productName: ProductName,

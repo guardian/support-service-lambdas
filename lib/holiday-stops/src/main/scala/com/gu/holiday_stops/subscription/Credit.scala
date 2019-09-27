@@ -7,22 +7,22 @@ import com.gu.holiday_stops._
 import com.typesafe.scalalogging.LazyLogging
 import mouse.all._
 
-object CreditCalculator extends LazyLogging {
+object Credit extends LazyLogging {
 
   type PartiallyWiredCreditCalculator = (LocalDate, Subscription) => Either[HolidayError, Double]
 
-  def calculateCredit(
+  def apply(
     config: Config,
-  )(stoppedPublicationDate: LocalDate, subscription: Subscription): Either[ZuoraHolidayWriteError, Double] =
+  )(stoppedPublicationDate: LocalDate, subscription: Subscription): Either[ZuoraHolidayError, Double] =
     guardianWeeklyCredit(config, stoppedPublicationDate)(subscription)
       .orElse(sundayVoucherCredit(config, stoppedPublicationDate)(subscription))
-      .orElse(Left(ZuoraHolidayWriteError(s"Could not calculate credit for subscription: ${subscription.subscriptionNumber}")))
+      .orElse(Left(ZuoraHolidayError(s"Could not calculate credit for subscription: ${subscription.subscriptionNumber}")))
       .<| (logger.error("Failed to calculate holiday stop credits", _))
 
-  def guardianWeeklyCredit(config: Config, stoppedPublicationDate: LocalDate)(subscription: Subscription): Either[ZuoraHolidayWriteError, Double] =
+  def guardianWeeklyCredit(config: Config, stoppedPublicationDate: LocalDate)(subscription: Subscription): Either[ZuoraHolidayError, Double] =
     CurrentGuardianWeeklySubscription(subscription, config).map(GuardianWeeklyHolidayCredit(_, stoppedPublicationDate))
 
-  def sundayVoucherCredit(config: Config, stoppedPublicationDate: LocalDate)(subscription: Subscription): Either[ZuoraHolidayWriteError, Double] =
+  def sundayVoucherCredit(config: Config, stoppedPublicationDate: LocalDate)(subscription: Subscription): Either[ZuoraHolidayError, Double] =
     CurrentSundayVoucherSubscription(subscription, config).map(SundayVoucherHolidayCredit(_, stoppedPublicationDate))
 
 }

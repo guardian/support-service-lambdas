@@ -11,20 +11,20 @@ import io.circe.generic.auto._
 import io.github.mkotsur.aws.handler.Lambda
 import io.github.mkotsur.aws.handler.Lambda._
 
-object Handler extends Lambda[Option[LocalDate], List[HolidayStopResponse]] {
+object Handler extends Lambda[Option[LocalDate], List[ZuoraHolidayWriteResult]] {
   /**
    * @param processDateOverride
    *             The date for which relevant holiday stop requests will be processed.
    *             This is to facilitate testing.
    *             In normal use it will be missing and a default value will apply instead.
    */
-  override def handle(processDateOverride: Option[LocalDate], context: Context): Either[Throwable, List[HolidayStopResponse]] = {
+  override def handle(processDateOverride: Option[LocalDate], context: Context): Either[Throwable, List[ZuoraHolidayWriteResult]] = {
     Config(GetFromS3.fetchString) match {
       case Left(msg) =>
         Left(new RuntimeException(s"Config failure: $msg"))
 
       case Right(config) =>
-        val results = HolidayStopProcess(config, processDateOverride, HttpURLConnectionBackend())
+        val results = Processor.processAllProducts(config, processDateOverride, HttpURLConnectionBackend())
         results.foreach(result => ProcessResult.log(result))
         results.flatMap(_.overallFailure.toList) match {
           case Nil =>

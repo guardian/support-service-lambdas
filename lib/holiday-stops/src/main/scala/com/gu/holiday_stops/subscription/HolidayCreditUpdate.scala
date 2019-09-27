@@ -2,7 +2,7 @@ package com.gu.holiday_stops.subscription
 
 import java.time.LocalDate
 
-import com.gu.holiday_stops.{HolidayCreditProduct, ZuoraHolidayWriteError}
+import com.gu.holiday_stops.{HolidayCreditProduct, ZuoraHolidayError}
 
 case class HolidayCreditUpdate(
   currentTerm: Option[Int],
@@ -24,7 +24,7 @@ object HolidayCreditUpdate {
     nextInvoiceStartDate: LocalDate,
     maybeExtendedTerm: Option[ExtendedTerm],
     holidayCredit: Double
-  ): Either[ZuoraHolidayWriteError, HolidayCreditUpdate] = {
+  ): Either[ZuoraHolidayError, HolidayCreditUpdate] = {
     Right(
       HolidayCreditUpdate(
         currentTerm = maybeExtendedTerm.map(_.length),

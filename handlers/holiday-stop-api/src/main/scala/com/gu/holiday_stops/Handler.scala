@@ -5,8 +5,8 @@ import java.time.LocalDate
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
-import com.gu.holiday_stops.subscription.CreditCalculator.PartiallyWiredCreditCalculator
-import com.gu.holiday_stops.subscription.{CreditCalculator, HolidayStopCredit, Subscription}
+import com.gu.holiday_stops.subscription.Credit.PartiallyWiredCreditCalculator
+import com.gu.holiday_stops.subscription.{Credit, HolidayStopCredit, Subscription}
 import com.gu.salesforce.SalesforceClient
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestId, ProductName, ProductRatePlanKey, ProductRatePlanName, ProductType, SubscriptionName}
@@ -62,7 +62,7 @@ object Handler extends Logging {
     } yield Operation.noHealthcheck(request => // checking connectivity to SF is sufficient healthcheck so no special steps required
       validateRequestAndCreateSteps(
         request,
-        CreditCalculator.calculateCredit(config),
+        Credit(config),
         getSubscriptionFromZuora(config, backend)
       )(request, sfClient))
   }

@@ -6,7 +6,6 @@ import com.gu.holiday_stops._
 import com.gu.holiday_stops.subscription.{Add, ChargeOverride, HolidayCreditUpdate, RatePlan, RatePlanCharge, Subscription}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
 import org.scalatest.{FlatSpec, Matchers}
-
 import scala.collection.mutable
 
 class SundayVoucherHolidayStopProcessTest extends FlatSpec with Matchers {
@@ -120,7 +119,7 @@ class SundayVoucherHolidayStopProcessTest extends FlatSpec with Matchers {
 
   val allZuoraHolidayStopResponses = List(
     Right(
-      HolidayStopResponse(
+      ZuoraHolidayWriteResult(
         HolidayStopRequestsDetailId("a2j3E000002Vl3OQAS"),
         SubscriptionName("A-S00051832"),
         ProductName("Newspaper Voucher"),
@@ -135,7 +134,7 @@ class SundayVoucherHolidayStopProcessTest extends FlatSpec with Matchers {
   val failedZuoraResponses = Nil
   val successfulZuoraResponses =
     Right(
-      HolidayStopResponse(
+      ZuoraHolidayWriteResult(
         HolidayStopRequestsDetailId("a2j3E000002Vl3OQAS"),
         SubscriptionName("A-S00051832"),
         ProductName("Newspaper Voucher"),
@@ -147,7 +146,7 @@ class SundayVoucherHolidayStopProcessTest extends FlatSpec with Matchers {
     )
 
   val notAlreadyActionedHolidays = List(
-    HolidayStopResponse(
+    ZuoraHolidayWriteResult(
       HolidayStopRequestsDetailId("a2j3E000002Vl3OQAS"),
       SubscriptionName("A-S00051832"),
       ProductName("Newspaper Voucher"),
@@ -178,13 +177,13 @@ class SundayVoucherHolidayStopProcessTest extends FlatSpec with Matchers {
       None,
       List(
         Add(
-          "2c92c0f96b03800b016b081fc04f1ba2",
+          Fixtures.config.holidayCreditProduct.productRatePlanId,
           expectedCustomerAcceptanceDateForHolidayStop,
           expectedCustomerAcceptanceDateForHolidayStop,
           expectedCustomerAcceptanceDateForHolidayStop,
           List(
             ChargeOverride(
-              SundayVoucherHolidayStopConfig.Dev.holidayCreditProduct.productRatePlanChargeId,
+              Fixtures.config.holidayCreditProduct.productRatePlanChargeId,
               exptedStoppedPublicationDate,
               exptedStoppedPublicationDate,
               expectedCredit
@@ -196,13 +195,12 @@ class SundayVoucherHolidayStopProcessTest extends FlatSpec with Matchers {
 
     val SubscriptionMock = subscription
 
-    SundayVoucherHolidayStopProcessor.processHolidayStops(
+    Processor.processProduct(
       Fixtures.config,
-      (_, _) => Right(holidayStopRequestsFromSalesforce),
+      Right(holidayStopRequestsFromSalesforce),
       getSubscription = _ => Right(getSubscriptionMock()),
       updateSubscription = { case (SubscriptionMock, ExpectedHolidayCreditUpdate) => Right(()) }, // here is main logic of test
-      _ => Right(()),
-      None
+      _ => Right(())
     ) should equal(processResult)
   }
 }

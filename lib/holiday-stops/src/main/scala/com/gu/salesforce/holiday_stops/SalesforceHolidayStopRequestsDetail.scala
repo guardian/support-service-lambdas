@@ -45,6 +45,18 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
    * @param ratePlanName   The name of the rateplan
    */
   case class ProductRatePlanKey(productType: ProductType, ratePlanName: ProductRatePlanName)
+  object ProductRatePlanKey {
+    def apply(product: Product): ProductRatePlanKey = {
+      product match {
+        case GuardianWeekly => ProductRatePlanKey(ProductType("Guardian Weekly"), ProductRatePlanName(""))
+        case SundayVoucher => ProductRatePlanKey(ProductType("Newspaper Voucher"), ProductRatePlanName("Sunday"))
+      }
+    }
+  }
+
+  sealed trait Product
+  case object GuardianWeekly extends Product
+  case object SundayVoucher extends Product
 
   case class HolidayStopRequestsDetailChargeCode(value: String) extends AnyVal
   implicit val formatHolidayStopRequestsDetailChargeCode = Jsonx.formatInline[HolidayStopRequestsDetailChargeCode]

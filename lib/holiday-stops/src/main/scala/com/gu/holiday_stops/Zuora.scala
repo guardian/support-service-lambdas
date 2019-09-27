@@ -10,7 +10,7 @@ object Zuora {
   def accessTokenGetResponse(
     config: ZuoraConfig,
     backend: SttpBackend[Id, Nothing]
-  ): Either[OverallFailure, AccessToken] = {
+  ): ZuoraHolidayResponse[AccessToken] = {
     implicit val b = backend
     sttp.post(uri"${config.baseUrl.stripSuffix("/v1")}/oauth/token")
       .body(
@@ -19,24 +19,24 @@ object Zuora {
         "client_secret" -> s"${config.holidayStopProcessor.oauth.clientSecret}"
       )
       .response(asJson[AccessToken])
-      .mapResponse(_.left.map(e => OverallFailure(e.message)))
+      .mapResponse(_.left.map(e => ZuoraHolidayError(e.message)))
       .send()
-      .body.left.map(e => OverallFailure(e))
+      .body.left.map(e => ZuoraHolidayError(e))
       .joinRight
   }
 
-  def subscriptionGetResponse(config: Config, accessToken: AccessToken, backend: SttpBackend[Id, Nothing])(subscriptionName: SubscriptionName): Either[ZuoraHolidayWriteError, Subscription] = {
+  def subscriptionGetResponse(config: Config, accessToken: AccessToken, backend: SttpBackend[Id, Nothing])(subscriptionName: SubscriptionName): ZuoraHolidayResponse[Subscription] = {
     implicit val b = backend
     sttp.get(uri"${config.zuoraConfig.baseUrl}/subscriptions/${subscriptionName.value}")
       .header("Authorization", s"Bearer ${accessToken.access_token}")
       .response(asJson[Subscription])
-      .mapResponse(_.left.map(e => ZuoraHolidayWriteError(e.message)))
+      .mapResponse(_.left.map(e => ZuoraHolidayError(e.message)))
       .send()
-      .body.left.map(ZuoraHolidayWriteError)
+      .body.left.map(ZuoraHolidayError)
       .joinRight
   }
 
-  def subscriptionUpdateResponse(config: Config, accessToken: AccessToken, backend: SttpBackend[Id, Nothing])(subscription: Subscription, update: HolidayCreditUpdate): Either[ZuoraHolidayWriteError, Unit] = {
+  def subscriptionUpdateResponse(config: Config, accessToken: AccessToken, backend: SttpBackend[Id, Nothing])(subscription: Subscription, update: HolidayCreditUpdate): ZuoraHolidayResponse[Unit] = {
     implicit val b = backend
     val errMsg = (reason: String) => s"Failed to update subscription '${subscription.subscriptionNumber}' with $update. Reason: $reason"
     sttp.put(uri"${config.zuoraConfig.baseUrl}/subscriptions/${subscription.subscriptionNumber}")
@@ -44,13 +44,13 @@ object Zuora {
       .body(update)
       .response(asJson[ZuoraStatusResponse])
       .mapResponse {
-        case Left(e) => Left(ZuoraHolidayWriteError(errMsg(e.message)))
+        case Left(e) => Left(ZuoraHolidayError(errMsg(e.message)))
         case Right(status) =>
           if (status.success) Right(())
-          else Left(ZuoraHolidayWriteError(errMsg(status.reasons.map(_.mkString).getOrElse(""))))
+          else Left(ZuoraHolidayError(errMsg(status.reasons.map(_.mkString).getOrElse(""))))
       }
       .send()
-      .body.left.map(reason => ZuoraHolidayWriteError(errMsg(reason)))
+      .body.left.map(reason => ZuoraHolidayError(errMsg(reason)))
       .joinRight
   }
 }

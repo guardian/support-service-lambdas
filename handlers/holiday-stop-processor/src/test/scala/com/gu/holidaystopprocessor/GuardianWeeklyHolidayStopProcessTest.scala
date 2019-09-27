@@ -2,8 +2,7 @@ package com.gu.holidaystopprocessor
 
 import java.time.LocalDate
 
-import com.gu.holiday_stops.ActionCalculator.GuardianWeeklyIssueSuspensionConstants
-import com.gu.holiday_stops.Fixtures.{guardianWeeklyConfig, mkSubscription}
+import com.gu.holiday_stops.Fixtures.mkSubscription
 import com.gu.holiday_stops._
 import com.gu.holiday_stops.subscription.{HolidayCreditUpdate, Subscription}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
@@ -27,29 +26,23 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
     None
   )
 
-  private def getHolidayStopRequestsFromSalesforce(requestsGet: Either[OverallFailure, List[HolidayStopRequestsDetail]]): (ProductName, LocalDate) => Either[OverallFailure, List[HolidayStopRequestsDetail]] =
-    (_, _) => requestsGet
-
-  private def getSubscription(subscriptionGet: Either[ZuoraHolidayWriteError, Subscription]): SubscriptionName => Either[ZuoraHolidayWriteError, Subscription] = {
-    _ => subscriptionGet
-  }
-
   private def updateSubscription(
-    subscriptionUpdate: Either[ZuoraHolidayWriteError, Unit]
-  ): (Subscription, HolidayCreditUpdate) => Either[ZuoraHolidayWriteError, Unit] = {
+    subscriptionUpdate: Either[ZuoraHolidayError, Unit]
+  ): (Subscription, HolidayCreditUpdate) => Either[ZuoraHolidayError, Unit] = {
     case (_, _) => subscriptionUpdate
   }
 
-  private def exportAmendments(amendmentExport: Either[SalesforceHolidayWriteError, Unit]): List[HolidayStopResponse] => Either[SalesforceHolidayWriteError, Unit] =
+  private def exportAmendments(amendmentExport: Either[SalesforceHolidayError, Unit]): List[ZuoraHolidayWriteResult] => Either[SalesforceHolidayError, Unit] =
     _ => amendmentExport
 
   "HolidayStopProcess" should "give correct added charge" in {
-    val response = GuardianWeeklyHolidayStopProcess.writeHolidayStopToZuora(
+    val response = Processor.writeHolidayStopToZuora(
       Fixtures.config,
-      getSubscription(Right(Fixtures.mkSubscriptionWithHolidayStops())),
+      _ => Right(Fixtures.mkSubscriptionWithHolidayStops()),
       updateSubscription(Right(()))
     )(holidayStop)
-    response.right.value shouldBe HolidayStopResponse(
+
+    response.right.value shouldBe ZuoraHolidayWriteResult(
       requestId = HolidayStopRequestsDetailId("HSR1"),
       subscriptionName = SubscriptionName("S1"),
       productName = ProductName("Gu Weekly"),
@@ -61,40 +54,40 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
   }
 
   it should "give an exception message if update fails" in {
-    val response = GuardianWeeklyHolidayStopProcess.writeHolidayStopToZuora(
+    val response = Processor.writeHolidayStopToZuora(
       Fixtures.config,
-      getSubscription(Right(subscription)),
-      updateSubscription(Left(ZuoraHolidayWriteError("update went wrong")))
+      _ => Right(subscription),
+      updateSubscription(Left(ZuoraHolidayError("update went wrong")))
     )(holidayStop)
-    response.left.value shouldBe ZuoraHolidayWriteError("update went wrong")
+    response.left.value shouldBe ZuoraHolidayError("update went wrong")
   }
 
   it should "give an exception message if getting subscription details fails" in {
-    val response = GuardianWeeklyHolidayStopProcess.writeHolidayStopToZuora(
+    val response = Processor.writeHolidayStopToZuora(
       Fixtures.config,
-      getSubscription(Left(ZuoraHolidayWriteError("get went wrong"))),
+      _ => Left(ZuoraHolidayError("get went wrong")),
       updateSubscription(Right(()))
     )(holidayStop)
-    response.left.value shouldBe ZuoraHolidayWriteError("get went wrong")
+    response.left.value shouldBe ZuoraHolidayError("get went wrong")
   }
 
   it should "give an exception message if subscription isn't auto-renewing" in {
-    val response = GuardianWeeklyHolidayStopProcess.writeHolidayStopToZuora(
+    val response = Processor.writeHolidayStopToZuora(
       Fixtures.config,
-      getSubscription(Right(subscription.copy(autoRenew = false))),
+      _ => Right(subscription.copy(autoRenew = false)),
       updateSubscription(Right(()))
     )(holidayStop)
     response.left.value shouldBe
-      ZuoraHolidayWriteError("Cannot currently process non-auto-renewing subscription")
+      ZuoraHolidayError("Cannot currently process non-auto-renewing subscription")
   }
 
   it should "just give charge added without applying an update if holiday stop has already been applied" in {
-    val response = GuardianWeeklyHolidayStopProcess.writeHolidayStopToZuora(
+    val response = Processor.writeHolidayStopToZuora(
       Fixtures.config,
-      getSubscription(Right(Fixtures.mkSubscriptionWithHolidayStops())),
-      updateSubscription(Left(ZuoraHolidayWriteError("shouldn't need to apply an update")))
+      _ => Right(Fixtures.mkSubscriptionWithHolidayStops()),
+      updateSubscription(Left(ZuoraHolidayError("shouldn't need to apply an update")))
     )(holidayStop)
-    response.right.value shouldBe HolidayStopResponse(
+    response.right.value shouldBe ZuoraHolidayWriteResult(
       requestId = HolidayStopRequestsDetailId("HSR1"),
       subscriptionName = SubscriptionName("S1"),
       productName = ProductName("Gu Weekly"),
@@ -106,28 +99,27 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
   }
 
   it should "give a failure if subscription has no added charge" in {
-    val response = GuardianWeeklyHolidayStopProcess.writeHolidayStopToZuora(
+    val response = Processor.writeHolidayStopToZuora(
       Fixtures.config,
-      getSubscription(Right(subscription)),
-      updateSubscription(Left(ZuoraHolidayWriteError("shouldn't need to apply an update")))
+      _ => Right(subscription),
+      updateSubscription(Left(ZuoraHolidayError("shouldn't need to apply an update")))
     )(holidayStop)
-    response.left.value shouldBe ZuoraHolidayWriteError("shouldn't need to apply an update")
+    response.left.value shouldBe ZuoraHolidayError("shouldn't need to apply an update")
   }
 
   "processHolidayStops" should "give correct charges added" in {
-    val responses = GuardianWeeklyHolidayStopProcess.processHolidayStops(
+    val responses = Processor.processProduct(
       Fixtures.config,
-      getHolidayStopRequestsFromSalesforce(Right(List(
+      Right(List(
         Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(Fixtures.mkHolidayStopRequest("R1", LocalDate.of(2019, 8, 2)), "C1"),
         Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(Fixtures.mkHolidayStopRequest("R2", LocalDate.of(2019, 9, 1)), "C3"),
         Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(Fixtures.mkHolidayStopRequest("R3", LocalDate.of(2019, 8, 9)), "C4")
-      ))),
-      getSubscription(Right(Fixtures.mkSubscriptionWithHolidayStops())),
+      )),
+      _ => Right(Fixtures.mkSubscriptionWithHolidayStops()),
       updateSubscription(Right(())),
-      exportAmendments(Right(())),
-      None
+      exportAmendments(Right(()))
     )
-    responses.holidayStopResults.headOption.value.right.value shouldBe HolidayStopResponse(
+    responses.holidayStopResults.headOption.value.right.value shouldBe ZuoraHolidayWriteResult(
       requestId = HolidayStopRequestsDetailId("R1"),
       subscriptionName = SubscriptionName("S1"),
       productName = ProductName("Gu Weekly"),
@@ -136,7 +128,7 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
       actualPrice = HolidayStopRequestsDetailChargePrice(-5.81),
       pubDate = StoppedPublicationDate(LocalDate.of(2019, 8, 2))
     )
-    responses.holidayStopResults.lastOption.value.right.value shouldBe HolidayStopResponse(
+    responses.holidayStopResults.lastOption.value.right.value shouldBe ZuoraHolidayWriteResult(
       requestId = HolidayStopRequestsDetailId("R3"),
       subscriptionName = SubscriptionName("S1"),
       productName = ProductName("Gu Weekly"),
@@ -148,20 +140,19 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
   }
 
   it should "only export results that haven't already been exported" in {
-    val responses = GuardianWeeklyHolidayStopProcess.processHolidayStops(
+    val responses = Processor.processProduct(
       Fixtures.config,
-      getHolidayStopRequestsFromSalesforce(Right(List(
+      Right(List(
         Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(Fixtures.mkHolidayStopRequest("R1", LocalDate.of(2019, 8, 2)), "C2"),
         Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(Fixtures.mkHolidayStopRequest("R2", LocalDate.of(2019, 9, 1)), "C5"),
         Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(Fixtures.mkHolidayStopRequest("R3", LocalDate.of(2019, 8, 9)), "C6")
-      ))),
-      getSubscription(Right(Fixtures.mkSubscriptionWithHolidayStops())),
+      )),
+      _ => Right(Fixtures.mkSubscriptionWithHolidayStops()),
       updateSubscription(Right(())),
-      exportAmendments(Right(())),
-      None
+      exportAmendments(Right(()))
     )
     responses.resultsToExport shouldBe List(
-      HolidayStopResponse(
+      ZuoraHolidayWriteResult(
         HolidayStopRequestsDetailId("R1"),
         subscriptionName = SubscriptionName("S1"),
         productName = ProductName("Gu Weekly"),
@@ -174,50 +165,16 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
   }
 
   it should "give an exception message if exporting results fails" in {
-    val responses = GuardianWeeklyHolidayStopProcess.processHolidayStops(
+    val responses = Processor.processProduct(
       Fixtures.config,
-      getHolidayStopRequestsFromSalesforce(Right(List(
+      Right(List(
         Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(Fixtures.mkHolidayStopRequest("r1"), ""),
         Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(Fixtures.mkHolidayStopRequest("r2"), ""),
         Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(Fixtures.mkHolidayStopRequest("r3"), "")
-      ))),
-      getSubscription(Right(subscription)),
+      )),
+      _ => Right(subscription),
       updateSubscription(Right(())),
-      exportAmendments(Left(SalesforceHolidayWriteError("Export failed"))),
-      None
-    )
-    responses.overallFailure.value shouldBe OverallFailure("Export failed")
-  }
-  it should "calculate process date correctly" in {
-    def verifyProcessDate(productName: ProductName, processDate: LocalDate): Either[OverallFailure, List[HolidayStopRequestsDetail]] = {
-      processDate should equal(LocalDate.now().plusDays(GuardianWeeklyIssueSuspensionConstants.processorRunLeadTimeDays))
-      Right(Nil)
-    }
-
-    val responses = GuardianWeeklyHolidayStopProcess.processHolidayStops(
-      Fixtures.config,
-      verifyProcessDate,
-      getSubscription(Right(subscription)),
-      updateSubscription(Right(())),
-      exportAmendments(Left(SalesforceHolidayWriteError("Export failed"))),
-      None
-    )
-    responses.overallFailure.value shouldBe OverallFailure("Export failed")
-  }
-  it should "use process date override" in {
-    val processOverrideDate = LocalDate.now().plusDays(123)
-    def verifyProcessDate(productName: ProductName, processDate: LocalDate): Either[OverallFailure, List[HolidayStopRequestsDetail]] = {
-      processDate should equal(processOverrideDate)
-      Right(Nil)
-    }
-
-    val responses = GuardianWeeklyHolidayStopProcess.processHolidayStops(
-      Fixtures.config,
-      verifyProcessDate,
-      getSubscription(Right(subscription)),
-      updateSubscription(Right(())),
-      exportAmendments(Left(SalesforceHolidayWriteError("Export failed"))),
-      Some(processOverrideDate)
+      exportAmendments(Left(SalesforceHolidayError("Export failed")))
     )
     responses.overallFailure.value shouldBe OverallFailure("Export failed")
   }
