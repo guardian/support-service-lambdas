@@ -7,7 +7,7 @@ import com.gu.holiday_stops._
 import com.typesafe.scalalogging.LazyLogging
 import mouse.all._
 
-object CreditCalculator extends LazyLogging {
+object Credit extends LazyLogging {
 
   type PartiallyWiredCreditCalculator = (LocalDate, Subscription) => Either[HolidayError, Double]
 

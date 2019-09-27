@@ -17,11 +17,11 @@ object HolidayStopProcess {
           CommonHolidayStopProcessor.processHolidayStops(config, Salesforce.holidayStopRequests(config.sfConfig)(SundayVoucher, processDateOverride), _, _, _),
           CommonHolidayStopProcessor.processHolidayStops(config, Salesforce.holidayStopRequests(config.sfConfig)(GuardianWeekly, processDateOverride), _, _, _)
         ) map {
-          _.apply(
-            Zuora.subscriptionGetResponse(config, zuoraAccessToken, backend),
-            Zuora.subscriptionUpdateResponse(config, zuoraAccessToken, backend),
-            Salesforce.holidayStopUpdateResponse(config.sfConfig)
-          )
-        }
+            _.apply(
+              Zuora.subscriptionGetResponse(config, zuoraAccessToken, backend),
+              Zuora.subscriptionUpdateResponse(config, zuoraAccessToken, backend),
+              Salesforce.holidayStopUpdateResponse(config.sfConfig)
+            )
+          }
     }
 }
