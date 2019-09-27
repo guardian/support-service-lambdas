@@ -30,12 +30,14 @@ object HolidayStopProcess {
       case Right(zuoraAccessToken) =>
 
         List(
-          GuardianWeeklyHolidayStopProcess.processHolidayStops(
+          CommonHolidayStopProcessor.processHolidayStops(
+            sundayVoucher,
             config,
             Salesforce.holidayStopRequests(config.sfConfig)(sundayVoucher, calculateProcessDate(sundayVoucher, processDateOverride)),
             _, _, _
           ),
-          SundayVoucherHolidayStopProcessor.processHolidayStops(
+          CommonHolidayStopProcessor.processHolidayStops(
+            sundayVoucher,
             config,
             Salesforce.holidayStopRequests(config.sfConfig)(guardianWeekly, calculateProcessDate(guardianWeekly, processDateOverride)),
             _, _, _
