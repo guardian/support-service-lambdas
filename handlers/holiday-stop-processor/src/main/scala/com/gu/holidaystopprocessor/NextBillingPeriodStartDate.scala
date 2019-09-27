@@ -4,7 +4,6 @@ import java.time.LocalDate
 import cats.syntax.either._
 import com.gu.holiday_stops.{Config, ZuoraHolidayWriteError}
 import com.gu.holiday_stops.subscription.{CurrentGuardianWeeklySubscription, CurrentSundayVoucherSubscription, Subscription}
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.StoppedPublicationDate
 
 /**
  * Holiday credit is applied to the next invoice on the first day of the next billing period.
@@ -36,29 +35,21 @@ object NextBillingPeriodStartDate {
       .orElse(Left(ZuoraHolidayWriteError(s"Failed to calculate when to apply holiday credit: $subscription")))
   }
 
-  def gwNextInvoiceDate(currentGuardianWeeklySubscription: CurrentGuardianWeeklySubscription, stoppedPublicationDate: LocalDate): LocalDate = {
-    currentGuardianWeeklySubscription.introNforNMode match {
-      case Some(introPlan) =>
-        if (stoppedPublicationDate.isBefore(currentGuardianWeeklySubscription.invoicedPeriod.startDateIncluding))
-          introPlan.invoicedPeriod.endDateExcluding
-        else
+  def guardianWeeklyBillingPeriodStartDate(config: Config, subscription: Subscription, stoppedPublicationDate: LocalDate): Either[ZuoraHolidayWriteError, LocalDate] =
+    CurrentGuardianWeeklySubscription(subscription, config).map { currentGuardianWeeklySubscription =>
+      currentGuardianWeeklySubscription.introNforNMode match {
+        case Some(introPlan) =>
+          if (stoppedPublicationDate.isBefore(currentGuardianWeeklySubscription.invoicedPeriod.startDateIncluding))
+            introPlan.invoicedPeriod.endDateExcluding
+          else
+            currentGuardianWeeklySubscription.invoicedPeriod.endDateExcluding
+
+        case None /* regular plan */ =>
           currentGuardianWeeklySubscription.invoicedPeriod.endDateExcluding
-
-      case None /* regular plan */ =>
-        currentGuardianWeeklySubscription.invoicedPeriod.endDateExcluding
+      }
     }
-  }
 
-  def sundayVoucherNextInvoiceDate(currentSundayVoucherSubscription: CurrentSundayVoucherSubscription): LocalDate = {
-    currentSundayVoucherSubscription.invoicedPeriod.endDateExcluding
-  }
-
-  def guardianWeeklyBillingPeriodStartDate(config: Config, subscription: Subscription, stoppedPublicationDate: LocalDate): Either[ZuoraHolidayWriteError, LocalDate] = {
-    CurrentGuardianWeeklySubscription(subscription, config).map(gwNextInvoiceDate(_, stoppedPublicationDate))
-  }
-
-  def sundayVoucherBillingPeriodStartDate(config: Config, subscription: Subscription): Either[ZuoraHolidayWriteError, LocalDate] = {
-    CurrentSundayVoucherSubscription(subscription, config).map(sundayVoucherNextInvoiceDate)
-  }
+  def sundayVoucherBillingPeriodStartDate(config: Config, subscription: Subscription): Either[ZuoraHolidayWriteError, LocalDate] =
+    CurrentSundayVoucherSubscription(subscription, config).map(_.invoicedPeriod.endDateExcluding)
 }
 
