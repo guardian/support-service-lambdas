@@ -2,6 +2,7 @@ package com.gu.holiday_stops
 
 import java.time.LocalDate
 
+import com.gu.holiday_stops.subscription.{RatePlan, RatePlanCharge, Subscription}
 import com.gu.salesforce.RecordsWrapperCaseClass
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.{HolidayStopRequest, HolidayStopRequestActionedCount, HolidayStopRequestEndDate, HolidayStopRequestStartDate}

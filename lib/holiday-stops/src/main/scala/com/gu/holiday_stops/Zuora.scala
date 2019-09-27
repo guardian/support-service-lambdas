@@ -1,5 +1,6 @@
 package com.gu.holiday_stops
 
+import com.gu.holiday_stops.subscription.{HolidayCreditUpdate, Subscription}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.SubscriptionName
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._

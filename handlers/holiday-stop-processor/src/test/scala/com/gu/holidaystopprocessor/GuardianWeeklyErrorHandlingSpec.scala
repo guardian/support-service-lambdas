@@ -5,6 +5,7 @@ import java.time.LocalDate
 import cats.implicits._
 import com.gu.holiday_stops.Fixtures._
 import com.gu.holiday_stops._
+import com.gu.holiday_stops.subscription.{HolidayCreditUpdate, Subscription}
 import com.gu.holidaystopprocessor.{GuardianWeeklyHolidayStopProcess, HolidayStopResponse}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestsDetail, ProductName, SubscriptionName}
 import org.scalatest._

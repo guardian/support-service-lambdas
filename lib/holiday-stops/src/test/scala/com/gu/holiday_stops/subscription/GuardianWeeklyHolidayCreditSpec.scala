@@ -1,9 +1,10 @@
-package com.gu.holiday_stops
+package com.gu.holiday_stops.subscription
 
 import java.time.LocalDate
 
+import com.gu.holiday_stops.{Fixtures, GuardianWeeklyHolidayStopConfig}
 import org.scalacheck.Prop.forAll
-import org.scalacheck._
+import org.scalacheck.{Gen, Properties}
 import org.scalatest.{EitherValues, OptionValues}
 
 object GuardianWeeklyHolidayCreditSpec extends Properties("HolidayCreditAmount") with OptionValues with EitherValues {
