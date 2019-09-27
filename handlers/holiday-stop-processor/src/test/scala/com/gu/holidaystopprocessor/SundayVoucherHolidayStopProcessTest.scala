@@ -196,13 +196,12 @@ class SundayVoucherHolidayStopProcessTest extends FlatSpec with Matchers {
 
     val SubscriptionMock = subscription
 
-    SundayVoucherHolidayStopProcessor.processHolidayStops(
+    CommonHolidayStopProcessor.processHolidayStops(
       Fixtures.config,
-      (_, _) => Right(holidayStopRequestsFromSalesforce),
+      Right(holidayStopRequestsFromSalesforce),
       getSubscription = _ => Right(getSubscriptionMock()),
       updateSubscription = { case (SubscriptionMock, ExpectedHolidayCreditUpdate) => Right(()) }, // here is main logic of test
-      _ => Right(()),
-      None
+      _ => Right(())
     ) should equal(processResult)
   }
 }

@@ -6,21 +6,20 @@ import cats.implicits._
 import com.gu.holiday_stops.Fixtures._
 import com.gu.holiday_stops._
 import com.gu.holiday_stops.subscription.{HolidayCreditUpdate, Subscription}
-import com.gu.holidaystopprocessor.{GuardianWeeklyHolidayStopProcess, HolidayStopResponse}
+import com.gu.holidaystopprocessor.{CommonHolidayStopProcessor, HolidayStopResponse}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestsDetail, ProductName, SubscriptionName}
 import org.scalatest._
 
 /**
  * Make sure short-circuiting does not happen.
  */
-class GuardianWeeklyErrorHandlingSpec extends FlatSpec with Matchers with OptionValues {
-  val getHolidayStopRequestsFromSalesforce: (ProductName, LocalDate) => Either[OverallFailure, List[HolidayStopRequestsDetail]] = {
-    (_, _) =>
-      Right(List(
-        mkHolidayStopRequestDetailsFromHolidayStopRequest(mkHolidayStopRequest("R1", LocalDate.of(2019, 8, 2), SubscriptionName("A-S1")), "C1"),
-        mkHolidayStopRequestDetailsFromHolidayStopRequest(mkHolidayStopRequest("R2", LocalDate.of(2019, 9, 1), SubscriptionName("A-S2")), "C3"),
-        mkHolidayStopRequestDetailsFromHolidayStopRequest(mkHolidayStopRequest("R3", LocalDate.of(2019, 8, 9), SubscriptionName("A-S3")), "C4")
-      ))
+class ProcessorErrorHandlingSpec extends FlatSpec with Matchers with OptionValues {
+  val holidayStopRequestsFromSalesforce: Either[OverallFailure, List[HolidayStopRequestsDetail]] = {
+    Right(List(
+      mkHolidayStopRequestDetailsFromHolidayStopRequest(mkHolidayStopRequest("R1", LocalDate.of(2019, 8, 2), SubscriptionName("A-S1")), "C1"),
+      mkHolidayStopRequestDetailsFromHolidayStopRequest(mkHolidayStopRequest("R2", LocalDate.of(2019, 9, 1), SubscriptionName("A-S2")), "C3"),
+      mkHolidayStopRequestDetailsFromHolidayStopRequest(mkHolidayStopRequest("R3", LocalDate.of(2019, 8, 9), SubscriptionName("A-S3")), "C4")
+    ))
   }
 
   val subscription: Subscription = mkSubscriptionWithHolidayStops()
@@ -40,13 +39,12 @@ class GuardianWeeklyErrorHandlingSpec extends FlatSpec with Matchers with Option
       case _ => Right(())
     }
 
-    val result = GuardianWeeklyHolidayStopProcess.processHolidayStops(
+    val result = CommonHolidayStopProcessor.processHolidayStops(
       Fixtures.config,
-      getHolidayStopRequestsFromSalesforce,
+      holidayStopRequestsFromSalesforce,
       getSubscription,
       updateSubscription,
-      writeHolidayStopsToSalesforce,
-      None
+      writeHolidayStopsToSalesforce
     )
 
     val (failedZuoraResponses, successfulZuoraResponses) = result.holidayStopResults.separate
@@ -67,13 +65,12 @@ class GuardianWeeklyErrorHandlingSpec extends FlatSpec with Matchers with Option
       case _ => Left(SalesforceHolidayWriteError("salesforce boom")) // NOTE: this line is key to the test
     }
 
-    val result = GuardianWeeklyHolidayStopProcess.processHolidayStops(
+    val result = CommonHolidayStopProcessor.processHolidayStops(
       Fixtures.config,
-      getHolidayStopRequestsFromSalesforce,
+      holidayStopRequestsFromSalesforce,
       getSubscription,
       updateSubscription,
-      writeHolidayStopsToSalesforce,
-      None
+      writeHolidayStopsToSalesforce
     )
 
     val (failedZuoraResponses, successfulZuoraResponses) = result.holidayStopResults.separate
@@ -95,13 +92,12 @@ class GuardianWeeklyErrorHandlingSpec extends FlatSpec with Matchers with Option
       case _ => Right(())
     }
 
-    val result = GuardianWeeklyHolidayStopProcess.processHolidayStops(
+    val result = CommonHolidayStopProcessor.processHolidayStops(
       Fixtures.config,
-      getHolidayStopRequestsFromSalesforce,
+      holidayStopRequestsFromSalesforce,
       getSubscription,
       updateSubscription,
-      writeHolidayStopsToSalesforce,
-      None
+      writeHolidayStopsToSalesforce
     )
 
     val (failedZuoraResponses, successfulZuoraResponses) = result.holidayStopResults.separate
@@ -122,13 +118,12 @@ class GuardianWeeklyErrorHandlingSpec extends FlatSpec with Matchers with Option
       case _ => Right(())
     }
 
-    val result = GuardianWeeklyHolidayStopProcess.processHolidayStops(
+    val result = CommonHolidayStopProcessor.processHolidayStops(
       Fixtures.config,
-      getHolidayStopRequestsFromSalesforce,
+      holidayStopRequestsFromSalesforce,
       getSubscription,
       updateSubscription,
-      writeHolidayStopsToSalesforce,
-      None
+      writeHolidayStopsToSalesforce
     )
 
     val (failedZuoraResponses, successfulZuoraResponses) = result.holidayStopResults.separate

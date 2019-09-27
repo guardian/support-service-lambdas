@@ -38,7 +38,7 @@ object CommonHolidayStopProcessor {
   /**
    * This is the main business logic for writing holiday stop to Zuora
    */
-  private def writeHolidayStopToZuora(
+  def writeHolidayStopToZuora(
     config: Config,
     getSubscription: SubscriptionName => Either[ZuoraHolidayWriteError, Subscription],
     updateSubscription: (Subscription, HolidayCreditUpdate) => Either[ZuoraHolidayWriteError, Unit]

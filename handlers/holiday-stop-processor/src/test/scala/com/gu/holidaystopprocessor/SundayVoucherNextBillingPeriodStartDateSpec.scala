@@ -2,8 +2,8 @@ package com.gu.holidaystopprocessor
 
 import java.time.LocalDate
 
-import com.gu.holiday_stops.subscription.{CurrentSundayVoucherSubscription, Subscription}
-import com.gu.holiday_stops.{Fixtures, SundayVoucherHolidayStopConfig}
+import com.gu.holiday_stops.subscription.Subscription
+import com.gu.holiday_stops.Fixtures
 import org.scalatest._
 
 import scala.io.Source
@@ -14,7 +14,6 @@ class SundayVoucherNextBillingPeriodStartDateSpec extends FlatSpec with Matchers
   "CurrentSundayVoucherSubscription" should "satisfy all the predicates" in {
     val subscriptionRaw = Source.fromResource("SundayVoucherSubscription.json").mkString
     val subscription = decode[Subscription](subscriptionRaw).getOrElse(fail("Could not decode CurrentSundayVoucherSubscription"))
-    val currentSundayVoucherSubscription = CurrentSundayVoucherSubscription(subscription, Fixtures.config).right.value
-    SundayVoucherNextBillingPeriodStartDate(currentSundayVoucherSubscription) should be(LocalDate.of(2019, 11, 6))
+    NextBillingPeriodStartDate(Fixtures.config, subscription, LocalDate.now) should be(LocalDate.of(2019, 11, 6))
   }
 }
