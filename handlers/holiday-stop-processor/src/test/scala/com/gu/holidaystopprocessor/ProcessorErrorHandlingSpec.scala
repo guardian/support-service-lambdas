@@ -6,15 +6,15 @@ import cats.implicits._
 import com.gu.holiday_stops.Fixtures._
 import com.gu.holiday_stops._
 import com.gu.holiday_stops.subscription.{HolidayCreditUpdate, Subscription}
-import com.gu.holidaystopprocessor.{ZuoraHolidayWriteResponse, Processor}
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestsDetail, ProductName, SubscriptionName}
+import com.gu.holidaystopprocessor.{ZuoraHolidayWriteResult, Processor}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestsDetail, SubscriptionName}
 import org.scalatest._
 
 /**
  * Make sure short-circuiting does not happen.
  */
 class ProcessorErrorHandlingSpec extends FlatSpec with Matchers with OptionValues {
-  val holidayStopRequestsFromSalesforce: Either[OverallFailure, List[HolidayStopRequestsDetail]] = {
+  val holidayStopRequestsFromSalesforce: SalesforceHolidayResponse[List[HolidayStopRequestsDetail]] = {
     Right(List(
       mkHolidayStopRequestDetailsFromHolidayStopRequest(mkHolidayStopRequest("R1", LocalDate.of(2019, 8, 2), SubscriptionName("A-S1")), "C1"),
       mkHolidayStopRequestDetailsFromHolidayStopRequest(mkHolidayStopRequest("R2", LocalDate.of(2019, 9, 1), SubscriptionName("A-S2")), "C3"),
@@ -24,18 +24,18 @@ class ProcessorErrorHandlingSpec extends FlatSpec with Matchers with OptionValue
 
   val subscription: Subscription = mkSubscriptionWithHolidayStops()
 
-  val updateSubscription: (Subscription, HolidayCreditUpdate) => Either[ZuoraHolidayWriteError, Unit] = {
+  val updateSubscription: (Subscription, HolidayCreditUpdate) => Either[ZuoraHolidayError, Unit] = {
     case _ => Right(())
   }
 
   "Error handling" should "not short-circuit if some writes to Zuora fail (but others succeed), and Salesforce write succeeds" in {
-    val getSubscription: SubscriptionName => Either[ZuoraHolidayWriteError, Subscription] = {
+    val getSubscription: SubscriptionName => Either[ZuoraHolidayError, Subscription] = {
       case subName if subName.value == "A-S1" => Right(subscription)
-      case subName if subName.value == "A-S2" => Left(ZuoraHolidayWriteError("zuora boom")) // NOTE: this line is key to the test
+      case subName if subName.value == "A-S2" => Left(ZuoraHolidayError("zuora boom")) // NOTE: this line is key to the test
       case subName if subName.value == "A-S3" => Right(subscription)
     }
 
-    val writeHolidayStopsToSalesforce: List[ZuoraHolidayWriteResponse] => Either[SalesforceHolidayWriteError, Unit] = {
+    val writeHolidayStopsToSalesforce: List[ZuoraHolidayWriteResult] => Either[SalesforceHolidayError, Unit] = {
       case _ => Right(())
     }
 
@@ -55,14 +55,14 @@ class ProcessorErrorHandlingSpec extends FlatSpec with Matchers with OptionValue
   }
 
   it should "not short-circuit if all Zuora writes succeeds, and Salesforce write fails" in {
-    val getSubscription: SubscriptionName => Either[ZuoraHolidayWriteError, Subscription] = {
+    val getSubscription: SubscriptionName => Either[ZuoraHolidayError, Subscription] = {
       case subName if subName.value == "A-S1" => Right(subscription)
       case subName if subName.value == "A-S2" => Right(subscription)
       case subName if subName.value == "A-S3" => Right(subscription)
     }
 
-    val writeHolidayStopsToSalesforce: List[ZuoraHolidayWriteResponse] => Either[SalesforceHolidayWriteError, Unit] = {
-      case _ => Left(SalesforceHolidayWriteError("salesforce boom")) // NOTE: this line is key to the test
+    val writeHolidayStopsToSalesforce: List[ZuoraHolidayWriteResult] => Either[SalesforceHolidayError, Unit] = {
+      case _ => Left(SalesforceHolidayError("salesforce boom")) // NOTE: this line is key to the test
     }
 
     val result = Processor.processProduct(
@@ -82,13 +82,13 @@ class ProcessorErrorHandlingSpec extends FlatSpec with Matchers with OptionValue
   }
 
   it should "collect all Zuora failures" in {
-    val getSubscription: SubscriptionName => Either[ZuoraHolidayWriteError, Subscription] = {
-      case subName if subName.value == "A-S1" => Left(ZuoraHolidayWriteError("zuora boom 1"))
-      case subName if subName.value == "A-S2" => Left(ZuoraHolidayWriteError("zuora boom 2"))
-      case subName if subName.value == "A-S3" => Left(ZuoraHolidayWriteError("zuora boom 3"))
+    val getSubscription: SubscriptionName => Either[ZuoraHolidayError, Subscription] = {
+      case subName if subName.value == "A-S1" => Left(ZuoraHolidayError("zuora boom 1"))
+      case subName if subName.value == "A-S2" => Left(ZuoraHolidayError("zuora boom 2"))
+      case subName if subName.value == "A-S3" => Left(ZuoraHolidayError("zuora boom 3"))
     }
 
-    val writeHolidayStopsToSalesforce: List[ZuoraHolidayWriteResponse] => Either[SalesforceHolidayWriteError, Unit] = {
+    val writeHolidayStopsToSalesforce: List[ZuoraHolidayWriteResult] => Either[SalesforceHolidayError, Unit] = {
       case _ => Right(())
     }
 
@@ -108,13 +108,13 @@ class ProcessorErrorHandlingSpec extends FlatSpec with Matchers with OptionValue
   }
 
   it should "be None if all Zuora writes succeed and Salesforce write succeeds" in {
-    val getSubscription: SubscriptionName => Either[ZuoraHolidayWriteError, Subscription] = {
+    val getSubscription: SubscriptionName => Either[ZuoraHolidayError, Subscription] = {
       case subName if subName.value == "A-S1" => Right(subscription)
       case subName if subName.value == "A-S2" => Right(subscription)
       case subName if subName.value == "A-S3" => Right(subscription)
     }
 
-    val writeHolidayStopsToSalesforce: List[ZuoraHolidayWriteResponse] => Either[SalesforceHolidayWriteError, Unit] = {
+    val writeHolidayStopsToSalesforce: List[ZuoraHolidayWriteResult] => Either[SalesforceHolidayError, Unit] = {
       case _ => Right(())
     }
 

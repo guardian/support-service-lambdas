@@ -1,6 +1,6 @@
 package com.gu.holiday_stops.subscription
 
-import com.gu.holiday_stops.ZuoraHolidayWriteError
+import com.gu.holiday_stops.ZuoraHolidayError
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.StoppedPublicationDate
 import enumeratum._
 
@@ -86,7 +86,7 @@ object CurrentWeekendVoucherSubscription {
     subscription: Subscription,
     weekendVoucherProductRatePlanId: String,
     stoppedPublicationDate: StoppedPublicationDate
-  ): Either[ZuoraHolidayWriteError, CurrentWeekendVoucherSubscription] = {
+  ): Either[ZuoraHolidayError, CurrentWeekendVoucherSubscription] = {
     findWeekendVoucherRatePlan(subscription, weekendVoucherProductRatePlanId, stoppedPublicationDate).flatMap { currentWeekendVoucherRatePlan =>
       for {
         rpc <- currentWeekendVoucherRatePlan.ratePlanCharges.find(_.name == stoppedPublicationDate.getDayOfWeek) // find particular RPC, Saturday or Sunday
@@ -105,7 +105,7 @@ object CurrentWeekendVoucherSubscription {
         productRatePlanId = currentWeekendVoucherRatePlan.productRatePlanId,
         dayOfWeek = VoucherDayOfWeek.withName(stoppedPublicationDate.getDayOfWeek)
       )
-    }.toRight(ZuoraHolidayWriteError(s"Failed to determine Weekend Voucher Newspaper Guardian rate plan: $subscription"))
+    }.toRight(ZuoraHolidayError(s"Failed to determine Weekend Voucher Newspaper Guardian rate plan: $subscription"))
   }
 }
 

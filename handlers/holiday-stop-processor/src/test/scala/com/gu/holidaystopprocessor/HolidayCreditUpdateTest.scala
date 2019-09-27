@@ -63,7 +63,7 @@ class HolidayCreditUpdateTest extends FlatSpec with Matchers with EitherValues {
       billingPeriod = "Quarter",
       chargedThroughDate = None
     )
-    CurrentGuardianWeeklySubscription(subscription, Fixtures.config).left.value shouldBe a[ZuoraHolidayWriteError]
+    CurrentGuardianWeeklySubscription(subscription, Fixtures.config).left.value shouldBe a[ZuoraHolidayError]
   }
 
   it should "generate an update with an extended term when charged-through date of subscription is after its term-end date" in {

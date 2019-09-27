@@ -2,7 +2,7 @@ package com.gu.holidaystopprocessor
 
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
 
-case class ZuoraHolidayWriteResponse(
+case class ZuoraHolidayWriteResult(
   requestId: HolidayStopRequestsDetailId,
   subscriptionName: SubscriptionName,
   productName: ProductName,

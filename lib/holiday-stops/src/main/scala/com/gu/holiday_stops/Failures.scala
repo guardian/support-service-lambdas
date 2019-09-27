@@ -3,8 +3,8 @@ package com.gu.holiday_stops
 sealed trait HolidayError {
   val reason: String
 }
-case class ZuoraHolidayWriteError(reason: String) extends HolidayError
-case class SalesforceHolidayWriteError(reason: String) extends HolidayError
+case class ZuoraHolidayError(reason: String) extends HolidayError
+case class SalesforceHolidayError(reason: String) extends HolidayError
 case class OverallFailure(reason: String) extends HolidayError
 
 /**
@@ -13,8 +13,8 @@ case class OverallFailure(reason: String) extends HolidayError
  */
 object OverallFailure {
   def apply(
-    zuoraFailures: List[ZuoraHolidayWriteError],
-    salesforceResult: Either[SalesforceHolidayWriteError, Unit]
+    zuoraFailures: List[ZuoraHolidayError],
+    salesforceResult: Either[SalesforceHolidayError, Unit]
   ): Option[OverallFailure] = {
 
     val zuoraError = zuoraFailures.headOption.map(e => OverallFailure(e.reason))

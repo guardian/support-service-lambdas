@@ -3,7 +3,7 @@ package com.gu.holiday_stops.subscription
 import java.time.temporal.ChronoUnit
 
 import cats.implicits._
-import com.gu.holiday_stops.{Config, ZuoraHolidayWriteError}
+import com.gu.holiday_stops.{Config, ZuoraHolidayError}
 
 object CurrentSundayVoucherSubscriptionPredicate {
   def ratePlanIsSundayVoucher(ratePlan: RatePlan, sundayVoucherProductRatePlanChargeId: String): Boolean =
@@ -58,7 +58,7 @@ object CurrentSundayVoucherSubscription {
   def apply(
     subscription: Subscription,
     config: Config
-  ): Either[ZuoraHolidayWriteError, CurrentSundayVoucherSubscription] = {
+  ): Either[ZuoraHolidayError, CurrentSundayVoucherSubscription] = {
 
     findSundayVoucherRatePlan(subscription, config.sundayVoucherConfig.productRatePlanChargeId).flatMap { currentSundayVoucherRatePlan =>
       for {
@@ -78,7 +78,7 @@ object CurrentSundayVoucherSubscription {
         productRatePlanId = currentSundayVoucherRatePlan.productRatePlanId,
         productRatePlanChargeId = currentSundayVoucherRatePlanRatePlanCharge.productRatePlanChargeId
       )
-    }.toRight(ZuoraHolidayWriteError(s"Failed to determine Sunday Voucher Newspaper Guardian rate plan: $subscription"))
+    }.toRight(ZuoraHolidayError(s"Failed to determine Sunday Voucher Newspaper Guardian rate plan: $subscription"))
 
   }
 }

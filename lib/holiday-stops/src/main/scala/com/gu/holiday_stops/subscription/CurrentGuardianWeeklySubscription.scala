@@ -2,7 +2,7 @@ package com.gu.holiday_stops.subscription
 
 import java.time.LocalDate
 
-import com.gu.holiday_stops.{Config, ZuoraHolidayWriteError}
+import com.gu.holiday_stops.{Config, ZuoraHolidayError}
 import com.typesafe.scalalogging.LazyLogging
 
 import scala.util.Try
@@ -211,7 +211,7 @@ object CurrentGuardianWeeklySubscription {
       .ratePlans
       .find(ratePlan => guardianWeeklyNForNProductRatePlanIds.contains(ratePlan.productRatePlanId))
 
-  def apply(subscription: Subscription, config: Config): Either[ZuoraHolidayWriteError, CurrentGuardianWeeklySubscription] = {
+  def apply(subscription: Subscription, config: Config): Either[ZuoraHolidayError, CurrentGuardianWeeklySubscription] = {
     val guardianWeeklyProductRatePlanIds = config.guardianWeeklyConfig.productRatePlanIds
     val gwNforNProductRatePlanIds = config.guardianWeeklyConfig.nForNProductRatePlanIds
 
@@ -260,7 +260,7 @@ object CurrentGuardianWeeklySubscription {
       }
 
     (maybeRegularGw orElse maybeGwWithIntro)
-      .toRight(ZuoraHolidayWriteError(s"Failed to determine current Guardian Weekly or Guardian Weekly+N-for-N rate plan: $subscription"))
+      .toRight(ZuoraHolidayError(s"Failed to determine current Guardian Weekly or Guardian Weekly+N-for-N rate plan: $subscription"))
 
   }
 }

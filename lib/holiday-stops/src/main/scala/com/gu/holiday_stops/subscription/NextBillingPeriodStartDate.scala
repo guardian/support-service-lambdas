@@ -2,7 +2,7 @@ package com.gu.holiday_stops.subscription
 
 import java.time.LocalDate
 import cats.syntax.either._
-import com.gu.holiday_stops.{Config, ZuoraHolidayWriteError}
+import com.gu.holiday_stops.{Config, ZuoraHolidayError}
 
 /**
  * Holiday credit is applied to the next invoice on the first day of the next billing period.
@@ -28,13 +28,13 @@ import com.gu.holiday_stops.{Config, ZuoraHolidayWriteError}
  */
 
 object NextBillingPeriodStartDate {
-  def apply(config: Config, subscription: Subscription, stoppedPublicationDate: LocalDate): Either[ZuoraHolidayWriteError, LocalDate] = {
+  def apply(config: Config, subscription: Subscription, stoppedPublicationDate: LocalDate): Either[ZuoraHolidayError, LocalDate] = {
     guardianWeeklyBillingPeriodStartDate(config, subscription, stoppedPublicationDate)
       .orElse(sundayVoucherBillingPeriodStartDate(config, subscription))
-      .orElse(Left(ZuoraHolidayWriteError(s"Failed to calculate when to apply holiday credit: $subscription")))
+      .orElse(Left(ZuoraHolidayError(s"Failed to calculate when to apply holiday credit: $subscription")))
   }
 
-  def guardianWeeklyBillingPeriodStartDate(config: Config, subscription: Subscription, stoppedPublicationDate: LocalDate): Either[ZuoraHolidayWriteError, LocalDate] =
+  def guardianWeeklyBillingPeriodStartDate(config: Config, subscription: Subscription, stoppedPublicationDate: LocalDate): Either[ZuoraHolidayError, LocalDate] =
     CurrentGuardianWeeklySubscription(subscription, config).map { currentGuardianWeeklySubscription =>
       currentGuardianWeeklySubscription.introNforNMode match {
         case Some(introPlan) =>
@@ -48,6 +48,6 @@ object NextBillingPeriodStartDate {
       }
     }
 
-  def sundayVoucherBillingPeriodStartDate(config: Config, subscription: Subscription): Either[ZuoraHolidayWriteError, LocalDate] =
+  def sundayVoucherBillingPeriodStartDate(config: Config, subscription: Subscription): Either[ZuoraHolidayError, LocalDate] =
     CurrentSundayVoucherSubscription(subscription, config).map(_.invoicedPeriod.endDateExcluding)
 }

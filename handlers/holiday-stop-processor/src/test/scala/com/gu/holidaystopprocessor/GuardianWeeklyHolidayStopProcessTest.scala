@@ -27,12 +27,12 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
   )
 
   private def updateSubscription(
-    subscriptionUpdate: Either[ZuoraHolidayWriteError, Unit]
-  ): (Subscription, HolidayCreditUpdate) => Either[ZuoraHolidayWriteError, Unit] = {
+    subscriptionUpdate: Either[ZuoraHolidayError, Unit]
+  ): (Subscription, HolidayCreditUpdate) => Either[ZuoraHolidayError, Unit] = {
     case (_, _) => subscriptionUpdate
   }
 
-  private def exportAmendments(amendmentExport: Either[SalesforceHolidayWriteError, Unit]): List[ZuoraHolidayWriteResponse] => Either[SalesforceHolidayWriteError, Unit] =
+  private def exportAmendments(amendmentExport: Either[SalesforceHolidayError, Unit]): List[ZuoraHolidayWriteResult] => Either[SalesforceHolidayError, Unit] =
     _ => amendmentExport
 
   "HolidayStopProcess" should "give correct added charge" in {
@@ -42,7 +42,7 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
       updateSubscription(Right(()))
     )(holidayStop)
 
-    response.right.value shouldBe ZuoraHolidayWriteResponse(
+    response.right.value shouldBe ZuoraHolidayWriteResult(
       requestId = HolidayStopRequestsDetailId("HSR1"),
       subscriptionName = SubscriptionName("S1"),
       productName = ProductName("Gu Weekly"),
@@ -57,18 +57,18 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
     val response = Processor.writeHolidayStopToZuora(
       Fixtures.config,
       _ => Right(subscription),
-      updateSubscription(Left(ZuoraHolidayWriteError("update went wrong")))
+      updateSubscription(Left(ZuoraHolidayError("update went wrong")))
     )(holidayStop)
-    response.left.value shouldBe ZuoraHolidayWriteError("update went wrong")
+    response.left.value shouldBe ZuoraHolidayError("update went wrong")
   }
 
   it should "give an exception message if getting subscription details fails" in {
     val response = Processor.writeHolidayStopToZuora(
       Fixtures.config,
-      _ => Left(ZuoraHolidayWriteError("get went wrong")),
+      _ => Left(ZuoraHolidayError("get went wrong")),
       updateSubscription(Right(()))
     )(holidayStop)
-    response.left.value shouldBe ZuoraHolidayWriteError("get went wrong")
+    response.left.value shouldBe ZuoraHolidayError("get went wrong")
   }
 
   it should "give an exception message if subscription isn't auto-renewing" in {
@@ -78,16 +78,16 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
       updateSubscription(Right(()))
     )(holidayStop)
     response.left.value shouldBe
-      ZuoraHolidayWriteError("Cannot currently process non-auto-renewing subscription")
+      ZuoraHolidayError("Cannot currently process non-auto-renewing subscription")
   }
 
   it should "just give charge added without applying an update if holiday stop has already been applied" in {
     val response = Processor.writeHolidayStopToZuora(
       Fixtures.config,
       _ => Right(Fixtures.mkSubscriptionWithHolidayStops()),
-      updateSubscription(Left(ZuoraHolidayWriteError("shouldn't need to apply an update")))
+      updateSubscription(Left(ZuoraHolidayError("shouldn't need to apply an update")))
     )(holidayStop)
-    response.right.value shouldBe ZuoraHolidayWriteResponse(
+    response.right.value shouldBe ZuoraHolidayWriteResult(
       requestId = HolidayStopRequestsDetailId("HSR1"),
       subscriptionName = SubscriptionName("S1"),
       productName = ProductName("Gu Weekly"),
@@ -102,9 +102,9 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
     val response = Processor.writeHolidayStopToZuora(
       Fixtures.config,
       _ => Right(subscription),
-      updateSubscription(Left(ZuoraHolidayWriteError("shouldn't need to apply an update")))
+      updateSubscription(Left(ZuoraHolidayError("shouldn't need to apply an update")))
     )(holidayStop)
-    response.left.value shouldBe ZuoraHolidayWriteError("shouldn't need to apply an update")
+    response.left.value shouldBe ZuoraHolidayError("shouldn't need to apply an update")
   }
 
   "processHolidayStops" should "give correct charges added" in {
@@ -119,7 +119,7 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
       updateSubscription(Right(())),
       exportAmendments(Right(()))
     )
-    responses.holidayStopResults.headOption.value.right.value shouldBe ZuoraHolidayWriteResponse(
+    responses.holidayStopResults.headOption.value.right.value shouldBe ZuoraHolidayWriteResult(
       requestId = HolidayStopRequestsDetailId("R1"),
       subscriptionName = SubscriptionName("S1"),
       productName = ProductName("Gu Weekly"),
@@ -128,7 +128,7 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
       actualPrice = HolidayStopRequestsDetailChargePrice(-5.81),
       pubDate = StoppedPublicationDate(LocalDate.of(2019, 8, 2))
     )
-    responses.holidayStopResults.lastOption.value.right.value shouldBe ZuoraHolidayWriteResponse(
+    responses.holidayStopResults.lastOption.value.right.value shouldBe ZuoraHolidayWriteResult(
       requestId = HolidayStopRequestsDetailId("R3"),
       subscriptionName = SubscriptionName("S1"),
       productName = ProductName("Gu Weekly"),
@@ -152,7 +152,7 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
       exportAmendments(Right(()))
     )
     responses.resultsToExport shouldBe List(
-      ZuoraHolidayWriteResponse(
+      ZuoraHolidayWriteResult(
         HolidayStopRequestsDetailId("R1"),
         subscriptionName = SubscriptionName("S1"),
         productName = ProductName("Gu Weekly"),
@@ -174,7 +174,7 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
       )),
       _ => Right(subscription),
       updateSubscription(Right(())),
-      exportAmendments(Left(SalesforceHolidayWriteError("Export failed")))
+      exportAmendments(Left(SalesforceHolidayError("Export failed")))
     )
     responses.overallFailure.value shouldBe OverallFailure("Export failed")
   }

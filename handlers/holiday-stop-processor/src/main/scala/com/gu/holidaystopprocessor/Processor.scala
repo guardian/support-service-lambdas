@@ -11,8 +11,8 @@ import com.gu.holiday_stops._
 object Processor {
   def processAllProducts(config: Config, processDateOverride: Option[LocalDate], backend: SttpBackend[Id, Nothing]): List[ProcessResult] =
     Zuora.accessTokenGetResponse(config.zuoraConfig, backend) match {
-      case Left(overallFailure) =>
-        List(ProcessResult(overallFailure))
+      case Left(err) =>
+        List(ProcessResult(Nil, Nil, Nil, Some(OverallFailure(err.reason))))
 
       case Right(zuoraAccessToken) =>
         List(
@@ -28,15 +28,15 @@ object Processor {
     }
 
   def processProduct(
-                      config: Config,
-                      getHolidayStopRequestsFromSalesforce: Either[OverallFailure, List[HolidayStopRequestsDetail]],
-                      getSubscription: SubscriptionName => Either[ZuoraHolidayWriteError, Subscription],
-                      updateSubscription: (Subscription, HolidayCreditUpdate) => Either[ZuoraHolidayWriteError, Unit],
-                      writeHolidayStopsToSalesforce: List[ZuoraHolidayWriteResponse] => Either[SalesforceHolidayWriteError, Unit],
+    config: Config,
+    getHolidayStopRequestsFromSalesforce: SalesforceHolidayResponse[List[HolidayStopRequestsDetail]],
+    getSubscription: SubscriptionName => ZuoraHolidayResponse[Subscription],
+    updateSubscription: (Subscription, HolidayCreditUpdate) => ZuoraHolidayResponse[Unit],
+    writeHolidayStopsToSalesforce: List[ZuoraHolidayWriteResult] => SalesforceHolidayResponse[Unit],
   ): ProcessResult = {
     getHolidayStopRequestsFromSalesforce match {
-      case Left(overallFailure) =>
-        ProcessResult(overallFailure)
+      case Left(sfReadError) =>
+        ProcessResult(Nil, Nil, Nil, Some(OverallFailure(sfReadError.reason)))
 
       case Right(holidayStopRequestsFromSalesforce) =>
         val holidayStops = holidayStopRequestsFromSalesforce.distinct.map(HolidayStop(_))
@@ -59,21 +59,21 @@ object Processor {
    */
   def writeHolidayStopToZuora(
     config: Config,
-    getSubscription: SubscriptionName => Either[ZuoraHolidayWriteError, Subscription],
-    updateSubscription: (Subscription, HolidayCreditUpdate) => Either[ZuoraHolidayWriteError, Unit]
-  )(stop: HolidayStop): Either[ZuoraHolidayWriteError, ZuoraHolidayWriteResponse] = {
+    getSubscription: SubscriptionName => ZuoraHolidayResponse[Subscription],
+    updateSubscription: (Subscription, HolidayCreditUpdate) => ZuoraHolidayResponse[Unit]
+  )(stop: HolidayStop): ZuoraHolidayResponse[ZuoraHolidayWriteResult] = {
     for {
       subscription <- getSubscription(stop.subscriptionName)
-      _ <- if (subscription.autoRenew) Right(()) else Left(ZuoraHolidayWriteError("Cannot currently process non-auto-renewing subscription"))
+      _ <- if (subscription.autoRenew) Right(()) else Left(ZuoraHolidayError("Cannot currently process non-auto-renewing subscription"))
       nextInvoiceStartDate <- NextBillingPeriodStartDate(config, subscription, stop.stoppedPublicationDate)
       maybeExtendedTerm = ExtendedTerm(nextInvoiceStartDate, subscription)
       holidayCredit <- Credit(config)(stop.stoppedPublicationDate, subscription)
       holidayCreditUpdate <- HolidayCreditUpdate(config.holidayCreditProduct, subscription, stop.stoppedPublicationDate, nextInvoiceStartDate, maybeExtendedTerm, holidayCredit)
       _ <- if (subscription.hasHolidayStop(stop)) Right(()) else updateSubscription(subscription, holidayCreditUpdate)
       updatedSubscription <- getSubscription(stop.subscriptionName)
-      addedCharge <- updatedSubscription.ratePlanCharge(stop).toRight(ZuoraHolidayWriteError(s"Failed to write holiday stop to Zuora: $stop"))
+      addedCharge <- updatedSubscription.ratePlanCharge(stop).toRight(ZuoraHolidayError(s"Failed to write holiday stop to Zuora: $stop"))
     } yield {
-      ZuoraHolidayWriteResponse(
+      ZuoraHolidayWriteResult(
         stop.requestId,
         stop.subscriptionName,
         stop.productName,

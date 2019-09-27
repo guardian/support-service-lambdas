@@ -119,7 +119,7 @@ class SundayVoucherHolidayStopProcessTest extends FlatSpec with Matchers {
 
   val allZuoraHolidayStopResponses = List(
     Right(
-      ZuoraHolidayWriteResponse(
+      ZuoraHolidayWriteResult(
         HolidayStopRequestsDetailId("a2j3E000002Vl3OQAS"),
         SubscriptionName("A-S00051832"),
         ProductName("Newspaper Voucher"),
@@ -134,7 +134,7 @@ class SundayVoucherHolidayStopProcessTest extends FlatSpec with Matchers {
   val failedZuoraResponses = Nil
   val successfulZuoraResponses =
     Right(
-      ZuoraHolidayWriteResponse(
+      ZuoraHolidayWriteResult(
         HolidayStopRequestsDetailId("a2j3E000002Vl3OQAS"),
         SubscriptionName("A-S00051832"),
         ProductName("Newspaper Voucher"),
@@ -146,7 +146,7 @@ class SundayVoucherHolidayStopProcessTest extends FlatSpec with Matchers {
     )
 
   val notAlreadyActionedHolidays = List(
-    ZuoraHolidayWriteResponse(
+    ZuoraHolidayWriteResult(
       HolidayStopRequestsDetailId("a2j3E000002Vl3OQAS"),
       SubscriptionName("A-S00051832"),
       ProductName("Newspaper Voucher"),
