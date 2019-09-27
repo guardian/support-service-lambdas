@@ -62,10 +62,7 @@ object Handler extends Logging {
     } yield Operation.noHealthcheck(request => // checking connectivity to SF is sufficient healthcheck so no special steps required
       validateRequestAndCreateSteps(
         request,
-        CreditCalculator.calculateCredit(
-          config,
-          config.sundayVoucherConfig.productRatePlanChargeId
-        ),
+        CreditCalculator.calculateCredit(config),
         getSubscriptionFromZuora(config, backend)
       )(request, sfClient))
   }

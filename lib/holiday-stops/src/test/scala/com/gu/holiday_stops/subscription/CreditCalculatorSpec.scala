@@ -36,9 +36,6 @@ class CreditCalculatorSpec extends FlatSpec with Matchers with EitherValues {
     val subscriptionRaw = Source.fromResource(zuoraSubscriptionData).mkString
     val subscription = decode[Subscription](subscriptionRaw).getOrElse(fail(s"Could not decode $zuoraSubscriptionData"))
 
-    CreditCalculator.calculateCredit(
-      Fixtures.config,
-      SundayVoucherHolidayStopConfig.Dev.productRatePlanChargeId
-    )(stopDate, subscription) should equal(Right(expectedCredit))
+    CreditCalculator.calculateCredit(Fixtures.config)(stopDate, subscription) should equal(Right(expectedCredit))
   }
 }
