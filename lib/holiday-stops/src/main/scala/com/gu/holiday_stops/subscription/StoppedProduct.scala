@@ -2,10 +2,10 @@ package com.gu.holiday_stops.subscription
 
 import java.time.LocalDate
 
+import acyclic.skipped
+import cats.syntax.either._
 import com.gu.holiday_stops.{ZuoraHolidayError, ZuoraHolidayResponse}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.StoppedPublicationDate
-import cats.syntax.either._
-import acyclic.skipped
 import scala.math.BigDecimal.RoundingMode
 
 /**
@@ -36,7 +36,7 @@ abstract class StoppedProduct(
   val billingPeriod: String,
   val invoicedPeriod: CurrentInvoicedPeriod,
 ) {
-  def credit: Double = {
+  private def creditAmount: Double = {
     def roundUp(d: Double): Double = BigDecimal(d).setScale(2, RoundingMode.UP).toDouble
     val recurringPrice = price
     val numPublicationsInPeriod = billingPeriodToApproxWeekCount(billingPeriod)
@@ -65,7 +65,7 @@ abstract class StoppedProduct(
    * If the holiday falls within N-for-N then credit should be applied on the first regular invoice, not the next billing
    * period of GW regular plan.
    */
-  def nextBillingPeriodStartDate: LocalDate = invoicedPeriod.endDateExcluding
+  private def nextBillingPeriodStartDate: LocalDate = invoicedPeriod.endDateExcluding
 
   private def billingPeriodToApproxWeekCount(billingPeriod: String): Int =
     billingPeriod match {
@@ -76,6 +76,8 @@ abstract class StoppedProduct(
       case "Specific_Weeks" => 6 // FIXME: When we have others than 6-for-6
       case _ => throw new RuntimeException(s"Failed to convert billing period to weeks because unknown period: $billingPeriod") // FIXME: Either
     }
+
+  def credit = HolidayStopCredit(amount = creditAmount, invoiceDate = nextBillingPeriodStartDate)
 }
 
 object StoppedProduct {

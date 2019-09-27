@@ -17,6 +17,6 @@ class SundayVoucherNextBillingPeriodStartDateSpec extends FlatSpec with Matchers
     val stoppedProduct = StoppedProduct(subscription, StoppedPublicationDate(LocalDate.parse("2019-10-27"))).right.value
     stoppedProduct shouldBe a[VoucherSubscription]
     stoppedProduct should matchPattern { case VoucherSubscription(_, _, _, _, _, VoucherDayOfWeek.Sunday) => }
-    stoppedProduct.nextBillingPeriodStartDate should be(LocalDate.of(2019, 11, 6))
+    stoppedProduct.credit.invoiceDate should be(LocalDate.of(2019, 11, 6))
   }
 }
