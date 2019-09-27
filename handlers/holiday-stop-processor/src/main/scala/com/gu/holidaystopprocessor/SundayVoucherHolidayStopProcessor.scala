@@ -11,7 +11,7 @@ import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{Holi
 object SundayVoucherHolidayStopProcessor {
 
   def processHolidayStops(
-    config: SundayVoucherHolidayStopConfig,
+    config: Config,
     getHolidayStopRequestsFromSalesforce: (ProductRatePlanKey, LocalDate) => Either[OverallFailure, List[HolidayStopRequestsDetail]],
     getSubscription: SubscriptionName => Either[ZuoraHolidayWriteError, Subscription],
     updateSubscription: (Subscription, HolidayCreditUpdate) => Either[ZuoraHolidayWriteError, Unit],
@@ -26,8 +26,7 @@ object SundayVoucherHolidayStopProcessor {
         val holidayStops = holidayStopRequestsFromSalesforce.distinct.map(HolidayStop(_))
         val alreadyActionedHolidayStops = holidayStopRequestsFromSalesforce.flatMap(_.Charge_Code__c).distinct
         val allZuoraHolidayStopResponses = holidayStops.map(writeHolidayStopToZuora(
-          config.holidayCreditProduct,
-          config.productRatePlanChargeId,
+          config,
           getSubscription,
           updateSubscription: (Subscription, HolidayCreditUpdate) => Either[ZuoraHolidayWriteError, Unit]
         ))
@@ -47,19 +46,18 @@ object SundayVoucherHolidayStopProcessor {
   }
 
   private def writeHolidayStopToZuora(
-    holidayCreditProduct: HolidayCreditProduct,
-    sundayVoucherProductRatePlanChargeId: String,
+    config: Config,
     getSubscription: SubscriptionName => Either[ZuoraHolidayWriteError, Subscription],
     updateSubscription: (Subscription, HolidayCreditUpdate) => Either[ZuoraHolidayWriteError, Unit]
   )(stop: HolidayStop): Either[ZuoraHolidayWriteError, HolidayStopResponse] = {
     for {
       subscription <- getSubscription(stop.subscriptionName)
       _ <- if (subscription.autoRenew) Right(()) else Left(ZuoraHolidayWriteError("Cannot currently process non-auto-renewing subscription"))
-      currentSundayVoucherSubscription <- CurrentSundayVoucherSubscription(subscription, sundayVoucherProductRatePlanChargeId)
+      currentSundayVoucherSubscription <- CurrentSundayVoucherSubscription(subscription, config)
       nextInvoiceStartDate = SundayVoucherNextBillingPeriodStartDate(currentSundayVoucherSubscription)
       maybeExtendedTerm = ExtendedTerm(nextInvoiceStartDate, subscription)
-      holidayCredit <- CreditCalculator.sundayVoucherCredit(sundayVoucherProductRatePlanChargeId, stop.stoppedPublicationDate)(subscription)
-      holidayCreditUpdate <- HolidayCreditUpdate(holidayCreditProduct, subscription, stop.stoppedPublicationDate, nextInvoiceStartDate, maybeExtendedTerm, holidayCredit)
+      holidayCredit <- CreditCalculator.sundayVoucherCredit(config, stop.stoppedPublicationDate)(subscription)
+      holidayCreditUpdate <- HolidayCreditUpdate(config.sundayVoucherConfig.holidayCreditProduct, subscription, stop.stoppedPublicationDate, nextInvoiceStartDate, maybeExtendedTerm, holidayCredit)
       _ <- if (subscription.hasHolidayStop(stop)) Right(()) else updateSubscription(subscription, holidayCreditUpdate)
       updatedSubscription <- getSubscription(stop.subscriptionName)
       addedCharge <- updatedSubscription.ratePlanCharge(stop).toRight(ZuoraHolidayWriteError(s"Failed to write holiday stop to Zuora: $stop"))
