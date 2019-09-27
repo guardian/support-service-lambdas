@@ -3,12 +3,10 @@ package com.gu.holidaystopprocessor
 import java.time.LocalDate
 
 import com.gu.holiday_stops._
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{ProductRatePlanKey, ProductRatePlanName, ProductType}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{GuardianWeekly, ProductRatePlanKey, ProductRatePlanName, ProductType, SundayVoucher}
 import com.softwaremill.sttp.{Id, SttpBackend}
 
 object Products {
-  val SundayVoucher = ProductRatePlanKey(ProductType("Newspaper Voucher"), ProductRatePlanName("Sunday"))
-  val GuardianWeekly = ProductRatePlanKey(ProductType("Guardian Weekly"), ProductRatePlanName(""))
 }
 
 object HolidayStopProcess {

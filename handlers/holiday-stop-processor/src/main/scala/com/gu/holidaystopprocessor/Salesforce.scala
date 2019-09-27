@@ -13,27 +13,27 @@ import scalaz.{-\/, \/-}
 import com.gu.holiday_stops.{OverallFailure, SalesforceHolidayWriteError}
 
 object Salesforce {
-  def calculateProcessDate(product: ProductRatePlanKey, processDateOverride: Option[LocalDate]) = {
+  def calculateProcessDate(product: Product, processDateOverride: Option[LocalDate]) = {
     processDateOverride.getOrElse(LocalDate.now.plusDays {
       product match {
-        case ProductRatePlanKey(ProductType("Newspaper Voucher"), ProductRatePlanName("Sunday")) => SundayVoucherIssueSuspensionConstants.processorRunLeadTimeDays
-        case ProductRatePlanKey(ProductType("Guardian Weekly"), _) => GuardianWeeklyIssueSuspensionConstants.processorRunLeadTimeDays
+        case SundayVoucher => SundayVoucherIssueSuspensionConstants.processorRunLeadTimeDays
+        case GuardianWeekly => GuardianWeeklyIssueSuspensionConstants.processorRunLeadTimeDays
       }
     })
   }
 
-  def holidayStopRequests(sfCredentials: SFAuthConfig)(productKey: ProductRatePlanKey, processDateOverride: Option[LocalDate]): Either[OverallFailure, List[HolidayStopRequestsDetail]] = {
-    val processDate = calculateProcessDate(productKey, processDateOverride)
+  def holidayStopRequests(sfCredentials: SFAuthConfig)(product: Product, processDateOverride: Option[LocalDate]): Either[OverallFailure, List[HolidayStopRequestsDetail]] = {
+    val processDate = calculateProcessDate(product, processDateOverride)
     SalesforceClient(RawEffects.response, sfCredentials).value.flatMap { sfAuth =>
       val sfGet = sfAuth.wrapWith(JsonHttp.getWithParams)
-      productKey match {
-        case ProductRatePlanKey(ProductType("Newspaper Voucher"), ProductRatePlanName("Sunday")) =>
+      product match {
+        case SundayVoucher =>
           val fetchOp = SalesforceHolidayStopRequestsDetail.FetchSundayVoucherHolidayStopRequestsDetails(sfGet)
-          fetchOp(productKey, processDate)
+          fetchOp(ProductRatePlanKey(SundayVoucher), processDate)
 
-        case ProductRatePlanKey(ProductType("Guardian Weekly"), _) =>
+        case GuardianWeekly =>
           val fetchOp = SalesforceHolidayStopRequestsDetail.LookupPendingByProductNamePrefixAndDate(sfGet)
-          fetchOp(ProductName(productKey.productType.value), processDate)
+          fetchOp(ProductName("Guardian Weekly"), processDate)
       }
     }.toDisjunction match {
       case -\/(failure) => Left(OverallFailure(failure.toString))
