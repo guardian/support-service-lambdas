@@ -50,6 +50,7 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
       product match {
         case GuardianWeekly => ProductRatePlanKey(ProductType("Guardian Weekly"), ProductRatePlanName(""))
         case SundayVoucher => ProductRatePlanKey(ProductType("Newspaper Voucher"), ProductRatePlanName("Sunday"))
+        case WeekendVoucher => ProductRatePlanKey(ProductType("Newspaper Voucher"), ProductRatePlanName("Weekend"))
       }
     }
   }
@@ -57,6 +58,7 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
   sealed trait Product
   case object GuardianWeekly extends Product
   case object SundayVoucher extends Product
+  case object WeekendVoucher extends Product
 
   case class HolidayStopRequestsDetailChargeCode(value: String) extends AnyVal
   implicit val formatHolidayStopRequestsDetailChargeCode = Jsonx.formatInline[HolidayStopRequestsDetailChargeCode]
@@ -131,7 +133,7 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
     }
   }
 
-  object FetchSundayVoucherHolidayStopRequestsDetails {
+  object FetchVoucherHolidayStopRequestsDetails {
 
     def apply(sfGet: HttpOp[RestRequestMaker.GetRequestWithParams, JsValue]): (ProductRatePlanKey, LocalDate) => ClientFailableOp[List[HolidayStopRequestsDetail]] =
       sfGet

@@ -1,8 +1,10 @@
 package com.gu.holiday_stops.subscription
 
 import java.time.LocalDate
+
 import cats.syntax.either._
 import com.gu.holiday_stops.{Config, ZuoraHolidayError}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.StoppedPublicationDate
 
 /**
  * Holiday credit is applied to the next invoice on the first day of the next billing period.
@@ -31,6 +33,7 @@ object NextBillingPeriodStartDate {
   def apply(config: Config, subscription: Subscription, stoppedPublicationDate: LocalDate): Either[ZuoraHolidayError, LocalDate] = {
     guardianWeeklyBillingPeriodStartDate(config, subscription, stoppedPublicationDate)
       .orElse(sundayVoucherBillingPeriodStartDate(config, subscription))
+      .orElse(weekendVoucherBillingPeriodStartDate(config, subscription, StoppedPublicationDate(stoppedPublicationDate)))
       .orElse(Left(ZuoraHolidayError(s"Failed to calculate when to apply holiday credit: $subscription")))
   }
 
@@ -50,4 +53,7 @@ object NextBillingPeriodStartDate {
 
   def sundayVoucherBillingPeriodStartDate(config: Config, subscription: Subscription): Either[ZuoraHolidayError, LocalDate] =
     CurrentSundayVoucherSubscription(subscription, config).map(_.invoicedPeriod.endDateExcluding)
+
+  def weekendVoucherBillingPeriodStartDate(config: Config, subscription: Subscription, stoppedPublicationDate: StoppedPublicationDate): Either[ZuoraHolidayError, LocalDate] =
+    CurrentWeekendVoucherSubscription(subscription, config, stoppedPublicationDate).map(_.invoicedPeriod.endDateExcluding)
 }

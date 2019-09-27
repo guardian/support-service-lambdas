@@ -1,6 +1,6 @@
 package com.gu.holiday_stops.subscription
 
-import com.gu.holiday_stops.ZuoraHolidayError
+import com.gu.holiday_stops.{Config, ZuoraHolidayError}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.StoppedPublicationDate
 import enumeratum._
 
@@ -84,10 +84,10 @@ object CurrentWeekendVoucherSubscription {
 
   def apply(
     subscription: Subscription,
-    weekendVoucherProductRatePlanId: String,
+    config: Config,
     stoppedPublicationDate: StoppedPublicationDate
   ): Either[ZuoraHolidayError, CurrentWeekendVoucherSubscription] = {
-    findWeekendVoucherRatePlan(subscription, weekendVoucherProductRatePlanId, stoppedPublicationDate).flatMap { currentWeekendVoucherRatePlan =>
+    findWeekendVoucherRatePlan(subscription, config.weekendVoucherConfig.productRatePlanId, stoppedPublicationDate).flatMap { currentWeekendVoucherRatePlan =>
       for {
         rpc <- currentWeekendVoucherRatePlan.ratePlanCharges.find(_.name == stoppedPublicationDate.getDayOfWeek) // find particular RPC, Saturday or Sunday
         billingPeriod <- rpc.billingPeriod

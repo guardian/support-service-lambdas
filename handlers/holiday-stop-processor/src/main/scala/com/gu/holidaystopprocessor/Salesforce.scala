@@ -27,13 +27,17 @@ object Salesforce {
     SalesforceClient(RawEffects.response, sfCredentials).value.flatMap { sfAuth =>
       val sfGet = sfAuth.wrapWith(JsonHttp.getWithParams)
       product match {
-        case SundayVoucher =>
-          val fetchOp = SalesforceHolidayStopRequestsDetail.FetchSundayVoucherHolidayStopRequestsDetails(sfGet)
-          fetchOp(ProductRatePlanKey(SundayVoucher), processDate)
-
         case GuardianWeekly =>
           val fetchOp = SalesforceHolidayStopRequestsDetail.LookupPendingByProductNamePrefixAndDate(sfGet)
           fetchOp(ProductName("Guardian Weekly"), processDate)
+
+        case SundayVoucher =>
+          val fetchOp = SalesforceHolidayStopRequestsDetail.FetchVoucherHolidayStopRequestsDetails(sfGet)
+          fetchOp(ProductRatePlanKey(SundayVoucher), processDate)
+
+        case WeekendVoucher =>
+          val fetchOp = SalesforceHolidayStopRequestsDetail.FetchVoucherHolidayStopRequestsDetails(sfGet)
+          fetchOp(ProductRatePlanKey(WeekendVoucher), processDate)
       }
     }.toDisjunction match {
       case -\/(failure) => Left(SalesforceHolidayError(failure.toString))
