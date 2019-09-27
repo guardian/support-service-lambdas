@@ -63,8 +63,7 @@ object Handler extends Logging {
       validateRequestAndCreateSteps(
         request,
         CreditCalculator.calculateCredit(
-          config.guardianWeeklyConfig.productRatePlanIds,
-          config.guardianWeeklyConfig.nForNProductRatePlanIds,
+          config,
           config.sundayVoucherConfig.productRatePlanChargeId
         ),
         getSubscriptionFromZuora(config, backend)

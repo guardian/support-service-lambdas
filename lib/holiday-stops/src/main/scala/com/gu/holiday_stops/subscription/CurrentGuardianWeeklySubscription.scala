@@ -2,7 +2,7 @@ package com.gu.holiday_stops.subscription
 
 import java.time.LocalDate
 
-import com.gu.holiday_stops.ZuoraHolidayWriteError
+import com.gu.holiday_stops.{Config, ZuoraHolidayWriteError}
 import com.typesafe.scalalogging.LazyLogging
 
 import scala.util.Try
@@ -211,11 +211,9 @@ object CurrentGuardianWeeklySubscription {
       .ratePlans
       .find(ratePlan => guardianWeeklyNForNProductRatePlanIds.contains(ratePlan.productRatePlanId))
 
-  def apply(
-    subscription: Subscription,
-    guardianWeeklyProductRatePlanIds: List[String],
-    gwNforNProductRatePlanIds: List[String]
-  ): Either[ZuoraHolidayWriteError, CurrentGuardianWeeklySubscription] = {
+  def apply(subscription: Subscription, config: Config): Either[ZuoraHolidayWriteError, CurrentGuardianWeeklySubscription] = {
+    val guardianWeeklyProductRatePlanIds = config.guardianWeeklyConfig.productRatePlanIds
+    val gwNforNProductRatePlanIds = config.guardianWeeklyConfig.nForNProductRatePlanIds
 
     val maybeRegularGw =
       findGuardianWeeklyRatePlan(subscription, guardianWeeklyProductRatePlanIds)

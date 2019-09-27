@@ -2,7 +2,7 @@ package com.gu.holiday_stops.subscription
 
 import java.time.LocalDate
 
-import com.gu.holiday_stops.{GuardianWeeklyHolidayStopConfig, SundayVoucherHolidayStopConfig}
+import com.gu.holiday_stops.{Fixtures, GuardianWeeklyHolidayStopConfig, SundayVoucherHolidayStopConfig}
 import io.circe.generic.auto._
 import io.circe.parser.decode
 import org.scalatest._
@@ -37,8 +37,7 @@ class CreditCalculatorSpec extends FlatSpec with Matchers with EitherValues {
     val subscription = decode[Subscription](subscriptionRaw).getOrElse(fail(s"Could not decode $zuoraSubscriptionData"))
 
     CreditCalculator.calculateCredit(
-      GuardianWeeklyHolidayStopConfig.Dev.productRatePlanIds,
-      GuardianWeeklyHolidayStopConfig.Dev.nForNProductRatePlanIds,
+      Fixtures.config,
       SundayVoucherHolidayStopConfig.Dev.productRatePlanChargeId
     )(stopDate, subscription) should equal(Right(expectedCredit))
   }
