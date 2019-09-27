@@ -284,8 +284,8 @@ class HandlerTest extends FlatSpec with Matchers {
                 ),
                 List(
                   IssueSpecifics(
-                    SundayVoucherIssueSuspensionConstants.firstAvailableDate(LocalDate.now()),
-                    SundayVoucherIssueSuspensionConstants.issueDayOfWeek.getValue
+                    SundayVoucherSuspensionConstants.issueConstants(0).firstAvailableDate(LocalDate.now()),
+                    SundayVoucherSuspensionConstants.issueConstants(0).issueDayOfWeek.getValue
                   )
                 ),
                 Some(SundayVoucherSuspensionConstants.annualIssueLimit)

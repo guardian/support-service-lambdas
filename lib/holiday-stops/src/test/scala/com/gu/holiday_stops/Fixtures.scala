@@ -254,6 +254,7 @@ object Fixtures {
     sfConfig = SFAuthConfig("", "", "", "", "", ""),
     HolidayCreditProduct.Dev,
     guardianWeeklyConfig = GuardianWeeklyHolidayStopConfig.Dev,
-    sundayVoucherConfig = SundayVoucherHolidayStopConfig.Dev
+    sundayVoucherConfig = SundayVoucherHolidayStopConfig.Dev,
+    weekendVoucherConfig = WeekendVoucherHolidayStopConfig.Dev
   )
 }

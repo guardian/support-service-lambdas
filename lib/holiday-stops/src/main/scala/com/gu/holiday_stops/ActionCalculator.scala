@@ -58,7 +58,7 @@ object ActionCalculator {
    */
   sealed abstract class IssueSuspensionConstants(
     val issueDayOfWeek: DayOfWeek,
-    val processorRunLeadTimeDays: Int,
+    val processorRunLeadTimeDays: Int
   ) {
     /**
      * The first date a holiday can started on for this issue when creating a stop on the supplied date
@@ -108,19 +108,31 @@ object ActionCalculator {
     }
   }
 
-  val SundayVoucherSuspensionConstants = SuspensionConstants(
-    annualIssueLimit = 6,
-    issueConstants = List(SundayVoucherIssueSuspensionConstants)
+  val SundayVoucherSuspensionConstants = voucherSuspensionConstans(
+    List(voucherIssueSuspensionConstants(DayOfWeek.SUNDAY))
   )
 
-  case object SundayVoucherIssueSuspensionConstants extends IssueSuspensionConstants(
-    issueDayOfWeek = DayOfWeek.SUNDAY,
-    processorRunLeadTimeDays = 1,
-  ) {
-    def firstAvailableDate(today: LocalDate): LocalDate = {
-      today.plus(processorRunLeadTimeDays.toLong, ChronoUnit.DAYS)
+  val WeekendVoucherSuspensionConstants = voucherSuspensionConstans(
+    List(
+      voucherIssueSuspensionConstants(DayOfWeek.SATURDAY),
+      voucherIssueSuspensionConstants(DayOfWeek.SUNDAY)
+    )
+  )
+
+  def voucherSuspensionConstans(issueSuspensionConstants: List[IssueSuspensionConstants]) =
+    SuspensionConstants(issueSuspensionConstants.size * 6, issueSuspensionConstants)
+
+  lazy val VoucherProcessorLeadTime: Int = 1
+
+  def voucherIssueSuspensionConstants(dayOfWeek: DayOfWeek): IssueSuspensionConstants =
+    new IssueSuspensionConstants(
+      issueDayOfWeek = dayOfWeek,
+      processorRunLeadTimeDays = VoucherProcessorLeadTime
+    ) {
+      def firstAvailableDate(today: LocalDate): LocalDate = {
+        today.plus(processorRunLeadTimeDays.toLong, ChronoUnit.DAYS)
+      }
     }
-  }
 
   // TODO this will likely need to change to return an array of days of week (when we support more than just GW)
   def suspensionConstantsByProduct(productNamePrefix: ProductName): SuspensionConstants =
@@ -134,6 +146,8 @@ object ActionCalculator {
   def suspensionConstantsByProductRatePlanKey(
     productKey: ProductRatePlanKey
   ): Either[ActionCalculatorError, SuspensionConstants] = productKey match {
+    case ProductRatePlanKey(ProductType("Newspaper - Voucher Book"), ProductRatePlanName("Weekend")) =>
+      Right(WeekendVoucherSuspensionConstants)
     case ProductRatePlanKey(ProductType("Newspaper - Voucher Book"), ProductRatePlanName("Sunday")) =>
       Right(SundayVoucherSuspensionConstants)
     case ProductRatePlanKey(ProductType("Guardian Weekly"), _) =>
@@ -158,15 +172,15 @@ object ActionCalculator {
   ): Either[ActionCalculatorError, ProductSpecifics] = {
     suspensionConstantsByProductRatePlanKey(productRatePlanChargeId)
       .map { constants =>
-          ProductSpecifics(
-            constants.annualIssueLimit,
-            constants.issueConstants.map { issueConstants =>
-              IssueSpecifics(
-                issueConstants.firstAvailableDate(today),
-                issueConstants.issueDayOfWeek.getValue
-              )
-            }
-          )
+        ProductSpecifics(
+          constants.annualIssueLimit,
+          constants.issueConstants.map { issueConstants =>
+            IssueSpecifics(
+              issueConstants.firstAvailableDate(today),
+              issueConstants.issueDayOfWeek.getValue
+            )
+          }
+        )
       }
   }
 

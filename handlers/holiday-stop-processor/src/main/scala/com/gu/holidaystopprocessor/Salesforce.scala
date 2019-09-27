@@ -3,20 +3,20 @@ package com.gu.holidaystopprocessor
 import java.time.LocalDate
 
 import com.gu.effects.RawEffects
-import com.gu.holiday_stops.ActionCalculator.{GuardianWeeklyIssueSuspensionConstants, SundayVoucherIssueSuspensionConstants}
+import com.gu.holiday_stops.ActionCalculator.GuardianWeeklyIssueSuspensionConstants
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.SalesforceClient
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{ProductRatePlanKey, _}
 import com.gu.util.resthttp.JsonHttp
 import scalaz.{-\/, \/-}
-import com.gu.holiday_stops.{SalesforceHolidayError, SalesforceHolidayResponse}
+import com.gu.holiday_stops.{ActionCalculator, SalesforceHolidayError, SalesforceHolidayResponse}
 
 object Salesforce {
   def calculateProcessDate(product: Product, processDateOverride: Option[LocalDate]) = {
     processDateOverride.getOrElse(LocalDate.now.plusDays {
       product match {
-        case SundayVoucher => SundayVoucherIssueSuspensionConstants.processorRunLeadTimeDays.toLong
+        case SundayVoucher => ActionCalculator.VoucherProcessorLeadTime
         case GuardianWeekly => GuardianWeeklyIssueSuspensionConstants.processorRunLeadTimeDays.toLong
       }
     })

@@ -45,7 +45,7 @@ case class CurrentWeekendVoucherSubscription(
   ratePlanId: String,
   productRatePlanId: String,
   dayOfWeek: VoucherDayOfWeek
-)
+) extends CurrentVoucherSubscription
 
 
 sealed trait VoucherDayOfWeek extends EnumEntry
