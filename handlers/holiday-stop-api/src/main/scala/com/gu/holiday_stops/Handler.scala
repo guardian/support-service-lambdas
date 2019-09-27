@@ -6,7 +6,7 @@ import java.time.LocalDate
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.holiday_stops.subscription.CreditCalculator.PartiallyWiredCreditCalculator
-import com.gu.holiday_stops.subscription.{CreditCalculator, Subscription}
+import com.gu.holiday_stops.subscription.{CreditCalculator, HolidayStopCredit, Subscription}
 import com.gu.salesforce.SalesforceClient
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestId, ProductName, ProductRatePlanKey, ProductRatePlanName, ProductType, SubscriptionName}
@@ -62,12 +62,7 @@ object Handler extends Logging {
     } yield Operation.noHealthcheck(request => // checking connectivity to SF is sufficient healthcheck so no special steps required
       validateRequestAndCreateSteps(
         request,
-        CreditCalculator.calculateCredit(
-          config.guardianWeeklyConfig.productRatePlanIds,
-          config.guardianWeeklyConfig.nForNProductRatePlanIds,
-          config.sundayVoucherConfig.productRatePlanChargeId,
-          config.weekendVoucherConfig.productRatePlanId
-        ),
+        CreditCalculator.calculateCredit(config),
         getSubscriptionFromZuora(config, backend)
       )(request, sfClient))
   }
@@ -174,8 +169,13 @@ object Handler extends Logging {
       queryParams <- req.queryParamsAsCaseClass[PotentialHolidayStopsQueryParams]()
       potentialHolidayStopDates <- getPublicationDatesToBeStopped(productNamePrefix, queryParams)
       optionalSubscription <- getSubscriptionIfRequired(getSubscription, pathParams, queryParams)
-      potentialHolidayStops = potentialHolidayStopDates.map { stoppedPublicationDate => // unfortunately necessary due to GW N-for-N requiring stoppedPublicationDate to calculate correct credit estimation
-        PotentialHolidayStop(stoppedPublicationDate, optionalSubscription.flatMap(creditCalculator(stoppedPublicationDate, _).toOption))
+      potentialHolidayStops = potentialHolidayStopDates.map { stoppedPublicationDate =>
+        // unfortunately necessary due to GW N-for-N requiring stoppedPublicationDate to calculate correct credit estimation
+        PotentialHolidayStop(
+          stoppedPublicationDate,
+          optionalSubscription.flatMap(sub =>
+            creditCalculator(stoppedPublicationDate, sub).toOption.map(HolidayStopCredit(_)))
+        )
       }
     } yield ApiGatewayResponse("200", PotentialHolidayStopsResponse(potentialHolidayStops))).apiResponse
   }

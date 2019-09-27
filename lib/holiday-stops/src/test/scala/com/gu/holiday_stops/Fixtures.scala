@@ -239,23 +239,21 @@ object Fixtures {
     estimatedCharge = None
   )
 
+  // FIXME remove this in favour of Fixture.config
   val guardianWeeklyConfig = GuardianWeeklyHolidayStopConfig(
     HolidayCreditProduct(
       productRatePlanId = "ratePlanId",
       productRatePlanChargeId = "ratePlanChargeId"
     ),
-    GuardianWeeklyHolidayStopConfig.Prod.productRatePlanIds, // FIXME
-    GuardianWeeklyHolidayStopConfig.Prod.nForNProductRatePlanIds
+    GuardianWeeklyHolidayStopConfig.Dev.productRatePlanIds,
+    GuardianWeeklyHolidayStopConfig.Dev.nForNProductRatePlanIds
   )
-
-//  val sundayVoucherHolidayStopConfig = SundayVoucherHolidayStopConfig(HolidayCreditProduct("", ""), "")
-  val sundayVoucherHolidayStopConfig = SundayVoucherHolidayStopConfig.Dev
 
   val config = Config(
     zuoraConfig = ZuoraConfig(baseUrl = "", holidayStopProcessor = HolidayStopProcessor(Oauth(clientId = "", clientSecret = ""))),
     sfConfig = SFAuthConfig("", "", "", "", "", ""),
-    guardianWeeklyConfig = guardianWeeklyConfig,
-    sundayVoucherConfig = sundayVoucherHolidayStopConfig,
+    guardianWeeklyConfig = GuardianWeeklyHolidayStopConfig.Dev,
+    sundayVoucherConfig = SundayVoucherHolidayStopConfig.Dev,
     weekendVoucherConfig = WeekendVoucherHolidayStopConfig.Dev
   )
 }

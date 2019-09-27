@@ -13,38 +13,24 @@ object CreditCalculator extends LazyLogging {
   type PartiallyWiredCreditCalculator = (LocalDate, Subscription) => Either[HolidayError, Double]
 
   def calculateCredit(
-    guardianWeeklyProductRatePlanIds: List[String],
-    gwNforNProductRatePlanIds: List[String],
-    sundayVoucherRatePlanId: String,
-    weekendVoucherRatePlanId: String
-  )(stoppedPublicationDate: LocalDate, subscription: Subscription): Either[ZuoraHolidayWriteError, Double] = {
-    guardianWeeklyCredit(
-      guardianWeeklyProductRatePlanIds,
-      gwNforNProductRatePlanIds,
-      stoppedPublicationDate
-    )(subscription) orElse {
-      sundayVoucherCredit(
-        sundayVoucherRatePlanId,
-        stoppedPublicationDate
-      )(subscription)
-    } orElse {
-      weekendVoucherCredit(
-        weekendVoucherRatePlanId,
-        stoppedPublicationDate
-      )(subscription)
-    } orElse {
-      Left(ZuoraHolidayWriteError(s"Could not calculate credit for subscription: ${subscription.subscriptionNumber}"))
-    }
-  } <| (logger.error("Failed to calculate holiday stop credits", _))
+    config: Config,
+  )(stoppedPublicationDate: LocalDate, subscription: Subscription): Either[ZuoraHolidayWriteError, Double] =
+    guardianWeeklyCredit(config, stoppedPublicationDate)(subscription)
+      .orElse(sundayVoucherCredit(config, stoppedPublicationDate)(subscription))
+      .orElse(Left(ZuoraHolidayWriteError(s"Could not calculate credit for subscription: ${subscription.subscriptionNumber}")))
+      .orElse {
+        weekendVoucherCredit(
+          config.weekendVoucherConfig.productRatePlanId,
+          stoppedPublicationDate
+        )(subscription)
+      }
+      .<| (logger.error("Failed to calculate holiday stop credits", _))
 
-  def guardianWeeklyCredit(guardianWeeklyProductRatePlanIds: List[String], gwNforNProductRatePlanIds: List[String], stoppedPublicationDate: LocalDate)(subscription: Subscription): Either[ZuoraHolidayWriteError, Double] =
-    CurrentGuardianWeeklySubscription(subscription, guardianWeeklyProductRatePlanIds, gwNforNProductRatePlanIds)
-      .map(GuardianWeeklyHolidayCredit(_, stoppedPublicationDate))
+  def guardianWeeklyCredit(config: Config, stoppedPublicationDate: LocalDate)(subscription: Subscription): Either[ZuoraHolidayWriteError, Double] =
+    CurrentGuardianWeeklySubscription(subscription, config).map(GuardianWeeklyHolidayCredit(_, stoppedPublicationDate))
 
-  def sundayVoucherCredit(sundayVoucherRatePlanId: String, stoppedPublicationDate: LocalDate)(subscription: Subscription) = {
-    CurrentSundayVoucherSubscription(subscription, sundayVoucherRatePlanId)
-      .map(VoucherHolidayCredit(_))
-  }
+  def sundayVoucherCredit(config: Config, stoppedPublicationDate: LocalDate)(subscription: Subscription): Either[ZuoraHolidayWriteError, Double] =
+    CurrentSundayVoucherSubscription(subscription, config).map(VoucherHolidayCredit(_))
 
   def weekendVoucherCredit(sundayVoucherRatePlanId: String, stoppedPublicationDate: LocalDate)(subscription: Subscription) = {
     CurrentWeekendVoucherSubscription(
