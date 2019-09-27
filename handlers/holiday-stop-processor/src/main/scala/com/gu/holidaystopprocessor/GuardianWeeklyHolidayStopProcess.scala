@@ -11,13 +11,12 @@ import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{Holi
 object GuardianWeeklyHolidayStopProcess {
   def processHolidayStops(
     config: Config,
-    getHolidayStopRequestsFromSalesforce: (ProductName, LocalDate) => Either[OverallFailure, List[HolidayStopRequestsDetail]],
+    getHolidayStopRequestsFromSalesforce: Either[OverallFailure, List[HolidayStopRequestsDetail]],
     getSubscription: SubscriptionName => Either[ZuoraHolidayWriteError, Subscription],
     updateSubscription: (Subscription, HolidayCreditUpdate) => Either[ZuoraHolidayWriteError, Unit],
     writeHolidayStopsToSalesforce: List[HolidayStopResponse] => Either[SalesforceHolidayWriteError, Unit],
-    processDateOverride: Option[LocalDate]
   ): ProcessResult = {
-    getHolidayStopRequestsFromSalesforce(ProductName("Guardian Weekly"), calculateProcessDate(processDateOverride)) match {
+    getHolidayStopRequestsFromSalesforce match {
       case Left(overallFailure) =>
         ProcessResult(overallFailure)
 
@@ -35,10 +34,6 @@ object GuardianWeeklyHolidayStopProcess {
           OverallFailure(failedZuoraResponses, salesforceExportResult)
         )
     }
-  }
-
-  private def calculateProcessDate(processDateOverride: Option[LocalDate]) = {
-    processDateOverride.getOrElse(LocalDate.now.plusDays(GuardianWeeklyIssueSuspensionConstants.processorRunLeadTimeDays))
   }
 
   /**

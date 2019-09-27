@@ -12,23 +12,18 @@ import scalaz.{-\/, \/-}
 import com.gu.holiday_stops.{OverallFailure, SalesforceHolidayWriteError}
 
 object Salesforce {
-
-  def holidayStopRequests(sfCredentials: SFAuthConfig)(productNamePrefix: ProductName, processDate: LocalDate): Either[OverallFailure, List[HolidayStopRequestsDetail]] = {
+  def holidayStopRequests(sfCredentials: SFAuthConfig)(productKey: ProductRatePlanKey, processDate: LocalDate): Either[OverallFailure, List[HolidayStopRequestsDetail]] = {
     SalesforceClient(RawEffects.response, sfCredentials).value.flatMap { sfAuth =>
       val sfGet = sfAuth.wrapWith(JsonHttp.getWithParams)
-      val fetchOp = SalesforceHolidayStopRequestsDetail.LookupPendingByProductNamePrefixAndDate(sfGet)
-      fetchOp(productNamePrefix, processDate)
-    }.toDisjunction match {
-      case -\/(failure) => Left(OverallFailure(failure.toString))
-      case \/-(details) => Right(details)
-    }
-  }
+      productKey match {
+        case ProductRatePlanKey(ProductType("Newspaper Voucher"), ProductRatePlanName("Sunday")) =>
+          val fetchOp = SalesforceHolidayStopRequestsDetail.FetchSundayVoucherHolidayStopRequestsDetails(sfGet)
+          fetchOp(productKey, processDate)
 
-  def sundayVoucherHolidayStopRequests(sfCredentials: SFAuthConfig)(productKey: ProductRatePlanKey, processDate: LocalDate): Either[OverallFailure, List[HolidayStopRequestsDetail]] = {
-    SalesforceClient(RawEffects.response, sfCredentials).value.flatMap { sfAuth =>
-      val sfGet = sfAuth.wrapWith(JsonHttp.getWithParams)
-      val fetchOp = SalesforceHolidayStopRequestsDetail.FetchSundayVoucherHolidayStopRequestsDetails(sfGet)
-      fetchOp(productKey, processDate)
+        case ProductRatePlanKey(ProductType("Guardian Weekly"), _) =>
+          val fetchOp = SalesforceHolidayStopRequestsDetail.LookupPendingByProductNamePrefixAndDate(sfGet)
+          fetchOp(ProductName(productKey.productType.value), processDate)
+      }
     }.toDisjunction match {
       case -\/(failure) => Left(OverallFailure(failure.toString))
       case \/-(details) => Right(details)
