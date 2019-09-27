@@ -51,13 +51,12 @@ object GuardianWeeklyHolidayStopProcess {
   )(stop: HolidayStop): Either[ZuoraHolidayWriteError, HolidayStopResponse] =
     for {
       subscription <- getSubscription(stop.subscriptionName)
-      holidayCreditProduct = config.guardianWeeklyConfig.holidayCreditProduct
       _ <- if (subscription.autoRenew) Right(()) else Left(ZuoraHolidayWriteError("Cannot currently process non-auto-renewing subscription"))
       currentGuardianWeeklySubscription <- CurrentGuardianWeeklySubscription(subscription, config)
       nextInvoiceStartDate = NextBillingPeriodStartDate(currentGuardianWeeklySubscription, stop.stoppedPublicationDate)
       maybeExtendedTerm = ExtendedTerm(nextInvoiceStartDate, subscription)
       holidayCredit <- CreditCalculator.guardianWeeklyCredit(config, stop.stoppedPublicationDate)(subscription)
-      holidayCreditUpdate <- HolidayCreditUpdate(holidayCreditProduct, subscription, stop.stoppedPublicationDate, nextInvoiceStartDate, maybeExtendedTerm, holidayCredit)
+      holidayCreditUpdate <- HolidayCreditUpdate(config.guardianWeeklyConfig.holidayCreditProduct, subscription, stop.stoppedPublicationDate, nextInvoiceStartDate, maybeExtendedTerm, holidayCredit)
       _ <- if (subscription.hasHolidayStop(stop)) Right(()) else updateSubscription(subscription, holidayCreditUpdate)
       updatedSubscription <- getSubscription(stop.subscriptionName)
       addedCharge <- updatedSubscription.ratePlanCharge(stop).toRight(ZuoraHolidayWriteError("Failed to add charge to subscription"))

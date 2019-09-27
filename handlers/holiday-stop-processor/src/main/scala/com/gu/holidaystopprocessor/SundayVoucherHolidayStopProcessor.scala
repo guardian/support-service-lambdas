@@ -9,7 +9,6 @@ import com.gu.holiday_stops.subscription._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestsDetail, HolidayStopRequestsDetailChargeCode, HolidayStopRequestsDetailChargePrice, ProductRatePlanKey, ProductRatePlanName, ProductType, StoppedPublicationDate, SubscriptionName}
 
 object SundayVoucherHolidayStopProcessor {
-
   def processHolidayStops(
     config: Config,
     getHolidayStopRequestsFromSalesforce: (ProductRatePlanKey, LocalDate) => Either[OverallFailure, List[HolidayStopRequestsDetail]],
@@ -25,11 +24,7 @@ object SundayVoucherHolidayStopProcessor {
       case Right(holidayStopRequestsFromSalesforce) =>
         val holidayStops = holidayStopRequestsFromSalesforce.distinct.map(HolidayStop(_))
         val alreadyActionedHolidayStops = holidayStopRequestsFromSalesforce.flatMap(_.Charge_Code__c).distinct
-        val allZuoraHolidayStopResponses = holidayStops.map(writeHolidayStopToZuora(
-          config,
-          getSubscription,
-          updateSubscription: (Subscription, HolidayCreditUpdate) => Either[ZuoraHolidayWriteError, Unit]
-        ))
+        val allZuoraHolidayStopResponses = holidayStops.map(writeHolidayStopToZuora(config, getSubscription, updateSubscription))
         val (failedZuoraResponses, successfulZuoraResponses) = allZuoraHolidayStopResponses.separate
         val notAlreadyActionedHolidays = successfulZuoraResponses.filterNot(v => alreadyActionedHolidayStops.contains(v.chargeCode))
         val salesforceExportResult = writeHolidayStopsToSalesforce(notAlreadyActionedHolidays)
@@ -41,10 +36,14 @@ object SundayVoucherHolidayStopProcessor {
         )
     }
   }
+
   private def calculateProcessDate(processDateOverride: Option[LocalDate]) = {
     processDateOverride.getOrElse(LocalDate.now.plusDays(SundayVoucherIssueSuspensionConstants.processorRunLeadTimeDays))
   }
 
+  /**
+   * This is the main business logic for writing holiday stop to Zuora
+   */
   private def writeHolidayStopToZuora(
     config: Config,
     getSubscription: SubscriptionName => Either[ZuoraHolidayWriteError, Subscription],
@@ -62,8 +61,6 @@ object SundayVoucherHolidayStopProcessor {
       updatedSubscription <- getSubscription(stop.subscriptionName)
       addedCharge <- updatedSubscription.ratePlanCharge(stop).toRight(ZuoraHolidayWriteError(s"Failed to write holiday stop to Zuora: $stop"))
     } yield {
-      println("woohoo")
-      println(holidayCreditUpdate)
       HolidayStopResponse(
         stop.requestId,
         stop.subscriptionName,
