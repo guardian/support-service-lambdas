@@ -11,7 +11,7 @@ object CreditCalculator extends LazyLogging {
 
   type PartiallyWiredCreditCalculator = (LocalDate, Subscription) => Either[HolidayError, Double]
 
-  def calculateCredit(
+  def apply(
     config: Config,
   )(stoppedPublicationDate: LocalDate, subscription: Subscription): Either[ZuoraHolidayWriteError, Double] =
     guardianWeeklyCredit(config, stoppedPublicationDate)(subscription)

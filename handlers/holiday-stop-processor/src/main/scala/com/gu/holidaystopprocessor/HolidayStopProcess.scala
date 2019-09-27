@@ -13,13 +13,12 @@ object HolidayStopProcess {
   val guardianWeekly = ProductRatePlanKey(ProductType("Guardian Weekly"), ProductRatePlanName(""))
 
   def calculateProcessDate(product: ProductRatePlanKey, processDateOverride: Option[LocalDate]) = {
-    product match {
-      case ProductRatePlanKey(ProductType("Newspaper Voucher"), ProductRatePlanName("Sunday")) =>
-        processDateOverride.getOrElse(LocalDate.now.plusDays(SundayVoucherIssueSuspensionConstants.processorRunLeadTimeDays))
-
-      case ProductRatePlanKey(ProductType("Guardian Weekly"), _) =>
-        processDateOverride.getOrElse(LocalDate.now.plusDays(GuardianWeeklyIssueSuspensionConstants.processorRunLeadTimeDays))
-    }
+    processDateOverride.getOrElse(LocalDate.now.plusDays {
+      product match {
+        case ProductRatePlanKey(ProductType("Newspaper Voucher"), ProductRatePlanName("Sunday")) => SundayVoucherIssueSuspensionConstants.processorRunLeadTimeDays
+        case ProductRatePlanKey(ProductType("Guardian Weekly"), _) => GuardianWeeklyIssueSuspensionConstants.processorRunLeadTimeDays
+      }
+    })
   }
 
   def apply(config: Config, processDateOverride: Option[LocalDate], backend: SttpBackend[Id, Nothing]): List[ProcessResult] =
