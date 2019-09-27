@@ -2,7 +2,7 @@ package com.gu.holidaystopprocessor
 
 import java.time.LocalDate
 
-import com.gu.holiday_stops.subscription.Subscription
+import com.gu.holiday_stops.subscription.{NextBillingPeriodStartDate, Subscription}
 import com.gu.holiday_stops.Fixtures
 import org.scalatest._
 

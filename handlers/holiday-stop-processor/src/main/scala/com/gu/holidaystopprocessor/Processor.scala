@@ -1,9 +1,10 @@
 package com.gu.holidaystopprocessor
 
-import com.gu.holiday_stops.subscription.{Credit, ExtendedTerm, HolidayCreditUpdate, Subscription}
+import com.gu.holiday_stops.subscription.{Credit, ExtendedTerm, HolidayCreditUpdate, NextBillingPeriodStartDate, Subscription}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{GuardianWeekly, HolidayStopRequestsDetail, HolidayStopRequestsDetailChargeCode, HolidayStopRequestsDetailChargePrice, StoppedPublicationDate, SubscriptionName, SundayVoucher}
 import com.softwaremill.sttp.{Id, SttpBackend}
 import java.time.LocalDate
+
 import cats.implicits._
 import com.gu.holiday_stops._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestsDetail, HolidayStopRequestsDetailChargeCode, HolidayStopRequestsDetailChargePrice, ProductRatePlanKey, ProductRatePlanName, ProductType, StoppedPublicationDate, SubscriptionName}

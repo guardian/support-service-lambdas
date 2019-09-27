@@ -1,9 +1,8 @@
-package com.gu.holidaystopprocessor
+package com.gu.holiday_stops.subscription
 
 import java.time.LocalDate
 import cats.syntax.either._
 import com.gu.holiday_stops.{Config, ZuoraHolidayWriteError}
-import com.gu.holiday_stops.subscription.{CurrentGuardianWeeklySubscription, CurrentSundayVoucherSubscription, Subscription}
 
 /**
  * Holiday credit is applied to the next invoice on the first day of the next billing period.
@@ -52,4 +51,3 @@ object NextBillingPeriodStartDate {
   def sundayVoucherBillingPeriodStartDate(config: Config, subscription: Subscription): Either[ZuoraHolidayWriteError, LocalDate] =
     CurrentSundayVoucherSubscription(subscription, config).map(_.invoicedPeriod.endDateExcluding)
 }
-
