@@ -1,13 +1,11 @@
 package com.gu.holidaystopprocessor
 
 import com.gu.holiday_stops.subscription.{Credit, ExtendedTerm, HolidayCreditUpdate, NextBillingPeriodStartDate, Subscription}
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{GuardianWeekly, HolidayStopRequestsDetail, HolidayStopRequestsDetailChargeCode, HolidayStopRequestsDetailChargePrice, StoppedPublicationDate, SubscriptionName, SundayVoucher}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
 import com.softwaremill.sttp.{Id, SttpBackend}
 import java.time.LocalDate
-
 import cats.implicits._
 import com.gu.holiday_stops._
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestsDetail, HolidayStopRequestsDetailChargeCode, HolidayStopRequestsDetailChargePrice, ProductRatePlanKey, ProductRatePlanName, ProductType, StoppedPublicationDate, SubscriptionName}
 
 
 object Processor {
@@ -30,11 +28,11 @@ object Processor {
     }
 
   def processProduct(
-    config: Config,
-    getHolidayStopRequestsFromSalesforce: Either[OverallFailure, List[HolidayStopRequestsDetail]],
-    getSubscription: SubscriptionName => Either[ZuoraHolidayWriteError, Subscription],
-    updateSubscription: (Subscription, HolidayCreditUpdate) => Either[ZuoraHolidayWriteError, Unit],
-    writeHolidayStopsToSalesforce: List[HolidayStopResponse] => Either[SalesforceHolidayWriteError, Unit],
+                      config: Config,
+                      getHolidayStopRequestsFromSalesforce: Either[OverallFailure, List[HolidayStopRequestsDetail]],
+                      getSubscription: SubscriptionName => Either[ZuoraHolidayWriteError, Subscription],
+                      updateSubscription: (Subscription, HolidayCreditUpdate) => Either[ZuoraHolidayWriteError, Unit],
+                      writeHolidayStopsToSalesforce: List[ZuoraHolidayWriteResponse] => Either[SalesforceHolidayWriteError, Unit],
   ): ProcessResult = {
     getHolidayStopRequestsFromSalesforce match {
       case Left(overallFailure) =>
@@ -63,7 +61,7 @@ object Processor {
     config: Config,
     getSubscription: SubscriptionName => Either[ZuoraHolidayWriteError, Subscription],
     updateSubscription: (Subscription, HolidayCreditUpdate) => Either[ZuoraHolidayWriteError, Unit]
-  )(stop: HolidayStop): Either[ZuoraHolidayWriteError, HolidayStopResponse] = {
+  )(stop: HolidayStop): Either[ZuoraHolidayWriteError, ZuoraHolidayWriteResponse] = {
     for {
       subscription <- getSubscription(stop.subscriptionName)
       _ <- if (subscription.autoRenew) Right(()) else Left(ZuoraHolidayWriteError("Cannot currently process non-auto-renewing subscription"))
@@ -75,7 +73,7 @@ object Processor {
       updatedSubscription <- getSubscription(stop.subscriptionName)
       addedCharge <- updatedSubscription.ratePlanCharge(stop).toRight(ZuoraHolidayWriteError(s"Failed to write holiday stop to Zuora: $stop"))
     } yield {
-      HolidayStopResponse(
+      ZuoraHolidayWriteResponse(
         stop.requestId,
         stop.subscriptionName,
         stop.productName,

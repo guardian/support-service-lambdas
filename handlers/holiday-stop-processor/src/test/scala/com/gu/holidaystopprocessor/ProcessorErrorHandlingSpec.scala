@@ -6,7 +6,7 @@ import cats.implicits._
 import com.gu.holiday_stops.Fixtures._
 import com.gu.holiday_stops._
 import com.gu.holiday_stops.subscription.{HolidayCreditUpdate, Subscription}
-import com.gu.holidaystopprocessor.{HolidayStopResponse, Processor}
+import com.gu.holidaystopprocessor.{ZuoraHolidayWriteResponse, Processor}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestsDetail, ProductName, SubscriptionName}
 import org.scalatest._
 
@@ -35,7 +35,7 @@ class ProcessorErrorHandlingSpec extends FlatSpec with Matchers with OptionValue
       case subName if subName.value == "A-S3" => Right(subscription)
     }
 
-    val writeHolidayStopsToSalesforce: List[HolidayStopResponse] => Either[SalesforceHolidayWriteError, Unit] = {
+    val writeHolidayStopsToSalesforce: List[ZuoraHolidayWriteResponse] => Either[SalesforceHolidayWriteError, Unit] = {
       case _ => Right(())
     }
 
@@ -61,7 +61,7 @@ class ProcessorErrorHandlingSpec extends FlatSpec with Matchers with OptionValue
       case subName if subName.value == "A-S3" => Right(subscription)
     }
 
-    val writeHolidayStopsToSalesforce: List[HolidayStopResponse] => Either[SalesforceHolidayWriteError, Unit] = {
+    val writeHolidayStopsToSalesforce: List[ZuoraHolidayWriteResponse] => Either[SalesforceHolidayWriteError, Unit] = {
       case _ => Left(SalesforceHolidayWriteError("salesforce boom")) // NOTE: this line is key to the test
     }
 
@@ -88,7 +88,7 @@ class ProcessorErrorHandlingSpec extends FlatSpec with Matchers with OptionValue
       case subName if subName.value == "A-S3" => Left(ZuoraHolidayWriteError("zuora boom 3"))
     }
 
-    val writeHolidayStopsToSalesforce: List[HolidayStopResponse] => Either[SalesforceHolidayWriteError, Unit] = {
+    val writeHolidayStopsToSalesforce: List[ZuoraHolidayWriteResponse] => Either[SalesforceHolidayWriteError, Unit] = {
       case _ => Right(())
     }
 
@@ -114,7 +114,7 @@ class ProcessorErrorHandlingSpec extends FlatSpec with Matchers with OptionValue
       case subName if subName.value == "A-S3" => Right(subscription)
     }
 
-    val writeHolidayStopsToSalesforce: List[HolidayStopResponse] => Either[SalesforceHolidayWriteError, Unit] = {
+    val writeHolidayStopsToSalesforce: List[ZuoraHolidayWriteResponse] => Either[SalesforceHolidayWriteError, Unit] = {
       case _ => Right(())
     }
 

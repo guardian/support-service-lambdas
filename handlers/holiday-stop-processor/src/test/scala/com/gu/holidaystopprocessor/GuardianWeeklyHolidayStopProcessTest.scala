@@ -32,7 +32,7 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
     case (_, _) => subscriptionUpdate
   }
 
-  private def exportAmendments(amendmentExport: Either[SalesforceHolidayWriteError, Unit]): List[HolidayStopResponse] => Either[SalesforceHolidayWriteError, Unit] =
+  private def exportAmendments(amendmentExport: Either[SalesforceHolidayWriteError, Unit]): List[ZuoraHolidayWriteResponse] => Either[SalesforceHolidayWriteError, Unit] =
     _ => amendmentExport
 
   "HolidayStopProcess" should "give correct added charge" in {
@@ -42,7 +42,7 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
       updateSubscription(Right(()))
     )(holidayStop)
 
-    response.right.value shouldBe HolidayStopResponse(
+    response.right.value shouldBe ZuoraHolidayWriteResponse(
       requestId = HolidayStopRequestsDetailId("HSR1"),
       subscriptionName = SubscriptionName("S1"),
       productName = ProductName("Gu Weekly"),
@@ -87,7 +87,7 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
       _ => Right(Fixtures.mkSubscriptionWithHolidayStops()),
       updateSubscription(Left(ZuoraHolidayWriteError("shouldn't need to apply an update")))
     )(holidayStop)
-    response.right.value shouldBe HolidayStopResponse(
+    response.right.value shouldBe ZuoraHolidayWriteResponse(
       requestId = HolidayStopRequestsDetailId("HSR1"),
       subscriptionName = SubscriptionName("S1"),
       productName = ProductName("Gu Weekly"),
@@ -119,7 +119,7 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
       updateSubscription(Right(())),
       exportAmendments(Right(()))
     )
-    responses.holidayStopResults.headOption.value.right.value shouldBe HolidayStopResponse(
+    responses.holidayStopResults.headOption.value.right.value shouldBe ZuoraHolidayWriteResponse(
       requestId = HolidayStopRequestsDetailId("R1"),
       subscriptionName = SubscriptionName("S1"),
       productName = ProductName("Gu Weekly"),
@@ -128,7 +128,7 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
       actualPrice = HolidayStopRequestsDetailChargePrice(-5.81),
       pubDate = StoppedPublicationDate(LocalDate.of(2019, 8, 2))
     )
-    responses.holidayStopResults.lastOption.value.right.value shouldBe HolidayStopResponse(
+    responses.holidayStopResults.lastOption.value.right.value shouldBe ZuoraHolidayWriteResponse(
       requestId = HolidayStopRequestsDetailId("R3"),
       subscriptionName = SubscriptionName("S1"),
       productName = ProductName("Gu Weekly"),
@@ -152,7 +152,7 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
       exportAmendments(Right(()))
     )
     responses.resultsToExport shouldBe List(
-      HolidayStopResponse(
+      ZuoraHolidayWriteResponse(
         HolidayStopRequestsDetailId("R1"),
         subscriptionName = SubscriptionName("S1"),
         productName = ProductName("Gu Weekly"),

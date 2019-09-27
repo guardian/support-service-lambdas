@@ -41,7 +41,7 @@ object Salesforce {
     }
   }
 
-  def holidayStopUpdateResponse(sfCredentials: SFAuthConfig)(responses: List[HolidayStopResponse]): Either[SalesforceHolidayWriteError, Unit] =
+  def holidayStopUpdateResponse(sfCredentials: SFAuthConfig)(responses: List[ZuoraHolidayWriteResponse]): Either[SalesforceHolidayWriteError, Unit] =
     SalesforceClient(RawEffects.response, sfCredentials).value.map { sfAuth =>
       val patch = sfAuth.wrapWith(JsonHttp.patch)
       val sendOp = ActionSalesforceHolidayStopRequestsDetail(patch) _
