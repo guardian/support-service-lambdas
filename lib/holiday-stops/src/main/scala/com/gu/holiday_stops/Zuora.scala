@@ -25,7 +25,7 @@ object Zuora {
       .joinRight
   }
 
-  def subscriptionGetResponse(config: Config, accessToken: AccessToken, backend: SttpBackend[Id, Nothing])(subscriptionName: SubscriptionName): Either[ZuoraHolidayError, Subscription] = {
+  def subscriptionGetResponse(config: Config, accessToken: AccessToken, backend: SttpBackend[Id, Nothing])(subscriptionName: SubscriptionName): ZuoraHolidayResponse[Subscription] = {
     implicit val b = backend
     sttp.get(uri"${config.zuoraConfig.baseUrl}/subscriptions/${subscriptionName.value}")
       .header("Authorization", s"Bearer ${accessToken.access_token}")
@@ -36,7 +36,7 @@ object Zuora {
       .joinRight
   }
 
-  def subscriptionUpdateResponse(config: Config, accessToken: AccessToken, backend: SttpBackend[Id, Nothing])(subscription: Subscription, update: HolidayCreditUpdate): Either[ZuoraHolidayError, Unit] = {
+  def subscriptionUpdateResponse(config: Config, accessToken: AccessToken, backend: SttpBackend[Id, Nothing])(subscription: Subscription, update: HolidayCreditUpdate): ZuoraHolidayResponse[Unit] = {
     implicit val b = backend
     val errMsg = (reason: String) => s"Failed to update subscription '${subscription.subscriptionNumber}' with $update. Reason: $reason"
     sttp.put(uri"${config.zuoraConfig.baseUrl}/subscriptions/${subscription.subscriptionNumber}")
