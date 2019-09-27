@@ -15,7 +15,8 @@ object CreditCalculator extends LazyLogging {
   def calculateCredit(
     guardianWeeklyProductRatePlanIds: List[String],
     gwNforNProductRatePlanIds: List[String],
-    sundayVoucherRatePlanId: String
+    sundayVoucherRatePlanId: String,
+    weekendVoucherRatePlanId: String
   )(stoppedPublicationDate: LocalDate, subscription: Subscription): Either[ZuoraHolidayWriteError, Double] = {
     guardianWeeklyCredit(
       guardianWeeklyProductRatePlanIds,
@@ -28,7 +29,7 @@ object CreditCalculator extends LazyLogging {
       )(subscription)
     } orElse {
       weekendVoucherCredit(
-        sundayVoucherRatePlanId,
+        weekendVoucherRatePlanId,
         stoppedPublicationDate
       )(subscription)
     } orElse {

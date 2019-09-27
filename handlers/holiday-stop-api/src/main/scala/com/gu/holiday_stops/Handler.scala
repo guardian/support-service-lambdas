@@ -65,7 +65,8 @@ object Handler extends Logging {
         CreditCalculator.calculateCredit(
           config.guardianWeeklyConfig.productRatePlanIds,
           config.guardianWeeklyConfig.nForNProductRatePlanIds,
-          config.sundayVoucherConfig.productRatePlanChargeId
+          config.sundayVoucherConfig.productRatePlanChargeId,
+          config.weekendVoucherConfig.productRatePlanId
         ),
         getSubscriptionFromZuora(config, backend)
       )(request, sfClient))

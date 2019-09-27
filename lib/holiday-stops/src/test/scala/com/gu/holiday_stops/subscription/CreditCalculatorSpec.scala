@@ -31,6 +31,20 @@ class CreditCalculatorSpec extends FlatSpec with Matchers with EitherValues {
       expectedCredit = -2.89
     )
   }
+  it should "calculate credit for weekend vouchers saturday issue" in {
+    checkCreditCalculation(
+      zuoraSubscriptionData = "WeekendVoucherSubscription.json",
+      stopDate = LocalDate.of(2019, 11, 16),
+      expectedCredit = -2.64
+    )
+  }
+  it should "calculate credit for weekend vouchers for a sunday issue" in {
+    checkCreditCalculation(
+      zuoraSubscriptionData = "WeekendVoucherSubscription.json",
+      stopDate = LocalDate.of(2019, 11, 17),
+      expectedCredit = -2.55
+    )
+  }
 
   private def checkCreditCalculation(zuoraSubscriptionData: String, stopDate: LocalDate, expectedCredit: Double) = {
     val subscriptionRaw = Source.fromResource(zuoraSubscriptionData).mkString
@@ -39,7 +53,8 @@ class CreditCalculatorSpec extends FlatSpec with Matchers with EitherValues {
     CreditCalculator.calculateCredit(
       GuardianWeeklyHolidayStopConfig.Dev.productRatePlanIds,
       GuardianWeeklyHolidayStopConfig.Dev.nForNProductRatePlanIds,
-      SundayVoucherHolidayStopConfig.Dev.productRatePlanChargeId
+      SundayVoucherHolidayStopConfig.Dev.productRatePlanChargeId,
+      WeekendVoucherHolidayStopConfig.Dev.productRatePlanId
     )(stopDate, subscription) should equal(Right(expectedCredit))
   }
 }

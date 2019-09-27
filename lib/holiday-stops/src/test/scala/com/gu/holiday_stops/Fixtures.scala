@@ -255,6 +255,7 @@ object Fixtures {
     zuoraConfig = ZuoraConfig(baseUrl = "", holidayStopProcessor = HolidayStopProcessor(Oauth(clientId = "", clientSecret = ""))),
     sfConfig = SFAuthConfig("", "", "", "", "", ""),
     guardianWeeklyConfig = guardianWeeklyConfig,
-    sundayVoucherConfig = sundayVoucherHolidayStopConfig
+    sundayVoucherConfig = sundayVoucherHolidayStopConfig,
+    weekendVoucherConfig = WeekendVoucherHolidayStopConfig.Dev
   )
 }

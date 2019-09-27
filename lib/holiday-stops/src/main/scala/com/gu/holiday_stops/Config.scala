@@ -9,7 +9,8 @@ case class Config(
   zuoraConfig: ZuoraConfig,
   sfConfig: SFAuthConfig,
   guardianWeeklyConfig: GuardianWeeklyHolidayStopConfig,
-  sundayVoucherConfig: SundayVoucherHolidayStopConfig
+  sundayVoucherConfig: SundayVoucherHolidayStopConfig,
+  weekendVoucherConfig: WeekendVoucherHolidayStopConfig
 )
 
 case class ZuoraConfig(
@@ -56,21 +57,24 @@ object Config {
             zuoraConfig,
             sfConfig,
             GuardianWeeklyHolidayStopConfig.Prod,
-            SundayVoucherHolidayStopConfig.Prod
+            SundayVoucherHolidayStopConfig.Prod,
+            WeekendVoucherHolidayStopConfig.Prod
           )
         case "CODE" =>
           Config(
             zuoraConfig,
             sfConfig,
             GuardianWeeklyHolidayStopConfig.Code,
-            SundayVoucherHolidayStopConfig.Code
+            SundayVoucherHolidayStopConfig.Code,
+            WeekendVoucherHolidayStopConfig.Code
           )
         case "DEV" =>
           Config(
             zuoraConfig,
             sfConfig,
             GuardianWeeklyHolidayStopConfig.Dev,
-            SundayVoucherHolidayStopConfig.Dev
+            SundayVoucherHolidayStopConfig.Dev,
+            WeekendVoucherHolidayStopConfig.Dev
           )
       }
     }
