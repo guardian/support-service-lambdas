@@ -6,7 +6,6 @@ import com.gu.holiday_stops._
 import com.gu.holiday_stops.subscription.{Add, ChargeOverride, HolidayCreditUpdate, RatePlan, RatePlanCharge, Subscription}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
 import org.scalatest.{FlatSpec, Matchers}
-
 import scala.collection.mutable
 
 class SundayVoucherHolidayStopProcessTest extends FlatSpec with Matchers {
@@ -196,7 +195,7 @@ class SundayVoucherHolidayStopProcessTest extends FlatSpec with Matchers {
 
     val SubscriptionMock = subscription
 
-    CommonHolidayStopProcessor.processHolidayStops(
+    Processor.processProduct(
       Fixtures.config,
       Right(holidayStopRequestsFromSalesforce),
       getSubscription = _ => Right(getSubscriptionMock()),

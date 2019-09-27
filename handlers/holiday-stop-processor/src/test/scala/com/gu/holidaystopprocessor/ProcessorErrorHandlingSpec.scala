@@ -6,7 +6,7 @@ import cats.implicits._
 import com.gu.holiday_stops.Fixtures._
 import com.gu.holiday_stops._
 import com.gu.holiday_stops.subscription.{HolidayCreditUpdate, Subscription}
-import com.gu.holidaystopprocessor.{CommonHolidayStopProcessor, HolidayStopResponse}
+import com.gu.holidaystopprocessor.{HolidayStopResponse, Processor}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestsDetail, ProductName, SubscriptionName}
 import org.scalatest._
 
@@ -39,7 +39,7 @@ class ProcessorErrorHandlingSpec extends FlatSpec with Matchers with OptionValue
       case _ => Right(())
     }
 
-    val result = CommonHolidayStopProcessor.processHolidayStops(
+    val result = Processor.processProduct(
       Fixtures.config,
       holidayStopRequestsFromSalesforce,
       getSubscription,
@@ -65,7 +65,7 @@ class ProcessorErrorHandlingSpec extends FlatSpec with Matchers with OptionValue
       case _ => Left(SalesforceHolidayWriteError("salesforce boom")) // NOTE: this line is key to the test
     }
 
-    val result = CommonHolidayStopProcessor.processHolidayStops(
+    val result = Processor.processProduct(
       Fixtures.config,
       holidayStopRequestsFromSalesforce,
       getSubscription,
@@ -92,7 +92,7 @@ class ProcessorErrorHandlingSpec extends FlatSpec with Matchers with OptionValue
       case _ => Right(())
     }
 
-    val result = CommonHolidayStopProcessor.processHolidayStops(
+    val result = Processor.processProduct(
       Fixtures.config,
       holidayStopRequestsFromSalesforce,
       getSubscription,
@@ -118,7 +118,7 @@ class ProcessorErrorHandlingSpec extends FlatSpec with Matchers with OptionValue
       case _ => Right(())
     }
 
-    val result = CommonHolidayStopProcessor.processHolidayStops(
+    val result = Processor.processProduct(
       Fixtures.config,
       holidayStopRequestsFromSalesforce,
       getSubscription,

@@ -1,14 +1,34 @@
 package com.gu.holidaystopprocessor
 
+import com.gu.holiday_stops.subscription.{Credit, ExtendedTerm, HolidayCreditUpdate, Subscription}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{GuardianWeekly, HolidayStopRequestsDetail, HolidayStopRequestsDetailChargeCode, HolidayStopRequestsDetailChargePrice, StoppedPublicationDate, SubscriptionName, SundayVoucher}
+import com.softwaremill.sttp.{Id, SttpBackend}
 import java.time.LocalDate
-
 import cats.implicits._
 import com.gu.holiday_stops._
-import com.gu.holiday_stops.subscription._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestsDetail, HolidayStopRequestsDetailChargeCode, HolidayStopRequestsDetailChargePrice, ProductRatePlanKey, ProductRatePlanName, ProductType, StoppedPublicationDate, SubscriptionName}
 
-object CommonHolidayStopProcessor {
-  def processHolidayStops(
+
+object Processor {
+  def processAllProducts(config: Config, processDateOverride: Option[LocalDate], backend: SttpBackend[Id, Nothing]): List[ProcessResult] =
+    Zuora.accessTokenGetResponse(config.zuoraConfig, backend) match {
+      case Left(overallFailure) =>
+        List(ProcessResult(overallFailure))
+
+      case Right(zuoraAccessToken) =>
+        List(
+          processProduct(config, Salesforce.holidayStopRequests(config.sfConfig)(SundayVoucher, processDateOverride), _, _, _),
+          processProduct(config, Salesforce.holidayStopRequests(config.sfConfig)(GuardianWeekly, processDateOverride), _, _, _)
+        ) map {
+            _.apply(
+              Zuora.subscriptionGetResponse(config, zuoraAccessToken, backend),
+              Zuora.subscriptionUpdateResponse(config, zuoraAccessToken, backend),
+              Salesforce.holidayStopUpdateResponse(config.sfConfig)
+            )
+          }
+    }
+
+  def processProduct(
     config: Config,
     getHolidayStopRequestsFromSalesforce: Either[OverallFailure, List[HolidayStopRequestsDetail]],
     getSubscription: SubscriptionName => Either[ZuoraHolidayWriteError, Subscription],
@@ -66,3 +86,4 @@ object CommonHolidayStopProcessor {
     }
   }
 }
+

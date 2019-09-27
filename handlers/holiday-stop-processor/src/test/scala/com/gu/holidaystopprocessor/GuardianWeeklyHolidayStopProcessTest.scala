@@ -36,7 +36,7 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
     _ => amendmentExport
 
   "HolidayStopProcess" should "give correct added charge" in {
-    val response = CommonHolidayStopProcessor.writeHolidayStopToZuora(
+    val response = Processor.writeHolidayStopToZuora(
       Fixtures.config,
       _ => Right(Fixtures.mkSubscriptionWithHolidayStops()),
       updateSubscription(Right(()))
@@ -54,7 +54,7 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
   }
 
   it should "give an exception message if update fails" in {
-    val response = CommonHolidayStopProcessor.writeHolidayStopToZuora(
+    val response = Processor.writeHolidayStopToZuora(
       Fixtures.config,
       _ => Right(subscription),
       updateSubscription(Left(ZuoraHolidayWriteError("update went wrong")))
@@ -63,7 +63,7 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
   }
 
   it should "give an exception message if getting subscription details fails" in {
-    val response = CommonHolidayStopProcessor.writeHolidayStopToZuora(
+    val response = Processor.writeHolidayStopToZuora(
       Fixtures.config,
       _ => Left(ZuoraHolidayWriteError("get went wrong")),
       updateSubscription(Right(()))
@@ -72,7 +72,7 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
   }
 
   it should "give an exception message if subscription isn't auto-renewing" in {
-    val response = CommonHolidayStopProcessor.writeHolidayStopToZuora(
+    val response = Processor.writeHolidayStopToZuora(
       Fixtures.config,
       _ => Right(subscription.copy(autoRenew = false)),
       updateSubscription(Right(()))
@@ -82,7 +82,7 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
   }
 
   it should "just give charge added without applying an update if holiday stop has already been applied" in {
-    val response = CommonHolidayStopProcessor.writeHolidayStopToZuora(
+    val response = Processor.writeHolidayStopToZuora(
       Fixtures.config,
       _ => Right(Fixtures.mkSubscriptionWithHolidayStops()),
       updateSubscription(Left(ZuoraHolidayWriteError("shouldn't need to apply an update")))
@@ -99,7 +99,7 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
   }
 
   it should "give a failure if subscription has no added charge" in {
-    val response = CommonHolidayStopProcessor.writeHolidayStopToZuora(
+    val response = Processor.writeHolidayStopToZuora(
       Fixtures.config,
       _ => Right(subscription),
       updateSubscription(Left(ZuoraHolidayWriteError("shouldn't need to apply an update")))
@@ -108,7 +108,7 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
   }
 
   "processHolidayStops" should "give correct charges added" in {
-    val responses = CommonHolidayStopProcessor.processHolidayStops(
+    val responses = Processor.processProduct(
       Fixtures.config,
       Right(List(
         Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(Fixtures.mkHolidayStopRequest("R1", LocalDate.of(2019, 8, 2)), "C1"),
@@ -140,7 +140,7 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
   }
 
   it should "only export results that haven't already been exported" in {
-    val responses = CommonHolidayStopProcessor.processHolidayStops(
+    val responses = Processor.processProduct(
       Fixtures.config,
       Right(List(
         Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(Fixtures.mkHolidayStopRequest("R1", LocalDate.of(2019, 8, 2)), "C2"),
@@ -165,7 +165,7 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
   }
 
   it should "give an exception message if exporting results fails" in {
-    val responses = CommonHolidayStopProcessor.processHolidayStops(
+    val responses = Processor.processProduct(
       Fixtures.config,
       Right(List(
         Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(Fixtures.mkHolidayStopRequest("r1"), ""),

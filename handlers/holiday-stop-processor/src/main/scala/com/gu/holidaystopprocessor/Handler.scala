@@ -24,7 +24,7 @@ object Handler extends Lambda[Option[LocalDate], List[HolidayStopResponse]] {
         Left(new RuntimeException(s"Config failure: $msg"))
 
       case Right(config) =>
-        val results = HolidayStopProcess(config, processDateOverride, HttpURLConnectionBackend())
+        val results = Processor.processAllProducts(config, processDateOverride, HttpURLConnectionBackend())
         results.foreach(result => ProcessResult.log(result))
         results.flatMap(_.overallFailure.toList) match {
           case Nil =>

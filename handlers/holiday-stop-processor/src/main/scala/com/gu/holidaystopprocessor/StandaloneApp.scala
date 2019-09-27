@@ -14,7 +14,7 @@ object StandaloneApp extends App {
   Config(GetFromS3.fetchString) match {
     case Left(msg) => println(s"Config failure: $msg")
     case Right(config) =>
-      val processResult = HolidayStopProcess(config, stopDate, HttpURLConnectionBackend())
+      val processResult = Processor.processAllProducts(config, stopDate, HttpURLConnectionBackend())
 
       println(processResult.flatMap(_.holidayStopsToApply).size)
 
