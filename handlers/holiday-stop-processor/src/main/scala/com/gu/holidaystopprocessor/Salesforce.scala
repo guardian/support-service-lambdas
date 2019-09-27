@@ -3,6 +3,7 @@ package com.gu.holidaystopprocessor
 import java.time.LocalDate
 
 import com.gu.effects.RawEffects
+import com.gu.holiday_stops.ActionCalculator.{GuardianWeeklyIssueSuspensionConstants, SundayVoucherIssueSuspensionConstants}
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.SalesforceClient
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail
@@ -12,7 +13,17 @@ import scalaz.{-\/, \/-}
 import com.gu.holiday_stops.{OverallFailure, SalesforceHolidayWriteError}
 
 object Salesforce {
-  def holidayStopRequests(sfCredentials: SFAuthConfig)(productKey: ProductRatePlanKey, processDate: LocalDate): Either[OverallFailure, List[HolidayStopRequestsDetail]] = {
+  def calculateProcessDate(product: ProductRatePlanKey, processDateOverride: Option[LocalDate]) = {
+    processDateOverride.getOrElse(LocalDate.now.plusDays {
+      product match {
+        case ProductRatePlanKey(ProductType("Newspaper Voucher"), ProductRatePlanName("Sunday")) => SundayVoucherIssueSuspensionConstants.processorRunLeadTimeDays
+        case ProductRatePlanKey(ProductType("Guardian Weekly"), _) => GuardianWeeklyIssueSuspensionConstants.processorRunLeadTimeDays
+      }
+    })
+  }
+
+  def holidayStopRequests(sfCredentials: SFAuthConfig)(productKey: ProductRatePlanKey, processDateOverride: Option[LocalDate]): Either[OverallFailure, List[HolidayStopRequestsDetail]] = {
+    val processDate = calculateProcessDate(productKey, processDateOverride)
     SalesforceClient(RawEffects.response, sfCredentials).value.flatMap { sfAuth =>
       val sfGet = sfAuth.wrapWith(JsonHttp.getWithParams)
       productKey match {

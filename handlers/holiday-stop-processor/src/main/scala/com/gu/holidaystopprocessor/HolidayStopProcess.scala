@@ -2,25 +2,17 @@ package com.gu.holidaystopprocessor
 
 import java.time.LocalDate
 
-import com.gu.holiday_stops.ActionCalculator.{GuardianWeeklyIssueSuspensionConstants, SundayVoucherIssueSuspensionConstants}
 import com.gu.holiday_stops._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{ProductRatePlanKey, ProductRatePlanName, ProductType}
 import com.softwaremill.sttp.{Id, SttpBackend}
 
+object Products {
+  val SundayVoucher = ProductRatePlanKey(ProductType("Newspaper Voucher"), ProductRatePlanName("Sunday"))
+  val GuardianWeekly = ProductRatePlanKey(ProductType("Guardian Weekly"), ProductRatePlanName(""))
+}
+
 object HolidayStopProcess {
-
-  val sundayVoucher = ProductRatePlanKey(ProductType("Newspaper Voucher"), ProductRatePlanName("Sunday"))
-  val guardianWeekly = ProductRatePlanKey(ProductType("Guardian Weekly"), ProductRatePlanName(""))
-
-  def calculateProcessDate(product: ProductRatePlanKey, processDateOverride: Option[LocalDate]) = {
-    processDateOverride.getOrElse(LocalDate.now.plusDays {
-      product match {
-        case ProductRatePlanKey(ProductType("Newspaper Voucher"), ProductRatePlanName("Sunday")) => SundayVoucherIssueSuspensionConstants.processorRunLeadTimeDays
-        case ProductRatePlanKey(ProductType("Guardian Weekly"), _) => GuardianWeeklyIssueSuspensionConstants.processorRunLeadTimeDays
-      }
-    })
-  }
-
+  import Products._
   def apply(config: Config, processDateOverride: Option[LocalDate], backend: SttpBackend[Id, Nothing]): List[ProcessResult] =
     Zuora.accessTokenGetResponse(config.zuoraConfig, backend) match {
       case Left(overallFailure) =>
@@ -31,12 +23,12 @@ object HolidayStopProcess {
         List(
           CommonHolidayStopProcessor.processHolidayStops(
             config,
-            Salesforce.holidayStopRequests(config.sfConfig)(sundayVoucher, calculateProcessDate(sundayVoucher, processDateOverride)),
+            Salesforce.holidayStopRequests(config.sfConfig)(SundayVoucher, processDateOverride),
             _, _, _
           ),
           CommonHolidayStopProcessor.processHolidayStops(
             config,
-            Salesforce.holidayStopRequests(config.sfConfig)(guardianWeekly, calculateProcessDate(guardianWeekly, processDateOverride)),
+            Salesforce.holidayStopRequests(config.sfConfig)(GuardianWeekly, processDateOverride),
             _, _, _
           )
         ) map {
