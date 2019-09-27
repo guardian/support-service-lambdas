@@ -41,7 +41,7 @@ class GuardianWeeklyErrorHandlingSpec extends FlatSpec with Matchers with Option
     }
 
     val result = GuardianWeeklyHolidayStopProcess.processHolidayStops(
-      guardianWeeklyConfig,
+      Fixtures.config,
       getHolidayStopRequestsFromSalesforce,
       getSubscription,
       updateSubscription,
@@ -68,7 +68,7 @@ class GuardianWeeklyErrorHandlingSpec extends FlatSpec with Matchers with Option
     }
 
     val result = GuardianWeeklyHolidayStopProcess.processHolidayStops(
-      guardianWeeklyConfig,
+      Fixtures.config,
       getHolidayStopRequestsFromSalesforce,
       getSubscription,
       updateSubscription,
@@ -96,7 +96,7 @@ class GuardianWeeklyErrorHandlingSpec extends FlatSpec with Matchers with Option
     }
 
     val result = GuardianWeeklyHolidayStopProcess.processHolidayStops(
-      guardianWeeklyConfig,
+      Fixtures.config,
       getHolidayStopRequestsFromSalesforce,
       getSubscription,
       updateSubscription,
@@ -123,7 +123,7 @@ class GuardianWeeklyErrorHandlingSpec extends FlatSpec with Matchers with Option
     }
 
     val result = GuardianWeeklyHolidayStopProcess.processHolidayStops(
-      guardianWeeklyConfig,
+      Fixtures.config,
       getHolidayStopRequestsFromSalesforce,
       getSubscription,
       updateSubscription,
