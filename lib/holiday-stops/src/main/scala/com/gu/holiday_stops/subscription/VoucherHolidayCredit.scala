@@ -6,12 +6,12 @@ import com.gu.holiday_stops.{BillingPeriodToApproxWeekCount, CurrentVoucherSubsc
 import scala.math.BigDecimal.RoundingMode
 
 object VoucherHolidayCredit {
-  def apply(sundayVoucherSubscription: CurrentVoucherSubscription): Double = {
-    val recurringPrice = sundayVoucherSubscription.price
+  def apply(voucherSubscription: CurrentVoucherSubscription): Double = {
+    val recurringPrice = voucherSubscription.price
     val numPublicationsInPeriod =
       BillingPeriodToApproxWeekCount(
-        subscriptionNumber = sundayVoucherSubscription.subscriptionNumber,
-        billingPeriod = sundayVoucherSubscription.billingPeriod
+        subscriptionNumber = voucherSubscription.subscriptionNumber,
+        billingPeriod = voucherSubscription.billingPeriod
       )
     -roundUp(recurringPrice / numPublicationsInPeriod)
   }
