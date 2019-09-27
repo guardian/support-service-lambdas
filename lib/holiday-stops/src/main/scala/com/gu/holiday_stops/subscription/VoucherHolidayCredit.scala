@@ -1,8 +1,6 @@
 package com.gu.holiday_stops.subscription
 
-
-import com.gu.holiday_stops.{BillingPeriodToApproxWeekCount, CurrentVoucherSubscription}
-
+import com.gu.holiday_stops.BillingPeriodToApproxWeekCount
 import scala.math.BigDecimal.RoundingMode
 
 object VoucherHolidayCredit {

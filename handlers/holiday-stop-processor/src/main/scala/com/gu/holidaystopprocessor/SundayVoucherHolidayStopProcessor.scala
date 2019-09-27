@@ -2,6 +2,7 @@ package com.gu.holidaystopprocessor
 
 import java.time.LocalDate
 
+import cats.implicits._
 import com.gu.holiday_stops.ActionCalculator.VoucherProcessorLeadTime
 import com.gu.holiday_stops._
 import com.gu.holiday_stops.subscription._
