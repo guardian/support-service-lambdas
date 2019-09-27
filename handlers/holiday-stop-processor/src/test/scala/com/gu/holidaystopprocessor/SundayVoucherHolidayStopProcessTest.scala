@@ -177,13 +177,13 @@ class SundayVoucherHolidayStopProcessTest extends FlatSpec with Matchers {
       None,
       List(
         Add(
-          "2c92c0f96b03800b016b081fc04f1ba2",
+          Fixtures.config.holidayCreditProduct.productRatePlanId,
           expectedCustomerAcceptanceDateForHolidayStop,
           expectedCustomerAcceptanceDateForHolidayStop,
           expectedCustomerAcceptanceDateForHolidayStop,
           List(
             ChargeOverride(
-              SundayVoucherHolidayStopConfig.Dev.holidayCreditProduct.productRatePlanChargeId,
+              Fixtures.config.holidayCreditProduct.productRatePlanChargeId,
               exptedStoppedPublicationDate,
               exptedStoppedPublicationDate,
               expectedCredit
