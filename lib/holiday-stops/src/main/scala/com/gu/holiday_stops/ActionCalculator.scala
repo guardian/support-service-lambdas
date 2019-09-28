@@ -142,16 +142,12 @@ object ActionCalculator {
     )
   )
 
-  val EverydayVoucherPlusSuspensionConstants = voucherSuspensionConstans(
-    List(
-      voucherIssueSuspensionConstants(DayOfWeek.MONDAY),
-      voucherIssueSuspensionConstants(DayOfWeek.TUESDAY),
-      voucherIssueSuspensionConstants(DayOfWeek.WEDNESDAY),
-      voucherIssueSuspensionConstants(DayOfWeek.THURSDAY),
-      voucherIssueSuspensionConstants(DayOfWeek.FRIDAY),
-      voucherIssueSuspensionConstants(DayOfWeek.SATURDAY),
-      voucherIssueSuspensionConstants(DayOfWeek.SUNDAY),
-    )
+  val EverydayPlusVoucherSuspensionConstants = EverydayVoucherSuspensionConstants
+  val SixdayPlusVoucherSuspensionConstants = SixdayVoucherSuspensionConstants
+  val WeekendPlusVoucherSuspensionConstants = WeekendVoucherSuspensionConstants
+  val SundayPlusVoucherSuspensionConstants = SundayVoucherSuspensionConstants
+  val SaturdayPlusVoucherSuspensionConstants = voucherSuspensionConstans(
+    List(voucherIssueSuspensionConstants(DayOfWeek.SATURDAY))
   )
 
   def voucherSuspensionConstans(issueSuspensionConstants: List[IssueSuspensionConstants]) =
@@ -181,8 +177,16 @@ object ActionCalculator {
   def suspensionConstantsByProductRatePlanKey(
     productKey: ProductRatePlanKey
   ): Either[ActionCalculatorError, SuspensionConstants] = productKey match {
+    case ProductRatePlanKey(ProductType("Newspaper - Voucher Book"), ProductRatePlanName("Saturday+")) =>
+      Right(SaturdayPlusVoucherSuspensionConstants)
+    case ProductRatePlanKey(ProductType("Newspaper - Voucher Book"), ProductRatePlanName("Sunday+")) =>
+      Right(SundayPlusVoucherSuspensionConstants)
+    case ProductRatePlanKey(ProductType("Newspaper - Voucher Book"), ProductRatePlanName("Weekend+")) =>
+      Right(WeekendPlusVoucherSuspensionConstants)
+    case ProductRatePlanKey(ProductType("Newspaper - Voucher Book"), ProductRatePlanName("Sixday+")) =>
+      Right(SixdayPlusVoucherSuspensionConstants)
     case ProductRatePlanKey(ProductType("Newspaper - Voucher Book"), ProductRatePlanName("Everyday+")) =>
-      Right(EverydayVoucherPlusSuspensionConstants)
+      Right(EverydayPlusVoucherSuspensionConstants)
     case ProductRatePlanKey(ProductType("Newspaper - Voucher Book"), ProductRatePlanName("Everyday")) =>
       Right(EverydayVoucherSuspensionConstants)
     case ProductRatePlanKey(ProductType("Newspaper - Voucher Book"), ProductRatePlanName("Sixday")) =>
@@ -208,10 +212,10 @@ object ActionCalculator {
   }
 
   def getProductSpecificsByProductRatePlanKey(
-    productRatePlanChargeId: ProductRatePlanKey,
+    productKey: ProductRatePlanKey,
     today: LocalDate = LocalDate.now()
   ): Either[ActionCalculatorError, ProductSpecifics] = {
-    suspensionConstantsByProductRatePlanKey(productRatePlanChargeId)
+    suspensionConstantsByProductRatePlanKey(productKey)
       .map { constants =>
         ProductSpecifics(
           constants.annualIssueLimit,

@@ -20,6 +20,10 @@ object Credit extends LazyLogging {
       .orElse(voucherCredit(config.sixdayVoucherConfig.productRatePlanId, stoppedPublicationDate)(subscription))
       .orElse(voucherCredit(config.everydayVoucherConfig.productRatePlanId, stoppedPublicationDate)(subscription))
       .orElse(voucherCredit(config.everydayPlusVoucherConfig.productRatePlanId, stoppedPublicationDate)(subscription))
+      .orElse(voucherCredit(config.sixdayPlusVoucherConfig.productRatePlanId, stoppedPublicationDate)(subscription))
+      .orElse(voucherCredit(config.weekendPlusVoucherConfig.productRatePlanId, stoppedPublicationDate)(subscription))
+      .orElse(voucherCredit(config.sundayPlusVoucherConfig.productRatePlanId, stoppedPublicationDate)(subscription))
+      .orElse(voucherCredit(config.saturdayPlusVoucherConfig.productRatePlanId, stoppedPublicationDate)(subscription))
       .orElse(Left(ZuoraHolidayError(s"Failed to calculate holiday stop credits for ${subscription.subscriptionNumber}")))
 
   def guardianWeeklyCredit(config: Config, stoppedPublicationDate: LocalDate)(subscription: Subscription): Either[ZuoraHolidayError, Double] =

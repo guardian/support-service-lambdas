@@ -260,5 +260,9 @@ object Fixtures {
     SixdayVoucherHolidayStopConfig.Dev,
     EverydayVoucherHolidayStopConfig.Dev,
     EverydayPlusVoucherHolidayStopConfig.Dev,
+    SixdayPlusVoucherHolidayStopConfig.Dev,
+    WeekendPlusVoucherHolidayStopConfig.Dev,
+    SundayPlusVoucherHolidayStopConfig.Dev,
+    SaturdayPlusVoucherHolidayStopConfig.Dev,
   )
 }

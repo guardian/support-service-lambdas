@@ -37,6 +37,10 @@ object NextBillingPeriodStartDate {
       .orElse(voucherBillingPeriodStartDate(config.sixdayVoucherConfig.productRatePlanId, subscription, StoppedPublicationDate(stoppedPublicationDate)))
       .orElse(voucherBillingPeriodStartDate(config.everydayVoucherConfig.productRatePlanId, subscription, StoppedPublicationDate(stoppedPublicationDate)))
       .orElse(voucherBillingPeriodStartDate(config.everydayPlusVoucherConfig.productRatePlanId, subscription, StoppedPublicationDate(stoppedPublicationDate)))
+      .orElse(voucherBillingPeriodStartDate(config.sixdayPlusVoucherConfig.productRatePlanId, subscription, StoppedPublicationDate(stoppedPublicationDate)))
+      .orElse(voucherBillingPeriodStartDate(config.weekendPlusVoucherConfig.productRatePlanId, subscription, StoppedPublicationDate(stoppedPublicationDate)))
+      .orElse(voucherBillingPeriodStartDate(config.sundayPlusVoucherConfig.productRatePlanId, subscription, StoppedPublicationDate(stoppedPublicationDate)))
+      .orElse(voucherBillingPeriodStartDate(config.saturdayPlusVoucherConfig.productRatePlanId, subscription, StoppedPublicationDate(stoppedPublicationDate)))
       .orElse(Left(ZuoraHolidayError(s"Failed to calculate when to apply holiday credit: $subscription")))
   }
 
