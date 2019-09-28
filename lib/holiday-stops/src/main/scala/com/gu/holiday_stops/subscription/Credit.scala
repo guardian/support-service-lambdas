@@ -15,6 +15,7 @@ object Credit extends LazyLogging {
     config: Config,
   )(stoppedPublicationDate: LocalDate, subscription: Subscription): Either[ZuoraHolidayError, Double] =
     guardianWeeklyCredit(config, stoppedPublicationDate)(subscription)
+      .orElse(voucherCredit(config.saturdayVoucherConfig.productRatePlanId, stoppedPublicationDate)(subscription))
       .orElse(voucherCredit(config.sundayVoucherConfig.productRatePlanId, stoppedPublicationDate)(subscription))
       .orElse(voucherCredit(config.weekendVoucherConfig.productRatePlanId, stoppedPublicationDate)(subscription))
       .orElse(voucherCredit(config.sixdayVoucherConfig.productRatePlanId, stoppedPublicationDate)(subscription))

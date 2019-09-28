@@ -31,6 +31,10 @@ object Salesforce {
           val fetchOp = SalesforceHolidayStopRequestsDetail.LookupPendingByProductNamePrefixAndDate(sfGet)
           fetchOp(ProductName("Guardian Weekly"), processDate)
 
+        case SaturdayVoucher =>
+          val fetchOp = SalesforceHolidayStopRequestsDetail.FetchVoucherHolidayStopRequestsDetails(sfGet)
+          fetchOp(ProductRatePlanKey(SaturdayVoucher), processDate)
+
         case SundayVoucher =>
           val fetchOp = SalesforceHolidayStopRequestsDetail.FetchVoucherHolidayStopRequestsDetails(sfGet)
           fetchOp(ProductRatePlanKey(SundayVoucher), processDate)

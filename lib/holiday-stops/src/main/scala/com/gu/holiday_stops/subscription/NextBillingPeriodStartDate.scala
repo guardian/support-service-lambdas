@@ -32,6 +32,7 @@ import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.Stopp
 object NextBillingPeriodStartDate {
   def apply(config: Config, subscription: Subscription, stoppedPublicationDate: LocalDate): Either[ZuoraHolidayError, LocalDate] = {
     guardianWeeklyBillingPeriodStartDate(config, subscription, stoppedPublicationDate)
+      .orElse(voucherBillingPeriodStartDate(config.saturdayVoucherConfig.productRatePlanId, subscription, StoppedPublicationDate(stoppedPublicationDate)))
       .orElse(voucherBillingPeriodStartDate(config.sundayVoucherConfig.productRatePlanId, subscription, StoppedPublicationDate(stoppedPublicationDate)))
       .orElse(voucherBillingPeriodStartDate(config.weekendVoucherConfig.productRatePlanId, subscription, StoppedPublicationDate(stoppedPublicationDate)))
       .orElse(voucherBillingPeriodStartDate(config.sixdayVoucherConfig.productRatePlanId, subscription, StoppedPublicationDate(stoppedPublicationDate)))

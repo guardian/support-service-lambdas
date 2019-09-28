@@ -49,6 +49,7 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
     def apply(product: Product): ProductRatePlanKey = {
       product match {
         case GuardianWeekly => ProductRatePlanKey(ProductType("Guardian Weekly"), ProductRatePlanName(""))
+        case SaturdayVoucher => ProductRatePlanKey(ProductType("Newspaper Voucher"), ProductRatePlanName("Saturday"))
         case SundayVoucher => ProductRatePlanKey(ProductType("Newspaper Voucher"), ProductRatePlanName("Sunday"))
         case WeekendVoucher => ProductRatePlanKey(ProductType("Newspaper Voucher"), ProductRatePlanName("Weekend"))
         case SixdayVoucher => ProductRatePlanKey(ProductType("Newspaper Voucher"), ProductRatePlanName("Sixday"))
@@ -64,6 +65,7 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
 
   sealed trait Product
   case object GuardianWeekly extends Product
+  case object SaturdayVoucher extends Product
   case object SundayVoucher extends Product
   case object WeekendVoucher extends Product
   case object SixdayVoucher extends Product

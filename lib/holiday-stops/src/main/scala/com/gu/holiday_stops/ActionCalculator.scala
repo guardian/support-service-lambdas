@@ -108,6 +108,10 @@ object ActionCalculator {
     }
   }
 
+  val SaturdayVoucherSuspensionConstants = voucherSuspensionConstans(
+    List(voucherIssueSuspensionConstants(DayOfWeek.SATURDAY))
+  )
+
   val SundayVoucherSuspensionConstants = voucherSuspensionConstans(
     List(voucherIssueSuspensionConstants(DayOfWeek.SUNDAY))
   )
@@ -146,9 +150,7 @@ object ActionCalculator {
   val SixdayPlusVoucherSuspensionConstants = SixdayVoucherSuspensionConstants
   val WeekendPlusVoucherSuspensionConstants = WeekendVoucherSuspensionConstants
   val SundayPlusVoucherSuspensionConstants = SundayVoucherSuspensionConstants
-  val SaturdayPlusVoucherSuspensionConstants = voucherSuspensionConstans(
-    List(voucherIssueSuspensionConstants(DayOfWeek.SATURDAY))
-  )
+  val SaturdayPlusVoucherSuspensionConstants = SaturdayVoucherSuspensionConstants
 
   def voucherSuspensionConstans(issueSuspensionConstants: List[IssueSuspensionConstants]) =
     SuspensionConstants(issueSuspensionConstants.size * 6, issueSuspensionConstants)
@@ -195,6 +197,8 @@ object ActionCalculator {
       Right(WeekendVoucherSuspensionConstants)
     case ProductRatePlanKey(ProductType("Newspaper - Voucher Book"), ProductRatePlanName("Sunday")) =>
       Right(SundayVoucherSuspensionConstants)
+    case ProductRatePlanKey(ProductType("Newspaper - Voucher Book"), ProductRatePlanName("Saturday")) =>
+      Right(SaturdayVoucherSuspensionConstants)
     case ProductRatePlanKey(ProductType("Guardian Weekly"), _) =>
       Right(GuardianWeeklySuspensionConstants)
     case _ =>
