@@ -2,6 +2,7 @@ package com.gu.holiday_stops
 
 import java.time.LocalDate
 
+import com.gu.holiday_stops.config._
 import com.gu.holiday_stops.subscription.{RatePlan, RatePlanCharge, Subscription}
 import com.gu.salesforce.RecordsWrapperCaseClass
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
@@ -257,6 +258,7 @@ object Fixtures {
     sundayVoucherConfig = SundayVoucherHolidayStopConfig.Dev,
     weekendVoucherConfig = WeekendVoucherHolidayStopConfig.Dev,
     SixdayVoucherHolidayStopConfig.Dev,
-    EverydayVoucherHolidayStopConfig.Dev
+    EverydayVoucherHolidayStopConfig.Dev,
+    EverydayPlusVoucherHolidayStopConfig.Dev,
   )
 }

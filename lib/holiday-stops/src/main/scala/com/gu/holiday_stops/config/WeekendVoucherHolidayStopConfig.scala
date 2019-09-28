@@ -1,4 +1,6 @@
-package com.gu.holiday_stops
+package com.gu.holiday_stops.config
+
+import com.gu.holiday_stops.HolidayCreditProduct
 
 case class WeekendVoucherHolidayStopConfig(
   holidayCreditProduct: HolidayCreditProduct,

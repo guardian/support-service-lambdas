@@ -2,7 +2,8 @@ package com.gu.holiday_stops.subscription
 
 import java.time.LocalDate
 
-import com.gu.holiday_stops.{Fixtures, GuardianWeeklyHolidayStopConfig}
+import com.gu.holiday_stops.Fixtures
+import com.gu.holiday_stops.config.GuardianWeeklyHolidayStopConfig
 import org.scalacheck.Prop.forAll
 import org.scalacheck.{Gen, Properties}
 import org.scalatest.{EitherValues, OptionValues}

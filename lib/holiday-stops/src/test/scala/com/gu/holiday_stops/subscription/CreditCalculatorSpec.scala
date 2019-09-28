@@ -2,7 +2,7 @@ package com.gu.holiday_stops.subscription
 
 import java.time.LocalDate
 
-import com.gu.holiday_stops.{Fixtures, GuardianWeeklyHolidayStopConfig, SundayVoucherHolidayStopConfig}
+import com.gu.holiday_stops.Fixtures
 import io.circe.generic.auto._
 import io.circe.parser.decode
 import org.scalatest._

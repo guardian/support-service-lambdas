@@ -53,6 +53,7 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
         case WeekendVoucher => ProductRatePlanKey(ProductType("Newspaper Voucher"), ProductRatePlanName("Weekend"))
         case SixdayVoucher => ProductRatePlanKey(ProductType("Newspaper Voucher"), ProductRatePlanName("Sixday"))
         case EverydayVoucher => ProductRatePlanKey(ProductType("Newspaper Voucher"), ProductRatePlanName("Everyday"))
+        case EverydayVoucherPlus => ProductRatePlanKey(ProductType("Newspaper Voucher"), ProductRatePlanName("Everyday+"))
       }
     }
   }
@@ -63,6 +64,7 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
   case object WeekendVoucher extends Product
   case object SixdayVoucher extends Product
   case object EverydayVoucher extends Product
+  case object EverydayVoucherPlus extends Product
 
   case class HolidayStopRequestsDetailChargeCode(value: String) extends AnyVal
   implicit val formatHolidayStopRequestsDetailChargeCode = Jsonx.formatInline[HolidayStopRequestsDetailChargeCode]

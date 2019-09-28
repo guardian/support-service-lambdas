@@ -142,6 +142,18 @@ object ActionCalculator {
     )
   )
 
+  val EverydayVoucherPlusSuspensionConstants = voucherSuspensionConstans(
+    List(
+      voucherIssueSuspensionConstants(DayOfWeek.MONDAY),
+      voucherIssueSuspensionConstants(DayOfWeek.TUESDAY),
+      voucherIssueSuspensionConstants(DayOfWeek.WEDNESDAY),
+      voucherIssueSuspensionConstants(DayOfWeek.THURSDAY),
+      voucherIssueSuspensionConstants(DayOfWeek.FRIDAY),
+      voucherIssueSuspensionConstants(DayOfWeek.SATURDAY),
+      voucherIssueSuspensionConstants(DayOfWeek.SUNDAY),
+    )
+  )
+
   def voucherSuspensionConstans(issueSuspensionConstants: List[IssueSuspensionConstants]) =
     SuspensionConstants(issueSuspensionConstants.size * 6, issueSuspensionConstants)
 
@@ -169,6 +181,8 @@ object ActionCalculator {
   def suspensionConstantsByProductRatePlanKey(
     productKey: ProductRatePlanKey
   ): Either[ActionCalculatorError, SuspensionConstants] = productKey match {
+    case ProductRatePlanKey(ProductType("Newspaper - Voucher Book"), ProductRatePlanName("Everyday+")) =>
+      Right(EverydayVoucherPlusSuspensionConstants)
     case ProductRatePlanKey(ProductType("Newspaper - Voucher Book"), ProductRatePlanName("Everyday")) =>
       Right(EverydayVoucherSuspensionConstants)
     case ProductRatePlanKey(ProductType("Newspaper - Voucher Book"), ProductRatePlanName("Sixday")) =>

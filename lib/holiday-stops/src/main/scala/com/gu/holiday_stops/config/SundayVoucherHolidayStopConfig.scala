@@ -1,4 +1,4 @@
-package com.gu.holiday_stops
+package com.gu.holiday_stops.config
 
 case class SundayVoucherHolidayStopConfig(
   productRatePlanId: String
