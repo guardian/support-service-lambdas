@@ -14,6 +14,6 @@ class SundayVoucherNextBillingPeriodStartDateSpec extends FlatSpec with Matchers
   "CurrentSundayVoucherSubscription" should "satisfy all the predicates" in {
     val subscriptionRaw = Source.fromResource("SundayVoucherSubscription.json").mkString
     val subscription = decode[Subscription](subscriptionRaw).getOrElse(fail("Could not decode CurrentSundayVoucherSubscription"))
-    NextBillingPeriodStartDate(Fixtures.config, subscription, LocalDate.now).right.value should be(LocalDate.of(2019, 11, 6))
+    NextBillingPeriodStartDate(Fixtures.config, subscription, LocalDate.parse("2019-10-27")).right.value should be(LocalDate.of(2019, 11, 6))
   }
 }

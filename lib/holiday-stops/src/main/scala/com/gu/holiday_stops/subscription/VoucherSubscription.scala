@@ -1,12 +1,36 @@
 package com.gu.holiday_stops.subscription
 
-import com.gu.holiday_stops.{Config, ZuoraHolidayError}
+import com.gu.holiday_stops.ZuoraHolidayError
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.StoppedPublicationDate
 import enumeratum._
 
-object CurrentEverydayVoucherSubscriptionPredicates {
-  def ratePlanIsEverydayVoucher(ratePlan: RatePlan, everydayVoucherProductRatePlanId: String): Boolean =
-    ratePlan.productRatePlanId == everydayVoucherProductRatePlanId
+case class VoucherSubscription(
+  subscriptionNumber: String,
+  billingPeriod: String,
+  price: Double,
+  invoicedPeriod: CurrentInvoicedPeriod,
+  ratePlanId: String,
+  productRatePlanId: String,
+  dayOfWeek: VoucherDayOfWeek
+)
+
+sealed trait VoucherDayOfWeek extends EnumEntry
+
+object VoucherDayOfWeek extends Enum[VoucherDayOfWeek] {
+  val values = findValues
+
+  case object Monday extends VoucherDayOfWeek
+  case object Tuesday extends VoucherDayOfWeek
+  case object Wednesday extends VoucherDayOfWeek
+  case object Thursday extends VoucherDayOfWeek
+  case object Friday extends VoucherDayOfWeek
+  case object Saturday extends VoucherDayOfWeek
+  case object Sunday extends VoucherDayOfWeek
+}
+
+object VoucherSubscriptionPredicates {
+  def ratePlanIsVoucher(ratePlan: RatePlan, voucherProductRatePlanId: String): Boolean =
+    ratePlan.productRatePlanId == voucherProductRatePlanId
 
   def ratePlanHasBeenInvoicedForAllCharges(ratePlan: RatePlan): Boolean = {
     ratePlan.ratePlanCharges.forall { ratePlanCharge =>
@@ -27,29 +51,18 @@ object CurrentEverydayVoucherSubscriptionPredicates {
   }
 }
 
-case class CurrentEverydayVoucherSubscription(
-  subscriptionNumber: String,
-  billingPeriod: String,
-  price: Double,
-  invoicedPeriod: CurrentInvoicedPeriod,
-  ratePlanId: String,
-  productRatePlanId: String,
-  dayOfWeek: VoucherDayOfWeek
-) extends CurrentVoucherSubscription
-
-
-object CurrentEverydayVoucherSubscription {
-  private def findEverydayVoucherRatePlan(
-      subscription: Subscription,
-      everydayVoucherProductRatePlanId: String,
-      stoppedPublicationDate: StoppedPublicationDate): Option[RatePlan] = {
+object VoucherSubscription {
+  private def findVoucherRatePlan(
+    subscription: Subscription,
+    voucherProductRatePlanId: String,
+    stoppedPublicationDate: StoppedPublicationDate): Option[RatePlan] = {
 
     subscription
       .ratePlans
       .find { ratePlan =>
-        import CurrentEverydayVoucherSubscriptionPredicates._
+        import VoucherSubscriptionPredicates._
         List(
-          ratePlanIsEverydayVoucher(ratePlan, everydayVoucherProductRatePlanId),
+          ratePlanIsVoucher(ratePlan, voucherProductRatePlanId),
           ratePlanHasBeenInvoicedForAllCharges(ratePlan),
           billingPeriodIsAnnualOrMonthOrQuarterOrSemiAnnual(ratePlan),
         ).forall(_ == true)
@@ -58,16 +71,16 @@ object CurrentEverydayVoucherSubscription {
 
   def apply(
     subscription: Subscription,
-    config: Config,
+    productRatePlanId: String,
     stoppedPublicationDate: StoppedPublicationDate
-  ): Either[ZuoraHolidayError, CurrentEverydayVoucherSubscription] = {
-    findEverydayVoucherRatePlan(subscription, config.everydayVoucherConfig.productRatePlanId, stoppedPublicationDate).flatMap { currentEverydayVoucherRatePlan =>
+  ): Either[ZuoraHolidayError, VoucherSubscription] = {
+    findVoucherRatePlan(subscription, productRatePlanId, stoppedPublicationDate).flatMap { voucherRatePlan =>
       for {
-        rpc <- currentEverydayVoucherRatePlan.ratePlanCharges.find(_.name == stoppedPublicationDate.getDayOfWeek) // find particular RPC, Saturday or Sunday
+        rpc <- voucherRatePlan.ratePlanCharges.find(_.name == stoppedPublicationDate.getDayOfWeek) // find particular RPC, Saturday, Sunday, etc.
         billingPeriod <- rpc.billingPeriod
         startDateIncluding <- rpc.processedThroughDate
         endDateExcluding <- rpc.chargedThroughDate
-      } yield new CurrentEverydayVoucherSubscription(
+      } yield new VoucherSubscription(
         subscriptionNumber = subscription.subscriptionNumber,
         billingPeriod = billingPeriod,
         price = rpc.price,
@@ -75,11 +88,10 @@ object CurrentEverydayVoucherSubscription {
           startDateIncluding = startDateIncluding,
           endDateExcluding = endDateExcluding
         ),
-        ratePlanId = currentEverydayVoucherRatePlan.id,
-        productRatePlanId = currentEverydayVoucherRatePlan.productRatePlanId,
+        ratePlanId = voucherRatePlan.id,
+        productRatePlanId = voucherRatePlan.productRatePlanId,
         dayOfWeek = VoucherDayOfWeek.withName(stoppedPublicationDate.getDayOfWeek)
       )
-    }.toRight(ZuoraHolidayError(s"Failed to determine Everyday Voucher Newspaper Guardian rate plan: $subscription"))
+    }.toRight(ZuoraHolidayError(s"Failed to determine Voucher Newspaper Guardian rate plan: $subscription"))
   }
 }
-
