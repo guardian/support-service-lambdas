@@ -19,7 +19,8 @@ object Processor {
           processProduct(config, Salesforce.holidayStopRequests(config.sfConfig)(GuardianWeekly, processDateOverride), _, _, _),
           processProduct(config, Salesforce.holidayStopRequests(config.sfConfig)(SundayVoucher, processDateOverride), _, _, _),
           processProduct(config, Salesforce.holidayStopRequests(config.sfConfig)(WeekendVoucher, processDateOverride), _, _, _),
-          processProduct(config, Salesforce.holidayStopRequests(config.sfConfig)(SixdayVoucher, processDateOverride), _, _, _)
+          processProduct(config, Salesforce.holidayStopRequests(config.sfConfig)(SixdayVoucher, processDateOverride), _, _, _),
+          processProduct(config, Salesforce.holidayStopRequests(config.sfConfig)(EverydayVoucher, processDateOverride), _, _, _),
         ) map {
             _.apply(
               Zuora.subscriptionGetResponse(config, zuoraAccessToken, backend),

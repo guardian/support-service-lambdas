@@ -256,6 +256,7 @@ object Fixtures {
     guardianWeeklyConfig = GuardianWeeklyHolidayStopConfig.Dev,
     sundayVoucherConfig = SundayVoucherHolidayStopConfig.Dev,
     weekendVoucherConfig = WeekendVoucherHolidayStopConfig.Dev,
-    SixdayVoucherHolidayStopConfig.Dev
+    SixdayVoucherHolidayStopConfig.Dev,
+    EverydayVoucherHolidayStopConfig.Dev
   )
 }

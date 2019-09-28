@@ -35,6 +35,7 @@ object NextBillingPeriodStartDate {
       .orElse(sundayVoucherBillingPeriodStartDate(config, subscription))
       .orElse(weekendVoucherBillingPeriodStartDate(config, subscription, StoppedPublicationDate(stoppedPublicationDate)))
       .orElse(sixdayVoucherBillingPeriodStartDate(config, subscription, StoppedPublicationDate(stoppedPublicationDate)))
+      .orElse(everydayVoucherBillingPeriodStartDate(config, subscription, StoppedPublicationDate(stoppedPublicationDate)))
       .orElse(Left(ZuoraHolidayError(s"Failed to calculate when to apply holiday credit: $subscription")))
   }
 
@@ -60,4 +61,7 @@ object NextBillingPeriodStartDate {
 
   def sixdayVoucherBillingPeriodStartDate(config: Config, subscription: Subscription, stoppedPublicationDate: StoppedPublicationDate): Either[ZuoraHolidayError, LocalDate] =
     CurrentSixdayVoucherSubscription(subscription, config, stoppedPublicationDate).map(_.invoicedPeriod.endDateExcluding)
+
+  def everydayVoucherBillingPeriodStartDate(config: Config, subscription: Subscription, stoppedPublicationDate: StoppedPublicationDate): Either[ZuoraHolidayError, LocalDate] =
+    CurrentEverydayVoucherSubscription(subscription, config, stoppedPublicationDate).map(_.invoicedPeriod.endDateExcluding)
 }

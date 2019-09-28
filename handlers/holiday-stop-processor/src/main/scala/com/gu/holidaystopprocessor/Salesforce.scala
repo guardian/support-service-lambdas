@@ -42,6 +42,10 @@ object Salesforce {
         case SixdayVoucher =>
           val fetchOp = SalesforceHolidayStopRequestsDetail.FetchVoucherHolidayStopRequestsDetails(sfGet)
           fetchOp(ProductRatePlanKey(SixdayVoucher), processDate)
+
+        case EverydayVoucher =>
+          val fetchOp = SalesforceHolidayStopRequestsDetail.FetchVoucherHolidayStopRequestsDetails(sfGet)
+          fetchOp(ProductRatePlanKey(EverydayVoucher), processDate)
       }
     }.toDisjunction match {
       case -\/(failure) => Left(SalesforceHolidayError(failure.toString))
