@@ -255,6 +255,7 @@ object Fixtures {
     HolidayCreditProduct.Dev,
     guardianWeeklyConfig = GuardianWeeklyHolidayStopConfig.Dev,
     sundayVoucherConfig = SundayVoucherHolidayStopConfig.Dev,
-    weekendVoucherConfig = WeekendVoucherHolidayStopConfig.Dev
+    weekendVoucherConfig = WeekendVoucherHolidayStopConfig.Dev,
+    SixdayVoucherHolidayStopConfig.Dev
   )
 }
