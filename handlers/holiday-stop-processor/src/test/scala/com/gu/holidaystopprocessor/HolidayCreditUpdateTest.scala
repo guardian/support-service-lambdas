@@ -3,14 +3,15 @@ package com.gu.holidaystopprocessor
 import java.time.LocalDate
 
 import com.gu.holiday_stops
-import com.gu.holiday_stops.Fixtures.guardianWeeklyConfig
 import com.gu.holiday_stops._
 import com.gu.holiday_stops.subscription._
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.StoppedPublicationDate
 import org.scalatest.{EitherValues, FlatSpec, Matchers}
 
 class HolidayCreditUpdateTest extends FlatSpec with Matchers with EitherValues {
 
-  val guardianWeeklyProductRatePlanIds = Fixtures.guardianWeeklyConfig.productRatePlanIds
+  val chargedThorughDate = LocalDate.parse("2019-09-12")
+  val stoppedPublicationDate = StoppedPublicationDate(chargedThorughDate.minusDays(1))
 
   "holidayCreditToAdd" should "generate update correctly" in {
     val subscription = Fixtures.mkSubscription(
@@ -18,15 +19,15 @@ class HolidayCreditUpdateTest extends FlatSpec with Matchers with EitherValues {
       termEndDate = LocalDate.of(2020, 7, 12),
       price = 42.1,
       billingPeriod = "Quarter",
-      chargedThroughDate = Some(LocalDate.of(2019, 9, 12))
+      chargedThroughDate = Some(chargedThorughDate)
     )
-    val currentGuardianWeeklySubscription = GuardianWeeklySubscription(subscription, Fixtures.config)
-    val nextInvoiceStartDate = holiday_stops.subscription.NextBillingPeriodStartDate(Fixtures.config, subscription, LocalDate.now).right.value
+    val currentGuardianWeeklySubscription = GuardianWeeklySubscription(subscription, stoppedPublicationDate)
+    val nextInvoiceStartDate = NextBillingPeriodStartDate(subscription, stoppedPublicationDate.value).right.value
     val maybeExtendedTerm = ExtendedTerm(nextInvoiceStartDate, subscription)
-    val holidayCredit = GuardianWeeklyHolidayCredit(currentGuardianWeeklySubscription.right.value, LocalDate.now)
+    val holidayCredit = GuardianWeeklyHolidayCredit(currentGuardianWeeklySubscription.right.value, stoppedPublicationDate.value)
 
     val update = HolidayCreditUpdate(
-      guardianWeeklyConfig.holidayCreditProduct,
+      Fixtures.config.holidayCreditProduct,
       subscription = subscription,
       stoppedPublicationDate = LocalDate.of(2019, 5, 18),
       nextInvoiceStartDate = nextInvoiceStartDate,
@@ -38,13 +39,13 @@ class HolidayCreditUpdateTest extends FlatSpec with Matchers with EitherValues {
       currentTermPeriodType = None,
       List(
         Add(
-          productRatePlanId = "ratePlanId",
-          contractEffectiveDate = LocalDate.of(2019, 9, 12),
-          customerAcceptanceDate = LocalDate.of(2019, 9, 12),
-          serviceActivationDate = LocalDate.of(2019, 9, 12),
+          productRatePlanId = Fixtures.config.holidayCreditProduct.productRatePlanId,
+          contractEffectiveDate = chargedThorughDate,
+          customerAcceptanceDate = chargedThorughDate,
+          serviceActivationDate = chargedThorughDate,
           chargeOverrides = List(
             ChargeOverride(
-              productRatePlanChargeId = "ratePlanChargeId",
+              productRatePlanChargeId = Fixtures.config.holidayCreditProduct.productRatePlanChargeId,
               HolidayStart__c = LocalDate.of(2019, 5, 18),
               HolidayEnd__c = LocalDate.of(2019, 5, 18),
               price = -3.24
@@ -63,7 +64,7 @@ class HolidayCreditUpdateTest extends FlatSpec with Matchers with EitherValues {
       billingPeriod = "Quarter",
       chargedThroughDate = None
     )
-    GuardianWeeklySubscription(subscription, Fixtures.config).left.value shouldBe a[ZuoraHolidayError]
+    GuardianWeeklySubscription(subscription, stoppedPublicationDate).left.value shouldBe a[ZuoraHolidayError]
   }
 
   it should "generate an update with an extended term when charged-through date of subscription is after its term-end date" in {
@@ -74,12 +75,12 @@ class HolidayCreditUpdateTest extends FlatSpec with Matchers with EitherValues {
       billingPeriod = "Annual",
       chargedThroughDate = Some(LocalDate.of(2020, 8, 2))
     )
-    val currentGuardianWeeklySubscription = GuardianWeeklySubscription(subscription, Fixtures.config)
-    val nextInvoiceStartDate = holiday_stops.subscription.NextBillingPeriodStartDate(Fixtures.config, subscription, LocalDate.now).right.value
+    val currentGuardianWeeklySubscription = GuardianWeeklySubscription(subscription, stoppedPublicationDate)
+    val nextInvoiceStartDate = holiday_stops.subscription.NextBillingPeriodStartDate(subscription, LocalDate.now).right.value
     val maybeExtendedTerm = ExtendedTerm(nextInvoiceStartDate, subscription)
     val holidayCredit = GuardianWeeklyHolidayCredit(currentGuardianWeeklySubscription.right.value, LocalDate.now)
     val update = HolidayCreditUpdate(
-      guardianWeeklyConfig.holidayCreditProduct,
+      Fixtures.config.holidayCreditProduct,
       subscription = subscription,
       stoppedPublicationDate = LocalDate.of(2019, 8, 6),
       nextInvoiceStartDate = nextInvoiceStartDate,
@@ -90,13 +91,13 @@ class HolidayCreditUpdateTest extends FlatSpec with Matchers with EitherValues {
       currentTerm = Some(376),
       currentTermPeriodType = Some("Day"),
       List(Add(
-        productRatePlanId = "ratePlanId",
+        Fixtures.config.holidayCreditProduct.productRatePlanId,
         contractEffectiveDate = LocalDate.of(2020, 8, 2),
         customerAcceptanceDate = LocalDate.of(2020, 8, 2),
         serviceActivationDate = LocalDate.of(2020, 8, 2),
         chargeOverrides = List(
           ChargeOverride(
-            productRatePlanChargeId = "ratePlanChargeId",
+            Fixtures.config.holidayCreditProduct.productRatePlanChargeId,
             HolidayStart__c = LocalDate.of(2019, 8, 6),
             HolidayEnd__c = LocalDate.of(2019, 8, 6),
             price = -2.89
@@ -114,12 +115,12 @@ class HolidayCreditUpdateTest extends FlatSpec with Matchers with EitherValues {
       billingPeriod = "Annual",
       chargedThroughDate = Some(LocalDate.of(2020, 7, 23))
     )
-    val currentGuardianWeeklySubscription = GuardianWeeklySubscription(subscription, Fixtures.config)
-    val nextInvoiceStartDate = holiday_stops.subscription.NextBillingPeriodStartDate(Fixtures.config, subscription, LocalDate.now).right.value
+    val currentGuardianWeeklySubscription = GuardianWeeklySubscription(subscription, stoppedPublicationDate)
+    val nextInvoiceStartDate = holiday_stops.subscription.NextBillingPeriodStartDate(subscription, LocalDate.now).right.value
     val maybeExtendedTerm = ExtendedTerm(nextInvoiceStartDate, subscription)
     val holidayCredit = GuardianWeeklyHolidayCredit(currentGuardianWeeklySubscription.right.value, LocalDate.now)
     val update = HolidayCreditUpdate(
-      guardianWeeklyConfig.holidayCreditProduct,
+      Fixtures.config.holidayCreditProduct,
       subscription = subscription,
       stoppedPublicationDate = LocalDate.of(2019, 8, 6),
       nextInvoiceStartDate = nextInvoiceStartDate,
@@ -130,13 +131,13 @@ class HolidayCreditUpdateTest extends FlatSpec with Matchers with EitherValues {
       currentTerm = None,
       currentTermPeriodType = None,
       List(Add(
-        productRatePlanId = "ratePlanId",
+        Fixtures.config.holidayCreditProduct.productRatePlanId,
         contractEffectiveDate = LocalDate.of(2020, 7, 23),
         customerAcceptanceDate = LocalDate.of(2020, 7, 23),
         serviceActivationDate = LocalDate.of(2020, 7, 23),
         chargeOverrides = List(
           ChargeOverride(
-            productRatePlanChargeId = "ratePlanChargeId",
+            Fixtures.config.holidayCreditProduct.productRatePlanChargeId,
             HolidayStart__c = LocalDate.of(2019, 8, 6),
             HolidayEnd__c = LocalDate.of(2019, 8, 6),
             price = -2.89

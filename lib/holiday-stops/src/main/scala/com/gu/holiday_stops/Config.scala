@@ -1,6 +1,5 @@
 package com.gu.holiday_stops
 
-import com.gu.holiday_stops.config._
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config.{ConfigLocation, LoadConfigModule, Stage}
@@ -10,7 +9,7 @@ case class Config(
   zuoraConfig: ZuoraConfig,
   sfConfig: SFAuthConfig,
   holidayCreditProduct: HolidayCreditProduct,
-  guardianWeeklyConfig: GuardianWeeklyHolidayStopConfig,
+//  guardianWeeklyConfig: GuardianWeeklyHolidayStopConfig,
 //  saturdayVoucherConfig: SaturdayVoucherHolidayStopConfig,
 //  sundayVoucherConfig: SundayVoucherHolidayStopConfig,
 //  weekendVoucherConfig: WeekendVoucherHolidayStopConfig,
@@ -67,7 +66,7 @@ object Config {
             zuoraConfig,
             sfConfig,
             HolidayCreditProduct.Prod,
-            GuardianWeeklyHolidayStopConfig.Prod,
+//            GuardianWeeklyHolidayStopConfig.Prod,
 //            SaturdayVoucherHolidayStopConfig.Prod,
 //            SundayVoucherHolidayStopConfig.Prod,
 //            WeekendVoucherHolidayStopConfig.Prod,
@@ -84,7 +83,7 @@ object Config {
             zuoraConfig,
             sfConfig,
             HolidayCreditProduct.Code,
-            GuardianWeeklyHolidayStopConfig.Code,
+//            GuardianWeeklyHolidayStopConfig.Code,
 //            SaturdayVoucherHolidayStopConfig.Code,
 //            SundayVoucherHolidayStopConfig.Code,
 //            WeekendVoucherHolidayStopConfig.Code,
@@ -101,7 +100,7 @@ object Config {
             zuoraConfig,
             sfConfig,
             HolidayCreditProduct.Dev,
-            GuardianWeeklyHolidayStopConfig.Dev,
+//            GuardianWeeklyHolidayStopConfig.Dev,
 //            SaturdayVoucherHolidayStopConfig.Dev,
 //            SundayVoucherHolidayStopConfig.Dev,
 //            WeekendVoucherHolidayStopConfig.Dev,

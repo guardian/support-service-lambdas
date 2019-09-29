@@ -16,8 +16,8 @@ object Salesforce {
   def calculateProcessDate(product: Product, processDateOverride: Option[LocalDate]) = {
     processDateOverride.getOrElse(LocalDate.now.plusDays {
       product match {
-        case SundayVoucher => ActionCalculator.VoucherProcessorLeadTime
         case GuardianWeekly => GuardianWeeklyIssueSuspensionConstants.processorRunLeadTimeDays.toLong
+        case _ => ActionCalculator.VoucherProcessorLeadTime // FIXME
       }
     })
   }

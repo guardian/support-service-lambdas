@@ -1,13 +1,11 @@
 package com.gu.holiday_stops
 
 import java.time.LocalDate
-import java.time.temporal.ChronoUnit
 
 import com.gu.effects.{FakeFetchString, SFTestEffects, TestingRawEffects}
 import com.gu.holiday_stops.ActionCalculator._
 import com.gu.holiday_stops.Handler._
 import com.gu.holiday_stops.ZuoraSttpEffects.ZuoraSttpEffectsOps
-import com.gu.holiday_stops.config.GuardianWeeklyHolidayStopConfig
 import com.gu.holiday_stops.subscription.{HolidayStopCredit, RatePlan, RatePlanCharge, Subscription}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.SubscriptionName
 import com.gu.salesforce.holiday_stops.SalesforceSFSubscription.SubscriptionForSubscriptionNameAndContact._
@@ -117,8 +115,8 @@ class HandlerTest extends FlatSpec with Matchers {
     "calculate potential holiday stop dates and estimated credit" in {
     val subscriptionName = "Sub12344"
 
-    val startDate = LocalDate.of(2018, 1, 1)
-    val endDate = startDate.plus(3, ChronoUnit.MONTHS)
+    val startDate = LocalDate.of(2019, 1, 1)
+    val endDate = startDate.plusMonths(3)
 
     val subscription = Subscription(
       subscriptionNumber = subscriptionName,
@@ -129,7 +127,7 @@ class HandlerTest extends FlatSpec with Matchers {
       autoRenew = true,
       ratePlans = List(
         RatePlan(
-          productName = "Guardian Weekly",
+          productName = "Guardian Weekly - Domestic",
           ratePlanCharges =
             List(RatePlanCharge(
               name = "GW",
@@ -137,13 +135,13 @@ class HandlerTest extends FlatSpec with Matchers {
               37.50,
               Some("Quarter"),
               effectiveStartDate = startDate,
-              chargedThroughDate = Some(endDate.plus(1, ChronoUnit.DAYS)),
+              chargedThroughDate = Some(endDate),
               HolidayStart__c = None,
               HolidayEnd__c = None,
-              processedThroughDate = Some(endDate.plus(1, ChronoUnit.DAYS).minus(3, ChronoUnit.MONTHS)),
+              processedThroughDate = Some(endDate.minusMonths(3)),
               ""
             )),
-          GuardianWeeklyHolidayStopConfig.Dev.productRatePlanIds.head,
+          "",
           ""
         )
       )

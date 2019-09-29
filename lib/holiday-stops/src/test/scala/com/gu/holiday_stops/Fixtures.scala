@@ -2,7 +2,6 @@ package com.gu.holiday_stops
 
 import java.time.LocalDate
 
-import com.gu.holiday_stops.config._
 import com.gu.holiday_stops.subscription.{RatePlan, RatePlanCharge, Subscription}
 import com.gu.salesforce.RecordsWrapperCaseClass
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
@@ -49,14 +48,14 @@ object Fixtures {
       autoRenew = true,
       ratePlans = List(
         RatePlan(
-          productName = "Guardian Weekly",
+          productName = "Guardian Weekly - Domestic",
           ratePlanCharges =
             List(mkRatePlanCharge(
               price,
               billingPeriod,
               chargedThroughDate
             )),
-          Fixtures.guardianWeeklyConfig.productRatePlanIds.head,
+          "",
           ""
         )
       )
@@ -84,7 +83,7 @@ object Fixtures {
           processedThroughDate = None,
           productRatePlanChargeId = ""
         )),
-        Fixtures.guardianWeeklyConfig.productRatePlanIds.head,
+        "",
         ""
       ),
       RatePlan(
@@ -101,7 +100,7 @@ object Fixtures {
           processedThroughDate = None,
           productRatePlanChargeId = ""
         )),
-        Fixtures.guardianWeeklyConfig.productRatePlanIds.head,
+        "",
         ""
       ),
       RatePlan(
@@ -118,7 +117,7 @@ object Fixtures {
           processedThroughDate = None,
           productRatePlanChargeId = ""
         )),
-        Fixtures.guardianWeeklyConfig.productRatePlanIds.head,
+        "",
         ""
       ),
       RatePlan(
@@ -152,7 +151,7 @@ object Fixtures {
           processedThroughDate = None,
           productRatePlanChargeId = ""
         )),
-        Fixtures.guardianWeeklyConfig.productRatePlanIds.head,
+        "",
         ""
       ),
       RatePlan(
@@ -169,17 +168,17 @@ object Fixtures {
           processedThroughDate = None,
           productRatePlanChargeId = ""
         )),
-        Fixtures.guardianWeeklyConfig.productRatePlanIds.head,
+        "",
         ""
       ),
       RatePlan(
-        productName = "Guardian Weekly",
+        productName = "Guardian Weekly - Domestic",
         ratePlanCharges = List(mkRatePlanCharge(
           price = 42.7,
           billingPeriod = "Quarter",
           chargedThroughDate = Some(LocalDate.of(2019, 9, 7))
         )),
-        Fixtures.guardianWeeklyConfig.productRatePlanIds.head,
+        "",
         ""
       )
     )
@@ -240,21 +239,11 @@ object Fixtures {
     estimatedCharge = None
   )
 
-  // FIXME remove this in favour of Fixture.config
-  val guardianWeeklyConfig = GuardianWeeklyHolidayStopConfig(
-    HolidayCreditProduct(
-      productRatePlanId = "ratePlanId",
-      productRatePlanChargeId = "ratePlanChargeId"
-    ),
-    GuardianWeeklyHolidayStopConfig.Dev.productRatePlanIds,
-    GuardianWeeklyHolidayStopConfig.Dev.nForNProductRatePlanIds
-  )
-
   val config = Config(
     zuoraConfig = ZuoraConfig(baseUrl = "", holidayStopProcessor = HolidayStopProcessor(Oauth(clientId = "", clientSecret = ""))),
     sfConfig = SFAuthConfig("", "", "", "", "", ""),
     HolidayCreditProduct.Dev,
-    guardianWeeklyConfig = GuardianWeeklyHolidayStopConfig.Dev,
+//    guardianWeeklyConfig = GuardianWeeklyHolidayStopConfig.Dev,
 //    SaturdayVoucherHolidayStopConfig.Dev,
 //    sundayVoucherConfig = SundayVoucherHolidayStopConfig.Dev,
 //    weekendVoucherConfig = WeekendVoucherHolidayStopConfig.Dev,

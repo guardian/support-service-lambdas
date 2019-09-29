@@ -3,6 +3,7 @@ package com.gu.holiday_stops.subscription
 import java.time.LocalDate
 
 import com.gu.holiday_stops.Fixtures
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.StoppedPublicationDate
 import io.circe.generic.auto._
 import io.circe.parser.decode
 import org.scalatest._
@@ -18,6 +19,9 @@ class CreditCalculatorSpec extends FlatSpec with Matchers with EitherValues {
     )
   }
   it should "calculate credit for guardian weekly in 6 for 6 period" in {
+    val subscriptionRaw = Source.fromResource("GuardianWeeklyWith6For6.json").mkString
+    val subscription = decode[Subscription](subscriptionRaw).getOrElse(fail(s"Could not decode"))
+
     checkCreditCalculation(
       zuoraSubscriptionData = "GuardianWeeklyWith6For6.json",
       stopDate = LocalDate.of(2019, 11, 8),
