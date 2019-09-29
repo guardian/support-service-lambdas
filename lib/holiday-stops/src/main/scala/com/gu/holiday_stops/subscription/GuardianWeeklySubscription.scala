@@ -83,7 +83,7 @@ case object GuardianWeeklyNForNHasBeenInvoiced extends CurrentGuardianWeeklyRate
  * scattered across multiple objects such as Subscription, RatePlan, RatePlanCharge.
  *
  */
-case class CurrentGuardianWeeklySubscription(
+case class GuardianWeeklySubscription(
   subscriptionNumber: String,
   billingPeriod: String,
   price: Double,
@@ -176,7 +176,7 @@ object PredictedInvoicedPeriod extends LazyLogging {
  * Purpose of N-for-N is providing customer with cheaper shorter plan to entice them to switch to regular one.
  * Regular GW plan in this case has not been invoiced so chargedThroughDate is null.
  */
-object CurrentGuardianWeeklySubscription {
+object GuardianWeeklySubscription {
 
   // Regular Guardian Weekly rate plan (for example, GW Oct 18 - Quarterly - Domestic)
   private def findGuardianWeeklyRatePlan(subscription: Subscription, guardianWeeklyProductRatePlanIds: List[String]): Option[RatePlan] =
@@ -211,7 +211,7 @@ object CurrentGuardianWeeklySubscription {
       .ratePlans
       .find(ratePlan => guardianWeeklyNForNProductRatePlanIds.contains(ratePlan.productRatePlanId))
 
-  def apply(subscription: Subscription, config: Config): Either[ZuoraHolidayError, CurrentGuardianWeeklySubscription] = {
+  def apply(subscription: Subscription, config: Config): Either[ZuoraHolidayError, GuardianWeeklySubscription] = {
     val guardianWeeklyProductRatePlanIds = config.guardianWeeklyConfig.productRatePlanIds
     val gwNforNProductRatePlanIds = config.guardianWeeklyConfig.nForNProductRatePlanIds
 
@@ -219,7 +219,7 @@ object CurrentGuardianWeeklySubscription {
       findGuardianWeeklyRatePlan(subscription, guardianWeeklyProductRatePlanIds)
         .map { currentGuardianWeeklyRatePlan => // these ugly gets are safe due to above conditions
           val currentGuardianWeeklyRatePlanCharge = currentGuardianWeeklyRatePlan.ratePlanCharges.head
-          new CurrentGuardianWeeklySubscription(
+          new GuardianWeeklySubscription(
             subscriptionNumber = subscription.subscriptionNumber,
             billingPeriod = currentGuardianWeeklyRatePlanCharge.billingPeriod.get,
             price = currentGuardianWeeklyRatePlanCharge.price,
@@ -239,7 +239,7 @@ object CurrentGuardianWeeklySubscription {
         predictedInvoicePeriod <- PredictedInvoicedPeriod(currentGuardianWeeklyWithoutInvoice, gwNForNwRatePlan)
       } yield { // // these ugly gets are safe due to above conditions
         val currentGuardianWeeklyRatePlanCharge = currentGuardianWeeklyWithoutInvoice.ratePlanCharges.head
-        new CurrentGuardianWeeklySubscription(
+        new GuardianWeeklySubscription(
           subscriptionNumber = subscription.subscriptionNumber,
           billingPeriod = currentGuardianWeeklyRatePlanCharge.billingPeriod.get,
           price = currentGuardianWeeklyRatePlanCharge.price,

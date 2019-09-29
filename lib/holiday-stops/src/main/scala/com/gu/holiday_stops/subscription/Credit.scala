@@ -12,7 +12,7 @@ object Credit extends LazyLogging {
   type PartiallyWiredCreditCalculator = (LocalDate, Subscription) => Either[HolidayError, Double]
 
   def apply(config: Config)(stoppedPublicationDate: LocalDate, subscription: Subscription): Either[ZuoraHolidayError, Double] =
-    CurrentGuardianWeeklySubscription(subscription, config).map(GuardianWeeklyHolidayCredit(_, stoppedPublicationDate))
+    GuardianWeeklySubscription(subscription, config).map(GuardianWeeklyHolidayCredit(_, stoppedPublicationDate))
       .orElse(VoucherSubscription(subscription, StoppedPublicationDate(stoppedPublicationDate)).map(VoucherHolidayCredit(_)))
       .orElse(Left(ZuoraHolidayError(s"Failed to calculate holiday stop credits for ${subscription.subscriptionNumber}")))
 }

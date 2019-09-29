@@ -37,7 +37,7 @@ object NextBillingPeriodStartDate {
   }
 
   def guardianWeeklyBillingPeriodStartDate(config: Config, subscription: Subscription, stoppedPublicationDate: LocalDate): Either[ZuoraHolidayError, LocalDate] =
-    CurrentGuardianWeeklySubscription(subscription, config).map { currentGuardianWeeklySubscription =>
+    GuardianWeeklySubscription(subscription, config).map { currentGuardianWeeklySubscription =>
       currentGuardianWeeklySubscription.introNforNMode match {
         case Some(introPlan) =>
           if (stoppedPublicationDate.isBefore(currentGuardianWeeklySubscription.invoicedPeriod.startDateIncluding))

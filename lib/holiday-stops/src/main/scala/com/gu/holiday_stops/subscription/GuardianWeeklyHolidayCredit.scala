@@ -13,7 +13,7 @@ import scala.math.BigDecimal.RoundingMode
  * FIXME: Discounts should be taken into account?
  */
 object GuardianWeeklyHolidayCredit {
-  def apply(currentGuardianWeeklySubscription: CurrentGuardianWeeklySubscription, stoppedPublicationDate: LocalDate): Double = {
+  def apply(currentGuardianWeeklySubscription: GuardianWeeklySubscription, stoppedPublicationDate: LocalDate): Double = {
     if (currentGuardianWeeklySubscription.introNforNMode.isDefined && stoppedPublicationDate.isBefore(currentGuardianWeeklySubscription.invoicedPeriod.startDateIncluding)) {
       -roundUp(1) // hardcoded because N-for-N means 1 currency unit per issue
     } else {
