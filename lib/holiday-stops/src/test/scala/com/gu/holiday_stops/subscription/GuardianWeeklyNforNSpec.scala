@@ -9,10 +9,6 @@ import org.scalatest._
 
 import scala.io.Source
 
-/*
-          "processedThroughDate": "2019-10-04",
-          "chargedThroughDate": "2019-11-15",
- */
 class GuardianWeeklyNforNSpec extends FlatSpec with Matchers with EitherValues {
   "GuardianWeeklySubscription" should "represent N-for-N when stopped publication date falls within N-for-N" in {
     val subscriptionRaw = Source.fromResource("GuardianWeeklyWith6For6.json").mkString

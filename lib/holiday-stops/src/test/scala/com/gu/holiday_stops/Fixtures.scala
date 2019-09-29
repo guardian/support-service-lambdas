@@ -242,17 +242,6 @@ object Fixtures {
   val config = Config(
     zuoraConfig = ZuoraConfig(baseUrl = "", holidayStopProcessor = HolidayStopProcessor(Oauth(clientId = "", clientSecret = ""))),
     sfConfig = SFAuthConfig("", "", "", "", "", ""),
-    HolidayCreditProduct.Dev,
-//    guardianWeeklyConfig = GuardianWeeklyHolidayStopConfig.Dev,
-//    SaturdayVoucherHolidayStopConfig.Dev,
-//    sundayVoucherConfig = SundayVoucherHolidayStopConfig.Dev,
-//    weekendVoucherConfig = WeekendVoucherHolidayStopConfig.Dev,
-//    SixdayVoucherHolidayStopConfig.Dev,
-//    EverydayVoucherHolidayStopConfig.Dev,
-//    EverydayPlusVoucherHolidayStopConfig.Dev,
-//    SixdayPlusVoucherHolidayStopConfig.Dev,
-//    WeekendPlusVoucherHolidayStopConfig.Dev,
-//    SundayPlusVoucherHolidayStopConfig.Dev,
-//    SaturdayPlusVoucherHolidayStopConfig.Dev,
+    HolidayCreditProduct.Dev
   )
 }
