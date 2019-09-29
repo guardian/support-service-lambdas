@@ -1,9 +1,10 @@
 package com.gu.holidaystopprocessor
 
-import com.gu.holiday_stops.subscription.{Credit, ExtendedTerm, HolidayCreditUpdate, NextBillingPeriodStartDate, Subscription}
+import com.gu.holiday_stops.subscription.{Credit, ExtendedTerm, HolidayCreditUpdate, NextBillingPeriodStartDate, StoppedProduct, Subscription}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
 import com.softwaremill.sttp.{Id, SttpBackend}
 import java.time.LocalDate
+
 import cats.implicits._
 import com.gu.holiday_stops._
 
@@ -73,10 +74,11 @@ object Processor {
   )(stop: HolidayStop): ZuoraHolidayResponse[ZuoraHolidayWriteResult] = {
     for {
       subscription <- getSubscription(stop.subscriptionName)
+      stoppedProduct <- StoppedProduct(subscription, StoppedPublicationDate(stop.stoppedPublicationDate))
       _ <- if (subscription.autoRenew) Right(()) else Left(ZuoraHolidayError("Cannot currently process non-auto-renewing subscription"))
-      nextInvoiceStartDate <- NextBillingPeriodStartDate(subscription, stop.stoppedPublicationDate)
+      nextInvoiceStartDate = stoppedProduct.nextBillingPeriodStartDate
       maybeExtendedTerm = ExtendedTerm(nextInvoiceStartDate, subscription)
-      holidayCredit <- Credit(config)(stop.stoppedPublicationDate, subscription)
+      holidayCredit = stoppedProduct.credit
       holidayCreditUpdate <- HolidayCreditUpdate(config.holidayCreditProduct, subscription, stop.stoppedPublicationDate, nextInvoiceStartDate, maybeExtendedTerm, holidayCredit)
       _ <- if (subscription.hasHolidayStop(stop)) Right(()) else updateSubscription(subscription, holidayCreditUpdate)
       updatedSubscription <- getSubscription(stop.subscriptionName)
