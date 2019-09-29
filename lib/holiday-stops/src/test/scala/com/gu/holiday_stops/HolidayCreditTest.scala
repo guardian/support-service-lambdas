@@ -2,7 +2,7 @@ package com.gu.holiday_stops
 
 import java.time.LocalDate
 
-import com.gu.holiday_stops.subscription.{GuardianWeeklyHolidayCredit, GuardianWeeklySubscription, RatePlan}
+import com.gu.holiday_stops.subscription.{GuardianWeeklySubscription, RatePlan}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.StoppedPublicationDate
 import org.scalatest.{EitherValues, FlatSpec, Matchers}
 
@@ -15,7 +15,7 @@ class HolidayCreditTest extends FlatSpec with Matchers with EitherValues {
     val ratePlans = List(RatePlan("Guardian Weekly - Domestic", List(charge), "", ""))
     val subscription = Fixtures.mkSubscription().copy(ratePlans = ratePlans)
     val currentGuardianWeeklySubscription = GuardianWeeklySubscription(subscription, stoppedPublicationDate)
-    val credit = GuardianWeeklyHolidayCredit(currentGuardianWeeklySubscription.right.value, stoppedPublicationDate.value)
+    val credit = currentGuardianWeeklySubscription.right.value.credit
     credit shouldBe -2.31
   }
 
@@ -24,7 +24,7 @@ class HolidayCreditTest extends FlatSpec with Matchers with EitherValues {
     val ratePlans = List(RatePlan("Guardian Weekly - Domestic", List(charge), "", ""))
     val subscription = Fixtures.mkSubscription().copy(ratePlans = ratePlans)
     val currentGuardianWeeklySubscription = GuardianWeeklySubscription(subscription, stoppedPublicationDate)
-    val credit = GuardianWeeklyHolidayCredit(currentGuardianWeeklySubscription.right.value, stoppedPublicationDate.value)
+    val credit = currentGuardianWeeklySubscription.right.value.credit
     credit shouldBe -2.89
   }
 
@@ -33,7 +33,7 @@ class HolidayCreditTest extends FlatSpec with Matchers with EitherValues {
     val ratePlans = List(RatePlan("Guardian Weekly - Domestic", List(charge), "", ""))
     val subscription = Fixtures.mkSubscription().copy(ratePlans = ratePlans)
     val currentGuardianWeeklySubscription = GuardianWeeklySubscription(subscription, stoppedPublicationDate)
-    val credit = GuardianWeeklyHolidayCredit(currentGuardianWeeklySubscription.right.value, stoppedPublicationDate.value)
+    val credit = currentGuardianWeeklySubscription.right.value.credit
     credit shouldBe -2.31
   }
 }

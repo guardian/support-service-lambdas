@@ -24,7 +24,7 @@ class HolidayCreditUpdateTest extends FlatSpec with Matchers with EitherValues {
     val currentGuardianWeeklySubscription = GuardianWeeklySubscription(subscription, stoppedPublicationDate)
     val nextInvoiceStartDate = NextBillingPeriodStartDate(subscription, stoppedPublicationDate.value).right.value
     val maybeExtendedTerm = ExtendedTerm(nextInvoiceStartDate, subscription)
-    val holidayCredit = GuardianWeeklyHolidayCredit(currentGuardianWeeklySubscription.right.value, stoppedPublicationDate.value)
+    val holidayCredit = currentGuardianWeeklySubscription.right.value.credit
 
     val update = HolidayCreditUpdate(
       Fixtures.config.holidayCreditProduct,
@@ -78,7 +78,7 @@ class HolidayCreditUpdateTest extends FlatSpec with Matchers with EitherValues {
     val currentGuardianWeeklySubscription = GuardianWeeklySubscription(subscription, stoppedPublicationDate)
     val nextInvoiceStartDate = holiday_stops.subscription.NextBillingPeriodStartDate(subscription, LocalDate.now).right.value
     val maybeExtendedTerm = ExtendedTerm(nextInvoiceStartDate, subscription)
-    val holidayCredit = GuardianWeeklyHolidayCredit(currentGuardianWeeklySubscription.right.value, LocalDate.now)
+    val holidayCredit = currentGuardianWeeklySubscription.right.value.credit
     val update = HolidayCreditUpdate(
       Fixtures.config.holidayCreditProduct,
       subscription = subscription,
@@ -118,7 +118,7 @@ class HolidayCreditUpdateTest extends FlatSpec with Matchers with EitherValues {
     val currentGuardianWeeklySubscription = GuardianWeeklySubscription(subscription, stoppedPublicationDate)
     val nextInvoiceStartDate = holiday_stops.subscription.NextBillingPeriodStartDate(subscription, LocalDate.now).right.value
     val maybeExtendedTerm = ExtendedTerm(nextInvoiceStartDate, subscription)
-    val holidayCredit = GuardianWeeklyHolidayCredit(currentGuardianWeeklySubscription.right.value, LocalDate.now)
+    val holidayCredit = currentGuardianWeeklySubscription.right.value.credit
     val update = HolidayCreditUpdate(
       Fixtures.config.holidayCreditProduct,
       subscription = subscription,

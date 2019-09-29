@@ -1,18 +1,21 @@
 package com.gu.holiday_stops.subscription
 
-import com.gu.holiday_stops.{ZuoraHolidayError, ZuoraHolidayResponse}
+import java.time.LocalDate
+
+import com.gu.holiday_stops.{BillingPeriodToApproxWeekCount, ZuoraHolidayError, ZuoraHolidayResponse}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.StoppedPublicationDate
 import enumeratum._
 
 case class VoucherSubscription(
   subscriptionNumber: String,
-  billingPeriod: String,
-  price: Double,
-  invoicedPeriod: CurrentInvoicedPeriod,
+  override val billingPeriod: String,
+  override val price: Double,
+  override val invoicedPeriod: CurrentInvoicedPeriod,
   ratePlanId: String,
   productRatePlanId: String,
-  dayOfWeek: VoucherDayOfWeek
-)
+  dayOfWeek: VoucherDayOfWeek,
+  override val stoppedPublicationDate: LocalDate
+) extends StoppableProduct(stoppedPublicationDate, price, billingPeriod, invoicedPeriod)
 
 sealed trait VoucherDayOfWeek extends EnumEntry
 
@@ -54,7 +57,8 @@ object VoucherSubscriptionPredicates {
 object VoucherSubscription {
   private def findVoucherRatePlan(
     subscription: Subscription,
-    stoppedPublicationDate: StoppedPublicationDate): Option[RatePlan] = {
+    stoppedPublicationDate: StoppedPublicationDate
+  ): Option[RatePlan] = {
 
     subscription
       .ratePlans
@@ -63,7 +67,7 @@ object VoucherSubscription {
         List(
           ratePlanIsVoucher(ratePlan, stoppedPublicationDate),
           stoppedPublicationDateFallsWithinInvoicedPeriod(ratePlan, stoppedPublicationDate),
-          billingPeriodIsAnnualOrMonthOrQuarterOrSemiAnnual(ratePlan),
+          billingPeriodIsAnnualOrMonthOrQuarterOrSemiAnnual(ratePlan)
         ).forall(_ == true)
       }
   }
@@ -85,7 +89,8 @@ object VoucherSubscription {
         ),
         ratePlanId = voucherRatePlan.id,
         productRatePlanId = voucherRatePlan.productRatePlanId,
-        dayOfWeek = VoucherDayOfWeek.withName(stoppedPublicationDate.getDayOfWeek)
+        dayOfWeek = VoucherDayOfWeek.withName(stoppedPublicationDate.getDayOfWeek),
+        stoppedPublicationDate.value
       )
     }.toRight(ZuoraHolidayError(s"Failed to determine Voucher Newspaper Guardian rate plan: $subscription"))
   }

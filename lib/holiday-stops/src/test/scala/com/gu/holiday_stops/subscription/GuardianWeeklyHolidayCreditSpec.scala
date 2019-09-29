@@ -32,12 +32,12 @@ object GuardianWeeklyHolidayCreditSpec extends Properties("HolidayCreditAmount")
   property("should be negative") = forAll(ratePlanChargeGen) { charge: RatePlanCharge =>
     val ratePlans = List(RatePlan("Guardian Weekly - Domestic", List(charge), "", ""))
     val currentGuardianWeeklySubscription = GuardianWeeklySubscription(subscription.copy(ratePlans = ratePlans), StoppedPublicationDate(chargedThroughDate.minusDays(1)))
-    GuardianWeeklyHolidayCredit(currentGuardianWeeklySubscription.right.value, LocalDate.now) < 0
+    currentGuardianWeeklySubscription.right.value.credit < 0
   }
 
   property("should never be overwhelmingly negative") = forAll(ratePlanChargeGen) { charge: RatePlanCharge =>
     val ratePlans = List(RatePlan("Guardian Weekly - Domestic", List(charge), "", ""))
     val currentGuardianWeeklySubscription = GuardianWeeklySubscription(subscription.copy(ratePlans = ratePlans), StoppedPublicationDate(chargedThroughDate.minusDays(1)))
-    GuardianWeeklyHolidayCredit(currentGuardianWeeklySubscription.right.value, LocalDate.now) > -charge.price
+    currentGuardianWeeklySubscription.right.value.credit > -charge.price
   }
 }

@@ -2,11 +2,12 @@ package com.gu.holiday_stops.subscription
 
 import java.time.LocalDate
 
-import com.gu.holiday_stops.ZuoraHolidayError
+import com.gu.holiday_stops.{BillingPeriodToApproxWeekCount, ZuoraHolidayError}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.StoppedPublicationDate
 import com.typesafe.scalalogging.LazyLogging
 import GuardianWeeklyRatePlanCondition._
 
+import scala.math.BigDecimal.RoundingMode
 import scala.util.Try
 
 /**
@@ -43,33 +44,13 @@ object GuardianWeeklyRatePlanCondition {
  */
 case class GuardianWeeklySubscription(
   subscriptionNumber: String,
-  billingPeriod: String,
-  price: Double,
-  invoicedPeriod: CurrentInvoicedPeriod,
+  override val billingPeriod: String,
+  override val price: Double,
+  override val invoicedPeriod: CurrentInvoicedPeriod,
   ratePlanId: String,
   productRatePlanId: String,
-)
-
-/**
- * Is date between two dates where including the start while excluding the end?
- */
-object PeriodContainsDate extends ((LocalDate, LocalDate, LocalDate) => Boolean) {
-  def apply(
-    startPeriodInclusive: LocalDate,
-    endPeriodExcluding: LocalDate,
-    date: LocalDate
-  ): Boolean =
-    (date.isEqual(startPeriodInclusive) || date.isAfter(startPeriodInclusive)) && date.isBefore(endPeriodExcluding)
-}
-
-/**
- * Invoiced period defined by [startDateIncluding, endDateExcluding) specifies the current period for which
- * the customer has been billed.
- *
- * @param startDateIncluding service active on startDateIncluding; corresponds to processedThroughDate
- * @param endDateExcluding service ends on endDateExcluding; corresponds to chargedThroughDate
- */
-case class CurrentInvoicedPeriod(startDateIncluding: LocalDate, endDateExcluding: LocalDate)
+  override val stoppedPublicationDate: LocalDate
+) extends StoppableProduct(stoppedPublicationDate, price, billingPeriod, invoicedPeriod)
 
 /**
  * Only for GW + N-for-N scenario when regular GW plan has not been invoiced so chargedThroughDate is null.
@@ -123,7 +104,8 @@ object GuardianWeeklySubscription {
           currentGuardianWeeklyRatePlanCharge.price,
           CurrentInvoicedPeriod(startDateIncluding, endDateExcluding),
           currentGuardianWeeklyRatePlan.id,
-          currentGuardianWeeklyRatePlan.productRatePlanId
+          currentGuardianWeeklyRatePlan.productRatePlanId,
+          stoppedPublicationDate.value
         )
       }
 
@@ -142,7 +124,8 @@ object GuardianWeeklySubscription {
           price = regularRpc.price,
           invoicedPeriod = predictedInvoicedPeriod,
           ratePlanId = regular.id,
-          productRatePlanId = regular.productRatePlanId
+          productRatePlanId = regular.productRatePlanId,
+          stoppedPublicationDate.value
         )
       })
 
