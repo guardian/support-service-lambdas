@@ -2,20 +2,18 @@ package com.gu.holiday_stops.subscription
 
 import java.time.LocalDate
 
-import com.gu.holiday_stops.{BillingPeriodToApproxWeekCount, ZuoraHolidayError, ZuoraHolidayResponse}
+import com.gu.holiday_stops.{ZuoraHolidayError, ZuoraHolidayResponse}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.StoppedPublicationDate
 import enumeratum._
 
 case class VoucherSubscription(
-  subscriptionNumber: String,
+  override val subscriptionNumber: String,
   override val billingPeriod: String,
   override val price: Double,
   override val invoicedPeriod: CurrentInvoicedPeriod,
-  ratePlanId: String,
-  productRatePlanId: String,
+  override val stoppedPublicationDate: LocalDate,
   dayOfWeek: VoucherDayOfWeek,
-  override val stoppedPublicationDate: LocalDate
-) extends StoppableProduct(stoppedPublicationDate, price, billingPeriod, invoicedPeriod)
+) extends StoppableProduct(subscriptionNumber, stoppedPublicationDate, price, billingPeriod, invoicedPeriod)
 
 sealed trait VoucherDayOfWeek extends EnumEntry
 
@@ -87,10 +85,8 @@ object VoucherSubscription {
           startDateIncluding = startDateIncluding,
           endDateExcluding = endDateExcluding
         ),
-        ratePlanId = voucherRatePlan.id,
-        productRatePlanId = voucherRatePlan.productRatePlanId,
+        stoppedPublicationDate.value,
         dayOfWeek = VoucherDayOfWeek.withName(stoppedPublicationDate.getDayOfWeek),
-        stoppedPublicationDate.value
       )
     }.toRight(ZuoraHolidayError(s"Failed to determine Voucher Newspaper Guardian rate plan: $subscription"))
   }

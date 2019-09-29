@@ -3,7 +3,6 @@ package com.gu.holiday_stops.subscription
 import java.time.LocalDate
 
 import com.gu.holiday_stops.BillingPeriodToApproxWeekCount
-
 import scala.math.BigDecimal.RoundingMode
 
 /**
@@ -28,6 +27,7 @@ object PeriodContainsDate extends ((LocalDate, LocalDate, LocalDate) => Boolean)
 }
 
 abstract class StoppableProduct(
+  val subscriptionNumber: String,
   val stoppedPublicationDate: LocalDate,
   val price: Double,
   val billingPeriod: String,

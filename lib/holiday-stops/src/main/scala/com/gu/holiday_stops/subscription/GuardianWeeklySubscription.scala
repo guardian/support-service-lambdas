@@ -7,7 +7,6 @@ import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.Stopp
 import com.typesafe.scalalogging.LazyLogging
 import GuardianWeeklyRatePlanCondition._
 
-import scala.math.BigDecimal.RoundingMode
 import scala.util.Try
 
 /**
@@ -43,14 +42,12 @@ object GuardianWeeklyRatePlanCondition {
  *
  */
 case class GuardianWeeklySubscription(
-  subscriptionNumber: String,
+  override val subscriptionNumber: String,
   override val billingPeriod: String,
   override val price: Double,
   override val invoicedPeriod: CurrentInvoicedPeriod,
-  ratePlanId: String,
-  productRatePlanId: String,
   override val stoppedPublicationDate: LocalDate
-) extends StoppableProduct(stoppedPublicationDate, price, billingPeriod, invoicedPeriod)
+) extends StoppableProduct(subscriptionNumber, stoppedPublicationDate, price, billingPeriod, invoicedPeriod)
 
 /**
  * Only for GW + N-for-N scenario when regular GW plan has not been invoiced so chargedThroughDate is null.
@@ -103,8 +100,6 @@ object GuardianWeeklySubscription {
           billingPeriod,
           currentGuardianWeeklyRatePlanCharge.price,
           CurrentInvoicedPeriod(startDateIncluding, endDateExcluding),
-          currentGuardianWeeklyRatePlan.id,
-          currentGuardianWeeklyRatePlan.productRatePlanId,
           stoppedPublicationDate.value
         )
       }
@@ -118,13 +113,11 @@ object GuardianWeeklySubscription {
         stoppedPublicationDateFallsWithinPredictedInvoicedPeriod = PeriodContainsDate(predictedInvoicedPeriod.startDateIncluding, predictedInvoicedPeriod.endDateExcluding, stoppedPublicationDate.value)
         _ <- if (stoppedPublicationDateFallsWithinPredictedInvoicedPeriod) Some({}) else None
       } yield {
-        GuardianWeeklySubscription(
+        new GuardianWeeklySubscription(
           subscriptionNumber = subscription.subscriptionNumber,
           billingPeriod = regularRpc.billingPeriod.get,
           price = regularRpc.price,
           invoicedPeriod = predictedInvoicedPeriod,
-          ratePlanId = regular.id,
-          productRatePlanId = regular.productRatePlanId,
           stoppedPublicationDate.value
         )
       })
