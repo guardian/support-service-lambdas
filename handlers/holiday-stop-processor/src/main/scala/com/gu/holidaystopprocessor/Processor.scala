@@ -17,18 +17,20 @@ object Processor {
 
       case Right(zuoraAccessToken) =>
         List(
-          processProduct(config, Salesforce.holidayStopRequests(config.sfConfig)(GuardianWeekly, processDateOverride), _, _, _),
-          processProduct(config, Salesforce.holidayStopRequests(config.sfConfig)(SaturdayVoucher, processDateOverride), _, _, _),
-          processProduct(config, Salesforce.holidayStopRequests(config.sfConfig)(SundayVoucher, processDateOverride), _, _, _),
-          processProduct(config, Salesforce.holidayStopRequests(config.sfConfig)(WeekendVoucher, processDateOverride), _, _, _),
-          processProduct(config, Salesforce.holidayStopRequests(config.sfConfig)(SixdayVoucher, processDateOverride), _, _, _),
-          processProduct(config, Salesforce.holidayStopRequests(config.sfConfig)(EverydayVoucher, processDateOverride), _, _, _),
-          processProduct(config, Salesforce.holidayStopRequests(config.sfConfig)(EverydayPlusVoucher, processDateOverride), _, _, _),
-          processProduct(config, Salesforce.holidayStopRequests(config.sfConfig)(SixdayPlusVoucher, processDateOverride), _, _, _),
-          processProduct(config, Salesforce.holidayStopRequests(config.sfConfig)(WeekendPlusVoucher, processDateOverride), _, _, _),
-          processProduct(config, Salesforce.holidayStopRequests(config.sfConfig)(SundayPlusVoucher, processDateOverride), _, _, _),
-          processProduct(config, Salesforce.holidayStopRequests(config.sfConfig)(SaturdayPlusVoucher, processDateOverride), _, _, _),
-        ) map {
+          GuardianWeekly,
+          SaturdayVoucher,
+          SundayVoucher,
+          WeekendVoucher,
+          SixdayVoucher,
+          EverydayVoucher,
+          EverydayPlusVoucher,
+          SixdayPlusVoucher,
+          WeekendPlusVoucher,
+          SundayPlusVoucher,
+          SaturdayPlusVoucher,
+        )
+          .map(product => processProduct(config, Salesforce.holidayStopRequests(config.sfConfig)(product, processDateOverride), _, _, _))
+          .map{
             _.apply(
               Zuora.subscriptionGetResponse(config, zuoraAccessToken, backend),
               Zuora.subscriptionUpdateResponse(config, zuoraAccessToken, backend),
