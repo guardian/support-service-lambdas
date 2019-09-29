@@ -1,12 +1,11 @@
 package com.gu.holiday_stops.subscription
 
 import java.time.LocalDate
-
-import com.gu.holiday_stops.{BillingPeriodToApproxWeekCount, ZuoraHolidayError}
+import com.gu.holiday_stops.ZuoraHolidayError
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.StoppedPublicationDate
 import com.typesafe.scalalogging.LazyLogging
 import GuardianWeeklyRatePlanCondition._
-
+import acyclic.skipped
 import scala.util.Try
 
 /**
@@ -47,7 +46,7 @@ case class GuardianWeeklySubscription(
   override val price: Double,
   override val invoicedPeriod: CurrentInvoicedPeriod,
   override val stoppedPublicationDate: LocalDate
-) extends StoppableProduct(subscriptionNumber, stoppedPublicationDate, price, billingPeriod, invoicedPeriod)
+) extends StoppedProduct(subscriptionNumber, stoppedPublicationDate, price, billingPeriod, invoicedPeriod)
 
 /**
  * Only for GW + N-for-N scenario when regular GW plan has not been invoiced so chargedThroughDate is null.
@@ -113,7 +112,7 @@ object GuardianWeeklySubscription {
         stoppedPublicationDateFallsWithinPredictedInvoicedPeriod = PeriodContainsDate(predictedInvoicedPeriod.startDateIncluding, predictedInvoicedPeriod.endDateExcluding, stoppedPublicationDate.value)
         _ <- if (stoppedPublicationDateFallsWithinPredictedInvoicedPeriod) Some({}) else None
       } yield {
-        new GuardianWeeklySubscription(
+        GuardianWeeklySubscription(
           subscriptionNumber = subscription.subscriptionNumber,
           billingPeriod = regularRpc.billingPeriod.get,
           price = regularRpc.price,
@@ -127,3 +126,4 @@ object GuardianWeeklySubscription {
 
   }
 }
+

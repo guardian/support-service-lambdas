@@ -3,7 +3,7 @@ package com.gu.holiday_stops.subscription
 import java.time.LocalDate
 
 import cats.syntax.either._
-import com.gu.holiday_stops.{Config, ZuoraHolidayError}
+import com.gu.holiday_stops.ZuoraHolidayError
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.StoppedPublicationDate
 
 /**
@@ -31,8 +31,8 @@ import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.Stopp
 
 object NextBillingPeriodStartDate {
   def apply(subscription: Subscription, stoppedPublicationDate: LocalDate): Either[ZuoraHolidayError, LocalDate] = {
-    GuardianWeeklySubscription(subscription, StoppedPublicationDate(stoppedPublicationDate)).map(_.nextBillingPeriodStartDate)
-      .orElse(VoucherSubscription(subscription, StoppedPublicationDate(stoppedPublicationDate)).map(_.nextBillingPeriodStartDate))
-      .orElse(Left(ZuoraHolidayError(s"Failed to calculate when to apply holiday credit: $subscription")))
+    StoppedProduct(subscription, StoppedPublicationDate(stoppedPublicationDate))
+      .map(_.nextBillingPeriodStartDate)
+      .leftMap(e => ZuoraHolidayError(s"Failed to calculate when to apply credit because $e"))
   }
 }

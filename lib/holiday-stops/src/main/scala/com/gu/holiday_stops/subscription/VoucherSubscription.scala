@@ -5,6 +5,7 @@ import java.time.LocalDate
 import com.gu.holiday_stops.{ZuoraHolidayError, ZuoraHolidayResponse}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.StoppedPublicationDate
 import enumeratum._
+import acyclic.skipped
 
 case class VoucherSubscription(
   override val subscriptionNumber: String,
@@ -13,7 +14,7 @@ case class VoucherSubscription(
   override val invoicedPeriod: CurrentInvoicedPeriod,
   override val stoppedPublicationDate: LocalDate,
   dayOfWeek: VoucherDayOfWeek,
-) extends StoppableProduct(subscriptionNumber, stoppedPublicationDate, price, billingPeriod, invoicedPeriod)
+) extends StoppedProduct(subscriptionNumber, stoppedPublicationDate, price, billingPeriod, invoicedPeriod)
 
 sealed trait VoucherDayOfWeek extends EnumEntry
 
