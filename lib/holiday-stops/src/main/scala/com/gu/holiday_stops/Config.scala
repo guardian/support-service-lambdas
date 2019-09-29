@@ -9,17 +9,6 @@ case class Config(
   zuoraConfig: ZuoraConfig,
   sfConfig: SFAuthConfig,
   holidayCreditProduct: HolidayCreditProduct,
-//  guardianWeeklyConfig: GuardianWeeklyHolidayStopConfig,
-//  saturdayVoucherConfig: SaturdayVoucherHolidayStopConfig,
-//  sundayVoucherConfig: SundayVoucherHolidayStopConfig,
-//  weekendVoucherConfig: WeekendVoucherHolidayStopConfig,
-//  sixdayVoucherConfig: SixdayVoucherHolidayStopConfig,
-//  everydayVoucherConfig: EverydayVoucherHolidayStopConfig,
-//  everydayPlusVoucherConfig: EverydayPlusVoucherHolidayStopConfig,
-//  sixdayPlusVoucherConfig: SixdayPlusVoucherHolidayStopConfig,
-//  weekendPlusVoucherConfig: WeekendPlusVoucherHolidayStopConfig,
-//  sundayPlusVoucherConfig: SundayPlusVoucherHolidayStopConfig,
-//  saturdayPlusVoucherConfig: SaturdayPlusVoucherHolidayStopConfig,
 )
 
 case class ZuoraConfig(
@@ -66,51 +55,18 @@ object Config {
             zuoraConfig,
             sfConfig,
             HolidayCreditProduct.Prod,
-//            GuardianWeeklyHolidayStopConfig.Prod,
-//            SaturdayVoucherHolidayStopConfig.Prod,
-//            SundayVoucherHolidayStopConfig.Prod,
-//            WeekendVoucherHolidayStopConfig.Prod,
-//            SixdayVoucherHolidayStopConfig.Prod,
-//            EverydayVoucherHolidayStopConfig.Prod,
-//            EverydayPlusVoucherHolidayStopConfig.Prod,
-//            SixdayPlusVoucherHolidayStopConfig.Prod,
-//            WeekendPlusVoucherHolidayStopConfig.Prod,
-//            SundayPlusVoucherHolidayStopConfig.Prod,
-//            SaturdayPlusVoucherHolidayStopConfig.Prod,
           )
         case "CODE" =>
           Config(
             zuoraConfig,
             sfConfig,
             HolidayCreditProduct.Code,
-//            GuardianWeeklyHolidayStopConfig.Code,
-//            SaturdayVoucherHolidayStopConfig.Code,
-//            SundayVoucherHolidayStopConfig.Code,
-//            WeekendVoucherHolidayStopConfig.Code,
-//            SixdayVoucherHolidayStopConfig.Code,
-//            EverydayVoucherHolidayStopConfig.Code,
-//            EverydayPlusVoucherHolidayStopConfig.Code,
-//            SixdayPlusVoucherHolidayStopConfig.Code,
-//            WeekendPlusVoucherHolidayStopConfig.Code,
-//            SundayPlusVoucherHolidayStopConfig.Code,
-//            SaturdayPlusVoucherHolidayStopConfig.Code,
           )
         case "DEV" =>
           Config(
             zuoraConfig,
             sfConfig,
             HolidayCreditProduct.Dev,
-//            GuardianWeeklyHolidayStopConfig.Dev,
-//            SaturdayVoucherHolidayStopConfig.Dev,
-//            SundayVoucherHolidayStopConfig.Dev,
-//            WeekendVoucherHolidayStopConfig.Dev,
-//            SixdayVoucherHolidayStopConfig.Dev,
-//            EverydayVoucherHolidayStopConfig.Dev,
-//            EverydayPlusVoucherHolidayStopConfig.Dev,
-//            SixdayPlusVoucherHolidayStopConfig.Dev,
-//            WeekendPlusVoucherHolidayStopConfig.Dev,
-//            SundayPlusVoucherHolidayStopConfig.Dev,
-//            SaturdayPlusVoucherHolidayStopConfig.Dev,
           )
       }
     }
