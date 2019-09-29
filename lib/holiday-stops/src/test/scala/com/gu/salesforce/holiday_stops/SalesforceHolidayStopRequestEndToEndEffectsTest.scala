@@ -3,8 +3,7 @@ package com.gu.salesforce.holiday_stops
 import java.time.LocalDate
 
 import com.gu.effects.{GetFromS3, RawEffects}
-import com.gu.holiday_stops.subscription.Credit.PartiallyWiredCreditCalculator
-import com.gu.holiday_stops.Fixtures
+import com.gu.holiday_stops.{Fixtures, PartiallyWiredCreditCalculator}
 import com.gu.holiday_stops.subscription.Subscription
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.SalesforceClient

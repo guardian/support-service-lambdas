@@ -19,9 +19,6 @@ class CreditCalculatorSpec extends FlatSpec with Matchers with EitherValues {
     )
   }
   it should "calculate credit for guardian weekly in 6 for 6 period" in {
-    val subscriptionRaw = Source.fromResource("GuardianWeeklyWith6For6.json").mkString
-    val subscription = decode[Subscription](subscriptionRaw).getOrElse(fail(s"Could not decode"))
-
     checkCreditCalculation(
       zuoraSubscriptionData = "GuardianWeeklyWith6For6.json",
       stopDate = LocalDate.of(2019, 11, 8),
@@ -55,7 +52,8 @@ class CreditCalculatorSpec extends FlatSpec with Matchers with EitherValues {
   private def checkCreditCalculation(zuoraSubscriptionData: String, stopDate: LocalDate, expectedCredit: Double) = {
     val subscriptionRaw = Source.fromResource(zuoraSubscriptionData).mkString
     val subscription = decode[Subscription](subscriptionRaw).getOrElse(fail(s"Could not decode $zuoraSubscriptionData"))
+    val stoppedProduct = StoppedProduct(subscription, StoppedPublicationDate(stopDate)).right.value
 
-    Credit(Fixtures.config)(stopDate, subscription) should equal(Right(expectedCredit))
+    stoppedProduct.credit should equal(expectedCredit)
   }
 }

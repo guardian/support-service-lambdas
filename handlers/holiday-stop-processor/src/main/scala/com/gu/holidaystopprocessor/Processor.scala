@@ -1,6 +1,6 @@
 package com.gu.holidaystopprocessor
 
-import com.gu.holiday_stops.subscription.{Credit, ExtendedTerm, HolidayCreditUpdate, NextBillingPeriodStartDate, StoppedProduct, Subscription}
+import com.gu.holiday_stops.subscription.{ExtendedTerm, HolidayCreditUpdate, StoppedProduct, Subscription}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
 import com.softwaremill.sttp.{Id, SttpBackend}
 import java.time.LocalDate

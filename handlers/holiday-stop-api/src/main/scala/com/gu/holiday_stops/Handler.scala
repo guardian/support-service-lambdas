@@ -2,14 +2,13 @@ package com.gu.holiday_stops
 
 import java.io.{InputStream, OutputStream}
 import java.time.LocalDate
-
+import cats.syntax.either._
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
-import com.gu.holiday_stops.subscription.Credit.PartiallyWiredCreditCalculator
-import com.gu.holiday_stops.subscription.{Credit, HolidayStopCredit, Subscription}
+import com.gu.holiday_stops.subscription.{HolidayStopCredit, StoppedProduct, Subscription}
 import com.gu.salesforce.SalesforceClient
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestId, ProductName, ProductRatePlanKey, ProductRatePlanName, ProductType, SubscriptionName}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestId, ProductName, ProductRatePlanKey, ProductRatePlanName, ProductType, StoppedPublicationDate, SubscriptionName}
 import com.gu.salesforce.holiday_stops.SalesforceSFSubscription.SubscriptionForSubscriptionNameAndContact._
 import com.gu.salesforce.holiday_stops.{SalesforceHolidayStopRequest, SalesforceSFSubscription}
 import com.gu.util.Logging
@@ -25,6 +24,7 @@ import com.gu.util.resthttp.JsonHttp.StringHttpRequest
 import com.gu.util.resthttp.RestRequestMaker.BodyAsString
 import com.gu.util.resthttp.{HttpOp, JsonHttp}
 import com.softwaremill.sttp.{HttpURLConnectionBackend, Id, SttpBackend}
+import com.typesafe.scalalogging.LazyLogging
 import okhttp3.{Request, Response}
 import play.api.libs.json.{Json, Reads}
 import scalaz.{-\/, \/, \/-}
@@ -62,7 +62,7 @@ object Handler extends Logging {
     } yield Operation.noHealthcheck(request => // checking connectivity to SF is sufficient healthcheck so no special steps required
       validateRequestAndCreateSteps(
         request,
-        Credit(config),
+        credit(config),
         getSubscriptionFromZuora(config, backend)
       )(request, sfClient))
   }
@@ -313,4 +313,9 @@ object Handler extends Logging {
 
   def badrequest(message: String)(req: ApiGatewayRequest, sfClient: HttpOp[StringHttpRequest, BodyAsString]): ApiResponse =
     ApiGatewayResponse.badRequest(message)
+
+  def credit(config: Config)(stoppedPublicationDate: LocalDate, subscription: Subscription): Either[ZuoraHolidayError, Double] =
+    StoppedProduct(subscription, StoppedPublicationDate(stoppedPublicationDate))
+      .map(_.credit)
+      .leftMap(e => ZuoraHolidayError(s"Failed to calculate holiday stop credits because $e"))
 }
