@@ -1,6 +1,6 @@
 package com.gu.holiday_stops.subscription
 
-import com.gu.holiday_stops.ZuoraHolidayError
+import com.gu.holiday_stops.{ZuoraHolidayError, ZuoraHolidayResponse}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.StoppedPublicationDate
 import enumeratum._
 
@@ -29,16 +29,16 @@ object VoucherDayOfWeek extends Enum[VoucherDayOfWeek] {
 }
 
 object VoucherSubscriptionPredicates {
-  def ratePlanIsVoucher(ratePlan: RatePlan, voucherProductRatePlanId: String): Boolean =
-    ratePlan.productRatePlanId == voucherProductRatePlanId
+  def ratePlanIsVoucher(ratePlan: RatePlan, stoppedPublicationDate: StoppedPublicationDate): Boolean =
+    ratePlan.productName == "Newspaper Voucher" && ratePlan.ratePlanCharges.exists(_.name == stoppedPublicationDate.getDayOfWeek)
 
-  def ratePlanHasBeenInvoicedForAllCharges(ratePlan: RatePlan): Boolean = {
+  def stoppedPublicationDateFallsWithinInvoicedPeriod(ratePlan: RatePlan, stoppedPublicationDate: StoppedPublicationDate): Boolean = {
     ratePlan.ratePlanCharges.forall { ratePlanCharge =>
       (for {
         fromInclusive <- ratePlanCharge.processedThroughDate
         toExclusive <- ratePlanCharge.chargedThroughDate
       } yield {
-        toExclusive isAfter fromInclusive
+        (toExclusive isAfter fromInclusive) && PeriodContainsDate(fromInclusive, toExclusive, stoppedPublicationDate.value)
       }).getOrElse(false)
     }
   }
@@ -54,7 +54,6 @@ object VoucherSubscriptionPredicates {
 object VoucherSubscription {
   private def findVoucherRatePlan(
     subscription: Subscription,
-    voucherProductRatePlanId: String,
     stoppedPublicationDate: StoppedPublicationDate): Option[RatePlan] = {
 
     subscription
@@ -62,19 +61,15 @@ object VoucherSubscription {
       .find { ratePlan =>
         import VoucherSubscriptionPredicates._
         List(
-          ratePlanIsVoucher(ratePlan, voucherProductRatePlanId),
-          ratePlanHasBeenInvoicedForAllCharges(ratePlan),
+          ratePlanIsVoucher(ratePlan, stoppedPublicationDate),
+          stoppedPublicationDateFallsWithinInvoicedPeriod(ratePlan, stoppedPublicationDate),
           billingPeriodIsAnnualOrMonthOrQuarterOrSemiAnnual(ratePlan),
         ).forall(_ == true)
       }
   }
 
-  def apply(
-    subscription: Subscription,
-    productRatePlanId: String,
-    stoppedPublicationDate: StoppedPublicationDate
-  ): Either[ZuoraHolidayError, VoucherSubscription] = {
-    findVoucherRatePlan(subscription, productRatePlanId, stoppedPublicationDate).flatMap { voucherRatePlan =>
+  def apply(subscription: Subscription, stoppedPublicationDate: StoppedPublicationDate): ZuoraHolidayResponse[VoucherSubscription] = {
+    findVoucherRatePlan(subscription, stoppedPublicationDate).flatMap { voucherRatePlan =>
       for {
         rpc <- voucherRatePlan.ratePlanCharges.find(_.name == stoppedPublicationDate.getDayOfWeek) // find particular RPC, Saturday, Sunday, etc.
         billingPeriod <- rpc.billingPeriod

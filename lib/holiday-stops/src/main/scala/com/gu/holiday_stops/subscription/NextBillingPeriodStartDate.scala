@@ -32,16 +32,7 @@ import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.Stopp
 object NextBillingPeriodStartDate {
   def apply(config: Config, subscription: Subscription, stoppedPublicationDate: LocalDate): Either[ZuoraHolidayError, LocalDate] = {
     guardianWeeklyBillingPeriodStartDate(config, subscription, stoppedPublicationDate)
-      .orElse(voucherBillingPeriodStartDate(config.saturdayVoucherConfig.productRatePlanId, subscription, StoppedPublicationDate(stoppedPublicationDate)))
-      .orElse(voucherBillingPeriodStartDate(config.sundayVoucherConfig.productRatePlanId, subscription, StoppedPublicationDate(stoppedPublicationDate)))
-      .orElse(voucherBillingPeriodStartDate(config.weekendVoucherConfig.productRatePlanId, subscription, StoppedPublicationDate(stoppedPublicationDate)))
-      .orElse(voucherBillingPeriodStartDate(config.sixdayVoucherConfig.productRatePlanId, subscription, StoppedPublicationDate(stoppedPublicationDate)))
-      .orElse(voucherBillingPeriodStartDate(config.everydayVoucherConfig.productRatePlanId, subscription, StoppedPublicationDate(stoppedPublicationDate)))
-      .orElse(voucherBillingPeriodStartDate(config.everydayPlusVoucherConfig.productRatePlanId, subscription, StoppedPublicationDate(stoppedPublicationDate)))
-      .orElse(voucherBillingPeriodStartDate(config.sixdayPlusVoucherConfig.productRatePlanId, subscription, StoppedPublicationDate(stoppedPublicationDate)))
-      .orElse(voucherBillingPeriodStartDate(config.weekendPlusVoucherConfig.productRatePlanId, subscription, StoppedPublicationDate(stoppedPublicationDate)))
-      .orElse(voucherBillingPeriodStartDate(config.sundayPlusVoucherConfig.productRatePlanId, subscription, StoppedPublicationDate(stoppedPublicationDate)))
-      .orElse(voucherBillingPeriodStartDate(config.saturdayPlusVoucherConfig.productRatePlanId, subscription, StoppedPublicationDate(stoppedPublicationDate)))
+      .orElse(voucherBillingPeriodStartDate(subscription, StoppedPublicationDate(stoppedPublicationDate)))
       .orElse(Left(ZuoraHolidayError(s"Failed to calculate when to apply holiday credit: $subscription")))
   }
 
@@ -59,6 +50,6 @@ object NextBillingPeriodStartDate {
       }
     }
 
-  def voucherBillingPeriodStartDate(voucherProductRatePlanId: String, subscription: Subscription, stoppedPublicationDate: StoppedPublicationDate): Either[ZuoraHolidayError, LocalDate] =
-    VoucherSubscription(subscription, voucherProductRatePlanId, stoppedPublicationDate).map(_.invoicedPeriod.endDateExcluding)
+  def voucherBillingPeriodStartDate(subscription: Subscription, stoppedPublicationDate: StoppedPublicationDate): Either[ZuoraHolidayError, LocalDate] =
+    VoucherSubscription(subscription, stoppedPublicationDate).map(_.invoicedPeriod.endDateExcluding)
 }
