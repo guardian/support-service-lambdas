@@ -8,7 +8,7 @@ import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.holiday_stops.subscription.{HolidayStopCredit, StoppedProduct, Subscription}
 import com.gu.salesforce.SalesforceClient
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestId, ProductName, ProductRatePlanKey, ProductRatePlanName, ProductType, StoppedPublicationDate, SubscriptionName}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestId, Product, ProductName, StoppedPublicationDate, SubscriptionName}
 import com.gu.salesforce.holiday_stops.SalesforceSFSubscription.SubscriptionForSubscriptionNameAndContact._
 import com.gu.salesforce.holiday_stops.{SalesforceHolidayStopRequest, SalesforceSFSubscription}
 import com.gu.util.Logging
@@ -200,7 +200,7 @@ object Handler extends Logging {
           .publicationDatesToBeStopped(
             startDate,
             endDate,
-            ProductRatePlanKey(ProductType(productType), ProductRatePlanName(productRatePlanName))
+            Product.withName(productRatePlanName)
           )
           .toApiGatewayOp(s"calculating publication dates")
       case PotentialHolidayStopsQueryParams(startDate, endDate, _, _, _) =>
@@ -247,13 +247,12 @@ object Handler extends Logging {
     } yield ApiGatewayResponse("200", response)).apiResponse
   }
 
-  private def getProductRatePlanKey(req: ApiGatewayRequest): Option[ProductRatePlanKey] = {
+  private def getProductRatePlanKey(req: ApiGatewayRequest): Option[Product] = {
     (
       req.queryStringParameters.flatMap(_.get(PRODUCT_TYPE_QUERY_STRING_KEY)),
       req.queryStringParameters.flatMap(_.get(PRODUCT_RATE_PLAN_NAME_QUERY_STRING_KEY))
     ) match {
-        case (Some(productType), Some(ratePlanName)) =>
-          Some(ProductRatePlanKey(ProductType(productType), ProductRatePlanName(ratePlanName)))
+        case (_, Some(ratePlanName)) => Some(Product.withName(ratePlanName))
         case _ => None
       }
   }

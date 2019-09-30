@@ -68,14 +68,14 @@ abstract class StoppedProduct(
   def nextBillingPeriodStartDate: LocalDate = invoicedPeriod.endDateExcluding
 
   private def billingPeriodToApproxWeekCount(billingPeriod: String): Int =
-      billingPeriod match {
-        case "Annual" => 52
-        case "Semi-Annual" => 26
-        case "Quarter" => 13
-        case "Month" => 4
-        case "Specific_Weeks" => 6 // FIXME: When we have others than 6-for-6
-        case _ => throw new RuntimeException(s"Failed to convert billing period to weeks because unknown period: $billingPeriod") // FIXME: Either
-      }
+    billingPeriod match {
+      case "Annual" => 52
+      case "Semi-Annual" => 26
+      case "Quarter" => 13
+      case "Month" => 4
+      case "Specific_Weeks" => 6 // FIXME: When we have others than 6-for-6
+      case _ => throw new RuntimeException(s"Failed to convert billing period to weeks because unknown period: $billingPeriod") // FIXME: Either
+    }
 }
 
 object StoppedProduct {

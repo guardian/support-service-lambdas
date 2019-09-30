@@ -6,8 +6,8 @@ import com.gu.effects.RawEffects
 import com.gu.holiday_stops.ActionCalculator.GuardianWeeklyIssueSuspensionConstants
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.SalesforceClient
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{ProductRatePlanKey, _}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
+import Product._
 import com.gu.util.resthttp.JsonHttp
 import scalaz.{-\/, \/-}
 import com.gu.holiday_stops.{ActionCalculator, SalesforceHolidayError, SalesforceHolidayResponse}
@@ -27,13 +27,8 @@ object Salesforce {
     SalesforceClient(RawEffects.response, sfCredentials).value.flatMap { sfAuth =>
       val sfGet = sfAuth.wrapWith(JsonHttp.getWithParams)
       product match {
-        case GuardianWeekly =>
-          val fetchOp = SalesforceHolidayStopRequestsDetail.LookupPendingByProductNamePrefixAndDate(sfGet)
-          fetchOp(ProductName("Guardian Weekly"), processDate)
-
-        case voucher =>
-          val fetchOp = SalesforceHolidayStopRequestsDetail.FetchVoucherHolidayStopRequestsDetails(sfGet)
-          fetchOp(ProductRatePlanKey(voucher), processDate)
+        case GuardianWeekly => LookupPendingByProductNamePrefixAndDate(sfGet)(GuardianWeekly, processDate)
+        case voucher => FetchVoucherHolidayStopRequestsDetails(sfGet)(voucher, processDate)
       }
     }.toDisjunction match {
       case -\/(failure) => Left(SalesforceHolidayError(failure.toString))

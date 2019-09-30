@@ -4,7 +4,7 @@ import com.gu.holiday_stops.subscription.{ExtendedTerm, HolidayCreditUpdate, Sto
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
 import com.softwaremill.sttp.{Id, SttpBackend}
 import java.time.LocalDate
-
+import Product._
 import cats.implicits._
 import com.gu.holiday_stops._
 

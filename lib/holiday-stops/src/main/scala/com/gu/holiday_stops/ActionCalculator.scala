@@ -3,8 +3,8 @@ package com.gu.holiday_stops
 import java.time.temporal.ChronoUnit.DAYS
 import java.time.temporal.{ChronoUnit, TemporalAdjusters}
 import java.time.{DayOfWeek, LocalDate}
-
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{ProductName, ProductRatePlanKey, ProductRatePlanName, ProductType}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.Product._
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{Product, ProductName, ProductRatePlanName, ProductType}
 
 case class LegacyProductSpecifics(
   firstAvailableDate: LocalDate,
@@ -176,34 +176,21 @@ object ActionCalculator {
       )
     }
 
-  def suspensionConstantsByProductRatePlanKey(
-    productKey: ProductRatePlanKey
-  ): Either[ActionCalculatorError, SuspensionConstants] = productKey match {
-    case ProductRatePlanKey(ProductType("Newspaper - Voucher Book"), ProductRatePlanName("Saturday+")) =>
-      Right(SaturdayPlusVoucherSuspensionConstants)
-    case ProductRatePlanKey(ProductType("Newspaper - Voucher Book"), ProductRatePlanName("Sunday+")) =>
-      Right(SundayPlusVoucherSuspensionConstants)
-    case ProductRatePlanKey(ProductType("Newspaper - Voucher Book"), ProductRatePlanName("Weekend+")) =>
-      Right(WeekendPlusVoucherSuspensionConstants)
-    case ProductRatePlanKey(ProductType("Newspaper - Voucher Book"), ProductRatePlanName("Sixday+")) =>
-      Right(SixdayPlusVoucherSuspensionConstants)
-    case ProductRatePlanKey(ProductType("Newspaper - Voucher Book"), ProductRatePlanName("Everyday+")) =>
-      Right(EverydayPlusVoucherSuspensionConstants)
-    case ProductRatePlanKey(ProductType("Newspaper - Voucher Book"), ProductRatePlanName("Everyday")) =>
-      Right(EverydayVoucherSuspensionConstants)
-    case ProductRatePlanKey(ProductType("Newspaper - Voucher Book"), ProductRatePlanName("Sixday")) =>
-      Right(SixdayVoucherSuspensionConstants)
-    case ProductRatePlanKey(ProductType("Newspaper - Voucher Book"), ProductRatePlanName("Weekend")) =>
-      Right(WeekendVoucherSuspensionConstants)
-    case ProductRatePlanKey(ProductType("Newspaper - Voucher Book"), ProductRatePlanName("Sunday")) =>
-      Right(SundayVoucherSuspensionConstants)
-    case ProductRatePlanKey(ProductType("Newspaper - Voucher Book"), ProductRatePlanName("Saturday")) =>
-      Right(SaturdayVoucherSuspensionConstants)
-    case ProductRatePlanKey(ProductType("Guardian Weekly"), _) =>
-      Right(GuardianWeeklySuspensionConstants)
-    case _ =>
-      Left(ActionCalculatorError(s"ProductRatePlan $productKey is not supported"))
-  }
+  def suspensionConstantsByProductRatePlanKey(product: Product): Either[ActionCalculatorError, SuspensionConstants] =
+    product match {
+      case GuardianWeekly => Right(GuardianWeeklySuspensionConstants)
+      case SaturdayVoucher => Right(SaturdayVoucherSuspensionConstants)
+      case SundayVoucher => Right(SundayVoucherSuspensionConstants)
+      case WeekendVoucher => Right(WeekendVoucherSuspensionConstants)
+      case SixdayVoucher => Right(SixdayVoucherSuspensionConstants)
+      case EverydayVoucher => Right(EverydayVoucherSuspensionConstants)
+      case SaturdayPlusVoucher => Right(SaturdayPlusVoucherSuspensionConstants)
+      case SundayPlusVoucher => Right(SundayPlusVoucherSuspensionConstants)
+      case WeekendPlusVoucher => Right(WeekendPlusVoucherSuspensionConstants)
+      case SixdayPlusVoucher => Right(SixdayPlusVoucherSuspensionConstants)
+      case EverydayPlusVoucher => Right(EverydayPlusVoucherSuspensionConstants)
+      case _ => Left(ActionCalculatorError(s"ProductRatePlan $product is not supported"))
+    }
 
   def getProductSpecifics(productNamePrefix: ProductName, today: LocalDate = LocalDate.now()): LegacyProductSpecifics = {
     val productSuspensionConstants = suspensionConstantsByProduct(productNamePrefix)
@@ -216,10 +203,10 @@ object ActionCalculator {
   }
 
   def getProductSpecificsByProductRatePlanKey(
-    productKey: ProductRatePlanKey,
+    product: Product,
     today: LocalDate = LocalDate.now()
   ): Either[ActionCalculatorError, ProductSpecifics] = {
-    suspensionConstantsByProductRatePlanKey(productKey)
+    suspensionConstantsByProductRatePlanKey(product)
       .map { constants =>
         ProductSpecifics(
           constants.annualIssueLimit,
@@ -252,9 +239,9 @@ object ActionCalculator {
   def publicationDatesToBeStopped(
     fromInclusive: LocalDate,
     toInclusive: LocalDate,
-    productRatePlanKey: ProductRatePlanKey): Either[ActionCalculatorError, List[LocalDate]] = {
+    product: Product): Either[ActionCalculatorError, List[LocalDate]] = {
 
-    suspensionConstantsByProductRatePlanKey(productRatePlanKey).map { suspensionConstants =>
+    suspensionConstantsByProductRatePlanKey(product).map { suspensionConstants =>
       val daysOfPublication = suspensionConstants.issueConstants.map(_.issueDayOfWeek)
 
       def isPublicationDay(currentDayWithinHoliday: Long) =

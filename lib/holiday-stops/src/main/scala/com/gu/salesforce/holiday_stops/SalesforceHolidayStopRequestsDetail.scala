@@ -11,6 +11,7 @@ import com.gu.util.resthttp.RestRequestMaker._
 import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.resthttp.{HttpOp, RestRequestMaker}
 import play.api.libs.json.{JsValue, Json}
+import enumeratum._
 
 object SalesforceHolidayStopRequestsDetail extends Logging {
 
@@ -31,50 +32,24 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
   case class ProductRatePlanName(value: String) extends AnyVal
   case class ProductType(value: String) extends AnyVal
 
-  /**
-   * This will uniquely identify a "product rate plan" in Zuora. This can loosely be seen as the 'type' of a particular
-   * subscription. Eg:
-   * ------------------------------------------------------------
-   * |Product Type             | Rate Plan Name                 |
-   * |----------------------------------------------------------|
-   * |Guardian Weekly          | GW Oct 18 - 1 Year - Domestic  |
-   * |Newspaper - Voucher Book | Weekend                        |
-   * |----------------------------------------------------------|
-   *
-   * @param productType    Identifies the group of products the rate plan is part of
-   * @param ratePlanName   The name of the rateplan
-   */
-  case class ProductRatePlanKey(productType: ProductType, ratePlanName: ProductRatePlanName)
-  object ProductRatePlanKey {
-    def apply(product: Product): ProductRatePlanKey = {
-      product match {
-        case GuardianWeekly => ProductRatePlanKey(ProductType("Guardian Weekly"), ProductRatePlanName(""))
-        case SaturdayVoucher => ProductRatePlanKey(ProductType("Newspaper Voucher"), ProductRatePlanName("Saturday"))
-        case SundayVoucher => ProductRatePlanKey(ProductType("Newspaper Voucher"), ProductRatePlanName("Sunday"))
-        case WeekendVoucher => ProductRatePlanKey(ProductType("Newspaper Voucher"), ProductRatePlanName("Weekend"))
-        case SixdayVoucher => ProductRatePlanKey(ProductType("Newspaper Voucher"), ProductRatePlanName("Sixday"))
-        case EverydayVoucher => ProductRatePlanKey(ProductType("Newspaper Voucher"), ProductRatePlanName("Everyday"))
-        case EverydayPlusVoucher => ProductRatePlanKey(ProductType("Newspaper Voucher"), ProductRatePlanName("Everyday+"))
-        case SixdayPlusVoucher => ProductRatePlanKey(ProductType("Newspaper Voucher"), ProductRatePlanName("Sixday+"))
-        case WeekendPlusVoucher => ProductRatePlanKey(ProductType("Newspaper Voucher"), ProductRatePlanName("Weekend+"))
-        case SundayPlusVoucher => ProductRatePlanKey(ProductType("Newspaper Voucher"), ProductRatePlanName("Sunday+"))
-        case SaturdayPlusVoucher => ProductRatePlanKey(ProductType("Newspaper Voucher"), ProductRatePlanName("Saturday+"))
-      }
-    }
+  sealed abstract class Product(override val entryName: String) extends EnumEntry
+  object Product extends Enum[Product] {
+    val values = findValues
+
+    case object GuardianWeekly extends Product("Guardian Weekly")
+    case object SaturdayVoucher extends Product("Saturday")
+    case object SundayVoucher extends Product("Sunday")
+    case object WeekendVoucher extends Product("Weekend")
+    case object SixdayVoucher extends Product("Sixday")
+    case object EverydayVoucher extends Product("Everyday")
+    case object EverydayPlusVoucher extends Product("Everyday+")
+    case object SixdayPlusVoucher extends Product("Sixday+")
+    case object WeekendPlusVoucher extends Product("Weekend+")
+    case object SundayPlusVoucher extends Product("Sunday+")
+    case object SaturdayPlusVoucher extends Product("Saturday+")
   }
 
-  sealed trait Product
-  case object GuardianWeekly extends Product
-  case object SaturdayVoucher extends Product
-  case object SundayVoucher extends Product
-  case object WeekendVoucher extends Product
-  case object SixdayVoucher extends Product
-  case object EverydayVoucher extends Product
-  case object EverydayPlusVoucher extends Product
-  case object SixdayPlusVoucher extends Product
-  case object WeekendPlusVoucher extends Product
-  case object SundayPlusVoucher extends Product
-  case object SaturdayPlusVoucher extends Product
+  //  ProductADT.withName("Newspaper Voucher - Weekend")
 
   case class HolidayStopRequestsDetailChargeCode(value: String) extends AnyVal
   implicit val formatHolidayStopRequestsDetailChargeCode = Jsonx.formatInline[HolidayStopRequestsDetailChargeCode]
@@ -124,18 +99,18 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
 
   object LookupPendingByProductNamePrefixAndDate {
 
-    def apply(sfGet: HttpOp[RestRequestMaker.GetRequestWithParams, JsValue]): (ProductName, LocalDate) => ClientFailableOp[List[HolidayStopRequestsDetail]] =
+    def apply(sfGet: HttpOp[RestRequestMaker.GetRequestWithParams, JsValue]): (Product, LocalDate) => ClientFailableOp[List[HolidayStopRequestsDetail]] =
       sfGet
         .setupRequestMultiArg(toRequest _)
         .parse[RecordsWrapperCaseClass[HolidayStopRequestsDetail]]
         .map(_.records)
         .runRequestMultiArg
 
-    def toRequest(productNamePrefix: ProductName, date: LocalDate): GetRequestWithParams = {
+    def toRequest(product: Product, date: LocalDate): GetRequestWithParams = {
       val soqlQuery = s"""
           | $SOQL_SELECT_CLAUSE
           | FROM $holidayStopRequestsDetailSfObjectRef
-          | WHERE Product_Name__c LIKE '${productNamePrefix.value}%'
+          | WHERE Product_Name__c LIKE '${product.entryName}%'
           | AND Stopped_Publication_Date__c = ${date.toString}
           | AND (
           |   Subscription_Cancellation_Effective_Date__c = null
@@ -151,19 +126,19 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
 
   object FetchVoucherHolidayStopRequestsDetails {
 
-    def apply(sfGet: HttpOp[RestRequestMaker.GetRequestWithParams, JsValue]): (ProductRatePlanKey, LocalDate) => ClientFailableOp[List[HolidayStopRequestsDetail]] =
+    def apply(sfGet: HttpOp[RestRequestMaker.GetRequestWithParams, JsValue]): (Product, LocalDate) => ClientFailableOp[List[HolidayStopRequestsDetail]] =
       sfGet
         .setupRequestMultiArg(toRequest _)
         .parse[RecordsWrapperCaseClass[HolidayStopRequestsDetail]]
         .map(_.records)
         .runRequestMultiArg
 
-    def toRequest(productKey: ProductRatePlanKey, date: LocalDate): GetRequestWithParams = {
+    def toRequest(product: Product, date: LocalDate): GetRequestWithParams = {
       val soqlQuery = s"""
                          | $SOQL_SELECT_CLAUSE
                          | FROM $holidayStopRequestsDetailSfObjectRef
-                         | WHERE Product_Name__c LIKE '${productKey.productType.value}%'
-                         | AND Holiday_Stop_Request__r.SF_Subscription__r.Rate_Plan_Name__c = '${productKey.ratePlanName.value}'
+                         | WHERE Product_Name__c LIKE 'Newspaper Voucher%'
+                         | AND Holiday_Stop_Request__r.SF_Subscription__r.Rate_Plan_Name__c = '${product.entryName}'
                          | AND Stopped_Publication_Date__c = ${date.toString}
                          | AND (
                          |   Subscription_Cancellation_Effective_Date__c = null

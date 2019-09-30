@@ -3,9 +3,11 @@ package com.gu.holiday_stops
 import java.time.{DayOfWeek, LocalDate}
 
 import com.gu.holiday_stops.ActionCalculator.SuspensionConstants
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{ProductName, ProductRatePlanKey, ProductRatePlanName, ProductType}
+import com.gu.holiday_stops.subscription.VoucherDayOfWeek.Sunday
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{ProductName, ProductRatePlanName, ProductType}
 import org.scalatest.Inside.inside
 import org.scalatest.{EitherValues, FlatSpec, Matchers}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.Product._
 
 import scala.collection.immutable.ListMap
 import scala.util.Random
@@ -79,7 +81,7 @@ class ActionCalculatorTest extends FlatSpec with Matchers with EitherValues {
 
         inside(ActionCalculator
           .getProductSpecificsByProductRatePlanKey(
-            ProductRatePlanKey(gwProductType, ProductRatePlanName(Random.nextString(10))),
+            GuardianWeekly,
             today
           )) {
           case Right(ProductSpecifics(_, List(issueSpecifics))) => issueSpecifics.firstAvailableDate shouldEqual expected
@@ -116,7 +118,7 @@ class ActionCalculatorTest extends FlatSpec with Matchers with EitherValues {
     inside(
       ActionCalculator
         .getProductSpecificsByProductRatePlanKey(
-          ProductRatePlanKey(vouchersProductType, sundayProductRatePlanName),
+          SundayVoucher,
           LocalDate.of(2019, 9, 9)
         )
     ) {
@@ -125,13 +127,12 @@ class ActionCalculatorTest extends FlatSpec with Matchers with EitherValues {
       }
   }
   it should "correctly list the action dates for Sunday Voucher" in {
-    val sundayVoucherProductRatePlanKey =
-      ProductRatePlanKey(ProductType("Newspaper - Voucher Book"), ProductRatePlanName("Sunday"))
+    val sundayProduct = SundayVoucher
 
     ActionCalculator.publicationDatesToBeStopped(
       fromInclusive = LocalDate.of(2019, 5, 20),
       toInclusive = LocalDate.of(2019, 6, 22),
-      productRatePlanKey = sundayVoucherProductRatePlanKey
+      sundayProduct
     ) shouldEqual Right(List(
         LocalDate.of(2019, 5, 26),
         LocalDate.of(2019, 6, 2),
@@ -142,7 +143,7 @@ class ActionCalculatorTest extends FlatSpec with Matchers with EitherValues {
     ActionCalculator.publicationDatesToBeStopped(
       fromInclusive = LocalDate.of(2019, 5, 20),
       toInclusive = LocalDate.of(2019, 6, 23),
-      productRatePlanKey = sundayVoucherProductRatePlanKey
+      sundayProduct
     ) shouldEqual Right(List(
         LocalDate.of(2019, 5, 26),
         LocalDate.of(2019, 6, 2),
@@ -152,13 +153,12 @@ class ActionCalculatorTest extends FlatSpec with Matchers with EitherValues {
       ))
   }
   it should "correctly list the action dates for Weekend Voucher" in {
-    val weekendVoucherProductRatePlanKey =
-      ProductRatePlanKey(ProductType("Newspaper - Voucher Book"), ProductRatePlanName("Weekend"))
+    val weekendProduct = WeekendVoucher
 
     ActionCalculator.publicationDatesToBeStopped(
       fromInclusive = LocalDate.of(2019, 5, 20),
       toInclusive = LocalDate.of(2019, 6, 21),
-      productRatePlanKey = weekendVoucherProductRatePlanKey
+      weekendProduct
     ) shouldEqual Right(List(
         LocalDate.of(2019, 5, 25),
         LocalDate.of(2019, 5, 26),
@@ -173,7 +173,7 @@ class ActionCalculatorTest extends FlatSpec with Matchers with EitherValues {
     ActionCalculator.publicationDatesToBeStopped(
       fromInclusive = LocalDate.of(2019, 5, 20),
       toInclusive = LocalDate.of(2019, 6, 23),
-      productRatePlanKey = weekendVoucherProductRatePlanKey
+      weekendProduct
     ) shouldEqual Right(List(
         LocalDate.of(2019, 5, 25),
         LocalDate.of(2019, 5, 26),
@@ -187,14 +187,14 @@ class ActionCalculatorTest extends FlatSpec with Matchers with EitherValues {
         LocalDate.of(2019, 6, 23)
       ))
   }
-  it should "return an error for an unsupported product rate plan" in {
-    val unsupportedProductRatePlanKey =
-      ProductRatePlanKey(ProductType("not supported"), ProductRatePlanName("not supported"))
-
-    ActionCalculator.publicationDatesToBeStopped(
-      fromInclusive = LocalDate.of(2019, 5, 20),
-      toInclusive = LocalDate.of(2019, 6, 22),
-      productRatePlanKey = unsupportedProductRatePlanKey
-    ) should be('left)
-  }
+  //  it should "return an error for an unsupported product rate plan" in {
+  //    val unsupportedProductRatePlanKey =
+  //      ProductRatePlanKey(ProductType("not supported"), ProductRatePlanName("not supported"))
+  //
+  //    ActionCalculator.publicationDatesToBeStopped(
+  //      fromInclusive = LocalDate.of(2019, 5, 20),
+  //      toInclusive = LocalDate.of(2019, 6, 22),
+  //      productRatePlanKey = unsupportedProductRatePlanKey
+  //    ) should be('left)
+  //  }
 }
