@@ -24,7 +24,6 @@ import com.gu.util.resthttp.JsonHttp.StringHttpRequest
 import com.gu.util.resthttp.RestRequestMaker.BodyAsString
 import com.gu.util.resthttp.{HttpOp, JsonHttp}
 import com.softwaremill.sttp.{HttpURLConnectionBackend, Id, SttpBackend}
-import com.typesafe.scalalogging.LazyLogging
 import okhttp3.{Request, Response}
 import play.api.libs.json.{Json, Reads}
 import scalaz.{-\/, \/, \/-}
@@ -200,7 +199,7 @@ object Handler extends Logging {
           .publicationDatesToBeStopped(
             startDate,
             endDate,
-            Product.withName(productRatePlanName)
+            Product.withNameOption(productRatePlanName).orElse(Product.withNameOption(productType)).get
           )
           .toApiGatewayOp(s"calculating publication dates")
       case PotentialHolidayStopsQueryParams(startDate, endDate, _, _, _) =>
@@ -252,7 +251,7 @@ object Handler extends Logging {
       req.queryStringParameters.flatMap(_.get(PRODUCT_TYPE_QUERY_STRING_KEY)),
       req.queryStringParameters.flatMap(_.get(PRODUCT_RATE_PLAN_NAME_QUERY_STRING_KEY))
     ) match {
-        case (Some(productName), Some(ratePlanName)) => Product.withNameOption(ratePlanName).orElse(Product.withNameOption(productName))
+        case (Some(productType), Some(ratePlanName)) => Product.withNameOption(ratePlanName).orElse(Product.withNameOption(productType))
         case _ => None
       }
   }

@@ -47,6 +47,9 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
     case object WeekendPlusVoucher extends Product("Weekend+")
     case object SundayPlusVoucher extends Product("Sunday+")
     case object SaturdayPlusVoucher extends Product("Saturday+")
+
+    def apply(productType: String, productRatePlanName: String): Product =
+      withNameOption(productRatePlanName).orElse(withNameOption((productType))).get
   }
 
   case class HolidayStopRequestsDetailChargeCode(value: String) extends AnyVal
