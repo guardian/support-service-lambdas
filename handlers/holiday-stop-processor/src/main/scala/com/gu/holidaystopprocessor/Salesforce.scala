@@ -16,8 +16,13 @@ object Salesforce {
   def calculateProcessDate(product: Product, processDateOverride: Option[LocalDate]) = {
     processDateOverride.getOrElse(LocalDate.now.plusDays {
       product match {
-        case GuardianWeekly => GuardianWeeklyIssueSuspensionConstants.processorRunLeadTimeDays.toLong
-        case _ => ActionCalculator.VoucherProcessorLeadTime // FIXME
+        case GuardianWeekly =>
+          GuardianWeeklyIssueSuspensionConstants.processorRunLeadTimeDays.toLong
+
+        case SaturdayVoucher | SundayVoucher | WeekendVoucher | SixdayVoucher | EverydayVoucher | EverydayPlusVoucher | SixdayPlusVoucher | WeekendPlusVoucher | SundayPlusVoucher | SaturdayPlusVoucher =>
+          ActionCalculator.VoucherProcessorLeadTime
+
+        case _ => throw new RuntimeException(s"Unknown product $product. Fix ASAP!")
       }
     })
   }
