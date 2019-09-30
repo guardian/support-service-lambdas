@@ -8,7 +8,7 @@ import org.scalatest.{EitherValues, FlatSpec, Matchers}
 
 class HolidayCreditTest extends FlatSpec with Matchers with EitherValues {
 
-  val stoppedPublicationDate = StoppedPublicationDate(LocalDate.parse("2019-09-02").minusDays(1))
+  val stoppedPublicationDate = StoppedPublicationDate(LocalDate.parse("2019-09-01").minusDays(1))
 
   "HolidayCredit" should "be correct for a quarterly billing period" in {
     val charge = Fixtures.mkRatePlanCharge(price = 30, billingPeriod = "Quarter")

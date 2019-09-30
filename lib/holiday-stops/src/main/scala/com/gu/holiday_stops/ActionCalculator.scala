@@ -108,22 +108,22 @@ object ActionCalculator {
     }
   }
 
-  val SaturdayVoucherSuspensionConstants = voucherSuspensionConstans(
+  val SaturdayVoucherSuspensionConstants = voucherSuspensionConstants(
     List(voucherIssueSuspensionConstants(DayOfWeek.SATURDAY))
   )
 
-  val SundayVoucherSuspensionConstants = voucherSuspensionConstans(
+  val SundayVoucherSuspensionConstants = voucherSuspensionConstants(
     List(voucherIssueSuspensionConstants(DayOfWeek.SUNDAY))
   )
 
-  val WeekendVoucherSuspensionConstants = voucherSuspensionConstans(
+  val WeekendVoucherSuspensionConstants = voucherSuspensionConstants(
     List(
       voucherIssueSuspensionConstants(DayOfWeek.SATURDAY),
       voucherIssueSuspensionConstants(DayOfWeek.SUNDAY)
     )
   )
 
-  val SixdayVoucherSuspensionConstants = voucherSuspensionConstans(
+  val SixdayVoucherSuspensionConstants = voucherSuspensionConstants(
     List(
       voucherIssueSuspensionConstants(DayOfWeek.MONDAY),
       voucherIssueSuspensionConstants(DayOfWeek.TUESDAY),
@@ -134,7 +134,7 @@ object ActionCalculator {
     )
   )
 
-  val EverydayVoucherSuspensionConstants = voucherSuspensionConstans(
+  val EverydayVoucherSuspensionConstants = voucherSuspensionConstants(
     List(
       voucherIssueSuspensionConstants(DayOfWeek.MONDAY),
       voucherIssueSuspensionConstants(DayOfWeek.TUESDAY),
@@ -152,7 +152,7 @@ object ActionCalculator {
   val SundayPlusVoucherSuspensionConstants = SundayVoucherSuspensionConstants
   val SaturdayPlusVoucherSuspensionConstants = SaturdayVoucherSuspensionConstants
 
-  def voucherSuspensionConstans(issueSuspensionConstants: List[IssueSuspensionConstants]) =
+  def voucherSuspensionConstants(issueSuspensionConstants: List[IssueSuspensionConstants]) =
     SuspensionConstants(issueSuspensionConstants.size * 6, issueSuspensionConstants)
 
   lazy val VoucherProcessorLeadTime: Int = 1
@@ -163,7 +163,7 @@ object ActionCalculator {
       processorRunLeadTimeDays = VoucherProcessorLeadTime
     ) {
       def firstAvailableDate(today: LocalDate): LocalDate = {
-        today.plus(processorRunLeadTimeDays.toLong, ChronoUnit.DAYS)
+        today.plusDays(processorRunLeadTimeDays.toLong)
       }
     }
 

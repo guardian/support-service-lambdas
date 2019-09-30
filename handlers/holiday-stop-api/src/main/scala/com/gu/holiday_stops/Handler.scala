@@ -68,7 +68,7 @@ object Handler extends Logging {
 
   private def validateRequestAndCreateSteps(
     request: ApiGatewayRequest,
-    creditCalculator: PartiallyWiredCreditCalculator,
+    creditCalculator: CreditCalculation,
     getSubscription: SubscriptionName => Either[HolidayError, Subscription]
   ) = {
     (for {
@@ -99,7 +99,7 @@ object Handler extends Logging {
   private def createSteps(
     httpMethod: String,
     path: List[String],
-    creditCalculator: PartiallyWiredCreditCalculator,
+    creditCalculator: CreditCalculation,
     getSubscription: SubscriptionName => Either[HolidayError, Subscription]
   ) = {
     path match {
@@ -158,7 +158,7 @@ object Handler extends Logging {
   )
 
   def stepsForPotentialHolidayStop(
-    creditCalculator: PartiallyWiredCreditCalculator,
+    creditCalculator: CreditCalculation,
     getSubscription: SubscriptionName => Either[HolidayError, Subscription]
   )(req: ApiGatewayRequest, unused: SfClient): ApiResponse = {
     implicit val reads: Reads[PotentialHolidayStopsQueryParams] = Json.reads[PotentialHolidayStopsQueryParams]
@@ -254,7 +254,7 @@ object Handler extends Logging {
   }
 
   def stepsToCreate(
-    creditCalculator: PartiallyWiredCreditCalculator,
+    creditCalculator: CreditCalculation,
     getSubscription: SubscriptionName => Either[HolidayError, Subscription]
   )(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
 

@@ -10,8 +10,8 @@ import org.scalatest.{EitherValues, FlatSpec, Matchers}
 
 class HolidayCreditUpdateTest extends FlatSpec with Matchers with EitherValues {
 
-  val chargedThorughDate = LocalDate.parse("2019-09-12")
-  val stoppedPublicationDate = StoppedPublicationDate(chargedThorughDate.minusDays(1))
+  val chargedThroughDate = LocalDate.parse("2019-09-12")
+  val stoppedPublicationDate = StoppedPublicationDate(chargedThroughDate.minusDays(1))
 
   "holidayCreditToAdd" should "generate update correctly" in {
     val subscription = Fixtures.mkSubscription(
@@ -19,7 +19,7 @@ class HolidayCreditUpdateTest extends FlatSpec with Matchers with EitherValues {
       termEndDate = LocalDate.of(2020, 7, 12),
       price = 42.1,
       billingPeriod = "Quarter",
-      chargedThroughDate = Some(chargedThorughDate)
+      chargedThroughDate = Some(chargedThroughDate)
     )
     val currentGuardianWeeklySubscription = GuardianWeeklySubscription(subscription, stoppedPublicationDate).right.value
     val nextInvoiceStartDate = currentGuardianWeeklySubscription.nextBillingPeriodStartDate
@@ -40,9 +40,9 @@ class HolidayCreditUpdateTest extends FlatSpec with Matchers with EitherValues {
       List(
         Add(
           productRatePlanId = Fixtures.config.holidayCreditProduct.productRatePlanId,
-          contractEffectiveDate = chargedThorughDate,
-          customerAcceptanceDate = chargedThorughDate,
-          serviceActivationDate = chargedThorughDate,
+          contractEffectiveDate = chargedThroughDate,
+          customerAcceptanceDate = chargedThroughDate,
+          serviceActivationDate = chargedThroughDate,
           chargeOverrides = List(
             ChargeOverride(
               productRatePlanChargeId = Fixtures.config.holidayCreditProduct.productRatePlanChargeId,

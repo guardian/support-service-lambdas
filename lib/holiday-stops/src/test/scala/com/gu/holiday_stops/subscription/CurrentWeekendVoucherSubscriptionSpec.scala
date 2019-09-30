@@ -18,7 +18,7 @@ class CurrentWeekendVoucherSubscriptionSpec extends FlatSpec with Matchers with 
     model.price should be(10.56)
   }
 
-  it should "fail if stoppedPublicationDate does not falls outside invoiced period" in {
+  it should "fail if stoppedPublicationDate falls outside invoiced period" in {
     val subscriptionRaw = Source.fromResource("WeekendVoucherSubscription.json").mkString
     val subscription = decode[Subscription](subscriptionRaw).getOrElse(fail("Could not decode CurrentWeekendVoucherSubscription"))
     val model = VoucherSubscription(subscription, StoppedPublicationDate(LocalDate.parse("2019-09-01")))

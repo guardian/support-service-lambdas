@@ -32,7 +32,7 @@ object Salesforce {
     SalesforceClient(RawEffects.response, sfCredentials).value.flatMap { sfAuth =>
       val sfGet = sfAuth.wrapWith(JsonHttp.getWithParams)
       product match {
-        case GuardianWeekly => LookupPendingByProductNamePrefixAndDate(sfGet)(GuardianWeekly, processDate)
+        case GuardianWeekly => FetchGuardianWeeklyHolidayStopRequestsDetails(sfGet)(GuardianWeekly, processDate)
         case voucher => FetchVoucherHolidayStopRequestsDetails(sfGet)(voucher, processDate)
       }
     }.toDisjunction match {

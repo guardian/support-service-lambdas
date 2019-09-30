@@ -33,7 +33,7 @@ class CreditCalculatorSpec extends FlatSpec with Matchers with EitherValues {
     )
   }
 
-  it should "calculate credit for weekend vouchers saturday issue" in {
+  it should "calculate credit for weekend vouchers Saturday issue" in {
     checkCreditCalculation(
       zuoraSubscriptionData = "WeekendVoucherSubscription.json",
       stopDate = LocalDate.of(2019, 11, 16),
