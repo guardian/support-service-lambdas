@@ -4,7 +4,7 @@ import java.time.temporal.ChronoUnit.DAYS
 import java.time.temporal.{ChronoUnit, TemporalAdjusters}
 import java.time.{DayOfWeek, LocalDate}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.Product._
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{Product, ProductName, ProductRatePlanName, ProductType}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{Product, ProductName}
 
 case class LegacyProductSpecifics(
   firstAvailableDate: LocalDate,

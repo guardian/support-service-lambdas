@@ -49,8 +49,6 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
     case object SaturdayPlusVoucher extends Product("Saturday+")
   }
 
-  //  ProductADT.withName("Newspaper Voucher - Weekend")
-
   case class HolidayStopRequestsDetailChargeCode(value: String) extends AnyVal
   implicit val formatHolidayStopRequestsDetailChargeCode = Jsonx.formatInline[HolidayStopRequestsDetailChargeCode]
 

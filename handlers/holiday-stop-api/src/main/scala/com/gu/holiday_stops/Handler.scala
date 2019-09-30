@@ -252,7 +252,7 @@ object Handler extends Logging {
       req.queryStringParameters.flatMap(_.get(PRODUCT_TYPE_QUERY_STRING_KEY)),
       req.queryStringParameters.flatMap(_.get(PRODUCT_RATE_PLAN_NAME_QUERY_STRING_KEY))
     ) match {
-        case (_, Some(ratePlanName)) => Some(Product.withName(ratePlanName))
+        case (Some(productName), Some(ratePlanName)) => Product.withNameOption(ratePlanName).orElse(Product.withNameOption(productName))
         case _ => None
       }
   }

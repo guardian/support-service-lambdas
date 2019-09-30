@@ -3,14 +3,12 @@ package com.gu.holiday_stops
 import java.time.{DayOfWeek, LocalDate}
 
 import com.gu.holiday_stops.ActionCalculator.SuspensionConstants
-import com.gu.holiday_stops.subscription.VoucherDayOfWeek.Sunday
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{ProductName, ProductRatePlanName, ProductType}
 import org.scalatest.Inside.inside
 import org.scalatest.{EitherValues, FlatSpec, Matchers}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.Product._
 
 import scala.collection.immutable.ListMap
-import scala.util.Random
 
 class ActionCalculatorTest extends FlatSpec with Matchers with EitherValues {
 
