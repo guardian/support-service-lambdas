@@ -49,7 +49,10 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
     case object SaturdayPlusVoucher extends Product("Saturday+")
 
     def apply(productType: String, productRatePlanName: String): Product =
-      withNameOption(productRatePlanName).orElse(withNameOption((productType))).get
+      withNameOption(productRatePlanName)
+        .orElse(withNameOption((productType)))
+        .orElse(withNameOption(s"$productType - $productRatePlanName"))
+        .getOrElse(throw new RuntimeException(s"Fix ASAP! Product not recognized (productType=$productType, productRatePlanName=$productRatePlanName"))
   }
 
   case class HolidayStopRequestsDetailChargeCode(value: String) extends AnyVal

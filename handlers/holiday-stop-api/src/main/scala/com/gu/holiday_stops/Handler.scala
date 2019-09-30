@@ -196,12 +196,9 @@ object Handler extends Logging {
     queryParams match {
       case PotentialHolidayStopsQueryParams(startDate, endDate, _, Some(productType), Some(productRatePlanName)) =>
         ActionCalculator
-          .publicationDatesToBeStopped(
-            startDate,
-            endDate,
-            Product.withNameOption(productRatePlanName).orElse(Product.withNameOption(productType)).get
-          )
+          .publicationDatesToBeStopped(startDate, endDate, Product(productType, (productRatePlanName)))
           .toApiGatewayOp(s"calculating publication dates")
+
       case PotentialHolidayStopsQueryParams(startDate, endDate, _, _, _) =>
         productNamePrefixOption match {
           case Some(productNamePrefix) =>
@@ -251,7 +248,7 @@ object Handler extends Logging {
       req.queryStringParameters.flatMap(_.get(PRODUCT_TYPE_QUERY_STRING_KEY)),
       req.queryStringParameters.flatMap(_.get(PRODUCT_RATE_PLAN_NAME_QUERY_STRING_KEY))
     ) match {
-        case (Some(productType), Some(ratePlanName)) => Product.withNameOption(ratePlanName).orElse(Product.withNameOption(productType))
+        case (Some(productType), Some(productRatePlanName)) => Some(Product(productType, productRatePlanName))
         case _ => None
       }
   }
