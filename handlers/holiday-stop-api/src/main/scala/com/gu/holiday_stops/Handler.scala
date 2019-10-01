@@ -2,14 +2,13 @@ package com.gu.holiday_stops
 
 import java.io.{InputStream, OutputStream}
 import java.time.LocalDate
-
+import cats.syntax.either._
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
-import com.gu.holiday_stops.subscription.Credit.PartiallyWiredCreditCalculator
-import com.gu.holiday_stops.subscription.{Credit, HolidayStopCredit, Subscription}
+import com.gu.holiday_stops.subscription.{HolidayStopCredit, StoppedProduct, Subscription}
 import com.gu.salesforce.SalesforceClient
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestId, ProductName, ProductRatePlanKey, ProductRatePlanName, ProductType, SubscriptionName}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestId, Product, ProductName, StoppedPublicationDate, SubscriptionName}
 import com.gu.salesforce.holiday_stops.SalesforceSFSubscription.SubscriptionForSubscriptionNameAndContact._
 import com.gu.salesforce.holiday_stops.{SalesforceHolidayStopRequest, SalesforceSFSubscription}
 import com.gu.util.Logging
@@ -62,14 +61,14 @@ object Handler extends Logging {
     } yield Operation.noHealthcheck(request => // checking connectivity to SF is sufficient healthcheck so no special steps required
       validateRequestAndCreateSteps(
         request,
-        Credit(config),
+        credit(config),
         getSubscriptionFromZuora(config, backend)
       )(request, sfClient))
   }
 
   private def validateRequestAndCreateSteps(
     request: ApiGatewayRequest,
-    creditCalculator: PartiallyWiredCreditCalculator,
+    creditCalculator: CreditCalculation,
     getSubscription: SubscriptionName => Either[HolidayError, Subscription]
   ) = {
     (for {
@@ -100,7 +99,7 @@ object Handler extends Logging {
   private def createSteps(
     httpMethod: String,
     path: List[String],
-    creditCalculator: PartiallyWiredCreditCalculator,
+    creditCalculator: CreditCalculation,
     getSubscription: SubscriptionName => Either[HolidayError, Subscription]
   ) = {
     path match {
@@ -159,7 +158,7 @@ object Handler extends Logging {
   )
 
   def stepsForPotentialHolidayStop(
-    creditCalculator: PartiallyWiredCreditCalculator,
+    creditCalculator: CreditCalculation,
     getSubscription: SubscriptionName => Either[HolidayError, Subscription]
   )(req: ApiGatewayRequest, unused: SfClient): ApiResponse = {
     implicit val reads: Reads[PotentialHolidayStopsQueryParams] = Json.reads[PotentialHolidayStopsQueryParams]
@@ -197,12 +196,9 @@ object Handler extends Logging {
     queryParams match {
       case PotentialHolidayStopsQueryParams(startDate, endDate, _, Some(productType), Some(productRatePlanName)) =>
         ActionCalculator
-          .publicationDatesToBeStopped(
-            startDate,
-            endDate,
-            ProductRatePlanKey(ProductType(productType), ProductRatePlanName(productRatePlanName))
-          )
+          .publicationDatesToBeStopped(startDate, endDate, Product(productType, (productRatePlanName)))
           .toApiGatewayOp(s"calculating publication dates")
+
       case PotentialHolidayStopsQueryParams(startDate, endDate, _, _, _) =>
         productNamePrefixOption match {
           case Some(productNamePrefix) =>
@@ -247,19 +243,18 @@ object Handler extends Logging {
     } yield ApiGatewayResponse("200", response)).apiResponse
   }
 
-  private def getProductRatePlanKey(req: ApiGatewayRequest): Option[ProductRatePlanKey] = {
+  private def getProductRatePlanKey(req: ApiGatewayRequest): Option[Product] = {
     (
       req.queryStringParameters.flatMap(_.get(PRODUCT_TYPE_QUERY_STRING_KEY)),
       req.queryStringParameters.flatMap(_.get(PRODUCT_RATE_PLAN_NAME_QUERY_STRING_KEY))
     ) match {
-        case (Some(productType), Some(ratePlanName)) =>
-          Some(ProductRatePlanKey(ProductType(productType), ProductRatePlanName(ratePlanName)))
+        case (Some(productType), Some(productRatePlanName)) => Some(Product(productType, productRatePlanName))
         case _ => None
       }
   }
 
   def stepsToCreate(
-    creditCalculator: PartiallyWiredCreditCalculator,
+    creditCalculator: CreditCalculation,
     getSubscription: SubscriptionName => Either[HolidayError, Subscription]
   )(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
 
@@ -313,4 +308,9 @@ object Handler extends Logging {
 
   def badrequest(message: String)(req: ApiGatewayRequest, sfClient: HttpOp[StringHttpRequest, BodyAsString]): ApiResponse =
     ApiGatewayResponse.badRequest(message)
+
+  def credit(config: Config)(stoppedPublicationDate: LocalDate, subscription: Subscription): Either[ZuoraHolidayError, Double] =
+    StoppedProduct(subscription, StoppedPublicationDate(stoppedPublicationDate))
+      .map(_.credit)
+      .leftMap(e => ZuoraHolidayError(s"Failed to calculate holiday stop credits because $e"))
 }

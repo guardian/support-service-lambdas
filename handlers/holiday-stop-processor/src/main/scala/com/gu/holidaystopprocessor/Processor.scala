@@ -1,9 +1,10 @@
 package com.gu.holidaystopprocessor
 
-import com.gu.holiday_stops.subscription.{Credit, ExtendedTerm, HolidayCreditUpdate, NextBillingPeriodStartDate, Subscription}
+import com.gu.holiday_stops.subscription.{ExtendedTerm, HolidayCreditUpdate, StoppedProduct, Subscription}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
 import com.softwaremill.sttp.{Id, SttpBackend}
 import java.time.LocalDate
+import Product._
 import cats.implicits._
 import com.gu.holiday_stops._
 
@@ -16,9 +17,20 @@ object Processor {
 
       case Right(zuoraAccessToken) =>
         List(
-          processProduct(config, Salesforce.holidayStopRequests(config.sfConfig)(SundayVoucher, processDateOverride), _, _, _),
-          processProduct(config, Salesforce.holidayStopRequests(config.sfConfig)(GuardianWeekly, processDateOverride), _, _, _)
-        ) map {
+          GuardianWeekly,
+          SaturdayVoucher,
+          SundayVoucher,
+          WeekendVoucher,
+          SixdayVoucher,
+          EverydayVoucher,
+          EverydayPlusVoucher,
+          SixdayPlusVoucher,
+          WeekendPlusVoucher,
+          SundayPlusVoucher,
+          SaturdayPlusVoucher,
+        )
+          .map(product => processProduct(config, Salesforce.holidayStopRequests(config.sfConfig)(product, processDateOverride), _, _, _))
+          .map{
             _.apply(
               Zuora.subscriptionGetResponse(config, zuoraAccessToken, backend),
               Zuora.subscriptionUpdateResponse(config, zuoraAccessToken, backend),
@@ -64,10 +76,11 @@ object Processor {
   )(stop: HolidayStop): ZuoraHolidayResponse[ZuoraHolidayWriteResult] = {
     for {
       subscription <- getSubscription(stop.subscriptionName)
+      stoppedProduct <- StoppedProduct(subscription, StoppedPublicationDate(stop.stoppedPublicationDate))
       _ <- if (subscription.autoRenew) Right(()) else Left(ZuoraHolidayError("Cannot currently process non-auto-renewing subscription"))
-      nextInvoiceStartDate <- NextBillingPeriodStartDate(config, subscription, stop.stoppedPublicationDate)
+      nextInvoiceStartDate = stoppedProduct.nextBillingPeriodStartDate
       maybeExtendedTerm = ExtendedTerm(nextInvoiceStartDate, subscription)
-      holidayCredit <- Credit(config)(stop.stoppedPublicationDate, subscription)
+      holidayCredit = stoppedProduct.credit
       holidayCreditUpdate <- HolidayCreditUpdate(config.holidayCreditProduct, subscription, stop.stoppedPublicationDate, nextInvoiceStartDate, maybeExtendedTerm, holidayCredit)
       _ <- if (subscription.hasHolidayStop(stop)) Right(()) else updateSubscription(subscription, holidayCreditUpdate)
       updatedSubscription <- getSubscription(stop.subscriptionName)

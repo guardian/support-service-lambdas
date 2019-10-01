@@ -5,8 +5,7 @@ import java.time.format.DateTimeFormatter
 import java.util.UUID
 
 import ai.x.play.json.Jsonx
-import com.gu.holiday_stops.ActionCalculator
-import com.gu.holiday_stops.subscription.Credit.PartiallyWiredCreditCalculator
+import com.gu.holiday_stops.{ActionCalculator, CreditCalculation}
 import com.gu.holiday_stops.subscription.Subscription
 import com.gu.salesforce.RecordsWrapperCaseClass
 import com.gu.salesforce.SalesforceConstants._
@@ -172,7 +171,7 @@ object SalesforceHolidayStopRequest extends Logging {
         .map(_.results.find(_.referenceId == holidayStopRequestSfObjectRef).map(_.id).get) //FIXME refactor this to map None to ClientFailure rather than nasty .get
         .runRequest
 
-    def buildBody(creditCalculator: PartiallyWiredCreditCalculator)(start: LocalDate, end: LocalDate, matchingSubscription: MatchingSubscription, subscription: Subscription) = {
+    def buildBody(creditCalculator: CreditCalculation)(start: LocalDate, end: LocalDate, matchingSubscription: MatchingSubscription, subscription: Subscription) = {
       RecordsWrapperCaseClass(List(
         CompositeTreeHolidayStopRequest(
           Start_Date__c = HolidayStopRequestStartDate(start),

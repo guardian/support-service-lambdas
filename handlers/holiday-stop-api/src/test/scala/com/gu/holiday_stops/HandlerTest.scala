@@ -1,7 +1,6 @@
 package com.gu.holiday_stops
 
 import java.time.LocalDate
-import java.time.temporal.ChronoUnit
 
 import com.gu.effects.{FakeFetchString, SFTestEffects, TestingRawEffects}
 import com.gu.holiday_stops.ActionCalculator._
@@ -116,8 +115,8 @@ class HandlerTest extends FlatSpec with Matchers {
     "calculate potential holiday stop dates and estimated credit" in {
     val subscriptionName = "Sub12344"
 
-    val startDate = LocalDate.of(2018, 1, 1)
-    val endDate = startDate.plus(3, ChronoUnit.MONTHS)
+    val startDate = LocalDate.of(2019, 1, 1)
+    val endDate = startDate.plusMonths(3)
 
     val subscription = Subscription(
       subscriptionNumber = subscriptionName,
@@ -128,7 +127,7 @@ class HandlerTest extends FlatSpec with Matchers {
       autoRenew = true,
       ratePlans = List(
         RatePlan(
-          productName = "Guardian Weekly",
+          productName = "Guardian Weekly - Domestic",
           ratePlanCharges =
             List(RatePlanCharge(
               name = "GW",
@@ -136,13 +135,13 @@ class HandlerTest extends FlatSpec with Matchers {
               37.50,
               Some("Quarter"),
               effectiveStartDate = startDate,
-              chargedThroughDate = Some(endDate.plus(1, ChronoUnit.DAYS)),
+              chargedThroughDate = Some(endDate),
               HolidayStart__c = None,
               HolidayEnd__c = None,
-              processedThroughDate = Some(endDate.plus(1, ChronoUnit.DAYS).minus(3, ChronoUnit.MONTHS)),
+              processedThroughDate = Some(endDate.minusMonths(3)),
               ""
             )),
-          GuardianWeeklyHolidayStopConfig.Dev.productRatePlanIds.head,
+          "",
           ""
         )
       )
@@ -284,8 +283,8 @@ class HandlerTest extends FlatSpec with Matchers {
                 ),
                 List(
                   IssueSpecifics(
-                    SundayVoucherIssueSuspensionConstants.firstAvailableDate(LocalDate.now()),
-                    SundayVoucherIssueSuspensionConstants.issueDayOfWeek.getValue
+                    SundayVoucherSuspensionConstants.issueConstants(0).firstAvailableDate(LocalDate.now()),
+                    SundayVoucherSuspensionConstants.issueConstants(0).issueDayOfWeek.getValue
                   )
                 ),
                 Some(SundayVoucherSuspensionConstants.annualIssueLimit)

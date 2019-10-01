@@ -3,21 +3,26 @@ package com.gu.holidaystopprocessor
 import java.time.LocalDate
 
 import com.gu.effects.RawEffects
-import com.gu.holiday_stops.ActionCalculator.{GuardianWeeklyIssueSuspensionConstants, SundayVoucherIssueSuspensionConstants}
+import com.gu.holiday_stops.ActionCalculator.GuardianWeeklyIssueSuspensionConstants
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.SalesforceClient
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{ProductRatePlanKey, _}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
+import Product._
 import com.gu.util.resthttp.JsonHttp
 import scalaz.{-\/, \/-}
-import com.gu.holiday_stops.{SalesforceHolidayError, SalesforceHolidayResponse}
+import com.gu.holiday_stops.{ActionCalculator, SalesforceHolidayError, SalesforceHolidayResponse}
 
 object Salesforce {
   def calculateProcessDate(product: Product, processDateOverride: Option[LocalDate]) = {
     processDateOverride.getOrElse(LocalDate.now.plusDays {
       product match {
-        case SundayVoucher => SundayVoucherIssueSuspensionConstants.processorRunLeadTimeDays.toLong
-        case GuardianWeekly => GuardianWeeklyIssueSuspensionConstants.processorRunLeadTimeDays.toLong
+        case GuardianWeekly =>
+          GuardianWeeklyIssueSuspensionConstants.processorRunLeadTimeDays.toLong
+
+        case SaturdayVoucher | SundayVoucher | WeekendVoucher | SixdayVoucher | EverydayVoucher | EverydayPlusVoucher | SixdayPlusVoucher | WeekendPlusVoucher | SundayPlusVoucher | SaturdayPlusVoucher =>
+          ActionCalculator.VoucherProcessorLeadTime
+
+        case _ => throw new RuntimeException(s"Unknown product $product. Fix ASAP!")
       }
     })
   }
@@ -27,13 +32,8 @@ object Salesforce {
     SalesforceClient(RawEffects.response, sfCredentials).value.flatMap { sfAuth =>
       val sfGet = sfAuth.wrapWith(JsonHttp.getWithParams)
       product match {
-        case SundayVoucher =>
-          val fetchOp = SalesforceHolidayStopRequestsDetail.FetchSundayVoucherHolidayStopRequestsDetails(sfGet)
-          fetchOp(ProductRatePlanKey(SundayVoucher), processDate)
-
-        case GuardianWeekly =>
-          val fetchOp = SalesforceHolidayStopRequestsDetail.LookupPendingByProductNamePrefixAndDate(sfGet)
-          fetchOp(ProductName("Guardian Weekly"), processDate)
+        case GuardianWeekly => FetchGuardianWeeklyHolidayStopRequestsDetails(sfGet)(GuardianWeekly, processDate)
+        case voucher => FetchVoucherHolidayStopRequestsDetails(sfGet)(voucher, processDate)
       }
     }.toDisjunction match {
       case -\/(failure) => Left(SalesforceHolidayError(failure.toString))

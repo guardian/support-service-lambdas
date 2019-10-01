@@ -3,8 +3,7 @@ package com.gu.salesforce.holiday_stops
 import java.time.LocalDate
 
 import com.gu.effects.{GetFromS3, RawEffects}
-import com.gu.holiday_stops.subscription.Credit.PartiallyWiredCreditCalculator
-import com.gu.holiday_stops.Fixtures
+import com.gu.holiday_stops.{Fixtures, CreditCalculation}
 import com.gu.holiday_stops.subscription.Subscription
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.SalesforceClient
@@ -44,7 +43,7 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends FlatSpec with Matc
         Left(IdentityId("100004814"))
       ).toDisjunction
 
-      fakePartiallyWiredCreditCalculator: PartiallyWiredCreditCalculator = (_, _) => Right(0.0)
+      fakePartiallyWiredCreditCalculator: CreditCalculation = (_, _) => Right(0.0)
       fakeSubscription: Subscription = Fixtures.mkSubscription()
 
       createOp = SalesforceHolidayStopRequest.CreateHolidayStopRequestWithDetail(sfAuth.wrapWith(JsonHttp.post))

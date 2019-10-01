@@ -4,7 +4,7 @@ import java.time.LocalDate
 
 import cats.implicits._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{ProductName, ProductRatePlanKey, SubscriptionName}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{Product, ProductName, SubscriptionName}
 import play.api.libs.json.{Json, OFormat}
 
 object WireHolidayStopRequest {
@@ -87,14 +87,14 @@ object GetHolidayStopRequests {
   def apply(
     holidayStopRequests: List[HolidayStopRequest],
     optionalProductNamePrefix: Option[ProductName],
-    optionalProductRatePlanKey: Option[ProductRatePlanKey]
+    optionalProduct: Option[Product]
   ): Either[GetHolidayStopRequestsError, GetHolidayStopRequests] = {
     for {
       optionalProductSpecificForProductPrefix <- optionalProductNamePrefix.map(
         productNamePrefix => ActionCalculator.getProductSpecifics(productNamePrefix)
       ).asRight[GetHolidayStopRequestsError]
 
-      optionalProductSpecificForProductNameRatePlanName <- optionalProductRatePlanKey.traverse(
+      optionalProductSpecificForProductNameRatePlanName <- optionalProduct.traverse(
         productRatePlanKey =>
           ActionCalculator
             .getProductSpecificsByProductRatePlanKey(productRatePlanKey)

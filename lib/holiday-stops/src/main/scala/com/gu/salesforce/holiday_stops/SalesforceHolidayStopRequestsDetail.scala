@@ -11,6 +11,7 @@ import com.gu.util.resthttp.RestRequestMaker._
 import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.resthttp.{HttpOp, RestRequestMaker}
 import play.api.libs.json.{JsValue, Json}
+import enumeratum._
 
 object SalesforceHolidayStopRequestsDetail extends Logging {
 
@@ -31,32 +32,28 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
   case class ProductRatePlanName(value: String) extends AnyVal
   case class ProductType(value: String) extends AnyVal
 
-  /**
-   * This will uniquely identify a "product rate plan" in Zuora. This can loosely be seen as the 'type' of a particular
-   * subscription. Eg:
-   * ------------------------------------------------------------
-   * |Product Type             | Rate Plan Name                 |
-   * |----------------------------------------------------------|
-   * |Guardian Weekly          | GW Oct 18 - 1 Year - Domestic  |
-   * |Newspaper - Voucher Book | Weekend                        |
-   * |----------------------------------------------------------|
-   *
-   * @param productType    Identifies the group of products the rate plan is part of
-   * @param ratePlanName   The name of the rateplan
-   */
-  case class ProductRatePlanKey(productType: ProductType, ratePlanName: ProductRatePlanName)
-  object ProductRatePlanKey {
-    def apply(product: Product): ProductRatePlanKey = {
-      product match {
-        case GuardianWeekly => ProductRatePlanKey(ProductType("Guardian Weekly"), ProductRatePlanName(""))
-        case SundayVoucher => ProductRatePlanKey(ProductType("Newspaper Voucher"), ProductRatePlanName("Sunday"))
-      }
-    }
-  }
+  sealed abstract class Product(override val entryName: String) extends EnumEntry
+  object Product extends Enum[Product] {
+    val values = findValues
 
-  sealed trait Product
-  case object GuardianWeekly extends Product
-  case object SundayVoucher extends Product
+    case object GuardianWeekly extends Product("Guardian Weekly")
+    case object SaturdayVoucher extends Product("Saturday")
+    case object SundayVoucher extends Product("Sunday")
+    case object WeekendVoucher extends Product("Weekend")
+    case object SixdayVoucher extends Product("Sixday")
+    case object EverydayVoucher extends Product("Everyday")
+    case object EverydayPlusVoucher extends Product("Everyday+")
+    case object SixdayPlusVoucher extends Product("Sixday+")
+    case object WeekendPlusVoucher extends Product("Weekend+")
+    case object SundayPlusVoucher extends Product("Sunday+")
+    case object SaturdayPlusVoucher extends Product("Saturday+")
+
+    def apply(productType: String, productRatePlanName: String): Product =
+      withNameOption(productRatePlanName)
+        .orElse(withNameOption((productType)))
+        .orElse(withNameOption(s"$productType - $productRatePlanName"))
+        .getOrElse(throw new RuntimeException(s"Fix ASAP! Product not recognized (productType=$productType, productRatePlanName=$productRatePlanName"))
+  }
 
   case class HolidayStopRequestsDetailChargeCode(value: String) extends AnyVal
   implicit val formatHolidayStopRequestsDetailChargeCode = Jsonx.formatInline[HolidayStopRequestsDetailChargeCode]
@@ -104,20 +101,20 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
 
   val SOQL_ORDER_BY_CLAUSE = "ORDER BY Stopped_Publication_Date__c ASC"
 
-  object LookupPendingByProductNamePrefixAndDate {
+  object FetchGuardianWeeklyHolidayStopRequestsDetails {
 
-    def apply(sfGet: HttpOp[RestRequestMaker.GetRequestWithParams, JsValue]): (ProductName, LocalDate) => ClientFailableOp[List[HolidayStopRequestsDetail]] =
+    def apply(sfGet: HttpOp[RestRequestMaker.GetRequestWithParams, JsValue]): (Product, LocalDate) => ClientFailableOp[List[HolidayStopRequestsDetail]] =
       sfGet
         .setupRequestMultiArg(toRequest _)
         .parse[RecordsWrapperCaseClass[HolidayStopRequestsDetail]]
         .map(_.records)
         .runRequestMultiArg
 
-    def toRequest(productNamePrefix: ProductName, date: LocalDate): GetRequestWithParams = {
+    def toRequest(product: Product, date: LocalDate): GetRequestWithParams = {
       val soqlQuery = s"""
           | $SOQL_SELECT_CLAUSE
           | FROM $holidayStopRequestsDetailSfObjectRef
-          | WHERE Product_Name__c LIKE '${productNamePrefix.value}%'
+          | WHERE Product_Name__c LIKE 'Guardian Weekly%'
           | AND Stopped_Publication_Date__c = ${date.toString}
           | AND (
           |   Subscription_Cancellation_Effective_Date__c = null
@@ -131,21 +128,21 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
     }
   }
 
-  object FetchSundayVoucherHolidayStopRequestsDetails {
+  object FetchVoucherHolidayStopRequestsDetails {
 
-    def apply(sfGet: HttpOp[RestRequestMaker.GetRequestWithParams, JsValue]): (ProductRatePlanKey, LocalDate) => ClientFailableOp[List[HolidayStopRequestsDetail]] =
+    def apply(sfGet: HttpOp[RestRequestMaker.GetRequestWithParams, JsValue]): (Product, LocalDate) => ClientFailableOp[List[HolidayStopRequestsDetail]] =
       sfGet
         .setupRequestMultiArg(toRequest _)
         .parse[RecordsWrapperCaseClass[HolidayStopRequestsDetail]]
         .map(_.records)
         .runRequestMultiArg
 
-    def toRequest(productKey: ProductRatePlanKey, date: LocalDate): GetRequestWithParams = {
+    def toRequest(product: Product, date: LocalDate): GetRequestWithParams = {
       val soqlQuery = s"""
                          | $SOQL_SELECT_CLAUSE
                          | FROM $holidayStopRequestsDetailSfObjectRef
-                         | WHERE Product_Name__c LIKE '${productKey.productType.value}%'
-                         | AND Holiday_Stop_Request__r.SF_Subscription__r.Rate_Plan_Name__c = '${productKey.ratePlanName.value}'
+                         | WHERE Product_Name__c = 'Newspaper Voucher'
+                         | AND Holiday_Stop_Request__r.SF_Subscription__r.Rate_Plan_Name__c = '${product.entryName}'
                          | AND Stopped_Publication_Date__c = ${date.toString}
                          | AND (
                          |   Subscription_Cancellation_Effective_Date__c = null
