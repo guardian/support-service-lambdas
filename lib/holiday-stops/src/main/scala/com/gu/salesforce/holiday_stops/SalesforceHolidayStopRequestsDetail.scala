@@ -114,7 +114,7 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
       val soqlQuery = s"""
           | $SOQL_SELECT_CLAUSE
           | FROM $holidayStopRequestsDetailSfObjectRef
-          | WHERE Product_Name__c LIKE 'Guardian Weekly'
+          | WHERE Product_Name__c LIKE 'Guardian Weekly%'
           | AND Stopped_Publication_Date__c = ${date.toString}
           | AND (
           |   Subscription_Cancellation_Effective_Date__c = null
