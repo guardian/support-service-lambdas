@@ -16,7 +16,8 @@ class StoppedPublicationDateOutsideInvoiceSpec extends FlatSpec with Matchers wi
     val subscriptionRaw = Source.fromResource("StoppedPublicationDateOutsideInvoice.json").mkString
     val subscription = decode[Subscription](subscriptionRaw).getOrElse(fail("Could not decode GuardianWeeklySubscription"))
     val guardianWeeklySub = GuardianWeeklySubscription(subscription, StoppedPublicationDate(LocalDate.parse("2019-10-11")))
-    guardianWeeklySub.right.value.credit should be(HolidayStopCredit(amount = -6.16, invoiceDate = chargedThroughDate))
+    guardianWeeklySub.right.value.nextBillingPeriodStartDate should be(chargedThroughDate)
+    guardianWeeklySub.right.value.credit should be(-6.16)
   }
 
   it should "fail if stoppedPublicationDate is before current invoiced period start date" in {
