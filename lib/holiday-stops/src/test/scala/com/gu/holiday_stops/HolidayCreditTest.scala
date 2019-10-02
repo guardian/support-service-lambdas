@@ -2,7 +2,7 @@ package com.gu.holiday_stops
 
 import java.time.LocalDate
 
-import com.gu.holiday_stops.subscription.{GuardianWeeklySubscription, HolidayStopCredit, RatePlan}
+import com.gu.holiday_stops.subscription.{GuardianWeeklySubscription, RatePlan}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.StoppedPublicationDate
 import org.scalatest.{EitherValues, FlatSpec, Matchers}
 
@@ -16,7 +16,7 @@ class HolidayCreditTest extends FlatSpec with Matchers with EitherValues {
     val subscription = Fixtures.mkSubscription().copy(ratePlans = ratePlans)
     val currentGuardianWeeklySubscription = GuardianWeeklySubscription(subscription, stoppedPublicationDate)
     val credit = currentGuardianWeeklySubscription.right.value.credit
-    credit shouldBe HolidayStopCredit(-2.31, LocalDate.parse("2019-09-02"))
+    credit shouldBe -2.31
   }
 
   it should "be correct for another quarterly billing period" in {
@@ -25,7 +25,7 @@ class HolidayCreditTest extends FlatSpec with Matchers with EitherValues {
     val subscription = Fixtures.mkSubscription().copy(ratePlans = ratePlans)
     val currentGuardianWeeklySubscription = GuardianWeeklySubscription(subscription, stoppedPublicationDate)
     val credit = currentGuardianWeeklySubscription.right.value.credit
-    credit shouldBe HolidayStopCredit(-2.89, LocalDate.parse("2019-09-02"))
+    credit shouldBe -2.89
   }
 
   it should "be correct for an annual billing period" in {
@@ -34,6 +34,6 @@ class HolidayCreditTest extends FlatSpec with Matchers with EitherValues {
     val subscription = Fixtures.mkSubscription().copy(ratePlans = ratePlans)
     val currentGuardianWeeklySubscription = GuardianWeeklySubscription(subscription, stoppedPublicationDate)
     val credit = currentGuardianWeeklySubscription.right.value.credit
-    credit shouldBe HolidayStopCredit(-2.31, LocalDate.parse("2019-09-02"))
+    credit shouldBe -2.31
   }
 }

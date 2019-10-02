@@ -177,8 +177,8 @@ class HandlerTest extends FlatSpec with Matchers {
             response should equal(
               PotentialHolidayStopsResponse(
                 List(
-                  PotentialHolidayStop(LocalDate.of(2019, 1, 4), Some(HolidayStopCredit(-2.89, LocalDate.parse("2019-04-01")))),
-                  PotentialHolidayStop(LocalDate.of(2019, 1, 11), Some(HolidayStopCredit(-2.89, LocalDate.parse("2019-04-01")))),
+                  PotentialHolidayStop(LocalDate.of(2019, 1, 4), Some(HolidayStopCredit(-2.89))),
+                  PotentialHolidayStop(LocalDate.of(2019, 1, 11), Some(HolidayStopCredit(-2.89))),
                 )
               )
             )
