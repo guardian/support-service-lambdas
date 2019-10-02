@@ -20,7 +20,7 @@ case class CurrentInvoicedPeriod(startDateIncluding: LocalDate, endDateExcluding
 /**
  * Is date between two dates where including the start while excluding the end?
  */
-object PeriodContainsDate extends ((LocalDate, LocalDate, LocalDate) => Boolean) {
+object PeriodContainsDate {
   def apply(
     startPeriodInclusive: LocalDate,
     endPeriodExcluding: LocalDate,
@@ -83,6 +83,34 @@ object StoppedProduct {
     (GuardianWeeklySubscription(subscription, stoppedPublicationDate)
       .orElse(VoucherSubscription(subscription, stoppedPublicationDate))
       .orElse(Left(ZuoraHolidayError(s"Failed to determine StoppableProduct: ${subscription.subscriptionNumber}; ${stoppedPublicationDate}"))))
+  }
+
+  def stoppedPublicationDateIsAfterCurrentInvoiceStartDate(
+      ratePlan: RatePlan,
+      stoppedPublicationDate: StoppedPublicationDate
+  ): Boolean = {
+    ratePlan.ratePlanCharges.forall { ratePlanCharge =>
+      (for {
+        fromInclusive <- ratePlanCharge.processedThroughDate
+        toExclusive <- ratePlanCharge.chargedThroughDate
+      } yield {
+        stoppedPublicationDate.value.isEqual(fromInclusive) || stoppedPublicationDate.value.isAfter(fromInclusive)
+      }).getOrElse(false)
+    }
+  }
+
+  def stoppedPublicationDateFallsStrictlyWithinInvoicedPeriod(
+    ratePlan: RatePlan,
+    stoppedPublicationDate: StoppedPublicationDate,
+  ): Boolean = {
+    ratePlan.ratePlanCharges.forall { ratePlanCharge =>
+      (for {
+        fromInclusive <- ratePlanCharge.processedThroughDate
+        toExclusive <- ratePlanCharge.chargedThroughDate
+      } yield {
+        (toExclusive isAfter fromInclusive) && PeriodContainsDate(fromInclusive, toExclusive, stoppedPublicationDate.value)
+      }).getOrElse(false)
+    }
   }
 }
 

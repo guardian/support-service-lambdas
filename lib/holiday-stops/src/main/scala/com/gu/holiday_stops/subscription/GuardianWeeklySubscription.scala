@@ -7,6 +7,8 @@ import com.typesafe.scalalogging.LazyLogging
 import GuardianWeeklyRatePlanCondition._
 import acyclic.skipped
 import scala.util.Try
+import StoppedProduct._
+import mouse.all._
 
 /**
  * Conditions defining what Guardian Weekly subscription the customer has today.
@@ -21,16 +23,9 @@ object GuardianWeeklyRatePlanCondition {
       "Guardian Weekly Zone C"
     ).contains(ratePlan.productName)
 
-  def stoppedPublicationDateFallsWithinInvoicedPeriod(ratePlan: RatePlan, stoppedPublicationDate: StoppedPublicationDate): Boolean = {
-    ratePlan.ratePlanCharges.forall { ratePlanCharge =>
-      (for {
-        fromInclusive <- ratePlanCharge.processedThroughDate
-        toExclusive <- ratePlanCharge.chargedThroughDate
-      } yield {
-        (toExclusive isAfter fromInclusive) && PeriodContainsDate(fromInclusive, toExclusive, stoppedPublicationDate.value)
-      }).getOrElse(false)
-    }
-  }
+  def productIsSixForSix(ratePlan: RatePlan): Boolean =
+    ratePlan.ratePlanCharges.exists(_.billingPeriod.contains("Specific_Weeks"))
+
 }
 
 /**
@@ -86,9 +81,29 @@ object PredictedInvoicedPeriod extends LazyLogging {
  */
 object GuardianWeeklySubscription {
   def apply(subscription: Subscription, stoppedPublicationDate: StoppedPublicationDate): Either[ZuoraHolidayError, GuardianWeeklySubscription] = {
-    val maybeRegularGw =
+
+    // stoppedPublicationDate within N-for-N period
+    lazy val maybeWithinNforN =
       for {
-        currentGuardianWeeklyRatePlan <- subscription.ratePlans.find(rp => productIsGuardianWeekly(rp) && stoppedPublicationDateFallsWithinInvoicedPeriod(rp, stoppedPublicationDate))
+        nForN <- subscription.ratePlans.find(ratePlan => productIsGuardianWeekly(ratePlan) && productIsSixForSix(ratePlan) && stoppedPublicationDateFallsStrictlyWithinInvoicedPeriod(ratePlan, stoppedPublicationDate))
+        nForNRatePlanCharge <- nForN.ratePlanCharges.headOption
+        billingPeriod <- nForNRatePlanCharge.billingPeriod
+        startDateIncluding <- nForNRatePlanCharge.processedThroughDate
+        endDateExcluding <- nForNRatePlanCharge.chargedThroughDate
+      } yield {
+        new GuardianWeeklySubscription(
+          subscription.subscriptionNumber,
+          billingPeriod,
+          nForNRatePlanCharge.price,
+          CurrentInvoicedPeriod(startDateIncluding, endDateExcluding),
+          stoppedPublicationDate.value
+        )
+      }
+
+    // just a regular Guardian Weekly
+    lazy val maybeRegularGw =
+      for {
+        currentGuardianWeeklyRatePlan <- subscription.ratePlans.find(rp => productIsGuardianWeekly(rp) && !productIsSixForSix(rp) && stoppedPublicationDateIsAfterCurrentInvoiceStartDate(rp, stoppedPublicationDate))
         currentGuardianWeeklyRatePlanCharge <- currentGuardianWeeklyRatePlan.ratePlanCharges.headOption
         billingPeriod <- currentGuardianWeeklyRatePlanCharge.billingPeriod
         startDateIncluding <- currentGuardianWeeklyRatePlanCharge.processedThroughDate
@@ -103,14 +118,14 @@ object GuardianWeeklySubscription {
         )
       }
 
+    // regular GW + N-for-N and stoppedPublicationDate falls within regular GW invoiced period
     lazy val maybeGwWithIntro =
       (for {
         nForN <- subscription.ratePlans.find(ratePlan => productIsGuardianWeekly(ratePlan) && ratePlan.ratePlanCharges.exists(_.billingPeriod.contains("Specific_Weeks")))
         regular <- subscription.ratePlans.find(ratePlan => productIsGuardianWeekly(ratePlan) && !ratePlan.ratePlanCharges.exists(_.billingPeriod.contains("Specific_Weeks")))
         predictedInvoicedPeriod <- PredictedInvoicedPeriod(regular, nForN)
         regularRpc <- regular.ratePlanCharges.headOption
-        stoppedPublicationDateFallsWithinPredictedInvoicedPeriod = PeriodContainsDate(predictedInvoicedPeriod.startDateIncluding, predictedInvoicedPeriod.endDateExcluding, stoppedPublicationDate.value)
-        _ <- if (stoppedPublicationDateFallsWithinPredictedInvoicedPeriod) Some({}) else None
+        _ <- (stoppedPublicationDate.value.isEqual(predictedInvoicedPeriod.startDateIncluding) || stoppedPublicationDate.value.isAfter(predictedInvoicedPeriod.startDateIncluding)) option {}
       } yield {
         GuardianWeeklySubscription(
           subscriptionNumber = subscription.subscriptionNumber,
@@ -121,7 +136,7 @@ object GuardianWeeklySubscription {
         )
       })
 
-    (maybeRegularGw orElse maybeGwWithIntro)
+    (maybeWithinNforN orElse maybeRegularGw orElse maybeGwWithIntro)
       .toRight(ZuoraHolidayError(s"Failed to determine current Guardian Weekly or Guardian Weekly+N-for-N rate plan: $subscription"))
 
   }

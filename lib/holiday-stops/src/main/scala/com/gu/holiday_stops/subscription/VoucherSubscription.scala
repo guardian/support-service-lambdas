@@ -6,6 +6,7 @@ import com.gu.holiday_stops.{ZuoraHolidayError, ZuoraHolidayResponse}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.StoppedPublicationDate
 import enumeratum._
 import acyclic.skipped
+import StoppedProduct._
 
 case class VoucherSubscription(
   override val subscriptionNumber: String,
@@ -34,17 +35,6 @@ object VoucherSubscriptionPredicates {
   def ratePlanIsVoucher(ratePlan: RatePlan, stoppedPublicationDate: StoppedPublicationDate): Boolean =
     ratePlan.productName == "Newspaper Voucher" && ratePlan.ratePlanCharges.exists(_.name == stoppedPublicationDate.getDayOfWeek)
 
-  def stoppedPublicationDateFallsWithinInvoicedPeriod(ratePlan: RatePlan, stoppedPublicationDate: StoppedPublicationDate): Boolean = {
-    ratePlan.ratePlanCharges.forall { ratePlanCharge =>
-      (for {
-        fromInclusive <- ratePlanCharge.processedThroughDate
-        toExclusive <- ratePlanCharge.chargedThroughDate
-      } yield {
-        (toExclusive isAfter fromInclusive) && PeriodContainsDate(fromInclusive, toExclusive, stoppedPublicationDate.value)
-      }).getOrElse(false)
-    }
-  }
-
   def billingPeriodIsAnnualOrMonthOrQuarterOrSemiAnnual(ratePlan: RatePlan): Boolean = {
     val billingPeriods = ratePlan.ratePlanCharges.map(_.billingPeriod)
     val allPeriodsAreTheSame = billingPeriods.headOption.exists(bp => billingPeriods.forall(_ == bp))
@@ -65,7 +55,7 @@ object VoucherSubscription {
         import VoucherSubscriptionPredicates._
         List(
           ratePlanIsVoucher(ratePlan, stoppedPublicationDate),
-          stoppedPublicationDateFallsWithinInvoicedPeriod(ratePlan, stoppedPublicationDate),
+          stoppedPublicationDateIsAfterCurrentInvoiceStartDate(ratePlan, stoppedPublicationDate),
           billingPeriodIsAnnualOrMonthOrQuarterOrSemiAnnual(ratePlan)
         ).forall(_ == true)
       }
