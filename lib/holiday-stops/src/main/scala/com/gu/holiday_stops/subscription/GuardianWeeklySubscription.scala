@@ -8,6 +8,7 @@ import GuardianWeeklyRatePlanCondition._
 import acyclic.skipped
 import scala.util.Try
 import StoppedProduct._
+import mouse.all._
 
 /**
  * Conditions defining what Guardian Weekly subscription the customer has today.
@@ -124,8 +125,7 @@ object GuardianWeeklySubscription {
         regular <- subscription.ratePlans.find(ratePlan => productIsGuardianWeekly(ratePlan) && !ratePlan.ratePlanCharges.exists(_.billingPeriod.contains("Specific_Weeks")))
         predictedInvoicedPeriod <- PredictedInvoicedPeriod(regular, nForN)
         regularRpc <- regular.ratePlanCharges.headOption
-        stoppedPublicationDateIsAfterInvoicedPeriodStartDate = stoppedPublicationDate.value.isEqual(predictedInvoicedPeriod.startDateIncluding) || stoppedPublicationDate.value.isAfter(predictedInvoicedPeriod.startDateIncluding)
-        _ <- if (stoppedPublicationDateIsAfterInvoicedPeriodStartDate) Some({}) else None
+        _ <- (stoppedPublicationDate.value.isEqual(predictedInvoicedPeriod.startDateIncluding) || stoppedPublicationDate.value.isAfter(predictedInvoicedPeriod.startDateIncluding)) option {}
       } yield {
         GuardianWeeklySubscription(
           subscriptionNumber = subscription.subscriptionNumber,
