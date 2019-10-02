@@ -2,11 +2,10 @@ package com.gu.holiday_stops
 
 import java.io.{InputStream, OutputStream}
 import java.time.LocalDate
-
 import cats.syntax.either._
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
-import com.gu.holiday_stops.subscription.{StoppedProduct, Subscription}
+import com.gu.holiday_stops.subscription.{HolidayStopCredit, StoppedProduct, Subscription}
 import com.gu.salesforce.SalesforceClient
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestId, Product, ProductName, StoppedPublicationDate, SubscriptionName}
@@ -173,9 +172,8 @@ object Handler extends Logging {
         // unfortunately necessary due to GW N-for-N requiring stoppedPublicationDate to calculate correct credit estimation
         PotentialHolidayStop(
           stoppedPublicationDate,
-          optionalSubscription flatMap { sub =>
-            StoppedProduct(sub, StoppedPublicationDate(stoppedPublicationDate)).map(_.credit).toOption
-          }
+          optionalSubscription.flatMap(sub =>
+            creditCalculator(stoppedPublicationDate, sub).toOption.map(HolidayStopCredit(_)))
         )
       }
     } yield ApiGatewayResponse("200", PotentialHolidayStopsResponse(potentialHolidayStops))).apiResponse
@@ -198,7 +196,7 @@ object Handler extends Logging {
     queryParams match {
       case PotentialHolidayStopsQueryParams(startDate, endDate, _, Some(productType), Some(productRatePlanName)) =>
         ActionCalculator
-          .publicationDatesToBeStopped(startDate, endDate, Product(productType, productRatePlanName))
+          .publicationDatesToBeStopped(startDate, endDate, Product(productType, (productRatePlanName)))
           .toApiGatewayOp(s"calculating publication dates")
 
       case PotentialHolidayStopsQueryParams(startDate, endDate, _, _, _) =>
@@ -313,6 +311,6 @@ object Handler extends Logging {
 
   def credit(config: Config)(stoppedPublicationDate: LocalDate, subscription: Subscription): Either[ZuoraHolidayError, Double] =
     StoppedProduct(subscription, StoppedPublicationDate(stoppedPublicationDate))
-      .map(_.credit.amount)
+      .map(_.credit)
       .leftMap(e => ZuoraHolidayError(s"Failed to calculate holiday stop credits because $e"))
 }
