@@ -41,6 +41,7 @@ class SundayVoucherHolidayStopProcessTest extends FlatSpec with Matchers {
       "A-S00051832",
       LocalDate.parse("2019-09-24"),
       LocalDate.parse("2020-09-24"),
+      LocalDate.parse("2020-09-24"),
       12,
       "Month",
       true,
@@ -67,6 +68,7 @@ class SundayVoucherHolidayStopProcessTest extends FlatSpec with Matchers {
     Subscription(
       "A-S00051832",
       LocalDate.parse("2019-09-24"),
+      LocalDate.parse("2020-09-24"),
       LocalDate.parse("2020-09-24"),
       12,
       "Month",

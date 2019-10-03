@@ -111,13 +111,13 @@ object Handler extends Logging {
         }
       case "hsr" :: Nil =>
         httpMethod match {
-          case "GET" => stepsToListExisting _
+          case "GET" => stepsToListExisting(getSubscription) _
           case "POST" => stepsToCreate(creditCalculator, getSubscription) _
           case _ => unsupported _
         }
       case "hsr" :: _ :: Nil =>
         httpMethod match {
-          case "GET" => stepsToListExisting _
+          case "GET" => stepsToListExisting(getSubscription) _
           case _ => unsupported _
         }
       case "hsr" :: _ :: _ :: Nil =>
@@ -219,16 +219,13 @@ object Handler extends Logging {
     }
   }
 
-  case class ListExistingPathParams(subscriptionName: Option[SubscriptionName])
+  case class ListExistingPathParams(subscriptionName: SubscriptionName)
 
-  def stepsToListExisting(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
+  def stepsToListExisting(getSubscription: SubscriptionName => Either[HolidayError, Subscription])(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
 
     val lookupOp = SalesforceHolidayStopRequest.LookupByContactAndOptionalSubscriptionName(sfClient.wrapWith(JsonHttp.getWithParams))
 
-    val extractOptionalSubNameOp: ApiGatewayOp[Option[SubscriptionName]] = req.pathParameters match {
-      case Some(_) => req.pathParamsAsCaseClass[ListExistingPathParams]()(Json.reads[ListExistingPathParams]).map(_.subscriptionName)
-      case None => ContinueProcessing(None)
-    }
+    val extractOptionalSubNameOp: ApiGatewayOp[SubscriptionName] = req.pathParamsAsCaseClass[ListExistingPathParams]()(Json.reads[ListExistingPathParams]).map(_.subscriptionName)
 
     val optionalProductNamePrefix = req.headers.flatMap(_.get(HEADER_PRODUCT_NAME_PREFIX).map(ProductName.apply))
 
@@ -237,11 +234,17 @@ object Handler extends Logging {
     (for {
       contact <- extractContactFromHeaders(req.headers)
       optionalSubName <- extractOptionalSubNameOp
-      usersHolidayStopRequests <- lookupOp(contact, optionalSubName)
+      usersHolidayStopRequests <- lookupOp(contact, Some(optionalSubName))
         .toDisjunction
         .toApiGatewayOp(s"lookup Holiday Stop Requests for contact $contact")
-      response <- GetHolidayStopRequests(usersHolidayStopRequests, optionalProductNamePrefix, productRatePlanKey)
-        .toApiGatewayOp("calculate holidays stops specifics")
+      subscription <- getSubscription(optionalSubName)
+        .toApiGatewayOp(s"get subscription $optionalSubName")
+      response <- GetHolidayStopRequests(
+        usersHolidayStopRequests,
+        optionalProductNamePrefix,
+        productRatePlanKey,
+        subscription
+      ).toApiGatewayOp("calculate holidays stops specifics")
     } yield ApiGatewayResponse("200", response)).apiResponse
   }
 

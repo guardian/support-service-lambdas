@@ -35,6 +35,7 @@ object Fixtures {
   def mkSubscription(
     termStartDate: LocalDate = LocalDate.now(),
     termEndDate: LocalDate = LocalDate.now(),
+    customerAcceptanceDate: LocalDate = LocalDate.now(),
     price: Double = -1.0,
     billingPeriod: String = "Quarter",
     chargedThroughDate: Option[LocalDate] = None
@@ -43,6 +44,7 @@ object Fixtures {
       subscriptionNumber = "S1",
       termStartDate,
       termEndDate,
+      customerAcceptanceDate,
       currentTerm = 12,
       currentTermPeriodType = "Month",
       autoRenew = true,
@@ -67,6 +69,7 @@ object Fixtures {
     subscriptionNumber = "S1",
     termStartDate = LocalDate.of(2019, 3, 1),
     termEndDate = LocalDate.of(2020, 3, 1),
+    customerAcceptanceDate = LocalDate.of(2020, 4, 1),
     currentTerm = 12,
     currentTermPeriodType = "Month",
     autoRenew = true,

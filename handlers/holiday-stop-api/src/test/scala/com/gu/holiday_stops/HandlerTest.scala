@@ -117,11 +117,13 @@ class HandlerTest extends FlatSpec with Matchers {
 
     val startDate = LocalDate.of(2019, 1, 1)
     val endDate = startDate.plusMonths(3)
+    val customerAcceptanceDate = startDate.plusMonths(1)
 
     val subscription = Subscription(
       subscriptionNumber = subscriptionName,
       termStartDate = startDate,
       termEndDate = endDate,
+      customerAcceptanceDate = customerAcceptanceDate,
       currentTerm = 12,
       currentTermPeriodType = "Month",
       autoRenew = true,
@@ -231,6 +233,7 @@ class HandlerTest extends FlatSpec with Matchers {
     val testBackend = SttpBackendStub.synchronous
 
     val subscriptionName = "Sub12344"
+    val subscription = Fixtures.mkSubscription()
     val contactId = "Contact1234"
     val holidayStopRequestsDetail = Fixtures.mkHolidayStopRequestDetails()
 
@@ -284,7 +287,7 @@ class HandlerTest extends FlatSpec with Matchers {
                 ),
                 List(
                   IssueSpecifics(
-                    SundayVoucherSuspensionConstants.issueConstants(0).firstAvailableDate(LocalDate.now()),
+                    SundayVoucherSuspensionConstants.issueConstants(0).firstAvailableDate(LocalDate.now(), subscription),
                     SundayVoucherSuspensionConstants.issueConstants(0).issueDayOfWeek.getValue
                   )
                 ),
@@ -302,6 +305,7 @@ class HandlerTest extends FlatSpec with Matchers {
     val subscriptionName = "Sub12344"
     val contactId = "Contact1234"
     val holidayStopRequestsDetail = Fixtures.mkHolidayStopRequestDetails()
+    val subscription = Fixtures.mkSubscription()
 
     val holidayStopRequest = Fixtures.mkHolidayStopRequest(
       id = "holidayStopId",
@@ -342,7 +346,7 @@ class HandlerTest extends FlatSpec with Matchers {
               GetHolidayStopRequests(
                 Some(
                   LegacyProductSpecifics(
-                    GuardianWeeklyIssueSuspensionConstants.firstAvailableDate(LocalDate.now()),
+                    GuardianWeeklyIssueSuspensionConstants.firstAvailableDate(LocalDate.now(), subscription),
                     GuardianWeeklyIssueSuspensionConstants.issueDayOfWeek.getValue,
                     GuardianWeeklySuspensionConstants.annualIssueLimit
                   )
