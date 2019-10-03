@@ -111,7 +111,6 @@ object Handler extends Logging {
         }
       case "hsr" :: Nil =>
         httpMethod match {
-          case "GET" => stepsToListExisting(getSubscription) _
           case "POST" => stepsToCreate(creditCalculator, getSubscription) _
           case _ => unsupported _
         }
