@@ -230,12 +230,16 @@ class HandlerTest extends FlatSpec with Matchers {
   }
   "GET /hsr/<<sub name>>?productType=...&ratePlanName=... endpoint" should
     "get subscription and calculate product specifics for product type and rate plan name query params" in {
-    val testBackend = SttpBackendStub.synchronous
 
     val subscriptionName = "Sub12344"
     val subscription = Fixtures.mkSubscription()
     val contactId = "Contact1234"
     val holidayStopRequestsDetail = Fixtures.mkHolidayStopRequestDetails()
+
+    val testBackend = SttpBackendStub
+      .synchronous
+      .stubZuoraAuthCall()
+      .stubZuoraSubscription(subscriptionName, subscription)
 
     val holidayStopRequest = Fixtures.mkHolidayStopRequest(
       id = "holidayStopId",
@@ -300,12 +304,15 @@ class HandlerTest extends FlatSpec with Matchers {
   }
   "GET /hsr/<<sub name>> endpoint" should
     "get subscription and calculate product specifics for product name prefix header" in {
-    val testBackend = SttpBackendStub.synchronous
-
     val subscriptionName = "Sub12344"
     val contactId = "Contact1234"
     val holidayStopRequestsDetail = Fixtures.mkHolidayStopRequestDetails()
     val subscription = Fixtures.mkSubscription()
+
+    val testBackend = SttpBackendStub
+      .synchronous
+      .stubZuoraAuthCall()
+      .stubZuoraSubscription(subscriptionName, subscription)
 
     val holidayStopRequest = Fixtures.mkHolidayStopRequest(
       id = "holidayStopId",
