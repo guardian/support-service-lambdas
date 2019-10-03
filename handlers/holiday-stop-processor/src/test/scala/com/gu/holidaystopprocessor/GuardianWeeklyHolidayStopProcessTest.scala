@@ -81,6 +81,15 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
       ZuoraHolidayError("Cannot currently process non-auto-renewing subscription")
   }
 
+  it should "fail if subscription is cancelled" in {
+    val response = Processor.writeHolidayStopToZuora(
+      Fixtures.config,
+      _ => Right(subscription.copy(status = "Cancelled")),
+      updateSubscription(Left(ZuoraHolidayError("shouldn't need to apply an update")))
+    )(holidayStop)
+    response.left.value.reason should include("Apply manual refund")
+  }
+
   it should "just give charge added without applying an update if holiday stop has already been applied" in {
     val response = Processor.writeHolidayStopToZuora(
       Fixtures.config,

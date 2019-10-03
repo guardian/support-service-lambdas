@@ -144,7 +144,8 @@ class HandlerTest extends FlatSpec with Matchers {
           "",
           ""
         )
-      )
+      ),
+      "Active"
     )
 
     val testBackend = SttpBackendStub

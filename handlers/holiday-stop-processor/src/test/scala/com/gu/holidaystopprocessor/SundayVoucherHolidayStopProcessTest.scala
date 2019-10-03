@@ -59,7 +59,8 @@ class SundayVoucherHolidayStopProcessTest extends FlatSpec with Matchers {
           "2c92c0f95aff3b56015b1045fba832d4")),
         "2c92c0f95aff3b56015b1045fb9332d2",
         "2c92c0f86d6263c0016d6271c6750a35")
-      )
+      ),
+      "Active"
     )
 
   val updatedSubscription =
@@ -107,7 +108,8 @@ class SundayVoucherHolidayStopProcessTest extends FlatSpec with Matchers {
           "2c92c0f95aff3b56015b1045fb9332d2",
           "2c92c0fb6d627309016d628f3fda31d7"
         )
-      )
+      ),
+      "Active"
     )
 
   val zuoraGetSubscriptionResponsesStack = mutable.Stack[Subscription](

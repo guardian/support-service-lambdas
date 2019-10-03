@@ -11,7 +11,8 @@ case class Subscription(
   currentTerm: Int,
   currentTermPeriodType: String,
   autoRenew: Boolean,
-  ratePlans: List[RatePlan]
+  ratePlans: List[RatePlan],
+  status: String
 ) {
 
   def ratePlanCharge(stop: HolidayStop): Option[RatePlanCharge] = {

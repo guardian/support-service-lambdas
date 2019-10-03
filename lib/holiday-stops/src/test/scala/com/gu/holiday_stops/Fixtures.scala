@@ -58,10 +58,12 @@ object Fixtures {
           "",
           ""
         )
-      )
+      ),
+      status = "Active"
     )
 
   def mkSubscriptionWithHolidayStops() = Subscription(
+    status = "Active",
     subscriptionNumber = "S1",
     termStartDate = LocalDate.of(2019, 3, 1),
     termEndDate = LocalDate.of(2020, 3, 1),
