@@ -2,14 +2,12 @@ package com.gu.holiday_stops.subscription
 
 import java.time.LocalDate
 
+import com.gu.holiday_stops.Fixtures
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.StoppedPublicationDate
-import io.circe.generic.auto._
-import io.circe.parser.decode
+import org.scalactic.TypeCheckedTripleEquals
 import org.scalatest._
 
-import scala.io.Source
-
-class CreditCalculatorSpec extends FlatSpec with Matchers with EitherValues {
+class CreditCalculatorSpec extends FlatSpec with Matchers with EitherValues with TypeCheckedTripleEquals {
   "CreditCalculator" should "calculate credit for sunday voucher subscription" in {
     checkCreditCalculation(
       zuoraSubscriptionData = "SundayVoucherSubscription.json",
@@ -49,10 +47,9 @@ class CreditCalculatorSpec extends FlatSpec with Matchers with EitherValues {
   }
 
   private def checkCreditCalculation(zuoraSubscriptionData: String, stopDate: LocalDate, expectedCredit: HolidayStopCredit) = {
-    val subscriptionRaw = Source.fromResource(zuoraSubscriptionData).mkString
-    val subscription = decode[Subscription](subscriptionRaw).getOrElse(fail(s"Could not decode $zuoraSubscriptionData"))
+    val subscription = Fixtures.subscriptionFromJson(zuoraSubscriptionData)
     val stoppedProduct = StoppedProduct(subscription, StoppedPublicationDate(stopDate)).right.value
 
-    stoppedProduct.credit should equal(expectedCredit)
+    stoppedProduct.credit should ===(expectedCredit)
   }
 }

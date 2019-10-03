@@ -7,8 +7,13 @@ import com.gu.salesforce.RecordsWrapperCaseClass
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.{HolidayStopRequest, HolidayStopRequestActionedCount, HolidayStopRequestEndDate, HolidayStopRequestStartDate}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
+import io.circe.generic.auto._
+import io.circe.parser.decode
+import org.scalatest.Assertions
 
-object Fixtures {
+import scala.io.Source
+
+object Fixtures extends Assertions {
 
   def billingPeriodToMonths(billingPeriod: String): Int = billingPeriod match {
     case "Quarter" => 3
@@ -183,6 +188,11 @@ object Fixtures {
       )
     )
   )
+
+  def subscriptionFromJson(resource: String): Subscription = {
+    val subscriptionRaw = Source.fromResource(resource).mkString
+    decode[Subscription](subscriptionRaw).getOrElse(fail(s"Could not decode $subscriptionRaw"))
+  }
 
   def mkHolidayStopRequest(
     id: String,
