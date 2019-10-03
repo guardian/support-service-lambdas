@@ -1,11 +1,13 @@
 package com.gu.holiday_stops.subscription
 
-import java.time.LocalDate
+import java.time.{LocalDate, Period}
 
 import acyclic.skipped
 import cats.syntax.either._
 import com.gu.holiday_stops.{ZuoraHolidayError, ZuoraHolidayResponse}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.StoppedPublicationDate
+
+import scala.annotation.tailrec
 import scala.math.BigDecimal.RoundingMode
 
 /**
@@ -15,18 +17,14 @@ import scala.math.BigDecimal.RoundingMode
  * @param startDateIncluding service active on startDateIncluding; corresponds to processedThroughDate
  * @param endDateExcluding service ends on endDateExcluding; corresponds to chargedThroughDate
  */
-case class CurrentInvoicedPeriod(startDateIncluding: LocalDate, endDateExcluding: LocalDate)
+case class CurrentInvoicedPeriod(startDateIncluding: LocalDate, endDateExcluding: LocalDate) {
 
-/**
- * Is date between two dates where including the start while excluding the end?
- */
-object PeriodContainsDate {
-  def apply(
-    startPeriodInclusive: LocalDate,
-    endPeriodExcluding: LocalDate,
-    date: LocalDate
-  ): Boolean =
-    (date.isEqual(startPeriodInclusive) || date.isAfter(startPeriodInclusive)) && date.isBefore(endPeriodExcluding)
+  /**
+   * Is date between two dates where including the start while excluding the end?
+   */
+  def containsDate(date: LocalDate): Boolean =
+    (date.isEqual(startDateIncluding) || date.isAfter(startDateIncluding)) &&
+    date.isBefore(endDateExcluding)
 }
 
 abstract class StoppedProduct(
@@ -65,7 +63,43 @@ abstract class StoppedProduct(
    * If the holiday falls within N-for-N then credit should be applied on the first regular invoice, not the next billing
    * period of GW regular plan.
    */
-  private def nextBillingPeriodStartDate: LocalDate = invoicedPeriod.endDateExcluding
+  private def nextBillingPeriodStartDate: LocalDate = {
+
+    if (billingPeriod == "Specific_Weeks") invoicedPeriod.endDateExcluding
+    else {
+
+      val billingPeriodDuration: Period = billingPeriod match {
+        case "Annual" => Period.ofYears(1)
+        case "Semi-Annual" => Period.ofMonths(6)
+        case "Quarter" => Period.ofMonths(3)
+        case "Month" => Period.ofMonths(1)
+        case _ => throw new RuntimeException(
+          s"Failed to determine duration of billing period: $billingPeriod"
+        )
+      }
+
+      val latestPossibleInvoiceDate = LocalDate.now.plusYears(3)
+
+      @tailrec
+      def go(invoicePeriod: CurrentInvoicedPeriod): LocalDate = {
+        if (invoicePeriod.containsDate(stoppedPublicationDate))
+          invoicePeriod.endDateExcluding
+        else {
+          if (invoicePeriod.endDateExcluding.isBefore(latestPossibleInvoiceDate))
+            go(CurrentInvoicedPeriod(
+              startDateIncluding = invoicePeriod.endDateExcluding,
+              endDateExcluding = invoicePeriod.endDateExcluding.plus(billingPeriodDuration)
+            ))
+          else
+            throw new RuntimeException(
+              s"Failed to determine invoice date before ${invoicePeriod.endDateExcluding}"
+            )
+        }
+      }
+
+      go(invoicedPeriod)
+    }
+  }
 
   private def billingPeriodToApproxWeekCount(billingPeriod: String): Int =
     billingPeriod match {
@@ -82,9 +116,9 @@ abstract class StoppedProduct(
 
 object StoppedProduct {
   def apply(subscription: Subscription, stoppedPublicationDate: StoppedPublicationDate): ZuoraHolidayResponse[StoppedProduct] = {
-    (GuardianWeeklySubscription(subscription, stoppedPublicationDate)
+    GuardianWeeklySubscription(subscription, stoppedPublicationDate)
       .orElse(VoucherSubscription(subscription, stoppedPublicationDate))
-      .orElse(Left(ZuoraHolidayError(s"Failed to determine StoppableProduct: ${subscription.subscriptionNumber}; ${stoppedPublicationDate}"))))
+      .orElse(Left(ZuoraHolidayError(s"Failed to determine StoppableProduct: ${subscription.subscriptionNumber}; ${stoppedPublicationDate}")))
   }
 
   def stoppedPublicationDateIsAfterCurrentInvoiceStartDate(
@@ -94,7 +128,7 @@ object StoppedProduct {
     ratePlan.ratePlanCharges.forall { ratePlanCharge =>
       (for {
         fromInclusive <- ratePlanCharge.processedThroughDate
-        toExclusive <- ratePlanCharge.chargedThroughDate
+        _ <- ratePlanCharge.chargedThroughDate
       } yield {
         stoppedPublicationDate.value.isEqual(fromInclusive) || stoppedPublicationDate.value.isAfter(fromInclusive)
       }).getOrElse(false)
@@ -110,7 +144,7 @@ object StoppedProduct {
         fromInclusive <- ratePlanCharge.processedThroughDate
         toExclusive <- ratePlanCharge.chargedThroughDate
       } yield {
-        (toExclusive isAfter fromInclusive) && PeriodContainsDate(fromInclusive, toExclusive, stoppedPublicationDate.value)
+        (toExclusive isAfter fromInclusive) && CurrentInvoicedPeriod(fromInclusive, toExclusive).containsDate(stoppedPublicationDate.value)
       }).getOrElse(false)
     }
   }
