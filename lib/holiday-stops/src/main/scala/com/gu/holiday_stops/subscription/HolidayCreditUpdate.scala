@@ -21,9 +21,8 @@ object HolidayCreditUpdate {
     holidayCreditProduct: HolidayCreditProduct,
     subscription: Subscription,
     stoppedPublicationDate: LocalDate,
-    nextInvoiceStartDate: LocalDate,
     maybeExtendedTerm: Option[ExtendedTerm],
-    holidayCredit: Double
+    holidayCredit: HolidayStopCredit
   ): Either[ZuoraHolidayError, HolidayCreditUpdate] = {
     Right(
       HolidayCreditUpdate(
@@ -32,15 +31,15 @@ object HolidayCreditUpdate {
         List(
           Add(
             productRatePlanId = holidayCreditProduct.productRatePlanId,
-            contractEffectiveDate = nextInvoiceStartDate,
-            customerAcceptanceDate = nextInvoiceStartDate,
-            serviceActivationDate = nextInvoiceStartDate,
+            contractEffectiveDate = holidayCredit.invoiceDate,
+            customerAcceptanceDate = holidayCredit.invoiceDate,
+            serviceActivationDate = holidayCredit.invoiceDate,
             chargeOverrides = List(
               ChargeOverride(
                 productRatePlanChargeId = holidayCreditProduct.productRatePlanChargeId,
                 HolidayStart__c = stoppedPublicationDate,
                 HolidayEnd__c = stoppedPublicationDate,
-                price = holidayCredit
+                price = holidayCredit.amount
               )
             )
           )
