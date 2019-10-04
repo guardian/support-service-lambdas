@@ -77,9 +77,10 @@ Resources:
     Type: AWS::CloudWatch::Alarm
     Condition: IsProd
     Properties:
-      AlarmName: holiday-stop-processor-failure-alarm
-      AlarmDescription:
-        Failed to process holiday stops.
+      AlarmName: "URGENT 9-5 - PROD: Failed to process holiday stops"
+      AlarmDescription: >
+        IMPACT: If this goes unaddressed at least one subscription
+        that was supposed to be suspended will be fulfilled.
       AlarmActions:
         - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:fulfilment-dev
       ComparisonOperator: GreaterThanOrEqualToThreshold
