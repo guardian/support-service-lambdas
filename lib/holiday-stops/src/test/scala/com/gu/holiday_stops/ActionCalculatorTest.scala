@@ -36,9 +36,7 @@ class ActionCalculatorTest extends FlatSpec with Matchers with EitherValues {
   }
 
   it should "calculate first available date for Guardian Weekly" in {
-    val customerAcceptanceDate = LocalDate.of(2019, 6, 8)
     val gwTodayToFirstAvailableDate = ListMap[Today, FirstAvailableDate](
-      LocalDate.of(2019, 5, 1) -> LocalDate.of(2019, 6, 8), // jump to first sunday after customerAcceptanceDate
       LocalDate.of(2019, 6, 1) -> LocalDate.of(2019, 6, 8), // first available on Sun
       LocalDate.of(2019, 6, 2) -> LocalDate.of(2019, 6, 8), // first available on Sun
       LocalDate.of(2019, 6, 3) -> LocalDate.of(2019, 6, 8), // first available on Sun
@@ -72,7 +70,7 @@ class ActionCalculatorTest extends FlatSpec with Matchers with EitherValues {
       LocalDate.of(2019, 7, 1) -> LocalDate.of(2019, 7, 6), // first available on Sun
       LocalDate.of(2019, 7, 2) -> LocalDate.of(2019, 7, 13) // jump on Tue, a day before processor run
     )
-    val subscription = Fixtures.mkSubscription(customerAcceptanceDate = customerAcceptanceDate)
+    val subscription = Fixtures.mkSubscription()
 
     gwTodayToFirstAvailableDate foreach {
       case (today, expected) =>

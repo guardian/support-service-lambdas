@@ -99,7 +99,7 @@ object ActionCalculator {
           (today `with` dayAfterNextPublicationDay) // next Saturday
 
       verify(firstAvailableDate, today)
-      latestOf(firstAvailableDate, subscription.customerAcceptanceDate)
+      firstAvailableDate
     }
 
     private def verify(firstAvailableDate: LocalDate, today: LocalDate): Unit = {
