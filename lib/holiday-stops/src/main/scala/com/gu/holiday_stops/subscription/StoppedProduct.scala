@@ -78,24 +78,15 @@ abstract class StoppedProduct(
         )
       }
 
-      val latestPossibleInvoiceDate = LocalDate.now.plusYears(3)
-
       @tailrec
-      def go(invoicePeriod: CurrentInvoicedPeriod): LocalDate = {
+      def go(invoicePeriod: CurrentInvoicedPeriod): LocalDate =
         if (invoicePeriod.containsDate(stoppedPublicationDate))
           invoicePeriod.endDateExcluding
-        else {
-          if (invoicePeriod.endDateExcluding.isBefore(latestPossibleInvoiceDate))
-            go(CurrentInvoicedPeriod(
-              startDateIncluding = invoicePeriod.endDateExcluding,
-              endDateExcluding = invoicePeriod.endDateExcluding.plus(billingPeriodDuration)
-            ))
-          else
-            throw new RuntimeException(
-              s"Failed to determine invoice date before ${invoicePeriod.endDateExcluding}"
-            )
-        }
-      }
+        else
+          go(CurrentInvoicedPeriod(
+            startDateIncluding = invoicePeriod.endDateExcluding,
+            endDateExcluding = invoicePeriod.endDateExcluding.plus(billingPeriodDuration)
+          ))
 
       go(invoicedPeriod)
     }
@@ -149,4 +140,3 @@ object StoppedProduct {
     }
   }
 }
-

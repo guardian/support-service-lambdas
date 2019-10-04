@@ -42,13 +42,4 @@ class StoppedProductTest extends FlatSpec with Matchers with TypeCheckedTripleEq
       expectedInvoiceDate = "2020-06-26"
     )
   }
-
-  it should "throw a runtime exception when stopped publication date is too far in future" in {
-    val subscription = Fixtures.subscriptionFromJson("GuardianWeeklyWith6For6.json")
-    val date = StoppedPublicationDate(LocalDate.of(2025, 1, 1))
-    val stoppedProduct = StoppedProduct(subscription, date).right.value
-    assertThrows[RuntimeException] {
-      stoppedProduct.credit.invoiceDate
-    }
-  }
 }
