@@ -73,7 +73,7 @@ abstract class StoppedProduct(
   private def nextBillingPeriodStartDate: LocalDate = {
 
     if (stoppedPublicationDate.isAfter(now.plusYears(5)))
-      logger.info(s"Calculating nextBillingPeriodStartDate for curious case $this")
+      logger.warn(s"Calculating nextBillingPeriodStartDate for curious case $this")
 
     if (billingPeriod == "Specific_Weeks") invoicedPeriod.endDateExcluding
     else {
