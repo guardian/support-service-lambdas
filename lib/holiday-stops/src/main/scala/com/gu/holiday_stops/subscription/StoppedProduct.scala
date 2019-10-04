@@ -1,5 +1,6 @@
 package com.gu.holiday_stops.subscription
 
+import java.time.LocalDate.now
 import java.time.{LocalDate, Period}
 
 import acyclic.skipped
@@ -71,7 +72,8 @@ abstract class StoppedProduct(
    */
   private def nextBillingPeriodStartDate: LocalDate = {
 
-    logger.info(s"Calculating nextBillingPeriodStartDate for $this")
+    if (stoppedPublicationDate.isAfter(now.plusYears(5)))
+      logger.info(s"Calculating nextBillingPeriodStartDate for curious case $this")
 
     if (billingPeriod == "Specific_Weeks") invoicedPeriod.endDateExcluding
     else {
