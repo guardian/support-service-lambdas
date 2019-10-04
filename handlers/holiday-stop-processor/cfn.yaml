@@ -81,6 +81,7 @@ Resources:
       AlarmDescription: >
         IMPACT: If this goes unaddressed at least one subscription
         that was supposed to be suspended will be fulfilled.
+        Until we document how to deal with likely problems please alert the SX team.
       AlarmActions:
         - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:fulfilment-dev
       ComparisonOperator: GreaterThanOrEqualToThreshold
