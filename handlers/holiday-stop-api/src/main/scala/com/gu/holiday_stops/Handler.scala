@@ -224,7 +224,7 @@ object Handler extends Logging {
 
     val lookupOp = SalesforceHolidayStopRequest.LookupByContactAndOptionalSubscriptionName(sfClient.wrapWith(JsonHttp.getWithParams))
 
-    val extractOptionalSubNameOp: ApiGatewayOp[SubscriptionName] = req.pathParamsAsCaseClass[ListExistingPathParams]()(Json.reads[ListExistingPathParams]).map(_.subscriptionName)
+    val extractSubNameOp: ApiGatewayOp[SubscriptionName] = req.pathParamsAsCaseClass[ListExistingPathParams]()(Json.reads[ListExistingPathParams]).map(_.subscriptionName)
 
     val optionalProductNamePrefix = req.headers.flatMap(_.get(HEADER_PRODUCT_NAME_PREFIX).map(ProductName.apply))
 
@@ -232,12 +232,12 @@ object Handler extends Logging {
 
     (for {
       contact <- extractContactFromHeaders(req.headers)
-      optionalSubName <- extractOptionalSubNameOp
-      usersHolidayStopRequests <- lookupOp(contact, Some(optionalSubName))
+      subName <- extractSubNameOp
+      usersHolidayStopRequests <- lookupOp(contact, Some(subName))
         .toDisjunction
         .toApiGatewayOp(s"lookup Holiday Stop Requests for contact $contact")
-      subscription <- getSubscription(optionalSubName)
-        .toApiGatewayOp(s"get subscription $optionalSubName")
+      subscription <- getSubscription(subName)
+        .toApiGatewayOp(s"get subscription $subName")
       response <- GetHolidayStopRequests(
         usersHolidayStopRequests,
         optionalProductNamePrefix,
