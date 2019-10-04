@@ -257,7 +257,6 @@ Resources:
             StageName: !Sub ${Stage}
         DependsOn:
         - HolidayStopApiPotentialBySubscriptionNameGetMethod
-        - HolidayStopApiGetAllMethod
         - HolidayStopApiGetBySubscriptionNameMethod
         - HolidayStopApiCreateMethod
         - HolidayStopApiDeleteMethod
@@ -269,7 +268,6 @@ Resources:
             RestApiId: !Ref HolidayStopApi
         DependsOn:
         - HolidayStopApiPotentialBySubscriptionNameGetMethod
-        - HolidayStopApiGetAllMethod
         - HolidayStopApiGetBySubscriptionNameMethod
         - HolidayStopApiCreateMethod
         - HolidayStopApiDeleteMethod
