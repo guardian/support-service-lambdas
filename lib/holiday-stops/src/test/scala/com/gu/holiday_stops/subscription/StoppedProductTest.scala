@@ -42,4 +42,20 @@ class StoppedProductTest extends FlatSpec with Matchers with TypeCheckedTripleEq
       expectedInvoiceDate = "2020-06-26"
     )
   }
+
+  it should "be first day of current billing period when stopped publication date is first day of a billing period" in {
+    testInvoiceDate(
+      resource = "GuardianWeeklyWith6For6.json",
+      stoppedPublicationDate = "2020-05-15",
+      expectedInvoiceDate = "2020-08-15"
+    )
+  }
+
+  it should "be first day of next billing period when stopped publication date is last day of a billing period" in {
+    testInvoiceDate(
+      resource = "GuardianWeeklyWith6For6.json",
+      stoppedPublicationDate = "2020-08-14",
+      expectedInvoiceDate = "2020-08-15"
+    )
+  }
 }
