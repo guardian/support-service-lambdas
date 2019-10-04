@@ -6,6 +6,7 @@ import acyclic.skipped
 import cats.syntax.either._
 import com.gu.holiday_stops.{ZuoraHolidayError, ZuoraHolidayResponse}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.StoppedPublicationDate
+import com.gu.util.Logging
 
 import scala.annotation.tailrec
 import scala.math.BigDecimal.RoundingMode
@@ -33,7 +34,7 @@ abstract class StoppedProduct(
   val price: Double,
   val billingPeriod: String,
   val invoicedPeriod: CurrentInvoicedPeriod,
-) {
+) extends Logging {
   private def creditAmount: Double = {
     def roundUp(d: Double): Double = BigDecimal(d).setScale(2, RoundingMode.UP).toDouble
     val recurringPrice = price
@@ -69,6 +70,8 @@ abstract class StoppedProduct(
    *         shows examples of the expected outcome.
    */
   private def nextBillingPeriodStartDate: LocalDate = {
+
+    logger.info(s"Calculating nextBillingPeriodStartDate for $this")
 
     if (billingPeriod == "Specific_Weeks") invoicedPeriod.endDateExcluding
     else {
