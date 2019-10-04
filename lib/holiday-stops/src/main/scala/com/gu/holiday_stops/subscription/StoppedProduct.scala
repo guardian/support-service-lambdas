@@ -51,17 +51,22 @@ abstract class StoppedProduct(
    *
    * Hence chargedThroughDate represents the first day of the next billing period. For quarterly
    * billing period this would be the first day of the next quarter, whilst for annual this would be
-   * the first day of the next year.
+   * the first day of the next year of the subscription.
    *
    * Note chargedThroughDate is an API concept. The UI and the actual invoice use the term 'Service Period'
    * where from and to dates are both inclusive.
    *
-   * Note nextBillingPeriodStartDate represents a specific date yyyy-mm-dd unlike billingPeriod (quarterly)
-   * or billingPeriodStartDay (1st of month).
+   * Note nextBillingPeriodStartDate represents a specific date yyyy-mm-dd unlike billingPeriod (eg. "quarterly")
+   * or billingPeriodStartDay (eg. 1st of month).
    *
    * There is a complication when reader has N-for-N intro plan (for example, GW Oct 18 - Six for Six - Domestic).
    * If the holiday falls within N-for-N then credit should be applied on the first regular invoice, not the next billing
    * period of GW regular plan.
+   *
+   * @return Date of the first day of the billing period
+   *         following this <code>stoppedPublicationDate</code>.
+   *         [[com.gu.holiday_stops.subscription.StoppedProductTest]]
+   *         shows examples of the expected outcome.
    */
   private def nextBillingPeriodStartDate: LocalDate = {
 
