@@ -3,6 +3,10 @@ package com.gu.holiday_stops
 import java.time.temporal.ChronoUnit.DAYS
 import java.time.temporal.{ChronoUnit, TemporalAdjusters}
 import java.time.{DayOfWeek, LocalDate}
+
+import cats.data.NonEmptyList
+import cats.kernel.Order
+import com.gu.holiday_stops.subscription.Subscription
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.Product._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{Product, ProductName}
 
@@ -63,8 +67,9 @@ object ActionCalculator {
     /**
      * The first date a holiday can started on for this issue when creating a stop on the supplied date
      * @param today          Date the holiday is being created on
+     * @param subscription   Subscription holiday is being created for
      */
-    def firstAvailableDate(today: LocalDate): LocalDate
+    def firstAvailableDate(today: LocalDate, subscription: Subscription): LocalDate
   }
 
   val GuardianWeeklySuspensionConstants = SuspensionConstants(
@@ -85,9 +90,9 @@ object ActionCalculator {
      * then Saturday after next (i.e., next-next Saturday),
      * otherwise next Saturday
      */
-    def firstAvailableDate(today: LocalDate): LocalDate = {
+    def firstAvailableDate(today: LocalDate, subscription: Subscription): LocalDate = {
       val dayAfterNextPublicationDay = TemporalAdjusters.next(issueDayOfWeek.plus(1)) // Saturday because GW is published on Friday, https://stackoverflow.com/a/29010338/5205022
-      val firstAvailableDate =
+      val firstAvailableDate: LocalDate =
         if (DAYS.between(today, today `with` dayAfterNextPublicationDay) < minDaysBetweenTodayAndFirstAvailableDate)
           (today `with` dayAfterNextPublicationDay `with` dayAfterNextPublicationDay) // Saturday after next
         else
@@ -162,8 +167,8 @@ object ActionCalculator {
       issueDayOfWeek = dayOfWeek,
       processorRunLeadTimeDays = VoucherProcessorLeadTime
     ) {
-      def firstAvailableDate(today: LocalDate): LocalDate = {
-        today.plusDays(processorRunLeadTimeDays.toLong)
+      def firstAvailableDate(today: LocalDate, subscription: Subscription): LocalDate = {
+        latestOf(subscription.customerAcceptanceDate, today.plusDays(processorRunLeadTimeDays.toLong))
       }
     }
 
@@ -192,11 +197,15 @@ object ActionCalculator {
       case _ => Left(ActionCalculatorError(s"ProductRatePlan $product is not supported"))
     }
 
-  def getProductSpecifics(productNamePrefix: ProductName, today: LocalDate = LocalDate.now()): LegacyProductSpecifics = {
+  def getProductSpecifics(
+    productNamePrefix: ProductName,
+    subscription: Subscription,
+    today: LocalDate = LocalDate.now()
+  ): LegacyProductSpecifics = {
     val productSuspensionConstants = suspensionConstantsByProduct(productNamePrefix)
     val firstIssueConstants = productSuspensionConstants.issueConstants(0)
     LegacyProductSpecifics(
-      firstIssueConstants.firstAvailableDate(today),
+      firstIssueConstants.firstAvailableDate(today, subscription),
       firstIssueConstants.issueDayOfWeek.getValue,
       productSuspensionConstants.annualIssueLimit
     )
@@ -204,6 +213,7 @@ object ActionCalculator {
 
   def getProductSpecificsByProductRatePlanKey(
     product: Product,
+    subscription: Subscription,
     today: LocalDate = LocalDate.now()
   ): Either[ActionCalculatorError, ProductSpecifics] = {
     suspensionConstantsByProductRatePlanKey(product)
@@ -212,7 +222,7 @@ object ActionCalculator {
           constants.annualIssueLimit,
           constants.issueConstants.map { issueConstants =>
             IssueSpecifics(
-              issueConstants.firstAvailableDate(today),
+              issueConstants.firstAvailableDate(today, subscription),
               issueConstants.issueDayOfWeek.getValue
             )
           }
@@ -254,6 +264,10 @@ object ActionCalculator {
     }
   }
 
+  def latestOf(head: LocalDate, tail: LocalDate*) = {
+    NonEmptyList(head, tail.toList)
+      .sorted(Order.fromLessThan[LocalDate](_.isAfter(_))).head
+  }
 }
 
 case class ActionCalculatorError(message: String)

@@ -8,6 +8,7 @@ case class Subscription(
   subscriptionNumber: String,
   termStartDate: LocalDate,
   termEndDate: LocalDate,
+  customerAcceptanceDate: LocalDate,
   currentTerm: Int,
   currentTermPeriodType: String,
   autoRenew: Boolean,

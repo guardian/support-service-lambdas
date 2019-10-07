@@ -70,16 +70,18 @@ class ActionCalculatorTest extends FlatSpec with Matchers with EitherValues {
       LocalDate.of(2019, 7, 1) -> LocalDate.of(2019, 7, 6), // first available on Sun
       LocalDate.of(2019, 7, 2) -> LocalDate.of(2019, 7, 13) // jump on Tue, a day before processor run
     )
+    val subscription = Fixtures.mkSubscription()
 
     gwTodayToFirstAvailableDate foreach {
       case (today, expected) =>
         ActionCalculator
-          .getProductSpecifics(gwProductName, today)
+          .getProductSpecifics(gwProductName, subscription, today)
           .firstAvailableDate shouldEqual expected
 
         inside(ActionCalculator
           .getProductSpecificsByProductRatePlanKey(
             GuardianWeekly,
+            subscription,
             today
           )) {
           case Right(ProductSpecifics(_, List(issueSpecifics))) => issueSpecifics.firstAvailableDate shouldEqual expected
@@ -113,15 +115,31 @@ class ActionCalculatorTest extends FlatSpec with Matchers with EitherValues {
       )
   }
   it should "calculate first available date for Sunday Voucher" in {
+    val acceptanceDateInThePast = LocalDate.of(2019, 1, 1)
     inside(
       ActionCalculator
         .getProductSpecificsByProductRatePlanKey(
           SundayVoucher,
+          Fixtures.mkSubscription(customerAcceptanceDate = acceptanceDateInThePast),
           LocalDate.of(2019, 9, 9)
         )
     ) {
         case Right(ProductSpecifics(_, List(issueSpecifics))) =>
           issueSpecifics.firstAvailableDate shouldEqual LocalDate.of(2019, 9, 10)
+      }
+  }
+  it should "calculate first available date for Sunday Voucher before customerAcceptanceDate" in {
+    val customerAcceptanceDate = LocalDate.of(2019, 9, 17)
+    inside(
+      ActionCalculator
+        .getProductSpecificsByProductRatePlanKey(
+          SundayVoucher,
+          Fixtures.mkSubscription(customerAcceptanceDate = customerAcceptanceDate),
+          LocalDate.of(2019, 9, 9)
+        )
+    ) {
+        case Right(ProductSpecifics(_, List(issueSpecifics))) =>
+          issueSpecifics.firstAvailableDate shouldEqual LocalDate.of(2019, 9, 17)
       }
   }
   it should "correctly list the action dates for Sunday Voucher" in {

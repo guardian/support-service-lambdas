@@ -3,6 +3,7 @@ package com.gu.holiday_stops
 import java.time.LocalDate
 
 import cats.implicits._
+import com.gu.holiday_stops.subscription.Subscription
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{Product, ProductName, SubscriptionName}
 import play.api.libs.json.{Json, OFormat}
@@ -87,17 +88,18 @@ object GetHolidayStopRequests {
   def apply(
     holidayStopRequests: List[HolidayStopRequest],
     optionalProductNamePrefix: Option[ProductName],
-    optionalProduct: Option[Product]
+    optionalProduct: Option[Product],
+    subscription: Subscription
   ): Either[GetHolidayStopRequestsError, GetHolidayStopRequests] = {
     for {
       optionalProductSpecificForProductPrefix <- optionalProductNamePrefix.map(
-        productNamePrefix => ActionCalculator.getProductSpecifics(productNamePrefix)
+        productNamePrefix => ActionCalculator.getProductSpecifics(productNamePrefix, subscription)
       ).asRight[GetHolidayStopRequestsError]
 
       optionalProductSpecificForProductNameRatePlanName <- optionalProduct.traverse(
         productRatePlanKey =>
           ActionCalculator
-            .getProductSpecificsByProductRatePlanKey(productRatePlanKey)
+            .getProductSpecificsByProductRatePlanKey(productRatePlanKey, subscription)
             .leftMap(error => GetHolidayStopRequestsError(s"Failed to get product specifics for $productRatePlanKey: $error"))
       )
     } yield GetHolidayStopRequests(
