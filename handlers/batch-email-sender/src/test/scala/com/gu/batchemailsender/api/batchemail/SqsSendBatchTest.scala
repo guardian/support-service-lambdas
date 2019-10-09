@@ -48,7 +48,8 @@ object SqsSendBatchTestData {
       holiday_end_date = None,
       stopped_credit_sum = None,
       currency_symbol = None,
-      stopped_issue_count = None
+      stopped_issue_count = None,
+      stopped_credit_details = None
     ),
     object_name = "Card_Expiry__c"
   )
@@ -69,7 +70,8 @@ object SqsSendBatchTestData {
       holiday_end_date = None,
       stopped_credit_sum = None,
       currency_symbol = None,
-      stopped_issue_count = None
+      stopped_issue_count = None,
+      stopped_credit_details = None
     ),
     object_name = "Card_Expiry__c"
   )

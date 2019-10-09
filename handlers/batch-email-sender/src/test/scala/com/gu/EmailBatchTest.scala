@@ -50,7 +50,8 @@ class EmailBatchTest extends FlatSpec {
             holiday_end_date = None,
             stopped_credit_sum = None,
             currency_symbol = None,
-            stopped_issue_count = None
+            stopped_issue_count = None,
+            stopped_credit_details = None
           ),
           object_name = "Card_Expiry__c"
         )
@@ -134,7 +135,8 @@ class EmailBatchTest extends FlatSpec {
             holiday_end_date = None,
             stopped_credit_sum = None,
             currency_symbol = None,
-            stopped_issue_count = None
+            stopped_issue_count = None,
+            stopped_credit_details = None
           ),
           object_name = "Card_Expiry__c"
         )
@@ -169,7 +171,17 @@ class EmailBatchTest extends FlatSpec {
         |               "holiday_end_date": "2019-10-12",
         |               "stopped_credit_sum": "97.42",
         |               "currency_symbol": "&pound;",
-        |               "stopped_issue_count": "3"
+        |               "stopped_issue_count": "3",
+        |               "stopped_credit_details": [
+        |                 {
+        |                   "amount": "1.23",
+        |                   "date": "2019-11-22"
+        |                 },
+        |                 {
+        |                   "amount": "2.34",
+        |                   "date": "2019-02-23"
+        |                 }
+        |               ]
         |             }
         |         },
         |         "object_name":"Holiday_Stop_Request__c"
@@ -196,7 +208,13 @@ class EmailBatchTest extends FlatSpec {
             holiday_end_date = Some(HolidayEndDate("12 October 2019")),
             stopped_credit_sum = Some(StoppedCreditSum("97.42")),
             currency_symbol = Some(CurrencySymbol("&pound;")),
-            stopped_issue_count = Some(StoppedIssueCount("3"))
+            stopped_issue_count = Some(StoppedIssueCount("3")),
+            stopped_credit_details = Some(
+              List(
+                StoppedCreditDetail(StoppedCreditDetailAmount("1.23"), StoppedCreditDetailDate("2019-11-22")),
+                StoppedCreditDetail(StoppedCreditDetailAmount("2.34"), StoppedCreditDetailDate("2019-02-23"))
+              )
+            )
           ),
           object_name = "Holiday_Stop_Request__c"
         )

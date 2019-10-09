@@ -29,9 +29,12 @@ object EmailBatch {
       holiday_end_date: String,
       stopped_credit_sum: String,
       currency_symbol: String,
-      stopped_issue_count: String
+      stopped_issue_count: String,
+      stopped_credit_details: Option[List[WireHolidayStopCreditDetail]]
     )
+    case class WireHolidayStopCreditDetail(amount: String, date: String)
 
+    implicit val holidayStopCreditDetailReads = Json.reads[WireHolidayStopCreditDetail]
     implicit val holidayStopRequestReads = Json.reads[WireHolidayStopRequest]
     implicit val emailBatchItemPayloadReads = Json.reads[WireEmailBatchItemPayload]
     implicit val emailBatchItemReads = Json.reads[WireEmailBatchItem]
@@ -80,7 +83,14 @@ object EmailBatch {
           currency_symbol = emailBatchPayload.holiday_stop_request.map(stop =>
             CurrencySymbol(stop.currency_symbol)),
           stopped_issue_count = emailBatchPayload.holiday_stop_request.map(stop =>
-            StoppedIssueCount(stop.stopped_issue_count))
+            StoppedIssueCount(stop.stopped_issue_count)),
+          stopped_credit_details = emailBatchPayload.holiday_stop_request
+            .flatMap(stop => stop.stopped_credit_details)
+            .map { detailList =>
+              detailList.map { detail =>
+                StoppedCreditDetail(StoppedCreditDetailAmount(detail.amount), StoppedCreditDetailDate(detail.date))
+              }
+            }
         ),
         object_name = wireEmailBatchItem.object_name
       )
@@ -99,6 +109,9 @@ case class HolidayEndDate(value: String) extends AnyVal
 case class StoppedCreditSum(value: String) extends AnyVal
 case class CurrencySymbol(value: String) extends AnyVal
 case class StoppedIssueCount(value: String) extends AnyVal
+case class StoppedCreditDetail(amount: StoppedCreditDetailAmount, date: StoppedCreditDetailDate)
+case class StoppedCreditDetailAmount(value: String) extends AnyVal
+case class StoppedCreditDetailDate(value: String) extends AnyVal
 
 case class EmailBatchItemPayload(
   record_id: EmailBatchItemId,
@@ -115,7 +128,8 @@ case class EmailBatchItemPayload(
   holiday_end_date: Option[HolidayEndDate],
   stopped_credit_sum: Option[StoppedCreditSum],
   currency_symbol: Option[CurrencySymbol],
-  stopped_issue_count: Option[StoppedIssueCount]
+  stopped_issue_count: Option[StoppedIssueCount],
+  stopped_credit_details: Option[List[StoppedCreditDetail]]
 )
 
 case class EmailBatchItem(payload: EmailBatchItemPayload, object_name: String)
