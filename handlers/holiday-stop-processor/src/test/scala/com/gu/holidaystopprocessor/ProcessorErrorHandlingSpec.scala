@@ -5,8 +5,8 @@ import java.time.LocalDate
 import cats.implicits._
 import com.gu.holiday_stops.Fixtures._
 import com.gu.holiday_stops._
-import com.gu.holiday_stops.subscription.{HolidayCreditUpdate, Subscription}
-import com.gu.holidaystopprocessor.{ZuoraHolidayWriteResult, Processor}
+import com.gu.holiday_stops.subscription.{HolidayCreditUpdate, MutableCalendar, Subscription}
+import com.gu.holidaystopprocessor.{Processor, ZuoraHolidayWriteResult}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestsDetail, SubscriptionName}
 import org.scalatest._
 
@@ -14,6 +14,9 @@ import org.scalatest._
  * Make sure short-circuiting does not happen.
  */
 class ProcessorErrorHandlingSpec extends FlatSpec with Matchers with OptionValues {
+
+  MutableCalendar.fakeToday = Some(LocalDate.parse("2019-08-01"))
+
   val holidayStopRequestsFromSalesforce: SalesforceHolidayResponse[List[HolidayStopRequestsDetail]] = {
     Right(List(
       mkHolidayStopRequestDetailsFromHolidayStopRequest(mkHolidayStopRequest("R1", LocalDate.of(2019, 8, 2), SubscriptionName("A-S1")), "C1"),
