@@ -2,7 +2,7 @@ name := "holiday-stop-processor"
 description := "Add a holiday credit amendment to a subscription."
 version := "0.1.0-SNAPSHOT"
 
-scalaVersion := "2.12.8"
+scalaVersion := "2.12.10"
 scalacOptions += "-Ypartial-unification"
 
 assemblyJarName := s"${name.value}.jar"

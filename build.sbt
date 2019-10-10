@@ -1,7 +1,7 @@
 import Dependencies._
 
 val scalaSettings = Seq(
-  scalaVersion := "2.12.6",
+  scalaVersion := "2.12.10",
   version      := "0.0.1",
   organization := "com.gu",
   scalacOptions ++= Seq(
@@ -161,6 +161,14 @@ lazy val `zuora-reports` = all(project in file("lib/zuora-reports"))
 
 
 // ==== END libraries ====
+
+// to resolve merge clash of 'module-info.class'
+assemblyMergeStrategy in assembly := {
+  case x if x.endsWith("module-info.class") => MergeStrategy.discard
+  case y =>
+    val oldStrategy = (assemblyMergeStrategy in assembly).value
+    oldStrategy(y)
+}
 
 // ==== START handlers ====
 
