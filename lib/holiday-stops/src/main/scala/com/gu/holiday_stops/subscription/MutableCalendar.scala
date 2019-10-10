@@ -1,6 +1,5 @@
 package com.gu.holiday_stops.subscription
 
-import java.time
 import java.time.LocalDate
 
 /**
@@ -10,5 +9,5 @@ import java.time.LocalDate
  */
 object MutableCalendar {
   var fakeToday: Option[LocalDate] = None
-  def today: LocalDate = fakeToday.fold(time.LocalDate.now)(identity)
+  def today: LocalDate = fakeToday.getOrElse(LocalDate.now)
 }
