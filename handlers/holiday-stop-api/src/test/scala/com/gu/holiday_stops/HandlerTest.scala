@@ -6,7 +6,7 @@ import com.gu.effects.{FakeFetchString, SFTestEffects, TestingRawEffects}
 import com.gu.holiday_stops.ActionCalculator._
 import com.gu.holiday_stops.Handler._
 import com.gu.holiday_stops.ZuoraSttpEffects.ZuoraSttpEffectsOps
-import com.gu.holiday_stops.subscription.{HolidayStopCredit, RatePlan, RatePlanCharge, Subscription}
+import com.gu.holiday_stops.subscription.{HolidayStopCredit, MutableCalendar, RatePlan, RatePlanCharge, Subscription}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.SubscriptionName
 import com.gu.salesforce.holiday_stops.SalesforceSFSubscription.SubscriptionForSubscriptionNameAndContact._
 import com.gu.salesforce.holiday_stops.{SalesForceHolidayStopsEffects, SalesforceHolidayStopRequestsDetail}
@@ -113,6 +113,7 @@ class HandlerTest extends FlatSpec with Matchers {
   }
   "GET /potential/<<sub name>>?startDate=...&endDate=...&estimateCredit=true endpoint" should
     "calculate potential holiday stop dates and estimated credit" in {
+    MutableCalendar.fakeToday = Some(LocalDate.parse("2019-02-01"))
     val subscriptionName = "Sub12344"
 
     val startDate = LocalDate.of(2019, 1, 1)
