@@ -1,19 +1,16 @@
 package com.gu.holiday_stops.subscription
 
-import java.time
-import java.time.{Clock, LocalDate}
-import java.time.LocalDate.now
+import java.time.LocalDate
 
+import acyclic.skipped
 import com.gu.holiday_stops.ZuoraHolidayError
+import com.gu.holiday_stops.subscription.GuardianWeeklyRatePlanCondition._
+import com.gu.holiday_stops.subscription.StoppedProduct._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.StoppedPublicationDate
 import com.typesafe.scalalogging.LazyLogging
-import GuardianWeeklyRatePlanCondition._
-import acyclic.skipped
+import mouse.all._
 
 import scala.util.Try
-import StoppedProduct._
-import mouse.all._
-import org.joda.time.DateTime
 
 /**
  * Conditions defining what Guardian Weekly subscription the customer has today.
@@ -21,12 +18,6 @@ import org.joda.time.DateTime
 object GuardianWeeklyRatePlanCondition {
 
   def productIsUnexpiredGuardianWeekly(ratePlan: RatePlan): Boolean = {
-
-    ////    "2019-09-01"
-    //    val fakeNow = Option(System.getProperty("fakeNow"))
-    //    LocalDate.parse(fakeNow)
-    //
-    //    val actualNow = if (fakeNow != "PROD") now(testClock) else now()
 
     lazy val isGuardianWeekly =
       List(
