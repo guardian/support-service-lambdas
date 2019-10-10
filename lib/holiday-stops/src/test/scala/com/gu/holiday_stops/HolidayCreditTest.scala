@@ -8,7 +8,7 @@ import org.scalatest.{EitherValues, FlatSpec, Matchers}
 
 class HolidayCreditTest extends FlatSpec with Matchers with EitherValues {
 
-  val stoppedPublicationDate = StoppedPublicationDate(LocalDate.parse("2019-09-01").minusDays(1))
+  val stoppedPublicationDate = StoppedPublicationDate(LocalDate.parse("2020-09-01").minusDays(1))
 
   "HolidayCredit" should "be correct for a quarterly billing period" in {
     val charge = Fixtures.mkRatePlanCharge(price = 30, billingPeriod = "Quarter")
@@ -16,7 +16,7 @@ class HolidayCreditTest extends FlatSpec with Matchers with EitherValues {
     val subscription = Fixtures.mkSubscription().copy(ratePlans = ratePlans)
     val currentGuardianWeeklySubscription = GuardianWeeklySubscription(subscription, stoppedPublicationDate)
     val credit = currentGuardianWeeklySubscription.right.value.credit
-    credit shouldBe HolidayStopCredit(-2.31, LocalDate.parse("2019-09-02"))
+    credit shouldBe HolidayStopCredit(-2.31, LocalDate.parse("2020-09-02"))
   }
 
   it should "be correct for another quarterly billing period" in {
@@ -25,7 +25,7 @@ class HolidayCreditTest extends FlatSpec with Matchers with EitherValues {
     val subscription = Fixtures.mkSubscription().copy(ratePlans = ratePlans)
     val currentGuardianWeeklySubscription = GuardianWeeklySubscription(subscription, stoppedPublicationDate)
     val credit = currentGuardianWeeklySubscription.right.value.credit
-    credit shouldBe HolidayStopCredit(-2.89, LocalDate.parse("2019-09-02"))
+    credit shouldBe HolidayStopCredit(-2.89, LocalDate.parse("2020-09-02"))
   }
 
   it should "be correct for an annual billing period" in {
@@ -34,6 +34,6 @@ class HolidayCreditTest extends FlatSpec with Matchers with EitherValues {
     val subscription = Fixtures.mkSubscription().copy(ratePlans = ratePlans)
     val currentGuardianWeeklySubscription = GuardianWeeklySubscription(subscription, stoppedPublicationDate)
     val credit = currentGuardianWeeklySubscription.right.value.credit
-    credit shouldBe HolidayStopCredit(-2.31, LocalDate.parse("2019-09-02"))
+    credit shouldBe HolidayStopCredit(-2.31, LocalDate.parse("2020-09-02"))
   }
 }

@@ -2,7 +2,7 @@ package com.gu.holiday_stops.subscription
 
 import java.time.LocalDate
 
-import com.gu.holiday_stops.Fixtures
+import com.gu.holiday_stops.{Fixtures, ZuoraHolidayError}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.StoppedPublicationDate
 import org.scalactic.TypeCheckedTripleEquals
 import org.scalatest.{Assertion, EitherValues, FlatSpec, Matchers}
@@ -27,11 +27,6 @@ class StoppedProductTest extends FlatSpec with Matchers with TypeCheckedTripleEq
       expectedInvoiceDate = "2020-08-15"
     )
     testInvoiceDate(
-      resource = "StoppedPublicationDateOutsideInvoice.json",
-      stoppedPublicationDate = "2020-06-05",
-      expectedInvoiceDate = "2020-07-05"
-    )
-    testInvoiceDate(
       resource = "SundayVoucherSubscription.json",
       stoppedPublicationDate = "2020-06-07",
       expectedInvoiceDate = "2020-07-06"
@@ -40,6 +35,16 @@ class StoppedProductTest extends FlatSpec with Matchers with TypeCheckedTripleEq
       resource = "WeekendVoucherSubscription.json",
       stoppedPublicationDate = "2020-06-06",
       expectedInvoiceDate = "2020-06-26"
+    )
+  }
+
+  "credit.invoiceDate" should "fail if sub has no relevant unexpired rate plan" in {
+    val subscription = Fixtures.subscriptionFromJson("StoppedPublicationDateOutsideInvoice.json")
+    val stoppedDate = StoppedPublicationDate(LocalDate.parse("2020-06-05"))
+    StoppedProduct(subscription, stoppedDate).left.value should ===(
+      ZuoraHolidayError(
+        "Failed to determine StoppableProduct: A-S11111111; StoppedPublicationDate(2020-06-05)"
+      )
     )
   }
 

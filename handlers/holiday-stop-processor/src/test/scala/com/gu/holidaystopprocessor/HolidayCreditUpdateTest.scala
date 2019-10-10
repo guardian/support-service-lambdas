@@ -9,7 +9,7 @@ import org.scalatest.{EitherValues, FlatSpec, Matchers}
 
 class HolidayCreditUpdateTest extends FlatSpec with Matchers with EitherValues {
 
-  val chargedThroughDate = LocalDate.parse("2019-09-12")
+  val chargedThroughDate = LocalDate.parse("2019-12-12")
   val stoppedPublicationDate = StoppedPublicationDate(chargedThroughDate.minusDays(1))
 
   "holidayCreditToAdd" should "generate update correctly" in {

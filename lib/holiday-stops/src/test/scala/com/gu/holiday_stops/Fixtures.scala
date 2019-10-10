@@ -23,7 +23,7 @@ object Fixtures extends Assertions {
   def mkRatePlanCharge(
     price: Double,
     billingPeriod: String,
-    chargedThroughDate: Option[LocalDate] = Some(LocalDate.of(2019, 9, 2))
+    chargedThroughDate: Option[LocalDate] = Some(LocalDate.of(2020, 9, 2))
   ) = RatePlanCharge(
     name = "GW",
     number = "C1",
@@ -186,7 +186,7 @@ object Fixtures extends Assertions {
         ratePlanCharges = List(mkRatePlanCharge(
           price = 42.7,
           billingPeriod = "Quarter",
-          chargedThroughDate = Some(LocalDate.of(2019, 9, 7))
+          chargedThroughDate = Some(LocalDate.of(2019, 12, 7))
         )),
         "",
         ""
