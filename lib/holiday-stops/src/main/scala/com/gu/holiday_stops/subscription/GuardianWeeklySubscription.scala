@@ -1,6 +1,7 @@
 package com.gu.holiday_stops.subscription
 
-import java.time.LocalDate
+import java.time
+import java.time.{Clock, LocalDate}
 import java.time.LocalDate.now
 
 import com.gu.holiday_stops.ZuoraHolidayError
@@ -12,6 +13,7 @@ import acyclic.skipped
 import scala.util.Try
 import StoppedProduct._
 import mouse.all._
+import org.joda.time.DateTime
 
 /**
  * Conditions defining what Guardian Weekly subscription the customer has today.
@@ -19,6 +21,12 @@ import mouse.all._
 object GuardianWeeklyRatePlanCondition {
 
   def productIsUnexpiredGuardianWeekly(ratePlan: RatePlan): Boolean = {
+
+    ////    "2019-09-01"
+    //    val fakeNow = Option(System.getProperty("fakeNow"))
+    //    LocalDate.parse(fakeNow)
+    //
+    //    val actualNow = if (fakeNow != "PROD") now(testClock) else now()
 
     lazy val isGuardianWeekly =
       List(
@@ -30,7 +38,7 @@ object GuardianWeeklyRatePlanCondition {
       ).contains(ratePlan.productName)
 
     lazy val isExpired =
-      ratePlan.ratePlanCharges.exists(_.chargedThroughDate.exists(_.isBefore(now)))
+      ratePlan.ratePlanCharges.exists(_.chargedThroughDate.exists(_.isBefore(MutableCalendar.today)))
 
     isGuardianWeekly && !isExpired
   }
