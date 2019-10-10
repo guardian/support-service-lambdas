@@ -84,13 +84,14 @@ object EmailBatch {
             CurrencySymbol(stop.currency_symbol)),
           stopped_issue_count = emailBatchPayload.holiday_stop_request.map(stop =>
             StoppedIssueCount(stop.stopped_issue_count)),
-          stopped_credit_details = emailBatchPayload.holiday_stop_request
-            .flatMap(stop => stop.stopped_credit_details)
-            .map { detailList =>
-              detailList.map { detail =>
+          stopped_credit_details =
+            for {
+              stop <- emailBatchPayload.holiday_stop_request
+              detailList <- stop.stopped_credit_details
+              stoppedCreditDetail = detailList.map { detail =>
                 StoppedCreditDetail(StoppedCreditDetailAmount(detail.amount), StoppedCreditDetailDate(detail.date))
               }
-            }
+            } yield stoppedCreditDetail
         ),
         object_name = wireEmailBatchItem.object_name
       )
