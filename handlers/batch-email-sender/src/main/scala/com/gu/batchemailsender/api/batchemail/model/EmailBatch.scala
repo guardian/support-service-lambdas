@@ -89,7 +89,10 @@ object EmailBatch {
               stop <- emailBatchPayload.holiday_stop_request
               detailList <- stop.stopped_credit_details
               stoppedCreditDetail = detailList.map { detail =>
-                StoppedCreditDetail(StoppedCreditDetailAmount(detail.amount), StoppedCreditDetailDate(detail.date))
+                StoppedCreditDetail(
+                  StoppedCreditDetailAmount(detail.amount),
+                  StoppedCreditDetailDate(fromSfDateToDisplayDate(detail.date))
+                )
               }
             } yield stoppedCreditDetail
         ),

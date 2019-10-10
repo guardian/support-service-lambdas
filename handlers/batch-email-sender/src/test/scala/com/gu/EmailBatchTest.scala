@@ -211,8 +211,8 @@ class EmailBatchTest extends FlatSpec {
             stopped_issue_count = Some(StoppedIssueCount("3")),
             stopped_credit_details = Some(
               List(
-                StoppedCreditDetail(StoppedCreditDetailAmount("1.23"), StoppedCreditDetailDate("2019-11-22")),
-                StoppedCreditDetail(StoppedCreditDetailAmount("2.34"), StoppedCreditDetailDate("2019-02-23"))
+                StoppedCreditDetail(StoppedCreditDetailAmount("1.23"), StoppedCreditDetailDate("22 November 2019")),
+                StoppedCreditDetail(StoppedCreditDetailAmount("2.34"), StoppedCreditDetailDate("23 February 2019"))
               )
             )
           ),
