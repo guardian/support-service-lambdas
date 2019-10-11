@@ -9,6 +9,8 @@ import org.scalatest.{Assertion, EitherValues, FlatSpec, Matchers}
 
 class StoppedProductTest extends FlatSpec with Matchers with TypeCheckedTripleEquals with EitherValues {
 
+  MutableCalendar.setFakeToday(Some(LocalDate.parse("2019-08-01")))
+
   private def testInvoiceDate(
     resource: String,
     stoppedPublicationDate: String,

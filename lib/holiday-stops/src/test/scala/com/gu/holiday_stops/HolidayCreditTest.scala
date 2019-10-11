@@ -2,11 +2,13 @@ package com.gu.holiday_stops
 
 import java.time.LocalDate
 
-import com.gu.holiday_stops.subscription.{GuardianWeeklySubscription, HolidayStopCredit, RatePlan}
+import com.gu.holiday_stops.subscription.{GuardianWeeklySubscription, HolidayStopCredit, MutableCalendar, RatePlan}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.StoppedPublicationDate
 import org.scalatest.{EitherValues, FlatSpec, Matchers}
 
 class HolidayCreditTest extends FlatSpec with Matchers with EitherValues {
+
+  MutableCalendar.setFakeToday(Some(LocalDate.parse("2019-08-01")))
 
   val stoppedPublicationDate = StoppedPublicationDate(LocalDate.parse("2019-09-01").minusDays(1))
 
