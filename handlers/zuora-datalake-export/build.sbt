@@ -1,3 +1,5 @@
+import Dependencies._
+
 name := "zuora-datalake-export"
 description:= "Zuora to Datalake export using Stateful AQuA API which exports incremental changes"
 scalacOptions += "-Ypartial-unification"
@@ -15,3 +17,5 @@ libraryDependencies ++= Seq(
   "com.typesafe.scala-logging" %% "scala-logging" % "3.9.2",
   "com.beachape" %% "enumeratum" % "1.5.13"
 )
+
+assemblyMergeStrategyDiscard

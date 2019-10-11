@@ -1,4 +1,7 @@
 import sbt._
+import sbtassembly.AssemblyKeys.assembly
+import sbtassembly.AssemblyPlugin.autoImport.{MergeStrategy, assemblyMergeStrategy}
+import sbtassembly.PathList
 
 object Dependencies {
   
@@ -29,4 +32,14 @@ object Dependencies {
   val sttpCirce = "com.softwaremill.sttp" %% "circe" % sttpVersion
   val mouse = "org.typelevel" %% "mouse" % "0.23" // can be removed once we move to Scala 2.13 (native 'tap')
   val enumeratum = "com.beachape" %% "enumeratum" % "1.5.13"
+
+  // to resolve merge clash of 'module-info.class'
+  // see https://stackoverflow.com/questions/54834125/sbt-assembly-deduplicate-module-info-class
+  val assemblyMergeStrategyDiscard = assemblyMergeStrategy in assembly := {
+    case PathList("module-info.class") => MergeStrategy.discard
+    case x =>
+      val oldStrategy = (assemblyMergeStrategy in assembly).value
+      oldStrategy(x)
+  }
+
 }

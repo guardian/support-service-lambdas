@@ -1,3 +1,5 @@
+import Dependencies._
+
 name := "braze-to-salesforce-file-upload"
 description:= "Braze to Salesforce file upload"
 scalacOptions += "-Ypartial-unification"
@@ -15,3 +17,5 @@ libraryDependencies ++= Seq(
   "com.typesafe.scala-logging" %% "scala-logging" % "3.9.2",
   "com.github.pathikrit" %% "better-files" % "3.7.1"
 )
+
+assemblyMergeStrategyDiscard

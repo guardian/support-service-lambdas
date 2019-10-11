@@ -17,3 +17,5 @@ riffRaffArtifactResources += (file("handlers/holiday-stop-api/cfn.yaml"), "cfn/c
 libraryDependencies ++= Seq(
   playJsonExtensions
 )
+
+assemblyMergeStrategyDiscard

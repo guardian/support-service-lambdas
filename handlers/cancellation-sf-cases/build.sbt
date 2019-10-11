@@ -19,3 +19,5 @@ libraryDependencies ++= Seq(
   "com.gu" %% "identity-test-users" % "0.7",
   playJsonExtensions
 )
+
+assemblyMergeStrategyDiscard

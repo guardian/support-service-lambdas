@@ -23,3 +23,5 @@ libraryDependencies ++= Seq(
   "com.stripe" % "stripe-java" % "5.28.0",
   jacksonDatabind
 )
+
+assemblyMergeStrategyDiscard
