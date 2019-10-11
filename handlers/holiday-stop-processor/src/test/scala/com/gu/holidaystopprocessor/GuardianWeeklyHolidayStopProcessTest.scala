@@ -9,7 +9,7 @@ import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
 import org.scalatest.{EitherValues, FlatSpec, Matchers, OptionValues}
 
 class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with EitherValues with OptionValues {
-  MutableCalendar.fakeToday = Some(LocalDate.parse("2019-07-12"))
+  MutableCalendar.setFakeToday(Some(LocalDate.parse("2019-07-12")))
   val chargedThroughDate = LocalDate.of(2019, 8, 11)
 
   private val subscription = mkSubscription(

@@ -15,7 +15,7 @@ import org.scalatest._
  */
 class ProcessorErrorHandlingSpec extends FlatSpec with Matchers with OptionValues {
 
-  MutableCalendar.fakeToday = Some(LocalDate.parse("2019-08-01"))
+  MutableCalendar.setFakeToday(Some(LocalDate.parse("2019-08-01")))
 
   val holidayStopRequestsFromSalesforce: SalesforceHolidayResponse[List[HolidayStopRequestsDetail]] = {
     Right(List(

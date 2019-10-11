@@ -8,7 +8,7 @@ import org.scalatest.{EitherValues, FlatSpec, Matchers}
 
 class HolidayCreditTest extends FlatSpec with Matchers with EitherValues {
 
-  MutableCalendar.fakeToday = Some(LocalDate.parse("2019-08-01"))
+  MutableCalendar.setFakeToday(Some(LocalDate.parse("2019-08-01")))
 
   val stoppedPublicationDate = StoppedPublicationDate(LocalDate.parse("2019-09-01").minusDays(1))
 

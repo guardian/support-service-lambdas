@@ -1,6 +1,7 @@
 package com.gu.holiday_stops.subscription
 
 import java.time.LocalDate
+import java.util.concurrent.atomic.AtomicReference
 
 /**
  * Enables simulating what is today for testing purposes.
@@ -8,6 +9,7 @@ import java.time.LocalDate
  * Joda's https://stackoverflow.com/q/24491260/5205022
  */
 object MutableCalendar {
-  var fakeToday: Option[LocalDate] = None
-  def today: LocalDate = fakeToday.getOrElse(LocalDate.now)
+  private val mutableDate: AtomicReference[Option[LocalDate]] = new AtomicReference(None)
+  def setFakeToday(date: Option[LocalDate]): Unit = mutableDate.set(date)
+  def today: LocalDate = mutableDate.get.getOrElse(LocalDate.now)
 }

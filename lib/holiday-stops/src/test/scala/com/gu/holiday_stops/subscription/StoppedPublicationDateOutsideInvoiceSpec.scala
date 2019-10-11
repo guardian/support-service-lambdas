@@ -9,7 +9,7 @@ import org.scalatest._
 
 class StoppedPublicationDateOutsideInvoiceSpec extends FlatSpec with Matchers with EitherValues with TypeCheckedTripleEquals {
 
-  MutableCalendar.fakeToday = Some(LocalDate.parse("2019-08-01"))
+  MutableCalendar.setFakeToday(Some(LocalDate.parse("2019-08-01")))
 
   private val processedThroughDate = LocalDate.parse("2019-07-05")
   private val chargedThroughDate = LocalDate.parse("2019-10-05")

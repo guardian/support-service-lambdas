@@ -113,7 +113,7 @@ class HandlerTest extends FlatSpec with Matchers {
   }
   "GET /potential/<<sub name>>?startDate=...&endDate=...&estimateCredit=true endpoint" should
     "calculate potential holiday stop dates and estimated credit" in {
-    MutableCalendar.fakeToday = Some(LocalDate.parse("2019-02-01"))
+    MutableCalendar.setFakeToday(Some(LocalDate.parse("2019-02-01")))
     val subscriptionName = "Sub12344"
 
     val startDate = LocalDate.of(2019, 1, 1)
