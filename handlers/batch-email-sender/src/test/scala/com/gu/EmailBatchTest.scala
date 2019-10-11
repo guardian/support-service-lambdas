@@ -174,12 +174,12 @@ class EmailBatchTest extends FlatSpec {
         |               "stopped_issue_count": "3",
         |               "stopped_credit_details": [
         |                 {
-        |                   "amount": "1.23",
-        |                   "date": "2019-11-22"
+        |                   "credit_amount": "1.23",
+        |                   "credit_date": "2019-11-22"
         |                 },
         |                 {
-        |                   "amount": "2.34",
-        |                   "date": "2019-02-23"
+        |                   "credit_amount": "2.34",
+        |                   "credit_date": "2019-02-23"
         |                 }
         |               ]
         |             }

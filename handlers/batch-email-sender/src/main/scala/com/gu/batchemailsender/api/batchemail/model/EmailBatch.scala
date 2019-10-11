@@ -32,7 +32,7 @@ object EmailBatch {
       stopped_issue_count: String,
       stopped_credit_details: Option[List[WireHolidayStopCreditDetail]]
     )
-    case class WireHolidayStopCreditDetail(amount: String, date: String)
+    case class WireHolidayStopCreditDetail(credit_amount: String, credit_date: String)
 
     implicit val holidayStopCreditDetailReads = Json.reads[WireHolidayStopCreditDetail]
     implicit val holidayStopRequestReads = Json.reads[WireHolidayStopRequest]
@@ -90,8 +90,8 @@ object EmailBatch {
               detailList <- stop.stopped_credit_details
               stoppedCreditDetail = detailList.map { detail =>
                 StoppedCreditDetail(
-                  StoppedCreditDetailAmount(detail.amount),
-                  StoppedCreditDetailDate(fromSfDateToDisplayDate(detail.date))
+                  StoppedCreditDetailAmount(detail.credit_amount),
+                  StoppedCreditDetailDate(fromSfDateToDisplayDate(detail.credit_date))
                 )
               }
             } yield stoppedCreditDetail
