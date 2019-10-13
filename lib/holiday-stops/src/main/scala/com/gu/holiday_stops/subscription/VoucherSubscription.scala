@@ -35,11 +35,9 @@ object VoucherSubscriptionPredicates {
   def ratePlanIsVoucher(ratePlan: RatePlan, stoppedPublicationDate: StoppedPublicationDate): Boolean =
     ratePlan.productName == "Newspaper Voucher" && ratePlan.ratePlanCharges.exists(_.name == stoppedPublicationDate.getDayOfWeek)
 
-  def billingPeriodIsAnnualOrMonthOrQuarterOrSemiAnnual(ratePlan: RatePlan): Boolean = {
+  def allBillingPeriodsAreTheSame(ratePlan: RatePlan): Boolean = {
     val billingPeriods = ratePlan.ratePlanCharges.map(_.billingPeriod)
-    val allPeriodsAreTheSame = billingPeriods.headOption.exists(bp => billingPeriods.forall(_ == bp))
-    val expectedBillingPeriod = billingPeriods.forall(List(Some("Annual"), Some("Month"), Some("Quarter"), Some("Semi-Annual")).contains)
-    allPeriodsAreTheSame && expectedBillingPeriod
+    billingPeriods.headOption.exists(bp => billingPeriods.forall(_ == bp))
   }
 }
 
@@ -56,7 +54,7 @@ object VoucherSubscription {
         List(
           ratePlanIsVoucher(ratePlan, stoppedPublicationDate),
           stoppedPublicationDateIsAfterCurrentInvoiceStartDate(ratePlan, stoppedPublicationDate),
-          billingPeriodIsAnnualOrMonthOrQuarterOrSemiAnnual(ratePlan)
+          allBillingPeriodsAreTheSame(ratePlan)
         ).forall(_ == true)
       }
   }
