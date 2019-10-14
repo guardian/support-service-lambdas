@@ -113,7 +113,7 @@ case class HolidayEndDate(value: String) extends AnyVal
 case class StoppedCreditSum(value: String) extends AnyVal
 case class CurrencySymbol(value: String) extends AnyVal
 case class StoppedIssueCount(value: String) extends AnyVal
-case class StoppedCreditSummary(amount: StoppedCreditSummaryAmount, date: StoppedCreditSummaryDate)
+case class StoppedCreditSummary(credit_amount: StoppedCreditSummaryAmount, credit_date: StoppedCreditSummaryDate)
 case class StoppedCreditSummaryAmount(value: Double) extends AnyVal
 case class StoppedCreditSummaryDate(value: String) extends AnyVal
 

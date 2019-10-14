@@ -2,7 +2,7 @@ package com.gu.batchemailsender.api.batchemail.model
 
 import play.api.libs.json.Json
 
-case class EmailPayloadStoppedCreditSummary(amount: Double, date: String)
+case class EmailPayloadStoppedCreditSummary(credit_amount: Double, credit_date: String)
 case class EmailPayloadSubscriberAttributes(
   first_name: String,
   last_name: String,
@@ -46,7 +46,7 @@ object EmailToSend {
           emailBatchItem.payload.stopped_issue_count.map(_.value),
           emailBatchItem.payload.stopped_credit_summaries.map { creditDetails =>
             creditDetails.map { creditDetail =>
-              EmailPayloadStoppedCreditSummary(creditDetail.amount.value, creditDetail.date.value)
+              EmailPayloadStoppedCreditSummary(creditDetail.credit_amount.value, creditDetail.credit_date.value)
             }
           }
         )
