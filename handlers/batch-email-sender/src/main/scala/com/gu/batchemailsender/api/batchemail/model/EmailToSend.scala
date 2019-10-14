@@ -2,7 +2,7 @@ package com.gu.batchemailsender.api.batchemail.model
 
 import play.api.libs.json.Json
 
-case class EmailPayloadStoppedCreditDetail(amount: String, date: String)
+case class EmailPayloadStoppedCreditSummary(amount: Double, date: String)
 case class EmailPayloadSubscriberAttributes(
   first_name: String,
   last_name: String,
@@ -14,7 +14,7 @@ case class EmailPayloadSubscriberAttributes(
   stopped_credit_sum: Option[String],
   currency_symbol: Option[String],
   stopped_issue_count: Option[String],
-  stopped_credit_details: Option[List[EmailPayloadStoppedCreditDetail]]
+  stopped_credit_summaries: Option[List[EmailPayloadStoppedCreditSummary]]
 )
 case class EmailPayloadContactAttributes(SubscriberAttributes: EmailPayloadSubscriberAttributes)
 case class EmailPayloadTo(Address: String, SubscriberKey: String, ContactAttributes: EmailPayloadContactAttributes)
@@ -22,7 +22,7 @@ case class EmailToSend(To: EmailPayloadTo, DataExtensionName: String, SfContactI
 
 object EmailToSend {
 
-  implicit val emailPayloadStoppedCreditDetailWriter = Json.writes[EmailPayloadStoppedCreditDetail]
+  implicit val emailPayloadStoppedCreditDetailWriter = Json.writes[EmailPayloadStoppedCreditSummary]
   implicit val emailPayloadSubscriberAttributesWriter = Json.writes[EmailPayloadSubscriberAttributes]
   implicit val emailPayloadContactAttributesWriter = Json.writes[EmailPayloadContactAttributes]
   implicit val emailPayloadToWriter = Json.writes[EmailPayloadTo]
@@ -44,9 +44,9 @@ object EmailToSend {
           emailBatchItem.payload.stopped_credit_sum.map(_.value),
           emailBatchItem.payload.currency_symbol.map(_.value),
           emailBatchItem.payload.stopped_issue_count.map(_.value),
-          emailBatchItem.payload.stopped_credit_details.map { creditDetails =>
+          emailBatchItem.payload.stopped_credit_summaries.map { creditDetails =>
             creditDetails.map { creditDetail =>
-              EmailPayloadStoppedCreditDetail(creditDetail.amount.value, creditDetail.date.value)
+              EmailPayloadStoppedCreditSummary(creditDetail.amount.value, creditDetail.date.value)
             }
           }
         )

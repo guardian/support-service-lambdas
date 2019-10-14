@@ -22,7 +22,7 @@ class EmailToSendTest extends FlatSpec {
       stopped_credit_sum = None,
       currency_symbol = None,
       stopped_issue_count = None,
-      stopped_credit_details = None
+      stopped_credit_summaries = None
     )
 
   val emailBatchItemStub = EmailBatchItem(
@@ -84,9 +84,9 @@ class EmailToSendTest extends FlatSpec {
         stopped_credit_sum = Some(StoppedCreditSum("11.24")),
         currency_symbol = Some(CurrencySymbol("&pound;")),
         stopped_issue_count = Some(StoppedIssueCount("2")),
-        stopped_credit_details = Some(
+        stopped_credit_summaries = Some(
           List(
-            StoppedCreditDetail(StoppedCreditDetailAmount("1.23"), StoppedCreditDetailDate("2020-01-01"))
+            StoppedCreditSummary(StoppedCreditSummaryAmount(1.23), StoppedCreditSummaryDate("2020-01-01"))
           )
         )
       )
@@ -100,9 +100,9 @@ class EmailToSendTest extends FlatSpec {
             stopped_credit_sum = Some("11.24"),
             currency_symbol = Some("&pound;"),
             stopped_issue_count = Some("2"),
-            stopped_credit_details = Some(
+            stopped_credit_summaries = Some(
               List(
-                EmailPayloadStoppedCreditDetail("1.23", "2020-01-01")
+                EmailPayloadStoppedCreditSummary(1.23, "2020-01-01")
               )
             )
           )

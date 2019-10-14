@@ -30,11 +30,11 @@ object EmailBatch {
       stopped_credit_sum: String,
       currency_symbol: String,
       stopped_issue_count: String,
-      stopped_credit_details: Option[List[WireHolidayStopCreditDetail]]
+      stopped_credit_summaries: Option[List[WireHolidayStopCreditSummary]]
     )
-    case class WireHolidayStopCreditDetail(credit_amount: String, credit_date: String)
+    case class WireHolidayStopCreditSummary(credit_amount: Double, credit_date: String)
 
-    implicit val holidayStopCreditDetailReads = Json.reads[WireHolidayStopCreditDetail]
+    implicit val holidayStopCreditDetailReads = Json.reads[WireHolidayStopCreditSummary]
     implicit val holidayStopRequestReads = Json.reads[WireHolidayStopRequest]
     implicit val emailBatchItemPayloadReads = Json.reads[WireEmailBatchItemPayload]
     implicit val emailBatchItemReads = Json.reads[WireEmailBatchItem]
@@ -84,17 +84,17 @@ object EmailBatch {
             CurrencySymbol(stop.currency_symbol)),
           stopped_issue_count = emailBatchPayload.holiday_stop_request.map(stop =>
             StoppedIssueCount(stop.stopped_issue_count)),
-          stopped_credit_details =
+          stopped_credit_summaries =
             for {
               stop <- emailBatchPayload.holiday_stop_request
-              detailList <- stop.stopped_credit_details
-              stoppedCreditDetail = detailList.map { detail =>
-                StoppedCreditDetail(
-                  StoppedCreditDetailAmount(detail.credit_amount),
-                  StoppedCreditDetailDate(fromSfDateToDisplayDate(detail.credit_date))
+              summaryList <- stop.stopped_credit_summaries
+              stoppedCreditSummaries = summaryList.map { detail =>
+                StoppedCreditSummary(
+                  StoppedCreditSummaryAmount(detail.credit_amount),
+                  StoppedCreditSummaryDate(fromSfDateToDisplayDate(detail.credit_date))
                 )
               }
-            } yield stoppedCreditDetail
+            } yield stoppedCreditSummaries
         ),
         object_name = wireEmailBatchItem.object_name
       )
@@ -113,9 +113,9 @@ case class HolidayEndDate(value: String) extends AnyVal
 case class StoppedCreditSum(value: String) extends AnyVal
 case class CurrencySymbol(value: String) extends AnyVal
 case class StoppedIssueCount(value: String) extends AnyVal
-case class StoppedCreditDetail(amount: StoppedCreditDetailAmount, date: StoppedCreditDetailDate)
-case class StoppedCreditDetailAmount(value: String) extends AnyVal
-case class StoppedCreditDetailDate(value: String) extends AnyVal
+case class StoppedCreditSummary(amount: StoppedCreditSummaryAmount, date: StoppedCreditSummaryDate)
+case class StoppedCreditSummaryAmount(value: Double) extends AnyVal
+case class StoppedCreditSummaryDate(value: String) extends AnyVal
 
 case class EmailBatchItemPayload(
   record_id: EmailBatchItemId,
@@ -133,7 +133,7 @@ case class EmailBatchItemPayload(
   stopped_credit_sum: Option[StoppedCreditSum],
   currency_symbol: Option[CurrencySymbol],
   stopped_issue_count: Option[StoppedIssueCount],
-  stopped_credit_details: Option[List[StoppedCreditDetail]]
+  stopped_credit_summaries: Option[List[StoppedCreditSummary]]
 )
 
 case class EmailBatchItem(payload: EmailBatchItemPayload, object_name: String)

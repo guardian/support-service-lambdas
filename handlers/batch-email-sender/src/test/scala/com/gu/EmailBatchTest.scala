@@ -51,7 +51,7 @@ class EmailBatchTest extends FlatSpec {
             stopped_credit_sum = None,
             currency_symbol = None,
             stopped_issue_count = None,
-            stopped_credit_details = None
+            stopped_credit_summaries = None
           ),
           object_name = "Card_Expiry__c"
         )
@@ -136,7 +136,7 @@ class EmailBatchTest extends FlatSpec {
             stopped_credit_sum = None,
             currency_symbol = None,
             stopped_issue_count = None,
-            stopped_credit_details = None
+            stopped_credit_summaries = None
           ),
           object_name = "Card_Expiry__c"
         )
@@ -172,13 +172,13 @@ class EmailBatchTest extends FlatSpec {
         |               "stopped_credit_sum": "97.42",
         |               "currency_symbol": "&pound;",
         |               "stopped_issue_count": "3",
-        |               "stopped_credit_details": [
+        |               "stopped_credit_summaries": [
         |                 {
-        |                   "credit_amount": "1.23",
+        |                   "credit_amount": 1.23,
         |                   "credit_date": "2019-11-22"
         |                 },
         |                 {
-        |                   "credit_amount": "2.34",
+        |                   "credit_amount": 2.34,
         |                   "credit_date": "2019-02-23"
         |                 }
         |               ]
@@ -209,10 +209,10 @@ class EmailBatchTest extends FlatSpec {
             stopped_credit_sum = Some(StoppedCreditSum("97.42")),
             currency_symbol = Some(CurrencySymbol("&pound;")),
             stopped_issue_count = Some(StoppedIssueCount("3")),
-            stopped_credit_details = Some(
+            stopped_credit_summaries = Some(
               List(
-                StoppedCreditDetail(StoppedCreditDetailAmount("1.23"), StoppedCreditDetailDate("22 November 2019")),
-                StoppedCreditDetail(StoppedCreditDetailAmount("2.34"), StoppedCreditDetailDate("23 February 2019"))
+                StoppedCreditSummary(StoppedCreditSummaryAmount(1.23), StoppedCreditSummaryDate("22 November 2019")),
+                StoppedCreditSummary(StoppedCreditSummaryAmount(2.34), StoppedCreditSummaryDate("23 February 2019"))
               )
             )
           ),
