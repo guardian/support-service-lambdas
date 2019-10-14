@@ -16,4 +16,4 @@ riffRaffArtifactResources += (file("handlers/sf-contact-merge/cfn.yaml"), "cfn/c
 
 libraryDependencies ++= Seq()
 
-assemblyMergeStrategyDiscard
+assemblyMergeStrategyDiscardModuleInfo

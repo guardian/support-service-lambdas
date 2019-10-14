@@ -16,4 +16,4 @@ riffRaffArtifactResources += (file("handlers/new-product-api/cfn.yaml"), "cfn/cf
 
 libraryDependencies ++= Seq(supportInternationalisation)
 
-assemblyMergeStrategyDiscard
+assemblyMergeStrategyDiscardModuleInfo

@@ -18,4 +18,4 @@ libraryDependencies ++= Seq(
   playJsonExtensions
 )
 
-assemblyMergeStrategyDiscard
+assemblyMergeStrategyDiscardModuleInfo

@@ -16,4 +16,4 @@ riffRaffArtifactResources += (file("handlers/batch-email-sender/cfn.yaml"), "cfn
 
 libraryDependencies ++= Seq(supportInternationalisation)
 
-assemblyMergeStrategyDiscard
+assemblyMergeStrategyDiscardModuleInfo

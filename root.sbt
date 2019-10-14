@@ -24,4 +24,4 @@ libraryDependencies ++= Seq(
   jacksonDatabind
 )
 
-assemblyMergeStrategyDiscard
+assemblyMergeStrategyDiscardModuleInfo

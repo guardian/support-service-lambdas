@@ -14,4 +14,4 @@ riffRaffUploadManifestBucket := Option("riffraff-builds")
 riffRaffManifestProjectName := "MemSub::Membership Admin::Identity Retention"
 riffRaffArtifactResources += (file("handlers/identity-retention/cfn.yaml"), "cfn/cfn.yaml")
 
-assemblyMergeStrategyDiscard
+assemblyMergeStrategyDiscardModuleInfo

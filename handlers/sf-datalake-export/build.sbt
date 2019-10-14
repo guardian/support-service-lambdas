@@ -16,4 +16,4 @@ riffRaffArtifactResources += (file("handlers/sf-datalake-export/cfn.yaml"), "cfn
 
 libraryDependencies += "org.scala-lang.modules" %% "scala-xml" % "1.1.0"
 
-assemblyMergeStrategyDiscard
+assemblyMergeStrategyDiscardModuleInfo

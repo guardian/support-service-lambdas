@@ -22,4 +22,4 @@ resolvers ++= Seq(
   Resolver.sonatypeRepo("releases")
 )
 
-assemblyMergeStrategyDiscard
+assemblyMergeStrategyDiscardModuleInfo

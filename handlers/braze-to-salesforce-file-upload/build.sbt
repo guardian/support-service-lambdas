@@ -18,4 +18,4 @@ libraryDependencies ++= Seq(
   "com.github.pathikrit" %% "better-files" % "3.7.1"
 )
 
-assemblyMergeStrategyDiscard
+assemblyMergeStrategyDiscardModuleInfo

@@ -11,4 +11,4 @@ riffRaffUploadManifestBucket := Option("riffraff-builds")
 riffRaffManifestProjectName := "MemSub::Membership Admin::Metric Push API"
 riffRaffArtifactResources += (file("handlers/metric-push-api/cfn.yaml"), "cfn/cfn.yaml")
 
-assemblyMergeStrategyDiscard
+assemblyMergeStrategyDiscardModuleInfo

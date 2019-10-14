@@ -18,4 +18,4 @@ libraryDependencies ++= Seq(
   "com.gu" %% "support-internationalisation" % "0.9"
 )
 
-assemblyMergeStrategyDiscard
+assemblyMergeStrategyDiscardModuleInfo
