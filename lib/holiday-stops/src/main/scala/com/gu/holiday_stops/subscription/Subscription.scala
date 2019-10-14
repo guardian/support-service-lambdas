@@ -3,6 +3,7 @@ package com.gu.holiday_stops.subscription
 import java.time.LocalDate
 
 import com.gu.holiday_stops.HolidayStop
+import acyclic.skipped
 
 case class Subscription(
   subscriptionNumber: String,
@@ -36,14 +37,21 @@ case class Subscription(
     charges.headOption
   }
 
+  private implicit val localDateOrdering: Ordering[LocalDate] = _ compareTo _
+  // this function accounts for the fact that in '6for6' the customerAcceptanceDate is the start date of the main rate plan
+  // not the introductory rate plan - but should result in the date that the customer actually selected for their first issue
+  def fulfilmentStartDate: LocalDate = (customerAcceptanceDate :: ratePlans.flatMap(_.effectiveStartDate)).min
+
   def hasHolidayStop(stop: HolidayStop): Boolean = ratePlanCharge(stop).isDefined
 }
 
 case class RatePlan(
   productName: String,
+  ratePlanName: String,
   ratePlanCharges: List[RatePlanCharge],
   productRatePlanId: String,
-  id: String
+  id: String,
+  effectiveStartDate: Option[LocalDate] = None
 )
 
 case class RatePlanCharge(

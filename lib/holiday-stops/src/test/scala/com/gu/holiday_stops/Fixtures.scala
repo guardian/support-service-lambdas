@@ -37,7 +37,7 @@ object Fixtures extends Assertions {
     productRatePlanChargeId = ""
   )
 
-  def mkSubscription(
+  def mkGuardianWeeklySubscription(
     termStartDate: LocalDate = LocalDate.now(),
     termEndDate: LocalDate = LocalDate.now(),
     customerAcceptanceDate: LocalDate = LocalDate.now(),
@@ -56,14 +56,15 @@ object Fixtures extends Assertions {
       ratePlans = List(
         RatePlan(
           productName = "Guardian Weekly - Domestic",
+          ratePlanName = "GW Oct 18 - Quarterly - Domestic",
           ratePlanCharges =
             List(mkRatePlanCharge(
               price,
               billingPeriod,
               chargedThroughDate
             )),
-          "",
-          ""
+          productRatePlanId = "",
+          id = ""
         )
       ),
       status = "Active"
@@ -81,6 +82,7 @@ object Fixtures extends Assertions {
     ratePlans = List(
       RatePlan(
         productName = "Discounts",
+        ratePlanName = "DO NOT USE MANUALLY: Holiday Credit - automated",
         ratePlanCharges = List(RatePlanCharge(
           name = "Holiday Credit",
           number = "C2",
@@ -93,11 +95,12 @@ object Fixtures extends Assertions {
           processedThroughDate = None,
           productRatePlanChargeId = ""
         )),
-        "",
-        ""
+        productRatePlanId = "",
+        id = ""
       ),
       RatePlan(
         productName = "Discounts",
+        ratePlanName = "DO NOT USE MANUALLY: Holiday Credit - automated",
         ratePlanCharges = List(RatePlanCharge(
           name = "Holiday Credit",
           number = "C5",
@@ -110,11 +113,12 @@ object Fixtures extends Assertions {
           processedThroughDate = None,
           productRatePlanChargeId = ""
         )),
-        "",
-        ""
+        productRatePlanId = "",
+        id = ""
       ),
       RatePlan(
         productName = "Not a discount",
+        ratePlanName = "???",
         ratePlanCharges = List(RatePlanCharge(
           name = "Holiday Credit",
           number = "C29",
@@ -127,11 +131,12 @@ object Fixtures extends Assertions {
           processedThroughDate = None,
           productRatePlanChargeId = ""
         )),
-        "",
-        ""
+        productRatePlanId = "",
+        id = ""
       ),
       RatePlan(
         productName = "Discounts",
+        ratePlanName = "DO NOT USE MANUALLY: Holiday Credit - automated",
         ratePlanCharges = List(RatePlanCharge(
           name = "Some other discount",
           number = "C73",
@@ -144,11 +149,12 @@ object Fixtures extends Assertions {
           processedThroughDate = None,
           productRatePlanChargeId = ""
         )),
-        "",
-        ""
+        productRatePlanId = "",
+        id = ""
       ),
       RatePlan(
         productName = "Discounts",
+        ratePlanName = "DO NOT USE MANUALLY: Holiday Credit - automated",
         ratePlanCharges = List(RatePlanCharge(
           name = "Holiday Credit",
           number = "C3",
@@ -161,11 +167,12 @@ object Fixtures extends Assertions {
           processedThroughDate = None,
           productRatePlanChargeId = ""
         )),
-        "",
-        ""
+        productRatePlanId = "",
+        id = ""
       ),
       RatePlan(
         productName = "Discounts",
+        ratePlanName = "DO NOT USE MANUALLY: Holiday Credit - automated",
         ratePlanCharges = List(RatePlanCharge(
           name = "Holiday Credit",
           number = "C987",
@@ -178,18 +185,19 @@ object Fixtures extends Assertions {
           processedThroughDate = None,
           productRatePlanChargeId = ""
         )),
-        "",
-        ""
+        productRatePlanId = "",
+        id = ""
       ),
       RatePlan(
         productName = "Guardian Weekly - Domestic",
+        ratePlanName = "GW Oct 18 - Quarterly - Domestic",
         ratePlanCharges = List(mkRatePlanCharge(
           price = 42.7,
           billingPeriod = "Quarter",
           chargedThroughDate = Some(LocalDate.of(2019, 9, 7))
         )),
-        "",
-        ""
+        productRatePlanId = "",
+        id = ""
       )
     )
   )

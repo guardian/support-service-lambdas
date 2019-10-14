@@ -4,36 +4,36 @@ import java.time.LocalDate
 
 import com.gu.effects.RawEffects
 import com.gu.holiday_stops.ActionCalculator.GuardianWeeklyIssueSuspensionConstants
+import com.gu.holiday_stops.ProductVariant._
+import com.gu.holiday_stops.{ActionCalculator, ProductVariant, SalesforceHolidayError, SalesforceHolidayResponse}
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.SalesforceClient
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
-import Product._
 import com.gu.util.resthttp.JsonHttp
 import scalaz.{-\/, \/-}
-import com.gu.holiday_stops.{ActionCalculator, SalesforceHolidayError, SalesforceHolidayResponse}
 
 object Salesforce {
-  def calculateProcessDate(product: Product, processDateOverride: Option[LocalDate]) = {
+  def calculateProcessDate(productVariant: ProductVariant, processDateOverride: Option[LocalDate]) = {
     processDateOverride.getOrElse(LocalDate.now.plusDays {
-      product match {
+      productVariant match {
         case GuardianWeekly =>
           GuardianWeeklyIssueSuspensionConstants.processorRunLeadTimeDays.toLong
 
         case SaturdayVoucher | SundayVoucher | WeekendVoucher | SixdayVoucher | EverydayVoucher | EverydayPlusVoucher | SixdayPlusVoucher | WeekendPlusVoucher | SundayPlusVoucher | SaturdayPlusVoucher =>
           ActionCalculator.VoucherProcessorLeadTime
 
-        case _ => throw new RuntimeException(s"Unknown product $product. Fix ASAP!")
+        case _ => throw new RuntimeException(s"Unknown product $productVariant. Fix ASAP!")
       }
     })
   }
 
-  def holidayStopRequests(sfCredentials: SFAuthConfig)(product: Product, processDateOverride: Option[LocalDate]): SalesforceHolidayResponse[List[HolidayStopRequestsDetail]] = {
-    val processDate = calculateProcessDate(product, processDateOverride)
+  def holidayStopRequests(sfCredentials: SFAuthConfig)(productVariant: ProductVariant, processDateOverride: Option[LocalDate]): SalesforceHolidayResponse[List[HolidayStopRequestsDetail]] = {
+    val processDate = calculateProcessDate(productVariant, processDateOverride)
     SalesforceClient(RawEffects.response, sfCredentials).value.flatMap { sfAuth =>
       val sfGet = sfAuth.wrapWith(JsonHttp.getWithParams)
-      product match {
-        case GuardianWeekly => FetchGuardianWeeklyHolidayStopRequestsDetails(sfGet)(GuardianWeekly, processDate)
-        case voucher => FetchVoucherHolidayStopRequestsDetails(sfGet)(voucher, processDate)
+      productVariant match {
+        case GuardianWeekly => FetchGuardianWeeklyHolidayStopRequestsDetails(sfGet)(processDate)
+        case voucherProductVariant => FetchVoucherHolidayStopRequestsDetails(sfGet)(processDate, voucherProductVariant)
       }
     }.toDisjunction match {
       case -\/(failure) => Left(SalesforceHolidayError(failure.toString))

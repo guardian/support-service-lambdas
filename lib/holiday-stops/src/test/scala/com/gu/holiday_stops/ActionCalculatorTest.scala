@@ -3,36 +3,26 @@ package com.gu.holiday_stops
 import java.time.{DayOfWeek, LocalDate}
 
 import com.gu.holiday_stops.ActionCalculator.SuspensionConstants
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{ProductName, ProductRatePlanName, ProductType}
+import com.gu.holiday_stops.ProductVariant._
 import org.scalatest.Inside.inside
 import org.scalatest.{EitherValues, FlatSpec, Matchers}
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.Product._
 
 import scala.collection.immutable.ListMap
 
 class ActionCalculatorTest extends FlatSpec with Matchers with EitherValues {
 
-  val gwProductName = ProductName("Guardian Weekly Zone A")
-  val gwProductType = ProductType("Guardian Weekly")
-
-  val sundayProductRatePlanName = ProductRatePlanName("Sunday")
-  val vouchersProductType = ProductType("Newspaper - Voucher Book")
-
   type Today = LocalDate
   type FirstAvailableDate = LocalDate
 
-  it should "convert ProductName to a set of constants for that product" in {
+  it should "convert ProductVariant to a set of constants for that product variant" in {
 
-    inside(ActionCalculator.suspensionConstantsByProduct(gwProductName)) {
-      case SuspensionConstants(annualIssueLimit, List(issues)) =>
+    inside(ActionCalculator.suspensionConstantsByProductVariant(GuardianWeekly)) {
+      case Right(SuspensionConstants(annualIssueLimit, List(issues))) =>
         annualIssueLimit shouldEqual 6
         issues.issueDayOfWeek shouldEqual DayOfWeek.FRIDAY
         issues.processorRunLeadTimeDays shouldEqual 9
     }
 
-    assertThrows[RuntimeException] {
-      ActionCalculator.suspensionConstantsByProduct(ProductName("blah"))
-    }
   }
 
   it should "calculate first available date for Guardian Weekly" in {
@@ -70,16 +60,12 @@ class ActionCalculatorTest extends FlatSpec with Matchers with EitherValues {
       LocalDate.of(2019, 7, 1) -> LocalDate.of(2019, 7, 6), // first available on Sun
       LocalDate.of(2019, 7, 2) -> LocalDate.of(2019, 7, 13) // jump on Tue, a day before processor run
     )
-    val subscription = Fixtures.mkSubscription()
+    val subscription = Fixtures.mkGuardianWeeklySubscription(customerAcceptanceDate = LocalDate.of(2018, 6, 1))
 
     gwTodayToFirstAvailableDate foreach {
       case (today, expected) =>
-        ActionCalculator
-          .getProductSpecifics(gwProductName, subscription, today)
-          .firstAvailableDate shouldEqual expected
-
         inside(ActionCalculator
-          .getProductSpecificsByProductRatePlanKey(
+          .getProductSpecificsByProductVariant(
             GuardianWeekly,
             subscription,
             today
@@ -94,33 +80,33 @@ class ActionCalculatorTest extends FlatSpec with Matchers with EitherValues {
     ActionCalculator.publicationDatesToBeStopped(
       fromInclusive = LocalDate.of(2019, 5, 18),
       toInclusive = LocalDate.of(2019, 6, 20),
-      productName = gwProductName
-    ) shouldEqual List(
+      productVariant = GuardianWeekly
+    ) shouldEqual Right(List(
         LocalDate.of(2019, 5, 24),
         LocalDate.of(2019, 5, 31),
         LocalDate.of(2019, 6, 7),
         LocalDate.of(2019, 6, 14)
-      )
+      ))
 
     ActionCalculator.publicationDatesToBeStopped(
       fromInclusive = LocalDate.of(2019, 5, 18),
       toInclusive = LocalDate.of(2019, 6, 21),
-      productName = gwProductName
-    ) shouldEqual List(
+      productVariant = GuardianWeekly
+    ) shouldEqual Right(List(
         LocalDate.of(2019, 5, 24),
         LocalDate.of(2019, 5, 31),
         LocalDate.of(2019, 6, 7),
         LocalDate.of(2019, 6, 14),
         LocalDate.of(2019, 6, 21)
-      )
+      ))
   }
   it should "calculate first available date for Sunday Voucher" in {
     val acceptanceDateInThePast = LocalDate.of(2019, 1, 1)
     inside(
       ActionCalculator
-        .getProductSpecificsByProductRatePlanKey(
+        .getProductSpecificsByProductVariant(
           SundayVoucher,
-          Fixtures.mkSubscription(customerAcceptanceDate = acceptanceDateInThePast),
+          Fixtures.mkGuardianWeeklySubscription(customerAcceptanceDate = acceptanceDateInThePast),
           LocalDate.of(2019, 9, 9)
         )
     ) {
@@ -132,9 +118,9 @@ class ActionCalculatorTest extends FlatSpec with Matchers with EitherValues {
     val customerAcceptanceDate = LocalDate.of(2019, 9, 17)
     inside(
       ActionCalculator
-        .getProductSpecificsByProductRatePlanKey(
+        .getProductSpecificsByProductVariant(
           SundayVoucher,
-          Fixtures.mkSubscription(customerAcceptanceDate = customerAcceptanceDate),
+          Fixtures.mkGuardianWeeklySubscription(customerAcceptanceDate = customerAcceptanceDate),
           LocalDate.of(2019, 9, 9)
         )
     ) {

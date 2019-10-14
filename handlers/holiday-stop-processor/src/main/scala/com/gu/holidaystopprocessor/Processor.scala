@@ -4,7 +4,7 @@ import com.gu.holiday_stops.subscription.{ExtendedTerm, HolidayCreditUpdate, Sto
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
 import com.softwaremill.sttp.{Id, SttpBackend}
 import java.time.LocalDate
-import Product._
+import com.gu.holiday_stops.ProductVariant._
 import cats.implicits._
 import com.gu.holiday_stops._
 
@@ -29,7 +29,7 @@ object Processor {
           SundayPlusVoucher,
           SaturdayPlusVoucher,
         )
-          .map(product => processProduct(config, Salesforce.holidayStopRequests(config.sfConfig)(product, processDateOverride), _, _, _))
+          .map(productVariant => processProduct(config, Salesforce.holidayStopRequests(config.sfConfig)(productVariant, processDateOverride), _, _, _))
           .map{
             _.apply(
               Zuora.subscriptionGetResponse(config, zuoraAccessToken, backend),
