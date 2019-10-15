@@ -37,10 +37,13 @@ case class Subscription(
     charges.headOption
   }
 
+  lazy val allEffectiveStartDates: List[LocalDate] =
+    ratePlans.flatMap(_.ratePlanCharges.map(_.effectiveStartDate))
+
   // this function accounts for the fact that in '6for6' the customerAcceptanceDate is the start date of the main rate plan
   // not the introductory rate plan - but should result in the date that the customer actually selected for their first issue
-  def fulfilmentStartDate: LocalDate =
-    (customerAcceptanceDate :: ratePlans.flatMap(_.ratePlanCharges.map(_.effectiveStartDate))).min[LocalDate](_ compareTo _)
+  lazy val fulfilmentStartDate: LocalDate =
+    (customerAcceptanceDate :: allEffectiveStartDates).min[LocalDate](_ compareTo _)
 
   def hasHolidayStop(stop: HolidayStop): Boolean = ratePlanCharge(stop).isDefined
 }
