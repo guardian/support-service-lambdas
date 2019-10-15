@@ -218,10 +218,7 @@ object ActionCalculator {
     }
   }
 
-  def latestOf(head: LocalDate, tail: LocalDate*) = {
-    NonEmptyList(head, tail.toList)
-      .sorted(Order.fromLessThan[LocalDate](_.isAfter(_))).head
-  }
+  def latestOf(head: LocalDate, tail: LocalDate*) = (head :: tail.toList).max[LocalDate](_ compareTo _)
 }
 
 case class ActionCalculatorError(message: String)
