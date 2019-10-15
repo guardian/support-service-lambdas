@@ -114,18 +114,18 @@ class ActionCalculatorTest extends FlatSpec with Matchers with EitherValues {
           issueSpecifics.firstAvailableDate shouldEqual LocalDate.of(2019, 9, 10)
       }
   }
-  it should "calculate first available date for Sunday Voucher before customerAcceptanceDate" in {
-    val customerAcceptanceDate = LocalDate.of(2019, 9, 17)
+  it should "calculate first available date when 'first fulfilment date' is significantly in the future" in {
+    val customerAcceptanceDate = LocalDate.of(2018, 6, 10)
     inside(
       ActionCalculator
         .getProductSpecificsByProductVariant(
           SundayVoucher,
           Fixtures.mkGuardianWeeklySubscription(customerAcceptanceDate = customerAcceptanceDate),
-          LocalDate.of(2019, 9, 9)
+          today = LocalDate.of(2018, 5, 1)
         )
     ) {
         case Right(ProductSpecifics(_, List(issueSpecifics))) =>
-          issueSpecifics.firstAvailableDate shouldEqual LocalDate.of(2019, 9, 17)
+          issueSpecifics.firstAvailableDate shouldEqual customerAcceptanceDate
       }
   }
   it should "correctly list the action dates for Sunday Voucher" in {
