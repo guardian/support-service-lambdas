@@ -2,39 +2,54 @@ package com.gu.batchemailsender.api.batchemail.model
 
 import play.api.libs.json.Json
 
-case class EmailPayloadContactAttributes(SubscriberAttributes: Map[String, String])
+case class EmailPayloadStoppedCreditSummary(credit_amount: Double, credit_date: String)
+case class EmailPayloadSubscriberAttributes(
+  first_name: String,
+  last_name: String,
+  subscriber_id: String,
+  next_charge_date: String,
+  product: String,
+  holiday_start_date: Option[String],
+  holiday_end_date: Option[String],
+  stopped_credit_sum: Option[String],
+  currency_symbol: Option[String],
+  stopped_issue_count: Option[String],
+  stopped_credit_summaries: Option[List[EmailPayloadStoppedCreditSummary]]
+)
+case class EmailPayloadContactAttributes(SubscriberAttributes: EmailPayloadSubscriberAttributes)
 case class EmailPayloadTo(Address: String, SubscriberKey: String, ContactAttributes: EmailPayloadContactAttributes)
 case class EmailToSend(To: EmailPayloadTo, DataExtensionName: String, SfContactId: Option[String], IdentityUserId: Option[String])
 
 object EmailToSend {
 
+  implicit val emailPayloadStoppedCreditDetailWriter = Json.writes[EmailPayloadStoppedCreditSummary]
+  implicit val emailPayloadSubscriberAttributesWriter = Json.writes[EmailPayloadSubscriberAttributes]
   implicit val emailPayloadContactAttributesWriter = Json.writes[EmailPayloadContactAttributes]
   implicit val emailPayloadToWriter = Json.writes[EmailPayloadTo]
   implicit val emailToSendWriter = Json.writes[EmailToSend]
 
   def fromEmailBatchItem(emailBatchItem: EmailBatchItem): EmailToSend = {
-
-    def optional(fldName: String, fldValue: Option[String]): Seq[(String, String)] =
-      fldValue.map(v => Seq(fldName -> v)).getOrElse(Nil)
-
-    val customFields: Map[String, String] = Map(
-      "first_name" -> emailBatchItem.payload.first_name,
-      "last_name" -> emailBatchItem.payload.last_name,
-      "subscriber_id" -> emailBatchItem.payload.subscriber_id.value,
-      "next_charge_date" -> emailBatchItem.payload.next_charge_date,
-      "product" -> emailBatchItem.payload.product
-    ) ++
-      optional("holiday_start_date", emailBatchItem.payload.holiday_start_date.map(_.value)) ++
-      optional("holiday_end_date", emailBatchItem.payload.holiday_end_date.map(_.value)) ++
-      optional("stopped_credit_sum", emailBatchItem.payload.stopped_credit_sum.map(_.value)) ++
-      optional("currency_symbol", emailBatchItem.payload.currency_symbol.map(_.value)) ++
-      optional("stopped_issue_count", emailBatchItem.payload.stopped_issue_count.map(_.value))
-
     val emailPayloadTo = EmailPayloadTo(
       Address = emailBatchItem.payload.to_address,
       SubscriberKey = emailBatchItem.payload.to_address,
       ContactAttributes = EmailPayloadContactAttributes(
-        SubscriberAttributes = customFields
+        SubscriberAttributes = EmailPayloadSubscriberAttributes(
+          emailBatchItem.payload.first_name,
+          emailBatchItem.payload.last_name,
+          emailBatchItem.payload.subscriber_id.value,
+          emailBatchItem.payload.next_charge_date,
+          emailBatchItem.payload.product,
+          emailBatchItem.payload.holiday_start_date.map(_.value),
+          emailBatchItem.payload.holiday_end_date.map(_.value),
+          emailBatchItem.payload.stopped_credit_sum.map(_.value),
+          emailBatchItem.payload.currency_symbol.map(_.value),
+          emailBatchItem.payload.stopped_issue_count.map(_.value),
+          emailBatchItem.payload.stopped_credit_summaries.map { creditDetails =>
+            creditDetails.map { creditDetail =>
+              EmailPayloadStoppedCreditSummary(creditDetail.credit_amount.value, creditDetail.credit_date.value)
+            }
+          }
+        )
       )
     )
 
