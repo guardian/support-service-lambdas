@@ -5,7 +5,7 @@ import java.time.LocalDate
 import cats.implicits._
 import com.gu.holiday_stops.subscription.Subscription
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{Product, ProductName, SubscriptionName}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.SubscriptionName
 import play.api.libs.json.{Json, OFormat}
 
 object WireHolidayStopRequest {
@@ -77,42 +77,29 @@ object HolidayStopRequestFull {
 }
 
 case class GetHolidayStopRequests(
-  productSpecifics: Option[LegacyProductSpecifics],
   existing: List[HolidayStopRequestFull],
   issueSpecifics: List[IssueSpecifics],
-  annualIssueLimit: Option[Int]
+  annualIssueLimit: Int
 )
 
 object GetHolidayStopRequests {
 
   def apply(
     holidayStopRequests: List[HolidayStopRequest],
-    optionalProductNamePrefix: Option[ProductName],
-    optionalProduct: Option[Product],
     subscription: Subscription
-  ): Either[GetHolidayStopRequestsError, GetHolidayStopRequests] = {
-    for {
-      optionalProductSpecificForProductPrefix <- optionalProductNamePrefix.map(
-        productNamePrefix => ActionCalculator.getProductSpecifics(productNamePrefix, subscription)
-      ).asRight[GetHolidayStopRequestsError]
-
-      optionalProductSpecificForProductNameRatePlanName <- optionalProduct.traverse(
-        productRatePlanKey =>
-          ActionCalculator
-            .getProductSpecificsByProductRatePlanKey(productRatePlanKey, subscription)
-            .leftMap(error => GetHolidayStopRequestsError(s"Failed to get product specifics for $productRatePlanKey: $error"))
-      )
-    } yield GetHolidayStopRequests(
-      optionalProductSpecificForProductPrefix,
-      holidayStopRequests.map(WireHolidayStopRequest.apply),
-      optionalProductSpecificForProductNameRatePlanName.map(_.issueSpecifics).getOrElse(Nil),
-      optionalProductSpecificForProductNameRatePlanName.map(_.annualIssueLimit)
-    )
-  }
+  ): Either[GetHolidayStopRequestsError, GetHolidayStopRequests] =
+    ActionCalculator
+      .getProductSpecificsByProductVariant(ProductVariant(subscription.ratePlans), subscription)
+      .leftMap(error => GetHolidayStopRequestsError(s"Failed to get product specifics for $subscription: $error"))
+      .map(productSpecifics =>
+        GetHolidayStopRequests(
+          holidayStopRequests.map(WireHolidayStopRequest.apply),
+          productSpecifics.issueSpecifics,
+          productSpecifics.annualIssueLimit
+        ))
 
   implicit val formatIssueSpecifics: OFormat[IssueSpecifics] = Json.format[IssueSpecifics]
   implicit val formatProductSpecifics: OFormat[ProductSpecifics] = Json.format[ProductSpecifics]
-  implicit val formatLegacyProductSpecifics: OFormat[LegacyProductSpecifics] = Json.format[LegacyProductSpecifics]
   implicit val format: OFormat[GetHolidayStopRequests] = Json.format[GetHolidayStopRequests]
 }
 
