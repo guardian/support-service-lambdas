@@ -1,4 +1,5 @@
 // this is stuff for the root handlers, which will be moved to handlers/root at some point
+import Dependencies._
 
 name := "support-service-lambdas"
 description:= "Handles auto-cancellations for membership and subscriptions"
@@ -20,5 +21,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.play" %% "play-json" % "2.6.9",
   "org.scalatest" %% "scalatest" % "3.0.1" % "test",
   "com.stripe" % "stripe-java" % "5.28.0",
-  "com.fasterxml.jackson.core" % "jackson-databind" % "2.8.11.1"
+  jacksonDatabind
 )
+
+assemblyMergeStrategyDiscardModuleInfo

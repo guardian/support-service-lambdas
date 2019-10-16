@@ -1,4 +1,7 @@
 import sbt._
+import sbtassembly.AssemblyKeys.assembly
+import sbtassembly.AssemblyPlugin.autoImport.{MergeStrategy, assemblyMergeStrategy}
+import sbtassembly.PathList
 
 object Dependencies {
   
@@ -17,7 +20,7 @@ object Dependencies {
   val playJsonExtensions = "ai.x" %% "play-json-extensions" % "0.30.1"
   val scalatest = "org.scalatest" %% "scalatest" % "3.0.1" % Test
   val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.14.0" % Test
-  val jacksonDatabind = "com.fasterxml.jackson.core" % "jackson-databind" % "2.8.11.1"
+  val jacksonDatabind = "com.fasterxml.jackson.core" % "jackson-databind" % "2.10.0"
   val awsS3 = "com.amazonaws" % "aws-java-sdk-s3" % awsVersion
   val awsSQS = "com.amazonaws" % "aws-java-sdk-sqs" % awsVersion
   val awsSES = "com.amazonaws" % "aws-java-sdk-ses" % awsVersion
@@ -29,4 +32,14 @@ object Dependencies {
   val sttpCirce = "com.softwaremill.sttp" %% "circe" % sttpVersion
   val mouse = "org.typelevel" %% "mouse" % "0.23" // can be removed once we move to Scala 2.13 (native 'tap')
   val enumeratum = "com.beachape" %% "enumeratum" % "1.5.13"
+
+  // to resolve merge clash of 'module-info.class'
+  // see https://stackoverflow.com/questions/54834125/sbt-assembly-deduplicate-module-info-class
+  val assemblyMergeStrategyDiscardModuleInfo = assemblyMergeStrategy in assembly := {
+    case PathList("module-info.class") => MergeStrategy.discard
+    case x =>
+      val oldStrategy = (assemblyMergeStrategy in assembly).value
+      oldStrategy(x)
+  }
+
 }

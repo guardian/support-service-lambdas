@@ -1,7 +1,7 @@
 import Dependencies._
 
 val scalaSettings = Seq(
-  scalaVersion := "2.12.6",
+  scalaVersion := "2.12.10",
   version      := "0.0.1",
   organization := "com.gu",
   scalacOptions ++= Seq(

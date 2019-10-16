@@ -17,3 +17,5 @@ riffRaffArtifactResources += (file("handlers/sf-gocardless-sync/cfn.yaml"), "cfn
 libraryDependencies ++= Seq(
   playJsonExtensions
 )
+
+assemblyMergeStrategyDiscardModuleInfo
