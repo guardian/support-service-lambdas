@@ -3,6 +3,7 @@ package com.gu.salesforce.holiday_stops
 import java.time.LocalDate
 
 import ai.x.play.json.Jsonx
+import com.gu.holiday_stops.ProductVariant
 import com.gu.salesforce.RecordsWrapperCaseClass
 import com.gu.salesforce.SalesforceConstants._
 import com.gu.util.Logging
@@ -11,7 +12,7 @@ import com.gu.util.resthttp.RestRequestMaker._
 import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.resthttp.{HttpOp, RestRequestMaker}
 import play.api.libs.json.{JsValue, Json}
-import enumeratum._
+import acyclic.skipped
 
 object SalesforceHolidayStopRequestsDetail extends Logging {
 
@@ -31,29 +32,6 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
 
   case class ProductRatePlanName(value: String) extends AnyVal
   case class ProductType(value: String) extends AnyVal
-
-  sealed abstract class Product(override val entryName: String) extends EnumEntry
-  object Product extends Enum[Product] {
-    val values = findValues
-
-    case object GuardianWeekly extends Product("Guardian Weekly")
-    case object SaturdayVoucher extends Product("Saturday")
-    case object SundayVoucher extends Product("Sunday")
-    case object WeekendVoucher extends Product("Weekend")
-    case object SixdayVoucher extends Product("Sixday")
-    case object EverydayVoucher extends Product("Everyday")
-    case object EverydayPlusVoucher extends Product("Everyday+")
-    case object SixdayPlusVoucher extends Product("Sixday+")
-    case object WeekendPlusVoucher extends Product("Weekend+")
-    case object SundayPlusVoucher extends Product("Sunday+")
-    case object SaturdayPlusVoucher extends Product("Saturday+")
-
-    def apply(productType: String, productRatePlanName: String): Product =
-      withNameOption(productRatePlanName)
-        .orElse(withNameOption((productType)))
-        .orElse(withNameOption(s"$productType - $productRatePlanName"))
-        .getOrElse(throw new RuntimeException(s"Fix ASAP! Product not recognized (productType=$productType, productRatePlanName=$productRatePlanName"))
-  }
 
   case class HolidayStopRequestsDetailChargeCode(value: String) extends AnyVal
   implicit val formatHolidayStopRequestsDetailChargeCode = Jsonx.formatInline[HolidayStopRequestsDetailChargeCode]
@@ -103,14 +81,14 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
 
   object FetchGuardianWeeklyHolidayStopRequestsDetails {
 
-    def apply(sfGet: HttpOp[RestRequestMaker.GetRequestWithParams, JsValue]): (Product, LocalDate) => ClientFailableOp[List[HolidayStopRequestsDetail]] =
+    def apply(sfGet: HttpOp[RestRequestMaker.GetRequestWithParams, JsValue]): LocalDate => ClientFailableOp[List[HolidayStopRequestsDetail]] =
       sfGet
-        .setupRequestMultiArg(toRequest _)
+        .setupRequest(toRequest)
         .parse[RecordsWrapperCaseClass[HolidayStopRequestsDetail]]
         .map(_.records)
-        .runRequestMultiArg
+        .runRequest
 
-    def toRequest(product: Product, date: LocalDate): GetRequestWithParams = {
+    def toRequest(date: LocalDate): GetRequestWithParams = {
       val soqlQuery = s"""
           | $SOQL_SELECT_CLAUSE
           | FROM $holidayStopRequestsDetailSfObjectRef
@@ -130,19 +108,19 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
 
   object FetchVoucherHolidayStopRequestsDetails {
 
-    def apply(sfGet: HttpOp[RestRequestMaker.GetRequestWithParams, JsValue]): (Product, LocalDate) => ClientFailableOp[List[HolidayStopRequestsDetail]] =
+    def apply(sfGet: HttpOp[RestRequestMaker.GetRequestWithParams, JsValue]): (LocalDate, ProductVariant) => ClientFailableOp[List[HolidayStopRequestsDetail]] =
       sfGet
         .setupRequestMultiArg(toRequest _)
         .parse[RecordsWrapperCaseClass[HolidayStopRequestsDetail]]
         .map(_.records)
         .runRequestMultiArg
 
-    def toRequest(product: Product, date: LocalDate): GetRequestWithParams = {
+    def toRequest(date: LocalDate, productVariant: ProductVariant): GetRequestWithParams = {
       val soqlQuery = s"""
                          | $SOQL_SELECT_CLAUSE
                          | FROM $holidayStopRequestsDetailSfObjectRef
                          | WHERE Product_Name__c = 'Newspaper Voucher'
-                         | AND Holiday_Stop_Request__r.SF_Subscription__r.Rate_Plan_Name__c = '${product.entryName}'
+                         | AND Holiday_Stop_Request__r.SF_Subscription__r.Rate_Plan_Name__c = '${productVariant.entryName}'
                          | AND Stopped_Publication_Date__c = ${date.toString}
                          | AND (
                          |   Subscription_Cancellation_Effective_Date__c = null

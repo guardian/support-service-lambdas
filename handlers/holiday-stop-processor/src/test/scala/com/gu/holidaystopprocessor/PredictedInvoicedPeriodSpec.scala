@@ -35,6 +35,7 @@ class PredictedInvoicedPeriodSpec extends FlatSpec with Matchers with OptionValu
 
   val guardianWeeklyWithoutInvoice = RatePlan(
     productName = "",
+    ratePlanName = "",
     ratePlanCharges = List(gwRatePlanCharge),
     productRatePlanId = "",
     id = ""
@@ -42,6 +43,7 @@ class PredictedInvoicedPeriodSpec extends FlatSpec with Matchers with OptionValu
 
   val gwNForN = RatePlan(
     productName = "",
+    ratePlanName = "",
     ratePlanCharges = List(gwNForNRatePlanCharge),
     productRatePlanId = "",
     id = ""

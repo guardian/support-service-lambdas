@@ -49,7 +49,7 @@ class SubscriptionTest extends FlatSpec with Matchers with OptionValues with Typ
   }
 
   it should "give no ratePlanCharge when subscription has no holiday stops applied" in {
-    val subscription = Fixtures.mkSubscription(
+    val subscription = Fixtures.mkGuardianWeeklySubscription(
       termStartDate = LocalDate.of(2018, 1, 1),
       termEndDate = LocalDate.of(2019, 1, 1),
       price = 123,

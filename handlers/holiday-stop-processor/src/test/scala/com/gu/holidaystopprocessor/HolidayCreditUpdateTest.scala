@@ -8,12 +8,12 @@ import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.Stopp
 import org.scalatest.{EitherValues, FlatSpec, Matchers}
 
 class HolidayCreditUpdateTest extends FlatSpec with Matchers with EitherValues {
-
+  MutableCalendar.setFakeToday(Some(LocalDate.parse("2019-08-12")))
   val chargedThroughDate = LocalDate.parse("2019-09-12")
   val stoppedPublicationDate = StoppedPublicationDate(chargedThroughDate.minusDays(1))
 
   "holidayCreditToAdd" should "generate update correctly" in {
-    val subscription = Fixtures.mkSubscription(
+    val subscription = Fixtures.mkGuardianWeeklySubscription(
       termStartDate = LocalDate.of(2019, 7, 12),
       termEndDate = LocalDate.of(2020, 7, 12),
       price = 42.1,
@@ -54,7 +54,7 @@ class HolidayCreditUpdateTest extends FlatSpec with Matchers with EitherValues {
   }
 
   it should "fail to generate an update when there's no chargedThroughDate, i.e., no invoice has been generated" in {
-    val subscription = Fixtures.mkSubscription(
+    val subscription = Fixtures.mkGuardianWeeklySubscription(
       termStartDate = LocalDate.of(2019, 7, 12),
       termEndDate = LocalDate.of(2020, 7, 12),
       price = 42.1,
@@ -65,7 +65,7 @@ class HolidayCreditUpdateTest extends FlatSpec with Matchers with EitherValues {
   }
 
   it should "generate an update with an extended term when charged-through date of subscription is after its term-end date" in {
-    val subscription = Fixtures.mkSubscription(
+    val subscription = Fixtures.mkGuardianWeeklySubscription(
       termStartDate = LocalDate.of(2019, 7, 23),
       termEndDate = LocalDate.of(2020, 7, 23),
       price = 150,
@@ -103,7 +103,7 @@ class HolidayCreditUpdateTest extends FlatSpec with Matchers with EitherValues {
   }
 
   it should "generate an update without an extended term when charged-through date of subscription is on its term-end date" in {
-    val subscription = Fixtures.mkSubscription(
+    val subscription = Fixtures.mkGuardianWeeklySubscription(
       termStartDate = LocalDate.of(2019, 7, 23),
       termEndDate = LocalDate.of(2020, 7, 23),
       price = 150,

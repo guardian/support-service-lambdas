@@ -6,7 +6,7 @@ import com.gu.effects.{FakeFetchString, SFTestEffects, TestingRawEffects}
 import com.gu.holiday_stops.ActionCalculator._
 import com.gu.holiday_stops.Handler._
 import com.gu.holiday_stops.ZuoraSttpEffects.ZuoraSttpEffectsOps
-import com.gu.holiday_stops.subscription.{HolidayStopCredit, RatePlan, RatePlanCharge, Subscription}
+import com.gu.holiday_stops.subscription.{HolidayStopCredit, MutableCalendar, RatePlan, RatePlanCharge, Subscription}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.SubscriptionName
 import com.gu.salesforce.holiday_stops.SalesforceSFSubscription.SubscriptionForSubscriptionNameAndContact._
 import com.gu.salesforce.holiday_stops.{SalesForceHolidayStopsEffects, SalesforceHolidayStopRequestsDetail}
@@ -35,84 +35,9 @@ class HandlerTest extends FlatSpec with Matchers {
       HEADER_SALESFORCE_CONTACT_ID -> expectedSfContactIdCoreValue
     ))) shouldBe ContinueProcessing(Right(SalesforceContactId(expectedSfContactIdCoreValue)))
   }
-  "GET /potential/<<sub name>>?startDate=...&endDate=...&estimateCredit=false endpoint" should
-    "calculate potential holiday stop dates" in {
-    inside(
-      Handler.operationForEffects(
-        defaultTestEffects.response,
-        Stage("DEV"),
-        FakeFetchString.fetchString,
-        SttpBackendStub.synchronous
-      ).map { operation =>
-        operation
-          .steps(
-            legacyPotentialIssueDateRequest(
-              productPrefix = "Guardian Weekly xxx",
-              startDate = "2019-01-01",
-              endDate = "2019-01-15",
-              subscriptionName = "Sub12344",
-              estimateCredit = false
-            )
-          )
-      }
-    ) {
-      case ContinueProcessing(response) =>
-        response.statusCode should equal("200")
-        val parsedResponseBody = Json.fromJson[PotentialHolidayStopsResponse](Json.parse(response.body))
-        inside(parsedResponseBody) {
-          case JsSuccess(response, _) =>
-            response should equal(
-              PotentialHolidayStopsResponse(
-                List(
-                  PotentialHolidayStop(LocalDate.of(2019, 1, 4), None),
-                  PotentialHolidayStop(LocalDate.of(2019, 1, 11), None),
-                )
-              )
-            )
-        }
-    }
-  }
-  "GET /potential/<<sub name>>?startDate=...&endDate=...&estimateCredit=false&productType=..." +
-    "&productRatePlanName=... endpoint" should
-    "calculate potential holiday stop dates" in {
-    inside(
-      Handler.operationForEffects(
-        defaultTestEffects.response,
-        Stage("DEV"),
-        FakeFetchString.fetchString,
-        SttpBackendStub.synchronous
-      ).map { operation =>
-        operation
-          .steps(
-            potentialIssueDateRequest(
-              productType = "Newspaper - Voucher Book",
-              productRatePlanName = "Sunday",
-              startDate = "2019-01-01",
-              endDate = "2019-01-15",
-              subscriptionName = "Sub12344",
-              estimateCredit = false
-            )
-          )
-      }
-    ) {
-      case ContinueProcessing(response) =>
-        response.statusCode should equal("200")
-        val parsedResponseBody = Json.fromJson[PotentialHolidayStopsResponse](Json.parse(response.body))
-        inside(parsedResponseBody) {
-          case JsSuccess(response, _) =>
-            response should equal(
-              PotentialHolidayStopsResponse(
-                List(
-                  PotentialHolidayStop(LocalDate.of(2019, 1, 6), None),
-                  PotentialHolidayStop(LocalDate.of(2019, 1, 13), None),
-                )
-              )
-            )
-        }
-    }
-  }
   "GET /potential/<<sub name>>?startDate=...&endDate=...&estimateCredit=true endpoint" should
     "calculate potential holiday stop dates and estimated credit" in {
+    MutableCalendar.setFakeToday(Some(LocalDate.parse("2019-02-01")))
     val subscriptionName = "Sub12344"
 
     val startDate = LocalDate.of(2019, 1, 1)
@@ -130,6 +55,7 @@ class HandlerTest extends FlatSpec with Matchers {
       ratePlans = List(
         RatePlan(
           productName = "Guardian Weekly - Domestic",
+          ratePlanName = "GW Oct 18 - Quarterly - Domestic",
           ratePlanCharges =
             List(RatePlanCharge(
               name = "GW",
@@ -143,8 +69,8 @@ class HandlerTest extends FlatSpec with Matchers {
               processedThroughDate = Some(endDate.minusMonths(3)),
               ""
             )),
-          "",
-          ""
+          productRatePlanId = "",
+          id = ""
         )
       ),
       "Active"
@@ -228,18 +154,18 @@ class HandlerTest extends FlatSpec with Matchers {
         )
     }
   }
-  "GET /hsr/<<sub name>>?productType=...&ratePlanName=... endpoint" should
-    "get subscription and calculate product specifics for product type and rate plan name query params" in {
+  "GET /hsr/<<sub name>> endpoint" should
+    "get subscription and calculate product specifics" in {
 
     val subscriptionName = "Sub12344"
-    val subscription = Fixtures.mkSubscription()
+    val gwSubscription = Fixtures.mkGuardianWeeklySubscription()
     val contactId = "Contact1234"
     val holidayStopRequestsDetail = Fixtures.mkHolidayStopRequestDetails()
 
     val testBackend = SttpBackendStub
       .synchronous
       .stubZuoraAuthCall()
-      .stubZuoraSubscription(subscriptionName, subscription)
+      .stubZuoraSubscription(subscriptionName, gwSubscription)
 
     val holidayStopRequest = Fixtures.mkHolidayStopRequest(
       id = "holidayStopId",
@@ -279,7 +205,6 @@ class HandlerTest extends FlatSpec with Matchers {
           case JsSuccess(response, _) =>
             response should equal(
               GetHolidayStopRequests(
-                None,
                 List(
                   HolidayStopRequestFull(
                     holidayStopRequest.Id.value,
@@ -291,86 +216,14 @@ class HandlerTest extends FlatSpec with Matchers {
                 ),
                 List(
                   IssueSpecifics(
-                    SundayVoucherSuspensionConstants.issueConstants(0).firstAvailableDate(LocalDate.now(), subscription),
-                    SundayVoucherSuspensionConstants.issueConstants(0).issueDayOfWeek.getValue
+                    GuardianWeeklySuspensionConstants.issueConstants.head.firstAvailableDate(LocalDate.now()),
+                    GuardianWeeklySuspensionConstants.issueConstants.head.issueDayOfWeek.getValue
                   )
                 ),
-                Some(SundayVoucherSuspensionConstants.annualIssueLimit)
+                GuardianWeeklySuspensionConstants.annualIssueLimit
               )
             )
 
-        }
-    }
-  }
-  "GET /hsr/<<sub name>> endpoint" should
-    "get subscription and calculate product specifics for product name prefix header" in {
-    val subscriptionName = "Sub12344"
-    val contactId = "Contact1234"
-    val holidayStopRequestsDetail = Fixtures.mkHolidayStopRequestDetails()
-    val subscription = Fixtures.mkSubscription()
-
-    val testBackend = SttpBackendStub
-      .synchronous
-      .stubZuoraAuthCall()
-      .stubZuoraSubscription(subscriptionName, subscription)
-
-    val holidayStopRequest = Fixtures.mkHolidayStopRequest(
-      id = "holidayStopId",
-      subscriptionName = SubscriptionName(subscriptionName),
-      requestDetail = List(holidayStopRequestsDetail)
-    )
-
-    inside(
-      Handler.operationForEffects(
-        new TestingRawEffects(
-          responses = Map(
-            SalesForceHolidayStopsEffects.listHolidayStops(contactId, subscriptionName, List(holidayStopRequest))
-          ),
-          postResponses = Map(
-            SFTestEffects.authSuccess,
-          )
-        ).response,
-        Stage("DEV"),
-        FakeFetchString.fetchString,
-        testBackend
-      ).map { operation =>
-        operation
-          .steps(
-            legacyExistingHolidayStopsRequest(
-              subscriptionName,
-              contactId,
-              "Guardian Weekly"
-            )
-          )
-      }
-    ) {
-      case ContinueProcessing(response) =>
-        response.statusCode should equal("200")
-        val parsedResponseBody = Json.fromJson[GetHolidayStopRequests](Json.parse(response.body))
-        inside(parsedResponseBody) {
-          case JsSuccess(response, _) =>
-            response should equal(
-              GetHolidayStopRequests(
-                Some(
-                  LegacyProductSpecifics(
-                    GuardianWeeklyIssueSuspensionConstants.firstAvailableDate(LocalDate.now(), subscription),
-                    GuardianWeeklyIssueSuspensionConstants.issueDayOfWeek.getValue,
-                    GuardianWeeklySuspensionConstants.annualIssueLimit
-                  )
-                ),
-                List(
-                  HolidayStopRequestFull(
-                    holidayStopRequest.Id.value,
-                    holidayStopRequest.Start_Date__c.value,
-                    holidayStopRequest.End_Date__c.value,
-                    holidayStopRequest.Subscription_Name__c,
-                    List(toHolidayStopRequestDetail(holidayStopRequestsDetail))
-                  )
-                ),
-                List(),
-                None
-              )
-            )
         }
     }
   }
@@ -425,22 +278,6 @@ class HandlerTest extends FlatSpec with Matchers {
       )),
       None,
       Some(Map("x-salesforce-contact-id" -> sfContactId)),
-      Some(JsObject(Seq("subscriptionName" -> JsString(subscriptionName)))),
-      Some(s"/hsr/$subscriptionName ")
-    )
-  }
-
-  private def legacyExistingHolidayStopsRequest(subscriptionName: String, sfContactId: String, productNamePrefix: String) = {
-    ApiGatewayRequest(
-      Some("GET"),
-      None,
-      None,
-      Some(
-        Map(
-          "x-salesforce-contact-id" -> sfContactId,
-          "x-product-name-prefix" -> productNamePrefix
-        )
-      ),
       Some(JsObject(Seq("subscriptionName" -> JsString(subscriptionName)))),
       Some(s"/hsr/$subscriptionName ")
     )

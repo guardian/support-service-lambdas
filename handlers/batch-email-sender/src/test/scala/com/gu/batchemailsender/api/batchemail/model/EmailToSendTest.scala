@@ -21,7 +21,8 @@ class EmailToSendTest extends FlatSpec {
       holiday_end_date = None,
       stopped_credit_sum = None,
       currency_symbol = None,
-      stopped_issue_count = None
+      stopped_issue_count = None,
+      stopped_credit_summaries = None
     )
 
   val emailBatchItemStub = EmailBatchItem(
@@ -34,13 +35,20 @@ class EmailToSendTest extends FlatSpec {
       Address = email,
       SubscriberKey = email,
       ContactAttributes = EmailPayloadContactAttributes(
-        SubscriberAttributes = Map(
-          "first_name" -> "something",
-          "subscriber_id" -> "A-S00044748",
-          "last_name" -> "bla",
-          "next_charge_date" -> "3 September 2018",
-          "product" -> "Supporter"
-        )
+        SubscriberAttributes =
+          EmailPayloadSubscriberAttributes(
+            "something",
+            "bla",
+            "A-S00044748",
+            "3 September 2018",
+            "Supporter",
+            None,
+            None,
+            None,
+            None,
+            None,
+            None
+          )
       )
     ),
     DataExtensionName = "",
@@ -75,18 +83,28 @@ class EmailToSendTest extends FlatSpec {
         holiday_end_date = Some(HolidayEndDate("2019-11-17")),
         stopped_credit_sum = Some(StoppedCreditSum("11.24")),
         currency_symbol = Some(CurrencySymbol("&pound;")),
-        stopped_issue_count = Some(StoppedIssueCount("2"))
+        stopped_issue_count = Some(StoppedIssueCount("2")),
+        stopped_credit_summaries = Some(
+          List(
+            StoppedCreditSummary(StoppedCreditSummaryAmount(1.23), StoppedCreditSummaryDate("2020-01-01"))
+          )
+        )
       )
     )
     val expected = expectedStub.copy(
       To = expectedStub.To.copy(
         ContactAttributes = expectedStub.To.ContactAttributes.copy(
-          expectedStub.To.ContactAttributes.SubscriberAttributes ++ Map(
-            "holiday_start_date" -> "2019-11-01",
-            "holiday_end_date" -> "2019-11-17",
-            "stopped_credit_sum" -> "11.24",
-            "currency_symbol" -> "&pound;",
-            "stopped_issue_count" -> "2"
+          expectedStub.To.ContactAttributes.SubscriberAttributes.copy(
+            holiday_start_date = Some("2019-11-01"),
+            holiday_end_date = Some("2019-11-17"),
+            stopped_credit_sum = Some("11.24"),
+            currency_symbol = Some("&pound;"),
+            stopped_issue_count = Some("2"),
+            stopped_credit_summaries = Some(
+              List(
+                EmailPayloadStoppedCreditSummary(1.23, "2020-01-01")
+              )
+            )
           )
         )
       ),

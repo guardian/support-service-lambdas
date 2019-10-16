@@ -80,7 +80,7 @@ abstract class StoppedProduct(
 
       val billingPeriodDuration: Period = billingPeriod match {
         case "Annual" => Period.ofYears(1)
-        case "Semi-Annual" => Period.ofMonths(6)
+        case "Semi_Annual" => Period.ofMonths(6)
         case "Quarter" => Period.ofMonths(3)
         case "Month" => Period.ofMonths(1)
         case _ => throw new RuntimeException(
@@ -105,11 +105,11 @@ abstract class StoppedProduct(
   private def billingPeriodToApproxWeekCount(billingPeriod: String): Int =
     billingPeriod match {
       case "Annual" => 52
-      case "Semi-Annual" => 26
+      case "Semi_Annual" => 26
       case "Quarter" => 13
       case "Month" => 4
       case "Specific_Weeks" => 6 // FIXME: When we have others than 6-for-6
-      case _ => throw new RuntimeException(s"Failed to convert billing period to weeks because unknown period: $billingPeriod") // FIXME: Either
+      case _ => throw new RuntimeException(s"Failed to convert billing period to weeks because unknown period: $billingPeriod")
     }
 
   def credit = HolidayStopCredit(amount = creditAmount, invoiceDate = nextBillingPeriodStartDate)
