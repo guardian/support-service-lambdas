@@ -7,7 +7,7 @@ case class EmailPayloadSubscriberAttributes(
   first_name: String,
   last_name: String,
   subscriber_id: String,
-  next_charge_date: String,
+  next_charge_date: Option[String],
   product: String,
   holiday_start_date: Option[String],
   holiday_end_date: Option[String],

@@ -12,7 +12,7 @@ class EmailToSendTest extends FlatSpec {
       subscriber_id = SubscriberId("A-S00044748"),
       sf_contact_id = SfContactId("0036E00000KtDaHQAV"),
       product = "Supporter",
-      next_charge_date = "3 September 2018",
+      next_charge_date = Some("3 September 2018"),
       last_name = "bla",
       identity_id = Some(IdentityUserId("30002177")),
       first_name = "something",
@@ -40,7 +40,7 @@ class EmailToSendTest extends FlatSpec {
             "something",
             "bla",
             "A-S00044748",
-            "3 September 2018",
+            Some("3 September 2018"),
             "Supporter",
             None,
             None,
@@ -116,5 +116,46 @@ class EmailToSendTest extends FlatSpec {
   it should "throw exception if it cannot recognize object_name" in {
     val emailBatchItemUnrecognized = emailBatchItemStub.copy(object_name = "unrecognized_object_name")
     assertThrows[RuntimeException](EmailToSend.fromEmailBatchItem(emailBatchItemUnrecognized))
+  }
+
+  it should "cope with a missing nextChargeDate" in {
+    val emailBatchItem = emailBatchItemStub.copy(
+      object_name = "Holiday_Stop_Request__c",
+      payload = emailBatchItemPayloadStub.copy(
+        email_stage = "create",
+        next_charge_date = None,
+        holiday_start_date = Some(HolidayStartDate("2019-11-01")),
+        holiday_end_date = Some(HolidayEndDate("2019-11-17")),
+        stopped_credit_sum = Some(StoppedCreditSum("11.24")),
+        currency_symbol = Some(CurrencySymbol("&pound;")),
+        stopped_issue_count = Some(StoppedIssueCount("2")),
+        stopped_credit_summaries = Some(
+          List(
+            StoppedCreditSummary(StoppedCreditSummaryAmount(1.23), StoppedCreditSummaryDate("2020-01-01"))
+          )
+        )
+      )
+    )
+    val expected = expectedStub.copy(
+      To = expectedStub.To.copy(
+        ContactAttributes = expectedStub.To.ContactAttributes.copy(
+          expectedStub.To.ContactAttributes.SubscriberAttributes.copy(
+            next_charge_date = None,
+            holiday_start_date = Some("2019-11-01"),
+            holiday_end_date = Some("2019-11-17"),
+            stopped_credit_sum = Some("11.24"),
+            currency_symbol = Some("&pound;"),
+            stopped_issue_count = Some("2"),
+            stopped_credit_summaries = Some(
+              List(
+                EmailPayloadStoppedCreditSummary(1.23, "2020-01-01")
+              )
+            )
+          )
+        )
+      ),
+      DataExtensionName = "SV_HolidayStopConfirmation"
+    )
+    assert(EmailToSend.fromEmailBatchItem(emailBatchItem) == expected)
   }
 }
