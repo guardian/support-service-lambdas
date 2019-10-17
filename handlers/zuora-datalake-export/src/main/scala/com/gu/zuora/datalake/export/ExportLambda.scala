@@ -214,6 +214,13 @@ object Query extends Enum[Query] {
     "ophan-raw-zuora-increment-invoiceitem",
     "InvoiceItem.csv"
   )
+
+  case object RevenueEventItemInvoiceItem extends Query(
+    "RevenueEventItemInvoiceItem",
+    """SELECT Amount, CreatedById, CreatedDate, Currency, Id, UpdatedById, UpdatedDate, Account.Id, AccountingPeriod.Id, Amendment.Id, BillToContact.Id, DefaultPaymentMethod.Id, Invoice.Id, InvoiceItem.Id, JournalEntry.Id, JournalRun.Id, ParentAccount.Id, Product.Id, ProductRatePlan.Id, ProductRatePlanCharge.Id, RatePlan.Id, RatePlanCharge.Id, RevenueChargeSummary.Id, RevenueEventInvoiceItem.Id, RevenueEventType.Id, RevenueScheduleInvoiceItem.Id, SoldToContact.Id, Subscription.Id FROM RevenueEventItemInvoiceItem""",
+    "ophan-raw-zuora-increment-revenueeventiteminvoiceitem",
+    "RevenueEventItemInvoiceItem.csv"
+  )
 }
 
 object ZuoraApiHost {
