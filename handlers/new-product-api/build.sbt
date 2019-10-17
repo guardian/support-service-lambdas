@@ -15,3 +15,5 @@ riffRaffManifestProjectName := "MemSub::Membership Admin::New product API"
 riffRaffArtifactResources += (file("handlers/new-product-api/cfn.yaml"), "cfn/cfn.yaml")
 
 libraryDependencies ++= Seq(supportInternationalisation)
+
+assemblyMergeStrategyDiscardModuleInfo

@@ -27,16 +27,16 @@ object GuardianWeeklyHolidayCreditSpec extends Properties("HolidayCreditAmount")
     productRatePlanChargeId = ""
   )
 
-  val subscription = Fixtures.mkSubscription()
+  val subscription = Fixtures.mkGuardianWeeklySubscription()
 
   property("should be negative") = forAll(ratePlanChargeGen) { charge: RatePlanCharge =>
-    val ratePlans = List(RatePlan("Guardian Weekly - Domestic", List(charge), "", ""))
+    val ratePlans = List(RatePlan("Guardian Weekly - Domestic", "GW Oct 18 - Quarterly - Domestic", List(charge), "", ""))
     val currentGuardianWeeklySubscription = GuardianWeeklySubscription(subscription.copy(ratePlans = ratePlans), StoppedPublicationDate(chargedThroughDate.minusDays(1)))
     currentGuardianWeeklySubscription.right.value.credit.amount < 0
   }
 
   property("should never be overwhelmingly negative") = forAll(ratePlanChargeGen) { charge: RatePlanCharge =>
-    val ratePlans = List(RatePlan("Guardian Weekly - Domestic", List(charge), "", ""))
+    val ratePlans = List(RatePlan("Guardian Weekly - Domestic", "GW Oct 18 - Quarterly - Domestic", List(charge), "", ""))
     val currentGuardianWeeklySubscription = GuardianWeeklySubscription(subscription.copy(ratePlans = ratePlans), StoppedPublicationDate(chargedThroughDate.minusDays(1)))
     currentGuardianWeeklySubscription.right.value.credit.amount > -charge.price
   }

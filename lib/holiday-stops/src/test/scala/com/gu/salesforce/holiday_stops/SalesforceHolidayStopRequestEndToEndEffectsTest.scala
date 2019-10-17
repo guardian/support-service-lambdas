@@ -3,7 +3,7 @@ package com.gu.salesforce.holiday_stops
 import java.time.LocalDate
 
 import com.gu.effects.{GetFromS3, RawEffects}
-import com.gu.holiday_stops.{Fixtures, CreditCalculation}
+import com.gu.holiday_stops.{ActionCalculator, CreditCalculation, Fixtures, ProductVariant}
 import com.gu.holiday_stops.subscription.Subscription
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
 import com.gu.salesforce.SalesforceClient
@@ -15,6 +15,7 @@ import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.resthttp.JsonHttp
 import org.scalatest.{FlatSpec, Matchers}
 import scalaz.{-\/, \/-}
+import com.gu.util.resthttp.RestRequestMaker.toClientFailableOp
 
 class SalesforceHolidayStopRequestEndToEndEffectsTest extends FlatSpec with Matchers {
 
@@ -43,8 +44,13 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends FlatSpec with Matc
         Left(IdentityId("100004814"))
       ).toDisjunction
 
-      fakePartiallyWiredCreditCalculator: CreditCalculation = (_, _) => Right(0.0)
-      fakeSubscription: Subscription = Fixtures.mkSubscription()
+      fakePartiallyWiredCreditCalculator: CreditCalculation = (_: LocalDate, _: Subscription) => Right(0.0)
+      fakeSubscription: Subscription = Fixtures.mkGuardianWeeklySubscription()
+
+      publicationDatesToBeStopped = ActionCalculator
+        .publicationDatesToBeStopped(startDate, endDate, ProductVariant(fakeSubscription.ratePlans))
+        .toOption
+        .get
 
       createOp = SalesforceHolidayStopRequest.CreateHolidayStopRequestWithDetail(sfAuth.wrapWith(JsonHttp.post))
       createResult <- createOp(CreateHolidayStopRequestWithDetail.buildBody(
@@ -52,6 +58,7 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends FlatSpec with Matc
       )(
         startDate,
         endDate,
+        publicationDatesToBeStopped,
         maybeMatchingSubscription.get,
         fakeSubscription
       )).toDisjunction

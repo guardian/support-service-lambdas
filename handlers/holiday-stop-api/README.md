@@ -8,11 +8,8 @@ All endpoints require...
 
 | Method | Endpoint | Description |
 | --- | --- | --- | 
-| GET | `/{STAGE}/potential/{SUBSCRIPTION_NAME}?startDate={yyyy-MM-dd}&endDate={yyyy-MM-dd}&estimateCredit={true`&#124;`false}`  (with `x-product-name-prefix` header set)  | returns a response containing dates for each issue impacted between the dates for the given product. Optionally the estimated credit can be calculated for each issue. |
-| GET | `/{STAGE}/hsr` | returns all holiday stops (past & present) for the user |
-| GET | `/{STAGE}/hsr` (with `x-product-name-prefix` header set) | returns all holiday stops (past & present) but including a calculated 'first available date' based on the type of product |
-| GET | `/{STAGE}/hsr/{SUBSCRIPTION_NAME}` (with `x-product-name-prefix` header set) | [DEPRECATED] returns all holiday stops (past & present) for the user filtered on the specified subscription also including a calculated 'first available date' based on the type of product |
-| GET | `/{STAGE}/hsr/{SUBSCRIPTION_NAME}?productType=<<product type>>&ratePlanName=<<rate plan name>>` | returns all holiday stops (past & present) for the user filtered on the specified subscription. Optionally including a calculated 'firstAvailableDate', 'issueDayOfWeek', 'annualIssueLimit' for each 'stoppable' product rate plan charges associated with the rate plan identified by the productType/ratePlanName query parameters. |
+| GET | `/{STAGE}/potential/{SUBSCRIPTION_NAME}?startDate={yyyy-MM-dd}&endDate={yyyy-MM-dd}&estimateCredit={true`&#124;`false}` | returns a response containing dates for each issue impacted between the start and end parameters inclusively, for the subscription. Optionally the estimated credit can be calculated for each issue (which comes with the invoice date it will be appear on) |
+| GET | `/{STAGE}/hsr/{SUBSCRIPTION_NAME}` | returns all holiday stops (past & present) for the specified subscription (user is verified as the 'bill to' contact of the subscription). Response includes an 'annualIssueLimit' and an 'issueSpecifics' array containing a series of objects each with calculated 'firstAvailableDate' and 'issueDayOfWeek'.|
 | POST | `/{STAGE}/hsr` | creates a new all holiday stop, example body `{ "start": "2023-06-10", "end": "2024-06-14", "subscriptionName": "A-S00071783" }`|
 | DELETE | `/{STAGE}/hsr/{SUBSCRIPTION_NAME} /{SF_ID}` | deletes the holiday stop request from SalesForce (with Id matching `{SF_ID}`) |
 

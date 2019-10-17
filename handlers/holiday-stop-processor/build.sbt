@@ -1,8 +1,10 @@
+import Dependencies._
+
 name := "holiday-stop-processor"
 description := "Add a holiday credit amendment to a subscription."
 version := "0.1.0-SNAPSHOT"
 
-scalaVersion := "2.12.8"
+scalaVersion := "2.12.10"
 scalacOptions += "-Ypartial-unification"
 
 assemblyJarName := s"${name.value}.jar"
@@ -19,3 +21,5 @@ libraryDependencies ++= Seq(
   "ch.qos.logback" % "logback-classic" % "1.2.3",
   "com.typesafe.scala-logging" %% "scala-logging" % "3.9.2"
 )
+
+assemblyMergeStrategyDiscardModuleInfo

@@ -15,3 +15,5 @@ riffRaffManifestProjectName := "MemSub::Membership Admin::Batch Email Sender"
 riffRaffArtifactResources += (file("handlers/batch-email-sender/cfn.yaml"), "cfn/cfn.yaml")
 
 libraryDependencies ++= Seq(supportInternationalisation)
+
+assemblyMergeStrategyDiscardModuleInfo

@@ -47,6 +47,7 @@ class SundayVoucherHolidayStopProcessTest extends FlatSpec with Matchers {
       true,
       List(RatePlan(
         "Newspaper Voucher",
+        "Sunday",
         List(RatePlanCharge(
           "Sunday",
           "C-00057516",
@@ -74,7 +75,9 @@ class SundayVoucherHolidayStopProcessTest extends FlatSpec with Matchers {
       "Month",
       true,
       List(
-        RatePlan("Discounts",
+        RatePlan(
+          "Discounts",
+          "DO NOT USE MANUALLY: Holiday Credit - automated",
           List(
             RatePlanCharge(
               "Holiday Credit",
@@ -92,7 +95,9 @@ class SundayVoucherHolidayStopProcessTest extends FlatSpec with Matchers {
           "2c92c0f96b03800b016b081fc04f1ba2",
           "2c92c0fb6d627309016d628f3f6231cc"
         ),
-        RatePlan("Newspaper Voucher",
+        RatePlan(
+          "Newspaper Voucher",
+          "Sunday",
           List(
             RatePlanCharge(
               "Sunday",

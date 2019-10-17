@@ -2,7 +2,7 @@ package com.gu.holidaystopprocessor
 
 import java.time.LocalDate
 
-import com.gu.holiday_stops.Fixtures.mkSubscription
+import com.gu.holiday_stops.Fixtures.mkGuardianWeeklySubscription
 import com.gu.holiday_stops._
 import com.gu.holiday_stops.subscription.{HolidayCreditUpdate, MutableCalendar, Subscription}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
@@ -12,7 +12,7 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
   MutableCalendar.setFakeToday(Some(LocalDate.parse("2019-07-12")))
   val chargedThroughDate = LocalDate.of(2019, 8, 11)
 
-  private val subscription = mkSubscription(
+  private val subscription = mkGuardianWeeklySubscription(
     termStartDate = LocalDate.of(2018, 1, 1),
     termEndDate = LocalDate.of(2019, 1, 1),
     price = 75.5,
