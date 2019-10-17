@@ -115,8 +115,8 @@ export of all objects
     ...
 1. Resulting InvoiceItem.csv should be >6GB and have >12M records
 1. Perform some sanity checks, for example, `wc -l`
-1. Manually upload resulting CSV to bucket `https://s3.console.aws.amazon.com/s3/buckets/ophan-clean-zuora-increment-invoiceitem` 
-1. Run ophnan job
+1. Manually upload resulting CSV to bucket `https://s3.console.aws.amazon.com/s3/buckets/ophan-raw-zuora-increment-invoiceitem` 
+1. Run ophan job
 1. Adjust to filter from yesterday, so if yesterday is 2020-12-20, then 
    
     ```
