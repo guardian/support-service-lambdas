@@ -19,9 +19,9 @@ class SundayVoucherHolidayStopProcessTest extends FlatSpec with Matchers {
       Some(HolidayStopRequestsDetailChargePrice(-2.7)), // Estimated_Price__c: Option[HolidayStopRequestsDetailChargePrice],
       Some(HolidayStopRequestsDetailChargeCode("C-00057516")), // Charge_Code__c: Option[HolidayStopRequestsDetailChargeCode],
       None, // Actual_Price__c: Option[HolidayStopRequestsDetailChargePrice]
+      None // Expected_Invoice_Date__c: Option[HolidayStopRequestsDetailExpectedInvoiceDate]
     )
   )
-
 
   val holidayStops = List(
     HolidayStop(
@@ -58,10 +58,11 @@ class SundayVoucherHolidayStopProcessTest extends FlatSpec with Matchers {
           None,
           None,
           Some(LocalDate.parse("2019-10-20")),
-          "2c92c0f95aff3b56015b1045fba832d4")),
+          "2c92c0f95aff3b56015b1045fba832d4"
+        )),
         "2c92c0f95aff3b56015b1045fb9332d2",
-        "2c92c0f86d6263c0016d6271c6750a35")
-      ),
+        "2c92c0f86d6263c0016d6271c6750a35"
+      )),
       "Active"
     )
 
@@ -174,8 +175,6 @@ class SundayVoucherHolidayStopProcessTest extends FlatSpec with Matchers {
     notAlreadyActionedHolidays,
     OverallFailure(failedZuoraResponses, salesforceExportResult)
   )
-
-
 
   "SundayVoucherHolidayStopProcess" should "pass in correct HolidayCreditUpdate request to zuora updateSubscription call" in {
     val exptedStoppedPublicationDate = LocalDate.parse("2019-10-20")

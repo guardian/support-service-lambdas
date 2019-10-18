@@ -231,7 +231,8 @@ object Fixtures extends Assertions {
     Stopped_Publication_Date__c = StoppedPublicationDate(request.Start_Date__c.value),
     Estimated_Price__c = None,
     Charge_Code__c = Some(HolidayStopRequestsDetailChargeCode(chargeCode)),
-    Actual_Price__c = None
+    Actual_Price__c = None,
+    Expected_Invoice_Date__c = None
   )
 
   def mkHolidayStopRequestDetails(
@@ -240,8 +241,9 @@ object Fixtures extends Assertions {
     productName: String = "Product 1",
     stopDate: LocalDate = LocalDate.of(2019, 1, 1),
     chargeCode: String = "Charge code 1",
-    estimatedPrice:  Option[Double] = None,
-    actualPrice:  Option[Double] = None,
+    estimatedPrice: Option[Double] = None,
+    actualPrice: Option[Double] = None,
+    expectedInvoiceDate: Option[LocalDate] = None
   ) = {
     HolidayStopRequestsDetail(
       Id = HolidayStopRequestsDetailId(id),
@@ -250,7 +252,8 @@ object Fixtures extends Assertions {
       Stopped_Publication_Date__c = StoppedPublicationDate(stopDate),
       Estimated_Price__c = estimatedPrice.map(HolidayStopRequestsDetailChargePrice.apply),
       Charge_Code__c = Some(HolidayStopRequestsDetailChargeCode(chargeCode)),
-      Actual_Price__c = actualPrice.map(HolidayStopRequestsDetailChargePrice.apply)
+      Actual_Price__c = actualPrice.map(HolidayStopRequestsDetailChargePrice.apply),
+      Expected_Invoice_Date__c = expectedInvoiceDate.map(HolidayStopRequestsDetailExpectedInvoiceDate.apply)
     )
   }
 

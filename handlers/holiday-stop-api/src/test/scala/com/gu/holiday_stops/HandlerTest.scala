@@ -233,6 +233,7 @@ class HandlerTest extends FlatSpec with Matchers {
       holidayStop.Stopped_Publication_Date__c.value,
       holidayStop.Estimated_Price__c.map(_.value),
       holidayStop.Actual_Price__c.map(_.value),
+      holidayStop.Expected_Invoice_Date__c.map(_.value)
     )
   }
 
