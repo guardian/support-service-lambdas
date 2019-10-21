@@ -18,7 +18,8 @@ object WireHolidayStopRequest {
     publicationsImpacted = sfHolidayStopRequest.Holiday_Stop_Request_Detail__r.map(_.records.map(detail => HolidayStopRequestsDetail(
       publicationDate = detail.Stopped_Publication_Date__c.value,
       estimatedPrice = detail.Estimated_Price__c.map(_.value),
-      actualPrice = detail.Actual_Price__c.map(_.value)
+      actualPrice = detail.Actual_Price__c.map(_.value),
+      invoiceDate = detail.Expected_Invoice_Date__c.map(_.value)
     ))).getOrElse(List())
   )
 
@@ -47,7 +48,8 @@ object MutabilityFlags {
 case class HolidayStopRequestsDetail(
   publicationDate: LocalDate,
   estimatedPrice: Option[Double],
-  actualPrice: Option[Double]
+  actualPrice: Option[Double],
+  invoiceDate: Option[LocalDate]
 )
 
 object HolidayStopRequestsDetail {

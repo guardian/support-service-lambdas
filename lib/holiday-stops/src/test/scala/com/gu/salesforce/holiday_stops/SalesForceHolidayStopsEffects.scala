@@ -20,7 +20,7 @@ object SalesForceHolidayStopsEffects {
       "   \n" +
       " SELECT Id, Subscription_Name__c, " +
       "Product_Name__c, Stopped_Publication_Date__c,\n" +
-      " Estimated_Price__c, Charge_Code__c, Actual_Price__c\n" +
+      " Estimated_Price__c, Charge_Code__c, Actual_Price__c, Expected_Invoice_Date__c\n" +
       "\n   " +
       "FROM Holiday_Stop_Request_Detail__r\n   " +
       "ORDER BY Stopped_Publication_Date__c ASC\n" +

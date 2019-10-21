@@ -39,6 +39,9 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
   case class HolidayStopRequestsDetailChargePrice(value: Double) extends AnyVal
   implicit val formatHolidayStopRequestsDetailChargePrice = Jsonx.formatInline[HolidayStopRequestsDetailChargePrice]
 
+  case class HolidayStopRequestsDetailExpectedInvoiceDate(value: LocalDate) extends AnyVal
+  implicit val formatHolidayStopRequestsDetailExpectedInvoiceDate = Jsonx.formatInline[HolidayStopRequestsDetailExpectedInvoiceDate]
+
   case class StoppedPublicationDate(value: LocalDate) extends AnyVal {
     def getDayOfWeek: String = value.getDayOfWeek.toString.toLowerCase.capitalize
   }
@@ -66,7 +69,8 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
     Stopped_Publication_Date__c: StoppedPublicationDate,
     Estimated_Price__c: Option[HolidayStopRequestsDetailChargePrice],
     Charge_Code__c: Option[HolidayStopRequestsDetailChargeCode],
-    Actual_Price__c: Option[HolidayStopRequestsDetailChargePrice]
+    Actual_Price__c: Option[HolidayStopRequestsDetailChargePrice],
+    Expected_Invoice_Date__c: Option[HolidayStopRequestsDetailExpectedInvoiceDate]
   )
   implicit val formatHolidayStopRequestsDetail = Json.format[HolidayStopRequestsDetail]
 
@@ -74,7 +78,7 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
 
   val SOQL_SELECT_CLAUSE = """
       | SELECT Id, Subscription_Name__c, Product_Name__c, Stopped_Publication_Date__c,
-      | Estimated_Price__c, Charge_Code__c, Actual_Price__c
+      | Estimated_Price__c, Charge_Code__c, Actual_Price__c, Expected_Invoice_Date__c
       |""".stripMargin
 
   val SOQL_ORDER_BY_CLAUSE = "ORDER BY Stopped_Publication_Date__c ASC"
