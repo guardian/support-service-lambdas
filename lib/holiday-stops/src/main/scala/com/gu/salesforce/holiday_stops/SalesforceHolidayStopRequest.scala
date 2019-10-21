@@ -5,7 +5,7 @@ import java.time.format.DateTimeFormatter
 import java.util.UUID
 
 import ai.x.play.json.Jsonx
-import com.gu.holiday_stops.{CreditCalculation, ZuoraHolidayError}
+import com.gu.holiday_stops.ZuoraHolidayError
 import com.gu.holiday_stops.subscription.{HolidayStopCredit, StoppedProduct, Subscription}
 import com.gu.salesforce.RecordsWrapperCaseClass
 import com.gu.salesforce.SalesforceConstants._
@@ -173,8 +173,6 @@ object SalesforceHolidayStopRequest extends Logging {
         .runRequest
 
     def buildBody(
-      creditCalculator: CreditCalculation
-    )(
       start: LocalDate,
       end: LocalDate,
       publicationDatesToBeStopped: List[LocalDate],
