@@ -212,7 +212,8 @@ class HandlerTest extends FlatSpec with Matchers {
                     holidayStopRequest.End_Date__c.value,
                     holidayStopRequest.Subscription_Name__c,
                     List(toHolidayStopRequestDetail(holidayStopRequestsDetail)),
-                    withdrawnTime = None
+                    withdrawnTime = None,
+                    MutabilityFlags(isFullyMutable = false, isEndDateEditable = false)
                   )
                 ),
                 List(
