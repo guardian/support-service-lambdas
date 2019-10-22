@@ -115,7 +115,7 @@ object Postconditions extends (JobResults => Either[Throwable, String]) with Laz
            |  Name: ${batch.name}
            |  Change size: ${batch.recordCount}
            |  Changes since: ${jobResult.incrementalTime}
-           |  Target S3 bucket: ${Query.withName(batc0h.name).targetBucket}
+           |  Target S3 bucket: ${Query.withName(batch.name).targetBucket}
            |  Job ID: ${jobResult.id}
            |  File ID: ${batch.fileId}
            |
@@ -210,7 +210,7 @@ object Query extends Enum[Query] {
   //  FIXME: Zuora is not capable of doing a full export of InvoiceItem hence the WHERE clause: https://support.zuora.com/hc/en-us/requests/186104
   case object InvoiceItem extends Query(
     "InvoiceItem",
-    "SELECT accountingCode, appliedToInvoiceItemId, chargeAmount, chargeDate, chargeName, createdById, createdDate, invoice.Id, processingType, product.Description, product.Id, product.Name, productRatePlanCharge.Id, quantity, ratePlanCharge.Id, revRecStartDate, serviceEndDate, serviceStartDate, sku, subscriptionId, taxAmount, taxCode, taxExemptAmount, taxMode, unitPrice, uom, updatedById, updatedDate, id, account.Id, balance, accountingPeriod.Id, amendment.Id, billToContact.Id, billToContactSnapShot.Id, defaultPaymentMethod.Id, deferredRevenueAccountingCode.Id, quantity, revRecStartDate, serviceEndDate, serviceStartDate, sku, invoice.Id, journalEntry.Id, journalRun.Id, parentAccount.Id, product.Id, productRatePlan.Id, ratePlan.Id, soldToContact.Id, subscription.Id FROM InvoiceItem  WHERE (CreatedDate >= '2019-10-22T00:00:00') AND (CreatedDate <= '2099-01-01T00:00:00')",
+    "SELECT accountingCode, appliedToInvoiceItemId, chargeAmount, chargeDate, chargeName, createdById, createdDate, invoice.Id, processingType, product.Description, product.Id, product.Name, productRatePlanCharge.Id, quantity, ratePlanCharge.Id, revRecStartDate, serviceEndDate, serviceStartDate, sku, subscriptionId, taxAmount, taxCode, taxExemptAmount, taxMode, unitPrice, uom, updatedById, updatedDate, id, account.Id, balance, accountingPeriod.Id, amendment.Id, billToContact.Id, billToContactSnapShot.Id, defaultPaymentMethod.Id, deferredRevenueAccountingCode.Id, journalEntry.Id, journalRun.Id, parentAccount.Id, productRatePlan.Id, ratePlan.Id, soldToContact.Id FROM InvoiceItem WHERE (CreatedDate >= '2019-10-21T00:00:00') AND (CreatedDate <= '2019-10-22T00:00:00')",
     "ophan-raw-zuora-increment-invoiceitem",
     "InvoiceItem.csv"
   )
@@ -232,8 +232,7 @@ case class ZuoraAquaStatefulApi(
 )
 object ZuoraAquaStatefulApi {
   def apply(): ZuoraAquaStatefulApi = System.getenv("Stage") match {
-    case "CODE" => ZuoraAquaStatefulApi(partner = "guardian-12357") // https://support.zuora.com/hc/en-us/requests/175239
-    case "PROD" => ZuoraAquaStatefulApi(partner = "GuardianNews4398") // https://support.zuora.com/hc/en-us/requests/177970
+    case "CODE" => ZuoraAquaStatefulApi(partner = "guardian-12357") // https://support.zuora.com/hc/en-us/requests/175239case "PROD" => ZuoraAquaStatefulApi(partner = "GuardianNews4398") // https://support.zuora.com/hc/en-us/requests/177970
   }
 }
 
