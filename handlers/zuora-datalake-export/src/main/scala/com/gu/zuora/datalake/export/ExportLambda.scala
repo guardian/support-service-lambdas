@@ -217,7 +217,7 @@ object Query extends Enum[Query] {
 
   case object RevenueEventItemInvoiceItem extends Query(
     "RevenueEventItemInvoiceItem",
-    """SELECT Amount, CreatedById, CreatedDate, Currency, Id, UpdatedById, UpdatedDate, Account.Id, AccountingPeriod.Id, Amendment.Id, BillToContact.Id, DefaultPaymentMethod.Id, Invoice.Id, InvoiceItem.Id, JournalEntry.Id, JournalRun.Id, ParentAccount.Id, Product.Id, ProductRatePlan.Id, ProductRatePlanCharge.Id, RatePlan.Id, RatePlanCharge.Id, RevenueChargeSummary.Id, RevenueEventInvoiceItem.Id, RevenueEventType.Id, RevenueScheduleInvoiceItem.Id, SoldToContact.Id, Subscription.Id FROM RevenueEventItemInvoiceItem""",
+    """SELECT Amount, CreatedById, CreatedDate, Currency, Id, UpdatedById, UpdatedDate, Account.Id, AccountingPeriod.Id, Amendment.Id, BillToContact.Id, DefaultPaymentMethod.Id, Invoice.Id, InvoiceItem.Id, JournalEntry.Id, JournalRun.Id, ParentAccount.Id, Product.Id, ProductRatePlan.Id, ProductRatePlanCharge.Id, RatePlan.Id, RatePlanCharge.Id, RevenueChargeSummary.Id, RevenueEventInvoiceItem.Id, RevenueEventType.Id, RevenueScheduleInvoiceItem.Id, SoldToContact.Id, Subscription.Id FROM RevenueEventItemInvoiceItem WHERE (CreatedDate >= '2019-10-22T00:00:00') AND (CreatedDate <= '2099-01-01T00:00:00')""",
     "ophan-raw-zuora-increment-revenueeventiteminvoiceitem",
     "RevenueEventItemInvoiceItem.csv"
   )
