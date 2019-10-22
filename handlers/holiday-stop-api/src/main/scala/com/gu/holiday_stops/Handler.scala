@@ -60,20 +60,18 @@ object Handler extends Logging {
     } yield Operation.noHealthcheck(request => // checking connectivity to SF is sufficient healthcheck so no special steps required
       validateRequestAndCreateSteps(
         request,
-        credit(config),
         getSubscriptionFromZuora(config, backend)
       )(request, sfClient))
   }
 
   private def validateRequestAndCreateSteps(
     request: ApiGatewayRequest,
-    creditCalculator: CreditCalculation,
     getSubscription: SubscriptionName => Either[HolidayError, Subscription]
   ) = {
     (for {
       httpMethod <- validateMethod(request.httpMethod)
       path <- validatePath(request.path)
-    } yield createSteps(httpMethod, splitPath(path), creditCalculator, getSubscription)).fold(
+    } yield createSteps(httpMethod, splitPath(path), getSubscription)).fold(
       { errorMessage: String =>
         badrequest(errorMessage) _
       },
@@ -98,18 +96,17 @@ object Handler extends Logging {
   private def createSteps(
     httpMethod: String,
     path: List[String],
-    creditCalculator: CreditCalculation,
     getSubscription: SubscriptionName => Either[HolidayError, Subscription]
   ) = {
     path match {
       case "potential" :: _ :: Nil =>
         httpMethod match {
-          case "GET" => stepsForPotentialHolidayStop(creditCalculator, getSubscription) _
+          case "GET" => stepsForPotentialHolidayStop(getSubscription) _
           case _ => unsupported _
         }
       case "hsr" :: Nil =>
         httpMethod match {
-          case "POST" => stepsToCreate(creditCalculator, getSubscription) _
+          case "POST" => stepsToCreate(getSubscription) _
           case _ => unsupported _
         }
       case "hsr" :: _ :: Nil =>
@@ -151,7 +148,6 @@ object Handler extends Logging {
   )
 
   def stepsForPotentialHolidayStop(
-    creditCalculator: CreditCalculation,
     getSubscription: SubscriptionName => Either[HolidayError, Subscription]
   )(req: ApiGatewayRequest, unused: SfClient): ApiResponse = {
     implicit val reads: Reads[PotentialHolidayStopsQueryParams] = Json.reads[PotentialHolidayStopsQueryParams]
@@ -197,7 +193,6 @@ object Handler extends Logging {
   }
 
   def stepsToCreate(
-    creditCalculator: CreditCalculation,
     getSubscription: SubscriptionName => Either[HolidayError, Subscription]
   )(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
 
@@ -213,7 +208,7 @@ object Handler extends Logging {
       publicationDatesToBeStopped <- ActionCalculator
         .publicationDatesToBeStopped(requestBody.start, requestBody.end, ProductVariant(zuoraSubscription.ratePlans))
         .toApiGatewayOp(s"calculating publication dates")
-      createBody = CreateHolidayStopRequestWithDetail.buildBody(creditCalculator)(requestBody.start, requestBody.end, publicationDatesToBeStopped, matchingSfSub, zuoraSubscription)
+      createBody = CreateHolidayStopRequestWithDetail.buildBody(requestBody.start, requestBody.end, publicationDatesToBeStopped, matchingSfSub, zuoraSubscription)
       _ <- createOp(createBody).toDisjunction.toApiGatewayOp(s"create new Holiday Stop Request for subscription ${requestBody.subscriptionName} (contact $contact)")
       // TODO nice to have - handle 'FIELD_CUSTOM_VALIDATION_EXCEPTION' etc back from SF and place in response
     } yield ApiGatewayResponse.successfulExecution).apiResponse
@@ -254,9 +249,4 @@ object Handler extends Logging {
 
   def badrequest(message: String)(req: ApiGatewayRequest, sfClient: HttpOp[StringHttpRequest, BodyAsString]): ApiResponse =
     ApiGatewayResponse.badRequest(message)
-
-  def credit(config: Config)(stoppedPublicationDate: LocalDate, subscription: Subscription): Either[ZuoraHolidayError, Double] =
-    StoppedProduct(subscription, StoppedPublicationDate(stoppedPublicationDate))
-      .map(_.credit.amount)
-      .leftMap(e => ZuoraHolidayError(s"Failed to calculate holiday stop credits because $e"))
 }
