@@ -50,9 +50,16 @@ object SalesforceHolidayStopRequest extends Logging {
   case class HolidayStopRequestActionedCount(value: Int) extends AnyVal
   implicit val formatHolidayStopRequestActionedCount = Jsonx.formatInline[HolidayStopRequestActionedCount]
 
+  case class HolidayStopRequestWithdrawnTime(value: ZonedDateTime) extends AnyVal
+  implicit val formatHolidayStopRequestWithdrawnTime = Jsonx.formatInline[HolidayStopRequestWithdrawnTime]
+
+  case class HolidayStopRequestIsWithdrawn(value: Boolean) extends AnyVal
+  implicit val formatHolidayStopRequestIsWithdrawn = Jsonx.formatInline[HolidayStopRequestIsWithdrawn]
+
   def getHolidayStopRequestPrefixSOQL(productNamePrefixOption: Option[ProductName] = None) = s"""
       | SELECT Id, Start_Date__c, End_Date__c, Subscription_Name__c, Product_Name__c,
-      | Actioned_Count__c, Pending_Count__c, Total_Issues_Publications_Impacted_Count__c, (
+      | Actioned_Count__c, Pending_Count__c, Total_Issues_Publications_Impacted_Count__c,
+      | Withdrawn_Time__c, Is_Withdrawn__c, (
       |   ${SalesforceHolidayStopRequestsDetail.SOQL_SELECT_CLAUSE}
       |   FROM Holiday_Stop_Request_Detail__r
       |   ${SalesforceHolidayStopRequestsDetail.SOQL_ORDER_BY_CLAUSE}
@@ -70,7 +77,9 @@ object SalesforceHolidayStopRequest extends Logging {
     Total_Issues_Publications_Impacted_Count__c: Int,
     Subscription_Name__c: SubscriptionName,
     Product_Name__c: ProductName,
-    Holiday_Stop_Request_Detail__r: Option[RecordsWrapperCaseClass[HolidayStopRequestsDetail]]
+    Holiday_Stop_Request_Detail__r: Option[RecordsWrapperCaseClass[HolidayStopRequestsDetail]],
+    Withdrawn_Time__c: Option[HolidayStopRequestWithdrawnTime],
+    Is_Withdrawn__c: HolidayStopRequestIsWithdrawn
   )
   implicit val format = Json.format[HolidayStopRequest]
 

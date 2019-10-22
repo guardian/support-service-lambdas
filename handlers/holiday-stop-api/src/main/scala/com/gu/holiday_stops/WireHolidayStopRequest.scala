@@ -1,6 +1,6 @@
 package com.gu.holiday_stops
 
-import java.time.LocalDate
+import java.time.{LocalDate, LocalDateTime}
 
 import cats.implicits._
 import com.gu.holiday_stops.subscription.Subscription
@@ -20,7 +20,8 @@ object WireHolidayStopRequest {
       estimatedPrice = detail.Estimated_Price__c.map(_.value),
       actualPrice = detail.Actual_Price__c.map(_.value),
       invoiceDate = detail.Expected_Invoice_Date__c.map(_.value)
-    ))).getOrElse(List())
+    ))).getOrElse(List()),
+    withdrawnTime = sfHolidayStopRequest.Withdrawn_Time__c.map(_.value)
   )
 
   def calculateMutabilityFlags(firstAvailableDate: LocalDate, actionedCount: Int, endDate: LocalDate): MutabilityFlags = {
@@ -71,7 +72,8 @@ case class HolidayStopRequestFull(
   start: LocalDate,
   end: LocalDate,
   subscriptionName: SubscriptionName,
-  publicationsImpacted: List[HolidayStopRequestsDetail]
+  publicationsImpacted: List[HolidayStopRequestsDetail],
+  withdrawnTime: Option[LocalDateTime]
 )
 
 object HolidayStopRequestFull {
