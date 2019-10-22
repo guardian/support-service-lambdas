@@ -1,6 +1,6 @@
 package com.gu.salesforce.holiday_stops
 
-import java.time.LocalDate
+import java.time.{LocalDate, ZonedDateTime}
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 
@@ -21,6 +21,7 @@ import play.api.libs.json._
 object SalesforceHolidayStopRequest extends Logging {
 
   val SALESFORCE_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+  val SALESFORCE_DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXXX")
 
   val holidayStopRequestSfObjectRef = "Holiday_Stop_Request__c"
   private val holidayStopRequestSfObjectsBaseUrl = sfObjectsBaseUrl + holidayStopRequestSfObjectRef
@@ -31,6 +32,13 @@ object SalesforceHolidayStopRequest extends Logging {
       jsValue.validate[String].map(sfDate => LocalDate.parse(sfDate, SALESFORCE_DATE_FORMATTER))
 
     override def writes(date: LocalDate): JsValue = JsString(date.format(SALESFORCE_DATE_FORMATTER))
+  }
+
+  implicit val formatZonedDateTimeAsSalesforceDateTime: Format[ZonedDateTime] = new Format[ZonedDateTime] {
+    override def reads(jsValue: JsValue): JsResult[ZonedDateTime] =
+      jsValue.validate[String].map(sfDate => ZonedDateTime.parse(sfDate, SALESFORCE_DATE_TIME_FORMATTER))
+
+    override def writes(dateTime: ZonedDateTime): JsValue = JsString(dateTime.format(SALESFORCE_DATE_TIME_FORMATTER))
   }
 
   case class HolidayStopRequestStartDate(value: LocalDate) extends AnyVal
@@ -201,11 +209,14 @@ object SalesforceHolidayStopRequest extends Logging {
     }
   }
 
-  object DeleteHolidayStopRequest {
+  object WithdrawHolidayStopRequest {
 
-    def apply(sfDelete: HttpOp[RestRequestMaker.DeleteRequest, String]): HolidayStopRequestId => ClientFailableOp[String] =
-      sfDelete.setupRequest[HolidayStopRequestId] { holidayStopRequestId =>
-        DeleteRequest(RelativePath(s"$holidayStopRequestSfObjectsBaseUrl/${holidayStopRequestId.value}"))
+    case class WithdrawnTimePatch(Withdrawn_Time__c: ZonedDateTime = ZonedDateTime.now())
+    implicit val writes = Json.writes[WithdrawnTimePatch]
+
+    def apply(sfPatch: HttpOp[RestRequestMaker.PatchRequest, Unit]): HolidayStopRequestId => ClientFailableOp[Unit] =
+      sfPatch.setupRequest[HolidayStopRequestId] { holidayStopRequestId =>
+        PatchRequest(WithdrawnTimePatch(), RelativePath(s"$holidayStopRequestSfObjectsBaseUrl/${holidayStopRequestId.value}"))
       }.runRequest
 
   }
