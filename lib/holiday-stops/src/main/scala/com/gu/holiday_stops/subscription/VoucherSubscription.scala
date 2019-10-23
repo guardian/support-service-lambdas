@@ -1,21 +1,20 @@
 package com.gu.holiday_stops.subscription
 
-import java.time.LocalDate
+import java.time.{DayOfWeek, LocalDate}
 
+import com.gu.holiday_stops.subscription.StoppedProduct._
 import com.gu.holiday_stops.{ZuoraHolidayError, ZuoraHolidayResponse}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.StoppedPublicationDate
 import enumeratum._
-import acyclic.skipped
-import StoppedProduct._
 
 case class VoucherSubscription(
   override val subscriptionNumber: String,
   override val billingPeriod: String,
   override val price: Double,
-  override val invoicedPeriod: CurrentInvoicedPeriod,
+  override val billingSchedule: BillingSchedule,
   override val stoppedPublicationDate: LocalDate,
   dayOfWeek: VoucherDayOfWeek,
-) extends StoppedProduct(subscriptionNumber, stoppedPublicationDate, price, billingPeriod, invoicedPeriod)
+) extends StoppedProduct(subscriptionNumber, stoppedPublicationDate, price, billingPeriod, billingSchedule)
 
 sealed trait VoucherDayOfWeek extends EnumEntry
 
@@ -45,8 +44,7 @@ object VoucherSubscription {
   private def findVoucherRatePlan(
     subscription: Subscription,
     stoppedPublicationDate: StoppedPublicationDate
-  ): Option[RatePlan] = {
-
+  ): Either[ZuoraHolidayError, RatePlan] = {
     subscription
       .ratePlans
       .find { ratePlan =>
@@ -57,26 +55,38 @@ object VoucherSubscription {
           allBillingPeriodsAreTheSame(ratePlan)
         ).forall(_ == true)
       }
+      .toRight(
+        ZuoraHolidayError(
+          s"Could not find voucher subscription for ${subscription.subscriptionNumber} on $stoppedPublicationDate"
+        )
+      )
+  }
+
+  def findRatePlanChargeForDayOfWeek(dayOfWeek: DayOfWeek, ratePlanCharges: List[RatePlanCharge]) = {
+    ratePlanCharges
+      .find(_.name == dayOfWeek.toString.toLowerCase.capitalize)
+      .toRight(
+        ZuoraHolidayError(
+          s"Could not find rate plan charge for $dayOfWeek"
+        )
+      )
   }
 
   def apply(subscription: Subscription, stoppedPublicationDate: StoppedPublicationDate): ZuoraHolidayResponse[VoucherSubscription] = {
-    findVoucherRatePlan(subscription, stoppedPublicationDate).flatMap { voucherRatePlan =>
-      for {
-        rpc <- voucherRatePlan.ratePlanCharges.find(_.name == stoppedPublicationDate.getDayOfWeek) // find particular RPC, Saturday, Sunday, etc.
-        billingPeriod <- rpc.billingPeriod
-        startDateIncluding <- rpc.processedThroughDate
-        endDateExcluding <- rpc.chargedThroughDate
-      } yield new VoucherSubscription(
-        subscriptionNumber = subscription.subscriptionNumber,
-        billingPeriod = billingPeriod,
-        price = rpc.price,
-        invoicedPeriod = CurrentInvoicedPeriod(
-          startDateIncluding = startDateIncluding,
-          endDateExcluding = endDateExcluding
-        ),
-        stoppedPublicationDate.value,
-        dayOfWeek = VoucherDayOfWeek.withName(stoppedPublicationDate.getDayOfWeek),
+    for {
+      voucherRatePlan <- findVoucherRatePlan(subscription, stoppedPublicationDate)
+      ratePlanChargeForDay <- findRatePlanChargeForDayOfWeek(
+        stoppedPublicationDate.value.getDayOfWeek,
+        voucherRatePlan.ratePlanCharges
       )
-    }.toRight(ZuoraHolidayError(s"Failed to determine Voucher Newspaper Guardian rate plan: $subscription"))
+      ratePlanChargeInfo <- RatePlanChargeInfo(ratePlanChargeForDay)
+    } yield new VoucherSubscription(
+      subscriptionNumber = subscription.subscriptionNumber,
+      billingPeriod = ratePlanChargeInfo.billingSchedule.billingPeriodZuoraId,
+      price = ratePlanChargeInfo.ratePlan.price,
+      billingSchedule = ratePlanChargeInfo.billingSchedule,
+      stoppedPublicationDate.value,
+      dayOfWeek = VoucherDayOfWeek.withName(stoppedPublicationDate.getDayOfWeek),
+    )
   }
 }

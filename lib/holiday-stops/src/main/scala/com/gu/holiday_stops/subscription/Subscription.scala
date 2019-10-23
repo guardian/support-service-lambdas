@@ -3,7 +3,6 @@ package com.gu.holiday_stops.subscription
 import java.time.LocalDate
 
 import com.gu.holiday_stops.HolidayStop
-import acyclic.skipped
 
 case class Subscription(
   subscriptionNumber: String,
@@ -67,4 +66,8 @@ case class RatePlanCharge(
   HolidayEnd__c: Option[LocalDate],
   processedThroughDate: Option[LocalDate],
   productRatePlanChargeId: String,
+  specificBillingPeriod: Option[Int],
+  endDateCondition: Option[String],
+  upToPeriodsType: Option[String],
+  upToPeriods: Option[Int]
 )

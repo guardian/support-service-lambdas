@@ -13,18 +13,21 @@ object GuardianWeeklyHolidayCreditSpec extends Properties("HolidayCreditAmount")
   private val ratePlanChargeGen = for {
     price <- Gen.choose(0.01, 10000)
     billingPeriod <- Gen.oneOf(List("Quarter", "Annual"))
-
   } yield RatePlanCharge(
     name = "GW",
     number = "C5",
     price,
     Some(billingPeriod),
     effectiveStartDate = LocalDate.of(2019, 7, 10),
-    chargedThroughDate = Some(chargedThroughDate),
+    chargedThroughDate = None,
     HolidayStart__c = None,
     HolidayEnd__c = None,
-    processedThroughDate = Some(chargedThroughDate.minusMonths(Fixtures.billingPeriodToMonths(billingPeriod))),
-    productRatePlanChargeId = ""
+    processedThroughDate = None,
+    productRatePlanChargeId = "",
+    specificBillingPeriod = None,
+    endDateCondition = Some("Subscription_End"),
+    upToPeriodsType = None,
+    upToPeriods = None
   )
 
   val subscription = Fixtures.mkGuardianWeeklySubscription()

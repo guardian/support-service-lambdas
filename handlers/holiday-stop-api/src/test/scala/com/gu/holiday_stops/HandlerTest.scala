@@ -6,7 +6,7 @@ import com.gu.effects.{FakeFetchString, SFTestEffects, TestingRawEffects}
 import com.gu.holiday_stops.ActionCalculator._
 import com.gu.holiday_stops.Handler._
 import com.gu.holiday_stops.ZuoraSttpEffects.ZuoraSttpEffectsOps
-import com.gu.holiday_stops.subscription.{HolidayStopCredit, MutableCalendar, RatePlan, RatePlanCharge, Subscription}
+import com.gu.holiday_stops.subscription._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.SubscriptionName
 import com.gu.salesforce.holiday_stops.SalesforceSFSubscription.SubscriptionForSubscriptionNameAndContact._
 import com.gu.salesforce.holiday_stops.{SalesForceHolidayStopsEffects, SalesforceHolidayStopRequestsDetail}
@@ -67,7 +67,11 @@ class HandlerTest extends FlatSpec with Matchers {
               HolidayStart__c = None,
               HolidayEnd__c = None,
               processedThroughDate = Some(endDate.minusMonths(3)),
-              ""
+              "",
+              specificBillingPeriod = None,
+              endDateCondition = Some("Subscription_End"),
+              upToPeriodsType = None,
+              upToPeriods = None
             )),
           productRatePlanId = "",
           id = ""
