@@ -5,8 +5,8 @@ import java.time.format.DateTimeFormatter
 import java.util.UUID
 
 import ai.x.play.json.Jsonx
-import com.gu.holiday_stops.CreditCalculation
-import com.gu.holiday_stops.subscription.Subscription
+import com.gu.holiday_stops.ZuoraHolidayError
+import com.gu.holiday_stops.subscription.{HolidayStopCredit, StoppedProduct, Subscription}
 import com.gu.salesforce.RecordsWrapperCaseClass
 import com.gu.salesforce.SalesforceConstants._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
@@ -135,6 +135,7 @@ object SalesforceHolidayStopRequest extends Logging {
   case class CompositeTreeHolidayStopRequestsDetail(
     Stopped_Publication_Date__c: LocalDate,
     Estimated_Price__c: Option[HolidayStopRequestsDetailChargePrice],
+    Expected_Invoice_Date__c: Option[HolidayStopRequestsDetailExpectedInvoiceDate],
     attributes: CompositeAttributes = CompositeAttributes(
       SalesforceHolidayStopRequestsDetail.holidayStopRequestsDetailSfObjectRef,
       UUID.randomUUID().toString
@@ -172,8 +173,6 @@ object SalesforceHolidayStopRequest extends Logging {
         .runRequest
 
     def buildBody(
-      creditCalculator: CreditCalculation
-    )(
       start: LocalDate,
       end: LocalDate,
       publicationDatesToBeStopped: List[LocalDate],
@@ -187,9 +186,13 @@ object SalesforceHolidayStopRequest extends Logging {
           SF_Subscription__c = sfSubscription.Id,
           Holiday_Stop_Request_Detail__r = RecordsWrapperCaseClass(
             publicationDatesToBeStopped.map { stoppedPublicationDate =>
+              val expectedCredit: Either[ZuoraHolidayError, HolidayStopCredit] =
+                StoppedProduct(zuoraSubscription, StoppedPublicationDate(stoppedPublicationDate)).map(_.credit)
+              // TODO log any credit calculation failure (currently swallowed in the toOption below)
               CompositeTreeHolidayStopRequestsDetail(
                 stoppedPublicationDate,
-                creditCalculator(stoppedPublicationDate, zuoraSubscription).toOption.map(HolidayStopRequestsDetailChargePrice)
+                Estimated_Price__c = expectedCredit.toOption.map(_.amount).map(HolidayStopRequestsDetailChargePrice),
+                Expected_Invoice_Date__c = expectedCredit.toOption.map(_.invoiceDate).map(HolidayStopRequestsDetailExpectedInvoiceDate)
               )
             }
           )
