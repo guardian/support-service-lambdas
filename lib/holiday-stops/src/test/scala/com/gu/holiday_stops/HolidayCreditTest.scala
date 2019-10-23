@@ -4,7 +4,7 @@ import java.time.LocalDate
 
 import com.gu.holiday_stops.subscription.{GuardianWeeklySubscription, HolidayStopCredit, MutableCalendar, RatePlan}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.StoppedPublicationDate
-import org.scalatest.{EitherValues, FlatSpec, Inside, Matchers}
+import org.scalatest.{EitherValues, FlatSpec, Matchers}
 import org.scalatest.Inside.inside
 
 class HolidayCreditTest extends FlatSpec with Matchers with EitherValues {
