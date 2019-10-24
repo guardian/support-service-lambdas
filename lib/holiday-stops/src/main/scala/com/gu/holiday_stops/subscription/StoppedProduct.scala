@@ -25,26 +25,14 @@ abstract class StoppedProduct(
   }
 
   /**
-   * Holiday credit is applied to the next invoice on the first day of the next billing period.
+   * This returns the date for the next bill after the stoppedPublicationDate.
    *
-   * 'Invoiced period' or `billing period that has already been invoiced` is defined as
-   * [processedThroughDate, chargedThroughDate) meaning
-   *   - from processedThroughDate inclusive
-   *   - to chargedThroughDate exclusive
+   * This currently calculates the current billing period and uses the following day. This is an over simplification
+   * but works for current use cases
    *
-   * Hence chargedThroughDate represents the first day of the next billing period. For quarterly
-   * billing period this would be the first day of the next quarter, whilst for annual this would be
-   * the first day of the next year of the subscription.
+   * For more details about the calculation of the current billing period see:
    *
-   * Note chargedThroughDate is an API concept. The UI and the actual invoice use the term 'Service Period'
-   * where from and to dates are both inclusive.
-   *
-   * Note nextBillingPeriodStartDate represents a specific date yyyy-mm-dd unlike billingPeriod (eg. "quarterly")
-   * or billingPeriodStartDay (eg. 1st of month).
-   *
-   * There is a complication when reader has N-for-N intro plan (for example, GW Oct 18 - Six for Six - Domestic).
-   * If the holiday falls within N-for-N then credit should be applied on the first regular invoice, not the next billing
-   * period of GW regular plan.
+   * [[com.gu.holiday_stops.subscription.BillingSchedule]]
    *
    * @return Date of the first day of the billing period
    *         following this <code>stoppedPublicationDate</code>.
@@ -52,7 +40,12 @@ abstract class StoppedProduct(
    *         shows examples of the expected outcome.
    */
   private def nextBillingPeriodStartDate: LocalDate = {
-    billingSchedule.billingPeriodForDate(stoppedPublicationDate).right.get.endDate
+    billingSchedule.billingPeriodForDate(stoppedPublicationDate).fold(
+      error =>
+        throw new RuntimeException(s"Failed to calculate next billing date: ${error.reason}"),
+      billingPeriod =>
+        billingPeriod.endDate.plusDays(1)
+    )
   }
 
   private def billingPeriodToApproxWeekCount(billingPeriod: String): Int =

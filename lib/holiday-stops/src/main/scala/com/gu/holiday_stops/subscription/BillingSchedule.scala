@@ -81,24 +81,27 @@ object BillingSchedule {
       )
     } yield new BillingSchedule {
       override def isDateCoveredBySchedule(date: LocalDate): Boolean = {
-        (date == effectiveStartDate | date.isAfter(effectiveStartDate)) &&
-          ratePlanEndDate.map(date.isBefore(_)).getOrElse(true)
+        (date == effectiveStartDate || date.isAfter(effectiveStartDate)) &&
+          ratePlanEndDate
+          .map(endDate => date == endDate || date.isBefore(endDate))
+          .getOrElse(true)
       }
 
       override def billingPeriodForDate(date: LocalDate): Either[ZuoraHolidayError, BillingPeriod] = {
         def billingPeriodByIndex(index: Int) = {
           val startDate = effectiveStartDate.plus(billingPeriod.multipliedBy(index))
-          val endDate = startDate.plus(billingPeriod)
+          val endDate = startDate.plus(billingPeriod).minusDays(1)
           BillingPeriod(startDate, endDate)
         }
 
         @tailrec
         def findNextBillingPeriodForDate(date: LocalDate, index: Int): Either[ZuoraHolidayError, BillingPeriod] = {
           val billingPeriod = billingPeriodByIndex(index)
-          if (billingPeriod.startDate.isAfter(date)) {
+          if (billingPeriod.startDate.isAfter(date) ||
+            ratePlanEndDate.map(endDate => date.isAfter(endDate)).getOrElse(false)) {
             ZuoraHolidayError(s"Billing schedule does not cover date $date").asLeft
           } else {
-            if (billingPeriod.endDate.isAfter(date)) {
+            if (billingPeriod.endDate.isAfter(date) || billingPeriod.endDate == date) {
               billingPeriodByIndex(index).asRight
             } else {
               findNextBillingPeriodForDate(date, index + 1)
@@ -158,7 +161,11 @@ object BillingSchedule {
       case Some("Billing_Periods") =>
         optionalUpToPeriods
           .toRight(ZuoraHolidayError("RatePlan.upToPeriods is required when RatePlan.upToPeriodsType=Billing_Periods"))
-          .map(upToPeriods => effectiveStartDate.plus(billingPeriod.multipliedBy(upToPeriods)))
+          .map { upToPeriods =>
+            effectiveStartDate
+              .plus(billingPeriod.multipliedBy(upToPeriods))
+              .minusDays(1)
+          }
       case unsupportedBillingPeriodType =>
         ZuoraHolidayError(s"RatePlan.upToPeriodsType=${unsupportedBillingPeriodType.getOrElse("null")} is not supported")
           .asLeft
