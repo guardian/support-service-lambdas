@@ -1,5 +1,6 @@
 package com.gu.holiday_stops.subscription
 
+import java.time.temporal.ChronoUnit
 import java.time.LocalDate
 
 import com.gu.holiday_stops.ZuoraHolidayError
@@ -154,8 +155,18 @@ class BillingScheduleSpec extends FlatSpec with Matchers with EitherValues with 
       )
     ) {
         case Right(billingSchedule) =>
-          billingSchedule.billingPeriodForDate(expectedBillingPeriod1.startDate) should equal(Right(expectedBillingPeriod1))
-          billingSchedule.billingPeriodForDate(expectedBillingPeriod2.startDate) should equal(Right(expectedBillingPeriod2))
+          datesBetweenDates(expectedBillingPeriod1.startDate, expectedBillingPeriod1.endDate).foreach( date =>
+            billingSchedule.billingPeriodForDate(date) should equal(Right(expectedBillingPeriod1))
+          )
+          datesBetweenDates(expectedBillingPeriod2.startDate, expectedBillingPeriod2.endDate).foreach( date =>
+            billingSchedule.billingPeriodForDate(date) should equal(Right(expectedBillingPeriod2))
+          )
       }
+  }
+
+  def datesBetweenDates(date1: LocalDate, date2: LocalDate) = {
+    (0L to ChronoUnit.DAYS.between(date1, date2))
+      .map(date1.plusDays(_))
+      .toList
   }
 }
