@@ -37,7 +37,7 @@ import scala.annotation.tailrec
  *
  *
  */
-trait BillingSchedule {
+trait RatePlanChargeBillingSchedule {
   def billingPeriodForDate(date: LocalDate): Either[ZuoraHolidayError, BillingPeriod]
   def isDateCoveredBySchedule(date: LocalDate): Boolean
   def billingPeriodZuoraId: String
@@ -49,9 +49,9 @@ case class BillingPeriod(startDate: LocalDate, endDate: LocalDate) {
       date.isBefore(endDate)
 }
 
-object BillingSchedule {
-  def forRatePlanCharge(ratePlanCharge: RatePlanCharge): Either[ZuoraHolidayError, BillingSchedule] =
-    BillingSchedule(
+object RatePlanChargeBillingSchedule {
+  def forRatePlanCharge(ratePlanCharge: RatePlanCharge): Either[ZuoraHolidayError, RatePlanChargeBillingSchedule] =
+    RatePlanChargeBillingSchedule(
       ratePlanCharge.billingPeriod,
       ratePlanCharge.specificBillingPeriod,
       ratePlanCharge.effectiveStartDate,
@@ -67,7 +67,7 @@ object BillingSchedule {
     optionalEndDateCondition: Option[String],
     upToPeriodsType: Option[String],
     upToPeriods: Option[Int]
-  ): Either[ZuoraHolidayError, BillingSchedule] = {
+  ): Either[ZuoraHolidayError, RatePlanChargeBillingSchedule] = {
     for {
       endDateCondition <- optionalEndDateCondition.toRight(ZuoraHolidayError("RatePlanCharge.endDateCondition is required"))
       billingPeriodId <- optionalBillingPeriodId.toRight(ZuoraHolidayError("RatePlanCharge.billingPeriod is required"))
@@ -79,7 +79,7 @@ object BillingSchedule {
         upToPeriodsType,
         upToPeriods
       )
-    } yield new BillingSchedule {
+    } yield new RatePlanChargeBillingSchedule {
       override def isDateCoveredBySchedule(date: LocalDate): Boolean = {
         (date == effectiveStartDate || date.isAfter(effectiveStartDate)) &&
           ratePlanEndDate

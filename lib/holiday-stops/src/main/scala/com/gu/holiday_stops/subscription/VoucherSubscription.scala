@@ -9,12 +9,12 @@ import acyclic.skipped
 import com.gu.holiday_stops.subscription.StoppedProduct._
 
 case class VoucherSubscription(
-  override val subscriptionNumber: String,
-  override val billingPeriod: String,
-  override val price: Double,
-  override val billingSchedule: BillingSchedule,
-  override val stoppedPublicationDate: LocalDate,
-  dayOfWeek: VoucherDayOfWeek,
+                                override val subscriptionNumber: String,
+                                override val billingPeriod: String,
+                                override val price: Double,
+                                override val billingSchedule: RatePlanChargeBillingSchedule,
+                                override val stoppedPublicationDate: LocalDate,
+                                dayOfWeek: VoucherDayOfWeek,
 ) extends StoppedProduct(subscriptionNumber, stoppedPublicationDate, price, billingPeriod, billingSchedule)
 
 sealed trait VoucherDayOfWeek extends EnumEntry

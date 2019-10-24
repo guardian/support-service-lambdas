@@ -46,7 +46,7 @@ case class GuardianWeeklySubscription(
   override val subscriptionNumber: String,
   override val billingPeriod: String,
   override val price: Double,
-  override val billingSchedule: BillingSchedule,
+  override val billingSchedule: RatePlanChargeBillingSchedule,
   override val stoppedPublicationDate: LocalDate
 ) extends StoppedProduct(subscriptionNumber, stoppedPublicationDate, price, billingPeriod, billingSchedule)
 /**

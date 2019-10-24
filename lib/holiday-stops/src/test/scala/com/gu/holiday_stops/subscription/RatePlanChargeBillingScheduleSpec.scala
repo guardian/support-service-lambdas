@@ -8,7 +8,7 @@ import org.scalactic.TypeCheckedTripleEquals
 import org.scalatest.Inside.inside
 import org.scalatest.{EitherValues, FlatSpec, Matchers}
 
-class BillingScheduleSpec extends FlatSpec with Matchers with EitherValues with TypeCheckedTripleEquals {
+class RatePlanChargeBillingScheduleSpec extends FlatSpec with Matchers with EitherValues with TypeCheckedTripleEquals {
   "BillingSchedule" should "calculate fixed period valid date range" in {
     testFixedBillingPeriod(
       zuoraBillingPeriodId = "Month",
@@ -49,7 +49,7 @@ class BillingScheduleSpec extends FlatSpec with Matchers with EitherValues with 
   it should "calculate open ended valid date range" in {
     val effectiveStartDate = LocalDate.of(2019, 10, 1)
     inside(
-      BillingSchedule(
+      RatePlanChargeBillingSchedule(
         optionalBillingPeriodId = Some("Month"),
         optionalSpecificBillingPeriod = None,
         effectiveStartDate = effectiveStartDate,
@@ -112,7 +112,7 @@ class BillingScheduleSpec extends FlatSpec with Matchers with EitherValues with 
 
   private def testFixedBillingPeriod(zuoraBillingPeriodId: String, optionalSpecificBillingPeriod: Option[Int], billingPeriodsRatePlanIsValidFor: Int, effectiveStartDate: LocalDate, expectedEndDate: LocalDate) = {
     inside(
-      BillingSchedule(
+      RatePlanChargeBillingSchedule(
         Some(zuoraBillingPeriodId),
         optionalSpecificBillingPeriod,
         effectiveStartDate,
@@ -145,7 +145,7 @@ class BillingScheduleSpec extends FlatSpec with Matchers with EitherValues with 
     expectedBillingPeriod2: BillingPeriod
   ) = {
     inside(
-      BillingSchedule(
+      RatePlanChargeBillingSchedule(
         Some(zuoraBillingPeriodId),
         optionalSpecificBillingPeriod,
         effectiveStartDate,
@@ -155,12 +155,10 @@ class BillingScheduleSpec extends FlatSpec with Matchers with EitherValues with 
       )
     ) {
         case Right(billingSchedule) =>
-          datesBetweenDates(expectedBillingPeriod1.startDate, expectedBillingPeriod1.endDate).foreach( date =>
-            billingSchedule.billingPeriodForDate(date) should equal(Right(expectedBillingPeriod1))
-          )
-          datesBetweenDates(expectedBillingPeriod2.startDate, expectedBillingPeriod2.endDate).foreach( date =>
-            billingSchedule.billingPeriodForDate(date) should equal(Right(expectedBillingPeriod2))
-          )
+          datesBetweenDates(expectedBillingPeriod1.startDate, expectedBillingPeriod1.endDate).foreach(date =>
+            billingSchedule.billingPeriodForDate(date) should equal(Right(expectedBillingPeriod1)))
+          datesBetweenDates(expectedBillingPeriod2.startDate, expectedBillingPeriod2.endDate).foreach(date =>
+            billingSchedule.billingPeriodForDate(date) should equal(Right(expectedBillingPeriod2)))
       }
   }
 

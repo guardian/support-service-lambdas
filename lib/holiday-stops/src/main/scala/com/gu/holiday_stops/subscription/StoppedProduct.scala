@@ -11,11 +11,11 @@ import com.gu.util.Logging
 import scala.math.BigDecimal.RoundingMode
 
 abstract class StoppedProduct(
-  val subscriptionNumber: String,
-  val stoppedPublicationDate: LocalDate,
-  val price: Double,
-  val billingPeriod: String,
-  val billingSchedule: BillingSchedule,
+                               val subscriptionNumber: String,
+                               val stoppedPublicationDate: LocalDate,
+                               val price: Double,
+                               val billingPeriod: String,
+                               val billingSchedule: RatePlanChargeBillingSchedule,
 ) extends Logging {
   private def creditAmount: Double = {
     def roundUp(d: Double): Double = BigDecimal(d).setScale(2, RoundingMode.UP).toDouble
@@ -32,7 +32,7 @@ abstract class StoppedProduct(
    *
    * For more details about the calculation of the current billing period see:
    *
-   * [[com.gu.holiday_stops.subscription.BillingSchedule]]
+   * [[com.gu.holiday_stops.subscription.RatePlanChargeBillingSchedule]]
    *
    * @return Date of the first day of the billing period
    *         following this <code>stoppedPublicationDate</code>.
