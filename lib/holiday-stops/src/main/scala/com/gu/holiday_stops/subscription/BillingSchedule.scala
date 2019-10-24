@@ -8,6 +8,35 @@ import acyclic.skipped
 
 import scala.annotation.tailrec
 
+/**
+ * Information about the billing cycles for a Zuora RatePlanCharge.
+ *
+ * This class uses fields from the Zuora RatePlanCharge to predict for what period a rate plan is valid for, and
+ * the start and end of each billing period.
+ *
+ * This class is not comprehensive and will only work for RatePlanCharges with the following fields/values:
+ *
+ * RatePlanCharge.endDateCondition = 'Subscription_End'
+ * ----------------------------------------------------
+ * This derives the end point of the RatePlanCharge from the end of the subscription. We currently assume all
+ * subscriptions do not terminate, hence these rate plans run for ever.
+ *
+ * RatePlanCharge.endDateCondition = 'Fixed_Period'
+ * ------------------------------------------------
+ * This indicates that the end of the rate plan is derived based on the upToPeriodsType field. See below for details
+ *
+ * - RatePlanCharge.upToPeriodsType = 'Billing_Periods'
+ *   This field indicates the rate plan end is derived from a number of Billing Periods defined by the
+ *   RatePlanCharge.upToPeriods field
+ *
+ * No other values in these fields are supported attempting to create a billing schedule for those RatePlanCharges will
+ * return an error.
+ *
+ * For more information see:
+ * https://knowledgecenter.zuora.com/DC_Developers/G_SOAP_API/E1_SOAP_API_Object_Reference/ProductRatePlanCharge
+ *
+ *
+ */
 trait BillingSchedule {
   def billingPeriodForDate(date: LocalDate): Either[ZuoraHolidayError, BillingPeriod]
   def isDateCoveredBySchedule(date: LocalDate): Boolean
@@ -39,7 +68,6 @@ object BillingSchedule {
     upToPeriodsType: Option[String],
     upToPeriods: Option[Int]
   ): Either[ZuoraHolidayError, BillingSchedule] = {
-
     for {
       endDateCondition <- optionalEndDateCondition.toRight(ZuoraHolidayError("RatePlanCharge.endDateCondition is required"))
       billingPeriodId <- optionalBillingPeriodId.toRight(ZuoraHolidayError("RatePlanCharge.billingPeriod is required"))
@@ -130,7 +158,7 @@ object BillingSchedule {
       case Some("Billing_Periods") =>
         optionalUpToPeriods
           .toRight(ZuoraHolidayError("RatePlan.upToPeriods is required when RatePlan.upToPeriodsType=Billing_Periods"))
-          .map(upToPeriods => effectiveStartDate.plus(billingPeriod.multipliedBy(upToPeriods)).minusDays(1))
+          .map(upToPeriods => effectiveStartDate.plus(billingPeriod.multipliedBy(upToPeriods)))
       case unsupportedBillingPeriodType =>
         ZuoraHolidayError(s"RatePlan.upToPeriodsType=${unsupportedBillingPeriodType.getOrElse("null")} is not supported")
           .asLeft

@@ -16,6 +16,7 @@ import scala.io.Source
 object Fixtures extends Assertions {
 
   def billingPeriodToMonths(billingPeriod: String): Int = billingPeriod match {
+    case "Month" => 1
     case "Quarter" => 3
     case "Annual" => 12
   }
