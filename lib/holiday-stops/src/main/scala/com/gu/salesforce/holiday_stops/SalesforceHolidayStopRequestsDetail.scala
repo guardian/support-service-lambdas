@@ -81,6 +81,16 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
       | Estimated_Price__c, Charge_Code__c, Actual_Price__c, Expected_Invoice_Date__c
       |""".stripMargin
 
+  private def soqlFilterClause(stoppedPublicationDate: LocalDate) = s"""
+      | Stopped_Publication_Date__c = ${stoppedPublicationDate.toString}
+      | AND (
+      |   Subscription_Cancellation_Effective_Date__c = null
+      |   OR Subscription_Cancellation_Effective_Date__c > ${stoppedPublicationDate.toString}
+      | )
+      | AND Is_Actioned__c = false
+      | AND Is_Withdrawn__c = false
+      |""".stripMargin
+
   val SOQL_ORDER_BY_CLAUSE = "ORDER BY Stopped_Publication_Date__c ASC"
 
   object FetchGuardianWeeklyHolidayStopRequestsDetails {
@@ -97,12 +107,7 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
           | $SOQL_SELECT_CLAUSE
           | FROM $holidayStopRequestsDetailSfObjectRef
           | WHERE Product_Name__c LIKE 'Guardian Weekly%'
-          | AND Stopped_Publication_Date__c = ${date.toString}
-          | AND (
-          |   Subscription_Cancellation_Effective_Date__c = null
-          |   OR Subscription_Cancellation_Effective_Date__c > ${date.toString}
-          | )
-          | AND Is_Actioned__c = false
+          | AND ${soqlFilterClause(date)}
           | $SOQL_ORDER_BY_CLAUSE
           |""".stripMargin
       logger.info(s"using SF query : $soqlQuery")
@@ -125,12 +130,7 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
                          | FROM $holidayStopRequestsDetailSfObjectRef
                          | WHERE Product_Name__c = 'Newspaper Voucher'
                          | AND Holiday_Stop_Request__r.SF_Subscription__r.Rate_Plan_Name__c = '${productVariant.entryName}'
-                         | AND Stopped_Publication_Date__c = ${date.toString}
-                         | AND (
-                         |   Subscription_Cancellation_Effective_Date__c = null
-                         |   OR Subscription_Cancellation_Effective_Date__c > ${date.toString}
-                         | )
-                         | AND Is_Actioned__c = false
+                         | AND ${soqlFilterClause(date)}
                          | $SOQL_ORDER_BY_CLAUSE
                          |""".stripMargin
       logger.info(s"using SF query : $soqlQuery")
