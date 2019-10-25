@@ -15,7 +15,6 @@ abstract class StoppedProduct(
   val stoppedPublicationDate: LocalDate,
   val price: Double,
   val billingPeriod: String,
-  val billingSchedule: RatePlanChargeBillingSchedule,
   val billingPeriodForDate: BillingPeriod
 ) extends Logging {
   private def creditAmount: Double = {

@@ -6,13 +6,11 @@ import com.gu.holiday_stops.{ZuoraHolidayError, ZuoraHolidayResponse}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.StoppedPublicationDate
 import enumeratum._
 import acyclic.skipped
-import com.gu.holiday_stops.subscription.StoppedProduct._
 
 case class VoucherSubscription(
                                 override val subscriptionNumber: String,
                                 override val billingPeriod: String,
                                 override val price: Double,
-                                override val billingSchedule: RatePlanChargeBillingSchedule,
                                 override val stoppedPublicationDate: LocalDate,
                                 override val billingPeriodForDate: BillingPeriod,
                                 dayOfWeek: VoucherDayOfWeek,
@@ -21,7 +19,6 @@ case class VoucherSubscription(
   stoppedPublicationDate,
   price,
   billingPeriod,
-  billingSchedule,
   billingPeriodForDate
 )
 
@@ -93,7 +90,6 @@ object VoucherSubscription {
       subscriptionNumber = subscription.subscriptionNumber,
       billingPeriod = ratePlanChargeInfo.billingSchedule.billingPeriodZuoraId,
       price = ratePlanChargeInfo.ratePlan.price,
-      billingSchedule = ratePlanChargeInfo.billingSchedule,
       stoppedPublicationDate.value,
       dayOfWeek = VoucherDayOfWeek.withName(stoppedPublicationDate.getDayOfWeek),
       billingPeriodForDate = billingPeriodForStopDate

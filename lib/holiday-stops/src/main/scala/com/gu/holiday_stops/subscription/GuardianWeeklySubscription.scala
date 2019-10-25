@@ -46,10 +46,9 @@ case class GuardianWeeklySubscription(
   override val subscriptionNumber: String,
   override val billingPeriod: String,
   override val price: Double,
-  override val billingSchedule: RatePlanChargeBillingSchedule,
   override val stoppedPublicationDate: LocalDate,
   override val billingPeriodForDate: BillingPeriod
-) extends StoppedProduct(subscriptionNumber, stoppedPublicationDate, price, billingPeriod, billingSchedule, billingPeriodForDate)
+) extends StoppedProduct(subscriptionNumber, stoppedPublicationDate, price, billingPeriod, billingPeriodForDate)
 /**
  * What Guardian Weekly does the customer have today?
  *
@@ -73,7 +72,6 @@ object GuardianWeeklySubscription {
       subscription.subscriptionNumber,
       ratePlanChargeInfo.billingSchedule.billingPeriodZuoraId,
       ratePlanChargeInfo.ratePlan.price,
-      ratePlanChargeInfo.billingSchedule,
       stoppedPublicationDate.value,
       billingPeriodDate
     )
