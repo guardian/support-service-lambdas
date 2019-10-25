@@ -38,7 +38,6 @@ import scala.annotation.tailrec
 trait RatePlanChargeBillingSchedule {
   def billingPeriodForDate(date: LocalDate): Either[ZuoraHolidayError, BillingPeriod]
   def isDateCoveredBySchedule(date: LocalDate): Boolean
-  def billingPeriodZuoraId: String
 }
 
 case class BillingPeriod(startDate: LocalDate, endDate: LocalDate) {
@@ -109,8 +108,6 @@ object RatePlanChargeBillingSchedule {
 
         findNextBillingPeriodForDate(date, 0)
       }
-
-      override def billingPeriodZuoraId: String = billingPeriodId
     }
   }
 

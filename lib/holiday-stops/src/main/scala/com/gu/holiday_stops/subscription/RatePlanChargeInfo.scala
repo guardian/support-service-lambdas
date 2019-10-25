@@ -3,10 +3,19 @@ package com.gu.holiday_stops.subscription
 import com.gu.holiday_stops.ZuoraHolidayError
 import acyclic.skipped
 
-case class RatePlanChargeInfo(ratePlan: RatePlanCharge, billingSchedule: RatePlanChargeBillingSchedule)
+case class RatePlanChargeInfo(
+  ratePlan: RatePlanCharge,
+  billingSchedule: RatePlanChargeBillingSchedule,
+  zoraBillingPeriodId: String
+)
 
 object RatePlanChargeInfo {
   def apply(ratePlanCharge: RatePlanCharge): Either[ZuoraHolidayError, RatePlanChargeInfo] = {
-    RatePlanChargeBillingSchedule.forRatePlanCharge(ratePlanCharge).map(RatePlanChargeInfo(ratePlanCharge, _))
+    for {
+      zuoraBillingPeriodId <- ratePlanCharge
+        .billingPeriod
+        .toRight(ZuoraHolidayError("RatePlanCharge.billingPeriod is required"))
+      schedule <- RatePlanChargeBillingSchedule.forRatePlanCharge(ratePlanCharge)
+    } yield RatePlanChargeInfo(ratePlanCharge, schedule, zuoraBillingPeriodId)
   }
 }
