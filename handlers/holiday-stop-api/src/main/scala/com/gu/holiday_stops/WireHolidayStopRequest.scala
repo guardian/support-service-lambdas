@@ -1,6 +1,6 @@
 package com.gu.holiday_stops
 
-import java.time.LocalDate
+import java.time.{LocalDate, ZonedDateTime}
 
 import cats.implicits._
 import com.gu.holiday_stops.subscription.Subscription
@@ -10,7 +10,7 @@ import play.api.libs.json.{Json, OFormat}
 
 object WireHolidayStopRequest {
 
-  def apply(sfHolidayStopRequest: HolidayStopRequest): HolidayStopRequestFull = HolidayStopRequestFull(
+  def apply(issueSpecifics: List[IssueSpecifics])(sfHolidayStopRequest: HolidayStopRequest): HolidayStopRequestFull = HolidayStopRequestFull(
     id = sfHolidayStopRequest.Id.value,
     start = sfHolidayStopRequest.Start_Date__c.value,
     end = sfHolidayStopRequest.End_Date__c.value,
@@ -20,25 +20,40 @@ object WireHolidayStopRequest {
       estimatedPrice = detail.Estimated_Price__c.map(_.value),
       actualPrice = detail.Actual_Price__c.map(_.value),
       invoiceDate = detail.Expected_Invoice_Date__c.map(_.value)
-    ))).getOrElse(List())
+    ))).getOrElse(List()),
+    withdrawnTime = sfHolidayStopRequest.Withdrawn_Time__c.map(_.value),
+    mutabilityFlags = calculateMutabilityFlags(
+      isWithdrawn = sfHolidayStopRequest.Is_Withdrawn__c.value,
+      firstAvailableDate = issueSpecifics.map(_.firstAvailableDate).min[LocalDate](_ compareTo _),
+      actionedCount = sfHolidayStopRequest.Actioned_Count__c.value,
+      firstPublicationDate = sfHolidayStopRequest.Holiday_Stop_Request_Detail__r.map(_.records.map(_.Stopped_Publication_Date__c.value).min[LocalDate](_ compareTo _)).get,
+      lastPublicationDate = sfHolidayStopRequest.Holiday_Stop_Request_Detail__r.map(_.records.map(_.Stopped_Publication_Date__c.value).max[LocalDate](_ compareTo _)).get
+    )
   )
 
-  def calculateMutabilityFlags(firstAvailableDate: LocalDate, actionedCount: Int, endDate: LocalDate): MutabilityFlags = {
-    if (actionedCount == 0 && firstAvailableDate.isAfter(LocalDate.now())) {
+  def calculateMutabilityFlags(
+    isWithdrawn: Boolean,
+    firstAvailableDate: LocalDate,
+    actionedCount: Int,
+    firstPublicationDate: LocalDate,
+    lastPublicationDate: LocalDate
+  ): MutabilityFlags = {
+    if (actionedCount == 0 && firstAvailableDate.isAfter(firstPublicationDate.plusDays(2))) {
       // TODO log warning (with CloudWatch alert) as indicates processing of holiday stop is well overdue
     }
-    // TODO perhaps also check that actioned count is expected value and alert if not
+    val firstPublicationDateIsGreaterOrEqualToFirstAvailableDate =
+      firstPublicationDate.isEqual(firstAvailableDate) || firstPublicationDate.isAfter(firstAvailableDate)
     MutabilityFlags(
-      isDeletable = actionedCount == 0,
-      isEditable = firstAvailableDate.isBefore(endDate)
+      isFullyMutable = !isWithdrawn && actionedCount == 0 && firstPublicationDateIsGreaterOrEqualToFirstAvailableDate,
+      isEndDateEditable = !isWithdrawn && firstAvailableDate.isBefore(lastPublicationDate)
     )
   }
 
 }
 
 case class MutabilityFlags(
-  isDeletable: Boolean,
-  isEditable: Boolean
+  isFullyMutable: Boolean,
+  isEndDateEditable: Boolean
 )
 
 object MutabilityFlags {
@@ -71,7 +86,9 @@ case class HolidayStopRequestFull(
   start: LocalDate,
   end: LocalDate,
   subscriptionName: SubscriptionName,
-  publicationsImpacted: List[HolidayStopRequestsDetail]
+  publicationsImpacted: List[HolidayStopRequestsDetail],
+  withdrawnTime: Option[ZonedDateTime],
+  mutabilityFlags: MutabilityFlags
 )
 
 object HolidayStopRequestFull {
@@ -95,9 +112,9 @@ object GetHolidayStopRequests {
       .leftMap(error => GetHolidayStopRequestsError(s"Failed to get product specifics for $subscription: $error"))
       .map(productSpecifics =>
         GetHolidayStopRequests(
-          holidayStopRequests.map(WireHolidayStopRequest.apply),
-          productSpecifics.issueSpecifics,
-          productSpecifics.annualIssueLimit
+          existing = holidayStopRequests.map(WireHolidayStopRequest.apply(productSpecifics.issueSpecifics)),
+          issueSpecifics = productSpecifics.issueSpecifics,
+          annualIssueLimit = productSpecifics.annualIssueLimit
         ))
 
   implicit val formatIssueSpecifics: OFormat[IssueSpecifics] = Json.format[IssueSpecifics]

@@ -16,7 +16,8 @@ object SalesForceHolidayStopsEffects {
 
   def listHolidayQuery(contactId: String, subscriptionName: String) =
     "\n SELECT Id, Start_Date__c, End_Date__c, Subscription_Name__c, Product_Name__c," +
-      "\n Actioned_Count__c, Pending_Count__c, Total_Issues_Publications_Impacted_Count__c, (\n" +
+      "\n Actioned_Count__c, Pending_Count__c, Total_Issues_Publications_Impacted_Count__c," +
+      "\n Withdrawn_Time__c, Is_Withdrawn__c, (\n" +
       "   \n" +
       " SELECT Id, Subscription_Name__c, " +
       "Product_Name__c, Stopped_Publication_Date__c,\n" +

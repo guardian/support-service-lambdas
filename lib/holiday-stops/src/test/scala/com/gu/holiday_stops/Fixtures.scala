@@ -5,7 +5,7 @@ import java.time.LocalDate
 import com.gu.holiday_stops.subscription.{RatePlan, RatePlanCharge, Subscription}
 import com.gu.salesforce.RecordsWrapperCaseClass
 import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.{HolidayStopRequest, HolidayStopRequestActionedCount, HolidayStopRequestEndDate, HolidayStopRequestStartDate}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.{HolidayStopRequest, HolidayStopRequestActionedCount, HolidayStopRequestEndDate, HolidayStopRequestIsWithdrawn, HolidayStopRequestStartDate, HolidayStopRequestWithdrawnTime}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
 import io.circe.generic.auto._
 import io.circe.parser.decode
@@ -253,7 +253,9 @@ object Fixtures extends Assertions {
     Total_Issues_Publications_Impacted_Count__c = 7,
     Subscription_Name__c = subscriptionName,
     Product_Name__c = ProductName("Gu Weekly"),
-    Holiday_Stop_Request_Detail__r = Some(RecordsWrapperCaseClass(requestDetail))
+    Holiday_Stop_Request_Detail__r = Some(RecordsWrapperCaseClass(requestDetail)),
+    Withdrawn_Time__c = None,
+    Is_Withdrawn__c = HolidayStopRequestIsWithdrawn(false)
   )
 
   def mkHolidayStopRequestDetailsFromHolidayStopRequest(request: HolidayStopRequest, chargeCode: String) = HolidayStopRequestsDetail(

@@ -116,7 +116,7 @@ object Handler extends Logging {
         }
       case "hsr" :: _ :: _ :: Nil =>
         httpMethod match {
-          case "DELETE" => stepsToDelete _
+          case "DELETE" => stepsToWithdraw _
           case _ => unsupported _
         }
       case _ =>
@@ -225,19 +225,19 @@ object Handler extends Logging {
       subscription <- Zuora.subscriptionGetResponse(config, accessToken, backend)(subscriptionName)
     } yield subscription
 
-  case class DeletePathParams(subscriptionName: SubscriptionName, holidayStopRequestId: HolidayStopRequestId)
+  case class WithdrawPathParams(subscriptionName: SubscriptionName, holidayStopRequestId: HolidayStopRequestId)
 
-  def stepsToDelete(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
+  def stepsToWithdraw(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
 
     val lookupOp = SalesforceHolidayStopRequest.LookupByContactAndOptionalSubscriptionName(sfClient.wrapWith(JsonHttp.getWithParams))
-    val deleteOp = SalesforceHolidayStopRequest.DeleteHolidayStopRequest(sfClient.wrapWith(JsonHttp.deleteWithStringResponse))
+    val withdrawOp = SalesforceHolidayStopRequest.WithdrawHolidayStopRequest(sfClient.wrapWith(JsonHttp.patch))
 
     (for {
       contact <- extractContactFromHeaders(req.headers)
-      pathParams <- req.pathParamsAsCaseClass[DeletePathParams]()(Json.reads[DeletePathParams])
+      pathParams <- req.pathParamsAsCaseClass[WithdrawPathParams]()(Json.reads[WithdrawPathParams])
       existingForUser <- lookupOp(contact, None).toDisjunction.toApiGatewayOp(s"lookup Holiday Stop Requests for contact $contact")
       _ = existingForUser.exists(_.Id == pathParams.holidayStopRequestId).toApiGatewayContinueProcessing(ApiGatewayResponse.forbidden("not your holiday stop"))
-      _ <- deleteOp(pathParams.holidayStopRequestId).toDisjunction.toApiGatewayOp(s"delete Holiday Stop Request for subscription ${pathParams.subscriptionName.value} of contact $contact")
+      _ <- withdrawOp(pathParams.holidayStopRequestId).toDisjunction.toApiGatewayOp(s"withdraw Holiday Stop Request for subscription ${pathParams.subscriptionName.value} of contact $contact")
     } yield ApiGatewayResponse.successfulExecution).apiResponse
   }
 
