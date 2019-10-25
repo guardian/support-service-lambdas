@@ -26,16 +26,14 @@ import scala.annotation.tailrec
  * This indicates that the end of the rate plan is derived based on the upToPeriodsType field. See below for details
  *
  * - RatePlanCharge.upToPeriodsType = 'Billing_Periods'
- *   This field indicates the rate plan end is derived from a number of Billing Periods defined by the
- *   RatePlanCharge.upToPeriods field
+ *   This field/value combination indicates the rate plan end is based on a fixed number of Billing Periods defined by
+ *   the RatePlanCharge.upToPeriods field
  *
  * No other values in these fields are supported attempting to create a billing schedule for those RatePlanCharges will
  * return an error.
  *
  * For more information see:
  * https://knowledgecenter.zuora.com/DC_Developers/G_SOAP_API/E1_SOAP_API_Object_Reference/ProductRatePlanCharge
- *
- *
  */
 trait RatePlanChargeBillingSchedule {
   def billingPeriodForDate(date: LocalDate): Either[ZuoraHolidayError, BillingPeriod]
