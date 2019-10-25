@@ -14,8 +14,16 @@ case class VoucherSubscription(
                                 override val price: Double,
                                 override val billingSchedule: RatePlanChargeBillingSchedule,
                                 override val stoppedPublicationDate: LocalDate,
+                                override val billingPeriodForDate: BillingPeriod,
                                 dayOfWeek: VoucherDayOfWeek,
-) extends StoppedProduct(subscriptionNumber, stoppedPublicationDate, price, billingPeriod, billingSchedule)
+) extends StoppedProduct(
+  subscriptionNumber,
+  stoppedPublicationDate,
+  price,
+  billingPeriod,
+  billingSchedule,
+  billingPeriodForDate
+)
 
 sealed trait VoucherDayOfWeek extends EnumEntry
 
@@ -52,7 +60,6 @@ object VoucherSubscription {
         import VoucherSubscriptionPredicates._
         List(
           ratePlanIsVoucher(ratePlan, stoppedPublicationDate),
-          stoppedPublicationDateIsAfterCurrentInvoiceStartDate(ratePlan, stoppedPublicationDate),
           allBillingPeriodsAreTheSame(ratePlan)
         ).forall(_ == true)
       }
@@ -81,6 +88,7 @@ object VoucherSubscription {
         voucherRatePlan.ratePlanCharges
       )
       ratePlanChargeInfo <- RatePlanChargeInfo(ratePlanChargeForDay)
+      billingPeriodForStopDate <- ratePlanChargeInfo.billingSchedule.billingPeriodForDate(stoppedPublicationDate.value)
     } yield new VoucherSubscription(
       subscriptionNumber = subscription.subscriptionNumber,
       billingPeriod = ratePlanChargeInfo.billingSchedule.billingPeriodZuoraId,
@@ -88,6 +96,7 @@ object VoucherSubscription {
       billingSchedule = ratePlanChargeInfo.billingSchedule,
       stoppedPublicationDate.value,
       dayOfWeek = VoucherDayOfWeek.withName(stoppedPublicationDate.getDayOfWeek),
+      billingPeriodForDate = billingPeriodForStopDate
     )
   }
 }

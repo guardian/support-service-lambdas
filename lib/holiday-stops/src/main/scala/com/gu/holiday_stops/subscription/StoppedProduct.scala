@@ -11,11 +11,12 @@ import com.gu.util.Logging
 import scala.math.BigDecimal.RoundingMode
 
 abstract class StoppedProduct(
-                               val subscriptionNumber: String,
-                               val stoppedPublicationDate: LocalDate,
-                               val price: Double,
-                               val billingPeriod: String,
-                               val billingSchedule: RatePlanChargeBillingSchedule,
+  val subscriptionNumber: String,
+  val stoppedPublicationDate: LocalDate,
+  val price: Double,
+  val billingPeriod: String,
+  val billingSchedule: RatePlanChargeBillingSchedule,
+  val billingPeriodForDate: BillingPeriod
 ) extends Logging {
   private def creditAmount: Double = {
     def roundUp(d: Double): Double = BigDecimal(d).setScale(2, RoundingMode.UP).toDouble
@@ -40,12 +41,7 @@ abstract class StoppedProduct(
    *         shows examples of the expected outcome.
    */
   private def nextBillingPeriodStartDate: LocalDate = {
-    billingSchedule.billingPeriodForDate(stoppedPublicationDate).fold(
-      error =>
-        throw new RuntimeException(s"Failed to calculate next billing date: ${error.reason}"),
-      billingPeriod =>
-        billingPeriod.endDate.plusDays(1)
-    )
+    billingPeriodForDate.endDate.plusDays(1)
   }
 
   private def billingPeriodToApproxWeekCount(billingPeriod: String): Int =
@@ -66,19 +62,5 @@ object StoppedProduct {
     GuardianWeeklySubscription(subscription, stoppedPublicationDate)
       .orElse(VoucherSubscription(subscription, stoppedPublicationDate))
       .orElse(Left(ZuoraHolidayError(s"Failed to determine StoppableProduct: ${subscription.subscriptionNumber}; ${stoppedPublicationDate}")))
-  }
-
-  def stoppedPublicationDateIsAfterCurrentInvoiceStartDate(
-      ratePlan: RatePlan,
-      stoppedPublicationDate: StoppedPublicationDate
-  ): Boolean = {
-    ratePlan.ratePlanCharges.forall { ratePlanCharge =>
-      (for {
-        fromInclusive <- ratePlanCharge.processedThroughDate
-        _ <- ratePlanCharge.chargedThroughDate
-      } yield {
-        stoppedPublicationDate.value.isEqual(fromInclusive) || stoppedPublicationDate.value.isAfter(fromInclusive)
-      }).getOrElse(false)
-    }
   }
 }
