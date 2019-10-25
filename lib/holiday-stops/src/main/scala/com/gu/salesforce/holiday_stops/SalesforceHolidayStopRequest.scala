@@ -186,19 +186,33 @@ object SalesforceHolidayStopRequest extends Logging {
           SF_Subscription__c = sfSubscription.Id,
           Holiday_Stop_Request_Detail__r = RecordsWrapperCaseClass(
             publicationDatesToBeStopped.map { stoppedPublicationDate =>
-              val expectedCredit: Either[ZuoraHolidayError, HolidayStopCredit] =
-                StoppedProduct(zuoraSubscription, StoppedPublicationDate(stoppedPublicationDate)).map(_.credit)
-              // TODO log any credit calculation failure (currently swallowed in the toOption below)
+              val maybeStoppedProduct = getStoppedProductAndLogFailure(zuoraSubscription, stoppedPublicationDate)
+
               CompositeTreeHolidayStopRequestsDetail(
                 stoppedPublicationDate,
-                Estimated_Price__c = expectedCredit.toOption.map(_.amount).map(HolidayStopRequestsDetailChargePrice),
-                Expected_Invoice_Date__c = expectedCredit.toOption.map(_.invoiceDate).map(HolidayStopRequestsDetailExpectedInvoiceDate)
+                Estimated_Price__c = maybeStoppedProduct
+                  .map(_.credit.amount)
+                  .map(HolidayStopRequestsDetailChargePrice),
+                Expected_Invoice_Date__c = maybeStoppedProduct
+                  .map(_.credit.invoiceDate)
+                  .map(HolidayStopRequestsDetailExpectedInvoiceDate)
               )
             }
           )
         )
       ))
     }
+  }
+
+  private def getStoppedProductAndLogFailure(zuoraSubscription: Subscription, stoppedPublicationDate: LocalDate) = {
+    StoppedProduct(zuoraSubscription, StoppedPublicationDate(stoppedPublicationDate))
+      .fold({ error =>
+        logger.error(s"Falied to calculate credit for subscription ${zuoraSubscription.subscriptionNumber} on " +
+          s"$stoppedPublicationDate: ${error.reason}")
+        None
+      },
+        Some(_)
+      )
   }
 
   object DeleteHolidayStopRequest {
