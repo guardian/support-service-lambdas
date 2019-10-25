@@ -1,6 +1,6 @@
 package com.gu.salesforce.holiday_stops
 
-import java.time.LocalDate
+import java.time.{LocalDate, ZonedDateTime}
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 
@@ -21,6 +21,7 @@ import play.api.libs.json._
 object SalesforceHolidayStopRequest extends Logging {
 
   val SALESFORCE_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+  val SALESFORCE_DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXXX")
 
   val holidayStopRequestSfObjectRef = "Holiday_Stop_Request__c"
   private val holidayStopRequestSfObjectsBaseUrl = sfObjectsBaseUrl + holidayStopRequestSfObjectRef
@@ -33,6 +34,13 @@ object SalesforceHolidayStopRequest extends Logging {
     override def writes(date: LocalDate): JsValue = JsString(date.format(SALESFORCE_DATE_FORMATTER))
   }
 
+  implicit val formatZonedDateTimeAsSalesforceDateTime: Format[ZonedDateTime] = new Format[ZonedDateTime] {
+    override def reads(jsValue: JsValue): JsResult[ZonedDateTime] =
+      jsValue.validate[String].map(sfDate => ZonedDateTime.parse(sfDate, SALESFORCE_DATE_TIME_FORMATTER))
+
+    override def writes(dateTime: ZonedDateTime): JsValue = JsString(dateTime.format(SALESFORCE_DATE_TIME_FORMATTER))
+  }
+
   case class HolidayStopRequestStartDate(value: LocalDate) extends AnyVal
   implicit val formatHolidayStopRequestStartDate = Jsonx.formatInline[HolidayStopRequestStartDate]
 
@@ -42,9 +50,16 @@ object SalesforceHolidayStopRequest extends Logging {
   case class HolidayStopRequestActionedCount(value: Int) extends AnyVal
   implicit val formatHolidayStopRequestActionedCount = Jsonx.formatInline[HolidayStopRequestActionedCount]
 
+  case class HolidayStopRequestWithdrawnTime(value: ZonedDateTime) extends AnyVal
+  implicit val formatHolidayStopRequestWithdrawnTime = Jsonx.formatInline[HolidayStopRequestWithdrawnTime]
+
+  case class HolidayStopRequestIsWithdrawn(value: Boolean) extends AnyVal
+  implicit val formatHolidayStopRequestIsWithdrawn = Jsonx.formatInline[HolidayStopRequestIsWithdrawn]
+
   def getHolidayStopRequestPrefixSOQL(productNamePrefixOption: Option[ProductName] = None) = s"""
       | SELECT Id, Start_Date__c, End_Date__c, Subscription_Name__c, Product_Name__c,
-      | Actioned_Count__c, Pending_Count__c, Total_Issues_Publications_Impacted_Count__c, (
+      | Actioned_Count__c, Pending_Count__c, Total_Issues_Publications_Impacted_Count__c,
+      | Withdrawn_Time__c, Is_Withdrawn__c, (
       |   ${SalesforceHolidayStopRequestsDetail.SOQL_SELECT_CLAUSE}
       |   FROM Holiday_Stop_Request_Detail__r
       |   ${SalesforceHolidayStopRequestsDetail.SOQL_ORDER_BY_CLAUSE}
@@ -62,7 +77,9 @@ object SalesforceHolidayStopRequest extends Logging {
     Total_Issues_Publications_Impacted_Count__c: Int,
     Subscription_Name__c: SubscriptionName,
     Product_Name__c: ProductName,
-    Holiday_Stop_Request_Detail__r: Option[RecordsWrapperCaseClass[HolidayStopRequestsDetail]]
+    Holiday_Stop_Request_Detail__r: Option[RecordsWrapperCaseClass[HolidayStopRequestsDetail]],
+    Withdrawn_Time__c: Option[HolidayStopRequestWithdrawnTime],
+    Is_Withdrawn__c: HolidayStopRequestIsWithdrawn
   )
   implicit val format = Json.format[HolidayStopRequest]
 
@@ -201,11 +218,14 @@ object SalesforceHolidayStopRequest extends Logging {
     }
   }
 
-  object DeleteHolidayStopRequest {
+  object WithdrawHolidayStopRequest {
 
-    def apply(sfDelete: HttpOp[RestRequestMaker.DeleteRequest, String]): HolidayStopRequestId => ClientFailableOp[String] =
-      sfDelete.setupRequest[HolidayStopRequestId] { holidayStopRequestId =>
-        DeleteRequest(RelativePath(s"$holidayStopRequestSfObjectsBaseUrl/${holidayStopRequestId.value}"))
+    case class WithdrawnTimePatch(Withdrawn_Time__c: ZonedDateTime = ZonedDateTime.now())
+    implicit val writes = Json.writes[WithdrawnTimePatch]
+
+    def apply(sfPatch: HttpOp[RestRequestMaker.PatchRequest, Unit]): HolidayStopRequestId => ClientFailableOp[Unit] =
+      sfPatch.setupRequest[HolidayStopRequestId] { holidayStopRequestId =>
+        PatchRequest(WithdrawnTimePatch(), RelativePath(s"$holidayStopRequestSfObjectsBaseUrl/${holidayStopRequestId.value}"))
       }.runRequest
 
   }

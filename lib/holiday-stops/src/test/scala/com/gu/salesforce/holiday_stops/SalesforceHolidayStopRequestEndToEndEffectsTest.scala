@@ -21,8 +21,7 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends FlatSpec with Matc
   case class EndToEndResults(
     createResult: HolidayStopRequestId,
     preProcessingFetchResult: List[SalesforceHolidayStopRequest.HolidayStopRequest],
-    postProcessingFetchResult: List[SalesforceHolidayStopRequest.HolidayStopRequest],
-    deleteResult: String
+    postProcessingFetchResult: List[SalesforceHolidayStopRequest.HolidayStopRequest]
   )
 
   it should "Salesforce Holiday Stop Requests should work end to end" taggedAs EffectsTest in {
@@ -81,16 +80,16 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends FlatSpec with Matc
         HolidayStopRequestsDetailChargePrice(0)
       )).toDisjunction
 
-      deleteOp = SalesforceHolidayStopRequest.DeleteHolidayStopRequest(sfAuth.wrapWith(JsonHttp.deleteWithStringResponse))
-      deleteResult <- deleteOp(createResult).toDisjunction
+      deleteOp = SalesforceHolidayStopRequest.WithdrawHolidayStopRequest(sfAuth.wrapWith(JsonHttp.patch))
+      _ <- deleteOp(createResult).toDisjunction
 
-    } yield EndToEndResults(createResult, preProcessingFetchResult, postProcessingFetchResult, deleteResult)
+    } yield EndToEndResults(createResult, preProcessingFetchResult, postProcessingFetchResult)
 
     actual match {
 
       case -\/(failure) => fail(failure.toString)
 
-      case \/-(EndToEndResults(createResult, preProcessingFetchResult, postProcessingFetchResult, _)) =>
+      case \/-(EndToEndResults(createResult, preProcessingFetchResult, postProcessingFetchResult)) =>
 
         withClue("should be able to find the freshly created Holiday Stop Request and its Actioned Count should be ZERO") {
           preProcessingFetchResult
