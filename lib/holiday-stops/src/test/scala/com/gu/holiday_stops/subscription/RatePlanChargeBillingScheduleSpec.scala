@@ -9,7 +9,7 @@ import org.scalatest.Inside.inside
 import org.scalatest.{EitherValues, FlatSpec, Matchers}
 
 class RatePlanChargeBillingScheduleSpec extends FlatSpec with Matchers with EitherValues with TypeCheckedTripleEquals {
-  "BillingSchedule" should "calculate fixed period valid date range" in {
+  "BillingSchedule" should "calculate fixed monthly period valid date range" in {
     testFixedBillingPeriod(
       zuoraBillingPeriodId = "Month",
       optionalSpecificBillingPeriod = None,
@@ -17,6 +17,8 @@ class RatePlanChargeBillingScheduleSpec extends FlatSpec with Matchers with Eith
       effectiveStartDate = LocalDate.of(2019, 10, 1),
       expectedEndDate = LocalDate.of(2019, 11, 30)
     )
+  }
+  it should "calculate fixed annual period valid date range" in {
     testFixedBillingPeriod(
       zuoraBillingPeriodId = "Annual",
       optionalSpecificBillingPeriod = None,
@@ -24,6 +26,8 @@ class RatePlanChargeBillingScheduleSpec extends FlatSpec with Matchers with Eith
       effectiveStartDate = LocalDate.of(2019, 10, 1),
       expectedEndDate = LocalDate.of(2021, 9, 30)
     )
+  }
+  it should "calculate fixed semi annual period valid date range" in {
     testFixedBillingPeriod(
       zuoraBillingPeriodId = "Semi_Annual",
       optionalSpecificBillingPeriod = None,
@@ -31,6 +35,8 @@ class RatePlanChargeBillingScheduleSpec extends FlatSpec with Matchers with Eith
       effectiveStartDate = LocalDate.of(2019, 10, 1),
       expectedEndDate = LocalDate.of(2020, 9, 30)
     )
+  }
+  it should "calculate fixed quarterly period valid date range" in {
     testFixedBillingPeriod(
       zuoraBillingPeriodId = "Quarter",
       optionalSpecificBillingPeriod = None,
@@ -38,6 +44,8 @@ class RatePlanChargeBillingScheduleSpec extends FlatSpec with Matchers with Eith
       effectiveStartDate = LocalDate.of(2019, 10, 1),
       expectedEndDate = LocalDate.of(2020, 3, 31)
     )
+  }
+  it should "calculate fixed specific number of weeks period valid date range" in {
     testFixedBillingPeriod(
       zuoraBillingPeriodId = "Specific_Weeks",
       optionalSpecificBillingPeriod = Some(3),

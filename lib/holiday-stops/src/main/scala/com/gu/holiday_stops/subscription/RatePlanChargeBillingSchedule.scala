@@ -139,11 +139,11 @@ object RatePlanChargeBillingSchedule {
       case "Subscription_End" => Right(None) //This assumes all subscriptions will renew for ever
       case "Fixed_Period" =>
         ratePlanFixedPeriodEndDate(
-          billingPeriod: Period,
-          effectiveStartDate: LocalDate,
-          endDateCondition: String,
-          upToPeriodsType: Option[String],
-          upToPeriods: Option[Int]
+          billingPeriod,
+          effectiveStartDate,
+          endDateCondition,
+          upToPeriodsType,
+          upToPeriods
         ).map(endDate => Some(endDate))
     }
   }
