@@ -14,7 +14,19 @@ import scala.annotation.tailrec
  * This class uses fields from the Zuora RatePlanCharge to predict for what period a rate plan is valid for, and
  * the start and end of each billing period.
  *
- * This class is not comprehensive and will only work for RatePlanCharges with the following fields/values:
+ * This class is not comprehensive and will only work for RatePlanCharges a limited set of configurations as follows.
+ *
+ * Billing Periods
+ * ---------------
+ *
+ * The billing periods are calculated using RatePlanCharge.effectiveStartDate as a starting point.
+ * RatePlanCharge.billingPeriod is used to derive the length of each billing cycle. These are projected into
+ * the future until the RatePlanCharge reaches its endpoint.
+ *
+ * RatePlanCharge termination
+ * --------------------------
+ *
+ * The point in time at which the ratePlanCharge terminates is derived as follows:
  *
  * RatePlanCharge.endDateCondition = 'Subscription_End'
  * ----------------------------------------------------
@@ -28,6 +40,7 @@ import scala.annotation.tailrec
  * - RatePlanCharge.upToPeriodsType = 'Billing_Periods'
  *   This field/value combination indicates the rate plan end is based on a fixed number of Billing Periods defined by
  *   the RatePlanCharge.upToPeriods field
+ *
  *
  * No other values in these fields are supported attempting to create a billing schedule for those RatePlanCharges will
  * return an error.
