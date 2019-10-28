@@ -16,6 +16,8 @@ object Types {
 
   case class GenericError(message: String) extends ClientFailure
 
+  case class CustomError(message: String) extends ClientFailure
+
   case class PaymentError(message: String) extends ClientFailure
 
   case class ClientSuccess[A](value: A) extends ClientFailableOp[A] {
@@ -48,6 +50,11 @@ object Types {
         case scalaz.-\/(failure) => failure
       }
 
+  }
+
+  implicit class BoolToOption(val self: Boolean) extends AnyVal {
+    def toOption[A](value: => A): Option[A] =
+      if (self) Some(value) else None
   }
 
   implicit val clientFailableOpM: Monad[ClientFailableOp] = {

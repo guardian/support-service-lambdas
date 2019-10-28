@@ -3,7 +3,6 @@ package com.gu.holiday_stops
 import java.io.{InputStream, OutputStream}
 import java.time.LocalDate
 
-import cats.syntax.either._
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.holiday_stops.subscription.{StoppedProduct, Subscription}
@@ -57,7 +56,11 @@ object Handler extends Logging {
   ): ApiGatewayOp[Operation] = {
     for {
       config <- Config(fetchString).toApiGatewayOp("Failed to load config")
-      sfClient <- SalesforceClient(response, config.sfConfig).value.toDisjunction.toApiGatewayOp("authenticate with SalesForce")
+      sfClient <- SalesforceClient(
+        response,
+        config.sfConfig,
+        shouldExposeSalesforceErrorMessageInClientFailure = true
+      ).value.toDisjunction.toApiGatewayOp("authenticate with SalesForce")
     } yield Operation.noHealthcheck(request => // checking connectivity to SF is sufficient healthcheck so no special steps required
       validateRequestAndCreateSteps(
         request,

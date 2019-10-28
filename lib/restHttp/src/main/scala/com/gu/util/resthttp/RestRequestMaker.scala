@@ -11,7 +11,9 @@ import scala.util.{Failure, Success, Try}
 
 object RestRequestMaker extends LazyLogging {
 
-  def httpIsSuccessful(response: Response): ClientFailableOp[Unit] = {
+  val genericError = GenericError("HTTP request was unsuccessful")
+
+  def httpIsSuccessful(response: Response, maybeErrorBodyParser: Option[String => ClientFailure] = None): ClientFailableOp[Unit] = {
     if (response.isSuccessful) {
       ClientSuccess(())
     } else {
@@ -19,9 +21,11 @@ object RestRequestMaker extends LazyLogging {
 
       val truncated = body.take(500) + (if (body.length > 500) "..." else "")
       logger.error(s"HTTP request was unsuccessful, response status was ${response.code}, response body: \n $response\n$truncated")
-      if (response.code == 404) {
-        NotFound(response.message)
-      } else GenericError("HTTP request was unsuccessful")
+      maybeErrorBodyParser match {
+        case Some(errorBodyParser) => errorBodyParser(body)
+        case _ if (response.code == 404) => NotFound(response.message)
+        case _ => genericError
+      }
     }
   }
 
@@ -175,9 +179,11 @@ object RestRequestMaker extends LazyLogging {
     toClientFailableOp(response).map(_.value)
   }
 
-  def toClientFailableOp(response: Response): ClientFailableOp[BodyAsString] = {
-    httpIsSuccessful(response).map(_ => response).map(_.body.string).map(BodyAsString.apply)
-  }
+  def toClientFailableOp(response: Response): ClientFailableOp[BodyAsString] =
+    toClientFailableOp(maybeErrorBodyParser = None)(response)
+
+  def toClientFailableOp(maybeErrorBodyParser: Option[String => ClientFailure])(response: Response): ClientFailableOp[BodyAsString] =
+    httpIsSuccessful(response, maybeErrorBodyParser).map(_ => response).map(_.body.string).map(BodyAsString.apply)
 
   def buildRequest(headers: Map[String, String], url: String, addMethod: Request.Builder => Request.Builder): Request = {
     val builder = headers.foldLeft(new Request.Builder())({
