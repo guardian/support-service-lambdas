@@ -137,7 +137,11 @@ object Handler extends Logging {
   def extractContactFromHeaders(headers: Option[Map[String, String]]): ApiGatewayOp[Contact] = headers.flatMap(_.toList.collectFirst {
     case (HEADER_SALESFORCE_CONTACT_ID, sfContactId) => Right(SalesforceContactId(sfContactId))
     case (HEADER_IDENTITY_ID, identityId) => Left(IdentityId(identityId))
-  }).toApiGatewayOp(s"either '$HEADER_IDENTITY_ID' header OR '$HEADER_SALESFORCE_CONTACT_ID' (one is required)")
+  }).toApiGatewayContinueProcessing(
+    ApiGatewayResponse.badRequest(
+    s"either '$HEADER_IDENTITY_ID' header OR '$HEADER_SALESFORCE_CONTACT_ID' (one is required)"
+    )
+  )
 
   case class PotentialHolidayStopsPathParams(subscriptionName: SubscriptionName)
 
