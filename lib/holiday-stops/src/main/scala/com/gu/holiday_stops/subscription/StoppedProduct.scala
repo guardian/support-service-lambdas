@@ -15,7 +15,7 @@ abstract class StoppedProduct(
   val stoppedPublicationDate: LocalDate,
   val price: Double,
   val billingPeriod: String,
-  val billingPeriodForDate: BillingPeriod
+  val stoppedPublicationDateBillingPeriod: BillingPeriod
 ) extends Logging {
   private def creditAmount: Double = {
     def roundUp(d: Double): Double = BigDecimal(d).setScale(2, RoundingMode.UP).toDouble
@@ -40,7 +40,7 @@ abstract class StoppedProduct(
    *         shows examples of the expected outcome.
    */
   private def nextBillingPeriodStartDate: LocalDate = {
-    billingPeriodForDate.endDate.plusDays(1)
+    stoppedPublicationDateBillingPeriod.endDate.plusDays(1)
   }
 
   private def billingPeriodToApproxWeekCount(billingPeriod: String): Int =

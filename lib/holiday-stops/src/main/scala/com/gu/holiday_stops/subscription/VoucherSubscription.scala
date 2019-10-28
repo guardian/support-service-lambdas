@@ -12,14 +12,14 @@ case class VoucherSubscription(
                                 override val billingPeriod: String,
                                 override val price: Double,
                                 override val stoppedPublicationDate: LocalDate,
-                                override val billingPeriodForDate: BillingPeriod,
+                                override val stoppedPublicationDateBillingPeriod: BillingPeriod,
                                 dayOfWeek: VoucherDayOfWeek,
 ) extends StoppedProduct(
   subscriptionNumber,
   stoppedPublicationDate,
   price,
   billingPeriod,
-  billingPeriodForDate
+  stoppedPublicationDateBillingPeriod
 )
 
 sealed trait VoucherDayOfWeek extends EnumEntry
@@ -92,7 +92,7 @@ object VoucherSubscription {
       price = ratePlanChargeInfo.ratePlan.price,
       stoppedPublicationDate.value,
       dayOfWeek = VoucherDayOfWeek.withName(stoppedPublicationDate.getDayOfWeek),
-      billingPeriodForDate = billingPeriodForStopDate
+      stoppedPublicationDateBillingPeriod = billingPeriodForStopDate
     )
   }
 }

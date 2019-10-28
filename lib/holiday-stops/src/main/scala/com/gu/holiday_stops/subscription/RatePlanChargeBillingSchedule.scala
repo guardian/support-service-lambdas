@@ -14,7 +14,7 @@ import scala.annotation.tailrec
  * This class uses fields from the Zuora RatePlanCharge to predict for what period a rate plan is valid for, and
  * the start and end of each billing period.
  *
- * This class is not comprehensive and will only work for RatePlanCharges a limited set of configurations as follows.
+ * This class is not comprehensive and will only work for RatePlanCharges with a limited set of configurations as follows.
  *
  * Billing Periods
  * ---------------
@@ -105,7 +105,7 @@ object RatePlanChargeBillingSchedule {
         }
 
         @tailrec
-        def findNextBillingPeriodForDate(date: LocalDate, index: Int): Either[ZuoraHolidayError, BillingPeriod] = {
+        def findBillingPeriodForDate(date: LocalDate, index: Int): Either[ZuoraHolidayError, BillingPeriod] = {
           val billingPeriod = billingPeriodByIndex(index)
           if (billingPeriod.startDate.isAfter(date) ||
             ratePlanEndDate.map(endDate => date.isAfter(endDate)).getOrElse(false)) {
@@ -114,12 +114,12 @@ object RatePlanChargeBillingSchedule {
             if (billingPeriod.endDate.isAfter(date) || billingPeriod.endDate == date) {
               billingPeriodByIndex(index).asRight
             } else {
-              findNextBillingPeriodForDate(date, index + 1)
+              findBillingPeriodForDate(date, index + 1)
             }
           }
         }
 
-        findNextBillingPeriodForDate(date, 0)
+        findBillingPeriodForDate(date, 0)
       }
     }
   }
