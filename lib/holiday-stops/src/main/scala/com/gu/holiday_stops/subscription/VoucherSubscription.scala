@@ -89,7 +89,7 @@ object VoucherSubscription {
     } yield new VoucherSubscription(
       subscriptionNumber = subscription.subscriptionNumber,
       billingPeriod = ratePlanChargeInfo.zoraBillingPeriodId,
-      price = ratePlanChargeInfo.ratePlan.price,
+      price = ratePlanChargeInfo.ratePlanCharge.price,
       stoppedPublicationDate.value,
       dayOfWeek = VoucherDayOfWeek.withName(stoppedPublicationDate.getDayOfWeek),
       stoppedPublicationDateBillingPeriod = billingPeriodForStopDate

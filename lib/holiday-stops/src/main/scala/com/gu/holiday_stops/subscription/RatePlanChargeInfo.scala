@@ -4,7 +4,7 @@ import com.gu.holiday_stops.ZuoraHolidayError
 import acyclic.skipped
 
 case class RatePlanChargeInfo(
-  ratePlan: RatePlanCharge,
+  ratePlanCharge: RatePlanCharge,
   billingSchedule: RatePlanChargeBillingSchedule,
   zoraBillingPeriodId: String
 )
@@ -15,7 +15,7 @@ object RatePlanChargeInfo {
       zuoraBillingPeriodId <- ratePlanCharge
         .billingPeriod
         .toRight(ZuoraHolidayError("RatePlanCharge.billingPeriod is required"))
-      schedule <- RatePlanChargeBillingSchedule.forRatePlanCharge(ratePlanCharge)
+      schedule <- RatePlanChargeBillingSchedule(ratePlanCharge)
     } yield RatePlanChargeInfo(ratePlanCharge, schedule, zuoraBillingPeriodId)
   }
 }

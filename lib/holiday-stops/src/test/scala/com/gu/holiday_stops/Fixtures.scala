@@ -19,13 +19,19 @@ object Fixtures extends Assertions {
     case "Month" => 1
     case "Quarter" => 3
     case "Annual" => 12
+    case "Semi_Annual" => 6
+    case "Specific_Weeks" => 1
   }
 
   def mkRatePlanCharge(
     price: Double,
     billingPeriod: String,
     chargedThroughDate: Option[LocalDate] = Some(LocalDate.of(2019, 9, 2)),
-    effectiveStartDate: LocalDate = LocalDate.of(2019, 6, 2)
+    effectiveStartDate: LocalDate = LocalDate.of(2019, 6, 2),
+    specificBillingPeriod: Option[Int] = None,
+    upToPeriodsType: Option[String] = None,
+    upToPeriods: Option[Int] = None,
+    endDateCondition: Option[String] = Some("Subscription_End"),
   ) = RatePlanCharge(
     name = "GW",
     number = "C1",
@@ -37,10 +43,10 @@ object Fixtures extends Assertions {
     HolidayEnd__c = None,
     processedThroughDate = chargedThroughDate.map(_.minusMonths(billingPeriodToMonths(billingPeriod))),
     productRatePlanChargeId = "",
-    specificBillingPeriod = None,
-    endDateCondition = Some("Subscription_End"),
-    upToPeriodsType = None,
-    upToPeriods = None
+    specificBillingPeriod = specificBillingPeriod,
+    endDateCondition = endDateCondition,
+    upToPeriodsType = upToPeriodsType,
+    upToPeriods = upToPeriods
   )
 
   def mkGuardianWeeklySubscription(

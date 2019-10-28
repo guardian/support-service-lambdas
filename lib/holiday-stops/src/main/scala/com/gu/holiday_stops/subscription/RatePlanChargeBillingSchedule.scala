@@ -38,8 +38,8 @@ import scala.annotation.tailrec
  * This indicates that the end of the rate plan is derived based on the upToPeriodsType field. See below for details
  *
  * - RatePlanCharge.upToPeriodsType = 'Billing_Periods'
- *   This field/value combination indicates the rate plan end is based on a fixed number of Billing Periods defined by
- *   the RatePlanCharge.upToPeriods field
+ * This field/value combination indicates the rate plan end is based on a fixed number of Billing Periods defined by
+ * the RatePlanCharge.upToPeriods field
  *
  *
  * No other values in these fields are supported attempting to create a billing schedule for those RatePlanCharges will
@@ -50,48 +50,34 @@ import scala.annotation.tailrec
  */
 trait RatePlanChargeBillingSchedule {
   def billingPeriodForDate(date: LocalDate): Either[ZuoraHolidayError, BillingPeriod]
+
   def isDateCoveredBySchedule(date: LocalDate): Boolean
 }
 
-case class BillingPeriod(startDate: LocalDate, endDate: LocalDate) {
-  def containsDate(date: LocalDate): Boolean =
-    (date.isEqual(startDate) || date.isAfter(startDate)) &&
-      date.isBefore(endDate)
-}
+/**
+ * Defines the dates for a billing period
+ *
+ * @param startDate inclusive start date of billing period
+ * @param endDate   inclusive end date of billing period
+ */
+case class BillingPeriod(startDate: LocalDate, endDate: LocalDate)
 
 object RatePlanChargeBillingSchedule {
-  def forRatePlanCharge(ratePlanCharge: RatePlanCharge): Either[ZuoraHolidayError, RatePlanChargeBillingSchedule] =
-    RatePlanChargeBillingSchedule(
-      ratePlanCharge.billingPeriod,
-      ratePlanCharge.specificBillingPeriod,
-      ratePlanCharge.effectiveStartDate,
-      ratePlanCharge.endDateCondition,
-      ratePlanCharge.upToPeriodsType,
-      ratePlanCharge.upToPeriods
-    )
-
-  def apply(
-    optionalBillingPeriodId: Option[String],
-    optionalSpecificBillingPeriod: Option[Int],
-    effectiveStartDate: LocalDate,
-    optionalEndDateCondition: Option[String],
-    upToPeriodsType: Option[String],
-    upToPeriods: Option[Int]
-  ): Either[ZuoraHolidayError, RatePlanChargeBillingSchedule] = {
+  def apply(ratePlanCharge: RatePlanCharge): Either[ZuoraHolidayError, RatePlanChargeBillingSchedule] = {
     for {
-      endDateCondition <- optionalEndDateCondition.toRight(ZuoraHolidayError("RatePlanCharge.endDateCondition is required"))
-      billingPeriodId <- optionalBillingPeriodId.toRight(ZuoraHolidayError("RatePlanCharge.billingPeriod is required"))
-      billingPeriod <- billingPeriodForZuoraId(billingPeriodId: String, optionalSpecificBillingPeriod)
+      endDateCondition <- ratePlanCharge.endDateCondition.toRight(ZuoraHolidayError("RatePlanCharge.endDateCondition is required"))
+      billingPeriodId <- ratePlanCharge.billingPeriod.toRight(ZuoraHolidayError("RatePlanCharge.billingPeriod is required"))
+      billingPeriod <- billingPeriodForZuoraId(billingPeriodId, ratePlanCharge.specificBillingPeriod)
       ratePlanEndDate <- ratePlanEndDate(
         billingPeriod,
-        effectiveStartDate,
+        ratePlanCharge.effectiveStartDate,
         endDateCondition,
-        upToPeriodsType,
-        upToPeriods
+        ratePlanCharge.upToPeriodsType,
+        ratePlanCharge.upToPeriods
       )
     } yield new RatePlanChargeBillingSchedule {
       override def isDateCoveredBySchedule(date: LocalDate): Boolean = {
-        (date == effectiveStartDate || date.isAfter(effectiveStartDate)) &&
+        (date == ratePlanCharge.effectiveStartDate || date.isAfter(ratePlanCharge.effectiveStartDate)) &&
           ratePlanEndDate
           .map(endDate => date == endDate || date.isBefore(endDate))
           .getOrElse(true)
@@ -99,7 +85,7 @@ object RatePlanChargeBillingSchedule {
 
       override def billingPeriodForDate(date: LocalDate): Either[ZuoraHolidayError, BillingPeriod] = {
         def billingPeriodByIndex(index: Int) = {
-          val startDate = effectiveStartDate.plus(billingPeriod.multipliedBy(index))
+          val startDate = ratePlanCharge.effectiveStartDate.plus(billingPeriod.multipliedBy(index))
           val endDate = startDate.plus(billingPeriod).minusDays(1)
           BillingPeriod(startDate, endDate)
         }

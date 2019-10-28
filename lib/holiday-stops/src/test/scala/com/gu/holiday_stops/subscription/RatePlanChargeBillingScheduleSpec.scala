@@ -3,7 +3,7 @@ package com.gu.holiday_stops.subscription
 import java.time.temporal.ChronoUnit
 import java.time.LocalDate
 
-import com.gu.holiday_stops.ZuoraHolidayError
+import com.gu.holiday_stops.{Fixtures, ZuoraHolidayError}
 import org.scalactic.TypeCheckedTripleEquals
 import org.scalatest.Inside.inside
 import org.scalatest.{EitherValues, FlatSpec, Matchers}
@@ -58,12 +58,14 @@ class RatePlanChargeBillingScheduleSpec extends FlatSpec with Matchers with Eith
     val effectiveStartDate = LocalDate.of(2019, 10, 1)
     inside(
       RatePlanChargeBillingSchedule(
-        optionalBillingPeriodId = Some("Month"),
-        optionalSpecificBillingPeriod = None,
-        effectiveStartDate = effectiveStartDate,
-        optionalEndDateCondition = Some("Subscription_End"),
-        upToPeriodsType = None,
-        upToPeriods = None
+        Fixtures.mkRatePlanCharge(
+          price = 1,
+          billingPeriod = "Month",
+          effectiveStartDate = effectiveStartDate,
+          endDateCondition = Some("Subscription_End"),
+          upToPeriodsType = None,
+          upToPeriods = None
+        )
       )
     ) {
         case Right(billingSchedule) =>
@@ -121,12 +123,15 @@ class RatePlanChargeBillingScheduleSpec extends FlatSpec with Matchers with Eith
   private def testFixedBillingPeriod(zuoraBillingPeriodId: String, optionalSpecificBillingPeriod: Option[Int], billingPeriodsRatePlanIsValidFor: Int, effectiveStartDate: LocalDate, expectedEndDate: LocalDate) = {
     inside(
       RatePlanChargeBillingSchedule(
-        Some(zuoraBillingPeriodId),
-        optionalSpecificBillingPeriod,
-        effectiveStartDate,
-        Some("Fixed_Period"),
-        Some("Billing_Periods"),
-        Some(billingPeriodsRatePlanIsValidFor)
+        Fixtures.mkRatePlanCharge(
+          price = 1,
+          billingPeriod = zuoraBillingPeriodId,
+          effectiveStartDate = effectiveStartDate,
+          endDateCondition = Some("Fixed_Period"),
+          upToPeriodsType = Some("Billing_Periods"),
+          upToPeriods = Some(billingPeriodsRatePlanIsValidFor),
+          specificBillingPeriod = optionalSpecificBillingPeriod
+        )
       )
     ) {
         case Right(billingSchedule) =>
@@ -154,12 +159,15 @@ class RatePlanChargeBillingScheduleSpec extends FlatSpec with Matchers with Eith
   ) = {
     inside(
       RatePlanChargeBillingSchedule(
-        Some(zuoraBillingPeriodId),
-        optionalSpecificBillingPeriod,
-        effectiveStartDate,
-        Some("Fixed_Period"),
-        Some("Billing_Periods"),
-        Some(2)
+        Fixtures.mkRatePlanCharge(
+          price = 1,
+          billingPeriod = zuoraBillingPeriodId,
+          effectiveStartDate = effectiveStartDate,
+          endDateCondition = Some("Fixed_Period"),
+          upToPeriodsType = Some("Billing_Periods"),
+          upToPeriods = Some(2),
+          specificBillingPeriod = optionalSpecificBillingPeriod
+        )
       )
     ) {
         case Right(billingSchedule) =>

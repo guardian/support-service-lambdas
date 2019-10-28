@@ -71,7 +71,7 @@ object GuardianWeeklySubscription {
     } yield GuardianWeeklySubscription(
       subscription.subscriptionNumber,
       ratePlanChargeInfo.zoraBillingPeriodId,
-      ratePlanChargeInfo.ratePlan.price,
+      ratePlanChargeInfo.ratePlanCharge.price,
       stoppedPublicationDate.value,
       billingPeriodDate
     )
