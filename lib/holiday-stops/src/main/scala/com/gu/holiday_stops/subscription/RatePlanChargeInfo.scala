@@ -6,16 +6,16 @@ import acyclic.skipped
 case class RatePlanChargeInfo(
   ratePlanCharge: RatePlanCharge,
   billingSchedule: RatePlanChargeBillingSchedule,
-  zoraBillingPeriodId: String
+  billingPeriodName: String
 )
 
 object RatePlanChargeInfo {
   def apply(ratePlanCharge: RatePlanCharge): Either[ZuoraHolidayError, RatePlanChargeInfo] = {
     for {
-      zuoraBillingPeriodId <- ratePlanCharge
+      billingPeriodName <- ratePlanCharge
         .billingPeriod
         .toRight(ZuoraHolidayError("RatePlanCharge.billingPeriod is required"))
       schedule <- RatePlanChargeBillingSchedule(ratePlanCharge)
-    } yield RatePlanChargeInfo(ratePlanCharge, schedule, zuoraBillingPeriodId)
+    } yield RatePlanChargeInfo(ratePlanCharge, schedule, billingPeriodName)
   }
 }

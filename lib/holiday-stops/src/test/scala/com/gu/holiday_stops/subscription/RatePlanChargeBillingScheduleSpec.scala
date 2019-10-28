@@ -11,7 +11,7 @@ import org.scalatest.{EitherValues, FlatSpec, Matchers}
 class RatePlanChargeBillingScheduleSpec extends FlatSpec with Matchers with EitherValues with TypeCheckedTripleEquals {
   "BillingSchedule" should "calculate fixed monthly period valid date range" in {
     testFixedBillingPeriod(
-      zuoraBillingPeriodId = "Month",
+      billingPeriodName = "Month",
       optionalSpecificBillingPeriod = None,
       billingPeriodsRatePlanIsValidFor = 2,
       effectiveStartDate = LocalDate.of(2019, 10, 1),
@@ -20,7 +20,7 @@ class RatePlanChargeBillingScheduleSpec extends FlatSpec with Matchers with Eith
   }
   it should "calculate fixed annual period valid date range" in {
     testFixedBillingPeriod(
-      zuoraBillingPeriodId = "Annual",
+      billingPeriodName = "Annual",
       optionalSpecificBillingPeriod = None,
       billingPeriodsRatePlanIsValidFor = 2,
       effectiveStartDate = LocalDate.of(2019, 10, 1),
@@ -29,7 +29,7 @@ class RatePlanChargeBillingScheduleSpec extends FlatSpec with Matchers with Eith
   }
   it should "calculate fixed semi annual period valid date range" in {
     testFixedBillingPeriod(
-      zuoraBillingPeriodId = "Semi_Annual",
+      billingPeriodName = "Semi_Annual",
       optionalSpecificBillingPeriod = None,
       billingPeriodsRatePlanIsValidFor = 2,
       effectiveStartDate = LocalDate.of(2019, 10, 1),
@@ -38,7 +38,7 @@ class RatePlanChargeBillingScheduleSpec extends FlatSpec with Matchers with Eith
   }
   it should "calculate fixed quarterly period valid date range" in {
     testFixedBillingPeriod(
-      zuoraBillingPeriodId = "Quarter",
+      billingPeriodName = "Quarter",
       optionalSpecificBillingPeriod = None,
       billingPeriodsRatePlanIsValidFor = 2,
       effectiveStartDate = LocalDate.of(2019, 10, 1),
@@ -47,7 +47,7 @@ class RatePlanChargeBillingScheduleSpec extends FlatSpec with Matchers with Eith
   }
   it should "calculate fixed specific number of weeks period valid date range" in {
     testFixedBillingPeriod(
-      zuoraBillingPeriodId = "Specific_Weeks",
+      billingPeriodName = "Specific_Weeks",
       optionalSpecificBillingPeriod = Some(3),
       billingPeriodsRatePlanIsValidFor = 2,
       effectiveStartDate = LocalDate.of(2019, 10, 1),
@@ -120,12 +120,12 @@ class RatePlanChargeBillingScheduleSpec extends FlatSpec with Matchers with Eith
     )
   }
 
-  private def testFixedBillingPeriod(zuoraBillingPeriodId: String, optionalSpecificBillingPeriod: Option[Int], billingPeriodsRatePlanIsValidFor: Int, effectiveStartDate: LocalDate, expectedEndDate: LocalDate) = {
+  private def testFixedBillingPeriod(billingPeriodName: String, optionalSpecificBillingPeriod: Option[Int], billingPeriodsRatePlanIsValidFor: Int, effectiveStartDate: LocalDate, expectedEndDate: LocalDate) = {
     inside(
       RatePlanChargeBillingSchedule(
         Fixtures.mkRatePlanCharge(
           price = 1,
-          billingPeriod = zuoraBillingPeriodId,
+          billingPeriod = billingPeriodName,
           effectiveStartDate = effectiveStartDate,
           endDateCondition = Some("Fixed_Period"),
           upToPeriodsType = Some("Billing_Periods"),
@@ -151,7 +151,7 @@ class RatePlanChargeBillingScheduleSpec extends FlatSpec with Matchers with Eith
   }
 
   private def testFixedBillingSchedule(
-    zuoraBillingPeriodId: String,
+    billingPeriodName: String,
     optionalSpecificBillingPeriod: Option[Int],
     effectiveStartDate: LocalDate,
     expectedBillingPeriod1: BillingPeriod,
@@ -161,7 +161,7 @@ class RatePlanChargeBillingScheduleSpec extends FlatSpec with Matchers with Eith
       RatePlanChargeBillingSchedule(
         Fixtures.mkRatePlanCharge(
           price = 1,
-          billingPeriod = zuoraBillingPeriodId,
+          billingPeriod = billingPeriodName,
           effectiveStartDate = effectiveStartDate,
           endDateCondition = Some("Fixed_Period"),
           upToPeriodsType = Some("Billing_Periods"),

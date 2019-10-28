@@ -66,8 +66,8 @@ object RatePlanChargeBillingSchedule {
   def apply(ratePlanCharge: RatePlanCharge): Either[ZuoraHolidayError, RatePlanChargeBillingSchedule] = {
     for {
       endDateCondition <- ratePlanCharge.endDateCondition.toRight(ZuoraHolidayError("RatePlanCharge.endDateCondition is required"))
-      billingPeriodId <- ratePlanCharge.billingPeriod.toRight(ZuoraHolidayError("RatePlanCharge.billingPeriod is required"))
-      billingPeriod <- billingPeriodForZuoraId(billingPeriodId, ratePlanCharge.specificBillingPeriod)
+      billingPeriodName <- ratePlanCharge.billingPeriod.toRight(ZuoraHolidayError("RatePlanCharge.billingPeriod is required"))
+      billingPeriod <- billingPeriodForName(billingPeriodName, ratePlanCharge.specificBillingPeriod)
       ratePlanEndDate <- ratePlanEndDate(
         billingPeriod,
         ratePlanCharge.effectiveStartDate,
@@ -110,17 +110,20 @@ object RatePlanChargeBillingSchedule {
     }
   }
 
-  private def billingPeriodForZuoraId(zuoraBillingPeriodId: String, optionalSpecificBillingPeriod: Option[Int]): Either[ZuoraHolidayError, Period] = {
-    zuoraBillingPeriodId match {
+  private def billingPeriodForName(
+    billingPeriodName: String,
+    optionalSpecificBillingPeriod: Option[Int]
+  ): Either[ZuoraHolidayError, Period] = {
+    billingPeriodName match {
       case "Annual" => Right(Period.ofYears(1))
       case "Semi_Annual" => Right(Period.ofMonths(6))
       case "Quarter" => Right(Period.ofMonths(3))
       case "Month" => Right(Period.ofMonths(1))
       case "Specific_Weeks" =>
         optionalSpecificBillingPeriod
-          .toRight(ZuoraHolidayError(s"specificBillingPeriod is required for $zuoraBillingPeriodId billing period"))
+          .toRight(ZuoraHolidayError(s"specificBillingPeriod is required for $billingPeriodName billing period"))
           .map(Period.ofWeeks(_))
-      case _ => Left(ZuoraHolidayError(s"Failed to determine duration of billing period: $zuoraBillingPeriodId"))
+      case _ => Left(ZuoraHolidayError(s"Failed to determine duration of billing period: $billingPeriodName"))
     }
   }
 

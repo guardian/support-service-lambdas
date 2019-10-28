@@ -88,7 +88,7 @@ object VoucherSubscription {
       billingPeriodForStopDate <- ratePlanChargeInfo.billingSchedule.billingPeriodForDate(stoppedPublicationDate.value)
     } yield new VoucherSubscription(
       subscriptionNumber = subscription.subscriptionNumber,
-      billingPeriod = ratePlanChargeInfo.zoraBillingPeriodId,
+      billingPeriod = ratePlanChargeInfo.billingPeriodName,
       price = ratePlanChargeInfo.ratePlanCharge.price,
       stoppedPublicationDate.value,
       dayOfWeek = VoucherDayOfWeek.withName(stoppedPublicationDate.getDayOfWeek),

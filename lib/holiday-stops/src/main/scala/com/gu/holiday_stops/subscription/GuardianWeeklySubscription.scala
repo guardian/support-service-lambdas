@@ -70,7 +70,7 @@ object GuardianWeeklySubscription {
       billingPeriodDate <- ratePlanChargeInfo.billingSchedule.billingPeriodForDate(stoppedPublicationDate.value)
     } yield GuardianWeeklySubscription(
       subscription.subscriptionNumber,
-      ratePlanChargeInfo.zoraBillingPeriodId,
+      ratePlanChargeInfo.billingPeriodName,
       ratePlanChargeInfo.ratePlanCharge.price,
       stoppedPublicationDate.value,
       billingPeriodDate
