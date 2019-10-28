@@ -21,6 +21,7 @@ import com.gu.util.config._
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.JsonHttp.StringHttpRequest
 import com.gu.util.resthttp.RestRequestMaker.BodyAsString
+import com.gu.util.resthttp.Types.ClientFailure
 import com.gu.util.resthttp.{HttpOp, JsonHttp}
 import com.softwaremill.sttp.{HttpURLConnectionBackend, Id, SttpBackend}
 import okhttp3.{Request, Response}
@@ -139,9 +140,14 @@ object Handler extends Logging {
     case (HEADER_IDENTITY_ID, identityId) => Left(IdentityId(identityId))
   }).toApiGatewayContinueProcessing(
     ApiGatewayResponse.badRequest(
-    s"either '$HEADER_IDENTITY_ID' header OR '$HEADER_SALESFORCE_CONTACT_ID' (one is required)"
+      s"either '$HEADER_IDENTITY_ID' header OR '$HEADER_SALESFORCE_CONTACT_ID' (one is required)"
     )
   )
+
+  private def exposeSfErrorMessageIn500ApiResponse(action: String) = (error: ClientFailure) => {
+    logger.error(s"Failed to $action: $error")
+    ApiGatewayResponse.messageResponse("500", error.message)
+  }
 
   case class PotentialHolidayStopsPathParams(subscriptionName: SubscriptionName)
 
@@ -213,8 +219,9 @@ object Handler extends Logging {
         .publicationDatesToBeStopped(requestBody.start, requestBody.end, ProductVariant(zuoraSubscription.ratePlans))
         .toApiGatewayOp(s"calculating publication dates")
       createBody = CreateHolidayStopRequestWithDetail.buildBody(requestBody.start, requestBody.end, publicationDatesToBeStopped, matchingSfSub, zuoraSubscription)
-      _ <- createOp(createBody).toDisjunction.toApiGatewayOp(s"create new Holiday Stop Request for subscription ${requestBody.subscriptionName} (contact $contact)")
-      // TODO nice to have - handle 'FIELD_CUSTOM_VALIDATION_EXCEPTION' etc back from SF and place in response
+      _ <- createOp(createBody).toDisjunction.toApiGatewayOp(
+        exposeSfErrorMessageIn500ApiResponse(s"create new Holiday Stop Request for subscription ${requestBody.subscriptionName} (contact $contact)")
+      )
     } yield ApiGatewayResponse.successfulExecution).apiResponse
   }
 
@@ -241,7 +248,9 @@ object Handler extends Logging {
       pathParams <- req.pathParamsAsCaseClass[WithdrawPathParams]()(Json.reads[WithdrawPathParams])
       existingForUser <- lookupOp(contact, None).toDisjunction.toApiGatewayOp(s"lookup Holiday Stop Requests for contact $contact")
       _ = existingForUser.exists(_.Id == pathParams.holidayStopRequestId).toApiGatewayContinueProcessing(ApiGatewayResponse.forbidden("not your holiday stop"))
-      _ <- withdrawOp(pathParams.holidayStopRequestId).toDisjunction.toApiGatewayOp(s"withdraw Holiday Stop Request for subscription ${pathParams.subscriptionName.value} of contact $contact")
+      _ <- withdrawOp(pathParams.holidayStopRequestId).toDisjunction.toApiGatewayOp(
+        exposeSfErrorMessageIn500ApiResponse(s"withdraw Holiday Stop Request for subscription ${pathParams.subscriptionName.value} of contact $contact")
+      )
     } yield ApiGatewayResponse.successfulExecution).apiResponse
   }
 
