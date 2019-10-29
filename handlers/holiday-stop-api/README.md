@@ -13,7 +13,8 @@ All endpoints require...
 | GET | `/{STAGE}/potential/{SUBSCRIPTION_NAME}?startDate={yyyy-MM-dd}&endDate={yyyy-MM-dd}&estimateCredit={true`&#124;`false}` | returns a response containing dates for each issue impacted between the start and end parameters inclusively, for the subscription. Optionally the estimated credit can be calculated for each issue (which comes with the invoice date it will be appear on) |
 | GET | `/{STAGE}/hsr/{SUBSCRIPTION_NAME}` | returns all holiday stops (past & present) for the specified subscription (user is verified as the 'bill to' contact of the subscription). Response includes an 'annualIssueLimit' and an 'issueSpecifics' array containing a series of objects each with calculated 'firstAvailableDate' and 'issueDayOfWeek'.|
 | POST | `/{STAGE}/hsr` | creates a new all holiday stop, example body `{ "start": "2023-06-10", "end": "2024-06-14", "subscriptionName": "A-S00071783" }`|
-| DELETE | `/{STAGE}/hsr/{SUBSCRIPTION_NAME} /{SF_ID}` | marks the holiday stop request as 'withdrawn' in SalesForce (specifically; placing timestamp in `Withdrawn_Time__c` field) (where holiday stop request `Id` matches `{SF_ID}`) |
+| PATCH | `/{STAGE}/hsr/{SUBSCRIPTION_NAME}/{SF_ID}` | with the same body as create endpoint above, amends the holiday stop request (where holiday stop request `Id` matches `{SF_ID}`) to the newly specified dates and adds/removes the underlying detail records where appropriate |
+| DELETE | `/{STAGE}/hsr/{SUBSCRIPTION_NAME}/{SF_ID}` | marks the holiday stop request as 'withdrawn' in SalesForce (specifically; placing timestamp in `Withdrawn_Time__c` field) (where holiday stop request `Id` matches `{SF_ID}`) |
 
 
 ### Handling Multiple Environments
