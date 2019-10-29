@@ -10,14 +10,14 @@ import org.scalatest.{EitherValues, FlatSpec, Matchers, OptionValues}
 
 class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with EitherValues with OptionValues {
   MutableCalendar.setFakeToday(Some(LocalDate.parse("2019-07-12")))
-  val chargedThroughDate = LocalDate.of(2019, 8, 11)
+  val effectiveStartDate = LocalDate.of(2019, 5, 11)
 
   private val subscription = mkGuardianWeeklySubscription(
     termStartDate = LocalDate.of(2018, 1, 1),
     termEndDate = LocalDate.of(2019, 1, 1),
     price = 75.5,
     billingPeriod = "Quarter",
-    chargedThroughDate = Some(chargedThroughDate)
+    effectiveStartDate = effectiveStartDate
   )
 
   private val holidayStop = HolidayStop(

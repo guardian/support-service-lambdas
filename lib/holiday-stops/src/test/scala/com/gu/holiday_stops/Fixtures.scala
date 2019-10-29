@@ -16,25 +16,37 @@ import scala.io.Source
 object Fixtures extends Assertions {
 
   def billingPeriodToMonths(billingPeriod: String): Int = billingPeriod match {
+    case "Month" => 1
     case "Quarter" => 3
     case "Annual" => 12
+    case "Semi_Annual" => 6
+    case "Specific_Weeks" => 1
   }
 
   def mkRatePlanCharge(
     price: Double,
     billingPeriod: String,
-    chargedThroughDate: Option[LocalDate] = Some(LocalDate.of(2019, 9, 2))
+    chargedThroughDate: Option[LocalDate] = Some(LocalDate.of(2019, 9, 2)),
+    effectiveStartDate: LocalDate = LocalDate.of(2019, 6, 2),
+    specificBillingPeriod: Option[Int] = None,
+    upToPeriodsType: Option[String] = None,
+    upToPeriods: Option[Int] = None,
+    endDateCondition: Option[String] = Some("Subscription_End"),
   ) = RatePlanCharge(
     name = "GW",
     number = "C1",
     price,
     Some(billingPeriod),
-    effectiveStartDate = LocalDate.of(2018, 6, 10),
+    effectiveStartDate,
     chargedThroughDate,
     HolidayStart__c = None,
     HolidayEnd__c = None,
     processedThroughDate = chargedThroughDate.map(_.minusMonths(billingPeriodToMonths(billingPeriod))),
-    productRatePlanChargeId = ""
+    productRatePlanChargeId = "",
+    specificBillingPeriod = specificBillingPeriod,
+    endDateCondition = endDateCondition,
+    upToPeriodsType = upToPeriodsType,
+    upToPeriods = upToPeriods
   )
 
   def mkGuardianWeeklySubscription(
@@ -43,7 +55,8 @@ object Fixtures extends Assertions {
     customerAcceptanceDate: LocalDate = LocalDate.now(),
     price: Double = -1.0,
     billingPeriod: String = "Quarter",
-    chargedThroughDate: Option[LocalDate] = None
+    chargedThroughDate: Option[LocalDate] = None,
+    effectiveStartDate: LocalDate = LocalDate.now()
   ): Subscription =
     Subscription(
       subscriptionNumber = "S1",
@@ -61,7 +74,8 @@ object Fixtures extends Assertions {
             List(mkRatePlanCharge(
               price,
               billingPeriod,
-              chargedThroughDate
+              chargedThroughDate,
+              effectiveStartDate
             )),
           productRatePlanId = "",
           id = ""
@@ -93,7 +107,11 @@ object Fixtures extends Assertions {
           HolidayStart__c = Some(LocalDate.of(2019, 8, 9)),
           HolidayEnd__c = Some(LocalDate.of(2019, 8, 9)),
           processedThroughDate = None,
-          productRatePlanChargeId = ""
+          productRatePlanChargeId = "",
+          specificBillingPeriod = None,
+          endDateCondition = None,
+          upToPeriodsType = None,
+          upToPeriods = None
         )),
         productRatePlanId = "",
         id = ""
@@ -111,7 +129,11 @@ object Fixtures extends Assertions {
           HolidayStart__c = Some(LocalDate.of(2019, 9, 1)),
           HolidayEnd__c = Some(LocalDate.of(2019, 9, 1)),
           processedThroughDate = None,
-          productRatePlanChargeId = ""
+          productRatePlanChargeId = "",
+          specificBillingPeriod = None,
+          endDateCondition = None,
+          upToPeriodsType = None,
+          upToPeriods = None
         )),
         productRatePlanId = "",
         id = ""
@@ -129,7 +151,11 @@ object Fixtures extends Assertions {
           HolidayStart__c = Some(LocalDate.of(2019, 8, 11)),
           HolidayEnd__c = Some(LocalDate.of(2019, 8, 11)),
           processedThroughDate = None,
-          productRatePlanChargeId = ""
+          productRatePlanChargeId = "",
+          specificBillingPeriod = None,
+          endDateCondition = None,
+          upToPeriodsType = None,
+          upToPeriods = None
         )),
         productRatePlanId = "",
         id = ""
@@ -147,7 +173,11 @@ object Fixtures extends Assertions {
           HolidayStart__c = Some(LocalDate.of(2019, 8, 19)),
           HolidayEnd__c = Some(LocalDate.of(2019, 8, 19)),
           processedThroughDate = None,
-          productRatePlanChargeId = ""
+          productRatePlanChargeId = "",
+          specificBillingPeriod = None,
+          endDateCondition = None,
+          upToPeriodsType = None,
+          upToPeriods = None
         )),
         productRatePlanId = "",
         id = ""
@@ -165,7 +195,11 @@ object Fixtures extends Assertions {
           HolidayStart__c = Some(LocalDate.of(2019, 8, 2)),
           HolidayEnd__c = Some(LocalDate.of(2019, 8, 2)),
           processedThroughDate = None,
-          productRatePlanChargeId = ""
+          productRatePlanChargeId = "",
+          specificBillingPeriod = None,
+          endDateCondition = None,
+          upToPeriodsType = None,
+          upToPeriods = None
         )),
         productRatePlanId = "",
         id = ""
@@ -183,7 +217,11 @@ object Fixtures extends Assertions {
           HolidayStart__c = Some(LocalDate.of(2018, 11, 16)),
           HolidayEnd__c = Some(LocalDate.of(2019, 1, 4)),
           processedThroughDate = None,
-          productRatePlanChargeId = ""
+          productRatePlanChargeId = "",
+          specificBillingPeriod = None,
+          endDateCondition = None,
+          upToPeriodsType = None,
+          upToPeriods = None
         )),
         productRatePlanId = "",
         id = ""

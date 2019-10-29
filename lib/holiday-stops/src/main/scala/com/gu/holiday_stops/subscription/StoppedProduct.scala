@@ -1,7 +1,6 @@
 package com.gu.holiday_stops.subscription
 
-import java.time.LocalDate.now
-import java.time.{LocalDate, Period}
+import java.time.LocalDate
 
 import acyclic.skipped
 import cats.syntax.either._
@@ -9,32 +8,14 @@ import com.gu.holiday_stops.{ZuoraHolidayError, ZuoraHolidayResponse}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.StoppedPublicationDate
 import com.gu.util.Logging
 
-import scala.annotation.tailrec
 import scala.math.BigDecimal.RoundingMode
-
-/**
- * Invoiced period defined by [startDateIncluding, endDateExcluding) specifies the current period for which
- * the customer has been billed.
- *
- * @param startDateIncluding service active on startDateIncluding; corresponds to processedThroughDate
- * @param endDateExcluding service ends on endDateExcluding; corresponds to chargedThroughDate
- */
-case class CurrentInvoicedPeriod(startDateIncluding: LocalDate, endDateExcluding: LocalDate) {
-
-  /**
-   * Is date between two dates where including the start while excluding the end?
-   */
-  def containsDate(date: LocalDate): Boolean =
-    (date.isEqual(startDateIncluding) || date.isAfter(startDateIncluding)) &&
-    date.isBefore(endDateExcluding)
-}
 
 abstract class StoppedProduct(
   val subscriptionNumber: String,
   val stoppedPublicationDate: LocalDate,
   val price: Double,
   val billingPeriod: String,
-  val invoicedPeriod: CurrentInvoicedPeriod,
+  val stoppedPublicationDateBillingPeriod: BillingPeriod
 ) extends Logging {
   private def creditAmount: Double = {
     def roundUp(d: Double): Double = BigDecimal(d).setScale(2, RoundingMode.UP).toDouble
@@ -44,26 +25,14 @@ abstract class StoppedProduct(
   }
 
   /**
-   * Holiday credit is applied to the next invoice on the first day of the next billing period.
+   * This returns the date for the next bill after the stoppedPublicationDate.
    *
-   * 'Invoiced period' or `billing period that has already been invoiced` is defined as
-   * [processedThroughDate, chargedThroughDate) meaning
-   *   - from processedThroughDate inclusive
-   *   - to chargedThroughDate exclusive
+   * This currently calculates the current billing period and uses the following day. This is an over simplification
+   * but works for current use cases
    *
-   * Hence chargedThroughDate represents the first day of the next billing period. For quarterly
-   * billing period this would be the first day of the next quarter, whilst for annual this would be
-   * the first day of the next year of the subscription.
+   * For more details about the calculation of the current billing period see:
    *
-   * Note chargedThroughDate is an API concept. The UI and the actual invoice use the term 'Service Period'
-   * where from and to dates are both inclusive.
-   *
-   * Note nextBillingPeriodStartDate represents a specific date yyyy-mm-dd unlike billingPeriod (eg. "quarterly")
-   * or billingPeriodStartDay (eg. 1st of month).
-   *
-   * There is a complication when reader has N-for-N intro plan (for example, GW Oct 18 - Six for Six - Domestic).
-   * If the holiday falls within N-for-N then credit should be applied on the first regular invoice, not the next billing
-   * period of GW regular plan.
+   * [[com.gu.holiday_stops.subscription.RatePlanChargeBillingSchedule]]
    *
    * @return Date of the first day of the billing period
    *         following this <code>stoppedPublicationDate</code>.
@@ -71,35 +40,7 @@ abstract class StoppedProduct(
    *         shows examples of the expected outcome.
    */
   private def nextBillingPeriodStartDate: LocalDate = {
-
-    if (stoppedPublicationDate.isAfter(now.plusYears(5)))
-      logger.warn(s"Calculating nextBillingPeriodStartDate for curious case $this")
-
-    if (billingPeriod == "Specific_Weeks") invoicedPeriod.endDateExcluding
-    else {
-
-      val billingPeriodDuration: Period = billingPeriod match {
-        case "Annual" => Period.ofYears(1)
-        case "Semi_Annual" => Period.ofMonths(6)
-        case "Quarter" => Period.ofMonths(3)
-        case "Month" => Period.ofMonths(1)
-        case _ => throw new RuntimeException(
-          s"Failed to determine duration of billing period: $billingPeriod"
-        )
-      }
-
-      @tailrec
-      def go(invoicePeriod: CurrentInvoicedPeriod): LocalDate =
-        if (invoicePeriod.containsDate(stoppedPublicationDate))
-          invoicePeriod.endDateExcluding
-        else
-          go(CurrentInvoicedPeriod(
-            startDateIncluding = invoicePeriod.endDateExcluding,
-            endDateExcluding = invoicePeriod.endDateExcluding.plus(billingPeriodDuration)
-          ))
-
-      go(invoicedPeriod)
-    }
+    stoppedPublicationDateBillingPeriod.endDate.plusDays(1)
   }
 
   private def billingPeriodToApproxWeekCount(billingPeriod: String): Int =
@@ -120,33 +61,5 @@ object StoppedProduct {
     GuardianWeeklySubscription(subscription, stoppedPublicationDate)
       .orElse(VoucherSubscription(subscription, stoppedPublicationDate))
       .orElse(Left(ZuoraHolidayError(s"Failed to determine StoppableProduct: ${subscription.subscriptionNumber}; ${stoppedPublicationDate}")))
-  }
-
-  def stoppedPublicationDateIsAfterCurrentInvoiceStartDate(
-      ratePlan: RatePlan,
-      stoppedPublicationDate: StoppedPublicationDate
-  ): Boolean = {
-    ratePlan.ratePlanCharges.forall { ratePlanCharge =>
-      (for {
-        fromInclusive <- ratePlanCharge.processedThroughDate
-        _ <- ratePlanCharge.chargedThroughDate
-      } yield {
-        stoppedPublicationDate.value.isEqual(fromInclusive) || stoppedPublicationDate.value.isAfter(fromInclusive)
-      }).getOrElse(false)
-    }
-  }
-
-  def stoppedPublicationDateFallsStrictlyWithinInvoicedPeriod(
-    ratePlan: RatePlan,
-    stoppedPublicationDate: StoppedPublicationDate,
-  ): Boolean = {
-    ratePlan.ratePlanCharges.forall { ratePlanCharge =>
-      (for {
-        fromInclusive <- ratePlanCharge.processedThroughDate
-        toExclusive <- ratePlanCharge.chargedThroughDate
-      } yield {
-        (toExclusive isAfter fromInclusive) && CurrentInvoicedPeriod(fromInclusive, toExclusive).containsDate(stoppedPublicationDate.value)
-      }).getOrElse(false)
-    }
   }
 }

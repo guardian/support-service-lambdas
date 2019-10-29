@@ -13,10 +13,4 @@ class CurrentSundayVoucherSubscriptionSpec extends FlatSpec with Matchers with E
     val currentSundayVoucherSubscription = VoucherSubscription(subscription, StoppedPublicationDate(LocalDate.parse("2019-10-27")))
     currentSundayVoucherSubscription.right.value.dayOfWeek should ===(VoucherDayOfWeek.Sunday)
   }
-
-  it should "fail on missing invoice" in {
-    val subscription = Fixtures.subscriptionFromJson("SundayVoucherSubscriptionMissingInvoice.json")
-    val currentSundayVoucherSubscription = VoucherSubscription(subscription, StoppedPublicationDate(LocalDate.parse("2019-10-27")))
-    currentSundayVoucherSubscription.isLeft should ===(true)
-  }
 }

@@ -23,12 +23,12 @@ case class Subscription(
 
     def isMatchingCharge(charge: RatePlanCharge): Boolean =
       charge.name == "Holiday Credit" &&
-      charge.HolidayStart__c.exists { start =>
-        start.isEqual(stop.stoppedPublicationDate) || start.isBefore(stop.stoppedPublicationDate)
-      } &&
-      charge.HolidayEnd__c.exists { end =>
-        end.isEqual(stop.stoppedPublicationDate) || end.isAfter(stop.stoppedPublicationDate)
-      }
+        charge.HolidayStart__c.exists { start =>
+          start.isEqual(stop.stoppedPublicationDate) || start.isBefore(stop.stoppedPublicationDate)
+        } &&
+        charge.HolidayEnd__c.exists { end =>
+          end.isEqual(stop.stoppedPublicationDate) || end.isAfter(stop.stoppedPublicationDate)
+        }
 
     val charges = for {
       plan <- ratePlans if isMatchingPlan(plan)
@@ -67,4 +67,8 @@ case class RatePlanCharge(
   HolidayEnd__c: Option[LocalDate],
   processedThroughDate: Option[LocalDate],
   productRatePlanChargeId: String,
+  specificBillingPeriod: Option[Int],
+  endDateCondition: Option[String],
+  upToPeriodsType: Option[String],
+  upToPeriods: Option[Int]
 )

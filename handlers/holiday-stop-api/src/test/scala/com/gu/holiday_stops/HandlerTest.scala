@@ -67,7 +67,11 @@ class HandlerTest extends FlatSpec with Matchers {
               HolidayStart__c = None,
               HolidayEnd__c = None,
               processedThroughDate = Some(endDate.minusMonths(3)),
-              ""
+              "",
+              specificBillingPeriod = None,
+              endDateCondition = Some("Subscription_End"),
+              upToPeriodsType = None,
+              upToPeriods = None
             )),
           productRatePlanId = "",
           id = ""

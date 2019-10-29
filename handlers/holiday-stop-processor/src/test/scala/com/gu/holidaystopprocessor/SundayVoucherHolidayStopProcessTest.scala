@@ -6,6 +6,7 @@ import com.gu.holiday_stops._
 import com.gu.holiday_stops.subscription.{Add, ChargeOverride, HolidayCreditUpdate, RatePlan, RatePlanCharge, Subscription}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
 import org.scalatest.{FlatSpec, Matchers}
+
 import scala.collection.mutable
 
 class SundayVoucherHolidayStopProcessTest extends FlatSpec with Matchers {
@@ -58,7 +59,11 @@ class SundayVoucherHolidayStopProcessTest extends FlatSpec with Matchers {
           None,
           None,
           Some(LocalDate.parse("2019-10-20")),
-          "2c92c0f95aff3b56015b1045fba832d4"
+          "2c92c0f95aff3b56015b1045fba832d4",
+          specificBillingPeriod = None,
+          endDateCondition = Some("Subscription_End"),
+          upToPeriodsType = None,
+          upToPeriods = None
         )),
         "2c92c0f95aff3b56015b1045fb9332d2",
         "2c92c0f86d6263c0016d6271c6750a35"
@@ -90,7 +95,11 @@ class SundayVoucherHolidayStopProcessTest extends FlatSpec with Matchers {
               Some(LocalDate.parse("2019-10-20")),
               Some(LocalDate.parse("2019-10-20")),
               None,
-              "2c92c0f96b03800b016b081fc0f41bb4"
+              "2c92c0f96b03800b016b081fc0f41bb4",
+              specificBillingPeriod = None,
+              endDateCondition = None,
+              upToPeriodsType = None,
+              upToPeriods = None
             )
           ),
           "2c92c0f96b03800b016b081fc04f1ba2",
@@ -110,7 +119,11 @@ class SundayVoucherHolidayStopProcessTest extends FlatSpec with Matchers {
               None,
               None,
               Some(LocalDate.parse("2019-10-20")),
-              "2c92c0f95aff3b56015b1045fba832d4"
+              "2c92c0f95aff3b56015b1045fba832d4",
+              specificBillingPeriod = None,
+              endDateCondition = None,
+              upToPeriodsType = None,
+              upToPeriods = None
             )
           ),
           "2c92c0f95aff3b56015b1045fb9332d2",
