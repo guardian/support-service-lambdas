@@ -3,18 +3,24 @@ package com.gu.salesforce
 import com.gu.salesforce.SalesforceAuthenticate.{SFAuthConfig, SalesforceAuth}
 import com.gu.util.resthttp.JsonHttp.StringHttpRequest
 import com.gu.util.resthttp.RestRequestMaker._
+import com.gu.util.resthttp.Types._
 import com.gu.util.resthttp.{HttpOp, LazyClientFailableOp}
+import com.typesafe.scalalogging.LazyLogging
 import okhttp3.{HttpUrl, Request, Response}
+import play.api.libs.json.Json
 
-object SalesforceClient {
+object SalesforceClient extends LazyLogging {
 
   def apply(
     getResponse: Request => Response,
-    config: SFAuthConfig
+    config: SFAuthConfig,
+    shouldExposeSalesforceErrorMessageInClientFailure: Boolean = false
   ): LazyClientFailableOp[HttpOp[StringHttpRequest, BodyAsString]] =
     SalesforceAuthenticate(getResponse)(config).map { sfAuth =>
       HttpOp(getResponse).flatMap {
-        toClientFailableOp
+        toClientFailableOp(
+          shouldExposeSalesforceErrorMessageInClientFailure.toOption(parseSalesforceErrorResponseAsCustomError _)
+        )
       }.setupRequest[StringHttpRequest] {
         withAuth(sfAuth)
       }
@@ -36,5 +42,24 @@ object SalesforceClient {
       case (nextBuilder, (key, value)) => nextBuilder.addQueryParameter(key, value)
     }.build()
     builderWithHeaders.url(url).build()
+  }
+
+  private case class SalesforceErrorResponseBody(message: String, errorCode: String)
+  private implicit val readsSalesforceErrorResponseBody = Json.reads[SalesforceErrorResponseBody]
+
+  def parseSalesforceErrorResponseAsCustomError(errorBody: String): ClientFailure = try {
+    Json.parse(errorBody).as[List[SalesforceErrorResponseBody]] match {
+      case singleSfError :: Nil =>  CustomError(s"${singleSfError.errorCode} : ${singleSfError.message}")
+      case multipleSfErrors => CustomError(
+        multipleSfErrors.groupBy(_.errorCode).mapValues(_.map(_.message)).mkString.take(500)
+      )
+      case _ =>
+        logger.warn("Salesforce error response didn't contain any detail")
+        genericError
+    }
+  } catch {
+    case _: Throwable =>
+      logger.warn("Couldn't parse the Salesforce error response body")
+      genericError
   }
 }
