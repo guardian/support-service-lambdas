@@ -125,6 +125,7 @@ object Handler extends Logging {
         }
       case "hsr" :: _ :: _ :: Nil =>
         httpMethod match {
+          case "PATCH" => stepsToAmend(getSubscription) _
           case "DELETE" => stepsToWithdraw _
           case _ => unsupported _
         }
@@ -256,6 +257,32 @@ object Handler extends Logging {
     } yield ApiGatewayResponse.successfulExecution).apiResponse
   }
 
+  case class SpecificHolidayStopRequestPathParams(subscriptionName: SubscriptionName, holidayStopRequestId: HolidayStopRequestId)
+  implicit val readsSpecificHolidayStopRequestPathParams = Json.reads[SpecificHolidayStopRequestPathParams]
+
+  def stepsToAmend(
+    getSubscription: SubscriptionName => Either[HolidayError, Subscription]
+  )(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
+
+    val lookupOp = SalesforceHolidayStopRequest.LookupByContactAndOptionalSubscriptionName(sfClient.wrapWith(JsonHttp.getWithParams))
+    val amendOp = SalesforceHolidayStopRequest.AmendHolidayStopRequest(sfClient.wrapWith(JsonHttp.post))
+
+    (for {
+      requestBody <- req.bodyAsCaseClass[HolidayStopRequestPartial]()
+      contact <- extractContactFromHeaders(req.headers)
+      pathParams <- req.pathParamsAsCaseClass[SpecificHolidayStopRequestPathParams]()
+      zuoraSubscription <- getSubscription(pathParams.subscriptionName).toApiGatewayOp("get subscription from zuora")
+      allExisting <- lookupOp(contact, Some(pathParams.subscriptionName)).toDisjunction.toApiGatewayOp(s"lookup Holiday Stop Requests for contact $contact")
+      existingPublicationsThatWereToBeStopped <- allExisting.find(_.Id == pathParams.holidayStopRequestId).flatMap(_.Holiday_Stop_Request_Detail__r.map(_.records)).toApiGatewayOp(s"contact $contact does not own ${requestBody.subscriptionName.value}")
+      newPublicationDatesToBeStopped <- ActionCalculator
+        .publicationDatesToBeStopped(requestBody.start, requestBody.end, ProductVariant(zuoraSubscription.ratePlans))
+        .toApiGatewayOp(s"calculating publication dates")
+      amendBody = AmendHolidayStopRequest.buildBody(pathParams.holidayStopRequestId, requestBody.start, requestBody.end, newPublicationDatesToBeStopped, existingPublicationsThatWereToBeStopped, zuoraSubscription)
+      _ <- amendOp(amendBody).toDisjunction.toApiGatewayOp(s"amend Holiday Stop Request for subscription ${requestBody.subscriptionName} (contact $contact)")
+      // TODO nice to have - handle 'FIELD_CUSTOM_VALIDATION_EXCEPTION' etc back from SF and place in response
+    } yield ApiGatewayResponse.successfulExecution).apiResponse
+  }
+
   def getSubscriptionFromZuora(
     config: Config,
     backend: SttpBackend[Id, Nothing]
@@ -267,8 +294,6 @@ object Handler extends Logging {
       subscription <- Zuora.subscriptionGetResponse(config, accessToken, backend)(subscriptionName)
     } yield subscription
 
-  case class WithdrawPathParams(subscriptionName: SubscriptionName, holidayStopRequestId: HolidayStopRequestId)
-
   def stepsToWithdraw(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
 
     val lookupOp = SalesforceHolidayStopRequest.LookupByContactAndOptionalSubscriptionName(sfClient.wrapWith(JsonHttp.getWithParams))
@@ -276,7 +301,7 @@ object Handler extends Logging {
 
     (for {
       contact <- extractContactFromHeaders(req.headers)
-      pathParams <- req.pathParamsAsCaseClass[WithdrawPathParams]()(Json.reads[WithdrawPathParams])
+      pathParams <- req.pathParamsAsCaseClass[SpecificHolidayStopRequestPathParams]()
       existingForUser <- lookupOp(contact, None).toDisjunction.toApiGatewayOp(s"lookup Holiday Stop Requests for contact $contact")
       _ = existingForUser.exists(_.Id == pathParams.holidayStopRequestId).toApiGatewayContinueProcessing(ApiGatewayResponse.forbidden("not your holiday stop"))
       _ <- withdrawOp(pathParams.holidayStopRequestId).toDisjunction.toApiGatewayOp(
