@@ -239,21 +239,31 @@ object Handler extends Logging {
 
   def stepsToCancel(getSubscription: SubscriptionName => Either[HolidayError, Subscription])(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
     val sfClientGetWithParams = sfClient.wrapWith(JsonHttp.getWithParams)
-    val lookupOp = SalesforceHolidayStopRequest.LookupByContactAndOptionalSubscriptionName(sfClientGetWithParams)
+    val lookupOpHolidayStopsOp = LookupByContactAndOptionalSubscriptionName(sfClientGetWithParams)
+    val updateRequestDetailOp = CancelHolidayStopRequestDetail(sfClient.wrapWith(JsonHttp.post))
 
     (for {
       pathParams <- req.pathParamsAsCaseClass[CancelHolidayStopsPathParams]()(Json.reads[CancelHolidayStopsPathParams])
       queryParams <- req.queryParamsAsCaseClass[CancelHolidayStopsQueryParams]()(Json.reads[CancelHolidayStopsQueryParams])
       contact <- extractContactFromHeaders(req.headers)
-      holidayStopRequests <- lookupOp(contact, Some(pathParams.subscriptionName))
+      holidayStopRequests <- lookupOpHolidayStopsOp(contact, Some(pathParams.subscriptionName))
         .toDisjunction
         .toApiGatewayOp(
           s"lookup Holiday Stop Requests for contact $contact and subscription ${pathParams.subscriptionName}"
         )
-      holidayStopRequestDetailUpdates = HolidayStopSubscriptionCancellation(
+      holidayStopRequestDetailToUpdate = HolidayStopSubscriptionCancellation(
         queryParams.effectiveCancellationDate,
         holidayStopRequests
       )
+      cancelBody = CancelHolidayStopRequestDetail.buildBody(holidayStopRequestDetailToUpdate)
+      _ <- updateRequestDetailOp(cancelBody)
+        .toDisjunction
+        .toApiGatewayOp(
+          exposeSfErrorMessageIn500ApiResponse(
+            s"cancel holiday stop request details: ${holidayStopRequestDetailToUpdate.map(_.Id).mkString(",")} " +
+              s"(contact $contact)"
+          )
+        )
     } yield ApiGatewayResponse.successfulExecution).apiResponse
   }
 
