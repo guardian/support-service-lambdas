@@ -6,6 +6,8 @@ All endpoints require...
   - `x-identity-id` header which specifies the identityID of the user to request data for _(sent in the `manage-frontend` use-case)_
   - `x-salesforce-contact-id` header which specifies the Salesforce contact ID of the user to request data for _(sent in the CSR UI (in Salesforce) use-case)_
 
+**If being used in the CSR UI (in Salesforce) use-case**, then one should also pass the CSR's Session ID via the `X-Ephemeral-Salesforce-Access-Token` header (can be obtained in Apex with `UserInfo.getSessionId()`) so that the actions can be attributed correctly to the CSR (rather than the confiugured API user for this repo).
+
 | Method | Endpoint | Description |
 | --- | --- | --- | 
 | GET | `/{STAGE}/potential/{SUBSCRIPTION_NAME}?startDate={yyyy-MM-dd}&endDate={yyyy-MM-dd}&estimateCredit={true`&#124;`false}` | returns a response containing dates for each issue impacted between the start and end parameters inclusively, for the subscription. Optionally the estimated credit can be calculated for each issue (which comes with the invoice date it will be appear on) |
