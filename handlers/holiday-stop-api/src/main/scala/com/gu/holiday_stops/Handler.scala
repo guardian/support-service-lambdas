@@ -118,6 +118,11 @@ object Handler extends Logging {
           case "GET" => stepsToListExisting(getSubscription) _
           case _ => unsupported _
         }
+      case "hsr" :: _ :: "cancel" :: Nil =>
+        httpMethod match {
+          case "GET" => stepsToCancel(getSubscription) _
+          case _ => unsupported _
+        }
       case "hsr" :: _ :: _ :: Nil =>
         httpMethod match {
           case "DELETE" => stepsToWithdraw _
@@ -224,6 +229,29 @@ object Handler extends Logging {
       createBody = CreateHolidayStopRequestWithDetail.buildBody(requestBody.start, requestBody.end, publicationDatesToBeStopped, matchingSfSub, zuoraSubscription)
       _ <- createOp(createBody).toDisjunction.toApiGatewayOp(
         exposeSfErrorMessageIn500ApiResponse(s"create new Holiday Stop Request for subscription ${requestBody.subscriptionName} (contact $contact)")
+      )
+    } yield ApiGatewayResponse.successfulExecution).apiResponse
+  }
+
+  case class CancelHolidayStopsPathParams(subscriptionName: SubscriptionName)
+  case class CancelHolidayStopsQueryParams(refundApplied: String, effectiveCancellationDate: LocalDate)
+
+  def stepsToCancel(getSubscription: SubscriptionName => Either[HolidayError, Subscription])(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
+    val sfClientGetWithParams = sfClient.wrapWith(JsonHttp.getWithParams)
+    val lookupOp = SalesforceHolidayStopRequest.LookupByContactAndOptionalSubscriptionName(sfClientGetWithParams)
+
+    (for {
+      pathParams <- req.pathParamsAsCaseClass[CancelHolidayStopsPathParams]()(Json.reads[CancelHolidayStopsPathParams])
+      queryParams <- req.queryParamsAsCaseClass[CancelHolidayStopsQueryParams]()(Json.reads[CancelHolidayStopsQueryParams])
+      contact <- extractContactFromHeaders(req.headers)
+      holidayStopRequests <- lookupOp(contact, Some(pathParams.subscriptionName))
+        .toDisjunction
+        .toApiGatewayOp(
+          s"lookup Holiday Stop Requests for contact $contact and subscription ${pathParams.subscriptionName}"
+        )
+      holidayStopRequestDetailUpdates = HolidayStopSubscriptionCancellation(
+        queryParams.effectiveCancellationDate,
+        holidayStopRequests
       )
     } yield ApiGatewayResponse.successfulExecution).apiResponse
   }
