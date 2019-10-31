@@ -282,7 +282,7 @@ Resources:
         ApiKeyRequired: true
         RestApiId: !Ref HolidayStopApi
         ResourceId: !Ref HolidayStopApiCancelResource
-        HttpMethod: Get
+        HttpMethod: GET
         RequestParameters:
           method.request.path.subscriptionName: true
         Integration:
