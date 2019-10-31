@@ -246,8 +246,26 @@ Resources:
         - HolidayStopApiLambda
         - HolidayStopApiDeleteAndEditResource
 
-    # TODO HolidayStopApiEditMethod
-    
+    HolidayStopApiEditMethod:
+      Type: AWS::ApiGateway::Method
+      Properties:
+        AuthorizationType: NONE
+        ApiKeyRequired: true
+        RestApiId: !Ref HolidayStopApi
+        ResourceId: !Ref HolidayStopApiDeleteAndEditResource
+        HttpMethod: PATCH
+        RequestParameters:
+          method.request.path.subscriptionName: true
+          method.request.path.holidayStopRequestId: true
+        Integration:
+          Type: AWS_PROXY
+          IntegrationHttpMethod: POST # this for the interaction between API Gateway and Lambda and MUST be POST
+          Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${HolidayStopApiLambda.Arn}/invocations
+      DependsOn:
+        - HolidayStopApi
+        - HolidayStopApiLambda
+        - HolidayStopApiDeleteAndEditResource
+
     HolidayStopApiStage:
         Type: AWS::ApiGateway::Stage
         Properties:
@@ -260,6 +278,7 @@ Resources:
         - HolidayStopApiGetBySubscriptionNameMethod
         - HolidayStopApiCreateMethod
         - HolidayStopApiDeleteMethod
+        - HolidayStopApiEditMethod
 
     HolidayStopApiDeployment:
         Type: AWS::ApiGateway::Deployment
@@ -271,6 +290,7 @@ Resources:
         - HolidayStopApiGetBySubscriptionNameMethod
         - HolidayStopApiCreateMethod
         - HolidayStopApiDeleteMethod
+        - HolidayStopApiEditMethod
 
     5xxApiAlarm:
       Type: AWS::CloudWatch::Alarm
