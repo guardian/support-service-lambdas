@@ -7,6 +7,7 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.holiday_stops.subscription.{StoppedProduct, Subscription}
 import com.gu.salesforce.SalesforceClient
+import com.gu.salesforce.SalesforceClient.withAlternateAccessTokenIfPresentInHeaderList
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestId, StoppedPublicationDate, SubscriptionName}
 import com.gu.salesforce.holiday_stops.SalesforceSFSubscription.SubscriptionForSubscriptionNameAndContact._
@@ -65,7 +66,11 @@ object Handler extends Logging {
       validateRequestAndCreateSteps(
         request,
         getSubscriptionFromZuora(config, backend)
-      )(request, sfClient))
+      )(
+        request,
+        sfClient.setupRequest(withAlternateAccessTokenIfPresentInHeaderList(request.headers))
+      )
+    )
   }
 
   private def validateRequestAndCreateSteps(
