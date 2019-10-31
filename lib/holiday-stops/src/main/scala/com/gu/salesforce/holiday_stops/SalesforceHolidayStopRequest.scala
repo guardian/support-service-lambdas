@@ -327,9 +327,9 @@ object SalesforceHolidayStopRequest extends Logging {
 
 
     def buildBody(
-      holidayStopRequestsDetails: List[HolidayStopRequestsDetail],
-      idGenerator: => String
-    ): CompositeRequest = {
+                   holidayStopRequestsDetails: List[HolidayStopRequestsDetail],
+                   idGenerator: => String
+                 ): CompositeRequest = {
       val requestDetailParts = holidayStopRequestsDetails
         .map { requestDetail =>
           CompositePart(
