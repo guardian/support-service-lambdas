@@ -275,9 +275,6 @@ Resources:
         - HolidayStopApiLambda
         - HolidayStopApiCancelResource
 
-
-    # TODO HolidayStopApiEditMethod
-    
     HolidayStopApiEditMethod:
       Type: AWS::ApiGateway::Method
       Properties:

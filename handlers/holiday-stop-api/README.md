@@ -13,7 +13,7 @@ All endpoints require...
 | POST | `/{STAGE}/hsr` | creates a new all holiday stop, example body `{ "start": "2023-06-10", "end": "2024-06-14", "subscriptionName": "A-S00071783" }`|
 | PATCH | `/{STAGE}/hsr/{SUBSCRIPTION_NAME}/{SF_ID}` | with the same body as create endpoint above, amends the holiday stop request (where holiday stop request `Id` matches `{SF_ID}`) to the newly specified dates and adds/removes the underlying detail records where appropriate |
 | DELETE | `/{STAGE}/hsr/{SUBSCRIPTION_NAME}/{SF_ID}` | marks the holiday stop request as 'withdrawn' in SalesForce (specifically; placing timestamp in `Withdrawn_Time__c` field) (where holiday stop request `Id` matches `{SF_ID}`) |
-| POST | `/{STAGE}/hsr/{SUBSCRIPTION_NAME}/cancel?effectiveCancellationDate=yyyy-MM-dd` | handles processing of holiday stops when a subscription is cancelled, unprocessed holiday stops before the effectiveCancellationDate will be marked with a charge code "ManualRefund_Cancellation" for reporting purposes.  This should only be called if the customer was refunded for holiday stops that falls in the cancellation period, otherwise no changes should be made to existing holiday stops. |
+| POST | `/{STAGE}/hsr/{SUBSCRIPTION_NAME}/cancel?effectiveCancellationDate=yyyy-MM-dd` | handles processing of holiday stops when a subscription is cancelled, unprocessed holiday stops before the effectiveCancellationDate will be marked with a charge code "ManualRefund_Cancellation" for reporting purposes.  This should only be called if the customer was refunded for holiday stops that fall in the cancellation period, otherwise no changes should be made to existing holiday stops. |
 
 
 ### Handling Multiple Environments
