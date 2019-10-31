@@ -2,6 +2,7 @@ package com.gu.holiday_stops
 
 import java.io.{InputStream, OutputStream}
 import java.time.LocalDate
+import java.util.UUID
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
@@ -43,7 +44,8 @@ object Handler extends Logging {
           RawEffects.response,
           RawEffects.stage,
           GetFromS3.fetchString,
-          HttpURLConnectionBackend()
+          HttpURLConnectionBackend(),
+          UUID.randomUUID().toString
         )
       )
   }
@@ -52,7 +54,8 @@ object Handler extends Logging {
     response: Request => Response,
     stage: Stage,
     fetchString: StringFromS3,
-    backend: SttpBackend[Id, Nothing]
+    backend: SttpBackend[Id, Nothing],
+    idGenerator: => String
   ): ApiGatewayOp[Operation] = {
     for {
       config <- Config(fetchString).toApiGatewayOp("Failed to load config")
@@ -64,18 +67,20 @@ object Handler extends Logging {
     } yield Operation.noHealthcheck(request => // checking connectivity to SF is sufficient healthcheck so no special steps required
       validateRequestAndCreateSteps(
         request,
-        getSubscriptionFromZuora(config, backend)
+        getSubscriptionFromZuora(config, backend),
+        idGenerator
       )(request, sfClient))
   }
 
   private def validateRequestAndCreateSteps(
     request: ApiGatewayRequest,
-    getSubscription: SubscriptionName => Either[HolidayError, Subscription]
+    getSubscription: SubscriptionName => Either[HolidayError, Subscription],
+    idGenerator: => String
   ) = {
     (for {
       httpMethod <- validateMethod(request.httpMethod)
       path <- validatePath(request.path)
-    } yield createSteps(httpMethod, splitPath(path), getSubscription)).fold(
+    } yield createSteps(httpMethod, splitPath(path), getSubscription, idGenerator)).fold(
       { errorMessage: String =>
         badrequest(errorMessage) _
       },
@@ -100,7 +105,8 @@ object Handler extends Logging {
   private def createSteps(
     httpMethod: String,
     path: List[String],
-    getSubscription: SubscriptionName => Either[HolidayError, Subscription]
+    getSubscription: SubscriptionName => Either[HolidayError, Subscription],
+    idGenerator: => String
   ) = {
     path match {
       case "potential" :: _ :: Nil =>
@@ -120,7 +126,7 @@ object Handler extends Logging {
         }
       case "hsr" :: _ :: "cancel" :: Nil =>
         httpMethod match {
-          case "GET" => stepsToCancel(getSubscription) _
+          case "POST" => stepsToCancel(getSubscription, idGenerator) _
           case _ => unsupported _
         }
       case "hsr" :: _ :: _ :: Nil =>
@@ -235,9 +241,9 @@ object Handler extends Logging {
   }
 
   case class CancelHolidayStopsPathParams(subscriptionName: SubscriptionName)
-  case class CancelHolidayStopsQueryParams(refundApplied: String, effectiveCancellationDate: LocalDate)
+  case class CancelHolidayStopsQueryParams(effectiveCancellationDate: Option[LocalDate])
 
-  def stepsToCancel(getSubscription: SubscriptionName => Either[HolidayError, Subscription])(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
+  def stepsToCancel(getSubscription: SubscriptionName => Either[HolidayError, Subscription], idGenerator: => String)(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
     val sfClientGetWithParams = sfClient.wrapWith(JsonHttp.getWithParams)
     val lookupOpHolidayStopsOp = LookupByContactAndOptionalSubscriptionName(sfClientGetWithParams)
     val updateRequestDetailOp = CancelHolidayStopRequestDetail(sfClient.wrapWith(JsonHttp.post))
@@ -245,6 +251,8 @@ object Handler extends Logging {
     (for {
       pathParams <- req.pathParamsAsCaseClass[CancelHolidayStopsPathParams]()(Json.reads[CancelHolidayStopsPathParams])
       queryParams <- req.queryParamsAsCaseClass[CancelHolidayStopsQueryParams]()(Json.reads[CancelHolidayStopsQueryParams])
+      effectiveCancellationDate <- queryParams.effectiveCancellationDate
+        .toApiGatewayOp("effectiveCancellationDate query string parameter is required")
       contact <- extractContactFromHeaders(req.headers)
       holidayStopRequests <- lookupOpHolidayStopsOp(contact, Some(pathParams.subscriptionName))
         .toDisjunction
@@ -252,15 +260,15 @@ object Handler extends Logging {
           s"lookup Holiday Stop Requests for contact $contact and subscription ${pathParams.subscriptionName}"
         )
       holidayStopRequestDetailToUpdate = HolidayStopSubscriptionCancellation(
-        queryParams.effectiveCancellationDate,
+        effectiveCancellationDate,
         holidayStopRequests
       )
-      cancelBody = CancelHolidayStopRequestDetail.buildBody(holidayStopRequestDetailToUpdate)
+      cancelBody = CancelHolidayStopRequestDetail.buildBody(holidayStopRequestDetailToUpdate, idGenerator)
       _ <- updateRequestDetailOp(cancelBody)
         .toDisjunction
         .toApiGatewayOp(
           exposeSfErrorMessageIn500ApiResponse(
-            s"cancel holiday stop request details: ${holidayStopRequestDetailToUpdate.map(_.Id).mkString(",")} " +
+            s"cancel holiday stop request details: ${holidayStopRequestDetailToUpdate.map(_.Id.value).mkString(",")} " +
               s"(contact $contact)"
           )
         )

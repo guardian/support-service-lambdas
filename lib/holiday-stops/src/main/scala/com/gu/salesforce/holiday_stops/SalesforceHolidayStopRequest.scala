@@ -326,13 +326,16 @@ object SalesforceHolidayStopRequest extends Logging {
       }.runRequest
 
 
-    def buildBody(holidayStopRequestsDetails: List[HolidayStopRequestsDetail]): CompositeRequest = {
+    def buildBody(
+      holidayStopRequestsDetails: List[HolidayStopRequestsDetail],
+      idGenerator: => String
+    ): CompositeRequest = {
       val requestDetailParts = holidayStopRequestsDetails
         .map { requestDetail =>
           CompositePart(
             "PATCH",
             s"$holidayStopRequestsDetailSfObjectsBaseUrl/${requestDetail.Id.value}",
-            "CANCEL DETAIL : " + UUID.randomUUID().toString,
+            "CANCEL DETAIL : " + idGenerator,
             Json.toJson(CancelHolidayStopRequestDetailBody(requestDetail.Actual_Price__c, requestDetail.Charge_Code__c))
           )
         }
