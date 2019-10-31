@@ -68,11 +68,11 @@ object Handler extends Logging {
     } yield Operation.noHealthcheck(request => // checking connectivity to SF is sufficient healthcheck so no special steps required
       validateRequestAndCreateSteps(
         request,
-        getSubscriptionFromZuora(config, backend)
+        getSubscriptionFromZuora(config, backend),
+        idGenerator
       )(
         request,
-        sfClient.setupRequest(withAlternateAccessTokenIfPresentInHeaderList(request.headers)),
-        idGenerator
+        sfClient.setupRequest(withAlternateAccessTokenIfPresentInHeaderList(request.headers))
       )
     )
   }
@@ -245,34 +245,6 @@ object Handler extends Logging {
     } yield ApiGatewayResponse.successfulExecution).apiResponse
   }
 
-  case class SpecificHolidayStopRequestPathParams(subscriptionName: SubscriptionName, holidayStopRequestId: HolidayStopRequestId)
-  implicit val readsSpecificHolidayStopRequestPathParams = Json.reads[SpecificHolidayStopRequestPathParams]
-
-  def stepsToAmend(
-    getSubscription: SubscriptionName => Either[HolidayError, Subscription]
-  )(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
-
-    val lookupOp = SalesforceHolidayStopRequest.LookupByContactAndOptionalSubscriptionName(sfClient.wrapWith(JsonHttp.getWithParams))
-    val amendOp = SalesforceHolidayStopRequest.AmendHolidayStopRequest(sfClient.wrapWith(JsonHttp.post))
-
-    (for {
-      requestBody <- req.bodyAsCaseClass[HolidayStopRequestPartial]()
-      contact <- extractContactFromHeaders(req.headers)
-      pathParams <- req.pathParamsAsCaseClass[SpecificHolidayStopRequestPathParams]()
-      zuoraSubscription <- getSubscription(pathParams.subscriptionName).toApiGatewayOp("get subscription from zuora")
-      allExisting <- lookupOp(contact, Some(pathParams.subscriptionName)).toDisjunction.toApiGatewayOp(s"lookup Holiday Stop Requests for contact $contact")
-      existingPublicationsThatWereToBeStopped <- allExisting.find(_.Id == pathParams.holidayStopRequestId).flatMap(_.Holiday_Stop_Request_Detail__r.map(_.records)).toApiGatewayOp(s"contact $contact does not own ${requestBody.subscriptionName.value}")
-      newPublicationDatesToBeStopped <- ActionCalculator
-        .publicationDatesToBeStopped(requestBody.start, requestBody.end, ProductVariant(zuoraSubscription.ratePlans))
-        .toApiGatewayOp(s"calculating publication dates")
-      amendBody = AmendHolidayStopRequest.buildBody(pathParams.holidayStopRequestId, requestBody.start, requestBody.end, newPublicationDatesToBeStopped, existingPublicationsThatWereToBeStopped, zuoraSubscription)
-      _ <- amendOp(amendBody).toDisjunction.toApiGatewayOp(
-        exposeSfErrorMessageIn500ApiResponse(s"amend Holiday Stop Request for subscription ${requestBody.subscriptionName} (contact $contact)")
-      )
-    } yield ApiGatewayResponse.successfulExecution).apiResponse
-
-  }
-
   case class CancelHolidayStopsPathParams(subscriptionName: SubscriptionName)
   case class CancelHolidayStopsQueryParams(effectiveCancellationDate: Option[LocalDate])
 
@@ -329,9 +301,11 @@ object Handler extends Logging {
         .publicationDatesToBeStopped(requestBody.start, requestBody.end, ProductVariant(zuoraSubscription.ratePlans))
         .toApiGatewayOp(s"calculating publication dates")
       amendBody = AmendHolidayStopRequest.buildBody(pathParams.holidayStopRequestId, requestBody.start, requestBody.end, newPublicationDatesToBeStopped, existingPublicationsThatWereToBeStopped, zuoraSubscription)
-      _ <- amendOp(amendBody).toDisjunction.toApiGatewayOp(s"amend Holiday Stop Request for subscription ${requestBody.subscriptionName} (contact $contact)")
-      // TODO nice to have - handle 'FIELD_CUSTOM_VALIDATION_EXCEPTION' etc back from SF and place in response
+      _ <- amendOp(amendBody).toDisjunction.toApiGatewayOp(
+        exposeSfErrorMessageIn500ApiResponse(s"amend Holiday Stop Request for subscription ${requestBody.subscriptionName} (contact $contact)")
+      )
     } yield ApiGatewayResponse.successfulExecution).apiResponse
+
   }
 
   def getSubscriptionFromZuora(
