@@ -74,7 +74,7 @@ class EmailToSendTest extends FlatSpec {
     assert(EmailToSend.fromEmailBatchItem(emailBatchItemDD) == expectedDD)
   }
 
-  it should "create holiday-stop confirmation email to send" in {
+  it should "create holiday-stop creation confirmation email to send" in {
     val emailBatchItem = emailBatchItemStub.copy(
       object_name = "Holiday_Stop_Request__c",
       payload = emailBatchItemPayloadStub.copy(
@@ -109,6 +109,45 @@ class EmailToSendTest extends FlatSpec {
         )
       ),
       DataExtensionName = "SV_HolidayStopConfirmation"
+    )
+    assert(EmailToSend.fromEmailBatchItem(emailBatchItem) == expected)
+  }
+
+  it should "create holiday-stop withdrawal confirmation email to send" in {
+    val emailBatchItem = emailBatchItemStub.copy(
+      object_name = "Holiday_Stop_Request__c",
+      payload = emailBatchItemPayloadStub.copy(
+        email_stage = "withdraw",
+        holiday_start_date = Some(HolidayStartDate("2019-11-01")),
+        holiday_end_date = Some(HolidayEndDate("2019-11-17")),
+        stopped_credit_sum = Some(StoppedCreditSum("11.24")),
+        currency_symbol = Some(CurrencySymbol("&pound;")),
+        stopped_issue_count = Some(StoppedIssueCount("2")),
+        stopped_credit_summaries = Some(
+          List(
+            StoppedCreditSummary(StoppedCreditSummaryAmount(1.23), StoppedCreditSummaryDate("2020-01-01"))
+          )
+        )
+      )
+    )
+    val expected = expectedStub.copy(
+      To = expectedStub.To.copy(
+        ContactAttributes = expectedStub.To.ContactAttributes.copy(
+          expectedStub.To.ContactAttributes.SubscriberAttributes.copy(
+            holiday_start_date = Some("2019-11-01"),
+            holiday_end_date = Some("2019-11-17"),
+            stopped_credit_sum = Some("11.24"),
+            currency_symbol = Some("&pound;"),
+            stopped_issue_count = Some("2"),
+            stopped_credit_summaries = Some(
+              List(
+                EmailPayloadStoppedCreditSummary(1.23, "2020-01-01")
+              )
+            )
+          )
+        )
+      ),
+      DataExtensionName = "SV_HolidayStopWithdrawal"
     )
     assert(EmailToSend.fromEmailBatchItem(emailBatchItem) == expected)
   }
