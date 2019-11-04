@@ -22,16 +22,18 @@ object SalesforceClient extends LazyLogging {
           shouldExposeSalesforceErrorMessageInClientFailure.toOption(parseSalesforceErrorResponseAsCustomError _)
         )
       }.setupRequest[StringHttpRequest] {
-        withAuth(sfAuth)
+        withAuthAndBaseUrl(sfAuth)
       }
     }
 
-  def withAuth(sfAuth: SalesforceAuth)(requestInfo: StringHttpRequest): Request = {
+  private def getAuthHeaders(accessToken: String): List[Header] = List(
+    Header(name = "Authorization", value = s"Bearer $accessToken"),
+    Header(name = "X-SFDC-Session", value = accessToken)
+  )
+
+  private def withAuthAndBaseUrl(sfAuth: SalesforceAuth)(requestInfo: StringHttpRequest): Request = {
     val builder = requestInfo.requestMethod.builder
-    val authHeaders = List(
-      Header(name = "Authorization", value = s"Bearer ${sfAuth.access_token}"),
-      Header(name = "X-SFDC-Session", value = sfAuth.access_token)
-    )
+    val authHeaders = getAuthHeaders(sfAuth.access_token)
     val headersWithAuth: List[Header] = requestInfo.headers ++ authHeaders
 
     val builderWithHeaders = headersWithAuth.foldLeft(builder)((builder: Request.Builder, header: Header) => {
@@ -43,6 +45,14 @@ object SalesforceClient extends LazyLogging {
     }.build()
     builderWithHeaders.url(url).build()
   }
+
+  def withAlternateAccessTokenIfPresentInHeaderList(headers: Option[Map[String, String]]): StringHttpRequest => StringHttpRequest =
+    withMaybeAlternateAccessToken(headers.flatMap(_.get("X-Ephemeral-Salesforce-Access-Token")))
+
+  def withMaybeAlternateAccessToken(maybeAlternateAccessToken: Option[String])(requestInfo: StringHttpRequest): StringHttpRequest =
+    maybeAlternateAccessToken.map{ alternateAccessToken =>
+      requestInfo.copy(headers = requestInfo.headers ++ getAuthHeaders(alternateAccessToken))
+    }.getOrElse(requestInfo)
 
   private case class SalesforceErrorResponseBody(message: String, errorCode: String)
   private implicit val readsSalesforceErrorResponseBody = Json.reads[SalesforceErrorResponseBody]
