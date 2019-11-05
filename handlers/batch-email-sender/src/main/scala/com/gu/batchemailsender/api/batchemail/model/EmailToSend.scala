@@ -79,6 +79,7 @@ object EmailToSend {
       case ("Payment_Failure__c", "DD_PF3") => "SV_DDpaymentfailure3"
       case ("Payment_Failure__c", "DD_PF4") => "SV_DDpaymentfailure4"
       case ("Holiday_Stop_Request__c", "create") => "SV_HolidayStopConfirmation"
+      case ("Holiday_Stop_Request__c", "withdraw") => "SV_HolidayStopWithdrawal"
       case (objectName, emailStage) => throw new RuntimeException(s"Unrecognized (object_name, email_stage) = ($objectName, $emailStage). Please fix SF trigger.")
     }
 }
