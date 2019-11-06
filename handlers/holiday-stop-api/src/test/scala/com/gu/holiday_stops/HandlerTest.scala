@@ -280,10 +280,10 @@ class HandlerTest extends FlatSpec with Matchers {
         operation
           .steps(
             cancelHolidayStops(
-              "POST",
-              subscriptionName,
-              contactId,
-              effectiveCancellationDate
+              isPreview = false,
+              subscriptionName = subscriptionName,
+              sfContactId = contactId,
+              effectiveCancellationDate = effectiveCancellationDate
             )
           )
       }
@@ -337,10 +337,10 @@ class HandlerTest extends FlatSpec with Matchers {
         operation
           .steps(
             cancelHolidayStops(
-              "GET",
-              subscriptionName,
-              contactId,
-              effectiveCancellationDate
+              isPreview = true,
+              subscriptionName = subscriptionName,
+              sfContactId = contactId,
+              effectiveCancellationDate = effectiveCancellationDate
             )
           )
       }
@@ -413,7 +413,8 @@ class HandlerTest extends FlatSpec with Matchers {
     )
   }
 
-  private def cancelHolidayStops(method: String, subscriptionName: String, sfContactId: String, effectiveCancellationDate: LocalDate) = {
+  private def cancelHolidayStops(isPreview: Boolean, subscriptionName: String, sfContactId: String, effectiveCancellationDate: LocalDate) = {
+    val method = if(isPreview) "GET" else "POST"
     ApiGatewayRequest(
       Some(method),
       Some(Map(
