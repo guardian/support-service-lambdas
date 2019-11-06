@@ -275,6 +275,25 @@ Resources:
         - HolidayStopApiLambda
         - HolidayStopApiCancelResource
 
+    HolidayStopApiCancelGetMethod:
+      Type: AWS::ApiGateway::Method
+      Properties:
+        AuthorizationType: NONE
+        ApiKeyRequired: true
+        RestApiId: !Ref HolidayStopApi
+        ResourceId: !Ref HolidayStopApiCancelResource
+        HttpMethod: GET
+        RequestParameters:
+          method.request.path.subscriptionName: true
+        Integration:
+          Type: AWS_PROXY
+          IntegrationHttpMethod: POST # this for the interaction between API Gateway and Lambda and MUST be POST
+          Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${HolidayStopApiLambda.Arn}/invocations
+      DependsOn:
+        - HolidayStopApi
+        - HolidayStopApiLambda
+        - HolidayStopApiCancelResource
+
     HolidayStopApiEditMethod:
       Type: AWS::ApiGateway::Method
       Properties:
@@ -309,6 +328,7 @@ Resources:
         - HolidayStopApiDeleteMethod
         - HolidayStopApiEditMethod
         - HolidayStopApiCancelPostMethod
+        - HolidayStopApiCancelGetMethod
 
     HolidayStopApiDeployment:
         Type: AWS::ApiGateway::Deployment
