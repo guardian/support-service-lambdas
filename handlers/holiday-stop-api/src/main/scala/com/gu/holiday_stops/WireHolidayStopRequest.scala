@@ -5,6 +5,7 @@ import java.time.{LocalDate, ZonedDateTime}
 import cats.implicits._
 import com.gu.holiday_stops.subscription.Subscription
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.SubscriptionName
 import play.api.libs.json.{Json, OFormat}
 
@@ -15,12 +16,9 @@ object WireHolidayStopRequest {
     start = sfHolidayStopRequest.Start_Date__c.value,
     end = sfHolidayStopRequest.End_Date__c.value,
     subscriptionName = sfHolidayStopRequest.Subscription_Name__c,
-    publicationsImpacted = sfHolidayStopRequest.Holiday_Stop_Request_Detail__r.map(_.records.map(detail => HolidayStopRequestsDetail(
-      publicationDate = detail.Stopped_Publication_Date__c.value,
-      estimatedPrice = detail.Estimated_Price__c.map(_.value),
-      actualPrice = detail.Actual_Price__c.map(_.value),
-      invoiceDate = detail.Expected_Invoice_Date__c.map(_.value)
-    ))).getOrElse(List()),
+    publicationsImpacted = sfHolidayStopRequest
+      .Holiday_Stop_Request_Detail__r
+      .map(_.records.map(toHolidayStopRequestDetail)).getOrElse(List()),
     withdrawnTime = sfHolidayStopRequest.Withdrawn_Time__c.map(_.value),
     mutabilityFlags = calculateMutabilityFlags(
       isWithdrawn = sfHolidayStopRequest.Is_Withdrawn__c.value,
@@ -30,6 +28,15 @@ object WireHolidayStopRequest {
       lastPublicationDate = sfHolidayStopRequest.Holiday_Stop_Request_Detail__r.map(_.records.map(_.Stopped_Publication_Date__c.value).max[LocalDate](_ compareTo _)).get
     )
   )
+
+  def toHolidayStopRequestDetail(detail: SalesforceHolidayStopRequestsDetail.HolidayStopRequestsDetail) = {
+    HolidayStopRequestsDetail(
+      publicationDate = detail.Stopped_Publication_Date__c.value,
+      estimatedPrice = detail.Estimated_Price__c.map(_.value),
+      actualPrice = detail.Actual_Price__c.map(_.value),
+      invoiceDate = detail.Expected_Invoice_Date__c.map(_.value)
+    )
+  }
 
   def calculateMutabilityFlags(
     isWithdrawn: Boolean,
@@ -123,3 +130,8 @@ object GetHolidayStopRequests {
 }
 
 case class GetHolidayStopRequestsError(message: String)
+
+case class GetCancellationDetails(publicationsToRefund: List[HolidayStopRequestsDetail])
+object GetCancellationDetails {
+  implicit val formatGetCancellationDetails = Json.format[GetCancellationDetails]
+}

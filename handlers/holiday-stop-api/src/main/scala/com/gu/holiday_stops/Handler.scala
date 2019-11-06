@@ -6,6 +6,7 @@ import java.util.UUID
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
+import com.gu.holiday_stops.WireHolidayStopRequest.toHolidayStopRequestDetail
 import com.gu.holiday_stops.subscription.{StoppedProduct, Subscription}
 import com.gu.salesforce.SalesforceClient
 import com.gu.salesforce.SalesforceClient.withAlternateAccessTokenIfPresentInHeaderList
@@ -132,6 +133,7 @@ object Handler extends Logging {
       case "hsr" :: _ :: "cancel" :: Nil =>
         httpMethod match {
           case "POST" => stepsToCancel(getSubscription, idGenerator) _
+          case "GET" => stepsToGetCancellationDetails(getSubscription, idGenerator) _
           case _ => unsupported _
         }
       case "hsr" :: _ :: _ :: Nil =>
@@ -278,6 +280,33 @@ object Handler extends Logging {
           )
         )
     } yield ApiGatewayResponse.successfulExecution).apiResponse
+  }
+
+  case class GetCancellationDetails(publicationsToRefund: List[HolidayStopRequestsDetail])
+  implicit val writesGetCancellationDetails = Json.writes[GetCancellationDetails]
+
+  def stepsToGetCancellationDetails(getSubscription: SubscriptionName => Either[HolidayError, Subscription], idGenerator: => String)(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
+    val sfClientGetWithParams = sfClient.wrapWith(JsonHttp.getWithParams)
+    val lookupOpHolidayStopsOp = LookupByContactAndOptionalSubscriptionName(sfClientGetWithParams)
+
+    (for {
+      pathParams <- req.pathParamsAsCaseClass[CancelHolidayStopsPathParams]()(Json.reads[CancelHolidayStopsPathParams])
+      queryParams <- req.queryParamsAsCaseClass[CancelHolidayStopsQueryParams]()(Json.reads[CancelHolidayStopsQueryParams])
+      effectiveCancellationDate <- queryParams.effectiveCancellationDate
+        .toApiGatewayOp("effectiveCancellationDate query string parameter is required")
+      contact <- extractContactFromHeaders(req.headers)
+      holidayStopRequests <- lookupOpHolidayStopsOp(contact, Some(pathParams.subscriptionName))
+        .toDisjunction
+        .toApiGatewayOp(
+          s"lookup Holiday Stop Requests for contact $contact and subscription ${pathParams.subscriptionName}"
+        )
+      holidayStopRequestDetailToRefund = HolidayStopSubscriptionCancellation(
+        effectiveCancellationDate,
+        holidayStopRequests
+      )
+
+      response = GetCancellationDetails(holidayStopRequestDetailToRefund.map(toHolidayStopRequestDetail))
+    } yield ApiGatewayResponse("200", response)).apiResponse
   }
 
   case class SpecificHolidayStopRequestPathParams(subscriptionName: SubscriptionName, holidayStopRequestId: HolidayStopRequestId)
