@@ -27,7 +27,12 @@ object ProcessResult extends LazyLogging {
     import cats.implicits._
     (zuoraHolidayWriteResult.estimatedPrice, Some(zuoraHolidayWriteResult.actualPrice)).mapN { (estimated, actual) =>
       if (estimated.value != actual.value)
-        logger.warn(s"Difference between actual and estimated credit. Investigate ASAP! estimated.value=${estimated.value}; actual.value=${actual.value}")
+        logger.warn(
+          s"""Difference between actual and estimated credit
+           |in sub ${zuoraHolidayWriteResult.subscriptionName.value},
+           |stop ${zuoraHolidayWriteResult.requestId.value}. Investigate ASAP!
+           |estimated.value=${estimated.value}; actual.value=${actual.value}""".stripMargin
+        )
       // throw new RuntimeException(s"Difference between actual and estimated credit. Investigate ASAP! estimated.value=${estimated.value}; actual.value=${actual.value}")
     }
   }
