@@ -25,4 +25,12 @@ object SFTestEffects {
     ),
       HTTPResponse(200, authSuccessResponseBody)
   )
+
+  def cancelSuccess(referenceId: String, price: Double) = (
+    POSTRequest(
+      "/services/data/v38.0/composite/",
+      s"""{"allOrNone":true,"compositeRequest":[{"method":"PATCH","url":"/services/data/v29.0/sobjects/Holiday_Stop_Requests_Detail__c/HSD-1","referenceId":"CANCEL DETAIL : $referenceId","body":{"Actual_Price__c":$price,"Charge_Code__c":"ManualRefund_Cancellation"}}]}"""
+    ),
+      HTTPResponse(200, """{ "compositeResponse" : []}""".stripMargin)
+  )
 }

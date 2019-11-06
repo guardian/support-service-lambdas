@@ -17,6 +17,7 @@ import acyclic.skipped
 object SalesforceHolidayStopRequestsDetail extends Logging {
 
   val holidayStopRequestsDetailSfObjectRef = "Holiday_Stop_Requests_Detail__c"
+  val holidayStopRequestsDetailSfObjectsBaseUrl = sfObjectsBaseUrl + holidayStopRequestsDetailSfObjectRef
 
   case class HolidayStopRequestsDetailId(value: String) extends AnyVal
   implicit val formatHolidayStopRequestsDetailId = Jsonx.formatInline[HolidayStopRequestsDetailId]
