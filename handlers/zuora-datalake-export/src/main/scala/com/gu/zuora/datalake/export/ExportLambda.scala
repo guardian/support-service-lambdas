@@ -232,7 +232,8 @@ case class ZuoraAquaStatefulApi(
 )
 object ZuoraAquaStatefulApi {
   def apply(): ZuoraAquaStatefulApi = System.getenv("Stage") match {
-    case "CODE" => ZuoraAquaStatefulApi(partner = "guardian-12357") // https://support.zuora.com/hc/en-us/requests/175239case "PROD" => ZuoraAquaStatefulApi(partner = "GuardianNews4398") // https://support.zuora.com/hc/en-us/requests/177970
+    case "CODE" => ZuoraAquaStatefulApi(partner = "guardian-12357") // https://support.zuora.com/hc/en-us/requests/175239case
+    case "PROD" => ZuoraAquaStatefulApi(partner = "GuardianNews4398") // https://support.zuora.com/hc/en-us/requests/177970
   }
 }
 
