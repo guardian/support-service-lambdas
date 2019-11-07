@@ -154,7 +154,7 @@ object Query extends Enum[Query] {
   )
   case object RatePlan extends Query(
     "RatePlan",
-    "SELECT Name, AmendmentType, CreatedDate, UpdatedDate, ID, Subscription.ID, Product.ID, Amendment.ID, Account.ID FROM RatePlan",
+    "SELECT Name, AmendmentType, CreatedDate, UpdatedDate, ID, Subscription.ID, Product.ID, Amendment.ID, Account.ID, CreatedByID, UpdatedByID, BillToContact.Id, DefaultPaymentMethod.Id, ParentAccount.Id, ProductRatePlan.Id, SoldToContact.Id, Subscription.Name, SubscriptionVersionAmendment.Id FROM RatePlan",
     "ophan-raw-zuora-increment-rateplan",
     "RatePlan.csv"
   )
