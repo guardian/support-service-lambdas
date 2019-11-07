@@ -190,7 +190,7 @@ object Query extends Enum[Query] {
   )
   case object Payment extends Query(
     "Payment",
-    "SELECT EffectiveDate, Amount, Currency, Gateway, GatewayResponse, GatewayResponseCode, GatewayState, Status, SubmittedOn, ID, Account.ID FROM Payment",
+    "SELECT EffectiveDate, Amount, Currency, Gateway, GatewayResponse, GatewayResponseCode, GatewayState, Status, SubmittedOn, ID, Account.ID, AccountingCode, AppliedAmount, AppliedCreditBalanceAmount, AuthTransactionId, BankIdentificationNumber, CancelledOn, Comment, CreatedByID, CreatedDate, GatewayOrderID, MarkedForSubmissionOn, PaymentNumber, ReferencedPaymentID, ReferenceID, RefundAmount, SecondPaymentReferenceID, SettledOn, SoftDescriptor, SoftDescriptorPhone, Source, SourceName, TransferredtoAccounting, Type, UnappliedAmount, UpdatedByID, UpdatedDate, BillToContact.Id, DefaultPaymentMethod.Id, ParentAccount.Id, PaymentMethod.Id, PaymentMethodSnapshot.Id, SoldToContact.Id FROM Payment",
     "ophan-raw-zuora-increment-payment",
     "Payment.csv"
   )
