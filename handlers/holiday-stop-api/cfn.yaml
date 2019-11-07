@@ -246,6 +246,54 @@ Resources:
         - HolidayStopApiLambda
         - HolidayStopApiDeleteAndEditResource
 
+    HolidayStopApiCancelResource:
+      Type: AWS::ApiGateway::Resource
+      Properties:
+        RestApiId: !Ref HolidayStopApi
+        ParentId: !Ref HolidayStopApiBySubscriptionNameProxyResource
+        PathPart: "cancel"
+      DependsOn:
+        - HolidayStopApi
+        - HolidayStopApiBySubscriptionNameProxyResource
+
+    HolidayStopApiCancelPostMethod:
+      Type: AWS::ApiGateway::Method
+      Properties:
+        AuthorizationType: NONE
+        ApiKeyRequired: true
+        RestApiId: !Ref HolidayStopApi
+        ResourceId: !Ref HolidayStopApiCancelResource
+        HttpMethod: POST
+        RequestParameters:
+          method.request.path.subscriptionName: true
+        Integration:
+          Type: AWS_PROXY
+          IntegrationHttpMethod: POST # this for the interaction between API Gateway and Lambda and MUST be POST
+          Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${HolidayStopApiLambda.Arn}/invocations
+      DependsOn:
+        - HolidayStopApi
+        - HolidayStopApiLambda
+        - HolidayStopApiCancelResource
+
+    HolidayStopApiCancelGetMethod:
+      Type: AWS::ApiGateway::Method
+      Properties:
+        AuthorizationType: NONE
+        ApiKeyRequired: true
+        RestApiId: !Ref HolidayStopApi
+        ResourceId: !Ref HolidayStopApiCancelResource
+        HttpMethod: GET
+        RequestParameters:
+          method.request.path.subscriptionName: true
+        Integration:
+          Type: AWS_PROXY
+          IntegrationHttpMethod: POST # this for the interaction between API Gateway and Lambda and MUST be POST
+          Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${HolidayStopApiLambda.Arn}/invocations
+      DependsOn:
+        - HolidayStopApi
+        - HolidayStopApiLambda
+        - HolidayStopApiCancelResource
+
     HolidayStopApiEditMethod:
       Type: AWS::ApiGateway::Method
       Properties:
@@ -279,6 +327,8 @@ Resources:
         - HolidayStopApiCreateMethod
         - HolidayStopApiDeleteMethod
         - HolidayStopApiEditMethod
+        - HolidayStopApiCancelPostMethod
+        - HolidayStopApiCancelGetMethod
 
     HolidayStopApiDeployment:
         Type: AWS::ApiGateway::Deployment
@@ -291,6 +341,7 @@ Resources:
         - HolidayStopApiCreateMethod
         - HolidayStopApiDeleteMethod
         - HolidayStopApiEditMethod
+        - HolidayStopApiCancelPostMethod
 
     5xxApiAlarm:
       Type: AWS::CloudWatch::Alarm

@@ -1,6 +1,7 @@
 package com.gu.holiday_stops
 
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 import com.gu.effects.{FakeFetchString, SFTestEffects, TestingRawEffects}
 import com.gu.holiday_stops.ActionCalculator._
@@ -19,6 +20,7 @@ import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.{JsObject, JsString, JsSuccess, Json}
 
 class HandlerTest extends FlatSpec with Matchers {
+  val testId = "test-generated-id"
 
   it should s"convert either the '$HEADER_IDENTITY_ID' header OR '$HEADER_SALESFORCE_CONTACT_ID' header to Contact or fail" in {
 
@@ -90,7 +92,8 @@ class HandlerTest extends FlatSpec with Matchers {
         defaultTestEffects.response,
         Stage("DEV"),
         FakeFetchString.fetchString,
-        testBackend
+        testBackend,
+        "test-generated-id"
       ).map { operation =>
         operation
           .steps(legacyPotentialIssueDateRequest(
@@ -125,7 +128,8 @@ class HandlerTest extends FlatSpec with Matchers {
           defaultTestEffects.response,
           Stage("DEV"),
           FakeFetchString.fetchString,
-          SttpBackendStub.synchronous
+          SttpBackendStub.synchronous,
+          testId
         )
         .map(_.steps(ApiGatewayRequest(None, None, None, None, None, None)))
     ) {
@@ -145,7 +149,8 @@ class HandlerTest extends FlatSpec with Matchers {
           defaultTestEffects.response,
           Stage("DEV"),
           FakeFetchString.fetchString,
-          SttpBackendStub.synchronous
+          SttpBackendStub.synchronous,
+          testId
         )
         .map(_.steps(ApiGatewayRequest(Some("GET"), None, None, None, None, None)))
     ) {
@@ -189,7 +194,8 @@ class HandlerTest extends FlatSpec with Matchers {
         ).response,
         Stage("DEV"),
         FakeFetchString.fetchString,
-        testBackend
+        testBackend,
+        testId
       ).map { operation =>
         operation
           .steps(
@@ -230,6 +236,123 @@ class HandlerTest extends FlatSpec with Matchers {
               )
             )
 
+        }
+    }
+  }
+  "POST /hsr/<<sub name>>/cancel?effectiveCancelationDate=yy-MM-dd endpoint" should
+    "update holiday stops detail for cancellation" in {
+
+    val effectiveCancellationDate = LocalDate.of(2019,10,1)
+    val subscriptionName = "Sub12344"
+    val contactId = "Contact1234"
+    val price = 1.23
+    val holidayStopRequestsDetail = Fixtures.mkHolidayStopRequestDetails(
+      chargeCode = None,
+      stopDate = effectiveCancellationDate.minusDays(1),
+      estimatedPrice = Some(price)
+    )
+
+    val testBackend = SttpBackendStub
+      .synchronous
+
+    val holidayStopRequest = Fixtures.mkHolidayStopRequest(
+      id = "holidayStopId",
+      subscriptionName = SubscriptionName(subscriptionName),
+      requestDetail = List(holidayStopRequestsDetail)
+    )
+
+    inside(
+      Handler.operationForEffects(
+        new TestingRawEffects(
+          responses = Map(
+            SalesForceHolidayStopsEffects.listHolidayStops(contactId, subscriptionName, List(holidayStopRequest))
+          ),
+          postResponses = Map(
+            SFTestEffects.authSuccess,
+            SFTestEffects.cancelSuccess(testId, price)
+          )
+        ).response,
+        Stage("DEV"),
+        FakeFetchString.fetchString,
+        testBackend,
+        testId
+      ).map { operation =>
+        operation
+          .steps(
+            cancelHolidayStops(
+              isPreview = false,
+              subscriptionName = subscriptionName,
+              sfContactId = contactId,
+              effectiveCancellationDate = effectiveCancellationDate
+            )
+          )
+      }
+    ) {
+      case ContinueProcessing(response) =>
+        response.statusCode should equal("200")
+    }
+  }
+
+  "GET /hsr/<<sub name>>/cancel?effectiveCancelationDate=yy-MM-dd endpoint" should
+    "get holiday stop details that should be refunded if the subscription is canceled" in {
+
+    val effectiveCancellationDate = LocalDate.of(2019,10,1)
+    val subscriptionName = "Sub12344"
+    val contactId = "Contact1234"
+    val price = 1.23
+    val stopDate = effectiveCancellationDate.minusDays(1)
+    val invoiceDate = effectiveCancellationDate.plusWeeks(1)
+    val holidayStopRequestsDetail = Fixtures.mkHolidayStopRequestDetails(
+      chargeCode = None,
+      stopDate = stopDate,
+      estimatedPrice = Some(price),
+      expectedInvoiceDate = Some(invoiceDate)
+
+    )
+
+    val testBackend = SttpBackendStub
+      .synchronous
+
+    val holidayStopRequest = Fixtures.mkHolidayStopRequest(
+      id = "holidayStopId",
+      subscriptionName = SubscriptionName(subscriptionName),
+      requestDetail = List(holidayStopRequestsDetail)
+    )
+
+    inside(
+      Handler.operationForEffects(
+        new TestingRawEffects(
+          responses = Map(
+            SalesForceHolidayStopsEffects.listHolidayStops(contactId, subscriptionName, List(holidayStopRequest))
+          ),
+          postResponses = Map(
+            SFTestEffects.authSuccess,
+          )
+        ).response,
+        Stage("DEV"),
+        FakeFetchString.fetchString,
+        testBackend,
+        testId
+      ).map { operation =>
+        operation
+          .steps(
+            cancelHolidayStops(
+              isPreview = true,
+              subscriptionName = subscriptionName,
+              sfContactId = contactId,
+              effectiveCancellationDate = effectiveCancellationDate
+            )
+          )
+      }
+    ) {
+      case ContinueProcessing(response) =>
+        response.statusCode should equal("200")
+        val parsedResponseBody = Json.fromJson[GetCancellationDetails](Json.parse(response.body))
+        inside(parsedResponseBody) {
+          case JsSuccess(response, _) =>
+            response.publicationsToRefund should contain only(
+              HolidayStopRequestsDetail(stopDate, Some(price), Some(price), Some(invoiceDate))
+            )
         }
     }
   }
@@ -287,6 +410,20 @@ class HandlerTest extends FlatSpec with Matchers {
       Some(Map("x-salesforce-contact-id" -> sfContactId)),
       Some(JsObject(Seq("subscriptionName" -> JsString(subscriptionName)))),
       Some(s"/hsr/$subscriptionName ")
+    )
+  }
+
+  private def cancelHolidayStops(isPreview: Boolean, subscriptionName: String, sfContactId: String, effectiveCancellationDate: LocalDate) = {
+    val method = if(isPreview) "GET" else "POST"
+    ApiGatewayRequest(
+      Some(method),
+      Some(Map(
+        "effectiveCancellationDate" -> effectiveCancellationDate.format(DateTimeFormatter.ISO_LOCAL_DATE)
+      )),
+      None,
+      Some(Map("x-salesforce-contact-id" -> sfContactId)),
+      Some(JsObject(Seq("subscriptionName" -> JsString(subscriptionName)))),
+      Some(s"/hsr/$subscriptionName/cancel")
     )
   }
 

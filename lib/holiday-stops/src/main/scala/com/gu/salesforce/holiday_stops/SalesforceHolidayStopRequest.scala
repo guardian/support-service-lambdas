@@ -313,6 +313,39 @@ object SalesforceHolidayStopRequest extends Logging {
 
   }
 
+  object CancelHolidayStopRequestDetail {
+    implicit val cancelHolidayStopRequestDetailBodyReads = Json.writes[CancelHolidayStopRequestDetailBody]
+    final case class CancelHolidayStopRequestDetailBody (
+      Actual_Price__c: Option[HolidayStopRequestsDetailChargePrice],
+      Charge_Code__c: Option[HolidayStopRequestsDetailChargeCode]
+    )
+
+    def apply(sfPost: HttpOp[RestRequestMaker.PostRequest, JsValue]): CompositeRequest => ClientFailableOp[JsValue] =
+      sfPost.setupRequest[CompositeRequest] { cancelHolidayStopRequestsWithDetail =>
+        PostRequest(cancelHolidayStopRequestsWithDetail, RelativePath(compositeBaseUrl))
+      }.runRequest
+
+
+    def buildBody(
+                   holidayStopRequestsDetails: List[HolidayStopRequestsDetail],
+                   idGenerator: => String
+                 ): CompositeRequest = {
+      val requestDetailParts = holidayStopRequestsDetails
+        .map { requestDetail =>
+          CompositePart(
+            "PATCH",
+            s"$holidayStopRequestsDetailSfObjectsBaseUrl/${requestDetail.Id.value}",
+            "CANCEL DETAIL : " + idGenerator,
+            Json.toJson(CancelHolidayStopRequestDetailBody(requestDetail.Actual_Price__c, requestDetail.Charge_Code__c))
+          )
+        }
+      CompositeRequest(
+        allOrNone = true,
+        requestDetailParts
+      )
+    }
+  }
+
   private def getStoppedProductAndLogFailure(zuoraSubscription: Subscription, stoppedPublicationDate: LocalDate) = {
     StoppedProduct(zuoraSubscription, StoppedPublicationDate(stoppedPublicationDate))
       .fold(
