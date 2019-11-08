@@ -31,6 +31,20 @@ incrementDataset
     .filter(_.isDeleted == false)
 ```
 
+## How to add amend fields in existing object?
+
+* Update the zoql query
+* Submit PR & get it approved
+* Submit PR in https://github.com/guardian/ophan-data-lake with additional fields in case class
+    * You might want to download data from Zuora API in case you get additional fields
+* Merge both PRs
+* Trigger lambda download for the new object only and let it fail (15 minutes)
+* Download the whole history data manually via Zuora API (~1 hour wait time)
+* Upload the file in to relevant S3 bucket
+* Drop the output table from Athena
+* Trigger the updated Spark job in Airflow (or run it manually) 
+* Next day lambda extract will be incremental and shouldn't cause anything to fail
+
 ## How to add another object to export?
 
 Example query object:

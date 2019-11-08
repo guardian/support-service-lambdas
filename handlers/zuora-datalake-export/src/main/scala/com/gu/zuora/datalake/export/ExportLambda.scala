@@ -154,13 +154,13 @@ object Query extends Enum[Query] {
   )
   case object RatePlan extends Query(
     "RatePlan",
-    "SELECT Name, AmendmentType, CreatedDate, UpdatedDate, ID, Subscription.ID, Product.ID, Amendment.ID, Account.ID FROM RatePlan",
+    "SELECT Name, AmendmentType, CreatedDate, UpdatedDate, ID, Subscription.ID, Product.ID, Amendment.ID, Account.ID, CreatedByID, UpdatedByID, BillToContact.Id, DefaultPaymentMethod.Id, ParentAccount.Id, ProductRatePlan.Id, SoldToContact.Id, Subscription.Name, SubscriptionVersionAmendment.Id FROM RatePlan",
     "ophan-raw-zuora-increment-rateplan",
     "RatePlan.csv"
   )
   case object Subscription extends Query(
     "Subscription",
-    "SELECT AutoRenew, CancellationReason__c, ContractAcceptanceDate, ContractEffectiveDate, IPCountry__c, CreatedDate, Name, InitialPromotionCode__c, PromotionCode__c, ReaderType__c, Status, TermEndDate, TermStartDate, Version, serviceActivationDate, ID, BillToContact.ID, SoldToContact.ID, SubscriptionVersionAmendment.ID, Account.ID FROM Subscription",
+    "SELECT AutoRenew, CancellationReason__c, ContractAcceptanceDate, ContractEffectiveDate, IPCountry__c, CreatedDate, Name, InitialPromotionCode__c, PromotionCode__c, ReaderType__c, Status, TermEndDate, TermStartDate, Version, serviceActivationDate, ID, BillToContact.ID, SoldToContact.ID, SubscriptionVersionAmendment.ID, Account.ID, AcquisitionCase__c, AcquisitionSource__c, ActivationDate__c, CanadaHandDelivery__c, CancelledDate, CASSubscriberID__c, CreatedByCSR__c, CreatedByID, CreatedRequestId__c, CreatorAccountID, CreatorInvoiceOwnerID, CurrentTerm, CurrentTermPeriodType, Gift_Subscription__c, InitialTerm, InitialTermPeriodType, InvoiceOwnerID, IPAddress__c, IsInvoiceSeparate, LastPriceChangeDate__c, legacy_cat__c, LegacyContractStartDate__c FROM Subscription",
     "ophan-raw-zuora-increment-subscription",
     "Subscription.csv"
   )
