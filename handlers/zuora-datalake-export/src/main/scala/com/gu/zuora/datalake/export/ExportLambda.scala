@@ -148,7 +148,7 @@ object Query extends Enum[Query] {
   // https://knowledgecenter.zuora.com/CD_Reporting/D_Data_Sources_and_Exports/C_Data_Source_Reference/Rate_Plan_Charge_Tier_Data_Source
   case object RatePlanChargeTier extends Query(
     "RatePlanChargeTier",
-    "SELECT Price, Currency, DiscountAmount, DiscountPercentage, ID, RatePlanCharge.ID, Subscription.ID FROM RatePlanChargeTier",
+    "SELECT Price, Currency, DiscountAmount, DiscountPercentage, ID, RatePlanCharge.ID, Subscription.ID, CreatedByID, CreatedDate, EndingUnit, IncludedUnits, OveragePrice, PriceFormat, StartingUnit, Tier, UpdatedByID, UpdatedDate, Amendment.Id, Product.Id, ProductRatePlan.Id, ProductRatePlanCharge.Id, RatePlan.Id, Subscription.Name FROM RatePlanChargeTier",
     "ophan-raw-zuora-increment-rateplanchargetier",
     "RatePlanChargeTier.csv"
   )
