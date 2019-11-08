@@ -160,7 +160,7 @@ object Query extends Enum[Query] {
   )
   case object Subscription extends Query(
     "Subscription",
-    "SELECT AutoRenew, CancellationReason__c, ContractAcceptanceDate, ContractEffectiveDate, IPCountry__c, CreatedDate, Name, InitialPromotionCode__c, PromotionCode__c, ReaderType__c, Status, TermEndDate, TermStartDate, Version, serviceActivationDate, ID, BillToContact.ID, SoldToContact.ID, SubscriptionVersionAmendment.ID, Account.ID FROM Subscription",
+    "SELECT AutoRenew, CancellationReason__c, ContractAcceptanceDate, ContractEffectiveDate, IPCountry__c, CreatedDate, Name, InitialPromotionCode__c, PromotionCode__c, ReaderType__c, Status, TermEndDate, TermStartDate, Version, serviceActivationDate, ID, BillToContact.ID, SoldToContact.ID, SubscriptionVersionAmendment.ID, Account.ID, AcquisitionCase__c, AcquisitionSource__c, ActivationDate__c, CanadaHandDelivery__c, CancelledDate, CASSubscriberID__c, CreatedByCSR__c, CreatedByID, CreatedRequestId__c, CreatorAccountID, CreatorInvoiceOwnerID, CurrentTerm, CurrentTermPeriodType, Gift_Subscription__c, InitialTerm, InitialTermPeriodType, InvoiceOwnerID, IPAddress__c, IsInvoiceSeparate, LastPriceChangeDate__c, legacy_cat__c, LegacyContractStartDate__c FROM Subscription",
     "ophan-raw-zuora-increment-subscription",
     "Subscription.csv"
   )
@@ -210,7 +210,7 @@ object Query extends Enum[Query] {
   //  FIXME: Zuora is not capable of doing a full export of InvoiceItem hence the WHERE clause: https://support.zuora.com/hc/en-us/requests/186104
   case object InvoiceItem extends Query(
     "InvoiceItem",
-    "SELECT accountingCode, appliedToInvoiceItemId, chargeAmount, chargeDate, chargeName, createdById, createdDate, invoice.Id, processingType, product.Description, product.Id, product.Name, productRatePlanCharge.Id, quantity, ratePlanCharge.Id, revRecStartDate, serviceEndDate, serviceStartDate, sku, subscriptionId, taxAmount, taxCode, taxExemptAmount, taxMode, unitPrice, uom, updatedById, updatedDate, id, account.Id FROM InvoiceItem  WHERE (CreatedDate >= '2019-08-28T00:00:00') AND (CreatedDate <= '2099-01-01T00:00:00')",
+    "SELECT accountingCode, appliedToInvoiceItemId, chargeAmount, chargeDate, chargeName, createdById, createdDate, invoice.Id, processingType, product.Description, product.Id, product.Name, productRatePlanCharge.Id, quantity, ratePlanCharge.Id, revRecStartDate, serviceEndDate, serviceStartDate, sku, subscriptionId, taxAmount, taxCode, taxExemptAmount, taxMode, unitPrice, uom, updatedById, updatedDate, id, account.Id, balance, accountingPeriod.Id, amendment.Id, billToContact.Id, billToContactSnapShot.Id, defaultPaymentMethod.Id, deferredRevenueAccountingCode.Id, journalEntry.Id, journalRun.Id, parentAccount.Id, productRatePlan.Id, ratePlan.Id, soldToContact.Id FROM InvoiceItem WHERE (CreatedDate >= '2019-11-07T00:00:00') AND (CreatedDate <= '2099-01-01T00:00:00')",
     "ophan-raw-zuora-increment-invoiceitem",
     "InvoiceItem.csv"
   )
@@ -232,7 +232,7 @@ case class ZuoraAquaStatefulApi(
 )
 object ZuoraAquaStatefulApi {
   def apply(): ZuoraAquaStatefulApi = System.getenv("Stage") match {
-    case "CODE" => ZuoraAquaStatefulApi(partner = "guardian-12357") // https://support.zuora.com/hc/en-us/requests/175239
+    case "CODE" => ZuoraAquaStatefulApi(partner = "guardian-12357") // https://support.zuora.com/hc/en-us/requests/175239case
     case "PROD" => ZuoraAquaStatefulApi(partner = "GuardianNews4398") // https://support.zuora.com/hc/en-us/requests/177970
   }
 }
