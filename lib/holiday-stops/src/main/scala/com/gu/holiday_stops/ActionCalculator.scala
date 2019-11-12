@@ -72,8 +72,8 @@ object ActionCalculator {
     issueDayOfWeek = DayOfWeek.FRIDAY,
     processorRunLeadTimeDays = 8 + (1 /* safety-day */ ), //one (safety) day before the Thursday of the week before the Friday issue day
   ) {
-    val minDaysBetweenTodayAndFirstAvailableDate = 5
-    val maxDaysBetweenTodayAndFirstAvailableDate = 11
+    val minDaysBetweenTodayAndFirstAvailableDate = 4
+    val maxDaysBetweenTodayAndFirstAvailableDate = 10
     val firstAvailableDateDayOfWeek = DayOfWeek.SATURDAY
 
     /**
