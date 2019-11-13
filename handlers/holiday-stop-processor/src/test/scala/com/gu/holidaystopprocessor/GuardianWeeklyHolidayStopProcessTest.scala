@@ -80,7 +80,7 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
       updateSubscription(Right(()))
     )(holidayStop)
     response.left.value shouldBe
-      ZuoraHolidayError("Cannot currently process non-auto-renewing subscription")
+      ZuoraHolidayError("Cannot currently process non-auto-renewing subscription 'S1'")
   }
 
   it should "fail if subscription is cancelled" in {
