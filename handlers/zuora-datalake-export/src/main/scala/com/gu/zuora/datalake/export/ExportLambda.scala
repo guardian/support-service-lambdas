@@ -172,7 +172,7 @@ object Query extends Enum[Query] {
   )
   case object PaymentMethod extends Query(
     "PaymentMethod",
-    "SELECT BankTransferType, CreditCardExpirationMonth, CreditCardExpirationYear, LastFailedSaleTransactionDate, LastTransactionDateTime, LastTransactionStatus, Name, NumConsecutiveFailures, PaymentMethodStatus, Type, ID, MandateID, PaypalBAID, SecondTokenID, TokenID, AccountID FROM PaymentMethod",
+    "SELECT BankTransferType, CreditCardExpirationMonth, CreditCardExpirationYear, LastFailedSaleTransactionDate, LastTransactionDateTime, LastTransactionStatus, Name, NumConsecutiveFailures, PaymentMethodStatus, Type, ID, MandateID, PaypalBAID, SecondTokenID, TokenID, AccountID, Active, Country, CreatedById, CreatedDate, CreditCardType, DeviceSessionId, IdentityNumber, MandateCreationDate, MandateReceived, MandateUpdateDate, MaxConsecutivePaymentFailures, PaymentRetryWindow, TotalNumberOfErrorPayments, TotalNumberOfProcessedPayments, UpdatedById, UpdatedDate, UseDefaultRetryRule FROM PaymentMethod",
     "ophan-raw-zuora-increment-paymentmethod",
     "PaymentMethod.csv"
   )
