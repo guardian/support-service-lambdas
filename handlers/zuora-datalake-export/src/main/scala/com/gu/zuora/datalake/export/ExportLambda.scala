@@ -202,7 +202,7 @@ object Query extends Enum[Query] {
   )
   case object Refund extends Query(
     "Refund",
-    "SELECT AccountingCode, Amount, CancelledOn, Comment, CreatedById, CreatedDate, Gateway, GatewayResponse, GatewayResponseCode, GatewayState, MarkedForSubmissionOn, MethodType, PaymentMethodId, PaymentMethodSnapshot.Id, ReasonCode, ReferenceID, RefundDate, RefundNumber, RefundTransactionTime, SecondRefundReferenceId, SettledOn, SoftDescriptor, SoftDescriptorPhone, SourceType, Status, SubmittedOn, TransferredToAccounting, Type, UpdatedById, UpdatedDate, Id, Account.ID FROM Refund",
+    "SELECT AccountingCode, Amount, CancelledOn, Comment, CreatedById, CreatedDate, Gateway, GatewayResponse, GatewayResponseCode, GatewayState, MarkedForSubmissionOn, MethodType, PaymentMethodId, PaymentMethodSnapshot.Id, ReasonCode, ReferenceID, RefundDate, RefundNumber, RefundTransactionTime, SecondRefundReferenceId, SettledOn, SoftDescriptor, SoftDescriptorPhone, SourceType, Status, SubmittedOn, TransferredToAccounting, Type, UpdatedById, UpdatedDate, Id, Account.ID, BillToContact.ID, DefaultPaymentMethod.ID FROM Refund",
     "ophan-raw-zuora-increment-refund",
     "Refund.csv"
   )
