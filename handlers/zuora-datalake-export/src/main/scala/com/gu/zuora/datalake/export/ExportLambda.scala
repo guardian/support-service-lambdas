@@ -141,7 +141,7 @@ object Query extends Enum[Query] {
   )
   case object RatePlanCharge extends Query(
     "RatePlanCharge",
-    "SELECT Account.ID, EffectiveStartDate, EffectiveEndDate, HolidayStart__c, HolidayEnd__c, ID, MRR,Name, TCV, Version, BillingPeriod, ProcessedThroughDate, ChargedThroughDate, Product.Name, RatePlan.ID, RatePlan.Name, Subscription.ID, ProductRatePlanCharge.BillingPeriod, AccountingCode, ApplyDiscountTo, BillCycleDay, BillCycleType, BillingPeriodAlignment, BillingTiming, ChargeModel, ChargeNumber, ChargeType, CreatedById, CreatedDate, Description, DiscountLevel, DTCV, ForceSync__c, IsLastSegment, ListPriceBase, NumberofPeriods, OriginalID, OverageCalculationOption, OverageUnusedUnitsCreditOption, PriceChangeOption, PriceIncreasePercentage, Quantity, RatingGroup, RevenueRecognitionRuleName, RevRecCode, RevRecTriggerCondition, Segment, SpecificBillingPeriod, SpecificEndDate, TriggerDate, TriggerEvent, UOM, UpdatedByID, UpdatedDate, UpToPeriods, UpToPeriodsType, WeeklyBillCycleDay, Amendment.ID, BillToContact.ID, DefaultPaymentMethod.ID, ParentAccount.ID, Product.ID, ProductRatePlan.ID, ProductRatePlanCharge.ID, SoldToContact.ID FROM RatePlanCharge",
+    "SELECT Account.ID, EffectiveStartDate, EffectiveEndDate, HolidayStart__c, HolidayEnd__c, ID, MRR,Name, TCV, Version, BillingPeriod, ProcessedThroughDate, ChargedThroughDate, Product.Name, RatePlan.ID, RatePlan.Name, Subscription.ID, ProductRatePlanCharge.BillingPeriod FROM RatePlanCharge",
     "ophan-raw-zuora-increment-rateplancharge",
     "RatePlanCharge.csv"
   )
@@ -172,13 +172,13 @@ object Query extends Enum[Query] {
   )
   case object PaymentMethod extends Query(
     "PaymentMethod",
-    "SELECT BankTransferType, CreditCardExpirationMonth, CreditCardExpirationYear, LastFailedSaleTransactionDate, LastTransactionDateTime, LastTransactionStatus, Name, NumConsecutiveFailures, PaymentMethodStatus, Type, ID, MandateID, PaypalBAID, SecondTokenID, TokenID, AccountID FROM PaymentMethod",
+    "SELECT BankTransferType, CreditCardExpirationMonth, CreditCardExpirationYear, LastFailedSaleTransactionDate, LastTransactionDateTime, LastTransactionStatus, Name, NumConsecutiveFailures, PaymentMethodStatus, Type, ID, MandateID, PaypalBAID, SecondTokenID, TokenID, AccountID, Active, Country, CreatedById, CreatedDate, CreditCardType, DeviceSessionId, IdentityNumber, MandateCreationDate, MandateReceived, MandateUpdateDate, MaxConsecutivePaymentFailures, PaymentRetryWindow, TotalNumberOfErrorPayments, TotalNumberOfProcessedPayments, UpdatedById, UpdatedDate, UseDefaultRetryRule FROM PaymentMethod",
     "ophan-raw-zuora-increment-paymentmethod",
     "PaymentMethod.csv"
   )
   case object Amendment extends Query(
     "Amendment",
-    "SELECT autoRenew, code, createdById, createdDate, currentTerm, currentTermPeriodType, customerAcceptanceDate, description, effectiveDate, id, name, renewalSetting, renewalTerm, renewalTermPeriodType, resumeDate, serviceActivationDate, specificUpdateDate, status, subscriptionId, suspendDate, termStartDate, termType, type, updatedById, updatedDate  FROM Amendment",
+    "SELECT autoRenew, code, createdById, createdDate, currentTerm, currentTermPeriodType, customerAcceptanceDate, description, effectiveDate, id, name, renewalSetting, renewalTerm, renewalTermPeriodType, resumeDate, serviceActivationDate, specificUpdateDate, status, subscriptionId, suspendDate, termStartDate, termType, type, updatedById, updatedDate, contractEffectiveDate FROM Amendment",
     "ophan-raw-zuora-increment-amendment",
     "Amendment.csv"
   )
