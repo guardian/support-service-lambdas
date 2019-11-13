@@ -84,10 +84,7 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
 
   private def soqlFilterClause(stoppedPublicationDate: LocalDate) = s"""
       | Stopped_Publication_Date__c = ${stoppedPublicationDate.toString}
-      | AND (
-      |   Subscription_Cancellation_Effective_Date__c = null
-      |   OR Subscription_Cancellation_Effective_Date__c > ${stoppedPublicationDate.toString}
-      | )
+      | AND Subscription_Cancellation_Effective_Date__c = null
       | AND Is_Actioned__c = false
       | AND Is_Withdrawn__c = false
       |""".stripMargin
