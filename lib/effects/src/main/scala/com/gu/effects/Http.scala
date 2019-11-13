@@ -25,7 +25,7 @@ object Http extends Logging {
 
     { request: Request =>
       val maybeBodySummary = Option(request.body).map(bodySummary)
-      logger.info(s"HTTP request: ${request.method} ${request.url} headers ${request.headers}" + maybeBodySummary.map(summary => s", body:  $summary").getOrElse(""))
+      logger.info(s"HTTP request: ${request.method} ${request.url} " + maybeBodySummary.map(summary => s", body:  $summary").getOrElse(""))
       val response = restClient.newCall(request).execute
       logger.info(s"HTTP response: ${response.code}")
       response
@@ -38,7 +38,7 @@ object Http extends Logging {
       .build()
 
     { request: Request =>
-      logger.info(s"HTTP request: ${request.method} ${request.url} ${request.headers.toMultimap.size} headers")
+      logger.info(s"HTTP request: ${request.method} ${request.url} ${request.headers.toMultimap.size}")
       val response = restClient.newCall(request).execute
       logger.info(s"HTTP response: ${response.code}")
       response
