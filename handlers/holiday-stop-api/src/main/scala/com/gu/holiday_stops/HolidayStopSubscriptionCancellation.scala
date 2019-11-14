@@ -24,13 +24,38 @@ object HolidayStopSubscriptionCancellation {
 
     allHolidayStopRequestDetails
       .collect {
-        case requestDetail: SalesforceHolidayStopRequestsDetail.HolidayStopRequestsDetail if requestDetail.Charge_Code__c == None
-          && (requestDetail.Stopped_Publication_Date__c.value.isBefore(cancellationDate)
-            || requestDetail.Stopped_Publication_Date__c.value.isEqual(cancellationDate)) =>
+        case requestDetail if holidayStopShouldBeRefunded(
+          requestDetail,
+          cancellationDate
+        ) =>
+          val chargeCode = requestDetail
+            .Charge_Code__c
+            .getOrElse(HolidayStopRequestsDetailChargeCode("ManualRefund_Cancellation"))
           requestDetail.copy(
-            Charge_Code__c = Some(HolidayStopRequestsDetailChargeCode("ManualRefund_Cancellation")),
+            Charge_Code__c = Some(chargeCode),
             Actual_Price__c = requestDetail.Estimated_Price__c
           )
       }
+  }
+
+  private def holidayStopShouldBeRefunded(
+    holidayStop: SalesforceHolidayStopRequestsDetail.HolidayStopRequestsDetail,
+    cancellationDate: LocalDate
+  ) = {
+    val stopDateIsBeforeCancellationDate = holidayStop.Stopped_Publication_Date__c.value.isBefore(cancellationDate)
+
+    val stopHasBeenProcessed = holidayStop.Charge_Code__c.isDefined
+
+    val stopHasNotBeenProcessed = !stopHasBeenProcessed
+
+    val stopRefundInvoiceDateIsAfterOrEqualToCancellationDate = holidayStop
+      .Expected_Invoice_Date__c
+      .map(invoiceDate => !invoiceDate.value.isBefore(cancellationDate))
+      .getOrElse(false)
+
+    stopDateIsBeforeCancellationDate && (
+      stopHasNotBeenProcessed ||
+      (stopHasBeenProcessed && stopRefundInvoiceDateIsAfterOrEqualToCancellationDate)
+    )
   }
 }

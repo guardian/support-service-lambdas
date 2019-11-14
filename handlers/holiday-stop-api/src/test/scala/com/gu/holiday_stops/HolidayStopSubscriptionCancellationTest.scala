@@ -3,51 +3,100 @@ package com.gu.holiday_stops
 import java.time.LocalDate
 
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestsDetailChargeCode, HolidayStopRequestsDetailChargePrice}
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.{FlatSpec, Inside, Matchers}
 
 class HolidayStopSubscriptionCancellationTest extends FlatSpec with Matchers {
-  "HolidayStopSubscriptionCancellationTest" should "return unprocessed holiday stops before cancellation" in {
-    val estimatedPrice = 1.23
+  val estimatedPrice = 1.23
 
-    val cancellationDate = LocalDate.now().plusMonths(1)
-    val cancelableDetail1 = testDetail(cancellationDate.minusDays(1), None, estimatedPrice)
-    val cancelableDetail2 = testDetail(cancellationDate, None, estimatedPrice)
-    val afterCancellationDateDetail = testDetail(cancellationDate.plusDays(1), None, estimatedPrice)
-    val allReadyProcessedDetail = testDetail(cancellationDate.minusDays(10), Some("ChargeCode-1111"), estimatedPrice)
+  val cancellationDate = LocalDate.now()
+  val dateBeforeCancellation = cancellationDate.minusDays(1)
+  val dateAfterCancellation = cancellationDate.plusDays(1)
+
+  "HolidayStopSubscriptionCancellationTest" should "return only unprocessed holiday stops before cancellation date" in {
+
+    val unprocessedStopForDateBeforeCancellation =
+      testDetail(dateBeforeCancellation, None, estimatedPrice, Some(cancellationDate))
+    val unprocessedStopForDateOnCancellation =
+      testDetail(cancellationDate, None, estimatedPrice, Some(cancellationDate))
+    val unprocessedStopForDateAfterCancellation =
+      testDetail(dateAfterCancellation, None, estimatedPrice, Some(cancellationDate))
 
     val holidayStopRequests = List(
       Fixtures.mkHolidayStopRequest(
         "id",
         requestDetail = List(
-          cancelableDetail1,
-          cancelableDetail2,
-          afterCancellationDateDetail,
-          allReadyProcessedDetail
+          unprocessedStopForDateBeforeCancellation,
+          unprocessedStopForDateOnCancellation,
+          unprocessedStopForDateAfterCancellation
         )
       )
     )
 
-    val requestsDetails = HolidayStopSubscriptionCancellation(cancellationDate, holidayStopRequests)
-
-    requestsDetails should contain allOf (
-      cancelableDetail1.copy(
+    HolidayStopSubscriptionCancellation(cancellationDate, holidayStopRequests) should contain only(
+      unprocessedStopForDateBeforeCancellation.copy(
         Actual_Price__c = Some(HolidayStopRequestsDetailChargePrice(estimatedPrice)),
         Charge_Code__c = Some(HolidayStopRequestsDetailChargeCode("ManualRefund_Cancellation"))
-      ),
-        cancelableDetail2.copy(
-          Actual_Price__c = Some(HolidayStopRequestsDetailChargePrice(estimatedPrice)),
-          Charge_Code__c = Some(HolidayStopRequestsDetailChargeCode("ManualRefund_Cancellation"))
+      )
+    )
+  }
+  it should "return holiday processed stops with refund date after cancellation date" in {
+
+    val processedExpectedRefundedBeforeCancellationDate = testDetail(
+      dateBeforeCancellation,
+      Some("ChargeCode-1111"),
+      estimatedPrice,
+      estimatedInvoiceDate = Some(dateBeforeCancellation)
+    )
+    val processedExpectedRefundedOnCancellationDate = testDetail(
+      dateBeforeCancellation,
+      Some("ChargeCode-1111"),
+      estimatedPrice,
+      estimatedInvoiceDate = Some(cancellationDate)
+    )
+    val processedExpectedRefundedAfterCancellationDate = testDetail(
+      dateBeforeCancellation,
+      Some("ChargeCode-1111"),
+      estimatedPrice,
+      estimatedInvoiceDate = Some(dateAfterCancellation)
+    )
+    val processedMissingExpectedRefundedDate = testDetail(
+      dateBeforeCancellation,
+      Some("ChargeCode-1111"),
+      estimatedPrice,
+      estimatedInvoiceDate = None
+    )
+    val holidayStopRequests = List(
+      Fixtures.mkHolidayStopRequest(
+        "id",
+        requestDetail = List(
+          processedMissingExpectedRefundedDate,
+          processedExpectedRefundedBeforeCancellationDate,
+          processedExpectedRefundedOnCancellationDate,
+          processedExpectedRefundedAfterCancellationDate
         )
+      )
+    )
+
+    HolidayStopSubscriptionCancellation(cancellationDate, holidayStopRequests) should contain only(
+      processedExpectedRefundedOnCancellationDate.copy(
+        Actual_Price__c = Some(HolidayStopRequestsDetailChargePrice(estimatedPrice)),
+      ),
+      processedExpectedRefundedAfterCancellationDate.copy(
+        Actual_Price__c = Some(HolidayStopRequestsDetailChargePrice(estimatedPrice)),
+      )
     )
   }
 
-  private def testDetail(date: LocalDate, chargeCode: Option[String], estimatedPrice: Double) = {
-    val cancelableDetail1 = Fixtures.mkHolidayStopRequestDetails(
+  private def testDetail(stopDate: LocalDate,
+                         chargeCode: Option[String],
+                         estimatedPrice: Double,
+                         estimatedInvoiceDate: Option[LocalDate]) = {
+    Fixtures.mkHolidayStopRequestDetails(
       estimatedPrice = Some(estimatedPrice),
       actualPrice = None,
       chargeCode = chargeCode,
-      stopDate = date
+      stopDate = stopDate,
+      expectedInvoiceDate = estimatedInvoiceDate
     )
-    cancelableDetail1
   }
 }
