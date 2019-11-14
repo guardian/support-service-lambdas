@@ -12,7 +12,7 @@ class HolidayStopSubscriptionCancellationTest extends FlatSpec with Matchers {
   val dateBeforeCancellation = cancellationDate.minusDays(1)
   val dateAfterCancellation = cancellationDate.plusDays(1)
 
-  "HolidayStopSubscriptionCancellationTest" should "return only unprocessed holiday stops before cancellation date" in {
+  "HolidayStopSubscriptionCancellationTest" should "return unprocessed holiday stops before cancellation date" in {
 
     val unprocessedStopForDateBeforeCancellation =
       testDetail(dateBeforeCancellation, None, estimatedPrice, Some(cancellationDate))
@@ -39,7 +39,7 @@ class HolidayStopSubscriptionCancellationTest extends FlatSpec with Matchers {
       )
     )
   }
-  it should "return holiday processed stops with refund date after cancellation date" in {
+  it should "return processed holiday stops with refund date after cancellation date" in {
 
     val processedExpectedRefundedBeforeCancellationDate = testDetail(
       dateBeforeCancellation,

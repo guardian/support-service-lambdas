@@ -24,7 +24,7 @@ object HolidayStopSubscriptionCancellation {
 
     allHolidayStopRequestDetails
       .collect {
-        case requestDetail if holidayStopShouldBeRefunded(
+        case requestDetail if holidayStopShouldBeManuallyRefunded(
           requestDetail,
           cancellationDate
         ) =>
@@ -38,7 +38,7 @@ object HolidayStopSubscriptionCancellation {
       }
   }
 
-  private def holidayStopShouldBeRefunded(
+  private def holidayStopShouldBeManuallyRefunded(
     holidayStop: SalesforceHolidayStopRequestsDetail.HolidayStopRequestsDetail,
     cancellationDate: LocalDate
   ) = {
