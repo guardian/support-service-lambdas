@@ -73,14 +73,18 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
     response.left.value shouldBe ZuoraHolidayError("get went wrong")
   }
 
-  it should "give an exception message if subscription isn't auto-renewing" in {
+  /*
+   * Non-auto-renewing holiday stops are blocked at the point of creation,
+   * but there is no harm in processing them nonetheless
+   * if they were created before the block was put in place.
+   */
+  it should "not give an exception message if subscription isn't auto-renewing" in {
     val response = Processor.writeHolidayStopToZuora(
       Fixtures.config,
-      _ => Right(subscription.copy(autoRenew = false)),
+      _ => Right(Fixtures.mkSubscriptionWithHolidayStops().copy(autoRenew = false)),
       updateSubscription(Right(()))
     )(holidayStop)
-    response.left.value shouldBe
-      ZuoraHolidayError("Cannot currently process non-auto-renewing subscription 'S1'")
+    response.isRight shouldBe true
   }
 
   it should "fail if subscription is cancelled" in {
