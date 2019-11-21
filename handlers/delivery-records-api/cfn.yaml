@@ -1,0 +1,190 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: CRUD API for Holiday Stop Requests (stored in SalesForce)
+
+Parameters:
+    Stage:
+        Description: Stage name
+        Type: String
+        AllowedValues:
+            - PROD
+            - CODE
+            - DEV
+        Default: CODE
+
+Mappings:
+    StageMap:
+        DEV:
+            ApiName: delivery-records-api-DEV
+        CODE:
+            ApiName: delivery-records-api-CODE
+        PROD:
+            ApiName: delivery-records-api-PROD
+
+Resources:
+    DeliveryRecordsApiRole:
+        Type: AWS::IAM::Role
+        Properties:
+            AssumeRolePolicyDocument:
+                Statement:
+                    - Effect: Allow
+                      Principal:
+                          Service:
+                             - lambda.amazonaws.com
+                      Action:
+                          - sts:AssumeRole
+            Path: /
+            Policies:
+                - PolicyName: LambdaPolicy
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                            - logs:CreateLogGroup
+                            - logs:CreateLogStream
+                            - logs:PutLogEvents
+                            - lambda:InvokeFunction
+                            Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/delivery-records-api-${Stage}:log-stream:*"
+                - PolicyName: ReadPrivateCredentials
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action: s3:GetObject
+                            Resource: !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/*
+
+    DeliveryRecordsApi:
+        Type: "AWS::ApiGateway::RestApi"
+        Properties:
+            Description: api for accessing delivery records in salesforce
+            Name: !FindInMap [StageMap, !Ref Stage, ApiName]
+
+    DeliveryRecordsApiPermission:
+        Type: AWS::Lambda::Permission
+        Properties:
+            Action: lambda:invokeFunction
+            FunctionName: !Sub delivery-records-api-${Stage}
+            Principal: apigateway.amazonaws.com
+        DependsOn: DeliveryRecordsApiLambda
+
+    DeliveryRecordsApiLambda:
+        Type: AWS::Lambda::Function
+        Properties:
+            Description: api for accessing delivery records in salesforce
+            FunctionName:
+                !Sub delivery-records-api-${Stage}
+            Code:
+                S3Bucket: support-service-lambdas-dist
+                S3Key: !Sub membership/${Stage}/delivery-records-api/delivery-records-api.jar
+            Handler: com.gu.delivery_records_api.Handler::apply
+            Environment:
+                Variables:
+                  Stage: !Ref Stage
+            Role:
+                Fn::GetAtt:
+                - DeliveryRecordsApiRole
+                - Arn
+            MemorySize: 1536
+            Runtime: java8
+            Timeout: 300
+        DependsOn:
+        - DeliveryRecordsApiRole
+
+    DeliveryRecordsApiUsagePlan:
+      Type: AWS::ApiGateway::UsagePlan
+      Properties:
+        UsagePlanName: delivery-records-api
+        ApiStages:
+          - ApiId: !Ref DeliveryRecordsApi
+            Stage: !Ref Stage
+      DependsOn:
+        - DeliveryRecordsApi
+        - DeliveryRecordsApiStage
+
+    DeliveryRecordsApiKey:
+      Type: AWS::ApiGateway::ApiKey
+      Properties:
+        Description: Used by manage-frontend
+        Enabled: true
+        Name: !Sub delivery-records-api-key-${Stage}
+        StageKeys:
+          - RestApiId: !Ref DeliveryRecordsApi
+            StageName: !Ref Stage
+      DependsOn:
+        - DeliveryRecordsApi
+        - DeliveryRecordsApiStage
+
+    DeliveryRecordsApiUsagePlanKey:
+      Type: AWS::ApiGateway::UsagePlanKey
+      Properties:
+        KeyId: !Ref DeliveryRecordsApiKey
+        KeyType: API_KEY
+        UsagePlanId: !Ref DeliveryRecordsApiUsagePlan
+      DependsOn:
+        - DeliveryRecordsApiKey
+        - DeliveryRecordsApiUsagePlan
+
+    DeliveryRecordsApiProxyResource:
+        Type: AWS::ApiGateway::Resource
+        Properties:
+            RestApiId: !Ref DeliveryRecordsApi
+            ParentId: !GetAtt [DeliveryRecordsApi, RootResourceId]
+            PathPart: "{proxy+}"
+        DependsOn: DeliveryRecordsApi
+
+    DeliveryRecordsApiAnyMethod:
+      Type: AWS::ApiGateway::Method
+      Properties:
+        AuthorizationType: NONE
+        ApiKeyRequired: true
+        RestApiId: !Ref DeliveryRecordsApi
+        ResourceId: !Ref DeliveryRecordsApiProxyResource
+        HttpMethod: ANY
+        Integration:
+          Type: AWS_PROXY
+          IntegrationHttpMethod: POST # this for the interaction between API Gateway and Lambda and MUST be POST
+          Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DeliveryRecordsApiLambda.Arn}/invocations
+      DependsOn:
+        - DeliveryRecordsApi
+        - DeliveryRecordsApiLambda
+        - DeliveryRecordsApiProxyResource
+
+    DeliveryRecordsApiStage:
+        Type: AWS::ApiGateway::Stage
+        Properties:
+            Description: Stage for delivery-records-api
+            RestApiId: !Ref DeliveryRecordsApi
+            DeploymentId: !Ref DeliveryRecordsApiDeployment
+            StageName: !Sub ${Stage}
+        DependsOn:
+        - DeliveryRecordsApiAnyMethod
+
+    DeliveryRecordsApiDeployment:
+        Type: AWS::ApiGateway::Deployment
+        Properties:
+            Description: Deploys delivery-records-api into an environment/stage
+            RestApiId: !Ref DeliveryRecordsApi
+        DependsOn:
+          - DeliveryRecordsApiAnyMethod
+
+    5xxApiAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Condition: CreateProdMonitoring
+      Properties:
+        AlarmActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:fulfilment-dev
+        AlarmName:
+          !Sub
+            - 5XX rate from ${ApiName}
+            - { ApiName: !FindInMap [StageMap, !Ref Stage, ApiName] }
+        ComparisonOperator: GreaterThanThreshold
+        Dimensions:
+          - Name: ApiName
+            Value: !FindInMap [StageMap, !Ref Stage, ApiName]
+          - Name: Stage
+            Value: !Sub ${Stage}
+        EvaluationPeriods: 1
+        MetricName: 5XXError
+        Namespace: AWS/ApiGateway
+        Period: 3600
+        Statistic: Sum
+        Threshold: 5
+        TreatMissingData: notBreaching

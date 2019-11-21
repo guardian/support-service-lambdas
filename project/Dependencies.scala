@@ -9,6 +9,7 @@ object Dependencies {
 
   val circeVersion = "0.11.1"
   val sttpVersion = "1.5.17"
+  val http4sVersion = "0.20.3"
 
   val okhttp3 = "com.squareup.okhttp3" % "okhttp" % "3.9.1"
   val logging = Seq(
@@ -32,6 +33,10 @@ object Dependencies {
   val sttpCirce = "com.softwaremill.sttp" %% "circe" % sttpVersion
   val mouse = "org.typelevel" %% "mouse" % "0.23" // can be removed once we move to Scala 2.13 (native 'tap')
   val enumeratum = "com.beachape" %% "enumeratum" % "1.5.13"
+  val http4sLambda = "io.github.howardjohn" %% "http4s-lambda" % "0.4.0"
+  val http4sDsl = "org.http4s" %% "http4s-dsl" % http4sVersion
+//  "io.circe"        %% "circe-generic"       % CirceVersion,
+
 
   // to resolve merge clash of 'module-info.class'
   // see https://stackoverflow.com/questions/54834125/sbt-assembly-deduplicate-module-info-class

@@ -193,7 +193,8 @@ lazy val root = all(project in file(".")).enablePlugins(RiffRaffArtifact).aggreg
   `batch-email-sender`,
   `braze-to-salesforce-file-upload`,
   `holiday-stop-processor`,
-  `metric-push-api`
+  `metric-push-api`,
+  `delivery-records-api`
 ).dependsOn(zuora, handler, effectsDepIncludingTestFolder, `effects-sqs`, testDep)
 
 lazy val `identity-backfill` = all(project in file("handlers/identity-backfill")) // when using the "project identity-backfill" command it uses the lazy val name
@@ -266,6 +267,12 @@ lazy val `holiday-stop-processor` = all(project in file("handlers/holiday-stop-p
 lazy val `metric-push-api` = all(project in file("handlers/metric-push-api"))
   .enablePlugins(RiffRaffArtifact)
   .dependsOn()
+
+lazy val `delivery-records-api` = all(project in file("handlers/delivery-records-api"))
+  .settings(
+    libraryDependencies ++= Seq(http4sLambda, http4sDsl)
+  )
+  .enablePlugins(RiffRaffArtifact)
 
 // ==== END handlers ====
 
