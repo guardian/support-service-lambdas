@@ -38,17 +38,18 @@ class EmailToSendTest extends FlatSpec {
       ContactAttributes = EmailPayloadContactAttributes(
         SubscriberAttributes =
           EmailPayloadSubscriberAttributes(
-            "something",
-            "bla",
-            "A-S00044748",
-            Some("3 September 2018"),
-            "Supporter",
-            None,
-            None,
-            None,
-            None,
-            None,
-            None
+            first_name = "something",
+            last_name = "bla",
+            subscriber_id = "A-S00044748",
+            next_charge_date = Some("3 September 2018"),
+            product = "Supporter",
+            modified_by_customer = None,
+            holiday_start_date = None,
+            holiday_end_date = None,
+            stopped_credit_sum = None,
+            currency_symbol = None,
+            stopped_issue_count = None,
+            stopped_credit_summaries = None
           )
       )
     ),
@@ -80,6 +81,7 @@ class EmailToSendTest extends FlatSpec {
       object_name = "Holiday_Stop_Request__c",
       payload = emailBatchItemPayloadStub.copy(
         email_stage = "create",
+        modified_by_customer = Some(true),
         holiday_start_date = Some(HolidayStartDate("2019-11-01")),
         holiday_end_date = Some(HolidayEndDate("2019-11-17")),
         stopped_credit_sum = Some(StoppedCreditSum("11.24")),
@@ -96,6 +98,7 @@ class EmailToSendTest extends FlatSpec {
       To = expectedStub.To.copy(
         ContactAttributes = expectedStub.To.ContactAttributes.copy(
           expectedStub.To.ContactAttributes.SubscriberAttributes.copy(
+            modified_by_customer = Some(true),
             holiday_start_date = Some("2019-11-01"),
             holiday_end_date = Some("2019-11-17"),
             stopped_credit_sum = Some("11.24"),
