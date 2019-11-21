@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: CRUD API for Holiday Stop Requests (stored in SalesForce)
+Description: API for subscription delivery records (stored in SalesForce)
 
 Parameters:
     Stage:
