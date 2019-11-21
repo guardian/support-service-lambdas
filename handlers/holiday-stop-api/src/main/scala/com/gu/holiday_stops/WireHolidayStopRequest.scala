@@ -7,7 +7,8 @@ import com.gu.holiday_stops.subscription.Subscription
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.SubscriptionName
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.functional.syntax._
+import play.api.libs.json._
 
 object WireHolidayStopRequest {
 
@@ -79,13 +80,17 @@ object HolidayStopRequestsDetail {
 }
 
 case class HolidayStopRequestPartial(
-  start: LocalDate,
-  end: LocalDate,
+  startDate: LocalDate,
+  endDate: LocalDate,
   subscriptionName: SubscriptionName
 )
 
 object HolidayStopRequestPartial {
-  implicit val format: OFormat[HolidayStopRequestPartial] = Json.format[HolidayStopRequestPartial]
+  implicit val reads: Reads[HolidayStopRequestPartial] = (
+    ((__ \ "start").read[LocalDate] or (__ \ "startDate").read[LocalDate]) and
+      ((__ \ "end").read[LocalDate] or (__ \ "endDate").read[LocalDate]) and
+      (__ \ "subscriptionName").read[SubscriptionName]
+    )(HolidayStopRequestPartial.apply _)
 }
 
 case class HolidayStopRequestFull(
