@@ -4,11 +4,11 @@ regions:
 - eu-west-1
 deployments:
 
-#  cfn:
-#    type: cloud-formation
-#    app: delivery-records-api
-#    parameters:
-#      templatePath: cfn.yaml
+  cfn:
+    type: cloud-formation
+    app: delivery-records-api
+    parameters:
+      templatePath: cfn.yaml
 
   delivery-records-api:
     type: aws-lambda
@@ -18,4 +18,4 @@ deployments:
       prefixStack: false
       functionNames:
       - delivery-records-api-
-#    dependencies: [cfn]
+    dependencies: [cfn]
