@@ -35,7 +35,7 @@ object Dependencies {
   val enumeratum = "com.beachape" %% "enumeratum" % "1.5.13"
   val http4sLambda = "io.github.howardjohn" %% "http4s-lambda" % "0.4.0"
   val http4sDsl = "org.http4s" %% "http4s-dsl" % http4sVersion
-//  "io.circe"        %% "circe-generic"       % CirceVersion,
+  val http4sCirce = "org.http4s" %% "http4s-circe" % http4sVersion
 
 
   // to resolve merge clash of 'module-info.class'

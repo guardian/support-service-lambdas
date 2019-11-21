@@ -270,7 +270,7 @@ lazy val `metric-push-api` = all(project in file("handlers/metric-push-api"))
 
 lazy val `delivery-records-api` = all(project in file("handlers/delivery-records-api"))
   .settings(
-    libraryDependencies ++= Seq(http4sLambda, http4sDsl)
+    libraryDependencies ++= Seq(http4sLambda, http4sDsl, http4sCirce, circe)
   )
   .enablePlugins(RiffRaffArtifact)
 
