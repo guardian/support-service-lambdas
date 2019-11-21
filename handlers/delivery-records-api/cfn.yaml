@@ -77,7 +77,7 @@ Resources:
             Code:
                 S3Bucket: support-service-lambdas-dist
                 S3Key: !Sub membership/${Stage}/delivery-records-api/delivery-records-api.jar
-            Handler: com.gu.delivery_records_api.Handler::apply
+            Handler: com.gu.delivery_records_api.Handler::handle
             Environment:
                 Variables:
                   Stage: !Ref Stage
