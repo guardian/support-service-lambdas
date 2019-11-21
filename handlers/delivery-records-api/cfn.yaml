@@ -11,6 +11,9 @@ Parameters:
             - DEV
         Default: CODE
 
+Conditions:
+  CreateProdMonitoring: !Equals [ !Ref Stage, PROD ]
+
 Mappings:
     StageMap:
         DEV:
