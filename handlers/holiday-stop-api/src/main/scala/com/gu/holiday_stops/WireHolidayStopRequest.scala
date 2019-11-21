@@ -14,8 +14,8 @@ object WireHolidayStopRequest {
 
   def apply(issueSpecifics: List[IssueSpecifics])(sfHolidayStopRequest: HolidayStopRequest): HolidayStopRequestFull = HolidayStopRequestFull(
     id = sfHolidayStopRequest.Id.value,
-    start = sfHolidayStopRequest.Start_Date__c.value,
-    end = sfHolidayStopRequest.End_Date__c.value,
+    startDate = sfHolidayStopRequest.Start_Date__c.value,
+    endDate = sfHolidayStopRequest.End_Date__c.value,
     subscriptionName = sfHolidayStopRequest.Subscription_Name__c,
     publicationsImpacted = sfHolidayStopRequest
       .Holiday_Stop_Request_Detail__r
@@ -95,8 +95,8 @@ object HolidayStopRequestPartial {
 
 case class HolidayStopRequestFull(
   id: String,
-  start: LocalDate,
-  end: LocalDate,
+  startDate: LocalDate,
+  endDate: LocalDate,
   subscriptionName: SubscriptionName,
   publicationsImpacted: List[HolidayStopRequestsDetail],
   withdrawnTime: Option[ZonedDateTime],
@@ -104,7 +104,16 @@ case class HolidayStopRequestFull(
 )
 
 object HolidayStopRequestFull {
-  implicit val format: OFormat[HolidayStopRequestFull] = Json.format[HolidayStopRequestFull]
+  //  implicit val format: OFormat[HolidayStopRequestFull] = Json.format[HolidayStopRequestFull] FIXME restore this when all clients updated, and remove the custom read/writes below
+  implicit val reads: Reads[HolidayStopRequestFull] = Json.reads[HolidayStopRequestFull]
+  implicit val writes: Writes[HolidayStopRequestFull] = new Writes[HolidayStopRequestFull] {
+    def writes(hsr: HolidayStopRequestFull): JsValue =
+      Json.writes[HolidayStopRequestFull].writes(hsr) ++
+        Json.obj(
+          "start" -> hsr.startDate,
+          "end" -> hsr.endDate
+        )
+  }
 }
 
 case class GetHolidayStopRequests(
