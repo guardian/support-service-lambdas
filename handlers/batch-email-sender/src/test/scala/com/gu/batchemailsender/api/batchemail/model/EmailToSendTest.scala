@@ -17,6 +17,7 @@ class EmailToSendTest extends FlatSpec {
       identity_id = Some(IdentityUserId("30002177")),
       first_name = "something",
       email_stage = "MBv1 - 1",
+      modified_by_customer = None,
       holiday_start_date = None,
       holiday_end_date = None,
       stopped_credit_sum = None,
