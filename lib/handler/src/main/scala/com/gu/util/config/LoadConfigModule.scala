@@ -23,12 +23,8 @@ object LoadConfigModule extends Logging {
   //we need this extra class here because otherwise we cannot partially apply the LoadConfig apply method without specifying the generic param
   class PartialApply(stage: Stage, fetchString: StringFromS3) {
     def apply[CONF](implicit configLocation: ConfigLocation[CONF], reads: Reads[CONF]): ConfigFailure \/ CONF = {
-      val basePath = s"membership/support-service-lambdas/${stage.value}"
-
       logger.info(s"Attempting to load config in $stage")
-      val versionString = if (stage.value == "DEV") "" else s".v${configLocation.version}"
-      val relativePath = s"${configLocation.path}-${stage.value}$versionString.json"
-      val s3Location = S3Location(bucket = bucketName, key = s"$basePath/$relativePath")
+      val s3Location = S3Location(bucket = bucketName, key = configLocation.toPath(stage))
       for {
         configStr <- toDisjunction(fetchString(s3Location))
         jsValue <- toDisjunction(Try(Json.parse(configStr)))
