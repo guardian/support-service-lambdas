@@ -189,16 +189,16 @@ object SalesforceHolidayStopRequest extends Logging {
         .runRequest
 
     def buildBody(
-      start: LocalDate,
-      end: LocalDate,
+      startDate: LocalDate,
+      endDate: LocalDate,
       publicationDatesToBeStopped: List[LocalDate],
       sfSubscription: MatchingSubscription,
       zuoraSubscription: Subscription
     ) = {
       RecordsWrapperCaseClass(List(
         CompositeTreeHolidayStopRequest(
-          Start_Date__c = HolidayStopRequestStartDate(start),
-          End_Date__c = HolidayStopRequestEndDate(end),
+          Start_Date__c = HolidayStopRequestStartDate(startDate),
+          End_Date__c = HolidayStopRequestEndDate(endDate),
           SF_Subscription__c = sfSubscription.Id,
           Holiday_Stop_Request_Detail__r = RecordsWrapperCaseClass(
             publicationDatesToBeStopped.map { stoppedPublicationDate =>
@@ -255,8 +255,8 @@ object SalesforceHolidayStopRequest extends Logging {
 
     def buildBody(
       holidayStopRequestId: HolidayStopRequestId,
-      start: LocalDate,
-      end: LocalDate,
+      startDate: LocalDate,
+      endDate: LocalDate,
       publicationDatesToBeStopped: List[LocalDate],
       existingPublicationsThatWereToBeStopped: List[HolidayStopRequestsDetail],
       zuoraSubscription: Subscription
@@ -267,8 +267,8 @@ object SalesforceHolidayStopRequest extends Logging {
         url = s"$holidayStopRequestSfObjectsBaseUrl/${holidayStopRequestId.value}",
         referenceId = holidayStopRequestSfObjectRef, // constant since only one of these in the request
         body = Json.toJson(AmendHolidayStopRequestItselfBody(
-          Start_Date__c = HolidayStopRequestStartDate(start),
-          End_Date__c = HolidayStopRequestEndDate(end)
+          Start_Date__c = HolidayStopRequestStartDate(startDate),
+          End_Date__c = HolidayStopRequestEndDate(endDate)
         ))(Json.writes[AmendHolidayStopRequestItselfBody])
       )
 

@@ -46,6 +46,7 @@ class EmailBatchTest extends FlatSpec {
             identity_id = Some(IdentityUserId("30002177")),
             first_name = "something",
             email_stage = "MBv1 - 1",
+            modified_by_customer = None,
             holiday_start_date = None,
             holiday_end_date = None,
             stopped_credit_sum = None,
@@ -131,6 +132,7 @@ class EmailBatchTest extends FlatSpec {
             identity_id = None,
             first_name = "something",
             email_stage = "MBv1 - 1",
+            modified_by_customer = None,
             holiday_start_date = None,
             holiday_end_date = None,
             stopped_credit_sum = None,
@@ -165,6 +167,7 @@ class EmailBatchTest extends FlatSpec {
         |             "last_name":"bla",
         |             "first_name":"something",
         |             "email_stage":"create",
+        |             "modified_by_customer": false,
         |             "holiday_stop_request":
         |             {
         |               "holiday_start_date": "2019-09-27",
@@ -204,6 +207,7 @@ class EmailBatchTest extends FlatSpec {
             identity_id = None,
             first_name = "something",
             email_stage = "create",
+            modified_by_customer = Some(false),
             holiday_start_date = Some(HolidayStartDate("27 September 2019")),
             holiday_end_date = Some(HolidayEndDate("12 October 2019")),
             stopped_credit_sum = Some(StoppedCreditSum("97.42")),
