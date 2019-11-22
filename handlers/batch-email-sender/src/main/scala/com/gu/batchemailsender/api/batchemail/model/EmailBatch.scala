@@ -1,7 +1,8 @@
 package com.gu.batchemailsender.api.batchemail.model
+
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
-import play.api.libs.json.Json
+import play.api.libs.json._
 
 import scala.util.{Failure, Success, Try}
 
@@ -9,6 +10,10 @@ object EmailBatch {
 
   object WireModel {
 
+    case class WireEmailBatchWithExceptions(
+      validBatch: WireEmailBatch,
+      exceptions: List[Seq[(JsPath, Seq[JsonValidationError])]]
+    )
     case class WireEmailBatch(batch_items: List[WireEmailBatchItem])
     case class WireEmailBatchItem(payload: WireEmailBatchItemPayload, object_name: String)
     case class WireEmailBatchItemPayload(
@@ -40,6 +45,18 @@ object EmailBatch {
     implicit val emailBatchItemPayloadReads = Json.reads[WireEmailBatchItemPayload]
     implicit val emailBatchItemReads = Json.reads[WireEmailBatchItem]
     implicit val emailBatch = Json.reads[WireEmailBatch]
+
+    implicit val emailBatchWithExceptions: Reads[WireEmailBatchWithExceptions] = json => {
+      val validated = (json \ "batch_items").as[List[JsObject]] map { itemOrException =>
+        itemOrException.validate[WireEmailBatchItem]
+      }
+      JsSuccess(
+        WireEmailBatchWithExceptions(
+          validBatch = WireEmailBatch(validated collect { case JsSuccess(item, _) => item }),
+          exceptions = validated collect { case JsError(e) => e }
+        )
+      )
+    }
 
     def fromSfDateToDisplayDate(sfDate: String): String = {
       val formattedDate: Try[String] = Try {
