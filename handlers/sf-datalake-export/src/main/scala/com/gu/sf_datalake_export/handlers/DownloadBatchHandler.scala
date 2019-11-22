@@ -5,8 +5,9 @@ import java.io.{InputStream, OutputStream}
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.s3.model.{PutObjectRequest, PutObjectResult}
 import com.gu.effects.{RawEffects, _}
-import com.gu.salesforce.SalesforceAuthenticate.{SFAuthConfig, SFExportAuthConfig}
+import com.gu.salesforce.{SFAuthConfig, SFExportAuthConfig}
 import com.gu.salesforce.SalesforceClient
+import com.gu.salesforce.SalesforceReads._
 import com.gu.sf_datalake_export.handlers.StartJobHandler.ShouldUploadToDataLake
 import com.gu.sf_datalake_export.salesforce_bulk_api.BulkApiParams.ObjectName
 import com.gu.sf_datalake_export.salesforce_bulk_api.CreateJob.JobId
@@ -105,7 +106,7 @@ object DownloadBatchHandler extends LazyLogging {
   (request: WireState): Try[WireState] = {
     val loadConfig = LoadConfigModule(stage, getFromS3)
     for {
-      sfConfig <- loadConfig[SFAuthConfig](SFExportAuthConfig.location, SFAuthConfig.reads).leftMap(_.error).toTry
+      sfConfig <- loadConfig[SFAuthConfig](SFExportAuthConfig.location, sfAuthConfigReads).leftMap(_.error).toTry
       sfClient <- SalesforceClient(getResponse, sfConfig).value.toTry
       wiredGetBatchResultId = sfClient.wrapWith(GetBatchResultId.wrapper).runRequest _
       wiredGetBatchResult = sfClient.wrapWith(GetBatchResult.wrapper).runRequest _

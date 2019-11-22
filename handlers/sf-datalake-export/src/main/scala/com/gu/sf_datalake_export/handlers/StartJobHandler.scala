@@ -6,8 +6,9 @@ import java.time.LocalDate
 import com.gu.sf_datalake_export.util.TryOps._
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
-import com.gu.salesforce.SalesforceAuthenticate.{SFAuthConfig, SFExportAuthConfig}
+import com.gu.salesforce.{SFAuthConfig, SFExportAuthConfig}
 import com.gu.salesforce.SalesforceClient
+import com.gu.salesforce.SalesforceReads._
 import com.gu.sf_datalake_export.salesforce_bulk_api.AddQueryToJob.AddQueryRequest
 import com.gu.sf_datalake_export.salesforce_bulk_api.BulkApiParams.ObjectName
 import com.gu.sf_datalake_export.salesforce_bulk_api.CreateJob.{CreateJobRequest, JobId}
@@ -83,7 +84,7 @@ object StartJobHandler {
   )(request: WireRequest): Try[WireResponse] = {
     val loadConfig = LoadConfigModule(stage, fetchString)
     for {
-      sfConfig <- loadConfig[SFAuthConfig](SFExportAuthConfig.location, SFAuthConfig.reads).leftMap(_.error).toTry
+      sfConfig <- loadConfig[SFAuthConfig](SFExportAuthConfig.location, sfAuthConfigReads).leftMap(_.error).toTry
       sfClient <- SalesforceClient(getResponse, sfConfig).value.toTry
       createJobOp = sfClient.wrapWith(JsonHttp.postWithHeaders).wrapWith(CreateJob.wrapper).runRequest _
       addQueryToJobOp = sfClient.wrapWith(AddQueryToJob.wrapper).runRequest _

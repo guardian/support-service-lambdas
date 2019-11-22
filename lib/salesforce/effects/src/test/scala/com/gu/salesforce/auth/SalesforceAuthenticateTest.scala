@@ -3,7 +3,7 @@ package com.gu.salesforce.auth
 import com.gu.effects.{SFTestEffects, TestingRawEffects}
 import com.gu.effects.TestingRawEffects.{HTTPResponse, POSTRequest}
 import com.gu.salesforce.SalesforceAuthenticate
-import com.gu.salesforce.SalesforceAuthenticate.{SFAuthConfig, SalesforceAuth}
+import com.gu.salesforce.{SFAuthConfig, SalesforceAuth}
 import com.gu.util.resthttp.Types.ClientSuccess
 import org.scalatest.{FlatSpec, Matchers}
 

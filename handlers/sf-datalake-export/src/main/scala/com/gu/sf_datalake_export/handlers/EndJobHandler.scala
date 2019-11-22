@@ -4,8 +4,9 @@ import java.io.{InputStream, OutputStream}
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects, S3Path}
-import com.gu.salesforce.SalesforceAuthenticate.{SFAuthConfig, SFExportAuthConfig}
+import com.gu.salesforce.{SFAuthConfig, SFExportAuthConfig}
 import com.gu.salesforce.SalesforceClient
+import com.gu.salesforce.SalesforceReads._
 import com.gu.sf_datalake_export.handlers.StartJobHandler.ShouldUploadToDataLake
 import com.gu.sf_datalake_export.salesforce_bulk_api.BulkApiParams.ObjectName
 import com.gu.sf_datalake_export.salesforce_bulk_api.{CloseJob, S3UploadFile}
@@ -82,7 +83,7 @@ object EndJobHandler {
 
     for {
       _ <- uploadDummySuccessFileToTriggerOphanJob(request)
-      sfConfig <- loadConfig[SFAuthConfig](SFExportAuthConfig.location, SFAuthConfig.reads).leftMap(_.error).toTry
+      sfConfig <- loadConfig[SFAuthConfig](SFExportAuthConfig.location, sfAuthConfigReads).leftMap(_.error).toTry
       sfClient <- SalesforceClient(getResponse, sfConfig).value.toTry
       wiredCloseJob = sfClient.wrapWith(JsonHttp.post).wrapWith(CloseJob.wrapper)
       _ <- wiredCloseJob.runRequest(jobId).toTry

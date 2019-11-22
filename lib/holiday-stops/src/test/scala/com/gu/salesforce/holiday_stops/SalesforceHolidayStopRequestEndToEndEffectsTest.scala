@@ -5,7 +5,8 @@ import java.time.LocalDate
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.holiday_stops.{ActionCalculator, Fixtures, ProductVariant}
 import com.gu.holiday_stops.subscription.Subscription
-import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
+import com.gu.salesforce.SFAuthConfig
+import com.gu.salesforce.SalesforceReads._
 import com.gu.salesforce.SalesforceClient
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._

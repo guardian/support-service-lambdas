@@ -1,6 +1,6 @@
 package com.gu.salesforce
 
-import com.gu.salesforce.SalesforceAuthenticate.{SFAuthConfig, SalesforceAuth}
+import com.gu.salesforce.{SFAuthConfig, SalesforceAuth}
 import com.gu.util.resthttp.JsonHttp.StringHttpRequest
 import com.gu.util.resthttp.RestRequestMaker._
 import com.gu.util.resthttp.Types._

@@ -13,8 +13,9 @@ import com.gu.identityBackfill.salesforce.ContactSyncCheck.RecordTypeId
 import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
 import com.gu.identityBackfill.salesforce._
 import com.gu.identityBackfill.zuora.{AddIdentityIdToAccount, CountZuoraAccountsForIdentityId, GetZuoraAccountsForEmail, GetZuoraSubTypeForAccount}
-import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
+import com.gu.salesforce.SFAuthConfig
 import com.gu.salesforce.SalesforceClient
+import com.gu.salesforce.SalesforceReads._
 import com.gu.salesforce.TypesForSFEffectsData.{SFAccountId, SFContactId}
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.ResponseModels.ApiResponse

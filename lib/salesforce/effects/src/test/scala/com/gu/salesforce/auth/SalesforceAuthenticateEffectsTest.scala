@@ -2,7 +2,8 @@ package com.gu.salesforce.auth
 
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.salesforce.SalesforceAuthenticate
-import com.gu.salesforce.SalesforceAuthenticate.{SFAuthConfig, SalesforceAuth}
+import com.gu.salesforce.SalesforceReads._
+import com.gu.salesforce.{SFAuthConfig, SalesforceAuth}
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
 import org.scalatest.{FlatSpec, Matchers}

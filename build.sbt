@@ -76,12 +76,19 @@ lazy val zuora = all(project in file("lib/zuora"))
     libraryDependencies ++= Seq(okhttp3, scalaz, playJson, scalatest, jacksonDatabind) ++ logging
   )
 
-lazy val salesforce = all(project in file("lib/salesforce"))
+lazy val `salesforce-core` = all(project in file("lib/salesforce/core"))
+  .dependsOn(`config-core`)
+  .settings(
+    libraryDependencies ++= Seq() ++ logging
+  )
+
+lazy val `salesforce-effects` = all(project in file("lib/salesforce/effects"))
   .dependsOn(
     restHttp,
     handler,// % "test->test" TODO make this dep only in test - SF client shouldn't depends on ApiGateway
     effects % "test->test",
-    testDep
+    testDep,
+    `salesforce-core`
   )
   .settings(
     libraryDependencies ++= Seq(okhttp3, scalaz, playJson, scalatest) ++ logging
@@ -89,7 +96,7 @@ lazy val salesforce = all(project in file("lib/salesforce"))
 
 lazy val `holiday-stops` = all(project in file("lib/holiday-stops"))
   .dependsOn(
-    salesforce,
+    `salesforce-effects`,
     effects % "test->test",
     testDep
   )
@@ -132,7 +139,7 @@ lazy val s3ConfigValidator = all(project in file("lib/s3ConfigValidator"))
   )
 
 lazy val handler = all(project in file("lib/handler"))
-  .dependsOn(`effects-s3`)
+  .dependsOn(`effects-s3`, `config-core`)
   .settings(
     libraryDependencies ++= Seq(okhttp3, scalaz, playJson, scalatest, awsLambda) ++ logging
   )
@@ -158,6 +165,8 @@ lazy val `effects-ses` = all(project in file("lib/effects-ses"))
   .settings(
     libraryDependencies ++= Seq(awsSES) ++ logging
   )
+
+lazy val `config-core` = all(project in file("lib/config-core"))
 
 val effectsDepIncludingTestFolder: ClasspathDependency = effects % "compile->compile;test->test"
 
@@ -187,7 +196,8 @@ lazy val root = all(project in file(".")).enablePlugins(RiffRaffArtifact).aggreg
   restHttp,
   zuora,
   `zuora-reports`,
-  salesforce,
+  `salesforce-core`,
+  `salesforce-effects`,
   `holiday-stops`,
   s3ConfigValidator,
   `new-product-api`,
@@ -207,7 +217,7 @@ lazy val `identity-backfill` = all(project in file("handlers/identity-backfill")
   .enablePlugins(RiffRaffArtifact)
   .dependsOn(
     zuora,
-    salesforce % "compile->compile;test->test",
+    `salesforce-effects` % "compile->compile;test->test",
     handler,
     effectsDepIncludingTestFolder,
     testDep
@@ -235,15 +245,15 @@ lazy val `zuora-retention` = all(project in file("handlers/zuora-retention"))
 
 lazy val `sf-contact-merge` = all(project in file("handlers/sf-contact-merge"))
   .enablePlugins(RiffRaffArtifact)
-  .dependsOn(zuora, salesforce % "compile->compile;test->test", handler, effectsDepIncludingTestFolder, testDep)
+  .dependsOn(zuora, `salesforce-effects` % "compile->compile;test->test", handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `cancellation-sf-cases` = all(project in file("handlers/cancellation-sf-cases"))
   .enablePlugins(RiffRaffArtifact)
-  .dependsOn(salesforce, handler, effectsDepIncludingTestFolder, testDep)
+  .dependsOn(`salesforce-effects`, handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `sf-gocardless-sync` = all(project in file("handlers/sf-gocardless-sync"))
   .enablePlugins(RiffRaffArtifact)
-  .dependsOn(salesforce, handler, effectsDepIncludingTestFolder, testDep)
+  .dependsOn(`salesforce-effects`, handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `holiday-stop-api` = all(project in file("handlers/holiday-stop-api"))
   .enablePlugins(RiffRaffArtifact)
@@ -251,7 +261,7 @@ lazy val `holiday-stop-api` = all(project in file("handlers/holiday-stop-api"))
 
 lazy val `sf-datalake-export` = all(project in file("handlers/sf-datalake-export"))
   .enablePlugins(RiffRaffArtifact)
-  .dependsOn(salesforce, handler, effectsDepIncludingTestFolder, testDep)
+  .dependsOn(`salesforce-effects`, handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `zuora-datalake-export` = all(project in file("handlers/zuora-datalake-export"))
   .enablePlugins(RiffRaffArtifact)
