@@ -1,0 +1,19 @@
+stacks:
+- membership
+regions:
+- eu-west-1
+deployments:
+  cfn:
+    type: cloud-formation
+    app: fulfilment-date-calculator
+    parameters:
+      templatePath: cfn.yaml
+  zuora-datalake-export:
+    type: aws-lambda
+    parameters:
+      fileName: fulfilment-date-calculator.jar
+      bucket: support-service-lambdas-dist
+      prefixStack: false
+      functionNames:
+      - fulfilment-date-calculator-
+    dependencies: [cfn]
