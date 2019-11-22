@@ -7,14 +7,15 @@ import com.gu.holiday_stops.subscription.Subscription
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.SubscriptionName
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.functional.syntax._
+import play.api.libs.json._
 
 object WireHolidayStopRequest {
 
   def apply(issueSpecifics: List[IssueSpecifics])(sfHolidayStopRequest: HolidayStopRequest): HolidayStopRequestFull = HolidayStopRequestFull(
     id = sfHolidayStopRequest.Id.value,
-    start = sfHolidayStopRequest.Start_Date__c.value,
-    end = sfHolidayStopRequest.End_Date__c.value,
+    startDate = sfHolidayStopRequest.Start_Date__c.value,
+    endDate = sfHolidayStopRequest.End_Date__c.value,
     subscriptionName = sfHolidayStopRequest.Subscription_Name__c,
     publicationsImpacted = sfHolidayStopRequest
       .Holiday_Stop_Request_Detail__r
@@ -79,19 +80,23 @@ object HolidayStopRequestsDetail {
 }
 
 case class HolidayStopRequestPartial(
-  start: LocalDate,
-  end: LocalDate,
+  startDate: LocalDate,
+  endDate: LocalDate,
   subscriptionName: SubscriptionName
 )
 
 object HolidayStopRequestPartial {
-  implicit val format: OFormat[HolidayStopRequestPartial] = Json.format[HolidayStopRequestPartial]
+  implicit val reads: Reads[HolidayStopRequestPartial] = (
+    ((__ \ "start").read[LocalDate] or (__ \ "startDate").read[LocalDate]) and
+      ((__ \ "end").read[LocalDate] or (__ \ "endDate").read[LocalDate]) and
+      (__ \ "subscriptionName").read[SubscriptionName]
+    )(HolidayStopRequestPartial.apply _)
 }
 
 case class HolidayStopRequestFull(
   id: String,
-  start: LocalDate,
-  end: LocalDate,
+  startDate: LocalDate,
+  endDate: LocalDate,
   subscriptionName: SubscriptionName,
   publicationsImpacted: List[HolidayStopRequestsDetail],
   withdrawnTime: Option[ZonedDateTime],
@@ -99,7 +104,16 @@ case class HolidayStopRequestFull(
 )
 
 object HolidayStopRequestFull {
-  implicit val format: OFormat[HolidayStopRequestFull] = Json.format[HolidayStopRequestFull]
+  //  implicit val format: OFormat[HolidayStopRequestFull] = Json.format[HolidayStopRequestFull] FIXME restore this when all clients updated, and remove the custom read/writes below
+  implicit val reads: Reads[HolidayStopRequestFull] = Json.reads[HolidayStopRequestFull]
+  implicit val writes: Writes[HolidayStopRequestFull] = new Writes[HolidayStopRequestFull] {
+    def writes(hsr: HolidayStopRequestFull): JsValue =
+      Json.writes[HolidayStopRequestFull].writes(hsr) ++
+        Json.obj(
+          "start" -> hsr.startDate,
+          "end" -> hsr.endDate
+        )
+  }
 }
 
 case class GetHolidayStopRequests(
