@@ -132,8 +132,9 @@ lazy val s3ConfigValidator = all(project in file("lib/s3ConfigValidator"))
   )
 
 lazy val handler = all(project in file("lib/handler"))
+  .dependsOn(`effects-s3`)
   .settings(
-    libraryDependencies ++= Seq(okhttp3, scalaz, playJson, scalatest, awsLambda, awsS3) ++ logging
+    libraryDependencies ++= Seq(okhttp3, scalaz, playJson, scalatest, awsLambda) ++ logging
   )
 
 // to aid testability, only the actual handlers called as a lambda can depend on this
@@ -141,6 +142,10 @@ lazy val effects = all(project in file("lib/effects"))
   .dependsOn(handler)
   .settings(
     libraryDependencies ++= Seq(okhttp3, scalaz, playJson, scalatest, awsS3, jacksonDatabind) ++ logging
+  )
+lazy val `effects-s3` = all(project in file("lib/effects-s3"))
+  .settings(
+    libraryDependencies ++= Seq(awsS3) ++ logging
   )
 lazy val `effects-sqs` = all(project in file("lib/effects-sqs"))
   .dependsOn(testDep)
@@ -188,6 +193,7 @@ lazy val root = all(project in file(".")).enablePlugins(RiffRaffArtifact).aggreg
   `new-product-api`,
   `effects-sqs`,
   `effects-ses`,
+  `effects-s3`,
   `sf-datalake-export`,
   `zuora-datalake-export`,
   `batch-email-sender`,

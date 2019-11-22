@@ -17,10 +17,10 @@ import com.gu.sf_datalake_export.salesforce_bulk_api.S3UploadFile.{File, FileCon
 import com.gu.sf_datalake_export.salesforce_bulk_api.{GetBatchResult, GetBatchResultId, S3UploadFile}
 import com.gu.sf_datalake_export.util.ExportS3Path
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
-import com.gu.util.config.LoadConfigModule.S3Location
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.handlers.JsonHandler
 import com.gu.util.reader.Types._
+import com.gu.effects.AwsS3
 import com.gu.util.resthttp.Types.ClientFailableOp
 import com.typesafe.scalalogging.LazyLogging
 import okhttp3.{Request, Response}

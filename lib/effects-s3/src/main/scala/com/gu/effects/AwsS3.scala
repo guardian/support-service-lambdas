@@ -5,14 +5,15 @@ import com.amazonaws.auth.profile.ProfileCredentialsProvider
 import com.amazonaws.regions.Regions
 import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.s3.model._
-import com.gu.util.Logging
-import com.gu.util.config.LoadConfigModule.S3Location
+import com.typesafe.scalalogging.LazyLogging
 
 import scala.collection.JavaConverters._
 import scala.io.Source
 import scala.util.{Failure, Try}
 
-object GetFromS3 extends Logging {
+case class S3Location(bucket: String, key: String)
+
+object GetFromS3 extends LazyLogging {
 
   def fetchContent(request: GetObjectRequest): Try[S3ObjectInputStream] = {
     logger.info(s"Getting file from S3. Bucket: ${request.getBucketName} | Key: ${request.getKey}")
@@ -39,7 +40,7 @@ object GetFromS3 extends Logging {
 
 }
 
-object UploadToS3 extends Logging {
+object UploadToS3 extends LazyLogging {
 
   def putObject(request: PutObjectRequest): Try[PutObjectResult] = {
     logger.info(s"Copying file to S3. Bucket: ${request.getBucketName} | Key: ${request.getKey}")
@@ -59,7 +60,7 @@ object S3Path {
 case class BucketName(value: String) extends AnyVal
 case class Key(value: String) extends AnyVal
 
-object ListS3Objects extends Logging {
+object ListS3Objects extends LazyLogging {
 
   def listObjectsWithPrefix(prefix: S3Path): Try[List[Key]] = {
     Try {
@@ -70,7 +71,7 @@ object ListS3Objects extends Logging {
   }
 }
 
-object DeleteS3Objects extends Logging {
+object DeleteS3Objects extends LazyLogging {
 
   def deleteObjects(bucketName: BucketName, keysToDelete: List[Key]): Try[Unit] = {
     Try {

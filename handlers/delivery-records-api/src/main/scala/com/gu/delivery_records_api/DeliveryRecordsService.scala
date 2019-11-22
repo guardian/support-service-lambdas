@@ -6,12 +6,12 @@ import cats.effect.IO
 
 final case class DeliveryRecord(deliveryDate: LocalDate, deliveryAddress: String, deliveryInstruction: String)
 
-trait DeliverRecordsService {
+trait DeliveryRecordsService {
   def getDeliveryRecordsForSubscription(subscriptionId: String): IO[List[DeliveryRecord]]
 }
 
-object DeliverRecordsService {
-  def apply(): DeliverRecordsService = new DeliverRecordsService {
+object DeliveryRecordsService {
+  def apply(): DeliveryRecordsService = new DeliveryRecordsService {
     override def getDeliveryRecordsForSubscription(subscriptionId: String): IO[List[DeliveryRecord]] =
       IO(
         List(

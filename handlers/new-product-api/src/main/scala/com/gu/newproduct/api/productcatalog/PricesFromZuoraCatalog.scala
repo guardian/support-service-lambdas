@@ -2,8 +2,9 @@ package com.gu.newproduct.api.productcatalog
 
 import com.gu.newproduct.api.addsubscription.TypeConvert._
 import com.gu.newproduct.api.productcatalog.ZuoraIds.ProductRatePlanId
-import com.gu.util.config.LoadConfigModule.{S3Location, StringFromS3}
+import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config.ZuoraEnvironment
+import com.gu.effects.S3Location
 import com.gu.util.resthttp.Types.ClientFailableOp
 import play.api.libs.json.Json
 import ZuoraCatalogWireModel._

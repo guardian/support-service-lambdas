@@ -4,6 +4,7 @@ import com.gu.util.Logging
 import com.gu.util.config.ConfigReads.ConfigFailure
 import play.api.libs.json._
 import scalaz.{-\/, \/, \/-}
+import com.gu.effects.S3Location
 
 import scala.util.{Failure, Success, Try}
 
@@ -15,7 +16,6 @@ object ConfigWithStage {
 
 object LoadConfigModule extends Logging {
 
-  case class S3Location(bucket: String, key: String)
   type StringFromS3 = S3Location => Try[String]
 
   val bucketName = "gu-reader-revenue-private"

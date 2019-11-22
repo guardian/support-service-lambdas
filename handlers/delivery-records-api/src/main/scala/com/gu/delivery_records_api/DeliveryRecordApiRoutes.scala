@@ -7,9 +7,7 @@ import io.circe.generic.auto._
 import org.http4s.circe.CirceEntityEncoder._
 
 object DeliveryRecordApiRoutes {
-  def apply(): HttpRoutes[IO] = {
-    val deliveryRecordsService = DeliverRecordsService()
-
+  def apply(deliveryRecordsService: DeliveryRecordsService): HttpRoutes[IO] = {
     HttpRoutes.of {
       case GET -> Root / "delivery-records" / subscriptionNumber =>
         Ok(deliveryRecordsService.getDeliveryRecordsForSubscription(subscriptionNumber))
