@@ -45,6 +45,7 @@ object Dependencies {
   // see https://stackoverflow.com/questions/54834125/sbt-assembly-deduplicate-module-info-class
   val assemblyMergeStrategyDiscardModuleInfo = assemblyMergeStrategy in assembly := {
     case PathList("module-info.class") => MergeStrategy.discard
+    case PathList("io.netty.versions.properties") => MergeStrategy.discard
     case x =>
       val oldStrategy = (assemblyMergeStrategy in assembly).value
       oldStrategy(x)
