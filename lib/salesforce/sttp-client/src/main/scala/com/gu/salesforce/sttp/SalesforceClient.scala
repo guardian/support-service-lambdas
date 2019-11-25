@@ -8,15 +8,12 @@ import com.gu.salesforce.{RecordsWrapperCaseClass, SFAuthConfig, SalesforceAuth,
 import com.softwaremill.sttp.SttpBackend
 import com.softwaremill.sttp._
 import cats.implicits._
-import com.gu.salesforce.sttp.SalesforceClient.auth
 import com.softwaremill.sttp.circe._
 import io.circe.Decoder
 import io.circe.generic.auto._
 
-
 trait SalesforceClient[F[_]] {
   def query[A: Decoder](query: String): EitherT[F, SalesforceClientError, RecordsWrapperCaseClass[A]]
-
 }
 
 case class SalesforceClientError(message: String)

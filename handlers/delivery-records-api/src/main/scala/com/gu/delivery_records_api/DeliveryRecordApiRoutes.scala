@@ -10,7 +10,7 @@ object DeliveryRecordApiRoutes {
   def apply(deliveryRecordsService: DeliveryRecordsService): HttpRoutes[IO] = {
     HttpRoutes.of {
       case GET -> Root / "delivery-records" / subscriptionNumber =>
-        Ok(deliveryRecordsService.getDeliveryRecordsForSubscription(subscriptionNumber))
+        Ok(deliveryRecordsService.getDeliveryRecordsForSubscription(subscriptionNumber).value)
     }
   }
 }

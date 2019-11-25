@@ -16,7 +16,7 @@ object SalesforceClient extends LazyLogging {
     config: SFAuthConfig,
     shouldExposeSalesforceErrorMessageInClientFailure: Boolean = false
   ): LazyClientFailableOp[HttpOp[StringHttpRequest, BodyAsString]] =
-    SalesforceAuthenticate(getResponse)(config).map { sfAuth =>
+    SalesforceAuthenticate(getResponse)(config).map { sfAuth: SalesforceAuth =>
       HttpOp(getResponse).flatMap {
         toClientFailableOp(
           shouldExposeSalesforceErrorMessageInClientFailure.toOption(parseSalesforceErrorResponseAsCustomError _)
