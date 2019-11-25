@@ -3,7 +3,7 @@
 import Dependencies._
 
 name := "batch-email-sender"
-description:= "Receive batches of emails to be sent, munge them into an appropriate formate and put them on the email sending queue."
+description:= "Receive batches of emails to be sent, munge them into an appropriate format and put them on the email sending queue."
 
 scalacOptions += "-Ypartial-unification"
 
@@ -14,6 +14,9 @@ riffRaffUploadManifestBucket := Option("riffraff-builds")
 riffRaffManifestProjectName := "MemSub::Membership Admin::Batch Email Sender"
 riffRaffArtifactResources += (file("handlers/batch-email-sender/cfn.yaml"), "cfn/cfn.yaml")
 
-libraryDependencies ++= Seq(supportInternationalisation)
+libraryDependencies ++= Seq(
+  supportInternationalisation,
+  "com.softwaremill.diffx" %% "diffx-scalatest" % "0.3.9" % Test
+)
 
 assemblyMergeStrategyDiscardModuleInfo
