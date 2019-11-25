@@ -28,15 +28,15 @@ class ActionCalculatorTest extends FlatSpec with Matchers with EitherValues {
     case class TestDateRange(today: Today, expectedFirstAvailableDate: FirstAvailableDate, comment: String)
 
     val gwTodayToFirstAvailableDate = List(
-      TestDateRange(LocalDate.of(2019, 6, 1), LocalDate.of(2019, 6, 8), "On a Saturday first available on next Sat"),
-      TestDateRange(LocalDate.of(2019, 6, 2), LocalDate.of(2019, 6, 8), "On a Sunday, first available on Sat"),
-      TestDateRange(LocalDate.of(2019, 6, 3), LocalDate.of(2019, 6, 8), "On a Monday, first available on Sat"),
-      TestDateRange(LocalDate.of(2019, 6, 4), LocalDate.of(2019, 6, 8), "On a Tuesday, first available on Sat"),
-      TestDateRange(LocalDate.of(2019, 6, 5), LocalDate.of(2019, 6, 15), "On a Wednesday, first available jumps to following Sat"),
-      TestDateRange(LocalDate.of(2019, 6, 6), LocalDate.of(2019, 6, 15), "On a Thursday, first available on Sat"),
-      TestDateRange(LocalDate.of(2019, 6, 7), LocalDate.of(2019, 6, 15), "On a Friday, first available on Sat"),
-      TestDateRange(LocalDate.of(2019, 6, 8), LocalDate.of(2019, 6, 15), "On a Saturday, first available on next Sat"),
-      TestDateRange(LocalDate.of(2019, 6, 9), LocalDate.of(2019, 6, 15), "On a Sunday, first available on Sat"),
+      TestDateRange(LocalDate.of(2019, 6,  1), LocalDate.of(2019, 6,  8), "On a Saturday first available on next Sat"),
+      TestDateRange(LocalDate.of(2019, 6,  2), LocalDate.of(2019, 6,  8), "On a Sunday, first available on Sat"),
+      TestDateRange(LocalDate.of(2019, 6,  3), LocalDate.of(2019, 6,  8), "On a Monday, first available on Sat"),
+      TestDateRange(LocalDate.of(2019, 6,  4), LocalDate.of(2019, 6,  8), "On a Tuesday, first available on Sat"),
+      TestDateRange(LocalDate.of(2019, 6,  5), LocalDate.of(2019, 6, 15), "On a Wednesday, first available jumps to following Sat"),
+      TestDateRange(LocalDate.of(2019, 6,  6), LocalDate.of(2019, 6, 15), "On a Thursday, first available on Sat"),
+      TestDateRange(LocalDate.of(2019, 6,  7), LocalDate.of(2019, 6, 15), "On a Friday, first available on Sat"),
+      TestDateRange(LocalDate.of(2019, 6,  8), LocalDate.of(2019, 6, 15), "On a Saturday, first available on next Sat"),
+      TestDateRange(LocalDate.of(2019, 6,  9), LocalDate.of(2019, 6, 15), "On a Sunday, first available on Sat"),
       TestDateRange(LocalDate.of(2019, 6, 10), LocalDate.of(2019, 6, 15), "On a Monday, first available on Sat"),
       TestDateRange(LocalDate.of(2019, 6, 11), LocalDate.of(2019, 6, 15), "On a Tuesday, first available on Sat"),
       TestDateRange(LocalDate.of(2019, 6, 12), LocalDate.of(2019, 6, 22), "On a Wednesday, first available jumps to following Sat"),
@@ -53,14 +53,14 @@ class ActionCalculatorTest extends FlatSpec with Matchers with EitherValues {
       TestDateRange(LocalDate.of(2019, 6, 23), LocalDate.of(2019, 6, 29), "On a Sunday, first available on Sat"),
       TestDateRange(LocalDate.of(2019, 6, 24), LocalDate.of(2019, 6, 29), "On a Monday, first available on Sat"),
       TestDateRange(LocalDate.of(2019, 6, 25), LocalDate.of(2019, 6, 29), "On a Tuesday, first available on Sat"),
-      TestDateRange(LocalDate.of(2019, 6, 26), LocalDate.of(2019, 7, 6), "On a Wednesday, first available jumps to following Sat"),
-      TestDateRange(LocalDate.of(2019, 6, 27), LocalDate.of(2019, 7, 6), "On a Thursday, first available on Sat"),
-      TestDateRange(LocalDate.of(2019, 6, 28), LocalDate.of(2019, 7, 6), "On a Friday, first available on Sat"),
-      TestDateRange(LocalDate.of(2019, 6, 29), LocalDate.of(2019, 7, 6), "On a Saturday first available on next Sat"),
-      TestDateRange(LocalDate.of(2019, 6, 30), LocalDate.of(2019, 7, 6), "On a Sunday, first available on Sat"),
-      TestDateRange(LocalDate.of(2019, 7, 1), LocalDate.of(2019, 7, 6), "On a Monday, first available on Sat"),
-      TestDateRange(LocalDate.of(2019, 7, 2), LocalDate.of(2019, 7, 6), "On a Tuesday, first available on Sat"),
-      TestDateRange(LocalDate.of(2019, 7, 3), LocalDate.of(2019, 7, 13), "On a Wednesday, first available jumps to following Sat")
+      TestDateRange(LocalDate.of(2019, 6, 26), LocalDate.of(2019, 7,  6), "On a Wednesday, first available jumps to following Sat"),
+      TestDateRange(LocalDate.of(2019, 6, 27), LocalDate.of(2019, 7,  6), "On a Thursday, first available on Sat"),
+      TestDateRange(LocalDate.of(2019, 6, 28), LocalDate.of(2019, 7,  6), "On a Friday, first available on Sat"),
+      TestDateRange(LocalDate.of(2019, 6, 29), LocalDate.of(2019, 7,  6), "On a Saturday first available on next Sat"),
+      TestDateRange(LocalDate.of(2019, 6, 30), LocalDate.of(2019, 7,  6), "On a Sunday, first available on Sat"),
+      TestDateRange(LocalDate.of(2019, 7,  1), LocalDate.of(2019, 7,  6), "On a Monday, first available on Sat"),
+      TestDateRange(LocalDate.of(2019, 7,  2), LocalDate.of(2019, 7,  6), "On a Tuesday, first available on Sat"),
+      TestDateRange(LocalDate.of(2019, 7,  3), LocalDate.of(2019, 7,  13), "On a Wednesday, first available jumps to following Sat")
     )
     val subscription = Fixtures.mkGuardianWeeklySubscription(customerAcceptanceDate = LocalDate.of(2018, 6, 1))
 

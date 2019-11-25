@@ -72,9 +72,10 @@ object Handler extends Logging {
         getSubscriptionFromZuora(config, backend),
         idGenerator
       )(
-          request,
-          sfClient.setupRequest(withAlternateAccessTokenIfPresentInHeaderList(request.headers))
-        ))
+        request,
+        sfClient.setupRequest(withAlternateAccessTokenIfPresentInHeaderList(request.headers))
+      )
+    )
   }
 
   private def validateRequestAndCreateSteps(
