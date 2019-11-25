@@ -94,6 +94,14 @@ lazy val `salesforce-client` = all(project in file("lib/salesforce/client"))
     libraryDependencies ++= Seq(okhttp3, scalaz, playJson, scalatest) ++ logging
   )
 
+lazy val `salesforce-sttp-client` = all(project in file("lib/salesforce/sttp-client"))
+  .dependsOn(
+    `salesforce-core`
+  )
+  .settings(
+    libraryDependencies ++= Seq(sttp, sttpCirce, scalatest, catsCore, circe) ++ logging
+  )
+
 lazy val `holiday-stops` = all(project in file("lib/holiday-stops"))
   .dependsOn(
     `salesforce-client`,
@@ -198,6 +206,7 @@ lazy val root = all(project in file(".")).enablePlugins(RiffRaffArtifact).aggreg
   `zuora-reports`,
   `salesforce-core`,
   `salesforce-client`,
+  `salesforce-sttp-client`,
   `holiday-stops`,
   s3ConfigValidator,
   `new-product-api`,

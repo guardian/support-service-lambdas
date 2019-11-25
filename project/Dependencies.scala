@@ -10,6 +10,7 @@ object Dependencies {
   val circeVersion = "0.11.1"
   val sttpVersion = "1.5.17"
   val http4sVersion = "0.20.3"
+  val catsVersion = "1.6.1"
 
   val okhttp3 = "com.squareup.okhttp3" % "okhttp" % "3.9.1"
   val logging = Seq(
@@ -36,6 +37,7 @@ object Dependencies {
   val http4sLambda = "io.github.howardjohn" %% "http4s-lambda" % "0.4.0"
   val http4sDsl = "org.http4s" %% "http4s-dsl" % http4sVersion
   val http4sCirce = "org.http4s" %% "http4s-circe" % http4sVersion
+  val catsCore =  "org.typelevel" %% "cats-core" % catsVersion
 
 
   // to resolve merge clash of 'module-info.class'
