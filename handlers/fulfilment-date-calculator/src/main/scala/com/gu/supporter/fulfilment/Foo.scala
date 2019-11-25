@@ -9,6 +9,6 @@ import io.github.mkotsur.aws.handler.Lambda._
 
 class FulfilmentDateCalculator extends Lambda[String, String] with LazyLogging {
   override def handle(todayOverride: String, context: Context) = {
-    Right("woohoo")
+    Right(todayOverride)
   }
 }

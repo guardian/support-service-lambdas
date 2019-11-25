@@ -50,7 +50,7 @@ object SalesforceClient extends LazyLogging {
     withMaybeAlternateAccessToken(headers.flatMap(_.get("X-Ephemeral-Salesforce-Access-Token")))
 
   def withMaybeAlternateAccessToken(maybeAlternateAccessToken: Option[String])(requestInfo: StringHttpRequest): StringHttpRequest =
-    maybeAlternateAccessToken.map{ alternateAccessToken =>
+    maybeAlternateAccessToken.map { alternateAccessToken =>
       requestInfo.copy(headers = requestInfo.headers ++ getAuthHeaders(alternateAccessToken))
     }.getOrElse(requestInfo)
 
@@ -59,7 +59,7 @@ object SalesforceClient extends LazyLogging {
 
   def parseSalesforceErrorResponseAsCustomError(errorBody: String): ClientFailure = try {
     Json.parse(errorBody).as[List[SalesforceErrorResponseBody]] match {
-      case singleSfError :: Nil =>  CustomError(s"${singleSfError.errorCode} : ${singleSfError.message}")
+      case singleSfError :: Nil => CustomError(s"${singleSfError.errorCode} : ${singleSfError.message}")
       case multipleSfErrors => CustomError(
         multipleSfErrors.groupBy(_.errorCode).mapValues(_.map(_.message)).mkString.take(500)
       )
