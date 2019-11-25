@@ -82,7 +82,7 @@ lazy val `salesforce-core` = all(project in file("lib/salesforce/core"))
     libraryDependencies ++= Seq() ++ logging
   )
 
-lazy val `salesforce-effects` = all(project in file("lib/salesforce/effects"))
+lazy val `salesforce-client` = all(project in file("lib/salesforce/client"))
   .dependsOn(
     restHttp,
     handler,// % "test->test" TODO make this dep only in test - SF client shouldn't depends on ApiGateway
@@ -96,7 +96,7 @@ lazy val `salesforce-effects` = all(project in file("lib/salesforce/effects"))
 
 lazy val `holiday-stops` = all(project in file("lib/holiday-stops"))
   .dependsOn(
-    `salesforce-effects`,
+    `salesforce-client`,
     effects % "test->test",
     testDep
   )
@@ -197,7 +197,7 @@ lazy val root = all(project in file(".")).enablePlugins(RiffRaffArtifact).aggreg
   zuora,
   `zuora-reports`,
   `salesforce-core`,
-  `salesforce-effects`,
+  `salesforce-client`,
   `holiday-stops`,
   s3ConfigValidator,
   `new-product-api`,
@@ -217,7 +217,7 @@ lazy val `identity-backfill` = all(project in file("handlers/identity-backfill")
   .enablePlugins(RiffRaffArtifact)
   .dependsOn(
     zuora,
-    `salesforce-effects` % "compile->compile;test->test",
+    `salesforce-client` % "compile->compile;test->test",
     handler,
     effectsDepIncludingTestFolder,
     testDep
@@ -245,15 +245,15 @@ lazy val `zuora-retention` = all(project in file("handlers/zuora-retention"))
 
 lazy val `sf-contact-merge` = all(project in file("handlers/sf-contact-merge"))
   .enablePlugins(RiffRaffArtifact)
-  .dependsOn(zuora, `salesforce-effects` % "compile->compile;test->test", handler, effectsDepIncludingTestFolder, testDep)
+  .dependsOn(zuora, `salesforce-client` % "compile->compile;test->test", handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `cancellation-sf-cases` = all(project in file("handlers/cancellation-sf-cases"))
   .enablePlugins(RiffRaffArtifact)
-  .dependsOn(`salesforce-effects`, handler, effectsDepIncludingTestFolder, testDep)
+  .dependsOn(`salesforce-client`, handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `sf-gocardless-sync` = all(project in file("handlers/sf-gocardless-sync"))
   .enablePlugins(RiffRaffArtifact)
-  .dependsOn(`salesforce-effects`, handler, effectsDepIncludingTestFolder, testDep)
+  .dependsOn(`salesforce-client`, handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `holiday-stop-api` = all(project in file("handlers/holiday-stop-api"))
   .enablePlugins(RiffRaffArtifact)
@@ -261,7 +261,7 @@ lazy val `holiday-stop-api` = all(project in file("handlers/holiday-stop-api"))
 
 lazy val `sf-datalake-export` = all(project in file("handlers/sf-datalake-export"))
   .enablePlugins(RiffRaffArtifact)
-  .dependsOn(`salesforce-effects`, handler, effectsDepIncludingTestFolder, testDep)
+  .dependsOn(`salesforce-client`, handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `zuora-datalake-export` = all(project in file("handlers/zuora-datalake-export"))
   .enablePlugins(RiffRaffArtifact)
