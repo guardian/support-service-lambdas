@@ -16,9 +16,8 @@ object DeliveryRecordsApiApp extends LazyLogging {
   def apply(): EitherT[IO, DeliveryRecordsApiAppError, HttpRoutes[IO]] = {
     for {
       config <- loadSalesforceConfig()
-      salesforceClient <-
-        SalesforceClient(AsyncHttpClientCatsBackend[cats.effect.IO](), config)
-          .leftMap(error => DeliveryRecordsApiAppError(error.toString))
+      salesforceClient <- SalesforceClient(AsyncHttpClientCatsBackend[cats.effect.IO](), config)
+        .leftMap(error => DeliveryRecordsApiAppError(error.toString))
       _ = logger.info(s"Loaded config sf url: ${config.url}")
     } yield DeliveryRecordApiRoutes(DeliveryRecordsService(salesforceClient))
   }
