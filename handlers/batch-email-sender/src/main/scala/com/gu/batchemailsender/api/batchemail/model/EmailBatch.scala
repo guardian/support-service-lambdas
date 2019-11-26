@@ -1,7 +1,8 @@
 package com.gu.batchemailsender.api.batchemail.model
+
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
-import play.api.libs.json.Json
+import play.api.libs.json._
 
 import scala.util.{Failure, Success, Try}
 
@@ -9,6 +10,10 @@ object EmailBatch {
 
   object WireModel {
 
+    case class WireEmailBatchWithExceptions(
+      validBatch: WireEmailBatch,
+      exceptions: List[Seq[(JsPath, Seq[JsonValidationError])]]
+    )
     case class WireEmailBatch(batch_items: List[WireEmailBatchItem])
     case class WireEmailBatchItem(payload: WireEmailBatchItemPayload, object_name: String)
     case class WireEmailBatchItemPayload(
@@ -22,6 +27,7 @@ object EmailBatch {
       identity_id: Option[String],
       first_name: String,
       email_stage: String,
+      modified_by_customer: Option[Boolean],
       holiday_stop_request: Option[WireHolidayStopRequest]
     )
     case class WireHolidayStopRequest(
@@ -39,6 +45,18 @@ object EmailBatch {
     implicit val emailBatchItemPayloadReads = Json.reads[WireEmailBatchItemPayload]
     implicit val emailBatchItemReads = Json.reads[WireEmailBatchItem]
     implicit val emailBatch = Json.reads[WireEmailBatch]
+
+    implicit val emailBatchWithExceptions: Reads[WireEmailBatchWithExceptions] = json => {
+      val validated = (json \ "batch_items").as[List[JsObject]] map { itemOrException =>
+        itemOrException.validate[WireEmailBatchItem]
+      }
+      JsSuccess(
+        WireEmailBatchWithExceptions(
+          validBatch = WireEmailBatch(validated collect { case JsSuccess(item, _) => item }),
+          exceptions = validated collect { case JsError(e) => e }
+        )
+      )
+    }
 
     def fromSfDateToDisplayDate(sfDate: String): String = {
       val formattedDate: Try[String] = Try {
@@ -74,6 +92,7 @@ object EmailBatch {
           identity_id = emailBatchPayload.identity_id.map(IdentityUserId),
           first_name = emailBatchPayload.first_name,
           email_stage = emailBatchPayload.email_stage,
+          modified_by_customer = emailBatchPayload.modified_by_customer,
           holiday_start_date = emailBatchPayload.holiday_stop_request.map(stop =>
             HolidayStartDate(fromSfDateToDisplayDate(stop.holiday_start_date))),
           holiday_end_date = emailBatchPayload.holiday_stop_request.map(stop =>
@@ -128,6 +147,7 @@ case class EmailBatchItemPayload(
   identity_id: Option[IdentityUserId],
   first_name: String,
   email_stage: String,
+  modified_by_customer: Option[Boolean],
   holiday_start_date: Option[HolidayStartDate],
   holiday_end_date: Option[HolidayEndDate],
   stopped_credit_sum: Option[StoppedCreditSum],
