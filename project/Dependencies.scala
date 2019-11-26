@@ -30,6 +30,7 @@ object Dependencies {
   val supportInternationalisation = "com.gu" %% "support-internationalisation" % "0.9"
   val circe = "io.circe" %% "circe-generic" % circeVersion
   val circeParser = "io.circe" %% "circe-parser" % circeVersion
+  val circeJava8 = "io.circe" %% "circe-java8" % circeVersion
   val sttp = "com.softwaremill.sttp" %% "core" % sttpVersion
   val sttpCirce = "com.softwaremill.sttp" %% "circe" % sttpVersion
   val sttpAsycHttpClientBackendCats = "com.softwaremill.sttp" %% "async-http-client-backend-cats" % sttpVersion

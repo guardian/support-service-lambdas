@@ -44,21 +44,21 @@ object DeliveryRecordsService {
           "FROM SF_Subscription__c " +
           s"WHERE Name = '$subscriptionId'"
       ).bimap(
-        error => DeliveryRecordServiceError(error.toString),
-        queryResult =>
-          queryResult
-            .records
-            .flatMap(_.Delivery_Records__r)
-            .flatMap(_.records)
-            .map { queryRecord =>
-              DeliveryRecord(
-                deliveryDate = queryRecord.Delivery_Date__c,
-                deliveryAddress = queryRecord.Delivery_Address__c,
-                deliveryInstruction = queryRecord.Delivery_Instructions__c,
-                hasHolidayStop = queryRecord.Has_Holiday_Stop__c
-              )
-            }
-      )
+          error => DeliveryRecordServiceError(error.toString),
+          queryResult =>
+            queryResult
+              .records
+              .flatMap(_.Delivery_Records__r)
+              .flatMap(_.records)
+              .map { queryRecord =>
+                DeliveryRecord(
+                  deliveryDate = queryRecord.Delivery_Date__c,
+                  deliveryAddress = queryRecord.Delivery_Address__c,
+                  deliveryInstruction = queryRecord.Delivery_Instructions__c,
+                  hasHolidayStop = queryRecord.Has_Holiday_Stop__c
+                )
+              }
+        )
   }
 }
 

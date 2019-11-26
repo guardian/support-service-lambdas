@@ -96,10 +96,19 @@ lazy val `salesforce-client` = all(project in file("lib/salesforce/client"))
 
 lazy val `salesforce-sttp-client` = all(project in file("lib/salesforce/sttp-client"))
   .dependsOn(
+    `salesforce-core`,
+    `salesforce-sttp-test-stub` % Test
+  )
+  .settings(
+    libraryDependencies ++= Seq(sttp, sttpCirce, scalatest, catsCore, circe, circeJava8) ++ logging
+  )
+
+lazy val `salesforce-sttp-test-stub` = all(project in file("lib/salesforce/sttp-test-stub"))
+  .dependsOn(
     `salesforce-core`
   )
   .settings(
-    libraryDependencies ++= Seq(sttp, sttpCirce, scalatest, catsCore, circe) ++ logging
+    libraryDependencies ++= Seq(sttp, sttpCirce, scalatest) ++ logging
   )
 
 lazy val `holiday-stops` = all(project in file("lib/holiday-stops"))

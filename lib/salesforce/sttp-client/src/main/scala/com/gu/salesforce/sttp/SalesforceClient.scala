@@ -9,6 +9,7 @@ import com.softwaremill.sttp.SttpBackend
 import com.softwaremill.sttp._
 import cats.implicits._
 import com.softwaremill.sttp.circe._
+import io.circe
 import io.circe.Decoder
 import io.circe.generic.auto._
 
@@ -65,11 +66,13 @@ object SalesforceClient {
   )(implicit backend: SttpBackend[F, S]): EitherT[F, SalesforceClientError, A] = {
     for {
       response <- EitherT.right[SalesforceClientError](request.send())
-      responseBody <- EitherT.fromEither[F](formatError(response))
+      responseBody <- EitherT.fromEither[F](formatError[A](response))
     } yield responseBody
   }
 
-  private def formatError[A](response: Response[Either[DeserializationError[io.circe.Error], A]]): Either[SalesforceClientError, A] = {
+  private def formatError[A](
+    response: Response[Either[DeserializationError[circe.Error], A]]
+  ): Either[SalesforceClientError, A] = {
     response
       .body
       .leftMap(
@@ -78,7 +81,7 @@ object SalesforceClient {
             s"Request failed returning a status ${response.code} with body: ${errorBody}"
           )
       )
-      .right.flatMap { parsedBody =>
+      .flatMap { parsedBody =>
         parsedBody.leftMap(deserializationError =>
           SalesforceClientError(
             s"Request to parse response: $deserializationError"
