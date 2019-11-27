@@ -24,7 +24,12 @@ object DeliveryRecordApiRoutes {
 
             records <- deliveryRecordsService
               .getDeliveryRecordsForSubscription(subscriptionNumber, contact)
-              .leftMap(error => InternalServerError(error.toString))
+              .leftMap {
+                case error: DeliveryRecordServiceSubscriptionNotFound =>
+                  NotFound(error)
+                case error: DeliveryRecordServiceGenericError =>
+                  InternalServerError(error)
+              }
           } yield records
         )
     }

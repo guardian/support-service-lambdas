@@ -8,6 +8,7 @@ import com.gu.salesforce.{RecordsWrapperCaseClass, SalesforceQueryConstants}
 import com.gu.salesforce.SalesforceQueryConstants.Contact
 import com.gu.salesforce.sttp.SalesforceClient
 import io.circe.generic.auto._
+import cats.implicits._
 
 final case class DeliveryRecord(
   deliveryDate: Option[LocalDate],
@@ -16,7 +17,11 @@ final case class DeliveryRecord(
   hasHolidayStop: Option[Boolean]
 )
 
-case class DeliveryRecordServiceError(message: String)
+sealed trait DeliveryRecordServiceError
+
+case class DeliveryRecordServiceGenericError(message: String) extends DeliveryRecordServiceError
+
+case class DeliveryRecordServiceSubscriptionNotFound(message: String) extends DeliveryRecordServiceError
 
 trait DeliveryRecordsService {
   def getDeliveryRecordsForSubscription(subscriptionId: String, contact: Contact): EitherT[IO, DeliveryRecordServiceError, List[DeliveryRecord]]
@@ -37,29 +42,51 @@ object DeliveryRecordsService {
 
   def apply(salesforceClient: SalesforceClient[IO]): DeliveryRecordsService = new DeliveryRecordsService {
     override def getDeliveryRecordsForSubscription(subscriptionId: String, contact: Contact): EitherT[IO, DeliveryRecordServiceError, List[DeliveryRecord]] =
-      salesforceClient.query[SubscriptionRecordQueryResult](
-        s"SELECT ( " +
-          s"  SELECT Delivery_Date__c, Delivery_Address__c, Delivery_Instructions__c, Has_Holiday_Stop__c " +
-          s"  FROM Delivery_Records__r " +
-          s") " +
-          "FROM SF_Subscription__c " +
-          s"WHERE Name = '$subscriptionId' AND ${SalesforceQueryConstants.contactToWhereClausePart(contact)}"
-      ).bimap(
-          error => DeliveryRecordServiceError(error.toString),
-          queryResult =>
-            queryResult
-              .records
-              .flatMap(_.Delivery_Records__r)
-              .flatMap(_.records)
-              .map { queryRecord =>
-                DeliveryRecord(
-                  deliveryDate = queryRecord.Delivery_Date__c,
-                  deliveryAddress = queryRecord.Delivery_Address__c,
-                  deliveryInstruction = queryRecord.Delivery_Instructions__c,
-                  hasHolidayStop = queryRecord.Has_Holiday_Stop__c
-                )
-              }
+      for {
+        queryResult <- queryForDeliveryRecords(salesforceClient, subscriptionId, contact)
+        records <- getDeliveryRecordsFromQueryResults(subscriptionId, contact, queryResult).toEitherT[IO]
+        results = records.map { queryRecord =>
+          DeliveryRecord(
+            deliveryDate = queryRecord.Delivery_Date__c,
+            deliveryAddress = queryRecord.Delivery_Address__c,
+            deliveryInstruction = queryRecord.Delivery_Instructions__c,
+            hasHolidayStop = queryRecord.Has_Holiday_Stop__c
+          )
+        }
+      } yield results
+  }
+
+  private def queryForDeliveryRecords(
+    salesforceClient: SalesforceClient[IO],
+    subscriptionId: String,
+    contact: Contact
+  ): EitherT[IO, DeliveryRecordServiceError, RecordsWrapperCaseClass[SubscriptionRecordQueryResult]] = {
+    salesforceClient.query[SubscriptionRecordQueryResult](
+      s"SELECT ( " +
+        s"  SELECT Delivery_Date__c, Delivery_Address__c, Delivery_Instructions__c, Has_Holiday_Stop__c " +
+        s"  FROM Delivery_Records__r " +
+        s") " +
+        "FROM SF_Subscription__c " +
+        s"WHERE Name = '$subscriptionId' AND ${SalesforceQueryConstants.contactToWhereClausePart(contact)}"
+    )
+      .leftMap(error => DeliveryRecordServiceGenericError(error.toString))
+  }
+
+  private def getDeliveryRecordsFromQueryResults(
+    subscriptionId: String,
+    contact: Contact,
+    queryResult: RecordsWrapperCaseClass[SubscriptionRecordQueryResult]
+  ): Either[DeliveryRecordServiceError, List[DeliveryRecordQueryResult]] = {
+    queryResult
+      .records
+      .headOption
+      .toRight(
+        DeliveryRecordServiceSubscriptionNotFound(
+          s"Subscription '$subscriptionId' not found or did not belong to contact " +
+            s"'${contact.fold(identity, identity)}'"
         )
+      )
+      .map(deliverRecordsOption => deliverRecordsOption.Delivery_Records__r.map(_.records).getOrElse(Nil))
   }
 }
 
