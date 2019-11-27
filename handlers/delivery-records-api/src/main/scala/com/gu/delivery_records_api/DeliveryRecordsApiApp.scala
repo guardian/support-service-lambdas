@@ -24,7 +24,7 @@ object DeliveryRecordsApiApp extends LazyLogging {
 
   private def loadSalesforceConfig(): EitherT[IO, DeliveryRecordsApiAppError, SFAuthConfig] = {
     ConfigLoader
-      .loadFileFromS3[SFAuthConfig](bucket, stage, salesforceConfigLocation)
+      .loadFileFromS3[IO, SFAuthConfig](bucket, stage, salesforceConfigLocation)
       .leftMap(error => DeliveryRecordsApiAppError(error.toString()))
   }
 

@@ -2,6 +2,7 @@ package com.gu.delivery_records_api
 
 import java.time.LocalDate
 
+import cats.Monad
 import cats.data.EitherT
 import cats.effect.IO
 import com.gu.salesforce.{RecordsWrapperCaseClass, SalesforceQueryConstants}
@@ -23,8 +24,8 @@ case class DeliveryRecordServiceGenericError(message: String) extends DeliveryRe
 
 case class DeliveryRecordServiceSubscriptionNotFound(message: String) extends DeliveryRecordServiceError
 
-trait DeliveryRecordsService {
-  def getDeliveryRecordsForSubscription(subscriptionId: String, contact: Contact): EitherT[IO, DeliveryRecordServiceError, List[DeliveryRecord]]
+trait DeliveryRecordsService[F[_]] {
+  def getDeliveryRecordsForSubscription(subscriptionId: String, contact: Contact): EitherT[F, DeliveryRecordServiceError, List[DeliveryRecord]]
 }
 
 object DeliveryRecordsService {
@@ -40,11 +41,11 @@ object DeliveryRecordsService {
     Has_Holiday_Stop__c: Option[Boolean]
   )
 
-  def apply(salesforceClient: SalesforceClient[IO]): DeliveryRecordsService = new DeliveryRecordsService {
-    override def getDeliveryRecordsForSubscription(subscriptionId: String, contact: Contact): EitherT[IO, DeliveryRecordServiceError, List[DeliveryRecord]] =
+  def apply[F[_]: Monad](salesforceClient: SalesforceClient[F]): DeliveryRecordsService[F] = new DeliveryRecordsService[F] {
+    override def getDeliveryRecordsForSubscription(subscriptionId: String, contact: Contact): EitherT[F, DeliveryRecordServiceError, List[DeliveryRecord]] =
       for {
         queryResult <- queryForDeliveryRecords(salesforceClient, subscriptionId, contact)
-        records <- getDeliveryRecordsFromQueryResults(subscriptionId, contact, queryResult).toEitherT[IO]
+        records <- getDeliveryRecordsFromQueryResults(subscriptionId, contact, queryResult).toEitherT[F]
         results = records.map { queryRecord =>
           DeliveryRecord(
             deliveryDate = queryRecord.Delivery_Date__c,
@@ -54,39 +55,39 @@ object DeliveryRecordsService {
           )
         }
       } yield results
-  }
 
-  private def queryForDeliveryRecords(
-    salesforceClient: SalesforceClient[IO],
-    subscriptionId: String,
-    contact: Contact
-  ): EitherT[IO, DeliveryRecordServiceError, RecordsWrapperCaseClass[SubscriptionRecordQueryResult]] = {
-    salesforceClient.query[SubscriptionRecordQueryResult](
-      s"SELECT ( " +
-        s"  SELECT Delivery_Date__c, Delivery_Address__c, Delivery_Instructions__c, Has_Holiday_Stop__c " +
-        s"  FROM Delivery_Records__r " +
-        s") " +
-        "FROM SF_Subscription__c " +
-        s"WHERE Name = '$subscriptionId' AND ${SalesforceQueryConstants.contactToWhereClausePart(contact)}"
-    )
-      .leftMap(error => DeliveryRecordServiceGenericError(error.toString))
-  }
-
-  private def getDeliveryRecordsFromQueryResults(
-    subscriptionId: String,
-    contact: Contact,
-    queryResult: RecordsWrapperCaseClass[SubscriptionRecordQueryResult]
-  ): Either[DeliveryRecordServiceError, List[DeliveryRecordQueryResult]] = {
-    queryResult
-      .records
-      .headOption
-      .toRight(
-        DeliveryRecordServiceSubscriptionNotFound(
-          s"Subscription '$subscriptionId' not found or did not belong to contact " +
-            s"'${contact.fold(identity, identity)}'"
-        )
+    private def queryForDeliveryRecords(
+      salesforceClient: SalesforceClient[F],
+      subscriptionId: String,
+      contact: Contact
+    ): EitherT[F, DeliveryRecordServiceError, RecordsWrapperCaseClass[SubscriptionRecordQueryResult]] = {
+      salesforceClient.query[SubscriptionRecordQueryResult](
+        s"SELECT ( " +
+          s"  SELECT Delivery_Date__c, Delivery_Address__c, Delivery_Instructions__c, Has_Holiday_Stop__c " +
+          s"  FROM Delivery_Records__r " +
+          s") " +
+          "FROM SF_Subscription__c " +
+          s"WHERE Name = '$subscriptionId' AND ${SalesforceQueryConstants.contactToWhereClausePart(contact)}"
       )
-      .map(deliverRecordsOption => deliverRecordsOption.Delivery_Records__r.map(_.records).getOrElse(Nil))
+        .leftMap(error => DeliveryRecordServiceGenericError(error.toString))
+    }
+
+    private def getDeliveryRecordsFromQueryResults(
+      subscriptionId: String,
+      contact: Contact,
+      queryResult: RecordsWrapperCaseClass[SubscriptionRecordQueryResult]
+    ): Either[DeliveryRecordServiceError, List[DeliveryRecordQueryResult]] = {
+      queryResult
+        .records
+        .headOption
+        .toRight(
+          DeliveryRecordServiceSubscriptionNotFound(
+            s"Subscription '$subscriptionId' not found or did not belong to contact " +
+              s"'${contact.fold(identity, identity)}'"
+          )
+        )
+        .map(deliverRecordsOption => deliverRecordsOption.Delivery_Records__r.map(_.records).getOrElse(Nil))
+    }
   }
 }
 
