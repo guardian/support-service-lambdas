@@ -7,20 +7,35 @@ import org.http4s.dsl.io._
 import io.circe.generic.auto._
 import org.http4s.circe.CirceEntityEncoder._
 import cats.implicits._
+import com.gu.salesforce.SalesforceHandlerSupport
 
 object DeliveryRecordApiRoutes {
   def apply(deliveryRecordsService: DeliveryRecordsService): HttpRoutes[IO] = {
     HttpRoutes.of {
-      case GET -> Root / "delivery-records" / subscriptionNumber =>
-        toResponse(deliveryRecordsService.getDeliveryRecordsForSubscription(subscriptionNumber))
+      case request @ GET -> Root / "delivery-records" / subscriptionNumber =>
+        toResponse(
+          for {
+            contact <- SalesforceHandlerSupport
+              .extractContactFromHeaders(
+                request.headers.toList.map(header => header.name.value -> header.value)
+              )
+              .toEitherT[IO]
+              .leftMap(error => BadRequest(error))
+
+            records <- deliveryRecordsService
+              .getDeliveryRecordsForSubscription(subscriptionNumber, contact)
+              .leftMap(error => InternalServerError(error.toString))
+          } yield records
+        )
     }
   }
 
-  private def toResponse[A](result: EitherT[IO, DeliveryRecordServiceError, A])(implicit enc: EntityEncoder[IO, A]) = {
+  private def toResponse[A](result: EitherT[IO, IO[Response[IO]], A])(implicit enc: EntityEncoder[IO, A]): IO[Response[IO]] = {
     result
       .fold(
-        Ok(_),
-        InternalServerError(_)
-      ).flatten
+        identity,
+        value => Ok(value)
+      )
+      .flatten
   }
 }

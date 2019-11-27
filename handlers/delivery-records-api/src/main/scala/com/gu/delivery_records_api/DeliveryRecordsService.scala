@@ -4,7 +4,8 @@ import java.time.LocalDate
 
 import cats.data.EitherT
 import cats.effect.IO
-import com.gu.salesforce.RecordsWrapperCaseClass
+import com.gu.salesforce.{RecordsWrapperCaseClass, SalesforceQueryConstants}
+import com.gu.salesforce.SalesforceQueryConstants.Contact
 import com.gu.salesforce.sttp.SalesforceClient
 import io.circe.generic.auto._
 
@@ -18,7 +19,7 @@ final case class DeliveryRecord(
 case class DeliveryRecordServiceError(message: String)
 
 trait DeliveryRecordsService {
-  def getDeliveryRecordsForSubscription(subscriptionId: String): EitherT[IO, DeliveryRecordServiceError, List[DeliveryRecord]]
+  def getDeliveryRecordsForSubscription(subscriptionId: String, contact: Contact): EitherT[IO, DeliveryRecordServiceError, List[DeliveryRecord]]
 }
 
 object DeliveryRecordsService {
@@ -35,14 +36,14 @@ object DeliveryRecordsService {
   )
 
   def apply(salesforceClient: SalesforceClient[IO]): DeliveryRecordsService = new DeliveryRecordsService {
-    override def getDeliveryRecordsForSubscription(subscriptionId: String): EitherT[IO, DeliveryRecordServiceError, List[DeliveryRecord]] =
+    override def getDeliveryRecordsForSubscription(subscriptionId: String, contact: Contact): EitherT[IO, DeliveryRecordServiceError, List[DeliveryRecord]] =
       salesforceClient.query[SubscriptionRecordQueryResult](
         s"SELECT ( " +
           s"  SELECT Delivery_Date__c, Delivery_Address__c, Delivery_Instructions__c, Has_Holiday_Stop__c " +
           s"  FROM Delivery_Records__r " +
           s") " +
           "FROM SF_Subscription__c " +
-          s"WHERE Name = '$subscriptionId'"
+          s"WHERE Name = '$subscriptionId' AND ${SalesforceQueryConstants.contactToWhereClausePart(contact)}"
       ).bimap(
           error => DeliveryRecordServiceError(error.toString),
           queryResult =>
