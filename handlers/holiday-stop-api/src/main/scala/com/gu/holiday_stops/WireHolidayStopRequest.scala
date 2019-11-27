@@ -86,11 +86,7 @@ case class HolidayStopRequestPartial(
 )
 
 object HolidayStopRequestPartial {
-  implicit val reads: Reads[HolidayStopRequestPartial] = (
-    ((__ \ "start").read[LocalDate] or (__ \ "startDate").read[LocalDate]) and
-      ((__ \ "end").read[LocalDate] or (__ \ "endDate").read[LocalDate]) and
-      (__ \ "subscriptionName").read[SubscriptionName]
-    )(HolidayStopRequestPartial.apply _)
+  implicit val reads: Reads[HolidayStopRequestPartial] = Json.reads[HolidayStopRequestPartial]
 }
 
 case class HolidayStopRequestFull(
@@ -104,16 +100,7 @@ case class HolidayStopRequestFull(
 )
 
 object HolidayStopRequestFull {
-  //  implicit val format: OFormat[HolidayStopRequestFull] = Json.format[HolidayStopRequestFull] FIXME restore this when all clients updated, and remove the custom read/writes below
-  implicit val reads: Reads[HolidayStopRequestFull] = Json.reads[HolidayStopRequestFull]
-  implicit val writes: Writes[HolidayStopRequestFull] = new Writes[HolidayStopRequestFull] {
-    def writes(hsr: HolidayStopRequestFull): JsValue =
-      Json.writes[HolidayStopRequestFull].writes(hsr) ++
-        Json.obj(
-          "start" -> hsr.startDate,
-          "end" -> hsr.endDate
-        )
-  }
+  implicit val format: OFormat[HolidayStopRequestFull] = Json.format[HolidayStopRequestFull]
 }
 
 case class GetHolidayStopRequests(
