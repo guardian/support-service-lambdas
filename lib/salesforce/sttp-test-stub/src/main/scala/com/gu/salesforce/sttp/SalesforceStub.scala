@@ -25,8 +25,8 @@ object SalesforceStub {
     val urlMatches = request.uri.toString() == (config.url + "/services/oauth2/token")
     val bodyMatches = request.body == StringBody(
       s"client_id=${config.client_id}&" +
-        s"client_secret=${config.client_secret}&username=${config.username}&" +
-        s"password=${config.password + config.token}&grant_type=password",
+      s"client_secret=${config.client_secret}&username=${config.username}&" +
+      s"password=${config.password + config.token}&grant_type=password",
       "utf-8",
       Some(MediaTypes.Text)
     )
