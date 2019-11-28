@@ -66,11 +66,12 @@ object SalesforceClient {
   )(implicit backend: SttpBackend[F, S]): EitherT[F, SalesforceClientError, A] = {
     for {
       response <- EitherT.right[SalesforceClientError](request.send())
-      responseBody <- EitherT.fromEither[F](formatError[A](response))
+      responseBody <- EitherT.fromEither[F](formatError[A, S](request, response))
     } yield responseBody
   }
 
-  private def formatError[A](
+  private def formatError[A, S](
+    request: Request[Either[DeserializationError[circe.Error], A], S],
     response: Response[Either[DeserializationError[circe.Error], A]]
   ): Either[SalesforceClientError, A] = {
     response
@@ -78,13 +79,13 @@ object SalesforceClient {
       .leftMap(
         errorBody =>
           SalesforceClientError(
-            s"Request failed returning a status ${response.code} with body: ${errorBody}"
+            s"Request ${request.method.m} ${request.uri.toString()} failed returning a status ${response.code} with body: ${errorBody}"
           )
       )
       .flatMap { parsedBody =>
         parsedBody.leftMap(deserializationError =>
           SalesforceClientError(
-            s"Request to parse response: $deserializationError"
+            s"Request ${request.method.m} ${request.uri.toString()} failed to parse response: $deserializationError"
           )
         )
       }
