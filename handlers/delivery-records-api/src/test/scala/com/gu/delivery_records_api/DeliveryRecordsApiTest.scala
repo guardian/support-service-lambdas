@@ -89,6 +89,63 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
     getBody[List[DeliveryRecord]](response) should equal(expectedValidDeliveryApiResponse)
     response.status.code should equal(200)
   }
+  it should "return 404 if no subscription returned from salesforce" in {
+    val backendStub =
+      SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
+        .stubAuth(config, auth)
+        .stubQuery(
+          auth,
+          deliveryRecordsQuery(Right(buyerContactId), subscriptionNumber),
+          RecordsWrapperCaseClass[SFApiSubscription](Nil)
+        )
+
+    val app = createApp(backendStub)
+    val response = app.run(
+      Request(
+        method = Method.GET,
+        Uri(path = s"/delivery-records/${subscriptionNumber}"),
+        headers = Headers.of(Header("x-salesforce-contact-id", buyerContactId))
+      )
+    ).value.unsafeRunSync().get
+
+    response.status.code should equal(404)
+  }
+  it should "return 500 request to salesforce fails" in {
+    val backendStub = SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
+      .stubAuth(config, auth)
+      //will return 404 for query endpoint
+
+    val app = createApp(backendStub)
+    val response = app.run(
+      Request(
+        method = Method.GET,
+        Uri(path = s"/delivery-records/${subscriptionNumber}"),
+        headers = Headers.of(Header("x-salesforce-contact-id", buyerContactId))
+      )
+    ).value.unsafeRunSync().get
+
+    response.status.code should equal(500)
+  }
+  it should "lookup return 400 if no auth headers" in {
+    val backendStub =
+      SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
+        .stubAuth(config, auth)
+
+    val app = createApp(backendStub)
+    val response = app.run(
+      Request(
+        method = Method.GET,
+        Uri(path = s"/delivery-records/${subscriptionNumber}")
+      )
+    ).value.unsafeRunSync().get
+
+    response.status.code should equal(400)
+  }
+  it should "fail to create if salesforce auth fails" in {
+    val backendStub = SttpBackendStub[IO, Nothing](new CatsMonadError[IO]) //Auth call not stubbed
+
+    DeliveryRecordsApiApp(config, backendStub).value.unsafeRunSync().isLeft should be (true)
+  }
 
   private def getBody[A: Decoder](response: Response[IO]) = {
     parse(
