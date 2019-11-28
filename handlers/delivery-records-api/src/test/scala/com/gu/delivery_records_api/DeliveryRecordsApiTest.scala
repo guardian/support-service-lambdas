@@ -55,13 +55,13 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
     )
   )
 
-  "DeliveryRecordsService" should "lookup subscription with identity id" in {
-    val backendStub =
+  "DeliveryRecordsApp" should "lookup subscription with identity id" in {
+    val salesforceBackendStub =
       SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
         .stubAuth(config, auth)
         .stubQuery(auth, deliveryRecordsQuery(Left(identityId), subscriptionNumber), validSalesforceResponseBody)
 
-    val app = createApp(backendStub)
+    val app = createApp(salesforceBackendStub)
     val response = app.run(
       Request(
         method = Method.GET,
@@ -74,12 +74,12 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
     response.status.code should equal(200)
   }
   it should "lookup subscription with contact id" in {
-    val backendStub =
+    val salesforceBackendStub =
       SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
         .stubAuth(config, auth)
         .stubQuery(auth, deliveryRecordsQuery(Right(buyerContactId), subscriptionNumber), validSalesforceResponseBody)
 
-    val app = createApp(backendStub)
+    val app = createApp(salesforceBackendStub)
     val response = app.run(
       Request(
         method = Method.GET,
@@ -92,7 +92,7 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
     response.status.code should equal(200)
   }
   it should "return 404 if no subscription returned from salesforce" in {
-    val backendStub =
+    val salesforceBackendStub =
       SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
         .stubAuth(config, auth)
         .stubQuery(
@@ -101,7 +101,7 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
           RecordsWrapperCaseClass[SFApiSubscription](Nil)
         )
 
-    val app = createApp(backendStub)
+    val app = createApp(salesforceBackendStub)
     val response = app.run(
       Request(
         method = Method.GET,
@@ -113,11 +113,11 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
     response.status.code should equal(404)
   }
   it should "return 500 request to salesforce fails" in {
-    val backendStub = SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
+    val salesforceBackendStub = SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
       .stubAuth(config, auth)
     //will return 404 for query endpoint
 
-    val app = createApp(backendStub)
+    val app = createApp(salesforceBackendStub)
     val response = app.run(
       Request(
         method = Method.GET,
@@ -129,11 +129,11 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
     response.status.code should equal(500)
   }
   it should "lookup return 400 if no auth headers" in {
-    val backendStub =
+    val salesforceBackendStub =
       SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
         .stubAuth(config, auth)
 
-    val app = createApp(backendStub)
+    val app = createApp(salesforceBackendStub)
     val response = app.run(
       Request(
         method = Method.GET,
@@ -144,9 +144,9 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
     response.status.code should equal(400)
   }
   it should "fail to create if salesforce auth fails" in {
-    val backendStub = SttpBackendStub[IO, Nothing](new CatsMonadError[IO]) //Auth call not stubbed
+    val salesforceBackendStub = SttpBackendStub[IO, Nothing](new CatsMonadError[IO]) //Auth call not stubbed
 
-    DeliveryRecordsApiApp(config, backendStub).value.unsafeRunSync().isLeft should be(true)
+    DeliveryRecordsApiApp(config, salesforceBackendStub).value.unsafeRunSync().isLeft should be(true)
   }
 
   private def getBody[A: Decoder](response: Response[IO]) = {
@@ -161,7 +161,7 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
       .as[A].right.value
   }
 
-  private def createApp(backendStub: SttpBackendStub[IO, Nothing]) = {
-    DeliveryRecordsApiApp(config, backendStub).value.unsafeRunSync().right.value
+  private def createApp(salesforceBackendStub: SttpBackendStub[IO, Nothing]) = {
+    DeliveryRecordsApiApp(config, salesforceBackendStub).value.unsafeRunSync().right.value
   }
 }

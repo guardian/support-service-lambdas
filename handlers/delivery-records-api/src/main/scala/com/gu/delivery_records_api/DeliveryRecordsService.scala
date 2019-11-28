@@ -4,7 +4,7 @@ import java.time.LocalDate
 
 import cats.Monad
 import cats.data.EitherT
-import com.gu.salesforce.{RecordsWrapperCaseClass, SalesforceQueryConstants}
+import com.gu.salesforce.{RecordsWrapperCaseClass}
 import com.gu.salesforce.SalesforceQueryConstants.{Contact, deliveryRecordsQuery}
 import com.gu.salesforce.sttp.SalesforceClient
 import io.circe.generic.auto._
