@@ -37,7 +37,7 @@ object DeliveryRecordsApiApp extends LazyLogging {
     Logger.httpRoutes(
       logHeaders = true,
       logBody = true,
-      redactHeadersWhen = { headerKey: CaseInsensitiveString => headerKey == "x-api-key" },
+      redactHeadersWhen = { headerKey: CaseInsensitiveString => headerKey.value == "x-api-key" },
       logAction = Some({ message: String => IO.delay(logger.info(message)) })
     )
   }
