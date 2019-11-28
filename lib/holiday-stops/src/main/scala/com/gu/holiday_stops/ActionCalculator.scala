@@ -149,7 +149,7 @@ object ActionCalculator {
   val SaturdayPlusVoucherSuspensionConstants = SaturdayVoucherSuspensionConstants
 
   def voucherSuspensionConstants(issueSuspensionConstants: List[IssueSuspensionConstants]) =
-    SuspensionConstants(issueSuspensionConstants.size * 6, issueSuspensionConstants)
+    SuspensionConstants(issueSuspensionConstants.size * 4, issueSuspensionConstants)
 
   lazy val VoucherProcessorLeadTime: Int = 1
 
