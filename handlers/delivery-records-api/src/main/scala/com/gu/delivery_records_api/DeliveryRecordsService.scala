@@ -5,7 +5,7 @@ import java.time.LocalDate
 import cats.Monad
 import cats.data.EitherT
 import com.gu.salesforce.{RecordsWrapperCaseClass, SalesforceQueryConstants}
-import com.gu.salesforce.SalesforceQueryConstants.Contact
+import com.gu.salesforce.SalesforceQueryConstants.{Contact, deliveryRecordsQuery}
 import com.gu.salesforce.sttp.SalesforceClient
 import io.circe.generic.auto._
 import cats.implicits._
@@ -61,12 +61,7 @@ object DeliveryRecordsService {
       contact: Contact
     ): EitherT[F, DeliveryRecordServiceError, RecordsWrapperCaseClass[SubscriptionRecordQueryResult]] = {
       salesforceClient.query[SubscriptionRecordQueryResult](
-        s"SELECT ( " +
-          s"  SELECT Delivery_Date__c, Delivery_Address__c, Delivery_Instructions__c, Has_Holiday_Stop__c " +
-          s"  FROM Delivery_Records__r " +
-          s") " +
-          "FROM SF_Subscription__c " +
-          s"WHERE Name = '$subscriptionId' AND ${SalesforceQueryConstants.contactToWhereClausePart(contact)}"
+        deliveryRecordsQuery(contact, subscriptionId)
       )
         .leftMap(error => DeliveryRecordServiceGenericError(error.toString))
     }
