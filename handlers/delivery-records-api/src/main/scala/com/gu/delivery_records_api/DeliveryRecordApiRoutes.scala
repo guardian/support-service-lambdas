@@ -15,8 +15,7 @@ object DeliveryRecordApiRoutes {
     object http4sDsl extends Http4sDsl[F]
     import http4sDsl._
 
-    def toResponse[A](result: EitherT[F, F[Response[F]], A])
-                     (implicit enc: EntityEncoder[F, A]): F[Response[F]] = {
+    def toResponse[A](result: EitherT[F, F[Response[F]], A])(implicit enc: EntityEncoder[F, A]): F[Response[F]] = {
       result
         .fold(
           identity,

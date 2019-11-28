@@ -12,12 +12,12 @@ object SalesforceQueryConstants {
 
   def deliveryRecordsQuery(contact: Contact, subscriptionNumber: String) =
     s"SELECT (" +
-    s"   SELECT Delivery_Date__c, Delivery_Address__c, Delivery_Instructions__c, Has_Holiday_Stop__c" +
-    s"   FROM Delivery_Records__r ) " +
-    s"FROM SF_Subscription__c WHERE Name = '${escapeString(subscriptionNumber)}' " +
-    s"                          AND ${contactToWhereClausePart(contact)}"
+      s"   SELECT Delivery_Date__c, Delivery_Address__c, Delivery_Instructions__c, Has_Holiday_Stop__c" +
+      s"   FROM Delivery_Records__r ) " +
+      s"FROM SF_Subscription__c WHERE Name = '${escapeString(subscriptionNumber)}' " +
+      s"                          AND ${contactToWhereClausePart(contact)}"
 
-  def escapeString(string: String)=
+  def escapeString(string: String) =
     string
       .replace("\\", "\\\\")
       .replace("\n", "\\n")

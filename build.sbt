@@ -303,7 +303,7 @@ lazy val `metric-push-api` = all(project in file("handlers/metric-push-api"))
   .dependsOn()
 
 lazy val `delivery-records-api` = all(project in file("handlers/delivery-records-api"))
-  .dependsOn(`effects-s3`, `config-core`, `salesforce-sttp-client`)
+  .dependsOn(`effects-s3`, `config-core`, `salesforce-sttp-client`, `salesforce-sttp-test-stub` % Test)
   .settings(
     libraryDependencies ++= Seq(http4sLambda, http4sDsl, http4sCirce, circe, sttpAsycHttpClientBackendCats, scalatest)
   )

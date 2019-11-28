@@ -3,10 +3,9 @@ package com.gu.delivery_records_api
 import java.time.LocalDate
 
 import cats.effect.IO
-import com.gu.salesforce.SalesforceQueryConstants.{Contact, deliveryRecordsQuery}
-import com.gu.salesforce.sttp.{SFApiDeliveryRecord, SFApiSubscription}
+import com.gu.salesforce.SalesforceQueryConstants.deliveryRecordsQuery
 import com.gu.salesforce.sttp.SalesforceStub._
-import com.gu.salesforce.{RecordsWrapperCaseClass, SFAuthConfig, SalesforceAuth, SalesforceQueryConstants}
+import com.gu.salesforce.{RecordsWrapperCaseClass, SFApiDeliveryRecord, SFApiSubscription, SFAuthConfig, SalesforceAuth}
 import com.softwaremill.sttp.impl.cats.CatsMonadError
 import com.softwaremill.sttp.testing.SttpBackendStub
 import io.circe.Decoder
@@ -91,7 +90,6 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
     response.status.code should equal(200)
   }
 
-
   private def getBody[A: Decoder](response: Response[IO]) = {
     parse(
       response
@@ -100,7 +98,7 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
         .toList
         .unsafeRunSync()
         .mkString("")
-    ) .right.value
+    ).right.value
       .as[A].right.value
   }
 

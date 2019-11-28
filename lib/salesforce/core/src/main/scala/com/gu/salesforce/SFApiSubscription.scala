@@ -1,5 +1,3 @@
-package com.gu.salesforce.sttp
-
-import com.gu.salesforce.RecordsWrapperCaseClass
+package com.gu.salesforce
 
 case class SFApiSubscription(Delivery_Records__r: Option[RecordsWrapperCaseClass[SFApiDeliveryRecord]])

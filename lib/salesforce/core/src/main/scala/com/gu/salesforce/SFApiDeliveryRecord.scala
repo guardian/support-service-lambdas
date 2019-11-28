@@ -1,4 +1,4 @@
-package com.gu.salesforce.sttp
+package com.gu.salesforce
 
 import java.time.LocalDate
 
