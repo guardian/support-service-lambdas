@@ -44,12 +44,14 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
     )
   )
 
-  val expectedValidDeliveryApiResponse = List(
-    DeliveryRecord(
-      Some(deliveryDate),
-      Some(deliveryInstruction),
-      Some(deliveryAddress),
-      Some(hasHolidayStop)
+  val expectedValidDeliveryApiResponse = DeliveryRecordsApiResponse(
+    List(
+      DeliveryRecord(
+        Some(deliveryDate),
+        Some(deliveryInstruction),
+        Some(deliveryAddress),
+        Some(hasHolidayStop)
+      )
     )
   )
 
@@ -68,7 +70,7 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
       )
     ).value.unsafeRunSync().get
 
-    getBody[List[DeliveryRecord]](response) should equal(expectedValidDeliveryApiResponse)
+    getBody[DeliveryRecordsApiResponse[DeliveryRecord]](response) should equal(expectedValidDeliveryApiResponse)
     response.status.code should equal(200)
   }
   it should "lookup subscription with contact id" in {
@@ -86,7 +88,7 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
       )
     ).value.unsafeRunSync().get
 
-    getBody[List[DeliveryRecord]](response) should equal(expectedValidDeliveryApiResponse)
+    getBody[DeliveryRecordsApiResponse[DeliveryRecord]](response) should equal(expectedValidDeliveryApiResponse)
     response.status.code should equal(200)
   }
   it should "return 404 if no subscription returned from salesforce" in {

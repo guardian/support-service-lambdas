@@ -37,6 +37,7 @@ object DeliveryRecordApiRoutes {
 
             records <- deliveryRecordsService
               .getDeliveryRecordsForSubscription(subscriptionNumber, contact)
+              .map(deliveryRecords => DeliveryRecordsApiResponse(deliveryRecords))
               .leftMap {
                 case error: DeliveryRecordServiceSubscriptionNotFound =>
                   NotFound(error)
