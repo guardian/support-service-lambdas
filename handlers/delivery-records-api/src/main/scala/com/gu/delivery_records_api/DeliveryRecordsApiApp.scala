@@ -1,7 +1,7 @@
 package com.gu.delivery_records_api
 
 import cats.data.EitherT
-import cats.effect.{Effect, IO}
+import cats.effect.{ContextShift, IO}
 import com.gu.salesforce.SFAuthConfig
 import com.gu.salesforce.sttp.SalesforceClient
 import com.gu.util.config.{ConfigLocation, Stage}
@@ -10,10 +10,15 @@ import com.softwaremill.sttp.asynchttpclient.cats.AsyncHttpClientCatsBackend
 import com.typesafe.scalalogging.LazyLogging
 import org.http4s.HttpRoutes
 import io.circe.generic.auto._
+import org.http4s.server.middleware.Logger
+import org.http4s.util.CaseInsensitiveString
 
 final case class DeliveryRecordsApiAppError(message: String)
 
 object DeliveryRecordsApiApp extends LazyLogging {
+
+  private implicit val cs: ContextShift[IO] = IO.contextShift(scala.concurrent.ExecutionContext.global)
+
   def apply(): EitherT[IO, DeliveryRecordsApiAppError, HttpRoutes[IO]] = {
     for {
       config <- loadSalesforceConfig()
@@ -21,11 +26,20 @@ object DeliveryRecordsApiApp extends LazyLogging {
     } yield app
   }
 
-  def apply[F[_]: Effect, S](config: SFAuthConfig, sttpBackend: SttpBackend[F, S]): EitherT[F, DeliveryRecordsApiAppError, HttpRoutes[F]] = {
+  def apply[S](config: SFAuthConfig, sttpBackend: SttpBackend[IO, S]): EitherT[IO, DeliveryRecordsApiAppError, HttpRoutes[IO]] = {
     for {
       salesforceClient <- SalesforceClient(sttpBackend, config)
         .leftMap(error => DeliveryRecordsApiAppError(error.toString))
-    } yield DeliveryRecordApiRoutes(DeliveryRecordsService(salesforceClient))
+    } yield createLogging()(DeliveryRecordApiRoutes(DeliveryRecordsService(salesforceClient)))
+  }
+
+  def createLogging(): HttpRoutes[IO] => HttpRoutes[IO] = {
+    Logger.httpRoutes(
+      logHeaders = true,
+      logBody = true,
+      redactHeadersWhen = { headerKey: CaseInsensitiveString => headerKey == "x-api-key" },
+      logAction = Some({ message: String => IO.delay(logger.info(message)) })
+    )
   }
 
   private def loadSalesforceConfig(): EitherT[IO, DeliveryRecordsApiAppError, SFAuthConfig] = {

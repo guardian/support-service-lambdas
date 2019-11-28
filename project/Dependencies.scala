@@ -39,7 +39,8 @@ object Dependencies {
   val http4sLambda = "io.github.howardjohn" %% "http4s-lambda" % "0.4.0"
   val http4sDsl = "org.http4s" %% "http4s-dsl" % http4sVersion
   val http4sCirce = "org.http4s" %% "http4s-circe" % http4sVersion
-  val catsCore =  "org.typelevel" %% "cats-core" % catsVersion
+  val http4sServer = "org.http4s" %% "http4s-server" % http4sVersion
+  val catsCore = "org.typelevel" %% "cats-core" % catsVersion
 
 
   // to resolve merge clash of 'module-info.class'

@@ -115,7 +115,7 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
   it should "return 500 request to salesforce fails" in {
     val backendStub = SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
       .stubAuth(config, auth)
-      //will return 404 for query endpoint
+    //will return 404 for query endpoint
 
     val app = createApp(backendStub)
     val response = app.run(
@@ -146,7 +146,7 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
   it should "fail to create if salesforce auth fails" in {
     val backendStub = SttpBackendStub[IO, Nothing](new CatsMonadError[IO]) //Auth call not stubbed
 
-    DeliveryRecordsApiApp(config, backendStub).value.unsafeRunSync().isLeft should be (true)
+    DeliveryRecordsApiApp(config, backendStub).value.unsafeRunSync().isLeft should be(true)
   }
 
   private def getBody[A: Decoder](response: Response[IO]) = {
