@@ -1,10 +1,11 @@
 package com.gu.delivery_records_api
 
 import cats.data.EitherT
-import cats.effect.IO
+import cats.effect.{Effect, IO}
 import com.gu.salesforce.SFAuthConfig
 import com.gu.salesforce.sttp.SalesforceClient
 import com.gu.util.config.{ConfigLocation, Stage}
+import com.softwaremill.sttp.SttpBackend
 import com.softwaremill.sttp.asynchttpclient.cats.AsyncHttpClientCatsBackend
 import com.typesafe.scalalogging.LazyLogging
 import org.http4s.HttpRoutes
@@ -16,9 +17,14 @@ object DeliveryRecordsApiApp extends LazyLogging {
   def apply(): EitherT[IO, DeliveryRecordsApiAppError, HttpRoutes[IO]] = {
     for {
       config <- loadSalesforceConfig()
-      salesforceClient <- SalesforceClient(AsyncHttpClientCatsBackend[cats.effect.IO](), config)
+      app <- DeliveryRecordsApiApp(config, AsyncHttpClientCatsBackend[cats.effect.IO]())
+    } yield app
+  }
+
+  def apply[F[_]: Effect, S](config: SFAuthConfig, sttpBackend: SttpBackend[F, S]): EitherT[F, DeliveryRecordsApiAppError, HttpRoutes[F]] = {
+    for {
+      salesforceClient <- SalesforceClient(sttpBackend, config)
         .leftMap(error => DeliveryRecordsApiAppError(error.toString))
-      _ = logger.info(s"Loaded config sf url: ${config.url}")
     } yield DeliveryRecordApiRoutes(DeliveryRecordsService(salesforceClient))
   }
 

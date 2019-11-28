@@ -1,8 +1,10 @@
 package com.gu.salesforce.sttp
 
 import com.gu.salesforce.{SFAuthConfig, SalesforceAuth, SalesforceConstants}
-import com.softwaremill.sttp.{Id, MediaTypes, Method, Request, RequestBody, Response, StatusCode, StringBody}
+import com.softwaremill.sttp.{MediaTypes, Method, Request, Response, StringBody}
 import com.softwaremill.sttp.testing.SttpBackendStub
+import io.circe.Encoder
+import io.circe.syntax._
 
 object SalesforceStub {
   class SalesforceStubSttpBackendStubOps[F[_], S](sttpStub: SttpBackendStub[F, S]) {
@@ -17,6 +19,12 @@ object SalesforceStub {
       sttpStub.whenRequestMatchesPartial {
         case request: Request[_, _] if matchesQueryRequest(auth, query, request) =>
           Response.ok(responseString)
+      }
+    }
+    def stubQuery[A: Encoder](auth: SalesforceAuth, query: String, response: A): SttpBackendStub[F, S] = {
+      sttpStub.whenRequestMatchesPartial {
+        case request: Request[_, _] if matchesQueryRequest(auth, query, request) =>
+          Response.ok(response.asJson.spaces2)
       }
     }
   }
@@ -34,15 +42,17 @@ object SalesforceStub {
   }
 
   private def matchesQueryRequest[S, F[_]](auth: SalesforceAuth, query: String, request: Request[_, _]) = {
-    urlNoQueryString(request) == auth.instance_url + SalesforceConstants.soqlQueryBaseUrl &&
-      request.method == Method.GET &&
-      request.uri.paramsMap.get("q") == Some(query)
+    val urlMatches = urlNoQueryString(request) == auth.instance_url + SalesforceConstants.soqlQueryBaseUrl
+    val methodMatches = request.method == Method.GET
+    val queryParamMatches = request.uri.paramsMap.get("q") == Some(query)
+    urlMatches && methodMatches && queryParamMatches
   }
 
   private def urlNoQueryString[F[_], S](request: Request[_, _]) = {
     s"${request.uri.scheme}://${request.uri.host}/${request.uri.path.mkString("/")}"
   }
 
-  implicit def syncStub(sttpStub: SttpBackendStub[Id, Nothing]) =
-    new SalesforceStubSttpBackendStubOps[Id, Nothing](sttpStub)
+  implicit def implicitStub[F[_]](sttpStub: SttpBackendStub[F, Nothing]) =
+    new SalesforceStubSttpBackendStubOps[F, Nothing](sttpStub)
+
 }
