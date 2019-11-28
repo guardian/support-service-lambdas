@@ -228,6 +228,7 @@ lazy val root = all(project in file(".")).enablePlugins(RiffRaffArtifact).aggreg
   `braze-to-salesforce-file-upload`,
   `holiday-stop-processor`,
   `metric-push-api`,
+  `fulfilment-date-calculator`,
   `delivery-records-api`
 ).dependsOn(zuora, handler, effectsDepIncludingTestFolder, `effects-sqs`, testDep)
 
@@ -301,6 +302,9 @@ lazy val `holiday-stop-processor` = all(project in file("handlers/holiday-stop-p
 lazy val `metric-push-api` = all(project in file("handlers/metric-push-api"))
   .enablePlugins(RiffRaffArtifact)
   .dependsOn()
+
+lazy val `fulfilment-date-calculator` = all(project in file("handlers/fulfilment-date-calculator"))
+  .enablePlugins(RiffRaffArtifact)
 
 lazy val `delivery-records-api` = all(project in file("handlers/delivery-records-api"))
   .dependsOn(`effects-s3`, `config-core`, `salesforce-sttp-client`, `salesforce-sttp-test-stub` % Test)

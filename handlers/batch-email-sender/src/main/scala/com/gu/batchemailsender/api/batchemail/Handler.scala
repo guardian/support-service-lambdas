@@ -24,7 +24,9 @@ object Handler extends Logging {
     def operation(apiGatewayRequest: ApiGatewayRequest): ApiResponse = {
 
       val apiGatewayOp: ApiGatewayOp[ApiResponse] = apiGatewayRequest.bodyAsCaseClass[WireEmailBatchWithExceptions]() map { emailBatch: WireEmailBatchWithExceptions =>
-        logger.error(s"There were parsing errors in the body received: ${emailBatch.exceptions}")
+        if (emailBatch.exceptions.nonEmpty) {
+          logger.error(s"There were parsing errors in the body received: ${emailBatch.exceptions}")
+        }
         val batch = EmailBatch.WireModel.fromWire(emailBatch.validBatch)
         SqsSendBatch.sendBatchSync(sqsSend)(batch.emailBatchItems) match {
           case Nil => ApiGatewayResponse.successfulExecution

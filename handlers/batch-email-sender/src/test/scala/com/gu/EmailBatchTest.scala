@@ -359,4 +359,142 @@ class EmailBatchTest extends FlatSpec with Matchers with DiffMatcher {
       )
     )
   }
+
+  it should "parse valid items in list and separate from exceptions when there are no exceptions" in {
+
+    val batch =
+      """
+        |{
+        |     "batch_items":
+        |   [
+        |       {
+        |         "payload":{
+        |             "record_id":"a2E6E000000aBxr",
+        |             "to_address":"dlasdj@dasd.com",
+        |             "subscriber_id":"A-S00044748",
+        |             "sf_contact_id":"0036E00000KtDaHQAV",
+        |             "product":"Membership",
+        |             "next_charge_date":"2018-09-03",
+        |             "last_name":"bla",
+        |             "first_name":"something",
+        |             "email_stage":"create",
+        |             "holiday_stop_request":
+        |             {
+        |               "holiday_start_date": "2019-09-27",
+        |               "holiday_end_date": "2019-10-12",
+        |               "stopped_credit_sum": "97.42",
+        |               "currency_symbol": "&pound;",
+        |               "stopped_issue_count": "3",
+        |               "stopped_credit_summaries": [
+        |                 {
+        |                   "credit_amount": 1.23,
+        |                   "credit_date": "2019-11-22"
+        |                 },
+        |                 {
+        |                   "credit_amount": 2.34,
+        |                   "credit_date": "2019-02-23"
+        |                 }
+        |               ]
+        |             }
+        |         },
+        |         "object_name":"Holiday_Stop_Request__c"
+        |       },
+        |       {
+        |         "payload":{
+        |             "record_id":"a2E6E000000aBxr",
+        |             "to_address":"dlasdj@dasd.com",
+        |             "subscriber_id":"A-S00044749",
+        |             "sf_contact_id":"0036E00000KtDaHQAV",
+        |             "product":"Membership",
+        |             "next_charge_date":"2018-09-03",
+        |             "last_name":"bla",
+        |             "first_name":"something",
+        |             "email_stage":"create",
+        |             "holiday_stop_request":
+        |             {
+        |               "holiday_start_date": "2019-09-28",
+        |               "holiday_end_date": "2019-10-12",
+        |               "stopped_credit_sum": "97.42",
+        |               "currency_symbol": "&pound;",
+        |               "stopped_issue_count": "3",
+        |               "stopped_credit_summaries": [
+        |                 {
+        |                   "credit_amount": 1.23,
+        |                   "credit_date": "2019-11-22"
+        |                 },
+        |                 {
+        |                   "credit_amount": 2.34,
+        |                   "credit_date": "2019-02-23"
+        |                 }
+        |               ]
+        |             }
+        |         },
+        |         "object_name":"Holiday_Stop_Request__c"
+        |       }
+        |   ]
+        |}
+      """.stripMargin
+
+    Json.parse(batch).as[WireEmailBatchWithExceptions] should matchTo(
+      WireEmailBatchWithExceptions(
+        validBatch = WireEmailBatch(List(
+          WireEmailBatchItem(
+            WireEmailBatchItemPayload(
+              record_id = "a2E6E000000aBxr",
+              to_address = "dlasdj@dasd.com",
+              subscriber_id = "A-S00044748",
+              sf_contact_id = "0036E00000KtDaHQAV",
+              product = "Membership",
+              next_charge_date = Some("2018-09-03"),
+              last_name = "bla",
+              identity_id = None,
+              first_name = "something",
+              email_stage = "create",
+              modified_by_customer = None,
+              holiday_stop_request = Some(WireHolidayStopRequest(
+                "2019-09-27",
+                "2019-10-12",
+                "97.42",
+                "&pound;",
+                "3",
+                Some(List(
+                  WireHolidayStopCreditSummary(1.23, "2019-11-22"),
+                  WireHolidayStopCreditSummary(2.34, "2019-02-23")
+                ))
+              ))
+            ),
+            "Holiday_Stop_Request__c"
+          ),
+          WireEmailBatchItem(
+            WireEmailBatchItemPayload(
+              record_id = "a2E6E000000aBxr",
+              to_address = "dlasdj@dasd.com",
+              subscriber_id = "A-S00044749",
+              sf_contact_id = "0036E00000KtDaHQAV",
+              product = "Membership",
+              next_charge_date = Some("2018-09-03"),
+              last_name = "bla",
+              identity_id = None,
+              first_name = "something",
+              email_stage = "create",
+              modified_by_customer = None,
+              holiday_stop_request = Some(WireHolidayStopRequest(
+                "2019-09-28",
+                "2019-10-12",
+                "97.42",
+                "&pound;",
+                "3",
+                Some(List(
+                  WireHolidayStopCreditSummary(1.23, "2019-11-22"),
+                  WireHolidayStopCreditSummary(2.34, "2019-02-23")
+                ))
+              ))
+            ),
+            "Holiday_Stop_Request__c"
+          )
+        )),
+        exceptions = List()
+      )
+    )
+  }
 }
