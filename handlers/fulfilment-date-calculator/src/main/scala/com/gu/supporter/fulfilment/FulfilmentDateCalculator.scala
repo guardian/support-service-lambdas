@@ -10,11 +10,12 @@ import io.github.mkotsur.aws.handler.Lambda._
 
 class FulfilmentDateCalculator extends Lambda[String, String] with LazyLogging {
   override def handle(todayOverride: String, context: Context) = {
-    writeToBucket("changeme.json", """{ "foo": 42 }""")
+    writeToBucket("guardianWeekly", "2020-01-01", """{ "foo": 42 }""")
     Right(todayOverride)
   }
 
-  private def writeToBucket(filename: String, content: String) = {
+  private def writeToBucket(product: String, date: String, content: String) = {
+    val filename = s"${product}/${date}_${product}.json"
     val s3Client = AmazonS3Client.builder.build
     val stage = System.getenv("Stage").toLowerCase
     val requestWithAcl = putRequestWithAcl(s"fulfilment-date-calculator-$stage", filename, content)
