@@ -25,8 +25,8 @@ object SalesforceQueryConstants {
 
   def deliveryDateFilter(optionalStartDate: Option[LocalDate], optionalEndDate: Option[LocalDate]) = {
     List(
-      optionalStartDate.map(startDate => s"Delivery_Date__c >= '$startDate' "),
-      optionalStartDate.map(endDate => s"Delivery_Date__c <= '$endDate'")
+      optionalStartDate.map(startDate => s"Delivery_Date__c >= $startDate "),
+      optionalStartDate.map(endDate => s"Delivery_Date__c <= $endDate")
     ).flatten match {
         case Nil => ""
         case nonEmpty => s" WHERE ${nonEmpty.mkString(" AND ")}"
