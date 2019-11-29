@@ -24,7 +24,12 @@ case class DeliveryRecordServiceGenericError(message: String) extends DeliveryRe
 case class DeliveryRecordServiceSubscriptionNotFound(message: String) extends DeliveryRecordServiceError
 
 trait DeliveryRecordsService[F[_]] {
-  def getDeliveryRecordsForSubscription(subscriptionId: String, contact: Contact): EitherT[F, DeliveryRecordServiceError, List[DeliveryRecord]]
+  def getDeliveryRecordsForSubscription(
+    subscriptionId: String,
+    contact: Contact,
+    optionalStartDate: Option[LocalDate],
+    optionalEndDate: Option[LocalDate]
+  ): EitherT[F, DeliveryRecordServiceError, List[DeliveryRecord]]
 }
 
 object DeliveryRecordsService {
@@ -43,10 +48,18 @@ object DeliveryRecordsService {
   def apply[F[_]: Monad](salesforceClient: SalesforceClient[F]): DeliveryRecordsService[F] = new DeliveryRecordsService[F] {
     override def getDeliveryRecordsForSubscription(
       subscriptionId: String,
-      contact: Contact
+      contact: Contact,
+      optionalStartDate: Option[LocalDate],
+      optionalEndDate: Option[LocalDate]
     ): EitherT[F, DeliveryRecordServiceError, List[DeliveryRecord]] =
       for {
-        queryResult <- queryForDeliveryRecords(salesforceClient, subscriptionId, contact)
+        queryResult <- queryForDeliveryRecords(
+          salesforceClient,
+          subscriptionId,
+          contact,
+          optionalStartDate,
+          optionalEndDate
+        )
         records <- getDeliveryRecordsFromQueryResults(subscriptionId, contact, queryResult).toEitherT[F]
         results = records.map { queryRecord =>
           DeliveryRecord(
@@ -61,10 +74,12 @@ object DeliveryRecordsService {
     private def queryForDeliveryRecords(
       salesforceClient: SalesforceClient[F],
       subscriptionId: String,
-      contact: Contact
+      contact: Contact,
+      optionalStartDate: Option[LocalDate],
+      optionalEndDate: Option[LocalDate]
     ): EitherT[F, DeliveryRecordServiceError, RecordsWrapperCaseClass[SubscriptionRecordQueryResult]] = {
       salesforceClient.query[SubscriptionRecordQueryResult](
-        deliveryRecordsQuery(contact, subscriptionId)
+        deliveryRecordsQuery(contact, subscriptionId, optionalStartDate, optionalEndDate)
       )
         .leftMap(error => DeliveryRecordServiceGenericError(error.toString))
     }
