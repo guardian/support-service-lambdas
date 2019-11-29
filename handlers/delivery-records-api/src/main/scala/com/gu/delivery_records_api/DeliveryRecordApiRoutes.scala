@@ -11,7 +11,7 @@ import com.gu.salesforce.{Contact, SalesforceHandlerSupport}
 import org.http4s.dsl.Http4sDsl
 
 object DeliveryRecordApiRoutes {
-  def apply[F[_]: Monad: Effect](deliveryRecordsService: DeliveryRecordsService[F]): HttpRoutes[F] = {
+  def apply[F[_]: Effect](deliveryRecordsService: DeliveryRecordsService[F]): HttpRoutes[F] = {
     object http4sDsl extends Http4sDsl[F]
     import http4sDsl._
 
