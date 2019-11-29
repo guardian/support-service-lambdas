@@ -5,12 +5,11 @@ import java.time.LocalDate
 import cats.effect.IO
 import com.gu.salesforce.SalesforceQueryConstants.deliveryRecordsQuery
 import com.gu.salesforce.sttp.SalesforceStub._
-
 import com.gu.salesforce.{IdentityId, RecordsWrapperCaseClass, SFApiDeliveryRecord, SFApiSubscription, SFAuthConfig, SalesforceAuth, SalesforceContactId}
 import com.softwaremill.sttp.impl.cats.CatsMonadError
 import com.softwaremill.sttp.testing.SttpBackendStub
 import io.circe.Decoder
-import org.http4s.{Header, Headers, Method, Request, Response, Uri}
+import org.http4s.{Header, Headers, Method, Query, Request, Response, Uri}
 import org.scalatest.{EitherValues, FlatSpec, Matchers}
 import io.circe.generic.auto._
 import io.circe.parser._
@@ -85,6 +84,39 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
       Request(
         method = Method.GET,
         Uri(path = s"/delivery-records/${subscriptionNumber}"),
+        headers = Headers.of(Header("x-salesforce-contact-id", buyerContactId))
+      )
+    ).value.unsafeRunSync().get
+
+    getBody[DeliveryRecordsApiResponse[DeliveryRecord]](response) should equal(expectedValidDeliveryApiResponse)
+    response.status.code should equal(200)
+  }
+  it should "lookup subscription with date filters" in {
+    val endDate = LocalDate.now()
+    val startDate = endDate.minusDays(1)
+
+    val salesforceBackendStub =
+      SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
+        .stubAuth(config, auth)
+        .stubQuery(
+          auth,
+          deliveryRecordsQuery(
+            SalesforceContactId(buyerContactId),
+            subscriptionNumber,
+            Some(startDate),
+            Some(endDate)
+          ),
+          validSalesforceResponseBody
+        )
+
+    val app = createApp(salesforceBackendStub)
+    val response = app.run(
+      Request(
+        method = Method.GET,
+        Uri(
+          path = s"/delivery-records/${subscriptionNumber}",
+          query = Query("startDate" -> Some(startDate.toString), "endDate" -> Some(endDate.toString))
+        ),
         headers = Headers.of(Header("x-salesforce-contact-id", buyerContactId))
       )
     ).value.unsafeRunSync().get
