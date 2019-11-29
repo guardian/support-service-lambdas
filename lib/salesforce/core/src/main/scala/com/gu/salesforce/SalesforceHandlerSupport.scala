@@ -1,8 +1,10 @@
 package com.gu.salesforce
 
-import com.gu.salesforce.SalesforceQueryConstants.Contact
-
 case class SalesforceHandlerSupportError(message: String)
+
+sealed trait Contact
+case class IdentityId(id: String) extends Contact
+case class SalesforceContactId(id: String) extends Contact
 
 object SalesforceHandlerSupport {
   val HEADER_IDENTITY_ID = "x-identity-id"
@@ -10,7 +12,7 @@ object SalesforceHandlerSupport {
 
   def extractContactFromHeaders(headers: List[(String, String)]): Either[SalesforceHandlerSupportError, Contact] =
     headers.collectFirst {
-      case (HEADER_SALESFORCE_CONTACT_ID, sfContactId) => Right(sfContactId)
-      case (HEADER_IDENTITY_ID, identityId) => Left(identityId)
+      case (HEADER_SALESFORCE_CONTACT_ID, sfContactId) => SalesforceContactId(sfContactId)
+      case (HEADER_IDENTITY_ID, identityId) => IdentityId(identityId)
     }.toRight(SalesforceHandlerSupportError(s"either '$HEADER_IDENTITY_ID' header OR '$HEADER_SALESFORCE_CONTACT_ID' (one is required)"))
 }

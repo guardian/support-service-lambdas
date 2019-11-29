@@ -5,7 +5,8 @@ import java.time.LocalDate
 import cats.effect.IO
 import com.gu.salesforce.SalesforceQueryConstants.deliveryRecordsQuery
 import com.gu.salesforce.sttp.SalesforceStub._
-import com.gu.salesforce.{RecordsWrapperCaseClass, SFApiDeliveryRecord, SFApiSubscription, SFAuthConfig, SalesforceAuth}
+
+import com.gu.salesforce.{IdentityId, RecordsWrapperCaseClass, SFApiDeliveryRecord, SFApiSubscription, SFAuthConfig, SalesforceAuth, SalesforceContactId}
 import com.softwaremill.sttp.impl.cats.CatsMonadError
 import com.softwaremill.sttp.testing.SttpBackendStub
 import io.circe.Decoder
@@ -59,7 +60,7 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
     val salesforceBackendStub =
       SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
         .stubAuth(config, auth)
-        .stubQuery(auth, deliveryRecordsQuery(Left(identityId), subscriptionNumber), validSalesforceResponseBody)
+        .stubQuery(auth, deliveryRecordsQuery(IdentityId(identityId), subscriptionNumber), validSalesforceResponseBody)
 
     val app = createApp(salesforceBackendStub)
     val response = app.run(
@@ -77,7 +78,7 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
     val salesforceBackendStub =
       SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
         .stubAuth(config, auth)
-        .stubQuery(auth, deliveryRecordsQuery(Right(buyerContactId), subscriptionNumber), validSalesforceResponseBody)
+        .stubQuery(auth, deliveryRecordsQuery(SalesforceContactId(buyerContactId), subscriptionNumber), validSalesforceResponseBody)
 
     val app = createApp(salesforceBackendStub)
     val response = app.run(
@@ -97,7 +98,7 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
         .stubAuth(config, auth)
         .stubQuery(
           auth,
-          deliveryRecordsQuery(Right(buyerContactId), subscriptionNumber),
+          deliveryRecordsQuery(SalesforceContactId(buyerContactId), subscriptionNumber),
           RecordsWrapperCaseClass[SFApiSubscription](Nil)
         )
 
@@ -112,7 +113,7 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
 
     response.status.code should equal(404)
   }
-  it should "return 500 request to salesforce fails" in {
+  it should "return 500 request if salesforce fails" in {
     val salesforceBackendStub = SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
       .stubAuth(config, auth)
     //will return 404 for query endpoint

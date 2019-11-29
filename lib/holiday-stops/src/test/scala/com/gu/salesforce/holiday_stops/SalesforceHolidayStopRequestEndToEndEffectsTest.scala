@@ -5,12 +5,10 @@ import java.time.LocalDate
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.holiday_stops.{ActionCalculator, Fixtures, ProductVariant}
 import com.gu.holiday_stops.subscription.Subscription
-import com.gu.salesforce.SFAuthConfig
+import com.gu.salesforce.{IdentityId, SFAuthConfig, SalesforceClient}
 import com.gu.salesforce.SalesforceReads._
-import com.gu.salesforce.SalesforceClient
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
-import com.gu.salesforce.holiday_stops.SalesforceSFSubscription.SubscriptionForSubscriptionNameAndContact.IdentityId
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.resthttp.JsonHttp
@@ -40,7 +38,7 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends FlatSpec with Matc
       verifySubOwnerOp = SalesforceSFSubscription.SubscriptionForSubscriptionNameAndContact(sfAuth.wrapWith(JsonHttp.getWithParams))
       maybeMatchingSubscription <- verifySubOwnerOp(
         SubscriptionName("A-S00050817"), // must exist in DEV Scalculate the first available date basedalesForce
-        Left(IdentityId("100004814"))
+        IdentityId("100004814")
       ).toDisjunction
 
       fakeSubscription: Subscription = Fixtures.mkGuardianWeeklySubscription()

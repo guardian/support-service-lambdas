@@ -4,8 +4,8 @@ import java.time.LocalDate
 
 import cats.Monad
 import cats.data.EitherT
-import com.gu.salesforce.{RecordsWrapperCaseClass}
-import com.gu.salesforce.SalesforceQueryConstants.{Contact, deliveryRecordsQuery}
+import com.gu.salesforce.{RecordsWrapperCaseClass, Contact}
+import com.gu.salesforce.SalesforceQueryConstants.deliveryRecordsQuery
 import com.gu.salesforce.sttp.SalesforceClient
 import io.circe.generic.auto._
 import cats.implicits._
@@ -41,7 +41,10 @@ object DeliveryRecordsService {
   )
 
   def apply[F[_]: Monad](salesforceClient: SalesforceClient[F]): DeliveryRecordsService[F] = new DeliveryRecordsService[F] {
-    override def getDeliveryRecordsForSubscription(subscriptionId: String, contact: Contact): EitherT[F, DeliveryRecordServiceError, List[DeliveryRecord]] =
+    override def getDeliveryRecordsForSubscription(
+      subscriptionId: String,
+      contact: Contact
+    ): EitherT[F, DeliveryRecordServiceError, List[DeliveryRecord]] =
       for {
         queryResult <- queryForDeliveryRecords(salesforceClient, subscriptionId, contact)
         records <- getDeliveryRecordsFromQueryResults(subscriptionId, contact, queryResult).toEitherT[F]
@@ -77,7 +80,7 @@ object DeliveryRecordsService {
         .toRight(
           DeliveryRecordServiceSubscriptionNotFound(
             s"Subscription '$subscriptionId' not found or did not belong to contact " +
-              s"'${contact.fold(identity, identity)}'"
+              s"'${contact}'"
           )
         )
         .map(deliverRecordsOption => deliverRecordsOption.Delivery_Records__r.map(_.records).getOrElse(Nil))

@@ -1,13 +1,10 @@
 package com.gu.salesforce
 
 object SalesforceQueryConstants {
-  type BuyerIdentityId = String
-  type BuyerContactId = String
-  type Contact = Either[BuyerIdentityId, BuyerContactId]
 
   def contactToWhereClausePart(contact: Contact) = contact match {
-    case Left(identityId) => s"Buyer__r.IdentityID__c = '${escapeString(identityId)}'"
-    case Right(sfContactId) => s"Buyer__r.Id = '${escapeString(sfContactId)}'"
+    case IdentityId(identityId) => s"Buyer__r.IdentityID__c = '${escapeString(identityId)}'"
+    case SalesforceContactId(sfContactId) => s"Buyer__r.Id = '${escapeString(sfContactId)}'"
   }
 
   def deliveryRecordsQuery(contact: Contact, subscriptionNumber: String) =
