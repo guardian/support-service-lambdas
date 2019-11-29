@@ -21,6 +21,12 @@ object SalesforceStub {
           Response.ok(responseString)
       }
     }
+    def stubNextRecordLink(auth: SalesforceAuth, nextRecordLink: String, responseString: String): SttpBackendStub[F, S] = {
+      sttpStub.whenRequestMatchesPartial {
+        case request: Request[_, _] if matchesNextRecordsRequest(auth, nextRecordLink, request) =>
+          Response.ok(responseString)
+      }
+    }
     def stubQuery[A: Encoder](auth: SalesforceAuth, query: String, response: A): SttpBackendStub[F, S] = {
       sttpStub.whenRequestMatchesPartial {
         case request: Request[_, _] if matchesQueryRequest(auth, query, request) =>
@@ -46,6 +52,12 @@ object SalesforceStub {
     val methodMatches = request.method == Method.GET
     val queryParamMatches = request.uri.paramsMap.get("q") == Some(query)
     urlMatches && methodMatches && queryParamMatches
+  }
+
+  private def matchesNextRecordsRequest[S, F[_]](auth: SalesforceAuth, nextRecordsLink: String, request: Request[_, _]) = {
+    val urlMatches = urlNoQueryString(request) == auth.instance_url + nextRecordsLink
+    val methodMatches = request.method == Method.GET
+    urlMatches && methodMatches
   }
 
   private def urlNoQueryString[F[_], S](request: Request[_, _]) = {

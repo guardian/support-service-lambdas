@@ -29,21 +29,40 @@ object SalesforceClient {
     for {
       auth <- auth[S, F](config)
       client = new SalesforceClient[F]() {
-        override def query[A: Decoder](query: String): EitherT[F, SalesforceClientError, RecordsWrapperCaseClass[A]] =
-          sendRequest[F, S, RecordsWrapperCaseClass[A]](
-            sttp
-              .get(
-                Uri(new URI(auth.instance_url + SalesforceConstants.soqlQueryBaseUrl))
-                  .param("q", query)
-              )
-              .headers(
-                "Authorization" -> s"Bearer ${auth.access_token}",
-                "X-SFDC-Session" -> auth.access_token,
-              )
-              .response(asJson[RecordsWrapperCaseClass[A]])
-          )
+        override def query[A: Decoder](query: String): EitherT[F, SalesforceClientError, RecordsWrapperCaseClass[A]] = {
+          val initialQueryUri = Uri(new URI(auth.instance_url + SalesforceConstants.soqlQueryBaseUrl)).param("q", query)
+          for {
+            initalQueryResults <- sendRequest[F, S, A](auth, Method.GET, initialQueryUri)
+            allResults <- followNextRecordsLinks[F, S, A](auth, initalQueryResults.records, initalQueryResults.nextRecordsUrl)
+          } yield allResults
+        }
       }
     } yield client
+  }
+
+  private def followNextRecordsLinks[F[_] : Monad, S, A: Decoder](auth: SalesforceAuth, records: List[A], optionalNextRecordsLink: Option[String])
+  (implicit backend: SttpBackend[F, S]): EitherT[F, SalesforceClientError, RecordsWrapperCaseClass[A]] = {
+    optionalNextRecordsLink match {
+      case Some(nextRecordsLinks) =>
+        for {
+          nextPageResults <- sendRequest[F, S, A](auth, Method.GET, Uri(new URI(auth.instance_url + nextRecordsLinks)))
+          allRecords <- followNextRecordsLinks[F, S, A](auth, records ++ nextPageResults.records, nextPageResults.nextRecordsUrl)
+        } yield allRecords
+      case None =>
+        EitherT.rightT(RecordsWrapperCaseClass(records))
+    }
+  }
+
+  private def sendRequest[F[_] : Monad, S, A: Decoder](auth: SalesforceAuth, method: Method, uri: Uri)(implicit backend: SttpBackend[F, S]): EitherT[F, SalesforceClientError, QueryRecordsWrapperCaseClass[A]] = {
+    sendRequest[F, S, QueryRecordsWrapperCaseClass[A]](
+      sttp
+        .method(method, uri)
+        .headers(
+          "Authorization" -> s"Bearer ${auth.access_token}",
+          "X-SFDC-Session" -> auth.access_token,
+        )
+        .response(asJson[QueryRecordsWrapperCaseClass[A]])
+    )
   }
 
   private def auth[S, F[_]: Monad](config: SFAuthConfig)(implicit backend: SttpBackend[F, S]) = {

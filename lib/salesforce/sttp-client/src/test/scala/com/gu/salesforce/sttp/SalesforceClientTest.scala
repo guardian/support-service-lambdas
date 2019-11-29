@@ -25,7 +25,12 @@ class SalesforceClientTest extends FlatSpec with Matchers {
       .stubQuery(
         auth,
         query,
-        Source.fromResource("subscription-query-response.json").mkString
+        Source.fromResource("subscription-query-response1.json").mkString
+      )
+      .stubNextRecordLink(
+        auth,
+        "/next-records-link",
+        Source.fromResource("subscription-query-response2.json").mkString
       )
 
     Inside.inside(
@@ -35,11 +40,18 @@ class SalesforceClientTest extends FlatSpec with Matchers {
           response.records should equal(
             List(
               QueryResults(
-                "a2F3E000001FhjuUAC",
+                "000000001",
                 Instant.parse(
                   "2019-11-18T16:59:24Z",
                 ),
-                "A-S00052409"
+                "A-000000001"
+              ),
+              QueryResults(
+                "000000002",
+                Instant.parse(
+                  "2019-11-18T16:59:24Z",
+                ),
+                "A-000000002"
               )
             )
           )
