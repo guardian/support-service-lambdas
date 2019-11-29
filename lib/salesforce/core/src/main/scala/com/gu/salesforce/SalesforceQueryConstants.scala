@@ -27,7 +27,10 @@ object SalesforceQueryConstants {
     List(
       optionalStartDate.map(startDate => s"Delivery_Date__c >= '$startDate' "),
       optionalStartDate.map(endDate => s"Delivery_Date__c <= '$endDate'")
-    ).flatten.mkString(" WHERE ", "AND", "")
+    ).flatten match {
+        case Nil => ""
+        case nonEmpty => s" WHERE ${nonEmpty.mkString(" AND ")}"
+      }
   }
 
   def escapeString(string: String) =
