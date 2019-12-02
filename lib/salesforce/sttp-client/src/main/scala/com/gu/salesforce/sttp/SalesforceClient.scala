@@ -9,6 +9,7 @@ import com.softwaremill.sttp.SttpBackend
 import com.softwaremill.sttp._
 import cats.implicits._
 import com.softwaremill.sttp.circe._
+import com.typesafe.scalalogging.LazyLogging
 import io.circe
 import io.circe.Decoder
 import io.circe.generic.auto._
@@ -19,7 +20,7 @@ trait SalesforceClient[F[_]] {
 
 case class SalesforceClientError(message: String)
 
-object SalesforceClient {
+object SalesforceClient extends LazyLogging {
   def apply[F[_] : Monad, S](
     backend: SttpBackend[F, S],
     config: SFAuthConfig
@@ -107,6 +108,7 @@ object SalesforceClient {
       auth <- auth(config)
       client = new SalesforceClient[F]() {
         override def query[A: Decoder](query: String): EitherT[F, SalesforceClientError, RecordsWrapperCaseClass[A]] = {
+          logger.info(s"Sending query to Salesforce: ${query}")
           val initialQueryUri = Uri(new URI(auth.instance_url + SalesforceConstants.soqlQueryBaseUrl)).param("q", query)
           for {
             initialQueryResults <- sendAuthenticatedRequest[A](auth, Method.GET, initialQueryUri)
