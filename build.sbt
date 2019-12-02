@@ -306,6 +306,7 @@ lazy val `metric-push-api` = all(project in file("handlers/metric-push-api"))
 
 lazy val `fulfilment-date-calculator` = all(project in file("handlers/fulfilment-date-calculator"))
   .enablePlugins(RiffRaffArtifact)
+  .dependsOn(testDep)
 
 lazy val `delivery-records-api` = all(project in file("handlers/delivery-records-api"))
   .dependsOn(`effects-s3`, `config-core`, `salesforce-sttp-client`, `salesforce-sttp-test-stub` % Test)
