@@ -20,7 +20,7 @@ object SalesforceQueryConstants {
     |    FROM Delivery_Records__r
     |    ${deliveryDateFilter(optionalStartDate, optionalEndDate)}
     |)
-    |FROM SF_SubscripOtion__c WHERE Name = '${escapeString(subscriptionNumber)}'
+    |FROM SF_Subscription__c WHERE Name = '${escapeString(subscriptionNumber)}'
     |                         AND ${contactToWhereClausePart(contact)}""".stripMargin
 
   def deliveryDateFilter(optionalStartDate: Option[LocalDate], optionalEndDate: Option[LocalDate]) = {
