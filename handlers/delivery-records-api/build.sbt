@@ -14,9 +14,6 @@ riffRaffUploadManifestBucket := Option("riffraff-builds")
 riffRaffManifestProjectName := "MemSub::Subscriptions::Lambdas::Delivery Record API"
 riffRaffArtifactResources += (file("handlers/delivery-records-api/cfn.yaml"), "cfn/cfn.yaml")
 
-libraryDependencies ++= Seq(
-)
-
 resolvers ++= Seq(
   Resolver.sonatypeRepo("releases")
 )

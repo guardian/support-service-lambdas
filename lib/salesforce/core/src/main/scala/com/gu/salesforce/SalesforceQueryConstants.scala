@@ -15,13 +15,13 @@ object SalesforceQueryConstants {
     optionalStartDate: Option[LocalDate],
     optionalEndDate: Option[LocalDate]
   ) =
-    s"SELECT (" +
-      s"   SELECT Delivery_Date__c, Delivery_Address__c, Delivery_Instructions__c, Has_Holiday_Stop__c" +
-      s"   FROM Delivery_Records__r " +
-      s"   ${deliveryDateFilter(optionalStartDate, optionalEndDate)}" +
-      s") " +
-      s"FROM SF_Subscription__c WHERE Name = '${escapeString(subscriptionNumber)}' " +
-      s"                          AND ${contactToWhereClausePart(contact)}"
+    s"""SELECT (
+    |    SELECT Delivery_Date__c, Delivery_Address__c, Delivery_Instructions__c, Has_Holiday_Stop__c
+    |    FROM Delivery_Records__r
+    |    ${deliveryDateFilter(optionalStartDate, optionalEndDate)}
+    |)
+    |FROM SF_SubscripOtion__c WHERE Name = '${escapeString(subscriptionNumber)}'
+    |                         AND ${contactToWhereClausePart(contact)}""".stripMargin
 
   def deliveryDateFilter(optionalStartDate: Option[LocalDate], optionalEndDate: Option[LocalDate]) = {
     List(
