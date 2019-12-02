@@ -11,6 +11,7 @@ object Dependencies {
   val sttpVersion = "1.5.17"
   val http4sVersion = "0.20.3"
   val catsVersion = "1.6.1"
+  val catsEffectVersion = "1.3.1"
 
   val okhttp3 = "com.squareup.okhttp3" % "okhttp" % "3.9.1"
   val logging = Seq(
@@ -33,6 +34,7 @@ object Dependencies {
   val circeJava8 = "io.circe" %% "circe-java8" % circeVersion
   val sttp = "com.softwaremill.sttp" %% "core" % sttpVersion
   val sttpCirce = "com.softwaremill.sttp" %% "circe" % sttpVersion
+  val sttpCats = "com.softwaremill.sttp" %% "cats" % sttpVersion
   val sttpAsycHttpClientBackendCats = "com.softwaremill.sttp" %% "async-http-client-backend-cats" % sttpVersion
   val mouse = "org.typelevel" %% "mouse" % "0.23" // can be removed once we move to Scala 2.13 (native 'tap')
   val enumeratum = "com.beachape" %% "enumeratum" % "1.5.13"
@@ -41,6 +43,7 @@ object Dependencies {
   val http4sCirce = "org.http4s" %% "http4s-circe" % http4sVersion
   val http4sServer = "org.http4s" %% "http4s-server" % http4sVersion
   val catsCore = "org.typelevel" %% "cats-core" % catsVersion
+  val catsEffect = "org.typelevel" %% "cats-effect" % catsEffectVersion
 
 
   // to resolve merge clash of 'module-info.class'

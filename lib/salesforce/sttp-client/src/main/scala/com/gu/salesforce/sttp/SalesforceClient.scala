@@ -2,8 +2,8 @@ package com.gu.salesforce.sttp
 
 import java.net.URI
 
-import cats.Monad
 import cats.data.EitherT
+import cats.effect.Sync
 import com.gu.salesforce.{RecordsWrapperCaseClass, SFAuthConfig, SalesforceAuth, SalesforceConstants}
 import com.softwaremill.sttp.SttpBackend
 import com.softwaremill.sttp._
@@ -21,7 +21,7 @@ trait SalesforceClient[F[_]] {
 case class SalesforceClientError(message: String)
 
 object SalesforceClient extends LazyLogging {
-  def apply[F[_] : Monad, S](
+  def apply[F[_] : Sync, S](
     backend: SttpBackend[F, S],
     config: SFAuthConfig
   ): EitherT[F, SalesforceClientError, SalesforceClient[F]] = {
@@ -104,13 +104,19 @@ object SalesforceClient extends LazyLogging {
         }
     }
 
+    def logQuery(query: String) =
+      Sync[F]
+        .delay(logger.info(s"Sending query to Salesforce: ${query}"))
+        .asRight[SalesforceClientError]
+        .toEitherT[F]
+
     for {
       auth <- auth(config)
       client = new SalesforceClient[F]() {
         override def query[A: Decoder](query: String): EitherT[F, SalesforceClientError, RecordsWrapperCaseClass[A]] = {
-          logger.info(s"Sending query to Salesforce: ${query}")
           val initialQueryUri = Uri(new URI(auth.instance_url + SalesforceConstants.soqlQueryBaseUrl)).param("q", query)
           for {
+            _ <- logQuery(query)
             initialQueryResults <- sendAuthenticatedRequest[A](auth, Method.GET, initialQueryUri)
             allResults <- followNextRecordsLinks[A](
               auth,
@@ -122,4 +128,5 @@ object SalesforceClient extends LazyLogging {
       }
     } yield client
   }
+
 }

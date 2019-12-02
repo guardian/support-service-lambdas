@@ -100,7 +100,8 @@ lazy val `salesforce-sttp-client` = all(project in file("lib/salesforce/sttp-cli
     `salesforce-sttp-test-stub` % Test
   )
   .settings(
-    libraryDependencies ++= Seq(sttp, sttpCirce, scalatest, catsCore, circe, circeJava8) ++ logging
+    libraryDependencies ++=
+      Seq(sttp, sttpCirce, sttpCats % Test, scalatest, catsCore, catsEffect, circe, circeJava8) ++ logging
   )
 
 lazy val `salesforce-sttp-test-stub` = all(project in file("lib/salesforce/sttp-test-stub"))

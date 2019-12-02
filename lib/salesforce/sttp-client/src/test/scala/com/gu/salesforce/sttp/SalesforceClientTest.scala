@@ -5,9 +5,12 @@ import java.time.Instant
 import com.gu.salesforce.{SFAuthConfig, SalesforceAuth}
 import org.scalatest.{FlatSpec, Inside, Matchers}
 import com.gu.salesforce.sttp.SalesforceStub._
+import com.softwaremill.sttp.impl.cats.CatsMonadError
 import com.softwaremill.sttp.testing.SttpBackendStub
 import io.circe.generic.auto._
 import SalesforceCirceImplicits._
+import cats.effect.IO
+
 import scala.io.Source
 
 case class QueryResults(Id: String, CreatedDate: Instant, Name: String)
@@ -19,8 +22,7 @@ class SalesforceClientTest extends FlatSpec with Matchers {
     val auth = SalesforceAuth("salesforce-access-token", "https://salesforceInstanceUrl")
 
     val query = "SELECT  Id,  CreatedDate, Name FROM SF_Subscription__c WHERE Name = 'A-S00052409'"
-    val backendStub = SttpBackendStub
-      .synchronous
+    val backendStub = SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
       .stubAuth(config, auth)
       .stubQuery(
         auth,
@@ -34,7 +36,7 @@ class SalesforceClientTest extends FlatSpec with Matchers {
       )
 
     Inside.inside(
-      SalesforceClient(backendStub, config).flatMap(_.query[QueryResults](query)).value
+      SalesforceClient(backendStub, config).flatMap(_.query[QueryResults](query)).value.unsafeRunSync()
     ) {
         case Right(response) =>
           response.records should equal(
