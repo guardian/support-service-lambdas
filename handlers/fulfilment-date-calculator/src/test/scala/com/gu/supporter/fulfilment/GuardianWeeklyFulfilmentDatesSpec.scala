@@ -3,7 +3,7 @@ package com.gu.supporter.fulfilment
 import java.time.LocalDate
 import org.scalatest.{FlatSpec, Matchers}
 
-class FulfilmentDatesSpec extends FlatSpec with Matchers with DateSupport {
+class GuardianWeeklyFulfilmentDatesSpec extends FlatSpec with Matchers with DateSupport {
   "GuardianWeeklyFulfilmentDates" should "calculate deliveryAddressChangeEffectiveDate" in {
     GuardianWeeklyFulfilmentDates("2019-12-02").deliveryAddressChangeEffectiveDate should equalDate("2019-12-13")
     GuardianWeeklyFulfilmentDates("2019-12-03").deliveryAddressChangeEffectiveDate should equalDate("2019-12-13")
@@ -77,15 +77,5 @@ class FulfilmentDatesSpec extends FlatSpec with Matchers with DateSupport {
     GuardianWeeklyFulfilmentDates("2019-12-11").finalFulfilmentFileGenerationDate should equalDate("2019-12-12")
     GuardianWeeklyFulfilmentDates("2019-12-12").finalFulfilmentFileGenerationDate should equalDate("2019-12-19")
     GuardianWeeklyFulfilmentDates("2019-12-13").finalFulfilmentFileGenerationDate should equalDate("2019-12-19")
-  }
-
-  "FulfilmentDates" should "be calculated for GuardianWeekly" in {
-    val today: LocalDate = "2019-12-02"
-    GuardianWeeklyFulfilmentDates(today).today should be(today)
-    GuardianWeeklyFulfilmentDates(today).acquisitionsStartDate should equalDate("2019-12-13")
-    GuardianWeeklyFulfilmentDates(today).holidayStopFirstAvailableDate should equalDate("2019-12-07")
-    GuardianWeeklyFulfilmentDates(today).finalFulfilmentFileGenerationDate should equalDate("2019-12-05")
-    GuardianWeeklyFulfilmentDates(today).deliveryAddressChangeEffectiveDate should equalDate("2019-12-13")
-    GuardianWeeklyFulfilmentDates(today).nextAffectablePublicationDateOnFrontCover should equalDate("2019-12-13")
   }
 }
