@@ -53,9 +53,24 @@ sealed trait JobResult {
   def tries: Int
 }
 
-case class Completed(name: String, jobId: String, batches: Seq[Batch], dryRun: Boolean, tries: Int) extends JobResult
+case class Completed(name: String, jobId: String, batches: Seq[Batch], dryRun: Boolean, tries: Int)
+  extends JobResult
+
+object Completed {
+  implicit val writes: Writes[Completed] = result => {
+    val wireResult = JobResultWire.fromJobResult(result)
+    JobResultWire.writes.writes(wireResult)
+  }
+}
 
 case class Pending(name: String, jobId: String, dryRun: Boolean, tries: Int) extends JobResult
+
+object Pending {
+  implicit val writes: Writes[Pending] = result => {
+    val wireResult = JobResultWire.fromJobResult(result)
+    JobResultWire.writes.writes(wireResult)
+  }
+}
 
 case class JobResultWire(
   name: String,
@@ -83,4 +98,3 @@ object JobResult {
     }
   }
 }
-
