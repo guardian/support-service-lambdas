@@ -41,7 +41,9 @@ object IdentityCookieToIdentityUser extends Logging {
     for {
       userFromScGuU <- cookieDecoder.getUserDataForScGuU(scGuU)
       userFromGuU <- cookieDecoder.getUserDataForGuU(guU)
-      displayName = if (userFromScGuU.id equals userFromGuU.getUser.id) userFromGuU.getUser.publicFields.displayName else None
+      displayName = if (userFromScGuU.id equals userFromGuU.user.id)
+        userFromGuU.user.publicFields.displayName
+      else None
     } yield IdentityUser(IdentityId(userFromScGuU.id), displayName)
   }
 
