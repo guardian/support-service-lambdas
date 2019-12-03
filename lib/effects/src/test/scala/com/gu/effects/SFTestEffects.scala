@@ -31,6 +31,6 @@ object SFTestEffects {
       "/services/data/v38.0/composite/",
       s"""{"allOrNone":true,"compositeRequest":[{"method":"PATCH","url":"/services/data/v29.0/sobjects/Holiday_Stop_Requests_Detail__c/HSD-1","referenceId":"CANCEL DETAIL : $referenceId","body":{"Actual_Price__c":$price,"Charge_Code__c":"ManualRefund_Cancellation"}}]}"""
     ),
-      HTTPResponse(200, """{ "compositeResponse" : []}""".stripMargin)
+      HTTPResponse(200, """{ "compositeResponse" : [ { "httpStatusCode": 200 } ]}""".stripMargin)
   )
 }
