@@ -1,7 +1,5 @@
 package com.gu.effects
 
-import com.gu.util.config.LoadConfigModule.S3Location
-
 import scala.util.{Failure, Success, Try}
 
 object FakeFetchString {

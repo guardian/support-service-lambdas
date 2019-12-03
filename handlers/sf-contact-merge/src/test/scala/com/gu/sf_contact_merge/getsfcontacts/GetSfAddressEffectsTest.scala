@@ -1,9 +1,10 @@
 package com.gu.sf_contact_merge.getsfcontacts
 
 import com.gu.effects.{GetFromS3, RawEffects}
-import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
+import com.gu.salesforce.SFAuthConfig
 import com.gu.salesforce.dev.SFEffectsData
 import com.gu.salesforce.SalesforceClient
+import com.gu.salesforce.SalesforceReads._
 import com.gu.sf_contact_merge.Types.IdentityId
 import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.EmailAddress
 import com.gu.sf_contact_merge.getsfcontacts.ToSfContactRequest.WireResult

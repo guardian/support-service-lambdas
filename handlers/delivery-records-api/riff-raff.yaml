@@ -1,0 +1,21 @@
+stacks:
+- membership
+regions:
+- eu-west-1
+deployments:
+
+  cfn:
+    type: cloud-formation
+    app: delivery-records-api
+    parameters:
+      templatePath: cfn.yaml
+
+  delivery-records-api:
+    type: aws-lambda
+    parameters:
+      fileName: delivery-records-api.jar
+      bucket: support-service-lambdas-dist
+      prefixStack: false
+      functionNames:
+      - delivery-records-api-
+    dependencies: [cfn]

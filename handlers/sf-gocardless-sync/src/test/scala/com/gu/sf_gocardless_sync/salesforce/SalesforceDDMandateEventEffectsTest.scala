@@ -1,8 +1,9 @@
 package com.gu.sf_gocardless_sync.salesforce
 
 import com.gu.effects.{GetFromS3, RawEffects}
-import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
+import com.gu.salesforce.SFAuthConfig
 import com.gu.salesforce.SalesforceClient
+import com.gu.salesforce.SalesforceReads._
 import com.gu.sf_gocardless_sync.SyncSharedObjects.{Cause, Description, GoCardlessMandateEventID, Status}
 import com.gu.sf_gocardless_sync.salesforce.SalesforceDDMandateEvent.Create.WireNewMandateEvent
 import com.gu.sf_gocardless_sync.salesforce.SalesforceSharedObjects.{MandateSfId, EventHappenedAt}

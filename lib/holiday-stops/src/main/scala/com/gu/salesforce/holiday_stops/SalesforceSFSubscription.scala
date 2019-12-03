@@ -1,8 +1,9 @@
 package com.gu.salesforce.holiday_stops
 
 import ai.x.play.json.Jsonx
-import com.gu.salesforce.RecordsWrapperCaseClass
+import com.gu.salesforce.{Contact, RecordsWrapperCaseClass, SalesforceQueryConstants}
 import com.gu.salesforce.SalesforceConstants._
+import com.gu.salesforce.SalesforceQueryConstants.contactToWhereClausePart
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{ProductName, SubscriptionName}
 import com.gu.util.Logging
 import com.gu.util.resthttp.RestOp._
@@ -27,14 +28,6 @@ object SalesforceSFSubscription extends Logging {
     )
     implicit val readsMatchingSubscription = Json.reads[MatchingSubscription]
     implicit val readsResults = Json.reads[RecordsWrapperCaseClass[MatchingSubscription]]
-
-    case class IdentityId(value: String) extends AnyVal
-    case class SalesforceContactId(value: String) extends AnyVal
-    type Contact = Either[IdentityId, SalesforceContactId]
-    def contactToWhereClausePart(contact: Contact) = contact match {
-      case Left(IdentityId(identityId)) => s"Buyer__r.IdentityID__c = '$identityId'"
-      case Right(SalesforceContactId(sfContactId)) => s"Buyer__r.Id = '$sfContactId'"
-    }
 
     def apply(sfGet: HttpOp[RestRequestMaker.GetRequestWithParams, JsValue]): (SubscriptionName, Contact) => ClientFailableOp[Option[MatchingSubscription]] =
       sfGet.setupRequestMultiArg(toRequest _).parse[RecordsWrapperCaseClass[MatchingSubscription]].map(_.records.headOption).runRequestMultiArg

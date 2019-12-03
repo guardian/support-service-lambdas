@@ -4,9 +4,10 @@ import java.io.{InputStream, OutputStream}
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
-import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
+import com.gu.salesforce.SFAuthConfig
 import com.gu.salesforce.TypesForSFEffectsData.SFContactId
 import com.gu.salesforce.SalesforceClient
+import com.gu.salesforce.SalesforceReads._
 import com.gu.sf_contact_merge.DomainSteps.MergeRequest
 import com.gu.sf_contact_merge.SFSteps.GetSfContact
 import com.gu.sf_contact_merge.TypeConvert._

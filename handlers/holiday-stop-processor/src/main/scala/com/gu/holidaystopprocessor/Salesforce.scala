@@ -6,7 +6,7 @@ import com.gu.effects.RawEffects
 import com.gu.holiday_stops.ActionCalculator.GuardianWeeklyIssueSuspensionConstants
 import com.gu.holiday_stops.ProductVariant._
 import com.gu.holiday_stops.{ActionCalculator, ProductVariant, SalesforceHolidayError, SalesforceHolidayResponse}
-import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
+import com.gu.salesforce.SFAuthConfig
 import com.gu.salesforce.SalesforceClient
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
 import com.gu.util.resthttp.JsonHttp

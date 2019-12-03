@@ -8,11 +8,10 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.holiday_stops.WireHolidayStopRequest.toHolidayStopRequestDetail
 import com.gu.holiday_stops.subscription.{StoppedProduct, Subscription}
-import com.gu.salesforce.SalesforceClient
+import com.gu.salesforce.{Contact, SalesforceClient, SalesforceHandlerSupport}
 import com.gu.salesforce.SalesforceClient.withAlternateAccessTokenIfPresentInHeaderList
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestId, StoppedPublicationDate, SubscriptionName}
-import com.gu.salesforce.holiday_stops.SalesforceSFSubscription.SubscriptionForSubscriptionNameAndContact._
 import com.gu.salesforce.holiday_stops.{SalesforceHolidayStopRequest, SalesforceSFSubscription}
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
@@ -153,17 +152,12 @@ object Handler extends Logging {
     }
   }
 
-  val HEADER_IDENTITY_ID = "x-identity-id"
-  val HEADER_SALESFORCE_CONTACT_ID = "x-salesforce-contact-id"
-
-  def extractContactFromHeaders(headers: Option[Map[String, String]]): ApiGatewayOp[Contact] = headers.flatMap(_.toList.collectFirst {
-    case (HEADER_SALESFORCE_CONTACT_ID, sfContactId) => Right(SalesforceContactId(sfContactId))
-    case (HEADER_IDENTITY_ID, identityId) => Left(IdentityId(identityId))
-  }).toApiGatewayContinueProcessing(
-    ApiGatewayResponse.badRequest(
-      s"either '$HEADER_IDENTITY_ID' header OR '$HEADER_SALESFORCE_CONTACT_ID' (one is required)"
-    )
-  )
+  def extractContactFromHeaders(headers: Option[Map[String, String]]): ApiGatewayOp[Contact] =
+    SalesforceHandlerSupport.extractContactFromHeaders(headers.getOrElse(Map.empty).toList)
+      .toApiGatewayOp(error =>
+        ApiGatewayResponse.badRequest(
+          error.message
+        ))
 
   private def exposeSfErrorMessageIn500ApiResponse(action: String) = (error: ClientFailure) => {
     logger.error(s"Failed to $action: $error")

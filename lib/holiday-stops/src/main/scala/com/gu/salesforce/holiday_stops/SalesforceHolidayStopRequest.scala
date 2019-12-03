@@ -6,9 +6,11 @@ import java.util.UUID
 
 import ai.x.play.json.Jsonx
 import com.gu.holiday_stops.subscription.{StoppedProduct, Subscription}
+import com.gu.salesforce.{Contact, RecordsWrapperCaseClass, SalesforceQueryConstants}
 import com.gu.salesforce.RecordsWrapperCaseClass
 import com.gu.salesforce.SalesforceClient.SalesforceErrorResponseBody
 import com.gu.salesforce.SalesforceConstants._
+import com.gu.salesforce.SalesforceQueryConstants.contactToWhereClausePart
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
 import com.gu.salesforce.holiday_stops.SalesforceSFSubscription.SubscriptionForSubscriptionNameAndContact._
 import com.gu.util.Logging
