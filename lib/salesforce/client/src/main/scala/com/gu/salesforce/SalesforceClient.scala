@@ -54,12 +54,14 @@ object SalesforceClient extends LazyLogging {
       requestInfo.copy(headers = requestInfo.headers ++ getAuthHeaders(alternateAccessToken))
     }.getOrElse(requestInfo)
 
-  private case class SalesforceErrorResponseBody(message: String, errorCode: String)
-  private implicit val readsSalesforceErrorResponseBody = Json.reads[SalesforceErrorResponseBody]
+  case class SalesforceErrorResponseBody(message: String, errorCode: String) {
+    override def toString = s"${errorCode} : ${message}"
+  }
+  implicit val readsSalesforceErrorResponseBody = Json.reads[SalesforceErrorResponseBody]
 
   def parseSalesforceErrorResponseAsCustomError(errorBody: String): ClientFailure = try {
     Json.parse(errorBody).as[List[SalesforceErrorResponseBody]] match {
-      case singleSfError :: Nil => CustomError(s"${singleSfError.errorCode} : ${singleSfError.message}")
+      case singleSfError :: Nil => CustomError(singleSfError.toString)
       case multipleSfErrors => CustomError(
         multipleSfErrors.groupBy(_.errorCode).mapValues(_.map(_.message)).mkString.take(500)
       )

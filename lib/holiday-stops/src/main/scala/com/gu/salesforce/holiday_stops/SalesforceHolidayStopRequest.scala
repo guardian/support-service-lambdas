@@ -7,14 +7,17 @@ import java.util.UUID
 import ai.x.play.json.Jsonx
 import com.gu.holiday_stops.subscription.{StoppedProduct, Subscription}
 import com.gu.salesforce.{Contact, RecordsWrapperCaseClass, SalesforceQueryConstants}
+import com.gu.salesforce.RecordsWrapperCaseClass
+import com.gu.salesforce.SalesforceClient.SalesforceErrorResponseBody
 import com.gu.salesforce.SalesforceConstants._
 import com.gu.salesforce.SalesforceQueryConstants.contactToWhereClausePart
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
 import com.gu.salesforce.holiday_stops.SalesforceSFSubscription.SubscriptionForSubscriptionNameAndContact._
 import com.gu.util.Logging
+import com.gu.util.resthttp.HttpOp.HttpOpWrapper
 import com.gu.util.resthttp.RestOp._
 import com.gu.util.resthttp.RestRequestMaker._
-import com.gu.util.resthttp.Types.ClientFailableOp
+import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, CustomError}
 import com.gu.util.resthttp.{HttpOp, RestRequestMaker}
 import play.api.libs.json._
 
@@ -235,12 +238,44 @@ object SalesforceHolidayStopRequest extends Logging {
   )
   implicit val writesCompositeRequest = Json.writes[CompositeRequest]
 
+  case class CompositeResponsePart (
+    httpStatusCode: Int,
+    body: Option[JsValue]
+  )
+  implicit val readsCompositeResponsePart = Json.reads[CompositeResponsePart]
+  case class CompositeResponse (
+    compositeResponse: List[CompositeResponsePart]
+  )
+  implicit val readsCompositeResponse = Json.reads[CompositeResponse]
+
+  lazy val successStatusCodes = 200 to 299
+
+  val safeSalesforceCompositeRequest = HttpOpWrapper[CompositeRequest, PostRequest, CompositeResponse, CompositeResponse](
+    (requestBody: CompositeRequest) => PostRequest(requestBody, RelativePath(compositeBaseUrl)),
+    // this is necessary because for some bizarre reason composite requests return a 200 even if the sub-requests fail
+    // see https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/requests_composite.htm
+    (response: CompositeResponse) => {
+      val failures = response.compositeResponse
+        .filter(resp => !successStatusCodes.contains(resp.httpStatusCode))
+      if(failures.isEmpty) {
+        ClientSuccess(response)
+      } else {
+        logger.error(response.toString)
+        val failuresStr: String = failures
+          .flatMap(_.body.map(_.validate[List[SalesforceErrorResponseBody]].asOpt)).flatten
+          .mkString(", ")
+        CustomError(s"MULTIPLE ERRORS : ${failuresStr.take(500)}${if (failuresStr.length > 500) "..." else "" }")
+      }
+    }
+  )
+
   object AmendHolidayStopRequest {
 
-    def apply(sfPost: HttpOp[RestRequestMaker.PostRequest, JsValue]): CompositeRequest => ClientFailableOp[JsValue] =
-      sfPost.setupRequest[CompositeRequest] { amendHolidayStopRequestWithDetail =>
-        PostRequest(amendHolidayStopRequestWithDetail, RelativePath(compositeBaseUrl))
-      }.runRequest
+    def apply(sfPost: HttpOp[RestRequestMaker.PostRequest, JsValue]): CompositeRequest => ClientFailableOp[CompositeResponse] =
+      sfPost
+        .parse[CompositeResponse]
+        .wrapWith(safeSalesforceCompositeRequest)
+        .runRequest
 
     case class AmendHolidayStopRequestItselfBody (
       Start_Date__c: HolidayStopRequestStartDate,
@@ -321,10 +356,11 @@ object SalesforceHolidayStopRequest extends Logging {
       Charge_Code__c: Option[HolidayStopRequestsDetailChargeCode]
     )
 
-    def apply(sfPost: HttpOp[RestRequestMaker.PostRequest, JsValue]): CompositeRequest => ClientFailableOp[JsValue] =
-      sfPost.setupRequest[CompositeRequest] { cancelHolidayStopRequestsWithDetail =>
-        PostRequest(cancelHolidayStopRequestsWithDetail, RelativePath(compositeBaseUrl))
-      }.runRequest
+    def apply(sfPost: HttpOp[RestRequestMaker.PostRequest, JsValue]): CompositeRequest => ClientFailableOp[CompositeResponse] =
+      sfPost
+        .parse[CompositeResponse]
+        .wrapWith(safeSalesforceCompositeRequest)
+        .runRequest
 
 
     def buildBody(
