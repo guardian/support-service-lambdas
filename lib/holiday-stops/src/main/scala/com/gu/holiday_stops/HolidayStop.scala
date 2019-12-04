@@ -4,8 +4,6 @@ import java.time.LocalDate
 
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestsDetail, HolidayStopRequestsDetailChargePrice, HolidayStopRequestsDetailId, ProductName, SubscriptionName}
 
-import acyclic.skipped
-
 case class HolidayStop(
   requestId: HolidayStopRequestsDetailId,
   subscriptionName: SubscriptionName,
