@@ -106,7 +106,7 @@ Resources:
         - Arn: !Sub ${FulfilmentDateCalculatorLambda.Arn}
           Id: TriggerLambda
           Input: |
-            "today"
+            null
 
   FulfilmentDateCalculatorLambdaTriggerPermission:
     Type: AWS::Lambda::Permission
