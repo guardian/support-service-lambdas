@@ -5,7 +5,7 @@ import java.time.{DayOfWeek, LocalDate}
 import com.gu.holiday_stops.{ZuoraHolidayError, ZuoraHolidayResponse}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.StoppedPublicationDate
 import enumeratum._
-import acyclic.skipped
+
 
 case class VoucherSubscription(
                                 override val subscriptionNumber: String,

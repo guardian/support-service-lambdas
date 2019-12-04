@@ -1,7 +1,6 @@
 package com.gu.holiday_stops.subscription
 
 import com.gu.holiday_stops.ZuoraHolidayError
-import acyclic.skipped
 
 case class RatePlanChargeInfo(
   ratePlanCharge: RatePlanCharge,

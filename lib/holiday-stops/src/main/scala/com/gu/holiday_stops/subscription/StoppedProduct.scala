@@ -2,7 +2,6 @@ package com.gu.holiday_stops.subscription
 
 import java.time.LocalDate
 
-import acyclic.skipped
 import cats.syntax.either._
 import com.gu.holiday_stops.{ZuoraHolidayError, ZuoraHolidayResponse}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.StoppedPublicationDate

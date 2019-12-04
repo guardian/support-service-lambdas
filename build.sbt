@@ -26,12 +26,9 @@ val scalaSettings = Seq(
       .setPreference(DanglingCloseParenthesis, Force)
       .setPreference(SpacesAroundMultiImports, false)
       .setPreference(NewlineAtEndOfFile, true)
-  },libraryDependencies += "com.lihaoyi" %% "acyclic" % "0.1.7" % "provided",
+  },
 
   autoCompilerPlugins := true,
-
-  addCompilerPlugin("com.lihaoyi" %% "acyclic" % "0.1.7"),
-  scalacOptions += "-P:acyclic:force"
 )
 
 // fixme this whole file needs splitting down appropriately

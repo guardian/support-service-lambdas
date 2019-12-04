@@ -12,7 +12,6 @@ import com.gu.util.resthttp.RestRequestMaker._
 import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.resthttp.{HttpOp, RestRequestMaker}
 import play.api.libs.json.{JsValue, Json}
-import acyclic.skipped
 
 object SalesforceHolidayStopRequestsDetail extends Logging {
 

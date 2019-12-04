@@ -2,7 +2,7 @@ package com.gu.holiday_stops
 
 import com.gu.holiday_stops.subscription.RatePlan
 import enumeratum.{Enum, EnumEntry}
-import acyclic.skipped
+
 import com.gu.holiday_stops.subscription.GuardianWeeklyRatePlanCondition
 
 sealed abstract class ProductVariant(override val entryName: String) extends EnumEntry

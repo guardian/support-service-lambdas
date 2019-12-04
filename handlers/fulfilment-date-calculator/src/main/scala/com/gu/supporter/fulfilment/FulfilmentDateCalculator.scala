@@ -12,7 +12,6 @@ import io.github.mkotsur.aws.handler.Lambda
 import io.github.mkotsur.aws.handler.Lambda._
 import io.circe.generic.auto._
 import io.circe.syntax._
-import acyclic.skipped
 
 case class FulfilmentDates(
   today: LocalDate,
