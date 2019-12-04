@@ -22,17 +22,19 @@ case class FulfilmentDates(
   nextAffectablePublicationDateOnFrontCover: LocalDate
 )
 
-class FulfilmentDateCalculator extends Lambda[String, String] with LazyLogging {
-  override def handle(todayOverride: String, context: Context) = {
+class FulfilmentDateCalculator extends Lambda[Option[String], String] with LazyLogging {
+  override def handle(todayOverride: Option[String], context: Context) = {
     val today = inputToDate(todayOverride)
     val fulfilmentDates = GuardianWeeklyFulfilmentDates(today)
     writeToBucket("WEEKLY", today, fulfilmentDates.asJson.spaces2)
     Right(s"Generated Guardian Weekly dates for $today")
   }
 
-  private def inputToDate(input: String): LocalDate = {
-    val todayInput = input.replaceAll("\"", "")
-    if ("today" == todayInput) LocalDate.now else LocalDate.parse(todayInput)
+  private def inputToDate(maybeTodayOverride: Option[String]): LocalDate = {
+    maybeTodayOverride match {
+      case None => LocalDate.now
+      case Some(todayOverride) => LocalDate.parse(todayOverride.replaceAll("\"", ""))
+    }
   }
 
   private def writeToBucket(product: String, date: LocalDate, content: String): PutObjectResult = {
