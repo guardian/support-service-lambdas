@@ -3,6 +3,7 @@ package com.gu.supporter.fulfilment
 import java.time.{DayOfWeek, LocalDate}
 import java.time.temporal.ChronoUnit.DAYS
 import java.time.temporal.TemporalAdjusters
+import acyclic.skipped
 
 /**
  * @param issueDayOfWeek                Weekday corresponding to publication issue date printed on the paper, for example, Friday for GW
