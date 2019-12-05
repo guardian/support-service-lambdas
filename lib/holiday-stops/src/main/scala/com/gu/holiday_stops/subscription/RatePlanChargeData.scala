@@ -6,7 +6,7 @@ import com.gu.holiday_stops.ZuoraHolidayError
 import acyclic.skipped
 import scala.math.BigDecimal.RoundingMode
 
-case class RatePlanChargeInfo(
+case class RatePlanChargeData(
   ratePlanCharge: RatePlanCharge,
   billingSchedule: RatePlanChargeBillingSchedule,
   billingPeriodName: String,
@@ -14,15 +14,15 @@ case class RatePlanChargeInfo(
   issueCreditAmount: Double
 )
 
-object RatePlanChargeInfo {
-  def apply(ratePlanCharge: RatePlanCharge, issueDayOfWeek: DayOfWeek): Either[ZuoraHolidayError, RatePlanChargeInfo] = {
+object RatePlanChargeData {
+  def apply(ratePlanCharge: RatePlanCharge, issueDayOfWeek: DayOfWeek): Either[ZuoraHolidayError, RatePlanChargeData] = {
     for {
       billingPeriodName <- ratePlanCharge
         .billingPeriod
         .toRight(ZuoraHolidayError("RatePlanCharge.billingPeriod is required"))
       schedule <- RatePlanChargeBillingSchedule(ratePlanCharge)
       issueCreditAmount <- calculateIssueCreditAmount(ratePlanCharge)
-    } yield RatePlanChargeInfo(ratePlanCharge, schedule, billingPeriodName, issueDayOfWeek, issueCreditAmount)
+    } yield RatePlanChargeData(ratePlanCharge, schedule, billingPeriodName, issueDayOfWeek, issueCreditAmount)
   }
 
   private def calculateIssueCreditAmount(ratePlanCharge: RatePlanCharge) = {

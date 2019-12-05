@@ -7,21 +7,14 @@ import cats.implicits._
 
 import scala.collection.immutable
 
-case class SubscriptionInfo(subscription: Subscription, ratePlanChargeInfo: List[RatePlanChargeInfo]) {
-  def ratePlanChargeInfoForDate(date: LocalDate): Either[ZuoraHolidayError, RatePlanChargeInfo] = {
-    ratePlanChargeInfo
-      .find { ratePlanCharge =>
-        ratePlanCharge.billingSchedule.isDateCoveredBySchedule(date) &&
-          ratePlanCharge.issueDayOfWeek == date.getDayOfWeek
-      }
-      .toRight(
-        ZuoraHolidayError(s"Subscription ${subscription.subscriptionNumber} does not have a rate plan for date $date")
-      )
-  }
+case class IssueData(issueDate: LocalDate, billingPeriod: BillingPeriod, credit: Double)
+
+trait SubscriptionData {
+  def issueDataForDate(issueDate: LocalDate): Either[ZuoraHolidayError, IssueData]
 }
 
-object SubscriptionInfo {
-  def apply(subscription: Subscription): Either[ZuoraHolidayError, SubscriptionInfo] = {
+object SubscriptionData {
+  def apply(subscription: Subscription): Either[ZuoraHolidayError, SubscriptionData] = {
     val supportedRatePlanCharges: immutable.Seq[(RatePlanCharge, SupportedRatePlanCharge)] = for {
       ratePlan <- subscription.ratePlans
       supportedProduct <- getSupportedProductForRatePlan(ratePlan).toList
@@ -30,13 +23,21 @@ object SubscriptionInfo {
       supportedRatePlanCharge <- getSupportedRatePlanCharge(supportedRatePlan, unExpiredRatePlanCharge)
     } yield (unExpiredRatePlanCharge, supportedRatePlanCharge)
 
-    supportedRatePlanCharges
-      .toList
-      .traverse[ZuoraHolidayResponse, RatePlanChargeInfo] {
-        case (ratePlanCharge, supportedRatePlanCharge) =>
-          RatePlanChargeInfo(ratePlanCharge, supportedRatePlanCharge.dayOfWeek)
+    for {
+      ratePlanChargeData <- supportedRatePlanCharges
+        .toList
+        .traverse[ZuoraHolidayResponse, RatePlanChargeData] {
+          case (ratePlanCharge, supportedRatePlanCharge) =>
+            RatePlanChargeData(ratePlanCharge, supportedRatePlanCharge.dayOfWeek)
+        }
+    } yield new SubscriptionData {
+      def issueDataForDate(issueDate: LocalDate): Either[ZuoraHolidayError, IssueData] = {
+        for {
+          ratePlanChargeData <- ratePlanChargeDataForDate(ratePlanChargeData, issueDate)
+          billingPeriod <- ratePlanChargeData.billingSchedule.billingPeriodForDate(issueDate)
+        } yield IssueData(issueDate, billingPeriod, ratePlanChargeData.issueCreditAmount)
       }
-      .map(SubscriptionInfo(subscription, _))
+    }
   }
 
   private def getSupportedRatePlanCharge(supportedRatePlan: SupportedRatePlan, unExpiredRatePlanCharge: RatePlanCharge) = {
@@ -53,5 +54,16 @@ object SubscriptionInfo {
 
   private def getUnexpiredRatePlanCharges(ratePlan: RatePlan) = {
     ratePlan.ratePlanCharges.filter(_.chargedThroughDate.map(!_.isBefore(MutableCalendar.today)).getOrElse(true))
+  }
+
+  def ratePlanChargeDataForDate(ratePlanChargeData: List[RatePlanChargeData], date: LocalDate): Either[ZuoraHolidayError, RatePlanChargeData] = {
+    ratePlanChargeData
+      .find { ratePlanCharge =>
+        ratePlanCharge.billingSchedule.isDateCoveredBySchedule(date) &&
+          ratePlanCharge.issueDayOfWeek == date.getDayOfWeek
+      }
+      .toRight(
+        ZuoraHolidayError(s"Subscription does not have a rate plan for date $date")
+      )
   }
 }

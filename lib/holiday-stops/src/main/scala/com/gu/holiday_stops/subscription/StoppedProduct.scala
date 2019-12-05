@@ -3,21 +3,16 @@ package com.gu.holiday_stops.subscription
 import java.time.LocalDate
 
 import acyclic.skipped
-import cats.syntax.either._
-import com.gu.holiday_stops.{ZuoraHolidayError, ZuoraHolidayResponse}
+import com.gu.holiday_stops.ZuoraHolidayResponse
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.StoppedPublicationDate
-import com.gu.util.Logging
-
-import scala.math.BigDecimal.RoundingMode
 
 object StoppedProduct {
   def apply(subscription: Subscription, stoppedPublicationDate: StoppedPublicationDate): ZuoraHolidayResponse[HolidayStopCredit] =
     for {
-      subscriptionInfo <- SubscriptionInfo(subscription)
-      ratePlanChargeInfo <- subscriptionInfo.ratePlanChargeInfoForDate(stoppedPublicationDate.value)
-      billingPeriod <- ratePlanChargeInfo.billingSchedule.billingPeriodForDate(stoppedPublicationDate.value)
+      subscriptionInfo <- SubscriptionData(subscription)
+      issueDate <- subscriptionInfo.issueDataForDate(stoppedPublicationDate.value)
     } yield {
-      HolidayStopCredit(ratePlanChargeInfo.issueCreditAmount, nextBillingPeriodStartDate(billingPeriod))
+      HolidayStopCredit(issueDate.credit, nextBillingPeriodStartDate(issueDate.billingPeriod))
     }
 
   /**
