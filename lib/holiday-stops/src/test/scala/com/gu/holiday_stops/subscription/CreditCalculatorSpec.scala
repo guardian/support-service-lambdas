@@ -8,6 +8,8 @@ import org.scalactic.TypeCheckedTripleEquals
 import org.scalatest._
 
 class CreditCalculatorSpec extends FlatSpec with Matchers with EitherValues with TypeCheckedTripleEquals {
+  MutableCalendar.setFakeToday(Some(LocalDate.of(2019, 10, 1)))
+
   "CreditCalculator" should "calculate credit for sunday voucher subscription" in {
     checkCreditCalculation(
       zuoraSubscriptionData = "SundayVoucherSubscription.json",
@@ -48,8 +50,9 @@ class CreditCalculatorSpec extends FlatSpec with Matchers with EitherValues with
 
   private def checkCreditCalculation(zuoraSubscriptionData: String, stopDate: LocalDate, expectedCredit: HolidayStopCredit) = {
     val subscription = Fixtures.subscriptionFromJson(zuoraSubscriptionData)
-    val stoppedProduct = StoppedProduct(subscription, StoppedPublicationDate(stopDate)).right.value
-
-    stoppedProduct.credit should ===(expectedCredit)
+    Inside.inside(StoppedProduct(subscription, StoppedPublicationDate(stopDate))) {
+      case Right(stoppedProduct) =>
+        stoppedProduct should ===(expectedCredit)
+    }
   }
 }

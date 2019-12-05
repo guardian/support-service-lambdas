@@ -188,7 +188,7 @@ object Handler extends Logging {
         // unfortunately necessary due to GW N-for-N requiring stoppedPublicationDate to calculate correct credit estimation
         PotentialHolidayStop(
           stoppedPublicationDate,
-          StoppedProduct(subscription, StoppedPublicationDate(stoppedPublicationDate)).map(_.credit).toOption
+          StoppedProduct(subscription, StoppedPublicationDate(stoppedPublicationDate)).toOption
         )
       }
     } yield ApiGatewayResponse("200", PotentialHolidayStopsResponse(potentialHolidayStops))).apiResponse

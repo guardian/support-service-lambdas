@@ -59,6 +59,7 @@ class RatePlanChargeBillingScheduleSpec extends FlatSpec with Matchers with Eith
     inside(
       RatePlanChargeBillingSchedule(
         Fixtures.mkRatePlanCharge(
+          name = "GW Oct 18 - Quarterly - Domestic",
           price = 1,
           billingPeriod = "Month",
           effectiveStartDate = effectiveStartDate,
@@ -124,6 +125,7 @@ class RatePlanChargeBillingScheduleSpec extends FlatSpec with Matchers with Eith
     inside(
       RatePlanChargeBillingSchedule(
         Fixtures.mkRatePlanCharge(
+          "GW Oct 18 - Quarterly - Domestic",
           price = 1,
           billingPeriod = billingPeriodName,
           effectiveStartDate = effectiveStartDate,
@@ -160,6 +162,7 @@ class RatePlanChargeBillingScheduleSpec extends FlatSpec with Matchers with Eith
     inside(
       RatePlanChargeBillingSchedule(
         Fixtures.mkRatePlanCharge(
+          name = "GW Oct 18 - Quarterly - Domestic",
           price = 1,
           billingPeriod = billingPeriodName,
           effectiveStartDate = effectiveStartDate,

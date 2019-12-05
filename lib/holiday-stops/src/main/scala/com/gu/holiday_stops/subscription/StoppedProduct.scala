@@ -10,19 +10,15 @@ import com.gu.util.Logging
 
 import scala.math.BigDecimal.RoundingMode
 
-abstract class StoppedProduct(
-  val subscriptionNumber: String,
-  val stoppedPublicationDate: LocalDate,
-  val price: Double,
-  val billingPeriod: String,
-  val stoppedPublicationDateBillingPeriod: BillingPeriod
-) extends Logging {
-  private def creditAmount: Double = {
-    def roundUp(d: Double): Double = BigDecimal(d).setScale(2, RoundingMode.UP).toDouble
-    val recurringPrice = price
-    val numPublicationsInPeriod = billingPeriodToApproxWeekCount(billingPeriod)
-    -roundUp(recurringPrice / numPublicationsInPeriod)
-  }
+object StoppedProduct {
+  def apply(subscription: Subscription, stoppedPublicationDate: StoppedPublicationDate): ZuoraHolidayResponse[HolidayStopCredit] =
+    for {
+      subscriptionInfo <- SubscriptionInfo(subscription)
+      ratePlanChargeInfo <- subscriptionInfo.ratePlanChargeInfoForDate(stoppedPublicationDate.value)
+      billingPeriod <- ratePlanChargeInfo.billingSchedule.billingPeriodForDate(stoppedPublicationDate.value)
+    } yield {
+      HolidayStopCredit(ratePlanChargeInfo.issueCreditAmount, nextBillingPeriodStartDate(billingPeriod))
+    }
 
   /**
    * This returns the date for the next bill after the stoppedPublicationDate.
@@ -39,27 +35,7 @@ abstract class StoppedProduct(
    *         [[com.gu.holiday_stops.subscription.StoppedProductTest]]
    *         shows examples of the expected outcome.
    */
-  private def nextBillingPeriodStartDate: LocalDate = {
-    stoppedPublicationDateBillingPeriod.endDate.plusDays(1)
-  }
-
-  private def billingPeriodToApproxWeekCount(billingPeriod: String): Int =
-    billingPeriod match {
-      case "Annual" => 52
-      case "Semi_Annual" => 26
-      case "Quarter" => 13
-      case "Month" => 4
-      case "Specific_Weeks" => 6 // FIXME: When we have others than 6-for-6
-      case _ => throw new RuntimeException(s"Failed to convert billing period to weeks because unknown period: $billingPeriod")
-    }
-
-  def credit = HolidayStopCredit(amount = creditAmount, invoiceDate = nextBillingPeriodStartDate)
-}
-
-object StoppedProduct {
-  def apply(subscription: Subscription, stoppedPublicationDate: StoppedPublicationDate): ZuoraHolidayResponse[StoppedProduct] = {
-    GuardianWeeklySubscription(subscription, stoppedPublicationDate)
-      .orElse(VoucherSubscription(subscription, stoppedPublicationDate))
-      .orElse(Left(ZuoraHolidayError(s"Failed to determine StoppableProduct: ${subscription.subscriptionNumber}; ${stoppedPublicationDate}")))
+  private def nextBillingPeriodStartDate(billingPeriod: BillingPeriod): LocalDate = {
+    billingPeriod.endDate.plusDays(1)
   }
 }
