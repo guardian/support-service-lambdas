@@ -63,18 +63,18 @@ class GuardianWeeklyFulfilmentDatesSpec extends FlatSpec with Matchers with Date
     GuardianWeeklyFulfilmentDates("2019-12-13").holidayStopFirstAvailableDate should equalDate("2019-12-21")
   }
 
-  //  it should "calculate finalFulfilmentFileGenerationDate" in {
-  //    GuardianWeeklyFulfilmentDates("2019-12-02").finalFulfilmentFileGenerationDate should equalDate("2019-12-05")
-  //    GuardianWeeklyFulfilmentDates("2019-12-03").finalFulfilmentFileGenerationDate should equalDate("2019-12-05")
-  //    GuardianWeeklyFulfilmentDates("2019-12-04").finalFulfilmentFileGenerationDate should equalDate("2019-12-05")
-  //    GuardianWeeklyFulfilmentDates("2019-12-05").finalFulfilmentFileGenerationDate should equalDate("2019-12-12")
-  //    GuardianWeeklyFulfilmentDates("2019-12-06").finalFulfilmentFileGenerationDate should equalDate("2019-12-12")
-  //    GuardianWeeklyFulfilmentDates("2019-12-07").finalFulfilmentFileGenerationDate should equalDate("2019-12-12")
-  //    GuardianWeeklyFulfilmentDates("2019-12-08").finalFulfilmentFileGenerationDate should equalDate("2019-12-12")
-  //    GuardianWeeklyFulfilmentDates("2019-12-09").finalFulfilmentFileGenerationDate should equalDate("2019-12-12")
-  //    GuardianWeeklyFulfilmentDates("2019-12-10").finalFulfilmentFileGenerationDate should equalDate("2019-12-12")
-  //    GuardianWeeklyFulfilmentDates("2019-12-11").finalFulfilmentFileGenerationDate should equalDate("2019-12-12")
-  //    GuardianWeeklyFulfilmentDates("2019-12-12").finalFulfilmentFileGenerationDate should equalDate("2019-12-19")
-  //    GuardianWeeklyFulfilmentDates("2019-12-13").finalFulfilmentFileGenerationDate should equalDate("2019-12-19")
-  //  }
+  it should "calculate finalFulfilmentFileGenerationDate" in {
+    GuardianWeeklyFulfilmentDates("2019-12-02").finalFulfilmentFileGenerationDate should equalDate("2019-12-05")
+    GuardianWeeklyFulfilmentDates("2019-12-03").finalFulfilmentFileGenerationDate should equalDate("2019-12-05")
+    GuardianWeeklyFulfilmentDates("2019-12-04").finalFulfilmentFileGenerationDate should equalDate("2019-12-05")
+    GuardianWeeklyFulfilmentDates("2019-12-05").finalFulfilmentFileGenerationDate should equalDate("2019-12-12")
+    GuardianWeeklyFulfilmentDates("2019-12-06").finalFulfilmentFileGenerationDate should equalDate("2019-12-12")
+    GuardianWeeklyFulfilmentDates("2019-12-07").finalFulfilmentFileGenerationDate should equalDate("2019-12-12")
+    GuardianWeeklyFulfilmentDates("2019-12-08").finalFulfilmentFileGenerationDate should equalDate("2019-12-12")
+    GuardianWeeklyFulfilmentDates("2019-12-09").finalFulfilmentFileGenerationDate should equalDate("2019-12-12")
+    GuardianWeeklyFulfilmentDates("2019-12-10").finalFulfilmentFileGenerationDate should equalDate("2019-12-12")
+    GuardianWeeklyFulfilmentDates("2019-12-11").finalFulfilmentFileGenerationDate should equalDate("2019-12-12")
+    GuardianWeeklyFulfilmentDates("2019-12-12").finalFulfilmentFileGenerationDate should equalDate("2019-12-19")
+    GuardianWeeklyFulfilmentDates("2019-12-13").finalFulfilmentFileGenerationDate should equalDate("2019-12-19")
+  }
 }

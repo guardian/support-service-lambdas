@@ -4,7 +4,6 @@ import java.time.{DayOfWeek, LocalDate}
 import java.time.temporal.ChronoUnit.DAYS
 import java.time.temporal.TemporalAdjusters
 
-
 /**
  * @param issueDayOfWeek                Weekday corresponding to publication issue date printed on the paper, for example, Friday for GW
  * @param fulfilmentGenerationDayOfWeek Weekday corresponding to when fulfilment-lambdas generate files
@@ -26,7 +25,7 @@ object GuardianWeeklyFulfilmentDates extends FulfilmentConstants(
       acquisitionsStartDate(today),
       deliveryAddressChangeEffectiveDate(today),
       holidayStopFirstAvailableDate(today),
-//      finalFulfilmentFileGenerationDate(today),
+      finalFulfilmentFileGenerationDate(today),
       nextAffectablePublicationDateOnFrontCover(today)
     )
 
@@ -61,11 +60,11 @@ object GuardianWeeklyFulfilmentDates extends FulfilmentConstants(
     today `with` nextFriday `with` nextFriday
   }
 
-//  // When was the fulfilment file generated for the nextAffectablePublicationDateOnFrontCover
-//  def finalFulfilmentFileGenerationDate(today: LocalDate): LocalDate = {
-//    val previousThursday = TemporalAdjusters.previous(fulfilmentGenerationDayOfWeek)
-//    nextAffectablePublicationDateOnFrontCover(today) `with` previousThursday `with` previousThursday
-//  }
+  // When was the fulfilment file generated for the nextAffectablePublicationDateOnFrontCover
+  def finalFulfilmentFileGenerationDate(today: LocalDate): LocalDate = {
+    val previousThursday = TemporalAdjusters.previous(fulfilmentGenerationDayOfWeek)
+    nextAffectablePublicationDateOnFrontCover(today) `with` previousThursday `with` previousThursday
+  }
 
 }
 
