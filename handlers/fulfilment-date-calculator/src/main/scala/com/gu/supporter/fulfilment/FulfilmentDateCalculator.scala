@@ -25,6 +25,7 @@ case class FulfilmentDates(
 
 class FulfilmentDateCalculator extends Lambda[Option[String], String] with LazyLogging {
   override def handle(todayOverride: Option[String], context: Context) = {
+    val bankHolidays = GovUkBankHolidays()
     val today = inputToDate(todayOverride)
 
     val datesForYesterdayThroughToAFortnight= (-1 to 14).map(_.toLong).map(today.plusDays)
