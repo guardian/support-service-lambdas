@@ -24,16 +24,19 @@ object SubscriptionData {
     } yield (unExpiredRatePlanCharge, supportedRatePlanCharge)
 
     for {
-      ratePlanChargeData <- supportedRatePlanCharges
+      ratePlanChargeDatas <- supportedRatePlanCharges
         .toList
         .traverse[ZuoraHolidayResponse, RatePlanChargeData] {
           case (ratePlanCharge, supportedRatePlanCharge) =>
             RatePlanChargeData(ratePlanCharge, supportedRatePlanCharge.dayOfWeek)
         }
+      nonZeroRatePlanChargeDatas = ratePlanChargeDatas.filter { ratePlanChargeData =>
+        ratePlanChargeData.issueCreditAmount != 0
+      }
     } yield new SubscriptionData {
       def issueDataForDate(issueDate: LocalDate): Either[ZuoraHolidayError, IssueData] = {
         for {
-          ratePlanChargeData <- ratePlanChargeDataForDate(ratePlanChargeData, issueDate)
+          ratePlanChargeData <- ratePlanChargeDataForDate(nonZeroRatePlanChargeDatas, issueDate)
           billingPeriod <- ratePlanChargeData.billingSchedule.billingPeriodForDate(issueDate)
         } yield IssueData(issueDate, billingPeriod, ratePlanChargeData.issueCreditAmount)
       }
