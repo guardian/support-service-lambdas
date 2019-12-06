@@ -3,7 +3,6 @@ package com.gu.holiday_stops.subscription
 import java.time.DayOfWeek
 
 import com.gu.holiday_stops.ZuoraHolidayError
-import acyclic.skipped
 import scala.math.BigDecimal.RoundingMode
 
 case class RatePlanChargeData(

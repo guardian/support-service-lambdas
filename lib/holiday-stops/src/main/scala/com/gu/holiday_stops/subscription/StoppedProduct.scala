@@ -2,8 +2,7 @@ package com.gu.holiday_stops.subscription
 
 import java.time.LocalDate
 
-import acyclic.skipped
-import com.gu.holiday_stops.ZuoraHolidayResponse
+import com.gu.holiday_stops.{ZuoraHolidayError, ZuoraHolidayResponse}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.StoppedPublicationDate
 
 object StoppedProduct {
