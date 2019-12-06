@@ -5,6 +5,7 @@ import java.time.temporal.ChronoUnit
 
 import com.gu.holiday_stops.Fixtures
 import org.scalatest.EitherValues._
+import org.scalatest.Inside
 import org.scalatest.Matchers._
 
 object SubscriptionDataIntegrationTest {
@@ -13,15 +14,17 @@ object SubscriptionDataIntegrationTest {
     val subscriptionData = SubscriptionData(subscription).right.value
     val datesToTest = getDatesToTest(startDate, expectedIssueData)
 
-    subscriptionData.issueDataForDate(startDate.minusDays(1)).isLeft should equal(true)
-
     datesToTest.foreach { testDate =>
       println(s"testing date $testDate")
       expectedIssueData.find(_.issueDate == testDate) match {
         case Some(expectedIssueData) =>
-          subscriptionData.issueDataForDate(testDate).right.value should equal(expectedIssueData)
+          Inside.inside(subscriptionData.issueDataForDate(testDate)) {
+            case Right(actualIssueData) => actualIssueData should equal(expectedIssueData)
+          }
         case None =>
-          subscriptionData.issueDataForDate(testDate).isLeft should equal(true)
+          Inside.inside(subscriptionData.issueDataForDate(testDate)) {
+            case Left(_) => //pass
+          }
       }
     }
   }
@@ -40,7 +43,6 @@ object SubscriptionDataIntegrationTest {
       }
       .toList
   }
-
 
   private def getDatesToTest(startDate: LocalDate, expectedIssues: List[IssueData]) = {
     val maxDate = getMaxDate(expectedIssues.map(_.issueDate))
