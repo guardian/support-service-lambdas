@@ -15,7 +15,6 @@ object SubscriptionDataIntegrationTest {
     val datesToTest = getDatesToTest(startDate, expectedIssueData)
 
     datesToTest.foreach { testDate =>
-      println(s"testing date $testDate")
       expectedIssueData.find(_.issueDate == testDate) match {
         case Some(expectedIssueData) =>
           Inside.inside(subscriptionData.issueDataForDate(testDate)) {

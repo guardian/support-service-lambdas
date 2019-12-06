@@ -5,8 +5,6 @@ import java.time.LocalDate
 import com.gu.holiday_stops.{ZuoraHolidayError, ZuoraHolidayResponse}
 import cats.implicits._
 
-import scala.collection.immutable
-
 case class IssueData(issueDate: LocalDate, billingPeriod: BillingPeriod, credit: Double)
 
 trait SubscriptionData {
@@ -15,7 +13,7 @@ trait SubscriptionData {
 
 object SubscriptionData {
   def apply(subscription: Subscription): Either[ZuoraHolidayError, SubscriptionData] = {
-    val supportedRatePlanCharges: immutable.Seq[(RatePlanCharge, SupportedRatePlanCharge)] = for {
+    val supportedRatePlanCharges: List[(RatePlanCharge, SupportedRatePlanCharge)] = for {
       ratePlan <- subscription.ratePlans
       supportedProduct <- getSupportedProductForRatePlan(ratePlan).toList
       supportedRatePlan <- getSupportedRatePlanForRatePlan(ratePlan, supportedProduct).toList
@@ -25,7 +23,6 @@ object SubscriptionData {
 
     for {
       ratePlanChargeDatas <- supportedRatePlanCharges
-        .toList
         .traverse[ZuoraHolidayResponse, RatePlanChargeData] {
           case (ratePlanCharge, supportedRatePlanCharge) =>
             RatePlanChargeData(ratePlanCharge, supportedRatePlanCharge.dayOfWeek)
