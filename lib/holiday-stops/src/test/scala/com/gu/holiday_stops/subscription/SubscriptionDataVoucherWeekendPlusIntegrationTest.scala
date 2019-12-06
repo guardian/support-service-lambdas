@@ -9,9 +9,6 @@ import org.scalatest.FlatSpec
 class SubscriptionDataVoucherWeekendPlusIntegrationTest extends FlatSpec {
   MutableCalendar.setFakeToday(Some(LocalDate.of(2019, 10, 4)))
 
-
-  MutableCalendar.setFakeToday(Some(LocalDate.of(2019, 10, 4)))
-
   "SubscriptionData" should "calculate issue data correctly for weekend voucher subscription" in {
     val startDate = LocalDate.parse("2019-03-16") //Sunday
     val firstSaturday = startDate.`with`(TemporalAdjusters.nextOrSame(DayOfWeek.SATURDAY))
