@@ -6,7 +6,7 @@ import java.time.temporal.TemporalAdjusters
 import com.gu.holiday_stops.subscription.SubscriptionDataIntegrationTest.testSubscriptonDataIssueGeneration
 import org.scalatest.FlatSpec
 
-class SubscriptionDateEchoLegacyIntegrationTest extends FlatSpec {
+class SubscriptionDataEchoLegacyIntegrationTest extends FlatSpec {
   MutableCalendar.setFakeToday(Some(LocalDate.of(2019, 10, 4)))
 
   /**
@@ -14,7 +14,7 @@ class SubscriptionDateEchoLegacyIntegrationTest extends FlatSpec {
    * This subscription is for Friday/Saturday ie it has non-zero rate plan charge price for those days
    */
 
-  "SubscriptionDataIntegrationTest" should "calculate issue data correctly for GW 6 for 6" in {
+  "SubscriptionData" should "calculate issue data correctly for echo legacy subscription" in {
     val startDate = LocalDate.parse("2016-09-21")
     val firstFridayIssue = startDate.`with`(TemporalAdjusters.next(DayOfWeek.FRIDAY))
     val firstSaturdayIssue = startDate.`with`(TemporalAdjusters.next(DayOfWeek.SATURDAY))
