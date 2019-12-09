@@ -9,8 +9,8 @@ case class IssueData(issueDate: LocalDate, billingPeriod: BillingPeriod, credit:
 
 trait SubscriptionData {
   def issueDataForDate(issueDate: LocalDate): Either[ZuoraHolidayError, IssueData]
+  def issueDataForPeriod(startDateInclusive: LocalDate, endDateInclusive: LocalDate): List[IssueData]
 }
-
 object SubscriptionData {
   def apply(subscription: Subscription): Either[ZuoraHolidayError, SubscriptionData] = {
     val supportedRatePlanCharges: List[(RatePlanCharge, SupportedRatePlanCharge)] = for {
@@ -30,12 +30,22 @@ object SubscriptionData {
       nonZeroRatePlanChargeDatas = ratePlanChargeDatas.filter { ratePlanChargeData =>
         ratePlanChargeData.issueCreditAmount != 0
       }
-    } yield new SubscriptionData {
+    } yield createSubscriptionData(nonZeroRatePlanChargeDatas)
+  }
+
+  private def createSubscriptionData(nonZeroRatePlanChargeDatas: List[RatePlanChargeData]) = {
+    new SubscriptionData {
       def issueDataForDate(issueDate: LocalDate): Either[ZuoraHolidayError, IssueData] = {
         for {
           ratePlanChargeData <- ratePlanChargeDataForDate(nonZeroRatePlanChargeDatas, issueDate)
           billingPeriod <- ratePlanChargeData.billingSchedule.billingPeriodForDate(issueDate)
         } yield IssueData(issueDate, billingPeriod, ratePlanChargeData.issueCreditAmount)
+      }
+
+      def issueDataForPeriod(startDateInclusive: LocalDate, endDateInclusive: LocalDate): List[IssueData] = {
+        nonZeroRatePlanChargeDatas
+          .flatMap(_.getIssuesForPeriod(startDateInclusive, endDateInclusive))
+          .sortBy(_.issueDate)(Ordering.fromLessThan(_.isBefore(_)))
       }
     }
   }
