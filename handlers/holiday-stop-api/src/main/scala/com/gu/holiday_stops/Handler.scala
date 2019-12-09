@@ -181,9 +181,9 @@ object Handler extends Logging {
       queryParams <- req.queryParamsAsCaseClass[PotentialHolidayStopsQueryParams]()
       subscription <- getSubscription(pathParams.subscriptionName)
         .toApiGatewayOp(s"get subscription ${pathParams.subscriptionName}")
-      subscriptionData <- SubscriptionData(subscription)
+      issuesData <- SubscriptionData(subscription)
+        .map(_.issueDataForPeriod(queryParams.startDate, queryParams.endDate))
         .toApiGatewayOp(s"calculating publication dates")
-      issuesData = subscriptionData.issueDataForPeriod(queryParams.startDate, queryParams.endDate)
       potentialHolidayStops = issuesData.map { issueData =>
         PotentialHolidayStop(
           issueData.issueDate,
@@ -231,10 +231,9 @@ object Handler extends Logging {
       zuoraSubscription <- getSubscription(requestBody.subscriptionName).toApiGatewayOp("get subscription from zuora")
       subscription <- getSubscription(requestBody.subscriptionName)
         .toApiGatewayOp(s"get subscription ${requestBody.subscriptionName}")
-      subscriptionData <- SubscriptionData(subscription)
+      issuesData <- SubscriptionData(subscription)
+        .map(_.issueDataForPeriod(requestBody.startDate, requestBody.endDate))
         .toApiGatewayOp(s"calculating publication dates")
-      issuesData = subscriptionData
-        .issueDataForPeriod(requestBody.startDate, requestBody.endDate)
       createBody = CreateHolidayStopRequestWithDetail.buildBody(requestBody.startDate, requestBody.endDate, issuesData, matchingSfSub, zuoraSubscription)
       _ <- createOp(createBody).toDisjunction.toApiGatewayOp(
         exposeSfErrorMessageIn500ApiResponse(s"create new Holiday Stop Request for subscription ${requestBody.subscriptionName} (contact $contact)")
@@ -323,11 +322,10 @@ object Handler extends Logging {
       existingPublicationsThatWereToBeStopped <- allExisting.find(_.Id == pathParams.holidayStopRequestId).flatMap(_.Holiday_Stop_Request_Detail__r.map(_.records)).toApiGatewayOp(s"contact $contact does not own ${requestBody.subscriptionName.value}")
       subscription <- getSubscription(requestBody.subscriptionName)
         .toApiGatewayOp(s"get subscription ${requestBody.subscriptionName}")
-      subscriptionData <- SubscriptionData(subscription)
+      issuesData <- SubscriptionData(subscription)
+        .map(_.issueDataForPeriod(requestBody.startDate, requestBody.endDate))
         .toApiGatewayOp(s"calculating publication dates")
-      issuesDates = subscriptionData
-        .issueDataForPeriod(requestBody.startDate, requestBody.endDate)
-      amendBody = AmendHolidayStopRequest.buildBody(pathParams.holidayStopRequestId, requestBody.startDate, requestBody.endDate, issuesDates, existingPublicationsThatWereToBeStopped, zuoraSubscription)
+      amendBody = AmendHolidayStopRequest.buildBody(pathParams.holidayStopRequestId, requestBody.startDate, requestBody.endDate, issuesData, existingPublicationsThatWereToBeStopped, zuoraSubscription)
       _ <- amendOp(amendBody).toDisjunction.toApiGatewayOp(
         exposeSfErrorMessageIn500ApiResponse(s"amend Holiday Stop Request for subscription ${requestBody.subscriptionName} (contact $contact)")
       )
