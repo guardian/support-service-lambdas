@@ -77,32 +77,6 @@ class ActionCalculatorTest extends FlatSpec with Matchers with EitherValues {
         }
     }
   }
-
-  it should "correctly list the action dates for given Holiday Stop Request" in {
-
-    ActionCalculator.publicationDatesToBeStopped(
-      fromInclusive = LocalDate.of(2019, 5, 18),
-      toInclusive = LocalDate.of(2019, 6, 20),
-      productVariant = GuardianWeekly
-    ) shouldEqual Right(List(
-        LocalDate.of(2019, 5, 24),
-        LocalDate.of(2019, 5, 31),
-        LocalDate.of(2019, 6, 7),
-        LocalDate.of(2019, 6, 14)
-      ))
-
-    ActionCalculator.publicationDatesToBeStopped(
-      fromInclusive = LocalDate.of(2019, 5, 18),
-      toInclusive = LocalDate.of(2019, 6, 21),
-      productVariant = GuardianWeekly
-    ) shouldEqual Right(List(
-        LocalDate.of(2019, 5, 24),
-        LocalDate.of(2019, 5, 31),
-        LocalDate.of(2019, 6, 7),
-        LocalDate.of(2019, 6, 14),
-        LocalDate.of(2019, 6, 21)
-      ))
-  }
   it should "calculate first available date for Sunday Voucher" in {
     val acceptanceDateInThePast = LocalDate.of(2019, 1, 1)
     inside(
@@ -131,75 +105,4 @@ class ActionCalculatorTest extends FlatSpec with Matchers with EitherValues {
           issueSpecifics.firstAvailableDate shouldEqual customerAcceptanceDate
       }
   }
-  it should "correctly list the action dates for Sunday Voucher" in {
-    val sundayProduct = SundayVoucher
-
-    ActionCalculator.publicationDatesToBeStopped(
-      fromInclusive = LocalDate.of(2019, 5, 20),
-      toInclusive = LocalDate.of(2019, 6, 22),
-      sundayProduct
-    ) shouldEqual Right(List(
-        LocalDate.of(2019, 5, 26),
-        LocalDate.of(2019, 6, 2),
-        LocalDate.of(2019, 6, 9),
-        LocalDate.of(2019, 6, 16)
-      ))
-
-    ActionCalculator.publicationDatesToBeStopped(
-      fromInclusive = LocalDate.of(2019, 5, 20),
-      toInclusive = LocalDate.of(2019, 6, 23),
-      sundayProduct
-    ) shouldEqual Right(List(
-        LocalDate.of(2019, 5, 26),
-        LocalDate.of(2019, 6, 2),
-        LocalDate.of(2019, 6, 9),
-        LocalDate.of(2019, 6, 16),
-        LocalDate.of(2019, 6, 23)
-      ))
-  }
-  it should "correctly list the action dates for Weekend Voucher" in {
-    val weekendProduct = WeekendVoucher
-
-    ActionCalculator.publicationDatesToBeStopped(
-      fromInclusive = LocalDate.of(2019, 5, 20),
-      toInclusive = LocalDate.of(2019, 6, 21),
-      weekendProduct
-    ) shouldEqual Right(List(
-        LocalDate.of(2019, 5, 25),
-        LocalDate.of(2019, 5, 26),
-        LocalDate.of(2019, 6, 1),
-        LocalDate.of(2019, 6, 2),
-        LocalDate.of(2019, 6, 8),
-        LocalDate.of(2019, 6, 9),
-        LocalDate.of(2019, 6, 15),
-        LocalDate.of(2019, 6, 16)
-      ))
-
-    ActionCalculator.publicationDatesToBeStopped(
-      fromInclusive = LocalDate.of(2019, 5, 20),
-      toInclusive = LocalDate.of(2019, 6, 23),
-      weekendProduct
-    ) shouldEqual Right(List(
-        LocalDate.of(2019, 5, 25),
-        LocalDate.of(2019, 5, 26),
-        LocalDate.of(2019, 6, 1),
-        LocalDate.of(2019, 6, 2),
-        LocalDate.of(2019, 6, 8),
-        LocalDate.of(2019, 6, 9),
-        LocalDate.of(2019, 6, 15),
-        LocalDate.of(2019, 6, 16),
-        LocalDate.of(2019, 6, 22),
-        LocalDate.of(2019, 6, 23)
-      ))
-  }
-  //  it should "return an error for an unsupported product rate plan" in {
-  //    val unsupportedProductRatePlanKey =
-  //      ProductRatePlanKey(ProductType("not supported"), ProductRatePlanName("not supported"))
-  //
-  //    ActionCalculator.publicationDatesToBeStopped(
-  //      fromInclusive = LocalDate.of(2019, 5, 20),
-  //      toInclusive = LocalDate.of(2019, 6, 22),
-  //      productRatePlanKey = unsupportedProductRatePlanKey
-  //    ) should be('left)
-  //  }
 }

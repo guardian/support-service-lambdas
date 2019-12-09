@@ -3,8 +3,8 @@ package com.gu.salesforce.holiday_stops
 import java.time.LocalDate
 
 import com.gu.effects.{GetFromS3, RawEffects}
-import com.gu.holiday_stops.{ActionCalculator, Fixtures, ProductVariant}
-import com.gu.holiday_stops.subscription.Subscription
+import com.gu.holiday_stops.Fixtures
+import com.gu.holiday_stops.subscription.{Subscription, SubscriptionData}
 import com.gu.salesforce.{IdentityId, SFAuthConfig, SalesforceClient}
 import com.gu.salesforce.SalesforceReads._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
@@ -43,8 +43,8 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends FlatSpec with Matc
 
       fakeSubscription: Subscription = Fixtures.mkGuardianWeeklySubscription()
 
-      publicationDatesToBeStopped = ActionCalculator
-        .publicationDatesToBeStopped(startDate, endDate, ProductVariant(fakeSubscription.ratePlans))
+      publicationDatesToBeStopped = SubscriptionData(fakeSubscription)
+        .map(_.issueDataForPeriod(startDate, endDate))
         .toOption
         .get
 
@@ -102,7 +102,5 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends FlatSpec with Matc
             .filter(_.Actioned_Count__c.value == 1) should not be None
         }
     }
-
   }
-
 }

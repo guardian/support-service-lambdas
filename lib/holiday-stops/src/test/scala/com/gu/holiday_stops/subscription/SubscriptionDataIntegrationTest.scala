@@ -49,7 +49,6 @@ object SubscriptionDataIntegrationTest {
   private def getDatesToTest(startDate: LocalDate, expectedIssues: List[IssueData]) = {
     val (firstTestDate, maxDate) = getTestPeriod(startDate, expectedIssues)
 
-
     getDatesBetween(firstTestDate, maxDate)
   }
 
