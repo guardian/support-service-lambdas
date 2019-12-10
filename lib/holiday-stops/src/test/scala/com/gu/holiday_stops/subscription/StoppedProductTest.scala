@@ -19,7 +19,7 @@ class StoppedProductTest extends FlatSpec with Matchers with TypeCheckedTripleEq
     val subscription = Fixtures.subscriptionFromJson(resource)
     val stoppedDate = StoppedPublicationDate(LocalDate.parse(stoppedPublicationDate))
     val stoppedProduct = StoppedProduct(subscription, stoppedDate).right.value
-    stoppedProduct.credit.invoiceDate should ===(LocalDate.parse(expectedInvoiceDate))
+    stoppedProduct.invoiceDate should ===(LocalDate.parse(expectedInvoiceDate))
   }
 
   "credit.invoiceDate" should "be first day of billing period after 1 June 2020" in {

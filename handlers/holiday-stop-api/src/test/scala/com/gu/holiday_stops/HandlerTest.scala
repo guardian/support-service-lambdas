@@ -60,7 +60,7 @@ class HandlerTest extends FlatSpec with Matchers {
           ratePlanName = "GW Oct 18 - Quarterly - Domestic",
           ratePlanCharges =
             List(RatePlanCharge(
-              name = "GW",
+              name = "GW Oct 18 - Quarterly - Domestic",
               number = "C1",
               37.50,
               Some("Quarter"),

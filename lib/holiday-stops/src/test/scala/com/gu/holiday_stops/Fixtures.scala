@@ -24,6 +24,7 @@ object Fixtures extends Assertions {
   }
 
   def mkRatePlanCharge(
+    name: String,
     price: Double,
     billingPeriod: String,
     chargedThroughDate: Option[LocalDate] = Some(LocalDate.of(2019, 9, 2)),
@@ -33,7 +34,7 @@ object Fixtures extends Assertions {
     upToPeriods: Option[Int] = None,
     endDateCondition: Option[String] = Some("Subscription_End"),
   ) = RatePlanCharge(
-    name = "GW",
+    name = name,
     number = "C1",
     price,
     Some(billingPeriod),
@@ -72,6 +73,7 @@ object Fixtures extends Assertions {
           ratePlanName = "GW Oct 18 - Quarterly - Domestic",
           ratePlanCharges =
             List(mkRatePlanCharge(
+              "GW Oct 18 - Quarterly - Domestic",
               price,
               billingPeriod,
               chargedThroughDate,
@@ -126,8 +128,8 @@ object Fixtures extends Assertions {
           billingPeriod = None,
           effectiveStartDate = LocalDate.of(2019, 9, 7),
           chargedThroughDate = None,
-          HolidayStart__c = Some(LocalDate.of(2019, 9, 1)),
-          HolidayEnd__c = Some(LocalDate.of(2019, 9, 1)),
+          HolidayStart__c = Some(LocalDate.of(2019, 9, 6)),
+          HolidayEnd__c = Some(LocalDate.of(2019, 9, 6)),
           processedThroughDate = None,
           productRatePlanChargeId = "",
           specificBillingPeriod = None,
@@ -230,6 +232,7 @@ object Fixtures extends Assertions {
         productName = "Guardian Weekly - Domestic",
         ratePlanName = "GW Oct 18 - Quarterly - Domestic",
         ratePlanCharges = List(mkRatePlanCharge(
+          name = "GW Oct 18 - Quarterly - Domestic",
           price = 42.7,
           billingPeriod = "Quarter",
           chargedThroughDate = Some(LocalDate.of(2019, 9, 7))
