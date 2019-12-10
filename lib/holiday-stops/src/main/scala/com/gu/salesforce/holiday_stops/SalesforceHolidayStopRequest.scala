@@ -5,7 +5,7 @@ import java.time.format.DateTimeFormatter
 import java.util.UUID
 
 import ai.x.play.json.Jsonx
-import com.gu.holiday_stops.subscription.{HolidayStopCredit, IssueData, Subscription, SubscriptionData}
+import com.gu.holiday_stops.subscription.{IssueData, Subscription}
 import com.gu.salesforce.Contact
 import com.gu.salesforce.RecordsWrapperCaseClass
 import com.gu.salesforce.SalesforceClient.SalesforceErrorResponseBody
@@ -154,8 +154,8 @@ object SalesforceHolidayStopRequest extends Logging {
 
   case class CompositeTreeHolidayStopRequestsDetail(
     Stopped_Publication_Date__c: LocalDate,
-    Estimated_Price__c: Option[HolidayStopRequestsDetailChargePrice],
-    Expected_Invoice_Date__c: Option[HolidayStopRequestsDetailExpectedInvoiceDate],
+    Estimated_Price__c: HolidayStopRequestsDetailChargePrice,
+    Expected_Invoice_Date__c: HolidayStopRequestsDetailExpectedInvoiceDate,
     attributes: CompositeAttributes = CompositeAttributes(
       holidayStopRequestsDetailSfObjectRef,
       UUID.randomUUID().toString
@@ -208,8 +208,8 @@ object SalesforceHolidayStopRequest extends Logging {
             issuesData.map { issuesData =>
               CompositeTreeHolidayStopRequestsDetail(
                 issuesData.issueDate,
-                Estimated_Price__c = Some(HolidayStopRequestsDetailChargePrice(issuesData.credit)),
-                Expected_Invoice_Date__c = Some(HolidayStopRequestsDetailExpectedInvoiceDate(issuesData.nextBillingPeriodStartDate))
+                Estimated_Price__c = HolidayStopRequestsDetailChargePrice(issuesData.credit),
+                Expected_Invoice_Date__c = HolidayStopRequestsDetailExpectedInvoiceDate(issuesData.nextBillingPeriodStartDate)
               )
             }
           )
@@ -279,8 +279,8 @@ object SalesforceHolidayStopRequest extends Logging {
     case class AddHolidayStopRequestDetailBody (
       Holiday_Stop_Request__c: HolidayStopRequestId,
       Stopped_Publication_Date__c: LocalDate,
-      Estimated_Price__c: Option[HolidayStopRequestsDetailChargePrice],
-      Expected_Invoice_Date__c: Option[HolidayStopRequestsDetailExpectedInvoiceDate],
+      Estimated_Price__c: HolidayStopRequestsDetailChargePrice,
+      Expected_Invoice_Date__c: HolidayStopRequestsDetailExpectedInvoiceDate,
     )
 
     def buildBody(
@@ -314,8 +314,8 @@ object SalesforceHolidayStopRequest extends Logging {
             body = Json.toJson(AddHolidayStopRequestDetailBody(
               Holiday_Stop_Request__c = holidayStopRequestId,
               Stopped_Publication_Date__c = issueData.issueDate,
-              Estimated_Price__c = Some(HolidayStopRequestsDetailChargePrice(issueData.credit)),
-              Expected_Invoice_Date__c = Some(HolidayStopRequestsDetailExpectedInvoiceDate(issueData.nextBillingPeriodStartDate))
+              Estimated_Price__c = HolidayStopRequestsDetailChargePrice(issueData.credit),
+              Expected_Invoice_Date__c = HolidayStopRequestsDetailExpectedInvoiceDate(issueData.nextBillingPeriodStartDate)
             ))(Json.writes[AddHolidayStopRequestDetailBody])
           )}
 
