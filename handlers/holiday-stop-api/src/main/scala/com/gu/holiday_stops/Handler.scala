@@ -187,7 +187,7 @@ object Handler extends Logging {
       potentialHolidayStops = issuesData.map { issueData =>
         PotentialHolidayStop(
           issueData.issueDate,
-          Some(HolidayStopCredit(issueData.credit, issueData.nextBillingPeriodStartDate))
+          HolidayStopCredit(issueData.credit, issueData.nextBillingPeriodStartDate)
         )
       }
     } yield ApiGatewayResponse("200", PotentialHolidayStopsResponse(potentialHolidayStops))).apiResponse
