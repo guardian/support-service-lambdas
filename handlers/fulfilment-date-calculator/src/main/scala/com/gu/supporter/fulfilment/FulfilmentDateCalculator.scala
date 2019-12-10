@@ -27,11 +27,17 @@ class FulfilmentDateCalculator extends Lambda[Option[String], String] with LazyL
   override def handle(todayOverride: Option[String], context: Context) = {
     val today = inputToDate(todayOverride)
 
-    writeToBucket(GuardianWeekly, today, GuardianWeeklyFulfilmentDates(today).asJson.spaces2)
+    val datesForYesterdayThroughToAFortnight= (-1 to 14).map(_.toLong).map(today.plusDays)
 
-    writeToBucket(NewspaperHomeDelivery, today, HomeDeliveryFulfilmentDates(today).asJson.spaces2)
+    datesForYesterdayThroughToAFortnight.foreach { date =>
 
-    Right(s"Generated Guardian Weekly and Home Delivery dates for $today")
+      writeToBucket(GuardianWeekly, date, GuardianWeeklyFulfilmentDates(date).asJson.spaces2)
+
+      writeToBucket(NewspaperHomeDelivery, date, HomeDeliveryFulfilmentDates(date).asJson.spaces2)
+
+    }
+
+    Right(s"Generated Guardian Weekly and Home Delivery dates for $datesForYesterdayThroughToAFortnight")
   }
 
   private def inputToDate(maybeTodayOverride: Option[String]): LocalDate = {
