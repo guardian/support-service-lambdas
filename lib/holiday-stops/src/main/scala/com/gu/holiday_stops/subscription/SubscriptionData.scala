@@ -5,7 +5,7 @@ import java.time.LocalDate
 import com.gu.holiday_stops.{ZuoraHolidayError, ZuoraHolidayResponse}
 import cats.implicits._
 
-case class IssueData(issueDate: LocalDate, billingPeriod: BillingPeriod, credit: Double) {
+case class IssueData(issueDate: LocalDate, billDates: BillDates, credit: Double) {
   /**
    * This returns the date for the next bill after the stoppedPublicationDate.
    *
@@ -22,7 +22,7 @@ case class IssueData(issueDate: LocalDate, billingPeriod: BillingPeriod, credit:
    *         shows examples of the expected outcome.
    */
   def nextBillingPeriodStartDate: LocalDate = {
-    billingPeriod.endDate.plusDays(1)
+    billDates.endDate.plusDays(1)
   }
 }
 
@@ -57,7 +57,7 @@ object SubscriptionData {
       def issueDataForDate(issueDate: LocalDate): Either[ZuoraHolidayError, IssueData] = {
         for {
           ratePlanChargeData <- ratePlanChargeDataForDate(nonZeroRatePlanChargeDatas, issueDate)
-          billingPeriod <- ratePlanChargeData.billingSchedule.billingPeriodForDate(issueDate)
+          billingPeriod <- ratePlanChargeData.billingSchedule.billDatesCoveringDate(issueDate)
         } yield IssueData(issueDate, billingPeriod, ratePlanChargeData.issueCreditAmount)
       }
 

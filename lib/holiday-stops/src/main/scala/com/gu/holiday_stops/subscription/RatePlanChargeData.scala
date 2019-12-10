@@ -24,7 +24,7 @@ case class RatePlanChargeData(
         getIssuesForPeriod(
           firstIssueDate.`with`(TemporalAdjusters.next(issueDayOfWeek)),
           endDateInclusive,
-          billingSchedule.billingPeriodForDate(firstIssueDate) match {
+          billingSchedule.billDatesCoveringDate(firstIssueDate) match {
             case Left(_) => issueData
             case Right(billingPeriod) => IssueData(firstIssueDate, billingPeriod, issueCreditAmount) :: issueData
           }
