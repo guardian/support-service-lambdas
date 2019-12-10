@@ -97,7 +97,6 @@ Resources:
 
   FulfilmentDateCalculatorLambdaTriggerRule:
     Type: AWS::Events::Rule
-    Condition: IsProd
     Properties:
       Description: Trigger fulfilment-date-calculator lambda every day at 00:30 AM UTC
       ScheduleExpression: cron(30 0 * * ? *)
@@ -110,7 +109,6 @@ Resources:
 
   FulfilmentDateCalculatorLambdaTriggerPermission:
     Type: AWS::Lambda::Permission
-    Condition: IsProd
     Properties:
       Action: lambda:InvokeFunction
       FunctionName: !Sub ${FulfilmentDateCalculatorLambda.Arn}
