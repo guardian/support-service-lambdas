@@ -25,11 +25,9 @@ object GuardianWeeklyFulfilmentDates extends FulfilmentConstants(
     Map(
       issueDayOfWeek.getDisplayName(FULL, ENGLISH) -> FulfilmentDates(
         today,
-        acquisitionsStartDate(today),
         deliveryAddressChangeEffectiveDate(today),
         holidayStopFirstAvailableDate(today),
-        finalFulfilmentFileGenerationDate(today),
-        nextAffectablePublicationDateOnFrontCover(today)
+        finalFulfilmentFileGenerationDate(today)
       )
     )
 
@@ -57,11 +55,6 @@ object GuardianWeeklyFulfilmentDates extends FulfilmentConstants(
       (today `with` nextFriday `with` nextFriday `with` nextFriday)
     else
       (today `with` nextFriday `with` nextFriday)
-  }
-
-  def acquisitionsStartDate(today: LocalDate): LocalDate = {
-    val nextFriday = TemporalAdjusters.next(issueDayOfWeek)
-    today `with` nextFriday `with` nextFriday
   }
 
   // When was the fulfilment file generated for the nextAffectablePublicationDateOnFrontCover
