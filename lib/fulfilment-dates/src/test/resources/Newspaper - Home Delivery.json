@@ -1,0 +1,58 @@
+{
+  "Wednesday" : {
+    "today" : "2019-12-11",
+    "acquisitionsStartDate" : "2019-12-18",
+    "deliveryAddressChangeEffectiveDate" : "2019-12-18",
+    "holidayStopFirstAvailableDate" : "2019-12-18",
+    "finalFulfilmentFileGenerationDate" : "2019-12-16",
+    "nextAffectablePublicationDateOnFrontCover" : "2019-12-18"
+  },
+  "Monday" : {
+    "today" : "2019-12-11",
+    "acquisitionsStartDate" : "2019-12-16",
+    "deliveryAddressChangeEffectiveDate" : "2019-12-16",
+    "holidayStopFirstAvailableDate" : "2019-12-16",
+    "finalFulfilmentFileGenerationDate" : "2019-12-12",
+    "nextAffectablePublicationDateOnFrontCover" : "2019-12-16"
+  },
+  "Saturday" : {
+    "today" : "2019-12-11",
+    "acquisitionsStartDate" : "2019-12-14",
+    "deliveryAddressChangeEffectiveDate" : "2019-12-14",
+    "holidayStopFirstAvailableDate" : "2019-12-14",
+    "finalFulfilmentFileGenerationDate" : "2019-12-12",
+    "nextAffectablePublicationDateOnFrontCover" : "2019-12-14"
+  },
+  "Thursday" : {
+    "today" : "2019-12-11",
+    "acquisitionsStartDate" : "2019-12-19",
+    "deliveryAddressChangeEffectiveDate" : "2019-12-19",
+    "holidayStopFirstAvailableDate" : "2019-12-19",
+    "finalFulfilmentFileGenerationDate" : "2019-12-17",
+    "nextAffectablePublicationDateOnFrontCover" : "2019-12-19"
+  },
+  "Tuesday" : {
+    "today" : "2019-12-11",
+    "acquisitionsStartDate" : "2019-12-17",
+    "deliveryAddressChangeEffectiveDate" : "2019-12-17",
+    "holidayStopFirstAvailableDate" : "2019-12-17",
+    "finalFulfilmentFileGenerationDate" : "2019-12-15",
+    "nextAffectablePublicationDateOnFrontCover" : "2019-12-17"
+  },
+  "Friday" : {
+    "today" : "2019-12-11",
+    "acquisitionsStartDate" : "2019-12-20",
+    "deliveryAddressChangeEffectiveDate" : "2019-12-20",
+    "holidayStopFirstAvailableDate" : "2019-12-20",
+    "finalFulfilmentFileGenerationDate" : "2019-12-18",
+    "nextAffectablePublicationDateOnFrontCover" : "2019-12-20"
+  },
+  "Sunday" : {
+    "today" : "2019-12-11",
+    "acquisitionsStartDate" : "2019-12-15",
+    "deliveryAddressChangeEffectiveDate" : "2019-12-15",
+    "holidayStopFirstAvailableDate" : "2019-12-15",
+    "finalFulfilmentFileGenerationDate" : "2019-12-12",
+    "nextAffectablePublicationDateOnFrontCover" : "2019-12-15"
+  }
+}
