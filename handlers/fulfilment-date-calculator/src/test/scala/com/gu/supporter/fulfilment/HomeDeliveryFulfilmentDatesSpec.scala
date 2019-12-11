@@ -1,9 +1,14 @@
 package com.gu.supporter.fulfilment
 
-import com.gu.supporter.fulfilment.HomeDeliveryFulfilmentDates.apply
+import java.time.LocalDate
+
 import org.scalatest.{FlatSpec, Matchers}
 
 class HomeDeliveryFulfilmentDatesSpec extends FlatSpec with Matchers with DateSupport {
+
+  def apply(today: LocalDate) = HomeDeliveryFulfilmentDates.apply(today)(
+    BankHolidays(Nil) // TODO reuse sampleBankHolidays from LocalDateHelpersSpec with some test cases below
+  )
 
   "MONDAY HomeDeliveryFulfilmentDates" should "have correct deliveryAddressChangeEffectiveDate" in {
     apply( /* Tuesday   */ "2019-12-03")("Monday").deliveryAddressChangeEffectiveDate should equalDate("2019-12-09")

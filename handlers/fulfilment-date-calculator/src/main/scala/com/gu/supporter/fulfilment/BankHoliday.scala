@@ -1,8 +1,10 @@
 package com.gu.supporter.fulfilment
 
-import scalaj.http.{Http, HttpRequest}
+import java.time.LocalDate
+
 import io.circe.generic.auto._
 import io.circe.parser.decode
+import scalaj.http.Http
 
 case class GovUkBankHolidays(
   `england-and-wales`: BankHolidays,
@@ -11,17 +13,34 @@ case class GovUkBankHolidays(
 )
 
 case class Event(
-  title: String,
-  date: String,
-  notes: String,
-  bunting: Boolean
+  // title: String,
+  // notes: String,
+  // bunting: Boolean,
+  date: LocalDate
 )
 
-case class BankHolidays(events: List[Event], division: String)
+case class BankHolidays(events: List[Event] /*, division: String*/ )
 
 object GovUkBankHolidays {
+
+  val fallbackFileName = "UK_BANK_HOLIDAYS.json";
+
   def apply(): GovUkBankHolidays = {
-    val request: HttpRequest = Http("https://www.gov.uk/bank-holidays.json")
-    decode[GovUkBankHolidays](request.asString.body).getOrElse(throw new RuntimeException("Failed to retrieve Bank Holidays"))
+
+    val rawResponseBody = Http("https://www.gov.uk/bank-holidays.json").asString.body
+
+    decode[GovUkBankHolidays](rawResponseBody) match {
+      case Right(bankHols) =>
+        BucketHelpers.write(fallbackFileName, rawResponseBody)
+        bankHols
+      case Left(error) =>
+        //TODO log error and perhaps alert on serving multi-day stale bank hols file
+        decode[GovUkBankHolidays](
+          BucketHelpers.read(fallbackFileName)
+        ).getOrElse(
+            throw new RuntimeException("Couldn't even get the fallback bank holidays file ")
+          )
+    }
   }
+
 }
