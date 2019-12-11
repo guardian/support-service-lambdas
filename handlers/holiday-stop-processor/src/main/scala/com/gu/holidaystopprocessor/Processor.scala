@@ -76,9 +76,8 @@ object Processor {
   )(stop: HolidayStop): ZuoraHolidayResponse[ZuoraHolidayWriteResult] = {
     for {
       subscription <- getSubscription(stop.subscriptionName)
-      stoppedProduct <- StoppedProduct(subscription, StoppedPublicationDate(stop.stoppedPublicationDate))
+      holidayCredit <- StoppedProduct(subscription, StoppedPublicationDate(stop.stoppedPublicationDate))
       _ <- if (subscription.status == "Cancelled") Left(ZuoraHolidayError(s"Cannot process cancelled subscription because Zuora does not allow amending cancelled subs (Code: 58730020). Apply manual refund ASAP! $stop; ${subscription.subscriptionNumber};")) else Right(())
-      holidayCredit = stoppedProduct.credit
       maybeExtendedTerm = ExtendedTerm(holidayCredit.invoiceDate, subscription)
       holidayCreditUpdate <- HolidayCreditUpdate(config.holidayCreditProduct, subscription, stop.stoppedPublicationDate, maybeExtendedTerm, holidayCredit)
       _ <- if (subscription.hasHolidayStop(stop)) Right(()) else updateSubscription(subscription, holidayCreditUpdate)

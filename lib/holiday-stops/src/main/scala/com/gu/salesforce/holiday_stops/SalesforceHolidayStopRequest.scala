@@ -211,10 +211,10 @@ object SalesforceHolidayStopRequest extends Logging {
               CompositeTreeHolidayStopRequestsDetail(
                 stoppedPublicationDate,
                 Estimated_Price__c = maybeStoppedProduct
-                  .map(_.credit.amount)
+                  .map(_.amount)
                   .map(HolidayStopRequestsDetailChargePrice),
                 Expected_Invoice_Date__c = maybeStoppedProduct
-                  .map(_.credit.invoiceDate)
+                  .map(_.invoiceDate)
                   .map(HolidayStopRequestsDetailExpectedInvoiceDate)
               )
             }
@@ -322,10 +322,10 @@ object SalesforceHolidayStopRequest extends Logging {
               Holiday_Stop_Request__c = holidayStopRequestId,
               Stopped_Publication_Date__c = stoppedPublicationDate,
               Estimated_Price__c = maybeStoppedProduct
-                .map(_.credit.amount)
+                .map(_.amount)
                 .map(HolidayStopRequestsDetailChargePrice),
               Expected_Invoice_Date__c = maybeStoppedProduct
-                .map(_.credit.invoiceDate)
+                .map(_.invoiceDate)
                 .map(HolidayStopRequestsDetailExpectedInvoiceDate)
             ))(Json.writes[AddHolidayStopRequestDetailBody])
           )}
