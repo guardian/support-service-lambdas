@@ -1,6 +1,5 @@
 package com.gu.supporter.fulfilment
 
-import java.time.LocalDate
 import org.scalatest.{FlatSpec, Matchers}
 
 class GuardianWeeklyFulfilmentDatesSpec extends FlatSpec with Matchers with DateSupport {

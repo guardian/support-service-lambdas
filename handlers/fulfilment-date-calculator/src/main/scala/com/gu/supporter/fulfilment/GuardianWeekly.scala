@@ -4,7 +4,6 @@ import java.time.{DayOfWeek, LocalDate}
 import java.time.temporal.ChronoUnit.DAYS
 import java.time.temporal.TemporalAdjusters
 
-
 /**
  * @param issueDayOfWeek                Weekday corresponding to publication issue date printed on the paper, for example, Friday for GW
  * @param fulfilmentGenerationDayOfWeek Weekday corresponding to when fulfilment-lambdas generate files

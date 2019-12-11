@@ -25,9 +25,12 @@ case class FulfilmentDates(
 class FulfilmentDateCalculator extends Lambda[Option[String], String] with LazyLogging {
   override def handle(todayOverride: Option[String], context: Context) = {
     val today = inputToDate(todayOverride)
-    val fulfilmentDates = GuardianWeeklyFulfilmentDates(today)
-    writeToBucket("WEEKLY", today, fulfilmentDates.asJson.spaces2)
-    Right(s"Generated Guardian Weekly dates for $today")
+
+    writeToBucket("WEEKLY", today, GuardianWeeklyFulfilmentDates(today).asJson.spaces2)
+
+    writeToBucket("HomeDelivery", today, HomeDeliveryFulfilmentDates(today).asJson.spaces2)
+
+    Right(s"Generated Guardian Weekly and Home Delivery dates for $today")
   }
 
   private def inputToDate(maybeTodayOverride: Option[String]): LocalDate = {
