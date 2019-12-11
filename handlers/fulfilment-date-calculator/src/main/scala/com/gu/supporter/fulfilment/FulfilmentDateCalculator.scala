@@ -16,7 +16,7 @@ import io.circe.syntax._
 
 case class FulfilmentDates(
   today: LocalDate,
-  acquisitionsStartDate: LocalDate,
+  // acquisitionsStartDate: LocalDate, FIXME reinstate when we officially support this feature
   deliveryAddressChangeEffectiveDate: LocalDate,
   holidayStopFirstAvailableDate: LocalDate,
   finalFulfilmentFileGenerationDate: LocalDate,

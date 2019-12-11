@@ -14,7 +14,6 @@ object HomeDeliveryFulfilmentDates {
     List(MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY).map(targetDayOfWeek =>
       targetDayOfWeek.getDisplayName(FULL, ENGLISH) -> FulfilmentDates(
         today,
-        acquisitionsStartDate = nextAffectablePublicationDateOnFrontCover(targetDayOfWeek, today), //TODO
         deliveryAddressChangeEffectiveDate(targetDayOfWeek, today),
         holidayStopFirstAvailableDate = nextAffectablePublicationDateOnFrontCover(targetDayOfWeek, today), //TODO
         finalFulfilmentFileGenerationDate(targetDayOfWeek, today),

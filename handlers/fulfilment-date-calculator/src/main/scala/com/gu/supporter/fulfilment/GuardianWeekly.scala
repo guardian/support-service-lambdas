@@ -22,7 +22,6 @@ object GuardianWeeklyFulfilmentDates extends FulfilmentConstants(
   def apply(today: LocalDate): FulfilmentDates =
     FulfilmentDates(
       today,
-      acquisitionsStartDate(today),
       deliveryAddressChangeEffectiveDate(today),
       holidayStopFirstAvailableDate(today),
       finalFulfilmentFileGenerationDate(today),
@@ -43,7 +42,6 @@ object GuardianWeeklyFulfilmentDates extends FulfilmentConstants(
   def deliveryAddressChangeEffectiveDate(today: LocalDate): LocalDate =
     nextAffectablePublicationDateOnFrontCover(today)
 
-  // TODO: Take into account bank holidays
   def nextAffectablePublicationDateOnFrontCover(today: LocalDate): LocalDate = {
     val nextFriday = TemporalAdjusters.next(issueDayOfWeek)
 
@@ -55,10 +53,11 @@ object GuardianWeeklyFulfilmentDates extends FulfilmentConstants(
       (today `with` nextFriday `with` nextFriday)
   }
 
-  def acquisitionsStartDate(today: LocalDate): LocalDate = {
-    val nextFriday = TemporalAdjusters.next(issueDayOfWeek)
-    today `with` nextFriday `with` nextFriday
-  }
+//  FIXME reinstate when we officially support this feature
+//  def acquisitionsStartDate(today: LocalDate): LocalDate = {
+//    val nextFriday = TemporalAdjusters.next(issueDayOfWeek)
+//    today `with` nextFriday `with` nextFriday
+//  }
 
   // When was the fulfilment file generated for the nextAffectablePublicationDateOnFrontCover
   def finalFulfilmentFileGenerationDate(today: LocalDate): LocalDate = {
