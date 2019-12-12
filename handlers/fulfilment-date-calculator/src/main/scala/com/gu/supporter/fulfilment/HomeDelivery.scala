@@ -32,7 +32,7 @@ object HomeDeliveryFulfilmentDates {
   ): LocalDate = {
     val nextTargetDayOfWeek = today `with` TemporalAdjusters.next(targetDayOfWeek)
     val distributorPickupDay: LocalDate = (nextTargetDayOfWeek findPreviousWorkingDay)
-    distributorPickupDay minusDays 1 //TODO double check this shouldn't be two days
+    distributorPickupDay minusDays 0 // distributor picks up files generated early-AM that SAME morning
   }
 
   def finalFulfilmentFileGenerationDate(
