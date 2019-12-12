@@ -5,19 +5,12 @@ import java.time.format.DateTimeFormatter
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.s3.model.PutObjectResult
-import com.gu.supporter.fulfilment.ZuoraProductTypes.{GuardianWeekly, NewspaperHomeDelivery, ZuoraProductType}
+import com.gu.fulfilmentdates.ZuoraProductTypes.{GuardianWeekly, NewspaperHomeDelivery, ZuoraProductType}
 import com.typesafe.scalalogging.LazyLogging
 import io.circe.generic.auto._
 import io.circe.syntax._
 import io.github.mkotsur.aws.handler.Lambda
 import io.github.mkotsur.aws.handler.Lambda._
-
-case class FulfilmentDates(
-  today: LocalDate,
-  deliveryAddressChangeEffectiveDate: LocalDate,
-  holidayStopFirstAvailableDate: LocalDate,
-  finalFulfilmentFileGenerationDate: LocalDate
-)
 
 class FulfilmentDateCalculator extends Lambda[Option[String], String] with LazyLogging {
 

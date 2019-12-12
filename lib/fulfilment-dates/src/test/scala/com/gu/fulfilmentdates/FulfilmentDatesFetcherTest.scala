@@ -36,59 +36,9 @@ class FulfilmentDatesFetcherTest extends FlatSpec {
             Map(
               "Monday" -> FulfilmentDates(
                 today = LocalDate.parse("2019-12-11"),
-                acquisitionsStartDate = LocalDate.parse("2019-12-16"),
                 deliveryAddressChangeEffectiveDate = LocalDate.parse("2019-12-16"),
                 holidayStopFirstAvailableDate = LocalDate.parse("2019-12-16"),
                 finalFulfilmentFileGenerationDate = LocalDate.parse("2019-12-12"),
-                nextAffectablePublicationDateOnFrontCover = LocalDate.parse("2019-12-16")
-              ),
-              "Tuesday" -> FulfilmentDates(
-                today = LocalDate.parse("2019-12-11"),
-                acquisitionsStartDate = LocalDate.parse("2019-12-17"),
-                deliveryAddressChangeEffectiveDate = LocalDate.parse("2019-12-17"),
-                holidayStopFirstAvailableDate = LocalDate.parse("2019-12-17"),
-                finalFulfilmentFileGenerationDate = LocalDate.parse("2019-12-15"),
-                nextAffectablePublicationDateOnFrontCover = LocalDate.parse("2019-12-17")
-              ),
-              "Wednesday" -> FulfilmentDates(
-                today = LocalDate.parse("2019-12-11"),
-                acquisitionsStartDate = LocalDate.parse("2019-12-18"),
-                deliveryAddressChangeEffectiveDate = LocalDate.parse("2019-12-18"),
-                holidayStopFirstAvailableDate = LocalDate.parse("2019-12-18"),
-                finalFulfilmentFileGenerationDate = LocalDate.parse("2019-12-16"),
-                nextAffectablePublicationDateOnFrontCover = LocalDate.parse("2019-12-18")
-              ),
-              "Thursday" -> FulfilmentDates(
-                today = LocalDate.parse("2019-12-11"),
-                acquisitionsStartDate = LocalDate.parse("2019-12-19"),
-                deliveryAddressChangeEffectiveDate = LocalDate.parse("2019-12-19"),
-                holidayStopFirstAvailableDate = LocalDate.parse("2019-12-19"),
-                finalFulfilmentFileGenerationDate = LocalDate.parse("2019-12-17"),
-                nextAffectablePublicationDateOnFrontCover = LocalDate.parse("2019-12-19")
-              ),
-              "Friday" -> FulfilmentDates(
-                today = LocalDate.parse("2019-12-11"),
-                acquisitionsStartDate = LocalDate.parse("2019-12-20"),
-                deliveryAddressChangeEffectiveDate = LocalDate.parse("2019-12-20"),
-                holidayStopFirstAvailableDate = LocalDate.parse("2019-12-20"),
-                finalFulfilmentFileGenerationDate = LocalDate.parse("2019-12-18"),
-                nextAffectablePublicationDateOnFrontCover = LocalDate.parse("2019-12-20")
-              ),
-              "Saturday" -> FulfilmentDates(
-                today = LocalDate.parse("2019-12-11"),
-                acquisitionsStartDate = LocalDate.parse("2019-12-14"),
-                deliveryAddressChangeEffectiveDate = LocalDate.parse("2019-12-14"),
-                holidayStopFirstAvailableDate = LocalDate.parse("2019-12-14"),
-                finalFulfilmentFileGenerationDate = LocalDate.parse("2019-12-12"),
-                nextAffectablePublicationDateOnFrontCover = LocalDate.parse("2019-12-14")
-              ),
-              "Sunday" -> FulfilmentDates(
-                today = LocalDate.parse("2019-12-11"),
-                acquisitionsStartDate = LocalDate.parse("2019-12-15"),
-                deliveryAddressChangeEffectiveDate = LocalDate.parse("2019-12-15"),
-                holidayStopFirstAvailableDate = LocalDate.parse("2019-12-15"),
-                finalFulfilmentFileGenerationDate = LocalDate.parse("2019-12-12"),
-                nextAffectablePublicationDateOnFrontCover = LocalDate.parse("2019-12-15")
               )
             )
           )
