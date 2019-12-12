@@ -1,9 +1,10 @@
 package com.gu.supporter.fulfilment
 
+import java.time.format.TextStyle.FULL
 import java.time.{DayOfWeek, LocalDate}
 import java.time.temporal.ChronoUnit.DAYS
 import java.time.temporal.TemporalAdjusters
-
+import java.util.Locale.ENGLISH
 
 /**
  * @param issueDayOfWeek                Weekday corresponding to publication issue date printed on the paper, for example, Friday for GW
@@ -20,14 +21,16 @@ object GuardianWeeklyFulfilmentDates extends FulfilmentConstants(
   issueDayOfWeek = DayOfWeek.FRIDAY,
   fulfilmentGenerationDayOfWeek = DayOfWeek.THURSDAY,
 ) {
-  def apply(today: LocalDate): FulfilmentDates =
-    FulfilmentDates(
-      today,
-      acquisitionsStartDate(today),
-      deliveryAddressChangeEffectiveDate(today),
-      holidayStopFirstAvailableDate(today),
-      finalFulfilmentFileGenerationDate(today),
-      nextAffectablePublicationDateOnFrontCover(today)
+  def apply(today: LocalDate): Map[String, FulfilmentDates] =
+    Map(
+      issueDayOfWeek.getDisplayName(FULL, ENGLISH) -> FulfilmentDates(
+        today,
+        acquisitionsStartDate(today),
+        deliveryAddressChangeEffectiveDate(today),
+        holidayStopFirstAvailableDate(today),
+        finalFulfilmentFileGenerationDate(today),
+        nextAffectablePublicationDateOnFrontCover(today)
+      )
     )
 
   val minDaysBetweenTodayAndFirstAvailableDate = 4

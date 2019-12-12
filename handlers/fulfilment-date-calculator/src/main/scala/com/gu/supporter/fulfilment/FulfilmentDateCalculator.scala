@@ -7,6 +7,7 @@ import java.time.format.DateTimeFormatter
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.s3.model.{CannedAccessControlList, ObjectMetadata, PutObjectRequest, PutObjectResult}
+import com.gu.supporter.fulfilment.ZuoraProductTypes.{GuardianWeekly, NewspaperHomeDelivery, ZuoraProductType}
 import com.typesafe.scalalogging.LazyLogging
 import io.github.mkotsur.aws.handler.Lambda
 import io.github.mkotsur.aws.handler.Lambda._
@@ -25,9 +26,18 @@ case class FulfilmentDates(
 class FulfilmentDateCalculator extends Lambda[Option[String], String] with LazyLogging {
   override def handle(todayOverride: Option[String], context: Context) = {
     val today = inputToDate(todayOverride)
-    val fulfilmentDates = GuardianWeeklyFulfilmentDates(today)
-    writeToBucket("WEEKLY", today, fulfilmentDates.asJson.spaces2)
-    Right(s"Generated Guardian Weekly dates for $today")
+
+    val datesForYesterdayThroughToAFortnight= (-1 to 14).map(_.toLong).map(today.plusDays)
+
+    datesForYesterdayThroughToAFortnight.foreach { date =>
+
+      writeToBucket(GuardianWeekly, date, GuardianWeeklyFulfilmentDates(date).asJson.spaces2)
+
+      writeToBucket(NewspaperHomeDelivery, date, HomeDeliveryFulfilmentDates(date).asJson.spaces2)
+
+    }
+
+    Right(s"Generated Guardian Weekly and Home Delivery dates for $datesForYesterdayThroughToAFortnight")
   }
 
   private def inputToDate(maybeTodayOverride: Option[String]): LocalDate = {
@@ -37,9 +47,9 @@ class FulfilmentDateCalculator extends Lambda[Option[String], String] with LazyL
     }
   }
 
-  private def writeToBucket(product: String, date: LocalDate, content: String): PutObjectResult = {
+  private def writeToBucket(product: ZuoraProductType, date: LocalDate, content: String): PutObjectResult = {
     val today = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-    val filename = s"${product}/${today}_${product}.json"
+    val filename = s"${product.name}/${today}_${product.name}.json"
     val s3Client = AmazonS3Client.builder.build
     val stage = System.getenv("Stage").toLowerCase
     val requestWithAcl = putRequestWithAcl(s"fulfilment-date-calculator-$stage", filename, content)
