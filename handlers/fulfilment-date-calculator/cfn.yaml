@@ -37,6 +37,8 @@ Resources:
         Rules:
           - ExpirationInDays: 30
             Status: Enabled
+      VersioningConfiguration:
+        Status: Enabled
 
   FulfilmentDateCalculatorLambdaRole:
     Type: AWS::IAM::Role
