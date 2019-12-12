@@ -9,16 +9,20 @@ import java.util.Locale.ENGLISH
 import com.gu.fulfilmentdates.FulfilmentDates
 import com.gu.supporter.fulfilment.LocalDateHelpers.LocalDateWithWorkingDaySupport
 
+import scala.collection.immutable.ListMap
+
 object HomeDeliveryFulfilmentDates {
 
-  def apply(today: LocalDate)(implicit bankHolidays: BankHolidays): Map[String, FulfilmentDates] =
-    List(MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY).map(targetDayOfWeek =>
-      targetDayOfWeek.getDisplayName(FULL, ENGLISH) -> FulfilmentDates(
-        today,
-        deliveryAddressChangeEffectiveDate(targetDayOfWeek, today),
-        holidayStopFirstAvailableDate(targetDayOfWeek, today),
-        finalFulfilmentFileGenerationDate(targetDayOfWeek, today)
-      )).toMap
+  def apply(today: LocalDate)(implicit bankHolidays: BankHolidays): ListMap[String, FulfilmentDates] =
+    ListMap( // to preserve insertion order, so the file is easier to read
+      List(MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY).map(targetDayOfWeek =>
+        targetDayOfWeek.getDisplayName(FULL, ENGLISH) -> FulfilmentDates(
+          today,
+          deliveryAddressChangeEffectiveDate(targetDayOfWeek, today),
+          holidayStopFirstAvailableDate(targetDayOfWeek, today),
+          finalFulfilmentFileGenerationDate(targetDayOfWeek, today)
+        )):_*
+    )
 
   private def getFulfilmentFileGenerationDateForNextTargetDayOfWeek(
     targetDayOfWeek: DayOfWeek,
@@ -29,7 +33,7 @@ object HomeDeliveryFulfilmentDates {
   ): LocalDate = {
     val nextTargetDayOfWeek = today `with` TemporalAdjusters.next(targetDayOfWeek)
     val distributorPickupDay: LocalDate = (nextTargetDayOfWeek findPreviousWorkingDay)
-    distributorPickupDay minusDays 1 //TODO double check this shouldn't be two days
+    distributorPickupDay minusDays 0 // distributor picks up files generated early-AM that SAME morning
   }
 
   def finalFulfilmentFileGenerationDate(
