@@ -11,23 +11,23 @@ class SubscriptionDataGuardianWeeklyIntegrationTest extends FlatSpec {
 
   "SubscriptionDataIntegrationTest" should "calculate issue data correctly for GW 6 for 6" in {
     val startDate = LocalDate.parse("2019-10-04")
-    val sixForSixBillingPeriod = BillingPeriod( startDate, startDate.plusWeeks(6).minusDays(1))
-    val normalBillingPeriod = BillingPeriod(
+    val sixForSixBillDates = BillDates( startDate, startDate.plusWeeks(6).minusDays(1))
+    val normalBillingPeriod = BillDates(
       startDate.plusWeeks(6),
       startDate.plusWeeks(6).plusMonths(3).minusDays(1)
     )
-    val normalBillingPeriod2 = BillingPeriod(
+    val normalBillDates2 = BillDates(
       startDate.plusWeeks(6).plusMonths(3),
       startDate.plusWeeks(6).plusMonths(6).minusDays(1)
     )
 
     val expectedIssueData = List(
-      IssueData(startDate, sixForSixBillingPeriod, -1),
-      IssueData(startDate.plusWeeks(1), sixForSixBillingPeriod, -1),
-      IssueData(startDate.plusWeeks(2), sixForSixBillingPeriod, -1),
-      IssueData(startDate.plusWeeks(3), sixForSixBillingPeriod, -1),
-      IssueData(startDate.plusWeeks(4), sixForSixBillingPeriod, -1),
-      IssueData(startDate.plusWeeks(5), sixForSixBillingPeriod, -1),
+      IssueData(startDate, sixForSixBillDates, -1),
+      IssueData(startDate.plusWeeks(1), sixForSixBillDates, -1),
+      IssueData(startDate.plusWeeks(2), sixForSixBillDates, -1),
+      IssueData(startDate.plusWeeks(3), sixForSixBillDates, -1),
+      IssueData(startDate.plusWeeks(4), sixForSixBillDates, -1),
+      IssueData(startDate.plusWeeks(5), sixForSixBillDates, -1),
       IssueData(startDate.plusWeeks(6), normalBillingPeriod, -2.89),
       IssueData(startDate.plusWeeks(7), normalBillingPeriod, -2.89),
       IssueData(startDate.plusWeeks(8), normalBillingPeriod, -2.89),
@@ -42,7 +42,7 @@ class SubscriptionDataGuardianWeeklyIntegrationTest extends FlatSpec {
       IssueData(startDate.plusWeeks(17), normalBillingPeriod, -2.89),
       IssueData(startDate.plusWeeks(18), normalBillingPeriod, -2.89),
       IssueData(startDate.plusWeeks(19), normalBillingPeriod, -2.89),
-      IssueData(startDate.plusWeeks(20), normalBillingPeriod2, -2.89),
+      IssueData(startDate.plusWeeks(20), normalBillDates2, -2.89),
     )
 
     testSubscriptonDataIssueGeneration("GuardianWeeklyWith6For6.json", startDate, expectedIssueData)

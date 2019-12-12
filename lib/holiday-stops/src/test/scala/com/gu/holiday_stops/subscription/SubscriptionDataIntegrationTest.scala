@@ -26,6 +26,9 @@ object SubscriptionDataIntegrationTest {
           }
       }
     }
+
+    val (startTestDate, endTestDate) = getTestPeriod(startDate, expectedIssueData)
+    subscriptionData.issueDataForPeriod(startTestDate, endTestDate) should equal(expectedIssueData)
   }
 
   private def getMaxDate(dates: List[LocalDate]): LocalDate = {
@@ -44,9 +47,12 @@ object SubscriptionDataIntegrationTest {
   }
 
   private def getDatesToTest(startDate: LocalDate, expectedIssues: List[IssueData]) = {
-    val maxDate = getMaxDate(expectedIssues.map(_.issueDate))
+    val (firstTestDate, maxDate) = getTestPeriod(startDate, expectedIssues)
 
-    getDatesBetween(startDate.minusDays(1), maxDate)
+    getDatesBetween(firstTestDate, maxDate)
   }
 
+  private def getTestPeriod(startDate: LocalDate, expectedIssues: List[IssueData]): (LocalDate, LocalDate) = {
+    (startDate.minusDays(1), getMaxDate(expectedIssues.map(_.issueDate)))
+  }
 }

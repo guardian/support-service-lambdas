@@ -8,7 +8,7 @@ import play.api.libs.json._
 
 case class PotentialHolidayStop(
   publicationDate: LocalDate,
-  expectedCredit: Option[HolidayStopCredit]
+  expectedCredit: HolidayStopCredit
 )
 
 object PotentialHolidayStop {
@@ -18,21 +18,17 @@ object PotentialHolidayStop {
 
     override def reads(json: JsValue): JsResult[PotentialHolidayStop] = for {
       publicationDate <- (json \ "publicationDate").validate[LocalDate]
-      optAmount <- (json \ "credit").validateOpt[Double]
-      optInvoiceDate <- (json \ "invoiceDate").validateOpt[LocalDate]
+      amount <- (json \ "credit").validate[Double]
+      invoiceDate <- (json \ "invoiceDate").validate[LocalDate]
     } yield {
-      val expectedCredit = for {
-        amount <- optAmount
-        invoiceDate <- optInvoiceDate
-      } yield HolidayStopCredit(amount, invoiceDate)
-      PotentialHolidayStop(publicationDate, expectedCredit)
+      PotentialHolidayStop(publicationDate, HolidayStopCredit(amount, invoiceDate))
     }
 
     override def writes(stop: PotentialHolidayStop): JsValue =
       Json.obj(
         "publicationDate" -> stop.publicationDate,
-        "credit" -> stop.expectedCredit.map(_.amount),
-        "invoiceDate" -> stop.expectedCredit.map(_.invoiceDate)
+        "credit" -> stop.expectedCredit.amount,
+        "invoiceDate" -> stop.expectedCredit.invoiceDate
       )
   }
 }

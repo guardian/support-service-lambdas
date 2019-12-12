@@ -24,11 +24,11 @@ class SubscriptionDataDeliveryEveryDayPlusIntegrationTest extends FlatSpec {
     val firstFriday = startDate.`with`(TemporalAdjusters.nextOrSame(DayOfWeek.FRIDAY))
     val firstSaturday = startDate.`with`(TemporalAdjusters.nextOrSame(DayOfWeek.SATURDAY))
 
-    val billingPeriod1 = BillingPeriod(
+    val billingPeriod1 = BillDates(
       startDate,
       startDate.plusMonths(1).minusDays(1)
     )
-    val billingPeriod2 = BillingPeriod(
+    val billingPeriod2 = BillDates(
       startDate.plusMonths(1),
       startDate.plusMonths(2).minusDays(1)
     )
