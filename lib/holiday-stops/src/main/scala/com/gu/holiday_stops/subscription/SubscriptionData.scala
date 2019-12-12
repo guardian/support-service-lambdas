@@ -5,12 +5,31 @@ import java.time.LocalDate
 import com.gu.holiday_stops.{ZuoraHolidayError, ZuoraHolidayResponse}
 import cats.implicits._
 
-case class IssueData(issueDate: LocalDate, billingPeriod: BillingPeriod, credit: Double)
+case class IssueData(issueDate: LocalDate, billDates: BillDates, credit: Double) {
+  /**
+   * This returns the date for the next bill after the stoppedPublicationDate.
+   *
+   * This currently calculates the current billing period and uses the following day. This is an over simplification
+   * but works for current use cases
+   *
+   * For more details about the calculation of the current billing period see:
+   *
+   * [[com.gu.holiday_stops.subscription.RatePlanChargeBillingSchedule]]
+   *
+   * @return Date of the first day of the billing period
+   *         following this <code>stoppedPublicationDate</code>.
+   *         [[com.gu.holiday_stops.subscription.StoppedProductTest]]
+   *         shows examples of the expected outcome.
+   */
+  def nextBillingPeriodStartDate: LocalDate = {
+    billDates.endDate.plusDays(1)
+  }
+}
 
 trait SubscriptionData {
   def issueDataForDate(issueDate: LocalDate): Either[ZuoraHolidayError, IssueData]
+  def issueDataForPeriod(startDateInclusive: LocalDate, endDateInclusive: LocalDate): List[IssueData]
 }
-
 object SubscriptionData {
   def apply(subscription: Subscription): Either[ZuoraHolidayError, SubscriptionData] = {
     val supportedRatePlanCharges: List[(RatePlanCharge, SupportedRatePlanCharge)] = for {
@@ -30,12 +49,22 @@ object SubscriptionData {
       nonZeroRatePlanChargeDatas = ratePlanChargeDatas.filter { ratePlanChargeData =>
         ratePlanChargeData.issueCreditAmount != 0
       }
-    } yield new SubscriptionData {
+    } yield createSubscriptionData(nonZeroRatePlanChargeDatas)
+  }
+
+  private def createSubscriptionData(nonZeroRatePlanChargeDatas: List[RatePlanChargeData]) = {
+    new SubscriptionData {
       def issueDataForDate(issueDate: LocalDate): Either[ZuoraHolidayError, IssueData] = {
         for {
           ratePlanChargeData <- ratePlanChargeDataForDate(nonZeroRatePlanChargeDatas, issueDate)
-          billingPeriod <- ratePlanChargeData.billingSchedule.billingPeriodForDate(issueDate)
+          billingPeriod <- ratePlanChargeData.billingSchedule.billDatesCoveringDate(issueDate)
         } yield IssueData(issueDate, billingPeriod, ratePlanChargeData.issueCreditAmount)
+      }
+
+      def issueDataForPeriod(startDateInclusive: LocalDate, endDateInclusive: LocalDate): List[IssueData] = {
+        nonZeroRatePlanChargeDatas
+          .flatMap(_.getIssuesForPeriod(startDateInclusive, endDateInclusive))
+          .sortBy(_.issueDate)(Ordering.fromLessThan(_.isBefore(_)))
       }
     }
   }

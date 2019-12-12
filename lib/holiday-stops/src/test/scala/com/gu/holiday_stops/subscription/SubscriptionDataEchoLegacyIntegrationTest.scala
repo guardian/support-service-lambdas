@@ -19,26 +19,26 @@ class SubscriptionDataEchoLegacyIntegrationTest extends FlatSpec {
     val firstFridayIssue = startDate.`with`(TemporalAdjusters.next(DayOfWeek.FRIDAY))
     val firstSaturdayIssue = startDate.`with`(TemporalAdjusters.next(DayOfWeek.SATURDAY))
 
-    val normalBillingPeriod = BillingPeriod(
+    val normalBillDates = BillDates(
       startDate,
       startDate.plusMonths(1).minusDays(1)
     )
-    val normalBillingPeriod2 = BillingPeriod(
+    val normalBillDates2 = BillDates(
       startDate.plusMonths(1),
       startDate.plusMonths(2).minusDays(1)
     )
 
     val expectedIssueData = List(
-      IssueData(firstFridayIssue, normalBillingPeriod, -1.85),
-      IssueData(firstSaturdayIssue, normalBillingPeriod, -2.82),
-      IssueData(firstFridayIssue.plusWeeks(1), normalBillingPeriod, -1.85),
-      IssueData(firstSaturdayIssue.plusWeeks(1), normalBillingPeriod, -2.82),
-      IssueData(firstFridayIssue.plusWeeks(2), normalBillingPeriod, -1.85),
-      IssueData(firstSaturdayIssue.plusWeeks(2), normalBillingPeriod, -2.82),
-      IssueData(firstFridayIssue.plusWeeks(3), normalBillingPeriod, -1.85),
-      IssueData(firstSaturdayIssue.plusWeeks(3), normalBillingPeriod, -2.82),
-      IssueData(firstFridayIssue.plusWeeks(4), normalBillingPeriod2, -1.85),
-      IssueData(firstSaturdayIssue.plusWeeks(4), normalBillingPeriod2, -2.82),
+      IssueData(firstFridayIssue, normalBillDates, -1.85),
+      IssueData(firstSaturdayIssue, normalBillDates, -2.82),
+      IssueData(firstFridayIssue.plusWeeks(1), normalBillDates, -1.85),
+      IssueData(firstSaturdayIssue.plusWeeks(1), normalBillDates, -2.82),
+      IssueData(firstFridayIssue.plusWeeks(2), normalBillDates, -1.85),
+      IssueData(firstSaturdayIssue.plusWeeks(2), normalBillDates, -2.82),
+      IssueData(firstFridayIssue.plusWeeks(3), normalBillDates, -1.85),
+      IssueData(firstSaturdayIssue.plusWeeks(3), normalBillDates, -2.82),
+      IssueData(firstFridayIssue.plusWeeks(4), normalBillDates2, -1.85),
+      IssueData(firstSaturdayIssue.plusWeeks(4), normalBillDates2, -2.82),
     )
 
     testSubscriptonDataIssueGeneration("EchoLegacySubscription.json", startDate, expectedIssueData)

@@ -24,7 +24,9 @@ class HolidayCreditUpdateTest extends FlatSpec with Matchers with EitherValues {
       billingPeriod = "Quarter",
       effectiveStartDate = effectiveStartDate
     )
-    val holidayCredit = StoppedProduct(subscription, stoppedPublicationDate).right.value
+    val subscriptionData = SubscriptionData(subscription).right.value
+    val issueData = subscriptionData.issueDataForDate(stoppedPublicationDate.value).right.value
+    val holidayCredit = HolidayStopCredit(issueData.credit, issueData.nextBillingPeriodStartDate)
     val maybeExtendedTerm = ExtendedTerm(holidayCredit.invoiceDate, subscription)
 
     val update = HolidayCreditUpdate(
@@ -64,7 +66,9 @@ class HolidayCreditUpdateTest extends FlatSpec with Matchers with EitherValues {
       billingPeriod = "Quarter",
       effectiveStartDate = effectiveStartDate
     )
-    val holidayCredit = StoppedProduct(subscription, stoppedPublicationDate).right.value
+    val subscriptionData = SubscriptionData(subscription).right.value
+    val issueData = subscriptionData.issueDataForDate(stoppedPublicationDate.value).right.value
+    val holidayCredit = HolidayStopCredit(issueData.credit, issueData.nextBillingPeriodStartDate)
     val maybeExtendedTerm = ExtendedTerm(holidayCredit.invoiceDate, subscription)
     val update = HolidayCreditUpdate(
       Fixtures.config.holidayCreditProduct,
@@ -102,7 +106,9 @@ class HolidayCreditUpdateTest extends FlatSpec with Matchers with EitherValues {
       chargedThroughDate = Some(LocalDate.of(2020, 8, 2)),
       effectiveStartDate = effectiveStartDate
     )
-    val holidayCredit = StoppedProduct(subscription, stoppedPublicationDate).right.value
+    val subscriptionData = SubscriptionData(subscription).right.value
+    val issueData = subscriptionData.issueDataForDate(stoppedPublicationDate.value).right.value
+    val holidayCredit = HolidayStopCredit(issueData.credit, issueData.nextBillingPeriodStartDate)
     val maybeExtendedTerm = ExtendedTerm(holidayCredit.invoiceDate, subscription)
     val update = HolidayCreditUpdate(
       Fixtures.config.holidayCreditProduct,
