@@ -199,25 +199,6 @@ object ActionCalculator {
       }
   }
 
-  def publicationDatesToBeStopped(
-    fromInclusive: LocalDate,
-    toInclusive: LocalDate,
-    productVariant: ProductVariant
-  ): Either[ActionCalculatorError, List[LocalDate]] = {
-
-    suspensionConstantsByProductVariant(productVariant).map { suspensionConstants =>
-      val daysOfPublication = suspensionConstants.issueConstants.map(_.issueDayOfWeek)
-
-      def isPublicationDay(currentDayWithinHoliday: Long) =
-        daysOfPublication.contains(fromInclusive.plusDays(currentDayWithinHoliday).getDayOfWeek)
-
-      def stoppedDate(currentDayWithinHoliday: Long) = fromInclusive.plusDays(currentDayWithinHoliday)
-
-      val holidayLengthInDays = 0 to ChronoUnit.DAYS.between(fromInclusive, toInclusive).toInt
-      holidayLengthInDays.toList.collect { case day if isPublicationDay(day.toLong) => stoppedDate(day.toLong) }
-    }
-  }
-
   def latestOf(head: LocalDate, tail: LocalDate*) = (head :: tail.toList).max[LocalDate](_ compareTo _)
 }
 

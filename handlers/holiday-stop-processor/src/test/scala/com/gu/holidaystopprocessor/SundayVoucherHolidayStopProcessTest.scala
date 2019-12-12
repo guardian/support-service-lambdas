@@ -3,13 +3,14 @@ package com.gu.holidaystopprocessor
 import java.time.LocalDate
 
 import com.gu.holiday_stops._
-import com.gu.holiday_stops.subscription.{Add, ChargeOverride, HolidayCreditUpdate, RatePlan, RatePlanCharge, Subscription}
+import com.gu.holiday_stops.subscription.{Add, ChargeOverride, HolidayCreditUpdate, MutableCalendar, RatePlan, RatePlanCharge, Subscription}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.collection.mutable
 
 class SundayVoucherHolidayStopProcessTest extends FlatSpec with Matchers {
+  MutableCalendar.setFakeToday(Some(LocalDate.parse("2019-02-01")))
 
   val holidayStopRequestsFromSalesforce = List(
     HolidayStopRequestsDetail(

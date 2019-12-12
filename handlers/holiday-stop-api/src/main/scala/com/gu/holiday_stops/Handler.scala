@@ -7,11 +7,11 @@ import java.util.UUID
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.holiday_stops.WireHolidayStopRequest.toHolidayStopRequestDetail
-import com.gu.holiday_stops.subscription.{StoppedProduct, Subscription}
+import com.gu.holiday_stops.subscription.{HolidayStopCredit, Subscription, SubscriptionData}
 import com.gu.salesforce.{Contact, SalesforceClient, SalesforceHandlerSupport}
 import com.gu.salesforce.SalesforceClient.withAlternateAccessTokenIfPresentInHeaderList
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestId, StoppedPublicationDate, SubscriptionName}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestId, SubscriptionName}
 import com.gu.salesforce.holiday_stops.{SalesforceHolidayStopRequest, SalesforceSFSubscription}
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
@@ -181,14 +181,13 @@ object Handler extends Logging {
       queryParams <- req.queryParamsAsCaseClass[PotentialHolidayStopsQueryParams]()
       subscription <- getSubscription(pathParams.subscriptionName)
         .toApiGatewayOp(s"get subscription ${pathParams.subscriptionName}")
-      publicationDatesToBeStopped <- ActionCalculator
-        .publicationDatesToBeStopped(queryParams.startDate, queryParams.endDate, ProductVariant(subscription.ratePlans))
+      issuesData <- SubscriptionData(subscription)
+        .map(_.issueDataForPeriod(queryParams.startDate, queryParams.endDate))
         .toApiGatewayOp(s"calculating publication dates")
-      potentialHolidayStops = publicationDatesToBeStopped.map { stoppedPublicationDate =>
-        // unfortunately necessary due to GW N-for-N requiring stoppedPublicationDate to calculate correct credit estimation
+      potentialHolidayStops = issuesData.map { issueData =>
         PotentialHolidayStop(
-          stoppedPublicationDate,
-          StoppedProduct(subscription, StoppedPublicationDate(stoppedPublicationDate)).toOption
+          issueData.issueDate,
+          HolidayStopCredit(issueData.credit, issueData.nextBillingPeriodStartDate)
         )
       }
     } yield ApiGatewayResponse("200", PotentialHolidayStopsResponse(potentialHolidayStops))).apiResponse
@@ -230,10 +229,12 @@ object Handler extends Logging {
       maybeMatchingSfSub <- verifyContactOwnsSubOp(requestBody.subscriptionName, contact).toDisjunction.toApiGatewayOp(s"fetching subscriptions for contact $contact")
       matchingSfSub <- maybeMatchingSfSub.toApiGatewayOp(s"contact $contact does not own ${requestBody.subscriptionName.value}")
       zuoraSubscription <- getSubscription(requestBody.subscriptionName).toApiGatewayOp("get subscription from zuora")
-      publicationDatesToBeStopped <- ActionCalculator
-        .publicationDatesToBeStopped(requestBody.startDate, requestBody.endDate, ProductVariant(zuoraSubscription.ratePlans))
+      subscription <- getSubscription(requestBody.subscriptionName)
+        .toApiGatewayOp(s"get subscription ${requestBody.subscriptionName}")
+      issuesData <- SubscriptionData(subscription)
+        .map(_.issueDataForPeriod(requestBody.startDate, requestBody.endDate))
         .toApiGatewayOp(s"calculating publication dates")
-      createBody = CreateHolidayStopRequestWithDetail.buildBody(requestBody.startDate, requestBody.endDate, publicationDatesToBeStopped, matchingSfSub, zuoraSubscription)
+      createBody = CreateHolidayStopRequestWithDetail.buildBody(requestBody.startDate, requestBody.endDate, issuesData, matchingSfSub, zuoraSubscription)
       _ <- createOp(createBody).toDisjunction.toApiGatewayOp(
         exposeSfErrorMessageIn500ApiResponse(s"create new Holiday Stop Request for subscription ${requestBody.subscriptionName} (contact $contact)")
       )
@@ -319,10 +320,12 @@ object Handler extends Logging {
       zuoraSubscription <- getSubscription(pathParams.subscriptionName).toApiGatewayOp("get subscription from zuora")
       allExisting <- lookupOp(contact, Some(pathParams.subscriptionName)).toDisjunction.toApiGatewayOp(s"lookup Holiday Stop Requests for contact $contact")
       existingPublicationsThatWereToBeStopped <- allExisting.find(_.Id == pathParams.holidayStopRequestId).flatMap(_.Holiday_Stop_Request_Detail__r.map(_.records)).toApiGatewayOp(s"contact $contact does not own ${requestBody.subscriptionName.value}")
-      newPublicationDatesToBeStopped <- ActionCalculator
-        .publicationDatesToBeStopped(requestBody.startDate, requestBody.endDate, ProductVariant(zuoraSubscription.ratePlans))
+      subscription <- getSubscription(requestBody.subscriptionName)
+        .toApiGatewayOp(s"get subscription ${requestBody.subscriptionName}")
+      issuesData <- SubscriptionData(subscription)
+        .map(_.issueDataForPeriod(requestBody.startDate, requestBody.endDate))
         .toApiGatewayOp(s"calculating publication dates")
-      amendBody = AmendHolidayStopRequest.buildBody(pathParams.holidayStopRequestId, requestBody.startDate, requestBody.endDate, newPublicationDatesToBeStopped, existingPublicationsThatWereToBeStopped, zuoraSubscription)
+      amendBody = AmendHolidayStopRequest.buildBody(pathParams.holidayStopRequestId, requestBody.startDate, requestBody.endDate, issuesData, existingPublicationsThatWereToBeStopped, zuoraSubscription)
       _ <- amendOp(amendBody).toDisjunction.toApiGatewayOp(
         exposeSfErrorMessageIn500ApiResponse(s"amend Holiday Stop Request for subscription ${requestBody.subscriptionName} (contact $contact)")
       )

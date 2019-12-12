@@ -1,8 +1,11 @@
 package com.gu.holiday_stops.subscription
 
-import java.time.DayOfWeek
+import java.time.temporal.TemporalAdjusters
+import java.time.{DayOfWeek, LocalDate}
 
 import com.gu.holiday_stops.ZuoraHolidayError
+
+import scala.annotation.tailrec
 import scala.math.BigDecimal.RoundingMode
 
 case class RatePlanChargeData(
@@ -11,7 +14,31 @@ case class RatePlanChargeData(
   billingPeriodName: String,
   issueDayOfWeek: DayOfWeek,
   issueCreditAmount: Double
-)
+) {
+  def getIssuesForPeriod(startDateInclusive: LocalDate, endDateInclusive: LocalDate): List[IssueData] = {
+    @tailrec
+    def getIssuesForPeriod(firstIssueDate: LocalDate, endDateInclusive: LocalDate, issueData: List[IssueData]): List[IssueData] = {
+      if (firstIssueDate.isAfter(endDateInclusive)) {
+        issueData
+      } else {
+        getIssuesForPeriod(
+          firstIssueDate.`with`(TemporalAdjusters.next(issueDayOfWeek)),
+          endDateInclusive,
+          billingSchedule.billDatesCoveringDate(firstIssueDate) match {
+            case Left(_) => issueData
+            case Right(billingPeriod) => IssueData(firstIssueDate, billingPeriod, issueCreditAmount) :: issueData
+          }
+        )
+      }
+    }
+
+    getIssuesForPeriod(
+      startDateInclusive.`with`(TemporalAdjusters.nextOrSame(issueDayOfWeek)),
+      endDateInclusive,
+      Nil
+    )
+  }
+}
 
 object RatePlanChargeData {
   def apply(ratePlanCharge: RatePlanCharge, issueDayOfWeek: DayOfWeek): Either[ZuoraHolidayError, RatePlanChargeData] = {
