@@ -14,11 +14,9 @@ import io.github.mkotsur.aws.handler.Lambda._
 
 case class FulfilmentDates(
   today: LocalDate,
-  acquisitionsStartDate: LocalDate,
   deliveryAddressChangeEffectiveDate: LocalDate,
   holidayStopFirstAvailableDate: LocalDate,
-  finalFulfilmentFileGenerationDate: LocalDate,
-  nextAffectablePublicationDateOnFrontCover: LocalDate
+  finalFulfilmentFileGenerationDate: LocalDate
 )
 
 class FulfilmentDateCalculator extends Lambda[Option[String], String] with LazyLogging {
