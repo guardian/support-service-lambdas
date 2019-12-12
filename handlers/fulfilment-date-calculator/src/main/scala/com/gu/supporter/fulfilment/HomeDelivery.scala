@@ -10,7 +10,7 @@ import com.gu.supporter.fulfilment.LocalDateHelpers.LocalDateWithWorkingDaySuppo
 
 object HomeDeliveryFulfilmentDates {
 
-  def apply(today: LocalDate): Map[String, FulfilmentDates] =
+  def apply(today: LocalDate)(implicit bankHolidays: BankHolidays): Map[String, FulfilmentDates] =
     List(MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY).map(targetDayOfWeek =>
       targetDayOfWeek.getDisplayName(FULL, ENGLISH) -> FulfilmentDates(
         today,
@@ -21,7 +21,13 @@ object HomeDeliveryFulfilmentDates {
         nextAffectablePublicationDateOnFrontCover(targetDayOfWeek, today)
       )).toMap
 
-  def finalFulfilmentFileGenerationDate(targetDayOfWeek: DayOfWeek, today: LocalDate): LocalDate = {
+  def finalFulfilmentFileGenerationDate(
+    targetDayOfWeek: DayOfWeek,
+    today: LocalDate
+  )(
+    implicit
+    bankHolidays: BankHolidays
+  ): LocalDate = {
     val nextTargetDayOfWeek = today `with` TemporalAdjusters.next(targetDayOfWeek)
     val distributorPickupDay = nextTargetDayOfWeek findPreviousWorkingDay
     val finalFulfilmentFileGenerationDate = distributorPickupDay minusDays 1 //TODO double check this shouldn't be two days
@@ -34,11 +40,23 @@ object HomeDeliveryFulfilmentDates {
     }
   }
 
-  def nextAffectablePublicationDateOnFrontCover(targetDayOfWeek: DayOfWeek, today: LocalDate): LocalDate =
+  def nextAffectablePublicationDateOnFrontCover(
+    targetDayOfWeek: DayOfWeek,
+    today: LocalDate
+  )(
+    implicit
+    bankHolidays: BankHolidays
+  ): LocalDate =
     finalFulfilmentFileGenerationDate(targetDayOfWeek, today) `with` TemporalAdjusters.next(targetDayOfWeek)
 
   // Cover date of first issue sent to the new address.
-  def deliveryAddressChangeEffectiveDate(targetDayOfWeek: DayOfWeek, today: LocalDate): LocalDate =
+  def deliveryAddressChangeEffectiveDate(
+    targetDayOfWeek: DayOfWeek,
+    today: LocalDate
+  )(
+    implicit
+    bankHolidays: BankHolidays
+  ): LocalDate =
     nextAffectablePublicationDateOnFrontCover(targetDayOfWeek, today)
 
 }

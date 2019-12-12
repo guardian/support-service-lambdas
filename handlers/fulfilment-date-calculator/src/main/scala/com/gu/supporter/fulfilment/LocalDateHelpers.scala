@@ -5,7 +5,7 @@ import java.time.LocalDate
 
 object LocalDateHelpers {
 
-  implicit class LocalDateWithWorkingDaySupport(date: LocalDate) {
+  implicit class LocalDateWithWorkingDaySupport(date: LocalDate)(implicit bankHolidays: BankHolidays) {
 
     val NormalWorkingDays = List(
       MONDAY,
@@ -15,7 +15,8 @@ object LocalDateHelpers {
       FRIDAY
     )
 
-    def isWorkingDay: Boolean = NormalWorkingDays.contains(date.getDayOfWeek) // TODO add bank hols here
+    def isWorkingDay: Boolean =
+      NormalWorkingDays.contains(date.getDayOfWeek) && !bankHolidays.events.map(_.date).contains(date)
 
     def findPreviousWorkingDay: LocalDate = {
       val previousDay = date.minusDays(1)

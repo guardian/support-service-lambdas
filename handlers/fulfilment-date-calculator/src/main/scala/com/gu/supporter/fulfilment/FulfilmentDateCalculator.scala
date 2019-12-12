@@ -1,18 +1,16 @@
 package com.gu.supporter.fulfilment
 
-import java.io.ByteArrayInputStream
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 import com.amazonaws.services.lambda.runtime.Context
-import com.amazonaws.services.s3.AmazonS3Client
-import com.amazonaws.services.s3.model.{CannedAccessControlList, ObjectMetadata, PutObjectRequest, PutObjectResult}
+import com.amazonaws.services.s3.model.PutObjectResult
 import com.gu.supporter.fulfilment.ZuoraProductTypes.{GuardianWeekly, NewspaperHomeDelivery, ZuoraProductType}
 import com.typesafe.scalalogging.LazyLogging
-import io.github.mkotsur.aws.handler.Lambda
-import io.github.mkotsur.aws.handler.Lambda._
 import io.circe.generic.auto._
 import io.circe.syntax._
+import io.github.mkotsur.aws.handler.Lambda
+import io.github.mkotsur.aws.handler.Lambda._
 
 case class FulfilmentDates(
   today: LocalDate,
@@ -24,10 +22,14 @@ case class FulfilmentDates(
 )
 
 class FulfilmentDateCalculator extends Lambda[Option[String], String] with LazyLogging {
+
   override def handle(todayOverride: Option[String], context: Context) = {
+
     val today = inputToDate(todayOverride)
 
-    val datesForYesterdayThroughToAFortnight= (-1 to 14).map(_.toLong).map(today.plusDays)
+    implicit val englishBankHolidays: BankHolidays = GovUkBankHolidays().`england-and-wales`
+
+    val datesForYesterdayThroughToAFortnight = (-1 to 14).map(_.toLong).map(today.plusDays)
 
     datesForYesterdayThroughToAFortnight.foreach { date =>
 
@@ -50,18 +52,8 @@ class FulfilmentDateCalculator extends Lambda[Option[String], String] with LazyL
   private def writeToBucket(product: ZuoraProductType, date: LocalDate, content: String): PutObjectResult = {
     val today = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
     val filename = s"${product.name}/${today}_${product.name}.json"
-    val s3Client = AmazonS3Client.builder.build
-    val stage = System.getenv("Stage").toLowerCase
-    val requestWithAcl = putRequestWithAcl(s"fulfilment-date-calculator-$stage", filename, content)
-    s3Client.putObject(requestWithAcl)
+    BucketHelpers.write(filename, content)
   }
 
-  private def putRequestWithAcl(bucket: String, key: String, content: String): PutObjectRequest =
-    new PutObjectRequest(
-      bucket,
-      key,
-      new ByteArrayInputStream(content.getBytes),
-      new ObjectMetadata
-    ).withCannedAcl(CannedAccessControlList.BucketOwnerRead)
 }
 
