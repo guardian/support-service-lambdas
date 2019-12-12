@@ -1,5 +1,7 @@
 package com.gu.effects
 
+import java.io.ByteArrayInputStream
+
 import com.amazonaws.auth._
 import com.amazonaws.auth.profile.ProfileCredentialsProvider
 import com.amazonaws.regions.Regions
@@ -25,6 +27,7 @@ object GetFromS3 extends LazyLogging {
       }
     }
   }
+
   def fetchString(s3Location: S3Location): Try[String] = {
     val request = new GetObjectRequest(s3Location.bucket, s3Location.key)
     fetchString(request)
@@ -48,7 +51,18 @@ object UploadToS3 extends LazyLogging {
     uploadRequest
   }
 
+  def putStringWithAcl(s3Location: S3Location, cannedAcl: CannedAccessControlList, content: String) = {
+    putObject(
+      new PutObjectRequest(
+        s3Location.bucket,
+        s3Location.key,
+        new ByteArrayInputStream(content.getBytes),
+        new ObjectMetadata
+      ).withCannedAcl(cannedAcl)
+    )
+  }
 }
+
 case class S3Path(bucketName: BucketName, key: Option[Key])
 object S3Path {
   def appendToPrefix(basePath: S3Path, suffix: String) = {
@@ -102,5 +116,4 @@ object aws {
     new InstanceProfileCredentialsProvider(false),
     new EC2ContainerCredentialsProviderWrapper
   )
-
 }

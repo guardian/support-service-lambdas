@@ -11,7 +11,11 @@ object FulfilmentDatesLocation {
   def fulfilmentDatesFileLocation(stage: Stage, zuoraProductType: ZuoraProductType, date: LocalDate) = {
     val formattedDate = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
     val path = s"${zuoraProductType.name}/${formattedDate}_${zuoraProductType.name}.json"
-    val bucket = s"fulfilment-date-calculator-${stage.value}"
+    val bucket = fulfilmentDatesBucket(stage)
     S3Location(bucket, path)
+  }
+
+  def fulfilmentDatesBucket(stage: Stage = Stage()) = {
+    s"fulfilment-date-calculator-${stage.value}"
   }
 }
