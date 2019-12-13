@@ -1,23 +1,17 @@
 package com.gu.supporter.fulfilment
 
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.s3.model.PutObjectResult
-import com.gu.supporter.fulfilment.ZuoraProductTypes.{GuardianWeekly, NewspaperHomeDelivery, ZuoraProductType}
+import com.gu.fulfilmentdates.FulfilmentDatesLocation.fulfilmentDatesFileLocation
+import com.gu.fulfilmentdates.ZuoraProductTypes.{GuardianWeekly, NewspaperHomeDelivery, ZuoraProductType}
+import com.gu.util.config.Stage
 import com.typesafe.scalalogging.LazyLogging
 import io.circe.generic.auto._
 import io.circe.syntax._
 import io.github.mkotsur.aws.handler.Lambda
 import io.github.mkotsur.aws.handler.Lambda._
-
-case class FulfilmentDates(
-  today: LocalDate,
-  deliveryAddressChangeEffectiveDate: LocalDate,
-  holidayStopFirstAvailableDate: LocalDate,
-  finalFulfilmentFileGenerationDate: LocalDate
-)
 
 class FulfilmentDateCalculator extends Lambda[Option[String], String] with LazyLogging {
 
@@ -48,9 +42,7 @@ class FulfilmentDateCalculator extends Lambda[Option[String], String] with LazyL
   }
 
   private def writeToBucket(product: ZuoraProductType, date: LocalDate, content: String): PutObjectResult = {
-    val today = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-    val filename = s"${product.name}/${today}_${product.name}.json"
-    BucketHelpers.write(filename, content)
+    BucketHelpers.write(fulfilmentDatesFileLocation(Stage(), product, date), content)
   }
 
 }

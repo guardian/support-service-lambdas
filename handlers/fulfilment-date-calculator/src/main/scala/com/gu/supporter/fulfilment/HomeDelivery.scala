@@ -6,6 +6,7 @@ import java.time.temporal.TemporalAdjusters
 import java.time.{DayOfWeek, LocalDate}
 import java.util.Locale.ENGLISH
 
+import com.gu.fulfilmentdates.FulfilmentDates
 import com.gu.supporter.fulfilment.LocalDateHelpers.LocalDateWithWorkingDaySupport
 
 import scala.collection.immutable.ListMap
@@ -81,5 +82,4 @@ object HomeDeliveryFulfilmentDates {
       }
     ) `with` TemporalAdjusters.next(targetDayOfWeek)
   }
-
 }

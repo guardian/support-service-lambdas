@@ -188,6 +188,11 @@ val effectsDepIncludingTestFolder: ClasspathDependency = effects % "compile->com
 lazy val `zuora-reports` = all(project in file("lib/zuora-reports"))
   .dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
 
+lazy val `fulfilment-dates` = all(project in file("lib/fulfilment-dates"))
+  .dependsOn(`effects-s3`, `config-core`, testDep)
+  .settings(
+    libraryDependencies ++= Seq(catsCore, circe, circeParser)
+  )
 
 // ==== END libraries ====
 
@@ -227,7 +232,8 @@ lazy val root = all(project in file(".")).enablePlugins(RiffRaffArtifact).aggreg
   `holiday-stop-processor`,
   `metric-push-api`,
   `fulfilment-date-calculator`,
-  `delivery-records-api`
+  `delivery-records-api`,
+  `fulfilment-dates`
 ).dependsOn(zuora, handler, effectsDepIncludingTestFolder, `effects-sqs`, testDep)
 
 lazy val `identity-backfill` = all(project in file("handlers/identity-backfill")) // when using the "project identity-backfill" command it uses the lazy val name
@@ -303,7 +309,7 @@ lazy val `metric-push-api` = all(project in file("handlers/metric-push-api"))
 
 lazy val `fulfilment-date-calculator` = all(project in file("handlers/fulfilment-date-calculator"))
   .enablePlugins(RiffRaffArtifact)
-  .dependsOn(testDep)
+  .dependsOn(testDep, `fulfilment-dates`)
 
 lazy val `delivery-records-api` = all(project in file("handlers/delivery-records-api"))
   .dependsOn(`effects-s3`, `config-core`, `salesforce-sttp-client`, `salesforce-sttp-test-stub` % Test)
