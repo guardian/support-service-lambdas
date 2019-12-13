@@ -33,6 +33,12 @@ Resources:
         ServerSideEncryptionConfiguration:
           - ServerSideEncryptionByDefault:
               SSEAlgorithm: AES256
+      LifecycleConfiguration:
+        Rules:
+          - ExpirationInDays: 30
+            Status: Enabled
+      VersioningConfiguration:
+        Status: Enabled
 
   FulfilmentDateCalculatorLambdaRole:
     Type: AWS::IAM::Role
