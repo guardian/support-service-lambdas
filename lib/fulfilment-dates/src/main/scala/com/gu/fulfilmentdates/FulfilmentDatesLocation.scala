@@ -16,6 +16,6 @@ object FulfilmentDatesLocation {
   }
 
   def fulfilmentDatesBucket(stage: Stage = Stage()) = {
-    s"fulfilment-date-calculator-${stage.value}"
+    s"fulfilment-date-calculator-${stage.value.toLowerCase}"
   }
 }

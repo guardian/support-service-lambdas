@@ -15,7 +15,7 @@ class FulfilmentDatesFetcherTest extends FlatSpec {
     def fetchFromS3(s3Location: S3Location): Try[String] = {
       s3Location match {
         case S3Location(
-          "fulfilment-date-calculator-DEV",
+          "fulfilment-date-calculator-dev",
           "Newspaper - Home Delivery/2019-12-11_Newspaper - Home Delivery.json"
           ) =>
           Success(Source.fromResource("Newspaper - Home Delivery.json").mkString)
