@@ -6,6 +6,7 @@ import java.time.temporal.TemporalAdjusters
 import java.time.{DayOfWeek, LocalDate}
 import java.util.Locale.ENGLISH
 
+import com.gu.fulfilmentdates.FulfilmentDates
 import com.gu.supporter.fulfilment.LocalDateHelpers.LocalDateWithWorkingDaySupport
 
 import scala.collection.immutable.ListMap
@@ -20,7 +21,8 @@ object HomeDeliveryFulfilmentDates {
           deliveryAddressChangeEffectiveDate(targetDayOfWeek, today),
           holidayStopFirstAvailableDate(targetDayOfWeek, today),
           finalFulfilmentFileGenerationDate(targetDayOfWeek, today)
-        )):_*
+        )
+      ):_*
     )
 
   private def getFulfilmentFileGenerationDateForNextTargetDayOfWeek(
@@ -81,5 +83,4 @@ object HomeDeliveryFulfilmentDates {
       }
     ) `with` TemporalAdjusters.next(targetDayOfWeek)
   }
-
 }
