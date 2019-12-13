@@ -1,12 +1,11 @@
 package com.gu.supporter.fulfilment
 
-import java.time.format.TextStyle.FULL
 import java.time.{DayOfWeek, LocalDate}
 import java.time.temporal.ChronoUnit.DAYS
 import java.time.temporal.TemporalAdjusters
-import java.util.Locale.ENGLISH
 
 import com.gu.fulfilmentdates.FulfilmentDates
+import com.gu.fulfilmentdates.FulfilmentDates.dayOfWeekFormat
 
 /**
  * @param issueDayOfWeek                Weekday corresponding to publication issue date printed on the paper, for example, Friday for GW
@@ -25,7 +24,7 @@ object GuardianWeeklyFulfilmentDates extends FulfilmentConstants(
 ) {
   def apply(today: LocalDate): Map[String, FulfilmentDates] =
     Map(
-      issueDayOfWeek.getDisplayName(FULL, ENGLISH) -> FulfilmentDates(
+      dayOfWeekFormat.format(issueDayOfWeek) -> FulfilmentDates(
         today,
         deliveryAddressChangeEffectiveDate(today),
         holidayStopFirstAvailableDate(today),

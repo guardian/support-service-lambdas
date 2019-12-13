@@ -1,11 +1,12 @@
 package com.gu.fulfilmentdates
 
+import java.time.DayOfWeek.MONDAY
 import java.time.LocalDate
 
 import com.gu.effects.S3Location
 import com.gu.util.config.Stage
-import org.scalatest.{FlatSpec, Inside}
 import org.scalatest.Matchers._
+import org.scalatest.{FlatSpec, Inside}
 
 import scala.io.Source
 import scala.util.{Failure, Success, Try}
@@ -34,7 +35,7 @@ class FulfilmentDatesFetcherTest extends FlatSpec {
         case Right(fulfilmentDates) =>
           fulfilmentDates should ===(
             Map(
-              "Monday" -> FulfilmentDates(
+              MONDAY -> FulfilmentDates(
                 today = LocalDate.parse("2019-12-11"),
                 deliveryAddressChangeEffectiveDate = LocalDate.parse("2019-12-16"),
                 holidayStopFirstAvailableDate = LocalDate.parse("2019-12-16"),

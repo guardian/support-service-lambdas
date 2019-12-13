@@ -1,12 +1,11 @@
 package com.gu.supporter.fulfilment
 
 import java.time.DayOfWeek._
-import java.time.format.TextStyle.FULL
 import java.time.temporal.TemporalAdjusters
 import java.time.{DayOfWeek, LocalDate}
-import java.util.Locale.ENGLISH
 
 import com.gu.fulfilmentdates.FulfilmentDates
+import com.gu.fulfilmentdates.FulfilmentDates.dayOfWeekFormat
 import com.gu.supporter.fulfilment.LocalDateHelpers.LocalDateWithWorkingDaySupport
 
 import scala.collection.immutable.ListMap
@@ -16,7 +15,7 @@ object HomeDeliveryFulfilmentDates {
   def apply(today: LocalDate)(implicit bankHolidays: BankHolidays): ListMap[String, FulfilmentDates] =
     ListMap( // to preserve insertion order, so the file is easier to read
       List(MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY).map(targetDayOfWeek =>
-        targetDayOfWeek.getDisplayName(FULL, ENGLISH) -> FulfilmentDates(
+        dayOfWeekFormat.format(targetDayOfWeek) -> FulfilmentDates(
           today,
           deliveryAddressChangeEffectiveDate(targetDayOfWeek, today),
           holidayStopFirstAvailableDate(targetDayOfWeek, today),
