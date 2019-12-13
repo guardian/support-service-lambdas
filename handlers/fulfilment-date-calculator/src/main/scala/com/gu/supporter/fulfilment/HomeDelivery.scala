@@ -21,7 +21,8 @@ object HomeDeliveryFulfilmentDates {
           deliveryAddressChangeEffectiveDate(targetDayOfWeek, today),
           holidayStopFirstAvailableDate(targetDayOfWeek, today),
           finalFulfilmentFileGenerationDate(targetDayOfWeek, today)
-        )):_*
+        )
+      ):_*
     )
 
   private def getFulfilmentFileGenerationDateForNextTargetDayOfWeek(

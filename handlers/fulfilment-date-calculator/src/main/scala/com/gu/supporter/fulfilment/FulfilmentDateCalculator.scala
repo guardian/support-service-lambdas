@@ -5,7 +5,7 @@ import java.time.LocalDate
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.s3.model.PutObjectResult
 import com.gu.fulfilmentdates.FulfilmentDatesLocation.fulfilmentDatesFileLocation
-import com.gu.fulfilmentdates.ZuoraProductTypes.{GuardianWeekly, NewspaperHomeDelivery, ZuoraProductType}
+import com.gu.fulfilmentdates.ZuoraProductTypes.{GuardianWeekly, NewspaperHomeDelivery, NewspaperVoucherBook, ZuoraProductType}
 import com.gu.util.config.Stage
 import com.typesafe.scalalogging.LazyLogging
 import io.circe.generic.auto._
@@ -29,9 +29,11 @@ class FulfilmentDateCalculator extends Lambda[Option[String], String] with LazyL
 
       writeToBucket(NewspaperHomeDelivery, date, HomeDeliveryFulfilmentDates(date).asJson.spaces2)
 
+      writeToBucket(NewspaperVoucherBook, date, VoucherBookletFulfilmentDates(date).asJson.spaces2)
+
     }
 
-    Right(s"Generated Guardian Weekly and Home Delivery dates for $datesForYesterdayThroughToAFortnight")
+    Right(s"Generated Guardian Weekly, Home Delivery and Voucher dates for $datesForYesterdayThroughToAFortnight")
   }
 
   private def inputToDate(maybeTodayOverride: Option[String]): LocalDate = {
