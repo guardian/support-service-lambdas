@@ -3,7 +3,7 @@ package com.gu.supporter.fulfilment
 import java.time.format.TextStyle.FULL
 import java.time.{DayOfWeek, LocalDate}
 import java.time.temporal.ChronoUnit.DAYS
-import java.time.temporal.TemporalAdjusters
+import java.time.temporal.TemporalAdjusters.{next, previous}
 import java.util.Locale.ENGLISH
 
 import com.gu.fulfilmentdates.FulfilmentDates
@@ -29,6 +29,7 @@ object GuardianWeeklyFulfilmentDates extends FulfilmentConstants(
         today,
         deliveryAddressChangeEffectiveDate(today),
         holidayStopFirstAvailableDate(today),
+        holidayStopProcessorTargetDate(today),
         finalFulfilmentFileGenerationDate(today)
       )
     )
@@ -36,11 +37,20 @@ object GuardianWeeklyFulfilmentDates extends FulfilmentConstants(
   val minDaysBetweenTodayAndFirstAvailableDate = 4
 
   def holidayStopFirstAvailableDate(today: LocalDate): LocalDate = {
-    val dayAfterNextPublicationDay = TemporalAdjusters.next(issueDayOfWeek.plus(1)) // Saturday because GW is published on Friday, https://stackoverflow.com/a/29010338/5205022
-    if (DAYS.between(today, today `with` dayAfterNextPublicationDay) < minDaysBetweenTodayAndFirstAvailableDate)
-      (today `with` dayAfterNextPublicationDay `with` dayAfterNextPublicationDay) // Saturday after next
+    val dayAfterPublicationDay = issueDayOfWeek.plus(1) // Saturday because GW cover date is a Friday
+    if (DAYS.between(today, today `with` next(dayAfterPublicationDay)) < minDaysBetweenTodayAndFirstAvailableDate)
+      (today `with` next(dayAfterPublicationDay) `with` next(dayAfterPublicationDay)) // Saturday after next
     else
-      (today `with` dayAfterNextPublicationDay) // next Saturday
+      (today `with` next(dayAfterPublicationDay)) // next Saturday
+  }
+
+  def holidayStopProcessorTargetDate(today: LocalDate): Option[LocalDate] = {
+    if(today.getDayOfWeek == fulfilmentGenerationDayOfWeek.minus(1)){
+      Some(today `with` next(issueDayOfWeek) `with` next(issueDayOfWeek)) // issue day after next
+    }
+    else {
+      None
+    }
   }
 
   // Cover date of first issue sent to the new address.
@@ -49,21 +59,20 @@ object GuardianWeeklyFulfilmentDates extends FulfilmentConstants(
 
   // TODO: Take into account bank holidays
   def nextAffectablePublicationDateOnFrontCover(today: LocalDate): LocalDate = {
-    val nextFriday = TemporalAdjusters.next(issueDayOfWeek)
 
     val todayIsFufilmentDay = today.getDayOfWeek equals fulfilmentGenerationDayOfWeek
 
     if(todayIsFufilmentDay)
-      (today `with` nextFriday `with` nextFriday `with` nextFriday)
+      (today `with` next(issueDayOfWeek) `with` next(issueDayOfWeek) `with` next(issueDayOfWeek))
     else
-      (today `with` nextFriday `with` nextFriday)
+      (today `with` next(issueDayOfWeek) `with` next(issueDayOfWeek))
   }
 
   // When was the fulfilment file generated for the nextAffectablePublicationDateOnFrontCover
-  def finalFulfilmentFileGenerationDate(today: LocalDate): LocalDate = {
-    val previousThursday = TemporalAdjusters.previous(fulfilmentGenerationDayOfWeek)
-    nextAffectablePublicationDateOnFrontCover(today) `with` previousThursday `with` previousThursday
-  }
+  def finalFulfilmentFileGenerationDate(today: LocalDate): LocalDate =
+    nextAffectablePublicationDateOnFrontCover(today) `with`
+      previous(fulfilmentGenerationDayOfWeek) `with`
+      previous(fulfilmentGenerationDayOfWeek)
 
 }
 

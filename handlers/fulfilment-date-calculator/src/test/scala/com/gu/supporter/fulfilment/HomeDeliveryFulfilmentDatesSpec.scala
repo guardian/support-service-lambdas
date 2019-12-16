@@ -10,6 +10,23 @@ class HomeDeliveryFulfilmentDatesSpec extends FlatSpec with Matchers with DateSu
     BankHolidays(Nil) // TODO reuse sampleBankHolidays from LocalDateHelpersSpec with some test cases below
   )
 
+  "HomeDeliveryFulfilmentDates" should "should contain correct holidayStopProcessorTargetDate(s)" in {
+    apply( /* Wednesday */ "2019-12-04").values.flatMap(_.holidayStopProcessorTargetDate) shouldBe List[LocalDate]("2019-12-06")
+    apply( /* Thursday  */ "2019-12-05").values.flatMap(_.holidayStopProcessorTargetDate) shouldBe List[LocalDate]("2019-12-09", "2019-12-07", "2019-12-08")
+    apply( /* Friday    */ "2019-12-06").values.flatMap(_.holidayStopProcessorTargetDate) shouldBe Nil
+    apply( /* Saturday  */ "2019-12-07").values.flatMap(_.holidayStopProcessorTargetDate) shouldBe Nil
+    apply( /* Sunday    */ "2019-12-08").values.flatMap(_.holidayStopProcessorTargetDate) shouldBe List[LocalDate]("2019-12-10")
+    apply( /* Monday    */ "2019-12-09").values.flatMap(_.holidayStopProcessorTargetDate) shouldBe List[LocalDate]("2019-12-11")
+    apply( /* Tuesday   */ "2019-12-10").values.flatMap(_.holidayStopProcessorTargetDate) shouldBe List[LocalDate]("2019-12-12")
+    apply( /* Wednesday */ "2019-12-11").values.flatMap(_.holidayStopProcessorTargetDate) shouldBe List[LocalDate]("2019-12-13")
+    apply( /* Thursday  */ "2019-12-12").values.flatMap(_.holidayStopProcessorTargetDate) shouldBe List[LocalDate]("2019-12-16", "2019-12-14", "2019-12-15")
+    apply( /* Friday    */ "2019-12-13").values.flatMap(_.holidayStopProcessorTargetDate) shouldBe Nil
+    apply( /* Saturday  */ "2019-12-14").values.flatMap(_.holidayStopProcessorTargetDate) shouldBe Nil
+    apply( /* Sunday    */ "2019-12-15").values.flatMap(_.holidayStopProcessorTargetDate) shouldBe List[LocalDate]("2019-12-17")
+
+    // TODO add some bank holiday examples
+  }
+
   "MONDAY HomeDeliveryFulfilmentDates" should "have correct deliveryAddressChangeEffectiveDate" in {
     apply( /* Wednesday */ "2019-12-04")("Monday").deliveryAddressChangeEffectiveDate.get should equalDate("2019-12-09")
     apply( /* Thursday  */ "2019-12-05")("Monday").deliveryAddressChangeEffectiveDate.get should equalDate("2019-12-09")
