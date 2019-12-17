@@ -4,12 +4,19 @@ import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
 import com.gu.holiday_stops.Fixtures
+import com.gu.zuora.ZuoraProductTypes.ZuoraProductType
 import org.scalatest.EitherValues._
 import org.scalatest.Inside
 import org.scalatest.Matchers._
 
 object SubscriptionDataIntegrationTest {
-  def testSubscriptonDataIssueGeneration(subscriptionFile: String, startDate: LocalDate, expectedIssueData: List[IssueData]) = {
+  def testSubscriptonDataIssueGeneration(
+    subscriptionFile: String,
+    startDate: LocalDate,
+    expectedIssueData: List[IssueData],
+    expectedAnnualIssueLimitPerEdition: Int,
+    expectedProductType: ZuoraProductType
+  ) = {
     val subscription = Fixtures.subscriptionFromJson(subscriptionFile)
     val subscriptionData = SubscriptionData(subscription).right.value
     val datesToTest = getDatesToTest(startDate, expectedIssueData)
@@ -29,6 +36,9 @@ object SubscriptionDataIntegrationTest {
 
     val (startTestDate, endTestDate) = getTestPeriod(startDate, expectedIssueData)
     subscriptionData.issueDataForPeriod(startTestDate, endTestDate) should equal(expectedIssueData)
+
+    subscriptionData.annualIssueLimitPerEdition should equal(expectedAnnualIssueLimitPerEdition)
+    subscriptionData.productType should equal(expectedProductType)
   }
 
   private def getMaxDate(dates: List[LocalDate]): LocalDate = {
