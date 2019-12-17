@@ -128,7 +128,6 @@ object GetHolidayStopRequests {
   }
 
   implicit val formatIssueSpecifics: OFormat[IssueSpecifics] = Json.format[IssueSpecifics]
-  implicit val formatProductSpecifics: OFormat[ProductSpecifics] = Json.format[ProductSpecifics]
   implicit val format: OFormat[GetHolidayStopRequests] = Json.format[GetHolidayStopRequests]
 }
 

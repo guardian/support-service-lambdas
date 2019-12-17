@@ -3,7 +3,6 @@ package com.gu.holidaystopprocessor
 import java.time.LocalDate
 
 import com.gu.effects.RawEffects
-import com.gu.holiday_stops.ActionCalculator.GuardianWeeklyIssueSuspensionConstants
 import com.gu.holiday_stops.ProductVariant._
 import com.gu.holiday_stops.{ActionCalculator, ProductVariant, SalesforceHolidayError, SalesforceHolidayResponse}
 import com.gu.salesforce.SFAuthConfig
@@ -17,7 +16,7 @@ object Salesforce {
     processDateOverride.getOrElse(LocalDate.now.plusDays {
       productVariant match {
         case GuardianWeekly =>
-          GuardianWeeklyIssueSuspensionConstants.processorRunLeadTimeDays.toLong
+          ActionCalculator.GuardianWeeklyProcessorRunLeadTime
 
         case SaturdayVoucher | SundayVoucher | WeekendVoucher | SixdayVoucher | EverydayVoucher | EverydayPlusVoucher | SixdayPlusVoucher | WeekendPlusVoucher | SundayPlusVoucher | SaturdayPlusVoucher =>
           ActionCalculator.VoucherProcessorLeadTime
