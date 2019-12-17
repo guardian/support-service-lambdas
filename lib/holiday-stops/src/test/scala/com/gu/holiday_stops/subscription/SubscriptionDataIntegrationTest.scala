@@ -1,6 +1,6 @@
 package com.gu.holiday_stops.subscription
 
-import java.time.LocalDate
+import java.time.{DayOfWeek, LocalDate}
 import java.time.temporal.ChronoUnit
 
 import com.gu.holiday_stops.Fixtures
@@ -11,11 +11,12 @@ import org.scalatest.Matchers._
 
 object SubscriptionDataIntegrationTest {
   def testSubscriptonDataIssueGeneration(
-                                          subscriptionFile: String,
-                                          startDate: LocalDate,
-                                          expectedIssueData: List[IssueData],
-                                          expectedTotalAnnualIssueLimitPerSubscription: Int,
-                                          expectedProductType: ZuoraProductType
+    subscriptionFile: String,
+    startDate: LocalDate,
+    expectedIssueData: List[IssueData],
+    expectedTotalAnnualIssueLimitPerSubscription: Int,
+    expectedProductType: ZuoraProductType,
+    expectedEditionDaysOfWeek: List[DayOfWeek]
   ) = {
     val subscription = Fixtures.subscriptionFromJson(subscriptionFile)
     val subscriptionData = SubscriptionData(subscription).right.value
@@ -39,6 +40,7 @@ object SubscriptionDataIntegrationTest {
 
     subscriptionData.subscriptionAnnualIssueLimit should equal(expectedTotalAnnualIssueLimitPerSubscription)
     subscriptionData.productType should equal(expectedProductType)
+    subscriptionData.editionDaysOfWeek should contain only (expectedEditionDaysOfWeek: _*)
   }
 
   private def getMaxDate(dates: List[LocalDate]): LocalDate = {

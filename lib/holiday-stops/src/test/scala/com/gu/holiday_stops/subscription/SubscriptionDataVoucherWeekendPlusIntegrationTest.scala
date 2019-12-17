@@ -1,5 +1,6 @@
 package com.gu.holiday_stops.subscription
 
+import java.time.DayOfWeek.{SATURDAY, SUNDAY}
 import java.time.temporal.TemporalAdjusters
 import java.time.{DayOfWeek, LocalDate}
 
@@ -44,7 +45,8 @@ class SubscriptionDataVoucherWeekendPlusIntegrationTest extends FlatSpec {
       startDate = startDate,
       expectedIssueData = expectedIssueData,
       expectedTotalAnnualIssueLimitPerSubscription = 8,
-      expectedProductType = ZuoraProductTypes.NewspaperVoucherBook
+      expectedProductType = ZuoraProductTypes.NewspaperVoucherBook,
+      expectedEditionDaysOfWeek = List(SATURDAY, SUNDAY)
     )
   }
 }

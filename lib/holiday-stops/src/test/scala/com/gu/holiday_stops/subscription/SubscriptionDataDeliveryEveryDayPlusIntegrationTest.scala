@@ -1,7 +1,8 @@
 package com.gu.holiday_stops.subscription
 
+import java.time.DayOfWeek._
+import java.time.LocalDate
 import java.time.temporal.TemporalAdjusters
-import java.time.{DayOfWeek, LocalDate}
 
 import com.gu.holiday_stops.subscription.SubscriptionDataIntegrationTest.testSubscriptonDataIssueGeneration
 import com.gu.zuora.ZuoraProductTypes
@@ -17,13 +18,13 @@ class SubscriptionDataDeliveryEveryDayPlusIntegrationTest extends FlatSpec {
 
   "SubscriptionData" should "calculate issue data correctly for delivery everyday plus" in {
     val startDate = LocalDate.parse("2019-10-06") //Sunday
-    val firstSunday = startDate.`with`(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY))
-    val firstMonday = startDate.`with`(TemporalAdjusters.nextOrSame(DayOfWeek.MONDAY))
-    val firstTuesday = startDate.`with`(TemporalAdjusters.nextOrSame(DayOfWeek.TUESDAY))
-    val firstWednesday = startDate.`with`(TemporalAdjusters.nextOrSame(DayOfWeek.WEDNESDAY))
-    val firstThursday = startDate.`with`(TemporalAdjusters.nextOrSame(DayOfWeek.THURSDAY))
-    val firstFriday = startDate.`with`(TemporalAdjusters.nextOrSame(DayOfWeek.FRIDAY))
-    val firstSaturday = startDate.`with`(TemporalAdjusters.nextOrSame(DayOfWeek.SATURDAY))
+    val firstSunday = startDate.`with`(TemporalAdjusters.nextOrSame(SUNDAY))
+    val firstMonday = startDate.`with`(TemporalAdjusters.nextOrSame(MONDAY))
+    val firstTuesday = startDate.`with`(TemporalAdjusters.nextOrSame(TUESDAY))
+    val firstWednesday = startDate.`with`(TemporalAdjusters.nextOrSame(WEDNESDAY))
+    val firstThursday = startDate.`with`(TemporalAdjusters.nextOrSame(THURSDAY))
+    val firstFriday = startDate.`with`(TemporalAdjusters.nextOrSame(FRIDAY))
+    val firstSaturday = startDate.`with`(TemporalAdjusters.nextOrSame(SATURDAY))
 
     val billingPeriod1 = BillDates(
       startDate,
@@ -77,7 +78,8 @@ class SubscriptionDataDeliveryEveryDayPlusIntegrationTest extends FlatSpec {
       startDate = startDate,
       expectedIssueData = expectedIssueData,
       expectedTotalAnnualIssueLimitPerSubscription = 28,
-      expectedProductType = ZuoraProductTypes.NewspaperHomeDelivery
+      expectedProductType = ZuoraProductTypes.NewspaperHomeDelivery,
+      expectedEditionDaysOfWeek = List(MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY)
     )
   }
 }

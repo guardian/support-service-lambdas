@@ -118,8 +118,8 @@ object GetHolidayStopRequests {
   ): Either[GetHolidayStopRequestsError, GetHolidayStopRequests] = {
     val today = MutableCalendar.today
     val issueSpecifics = subscription
-      .issueDataForPeriod(today, today.plusWeeks(1).minusDays(1))
-      .map(issueData => IssueSpecifics(fulfilmentDates(issueData.issueDate.getDayOfWeek).holidayStopFirstAvailableDate, issueData.issueDate.getDayOfWeek.getValue))
+      .editionDaysOfWeek
+      .map(editionDayOfWeek => IssueSpecifics(fulfilmentDates(editionDayOfWeek).holidayStopFirstAvailableDate, editionDayOfWeek.getValue))
     GetHolidayStopRequests(
       existing = holidayStopRequests.map(WireHolidayStopRequest.apply(issueSpecifics)),
       issueSpecifics = issueSpecifics,

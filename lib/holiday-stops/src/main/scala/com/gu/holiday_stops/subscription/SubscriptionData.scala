@@ -1,6 +1,6 @@
 package com.gu.holiday_stops.subscription
 
-import java.time.LocalDate
+import java.time.{DayOfWeek, LocalDate}
 
 import com.gu.holiday_stops.{ZuoraHolidayError, ZuoraHolidayResponse}
 import cats.implicits._
@@ -32,6 +32,7 @@ trait SubscriptionData {
   def issueDataForPeriod(startDateInclusive: LocalDate, endDateInclusive: LocalDate): List[IssueData]
   def productType: ZuoraProductType
   def subscriptionAnnualIssueLimit: Int
+  def editionDaysOfWeek: List[DayOfWeek]
 }
 object SubscriptionData {
   def apply(subscription: Subscription): Either[ZuoraHolidayError, SubscriptionData] = {
@@ -81,9 +82,11 @@ object SubscriptionData {
       }
 
       override def subscriptionAnnualIssueLimit: Int = {
-        val numberOfEditions = nonZeroRatePlanChargeDatas.map(_.issueDayOfWeek).distinct.size
-        productAnnualIssueLimitPerEdition * numberOfEditions
+        productAnnualIssueLimitPerEdition * editionDaysOfWeek.size
       }
+
+      override def editionDaysOfWeek: List[DayOfWeek] =
+        nonZeroRatePlanChargeDatas.map(_.issueDayOfWeek).distinct
     }
   }
 

@@ -1,5 +1,6 @@
 package com.gu.holiday_stops.subscription
 
+import java.time.DayOfWeek.FRIDAY
 import java.time.LocalDate
 
 import com.gu.holiday_stops.subscription.SubscriptionDataIntegrationTest.testSubscriptonDataIssueGeneration
@@ -51,7 +52,8 @@ class SubscriptionDataGuardianWeeklyIntegrationTest extends FlatSpec {
       startDate = startDate,
       expectedIssueData = expectedIssueData,
       expectedTotalAnnualIssueLimitPerSubscription = 6,
-      expectedProductType = ZuoraProductTypes.GuardianWeekly
+      expectedProductType = ZuoraProductTypes.GuardianWeekly,
+      expectedEditionDaysOfWeek = List(FRIDAY)
     )
   }
 }
