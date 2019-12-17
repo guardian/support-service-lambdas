@@ -11,11 +11,11 @@ import org.scalatest.Matchers._
 
 object SubscriptionDataIntegrationTest {
   def testSubscriptonDataIssueGeneration(
-    subscriptionFile: String,
-    startDate: LocalDate,
-    expectedIssueData: List[IssueData],
-    expectedAnnualIssueLimitPerEdition: Int,
-    expectedProductType: ZuoraProductType
+                                          subscriptionFile: String,
+                                          startDate: LocalDate,
+                                          expectedIssueData: List[IssueData],
+                                          expectedTotalAnnualIssueLimitPerSubscription: Int,
+                                          expectedProductType: ZuoraProductType
   ) = {
     val subscription = Fixtures.subscriptionFromJson(subscriptionFile)
     val subscriptionData = SubscriptionData(subscription).right.value
@@ -37,7 +37,7 @@ object SubscriptionDataIntegrationTest {
     val (startTestDate, endTestDate) = getTestPeriod(startDate, expectedIssueData)
     subscriptionData.issueDataForPeriod(startTestDate, endTestDate) should equal(expectedIssueData)
 
-    subscriptionData.annualIssueLimitPerEdition should equal(expectedAnnualIssueLimitPerEdition)
+    subscriptionData.subscriptionAnnualIssueLimit should equal(expectedTotalAnnualIssueLimitPerSubscription)
     subscriptionData.productType should equal(expectedProductType)
   }
 

@@ -31,7 +31,7 @@ trait SubscriptionData {
   def issueDataForDate(issueDate: LocalDate): Either[ZuoraHolidayError, IssueData]
   def issueDataForPeriod(startDateInclusive: LocalDate, endDateInclusive: LocalDate): List[IssueData]
   def productType: ZuoraProductType
-  def annualIssueLimitPerEdition: Int
+  def subscriptionAnnualIssueLimit: Int
 }
 object SubscriptionData {
   def apply(subscription: Subscription): Either[ZuoraHolidayError, SubscriptionData] = {
@@ -80,8 +80,9 @@ object SubscriptionData {
         zuoraProductType
       }
 
-      override def annualIssueLimitPerEdition: Int = {
-        productAnnualIssueLimitPerEdition
+      override def subscriptionAnnualIssueLimit: Int = {
+        val numberOfEditions = nonZeroRatePlanChargeDatas.map(_.issueDayOfWeek).distinct.size
+        productAnnualIssueLimitPerEdition * numberOfEditions
       }
     }
   }

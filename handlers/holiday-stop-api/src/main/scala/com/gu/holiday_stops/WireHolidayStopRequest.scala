@@ -123,7 +123,7 @@ object GetHolidayStopRequests {
     GetHolidayStopRequests(
       existing = holidayStopRequests.map(WireHolidayStopRequest.apply(issueSpecifics)),
       issueSpecifics = issueSpecifics,
-      annualIssueLimit = subscription.annualIssueLimitPerEdition * issueSpecifics.size
+      annualIssueLimit = subscription.subscriptionAnnualIssueLimit
     ).asRight
   }
 

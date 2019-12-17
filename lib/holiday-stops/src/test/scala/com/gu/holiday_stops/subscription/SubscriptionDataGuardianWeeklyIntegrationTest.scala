@@ -50,7 +50,7 @@ class SubscriptionDataGuardianWeeklyIntegrationTest extends FlatSpec {
       subscriptionFile = "GuardianWeeklyWith6For6.json",
       startDate = startDate,
       expectedIssueData = expectedIssueData,
-      expectedAnnualIssueLimitPerEdition = 6,
+      expectedTotalAnnualIssueLimitPerSubscription = 6,
       expectedProductType = ZuoraProductTypes.GuardianWeekly
     )
   }
