@@ -18,13 +18,13 @@ Mappings:
     StageMap:
         DEV:
             ApiName: holiday-stop-api-DEV
-            FulfilmentDatesBucketUrn: "arn:aws:s3:::fulfilment-date-calculator-dev"
+            FulfilmentDatesBucketUrn: "arn:aws:s3:::fulfilment-date-calculator-dev/*"
         CODE:
             ApiName: holiday-stop-api-CODE
-            FulfilmentDatesBucketUrn: "arn:aws:s3:::fulfilment-date-calculator-code"
+            FulfilmentDatesBucketUrn: "arn:aws:s3:::fulfilment-date-calculator-code/*"
         PROD:
             ApiName: holiday-stop-api-PROD
-            FulfilmentDatesBucketUrn: "arn:aws:s3:::fulfilment-date-calculator-prod"
+            FulfilmentDatesBucketUrn: "arn:aws:s3:::fulfilment-date-calculator-prod/*"
 
 Resources:
     HolidayStopApiRole:
