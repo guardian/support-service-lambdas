@@ -20,7 +20,7 @@ object Salesforce {
           GuardianWeeklyIssueSuspensionConstants.processorRunLeadTimeDays.toLong
 
         case SaturdayVoucher | SundayVoucher | WeekendVoucher | SixdayVoucher | EverydayVoucher | EverydayPlusVoucher | SixdayPlusVoucher | WeekendPlusVoucher | SundayPlusVoucher | SaturdayPlusVoucher =>
-          ActionCalculator.VoucherProcessorLeadTime
+          0 // should process holiday stop vouchers that are stopped 'today'
 
         case _ => throw new RuntimeException(s"Unknown product $productVariant. Fix ASAP!")
       }
