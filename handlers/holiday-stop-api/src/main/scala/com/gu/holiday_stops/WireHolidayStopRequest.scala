@@ -113,18 +113,30 @@ case class GetHolidayStopRequests(
 object GetHolidayStopRequests {
   def apply(
     holidayStopRequests: List[HolidayStopRequest],
-    subscription: SubscriptionData,
+    subscriptionData: SubscriptionData,
     fulfilmentDates: Map[DayOfWeek, FulfilmentDates]
   ): Either[GetHolidayStopRequestsError, GetHolidayStopRequests] = {
-    val today = MutableCalendar.today
-    val issueSpecifics = subscription
+    subscriptionData
       .editionDaysOfWeek
-      .map(editionDayOfWeek => IssueSpecifics(fulfilmentDates(editionDayOfWeek).holidayStopFirstAvailableDate, editionDayOfWeek.getValue))
-    GetHolidayStopRequests(
-      existing = holidayStopRequests.map(WireHolidayStopRequest.apply(issueSpecifics)),
-      issueSpecifics = issueSpecifics,
-      annualIssueLimit = subscription.subscriptionAnnualIssueLimit
-    ).asRight
+      .traverse { editionDayOfWeek =>
+        createIssueSpecificsForDayOfWeek(fulfilmentDates, editionDayOfWeek)
+      }
+      .map { issueSpecifics =>
+        GetHolidayStopRequests(
+          existing = holidayStopRequests.map(WireHolidayStopRequest.apply(issueSpecifics)),
+          issueSpecifics = issueSpecifics,
+          annualIssueLimit = subscriptionData.subscriptionAnnualIssueLimit
+        )
+      }
+  }
+
+  private def createIssueSpecificsForDayOfWeek(fulfilmentDates: Map[DayOfWeek, FulfilmentDates], editionDayOfWeek: DayOfWeek) = {
+    fulfilmentDates
+      .get(editionDayOfWeek)
+      .toRight(GetHolidayStopRequestsError(s"Could not find fulfilment dates for day $editionDayOfWeek"))
+      .map { fulfilmentDateForDayOfWeek =>
+        IssueSpecifics(fulfilmentDateForDayOfWeek.holidayStopFirstAvailableDate, editionDayOfWeek.getValue)
+      }
   }
 
   implicit val formatIssueSpecifics: OFormat[IssueSpecifics] = Json.format[IssueSpecifics]
