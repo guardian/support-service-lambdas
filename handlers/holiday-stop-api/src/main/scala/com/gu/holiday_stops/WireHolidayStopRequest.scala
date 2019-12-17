@@ -1,9 +1,10 @@
 package com.gu.holiday_stops
 
-import java.time.{LocalDate, ZonedDateTime}
+import java.time.{DayOfWeek, LocalDate, ZonedDateTime}
 
 import cats.implicits._
-import com.gu.holiday_stops.subscription.Subscription
+import com.gu.fulfilmentdates.FulfilmentDates
+import com.gu.holiday_stops.subscription.{MutableCalendar, SubscriptionData}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.SubscriptionName
@@ -110,20 +111,21 @@ case class GetHolidayStopRequests(
 )
 
 object GetHolidayStopRequests {
-
   def apply(
     holidayStopRequests: List[HolidayStopRequest],
-    subscription: Subscription
-  ): Either[GetHolidayStopRequestsError, GetHolidayStopRequests] =
-    ActionCalculator
-      .getProductSpecificsByProductVariant(ProductVariant(subscription.ratePlans), subscription)
-      .leftMap(error => GetHolidayStopRequestsError(s"Failed to get product specifics for $subscription: $error"))
-      .map(productSpecifics =>
-        GetHolidayStopRequests(
-          existing = holidayStopRequests.map(WireHolidayStopRequest.apply(productSpecifics.issueSpecifics)),
-          issueSpecifics = productSpecifics.issueSpecifics,
-          annualIssueLimit = productSpecifics.annualIssueLimit
-        ))
+    subscription: SubscriptionData,
+    fulfilmentDates: Map[DayOfWeek, FulfilmentDates]
+  ): Either[GetHolidayStopRequestsError, GetHolidayStopRequests] = {
+    val today = MutableCalendar.today
+    val issueSpecifics = subscription
+      .issueDataForPeriod(today, today.plusWeeks(1).minusDays(1))
+      .map(issueData => IssueSpecifics(fulfilmentDates(issueData.issueDate.getDayOfWeek).holidayStopFirstAvailableDate, issueData.issueDate.getDayOfWeek.getValue))
+    GetHolidayStopRequests(
+      existing = holidayStopRequests.map(WireHolidayStopRequest.apply(issueSpecifics)),
+      issueSpecifics = issueSpecifics,
+      annualIssueLimit = subscription.annualIssueLimitPerEdition * issueSpecifics.size
+    ).asRight
+  }
 
   implicit val formatIssueSpecifics: OFormat[IssueSpecifics] = Json.format[IssueSpecifics]
   implicit val formatProductSpecifics: OFormat[ProductSpecifics] = Json.format[ProductSpecifics]

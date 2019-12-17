@@ -5,8 +5,8 @@ import java.time.{DayOfWeek, LocalDate}
 import cats.implicits._
 import com.gu.effects.S3Location
 import com.gu.fulfilmentdates.FulfilmentDatesLocation.fulfilmentDatesFileLocation
-import com.gu.fulfilmentdates.ZuoraProductTypes.ZuoraProductType
 import com.gu.util.config.Stage
+import com.gu.zuora.ZuoraProductTypes.ZuoraProductType
 import io.circe.KeyDecoder
 import io.circe.generic.auto._
 import io.circe.parser._
@@ -22,7 +22,7 @@ trait FulfilmentDatesFetcher {
 case class FulfilmentDatesFetcherError(message: String)
 
 object FulfilmentDatesFetcher {
-  private implicit val fooKeyDecoder: KeyDecoder[DayOfWeek] = new KeyDecoder[DayOfWeek] {
+  private implicit val keyDecoder: KeyDecoder[DayOfWeek] = new KeyDecoder[DayOfWeek] {
     override def apply(key: String): Option[DayOfWeek] = {
       Try(DayOfWeek.from(FulfilmentDates.dayOfWeekFormat.parse(key))).toOption
     }

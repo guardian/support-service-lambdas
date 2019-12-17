@@ -1,6 +1,6 @@
 package com.gu.holiday_stops
 
-import java.time.LocalDate
+import java.time.{DayOfWeek, LocalDate}
 import java.time.format.DateTimeFormatter
 
 import com.gu.effects.{FakeFetchString, SFTestEffects, TestingRawEffects}
@@ -165,11 +165,12 @@ class HandlerTest extends FlatSpec with Matchers {
   }
   "GET /hsr/<<sub name>> endpoint" should
     "get subscription and calculate product specifics" in {
-
+    MutableCalendar.setFakeToday(Some(LocalDate.now()))
     val subscriptionName = "Sub12344"
     val gwSubscription = Fixtures.mkGuardianWeeklySubscription()
     val contactId = "Contact1234"
     val holidayStopRequestsDetail = Fixtures.mkHolidayStopRequestDetails()
+    val GuardianWeeklyAnnualIssueLimit = 6
 
     val testBackend = SttpBackendStub
       .synchronous
@@ -228,11 +229,11 @@ class HandlerTest extends FlatSpec with Matchers {
                 ),
                 List(
                   IssueSpecifics(
-                    GuardianWeeklySuspensionConstants.issueConstants.head.firstAvailableDate(LocalDate.now()),
-                    GuardianWeeklySuspensionConstants.issueConstants.head.issueDayOfWeek.getValue
+                    LocalDate.of(2019,12,20), //from com.gu.effects.FakeFetchString.guardianWeeklyFulfilmentDatesFile
+                    DayOfWeek.FRIDAY.getValue
                   )
                 ),
-                GuardianWeeklySuspensionConstants.annualIssueLimit
+                GuardianWeeklyAnnualIssueLimit
               )
             )
 

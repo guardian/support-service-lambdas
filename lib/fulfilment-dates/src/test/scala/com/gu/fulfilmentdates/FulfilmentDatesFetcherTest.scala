@@ -5,6 +5,7 @@ import java.time.LocalDate
 
 import com.gu.effects.S3Location
 import com.gu.util.config.Stage
+import com.gu.zuora.ZuoraProductTypes
 import org.scalatest.Matchers._
 import org.scalatest.{FlatSpec, Inside}
 

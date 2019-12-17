@@ -5,7 +5,7 @@ import java.time.LocalDate
 import com.gu.holiday_stops.subscription.{RatePlan, RatePlanCharge, Subscription}
 import com.gu.salesforce.RecordsWrapperCaseClass
 import com.gu.salesforce.SFAuthConfig
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.{HolidayStopRequest, HolidayStopRequestActionedCount, HolidayStopRequestEndDate, HolidayStopRequestIsWithdrawn, HolidayStopRequestStartDate, HolidayStopRequestWithdrawnTime}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.{HolidayStopRequest, HolidayStopRequestActionedCount, HolidayStopRequestEndDate, HolidayStopRequestIsWithdrawn, HolidayStopRequestStartDate}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
 import io.circe.generic.auto._
 import io.circe.parser.decode

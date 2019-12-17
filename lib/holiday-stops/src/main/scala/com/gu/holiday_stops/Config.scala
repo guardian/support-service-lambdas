@@ -44,7 +44,7 @@ object Config {
   }
 
   def apply(fetchString: StringFromS3): Either[OverallFailure, Config] = {
-    val stage = Option(System.getenv("Stage")).getOrElse("DEV")
+    val stage = Stage().value
     for {
       zuoraConfig <- zuoraCredentials(stage, fetchString)
       sfConfig <- salesforceCredentials(stage, fetchString)
