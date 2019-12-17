@@ -18,10 +18,13 @@ Mappings:
     StageMap:
         DEV:
             ApiName: holiday-stop-api-DEV
+            FulfilmentDatesBucketUrn: "arn:aws:s3:::fulfilment-date-calculator-dev"
         CODE:
             ApiName: holiday-stop-api-CODE
+            FulfilmentDatesBucketUrn: "arn:aws:s3:::fulfilment-date-calculator-code"
         PROD:
             ApiName: holiday-stop-api-PROD
+            FulfilmentDatesBucketUrn: "arn:aws:s3:::fulfilment-date-calculator-prod"
 
 Resources:
     HolidayStopApiRole:
@@ -53,6 +56,13 @@ Resources:
                           - Effect: Allow
                             Action: s3:GetObject
                             Resource: !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/*
+                - PolicyName: FulfilmentDatesCalculatorBucket
+                  PolicyDocument:
+                    Statement:
+                      - Effect: Allow
+                        Action: s3:GetObject
+                        Resource:
+                          - !FindInMap [StageMap, !Ref Stage, FulfilmentDatesBucketUrn]
 
     HolidayStopApi:
         Type: "AWS::ApiGateway::RestApi"
