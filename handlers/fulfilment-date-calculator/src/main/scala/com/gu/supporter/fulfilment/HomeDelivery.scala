@@ -2,7 +2,7 @@ package com.gu.supporter.fulfilment
 
 import java.time.DayOfWeek._
 import java.time.format.TextStyle.FULL
-import java.time.temporal.TemporalAdjusters
+import java.time.temporal.TemporalAdjusters.next
 import java.time.{DayOfWeek, LocalDate}
 import java.util.Locale.ENGLISH
 
@@ -20,9 +20,9 @@ object HomeDeliveryFulfilmentDates {
           today,
           deliveryAddressChangeEffectiveDate(targetDayOfWeek, today),
           holidayStopFirstAvailableDate(targetDayOfWeek, today),
+          holidayStopProcessorTargetDate(targetDayOfWeek, today),
           finalFulfilmentFileGenerationDate(targetDayOfWeek, today)
-        )
-      ):_*
+        )): _*
     )
 
   private def getFulfilmentFileGenerationDateForNextTargetDayOfWeek(
@@ -32,7 +32,7 @@ object HomeDeliveryFulfilmentDates {
     implicit
     bankHolidays: BankHolidays
   ): LocalDate = {
-    val nextTargetDayOfWeek = today `with` TemporalAdjusters.next(targetDayOfWeek)
+    val nextTargetDayOfWeek = today `with` next(targetDayOfWeek)
     val distributorPickupDay: LocalDate = (nextTargetDayOfWeek findPreviousWorkingDay)
     distributorPickupDay minusDays 0 // distributor picks up files generated early-AM that SAME morning
   }
@@ -50,7 +50,7 @@ object HomeDeliveryFulfilmentDates {
       fulfilmentFileGenerationDateForNextTargetDayOfWeek
     } else {
       // we're not in time to affect the next target day, so return the one the following week
-      fulfilmentFileGenerationDateForNextTargetDayOfWeek `with` TemporalAdjusters.next(fulfilmentFileGenerationDateForNextTargetDayOfWeek.getDayOfWeek)
+      fulfilmentFileGenerationDateForNextTargetDayOfWeek `with` next(fulfilmentFileGenerationDateForNextTargetDayOfWeek.getDayOfWeek)
     }
   }
 
@@ -62,7 +62,7 @@ object HomeDeliveryFulfilmentDates {
     implicit
     bankHolidays: BankHolidays
   ): LocalDate =
-    finalFulfilmentFileGenerationDate(targetDayOfWeek, today) `with` TemporalAdjusters.next(targetDayOfWeek)
+    finalFulfilmentFileGenerationDate(targetDayOfWeek, today) `with` next(targetDayOfWeek)
 
   def holidayStopFirstAvailableDate(
     targetDayOfWeek: DayOfWeek,
@@ -79,8 +79,25 @@ object HomeDeliveryFulfilmentDates {
         holidayStopProcessingDayForNextTargetDayOfWeek
       } else {
         // we're not in time to affect the next target day, so return the one the following week
-        holidayStopProcessingDayForNextTargetDayOfWeek `with` TemporalAdjusters.next(fulfilmentFileGenerationDateForNextTargetDayOfWeek.getDayOfWeek)
+        holidayStopProcessingDayForNextTargetDayOfWeek `with` next(fulfilmentFileGenerationDateForNextTargetDayOfWeek.getDayOfWeek)
       }
-    ) `with` TemporalAdjusters.next(targetDayOfWeek)
+    ) `with` next(targetDayOfWeek)
   }
+
+  def holidayStopProcessorTargetDate(
+    targetDayOfWeek: DayOfWeek,
+    today: LocalDate
+  )(
+    implicit
+    bankHolidays: BankHolidays
+  ): Option[LocalDate] = {
+    val fulfilmentFileGenerationDateForNextTargetDayOfWeek = getFulfilmentFileGenerationDateForNextTargetDayOfWeek(targetDayOfWeek, today)
+    if ((fulfilmentFileGenerationDateForNextTargetDayOfWeek minusDays 1) isEqual today) {
+      // this is the holiday-stop-processor for the target day
+      Some(fulfilmentFileGenerationDateForNextTargetDayOfWeek `with` next(targetDayOfWeek))
+    } else {
+      None
+    }
+  }
+
 }

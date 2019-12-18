@@ -1,10 +1,27 @@
 package com.gu.supporter.fulfilment
 
+import java.time.LocalDate
+
 import org.scalatest.{FlatSpec, Matchers}
 
 class GuardianWeeklyFulfilmentDatesSpec extends FlatSpec with Matchers with DateSupport {
 
-  "GuardianWeeklyFulfilmentDates" should "calculate deliveryAddressChangeEffectiveDate" in {
+  it should "calculate holidayStopProcessorTargetDate" in {
+    GuardianWeeklyFulfilmentDates( /* Monday    */ "2019-12-02").values.flatMap(_.holidayStopProcessorTargetDate) shouldBe Nil
+    GuardianWeeklyFulfilmentDates( /* Tuesday   */ "2019-12-03").values.flatMap(_.holidayStopProcessorTargetDate) shouldBe Nil
+    GuardianWeeklyFulfilmentDates( /* Wednesday */ "2019-12-04").values.flatMap(_.holidayStopProcessorTargetDate) shouldBe List[LocalDate]("2019-12-13")
+    GuardianWeeklyFulfilmentDates( /* Thursday  */ "2019-12-05").values.flatMap(_.holidayStopProcessorTargetDate) shouldBe Nil
+    GuardianWeeklyFulfilmentDates( /* Friday    */ "2019-12-06").values.flatMap(_.holidayStopProcessorTargetDate) shouldBe Nil
+    GuardianWeeklyFulfilmentDates( /* Saturday  */ "2019-12-07").values.flatMap(_.holidayStopProcessorTargetDate) shouldBe Nil
+    GuardianWeeklyFulfilmentDates( /* Sunday    */ "2019-12-08").values.flatMap(_.holidayStopProcessorTargetDate) shouldBe Nil
+    GuardianWeeklyFulfilmentDates( /* Monday    */ "2019-12-09").values.flatMap(_.holidayStopProcessorTargetDate) shouldBe Nil
+    GuardianWeeklyFulfilmentDates( /* Tuesday   */ "2019-12-10").values.flatMap(_.holidayStopProcessorTargetDate) shouldBe Nil
+    GuardianWeeklyFulfilmentDates( /* Wednesday */ "2019-12-11").values.flatMap(_.holidayStopProcessorTargetDate) shouldBe List[LocalDate]("2019-12-20")
+    GuardianWeeklyFulfilmentDates( /* Thursday  */ "2019-12-12").values.flatMap(_.holidayStopProcessorTargetDate) shouldBe Nil
+    GuardianWeeklyFulfilmentDates( /* Friday    */ "2019-12-13").values.flatMap(_.holidayStopProcessorTargetDate) shouldBe Nil
+  }
+
+  it should "calculate deliveryAddressChangeEffectiveDate" in {
     GuardianWeeklyFulfilmentDates("2019-12-02")("Friday").deliveryAddressChangeEffectiveDate.get should equalDate("2019-12-13")
     GuardianWeeklyFulfilmentDates("2019-12-03")("Friday").deliveryAddressChangeEffectiveDate.get should equalDate("2019-12-13")
     GuardianWeeklyFulfilmentDates("2019-12-04")("Friday").deliveryAddressChangeEffectiveDate.get should equalDate("2019-12-13")
