@@ -321,7 +321,7 @@ object SalesforceHolidayStopRequest extends Logging {
 
       val detailRecordsToBeDeleted = existingPublicationsThatWereToBeStopped
         .filterNot(holidayStopRequestDetail =>
-          issuesData.contains(holidayStopRequestDetail.Stopped_Publication_Date__c.value)
+          issuesData.map(_.issueDate).contains(holidayStopRequestDetail.Stopped_Publication_Date__c.value)
         )
         .map( holidayStopRequestDetail => CompositePart(
           method = "DELETE",
