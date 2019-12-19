@@ -114,6 +114,10 @@ object RatePlanChargeBillingSchedule {
         optionalSpecificBillingPeriod
           .toRight(ZuoraHolidayError(s"specificBillingPeriod is required for $billingPeriodName billing period"))
           .map(BillingPeriod(ChronoUnit.WEEKS, _))
+      case "Specific_Months" =>
+        optionalSpecificBillingPeriod
+          .toRight(ZuoraHolidayError(s"specificBillingPeriod is required for $billingPeriodName billing period"))
+          .map(BillingPeriod(ChronoUnit.MONTHS, _))
       case _ => Left(ZuoraHolidayError(s"Failed to determine duration of billing period: $billingPeriodName"))
     }
   }

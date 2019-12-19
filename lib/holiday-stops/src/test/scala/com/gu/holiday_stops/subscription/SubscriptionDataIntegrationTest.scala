@@ -11,24 +11,27 @@ import org.scalatest.Matchers._
 object SubscriptionDataIntegrationTest {
   def testSubscriptonDataIssueGeneration(subscriptionFile: String, startDate: LocalDate, expectedIssueData: List[IssueData]) = {
     val subscription = Fixtures.subscriptionFromJson(subscriptionFile)
-    val subscriptionData = SubscriptionData(subscription).right.value
     val datesToTest = getDatesToTest(startDate, expectedIssueData)
 
-    datesToTest.foreach { testDate =>
-      expectedIssueData.find(_.issueDate == testDate) match {
-        case Some(expectedIssueData) =>
-          Inside.inside(subscriptionData.issueDataForDate(testDate)) {
-            case Right(actualIssueData) => actualIssueData should equal(expectedIssueData)
+    Inside.inside(SubscriptionData(subscription)) {
+      case Right(subscriptionData) =>
+        datesToTest.foreach { testDate =>
+          expectedIssueData.find(_.issueDate == testDate) match {
+            case Some(expectedIssueData) =>
+              Inside.inside(subscriptionData.issueDataForDate(testDate)) {
+                case Right(actualIssueData) => actualIssueData should equal(expectedIssueData)
+              }
+            case None =>
+              Inside.inside(subscriptionData.issueDataForDate(testDate)) {
+                case Left(_) => //pass
+              }
           }
-        case None =>
-          Inside.inside(subscriptionData.issueDataForDate(testDate)) {
-            case Left(_) => //pass
-          }
-      }
+        }
+
+        val (startTestDate, endTestDate) = getTestPeriod(startDate, expectedIssueData)
+        subscriptionData.issueDataForPeriod(startTestDate, endTestDate) should equal(expectedIssueData)
     }
 
-    val (startTestDate, endTestDate) = getTestPeriod(startDate, expectedIssueData)
-    subscriptionData.issueDataForPeriod(startTestDate, endTestDate) should equal(expectedIssueData)
   }
 
   private def getMaxDate(dates: List[LocalDate]): LocalDate = {

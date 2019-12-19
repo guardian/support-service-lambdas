@@ -52,7 +52,8 @@ case class RatePlan(
   ratePlanName: String,
   ratePlanCharges: List[RatePlanCharge],
   productRatePlanId: String,
-  id: String
+  id: String,
+  lastChangeType: Option[String]
 )
 
 case class RatePlanCharge(

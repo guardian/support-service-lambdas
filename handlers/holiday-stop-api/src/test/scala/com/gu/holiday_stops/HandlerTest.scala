@@ -76,7 +76,8 @@ class HandlerTest extends FlatSpec with Matchers {
               upToPeriods = None
             )),
           productRatePlanId = "",
-          id = ""
+          id = "",
+          lastChangeType = None
         )
       ),
       "Active"
