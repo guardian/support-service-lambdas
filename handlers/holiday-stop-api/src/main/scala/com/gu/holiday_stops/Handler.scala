@@ -225,7 +225,8 @@ object Handler extends Logging {
       response <- GetHolidayStopRequests(
         usersHolidayStopRequests,
         subscriptionData,
-        fulfilmentDates
+        fulfilmentDates,
+        subscription.fulfilmentStartDate
       ).toApiGatewayOp("calculate holidays stops specifics")
     } yield ApiGatewayResponse("200", response)).apiResponse
   }

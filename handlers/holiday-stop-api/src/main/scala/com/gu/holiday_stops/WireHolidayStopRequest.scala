@@ -4,7 +4,7 @@ import java.time.{DayOfWeek, LocalDate, ZonedDateTime}
 
 import cats.implicits._
 import com.gu.fulfilmentdates.FulfilmentDates
-import com.gu.holiday_stops.subscription.{MutableCalendar, SubscriptionData}
+import com.gu.holiday_stops.subscription.SubscriptionData
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.SubscriptionName
@@ -114,12 +114,13 @@ object GetHolidayStopRequests {
   def apply(
     holidayStopRequests: List[HolidayStopRequest],
     subscriptionData: SubscriptionData,
-    fulfilmentDates: Map[DayOfWeek, FulfilmentDates]
+    fulfilmentDates: Map[DayOfWeek, FulfilmentDates],
+    fulfilmentStartDate: LocalDate
   ): Either[GetHolidayStopRequestsError, GetHolidayStopRequests] = {
     subscriptionData
       .editionDaysOfWeek
       .traverse { editionDayOfWeek =>
-        createIssueSpecificsForDayOfWeek(fulfilmentDates, editionDayOfWeek)
+        createIssueSpecificsForDayOfWeek(fulfilmentDates, editionDayOfWeek, fulfilmentStartDate)
       }
       .map { issueSpecifics =>
         GetHolidayStopRequests(
@@ -130,14 +131,21 @@ object GetHolidayStopRequests {
       }
   }
 
-  private def createIssueSpecificsForDayOfWeek(fulfilmentDates: Map[DayOfWeek, FulfilmentDates], editionDayOfWeek: DayOfWeek) = {
+  private def createIssueSpecificsForDayOfWeek(
+    fulfilmentDates: Map[DayOfWeek, FulfilmentDates],
+    editionDayOfWeek: DayOfWeek,
+    fulfilmentStartDate: LocalDate
+  ) = {
     fulfilmentDates
       .get(editionDayOfWeek)
       .toRight(GetHolidayStopRequestsError(s"Could not find fulfilment dates for day $editionDayOfWeek"))
-      .map { fulfilmentDateForDayOfWeek =>
-        IssueSpecifics(fulfilmentDateForDayOfWeek.holidayStopFirstAvailableDate, editionDayOfWeek.getValue)
+      .map { fulfilmentDatesForDayOfWeek =>
+        val firstAvailableDate = latestOf(fulfilmentStartDate, fulfilmentDatesForDayOfWeek.holidayStopFirstAvailableDate)
+        IssueSpecifics(firstAvailableDate, editionDayOfWeek.getValue)
       }
   }
+
+  private def latestOf(head: LocalDate, tail: LocalDate*) = (head :: tail.toList).max[LocalDate](_ compareTo _)
 
   implicit val formatIssueSpecifics: OFormat[IssueSpecifics] = Json.format[IssueSpecifics]
   implicit val format: OFormat[GetHolidayStopRequests] = Json.format[GetHolidayStopRequests]
