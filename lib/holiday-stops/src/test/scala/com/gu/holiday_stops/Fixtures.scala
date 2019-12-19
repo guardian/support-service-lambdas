@@ -80,7 +80,8 @@ object Fixtures extends Assertions {
               effectiveStartDate
             )),
           productRatePlanId = "",
-          id = ""
+          id = "",
+          lastChangeType = None
         )
       ),
       status = "Active"
@@ -116,7 +117,8 @@ object Fixtures extends Assertions {
           upToPeriods = None
         )),
         productRatePlanId = "",
-        id = ""
+        id = "",
+        lastChangeType = None
       ),
       RatePlan(
         productName = "Discounts",
@@ -138,7 +140,8 @@ object Fixtures extends Assertions {
           upToPeriods = None
         )),
         productRatePlanId = "",
-        id = ""
+        id = "",
+        lastChangeType = None
       ),
       RatePlan(
         productName = "Not a discount",
@@ -160,7 +163,8 @@ object Fixtures extends Assertions {
           upToPeriods = None
         )),
         productRatePlanId = "",
-        id = ""
+        id = "",
+        lastChangeType = None
       ),
       RatePlan(
         productName = "Discounts",
@@ -182,7 +186,8 @@ object Fixtures extends Assertions {
           upToPeriods = None
         )),
         productRatePlanId = "",
-        id = ""
+        id = "",
+        lastChangeType = None
       ),
       RatePlan(
         productName = "Discounts",
@@ -204,7 +209,8 @@ object Fixtures extends Assertions {
           upToPeriods = None
         )),
         productRatePlanId = "",
-        id = ""
+        id = "",
+        lastChangeType = None
       ),
       RatePlan(
         productName = "Discounts",
@@ -226,7 +232,8 @@ object Fixtures extends Assertions {
           upToPeriods = None
         )),
         productRatePlanId = "",
-        id = ""
+        id = "",
+        lastChangeType = None
       ),
       RatePlan(
         productName = "Guardian Weekly - Domestic",
@@ -238,7 +245,8 @@ object Fixtures extends Assertions {
           chargedThroughDate = Some(LocalDate.of(2019, 9, 7))
         )),
         productRatePlanId = "",
-        id = ""
+        id = "",
+        lastChangeType = None
       )
     )
   )

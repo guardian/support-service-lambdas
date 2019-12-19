@@ -13,7 +13,8 @@ class ProductVariantTest extends FlatSpec with Matchers with EitherValues {
       ratePlanName = "GW Oct 18 - Quarterly - Domestic",
       ratePlanCharges = Nil,
       productRatePlanId = "",
-      id = ""
+      id = "",
+      lastChangeType = None
     ))
 
     ProductVariant(gwRatePlans) shouldBe GuardianWeekly
@@ -27,7 +28,8 @@ class ProductVariantTest extends FlatSpec with Matchers with EitherValues {
       ratePlanName = "Sixday",
       ratePlanCharges = Nil,
       productRatePlanId = "",
-      id = ""
+      id = "",
+      lastChangeType = None
     ))
 
     ProductVariant(sixdayVoucherRatePlans) shouldBe SixdayVoucher
@@ -37,7 +39,8 @@ class ProductVariantTest extends FlatSpec with Matchers with EitherValues {
       ratePlanName = "Everyday+",
       ratePlanCharges = Nil,
       productRatePlanId = "",
-      id = ""
+      id = "",
+      lastChangeType = None
     ))
 
     ProductVariant(everydayPlusVoucherRatePlans) shouldBe EverydayPlusVoucher
@@ -56,7 +59,8 @@ class ProductVariantTest extends FlatSpec with Matchers with EitherValues {
         ratePlanName = "Newfangled",
         ratePlanCharges = Nil,
         productRatePlanId = "",
-        id = ""
+        id = "",
+        lastChangeType = None
       )))
     }
 
