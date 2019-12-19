@@ -33,7 +33,7 @@ trait SubscriptionData {
 object SubscriptionData {
   def apply(subscription: Subscription): Either[ZuoraHolidayError, SubscriptionData] = {
     val supportedRatePlanCharges: List[(RatePlanCharge, SupportedRatePlanCharge)] = for {
-      ratePlan <- subscription.ratePlans
+      ratePlan <- subscription.ratePlans if ratePlan.lastChangeType =!= Some("Remove")
       supportedProduct <- getSupportedProductForRatePlan(ratePlan).toList
       supportedRatePlan <- getSupportedRatePlanForRatePlan(ratePlan, supportedProduct).toList
       unExpiredRatePlanCharge <- getUnexpiredRatePlanCharges(ratePlan)
