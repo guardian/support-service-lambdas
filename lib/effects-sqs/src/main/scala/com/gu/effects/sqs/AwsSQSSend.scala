@@ -4,7 +4,7 @@ import com.amazonaws.auth._
 import com.amazonaws.auth.profile.ProfileCredentialsProvider
 import com.amazonaws.regions.Regions
 import com.amazonaws.services.sqs.{AmazonSQSAsync, AmazonSQSAsyncClientBuilder}
-import com.amazonaws.services.sqs.model.{SendMessageRequest, SendMessageResult}
+import com.amazonaws.services.sqs.model.{SendMessageRequest}
 import com.typesafe.scalalogging.LazyLogging
 
 import scala.concurrent.ExecutionContext.Implicits.global
