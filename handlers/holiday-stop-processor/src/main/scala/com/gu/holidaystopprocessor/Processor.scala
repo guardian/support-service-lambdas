@@ -11,11 +11,14 @@ import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
 import com.gu.util.config.Stage
 import com.gu.zuora.ZuoraProductTypes.{GuardianWeekly, NewspaperHomeDelivery, NewspaperVoucherBook, ZuoraProductType}
 import com.softwaremill.sttp.{Id, SttpBackend}
+import org.slf4j.LoggerFactory
 
 import scala.util.Try
 
 
 object Processor {
+  private val logger = LoggerFactory.getLogger(this.getClass)
+
   def processAllProducts(
     config: Config,
     processDateOverride: Option[LocalDate],
@@ -60,6 +63,7 @@ object Processor {
   ): ProcessResult = {
     val holidayStops = for {
       datesToProcess <- getDatesToProcess(fulfilmentDatesFetcher, productType, processOverrideDate, LocalDate.now())
+      _ = logger.info(s"Processing holiday stops for $productType for issue dates ${datesToProcess.mkString(", ")}")
       holidayStopsFromSalesforce <-
         if(datesToProcess.isEmpty) Nil.asRight else getHolidayStopRequestsFromSalesforce(productType, datesToProcess)
     } yield holidayStopsFromSalesforce
