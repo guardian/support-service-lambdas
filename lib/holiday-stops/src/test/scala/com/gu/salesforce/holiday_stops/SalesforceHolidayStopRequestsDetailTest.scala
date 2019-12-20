@@ -17,7 +17,7 @@ class SalesforceHolidayStopRequestsDetailTest extends FlatSpec {
         | Estimated_Price__c, Charge_Code__c, Actual_Price__c, Expected_Invoice_Date__c
         |
         | FROM Holiday_Stop_Requests_Detail__c
-        | WHERE Holiday_Stop_Request__r.SF_Sub_c = 'Guardian Weekly'
+        | WHERE Holiday_Stop_Request__r.SF_Subscription__r.Product_Type__c = 'Guardian Weekly'
         | AND
         | Stopped_Publication_Date__c IN (2019-12-20, 2019-12-21)
         | AND Subscription_Cancellation_Effective_Date__c = null

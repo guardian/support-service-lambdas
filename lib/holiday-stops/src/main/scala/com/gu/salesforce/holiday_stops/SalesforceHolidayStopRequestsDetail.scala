@@ -108,7 +108,7 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
       s"""
          | $SOQL_SELECT_CLAUSE
          | FROM $holidayStopRequestsDetailSfObjectRef
-         | WHERE Holiday_Stop_Request__r.SF_Sub_c = '${productType.name}'
+         | WHERE Holiday_Stop_Request__r.SF_Subscription__r.Product_Type__c = '${productType.name}'
          | AND${soqlFilterClause(dates)}
          | $SOQL_ORDER_BY_CLAUSE
          |""".stripMargin
