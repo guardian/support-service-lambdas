@@ -60,7 +60,8 @@ object Processor {
   ): ProcessResult = {
     val holidayStops = for {
       datesToProcess <- getDatesToProcess(fulfilmentDatesFetcher, productType, processOverrideDate, LocalDate.now())
-      holidayStopsFromSalesforce <- getHolidayStopRequestsFromSalesforce(productType, datesToProcess)
+      holidayStopsFromSalesforce <-
+        if(datesToProcess.isEmpty) Nil.asRight else getHolidayStopRequestsFromSalesforce(productType, datesToProcess)
     } yield holidayStopsFromSalesforce
 
     holidayStops match {
