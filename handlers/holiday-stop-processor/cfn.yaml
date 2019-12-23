@@ -16,12 +16,12 @@ Conditions:
 
 Mappings:
   StageMap:
-    DEV:
-      FulfilmentDatesBucketUrn: "arn:aws:s3:::fulfilment-date-calculator-dev/*"
     CODE:
       FulfilmentDatesBucketUrn: "arn:aws:s3:::fulfilment-date-calculator-code/*"
+      ScheduleName: holiday-stop-processor-schedule-code
     PROD:
       FulfilmentDatesBucketUrn: "arn:aws:s3:::fulfilment-date-calculator-prod/*"
+      ScheduleName: holiday-stop-processor-schedule
 
 Resources:
 
@@ -120,7 +120,7 @@ Resources:
     Type: AWS::Events::Rule
     Properties:
       Description: Trigger processing of holiday stops every hour (to give 24 attempts a day)
-      Name: holiday-stop-processor-schedule
+      Name: !FindInMap [StageMap, !Ref Stage, ScheduleName]
       ScheduleExpression: "cron(0 * ? * * *)"
       State: ENABLED
       Targets:
