@@ -102,7 +102,6 @@ Resources:
 
   HolidayStopProcessorScheduleRule:
     Type: AWS::Events::Rule
-    Condition: IsProd
     Properties:
       Description: Trigger processing of holiday stops every hour (to give 24 attempts a day)
       Name: holiday-stop-processor-schedule
