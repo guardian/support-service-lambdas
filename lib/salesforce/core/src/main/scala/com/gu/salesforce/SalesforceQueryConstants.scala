@@ -16,7 +16,8 @@ object SalesforceQueryConstants {
     optionalEndDate: Option[LocalDate]
   ) =
     s"""SELECT (
-    |    SELECT Delivery_Date__c, Delivery_Address__c, Delivery_Instructions__c, Has_Holiday_Stop__c
+    |    SELECT Delivery_Date__c, Delivery_Address__c, Delivery_Instructions__c, Has_Holiday_Stop__c, Address_Line_1__c,
+    |           Address_Line_2__c, Address_Line_3__c, Address_Town__c, Address_Country__c, Address_Postcode__c
     |    FROM Delivery_Records__r
     |    ${deliveryDateFilter(optionalStartDate, optionalEndDate)}
     |)
