@@ -1,5 +1,9 @@
 package com.gu.effects
 
+import java.time.{DayOfWeek, LocalDate}
+import java.time.temporal.TemporalAdjusters
+import java.time.temporal.TemporalAdjusters._
+
 import scala.util.{Failure, Success, Try}
 
 object FakeFetchString {
@@ -78,16 +82,17 @@ object FakeFetchString {
       |}
     """.stripMargin
 
-  val guardianWeeklyFulfilmentDatesFile = {
-    """
+  def guardianWeeklyFulfilmentDatesFile(today: LocalDate) = {
+    val issueDate = today `with` next(DayOfWeek.FRIDAY) `with` next(DayOfWeek.FRIDAY)
+
+    s"""
       |{
       |  "Friday" : {
-      |    "today" : "2019-12-11",
-      |    "acquisitionsStartDate" : "2019-12-20",
-      |    "deliveryAddressChangeEffectiveDate" : "2019-12-20",
-      |    "holidayStopFirstAvailableDate" : "2019-12-20",
-      |    "finalFulfilmentFileGenerationDate" : "2019-12-18",
-      |    "nextAffectablePublicationDateOnFrontCover" : "2019-12-20"
+      |    "today" : "$today",
+      |    "deliveryAddressChangeEffectiveDate" : "${issueDate.minusDays(2)}",
+      |    "holidayStopFirstAvailableDate" : "${issueDate.minusDays(3)}",
+      |    "finalFulfilmentFileGenerationDate" : "${issueDate.minusDays(1)}",
+      |    "nextAffectablePublicationDateOnFrontCover" : "${issueDate}"
       |  }
       |}
       |""".stripMargin
@@ -103,6 +108,10 @@ object FakeFetchString {
   )
 
   def fetchString(location: S3Location): Try[String] = {
+    fetchString(LocalDate.now(), location)
+  }
+
+  def fetchString(today: LocalDate,location: S3Location): Try[String] = {
     location match {
       case S3Location("gu-reader-revenue-private", s3Key) =>
         configFiles
@@ -110,7 +119,7 @@ object FakeFetchString {
           .map(contents => Success(contents))
           .getOrElse(Failure(new RuntimeException(s"test failure unexpected config s3 key ${location.key}")))
       case S3Location("fulfilment-date-calculator-dev", s3Key) if s3Key.contains("Guardian Weekly") =>
-        Success(guardianWeeklyFulfilmentDatesFile)
+        Success(guardianWeeklyFulfilmentDatesFile(today))
       case _ => Failure(new RuntimeException(s"test failure unexpected config s3 $location"))
     }
   }
