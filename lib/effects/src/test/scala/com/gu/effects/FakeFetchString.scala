@@ -111,7 +111,7 @@ object FakeFetchString {
     fetchString(LocalDate.now(), location)
   }
 
-  def fetchString(today: LocalDate,location: S3Location): Try[String] = {
+  def fetchString(today: LocalDate, location: S3Location): Try[String] = {
     location match {
       case S3Location("gu-reader-revenue-private", s3Key) =>
         configFiles
