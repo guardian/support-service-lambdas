@@ -4,7 +4,7 @@ import java.time.LocalDate
 
 import com.gu.holiday_stops.subscription.{RatePlan, RatePlanCharge, Subscription}
 import com.gu.salesforce.RecordsWrapperCaseClass
-import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
+import com.gu.salesforce.SFAuthConfig
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.{HolidayStopRequest, HolidayStopRequestActionedCount, HolidayStopRequestEndDate, HolidayStopRequestIsWithdrawn, HolidayStopRequestStartDate, HolidayStopRequestWithdrawnTime}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
 import io.circe.generic.auto._
@@ -24,6 +24,7 @@ object Fixtures extends Assertions {
   }
 
   def mkRatePlanCharge(
+    name: String,
     price: Double,
     billingPeriod: String,
     chargedThroughDate: Option[LocalDate] = Some(LocalDate.of(2019, 9, 2)),
@@ -33,7 +34,7 @@ object Fixtures extends Assertions {
     upToPeriods: Option[Int] = None,
     endDateCondition: Option[String] = Some("Subscription_End"),
   ) = RatePlanCharge(
-    name = "GW",
+    name = name,
     number = "C1",
     price,
     Some(billingPeriod),
@@ -72,13 +73,15 @@ object Fixtures extends Assertions {
           ratePlanName = "GW Oct 18 - Quarterly - Domestic",
           ratePlanCharges =
             List(mkRatePlanCharge(
+              "GW Oct 18 - Quarterly - Domestic",
               price,
               billingPeriod,
               chargedThroughDate,
               effectiveStartDate
             )),
           productRatePlanId = "",
-          id = ""
+          id = "",
+          lastChangeType = None
         )
       ),
       status = "Active"
@@ -114,7 +117,8 @@ object Fixtures extends Assertions {
           upToPeriods = None
         )),
         productRatePlanId = "",
-        id = ""
+        id = "",
+        lastChangeType = None
       ),
       RatePlan(
         productName = "Discounts",
@@ -126,8 +130,8 @@ object Fixtures extends Assertions {
           billingPeriod = None,
           effectiveStartDate = LocalDate.of(2019, 9, 7),
           chargedThroughDate = None,
-          HolidayStart__c = Some(LocalDate.of(2019, 9, 1)),
-          HolidayEnd__c = Some(LocalDate.of(2019, 9, 1)),
+          HolidayStart__c = Some(LocalDate.of(2019, 9, 6)),
+          HolidayEnd__c = Some(LocalDate.of(2019, 9, 6)),
           processedThroughDate = None,
           productRatePlanChargeId = "",
           specificBillingPeriod = None,
@@ -136,7 +140,8 @@ object Fixtures extends Assertions {
           upToPeriods = None
         )),
         productRatePlanId = "",
-        id = ""
+        id = "",
+        lastChangeType = None
       ),
       RatePlan(
         productName = "Not a discount",
@@ -158,7 +163,8 @@ object Fixtures extends Assertions {
           upToPeriods = None
         )),
         productRatePlanId = "",
-        id = ""
+        id = "",
+        lastChangeType = None
       ),
       RatePlan(
         productName = "Discounts",
@@ -180,7 +186,8 @@ object Fixtures extends Assertions {
           upToPeriods = None
         )),
         productRatePlanId = "",
-        id = ""
+        id = "",
+        lastChangeType = None
       ),
       RatePlan(
         productName = "Discounts",
@@ -202,7 +209,8 @@ object Fixtures extends Assertions {
           upToPeriods = None
         )),
         productRatePlanId = "",
-        id = ""
+        id = "",
+        lastChangeType = None
       ),
       RatePlan(
         productName = "Discounts",
@@ -224,18 +232,21 @@ object Fixtures extends Assertions {
           upToPeriods = None
         )),
         productRatePlanId = "",
-        id = ""
+        id = "",
+        lastChangeType = None
       ),
       RatePlan(
         productName = "Guardian Weekly - Domestic",
         ratePlanName = "GW Oct 18 - Quarterly - Domestic",
         ratePlanCharges = List(mkRatePlanCharge(
+          name = "GW Oct 18 - Quarterly - Domestic",
           price = 42.7,
           billingPeriod = "Quarter",
           chargedThroughDate = Some(LocalDate.of(2019, 9, 7))
         )),
         productRatePlanId = "",
-        id = ""
+        id = "",
+        lastChangeType = None
       )
     )
   )

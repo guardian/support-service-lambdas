@@ -5,15 +5,19 @@ import java.time.format.DateTimeFormatter
 import java.util.UUID
 
 import ai.x.play.json.Jsonx
-import com.gu.holiday_stops.subscription.{StoppedProduct, Subscription}
+import com.gu.holiday_stops.subscription.{IssueData, Subscription}
+import com.gu.salesforce.Contact
 import com.gu.salesforce.RecordsWrapperCaseClass
+import com.gu.salesforce.SalesforceClient.SalesforceErrorResponseBody
 import com.gu.salesforce.SalesforceConstants._
+import com.gu.salesforce.SalesforceQueryConstants.contactToWhereClausePart
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
 import com.gu.salesforce.holiday_stops.SalesforceSFSubscription.SubscriptionForSubscriptionNameAndContact._
 import com.gu.util.Logging
+import com.gu.util.resthttp.HttpOp.HttpOpWrapper
 import com.gu.util.resthttp.RestOp._
 import com.gu.util.resthttp.RestRequestMaker._
-import com.gu.util.resthttp.Types.ClientFailableOp
+import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, CustomError}
 import com.gu.util.resthttp.{HttpOp, RestRequestMaker}
 import play.api.libs.json._
 
@@ -150,8 +154,8 @@ object SalesforceHolidayStopRequest extends Logging {
 
   case class CompositeTreeHolidayStopRequestsDetail(
     Stopped_Publication_Date__c: LocalDate,
-    Estimated_Price__c: Option[HolidayStopRequestsDetailChargePrice],
-    Expected_Invoice_Date__c: Option[HolidayStopRequestsDetailExpectedInvoiceDate],
+    Estimated_Price__c: HolidayStopRequestsDetailChargePrice,
+    Expected_Invoice_Date__c: HolidayStopRequestsDetailExpectedInvoiceDate,
     attributes: CompositeAttributes = CompositeAttributes(
       holidayStopRequestsDetailSfObjectRef,
       UUID.randomUUID().toString
@@ -189,29 +193,23 @@ object SalesforceHolidayStopRequest extends Logging {
         .runRequest
 
     def buildBody(
-      start: LocalDate,
-      end: LocalDate,
-      publicationDatesToBeStopped: List[LocalDate],
+      startDate: LocalDate,
+      endDate: LocalDate,
+      issuesData: List[IssueData],
       sfSubscription: MatchingSubscription,
       zuoraSubscription: Subscription
     ) = {
       RecordsWrapperCaseClass(List(
         CompositeTreeHolidayStopRequest(
-          Start_Date__c = HolidayStopRequestStartDate(start),
-          End_Date__c = HolidayStopRequestEndDate(end),
+          Start_Date__c = HolidayStopRequestStartDate(startDate),
+          End_Date__c = HolidayStopRequestEndDate(endDate),
           SF_Subscription__c = sfSubscription.Id,
           Holiday_Stop_Request_Detail__r = RecordsWrapperCaseClass(
-            publicationDatesToBeStopped.map { stoppedPublicationDate =>
-              val maybeStoppedProduct = getStoppedProductAndLogFailure(zuoraSubscription, stoppedPublicationDate)
-
+            issuesData.map { issuesData =>
               CompositeTreeHolidayStopRequestsDetail(
-                stoppedPublicationDate,
-                Estimated_Price__c = maybeStoppedProduct
-                  .map(_.credit.amount)
-                  .map(HolidayStopRequestsDetailChargePrice),
-                Expected_Invoice_Date__c = maybeStoppedProduct
-                  .map(_.credit.invoiceDate)
-                  .map(HolidayStopRequestsDetailExpectedInvoiceDate)
+                issuesData.issueDate,
+                Estimated_Price__c = HolidayStopRequestsDetailChargePrice(issuesData.credit),
+                Expected_Invoice_Date__c = HolidayStopRequestsDetailExpectedInvoiceDate(issuesData.nextBillingPeriodStartDate)
               )
             }
           )
@@ -234,12 +232,44 @@ object SalesforceHolidayStopRequest extends Logging {
   )
   implicit val writesCompositeRequest = Json.writes[CompositeRequest]
 
+  case class CompositeResponsePart (
+    httpStatusCode: Int,
+    body: Option[JsValue]
+  )
+  implicit val readsCompositeResponsePart = Json.reads[CompositeResponsePart]
+  case class CompositeResponse (
+    compositeResponse: List[CompositeResponsePart]
+  )
+  implicit val readsCompositeResponse = Json.reads[CompositeResponse]
+
+  lazy val successStatusCodes = 200 to 299
+
+  val safeSalesforceCompositeRequest = HttpOpWrapper[CompositeRequest, PostRequest, CompositeResponse, CompositeResponse](
+    (requestBody: CompositeRequest) => PostRequest(requestBody, RelativePath(compositeBaseUrl)),
+    // this is necessary because for some bizarre reason composite requests return a 200 even if the sub-requests fail
+    // see https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/requests_composite.htm
+    (response: CompositeResponse) => {
+      val failures = response.compositeResponse
+        .filter(resp => !successStatusCodes.contains(resp.httpStatusCode))
+      if(failures.isEmpty) {
+        ClientSuccess(response)
+      } else {
+        logger.error(response.toString)
+        val failuresStr: String = failures
+          .flatMap(_.body.map(_.validate[List[SalesforceErrorResponseBody]].asOpt)).flatten
+          .mkString(", ")
+        CustomError(s"MULTIPLE ERRORS : ${failuresStr.take(500)}${if (failuresStr.length > 500) "..." else "" }")
+      }
+    }
+  )
+
   object AmendHolidayStopRequest {
 
-    def apply(sfPost: HttpOp[RestRequestMaker.PostRequest, JsValue]): CompositeRequest => ClientFailableOp[JsValue] =
-      sfPost.setupRequest[CompositeRequest] { amendHolidayStopRequestWithDetail =>
-        PostRequest(amendHolidayStopRequestWithDetail, RelativePath(compositeBaseUrl))
-      }.runRequest
+    def apply(sfPost: HttpOp[RestRequestMaker.PostRequest, JsValue]): CompositeRequest => ClientFailableOp[CompositeResponse] =
+      sfPost
+        .parse[CompositeResponse]
+        .wrapWith(safeSalesforceCompositeRequest)
+        .runRequest
 
     case class AmendHolidayStopRequestItselfBody (
       Start_Date__c: HolidayStopRequestStartDate,
@@ -249,15 +279,15 @@ object SalesforceHolidayStopRequest extends Logging {
     case class AddHolidayStopRequestDetailBody (
       Holiday_Stop_Request__c: HolidayStopRequestId,
       Stopped_Publication_Date__c: LocalDate,
-      Estimated_Price__c: Option[HolidayStopRequestsDetailChargePrice],
-      Expected_Invoice_Date__c: Option[HolidayStopRequestsDetailExpectedInvoiceDate],
+      Estimated_Price__c: HolidayStopRequestsDetailChargePrice,
+      Expected_Invoice_Date__c: HolidayStopRequestsDetailExpectedInvoiceDate,
     )
 
     def buildBody(
       holidayStopRequestId: HolidayStopRequestId,
-      start: LocalDate,
-      end: LocalDate,
-      publicationDatesToBeStopped: List[LocalDate],
+      startDate: LocalDate,
+      endDate: LocalDate,
+      issuesData: List[IssueData],
       existingPublicationsThatWereToBeStopped: List[HolidayStopRequestsDetail],
       zuoraSubscription: Subscription
     ) = {
@@ -267,36 +297,31 @@ object SalesforceHolidayStopRequest extends Logging {
         url = s"$holidayStopRequestSfObjectsBaseUrl/${holidayStopRequestId.value}",
         referenceId = holidayStopRequestSfObjectRef, // constant since only one of these in the request
         body = Json.toJson(AmendHolidayStopRequestItselfBody(
-          Start_Date__c = HolidayStopRequestStartDate(start),
-          End_Date__c = HolidayStopRequestEndDate(end)
+          Start_Date__c = HolidayStopRequestStartDate(startDate),
+          End_Date__c = HolidayStopRequestEndDate(endDate)
         ))(Json.writes[AmendHolidayStopRequestItselfBody])
       )
 
-      val detailRecordsToBeAdded = publicationDatesToBeStopped
-        .filterNot(date =>
-          existingPublicationsThatWereToBeStopped.exists(_.Stopped_Publication_Date__c.value == date)
+      val detailRecordsToBeAdded = issuesData
+        .filterNot(issueData =>
+          existingPublicationsThatWereToBeStopped.exists(_.Stopped_Publication_Date__c.value == issueData.issueDate)
         )
-        .map{ stoppedPublicationDate =>
-          val maybeStoppedProduct = getStoppedProductAndLogFailure(zuoraSubscription, stoppedPublicationDate)
+        .map{ issueData =>
           CompositePart(
             method = "POST",
             url = s"$sfObjectsBaseUrl$holidayStopRequestsDetailSfObjectRef",
             referenceId = "CREATE DETAIL : " + UUID.randomUUID().toString,
             body = Json.toJson(AddHolidayStopRequestDetailBody(
               Holiday_Stop_Request__c = holidayStopRequestId,
-              Stopped_Publication_Date__c = stoppedPublicationDate,
-              Estimated_Price__c = maybeStoppedProduct
-                .map(_.credit.amount)
-                .map(HolidayStopRequestsDetailChargePrice),
-              Expected_Invoice_Date__c = maybeStoppedProduct
-                .map(_.credit.invoiceDate)
-                .map(HolidayStopRequestsDetailExpectedInvoiceDate)
+              Stopped_Publication_Date__c = issueData.issueDate,
+              Estimated_Price__c = HolidayStopRequestsDetailChargePrice(issueData.credit),
+              Expected_Invoice_Date__c = HolidayStopRequestsDetailExpectedInvoiceDate(issueData.nextBillingPeriodStartDate)
             ))(Json.writes[AddHolidayStopRequestDetailBody])
           )}
 
       val detailRecordsToBeDeleted = existingPublicationsThatWereToBeStopped
         .filterNot(holidayStopRequestDetail =>
-          publicationDatesToBeStopped.contains(holidayStopRequestDetail.Stopped_Publication_Date__c.value)
+          issuesData.map(_.issueDate).contains(holidayStopRequestDetail.Stopped_Publication_Date__c.value)
         )
         .map( holidayStopRequestDetail => CompositePart(
           method = "DELETE",
@@ -320,10 +345,11 @@ object SalesforceHolidayStopRequest extends Logging {
       Charge_Code__c: Option[HolidayStopRequestsDetailChargeCode]
     )
 
-    def apply(sfPost: HttpOp[RestRequestMaker.PostRequest, JsValue]): CompositeRequest => ClientFailableOp[JsValue] =
-      sfPost.setupRequest[CompositeRequest] { cancelHolidayStopRequestsWithDetail =>
-        PostRequest(cancelHolidayStopRequestsWithDetail, RelativePath(compositeBaseUrl))
-      }.runRequest
+    def apply(sfPost: HttpOp[RestRequestMaker.PostRequest, JsValue]): CompositeRequest => ClientFailableOp[CompositeResponse] =
+      sfPost
+        .parse[CompositeResponse]
+        .wrapWith(safeSalesforceCompositeRequest)
+        .runRequest
 
 
     def buildBody(
@@ -346,20 +372,7 @@ object SalesforceHolidayStopRequest extends Logging {
     }
   }
 
-  private def getStoppedProductAndLogFailure(zuoraSubscription: Subscription, stoppedPublicationDate: LocalDate) = {
-    StoppedProduct(zuoraSubscription, StoppedPublicationDate(stoppedPublicationDate))
-      .fold(
-        { error =>
-          logger.error(s"Falied to calculate credit for subscription ${zuoraSubscription.subscriptionNumber} on " +
-            s"$stoppedPublicationDate: ${error.reason}")
-          None
-        },
-        Some(_)
-      )
-  }
-
   object WithdrawHolidayStopRequest {
-
     case class WithdrawnTimePatch(Withdrawn_Time__c: ZonedDateTime = ZonedDateTime.now())
     implicit val writes = Json.writes[WithdrawnTimePatch]
 
@@ -367,6 +380,5 @@ object SalesforceHolidayStopRequest extends Logging {
       sfPatch.setupRequest[HolidayStopRequestId] { holidayStopRequestId =>
         PatchRequest(WithdrawnTimePatch(), RelativePath(s"$holidayStopRequestSfObjectsBaseUrl/${holidayStopRequestId.value}"))
       }.runRequest
-
   }
 }

@@ -4,8 +4,9 @@ import java.io.{InputStream, OutputStream}
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
-import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
+import com.gu.salesforce.SFAuthConfig
 import com.gu.salesforce.SalesforceClient
+import com.gu.salesforce.SalesforceReads._
 import com.gu.sf_gocardless_sync.SyncSharedObjects.{Description, GoCardlessMandateEventID, Reference}
 import com.gu.sf_gocardless_sync.gocardless.GoCardlessDDMandateEvent.GetEventsSince._
 import com.gu.sf_gocardless_sync.gocardless.{GoCardlessClient, GoCardlessConfig, GoCardlessDDMandateEvent}

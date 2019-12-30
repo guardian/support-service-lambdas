@@ -1,6 +1,6 @@
 package com.gu.holidaystopprocessor
 
-import com.gu.holiday_stops.subscription.{ExtendedTerm, HolidayCreditUpdate, StoppedProduct, Subscription}
+import com.gu.holiday_stops.subscription.{ExtendedTerm, HolidayCreditUpdate, HolidayStopCredit, Subscription, SubscriptionData}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
 import com.softwaremill.sttp.{Id, SttpBackend}
 import java.time.LocalDate
@@ -76,12 +76,17 @@ object Processor {
   )(stop: HolidayStop): ZuoraHolidayResponse[ZuoraHolidayWriteResult] = {
     for {
       subscription <- getSubscription(stop.subscriptionName)
-      stoppedProduct <- StoppedProduct(subscription, StoppedPublicationDate(stop.stoppedPublicationDate))
-      _ <- if (subscription.autoRenew) Right(()) else Left(ZuoraHolidayError(s"Cannot currently process non-auto-renewing subscription '${subscription.subscriptionNumber}'"))
+      subscriptionData <- SubscriptionData(subscription)
+      issueData <- subscriptionData.issueDataForDate(stop.stoppedPublicationDate)
       _ <- if (subscription.status == "Cancelled") Left(ZuoraHolidayError(s"Cannot process cancelled subscription because Zuora does not allow amending cancelled subs (Code: 58730020). Apply manual refund ASAP! $stop; ${subscription.subscriptionNumber};")) else Right(())
-      holidayCredit = stoppedProduct.credit
-      maybeExtendedTerm = ExtendedTerm(holidayCredit.invoiceDate, subscription)
-      holidayCreditUpdate <- HolidayCreditUpdate(config.holidayCreditProduct, subscription, stop.stoppedPublicationDate, maybeExtendedTerm, holidayCredit)
+      maybeExtendedTerm = ExtendedTerm(issueData.nextBillingPeriodStartDate, subscription)
+      holidayCreditUpdate <- HolidayCreditUpdate(
+        config.holidayCreditProduct,
+        subscription,
+        stop.stoppedPublicationDate,
+        maybeExtendedTerm,
+        HolidayStopCredit(issueData.credit, issueData.nextBillingPeriodStartDate)
+      )
       _ <- if (subscription.hasHolidayStop(stop)) Right(()) else updateSubscription(subscription, holidayCreditUpdate)
       updatedSubscription <- getSubscription(stop.subscriptionName)
       addedCharge <- updatedSubscription.ratePlanCharge(stop).toRight(ZuoraHolidayError(s"Failed to write holiday stop to Zuora: $stop"))

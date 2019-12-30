@@ -2,7 +2,7 @@ package com.gu.catalogService
 
 import com.gu.catalogService.Handler.CatalogServiceException
 import com.gu.effects.{FakeFetchString, TestingRawEffects}
-import com.gu.util.config.LoadConfigModule.S3Location
+import com.gu.effects.S3Location
 import com.gu.util.config.{Stage, ZuoraEnvironment}
 import com.gu.util.zuora.ZuoraRestConfig
 import org.scalatest.{FlatSpec, Matchers}

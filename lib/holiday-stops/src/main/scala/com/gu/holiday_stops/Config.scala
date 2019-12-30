@@ -1,6 +1,6 @@
 package com.gu.holiday_stops
 
-import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
+import com.gu.salesforce.SFAuthConfig
 import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config.{ConfigLocation, LoadConfigModule, Stage}
 import play.api.libs.json.{Json, Reads}

@@ -12,11 +12,9 @@ class PotentialHolidayStopsResponseTest extends FlatSpec with Matchers {
     List(
       PotentialHolidayStop(
         publicationDate = LocalDate.of(2019, 9, 27),
-        expectedCredit = Some(
-          HolidayStopCredit(
-            amount = -2.89,
-            invoiceDate = LocalDate.of(2019, 10, 1)
-          )
+        expectedCredit = HolidayStopCredit(
+          amount = -2.89,
+          invoiceDate = LocalDate.of(2019, 10, 1)
         )
       )
     )

@@ -4,8 +4,9 @@ import java.io.{InputStream, OutputStream}
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
-import com.gu.salesforce.SalesforceAuthenticate.{SFAuthConfig, SFExportAuthConfig}
+import com.gu.salesforce.{SFAuthConfig, SFExportAuthConfig}
 import com.gu.salesforce.SalesforceClient
+import com.gu.salesforce.SalesforceReads.sfAuthConfigReads
 import com.gu.sf_datalake_export.salesforce_bulk_api.CreateJob.JobId
 import com.gu.sf_datalake_export.salesforce_bulk_api.GetJobBatches
 import com.gu.sf_datalake_export.salesforce_bulk_api.GetJobBatches._
@@ -99,7 +100,7 @@ object GetBatchesHandler {
     val jobId = JobId(request.jobId)
 
     for {
-      sfConfig <- loadConfig[SFAuthConfig](SFExportAuthConfig.location, SFAuthConfig.reads).leftMap(failure => failure.error).toTry
+      sfConfig <- loadConfig[SFAuthConfig](SFExportAuthConfig.location, sfAuthConfigReads).leftMap(failure => failure.error).toTry
       sfClient <- SalesforceClient(getResponse, sfConfig).value.toTry
       getJobBatchesOp = sfClient.wrapWith(GetJobBatches.wrapper)
       batches <- getJobBatchesOp.runRequest(jobId).toTry

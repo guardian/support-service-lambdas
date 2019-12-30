@@ -1,7 +1,7 @@
 package com.gu.util.config
 
+import com.gu.effects.S3Location
 import com.gu.util.config.ConfigReads.ConfigFailure
-import com.gu.util.config.LoadConfigModule.S3Location
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
 import scalaz.{-\/, \/-}

@@ -3,13 +3,14 @@ package com.gu.holidaystopprocessor
 import java.time.LocalDate
 
 import com.gu.holiday_stops._
-import com.gu.holiday_stops.subscription.{Add, ChargeOverride, HolidayCreditUpdate, RatePlan, RatePlanCharge, Subscription}
+import com.gu.holiday_stops.subscription.{Add, ChargeOverride, HolidayCreditUpdate, MutableCalendar, RatePlan, RatePlanCharge, Subscription}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.collection.mutable
 
 class SundayVoucherHolidayStopProcessTest extends FlatSpec with Matchers {
+  MutableCalendar.setFakeToday(Some(LocalDate.parse("2019-02-01")))
 
   val holidayStopRequestsFromSalesforce = List(
     HolidayStopRequestsDetail(
@@ -66,7 +67,8 @@ class SundayVoucherHolidayStopProcessTest extends FlatSpec with Matchers {
           upToPeriods = None
         )),
         "2c92c0f95aff3b56015b1045fb9332d2",
-        "2c92c0f86d6263c0016d6271c6750a35"
+        "2c92c0f86d6263c0016d6271c6750a35",
+        None
       )),
       "Active"
     )
@@ -103,7 +105,8 @@ class SundayVoucherHolidayStopProcessTest extends FlatSpec with Matchers {
             )
           ),
           "2c92c0f96b03800b016b081fc04f1ba2",
-          "2c92c0fb6d627309016d628f3f6231cc"
+          "2c92c0fb6d627309016d628f3f6231cc",
+          None
         ),
         RatePlan(
           "Newspaper Voucher",
@@ -127,7 +130,8 @@ class SundayVoucherHolidayStopProcessTest extends FlatSpec with Matchers {
             )
           ),
           "2c92c0f95aff3b56015b1045fb9332d2",
-          "2c92c0fb6d627309016d628f3fda31d7"
+          "2c92c0fb6d627309016d628f3fda31d7",
+          None
         )
       ),
       "Active"

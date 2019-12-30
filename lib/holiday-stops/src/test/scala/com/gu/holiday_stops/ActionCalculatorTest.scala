@@ -28,15 +28,15 @@ class ActionCalculatorTest extends FlatSpec with Matchers with EitherValues {
     case class TestDateRange(today: Today, expectedFirstAvailableDate: FirstAvailableDate, comment: String)
 
     val gwTodayToFirstAvailableDate = List(
-      TestDateRange(LocalDate.of(2019, 6,  1), LocalDate.of(2019, 6,  8), "On a Saturday first available on next Sat"),
-      TestDateRange(LocalDate.of(2019, 6,  2), LocalDate.of(2019, 6,  8), "On a Sunday, first available on Sat"),
-      TestDateRange(LocalDate.of(2019, 6,  3), LocalDate.of(2019, 6,  8), "On a Monday, first available on Sat"),
-      TestDateRange(LocalDate.of(2019, 6,  4), LocalDate.of(2019, 6,  8), "On a Tuesday, first available on Sat"),
-      TestDateRange(LocalDate.of(2019, 6,  5), LocalDate.of(2019, 6, 15), "On a Wednesday, first available jumps to following Sat"),
-      TestDateRange(LocalDate.of(2019, 6,  6), LocalDate.of(2019, 6, 15), "On a Thursday, first available on Sat"),
-      TestDateRange(LocalDate.of(2019, 6,  7), LocalDate.of(2019, 6, 15), "On a Friday, first available on Sat"),
-      TestDateRange(LocalDate.of(2019, 6,  8), LocalDate.of(2019, 6, 15), "On a Saturday, first available on next Sat"),
-      TestDateRange(LocalDate.of(2019, 6,  9), LocalDate.of(2019, 6, 15), "On a Sunday, first available on Sat"),
+      TestDateRange(LocalDate.of(2019, 6, 1), LocalDate.of(2019, 6, 8), "On a Saturday first available on next Sat"),
+      TestDateRange(LocalDate.of(2019, 6, 2), LocalDate.of(2019, 6, 8), "On a Sunday, first available on Sat"),
+      TestDateRange(LocalDate.of(2019, 6, 3), LocalDate.of(2019, 6, 8), "On a Monday, first available on Sat"),
+      TestDateRange(LocalDate.of(2019, 6, 4), LocalDate.of(2019, 6, 8), "On a Tuesday, first available on Sat"),
+      TestDateRange(LocalDate.of(2019, 6, 5), LocalDate.of(2019, 6, 15), "On a Wednesday, first available jumps to following Sat"),
+      TestDateRange(LocalDate.of(2019, 6, 6), LocalDate.of(2019, 6, 15), "On a Thursday, first available on Sat"),
+      TestDateRange(LocalDate.of(2019, 6, 7), LocalDate.of(2019, 6, 15), "On a Friday, first available on Sat"),
+      TestDateRange(LocalDate.of(2019, 6, 8), LocalDate.of(2019, 6, 15), "On a Saturday, first available on next Sat"),
+      TestDateRange(LocalDate.of(2019, 6, 9), LocalDate.of(2019, 6, 15), "On a Sunday, first available on Sat"),
       TestDateRange(LocalDate.of(2019, 6, 10), LocalDate.of(2019, 6, 15), "On a Monday, first available on Sat"),
       TestDateRange(LocalDate.of(2019, 6, 11), LocalDate.of(2019, 6, 15), "On a Tuesday, first available on Sat"),
       TestDateRange(LocalDate.of(2019, 6, 12), LocalDate.of(2019, 6, 22), "On a Wednesday, first available jumps to following Sat"),
@@ -53,14 +53,14 @@ class ActionCalculatorTest extends FlatSpec with Matchers with EitherValues {
       TestDateRange(LocalDate.of(2019, 6, 23), LocalDate.of(2019, 6, 29), "On a Sunday, first available on Sat"),
       TestDateRange(LocalDate.of(2019, 6, 24), LocalDate.of(2019, 6, 29), "On a Monday, first available on Sat"),
       TestDateRange(LocalDate.of(2019, 6, 25), LocalDate.of(2019, 6, 29), "On a Tuesday, first available on Sat"),
-      TestDateRange(LocalDate.of(2019, 6, 26), LocalDate.of(2019, 7,  6), "On a Wednesday, first available jumps to following Sat"),
-      TestDateRange(LocalDate.of(2019, 6, 27), LocalDate.of(2019, 7,  6), "On a Thursday, first available on Sat"),
-      TestDateRange(LocalDate.of(2019, 6, 28), LocalDate.of(2019, 7,  6), "On a Friday, first available on Sat"),
-      TestDateRange(LocalDate.of(2019, 6, 29), LocalDate.of(2019, 7,  6), "On a Saturday first available on next Sat"),
-      TestDateRange(LocalDate.of(2019, 6, 30), LocalDate.of(2019, 7,  6), "On a Sunday, first available on Sat"),
-      TestDateRange(LocalDate.of(2019, 7,  1), LocalDate.of(2019, 7,  6), "On a Monday, first available on Sat"),
-      TestDateRange(LocalDate.of(2019, 7,  2), LocalDate.of(2019, 7,  6), "On a Tuesday, first available on Sat"),
-      TestDateRange(LocalDate.of(2019, 7,  3), LocalDate.of(2019, 7,  13), "On a Wednesday, first available jumps to following Sat")
+      TestDateRange(LocalDate.of(2019, 6, 26), LocalDate.of(2019, 7, 6), "On a Wednesday, first available jumps to following Sat"),
+      TestDateRange(LocalDate.of(2019, 6, 27), LocalDate.of(2019, 7, 6), "On a Thursday, first available on Sat"),
+      TestDateRange(LocalDate.of(2019, 6, 28), LocalDate.of(2019, 7, 6), "On a Friday, first available on Sat"),
+      TestDateRange(LocalDate.of(2019, 6, 29), LocalDate.of(2019, 7, 6), "On a Saturday first available on next Sat"),
+      TestDateRange(LocalDate.of(2019, 6, 30), LocalDate.of(2019, 7, 6), "On a Sunday, first available on Sat"),
+      TestDateRange(LocalDate.of(2019, 7, 1), LocalDate.of(2019, 7, 6), "On a Monday, first available on Sat"),
+      TestDateRange(LocalDate.of(2019, 7, 2), LocalDate.of(2019, 7, 6), "On a Tuesday, first available on Sat"),
+      TestDateRange(LocalDate.of(2019, 7, 3), LocalDate.of(2019, 7, 13), "On a Wednesday, first available jumps to following Sat")
     )
     val subscription = Fixtures.mkGuardianWeeklySubscription(customerAcceptanceDate = LocalDate.of(2018, 6, 1))
 
@@ -76,32 +76,6 @@ class ActionCalculatorTest extends FlatSpec with Matchers with EitherValues {
             withClue(s"Expected: $comment.  Problem was ") { issueSpecifics.firstAvailableDate shouldEqual expected }
         }
     }
-  }
-
-  it should "correctly list the action dates for given Holiday Stop Request" in {
-
-    ActionCalculator.publicationDatesToBeStopped(
-      fromInclusive = LocalDate.of(2019, 5, 18),
-      toInclusive = LocalDate.of(2019, 6, 20),
-      productVariant = GuardianWeekly
-    ) shouldEqual Right(List(
-        LocalDate.of(2019, 5, 24),
-        LocalDate.of(2019, 5, 31),
-        LocalDate.of(2019, 6, 7),
-        LocalDate.of(2019, 6, 14)
-      ))
-
-    ActionCalculator.publicationDatesToBeStopped(
-      fromInclusive = LocalDate.of(2019, 5, 18),
-      toInclusive = LocalDate.of(2019, 6, 21),
-      productVariant = GuardianWeekly
-    ) shouldEqual Right(List(
-        LocalDate.of(2019, 5, 24),
-        LocalDate.of(2019, 5, 31),
-        LocalDate.of(2019, 6, 7),
-        LocalDate.of(2019, 6, 14),
-        LocalDate.of(2019, 6, 21)
-      ))
   }
   it should "calculate first available date for Sunday Voucher" in {
     val acceptanceDateInThePast = LocalDate.of(2019, 1, 1)
@@ -131,75 +105,4 @@ class ActionCalculatorTest extends FlatSpec with Matchers with EitherValues {
           issueSpecifics.firstAvailableDate shouldEqual customerAcceptanceDate
       }
   }
-  it should "correctly list the action dates for Sunday Voucher" in {
-    val sundayProduct = SundayVoucher
-
-    ActionCalculator.publicationDatesToBeStopped(
-      fromInclusive = LocalDate.of(2019, 5, 20),
-      toInclusive = LocalDate.of(2019, 6, 22),
-      sundayProduct
-    ) shouldEqual Right(List(
-        LocalDate.of(2019, 5, 26),
-        LocalDate.of(2019, 6, 2),
-        LocalDate.of(2019, 6, 9),
-        LocalDate.of(2019, 6, 16)
-      ))
-
-    ActionCalculator.publicationDatesToBeStopped(
-      fromInclusive = LocalDate.of(2019, 5, 20),
-      toInclusive = LocalDate.of(2019, 6, 23),
-      sundayProduct
-    ) shouldEqual Right(List(
-        LocalDate.of(2019, 5, 26),
-        LocalDate.of(2019, 6, 2),
-        LocalDate.of(2019, 6, 9),
-        LocalDate.of(2019, 6, 16),
-        LocalDate.of(2019, 6, 23)
-      ))
-  }
-  it should "correctly list the action dates for Weekend Voucher" in {
-    val weekendProduct = WeekendVoucher
-
-    ActionCalculator.publicationDatesToBeStopped(
-      fromInclusive = LocalDate.of(2019, 5, 20),
-      toInclusive = LocalDate.of(2019, 6, 21),
-      weekendProduct
-    ) shouldEqual Right(List(
-        LocalDate.of(2019, 5, 25),
-        LocalDate.of(2019, 5, 26),
-        LocalDate.of(2019, 6, 1),
-        LocalDate.of(2019, 6, 2),
-        LocalDate.of(2019, 6, 8),
-        LocalDate.of(2019, 6, 9),
-        LocalDate.of(2019, 6, 15),
-        LocalDate.of(2019, 6, 16)
-      ))
-
-    ActionCalculator.publicationDatesToBeStopped(
-      fromInclusive = LocalDate.of(2019, 5, 20),
-      toInclusive = LocalDate.of(2019, 6, 23),
-      weekendProduct
-    ) shouldEqual Right(List(
-        LocalDate.of(2019, 5, 25),
-        LocalDate.of(2019, 5, 26),
-        LocalDate.of(2019, 6, 1),
-        LocalDate.of(2019, 6, 2),
-        LocalDate.of(2019, 6, 8),
-        LocalDate.of(2019, 6, 9),
-        LocalDate.of(2019, 6, 15),
-        LocalDate.of(2019, 6, 16),
-        LocalDate.of(2019, 6, 22),
-        LocalDate.of(2019, 6, 23)
-      ))
-  }
-  //  it should "return an error for an unsupported product rate plan" in {
-  //    val unsupportedProductRatePlanKey =
-  //      ProductRatePlanKey(ProductType("not supported"), ProductRatePlanName("not supported"))
-  //
-  //    ActionCalculator.publicationDatesToBeStopped(
-  //      fromInclusive = LocalDate.of(2019, 5, 20),
-  //      toInclusive = LocalDate.of(2019, 6, 22),
-  //      productRatePlanKey = unsupportedProductRatePlanKey
-  //    ) should be('left)
-  //  }
 }

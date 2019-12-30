@@ -3,8 +3,9 @@ package com.gu.identityBackfill.salesforce.updateSFIdentityId
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId
 import com.gu.identityBackfill.salesforce.UpdateSalesforceIdentityId.IdentityId
+import com.gu.salesforce.SalesforceReads._
 import com.gu.salesforce.SalesforceClient
-import com.gu.salesforce.SalesforceAuthenticate.SFAuthConfig
+import com.gu.salesforce.SFAuthConfig
 import com.gu.salesforce.dev.SFEffectsData
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}

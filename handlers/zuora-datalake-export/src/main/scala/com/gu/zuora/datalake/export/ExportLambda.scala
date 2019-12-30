@@ -141,7 +141,7 @@ object Query extends Enum[Query] {
   )
   case object RatePlanCharge extends Query(
     "RatePlanCharge",
-    "SELECT Account.ID, EffectiveStartDate, EffectiveEndDate, HolidayStart__c, HolidayEnd__c, ID, MRR,Name, TCV, Version, BillingPeriod, ProcessedThroughDate, ChargedThroughDate, Product.Name, RatePlan.ID, RatePlan.Name, Subscription.ID, ProductRatePlanCharge.BillingPeriod FROM RatePlanCharge",
+    "SELECT Account.ID, EffectiveStartDate, EffectiveEndDate, HolidayStart__c, HolidayEnd__c, ID, MRR,Name, TCV, Version, BillingPeriod, ProcessedThroughDate, ChargedThroughDate, Product.Name, RatePlan.ID, RatePlan.Name, Subscription.ID, ProductRatePlanCharge.BillingPeriod, AccountingCode, ApplyDiscountTo, BillCycleDay, BillCycleType, BillingPeriodAlignment, BillingTiming, ChargeModel, ChargeNumber, ChargeType, CreatedById, CreatedDate, Description, DiscountLevel, DTCV, ForceSync__c, IsLastSegment, ListPriceBase, NumberofPeriods, OriginalID, OverageCalculationOption, OverageUnusedUnitsCreditOption, PriceChangeOption, PriceIncreasePercentage, Quantity, RatingGroup, RevenueRecognitionRuleName, RevRecCode, RevRecTriggerCondition, Segment, SpecificBillingPeriod, SpecificEndDate, TriggerDate, TriggerEvent, UOM, UpdatedByID, UpdatedDate, UpToPeriods, UpToPeriodsType, WeeklyBillCycleDay, Amendment.ID, BillToContact.ID, DefaultPaymentMethod.ID, ParentAccount.ID, Product.ID, ProductRatePlan.ID, ProductRatePlanCharge.ID, SoldToContact.ID FROM RatePlanCharge",
     "ophan-raw-zuora-increment-rateplancharge",
     "RatePlanCharge.csv"
   )
@@ -172,19 +172,19 @@ object Query extends Enum[Query] {
   )
   case object PaymentMethod extends Query(
     "PaymentMethod",
-    "SELECT BankTransferType, CreditCardExpirationMonth, CreditCardExpirationYear, LastFailedSaleTransactionDate, LastTransactionDateTime, LastTransactionStatus, Name, NumConsecutiveFailures, PaymentMethodStatus, Type, ID, MandateID, PaypalBAID, SecondTokenID, TokenID, AccountID FROM PaymentMethod",
+    "SELECT BankTransferType, CreditCardExpirationMonth, CreditCardExpirationYear, LastFailedSaleTransactionDate, LastTransactionDateTime, LastTransactionStatus, Name, NumConsecutiveFailures, PaymentMethodStatus, Type, ID, MandateID, PaypalBAID, SecondTokenID, TokenID, AccountID, Active, Country, CreatedById, CreatedDate, CreditCardType, DeviceSessionId, IdentityNumber, MandateCreationDate, MandateReceived, MandateUpdateDate, MaxConsecutivePaymentFailures, PaymentRetryWindow, TotalNumberOfErrorPayments, TotalNumberOfProcessedPayments, UpdatedById, UpdatedDate, UseDefaultRetryRule FROM PaymentMethod",
     "ophan-raw-zuora-increment-paymentmethod",
     "PaymentMethod.csv"
   )
   case object Amendment extends Query(
     "Amendment",
-    "SELECT autoRenew, code, createdById, createdDate, currentTerm, currentTermPeriodType, customerAcceptanceDate, description, effectiveDate, id, name, renewalSetting, renewalTerm, renewalTermPeriodType, resumeDate, serviceActivationDate, specificUpdateDate, status, subscriptionId, suspendDate, termStartDate, termType, type, updatedById, updatedDate  FROM Amendment",
+    "SELECT autoRenew, code, createdById, createdDate, currentTerm, currentTermPeriodType, customerAcceptanceDate, description, effectiveDate, id, name, renewalSetting, renewalTerm, renewalTermPeriodType, resumeDate, serviceActivationDate, specificUpdateDate, status, subscriptionId, suspendDate, termStartDate, termType, type, updatedById, updatedDate, contractEffectiveDate FROM Amendment",
     "ophan-raw-zuora-increment-amendment",
     "Amendment.csv"
   )
   case object Invoice extends Query(
     "Invoice",
-    "SELECT AdjustmentAmount, Amount, AmountWithoutTax, AutoPay, Balance, Comments, CreatedByID, CreatedDate, CreditBalanceAdjustmentAmount, DueDate, IncludesOneTime, IncludesRecurring, IncludesUsage, InvoiceDate, InvoiceNumber, LastEmailSentDate, PaymentAmount, PostedBy, PostedDate, RefundAmount, Source, SourceID, Status, TargetDate, TaxAmount, TaxExemptAmount, TransferredToAccounting, UpdatedByID, UpdatedDate, ID, Account.ID FROM Invoice",
+    "SELECT AdjustmentAmount, Amount, AmountWithoutTax, AutoPay, Balance, Comments, CreatedByID, CreatedDate, CreditBalanceAdjustmentAmount, DueDate, IncludesOneTime, IncludesRecurring, IncludesUsage, InvoiceDate, InvoiceNumber, LastEmailSentDate, PaymentAmount, PostedBy, PostedDate, RefundAmount, Source, SourceID, Status, TargetDate, TaxAmount, TaxExemptAmount, TransferredToAccounting, UpdatedByID, UpdatedDate, ID, Account.ID, Reversed, BillToContact.Id, BillToContactSnapShot.Id, DefaultPaymentMethod.Id, ParentAccount.Id, SoldToContact.Id, SoldToContactSnapshot.Id FROM Invoice",
     "ophan-raw-zuora-increment-invoice",
     "Invoice.csv"
   )
@@ -196,13 +196,13 @@ object Query extends Enum[Query] {
   )
   case object InvoicePayment extends Query(
     "InvoicePayment",
-    "SELECT Amount, CreatedById, CreatedDate, RefundAmount, UpdatedById, UpdatedDate, ID, Payment.ID, Invoice.ID, Account.ID FROM InvoicePayment",
+    "SELECT Amount, CreatedById, CreatedDate, RefundAmount, UpdatedById, UpdatedDate, ID, Payment.ID, Invoice.ID, Account.ID, AccountingPeriod.Id, BillToContact.Id, DefaultPaymentMethod.Id, JournalEntry.Id, JournalRun.Id, ParentAccount.Id, PaymentMethod.Id, PaymentMethodSnapshot.Id, SoldToContact.Id FROM InvoicePayment",
     "ophan-raw-zuora-increment-invoicepayment",
     "InvoicePayment.csv"
   )
   case object Refund extends Query(
     "Refund",
-    "SELECT AccountingCode, Amount, CancelledOn, Comment, CreatedById, CreatedDate, Gateway, GatewayResponse, GatewayResponseCode, GatewayState, MarkedForSubmissionOn, MethodType, PaymentMethodId, PaymentMethodSnapshot.Id, ReasonCode, ReferenceID, RefundDate, RefundNumber, RefundTransactionTime, SecondRefundReferenceId, SettledOn, SoftDescriptor, SoftDescriptorPhone, SourceType, Status, SubmittedOn, TransferredToAccounting, Type, UpdatedById, UpdatedDate, Id, Account.ID FROM Refund",
+    "SELECT AccountingCode, Amount, CancelledOn, Comment, CreatedById, CreatedDate, Gateway, GatewayResponse, GatewayResponseCode, GatewayState, MarkedForSubmissionOn, MethodType, PaymentMethodId, PaymentMethodSnapshot.Id, ReasonCode, ReferenceID, RefundDate, RefundNumber, RefundTransactionTime, SecondRefundReferenceId, SettledOn, SoftDescriptor, SoftDescriptorPhone, SourceType, Status, SubmittedOn, TransferredToAccounting, Type, UpdatedById, UpdatedDate, Id, Account.ID, BillToContact.ID, DefaultPaymentMethod.ID FROM Refund",
     "ophan-raw-zuora-increment-refund",
     "Refund.csv"
   )

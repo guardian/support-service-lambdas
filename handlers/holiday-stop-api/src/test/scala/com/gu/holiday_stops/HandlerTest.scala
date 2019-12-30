@@ -5,11 +5,10 @@ import java.time.format.DateTimeFormatter
 
 import com.gu.effects.{FakeFetchString, SFTestEffects, TestingRawEffects}
 import com.gu.holiday_stops.ActionCalculator._
-import com.gu.holiday_stops.Handler._
 import com.gu.holiday_stops.ZuoraSttpEffects.ZuoraSttpEffectsOps
 import com.gu.holiday_stops.subscription.{HolidayStopCredit, MutableCalendar, RatePlan, RatePlanCharge, Subscription}
+import com.gu.salesforce.{IdentityId, SalesforceContactId}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.SubscriptionName
-import com.gu.salesforce.holiday_stops.SalesforceSFSubscription.SubscriptionForSubscriptionNameAndContact._
 import com.gu.salesforce.holiday_stops.{SalesForceHolidayStopsEffects, SalesforceHolidayStopRequestsDetail}
 import com.gu.util.apigateway.ApiGatewayRequest
 import com.gu.util.config.Stage
@@ -18,6 +17,7 @@ import com.softwaremill.sttp.testing.SttpBackendStub
 import org.scalatest.Inside.inside
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.{JsObject, JsString, JsSuccess, Json}
+import com.gu.salesforce.SalesforceHandlerSupport.{HEADER_IDENTITY_ID, HEADER_SALESFORCE_CONTACT_ID}
 
 class HandlerTest extends FlatSpec with Matchers {
   val testId = "test-generated-id"
@@ -30,12 +30,12 @@ class HandlerTest extends FlatSpec with Matchers {
     val expectedIdentityIdCoreValue = "identity_id"
     Handler.extractContactFromHeaders(Some(Map(
       HEADER_IDENTITY_ID -> expectedIdentityIdCoreValue
-    ))) shouldBe ContinueProcessing(Left(IdentityId(expectedIdentityIdCoreValue)))
+    ))) shouldBe ContinueProcessing(IdentityId(expectedIdentityIdCoreValue))
 
     val expectedSfContactIdCoreValue = "sf_contact_id"
     Handler.extractContactFromHeaders(Some(Map(
       HEADER_SALESFORCE_CONTACT_ID -> expectedSfContactIdCoreValue
-    ))) shouldBe ContinueProcessing(Right(SalesforceContactId(expectedSfContactIdCoreValue)))
+    ))) shouldBe ContinueProcessing(SalesforceContactId(expectedSfContactIdCoreValue))
   }
   "GET /potential/<<sub name>>?startDate=...&endDate=...&estimateCredit=true endpoint" should
     "calculate potential holiday stop dates and estimated credit" in {
@@ -60,7 +60,7 @@ class HandlerTest extends FlatSpec with Matchers {
           ratePlanName = "GW Oct 18 - Quarterly - Domestic",
           ratePlanCharges =
             List(RatePlanCharge(
-              name = "GW",
+              name = "GW Oct 18 - Quarterly - Domestic",
               number = "C1",
               37.50,
               Some("Quarter"),
@@ -76,7 +76,8 @@ class HandlerTest extends FlatSpec with Matchers {
               upToPeriods = None
             )),
           productRatePlanId = "",
-          id = ""
+          id = "",
+          lastChangeType = None
         )
       ),
       "Active"
@@ -113,8 +114,8 @@ class HandlerTest extends FlatSpec with Matchers {
             response should equal(
               PotentialHolidayStopsResponse(
                 List(
-                  PotentialHolidayStop(LocalDate.of(2019, 1, 4), Some(HolidayStopCredit(-2.89, LocalDate.parse("2019-04-01")))),
-                  PotentialHolidayStop(LocalDate.of(2019, 1, 11), Some(HolidayStopCredit(-2.89, LocalDate.parse("2019-04-01")))),
+                  PotentialHolidayStop(LocalDate.of(2019, 1, 4), HolidayStopCredit(-2.89, LocalDate.parse("2019-04-01"))),
+                  PotentialHolidayStop(LocalDate.of(2019, 1, 11), HolidayStopCredit(-2.89, LocalDate.parse("2019-04-01"))),
                 )
               )
             )

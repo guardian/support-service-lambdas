@@ -1,0 +1,144 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: Generate files in S3 bucket containing relevant fulfilment-related dates, for example, acquisitionsStartDate, holidayStopFirstAvailableDate, etc.
+
+Parameters:
+  Stage:
+    Description: Stage name
+    Type: String
+    AllowedValues:
+      - DEV
+      - CODE
+      - PROD
+    Default: CODE
+
+Conditions:
+  IsProd: !Equals [!Ref "Stage", "PROD"]
+
+Mappings:
+  StageMap:
+    DEV:
+      bucketName: "fulfilment-date-calculator-dev"
+    CODE:
+      bucketName: "fulfilment-date-calculator-code"
+    PROD:
+      bucketName: "fulfilment-date-calculator-prod"
+
+Resources:
+  FulfilmentDateCalculatorBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !FindInMap [StageMap, !Ref Stage, bucketName]
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      LifecycleConfiguration:
+        Rules:
+          - ExpirationInDays: 30
+            Status: Enabled
+      VersioningConfiguration:
+        Status: Enabled
+
+  FulfilmentDateCalculatorLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: LambdaPolicy
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  - lambda:InvokeFunction
+                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/fulfilment-date-calculator-${Stage}:log-stream:*
+
+        - PolicyName: ReadPrivateCredentials
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action: s3:GetObject
+                Resource: !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/zuoraRest-${Stage}*.json
+
+        - PolicyName: FulfilmentDatesCalculatorBucket
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:PutObjectAcl
+                  - s3:GetObject
+                Resource:
+                  - arn:aws:s3:::fulfilment-date-calculator-*
+
+  FulfilmentDateCalculatorLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      Description: Generate files in S3 bucket containing relevant fulfilment-related dates, for example, acquisitionsStartDate, holidayStopFirstAvailableDate, etc.
+      FunctionName:
+        !Sub fulfilment-date-calculator-${Stage}
+      Code:
+        S3Bucket: support-service-lambdas-dist
+        S3Key: !Sub membership/${Stage}/fulfilment-date-calculator/fulfilment-date-calculator.jar
+      Handler: com.gu.supporter.fulfilment.FulfilmentDateCalculator::handle
+      Environment:
+        Variables:
+          Stage: !Ref Stage
+      Role: !GetAtt FulfilmentDateCalculatorLambdaRole.Arn
+      MemorySize: 1536
+      Runtime: java8
+      Timeout: 900
+    DependsOn:
+      - FulfilmentDateCalculatorLambdaRole
+
+  FulfilmentDateCalculatorLambdaTriggerRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Description: Trigger fulfilment-date-calculator lambda every day at 00:30 AM UTC
+      ScheduleExpression: cron(30 0 * * ? *)
+      State: ENABLED
+      Targets:
+        - Arn: !Sub ${FulfilmentDateCalculatorLambda.Arn}
+          Id: TriggerLambda
+          Input: |
+            null
+
+  FulfilmentDateCalculatorLambdaTriggerPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Sub ${FulfilmentDateCalculatorLambda.Arn}
+      Principal: events.amazonaws.com
+      SourceArn: !Sub ${FulfilmentDateCalculatorLambdaTriggerRule.Arn}
+
+  FailedFulfilmentDateCalculatorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
+    Properties:
+      AlarmName: fulfilment-date-calculator
+      AlarmDescription: Failed to generate fulfilment-dates files in fulfilment-date-calculator S3 bucket for today
+      AlarmActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:MarioTest
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref FulfilmentDateCalculatorLambda
+      EvaluationPeriods: 1
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Period: 300
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
+

@@ -1,10 +1,11 @@
 package com.gu.newproduct.api
 
+import com.gu.effects.S3Location
 import com.gu.i18n.Currency.{EUR, GBP, USD}
 import com.gu.newproduct.api.productcatalog.PlanId._
 import com.gu.newproduct.api.productcatalog.ZuoraIds.ProductRatePlanId
 import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, PricesFromZuoraCatalog}
-import com.gu.util.config.LoadConfigModule.{S3Location, StringFromS3}
+import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config.ZuoraEnvironment
 import com.gu.util.resthttp.Types.ClientSuccess
 import org.scalatest.{FlatSpec, Matchers}

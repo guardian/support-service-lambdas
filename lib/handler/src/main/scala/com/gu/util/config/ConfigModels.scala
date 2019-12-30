@@ -30,10 +30,6 @@ object StripeConfig {
   )(StripeConfig.apply _)
 }
 
-case class Stage(value: String) extends AnyVal {
-  def isProd: Boolean = value == "PROD"
-}
-
 case class ZuoraEnvironment(value: String) extends Logging {
 
   def stageToLoad: Stage = value match {

@@ -5,8 +5,9 @@ import java.io.{InputStream, OutputStream}
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.s3.model.{PutObjectRequest, PutObjectResult}
 import com.gu.effects.{RawEffects, _}
-import com.gu.salesforce.SalesforceAuthenticate.{SFAuthConfig, SFExportAuthConfig}
+import com.gu.salesforce.{SFAuthConfig, SFExportAuthConfig}
 import com.gu.salesforce.SalesforceClient
+import com.gu.salesforce.SalesforceReads._
 import com.gu.sf_datalake_export.handlers.StartJobHandler.ShouldUploadToDataLake
 import com.gu.sf_datalake_export.salesforce_bulk_api.BulkApiParams.ObjectName
 import com.gu.sf_datalake_export.salesforce_bulk_api.CreateJob.JobId
@@ -17,10 +18,10 @@ import com.gu.sf_datalake_export.salesforce_bulk_api.S3UploadFile.{File, FileCon
 import com.gu.sf_datalake_export.salesforce_bulk_api.{GetBatchResult, GetBatchResultId, S3UploadFile}
 import com.gu.sf_datalake_export.util.ExportS3Path
 import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
-import com.gu.util.config.LoadConfigModule.S3Location
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.handlers.JsonHandler
 import com.gu.util.reader.Types._
+import com.gu.effects.AwsS3
 import com.gu.util.resthttp.Types.ClientFailableOp
 import com.typesafe.scalalogging.LazyLogging
 import okhttp3.{Request, Response}
@@ -105,7 +106,7 @@ object DownloadBatchHandler extends LazyLogging {
   (request: WireState): Try[WireState] = {
     val loadConfig = LoadConfigModule(stage, getFromS3)
     for {
-      sfConfig <- loadConfig[SFAuthConfig](SFExportAuthConfig.location, SFAuthConfig.reads).leftMap(_.error).toTry
+      sfConfig <- loadConfig[SFAuthConfig](SFExportAuthConfig.location, sfAuthConfigReads).leftMap(_.error).toTry
       sfClient <- SalesforceClient(getResponse, sfConfig).value.toTry
       wiredGetBatchResultId = sfClient.wrapWith(GetBatchResultId.wrapper).runRequest _
       wiredGetBatchResult = sfClient.wrapWith(GetBatchResult.wrapper).runRequest _

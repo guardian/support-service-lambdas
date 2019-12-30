@@ -8,13 +8,14 @@ import com.gu.cancellation.sf_cases.TypeConvert._
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.identity.IdentityCookieToIdentityUser.{CookieValuesToIdentityUser, IdentityId, IdentityUser}
 import com.gu.identity.{IdentityCookieToIdentityUser, IdentityTestUserConfig, IsIdentityTestUser}
-import com.gu.salesforce.SalesforceAuthenticate.{SFAuthConfig, SFAuthTestConfig}
+import com.gu.salesforce.{SFAuthConfig, SFAuthTestConfig}
 import com.gu.salesforce.SalesforceGenericIdLookup.{FieldName, LookupValue, SfObjectType, TSalesforceGenericIdLookup}
 import com.gu.salesforce.cases.SalesforceCase
 import com.gu.salesforce.cases.SalesforceCase.Create.WireNewCase
 import com.gu.salesforce.cases.SalesforceCase.GetMostRecentCaseByContactId.TGetMostRecentCaseByContactId
 import com.gu.salesforce.cases.SalesforceCase.{CaseId, CaseSubject, CaseWithId, ContactId, SubscriptionId}
 import com.gu.salesforce.{SalesforceClient, SalesforceGenericIdLookup}
+import com.gu.salesforce.SalesforceReads._
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
@@ -249,9 +250,9 @@ object Handler extends Logging {
         _ <- sfRequests.test()
       } yield ApiGatewayResponse.successfulExecution).apiResponse
 
-    def loadNormalSfConfig = loadConfig[SFAuthConfig](SFAuthConfig.location, SFAuthConfig.reads)
+    def loadNormalSfConfig = loadConfig[SFAuthConfig](SFAuthConfig.location, sfAuthConfigReads)
 
-    def loadTestSfConfig = loadConfig[SFAuthConfig](SFAuthTestConfig.location, SFAuthTestConfig.reads)
+    def loadTestSfConfig = loadConfig[SFAuthConfig](SFAuthTestConfig.location, sfAuthConfigReads)
 
     for {
       identityTestUsersConfig <- loadConfig[IdentityTestUserConfig].toApiGatewayOp("load identity 'test-users' config")

@@ -1,8 +1,8 @@
 package manualTest
 
+import com.gu.effects.S3Location
 import com.gu.effects.{GetFromS3, Http}
 import com.gu.test.HealthCheck
-import com.gu.util.config.LoadConfigModule.S3Location
 import okhttp3._
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json

@@ -1,12 +1,10 @@
 package com.gu.holiday_stops.subscription
 
+import java.time.temporal.ChronoUnit
 import java.time.{LocalDate, Period}
 
 import cats.implicits._
 import com.gu.holiday_stops.ZuoraHolidayError
-import acyclic.skipped
-
-import scala.annotation.tailrec
 
 /**
  * Information about the billing cycles for a Zuora RatePlanCharge.
@@ -49,7 +47,7 @@ import scala.annotation.tailrec
  * https://knowledgecenter.zuora.com/DC_Developers/G_SOAP_API/E1_SOAP_API_Object_Reference/ProductRatePlanCharge
  */
 trait RatePlanChargeBillingSchedule {
-  def billingPeriodForDate(date: LocalDate): Either[ZuoraHolidayError, BillingPeriod]
+  def billDatesCoveringDate(date: LocalDate): Either[ZuoraHolidayError, BillDates]
 
   def isDateCoveredBySchedule(date: LocalDate): Boolean
 }
@@ -60,7 +58,7 @@ trait RatePlanChargeBillingSchedule {
  * @param startDate inclusive start date of billing period
  * @param endDate   inclusive end date of billing period
  */
-case class BillingPeriod(startDate: LocalDate, endDate: LocalDate)
+case class BillDates(startDate: LocalDate, endDate: LocalDate)
 
 object RatePlanChargeBillingSchedule {
   def apply(ratePlanCharge: RatePlanCharge): Either[ZuoraHolidayError, RatePlanChargeBillingSchedule] = {
@@ -83,29 +81,22 @@ object RatePlanChargeBillingSchedule {
           .getOrElse(true)
       }
 
-      override def billingPeriodForDate(date: LocalDate): Either[ZuoraHolidayError, BillingPeriod] = {
-        def billingPeriodByIndex(index: Int) = {
-          val startDate = ratePlanCharge.effectiveStartDate.plus(billingPeriod.multipliedBy(index))
-          val endDate = startDate.plus(billingPeriod).minusDays(1)
-          BillingPeriod(startDate, endDate)
-        }
+      override def billDatesCoveringDate(date: LocalDate): Either[ZuoraHolidayError, BillDates] = {
+        if (isDateCoveredBySchedule(date)) {
+          val startPeriods = billingPeriod
+            .unit
+            .between(ratePlanCharge.effectiveStartDate, date) / billingPeriod.multiple
+          val startDate = ratePlanCharge
+            .effectiveStartDate
+            .plus(startPeriods * billingPeriod.multiple, billingPeriod.unit)
+          val endDate = startDate
+            .plus(billingPeriod.multiple, billingPeriod.unit)
+            .minusDays(1)
 
-        @tailrec
-        def findBillingPeriodForDate(date: LocalDate, index: Int): Either[ZuoraHolidayError, BillingPeriod] = {
-          val billingPeriod = billingPeriodByIndex(index)
-          if (billingPeriod.startDate.isAfter(date) ||
-            ratePlanEndDate.map(endDate => date.isAfter(endDate)).getOrElse(false)) {
-            ZuoraHolidayError(s"Billing schedule does not cover date $date").asLeft
-          } else {
-            if (billingPeriod.endDate.isAfter(date) || billingPeriod.endDate == date) {
-              billingPeriodByIndex(index).asRight
-            } else {
-              findBillingPeriodForDate(date, index + 1)
-            }
-          }
+          BillDates(startDate, endDate).asRight
+        } else {
+          ZuoraHolidayError(s"Billing schedule does not cover date $date").asLeft
         }
-
-        findBillingPeriodForDate(date, 0)
       }
     }
   }
@@ -113,22 +104,26 @@ object RatePlanChargeBillingSchedule {
   private def billingPeriodForName(
     billingPeriodName: String,
     optionalSpecificBillingPeriod: Option[Int]
-  ): Either[ZuoraHolidayError, Period] = {
+  ): Either[ZuoraHolidayError, BillingPeriod] = {
     billingPeriodName match {
-      case "Annual" => Right(Period.ofYears(1))
-      case "Semi_Annual" => Right(Period.ofMonths(6))
-      case "Quarter" => Right(Period.ofMonths(3))
-      case "Month" => Right(Period.ofMonths(1))
+      case "Annual" => Right(BillingPeriod(ChronoUnit.YEARS, 1))
+      case "Semi_Annual" => Right(BillingPeriod(ChronoUnit.MONTHS, 6))
+      case "Quarter" => Right(BillingPeriod(ChronoUnit.MONTHS, 3))
+      case "Month" => Right(BillingPeriod(ChronoUnit.MONTHS, 1))
       case "Specific_Weeks" =>
         optionalSpecificBillingPeriod
           .toRight(ZuoraHolidayError(s"specificBillingPeriod is required for $billingPeriodName billing period"))
-          .map(Period.ofWeeks(_))
+          .map(BillingPeriod(ChronoUnit.WEEKS, _))
+      case "Specific_Months" =>
+        optionalSpecificBillingPeriod
+          .toRight(ZuoraHolidayError(s"specificBillingPeriod is required for $billingPeriodName billing period"))
+          .map(BillingPeriod(ChronoUnit.MONTHS, _))
       case _ => Left(ZuoraHolidayError(s"Failed to determine duration of billing period: $billingPeriodName"))
     }
   }
 
   private def ratePlanEndDate(
-    billingPeriod: Period,
+    billingPeriod: BillingPeriod,
     effectiveStartDate: LocalDate,
     endDateCondition: String,
     upToPeriodsType: Option[String],
@@ -148,7 +143,7 @@ object RatePlanChargeBillingSchedule {
   }
 
   private def ratePlanFixedPeriodEndDate(
-    billingPeriod: Period,
+    billingPeriod: BillingPeriod,
     effectiveStartDate: LocalDate,
     endDateCondition: String,
     optionalUpToPeriodsType: Option[String],
@@ -159,8 +154,9 @@ object RatePlanChargeBillingSchedule {
         optionalUpToPeriods
           .toRight(ZuoraHolidayError("RatePlan.upToPeriods is required when RatePlan.upToPeriodsType=Billing_Periods"))
           .map { upToPeriods =>
-            effectiveStartDate
-              .plus(billingPeriod.multipliedBy(upToPeriods))
+            billingPeriod
+              .unit
+              .addTo(effectiveStartDate, upToPeriods * billingPeriod.multiple)
               .minusDays(1)
           }
       case unsupportedBillingPeriodType =>
@@ -168,4 +164,6 @@ object RatePlanChargeBillingSchedule {
           .asLeft
     }
   }
+
+  case class BillingPeriod(unit: ChronoUnit, multiple: Int)
 }
