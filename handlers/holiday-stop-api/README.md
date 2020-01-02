@@ -8,6 +8,13 @@ All endpoints require...
 
 **If being used in the CSR UI (in Salesforce) use-case**, then one should also pass the CSR's Session ID via the `X-Ephemeral-Salesforce-Access-Token` header (can be obtained in Apex with `UserInfo.getSessionId()`) so that the actions can be attributed correctly to the CSR (rather than the configured API user for this repo).
 
+#### Handling Multiple Environments
+The CSR UI (in Salesforce) is one consumer of this API and so each Salesforce environment is configured to speak the corresponding instance of the lambda.
+
+`manage-frontend` is the main consumer and it supports 'test-users' and calls the correct instance of this lambda accordingly.
+
+See [handlers/README](../README.md#3rd-party-service-environments) for more general information on this.
+
 ### `GET` `/{STAGE}/potential/{SUBSCRIPTION_NAME}?startDate={yyyy-MM-dd}&endDate={yyyy-MM-dd}`
 returns a response containing dates for each issue impacted between the start and end parameters inclusively, for the subscription. Each one is accompanied by expected credit amount and the invoice date the credit will be appear on.
  
@@ -37,24 +44,4 @@ handles processing of holiday stops when a subscription is cancelled, unprocesse
 
 ### `GET` `/{STAGE}/hsr/{SUBSCRIPTION_NAME}/cancel?effectiveCancellationDate=yyyy-MM-dd`
 returns details of existing holiday stops that should be manually refunded if a subscription is canceled. This includes unprocessed holiday stops for dates before the cancellation date defined by the effectiveCancellationDate query string parameter.
-
-
-## Handling Multiple Environments
-This lambda has a one-to-one relationship between AWS Stack/Stage and Salesforce Environment.
-- SF DEV <-> AWS DEV Stack
-- SF UAT <-> AWS CODE Stack
-- SF PROD <-> AWS PROD Stack
-
-
-The CSR UI (in Salesforce) is one consumer of this API and so each Salesforce environment is configured to speak the corresponding instance of the lambda.
-
-`manage-frontend` is the main consumer and it supports 'test-users' and calls the correct instance of this lambda accordingly.
-
-| Stage of `manage-frontend` | normal mode | test user mode |
-| --- | --- | --- |
-| DEV (local machine) | DEV Lambda* (SF Dev) | CODE Lambda (SF UAT) |
-| CODE | DEV Lambda* (SF Dev) | CODE Lambda (SF UAT) |
-| PROD | PROD Lambda (SF Dev) | CODE Lambda (SF UAT) |
-
-\* Yes indeed there is a DEV Stack for the lambda, which is available in riff-raff as of [guardian/prism/pull/75](https://github.com/guardian/prism/pull/75)
 

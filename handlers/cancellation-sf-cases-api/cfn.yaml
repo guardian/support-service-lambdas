@@ -1,0 +1,181 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Create/update SalesForce cases for self service cancellation tracking
+
+Parameters:
+  Stage:
+    Description: Stage name
+    Type: String
+    AllowedValues:
+      - PROD
+      - CODE
+      - DEV
+    Default: CODE
+
+Conditions:
+  CreateProdMonitoring: !Equals [ !Ref Stage, PROD ]
+
+Resources:
+  CancellationSFCasesApiRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: LambdaPolicy
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  - lambda:InvokeFunction
+                Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/cancellation-sf-cases-api-${Stage}:log-stream:*"
+        - PolicyName: ReadPrivateCredentials
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action: s3:GetObject
+                Resource: !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/*
+
+  CancellationSFCasesApi:
+    Type: "AWS::ApiGateway::RestApi"
+    Properties:
+      Description: manage-frontend uses this to create/update SalesForce cases for self service cancellation tracking
+      Name: !Sub cancellation-sf-cases-api-${Stage}
+
+  CancellationSFCasesApiPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:invokeFunction
+      FunctionName: !Sub cancellation-sf-cases-api-${Stage}
+      Principal: apigateway.amazonaws.com
+    DependsOn: CancellationSFCasesApiLambda
+
+  CancellationSFCasesApiLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      Description: manage-frontend used to create/update SalesForce cases for self service cancellation tracking
+      FunctionName:
+        !Sub cancellation-sf-cases-api-${Stage}
+      Code:
+        S3Bucket: support-service-lambdas-dist
+        S3Key: !Sub membership/${Stage}/cancellation-sf-cases-api/cancellation-sf-cases-api.jar
+      Handler: com.gu.cancellation.sf_cases.Handler::handle
+      Environment:
+        Variables:
+          Stage: !Ref Stage
+      Role:
+        Fn::GetAtt:
+          - CancellationSFCasesApiRole
+          - Arn
+      MemorySize: 1536
+      Runtime: java8
+      Timeout: 300
+    DependsOn:
+      - CancellationSFCasesApiRole
+
+  CancellationSFCasesApiUsagePlan:
+    Type: AWS::ApiGateway::UsagePlan
+    Properties:
+      UsagePlanName: cancellation-sf-cases-api
+      ApiStages:
+        - ApiId: !Ref CancellationSFCasesApi
+          Stage: !Ref Stage
+    DependsOn:
+      - CancellationSFCasesApi
+      - CancellationSFCasesApiStage
+
+  CancellationSFCasesApiKey:
+    Type: AWS::ApiGateway::ApiKey
+    Properties:
+      Description: Used by manage-frontend
+      Enabled: true
+      Name: !Sub cancellation-sf-cases-api-key-${Stage}
+      StageKeys:
+        - RestApiId: !Ref CancellationSFCasesApi
+          StageName: !Ref Stage
+    DependsOn:
+      - CancellationSFCasesApi
+      - CancellationSFCasesApiStage
+
+  CancellationSFCasesApiUsagePlanKey:
+    Type: AWS::ApiGateway::UsagePlanKey
+    Properties:
+      KeyId: !Ref CancellationSFCasesApiKey
+      KeyType: API_KEY
+      UsagePlanId: !Ref CancellationSFCasesApiUsagePlan
+    DependsOn:
+      - CancellationSFCasesApiKey
+      - CancellationSFCasesApiUsagePlan
+
+  CancellationSFCasesApiProxyResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref CancellationSFCasesApi
+      ParentId: !GetAtt [CancellationSFCasesApi, RootResourceId]
+      PathPart: "{proxy+}"
+    DependsOn: CancellationSFCasesApi
+
+  CancellationSFCasesApiAnyMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE
+      ApiKeyRequired: true
+      RestApiId: !Ref CancellationSFCasesApi
+      ResourceId: !Ref CancellationSFCasesApiProxyResource
+      HttpMethod: ANY
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST # this for the interaction between API Gateway and Lambda and MUST be POST
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CancellationSFCasesApiLambda.Arn}/invocations
+    DependsOn:
+      - CancellationSFCasesApi
+      - CancellationSFCasesApiLambda
+      - CancellationSFCasesApiProxyResource
+
+  CancellationSFCasesApiStage:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      Description: Stage for cancellation-sf-cases-api
+      RestApiId: !Ref CancellationSFCasesApi
+      DeploymentId: !Ref CancellationSFCasesApiDeployment
+      StageName: !Sub ${Stage}
+    DependsOn:
+      - CancellationSFCasesApiAnyMethod
+
+  CancellationSFCasesApiDeployment:
+    Type: AWS::ApiGateway::Deployment
+    Properties:
+      Description: Deploys cancellation-sf-cases-api into an environment/stage
+      RestApiId: !Ref CancellationSFCasesApi
+    DependsOn:
+      - CancellationSFCasesApiAnyMethod
+
+  5xxApiAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: CreateProdMonitoring
+    Properties:
+      AlarmActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:fulfilment-dev
+      AlarmName: !Sub "5XX from cancellation-sf-cases-api-${Stage}"
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: ApiName
+          Value: !Sub cancellation-sf-cases-api-${Stage}
+        - Name: Stage
+          Value: !Sub ${Stage}
+      EvaluationPeriods: 1
+      MetricName: 5XXError
+      Namespace: AWS/ApiGateway
+      Period: 3600
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching

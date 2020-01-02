@@ -66,7 +66,7 @@ object SalesforceCase extends Logging {
   object GetById {
 
     def apply[ResponseType: Reads](get: HttpOp[RestRequestMaker.GetRequest, JsValue]): CaseId => ClientFailableOp[ResponseType] =
-      get.setupRequest(toRequest _).parse[ResponseType].runRequest
+      get.setupRequest(toRequest).parse[ResponseType].runRequest
 
     def toRequest(caseId: CaseId): GetRequest = RestRequestMaker.GetRequest(RelativePath(s"$caseSObjectsBaseUrl/${caseId.value}"))
 

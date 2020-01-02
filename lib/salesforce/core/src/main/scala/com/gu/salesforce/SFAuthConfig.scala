@@ -17,10 +17,6 @@ object SFAuthConfig {
   implicit val location = ConfigLocation[SFAuthConfig](path = "sfAuth", version = 1)
 }
 
-object SFAuthTestConfig {
-  implicit val location = ConfigLocation[SFAuthConfig](path = "TEST/sfAuth", version = 1)
-}
-
 object SFExportAuthConfig {
   val location = ConfigLocation[SFAuthConfig](path = "sfExportAuth", version = 1)
 }

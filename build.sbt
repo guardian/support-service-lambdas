@@ -148,7 +148,7 @@ lazy val s3ConfigValidator = all(project in file("lib/s3ConfigValidator"))
     `digital-subscription-expiry`,
     `identity-backfill`,
     effectsDepIncludingTestFolder,
-    `cancellation-sf-cases`,
+    `cancellation-sf-cases-api`,
     `sf-gocardless-sync`,
     `holiday-stop-api`
   )
@@ -235,7 +235,7 @@ lazy val root = all(project in file(".")).enablePlugins(RiffRaffArtifact).aggreg
   `identity-retention`,
   `zuora-retention`,
   `sf-contact-merge`,
-  `cancellation-sf-cases`,
+  `cancellation-sf-cases-api`,
   `sf-gocardless-sync`,
   `holiday-stop-api`,
   effects,
@@ -302,7 +302,7 @@ lazy val `sf-contact-merge` = all(project in file("handlers/sf-contact-merge"))
   .enablePlugins(RiffRaffArtifact)
   .dependsOn(zuora, `salesforce-client` % "compile->compile;test->test", handler, effectsDepIncludingTestFolder, testDep)
 
-lazy val `cancellation-sf-cases` = all(project in file("handlers/cancellation-sf-cases"))
+lazy val `cancellation-sf-cases-api` = all(project in file("handlers/cancellation-sf-cases-api"))
   .enablePlugins(RiffRaffArtifact)
   .dependsOn(`salesforce-client`, handler, effectsDepIncludingTestFolder, testDep)
 
