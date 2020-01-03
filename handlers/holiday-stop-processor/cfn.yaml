@@ -11,9 +11,6 @@ Parameters:
       - PROD
     Default: CODE
 
-Conditions:
-  IsProd: !Equals [!Ref "Stage", "PROD"]
-
 Mappings:
   StageMap:
     CODE:
@@ -132,7 +129,6 @@ Resources:
 
   HolidayStopProcessorLambdaInvokePermission:
     Type: AWS::Lambda::Permission
-    Condition: IsProd
     Properties:
       Action: lambda:invokeFunction
       FunctionName: !Ref HolidayStopProcessor
