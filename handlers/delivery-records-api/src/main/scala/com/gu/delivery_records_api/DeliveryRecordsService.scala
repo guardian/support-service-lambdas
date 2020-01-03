@@ -4,7 +4,7 @@ import java.time.LocalDate
 
 import cats.Monad
 import cats.data.EitherT
-import com.gu.salesforce.{RecordsWrapperCaseClass, Contact}
+import com.gu.salesforce.{Contact, RecordsWrapperCaseClass, SFApiDeliveryRecord}
 import com.gu.salesforce.SalesforceQueryConstants.deliveryRecordsQuery
 import com.gu.salesforce.sttp.SalesforceClient
 import io.circe.generic.auto._
@@ -14,7 +14,14 @@ final case class DeliveryRecord(
   deliveryDate: Option[LocalDate],
   deliveryInstruction: Option[String],
   deliveryAddress: Option[String],
+  addressLine1: Option[String],
+  addressLine2: Option[String],
+  addressLine3: Option[String],
+  addressTown: Option[String],
+  addressCountry: Option[String],
+  addressPostcode: Option[String],
   hasHolidayStop: Option[Boolean]
+
 )
 
 sealed trait DeliveryRecordServiceError
@@ -35,14 +42,7 @@ trait DeliveryRecordsService[F[_]] {
 object DeliveryRecordsService {
 
   private case class SubscriptionRecordQueryResult(
-    Delivery_Records__r: Option[RecordsWrapperCaseClass[DeliveryRecordQueryResult]]
-  )
-
-  private case class DeliveryRecordQueryResult(
-    Delivery_Date__c: Option[LocalDate],
-    Delivery_Address__c: Option[String],
-    Delivery_Instructions__c: Option[String],
-    Has_Holiday_Stop__c: Option[Boolean]
+    Delivery_Records__r: Option[RecordsWrapperCaseClass[SFApiDeliveryRecord]]
   )
 
   def apply[F[_]: Monad](salesforceClient: SalesforceClient[F]): DeliveryRecordsService[F] = new DeliveryRecordsService[F] {
@@ -65,6 +65,12 @@ object DeliveryRecordsService {
           DeliveryRecord(
             deliveryDate = queryRecord.Delivery_Date__c,
             deliveryAddress = queryRecord.Delivery_Address__c,
+            addressLine1 = queryRecord.Address_Line_1__c,
+            addressLine2 = queryRecord.Address_Line_2__c,
+            addressLine3 = queryRecord.Address_Line_3__c,
+            addressTown = queryRecord.Address_Town__c,
+            addressCountry = queryRecord.Address_Country__c,
+            addressPostcode = queryRecord.Address_Postcode__c,
             deliveryInstruction = queryRecord.Delivery_Instructions__c,
             hasHolidayStop = queryRecord.Has_Holiday_Stop__c
           )
@@ -88,7 +94,7 @@ object DeliveryRecordsService {
       subscriptionId: String,
       contact: Contact,
       queryResult: RecordsWrapperCaseClass[SubscriptionRecordQueryResult]
-    ): Either[DeliveryRecordServiceError, List[DeliveryRecordQueryResult]] = {
+    ): Either[DeliveryRecordServiceError, List[SFApiDeliveryRecord]] = {
       queryResult
         .records
         .headOption
