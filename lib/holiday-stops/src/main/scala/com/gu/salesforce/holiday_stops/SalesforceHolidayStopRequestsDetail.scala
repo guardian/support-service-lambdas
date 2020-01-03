@@ -80,12 +80,12 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
       | Estimated_Price__c, Charge_Code__c, Actual_Price__c, Expected_Invoice_Date__c
       |""".stripMargin
 
-  private def soqlFilterClause(stoppedPublicationDates: List[LocalDate]) = s"""
-      | Stopped_Publication_Date__c IN (${stoppedPublicationDates.map(_.toString).mkString(", ")})
-      | AND Subscription_Cancellation_Effective_Date__c = null
-      | AND Is_Actioned__c = false
-      | AND Is_Withdrawn__c = false
-      |""".stripMargin
+  private def soqlFilterClause(stoppedPublicationDates: List[LocalDate]) =
+    s"""Stopped_Publication_Date__c IN (${stoppedPublicationDates.map(_.toString).mkString(", ")})
+       | AND Subscription_Cancellation_Effective_Date__c = null
+       | AND Is_Actioned__c = false
+       | AND Is_Withdrawn__c = false
+       |""".stripMargin
 
   val SOQL_ORDER_BY_CLAUSE = "ORDER BY Stopped_Publication_Date__c ASC"
 
@@ -109,7 +109,7 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
          | $SOQL_SELECT_CLAUSE
          | FROM $holidayStopRequestsDetailSfObjectRef
          | WHERE Holiday_Stop_Request__r.SF_Subscription__r.Product_Type__c = '${productType.name}'
-         | AND${soqlFilterClause(dates)}
+         | AND ${soqlFilterClause(dates)}
          | $SOQL_ORDER_BY_CLAUSE
          |""".stripMargin
     }
