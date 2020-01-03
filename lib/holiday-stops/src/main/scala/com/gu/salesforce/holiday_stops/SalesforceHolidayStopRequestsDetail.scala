@@ -1,6 +1,7 @@
 package com.gu.salesforce.holiday_stops
 
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 import ai.x.play.json.Jsonx
 import com.gu.salesforce.RecordsWrapperCaseClass
@@ -81,7 +82,7 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
       |""".stripMargin
 
   private def soqlFilterClause(stoppedPublicationDates: List[LocalDate]) =
-    s"""Stopped_Publication_Date__c IN (${stoppedPublicationDates.map(_.toString).mkString(", ")})
+    s"""Stopped_Publication_Date__c IN (${stoppedPublicationDates.map(SoqlDateFormat.format).mkString(", ")})
        | AND Subscription_Cancellation_Effective_Date__c = null
        | AND Is_Actioned__c = false
        | AND Is_Withdrawn__c = false
@@ -114,4 +115,6 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
          |""".stripMargin
     }
   }
+
+  val SoqlDateFormat = DateTimeFormatter.ISO_LOCAL_DATE
 }
