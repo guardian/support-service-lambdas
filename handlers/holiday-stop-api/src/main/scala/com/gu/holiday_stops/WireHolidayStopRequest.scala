@@ -120,7 +120,7 @@ object GetHolidayStopRequests {
       .getProductSpecificsByProductVariant(ProductVariant(subscription.ratePlans), subscription)
       .leftMap(error => GetHolidayStopRequestsError(s"Failed to get product specifics for $subscription: $error"))
       .map { productSpecifics =>
-        val firstAvailableDate = productSpecifics.issueSpecifics.map(_.firstAvailableDate).min[LocalDate](_ compareTo _)
+        val firstAvailableDate = calculateFirstAvailableDate(productSpecifics)
         GetHolidayStopRequests(
           existing = holidayStopRequests.map(WireHolidayStopRequest.apply(firstAvailableDate)),
           issueSpecifics = productSpecifics.issueSpecifics,
@@ -128,6 +128,10 @@ object GetHolidayStopRequests {
           firstAvailableDate = firstAvailableDate
         )
       }
+
+  private def calculateFirstAvailableDate(productSpecifics: ProductSpecifics) = {
+    productSpecifics.issueSpecifics.map(_.firstAvailableDate).min[LocalDate](_ compareTo _)
+  }
 
   implicit val formatIssueSpecifics: OFormat[IssueSpecifics] = Json.format[IssueSpecifics]
   implicit val formatProductSpecifics: OFormat[ProductSpecifics] = Json.format[ProductSpecifics]
