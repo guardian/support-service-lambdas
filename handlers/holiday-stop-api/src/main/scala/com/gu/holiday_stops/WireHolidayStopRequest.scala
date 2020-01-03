@@ -12,29 +12,23 @@ import play.api.libs.json._
 
 object WireHolidayStopRequest {
 
-  def apply(
-    firstAvailableDate: LocalDate
-  )(
-    sfHolidayStopRequest: HolidayStopRequest
-  ): HolidayStopRequestFull = {
-    HolidayStopRequestFull(
-      id = sfHolidayStopRequest.Id.value,
-      startDate = sfHolidayStopRequest.Start_Date__c.value,
-      endDate = sfHolidayStopRequest.End_Date__c.value,
-      subscriptionName = sfHolidayStopRequest.Subscription_Name__c,
-      publicationsImpacted = sfHolidayStopRequest
-        .Holiday_Stop_Request_Detail__r
-        .map(_.records.map(toHolidayStopRequestDetail)).getOrElse(List()),
-      withdrawnTime = sfHolidayStopRequest.Withdrawn_Time__c.map(_.value),
-      mutabilityFlags = calculateMutabilityFlags(
-        isWithdrawn = sfHolidayStopRequest.Is_Withdrawn__c.value,
-        firstAvailableDate = firstAvailableDate,
-        actionedCount = sfHolidayStopRequest.Actioned_Count__c.value,
-        firstPublicationDate = sfHolidayStopRequest.Holiday_Stop_Request_Detail__r.map(_.records.map(_.Stopped_Publication_Date__c.value).min[LocalDate](_ compareTo _)).get,
-        lastPublicationDate = sfHolidayStopRequest.Holiday_Stop_Request_Detail__r.map(_.records.map(_.Stopped_Publication_Date__c.value).max[LocalDate](_ compareTo _)).get
-      )
+  def apply(firstAvailableDate: LocalDate)(sfHolidayStopRequest: HolidayStopRequest): HolidayStopRequestFull = HolidayStopRequestFull(
+    id = sfHolidayStopRequest.Id.value,
+    startDate = sfHolidayStopRequest.Start_Date__c.value,
+    endDate = sfHolidayStopRequest.End_Date__c.value,
+    subscriptionName = sfHolidayStopRequest.Subscription_Name__c,
+    publicationsImpacted = sfHolidayStopRequest
+      .Holiday_Stop_Request_Detail__r
+      .map(_.records.map(toHolidayStopRequestDetail)).getOrElse(List()),
+    withdrawnTime = sfHolidayStopRequest.Withdrawn_Time__c.map(_.value),
+    mutabilityFlags = calculateMutabilityFlags(
+      isWithdrawn = sfHolidayStopRequest.Is_Withdrawn__c.value,
+      firstAvailableDate = firstAvailableDate,
+      actionedCount = sfHolidayStopRequest.Actioned_Count__c.value,
+      firstPublicationDate = sfHolidayStopRequest.Holiday_Stop_Request_Detail__r.map(_.records.map(_.Stopped_Publication_Date__c.value).min[LocalDate](_ compareTo _)).get,
+      lastPublicationDate = sfHolidayStopRequest.Holiday_Stop_Request_Detail__r.map(_.records.map(_.Stopped_Publication_Date__c.value).max[LocalDate](_ compareTo _)).get
     )
-  }
+  )
 
   def toHolidayStopRequestDetail(detail: SalesforceHolidayStopRequestsDetail.HolidayStopRequestsDetail) = {
     HolidayStopRequestsDetail(
