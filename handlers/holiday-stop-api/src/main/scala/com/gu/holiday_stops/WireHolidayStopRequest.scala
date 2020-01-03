@@ -12,23 +12,29 @@ import play.api.libs.json._
 
 object WireHolidayStopRequest {
 
-  def apply(issueSpecifics: List[IssueSpecifics])(sfHolidayStopRequest: HolidayStopRequest): HolidayStopRequestFull = HolidayStopRequestFull(
-    id = sfHolidayStopRequest.Id.value,
-    startDate = sfHolidayStopRequest.Start_Date__c.value,
-    endDate = sfHolidayStopRequest.End_Date__c.value,
-    subscriptionName = sfHolidayStopRequest.Subscription_Name__c,
-    publicationsImpacted = sfHolidayStopRequest
-      .Holiday_Stop_Request_Detail__r
-      .map(_.records.map(toHolidayStopRequestDetail)).getOrElse(List()),
-    withdrawnTime = sfHolidayStopRequest.Withdrawn_Time__c.map(_.value),
-    mutabilityFlags = calculateMutabilityFlags(
-      isWithdrawn = sfHolidayStopRequest.Is_Withdrawn__c.value,
-      firstAvailableDate = issueSpecifics.map(_.firstAvailableDate).min[LocalDate](_ compareTo _),
-      actionedCount = sfHolidayStopRequest.Actioned_Count__c.value,
-      firstPublicationDate = sfHolidayStopRequest.Holiday_Stop_Request_Detail__r.map(_.records.map(_.Stopped_Publication_Date__c.value).min[LocalDate](_ compareTo _)).get,
-      lastPublicationDate = sfHolidayStopRequest.Holiday_Stop_Request_Detail__r.map(_.records.map(_.Stopped_Publication_Date__c.value).max[LocalDate](_ compareTo _)).get
+  def apply(
+    firstAvailableDate: LocalDate
+  )(
+    sfHolidayStopRequest: HolidayStopRequest
+  ): HolidayStopRequestFull = {
+    HolidayStopRequestFull(
+      id = sfHolidayStopRequest.Id.value,
+      startDate = sfHolidayStopRequest.Start_Date__c.value,
+      endDate = sfHolidayStopRequest.End_Date__c.value,
+      subscriptionName = sfHolidayStopRequest.Subscription_Name__c,
+      publicationsImpacted = sfHolidayStopRequest
+        .Holiday_Stop_Request_Detail__r
+        .map(_.records.map(toHolidayStopRequestDetail)).getOrElse(List()),
+      withdrawnTime = sfHolidayStopRequest.Withdrawn_Time__c.map(_.value),
+      mutabilityFlags = calculateMutabilityFlags(
+        isWithdrawn = sfHolidayStopRequest.Is_Withdrawn__c.value,
+        firstAvailableDate = firstAvailableDate,
+        actionedCount = sfHolidayStopRequest.Actioned_Count__c.value,
+        firstPublicationDate = sfHolidayStopRequest.Holiday_Stop_Request_Detail__r.map(_.records.map(_.Stopped_Publication_Date__c.value).min[LocalDate](_ compareTo _)).get,
+        lastPublicationDate = sfHolidayStopRequest.Holiday_Stop_Request_Detail__r.map(_.records.map(_.Stopped_Publication_Date__c.value).max[LocalDate](_ compareTo _)).get
+      )
     )
-  )
+  }
 
   def toHolidayStopRequestDetail(detail: SalesforceHolidayStopRequestsDetail.HolidayStopRequestsDetail) = {
     HolidayStopRequestsDetail(
@@ -106,7 +112,8 @@ object HolidayStopRequestFull {
 case class GetHolidayStopRequests(
   existing: List[HolidayStopRequestFull],
   issueSpecifics: List[IssueSpecifics],
-  annualIssueLimit: Int
+  annualIssueLimit: Int,
+  firstAvailableDate: LocalDate
 )
 
 object GetHolidayStopRequests {
@@ -118,12 +125,15 @@ object GetHolidayStopRequests {
     ActionCalculator
       .getProductSpecificsByProductVariant(ProductVariant(subscription.ratePlans), subscription)
       .leftMap(error => GetHolidayStopRequestsError(s"Failed to get product specifics for $subscription: $error"))
-      .map(productSpecifics =>
+      .map { productSpecifics =>
+        val firstAvailableDate = productSpecifics.issueSpecifics.map(_.firstAvailableDate).min[LocalDate](_ compareTo _)
         GetHolidayStopRequests(
-          existing = holidayStopRequests.map(WireHolidayStopRequest.apply(productSpecifics.issueSpecifics)),
+          existing = holidayStopRequests.map(WireHolidayStopRequest.apply(firstAvailableDate)),
           issueSpecifics = productSpecifics.issueSpecifics,
-          annualIssueLimit = productSpecifics.annualIssueLimit
-        ))
+          annualIssueLimit = productSpecifics.annualIssueLimit,
+          firstAvailableDate = firstAvailableDate
+        )
+      }
 
   implicit val formatIssueSpecifics: OFormat[IssueSpecifics] = Json.format[IssueSpecifics]
   implicit val formatProductSpecifics: OFormat[ProductSpecifics] = Json.format[ProductSpecifics]

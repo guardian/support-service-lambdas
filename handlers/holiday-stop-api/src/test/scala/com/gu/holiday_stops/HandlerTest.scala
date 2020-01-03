@@ -233,7 +233,8 @@ class HandlerTest extends FlatSpec with Matchers {
                     GuardianWeeklySuspensionConstants.issueConstants.head.issueDayOfWeek.getValue
                   )
                 ),
-                GuardianWeeklySuspensionConstants.annualIssueLimit
+                GuardianWeeklySuspensionConstants.annualIssueLimit,
+                GuardianWeeklyIssueSuspensionConstants.firstAvailableDate(LocalDate.now())
               )
             )
 
