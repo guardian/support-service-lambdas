@@ -22,6 +22,12 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
   val buyerContactId = "contact id"
   val deliveryDate = LocalDate.now()
   val deliveryAddress = "a delivery address"
+  val addressLine1 = "an address line 1"
+  val addressLine2 = "an address line 2"
+  val addressLine3 = "an address line 3"
+  val addressTown = "an address town"
+  val addressCountry = "an address country"
+  val addressPostcode = "an address postcode"
   val deliveryInstruction = "leave by the gnome"
   val hasHolidayStop = true
 
@@ -34,6 +40,12 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
               SFApiDeliveryRecord(
                 Delivery_Date__c = Some(deliveryDate),
                 Delivery_Address__c = Some(deliveryAddress),
+                Address_Line_1__c = Some(addressLine1),
+                Address_Line_2__c = Some(addressLine2),
+                Address_Line_3__c = Some(addressLine3),
+                Address_Town__c = Some(addressTown),
+                Address_Country__c = Some(addressCountry),
+                Address_Postcode__c = Some(addressPostcode),
                 Delivery_Instructions__c = Some(deliveryInstruction),
                 Has_Holiday_Stop__c = Some(hasHolidayStop)
               )
@@ -50,6 +62,12 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
         Some(deliveryDate),
         Some(deliveryInstruction),
         Some(deliveryAddress),
+        Some(addressLine1),
+        Some(addressLine2),
+        Some(addressLine3),
+        Some(addressTown),
+        Some(addressCountry),
+        Some(addressPostcode),
         Some(hasHolidayStop)
       )
     )
