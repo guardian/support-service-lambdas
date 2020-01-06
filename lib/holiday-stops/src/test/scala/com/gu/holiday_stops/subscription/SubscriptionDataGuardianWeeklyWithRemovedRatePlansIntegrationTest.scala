@@ -1,8 +1,10 @@
 package com.gu.holiday_stops.subscription
 
+import java.time.DayOfWeek.FRIDAY
 import java.time.LocalDate
 
 import com.gu.holiday_stops.subscription.SubscriptionDataIntegrationTest.testSubscriptonDataIssueGeneration
+import com.gu.zuora.ZuoraProductTypes
 import org.scalatest.FlatSpec
 
 class SubscriptionDataGuardianWeeklyWithRemovedRatePlansIntegrationTest extends FlatSpec {
@@ -52,6 +54,13 @@ class SubscriptionDataGuardianWeeklyWithRemovedRatePlansIntegrationTest extends 
       IssueData(startDate.plusWeeks(22), normalBillDates2, -5.77),
     )
 
-    testSubscriptonDataIssueGeneration("GuardianWeeklyWith6For6WithChristmasFix.json", startDate, expectedIssueData)
+    testSubscriptonDataIssueGeneration(
+      subscriptionFile = "GuardianWeeklyWith6For6WithChristmasFix.json",
+      startDate = startDate,
+      expectedIssueData = expectedIssueData,
+      expectedTotalAnnualIssueLimitPerSubscription = 6,
+      expectedProductType = ZuoraProductTypes.GuardianWeekly,
+      expectedEditionDaysOfWeek = List(FRIDAY)
+    )
   }
 }

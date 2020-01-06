@@ -113,7 +113,8 @@ lazy val `holiday-stops` = all(project in file("lib/holiday-stops"))
   .dependsOn(
     `salesforce-client`,
     effects % "test->test",
-    testDep
+    testDep,
+    `zuora-core`
   )
   .settings(
     libraryDependencies ++= Seq(
@@ -189,10 +190,12 @@ lazy val `zuora-reports` = all(project in file("lib/zuora-reports"))
   .dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `fulfilment-dates` = all(project in file("lib/fulfilment-dates"))
-  .dependsOn(`effects-s3`, `config-core`, testDep)
+  .dependsOn(`effects-s3`, `config-core`, testDep, `zuora-core`)
   .settings(
     libraryDependencies ++= Seq(catsCore, circe, circeParser)
   )
+
+lazy val `zuora-core` = all(project in file("lib/zuora-core"))
 
 // ==== END libraries ====
 
@@ -233,7 +236,8 @@ lazy val root = all(project in file(".")).enablePlugins(RiffRaffArtifact).aggreg
   `metric-push-api`,
   `fulfilment-date-calculator`,
   `delivery-records-api`,
-  `fulfilment-dates`
+  `fulfilment-dates`,
+  `zuora-core`
 ).dependsOn(zuora, handler, effectsDepIncludingTestFolder, `effects-sqs`, testDep)
 
 lazy val `identity-backfill` = all(project in file("handlers/identity-backfill")) // when using the "project identity-backfill" command it uses the lazy val name
@@ -280,7 +284,9 @@ lazy val `sf-gocardless-sync` = all(project in file("handlers/sf-gocardless-sync
 
 lazy val `holiday-stop-api` = all(project in file("handlers/holiday-stop-api"))
   .enablePlugins(RiffRaffArtifact)
-  .dependsOn(`holiday-stops` % "compile->compile;test->test", handler, effectsDepIncludingTestFolder, testDep)
+  .dependsOn(
+    `holiday-stops` % "compile->compile;test->test", handler, effectsDepIncludingTestFolder, testDep, `fulfilment-dates`
+  )
 
 lazy val `sf-datalake-export` = all(project in file("handlers/sf-datalake-export"))
   .enablePlugins(RiffRaffArtifact)

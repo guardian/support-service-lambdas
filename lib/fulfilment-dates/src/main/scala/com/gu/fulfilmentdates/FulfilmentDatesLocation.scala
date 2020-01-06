@@ -4,8 +4,8 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 import com.gu.effects.S3Location
-import com.gu.fulfilmentdates.ZuoraProductTypes.ZuoraProductType
 import com.gu.util.config.Stage
+import com.gu.zuora.ZuoraProductTypes.ZuoraProductType
 
 object FulfilmentDatesLocation {
   def fulfilmentDatesFileLocation(stage: Stage, zuoraProductType: ZuoraProductType, date: LocalDate) = {
