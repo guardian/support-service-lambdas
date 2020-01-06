@@ -1,7 +1,6 @@
 package com.gu.effects
 
 import java.time.{DayOfWeek, LocalDate}
-import java.time.temporal.TemporalAdjusters
 import java.time.temporal.TemporalAdjusters._
 
 import scala.util.{Failure, Success, Try}

@@ -13,7 +13,7 @@ import play.api.libs.json._
 
 object WireHolidayStopRequest {
 
-  def apply(issueSpecifics: List[IssueSpecifics])(sfHolidayStopRequest: HolidayStopRequest): HolidayStopRequestFull = HolidayStopRequestFull(
+  def apply(firstAvailableDate: LocalDate)(sfHolidayStopRequest: HolidayStopRequest): HolidayStopRequestFull = HolidayStopRequestFull(
     id = sfHolidayStopRequest.Id.value,
     startDate = sfHolidayStopRequest.Start_Date__c.value,
     endDate = sfHolidayStopRequest.End_Date__c.value,
@@ -24,7 +24,7 @@ object WireHolidayStopRequest {
     withdrawnTime = sfHolidayStopRequest.Withdrawn_Time__c.map(_.value),
     mutabilityFlags = calculateMutabilityFlags(
       isWithdrawn = sfHolidayStopRequest.Is_Withdrawn__c.value,
-      firstAvailableDate = issueSpecifics.map(_.firstAvailableDate).min[LocalDate](_ compareTo _),
+      firstAvailableDate = firstAvailableDate,
       actionedCount = sfHolidayStopRequest.Actioned_Count__c.value,
       firstPublicationDate = sfHolidayStopRequest.Holiday_Stop_Request_Detail__r.map(_.records.map(_.Stopped_Publication_Date__c.value).min[LocalDate](_ compareTo _)).get,
       lastPublicationDate = sfHolidayStopRequest.Holiday_Stop_Request_Detail__r.map(_.records.map(_.Stopped_Publication_Date__c.value).max[LocalDate](_ compareTo _)).get
@@ -107,7 +107,8 @@ object HolidayStopRequestFull {
 case class GetHolidayStopRequests(
   existing: List[HolidayStopRequestFull],
   issueSpecifics: List[IssueSpecifics],
-  annualIssueLimit: Int
+  annualIssueLimit: Int,
+  firstAvailableDate: LocalDate
 )
 
 object GetHolidayStopRequests {
@@ -123,10 +124,12 @@ object GetHolidayStopRequests {
         createIssueSpecificsForDayOfWeek(fulfilmentDates, editionDayOfWeek, fulfilmentStartDate)
       }
       .map { issueSpecifics =>
+        val firstAvailableDate = calculateFirstAvailableDate(issueSpecifics)
         GetHolidayStopRequests(
-          existing = holidayStopRequests.map(WireHolidayStopRequest.apply(issueSpecifics)),
+          existing = holidayStopRequests.map(WireHolidayStopRequest.apply(firstAvailableDate)),
           issueSpecifics = issueSpecifics,
-          annualIssueLimit = subscriptionData.subscriptionAnnualIssueLimit
+          annualIssueLimit = subscriptionData.subscriptionAnnualIssueLimit,
+          firstAvailableDate
         )
       }
   }
@@ -143,6 +146,10 @@ object GetHolidayStopRequests {
         val firstAvailableDate = latestOf(fulfilmentStartDate, fulfilmentDatesForDayOfWeek.holidayStopFirstAvailableDate)
         IssueSpecifics(firstAvailableDate, editionDayOfWeek.getValue)
       }
+  }
+
+  private def calculateFirstAvailableDate(issueSpecifics: List[IssueSpecifics]) = {
+    issueSpecifics.map(_.firstAvailableDate).min[LocalDate](_ compareTo _)
   }
 
   private def latestOf(head: LocalDate, tail: LocalDate*) = (head :: tail.toList).max[LocalDate](_ compareTo _)

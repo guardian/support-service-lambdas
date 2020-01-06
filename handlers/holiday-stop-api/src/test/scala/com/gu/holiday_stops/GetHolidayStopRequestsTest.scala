@@ -50,7 +50,8 @@ class GetHolidayStopRequestsTest extends FlatSpec {
         GetHolidayStopRequests(
           Nil,
           List(IssueSpecifics(fulfilmentDatesFirstAvailableDate, 5)),
-          annualIssueLimit
+          annualIssueLimit,
+          fulfilmentDatesFirstAvailableDate
         )
       )
     )
@@ -68,7 +69,8 @@ class GetHolidayStopRequestsTest extends FlatSpec {
         GetHolidayStopRequests(
           Nil,
           List(IssueSpecifics(fulfilmentStartDateInFuture, 5)),
-          annualIssueLimit
+          annualIssueLimit,
+          fulfilmentStartDateInFuture
         )
       )
     )

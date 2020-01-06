@@ -5,7 +5,6 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters.next
 
 import com.gu.effects.{FakeFetchString, SFTestEffects, TestingRawEffects}
-import com.gu.holiday_stops.ActionCalculator._
 import com.gu.holiday_stops.ZuoraSttpEffects.ZuoraSttpEffectsOps
 import com.gu.holiday_stops.subscription.{HolidayStopCredit, MutableCalendar, RatePlan, RatePlanCharge, Subscription}
 import com.gu.salesforce.{IdentityId, SalesforceContactId}
@@ -174,6 +173,9 @@ class HandlerTest extends FlatSpec with Matchers {
     val contactId = "Contact1234"
     val holidayStopRequestsDetail = Fixtures.mkHolidayStopRequestDetails()
     val GuardianWeeklyAnnualIssueLimit = 6
+    //For details of creation of test first available date see:
+    //com.gu.effects.FakeFetchString.guardianWeeklyFulfilmentDatesFile
+    val SubscriptionFirstAvailableDate = today `with` next(DayOfWeek.FRIDAY) `with` next(DayOfWeek.FRIDAY) minusDays(3)
 
     val testBackend = SttpBackendStub
       .synchronous
@@ -236,7 +238,8 @@ class HandlerTest extends FlatSpec with Matchers {
                     DayOfWeek.FRIDAY.getValue
                   )
                 ),
-                GuardianWeeklyAnnualIssueLimit
+                GuardianWeeklyAnnualIssueLimit,
+                SubscriptionFirstAvailableDate
               )
             )
 
