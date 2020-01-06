@@ -25,16 +25,24 @@ object HomeDeliveryFulfilmentDates {
     )
 
   private def getFulfilmentFileGenerationDateForNextTargetDayOfWeek(
+    nextTargetDayOfWeek: LocalDate
+  )(
+    implicit
+    bankHolidays: BankHolidays
+  ): LocalDate = {
+    val distributorPickupDay: LocalDate = (nextTargetDayOfWeek findPreviousWorkingDay)
+    distributorPickupDay minusDays 0 // distributor picks up files generated early-AM that SAME morning
+  }
+
+  private def getFulfilmentFileGenerationDateForNextTargetDayOfWeek(
     targetDayOfWeek: DayOfWeek,
     today: LocalDate
   )(
     implicit
     bankHolidays: BankHolidays
-  ): LocalDate = {
-    val nextTargetDayOfWeek = today `with` next(targetDayOfWeek)
-    val distributorPickupDay: LocalDate = (nextTargetDayOfWeek findPreviousWorkingDay)
-    distributorPickupDay minusDays 0 // distributor picks up files generated early-AM that SAME morning
-  }
+  ): LocalDate = getFulfilmentFileGenerationDateForNextTargetDayOfWeek(
+    today `with` next(targetDayOfWeek)
+  )
 
   def finalFulfilmentFileGenerationDate(
     targetDayOfWeek: DayOfWeek,
@@ -70,17 +78,16 @@ object HomeDeliveryFulfilmentDates {
     implicit
     bankHolidays: BankHolidays
   ): LocalDate = {
-    val fulfilmentFileGenerationDateForNextTargetDayOfWeek = getFulfilmentFileGenerationDateForNextTargetDayOfWeek(targetDayOfWeek, today)
+    val nextTargetDayOfWeek = today `with` next(targetDayOfWeek)
+    val fulfilmentFileGenerationDateForNextTargetDayOfWeek = getFulfilmentFileGenerationDateForNextTargetDayOfWeek(nextTargetDayOfWeek)
     val holidayStopProcessingDayForNextTargetDayOfWeek = fulfilmentFileGenerationDateForNextTargetDayOfWeek minusDays 1
-    (
-      if (holidayStopProcessingDayForNextTargetDayOfWeek isAfter today) {
-        // we're still in time to affect the next target day
-        holidayStopProcessingDayForNextTargetDayOfWeek
-      } else {
-        // we're not in time to affect the next target day, so return the one the following week
-        holidayStopProcessingDayForNextTargetDayOfWeek `with` next(fulfilmentFileGenerationDateForNextTargetDayOfWeek.getDayOfWeek)
-      }
-    ) `with` next(targetDayOfWeek)
+    if (holidayStopProcessingDayForNextTargetDayOfWeek isAfter today) {
+      // we're still in time to affect the next target day
+      nextTargetDayOfWeek
+    } else {
+      // we're not in time to affect the next target day, so return the one the following week
+      nextTargetDayOfWeek `with` next(targetDayOfWeek)
+    }
   }
 
   def holidayStopProcessorTargetDate(

@@ -27,6 +27,104 @@ class HomeDeliveryFulfilmentDatesSpec extends FlatSpec with Matchers with DateSu
     // TODO add some bank holiday examples
   }
 
+  "MONDAY HomeDeliveryFulfilmentDates" should "have correct holidayStopFirstAvailableDate" in {
+    apply( /* Tuesday   */ "2019-12-03")("Monday").holidayStopFirstAvailableDate should equalDate("2019-12-09")
+    apply( /* Wednesday */ "2019-12-04")("Monday").holidayStopFirstAvailableDate should equalDate("2019-12-09")
+    apply( /* Thursday  */ "2019-12-05")("Monday").holidayStopFirstAvailableDate should equalDate("2019-12-16")
+    apply( /* Friday    */ "2019-12-06")("Monday").holidayStopFirstAvailableDate should equalDate("2019-12-16")
+    apply( /* Saturday  */ "2019-12-07")("Monday").holidayStopFirstAvailableDate should equalDate("2019-12-16")
+    apply( /* Sunday    */ "2019-12-08")("Monday").holidayStopFirstAvailableDate should equalDate("2019-12-16")
+    apply( /* Monday    */ "2019-12-09")("Monday").holidayStopFirstAvailableDate should equalDate("2019-12-16")
+    apply( /* Tuesday   */ "2019-12-10")("Monday").holidayStopFirstAvailableDate should equalDate("2019-12-16")
+    apply( /* Wednesday */ "2019-12-11")("Monday").holidayStopFirstAvailableDate should equalDate("2019-12-16")
+    apply( /* Thursday  */ "2019-12-12")("Monday").holidayStopFirstAvailableDate should equalDate("2019-12-23")
+    apply( /* Friday    */ "2019-12-13")("Monday").holidayStopFirstAvailableDate should equalDate("2019-12-23")
+  }
+
+  "TUESDAY HomeDeliveryFulfilmentDates" should "have correct holidayStopFirstAvailableDate" in {
+    apply( /* Friday    */ "2019-12-06")("Tuesday").holidayStopFirstAvailableDate should equalDate("2019-12-10")
+    apply( /* Saturday  */ "2019-12-07")("Tuesday").holidayStopFirstAvailableDate should equalDate("2019-12-10")
+    apply( /* Sunday    */ "2019-12-08")("Tuesday").holidayStopFirstAvailableDate should equalDate("2019-12-17")
+    apply( /* Monday    */ "2019-12-09")("Tuesday").holidayStopFirstAvailableDate should equalDate("2019-12-17")
+    apply( /* Tuesday   */ "2019-12-10")("Tuesday").holidayStopFirstAvailableDate should equalDate("2019-12-17")
+    apply( /* Wednesday */ "2019-12-11")("Tuesday").holidayStopFirstAvailableDate should equalDate("2019-12-17")
+    apply( /* Thursday  */ "2019-12-12")("Tuesday").holidayStopFirstAvailableDate should equalDate("2019-12-17")
+    apply( /* Friday    */ "2019-12-13")("Tuesday").holidayStopFirstAvailableDate should equalDate("2019-12-17")
+    apply( /* Saturday  */ "2019-12-14")("Tuesday").holidayStopFirstAvailableDate should equalDate("2019-12-17")
+    apply( /* Sunday    */ "2019-12-15")("Tuesday").holidayStopFirstAvailableDate should equalDate("2019-12-24")
+    apply( /* Monday    */ "2019-12-16")("Tuesday").holidayStopFirstAvailableDate should equalDate("2019-12-24")
+  }
+
+  "WEDNESDAY HomeDeliveryFulfilmentDates" should "have correct holidayStopFirstAvailableDate" in {
+    apply( /* Saturday  */ "2019-12-07")("Wednesday").holidayStopFirstAvailableDate should equalDate("2019-12-11")
+    apply( /* Sunday    */ "2019-12-08")("Wednesday").holidayStopFirstAvailableDate should equalDate("2019-12-11")
+    apply( /* Monday    */ "2019-12-09")("Wednesday").holidayStopFirstAvailableDate should equalDate("2019-12-18")
+    apply( /* Tuesday   */ "2019-12-10")("Wednesday").holidayStopFirstAvailableDate should equalDate("2019-12-18")
+    apply( /* Wednesday */ "2019-12-11")("Wednesday").holidayStopFirstAvailableDate should equalDate("2019-12-18")
+    apply( /* Thursday  */ "2019-12-12")("Wednesday").holidayStopFirstAvailableDate should equalDate("2019-12-18")
+    apply( /* Friday    */ "2019-12-13")("Wednesday").holidayStopFirstAvailableDate should equalDate("2019-12-18")
+    apply( /* Saturday  */ "2019-12-14")("Wednesday").holidayStopFirstAvailableDate should equalDate("2019-12-18")
+    apply( /* Sunday    */ "2019-12-15")("Wednesday").holidayStopFirstAvailableDate should equalDate("2019-12-18")
+    apply( /* Monday    */ "2019-12-16")("Wednesday").holidayStopFirstAvailableDate should equalDate("2019-12-25")
+    apply( /* Tuesday   */ "2019-12-17")("Wednesday").holidayStopFirstAvailableDate should equalDate("2019-12-25")
+  }
+
+  "THURSDAY HomeDeliveryFulfilmentDates" should "have correct holidayStopFirstAvailableDate" in {
+    apply( /* Sunday    */ "2019-12-08")("Thursday").holidayStopFirstAvailableDate should equalDate("2019-12-12")
+    apply( /* Monday    */ "2019-12-09")("Thursday").holidayStopFirstAvailableDate should equalDate("2019-12-12")
+    apply( /* Tuesday   */ "2019-12-10")("Thursday").holidayStopFirstAvailableDate should equalDate("2019-12-19")
+    apply( /* Wednesday */ "2019-12-11")("Thursday").holidayStopFirstAvailableDate should equalDate("2019-12-19")
+    apply( /* Thursday  */ "2019-12-12")("Thursday").holidayStopFirstAvailableDate should equalDate("2019-12-19")
+    apply( /* Friday    */ "2019-12-13")("Thursday").holidayStopFirstAvailableDate should equalDate("2019-12-19")
+    apply( /* Saturday  */ "2019-12-14")("Thursday").holidayStopFirstAvailableDate should equalDate("2019-12-19")
+    apply( /* Sunday    */ "2019-12-15")("Thursday").holidayStopFirstAvailableDate should equalDate("2019-12-19")
+    apply( /* Monday    */ "2019-12-16")("Thursday").holidayStopFirstAvailableDate should equalDate("2019-12-19")
+    apply( /* Tuesday   */ "2019-12-17")("Thursday").holidayStopFirstAvailableDate should equalDate("2019-12-26")
+    apply( /* Wednesday */ "2019-12-18")("Thursday").holidayStopFirstAvailableDate should equalDate("2019-12-26")
+  }
+
+  "FRIDAY HomeDeliveryFulfilmentDates" should "have correct holidayStopFirstAvailableDate" in {
+    apply( /* Monday    */ "2019-12-09")("Friday").holidayStopFirstAvailableDate should equalDate("2019-12-13")
+    apply( /* Tuesday   */ "2019-12-10")("Friday").holidayStopFirstAvailableDate should equalDate("2019-12-13")
+    apply( /* Thursday  */ "2019-12-12")("Friday").holidayStopFirstAvailableDate should equalDate("2019-12-20")
+    apply( /* Wednesday */ "2019-12-11")("Friday").holidayStopFirstAvailableDate should equalDate("2019-12-20")
+    apply( /* Friday    */ "2019-12-13")("Friday").holidayStopFirstAvailableDate should equalDate("2019-12-20")
+    apply( /* Saturday  */ "2019-12-14")("Friday").holidayStopFirstAvailableDate should equalDate("2019-12-20")
+    apply( /* Sunday    */ "2019-12-15")("Friday").holidayStopFirstAvailableDate should equalDate("2019-12-20")
+    apply( /* Monday    */ "2019-12-16")("Friday").holidayStopFirstAvailableDate should equalDate("2019-12-20")
+    apply( /* Tuesday   */ "2019-12-17")("Friday").holidayStopFirstAvailableDate should equalDate("2019-12-20")
+    apply( /* Wednesday */ "2019-12-18")("Friday").holidayStopFirstAvailableDate should equalDate("2019-12-27")
+    apply( /* Thursday  */ "2019-12-19")("Friday").holidayStopFirstAvailableDate should equalDate("2019-12-27")
+  }
+
+  "SATURDAY HomeDeliveryFulfilmentDates" should "have correct holidayStopFirstAvailableDate" in {
+    apply( /* Tuesday   */ "2019-12-10")("Saturday").holidayStopFirstAvailableDate should equalDate("2019-12-14")
+    apply( /* Wednesday */ "2019-12-11")("Saturday").holidayStopFirstAvailableDate should equalDate("2019-12-14")
+    apply( /* Thursday  */ "2019-12-12")("Saturday").holidayStopFirstAvailableDate should equalDate("2019-12-21")
+    apply( /* Friday    */ "2019-12-13")("Saturday").holidayStopFirstAvailableDate should equalDate("2019-12-21")
+    apply( /* Saturday  */ "2019-12-14")("Saturday").holidayStopFirstAvailableDate should equalDate("2019-12-21")
+    apply( /* Sunday    */ "2019-12-15")("Saturday").holidayStopFirstAvailableDate should equalDate("2019-12-21")
+    apply( /* Monday    */ "2019-12-16")("Saturday").holidayStopFirstAvailableDate should equalDate("2019-12-21")
+    apply( /* Tuesday   */ "2019-12-17")("Saturday").holidayStopFirstAvailableDate should equalDate("2019-12-21")
+    apply( /* Wednesday */ "2019-12-18")("Saturday").holidayStopFirstAvailableDate should equalDate("2019-12-21")
+    apply( /* Thursday  */ "2019-12-19")("Saturday").holidayStopFirstAvailableDate should equalDate("2019-12-28")
+    apply( /* Friday    */ "2019-12-20")("Saturday").holidayStopFirstAvailableDate should equalDate("2019-12-28")
+  }
+
+  "SUNDAY HomeDeliveryFulfilmentDates" should "have correct holidayStopFirstAvailableDate" in {
+    apply( /* Tuesday   */ "2019-12-10")("Sunday").holidayStopFirstAvailableDate should equalDate("2019-12-15")
+    apply( /* Wednesday */ "2019-12-11")("Sunday").holidayStopFirstAvailableDate should equalDate("2019-12-15")
+    apply( /* Thursday  */ "2019-12-12")("Sunday").holidayStopFirstAvailableDate should equalDate("2019-12-22")
+    apply( /* Friday    */ "2019-12-13")("Sunday").holidayStopFirstAvailableDate should equalDate("2019-12-22")
+    apply( /* Saturday  */ "2019-12-14")("Sunday").holidayStopFirstAvailableDate should equalDate("2019-12-22")
+    apply( /* Sunday    */ "2019-12-15")("Sunday").holidayStopFirstAvailableDate should equalDate("2019-12-22")
+    apply( /* Monday    */ "2019-12-16")("Sunday").holidayStopFirstAvailableDate should equalDate("2019-12-22")
+    apply( /* Tuesday   */ "2019-12-17")("Sunday").holidayStopFirstAvailableDate should equalDate("2019-12-22")
+    apply( /* Wednesday */ "2019-12-18")("Sunday").holidayStopFirstAvailableDate should equalDate("2019-12-22")
+    apply( /* Thursday  */ "2019-12-19")("Sunday").holidayStopFirstAvailableDate should equalDate("2019-12-29")
+    apply( /* Friday    */ "2019-12-20")("Sunday").holidayStopFirstAvailableDate should equalDate("2019-12-29")
+  }
+
   "MONDAY HomeDeliveryFulfilmentDates" should "have correct deliveryAddressChangeEffectiveDate" in {
     apply( /* Wednesday */ "2019-12-04")("Monday").deliveryAddressChangeEffectiveDate.get should equalDate("2019-12-09")
     apply( /* Thursday  */ "2019-12-05")("Monday").deliveryAddressChangeEffectiveDate.get should equalDate("2019-12-09")
