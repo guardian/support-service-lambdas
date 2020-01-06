@@ -306,7 +306,9 @@ lazy val `holiday-stop-processor` = all(project in file("handlers/holiday-stop-p
   .enablePlugins(RiffRaffArtifact)
   .dependsOn(
     `holiday-stops` % "compile->compile;test->test",
-    effects
+    effects,
+    `zuora-core`,
+    `fulfilment-dates`
   )
 
 lazy val `metric-push-api` = all(project in file("handlers/metric-push-api"))

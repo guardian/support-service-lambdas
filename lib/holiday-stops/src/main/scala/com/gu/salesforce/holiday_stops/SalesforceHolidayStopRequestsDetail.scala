@@ -1,9 +1,9 @@
 package com.gu.salesforce.holiday_stops
 
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 import ai.x.play.json.Jsonx
-import com.gu.holiday_stops.ProductVariant
 import com.gu.salesforce.RecordsWrapperCaseClass
 import com.gu.salesforce.SalesforceConstants._
 import com.gu.util.Logging
@@ -11,6 +11,7 @@ import com.gu.util.resthttp.RestOp._
 import com.gu.util.resthttp.RestRequestMaker._
 import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.resthttp.{HttpOp, RestRequestMaker}
+import com.gu.zuora.ZuoraProductTypes.ZuoraProductType
 import play.api.libs.json.{JsValue, Json}
 
 object SalesforceHolidayStopRequestsDetail extends Logging {
@@ -31,7 +32,6 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
   implicit val formatProductName = Jsonx.formatInline[ProductName]
 
   case class ProductRatePlanName(value: String) extends AnyVal
-  case class ProductType(value: String) extends AnyVal
 
   case class HolidayStopRequestsDetailChargeCode(value: String) extends AnyVal
   implicit val formatHolidayStopRequestsDetailChargeCode = Jsonx.formatInline[HolidayStopRequestsDetailChargeCode]
@@ -81,57 +81,40 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
       | Estimated_Price__c, Charge_Code__c, Actual_Price__c, Expected_Invoice_Date__c
       |""".stripMargin
 
-  private def soqlFilterClause(stoppedPublicationDate: LocalDate) = s"""
-      | Stopped_Publication_Date__c = ${stoppedPublicationDate.toString}
-      | AND Subscription_Cancellation_Effective_Date__c = null
-      | AND Is_Actioned__c = false
-      | AND Is_Withdrawn__c = false
-      |""".stripMargin
+  private def soqlFilterClause(stoppedPublicationDates: List[LocalDate]) =
+    s"""Stopped_Publication_Date__c IN (${stoppedPublicationDates.map(SoqlDateFormat.format).mkString(", ")})
+       | AND Subscription_Cancellation_Effective_Date__c = null
+       | AND Is_Actioned__c = false
+       | AND Is_Withdrawn__c = false
+       |""".stripMargin
 
   val SOQL_ORDER_BY_CLAUSE = "ORDER BY Stopped_Publication_Date__c ASC"
 
-  object FetchGuardianWeeklyHolidayStopRequestsDetails {
+  object FetchHolidayStopRequestsDetailsForProductType {
 
-    def apply(sfGet: HttpOp[RestRequestMaker.GetRequestWithParams, JsValue]): LocalDate => ClientFailableOp[List[HolidayStopRequestsDetail]] =
-      sfGet
-        .setupRequest(toRequest)
-        .parse[RecordsWrapperCaseClass[HolidayStopRequestsDetail]]
-        .map(_.records)
-        .runRequest
-
-    def toRequest(date: LocalDate): GetRequestWithParams = {
-      val soqlQuery = s"""
-          | $SOQL_SELECT_CLAUSE
-          | FROM $holidayStopRequestsDetailSfObjectRef
-          | WHERE Product_Name__c LIKE 'Guardian Weekly%'
-          | AND ${soqlFilterClause(date)}
-          | $SOQL_ORDER_BY_CLAUSE
-          |""".stripMargin
-      logger.info(s"using SF query : $soqlQuery")
-      RestRequestMaker.GetRequestWithParams(RelativePath(soqlQueryBaseUrl), UrlParams(Map("q" -> soqlQuery)))
-    }
-  }
-
-  object FetchVoucherHolidayStopRequestsDetails {
-
-    def apply(sfGet: HttpOp[RestRequestMaker.GetRequestWithParams, JsValue]): (LocalDate, ProductVariant) => ClientFailableOp[List[HolidayStopRequestsDetail]] =
+    def apply(sfGet: HttpOp[RestRequestMaker.GetRequestWithParams, JsValue]): (List[LocalDate], ZuoraProductType) => ClientFailableOp[List[HolidayStopRequestsDetail]] =
       sfGet
         .setupRequestMultiArg(toRequest _)
         .parse[RecordsWrapperCaseClass[HolidayStopRequestsDetail]]
         .map(_.records)
         .runRequestMultiArg
 
-    def toRequest(date: LocalDate, productVariant: ProductVariant): GetRequestWithParams = {
-      val soqlQuery = s"""
-                         | $SOQL_SELECT_CLAUSE
-                         | FROM $holidayStopRequestsDetailSfObjectRef
-                         | WHERE Product_Name__c = 'Newspaper Voucher'
-                         | AND Holiday_Stop_Request__r.SF_Subscription__r.Rate_Plan_Name__c = '${productVariant.entryName}'
-                         | AND ${soqlFilterClause(date)}
-                         | $SOQL_ORDER_BY_CLAUSE
-                         |""".stripMargin
+    def toRequest(dates: List[LocalDate], productType: ZuoraProductType): GetRequestWithParams = {
+      val soqlQuery = createSoql(dates, productType)
       logger.info(s"using SF query : $soqlQuery")
       RestRequestMaker.GetRequestWithParams(RelativePath(soqlQueryBaseUrl), UrlParams(Map("q" -> soqlQuery)))
     }
+
+    def createSoql(dates: List[LocalDate], productType: ZuoraProductType) = {
+      s"""
+         | $SOQL_SELECT_CLAUSE
+         | FROM $holidayStopRequestsDetailSfObjectRef
+         | WHERE Holiday_Stop_Request__r.SF_Subscription__r.Product_Type__c = '${productType.name}'
+         | AND ${soqlFilterClause(dates)}
+         | $SOQL_ORDER_BY_CLAUSE
+         |""".stripMargin
+    }
   }
+
+  val SoqlDateFormat = DateTimeFormatter.ISO_LOCAL_DATE
 }

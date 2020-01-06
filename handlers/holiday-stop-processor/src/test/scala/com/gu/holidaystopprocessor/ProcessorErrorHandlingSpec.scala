@@ -1,13 +1,17 @@
 package com.gu.GuardianWeeklyHolidayStopProcessor
 
-import java.time.LocalDate
+import java.time.temporal.TemporalAdjusters
+import java.time.{DayOfWeek, LocalDate}
 
 import cats.implicits._
+import com.gu.fulfilmentdates.{FulfilmentDates, FulfilmentDatesFetcher, FulfilmentDatesFetcherError}
 import com.gu.holiday_stops.Fixtures._
 import com.gu.holiday_stops._
 import com.gu.holiday_stops.subscription.{HolidayCreditUpdate, MutableCalendar, Subscription}
 import com.gu.holidaystopprocessor.{Processor, ZuoraHolidayWriteResult}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestsDetail, SubscriptionName}
+import com.gu.zuora.ZuoraProductTypes
+import com.gu.zuora.ZuoraProductTypes.ZuoraProductType
 import org.scalatest._
 
 /**
@@ -17,18 +21,29 @@ class ProcessorErrorHandlingSpec extends FlatSpec with Matchers with OptionValue
 
   MutableCalendar.setFakeToday(Some(LocalDate.parse("2019-08-01")))
 
-  val holidayStopRequestsFromSalesforce: SalesforceHolidayResponse[List[HolidayStopRequestsDetail]] = {
-    Right(List(
-      mkHolidayStopRequestDetailsFromHolidayStopRequest(mkHolidayStopRequest("R1", LocalDate.of(2019, 8, 2), SubscriptionName("A-S1")), "C1"),
-      mkHolidayStopRequestDetailsFromHolidayStopRequest(mkHolidayStopRequest("R2", LocalDate.of(2019, 9, 6), SubscriptionName("A-S2")), "C3"),
-      mkHolidayStopRequestDetailsFromHolidayStopRequest(mkHolidayStopRequest("R3", LocalDate.of(2019, 8, 9), SubscriptionName("A-S3")), "C4")
-    ))
+  val holidayStopRequestsFromSalesforce: (ZuoraProductType, List[LocalDate]) => SalesforceHolidayResponse[List[HolidayStopRequestsDetail]] = {
+    (_, _) =>
+      Right(List(
+        mkHolidayStopRequestDetailsFromHolidayStopRequest(mkHolidayStopRequest("R1", LocalDate.of(2019, 8, 2), SubscriptionName("A-S1")), "C1"),
+        mkHolidayStopRequestDetailsFromHolidayStopRequest(mkHolidayStopRequest("R2", LocalDate.of(2019, 9, 6), SubscriptionName("A-S2")), "C3"),
+        mkHolidayStopRequestDetailsFromHolidayStopRequest(mkHolidayStopRequest("R3", LocalDate.of(2019, 8, 9), SubscriptionName("A-S3")), "C4")
+      ))
   }
 
   val subscription: Subscription = mkSubscriptionWithHolidayStops()
 
   val updateSubscription: (Subscription, HolidayCreditUpdate) => Either[ZuoraHolidayError, Unit] = {
     case _ => Right(())
+  }
+
+  val today = LocalDate.now()
+
+  val processingDate = today `with` TemporalAdjusters.next(DayOfWeek.FRIDAY)
+
+  private val fulfilmentDatesFetcher = new FulfilmentDatesFetcher {
+    override def getFulfilmentDates(zuoraProductType: ZuoraProductType, date: LocalDate): Either[FulfilmentDatesFetcherError, Map[DayOfWeek, FulfilmentDates]] = {
+      Map(DayOfWeek.FRIDAY -> FulfilmentDates(today, today, Some(processingDate))).asRight
+    }
   }
 
   "Error handling" should "not short-circuit if some writes to Zuora fail (but others succeed), and Salesforce write succeeds" in {
@@ -45,6 +60,9 @@ class ProcessorErrorHandlingSpec extends FlatSpec with Matchers with OptionValue
     val result = Processor.processProduct(
       Fixtures.config,
       holidayStopRequestsFromSalesforce,
+      fulfilmentDatesFetcher,
+      None,
+      ZuoraProductTypes.GuardianWeekly,
       getSubscription,
       updateSubscription,
       writeHolidayStopsToSalesforce
@@ -71,6 +89,9 @@ class ProcessorErrorHandlingSpec extends FlatSpec with Matchers with OptionValue
     val result = Processor.processProduct(
       Fixtures.config,
       holidayStopRequestsFromSalesforce,
+      fulfilmentDatesFetcher,
+      None,
+      ZuoraProductTypes.GuardianWeekly,
       getSubscription,
       updateSubscription,
       writeHolidayStopsToSalesforce
@@ -98,6 +119,9 @@ class ProcessorErrorHandlingSpec extends FlatSpec with Matchers with OptionValue
     val result = Processor.processProduct(
       Fixtures.config,
       holidayStopRequestsFromSalesforce,
+      fulfilmentDatesFetcher,
+      None,
+      ZuoraProductTypes.GuardianWeekly,
       getSubscription,
       updateSubscription,
       writeHolidayStopsToSalesforce
@@ -124,6 +148,9 @@ class ProcessorErrorHandlingSpec extends FlatSpec with Matchers with OptionValue
     val result = Processor.processProduct(
       Fixtures.config,
       holidayStopRequestsFromSalesforce,
+      fulfilmentDatesFetcher,
+      None,
+      ZuoraProductTypes.GuardianWeekly,
       getSubscription,
       updateSubscription,
       writeHolidayStopsToSalesforce
