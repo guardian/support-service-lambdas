@@ -14,6 +14,15 @@ Parameters:
 Conditions:
   IsProd: !Equals [!Ref "Stage", "PROD"]
 
+Mappings:
+  StageMap:
+    CODE:
+      FulfilmentDatesBucketUrn: "arn:aws:s3:::fulfilment-date-calculator-code/*"
+      ScheduleName: holiday-stop-processor-schedule-code
+    PROD:
+      FulfilmentDatesBucketUrn: "arn:aws:s3:::fulfilment-date-calculator-prod/*"
+      ScheduleName: holiday-stop-processor-schedule
+
 Resources:
 
   HolidayStopProcessorRole:
@@ -51,6 +60,13 @@ Resources:
               - Effect: Allow
                 Action: s3:GetObject
                 Resource: !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/sfAuth-${Stage}*.json
+        - PolicyName: FulfilmentDatesCalculatorBucket
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action: s3:GetObject
+                Resource:
+                  - !FindInMap [StageMap, !Ref Stage, FulfilmentDatesBucketUrn]
 
   HolidayStopProcessor:
     Type: AWS::Lambda::Function
@@ -102,10 +118,9 @@ Resources:
 
   HolidayStopProcessorScheduleRule:
     Type: AWS::Events::Rule
-    Condition: IsProd
     Properties:
       Description: Trigger processing of holiday stops every hour (to give 24 attempts a day)
-      Name: holiday-stop-processor-schedule
+      Name: !FindInMap [StageMap, !Ref Stage, ScheduleName]
       ScheduleExpression: "cron(0 * ? * * *)"
       State: ENABLED
       Targets:
@@ -117,7 +132,6 @@ Resources:
 
   HolidayStopProcessorLambdaInvokePermission:
     Type: AWS::Lambda::Permission
-    Condition: IsProd
     Properties:
       Action: lambda:invokeFunction
       FunctionName: !Ref HolidayStopProcessor

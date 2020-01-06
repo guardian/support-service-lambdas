@@ -1,52 +1,74 @@
 package com.gu.holidaystopprocessor
 
-import com.gu.holiday_stops.subscription.{ExtendedTerm, HolidayCreditUpdate, HolidayStopCredit, Subscription, SubscriptionData}
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
-import com.softwaremill.sttp.{Id, SttpBackend}
 import java.time.LocalDate
-import com.gu.holiday_stops.ProductVariant._
+
 import cats.implicits._
-import com.gu.holiday_stops._
+import com.gu.effects.S3Location
+import com.gu.fulfilmentdates.FulfilmentDatesFetcher
+import com.gu.holiday_stops.subscription._
+import com.gu.holiday_stops.{Zuora, _}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
+import com.gu.util.config.Stage
+import com.gu.zuora.ZuoraProductTypes.{GuardianWeekly, NewspaperHomeDelivery, NewspaperVoucherBook, ZuoraProductType}
+import com.softwaremill.sttp.{Id, SttpBackend}
+import org.slf4j.LoggerFactory
+
+import scala.util.Try
 
 
 object Processor {
-  def processAllProducts(config: Config, processDateOverride: Option[LocalDate], backend: SttpBackend[Id, Nothing]): List[ProcessResult] =
+  private val logger = LoggerFactory.getLogger(this.getClass)
+
+  def processAllProducts(
+    config: Config,
+    processDateOverride: Option[LocalDate],
+    backend: SttpBackend[Id, Nothing],
+    fetchFromS3: S3Location => Try[String]
+  ): List[ProcessResult] =
     Zuora.accessTokenGetResponse(config.zuoraConfig, backend) match {
       case Left(err) =>
         List(ProcessResult(Nil, Nil, Nil, Some(OverallFailure(err.reason))))
 
-      case Right(zuoraAccessToken) =>
+      case Right(zuoraAccessToken) => {
+        val fulfilmentDatesFetcher = FulfilmentDatesFetcher(fetchFromS3, Stage())
         List(
+          NewspaperHomeDelivery,
+          NewspaperVoucherBook,
           GuardianWeekly,
-          SaturdayVoucher,
-          SundayVoucher,
-          WeekendVoucher,
-          SixdayVoucher,
-          EverydayVoucher,
-          EverydayPlusVoucher,
-          SixdayPlusVoucher,
-          WeekendPlusVoucher,
-          SundayPlusVoucher,
-          SaturdayPlusVoucher,
         )
-          .map(productVariant => processProduct(config, Salesforce.holidayStopRequests(config.sfConfig)(productVariant, processDateOverride), _, _, _))
-          .map{
-            _.apply(
-              Zuora.subscriptionGetResponse(config, zuoraAccessToken, backend),
-              Zuora.subscriptionUpdateResponse(config, zuoraAccessToken, backend),
-              Salesforce.holidayStopUpdateResponse(config.sfConfig)
-            )
-          }
+        .map { productType =>
+          processProduct(
+            config,
+            Salesforce.holidayStopRequests(config.sfConfig),
+            fulfilmentDatesFetcher,
+            processDateOverride,
+            productType,
+            Zuora.subscriptionGetResponse(config, zuoraAccessToken, backend),
+            Zuora.subscriptionUpdateResponse(config, zuoraAccessToken, backend),
+            Salesforce.holidayStopUpdateResponse(config.sfConfig)
+          )
+        }
+      }
     }
 
   def processProduct(
     config: Config,
-    getHolidayStopRequestsFromSalesforce: SalesforceHolidayResponse[List[HolidayStopRequestsDetail]],
+    getHolidayStopRequestsFromSalesforce: (ZuoraProductType, List[LocalDate]) => SalesforceHolidayResponse[List[HolidayStopRequestsDetail]],
+    fulfilmentDatesFetcher: FulfilmentDatesFetcher,
+    processOverrideDate: Option[LocalDate],
+    productType: ZuoraProductType,
     getSubscription: SubscriptionName => ZuoraHolidayResponse[Subscription],
     updateSubscription: (Subscription, HolidayCreditUpdate) => ZuoraHolidayResponse[Unit],
     writeHolidayStopsToSalesforce: List[ZuoraHolidayWriteResult] => SalesforceHolidayResponse[Unit],
   ): ProcessResult = {
-    getHolidayStopRequestsFromSalesforce match {
+    val holidayStops = for {
+      datesToProcess <- getDatesToProcess(fulfilmentDatesFetcher, productType, processOverrideDate, LocalDate.now())
+      _ = logger.info(s"Processing holiday stops for $productType for issue dates ${datesToProcess.mkString(", ")}")
+      holidayStopsFromSalesforce <-
+        if(datesToProcess.isEmpty) Nil.asRight else getHolidayStopRequestsFromSalesforce(productType, datesToProcess)
+    } yield holidayStopsFromSalesforce
+
+    holidayStops match {
       case Left(sfReadError) =>
         ProcessResult(Nil, Nil, Nil, Some(OverallFailure(sfReadError.reason)))
 
@@ -101,6 +123,25 @@ object Processor {
         StoppedPublicationDate(addedCharge.HolidayStart__c.getOrElse(LocalDate.MIN))
       )
     }
+  }
+
+  def getDatesToProcess(
+    fulfilmentDatesFetcher: FulfilmentDatesFetcher,
+    zuoraProductType: ZuoraProductType,
+    processOverRideDate: Option[LocalDate],
+    today: LocalDate
+  ): Either[ZuoraHolidayError, List[LocalDate]] = {
+    processOverRideDate
+      .fold(
+        fulfilmentDatesFetcher
+          .getFulfilmentDates(zuoraProductType, today)
+          .map( fulfilmentDates =>
+            fulfilmentDates.values.flatMap(_.holidayStopProcessorTargetDate).toList
+          )
+          .leftMap(error => ZuoraHolidayError(s"Failed to fetch fulfilment dates: $error"))
+      )(
+        processOverRideDate => List(processOverRideDate).asRight
+      )
   }
 }
 

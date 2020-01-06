@@ -2,17 +2,21 @@ package com.gu.holiday_stops.subscription
 
 import java.time.DayOfWeek
 
+import com.gu.zuora.ZuoraProductTypes.{GuardianWeekly, NewspaperHomeDelivery, NewspaperVoucherBook, ZuoraProductType}
+
 case class SupportedRatePlan(name: String, ratePlanCharges: List[SupportedRatePlanCharge])
 
 case class SupportedRatePlanCharge(name: String, dayOfWeek: DayOfWeek)
 
-case class SupportedProduct(name: String, ratePlans: List[SupportedRatePlan])
+case class SupportedProduct(name: String, productType: ZuoraProductType, annualIssueLimitPerEdition: Int, ratePlans: List[SupportedRatePlan])
 
 object SupportedProduct {
   lazy val supportedProducts = List(
     SupportedProduct(
-      "Guardian Weekly - Domestic",
-      List(
+      name = "Guardian Weekly - Domestic",
+      productType = GuardianWeekly,
+      annualIssueLimitPerEdition = 6,
+      ratePlans = List(
         SupportedRatePlan("GW Oct 18 - 1 Year - Domestic", List(SupportedRatePlanCharge("GW Oct 18 - 1 Year - Domestic", DayOfWeek.FRIDAY))),
         SupportedRatePlan("GW Oct 18 - 3 Month - Domestic", List(SupportedRatePlanCharge("GW Oct 18 - 3 Month - Domestic", DayOfWeek.FRIDAY))),
         SupportedRatePlan("GW Oct 18 - Annual - Domestic", List(SupportedRatePlanCharge("GW Oct 18 - Annual - Domestic", DayOfWeek.FRIDAY))),
@@ -21,8 +25,10 @@ object SupportedProduct {
       )
     ),
     SupportedProduct(
-      "Guardian Weekly - ROW",
-      List(
+      name = "Guardian Weekly - ROW",
+      productType = GuardianWeekly,
+      annualIssueLimitPerEdition = 6,
+      ratePlans = List(
         SupportedRatePlan("GW Oct 18 - 1 Year - ROW", List(SupportedRatePlanCharge("GW Oct 18 - 1 Year - ROW", DayOfWeek.FRIDAY))),
         SupportedRatePlan("GW Oct 18 - 3 Month - ROW", List(SupportedRatePlanCharge("GW Oct 18 - 3 Month - ROW", DayOfWeek.FRIDAY))),
         SupportedRatePlan("GW Oct 18 - Annual - ROW", List(SupportedRatePlanCharge("GW Oct 18 - Annual - ROW", DayOfWeek.FRIDAY))),
@@ -31,8 +37,10 @@ object SupportedProduct {
       )
     ),
     SupportedProduct(
-      "Guardian Weekly Zone A",
-      List(
+      name = "Guardian Weekly Zone A",
+      productType = GuardianWeekly,
+      annualIssueLimitPerEdition = 6,
+      ratePlans = List(
         SupportedRatePlan("Guardian Weekly 1 Year", List(SupportedRatePlanCharge("Zone A 1 Year", DayOfWeek.FRIDAY))),
         SupportedRatePlan("Guardian Weekly 12 Issues", List(SupportedRatePlanCharge("Zone A 12 Issues", DayOfWeek.FRIDAY))),
         SupportedRatePlan("Guardian Weekly 2 Years", List(SupportedRatePlanCharge("Zone A 2 Years", DayOfWeek.FRIDAY))),
@@ -45,8 +53,10 @@ object SupportedProduct {
       )
     ),
     SupportedProduct(
-      "Guardian Weekly Zone B",
-      List(
+      name = "Guardian Weekly Zone B",
+      productType = GuardianWeekly,
+      annualIssueLimitPerEdition = 6,
+      ratePlans = List(
         SupportedRatePlan("Guardian Weekly 1 Year", List(SupportedRatePlanCharge("Zone B 1 Year", DayOfWeek.FRIDAY))),
         SupportedRatePlan("Guardian Weekly 12 Issues", List(SupportedRatePlanCharge("Zone B 12 Issues", DayOfWeek.FRIDAY))),
         SupportedRatePlan("Guardian Weekly 2 Years", List(SupportedRatePlanCharge("Zone B 2 Years", DayOfWeek.FRIDAY))),
@@ -59,8 +69,10 @@ object SupportedProduct {
       )
     ),
     SupportedProduct(
-      "Guardian Weekly Zone C",
-      List(
+      name = "Guardian Weekly Zone C",
+      productType = GuardianWeekly,
+      annualIssueLimitPerEdition = 6,
+      ratePlans = List(
         SupportedRatePlan("Guardian Weekly 1 Year", List(SupportedRatePlanCharge("Zone C 1 Year", DayOfWeek.FRIDAY))),
         SupportedRatePlan("Guardian Weekly 12 Issues", List(SupportedRatePlanCharge("Guardian Weekly 12 Issues", DayOfWeek.FRIDAY))),
         SupportedRatePlan("Guardian Weekly 6 Issues", List(SupportedRatePlanCharge("Guardian Weekly 6 Issues", DayOfWeek.FRIDAY))),
@@ -71,8 +83,10 @@ object SupportedProduct {
       )
     ),
     SupportedProduct(
-      "Newspaper Delivery",
-      List(
+      name = "Newspaper Delivery",
+      productType = NewspaperHomeDelivery,
+      annualIssueLimitPerEdition = 4,
+      ratePlans = List(
         SupportedRatePlan("Echo-Legacy", everyDayCharges),
         SupportedRatePlan("Everyday", everyDayCharges),
         SupportedRatePlan("Everyday+", everyDayCharges),
@@ -89,8 +103,10 @@ object SupportedProduct {
       )
     ),
     SupportedProduct(
-      "Newspaper Voucher",
-      List(
+      name = "Newspaper Voucher",
+      productType = NewspaperVoucherBook,
+      annualIssueLimitPerEdition = 4,
+      ratePlans = List(
         SupportedRatePlan("Everyday", everyDayCharges),
         SupportedRatePlan("Everyday+", everyDayCharges),
         SupportedRatePlan("Saturday", saturdayCharges),

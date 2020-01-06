@@ -1,14 +1,19 @@
 package com.gu.holidaystopprocessor
 
-import java.time.LocalDate
+import java.time.temporal.TemporalAdjusters
+import java.time.{DayOfWeek, LocalDate}
 
+import cats.implicits._
+import com.gu.fulfilmentdates.{FulfilmentDates, FulfilmentDatesFetcher, FulfilmentDatesFetcherError}
 import com.gu.holiday_stops.Fixtures.mkGuardianWeeklySubscription
 import com.gu.holiday_stops._
 import com.gu.holiday_stops.subscription.{HolidayCreditUpdate, MutableCalendar, Subscription}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
+import com.gu.zuora.ZuoraProductTypes
+import com.gu.zuora.ZuoraProductTypes.ZuoraProductType
 import org.scalatest.{EitherValues, FlatSpec, Matchers, OptionValues}
 
-class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with EitherValues with OptionValues {
+class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues with OptionValues {
   MutableCalendar.setFakeToday(Some(LocalDate.parse("2019-07-12")))
   val effectiveStartDate = LocalDate.of(2019, 5, 11)
 
@@ -36,6 +41,16 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
 
   private def exportAmendments(amendmentExport: Either[SalesforceHolidayError, Unit]): List[ZuoraHolidayWriteResult] => Either[SalesforceHolidayError, Unit] =
     _ => amendmentExport
+
+  val today = LocalDate.now()
+
+  val targetProcessingDate = today `with` TemporalAdjusters.next(DayOfWeek.FRIDAY)
+
+  private val fulfilmentDatesFetcher = new FulfilmentDatesFetcher {
+    override def getFulfilmentDates(zuoraProductType: ZuoraProductType, date: LocalDate): Either[FulfilmentDatesFetcherError, Map[DayOfWeek, FulfilmentDates]] = {
+      Map(DayOfWeek.FRIDAY -> FulfilmentDates(today, today, Some(targetProcessingDate))).asRight
+    }
+  }
 
   "HolidayStopProcess" should "give correct added charge" in {
     val response = Processor.writeHolidayStopToZuora(
@@ -125,11 +140,14 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
   "processHolidayStops" should "give correct charges added" in {
     val responses = Processor.processProduct(
       Fixtures.config,
-      Right(List(
+      (_, _) => Right(List(
         Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(Fixtures.mkHolidayStopRequest("R1", LocalDate.of(2019, 8, 2)), "C1"),
         Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(Fixtures.mkHolidayStopRequest("R2", LocalDate.of(2019, 9, 1)), "C3"),
         Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(Fixtures.mkHolidayStopRequest("R3", LocalDate.of(2019, 8, 9)), "C4")
       )),
+      fulfilmentDatesFetcher,
+      None,
+      ZuoraProductTypes.GuardianWeekly,
       _ => Right(Fixtures.mkSubscriptionWithHolidayStops()),
       updateSubscription(Right(())),
       exportAmendments(Right(()))
@@ -153,15 +171,51 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
       pubDate = StoppedPublicationDate(LocalDate.of(2019, 8, 9))
     )
   }
+  it should "get target dates from fulfilment dates" in {
+    Processor.processProduct(
+      Fixtures.config,
+      (productType, targetDates) => {
+        productType should ===(ZuoraProductTypes.GuardianWeekly)
+        targetDates should ===(List(targetProcessingDate))
+        Right(List())
+      },
+      fulfilmentDatesFetcher,
+      None,
+      ZuoraProductTypes.GuardianWeekly,
+      _ => Right(Fixtures.mkSubscriptionWithHolidayStops()),
+      updateSubscription(Right(())),
+      exportAmendments(Right(()))
+    )
+  }
+  it should "get target date from overridedate" in {
+    val overrideDate = LocalDate.now().plusWeeks(1)
+    Processor.processProduct(
+      Fixtures.config,
+      (productType, targetDates) => {
+        productType should ===(ZuoraProductTypes.GuardianWeekly)
+        targetDates should ===(List(overrideDate))
+        Right(List())
+      },
+      fulfilmentDatesFetcher,
+      Some(overrideDate),
+      ZuoraProductTypes.GuardianWeekly,
+      _ => Right(Fixtures.mkSubscriptionWithHolidayStops()),
+      updateSubscription(Right(())),
+      exportAmendments(Right(()))
+    )
+  }
 
   it should "only export results that haven't already been exported" in {
     val responses = Processor.processProduct(
       Fixtures.config,
-      Right(List(
+      (_, _) => Right(List(
         Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(Fixtures.mkHolidayStopRequest("R1", LocalDate.of(2019, 8, 2)), "C2"),
         Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(Fixtures.mkHolidayStopRequest("R2", LocalDate.of(2019, 9, 1)), "C5"),
         Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(Fixtures.mkHolidayStopRequest("R3", LocalDate.of(2019, 8, 9)), "C6")
       )),
+      fulfilmentDatesFetcher,
+      None,
+      ZuoraProductTypes.GuardianWeekly,
       _ => Right(Fixtures.mkSubscriptionWithHolidayStops()),
       updateSubscription(Right(())),
       exportAmendments(Right(()))
@@ -182,11 +236,14 @@ class GuardianWeeklyHolidayStopProcessTest extends FlatSpec with Matchers with E
   it should "give an exception message if exporting results fails" in {
     val responses = Processor.processProduct(
       Fixtures.config,
-      Right(List(
+      (_, _) => Right(List(
         Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(Fixtures.mkHolidayStopRequest("r1"), ""),
         Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(Fixtures.mkHolidayStopRequest("r2"), ""),
         Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(Fixtures.mkHolidayStopRequest("r3"), "")
       )),
+      fulfilmentDatesFetcher,
+      None,
+      ZuoraProductTypes.GuardianWeekly,
       _ => Right(subscription),
       updateSubscription(Right(())),
       exportAmendments(Left(SalesforceHolidayError("Export failed")))

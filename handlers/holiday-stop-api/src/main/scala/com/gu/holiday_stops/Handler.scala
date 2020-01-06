@@ -6,8 +6,9 @@ import java.util.UUID
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
+import com.gu.fulfilmentdates.FulfilmentDatesFetcher
 import com.gu.holiday_stops.WireHolidayStopRequest.toHolidayStopRequestDetail
-import com.gu.holiday_stops.subscription.{HolidayStopCredit, Subscription, SubscriptionData}
+import com.gu.holiday_stops.subscription.{HolidayStopCredit, MutableCalendar, Subscription, SubscriptionData}
 import com.gu.salesforce.{Contact, SalesforceClient, SalesforceHandlerSupport}
 import com.gu.salesforce.SalesforceClient.withAlternateAccessTokenIfPresentInHeaderList
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
@@ -69,7 +70,8 @@ object Handler extends Logging {
       validateRequestAndCreateSteps(
         request,
         getSubscriptionFromZuora(config, backend),
-        idGenerator
+        idGenerator,
+        FulfilmentDatesFetcher(fetchString, Stage())
       )(
           request,
           sfClient.setupRequest(withAlternateAccessTokenIfPresentInHeaderList(request.headers))
@@ -79,12 +81,13 @@ object Handler extends Logging {
   private def validateRequestAndCreateSteps(
     request: ApiGatewayRequest,
     getSubscription: SubscriptionName => Either[HolidayError, Subscription],
-    idGenerator: => String
+    idGenerator: => String,
+    fulfilmentDatesFetcher: FulfilmentDatesFetcher
   ) = {
     (for {
       httpMethod <- validateMethod(request.httpMethod)
       path <- validatePath(request.path)
-    } yield createSteps(httpMethod, splitPath(path), getSubscription, idGenerator)).fold(
+    } yield createSteps(httpMethod, splitPath(path), getSubscription, idGenerator, fulfilmentDatesFetcher)).fold(
       { errorMessage: String =>
         badrequest(errorMessage) _
       },
@@ -110,7 +113,8 @@ object Handler extends Logging {
     httpMethod: String,
     path: List[String],
     getSubscription: SubscriptionName => Either[HolidayError, Subscription],
-    idGenerator: => String
+    idGenerator: => String,
+    fulfilmentDatesFetcher: FulfilmentDatesFetcher
   ) = {
     path match {
       case "potential" :: _ :: Nil =>
@@ -125,7 +129,7 @@ object Handler extends Logging {
         }
       case "hsr" :: _ :: Nil =>
         httpMethod match {
-          case "GET" => stepsToListExisting(getSubscription) _
+          case "GET" => stepsToListExisting(getSubscription, fulfilmentDatesFetcher) _
           case _ => unsupported _
         }
       case "hsr" :: _ :: "cancel" :: Nil =>
@@ -195,7 +199,10 @@ object Handler extends Logging {
 
   case class ListExistingPathParams(subscriptionName: SubscriptionName)
 
-  def stepsToListExisting(getSubscription: SubscriptionName => Either[HolidayError, Subscription])(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
+  def stepsToListExisting(
+    getSubscription: SubscriptionName => Either[HolidayError, Subscription],
+    fulfilmentDatesFetcher: FulfilmentDatesFetcher
+  )(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
 
     val lookupOp = SalesforceHolidayStopRequest.LookupByContactAndOptionalSubscriptionName(sfClient.wrapWith(JsonHttp.getWithParams))
 
@@ -209,9 +216,17 @@ object Handler extends Logging {
         .toApiGatewayOp(s"lookup Holiday Stop Requests for contact $contact")
       subscription <- getSubscription(subName)
         .toApiGatewayOp(s"get subscription $subName")
+      subscriptionData <- SubscriptionData(subscription)
+        .toApiGatewayOp(s"extract subscription data from subscription")
+      fulfilmentDates <- fulfilmentDatesFetcher.getFulfilmentDates(
+        subscriptionData.productType,
+        MutableCalendar.today
+      ).toApiGatewayOp("get fulfilment dates for subscription")
       response <- GetHolidayStopRequests(
         usersHolidayStopRequests,
-        subscription
+        subscriptionData,
+        fulfilmentDates,
+        subscription.fulfilmentStartDate
       ).toApiGatewayOp("calculate holidays stops specifics")
     } yield ApiGatewayResponse("200", response)).apiResponse
   }

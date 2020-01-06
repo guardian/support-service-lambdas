@@ -1,4 +1,4 @@
-package com.gu.fulfilmentdates
+package com.gu.zuora
 
 object ZuoraProductTypes {
   sealed case class ZuoraProductType(name: String)

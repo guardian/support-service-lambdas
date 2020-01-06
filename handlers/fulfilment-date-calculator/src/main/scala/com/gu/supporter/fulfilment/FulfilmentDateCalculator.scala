@@ -5,8 +5,8 @@ import java.time.LocalDate
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.s3.model.PutObjectResult
 import com.gu.fulfilmentdates.FulfilmentDatesLocation.fulfilmentDatesFileLocation
-import com.gu.fulfilmentdates.ZuoraProductTypes.{GuardianWeekly, NewspaperHomeDelivery, NewspaperVoucherBook, ZuoraProductType}
 import com.gu.util.config.Stage
+import com.gu.zuora.ZuoraProductTypes.{GuardianWeekly, NewspaperHomeDelivery, NewspaperVoucherBook, ZuoraProductType}
 import com.typesafe.scalalogging.LazyLogging
 import io.circe.generic.auto._
 import io.circe.syntax._

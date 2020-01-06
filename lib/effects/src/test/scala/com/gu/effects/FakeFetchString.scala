@@ -1,5 +1,8 @@
 package com.gu.effects
 
+import java.time.{DayOfWeek, LocalDate}
+import java.time.temporal.TemporalAdjusters._
+
 import scala.util.{Failure, Success, Try}
 
 object FakeFetchString {
@@ -78,6 +81,22 @@ object FakeFetchString {
       |}
     """.stripMargin
 
+  def guardianWeeklyFulfilmentDatesFile(today: LocalDate) = {
+    val issueDate = today `with` next(DayOfWeek.FRIDAY) `with` next(DayOfWeek.FRIDAY)
+
+    s"""
+      |{
+      |  "Friday" : {
+      |    "today" : "$today",
+      |    "deliveryAddressChangeEffectiveDate" : "${issueDate.minusDays(2)}",
+      |    "holidayStopFirstAvailableDate" : "${issueDate.minusDays(3)}",
+      |    "finalFulfilmentFileGenerationDate" : "${issueDate.minusDays(1)}",
+      |    "nextAffectablePublicationDateOnFrontCover" : "${issueDate}"
+      |  }
+      |}
+      |""".stripMargin
+  }
+
   val configFiles = Map(
     "membership/support-service-lambdas/DEV/identity-DEV.json" -> identityTestConfig,
     "membership/support-service-lambdas/DEV/sfAuth-DEV.json" -> sfTestConfig,
@@ -85,13 +104,23 @@ object FakeFetchString {
     "membership/support-service-lambdas/DEV/zuoraRest-DEV.json" -> zuoraRestTestConfig,
     "membership/support-service-lambdas/DEV/exactTarget-DEV.json" -> exactTargetConfig,
     "membership/support-service-lambdas/DEV/stripe-DEV.json" -> stripeConfig
-
   )
 
   def fetchString(location: S3Location): Try[String] = {
-    if (location.bucket != "gu-reader-revenue-private") Failure(new RuntimeException(s"test failure, unexpected bucket: ${location.bucket}"))
-    else
-      configFiles.get(location.key).map(key => Success(key)).getOrElse(Failure(new RuntimeException(s"test failure unexpected config s3 key ${location.key}")))
+    fetchString(LocalDate.now(), location)
+  }
+
+  def fetchString(today: LocalDate, location: S3Location): Try[String] = {
+    location match {
+      case S3Location("gu-reader-revenue-private", s3Key) =>
+        configFiles
+          .get(s3Key)
+          .map(contents => Success(contents))
+          .getOrElse(Failure(new RuntimeException(s"test failure unexpected config s3 key ${location.key}")))
+      case S3Location("fulfilment-date-calculator-dev", s3Key) if s3Key.contains("Guardian Weekly") =>
+        Success(guardianWeeklyFulfilmentDatesFile(today))
+      case _ => Failure(new RuntimeException(s"test failure unexpected config s3 $location"))
+    }
   }
 
 }

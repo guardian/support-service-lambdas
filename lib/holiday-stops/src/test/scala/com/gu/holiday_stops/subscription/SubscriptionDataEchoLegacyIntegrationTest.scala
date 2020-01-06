@@ -1,9 +1,11 @@
 package com.gu.holiday_stops.subscription
 
-import java.time.{DayOfWeek, LocalDate}
+import java.time.DayOfWeek.{FRIDAY, SATURDAY}
 import java.time.temporal.TemporalAdjusters
+import java.time.{DayOfWeek, LocalDate}
 
 import com.gu.holiday_stops.subscription.SubscriptionDataIntegrationTest.testSubscriptonDataIssueGeneration
+import com.gu.zuora.ZuoraProductTypes
 import org.scalatest.FlatSpec
 
 class SubscriptionDataEchoLegacyIntegrationTest extends FlatSpec {
@@ -41,6 +43,13 @@ class SubscriptionDataEchoLegacyIntegrationTest extends FlatSpec {
       IssueData(firstSaturdayIssue.plusWeeks(4), normalBillDates2, -2.82),
     )
 
-    testSubscriptonDataIssueGeneration("EchoLegacySubscription.json", startDate, expectedIssueData)
+    testSubscriptonDataIssueGeneration(
+      subscriptionFile = "EchoLegacySubscription.json",
+      startDate = startDate,
+      expectedIssueData = expectedIssueData,
+      expectedTotalAnnualIssueLimitPerSubscription = 8,
+      expectedProductType = ZuoraProductTypes.NewspaperHomeDelivery,
+      expectedEditionDaysOfWeek = List(FRIDAY, SATURDAY)
+    )
   }
 }
