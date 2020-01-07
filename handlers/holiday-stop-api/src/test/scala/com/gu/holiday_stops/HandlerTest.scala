@@ -1,26 +1,39 @@
 package com.gu.holiday_stops
 
-import java.time.{DayOfWeek, LocalDate}
+import java.io.Serializable
 import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters.next
+import java.time.{DayOfWeek, LocalDate}
 
 import com.gu.effects.{FakeFetchString, SFTestEffects, TestingRawEffects}
 import com.gu.holiday_stops.ZuoraSttpEffects.ZuoraSttpEffectsOps
-import com.gu.holiday_stops.subscription.{HolidayStopCredit, MutableCalendar, RatePlan, RatePlanCharge, Subscription}
-import com.gu.salesforce.{IdentityId, SalesforceContactId}
+import com.gu.holiday_stops.subscription._
+import com.gu.salesforce.SalesforceHandlerSupport.{HEADER_IDENTITY_ID, HEADER_SALESFORCE_CONTACT_ID}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.SubscriptionName
 import com.gu.salesforce.holiday_stops.{SalesForceHolidayStopsEffects, SalesforceHolidayStopRequestsDetail}
-import com.gu.util.apigateway.ApiGatewayRequest
+import com.gu.salesforce.{IdentityId, SalesforceContactId}
+import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest}
 import com.gu.util.config.Stage
+import com.gu.util.reader.Types.ApiGatewayOp
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.softwaremill.sttp.testing.SttpBackendStub
 import org.scalatest.Inside.inside
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.{JsObject, JsString, JsSuccess, Json}
-import com.gu.salesforce.SalesforceHandlerSupport.{HEADER_IDENTITY_ID, HEADER_SALESFORCE_CONTACT_ID}
+import zio.console.Console
+import zio.{DefaultRuntime, ZIO}
 
 class HandlerTest extends FlatSpec with Matchers {
   val testId = "test-generated-id"
+
+  private val runtime = new DefaultRuntime {}
+
+  private def unwrappedOp(wrapped: ZIO[Console with Configuration, Serializable,
+    ApiGatewayOp[ApiGatewayHandler.Operation]]): ApiGatewayOp[ApiGatewayHandler.Operation] = {
+    runtime.unsafeRun {
+      wrapped.provide(new Console.Live with ConfigTest {})
+    }
+  }
 
   it should s"convert either the '$HEADER_IDENTITY_ID' header OR '$HEADER_SALESFORCE_CONTACT_ID' header to Contact or fail" in {
 
@@ -89,13 +102,13 @@ class HandlerTest extends FlatSpec with Matchers {
       .stubZuoraSubscription(subscriptionName, subscription)
 
     inside(
-      Handler.operationForEffects(
+      unwrappedOp(Handler.operationForEffects(
         defaultTestEffects.response,
         Stage("DEV"),
         FakeFetchString.fetchString,
         testBackend,
         "test-generated-id"
-      ).map { operation =>
+      )).map { operation =>
         operation
           .steps(legacyPotentialIssueDateRequest(
             productPrefix = "Guardian Weekly xxx",
@@ -124,14 +137,14 @@ class HandlerTest extends FlatSpec with Matchers {
   }
   it should "return bad request if method is missing" in {
     inside(
-      Handler
+      unwrappedOp(Handler
         .operationForEffects(
           defaultTestEffects.response,
           Stage("DEV"),
           FakeFetchString.fetchString,
           SttpBackendStub.synchronous,
           testId
-        )
+        ))
         .map(_.steps(ApiGatewayRequest(None, None, None, None, None, None)))
     ) {
       case ContinueProcessing(response) =>
@@ -145,14 +158,14 @@ class HandlerTest extends FlatSpec with Matchers {
   }
   it should "return bad request if path is missing" in {
     inside(
-      Handler
+      unwrappedOp(Handler
         .operationForEffects(
           defaultTestEffects.response,
           Stage("DEV"),
           FakeFetchString.fetchString,
           SttpBackendStub.synchronous,
           testId
-        )
+        ))
         .map(_.steps(ApiGatewayRequest(Some("GET"), None, None, None, None, None)))
     ) {
       case ContinueProcessing(response) =>
@@ -189,7 +202,7 @@ class HandlerTest extends FlatSpec with Matchers {
     )
 
     inside(
-      Handler.operationForEffects(
+      unwrappedOp(Handler.operationForEffects(
         new TestingRawEffects(
           responses = Map(
             SalesForceHolidayStopsEffects.listHolidayStops(contactId, subscriptionName, List(holidayStopRequest))
@@ -202,7 +215,7 @@ class HandlerTest extends FlatSpec with Matchers {
         FakeFetchString.fetchString,
         testBackend,
         testId
-      ).map { operation =>
+      )).map { operation =>
         operation
           .steps(
             existingHolidayStopsRequest(
@@ -269,7 +282,7 @@ class HandlerTest extends FlatSpec with Matchers {
     )
 
     inside(
-      Handler.operationForEffects(
+      unwrappedOp(Handler.operationForEffects(
         new TestingRawEffects(
           responses = Map(
             SalesForceHolidayStopsEffects.listHolidayStops(contactId, subscriptionName, List(holidayStopRequest))
@@ -283,7 +296,7 @@ class HandlerTest extends FlatSpec with Matchers {
         FakeFetchString.fetchString,
         testBackend,
         testId
-      ).map { operation =>
+      )).map { operation =>
         operation
           .steps(
             cancelHolidayStops(
@@ -327,7 +340,7 @@ class HandlerTest extends FlatSpec with Matchers {
     )
 
     inside(
-      Handler.operationForEffects(
+      unwrappedOp(Handler.operationForEffects(
         new TestingRawEffects(
           responses = Map(
             SalesForceHolidayStopsEffects.listHolidayStops(contactId, subscriptionName, List(holidayStopRequest))
@@ -340,7 +353,7 @@ class HandlerTest extends FlatSpec with Matchers {
         FakeFetchString.fetchString,
         testBackend,
         testId
-      ).map { operation =>
+      )).map { operation =>
         operation
           .steps(
             cancelHolidayStops(

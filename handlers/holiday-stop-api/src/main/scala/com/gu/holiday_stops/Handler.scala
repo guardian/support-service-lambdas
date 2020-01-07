@@ -1,6 +1,6 @@
 package com.gu.holiday_stops
 
-import java.io.{InputStream, OutputStream}
+import java.io.{InputStream, OutputStream, Serializable}
 import java.time.LocalDate
 import java.util.UUID
 
@@ -9,11 +9,11 @@ import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.fulfilmentdates.FulfilmentDatesFetcher
 import com.gu.holiday_stops.WireHolidayStopRequest.toHolidayStopRequestDetail
 import com.gu.holiday_stops.subscription.{HolidayStopCredit, MutableCalendar, Subscription, SubscriptionData}
-import com.gu.salesforce.{Contact, SalesforceClient, SalesforceHandlerSupport}
 import com.gu.salesforce.SalesforceClient.withAlternateAccessTokenIfPresentInHeaderList
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestId, SubscriptionName}
 import com.gu.salesforce.holiday_stops.{SalesforceHolidayStopRequest, SalesforceSFSubscription}
+import com.gu.salesforce.{Contact, SalesforceClient, SalesforceHandlerSupport}
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
@@ -29,27 +29,28 @@ import com.softwaremill.sttp.{HttpURLConnectionBackend, Id, SttpBackend}
 import okhttp3.{Request, Response}
 import play.api.libs.json.{Json, Reads}
 import scalaz.{-\/, \/, \/-}
+import zio.console.{Console, putStrLn}
+import zio.{DefaultRuntime, ZIO}
 
 object Handler extends Logging {
 
   type SfClient = HttpOp[StringHttpRequest, BodyAsString]
 
+  private val runtime = new DefaultRuntime {}
+
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
-    ApiGatewayHandler(
-      LambdaIO(
-        inputStream,
-        outputStream,
-        context
-      )
-    )(
-        operationForEffects(
-          RawEffects.response,
-          RawEffects.stage,
-          GetFromS3.fetchString,
-          HttpURLConnectionBackend(),
-          UUID.randomUUID().toString
-        )
-      )
+
+    val configOp = runtime.unsafeRun {
+      operationForEffects(
+        RawEffects.response,
+        RawEffects.stage,
+        GetFromS3.fetchString,
+        HttpURLConnectionBackend(),
+        UUID.randomUUID().toString,
+      ).provide(new Console.Live with ConfigLive {})
+    }
+
+    ApiGatewayHandler(LambdaIO(inputStream, outputStream, context))(configOp)
   }
 
   def operationForEffects(
@@ -57,10 +58,28 @@ object Handler extends Logging {
     stage: Stage,
     fetchString: StringFromS3,
     backend: SttpBackend[Id, Nothing],
-    idGenerator: => String
+    idGenerator: => String,
+  ): ZIO[Console with Configuration, Serializable, ApiGatewayOp[Operation]] =
+    for {
+      config <- Configuration.factory.config.tapError(e => putStrLn(s"Config failure: $e"))
+    } yield operationForEffectsInternal(
+      response,
+      stage,
+      fetchString,
+      backend,
+      idGenerator,
+      config
+    )
+
+  private def operationForEffectsInternal(
+    response: Request => Response,
+    stage: Stage,
+    fetchString: StringFromS3,
+    backend: SttpBackend[Id, Nothing],
+    idGenerator: => String,
+    config: Config
   ): ApiGatewayOp[Operation] = {
     for {
-      config <- Config(fetchString).toApiGatewayOp("Failed to load config")
       sfClient <- SalesforceClient(
         response,
         config.sfConfig,

@@ -44,7 +44,7 @@ object Dependencies {
   val http4sServer = "org.http4s" %% "http4s-server" % http4sVersion
   val catsCore = "org.typelevel" %% "cats-core" % catsVersion
   val catsEffect = "org.typelevel" %% "cats-effect" % catsEffectVersion
-
+  val zio = "dev.zio" %% "zio" % "1.0.0-RC17"
 
   // to resolve merge clash of 'module-info.class'
   // see https://stackoverflow.com/questions/54834125/sbt-assembly-deduplicate-module-info-class
