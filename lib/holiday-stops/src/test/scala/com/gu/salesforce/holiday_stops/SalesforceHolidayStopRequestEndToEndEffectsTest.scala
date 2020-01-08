@@ -67,7 +67,7 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends FlatSpec with Matc
         sfAuth.wrapWith(JsonHttp.patch)
       )(id)
       _ <- processOp(HolidayStopRequestsDetailActioned(
-        HolidayStopRequestsDetailChargeCode("C-1234567"),
+        RatePlanChargeCode("C-1234567"),
         HolidayStopRequestsDetailChargePrice(-12.34)
       )).toDisjunction
 
@@ -75,7 +75,7 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends FlatSpec with Matc
 
       // UN-ACTION in order to delete the parent
       _ <- processOp(HolidayStopRequestsDetailActioned(
-        HolidayStopRequestsDetailChargeCode(""),
+        RatePlanChargeCode(""),
         HolidayStopRequestsDetailChargePrice(0)
       )).toDisjunction
 

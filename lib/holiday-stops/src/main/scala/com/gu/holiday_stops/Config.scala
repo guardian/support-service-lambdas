@@ -8,7 +8,7 @@ import play.api.libs.json.{Json, Reads}
 case class Config(
   zuoraConfig: ZuoraConfig,
   sfConfig: SFAuthConfig,
-  holidayCreditProduct: HolidayCreditProduct,
+  creditProduct: CreditProduct
 )
 
 case class ZuoraConfig(

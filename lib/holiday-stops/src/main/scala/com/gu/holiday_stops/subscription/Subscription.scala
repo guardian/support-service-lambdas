@@ -2,7 +2,7 @@ package com.gu.holiday_stops.subscription
 
 import java.time.LocalDate
 
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.HolidayStopRequestsDetail
+import com.gu.holiday_stops.CreditRequest
 
 case class Subscription(
   subscriptionNumber: String,
@@ -16,18 +16,18 @@ case class Subscription(
   status: String
 ) {
 
-  def ratePlanCharge(request: HolidayStopRequestsDetail): Option[RatePlanCharge] = {
+  def ratePlanCharge(request: CreditRequest): Option[RatePlanCharge] = {
 
     def isMatchingPlan(plan: RatePlan): Boolean = plan.productName == "Discounts"
 
     def isMatchingCharge(charge: RatePlanCharge): Boolean = {
-      val stoppedPublicationDate = request.Stopped_Publication_Date__c.value
-      charge.name == "Holiday Credit" &&
+      val publicationDate = request.publicationDate.value
+      charge.name == request.productRatePlanChargeName &&
         charge.HolidayStart__c.exists { start =>
-          start.isEqual(stoppedPublicationDate) || start.isBefore(stoppedPublicationDate)
+          start.isEqual(publicationDate) || start.isBefore(publicationDate)
         } &&
         charge.HolidayEnd__c.exists { end =>
-          end.isEqual(stoppedPublicationDate) || end.isAfter(stoppedPublicationDate)
+          end.isEqual(publicationDate) || end.isAfter(publicationDate)
         }
     }
 
@@ -46,7 +46,7 @@ case class Subscription(
   lazy val fulfilmentStartDate: LocalDate =
     (customerAcceptanceDate :: allEffectiveStartDates).min[LocalDate](_ compareTo _)
 
-  def hasHolidayStop(request: HolidayStopRequestsDetail): Boolean = ratePlanCharge(request).isDefined
+  def hasCreditAmendment(request: CreditRequest): Boolean = ratePlanCharge(request).isDefined
 }
 
 case class RatePlan(

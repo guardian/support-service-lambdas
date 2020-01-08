@@ -279,9 +279,9 @@ object Fixtures extends Assertions {
     Id = HolidayStopRequestsDetailId(request.Id.value),
     Subscription_Name__c = request.Subscription_Name__c,
     Product_Name__c = request.Product_Name__c,
-    Stopped_Publication_Date__c = StoppedPublicationDate(request.Start_Date__c.value),
+    Stopped_Publication_Date__c = AffectedPublicationDate(request.Start_Date__c.value),
     Estimated_Price__c = None,
-    Charge_Code__c = Some(HolidayStopRequestsDetailChargeCode(chargeCode)),
+    Charge_Code__c = Some(RatePlanChargeCode(chargeCode)),
     Actual_Price__c = None,
     Expected_Invoice_Date__c = None
   )
@@ -300,9 +300,9 @@ object Fixtures extends Assertions {
       Id = HolidayStopRequestsDetailId(id),
       Subscription_Name__c = SubscriptionName(subscriptionName),
       Product_Name__c = ProductName(productName),
-      Stopped_Publication_Date__c = StoppedPublicationDate(stopDate),
+      Stopped_Publication_Date__c = AffectedPublicationDate(stopDate),
       Estimated_Price__c = estimatedPrice.map(HolidayStopRequestsDetailChargePrice.apply),
-      Charge_Code__c = chargeCode.map(HolidayStopRequestsDetailChargeCode.apply),
+      Charge_Code__c = chargeCode.map(RatePlanChargeCode),
       Actual_Price__c = actualPrice.map(HolidayStopRequestsDetailChargePrice.apply),
       Expected_Invoice_Date__c = expectedInvoiceDate.map(HolidayStopRequestsDetailExpectedInvoiceDate.apply)
     )
@@ -312,7 +312,7 @@ object Fixtures extends Assertions {
     Id = HolidayStopRequestsDetailId("R1"),
     Subscription_Name__c = SubscriptionName("S1"),
     Product_Name__c = ProductName("Gu Weekly"),
-    Stopped_Publication_Date__c = StoppedPublicationDate(date),
+    Stopped_Publication_Date__c = AffectedPublicationDate(date),
     Estimated_Price__c = None,
     Charge_Code__c = None,
     Actual_Price__c = None,

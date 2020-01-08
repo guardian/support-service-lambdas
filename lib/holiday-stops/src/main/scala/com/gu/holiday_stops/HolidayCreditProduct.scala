@@ -9,7 +9,7 @@ package com.gu.holiday_stops
 case class HolidayCreditProduct(
   productRatePlanId: String,
   productRatePlanChargeId: String
-)
+) extends CreditProduct
 
 object HolidayCreditProduct {
   val Prod = HolidayCreditProduct(
@@ -27,4 +27,3 @@ object HolidayCreditProduct {
     productRatePlanChargeId = "2c92c0f96b03800b016b081fc0f41bb4"
   )
 }
-

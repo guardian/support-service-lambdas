@@ -5,8 +5,8 @@ import java.time.LocalDate
 import cats.implicits._
 import com.gu.effects.S3Location
 import com.gu.fulfilmentdates.FulfilmentDatesFetcher
+import com.gu.holiday_stops._
 import com.gu.holiday_stops.subscription._
-import com.gu.holiday_stops.{Zuora, _}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
 import com.gu.util.config.Stage
 import com.gu.zuora.ZuoraProductTypes.{GuardianWeekly, NewspaperHomeDelivery, NewspaperVoucherBook, ZuoraProductType}
@@ -29,7 +29,7 @@ object Processor {
       case Left(err) =>
         List(ProcessResult(Nil, Nil, Nil, Some(OverallFailure(err.reason))))
 
-      case Right(zuoraAccessToken) => {
+      case Right(zuoraAccessToken) =>
         val fulfilmentDatesFetcher = FulfilmentDatesFetcher(fetchFromS3, Stage())
         List(
           NewspaperHomeDelivery,
@@ -45,84 +45,83 @@ object Processor {
             productType,
             Zuora.subscriptionGetResponse(config, zuoraAccessToken, backend),
             Zuora.subscriptionUpdateResponse(config, zuoraAccessToken, backend),
+            ZuoraCreditAddResult.forHolidayStop,
             Salesforce.holidayStopUpdateResponse(config.sfConfig)
           )
         }
-      }
     }
 
-  def processProduct(
+  def processProduct[RequestType <: CreditRequest, ResultType <: ZuoraCreditAddResult](
     config: Config,
-    getHolidayStopRequestsFromSalesforce: (ZuoraProductType, List[LocalDate]) => SalesforceHolidayResponse[List[HolidayStopRequestsDetail]],
+    getCreditRequestsFromSalesforce: (ZuoraProductType, List[LocalDate]) => SalesforceApiResponse[List[RequestType]],
     fulfilmentDatesFetcher: FulfilmentDatesFetcher,
     processOverrideDate: Option[LocalDate],
     productType: ZuoraProductType,
-    getSubscription: SubscriptionName => ZuoraHolidayResponse[Subscription],
-    updateSubscription: (Subscription, HolidayCreditUpdate) => ZuoraHolidayResponse[Unit],
-    writeHolidayStopsToSalesforce: List[ZuoraHolidayWriteResult] => SalesforceHolidayResponse[Unit],
+    getSubscription: SubscriptionName => ZuoraApiResponse[Subscription],
+    updateSubscription: (Subscription, SubscriptionUpdate) => ZuoraApiResponse[Unit],
+    resultOfZuoraCreditAdd: (RequestType, RatePlanCharge) => ResultType,
+    writeCreditResultsToSalesforce: List[ResultType] => SalesforceApiResponse[Unit]
   ): ProcessResult = {
-    val holidayStops = for {
+    val creditRequestsFromSalesforce = for {
       datesToProcess <- getDatesToProcess(fulfilmentDatesFetcher, productType, processOverrideDate, LocalDate.now())
       _ = logger.info(s"Processing holiday stops for $productType for issue dates ${datesToProcess.mkString(", ")}")
-      holidayStopsFromSalesforce <-
-        if(datesToProcess.isEmpty) Nil.asRight else getHolidayStopRequestsFromSalesforce(productType, datesToProcess)
-    } yield holidayStopsFromSalesforce
+      salesforceCreditRequests <-
+        if(datesToProcess.isEmpty) Nil.asRight else getCreditRequestsFromSalesforce(productType, datesToProcess)
+    } yield salesforceCreditRequests
 
-    holidayStops match {
+    creditRequestsFromSalesforce match {
       case Left(sfReadError) =>
         ProcessResult(Nil, Nil, Nil, Some(OverallFailure(sfReadError.reason)))
 
-      case Right(holidayStopRequestsFromSalesforce) =>
-        val holidayStops = holidayStopRequestsFromSalesforce.distinct
-        val alreadyActionedHolidayStops = holidayStopRequestsFromSalesforce.flatMap(_.Charge_Code__c).distinct
-        val allZuoraHolidayStopResponses = holidayStops.map(writeHolidayStopToZuora(config, getSubscription, updateSubscription))
-        val (failedZuoraResponses, successfulZuoraResponses) = allZuoraHolidayStopResponses.separate
-        val notAlreadyActionedHolidays = successfulZuoraResponses.filterNot(v => alreadyActionedHolidayStops.contains(v.chargeCode))
-        val salesforceExportResult = writeHolidayStopsToSalesforce(notAlreadyActionedHolidays)
+      case Right(creditRequestsFromSalesforce) =>
+        val creditRequests = creditRequestsFromSalesforce.distinct
+        val alreadyActionedCredits = creditRequestsFromSalesforce.flatMap(_.chargeCode).distinct
+        val allZuoraCreditResponses = creditRequests.map(
+          addCreditToSubscription(
+            config,
+            getSubscription,
+            updateSubscription,
+            resultOfZuoraCreditAdd
+          )
+        )
+        val (failedZuoraResponses, successfulZuoraResponses) = allZuoraCreditResponses.separate
+        val notAlreadyActionedCredits = successfulZuoraResponses.filterNot(v => alreadyActionedCredits.contains(v.chargeCode))
+        val salesforceExportResult = writeCreditResultsToSalesforce(notAlreadyActionedCredits)
         ProcessResult(
-          holidayStops,
-          allZuoraHolidayStopResponses,
-          notAlreadyActionedHolidays,
+          creditRequests,
+          allZuoraCreditResponses,
+          notAlreadyActionedCredits,
           OverallFailure(failedZuoraResponses, salesforceExportResult)
         )
     }
   }
 
   /**
-   * This is the main business logic for writing holiday stop to Zuora
+   * This is the main business logic for adding a credit amendment to a subscription in Zuora
    */
-  def writeHolidayStopToZuora(
+  def addCreditToSubscription[RequestType <: CreditRequest, ResultType <: ZuoraCreditAddResult](
     config: Config,
-    getSubscription: SubscriptionName => ZuoraHolidayResponse[Subscription],
-    updateSubscription: (Subscription, HolidayCreditUpdate) => ZuoraHolidayResponse[Unit]
-  )(request: HolidayStopRequestsDetail): ZuoraHolidayResponse[ZuoraHolidayWriteResult] = {
+    getSubscription: SubscriptionName => ZuoraApiResponse[Subscription],
+    updateSubscription: (Subscription, SubscriptionUpdate) => ZuoraApiResponse[Unit],
+    result: (RequestType, RatePlanCharge) => ResultType
+  )(request: RequestType): ZuoraApiResponse[ResultType] = {
     for {
-      subscription <- getSubscription(request.Subscription_Name__c)
+      subscription <- getSubscription(request.subscriptionName)
       subscriptionData <- SubscriptionData(subscription)
-      issueData <- subscriptionData.issueDataForDate(request.Stopped_Publication_Date__c.value)
-      _ <- if (subscription.status == "Cancelled") Left(ZuoraHolidayError(s"Cannot process cancelled subscription because Zuora does not allow amending cancelled subs (Code: 58730020). Apply manual refund ASAP! $request; ${ subscription.subscriptionNumber};")) else Right(())
+      issueData <- subscriptionData.issueDataForDate(request.publicationDate.value)
+      _ <- if (subscription.status == "Cancelled") Left(ZuoraApiFailure(s"Cannot process cancelled subscription because Zuora does not allow amending cancelled subs (Code: 58730020). Apply manual refund ASAP! $request; ${ subscription.subscriptionNumber};")) else Right(())
       maybeExtendedTerm = ExtendedTerm(issueData.nextBillingPeriodStartDate, subscription)
-      holidayCreditUpdate <- HolidayCreditUpdate(
-        config.holidayCreditProduct,
+      subscriptionUpdate <- SubscriptionUpdate.forHolidayStop(
+        config.creditProduct,
         subscription,
-        request.Stopped_Publication_Date__c.value,
+        request.publicationDate.value,
         maybeExtendedTerm,
         HolidayStopCredit(issueData.credit, issueData.nextBillingPeriodStartDate)
       )
-      _ <- if (subscription.hasHolidayStop(request)) Right(()) else updateSubscription(subscription, holidayCreditUpdate)
-      updatedSubscription <- getSubscription(request.Subscription_Name__c)
-      addedCharge <- updatedSubscription.ratePlanCharge(request).toRight(ZuoraHolidayError(s"Failed to write holiday stop to Zuora: $request"))
-    } yield {
-      ZuoraHolidayWriteResult(
-        request.Id,
-        request.Subscription_Name__c,
-        request.Product_Name__c,
-        HolidayStopRequestsDetailChargeCode(addedCharge.number),
-        request.Estimated_Price__c,
-        HolidayStopRequestsDetailChargePrice(addedCharge.price),
-        StoppedPublicationDate(addedCharge.HolidayStart__c.getOrElse(LocalDate.MIN))
-      )
-    }
+      _ <- if (subscription.hasCreditAmendment(request)) Right(()) else updateSubscription(subscription, subscriptionUpdate)
+      updatedSubscription <- getSubscription(request.subscriptionName)
+      addedCharge <- updatedSubscription.ratePlanCharge(request).toRight(ZuoraApiFailure(s"Failed to write holiday stop to Zuora: $request"))
+    } yield result(request, addedCharge)
   }
 
   def getDatesToProcess(
@@ -130,7 +129,7 @@ object Processor {
     zuoraProductType: ZuoraProductType,
     processOverRideDate: Option[LocalDate],
     today: LocalDate
-  ): Either[ZuoraHolidayError, List[LocalDate]] = {
+  ): Either[ZuoraApiFailure, List[LocalDate]] = {
     processOverRideDate
       .fold(
         fulfilmentDatesFetcher
@@ -138,7 +137,7 @@ object Processor {
           .map( fulfilmentDates =>
             fulfilmentDates.values.flatMap(_.holidayStopProcessorTargetDate).toList
           )
-          .leftMap(error => ZuoraHolidayError(s"Failed to fetch fulfilment dates: $error"))
+          .leftMap(error => ZuoraApiFailure(s"Failed to fetch fulfilment dates: $error"))
       )(
         processOverRideDate => List(processOverRideDate).asRight
       )

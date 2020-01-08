@@ -16,7 +16,7 @@ class GetHolidayStopRequestsTest extends FlatSpec {
   val expectedEditionDaysOfWeek = List(FRIDAY)
 
   val subscriptionData = new SubscriptionData {
-    override def issueDataForDate(issueDate: LocalDate): Either[ZuoraHolidayError, IssueData] = ???
+    override def issueDataForDate(issueDate: LocalDate): Either[ZuoraApiFailure, IssueData] = ???
 
     override def issueDataForPeriod(startDateInclusive: LocalDate, endDateInclusive: LocalDate): List[IssueData] = ???
 

@@ -3,7 +3,7 @@ package com.gu.holiday_stops.subscription
 import java.time.temporal.TemporalAdjusters
 import java.time.{DayOfWeek, LocalDate}
 
-import com.gu.holiday_stops.ZuoraHolidayError
+import com.gu.holiday_stops.ZuoraApiFailure
 
 import scala.annotation.tailrec
 import scala.math.BigDecimal.RoundingMode
@@ -41,11 +41,11 @@ case class RatePlanChargeData(
 }
 
 object RatePlanChargeData {
-  def apply(ratePlanCharge: RatePlanCharge, issueDayOfWeek: DayOfWeek): Either[ZuoraHolidayError, RatePlanChargeData] = {
+  def apply(ratePlanCharge: RatePlanCharge, issueDayOfWeek: DayOfWeek): Either[ZuoraApiFailure, RatePlanChargeData] = {
     for {
       billingPeriodName <- ratePlanCharge
         .billingPeriod
-        .toRight(ZuoraHolidayError("RatePlanCharge.billingPeriod is required"))
+        .toRight(ZuoraApiFailure("RatePlanCharge.billingPeriod is required"))
       schedule <- RatePlanChargeBillingSchedule(ratePlanCharge)
       issueCreditAmount <- calculateIssueCreditAmount(ratePlanCharge)
     } yield RatePlanChargeData(ratePlanCharge, schedule, billingPeriodName, issueDayOfWeek, issueCreditAmount)
@@ -57,7 +57,7 @@ object RatePlanChargeData {
     for {
       billingPeriodName <- ratePlanCharge
         .billingPeriod
-        .toRight(ZuoraHolidayError("RatePlanCharge.billingPeriod is required"))
+        .toRight(ZuoraApiFailure("RatePlanCharge.billingPeriod is required"))
       approximateBillingPeriodWeeks <- approximateBillingPeriodWeeksForName(billingPeriodName, ratePlanCharge.specificBillingPeriod)
       price = -roundUp(ratePlanCharge.price / approximateBillingPeriodWeeks)
     } yield price
@@ -66,7 +66,7 @@ object RatePlanChargeData {
   private def approximateBillingPeriodWeeksForName(
     billingPeriodName: String,
     optionalSpecificBillingPeriod: Option[Int]
-  ): Either[ZuoraHolidayError, Int] = {
+  ): Either[ZuoraApiFailure, Int] = {
     billingPeriodName match {
       case "Annual" => Right(52)
       case "Semi_Annual" => Right(26)
@@ -74,12 +74,12 @@ object RatePlanChargeData {
       case "Month" => Right(4)
       case "Specific_Weeks" =>
         optionalSpecificBillingPeriod
-          .toRight(ZuoraHolidayError(s"specificBillingPeriod is required for $billingPeriodName billing period"))
+          .toRight(ZuoraApiFailure(s"specificBillingPeriod is required for $billingPeriodName billing period"))
       case "Specific_Months" =>
         optionalSpecificBillingPeriod
-          .toRight(ZuoraHolidayError(s"specificBillingPeriod is required for $billingPeriodName billing period"))
+          .toRight(ZuoraApiFailure(s"specificBillingPeriod is required for $billingPeriodName billing period"))
           .map(numberOfMonths => numberOfMonths * 4)
-      case _ => Left(ZuoraHolidayError(s"Failed to determine duration of billing period: $billingPeriodName"))
+      case _ => Left(ZuoraApiFailure(s"Failed to determine duration of billing period: $billingPeriodName"))
     }
   }
 }

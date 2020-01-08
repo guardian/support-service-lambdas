@@ -2,7 +2,7 @@ package com.gu.holiday_stops.subscription
 
 import java.time.{DayOfWeek, LocalDate}
 
-import com.gu.holiday_stops.{ZuoraHolidayError, ZuoraHolidayResponse}
+import com.gu.holiday_stops.{ZuoraApiFailure, ZuoraApiResponse}
 import cats.implicits._
 import com.gu.zuora.ZuoraProductTypes.ZuoraProductType
 
@@ -28,14 +28,14 @@ case class IssueData(issueDate: LocalDate, billDates: BillDates, credit: Double)
 }
 
 trait SubscriptionData {
-  def issueDataForDate(issueDate: LocalDate): Either[ZuoraHolidayError, IssueData]
+  def issueDataForDate(issueDate: LocalDate): Either[ZuoraApiFailure, IssueData]
   def issueDataForPeriod(startDateInclusive: LocalDate, endDateInclusive: LocalDate): List[IssueData]
   def productType: ZuoraProductType
   def subscriptionAnnualIssueLimit: Int
   def editionDaysOfWeek: List[DayOfWeek]
 }
 object SubscriptionData {
-  def apply(subscription: Subscription): Either[ZuoraHolidayError, SubscriptionData] = {
+  def apply(subscription: Subscription): Either[ZuoraApiFailure, SubscriptionData] = {
     val supportedRatePlanCharges: List[(RatePlanCharge, SupportedRatePlanCharge, SupportedProduct)] = for {
       ratePlan <- subscription.ratePlans if ratePlan.lastChangeType =!= Some("Remove")
       supportedProduct <- getSupportedProductForRatePlan(ratePlan).toList
@@ -46,7 +46,7 @@ object SubscriptionData {
 
     for {
       ratePlanChargeDatas <- supportedRatePlanCharges
-        .traverse[ZuoraHolidayResponse, RatePlanChargeData] {
+        .traverse[ZuoraApiResponse, RatePlanChargeData] {
           case (ratePlanCharge, supportedRatePlanCharge, _) =>
             RatePlanChargeData(ratePlanCharge, supportedRatePlanCharge.dayOfWeek)
         }
@@ -64,7 +64,7 @@ object SubscriptionData {
     productAnnualIssueLimitPerEdition: Int
   ): SubscriptionData = {
     new SubscriptionData {
-      def issueDataForDate(issueDate: LocalDate): Either[ZuoraHolidayError, IssueData] = {
+      def issueDataForDate(issueDate: LocalDate): Either[ZuoraApiFailure, IssueData] = {
         for {
           ratePlanChargeData <- ratePlanChargeDataForDate(nonZeroRatePlanChargeDatas, issueDate)
           billingPeriod <- ratePlanChargeData.billingSchedule.billDatesCoveringDate(issueDate)
@@ -106,36 +106,36 @@ object SubscriptionData {
     ratePlan.ratePlanCharges.filter(_.chargedThroughDate.map(!_.isBefore(MutableCalendar.today)).getOrElse(true))
   }
 
-  def ratePlanChargeDataForDate(ratePlanChargeData: List[RatePlanChargeData], date: LocalDate): Either[ZuoraHolidayError, RatePlanChargeData] = {
+  def ratePlanChargeDataForDate(ratePlanChargeData: List[RatePlanChargeData], date: LocalDate): Either[ZuoraApiFailure, RatePlanChargeData] = {
     ratePlanChargeData
       .find { ratePlanCharge =>
         ratePlanCharge.billingSchedule.isDateCoveredBySchedule(date) &&
           ratePlanCharge.issueDayOfWeek == date.getDayOfWeek
       }
       .toRight(
-        ZuoraHolidayError(s"Subscription does not have a rate plan for date $date")
+        ZuoraApiFailure(s"Subscription does not have a rate plan for date $date")
       )
   }
 
-  private def getZuoraProductType(supportedProducts: List[SupportedProduct]): Either[ZuoraHolidayError, ZuoraProductType] = {
+  private def getZuoraProductType(supportedProducts: List[SupportedProduct]): Either[ZuoraApiFailure, ZuoraProductType] = {
     supportedProducts
       .map(_.productType)
       .distinct match {
-        case Nil => ZuoraHolidayError("Could not derive product type as there are no supported rateplan charges").asLeft
+        case Nil => ZuoraApiFailure("Could not derive product type as there are no supported rateplan charges").asLeft
         case List(productType) => productType.asRight
-        case moreThanOne => ZuoraHolidayError(
+        case moreThanOne => ZuoraApiFailure(
           s"Could not derive product type as they are rate plan charges from more than one product type $moreThanOne"
         ).asLeft
       }
   }
 
-  private def getAnnualIssueLimitPerEdition(supportedProducts: List[SupportedProduct]): Either[ZuoraHolidayError, Int] = {
+  private def getAnnualIssueLimitPerEdition(supportedProducts: List[SupportedProduct]): Either[ZuoraApiFailure, Int] = {
     supportedProducts
       .map(_.annualIssueLimitPerEdition)
       .distinct match {
-        case Nil => ZuoraHolidayError("Could not derive annual issue limit as there are no supported rateplan charges").asLeft
+        case Nil => ZuoraApiFailure("Could not derive annual issue limit as there are no supported rateplan charges").asLeft
         case List(productType) => productType.asRight
-        case moreThanOne => ZuoraHolidayError(
+        case moreThanOne => ZuoraApiFailure(
           s"Could not annual issue limit as they are rate plan charges from more than one annual issue limit $moreThanOne"
         ).asLeft
       }
