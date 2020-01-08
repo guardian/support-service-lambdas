@@ -1,4 +1,4 @@
-package com.gu.salesforce
+package com.gu.delivery_records_api
 
 import java.time.LocalDate
 
@@ -12,5 +12,6 @@ case class SFApiDeliveryRecord(
   Address_Country__c: Option[String],
   Address_Postcode__c: Option[String],
   Delivery_Instructions__c: Option[String],
-  Has_Holiday_Stop__c: Option[Boolean]
+  Has_Holiday_Stop__c: Option[Boolean],
+  Case__r: Option[SFApiDeliveryProblemCase]
 )

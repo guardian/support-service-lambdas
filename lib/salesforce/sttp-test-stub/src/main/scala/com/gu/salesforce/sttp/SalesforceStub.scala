@@ -50,7 +50,7 @@ object SalesforceStub {
   private def matchesQueryRequest[S, F[_]](auth: SalesforceAuth, query: String, request: Request[_, _]) = {
     val urlMatches = urlNoQueryString(request) == auth.instance_url + SalesforceConstants.soqlQueryBaseUrl
     val methodMatches = request.method == Method.GET
-    val queryParamMatches = request.uri.paramsMap.get("q") == Some(query)
+    val queryParamMatches = request.uri.paramsMap.get("q").contains(query)
     urlMatches && methodMatches && queryParamMatches
   }
 
