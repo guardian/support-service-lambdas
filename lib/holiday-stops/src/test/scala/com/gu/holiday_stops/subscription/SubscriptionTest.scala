@@ -25,7 +25,10 @@ class SubscriptionTest extends FlatSpec with Matchers with OptionValues with Typ
       specificBillingPeriod = None,
       endDateCondition = None,
       upToPeriodsType = None,
-      upToPeriods = None
+      upToPeriods = None,
+      billingDay = None,
+      triggerEvent = None,
+      triggerDate = None
     ))
   }
 
@@ -46,7 +49,10 @@ class SubscriptionTest extends FlatSpec with Matchers with OptionValues with Typ
       specificBillingPeriod = None,
       endDateCondition = None,
       upToPeriodsType = None,
-      upToPeriods = None
+      upToPeriods = None,
+      billingDay = None,
+      triggerEvent = None,
+      triggerDate = None
     ))
   }
 
@@ -97,7 +103,10 @@ class SubscriptionTest extends FlatSpec with Matchers with OptionValues with Typ
       specificBillingPeriod = None,
       endDateCondition = None,
       upToPeriodsType = None,
-      upToPeriods = None
+      upToPeriods = None,
+      billingDay = None,
+      triggerEvent = None,
+      triggerDate = None
     ))
   }
 }

@@ -9,14 +9,14 @@ import org.scalatest.FlatSpec
 
 class SubscriptionDataGuardianWeeklyWithRemovedRatePlansIntegrationTest extends FlatSpec {
 
-  MutableCalendar.setFakeToday(Some(LocalDate.of(2019, 10, 4)))
-
   /**
    * This tests GuardianWeeklyWith6For6WithChristmasFix.json which is a subscription that has modified rateplans
    * that that were fixed because the 6 for 6 period fell over christmas and customers would not have received one
    * of their introductory 6 issues. The 6 for 6 rate plan charge was extended for two months.
    */
   "SubscriptionDataIntegrationTest" should "calculate issue data correctly for GW 6 for 6 subs that have been 'hacked' for christmas" in {
+    MutableCalendar.setFakeToday(Some(LocalDate.of(2019, 10, 4)))
+
     val startDate = LocalDate.parse("2019-11-22")
     val modifiedSixForSixBillDates = BillDates( startDate, startDate.plusMonths(2).minusDays(1))
     val normalBillingPeriod = BillDates(

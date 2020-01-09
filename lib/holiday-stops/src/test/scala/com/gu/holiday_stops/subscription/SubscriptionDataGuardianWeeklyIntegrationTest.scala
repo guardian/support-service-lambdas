@@ -8,10 +8,10 @@ import com.gu.zuora.ZuoraProductTypes
 import org.scalatest.FlatSpec
 
 class SubscriptionDataGuardianWeeklyIntegrationTest extends FlatSpec {
-
-  MutableCalendar.setFakeToday(Some(LocalDate.of(2019, 10, 4)))
-
   "SubscriptionDataIntegrationTest" should "calculate issue data correctly for GW 6 for 6" in {
+
+    MutableCalendar.setFakeToday(Some(LocalDate.of(2019, 10, 4)))
+
     val startDate = LocalDate.parse("2019-10-04")
     val sixForSixBillDates = BillDates( startDate, startDate.plusWeeks(6).minusDays(1))
     val normalBillingPeriod = BillDates(

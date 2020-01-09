@@ -73,7 +73,10 @@ class HandlerTest extends FlatSpec with Matchers {
               specificBillingPeriod = None,
               endDateCondition = Some("Subscription_End"),
               upToPeriodsType = None,
-              upToPeriods = None
+              upToPeriods = None,
+              billingDay = None,
+              triggerEvent = None,
+              triggerDate = None
             )),
           productRatePlanId = "",
           id = "",

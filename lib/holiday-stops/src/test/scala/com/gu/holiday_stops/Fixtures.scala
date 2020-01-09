@@ -33,6 +33,9 @@ object Fixtures extends Assertions {
     upToPeriodsType: Option[String] = None,
     upToPeriods: Option[Int] = None,
     endDateCondition: Option[String] = Some("Subscription_End"),
+    billingDay: Option[String] = None,
+    triggerEvent: Option[String] = Some("SpecificDate"),
+    triggerDate: Option[LocalDate] = Some(LocalDate.of(2019, 6, 2))
   ) = RatePlanCharge(
     name = name,
     number = "C1",
@@ -47,7 +50,10 @@ object Fixtures extends Assertions {
     specificBillingPeriod = specificBillingPeriod,
     endDateCondition = endDateCondition,
     upToPeriodsType = upToPeriodsType,
-    upToPeriods = upToPeriods
+    upToPeriods = upToPeriods,
+    billingDay = billingDay,
+    triggerEvent = triggerEvent,
+    triggerDate = triggerDate
   )
 
   def mkGuardianWeeklySubscription(
@@ -114,7 +120,10 @@ object Fixtures extends Assertions {
           specificBillingPeriod = None,
           endDateCondition = None,
           upToPeriodsType = None,
-          upToPeriods = None
+          upToPeriods = None,
+          billingDay = None,
+          triggerEvent = None,
+          triggerDate = None
         )),
         productRatePlanId = "",
         id = "",
@@ -137,7 +146,10 @@ object Fixtures extends Assertions {
           specificBillingPeriod = None,
           endDateCondition = None,
           upToPeriodsType = None,
-          upToPeriods = None
+          upToPeriods = None,
+          billingDay = None,
+          triggerEvent = None,
+          triggerDate = None
         )),
         productRatePlanId = "",
         id = "",
@@ -160,7 +172,10 @@ object Fixtures extends Assertions {
           specificBillingPeriod = None,
           endDateCondition = None,
           upToPeriodsType = None,
-          upToPeriods = None
+          upToPeriods = None,
+          billingDay = None,
+          triggerEvent = None,
+          triggerDate = None
         )),
         productRatePlanId = "",
         id = "",
@@ -183,7 +198,10 @@ object Fixtures extends Assertions {
           specificBillingPeriod = None,
           endDateCondition = None,
           upToPeriodsType = None,
-          upToPeriods = None
+          upToPeriods = None,
+          billingDay = None,
+          triggerEvent = None,
+          triggerDate = None
         )),
         productRatePlanId = "",
         id = "",
@@ -206,7 +224,10 @@ object Fixtures extends Assertions {
           specificBillingPeriod = None,
           endDateCondition = None,
           upToPeriodsType = None,
-          upToPeriods = None
+          upToPeriods = None,
+          billingDay = None,
+          triggerEvent = None,
+          triggerDate = None
         )),
         productRatePlanId = "",
         id = "",
@@ -229,7 +250,10 @@ object Fixtures extends Assertions {
           specificBillingPeriod = None,
           endDateCondition = None,
           upToPeriodsType = None,
-          upToPeriods = None
+          upToPeriods = None,
+          billingDay = None,
+          triggerEvent = None,
+          triggerDate = None
         )),
         productRatePlanId = "",
         id = "",

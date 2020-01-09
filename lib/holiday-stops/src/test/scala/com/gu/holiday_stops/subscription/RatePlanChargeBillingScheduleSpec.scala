@@ -58,6 +58,7 @@ class RatePlanChargeBillingScheduleSpec extends FlatSpec with Matchers with Eith
     val effectiveStartDate = LocalDate.of(2019, 10, 1)
     inside(
       RatePlanChargeBillingSchedule(
+        Fixtures.mkGuardianWeeklySubscription(),
         Fixtures.mkRatePlanCharge(
           name = "GW Oct 18 - Quarterly - Domestic",
           price = 1,
@@ -65,7 +66,10 @@ class RatePlanChargeBillingScheduleSpec extends FlatSpec with Matchers with Eith
           effectiveStartDate = effectiveStartDate,
           endDateCondition = Some("Subscription_End"),
           upToPeriodsType = None,
-          upToPeriods = None
+          upToPeriods = None,
+          billingDay = Some("ChargeTriggerDay"),
+          triggerEvent = Some("SpecificDate"),
+          triggerDate = Some(effectiveStartDate)
         )
       )
     ) {
@@ -124,15 +128,19 @@ class RatePlanChargeBillingScheduleSpec extends FlatSpec with Matchers with Eith
   private def testFixedBillingPeriod(billingPeriodName: String, optionalSpecificBillingPeriod: Option[Int], billingPeriodsRatePlanIsValidFor: Int, effectiveStartDate: LocalDate, expectedEndDate: LocalDate) = {
     inside(
       RatePlanChargeBillingSchedule(
+        Fixtures.mkGuardianWeeklySubscription(),
         Fixtures.mkRatePlanCharge(
-          "GW Oct 18 - Quarterly - Domestic",
+          name = "GW Oct 18 - Quarterly - Domestic",
           price = 1,
           billingPeriod = billingPeriodName,
           effectiveStartDate = effectiveStartDate,
           endDateCondition = Some("Fixed_Period"),
           upToPeriodsType = Some("Billing_Periods"),
           upToPeriods = Some(billingPeriodsRatePlanIsValidFor),
-          specificBillingPeriod = optionalSpecificBillingPeriod
+          specificBillingPeriod = optionalSpecificBillingPeriod,
+          billingDay = Some("ChargeTriggerDay"),
+          triggerEvent = Some("SpecificDate"),
+          triggerDate = Some(effectiveStartDate)
         )
       )
     ) {
@@ -161,15 +169,18 @@ class RatePlanChargeBillingScheduleSpec extends FlatSpec with Matchers with Eith
   ) = {
     inside(
       RatePlanChargeBillingSchedule(
+        Fixtures.mkGuardianWeeklySubscription(),
         Fixtures.mkRatePlanCharge(
           name = "GW Oct 18 - Quarterly - Domestic",
           price = 1,
           billingPeriod = billingPeriodName,
-          effectiveStartDate = effectiveStartDate,
           endDateCondition = Some("Fixed_Period"),
           upToPeriodsType = Some("Billing_Periods"),
           upToPeriods = Some(2),
-          specificBillingPeriod = optionalSpecificBillingPeriod
+          specificBillingPeriod = optionalSpecificBillingPeriod,
+          billingDay = Some("ChargeTriggerDay"),
+          triggerEvent = Some("SpecificDate"),
+          triggerDate = Some(effectiveStartDate)
         )
       )
     ) {

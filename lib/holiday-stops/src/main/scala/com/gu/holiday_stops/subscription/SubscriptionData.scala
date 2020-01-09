@@ -48,7 +48,7 @@ object SubscriptionData {
       ratePlanChargeDatas <- supportedRatePlanCharges
         .traverse[ZuoraHolidayResponse, RatePlanChargeData] {
           case (ratePlanCharge, supportedRatePlanCharge, _) =>
-            RatePlanChargeData(ratePlanCharge, supportedRatePlanCharge.dayOfWeek)
+            RatePlanChargeData(subscription, ratePlanCharge, supportedRatePlanCharge.dayOfWeek)
         }
       nonZeroRatePlanChargeDatas = ratePlanChargeDatas.filter { ratePlanChargeData =>
         ratePlanChargeData.issueCreditAmount != 0

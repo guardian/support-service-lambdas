@@ -9,14 +9,14 @@ import com.gu.zuora.ZuoraProductTypes
 import org.scalatest.FlatSpec
 
 class SubscriptionDataDeliveryEveryDayPlusIntegrationTest extends FlatSpec {
-  MutableCalendar.setFakeToday(Some(LocalDate.of(2019, 10, 4)))
-
   /**
    * This tests the echo legacy subscription description described in EchoLegacySubscription.json
    * This subscription is for Friday/Saturday ie it has non-zero rate plan charge price for those days
    */
 
   "SubscriptionData" should "calculate issue data correctly for delivery everyday plus" in {
+    MutableCalendar.setFakeToday(Some(LocalDate.of(2019, 10, 4)))
+
     val startDate = LocalDate.parse("2019-10-06") //Sunday
     val firstSunday = startDate.`with`(TemporalAdjusters.nextOrSame(SUNDAY))
     val firstMonday = startDate.`with`(TemporalAdjusters.nextOrSame(MONDAY))
