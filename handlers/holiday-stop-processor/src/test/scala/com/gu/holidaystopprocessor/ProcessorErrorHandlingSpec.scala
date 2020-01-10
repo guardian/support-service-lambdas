@@ -7,7 +7,7 @@ import cats.implicits._
 import com.gu.fulfilmentdates.{FulfilmentDates, FulfilmentDatesFetcher, FulfilmentDatesFetcherError}
 import com.gu.holiday_stops.Fixtures._
 import com.gu.holiday_stops._
-import com.gu.holiday_stops.subscription.{HolidayCreditUpdate, MutableCalendar, Subscription}
+import com.gu.holiday_stops.subscription.{HolidayCreditUpdate, MutableCalendar, Subscription, ZuoraAccount}
 import com.gu.holidaystopprocessor.{Processor, ZuoraHolidayWriteResult}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestsDetail, SubscriptionName}
 import com.gu.zuora.ZuoraProductTypes
@@ -34,6 +34,12 @@ class ProcessorErrorHandlingSpec extends FlatSpec with Matchers with OptionValue
 
   val updateSubscription: (Subscription, HolidayCreditUpdate) => Either[ZuoraHolidayError, Unit] = {
     case _ => Right(())
+  }
+
+  private def getAccount(
+    getAccountResult: Either[ZuoraHolidayError, ZuoraAccount]
+  ): String => Either[ZuoraHolidayError, ZuoraAccount] = {
+    _ => getAccountResult
   }
 
   val today = LocalDate.now()
@@ -65,6 +71,7 @@ class ProcessorErrorHandlingSpec extends FlatSpec with Matchers with OptionValue
       ZuoraProductTypes.GuardianWeekly,
       getSubscription,
       updateSubscription,
+      getAccount(Fixtures.mkAccount().asRight),
       writeHolidayStopsToSalesforce
     )
 
@@ -94,6 +101,7 @@ class ProcessorErrorHandlingSpec extends FlatSpec with Matchers with OptionValue
       ZuoraProductTypes.GuardianWeekly,
       getSubscription,
       updateSubscription,
+      getAccount(Fixtures.mkAccount().asRight),
       writeHolidayStopsToSalesforce
     )
 
@@ -124,6 +132,7 @@ class ProcessorErrorHandlingSpec extends FlatSpec with Matchers with OptionValue
       ZuoraProductTypes.GuardianWeekly,
       getSubscription,
       updateSubscription,
+      getAccount(Fixtures.mkAccount().asRight),
       writeHolidayStopsToSalesforce
     )
 
@@ -153,6 +162,7 @@ class ProcessorErrorHandlingSpec extends FlatSpec with Matchers with OptionValue
       ZuoraProductTypes.GuardianWeekly,
       getSubscription,
       updateSubscription,
+      getAccount(Fixtures.mkAccount().asRight),
       writeHolidayStopsToSalesforce
     )
 

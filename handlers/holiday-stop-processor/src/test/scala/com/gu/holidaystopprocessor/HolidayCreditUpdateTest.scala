@@ -24,7 +24,7 @@ class HolidayCreditUpdateTest extends FlatSpec with Matchers with EitherValues {
       billingPeriod = "Quarter",
       effectiveStartDate = effectiveStartDate
     )
-    val subscriptionData = SubscriptionData(subscription).right.value
+    val subscriptionData = SubscriptionData(subscription, Fixtures.mkAccount()).right.value
     val issueData = subscriptionData.issueDataForDate(stoppedPublicationDate.value).right.value
     val holidayCredit = HolidayStopCredit(issueData.credit, issueData.nextBillingPeriodStartDate)
     val maybeExtendedTerm = ExtendedTerm(holidayCredit.invoiceDate, subscription)
@@ -66,7 +66,7 @@ class HolidayCreditUpdateTest extends FlatSpec with Matchers with EitherValues {
       billingPeriod = "Quarter",
       effectiveStartDate = effectiveStartDate
     )
-    val subscriptionData = SubscriptionData(subscription).right.value
+    val subscriptionData = SubscriptionData(subscription, Fixtures.mkAccount()).right.value
     val issueData = subscriptionData.issueDataForDate(stoppedPublicationDate.value).right.value
     val holidayCredit = HolidayStopCredit(issueData.credit, issueData.nextBillingPeriodStartDate)
     val maybeExtendedTerm = ExtendedTerm(holidayCredit.invoiceDate, subscription)
@@ -106,7 +106,7 @@ class HolidayCreditUpdateTest extends FlatSpec with Matchers with EitherValues {
       chargedThroughDate = Some(LocalDate.of(2020, 8, 2)),
       effectiveStartDate = effectiveStartDate
     )
-    val subscriptionData = SubscriptionData(subscription).right.value
+    val subscriptionData = SubscriptionData(subscription, Fixtures.mkAccount()).right.value
     val issueData = subscriptionData.issueDataForDate(stoppedPublicationDate.value).right.value
     val holidayCredit = HolidayStopCredit(issueData.credit, issueData.nextBillingPeriodStartDate)
     val maybeExtendedTerm = ExtendedTerm(holidayCredit.invoiceDate, subscription)

@@ -35,7 +35,7 @@ trait SubscriptionData {
   def editionDaysOfWeek: List[DayOfWeek]
 }
 object SubscriptionData {
-  def apply(subscription: Subscription): Either[ZuoraHolidayError, SubscriptionData] = {
+  def apply(subscription: Subscription, account: ZuoraAccount): Either[ZuoraHolidayError, SubscriptionData] = {
     val supportedRatePlanCharges: List[(RatePlanCharge, SupportedRatePlanCharge, SupportedProduct)] = for {
       ratePlan <- subscription.ratePlans if ratePlan.lastChangeType =!= Some("Remove")
       supportedProduct <- getSupportedProductForRatePlan(ratePlan).toList

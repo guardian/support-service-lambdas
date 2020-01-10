@@ -7,7 +7,7 @@ import cats.implicits._
 import com.gu.fulfilmentdates.{FulfilmentDates, FulfilmentDatesFetcher, FulfilmentDatesFetcherError}
 import com.gu.holiday_stops.Fixtures.mkGuardianWeeklySubscription
 import com.gu.holiday_stops._
-import com.gu.holiday_stops.subscription.{HolidayCreditUpdate, MutableCalendar, Subscription}
+import com.gu.holiday_stops.subscription.{HolidayCreditUpdate, MutableCalendar, Subscription, ZuoraAccount}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
 import com.gu.zuora.ZuoraProductTypes
 import com.gu.zuora.ZuoraProductTypes.ZuoraProductType
@@ -39,6 +39,12 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
     case (_, _) => subscriptionUpdate
   }
 
+  private def getAccount(
+    getAccountResult: Either[ZuoraHolidayError, ZuoraAccount]
+  ): String => Either[ZuoraHolidayError, ZuoraAccount] = {
+    _ => getAccountResult
+  }
+
   private def exportAmendments(amendmentExport: Either[SalesforceHolidayError, Unit]): List[ZuoraHolidayWriteResult] => Either[SalesforceHolidayError, Unit] =
     _ => amendmentExport
 
@@ -56,7 +62,8 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
     val response = Processor.writeHolidayStopToZuora(
       Fixtures.config,
       _ => Right(Fixtures.mkSubscriptionWithHolidayStops()),
-      updateSubscription(Right(()))
+      updateSubscription(Right(())),
+      getAccount(Fixtures.mkAccount().asRight)
     )(holidayStop)
 
     response.right.value shouldBe ZuoraHolidayWriteResult(
@@ -74,7 +81,8 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
     val response = Processor.writeHolidayStopToZuora(
       Fixtures.config,
       _ => Right(subscription),
-      updateSubscription(Left(ZuoraHolidayError("update went wrong")))
+      updateSubscription(Left(ZuoraHolidayError("update went wrong"))),
+      getAccount(Fixtures.mkAccount().asRight)
     )(holidayStop)
     response.left.value shouldBe ZuoraHolidayError("update went wrong")
   }
@@ -83,7 +91,8 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
     val response = Processor.writeHolidayStopToZuora(
       Fixtures.config,
       _ => Left(ZuoraHolidayError("get went wrong")),
-      updateSubscription(Right(()))
+      updateSubscription(Right(())),
+      getAccount(Fixtures.mkAccount().asRight)
     )(holidayStop)
     response.left.value shouldBe ZuoraHolidayError("get went wrong")
   }
@@ -97,7 +106,8 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
     val response = Processor.writeHolidayStopToZuora(
       Fixtures.config,
       _ => Right(Fixtures.mkSubscriptionWithHolidayStops().copy(autoRenew = false)),
-      updateSubscription(Right(()))
+      updateSubscription(Right(())),
+      getAccount(Fixtures.mkAccount().asRight)
     )(holidayStop)
     response.isRight shouldBe true
   }
@@ -106,7 +116,8 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
     val response = Processor.writeHolidayStopToZuora(
       Fixtures.config,
       _ => Right(subscription.copy(status = "Cancelled")),
-      updateSubscription(Left(ZuoraHolidayError("shouldn't need to apply an update")))
+      updateSubscription(Left(ZuoraHolidayError("shouldn't need to apply an update"))),
+      getAccount(Fixtures.mkAccount().asRight)
     )(holidayStop)
     response.left.value.reason should include("Apply manual refund")
   }
@@ -115,7 +126,8 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
     val response = Processor.writeHolidayStopToZuora(
       Fixtures.config,
       _ => Right(Fixtures.mkSubscriptionWithHolidayStops()),
-      updateSubscription(Left(ZuoraHolidayError("shouldn't need to apply an update")))
+      updateSubscription(Left(ZuoraHolidayError("shouldn't need to apply an update"))),
+      getAccount(Fixtures.mkAccount().asRight)
     )(holidayStop)
     response.right.value shouldBe ZuoraHolidayWriteResult(
       requestId = HolidayStopRequestsDetailId("HSR1"),
@@ -132,7 +144,8 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
     val response = Processor.writeHolidayStopToZuora(
       Fixtures.config,
       _ => Right(subscription),
-      updateSubscription(Left(ZuoraHolidayError("shouldn't need to apply an update")))
+      updateSubscription(Left(ZuoraHolidayError("shouldn't need to apply an update"))),
+      getAccount(Fixtures.mkAccount().asRight)
     )(holidayStop)
     response.left.value shouldBe ZuoraHolidayError("shouldn't need to apply an update")
   }
@@ -150,7 +163,8 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
       ZuoraProductTypes.GuardianWeekly,
       _ => Right(Fixtures.mkSubscriptionWithHolidayStops()),
       updateSubscription(Right(())),
-      exportAmendments(Right(()))
+      getAccount(Fixtures.mkAccount().asRight),
+      exportAmendments(Right(())),
     )
     responses.holidayStopResults.headOption.value.right.value shouldBe ZuoraHolidayWriteResult(
       requestId = HolidayStopRequestsDetailId("R1"),
@@ -184,6 +198,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
       ZuoraProductTypes.GuardianWeekly,
       _ => Right(Fixtures.mkSubscriptionWithHolidayStops()),
       updateSubscription(Right(())),
+      getAccount(Fixtures.mkAccount().asRight),
       exportAmendments(Right(()))
     )
   }
@@ -201,6 +216,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
       ZuoraProductTypes.GuardianWeekly,
       _ => Right(Fixtures.mkSubscriptionWithHolidayStops()),
       updateSubscription(Right(())),
+      getAccount(Fixtures.mkAccount().asRight),
       exportAmendments(Right(()))
     )
   }
@@ -218,7 +234,8 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
       ZuoraProductTypes.GuardianWeekly,
       _ => Right(Fixtures.mkSubscriptionWithHolidayStops()),
       updateSubscription(Right(())),
-      exportAmendments(Right(()))
+      getAccount(Fixtures.mkAccount().asRight),
+      exportAmendments(Right(())),
     )
     responses.resultsToExport shouldBe List(
       ZuoraHolidayWriteResult(
@@ -246,6 +263,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
       ZuoraProductTypes.GuardianWeekly,
       _ => Right(subscription),
       updateSubscription(Right(())),
+      getAccount(Fixtures.mkAccount().asRight),
       exportAmendments(Left(SalesforceHolidayError("Export failed")))
     )
     responses.overallFailure.value shouldBe OverallFailure("Export failed")

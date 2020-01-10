@@ -32,7 +32,6 @@ object Handler extends Lambda[Option[LocalDate], List[ZuoraHolidayWriteResult]] 
             Right(successfulZuoraResponses)
           case failures =>
             Left(new RuntimeException(failures.map(_.reason).mkString("; ")))
-
         }
     }
   }

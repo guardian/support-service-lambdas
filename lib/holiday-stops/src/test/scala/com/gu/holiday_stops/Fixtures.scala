@@ -2,7 +2,7 @@ package com.gu.holiday_stops
 
 import java.time.LocalDate
 
-import com.gu.holiday_stops.subscription.{RatePlan, RatePlanCharge, Subscription}
+import com.gu.holiday_stops.subscription.{RatePlan, RatePlanCharge, Subscription, ZuoraAccount, ZuoraAccountBillingAndPayment}
 import com.gu.salesforce.RecordsWrapperCaseClass
 import com.gu.salesforce.SFAuthConfig
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.{HolidayStopRequest, HolidayStopRequestActionedCount, HolidayStopRequestEndDate, HolidayStopRequestIsWithdrawn, HolidayStopRequestStartDate}
@@ -63,7 +63,8 @@ object Fixtures extends Assertions {
     price: Double = -1.0,
     billingPeriod: String = "Quarter",
     chargedThroughDate: Option[LocalDate] = None,
-    effectiveStartDate: LocalDate = LocalDate.now()
+    effectiveStartDate: LocalDate = LocalDate.now(),
+    accountNumber: String = "123456"
   ): Subscription =
     Subscription(
       subscriptionNumber = "S1",
@@ -79,18 +80,21 @@ object Fixtures extends Assertions {
           ratePlanName = "GW Oct 18 - Quarterly - Domestic",
           ratePlanCharges =
             List(mkRatePlanCharge(
-              "GW Oct 18 - Quarterly - Domestic",
-              price,
-              billingPeriod,
-              chargedThroughDate,
-              effectiveStartDate
+              name = "GW Oct 18 - Quarterly - Domestic",
+              price = price,
+              billingPeriod = billingPeriod,
+              chargedThroughDate = chargedThroughDate,
+              effectiveStartDate = effectiveStartDate,
+              triggerEvent = Some("SpecificDate"),
+              triggerDate = Some(effectiveStartDate)
             )),
           productRatePlanId = "",
           id = "",
           lastChangeType = None
         )
       ),
-      status = "Active"
+      status = "Active",
+      accountNumber = accountNumber
     )
 
   def mkSubscriptionWithHolidayStops() = Subscription(
@@ -272,7 +276,8 @@ object Fixtures extends Assertions {
         id = "",
         lastChangeType = None
       )
-    )
+    ),
+    accountNumber = "123456"
   )
 
   def subscriptionFromJson(resource: String): Subscription = {
@@ -339,6 +344,12 @@ object Fixtures extends Assertions {
     stoppedPublicationDate = date,
     estimatedCharge = None
   )
+
+  def mkAccount(billCycleDay: Int = 1) = {
+    ZuoraAccount(
+      ZuoraAccountBillingAndPayment(billCycleDay = billCycleDay)
+    )
+  }
 
   val config = Config(
     zuoraConfig = ZuoraConfig(baseUrl = "", holidayStopProcessor = HolidayStopProcessor(Oauth(clientId = "", clientSecret = ""))),

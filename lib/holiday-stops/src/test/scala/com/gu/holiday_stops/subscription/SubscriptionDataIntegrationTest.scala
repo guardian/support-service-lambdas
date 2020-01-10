@@ -19,9 +19,10 @@ object SubscriptionDataIntegrationTest {
     expectedEditionDaysOfWeek: List[DayOfWeek]
   ) = {
     val subscription = Fixtures.subscriptionFromJson(subscriptionFile)
+    val account = Fixtures.mkAccount()
     val datesToTest = getDatesToTest(startDate, expectedIssueData)
 
-    Inside.inside(SubscriptionData(subscription)) {
+    Inside.inside(SubscriptionData(subscription, account)) {
       case Right(subscriptionData) =>
         datesToTest.foreach { testDate =>
           expectedIssueData.find(_.issueDate == testDate) match {

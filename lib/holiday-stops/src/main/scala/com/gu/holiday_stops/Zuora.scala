@@ -1,6 +1,6 @@
 package com.gu.holiday_stops
 
-import com.gu.holiday_stops.subscription.{HolidayCreditUpdate, Subscription}
+import com.gu.holiday_stops.subscription.{HolidayCreditUpdate, Subscription, ZuoraAccount}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.SubscriptionName
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
@@ -53,4 +53,22 @@ object Zuora {
       .body.left.map(reason => ZuoraHolidayError(errMsg(reason)))
       .joinRight
   }
+
+  def accountGetResponse(
+    config: Config,
+    accessToken: AccessToken,
+    backend: SttpBackend[Id, Nothing]
+  )(
+    accountNumber: String
+  ): ZuoraHolidayResponse[ZuoraAccount] = {
+    implicit val b = backend
+    sttp.get(uri"${config.zuoraConfig.baseUrl}/accounts/$accountNumber")
+      .header("Authorization", s"Bearer ${accessToken.access_token}")
+      .response(asJson[ZuoraAccount])
+      .mapResponse(_.left.map(e => ZuoraHolidayError(e.message)))
+      .send()
+      .body.left.map(ZuoraHolidayError)
+      .joinRight
+  }
+
 }

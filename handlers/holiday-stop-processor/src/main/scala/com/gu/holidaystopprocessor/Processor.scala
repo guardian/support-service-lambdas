@@ -45,6 +45,7 @@ object Processor {
             productType,
             Zuora.subscriptionGetResponse(config, zuoraAccessToken, backend),
             Zuora.subscriptionUpdateResponse(config, zuoraAccessToken, backend),
+            Zuora.accountGetResponse(config, zuoraAccessToken, backend),
             Salesforce.holidayStopUpdateResponse(config.sfConfig)
           )
         }
@@ -59,6 +60,7 @@ object Processor {
     productType: ZuoraProductType,
     getSubscription: SubscriptionName => ZuoraHolidayResponse[Subscription],
     updateSubscription: (Subscription, HolidayCreditUpdate) => ZuoraHolidayResponse[Unit],
+    getAccount: String => ZuoraHolidayResponse[ZuoraAccount],
     writeHolidayStopsToSalesforce: List[ZuoraHolidayWriteResult] => SalesforceHolidayResponse[Unit],
   ): ProcessResult = {
     val holidayStops = for {
@@ -75,7 +77,7 @@ object Processor {
       case Right(holidayStopRequestsFromSalesforce) =>
         val holidayStops = holidayStopRequestsFromSalesforce.distinct.map(HolidayStop(_))
         val alreadyActionedHolidayStops = holidayStopRequestsFromSalesforce.flatMap(_.Charge_Code__c).distinct
-        val allZuoraHolidayStopResponses = holidayStops.map(writeHolidayStopToZuora(config, getSubscription, updateSubscription))
+        val allZuoraHolidayStopResponses = holidayStops.map(writeHolidayStopToZuora(config, getSubscription, updateSubscription, getAccount))
         val (failedZuoraResponses, successfulZuoraResponses) = allZuoraHolidayStopResponses.separate
         val notAlreadyActionedHolidays = successfulZuoraResponses.filterNot(v => alreadyActionedHolidayStops.contains(v.chargeCode))
         val salesforceExportResult = writeHolidayStopsToSalesforce(notAlreadyActionedHolidays)
@@ -94,11 +96,13 @@ object Processor {
   def writeHolidayStopToZuora(
     config: Config,
     getSubscription: SubscriptionName => ZuoraHolidayResponse[Subscription],
-    updateSubscription: (Subscription, HolidayCreditUpdate) => ZuoraHolidayResponse[Unit]
+    updateSubscription: (Subscription, HolidayCreditUpdate) => ZuoraHolidayResponse[Unit],
+    getAccount: String => ZuoraHolidayResponse[ZuoraAccount],
   )(stop: HolidayStop): ZuoraHolidayResponse[ZuoraHolidayWriteResult] = {
     for {
       subscription <- getSubscription(stop.subscriptionName)
-      subscriptionData <- SubscriptionData(subscription)
+      account <- getAccount(subscription.accountNumber)
+      subscriptionData <- SubscriptionData(subscription, account)
       issueData <- subscriptionData.issueDataForDate(stop.stoppedPublicationDate)
       _ <- if (subscription.status == "Cancelled") Left(ZuoraHolidayError(s"Cannot process cancelled subscription because Zuora does not allow amending cancelled subs (Code: 58730020). Apply manual refund ASAP! $stop; ${subscription.subscriptionNumber};")) else Right(())
       maybeExtendedTerm = ExtendedTerm(issueData.nextBillingPeriodStartDate, subscription)

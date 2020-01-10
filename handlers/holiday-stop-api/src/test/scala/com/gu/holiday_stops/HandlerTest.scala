@@ -46,6 +46,8 @@ class HandlerTest extends FlatSpec with Matchers {
     val endDate = startDate.plusMonths(3)
     val customerAcceptanceDate = startDate.plusMonths(1)
 
+    val accountNumber = "123456"
+    val account = Fixtures.mkAccount()
     val subscription = Subscription(
       subscriptionNumber = subscriptionName,
       termStartDate = startDate,
@@ -75,20 +77,22 @@ class HandlerTest extends FlatSpec with Matchers {
               upToPeriodsType = None,
               upToPeriods = None,
               billingDay = None,
-              triggerEvent = None,
-              triggerDate = None
+              triggerEvent = Some("SpecificDate"),
+              triggerDate = Some(startDate)
             )),
           productRatePlanId = "",
           id = "",
           lastChangeType = None
         )
       ),
-      "Active"
+      "Active",
+      accountNumber = accountNumber
     )
 
     val testBackend = SttpBackendStub
       .synchronous
       .stubZuoraAuthCall()
+      .stubZuoraAccount(accountNumber, account)
       .stubZuoraSubscription(subscriptionName, subscription)
 
     inside(
@@ -172,7 +176,9 @@ class HandlerTest extends FlatSpec with Matchers {
     val today = LocalDate.now()
     MutableCalendar.setFakeToday(Some(today))
     val subscriptionName = "Sub12344"
-    val gwSubscription = Fixtures.mkGuardianWeeklySubscription()
+    val accountNumber = "12323445"
+    val gwSubscription = Fixtures.mkGuardianWeeklySubscription(accountNumber = accountNumber)
+    val account = Fixtures.mkAccount()
     val contactId = "Contact1234"
     val holidayStopRequestsDetail = Fixtures.mkHolidayStopRequestDetails()
     val GuardianWeeklyAnnualIssueLimit = 6
@@ -184,6 +190,7 @@ class HandlerTest extends FlatSpec with Matchers {
       .synchronous
       .stubZuoraAuthCall()
       .stubZuoraSubscription(subscriptionName, gwSubscription)
+      .stubZuoraAccount(accountNumber, account)
 
     val holidayStopRequest = Fixtures.mkHolidayStopRequest(
       id = "holidayStopId",
