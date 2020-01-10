@@ -1,7 +1,7 @@
 package com.gu.holiday_stops.subscription
 
-import java.time.temporal.ChronoUnit
-import java.time.{LocalDate, Period}
+import java.time.temporal.{ChronoUnit, TemporalAdjusters}
+import java.time.LocalDate
 
 import cats.implicits._
 import com.gu.holiday_stops.ZuoraHolidayError
@@ -62,7 +62,7 @@ case class BillDates(startDate: LocalDate, endDate: LocalDate)
 
 object RatePlanChargeBillingSchedule {
 
-  def apply(subscription: Subscription, ratePlanCharge: RatePlanCharge): Either[ZuoraHolidayError, RatePlanChargeBillingSchedule] = {
+  def apply(subscription: Subscription, ratePlanCharge: RatePlanCharge, account: ZuoraAccount): Either[ZuoraHolidayError, RatePlanChargeBillingSchedule] = {
     for {
       endDateCondition <- ratePlanCharge.endDateCondition.toRight(ZuoraHolidayError("RatePlanCharge.endDateCondition is required"))
       billingPeriodName <- ratePlanCharge.billingPeriod.toRight(ZuoraHolidayError("RatePlanCharge.billingPeriod is required"))
@@ -72,7 +72,8 @@ object RatePlanChargeBillingSchedule {
         ratePlanCharge.billingDay,
         ratePlanCharge.triggerEvent,
         ratePlanCharge.triggerDate,
-        ratePlanCharge.processedThroughDate
+        ratePlanCharge.processedThroughDate,
+        account.billingAndPayment.billCycleDay
       )
       ratePlanEndDate <- ratePlanEndDate(
         billingPeriod,
@@ -154,7 +155,8 @@ object RatePlanChargeBillingSchedule {
     optionalBillingDay: Option[String],
     optionalTriggerEvent: Option[String],
     optionalTriggerDate: Option[LocalDate],
-    processedThroughDate: Option[LocalDate]
+    processedThroughDate: Option[LocalDate],
+    billCycleDay: Int
   ): Either[ZuoraHolidayError, LocalDate] = {
     optionalBillingDay match {
       case None | Some("ChargeTriggerDay") => ratePlanTriggerDate(
@@ -163,13 +165,31 @@ object RatePlanChargeBillingSchedule {
         customerAcceptanceDate
       )
       case Some("DefaultFromCustomer") =>
-        //Note: Ideally the start date should be calculated based on the customers Bill Cycle Day, this
-        //would require access to the customer account data which would require an additional lookup in zuora.
-        //Only 'echo legacy' subscriptions have this option set so in this case the processed though date
-        //provides and adequate 'start' date for the rate plan charge.
-        processedThroughDate.toRight(
-          ZuoraHolidayError("RatePlan.processedThroughDate is required when RatePlan.triggerEvent=DefaultFromCustomer")
-        )
+        for {
+          triggerDate <- ratePlanTriggerDate(
+            optionalTriggerEvent,
+            optionalTriggerDate,
+            customerAcceptanceDate
+          )
+        } yield adjustDateForBillCycleDate(triggerDate, billCycleDay)
+
+      case Some(unsupported) =>
+        ZuoraHolidayError(s"RatePlanCharge.billingDay = $unsupported is not supported").asLeft
+    }
+  }
+
+  private def adjustDateForBillCycleDate(date: LocalDate, billCycleDay: Int): LocalDate = {
+    val lastDayOfMonth = date `with` TemporalAdjusters.lastDayOfMonth()
+    val startDateWithBillCycleDate =
+      if (lastDayOfMonth.getDayOfMonth < billCycleDay) {
+        lastDayOfMonth
+      } else {
+        lastDayOfMonth.withDayOfMonth(billCycleDay)
+      }
+    if (startDateWithBillCycleDate.isBefore(date)) {
+      startDateWithBillCycleDate.plusMonths(1)
+    } else {
+      startDateWithBillCycleDate
     }
   }
 

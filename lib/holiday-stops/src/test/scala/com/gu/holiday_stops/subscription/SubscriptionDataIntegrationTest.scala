@@ -16,10 +16,11 @@ object SubscriptionDataIntegrationTest {
     expectedIssueData: List[IssueData],
     expectedTotalAnnualIssueLimitPerSubscription: Int,
     expectedProductType: ZuoraProductType,
-    expectedEditionDaysOfWeek: List[DayOfWeek]
+    expectedEditionDaysOfWeek: List[DayOfWeek],
+    billCycleDay: Int = 1
   ) = {
     val subscription = Fixtures.subscriptionFromJson(subscriptionFile)
-    val account = Fixtures.mkAccount()
+    val account = Fixtures.mkAccount(billCycleDay = billCycleDay)
     val datesToTest = getDatesToTest(startDate, expectedIssueData)
 
     Inside.inside(SubscriptionData(subscription, account)) {

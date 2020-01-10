@@ -49,7 +49,8 @@ class SubscriptionDataEchoLegacyIntegrationTest extends FlatSpec {
       expectedIssueData = expectedIssueData,
       expectedTotalAnnualIssueLimitPerSubscription = 8,
       expectedProductType = ZuoraProductTypes.NewspaperHomeDelivery,
-      expectedEditionDaysOfWeek = List(FRIDAY, SATURDAY)
+      expectedEditionDaysOfWeek = List(FRIDAY, SATURDAY),
+      billCycleDay = 21
     )
   }
 }

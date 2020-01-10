@@ -70,7 +70,8 @@ class RatePlanChargeBillingScheduleSpec extends FlatSpec with Matchers with Eith
           billingDay = Some("ChargeTriggerDay"),
           triggerEvent = Some("SpecificDate"),
           triggerDate = Some(effectiveStartDate)
-        )
+        ),
+        Fixtures.mkAccount()
       )
     ) {
         case Right(billingSchedule) =>
@@ -141,7 +142,8 @@ class RatePlanChargeBillingScheduleSpec extends FlatSpec with Matchers with Eith
           billingDay = Some("ChargeTriggerDay"),
           triggerEvent = Some("SpecificDate"),
           triggerDate = Some(effectiveStartDate)
-        )
+        ),
+        Fixtures.mkAccount()
       )
     ) {
         case Right(billingSchedule) =>
@@ -181,7 +183,8 @@ class RatePlanChargeBillingScheduleSpec extends FlatSpec with Matchers with Eith
           billingDay = Some("ChargeTriggerDay"),
           triggerEvent = Some("SpecificDate"),
           triggerDate = Some(effectiveStartDate)
-        )
+        ),
+        Fixtures.mkAccount()
       )
     ) {
         case Right(billingSchedule) =>
