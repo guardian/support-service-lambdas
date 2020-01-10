@@ -1,10 +1,11 @@
 package com.gu.holidaystopprocessor
 
-import com.gu.holiday_stops.{HolidayStop, OverallFailure, ZuoraHolidayError}
+import com.gu.holiday_stops.{OverallFailure, ZuoraHolidayError}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.HolidayStopRequestsDetail
 import com.typesafe.scalalogging.LazyLogging
 
 case class ProcessResult(
-  holidayStopsToApply: List[HolidayStop],
+  holidayStopsToApply: List[HolidayStopRequestsDetail],
   holidayStopResults: List[Either[ZuoraHolidayError, ZuoraHolidayWriteResult]],
   resultsToExport: List[ZuoraHolidayWriteResult],
   overallFailure: Option[OverallFailure]

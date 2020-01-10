@@ -308,12 +308,15 @@ object Fixtures extends Assertions {
     )
   }
 
-  def mkHolidayStop(date: LocalDate) = HolidayStop(
-    requestId = HolidayStopRequestsDetailId("R1"),
-    subscriptionName = SubscriptionName("S1"),
-    productName = ProductName("Gu Weekly"),
-    stoppedPublicationDate = date,
-    estimatedCharge = None
+  def mkHolidayStopRequestsDetail(date: LocalDate) = HolidayStopRequestsDetail(
+    Id = HolidayStopRequestsDetailId("R1"),
+    Subscription_Name__c = SubscriptionName("S1"),
+    Product_Name__c = ProductName("Gu Weekly"),
+    Stopped_Publication_Date__c = StoppedPublicationDate(date),
+    Estimated_Price__c = None,
+    Charge_Code__c = None,
+    Actual_Price__c = None,
+    Expected_Invoice_Date__c = None
   )
 
   val config = Config(
