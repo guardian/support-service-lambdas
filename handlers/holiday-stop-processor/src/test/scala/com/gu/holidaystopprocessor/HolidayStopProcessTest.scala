@@ -25,11 +25,14 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
     effectiveStartDate = effectiveStartDate
   )
 
-  private val holidayStop = HolidayStop(
+  private val request = HolidayStopRequestsDetail(
     HolidayStopRequestsDetailId("HSR1"),
     SubscriptionName("S1"),
     ProductName("Gu Weekly"),
-    LocalDate.of(2019, 8, 9),
+    StoppedPublicationDate(LocalDate.of(2019, 8, 9)),
+    None,
+    None,
+    None,
     None
   )
 
@@ -57,7 +60,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
       Fixtures.config,
       _ => Right(Fixtures.mkSubscriptionWithHolidayStops()),
       updateSubscription(Right(()))
-    )(holidayStop)
+    )(request)
 
     response.right.value shouldBe ZuoraHolidayWriteResult(
       requestId = HolidayStopRequestsDetailId("HSR1"),
@@ -75,7 +78,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
       Fixtures.config,
       _ => Right(subscription),
       updateSubscription(Left(ZuoraHolidayError("update went wrong")))
-    )(holidayStop)
+    )(request)
     response.left.value shouldBe ZuoraHolidayError("update went wrong")
   }
 
@@ -84,7 +87,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
       Fixtures.config,
       _ => Left(ZuoraHolidayError("get went wrong")),
       updateSubscription(Right(()))
-    )(holidayStop)
+    )(request)
     response.left.value shouldBe ZuoraHolidayError("get went wrong")
   }
 
@@ -98,7 +101,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
       Fixtures.config,
       _ => Right(Fixtures.mkSubscriptionWithHolidayStops().copy(autoRenew = false)),
       updateSubscription(Right(()))
-    )(holidayStop)
+    )(request)
     response.isRight shouldBe true
   }
 
@@ -107,7 +110,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
       Fixtures.config,
       _ => Right(subscription.copy(status = "Cancelled")),
       updateSubscription(Left(ZuoraHolidayError("shouldn't need to apply an update")))
-    )(holidayStop)
+    )(request)
     response.left.value.reason should include("Apply manual refund")
   }
 
@@ -116,7 +119,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
       Fixtures.config,
       _ => Right(Fixtures.mkSubscriptionWithHolidayStops()),
       updateSubscription(Left(ZuoraHolidayError("shouldn't need to apply an update")))
-    )(holidayStop)
+    )(request)
     response.right.value shouldBe ZuoraHolidayWriteResult(
       requestId = HolidayStopRequestsDetailId("HSR1"),
       subscriptionName = SubscriptionName("S1"),
@@ -133,7 +136,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
       Fixtures.config,
       _ => Right(subscription),
       updateSubscription(Left(ZuoraHolidayError("shouldn't need to apply an update")))
-    )(holidayStop)
+    )(request)
     response.left.value shouldBe ZuoraHolidayError("shouldn't need to apply an update")
   }
 

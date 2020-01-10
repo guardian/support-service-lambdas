@@ -73,7 +73,7 @@ object Processor {
         ProcessResult(Nil, Nil, Nil, Some(OverallFailure(sfReadError.reason)))
 
       case Right(holidayStopRequestsFromSalesforce) =>
-        val holidayStops = holidayStopRequestsFromSalesforce.distinct.map(HolidayStop(_))
+        val holidayStops = holidayStopRequestsFromSalesforce.distinct
         val alreadyActionedHolidayStops = holidayStopRequestsFromSalesforce.flatMap(_.Charge_Code__c).distinct
         val allZuoraHolidayStopResponses = holidayStops.map(writeHolidayStopToZuora(config, getSubscription, updateSubscription))
         val (failedZuoraResponses, successfulZuoraResponses) = allZuoraHolidayStopResponses.separate
@@ -95,30 +95,30 @@ object Processor {
     config: Config,
     getSubscription: SubscriptionName => ZuoraHolidayResponse[Subscription],
     updateSubscription: (Subscription, HolidayCreditUpdate) => ZuoraHolidayResponse[Unit]
-  )(stop: HolidayStop): ZuoraHolidayResponse[ZuoraHolidayWriteResult] = {
+  )(request: HolidayStopRequestsDetail): ZuoraHolidayResponse[ZuoraHolidayWriteResult] = {
     for {
-      subscription <- getSubscription(stop.subscriptionName)
+      subscription <- getSubscription(request.Subscription_Name__c)
       subscriptionData <- SubscriptionData(subscription)
-      issueData <- subscriptionData.issueDataForDate(stop.stoppedPublicationDate)
-      _ <- if (subscription.status == "Cancelled") Left(ZuoraHolidayError(s"Cannot process cancelled subscription because Zuora does not allow amending cancelled subs (Code: 58730020). Apply manual refund ASAP! $stop; ${subscription.subscriptionNumber};")) else Right(())
+      issueData <- subscriptionData.issueDataForDate(request.Stopped_Publication_Date__c.value)
+      _ <- if (subscription.status == "Cancelled") Left(ZuoraHolidayError(s"Cannot process cancelled subscription because Zuora does not allow amending cancelled subs (Code: 58730020). Apply manual refund ASAP! $request; ${ subscription.subscriptionNumber};")) else Right(())
       maybeExtendedTerm = ExtendedTerm(issueData.nextBillingPeriodStartDate, subscription)
       holidayCreditUpdate <- HolidayCreditUpdate(
         config.holidayCreditProduct,
         subscription,
-        stop.stoppedPublicationDate,
+        request.Stopped_Publication_Date__c.value,
         maybeExtendedTerm,
         HolidayStopCredit(issueData.credit, issueData.nextBillingPeriodStartDate)
       )
-      _ <- if (subscription.hasHolidayStop(stop)) Right(()) else updateSubscription(subscription, holidayCreditUpdate)
-      updatedSubscription <- getSubscription(stop.subscriptionName)
-      addedCharge <- updatedSubscription.ratePlanCharge(stop).toRight(ZuoraHolidayError(s"Failed to write holiday stop to Zuora: $stop"))
+      _ <- if (subscription.hasHolidayStop(request)) Right(()) else updateSubscription(subscription, holidayCreditUpdate)
+      updatedSubscription <- getSubscription(request.Subscription_Name__c)
+      addedCharge <- updatedSubscription.ratePlanCharge(request).toRight(ZuoraHolidayError(s"Failed to write holiday stop to Zuora: $request"))
     } yield {
       ZuoraHolidayWriteResult(
-        stop.requestId,
-        stop.subscriptionName,
-        stop.productName,
+        request.Id,
+        request.Subscription_Name__c,
+        request.Product_Name__c,
         HolidayStopRequestsDetailChargeCode(addedCharge.number),
-        stop.estimatedCharge,
+        request.Estimated_Price__c,
         HolidayStopRequestsDetailChargePrice(addedCharge.price),
         StoppedPublicationDate(addedCharge.HolidayStart__c.getOrElse(LocalDate.MIN))
       )
