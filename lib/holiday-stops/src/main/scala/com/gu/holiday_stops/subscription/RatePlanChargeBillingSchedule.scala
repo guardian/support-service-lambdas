@@ -63,31 +63,48 @@ case class BillDates(startDate: LocalDate, endDate: LocalDate)
 object RatePlanChargeBillingSchedule {
 
   def apply(subscription: Subscription, ratePlanCharge: RatePlanCharge, account: ZuoraAccount): Either[ZuoraHolidayError, RatePlanChargeBillingSchedule] = {
+    val customerAcceptanceDate = subscription.customerAcceptanceDate
+    val billingDay = ratePlanCharge.billingDay
+    val triggerEvent = ratePlanCharge.triggerEvent
+    val triggerDate = ratePlanCharge.triggerDate
+    val processedThroughDate = ratePlanCharge.processedThroughDate
+    val billCycleDay = account.billingAndPayment.billCycleDay
+    val upToPeriodType = ratePlanCharge.upToPeriodsType
+    val upToPeriods = ratePlanCharge.upToPeriods
+    val optionalBillingPeriodName = ratePlanCharge.billingPeriod
+    val specificBillingPeriod = ratePlanCharge.specificBillingPeriod
+    val endDateCondition = ratePlanCharge.endDateCondition
+
+    apply(customerAcceptanceDate, billingDay, triggerEvent, triggerDate, processedThroughDate, billCycleDay, upToPeriodType, upToPeriods, optionalBillingPeriodName, specificBillingPeriod, endDateCondition)
+  }
+
+  def apply(customerAcceptanceDate: LocalDate, billingDay: Option[String], triggerEvent: Option[String], triggerDate: Option[LocalDate], processedThroughDate: Option[LocalDate], billCycleDay: Int, upToPeriodType: Option[String], upToPeriods: Option[Int], optionalBillingPeriodName: Option[String], specificBillingPeriod: Option[Int], endDateCondition: Option[String]) = {
     for {
-      endDateCondition <- ratePlanCharge.endDateCondition.toRight(ZuoraHolidayError("RatePlanCharge.endDateCondition is required"))
-      billingPeriodName <- ratePlanCharge.billingPeriod.toRight(ZuoraHolidayError("RatePlanCharge.billingPeriod is required"))
-      billingPeriod <- billingPeriodForName(billingPeriodName, ratePlanCharge.specificBillingPeriod)
+      endDateCondition <- endDateCondition.toRight(ZuoraHolidayError("RatePlanCharge.endDateCondition is required"))
+      billingPeriodName <- optionalBillingPeriodName.toRight(ZuoraHolidayError("RatePlanCharge.billingPeriod is required"))
+      billingPeriod <- billingPeriodForName(billingPeriodName, specificBillingPeriod)
+
       ratePlanStartDate <- ratePlanStartDate(
-        subscription.customerAcceptanceDate,
-        ratePlanCharge.billingDay,
-        ratePlanCharge.triggerEvent,
-        ratePlanCharge.triggerDate,
-        ratePlanCharge.processedThroughDate,
-        account.billingAndPayment.billCycleDay
+        customerAcceptanceDate,
+        billingDay,
+        triggerEvent,
+        triggerDate,
+        processedThroughDate,
+        billCycleDay
       )
       ratePlanEndDate <- ratePlanEndDate(
         billingPeriod,
         ratePlanStartDate,
         endDateCondition,
-        ratePlanCharge.upToPeriodsType,
-        ratePlanCharge.upToPeriods
+        upToPeriodType,
+        upToPeriods
       )
     } yield new RatePlanChargeBillingSchedule {
       override def isDateCoveredBySchedule(date: LocalDate): Boolean = {
         (date == ratePlanStartDate || date.isAfter(ratePlanStartDate)) &&
           ratePlanEndDate
-          .map(endDate => date == endDate || date.isBefore(endDate))
-          .getOrElse(true)
+            .map(endDate => date == endDate || date.isBefore(endDate))
+            .getOrElse(true)
       }
 
       override def billDatesCoveringDate(date: LocalDate): Either[ZuoraHolidayError, BillDates] = {
