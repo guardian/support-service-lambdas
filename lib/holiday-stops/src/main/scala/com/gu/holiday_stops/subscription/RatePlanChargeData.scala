@@ -41,12 +41,18 @@ case class RatePlanChargeData(
 }
 
 object RatePlanChargeData {
-  def apply(subscription: Subscription, ratePlanCharge: RatePlanCharge, account: ZuoraAccount, issueDayOfWeek: DayOfWeek): Either[ZuoraHolidayError, RatePlanChargeData] = {
+  def apply(
+    subscription: Subscription,
+    ratePlanCharge: RatePlanCharge,
+    account: ZuoraAccount,
+    issueDayOfWeek: DayOfWeek,
+    useEffectiveStartDate: Boolean
+  ): Either[ZuoraHolidayError, RatePlanChargeData] = {
     for {
       billingPeriodName <- ratePlanCharge
         .billingPeriod
         .toRight(ZuoraHolidayError("RatePlanCharge.billingPeriod is required"))
-      schedule <- RatePlanChargeBillingSchedule(subscription, ratePlanCharge, account)
+      schedule <- RatePlanChargeBillingSchedule(subscription, ratePlanCharge, account, useEffectiveStartDate)
       issueCreditAmount <- calculateIssueCreditAmount(ratePlanCharge)
     } yield RatePlanChargeData(ratePlanCharge, schedule, billingPeriodName, issueDayOfWeek, issueCreditAmount)
   }
