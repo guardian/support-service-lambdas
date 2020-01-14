@@ -3,7 +3,7 @@ import java.time.LocalDate
 import com.github.tototoshi.csv.CSVReader
 import com.gu.holiday_stops.subscription.RatePlanChargeBillingSchedule
 
-class Main extends App {
+object Main extends App {
   val fileName = args(0)
 
   val reader = CSVReader.open(fileName)
@@ -32,16 +32,16 @@ class Main extends App {
 
       RatePlanChargeBillingSchedule(
         LocalDate.parse(record("customer_acceptance_date")),
-        record.get("billing_day"),
-        record.get("trigger_event"),
-        record.get("trigger_date").map(LocalDate.parse),
+        record.get("billing_day").filter(_ != ""),
+        record.get("trigger_event").filter(_ != ""),
+        record.get("trigger_date").filter(_ != "").map(LocalDate.parse),
         None,
         record("bill_cycle_day").toInt,
-        record.get("up_to_periods_type"),
-        record.get("up_to_periods").map(_.toInt),
-        record.get("billing_period"),
-        record.get("specific_billing_period").map(_.toInt),
-        record.get("end_date_condition") //TODO: add to datalake table
+        record.get("up_to_periods_type").filter(_ != ""),
+        record.get("up_to_periods").filter(_ != "").map(_.toInt),
+        record.get("billing_period").filter(_ != ""),
+        record.get("specific_billing_period").filter(_ != "").map(_.toInt),
+        record.get("end_date_condition").filter(_ != "") //TODO: add to datalake table
       ).fold(
         error => println(s"Failed to generate schedule for $id: $error"),
         { schedule =>
