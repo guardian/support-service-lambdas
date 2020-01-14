@@ -1,7 +1,7 @@
 import java.time.LocalDate
 
 import com.github.tototoshi.csv.CSVReader
-import com.gu.holiday_stops.subscription.RatePlanChargeBillingSchedule
+import com.gu.holiday_stops.subscription.{RatePlanChargeBillingSchedule, SubscriptionData}
 
 object Main extends App {
   val fileName = args(0)
@@ -26,6 +26,15 @@ object Main extends App {
 
   def checkInvoiceDates(recordsForSub: List[Map[String, String]]) = {
     val allInvoiceDates = recordsForSub.map(record => LocalDate.parse(record("invoice_date")))
+    val shouldUseEffectiveStartDate = recordsForSub.exists( record =>
+      SubscriptionData.shouldUseEffectiveStartDate(
+        record("rate_plan_charge_name"),
+        record.get("up_to_periods_type").filter(_ != ""),
+        record.get("billing_period").filter(_ != ""),
+        record.get("specific_billing_period").filter(_ != "").map(_.toInt)
+      )
+    )
+
 
     recordsForSub.foreach { record =>
       val id = s"${record("subscription_name")}-${record("invoice_number")}"
@@ -41,7 +50,9 @@ object Main extends App {
         record.get("up_to_periods").filter(_ != "").map(_.toInt),
         record.get("billing_period").filter(_ != ""),
         record.get("specific_billing_period").filter(_ != "").map(_.toInt),
-        record.get("end_date_condition").filter(_ != "") //TODO: add to datalake table
+        record.get("end_date_condition").filter(_ != ""), //TODO: add to datalake table
+        shouldUseEffectiveStartDate,
+        LocalDate.parse(record("effective_start_date"))
       ).fold(
         error => println(s"Failed to generate schedule for $id: $error"),
         { schedule =>

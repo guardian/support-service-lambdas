@@ -45,7 +45,7 @@ object SubscriptionData {
       supportedRatePlanCharge <- getSupportedRatePlanCharge(supportedRatePlan, unExpiredRatePlanCharge)
     } yield (unExpiredRatePlanCharge, supportedRatePlanCharge, supportedProduct)
 
-    val useEffectiveStartDate = shouldUseEffectiveStartDate(supportedRatePlanCharges.map(_._1))
+    val useEffectiveStartDate = shouldUseEffectiveStartDateForSubscription(supportedRatePlanCharges.map(_._1))
 
     for {
       ratePlanChargeDatas <- supportedRatePlanCharges
@@ -150,16 +150,20 @@ object SubscriptionData {
       }
   }
 
-  private def shouldUseEffectiveStartDate(supportedRatePlanCharges: List[RatePlanCharge]) = {
-    val isWeekly6for6WithChristmasFix =
-      supportedRatePlanCharges.exists { ratePlanCharge =>
-        val name = ratePlanCharge.name === "GW Oct 18 - First 6 issues - Domestic"
-        val uptoPeriodsType = ratePlanCharge.upToPeriodsType === Some("Billing_Periods")
-        val billingPeriod = ratePlanCharge.billingPeriod === Some("Specific_Months")
-        val uptoPeriods = ratePlanCharge.specificBillingPeriod === Some(2)
-        name && uptoPeriodsType && billingPeriod && uptoPeriods
-      }
+  private def shouldUseEffectiveStartDateForSubscription(supportedRatePlanCharges: List[RatePlanCharge]) = {
+    val isWeekly6for6WithChristmasFix = supportedRatePlanCharges.exists { ratePlanCharge =>
+      shouldUseEffectiveStartDate(
+        ratePlanCharge.name,
+        ratePlanCharge.upToPeriodsType,
+        ratePlanCharge.billingPeriod,
+        ratePlanCharge.specificBillingPeriod
+      )
+    }
 
     isWeekly6for6WithChristmasFix
+  }
+
+  def shouldUseEffectiveStartDate(ratePlanChargeName: String, upToPeriodsType: Option[String], billingPeriod: Option[String], specificBillingPeriods: Option[Int]): Boolean = {
+    ratePlanChargeName === "GW Oct 18 - First 6 issues - Domestic" && upToPeriodsType === Some("Billing_Periods") && billingPeriod === Some("Specific_Months") && specificBillingPeriods === Some(2)
   }
 }

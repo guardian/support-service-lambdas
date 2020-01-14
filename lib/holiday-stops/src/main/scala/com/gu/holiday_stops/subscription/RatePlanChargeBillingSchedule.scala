@@ -105,8 +105,8 @@ object RatePlanChargeBillingSchedule {
       override def isDateCoveredBySchedule(date: LocalDate): Boolean = {
         (date == ratePlanStartDate || date.isAfter(ratePlanStartDate)) &&
           ratePlanEndDate
-            .map(endDate => date == endDate || date.isBefore(endDate))
-            .getOrElse(true)
+          .map(endDate => date == endDate || date.isBefore(endDate))
+          .getOrElse(true)
       }
 
       override def billDatesCoveringDate(date: LocalDate): Either[ZuoraHolidayError, BillDates] = {
