@@ -35,6 +35,7 @@ trait SubscriptionData {
   def editionDaysOfWeek: List[DayOfWeek]
 }
 object SubscriptionData {
+
   def apply(subscription: Subscription, account: ZuoraAccount): Either[ZuoraHolidayError, SubscriptionData] = {
     val supportedRatePlanCharges: List[(RatePlanCharge, SupportedRatePlanCharge, SupportedProduct)] = for {
       ratePlan <- subscription.ratePlans if ratePlan.lastChangeType =!= Some("Remove")
@@ -44,11 +45,19 @@ object SubscriptionData {
       supportedRatePlanCharge <- getSupportedRatePlanCharge(supportedRatePlan, unExpiredRatePlanCharge)
     } yield (unExpiredRatePlanCharge, supportedRatePlanCharge, supportedProduct)
 
+    val useEffectiveStartDate = shouldUseEffectiveStartDate(supportedRatePlanCharges.map(_._1))
+
     for {
       ratePlanChargeDatas <- supportedRatePlanCharges
         .traverse[ZuoraHolidayResponse, RatePlanChargeData] {
           case (ratePlanCharge, supportedRatePlanCharge, _) =>
-            RatePlanChargeData(subscription, ratePlanCharge, account, supportedRatePlanCharge.dayOfWeek)
+            RatePlanChargeData(
+              subscription,
+              ratePlanCharge,
+              account,
+              supportedRatePlanCharge.dayOfWeek,
+              useEffectiveStartDate
+            )
         }
       nonZeroRatePlanChargeDatas = ratePlanChargeDatas.filter { ratePlanChargeData =>
         ratePlanChargeData.issueCreditAmount != 0
@@ -139,5 +148,18 @@ object SubscriptionData {
           s"Could not annual issue limit as they are rate plan charges from more than one annual issue limit $moreThanOne"
         ).asLeft
       }
+  }
+
+  private def shouldUseEffectiveStartDate(supportedRatePlanCharges: List[RatePlanCharge]) = {
+    val isWeekly6for6WithChristmasFix =
+      supportedRatePlanCharges.exists { ratePlanCharge =>
+        val name = ratePlanCharge.name === "GW Oct 18 - First 6 issues - Domestic"
+        val uptoPeriodsType = ratePlanCharge.upToPeriodsType === Some("Billing_Periods")
+        val billingPeriod = ratePlanCharge.billingPeriod === Some("Specific_Months")
+        val uptoPeriods = ratePlanCharge.specificBillingPeriod === Some(2)
+        name && uptoPeriodsType && billingPeriod && uptoPeriods
+      }
+
+    isWeekly6for6WithChristmasFix
   }
 }
