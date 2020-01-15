@@ -4,6 +4,7 @@ import java.time.temporal.TemporalAdjusters
 import java.time.{DayOfWeek, LocalDate}
 
 import cats.implicits._
+import com.gu.creditprocessor.{Processor, ZuoraCreditAddResult, ZuoraHolidayCreditAddResult}
 import com.gu.fulfilmentdates.{FulfilmentDates, FulfilmentDatesFetcher, FulfilmentDatesFetcherError}
 import com.gu.holiday_stops.Fixtures.mkGuardianWeeklySubscription
 import com.gu.holiday_stops._

@@ -1,4 +1,4 @@
-package com.gu.holidaystopprocessor
+package com.gu.creditprocessor
 
 import java.time.LocalDate
 

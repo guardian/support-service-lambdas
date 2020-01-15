@@ -1,55 +1,17 @@
-package com.gu.holidaystopprocessor
+package com.gu.creditprocessor
 
 import java.time.LocalDate
 
 import cats.implicits._
-import com.gu.effects.S3Location
 import com.gu.fulfilmentdates.FulfilmentDatesFetcher
-import com.gu.holiday_stops._
-import com.gu.holiday_stops.subscription._
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
-import com.gu.util.config.Stage
-import com.gu.zuora.ZuoraProductTypes.{GuardianWeekly, NewspaperHomeDelivery, NewspaperVoucherBook, ZuoraProductType}
-import com.softwaremill.sttp.{Id, SttpBackend}
+import com.gu.holiday_stops.{Config, CreditRequest, OverallFailure, SalesforceApiResponse, ZuoraApiFailure, ZuoraApiResponse}
+import com.gu.holiday_stops.subscription.{ExtendedTerm, HolidayStopCredit, RatePlanCharge, Subscription, SubscriptionData, SubscriptionUpdate}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.SubscriptionName
+import com.gu.zuora.ZuoraProductTypes.ZuoraProductType
 import org.slf4j.LoggerFactory
 
-import scala.util.Try
-
-
 object Processor {
-  private val logger = LoggerFactory.getLogger(this.getClass)
-
-  def processAllProducts(
-    config: Config,
-    processDateOverride: Option[LocalDate],
-    backend: SttpBackend[Id, Nothing],
-    fetchFromS3: S3Location => Try[String]
-  ): List[ProcessResult] =
-    Zuora.accessTokenGetResponse(config.zuoraConfig, backend) match {
-      case Left(err) =>
-        List(ProcessResult(Nil, Nil, Nil, Some(OverallFailure(err.reason))))
-
-      case Right(zuoraAccessToken) =>
-        val fulfilmentDatesFetcher = FulfilmentDatesFetcher(fetchFromS3, Stage())
-        List(
-          NewspaperHomeDelivery,
-          NewspaperVoucherBook,
-          GuardianWeekly,
-        )
-        .map { productType =>
-          processProduct(
-            config,
-            Salesforce.holidayStopRequests(config.sfConfig),
-            fulfilmentDatesFetcher,
-            processDateOverride,
-            productType,
-            Zuora.subscriptionGetResponse(config, zuoraAccessToken, backend),
-            Zuora.subscriptionUpdateResponse(config, zuoraAccessToken, backend),
-            ZuoraCreditAddResult.forHolidayStop,
-            Salesforce.holidayStopUpdateResponse(config.sfConfig)
-          )
-        }
-    }
+  private val logger = LoggerFactory.getLogger(getClass)
 
   def processProduct[RequestType <: CreditRequest, ResultType <: ZuoraCreditAddResult](
     config: Config,
@@ -65,8 +27,7 @@ object Processor {
     val creditRequestsFromSalesforce = for {
       datesToProcess <- getDatesToProcess(fulfilmentDatesFetcher, productType, processOverrideDate, LocalDate.now())
       _ = logger.info(s"Processing holiday stops for $productType for issue dates ${datesToProcess.mkString(", ")}")
-      salesforceCreditRequests <-
-        if(datesToProcess.isEmpty) Nil.asRight else getCreditRequestsFromSalesforce(productType, datesToProcess)
+      salesforceCreditRequests <- if (datesToProcess.isEmpty) Nil.asRight else getCreditRequestsFromSalesforce(productType, datesToProcess)
     } yield salesforceCreditRequests
 
     creditRequestsFromSalesforce match {
@@ -109,7 +70,7 @@ object Processor {
       subscription <- getSubscription(request.subscriptionName)
       subscriptionData <- SubscriptionData(subscription)
       issueData <- subscriptionData.issueDataForDate(request.publicationDate.value)
-      _ <- if (subscription.status == "Cancelled") Left(ZuoraApiFailure(s"Cannot process cancelled subscription because Zuora does not allow amending cancelled subs (Code: 58730020). Apply manual refund ASAP! $request; ${ subscription.subscriptionNumber};")) else Right(())
+      _ <- if (subscription.status == "Cancelled") Left(ZuoraApiFailure(s"Cannot process cancelled subscription because Zuora does not allow amending cancelled subs (Code: 58730020). Apply manual refund ASAP! $request; ${subscription.subscriptionNumber};")) else Right(())
       maybeExtendedTerm = ExtendedTerm(issueData.nextBillingPeriodStartDate, subscription)
       subscriptionUpdate <- SubscriptionUpdate.forHolidayStop(
         config.creditProduct,
@@ -134,13 +95,11 @@ object Processor {
       .fold(
         fulfilmentDatesFetcher
           .getFulfilmentDates(zuoraProductType, today)
-          .map( fulfilmentDates =>
-            fulfilmentDates.values.flatMap(_.holidayStopProcessorTargetDate).toList
-          )
+          .map(fulfilmentDates =>
+            fulfilmentDates.values.flatMap(_.holidayStopProcessorTargetDate).toList)
           .leftMap(error => ZuoraApiFailure(s"Failed to fetch fulfilment dates: $error"))
       )(
-        processOverRideDate => List(processOverRideDate).asRight
-      )
+          processOverRideDate => List(processOverRideDate).asRight
+        )
   }
 }
-
