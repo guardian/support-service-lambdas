@@ -1,6 +1,4 @@
-package com.gu.holiday_stops
-
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{AffectedPublicationDate, HolidayStopRequestsDetail, RatePlanChargeCode, SubscriptionName}
+package com.gu.zuora.subscription
 
 /**
  * Request to add a credit amendment to a Zuora subscription.

@@ -1,11 +1,11 @@
-package com.gu.holiday_stops.subscription
+package com.gu.zuora.subscription
 
 import java.time.DayOfWeek.{FRIDAY, SATURDAY}
 import java.time.temporal.TemporalAdjusters
 import java.time.{DayOfWeek, LocalDate}
 
-import com.gu.holiday_stops.subscription.SubscriptionDataIntegrationTest.testSubscriptonDataIssueGeneration
 import com.gu.zuora.ZuoraProductTypes
+import com.gu.zuora.subscription.SubscriptionDataIntegrationTest.testSubscriptonDataIssueGeneration
 import org.scalatest.FlatSpec
 
 class SubscriptionDataEchoLegacyIntegrationTest extends FlatSpec {

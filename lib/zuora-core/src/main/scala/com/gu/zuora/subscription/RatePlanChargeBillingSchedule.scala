@@ -1,10 +1,9 @@
-package com.gu.holiday_stops.subscription
+package com.gu.zuora.subscription
 
+import java.time.LocalDate
 import java.time.temporal.ChronoUnit
-import java.time.{LocalDate, Period}
 
 import cats.implicits._
-import com.gu.holiday_stops.ZuoraApiFailure
 
 /**
  * Information about the billing cycles for a Zuora RatePlanCharge.
@@ -76,9 +75,7 @@ object RatePlanChargeBillingSchedule {
     } yield new RatePlanChargeBillingSchedule {
       override def isDateCoveredBySchedule(date: LocalDate): Boolean = {
         (date == ratePlanCharge.effectiveStartDate || date.isAfter(ratePlanCharge.effectiveStartDate)) &&
-          ratePlanEndDate
-          .map(endDate => date == endDate || date.isBefore(endDate))
-          .getOrElse(true)
+          ratePlanEndDate.forall(endDate => date == endDate || date.isBefore(endDate))
       }
 
       override def billDatesCoveringDate(date: LocalDate): Either[ZuoraApiFailure, BillDates] = {

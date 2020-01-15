@@ -2,8 +2,8 @@ package com.gu.creditprocessor
 
 import java.time.LocalDate
 
-import com.gu.holiday_stops.subscription.RatePlanCharge
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
+import com.gu.zuora.subscription.{AffectedPublicationDate, RatePlanCharge, RatePlanChargeCode, SubscriptionName}
 
 /**
  * Result of adding a credit amendment to a Zuora subscription.

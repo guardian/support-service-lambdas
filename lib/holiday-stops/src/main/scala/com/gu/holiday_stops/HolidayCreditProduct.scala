@@ -1,5 +1,7 @@
 package com.gu.holiday_stops
 
+import com.gu.zuora.subscription.CreditProduct
+
 /**
  * Same Discount holiday stop product is reused for all products, namely:
  *   'DO NOT USE MANUALLY: Holiday Credit - automated'

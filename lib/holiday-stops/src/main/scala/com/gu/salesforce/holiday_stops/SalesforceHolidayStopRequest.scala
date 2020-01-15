@@ -1,13 +1,11 @@
 package com.gu.salesforce.holiday_stops
 
-import java.time.{LocalDate, ZonedDateTime}
 import java.time.format.DateTimeFormatter
+import java.time.{LocalDate, ZonedDateTime}
 import java.util.UUID
 
 import ai.x.play.json.Jsonx
-import com.gu.holiday_stops.subscription.{IssueData, Subscription}
-import com.gu.salesforce.Contact
-import com.gu.salesforce.RecordsWrapperCaseClass
+import com.gu.salesforce.{Contact, RecordsWrapperCaseClass}
 import com.gu.salesforce.SalesforceClient.SalesforceErrorResponseBody
 import com.gu.salesforce.SalesforceConstants._
 import com.gu.salesforce.SalesforceQueryConstants.contactToWhereClausePart
@@ -19,6 +17,7 @@ import com.gu.util.resthttp.RestOp._
 import com.gu.util.resthttp.RestRequestMaker._
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, CustomError}
 import com.gu.util.resthttp.{HttpOp, RestRequestMaker}
+import com.gu.zuora.subscription.{IssueData, RatePlanChargeCode, Subscription, SubscriptionName}
 import play.api.libs.json._
 
 object SalesforceHolidayStopRequest extends Logging {

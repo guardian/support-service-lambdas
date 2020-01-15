@@ -1,4 +1,4 @@
-package com.gu.holiday_stops.subscription
+package com.gu.zuora.subscription
 
 import java.time.LocalDate
 import java.util.concurrent.atomic.AtomicReference

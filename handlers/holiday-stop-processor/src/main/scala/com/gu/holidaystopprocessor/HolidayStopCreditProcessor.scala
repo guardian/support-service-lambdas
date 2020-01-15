@@ -5,9 +5,10 @@ import java.time.LocalDate
 import com.gu.creditprocessor.{ProcessResult, Processor, ZuoraCreditAddResult}
 import com.gu.effects.S3Location
 import com.gu.fulfilmentdates.FulfilmentDatesFetcher
-import com.gu.holiday_stops._
+import com.gu.holiday_stops.{Config, Zuora}
 import com.gu.util.config.Stage
 import com.gu.zuora.ZuoraProductTypes.{GuardianWeekly, NewspaperHomeDelivery, NewspaperVoucherBook}
+import com.gu.zuora.subscription.OverallFailure
 import com.softwaremill.sttp.{Id, SttpBackend}
 
 import scala.util.Try

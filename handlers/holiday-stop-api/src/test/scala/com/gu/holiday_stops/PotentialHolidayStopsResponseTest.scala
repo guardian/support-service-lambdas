@@ -2,7 +2,7 @@ package com.gu.holiday_stops
 
 import java.time.LocalDate
 
-import com.gu.holiday_stops.subscription.HolidayStopCredit
+import com.gu.zuora.subscription.HolidayStopCredit
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
 

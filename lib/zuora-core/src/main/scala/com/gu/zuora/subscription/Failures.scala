@@ -1,4 +1,4 @@
-package com.gu.holiday_stops
+package com.gu.zuora.subscription
 
 sealed trait ApiFailure {
   val reason: String

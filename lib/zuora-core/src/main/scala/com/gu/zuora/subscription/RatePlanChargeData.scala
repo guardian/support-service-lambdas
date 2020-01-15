@@ -1,9 +1,7 @@
-package com.gu.holiday_stops.subscription
+package com.gu.zuora.subscription
 
 import java.time.temporal.TemporalAdjusters
 import java.time.{DayOfWeek, LocalDate}
-
-import com.gu.holiday_stops.ZuoraApiFailure
 
 import scala.annotation.tailrec
 import scala.math.BigDecimal.RoundingMode
@@ -83,4 +81,3 @@ object RatePlanChargeData {
     }
   }
 }
-

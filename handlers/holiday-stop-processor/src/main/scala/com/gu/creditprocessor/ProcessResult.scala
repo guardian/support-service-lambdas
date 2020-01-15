@@ -1,6 +1,6 @@
 package com.gu.creditprocessor
 
-import com.gu.holiday_stops.{CreditRequest, OverallFailure, ZuoraApiFailure}
+import com.gu.zuora.subscription.{CreditRequest, OverallFailure, ZuoraApiFailure}
 import com.typesafe.scalalogging.LazyLogging
 
 case class ProcessResult(

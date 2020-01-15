@@ -1,4 +1,4 @@
-package com.gu.holiday_stops
+package com.gu.zuora.subscription
 
 /**
  * Type of credit amendment to add to a Zuora subscription.

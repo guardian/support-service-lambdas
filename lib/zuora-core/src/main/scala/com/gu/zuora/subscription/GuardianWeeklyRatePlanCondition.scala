@@ -1,4 +1,4 @@
-package com.gu.holiday_stops.subscription
+package com.gu.zuora.subscription
 
 /**
  * Conditions defining what Guardian Weekly subscription the customer has today.
@@ -22,4 +22,3 @@ object GuardianWeeklyRatePlanCondition {
     isGuardianWeekly && !isExpired
   }
 }
-

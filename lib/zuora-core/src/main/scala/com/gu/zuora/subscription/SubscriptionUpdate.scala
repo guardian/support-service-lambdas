@@ -1,8 +1,6 @@
-package com.gu.holiday_stops.subscription
+package com.gu.zuora.subscription
 
 import java.time.LocalDate
-
-import com.gu.holiday_stops.{CreditProduct, ZuoraApiFailure}
 
 case class SubscriptionUpdate(
   currentTerm: Option[Int],

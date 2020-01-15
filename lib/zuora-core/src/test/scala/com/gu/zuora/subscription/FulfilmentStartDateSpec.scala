@@ -1,10 +1,9 @@
-package com.gu.holiday_stops.subscription
+package com.gu.zuora.subscription
 
 import java.time.LocalDate
 
-import com.gu.holiday_stops.Fixtures
 import org.scalactic.TypeCheckedTripleEquals
-import org.scalatest._
+import org.scalatest.{EitherValues, FlatSpec, Matchers}
 
 class FulfilmentStartDateSpec extends FlatSpec with Matchers with EitherValues with TypeCheckedTripleEquals {
 

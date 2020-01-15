@@ -1,8 +1,6 @@
-package com.gu.holiday_stops.subscription
+package com.gu.zuora.subscription
 
 import java.time.LocalDate
-
-import com.gu.holiday_stops.CreditRequest
 
 case class Subscription(
   subscriptionNumber: String,

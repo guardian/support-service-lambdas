@@ -6,12 +6,11 @@ import java.time.{DayOfWeek, LocalDate}
 import cats.implicits._
 import com.gu.creditprocessor.{Processor, ZuoraCreditAddResult, ZuoraHolidayCreditAddResult}
 import com.gu.fulfilmentdates.{FulfilmentDates, FulfilmentDatesFetcher, FulfilmentDatesFetcherError}
-import com.gu.holiday_stops.Fixtures._
-import com.gu.holiday_stops._
-import com.gu.holiday_stops.subscription.{MutableCalendar, Subscription, SubscriptionUpdate}
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestsDetail, SubscriptionName}
+import com.gu.holiday_stops.Fixtures
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.HolidayStopRequestsDetail
 import com.gu.zuora.ZuoraProductTypes
 import com.gu.zuora.ZuoraProductTypes.ZuoraProductType
+import com.gu.zuora.subscription._
 import org.scalatest._
 
 /**
@@ -24,13 +23,13 @@ class ProcessorErrorHandlingSpec extends FlatSpec with Matchers with OptionValue
   val holidayStopRequestsFromSalesforce: (ZuoraProductType, List[LocalDate]) => SalesforceApiResponse[List[HolidayStopRequestsDetail]] = {
     (_, _) =>
       Right(List(
-        mkHolidayStopRequestDetailsFromHolidayStopRequest(mkHolidayStopRequest("R1", LocalDate.of(2019, 8, 2), SubscriptionName("A-S1")), "C1"),
-        mkHolidayStopRequestDetailsFromHolidayStopRequest(mkHolidayStopRequest("R2", LocalDate.of(2019, 9, 6), SubscriptionName("A-S2")), "C3"),
-        mkHolidayStopRequestDetailsFromHolidayStopRequest(mkHolidayStopRequest("R3", LocalDate.of(2019, 8, 9), SubscriptionName("A-S3")), "C4")
+        Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(Fixtures.mkHolidayStopRequest("R1", LocalDate.of(2019, 8, 2), SubscriptionName("A-S1")), "C1"),
+        Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(Fixtures.mkHolidayStopRequest("R2", LocalDate.of(2019, 9, 6), SubscriptionName("A-S2")), "C3"),
+        Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(Fixtures.mkHolidayStopRequest("R3", LocalDate.of(2019, 8, 9), SubscriptionName("A-S3")), "C4")
       ))
   }
 
-  val subscription: Subscription = mkSubscriptionWithHolidayStops()
+  val subscription: Subscription = Fixtures.mkSubscriptionWithHolidayStops()
 
   val updateSubscription: (Subscription, SubscriptionUpdate) => Either[ZuoraApiFailure, Unit] = (_, _) => Right(())
 

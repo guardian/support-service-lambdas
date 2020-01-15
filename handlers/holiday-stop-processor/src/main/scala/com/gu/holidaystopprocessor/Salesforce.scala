@@ -4,12 +4,11 @@ import java.time.LocalDate
 
 import com.gu.creditprocessor.ZuoraHolidayCreditAddResult
 import com.gu.effects.RawEffects
-import com.gu.holiday_stops.{SalesforceApiFailure, SalesforceApiResponse}
-import com.gu.salesforce.SFAuthConfig
-import com.gu.salesforce.SalesforceClient
+import com.gu.salesforce.{SFAuthConfig, SalesforceClient}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
 import com.gu.util.resthttp.JsonHttp
 import com.gu.zuora.ZuoraProductTypes.ZuoraProductType
+import com.gu.zuora.subscription.{SalesforceApiFailure, SalesforceApiResponse}
 import scalaz.{-\/, \/-}
 
 object Salesforce {

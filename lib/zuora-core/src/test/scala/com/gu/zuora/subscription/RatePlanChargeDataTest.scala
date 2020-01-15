@@ -1,10 +1,8 @@
-package com.gu.holiday_stops.subscription
+package com.gu.zuora.subscription
 
 import java.time.temporal.TemporalAdjusters
 import java.time.{DayOfWeek, LocalDate}
 
-import com.gu.holiday_stops.Fixtures
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.AffectedPublicationDate
 import org.scalatest.Inside.inside
 import org.scalatest.{EitherValues, FlatSpec, Matchers}
 

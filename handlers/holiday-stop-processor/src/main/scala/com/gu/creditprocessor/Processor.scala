@@ -4,10 +4,9 @@ import java.time.LocalDate
 
 import cats.implicits._
 import com.gu.fulfilmentdates.FulfilmentDatesFetcher
-import com.gu.holiday_stops.{Config, CreditRequest, OverallFailure, SalesforceApiResponse, ZuoraApiFailure, ZuoraApiResponse}
-import com.gu.holiday_stops.subscription.{ExtendedTerm, HolidayStopCredit, RatePlanCharge, Subscription, SubscriptionData, SubscriptionUpdate}
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.SubscriptionName
+import com.gu.holiday_stops.Config
 import com.gu.zuora.ZuoraProductTypes.ZuoraProductType
+import com.gu.zuora.subscription._
 import org.slf4j.LoggerFactory
 
 object Processor {
@@ -96,10 +95,11 @@ object Processor {
         fulfilmentDatesFetcher
           .getFulfilmentDates(zuoraProductType, today)
           .map(fulfilmentDates =>
-            fulfilmentDates.values.flatMap(_.holidayStopProcessorTargetDate).toList)
+            fulfilmentDates.values.flatMap(_.holidayStopProcessorTargetDate).toList
+          )
           .leftMap(error => ZuoraApiFailure(s"Failed to fetch fulfilment dates: $error"))
       )(
-          processOverRideDate => List(processOverRideDate).asRight
-        )
+        processOverRideDate => List(processOverRideDate).asRight
+      )
   }
 }

@@ -1,9 +1,8 @@
-package com.gu.holiday_stops.subscription
+package com.gu.zuora.subscription
 
-import java.time.temporal.ChronoUnit
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 
-import com.gu.holiday_stops.{Fixtures, ZuoraApiFailure}
 import org.scalactic.TypeCheckedTripleEquals
 import org.scalatest.Inside.inside
 import org.scalatest.{EitherValues, FlatSpec, Matchers}

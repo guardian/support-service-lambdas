@@ -5,8 +5,8 @@ import java.time.temporal.TemporalAdjusters.next
 import java.time.{DayOfWeek, LocalDate}
 
 import com.gu.fulfilmentdates.FulfilmentDates
-import com.gu.holiday_stops.subscription.{IssueData, SubscriptionData}
 import com.gu.zuora.ZuoraProductTypes
+import com.gu.zuora.subscription.{IssueData, SubscriptionData, ZuoraApiFailure}
 import org.scalatest.FlatSpec
 import org.scalatest.Matchers._
 

@@ -1,15 +1,12 @@
-package com.gu.holiday_stops.subscription
+package com.gu.zuora.subscription
 
-import java.time.{DayOfWeek, LocalDate}
 import java.time.temporal.ChronoUnit
+import java.time.{DayOfWeek, LocalDate}
 
-import com.gu.holiday_stops.Fixtures
 import com.gu.zuora.ZuoraProductTypes.ZuoraProductType
-import org.scalatest.EitherValues._
-import org.scalatest.Inside
-import org.scalatest.Matchers._
+import org.scalatest.{Assertion, Inside, Matchers}
 
-object SubscriptionDataIntegrationTest {
+object SubscriptionDataIntegrationTest extends Matchers {
   def testSubscriptonDataIssueGeneration(
     subscriptionFile: String,
     startDate: LocalDate,
@@ -17,7 +14,7 @@ object SubscriptionDataIntegrationTest {
     expectedTotalAnnualIssueLimitPerSubscription: Int,
     expectedProductType: ZuoraProductType,
     expectedEditionDaysOfWeek: List[DayOfWeek]
-  ) = {
+  ): Assertion = {
     val subscription = Fixtures.subscriptionFromJson(subscriptionFile)
     val datesToTest = getDatesToTest(startDate, expectedIssueData)
 

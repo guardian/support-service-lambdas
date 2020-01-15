@@ -2,7 +2,8 @@ package com.gu.holiday_stops
 
 import java.time.LocalDate
 
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestsDetailChargePrice, RatePlanChargeCode}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.HolidayStopRequestsDetailChargePrice
+import com.gu.zuora.subscription.RatePlanChargeCode
 import org.scalatest.{FlatSpec, Matchers}
 
 class HolidayStopSubscriptionCancellationTest extends FlatSpec with Matchers {

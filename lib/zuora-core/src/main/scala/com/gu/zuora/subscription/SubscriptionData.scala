@@ -1,8 +1,7 @@
-package com.gu.holiday_stops.subscription
+package com.gu.zuora.subscription
 
 import java.time.{DayOfWeek, LocalDate}
 
-import com.gu.holiday_stops.{ZuoraApiFailure, ZuoraApiResponse}
 import cats.implicits._
 import com.gu.zuora.ZuoraProductTypes.ZuoraProductType
 
@@ -15,12 +14,10 @@ case class IssueData(issueDate: LocalDate, billDates: BillDates, credit: Double)
    *
    * For more details about the calculation of the current billing period see:
    *
-   * [[com.gu.holiday_stops.subscription.RatePlanChargeBillingSchedule]]
+   * [[com.gu.zuora.subscription.RatePlanChargeBillingSchedule]]
    *
    * @return Date of the first day of the billing period
    *         following this <code>stoppedPublicationDate</code>.
-   *         [[com.gu.holiday_stops.subscription.StoppedProductTest]]
-   *         shows examples of the expected outcome.
    */
   def nextBillingPeriodStartDate: LocalDate = {
     billDates.endDate.plusDays(1)

@@ -1,23 +1,22 @@
 package com.gu.holiday_stops
 
-import java.time.{DayOfWeek, LocalDate}
 import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters.next
+import java.time.{DayOfWeek, LocalDate}
 
 import com.gu.effects.{FakeFetchString, SFTestEffects, TestingRawEffects}
 import com.gu.holiday_stops.ZuoraSttpEffects.ZuoraSttpEffectsOps
-import com.gu.holiday_stops.subscription.{HolidayStopCredit, MutableCalendar, RatePlan, RatePlanCharge, Subscription}
-import com.gu.salesforce.{IdentityId, SalesforceContactId}
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.SubscriptionName
+import com.gu.salesforce.SalesforceHandlerSupport.{HEADER_IDENTITY_ID, HEADER_SALESFORCE_CONTACT_ID}
 import com.gu.salesforce.holiday_stops.{SalesForceHolidayStopsEffects, SalesforceHolidayStopRequestsDetail}
+import com.gu.salesforce.{IdentityId, SalesforceContactId}
 import com.gu.util.apigateway.ApiGatewayRequest
 import com.gu.util.config.Stage
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
+import com.gu.zuora.subscription.{HolidayStopCredit, MutableCalendar, RatePlan, RatePlanCharge, Subscription, SubscriptionName, Fixtures => SubscriptionFixtures}
 import com.softwaremill.sttp.testing.SttpBackendStub
 import org.scalatest.Inside.inside
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.{JsObject, JsString, JsSuccess, Json}
-import com.gu.salesforce.SalesforceHandlerSupport.{HEADER_IDENTITY_ID, HEADER_SALESFORCE_CONTACT_ID}
 
 class HandlerTest extends FlatSpec with Matchers {
   val testId = "test-generated-id"
@@ -169,7 +168,7 @@ class HandlerTest extends FlatSpec with Matchers {
     val today = LocalDate.now()
     MutableCalendar.setFakeToday(Some(today))
     val subscriptionName = "Sub12344"
-    val gwSubscription = Fixtures.mkGuardianWeeklySubscription()
+    val gwSubscription = SubscriptionFixtures.mkGuardianWeeklySubscription()
     val contactId = "Contact1234"
     val holidayStopRequestsDetail = Fixtures.mkHolidayStopRequestDetails()
     val GuardianWeeklyAnnualIssueLimit = 6
