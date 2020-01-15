@@ -4,8 +4,10 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 import ai.x.play.json.Jsonx
+import com.gu.holiday_stops.CreditRequest
 import com.gu.salesforce.RecordsWrapperCaseClass
 import com.gu.salesforce.SalesforceConstants._
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestsDetailChargePrice, RatePlanChargeCode, AffectedPublicationDate, SubscriptionName}
 import com.gu.util.Logging
 import com.gu.util.resthttp.RestOp._
 import com.gu.util.resthttp.RestRequestMaker._
@@ -33,8 +35,8 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
 
   case class ProductRatePlanName(value: String) extends AnyVal
 
-  case class HolidayStopRequestsDetailChargeCode(value: String) extends AnyVal
-  implicit val formatHolidayStopRequestsDetailChargeCode = Jsonx.formatInline[HolidayStopRequestsDetailChargeCode]
+  case class RatePlanChargeCode(value: String) extends AnyVal
+  implicit val formatSubscriptionCreditRatePlanChargeCode = Jsonx.formatInline[RatePlanChargeCode]
 
   case class HolidayStopRequestsDetailChargePrice(value: Double) extends AnyVal
   implicit val formatHolidayStopRequestsDetailChargePrice = Jsonx.formatInline[HolidayStopRequestsDetailChargePrice]
@@ -42,13 +44,13 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
   case class HolidayStopRequestsDetailExpectedInvoiceDate(value: LocalDate) extends AnyVal
   implicit val formatHolidayStopRequestsDetailExpectedInvoiceDate = Jsonx.formatInline[HolidayStopRequestsDetailExpectedInvoiceDate]
 
-  case class StoppedPublicationDate(value: LocalDate) extends AnyVal {
+  case class AffectedPublicationDate(value: LocalDate) extends AnyVal {
     def getDayOfWeek: String = value.getDayOfWeek.toString.toLowerCase.capitalize
   }
-  implicit val formatStoppedPublicationDate = Jsonx.formatInline[StoppedPublicationDate]
+  implicit val formatAffectedPublicationDate = Jsonx.formatInline[AffectedPublicationDate]
 
   case class HolidayStopRequestsDetailActioned(
-    Charge_Code__c: HolidayStopRequestsDetailChargeCode,
+    Charge_Code__c: RatePlanChargeCode,
     Actual_Price__c: HolidayStopRequestsDetailChargePrice
   )
   implicit val formatActioned = Json.format[HolidayStopRequestsDetailActioned]
@@ -66,12 +68,18 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
     Id: HolidayStopRequestsDetailId,
     Subscription_Name__c: SubscriptionName,
     Product_Name__c: ProductName,
-    Stopped_Publication_Date__c: StoppedPublicationDate,
+    Stopped_Publication_Date__c: AffectedPublicationDate,
     Estimated_Price__c: Option[HolidayStopRequestsDetailChargePrice],
-    Charge_Code__c: Option[HolidayStopRequestsDetailChargeCode],
+    Charge_Code__c: Option[RatePlanChargeCode],
     Actual_Price__c: Option[HolidayStopRequestsDetailChargePrice],
     Expected_Invoice_Date__c: Option[HolidayStopRequestsDetailExpectedInvoiceDate]
-  )
+  ) extends CreditRequest {
+    val subscriptionName: SubscriptionName = Subscription_Name__c
+    val publicationDate: AffectedPublicationDate = Stopped_Publication_Date__c
+    val chargeCode: Option[RatePlanChargeCode] = Charge_Code__c
+    def productRatePlanChargeName: String = "Holiday Credit"
+  }
+
   implicit val formatHolidayStopRequestsDetail = Json.format[HolidayStopRequestsDetail]
 
   implicit val formatIds = Json.format[RecordsWrapperCaseClass[HolidayStopRequestsDetail]]

@@ -1,11 +1,11 @@
 package com.gu.holiday_stops
 
-sealed trait HolidayError {
+sealed trait ApiFailure {
   val reason: String
 }
-case class ZuoraHolidayError(reason: String) extends HolidayError
-case class SalesforceHolidayError(reason: String) extends HolidayError
-case class OverallFailure(reason: String) extends HolidayError
+case class ZuoraApiFailure(reason: String) extends ApiFailure
+case class SalesforceApiFailure(reason: String) extends ApiFailure
+case class OverallFailure(reason: String) extends ApiFailure
 
 /**
  * FIXME: Current implementation is not atomic, so how should we handle inconsistent state cleanup?
@@ -13,8 +13,8 @@ case class OverallFailure(reason: String) extends HolidayError
  */
 object OverallFailure {
   def apply(
-    zuoraFailures: List[ZuoraHolidayError],
-    salesforceResult: Either[SalesforceHolidayError, Unit]
+    zuoraFailures: List[ZuoraApiFailure],
+    salesforceResult: Either[SalesforceApiFailure, Unit]
   ): Option[OverallFailure] = {
 
     val zuoraError = zuoraFailures.headOption.map(e => OverallFailure(e.reason))

@@ -3,7 +3,7 @@ package com.gu.holiday_stops.subscription
 import java.time.temporal.ChronoUnit
 import java.time.LocalDate
 
-import com.gu.holiday_stops.{Fixtures, ZuoraHolidayError}
+import com.gu.holiday_stops.{Fixtures, ZuoraApiFailure}
 import org.scalactic.TypeCheckedTripleEquals
 import org.scalatest.Inside.inside
 import org.scalatest.{EitherValues, FlatSpec, Matchers}
@@ -140,14 +140,14 @@ class RatePlanChargeBillingScheduleSpec extends FlatSpec with Matchers with Eith
           val dateBeforeSchedule = effectiveStartDate.minusDays(1)
           billingSchedule.isDateCoveredBySchedule(dateBeforeSchedule) should equal(false)
           billingSchedule.billDatesCoveringDate(dateBeforeSchedule) should equal(
-            Left(ZuoraHolidayError(s"Billing schedule does not cover date $dateBeforeSchedule"))
+            Left(ZuoraApiFailure(s"Billing schedule does not cover date $dateBeforeSchedule"))
           )
           billingSchedule.isDateCoveredBySchedule(effectiveStartDate) should equal(true)
           billingSchedule.isDateCoveredBySchedule(expectedEndDate) should equal(true)
           val dateAfterSchedule = expectedEndDate.plusDays(1)
           billingSchedule.isDateCoveredBySchedule(dateAfterSchedule) should equal(false)
           billingSchedule.billDatesCoveringDate(dateAfterSchedule) should equal(
-            Left(ZuoraHolidayError(s"Billing schedule does not cover date $dateAfterSchedule"))
+            Left(ZuoraApiFailure(s"Billing schedule does not cover date $dateAfterSchedule"))
           )
       }
   }

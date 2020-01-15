@@ -16,12 +16,12 @@ object StandaloneApp extends App {
     case Right(config) =>
       val processResult = Processor.processAllProducts(config, stopDate, HttpURLConnectionBackend(), GetFromS3.fetchString)
 
-      println(processResult.flatMap(_.holidayStopsToApply).size)
+      println(processResult.flatMap(_.creditsToApply).size)
 
       processResult.flatMap(_.overallFailure) foreach { failure =>
         println(s"Overall failure: ${failure.reason}")
       }
-      processResult.flatMap(_.holidayStopResults) foreach {
+      processResult.flatMap(_.creditResults) foreach {
         case Left(failure) => println(s"Failed: ${failure.reason}")
         case Right(response) => println(s"Success: $response")
       }

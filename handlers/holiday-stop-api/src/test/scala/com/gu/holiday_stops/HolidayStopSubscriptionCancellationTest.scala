@@ -2,8 +2,8 @@ package com.gu.holiday_stops
 
 import java.time.LocalDate
 
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestsDetailChargeCode, HolidayStopRequestsDetailChargePrice}
-import org.scalatest.{FlatSpec, Inside, Matchers}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestsDetailChargePrice, RatePlanChargeCode}
+import org.scalatest.{FlatSpec, Matchers}
 
 class HolidayStopSubscriptionCancellationTest extends FlatSpec with Matchers {
   val estimatedPrice = 1.23
@@ -35,7 +35,7 @@ class HolidayStopSubscriptionCancellationTest extends FlatSpec with Matchers {
     HolidayStopSubscriptionCancellation(cancellationDate, holidayStopRequests) should contain only(
       unprocessedStopForDateBeforeCancellation.copy(
         Actual_Price__c = Some(HolidayStopRequestsDetailChargePrice(estimatedPrice)),
-        Charge_Code__c = Some(HolidayStopRequestsDetailChargeCode("ManualRefund_Cancellation"))
+        Charge_Code__c = Some(RatePlanChargeCode("ManualRefund_Cancellation"))
       )
     )
   }

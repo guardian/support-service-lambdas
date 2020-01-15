@@ -2,41 +2,41 @@ package com.gu.holiday_stops.subscription
 
 import java.time.LocalDate
 
-import com.gu.holiday_stops.{HolidayCreditProduct, ZuoraHolidayError}
+import com.gu.holiday_stops.{CreditProduct, ZuoraApiFailure}
 
-case class HolidayCreditUpdate(
+case class SubscriptionUpdate(
   currentTerm: Option[Int],
   currentTermPeriodType: Option[String],
   add: List[Add]
 )
 
 /**
- * This builds the actual request body to add Holiday Credit RatePlanCharge in Zuora.
+ * This builds the request body to add a Credit RatePlanCharge in Zuora.
  * It should not contain business logic. Any business logic should be moved out to the
  * main for-comprehension.
  */
-object HolidayCreditUpdate {
+object SubscriptionUpdate {
 
-  def apply(
-    holidayCreditProduct: HolidayCreditProduct,
+  def forHolidayStop(
+    creditProduct: CreditProduct,
     subscription: Subscription,
     stoppedPublicationDate: LocalDate,
     maybeExtendedTerm: Option[ExtendedTerm],
     holidayCredit: HolidayStopCredit
-  ): Either[ZuoraHolidayError, HolidayCreditUpdate] = {
+  ): Either[ZuoraApiFailure, SubscriptionUpdate] = {
     Right(
-      HolidayCreditUpdate(
+      SubscriptionUpdate(
         currentTerm = maybeExtendedTerm.map(_.length),
         currentTermPeriodType = maybeExtendedTerm.map(_.unit),
         List(
           Add(
-            productRatePlanId = holidayCreditProduct.productRatePlanId,
+            productRatePlanId = creditProduct.productRatePlanId,
             contractEffectiveDate = holidayCredit.invoiceDate,
             customerAcceptanceDate = holidayCredit.invoiceDate,
             serviceActivationDate = holidayCredit.invoiceDate,
             chargeOverrides = List(
               ChargeOverride(
-                productRatePlanChargeId = holidayCreditProduct.productRatePlanChargeId,
+                productRatePlanChargeId = creditProduct.productRatePlanChargeId,
                 HolidayStart__c = stoppedPublicationDate,
                 HolidayEnd__c = stoppedPublicationDate,
                 price = holidayCredit.amount

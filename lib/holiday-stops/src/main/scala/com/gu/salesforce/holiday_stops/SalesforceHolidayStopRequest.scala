@@ -342,7 +342,7 @@ object SalesforceHolidayStopRequest extends Logging {
     implicit val cancelHolidayStopRequestDetailBodyReads = Json.writes[CancelHolidayStopRequestDetailBody]
     final case class CancelHolidayStopRequestDetailBody (
       Actual_Price__c: Option[HolidayStopRequestsDetailChargePrice],
-      Charge_Code__c: Option[HolidayStopRequestsDetailChargeCode]
+      Charge_Code__c: Option[RatePlanChargeCode]
     )
 
     def apply(sfPost: HttpOp[RestRequestMaker.PostRequest, JsValue]): CompositeRequest => ClientFailableOp[CompositeResponse] =

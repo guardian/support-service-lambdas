@@ -3,8 +3,8 @@ package com.gu.holiday_stops
 import java.time.LocalDate
 
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.HolidayStopRequest
-import com.gu.salesforce.holiday_stops.{SalesforceHolidayStopRequest, SalesforceHolidayStopRequestsDetail}
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestsDetailChargeCode, HolidayStopRequestsDetailChargePrice, SubscriptionName}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.RatePlanChargeCode
 
 final case class HolidayStopSubscriptionCancellationError(reason: String)
 
@@ -30,7 +30,7 @@ object HolidayStopSubscriptionCancellation {
         ) =>
           val chargeCode = requestDetail
             .Charge_Code__c
-            .getOrElse(HolidayStopRequestsDetailChargeCode("ManualRefund_Cancellation"))
+            .getOrElse(RatePlanChargeCode("ManualRefund_Cancellation"))
           requestDetail.copy(
             Charge_Code__c = Some(chargeCode),
             Actual_Price__c = requestDetail.Estimated_Price__c
@@ -49,9 +49,7 @@ object HolidayStopSubscriptionCancellation {
     val stopHasNotBeenProcessed = !stopHasBeenProcessed
 
     val stopRefundInvoiceDateIsAfterOrEqualToCancellationDate = holidayStop
-      .Expected_Invoice_Date__c
-      .map(invoiceDate => !invoiceDate.value.isBefore(cancellationDate))
-      .getOrElse(false)
+      .Expected_Invoice_Date__c.exists(invoiceDate => !invoiceDate.value.isBefore(cancellationDate))
 
     stopDateIsBeforeCancellationDate && (
       stopHasNotBeenProcessed ||

@@ -4,7 +4,7 @@ import java.time.temporal.ChronoUnit
 import java.time.{LocalDate, Period}
 
 import cats.implicits._
-import com.gu.holiday_stops.ZuoraHolidayError
+import com.gu.holiday_stops.ZuoraApiFailure
 
 /**
  * Information about the billing cycles for a Zuora RatePlanCharge.
@@ -47,7 +47,7 @@ import com.gu.holiday_stops.ZuoraHolidayError
  * https://knowledgecenter.zuora.com/DC_Developers/G_SOAP_API/E1_SOAP_API_Object_Reference/ProductRatePlanCharge
  */
 trait RatePlanChargeBillingSchedule {
-  def billDatesCoveringDate(date: LocalDate): Either[ZuoraHolidayError, BillDates]
+  def billDatesCoveringDate(date: LocalDate): Either[ZuoraApiFailure, BillDates]
 
   def isDateCoveredBySchedule(date: LocalDate): Boolean
 }
@@ -61,10 +61,10 @@ trait RatePlanChargeBillingSchedule {
 case class BillDates(startDate: LocalDate, endDate: LocalDate)
 
 object RatePlanChargeBillingSchedule {
-  def apply(ratePlanCharge: RatePlanCharge): Either[ZuoraHolidayError, RatePlanChargeBillingSchedule] = {
+  def apply(ratePlanCharge: RatePlanCharge): Either[ZuoraApiFailure, RatePlanChargeBillingSchedule] = {
     for {
-      endDateCondition <- ratePlanCharge.endDateCondition.toRight(ZuoraHolidayError("RatePlanCharge.endDateCondition is required"))
-      billingPeriodName <- ratePlanCharge.billingPeriod.toRight(ZuoraHolidayError("RatePlanCharge.billingPeriod is required"))
+      endDateCondition <- ratePlanCharge.endDateCondition.toRight(ZuoraApiFailure("RatePlanCharge.endDateCondition is required"))
+      billingPeriodName <- ratePlanCharge.billingPeriod.toRight(ZuoraApiFailure("RatePlanCharge.billingPeriod is required"))
       billingPeriod <- billingPeriodForName(billingPeriodName, ratePlanCharge.specificBillingPeriod)
       ratePlanEndDate <- ratePlanEndDate(
         billingPeriod,
@@ -81,7 +81,7 @@ object RatePlanChargeBillingSchedule {
           .getOrElse(true)
       }
 
-      override def billDatesCoveringDate(date: LocalDate): Either[ZuoraHolidayError, BillDates] = {
+      override def billDatesCoveringDate(date: LocalDate): Either[ZuoraApiFailure, BillDates] = {
         if (isDateCoveredBySchedule(date)) {
           val startPeriods = billingPeriod
             .unit
@@ -95,7 +95,7 @@ object RatePlanChargeBillingSchedule {
 
           BillDates(startDate, endDate).asRight
         } else {
-          ZuoraHolidayError(s"Billing schedule does not cover date $date").asLeft
+          ZuoraApiFailure(s"Billing schedule does not cover date $date").asLeft
         }
       }
     }
@@ -104,7 +104,7 @@ object RatePlanChargeBillingSchedule {
   private def billingPeriodForName(
     billingPeriodName: String,
     optionalSpecificBillingPeriod: Option[Int]
-  ): Either[ZuoraHolidayError, BillingPeriod] = {
+  ): Either[ZuoraApiFailure, BillingPeriod] = {
     billingPeriodName match {
       case "Annual" => Right(BillingPeriod(ChronoUnit.YEARS, 1))
       case "Semi_Annual" => Right(BillingPeriod(ChronoUnit.MONTHS, 6))
@@ -112,13 +112,13 @@ object RatePlanChargeBillingSchedule {
       case "Month" => Right(BillingPeriod(ChronoUnit.MONTHS, 1))
       case "Specific_Weeks" =>
         optionalSpecificBillingPeriod
-          .toRight(ZuoraHolidayError(s"specificBillingPeriod is required for $billingPeriodName billing period"))
+          .toRight(ZuoraApiFailure(s"specificBillingPeriod is required for $billingPeriodName billing period"))
           .map(BillingPeriod(ChronoUnit.WEEKS, _))
       case "Specific_Months" =>
         optionalSpecificBillingPeriod
-          .toRight(ZuoraHolidayError(s"specificBillingPeriod is required for $billingPeriodName billing period"))
+          .toRight(ZuoraApiFailure(s"specificBillingPeriod is required for $billingPeriodName billing period"))
           .map(BillingPeriod(ChronoUnit.MONTHS, _))
-      case _ => Left(ZuoraHolidayError(s"Failed to determine duration of billing period: $billingPeriodName"))
+      case _ => Left(ZuoraApiFailure(s"Failed to determine duration of billing period: $billingPeriodName"))
     }
   }
 
@@ -128,7 +128,7 @@ object RatePlanChargeBillingSchedule {
     endDateCondition: String,
     upToPeriodsType: Option[String],
     upToPeriods: Option[Int]
-  ): Either[ZuoraHolidayError, Option[LocalDate]] = {
+  ): Either[ZuoraApiFailure, Option[LocalDate]] = {
     endDateCondition match {
       case "Subscription_End" => Right(None) //This assumes all subscriptions will renew for ever
       case "Fixed_Period" =>
@@ -152,7 +152,7 @@ object RatePlanChargeBillingSchedule {
     optionalUpToPeriodsType match {
       case Some("Billing_Periods") =>
         optionalUpToPeriods
-          .toRight(ZuoraHolidayError("RatePlan.upToPeriods is required when RatePlan.upToPeriodsType=Billing_Periods"))
+          .toRight(ZuoraApiFailure("RatePlan.upToPeriods is required when RatePlan.upToPeriodsType=Billing_Periods"))
           .map { upToPeriods =>
             billingPeriod
               .unit
@@ -160,7 +160,7 @@ object RatePlanChargeBillingSchedule {
               .minusDays(1)
           }
       case unsupportedBillingPeriodType =>
-        ZuoraHolidayError(s"RatePlan.upToPeriodsType=${unsupportedBillingPeriodType.getOrElse("null")} is not supported")
+        ZuoraApiFailure(s"RatePlan.upToPeriodsType=${unsupportedBillingPeriodType.getOrElse("null")} is not supported")
           .asLeft
     }
   }
