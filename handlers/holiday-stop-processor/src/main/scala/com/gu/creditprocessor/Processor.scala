@@ -95,11 +95,10 @@ object Processor {
         fulfilmentDatesFetcher
           .getFulfilmentDates(zuoraProductType, today)
           .map(fulfilmentDates =>
-            fulfilmentDates.values.flatMap(_.holidayStopProcessorTargetDate).toList
-          )
+            fulfilmentDates.values.flatMap(_.holidayStopProcessorTargetDate).toList)
           .leftMap(error => ZuoraApiFailure(s"Failed to fetch fulfilment dates: $error"))
       )(
-        processOverRideDate => List(processOverRideDate).asRight
-      )
+          processOverRideDate => List(processOverRideDate).asRight
+        )
   }
 }
