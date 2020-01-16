@@ -19,46 +19,45 @@ object Main extends App {
     val firstRecord = records.next()
     firstRecord ::
       records.takeWhile { record =>
-        (record("subscription_name") == firstRecord("subscription_name")) &&
-        (record("rate_plan_charge_name") == firstRecord("rate_plan_charge_name"))
+        (record("Subscription.Name") == firstRecord("Subscription.Name")) &&
+        (record("RatePlanCharge.Name") == firstRecord("RatePlanCharge.Name"))
       }.toList
   }
 
   def checkInvoiceDates(recordsForSub: List[Map[String, String]]) = {
-    val allInvoiceDates = recordsForSub.map(record => LocalDate.parse(record("invoice_date")))
+    val allInvoiceDates = recordsForSub.map(record => LocalDate.parse(record("Invoice.InvoiceDate")))
     val shouldUseEffectiveStartDate = recordsForSub.exists( record =>
       SubscriptionData.shouldUseEffectiveStartDate(
-        record("rate_plan_charge_name"),
-        record.get("up_to_periods_type").filter(_ != ""),
-        record.get("billing_period").filter(_ != ""),
-        record.get("specific_billing_period").filter(_ != "").map(_.toInt)
+        record.apply("RatePlanCharge.Name"),
+        Option(record("RatePlanCharge.UpToPeriodsType")).filter(_ != ""),
+        Option(record("RatePlanCharge.BillingPeriod")).filter(_ != ""),
+        Option(record("RatePlanCharge.SpecificBillingPeriod")).filter(_ != "").map(_.toInt)
       )
     )
 
-
     recordsForSub.foreach { record =>
-      val id = s"${record("subscription_name")}-${record("invoice_number")}"
+      val id = s"${record("Subscription.Name")}-${record("Invoice.InvoiceNumber")}"
 
       RatePlanChargeBillingSchedule(
-        LocalDate.parse(record("customer_acceptance_date")),
-        record.get("billing_day").filter(_ != ""),
-        record.get("trigger_event").filter(_ != ""),
-        record.get("trigger_date").filter(_ != "").map(LocalDate.parse),
+        LocalDate.parse(record("Subscription.ContractAcceptanceDate")),
+        Option(record("RatePlanCharge.BillCycleType")).filter(_ != ""),
+        Option(record("RatePlanCharge.TriggerEvent")).filter(_ != ""),
+        Option(record("RatePlanCharge.TriggerDate")).filter(_ != "").map(LocalDate.parse),
         None,
-        record("bill_cycle_day").toInt,
-        record.get("up_to_periods_type").filter(_ != ""),
-        record.get("up_to_periods").filter(_ != "").map(_.toInt),
-        record.get("billing_period").filter(_ != ""),
-        record.get("specific_billing_period").filter(_ != "").map(_.toInt),
-        record.get("end_date_condition").filter(_ != ""), //TODO: add to datalake table
+        record("Account.BillCycleDay").toInt,
+        Option(record("RatePlanCharge.UpToPeriodsType")).filter(_ != ""),
+        Option(record("RatePlanCharge.UpToPeriods")).filter(_ != "").map(_.toInt),
+        Option(record("RatePlanCharge.BillingPeriod")).filter(_ != ""),
+        Option(record("RatePlanCharge.SpecificBillingPeriod")).filter(_ != "").map(_.toInt),
+        Option(record("RatePlanCharge.EndDateCondition")).filter(_ != ""), //TODO: add to datalake table
         shouldUseEffectiveStartDate,
-        LocalDate.parse(record("effective_start_date"))
+        LocalDate.parse(record("RatePlanCharge.EffectiveStartDate"))
       ).fold(
         error => println(s"Failed to generate schedule for $id: $error"),
         { schedule =>
-          val invoiceDate = LocalDate.parse(record("invoice_date"))
+          val invoiceDate = LocalDate.parse(record("Invoice.InvoiceDate"))
           schedule.billDatesCoveringDate(invoiceDate).fold(
-            { error => println(s"Could not get billing period for $id for date $invoiceDate: $error") },
+            { error => println(s"Could not get billing period for $id for date $invoiceDate shouldUseEffectiveStartDate=$shouldUseEffectiveStartDate: $error") },
             { billDates =>
               if (!allInvoiceDates.contains(billDates.startDate)) {
                 s"$id had invoices on dates $allInvoiceDates which did not include the bill dates calculated for date $invoiceDate: $billDates"

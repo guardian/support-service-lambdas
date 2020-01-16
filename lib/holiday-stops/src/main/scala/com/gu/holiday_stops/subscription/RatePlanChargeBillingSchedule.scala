@@ -134,14 +134,14 @@ object RatePlanChargeBillingSchedule {
   ): Either[ZuoraHolidayError, BillingPeriod] = {
     billingPeriodName match {
       case "Annual" => Right(BillingPeriod(ChronoUnit.YEARS, 1))
-      case "Semi_Annual" => Right(BillingPeriod(ChronoUnit.MONTHS, 6))
+      case "Semi_Annual" | "Semi-Annual" => Right(BillingPeriod(ChronoUnit.MONTHS, 6))
       case "Quarter" => Right(BillingPeriod(ChronoUnit.MONTHS, 3))
       case "Month" => Right(BillingPeriod(ChronoUnit.MONTHS, 1))
-      case "Specific_Weeks" =>
+      case "Specific_Weeks" | "Specific Weeks" =>
         optionalSpecificBillingPeriod
           .toRight(ZuoraHolidayError(s"specificBillingPeriod is required for $billingPeriodName billing period"))
           .map(BillingPeriod(ChronoUnit.WEEKS, _))
-      case "Specific_Months" =>
+      case "Specific_Months" | "Specific Months" =>
         optionalSpecificBillingPeriod
           .toRight(ZuoraHolidayError(s"specificBillingPeriod is required for $billingPeriodName billing period"))
           .map(BillingPeriod(ChronoUnit.MONTHS, _))
@@ -157,8 +157,8 @@ object RatePlanChargeBillingSchedule {
     upToPeriods: Option[Int]
   ): Either[ZuoraHolidayError, Option[LocalDate]] = {
     endDateCondition match {
-      case "Subscription_End" => Right(None) //This assumes all subscriptions will renew for ever
-      case "Fixed_Period" =>
+      case "Subscription_End" | "SubscriptionEnd" => Right(None) //This assumes all subscriptions will renew for ever
+      case "Fixed_Period" | "FixedPeriod" =>
         ratePlanFixedPeriodEndDate(
           billingPeriod,
           ratePlanStartDate,
@@ -166,6 +166,8 @@ object RatePlanChargeBillingSchedule {
           upToPeriodsType,
           upToPeriods
         ).map(endDate => Some(endDate))
+      case unsupported =>
+        ZuoraHolidayError(s"RatePlanCharge.endDateCondition=$unsupported is not supported").asLeft
     }
   }
 
@@ -228,6 +230,9 @@ object RatePlanChargeBillingSchedule {
       case Some("SpecificDate") =>
         optionalTriggerDate
           .toRight(ZuoraHolidayError("RatePlan.triggerDate is required when RatePlan.triggerEvent=SpecificDate"))
+      case Some(unsupported) =>
+        ZuoraHolidayError(s"RatePlan.triggerEvent=$unsupported is not supported")
+          .asLeft
       case None =>
         ZuoraHolidayError("RatePlan.triggerEvent is a required field")
           .asLeft
@@ -242,7 +247,7 @@ object RatePlanChargeBillingSchedule {
     optionalUpToPeriods: Option[Int]
   ) = {
     optionalUpToPeriodsType match {
-      case Some("Billing_Periods") =>
+      case Some("Billing_Periods") | Some("Billing Periods") =>
         optionalUpToPeriods
           .toRight(ZuoraHolidayError("RatePlan.upToPeriods is required when RatePlan.upToPeriodsType=Billing_Periods"))
           .map { upToPeriods =>
