@@ -9,6 +9,7 @@ case class Subscription(
   termStartDate: LocalDate,
   termEndDate: LocalDate,
   customerAcceptanceDate: LocalDate,
+  contractEffectiveDate: LocalDate,
   currentTerm: Int,
   currentTermPeriodType: String,
   autoRenew: Boolean,

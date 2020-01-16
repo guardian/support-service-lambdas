@@ -40,6 +40,7 @@ object Main extends App {
 
       RatePlanChargeBillingSchedule(
         LocalDate.parse(record("Subscription.ContractAcceptanceDate")),
+        LocalDate.parse(record("Subscription.ContractEffectiveDate")),
         Option(record("RatePlanCharge.BillCycleType")).filter(_ != ""),
         Option(record("RatePlanCharge.TriggerEvent")).filter(_ != ""),
         Option(record("RatePlanCharge.TriggerDate")).filter(_ != "").map(LocalDate.parse),

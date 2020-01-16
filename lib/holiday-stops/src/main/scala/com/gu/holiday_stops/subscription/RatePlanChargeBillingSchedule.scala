@@ -63,22 +63,25 @@ case class BillDates(startDate: LocalDate, endDate: LocalDate)
 object RatePlanChargeBillingSchedule {
 
   def apply(subscription: Subscription, ratePlanCharge: RatePlanCharge, account: ZuoraAccount, useEffectiveStartDate: Boolean): Either[ZuoraHolidayError, RatePlanChargeBillingSchedule] = {
-    val customerAcceptanceDate = subscription.customerAcceptanceDate
-    val billingDay = ratePlanCharge.billingDay
-    val triggerEvent = ratePlanCharge.triggerEvent
-    val triggerDate = ratePlanCharge.triggerDate
-    val processedThroughDate = ratePlanCharge.processedThroughDate
-    val billCycleDay = account.billingAndPayment.billCycleDay
-    val upToPeriodType = ratePlanCharge.upToPeriodsType
-    val upToPeriods = ratePlanCharge.upToPeriods
-    val optionalBillingPeriodName = ratePlanCharge.billingPeriod
-    val specificBillingPeriod = ratePlanCharge.specificBillingPeriod
-    val endDateCondition = ratePlanCharge.endDateCondition
-
-    apply(customerAcceptanceDate, billingDay, triggerEvent, triggerDate, processedThroughDate, billCycleDay, upToPeriodType, upToPeriods, optionalBillingPeriodName, specificBillingPeriod, endDateCondition, useEffectiveStartDate, ratePlanCharge.effectiveStartDate)
+    apply(
+      subscription.customerAcceptanceDate,
+      subscription.contractEffectiveDate,
+      ratePlanCharge.billingDay,
+      ratePlanCharge.triggerEvent,
+      ratePlanCharge.triggerDate,
+      ratePlanCharge.processedThroughDate,
+      account.billingAndPayment.billCycleDay,
+      ratePlanCharge.upToPeriodsType,
+      ratePlanCharge.upToPeriods,
+      ratePlanCharge.billingPeriod,
+      ratePlanCharge.specificBillingPeriod,
+      ratePlanCharge.endDateCondition,
+      useEffectiveStartDate,
+      ratePlanCharge.effectiveStartDate
+    )
   }
 
-  def apply(customerAcceptanceDate: LocalDate, billingDay: Option[String], triggerEvent: Option[String], triggerDate: Option[LocalDate], processedThroughDate: Option[LocalDate], billCycleDay: Int, upToPeriodType: Option[String], upToPeriods: Option[Int], optionalBillingPeriodName: Option[String], specificBillingPeriod: Option[Int], endDateCondition: Option[String], useEffectiveStartDate: Boolean, effectiveStartDate: LocalDate) = {
+  def apply(customerAcceptanceDate: LocalDate, contractEffectiveDate: LocalDate, billingDay: Option[String], triggerEvent: Option[String], triggerDate: Option[LocalDate], processedThroughDate: Option[LocalDate], billCycleDay: Int, upToPeriodType: Option[String], upToPeriods: Option[Int], optionalBillingPeriodName: Option[String], specificBillingPeriod: Option[Int], endDateCondition: Option[String], useEffectiveStartDate: Boolean, effectiveStartDate: LocalDate) = {
     for {
       endDateCondition <- endDateCondition.toRight(ZuoraHolidayError("RatePlanCharge.endDateCondition is required"))
       billingPeriodName <- optionalBillingPeriodName.toRight(ZuoraHolidayError("RatePlanCharge.billingPeriod is required"))
@@ -86,6 +89,7 @@ object RatePlanChargeBillingSchedule {
 
       ratePlanStartDate <- ratePlanStartDate(
         customerAcceptanceDate,
+        contractEffectiveDate,
         billingDay,
         triggerEvent,
         triggerDate,
@@ -117,7 +121,7 @@ object RatePlanChargeBillingSchedule {
           val startDate = ratePlanStartDate
             .plus(startPeriods * billingPeriod.multiple, billingPeriod.unit)
           val endDate = startDate
-            .plus(billingPeriod.multiple, billingPeriod.unit)
+            .plus(billingPeriod.multiple.toLong, billingPeriod.unit)
             .minusDays(1)
 
           BillDates(startDate, endDate).asRight
@@ -173,6 +177,7 @@ object RatePlanChargeBillingSchedule {
 
   private def ratePlanStartDate(
     customerAcceptanceDate: LocalDate,
+    contractEffectiveDate: LocalDate,
     optionalBillingDay: Option[String],
     optionalTriggerEvent: Option[String],
     optionalTriggerDate: Option[LocalDate],
@@ -188,14 +193,16 @@ object RatePlanChargeBillingSchedule {
         case None | Some("ChargeTriggerDay") => ratePlanTriggerDate(
           optionalTriggerEvent,
           optionalTriggerDate,
-          customerAcceptanceDate
+          customerAcceptanceDate,
+          contractEffectiveDate
         )
         case Some("DefaultFromCustomer") =>
           for {
             triggerDate <- ratePlanTriggerDate(
               optionalTriggerEvent,
               optionalTriggerDate,
-              customerAcceptanceDate
+              customerAcceptanceDate,
+              contractEffectiveDate
             )
           } yield adjustDateForBillCycleDate(triggerDate, billCycleDay)
 
@@ -223,10 +230,12 @@ object RatePlanChargeBillingSchedule {
   private def ratePlanTriggerDate(
     optionalTriggerEvent: Option[String],
     optionalTriggerDate: Option[LocalDate],
-    customerAcceptanceDate: LocalDate
+    customerAcceptanceDate: LocalDate,
+    contractEffectiveDate: LocalDate
   ): Either[ZuoraHolidayError, LocalDate] = {
     optionalTriggerEvent match {
       case Some("CustomerAcceptance") => Right(customerAcceptanceDate)
+      case Some("ContractEffective") => Right(contractEffectiveDate)
       case Some("SpecificDate") =>
         optionalTriggerDate
           .toRight(ZuoraHolidayError("RatePlan.triggerDate is required when RatePlan.triggerEvent=SpecificDate"))
@@ -253,7 +262,7 @@ object RatePlanChargeBillingSchedule {
           .map { upToPeriods =>
             billingPeriod
               .unit
-              .addTo(ratePlanStartDate, upToPeriods * billingPeriod.multiple)
+              .addTo(ratePlanStartDate, (upToPeriods * billingPeriod.multiple).toLong)
               .minusDays(1)
           }
       case unsupportedBillingPeriodType =>

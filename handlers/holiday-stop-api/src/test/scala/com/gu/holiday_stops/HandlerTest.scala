@@ -53,6 +53,7 @@ class HandlerTest extends FlatSpec with Matchers {
       termStartDate = startDate,
       termEndDate = endDate,
       customerAcceptanceDate = customerAcceptanceDate,
+      contractEffectiveDate = customerAcceptanceDate,
       currentTerm = 12,
       currentTermPeriodType = "Month",
       autoRenew = true,
