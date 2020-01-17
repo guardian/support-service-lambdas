@@ -4,11 +4,9 @@ import java.time.{DayOfWeek, LocalDate, ZonedDateTime}
 
 import cats.implicits._
 import com.gu.fulfilmentdates.FulfilmentDates
-import com.gu.holiday_stops.subscription.SubscriptionData
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.SubscriptionName
-import play.api.libs.functional.syntax._
+import com.gu.zuora.subscription.{SubscriptionData, SubscriptionName}
 import play.api.libs.json._
 
 object WireHolidayStopRequest {

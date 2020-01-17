@@ -114,7 +114,7 @@ lazy val `holiday-stops` = all(project in file("lib/holiday-stops"))
     `salesforce-client`,
     effects % "test->test",
     testDep,
-    `zuora-core`
+    `zuora-core` % "compile->compile;test->test"
   )
   .settings(
     libraryDependencies ++= Seq(
@@ -196,6 +196,16 @@ lazy val `fulfilment-dates` = all(project in file("lib/fulfilment-dates"))
   )
 
 lazy val `zuora-core` = all(project in file("lib/zuora-core"))
+  .settings(
+    libraryDependencies ++= Seq(
+      playJson,
+      playJsonExtensions,
+      catsCore,
+      circe,
+      circeParser,
+      scalatest
+    )
+  )
 
 // ==== END libraries ====
 

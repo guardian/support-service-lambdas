@@ -4,8 +4,10 @@ import java.time.LocalDate
 
 import cats.implicits._
 import com.amazonaws.services.lambda.runtime.Context
+import com.gu.creditprocessor.{ProcessResult, ZuoraCreditAddResult}
 import com.gu.effects.GetFromS3
 import com.gu.holiday_stops.Config
+import com.gu.holidaystopprocessor.HolidayStopCreditProcessor.processAllProducts
 import com.softwaremill.sttp.HttpURLConnectionBackend
 import io.circe.generic.auto._
 import io.github.mkotsur.aws.handler.Lambda
@@ -24,7 +26,7 @@ object Handler extends Lambda[Option[LocalDate], List[ZuoraCreditAddResult]] {
         Left(new RuntimeException(s"Config failure: $msg"))
 
       case Right(config) =>
-        val results = Processor.processAllProducts(config, processDateOverride, HttpURLConnectionBackend(), GetFromS3.fetchString)
+        val results = processAllProducts(config, processDateOverride, HttpURLConnectionBackend(), GetFromS3.fetchString)
         results.foreach(result => ProcessResult.log(result))
         results.flatMap(_.overallFailure.toList) match {
           case Nil =>
@@ -32,7 +34,6 @@ object Handler extends Lambda[Option[LocalDate], List[ZuoraCreditAddResult]] {
             Right(successfulZuoraResponses)
           case failures =>
             Left(new RuntimeException(failures.map(_.reason).mkString("; ")))
-
         }
     }
   }

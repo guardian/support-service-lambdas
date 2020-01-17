@@ -4,16 +4,15 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 import ai.x.play.json.Jsonx
-import com.gu.holiday_stops.CreditRequest
 import com.gu.salesforce.RecordsWrapperCaseClass
 import com.gu.salesforce.SalesforceConstants._
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestsDetailChargePrice, RatePlanChargeCode, AffectedPublicationDate, SubscriptionName}
 import com.gu.util.Logging
 import com.gu.util.resthttp.RestOp._
 import com.gu.util.resthttp.RestRequestMaker._
 import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.resthttp.{HttpOp, RestRequestMaker}
 import com.gu.zuora.ZuoraProductTypes.ZuoraProductType
+import com.gu.zuora.subscription.{AffectedPublicationDate, CreditRequest, RatePlanChargeCode, SubscriptionName}
 import play.api.libs.json.{JsValue, Json}
 
 object SalesforceHolidayStopRequestsDetail extends Logging {
@@ -27,27 +26,16 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
   case class HolidayStopRequestId(value: String) extends AnyVal
   implicit val formatHolidayStopRequestId = Jsonx.formatInline[HolidayStopRequestId]
 
-  case class SubscriptionName(value: String) extends AnyVal
-  implicit val formatSubscriptionName = Jsonx.formatInline[SubscriptionName]
-
   case class ProductName(value: String) extends AnyVal
   implicit val formatProductName = Jsonx.formatInline[ProductName]
 
   case class ProductRatePlanName(value: String) extends AnyVal
-
-  case class RatePlanChargeCode(value: String) extends AnyVal
-  implicit val formatSubscriptionCreditRatePlanChargeCode = Jsonx.formatInline[RatePlanChargeCode]
 
   case class HolidayStopRequestsDetailChargePrice(value: Double) extends AnyVal
   implicit val formatHolidayStopRequestsDetailChargePrice = Jsonx.formatInline[HolidayStopRequestsDetailChargePrice]
 
   case class HolidayStopRequestsDetailExpectedInvoiceDate(value: LocalDate) extends AnyVal
   implicit val formatHolidayStopRequestsDetailExpectedInvoiceDate = Jsonx.formatInline[HolidayStopRequestsDetailExpectedInvoiceDate]
-
-  case class AffectedPublicationDate(value: LocalDate) extends AnyVal {
-    def getDayOfWeek: String = value.getDayOfWeek.toString.toLowerCase.capitalize
-  }
-  implicit val formatAffectedPublicationDate = Jsonx.formatInline[AffectedPublicationDate]
 
   case class HolidayStopRequestsDetailActioned(
     Charge_Code__c: RatePlanChargeCode,

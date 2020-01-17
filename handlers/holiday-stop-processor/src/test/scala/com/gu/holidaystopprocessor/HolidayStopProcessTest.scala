@@ -4,13 +4,14 @@ import java.time.temporal.TemporalAdjusters
 import java.time.{DayOfWeek, LocalDate}
 
 import cats.implicits._
+import com.gu.creditprocessor.{Processor, ZuoraCreditAddResult, ZuoraHolidayCreditAddResult}
 import com.gu.fulfilmentdates.{FulfilmentDates, FulfilmentDatesFetcher, FulfilmentDatesFetcherError}
-import com.gu.holiday_stops.Fixtures.mkGuardianWeeklySubscription
-import com.gu.holiday_stops._
-import com.gu.holiday_stops.subscription.{MutableCalendar, Subscription, SubscriptionUpdate}
+import com.gu.holiday_stops.Fixtures
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
 import com.gu.zuora.ZuoraProductTypes
 import com.gu.zuora.ZuoraProductTypes.ZuoraProductType
+import com.gu.zuora.subscription.Fixtures.mkGuardianWeeklySubscription
+import com.gu.zuora.subscription._
 import org.scalatest.{EitherValues, FlatSpec, Matchers, OptionValues}
 
 class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues with OptionValues {

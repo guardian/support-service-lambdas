@@ -4,7 +4,7 @@ import java.time.LocalDate
 
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.HolidayStopRequest
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.RatePlanChargeCode
+import com.gu.zuora.subscription.RatePlanChargeCode
 
 final case class HolidayStopSubscriptionCancellationError(reason: String)
 

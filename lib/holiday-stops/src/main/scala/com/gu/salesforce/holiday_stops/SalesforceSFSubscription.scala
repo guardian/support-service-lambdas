@@ -1,15 +1,16 @@
 package com.gu.salesforce.holiday_stops
 
 import ai.x.play.json.Jsonx
-import com.gu.salesforce.{Contact, RecordsWrapperCaseClass, SalesforceQueryConstants}
 import com.gu.salesforce.SalesforceConstants._
 import com.gu.salesforce.SalesforceQueryConstants.contactToWhereClausePart
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{ProductName, SubscriptionName}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.ProductName
+import com.gu.salesforce.{Contact, RecordsWrapperCaseClass}
 import com.gu.util.Logging
 import com.gu.util.resthttp.RestOp._
 import com.gu.util.resthttp.RestRequestMaker._
 import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.resthttp.{HttpOp, RestRequestMaker}
+import com.gu.zuora.subscription.SubscriptionName
 import play.api.libs.json.{JsValue, Json}
 
 object SalesforceSFSubscription extends Logging {

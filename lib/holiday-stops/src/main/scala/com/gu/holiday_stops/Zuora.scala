@@ -1,7 +1,6 @@
 package com.gu.holiday_stops
 
-import com.gu.holiday_stops.subscription.{Subscription, SubscriptionUpdate}
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.SubscriptionName
+import com.gu.zuora.subscription._
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
 import io.circe.generic.auto._

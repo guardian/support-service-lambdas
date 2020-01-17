@@ -1,12 +1,11 @@
 package com.gu.holidaystopprocessor
 
-import java.time.{DayOfWeek, LocalDate}
 import java.time.temporal.TemporalAdjusters
+import java.time.{DayOfWeek, LocalDate}
 
-import com.gu.holiday_stops._
-import com.gu.holiday_stops.subscription._
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.AffectedPublicationDate
+import com.gu.zuora.subscription.{Add, AffectedPublicationDate, ChargeOverride, ExtendedTerm, HolidayStopCredit, MutableCalendar, SubscriptionData, SubscriptionUpdate, Fixtures => SubscriptionFixtures}
 import org.scalatest.{EitherValues, FlatSpec, Matchers}
+import com.gu.holiday_stops.Fixtures
 
 class SubscriptionUpdateTest extends FlatSpec with Matchers with EitherValues {
   MutableCalendar.setFakeToday(Some(LocalDate.parse("2019-08-12")))
@@ -17,7 +16,7 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers with EitherValues {
   )
 
   "forHolidayStop" should "generate update correctly" in {
-    val subscription = Fixtures.mkGuardianWeeklySubscription(
+    val subscription = SubscriptionFixtures.mkGuardianWeeklySubscription(
       termStartDate = LocalDate.of(2019, 7, 12),
       termEndDate = LocalDate.of(2020, 7, 12),
       price = 42.1,
@@ -59,7 +58,7 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers with EitherValues {
   }
 
   it should "generate an update with an extended term when credit invoice date is after its term-end date" in {
-    val subscription = Fixtures.mkGuardianWeeklySubscription(
+    val subscription = SubscriptionFixtures.mkGuardianWeeklySubscription(
       termStartDate = dateCreditIsApplied.minusYears(1).minusDays(1),
       termEndDate = dateCreditIsApplied.minusDays(1),
       price = 42.1,
@@ -98,7 +97,7 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers with EitherValues {
   }
 
   it should "generate an update without an extended term when credit invoice date is on its term-end date" in {
-    val subscription = Fixtures.mkGuardianWeeklySubscription(
+    val subscription = SubscriptionFixtures.mkGuardianWeeklySubscription(
       termStartDate = dateCreditIsApplied.minusYears(1),
       termEndDate = dateCreditIsApplied,
       price = 42.1,
