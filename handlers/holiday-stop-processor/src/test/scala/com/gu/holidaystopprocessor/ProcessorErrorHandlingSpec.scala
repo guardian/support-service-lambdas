@@ -4,7 +4,7 @@ import java.time.temporal.TemporalAdjusters
 import java.time.{DayOfWeek, LocalDate}
 
 import cats.implicits._
-import com.gu.creditprocessor.{Processor, ZuoraCreditAddResult, ZuoraHolidayCreditAddResult}
+import com.gu.creditprocessor.Processor
 import com.gu.fulfilmentdates.{FulfilmentDates, FulfilmentDatesFetcher, FulfilmentDatesFetcherError}
 import com.gu.holiday_stops.Fixtures
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.HolidayStopRequestsDetail
@@ -43,6 +43,8 @@ class ProcessorErrorHandlingSpec extends FlatSpec with Matchers with OptionValue
     }
   }
 
+  private val creditProduct = HolidayCreditProduct.Dev
+
   "Error handling" should "not short-circuit if some writes to Zuora fail (but others succeed), and Salesforce write succeeds" in {
     val getSubscription: SubscriptionName => Either[ZuoraApiFailure, Subscription] = {
       case subName if subName.value == "A-S1" => Right(subscription)
@@ -53,14 +55,15 @@ class ProcessorErrorHandlingSpec extends FlatSpec with Matchers with OptionValue
     val writeHolidayStopsToSalesforce: List[ZuoraHolidayCreditAddResult] => Either[SalesforceApiFailure, Unit] = _ => Right(())
 
     val result = Processor.processProduct(
-      Fixtures.config,
+      creditProduct,
       holidayStopRequestsFromSalesforce,
       fulfilmentDatesFetcher,
       None,
       ZuoraProductTypes.GuardianWeekly,
       getSubscription,
+      SubscriptionUpdate.forHolidayStop,
       updateSubscription,
-      ZuoraCreditAddResult.forHolidayStop,
+      ZuoraHolidayCreditAddResult.apply,
       writeHolidayStopsToSalesforce
     )
 
@@ -82,14 +85,15 @@ class ProcessorErrorHandlingSpec extends FlatSpec with Matchers with OptionValue
       _ => Left(SalesforceApiFailure("salesforce boom"))
 
     val result = Processor.processProduct(
-      Fixtures.config,
+      creditProduct,
       holidayStopRequestsFromSalesforce,
       fulfilmentDatesFetcher,
       None,
       ZuoraProductTypes.GuardianWeekly,
       getSubscription,
+      SubscriptionUpdate.forHolidayStop,
       updateSubscription,
-      ZuoraCreditAddResult.forHolidayStop,
+      ZuoraHolidayCreditAddResult.apply,
       writeHolidayStopsToSalesforce
     )
 
@@ -111,14 +115,15 @@ class ProcessorErrorHandlingSpec extends FlatSpec with Matchers with OptionValue
     val writeHolidayStopsToSalesforce: List[ZuoraHolidayCreditAddResult] => Either[SalesforceApiFailure, Unit] = _ => Right(())
 
     val result = Processor.processProduct(
-      Fixtures.config,
+      creditProduct,
       holidayStopRequestsFromSalesforce,
       fulfilmentDatesFetcher,
       None,
       ZuoraProductTypes.GuardianWeekly,
       getSubscription,
+      SubscriptionUpdate.forHolidayStop,
       updateSubscription,
-      ZuoraCreditAddResult.forHolidayStop,
+      ZuoraHolidayCreditAddResult.apply,
       writeHolidayStopsToSalesforce
     )
 
@@ -139,14 +144,15 @@ class ProcessorErrorHandlingSpec extends FlatSpec with Matchers with OptionValue
     val writeHolidayStopsToSalesforce: List[ZuoraHolidayCreditAddResult] => Either[SalesforceApiFailure, Unit] = _ => Right(())
 
     val result = Processor.processProduct(
-      Fixtures.config,
+      creditProduct,
       holidayStopRequestsFromSalesforce,
       fulfilmentDatesFetcher,
       None,
       ZuoraProductTypes.GuardianWeekly,
       getSubscription,
+      SubscriptionUpdate.forHolidayStop,
       updateSubscription,
-      ZuoraCreditAddResult.forHolidayStop,
+      ZuoraHolidayCreditAddResult.apply,
       writeHolidayStopsToSalesforce
     )
 

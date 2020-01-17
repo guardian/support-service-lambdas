@@ -18,11 +18,14 @@ object SubscriptionUpdate {
   def forHolidayStop(
     creditProduct: CreditProduct,
     subscription: Subscription,
-    stoppedPublicationDate: LocalDate,
-    maybeExtendedTerm: Option[ExtendedTerm],
-    holidayCredit: HolidayStopCredit
-  ): Either[ZuoraApiFailure, SubscriptionUpdate] = {
-    Right(
+    stoppedPublicationDate: AffectedPublicationDate
+  ): ZuoraApiResponse[SubscriptionUpdate] =
+    for {
+      subscriptionData <- SubscriptionData(subscription)
+      issueData <- subscriptionData.issueDataForDate(stoppedPublicationDate.value)
+    } yield {
+      val maybeExtendedTerm = ExtendedTerm(issueData.nextBillingPeriodStartDate, subscription)
+      val holidayCredit = HolidayStopCredit(issueData.credit, issueData.nextBillingPeriodStartDate)
       SubscriptionUpdate(
         currentTerm = maybeExtendedTerm.map(_.length),
         currentTermPeriodType = maybeExtendedTerm.map(_.unit),
@@ -35,16 +38,15 @@ object SubscriptionUpdate {
             chargeOverrides = List(
               ChargeOverride(
                 productRatePlanChargeId = creditProduct.productRatePlanChargeId,
-                HolidayStart__c = stoppedPublicationDate,
-                HolidayEnd__c = stoppedPublicationDate,
+                HolidayStart__c = stoppedPublicationDate.value,
+                HolidayEnd__c = stoppedPublicationDate.value,
                 price = holidayCredit.amount
               )
             )
           )
         )
       )
-    )
-  }
+    }
 }
 
 case class Add(

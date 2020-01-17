@@ -208,6 +208,12 @@ lazy val `zuora-core` = all(project in file("lib/zuora-core"))
   )
 
 lazy val `credit-processor` = all(project in file("lib/credit-processor"))
+  .dependsOn(
+    `zuora-core`,
+    `fulfilment-dates`
+  ).settings(
+    libraryDependencies ++= logging
+  )
 
 // ==== END libraries ====
 
@@ -318,10 +324,9 @@ lazy val `braze-to-salesforce-file-upload` = all(project in file("handlers/braze
 lazy val `holiday-stop-processor` = all(project in file("handlers/holiday-stop-processor"))
   .enablePlugins(RiffRaffArtifact)
   .dependsOn(
+    `credit-processor`,
     `holiday-stops` % "compile->compile;test->test",
-    effects,
-    `zuora-core`,
-    `fulfilment-dates`
+    effects
   )
 
 lazy val `metric-push-api` = all(project in file("handlers/metric-push-api"))
