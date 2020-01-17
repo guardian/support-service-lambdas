@@ -1,7 +1,7 @@
 import java.time.LocalDate
 
 import com.github.tototoshi.csv.CSVReader
-import com.gu.holiday_stops.subscription.{RatePlanChargeBillingSchedule, SubscriptionData}
+import com.gu.holiday_stops.subscription.{RatePlanChargeBillingSchedule}
 
 object Main extends App {
   val fileName = args(0)
@@ -10,7 +10,7 @@ object Main extends App {
 
   val records: Iterator[Map[String, String]] = reader.iteratorWithHeaders
 
-  while(records.hasNext) {
+  while (records.hasNext) {
     val recordsForSubs: List[Map[String, String]] = readRecordsForSub(records)
     checkInvoiceDates(recordsForSubs)
   }
@@ -20,23 +20,18 @@ object Main extends App {
     firstRecord ::
       records.takeWhile { record =>
         (record("Subscription.Name") == firstRecord("Subscription.Name")) &&
-        (record("RatePlanCharge.Name") == firstRecord("RatePlanCharge.Name"))
+          (record("RatePlanCharge.Name") == firstRecord("RatePlanCharge.Name"))
       }.toList
   }
 
   def checkInvoiceDates(recordsForSub: List[Map[String, String]]) = {
     val allInvoiceDates = recordsForSub.map(record => LocalDate.parse(record("Invoice.InvoiceDate")))
-    val shouldUseEffectiveStartDate = recordsForSub.exists( record =>
-      SubscriptionData.shouldUseEffectiveStartDate(
-        record.apply("RatePlanCharge.Name"),
-        Option(record("RatePlanCharge.UpToPeriodsType")).filter(_ != ""),
-        Option(record("RatePlanCharge.BillingPeriod")).filter(_ != ""),
-        Option(record("RatePlanCharge.SpecificBillingPeriod")).filter(_ != "").map(_.toInt)
-      )
-    )
+    val unRemovedRecordsForSubs = recordsForSub.filter(_.get("RatePlan.AmendmentType") != Some("RemoveProduct"))
 
-    recordsForSub.foreach { record =>
-      val id = s"${record("Subscription.Name")}-${record("Invoice.InvoiceNumber")}"
+    val recordsWithoutProRated = unRemovedRecordsForSubs.filter(!_("InvoiceItem.ChargeName").contains("Proration"))
+
+    recordsWithoutProRated.foreach { record =>
+      val id = s"${record("Subscription.Name")}-${record("Invoice.InvoiceNumber")}-${record("Invoice.InvoiceDate")}"
 
       RatePlanChargeBillingSchedule(
         LocalDate.parse(record("Subscription.ContractAcceptanceDate")),
@@ -44,29 +39,29 @@ object Main extends App {
         Option(record("RatePlanCharge.BillCycleType")).filter(_ != ""),
         Option(record("RatePlanCharge.TriggerEvent")).filter(_ != ""),
         Option(record("RatePlanCharge.TriggerDate")).filter(_ != "").map(LocalDate.parse),
-        None,
+        Option(record("RatePlanCharge.ProcessedThroughDate")).filter(_ != "").map(LocalDate.parse),
+        Option(record("RatePlanCharge.ChargedThroughDate")).filter(_ != "").map(LocalDate.parse),
         record("Account.BillCycleDay").toInt,
         Option(record("RatePlanCharge.UpToPeriodsType")).filter(_ != ""),
         Option(record("RatePlanCharge.UpToPeriods")).filter(_ != "").map(_.toInt),
         Option(record("RatePlanCharge.BillingPeriod")).filter(_ != ""),
         Option(record("RatePlanCharge.SpecificBillingPeriod")).filter(_ != "").map(_.toInt),
         Option(record("RatePlanCharge.EndDateCondition")).filter(_ != ""), //TODO: add to datalake table
-        shouldUseEffectiveStartDate,
         LocalDate.parse(record("RatePlanCharge.EffectiveStartDate"))
       ).fold(
-        error => println(s"Failed to generate schedule for $id: $error"),
-        { schedule =>
-          val invoiceDate = LocalDate.parse(record("Invoice.InvoiceDate"))
-          schedule.billDatesCoveringDate(invoiceDate).fold(
-            { error => println(s"Could not get billing period for $id for date $invoiceDate shouldUseEffectiveStartDate=$shouldUseEffectiveStartDate: $error") },
-            { billDates =>
-              if (!allInvoiceDates.contains(billDates.startDate)) {
-                s"$id had invoices on dates $allInvoiceDates which did not include the bill dates calculated for date $invoiceDate: $billDates"
+          error => println(s"Failed to generate schedule for $id: $error"),
+          { schedule =>
+            val invoiceDate = LocalDate.parse(record("Invoice.InvoiceDate"))
+            schedule.billDatesCoveringDate(invoiceDate).fold(
+              { error => println(s"Could not get billing period for $id for date $invoiceDate: $error") },
+              { billDates =>
+                if (!allInvoiceDates.contains(billDates.startDate)) {
+                  println(s"$id had invoices on dates $allInvoiceDates which did not include the bill dates calculated for date $invoiceDate: $billDates")
+                }
               }
-            }
-          )
-        }
-      )
+            )
+          }
+        )
     }
   }
 }

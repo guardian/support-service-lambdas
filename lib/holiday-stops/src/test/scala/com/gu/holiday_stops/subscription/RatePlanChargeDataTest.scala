@@ -55,7 +55,7 @@ class RatePlanChargeDataTest extends FlatSpec with Matchers with EitherValues {
       specificBillingPeriod = specificBillingPeriod
     )
 
-    val ratePlanChargeData = RatePlanChargeData(subscription, charge, Fixtures.mkAccount(), DayOfWeek.FRIDAY, false)
+    val ratePlanChargeData = RatePlanChargeData(subscription, charge, Fixtures.mkAccount(), DayOfWeek.FRIDAY)
     inside(ratePlanChargeData) {
       case Right(credit) =>
         credit.issueCreditAmount shouldBe expectedCredit

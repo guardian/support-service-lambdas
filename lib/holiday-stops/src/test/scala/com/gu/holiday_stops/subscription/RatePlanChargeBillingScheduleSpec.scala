@@ -69,10 +69,10 @@ class RatePlanChargeBillingScheduleSpec extends FlatSpec with Matchers with Eith
           upToPeriods = None,
           billingDay = Some("ChargeTriggerDay"),
           triggerEvent = Some("SpecificDate"),
-          triggerDate = Some(effectiveStartDate)
+          triggerDate = Some(effectiveStartDate),
+          chargedThroughDate = None
         ),
-        Fixtures.mkAccount(),
-        false
+        Fixtures.mkAccount()
       )
     ) {
         case Right(billingSchedule) =>
@@ -126,6 +126,15 @@ class RatePlanChargeBillingScheduleSpec extends FlatSpec with Matchers with Eith
       BillDates(LocalDate.of(2019, 10, 22), LocalDate.of(2019, 11, 11))
     )
   }
+  it should "calculate quarterly billing period when period starts at end of month" in {
+    testFixedBillingSchedule(
+      "Quarter",
+      None,
+      LocalDate.of(2019, 8, 31),
+      BillDates(LocalDate.of(2019, 8, 31), LocalDate.of(2019, 11, 29)),
+      BillDates(LocalDate.of(2019, 11, 30), LocalDate.of(2020, 2, 28))
+    )
+  }
 
   private def testFixedBillingPeriod(billingPeriodName: String, optionalSpecificBillingPeriod: Option[Int], billingPeriodsRatePlanIsValidFor: Int, effectiveStartDate: LocalDate, expectedEndDate: LocalDate) = {
     inside(
@@ -142,10 +151,10 @@ class RatePlanChargeBillingScheduleSpec extends FlatSpec with Matchers with Eith
           specificBillingPeriod = optionalSpecificBillingPeriod,
           billingDay = Some("ChargeTriggerDay"),
           triggerEvent = Some("SpecificDate"),
-          triggerDate = Some(effectiveStartDate)
+          triggerDate = Some(effectiveStartDate),
+          chargedThroughDate = None
         ),
-        Fixtures.mkAccount(),
-        false
+        Fixtures.mkAccount()
       )
     ) {
         case Right(billingSchedule) =>
@@ -184,17 +193,17 @@ class RatePlanChargeBillingScheduleSpec extends FlatSpec with Matchers with Eith
           specificBillingPeriod = optionalSpecificBillingPeriod,
           billingDay = Some("ChargeTriggerDay"),
           triggerEvent = Some("SpecificDate"),
-          triggerDate = Some(effectiveStartDate)
+          triggerDate = Some(effectiveStartDate),
+          chargedThroughDate = None
         ),
-        Fixtures.mkAccount(),
-        false
+        Fixtures.mkAccount()
       )
     ) {
         case Right(billingSchedule) =>
           datesBetweenDates(expectedBillDates1.startDate, expectedBillDates1.endDate).foreach(date =>
-            billingSchedule.billDatesCoveringDate(date) should equal(Right(expectedBillDates1)))
+            withClue(s"For date: $date") { billingSchedule.billDatesCoveringDate(date) should equal(Right(expectedBillDates1)) })
           datesBetweenDates(expectedBillDates2.startDate, expectedBillDates2.endDate).foreach(date =>
-            billingSchedule.billDatesCoveringDate(date) should equal(Right(expectedBillDates2)))
+            withClue(s"For date: $date") { billingSchedule.billDatesCoveringDate(date) should equal(Right(expectedBillDates2)) })
       }
   }
 

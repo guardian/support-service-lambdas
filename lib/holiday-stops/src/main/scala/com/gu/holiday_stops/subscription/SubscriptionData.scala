@@ -44,9 +44,6 @@ object SubscriptionData {
       unExpiredRatePlanCharge <- getUnexpiredRatePlanCharges(ratePlan)
       supportedRatePlanCharge <- getSupportedRatePlanCharge(supportedRatePlan, unExpiredRatePlanCharge)
     } yield (unExpiredRatePlanCharge, supportedRatePlanCharge, supportedProduct)
-
-    val useEffectiveStartDate = shouldUseEffectiveStartDateForSubscription(supportedRatePlanCharges.map(_._1))
-
     for {
       ratePlanChargeDatas <- supportedRatePlanCharges
         .traverse[ZuoraHolidayResponse, RatePlanChargeData] {
@@ -55,8 +52,7 @@ object SubscriptionData {
               subscription,
               ratePlanCharge,
               account,
-              supportedRatePlanCharge.dayOfWeek,
-              useEffectiveStartDate
+              supportedRatePlanCharge.dayOfWeek
             )
         }
       nonZeroRatePlanChargeDatas = ratePlanChargeDatas.filter { ratePlanChargeData =>
@@ -150,23 +146,10 @@ object SubscriptionData {
       }
   }
 
-  private def shouldUseEffectiveStartDateForSubscription(supportedRatePlanCharges: List[RatePlanCharge]) = {
-    val isWeekly6for6WithChristmasFix = supportedRatePlanCharges.exists { ratePlanCharge =>
-      shouldUseEffectiveStartDate(
-        ratePlanCharge.name,
-        ratePlanCharge.upToPeriodsType,
-        ratePlanCharge.billingPeriod,
-        ratePlanCharge.specificBillingPeriod
-      )
-    }
-
-    isWeekly6for6WithChristmasFix
-  }
-
   def shouldUseEffectiveStartDate(ratePlanChargeName: String, upToPeriodsType: Option[String], billingPeriod: Option[String], specificBillingPeriods: Option[Int]): Boolean = {
-    ( ratePlanChargeName === "GW Oct 18 - First 6 issues - Domestic" || ratePlanChargeName === "GW Oct 18 - First 6 issues - ROW" ) &&
-      ( upToPeriodsType === Some("Billing_Periods") || upToPeriodsType === Some("Billing Periods") ) &&
-      ( billingPeriod === Some("Specific_Months") || billingPeriod === Some("Specific Months")) &&
+    (ratePlanChargeName === "GW Oct 18 - First 6 issues - Domestic" || ratePlanChargeName === "GW Oct 18 - First 6 issues - ROW") &&
+      (upToPeriodsType === Some("Billing_Periods") || upToPeriodsType === Some("Billing Periods")) &&
+      (billingPeriod === Some("Specific_Months") || billingPeriod === Some("Specific Months")) &&
       specificBillingPeriods === Some(2)
   }
 }

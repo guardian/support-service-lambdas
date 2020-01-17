@@ -3,9 +3,9 @@ package com.gu.holiday_stops.subscription
 import java.time.temporal.{ChronoUnit, TemporalAdjusters}
 import java.time.LocalDate
 
+import cats.data.NonEmptyList
 import cats.implicits._
 import com.gu.holiday_stops.ZuoraHolidayError
-
 /**
  * Information about the billing cycles for a Zuora RatePlanCharge.
  *
@@ -62,7 +62,7 @@ case class BillDates(startDate: LocalDate, endDate: LocalDate)
 
 object RatePlanChargeBillingSchedule {
 
-  def apply(subscription: Subscription, ratePlanCharge: RatePlanCharge, account: ZuoraAccount, useEffectiveStartDate: Boolean): Either[ZuoraHolidayError, RatePlanChargeBillingSchedule] = {
+  def apply(subscription: Subscription, ratePlanCharge: RatePlanCharge, account: ZuoraAccount): Either[ZuoraHolidayError, RatePlanChargeBillingSchedule] = {
     apply(
       subscription.customerAcceptanceDate,
       subscription.contractEffectiveDate,
@@ -70,18 +70,18 @@ object RatePlanChargeBillingSchedule {
       ratePlanCharge.triggerEvent,
       ratePlanCharge.triggerDate,
       ratePlanCharge.processedThroughDate,
+      ratePlanCharge.chargedThroughDate,
       account.billingAndPayment.billCycleDay,
       ratePlanCharge.upToPeriodsType,
       ratePlanCharge.upToPeriods,
       ratePlanCharge.billingPeriod,
       ratePlanCharge.specificBillingPeriod,
       ratePlanCharge.endDateCondition,
-      useEffectiveStartDate,
       ratePlanCharge.effectiveStartDate
     )
   }
 
-  def apply(customerAcceptanceDate: LocalDate, contractEffectiveDate: LocalDate, billingDay: Option[String], triggerEvent: Option[String], triggerDate: Option[LocalDate], processedThroughDate: Option[LocalDate], billCycleDay: Int, upToPeriodType: Option[String], upToPeriods: Option[Int], optionalBillingPeriodName: Option[String], specificBillingPeriod: Option[Int], endDateCondition: Option[String], useEffectiveStartDate: Boolean, effectiveStartDate: LocalDate) = {
+  def apply(customerAcceptanceDate: LocalDate, contractEffectiveDate: LocalDate, billingDay: Option[String], triggerEvent: Option[String], triggerDate: Option[LocalDate], processedThroughDate: Option[LocalDate], chargedThroughDate: Option[LocalDate], billCycleDay: Int, upToPeriodType: Option[String], upToPeriods: Option[Int], optionalBillingPeriodName: Option[String], specificBillingPeriod: Option[Int], endDateCondition: Option[String], effectiveStartDate: LocalDate): Either[ZuoraHolidayError, RatePlanChargeBillingSchedule] = {
     for {
       endDateCondition <- endDateCondition.toRight(ZuoraHolidayError("RatePlanCharge.endDateCondition is required"))
       billingPeriodName <- optionalBillingPeriodName.toRight(ZuoraHolidayError("RatePlanCharge.billingPeriod is required"))
@@ -96,7 +96,7 @@ object RatePlanChargeBillingSchedule {
         processedThroughDate,
         billCycleDay,
         effectiveStartDate,
-        useEffectiveStartDate
+        false
       )
       ratePlanEndDate <- ratePlanEndDate(
         billingPeriod,
@@ -105,7 +105,19 @@ object RatePlanChargeBillingSchedule {
         upToPeriodType,
         upToPeriods
       )
-    } yield new RatePlanChargeBillingSchedule {
+
+      billingSchedule <- selectScheduleThatPredictsProcessedThroughDate(
+        NonEmptyList.of(
+          apply(ratePlanStartDate, ratePlanEndDate, billingPeriod),
+          apply(effectiveStartDate, ratePlanEndDate, billingPeriod)
+        ),
+        processedThroughDate
+      )
+    } yield billingSchedule
+  }
+
+  private def apply(ratePlanStartDate: LocalDate, ratePlanEndDate: Option[LocalDate], billingPeriod: BillingPeriod): RatePlanChargeBillingSchedule = {
+    new RatePlanChargeBillingSchedule {
       override def isDateCoveredBySchedule(date: LocalDate): Boolean = {
         (date == ratePlanStartDate || date.isAfter(ratePlanStartDate)) &&
           ratePlanEndDate
@@ -115,20 +127,45 @@ object RatePlanChargeBillingSchedule {
 
       override def billDatesCoveringDate(date: LocalDate): Either[ZuoraHolidayError, BillDates] = {
         if (isDateCoveredBySchedule(date)) {
-          val startPeriods = billingPeriod
-            .unit
-            .between(ratePlanStartDate, date) / billingPeriod.multiple
-          val startDate = ratePlanStartDate
-            .plus(startPeriods * billingPeriod.multiple, billingPeriod.unit)
-          val endDate = startDate
-            .plus(billingPeriod.multiple.toLong, billingPeriod.unit)
-            .minusDays(1)
-
-          BillDates(startDate, endDate).asRight
+          billDatesCoveringDate(date, ratePlanStartDate, 0)
         } else {
           ZuoraHolidayError(s"Billing schedule does not cover date $date").asLeft
         }
       }
+
+      private def billDatesCoveringDate(date: LocalDate, startDate: LocalDate, billingPeriodIndex: Int): Either[ZuoraHolidayError, BillDates] = {
+        val currentPeriod = BillDates(
+          startDate.plus(billingPeriod.multiple.toLong * billingPeriodIndex, billingPeriod.unit),
+          startDate.plus(billingPeriod.multiple.toLong * (billingPeriodIndex + 1), billingPeriod.unit).minusDays(1)
+        )
+
+        if (currentPeriod.startDate.isAfter(date)) {
+          ZuoraHolidayError(s"Billing schedule does not cover date $date").asLeft
+        } else if (!currentPeriod.endDate.isBefore(date)) {
+          currentPeriod.asRight
+        } else {
+          billDatesCoveringDate(date, startDate, billingPeriodIndex + 1)
+        }
+      }
+    }
+  }
+
+  private def selectScheduleThatPredictsProcessedThroughDate(
+    schedules: NonEmptyList[RatePlanChargeBillingSchedule],
+    optionalProcessedThroughDate: Option[LocalDate]
+  ): Either[ZuoraHolidayError, RatePlanChargeBillingSchedule] = {
+    optionalProcessedThroughDate match {
+      case Some(processedThroughDate) =>
+        schedules.find { schedule =>
+          val processThoughDateIsAtStartOfBillingSchedule = schedule.billDatesCoveringDate(processedThroughDate).map(_.startDate == processedThroughDate).getOrElse(false)
+
+          val dayBeforeProcessedThroughDate = processedThroughDate.minusDays(1)
+          val processThoughDateIsJustAfterEndOfBillingSchedule = schedule.billDatesCoveringDate(dayBeforeProcessedThroughDate).map(_.endDate == dayBeforeProcessedThroughDate).getOrElse(false)
+
+          processThoughDateIsAtStartOfBillingSchedule || processThoughDateIsJustAfterEndOfBillingSchedule
+        }.toRight(ZuoraHolidayError(s"Could not create schedule that correctly predicts processed through date $processedThroughDate"))
+      case None =>
+        schedules.head.asRight
     }
   }
 

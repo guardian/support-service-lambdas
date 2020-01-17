@@ -45,14 +45,13 @@ object RatePlanChargeData {
     subscription: Subscription,
     ratePlanCharge: RatePlanCharge,
     account: ZuoraAccount,
-    issueDayOfWeek: DayOfWeek,
-    useEffectiveStartDate: Boolean
+    issueDayOfWeek: DayOfWeek
   ): Either[ZuoraHolidayError, RatePlanChargeData] = {
     for {
       billingPeriodName <- ratePlanCharge
         .billingPeriod
         .toRight(ZuoraHolidayError("RatePlanCharge.billingPeriod is required"))
-      schedule <- RatePlanChargeBillingSchedule(subscription, ratePlanCharge, account, useEffectiveStartDate)
+      schedule <- RatePlanChargeBillingSchedule(subscription, ratePlanCharge, account)
       issueCreditAmount <- calculateIssueCreditAmount(ratePlanCharge)
     } yield RatePlanChargeData(ratePlanCharge, schedule, billingPeriodName, issueDayOfWeek, issueCreditAmount)
   }
