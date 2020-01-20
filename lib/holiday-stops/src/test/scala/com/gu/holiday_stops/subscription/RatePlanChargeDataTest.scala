@@ -53,7 +53,8 @@ class RatePlanChargeDataTest extends FlatSpec with Matchers with EitherValues {
       price = chargeForPeriod,
       billingPeriod = period,
       specificBillingPeriod = specificBillingPeriod,
-      chargedThroughDate = None
+      chargedThroughDate = None,
+      processedThroughDate = None
     )
 
     val ratePlanChargeData = RatePlanChargeData(subscription, charge, Fixtures.mkAccount(), DayOfWeek.FRIDAY)

@@ -28,6 +28,7 @@ object Fixtures extends Assertions {
     price: Double,
     billingPeriod: String,
     chargedThroughDate: Option[LocalDate] = Some(LocalDate.of(2019, 9, 2)),
+    processedThroughDate: Option[LocalDate] = Some(LocalDate.of(2019, 8, 2)),
     effectiveStartDate: LocalDate = LocalDate.of(2019, 6, 2),
     specificBillingPeriod: Option[Int] = None,
     upToPeriodsType: Option[String] = None,
@@ -45,7 +46,7 @@ object Fixtures extends Assertions {
     chargedThroughDate,
     HolidayStart__c = None,
     HolidayEnd__c = None,
-    processedThroughDate = chargedThroughDate.map(_.minusMonths(billingPeriodToMonths(billingPeriod))),
+    processedThroughDate = processedThroughDate,
     productRatePlanChargeId = "",
     specificBillingPeriod = specificBillingPeriod,
     endDateCondition = endDateCondition,
@@ -86,6 +87,7 @@ object Fixtures extends Assertions {
               price = price,
               billingPeriod = billingPeriod,
               chargedThroughDate = chargedThroughDate,
+              processedThroughDate = chargedThroughDate,
               effectiveStartDate = effectiveStartDate,
               triggerEvent = Some("SpecificDate"),
               triggerDate = Some(effectiveStartDate)
@@ -274,6 +276,7 @@ object Fixtures extends Assertions {
           price = 42.7,
           billingPeriod = "Quarter",
           chargedThroughDate = None,
+          processedThroughDate = None,
           effectiveStartDate = LocalDate.of(2019, 9, 7)
         )),
         productRatePlanId = "",

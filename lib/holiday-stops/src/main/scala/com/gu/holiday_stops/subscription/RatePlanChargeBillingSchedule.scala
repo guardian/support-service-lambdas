@@ -81,7 +81,22 @@ object RatePlanChargeBillingSchedule {
     )
   }
 
-  def apply(customerAcceptanceDate: LocalDate, contractEffectiveDate: LocalDate, billingDay: Option[String], triggerEvent: Option[String], triggerDate: Option[LocalDate], processedThroughDate: Option[LocalDate], chargedThroughDate: Option[LocalDate], billCycleDay: Int, upToPeriodType: Option[String], upToPeriods: Option[Int], optionalBillingPeriodName: Option[String], specificBillingPeriod: Option[Int], endDateCondition: Option[String], effectiveStartDate: LocalDate): Either[ZuoraHolidayError, RatePlanChargeBillingSchedule] = {
+  def apply(
+    customerAcceptanceDate: LocalDate,
+    contractEffectiveDate: LocalDate,
+    billingDay: Option[String],
+    triggerEvent: Option[String],
+    triggerDate: Option[LocalDate],
+    processedThroughDate: Option[LocalDate],
+    chargedThroughDate: Option[LocalDate],
+    billCycleDay: Int,
+    upToPeriodType: Option[String],
+    upToPeriods: Option[Int],
+    optionalBillingPeriodName: Option[String],
+    specificBillingPeriod: Option[Int],
+    endDateCondition: Option[String],
+    effectiveStartDate: LocalDate
+  ): Either[ZuoraHolidayError, RatePlanChargeBillingSchedule] = {
     for {
       endDateCondition <- endDateCondition.toRight(ZuoraHolidayError("RatePlanCharge.endDateCondition is required"))
       billingPeriodName <- optionalBillingPeriodName.toRight(ZuoraHolidayError("RatePlanCharge.billingPeriod is required"))
@@ -255,18 +270,15 @@ object RatePlanChargeBillingSchedule {
   }
 
   private def adjustDateForBillCycleDate(date: LocalDate, billCycleDay: Int): LocalDate = {
-    val lastDayOfMonth = date `with` TemporalAdjusters.lastDayOfMonth()
-    val startDateWithBillCycleDate =
-      if (lastDayOfMonth.getDayOfMonth < billCycleDay) {
-        lastDayOfMonth
-      } else {
-        lastDayOfMonth.withDayOfMonth(billCycleDay)
-      }
-    if (startDateWithBillCycleDate.isBefore(date)) {
-      startDateWithBillCycleDate.plusMonths(1)
+    val dateWithCorrectMonth = if(date.getDayOfMonth < billCycleDay) {
+      date.plusMonths(1)
     } else {
-      startDateWithBillCycleDate
+      date
     }
+
+    val lastDateOfMonth = dateWithCorrectMonth `with` TemporalAdjusters.lastDayOfMonth()
+
+    dateWithCorrectMonth.withDayOfMonth(Math.min(lastDateOfMonth.getDayOfMonth, billCycleDay))
   }
 
   private def ratePlanTriggerDate(
