@@ -103,7 +103,7 @@ class HolidayCreditUpdateTest extends FlatSpec with Matchers with EitherValues {
       termEndDate = dateCreditIsApplied,
       price = 42.1,
       billingPeriod = "Quarter",
-      chargedThroughDate = Some(LocalDate.of(2020, 8, 2)),
+      chargedThroughDate = None,
       effectiveStartDate = effectiveStartDate
     )
     val subscriptionData = SubscriptionData(subscription, Fixtures.mkAccount()).right.value

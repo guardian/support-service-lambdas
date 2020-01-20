@@ -87,29 +87,40 @@ object RatePlanChargeBillingSchedule {
       billingPeriodName <- optionalBillingPeriodName.toRight(ZuoraHolidayError("RatePlanCharge.billingPeriod is required"))
       billingPeriod <- billingPeriodForName(billingPeriodName, specificBillingPeriod)
 
-      ratePlanStartDate <- ratePlanStartDate(
+      calculatedRatePlanStartDate <- ratePlanStartDate(
         customerAcceptanceDate,
         contractEffectiveDate,
         billingDay,
         triggerEvent,
         triggerDate,
         processedThroughDate,
-        billCycleDay,
-        effectiveStartDate,
-        false
+        billCycleDay
       )
-      ratePlanEndDate <- ratePlanEndDate(
+
+      calculatedRatePlanEndDate <- ratePlanEndDate(
         billingPeriod,
-        ratePlanStartDate,
+        calculatedRatePlanStartDate,
         endDateCondition,
         upToPeriodType,
         upToPeriods
       )
 
+      scheduleForCalculatedStartDate = RatePlanChargeBillingSchedule(calculatedRatePlanStartDate, calculatedRatePlanEndDate, billingPeriod)
+
+      endDateBasedOnEffectiveStartDate <- ratePlanEndDate(
+        billingPeriod,
+        effectiveStartDate,
+        endDateCondition,
+        upToPeriodType,
+        upToPeriods
+      )
+
+      scheduleForEffectiveStartDate = RatePlanChargeBillingSchedule(effectiveStartDate, endDateBasedOnEffectiveStartDate, billingPeriod)
+
       billingSchedule <- selectScheduleThatPredictsProcessedThroughDate(
         NonEmptyList.of(
-          apply(ratePlanStartDate, ratePlanEndDate, billingPeriod),
-          apply(effectiveStartDate, ratePlanEndDate, billingPeriod)
+          scheduleForCalculatedStartDate,
+          scheduleForEffectiveStartDate
         ),
         processedThroughDate
       )
@@ -219,33 +230,27 @@ object RatePlanChargeBillingSchedule {
     optionalTriggerEvent: Option[String],
     optionalTriggerDate: Option[LocalDate],
     processedThroughDate: Option[LocalDate],
-    billCycleDay: Int,
-    effectiveStartDate: LocalDate,
-    useEffectiveStartDate: Boolean
+    billCycleDay: Int
   ): Either[ZuoraHolidayError, LocalDate] = {
-    if (useEffectiveStartDate) {
-      effectiveStartDate.asRight
-    } else {
-      optionalBillingDay match {
-        case None | Some("ChargeTriggerDay") => ratePlanTriggerDate(
-          optionalTriggerEvent,
-          optionalTriggerDate,
-          customerAcceptanceDate,
-          contractEffectiveDate
-        )
-        case Some("DefaultFromCustomer") =>
-          for {
-            triggerDate <- ratePlanTriggerDate(
-              optionalTriggerEvent,
-              optionalTriggerDate,
-              customerAcceptanceDate,
-              contractEffectiveDate
-            )
-          } yield adjustDateForBillCycleDate(triggerDate, billCycleDay)
+    optionalBillingDay match {
+      case None | Some("ChargeTriggerDay") => ratePlanTriggerDate(
+        optionalTriggerEvent,
+        optionalTriggerDate,
+        customerAcceptanceDate,
+        contractEffectiveDate
+      )
+      case Some("DefaultFromCustomer") =>
+        for {
+          triggerDate <- ratePlanTriggerDate(
+            optionalTriggerEvent,
+            optionalTriggerDate,
+            customerAcceptanceDate,
+            contractEffectiveDate
+          )
+        } yield adjustDateForBillCycleDate(triggerDate, billCycleDay)
 
-        case Some(unsupported) =>
-          ZuoraHolidayError(s"RatePlanCharge.billingDay = $unsupported is not supported").asLeft
-      }
+      case Some(unsupported) =>
+        ZuoraHolidayError(s"RatePlanCharge.billingDay = $unsupported is not supported").asLeft
     }
   }
 

@@ -273,7 +273,8 @@ object Fixtures extends Assertions {
           name = "GW Oct 18 - Quarterly - Domestic",
           price = 42.7,
           billingPeriod = "Quarter",
-          chargedThroughDate = Some(LocalDate.of(2019, 9, 7))
+          chargedThroughDate = None,
+          effectiveStartDate = LocalDate.of(2019, 9, 7)
         )),
         productRatePlanId = "",
         id = "",
