@@ -10,6 +10,8 @@ import io.circe.generic.auto._
 import cats.implicits._
 import com.gu.salesforce.SalesforceQueryConstants.{contactToWhereClausePart, escapeString}
 
+import scala.annotation.tailrec
+
 final case class DeliveryRecord(
   deliveryDate: Option[LocalDate],
   deliveryInstruction: Option[String],
@@ -21,7 +23,9 @@ final case class DeliveryRecord(
   addressCountry: Option[String],
   addressPostcode: Option[String],
   hasHolidayStop: Option[Boolean],
-  problemCaseId: Option[String]
+  problemCaseId: Option[String],
+  isChangedAddress: Option[Boolean],
+  isChangedDeliveryInstruction: Option[Boolean]
 )
 
 final case class DeliveryProblemCase(
@@ -52,6 +56,37 @@ object DeliveryRecordsService {
     Delivery_Records__r: Option[RecordsWrapperCaseClass[SFApiDeliveryRecord]]
   )
 
+  @tailrec
+  private def detectChangeSkippingNoneAtHead[T](
+    allPrevious: List[DeliveryRecord],
+    fieldExtractor: DeliveryRecord => Option[T]
+  )(
+    value: T
+  ): Boolean = allPrevious match {
+    case head :: tail => fieldExtractor(head) match {
+      case Some(previousValue) => value != previousValue // this detects the change
+      case None => detectChangeSkippingNoneAtHead(tail, fieldExtractor)(value) // this skips over a None at the head
+    }
+    case Nil => false // if we reach the beginning of the list and we don't have an address to compare to, don't mark this as changed
+  }
+
+  private def transformSfApiDeliveryRecords(accumulator: List[DeliveryRecord], sfRecord: SFApiDeliveryRecord): List[DeliveryRecord] =
+    DeliveryRecord(
+      deliveryDate = sfRecord.Delivery_Date__c,
+      deliveryAddress = sfRecord.Delivery_Address__c,
+      addressLine1 = sfRecord.Address_Line_1__c,
+      addressLine2 = sfRecord.Address_Line_2__c,
+      addressLine3 = sfRecord.Address_Line_3__c,
+      addressTown = sfRecord.Address_Town__c,
+      addressCountry = sfRecord.Address_Country__c,
+      addressPostcode = sfRecord.Address_Postcode__c,
+      deliveryInstruction = sfRecord.Delivery_Instructions__c,
+      hasHolidayStop = sfRecord.Has_Holiday_Stop__c,
+      problemCaseId = sfRecord.Case__r.map(_.Id),
+      isChangedAddress = sfRecord.Delivery_Address__c.map(detectChangeSkippingNoneAtHead(accumulator, _.deliveryAddress)),
+      isChangedDeliveryInstruction = sfRecord.Delivery_Instructions__c.map(detectChangeSkippingNoneAtHead(accumulator, _.deliveryInstruction))
+    ) :: accumulator
+
   def apply[F[_]: Monad](salesforceClient: SalesforceClient[F]): DeliveryRecordsService[F] = new DeliveryRecordsService[F] {
     override def getDeliveryRecordsForSubscription(
       subscriptionId: String,
@@ -68,21 +103,7 @@ object DeliveryRecordsService {
           optionalEndDate
         )
         records <- getDeliveryRecordsFromQueryResults(subscriptionId, contact, queryResult).toEitherT[F]
-        results = records.map { queryRecord =>
-          DeliveryRecord(
-            deliveryDate = queryRecord.Delivery_Date__c,
-            deliveryAddress = queryRecord.Delivery_Address__c,
-            addressLine1 = queryRecord.Address_Line_1__c,
-            addressLine2 = queryRecord.Address_Line_2__c,
-            addressLine3 = queryRecord.Address_Line_3__c,
-            addressTown = queryRecord.Address_Town__c,
-            addressCountry = queryRecord.Address_Country__c,
-            addressPostcode = queryRecord.Address_Postcode__c,
-            deliveryInstruction = queryRecord.Delivery_Instructions__c,
-            hasHolidayStop = queryRecord.Has_Holiday_Stop__c,
-            problemCaseId = queryRecord.Case__r.map(_.Id)
-          )
-        }
+        results = records.reverse.foldLeft(List.empty[DeliveryRecord])(transformSfApiDeliveryRecords)
         deliveryProblemMap = records.flatMap(
           _.Case__r.map(
             problemCase => problemCase.Id -> DeliveryProblemCase(
@@ -140,6 +161,7 @@ object DeliveryRecordsService {
        |           Case__c, Case__r.Id, Case__r.Subject, Case__r.Description, Case__r.Case_Closure_Reason__c
        |    FROM Delivery_Records__r
        |    ${deliveryDateFilter(optionalStartDate, optionalEndDate)}
+       |    ORDER BY Delivery_Date__c DESC
        |)
        |FROM SF_Subscription__c WHERE Name = '${escapeString(subscriptionNumber)}'
        |                         AND ${contactToWhereClausePart(contact)}""".stripMargin
