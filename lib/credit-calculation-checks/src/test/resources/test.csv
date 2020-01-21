@@ -1,0 +1,5 @@
+"subscription_name","invoice_number","amount","invoice_date","customer_acceptance_date","rate_plan_charge_id","rate_plan_charge_name","effective_start_date","billing_period","bill_cycle_day","billing_day","trigger_event","trigger_date","specific_billing_period","specific_end_date","up_to_periods","up_to_periods_type","specific_billing_period","end_date_condition"
+"100006","INV01327592","240.0","2017-02-26","2016-08-23","2c92a0fe5a83f007015aaa7440484bbd","Zone B 1 Year","2016-08-23","Annual","1","ChargeTriggerDay","CustomerAcceptance",,,,,,,"Subscription_End"
+"100006","INV01327592","240.0","2014-02-02","2016-08-23","2c92a0fe5a83f007015aaa7440484bbd","Zone B 1 Year","2016-08-23","Annual","1","ChargeTriggerDay","CustomerAcceptance",,,,,,,"Subscription_End"
+"100007","INV01327592","240.0","2017-02-26","2016-08-23","2c92a0fe5a83f007015aaa7440484bbd","Zone B 1 Year","2016-08-23","Annual","1","ChargeTriggerDay","CustomerAcceptance",,,,,,,"Subscription_End"
+"100007","INV01327592","240.0","2017-02-27","2016-08-23","2c92a0fe5a83f007015aaa7440484bbd","Zone B 1 Year","2016-08-23","Annual","1","ChargeTriggerDay","CustomerAcceptance",,,,,,,"Subscription_End"
