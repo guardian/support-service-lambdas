@@ -3,6 +3,7 @@ package com.gu.delivery_records_api
 import java.time.LocalDate
 
 case class SFApiDeliveryRecord(
+  Id: String,
   Delivery_Date__c: Option[LocalDate],
   Delivery_Address__c: Option[String],
   Address_Line_1__c: Option[String],
