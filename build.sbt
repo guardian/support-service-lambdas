@@ -340,7 +340,7 @@ lazy val `delivery-records-api` = all(project in file("handlers/delivery-records
   .enablePlugins(RiffRaffArtifact)
 
 lazy val `credit-calculation-checks` = all(project in file("lib/credit-calculation-checks"))
-  .dependsOn(`holiday-stops`)
+  .dependsOn(`zuora-core`)
   .settings(libraryDependencies ++= Seq(scalaCsv, scalatest) ++ logging)
 
 // ==== END handlers ====
