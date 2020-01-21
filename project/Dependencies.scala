@@ -44,7 +44,7 @@ object Dependencies {
   val http4sServer = "org.http4s" %% "http4s-server" % http4sVersion
   val catsCore = "org.typelevel" %% "cats-core" % catsVersion
   val catsEffect = "org.typelevel" %% "cats-effect" % catsEffectVersion
-
+  val scalaCsv = "com.github.tototoshi" %% "scala-csv" % "1.3.6"
 
   // to resolve merge clash of 'module-info.class'
   // see https://stackoverflow.com/questions/54834125/sbt-assembly-deduplicate-module-info-class
