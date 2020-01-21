@@ -237,8 +237,7 @@ lazy val root = all(project in file(".")).enablePlugins(RiffRaffArtifact).aggreg
   `fulfilment-date-calculator`,
   `delivery-records-api`,
   `fulfilment-dates`,
-  `zuora-core`,
-  `credit-calculation-checks`
+  `zuora-core`
 ).dependsOn(zuora, handler, effectsDepIncludingTestFolder, `effects-sqs`, testDep)
 
 lazy val `identity-backfill` = all(project in file("handlers/identity-backfill")) // when using the "project identity-backfill" command it uses the lazy val name
@@ -328,10 +327,6 @@ lazy val `delivery-records-api` = all(project in file("handlers/delivery-records
         ++ logging
   )
   .enablePlugins(RiffRaffArtifact)
-
-lazy val `credit-calculation-checks` = all(project in file("lib/credit-calculation-checks"))
-  .dependsOn(`holiday-stops`)
-  .settings(libraryDependencies ++= Seq(scalaCsv, scalatest) ++ logging)
 
 // ==== END handlers ====
 
