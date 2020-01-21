@@ -20,6 +20,7 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
   val subscriptionNumber = "A-213123"
   val identityId = "identity id"
   val buyerContactId = "contact id"
+  val deliveryRecordId = "id"
   val deliveryDate: LocalDate = LocalDate.now()
   val deliveryAddress1 = "a delivery address"
   val deliveryAddress2 = "a detailed delivery address"
@@ -41,6 +42,7 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
   )
 
   val sfDeliveryRecordA = SFApiDeliveryRecord(
+    Id = deliveryRecordId,
     Delivery_Date__c = Some(deliveryDate),
     Delivery_Address__c = Some(deliveryAddress1),
     Address_Line_1__c = Some(addressLine1),
@@ -84,6 +86,7 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
   )
 
   val expectedDeliveryRecordA = DeliveryRecord(
+    id = deliveryRecordId,
     deliveryDate = Some(deliveryDate),
     deliveryInstruction = Some(deliveryInstruction1),
     deliveryAddress = Some(deliveryAddress1),

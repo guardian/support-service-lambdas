@@ -13,6 +13,7 @@ import com.gu.salesforce.SalesforceQueryConstants.{contactToWhereClausePart, esc
 import scala.annotation.tailrec
 
 final case class DeliveryRecord(
+  id: String,
   deliveryDate: Option[LocalDate],
   deliveryInstruction: Option[String],
   deliveryAddress: Option[String],
@@ -72,6 +73,7 @@ object DeliveryRecordsService {
 
   private def transformSfApiDeliveryRecords(accumulator: List[DeliveryRecord], sfRecord: SFApiDeliveryRecord): List[DeliveryRecord] =
     DeliveryRecord(
+      id = sfRecord.Id,
       deliveryDate = sfRecord.Delivery_Date__c,
       deliveryAddress = sfRecord.Delivery_Address__c,
       addressLine1 = sfRecord.Address_Line_1__c,
@@ -156,8 +158,8 @@ object DeliveryRecordsService {
     optionalEndDate: Option[LocalDate]
   ) =
     s"""SELECT (
-       |    SELECT Delivery_Date__c, Delivery_Address__c, Delivery_Instructions__c, Has_Holiday_Stop__c, Address_Line_1__c,
-       |           Address_Line_2__c, Address_Line_3__c, Address_Town__c, Address_Country__c, Address_Postcode__c,
+       |    SELECT Id, Delivery_Date__c, Delivery_Address__c, Delivery_Instructions__c, Has_Holiday_Stop__c,
+       |           Address_Line_1__c,Address_Line_2__c, Address_Line_3__c, Address_Town__c, Address_Country__c, Address_Postcode__c,
        |           Case__c, Case__r.Id, Case__r.Subject, Case__r.Description, Case__r.Case_Closure_Reason__c
        |    FROM Delivery_Records__r
        |    ${deliveryDateFilter(optionalStartDate, optionalEndDate)}
