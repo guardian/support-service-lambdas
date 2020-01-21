@@ -143,11 +143,4 @@ object SubscriptionData {
         ).asLeft
       }
   }
-
-  def shouldUseEffectiveStartDate(ratePlanChargeName: String, upToPeriodsType: Option[String], billingPeriod: Option[String], specificBillingPeriods: Option[Int]): Boolean = {
-    (ratePlanChargeName === "GW Oct 18 - First 6 issues - Domestic" || ratePlanChargeName === "GW Oct 18 - First 6 issues - ROW") &&
-      (upToPeriodsType === Some("Billing_Periods") || upToPeriodsType === Some("Billing Periods")) &&
-      (billingPeriod === Some("Specific_Months") || billingPeriod === Some("Specific Months")) &&
-      specificBillingPeriods === Some(2)
-  }
 }
