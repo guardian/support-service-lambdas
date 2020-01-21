@@ -1,13 +1,12 @@
-package com.gu.holiday_stops.subscription
+package com.gu.zuora.subscription
 
 import java.time.DayOfWeek.FRIDAY
 import java.time.LocalDate
 import java.time.temporal.TemporalAdjusters.next
 
 import com.gu.zuora.ZuoraProductTypes
-import com.gu.zuora.subscription.{BillDates, IssueData, MutableCalendar}
-import org.scalatest.FlatSpec
 import com.gu.zuora.subscription.SubscriptionDataIntegrationTest.testSubscriptonDataIssueGeneration
+import org.scalatest.FlatSpec
 
 class SubscriptionDataGuardianWeeklyMigratedWithIncorrectStartDateIntegrationTest extends FlatSpec {
     "SubscriptionData" should "calculate issue data correctly for migrated GW with incorrect start date" in {
