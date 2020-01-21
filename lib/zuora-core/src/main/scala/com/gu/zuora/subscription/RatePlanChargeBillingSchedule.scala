@@ -8,6 +8,8 @@ import java.time.LocalDate
 import cats.data.NonEmptyList
 import cats.implicits._
 
+import scala.annotation.tailrec
+
 /**
  * Information about the billing cycles for a Zuora RatePlanCharge.
  *
@@ -160,6 +162,7 @@ object RatePlanChargeBillingSchedule {
         }
       }
 
+      @tailrec
       private def billDatesCoveringDate(date: LocalDate, startDate: LocalDate, billingPeriodIndex: Int): Either[ZuoraApiFailure, BillDates] = {
         val currentPeriod = BillDates(
           startDate.plus(billingPeriod.multiple.toLong * billingPeriodIndex, billingPeriod.unit),
