@@ -1,5 +1,7 @@
 package com.gu.holiday_stops
 
+import com.gu.zuora.subscription.CreditProduct
+
 /**
  * Same Discount holiday stop product is reused for all products, namely:
  *   'DO NOT USE MANUALLY: Holiday Credit - automated'
@@ -9,7 +11,7 @@ package com.gu.holiday_stops
 case class HolidayCreditProduct(
   productRatePlanId: String,
   productRatePlanChargeId: String
-)
+) extends CreditProduct
 
 object HolidayCreditProduct {
   val Prod = HolidayCreditProduct(
@@ -27,4 +29,3 @@ object HolidayCreditProduct {
     productRatePlanChargeId = "2c92c0f96b03800b016b081fc0f41bb4"
   )
 }
-

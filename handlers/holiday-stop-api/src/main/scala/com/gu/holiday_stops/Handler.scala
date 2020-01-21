@@ -8,12 +8,11 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.fulfilmentdates.FulfilmentDatesFetcher
 import com.gu.holiday_stops.WireHolidayStopRequest.toHolidayStopRequestDetail
-import com.gu.holiday_stops.subscription.{HolidayStopCredit, MutableCalendar, Subscription, SubscriptionData, ZuoraAccount}
-import com.gu.salesforce.{Contact, SalesforceClient, SalesforceHandlerSupport}
 import com.gu.salesforce.SalesforceClient.withAlternateAccessTokenIfPresentInHeaderList
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestId, SubscriptionName}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.HolidayStopRequestId
 import com.gu.salesforce.holiday_stops.{SalesforceHolidayStopRequest, SalesforceSFSubscription}
+import com.gu.salesforce.{Contact, SalesforceClient, SalesforceHandlerSupport}
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
@@ -25,10 +24,12 @@ import com.gu.util.resthttp.JsonHttp.StringHttpRequest
 import com.gu.util.resthttp.RestRequestMaker.BodyAsString
 import com.gu.util.resthttp.Types.ClientFailure
 import com.gu.util.resthttp.{HttpOp, JsonHttp}
+import com.gu.zuora.subscription.{ZuoraAccount, _}
 import com.softwaremill.sttp.{HttpURLConnectionBackend, Id, SttpBackend}
 import okhttp3.{Request, Response}
 import play.api.libs.json.{Json, Reads}
 import scalaz.{-\/, \/, \/-}
+import com.gu.salesforce.{Contact, SalesforceClient, SalesforceHandlerSupport}
 
 object Handler extends Logging {
 
@@ -82,9 +83,9 @@ object Handler extends Logging {
 
   private def validateRequestAndCreateSteps(
     request: ApiGatewayRequest,
-    getAccessToken: () => Either[HolidayError, AccessToken],
-    getSubscription: (AccessToken, SubscriptionName) => Either[HolidayError, Subscription],
-    getAccount: (AccessToken, String) => Either[HolidayError, ZuoraAccount],
+    getAccessToken: () => Either[ApiFailure, AccessToken],
+    getSubscription: (AccessToken, SubscriptionName) => Either[ApiFailure, Subscription],
+    getAccount: (AccessToken, String) => Either[ApiFailure, ZuoraAccount],
     idGenerator: => String,
     fulfilmentDatesFetcher: FulfilmentDatesFetcher
   ) = {
@@ -116,9 +117,9 @@ object Handler extends Logging {
   private def createSteps(
     httpMethod: String,
     path: List[String],
-    getAccessToken: () => Either[HolidayError, AccessToken],
-    getSubscription: (AccessToken, SubscriptionName) => Either[HolidayError, Subscription],
-    getAccount: (AccessToken, String) => Either[HolidayError, ZuoraAccount],
+    getAccessToken: () => Either[ApiFailure, AccessToken],
+    getSubscription: (AccessToken, SubscriptionName) => Either[ApiFailure, Subscription],
+    getAccount: (AccessToken, String) => Either[ApiFailure, ZuoraAccount],
     idGenerator: => String,
     fulfilmentDatesFetcher: FulfilmentDatesFetcher
   ) = {
@@ -183,9 +184,9 @@ object Handler extends Logging {
   )
 
   def stepsForPotentialHolidayStop(
-    getAccessToken: () => Either[HolidayError, AccessToken],
-    getSubscription: (AccessToken, SubscriptionName) => Either[HolidayError, Subscription],
-    getAccount: (AccessToken, String) => Either[HolidayError, ZuoraAccount],
+    getAccessToken: () => Either[ApiFailure, AccessToken],
+    getSubscription: (AccessToken, SubscriptionName) => Either[ApiFailure, Subscription],
+    getAccount: (AccessToken, String) => Either[ApiFailure, ZuoraAccount],
   )(req: ApiGatewayRequest, unused: SfClient): ApiResponse = {
     implicit val reads: Reads[PotentialHolidayStopsQueryParams] = Json.reads[PotentialHolidayStopsQueryParams]
     (for {
@@ -212,9 +213,9 @@ object Handler extends Logging {
   case class ListExistingPathParams(subscriptionName: SubscriptionName)
 
   def stepsToListExisting(
-    getAccessToken: () => Either[HolidayError, AccessToken],
-    getSubscription: (AccessToken, SubscriptionName) => Either[HolidayError, Subscription],
-    getAccount: (AccessToken, String) => Either[HolidayError, ZuoraAccount],
+    getAccessToken: () => Either[ApiFailure, AccessToken],
+    getSubscription: (AccessToken, SubscriptionName) => Either[ApiFailure, Subscription],
+    getAccount: (AccessToken, String) => Either[ApiFailure, ZuoraAccount],
     fulfilmentDatesFetcher: FulfilmentDatesFetcher
   )(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
 
@@ -250,9 +251,9 @@ object Handler extends Logging {
   }
 
   def stepsToCreate(
-    getAccessToken: () => Either[HolidayError, AccessToken],
-    getSubscription: (AccessToken, SubscriptionName) => Either[HolidayError, Subscription],
-    getAccount: (AccessToken, String) => Either[HolidayError, ZuoraAccount],
+    getAccessToken: () => Either[ApiFailure, AccessToken],
+    getSubscription: (AccessToken, SubscriptionName) => Either[ApiFailure, Subscription],
+    getAccount: (AccessToken, String) => Either[ApiFailure, ZuoraAccount],
   )(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
 
     val verifyContactOwnsSubOp = SalesforceSFSubscription.SubscriptionForSubscriptionNameAndContact(sfClient.wrapWith(JsonHttp.getWithParams))
@@ -346,9 +347,9 @@ object Handler extends Logging {
   implicit val readsSpecificHolidayStopRequestPathParams = Json.reads[SpecificHolidayStopRequestPathParams]
 
   def stepsToAmend(
-    getAccessToken: () => Either[HolidayError, AccessToken],
-    getSubscription: (AccessToken, SubscriptionName) => Either[HolidayError, Subscription],
-    getAccount: (AccessToken, String) => Either[HolidayError, ZuoraAccount],
+    getAccessToken: () => Either[ApiFailure, AccessToken],
+    getSubscription: (AccessToken, SubscriptionName) => Either[ApiFailure, Subscription],
+    getAccount: (AccessToken, String) => Either[ApiFailure, ZuoraAccount],
   )(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
 
     val lookupOp = SalesforceHolidayStopRequest.LookupByContactAndOptionalSubscriptionName(sfClient.wrapWith(JsonHttp.getWithParams))
@@ -382,7 +383,7 @@ object Handler extends Logging {
   )(
     accessToken: AccessToken,
     subscriptionName: SubscriptionName
-  ): Either[HolidayError, Subscription] = Zuora.subscriptionGetResponse(config, accessToken, backend)(subscriptionName)
+  ): Either[ApiFailure, Subscription] = Zuora.subscriptionGetResponse(config, accessToken, backend)(subscriptionName)
 
   def getAccountFromZuora(
     config: Config,
@@ -390,12 +391,12 @@ object Handler extends Logging {
   )(
     accessToken: AccessToken,
     accountKey: String
-  ): Either[HolidayError, ZuoraAccount] = Zuora.accountGetResponse(config, accessToken, backend)(accountKey)
+  ): Either[ApiFailure, ZuoraAccount] = Zuora.accountGetResponse(config, accessToken, backend)(accountKey)
 
   def getAccessTokenFromZuora(
     config: Config,
     backend: SttpBackend[Id, Nothing]
-  )(): Either[HolidayError, AccessToken] = Zuora.accessTokenGetResponse(config.zuoraConfig, backend)
+  )(): Either[ApiFailure, AccessToken] = Zuora.accessTokenGetResponse(config.zuoraConfig, backend)
 
 
 

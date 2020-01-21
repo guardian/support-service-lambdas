@@ -34,18 +34,15 @@ object DeliveryRecordApiRoutes {
       contact: Contact,
       optionalStartDate: Option[LocalDate],
       optionalEndDate: Option[LocalDate]
-    ): EitherT[F, F[Response[F]], DeliveryRecordsApiResponse[DeliveryRecord]] = {
+    ): EitherT[F, F[Response[F]], DeliveryRecordsApiResponse] = {
       deliveryRecordsService
         .getDeliveryRecordsForSubscription(subscriptionNumber, contact, optionalStartDate, optionalEndDate)
-        .bimap(
-          {
-            case error: DeliveryRecordServiceSubscriptionNotFound =>
-              NotFound(error)
-            case error: DeliveryRecordServiceGenericError =>
-              InternalServerError(error)
-          },
-          deliveryRecords => DeliveryRecordsApiResponse(deliveryRecords)
-        )
+        .leftMap {
+          case error: DeliveryRecordServiceSubscriptionNotFound =>
+            NotFound(error)
+          case error: DeliveryRecordServiceGenericError =>
+            InternalServerError(error)
+        }
     }
 
     def parseDateFromQueryString(request: Request[F], queryParameterKey: String): EitherT[F, F[Response[F]], Option[LocalDate]] = {

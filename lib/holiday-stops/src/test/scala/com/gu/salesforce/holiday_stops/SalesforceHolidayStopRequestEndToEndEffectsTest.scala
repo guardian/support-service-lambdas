@@ -3,15 +3,14 @@ package com.gu.salesforce.holiday_stops
 import java.time.LocalDate
 
 import com.gu.effects.{GetFromS3, RawEffects}
-import com.gu.holiday_stops.Fixtures
-import com.gu.holiday_stops.subscription.{Subscription, SubscriptionData}
-import com.gu.salesforce.{IdentityId, SFAuthConfig, SalesforceClient}
 import com.gu.salesforce.SalesforceReads._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
+import com.gu.salesforce.{IdentityId, SFAuthConfig, SalesforceClient}
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.resthttp.JsonHttp
+import com.gu.zuora.subscription._
 import org.scalatest.{FlatSpec, Matchers}
 import scalaz.{-\/, \/-}
 
@@ -67,7 +66,7 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends FlatSpec with Matc
         sfAuth.wrapWith(JsonHttp.patch)
       )(id)
       _ <- processOp(HolidayStopRequestsDetailActioned(
-        HolidayStopRequestsDetailChargeCode("C-1234567"),
+        RatePlanChargeCode("C-1234567"),
         HolidayStopRequestsDetailChargePrice(-12.34)
       )).toDisjunction
 
@@ -75,7 +74,7 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends FlatSpec with Matc
 
       // UN-ACTION in order to delete the parent
       _ <- processOp(HolidayStopRequestsDetailActioned(
-        HolidayStopRequestsDetailChargeCode(""),
+        RatePlanChargeCode(""),
         HolidayStopRequestsDetailChargePrice(0)
       )).toDisjunction
 

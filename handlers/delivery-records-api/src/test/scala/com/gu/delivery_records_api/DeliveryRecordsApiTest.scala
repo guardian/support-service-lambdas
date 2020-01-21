@@ -3,9 +3,9 @@ package com.gu.delivery_records_api
 import java.time.LocalDate
 
 import cats.effect.IO
-import com.gu.salesforce.SalesforceQueryConstants.deliveryRecordsQuery
+import com.gu.delivery_records_api.DeliveryRecordsService.deliveryRecordsQuery
 import com.gu.salesforce.sttp.SalesforceStub._
-import com.gu.salesforce.{IdentityId, RecordsWrapperCaseClass, SFApiDeliveryRecord, SFApiSubscription, SFAuthConfig, SalesforceAuth, SalesforceContactId}
+import com.gu.salesforce.{IdentityId, RecordsWrapperCaseClass, SFAuthConfig, SalesforceAuth, SalesforceContactId}
 import com.softwaremill.sttp.impl.cats.CatsMonadError
 import com.softwaremill.sttp.testing.SttpBackendStub
 import io.circe.Decoder
@@ -20,16 +20,50 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
   val subscriptionNumber = "A-213123"
   val identityId = "identity id"
   val buyerContactId = "contact id"
-  val deliveryDate = LocalDate.now()
-  val deliveryAddress = "a delivery address"
+  val deliveryDate: LocalDate = LocalDate.now()
+  val deliveryAddress1 = "a delivery address"
+  val deliveryAddress2 = "a detailed delivery address"
   val addressLine1 = "an address line 1"
   val addressLine2 = "an address line 2"
   val addressLine3 = "an address line 3"
   val addressTown = "an address town"
   val addressCountry = "an address country"
   val addressPostcode = "an address postcode"
-  val deliveryInstruction = "leave by the gnome"
+  val deliveryInstruction1 = "leave by the gnome"
+  val deliveryInstruction2 = "leave by the red gnome"
   val hasHolidayStop = true
+  val doesntHaveHolidayStop = true
+  val sfProblemCase = SFApiDeliveryProblemCase(
+    Id = "case_id",
+    Subject = Some("subject"),
+    Description = Some("blah blah"),
+    Case_Closure_Reason__c = Some("Paper Damaged")
+  )
+
+  val sfDeliveryRecordA = SFApiDeliveryRecord(
+    Delivery_Date__c = Some(deliveryDate),
+    Delivery_Address__c = Some(deliveryAddress1),
+    Address_Line_1__c = Some(addressLine1),
+    Address_Line_2__c = Some(addressLine2),
+    Address_Line_3__c = Some(addressLine3),
+    Address_Town__c = Some(addressTown),
+    Address_Country__c = Some(addressCountry),
+    Address_Postcode__c = Some(addressPostcode),
+    Delivery_Instructions__c = Some(deliveryInstruction1),
+    Has_Holiday_Stop__c = Some(doesntHaveHolidayStop),
+    Case__r = Some(sfProblemCase)
+  )
+
+  val sfDeliveryRecordWithHolidayStop: SFApiDeliveryRecord = sfDeliveryRecordA.copy(
+    Has_Holiday_Stop__c = Some(hasHolidayStop),
+    Delivery_Address__c = None,
+    Delivery_Instructions__c = None
+  )
+
+  val sfDeliveryRecordB: SFApiDeliveryRecord = sfDeliveryRecordA.copy(
+    Delivery_Address__c = Some(deliveryAddress2),
+    Delivery_Instructions__c = Some(deliveryInstruction2)
+  )
 
   val validSalesforceResponseBody = RecordsWrapperCaseClass(
     List(
@@ -37,18 +71,11 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
         Delivery_Records__r = Some(
           RecordsWrapperCaseClass(
             List(
-              SFApiDeliveryRecord(
-                Delivery_Date__c = Some(deliveryDate),
-                Delivery_Address__c = Some(deliveryAddress),
-                Address_Line_1__c = Some(addressLine1),
-                Address_Line_2__c = Some(addressLine2),
-                Address_Line_3__c = Some(addressLine3),
-                Address_Town__c = Some(addressTown),
-                Address_Country__c = Some(addressCountry),
-                Address_Postcode__c = Some(addressPostcode),
-                Delivery_Instructions__c = Some(deliveryInstruction),
-                Has_Holiday_Stop__c = Some(hasHolidayStop)
-              )
+              sfDeliveryRecordB,
+              sfDeliveryRecordB,
+              sfDeliveryRecordWithHolidayStop,
+              sfDeliveryRecordA,
+              sfDeliveryRecordWithHolidayStop
             )
           )
         )
@@ -56,19 +83,52 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
     )
   )
 
+  val expectedDeliveryRecordA = DeliveryRecord(
+    deliveryDate = Some(deliveryDate),
+    deliveryInstruction = Some(deliveryInstruction1),
+    deliveryAddress = Some(deliveryAddress1),
+    addressLine1 = Some(addressLine1),
+    addressLine2 = Some(addressLine2),
+    addressLine3 = Some(addressLine3),
+    addressTown = Some(addressTown),
+    addressCountry = Some(addressCountry),
+    addressPostcode = Some(addressPostcode),
+    hasHolidayStop = Some(doesntHaveHolidayStop),
+    problemCaseId = Some(sfProblemCase.Id),
+    isChangedAddress = Some(false),
+    isChangedDeliveryInstruction = Some(false)
+  )
+
+  val expectedDeliveryRecordWithHolidayStop: DeliveryRecord = expectedDeliveryRecordA.copy(
+    deliveryInstruction = None,
+    deliveryAddress = None,
+    hasHolidayStop = Some(true),
+    isChangedAddress = None,
+    isChangedDeliveryInstruction = None
+  )
+
+  val expectedDeliveryRecordB: DeliveryRecord = expectedDeliveryRecordA.copy(
+    deliveryInstruction = Some(deliveryInstruction2),
+    deliveryAddress = Some(deliveryAddress2)
+  )
+
   val expectedValidDeliveryApiResponse = DeliveryRecordsApiResponse(
     List(
-      DeliveryRecord(
-        Some(deliveryDate),
-        Some(deliveryInstruction),
-        Some(deliveryAddress),
-        Some(addressLine1),
-        Some(addressLine2),
-        Some(addressLine3),
-        Some(addressTown),
-        Some(addressCountry),
-        Some(addressPostcode),
-        Some(hasHolidayStop)
+      expectedDeliveryRecordB,
+      expectedDeliveryRecordB.copy(
+        isChangedAddress = Some(true),
+        isChangedDeliveryInstruction = Some(true)
+      ),
+      expectedDeliveryRecordWithHolidayStop,
+      expectedDeliveryRecordA,
+      expectedDeliveryRecordWithHolidayStop
+    ),
+    Map(
+      sfProblemCase.Id -> DeliveryProblemCase(
+        id = sfProblemCase.Id,
+        subject = sfProblemCase.Subject,
+        description = sfProblemCase.Description,
+        problemType = sfProblemCase.Case_Closure_Reason__c
       )
     )
   )
@@ -88,7 +148,7 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
       )
     ).value.unsafeRunSync().get
 
-    getBody[DeliveryRecordsApiResponse[DeliveryRecord]](response) should equal(expectedValidDeliveryApiResponse)
+    getBody[DeliveryRecordsApiResponse](response) should equal(expectedValidDeliveryApiResponse)
     response.status.code should equal(200)
   }
   it should "lookup subscription with contact id" in {
@@ -106,7 +166,7 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
       )
     ).value.unsafeRunSync().get
 
-    getBody[DeliveryRecordsApiResponse[DeliveryRecord]](response) should equal(expectedValidDeliveryApiResponse)
+    getBody[DeliveryRecordsApiResponse](response) should equal(expectedValidDeliveryApiResponse)
     response.status.code should equal(200)
   }
   it should "lookup subscription with date filters" in {
@@ -139,7 +199,7 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
       )
     ).value.unsafeRunSync().get
 
-    getBody[DeliveryRecordsApiResponse[DeliveryRecord]](response) should equal(expectedValidDeliveryApiResponse)
+    getBody[DeliveryRecordsApiResponse](response) should equal(expectedValidDeliveryApiResponse)
     response.status.code should equal(200)
   }
   it should "return 404 if no subscription returned from salesforce" in {
