@@ -24,12 +24,12 @@ import com.gu.util.resthttp.JsonHttp.StringHttpRequest
 import com.gu.util.resthttp.RestRequestMaker.BodyAsString
 import com.gu.util.resthttp.Types.ClientFailure
 import com.gu.util.resthttp.{HttpOp, JsonHttp}
-import com.gu.zuora.subscription.{ZuoraAccount, _}
+import com.gu.zuora.subscription._
+import com.gu.zuora.{AccessToken, Zuora}
 import com.softwaremill.sttp.{HttpURLConnectionBackend, Id, SttpBackend}
 import okhttp3.{Request, Response}
 import play.api.libs.json.{Json, Reads}
 import scalaz.{-\/, \/, \/-}
-import com.gu.salesforce.{Contact, SalesforceClient, SalesforceHandlerSupport}
 
 object Handler extends Logging {
 
@@ -204,7 +204,7 @@ object Handler extends Logging {
       potentialHolidayStops = issuesData.map { issueData =>
         PotentialHolidayStop(
           issueData.issueDate,
-          HolidayStopCredit(issueData.credit, issueData.nextBillingPeriodStartDate)
+          Credit(issueData.credit, issueData.nextBillingPeriodStartDate)
         )
       }
     } yield ApiGatewayResponse("200", PotentialHolidayStopsResponse(potentialHolidayStops))).apiResponse

@@ -45,6 +45,7 @@ object Dependencies {
   val catsCore = "org.typelevel" %% "cats-core" % catsVersion
   val catsEffect = "org.typelevel" %% "cats-effect" % catsEffectVersion
   val scalaLambda = "io.github.mkotsur" %% "aws-lambda-scala" % "0.1.1"
+  val zio = "dev.zio" %% "zio" % "1.0.0-RC17"
 
 
   // to resolve merge clash of 'module-info.class'

@@ -5,6 +5,7 @@ import java.time.LocalDate
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.{HolidayStopRequest, HolidayStopRequestActionedCount, HolidayStopRequestEndDate, HolidayStopRequestIsWithdrawn, HolidayStopRequestStartDate}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestId, HolidayStopRequestsDetail, HolidayStopRequestsDetailExpectedInvoiceDate, HolidayStopRequestsDetailId, ProductName}
 import com.gu.salesforce.{RecordsWrapperCaseClass, SFAuthConfig}
+import com.gu.zuora.{HolidayStopProcessor, Oauth, ZuoraConfig}
 import com.gu.zuora.subscription.Fixtures.mkRatePlanCharge
 import com.gu.zuora.subscription._
 import io.circe.generic.auto._

@@ -1,4 +1,4 @@
-package com.gu.holiday_stops
+package com.gu.zuora
 
 import com.gu.zuora.subscription.{ZuoraAccount, _}
 import com.softwaremill.sttp._
@@ -10,7 +10,7 @@ object Zuora {
     config: ZuoraConfig,
     backend: SttpBackend[Id, Nothing]
   ): ZuoraApiResponse[AccessToken] = {
-    implicit val b = backend
+    implicit val b: SttpBackend[Id, Nothing] = backend
     sttp.post(uri"${config.baseUrl.stripSuffix("/v1")}/oauth/token")
       .body(
         "grant_type" -> "client_credentials",
@@ -24,9 +24,9 @@ object Zuora {
       .joinRight
   }
 
-  def subscriptionGetResponse(config: Config, accessToken: AccessToken, backend: SttpBackend[Id, Nothing])(subscriptionName: SubscriptionName): ZuoraApiResponse[Subscription] = {
-    implicit val b = backend
-    sttp.get(uri"${config.zuoraConfig.baseUrl}/subscriptions/${subscriptionName.value}")
+  def subscriptionGetResponse(config: ZuoraConfig, accessToken: AccessToken, backend: SttpBackend[Id, Nothing])(subscriptionName: SubscriptionName): ZuoraApiResponse[Subscription] = {
+    implicit val b: SttpBackend[Id, Nothing] = backend
+    sttp.get(uri"${config.baseUrl}/subscriptions/${subscriptionName.value}")
       .header("Authorization", s"Bearer ${accessToken.access_token}")
       .response(asJson[Subscription])
       .mapResponse(_.left.map(e => ZuoraApiFailure(e.message)))
@@ -35,10 +35,10 @@ object Zuora {
       .joinRight
   }
 
-  def subscriptionUpdateResponse(config: Config, accessToken: AccessToken, backend: SttpBackend[Id, Nothing])(subscription: Subscription, update: SubscriptionUpdate): ZuoraApiResponse[Unit] = {
-    implicit val b = backend
+  def subscriptionUpdateResponse(config: ZuoraConfig, accessToken: AccessToken, backend: SttpBackend[Id, Nothing])(subscription: Subscription, update: SubscriptionUpdate): ZuoraApiResponse[Unit] = {
+    implicit val b: SttpBackend[Id, Nothing] = backend
     val errMsg = (reason: String) => s"Failed to update subscription '${subscription.subscriptionNumber}' with $update. Reason: $reason"
-    sttp.put(uri"${config.zuoraConfig.baseUrl}/subscriptions/${subscription.subscriptionNumber}")
+    sttp.put(uri"${config.baseUrl}/subscriptions/${subscription.subscriptionNumber}")
       .header("Authorization", s"Bearer ${accessToken.access_token}")
       .body(update)
       .response(asJson[ZuoraStatusResponse])

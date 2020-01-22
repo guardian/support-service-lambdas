@@ -2,7 +2,7 @@ package com.gu.holiday_stops
 
 import java.time.LocalDate
 
-import com.gu.zuora.subscription.HolidayStopCredit
+import com.gu.zuora.subscription.Credit
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
 
@@ -12,7 +12,7 @@ class PotentialHolidayStopsResponseTest extends FlatSpec with Matchers {
     List(
       PotentialHolidayStop(
         publicationDate = LocalDate.of(2019, 9, 27),
-        expectedCredit = HolidayStopCredit(
+        expectedCredit = Credit(
           amount = -2.89,
           invoiceDate = LocalDate.of(2019, 10, 1)
         )

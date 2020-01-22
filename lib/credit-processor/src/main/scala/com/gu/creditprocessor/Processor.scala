@@ -4,14 +4,55 @@ import java.time.LocalDate
 
 import cats.implicits._
 import com.gu.fulfilmentdates.FulfilmentDatesFetcher
+import com.gu.zuora.{AccessToken, Zuora, ZuoraConfig}
 import com.gu.zuora.ZuoraProductTypes.ZuoraProductType
 import com.gu.zuora.subscription._
+import com.softwaremill.sttp.{Id, SttpBackend}
 import org.slf4j.LoggerFactory
 
 object Processor {
   private val logger = LoggerFactory.getLogger(getClass)
 
-  // TODO: could pass in a typeclass instead of a huge list of arguments here
+  def processLiveProduct[RequestType <: CreditRequest, ResultType <: ZuoraCreditAddResult](
+    config: ZuoraConfig,
+    zuoraAccessToken: AccessToken,
+    sttpBackend: SttpBackend[Id, Nothing],
+    creditProduct: CreditProduct,
+    getCreditRequestsFromSalesforce: (ZuoraProductType, List[LocalDate]) => SalesforceApiResponse[List[RequestType]],
+    fulfilmentDatesFetcher: FulfilmentDatesFetcher,
+    processOverrideDate: Option[LocalDate],
+    productType: ZuoraProductType,
+    updateToApply: (CreditProduct, Subscription, AffectedPublicationDate) => ZuoraApiResponse[SubscriptionUpdate],
+    resultOfZuoraCreditAdd: (RequestType, RatePlanCharge) => ResultType,
+    writeCreditResultsToSalesforce: List[ResultType] => SalesforceApiResponse[Unit]
+  ): ProcessResult[ResultType] = {
+
+    def getSubscription(
+      subscriptionName: SubscriptionName
+    ): ZuoraApiResponse[Subscription] =
+      Zuora.subscriptionGetResponse(config, zuoraAccessToken, sttpBackend)(subscriptionName)
+
+    def updateSubscription(
+      subscription: Subscription,
+      update: SubscriptionUpdate
+    ): ZuoraApiResponse[Unit] =
+      Zuora.subscriptionUpdateResponse(config, zuoraAccessToken, sttpBackend)(subscription, update)
+
+    processProduct(
+      creditProduct: CreditProduct,
+      getCreditRequestsFromSalesforce: (ZuoraProductType, List[LocalDate]) => SalesforceApiResponse[List[RequestType]],
+      fulfilmentDatesFetcher: FulfilmentDatesFetcher,
+      processOverrideDate: Option[LocalDate],
+      productType: ZuoraProductType,
+      getSubscription: SubscriptionName => ZuoraApiResponse[Subscription],
+      updateToApply: (CreditProduct, Subscription, AffectedPublicationDate) => ZuoraApiResponse[SubscriptionUpdate],
+      updateSubscription: (Subscription, SubscriptionUpdate) => ZuoraApiResponse[Unit],
+      resultOfZuoraCreditAdd: (RequestType, RatePlanCharge) => ResultType,
+      writeCreditResultsToSalesforce: List[ResultType] => SalesforceApiResponse[Unit]
+    )
+  }
+
+  // TODO: could pass in a trait instead of a huge list of arguments here
   def processProduct[RequestType <: CreditRequest, ResultType <: ZuoraCreditAddResult](
     creditProduct: CreditProduct,
     getCreditRequestsFromSalesforce: (ZuoraProductType, List[LocalDate]) => SalesforceApiResponse[List[RequestType]],

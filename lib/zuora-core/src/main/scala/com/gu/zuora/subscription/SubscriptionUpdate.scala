@@ -21,27 +21,47 @@ object SubscriptionUpdate {
     account: ZuoraAccount,
     stoppedPublicationDate: AffectedPublicationDate
   ): ZuoraApiResponse[SubscriptionUpdate] =
+    creditAddUpdate(
+      creditProduct,
+      subscription,
+      stoppedPublicationDate,
+      Some(stoppedPublicationDate.value)
+    )
+
+  def forDeliveryProblemCredit(
+    creditProduct: CreditProduct,
+    subscription: Subscription,
+    deliveryDate: AffectedPublicationDate
+  ): ZuoraApiResponse[SubscriptionUpdate] =
+    creditAddUpdate(creditProduct, subscription, deliveryDate, None)
+
+  private def creditAddUpdate(
+    creditProduct: CreditProduct,
+    subscription: Subscription,
+    affectedDate: AffectedPublicationDate,
+    holidayDate: Option[LocalDate]
+  ): ZuoraApiResponse[SubscriptionUpdate] =
     for {
       subscriptionData <- SubscriptionData(subscription, account)
-      issueData <- subscriptionData.issueDataForDate(stoppedPublicationDate.value)
+      issueData <- subscriptionData.issueDataForDate(affectedDate.value)
     } yield {
       val maybeExtendedTerm = ExtendedTerm(issueData.nextBillingPeriodStartDate, subscription)
-      val holidayCredit = HolidayStopCredit(issueData.credit, issueData.nextBillingPeriodStartDate)
+      val credit = Credit(issueData.credit, issueData.nextBillingPeriodStartDate)
       SubscriptionUpdate(
         currentTerm = maybeExtendedTerm.map(_.length),
         currentTermPeriodType = maybeExtendedTerm.map(_.unit),
         List(
           Add(
             productRatePlanId = creditProduct.productRatePlanId,
-            contractEffectiveDate = holidayCredit.invoiceDate,
-            customerAcceptanceDate = holidayCredit.invoiceDate,
-            serviceActivationDate = holidayCredit.invoiceDate,
+            contractEffectiveDate = credit.invoiceDate,
+            customerAcceptanceDate = credit.invoiceDate,
+            serviceActivationDate = credit.invoiceDate,
             chargeOverrides = List(
               ChargeOverride(
                 productRatePlanChargeId = creditProduct.productRatePlanChargeId,
-                HolidayStart__c = stoppedPublicationDate.value,
-                HolidayEnd__c = stoppedPublicationDate.value,
-                price = holidayCredit.amount
+                HolidayStart__c = holidayDate,
+                HolidayEnd__c = holidayDate,
+                price = credit.amount
               )
             )
           )
@@ -60,7 +80,7 @@ case class Add(
 
 case class ChargeOverride(
   productRatePlanChargeId: String,
-  HolidayStart__c: LocalDate,
-  HolidayEnd__c: LocalDate,
+  HolidayStart__c: Option[LocalDate],
+  HolidayEnd__c: Option[LocalDate],
   price: Double
 )

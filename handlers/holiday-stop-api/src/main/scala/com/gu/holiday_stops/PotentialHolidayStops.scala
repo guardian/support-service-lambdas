@@ -2,13 +2,13 @@ package com.gu.holiday_stops
 
 import java.time.LocalDate
 
-import com.gu.zuora.subscription.HolidayStopCredit
+import com.gu.zuora.subscription.Credit
 import play.api.libs.json.Reads._
 import play.api.libs.json._
 
 case class PotentialHolidayStop(
   publicationDate: LocalDate,
-  expectedCredit: HolidayStopCredit
+  expectedCredit: Credit
 )
 
 object PotentialHolidayStop {
@@ -21,7 +21,7 @@ object PotentialHolidayStop {
       amount <- (json \ "credit").validate[Double]
       invoiceDate <- (json \ "invoiceDate").validate[LocalDate]
     } yield {
-      PotentialHolidayStop(publicationDate, HolidayStopCredit(amount, invoiceDate))
+      PotentialHolidayStop(publicationDate, Credit(amount, invoiceDate))
     }
 
     override def writes(stop: PotentialHolidayStop): JsValue =

@@ -1,5 +1,6 @@
 package com.gu.holiday_stops
 
+import com.gu.zuora.AccessToken
 import com.gu.zuora.subscription.{Subscription, ZuoraAccount}
 import com.softwaremill.sttp.testing.SttpBackendStub
 import com.softwaremill.sttp.{Id, Response}

@@ -1,4 +1,4 @@
-import Dependencies._
+import Dependencies.{sttpAsycHttpClientBackendCats, _}
 
 val scalaSettings = Seq(
   scalaVersion := "2.12.10",
@@ -76,7 +76,7 @@ lazy val zuora = all(project in file("lib/zuora"))
 lazy val `salesforce-core` = all(project in file("lib/salesforce/core"))
   .dependsOn(`config-core`)
   .settings(
-    libraryDependencies ++= Seq() ++ logging
+    libraryDependencies ++= Seq(playJson) ++ logging
   )
 
 lazy val `salesforce-client` = all(project in file("lib/salesforce/client"))
@@ -203,6 +203,8 @@ lazy val `zuora-core` = all(project in file("lib/zuora-core"))
       catsCore,
       circe,
       circeParser,
+      sttp,
+      sttpCirce,
       scalatest
     )
   )
@@ -334,11 +336,15 @@ lazy val `holiday-stop-processor` = all(project in file("handlers/holiday-stop-p
 lazy val `delivery-problem-credit-processor` =
   all(project in file("handlers/delivery-problem-credit-processor"))
     .dependsOn(
-      `credit-processor`
+      `credit-processor`,
+      `salesforce-client`,
+      effects
     )
     .settings(
       libraryDependencies ++= Seq(
-        scalaLambda
+        scalaLambda,
+        circe,
+        zio
       )
     )
     .enablePlugins(RiffRaffArtifact)
