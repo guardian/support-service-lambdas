@@ -17,7 +17,7 @@ import com.gu.util.resthttp.RestOp._
 import com.gu.util.resthttp.RestRequestMaker._
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, CustomError}
 import com.gu.util.resthttp.{HttpOp, RestRequestMaker}
-import com.gu.zuora.subscription.{IssueData, RatePlanChargeCode, Subscription, SubscriptionName}
+import com.gu.zuora.subscription.{IssueData, Price, RatePlanChargeCode, Subscription, SubscriptionName}
 import play.api.libs.json._
 
 object SalesforceHolidayStopRequest extends Logging {
@@ -153,7 +153,7 @@ object SalesforceHolidayStopRequest extends Logging {
 
   case class CompositeTreeHolidayStopRequestsDetail(
     Stopped_Publication_Date__c: LocalDate,
-    Estimated_Price__c: HolidayStopRequestsDetailChargePrice,
+    Estimated_Price__c: Price,
     Expected_Invoice_Date__c: HolidayStopRequestsDetailExpectedInvoiceDate,
     attributes: CompositeAttributes = CompositeAttributes(
       holidayStopRequestsDetailSfObjectRef,
@@ -207,7 +207,7 @@ object SalesforceHolidayStopRequest extends Logging {
             issuesData.map { issuesData =>
               CompositeTreeHolidayStopRequestsDetail(
                 issuesData.issueDate,
-                Estimated_Price__c = HolidayStopRequestsDetailChargePrice(issuesData.credit),
+                Estimated_Price__c = Price(issuesData.credit),
                 Expected_Invoice_Date__c = HolidayStopRequestsDetailExpectedInvoiceDate(issuesData.nextBillingPeriodStartDate)
               )
             }
@@ -278,7 +278,7 @@ object SalesforceHolidayStopRequest extends Logging {
     case class AddHolidayStopRequestDetailBody (
       Holiday_Stop_Request__c: HolidayStopRequestId,
       Stopped_Publication_Date__c: LocalDate,
-      Estimated_Price__c: HolidayStopRequestsDetailChargePrice,
+      Estimated_Price__c: Price,
       Expected_Invoice_Date__c: HolidayStopRequestsDetailExpectedInvoiceDate,
     )
 
@@ -313,7 +313,7 @@ object SalesforceHolidayStopRequest extends Logging {
             body = Json.toJson(AddHolidayStopRequestDetailBody(
               Holiday_Stop_Request__c = holidayStopRequestId,
               Stopped_Publication_Date__c = issueData.issueDate,
-              Estimated_Price__c = HolidayStopRequestsDetailChargePrice(issueData.credit),
+              Estimated_Price__c = Price(issueData.credit),
               Expected_Invoice_Date__c = HolidayStopRequestsDetailExpectedInvoiceDate(issueData.nextBillingPeriodStartDate)
             ))(Json.writes[AddHolidayStopRequestDetailBody])
           )}
@@ -340,7 +340,7 @@ object SalesforceHolidayStopRequest extends Logging {
   object CancelHolidayStopRequestDetail {
     implicit val cancelHolidayStopRequestDetailBodyReads = Json.writes[CancelHolidayStopRequestDetailBody]
     final case class CancelHolidayStopRequestDetailBody (
-      Actual_Price__c: Option[HolidayStopRequestsDetailChargePrice],
+      Actual_Price__c: Option[Price],
       Charge_Code__c: Option[RatePlanChargeCode]
     )
 

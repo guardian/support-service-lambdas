@@ -3,13 +3,12 @@ package com.gu.holiday_stops
 import com.gu.salesforce.SFAuthConfig
 import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config.{ConfigLocation, LoadConfigModule, Stage}
-import com.gu.zuora.subscription.{CreditProduct, OverallFailure}
+import com.gu.zuora.subscription.OverallFailure
 import play.api.libs.json.{Json, Reads}
 
 case class Config(
   zuoraConfig: ZuoraConfig,
-  sfConfig: SFAuthConfig,
-  creditProduct: CreditProduct
+  sfConfig: SFAuthConfig
 )
 
 case class ZuoraConfig(
@@ -54,20 +53,17 @@ object Config {
         case "PROD" =>
           Config(
             zuoraConfig,
-            sfConfig,
-            HolidayCreditProduct.Prod,
+            sfConfig
           )
         case "CODE" =>
           Config(
             zuoraConfig,
-            sfConfig,
-            HolidayCreditProduct.Code,
+            sfConfig
           )
         case "DEV" =>
           Config(
             zuoraConfig,
-            sfConfig,
-            HolidayCreditProduct.Dev,
+            sfConfig
           )
       }
     }

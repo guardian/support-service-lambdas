@@ -2,9 +2,9 @@ package com.gu.holiday_stops
 
 import java.time.LocalDate
 
-import com.gu.salesforce.{RecordsWrapperCaseClass, SFAuthConfig}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.{HolidayStopRequest, HolidayStopRequestActionedCount, HolidayStopRequestEndDate, HolidayStopRequestIsWithdrawn, HolidayStopRequestStartDate}
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestId, HolidayStopRequestsDetail, HolidayStopRequestsDetailChargePrice, HolidayStopRequestsDetailExpectedInvoiceDate, HolidayStopRequestsDetailId, ProductName}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestId, HolidayStopRequestsDetail, HolidayStopRequestsDetailExpectedInvoiceDate, HolidayStopRequestsDetailId, ProductName}
+import com.gu.salesforce.{RecordsWrapperCaseClass, SFAuthConfig}
 import com.gu.zuora.subscription.Fixtures.mkRatePlanCharge
 import com.gu.zuora.subscription._
 import io.circe.generic.auto._
@@ -237,9 +237,9 @@ object Fixtures extends Assertions {
       Subscription_Name__c = SubscriptionName(subscriptionName),
       Product_Name__c = ProductName(productName),
       Stopped_Publication_Date__c = AffectedPublicationDate(stopDate),
-      Estimated_Price__c = estimatedPrice.map(HolidayStopRequestsDetailChargePrice.apply),
+      Estimated_Price__c = estimatedPrice.map(Price.apply),
       Charge_Code__c = chargeCode.map(RatePlanChargeCode(_)),
-      Actual_Price__c = actualPrice.map(HolidayStopRequestsDetailChargePrice.apply),
+      Actual_Price__c = actualPrice.map(Price.apply),
       Expected_Invoice_Date__c = expectedInvoiceDate.map(HolidayStopRequestsDetailExpectedInvoiceDate.apply)
     )
   }
@@ -258,6 +258,5 @@ object Fixtures extends Assertions {
   val config = Config(
     zuoraConfig = ZuoraConfig(baseUrl = "", holidayStopProcessor = HolidayStopProcessor(Oauth(clientId = "", clientSecret = ""))),
     sfConfig = SFAuthConfig("", "", "", "", "", ""),
-    HolidayCreditProduct.Dev
   )
 }

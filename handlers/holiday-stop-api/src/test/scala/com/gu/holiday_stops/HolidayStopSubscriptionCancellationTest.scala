@@ -2,8 +2,7 @@ package com.gu.holiday_stops
 
 import java.time.LocalDate
 
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.HolidayStopRequestsDetailChargePrice
-import com.gu.zuora.subscription.RatePlanChargeCode
+import com.gu.zuora.subscription.{Price, RatePlanChargeCode}
 import org.scalatest.{FlatSpec, Matchers}
 
 class HolidayStopSubscriptionCancellationTest extends FlatSpec with Matchers {
@@ -35,7 +34,7 @@ class HolidayStopSubscriptionCancellationTest extends FlatSpec with Matchers {
 
     HolidayStopSubscriptionCancellation(cancellationDate, holidayStopRequests) should contain only(
       unprocessedStopForDateBeforeCancellation.copy(
-        Actual_Price__c = Some(HolidayStopRequestsDetailChargePrice(estimatedPrice)),
+        Actual_Price__c = Some(Price(estimatedPrice)),
         Charge_Code__c = Some(RatePlanChargeCode("ManualRefund_Cancellation"))
       )
     )
@@ -80,10 +79,10 @@ class HolidayStopSubscriptionCancellationTest extends FlatSpec with Matchers {
 
     HolidayStopSubscriptionCancellation(cancellationDate, holidayStopRequests) should contain only(
       processedExpectedRefundedOnCancellationDate.copy(
-        Actual_Price__c = Some(HolidayStopRequestsDetailChargePrice(estimatedPrice)),
+        Actual_Price__c = Some(Price(estimatedPrice)),
       ),
       processedExpectedRefundedAfterCancellationDate.copy(
-        Actual_Price__c = Some(HolidayStopRequestsDetailChargePrice(estimatedPrice)),
+        Actual_Price__c = Some(Price(estimatedPrice)),
       )
     )
   }
