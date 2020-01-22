@@ -72,9 +72,7 @@ object Processor {
       subscription <- getSubscription(request.subscriptionName)
       _ <- if (subscription.status == "Cancelled") Left(ZuoraApiFailure(s"Cannot process cancelled subscription because Zuora does not allow amending cancelled subs (Code: 58730020). Apply manual refund ASAP! $request; ${subscription.subscriptionNumber};")) else Right(())
       subscriptionUpdate <- updateToApply(creditProduct, subscription, request.publicationDate)
-      _ <- if (subscription.hasCreditAmendment(request)) Right(()) else {
-        updateSubscription(subscription, subscriptionUpdate)
-      }
+      _ <- if (subscription.hasCreditAmendment(request)) Right(()) else updateSubscription(subscription, subscriptionUpdate)
       updatedSubscription <- getSubscription(request.subscriptionName)
       addedCharge <- updatedSubscription.ratePlanCharge(request).toRight(ZuoraApiFailure(s"Failed to write holiday stop to Zuora: $request"))
     } yield result(request, addedCharge)
