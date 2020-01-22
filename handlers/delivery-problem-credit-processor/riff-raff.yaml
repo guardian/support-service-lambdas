@@ -1,0 +1,19 @@
+stacks:
+  - membership
+regions:
+  - eu-west-1
+deployments:
+  cfn:
+    type: cloud-formation
+    app: delivery-problem-credit-processor
+    parameters:
+      templatePath: cfn.yaml
+  holiday-stop-processor:
+    type: aws-lambda
+    parameters:
+      fileName: delivery-problem-credit-processor.jar
+      bucket: support-service-lambdas-dist
+      prefixStack: false
+      functionNames:
+        - delivery-problem-credit-processor-
+    dependencies: [cfn]

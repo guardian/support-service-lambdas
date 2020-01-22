@@ -44,6 +44,7 @@ object Dependencies {
   val http4sServer = "org.http4s" %% "http4s-server" % http4sVersion
   val catsCore = "org.typelevel" %% "cats-core" % catsVersion
   val catsEffect = "org.typelevel" %% "cats-effect" % catsEffectVersion
+  val scalaLambda = "io.github.mkotsur" %% "aws-lambda-scala" % "0.1.1"
 
 
   // to resolve merge clash of 'module-info.class'

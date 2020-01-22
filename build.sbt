@@ -251,6 +251,7 @@ lazy val root = all(project in file(".")).enablePlugins(RiffRaffArtifact).aggreg
   `batch-email-sender`,
   `braze-to-salesforce-file-upload`,
   `holiday-stop-processor`,
+  `delivery-problem-credit-processor`,
   `metric-push-api`,
   `fulfilment-date-calculator`,
   `delivery-records-api`,
@@ -329,6 +330,18 @@ lazy val `holiday-stop-processor` = all(project in file("handlers/holiday-stop-p
     `holiday-stops` % "compile->compile;test->test",
     effects
   )
+
+lazy val `delivery-problem-credit-processor` =
+  all(project in file("handlers/delivery-problem-credit-processor"))
+    .dependsOn(
+      `credit-processor`
+    )
+    .settings(
+      libraryDependencies ++= Seq(
+        scalaLambda
+      )
+    )
+    .enablePlugins(RiffRaffArtifact)
 
 lazy val `metric-push-api` = all(project in file("handlers/metric-push-api"))
   .enablePlugins(RiffRaffArtifact)

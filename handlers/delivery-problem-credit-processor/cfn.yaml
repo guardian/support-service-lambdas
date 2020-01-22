@@ -1,0 +1,134 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Applies a credit amendment to a subscription for a delivery problem.
+
+Parameters:
+
+  Stage:
+    Description: Stage name
+    Type: String
+    AllowedValues:
+      - PROD
+      - CODE
+      - DEV
+    Default: CODE
+
+Conditions:
+  IsProd: !Equals [!Ref "Stage", "PROD"]
+
+Mappings:
+  StageMap:
+    CODE:
+      ScheduleName: delivery-problem-credit-processor-schedule-code
+    PROD:
+      ScheduleName: delivery-problem-credit-processor-schedule
+
+Resources:
+
+  DeliveryProblemCreditProcessorRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: DeliveryProblemCreditProcessorPolicy
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - lambda:InvokeFunction
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/delivery-problem-credit-processor-${Stage}:log-stream:*
+        - PolicyName: ReadZuoraCredentials
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action: s3:GetObject
+                Resource: !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/zuoraRest-${Stage}*.json
+        - PolicyName: ReadSalesforceCredentials
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action: s3:GetObject
+                Resource: !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/sfAuth-${Stage}*.json
+
+  DeliveryProblemCreditProcessor:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName:
+        !Sub delivery-problem-credit-processor-${Stage}
+      Description: Applies credit amendments for delivery problems. Source - https://github.com/guardian/support-service-lambdas/tree/master/handlers/delivery-problem-credit-processor
+      Code:
+        S3Bucket: support-service-lambdas-dist
+        S3Key: !Sub membership/${Stage}/delivery-problem-credit-processor/delivery-problem-credit-processor.jar
+      Handler: com.gu.deliveryproblemcreditprocessor.Handler::handle
+      Environment:
+        Variables:
+          Stage: !Ref Stage
+      Role:
+        !GetAtt DeliveryProblemCreditProcessorRole.Arn
+      MemorySize: 512
+      Runtime: java8
+      Timeout: 900
+    DependsOn:
+      - DeliveryProblemCreditProcessorRole
+
+  DeliveryProblemCreditProcessorFailureAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
+    Properties:
+      AlarmName: "URGENT 9-5 - PROD: Failed to process delivery-problem credits"
+      AlarmDescription: >
+        IMPACT: If this goes unaddressed at least one subscription
+        that was supposed to be suspended will be fulfilled.
+        Until we document how to deal with likely problems please alert the SX team.
+        For general advice, see
+        https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk
+      AlarmActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:fulfilment-dev
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref DeliveryProblemCreditProcessor
+      EvaluationPeriods: 1
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Period: 300
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
+    DependsOn:
+      - DeliveryProblemCreditProcessor
+
+  DeliveryProblemCreditProcessorScheduleRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Description: Trigger processing of delivery-problem credits every hour (to give 24 attempts a day)
+      Name: !FindInMap [StageMap, !Ref Stage, ScheduleName]
+      ScheduleExpression: "cron(0 * ? * * *)"
+      State: ENABLED
+      Targets:
+        - Arn: !GetAtt DeliveryProblemCreditProcessor.Arn
+          Id: !Ref DeliveryProblemCreditProcessor
+          Input: "null"
+    DependsOn:
+      - DeliveryProblemCreditProcessor
+
+  DeliveryProblemCreditProcessorLambdaInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:invokeFunction
+      FunctionName: !Ref DeliveryProblemCreditProcessor
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt DeliveryProblemCreditProcessorScheduleRule.Arn
+    DependsOn:
+      - DeliveryProblemCreditProcessor
+      - DeliveryProblemCreditProcessorScheduleRule
