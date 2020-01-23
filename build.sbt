@@ -207,6 +207,14 @@ lazy val `zuora-core` = all(project in file("lib/zuora-core"))
     )
   )
 
+lazy val `credit-processor` = all(project in file("lib/credit-processor"))
+  .dependsOn(
+    `zuora-core`,
+    `fulfilment-dates`
+  ).settings(
+    libraryDependencies ++= logging
+  )
+
 // ==== END libraries ====
 
 // ==== START handlers ====
@@ -248,7 +256,9 @@ lazy val root = all(project in file(".")).enablePlugins(RiffRaffArtifact).aggreg
   `delivery-records-api`,
   `fulfilment-dates`,
   `zuora-core`,
-  `credit-calculation-checks`
+  `credit-calculation-checks`,
+  `zuora-core`,
+  `credit-processor`
 ).dependsOn(zuora, handler, effectsDepIncludingTestFolder, `effects-sqs`, testDep)
 
 lazy val `identity-backfill` = all(project in file("handlers/identity-backfill")) // when using the "project identity-backfill" command it uses the lazy val name
@@ -316,10 +326,9 @@ lazy val `braze-to-salesforce-file-upload` = all(project in file("handlers/braze
 lazy val `holiday-stop-processor` = all(project in file("handlers/holiday-stop-processor"))
   .enablePlugins(RiffRaffArtifact)
   .dependsOn(
+    `credit-processor`,
     `holiday-stops` % "compile->compile;test->test",
-    effects,
-    `zuora-core`,
-    `fulfilment-dates`
+    effects
   )
 
 lazy val `metric-push-api` = all(project in file("handlers/metric-push-api"))
