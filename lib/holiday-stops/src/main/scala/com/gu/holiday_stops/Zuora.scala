@@ -1,6 +1,6 @@
 package com.gu.holiday_stops
 
-import com.gu.zuora.subscription._
+import com.gu.zuora.subscription.{ZuoraAccount, _}
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
 import io.circe.generic.auto._
@@ -52,4 +52,22 @@ object Zuora {
       .body.left.map(reason => ZuoraApiFailure(errMsg(reason)))
       .joinRight
   }
+
+  def accountGetResponse(
+    config: Config,
+    accessToken: AccessToken,
+    backend: SttpBackend[Id, Nothing]
+  )(
+    accountNumber: String
+  ): ZuoraApiResponse[ZuoraAccount] = {
+    implicit val b = backend
+    sttp.get(uri"${config.zuoraConfig.baseUrl}/accounts/$accountNumber")
+      .header("Authorization", s"Bearer ${accessToken.access_token}")
+      .response(asJson[ZuoraAccount])
+      .mapResponse(_.left.map(e => ZuoraApiFailure(e.message)))
+      .send()
+      .body.left.map(ZuoraApiFailure)
+      .joinRight
+  }
+
 }

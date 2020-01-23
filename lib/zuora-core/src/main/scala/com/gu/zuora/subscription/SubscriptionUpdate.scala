@@ -18,10 +18,11 @@ object SubscriptionUpdate {
   def forHolidayStop(
     creditProduct: CreditProduct,
     subscription: Subscription,
+    account: ZuoraAccount,
     stoppedPublicationDate: AffectedPublicationDate
   ): ZuoraApiResponse[SubscriptionUpdate] =
     for {
-      subscriptionData <- SubscriptionData(subscription)
+      subscriptionData <- SubscriptionData(subscription, account)
       issueData <- subscriptionData.issueDataForDate(stoppedPublicationDate.value)
     } yield {
       val maybeExtendedTerm = ExtendedTerm(issueData.nextBillingPeriodStartDate, subscription)

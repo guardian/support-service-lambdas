@@ -2,8 +2,9 @@ package com.gu.zuora.subscription
 
 import java.time.{DayOfWeek, LocalDate}
 
-import cats.implicits._
 import com.gu.zuora.ZuoraProductTypes.ZuoraProductType
+import com.gu.zuora.subscription.ZuoraApiFailure
+import cats.implicits._
 
 case class IssueData(issueDate: LocalDate, billDates: BillDates, credit: Double) {
   /**
@@ -32,7 +33,7 @@ trait SubscriptionData {
   def editionDaysOfWeek: List[DayOfWeek]
 }
 object SubscriptionData {
-  def apply(subscription: Subscription): Either[ZuoraApiFailure, SubscriptionData] = {
+  def apply(subscription: Subscription, account: ZuoraAccount): Either[ZuoraApiFailure, SubscriptionData] = {
     val supportedRatePlanCharges: List[(RatePlanCharge, SupportedRatePlanCharge, SupportedProduct)] = for {
       ratePlan <- subscription.ratePlans if ratePlan.lastChangeType =!= Some("Remove")
       supportedProduct <- getSupportedProductForRatePlan(ratePlan).toList
@@ -45,7 +46,12 @@ object SubscriptionData {
       ratePlanChargeDatas <- supportedRatePlanCharges
         .traverse[ZuoraApiResponse, RatePlanChargeData] {
           case (ratePlanCharge, supportedRatePlanCharge, _) =>
-            RatePlanChargeData(ratePlanCharge, supportedRatePlanCharge.dayOfWeek)
+            RatePlanChargeData(
+              subscription,
+              ratePlanCharge,
+              account,
+              supportedRatePlanCharge.dayOfWeek
+            )
         }
       nonZeroRatePlanChargeDatas = ratePlanChargeDatas.filter { ratePlanChargeData =>
         ratePlanChargeData.issueCreditAmount != 0

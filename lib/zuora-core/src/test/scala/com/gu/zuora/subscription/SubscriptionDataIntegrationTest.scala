@@ -13,12 +13,14 @@ object SubscriptionDataIntegrationTest extends Matchers {
     expectedIssueData: List[IssueData],
     expectedTotalAnnualIssueLimitPerSubscription: Int,
     expectedProductType: ZuoraProductType,
-    expectedEditionDaysOfWeek: List[DayOfWeek]
+    expectedEditionDaysOfWeek: List[DayOfWeek],
+    billCycleDay: Int = 1
   ): Assertion = {
     val subscription = Fixtures.subscriptionFromJson(subscriptionFile)
+    val account = Fixtures.mkAccount(billCycleDay = billCycleDay)
     val datesToTest = getDatesToTest(startDate, expectedIssueData)
 
-    Inside.inside(SubscriptionData(subscription)) {
+    Inside.inside(SubscriptionData(subscription, account)) {
       case Right(subscriptionData) =>
         datesToTest.foreach { testDate =>
           expectedIssueData.find(_.issueDate == testDate) match {

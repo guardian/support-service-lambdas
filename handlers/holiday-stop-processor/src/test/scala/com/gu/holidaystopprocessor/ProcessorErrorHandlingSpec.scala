@@ -10,7 +10,7 @@ import com.gu.holiday_stops.Fixtures
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.HolidayStopRequestsDetail
 import com.gu.zuora.ZuoraProductTypes
 import com.gu.zuora.ZuoraProductTypes.ZuoraProductType
-import com.gu.zuora.subscription._
+import com.gu.zuora.subscription.{ZuoraAccount, _}
 import org.scalatest._
 
 /**
@@ -32,6 +32,12 @@ class ProcessorErrorHandlingSpec extends FlatSpec with Matchers with OptionValue
   val subscription: Subscription = Fixtures.mkSubscriptionWithHolidayStops()
 
   val updateSubscription: (Subscription, SubscriptionUpdate) => Either[ZuoraApiFailure, Unit] = (_, _) => Right(())
+
+  private def getAccount(
+    getAccountResult: Either[ZuoraApiFailure, ZuoraAccount]
+  ): String => Either[ZuoraApiFailure, ZuoraAccount] = {
+    _ => getAccountResult
+  }
 
   val today = LocalDate.now()
 
@@ -61,6 +67,7 @@ class ProcessorErrorHandlingSpec extends FlatSpec with Matchers with OptionValue
       None,
       ZuoraProductTypes.GuardianWeekly,
       getSubscription,
+      getAccount(Fixtures.mkAccount().asRight),
       SubscriptionUpdate.forHolidayStop,
       updateSubscription,
       ZuoraHolidayCreditAddResult.apply,
@@ -91,6 +98,7 @@ class ProcessorErrorHandlingSpec extends FlatSpec with Matchers with OptionValue
       None,
       ZuoraProductTypes.GuardianWeekly,
       getSubscription,
+      getAccount(Fixtures.mkAccount().asRight),
       SubscriptionUpdate.forHolidayStop,
       updateSubscription,
       ZuoraHolidayCreditAddResult.apply,
@@ -121,6 +129,7 @@ class ProcessorErrorHandlingSpec extends FlatSpec with Matchers with OptionValue
       None,
       ZuoraProductTypes.GuardianWeekly,
       getSubscription,
+      getAccount(Fixtures.mkAccount().asRight),
       SubscriptionUpdate.forHolidayStop,
       updateSubscription,
       ZuoraHolidayCreditAddResult.apply,
@@ -150,6 +159,7 @@ class ProcessorErrorHandlingSpec extends FlatSpec with Matchers with OptionValue
       None,
       ZuoraProductTypes.GuardianWeekly,
       getSubscription,
+      getAccount(Fixtures.mkAccount().asRight),
       SubscriptionUpdate.forHolidayStop,
       updateSubscription,
       ZuoraHolidayCreditAddResult.apply,

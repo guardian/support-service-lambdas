@@ -7,11 +7,13 @@ case class Subscription(
   termStartDate: LocalDate,
   termEndDate: LocalDate,
   customerAcceptanceDate: LocalDate,
+  contractEffectiveDate: LocalDate,
   currentTerm: Int,
   currentTermPeriodType: String,
   autoRenew: Boolean,
   ratePlans: List[RatePlan],
-  status: String
+  status: String,
+  accountNumber: String
 ) {
 
   def ratePlanCharge(request: CreditRequest): Option[RatePlanCharge] = {
@@ -70,5 +72,8 @@ case class RatePlanCharge(
   specificBillingPeriod: Option[Int],
   endDateCondition: Option[String],
   upToPeriodsType: Option[String],
-  upToPeriods: Option[Int]
+  upToPeriods: Option[Int],
+  billingDay: Option[String],
+  triggerEvent: Option[String],
+  triggerDate: Option[LocalDate]
 )

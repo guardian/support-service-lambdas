@@ -24,11 +24,12 @@ import com.gu.util.resthttp.JsonHttp.StringHttpRequest
 import com.gu.util.resthttp.RestRequestMaker.BodyAsString
 import com.gu.util.resthttp.Types.ClientFailure
 import com.gu.util.resthttp.{HttpOp, JsonHttp}
-import com.gu.zuora.subscription._
+import com.gu.zuora.subscription.{ZuoraAccount, _}
 import com.softwaremill.sttp.{HttpURLConnectionBackend, Id, SttpBackend}
 import okhttp3.{Request, Response}
 import play.api.libs.json.{Json, Reads}
 import scalaz.{-\/, \/, \/-}
+import com.gu.salesforce.{Contact, SalesforceClient, SalesforceHandlerSupport}
 
 object Handler extends Logging {
 
@@ -69,7 +70,9 @@ object Handler extends Logging {
     } yield Operation.noHealthcheck(request => // checking connectivity to SF is sufficient healthcheck so no special steps required
       validateRequestAndCreateSteps(
         request,
+        getAccessTokenFromZuora(config, backend),
         getSubscriptionFromZuora(config, backend),
+        getAccountFromZuora(config, backend),
         idGenerator,
         FulfilmentDatesFetcher(fetchString, Stage())
       )(
@@ -80,14 +83,16 @@ object Handler extends Logging {
 
   private def validateRequestAndCreateSteps(
     request: ApiGatewayRequest,
-    getSubscription: SubscriptionName => Either[ApiFailure, Subscription],
+    getAccessToken: () => Either[ApiFailure, AccessToken],
+    getSubscription: (AccessToken, SubscriptionName) => Either[ApiFailure, Subscription],
+    getAccount: (AccessToken, String) => Either[ApiFailure, ZuoraAccount],
     idGenerator: => String,
     fulfilmentDatesFetcher: FulfilmentDatesFetcher
   ) = {
     (for {
       httpMethod <- validateMethod(request.httpMethod)
       path <- validatePath(request.path)
-    } yield createSteps(httpMethod, splitPath(path), getSubscription, idGenerator, fulfilmentDatesFetcher)).fold(
+    } yield createSteps(httpMethod, splitPath(path), getAccessToken, getSubscription, getAccount, idGenerator, fulfilmentDatesFetcher)).fold(
       { errorMessage: String =>
         badrequest(errorMessage) _
       },
@@ -112,35 +117,37 @@ object Handler extends Logging {
   private def createSteps(
     httpMethod: String,
     path: List[String],
-    getSubscription: SubscriptionName => Either[ApiFailure, Subscription],
+    getAccessToken: () => Either[ApiFailure, AccessToken],
+    getSubscription: (AccessToken, SubscriptionName) => Either[ApiFailure, Subscription],
+    getAccount: (AccessToken, String) => Either[ApiFailure, ZuoraAccount],
     idGenerator: => String,
     fulfilmentDatesFetcher: FulfilmentDatesFetcher
   ) = {
     path match {
       case "potential" :: _ :: Nil =>
         httpMethod match {
-          case "GET" => stepsForPotentialHolidayStop(getSubscription) _
+          case "GET" => stepsForPotentialHolidayStop(getAccessToken, getSubscription, getAccount) _
           case _ => unsupported _
         }
       case "hsr" :: Nil =>
         httpMethod match {
-          case "POST" => stepsToCreate(getSubscription) _
+          case "POST" => stepsToCreate(getAccessToken, getSubscription, getAccount) _
           case _ => unsupported _
         }
       case "hsr" :: _ :: Nil =>
         httpMethod match {
-          case "GET" => stepsToListExisting(getSubscription, fulfilmentDatesFetcher) _
+          case "GET" => stepsToListExisting(getAccessToken, getSubscription, getAccount, fulfilmentDatesFetcher) _
           case _ => unsupported _
         }
       case "hsr" :: _ :: "cancel" :: Nil =>
         httpMethod match {
-          case "POST" => stepsToCancel(getSubscription, idGenerator) _
-          case "GET" => stepsToGetCancellationDetails(getSubscription, idGenerator) _
+          case "POST" => stepsToCancel(idGenerator) _
+          case "GET" => stepsToGetCancellationDetails(idGenerator) _
           case _ => unsupported _
         }
       case "hsr" :: _ :: _ :: Nil =>
         httpMethod match {
-          case "PATCH" => stepsToAmend(getSubscription) _
+          case "PATCH" => stepsToAmend(getAccessToken, getSubscription, getAccount) _
           case "DELETE" => stepsToWithdraw _
           case _ => unsupported _
         }
@@ -177,15 +184,21 @@ object Handler extends Logging {
   )
 
   def stepsForPotentialHolidayStop(
-    getSubscription: SubscriptionName => Either[ApiFailure, Subscription]
+    getAccessToken: () => Either[ApiFailure, AccessToken],
+    getSubscription: (AccessToken, SubscriptionName) => Either[ApiFailure, Subscription],
+    getAccount: (AccessToken, String) => Either[ApiFailure, ZuoraAccount],
   )(req: ApiGatewayRequest, unused: SfClient): ApiResponse = {
     implicit val reads: Reads[PotentialHolidayStopsQueryParams] = Json.reads[PotentialHolidayStopsQueryParams]
     (for {
       pathParams <- req.pathParamsAsCaseClass[PotentialHolidayStopsPathParams]()(Json.reads[PotentialHolidayStopsPathParams])
       queryParams <- req.queryParamsAsCaseClass[PotentialHolidayStopsQueryParams]()
-      subscription <- getSubscription(pathParams.subscriptionName)
+      accessToken <- getAccessToken()
+        .toApiGatewayOp(s"get zuora access token")
+      subscription <- getSubscription(accessToken, pathParams.subscriptionName)
         .toApiGatewayOp(s"get subscription ${pathParams.subscriptionName}")
-      issuesData <- SubscriptionData(subscription)
+      account <- getAccount(accessToken, subscription.accountNumber)
+        .toApiGatewayOp(s"get account ${subscription.accountNumber}")
+      issuesData <- SubscriptionData(subscription, account)
         .map(_.issueDataForPeriod(queryParams.startDate, queryParams.endDate))
         .toApiGatewayOp(s"calculating publication dates")
       potentialHolidayStops = issuesData.map { issueData =>
@@ -200,7 +213,9 @@ object Handler extends Logging {
   case class ListExistingPathParams(subscriptionName: SubscriptionName)
 
   def stepsToListExisting(
-    getSubscription: SubscriptionName => Either[ApiFailure, Subscription],
+    getAccessToken: () => Either[ApiFailure, AccessToken],
+    getSubscription: (AccessToken, SubscriptionName) => Either[ApiFailure, Subscription],
+    getAccount: (AccessToken, String) => Either[ApiFailure, ZuoraAccount],
     fulfilmentDatesFetcher: FulfilmentDatesFetcher
   )(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
 
@@ -214,9 +229,13 @@ object Handler extends Logging {
       usersHolidayStopRequests <- lookupOp(contact, Some(subName))
         .toDisjunction
         .toApiGatewayOp(s"lookup Holiday Stop Requests for contact $contact")
-      subscription <- getSubscription(subName)
+      accessToken <- getAccessToken()
+        .toApiGatewayOp(s"get zuora access token")
+      subscription <- getSubscription(accessToken, subName)
         .toApiGatewayOp(s"get subscription $subName")
-      subscriptionData <- SubscriptionData(subscription)
+      account <- getAccount(accessToken, subscription.accountNumber)
+        .toApiGatewayOp(s"get account ${subscription.accountNumber}")
+      subscriptionData <- SubscriptionData(subscription, account)
         .toApiGatewayOp(s"extract subscription data from subscription")
       fulfilmentDates <- fulfilmentDatesFetcher.getFulfilmentDates(
         subscriptionData.productType,
@@ -232,7 +251,9 @@ object Handler extends Logging {
   }
 
   def stepsToCreate(
-    getSubscription: SubscriptionName => Either[ApiFailure, Subscription]
+    getAccessToken: () => Either[ApiFailure, AccessToken],
+    getSubscription: (AccessToken, SubscriptionName) => Either[ApiFailure, Subscription],
+    getAccount: (AccessToken, String) => Either[ApiFailure, ZuoraAccount],
   )(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
 
     val verifyContactOwnsSubOp = SalesforceSFSubscription.SubscriptionForSubscriptionNameAndContact(sfClient.wrapWith(JsonHttp.getWithParams))
@@ -243,13 +264,15 @@ object Handler extends Logging {
       contact <- extractContactFromHeaders(req.headers)
       maybeMatchingSfSub <- verifyContactOwnsSubOp(requestBody.subscriptionName, contact).toDisjunction.toApiGatewayOp(s"fetching subscriptions for contact $contact")
       matchingSfSub <- maybeMatchingSfSub.toApiGatewayOp(s"contact $contact does not own ${requestBody.subscriptionName.value}")
-      zuoraSubscription <- getSubscription(requestBody.subscriptionName).toApiGatewayOp("get subscription from zuora")
-      subscription <- getSubscription(requestBody.subscriptionName)
+      accessToken <- getAccessToken().toApiGatewayOp(s"get zuora access token")
+      subscription <- getSubscription(accessToken, requestBody.subscriptionName)
         .toApiGatewayOp(s"get subscription ${requestBody.subscriptionName}")
-      issuesData <- SubscriptionData(subscription)
+      account <- getAccount(accessToken, subscription.accountNumber)
+        .toApiGatewayOp(s"get account ${subscription.accountNumber}")
+      issuesData <- SubscriptionData(subscription, account)
         .map(_.issueDataForPeriod(requestBody.startDate, requestBody.endDate))
         .toApiGatewayOp(s"calculating publication dates")
-      createBody = CreateHolidayStopRequestWithDetail.buildBody(requestBody.startDate, requestBody.endDate, issuesData, matchingSfSub, zuoraSubscription)
+      createBody = CreateHolidayStopRequestWithDetail.buildBody(requestBody.startDate, requestBody.endDate, issuesData, matchingSfSub, subscription)
       _ <- createOp(createBody).toDisjunction.toApiGatewayOp(
         exposeSfErrorMessageIn500ApiResponse(s"create new Holiday Stop Request for subscription ${requestBody.subscriptionName} (contact $contact)")
       )
@@ -259,7 +282,9 @@ object Handler extends Logging {
   case class CancelHolidayStopsPathParams(subscriptionName: SubscriptionName)
   case class CancelHolidayStopsQueryParams(effectiveCancellationDate: Option[LocalDate])
 
-  def stepsToCancel(getSubscription: SubscriptionName => Either[ApiFailure, Subscription], idGenerator: => String)(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
+  def stepsToCancel(
+    idGenerator: => String
+  )(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
     val sfClientGetWithParams = sfClient.wrapWith(JsonHttp.getWithParams)
     val lookupOpHolidayStopsOp = LookupByContactAndOptionalSubscriptionName(sfClientGetWithParams)
     val updateRequestDetailOp = CancelHolidayStopRequestDetail(sfClient.wrapWith(JsonHttp.post))
@@ -294,7 +319,7 @@ object Handler extends Logging {
   case class GetCancellationDetails(publicationsToRefund: List[HolidayStopRequestsDetail])
   implicit val writesGetCancellationDetails = Json.writes[GetCancellationDetails]
 
-  def stepsToGetCancellationDetails(getSubscription: SubscriptionName => Either[ApiFailure, Subscription], idGenerator: => String)(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
+  def stepsToGetCancellationDetails(idGenerator: => String)(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
     val sfClientGetWithParams = sfClient.wrapWith(JsonHttp.getWithParams)
     val lookupOpHolidayStopsOp = LookupByContactAndOptionalSubscriptionName(sfClientGetWithParams)
 
@@ -322,7 +347,9 @@ object Handler extends Logging {
   implicit val readsSpecificHolidayStopRequestPathParams = Json.reads[SpecificHolidayStopRequestPathParams]
 
   def stepsToAmend(
-    getSubscription: SubscriptionName => Either[ApiFailure, Subscription]
+    getAccessToken: () => Either[ApiFailure, AccessToken],
+    getSubscription: (AccessToken, SubscriptionName) => Either[ApiFailure, Subscription],
+    getAccount: (AccessToken, String) => Either[ApiFailure, ZuoraAccount],
   )(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
 
     val lookupOp = SalesforceHolidayStopRequest.LookupByContactAndOptionalSubscriptionName(sfClient.wrapWith(JsonHttp.getWithParams))
@@ -332,15 +359,17 @@ object Handler extends Logging {
       requestBody <- req.bodyAsCaseClass[HolidayStopRequestPartial]()
       contact <- extractContactFromHeaders(req.headers)
       pathParams <- req.pathParamsAsCaseClass[SpecificHolidayStopRequestPathParams]()
-      zuoraSubscription <- getSubscription(pathParams.subscriptionName).toApiGatewayOp("get subscription from zuora")
       allExisting <- lookupOp(contact, Some(pathParams.subscriptionName)).toDisjunction.toApiGatewayOp(s"lookup Holiday Stop Requests for contact $contact")
       existingPublicationsThatWereToBeStopped <- allExisting.find(_.Id == pathParams.holidayStopRequestId).flatMap(_.Holiday_Stop_Request_Detail__r.map(_.records)).toApiGatewayOp(s"contact $contact does not own ${requestBody.subscriptionName.value}")
-      subscription <- getSubscription(requestBody.subscriptionName)
+      accessToken <- getAccessToken().toApiGatewayOp(s"get zuora access token")
+      subscription <- getSubscription(accessToken, requestBody.subscriptionName)
         .toApiGatewayOp(s"get subscription ${requestBody.subscriptionName}")
-      issuesData <- SubscriptionData(subscription)
+      account <- getAccount(accessToken, subscription.accountNumber)
+        .toApiGatewayOp(s"get account ${subscription.accountNumber}")
+      issuesData <- SubscriptionData(subscription, account)
         .map(_.issueDataForPeriod(requestBody.startDate, requestBody.endDate))
         .toApiGatewayOp(s"calculating publication dates")
-      amendBody = AmendHolidayStopRequest.buildBody(pathParams.holidayStopRequestId, requestBody.startDate, requestBody.endDate, issuesData, existingPublicationsThatWereToBeStopped, zuoraSubscription)
+      amendBody = AmendHolidayStopRequest.buildBody(pathParams.holidayStopRequestId, requestBody.startDate, requestBody.endDate, issuesData, existingPublicationsThatWereToBeStopped, subscription)
       _ <- amendOp(amendBody).toDisjunction.toApiGatewayOp(
         exposeSfErrorMessageIn500ApiResponse(s"amend Holiday Stop Request for subscription ${requestBody.subscriptionName} (contact $contact)")
       )
@@ -352,12 +381,24 @@ object Handler extends Logging {
     config: Config,
     backend: SttpBackend[Id, Nothing]
   )(
+    accessToken: AccessToken,
     subscriptionName: SubscriptionName
-  ): Either[ApiFailure, Subscription] =
-    for {
-      accessToken <- Zuora.accessTokenGetResponse(config.zuoraConfig, backend)
-      subscription <- Zuora.subscriptionGetResponse(config, accessToken, backend)(subscriptionName)
-    } yield subscription
+  ): Either[ApiFailure, Subscription] = Zuora.subscriptionGetResponse(config, accessToken, backend)(subscriptionName)
+
+  def getAccountFromZuora(
+    config: Config,
+    backend: SttpBackend[Id, Nothing]
+  )(
+    accessToken: AccessToken,
+    accountKey: String
+  ): Either[ApiFailure, ZuoraAccount] = Zuora.accountGetResponse(config, accessToken, backend)(accountKey)
+
+  def getAccessTokenFromZuora(
+    config: Config,
+    backend: SttpBackend[Id, Nothing]
+  )(): Either[ApiFailure, AccessToken] = Zuora.accessTokenGetResponse(config.zuoraConfig, backend)
+
+
 
   def stepsToWithdraw(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
 

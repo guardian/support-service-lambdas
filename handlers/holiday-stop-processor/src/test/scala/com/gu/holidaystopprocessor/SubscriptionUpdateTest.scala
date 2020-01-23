@@ -3,6 +3,7 @@ package com.gu.holidaystopprocessor
 import java.time.temporal.TemporalAdjusters
 import java.time.{DayOfWeek, LocalDate}
 
+import com.gu.holiday_stops.Fixtures
 import com.gu.zuora.subscription.{Add, AffectedPublicationDate, ChargeOverride, MutableCalendar, SubscriptionUpdate, Fixtures => SubscriptionFixtures}
 import org.scalatest.{EitherValues, FlatSpec, Matchers}
 
@@ -27,6 +28,7 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers with EitherValues {
     val update = SubscriptionUpdate.forHolidayStop(
       creditProduct,
       subscription = subscription,
+      account = Fixtures.mkAccount(),
       stoppedPublicationDate
     )
     update shouldBe Right(SubscriptionUpdate(
@@ -62,6 +64,7 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers with EitherValues {
     val update = SubscriptionUpdate.forHolidayStop(
       creditProduct,
       subscription = subscription,
+      account = Fixtures.mkAccount(),
       stoppedPublicationDate
     )
     update shouldBe Right(SubscriptionUpdate(
@@ -90,12 +93,13 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers with EitherValues {
       termEndDate = dateCreditIsApplied,
       price = 42.1,
       billingPeriod = "Quarter",
-      chargedThroughDate = Some(LocalDate.of(2020, 8, 2)),
+      chargedThroughDate = None,
       effectiveStartDate = effectiveStartDate
     )
     val update = SubscriptionUpdate.forHolidayStop(
       creditProduct,
       subscription = subscription,
+      account = Fixtures.mkAccount(),
       stoppedPublicationDate
     )
     update shouldBe Right(SubscriptionUpdate(

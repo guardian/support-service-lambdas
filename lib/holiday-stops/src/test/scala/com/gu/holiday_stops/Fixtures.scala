@@ -29,6 +29,7 @@ object Fixtures extends Assertions {
     termStartDate = LocalDate.of(2019, 3, 1),
     termEndDate = LocalDate.of(2020, 3, 1),
     customerAcceptanceDate = LocalDate.of(2020, 4, 1),
+    contractEffectiveDate = LocalDate.of(2020, 4, 1),
     currentTerm = 12,
     currentTermPeriodType = "Month",
     autoRenew = true,
@@ -50,7 +51,10 @@ object Fixtures extends Assertions {
           specificBillingPeriod = None,
           endDateCondition = None,
           upToPeriodsType = None,
-          upToPeriods = None
+          upToPeriods = None,
+          billingDay = None,
+          triggerEvent = None,
+          triggerDate = None
         )),
         productRatePlanId = "",
         id = "",
@@ -73,7 +77,10 @@ object Fixtures extends Assertions {
           specificBillingPeriod = None,
           endDateCondition = None,
           upToPeriodsType = None,
-          upToPeriods = None
+          upToPeriods = None,
+          billingDay = None,
+          triggerEvent = None,
+          triggerDate = None
         )),
         productRatePlanId = "",
         id = "",
@@ -96,7 +103,10 @@ object Fixtures extends Assertions {
           specificBillingPeriod = None,
           endDateCondition = None,
           upToPeriodsType = None,
-          upToPeriods = None
+          upToPeriods = None,
+          billingDay = None,
+          triggerEvent = None,
+          triggerDate = None
         )),
         productRatePlanId = "",
         id = "",
@@ -119,7 +129,10 @@ object Fixtures extends Assertions {
           specificBillingPeriod = None,
           endDateCondition = None,
           upToPeriodsType = None,
-          upToPeriods = None
+          upToPeriods = None,
+          billingDay = None,
+          triggerEvent = None,
+          triggerDate = None
         )),
         productRatePlanId = "",
         id = "",
@@ -142,7 +155,10 @@ object Fixtures extends Assertions {
           specificBillingPeriod = None,
           endDateCondition = None,
           upToPeriodsType = None,
-          upToPeriods = None
+          upToPeriods = None,
+          billingDay = None,
+          triggerEvent = None,
+          triggerDate = None
         )),
         productRatePlanId = "",
         id = "",
@@ -165,7 +181,10 @@ object Fixtures extends Assertions {
           specificBillingPeriod = None,
           endDateCondition = None,
           upToPeriodsType = None,
-          upToPeriods = None
+          upToPeriods = None,
+          billingDay = None,
+          triggerEvent = None,
+          triggerDate = None
         )),
         productRatePlanId = "",
         id = "",
@@ -178,13 +197,16 @@ object Fixtures extends Assertions {
           name = "GW Oct 18 - Quarterly - Domestic",
           price = 42.7,
           billingPeriod = "Quarter",
-          chargedThroughDate = Some(LocalDate.of(2019, 9, 7))
+          chargedThroughDate = None,
+          processedThroughDate = None,
+          effectiveStartDate = LocalDate.of(2019, 9, 7)
         )),
         productRatePlanId = "",
         id = "",
         lastChangeType = None
       )
-    )
+    ),
+    accountNumber = "123456"
   )
 
   def subscriptionFromJson(resource: String): Subscription = {
@@ -254,6 +276,12 @@ object Fixtures extends Assertions {
     Actual_Price__c = None,
     Expected_Invoice_Date__c = None
   )
+
+  def mkAccount(billCycleDay: Int = 1) = {
+    ZuoraAccount(
+      ZuoraAccountBillingAndPayment(billCycleDay = billCycleDay)
+    )
+  }
 
   val config = Config(
     zuoraConfig = ZuoraConfig(baseUrl = "", holidayStopProcessor = HolidayStopProcessor(Oauth(clientId = "", clientSecret = ""))),

@@ -19,7 +19,8 @@ object Processor {
     processOverrideDate: Option[LocalDate],
     productType: ZuoraProductType,
     getSubscription: SubscriptionName => ZuoraApiResponse[Subscription],
-    updateToApply: (CreditProduct, Subscription, AffectedPublicationDate) => ZuoraApiResponse[SubscriptionUpdate],
+    getAccount: String => ZuoraApiResponse[ZuoraAccount],
+    updateToApply: (CreditProduct, Subscription, ZuoraAccount, AffectedPublicationDate) => ZuoraApiResponse[SubscriptionUpdate],
     updateSubscription: (Subscription, SubscriptionUpdate) => ZuoraApiResponse[Unit],
     resultOfZuoraCreditAdd: (RequestType, RatePlanCharge) => ResultType,
     writeCreditResultsToSalesforce: List[ResultType] => SalesforceApiResponse[Unit]
@@ -41,6 +42,7 @@ object Processor {
           addCreditToSubscription(
             creditProduct,
             getSubscription,
+            getAccount,
             updateToApply,
             updateSubscription,
             resultOfZuoraCreditAdd
@@ -64,14 +66,16 @@ object Processor {
   def addCreditToSubscription[RequestType <: CreditRequest, ResultType <: ZuoraCreditAddResult](
     creditProduct: CreditProduct,
     getSubscription: SubscriptionName => ZuoraApiResponse[Subscription],
-    updateToApply: (CreditProduct, Subscription, AffectedPublicationDate) => ZuoraApiResponse[SubscriptionUpdate],
+    getAccount: String => ZuoraApiResponse[ZuoraAccount],
+    updateToApply: (CreditProduct, Subscription, ZuoraAccount, AffectedPublicationDate) => ZuoraApiResponse[SubscriptionUpdate],
     updateSubscription: (Subscription, SubscriptionUpdate) => ZuoraApiResponse[Unit],
     result: (RequestType, RatePlanCharge) => ResultType
   )(request: RequestType): ZuoraApiResponse[ResultType] =
     for {
       subscription <- getSubscription(request.subscriptionName)
+      account <- getAccount(subscription.accountNumber)
       _ <- if (subscription.status == "Cancelled") Left(ZuoraApiFailure(s"Cannot process cancelled subscription because Zuora does not allow amending cancelled subs (Code: 58730020). Apply manual refund ASAP! $request; ${subscription.subscriptionNumber};")) else Right(())
-      subscriptionUpdate <- updateToApply(creditProduct, subscription, request.publicationDate)
+      subscriptionUpdate <- updateToApply(creditProduct, subscription, account, request.publicationDate)
       _ <- if (subscription.hasCreditAmendment(request)) Right(()) else updateSubscription(subscription, subscriptionUpdate)
       updatedSubscription <- getSubscription(request.subscriptionName)
       addedCharge <- updatedSubscription.ratePlanCharge(request).toRight(ZuoraApiFailure(s"Failed to write holiday stop to Zuora: $request"))

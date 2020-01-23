@@ -41,6 +41,7 @@ object HolidayStopCreditProcessor {
             processDateOverride,
             productType,
             Zuora.subscriptionGetResponse(config, zuoraAccessToken, backend),
+            Zuora.accountGetResponse(config, zuoraAccessToken, backend),
             SubscriptionUpdate.forHolidayStop,
             Zuora.subscriptionUpdateResponse(config, zuoraAccessToken, backend),
             ZuoraHolidayCreditAddResult.apply,

@@ -57,6 +57,7 @@ class RatePlanChargeBillingScheduleSpec extends FlatSpec with Matchers with Eith
     val effectiveStartDate = LocalDate.of(2019, 10, 1)
     inside(
       RatePlanChargeBillingSchedule(
+        Fixtures.mkGuardianWeeklySubscription(),
         Fixtures.mkRatePlanCharge(
           name = "GW Oct 18 - Quarterly - Domestic",
           price = 1,
@@ -64,8 +65,14 @@ class RatePlanChargeBillingScheduleSpec extends FlatSpec with Matchers with Eith
           effectiveStartDate = effectiveStartDate,
           endDateCondition = Some("Subscription_End"),
           upToPeriodsType = None,
-          upToPeriods = None
-        )
+          upToPeriods = None,
+          billingDay = Some("ChargeTriggerDay"),
+          triggerEvent = Some("SpecificDate"),
+          triggerDate = Some(effectiveStartDate),
+          chargedThroughDate = None,
+          processedThroughDate = None
+        ),
+        Fixtures.mkAccount()
       )
     ) {
         case Right(billingSchedule) =>
@@ -119,20 +126,90 @@ class RatePlanChargeBillingScheduleSpec extends FlatSpec with Matchers with Eith
       BillDates(LocalDate.of(2019, 10, 22), LocalDate.of(2019, 11, 11))
     )
   }
+  it should "calculate quarterly billing period when period starts at end of month" in {
+    testFixedBillingSchedule(
+      "Quarter",
+      None,
+      LocalDate.of(2019, 8, 31),
+      BillDates(LocalDate.of(2019, 8, 31), LocalDate.of(2019, 11, 29)),
+      BillDates(LocalDate.of(2019, 11, 30), LocalDate.of(2020, 2, 28))
+    )
+  }
+  it should "calculate start date from customer acceptance date" in {
+    val expectedDate = LocalDate.of(2020, 1, 1)
+    testBillingScheduleStartDate(
+      "CustomerAcceptance",
+      expectedDate,
+      customerAcceptanceDate = expectedDate
+    )
+  }
+  it should "calculate start date from contract effective date" in {
+    val expectedDate = LocalDate.of(2020, 1, 1)
+    testBillingScheduleStartDate(
+      "ContractEffective",
+      expectedDate,
+      contractEffectiveDate = expectedDate
+    )
+  }
+  it should "calculate start date from specific trigger date" in {
+    val expectedDate = LocalDate.of(2020, 1, 1)
+    testBillingScheduleStartDate(
+      "SpecificDate",
+      expectedDate,
+      triggerDate = Some(expectedDate)
+    )
+  }
+  it should "use effective start date if matches charged through date" in {
+    val calculatedDate = LocalDate.of(2020, 1, 1)
+    val effectiveStartDate = LocalDate.of(2020, 1, 5)
+    testBillingScheduleStartDate(
+      "SpecificDate",
+      effectiveStartDate,
+      triggerDate = Some(calculatedDate),
+      effectiveStartDate = effectiveStartDate,
+      processedThroughDate = Some(effectiveStartDate)
+    )
+  }
+  it should "adjust billing day to bill cycle day" in {
+    val billCycleDay = 30
+    val startDate = LocalDate.of(2020, 2, 28)
+    val expectedSecondBillDate = startDate.plusMonths(1).withDayOfMonth(billCycleDay)
 
-  private def testFixedBillingPeriod(billingPeriodName: String, optionalSpecificBillingPeriod: Option[Int], billingPeriodsRatePlanIsValidFor: Int, effectiveStartDate: LocalDate, expectedEndDate: LocalDate) = {
+    testBillingScheduleStartDate(
+      "SpecificDate",
+      expectedSecondBillDate,
+      triggerDate = Some(startDate),
+      billCycleDay = billCycleDay,
+      billingDay = Some("DefaultFromCustomer")
+    )
+  }
+
+  private def testFixedBillingPeriod(
+    billingPeriodName: String,
+    optionalSpecificBillingPeriod: Option[Int],
+    billingPeriodsRatePlanIsValidFor: Int,
+    effectiveStartDate: LocalDate,
+    expectedEndDate: LocalDate
+  ) = {
     inside(
       RatePlanChargeBillingSchedule(
+        Fixtures.mkGuardianWeeklySubscription(),
         Fixtures.mkRatePlanCharge(
-          "GW Oct 18 - Quarterly - Domestic",
+          name = "GW Oct 18 - Quarterly - Domestic",
           price = 1,
           billingPeriod = billingPeriodName,
           effectiveStartDate = effectiveStartDate,
           endDateCondition = Some("Fixed_Period"),
           upToPeriodsType = Some("Billing_Periods"),
           upToPeriods = Some(billingPeriodsRatePlanIsValidFor),
-          specificBillingPeriod = optionalSpecificBillingPeriod
-        )
+          specificBillingPeriod = optionalSpecificBillingPeriod,
+          billingDay = Some("ChargeTriggerDay"),
+          triggerEvent = Some("SpecificDate"),
+          triggerDate = Some(effectiveStartDate),
+          chargedThroughDate = None,
+          processedThroughDate = None
+        ),
+        Fixtures.mkAccount()
       )
     ) {
         case Right(billingSchedule) =>
@@ -160,23 +237,73 @@ class RatePlanChargeBillingScheduleSpec extends FlatSpec with Matchers with Eith
   ) = {
     inside(
       RatePlanChargeBillingSchedule(
+        Fixtures.mkGuardianWeeklySubscription(),
         Fixtures.mkRatePlanCharge(
           name = "GW Oct 18 - Quarterly - Domestic",
           price = 1,
           billingPeriod = billingPeriodName,
-          effectiveStartDate = effectiveStartDate,
           endDateCondition = Some("Fixed_Period"),
           upToPeriodsType = Some("Billing_Periods"),
           upToPeriods = Some(2),
-          specificBillingPeriod = optionalSpecificBillingPeriod
-        )
+          specificBillingPeriod = optionalSpecificBillingPeriod,
+          billingDay = Some("ChargeTriggerDay"),
+          triggerEvent = Some("SpecificDate"),
+          triggerDate = Some(effectiveStartDate),
+          chargedThroughDate = None,
+          processedThroughDate = None
+        ),
+        Fixtures.mkAccount()
       )
     ) {
         case Right(billingSchedule) =>
           datesBetweenDates(expectedBillDates1.startDate, expectedBillDates1.endDate).foreach(date =>
-            billingSchedule.billDatesCoveringDate(date) should equal(Right(expectedBillDates1)))
+            withClue(s"For date: $date") { billingSchedule.billDatesCoveringDate(date) should equal(Right(expectedBillDates1)) })
           datesBetweenDates(expectedBillDates2.startDate, expectedBillDates2.endDate).foreach(date =>
-            billingSchedule.billDatesCoveringDate(date) should equal(Right(expectedBillDates2)))
+            withClue(s"For date: $date") { billingSchedule.billDatesCoveringDate(date) should equal(Right(expectedBillDates2)) })
+      }
+  }
+
+  private def testBillingScheduleStartDate(
+    triggerEvent: String,
+    expectedDate: LocalDate,
+    customerAcceptanceDate: LocalDate = LocalDate.of(2020, 6, 6),
+    contractEffectiveDate: LocalDate = LocalDate.of(2020, 6, 6),
+    triggerDate: Option[LocalDate] = None,
+    effectiveStartDate: LocalDate = LocalDate.of(2020, 6, 6),
+    processedThroughDate: Option[LocalDate] = None,
+    billCycleDay: Int = 1,
+    billingDay: Option[String] = Some("ChargeTriggerDay")
+  ) = {
+    inside(
+      RatePlanChargeBillingSchedule(
+        Fixtures.mkGuardianWeeklySubscription(
+          customerAcceptanceDate = customerAcceptanceDate,
+          contractEffectiveDate = contractEffectiveDate
+        ),
+        Fixtures.mkRatePlanCharge(
+          name = "GW Oct 18 - Quarterly - Domestic",
+          price = 1,
+          billingPeriod = "Month",
+          endDateCondition = Some("Fixed_Period"),
+          upToPeriodsType = Some("Billing_Periods"),
+          upToPeriods = Some(2),
+          specificBillingPeriod = None,
+          billingDay = billingDay,
+          triggerEvent = Some(triggerEvent),
+          triggerDate = triggerDate,
+          processedThroughDate = processedThroughDate,
+          effectiveStartDate = effectiveStartDate
+        ),
+        Fixtures.mkAccount(
+          billCycleDay = billCycleDay
+        )
+      )
+    ) {
+        case Right(billingSchedule) =>
+          inside(billingSchedule.billDatesCoveringDate(expectedDate)) {
+            case Right(billDates: BillDates) =>
+              billDates.startDate should equal(expectedDate)
+          }
       }
   }
 
