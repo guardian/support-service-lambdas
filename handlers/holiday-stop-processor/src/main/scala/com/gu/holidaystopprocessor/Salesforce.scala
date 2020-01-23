@@ -2,10 +2,9 @@ package com.gu.holidaystopprocessor
 
 import java.time.LocalDate
 
-import com.gu.creditprocessor.ZuoraHolidayCreditAddResult
 import com.gu.effects.RawEffects
-import com.gu.salesforce.{SFAuthConfig, SalesforceClient}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
+import com.gu.salesforce.{SFAuthConfig, SalesforceClient}
 import com.gu.util.resthttp.JsonHttp
 import com.gu.zuora.ZuoraProductTypes.ZuoraProductType
 import com.gu.zuora.subscription.{SalesforceApiFailure, SalesforceApiResponse}

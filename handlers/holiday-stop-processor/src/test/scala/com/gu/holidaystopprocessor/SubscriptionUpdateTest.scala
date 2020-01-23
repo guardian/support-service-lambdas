@@ -3,9 +3,9 @@ package com.gu.holidaystopprocessor
 import java.time.temporal.TemporalAdjusters
 import java.time.{DayOfWeek, LocalDate}
 
-import com.gu.zuora.subscription.{Add, AffectedPublicationDate, ChargeOverride, ExtendedTerm, HolidayStopCredit, MutableCalendar, SubscriptionData, SubscriptionUpdate, Fixtures => SubscriptionFixtures}
-import org.scalatest.{EitherValues, FlatSpec, Matchers}
 import com.gu.holiday_stops.Fixtures
+import com.gu.zuora.subscription.{Add, AffectedPublicationDate, ChargeOverride, MutableCalendar, SubscriptionUpdate, Fixtures => SubscriptionFixtures}
+import org.scalatest.{EitherValues, FlatSpec, Matchers}
 
 class SubscriptionUpdateTest extends FlatSpec with Matchers with EitherValues {
   MutableCalendar.setFakeToday(Some(LocalDate.parse("2019-08-12")))
@@ -14,6 +14,7 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers with EitherValues {
   val stoppedPublicationDate = AffectedPublicationDate(
     dateCreditIsApplied.`with`(TemporalAdjusters.previous(DayOfWeek.FRIDAY))
   )
+  private val creditProduct = HolidayCreditProduct.Dev
 
   "forHolidayStop" should "generate update correctly" in {
     val subscription = SubscriptionFixtures.mkGuardianWeeklySubscription(
@@ -23,30 +24,25 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers with EitherValues {
       billingPeriod = "Quarter",
       effectiveStartDate = effectiveStartDate
     )
-    val subscriptionData = SubscriptionData(subscription, Fixtures.mkAccount()).right.value
-    val issueData = subscriptionData.issueDataForDate(stoppedPublicationDate.value).right.value
-    val holidayCredit = HolidayStopCredit(issueData.credit, issueData.nextBillingPeriodStartDate)
-    val maybeExtendedTerm = ExtendedTerm(holidayCredit.invoiceDate, subscription)
 
     val update = SubscriptionUpdate.forHolidayStop(
-      Fixtures.config.creditProduct,
+      creditProduct,
       subscription = subscription,
-      stoppedPublicationDate = stoppedPublicationDate.value,
-      maybeExtendedTerm = maybeExtendedTerm,
-      holidayCredit
+      account = Fixtures.mkAccount(),
+      stoppedPublicationDate
     )
     update shouldBe Right(SubscriptionUpdate(
       currentTerm = None,
       currentTermPeriodType = None,
       List(
         Add(
-          productRatePlanId = Fixtures.config.creditProduct.productRatePlanId,
+          productRatePlanId = creditProduct.productRatePlanId,
           contractEffectiveDate = dateCreditIsApplied,
           customerAcceptanceDate = dateCreditIsApplied,
           serviceActivationDate = dateCreditIsApplied,
           chargeOverrides = List(
             ChargeOverride(
-              productRatePlanChargeId = Fixtures.config.creditProduct.productRatePlanChargeId,
+              productRatePlanChargeId = creditProduct.productRatePlanChargeId,
               HolidayStart__c = stoppedPublicationDate.value,
               HolidayEnd__c = stoppedPublicationDate.value,
               price = -3.24
@@ -65,28 +61,23 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers with EitherValues {
       billingPeriod = "Quarter",
       effectiveStartDate = effectiveStartDate
     )
-    val subscriptionData = SubscriptionData(subscription, Fixtures.mkAccount()).right.value
-    val issueData = subscriptionData.issueDataForDate(stoppedPublicationDate.value).right.value
-    val holidayCredit = HolidayStopCredit(issueData.credit, issueData.nextBillingPeriodStartDate)
-    val maybeExtendedTerm = ExtendedTerm(holidayCredit.invoiceDate, subscription)
     val update = SubscriptionUpdate.forHolidayStop(
-      Fixtures.config.creditProduct,
+      creditProduct,
       subscription = subscription,
-      stoppedPublicationDate = stoppedPublicationDate.value,
-      maybeExtendedTerm = maybeExtendedTerm,
-      holidayCredit
+      account = Fixtures.mkAccount(),
+      stoppedPublicationDate
     )
     update shouldBe Right(SubscriptionUpdate(
       currentTerm = Some(366),
       currentTermPeriodType = Some("Day"),
       List(Add(
-        Fixtures.config.creditProduct.productRatePlanId,
+        creditProduct.productRatePlanId,
         contractEffectiveDate = dateCreditIsApplied,
         customerAcceptanceDate = dateCreditIsApplied,
         serviceActivationDate = dateCreditIsApplied,
         chargeOverrides = List(
           ChargeOverride(
-            Fixtures.config.creditProduct.productRatePlanChargeId,
+            creditProduct.productRatePlanChargeId,
             HolidayStart__c = stoppedPublicationDate.value,
             HolidayEnd__c = stoppedPublicationDate.value,
             price = -3.24
@@ -105,28 +96,23 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers with EitherValues {
       chargedThroughDate = None,
       effectiveStartDate = effectiveStartDate
     )
-    val subscriptionData = SubscriptionData(subscription, Fixtures.mkAccount()).right.value
-    val issueData = subscriptionData.issueDataForDate(stoppedPublicationDate.value).right.value
-    val holidayCredit = HolidayStopCredit(issueData.credit, issueData.nextBillingPeriodStartDate)
-    val maybeExtendedTerm = ExtendedTerm(holidayCredit.invoiceDate, subscription)
     val update = SubscriptionUpdate.forHolidayStop(
-      Fixtures.config.creditProduct,
+      creditProduct,
       subscription = subscription,
-      stoppedPublicationDate = stoppedPublicationDate.value,
-      maybeExtendedTerm = maybeExtendedTerm,
-      holidayCredit
+      account = Fixtures.mkAccount(),
+      stoppedPublicationDate
     )
     update shouldBe Right(SubscriptionUpdate(
       currentTerm = None,
       currentTermPeriodType = None,
       List(Add(
-        Fixtures.config.creditProduct.productRatePlanId,
+        creditProduct.productRatePlanId,
         contractEffectiveDate = dateCreditIsApplied,
         customerAcceptanceDate = dateCreditIsApplied,
         serviceActivationDate = dateCreditIsApplied,
         chargeOverrides = List(
           ChargeOverride(
-            Fixtures.config.creditProduct.productRatePlanChargeId,
+            creditProduct.productRatePlanChargeId,
             HolidayStart__c = stoppedPublicationDate.value,
             HolidayEnd__c = stoppedPublicationDate.value,
             price = -3.24

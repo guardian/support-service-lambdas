@@ -12,7 +12,7 @@ import com.gu.util.resthttp.RestRequestMaker._
 import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.resthttp.{HttpOp, RestRequestMaker}
 import com.gu.zuora.ZuoraProductTypes.ZuoraProductType
-import com.gu.zuora.subscription.{AffectedPublicationDate, CreditRequest, RatePlanChargeCode, SubscriptionName}
+import com.gu.zuora.subscription.{AffectedPublicationDate, CreditRequest, Price, RatePlanChargeCode, SubscriptionName}
 import play.api.libs.json.{JsValue, Json}
 
 object SalesforceHolidayStopRequestsDetail extends Logging {
@@ -31,15 +31,12 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
 
   case class ProductRatePlanName(value: String) extends AnyVal
 
-  case class HolidayStopRequestsDetailChargePrice(value: Double) extends AnyVal
-  implicit val formatHolidayStopRequestsDetailChargePrice = Jsonx.formatInline[HolidayStopRequestsDetailChargePrice]
-
   case class HolidayStopRequestsDetailExpectedInvoiceDate(value: LocalDate) extends AnyVal
   implicit val formatHolidayStopRequestsDetailExpectedInvoiceDate = Jsonx.formatInline[HolidayStopRequestsDetailExpectedInvoiceDate]
 
   case class HolidayStopRequestsDetailActioned(
     Charge_Code__c: RatePlanChargeCode,
-    Actual_Price__c: HolidayStopRequestsDetailChargePrice
+    Actual_Price__c: Price
   )
   implicit val formatActioned = Json.format[HolidayStopRequestsDetailActioned]
 
@@ -57,9 +54,9 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
     Subscription_Name__c: SubscriptionName,
     Product_Name__c: ProductName,
     Stopped_Publication_Date__c: AffectedPublicationDate,
-    Estimated_Price__c: Option[HolidayStopRequestsDetailChargePrice],
+    Estimated_Price__c: Option[Price],
     Charge_Code__c: Option[RatePlanChargeCode],
-    Actual_Price__c: Option[HolidayStopRequestsDetailChargePrice],
+    Actual_Price__c: Option[Price],
     Expected_Invoice_Date__c: Option[HolidayStopRequestsDetailExpectedInvoiceDate]
   ) extends CreditRequest {
     val subscriptionName: SubscriptionName = Subscription_Name__c
