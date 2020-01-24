@@ -26,7 +26,7 @@ https://www.zuora.com/developer/api-reference/#section/Authentication
 
 cd into root of project and execute export script:
 
-lib/credit-calculation-checks/exportinvoiceitems.sh <zuora acces token>
+lib/credit-calculation-checks/exportinvoiceitems.sh <zuora access token>
 
 Log into Zuora and navigate to the AQuA job finder:
 
