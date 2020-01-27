@@ -15,31 +15,11 @@ case class SubscriptionUpdate(
  */
 object SubscriptionUpdate {
 
-  def forHolidayStop(
+  def apply(
     creditProduct: CreditProduct,
     subscription: Subscription,
     account: ZuoraAccount,
-    stoppedPublicationDate: AffectedPublicationDate
-  ): ZuoraApiResponse[SubscriptionUpdate] =
-    creditAddUpdate(
-      creditProduct,
-      subscription,
-      stoppedPublicationDate,
-      Some(stoppedPublicationDate.value)
-    )
-
-  def forDeliveryProblemCredit(
-    creditProduct: CreditProduct,
-    subscription: Subscription,
-    deliveryDate: AffectedPublicationDate
-  ): ZuoraApiResponse[SubscriptionUpdate] =
-    creditAddUpdate(creditProduct, subscription, deliveryDate, None)
-
-  private def creditAddUpdate(
-    creditProduct: CreditProduct,
-    subscription: Subscription,
-    affectedDate: AffectedPublicationDate,
-    holidayDate: Option[LocalDate]
+    affectedDate: AffectedPublicationDate
   ): ZuoraApiResponse[SubscriptionUpdate] =
     for {
       subscriptionData <- SubscriptionData(subscription, account)
@@ -59,8 +39,8 @@ object SubscriptionUpdate {
             chargeOverrides = List(
               ChargeOverride(
                 productRatePlanChargeId = creditProduct.productRatePlanChargeId,
-                HolidayStart__c = holidayDate,
-                HolidayEnd__c = holidayDate,
+                HolidayStart__c = affectedDate.value,
+                HolidayEnd__c = affectedDate.value,
                 price = credit.amount
               )
             )
@@ -80,7 +60,7 @@ case class Add(
 
 case class ChargeOverride(
   productRatePlanChargeId: String,
-  HolidayStart__c: Option[LocalDate],
-  HolidayEnd__c: Option[LocalDate],
+  HolidayStart__c: LocalDate,
+  HolidayEnd__c: LocalDate,
   price: Double
 )

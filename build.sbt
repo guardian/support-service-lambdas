@@ -1,4 +1,4 @@
-import Dependencies.{sttpAsycHttpClientBackendCats, _}
+import Dependencies._
 
 val scalaSettings = Seq(
   scalaVersion := "2.12.10",

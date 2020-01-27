@@ -1,27 +1,26 @@
 package com.gu.deliveryproblemcreditprocessor
 
-import java.time.{DayOfWeek, LocalDate}
+import java.time.{DayOfWeek, LocalDate, LocalDateTime}
 
-import cats.implicits._
-import com.gu.creditprocessor.Processor
+import com.gu.creditprocessor.{ProcessResult, Processor}
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.fulfilmentdates.{FulfilmentDates, FulfilmentDatesFetcher}
-import com.gu.salesforce.SalesforceConstants.soqlQueryBaseUrl
+import com.gu.salesforce.SalesforceConstants.{sfObjectsBaseUrl, soqlQueryBaseUrl}
 import com.gu.salesforce.{RecordsWrapperCaseClass, SFAuthConfig, SalesforceClient}
 import com.gu.util.Logging
 import com.gu.util.config.ConfigReads.ConfigFailure
 import com.gu.util.config.{ConfigLocation, LoadConfigModule, Stage}
 import com.gu.util.resthttp.RestOp._
-import com.gu.util.resthttp.RestRequestMaker.{RelativePath, UrlParams}
+import com.gu.util.resthttp.RestRequestMaker.{PatchRequest, RelativePath, UrlParams}
 import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.resthttp.{HttpOp, JsonHttp, RestRequestMaker}
 import com.gu.zuora.ZuoraProductTypes.{GuardianWeekly, NewspaperHomeDelivery, ZuoraProductType}
 import com.gu.zuora.subscription.{Price, RatePlanChargeCode, _}
 import com.gu.zuora.{AccessToken, Zuora, ZuoraConfig}
 import com.softwaremill.sttp.HttpURLConnectionBackend
-import play.api.libs.json.JsValue
+import play.api.libs.json.{JsValue, Json, Writes}
 import scalaz.{-\/, \/-}
-import zio.Task
+import zio.{Task, ZIO}
 
 object DeliveryCreditProcessor extends Logging {
 
@@ -61,15 +60,34 @@ object DeliveryCreditProcessor extends Logging {
       sfAuthConfig <- sfConfig
       zConfig <- zuoraConfig
       zAccessToken <- zuoraAccessToken(zConfig)
-      results <- Task.foreach(productTypes)(processProduct(sfAuthConfig, zConfig, zAccessToken))
-    } yield {
-      results.flatten
-    }
+      processResults <- Task.foreach(productTypes)(processProduct(sfAuthConfig, zConfig, zAccessToken))
+      creditResults <- Task.foreach(processResults)(dealWithProcessResult)
+    } yield creditResults.flatten
   }
 
-  def processProduct(sfAuthConfig: SFAuthConfig, zuoraConfig: ZuoraConfig, zuoraAccessToken: AccessToken)(productType: ZuoraProductType): Task[List[DeliveryCreditResult]] =
+  def dealWithProcessResult(processResult: ProcessResult[DeliveryCreditResult]): Task[List[DeliveryCreditResult]] =
     for {
-      results <- Task.effect(
+      _ <- Task.effect(ProcessResult.log(processResult))
+      _ <- dealWithOverallException(processResult.overallFailure)
+      results <- Task.foreach(processResult.creditResults)(result => dealWithCreditResult(result))
+    } yield results
+
+  def dealWithOverallException(overallFailure: Option[OverallFailure]): Task[Unit] =
+    Task.effect(overallFailure).flatMap {
+      case None => Task.succeed(())
+      case Some(e) => Task.fail(new RuntimeException(e.reason))
+    }
+
+  def dealWithCreditResult(result: Either[ZuoraApiFailure, DeliveryCreditResult]): Task[DeliveryCreditResult] =
+    ZIO.fromEither(result).mapError(e => new RuntimeException(e.reason))
+
+  def processProduct(
+    sfAuthConfig: SFAuthConfig,
+    zuoraConfig: ZuoraConfig,
+    zuoraAccessToken: AccessToken
+  )(productType: ZuoraProductType): Task[ProcessResult[DeliveryCreditResult]] =
+    for {
+      processResult <- Task.effect(
         Processor
           .processLiveProduct[DeliveryCreditRequest, DeliveryCreditResult](
             zuoraConfig,
@@ -82,15 +100,12 @@ object DeliveryCreditProcessor extends Logging {
             productType,
             updateToApply,
             resultOfZuoraCreditAdd,
-            writeCreditResultsToSalesforce
+            writeCreditResultsToSalesforce(sfAuthConfig)
           )
-          .creditResults
       )
-    } yield {
-      val (_, successes) = results.separate
-      successes
-    }
+    } yield processResult
 
+  // TODO: this isn't actually used so could be optional in the credit processor
   val fulfilmentDatesFetcher: FulfilmentDatesFetcher = (_, _) => {
     val tomorrow = LocalDate.now.plusDays(1)
     val fulfilmentDates = FulfilmentDates(
@@ -113,16 +128,18 @@ object DeliveryCreditProcessor extends Logging {
     subscription: Subscription,
     deliveryDate: AffectedPublicationDate
   ): ZuoraApiResponse[SubscriptionUpdate] =
-    SubscriptionUpdate.forDeliveryProblemCredit(creditProduct, subscription, deliveryDate)
+    SubscriptionUpdate.apply(creditProduct, subscription, deliveryDate)
 
   def resultOfZuoraCreditAdd(
     request: DeliveryCreditRequest,
     addedCharge: RatePlanCharge
   ): DeliveryCreditResult = DeliveryCreditResult(
+    deliveryId = request.Id,
     chargeCode = RatePlanChargeCode(addedCharge.number),
     amountCredited = Price(addedCharge.price)
   )
 
+  // TODO use http4s solution
   def getCreditRequestsFromSalesforce[S](sfAuthConfig: SFAuthConfig)(
     productType: ZuoraProductType,
     unused: List[LocalDate]
@@ -130,11 +147,12 @@ object DeliveryCreditProcessor extends Logging {
 
     def soqlQuery(productType: ZuoraProductType) =
       s"""
-         |SELECT SF_Subscription__r.Name, Delivery_Date__c, Charge_Code__c
+         |SELECT Id, SF_Subscription__r.Name, Delivery_Date__c, Charge_Code__c
          |FROM Delivery__c
-         |WHERE SF_Subscription__r.Product_Type__c = '$productType'
+         |WHERE SF_Subscription__r.Product_Type__c = '${productType.name}'
          |AND Credit_Requested__c = true
          |AND Is_Actioned__c = false
+         |ORDER BY SF_Subscription__r.Name, Delivery_Date__c
          |""".stripMargin
 
     def sfRequest(productType: ZuoraProductType) = {
@@ -158,13 +176,39 @@ object DeliveryCreditProcessor extends Logging {
     }
   }
 
-  def writeCreditResultsToSalesforce(
+  case class DeliveryCreditActioned(
+    Charge_Code__c: RatePlanChargeCode,
+    Credit_Amount__c: Price,
+    Actioned_On__c: LocalDateTime
+  )
+
+  implicit val deliveryCreditActionedWrites: Writes[DeliveryCreditActioned] =
+    Json.writes[DeliveryCreditActioned]
+
+  // TODO use http4s solution
+  def writeCreditResultsToSalesforce(sfAuthConfig: SFAuthConfig)(
     results: List[DeliveryCreditResult]
   ): SalesforceApiResponse[Unit] = {
-    //TODO
-    println("=== results ===")
-    results.foreach(println)
-    println("+++++++++++++++")
-    Right(())
+
+    val deliverySfObjectRef = "Delivery__c"
+
+    SalesforceClient(RawEffects.response, sfAuthConfig).value.map { sfAuth =>
+      results map { result =>
+        val actioned = DeliveryCreditActioned(
+          result.chargeCode,
+          result.amountCredited,
+          LocalDateTime.now
+        )
+        sfAuth.wrapWith(JsonHttp.patch).setupRequest[DeliveryCreditActioned] { actionedInfo =>
+          PatchRequest(
+            actionedInfo,
+            RelativePath(s"$sfObjectsBaseUrl$deliverySfObjectRef/${result.deliveryId.value}")
+          )
+        }.runRequest(actioned)
+      }
+    }.toDisjunction match {
+      case -\/(failure) => Left(SalesforceApiFailure(failure.toString))
+      case _ => Right(())
+    }
   }
 }

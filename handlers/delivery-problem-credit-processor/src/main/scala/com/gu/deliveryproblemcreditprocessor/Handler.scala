@@ -1,7 +1,6 @@
 package com.gu.deliveryproblemcreditprocessor
 
 import com.amazonaws.services.lambda.runtime.Context
-import com.gu.deliveryproblemcreditprocessor.DeliveryCreditProcessor.processAllProducts
 import io.circe.generic.auto._
 import io.github.mkotsur.aws.handler.Lambda
 import io.github.mkotsur.aws.handler.Lambda._
@@ -16,7 +15,7 @@ object Handler extends Lambda[None.type, List[DeliveryCreditResult]] {
     context: Context
   ): Either[Throwable, List[DeliveryCreditResult]] =
     runtime.unsafeRun {
-      val program = processAllProducts
+      val program = DeliveryCreditProcessor.processAllProducts
       program.either
     }
 }

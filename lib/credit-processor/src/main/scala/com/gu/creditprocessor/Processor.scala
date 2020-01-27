@@ -52,7 +52,6 @@ object Processor {
     )
   }
 
-  // TODO: could pass in a trait instead of a huge list of arguments here
   def processProduct[RequestType <: CreditRequest, ResultType <: ZuoraCreditAddResult](
     creditProduct: CreditProduct,
     getCreditRequestsFromSalesforce: (ZuoraProductType, List[LocalDate]) => SalesforceApiResponse[List[RequestType]],
@@ -68,7 +67,7 @@ object Processor {
   ): ProcessResult[ResultType] = {
     val creditRequestsFromSalesforce = for {
       datesToProcess <- getDatesToProcess(fulfilmentDatesFetcher, productType, processOverrideDate, LocalDate.now())
-      _ = logger.info(s"Processing holiday stops for $productType for issue dates ${datesToProcess.mkString(", ")}")
+      _ = logger.info(s"Processing ${creditProduct.productRatePlanChargeName}s for ${productType.name} for issue dates ${datesToProcess.mkString(", ")}")
       salesforceCreditRequests <- if (datesToProcess.isEmpty) Nil.asRight else getCreditRequestsFromSalesforce(productType, datesToProcess)
     } yield salesforceCreditRequests
 
@@ -119,7 +118,7 @@ object Processor {
       subscriptionUpdate <- updateToApply(creditProduct, subscription, account, request.publicationDate)
       _ <- if (subscription.hasCreditAmendment(request)) Right(()) else updateSubscription(subscription, subscriptionUpdate)
       updatedSubscription <- getSubscription(request.subscriptionName)
-      addedCharge <- updatedSubscription.ratePlanCharge(request).toRight(ZuoraApiFailure(s"Failed to write holiday stop to Zuora: $request"))
+      addedCharge <- updatedSubscription.ratePlanCharge(request).toRight(ZuoraApiFailure(s"Failed to write credit amendment to Zuora: $request"))
     } yield result(request, addedCharge)
 
   def getDatesToProcess(
