@@ -42,4 +42,4 @@ Click on the download link in the status dialog box.
 Running the tool
 ----------------
 
-sbt "credit-calculation-checks/run <path to downloaded export file>"
+sbt "credit-calculation-checks/runMain CheckInvoiceDates  <path to downloaded export file>"

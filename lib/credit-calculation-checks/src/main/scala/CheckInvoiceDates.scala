@@ -3,25 +3,31 @@ import java.time.LocalDate
 import com.github.tototoshi.csv.CSVReader
 import com.gu.zuora.subscription.RatePlanChargeBillingSchedule
 
-object Main extends App {
+import scala.collection.mutable
+
+object CheckInvoiceDates extends App {
   val fileName = args(0)
 
   val reader = CSVReader.open(fileName)
 
   val records: Iterator[Map[String, String]] = reader.iteratorWithHeaders
 
-  while (records.hasNext) {
-    val recordsForSubs: List[Map[String, String]] = readRecordsForSub(records)
-    checkInvoiceDates(recordsForSubs)
-  }
+  var currentSub: Option[String] = None
+  var currentRecords = mutable.Buffer[Map[String, String]]()
 
-  def readRecordsForSub(records: Iterator[Map[String, String]]) = {
-    val firstRecord = records.next()
-    firstRecord ::
-      records.takeWhile { record =>
-        (record("Subscription.Name") == firstRecord("Subscription.Name")) &&
-          (record("RatePlanCharge.Name") == firstRecord("RatePlanCharge.Name"))
-      }.toList
+  records.foreach { record =>
+    val subName = record("Subscription.Name")
+
+    if (currentSub == Some(subName)) {
+      currentRecords.append(record)
+    } else {
+      if (currentSub != None) {
+        checkInvoiceDates(currentRecords.toList)
+      }
+      currentSub = Some(subName)
+      currentRecords = mutable.Buffer[Map[String, String]]()
+      currentRecords.append(record)
+    }
   }
 
   def checkInvoiceDates(recordsForSub: List[Map[String, String]]) = {
