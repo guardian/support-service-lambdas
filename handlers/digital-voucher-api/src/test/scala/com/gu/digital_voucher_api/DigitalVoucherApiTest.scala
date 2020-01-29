@@ -14,7 +14,7 @@ class DigitalVoucherApiTest extends FlatSpec with Matchers with EitherValues {
     val response = app.run(
       Request(
         method = Method.PUT,
-        Uri(path = s"/digital-voucher/create/sub123456")
+        Uri(path = "/digital-voucher/create/sub123456")
       ).withEntity[String](CreateVoucherRequestBody("Rate-Plan-Name").asJson.spaces2)
     ).value.unsafeRunSync().get
 
@@ -26,7 +26,7 @@ class DigitalVoucherApiTest extends FlatSpec with Matchers with EitherValues {
     val response = app.run(
       Request(
         method = Method.PUT,
-        Uri(path = s"/digital-voucher/replace/sub123456")
+        Uri(path = "/digital-voucher/replace/sub123456")
       ).withEntity[String](CreateVoucherRequestBody("Rate-Plan-Name").asJson.spaces2)
     ).value.unsafeRunSync().get
 
@@ -38,7 +38,7 @@ class DigitalVoucherApiTest extends FlatSpec with Matchers with EitherValues {
     val response = app.run(
       Request(
         method = Method.GET,
-        Uri(path = s"/digital-voucher/sub123456")
+        Uri(path = "/digital-voucher/sub123456")
       )
     ).value.unsafeRunSync().get
 
@@ -50,7 +50,7 @@ class DigitalVoucherApiTest extends FlatSpec with Matchers with EitherValues {
     val response = app.run(
       Request(
         method = Method.DELETE,
-        Uri(path = s"/digital-voucher/123456")
+        Uri(path = "/digital-voucher/123456")
       )
     ).value.unsafeRunSync().get
 
