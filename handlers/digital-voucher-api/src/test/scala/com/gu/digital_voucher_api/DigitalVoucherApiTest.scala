@@ -9,16 +9,51 @@ import org.http4s.{Method, Request, Response, Uri}
 import org.scalatest.{EitherValues, FlatSpec, Matchers}
 
 class DigitalVoucherApiTest extends FlatSpec with Matchers with EitherValues {
-  "DigitalVoucherApi" should "return stubbed voucher details" in {
+  "DigitalVoucherApi" should "return stubbed voucher details for create request" in {
     val app = createApp()
     val response = app.run(
       Request(
         method = Method.PUT,
-        Uri(path = s"/digital-voucher/create/123456")
+        Uri(path = s"/digital-voucher/create/sub123456")
       ).withEntity[String](CreateVoucherRequestBody("Rate-Plan-Name").asJson.spaces2)
     ).value.unsafeRunSync().get
 
-    getBody[Voucher](response) should equal(Voucher("123456", "654321"))
+    getBody[Voucher](response) should equal(Voucher("sub123456-card-code", "sub123456-letter-code"))
+    response.status.code should equal(200)
+  }
+  it should "return stubbed voucher details for replace request" in {
+    val app = createApp()
+    val response = app.run(
+      Request(
+        method = Method.PUT,
+        Uri(path = s"/digital-voucher/replace/sub123456")
+      ).withEntity[String](CreateVoucherRequestBody("Rate-Plan-Name").asJson.spaces2)
+    ).value.unsafeRunSync().get
+
+    getBody[Voucher](response) should equal(Voucher("sub123456-replaced-card-code", "sub123456-replaced-letter-code"))
+    response.status.code should equal(200)
+  }
+  it should "return stubbed voucher details for get request" in {
+    val app = createApp()
+    val response = app.run(
+      Request(
+        method = Method.GET,
+        Uri(path = s"/digital-voucher/sub123456")
+      )
+    ).value.unsafeRunSync().get
+
+    getBody[Voucher](response) should equal(Voucher("sub123456-card-code", "sub123456-letter-code"))
+    response.status.code should equal(200)
+  }
+  it should "return stubbed 200 response for delete request" in {
+    val app = createApp()
+    val response = app.run(
+      Request(
+        method = Method.DELETE,
+        Uri(path = s"/digital-voucher/123456")
+      )
+    ).value.unsafeRunSync().get
+
     response.status.code should equal(200)
   }
 

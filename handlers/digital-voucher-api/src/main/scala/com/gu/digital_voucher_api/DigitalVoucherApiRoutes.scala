@@ -38,18 +38,55 @@ object DigitalVoucherApiRoutes {
         }
     }
 
+    def handleCreateRequest(request: Request[F], subscriptionId: String) = {
+      toResponse(
+        for {
+          requestBody <- parseRequest[CreateVoucherRequestBody](request)
+          voucher <- digitalVoucherService.createVoucher(
+            subscriptionId,
+            requestBody.ratePlanName
+          ).leftMap(_ => InternalServerError())
+        } yield voucher
+      )
+    }
+
+    def handleReplaceRequest(request: Request[F], subscriptionId: String) = {
+      toResponse(
+        for {
+          requestBody <- parseRequest[CreateVoucherRequestBody](request)
+          voucher <- digitalVoucherService.replaceVoucher(
+            subscriptionId,
+            requestBody.ratePlanName
+          ).leftMap(_ => InternalServerError())
+        } yield voucher
+      )
+    }
+
+    def handleGetRequest(subscriptionId: String) = {
+      toResponse(
+        digitalVoucherService
+          .getVoucher(subscriptionId)
+          .leftMap(_ => InternalServerError())
+      )
+    }
+
+    def handleDeleteRequest(subscriptionId: String) = {
+      toResponse(
+        digitalVoucherService
+          .deleteVoucherForSubscription(subscriptionId)
+          .leftMap(_ => InternalServerError())
+      )
+    }
+
     HttpRoutes.of[F] {
       case request @ PUT -> Root / "digital-voucher" / "create" / subscriptionId =>
-        toResponse(
-          for {
-            requestBody <- parseRequest[CreateVoucherRequestBody](request)
-            voucher <- digitalVoucherService.createVoucherForSubscription(
-              subscriptionId,
-              requestBody.ratePlanName
-            ).leftMap(_ => InternalServerError())
-          } yield voucher
-        )
+        handleCreateRequest(request, subscriptionId)
+      case request @ PUT -> Root / "digital-voucher" / "replace" / subscriptionId =>
+        handleReplaceRequest(request, subscriptionId)
+      case GET -> Root / "digital-voucher" / subscriptionId =>
+        handleGetRequest(subscriptionId)
+      case DELETE -> Root / "digital-voucher" / subscriptionId =>
+        handleDeleteRequest(subscriptionId)
     }
   }
-
 }
