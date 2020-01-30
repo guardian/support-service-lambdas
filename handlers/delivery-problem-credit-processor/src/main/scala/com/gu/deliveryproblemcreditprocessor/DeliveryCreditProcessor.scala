@@ -2,10 +2,14 @@ package com.gu.deliveryproblemcreditprocessor
 
 import java.time.{DayOfWeek, LocalDate, LocalDateTime}
 
+import cats.data.EitherT
+import cats.effect.IO
+import cats.implicits._
 import com.gu.creditprocessor.{ProcessResult, Processor}
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.fulfilmentdates.{FulfilmentDates, FulfilmentDatesFetcher}
 import com.gu.salesforce.SalesforceConstants.{sfObjectsBaseUrl, soqlQueryBaseUrl}
+import com.gu.salesforce.sttp.{SalesforceClientError, SalesforceClient => SttpSalesforceClient}
 import com.gu.salesforce.{RecordsWrapperCaseClass, SFAuthConfig, SalesforceClient}
 import com.gu.util.Logging
 import com.gu.util.config.ConfigReads.ConfigFailure
@@ -15,9 +19,11 @@ import com.gu.util.resthttp.RestRequestMaker.{PatchRequest, RelativePath, UrlPar
 import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.resthttp.{HttpOp, JsonHttp, RestRequestMaker}
 import com.gu.zuora.ZuoraProductTypes.{GuardianWeekly, NewspaperHomeDelivery, ZuoraProductType}
-import com.gu.zuora.subscription.{Price, RatePlanChargeCode, _}
+import com.gu.zuora.subscription._
 import com.gu.zuora.{AccessToken, Zuora, ZuoraConfig}
 import com.softwaremill.sttp.HttpURLConnectionBackend
+import com.softwaremill.sttp.asynchttpclient.cats.AsyncHttpClientCatsBackend
+import io.circe.generic.auto._
 import play.api.libs.json.{JsValue, Json, Writes}
 import scalaz.{-\/, \/-}
 import zio.{Task, ZIO}
@@ -139,13 +145,21 @@ object DeliveryCreditProcessor extends Logging {
     amountCredited = Price(addedCharge.price)
   )
 
-  // TODO use http4s solution
-  def getCreditRequestsFromSalesforce[S](sfAuthConfig: SFAuthConfig)(
+  def getCreditRequestsFromSalesforce(sfAuthConfig: SFAuthConfig)(
     productType: ZuoraProductType,
     unused: List[LocalDate]
   ): SalesforceApiResponse[List[DeliveryCreditRequest]] = {
 
-    def soqlQuery(productType: ZuoraProductType) =
+    val sttpBackend = AsyncHttpClientCatsBackend[cats.effect.IO]()
+
+    def queryForDeliveryRecords(
+      salesforceClient: SttpSalesforceClient[IO],
+      productType: ZuoraProductType
+    ): EitherT[IO, SalesforceApiFailure, RecordsWrapperCaseClass[DeliveryCreditRequest]] =
+      salesforceClient.query[DeliveryCreditRequest](deliveryRecordsQuery(productType))
+        .leftMap(error => SalesforceApiFailure(error.toString))
+
+    def deliveryRecordsQuery(productType: ZuoraProductType) =
       s"""
          |SELECT Id, SF_Subscription__r.Name, Delivery_Date__c, Charge_Code__c
          |FROM Delivery__c
@@ -155,25 +169,20 @@ object DeliveryCreditProcessor extends Logging {
          |ORDER BY SF_Subscription__r.Name, Delivery_Date__c
          |""".stripMargin
 
-    def sfRequest(productType: ZuoraProductType) = {
-      logger.info(s"using SF query : ${soqlQuery(productType)}")
-      RestRequestMaker.GetRequestWithParams(RelativePath(soqlQueryBaseUrl), UrlParams(Map("q" -> soqlQuery(productType))))
-    }
+    val results = for {
+      salesforceClient <- SttpSalesforceClient(sttpBackend, sfAuthConfig).leftMap { e =>
+        SalesforceApiFailure(e.message)
+      }
+      queryResult <- queryForDeliveryRecords(salesforceClient, productType)
+    } yield queryResult.records
 
-    def sfResponse(sfGet: HttpOp[RestRequestMaker.GetRequestWithParams, JsValue]): ZuoraProductType => ClientFailableOp[List[DeliveryCreditRequest]] =
-      sfGet
-        .setupRequest { sfRequest }
-        .parse[RecordsWrapperCaseClass[DeliveryCreditRequest]]
-        .map(_.records)
-        .runRequest
-
-    SalesforceClient(RawEffects.response, sfAuthConfig).value.flatMap { sfAuth =>
-      val sfGet = sfAuth.wrapWith(JsonHttp.getWithParams)
-      sfResponse(sfGet)(productType)
-    }.toDisjunction match {
-      case -\/(failure) => Left(SalesforceApiFailure(failure.toString))
-      case \/-(details) => Right(details)
-    }
+    /*
+     * TODO: doing this at this level to avoid having to rewrite holiday-stop credit query as well.
+     * But would be better to have common code in the credit-processor to run queries and just supply
+     * the query and the return type.  Then effect could be run at a much higher level.
+     * (Or converted to a Zio effect and run at a much higher level.)
+     */
+    results.value.unsafeRunSync()
   }
 
   case class DeliveryCreditActioned(
