@@ -4,11 +4,11 @@ import java.time.LocalDate
 
 import cats.Monad
 import cats.data.EitherT
-import com.gu.salesforce.{Contact, RecordsWrapperCaseClass}
-import com.gu.salesforce.sttp.SalesforceClient
-import io.circe.generic.auto._
 import cats.implicits._
 import com.gu.salesforce.SalesforceQueryConstants.{contactToWhereClausePart, escapeString}
+import com.gu.salesforce.sttp.{SFApiCompositeResponse, SalesforceClient}
+import com.gu.salesforce.{Contact, RecordsWrapperCaseClass}
+import io.circe.generic.auto._
 
 import scala.annotation.tailrec
 
@@ -43,12 +43,23 @@ case class DeliveryRecordServiceGenericError(message: String) extends DeliveryRe
 case class DeliveryRecordServiceSubscriptionNotFound(message: String) extends DeliveryRecordServiceError
 
 trait DeliveryRecordsService[F[_]] {
+
   def getDeliveryRecordsForSubscription(
     subscriptionId: String,
     contact: Contact,
     optionalStartDate: Option[LocalDate],
     optionalEndDate: Option[LocalDate]
   ): EitherT[F, DeliveryRecordServiceError, DeliveryRecordsApiResponse]
+
+  def createDeliveryProblemForSubscription(
+    subscriptionNumber: String,
+    contact: Contact,
+    productName: String,
+    description: Option[String],
+    problemType: String,
+    recordIds: List[String]
+  ): EitherT[F, DeliveryRecordServiceError, SFApiCompositeResponse]
+
 }
 
 object DeliveryRecordsService {
@@ -117,6 +128,27 @@ object DeliveryRecordsService {
           )
         ).toMap
       } yield DeliveryRecordsApiResponse(results, deliveryProblemMap)
+
+    override def createDeliveryProblemForSubscription(
+      subscriptionNumber: String,
+      contact: Contact,
+      productName: String,
+      description: Option[String],
+      problemType: String,
+      recordIds: List[String]
+    ): EitherT[F, DeliveryRecordServiceError, SFApiCompositeResponse] = {
+      salesforceClient.composite[SFApiCompositePartBody](
+        SFApiCompositeCreateDeliveryProblem(
+          subscriptionNumber,
+          contact,
+          productName,
+          description,
+          problemType,
+          recordIds
+        )
+      )
+        .leftMap(error => DeliveryRecordServiceGenericError(error.toString))
+    }
 
     private def queryForDeliveryRecords(
       salesforceClient: SalesforceClient[F],

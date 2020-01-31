@@ -245,8 +245,7 @@ object SalesforceHolidayStopRequest extends Logging {
 
   val safeSalesforceCompositeRequest = HttpOpWrapper[CompositeRequest, PostRequest, CompositeResponse, CompositeResponse](
     (requestBody: CompositeRequest) => PostRequest(requestBody, RelativePath(compositeBaseUrl)),
-    // this is necessary because for some bizarre reason composite requests return a 200 even if the sub-requests fail
-    // see https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/requests_composite.htm
+
     (response: CompositeResponse) => {
       val failures = response.compositeResponse
         .filter(resp => !successStatusCodes.contains(resp.httpStatusCode))
