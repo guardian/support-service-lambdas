@@ -7,14 +7,14 @@ import cats.data.EitherT
 import cats.effect.Sync
 import cats.implicits._
 import com.gu.salesforce.SalesforceConstants.{sfObjectsBaseUrl, soqlQueryBaseUrl}
-import com.gu.salesforce.{RecordsWrapperCaseClass, SFAuthConfig, SalesforceAuth, SalesforceConstants}
-import com.softwaremill.sttp.{SttpBackend, _}
+import com.gu.salesforce.{RecordsWrapperCaseClass, SFAuthConfig, SalesforceAuth}
 import com.softwaremill.sttp.circe._
+import com.softwaremill.sttp.{SttpBackend, _}
 import com.typesafe.scalalogging.LazyLogging
 import io.circe
-import io.circe.{Decoder, Encoder}
 import io.circe.generic.auto._
 import io.circe.parser.decode
+import io.circe.{Decoder, Encoder}
 
 trait SalesforceClient[F[_]] {
   def query[A: Decoder](query: String): EitherT[F, SalesforceClientError, RecordsWrapperCaseClass[A]]
@@ -108,8 +108,8 @@ object SalesforceClient extends LazyLogging {
       request: Request[Either[DeserializationError[circe.Error], A], S],
       response: Response[Either[DeserializationError[circe.Error], A]]
     ): Either[SalesforceClientError, A] = {
-      val body: Either[String, Either[DeserializationError[circe.Error], A]] = response.body
-      body
+      response
+        .body
         .leftMap(
           errorBody =>
             SalesforceClientError(

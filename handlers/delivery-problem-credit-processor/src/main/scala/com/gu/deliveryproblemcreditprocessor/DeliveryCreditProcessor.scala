@@ -6,31 +6,26 @@ import cats.data.EitherT
 import cats.effect.IO
 import cats.implicits._
 import com.gu.creditprocessor.{ProcessResult, Processor}
-import com.gu.effects.{GetFromS3, RawEffects}
+import com.gu.effects.GetFromS3
 import com.gu.fulfilmentdates.{FulfilmentDates, FulfilmentDatesFetcher}
-import com.gu.salesforce.SalesforceConstants.{sfObjectsBaseUrl, soqlQueryBaseUrl}
-import com.gu.salesforce.sttp.{SalesforceClientError, SalesforceClient => SttpSalesforceClient}
-import com.gu.salesforce.{RecordsWrapperCaseClass, SFAuthConfig, SalesforceClient}
+import com.gu.salesforce.sttp.SalesforceClient
+import com.gu.salesforce.{RecordsWrapperCaseClass, SFAuthConfig}
 import com.gu.util.Logging
 import com.gu.util.config.ConfigReads.ConfigFailure
 import com.gu.util.config.{ConfigLocation, LoadConfigModule, Stage}
-import com.gu.util.resthttp.RestOp._
-import com.gu.util.resthttp.RestRequestMaker.{PatchRequest, RelativePath, UrlParams}
-import com.gu.util.resthttp.Types.ClientFailableOp
-import com.gu.util.resthttp.{HttpOp, JsonHttp, RestRequestMaker}
 import com.gu.zuora.ZuoraProductTypes.{GuardianWeekly, NewspaperHomeDelivery, ZuoraProductType}
 import com.gu.zuora.subscription._
 import com.gu.zuora.{AccessToken, Zuora, ZuoraConfig}
 import com.softwaremill.sttp.HttpURLConnectionBackend
 import com.softwaremill.sttp.asynchttpclient.cats.AsyncHttpClientCatsBackend
 import io.circe.generic.auto._
-import play.api.libs.json.{JsValue, Json, Writes}
-import scalaz.{-\/, \/-}
+import play.api.libs.json.{Json, Writes}
 import zio.{Task, ZIO}
 
 object DeliveryCreditProcessor extends Logging {
 
-  private val sttpBackend = HttpURLConnectionBackend()
+  private val zuoraSttpBackend = HttpURLConnectionBackend()
+  private val sfSttpBackend = AsyncHttpClientCatsBackend[cats.effect.IO]()
 
   private lazy val stage = Stage()
 
@@ -55,7 +50,7 @@ object DeliveryCreditProcessor extends Logging {
     }
 
   private def zuoraAccessToken(config: ZuoraConfig): Task[AccessToken] =
-    Task.effect(Zuora.accessTokenGetResponse(config, sttpBackend)).absolve.mapError {
+    Task.effect(Zuora.accessTokenGetResponse(config, zuoraSttpBackend)).absolve.mapError {
       case e: ZuoraApiFailure => new RuntimeException(e.reason)
       case e: Throwable => e
     }
@@ -98,7 +93,7 @@ object DeliveryCreditProcessor extends Logging {
           .processLiveProduct[DeliveryCreditRequest, DeliveryCreditResult](
             zuoraConfig,
             zuoraAccessToken,
-            sttpBackend,
+            zuoraSttpBackend,
             DeliveryCreditProduct.forStage(Stage()),
             getCreditRequestsFromSalesforce(sfAuthConfig),
             fulfilmentDatesFetcher,
@@ -150,10 +145,8 @@ object DeliveryCreditProcessor extends Logging {
     unused: List[LocalDate]
   ): SalesforceApiResponse[List[DeliveryCreditRequest]] = {
 
-    val sttpBackend = AsyncHttpClientCatsBackend[cats.effect.IO]()
-
     def queryForDeliveryRecords(
-      salesforceClient: SttpSalesforceClient[IO],
+      salesforceClient: SalesforceClient[IO],
       productType: ZuoraProductType
     ): EitherT[IO, SalesforceApiFailure, RecordsWrapperCaseClass[DeliveryCreditRequest]] =
       salesforceClient.query[DeliveryCreditRequest](deliveryRecordsQuery(productType))
@@ -170,7 +163,7 @@ object DeliveryCreditProcessor extends Logging {
          |""".stripMargin
 
     val results = for {
-      salesforceClient <- SttpSalesforceClient(sttpBackend, sfAuthConfig).leftMap { e =>
+      salesforceClient <- SalesforceClient(sfSttpBackend, sfAuthConfig).leftMap { e =>
         SalesforceApiFailure(e.message)
       }
       queryResult <- queryForDeliveryRecords(salesforceClient, productType)
@@ -194,30 +187,37 @@ object DeliveryCreditProcessor extends Logging {
   implicit val deliveryCreditActionedWrites: Writes[DeliveryCreditActioned] =
     Json.writes[DeliveryCreditActioned]
 
-  // TODO use http4s solution
   def writeCreditResultsToSalesforce(sfAuthConfig: SFAuthConfig)(
     results: List[DeliveryCreditResult]
   ): SalesforceApiResponse[Unit] = {
 
-    val deliverySfObjectRef = "Delivery__c"
+    val deliveryObject = "Delivery__c"
 
-    SalesforceClient(RawEffects.response, sfAuthConfig).value.map { sfAuth =>
-      results map { result =>
+    val responses = SalesforceClient(sfSttpBackend, sfAuthConfig).leftMap { e =>
+      SalesforceApiFailure(e.message)
+    }.flatMap { salesforceClient =>
+      results.map { result =>
         val actioned = DeliveryCreditActioned(
           result.chargeCode,
           result.amountCredited,
           LocalDateTime.now
         )
-        sfAuth.wrapWith(JsonHttp.patch).setupRequest[DeliveryCreditActioned] { actionedInfo =>
-          PatchRequest(
-            actionedInfo,
-            RelativePath(s"$sfObjectsBaseUrl$deliverySfObjectRef/${result.deliveryId.value}")
-          )
-        }.runRequest(actioned)
-      }
-    }.toDisjunction match {
-      case -\/(failure) => Left(SalesforceApiFailure(failure.toString))
-      case _ => Right(())
+        salesforceClient.patch(
+          deliveryObject,
+          objectId = result.deliveryId.value,
+          body = actioned
+        ).leftMap { e =>
+          SalesforceApiFailure(e.message)
+        }
+      }.sequence.map { _ => () }
     }
+
+    /*
+     * TODO: doing this at this level to avoid having to rewrite holiday-stop credit query as well.
+     * But would be better to have common code in the credit-processor to run queries and just supply
+     * the query and the return type.  Then effect could be run at a much higher level.
+     * (Or converted to a Zio effect and run at a much higher level.)
+     */
+    responses.value.unsafeRunSync()
   }
 }
