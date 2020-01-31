@@ -77,7 +77,7 @@ class SubscriptionDataDeliveryEveryDayPlusIntegrationTest extends FlatSpec {
       subscriptionFile = "DeliveryEveryDatePlusSubscription.json",
       startDate = startDate,
       expectedIssueData = expectedIssueData,
-      expectedTotalAnnualIssueLimitPerSubscription = 28,
+      expectedTotalAnnualIssueLimitPerSubscription = 42,
       expectedProductType = ZuoraProductTypes.NewspaperHomeDelivery,
       expectedEditionDaysOfWeek = List(MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY)
     )
