@@ -4,9 +4,9 @@ import java.time.LocalDate
 
 import cats.implicits._
 import com.gu.fulfilmentdates.FulfilmentDatesFetcher
-import com.gu.zuora.{AccessToken, Zuora, ZuoraConfig}
 import com.gu.zuora.ZuoraProductTypes.ZuoraProductType
 import com.gu.zuora.subscription._
+import com.gu.zuora.{AccessToken, Zuora, ZuoraConfig}
 import com.softwaremill.sttp.{Id, SttpBackend}
 import org.slf4j.LoggerFactory
 
@@ -22,9 +22,10 @@ object Processor {
     fulfilmentDatesFetcher: FulfilmentDatesFetcher,
     processOverrideDate: Option[LocalDate],
     productType: ZuoraProductType,
-    updateToApply: (CreditProduct, Subscription, AffectedPublicationDate) => ZuoraApiResponse[SubscriptionUpdate],
+    updateToApply: (CreditProduct, Subscription, ZuoraAccount, AffectedPublicationDate) => ZuoraApiResponse[SubscriptionUpdate],
     resultOfZuoraCreditAdd: (RequestType, RatePlanCharge) => ResultType,
-    writeCreditResultsToSalesforce: List[ResultType] => SalesforceApiResponse[Unit]
+    writeCreditResultsToSalesforce: List[ResultType] => SalesforceApiResponse[Unit],
+    getAccount: String => ZuoraApiResponse[ZuoraAccount]
   ): ProcessResult[ResultType] = {
 
     def getSubscription(
@@ -45,7 +46,8 @@ object Processor {
       processOverrideDate: Option[LocalDate],
       productType: ZuoraProductType,
       getSubscription: SubscriptionName => ZuoraApiResponse[Subscription],
-      updateToApply: (CreditProduct, Subscription, AffectedPublicationDate) => ZuoraApiResponse[SubscriptionUpdate],
+      getAccount: String => ZuoraApiResponse[ZuoraAccount],
+      updateToApply: (CreditProduct, Subscription, ZuoraAccount, AffectedPublicationDate) => ZuoraApiResponse[SubscriptionUpdate],
       updateSubscription: (Subscription, SubscriptionUpdate) => ZuoraApiResponse[Unit],
       resultOfZuoraCreditAdd: (RequestType, RatePlanCharge) => ResultType,
       writeCreditResultsToSalesforce: List[ResultType] => SalesforceApiResponse[Unit]

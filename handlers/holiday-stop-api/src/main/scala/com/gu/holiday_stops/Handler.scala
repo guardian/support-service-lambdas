@@ -383,7 +383,7 @@ object Handler extends Logging {
   )(
     accessToken: AccessToken,
     subscriptionName: SubscriptionName
-  ): Either[ApiFailure, Subscription] = Zuora.subscriptionGetResponse(config, accessToken, backend)(subscriptionName)
+  ): Either[ApiFailure, Subscription] = Zuora.subscriptionGetResponse(config.zuoraConfig, accessToken, backend)(subscriptionName)
 
   def getAccountFromZuora(
     config: Config,
@@ -391,7 +391,7 @@ object Handler extends Logging {
   )(
     accessToken: AccessToken,
     accountKey: String
-  ): Either[ApiFailure, ZuoraAccount] = Zuora.accountGetResponse(config, accessToken, backend)(accountKey)
+  ): Either[ApiFailure, ZuoraAccount] = Zuora.accountGetResponse(config.zuoraConfig, accessToken, backend)(accountKey)
 
   def getAccessTokenFromZuora(
     config: Config,

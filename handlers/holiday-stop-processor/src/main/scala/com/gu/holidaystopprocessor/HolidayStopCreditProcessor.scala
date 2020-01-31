@@ -44,11 +44,10 @@ object HolidayStopCreditProcessor {
             fulfilmentDatesFetcher,
             processDateOverride,
             productType,
-            Zuora.subscriptionGetResponse(config, zuoraAccessToken, backend),
-            Zuora.accountGetResponse(config, zuoraAccessToken, backend),
             SubscriptionUpdate.apply,
             ZuoraHolidayCreditAddResult.apply,
-            Salesforce.holidayStopUpdateResponse(config.sfConfig)
+            Salesforce.holidayStopUpdateResponse(config.sfConfig),
+            Zuora.accountGetResponse(config.zuoraConfig, zuoraAccessToken, backend)
           )
         }
     }

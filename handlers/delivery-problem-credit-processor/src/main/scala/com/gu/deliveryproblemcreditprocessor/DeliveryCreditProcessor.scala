@@ -101,7 +101,8 @@ object DeliveryCreditProcessor extends Logging {
             productType,
             updateToApply,
             resultOfZuoraCreditAdd,
-            writeCreditResultsToSalesforce(sfAuthConfig)
+            writeCreditResultsToSalesforce(sfAuthConfig),
+            Zuora.accountGetResponse(zuoraConfig, zuoraAccessToken, zuoraSttpBackend)
           )
       )
     } yield processResult
@@ -127,9 +128,10 @@ object DeliveryCreditProcessor extends Logging {
   def updateToApply(
     creditProduct: CreditProduct,
     subscription: Subscription,
+    account: ZuoraAccount,
     deliveryDate: AffectedPublicationDate
   ): ZuoraApiResponse[SubscriptionUpdate] =
-    SubscriptionUpdate.apply(creditProduct, subscription, deliveryDate)
+    SubscriptionUpdate.apply(creditProduct, subscription, account, deliveryDate)
 
   def resultOfZuoraCreditAdd(
     request: DeliveryCreditRequest,
