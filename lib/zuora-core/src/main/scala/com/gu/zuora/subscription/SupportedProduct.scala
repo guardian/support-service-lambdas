@@ -85,7 +85,7 @@ object SupportedProduct {
     SupportedProduct(
       name = "Newspaper Delivery",
       productType = NewspaperHomeDelivery,
-      annualIssueLimitPerEdition = 4,
+      annualIssueLimitPerEdition = 6,
       ratePlans = List(
         SupportedRatePlan("Echo-Legacy", everyDayCharges),
         SupportedRatePlan("Everyday", everyDayCharges),
