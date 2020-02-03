@@ -47,7 +47,7 @@ class SubscriptionDataEchoLegacyIntegrationTest extends FlatSpec {
       subscriptionFile = "EchoLegacySubscription.json",
       startDate = startDate,
       expectedIssueData = expectedIssueData,
-      expectedTotalAnnualIssueLimitPerSubscription = 8,
+      expectedTotalAnnualIssueLimitPerSubscription = 12,
       expectedProductType = ZuoraProductTypes.NewspaperHomeDelivery,
       expectedEditionDaysOfWeek = List(FRIDAY, SATURDAY),
       billCycleDay = 21
