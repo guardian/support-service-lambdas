@@ -19,7 +19,6 @@ import com.gu.zuora.{AccessToken, Zuora, ZuoraConfig}
 import com.softwaremill.sttp.HttpURLConnectionBackend
 import com.softwaremill.sttp.asynchttpclient.cats.AsyncHttpClientCatsBackend
 import io.circe.generic.auto._
-import play.api.libs.json.{Json, Writes}
 import zio.{Task, ZIO}
 
 object DeliveryCreditProcessor extends Logging {
@@ -150,9 +149,15 @@ object DeliveryCreditProcessor extends Logging {
     def queryForDeliveryRecords(
       salesforceClient: SalesforceClient[IO],
       productType: ZuoraProductType
-    ): EitherT[IO, SalesforceApiFailure, RecordsWrapperCaseClass[DeliveryCreditRequest]] =
-      salesforceClient.query[DeliveryCreditRequest](deliveryRecordsQuery(productType))
-        .leftMap(error => SalesforceApiFailure(error.toString))
+    ): EitherT[IO, SalesforceApiFailure, RecordsWrapperCaseClass[DeliveryCreditRequest]] = {
+      val qry = deliveryRecordsQuery(productType)
+      logger.info(s"Running SF query:\n$qry")
+      salesforceClient
+        .query[DeliveryCreditRequest](qry)
+        .leftMap { error =>
+          SalesforceApiFailure(s"Exception querying SF for delivery records: ${error.toString}")
+        }
+    }
 
     def deliveryRecordsQuery(productType: ZuoraProductType) =
       s"""
@@ -181,13 +186,10 @@ object DeliveryCreditProcessor extends Logging {
   }
 
   case class DeliveryCreditActioned(
-    Charge_Code__c: RatePlanChargeCode,
-    Credit_Amount__c: Price,
+    Charge_Code__c: String,
+    Credit_Amount__c: Double,
     Actioned_On__c: LocalDateTime
   )
-
-  implicit val deliveryCreditActionedWrites: Writes[DeliveryCreditActioned] =
-    Json.writes[DeliveryCreditActioned]
 
   def writeCreditResultsToSalesforce(sfAuthConfig: SFAuthConfig)(
     results: List[DeliveryCreditResult]
@@ -200,13 +202,13 @@ object DeliveryCreditProcessor extends Logging {
     }.flatMap { salesforceClient =>
       results.map { result =>
         val actioned = DeliveryCreditActioned(
-          result.chargeCode,
-          result.amountCredited,
+          result.chargeCode.value,
+          result.amountCredited.value,
           LocalDateTime.now
         )
         salesforceClient.patch(
           deliveryObject,
-          objectId = result.deliveryId.value,
+          objectId = result.deliveryId,
           body = actioned
         ).leftMap { e =>
           SalesforceApiFailure(e.message)

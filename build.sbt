@@ -76,7 +76,7 @@ lazy val zuora = all(project in file("lib/zuora"))
 lazy val `salesforce-core` = all(project in file("lib/salesforce/core"))
   .dependsOn(`config-core`)
   .settings(
-    libraryDependencies ++= Seq(playJson) ++ logging
+    libraryDependencies ++= Seq() ++ logging
   )
 
 lazy val `salesforce-client` = all(project in file("lib/salesforce/client"))
@@ -345,7 +345,8 @@ lazy val `delivery-problem-credit-processor` =
         scalaLambda,
         circe,
         zio,
-        sttpAsycHttpClientBackendCats
+        sttpAsycHttpClientBackendCats,
+        scalatest
       )
     )
     .enablePlugins(RiffRaffArtifact)

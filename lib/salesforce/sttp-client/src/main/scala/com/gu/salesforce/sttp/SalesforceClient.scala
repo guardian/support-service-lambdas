@@ -14,7 +14,9 @@ import com.typesafe.scalalogging.LazyLogging
 import io.circe
 import io.circe.generic.auto._
 import io.circe.parser.decode
+import io.circe.parser._
 import io.circe.{Decoder, Encoder}
+import io.circe.generic.auto._
 
 trait SalesforceClient[F[_]] {
   def query[A: Decoder](query: String): EitherT[F, SalesforceClientError, RecordsWrapperCaseClass[A]]
@@ -148,7 +150,7 @@ object SalesforceClient extends LazyLogging {
           } yield allResults
         }
 
-        override def patch[A: Encoder](objectName: String, objectId: String, body: A): EitherT[F, SalesforceClientError, Unit] = {
+        override def patch[B: Encoder](objectName: String, objectId: String, body: B): EitherT[F, SalesforceClientError, Unit] = {
           val uri = Uri(new URI(s"${ auth.instance_url }$sfObjectsBaseUrl$objectName/$objectId"))
           for {
             _ <- logQuery(s"$objectName $objectId PATCH with '$body'")
