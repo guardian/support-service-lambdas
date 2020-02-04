@@ -8,7 +8,7 @@ deployments:
     app: delivery-problem-credit-processor
     parameters:
       templatePath: cfn.yaml
-  holiday-stop-processor:
+  delivery-problem-credit-processor:
     type: aws-lambda
     parameters:
       fileName: delivery-problem-credit-processor.jar
