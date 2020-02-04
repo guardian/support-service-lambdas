@@ -40,6 +40,9 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
     Description = Some("blah blah"),
     Case_Closure_Reason__c = Some("Paper Damaged")
   )
+  val creditAmount = 1.23
+  val invoiceDate = LocalDate.of(2019, 12, 10)
+  val isActioned = true
 
   val sfDeliveryRecordA = SFApiDeliveryRecord(
     Id = deliveryRecordId,
@@ -53,7 +56,10 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
     Address_Postcode__c = Some(addressPostcode),
     Delivery_Instructions__c = Some(deliveryInstruction1),
     Has_Holiday_Stop__c = Some(doesntHaveHolidayStop),
-    Case__r = Some(sfProblemCase)
+    Case__r = Some(sfProblemCase),
+    Credit_Amount__c = Some(creditAmount),
+    Invoice_Date__c = Some(invoiceDate),
+    Is_Actioned__c = isActioned
   )
 
   val sfDeliveryRecordWithHolidayStop: SFApiDeliveryRecord = sfDeliveryRecordA.copy(
@@ -99,7 +105,12 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
     hasHolidayStop = Some(doesntHaveHolidayStop),
     problemCaseId = Some(sfProblemCase.Id),
     isChangedAddress = Some(false),
-    isChangedDeliveryInstruction = Some(false)
+    isChangedDeliveryInstruction = Some(false),
+    credit = Some(DeliveryProblemCredit(
+      isActioned = isActioned,
+      amount = creditAmount,
+      invoiceDate = Some(invoiceDate)
+    ))
   )
 
   val expectedDeliveryRecordWithHolidayStop: DeliveryRecord = expectedDeliveryRecordA.copy(

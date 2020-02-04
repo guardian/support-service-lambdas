@@ -1,5 +1,7 @@
 package com.gu.delivery_records_api
 
+import java.time.{LocalDate, LocalDateTime}
+
 import com.gu.salesforce.SalesforceConstants.sfObjectsBaseUrl
 import com.gu.salesforce.sttp.{SFApiCompositePart, SFApiCompositeRequest}
 import com.gu.salesforce.{Contact, IdentityId, SalesforceContactId}
@@ -39,7 +41,10 @@ case class SFApiCreateDeliveryProblemCase(
 ) extends SFApiCompositePartBody
 
 case class SFApiLinkDeliveryRecord(
-  Case__c: String
+  Case__c: String,
+  Credit_Amount__c: Option[Double],
+  Invoice_Date__c: Option[LocalDate],
+  Credit_Requested_On__c: Option[LocalDateTime]
 ) extends SFApiCompositePartBody
 
 object SFApiCompositePartBody {
@@ -54,10 +59,8 @@ object SFApiCompositeCreateDeliveryProblem {
   def apply(
     subscriptionNumber: String,
     contact: Contact,
-    productName: String,
-    description: Option[String],
-    problemType: String,
-    recordIds: List[String]
+    detail: CreateDeliveryProblem,
+    now: LocalDateTime = LocalDateTime.now()
   ) = SFApiCompositeRequest[SFApiCompositePartBody](
     allOrNone = true,
     // this is needed so ID of case creation can be injected into the parts that link delivery records
@@ -67,11 +70,11 @@ object SFApiCompositeCreateDeliveryProblem {
       method = "POST",
       url = s"${sfObjectsBaseUrl}Case",
       body = SFApiCreateDeliveryProblemCase(
-        Subject = s"[Self Service] Delivery Problem : $problemType ($productName - $subscriptionNumber)",
-        Description = description,
-        Case_Closure_Reason__c = problemType,
-        Product__c = productName,
-        Journey__c = s"CS - $productName Support",
+        Subject = s"[Self Service] Delivery Problem : ${detail.problemType} (${detail.productName} - $subscriptionNumber)",
+        Description = detail.description,
+        Case_Closure_Reason__c = detail.problemType,
+        Product__c = detail.productName,
+        Journey__c = s"CS - ${detail.productName} Support",
         Contact = contact match {
           case IdentityId(identityId) => Some(Contact_ByIdentityId(identityId))
           case _ => None
@@ -84,13 +87,16 @@ object SFApiCompositeCreateDeliveryProblem {
           Name = subscriptionNumber
         )
       )
-    )) ++ recordIds.map(recordId => SFApiCompositePart[SFApiCompositePartBody](
-      referenceId = s"LinkDeliveryRecord-$recordId",
+    )) ++ detail.deliveryRecords.map(deliveryRecord => SFApiCompositePart[SFApiCompositePartBody](
+      referenceId = s"LinkDeliveryRecord-${deliveryRecord.id}",
       method = "PATCH",
-      url = s"${sfObjectsBaseUrl}Delivery__c/$recordId",
-      // this case id is injected by SF based on the the composite request first creating a SFApiDeliveryProblemCase
+      url = s"${sfObjectsBaseUrl}Delivery__c/${deliveryRecord.id}",
       body = SFApiLinkDeliveryRecord(
-        "@{CaseCreation.id}"
+        // this case id is injected by SF based on the the composite request first creating a SFApiDeliveryProblemCase
+        Case__c = "@{CaseCreation.id}",
+        Credit_Amount__c = deliveryRecord.creditAmount,
+        Invoice_Date__c = deliveryRecord.invoiceDate,
+        Credit_Requested_On__c = deliveryRecord.creditAmount.map(_ => now)
       )
     ))
   )

@@ -12,6 +12,12 @@ import io.circe.generic.auto._
 
 import scala.annotation.tailrec
 
+final case class DeliveryProblemCredit(
+  amount: Double,
+  invoiceDate: Option[LocalDate],
+  isActioned: Boolean
+)
+
 final case class DeliveryRecord(
   id: String,
   deliveryDate: Option[LocalDate],
@@ -26,7 +32,8 @@ final case class DeliveryRecord(
   hasHolidayStop: Option[Boolean],
   problemCaseId: Option[String],
   isChangedAddress: Option[Boolean],
-  isChangedDeliveryInstruction: Option[Boolean]
+  isChangedDeliveryInstruction: Option[Boolean],
+  credit: Option[DeliveryProblemCredit]
 )
 
 final case class DeliveryProblemCase(
@@ -34,6 +41,19 @@ final case class DeliveryProblemCase(
   subject: Option[String],
   description: Option[String],
   problemType: Option[String]
+)
+
+case class DeliveryRecordToLink(
+  id: String,
+  creditAmount: Option[Double],
+  invoiceDate: Option[LocalDate]
+)
+
+case class CreateDeliveryProblem(
+  productName: String,
+  description: Option[String],
+  problemType: String,
+  deliveryRecords: List[DeliveryRecordToLink]
 )
 
 sealed trait DeliveryRecordServiceError
@@ -54,10 +74,7 @@ trait DeliveryRecordsService[F[_]] {
   def createDeliveryProblemForSubscription(
     subscriptionNumber: String,
     contact: Contact,
-    productName: String,
-    description: Option[String],
-    problemType: String,
-    recordIds: List[String]
+    detail: CreateDeliveryProblem
   ): EitherT[F, DeliveryRecordServiceError, SFApiCompositeResponse]
 
 }
@@ -97,7 +114,12 @@ object DeliveryRecordsService {
       hasHolidayStop = sfRecord.Has_Holiday_Stop__c,
       problemCaseId = sfRecord.Case__r.map(_.Id),
       isChangedAddress = sfRecord.Delivery_Address__c.map(detectChangeSkippingNoneAtHead(accumulator, _.deliveryAddress)),
-      isChangedDeliveryInstruction = sfRecord.Delivery_Instructions__c.map(detectChangeSkippingNoneAtHead(accumulator, _.deliveryInstruction))
+      isChangedDeliveryInstruction = sfRecord.Delivery_Instructions__c.map(detectChangeSkippingNoneAtHead(accumulator, _.deliveryInstruction)),
+      credit = sfRecord.Credit_Amount__c.map(creditAmount => DeliveryProblemCredit(
+        amount = creditAmount,
+        invoiceDate = sfRecord.Invoice_Date__c,
+        isActioned = sfRecord.Is_Actioned__c
+      ))
     ) :: accumulator
 
   def apply[F[_]: Monad](salesforceClient: SalesforceClient[F]): DeliveryRecordsService[F] = new DeliveryRecordsService[F] {
@@ -132,19 +154,13 @@ object DeliveryRecordsService {
     override def createDeliveryProblemForSubscription(
       subscriptionNumber: String,
       contact: Contact,
-      productName: String,
-      description: Option[String],
-      problemType: String,
-      recordIds: List[String]
+      detail: CreateDeliveryProblem
     ): EitherT[F, DeliveryRecordServiceError, SFApiCompositeResponse] = {
       salesforceClient.composite[SFApiCompositePartBody](
         SFApiCompositeCreateDeliveryProblem(
           subscriptionNumber,
           contact,
-          productName,
-          description,
-          problemType,
-          recordIds
+          detail
         )
       )
         .leftMap(error => DeliveryRecordServiceGenericError(error.toString))
@@ -192,7 +208,8 @@ object DeliveryRecordsService {
     s"""SELECT (
        |    SELECT Id, Delivery_Date__c, Delivery_Address__c, Delivery_Instructions__c, Has_Holiday_Stop__c,
        |           Address_Line_1__c,Address_Line_2__c, Address_Line_3__c, Address_Town__c, Address_Country__c, Address_Postcode__c,
-       |           Case__c, Case__r.Id, Case__r.Subject, Case__r.Description, Case__r.Case_Closure_Reason__c
+       |           Case__c, Case__r.Id, Case__r.Subject, Case__r.Description, Case__r.Case_Closure_Reason__c,
+       |           Credit_Amount__c, Is_Actioned__c, Invoice_Date__c
        |    FROM Delivery_Records__r
        |    ${deliveryDateFilter(optionalStartDate, optionalEndDate)}
        |    ORDER BY Delivery_Date__c DESC

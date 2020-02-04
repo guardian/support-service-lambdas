@@ -47,22 +47,12 @@ object DeliveryRecordApiRoutes {
         }
     }
 
-    case class CreateDeliveryProblemBody(
-      productName: String,
-      description: Option[String],
-      problemType: String,
-      recordIds: List[String]
-    )
-
     def createDeliveryProblem(
       subscriptionNumber: String,
       contact: Contact,
-      productName: String,
-      description: Option[String],
-      problemType: String,
-      recordIds: List[String]
+      detail: CreateDeliveryProblem
     ): EitherT[F, F[Response[F]], SFApiCompositeResponse] =
-      deliveryRecordsService.createDeliveryProblemForSubscription(subscriptionNumber, contact, productName, description, problemType, recordIds)
+      deliveryRecordsService.createDeliveryProblemForSubscription(subscriptionNumber, contact, detail)
         .leftMap(InternalServerError(_))
 
     def parseDateFromQueryString(request: Request[F], queryParameterKey: String): EitherT[F, F[Response[F]], Option[LocalDate]] = {
@@ -111,16 +101,13 @@ object DeliveryRecordApiRoutes {
         toResponse(
           for {
             contact <- getContactFromHeaders(request)
-            body <- request.attemptAs[CreateDeliveryProblemBody]
+            body <- request.attemptAs[CreateDeliveryProblem]
               .leftMap(error =>
                 BadRequest(DeliveryRecordApiRoutesError(error.getMessage)))
             _ <- createDeliveryProblem(
               subscriptionNumber,
               contact,
-              body.productName,
-              body.description,
-              body.problemType,
-              body.recordIds
+              body
             )
             records <- getDeliveryRecords(
               subscriptionNumber,
