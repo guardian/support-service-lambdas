@@ -18,7 +18,7 @@ Conditions:
 Mappings:
   StageMap:
     PROD:
-      ScheduleName: delivery-problem-credit-processor-schedule
+      ScheduleName: delivery-problem-credit-processor-schedule-prod
     CODE:
       ScheduleName: delivery-problem-credit-processor-schedule-code
     DEV:
