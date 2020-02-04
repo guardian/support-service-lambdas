@@ -76,7 +76,7 @@ lazy val zuora = all(project in file("lib/zuora"))
 lazy val `salesforce-core` = all(project in file("lib/salesforce/core"))
   .dependsOn(`config-core`)
   .settings(
-    libraryDependencies ++= Seq() ++ logging
+    libraryDependencies ++= Seq(playJson) ++ logging
   )
 
 lazy val `salesforce-client` = all(project in file("lib/salesforce/client"))
