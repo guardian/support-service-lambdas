@@ -5,6 +5,12 @@ import java.time.{DayOfWeek, LocalDate}
 
 import scala.annotation.tailrec
 import scala.math.BigDecimal.RoundingMode
+import com.typesafe.scalalogging.LazyLogging
+import mouse.all._
+import MutableCalendar.today
+import cats.implicits._
+
+case class Discount(percentage: Option[Double], from: LocalDate, until: LocalDate)
 
 case class RatePlanChargeData(
   ratePlanCharge: RatePlanCharge,
@@ -38,23 +44,25 @@ case class RatePlanChargeData(
   }
 }
 
-object RatePlanChargeData {
+object RatePlanChargeData extends LazyLogging {
   def apply(
     subscription: Subscription,
     ratePlanCharge: RatePlanCharge,
     account: ZuoraAccount,
-    issueDayOfWeek: DayOfWeek
+    issueDayOfWeek: DayOfWeek,
   ): Either[ZuoraApiFailure, RatePlanChargeData] = {
     for {
       billingPeriodName <- ratePlanCharge
         .billingPeriod
         .toRight(ZuoraApiFailure("RatePlanCharge.billingPeriod is required"))
       schedule <- RatePlanChargeBillingSchedule(subscription, ratePlanCharge, account)
-      issueCreditAmount <- calculateIssueCreditAmount(ratePlanCharge)
+      discount = maybeDiscount(subscription)
+      issueCreditAmount <- calculateIssueCreditAmount(ratePlanCharge, discount)
     } yield RatePlanChargeData(ratePlanCharge, schedule, billingPeriodName, issueDayOfWeek, issueCreditAmount)
   }
 
-  private def calculateIssueCreditAmount(ratePlanCharge: RatePlanCharge) = {
+  // Calculate credit
+  private def calculateIssueCreditAmount(ratePlanCharge: RatePlanCharge, discountPercentageMaybe: Option[Double]) = {
     def roundUp(d: Double): Double = BigDecimal(d).setScale(2, RoundingMode.UP).toDouble
 
     for {
@@ -63,7 +71,7 @@ object RatePlanChargeData {
         .toRight(ZuoraApiFailure("RatePlanCharge.billingPeriod is required"))
       approximateBillingPeriodWeeks <- approximateBillingPeriodWeeksForName(billingPeriodName, ratePlanCharge.specificBillingPeriod)
       price = -roundUp(ratePlanCharge.price / approximateBillingPeriodWeeks)
-    } yield price
+    } yield discountPercentageMaybe.map(price * _).getOrElse(price)
   }
 
   private def approximateBillingPeriodWeeksForName(
@@ -84,5 +92,18 @@ object RatePlanChargeData {
           .map(numberOfMonths => numberOfMonths * 4)
       case _ => Left(ZuoraApiFailure(s"Failed to determine duration of billing period: $billingPeriodName"))
     }
+  }
+
+  def maybeDiscount(subscription: Subscription): Option[Double] = {
+    subscription
+      .ratePlans
+      .iterator
+      .filter(_.productName == "Discounts")
+      .flatMap(_.ratePlanCharges.map(rpc => Discount(rpc.discountPercentage, rpc.effectiveStartDate, rpc.effectiveEndDate)))
+      .filter(_.percentage.isDefined)
+      .filter(_.until.isAfter(today))
+      .flatMap(_.percentage).<|(discounts => if (discounts.size > 1) logger.warn(s"${subscription.subscriptionNumber} has multiple discounts"))
+      .toList
+      .maximumOption
   }
 }

@@ -92,7 +92,9 @@ class HandlerTest extends AnyFlatSpec with Matchers {
               upToPeriods = None,
               billingDay = None,
               triggerEvent = Some("SpecificDate"),
-              triggerDate = Some(startDate)
+              triggerDate = Some(startDate),
+              discountPercentage = None,
+              effectiveEndDate = LocalDate.now,
             )),
           productRatePlanId = "",
           id = "",

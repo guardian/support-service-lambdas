@@ -6,6 +6,7 @@ import com.gu.zuora.ZuoraProductTypes.ZuoraProductType
 import com.gu.zuora.subscription.ZuoraApiFailure
 import cats.implicits._
 
+
 case class IssueData(issueDate: LocalDate, billDates: BillDates, credit: Double) {
   /**
    * This returns the date for the next bill after the stoppedPublicationDate.
@@ -32,7 +33,7 @@ trait SubscriptionData {
   def subscriptionAnnualIssueLimit: Int
   def editionDaysOfWeek: List[DayOfWeek]
 }
-object SubscriptionData {
+object SubscriptionData  {
   def apply(subscription: Subscription, account: ZuoraAccount): Either[ZuoraApiFailure, SubscriptionData] = {
     val supportedRatePlanCharges: List[(RatePlanCharge, SupportedRatePlanCharge, SupportedProduct)] = for {
       ratePlan <- subscription.ratePlans if ratePlan.lastChangeType =!= Some("Remove")
@@ -50,7 +51,7 @@ object SubscriptionData {
               subscription,
               ratePlanCharge,
               account,
-              supportedRatePlanCharge.dayOfWeek
+              supportedRatePlanCharge.dayOfWeek,
             )
         }
       nonZeroRatePlanChargeDatas = ratePlanChargeDatas.filter { ratePlanChargeData =>

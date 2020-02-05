@@ -28,7 +28,9 @@ class SubscriptionTest extends FlatSpec with Matchers with OptionValues with Typ
       upToPeriods = None,
       billingDay = None,
       triggerEvent = None,
-      triggerDate = None
+      triggerDate = None,
+      discountPercentage = None,
+      effectiveEndDate = LocalDate.now,
     ))
   }
 
@@ -52,7 +54,9 @@ class SubscriptionTest extends FlatSpec with Matchers with OptionValues with Typ
       upToPeriods = None,
       billingDay = None,
       triggerEvent = None,
-      triggerDate = None
+      triggerDate = None,
+      discountPercentage = None,
+      effectiveEndDate = LocalDate.now,
     ))
   }
 
@@ -106,7 +110,9 @@ class SubscriptionTest extends FlatSpec with Matchers with OptionValues with Typ
       upToPeriods = None,
       billingDay = None,
       triggerEvent = None,
-      triggerDate = None
+      triggerDate = None,
+      discountPercentage = None,
+      effectiveEndDate = LocalDate.now,
     ))
   }
 }
