@@ -61,25 +61,21 @@ object DeliveryCreditProcessor extends Logging {
       zConfig <- zuoraConfig
       zAccessToken <- zuoraAccessToken(zConfig)
       processResults <- Task.foreach(productTypes)(processProduct(sfAuthConfig, zConfig, zAccessToken))
-      creditResults <- Task.foreach(processResults)(dealWithProcessResult)
+      creditResults <- Task.foreach(processResults)(gatherCreditResults)
     } yield creditResults.flatten
   }
 
-  def dealWithProcessResult(processResult: ProcessResult[DeliveryCreditResult]): Task[List[DeliveryCreditResult]] =
+  def gatherCreditResults(processResult: ProcessResult[DeliveryCreditResult]): Task[List[DeliveryCreditResult]] =
     for {
       _ <- Task.effect(ProcessResult.log(processResult))
-      _ <- dealWithOverallException(processResult.overallFailure)
-      results <- Task.foreach(processResult.creditResults)(result => dealWithCreditResult(result))
+      _ <- Task.effect(processResult.overallFailure).flatMap {
+        case None => Task.succeed(())
+        case Some(e) => Task.fail(new RuntimeException(e.reason))
+      }
+      results <- Task.foreach(processResult.creditResults) { result =>
+        ZIO.fromEither(result).mapError(e => new RuntimeException(e.reason))
+      }
     } yield results
-
-  def dealWithOverallException(overallFailure: Option[OverallFailure]): Task[Unit] =
-    Task.effect(overallFailure).flatMap {
-      case None => Task.succeed(())
-      case Some(e) => Task.fail(new RuntimeException(e.reason))
-    }
-
-  def dealWithCreditResult(result: Either[ZuoraApiFailure, DeliveryCreditResult]): Task[DeliveryCreditResult] =
-    ZIO.fromEither(result).mapError(e => new RuntimeException(e.reason))
 
   def processProduct(
     sfAuthConfig: SFAuthConfig,
