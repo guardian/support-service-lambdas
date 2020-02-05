@@ -1,6 +1,7 @@
 package com.gu.salesforce
 
 import com.gu.util.config.ConfigLocation
+import play.api.libs.json.{Json, Reads}
 
 case class SFAuthConfig(
   url: String,
@@ -12,6 +13,7 @@ case class SFAuthConfig(
 )
 
 object SFAuthConfig {
+  implicit val reads: Reads[SFAuthConfig] = Json.reads[SFAuthConfig]
   implicit val location = ConfigLocation[SFAuthConfig](path = "sfAuth", version = 1)
 }
 

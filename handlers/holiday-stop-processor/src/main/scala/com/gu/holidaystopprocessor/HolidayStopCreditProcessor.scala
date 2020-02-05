@@ -5,8 +5,9 @@ import java.time.LocalDate
 import com.gu.creditprocessor.{ProcessResult, Processor}
 import com.gu.effects.S3Location
 import com.gu.fulfilmentdates.FulfilmentDatesFetcher
-import com.gu.holiday_stops.{Config, Zuora}
+import com.gu.holiday_stops.Config
 import com.gu.util.config.Stage
+import com.gu.zuora.Zuora
 import com.gu.zuora.ZuoraProductTypes.{GuardianWeekly, NewspaperHomeDelivery, NewspaperVoucherBook}
 import com.gu.zuora.subscription.{OverallFailure, SubscriptionUpdate}
 import com.softwaremill.sttp.{Id, SttpBackend}
@@ -34,18 +35,19 @@ object HolidayStopCreditProcessor {
           GuardianWeekly,
         )
         .map { productType =>
-          Processor.processProduct(
+          Processor.processLiveProduct(
+            config.zuoraConfig,
+            zuoraAccessToken,
+            backend,
             HolidayCreditProduct.forStage(stage),
             Salesforce.holidayStopRequests(config.sfConfig),
             fulfilmentDatesFetcher,
             processDateOverride,
             productType,
-            Zuora.subscriptionGetResponse(config, zuoraAccessToken, backend),
-            Zuora.accountGetResponse(config, zuoraAccessToken, backend),
-            SubscriptionUpdate.forHolidayStop,
-            Zuora.subscriptionUpdateResponse(config, zuoraAccessToken, backend),
+            SubscriptionUpdate.apply,
             ZuoraHolidayCreditAddResult.apply,
-            Salesforce.holidayStopUpdateResponse(config.sfConfig)
+            Salesforce.holidayStopUpdateResponse(config.sfConfig),
+            Zuora.accountGetResponse(config.zuoraConfig, zuoraAccessToken, backend)
           )
         }
     }

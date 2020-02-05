@@ -14,7 +14,7 @@ case class OverallFailure(reason: String) extends ApiFailure
 object OverallFailure {
   def apply(
     zuoraFailures: List[ZuoraApiFailure],
-    salesforceResult: Either[SalesforceApiFailure, Unit]
+    salesforceResult: SalesforceApiResponse[_]
   ): Option[OverallFailure] = {
 
     val zuoraError = zuoraFailures.headOption.map(e => OverallFailure(e.reason))

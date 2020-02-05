@@ -12,7 +12,7 @@ import com.gu.salesforce.{IdentityId, SalesforceContactId}
 import com.gu.util.apigateway.ApiGatewayRequest
 import com.gu.util.config.Stage
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
-import com.gu.zuora.subscription.{HolidayStopCredit, MutableCalendar, RatePlan, RatePlanCharge, Subscription, SubscriptionName, Fixtures => SubscriptionFixtures}
+import com.gu.zuora.subscription.{Credit, MutableCalendar, RatePlan, RatePlanCharge, Subscription, SubscriptionName, Fixtures => SubscriptionFixtures}
 import com.softwaremill.sttp.testing.SttpBackendStub
 import org.scalatest.Inside.inside
 import org.scalatest.{FlatSpec, Matchers}
@@ -121,8 +121,8 @@ class HandlerTest extends FlatSpec with Matchers {
             response should equal(
               PotentialHolidayStopsResponse(
                 List(
-                  PotentialHolidayStop(LocalDate.of(2019, 1, 4), HolidayStopCredit(-2.89, LocalDate.parse("2019-04-01"))),
-                  PotentialHolidayStop(LocalDate.of(2019, 1, 11), HolidayStopCredit(-2.89, LocalDate.parse("2019-04-01"))),
+                  PotentialHolidayStop(LocalDate.of(2019, 1, 4), Credit(-2.89, LocalDate.parse("2019-04-01"))),
+                  PotentialHolidayStop(LocalDate.of(2019, 1, 11), Credit(-2.89, LocalDate.parse("2019-04-01"))),
                 )
               )
             )

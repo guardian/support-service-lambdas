@@ -25,7 +25,7 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers with EitherValues {
       effectiveStartDate = effectiveStartDate
     )
 
-    val update = SubscriptionUpdate.forHolidayStop(
+    val update = SubscriptionUpdate.apply(
       creditProduct,
       subscription = subscription,
       account = Fixtures.mkAccount(),
@@ -61,7 +61,7 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers with EitherValues {
       billingPeriod = "Quarter",
       effectiveStartDate = effectiveStartDate
     )
-    val update = SubscriptionUpdate.forHolidayStop(
+    val update = SubscriptionUpdate.apply(
       creditProduct,
       subscription = subscription,
       account = Fixtures.mkAccount(),
@@ -96,7 +96,7 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers with EitherValues {
       chargedThroughDate = None,
       effectiveStartDate = effectiveStartDate
     )
-    val update = SubscriptionUpdate.forHolidayStop(
+    val update = SubscriptionUpdate.apply(
       creditProduct,
       subscription = subscription,
       account = Fixtures.mkAccount(),

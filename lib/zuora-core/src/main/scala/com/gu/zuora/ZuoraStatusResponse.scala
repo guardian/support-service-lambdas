@@ -1,4 +1,4 @@
-package com.gu.holiday_stops
+package com.gu.zuora
 
 case class ZuoraStatusResponse(
   success: Boolean,

@@ -17,6 +17,8 @@ case class ZuoraHolidayCreditAddResult(
   pubDate: AffectedPublicationDate
 ) extends ZuoraCreditAddResult {
 
+  val amountCredited: Price = actualPrice
+
   override def logDiscrepancies(): Unit = {
 
     // FIXME: Temporary logging to confirm the problem of incorrect credits is fixed. Change to hard crash once we are happy it should be impossible scenario.

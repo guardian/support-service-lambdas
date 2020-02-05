@@ -6,12 +6,54 @@ import cats.implicits._
 import com.gu.fulfilmentdates.FulfilmentDatesFetcher
 import com.gu.zuora.ZuoraProductTypes.ZuoraProductType
 import com.gu.zuora.subscription._
+import com.gu.zuora.{AccessToken, Zuora, ZuoraConfig}
+import com.softwaremill.sttp.{Id, SttpBackend}
 import org.slf4j.LoggerFactory
 
 object Processor {
   private val logger = LoggerFactory.getLogger(getClass)
 
-  // TODO: could pass in a typeclass instead of a huge list of arguments here
+  def processLiveProduct[RequestType <: CreditRequest, ResultType <: ZuoraCreditAddResult](
+    config: ZuoraConfig,
+    zuoraAccessToken: AccessToken,
+    sttpBackend: SttpBackend[Id, Nothing],
+    creditProduct: CreditProduct,
+    getCreditRequestsFromSalesforce: (ZuoraProductType, List[LocalDate]) => SalesforceApiResponse[List[RequestType]],
+    fulfilmentDatesFetcher: FulfilmentDatesFetcher,
+    processOverrideDate: Option[LocalDate],
+    productType: ZuoraProductType,
+    updateToApply: (CreditProduct, Subscription, ZuoraAccount, AffectedPublicationDate) => ZuoraApiResponse[SubscriptionUpdate],
+    resultOfZuoraCreditAdd: (RequestType, RatePlanCharge) => ResultType,
+    writeCreditResultsToSalesforce: List[ResultType] => SalesforceApiResponse[_],
+    getAccount: String => ZuoraApiResponse[ZuoraAccount]
+  ): ProcessResult[ResultType] = {
+
+    def getSubscription(
+      subscriptionName: SubscriptionName
+    ): ZuoraApiResponse[Subscription] =
+      Zuora.subscriptionGetResponse(config, zuoraAccessToken, sttpBackend)(subscriptionName)
+
+    def updateSubscription(
+      subscription: Subscription,
+      update: SubscriptionUpdate
+    ): ZuoraApiResponse[Unit] =
+      Zuora.subscriptionUpdateResponse(config, zuoraAccessToken, sttpBackend)(subscription, update)
+
+    processProduct(
+      creditProduct: CreditProduct,
+      getCreditRequestsFromSalesforce: (ZuoraProductType, List[LocalDate]) => SalesforceApiResponse[List[RequestType]],
+      fulfilmentDatesFetcher: FulfilmentDatesFetcher,
+      processOverrideDate: Option[LocalDate],
+      productType: ZuoraProductType,
+      getSubscription: SubscriptionName => ZuoraApiResponse[Subscription],
+      getAccount: String => ZuoraApiResponse[ZuoraAccount],
+      updateToApply: (CreditProduct, Subscription, ZuoraAccount, AffectedPublicationDate) => ZuoraApiResponse[SubscriptionUpdate],
+      updateSubscription: (Subscription, SubscriptionUpdate) => ZuoraApiResponse[Unit],
+      resultOfZuoraCreditAdd: (RequestType, RatePlanCharge) => ResultType,
+      writeCreditResultsToSalesforce: List[ResultType] => SalesforceApiResponse[_]
+    )
+  }
+
   def processProduct[RequestType <: CreditRequest, ResultType <: ZuoraCreditAddResult](
     creditProduct: CreditProduct,
     getCreditRequestsFromSalesforce: (ZuoraProductType, List[LocalDate]) => SalesforceApiResponse[List[RequestType]],
@@ -23,11 +65,11 @@ object Processor {
     updateToApply: (CreditProduct, Subscription, ZuoraAccount, AffectedPublicationDate) => ZuoraApiResponse[SubscriptionUpdate],
     updateSubscription: (Subscription, SubscriptionUpdate) => ZuoraApiResponse[Unit],
     resultOfZuoraCreditAdd: (RequestType, RatePlanCharge) => ResultType,
-    writeCreditResultsToSalesforce: List[ResultType] => SalesforceApiResponse[Unit]
+    writeCreditResultsToSalesforce: List[ResultType] => SalesforceApiResponse[_]
   ): ProcessResult[ResultType] = {
     val creditRequestsFromSalesforce = for {
       datesToProcess <- getDatesToProcess(fulfilmentDatesFetcher, productType, processOverrideDate, LocalDate.now())
-      _ = logger.info(s"Processing holiday stops for $productType for issue dates ${datesToProcess.mkString(", ")}")
+      _ = logger.info(s"Processing ${creditProduct.productRatePlanChargeName}s for ${productType.name} for issue dates ${datesToProcess.mkString(", ")}")
       salesforceCreditRequests <- if (datesToProcess.isEmpty) Nil.asRight else getCreditRequestsFromSalesforce(productType, datesToProcess)
     } yield salesforceCreditRequests
 
@@ -78,7 +120,7 @@ object Processor {
       subscriptionUpdate <- updateToApply(creditProduct, subscription, account, request.publicationDate)
       _ <- if (subscription.hasCreditAmendment(request)) Right(()) else updateSubscription(subscription, subscriptionUpdate)
       updatedSubscription <- getSubscription(request.subscriptionName)
-      addedCharge <- updatedSubscription.ratePlanCharge(request).toRight(ZuoraApiFailure(s"Failed to write holiday stop to Zuora: $request"))
+      addedCharge <- updatedSubscription.ratePlanCharge(request).toRight(ZuoraApiFailure(s"Failed to write credit amendment to Zuora: $request"))
     } yield result(request, addedCharge)
 
   def getDatesToProcess(
