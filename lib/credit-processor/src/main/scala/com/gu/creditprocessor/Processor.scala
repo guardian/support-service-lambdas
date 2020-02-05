@@ -24,7 +24,7 @@ object Processor {
     productType: ZuoraProductType,
     updateToApply: (CreditProduct, Subscription, ZuoraAccount, AffectedPublicationDate) => ZuoraApiResponse[SubscriptionUpdate],
     resultOfZuoraCreditAdd: (RequestType, RatePlanCharge) => ResultType,
-    writeCreditResultsToSalesforce: List[ResultType] => SalesforceApiResponse[Unit],
+    writeCreditResultsToSalesforce: List[ResultType] => SalesforceApiResponse[_],
     getAccount: String => ZuoraApiResponse[ZuoraAccount]
   ): ProcessResult[ResultType] = {
 
@@ -50,7 +50,7 @@ object Processor {
       updateToApply: (CreditProduct, Subscription, ZuoraAccount, AffectedPublicationDate) => ZuoraApiResponse[SubscriptionUpdate],
       updateSubscription: (Subscription, SubscriptionUpdate) => ZuoraApiResponse[Unit],
       resultOfZuoraCreditAdd: (RequestType, RatePlanCharge) => ResultType,
-      writeCreditResultsToSalesforce: List[ResultType] => SalesforceApiResponse[Unit]
+      writeCreditResultsToSalesforce: List[ResultType] => SalesforceApiResponse[_]
     )
   }
 
@@ -65,7 +65,7 @@ object Processor {
     updateToApply: (CreditProduct, Subscription, ZuoraAccount, AffectedPublicationDate) => ZuoraApiResponse[SubscriptionUpdate],
     updateSubscription: (Subscription, SubscriptionUpdate) => ZuoraApiResponse[Unit],
     resultOfZuoraCreditAdd: (RequestType, RatePlanCharge) => ResultType,
-    writeCreditResultsToSalesforce: List[ResultType] => SalesforceApiResponse[Unit]
+    writeCreditResultsToSalesforce: List[ResultType] => SalesforceApiResponse[_]
   ): ProcessResult[ResultType] = {
     val creditRequestsFromSalesforce = for {
       datesToProcess <- getDatesToProcess(fulfilmentDatesFetcher, productType, processOverrideDate, LocalDate.now())

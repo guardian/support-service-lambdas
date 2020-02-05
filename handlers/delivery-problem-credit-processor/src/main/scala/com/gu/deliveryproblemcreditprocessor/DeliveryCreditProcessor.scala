@@ -189,7 +189,7 @@ object DeliveryCreditProcessor extends Logging {
 
   def writeCreditResultsToSalesforce(sfAuthConfig: SFAuthConfig)(
     results: List[DeliveryCreditResult]
-  ): SalesforceApiResponse[Unit] = {
+  ): SalesforceApiResponse[_] = {
 
     val deliveryObject = "Delivery__c"
 
@@ -209,7 +209,7 @@ object DeliveryCreditProcessor extends Logging {
         ).leftMap { e =>
           SalesforceApiFailure(e.message)
         }
-      }.sequence.map { _ => () }
+      }.sequence
     }
 
     /*
