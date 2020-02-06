@@ -120,7 +120,8 @@ class HandlerTest extends FlatSpec with Matchers {
           case JsSuccess(response, _) =>
             response should equal(
               PotentialHolidayStopsResponse(
-                List(
+                nextInvoiceDateAfterToday = LocalDate.parse("2019-04-01"),
+                potentials = List(
                   PotentialHolidayStop(LocalDate.of(2019, 1, 4), Credit(-2.89, LocalDate.parse("2019-04-01"))),
                   PotentialHolidayStop(LocalDate.of(2019, 1, 11), Credit(-2.89, LocalDate.parse("2019-04-01"))),
                 )
