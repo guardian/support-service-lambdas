@@ -46,7 +46,7 @@ object Dependencies {
   val catsEffect = "org.typelevel" %% "cats-effect" % catsEffectVersion
   val scalaLambda = "io.github.mkotsur" %% "aws-lambda-scala" % "0.2.0"
   val zio = "dev.zio" %% "zio" % "1.0.0-RC17"
-
+  val diffx = "com.softwaremill.diffx" %% "diffx-scalatest" % "0.3.17" % Test
 
   // to resolve merge clash of 'module-info.class'
   // see https://stackoverflow.com/questions/54834125/sbt-assembly-deduplicate-module-info-class

@@ -16,7 +16,7 @@ riffRaffArtifactResources += (file("handlers/batch-email-sender/cfn.yaml"), "cfn
 
 libraryDependencies ++= Seq(
   supportInternationalisation,
-  "com.softwaremill.diffx" %% "diffx-scalatest" % "0.3.9" % Test
+  diffx
 )
 
 assemblyMergeStrategyDiscardModuleInfo
