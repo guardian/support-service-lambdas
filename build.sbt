@@ -205,7 +205,8 @@ lazy val `zuora-core` = all(project in file("lib/zuora-core"))
       circeParser,
       sttp,
       sttpCirce,
-      scalatest
+      scalatest,
+      diffx
     )
   )
 
