@@ -41,6 +41,12 @@ object SalesforceStub {
           Response.ok(response.asJson.spaces2)
       }
     }
+    def stubDescribe[A: Encoder](auth: SalesforceAuth, objectName: String, response: A): SttpBackendStub[F, S] = {
+      sttpStub.whenRequestMatchesPartial {
+        case request: Request[_, _] if matchesDescribeRequest(auth, objectName, request) =>
+          Response.ok(response.asJson.spaces2)
+      }
+    }
   }
 
   private def matchesAuthRequest[S, F[_]](config: SFAuthConfig, request: Request[_, _]) = {
@@ -65,6 +71,12 @@ object SalesforceStub {
   private def matchesPatchRequest[S, F[_]](auth: SalesforceAuth, request: Request[_, _]) = {
     val urlMatches = urlNoQueryString(request).startsWith(auth.instance_url + SalesforceConstants.sfObjectsBaseUrl)
     val methodMatches = request.method == Method.PATCH
+    urlMatches && methodMatches
+  }
+
+  private def matchesDescribeRequest[S, F[_]](auth: SalesforceAuth, objectName: String, request: Request[_, _]) = {
+    val urlMatches = urlNoQueryString(request) == auth.instance_url + SalesforceConstants.sfObjectsBaseUrl + objectName + "/describe"
+    val methodMatches = request.method == Method.GET
     urlMatches && methodMatches
   }
 

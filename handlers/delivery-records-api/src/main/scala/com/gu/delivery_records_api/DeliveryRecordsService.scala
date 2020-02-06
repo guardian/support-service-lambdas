@@ -116,7 +116,8 @@ object DeliveryRecordsService {
             )
           )
         ).toMap
-      } yield DeliveryRecordsApiResponse(results, deliveryProblemMap)
+        problemTypes <- getCaseMetadata(salesforceClient).map(_.extractAvailableProblemTypes)
+      } yield DeliveryRecordsApiResponse(results, deliveryProblemMap, problemTypes)
 
     private def queryForDeliveryRecords(
       salesforceClient: SalesforceClient[F],
@@ -130,6 +131,11 @@ object DeliveryRecordsService {
       )
         .leftMap(error => DeliveryRecordServiceGenericError(error.toString))
     }
+
+    private def getCaseMetadata(
+      salesforceClient: SalesforceClient[F],
+    ) : EitherT[F, DeliveryRecordServiceError, SFApiCaseMetadata] = salesforceClient.describe[SFApiCaseMetadata]("Case")
+      .leftMap(error => DeliveryRecordServiceGenericError(error.toString))
 
     private def getDeliveryRecordsFromQueryResults(
       subscriptionId: String,

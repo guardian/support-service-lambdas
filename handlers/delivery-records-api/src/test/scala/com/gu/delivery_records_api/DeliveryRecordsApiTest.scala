@@ -40,6 +40,7 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
     Description = Some("blah blah"),
     Case_Closure_Reason__c = Some("Paper Damaged")
   )
+  val problemTypes = SFApiCaseMetadataTest.knownDeliveryIssueChoices
 
   val sfDeliveryRecordA = SFApiDeliveryRecord(
     Id = deliveryRecordId,
@@ -133,7 +134,8 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
         description = sfProblemCase.Description,
         problemType = sfProblemCase.Case_Closure_Reason__c
       )
-    )
+    ),
+    problemTypes
   )
 
   "DeliveryRecordsApp" should "lookup subscription with identity id" in {
@@ -141,6 +143,7 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
       SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
         .stubAuth(config, auth)
         .stubQuery(auth, deliveryRecordsQuery(IdentityId(identityId), subscriptionNumber, None, None), validSalesforceResponseBody)
+        .stubDescribe(auth, "Case", SFApiCaseMetadataTest.sfApiCaseMetadata)
 
     val app = createApp(salesforceBackendStub)
     val response = app.run(
@@ -159,6 +162,7 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
       SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
         .stubAuth(config, auth)
         .stubQuery(auth, deliveryRecordsQuery(SalesforceContactId(buyerContactId), subscriptionNumber, None, None), validSalesforceResponseBody)
+        .stubDescribe(auth, "Case", SFApiCaseMetadataTest.sfApiCaseMetadata)
 
     val app = createApp(salesforceBackendStub)
     val response = app.run(
@@ -189,6 +193,7 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
           ),
           validSalesforceResponseBody
         )
+        .stubDescribe(auth, "Case", SFApiCaseMetadataTest.sfApiCaseMetadata)
 
     val app = createApp(salesforceBackendStub)
     val response = app.run(

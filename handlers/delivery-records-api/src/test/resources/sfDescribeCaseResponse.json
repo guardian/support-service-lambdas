@@ -1,0 +1,2377 @@
+{
+  "fields": [
+    {
+      "aggregatable": true,
+      "autoNumber": false,
+      "byteLength": 765,
+      "calculated": false,
+      "calculatedFormula": null,
+      "cascadeDelete": false,
+      "caseSensitive": false,
+      "compoundFieldName": null,
+      "controllerName": "Enquiry_Type__c",
+      "createable": true,
+      "custom": true,
+      "defaultValue": null,
+      "defaultValueFormula": null,
+      "defaultedOnCreate": false,
+      "dependentPicklist": true,
+      "deprecatedAndHidden": false,
+      "digits": 0,
+      "displayLocationInDecimal": false,
+      "encrypted": false,
+      "externalId": false,
+      "extraTypeInfo": null,
+      "filterable": true,
+      "filteredLookupInfo": null,
+      "groupable": true,
+      "highScaleNumber": false,
+      "htmlFormatted": false,
+      "idLookup": false,
+      "inlineHelpText": null,
+      "label": "Case Sub-Category",
+      "length": 255,
+      "mask": null,
+      "maskType": null,
+      "name": "Case_Closure_Reason__c",
+      "nameField": false,
+      "namePointing": false,
+      "nillable": true,
+      "permissionable": true,
+      "picklistValues": [
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Add dietary requirements",
+          "validFor": "",
+          "value": "Add dietary requirements"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "After Digital Voucher Start",
+          "validFor": "AAAAAAAAAAAAAAAAAAAAAAAAAACA",
+          "value": "After Digital Voucher Start"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Already subscribed",
+          "validFor": "AAAAAAAAAAQA",
+          "value": "Already subscribed"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Already Updated",
+          "validFor": "AAAAAAAAAAgA",
+          "value": "Already Updated"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Amend ticket name",
+          "validFor": "",
+          "value": "Amend ticket name"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Android Phone",
+          "validFor": "AgAAAABAAAACAAAAAAAAAEEA",
+          "value": "Android Phone"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Android Tablet",
+          "validFor": "BgAAAADAAAAGAAAAAAAAAMMA",
+          "value": "Android Tablet"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Answerphone",
+          "validFor": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQ",
+          "value": "Answerphone"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Before Digital Voucher Start",
+          "validFor": "AAAAAAAAAAAAAAAAAAAAAAAAAACA",
+          "value": "Before Digital Voucher Start"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Before fulfilment cut off",
+          "validFor": "AAAAAAAAAAAAAAAAAAAAAAAAAACA",
+          "value": "Before fulfilment cut off"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Call-Back",
+          "validFor": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQ",
+          "value": "Call-Back"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Cancellation",
+          "validFor": "AAAAAAAAAAgA",
+          "value": "Cancellation"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Card",
+          "validFor": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAA",
+          "value": "Card"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Card and Letter",
+          "validFor": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAA",
+          "value": "Card and Letter"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Card and Letter with SMS",
+          "validFor": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAA",
+          "value": "Card and Letter with SMS"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Card Details Already Updated",
+          "validFor": "AAAAAAAAAAgA",
+          "value": "Card Details Already Updated"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Card with SMS",
+          "validFor": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAA",
+          "value": "Card with SMS"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Change contact details",
+          "validFor": "",
+          "value": "Change contact details"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Customer Deceased",
+          "validFor": "AAAAAAAAAAAAAAAAAAAAAAAAAEAA",
+          "value": "Customer Deceased"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Customer to Self-Serve",
+          "validFor": "IAAA",
+          "value": "Customer to Self-Serve"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Customer Will Resubscribe Online",
+          "validFor": "AAAAAAAAAAQA",
+          "value": "Customer Will Resubscribe Online"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Customer Will Update via Self Service",
+          "validFor": "AAAAAAAAAAgA",
+          "value": "Customer Will Update via Self Service"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Damaged Paper",
+          "validFor": "AAAAAAAAAgAA",
+          "value": "Damaged Paper"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Declined",
+          "validFor": "AAAAAAAAAAQA",
+          "value": "Declined"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Delivered Despite Holiday",
+          "validFor": "AAAAAAAAAgAA",
+          "value": "Delivered Despite Holiday"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Disabled access",
+          "validFor": "",
+          "value": "Disabled access"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "DMNP Declined",
+          "validFor": "AAAAAAAAAAIA",
+          "value": "DMNP Declined"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "DMNP Sign Up",
+          "validFor": "AAAAAAAAAAIA",
+          "value": "DMNP Sign Up"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Downgrade-Partner to friend",
+          "validFor": "",
+          "value": "Downgrade-Partner to friend"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Downgrade-Patron to partner",
+          "validFor": "",
+          "value": "Downgrade-Patron to partner"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Escalated",
+          "validFor": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIA",
+          "value": "Escalated"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Failed DPA Check",
+          "validFor": "AAAAAAAAAAAAAAAAAAAAAAAAAEAA",
+          "value": "Failed DPA Check"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "How does it work?",
+          "validFor": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAA",
+          "value": "How does it work?"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "I don’t have a machine",
+          "validFor": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAA",
+          "value": "I don’t have a machine"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Instructions Not Followed",
+          "validFor": "AAAAAAAAAgAA",
+          "value": "Instructions Not Followed"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "iPad",
+          "validFor": "BgAAAADAAAAGAAAAAAAAAMMA",
+          "value": "iPad"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "iPhone",
+          "validFor": "AgAAAABAAAACAAAAAAAAAEEA",
+          "value": "iPhone"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Late Delivery",
+          "validFor": "AAAAAAAAAgAA",
+          "value": "Late Delivery"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Left Voicemail",
+          "validFor": "AAAAAAAAAAAAAAAAAAAAAAAAAEAA",
+          "value": "Left Voicemail"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Letter",
+          "validFor": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAA",
+          "value": "Letter"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Max Attempts Reached",
+          "validFor": "AAAAAAAAAAAAAAAAAAAAAAAAAEAA",
+          "value": "Max Attempts Reached"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Missing Supplements",
+          "validFor": "AAAAAAAAAgAA",
+          "value": "Missing Supplements"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Negative",
+          "validFor": "AAAAAAAAAAAAAAAAIgAA",
+          "value": "Negative"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "No Answer",
+          "validFor": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQ",
+          "value": "No Answer"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "No Delivery",
+          "validFor": "AAAAAAAAAgAA",
+          "value": "No Delivery"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Number no longer in service",
+          "validFor": "AAAAAAAAAAAAAAAAAAAAAAAAAEAA",
+          "value": "Number no longer in service"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Other Query",
+          "validFor": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAA",
+          "value": "Other Query"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Payment Details Updated",
+          "validFor": "AAAAAAAAAAgA",
+          "value": "Payment Details Updated"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Payment Process",
+          "validFor": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAA",
+          "value": "Payment Process"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Please add a description of the query",
+          "validFor": "AAAAAAQAAEAAAAgAhABCAAACAAAgEAAh",
+          "value": "Please add a description of the query"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Positive",
+          "validFor": "AAAAAAAAAAAAAAAAIgAA",
+          "value": "Positive"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Prompted by - Email",
+          "validFor": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAA",
+          "value": "Prompted by - Email"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Prompted by - Letter",
+          "validFor": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAA",
+          "value": "Prompted by - Letter"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Prompted by - OB Call",
+          "validFor": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAA",
+          "value": "Prompted by - OB Call"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Query",
+          "validFor": "AAAAAAAAAAIA",
+          "value": "Query"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Refused to Pay",
+          "validFor": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIA",
+          "value": "Refused to Pay"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Refused To Update Payment Details",
+          "validFor": "AAAAAAAAAAgA",
+          "value": "Refused To Update Payment Details"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Registration/ Sign in",
+          "validFor": "",
+          "value": "Registration/ Sign in"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Resubscribed",
+          "validFor": "AAAAAAAAAAQA",
+          "value": "Resubscribed"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Resubscribed Customer",
+          "validFor": "IAAA",
+          "value": "Resubscribed Customer"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Saved - Discounted",
+          "validFor": "AAgQAAAEAACAAIAECIAAAAAAJAAIAAAAEAgAAggAFAAA",
+          "value": "Saved - Discounted"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Saved - No Incentive",
+          "validFor": "AAgwAAAUAACgAYAECIAAIBBAJAIIAAAAEBgAAhgAFIAA",
+          "value": "Saved - No Incentive"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Saved - Regrade and Discount",
+          "validFor": "AAgQAAAEAACAAIAACIAAAAAAJAAIAAAAEAgAAggAFAAA",
+          "value": "Saved - Regrade and Discount"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Saved - Regraded",
+          "validFor": "AAgwAAAUAACgAYAECIAAIBBAJAIIAAAAEBgAAhgAFIAA",
+          "value": "Saved - Regraded"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Thought they were getting sub / membership",
+          "validFor": "",
+          "value": "Thought they were getting sub / membership"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Upgrade-Friend to partner",
+          "validFor": "",
+          "value": "Upgrade-Friend to partner"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Upgrade-Partner to patron",
+          "validFor": "",
+          "value": "Upgrade-Partner to patron"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Welcome Pack has not arrived",
+          "validFor": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAA",
+          "value": "Welcome Pack has not arrived"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Windows 10",
+          "validFor": "AgAAAABAAAACAAAAAAAAAEEA",
+          "value": "Windows 10"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Wrong Number",
+          "validFor": "AAAAAAAAAAAAAAAAAAAAAAAAAEAA",
+          "value": "Wrong Number"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Wrong Paper Received",
+          "validFor": "AAAAAAAAAgAA",
+          "value": "Wrong Paper Received"
+        }
+      ],
+      "precision": 0,
+      "queryByDistance": false,
+      "referenceTargetField": null,
+      "referenceTo": [],
+      "relationshipName": null,
+      "relationshipOrder": null,
+      "restrictedDelete": false,
+      "restrictedPicklist": false,
+      "scale": 0,
+      "soapType": "xsd:string",
+      "sortable": true,
+      "type": "picklist",
+      "unique": false,
+      "updateable": true,
+      "writeRequiresMasterRead": false
+    },
+    {
+      "aggregatable": true,
+      "autoNumber": false,
+      "byteLength": 765,
+      "calculated": false,
+      "calculatedFormula": null,
+      "cascadeDelete": false,
+      "caseSensitive": false,
+      "compoundFieldName": null,
+      "controllerName": "Journey__c",
+      "createable": true,
+      "custom": true,
+      "defaultValue": null,
+      "defaultValueFormula": null,
+      "defaultedOnCreate": false,
+      "dependentPicklist": true,
+      "deprecatedAndHidden": false,
+      "digits": 0,
+      "displayLocationInDecimal": false,
+      "encrypted": false,
+      "externalId": false,
+      "extraTypeInfo": null,
+      "filterable": true,
+      "filteredLookupInfo": null,
+      "groupable": true,
+      "highScaleNumber": false,
+      "htmlFormatted": false,
+      "idLookup": false,
+      "inlineHelpText": null,
+      "label": "Case Category",
+      "length": 255,
+      "mask": null,
+      "maskType": null,
+      "name": "Enquiry_Type__c",
+      "nameField": false,
+      "namePointing": false,
+      "nillable": true,
+      "permissionable": true,
+      "picklistValues": [
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Abusive Customer",
+          "validFor": "QAAA",
+          "value": "Abusive Customer"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Aditus",
+          "validFor": "gAAA",
+          "value": "Aditus"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Already Cancelled",
+          "validFor": "AAAAAAAE",
+          "value": "Already Cancelled"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Annoyed by marketing",
+          "validFor": "AAAAAABA",
+          "value": "Annoyed by marketing"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "App Freezes / Crashes",
+          "validFor": "",
+          "value": "App Freezes / Crashes"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "App Freezes / Crashes - DE",
+          "validFor": "AAAAABAA",
+          "value": "App Freezes / Crashes - DE"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "App Freezes / Crashes - GA",
+          "validFor": "AAAAAAgA",
+          "value": "App Freezes / Crashes - GA"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Attendee change",
+          "validFor": "IAAA",
+          "value": "Attendee change"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Automatic Email Notification",
+          "validFor": "AAAAAAAAQAAA",
+          "value": "Automatic Email Notification"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Bank cancel (no contact from subscriber)",
+          "validFor": "AAAAAABA",
+          "value": "Bank cancel (no contact from subscriber)"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Benefits for international",
+          "validFor": "BAAA",
+          "value": "Benefits for international"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Better Competitor Subscription Offer",
+          "validFor": "AAAAAAAAB0AA",
+          "value": "Better Competitor Subscription Offer"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Better Competitor Subscription Offer -SV3",
+          "validFor": "AAAAAAAAAB0A",
+          "value": "Better Competitor Subscription Offer -SV3"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Booking Query",
+          "validFor": "AAAi",
+          "value": "Booking Query"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Books",
+          "validFor": "BAAA",
+          "value": "Books"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Cancel and refund",
+          "validFor": "",
+          "value": "Cancel and refund"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "cannot afford",
+          "validFor": "AgAA",
+          "value": "cannot afford"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Cannot afford anymore",
+          "validFor": "AAAAAAAAD8AA",
+          "value": "Cannot afford anymore"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Cannot afford anymore -SV2",
+          "validFor": "AAAAAAAAACIA",
+          "value": "Cannot afford anymore -SV2"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Cannot afford anymore -SV3",
+          "validFor": "AAAAAAAAAB0A",
+          "value": "Cannot afford anymore -SV3"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Card Issuer - Overseas Charge",
+          "validFor": "ABAA",
+          "value": "Card Issuer - Overseas Charge"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Case progress",
+          "validFor": "IAAA",
+          "value": "Case progress"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Catering preference change",
+          "validFor": "IAAA",
+          "value": "Catering preference change"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Change Benefit",
+          "validFor": "AAAAAAAAAACA",
+          "value": "Change Benefit"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Change contact details",
+          "validFor": "IAAAAAACYAAA",
+          "value": "Change contact details"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Change Contribution Amount",
+          "validFor": "AAAAAIAA",
+          "value": "Change Contribution Amount"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Change delivery details",
+          "validFor": "AAAAAAAAQAAA",
+          "value": "Change delivery details"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Change of Address",
+          "validFor": "AEgA",
+          "value": "Change of Address"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Change of date",
+          "validFor": "IAAA",
+          "value": "Change of date"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Change of Email Address",
+          "validFor": "AEgA",
+          "value": "Change of Email Address"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Change of Personal information",
+          "validFor": "AEgA",
+          "value": "Change of Personal information"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Cheque Query",
+          "validFor": "ABAAQAAA",
+          "value": "Cheque Query"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Commenting Rules",
+          "validFor": "AAAAAAQA",
+          "value": "Commenting Rules"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Communication",
+          "validFor": "BIAA",
+          "value": "Communication"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Complaint",
+          "validFor": "AACAAAAg",
+          "value": "Complaint"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Complaints",
+          "validFor": "AAAAAAAQ",
+          "value": "Complaints"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Confirmation of event details",
+          "validFor": "IAAA",
+          "value": "Confirmation of event details"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Contribution Query",
+          "validFor": "AAAAQIAA",
+          "value": "Contribution Query"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Credit Card payment failure",
+          "validFor": "",
+          "value": "Credit Card payment failure"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Crossword",
+          "validFor": "AAAAAAQA",
+          "value": "Crossword"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Crossword - DE",
+          "validFor": "AAAAABAA",
+          "value": "Crossword - DE"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Crossword - GA",
+          "validFor": "AAAAAAgA",
+          "value": "Crossword - GA"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Customer already a Subscriber",
+          "validFor": "AAAAAAAACIAA",
+          "value": "Customer already a Subscriber"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Customer already a Subscriber -SV2",
+          "validFor": "AAAAAAAAACIA",
+          "value": "Customer already a Subscriber -SV2"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Customer Experience Issue",
+          "validFor": "AAAAAAAAB0AA",
+          "value": "Customer Experience Issue"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Customer Experience Issue -SV3",
+          "validFor": "AAAAAAAAAB0A",
+          "value": "Customer Experience Issue -SV3"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Customer Hung Up",
+          "validFor": "QAAA",
+          "value": "Customer Hung Up"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Customer instructed to call",
+          "validFor": "AABA",
+          "value": "Customer instructed to call"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Customer Service for T&M",
+          "validFor": "AAAAAAACYAAA",
+          "value": "Customer Service for T&M"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Damaged in transit",
+          "validFor": "AAAAAAAAQAAA",
+          "value": "Damaged in transit"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Dead Line",
+          "validFor": "QAAA",
+          "value": "Dead Line"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Deceased / ill health",
+          "validFor": "AgAAAAAAD8AA",
+          "value": "Deceased / ill health"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Deceased/Medical Problem",
+          "validFor": "AAAAAABA",
+          "value": "Deceased/Medical Problem"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Delivery",
+          "validFor": "AAAAAAACYAAA",
+          "value": "Delivery"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Delivery issues",
+          "validFor": "AAAU",
+          "value": "Delivery issues"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Delivery Query",
+          "validFor": "AAAE",
+          "value": "Delivery Query"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Dietary Requirements",
+          "validFor": "AAAi",
+          "value": "Dietary Requirements"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Digital Pack Query",
+          "validFor": "AAIA",
+          "value": "Digital Pack Query"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Discount Code request",
+          "validFor": "AAAAAAAQ",
+          "value": "Discount Code request"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Discount Query",
+          "validFor": "AAAi",
+          "value": "Discount Query"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "DMC Completes",
+          "validFor": "AQAAAACB",
+          "value": "DMC Completes"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "DMC Completes - WB",
+          "validFor": "AAAAAAAAAAAg",
+          "value": "DMC Completes - WB"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "DMC Completes - WC",
+          "validFor": "AAAAAAAAAABA",
+          "value": "DMC Completes - WC"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Does Not Have Time To Use Subscription",
+          "validFor": "AAAAAAAAB0AA",
+          "value": "Does Not Have Time To Use Subscription"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Does Not Have Time To Use Subscription -SV3",
+          "validFor": "AAAAAAAAAB0A",
+          "value": "Does Not Have Time To Use Subscription -SV3"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Does not wish to continue after offer",
+          "validFor": "AAAAAAAACIAA",
+          "value": "Does not wish to continue after offer"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Does not wish to continue after offer -SV2",
+          "validFor": "AAAAAAAAAAIA",
+          "value": "Does not wish to continue after offer -SV2"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Downgrade",
+          "validFor": "AAABAAAAAACA",
+          "value": "Downgrade"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Download Support",
+          "validFor": "",
+          "value": "Download Support"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Download Support - DE",
+          "validFor": "AAAAABAA",
+          "value": "Download Support - DE"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Download Support - GA",
+          "validFor": "AAAAAAgA",
+          "value": "Download Support - GA"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Duplicate Booklet Sent",
+          "validFor": "AAAAAAEA",
+          "value": "Duplicate Booklet Sent"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Duplicate Email",
+          "validFor": "AAAAACAA",
+          "value": "Duplicate Email"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Duplicate Issue Sent",
+          "validFor": "AAAQ",
+          "value": "Duplicate Issue Sent"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Duplicate Sub Cancellation",
+          "validFor": "AAAAAAAABkAA",
+          "value": "Duplicate Sub Cancellation"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Duplicate subscription",
+          "validFor": "AAAAAABA",
+          "value": "Duplicate subscription"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Editorial content",
+          "validFor": "AAAAAABA",
+          "value": "Editorial content"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Editorial Enquiry",
+          "validFor": "AAAAAAAQ",
+          "value": "Editorial Enquiry"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Editorial Issue",
+          "validFor": "AgAAAAAAD8AA",
+          "value": "Editorial Issue"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Editorial Issue -SV2",
+          "validFor": "AAAAAAAAACIA",
+          "value": "Editorial Issue -SV2"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Editorial Issue -SV3",
+          "validFor": "AAAAAAAAAB0A",
+          "value": "Editorial Issue -SV3"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Epic / Membership Messages Still Displayed",
+          "validFor": "AAABAIAA",
+          "value": "Epic / Membership Messages Still Displayed"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Event",
+          "validFor": "AIAA",
+          "value": "Event"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Event Cancellation",
+          "validFor": "AAAg",
+          "value": "Event Cancellation"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Event Query",
+          "validFor": "AAAB",
+          "value": "Event Query"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Events",
+          "validFor": "BAAA",
+          "value": "Events"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Events Query",
+          "validFor": "AAAg",
+          "value": "Events Query"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Explicit Opt Out Requested",
+          "validFor": "ACAA",
+          "value": "Explicit Opt Out Requested"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Extra contributions",
+          "validFor": "AAAAAAAAgAAA",
+          "value": "Extra contributions"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Failed DPA",
+          "validFor": "QAAA",
+          "value": "Failed DPA"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Faulty product",
+          "validFor": "AAAAAAAAQAAA",
+          "value": "Faulty product"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Feedback",
+          "validFor": "AAOVQIEwEAAA",
+          "value": "Feedback"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Flash Sale - 50% Off 3M Incentive Applied",
+          "validFor": "",
+          "value": "Flash Sale - 50% Off 3M Incentive Applied"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Flash Sale - 50% off 3M incentive applied -SV3",
+          "validFor": "",
+          "value": "Flash Sale - 50% off 3M incentive applied -SV3"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "General",
+          "validFor": "AAAAAAAKYAAA",
+          "value": "General"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "General Delivery",
+          "validFor": "AAAAAAAAQAAA",
+          "value": "General Delivery"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Gift Membership Query",
+          "validFor": "AAAB",
+          "value": "Gift Membership Query"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Gift Sub Enquiry",
+          "validFor": "AAAQ",
+          "value": "Gift Sub Enquiry"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "GW Price Change Feedback",
+          "validFor": "AAAQ",
+          "value": "GW Price Change Feedback"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "GW Price Change Issue",
+          "validFor": "AAAAAAAAAgAA",
+          "value": "GW Price Change Issue"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "GW Price Change Issue -SV3",
+          "validFor": "AAAAAAAAAAgA",
+          "value": "GW Price Change Issue -SV3"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "GW Query",
+          "validFor": "AAAQ",
+          "value": "GW Query"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "GW Relaunch Feedback",
+          "validFor": "AAAQ",
+          "value": "GW Relaunch Feedback"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "GW Relaunch Issue",
+          "validFor": "AAAAAAAAAgAA",
+          "value": "GW Relaunch Issue"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "GW Relaunch Issue - SV3",
+          "validFor": "AAAAAAAAAAgA",
+          "value": "GW Relaunch Issue - SV3"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Hoax Call",
+          "validFor": "QAAA",
+          "value": "Hoax Call"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Holiday ad in paper can't find online",
+          "validFor": "AAAAAAAQ",
+          "value": "Holiday ad in paper can't find online"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Holiday Allowance Query",
+          "validFor": "AAEUAAEA",
+          "value": "Holiday Allowance Query"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Holiday Query",
+          "validFor": "AAAI",
+          "value": "Holiday Query"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Holiday Requests (DV)",
+          "validFor": "AAEA",
+          "value": "Holiday Requests (DV)"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Holiday Requests (GW)",
+          "validFor": "AAAQ",
+          "value": "Holiday Requests (GW)"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Holiday Requests (HD)",
+          "validFor": "AAAE",
+          "value": "Holiday Requests (HD)"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Holiday Requests (VCH)",
+          "validFor": "AAAAAAEA",
+          "value": "Holiday Requests (VCH)"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "How does it work?",
+          "validFor": "AAEA",
+          "value": "How does it work?"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Idea",
+          "validFor": "AAAAAAAg",
+          "value": "Idea"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Implicit Opt Out",
+          "validFor": "ACAA",
+          "value": "Implicit Opt Out"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Incentive has not arrived",
+          "validFor": "AAIVAAEA",
+          "value": "Incentive has not arrived"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Incorrect/missing items",
+          "validFor": "AAAAAAAAQAAA",
+          "value": "Incorrect/missing items"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Indirect Sub Query",
+          "validFor": "AAIA",
+          "value": "Indirect Sub Query"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Integration issue",
+          "validFor": "",
+          "value": "Integration issue"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Intended a one-off payment",
+          "validFor": "AgAA",
+          "value": "Intended a one-off payment"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Intended to purchase Subscription",
+          "validFor": "AAAAAAAACIAA",
+          "value": "Intended to purchase Subscription"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Intended to purchase Subscription -SV2",
+          "validFor": "AAAAAAAAACIA",
+          "value": "Intended to purchase Subscription -SV2"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Internal",
+          "validFor": "gAAA",
+          "value": "Internal"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Invitations",
+          "validFor": "BAAA",
+          "value": "Invitations"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Invoice Request",
+          "validFor": "AAACAAAAgAAA",
+          "value": "Invoice Request"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Invoice Requested",
+          "validFor": "ABAAQAAA",
+          "value": "Invoice Requested"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Key Features / Navigation",
+          "validFor": "AAAAAAQA",
+          "value": "Key Features / Navigation"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Key Features / Navigation - DE",
+          "validFor": "AAAAABAA",
+          "value": "Key Features / Navigation - DE"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Key Features / Navigation - GA",
+          "validFor": "AAAAAAgA",
+          "value": "Key Features / Navigation - GA"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Lack Of Benefits",
+          "validFor": "AAAAAAAACIAA",
+          "value": "Lack Of Benefits"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Lack Of Benefits -SV2",
+          "validFor": "AAAAAAAAACIA",
+          "value": "Lack Of Benefits -SV2"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Location / Directions Query",
+          "validFor": "AAAi",
+          "value": "Location / Directions Query"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Login Issue / Password Reset",
+          "validFor": "AAAAAAQA",
+          "value": "Login Issue / Password Reset"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Login Issue / Password Reset - DE",
+          "validFor": "AAAAABAA",
+          "value": "Login Issue / Password Reset - DE"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Login Issue / Password Reset - GA",
+          "validFor": "AAAAAAgA",
+          "value": "Login Issue / Password Reset - GA"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "London Centric Events",
+          "validFor": "AAAAAAAAAIAA",
+          "value": "London Centric Events"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "London Centric Events -SV2",
+          "validFor": "AAAAAAAAAAIA",
+          "value": "London Centric Events -SV2"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Lost in post",
+          "validFor": "AAAAAAAAQAAA",
+          "value": "Lost in post"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Masterclass Cancellation",
+          "validFor": "AAAC",
+          "value": "Masterclass Cancellation"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Masterclasses ad in paper can't find online",
+          "validFor": "AAAAAAAQ",
+          "value": "Masterclasses ad in paper can't find online"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Masterclass Query",
+          "validFor": "AAAC",
+          "value": "Masterclass Query"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Membership Query",
+          "validFor": "AAAB",
+          "value": "Membership Query"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Membership tier / term",
+          "validFor": "IAAA",
+          "value": "Membership tier / term"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Missing Sections / Supplements",
+          "validFor": "AAEEgAEA",
+          "value": "Missing Sections / Supplements"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Moving Abroad / Travelling Too Often",
+          "validFor": "AAAAAAAAB0AA",
+          "value": "Moving Abroad / Travelling Too Often"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Moving Abroad / Travelling Too Often -SV3",
+          "validFor": "AAAAAAAAAB0A",
+          "value": "Moving Abroad / Travelling Too Often -SV3"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Moving From Gift To Personal Sub",
+          "validFor": "AAAAAAAAAgAA",
+          "value": "Moving From Gift To Personal Sub"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Moving Outside Home Delivery Area",
+          "validFor": "AAAAAAAAAQAA",
+          "value": "Moving Outside Home Delivery Area"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Moving Outside Home Delivery Area -SV3",
+          "validFor": "AAAAAAAAAAQA",
+          "value": "Moving Outside Home Delivery Area -SV3"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Newsletters",
+          "validFor": "BAAA",
+          "value": "Newsletters"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "No DM",
+          "validFor": "ACAA",
+          "value": "No DM"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "No emails",
+          "validFor": "ACAA",
+          "value": "No emails"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Non DMC Completes",
+          "validFor": "AQAAAACBAABg",
+          "value": "Non DMC Completes"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "No reason given",
+          "validFor": "AAAAAABA",
+          "value": "No reason given"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Not using enough",
+          "validFor": "AAAAAABA",
+          "value": "Not using enough"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Only interested in free trial",
+          "validFor": "AAAAAABA",
+          "value": "Only interested in free trial"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Only interested in incentive",
+          "validFor": "AAAAAABA",
+          "value": "Only interested in incentive"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Only wanted to make Contribution -SV2",
+          "validFor": "AAAAAAAAACIA",
+          "value": "Only wanted to make Contribution -SV2"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Only wanted to make one-off Contribution",
+          "validFor": "AAAAAAAACIAA",
+          "value": "Only wanted to make one off Contribution"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Opt Out - Switch back to Voucher",
+          "validFor": "AAEA",
+          "value": "Opt Out - Switch back to Voucher"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Other",
+          "validFor": "BoAA",
+          "value": "Other"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Other Query",
+          "validFor": "AAEA",
+          "value": "Other Query"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Package not value for money",
+          "validFor": "AAAAAAAAB0AA",
+          "value": "Package not value for money"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Package not value for money -SV3",
+          "validFor": "AAAAAAAAAB0A",
+          "value": "Package not value for money -SV3"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Partner Contact",
+          "validFor": "AAAAAAAQ",
+          "value": "Partner Contact"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Partner Enquiry",
+          "validFor": "AAAAAAAQ",
+          "value": "Partner Enquiry"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Payment",
+          "validFor": "AAAAAAAAQAAA",
+          "value": "Payment"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Payment Details Updated",
+          "validFor": "ABAA",
+          "value": "Payment Details Updated"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Payment method",
+          "validFor": "AAAAAAACYAAA",
+          "value": "Payment method"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Payment Method Closed - Customer cancelled mandate​ - ​ C​ancel Immediately​",
+          "validFor": "",
+          "value": "Payment Method Closed - Customer cancelled mandate​ - ​ C​ancel Immediately​"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Payment Query",
+          "validFor": "ABAAAAAAgAAA",
+          "value": "Payment Query"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Payment Rejection - Problem with payment details​ -On 3rd email cancel",
+          "validFor": "",
+          "value": "Payment Rejection - Problem with payment details​ -On 3rd email cancel"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Payment Reversal - Customer did not authorise DD mandate - C​ancel Immediately​",
+          "validFor": "",
+          "value": "Payment Reversal - Customer did not authorise DD mandate - C​ancel Immediately​"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "PayPal Query",
+          "validFor": "AAAAQAAA",
+          "value": "PayPal Query"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Premium Tier Query",
+          "validFor": "AAAAAAgA",
+          "value": "Premium Tier Query"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Pressreader Support / Access",
+          "validFor": "AAAQ",
+          "value": "Pressreader Support / Access"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Price",
+          "validFor": "AIAAAAACYAAA",
+          "value": "Price"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Probate/Incapacity Opt Out",
+          "validFor": "ACAA",
+          "value": "Probate/Incapacity Opt Out"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Product",
+          "validFor": "AAAAAAACYAAA",
+          "value": "Product"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Product too expensive",
+          "validFor": "AAAAAABA",
+          "value": "Product too expensive"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Promo code issue",
+          "validFor": "AAAAAAACYAAA",
+          "value": "Promo code issue"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Proposition",
+          "validFor": "AAAAAAAAEAAA",
+          "value": "Proposition"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Publisher/Author Enquiry",
+          "validFor": "AAAAAAAAIAAA",
+          "value": "Publisher/Author Enquiry"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Purpose",
+          "validFor": "AAAAAAAAEAAA",
+          "value": "Purpose"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "QSS",
+          "validFor": "gAAA",
+          "value": "QSS"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Redemption Issue",
+          "validFor": "AAEA",
+          "value": "Redemption Issue"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Re-Dialable",
+          "validFor": "AAAAAAAAAABg",
+          "value": "Re-Dialable"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Refund Processed",
+          "validFor": "ABAA",
+          "value": "Refund Processed"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Refund Request",
+          "validFor": "AAAAQAAAgAAA",
+          "value": "Refund Request"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Registration / Sign in",
+          "validFor": "AAAAAAACYAAA",
+          "value": "Registration / Sign in"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Registration Query",
+          "validFor": "AAAB",
+          "value": "Registration Query"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Renewal Processed",
+          "validFor": "AAAQ",
+          "value": "Renewal Processed"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Renewal Query",
+          "validFor": "AAIVAIEA",
+          "value": "Renewal Query"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Repeated Delivery Issues",
+          "validFor": "AAAAAAAAAwAA",
+          "value": "Repeated Delivery Issues"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Repeated Delivery Issues -SV3",
+          "validFor": "AAAAAAAAAAwA",
+          "value": "Repeated Delivery Issues -SV3"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Repermissioning Email Query",
+          "validFor": "AAQA",
+          "value": "Repermissioning Email Query"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Replacement Letter / Card",
+          "validFor": "AAEA",
+          "value": "Replacement Letter / Card"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Resolved - New Details Provided",
+          "validFor": "AAAAAAAE",
+          "value": "Resolved - New Details Provided"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Resolved via Phone",
+          "validFor": "AAAAACAA",
+          "value": "Resolved via Phone"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Retailer Queries",
+          "validFor": "AAEA",
+          "value": "Retailer Queries"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Running late / lost",
+          "validFor": "IAAA",
+          "value": "Running late / lost"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Sales Process Issue",
+          "validFor": "AAAAAAAAD8IA",
+          "value": "Sales Process Issue"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Sales Process Issue -SV2",
+          "validFor": "AAAAAAAAACIA",
+          "value": "Sales Process Issue -SV2"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Sales Process Issue -SV3",
+          "validFor": "AAAAAAAAAB0A",
+          "value": "Sales Process Issue -SV3"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Site Freezes / Crashes",
+          "validFor": "AAAAAAQA",
+          "value": "Site Freezes / Crashes"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Site Functionality",
+          "validFor": "AAAAAAACYAAA",
+          "value": "Site Functionality"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Site Navigation",
+          "validFor": "AAAAAAASYAAA",
+          "value": "Site Navigation"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Stock query",
+          "validFor": "AAAAAAAAIAAA",
+          "value": "Stock query"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Store/Newsagent Closure",
+          "validFor": "AAAAAAAAAEAA",
+          "value": "Store/Newsagent Closure"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Subscribing through store",
+          "validFor": "AAAAAABA",
+          "value": "Subscribing through store"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Switch To Digital Pack",
+          "validFor": "AAAALwAA",
+          "value": "Switch To Digital Pack"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Switch To Guardian Weekly",
+          "validFor": "AAAANwAA",
+          "value": "Switch To Guardian Weekly"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Switch To Home Delivery",
+          "validFor": "AAAAOwAA",
+          "value": "Switch To Home Delivery"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Switch To Home Delivery (Change Frequency)",
+          "validFor": "AAAABAAA",
+          "value": "Switch To Home Delivery (Change Frequency)"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Switch To Local Membership",
+          "validFor": "AAAB",
+          "value": "Switch To Local Membership"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Switch To Membership",
+          "validFor": "AAAAPQAA",
+          "value": "Switch To Membership"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Switch To Recurring Contributor",
+          "validFor": "AAAAHwAA",
+          "value": "Switch To Recurring Contributor"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Switch To Voucher (Change Frequency)",
+          "validFor": "AAAAAQAA",
+          "value": "Switch To Voucher (Change Frequency)"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Switch To Voucher Subscription",
+          "validFor": "AAAAPgAA",
+          "value": "Switch To Voucher Subscription"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Technical Issue",
+          "validFor": "AAAAAAAAB0AA",
+          "value": "Technical Issue"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Technical issues",
+          "validFor": "AAAAAABA",
+          "value": "Technical issues"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Technical Issue -SV3",
+          "validFor": "AAAAAAAAAB0A",
+          "value": "Technical Issue -SV3"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Test Call",
+          "validFor": "QAAA",
+          "value": "Test Call"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Third Party Enquiry",
+          "validFor": "AAAAAAAQ",
+          "value": "Third Party Enquiry"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Unable to afford",
+          "validFor": "AAAAAABA",
+          "value": "Unable to afford"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Unhappy  with Auto Renew",
+          "validFor": "AAAAAAAACoAA",
+          "value": "Unhappy  with Auto Renew"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Unhappy  with Auto Renew -SV2",
+          "validFor": "AAAAAAAAACIA",
+          "value": "Unhappy  with Auto Renew -SV2"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Unhappy  with Auto Renew - SV3",
+          "validFor": "AAAAAAAAAAgA",
+          "value": "Unhappy  with Auto Renew - SV3"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Unhappy with the Guardian Daily app/ Daily Edition",
+          "validFor": "AAAAAAAABAAA",
+          "value": "Unhappy with the Guardian Daily app/ Daily Edition"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Unresolved",
+          "validFor": "AAAAAAAE",
+          "value": "Unresolved"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Unscheduled Charge",
+          "validFor": "ABAA",
+          "value": "Unscheduled Charge"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Unserviceable Address",
+          "validFor": "",
+          "value": "Unserviceable Address"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Unsubscribe all",
+          "validFor": "AAQA",
+          "value": "Unsubscribe all"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Unsubscribe from all comms",
+          "validFor": "ACAA",
+          "value": "Unsubscribe from all comms"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Update Direct Mail Preferences",
+          "validFor": "AAQA",
+          "value": "Update Direct Mail Preferences"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Update Email Preferences",
+          "validFor": "AAQA",
+          "value": "Update Email Preferences"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Upgrade",
+          "validFor": "AAABAAAAAACA",
+          "value": "Upgrade"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Upgraded to print and /or digital product",
+          "validFor": "AAAAAABA",
+          "value": "Upgraded to print and /or digital product"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Value",
+          "validFor": "AgAA",
+          "value": "Value"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Voucher Booklet Chase - Early Chase",
+          "validFor": "AAAAAAEA",
+          "value": "Voucher Booklet Chase - Early Chase"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Voucher Booklet Chase - Manual Resend",
+          "validFor": "AAAAAAEA",
+          "value": "Voucher Booklet Chase - Manual Resend"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Voucher Delivery Issues",
+          "validFor": "AAAAAAAAAEAA",
+          "value": "Voucher Delivery Issues"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Voucher Delivery Issues -SV3",
+          "validFor": "AAAAAAAAAAEA",
+          "value": "Voucher Delivery Issues -SV3"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Voucher Redemption Issues",
+          "validFor": "AAAAAAAAAEAA",
+          "value": "Voucher Redemption Issues"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Voucher Redemption Issues -SV3",
+          "validFor": "AAAAAAAAAAEA",
+          "value": "Voucher Redemption Issues -SV3"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Voucher Sub Query",
+          "validFor": "AAAAAAEA",
+          "value": "Voucher Sub Query"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Wants to pay by DD",
+          "validFor": "AAAAAAAACIAA",
+          "value": "Wants to pay by DD"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Wants to pay by DD -SV2",
+          "validFor": "AAAAAAAAACIA",
+          "value": "Wants to pay by DD -SV2"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Welcome Pack Query",
+          "validFor": "AAIVAAEA",
+          "value": "Welcome Pack Query"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Wrong Number",
+          "validFor": "QAAA",
+          "value": "Wrong Number"
+        },
+        {
+          "active": true,
+          "defaultValue": false,
+          "label": "Puzzles",
+          "validFor": "AAAAAEAA",
+          "value": "Puzzles"
+        }
+      ],
+      "precision": 0,
+      "queryByDistance": false,
+      "referenceTargetField": null,
+      "referenceTo": [],
+      "relationshipName": null,
+      "relationshipOrder": null,
+      "restrictedDelete": false,
+      "restrictedPicklist": false,
+      "scale": 0,
+      "soapType": "xsd:string",
+      "sortable": true,
+      "type": "picklist",
+      "unique": false,
+      "updateable": true,
+      "writeRequiresMasterRead": false
+    }
+  ]
+}
