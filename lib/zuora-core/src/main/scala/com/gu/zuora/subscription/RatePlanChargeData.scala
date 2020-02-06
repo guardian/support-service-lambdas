@@ -61,18 +61,24 @@ object RatePlanChargeData extends LazyLogging {
     } yield RatePlanChargeData(ratePlanCharge, schedule, billingPeriodName, issueDayOfWeek, issueCreditAmount)
   }
 
-  // Calculate credit
+  // Calculate credit by taking into account potential discounts
   private def calculateIssueCreditAmount(ratePlanCharge: RatePlanCharge, discountPercentageMaybe: Option[Double]) = {
     def roundUp(d: Double): Double = BigDecimal(d).setScale(2, RoundingMode.UP).toDouble
+    def discounted(roundedCredit: Double, discount: Double): Double = roundUp(roundedCredit * (1 - discount))
 
     for {
       billingPeriodName <- ratePlanCharge
         .billingPeriod
         .toRight(ZuoraApiFailure("RatePlanCharge.billingPeriod is required"))
       approximateBillingPeriodWeeks <- approximateBillingPeriodWeeksForName(billingPeriodName, ratePlanCharge.specificBillingPeriod)
-      price = -roundUp(ratePlanCharge.price / approximateBillingPeriodWeeks)
-    } yield discountPercentageMaybe.map(price * _).getOrElse(price)
+      roundedCredit = -roundUp(ratePlanCharge.price / approximateBillingPeriodWeeks)
+    } yield {
+        discountPercentageMaybe
+          .map(discounted(roundedCredit, _))
+          .getOrElse(roundedCredit)
+    }
   }
+
 
   private def approximateBillingPeriodWeeksForName(
     billingPeriodName: String,
@@ -102,8 +108,10 @@ object RatePlanChargeData extends LazyLogging {
       .flatMap(_.ratePlanCharges.map(rpc => Discount(rpc.discountPercentage, rpc.effectiveStartDate, rpc.effectiveEndDate)))
       .filter(_.percentage.isDefined)
       .filter(_.until.isAfter(today))
-      .flatMap(_.percentage).<|(discounts => if (discounts.size > 1) logger.warn(s"${subscription.subscriptionNumber} has multiple discounts"))
+      .flatMap(_.percentage)
       .toList
+      .<|(discounts => if (discounts.size > 1) logger.warn(s"${subscription.subscriptionNumber} has multiple discounts"))
       .maximumOption
+      .map(_ / 100)
   }
 }
