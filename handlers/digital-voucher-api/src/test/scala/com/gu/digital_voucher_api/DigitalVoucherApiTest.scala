@@ -26,11 +26,11 @@ class DigitalVoucherApiTest extends FlatSpec with Matchers with EitherValues {
     val response = app.run(
       Request(
         method = Method.PUT,
-        Uri(path = "/digital-voucher/replace/sub123456")
-      ).withEntity[String](CreateVoucherRequestBody("Rate-Plan-Name").asJson.spaces2)
+        Uri(path = "/digital-voucher/replace")
+      ).withEntity[String](Voucher("card-code", "letter-code").asJson.spaces2)
     ).value.unsafeRunSync().get
 
-    getBody[Voucher](response) should equal(Voucher("sub123456-replaced-card-code", "sub123456-replaced-letter-code"))
+    getBody[Voucher](response) should equal(Voucher("card-code-replaced-card-code", "letter-code-replaced-letter-code"))
     response.status.code should equal(200)
   }
   it should "return stubbed voucher details for get request" in {

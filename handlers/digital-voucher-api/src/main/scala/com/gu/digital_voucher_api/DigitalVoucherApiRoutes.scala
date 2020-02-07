@@ -50,13 +50,12 @@ object DigitalVoucherApiRoutes {
       )
     }
 
-    def handleReplaceRequest(request: Request[F], subscriptionId: String) = {
+    def handleReplaceRequest(request: Request[F]) = {
       toResponse(
         for {
-          requestBody <- parseRequest[CreateVoucherRequestBody](request)
+          requestBody <- parseRequest[Voucher](request)
           voucher <- digitalVoucherService.replaceVoucher(
-            subscriptionId,
-            requestBody.ratePlanName
+            requestBody
           ).leftMap(_ => InternalServerError())
         } yield voucher
       )
@@ -81,8 +80,8 @@ object DigitalVoucherApiRoutes {
     HttpRoutes.of[F] {
       case request @ PUT -> Root / "digital-voucher" / "create" / subscriptionId =>
         handleCreateRequest(request, subscriptionId)
-      case request @ PUT -> Root / "digital-voucher" / "replace" / subscriptionId =>
-        handleReplaceRequest(request, subscriptionId)
+      case request @ PUT -> Root / "digital-voucher" / "replace" =>
+        handleReplaceRequest(request)
       case GET -> Root / "digital-voucher" / subscriptionId =>
         handleGetRequest(subscriptionId)
       case DELETE -> Root / "digital-voucher" / subscriptionId =>

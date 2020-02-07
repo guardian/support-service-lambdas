@@ -8,7 +8,7 @@ case class Voucher(cardCode: String, letterCode: String)
 
 trait DigitalVoucherService[F[_]] {
   def createVoucher(subscriptionId: String, ratePlanName: String): EitherT[F, DigitalVoucherServiceError, Voucher]
-  def replaceVoucher(subscriptionId: String, ratePlanName: String): EitherT[F, DigitalVoucherServiceError, Voucher]
+  def replaceVoucher(voucher: Voucher): EitherT[F, DigitalVoucherServiceError, Voucher]
   def getVoucher(subscriptionId: String): EitherT[F, DigitalVoucherServiceError, Voucher]
   def deleteVoucherForSubscription(subscriptionId: String): EitherT[F, DigitalVoucherServiceError, Unit]
 }
@@ -22,11 +22,10 @@ object DigitalVoucherService {
       EitherT.rightT[F, DigitalVoucherServiceError](Voucher(s"$subscriptionId-card-code", s"$subscriptionId-letter-code"))
 
     override def replaceVoucher(
-      subscriptionId: String,
-      ratePlanName: String
+      voucher: Voucher
     ): EitherT[F, DigitalVoucherServiceError, Voucher] =
       EitherT.rightT[F, DigitalVoucherServiceError](
-        Voucher(s"$subscriptionId-replaced-card-code", s"$subscriptionId-replaced-letter-code")
+        Voucher(s"${voucher.cardCode}-replaced-card-code", s"${voucher.letterCode}-replaced-letter-code")
       )
 
     override def deleteVoucherForSubscription(subscriptionId: String): EitherT[F, DigitalVoucherServiceError, Unit] =
