@@ -179,14 +179,13 @@ object Handler extends Logging {
 
   case class PotentialHolidayStopsQueryParams(
     startDate: LocalDate,
-    endDate: LocalDate,
-    estimateCredit: Option[String]
+    endDate: LocalDate
   )
 
   def stepsForPotentialHolidayStop(
     getAccessToken: () => Either[ApiFailure, AccessToken],
     getSubscription: (AccessToken, SubscriptionName) => Either[ApiFailure, Subscription],
-    getAccount: (AccessToken, String) => Either[ApiFailure, ZuoraAccount],
+    getAccount: (AccessToken, String) => Either[ApiFailure, ZuoraAccount]
   )(req: ApiGatewayRequest, unused: SfClient): ApiResponse = {
     implicit val reads: Reads[PotentialHolidayStopsQueryParams] = Json.reads[PotentialHolidayStopsQueryParams]
     (for {
@@ -198,16 +197,24 @@ object Handler extends Logging {
         .toApiGatewayOp(s"get subscription ${pathParams.subscriptionName}")
       account <- getAccount(accessToken, subscription.accountNumber)
         .toApiGatewayOp(s"get account ${subscription.accountNumber}")
-      issuesData <- SubscriptionData(subscription, account)
-        .map(_.issueDataForPeriod(queryParams.startDate, queryParams.endDate))
-        .toApiGatewayOp(s"calculating publication dates")
+      subscriptionData <- SubscriptionData(subscription, account)
+        .toApiGatewayOp(s"building SubscriptionData")
+      issuesData = subscriptionData.issueDataForPeriod(queryParams.startDate, queryParams.endDate)
       potentialHolidayStops = issuesData.map { issueData =>
         PotentialHolidayStop(
           issueData.issueDate,
           Credit(issueData.credit, issueData.nextBillingPeriodStartDate)
         )
       }
-    } yield ApiGatewayResponse("200", PotentialHolidayStopsResponse(potentialHolidayStops))).apiResponse
+      nextInvoiceDateAfterToday = subscriptionData
+        .issueDataForPeriod(MutableCalendar.today.minusDays(7), MutableCalendar.today.plusDays(7))
+        .filter(_.nextBillingPeriodStartDate.isAfter(MutableCalendar.today))
+        .minBy(_.nextBillingPeriodStartDate)(Ordering.by(_.toEpochDay))
+        .nextBillingPeriodStartDate
+    } yield ApiGatewayResponse(
+      "200",
+      PotentialHolidayStopsResponse(nextInvoiceDateAfterToday, potentialHolidayStops)
+    )).apiResponse
   }
 
   case class ListExistingPathParams(subscriptionName: SubscriptionName)

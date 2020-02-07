@@ -137,8 +137,8 @@ object RatePlanChargeBillingSchedule {
 
       billingSchedule <- selectScheduleThatPredictsProcessedThroughDate(
         NonEmptyList.of(
-          scheduleForEffectiveStartDate,
-          scheduleForCalculatedStartDate
+          scheduleForCalculatedStartDate,
+          scheduleForEffectiveStartDate
         ),
         processedThroughDate
       )
