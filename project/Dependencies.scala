@@ -7,7 +7,7 @@ object Dependencies {
   
   val awsVersion = "1.11.574"
 
-  val circeVersion = "0.12.3"
+  val circeVersion = "0.11.1"
   val sttpVersion = "1.5.17"
   val http4sVersion = "0.20.3"
   val catsVersion = "1.6.1"
@@ -31,7 +31,7 @@ object Dependencies {
   val supportInternationalisation = "com.gu" %% "support-internationalisation" % "0.9"
   val circe = "io.circe" %% "circe-generic" % circeVersion
   val circeParser = "io.circe" %% "circe-parser" % circeVersion
-  val circeJava8 = "io.circe" %% "circe-java8" % "0.11.1"
+  val circeJava8 = "io.circe" %% "circe-java8" % circeVersion
   val sttp = "com.softwaremill.sttp" %% "core" % sttpVersion
   val sttpCirce = "com.softwaremill.sttp" %% "circe" % sttpVersion
   val sttpCats = "com.softwaremill.sttp" %% "cats" % sttpVersion
