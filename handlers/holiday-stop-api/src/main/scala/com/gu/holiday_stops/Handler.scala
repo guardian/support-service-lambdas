@@ -179,8 +179,7 @@ object Handler extends Logging {
 
   case class PotentialHolidayStopsQueryParams(
     startDate: LocalDate,
-    endDate: LocalDate,
-    estimateCredit: Option[String]
+    endDate: LocalDate
   )
 
   def stepsForPotentialHolidayStop(

@@ -36,7 +36,7 @@ class HandlerTest extends FlatSpec with Matchers {
       HEADER_SALESFORCE_CONTACT_ID -> expectedSfContactIdCoreValue
     ))) shouldBe ContinueProcessing(SalesforceContactId(expectedSfContactIdCoreValue))
   }
-  "GET /potential/<<sub name>>?startDate=...&endDate=...&estimateCredit=true endpoint" should
+  "GET /potential/<<sub name>>?startDate=...&endDate=... endpoint" should
     "calculate potential holiday stop dates and estimated credit" in {
     MutableCalendar.setFakeToday(Some(LocalDate.parse("2019-02-01")))
     val subscriptionName = "Sub12344"
@@ -108,8 +108,7 @@ class HandlerTest extends FlatSpec with Matchers {
             productPrefix = "Guardian Weekly xxx",
             startDate = "2019-01-01",
             endDate = "2019-01-15",
-            subscriptionName = subscriptionName,
-            estimateCredit = true
+            subscriptionName = subscriptionName
           ))
       }
     ) {
@@ -385,13 +384,13 @@ class HandlerTest extends FlatSpec with Matchers {
   }
 
   private def legacyPotentialIssueDateRequest(productPrefix: String, startDate: String, endDate: String,
-                                        subscriptionName: String, estimateCredit: Boolean) = {
+                                        subscriptionName: String) = {
     ApiGatewayRequest(
       Some("GET"),
       Some(Map(
         "startDate" -> startDate,
         "endDate" -> endDate,
-        "estimateCredit" -> (if (estimateCredit) "true" else "false"))),
+      )),
       None,
       Some(Map("x-product-name-prefix" -> productPrefix)),
       Some(JsObject(Seq("subscriptionName" -> JsString(subscriptionName)))),
@@ -400,13 +399,12 @@ class HandlerTest extends FlatSpec with Matchers {
   }
 
   private def potentialIssueDateRequest(productType: String, productRatePlanName: String, startDate: String,
-                                        endDate: String, subscriptionName: String, estimateCredit: Boolean) = {
+                                        endDate: String, subscriptionName: String) = {
     ApiGatewayRequest(
       Some("GET"),
       Some(Map(
         "startDate" -> startDate,
         "endDate" -> endDate,
-        "estimateCredit" -> (if (estimateCredit) "true" else "false"),
         "productType" -> productType,
         "productRatePlanName" -> productRatePlanName
       )),
