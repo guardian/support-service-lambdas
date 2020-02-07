@@ -7,7 +7,7 @@ import com.gu.zuora.subscription.ZuoraApiFailure
 import cats.implicits._
 import RatePlanChargeData.round2Places
 
-
+// FIXME: We need to make sure credit calculation goes through a single code path. Right now onus is on the user to make sure discounts are applied to credit.
 case class IssueData(issueDate: LocalDate, billDates: BillDates, credit: Double) {
   /**
    * This returns the date for the next bill after the stoppedPublicationDate.
