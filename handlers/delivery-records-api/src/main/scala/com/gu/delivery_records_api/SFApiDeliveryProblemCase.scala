@@ -38,6 +38,7 @@ case class SFApiCreateDeliveryProblemCase(
   Journey__c: String,
   Enquiry_Type__c: String = "Delivery issues",
   Case_Closure_Reason__c: String,
+  Repeat_Delivery_Issue__c: Boolean
 ) extends SFApiCompositePartBody
 
 case class SFApiLinkDeliveryRecord(
@@ -85,7 +86,8 @@ object SFApiCompositeCreateDeliveryProblem {
         },
         SF_Subscription__r = SF_Subscription_ByName(
           Name = subscriptionNumber
-        )
+        ),
+        Repeat_Delivery_Issue__c = detail.repeatDeliveryProblem.contains(true)
       )
     )) ++ detail.deliveryRecords.map(deliveryRecord => SFApiCompositePart[SFApiCompositePartBody](
       referenceId = s"LinkDeliveryRecord-${deliveryRecord.id}",

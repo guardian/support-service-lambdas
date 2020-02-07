@@ -32,7 +32,8 @@ class SFApiCompositeCreateDeliveryProblemTest extends FlatSpec with Matchers {
             creditAmount = Some(3.21),
             invoiceDate = Some(LocalDate.of(2020, 1, 10))
           )
-        )
+        ),
+        repeatDeliveryProblem = Some(true)
       ),
       now
     ).asJson.spaces2 should equal(
@@ -59,7 +60,8 @@ class SFApiCompositeCreateDeliveryProblemTest extends FlatSpec with Matchers {
          |        "Product__c" : "Guardian Weekly",
          |        "Journey__c" : "CS - Guardian Weekly Support",
          |        "Enquiry_Type__c" : "Delivery issues",
-         |        "Case_Closure_Reason__c" : "No delivery"
+         |        "Case_Closure_Reason__c" : "No delivery",
+         |        "Repeat_Delivery_Issue__c" : true
          |      }
          |    },
          |    {

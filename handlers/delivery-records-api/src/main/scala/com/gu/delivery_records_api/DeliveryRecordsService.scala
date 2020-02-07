@@ -53,7 +53,8 @@ case class CreateDeliveryProblem(
   productName: String,
   description: Option[String],
   problemType: String,
-  deliveryRecords: List[DeliveryRecordToLink]
+  deliveryRecords: List[DeliveryRecordToLink],
+  repeatDeliveryProblem: Option[Boolean]
 )
 
 sealed trait DeliveryRecordServiceError
