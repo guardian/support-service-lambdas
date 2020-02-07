@@ -5,6 +5,7 @@ import java.time.{DayOfWeek, LocalDate}
 import com.gu.zuora.ZuoraProductTypes.ZuoraProductType
 import com.gu.zuora.subscription.ZuoraApiFailure
 import cats.implicits._
+import RatePlanChargeData.round2Places
 
 
 case class IssueData(issueDate: LocalDate, billDates: BillDates, credit: Double) {
@@ -59,25 +60,49 @@ object SubscriptionData  {
       }
       productType <- getZuoraProductType(supportedRatePlanCharges.map(_._3))
       annualIssueLimitPerEdition <- getAnnualIssueLimitPerEdition(supportedRatePlanCharges.map(_._3))
-    } yield createSubscriptionData(nonZeroRatePlanChargeDatas, productType, annualIssueLimitPerEdition)
+    } yield createSubscriptionData(nonZeroRatePlanChargeDatas, productType, annualIssueLimitPerEdition, subscription)
   }
 
   private def createSubscriptionData(
     nonZeroRatePlanChargeDatas: List[RatePlanChargeData],
     zuoraProductType: ZuoraProductType,
-    productAnnualIssueLimitPerEdition: Int
+    productAnnualIssueLimitPerEdition: Int,
+    subscription: Subscription,
   ): SubscriptionData = {
     new SubscriptionData {
       def issueDataForDate(issueDate: LocalDate): Either[ZuoraApiFailure, IssueData] = {
         for {
           ratePlanChargeData <- ratePlanChargeDataForDate(nonZeroRatePlanChargeDatas, issueDate)
           billingPeriod <- ratePlanChargeData.billingSchedule.billDatesCoveringDate(issueDate)
-        } yield IssueData(issueDate, billingPeriod, ratePlanChargeData.issueCreditAmount)
+        } yield {
+          discountedIssueData(IssueData(issueDate, billingPeriod, ratePlanChargeData.issueCreditAmount))
+        }
+      }
+
+      // Calculate credit by taking into account potential discounts
+      // must be negative
+      // must not be greater than the rpc.price
+      // two decimal places
+      def discountedIssueData(issueData: IssueData): IssueData = {
+        import mouse.all._
+        val discountedCreditAmount = subscription
+          .ratePlans
+          .iterator
+          .filter(_.productName == "Discounts")
+          .flatMap(_.ratePlanCharges.map(rpc => Discount(rpc.discountPercentage, rpc.effectiveStartDate, rpc.effectiveEndDate)))
+          .filter(_.percentage.isDefined)
+          .filter(_.until.isAfter(issueData.issueDate))
+          .flatMap(_.percentage)
+          .map(_ / 100)
+          .foldLeft(issueData.credit) { case (acc, next) => acc * (1 - next) }
+          .thrush(round2Places)
+        issueData.copy(credit = discountedCreditAmount)
       }
 
       def issueDataForPeriod(startDateInclusive: LocalDate, endDateInclusive: LocalDate): List[IssueData] = {
         nonZeroRatePlanChargeDatas
           .flatMap(_.getIssuesForPeriod(startDateInclusive, endDateInclusive))
+          .map(discountedIssueData)
           .sortBy(_.issueDate)(Ordering.fromLessThan(_.isBefore(_)))
       }
 

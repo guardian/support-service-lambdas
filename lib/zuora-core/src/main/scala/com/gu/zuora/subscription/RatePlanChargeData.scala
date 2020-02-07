@@ -56,29 +56,23 @@ object RatePlanChargeData extends LazyLogging {
         .billingPeriod
         .toRight(ZuoraApiFailure("RatePlanCharge.billingPeriod is required"))
       schedule <- RatePlanChargeBillingSchedule(subscription, ratePlanCharge, account)
-      discount = maybeDiscount(subscription)
-      issueCreditAmount <- calculateIssueCreditAmount(ratePlanCharge, discount)
+      issueCreditAmount <- calculateIssueCreditAmount(ratePlanCharge)
     } yield RatePlanChargeData(ratePlanCharge, schedule, billingPeriodName, issueDayOfWeek, issueCreditAmount)
   }
 
-  // Calculate credit by taking into account potential discounts
-  private def calculateIssueCreditAmount(ratePlanCharge: RatePlanCharge, discountPercentageMaybe: Option[Double]) = {
-    def roundUp(d: Double): Double = BigDecimal(d).setScale(2, RoundingMode.UP).toDouble
-    def discounted(roundedCredit: Double, discount: Double): Double = roundUp(roundedCredit * (1 - discount))
-
+  private def calculateIssueCreditAmount(ratePlanCharge: RatePlanCharge) = {
     for {
       billingPeriodName <- ratePlanCharge
         .billingPeriod
         .toRight(ZuoraApiFailure("RatePlanCharge.billingPeriod is required"))
       approximateBillingPeriodWeeks <- approximateBillingPeriodWeeksForName(billingPeriodName, ratePlanCharge.specificBillingPeriod)
-      roundedCredit = -roundUp(ratePlanCharge.price / approximateBillingPeriodWeeks)
+      roundedCredit = -round2Places(ratePlanCharge.price / approximateBillingPeriodWeeks)
     } yield {
-        discountPercentageMaybe
-          .map(discounted(roundedCredit, _))
-          .getOrElse(roundedCredit)
+      roundedCredit
     }
   }
 
+  def round2Places(d: Double): Double = BigDecimal(d).setScale(2, RoundingMode.UP).toDouble
 
   private def approximateBillingPeriodWeeksForName(
     billingPeriodName: String,
@@ -98,20 +92,5 @@ object RatePlanChargeData extends LazyLogging {
           .map(numberOfMonths => numberOfMonths * 4)
       case _ => Left(ZuoraApiFailure(s"Failed to determine duration of billing period: $billingPeriodName"))
     }
-  }
-
-  def maybeDiscount(subscription: Subscription): Option[Double] = {
-    subscription
-      .ratePlans
-      .iterator
-      .filter(_.productName == "Discounts")
-      .flatMap(_.ratePlanCharges.map(rpc => Discount(rpc.discountPercentage, rpc.effectiveStartDate, rpc.effectiveEndDate)))
-      .filter(_.percentage.isDefined)
-      .filter(_.until.isAfter(today))
-      .flatMap(_.percentage)
-      .toList
-      .<|(discounts => if (discounts.size > 1) logger.warn(s"${subscription.subscriptionNumber} has multiple discounts"))
-      .maximumOption
-      .map(_ / 100)
   }
 }
