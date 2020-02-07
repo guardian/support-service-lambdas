@@ -80,7 +80,7 @@ object DigitalVoucherApiRoutes {
     HttpRoutes.of[F] {
       case request @ PUT -> Root / "digital-voucher" / "create" / subscriptionId =>
         handleCreateRequest(request, subscriptionId)
-      case request @ PUT -> Root / "digital-voucher" / "replace" =>
+      case request @ POST -> Root / "digital-voucher" / "replace" =>
         handleReplaceRequest(request)
       case GET -> Root / "digital-voucher" / subscriptionId =>
         handleGetRequest(subscriptionId)
