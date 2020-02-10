@@ -58,7 +58,7 @@ Resources:
                       Statement:
                           - Effect: Allow
                             Action: ssm:GetParametersByPath
-                            Resource: !Sub arn:aws:ssm:::parameter/${Stage}/membership-${Stage}-digital-voucher-api/digital-voucher-api-${Stage}
+                            Resource: !Sub arn:aws:ssm:::parameter/${Stage}/membership-${Stage}-digital-voucher-api/digital-voucher-api-${Stage}/*
 
     DigitalVoucherApi:
         Type: "AWS::ApiGateway::RestApi"
