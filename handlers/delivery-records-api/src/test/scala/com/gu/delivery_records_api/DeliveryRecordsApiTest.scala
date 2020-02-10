@@ -43,6 +43,12 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
   val creditAmount = 1.23
   val invoiceDate = LocalDate.of(2019, 12, 10)
   val isActioned = true
+  val contactNumbers = SFApiContactPhoneNumbers(
+    Phone = Some("+447654321234"),
+    HomePhone = Some("+441234567890"),
+    MobilePhone = Some("garbage"),
+    OtherPhone = None
+  )
 
   val sfDeliveryRecordA = SFApiDeliveryRecord(
     Id = deliveryRecordId,
@@ -76,6 +82,7 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
   val validSalesforceResponseBody = RecordsWrapperCaseClass(
     List(
       SFApiSubscription(
+        Buyer__r = contactNumbers,
         Delivery_Records__r = Some(
           RecordsWrapperCaseClass(
             List(
@@ -144,7 +151,8 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
         description = sfProblemCase.Description,
         problemType = sfProblemCase.Case_Closure_Reason__c
       )
-    )
+    ),
+    contactNumbers
   )
 
   "DeliveryRecordsApp" should "lookup subscription with identity id" in {

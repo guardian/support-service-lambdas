@@ -83,6 +83,7 @@ trait DeliveryRecordsService[F[_]] {
 object DeliveryRecordsService {
 
   private case class SubscriptionRecordQueryResult(
+    Buyer__r: SFApiContactPhoneNumbers,
     Delivery_Records__r: Option[RecordsWrapperCaseClass[SFApiDeliveryRecord]]
   )
 
@@ -139,6 +140,7 @@ object DeliveryRecordsService {
           optionalEndDate
         )
         records <- getDeliveryRecordsFromQueryResults(subscriptionId, contact, queryResult).toEitherT[F]
+        contactPhoneNumbers = queryResult.records.head.Buyer__r.filterOutGarbage()
         results = records.reverse.foldLeft(List.empty[DeliveryRecord])(transformSfApiDeliveryRecords)
         deliveryProblemMap = records.flatMap(
           _.Case__r.map(
@@ -150,7 +152,7 @@ object DeliveryRecordsService {
             )
           )
         ).toMap
-      } yield DeliveryRecordsApiResponse(results, deliveryProblemMap)
+      } yield DeliveryRecordsApiResponse(results, deliveryProblemMap, contactPhoneNumbers)
 
     override def createDeliveryProblemForSubscription(
       subscriptionNumber: String,
@@ -206,7 +208,7 @@ object DeliveryRecordsService {
     optionalStartDate: Option[LocalDate],
     optionalEndDate: Option[LocalDate]
   ) =
-    s"""SELECT (
+    s"""SELECT Buyer__r.Phone, Buyer__r.HomePhone, Buyer__r.MobilePhone, Buyer__r.OtherPhone, (
        |    SELECT Id, Delivery_Date__c, Delivery_Address__c, Delivery_Instructions__c, Has_Holiday_Stop__c,
        |           Address_Line_1__c,Address_Line_2__c, Address_Line_3__c, Address_Town__c, Address_Country__c, Address_Postcode__c,
        |           Case__c, Case__r.Id, Case__r.Subject, Case__r.Description, Case__r.Case_Closure_Reason__c,
