@@ -80,6 +80,8 @@ Resources:
             Handler: com.gu.digital_voucher_api.Handler::handle
             Environment:
                 Variables:
+                  App: !Sub digital-voucher-api-${Stage}
+                  Stack: !Sub membership-${Stage}-digital-voucher-api
                   Stage: !Ref Stage
             Role:
                 Fn::GetAtt:
