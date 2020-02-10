@@ -33,7 +33,7 @@ object PotentialHolidayStop {
   }
 }
 
-case class PotentialHolidayStopsResponse(potentials: List[PotentialHolidayStop])
+case class PotentialHolidayStopsResponse(nextInvoiceDateAfterToday: LocalDate, potentials: List[PotentialHolidayStop])
 
 object PotentialHolidayStopsResponse {
 
