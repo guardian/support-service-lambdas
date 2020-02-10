@@ -13,8 +13,12 @@ object DigitalVoucherApiApp extends LazyLogging {
 
   private implicit val cs: ContextShift[IO] = IO.contextShift(scala.concurrent.ExecutionContext.global)
 
-  def apply[S](): EitherT[IO, DigitalVoucherApiAppError, HttpRoutes[IO]] = {
-    EitherT.rightT(createLogging()(DigitalVoucherApiRoutes(DigitalVoucherService())))
+  def apply(): EitherT[IO, DigitalVoucherApiAppError, HttpRoutes[IO]] = {
+    for {
+      config <- ConfigLoader.loadConfig[IO]().leftMap(error => DigitalVoucherApiAppError(error.toString))
+      _ = logger.info(s"Loaded config: ${config.imovoBaseUrl}") //Temporary log message to check config is loaded
+      routes <- EitherT.rightT[IO, DigitalVoucherApiAppError](createLogging()(DigitalVoucherApiRoutes(DigitalVoucherService())))
+    } yield routes
   }
 
   def createLogging(): HttpRoutes[IO] => HttpRoutes[IO] = {

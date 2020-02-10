@@ -29,6 +29,7 @@ val scalaSettings = Seq(
   },
 
   autoCompilerPlugins := true,
+  resolvers += "Guardian Platform Bintray" at "https://dl.bintray.com/guardian/platforms"
 )
 
 // fixme this whole file needs splitting down appropriately
@@ -373,7 +374,7 @@ lazy val `digital-voucher-api` = all(project in file("handlers/digital-voucher-a
   .dependsOn(`effects-s3`, `config-core`)
   .settings(
     libraryDependencies ++=
-      Seq(http4sLambda, http4sDsl, http4sCirce, http4sServer, circe, sttpAsycHttpClientBackendCats, scalatest)
+      Seq(http4sLambda, http4sDsl, http4sCirce, http4sServer, circe, circeConfig, sttpAsycHttpClientBackendCats, scalatest, simpleConfig)
         ++ logging
   )
   .enablePlugins(RiffRaffArtifact)
