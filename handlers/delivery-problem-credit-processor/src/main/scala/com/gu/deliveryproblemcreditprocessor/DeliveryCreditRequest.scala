@@ -8,7 +8,8 @@ case class DeliveryCreditRequest(
   Id: String,
   SF_Subscription__r: DeliveryCreditSubscription,
   Delivery_Date__c: LocalDate,
-  Charge_Code__c: Option[String]
+  Charge_Code__c: Option[String],
+  Invoice_Date__c: LocalDate
 ) extends CreditRequest {
   val subscriptionName: SubscriptionName = SubscriptionName(SF_Subscription__r.Name)
   val publicationDate: AffectedPublicationDate = AffectedPublicationDate(Delivery_Date__c)
