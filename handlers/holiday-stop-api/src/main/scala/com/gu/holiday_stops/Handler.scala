@@ -226,7 +226,7 @@ object Handler extends Logging {
         )
       }
       nextInvoiceDateAfterToday = subscriptionData
-        .issueDataForPeriod(MutableCalendar.today.minusDays(7), MutableCalendar.today.plusDays(7))
+        .issueDataForPeriod(MutableCalendar.today.minusDays(7), MutableCalendar.today.plusMonths(2))
         .filter(_.nextBillingPeriodStartDate.isAfter(MutableCalendar.today))
         .minBy(_.nextBillingPeriodStartDate)(Ordering.by(_.toEpochDay))
         .nextBillingPeriodStartDate
