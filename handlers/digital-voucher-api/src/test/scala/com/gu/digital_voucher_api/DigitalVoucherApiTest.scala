@@ -6,7 +6,7 @@ import io.circe.syntax._
 import io.circe.generic.auto._
 import io.circe.parser.decode
 import org.http4s.{Method, Request, Response, Uri}
-import org.scalatest.{EitherValues, FlatSpec, Matchers}
+import org.scalatest.{EitherValues, FlatSpec, Inside, Matchers}
 
 class DigitalVoucherApiTest extends FlatSpec with Matchers with EitherValues {
   "DigitalVoucherApi" should "return stubbed voucher details for create request" in {
@@ -58,7 +58,9 @@ class DigitalVoucherApiTest extends FlatSpec with Matchers with EitherValues {
   }
 
   private def createApp() = {
-    DigitalVoucherApiApp().value.unsafeRunSync().right.value
+    Inside.inside(DigitalVoucherApiApp().value.unsafeRunSync()) {
+      case Right(value) => value
+    }
   }
 
   private def getBody[A: Decoder](response: Response[IO]) = {
