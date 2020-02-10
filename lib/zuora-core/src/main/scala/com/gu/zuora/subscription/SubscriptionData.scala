@@ -6,6 +6,8 @@ import com.gu.zuora.ZuoraProductTypes.ZuoraProductType
 import com.gu.zuora.subscription.ZuoraApiFailure
 import cats.implicits._
 import RatePlanChargeData.round2Places
+import mouse.all._
+import math.abs
 
 // FIXME: We need to make sure credit calculation goes through a single code path. Right now onus is on the user to make sure discounts are applied to credit.
 case class IssueData(issueDate: LocalDate, billDates: BillDates, credit: Double) {
@@ -79,24 +81,33 @@ object SubscriptionData  {
         }
       }
 
-      // Calculate credit by taking into account potential discounts
-      // must be negative
-      // must not be greater than the rpc.price
-      // two decimal places
+      // Calculate credit by taking into account potential discounts, otherwise return original credit
       def discountedIssueData(issueData: IssueData): IssueData = {
-        import mouse.all._
-        val discountedCreditAmount = subscription
-          .ratePlans
-          .iterator
-          .filter(_.productName == "Discounts")
-          .flatMap(_.ratePlanCharges.map(rpc => Discount(rpc.discountPercentage, rpc.effectiveStartDate, rpc.effectiveEndDate)))
-          .filter(_.percentage.isDefined)
-          .filter(_.until.isAfter(issueData.issueDate))
-          .flatMap(_.percentage)
-          .map(_ / 100)
+        val discounts: List[Double] =
+          subscription
+            .ratePlans
+            .iterator
+            .filter(_.productName == "Discounts")
+            .flatMap(_.ratePlanCharges.map(rpc => (rpc.discountPercentage, rpc.effectiveEndDate)))
+            .collect { case (percentage, effectiveEndDate) if percentage.isDefined && effectiveEndDate.isAfter(issueData.issueDate) => percentage }
+            .flatten
+            .map(_ / 100)
+            .toList
+
+        def verify(discountedCredit: Double): Double = {
+          discountedCredit
+            .<|(v => assert(abs(v) <= abs(issueData.credit), "Discounted credit should not be more than un-discounted"))
+            .<|(v => assert(v <= 0, "Credit should be negative"))
+            .<|(v => assert(v.toString.dropWhile(_ != '.').tail.length <= 2, "Credit should have up to two decimal places"))
+            .<|(v => assert(abs(v) < 10.0, "Credit should not go beyond maximum bound"))
+            .<|(v => if (discounts.isEmpty) assert(v == issueData.credit, "Credit should not be affected if there are no discounts"))
+          }
+
+        discounts
           .foldLeft(issueData.credit) { case (acc, next) => acc * (1 - next) }
           .thrush(round2Places)
-        issueData.copy(credit = discountedCreditAmount)
+          .thrush(verify)
+          .thrush(discountedCredit => issueData.copy(credit = discountedCredit))
       }
 
       def issueDataForPeriod(startDateInclusive: LocalDate, endDateInclusive: LocalDate): List[IssueData] = {

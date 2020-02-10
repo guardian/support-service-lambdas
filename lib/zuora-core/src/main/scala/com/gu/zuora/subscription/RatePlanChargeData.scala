@@ -6,11 +6,6 @@ import java.time.{DayOfWeek, LocalDate}
 import scala.annotation.tailrec
 import scala.math.BigDecimal.RoundingMode
 import com.typesafe.scalalogging.LazyLogging
-import mouse.all._
-import MutableCalendar.today
-import cats.implicits._
-
-case class Discount(percentage: Option[Double], from: LocalDate, until: LocalDate)
 
 case class RatePlanChargeData(
   ratePlanCharge: RatePlanCharge,
