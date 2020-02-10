@@ -1,6 +1,6 @@
 package com.gu.holiday_stops
 
-import java.io.{InputStream, OutputStream}
+import java.io.{InputStream, OutputStream, Serializable}
 import java.time.LocalDate
 import java.util.UUID
 
@@ -28,29 +28,30 @@ import com.gu.zuora.subscription._
 import com.gu.zuora.{AccessToken, Zuora}
 import com.softwaremill.sttp.{HttpURLConnectionBackend, Id, SttpBackend}
 import okhttp3.{Request, Response}
-import play.api.libs.json.{Json, Reads}
+import play.api.libs.json.{Json, Reads, Writes}
 import scalaz.{-\/, \/, \/-}
+import zio.console.Console
+import zio.{DefaultRuntime, ZIO, console}
 
 object Handler extends Logging {
 
   type SfClient = HttpOp[StringHttpRequest, BodyAsString]
 
+  private val runtime = new DefaultRuntime {}
+
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
-    ApiGatewayHandler(
-      LambdaIO(
-        inputStream,
-        outputStream,
-        context
-      )
-    )(
-        operationForEffects(
-          RawEffects.response,
-          RawEffects.stage,
-          GetFromS3.fetchString,
-          HttpURLConnectionBackend(),
-          UUID.randomUUID().toString
-        )
-      )
+
+    val configOp = runtime.unsafeRun {
+      operationForEffects(
+        RawEffects.response,
+        RawEffects.stage,
+        GetFromS3.fetchString,
+        HttpURLConnectionBackend(),
+        UUID.randomUUID().toString,
+      ).provide(new Console.Live with ConfigLive {})
+    }
+
+    ApiGatewayHandler(LambdaIO(inputStream, outputStream, context))(configOp)
   }
 
   def operationForEffects(
@@ -58,10 +59,28 @@ object Handler extends Logging {
     stage: Stage,
     fetchString: StringFromS3,
     backend: SttpBackend[Id, Nothing],
-    idGenerator: => String
+    idGenerator: => String,
+  ): ZIO[Console with Configuration, Serializable, ApiGatewayOp[Operation]] =
+    for {
+      config <- Configuration.factory.config.tapError(e => console.putStrLn(s"Config failure: $e"))
+    } yield operationForEffectsInternal(
+      response,
+      stage,
+      fetchString,
+      backend,
+      idGenerator,
+      config
+    )
+
+  private def operationForEffectsInternal(
+    response: Request => Response,
+    stage: Stage,
+    fetchString: StringFromS3,
+    backend: SttpBackend[Id, Nothing],
+    idGenerator: => String,
+    config: Config
   ): ApiGatewayOp[Operation] = {
     for {
-      config <- Config(fetchString).toApiGatewayOp("Failed to load config")
       sfClient <- SalesforceClient(
         response,
         config.sfConfig,
@@ -324,7 +343,7 @@ object Handler extends Logging {
   }
 
   case class GetCancellationDetails(publicationsToRefund: List[HolidayStopRequestsDetail])
-  implicit val writesGetCancellationDetails = Json.writes[GetCancellationDetails]
+  implicit val writesGetCancellationDetails: Writes[GetCancellationDetails] = Json.writes[GetCancellationDetails]
 
   def stepsToGetCancellationDetails(idGenerator: => String)(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
     val sfClientGetWithParams = sfClient.wrapWith(JsonHttp.getWithParams)
@@ -351,7 +370,8 @@ object Handler extends Logging {
   }
 
   case class SpecificHolidayStopRequestPathParams(subscriptionName: SubscriptionName, holidayStopRequestId: HolidayStopRequestId)
-  implicit val readsSpecificHolidayStopRequestPathParams = Json.reads[SpecificHolidayStopRequestPathParams]
+  implicit val readsSpecificHolidayStopRequestPathParams: Reads
+    [SpecificHolidayStopRequestPathParams] = Json.reads[SpecificHolidayStopRequestPathParams]
 
   def stepsToAmend(
     getAccessToken: () => Either[ApiFailure, AccessToken],

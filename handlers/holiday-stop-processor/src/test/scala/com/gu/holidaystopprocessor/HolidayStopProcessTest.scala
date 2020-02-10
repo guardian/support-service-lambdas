@@ -11,10 +11,12 @@ import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
 import com.gu.zuora.ZuoraProductTypes
 import com.gu.zuora.ZuoraProductTypes.ZuoraProductType
 import com.gu.zuora.subscription.Fixtures.mkGuardianWeeklySubscription
-import com.gu.zuora.subscription.{ZuoraAccount, _}
-import org.scalatest.{EitherValues, FlatSpec, Matchers, OptionValues}
+import com.gu.zuora.subscription._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.{EitherValues, OptionValues}
 
-class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues with OptionValues {
+class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues with OptionValues {
   MutableCalendar.setFakeToday(Some(LocalDate.parse("2019-07-12")))
   val effectiveStartDate = LocalDate.of(2019, 5, 11)
 
@@ -64,12 +66,26 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
 
   private val creditProduct = HolidayCreditProduct.Dev
 
+  private def updateToApply(
+    creditProduct: CreditProduct,
+    subscription: Subscription,
+    account: ZuoraAccount,
+    request: HolidayStopRequestsDetail
+  ) =
+    SubscriptionUpdate(
+      creditProduct,
+      subscription,
+      account,
+      request.Stopped_Publication_Date__c,
+      None
+    )
+
   "HolidayStopProcess" should "give correct added charge" in {
     val response = Processor.addCreditToSubscription(
       creditProduct,
       _ => Right(Fixtures.mkSubscriptionWithHolidayStops()),
       getAccount(Fixtures.mkAccount().asRight),
-      SubscriptionUpdate.apply,
+      updateToApply,
       updateSubscription(Right(())),
       ZuoraHolidayCreditAddResult.apply
     )(request)
@@ -90,7 +106,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
       creditProduct,
       _ => Right(subscription),
       getAccount(Fixtures.mkAccount().asRight),
-      SubscriptionUpdate.apply,
+      updateToApply,
       updateSubscription(Left(ZuoraApiFailure("update went wrong"))),
       ZuoraHolidayCreditAddResult.apply
     )(request)
@@ -102,7 +118,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
       creditProduct,
       _ => Left(ZuoraApiFailure("get went wrong")),
       getAccount(Fixtures.mkAccount().asRight),
-      SubscriptionUpdate.apply,
+      updateToApply,
       updateSubscription(Right(())),
       ZuoraHolidayCreditAddResult.apply
     )(request)
@@ -119,7 +135,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
       creditProduct,
       _ => Right(Fixtures.mkSubscriptionWithHolidayStops().copy(autoRenew = false)),
       getAccount(Fixtures.mkAccount().asRight),
-      SubscriptionUpdate.apply,
+      updateToApply,
       updateSubscription(Right(())),
       ZuoraHolidayCreditAddResult.apply
     )(request)
@@ -131,7 +147,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
       creditProduct,
       _ => Right(subscription.copy(status = "Cancelled")),
       getAccount(Fixtures.mkAccount().asRight),
-      SubscriptionUpdate.apply,
+      updateToApply,
       updateSubscription(Left(ZuoraApiFailure("shouldn't need to apply an update"))),
       ZuoraHolidayCreditAddResult.apply
     )(request)
@@ -143,7 +159,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
       creditProduct,
       _ => Right(Fixtures.mkSubscriptionWithHolidayStops()),
       getAccount(Fixtures.mkAccount().asRight),
-      SubscriptionUpdate.apply,
+      updateToApply,
       updateSubscription(Left(ZuoraApiFailure("shouldn't need to apply an update"))),
       ZuoraHolidayCreditAddResult.apply
     )(request)
@@ -163,7 +179,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
       creditProduct,
       _ => Right(subscription),
       getAccount(Fixtures.mkAccount().asRight),
-      SubscriptionUpdate.apply,
+      updateToApply,
       updateSubscription(Left(ZuoraApiFailure("shouldn't need to apply an update"))),
       ZuoraHolidayCreditAddResult.apply
     )(request)
@@ -183,7 +199,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
       ZuoraProductTypes.GuardianWeekly,
       _ => Right(Fixtures.mkSubscriptionWithHolidayStops()),
       getAccount(Fixtures.mkAccount().asRight),
-      SubscriptionUpdate.apply,
+      updateToApply,
       updateSubscription(Right(())),
       ZuoraHolidayCreditAddResult.apply,
       exportAmendments(Right(()))
@@ -220,7 +236,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
       ZuoraProductTypes.GuardianWeekly,
       _ => Right(Fixtures.mkSubscriptionWithHolidayStops()),
       getAccount(Fixtures.mkAccount().asRight),
-      SubscriptionUpdate.apply,
+      updateToApply,
       updateSubscription(Right(())),
       ZuoraHolidayCreditAddResult.apply,
       exportAmendments(Right(()))
@@ -240,7 +256,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
       ZuoraProductTypes.GuardianWeekly,
       _ => Right(Fixtures.mkSubscriptionWithHolidayStops()),
       getAccount(Fixtures.mkAccount().asRight),
-      SubscriptionUpdate.apply,
+      updateToApply,
       updateSubscription(Right(())),
       ZuoraHolidayCreditAddResult.apply,
       exportAmendments(Right(()))
@@ -260,7 +276,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
       ZuoraProductTypes.GuardianWeekly,
       _ => Right(Fixtures.mkSubscriptionWithHolidayStops()),
       getAccount(Fixtures.mkAccount().asRight),
-      SubscriptionUpdate.apply,
+      updateToApply,
       updateSubscription(Right(())),
       ZuoraHolidayCreditAddResult.apply,
       exportAmendments(Right(()))
@@ -291,7 +307,7 @@ class HolidayStopProcessTest extends FlatSpec with Matchers with EitherValues wi
       ZuoraProductTypes.GuardianWeekly,
       _ => Right(subscription),
       getAccount(Fixtures.mkAccount().asRight),
-      SubscriptionUpdate.apply,
+      updateToApply,
       updateSubscription(Right(())),
       ZuoraHolidayCreditAddResult.apply,
       exportAmendments(Left(SalesforceApiFailure("Export failed")))

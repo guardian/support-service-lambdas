@@ -10,13 +10,15 @@ import com.gu.holiday_stops.Fixtures
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.HolidayStopRequestsDetail
 import com.gu.zuora.ZuoraProductTypes
 import com.gu.zuora.ZuoraProductTypes.ZuoraProductType
-import com.gu.zuora.subscription.{ZuoraAccount, _}
-import org.scalatest._
+import com.gu.zuora.subscription._
+import org.scalatest.OptionValues
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
 /**
  * Make sure short-circuiting does not happen.
  */
-class ProcessorErrorHandlingSpec extends FlatSpec with Matchers with OptionValues {
+class ProcessorErrorHandlingSpec extends AnyFlatSpec with Matchers with OptionValues {
 
   MutableCalendar.setFakeToday(Some(LocalDate.parse("2019-08-01")))
 
@@ -51,6 +53,20 @@ class ProcessorErrorHandlingSpec extends FlatSpec with Matchers with OptionValue
 
   private val creditProduct = HolidayCreditProduct.Dev
 
+  private def updateToApply(
+    creditProduct: CreditProduct,
+    subscription: Subscription,
+    account: ZuoraAccount,
+    request: HolidayStopRequestsDetail
+  ) =
+    SubscriptionUpdate(
+      creditProduct,
+      subscription,
+      account,
+      request.Stopped_Publication_Date__c,
+      None
+    )
+
   "Error handling" should "not short-circuit if some writes to Zuora fail (but others succeed), and Salesforce write succeeds" in {
     val getSubscription: SubscriptionName => Either[ZuoraApiFailure, Subscription] = {
       case subName if subName.value == "A-S1" => Right(subscription)
@@ -68,7 +84,7 @@ class ProcessorErrorHandlingSpec extends FlatSpec with Matchers with OptionValue
       ZuoraProductTypes.GuardianWeekly,
       getSubscription,
       getAccount(Fixtures.mkAccount().asRight),
-      SubscriptionUpdate.apply,
+      updateToApply,
       updateSubscription,
       ZuoraHolidayCreditAddResult.apply,
       writeHolidayStopsToSalesforce
@@ -99,7 +115,7 @@ class ProcessorErrorHandlingSpec extends FlatSpec with Matchers with OptionValue
       ZuoraProductTypes.GuardianWeekly,
       getSubscription,
       getAccount(Fixtures.mkAccount().asRight),
-      SubscriptionUpdate.apply,
+      updateToApply,
       updateSubscription,
       ZuoraHolidayCreditAddResult.apply,
       writeHolidayStopsToSalesforce
@@ -130,7 +146,7 @@ class ProcessorErrorHandlingSpec extends FlatSpec with Matchers with OptionValue
       ZuoraProductTypes.GuardianWeekly,
       getSubscription,
       getAccount(Fixtures.mkAccount().asRight),
-      SubscriptionUpdate.apply,
+      updateToApply,
       updateSubscription,
       ZuoraHolidayCreditAddResult.apply,
       writeHolidayStopsToSalesforce
@@ -160,7 +176,7 @@ class ProcessorErrorHandlingSpec extends FlatSpec with Matchers with OptionValue
       ZuoraProductTypes.GuardianWeekly,
       getSubscription,
       getAccount(Fixtures.mkAccount().asRight),
-      SubscriptionUpdate.apply,
+      updateToApply,
       updateSubscription,
       ZuoraHolidayCreditAddResult.apply,
       writeHolidayStopsToSalesforce
