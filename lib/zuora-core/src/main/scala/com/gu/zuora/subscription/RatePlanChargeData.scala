@@ -5,7 +5,6 @@ import java.time.{DayOfWeek, LocalDate}
 
 import scala.annotation.tailrec
 import scala.math.BigDecimal.RoundingMode
-import com.typesafe.scalalogging.LazyLogging
 
 case class RatePlanChargeData(
   ratePlanCharge: RatePlanCharge,
@@ -39,7 +38,7 @@ case class RatePlanChargeData(
   }
 }
 
-object RatePlanChargeData extends LazyLogging {
+object RatePlanChargeData {
   def apply(
     subscription: Subscription,
     ratePlanCharge: RatePlanCharge,

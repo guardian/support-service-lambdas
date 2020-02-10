@@ -36,7 +36,7 @@ trait SubscriptionData {
   def subscriptionAnnualIssueLimit: Int
   def editionDaysOfWeek: List[DayOfWeek]
 }
-object SubscriptionData  {
+object SubscriptionData {
   def apply(subscription: Subscription, account: ZuoraAccount): Either[ZuoraApiFailure, SubscriptionData] = {
     val supportedRatePlanCharges: List[(RatePlanCharge, SupportedRatePlanCharge, SupportedProduct)] = for {
       ratePlan <- subscription.ratePlans if ratePlan.lastChangeType =!= Some("Remove")
@@ -77,12 +77,12 @@ object SubscriptionData  {
           ratePlanChargeData <- ratePlanChargeDataForDate(nonZeroRatePlanChargeDatas, issueDate)
           billingPeriod <- ratePlanChargeData.billingSchedule.billDatesCoveringDate(issueDate)
         } yield {
-          discountedIssueData(IssueData(issueDate, billingPeriod, ratePlanChargeData.issueCreditAmount))
+          applyAnyDiscounts(IssueData(issueDate, billingPeriod, ratePlanChargeData.issueCreditAmount))
         }
       }
 
       // Calculate credit by taking into account potential discounts, otherwise return original credit
-      def discountedIssueData(issueData: IssueData): IssueData = {
+      def applyAnyDiscounts(issueData: IssueData): IssueData = {
         val discounts: List[Double] =
           subscription
             .ratePlans
@@ -113,7 +113,7 @@ object SubscriptionData  {
       def issueDataForPeriod(startDateInclusive: LocalDate, endDateInclusive: LocalDate): List[IssueData] = {
         nonZeroRatePlanChargeDatas
           .flatMap(_.getIssuesForPeriod(startDateInclusive, endDateInclusive))
-          .map(discountedIssueData)
+          .map(applyAnyDiscounts)
           .sortBy(_.issueDate)(Ordering.fromLessThan(_.isBefore(_)))
       }
 
