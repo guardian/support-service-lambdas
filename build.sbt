@@ -129,7 +129,8 @@ lazy val `holiday-stops` = all(project in file("lib/holiday-stops"))
       sttp,
       sttpCirce,
       mouse,
-      enumeratum
+      enumeratum,
+      zio
     ) ++ logging
   )
 
