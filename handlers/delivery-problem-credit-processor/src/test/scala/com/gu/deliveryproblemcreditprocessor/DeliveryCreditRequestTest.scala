@@ -3,34 +3,38 @@ package com.gu.deliveryproblemcreditprocessor
 import java.time.LocalDate
 
 import com.gu.salesforce.RecordsWrapperCaseClass
+import com.softwaremill.diffx.scalatest.DiffMatcher
 import io.circe.generic.auto._
 import io.circe.parser._
-import org.scalactic.TypeCheckedTripleEquals
-import org.scalatest.{EitherValues, FlatSpec, Matchers}
+import org.scalatest.EitherValues
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
 import scala.io.Source
 
 class DeliveryCreditRequestTest
-  extends FlatSpec
+  extends AnyFlatSpec
   with Matchers
-  with EitherValues
-  with TypeCheckedTripleEquals {
+  with DiffMatcher
+  with EitherValues {
 
   "Json decode" should "decode SF response correctly" in {
     val json = Source.fromResource("sf-credit-request.json").mkString
-    decode[RecordsWrapperCaseClass[DeliveryCreditRequest]](json).right.value should ===(
+    decode[RecordsWrapperCaseClass[DeliveryCreditRequest]](json).right.value should matchTo(
       RecordsWrapperCaseClass(List(
         DeliveryCreditRequest(
           Id = "r1",
           SF_Subscription__r = DeliveryCreditSubscription(Name = "A-S00001"),
           Delivery_Date__c = LocalDate.of(2019, 12, 6),
-          Charge_Code__c = None
+          Charge_Code__c = None,
+          Invoice_Date__c = LocalDate.of(2020, 2, 10)
         ),
         DeliveryCreditRequest(
           Id = "r2",
           SF_Subscription__r = DeliveryCreditSubscription(Name = "A-S00002"),
           Delivery_Date__c = LocalDate.of(2019, 12, 13),
-          Charge_Code__c = Some("C12345")
+          Charge_Code__c = Some("C12345"),
+          Invoice_Date__c = LocalDate.of(2020, 3, 1)
         )
       ))
     )

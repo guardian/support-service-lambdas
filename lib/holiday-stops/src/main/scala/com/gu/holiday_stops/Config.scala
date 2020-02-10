@@ -30,7 +30,7 @@ object Config {
       .toEither
   }
 
-  def apply(fetchString: StringFromS3): Either[OverallFailure, Config] = {
+  def fromS3(fetchString: StringFromS3): Either[OverallFailure, Config] = {
     val stage = Stage().value
     for {
       zuoraConfig <- zuoraCredentials(stage, fetchString)

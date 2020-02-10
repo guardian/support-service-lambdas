@@ -4,10 +4,13 @@ import java.time.temporal.TemporalAdjusters
 import java.time.{DayOfWeek, LocalDate}
 
 import com.gu.holiday_stops.Fixtures
-import com.gu.zuora.subscription.{Add, AffectedPublicationDate, ChargeOverride, MutableCalendar, SubscriptionUpdate, Fixtures => SubscriptionFixtures}
-import org.scalatest.{EitherValues, FlatSpec, Matchers}
+import com.gu.zuora.subscription.{Add, AffectedPublicationDate, ChargeOverride, InvoiceDate, MutableCalendar, SubscriptionUpdate, Fixtures => SubscriptionFixtures}
+import com.softwaremill.diffx.scalatest.DiffMatcher
+import org.scalatest.EitherValues
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class SubscriptionUpdateTest extends FlatSpec with Matchers with EitherValues {
+class SubscriptionUpdateTest extends AnyFlatSpec with Matchers with DiffMatcher with EitherValues {
   MutableCalendar.setFakeToday(Some(LocalDate.parse("2019-08-12")))
   val effectiveStartDate = LocalDate.of(2019, 6, 12)
   val dateCreditIsApplied = effectiveStartDate.plusMonths(3)
@@ -25,11 +28,12 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers with EitherValues {
       effectiveStartDate = effectiveStartDate
     )
 
-    val update = SubscriptionUpdate.apply(
+    val update = SubscriptionUpdate(
       creditProduct,
       subscription = subscription,
       account = Fixtures.mkAccount(),
-      stoppedPublicationDate
+      stoppedPublicationDate,
+      None
     )
     update shouldBe Right(SubscriptionUpdate(
       currentTerm = None,
@@ -61,11 +65,12 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers with EitherValues {
       billingPeriod = "Quarter",
       effectiveStartDate = effectiveStartDate
     )
-    val update = SubscriptionUpdate.apply(
+    val update = SubscriptionUpdate(
       creditProduct,
       subscription = subscription,
       account = Fixtures.mkAccount(),
-      stoppedPublicationDate
+      stoppedPublicationDate,
+      None
     )
     update shouldBe Right(SubscriptionUpdate(
       currentTerm = Some(366),
@@ -96,11 +101,12 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers with EitherValues {
       chargedThroughDate = None,
       effectiveStartDate = effectiveStartDate
     )
-    val update = SubscriptionUpdate.apply(
+    val update = SubscriptionUpdate(
       creditProduct,
       subscription = subscription,
       account = Fixtures.mkAccount(),
-      stoppedPublicationDate
+      stoppedPublicationDate,
+      None
     )
     update shouldBe Right(SubscriptionUpdate(
       currentTerm = None,
@@ -110,6 +116,43 @@ class SubscriptionUpdateTest extends FlatSpec with Matchers with EitherValues {
         contractEffectiveDate = dateCreditIsApplied,
         customerAcceptanceDate = dateCreditIsApplied,
         serviceActivationDate = dateCreditIsApplied,
+        chargeOverrides = List(
+          ChargeOverride(
+            creditProduct.productRatePlanChargeId,
+            HolidayStart__c = stoppedPublicationDate.value,
+            HolidayEnd__c = stoppedPublicationDate.value,
+            price = -3.24
+          )
+        )
+      ))
+    ))
+  }
+
+  it should "generate an update using given invoice date if provided" in {
+    val subscription = SubscriptionFixtures.mkGuardianWeeklySubscription(
+      termStartDate = dateCreditIsApplied.minusYears(1),
+      termEndDate = dateCreditIsApplied,
+      price = 42.1,
+      billingPeriod = "Quarter",
+      chargedThroughDate = None,
+      effectiveStartDate = effectiveStartDate
+    )
+    val givenInvoiceDate = InvoiceDate(LocalDate.of(2020, 3, 1))
+    val update = SubscriptionUpdate(
+      creditProduct,
+      subscription = subscription,
+      account = Fixtures.mkAccount(),
+      stoppedPublicationDate,
+      Some(givenInvoiceDate)
+    )
+    update.right.value should matchTo(SubscriptionUpdate(
+      currentTerm = None,
+      currentTermPeriodType = None,
+      List(Add(
+        creditProduct.productRatePlanId,
+        contractEffectiveDate = givenInvoiceDate.value,
+        customerAcceptanceDate = givenInvoiceDate.value,
+        serviceActivationDate = givenInvoiceDate.value,
         chargeOverrides = List(
           ChargeOverride(
             creditProduct.productRatePlanChargeId,

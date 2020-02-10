@@ -129,7 +129,8 @@ lazy val `holiday-stops` = all(project in file("lib/holiday-stops"))
       sttp,
       sttpCirce,
       mouse,
-      enumeratum
+      enumeratum,
+      zio
     ) ++ logging
   )
 
@@ -347,7 +348,8 @@ lazy val `delivery-problem-credit-processor` =
         circe,
         zio,
         sttpAsycHttpClientBackendCats,
-        scalatest
+        scalatest,
+        diffx
       )
     )
     .enablePlugins(RiffRaffArtifact)
