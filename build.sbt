@@ -348,7 +348,8 @@ lazy val `delivery-problem-credit-processor` =
         circe,
         zio,
         sttpAsycHttpClientBackendCats,
-        scalatest
+        scalatest,
+        diffx
       )
     )
     .enablePlugins(RiffRaffArtifact)
