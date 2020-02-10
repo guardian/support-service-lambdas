@@ -1,0 +1,38 @@
+{
+  "totalSize": 2,
+  "done": true,
+  "records": [
+    {
+      "attributes": {
+        "type": "Delivery__c",
+        "url": "/services/data/v29.0/sobjects/Delivery__c/r1"
+      },
+      "Id": "r1",
+      "SF_Subscription__r": {
+        "attributes": {
+          "type": "SF_Subscription__c",
+          "url": "/services/data/v29.0/sobjects/SF_Subscription__c/someId"
+        },
+        "Name": "A-S00001"
+      },
+      "Delivery_Date__c": "2019-12-06",
+      "Charge_Code__c": null
+    },
+    {
+      "attributes": {
+        "type": "Delivery__c",
+        "url": "/services/data/v29.0/sobjects/Delivery__c/r2"
+      },
+      "Id": "r2",
+      "SF_Subscription__r": {
+        "attributes": {
+          "type": "SF_Subscription__c",
+          "url": "/services/data/v29.0/sobjects/SF_Subscription__c/someId"
+        },
+        "Name": "A-S00002"
+      },
+      "Delivery_Date__c": "2019-12-13",
+      "Charge_Code__c": "C12345"
+    }
+  ]
+}

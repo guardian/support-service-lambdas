@@ -3,29 +3,16 @@ package com.gu.holiday_stops
 import com.gu.salesforce.SFAuthConfig
 import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config.{ConfigLocation, LoadConfigModule, Stage}
-import play.api.libs.json.{Json, Reads}
+import com.gu.zuora.ZuoraConfig
+import com.gu.zuora.subscription.OverallFailure
+import play.api.libs.json.Reads
 
 case class Config(
   zuoraConfig: ZuoraConfig,
-  sfConfig: SFAuthConfig,
-  holidayCreditProduct: HolidayCreditProduct,
+  sfConfig: SFAuthConfig
 )
-
-case class ZuoraConfig(
-  baseUrl: String,
-  holidayStopProcessor: HolidayStopProcessor
-)
-
-case class HolidayStopProcessor(oauth: Oauth)
-
-case class Oauth(clientId: String, clientSecret: String)
 
 object Config {
-
-  implicit val oAuthØReads = Json.reads[Oauth]
-  implicit val holidayStopProcessorReads = Json.reads[HolidayStopProcessor]
-  implicit val sfAuthConfigReads = Json.reads[SFAuthConfig]
-  implicit val zuoraConfigReads = Json.reads[ZuoraConfig]
 
   private def zuoraCredentials(stage: String, fetchString: StringFromS3): Either[OverallFailure, ZuoraConfig] = {
     credentials[ZuoraConfig](stage, "zuoraRest", fetchString)
@@ -53,20 +40,17 @@ object Config {
         case "PROD" =>
           Config(
             zuoraConfig,
-            sfConfig,
-            HolidayCreditProduct.Prod,
+            sfConfig
           )
         case "CODE" =>
           Config(
             zuoraConfig,
-            sfConfig,
-            HolidayCreditProduct.Code,
+            sfConfig
           )
         case "DEV" =>
           Config(
             zuoraConfig,
-            sfConfig,
-            HolidayCreditProduct.Dev,
+            sfConfig
           )
       }
     }

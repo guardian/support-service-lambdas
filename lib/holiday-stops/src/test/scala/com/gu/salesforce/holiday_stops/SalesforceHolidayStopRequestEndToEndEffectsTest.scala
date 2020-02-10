@@ -3,15 +3,14 @@ package com.gu.salesforce.holiday_stops
 import java.time.LocalDate
 
 import com.gu.effects.{GetFromS3, RawEffects}
-import com.gu.holiday_stops.Fixtures
-import com.gu.holiday_stops.subscription.{Subscription, SubscriptionData}
-import com.gu.salesforce.{IdentityId, SFAuthConfig, SalesforceClient}
 import com.gu.salesforce.SalesforceReads._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
+import com.gu.salesforce.{IdentityId, SFAuthConfig, SalesforceClient}
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.resthttp.JsonHttp
+import com.gu.zuora.subscription._
 import org.scalatest.{FlatSpec, Matchers}
 import scalaz.{-\/, \/-}
 
@@ -43,7 +42,7 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends FlatSpec with Matc
 
       fakeSubscription: Subscription = Fixtures.mkGuardianWeeklySubscription()
 
-      publicationDatesToBeStopped = SubscriptionData(fakeSubscription)
+      publicationDatesToBeStopped = SubscriptionData(fakeSubscription, Fixtures.mkAccount())
         .map(_.issueDataForPeriod(startDate, endDate))
         .toOption
         .get
@@ -67,16 +66,16 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends FlatSpec with Matc
         sfAuth.wrapWith(JsonHttp.patch)
       )(id)
       _ <- processOp(HolidayStopRequestsDetailActioned(
-        HolidayStopRequestsDetailChargeCode("C-1234567"),
-        HolidayStopRequestsDetailChargePrice(-12.34)
+        RatePlanChargeCode("C-1234567"),
+        Price(-12.34)
       )).toDisjunction
 
       postProcessingFetchResult <- fetchOp(lookupDate, productName).toDisjunction
 
       // UN-ACTION in order to delete the parent
       _ <- processOp(HolidayStopRequestsDetailActioned(
-        HolidayStopRequestsDetailChargeCode(""),
-        HolidayStopRequestsDetailChargePrice(0)
+        RatePlanChargeCode(""),
+        Price(0)
       )).toDisjunction
 
       deleteOp = SalesforceHolidayStopRequest.WithdrawHolidayStopRequest(sfAuth.wrapWith(JsonHttp.patch))

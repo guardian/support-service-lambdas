@@ -1,0 +1,193 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: API for integrating Imovos digital voucher services
+
+Parameters:
+    Stage:
+        Description: Stage name
+        Type: String
+        AllowedValues:
+            - PROD
+            - CODE
+            - DEV
+        Default: CODE
+
+Conditions:
+  CreateProdMonitoring: !Equals [ !Ref Stage, PROD ]
+
+Mappings:
+    StageMap:
+        DEV:
+            ApiName: digital-voucher-api-DEV
+        CODE:
+            ApiName: digital-voucher-api-CODE
+        PROD:
+            ApiName: digital-voucher-api-PROD
+
+Resources:
+    DigitalVoucherApiRole:
+        Type: AWS::IAM::Role
+        Properties:
+            AssumeRolePolicyDocument:
+                Statement:
+                    - Effect: Allow
+                      Principal:
+                          Service:
+                             - lambda.amazonaws.com
+                      Action:
+                          - sts:AssumeRole
+            Path: /
+            Policies:
+                - PolicyName: LambdaPolicy
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                            - logs:CreateLogGroup
+                            - logs:CreateLogStream
+                            - logs:PutLogEvents
+                            - lambda:InvokeFunction
+                            Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/digital-voucher-api-${Stage}:log-stream:*"
+                - PolicyName: ReadPrivateCredentials
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action: s3:GetObject
+                            Resource: !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/*
+
+    DigitalVoucherApi:
+        Type: "AWS::ApiGateway::RestApi"
+        Properties:
+            Description: api for accessing digital voucher in salesforce
+            Name: !FindInMap [StageMap, !Ref Stage, ApiName]
+
+    DigitalVoucherApiPermission:
+        Type: AWS::Lambda::Permission
+        Properties:
+            Action: lambda:invokeFunction
+            FunctionName: !Sub digital-voucher-api-${Stage}
+            Principal: apigateway.amazonaws.com
+        DependsOn: DigitalVoucherApiLambda
+
+    DigitalVoucherApiLambda:
+        Type: AWS::Lambda::Function
+        Properties:
+            Description: api for accessing digital voucher in salesforce
+            FunctionName:
+                !Sub digital-voucher-api-${Stage}
+            Code:
+                S3Bucket: support-service-lambdas-dist
+                S3Key: !Sub membership/${Stage}/digital-voucher-api/digital-voucher-api.jar
+            Handler: com.gu.digital_voucher_api.Handler::handle
+            Environment:
+                Variables:
+                  Stage: !Ref Stage
+            Role:
+                Fn::GetAtt:
+                - DigitalVoucherApiRole
+                - Arn
+            MemorySize: 1536
+            Runtime: java8
+            Timeout: 300
+        DependsOn:
+        - DigitalVoucherApiRole
+
+    DigitalVoucherApiUsagePlan:
+      Type: AWS::ApiGateway::UsagePlan
+      Properties:
+        UsagePlanName: digital-voucher-api
+        ApiStages:
+          - ApiId: !Ref DigitalVoucherApi
+            Stage: !Ref Stage
+      DependsOn:
+        - DigitalVoucherApi
+        - DigitalVoucherApiStage
+
+    DigitalVoucherApiKey:
+      Type: AWS::ApiGateway::ApiKey
+      Properties:
+        Description: Used by manage-frontend
+        Enabled: true
+        Name: !Sub digital-voucher-api-key-${Stage}
+        StageKeys:
+          - RestApiId: !Ref DigitalVoucherApi
+            StageName: !Ref Stage
+      DependsOn:
+        - DigitalVoucherApi
+        - DigitalVoucherApiStage
+
+    DigitalVoucherApiUsagePlanKey:
+      Type: AWS::ApiGateway::UsagePlanKey
+      Properties:
+        KeyId: !Ref DigitalVoucherApiKey
+        KeyType: API_KEY
+        UsagePlanId: !Ref DigitalVoucherApiUsagePlan
+      DependsOn:
+        - DigitalVoucherApiKey
+        - DigitalVoucherApiUsagePlan
+
+    DigitalVoucherApiProxyResource:
+        Type: AWS::ApiGateway::Resource
+        Properties:
+            RestApiId: !Ref DigitalVoucherApi
+            ParentId: !GetAtt [DigitalVoucherApi, RootResourceId]
+            PathPart: "{proxy+}"
+        DependsOn: DigitalVoucherApi
+
+    DigitalVoucherApiAnyMethod:
+      Type: AWS::ApiGateway::Method
+      Properties:
+        AuthorizationType: NONE
+        ApiKeyRequired: true
+        RestApiId: !Ref DigitalVoucherApi
+        ResourceId: !Ref DigitalVoucherApiProxyResource
+        HttpMethod: ANY
+        Integration:
+          Type: AWS_PROXY
+          IntegrationHttpMethod: POST # this for the interaction between API Gateway and Lambda and MUST be POST
+          Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DigitalVoucherApiLambda.Arn}/invocations
+      DependsOn:
+        - DigitalVoucherApi
+        - DigitalVoucherApiLambda
+        - DigitalVoucherApiProxyResource
+
+    DigitalVoucherApiStage:
+        Type: AWS::ApiGateway::Stage
+        Properties:
+            Description: Stage for digital-voucher-api
+            RestApiId: !Ref DigitalVoucherApi
+            DeploymentId: !Ref DigitalVoucherApiDeployment
+            StageName: !Sub ${Stage}
+        DependsOn:
+        - DigitalVoucherApiAnyMethod
+
+    DigitalVoucherApiDeployment:
+        Type: AWS::ApiGateway::Deployment
+        Properties:
+            Description: Deploys digital-voucher-api into an environment/stage
+            RestApiId: !Ref DigitalVoucherApi
+        DependsOn:
+          - DigitalVoucherApiAnyMethod
+
+    5xxApiAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Condition: CreateProdMonitoring
+      Properties:
+        AlarmActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:fulfilment-dev
+        AlarmName:
+          !Sub
+            - 5XX rate from ${ApiName}
+            - { ApiName: !FindInMap [StageMap, !Ref Stage, ApiName] }
+        ComparisonOperator: GreaterThanThreshold
+        Dimensions:
+          - Name: ApiName
+            Value: !FindInMap [StageMap, !Ref Stage, ApiName]
+          - Name: Stage
+            Value: !Sub ${Stage}
+        EvaluationPeriods: 1
+        MetricName: 5XXError
+        Namespace: AWS/ApiGateway
+        Period: 3600
+        Statistic: Sum
+        Threshold: 5
+        TreatMissingData: notBreaching

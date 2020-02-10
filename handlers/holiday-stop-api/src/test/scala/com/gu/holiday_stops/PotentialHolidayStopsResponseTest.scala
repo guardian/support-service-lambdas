@@ -2,17 +2,18 @@ package com.gu.holiday_stops
 
 import java.time.LocalDate
 
-import com.gu.holiday_stops.subscription.HolidayStopCredit
+import com.gu.zuora.subscription.Credit
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
 
 class PotentialHolidayStopsResponseTest extends FlatSpec with Matchers {
 
   private val response = PotentialHolidayStopsResponse(
-    List(
+    nextInvoiceDateAfterToday = LocalDate.of(2019, 10, 1),
+    potentials = List(
       PotentialHolidayStop(
         publicationDate = LocalDate.of(2019, 9, 27),
-        expectedCredit = HolidayStopCredit(
+        expectedCredit = Credit(
           amount = -2.89,
           invoiceDate = LocalDate.of(2019, 10, 1)
         )
@@ -21,7 +22,7 @@ class PotentialHolidayStopsResponseTest extends FlatSpec with Matchers {
   )
 
   private val jsonString =
-    """{"potentials":[{"publicationDate":"2019-09-27","credit":-2.89,"invoiceDate":"2019-10-01"}]}"""
+    """{"nextInvoiceDateAfterToday":"2019-10-01","potentials":[{"publicationDate":"2019-09-27","credit":-2.89,"invoiceDate":"2019-10-01"}]}"""
 
   "parse" should "read json correctly" in {
     Json.parse(jsonString).as[PotentialHolidayStopsResponse] should equal(response)

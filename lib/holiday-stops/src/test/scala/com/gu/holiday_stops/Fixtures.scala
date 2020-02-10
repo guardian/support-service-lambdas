@@ -2,11 +2,12 @@ package com.gu.holiday_stops
 
 import java.time.LocalDate
 
-import com.gu.holiday_stops.subscription.{RatePlan, RatePlanCharge, Subscription}
-import com.gu.salesforce.RecordsWrapperCaseClass
-import com.gu.salesforce.SFAuthConfig
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.{HolidayStopRequest, HolidayStopRequestActionedCount, HolidayStopRequestEndDate, HolidayStopRequestIsWithdrawn, HolidayStopRequestStartDate}
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.{HolidayStopRequestId, HolidayStopRequestsDetail, HolidayStopRequestsDetailExpectedInvoiceDate, HolidayStopRequestsDetailId, ProductName}
+import com.gu.salesforce.{RecordsWrapperCaseClass, SFAuthConfig}
+import com.gu.zuora.{HolidayStopProcessor, Oauth, ZuoraConfig}
+import com.gu.zuora.subscription.Fixtures.mkRatePlanCharge
+import com.gu.zuora.subscription._
 import io.circe.generic.auto._
 import io.circe.parser.decode
 import org.scalatest.Assertions
@@ -23,76 +24,13 @@ object Fixtures extends Assertions {
     case "Specific_Weeks" => 1
   }
 
-  def mkRatePlanCharge(
-    name: String,
-    price: Double,
-    billingPeriod: String,
-    chargedThroughDate: Option[LocalDate] = Some(LocalDate.of(2019, 9, 2)),
-    effectiveStartDate: LocalDate = LocalDate.of(2019, 6, 2),
-    specificBillingPeriod: Option[Int] = None,
-    upToPeriodsType: Option[String] = None,
-    upToPeriods: Option[Int] = None,
-    endDateCondition: Option[String] = Some("Subscription_End"),
-  ) = RatePlanCharge(
-    name = name,
-    number = "C1",
-    price,
-    Some(billingPeriod),
-    effectiveStartDate,
-    chargedThroughDate,
-    HolidayStart__c = None,
-    HolidayEnd__c = None,
-    processedThroughDate = chargedThroughDate.map(_.minusMonths(billingPeriodToMonths(billingPeriod))),
-    productRatePlanChargeId = "",
-    specificBillingPeriod = specificBillingPeriod,
-    endDateCondition = endDateCondition,
-    upToPeriodsType = upToPeriodsType,
-    upToPeriods = upToPeriods
-  )
-
-  def mkGuardianWeeklySubscription(
-    termStartDate: LocalDate = LocalDate.now(),
-    termEndDate: LocalDate = LocalDate.now(),
-    customerAcceptanceDate: LocalDate = LocalDate.now(),
-    price: Double = -1.0,
-    billingPeriod: String = "Quarter",
-    chargedThroughDate: Option[LocalDate] = None,
-    effectiveStartDate: LocalDate = LocalDate.now()
-  ): Subscription =
-    Subscription(
-      subscriptionNumber = "S1",
-      termStartDate,
-      termEndDate,
-      customerAcceptanceDate,
-      currentTerm = 12,
-      currentTermPeriodType = "Month",
-      autoRenew = true,
-      ratePlans = List(
-        RatePlan(
-          productName = "Guardian Weekly - Domestic",
-          ratePlanName = "GW Oct 18 - Quarterly - Domestic",
-          ratePlanCharges =
-            List(mkRatePlanCharge(
-              "GW Oct 18 - Quarterly - Domestic",
-              price,
-              billingPeriod,
-              chargedThroughDate,
-              effectiveStartDate
-            )),
-          productRatePlanId = "",
-          id = "",
-          lastChangeType = None
-        )
-      ),
-      status = "Active"
-    )
-
   def mkSubscriptionWithHolidayStops() = Subscription(
     status = "Active",
     subscriptionNumber = "S1",
     termStartDate = LocalDate.of(2019, 3, 1),
     termEndDate = LocalDate.of(2020, 3, 1),
     customerAcceptanceDate = LocalDate.of(2020, 4, 1),
+    contractEffectiveDate = LocalDate.of(2020, 4, 1),
     currentTerm = 12,
     currentTermPeriodType = "Month",
     autoRenew = true,
@@ -114,7 +52,10 @@ object Fixtures extends Assertions {
           specificBillingPeriod = None,
           endDateCondition = None,
           upToPeriodsType = None,
-          upToPeriods = None
+          upToPeriods = None,
+          billingDay = None,
+          triggerEvent = None,
+          triggerDate = None
         )),
         productRatePlanId = "",
         id = "",
@@ -137,7 +78,10 @@ object Fixtures extends Assertions {
           specificBillingPeriod = None,
           endDateCondition = None,
           upToPeriodsType = None,
-          upToPeriods = None
+          upToPeriods = None,
+          billingDay = None,
+          triggerEvent = None,
+          triggerDate = None
         )),
         productRatePlanId = "",
         id = "",
@@ -160,7 +104,10 @@ object Fixtures extends Assertions {
           specificBillingPeriod = None,
           endDateCondition = None,
           upToPeriodsType = None,
-          upToPeriods = None
+          upToPeriods = None,
+          billingDay = None,
+          triggerEvent = None,
+          triggerDate = None
         )),
         productRatePlanId = "",
         id = "",
@@ -183,7 +130,10 @@ object Fixtures extends Assertions {
           specificBillingPeriod = None,
           endDateCondition = None,
           upToPeriodsType = None,
-          upToPeriods = None
+          upToPeriods = None,
+          billingDay = None,
+          triggerEvent = None,
+          triggerDate = None
         )),
         productRatePlanId = "",
         id = "",
@@ -206,7 +156,10 @@ object Fixtures extends Assertions {
           specificBillingPeriod = None,
           endDateCondition = None,
           upToPeriodsType = None,
-          upToPeriods = None
+          upToPeriods = None,
+          billingDay = None,
+          triggerEvent = None,
+          triggerDate = None
         )),
         productRatePlanId = "",
         id = "",
@@ -229,7 +182,10 @@ object Fixtures extends Assertions {
           specificBillingPeriod = None,
           endDateCondition = None,
           upToPeriodsType = None,
-          upToPeriods = None
+          upToPeriods = None,
+          billingDay = None,
+          triggerEvent = None,
+          triggerDate = None
         )),
         productRatePlanId = "",
         id = "",
@@ -242,13 +198,16 @@ object Fixtures extends Assertions {
           name = "GW Oct 18 - Quarterly - Domestic",
           price = 42.7,
           billingPeriod = "Quarter",
-          chargedThroughDate = Some(LocalDate.of(2019, 9, 7))
+          chargedThroughDate = None,
+          processedThroughDate = None,
+          effectiveStartDate = LocalDate.of(2019, 9, 7)
         )),
         productRatePlanId = "",
         id = "",
         lastChangeType = None
       )
-    )
+    ),
+    accountNumber = "123456"
   )
 
   def subscriptionFromJson(resource: String): Subscription = {
@@ -279,9 +238,9 @@ object Fixtures extends Assertions {
     Id = HolidayStopRequestsDetailId(request.Id.value),
     Subscription_Name__c = request.Subscription_Name__c,
     Product_Name__c = request.Product_Name__c,
-    Stopped_Publication_Date__c = StoppedPublicationDate(request.Start_Date__c.value),
+    Stopped_Publication_Date__c = AffectedPublicationDate(request.Start_Date__c.value),
     Estimated_Price__c = None,
-    Charge_Code__c = Some(HolidayStopRequestsDetailChargeCode(chargeCode)),
+    Charge_Code__c = Some(RatePlanChargeCode(chargeCode)),
     Actual_Price__c = None,
     Expected_Invoice_Date__c = None
   )
@@ -300,10 +259,10 @@ object Fixtures extends Assertions {
       Id = HolidayStopRequestsDetailId(id),
       Subscription_Name__c = SubscriptionName(subscriptionName),
       Product_Name__c = ProductName(productName),
-      Stopped_Publication_Date__c = StoppedPublicationDate(stopDate),
-      Estimated_Price__c = estimatedPrice.map(HolidayStopRequestsDetailChargePrice.apply),
-      Charge_Code__c = chargeCode.map(HolidayStopRequestsDetailChargeCode.apply),
-      Actual_Price__c = actualPrice.map(HolidayStopRequestsDetailChargePrice.apply),
+      Stopped_Publication_Date__c = AffectedPublicationDate(stopDate),
+      Estimated_Price__c = estimatedPrice.map(Price.apply),
+      Charge_Code__c = chargeCode.map(RatePlanChargeCode(_)),
+      Actual_Price__c = actualPrice.map(Price.apply),
       Expected_Invoice_Date__c = expectedInvoiceDate.map(HolidayStopRequestsDetailExpectedInvoiceDate.apply)
     )
   }
@@ -312,16 +271,21 @@ object Fixtures extends Assertions {
     Id = HolidayStopRequestsDetailId("R1"),
     Subscription_Name__c = SubscriptionName("S1"),
     Product_Name__c = ProductName("Gu Weekly"),
-    Stopped_Publication_Date__c = StoppedPublicationDate(date),
+    Stopped_Publication_Date__c = AffectedPublicationDate(date),
     Estimated_Price__c = None,
     Charge_Code__c = None,
     Actual_Price__c = None,
     Expected_Invoice_Date__c = None
   )
 
+  def mkAccount(billCycleDay: Int = 1) = {
+    ZuoraAccount(
+      ZuoraAccountBillingAndPayment(billCycleDay = billCycleDay)
+    )
+  }
+
   val config = Config(
     zuoraConfig = ZuoraConfig(baseUrl = "", holidayStopProcessor = HolidayStopProcessor(Oauth(clientId = "", clientSecret = ""))),
     sfConfig = SFAuthConfig("", "", "", "", "", ""),
-    HolidayCreditProduct.Dev
   )
 }

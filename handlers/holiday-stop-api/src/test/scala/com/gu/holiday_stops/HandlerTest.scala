@@ -7,23 +7,23 @@ import java.time.{DayOfWeek, LocalDate}
 
 import com.gu.effects.{FakeFetchString, SFTestEffects, TestingRawEffects}
 import com.gu.holiday_stops.ZuoraSttpEffects.ZuoraSttpEffectsOps
-import com.gu.holiday_stops.subscription._
 import com.gu.salesforce.SalesforceHandlerSupport.{HEADER_IDENTITY_ID, HEADER_SALESFORCE_CONTACT_ID}
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.SubscriptionName
 import com.gu.salesforce.holiday_stops.{SalesForceHolidayStopsEffects, SalesforceHolidayStopRequestsDetail}
 import com.gu.salesforce.{IdentityId, SalesforceContactId}
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest}
 import com.gu.util.config.Stage
 import com.gu.util.reader.Types.ApiGatewayOp
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
+import com.gu.zuora.subscription.{Credit, MutableCalendar, RatePlan, RatePlanCharge, Subscription, SubscriptionName, Fixtures => SubscriptionFixtures}
 import com.softwaremill.sttp.testing.SttpBackendStub
 import org.scalatest.Inside.inside
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 import play.api.libs.json.{JsObject, JsString, JsSuccess, Json}
 import zio.console.Console
 import zio.{DefaultRuntime, ZIO}
 
-class HandlerTest extends FlatSpec with Matchers {
+class HandlerTest extends AnyFlatSpec with Matchers {
   val testId = "test-generated-id"
 
   private val runtime = new DefaultRuntime {}
@@ -50,7 +50,7 @@ class HandlerTest extends FlatSpec with Matchers {
       HEADER_SALESFORCE_CONTACT_ID -> expectedSfContactIdCoreValue
     ))) shouldBe ContinueProcessing(SalesforceContactId(expectedSfContactIdCoreValue))
   }
-  "GET /potential/<<sub name>>?startDate=...&endDate=...&estimateCredit=true endpoint" should
+  "GET /potential/<<sub name>>?startDate=...&endDate=... endpoint" should
     "calculate potential holiday stop dates and estimated credit" in {
     MutableCalendar.setFakeToday(Some(LocalDate.parse("2019-02-01")))
     val subscriptionName = "Sub12344"
@@ -59,11 +59,14 @@ class HandlerTest extends FlatSpec with Matchers {
     val endDate = startDate.plusMonths(3)
     val customerAcceptanceDate = startDate.plusMonths(1)
 
+    val accountNumber = "123456"
+    val account = Fixtures.mkAccount()
     val subscription = Subscription(
       subscriptionNumber = subscriptionName,
       termStartDate = startDate,
       termEndDate = endDate,
       customerAcceptanceDate = customerAcceptanceDate,
+      contractEffectiveDate = customerAcceptanceDate,
       currentTerm = 12,
       currentTermPeriodType = "Month",
       autoRenew = true,
@@ -86,19 +89,24 @@ class HandlerTest extends FlatSpec with Matchers {
               specificBillingPeriod = None,
               endDateCondition = Some("Subscription_End"),
               upToPeriodsType = None,
-              upToPeriods = None
+              upToPeriods = None,
+              billingDay = None,
+              triggerEvent = Some("SpecificDate"),
+              triggerDate = Some(startDate)
             )),
           productRatePlanId = "",
           id = "",
           lastChangeType = None
         )
       ),
-      "Active"
+      "Active",
+      accountNumber = accountNumber
     )
 
     val testBackend = SttpBackendStub
       .synchronous
       .stubZuoraAuthCall()
+      .stubZuoraAccount(accountNumber, account)
       .stubZuoraSubscription(subscriptionName, subscription)
 
     inside(
@@ -114,8 +122,7 @@ class HandlerTest extends FlatSpec with Matchers {
             productPrefix = "Guardian Weekly xxx",
             startDate = "2019-01-01",
             endDate = "2019-01-15",
-            subscriptionName = subscriptionName,
-            estimateCredit = true
+            subscriptionName = subscriptionName
           ))
       }
     ) {
@@ -126,9 +133,10 @@ class HandlerTest extends FlatSpec with Matchers {
           case JsSuccess(response, _) =>
             response should equal(
               PotentialHolidayStopsResponse(
-                List(
-                  PotentialHolidayStop(LocalDate.of(2019, 1, 4), HolidayStopCredit(-2.89, LocalDate.parse("2019-04-01"))),
-                  PotentialHolidayStop(LocalDate.of(2019, 1, 11), HolidayStopCredit(-2.89, LocalDate.parse("2019-04-01"))),
+                nextInvoiceDateAfterToday = LocalDate.parse("2019-04-01"),
+                potentials = List(
+                  PotentialHolidayStop(LocalDate.of(2019, 1, 4), Credit(-2.89, LocalDate.parse("2019-04-01"))),
+                  PotentialHolidayStop(LocalDate.of(2019, 1, 11), Credit(-2.89, LocalDate.parse("2019-04-01"))),
                 )
               )
             )
@@ -182,7 +190,9 @@ class HandlerTest extends FlatSpec with Matchers {
     val today = LocalDate.now()
     MutableCalendar.setFakeToday(Some(today))
     val subscriptionName = "Sub12344"
-    val gwSubscription = Fixtures.mkGuardianWeeklySubscription()
+    val accountNumber = "12323445"
+    val gwSubscription = SubscriptionFixtures.mkGuardianWeeklySubscription(accountNumber = accountNumber)
+    val account = Fixtures.mkAccount()
     val contactId = "Contact1234"
     val holidayStopRequestsDetail = Fixtures.mkHolidayStopRequestDetails()
     val GuardianWeeklyAnnualIssueLimit = 6
@@ -194,6 +204,7 @@ class HandlerTest extends FlatSpec with Matchers {
       .synchronous
       .stubZuoraAuthCall()
       .stubZuoraSubscription(subscriptionName, gwSubscription)
+      .stubZuoraAccount(accountNumber, account)
 
     val holidayStopRequest = Fixtures.mkHolidayStopRequest(
       id = "holidayStopId",
@@ -387,13 +398,13 @@ class HandlerTest extends FlatSpec with Matchers {
   }
 
   private def legacyPotentialIssueDateRequest(productPrefix: String, startDate: String, endDate: String,
-                                        subscriptionName: String, estimateCredit: Boolean) = {
+                                        subscriptionName: String) = {
     ApiGatewayRequest(
       Some("GET"),
       Some(Map(
         "startDate" -> startDate,
         "endDate" -> endDate,
-        "estimateCredit" -> (if (estimateCredit) "true" else "false"))),
+      )),
       None,
       Some(Map("x-product-name-prefix" -> productPrefix)),
       Some(JsObject(Seq("subscriptionName" -> JsString(subscriptionName)))),
@@ -402,13 +413,12 @@ class HandlerTest extends FlatSpec with Matchers {
   }
 
   private def potentialIssueDateRequest(productType: String, productRatePlanName: String, startDate: String,
-                                        endDate: String, subscriptionName: String, estimateCredit: Boolean) = {
+                                        endDate: String, subscriptionName: String) = {
     ApiGatewayRequest(
       Some("GET"),
       Some(Map(
         "startDate" -> startDate,
         "endDate" -> endDate,
-        "estimateCredit" -> (if (estimateCredit) "true" else "false"),
         "productType" -> productType,
         "productRatePlanName" -> productRatePlanName
       )),

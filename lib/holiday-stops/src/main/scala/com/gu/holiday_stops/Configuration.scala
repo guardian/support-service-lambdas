@@ -1,19 +1,17 @@
 package com.gu.holiday_stops
 
-import java.io.Serializable
-
-import zio.{IO, ZIO}
+import zio.RIO
 
 trait Configuration {
-  val configuration: Configuration.Service
+  val configuration: Configuration.Service[Any]
 }
 
 object Configuration {
-  trait Service {
-    val config: IO[Serializable, Config]
+  trait Service[R] {
+    val config: RIO[R, Config]
   }
 
-  object factory {
-    val config: ZIO[Configuration, Serializable, Config] = ZIO.accessM(_.configuration.config)
+  object factory extends Service[Configuration] {
+    val config: RIO[Configuration, Config] = RIO.accessM(_.configuration.config)
   }
 }

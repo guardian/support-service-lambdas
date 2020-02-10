@@ -5,8 +5,8 @@ import java.time.temporal.TemporalAdjusters.next
 import java.time.{DayOfWeek, LocalDate}
 
 import com.gu.fulfilmentdates.FulfilmentDates
-import com.gu.holiday_stops.subscription.{IssueData, SubscriptionData}
 import com.gu.zuora.ZuoraProductTypes
+import com.gu.zuora.subscription.{IssueData, SubscriptionData, ZuoraApiFailure}
 import org.scalatest.FlatSpec
 import org.scalatest.Matchers._
 
@@ -16,7 +16,7 @@ class GetHolidayStopRequestsTest extends FlatSpec {
   val expectedEditionDaysOfWeek = List(FRIDAY)
 
   val subscriptionData = new SubscriptionData {
-    override def issueDataForDate(issueDate: LocalDate): Either[ZuoraHolidayError, IssueData] = ???
+    override def issueDataForDate(issueDate: LocalDate): Either[ZuoraApiFailure, IssueData] = ???
 
     override def issueDataForPeriod(startDateInclusive: LocalDate, endDateInclusive: LocalDate): List[IssueData] = ???
 

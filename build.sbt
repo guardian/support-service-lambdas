@@ -76,7 +76,7 @@ lazy val zuora = all(project in file("lib/zuora"))
 lazy val `salesforce-core` = all(project in file("lib/salesforce/core"))
   .dependsOn(`config-core`)
   .settings(
-    libraryDependencies ++= Seq() ++ logging
+    libraryDependencies ++= Seq(playJson) ++ logging
   )
 
 lazy val `salesforce-client` = all(project in file("lib/salesforce/client"))
@@ -114,7 +114,7 @@ lazy val `holiday-stops` = all(project in file("lib/holiday-stops"))
     `salesforce-client`,
     effects % "test->test",
     testDep,
-    `zuora-core`
+    `zuora-core` % "compile->compile;test->test"
   )
   .settings(
     libraryDependencies ++= Seq(
@@ -197,6 +197,27 @@ lazy val `fulfilment-dates` = all(project in file("lib/fulfilment-dates"))
   )
 
 lazy val `zuora-core` = all(project in file("lib/zuora-core"))
+  .settings(
+    libraryDependencies ++= Seq(
+      playJson,
+      playJsonExtensions,
+      catsCore,
+      circe,
+      circeParser,
+      sttp,
+      sttpCirce,
+      scalatest,
+      diffx
+    )
+  )
+
+lazy val `credit-processor` = all(project in file("lib/credit-processor"))
+  .dependsOn(
+    `zuora-core`,
+    `fulfilment-dates`
+  ).settings(
+    libraryDependencies ++= logging
+  )
 
 // ==== END libraries ====
 
@@ -234,11 +255,14 @@ lazy val root = all(project in file(".")).enablePlugins(RiffRaffArtifact).aggreg
   `batch-email-sender`,
   `braze-to-salesforce-file-upload`,
   `holiday-stop-processor`,
+  `delivery-problem-credit-processor`,
   `metric-push-api`,
   `fulfilment-date-calculator`,
   `delivery-records-api`,
   `fulfilment-dates`,
-  `zuora-core`
+  `zuora-core`,
+  `credit-processor`,
+  `digital-voucher-api`,
 ).dependsOn(zuora, handler, effectsDepIncludingTestFolder, `effects-sqs`, testDep)
 
 lazy val `identity-backfill` = all(project in file("handlers/identity-backfill")) // when using the "project identity-backfill" command it uses the lazy val name
@@ -306,11 +330,28 @@ lazy val `braze-to-salesforce-file-upload` = all(project in file("handlers/braze
 lazy val `holiday-stop-processor` = all(project in file("handlers/holiday-stop-processor"))
   .enablePlugins(RiffRaffArtifact)
   .dependsOn(
+    `credit-processor`,
     `holiday-stops` % "compile->compile;test->test",
-    effects,
-    `zuora-core`,
-    `fulfilment-dates`
+    effects
   )
+
+lazy val `delivery-problem-credit-processor` =
+  all(project in file("handlers/delivery-problem-credit-processor"))
+    .dependsOn(
+      `credit-processor`,
+      `salesforce-sttp-client`,
+      effects
+    )
+    .settings(
+      libraryDependencies ++= Seq(
+        scalaLambda,
+        circe,
+        zio,
+        sttpAsycHttpClientBackendCats,
+        scalatest
+      )
+    )
+    .enablePlugins(RiffRaffArtifact)
 
 lazy val `metric-push-api` = all(project in file("handlers/metric-push-api"))
   .enablePlugins(RiffRaffArtifact)
@@ -322,6 +363,15 @@ lazy val `fulfilment-date-calculator` = all(project in file("handlers/fulfilment
 
 lazy val `delivery-records-api` = all(project in file("handlers/delivery-records-api"))
   .dependsOn(`effects-s3`, `config-core`, `salesforce-sttp-client`, `salesforce-sttp-test-stub` % Test)
+  .settings(
+    libraryDependencies ++=
+      Seq(http4sLambda, http4sDsl, http4sCirce, http4sServer, circe, sttpAsycHttpClientBackendCats, scalatest)
+        ++ logging
+  )
+  .enablePlugins(RiffRaffArtifact)
+
+lazy val `digital-voucher-api` = all(project in file("handlers/digital-voucher-api"))
+  .dependsOn(`effects-s3`, `config-core`)
   .settings(
     libraryDependencies ++=
       Seq(http4sLambda, http4sDsl, http4sCirce, http4sServer, circe, sttpAsycHttpClientBackendCats, scalatest)
