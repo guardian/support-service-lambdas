@@ -16,7 +16,8 @@
         "Name": "A-S00001"
       },
       "Delivery_Date__c": "2019-12-06",
-      "Charge_Code__c": null
+      "Charge_Code__c": null,
+      "Invoice_Date__c": "2020-02-10"
     },
     {
       "attributes": {
@@ -32,7 +33,8 @@
         "Name": "A-S00002"
       },
       "Delivery_Date__c": "2019-12-13",
-      "Charge_Code__c": "C12345"
+      "Charge_Code__c": "C12345",
+      "Invoice_Date__c": "2020-03-01"
     }
   ]
 }

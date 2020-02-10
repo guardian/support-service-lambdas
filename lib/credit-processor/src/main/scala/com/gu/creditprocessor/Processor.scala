@@ -13,20 +13,20 @@ import org.slf4j.LoggerFactory
 object Processor {
   private val logger = LoggerFactory.getLogger(getClass)
 
-  def processLiveProduct[RequestType <: CreditRequest, ResultType <: ZuoraCreditAddResult](
+  def processLiveProduct[Request <: CreditRequest, Result <: ZuoraCreditAddResult](
     config: ZuoraConfig,
     zuoraAccessToken: AccessToken,
     sttpBackend: SttpBackend[Id, Nothing],
     creditProduct: CreditProduct,
-    getCreditRequestsFromSalesforce: (ZuoraProductType, List[LocalDate]) => SalesforceApiResponse[List[RequestType]],
+    getCreditRequestsFromSalesforce: (ZuoraProductType, List[LocalDate]) => SalesforceApiResponse[List[Request]],
     fulfilmentDatesFetcher: FulfilmentDatesFetcher,
     processOverrideDate: Option[LocalDate],
     productType: ZuoraProductType,
-    updateToApply: (CreditProduct, Subscription, ZuoraAccount, AffectedPublicationDate) => ZuoraApiResponse[SubscriptionUpdate],
-    resultOfZuoraCreditAdd: (RequestType, RatePlanCharge) => ResultType,
-    writeCreditResultsToSalesforce: List[ResultType] => SalesforceApiResponse[_],
+    updateToApply: (CreditProduct, Subscription, ZuoraAccount, Request) => ZuoraApiResponse[SubscriptionUpdate],
+    resultOfZuoraCreditAdd: (Request, RatePlanCharge) => Result,
+    writeCreditResultsToSalesforce: List[Result] => SalesforceApiResponse[_],
     getAccount: String => ZuoraApiResponse[ZuoraAccount]
-  ): ProcessResult[ResultType] = {
+  ): ProcessResult[Result] = {
 
     def getSubscription(
       subscriptionName: SubscriptionName
@@ -41,32 +41,32 @@ object Processor {
 
     processProduct(
       creditProduct: CreditProduct,
-      getCreditRequestsFromSalesforce: (ZuoraProductType, List[LocalDate]) => SalesforceApiResponse[List[RequestType]],
+      getCreditRequestsFromSalesforce: (ZuoraProductType, List[LocalDate]) => SalesforceApiResponse[List[Request]],
       fulfilmentDatesFetcher: FulfilmentDatesFetcher,
       processOverrideDate: Option[LocalDate],
       productType: ZuoraProductType,
       getSubscription: SubscriptionName => ZuoraApiResponse[Subscription],
       getAccount: String => ZuoraApiResponse[ZuoraAccount],
-      updateToApply: (CreditProduct, Subscription, ZuoraAccount, AffectedPublicationDate) => ZuoraApiResponse[SubscriptionUpdate],
+      updateToApply: (CreditProduct, Subscription, ZuoraAccount, Request) => ZuoraApiResponse[SubscriptionUpdate],
       updateSubscription: (Subscription, SubscriptionUpdate) => ZuoraApiResponse[Unit],
-      resultOfZuoraCreditAdd: (RequestType, RatePlanCharge) => ResultType,
-      writeCreditResultsToSalesforce: List[ResultType] => SalesforceApiResponse[_]
+      resultOfZuoraCreditAdd: (Request, RatePlanCharge) => Result,
+      writeCreditResultsToSalesforce: List[Result] => SalesforceApiResponse[_]
     )
   }
 
-  def processProduct[RequestType <: CreditRequest, ResultType <: ZuoraCreditAddResult](
+  def processProduct[Request <: CreditRequest, Result <: ZuoraCreditAddResult](
     creditProduct: CreditProduct,
-    getCreditRequestsFromSalesforce: (ZuoraProductType, List[LocalDate]) => SalesforceApiResponse[List[RequestType]],
+    getCreditRequestsFromSalesforce: (ZuoraProductType, List[LocalDate]) => SalesforceApiResponse[List[Request]],
     fulfilmentDatesFetcher: FulfilmentDatesFetcher,
     processOverrideDate: Option[LocalDate],
     productType: ZuoraProductType,
     getSubscription: SubscriptionName => ZuoraApiResponse[Subscription],
     getAccount: String => ZuoraApiResponse[ZuoraAccount],
-    updateToApply: (CreditProduct, Subscription, ZuoraAccount, AffectedPublicationDate) => ZuoraApiResponse[SubscriptionUpdate],
+    updateToApply: (CreditProduct, Subscription, ZuoraAccount, Request) => ZuoraApiResponse[SubscriptionUpdate],
     updateSubscription: (Subscription, SubscriptionUpdate) => ZuoraApiResponse[Unit],
-    resultOfZuoraCreditAdd: (RequestType, RatePlanCharge) => ResultType,
-    writeCreditResultsToSalesforce: List[ResultType] => SalesforceApiResponse[_]
-  ): ProcessResult[ResultType] = {
+    resultOfZuoraCreditAdd: (Request, RatePlanCharge) => Result,
+    writeCreditResultsToSalesforce: List[Result] => SalesforceApiResponse[_]
+  ): ProcessResult[Result] = {
     val creditRequestsFromSalesforce = for {
       datesToProcess <- getDatesToProcess(fulfilmentDatesFetcher, productType, processOverrideDate, LocalDate.now())
       _ = logger.info(s"Processing ${creditProduct.productRatePlanChargeName}s for ${productType.name} for issue dates ${datesToProcess.mkString(", ")}")
@@ -105,19 +105,19 @@ object Processor {
   /**
    * This is the main business logic for adding a credit amendment to a subscription in Zuora
    */
-  def addCreditToSubscription[RequestType <: CreditRequest, ResultType <: ZuoraCreditAddResult](
+  def addCreditToSubscription[Request <: CreditRequest, Result <: ZuoraCreditAddResult](
     creditProduct: CreditProduct,
     getSubscription: SubscriptionName => ZuoraApiResponse[Subscription],
     getAccount: String => ZuoraApiResponse[ZuoraAccount],
-    updateToApply: (CreditProduct, Subscription, ZuoraAccount, AffectedPublicationDate) => ZuoraApiResponse[SubscriptionUpdate],
+    updateToApply: (CreditProduct, Subscription, ZuoraAccount, Request) => ZuoraApiResponse[SubscriptionUpdate],
     updateSubscription: (Subscription, SubscriptionUpdate) => ZuoraApiResponse[Unit],
-    result: (RequestType, RatePlanCharge) => ResultType
-  )(request: RequestType): ZuoraApiResponse[ResultType] =
+    result: (Request, RatePlanCharge) => Result
+  )(request: Request): ZuoraApiResponse[Result] =
     for {
       subscription <- getSubscription(request.subscriptionName)
       account <- getAccount(subscription.accountNumber)
       _ <- if (subscription.status == "Cancelled") Left(ZuoraApiFailure(s"Cannot process cancelled subscription because Zuora does not allow amending cancelled subs (Code: 58730020). Apply manual refund ASAP! $request; ${subscription.subscriptionNumber};")) else Right(())
-      subscriptionUpdate <- updateToApply(creditProduct, subscription, account, request.publicationDate)
+      subscriptionUpdate <- updateToApply(creditProduct, subscription, account, request)
       _ <- if (subscription.hasCreditAmendment(request)) Right(()) else updateSubscription(subscription, subscriptionUpdate)
       updatedSubscription <- getSubscription(request.subscriptionName)
       addedCharge <- updatedSubscription.ratePlanCharge(request).toRight(ZuoraApiFailure(s"Failed to write credit amendment to Zuora: $request"))

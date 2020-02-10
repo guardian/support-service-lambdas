@@ -124,9 +124,15 @@ object DeliveryCreditProcessor extends Logging {
     creditProduct: CreditProduct,
     subscription: Subscription,
     account: ZuoraAccount,
-    deliveryDate: AffectedPublicationDate
+    request: DeliveryCreditRequest
   ): ZuoraApiResponse[SubscriptionUpdate] =
-    SubscriptionUpdate.apply(creditProduct, subscription, account, deliveryDate)
+    SubscriptionUpdate(
+      creditProduct,
+      subscription,
+      account,
+      AffectedPublicationDate(request.Delivery_Date__c),
+      Some(InvoiceDate(request.Invoice_Date__c))
+    )
 
   def resultOfZuoraCreditAdd(
     request: DeliveryCreditRequest,
@@ -158,7 +164,7 @@ object DeliveryCreditProcessor extends Logging {
 
     def deliveryRecordsQuery(productType: ZuoraProductType) =
       s"""
-         |SELECT Id, SF_Subscription__r.Name, Delivery_Date__c, Charge_Code__c
+         |SELECT Id, SF_Subscription__r.Name, Delivery_Date__c, Charge_Code__c, Invoice_Date__c
          |FROM Delivery__c
          |WHERE SF_Subscription__r.Product_Type__c = '${productType.name}'
          |AND Credit_Requested__c = true
