@@ -54,7 +54,8 @@ case class CreateDeliveryProblem(
   description: Option[String],
   problemType: String,
   deliveryRecords: List[DeliveryRecordToLink],
-  repeatDeliveryProblem: Option[Boolean]
+  repeatDeliveryProblem: Option[Boolean],
+  newContactPhoneNumbers: Option[SFApiContactPhoneNumbers]
 )
 
 sealed trait DeliveryRecordServiceError
@@ -208,7 +209,7 @@ object DeliveryRecordsService {
     optionalStartDate: Option[LocalDate],
     optionalEndDate: Option[LocalDate]
   ) =
-    s"""SELECT Buyer__r.Phone, Buyer__r.HomePhone, Buyer__r.MobilePhone, Buyer__r.OtherPhone, (
+    s"""SELECT Buyer__r.Id, Buyer__r.Phone, Buyer__r.HomePhone, Buyer__r.MobilePhone, Buyer__r.OtherPhone, (
        |    SELECT Id, Delivery_Date__c, Delivery_Address__c, Delivery_Instructions__c, Has_Holiday_Stop__c,
        |           Address_Line_1__c,Address_Line_2__c, Address_Line_3__c, Address_Town__c, Address_Country__c, Address_Postcode__c,
        |           Case__c, Case__r.Id, Case__r.Subject, Case__r.Description, Case__r.Case_Closure_Reason__c,

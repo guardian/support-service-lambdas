@@ -44,6 +44,7 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
   val invoiceDate = LocalDate.of(2019, 12, 10)
   val isActioned = true
   val contactNumbers = SFApiContactPhoneNumbers(
+    Id = Some("id"),
     Phone = Some("+447654321234"),
     HomePhone = Some("+441234567890"),
     MobilePhone = Some("garbage"),
@@ -152,7 +153,7 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
         problemType = sfProblemCase.Case_Closure_Reason__c
       )
     ),
-    contactNumbers
+    contactNumbers.copy(MobilePhone = None)
   )
 
   "DeliveryRecordsApp" should "lookup subscription with identity id" in {

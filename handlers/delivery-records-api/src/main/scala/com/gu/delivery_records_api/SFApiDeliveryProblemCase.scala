@@ -50,10 +50,32 @@ case class SFApiLinkDeliveryRecord(
 
 object SFApiCompositePartBody {
   // this encoder needs to be defined, otherwise circe wraps the case classes with their name (as a discriminator)
-  implicit val encoder: Encoder[SFApiCompositePartBody] = Encoder.instance[SFApiCompositePartBody]{
+  implicit val encoder: Encoder[SFApiCompositePartBody] = Encoder.instance[SFApiCompositePartBody] {
     case caseBody: SFApiCreateDeliveryProblemCase => caseBody.asJson
     case linkRecordBody: SFApiLinkDeliveryRecord => linkRecordBody.asJson
+    case contactPhoneNumbers: SFApiContactPhoneNumbers => contactPhoneNumbers.asJson
+    case _ => throw new RuntimeException("non-exhaustive pattern match for SFApiCompositePartBody Encoder")
   }
+}
+
+case class SFApiContactPhoneNumbers(
+  Id: Option[String],
+  Phone: Option[String] = None,
+  HomePhone: Option[String] = None,
+  MobilePhone: Option[String] = None,
+  OtherPhone: Option[String] = None
+) extends SFApiCompositePartBody {
+
+  private def validator(trimmedValue: String) =
+    !trimmedValue.isEmpty && trimmedValue.matches("[+\\-\\d\\s]+")
+
+  def filterOutGarbage(): SFApiContactPhoneNumbers = copy(
+    Phone = Phone.map(_.trim).filter(validator),
+    HomePhone = HomePhone.map(_.trim).filter(validator),
+    MobilePhone = MobilePhone.map(_.trim).filter(validator),
+    OtherPhone = OtherPhone.map(_.trim).filter(validator)
+  )
+
 }
 
 object SFApiCompositeCreateDeliveryProblem {
@@ -100,7 +122,12 @@ object SFApiCompositeCreateDeliveryProblem {
         Invoice_Date__c = deliveryRecord.invoiceDate,
         Credit_Requested_On__c = deliveryRecord.creditAmount.map(_ => now)
       )
-    ))
+    )) ++ detail.newContactPhoneNumbers.map(contactPhoneNumbers => SFApiCompositePart[SFApiCompositePartBody](
+      referenceId = "UpdateContactPhoneNumbers",
+      method = "PATCH",
+      url = s"${sfObjectsBaseUrl}Contact/${contactPhoneNumbers.Id.get}",
+      body = contactPhoneNumbers.filterOutGarbage().copy(Id = None)
+    )).toList
   )
 
 }

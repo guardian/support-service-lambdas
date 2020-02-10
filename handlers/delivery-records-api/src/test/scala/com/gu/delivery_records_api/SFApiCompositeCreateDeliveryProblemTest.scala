@@ -33,6 +33,10 @@ class SFApiCompositeCreateDeliveryProblemTest extends FlatSpec with Matchers {
             invoiceDate = Some(LocalDate.of(2020, 1, 10))
           )
         ),
+        newContactPhoneNumbers = Some(SFApiContactPhoneNumbers(
+          Id = Some("id"),
+          Phone = Some("1234567890")
+        )),
         repeatDeliveryProblem = Some(true)
       ),
       now
@@ -85,10 +89,62 @@ class SFApiCompositeCreateDeliveryProblemTest extends FlatSpec with Matchers {
          |        "Invoice_Date__c" : "2020-01-10",
          |        "Credit_Requested_On__c" : ${now.asJson.toString}
          |      }
+         |    },
+         |    {
+         |      "referenceId" : "UpdateContactPhoneNumbers",
+         |      "method" : "PATCH",
+         |      "url" : "/services/data/v29.0/sobjects/Contact/id",
+         |      "body" : {
+         |        "Id" : null,
+         |        "Phone" : "1234567890",
+         |        "HomePhone" : null,
+         |        "MobilePhone" : null,
+         |        "OtherPhone" : null
+         |      }
          |    }
          |  ]
          |}""".stripMargin
       )
+
+  }
+
+  "SFApiContactPhoneNumbers" should "filter out garbage" in {
+
+    val baseContactNumbers = SFApiContactPhoneNumbers(Some("id"))
+
+    baseContactNumbers.copy(
+      Phone = Some("123456789")
+    ).filterOutGarbage() should equal(baseContactNumbers.copy(
+        Phone = Some("123456789")
+      ))
+
+    baseContactNumbers.copy(
+      Phone = Some("123456789"),
+      HomePhone = Some("whats_an_email_address_doing_here@123.com"),
+      OtherPhone = Some("some garbage text which shouldn't be in a phone field!!!")
+    ).filterOutGarbage() should equal(baseContactNumbers.copy(
+        Phone = Some("123456789")
+      ))
+
+    baseContactNumbers.copy(
+      Phone = Some("123456789"),
+      OtherPhone = Some("123-456-789")
+    ).filterOutGarbage() should equal(baseContactNumbers.copy(
+        Phone = Some("123456789"),
+        OtherPhone = Some("123-456-789")
+      ))
+
+    baseContactNumbers.copy(
+      Phone = Some("+44123456789")
+    ).filterOutGarbage() should equal(baseContactNumbers.copy(
+        Phone = Some("+44123456789")
+      ))
+
+    baseContactNumbers.copy(
+      Phone = Some("123 456 789")
+    ).filterOutGarbage() should equal(baseContactNumbers.copy(
+        Phone = Some("123 456 789")
+      ))
 
   }
 

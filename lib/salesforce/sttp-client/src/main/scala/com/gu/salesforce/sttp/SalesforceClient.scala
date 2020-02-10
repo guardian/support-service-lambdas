@@ -186,7 +186,7 @@ object SalesforceClient extends LazyLogging {
             Method.POST,
             Uri(new URI(auth.instance_url + compositeBaseUrl)),
             Some(body)
-          ).flatMap(response => //TODO extract to named function
+          ).flatMap(response =>
             // this is necessary because for some bizarre reason composite requests return a 200 even if the sub-requests fail
             // see https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/requests_composite.htm
             response.compositeResponse.filterNot(part => successStatusCodes.contains(part.httpStatusCode)).toNel.fold(
