@@ -14,9 +14,9 @@ case class DigitalVoucherApiConfig(imovoBaseUrl: String, imovoApiKey: String)
 case class ConfigError(message: String)
 
 object ConfigLoader {
-  def loadConfig[F[_]: Sync](): EitherT[F, ConfigError, DigitalVoucherApiConfig] = {
+  def loadConfig[F[_]: Sync](appIdentity: AppIdentity): EitherT[F, ConfigError, DigitalVoucherApiConfig] = {
     for {
-      typeSafeConfig <- loadConfigFromPropertyStore[F]()
+      typeSafeConfig <- loadConfigFromPropertyStore[F](appIdentity)
       parsedConfig <- typeSafeConfig
         .as[DigitalVoucherApiConfig]
         .leftMap(error => ConfigError(s"Failed to decode config: $error"))
@@ -24,11 +24,10 @@ object ConfigLoader {
     } yield parsedConfig
   }
 
-  private def loadConfigFromPropertyStore[F[_]: Sync](): EitherT[F, ConfigError, Config] =
+  private def loadConfigFromPropertyStore[F[_]: Sync](appIdentity: AppIdentity): EitherT[F, ConfigError, Config] =
     EitherT(Sync[F].delay {
       Either.catchNonFatal {
-        val identity = AppIdentity.whoAmI(defaultAppName = "digital-voucher-api")
-        com.gu.conf.ConfigurationLoader.load(identity) {
+        com.gu.conf.ConfigurationLoader.load(appIdentity) {
           case identity: AwsIdentity => SSMConfigurationLocation.default(identity)
           case DevIdentity(myApp) => ResourceConfigurationLocation(s"${myApp}-secret-dev.conf")
         }

@@ -1,6 +1,7 @@
 package com.gu.digital_voucher_api
 
 import cats.effect.IO
+import com.gu.DevIdentity
 import io.circe.Decoder
 import io.circe.syntax._
 import io.circe.generic.auto._
@@ -58,7 +59,7 @@ class DigitalVoucherApiTest extends FlatSpec with Matchers with EitherValues {
   }
 
   private def createApp() = {
-    Inside.inside(DigitalVoucherApiApp().value.unsafeRunSync()) {
+    Inside.inside(DigitalVoucherApiApp(DevIdentity("digital-voucher-api")).value.unsafeRunSync()) {
       case Right(value) => value
     }
   }
