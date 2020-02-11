@@ -32,6 +32,7 @@ object Dependencies {
   val circe = "io.circe" %% "circe-generic" % circeVersion
   val circeParser = "io.circe" %% "circe-parser" % circeVersion
   val circeJava8 = "io.circe" %% "circe-java8" % circeVersion
+  val circeConfig =  "io.circe" %% "circe-config" % "0.6.1"
   val sttp = "com.softwaremill.sttp" %% "core" % sttpVersion
   val sttpCirce = "com.softwaremill.sttp" %% "circe" % sttpVersion
   val sttpCats = "com.softwaremill.sttp" %% "cats" % sttpVersion
@@ -47,6 +48,7 @@ object Dependencies {
   val scalaLambda = "io.github.mkotsur" %% "aws-lambda-scala" % "0.1.1"
   val zio = "dev.zio" %% "zio" % "1.0.0-RC17"
   val diffx = "com.softwaremill.diffx" %% "diffx-scalatest" % "0.3.17" % Test
+  val simpleConfig = "com.gu" %% "simple-configuration-ssm" % "1.4.1"
 
   // to resolve merge clash of 'module-info.class'
   // see https://stackoverflow.com/questions/54834125/sbt-assembly-deduplicate-module-info-class

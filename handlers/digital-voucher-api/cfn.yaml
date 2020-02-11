@@ -52,7 +52,21 @@ Resources:
                       Statement:
                           - Effect: Allow
                             Action: s3:GetObject
-                            Resource: !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/*
+                            Resource: !Sub "arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/*"
+                - PolicyName: ReadApplicationConfig
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action: ssm:GetParametersByPath
+                            Resource: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${Stage}/membership-${Stage}-digital-voucher-api/digital-voucher-api-${Stage}"
+                - PolicyName: DecryptApplicationConfig
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action: kms:Decrypt
+                            Resource: !Sub "arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/302bd430-2d97-4984-8625-b55a70691b49"
+
+
 
     DigitalVoucherApi:
         Type: "AWS::ApiGateway::RestApi"
@@ -80,6 +94,8 @@ Resources:
             Handler: com.gu.digital_voucher_api.Handler::handle
             Environment:
                 Variables:
+                  App: !Sub digital-voucher-api-${Stage}
+                  Stack: !Sub membership-${Stage}-digital-voucher-api
                   Stage: !Ref Stage
             Role:
                 Fn::GetAtt:

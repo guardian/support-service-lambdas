@@ -1,6 +1,7 @@
 package com.gu.digital_voucher_api
 
 import cats.effect.IO
+import com.gu.DevIdentity
 import io.circe.Decoder
 import io.circe.syntax._
 import io.circe.generic.auto._
@@ -18,7 +19,7 @@ class DigitalVoucherApiTest extends FlatSpec with Matchers with EitherValues {
       ).withEntity[String](CreateVoucherRequestBody("Rate-Plan-Name").asJson.spaces2)
     ).value.unsafeRunSync().get
 
-    getBody[Voucher](response) should equal(Voucher("sub123456-card-code", "sub123456-letter-code"))
+    getBody[Voucher](response) should equal(Voucher("1111111111", "2222222222"))
     response.status.code should equal(200)
   }
   it should "return stubbed voucher details for replace request" in {
@@ -27,10 +28,10 @@ class DigitalVoucherApiTest extends FlatSpec with Matchers with EitherValues {
       Request(
         method = Method.POST,
         Uri(path = "/digital-voucher/replace")
-      ).withEntity[String](Voucher("card-code", "letter-code").asJson.spaces2)
+      ).withEntity[String](Voucher("3333333333", "4444444444").asJson.spaces2)
     ).value.unsafeRunSync().get
 
-    getBody[Voucher](response) should equal(Voucher("card-code-replaced-card-code", "letter-code-replaced-letter-code"))
+    getBody[Voucher](response) should equal(Voucher("3333333333", "4444444444"))
     response.status.code should equal(200)
   }
   it should "return stubbed voucher details for get request" in {
@@ -42,7 +43,7 @@ class DigitalVoucherApiTest extends FlatSpec with Matchers with EitherValues {
       )
     ).value.unsafeRunSync().get
 
-    getBody[Voucher](response) should equal(Voucher("sub123456-card-code", "sub123456-letter-code"))
+    getBody[Voucher](response) should equal(Voucher("5555555555", "6666666666"))
     response.status.code should equal(200)
   }
   it should "return stubbed 200 response for delete request" in {
@@ -58,7 +59,7 @@ class DigitalVoucherApiTest extends FlatSpec with Matchers with EitherValues {
   }
 
   private def createApp() = {
-    Inside.inside(DigitalVoucherApiApp().value.unsafeRunSync()) {
+    Inside.inside(DigitalVoucherApiApp(DevIdentity("digital-voucher-api")).value.unsafeRunSync()) {
       case Right(value) => value
     }
   }

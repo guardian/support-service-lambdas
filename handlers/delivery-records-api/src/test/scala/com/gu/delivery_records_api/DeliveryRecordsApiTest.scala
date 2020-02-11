@@ -10,7 +10,7 @@ import com.softwaremill.sttp.impl.cats.CatsMonadError
 import com.softwaremill.sttp.testing.SttpBackendStub
 import io.circe.Decoder
 import org.http4s.{Header, Headers, Method, Query, Request, Response, Uri}
-import org.scalatest.{EitherValues, FlatSpec, Matchers}
+import org.scalatest.{EitherValues, FlatSpec, Inside, Matchers}
 import io.circe.generic.auto._
 import io.circe.parser._
 
@@ -273,6 +273,8 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
   }
 
   private def createApp(salesforceBackendStub: SttpBackendStub[IO, Nothing]) = {
-    DeliveryRecordsApiApp(config, salesforceBackendStub).value.unsafeRunSync().right.value
+    Inside.inside(DeliveryRecordsApiApp(config, salesforceBackendStub).value.unsafeRunSync()) {
+      case Right(value) => value
+    }
   }
 }
