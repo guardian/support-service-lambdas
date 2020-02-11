@@ -10,7 +10,7 @@ import io.circe.syntax._
 class SFApiCompositeCreateDeliveryProblemTest extends FlatSpec with Matchers {
 
   // because by default circe wraps the inner 'body' fields with the case class name (as a discriminator) - invalid for SF
-  it should "encode a SFApiCompositeCreateDeliveryProblem to JSON correctly" in {
+  it should "encode a SFApiCompositeCreateDeliveryProblem to JSON correctly (for composite request)" in {
 
     val now = LocalDateTime.now()
 

@@ -41,6 +41,12 @@ object SalesforceStub {
           Response.ok(response.asJson.spaces2)
       }
     }
+    def stubComposite[A: Encoder](auth: SalesforceAuth, response: A): SttpBackendStub[F, S] = {
+      sttpStub.whenRequestMatchesPartial {
+        case request: Request[_, _] if matchesCompositeRequest(auth, request) =>
+          Response.ok(response.asJson.spaces2)
+      }
+    }
   }
 
   private def matchesAuthRequest[S, F[_]](config: SFAuthConfig, request: Request[_, _]) = {
@@ -65,6 +71,12 @@ object SalesforceStub {
   private def matchesPatchRequest[S, F[_]](auth: SalesforceAuth, request: Request[_, _]) = {
     val urlMatches = urlNoQueryString(request).startsWith(auth.instance_url + SalesforceConstants.sfObjectsBaseUrl)
     val methodMatches = request.method == Method.PATCH
+    urlMatches && methodMatches
+  }
+
+  private def matchesCompositeRequest[S, F[_]](auth: SalesforceAuth, request: Request[_, _]) = {
+    val urlMatches = urlNoQueryString(request).startsWith(auth.instance_url + SalesforceConstants.compositeBaseUrl)
+    val methodMatches = request.method == Method.POST
     urlMatches && methodMatches
   }
 
