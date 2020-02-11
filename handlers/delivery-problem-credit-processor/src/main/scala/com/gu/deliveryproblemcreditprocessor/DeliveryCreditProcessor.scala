@@ -141,7 +141,6 @@ object DeliveryCreditProcessor extends Logging {
     deliveryId = request.Id,
     chargeCode = RatePlanChargeCode(addedCharge.number),
     amountCredited = Price(addedCharge.price),
-    invoiceDate = addedCharge.effectiveStartDate
   )
 
   def getCreditRequestsFromSalesforce(sfAuthConfig: SFAuthConfig)(
@@ -192,7 +191,6 @@ object DeliveryCreditProcessor extends Logging {
     Charge_Code__c: String,
     Credit_Amount__c: Double,
     Actioned_On__c: LocalDateTime,
-    Invoice_Date__c: LocalDate
   )
 
   def writeCreditResultsToSalesforce(sfAuthConfig: SFAuthConfig)(
@@ -209,7 +207,6 @@ object DeliveryCreditProcessor extends Logging {
           Charge_Code__c = result.chargeCode.value,
           Credit_Amount__c = result.amountCredited.value,
           Actioned_On__c = LocalDateTime.now,
-          Invoice_Date__c = result.invoiceDate
         )
         salesforceClient.patch(
           deliveryObject,

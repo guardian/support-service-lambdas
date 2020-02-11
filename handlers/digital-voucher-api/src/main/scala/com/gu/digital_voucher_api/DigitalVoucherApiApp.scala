@@ -30,6 +30,4 @@ object DigitalVoucherApiApp extends LazyLogging {
       logAction = Some({ message: String => IO.delay(logger.info(message)) })
     )
   }
-
-  private val bucket = "gu-reader-revenue-private"
 }
