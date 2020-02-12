@@ -1,10 +1,8 @@
-Delivery Records Api
-====================
+# delivery-records-api
 
 This api provides access to delivery records for a subscription. Delivery records are stored in Salesforce. 
 
-Usage
-=====
+### Usage
 
 All endpoints require...
 
@@ -13,6 +11,98 @@ All endpoints require...
   - `x-identity-id` header which specifies the identityID of the user to request data for _(sent in the `manage-frontend` use-case)_
   - `x-salesforce-contact-id` header which specifies the Salesforce contact ID of the user to request data for _(sent in the CSR UI (in Salesforce) use-case)_
 
-| Method | Endpoint | Description |
-| --- | --- | --- | 
-| GET | `/{STAGE}/delivery-records/{SUBSCRIPTION_NAME}?startDate={yyyy-MM-dd}&endDate={yyyy-MM-dd}` | Returns the delivery records for a subscription optionally filtered based on delivery date |
+#### **`GET`** `/{STAGE}/delivery-records/{SUBSCRIPTION_NAME}?startDate={yyyy-MM-dd}&endDate={yyyy-MM-dd}`
+
+- Returns the delivery records for a subscription, optionally filtered based on delivery date.
+- Returns 404 if the user doesn't have access to the subscription.
+- For each delivery record there is an nullable `problemCaseId` field, which if populated means there is a delivery problem on that delivery record, details of which can be found in the `deliveryProblemMap`
+- There is also a top-level key called `contactPhoneNumbers` containing various contact numbers from the contact in Salesforce (should these need to be updated when reporting a problem)
+
+##### Sample Response
+```json
+{
+    "results": [
+        {
+            "id": "a3M3E0000001a50UAA",
+            "deliveryDate": "2020-07-31",
+            "deliveryInstruction": null,
+            "deliveryAddress": null,
+            "addressLine1": null,
+            "addressLine2": null,
+            "addressLine3": null,
+            "addressTown": null,
+            "addressCountry": null,
+            "addressPostcode": null,
+            "hasHolidayStop": false,
+            "problemCaseId": "5003E00000FwUMYQA3",
+            "isChangedAddress": null,
+            "isChangedDeliveryInstruction": null,
+            "credit": {
+                "amount": 12.34,
+                "invoiceDate": "2019-12-30",
+                "isActioned": true
+            }
+        },
+        {
+            "id": "a3M3E0000001al2UAA",
+            "deliveryDate": "2020-02-07",
+            "deliveryInstruction": null,
+            "deliveryAddress": null,
+            "addressLine1": null,
+            "addressLine2": null,
+            "addressLine3": null,
+            "addressTown": null,
+            "addressCountry": null,
+            "addressPostcode": null,
+            "hasHolidayStop": true,
+            "problemCaseId": null,
+            "isChangedAddress": null,
+            "isChangedDeliveryInstruction": null,
+            "credit": null
+        }
+    ],
+    "deliveryProblemMap": {
+        "5003E00000FwUMYQA3": {
+            "id": "5003E00000FwUMYQA3",
+            "subject": "[Self Service] Delivery Problem : No Delivery (Guardian Weekly - A-S00080535)",
+            "description": "description",
+            "problemType": "No Delivery"
+        }
+    },
+    "contactPhoneNumbers": {
+        "Id": "0033E00001BDFFzQAP",
+        "Phone": "+44123456789",
+        "HomePhone": "123 456 789",
+        "MobilePhone": "123-456-789",
+        "OtherPhone": null
+    }
+}
+```
+
+#### `POST` `/{STAGE}/delivery-records/{SUBSCRIPTION_NAME}`
+
+- Creates a delivery problem case, linking the provided delivery records to the new case, then **returns the same as the `GET`** once the changes have been made.
+- Optionally takes a `repeatDeliveryProblem` top-level field to mark the case as a 'repeat delivery problem'.
+- Optionally takes a `newContactPhoneNumbers` top-level field which will update the various phone numbers on the contact.
+
+##### Sample Request
+```json
+{
+    "productName": "Guardian Weekly",
+    "description": "description",
+    "problemType": "No Delivery",
+    "repeatDeliveryProblem": true,
+    "deliveryRecords": [
+    	{
+    		"id": "a3M3E0000001a50UAA",
+    		"creditAmount": 12.34,
+    		"invoiceDate": "2019-12-30"
+
+    	}
+    ],
+    "newContactPhoneNumbers": {
+        "Id": "0033E00001BDFFzQAP",
+        "MobilePhone": "987-654-321"
+    }
+}
+```
