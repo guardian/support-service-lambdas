@@ -11,7 +11,7 @@ import io.circe.parser.decode
 import org.http4s.{Method, Request, Response, Uri}
 import org.scalatest.{EitherValues, FlatSpec, Inside, Matchers}
 import com.gu.digital_voucher_api.imovo.ImovoStub._
-import com.gu.digital_voucher_api.imovo.ImovoVoucherResponse
+import com.gu.digital_voucher_api.imovo.{ImovoErrorResponse, ImovoVoucherResponse}
 
 class DigitalVoucherApiTest extends FlatSpec with Matchers with EitherValues {
   "DigitalVoucherApi" should "return stubbed voucher details for create request" in {
@@ -53,6 +53,31 @@ class DigitalVoucherApiTest extends FlatSpec with Matchers with EitherValues {
       Voucher("replaced-card-test-voucher-code", "replaced-letter-test-voucher-code")
     )
     response.status.code should equal(200)
+  }
+  it should "return error response when one imovo replace request fails" in {
+    val imovoBackendStub: SttpBackendStub[IO, Nothing] = SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
+      .stubReplace(
+        apiKey = "imovo-test-api-key",
+        baseUrl = "https://imovo.test.com",
+        voucherCode = "card-test-voucher-code",
+        response = ImovoErrorResponse(Nil, false)
+      )
+      .stubReplace(
+        apiKey = "imovo-test-api-key",
+        baseUrl = "https://imovo.test.com",
+        voucherCode = "letter-test-voucher-code",
+        response = ImovoVoucherResponse("replaced-letter-test-voucher-code", 0.0, "", true)
+      )
+
+    val app = createApp(imovoBackendStub)
+    val response = app.run(
+      Request(
+        method = Method.POST,
+        Uri(path = "/digital-voucher/replace")
+      ).withEntity[String](Voucher("card-test-voucher-code", "letter-test-voucher-code").asJson.spaces2)
+    ).value.unsafeRunSync().get
+
+    response.status.code should equal(500)
   }
   it should "return stubbed voucher details for get request" in {
     val app = createApp(SttpBackendStub[IO, Nothing](new CatsMonadError[IO]))

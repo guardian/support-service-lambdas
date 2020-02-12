@@ -2,12 +2,12 @@ package com.gu.digital_voucher_api.imovo
 
 import com.softwaremill.sttp.testing.SttpBackendStub
 import com.softwaremill.sttp.{Method, Request, Response}
+import io.circe.Encoder
 import io.circe.syntax._
-import io.circe.generic.auto._
 
 object ImovoStub {
   class ImovoStubSttpBackendStubOps[F[_], S](sttpStub: SttpBackendStub[F, S]) {
-    def stubReplace(apiKey: String, baseUrl: String, voucherCode: String, response: ImovoVoucherResponse): SttpBackendStub[F, S] = {
+    def stubReplace[A: Encoder](apiKey: String, baseUrl: String, voucherCode: String, response: A): SttpBackendStub[F, S] = {
       sttpStub.whenRequestMatchesPartial {
         case request: Request[_, _] if matchesQueryRequest(apiKey, baseUrl, voucherCode, request) =>
           Response.ok(response.asJson.spaces2)

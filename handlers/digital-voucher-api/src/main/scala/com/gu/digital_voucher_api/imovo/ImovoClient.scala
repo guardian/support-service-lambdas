@@ -2,22 +2,20 @@ package com.gu.digital_voucher_api.imovo
 
 import java.net.URI
 
-import cats.Show
 import cats.data.EitherT
 import cats.effect.Sync
 import cats.implicits._
 import com.softwaremill.sttp.circe._
 import com.softwaremill.sttp._
 import com.typesafe.scalalogging.LazyLogging
-import io.circe
-import io.circe.{Decoder, Encoder, ParsingFailure}
+import io.circe.{Decoder, Encoder}
 import io.circe.parser._
 import io.circe.generic.auto._
-import io.circe.syntax._
 
 case class ImovoClientError(message: String)
 
 case class ImovoVoucherResponse(voucherCode: String, balance: Double, message: String, successfulRequest: Boolean)
+case class ImovoErrorResponse(errorMessages: List[String], successfulRequest: Boolean)
 
 trait ImovoClient[F[_]] {
   def replaceVoucher(voucherCode: String): EitherT[F, ImovoClientError, ImovoVoucherResponse]
