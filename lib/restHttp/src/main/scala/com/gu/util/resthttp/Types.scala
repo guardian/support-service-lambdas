@@ -1,11 +1,28 @@
 package com.gu.util.resthttp
+import cats.Monad
+import cats.implicits._
 
-import scalaz.{-\/, Monad, \/, \/-}
-
+// FIXME: STOP!
 object Types {
 
+  implicit def eitherMonad[Err]: Monad[Either[Err, ?]] =
+    new Monad[Either[Err, ?]] {
+      def flatMap[A, B](fa: Either[Err, A])(f: A => Either[Err, B]): Either[Err, B] =
+        fa.flatMap(f)
+
+      def pure[A](x: A): Either[Err, A] = Right(x)
+
+      @annotation.tailrec
+      def tailRecM[A, B](a: A)(f: A => Either[Err, Either[A, B]]): Either[Err, B] =
+        f(a) match {
+          case Right(Right(b)) => Right(b)
+          case Right(Left(a)) => tailRecM(a)(f)
+          case l @ Left(_) => l.rightCast[B] // Cast the right type parameter to avoid allocation
+        }
+    }
+
   sealed trait ClientFailure extends ClientFailableOp[Nothing] {
-    override def toDisjunction: ClientFailure \/ Nothing = -\/(this)
+    override def toDisjunction: Either[ClientFailure, Nothing] = Left(this)
 
     val isFailure = true
 
@@ -22,14 +39,14 @@ object Types {
 
   case class ClientSuccess[A](value: A) extends ClientFailableOp[A] {
     val isFailure = false
-    override def toDisjunction: ClientFailure \/ A = \/-(value)
+    override def toDisjunction: Either[ClientFailure, A] = Right(value)
   }
 
   sealed trait ClientFailableOp[+A] {
 
     def isFailure: Boolean
 
-    def toDisjunction: scalaz.\/[ClientFailure, A]
+    def toDisjunction: Either[ClientFailure, A]
 
     def flatMap[B](f: A => ClientFailableOp[B]): ClientFailableOp[B] =
       toDisjunction.flatMap(f.andThen(_.toDisjunction)).toClientFailableOp
@@ -38,16 +55,16 @@ object Types {
       toDisjunction.map(f).toClientFailableOp
 
     def mapFailure(f: ClientFailure => ClientFailure): ClientFailableOp[A] =
-      toDisjunction.leftMap(f).toClientFailableOp
+      toDisjunction.left.map(f).toClientFailableOp
 
   }
 
-  implicit class UnderlyingOps[A](theEither: scalaz.\/[ClientFailure, A]) {
+  implicit class UnderlyingOps[A](theEither: Either[ClientFailure, A]) {
 
     def toClientFailableOp: ClientFailableOp[A] =
       theEither match {
-        case scalaz.\/-(success) => ClientSuccess(success)
-        case scalaz.-\/(failure) => failure
+        case Right(success) => ClientSuccess(success)
+        case Left(failure) => failure
       }
 
   }
@@ -59,13 +76,13 @@ object Types {
 
   implicit val clientFailableOpM: Monad[ClientFailableOp] = {
 
-    type ClientDisjunction[A] = scalaz.\/[ClientFailure, A]
+    type ClientDisjunction[A] = Either[ClientFailure, A]
 
     val disjunctionMonad = implicitly[Monad[ClientDisjunction]]
 
     new Monad[ClientFailableOp] {
 
-      override def bind[A, B](fa: ClientFailableOp[A])(f: A => ClientFailableOp[B]): ClientFailableOp[B] = {
+      override def flatMap[A, B](fa: ClientFailableOp[A])(f: A => ClientFailableOp[B]): ClientFailableOp[B] = {
 
         val originalAsDisjunction: ClientDisjunction[A] =
           fa.toDisjunction
@@ -74,12 +91,14 @@ object Types {
           f.andThen(_.toDisjunction)
 
         val boundAsDisjunction: ClientDisjunction[B] =
-          disjunctionMonad.bind(originalAsDisjunction)(functionWithResultAsDisjunction)
+          disjunctionMonad.flatMap(originalAsDisjunction)(functionWithResultAsDisjunction)
 
         boundAsDisjunction.toClientFailableOp
       }
 
-      override def point[A](a: => A): ClientFailableOp[A] = ClientSuccess(a)
+      override def tailRecM[A, B](a: A)(f: A => ClientFailableOp[Either[A, B]]): ClientFailableOp[B] = ???
+
+      override def pure[A](a: A): ClientFailableOp[A] = ClientSuccess(a)
 
     }
   }
