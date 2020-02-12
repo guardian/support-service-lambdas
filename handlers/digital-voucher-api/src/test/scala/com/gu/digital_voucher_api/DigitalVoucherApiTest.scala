@@ -32,13 +32,13 @@ class DigitalVoucherApiTest extends FlatSpec with Matchers with EitherValues {
         apiKey = "imovo-test-api-key",
         baseUrl = "https://imovo.test.com",
         voucherCode = "card-test-voucher-code",
-        response = ImovoVoucherResponse("replaced-card-test-voucher-code", 0.0, "")
+        response = ImovoVoucherResponse("replaced-card-test-voucher-code", 0.0, "", true)
       )
       .stubReplace(
         apiKey = "imovo-test-api-key",
         baseUrl = "https://imovo.test.com",
         voucherCode = "letter-test-voucher-code",
-        response = ImovoVoucherResponse("replaced-letter-test-voucher-code", 0.0, "")
+        response = ImovoVoucherResponse("replaced-letter-test-voucher-code", 0.0, "", true)
       )
 
     val app = createApp(imovoBackendStub)

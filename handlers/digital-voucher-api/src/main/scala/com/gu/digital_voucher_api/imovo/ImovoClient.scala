@@ -10,13 +10,14 @@ import com.softwaremill.sttp.circe._
 import com.softwaremill.sttp._
 import com.typesafe.scalalogging.LazyLogging
 import io.circe
-import io.circe.{Decoder, Encoder}
-import io.circe.parser.decode
+import io.circe.{Decoder, Encoder, ParsingFailure}
+import io.circe.parser._
 import io.circe.generic.auto._
+import io.circe.syntax._
 
 case class ImovoClientError(message: String)
 
-case class ImovoVoucherResponse(voucherCode: String, balance: Double, message: String)
+case class ImovoVoucherResponse(voucherCode: String, balance: Double, message: String, successfulRequest: Boolean)
 
 trait ImovoClient[F[_]] {
   def replaceVoucher(voucherCode: String): EitherT[F, ImovoClientError, ImovoVoucherResponse]
@@ -37,27 +38,18 @@ object ImovoClient extends LazyLogging {
         .headers(
           "X-API-KEY" -> apiKey
         )
-        .mapResponse(responseBodyString => {
-          logger.info(responseBodyString)
-          decode[A](responseBodyString)
-            .leftMap(e => DeserializationError(responseBodyString, e, Show[circe.Error].show(e)))
-        })
-      val request = body.fold(requestWithoutBody)(b => requestWithoutBody.body(b))
-      sendRequest[A](request)
-    }
 
-    def sendRequest[A](
-      request: RequestT[Id, Either[DeserializationError[io.circe.Error], A], Nothing]
-    ): EitherT[F, ImovoClientError, A] = {
+      val request = body.fold(requestWithoutBody)(b => requestWithoutBody.body(b))
+
       for {
         response <- EitherT.right[ImovoClientError](request.send())
-        responseBody <- EitherT.fromEither[F](formatError[A](request, response))
+        responseBody <- EitherT.fromEither[F](decodeResponse[A](request, response))
       } yield responseBody
     }
 
-    def formatError[A](
-      request: Request[Either[DeserializationError[circe.Error], A], S],
-      response: Response[Either[DeserializationError[circe.Error], A]]
+    def decodeResponse[A: Decoder](
+      request: Request[String, S],
+      response: Response[String]
     ): Either[ImovoClientError, A] = {
       response
         .body
@@ -67,11 +59,27 @@ object ImovoClient extends LazyLogging {
               s"Request ${request.method.m} ${request.uri.toString()} failed returning a status ${response.code} with body: ${errorBody}"
             )
         )
-        .flatMap { parsedBody =>
-          parsedBody.leftMap(deserializationError =>
-            ImovoClientError(
-              s"Request ${request.method.m} ${request.uri.toString()} failed to parse response: $deserializationError"
-            ))
+        .flatMap { successBody =>
+          for {
+            parsedResponse <- parse(successBody)
+              .leftMap(e => ImovoClientError(s"Request ${request.method.m} ${request.uri.toString()} failed to parse response ($successBody): $e"))
+
+            successFlag <- parsedResponse
+              .hcursor
+              .downField("successfulRequest")
+              .as[Boolean]
+              .leftMap(e => ImovoClientError(s"Request ${request.method.m} ${request.uri.toString()} had a response which did not contain the successfulRequest flag ($successBody): $e"))
+
+            response <- {
+              if (successFlag) {
+                parsedResponse
+                  .as[A]
+                  .leftMap(e => ImovoClientError(s"Request ${request.method.m} ${request.uri.toString()} failed to decode response ($successBody): $e"))
+              } else {
+                ImovoClientError(s"Request ${request.method.m} ${request.uri.toString()} failed with response ($successBody)").asLeft[A]
+              }
+            }
+          } yield response
         }
     }
 
