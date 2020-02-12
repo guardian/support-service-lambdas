@@ -14,7 +14,7 @@ import io.circe.generic.auto._
 
 case class ImovoClientError(message: String)
 
-case class ImovoVoucherResponse(voucherCode: String, balance: Double, message: String, successfulRequest: Boolean)
+case class ImovoVoucherResponse(voucherCode: String, successfulRequest: Boolean)
 case class ImovoErrorResponse(errorMessages: List[String], successfulRequest: Boolean)
 
 trait ImovoClient[F[_]] {
