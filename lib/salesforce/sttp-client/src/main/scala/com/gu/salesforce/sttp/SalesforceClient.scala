@@ -9,14 +9,13 @@ import cats.implicits._
 import com.gu.salesforce.SalesforceConstants.{compositeBaseUrl, sfObjectsBaseUrl, soqlQueryBaseUrl}
 import com.gu.salesforce.{RecordsWrapperCaseClass, SFAuthConfig, SalesforceAuth}
 import com.softwaremill.sttp.circe._
-import com.softwaremill.sttp.{SttpBackend, _}
+import com.softwaremill.sttp._
 import com.typesafe.scalalogging.LazyLogging
 import io.circe
 import io.circe.generic.auto._
-import io.circe.parser.decode
 import io.circe.parser._
 import io.circe.syntax._
-import io.circe.{Decoder, Encoder, Printer}
+import io.circe.{Decoder, Encoder, Json, Printer}
 
 trait SalesforceClient[F[_]] {
   def query[RESP_BODY: Decoder](query: String): EitherT[F, SalesforceClientError, RecordsWrapperCaseClass[RESP_BODY]]
@@ -29,6 +28,9 @@ case class SalesforceClientError(message: String)
 object SalesforceClient extends LazyLogging {
 
   private lazy val printer: Printer = Printer.noSpaces.copy(dropNullValues = true) // SF doesn't ignore null value fields 😢
+
+  // A Unit decoder decodes everything as a Unit
+  private implicit val unitDecoder: Decoder[Unit] = _ => Right(())
 
   def apply[F[_] : Sync, S](
     backend: SttpBackend[F, S],
@@ -77,6 +79,18 @@ object SalesforceClient extends LazyLogging {
       uri: Uri,
       body: Option[REQ_BODY]
     ): EitherT[F, SalesforceClientError, RESP_BODY] = {
+
+      /*
+       * This is to decode an empty String as a RESP_BODY.
+       * Circe treats an empty response body as an error
+       * because it's not valid json.
+       */
+      def decode[RESP_BODY: Decoder](s: String) = {
+        val parsed =
+          if (s.isEmpty) Right(Json.Null)
+          else parse(s)
+        parsed.flatMap(_.as[RESP_BODY])
+      }
 
       val requestWithoutBody = sttp
         .method(method, uri)
