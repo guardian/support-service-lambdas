@@ -6,20 +6,40 @@ All endpoints require...
   - `x-identity-id` header which specifies the identityID of the user to request data for _(sent in the `manage-frontend` use-case)_
   - `x-salesforce-contact-id` header which specifies the Salesforce contact ID of the user to request data for _(sent in the CSR UI (in Salesforce) use-case)_
 
-**If being used in the CSR UI (in Salesforce) use-case**, then one should also pass the CSR's Session ID via the `X-Ephemeral-Salesforce-Access-Token` header (can be obtained in Apex with `UserInfo.getSessionId()`) so that the actions can be attributed correctly to the CSR (rather than the confiugured API user for this repo).
+**If being used in the CSR UI (in Salesforce) use-case**, then one should also pass the CSR's Session ID via the `X-Ephemeral-Salesforce-Access-Token` header (can be obtained in Apex with `UserInfo.getSessionId()`) so that the actions can be attributed correctly to the CSR (rather than the configured API user for this repo).
 
-| Method | Endpoint | Description |
-| --- | --- | --- | 
-| GET | `/{STAGE}/potential/{SUBSCRIPTION_NAME}?startDate={yyyy-MM-dd}&endDate={yyyy-MM-dd}` | returns a response containing dates for each issue impacted between the start and end parameters inclusively, for the subscription. Each one is accompanied by expected credit amount and the invoice date the credit will be appear on. |
-| GET | `/{STAGE}/hsr/{SUBSCRIPTION_NAME}` | returns all holiday stops (past & present) for the specified subscription (user is verified as the 'bill to' contact of the subscription). Response includes an 'annualIssueLimit' and an 'issueSpecifics' array containing a series of objects each with calculated 'firstAvailableDate' and 'issueDayOfWeek'.|
-| POST | `/{STAGE}/hsr` | creates a new all holiday stop, example body `{ "startDate": "2023-06-10", "endDate": "2024-06-14", "subscriptionName": "A-S00071783" }`|
-| PATCH | `/{STAGE}/hsr/{SUBSCRIPTION_NAME}/{SF_ID}` | with the same body as create endpoint above, amends the holiday stop request (where holiday stop request `Id` matches `{SF_ID}`) to the newly specified dates and adds/removes the underlying detail records where appropriate |
-| DELETE | `/{STAGE}/hsr/{SUBSCRIPTION_NAME}/{SF_ID}` | marks the holiday stop request as 'withdrawn' in SalesForce (specifically; placing timestamp in `Withdrawn_Time__c` field) (where holiday stop request `Id` matches `{SF_ID}`) |
-| POST | `/{STAGE}/hsr/{SUBSCRIPTION_NAME}/cancel?effectiveCancellationDate=yyyy-MM-dd` | handles processing of holiday stops when a subscription is cancelled, unprocessed holiday stops before the effectiveCancellationDate will be marked with a charge code "ManualRefund_Cancellation" for reporting purposes.  This should only be called if the customer was refunded for holiday stops that fall in the cancellation period, otherwise no changes should be made to existing holiday stops. |
-| GET | `/{STAGE}/hsr/{SUBSCRIPTION_NAME}/cancel?effectiveCancellationDate=yyyy-MM-dd` | returns details of existing holiday stops that should be manually refunded if a subscription is canceled. This includes unprocessed holiday stops for dates before the cancellation date defined by the effectiveCancellationDate query string parameter. |
+### `GET` `/{STAGE}/potential/{SUBSCRIPTION_NAME}?startDate={yyyy-MM-dd}&endDate={yyyy-MM-dd}`
+returns a response containing dates for each issue impacted between the start and end parameters inclusively, for the subscription. Each one is accompanied by expected credit amount and the invoice date the credit will be appear on.
+ 
+### `GET` `/{STAGE}/hsr/{SUBSCRIPTION_NAME}`
+returns all holiday stops (past & present) for the specified subscription (user is verified as the 'bill to' contact of the subscription). In addition to the list of holiday stop requests (in `existing` field) the response includes an `annualIssueLimit`, `firstAvailableDate` and an `issueSpecifics` (array containing a series of objects each with `issueDayOfWeek`).
+
+Excludes holiday stop requests where the `Max_Expected_Invoice_Date__c` is older than 6 months, however for some records that field will be null (from before we calculated this value), so if it's null we exclude based on `End_Date__c` being older than 6 months.
+
+### `POST` `/{STAGE}/hsr`
+creates a new all holiday stop, example body:
+```json
+{
+    "startDate": "2023-06-10", 
+    "endDate": "2024-06-14", 
+    "subscriptionName": "A-S00071783"
+ }
+```
+
+### `PATCH` `/{STAGE}/hsr/{SUBSCRIPTION_NAME}/{SF_ID}`
+with the same body as create endpoint above, amends the holiday stop request (where holiday stop request `Id` matches `{SF_ID}`) to the newly specified dates and adds/removes the underlying detail records where appropriate.
+
+### `DELETE` `/{STAGE}/hsr/{SUBSCRIPTION_NAME}/{SF_ID}`
+marks the holiday stop request as 'withdrawn' in SalesForce (by placing timestamp in `Withdrawn_Time__c` field), where holiday stop request `Id` matches `{SF_ID}`.
+
+### `POST` `/{STAGE}/hsr/{SUBSCRIPTION_NAME}/cancel?effectiveCancellationDate=yyyy-MM-dd`
+handles processing of holiday stops when a subscription is cancelled, unprocessed holiday stops before the effectiveCancellationDate will be marked with a charge code "ManualRefund_Cancellation" for reporting purposes.  This should only be called if the customer was refunded for holiday stops that fall in the cancellation period, otherwise no changes should be made to existing holiday stops.
+
+### `GET` `/{STAGE}/hsr/{SUBSCRIPTION_NAME}/cancel?effectiveCancellationDate=yyyy-MM-dd`
+returns details of existing holiday stops that should be manually refunded if a subscription is canceled. This includes unprocessed holiday stops for dates before the cancellation date defined by the effectiveCancellationDate query string parameter.
 
 
-### Handling Multiple Environments
+## Handling Multiple Environments
 This lambda has a one-to-one relationship between AWS Stack/Stage and Salesforce Environment.
 - SF DEV <-> AWS DEV Stack
 - SF UAT <-> AWS CODE Stack
