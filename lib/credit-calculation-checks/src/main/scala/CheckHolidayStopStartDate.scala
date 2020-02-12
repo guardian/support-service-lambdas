@@ -20,10 +20,10 @@ object CheckHolidayStopStartDate extends App {
   records.foreach { record =>
     val subName = record("Subscription.Name")
 
-    if (currentSub == Some(subName)) {
+    if (currentSub.contains(subName)) {
       currentRecords.append(record)
     } else {
-      if (currentSub != None) {
+      if (currentSub.isDefined) {
         checkHolidayStopDates(currentRecords.toList)
       }
       currentSub = Some(subName)
@@ -35,16 +35,16 @@ object CheckHolidayStopStartDate extends App {
   def checkHolidayStopDates(recordsForSub: List[Map[String, String]]) = {
     recordsForSub
       .filter(record =>
-        (record.get("RatePlanCharge.Name") == Some("Holiday Credit")) &&
-          (record.get("RatePlan.Name") == Some("DO NOT USE MANUALLY: Holiday Credit - automated")))
+        record.get("RatePlanCharge.Name").contains("Holiday Credit") &&
+          record.get("RatePlan.Name").contains("DO NOT USE MANUALLY: Holiday Credit - automated"))
       .toNel
       .map { holidayCreditRecords =>
         val id = s"${holidayCreditRecords.head("Subscription.Name")}"
 
         val billingScheduleRecords = recordsForSub
           .filter { record =>
-            record.get("RatePlan.AmendmentType") != Some("RemoveProduct") &&
-              record.get("RatePlanCharge.Name") != Some("Holiday Credit")
+            !record.get("RatePlan.AmendmentType").contains("RemoveProduct") &&
+              !record.get("RatePlanCharge.Name").contains("Holiday Credit")
           } //Filter out removed rateplans
         val billingSchedules = billingScheduleRecords
           .map { record =>

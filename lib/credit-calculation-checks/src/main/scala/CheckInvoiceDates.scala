@@ -18,10 +18,10 @@ object CheckInvoiceDates extends App {
   records.foreach { record =>
     val subName = record("Subscription.Name")
 
-    if (currentSub == Some(subName)) {
+    if (currentSub.contains(subName)) {
       currentRecords.append(record)
     } else {
-      if (currentSub != None) {
+      if (currentSub.isDefined) {
         checkInvoiceDates(currentRecords.toList)
       }
       currentSub = Some(subName)
@@ -32,7 +32,7 @@ object CheckInvoiceDates extends App {
 
   def checkInvoiceDates(recordsForSub: List[Map[String, String]]) = {
     recordsForSub
-      .filter(_.get("RatePlan.AmendmentType") != Some("RemoveProduct")) //Filter out removed rateplans
+      .filter(!_.get("RatePlan.AmendmentType").contains("RemoveProduct")) //Filter out removed rateplans
       .filter(!_("InvoiceItem.ChargeName").contains("Proration")) //Filter out invoice items for pro-rated invoices
       .foreach { record =>
         val id = s"${record("Subscription.Name")}-${record("Invoice.InvoiceNumber")}-${record("Invoice.InvoiceDate")}"
