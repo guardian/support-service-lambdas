@@ -4,15 +4,22 @@ import java.time.LocalDate
 
 import cats.Monad
 import cats.data.EitherT
-import com.gu.salesforce.{Contact, RecordsWrapperCaseClass}
-import com.gu.salesforce.sttp.SalesforceClient
-import io.circe.generic.auto._
 import cats.implicits._
 import com.gu.salesforce.SalesforceQueryConstants.{contactToWhereClausePart, escapeString}
+import com.gu.salesforce.sttp.{SFApiCompositeResponse, SalesforceClient}
+import com.gu.salesforce.{Contact, RecordsWrapperCaseClass}
+import io.circe.generic.auto._
 
 import scala.annotation.tailrec
 
+final case class DeliveryProblemCredit(
+  amount: Double,
+  invoiceDate: Option[LocalDate],
+  isActioned: Boolean
+)
+
 final case class DeliveryRecord(
+  id: String,
   deliveryDate: Option[LocalDate],
   deliveryInstruction: Option[String],
   deliveryAddress: Option[String],
@@ -25,7 +32,8 @@ final case class DeliveryRecord(
   hasHolidayStop: Option[Boolean],
   problemCaseId: Option[String],
   isChangedAddress: Option[Boolean],
-  isChangedDeliveryInstruction: Option[Boolean]
+  isChangedDeliveryInstruction: Option[Boolean],
+  credit: Option[DeliveryProblemCredit]
 )
 
 final case class DeliveryProblemCase(
@@ -35,6 +43,21 @@ final case class DeliveryProblemCase(
   problemType: Option[String]
 )
 
+case class DeliveryRecordToLink(
+  id: String,
+  creditAmount: Option[Double],
+  invoiceDate: Option[LocalDate]
+)
+
+case class CreateDeliveryProblem(
+  productName: String,
+  description: Option[String],
+  problemType: String,
+  deliveryRecords: List[DeliveryRecordToLink],
+  repeatDeliveryProblem: Option[Boolean],
+  newContactPhoneNumbers: Option[SFApiContactPhoneNumbers]
+)
+
 sealed trait DeliveryRecordServiceError
 
 case class DeliveryRecordServiceGenericError(message: String) extends DeliveryRecordServiceError
@@ -42,17 +65,26 @@ case class DeliveryRecordServiceGenericError(message: String) extends DeliveryRe
 case class DeliveryRecordServiceSubscriptionNotFound(message: String) extends DeliveryRecordServiceError
 
 trait DeliveryRecordsService[F[_]] {
+
   def getDeliveryRecordsForSubscription(
     subscriptionId: String,
     contact: Contact,
     optionalStartDate: Option[LocalDate],
     optionalEndDate: Option[LocalDate]
   ): EitherT[F, DeliveryRecordServiceError, DeliveryRecordsApiResponse]
+
+  def createDeliveryProblemForSubscription(
+    subscriptionNumber: String,
+    contact: Contact,
+    detail: CreateDeliveryProblem
+  ): EitherT[F, DeliveryRecordServiceError, SFApiCompositeResponse]
+
 }
 
 object DeliveryRecordsService {
 
   private case class SubscriptionRecordQueryResult(
+    Buyer__r: SFApiContactPhoneNumbers,
     Delivery_Records__r: Option[RecordsWrapperCaseClass[SFApiDeliveryRecord]]
   )
 
@@ -72,6 +104,7 @@ object DeliveryRecordsService {
 
   private def transformSfApiDeliveryRecords(accumulator: List[DeliveryRecord], sfRecord: SFApiDeliveryRecord): List[DeliveryRecord] =
     DeliveryRecord(
+      id = sfRecord.Id,
       deliveryDate = sfRecord.Delivery_Date__c,
       deliveryAddress = sfRecord.Delivery_Address__c,
       addressLine1 = sfRecord.Address_Line_1__c,
@@ -84,7 +117,12 @@ object DeliveryRecordsService {
       hasHolidayStop = sfRecord.Has_Holiday_Stop__c,
       problemCaseId = sfRecord.Case__r.map(_.Id),
       isChangedAddress = sfRecord.Delivery_Address__c.map(detectChangeSkippingNoneAtHead(accumulator, _.deliveryAddress)),
-      isChangedDeliveryInstruction = sfRecord.Delivery_Instructions__c.map(detectChangeSkippingNoneAtHead(accumulator, _.deliveryInstruction))
+      isChangedDeliveryInstruction = sfRecord.Delivery_Instructions__c.map(detectChangeSkippingNoneAtHead(accumulator, _.deliveryInstruction)),
+      credit = sfRecord.Credit_Amount__c.map(creditAmount => DeliveryProblemCredit(
+        amount = creditAmount,
+        invoiceDate = sfRecord.Invoice_Date__c,
+        isActioned = sfRecord.Is_Actioned__c
+      ))
     ) :: accumulator
 
   def apply[F[_]: Monad](salesforceClient: SalesforceClient[F]): DeliveryRecordsService[F] = new DeliveryRecordsService[F] {
@@ -103,6 +141,7 @@ object DeliveryRecordsService {
           optionalEndDate
         )
         records <- getDeliveryRecordsFromQueryResults(subscriptionId, contact, queryResult).toEitherT[F]
+        contactPhoneNumbers = queryResult.records.head.Buyer__r.filterOutGarbage()
         results = records.reverse.foldLeft(List.empty[DeliveryRecord])(transformSfApiDeliveryRecords)
         deliveryProblemMap = records.flatMap(
           _.Case__r.map(
@@ -114,7 +153,22 @@ object DeliveryRecordsService {
             )
           )
         ).toMap
-      } yield DeliveryRecordsApiResponse(results, deliveryProblemMap)
+      } yield DeliveryRecordsApiResponse(results, deliveryProblemMap, contactPhoneNumbers)
+
+    override def createDeliveryProblemForSubscription(
+      subscriptionNumber: String,
+      contact: Contact,
+      detail: CreateDeliveryProblem
+    ): EitherT[F, DeliveryRecordServiceError, SFApiCompositeResponse] = {
+      salesforceClient.composite[SFApiCompositePartBody](
+        SFApiCompositeCreateDeliveryProblem(
+          subscriptionNumber,
+          contact,
+          detail
+        )
+      )
+        .leftMap(error => DeliveryRecordServiceGenericError(error.toString))
+    }
 
     private def queryForDeliveryRecords(
       salesforceClient: SalesforceClient[F],
@@ -155,10 +209,11 @@ object DeliveryRecordsService {
     optionalStartDate: Option[LocalDate],
     optionalEndDate: Option[LocalDate]
   ) =
-    s"""SELECT (
-       |    SELECT Delivery_Date__c, Delivery_Address__c, Delivery_Instructions__c, Has_Holiday_Stop__c, Address_Line_1__c,
-       |           Address_Line_2__c, Address_Line_3__c, Address_Town__c, Address_Country__c, Address_Postcode__c,
-       |           Case__c, Case__r.Id, Case__r.Subject, Case__r.Description, Case__r.Case_Closure_Reason__c
+    s"""SELECT Buyer__r.Id, Buyer__r.Phone, Buyer__r.HomePhone, Buyer__r.MobilePhone, Buyer__r.OtherPhone, (
+       |    SELECT Id, Delivery_Date__c, Delivery_Address__c, Delivery_Instructions__c, Has_Holiday_Stop__c,
+       |           Address_Line_1__c,Address_Line_2__c, Address_Line_3__c, Address_Town__c, Address_Country__c, Address_Postcode__c,
+       |           Case__c, Case__r.Id, Case__r.Subject, Case__r.Description, Case__r.Case_Closure_Reason__c,
+       |           Credit_Amount__c, Is_Actioned__c, Invoice_Date__c
        |    FROM Delivery_Records__r
        |    ${deliveryDateFilter(optionalStartDate, optionalEndDate)}
        |    ORDER BY Delivery_Date__c DESC

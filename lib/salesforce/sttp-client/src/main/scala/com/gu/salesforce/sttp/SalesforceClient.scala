@@ -6,7 +6,7 @@ import cats.Show
 import cats.data.EitherT
 import cats.effect.Sync
 import cats.implicits._
-import com.gu.salesforce.SalesforceConstants.{sfObjectsBaseUrl, soqlQueryBaseUrl}
+import com.gu.salesforce.SalesforceConstants.{compositeBaseUrl, sfObjectsBaseUrl, soqlQueryBaseUrl}
 import com.gu.salesforce.{RecordsWrapperCaseClass, SFAuthConfig, SalesforceAuth}
 import com.softwaremill.sttp.circe._
 import com.softwaremill.sttp.{SttpBackend, _}
@@ -15,17 +15,21 @@ import io.circe
 import io.circe.generic.auto._
 import io.circe.parser.decode
 import io.circe.parser._
-import io.circe.{Decoder, Encoder}
-import io.circe.generic.auto._
+import io.circe.syntax._
+import io.circe.{Decoder, Encoder, Printer}
 
 trait SalesforceClient[F[_]] {
-  def query[A: Decoder](query: String): EitherT[F, SalesforceClientError, RecordsWrapperCaseClass[A]]
-  def patch[A: Encoder](objectName: String, objectId: String, body: A): EitherT[F, SalesforceClientError, Unit]
+  def query[RESP_BODY: Decoder](query: String): EitherT[F, SalesforceClientError, RecordsWrapperCaseClass[RESP_BODY]]
+  def patch[REQ_BODY: Encoder](objectName: String, objectId: String, body: REQ_BODY): EitherT[F, SalesforceClientError, Unit]
+  def composite[PART_BODY: Encoder](body: SFApiCompositeRequest[PART_BODY]): EitherT[F, SalesforceClientError, SFApiCompositeResponse]
 }
 
 case class SalesforceClientError(message: String)
 
 object SalesforceClient extends LazyLogging {
+
+  private lazy val printer: Printer = Printer.noSpaces.copy(dropNullValues = true) // SF doesn't ignore null value fields 😢
+
   def apply[F[_] : Sync, S](
     backend: SttpBackend[F, S],
     config: SFAuthConfig
@@ -55,7 +59,11 @@ object SalesforceClient extends LazyLogging {
       optionalNextRecordsLink match {
         case Some(nextRecordsLinks) =>
           for {
-            nextPageResults <- sendAuthenticatedGetRequest(auth, Uri(new URI(auth.instance_url + nextRecordsLinks)))
+            nextPageResults <- sendAuthenticatedRequest[QueryRecordsWrapperCaseClass[A]](
+              auth,
+              Method.GET,
+              Uri(new URI(auth.instance_url + nextRecordsLinks))
+            )
             allRecords <- followNextRecordsLinks(auth, records ++ nextPageResults.records, nextPageResults.nextRecordsUrl)
           } yield allRecords
         case None =>
@@ -63,39 +71,43 @@ object SalesforceClient extends LazyLogging {
       }
     }
 
-    def sendAuthenticatedGetRequest[A: Decoder](
-      auth: SalesforceAuth,
-      uri: Uri
-    ): EitherT[F, SalesforceClientError, QueryRecordsWrapperCaseClass[A]] =
-      sendAuthenticatedRequest[QueryRecordsWrapperCaseClass[A], Unit](auth, Method.GET, uri, None)
-
-    def sendAuthenticatedPatchRequest[B: Encoder](
-      auth: SalesforceAuth,
-      uri: Uri,
-      body: B
-    ): EitherT[F, SalesforceClientError, Unit] =
-      sendAuthenticatedRequest[Unit, B](auth, Method.PATCH, uri, Some(body))
-
-    def sendAuthenticatedRequest[A: Decoder, B: Encoder](
+    def sendAuthenticatedRequestWithOptionalBody[REQ_BODY: Encoder, RESP_BODY: Decoder](
       auth: SalesforceAuth,
       method: Method,
       uri: Uri,
-      body: Option[B]
-    ): EitherT[F, SalesforceClientError, A] = {
+      body: Option[REQ_BODY]
+    ): EitherT[F, SalesforceClientError, RESP_BODY] = {
+
       val requestWithoutBody = sttp
         .method(method, uri)
         .headers(
-          "Authorization" -> s"Bearer ${ auth.access_token }",
+          "Authorization" -> s"Bearer ${auth.access_token}",
           "X-SFDC-Session" -> auth.access_token,
+          "Content-Type" -> "application/json"
         )
         .mapResponse(responseBodyString => {
           logger.info(responseBodyString)
-          decode[A](responseBodyString)
-            .left.map(e => DeserializationError(responseBodyString, e, Show[circe.Error].show(e)))
+          decode[RESP_BODY](responseBodyString)
+            .left.map(e => DeserializationError(responseBodyString, e, Show[io.circe.Error].show(e)))
         })
-      val request = body.fold(requestWithoutBody)(b => requestWithoutBody.body(b))
-      sendRequest[A](request)
+
+      val bodyAsStringNoNulls = printer.pretty(body.asJson)
+
+      sendRequest[RESP_BODY](
+        body.fold(requestWithoutBody)(_ => requestWithoutBody.body(bodyAsStringNoNulls))
+      )
     }
+
+    def sendAuthenticatedRequest[RESP_BODY: Decoder](
+      auth: SalesforceAuth,
+      method: Method,
+      uri: Uri
+    ): EitherT[F, SalesforceClientError, RESP_BODY] = sendAuthenticatedRequestWithOptionalBody[Unit, RESP_BODY](
+      auth,
+      method,
+      uri,
+      body = None
+    )
 
     def sendRequest[A](
       request: RequestT[Id, Either[DeserializationError[io.circe.Error], A], Nothing]
@@ -137,11 +149,17 @@ object SalesforceClient extends LazyLogging {
       auth <- auth(config)
       client = new SalesforceClient[F]() {
 
-        override def query[A: Decoder](query: String): EitherT[F, SalesforceClientError, RecordsWrapperCaseClass[A]] = {
+        override def query[A: Decoder](
+          query: String
+        ): EitherT[F, SalesforceClientError, RecordsWrapperCaseClass[A]] = {
           val initialQueryUri = Uri(new URI(auth.instance_url + soqlQueryBaseUrl)).param("q", query)
           for {
             _ <- logQuery(query)
-            initialQueryResults <- sendAuthenticatedGetRequest[A](auth, initialQueryUri)
+            initialQueryResults <- sendAuthenticatedRequest[QueryRecordsWrapperCaseClass[A]](
+              auth,
+              Method.GET,
+              initialQueryUri
+            )
             allResults <- followNextRecordsLinks[A](
               auth,
               initialQueryResults.records,
@@ -150,12 +168,38 @@ object SalesforceClient extends LazyLogging {
           } yield allResults
         }
 
-        override def patch[B: Encoder](objectName: String, objectId: String, body: B): EitherT[F, SalesforceClientError, Unit] = {
+        override def patch[REQ_BODY: Encoder](objectName: String, objectId: String, body: REQ_BODY): EitherT[F, SalesforceClientError, Unit] = {
           val uri = Uri(new URI(s"${ auth.instance_url }$sfObjectsBaseUrl$objectName/$objectId"))
           for {
             _ <- logQuery(s"$objectName $objectId PATCH with '$body'")
-            _ <- sendAuthenticatedPatchRequest(auth, uri, body)
+            _ <- sendAuthenticatedRequestWithOptionalBody[REQ_BODY, Unit](auth, Method.PATCH, uri, Some(body))
           } yield ()
+        }
+
+        private lazy val successStatusCodes = 200 to 299
+
+        override def composite[PART_BODY: Encoder](
+          body: SFApiCompositeRequest[PART_BODY]
+        ): EitherT[F, SalesforceClientError, SFApiCompositeResponse] = {
+          sendAuthenticatedRequestWithOptionalBody[SFApiCompositeRequest[PART_BODY], SFApiCompositeResponse](
+            auth,
+            Method.POST,
+            Uri(new URI(auth.instance_url + compositeBaseUrl)),
+            Some(body)
+          ).flatMap(response =>
+            // this is necessary because for some bizarre reason composite requests return a 200 even if the sub-requests fail
+            // see https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/requests_composite.htm
+            response.compositeResponse.filterNot(part => successStatusCodes.contains(part.httpStatusCode)).toNel.fold(
+              response.asRight[SalesforceClientError] // no inner failures so return response
+            )(
+              failureCodes =>
+                SalesforceClientError(
+                  failureCodes
+                    .map(part => s"${part.httpStatusCode} (${part.referenceId})")
+                    .mkString_("Composite Failure Status Codes : ", ", ", "")
+                ).asLeft[SFApiCompositeResponse]
+            ).toEitherT[F]
+          )
         }
       }
     } yield client
