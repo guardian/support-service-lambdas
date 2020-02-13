@@ -16,9 +16,12 @@ case class ImovoClientError(message: String)
 
 case class ImovoVoucherResponse(voucherCode: String, successfulRequest: Boolean)
 case class ImovoErrorResponse(errorMessages: List[String], successfulRequest: Boolean)
+case class ImovoDeleteResponse(successfulRequest: Boolean)
 
 trait ImovoClient[F[_]] {
   def replaceVoucher(voucherCode: String): EitherT[F, ImovoClientError, ImovoVoucherResponse]
+  def getVoucher(voucherCode: String): EitherT[F, ImovoClientError, ImovoVoucherResponse]
+  def deleteVoucher(subscriptionId: String): EitherT[F, ImovoClientError, Unit]
 }
 
 object ImovoClient extends LazyLogging {
@@ -89,6 +92,22 @@ object ImovoClient extends LazyLogging {
           Uri(new URI(s"$baseUrl//Subscription/ReplaceVoucher")).param("VoucherCode", voucherCode),
           None
         )
+      }
+      override def getVoucher(subscriptionId: String): EitherT[F, ImovoClientError, ImovoVoucherResponse] = {
+        sendAuthenticatedRequest[ImovoVoucherResponse, String](
+          apiKey,
+          Method.GET,
+          Uri(new URI(s"$baseUrl//Subscription/GetVoucher")).param("SubscriptionId", subscriptionId),
+          None
+        )
+      }
+      override def deleteVoucher(subscriptionId: String): EitherT[F, ImovoClientError, Unit] = {
+        sendAuthenticatedRequest[ImovoDeleteResponse, String](
+          apiKey,
+          Method.GET,
+          Uri(new URI(s"$baseUrl//Subscription/DeleteVoucher")).param("SubscriptionId", subscriptionId),
+          None
+        ).map(_ => ())
       }
     }.asRight[ImovoClientError].toEitherT[F]
   }

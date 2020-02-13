@@ -73,7 +73,7 @@ object DigitalVoucherApiRoutes {
       toResponse(
         digitalVoucherService
           .deleteVoucherForSubscription(subscriptionId)
-          .leftMap(_ => InternalServerError())
+          .leftMap(error => InternalServerError(DigitalVoucherApiRoutesError(s"Failed get voucher: $error")))
       )
     }
 

@@ -35,11 +35,16 @@ object DigitalVoucherService {
         }.leftMap(errors => DigitalVoucherServiceError(errors.mkString(", ")))
 
     override def deleteVoucherForSubscription(subscriptionId: String): EitherT[F, DigitalVoucherServiceError, Unit] =
-      EitherT.rightT(())
+      imovoClient
+        .deleteVoucher(subscriptionId)
+        .map(_ => ())
+        .leftMap(error => DigitalVoucherServiceError(error.toString))
 
     override def getVoucher(subscriptionId: String): EitherT[F, DigitalVoucherServiceError, Voucher] =
-      EitherT.rightT[F, DigitalVoucherServiceError](
-        Voucher(s"5555555555", s"6666666666")
-      )
+      for {
+        voucherResponse <- imovoClient
+          .getVoucher(subscriptionId)
+          .leftMap(error => DigitalVoucherServiceError(error.toString))
+      } yield Voucher(voucherResponse.voucherCode, voucherResponse.voucherCode)
   }
 }
