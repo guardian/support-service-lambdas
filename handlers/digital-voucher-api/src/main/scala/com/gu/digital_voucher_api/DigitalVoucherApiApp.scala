@@ -11,23 +11,23 @@ import org.http4s.HttpRoutes
 import org.http4s.server.middleware.Logger
 import org.http4s.util.CaseInsensitiveString
 
-final case class DigitalVoucherApiAppError(message: String)
+final case class DigitalVoucherApiError(message: String)
 
 object DigitalVoucherApiApp extends LazyLogging {
 
   private implicit val cs: ContextShift[IO] = IO.contextShift(scala.concurrent.ExecutionContext.global)
 
-  def apply(appIdentity: AppIdentity): EitherT[IO, DigitalVoucherApiAppError, HttpRoutes[IO]] = {
+  def apply(appIdentity: AppIdentity): EitherT[IO, DigitalVoucherApiError, HttpRoutes[IO]] = {
     DigitalVoucherApiApp(appIdentity, AsyncHttpClientCatsBackend[cats.effect.IO]())
   }
 
-  def apply[S](appIdentity: AppIdentity, backend: SttpBackend[IO, S]): EitherT[IO, DigitalVoucherApiAppError, HttpRoutes[IO]] = {
+  def apply[S](appIdentity: AppIdentity, backend: SttpBackend[IO, S]): EitherT[IO, DigitalVoucherApiError, HttpRoutes[IO]] = {
     for {
       config <- ConfigLoader.loadConfig[IO](appIdentity: AppIdentity)
-        .leftMap(error => DigitalVoucherApiAppError(error.toString))
+        .leftMap(error => DigitalVoucherApiError(error.toString))
       imovoClient <- ImovoClient(backend, config.imovoBaseUrl, config.imovoApiKey)
-        .leftMap(error => DigitalVoucherApiAppError(error.toString))
-      routes <- EitherT.rightT[IO, DigitalVoucherApiAppError](
+        .leftMap(error => DigitalVoucherApiError(error.toString))
+      routes <- EitherT.rightT[IO, DigitalVoucherApiError](
         createLogging()(DigitalVoucherApiRoutes(DigitalVoucherService(imovoClient)))
       )
     } yield routes
