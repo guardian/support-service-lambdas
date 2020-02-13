@@ -6,7 +6,6 @@ import com.amazonaws.util.IOUtils
 import com.gu.util.Logging
 import com.gu.util.config.{Stage, ZuoraEnvironment}
 import scala.util.Try
-import scalaz.{-\/, \/, \/-}
 
 object S3UploadCatalog extends Logging {
 
@@ -15,7 +14,7 @@ object S3UploadCatalog extends Logging {
     zuoraEnvironment: ZuoraEnvironment,
     catalog: String,
     s3Write: PutObjectRequest => Try[PutObjectResult]
-  ): String \/ PutObjectResult = {
+  ): Either[String, PutObjectResult] = {
     logger.info("Uploading catalog to S3...")
     val stream: InputStream = new ByteArrayInputStream(catalog.getBytes(java.nio.charset.StandardCharsets.UTF_8.name))
     val bytes = IOUtils.toByteArray(stream)
@@ -35,11 +34,11 @@ object S3UploadCatalog extends Logging {
     uploadAttempt.fold(
       ex => {
         logger.error(s"Upload failed due to $ex")
-        -\/(s"Upload failed due to $ex")
+        Left(s"Upload failed due to $ex")
       },
       result => {
         logger.info(s"Successfully uploaded catalog to S3: $result")
-        \/-(result)
+        Right(result)
       }
     )
   }

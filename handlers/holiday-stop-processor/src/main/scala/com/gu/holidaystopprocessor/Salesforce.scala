@@ -8,7 +8,6 @@ import com.gu.salesforce.{SFAuthConfig, SalesforceClient}
 import com.gu.util.resthttp.JsonHttp
 import com.gu.zuora.ZuoraProductTypes.ZuoraProductType
 import com.gu.zuora.subscription.{SalesforceApiFailure, SalesforceApiResponse}
-import scalaz.{-\/, \/-}
 
 object Salesforce {
 
@@ -17,8 +16,8 @@ object Salesforce {
       val sfGet = sfAuth.wrapWith(JsonHttp.getWithParams)
       FetchHolidayStopRequestsDetailsForProductType(sfGet)(datesToProcess, productVariant)
     }.toDisjunction match {
-      case -\/(failure) => Left(SalesforceApiFailure(failure.toString))
-      case \/-(details) => Right(details)
+      case Left(failure) => Left(SalesforceApiFailure(failure.toString))
+      case Right(details) => Right(details)
     }
   }
 
@@ -31,7 +30,7 @@ object Salesforce {
         sendOp(response.requestId)(actioned)
       }
     }.toDisjunction match {
-      case -\/(failure) => Left(SalesforceApiFailure(failure.toString))
+      case Left(failure) => Left(SalesforceApiFailure(failure.toString))
       case _ => Right(())
     }
 }

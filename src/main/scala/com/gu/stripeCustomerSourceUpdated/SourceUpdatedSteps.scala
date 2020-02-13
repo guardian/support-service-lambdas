@@ -16,9 +16,9 @@ import com.gu.util.zuora.ZuoraGetAccountSummary.AccountSummary
 import com.gu.util.zuora.ZuoraGetAccountSummary.ZuoraAccount.PaymentMethodId
 import com.gu.util.zuora._
 import play.api.libs.json.JsPath
-import scalaz.std.list._
-import scalaz.syntax.applicative._
-import scalaz.{ListT, NonEmptyList}
+//import scalaz.std.list._
+//import scalaz.syntax.applicative._
+//import scalaz.{ListT, NonEmptyList}
 
 object SourceUpdatedSteps extends Logging {
 

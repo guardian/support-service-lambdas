@@ -18,7 +18,6 @@ object Dependencies {
     "ch.qos.logback" % "logback-classic" % "1.2.3",
     "com.typesafe.scala-logging" %% "scala-logging" % "3.9.2"
   )
-  val scalaz = "org.scalaz" %% "scalaz-core" % "7.2.18"
   val playJson = "com.typesafe.play" %% "play-json" % "2.8.0"
   val playJsonExtensions = "ai.x" %% "play-json-extensions" % "0.30.1"
   val scalatest = "org.scalatest" %% "scalatest" % "3.0.1" % Test

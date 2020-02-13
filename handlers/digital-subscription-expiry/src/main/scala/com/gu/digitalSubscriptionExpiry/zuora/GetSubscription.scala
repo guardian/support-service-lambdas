@@ -48,7 +48,7 @@ object GetSubscription {
     )(SubscriptionResult.apply _)
 
   def apply(requests: Requests)(subscriptionId: SubscriptionId): ApiGatewayOp[SubscriptionResult] =
-    requests.get[SubscriptionResult](s"subscriptions/${subscriptionId.value}").toDisjunction.leftMap {
+    requests.get[SubscriptionResult](s"subscriptions/${subscriptionId.value}").toDisjunction.left.map {
       case genericError: GenericError => ApiGatewayResponse.internalServerError(s"zuora client fail: ${genericError.message}")
       case notFound: NotFound => notFoundResponse
     }.toApiGatewayOp

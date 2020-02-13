@@ -6,21 +6,38 @@ import com.gu.util.apigateway.ApiGatewayResponse.internalServerError
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
 import play.api.libs.json.{JsError, JsResult, JsSuccess}
-import scalaz.{-\/, Monad, \/, \/-}
-
 import scala.util.{Failure, Success, Try}
+import cats.Monad
+import cats.implicits._
 
+// FIXME: STOP!
 object Types extends Logging {
+
+  implicit def eitherMonad[Err]: Monad[Either[Err, ?]] =
+    new Monad[Either[Err, ?]] {
+      def flatMap[A, B](fa: Either[Err, A])(f: A => Either[Err, B]): Either[Err, B] =
+        fa.flatMap(f)
+
+      def pure[A](x: A): Either[Err, A] = Right(x)
+
+      @annotation.tailrec
+      def tailRecM[A, B](a: A)(f: A => Either[Err, Either[A, B]]): Either[Err, B] =
+        f(a) match {
+          case Right(Right(b)) => Right(b)
+          case Right(Left(a)) => tailRecM(a)(f)
+          case l @ Left(_) => l.rightCast[B] // Cast the right type parameter to avoid allocation
+        }
+    }
 
   object ApiGatewayOp {
 
     case class ContinueProcessing[A](a: A) extends ApiGatewayOp[A] {
-      override def toDisjunction: ApiResponse \/ A = \/-(a)
+      override def toDisjunction: Either[ApiResponse, A] = Right(a)
 
       override def isComplete: Boolean = false
     }
     case class ReturnWithResponse(resp: ApiResponse) extends ApiGatewayOp[Nothing] {
-      override def toDisjunction: ApiResponse \/ Nothing = -\/(resp)
+      override def toDisjunction: Either[ApiResponse, Nothing] = Left(resp)
 
       override def isComplete: Boolean = true
     }
@@ -29,7 +46,7 @@ object Types extends Logging {
   sealed trait ApiGatewayOp[+A] {
     def isComplete: Boolean
 
-    def toDisjunction: scalaz.\/[ApiResponse, A]
+    def toDisjunction: Either[ApiResponse, A]
 
     def flatMap[B](f: A => ApiGatewayOp[B]): ApiGatewayOp[B] =
       toDisjunction.flatMap(f.andThen(_.toDisjunction)).toApiGatewayOp
@@ -38,19 +55,19 @@ object Types extends Logging {
       toDisjunction.map(f).toApiGatewayOp
 
     def mapResponse(f: ApiResponse => ApiResponse): ApiGatewayOp[A] =
-      toDisjunction.leftMap(f).toApiGatewayOp
+      toDisjunction.left.map(f).toApiGatewayOp
 
   }
 
   implicit val apiGatewayOpM: Monad[ApiGatewayOp] = {
 
-    type ApiGatewayDisjunction[A] = scalaz.\/[ApiResponse, A]
+    type ApiGatewayDisjunction[A] = Either[ApiResponse, A]
 
     val disjunctionMonad = implicitly[Monad[ApiGatewayDisjunction]]
 
     new Monad[ApiGatewayOp] {
 
-      override def bind[A, B](fa: ApiGatewayOp[A])(f: A => ApiGatewayOp[B]): ApiGatewayOp[B] = {
+      override def flatMap[A, B](fa: ApiGatewayOp[A])(f: A => ApiGatewayOp[B]): ApiGatewayOp[B] = {
 
         val originalAsDisjunction: ApiGatewayDisjunction[A] =
           fa.toDisjunction
@@ -59,12 +76,14 @@ object Types extends Logging {
           f.andThen(_.toDisjunction)
 
         val boundAsDisjunction: ApiGatewayDisjunction[B] =
-          disjunctionMonad.bind(originalAsDisjunction)(functionWithResultAsDisjunction)
+          disjunctionMonad.flatMap(originalAsDisjunction)(functionWithResultAsDisjunction)
 
         boundAsDisjunction.toApiGatewayOp
       }
 
-      override def point[A](a: => A): ApiGatewayOp[A] = ContinueProcessing(a)
+      override def tailRecM[A, B](a: A)(f: A => ApiGatewayOp[Either[A, B]]): ApiGatewayOp[B] = ???
+
+      override def pure[A](a: A): ApiGatewayOp[A] = ContinueProcessing(a)
 
     }
   }
@@ -152,33 +171,33 @@ object Types extends Logging {
 
   }
 
-  implicit class UnderlyingOps[A](theEither: scalaz.\/[ApiResponse, A]) {
+  implicit class UnderlyingOps[A](theEither: Either[ApiResponse, A]) {
 
     def toApiGatewayOp: ApiGatewayOp[A] =
       theEither match {
-        case scalaz.\/-(success) => ContinueProcessing(success)
-        case scalaz.-\/(finished) => ReturnWithResponse(finished)
+        case Right(success) => ContinueProcessing(success)
+        case Left(finished) => ReturnWithResponse(finished)
       }
 
   }
 
-  implicit class DisjunctionOps[L, A](theEither: scalaz.\/[L, A]) {
-
-    def toApiGatewayOp(action: String): ApiGatewayOp[A] =
-      theEither match {
-        case scalaz.\/-(success) => ContinueProcessing(success)
-        case scalaz.-\/(error) =>
-          logger.error(s"Failed to $action: $error")
-          ReturnWithResponse(internalServerError(s"Failed to execute lambda - unable to $action"))
-      }
-
-    def toApiGatewayOp(toApiResponse: L => ApiResponse): ApiGatewayOp[A] =
-      theEither match {
-        case scalaz.\/-(success) => ContinueProcessing(success)
-        case scalaz.-\/(error) => ReturnWithResponse(toApiResponse(error))
-      }
-
-  }
+  //  implicit class DisjunctionOps[L, A](theEither: Either[L, A]) {
+  //
+  //    def toApiGatewayOp(action: String): ApiGatewayOp[A] =
+  //      theEither match {
+  //        case Right(success) => ContinueProcessing(success)
+  //        case Left(error) =>
+  //          logger.error(s"Failed to $action: $error")
+  //          ReturnWithResponse(internalServerError(s"Failed to execute lambda - unable to $action"))
+  //      }
+  //
+  //    def toApiGatewayOp(toApiResponse: L => ApiResponse): ApiGatewayOp[A] =
+  //      theEither match {
+  //        case Right(success) => ContinueProcessing(success)
+  //        case Left(error) => ReturnWithResponse(toApiResponse(error))
+  //      }
+  //
+  //  }
 
   implicit class EitherOps[L, A](theEither: Either[L, A]) {
 

@@ -6,7 +6,6 @@ import com.gu.util.config.ConfigLocation
 import com.gu.util.config.ConfigReads.ConfigFailure
 import com.gu.util.reader.Types.{ApiGatewayOp, _}
 import play.api.libs.json.{Json, Reads}
-import scalaz.\/
 
 object Auth extends Logging {
 
@@ -23,7 +22,7 @@ object Auth extends Logging {
     implicit val apiConfigReads = Json.reads[TrustedApiConfig]
   }
 
-  def apply(loadConfigModule: ConfigFailure \/ TrustedApiConfig)(apiGatewayRequest: ApiGatewayRequest): ApiGatewayOp[Unit] = {
+  def apply(loadConfigModule: Either[ConfigFailure, TrustedApiConfig])(apiGatewayRequest: ApiGatewayRequest): ApiGatewayOp[Unit] = {
     for {
       trustedApiConfig <- loadConfigModule.toApiGatewayOp("load trusted Api config")
       requestAuth <- apiGatewayRequest.queryParamsAsCaseClass[RequestAuth]()

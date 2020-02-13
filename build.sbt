@@ -72,7 +72,7 @@ lazy val zuora = all(project in file("lib/zuora"))
     effects % "test->test"
   )
   .settings(
-    libraryDependencies ++= Seq(okhttp3, scalaz, playJson, scalatest, jacksonDatabind) ++ logging
+    libraryDependencies ++= Seq(okhttp3, playJson, scalatest, jacksonDatabind) ++ logging
   )
 
 lazy val `salesforce-core` = all(project in file("lib/salesforce/core"))
@@ -90,7 +90,7 @@ lazy val `salesforce-client` = all(project in file("lib/salesforce/client"))
     `salesforce-core`
   )
   .settings(
-    libraryDependencies ++= Seq(okhttp3, scalaz, playJson, scalatest) ++ logging
+    libraryDependencies ++= Seq(okhttp3, catsCore, playJson, scalatest) ++ logging
   )
 
 lazy val `salesforce-sttp-client` = all(project in file("lib/salesforce/sttp-client"))
@@ -121,7 +121,6 @@ lazy val `holiday-stops` = all(project in file("lib/holiday-stops"))
   .settings(
     libraryDependencies ++= Seq(
       okhttp3,
-      scalaz,
       playJson,
       scalatest,
       scalaCheck,
@@ -160,14 +159,14 @@ lazy val s3ConfigValidator = all(project in file("lib/s3ConfigValidator"))
 lazy val handler = all(project in file("lib/handler"))
   .dependsOn(`effects-s3`, `config-core`)
   .settings(
-    libraryDependencies ++= Seq(okhttp3, scalaz, playJson, scalatest, awsLambda) ++ logging
+    libraryDependencies ++= Seq(okhttp3, catsCore, playJson, scalatest, awsLambda) ++ logging
   )
 
 // to aid testability, only the actual handlers called as a lambda can depend on this
 lazy val effects = all(project in file("lib/effects"))
   .dependsOn(handler)
   .settings(
-    libraryDependencies ++= Seq(okhttp3, scalaz, playJson, scalatest, awsS3, jacksonDatabind) ++ logging
+    libraryDependencies ++= Seq(okhttp3, playJson, scalatest, awsS3, jacksonDatabind) ++ logging
   )
 lazy val `effects-s3` = all(project in file("lib/effects-s3"))
   .settings(
