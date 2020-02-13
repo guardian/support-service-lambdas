@@ -41,8 +41,8 @@ object DigitalVoucherService {
         imovoClient.updateVoucher(cardCode, cancellationDate).leftMap(List(_)),
         imovoClient.updateVoucher(letterCode, cancellationDate).leftMap(List(_))
       ).parMapN { (_, _) =>
-          ()
-        }.leftMap(errors => DigitalVoucherServiceError(errors.mkString(", ")))
+        ()
+      }.leftMap(errors => DigitalVoucherServiceError(errors.mkString(", ")))
 
     override def getVoucher(subscriptionId: String): EitherT[F, DigitalVoucherServiceError, Voucher] =
       EitherT.rightT[F, DigitalVoucherServiceError](

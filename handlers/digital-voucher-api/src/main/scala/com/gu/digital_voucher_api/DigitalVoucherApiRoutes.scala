@@ -80,7 +80,6 @@ object DigitalVoucherApiRoutes {
           result <- digitalVoucherService
             .cancelVouchers(requestBody.cardCode, requestBody.letterCode, requestBody.cancellationDate)
             .leftMap(error => InternalServerError(DigitalVoucherApiRoutesError(s"Failed get voucher: $error")))
-
         } yield result
 
       )

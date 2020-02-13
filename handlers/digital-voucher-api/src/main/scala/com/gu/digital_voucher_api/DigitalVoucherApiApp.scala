@@ -32,7 +32,6 @@ object DigitalVoucherApiApp extends LazyLogging {
       routes <- createLogging()(DigitalVoucherApiRoutes(DigitalVoucherService(imovoClient)))
         .asRight[DigitalVoucherApiError]
         .toEitherT[IO]
-
     } yield routes
   }
 
