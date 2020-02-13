@@ -83,13 +83,18 @@ object SubscriptionData {
 
       // Calculate credit by taking into account potential discounts, otherwise return original credit
       def applyAnyDiscounts(issueData: IssueData): IssueData = {
+        import issueData._
+
+        def isActiveDiscount(start: LocalDate, end: LocalDate): Boolean =
+          (start.isEqual(issueDate) || start.isBefore(issueDate)) && end.isAfter(issueDate)
+
         val discounts: List[Double] =
           subscription
             .ratePlans
             .iterator
             .filter(_.productName == "Discounts")
-            .flatMap(_.ratePlanCharges.map(rpc => (rpc.discountPercentage, rpc.effectiveEndDate)))
-            .collect { case (percentage, effectiveEndDate) if percentage.isDefined && effectiveEndDate.isAfter(issueData.issueDate) => percentage }
+            .flatMap(_.ratePlanCharges.map(rpc => (rpc.discountPercentage, rpc.effectiveStartDate, rpc.effectiveEndDate)))
+            .collect { case (percent, start, end) if percent.isDefined && isActiveDiscount(start, end) => percent }
             .flatten
             .map(_ / 100)
             .toList
