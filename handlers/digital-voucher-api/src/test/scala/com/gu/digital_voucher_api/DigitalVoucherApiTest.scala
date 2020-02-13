@@ -1,5 +1,7 @@
 package com.gu.digital_voucher_api
 
+import java.time.LocalDate
+
 import cats.effect.IO
 import com.gu.DevIdentity
 import com.softwaremill.sttp.impl.cats.CatsMonadError
@@ -11,7 +13,7 @@ import io.circe.parser.decode
 import org.http4s.{Method, Request, Response, Uri}
 import org.scalatest.{EitherValues, FlatSpec, Inside, Matchers}
 import com.gu.digital_voucher_api.imovo.ImovoStub._
-import com.gu.digital_voucher_api.imovo.{ImovoDeleteResponse, ImovoErrorResponse, ImovoVoucherResponse}
+import com.gu.digital_voucher_api.imovo.{ImovoErrorResponse, ImovoUpdateResponse, ImovoVoucherResponse}
 
 class DigitalVoucherApiTest extends FlatSpec with Matchers with EitherValues {
   "DigitalVoucherApi" should "return stubbed voucher details for create request" in {
@@ -80,40 +82,42 @@ class DigitalVoucherApiTest extends FlatSpec with Matchers with EitherValues {
     response.status.code should equal(500)
   }
   it should "return stubbed voucher details for get request" in {
-    val imovoBackendStub: SttpBackendStub[IO, Nothing] = SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
-      .stubGet(
-        apiKey = "imovo-test-api-key",
-        baseUrl = "https://imovo.test.com",
-        subscriptionId = "test-subscription-id",
-        response = ImovoVoucherResponse("test-voucher-code", true)
-      )
-
-    val app = createApp(imovoBackendStub)
+    val app = createApp(SttpBackendStub[IO, Nothing](new CatsMonadError[IO]))
     val response = app.run(
       Request(
         method = Method.GET,
-        Uri(path = "/digital-voucher/test-subscription-id")
+        Uri(path = "/digital-voucher/sub123456")
       )
     ).value.unsafeRunSync().get
 
-    getBody[Voucher](response) should equal(Voucher("test-voucher-code", "test-voucher-code"))
+    getBody[Voucher](response) should equal(Voucher("5555555555", "6666666666"))
     response.status.code should equal(200)
   }
-  it should "return stubbed 200 response for delete request" in {
+  it should "return stubbed 200 response for canel request" in {
+    val cancellationDate = LocalDate.now().plusWeeks(1)
+
     val imovoBackendStub: SttpBackendStub[IO, Nothing] = SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
-      .stubDelete(
+      .stubUpdate(
         apiKey = "imovo-test-api-key",
         baseUrl = "https://imovo.test.com",
-        subscriptionId = "test-subscription-id",
-        response = ImovoDeleteResponse(true)
+        voucherCode = "card-test-voucher-code",
+        expiryDate = Some(cancellationDate),
+        response = ImovoUpdateResponse(true)
+      )
+      .stubUpdate(
+        apiKey = "imovo-test-api-key",
+        baseUrl = "https://imovo.test.com",
+        voucherCode = "letter-test-voucher-code",
+        expiryDate = Some(cancellationDate),
+        response = ImovoUpdateResponse(true)
       )
 
     val app = createApp(imovoBackendStub)
     val response = app.run(
       Request(
-        method = Method.DELETE,
-        Uri(path = "/digital-voucher/test-subscription-id")
-      )
+        method = Method.POST,
+        Uri(path = "/digital-voucher/cancel")
+      ).withEntity[String](CancelVoucherRequestBody("card-test-voucher-code", "letter-test-voucher-code", cancellationDate).asJson.spaces2)
     ).value.unsafeRunSync().get
 
     getBody[Unit](response) should equal(())

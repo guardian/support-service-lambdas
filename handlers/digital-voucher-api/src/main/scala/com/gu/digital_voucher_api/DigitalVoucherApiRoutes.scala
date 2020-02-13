@@ -1,5 +1,7 @@
 package com.gu.digital_voucher_api
 
+import java.time.LocalDate
+
 import cats.data.EitherT
 import cats.effect.Effect
 import org.http4s.{EntityEncoder, HttpRoutes, Request, Response}
@@ -13,6 +15,8 @@ import org.http4s.dsl.Http4sDsl
 case class DigitalVoucherApiRoutesError(message: String)
 
 case class CreateVoucherRequestBody(ratePlanName: String)
+
+case class CancelVoucherRequestBody(cardCode: String, letterCode: String, cancellationDate: LocalDate)
 
 object DigitalVoucherApiRoutes {
 
@@ -69,11 +73,16 @@ object DigitalVoucherApiRoutes {
       )
     }
 
-    def handleDeleteRequest(subscriptionId: String) = {
+    def handleCancelRequest(request: Request[F]) = {
       toResponse(
-        digitalVoucherService
-          .deleteVoucherForSubscription(subscriptionId)
-          .leftMap(error => InternalServerError(DigitalVoucherApiRoutesError(s"Failed get voucher: $error")))
+        for {
+          requestBody <- parseRequest[CancelVoucherRequestBody](request)
+          result <- digitalVoucherService
+            .cancelVouchers(requestBody.cardCode, requestBody.letterCode, requestBody.cancellationDate)
+            .leftMap(error => InternalServerError(DigitalVoucherApiRoutesError(s"Failed get voucher: $error")))
+
+        } yield result
+
       )
     }
 
@@ -84,8 +93,8 @@ object DigitalVoucherApiRoutes {
         handleReplaceRequest(request)
       case GET -> Root / "digital-voucher" / subscriptionId =>
         handleGetRequest(subscriptionId)
-      case DELETE -> Root / "digital-voucher" / subscriptionId =>
-        handleDeleteRequest(subscriptionId)
+      case request @ POST -> Root / "digital-voucher" / "cancel" =>
+        handleCancelRequest(request)
     }
   }
 }

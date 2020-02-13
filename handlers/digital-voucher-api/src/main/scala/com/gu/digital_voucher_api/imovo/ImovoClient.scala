@@ -1,6 +1,8 @@
 package com.gu.digital_voucher_api.imovo
 
 import java.net.URI
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 import cats.data.EitherT
 import cats.effect.Sync
@@ -17,11 +19,11 @@ case class ImovoClientError(message: String)
 case class ImovoVoucherResponse(voucherCode: String, successfulRequest: Boolean)
 case class ImovoErrorResponse(errorMessages: List[String], successfulRequest: Boolean)
 case class ImovoDeleteResponse(successfulRequest: Boolean)
+case class ImovoUpdateResponse(successfulRequest: Boolean)
 
 trait ImovoClient[F[_]] {
   def replaceVoucher(voucherCode: String): EitherT[F, ImovoClientError, ImovoVoucherResponse]
-  def getVoucher(voucherCode: String): EitherT[F, ImovoClientError, ImovoVoucherResponse]
-  def deleteVoucher(subscriptionId: String): EitherT[F, ImovoClientError, Unit]
+  def updateVoucher(voucherCode: String, expiryDate: LocalDate): EitherT[F, ImovoClientError, Unit]
 }
 
 object ImovoClient extends LazyLogging {
@@ -84,6 +86,8 @@ object ImovoClient extends LazyLogging {
         }
     }
 
+    val imovoDateFormat = DateTimeFormatter.ISO_DATE
+
     new ImovoClient[F] {
       override def replaceVoucher(voucherCode: String): EitherT[F, ImovoClientError, ImovoVoucherResponse] = {
         sendAuthenticatedRequest[ImovoVoucherResponse, String](
@@ -93,19 +97,13 @@ object ImovoClient extends LazyLogging {
           None
         )
       }
-      override def getVoucher(subscriptionId: String): EitherT[F, ImovoClientError, ImovoVoucherResponse] = {
-        sendAuthenticatedRequest[ImovoVoucherResponse, String](
+      override def updateVoucher(voucherCode: String, expiryDate: LocalDate): EitherT[F, ImovoClientError, Unit] = {
+        sendAuthenticatedRequest[ImovoUpdateResponse, String](
           apiKey,
           Method.GET,
-          Uri(new URI(s"$baseUrl//Subscription/GetVoucher")).param("SubscriptionId", subscriptionId),
-          None
-        )
-      }
-      override def deleteVoucher(subscriptionId: String): EitherT[F, ImovoClientError, Unit] = {
-        sendAuthenticatedRequest[ImovoDeleteResponse, String](
-          apiKey,
-          Method.GET,
-          Uri(new URI(s"$baseUrl//Subscription/DeleteVoucher")).param("SubscriptionId", subscriptionId),
+          Uri(new URI(s"$baseUrl/Voucher/Update/"))
+            .param("VoucherCode", voucherCode)
+            .param("ExpiryDate", imovoDateFormat.format(expiryDate)),
           None
         ).map(_ => ())
       }

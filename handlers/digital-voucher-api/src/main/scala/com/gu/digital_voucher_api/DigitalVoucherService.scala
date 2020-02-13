@@ -1,5 +1,7 @@
 package com.gu.digital_voucher_api
 
+import java.time.LocalDate
+
 import cats.Monad
 import cats.implicits._
 import cats.data.EitherT
@@ -13,7 +15,7 @@ trait DigitalVoucherService[F[_]] {
   def createVoucher(subscriptionId: String, ratePlanName: String): EitherT[F, DigitalVoucherServiceError, Voucher]
   def replaceVoucher(voucher: Voucher): EitherT[F, DigitalVoucherServiceError, Voucher]
   def getVoucher(subscriptionId: String): EitherT[F, DigitalVoucherServiceError, Voucher]
-  def deleteVoucherForSubscription(subscriptionId: String): EitherT[F, DigitalVoucherServiceError, Unit]
+  def cancelVouchers(cardCode: String, letterCode: String, cancellationDate: LocalDate): EitherT[F, DigitalVoucherServiceError, Unit]
 }
 
 object DigitalVoucherService {
@@ -34,17 +36,17 @@ object DigitalVoucherService {
           Voucher(cardResponse.voucherCode, letterResponse.voucherCode)
         }.leftMap(errors => DigitalVoucherServiceError(errors.mkString(", ")))
 
-    override def deleteVoucherForSubscription(subscriptionId: String): EitherT[F, DigitalVoucherServiceError, Unit] =
-      imovoClient
-        .deleteVoucher(subscriptionId)
-        .map(_ => ())
-        .leftMap(error => DigitalVoucherServiceError(error.toString))
+    override def cancelVouchers(cardCode: String, letterCode: String, cancellationDate: LocalDate): EitherT[F, DigitalVoucherServiceError, Unit] =
+      (
+        imovoClient.updateVoucher(cardCode, cancellationDate).leftMap(List(_)),
+        imovoClient.updateVoucher(letterCode, cancellationDate).leftMap(List(_))
+      ).parMapN { (_, _) =>
+          ()
+        }.leftMap(errors => DigitalVoucherServiceError(errors.mkString(", ")))
 
     override def getVoucher(subscriptionId: String): EitherT[F, DigitalVoucherServiceError, Voucher] =
-      for {
-        voucherResponse <- imovoClient
-          .getVoucher(subscriptionId)
-          .leftMap(error => DigitalVoucherServiceError(error.toString))
-      } yield Voucher(voucherResponse.voucherCode, voucherResponse.voucherCode)
+      EitherT.rightT[F, DigitalVoucherServiceError](
+        Voucher(s"5555555555", s"6666666666")
+      )
   }
 }
