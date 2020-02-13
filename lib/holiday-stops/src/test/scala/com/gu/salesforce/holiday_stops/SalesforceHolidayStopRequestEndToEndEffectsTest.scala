@@ -1,7 +1,5 @@
 package com.gu.salesforce.holiday_stops
 
-import java.time.LocalDate
-
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.salesforce.SalesforceReads._
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest._
@@ -11,10 +9,11 @@ import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.resthttp.JsonHttp
 import com.gu.zuora.subscription._
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 import scalaz.{-\/, \/-}
 
-class SalesforceHolidayStopRequestEndToEndEffectsTest extends FlatSpec with Matchers {
+class SalesforceHolidayStopRequestEndToEndEffectsTest extends AnyFlatSpec with Matchers {
 
   case class EndToEndResults(
     createResult: HolidayStopRequestId,
@@ -24,10 +23,10 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends FlatSpec with Matc
 
   it should "Salesforce Holiday Stop Requests should work end to end" taggedAs EffectsTest in {
 
-    val startDate = LocalDate.now().plusDays(10)
-    val endDate = LocalDate.now().plusDays(15)
-    val lookupDate = LocalDate.now().plusDays(12)
-    val productName = ProductName("Guardian Weekly")
+    val startDate = MutableCalendar.today.plusDays(10)
+    val endDate = MutableCalendar.today.plusDays(15)
+    val subscriptionName = SubscriptionName("A-S00050817") // must exist in DEV SalesForce
+    val contact = IdentityId("100004814") // must exist in DEV SalesForce
 
     val actual = for {
       sfConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[SFAuthConfig]
@@ -36,8 +35,8 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends FlatSpec with Matc
 
       verifySubOwnerOp = SalesforceSFSubscription.SubscriptionForSubscriptionNameAndContact(sfAuth.wrapWith(JsonHttp.getWithParams))
       maybeMatchingSubscription <- verifySubOwnerOp(
-        SubscriptionName("A-S00050817"), // must exist in DEV Scalculate the first available date basedalesForce
-        IdentityId("100004814")
+        subscriptionName,
+        contact
       ).toDisjunction
 
       fakeSubscription: Subscription = Fixtures.mkGuardianWeeklySubscription()
@@ -56,8 +55,8 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends FlatSpec with Matc
         fakeSubscription
       )).toDisjunction
 
-      fetchOp = SalesforceHolidayStopRequest.LookupByDateAndProductNamePrefix(sfAuth.wrapWith(JsonHttp.getWithParams))
-      preProcessingFetchResult <- fetchOp(lookupDate, productName).toDisjunction
+      fetchOp = SalesforceHolidayStopRequest.LookupByContactAndOptionalSubscriptionName(sfAuth.wrapWith(JsonHttp.getWithParams))
+      preProcessingFetchResult <- fetchOp(contact, Some(subscriptionName), None).toDisjunction
 
       id: HolidayStopRequestsDetailId = preProcessingFetchResult.find(_.Id == createResult).get
         .Holiday_Stop_Request_Detail__r.get.records
@@ -70,7 +69,7 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends FlatSpec with Matc
         Price(-12.34)
       )).toDisjunction
 
-      postProcessingFetchResult <- fetchOp(lookupDate, productName).toDisjunction
+      postProcessingFetchResult <- fetchOp(contact, Some(subscriptionName), None).toDisjunction
 
       // UN-ACTION in order to delete the parent
       _ <- processOp(HolidayStopRequestsDetailActioned(

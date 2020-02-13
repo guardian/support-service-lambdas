@@ -216,7 +216,12 @@ class HandlerTest extends AnyFlatSpec with Matchers {
       unwrappedOp(Handler.operationForEffects(
         new TestingRawEffects(
           responses = Map(
-            SalesForceHolidayStopsEffects.listHolidayStops(contactId, subscriptionName, List(holidayStopRequest))
+            SalesForceHolidayStopsEffects.listHolidayStops(
+              contactId,
+              subscriptionName,
+              List(holidayStopRequest),
+              Some(MutableCalendar.today.minusMonths(6))
+            )
           ),
           postResponses = Map(
             SFTestEffects.authSuccess,
@@ -231,9 +236,7 @@ class HandlerTest extends AnyFlatSpec with Matchers {
           .steps(
             existingHolidayStopsRequest(
               subscriptionName,
-              contactId,
-              "Newspaper - Voucher Book",
-              "Sunday"
+              contactId
             )
           )
       }
@@ -412,30 +415,10 @@ class HandlerTest extends AnyFlatSpec with Matchers {
     )
   }
 
-  private def potentialIssueDateRequest(productType: String, productRatePlanName: String, startDate: String,
-                                        endDate: String, subscriptionName: String) = {
+  private def existingHolidayStopsRequest(subscriptionName: String, sfContactId: String) = {
     ApiGatewayRequest(
       Some("GET"),
-      Some(Map(
-        "startDate" -> startDate,
-        "endDate" -> endDate,
-        "productType" -> productType,
-        "productRatePlanName" -> productRatePlanName
-      )),
       None,
-      None,
-      Some(JsObject(Seq("subscriptionName" -> JsString(subscriptionName)))),
-      Some(s"/potential/$subscriptionName ")
-    )
-  }
-
-  private def existingHolidayStopsRequest(subscriptionName: String, sfContactId: String, productType: String, produtRatePlanName: String) = {
-    ApiGatewayRequest(
-      Some("GET"),
-      Some(Map(
-        "productType" -> productType,
-        "productRatePlanName" -> produtRatePlanName
-      )),
       None,
       Some(Map("x-salesforce-contact-id" -> sfContactId)),
       Some(JsObject(Seq("subscriptionName" -> JsString(subscriptionName)))),
