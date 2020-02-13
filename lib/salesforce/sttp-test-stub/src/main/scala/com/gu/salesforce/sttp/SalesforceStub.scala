@@ -25,7 +25,7 @@ object SalesforceStub {
     def stubPatch(auth: SalesforceAuth): SttpBackendStub[F, S] = {
       sttpStub.whenRequestMatchesPartial {
         case request: Request[_, _] if matchesPatchRequest(auth, request) =>
-          Response(Right("{}"), 204, "")
+          Response(Right(""), 204, "")
       }
     }
 
