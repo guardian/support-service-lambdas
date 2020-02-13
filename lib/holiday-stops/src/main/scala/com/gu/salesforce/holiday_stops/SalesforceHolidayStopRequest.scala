@@ -5,19 +5,19 @@ import java.time.{LocalDate, ZonedDateTime}
 import java.util.UUID
 
 import ai.x.play.json.Jsonx
-import com.gu.salesforce.{Contact, RecordsWrapperCaseClass}
 import com.gu.salesforce.SalesforceClient.SalesforceErrorResponseBody
 import com.gu.salesforce.SalesforceConstants._
 import com.gu.salesforce.SalesforceQueryConstants.contactToWhereClausePart
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
 import com.gu.salesforce.holiday_stops.SalesforceSFSubscription.SubscriptionForSubscriptionNameAndContact._
+import com.gu.salesforce.{Contact, RecordsWrapperCaseClass}
 import com.gu.util.Logging
 import com.gu.util.resthttp.HttpOp.HttpOpWrapper
 import com.gu.util.resthttp.RestOp._
 import com.gu.util.resthttp.RestRequestMaker._
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, CustomError}
 import com.gu.util.resthttp.{HttpOp, RestRequestMaker}
-import com.gu.zuora.subscription.{IssueData, Price, RatePlanChargeCode, Subscription, SubscriptionName}
+import com.gu.zuora.subscription._
 import play.api.libs.json._
 
 object SalesforceHolidayStopRequest extends Logging {
@@ -87,55 +87,24 @@ object SalesforceHolidayStopRequest extends Logging {
 
   implicit val formatIds = Json.format[RecordsWrapperCaseClass[HolidayStopRequest]]
 
-  object LookupByDateAndProductNamePrefix {
-
-    def apply(sfGet: HttpOp[RestRequestMaker.GetRequestWithParams, JsValue]): (LocalDate, ProductName) => ClientFailableOp[List[HolidayStopRequest]] =
-      sfGet
-        .setupRequestMultiArg(toRequest _)
-        .parse[RecordsWrapperCaseClass[HolidayStopRequest]](Json.reads[RecordsWrapperCaseClass[HolidayStopRequest]])
-        .map(_.records)
-        .runRequestMultiArg
-
-    def toRequest(date: LocalDate, productNamePrefix: ProductName) = {
-      val sfDate = date.format(SALESFORCE_DATE_FORMATTER)
-      val soqlQuery = getHolidayStopRequestPrefixSOQL(Some(productNamePrefix)) +
-        s"AND Start_Date__c <= $sfDate " +
-        s"AND End_Date__c >= $sfDate"
-      logger.info(s"using SF query : $soqlQuery")
-      RestRequestMaker.GetRequestWithParams(RelativePath(soqlQueryBaseUrl), UrlParams(Map("q" -> soqlQuery)))
-    }
-
-  }
-
-  object LookupByDateRangeAndProductNamePrefix {
-
-    def apply(sfGet: HttpOp[RestRequestMaker.GetRequestWithParams, JsValue]): (HolidayStopRequestStartDate, HolidayStopRequestEndDate, ProductName) => ClientFailableOp[List[HolidayStopRequest]] =
-      sfGet
-        .setupRequestMultiArg(toRequest _)
-        .parse[RecordsWrapperCaseClass[HolidayStopRequest]](Json.reads[RecordsWrapperCaseClass[HolidayStopRequest]])
-        .map(_.records)
-        .runRequestMultiArg
-
-    def toRequest(startDate: HolidayStopRequestStartDate, endDate: HolidayStopRequestEndDate, productNamePrefix: ProductName) = {
-      val soqlQuery = s"""
-        | ${getHolidayStopRequestPrefixSOQL(Some(productNamePrefix))}
-        | AND Start_Date__c >= ${startDate.value.format(SALESFORCE_DATE_FORMATTER)}
-        | AND End_Date__c <= ${endDate.value.format(SALESFORCE_DATE_FORMATTER)}
-        | """.stripMargin
-      logger.info(s"using SF query : $soqlQuery")
-      RestRequestMaker.GetRequestWithParams(RelativePath(soqlQueryBaseUrl), UrlParams(Map("q" -> soqlQuery)))
-    }
-  }
-
   object LookupByContactAndOptionalSubscriptionName {
 
-    def apply(sfGet: HttpOp[RestRequestMaker.GetRequestWithParams, JsValue]): (Contact, Option[SubscriptionName]) => ClientFailableOp[List[HolidayStopRequest]] =
+    def apply(sfGet: HttpOp[RestRequestMaker.GetRequestWithParams, JsValue]): (Contact, Option[SubscriptionName], Option[LocalDate]) => ClientFailableOp[List[HolidayStopRequest]] =
       sfGet.setupRequestMultiArg(toRequest _).parse[RecordsWrapperCaseClass[HolidayStopRequest]].map(_.records).runRequestMultiArg
 
-    def toRequest(contact: Contact, optionalSubscriptionName: Option[SubscriptionName]) = {
-      val soqlQuery = getHolidayStopRequestPrefixSOQL() +
+    def getSOQL(contact: Contact, optionalSubscriptionName: Option[SubscriptionName], optionalHistoricalCutOff: Option[LocalDate]) =
+      getHolidayStopRequestPrefixSOQL() +
         s"WHERE SF_Subscription__r.${contactToWhereClausePart(contact)}" +
-        optionalSubscriptionName.map(subName => s" AND Subscription_Name__c = '${subName.value}'").getOrElse("")
+        optionalHistoricalCutOff.map(_.format(SALESFORCE_DATE_FORMATTER)).map(historicalCutOff =>
+          s" AND (Max_Expected_Invoice_Date__c > $historicalCutOff OR (Max_Expected_Invoice_Date__c = NULL AND End_Date__c > $historicalCutOff))"
+        ).getOrElse("") +
+        optionalSubscriptionName.map(subName =>
+          s" AND Subscription_Name__c = '${subName.value}'"
+        ).getOrElse("")
+
+    def toRequest(contact: Contact, optionalSubscriptionName: Option[SubscriptionName], optionalHistoricalCutOff: Option[LocalDate]) = {
+
+      val soqlQuery = getSOQL(contact, optionalSubscriptionName, optionalHistoricalCutOff)
       logger.info(s"using SF query : $soqlQuery")
       RestRequestMaker.GetRequestWithParams(RelativePath(soqlQueryBaseUrl), UrlParams(Map("q" -> soqlQuery)))
     }
@@ -351,9 +320,9 @@ object SalesforceHolidayStopRequest extends Logging {
 
 
     def buildBody(
-                   holidayStopRequestsDetails: List[HolidayStopRequestsDetail],
-                   idGenerator: => String
-                 ): CompositeRequest = {
+      holidayStopRequestsDetails: List[HolidayStopRequestsDetail],
+      idGenerator: => String
+    ): CompositeRequest = {
       val requestDetailParts = holidayStopRequestsDetails
         .map { requestDetail =>
           CompositePart(

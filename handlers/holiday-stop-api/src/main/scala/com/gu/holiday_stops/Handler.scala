@@ -252,7 +252,7 @@ object Handler extends Logging {
     (for {
       contact <- extractContactFromHeaders(req.headers)
       subName <- extractSubNameOp
-      usersHolidayStopRequests <- lookupOp(contact, Some(subName))
+      usersHolidayStopRequests <- lookupOp(contact, Some(subName), Some(MutableCalendar.today.minusMonths(6)))
         .toDisjunction
         .toApiGatewayOp(s"lookup Holiday Stop Requests for contact $contact")
       accessToken <- getAccessToken()
@@ -321,7 +321,7 @@ object Handler extends Logging {
       effectiveCancellationDate <- queryParams.effectiveCancellationDate
         .toApiGatewayOp("effectiveCancellationDate query string parameter is required")
       contact <- extractContactFromHeaders(req.headers)
-      holidayStopRequests <- lookupOpHolidayStopsOp(contact, Some(pathParams.subscriptionName))
+      holidayStopRequests <- lookupOpHolidayStopsOp(contact, Some(pathParams.subscriptionName), None)
         .toDisjunction
         .toApiGatewayOp(
           s"lookup Holiday Stop Requests for contact $contact and subscription ${pathParams.subscriptionName}"
@@ -355,7 +355,7 @@ object Handler extends Logging {
       effectiveCancellationDate <- queryParams.effectiveCancellationDate
         .toApiGatewayOp("effectiveCancellationDate query string parameter is required")
       contact <- extractContactFromHeaders(req.headers)
-      holidayStopRequests <- lookupOpHolidayStopsOp(contact, Some(pathParams.subscriptionName))
+      holidayStopRequests <- lookupOpHolidayStopsOp(contact, Some(pathParams.subscriptionName), None)
         .toDisjunction
         .toApiGatewayOp(
           s"lookup Holiday Stop Requests for contact $contact and subscription ${pathParams.subscriptionName}"
@@ -386,7 +386,7 @@ object Handler extends Logging {
       requestBody <- req.bodyAsCaseClass[HolidayStopRequestPartial]()
       contact <- extractContactFromHeaders(req.headers)
       pathParams <- req.pathParamsAsCaseClass[SpecificHolidayStopRequestPathParams]()
-      allExisting <- lookupOp(contact, Some(pathParams.subscriptionName)).toDisjunction.toApiGatewayOp(s"lookup Holiday Stop Requests for contact $contact")
+      allExisting <- lookupOp(contact, Some(pathParams.subscriptionName), None).toDisjunction.toApiGatewayOp(s"lookup Holiday Stop Requests for contact $contact")
       existingPublicationsThatWereToBeStopped <- allExisting.find(_.Id == pathParams.holidayStopRequestId).flatMap(_.Holiday_Stop_Request_Detail__r.map(_.records)).toApiGatewayOp(s"contact $contact does not own ${requestBody.subscriptionName.value}")
       accessToken <- getAccessToken().toApiGatewayOp(s"get zuora access token")
       subscription <- getSubscription(accessToken, requestBody.subscriptionName)
@@ -435,7 +435,7 @@ object Handler extends Logging {
     (for {
       contact <- extractContactFromHeaders(req.headers)
       pathParams <- req.pathParamsAsCaseClass[SpecificHolidayStopRequestPathParams]()
-      existingForUser <- lookupOp(contact, None).toDisjunction.toApiGatewayOp(s"lookup Holiday Stop Requests for contact $contact")
+      existingForUser <- lookupOp(contact, None, None).toDisjunction.toApiGatewayOp(s"lookup Holiday Stop Requests for contact $contact")
       _ = existingForUser.exists(_.Id == pathParams.holidayStopRequestId).toApiGatewayContinueProcessing(ApiGatewayResponse.forbidden("not your holiday stop"))
       _ <- withdrawOp(pathParams.holidayStopRequestId).toDisjunction.toApiGatewayOp(
         exposeSfErrorMessageIn500ApiResponse(s"withdraw Holiday Stop Request for subscription ${pathParams.subscriptionName.value} of contact $contact")

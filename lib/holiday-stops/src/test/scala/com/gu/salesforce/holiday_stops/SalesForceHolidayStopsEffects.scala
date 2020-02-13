@@ -1,10 +1,12 @@
 package com.gu.salesforce.holiday_stops
 
 import java.net.URLEncoder
+import java.time.LocalDate
 
 import com.gu.effects.TestingRawEffects.HTTPResponse
-import com.gu.salesforce.RecordsWrapperCaseClass
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.HolidayStopRequest
+import com.gu.salesforce.{RecordsWrapperCaseClass, SalesforceContactId}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.{HolidayStopRequest, LookupByContactAndOptionalSubscriptionName}
+import com.gu.zuora.subscription.SubscriptionName
 import play.api.libs.json.Json
 
 object SalesForceHolidayStopsEffects {
@@ -14,24 +16,16 @@ object SalesForceHolidayStopsEffects {
       | "records": []
       |}""".stripMargin
 
-  def listHolidayQuery(contactId: String, subscriptionName: String) =
-    "\n SELECT Id, Start_Date__c, End_Date__c, Subscription_Name__c, Product_Name__c," +
-      "\n Actioned_Count__c, Pending_Count__c, Total_Issues_Publications_Impacted_Count__c," +
-      "\n Withdrawn_Time__c, Is_Withdrawn__c, (\n" +
-      "   \n" +
-      " SELECT Id, Subscription_Name__c, " +
-      "Product_Name__c, Stopped_Publication_Date__c,\n" +
-      " Estimated_Price__c, Charge_Code__c, Actual_Price__c, Expected_Invoice_Date__c\n" +
-      "\n   " +
-      "FROM Holiday_Stop_Request_Detail__r\n   " +
-      "ORDER BY Stopped_Publication_Date__c ASC\n" +
-      " )\n " +
-      "FROM Holiday_Stop_Request__c\n" +
-      " \n" +
-      s"WHERE SF_Subscription__r.Buyer__r.Id = '$contactId' AND Subscription_Name__c = '$subscriptionName'"
+  val listHolidayQuery = LookupByContactAndOptionalSubscriptionName.getSOQL _
 
-  def listHolidayRequestUrl(contactId: String, subscriptionName: String) = {
-    s"/services/data/v29.0/query/?q=${escapeQueryStringValue(listHolidayQuery(contactId, subscriptionName))}"
+  def listHolidayRequestUrl(contactId: String, subscriptionName: String, optionalHistoricalCutOff: Option[LocalDate]) = {
+    s"/services/data/v29.0/query/?q=${
+      escapeQueryStringValue(listHolidayQuery(
+        SalesforceContactId(contactId),
+        Some(SubscriptionName(subscriptionName)),
+        optionalHistoricalCutOff
+      ))
+    }"
   }
 
   def escapeQueryStringValue(value: String) = {
@@ -43,10 +37,11 @@ object SalesForceHolidayStopsEffects {
       .replace("%29", ")")
   }
 
-  def listHolidayStops(contactId: String, subscriptionName: String, holidayStops: List[HolidayStopRequest]): (String, HTTPResponse) =
+  def listHolidayStops(contactId: String, subscriptionName: String, holidayStops: List[HolidayStopRequest], optionalHistoricalCutOff: Option[LocalDate] = None): (String, HTTPResponse) =
     listHolidayRequestUrl(
       contactId,
-      subscriptionName
+      subscriptionName,
+      optionalHistoricalCutOff
     ) -> HTTPResponse(200, Json.toJson(RecordsWrapperCaseClass(holidayStops)).toString())
 
 }
