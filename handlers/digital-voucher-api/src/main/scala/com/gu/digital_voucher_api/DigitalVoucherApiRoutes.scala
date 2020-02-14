@@ -2,9 +2,10 @@ package com.gu.digital_voucher_api
 
 import java.time.LocalDate
 
+import cats.Show
 import cats.data.EitherT
 import cats.effect.Effect
-import org.http4s.{EntityEncoder, HttpRoutes, Request, Response}
+import org.http4s.{DecodeFailure, EntityEncoder, HttpRoutes, InvalidMessageBodyFailure, MalformedMessageBodyFailure, Request, Response}
 import io.circe.generic.auto._
 import org.http4s.circe.CirceEntityEncoder._
 import org.http4s.circe.CirceEntityDecoder._
@@ -35,10 +36,16 @@ object DigitalVoucherApiRoutes {
     }
 
     def parseRequest[A: Decoder](request: Request[F]) = {
+      implicit val showDecodeFailure = Show.show[DecodeFailure] {
+        case InvalidMessageBodyFailure(details, cause) => s"InvalidMessageBodyFailure($details, $cause)"
+        case MalformedMessageBodyFailure(details, cause) => s"MalformedMessageBodyFailure($details, $cause)"
+        case error => error.toString
+      }
+
       request
         .attemptAs[A]
-        .leftMap { decodingFailure =>
-          BadRequest(DigitalVoucherApiRoutesError(s"Failed to decoded request body: $decodingFailure"))
+        .leftMap { decodingFailure: DecodeFailure =>
+          BadRequest(DigitalVoucherApiRoutesError(s"Failed to decoded request body: ${decodingFailure.show}"))
         }
     }
 

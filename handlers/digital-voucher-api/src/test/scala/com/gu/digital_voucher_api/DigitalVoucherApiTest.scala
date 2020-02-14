@@ -93,7 +93,7 @@ class DigitalVoucherApiTest extends FlatSpec with Matchers with EitherValues {
     getBody[Voucher](response) should equal(Voucher("5555555555", "6666666666"))
     response.status.code should equal(200)
   }
-  it should "return stubbed 200 response for canel request" in {
+  it should "return stubbed 200 response for cancel request" in {
     val cancellationDate = LocalDate.now().plusWeeks(1)
 
     val imovoBackendStub: SttpBackendStub[IO, Nothing] = SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
