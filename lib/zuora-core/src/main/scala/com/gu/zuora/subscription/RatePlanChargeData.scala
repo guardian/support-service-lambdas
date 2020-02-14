@@ -43,7 +43,7 @@ object RatePlanChargeData {
     subscription: Subscription,
     ratePlanCharge: RatePlanCharge,
     account: ZuoraAccount,
-    issueDayOfWeek: DayOfWeek
+    issueDayOfWeek: DayOfWeek,
   ): Either[ZuoraApiFailure, RatePlanChargeData] = {
     for {
       billingPeriodName <- ratePlanCharge
@@ -55,16 +55,18 @@ object RatePlanChargeData {
   }
 
   private def calculateIssueCreditAmount(ratePlanCharge: RatePlanCharge) = {
-    def roundUp(d: Double): Double = BigDecimal(d).setScale(2, RoundingMode.UP).toDouble
-
     for {
       billingPeriodName <- ratePlanCharge
         .billingPeriod
         .toRight(ZuoraApiFailure("RatePlanCharge.billingPeriod is required"))
       approximateBillingPeriodWeeks <- approximateBillingPeriodWeeksForName(billingPeriodName, ratePlanCharge.specificBillingPeriod)
-      price = -roundUp(ratePlanCharge.price / approximateBillingPeriodWeeks)
-    } yield price
+      roundedCredit = -round2Places(ratePlanCharge.price / approximateBillingPeriodWeeks)
+    } yield {
+      roundedCredit
+    }
   }
+
+  def round2Places(d: Double): Double = BigDecimal(d).setScale(2, RoundingMode.UP).toDouble
 
   private def approximateBillingPeriodWeeksForName(
     billingPeriodName: String,
