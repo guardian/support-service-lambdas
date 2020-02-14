@@ -45,7 +45,7 @@ object DigitalVoucherApiRoutes {
           voucher <- digitalVoucherService.createVoucher(
             subscriptionId,
             requestBody.ratePlanName
-          ).leftMap(_ => InternalServerError())
+          ).leftMap(error => InternalServerError(DigitalVoucherApiRoutesError(s"Failed create voucher: $error")))
         } yield voucher
       )
     }
@@ -56,7 +56,7 @@ object DigitalVoucherApiRoutes {
           requestBody <- parseRequest[Voucher](request)
           voucher <- digitalVoucherService.replaceVoucher(
             requestBody
-          ).leftMap(_ => InternalServerError())
+          ).leftMap(error => InternalServerError(DigitalVoucherApiRoutesError(s"Failed replace voucher: $error")))
         } yield voucher
       )
     }
@@ -65,7 +65,7 @@ object DigitalVoucherApiRoutes {
       toResponse(
         digitalVoucherService
           .getVoucher(subscriptionId)
-          .leftMap(_ => InternalServerError())
+          .leftMap(error => InternalServerError(DigitalVoucherApiRoutesError(s"Failed get voucher: $error")))
       )
     }
 

@@ -8,5 +8,5 @@ object Handler extends Http4sLambdaHandler(
   DigitalVoucherApiApp(AppIdentity.whoAmI(defaultAppName = "digital-voucher-api"))
     .value
     .unsafeRunSync()
-    .valueOr((error: DigitalVoucherApiAppError) => throw new RuntimeException(error.toString))
+    .valueOr((error: DigitalVoucherApiError) => throw new RuntimeException(error.toString))
 )

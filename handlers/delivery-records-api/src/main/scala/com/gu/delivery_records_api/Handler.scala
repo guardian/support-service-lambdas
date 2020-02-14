@@ -7,5 +7,5 @@ object Handler extends Http4sLambdaHandler(
   DeliveryRecordsApiApp()
     .value
     .unsafeRunSync()
-    .valueOr((error: DeliveryRecordsApiAppError) => throw new RuntimeException(error.toString))
+    .valueOr((error: DeliveryRecordsApiError) => throw new RuntimeException(error.toString))
 )

@@ -13,23 +13,23 @@ import io.circe.generic.auto._
 import org.http4s.server.middleware.Logger
 import org.http4s.util.CaseInsensitiveString
 
-final case class DeliveryRecordsApiAppError(message: String)
+final case class DeliveryRecordsApiError(message: String)
 
 object DeliveryRecordsApiApp extends LazyLogging {
 
   private implicit val cs: ContextShift[IO] = IO.contextShift(scala.concurrent.ExecutionContext.global)
 
-  def apply(): EitherT[IO, DeliveryRecordsApiAppError, HttpRoutes[IO]] = {
+  def apply(): EitherT[IO, DeliveryRecordsApiError, HttpRoutes[IO]] = {
     for {
       config <- loadSalesforceConfig()
       app <- DeliveryRecordsApiApp(config, AsyncHttpClientCatsBackend[cats.effect.IO]())
     } yield app
   }
 
-  def apply[S](config: SFAuthConfig, sttpBackend: SttpBackend[IO, S]): EitherT[IO, DeliveryRecordsApiAppError, HttpRoutes[IO]] = {
+  def apply[S](config: SFAuthConfig, sttpBackend: SttpBackend[IO, S]): EitherT[IO, DeliveryRecordsApiError, HttpRoutes[IO]] = {
     for {
       salesforceClient <- SalesforceClient(sttpBackend, config)
-        .leftMap(error => DeliveryRecordsApiAppError(error.toString))
+        .leftMap(error => DeliveryRecordsApiError(error.toString))
     } yield createLogging()(DeliveryRecordApiRoutes(DeliveryRecordsService(salesforceClient)))
   }
 
@@ -42,10 +42,10 @@ object DeliveryRecordsApiApp extends LazyLogging {
     )
   }
 
-  private def loadSalesforceConfig(): EitherT[IO, DeliveryRecordsApiAppError, SFAuthConfig] = {
+  private def loadSalesforceConfig(): EitherT[IO, DeliveryRecordsApiError, SFAuthConfig] = {
     ConfigLoader
       .loadFileFromS3[IO, SFAuthConfig](bucket, stage, salesforceConfigLocation)
-      .leftMap(error => DeliveryRecordsApiAppError(error.toString()))
+      .leftMap(error => DeliveryRecordsApiError(error.toString()))
   }
 
   private lazy val stage: Stage =
