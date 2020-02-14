@@ -75,5 +75,7 @@ case class RatePlanCharge(
   upToPeriods: Option[Int],
   billingDay: Option[String],
   triggerEvent: Option[String],
-  triggerDate: Option[LocalDate]
+  triggerDate: Option[LocalDate],
+  discountPercentage: Option[Double],
+  effectiveEndDate: LocalDate,
 )
