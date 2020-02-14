@@ -49,7 +49,9 @@ object Fixtures extends Assertions {
     upToPeriods = upToPeriods,
     billingDay = billingDay,
     triggerEvent = triggerEvent,
-    triggerDate = triggerDate
+    triggerDate = triggerDate,
+    discountPercentage = None,
+    effectiveEndDate = LocalDate.now,
   )
 
   def mkGuardianWeeklySubscription(

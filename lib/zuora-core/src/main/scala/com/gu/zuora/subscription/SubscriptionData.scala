@@ -5,7 +5,11 @@ import java.time.{DayOfWeek, LocalDate}
 import com.gu.zuora.ZuoraProductTypes.ZuoraProductType
 import com.gu.zuora.subscription.ZuoraApiFailure
 import cats.implicits._
+import RatePlanChargeData.round2Places
+import mouse.all._
+import math.abs
 
+// FIXME: We need to make sure credit calculation goes through a single code path. Right now onus is on the user to make sure discounts are applied to credit.
 case class IssueData(issueDate: LocalDate, billDates: BillDates, credit: Double) {
   /**
    * This returns the date for the next bill after the stoppedPublicationDate.
@@ -50,7 +54,7 @@ object SubscriptionData {
               subscription,
               ratePlanCharge,
               account,
-              supportedRatePlanCharge.dayOfWeek
+              supportedRatePlanCharge.dayOfWeek,
             )
         }
       nonZeroRatePlanChargeDatas = ratePlanChargeDatas.filter { ratePlanChargeData =>
@@ -58,25 +62,63 @@ object SubscriptionData {
       }
       productType <- getZuoraProductType(supportedRatePlanCharges.map(_._3))
       annualIssueLimitPerEdition <- getAnnualIssueLimitPerEdition(supportedRatePlanCharges.map(_._3))
-    } yield createSubscriptionData(nonZeroRatePlanChargeDatas, productType, annualIssueLimitPerEdition)
+    } yield createSubscriptionData(nonZeroRatePlanChargeDatas, productType, annualIssueLimitPerEdition, subscription)
   }
 
   private def createSubscriptionData(
     nonZeroRatePlanChargeDatas: List[RatePlanChargeData],
     zuoraProductType: ZuoraProductType,
-    productAnnualIssueLimitPerEdition: Int
+    productAnnualIssueLimitPerEdition: Int,
+    subscription: Subscription,
   ): SubscriptionData = {
     new SubscriptionData {
       def issueDataForDate(issueDate: LocalDate): Either[ZuoraApiFailure, IssueData] = {
         for {
           ratePlanChargeData <- ratePlanChargeDataForDate(nonZeroRatePlanChargeDatas, issueDate)
           billingPeriod <- ratePlanChargeData.billingSchedule.billDatesCoveringDate(issueDate)
-        } yield IssueData(issueDate, billingPeriod, ratePlanChargeData.issueCreditAmount)
+        } yield {
+          applyAnyDiscounts(IssueData(issueDate, billingPeriod, ratePlanChargeData.issueCreditAmount))
+        }
+      }
+
+      // Calculate credit by taking into account potential discounts, otherwise return original credit
+      def applyAnyDiscounts(issueData: IssueData): IssueData = {
+        import issueData._
+
+        def isActiveDiscount(start: LocalDate, end: LocalDate): Boolean =
+          (start.isEqual(issueDate) || start.isBefore(issueDate)) && end.isAfter(issueDate)
+
+        val discounts: List[Double] =
+          subscription
+            .ratePlans
+            .iterator
+            .filter(_.productName == "Discounts")
+            .flatMap(_.ratePlanCharges.map(rpc => (rpc.discountPercentage, rpc.effectiveStartDate, rpc.effectiveEndDate)))
+            .collect { case (percent, start, end) if percent.isDefined && isActiveDiscount(start, end) => percent }
+            .flatten
+            .map(_ / 100)
+            .toList
+
+        def verify(discountedCredit: Double): Double = {
+          discountedCredit
+            .<|(v => assert(abs(v) <= abs(issueData.credit), "Discounted credit should not be more than un-discounted"))
+            .<|(v => assert(v <= 0, "Credit should be negative"))
+            .<|(v => assert(v.toString.dropWhile(_ != '.').tail.length <= 2, "Credit should have up to two decimal places"))
+            .<|(v => assert(abs(v) < 10.0, "Credit should not go beyond maximum bound"))
+            .<|(v => if (discounts.isEmpty) assert(v == issueData.credit, "Credit should not be affected if there are no discounts"))
+          }
+
+        discounts
+          .foldLeft(issueData.credit) { case (acc, next) => acc * (1 - next) }
+          .thrush(round2Places)
+          .thrush(verify)
+          .thrush(discountedCredit => issueData.copy(credit = discountedCredit))
       }
 
       def issueDataForPeriod(startDateInclusive: LocalDate, endDateInclusive: LocalDate): List[IssueData] = {
         nonZeroRatePlanChargeDatas
           .flatMap(_.getIssuesForPeriod(startDateInclusive, endDateInclusive))
+          .map(applyAnyDiscounts)
           .sortBy(_.issueDate)(Ordering.fromLessThan(_.isBefore(_)))
       }
 
