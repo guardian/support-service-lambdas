@@ -4,7 +4,7 @@ import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError
 import com.gu.util.zuora.SafeQueryBuilder.Implicits._
 import com.gu.util.zuora.SafeQueryBuilder.{OrTraverse, SafeQuery}
 import org.scalatest._
-import scalaz.{-\/, NonEmptyList}
+import cats.data.NonEmptyList
 
 class SafeQueryBuilderEscapeTest extends FlatSpec with Matchers {
 
@@ -42,10 +42,10 @@ class SafeQueryBuilderEscapeTest extends FlatSpec with Matchers {
     val badChars = "\t\n\r\u007f\u0000".toCharArray.toList
     badChars.foreach { char =>
       val actual = makeSafeStringIntoQueryLiteral(s"hello${char}bye")
-      actual.toDisjunction.leftMap {
+      actual.toDisjunction.left.map {
         case GenericError(mess) => mess.split(':')(0)
         case a => a
-      } should be(-\/("control characters can't be inserted into a query"))
+      } should be(Left("control characters can't be inserted into a query"))
     }
   }
 
@@ -74,7 +74,7 @@ class SafeQueryBuilderApplyTest extends FlatSpec with Matchers {
   }
 
   it should "use a List in insert clause" in {
-    val ids = NonEmptyList("anna", "bill")
+    val ids = NonEmptyList("anna", List("bill"))
     val actual = for {
       insert <- OrTraverse(ids)({ id => zoql"""id = $id""" })
       wholeQuery <- zoql"""select hi from table where $insert"""

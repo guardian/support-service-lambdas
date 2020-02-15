@@ -19,7 +19,7 @@ object ConfigLoader {
   }
 
   private def decodeString[F[_]: Sync, A: Decoder](string: String) = {
-    EitherT.fromEither[F](decode[A](string).leftMap(error => ConfigError(s"$error")))
+    EitherT.fromEither[F](decode[A](string).left.map(error => ConfigError(s"$error")))
   }
 
   private def getStringFromS3[F[_]: Sync, A: Decoder](s3Location: S3Location): EitherT[F, ConfigError, String] = {
@@ -27,7 +27,7 @@ object ConfigLoader {
       Sync[F].delay(
         GetFromS3.fetchString(S3Location(s3Location.bucket, s3Location.key))
           .toEither
-          .leftMap(ex => ConfigError(ex.toString))
+          .left.map(ex => ConfigError(ex.toString))
       )
     )
   }

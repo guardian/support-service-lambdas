@@ -4,7 +4,6 @@ import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
 import org.scalatest.FlatSpec
 import org.scalatest.Matchers._
 import play.api.libs.json.{JsResult, JsSuccess, Json}
-import scalaz.-\/
 
 class ApiGatewayHandlerReadsTest extends FlatSpec {
 
@@ -123,8 +122,8 @@ class ApiGatewayHandlerReadsTest extends FlatSpec {
       httpMethod = None, queryStringParameters = queryParams, body = None, headers = None, path = None
     )
     val actual = noQueryParamsRequest.queryParamsAsCaseClass[NonOptionalParams]()
-    val expected = -\/("400")
-    actual.toDisjunction.leftMap(_.statusCode) shouldBe expected
+    val expected = Left("400")
+    actual.toDisjunction.left.map(_.statusCode) shouldBe expected
   }
 
   it should "deserialise correctly if all params are there" in {

@@ -6,14 +6,13 @@ import com.gu.sf_contact_merge.Types.WinningSFContact
 import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.FirstName
 import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
 import org.scalatest.{FlatSpec, Matchers}
-import scalaz.-\/
 
 class GetFirstNameToUseFirstNameForSFContactTest extends FlatSpec with Matchers {
 
   it should "abort if the winning contact isn't in any zuora account" in {
     val contactIdsFromZuora = List(NameForContactId(SFContactId("wrong"), None))
     val actual = GetFirstNameToUse.firstNameForSFContact(WinningSFContact(SFContactId("winningSfContact")), contactIdsFromZuora)
-    actual.toDisjunction.leftMap(_.statusCode) should be(-\/("404"))
+    actual.toDisjunction.left.map(_.statusCode) should be(Left("404"))
   }
 
   it should "be happy if the winning contact is in a zuora account" in {

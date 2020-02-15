@@ -9,7 +9,6 @@ import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
 import org.scalatest.{FlatSpec, Matchers}
-import scalaz.\/-
 
 class GetPaymentMethodEffectsTest extends FlatSpec with Matchers {
 
@@ -21,7 +20,7 @@ class GetPaymentMethodEffectsTest extends FlatSpec with Matchers {
     } yield {
       res
     }
-    actual shouldBe \/-(NonDirectDebitMethod(ActivePaymentMethod, CreditCard))
+    actual shouldBe Right(NonDirectDebitMethod(ActivePaymentMethod, CreditCard))
   }
 }
 

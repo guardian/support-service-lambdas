@@ -10,7 +10,6 @@ import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.resthttp.JsonHttp
 import com.gu.util.resthttp.Types.ClientSuccess
 import org.scalatest.{FlatSpec, Matchers}
-import scalaz.\/-
 
 class GoCardlessDDMandateEventEffectsTest extends FlatSpec with Matchers {
 
@@ -22,7 +21,7 @@ class GoCardlessDDMandateEventEffectsTest extends FlatSpec with Matchers {
       wiredOp = GetEventsSince(goCardlessClient.wrapWith(JsonHttp.get), 2)
     } yield wiredOp(GoCardlessMandateEventID("EV002140EW1YFZ"))
 
-    actual shouldBe \/-(ClientSuccess(
+    actual shouldBe Right(ClientSuccess(
       List(
         MandateEventWithMandateDetail(
           GoCardlessMandateEvent(
@@ -77,7 +76,7 @@ class GoCardlessDDMandateEventEffectsTest extends FlatSpec with Matchers {
       wiredOp = GetBankDetail(goCardlessClient.wrapWith(JsonHttp.get))
     } yield wiredOp(GoCardlessCustomerBankAccountID("BA0004D82Z5S0H"))
 
-    actual shouldBe \/-(ClientSuccess(
+    actual shouldBe Right(ClientSuccess(
       GoCardlessCustomerBankDetail(
         BankAccountNumberEnding("11"),
         BankName("BARCLAYS BANK PLC")

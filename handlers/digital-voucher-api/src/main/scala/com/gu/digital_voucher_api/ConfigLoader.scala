@@ -19,7 +19,7 @@ object ConfigLoader {
       typeSafeConfig <- loadConfigFromPropertyStore[F](appIdentity)
       parsedConfig <- typeSafeConfig
         .as[DigitalVoucherApiConfig]
-        .leftMap(error => ConfigError(s"Failed to decode config: $error"))
+        .left.map(error => ConfigError(s"Failed to decode config: $error"))
         .toEitherT[F]
     } yield parsedConfig
   }
@@ -31,6 +31,6 @@ object ConfigLoader {
           case identity: AwsIdentity => SSMConfigurationLocation.default(identity)
           case DevIdentity(myApp) => ResourceConfigurationLocation(s"${myApp}-secret-dev.conf")
         }
-      }.leftMap(ex => ConfigError(s"Failed to load config: ${ex.getMessage}"))
+      }.left.map(ex => ConfigError(s"Failed to load config: ${ex.getMessage}"))
     })
 }

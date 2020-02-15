@@ -6,7 +6,6 @@ import com.gu.zuora.reports.aqua.AquaJobResponse
 import com.gu.zuora.reports.dataModel.Batch
 import org.scalatest.AsyncFlatSpec
 import org.scalatest.Matchers._
-import scalaz.-\/
 
 class GetJobResultTest extends AsyncFlatSpec {
 
@@ -54,7 +53,7 @@ class GetJobResultTest extends AsyncFlatSpec {
     def get: RequestsGet[AquaJobResponse] = { case notTested => ZuoraResponseWithStatus("aborted") }
     val jobResultRequest = JobResultRequest("someJobId", false, None)
     val actualResponse = GetJobResult(get)(jobResultRequest).toDisjunction
-    actualResponse.leftMap(_.message.split(":")(0)) shouldBe -\/("unexpected status in zuora response")
+    actualResponse.left.map(_.message.split(":")(0)) shouldBe Left("unexpected status in zuora response")
   }
 
   it should "return completed if zuora response status is completed " in {
