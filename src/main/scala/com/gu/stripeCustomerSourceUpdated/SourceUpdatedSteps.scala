@@ -66,21 +66,18 @@ object SourceUpdatedSteps extends Logging {
     requests: Requests
   )(customer: StripeCustomerId, source: StripeSourceId): ApiGatewayOp[List[PaymentMethodFields]] = {
     val zuoraQuerier = ZuoraQuery(requests)
-    //traverse
     ZuoraQueryPaymentMethod.getPaymentMethodForStripeCustomer(zuoraQuerier)(customer, source)
       .flatMap {
-        _.traverse { (paymentMethods: AccountPaymentMethodIds) =>
-          ZuoraGetAccountSummary(requests)(paymentMethods.accountId.value).toApiGatewayOp("ZuoraGetAccountSummary failed").flatMap { account =>
-            findDefaultOrSkip(account.basicInfo.defaultPaymentMethod, paymentMethods.paymentMethods).toApiGatewayOp("findDefaultOrSkip")
-          }
+        _.flatTraverse { paymentMethods =>
+          ZuoraGetAccountSummary(requests)(paymentMethods.accountId.value).toApiGatewayOp("ZuoraGetAccountSummary failed").map(_.pure[List])
+            .flatMap {
+              _.flatTraverse { account =>
+                findDefaultOrSkip(account.basicInfo.defaultPaymentMethod, paymentMethods.paymentMethods).toList.pure[ApiGatewayOp].withLogging("findDefaultOrSkip")
+              }
+            }
         }
       }
-    //      .flatMap(_.traverse(account => findDefaultOrSkip(account.basicInfo.defaultPaymentMethod, paymentMethods.paymentMethods))
-    //        ZuoraGetAccountSummary(requests)(paymentMethods.accountId.value)
-    //        .toApiGatewayOp("ZuoraGetAccountSummary failed"))
-
     //    (for {
-    //
     //      // similar to AccountController.updateCard in members-data-api
     //      paymentMethods <- ListT.apply[ApiGatewayOp, AccountPaymentMethodIds](ZuoraQueryPaymentMethod.getPaymentMethodForStripeCustomer(zuoraQuerier)(customer, source))
     //      account <- ListT[ApiGatewayOp, AccountSummary](ZuoraGetAccountSummary(requests)(paymentMethods.accountId.value).toApiGatewayOp("ZuoraGetAccountSummary failed").withLogging("getAccountSummary").map(_.pure[List]))
@@ -115,7 +112,8 @@ object SourceUpdatedSteps extends Logging {
   }
 
   def findDefaultOrSkip(defaultPaymentMethod: PaymentMethodId, paymentMethods: NonEmptyList[PaymentMethodFields]): Option[PaymentMethodFields] = {
-    paymentMethods.find(_.Id == defaultPaymentMethod)
+    val result = paymentMethods.find(_.Id == defaultPaymentMethod)
+    result
   }
 
 }
