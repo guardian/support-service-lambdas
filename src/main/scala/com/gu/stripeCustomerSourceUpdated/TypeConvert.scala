@@ -12,7 +12,7 @@ object TypeConvert {
 
     def toApiGatewayOp(failureToApiResponse: ClientFailure => ApiResponse): ApiGatewayOp[A] = clientOp.toDisjunction.toApiGatewayOp(failureToApiResponse)
 
-    def withAmendedError(amendError: ClientFailure => ClientFailure) = clientOp.toDisjunction.leftMap(amendError(_)).toClientFailableOp
+    def withAmendedError(amendError: ClientFailure => ClientFailure) = clientOp.toDisjunction.left.map(amendError(_)).toClientFailableOp
   }
 
 }

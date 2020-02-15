@@ -7,9 +7,6 @@ import java.time.format.DateTimeFormatter
 import com.gu.autoCancel.AutoCancelCallout
 import com.gu.paymentFailure.GetPaymentData.PaymentFailureInformation
 import com.gu.util.email._
-import scalaz.{\/, \/-}
-
-import scalaz.{-\/, \/, \/-}
 
 import scala.math.BigDecimal.decimal
 
@@ -50,9 +47,9 @@ object ToMessage {
       ))
     }
 
-  def apply(callout: AutoCancelCallout, paymentFailureInformation: PaymentFailureInformation, sendId: EmailId): String \/ EmailMessage =
+  def apply(callout: AutoCancelCallout, paymentFailureInformation: PaymentFailureInformation, sendId: EmailId): Either[String, EmailMessage] =
     callout.email match {
-      case Some(emailAddress) => \/-(EmailMessage(
+      case Some(emailAddress) => Right(EmailMessage(
         To = ToDef(
           Address = emailAddress,
           SubscriberKey = emailAddress,
@@ -75,7 +72,7 @@ object ToMessage {
         DataExtensionName = sendId.id,
         SfContactId = callout.sfContactId
       ))
-      case None => -\/(s"Cannot create email message: no email address associated with accountId: ${callout.accountId} and sfContactId: ${callout.sfContactId}")
+      case None => Left(s"Cannot create email message: no email address associated with accountId: ${callout.accountId} and sfContactId: ${callout.sfContactId}")
     }
 
   val currencySymbol = Map("GBP" -> "£", "AUD" -> "$", "EUR" -> "€", "USD" -> "$", "CAD" -> "$", "NZD" -> "$")

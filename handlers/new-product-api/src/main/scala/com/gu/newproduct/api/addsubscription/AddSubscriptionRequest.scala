@@ -24,7 +24,6 @@ case class AddSubscriptionRequest(
 case class CaseId(value: String) extends AnyVal
 case class AcquisitionSource(value: String) extends AnyVal
 case class CreatedByCSR(value: String) extends AnyVal
-import scalaz.std.`try`._
 object AddSubscriptionRequest {
 
   case class AddSubscriptionRequestWire(

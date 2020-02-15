@@ -8,7 +8,7 @@ import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.{EmailAddress,
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess}
 import com.gu.util.zuora.SafeQueryBuilder.MaybeNonEmptyList
 import com.gu.util.zuora.ZuoraQuery.ZuoraQuerier
-import scalaz.NonEmptyList
+import cats.data.NonEmptyList
 
 object GetIdentityAndZuoraEmailsForAccountsSteps {
 

@@ -12,7 +12,6 @@ import com.gu.stripeCustomerSourceUpdated.TypeConvert._
 import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientFailure, ClientSuccess}
 import play.api.libs.json._
-import scalaz.\/
 
 object AutoCancelSteps extends Logging {
 
@@ -31,7 +30,7 @@ object AutoCancelSteps extends Logging {
   def apply(
     autoCancel: AutoCancelRequest => ApiGatewayOp[Unit],
     autoCancelFilter: AutoCancelCallout => ApiGatewayOp[AutoCancelRequest],
-    sendEmailRegardingAccount: (String, PaymentFailureInformation => String \/ EmailMessage) => ClientFailableOp[Unit]
+    sendEmailRegardingAccount: (String, PaymentFailureInformation => Either[String, EmailMessage]) => ClientFailableOp[Unit]
   ): Operation = Operation.noHealthcheck({ apiGatewayRequest: ApiGatewayRequest =>
     (for {
       autoCancelCallout <- apiGatewayRequest.bodyAsCaseClass[AutoCancelCallout]()
@@ -44,7 +43,7 @@ object AutoCancelSteps extends Logging {
     } yield ApiGatewayResponse.successfulExecution).apiResponse
   })
 
-  def makeRequest(autoCancelCallout: AutoCancelCallout)(paymentFailureInformation: PaymentFailureInformation): String \/ EmailMessage =
+  def makeRequest(autoCancelCallout: AutoCancelCallout)(paymentFailureInformation: PaymentFailureInformation): Either[String, EmailMessage] =
     ToMessage(autoCancelCallout, paymentFailureInformation, EmailId.cancelledId)
 
   def logErrorsAndContinueProcessing(clientFailableOp: ClientFailableOp[Unit]): ContinueProcessing[Unit] = clientFailableOp match {
