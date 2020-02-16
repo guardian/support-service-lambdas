@@ -8,8 +8,6 @@ import com.gu.util.handlers.{LambdaException, ParseRequest, SerialiseResponse}
 import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.zuora.ZuoraRestConfig
 import play.api.libs.json.{Reads, Writes}
-//import scalaz.Scalaz._
-//import scalaz._
 
 object ReportsLambda extends Logging {
 

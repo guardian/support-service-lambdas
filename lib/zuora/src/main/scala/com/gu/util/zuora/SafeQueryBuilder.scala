@@ -3,8 +3,6 @@ package com.gu.util.zuora
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError}
 import cats.data.NonEmptyList
 import cats.implicits._
-//import scalaz.std.list.listInstance
-//import scalaz.syntax.traverse.ToTraverseOps
 
 import scala.annotation.implicitNotFound
 

@@ -3,7 +3,6 @@ package com.gu.paymentFailure
 import java.time.LocalDate
 
 import com.gu.util.Logging
-import scalaz.syntax.std.option._
 import com.gu.util.zuora.ZuoraGetInvoiceTransactions.{InvoiceItem, InvoiceTransactionSummary, ItemisedInvoice}
 
 object GetPaymentData extends Logging {
