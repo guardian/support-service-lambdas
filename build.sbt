@@ -1,7 +1,6 @@
 import Dependencies._
 
 val scalaSettings = Seq(
-  logLevel in compile := Level.Error,
   addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.0" cross CrossVersion.full),
   scalaVersion := "2.12.10",
   version      := "0.0.1",
@@ -137,6 +136,7 @@ lazy val `holiday-stops` = all(project in file("lib/holiday-stops"))
   )
 
 lazy val restHttp = all(project in file("lib/restHttp"))
+  .dependsOn(handler)
   .settings(
     libraryDependencies ++= Seq(okhttp3, catsCore, playJson, scalatest) ++ logging
   )

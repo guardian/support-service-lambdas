@@ -2,25 +2,7 @@ package com.gu.util.resthttp
 import cats.Monad
 import cats.implicits._
 
-// FIXME: STOP!
 object Types {
-
-  implicit def eitherMonad[Err]: Monad[Either[Err, ?]] =
-    new Monad[Either[Err, ?]] {
-      def flatMap[A, B](fa: Either[Err, A])(f: A => Either[Err, B]): Either[Err, B] =
-        fa.flatMap(f)
-
-      def pure[A](x: A): Either[Err, A] = Right(x)
-
-      @annotation.tailrec
-      def tailRecM[A, B](a: A)(f: A => Either[Err, Either[A, B]]): Either[Err, B] =
-        f(a) match {
-          case Right(Right(b)) => Right(b)
-          case Right(Left(a)) => tailRecM(a)(f)
-          case l @ Left(_) => l.rightCast[B] // Cast the right type parameter to avoid allocation
-        }
-    }
-
   sealed trait ClientFailure extends ClientFailableOp[Nothing] {
     override def toDisjunction: Either[ClientFailure, Nothing] = Left(this)
 

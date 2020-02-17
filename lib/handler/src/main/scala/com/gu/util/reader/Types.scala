@@ -10,25 +10,7 @@ import scala.util.{Failure, Success, Try}
 import cats.Monad
 import cats.implicits._
 
-// FIXME: STOP!
 object Types extends Logging {
-
-  implicit def eitherMonad[Err]: Monad[Either[Err, ?]] =
-    new Monad[Either[Err, ?]] {
-      def flatMap[A, B](fa: Either[Err, A])(f: A => Either[Err, B]): Either[Err, B] =
-        fa.flatMap(f)
-
-      def pure[A](x: A): Either[Err, A] = Right(x)
-
-      @annotation.tailrec
-      def tailRecM[A, B](a: A)(f: A => Either[Err, Either[A, B]]): Either[Err, B] =
-        f(a) match {
-          case Right(Right(b)) => Right(b)
-          case Right(Left(a)) => tailRecM(a)(f)
-          case l @ Left(_) => l.rightCast[B] // Cast the right type parameter to avoid allocation
-        }
-    }
-
   object ApiGatewayOp {
 
     case class ContinueProcessing[A](a: A) extends ApiGatewayOp[A] {
@@ -180,24 +162,6 @@ object Types extends Logging {
       }
 
   }
-
-  //  implicit class DisjunctionOps[L, A](theEither: Either[L, A]) {
-  //
-  //    def toApiGatewayOp(action: String): ApiGatewayOp[A] =
-  //      theEither match {
-  //        case Right(success) => ContinueProcessing(success)
-  //        case Left(error) =>
-  //          logger.error(s"Failed to $action: $error")
-  //          ReturnWithResponse(internalServerError(s"Failed to execute lambda - unable to $action"))
-  //      }
-  //
-  //    def toApiGatewayOp(toApiResponse: L => ApiResponse): ApiGatewayOp[A] =
-  //      theEither match {
-  //        case Right(success) => ContinueProcessing(success)
-  //        case Left(error) => ReturnWithResponse(toApiResponse(error))
-  //      }
-  //
-  //  }
 
   implicit class EitherOps[L, A](theEither: Either[L, A]) {
 

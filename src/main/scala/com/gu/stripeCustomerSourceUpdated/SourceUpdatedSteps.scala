@@ -29,8 +29,8 @@ object SourceUpdatedSteps extends Logging {
     }
   }
 
-  def apply(zuoraRequests: Requests, stripeDeps: StripeDeps): Operation = Operation.noHealthcheck { (apiGatewayRequest: ApiGatewayRequest) =>
-
+  // cats does not have ListT so after removing scalaz it became flatMap + traverse
+  def apply(zuoraRequests: Requests, stripeDeps: StripeDeps): Operation = Operation.noHealthcheck { apiGatewayRequest =>
     (if (stripeDeps.config.signatureChecking) bodyIfSignatureVerified(stripeDeps, apiGatewayRequest) else apiGatewayRequest.bodyAsCaseClass[SourceUpdatedCallout]())
       .flatMap { sourceUpdatedCallout =>
         getPaymentMethodsToUpdate(zuoraRequests)(sourceUpdatedCallout.data.`object`.customer, sourceUpdatedCallout.data.`object`.id)
@@ -62,6 +62,7 @@ object SourceUpdatedSteps extends Logging {
       ReturnWithResponse(unauthorized)
   } yield res
 
+  // cats does not have ListT so after removing scalaz it became flatMap + traverse
   def getPaymentMethodsToUpdate(
     requests: Requests
   )(customer: StripeCustomerId, source: StripeSourceId): ApiGatewayOp[List[PaymentMethodFields]] = {
@@ -77,12 +78,6 @@ object SourceUpdatedSteps extends Logging {
             }
         }
       }
-    //    (for {
-    //      // similar to AccountController.updateCard in members-data-api
-    //      paymentMethods <- ListT.apply[ApiGatewayOp, AccountPaymentMethodIds](ZuoraQueryPaymentMethod.getPaymentMethodForStripeCustomer(zuoraQuerier)(customer, source))
-    //      account <- ListT[ApiGatewayOp, AccountSummary](ZuoraGetAccountSummary(requests)(paymentMethods.accountId.value).toApiGatewayOp("ZuoraGetAccountSummary failed").withLogging("getAccountSummary").map(_.pure[List]))
-    //      defaultPaymentMethods <- ListT[ApiGatewayOp, PaymentMethodFields](findDefaultOrSkip(account.basicInfo.defaultPaymentMethod, paymentMethods.paymentMethods).toList.pure[ApiGatewayOp].withLogging("skipIfNotDefault"))
-    //    } yield defaultPaymentMethods).run
   }
 
   import com.gu.util.reader.Types._
@@ -112,8 +107,7 @@ object SourceUpdatedSteps extends Logging {
   }
 
   def findDefaultOrSkip(defaultPaymentMethod: PaymentMethodId, paymentMethods: NonEmptyList[PaymentMethodFields]): Option[PaymentMethodFields] = {
-    val result = paymentMethods.find(_.Id == defaultPaymentMethod)
-    result
+    paymentMethods.find(_.Id == defaultPaymentMethod)
   }
 
 }
