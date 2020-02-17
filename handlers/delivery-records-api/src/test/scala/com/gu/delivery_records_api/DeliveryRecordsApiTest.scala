@@ -39,6 +39,7 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
   val doesntHaveHolidayStop = true
   val sfProblemCase = SFApiDeliveryProblemCase(
     Id = "case_id",
+    CaseNumber = "123456",
     Subject = Some("subject"),
     Description = Some("blah blah"),
     Case_Closure_Reason__c = Some("Paper Damaged")
@@ -151,6 +152,7 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
     Map(
       sfProblemCase.Id -> DeliveryProblemCase(
         id = sfProblemCase.Id,
+        ref = sfProblemCase.CaseNumber,
         subject = sfProblemCase.Subject,
         description = sfProblemCase.Description,
         problemType = sfProblemCase.Case_Closure_Reason__c
