@@ -1,7 +1,6 @@
 import Dependencies._
 
 val scalaSettings = Seq(
-  addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.0" cross CrossVersion.full),
   scalaVersion := "2.12.10",
   version      := "0.0.1",
   organization := "com.gu",
