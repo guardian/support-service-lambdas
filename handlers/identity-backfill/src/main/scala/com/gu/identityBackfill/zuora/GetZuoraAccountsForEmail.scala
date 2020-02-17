@@ -22,6 +22,7 @@ object GetZuoraAccountsForEmail {
   )
   implicit val readsA = Json.reads[WireResponseAccount]
 
+  // cats does not have ListT so after removing scalaz it became flatMap + traverse
   def apply(zuoraQuerier: ZuoraQuerier)(emailAddress: EmailAddress): ClientFailableOp[List[ZuoraAccountIdentitySFContact]] = {
     findZuoraContacts(zuoraQuerier, emailAddress).flatMap {
       _.flatTraverse { contactWithEmail =>
