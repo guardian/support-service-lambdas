@@ -7,7 +7,6 @@ import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.resthttp.JsonHttp
 import org.scalatest.{FlatSpec, Matchers}
-import scalaz.\/-
 
 // run this manually
 class GetByIdentityIdEffectsTest extends FlatSpec with Matchers {
@@ -22,7 +21,7 @@ class GetByIdentityIdEffectsTest extends FlatSpec with Matchers {
       getByIdentityId = identityClient.wrapWith(JsonHttp.get).wrapWith(GetByIdentityId.wrapper)
       identityId <- getByIdentityId.runRequest(IdentityId("21814163")).toDisjunction
     } yield identityId
-    actual should be(\/-(IdentityUser(IdentityId("21814163"), hasPassword = true)))
+    actual should be(Right(IdentityUser(IdentityId("21814163"), hasPassword = true)))
 
   }
 

@@ -11,7 +11,6 @@ import com.gu.util.resthttp.RestOp.HttpOpParseOp
 import com.gu.util.resthttp.RestRequestMaker.{GetRequest, RelativePath}
 import com.gu.util.resthttp.{HttpOp, LazyClientFailableOp}
 import play.api.libs.json.{JsValue, Json}
-import scalaz.{-\/, \/, \/-}
 
 object GetSFContactSyncCheckFields {
 
@@ -57,7 +56,7 @@ object ContactSyncCheck {
     standardRecordType: RecordTypeId
   )(
     contactSyncCheckFields: List[GetSFContactSyncCheckFields.ContactSyncCheckFields]
-  ): String \/ SFContactId = {
+  ): Either[String, SFContactId] = {
 
     def isStandardContact(fields: ContactSyncCheckFields) = fields.RecordTypeId.contains(standardRecordType.value)
 
@@ -68,25 +67,25 @@ object ContactSyncCheck {
         val country = fields.OtherCountry.getOrElse("").trim
         val countryIsValid = country.nonEmpty && CountryGroup.byOptimisticCountryNameOrCode(country).isDefined
         if (fields.FirstName.trim.isEmpty) {
-          \/.left(s"Contact ${fields.Id} is not syncable - does not have a first name")
+          Left(s"Contact ${fields.Id} is not syncable - does not have a first name")
         } else if (fields.LastName.trim.isEmpty) {
-          \/.left(s"Contact ${fields.Id} is not syncable - does not have a last name")
+          Left(s"Contact ${fields.Id} is not syncable - does not have a last name")
         } else if (!emailIsValid) {
-          \/.left(s"Contact ${fields.Id} is not syncable - does not have a valid email address: $email")
+          Left(s"Contact ${fields.Id} is not syncable - does not have a valid email address: $email")
         } else if (!countryIsValid) {
-          \/.left(s"Contact ${fields.Id} is not syncable - does not have a valid country: $country")
+          Left(s"Contact ${fields.Id} is not syncable - does not have a valid country: $country")
         } else {
-          \/.right(SFContactId(fields.Id))
+          Right(SFContactId(fields.Id))
         }
       }
       case _ :: _ :: Nil =>
-        \/.left(s"There are more than one syncable SF Contacts within this SF Account: ${contactSyncCheckFields.map(_.Id)}")
+        Left(s"There are more than one syncable SF Contacts within this SF Account: ${contactSyncCheckFields.map(_.Id)}")
       case Nil if contactSyncCheckFields.nonEmpty =>
-        \/.left(s"There are no syncable SF Contacts within the customer's account: ${contactSyncCheckFields.map(_.Id).mkString(", ")}")
+        Left(s"There are no syncable SF Contacts within the customer's account: ${contactSyncCheckFields.map(_.Id).mkString(", ")}")
       case Nil if contactSyncCheckFields.isEmpty =>
-        \/.left(s"There are no SF Contacts within the customer's account")
+        Left(s"There are no SF Contacts within the customer's account")
       case _ =>
-        \/.left(s"Syncable SF Contact did not meet validation: ${contactSyncCheckFields.map(_.Id)}") // should never happen!
+        Left(s"Syncable SF Contact did not meet validation: ${contactSyncCheckFields.map(_.Id)}") // should never happen!
     }
   }
 
@@ -100,8 +99,8 @@ object GetSFBillingContactIfSyncable {
   ): Types.ApiGatewayOp[Option[SFContactId]] = {
     val syncableContactOrError = ContactSyncCheck(standardRecordType)(fields)
     syncableContactOrError match {
-      case -\/(reason) => ReturnWithResponse(ApiGatewayResponse.notFound(s"Unable to select SF Contact to update. Reason: $reason"))
-      case \/-(contactId) => ContinueProcessing(Some(contactId))
+      case Left(reason) => ReturnWithResponse(ApiGatewayResponse.notFound(s"Unable to select SF Contact to update. Reason: $reason"))
+      case Right(contactId) => ContinueProcessing(Some(contactId))
     }
   }
 }

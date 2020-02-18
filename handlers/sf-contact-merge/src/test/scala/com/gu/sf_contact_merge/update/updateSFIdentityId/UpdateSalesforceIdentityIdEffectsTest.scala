@@ -21,7 +21,6 @@ import com.gu.util.resthttp.RestRequestMaker.{GetRequest, RelativePath}
 import com.gu.util.resthttp.Types.ClientFailableOp
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.{JsValue, Json}
-import scalaz.\/-
 
 import scala.util.Random
 
@@ -61,7 +60,7 @@ class UpdateSalesforceIdentityIdEffectsTest extends FlatSpec with Matchers {
       updatedIdentityId <- getSalesforceIdentityId(testContact).toDisjunction
     } yield updatedIdentityId
 
-    actual should be(\/-(WireResult(
+    actual should be(Right(WireResult(
       testIdentityId.value,
       testFirstName.value,
       s"street$unique",

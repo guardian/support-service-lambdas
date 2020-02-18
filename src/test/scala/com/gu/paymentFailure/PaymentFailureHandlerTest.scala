@@ -11,14 +11,13 @@ import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
 import com.gu.util.resthttp.Types.{ClientSuccess, GenericError}
 import com.gu.util.zuora.ZuoraGetInvoiceTransactions.InvoiceTransactionSummary
 import org.scalatest.{FlatSpec, Matchers}
-import scalaz.\/-
 
 class PaymentFailureHandlerTest extends FlatSpec with Matchers {
 
   "lambda" should "return error if credentials are missing" in {
     val stream = getClass.getResourceAsStream("/paymentFailure/missingCredentials.json")
     val os = new ByteArrayOutputStream()
-    val op = Lambda.operationForEffects(\/-(TestData.fakeApiConfig), ContinueProcessing(basicOp()))
+    val op = Lambda.operationForEffects(Right(TestData.fakeApiConfig), ContinueProcessing(basicOp()))
     ApiGatewayHandler(LambdaIO(stream, os, null))(op)
     val responseString = new String(os.toByteArray(), "UTF-8")
     responseString jsonMatches missingCredentialsResponse
@@ -27,7 +26,7 @@ class PaymentFailureHandlerTest extends FlatSpec with Matchers {
   it should "return error if credentials don't match" in {
     val stream = getClass.getResourceAsStream("/paymentFailure/invalidCredentials.json")
     val os = new ByteArrayOutputStream()
-    val op = Lambda.operationForEffects(\/-(TestData.fakeApiConfig), ContinueProcessing(basicOp()))
+    val op = Lambda.operationForEffects(Right(TestData.fakeApiConfig), ContinueProcessing(basicOp()))
     ApiGatewayHandler(LambdaIO(stream, os, null))(op)
     val responseString = new String(os.toByteArray(), "UTF-8")
     responseString jsonMatches missingCredentialsResponse

@@ -11,7 +11,6 @@ import com.gu.util.resthttp.Types.ClientSuccess
 import com.gu.util.zuora.ZuoraGetAccountSummary.ZuoraAccount.{AccountId, PaymentMethodId}
 import com.gu.util.zuora.ZuoraGetAccountSummary.{AccountSummary, BasicAccountInfo, Invoice, SubscriptionId, SubscriptionSummary}
 import org.scalatest._
-import scalaz.\/-
 
 class AutoCancelStepsTest extends FlatSpec with Matchers {
 
@@ -27,7 +26,7 @@ class AutoCancelStepsTest extends FlatSpec with Matchers {
     val autoCancelCallout = AutoCancelHandlerTest.fakeCallout(true)
     val cancel: ApiGatewayOp[AutoCancelRequest] = ac(autoCancelCallout)
 
-    cancel.toDisjunction should be(\/-(AutoCancelRequest("id123", SubscriptionId("sub123"), LocalDate.now.minusDays(14))))
+    cancel.toDisjunction should be(Right(AutoCancelRequest("id123", SubscriptionId("sub123"), LocalDate.now.minusDays(14))))
   }
 
   "auto cancel" should "turn off auto pay" in {

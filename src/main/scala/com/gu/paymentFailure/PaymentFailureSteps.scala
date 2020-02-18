@@ -13,7 +13,6 @@ import com.gu.util.reader.Types._
 import com.gu.util.resthttp.Types.{ClientFailableOp, GenericError, UnderlyingOps}
 import com.gu.util.zuora.ZuoraGetAccountSummary.ZuoraAccount.AccountId
 import com.gu.util.zuora.ZuoraGetInvoiceTransactions.InvoiceTransactionSummary
-import scalaz.\/
 
 object PaymentFailureSteps extends Logging {
 
@@ -22,7 +21,7 @@ object PaymentFailureSteps extends Logging {
   }
 
   def apply(
-    sendEmailRegardingAccount: (String, PaymentFailureInformation => String \/ EmailMessage) => ClientFailableOp[Unit],
+    sendEmailRegardingAccount: (String, PaymentFailureInformation => Either[String, EmailMessage]) => ClientFailableOp[Unit],
     trustedApiConfig: TrustedApiConfig
   ): Operation = Operation.noHealthcheck({ apiGatewayRequest: ApiGatewayRequest =>
 
@@ -38,7 +37,7 @@ object PaymentFailureSteps extends Logging {
 
   def makeEmailMessage(
     paymentFailureCallout: PaymentFailureCallout
-  )(pFI: PaymentFailureInformation): String \/ EmailMessage = for {
+  )(pFI: PaymentFailureInformation): Either[String, EmailMessage] = for {
     emailSendId <- EmailId.paymentFailureId(paymentFailureCallout.failureNumber)
     emailMessage <- ToMessage(paymentFailureCallout, pFI, emailSendId)
   } yield emailMessage
@@ -58,11 +57,11 @@ object ZuoraEmailSteps {
   def sendEmailRegardingAccount(
     sendEmail: EmailMessage => ClientFailableOp[Unit],
     getInvoiceTransactions: String => ClientFailableOp[InvoiceTransactionSummary]
-  )(accountId: String, toMessage: PaymentFailureInformation => String \/ EmailMessage): ClientFailableOp[Unit] = {
+  )(accountId: String, toMessage: PaymentFailureInformation => Either[String, EmailMessage]): ClientFailableOp[Unit] = {
     for {
       invoiceTransactionSummary <- getInvoiceTransactions(accountId)
-      paymentInformation <- GetPaymentData(accountId)(invoiceTransactionSummary).leftMap(GenericError(_)).toClientFailableOp
-      message <- toMessage(paymentInformation).leftMap(GenericError(_)).toClientFailableOp
+      paymentInformation <- GetPaymentData(accountId)(invoiceTransactionSummary).left.map(GenericError(_)).toClientFailableOp
+      message <- toMessage(paymentInformation).left.map(GenericError(_)).toClientFailableOp
       _ <- sendEmail(message).withAmendedError(oldError => GenericError(s"email not sent for account ${accountId}, error: ${oldError.message}"))
     } yield ()
   }

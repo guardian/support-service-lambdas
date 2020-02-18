@@ -8,7 +8,6 @@ import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.resthttp.JsonHttp
 import org.scalatest.{FlatSpec, Matchers}
-import scalaz.\/-
 
 // run this manually
 class GetByEmailEffectsTest extends FlatSpec with Matchers {
@@ -23,7 +22,7 @@ class GetByEmailEffectsTest extends FlatSpec with Matchers {
       getByEmail = identityClient.wrapWith(JsonHttp.getWithParams).wrapWith(GetByEmail.wrapper)
       identityId <- getByEmail.runRequest(EmailAddress("john.duffell@guardian.co.uk")).toDisjunction
     } yield identityId
-    actual should be(\/-(IdentityAccount(IdentityId("21814163"), isUserEmailValidated = true)))
+    actual should be(Right(IdentityAccount(IdentityId("21814163"), isUserEmailValidated = true)))
 
   }
 

@@ -4,7 +4,7 @@ import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.{ContactId, Em
 import com.gu.util.resthttp.Types.ClientSuccess
 import com.gu.zuora.fake.FakeZuoraQuerier
 import org.scalatest.{FlatSpec, Matchers}
-import scalaz.NonEmptyList
+import cats.data.NonEmptyList
 
 class GetZuoraContactDetailsTest extends FlatSpec with Matchers {
 
@@ -18,7 +18,7 @@ class GetZuoraContactDetailsTest extends FlatSpec with Matchers {
 
     val actual = GetZuoraContactDetails(querier)(NonEmptyList(
       ContactId("cid1"),
-      ContactId("cid2")
+      List(ContactId("cid2"))
     ))
 
     val expected = Map(

@@ -10,7 +10,6 @@ import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
 import org.scalatest.{FlatSpec, Matchers}
-import scalaz.\/-
 
 import scala.util.Random
 
@@ -30,7 +29,7 @@ class AddIdentityIdEffectsTest extends FlatSpec with Matchers {
     } yield {
       identityId
     }
-    actual.toDisjunction should be(\/-(IdentityId(unique)))
+    actual.toDisjunction should be(Right(IdentityId(unique)))
 
   }
 

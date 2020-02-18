@@ -1,9 +1,8 @@
 package com.gu.util.zuora
 
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError}
-import scalaz.NonEmptyList
-import scalaz.std.list.listInstance
-import scalaz.syntax.traverse.ToTraverseOps
+import cats.data.NonEmptyList
+import cats.implicits._
 
 import scala.annotation.implicitNotFound
 
@@ -69,13 +68,13 @@ object SafeQueryBuilder {
       list match {
         case Nil => None
         case account :: accounts =>
-          Some(NonEmptyList(account, accounts: _*))
+          Some(NonEmptyList(account, accounts))
       }
   }
 
   object OrTraverse {
     def apply[A](queries: NonEmptyList[A])(f: A => ClientFailableOp[SafeQuery]): ClientFailableOp[SafeQuery] = {
-      queries.traverseU(f.andThen(_.map(_.queryString))).map(_.list.toList.mkString(" or ")).map(new SafeQuery(_))
+      queries.traverse(f.andThen(_.map(_.queryString))).map(_.toList.mkString(" or ")).map(new SafeQuery(_))
     }
   }
 

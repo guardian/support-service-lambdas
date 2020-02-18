@@ -3,7 +3,6 @@ package com.gu.autoCancel
 import com.gu.autoCancel.AutoCancelSteps.AutoCancelUrlParams
 import org.scalatest._
 import play.api.libs.json.{JsSuccess, Json}
-import scalaz.{-\/, \/-}
 object AutoCancelHandlerTest {
 
   def fakeCallout(autoPay: Boolean) = {
@@ -22,7 +21,7 @@ class AutoCancelHandlerTest extends FlatSpec {
     val autoCancelCallout = fakeCallout(false)
     val apiGatewayOp = apply(autoCancelCallout, false)
     assert(apiGatewayOp.toDisjunction match {
-      case -\/(_) => true
+      case Left(_) => true
       case _ => false
     }, s"We got: $apiGatewayOp")
   }
@@ -31,7 +30,7 @@ class AutoCancelHandlerTest extends FlatSpec {
     val autoCancelCallout = fakeCallout(true)
     val apiGatewayOp = apply(autoCancelCallout, false)
     assert(apiGatewayOp.toDisjunction match {
-      case \/-(_) => true
+      case Right(_) => true
       case _ => false
     }, s"We got: $apiGatewayOp")
   }
@@ -39,7 +38,7 @@ class AutoCancelHandlerTest extends FlatSpec {
   "filterDirectDebit" should "return a left if we're only cancelling direct debits, but the sub isn't paid that way" in {
     val apiGatewayOp = filterDirectDebit(onlyCancelDirectDebit = true, nonDirectDebit = true)
     assert(apiGatewayOp.toDisjunction match {
-      case -\/(_) => true
+      case Left(_) => true
       case _ => false
     }, s"We got: $apiGatewayOp")
   }
@@ -47,7 +46,7 @@ class AutoCancelHandlerTest extends FlatSpec {
   "filterDirectDebit" should "return a right if we're not just cancelling direct debits even if it's not paid by DD" in {
     val apiGatewayOp = filterDirectDebit(onlyCancelDirectDebit = false, nonDirectDebit = true)
     assert(apiGatewayOp.toDisjunction match {
-      case \/-(_) => true
+      case Right(_) => true
       case _ => false
     }, s"We got: $apiGatewayOp")
   }
@@ -55,7 +54,7 @@ class AutoCancelHandlerTest extends FlatSpec {
   "filterDirectDebit" should "return a right if we're only cancelling DDs and it is a direct debit" in {
     val apiGatewayOp = filterDirectDebit(onlyCancelDirectDebit = true, nonDirectDebit = false)
     assert(apiGatewayOp.toDisjunction match {
-      case \/-(_) => true
+      case Right(_) => true
       case _ => false
     }, s"We got: $apiGatewayOp")
   }

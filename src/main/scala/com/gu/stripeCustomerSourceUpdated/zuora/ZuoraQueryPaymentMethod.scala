@@ -10,7 +10,7 @@ import com.gu.util.zuora.SafeQueryBuilder.Implicits._
 import com.gu.util.zuora.ZuoraGetAccountSummary.ZuoraAccount._
 import com.gu.util.zuora.ZuoraQuery.ZuoraQuerier
 import play.api.libs.json._
-import scalaz.NonEmptyList
+import cats.data.NonEmptyList
 
 object ZuoraQueryPaymentMethod extends Logging {
 
@@ -52,7 +52,7 @@ object ZuoraQueryPaymentMethod extends Logging {
         def groupedList(records: List[PaymentMethodFields]): List[(AccountId, NonEmptyList[PaymentMethodFields])] = {
           records.groupBy(_.AccountId).toList.collect {
             case (accountId, head :: tail) =>
-              (accountId, NonEmptyList(head, tail: _*))
+              (accountId, NonEmptyList(head, tail))
           }
         }
 

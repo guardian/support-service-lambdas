@@ -11,7 +11,6 @@ import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
 import org.scalatest.{FlatSpec, Matchers}
-import scalaz.{-\/, \/-}
 
 class GetSubscriptionEffectsTest extends FlatSpec with Matchers {
 
@@ -26,7 +25,7 @@ class GetSubscriptionEffectsTest extends FlatSpec with Matchers {
   it should "return not found if sub id is invalid" taggedAs EffectsTest in {
     val testSubscriptionId = SubscriptionId("invalidSubId")
 
-    actual(testSubscriptionId).toDisjunction should be(-\/(notFoundResponse))
+    actual(testSubscriptionId).toDisjunction should be(Left(notFoundResponse))
   }
 
   it should "successfully get subscription info against dev" taggedAs EffectsTest in {
@@ -62,6 +61,6 @@ class GetSubscriptionEffectsTest extends FlatSpec with Matchers {
       )
     )
 
-    actual(testSubscriptionId).toDisjunction should be(\/-(expected))
+    actual(testSubscriptionId).toDisjunction should be(Right(expected))
   }
 }

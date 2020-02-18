@@ -1,35 +1,34 @@
 package com.gu.newproduct.api.addsubscription.validation
 
 import com.gu.newproduct.api.addsubscription.validation.Conversion._
-import scalaz.{-\/, \/, \/-}
 
 sealed trait ValidationResult[+A] {
-  def toDisjunction: Failed \/ A
+  def toDisjunction: Either[Failed, A]
   def flatMap[B](f: A => ValidationResult[B]): ValidationResult[B] =
     toDisjunction.flatMap(f.andThen(_.toDisjunction)).toValidationResult
 
   def map[B](f: A => B): ValidationResult[B] =
     toDisjunction.map(f).toValidationResult
   def mapFailure(f: String => String): ValidationResult[A] =
-    toDisjunction.leftMap(old => Failed(f(old.message))).toValidationResult
+    toDisjunction.left.map(old => Failed(f(old.message))).toValidationResult
 }
 
 case class Passed[A](value: A) extends ValidationResult[A] {
-  override def toDisjunction: Failed \/ A = \/-(value)
+  override def toDisjunction: Either[Failed, A] = Right(value)
 }
 
 case class Failed(message: String) extends ValidationResult[Nothing] {
-  override def toDisjunction: Failed \/ Nothing = -\/(this)
+  override def toDisjunction: Either[Failed, Nothing] = Left(this)
 }
 
 object Conversion {
 
-  implicit class UnderlyingOps[A](theEither: Failed \/ A) {
+  implicit class UnderlyingOps[A](theEither: Either[Failed, A]) {
 
     def toValidationResult: ValidationResult[A] =
       theEither match {
-        case scalaz.\/-(success) => Passed(success)
-        case scalaz.-\/(failure) => failure
+        case Right(success) => Passed(success)
+        case Left(failure) => failure
       }
   }
 

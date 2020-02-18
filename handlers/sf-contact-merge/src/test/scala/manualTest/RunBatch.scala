@@ -10,12 +10,8 @@ import manualTest.GetArgs.{ApiKey, FileName}
 import manualTest.ReadFile.JsonString
 import okhttp3.Request
 import play.api.libs.json.{JsSuccess, Json}
-import scalaz.std.list.listInstance
-import scalaz.syntax.std.either._
-import scalaz.syntax.traverse.ToTraverseOps
-import scalaz.{-\/, \/, \/-}
-
 import scala.util.Try
+import cats.implicits._
 
 object RunBatch {
 
@@ -39,11 +35,11 @@ object RunBatch {
       postJsonString = postString.setupRequest[JsonString](jsonString => BodyAsString(jsonString.value))
       requestWithResultAsTry = (jsonString: JsonString) =>
         postJsonString.runRequest(jsonString) match {
-          case ClientSuccess(body) if body.value.contains("Success") => \/-(())
-          case ClientSuccess(body) => \/-(body.value)
-          case f: ClientFailure => -\/(s"failed to call sf contact merge: $f")
+          case ClientSuccess(body) if body.value.contains("Success") => Right(())
+          case ClientSuccess(body) => Right(body.value)
+          case f: ClientFailure => Left(s"failed to call sf contact merge: $f")
         }
-      err <- jsons.traverseU(requestWithResultAsTry)
+      err <- jsons.traverse(requestWithResultAsTry)
     } yield err
 
     println(s"result: $result")
@@ -62,10 +58,10 @@ object RunBatch {
 
 object GetArgs {
 
-  def apply(rawArgs: Array[String]): String \/ Args = {
+  def apply(rawArgs: Array[String]): Either[String, Args] = {
     rawArgs.toList match {
-      case apiKey :: fileName :: Nil => \/-(Args(ApiKey(apiKey), FileName(fileName)))
-      case _ => -\/("syntax: $0 <sf-contact-merge-apikey> <queryResultFileName>")
+      case apiKey :: fileName :: Nil => Right(Args(ApiKey(apiKey), FileName(fileName)))
+      case _ => Left("syntax: $0 <sf-contact-merge-apikey> <queryResultFileName>")
     }
   }
 
@@ -89,15 +85,15 @@ object ReadFile {
 
   implicit val readsSFQueryResponse = Json.reads[SFQueryResponse]
 
-  def apply(name: FileName): String \/ List[JsonString] = {
+  def apply(name: FileName): Either[String, List[JsonString]] = {
     Try {
       val json = Json.parse(new FileInputStream(name.value))
       val resp = json.validate[SFQueryResponse]
       resp match {
-        case JsSuccess(value, _) => \/-(value.records.flatMap(_.Json_For_Zuora__c.map(JsonString.apply)))
-        case fail => -\/(s"FAIL to parse: $fail")
+        case JsSuccess(value, _) => Right(value.records.flatMap(_.Json_For_Zuora__c.map(JsonString.apply)))
+        case fail => Left(s"FAIL to parse: $fail")
       }
-    }.toEither.disjunction.leftMap(_.toString).flatMap(identity)
+    }.toEither.left.map(_.toString).flatMap(identity)
   }
 
 }

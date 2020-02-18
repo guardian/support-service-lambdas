@@ -4,7 +4,6 @@ import com.gu.effects.S3Location
 import com.gu.util.config.ConfigReads.ConfigFailure
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
-import scalaz.{-\/, \/-}
 
 import scala.util.Try
 
@@ -32,7 +31,7 @@ class LoadConfigModuleTest extends FlatSpec with Matchers {
 
     val prodConfig = LoadConfigModule(prodStage, prodS3Load)
 
-    prodConfig[TestConfig] shouldBe \/-(TestConfig("prodValue", 92))
+    prodConfig[TestConfig] shouldBe Right(TestConfig("prodValue", 92))
 
   }
 
@@ -85,7 +84,7 @@ class LoadConfigModuleTest extends FlatSpec with Matchers {
 
     val prodConfig = LoadConfigModule(prodStage, wrongFileS3Load)
 
-    prodConfig[TestConfig] shouldBe -\/(ConfigFailure("Expected to load PROD config, but loaded DEV config"))
+    prodConfig[TestConfig] shouldBe Left(ConfigFailure("Expected to load PROD config, but loaded DEV config"))
   }
 
   it should "fail if no stage variable in configuration file" in {

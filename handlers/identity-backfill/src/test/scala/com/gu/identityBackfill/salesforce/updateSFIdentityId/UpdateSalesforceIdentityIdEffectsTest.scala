@@ -11,7 +11,6 @@ import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.resthttp.JsonHttp
 import org.scalatest.{FlatSpec, Matchers}
-import scalaz.\/-
 
 import scala.util.Random
 
@@ -32,7 +31,7 @@ class UpdateSalesforceIdentityIdEffectsTest extends FlatSpec with Matchers {
       identityId <- getSalesforceIdentityId(testContact).value.toDisjunction
     } yield identityId
 
-    actual should be(\/-(IdentityId(unique)))
+    actual should be(Right(IdentityId(unique)))
 
   }
 

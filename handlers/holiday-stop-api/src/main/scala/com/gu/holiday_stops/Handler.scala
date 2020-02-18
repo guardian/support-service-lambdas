@@ -29,7 +29,6 @@ import com.gu.zuora.{AccessToken, Zuora}
 import com.softwaremill.sttp.{HttpURLConnectionBackend, Id, SttpBackend}
 import okhttp3.{Request, Response}
 import play.api.libs.json.{Json, Reads, Writes}
-import scalaz.{-\/, \/, \/-}
 import zio.console.Console
 import zio.{DefaultRuntime, ZIO, console}
 
@@ -119,17 +118,17 @@ object Handler extends Logging {
     )
   }
 
-  private def validateMethod(method: Option[String]): String \/ String = {
+  private def validateMethod(method: Option[String]): Either[String,String] = {
     method match {
-      case Some(method) => \/-(method)
-      case None => -\/("Http method is required")
+      case Some(method) => Right(method)
+      case None => Left("Http method is required")
     }
   }
 
-  private def validatePath(path: Option[String]): String \/ String = {
+  private def validatePath(path: Option[String]): Either[String, String] = {
     path match {
-      case Some(method) => \/-(method)
-      case None => -\/("Path is required")
+      case Some(method) => Right(method)
+      case None => Left("Path is required")
     }
   }
 

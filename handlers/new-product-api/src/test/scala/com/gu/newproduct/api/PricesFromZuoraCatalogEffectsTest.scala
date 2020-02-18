@@ -6,7 +6,6 @@ import com.gu.newproduct.api.productcatalog.{PricesFromZuoraCatalog, ZuoraIds}
 import com.gu.test.EffectsTest
 import com.gu.util.config.{Stage, ZuoraEnvironment}
 import org.scalatest.{FlatSpec, Matchers}
-import scalaz._
 
 class PricesFromZuoraCatalogEffectsTest extends FlatSpec with Matchers {
 
@@ -17,7 +16,7 @@ class PricesFromZuoraCatalogEffectsTest extends FlatSpec with Matchers {
       response <- PricesFromZuoraCatalog(ZuoraEnvironment("DEV"), GetFromS3.fetchString, zuoraIds.rateplanIdToApiId.get).toDisjunction
     } yield response
     //the prices might change but at least we can assert that we got some price for each product
-    actual.map(_.keySet) shouldBe \/-(
+    actual.map(_.keySet) shouldBe Right(
       Set(
         VoucherSaturdayPlus,
         VoucherSundayPlus,

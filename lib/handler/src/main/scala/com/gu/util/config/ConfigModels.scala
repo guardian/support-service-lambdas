@@ -54,6 +54,6 @@ object ZuoraEnvironment extends Logging {
 
 object ConfigReads {
 
-  case class ConfigFailure(error: String)
+  case class ConfigFailure(error: String) extends Throwable
 
 }
