@@ -104,20 +104,13 @@ class DigitalVoucherApiTest extends FlatSpec with Matchers with EitherValues {
         expiryDate = Some(cancellationDate),
         response = ImovoUpdateResponse(true)
       )
-      .stubUpdate(
-        apiKey = "imovo-test-api-key",
-        baseUrl = "https://imovo.test.com",
-        voucherCode = "letter-test-voucher-code",
-        expiryDate = Some(cancellationDate),
-        response = ImovoUpdateResponse(true)
-      )
 
     val app = createApp(imovoBackendStub)
     val response = app.run(
       Request(
         method = Method.POST,
         Uri(path = "/digital-voucher/cancel")
-      ).withEntity[String](CancelVoucherRequestBody("card-test-voucher-code", "letter-test-voucher-code", cancellationDate).asJson.spaces2)
+      ).withEntity[String](CancelVoucherRequestBody("card-test-voucher-code", cancellationDate).asJson.spaces2)
     ).value.unsafeRunSync().get
 
     getBody[Unit](response) should equal(())
