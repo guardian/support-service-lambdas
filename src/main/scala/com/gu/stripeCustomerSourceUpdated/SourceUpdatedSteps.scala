@@ -3,7 +3,7 @@ package com.gu.stripeCustomerSourceUpdated
 import com.gu.stripeCustomerSourceUpdated.StripeRequestSignatureChecker.verifyRequest
 import com.gu.stripeCustomerSourceUpdated.TypeConvert._
 import com.gu.stripeCustomerSourceUpdated.zuora.CreatePaymentMethod.{CreateStripePaymentMethod, CreditCardType}
-import com.gu.stripeCustomerSourceUpdated.zuora.ZuoraQueryPaymentMethod.{AccountPaymentMethodIds, PaymentMethodFields}
+import com.gu.stripeCustomerSourceUpdated.zuora.ZuoraQueryPaymentMethod.PaymentMethodFields
 import com.gu.stripeCustomerSourceUpdated.zuora.{CreatePaymentMethod, SetDefaultPaymentMethod, ZuoraQueryPaymentMethod}
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.Operation
@@ -12,7 +12,6 @@ import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.reader.Types.ApiGatewayOp._
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.RestRequestMaker.Requests
-import com.gu.util.zuora.ZuoraGetAccountSummary.AccountSummary
 import com.gu.util.zuora.ZuoraGetAccountSummary.ZuoraAccount.PaymentMethodId
 import com.gu.util.zuora._
 import play.api.libs.json.JsPath
@@ -70,11 +69,9 @@ object SourceUpdatedSteps extends Logging {
     ZuoraQueryPaymentMethod.getPaymentMethodForStripeCustomer(zuoraQuerier)(customer, source)
       .flatMap {
         _.flatTraverse { paymentMethods =>
-          ZuoraGetAccountSummary(requests)(paymentMethods.accountId.value).toApiGatewayOp("ZuoraGetAccountSummary failed").map(_.pure[List])
-            .flatMap {
-              _.flatTraverse { account =>
-                findDefaultOrSkip(account.basicInfo.defaultPaymentMethod, paymentMethods.paymentMethods).toList.pure[ApiGatewayOp].withLogging("findDefaultOrSkip")
-              }
+          ZuoraGetAccountSummary(requests)(paymentMethods.accountId.value).toApiGatewayOp("ZuoraGetAccountSummary failed")
+            .flatMap { account =>
+              findDefaultOrSkip(account.basicInfo.defaultPaymentMethod, paymentMethods.paymentMethods).toList.pure[ApiGatewayOp].withLogging("findDefaultOrSkip")
             }
         }
       }

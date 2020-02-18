@@ -26,9 +26,9 @@ object GetZuoraAccountsForEmail {
   def apply(zuoraQuerier: ZuoraQuerier)(emailAddress: EmailAddress): ClientFailableOp[List[ZuoraAccountIdentitySFContact]] = {
     findZuoraContacts(zuoraQuerier, emailAddress).flatMap {
       _.flatTraverse { contactWithEmail =>
-        findZuoraAccounts(zuoraQuerier, contactWithEmail).flatMap {
-          _.traverse { accountsWithEmail =>
-            clientFailableOpM.pure(ZuoraAccountIdentitySFContact(AccountId(accountsWithEmail.Id), accountsWithEmail.IdentityId__c.map(IdentityId.apply), SFContactId(accountsWithEmail.sfContactId__c), CrmId(accountsWithEmail.CrmId)))
+        findZuoraAccounts(zuoraQuerier, contactWithEmail).map {
+          _.map { accountsWithEmail =>
+            ZuoraAccountIdentitySFContact(AccountId(accountsWithEmail.Id), accountsWithEmail.IdentityId__c.map(IdentityId.apply), SFContactId(accountsWithEmail.sfContactId__c), CrmId(accountsWithEmail.CrmId))
           }
         }
       }

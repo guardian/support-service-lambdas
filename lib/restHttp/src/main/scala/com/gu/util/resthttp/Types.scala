@@ -2,6 +2,8 @@ package com.gu.util.resthttp
 import cats.Monad
 import cats.implicits._
 
+import scala.annotation.tailrec
+
 object Types {
   sealed trait ClientFailure extends ClientFailableOp[Nothing] {
     override def toDisjunction: Either[ClientFailure, Nothing] = Left(this)
@@ -78,7 +80,14 @@ object Types {
         boundAsDisjunction.toClientFailableOp
       }
 
-      override def tailRecM[A, B](a: A)(f: A => ClientFailableOp[Either[A, B]]): ClientFailableOp[B] = ???
+      @tailrec
+      override def tailRecM[A, B](a: A)(f: A => ClientFailableOp[Either[A, B]]): ClientFailableOp[B] = {
+        f(a) match {
+          case ClientSuccess(Left(newA)) => this.tailRecM(newA)(f)
+          case ClientSuccess(Right(newB)) => ClientSuccess[B](newB)
+          case failed: ClientFailure => failed
+        }
+      }
 
       override def pure[A](a: A): ClientFailableOp[A] = ClientSuccess(a)
 
