@@ -1,5 +1,7 @@
 package com.gu.digital_voucher_api
 
+import java.time.LocalDate
+
 import cats.Monad
 import cats.implicits._
 import cats.data.EitherT
@@ -13,7 +15,7 @@ trait DigitalVoucherService[F[_]] {
   def createVoucher(subscriptionId: String, ratePlanName: String): EitherT[F, DigitalVoucherServiceError, Voucher]
   def replaceVoucher(voucher: Voucher): EitherT[F, DigitalVoucherServiceError, Voucher]
   def getVoucher(subscriptionId: String): EitherT[F, DigitalVoucherServiceError, Voucher]
-  def deleteVoucherForSubscription(subscriptionId: String): EitherT[F, DigitalVoucherServiceError, Unit]
+  def cancelVouchers(cardCode: String, cancellationDate: LocalDate): EitherT[F, DigitalVoucherServiceError, Unit]
 }
 
 object DigitalVoucherService {
@@ -34,8 +36,8 @@ object DigitalVoucherService {
           Voucher(cardResponse.voucherCode, letterResponse.voucherCode)
         }.leftMap(errors => DigitalVoucherServiceError(errors.mkString(", ")))
 
-    override def deleteVoucherForSubscription(subscriptionId: String): EitherT[F, DigitalVoucherServiceError, Unit] =
-      EitherT.rightT(())
+    override def cancelVouchers(cardCode: String, cancellationDate: LocalDate): EitherT[F, DigitalVoucherServiceError, Unit] =
+      imovoClient.updateVoucher(cardCode, cancellationDate).leftMap(error => DigitalVoucherServiceError(error.message))
 
     override def getVoucher(subscriptionId: String): EitherT[F, DigitalVoucherServiceError, Voucher] =
       EitherT.rightT[F, DigitalVoucherServiceError](

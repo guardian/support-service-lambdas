@@ -1,6 +1,7 @@
 package com.gu.digital_voucher_api
 
 import cats.data.EitherT
+import cats.implicits._
 import cats.effect.{ContextShift, IO}
 import com.gu.AppIdentity
 import com.gu.digital_voucher_api.imovo.ImovoClient
@@ -23,13 +24,14 @@ object DigitalVoucherApiApp extends LazyLogging {
 
   def apply[S](appIdentity: AppIdentity, backend: SttpBackend[IO, S]): EitherT[IO, DigitalVoucherApiError, HttpRoutes[IO]] = {
     for {
-      config <- ConfigLoader.loadConfig[IO](appIdentity: AppIdentity)
+      config <- ConfigLoader
+        .loadConfig[IO](appIdentity: AppIdentity)
         .leftMap(error => DigitalVoucherApiError(error.toString))
       imovoClient <- ImovoClient(backend, config.imovoBaseUrl, config.imovoApiKey)
         .leftMap(error => DigitalVoucherApiError(error.toString))
-      routes <- EitherT.rightT[IO, DigitalVoucherApiError](
-        createLogging()(DigitalVoucherApiRoutes(DigitalVoucherService(imovoClient)))
-      )
+      routes <- createLogging()(DigitalVoucherApiRoutes(DigitalVoucherService(imovoClient)))
+        .asRight[DigitalVoucherApiError]
+        .toEitherT[IO]
     } yield routes
   }
 
