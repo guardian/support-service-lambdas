@@ -11,7 +11,6 @@ import com.gu.util.resthttp.JsonHttp
 import com.gu.zuora.subscription._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import scalaz.{-\/, \/-}
 
 class SalesforceHolidayStopRequestEndToEndEffectsTest extends AnyFlatSpec with Matchers {
 
@@ -84,9 +83,9 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends AnyFlatSpec with M
 
     actual match {
 
-      case -\/(failure) => fail(failure.toString)
+      case Left(failure) => fail(failure.toString)
 
-      case \/-(EndToEndResults(createResult, preProcessingFetchResult, postProcessingFetchResult)) =>
+      case Right(EndToEndResults(createResult, preProcessingFetchResult, postProcessingFetchResult)) =>
 
         withClue("should be able to find the freshly created Holiday Stop Request and its Actioned Count should be ZERO") {
           preProcessingFetchResult

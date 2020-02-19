@@ -5,7 +5,7 @@ import java.time.LocalDate
 import cats.effect.IO
 import com.gu.DevIdentity
 import com.gu.digital_voucher_api.imovo.ImovoStub._
-import com.gu.digital_voucher_api.imovo.{ImovoErrorResponse, ImovoVoucherResponse}
+import com.gu.digital_voucher_api.imovo.{ImovoErrorResponse, ImovoUpdateResponse, ImovoVoucherResponse}
 import com.softwaremill.diffx.scalatest.DiffMatcher
 import com.softwaremill.sttp.impl.cats.CatsMonadError
 import com.softwaremill.sttp.testing.SttpBackendStub
@@ -179,17 +179,29 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
     getBody[Voucher](response) should matchTo(Voucher("5555555555", "6666666666"))
     response.status.code should matchTo(200)
   }
+  it should "return stubbed 200 response for cancel request" in {
+    val cancellationDate = LocalDate.now().plusWeeks(1)
 
-  it should "return stubbed 200 response for delete request" in {
-    val app = createApp(SttpBackendStub[IO, Nothing](new CatsMonadError[IO]))
+    val imovoBackendStub: SttpBackendStub[IO, Nothing] = SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
+      .stubUpdate(
+        apiKey = "imovo-test-api-key",
+        baseUrl = "https://imovo.test.com",
+        voucherCode = "card-test-voucher-code",
+        expiryDate = Some(cancellationDate),
+        response = ImovoUpdateResponse(true)
+      )
+
+    val app = createApp(imovoBackendStub)
     val response = app.run(
       Request(
-        method = Method.DELETE,
-        Uri(path = "/digital-voucher/123456")
-      )
+        method = Method.POST,
+        Uri(path = "/digital-voucher/cancel")
+      ).withEntity[String](CancelVoucherRequestBody("card-test-voucher-code", cancellationDate).asJson.spaces2)
     ).value.unsafeRunSync().get
 
-    response.status.code should matchTo(200)
+    getBody[Unit](response) should equal(())
+
+    response.status.code should equal(200)
   }
 
   private def createApp(backendStub: SttpBackendStub[IO, Nothing]) = {

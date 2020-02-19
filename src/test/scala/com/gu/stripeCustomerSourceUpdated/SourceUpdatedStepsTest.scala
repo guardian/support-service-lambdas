@@ -10,7 +10,6 @@ import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.zuora.ZuoraGetAccountSummary.ZuoraAccount.{AccountId, NumConsecutiveFailures, PaymentMethodId}
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.{JsSuccess, Json}
-import scalaz.{-\/, \/-}
 
 class SourceUpdatedStepsGetPaymentMethodsToUpdateTest extends FlatSpec with Matchers {
 
@@ -47,7 +46,7 @@ class SourceUpdatedStepsGetPaymentMethodsToUpdateTest extends FlatSpec with Matc
     )
 
     effects.requestsAttempted should be(List(expectedGET, expectedPOST))
-    actual.toDisjunction should be(\/-(List()))
+    actual.toDisjunction should be(Right(List()))
   }
 
   "SourceUpdatedSteps" should "getAccountToUpdate default pm" in {
@@ -83,7 +82,7 @@ class SourceUpdatedStepsGetPaymentMethodsToUpdateTest extends FlatSpec with Matc
     )
 
     effects.requestsAttempted should be(List(expectedGET, expectedPOST))
-    actual.toDisjunction should be(\/-(List(PaymentMethodFields(PaymentMethodId("defaultPMID"), AccountId("accid"), NumConsecutiveFailures(3)))))
+    actual.toDisjunction should be(Right(List(PaymentMethodFields(PaymentMethodId("defaultPMID"), AccountId("accid"), NumConsecutiveFailures(3)))))
   }
 
   "SourceUpdatedSteps" should "getAccountToUpdate default pm with multiple on the same account" in {
@@ -124,7 +123,7 @@ class SourceUpdatedStepsGetPaymentMethodsToUpdateTest extends FlatSpec with Matc
     )
 
     effects.requestsAttempted should be(List(expectedGET, expectedPOST))
-    actual.toDisjunction should be(\/-(List(PaymentMethodFields(PaymentMethodId("defaultPMID"), AccountId("accountidfake"), NumConsecutiveFailures(2)))))
+    actual.toDisjunction should be(Right(List(PaymentMethodFields(PaymentMethodId("defaultPMID"), AccountId("accountidfake"), NumConsecutiveFailures(2)))))
   }
 
   "SourceUpdatedSteps" should "getAccountToUpdate multiple on different account three only" in {
@@ -181,7 +180,7 @@ class SourceUpdatedStepsGetPaymentMethodsToUpdateTest extends FlatSpec with Matc
       ""
     )
     effects.requestsAttempted.toSet should be(Set(expectedGET1, expectedGET2, expectedGET3, expectedPOST))
-    actual.toDisjunction.map(_.toSet) should be(\/-(Set(
+    actual.toDisjunction.map(_.toSet) should be(Right(Set(
       PaymentMethodFields(PaymentMethodId("defaultPMID"), AccountId("accountidfake"), NumConsecutiveFailures(2)),
       PaymentMethodFields(PaymentMethodId("anotherPM"), AccountId("accountidANOTHER"), NumConsecutiveFailures(4)),
       PaymentMethodFields(PaymentMethodId("anotherPMAGAIN"), AccountId("accountidANOTHERONE"), NumConsecutiveFailures(4))
@@ -231,7 +230,7 @@ class SourceUpdatedStepsGetPaymentMethodsToUpdateTest extends FlatSpec with Matc
       ""
     )
     effects.requestsAttempted.toSet should be(Set(expectedGET1, expectedGET2, expectedPOST))
-    actual.toDisjunction.map(_.toSet) should be(\/-(Set(
+    actual.toDisjunction.map(_.toSet) should be(Right(Set(
       PaymentMethodFields(PaymentMethodId("defaultPMID"), AccountId("accountidfake"), NumConsecutiveFailures(2))
     )))
   }
@@ -278,7 +277,7 @@ class SourceUpdatedStepsGetPaymentMethodsToUpdateTest extends FlatSpec with Matc
       "{\"queryString\":\"SELECT Id, AccountId, NumConsecutiveFailures FROM PaymentMethod where Type='CreditCardReferenceTransaction' AND PaymentMethodStatus = 'Active' AND TokenId = 'fakecardid' AND SecondTokenId = 'fakecustid'\"}"
     )
     effects.requestsAttempted should be(List(expectedPOST))
-    actual.toDisjunction should be(-\/(ApiGatewayResponse.internalServerError("could not find correct account for stripe details")))
+    actual.toDisjunction should be(Left(ApiGatewayResponse.internalServerError("could not find correct account for stripe details")))
   }
 
   "SourceUpdatedSteps" should "getAccountToUpdate no payment methods at all" in {
@@ -303,7 +302,7 @@ class SourceUpdatedStepsGetPaymentMethodsToUpdateTest extends FlatSpec with Matc
       "{\"queryString\":\"SELECT Id, AccountId, NumConsecutiveFailures FROM PaymentMethod where Type='CreditCardReferenceTransaction' AND PaymentMethodStatus = 'Active' AND TokenId = 'fakecardid' AND SecondTokenId = 'fakecustid'\"}"
     )
     effects.requestsAttempted should be(List(expectedPOST))
-    actual.toDisjunction should be(\/-(List()))
+    actual.toDisjunction should be(Right(List()))
   }
 
 }
@@ -345,7 +344,7 @@ class SourceUpdatedStepsUpdatePaymentMethodTest extends FlatSpec with Matchers {
     )
 
     effects.requestsAttempted should be(List(expectedPUT, expectedPOST))
-    actual.toDisjunction should be(\/-(()))
+    actual.toDisjunction should be(Right(()))
   }
 
 }

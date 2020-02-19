@@ -11,6 +11,7 @@ import io.circe.syntax._
 
 case class SFApiDeliveryProblemCase(
   Id: String,
+  CaseNumber: String,
   Subject: Option[String],
   Description: Option[String],
   Case_Closure_Reason__c: Option[String] // this is actually the case sub-category (e.g. 'No Delivery', 'Damaged Delivery' etc.)

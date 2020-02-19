@@ -13,7 +13,7 @@ trait DigitalVoucherService[F[_]] {
   def createVoucher(subscriptionId: SfSubscriptionId, ratePlanName: RatePlanName): EitherT[F, DigitalVoucherApiException, Voucher]
   def replaceVoucher(voucher: Voucher): EitherT[F, DigitalVoucherServiceException, Voucher]
   def getVoucher(subscriptionId: String): EitherT[F, DigitalVoucherServiceException, Voucher]
-  def deleteVoucherForSubscription(subscriptionId: String): EitherT[F, DigitalVoucherServiceException, Unit]
+  def cancelVouchers(cardCode: String, cancellationDate: LocalDate): EitherT[F, DigitalVoucherServiceException, Unit]
 }
 
 object DigitalVoucherService {
@@ -88,8 +88,8 @@ object DigitalVoucherService {
           Voucher(cardResponse.voucherCode, letterResponse.voucherCode)
         }.leftMap(errors => DigitalVoucherServiceException(errors.mkString(", ")))
 
-    override def deleteVoucherForSubscription(subscriptionId: String): EitherT[F, DigitalVoucherServiceException, Unit] =
-      EitherT.rightT(())
+    override def cancelVouchers(cardCode: String, cancellationDate: LocalDate): EitherT[F, DigitalVoucherServiceException, Unit] =
+      imovoClient.updateVoucher(cardCode, cancellationDate).leftMap(error => DigitalVoucherServiceException(error.message))
 
     override def getVoucher(subscriptionId: String): EitherT[F, DigitalVoucherServiceException, Voucher] =
       EitherT.rightT[F, DigitalVoucherServiceException](

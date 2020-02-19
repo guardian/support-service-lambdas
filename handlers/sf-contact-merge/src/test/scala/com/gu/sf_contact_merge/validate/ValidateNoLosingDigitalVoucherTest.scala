@@ -5,7 +5,6 @@ import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
 import com.gu.util.resthttp.LazyClientFailableOp
 import com.gu.util.resthttp.Types.{ClientSuccess, GenericError}
 import org.scalatest.{FlatSpec, Matchers}
-import scalaz.-\/
 
 class ValidateNoLosingDigitalVoucherTest extends FlatSpec with Matchers {
 
@@ -40,7 +39,7 @@ class ValidateNoLosingDigitalVoucherTest extends FlatSpec with Matchers {
 
     val actual = ValidateNoLosingDigitalVoucher(input)
 
-    actual.toDisjunction.leftMap(_.statusCode) should be(-\/("404"))
+    actual.toDisjunction.left.map(_.statusCode) should be(Left("404"))
   }
 
   it should "object to an error" in {
@@ -52,7 +51,7 @@ class ValidateNoLosingDigitalVoucherTest extends FlatSpec with Matchers {
 
     val actual = ValidateNoLosingDigitalVoucher(input)
 
-    actual.toDisjunction.leftMap(_.statusCode) should be(-\/("500"))
+    actual.toDisjunction.left.map(_.statusCode) should be(Left("500"))
   }
 
 }

@@ -21,8 +21,8 @@ import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResp
 import com.gu.util.reader.Types.{ApiGatewayOp, _}
 import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.resthttp.{HttpOp, LazyClientFailableOp}
-import scalaz.NonEmptyList
-import scalaz.syntax.traverse.ToTraverseOps
+import cats.data.NonEmptyList
+import cats.implicits._
 
 object DomainSteps {
 
@@ -53,7 +53,7 @@ object DomainSteps {
           },
           sfData.maybeEmailOverride
         )
-        mergeRequest.zuoraAccountIds.traverseU(updateAccountSFLinks(linksFromZuora, _))
+        mergeRequest.zuoraAccountIds.traverse(updateAccountSFLinks(linksFromZuora, _))
       }.toApiGatewayOp("update zuora accounts with winning details")
       _ <- updateSFContacts(
         mergeRequest.winningSFContact,
@@ -96,10 +96,10 @@ object SFSteps {
   def flattenContactData(
     sfContacts: SFContactsForMerge[LazyClientFailableOp[IdWithContact]]
   ): ClientFailableOp[List[SFContactIdEmailIdentity]] = {
-    val contactsList = NonEmptyList(sfContacts.winner, sfContacts.others: _*)
+    val contactsList = NonEmptyList(sfContacts.winner, sfContacts.others)
     val lazyContactsEmailIdentity = contactsList.map(_.map(idWithContact =>
       SFContactIdEmailIdentity(idWithContact.id, idWithContact.contact.emailIdentity)))
-    lazyContactsEmailIdentity.traverseU(_.value).map(_.list.toList)
+    lazyContactsEmailIdentity.traverse(_.value).map(_.toList)
   }
 
   case class IdWithContact(id: SFContactId, contact: SFContact)

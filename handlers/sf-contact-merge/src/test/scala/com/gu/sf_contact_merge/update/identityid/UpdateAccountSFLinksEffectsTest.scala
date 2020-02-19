@@ -15,7 +15,6 @@ import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
 import org.scalatest.{FlatSpec, Matchers}
-import scalaz.\/-
 
 import scala.util.Random
 
@@ -39,7 +38,7 @@ class UpdateAccountSFLinksEffectsTest extends FlatSpec with Matchers {
       _ <- updateAccount(DevZuora.accountWithRandomLinks).toApiGatewayOp("AddIdentityIdToAccount")
       basicInfo <- GetZuoraAccount(zuoraDeps)(DevZuora.accountWithRandomLinks).toApiGatewayOp("GetIdentityIdForAccount")
     } yield basicInfo
-    actual.toDisjunction should be(\/-(ZuoraAccount(
+    actual.toDisjunction should be(Right(ZuoraAccount(
       BasicInfo(s"cont$unique", s"acc$unique", Some(s"ident$unique")),
       ZContact(s"fulfilment.dev+$unique@guardian.co.uk")
     )))

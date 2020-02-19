@@ -9,7 +9,6 @@ import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
 import org.scalatest.{FlatSpec, Matchers}
-import scalaz.\/-
 
 class GetAccountEffectsTest extends FlatSpec with Matchers {
 
@@ -27,6 +26,6 @@ class GetAccountEffectsTest extends FlatSpec with Matchers {
       accountBalanceMinorUnits = AccountBalanceMinorUnits(0),
       currency = GBP
     )
-    actual shouldBe \/-(expected)
+    actual shouldBe Right(expected)
   }
 }

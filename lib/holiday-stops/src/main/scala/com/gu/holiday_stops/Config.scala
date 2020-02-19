@@ -26,8 +26,7 @@ object Config {
     val loadConfigModule = LoadConfigModule(Stage(stage), fetchString)
     loadConfigModule
       .apply[T](ConfigLocation(filePrefix, 1), reads)
-      .leftMap(failure => OverallFailure(failure.error))
-      .toEither
+      .left.map(failure => OverallFailure(failure.error))
   }
 
   def fromS3(fetchString: StringFromS3): Either[OverallFailure, Config] = {

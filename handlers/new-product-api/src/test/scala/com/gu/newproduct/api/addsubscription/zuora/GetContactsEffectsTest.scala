@@ -9,7 +9,6 @@ import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
 import org.scalatest.{FlatSpec, Matchers}
-import scalaz.\/-
 
 class GetContactsEffectsTest extends FlatSpec with Matchers {
 
@@ -50,6 +49,6 @@ class GetContactsEffectsTest extends FlatSpec with Matchers {
       )
     )
 
-    actual shouldBe \/-(Contacts(billTo = expectedBillTo, soldTo = expectedSoldTo))
+    actual shouldBe Right(Contacts(billTo = expectedBillTo, soldTo = expectedSoldTo))
   }
 }

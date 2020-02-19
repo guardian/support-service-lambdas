@@ -14,7 +14,6 @@ import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.resthttp.JsonHttp
 import org.scalatest.{FlatSpec, Matchers}
-import scalaz.\/-
 
 class GetSfAddressEffectsTest extends FlatSpec with Matchers {
 
@@ -43,7 +42,7 @@ class GetSfAddressEffectsTest extends FlatSpec with Matchers {
       EmailIdentity(EmailAddress("effecttests@gu.com"), Some(IdentityId("100003915")))
     )
 
-    actual should be(\/-(expected))
+    actual should be(Right(expected))
 
   }
 

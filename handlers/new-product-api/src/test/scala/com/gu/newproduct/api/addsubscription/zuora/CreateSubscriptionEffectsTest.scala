@@ -13,7 +13,6 @@ import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.resthttp.RestRequestMaker.RequestsPost
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
 import org.scalatest.{FlatSpec, Matchers}
-import scalaz.\/-
 
 class CreateSubscriptionEffectsTest extends FlatSpec with Matchers {
 
@@ -41,7 +40,7 @@ class CreateSubscriptionEffectsTest extends FlatSpec with Matchers {
       res <- CreateSubscription(post, currentDate)(request).toDisjunction
     } yield res
     withClue(actual) {
-      actual.map(_.value.substring(0, 3)) shouldBe \/-("A-S")
+      actual.map(_.value.substring(0, 3)) shouldBe Right("A-S")
     }
     // ideally should check that it was really created with the right fields
   }

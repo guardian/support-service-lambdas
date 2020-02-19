@@ -1,8 +1,11 @@
 package com.gu.digital_voucher_api
 
+import java.time.LocalDate
+
+import cats.Show
 import cats.data.EitherT
 import cats.effect.Effect
-import org.http4s.{EntityEncoder, HttpRoutes, Request, Response}
+import org.http4s.{DecodeFailure, EntityEncoder, HttpRoutes, InvalidMessageBodyFailure, MalformedMessageBodyFailure, Request, Response}
 import io.circe.generic.auto._
 import org.http4s.circe.CirceEntityEncoder._
 import org.http4s.circe.CirceEntityDecoder._
@@ -13,6 +16,8 @@ import org.http4s.dsl.Http4sDsl
 case class DigitalVoucherApiRoutesError(message: String)
 
 case class CreateVoucherRequestBody(ratePlanName: RatePlanName)
+
+case class CancelVoucherRequestBody(cardCode: String, cancellationDate: LocalDate)
 
 object DigitalVoucherApiRoutes {
 
@@ -31,10 +36,16 @@ object DigitalVoucherApiRoutes {
     }
 
     def parseRequest[A: Decoder](request: Request[F]) = {
+      implicit val showDecodeFailure = Show.show[DecodeFailure] {
+        case InvalidMessageBodyFailure(details, cause) => s"InvalidMessageBodyFailure($details, $cause)"
+        case MalformedMessageBodyFailure(details, cause) => s"MalformedMessageBodyFailure($details, $cause)"
+        case error => error.toString
+      }
+
       request
         .attemptAs[A]
-        .leftMap { decodingFailure =>
-          BadRequest(DigitalVoucherApiRoutesError(s"Failed to decoded request body: $decodingFailure"))
+        .leftMap { decodingFailure: DecodeFailure =>
+          BadRequest(DigitalVoucherApiRoutesError(s"Failed to decoded request body: ${decodingFailure.show}"))
         }
     }
 
@@ -78,11 +89,15 @@ object DigitalVoucherApiRoutes {
       )
     }
 
-    def handleDeleteRequest(subscriptionId: String) = {
+    def handleCancelRequest(request: Request[F]) = {
       toResponse(
-        digitalVoucherService
-          .deleteVoucherForSubscription(subscriptionId)
-          .leftMap(_ => InternalServerError())
+        for {
+          requestBody <- parseRequest[CancelVoucherRequestBody](request)
+          result <- digitalVoucherService
+            .cancelVouchers(requestBody.cardCode, requestBody.cancellationDate)
+            .leftMap(error => InternalServerError(DigitalVoucherApiRoutesError(s"Failed get voucher: $error")))
+        } yield result
+
       )
     }
 
@@ -93,8 +108,8 @@ object DigitalVoucherApiRoutes {
         handleReplaceRequest(request)
       case GET -> Root / "digital-voucher" / subscriptionId =>
         handleGetRequest(subscriptionId)
-      case DELETE -> Root / "digital-voucher" / subscriptionId =>
-        handleDeleteRequest(subscriptionId)
+      case request @ POST -> Root / "digital-voucher" / "cancel" =>
+        handleCancelRequest(request)
     }
   }
 }

@@ -4,8 +4,7 @@ import java.time.LocalDate
 
 import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, PlanId}
 import play.api.libs.json.{JsError, JsSuccess, Json, Reads}
-import scalaz._
-import Scalaz._
+import cats.implicits._
 
 import scala.util.Try
 
@@ -23,7 +22,6 @@ case class AddSubscriptionRequest(
 case class CaseId(value: String) extends AnyVal
 case class AcquisitionSource(value: String) extends AnyVal
 case class CreatedByCSR(value: String) extends AnyVal
-import scalaz.std.`try`._
 object AddSubscriptionRequest {
 
   case class AddSubscriptionRequestWire(
@@ -37,8 +35,8 @@ object AddSubscriptionRequest {
   ) {
     def toAddSubscriptionRequest = {
       val parsedRequestOrError = for {
-        parsedDate <- toDisjunction(Try(LocalDate.parse(startDate))).leftMap(_ => "invalid date format")
-        parsedPlanId <- PlanId.fromName(planId).toRightDisjunction(invalidPlanError)
+        parsedDate <- Try(LocalDate.parse(startDate)).toEither.left.map(_ => "invalid date format")
+        parsedPlanId <- PlanId.fromName(planId).toRight(invalidPlanError)
       } yield AddSubscriptionRequest(
         zuoraAccountId = ZuoraAccountId(zuoraAccountId),
         startDate = parsedDate,
@@ -50,8 +48,8 @@ object AddSubscriptionRequest {
       )
 
       parsedRequestOrError match {
-        case \/-(req) => JsSuccess(req)
-        case -\/(error) => JsError(error)
+        case Right(req) => JsSuccess(req)
+        case Left(error) => JsError(error)
       }
 
     }

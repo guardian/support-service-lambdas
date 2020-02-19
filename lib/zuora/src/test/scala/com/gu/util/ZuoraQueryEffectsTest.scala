@@ -9,7 +9,6 @@ import com.gu.util.zuora.ZuoraQuery._
 import com.gu.util.zuora.{ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
-import scalaz.\/-
 
 // run this manually
 class ZuoraQueryEffectsTest extends FlatSpec with Matchers {
@@ -27,7 +26,7 @@ class ZuoraQueryEffectsTest extends FlatSpec with Matchers {
     } yield {
       subs
     }
-    actual.map(_.map(_.PromotionCode__c)) should be(\/-(List("""qwerty"asdf'zxcv\1234""")))
+    actual.map(_.map(_.PromotionCode__c)) should be(Right(List("""qwerty"asdf'zxcv\1234""")))
 
   }
 
