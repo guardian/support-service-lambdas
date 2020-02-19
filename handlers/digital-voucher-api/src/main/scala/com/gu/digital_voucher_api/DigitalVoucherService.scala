@@ -40,10 +40,6 @@ object DigitalVoucherService {
     Map(
       RatePlanName("Everyday") -> everydayCampaignCodes,
       RatePlanName("Everyday+") -> everydayCampaignCodes,
-      RatePlanName("Saturday") ->
-      CampaignCodeSet(CampaignCode("TODO"), CampaignCode("TODO")),
-      RatePlanName("Saturday+") ->
-      CampaignCodeSet(CampaignCode("TODO"), CampaignCode("TODO")),
       RatePlanName("Sunday") -> sundayCampaignCodes,
       RatePlanName("Sunday+") -> sundayCampaignCodes,
       RatePlanName("Weekend") -> weekendCampaignCodes,
