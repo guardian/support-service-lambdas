@@ -95,6 +95,49 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
     ))
   }
 
+  it should "return a 502 when multiple calls to Imovo fail" in {
+    val imovoBackendStub: SttpBackendStub[IO, Nothing] = SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
+      .stubCreate(
+        apiKey = apiKey,
+        baseUrl = baseUrl,
+        customerRef = subscriptionId.value,
+        campaignCode = "GMGSub7DayCard",
+        startDate = tomorrow,
+        response = ImovoErrorResponse(List("imovo-error-1"), successfulRequest = false)
+      )
+      .stubCreate(
+        apiKey = apiKey,
+        baseUrl = baseUrl,
+        customerRef = subscriptionId.value,
+        campaignCode = "GMGSub7DayHNDSS",
+        startDate = tomorrow,
+        response = ImovoErrorResponse(List("imovo-error-2"), successfulRequest = false)
+      )
+
+    val app = createApp(imovoBackendStub)
+    val response = app.run(
+      Request(
+        method = Method.PUT,
+        uri = Uri(path = s"/digital-voucher/create/${subscriptionId.value}")
+      ).withEntity[String](CreateVoucherRequestBody(RatePlanName("Everyday")).asJson.spaces2)
+    ).value.unsafeRunSync().get
+
+    response.status.code should matchTo(502)
+    getBody[DigitalVoucherApiRoutesError](response) should matchTo(DigitalVoucherApiRoutesError(
+      s"""Imovo failure to create voucher: Request GET $baseUrl//VoucherRequest/Request?customerReference=123456&campaignCode=GMGSub7DayCard&StartDate=2020-02-20 failed with response ({
+        |  "errorMessages" : [
+        |    "imovo-error-1"
+        |  ],
+        |  "successfulRequest" : false
+        |}), Request GET $baseUrl//VoucherRequest/Request?customerReference=123456&campaignCode=GMGSub7DayHNDSS&StartDate=2020-02-20 failed with response ({
+        |  "errorMessages" : [
+        |    "imovo-error-2"
+        |  ],
+        |  "successfulRequest" : false
+        |})""".stripMargin
+    ))
+  }
+
   it should "return a 422 when ratePlanName param doesn't match an Imovo campaign" in {
     val imovoBackendStub: SttpBackendStub[IO, Nothing] = SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
 

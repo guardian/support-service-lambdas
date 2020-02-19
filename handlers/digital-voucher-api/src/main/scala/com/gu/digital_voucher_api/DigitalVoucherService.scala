@@ -64,7 +64,9 @@ object DigitalVoucherService {
           imovoClient.createVoucher(subscriptionId, code.letter, tomorrow).leftMap(List(_))
           ).parMapN { (cardResponse, letterResponse) =>
           Voucher(cardResponse.voucherCode, letterResponse.voucherCode)
-        }.leftMap(es => DigitalVoucherApiException(es.head))
+        }.leftMap(errors =>
+          DigitalVoucherApiException(ImovoClientException(errors.map(_.message).mkString(", ")))
+        )
       }
 
       campaignCodes.get(ratePlanName).map(requestVoucher).getOrElse {
