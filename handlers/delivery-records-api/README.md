@@ -64,6 +64,7 @@ All endpoints require...
     "deliveryProblemMap": {
         "5003E00000FwUMYQA3": {
             "id": "5003E00000FwUMYQA3",
+            "ref": "1234567",
             "subject": "[Self Service] Delivery Problem : No Delivery (Guardian Weekly - A-S00080535)",
             "description": "description",
             "problemType": "No Delivery"

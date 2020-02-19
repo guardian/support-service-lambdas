@@ -7,7 +7,6 @@ import com.gu.sf_contact_merge.getaccounts.GetZuoraContactDetails.EmailAddress
 import com.gu.sf_contact_merge.getsfcontacts.WireContactToSfContact.Types.EmailIdentity
 import com.gu.sf_contact_merge.update.UpdateSFContacts.{IdentityIdMoveData, IdentityIdToUse, OldSFContact}
 import org.scalatest.{FlatSpec, Matchers}
-import scalaz.{-\/, \/-}
 
 class GetSFIdentityIdMoveDataTest extends FlatSpec with Matchers {
 
@@ -18,7 +17,7 @@ class GetSFIdentityIdMoveDataTest extends FlatSpec with Matchers {
 
     val actual = GetSFIdentityIdMoveData(canonicalEmail, contactEmailIdentities)
 
-    val expected = \/-(None)
+    val expected = Right(None)
 
     actual should be(expected)
 
@@ -33,7 +32,7 @@ class GetSFIdentityIdMoveDataTest extends FlatSpec with Matchers {
 
     val actual = GetSFIdentityIdMoveData(canonicalEmail, contactEmailIdentities)
 
-    val expected = \/-(None)
+    val expected = Right(None)
 
     actual should be(expected)
 
@@ -48,7 +47,7 @@ class GetSFIdentityIdMoveDataTest extends FlatSpec with Matchers {
 
     val actual = GetSFIdentityIdMoveData(canonicalEmail, contactEmailIdentities)
 
-    val expected = \/-(Some(IdentityIdMoveData(OldSFContact(SFContactId("con1")), IdentityIdToUse(IdentityId("1234")))))
+    val expected = Right(Some(IdentityIdMoveData(OldSFContact(SFContactId("con1")), IdentityIdToUse(IdentityId("1234")))))
 
     actual should be(expected)
 
@@ -64,7 +63,7 @@ class GetSFIdentityIdMoveDataTest extends FlatSpec with Matchers {
 
     val actual = GetSFIdentityIdMoveData(canonicalEmail, contactEmailIdentities)
 
-    val expected = \/-(Some(IdentityIdMoveData(OldSFContact(SFContactId("con2")), IdentityIdToUse(IdentityId("1234")))))
+    val expected = Right(Some(IdentityIdMoveData(OldSFContact(SFContactId("con2")), IdentityIdToUse(IdentityId("1234")))))
 
     actual should be(expected)
 
@@ -80,7 +79,7 @@ class GetSFIdentityIdMoveDataTest extends FlatSpec with Matchers {
 
     val actual = GetSFIdentityIdMoveData(canonicalEmail, contactEmailIdentities)
 
-    val expected = \/-(Some(IdentityIdMoveData(OldSFContact(SFContactId("con2")), IdentityIdToUse(IdentityId("1234")))))
+    val expected = Right(Some(IdentityIdMoveData(OldSFContact(SFContactId("con2")), IdentityIdToUse(IdentityId("1234")))))
 
     actual should be(expected)
 
@@ -96,9 +95,9 @@ class GetSFIdentityIdMoveDataTest extends FlatSpec with Matchers {
 
     val actual = GetSFIdentityIdMoveData(canonicalEmail, contactEmailIdentities)
 
-    val expected = -\/("there are multiple identity ids")
+    val expected = Left("there are multiple identity ids")
 
-    actual.leftMap(_.split(":")(0)) should be(expected)
+    actual.left.map(_.split(":")(0)) should be(expected)
 
   }
 

@@ -17,7 +17,6 @@ libraryDependencies ++= Seq(
   "com.typesafe.scala-logging" %% "scala-logging" % "3.9.2",
   "com.amazonaws" % "aws-lambda-java-core" % "1.2.0",
   "com.squareup.okhttp3" % "okhttp" % "3.9.1",
-  "org.scalaz" %% "scalaz-core" % "7.2.18",
   "org.scalatest" %% "scalatest" % "3.0.1" % "test",
   "com.stripe" % "stripe-java" % "5.28.0",
   jacksonDatabind

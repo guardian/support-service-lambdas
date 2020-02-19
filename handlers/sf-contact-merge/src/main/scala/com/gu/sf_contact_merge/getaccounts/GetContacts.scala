@@ -8,7 +8,7 @@ import com.gu.util.zuora.SafeQueryBuilder.Implicits._
 import com.gu.util.zuora.SafeQueryBuilder.OrTraverse
 import com.gu.util.zuora.ZuoraQuery.ZuoraQuerier
 import play.api.libs.json.Json
-import scalaz.NonEmptyList
+import cats.data.NonEmptyList
 
 object GetContacts {
 

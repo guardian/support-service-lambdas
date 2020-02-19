@@ -190,16 +190,16 @@ class PreReqCheckTest extends FlatSpec with Matchers {
 
   "acceptable reader type" should "not allow agent" in {
     val readerTypes = List(ReaderType.ReaderTypeValue("Agent"))
-    PreReqCheck.acceptableReaderType(ClientSuccess(readerTypes)).toDisjunction.leftMap(_.statusCode) should be(scalaz.-\/("404"))
+    PreReqCheck.acceptableReaderType(ClientSuccess(readerTypes)).toDisjunction.left.map(_.statusCode) should be(Left("404"))
   }
 
   "acceptable reader type" should "not allow gift" in {
     val readerTypes = List(ReaderType.ReaderTypeValue("Gift"))
-    PreReqCheck.acceptableReaderType(ClientSuccess(readerTypes)).toDisjunction.leftMap(_.statusCode) should be(scalaz.-\/("404"))
+    PreReqCheck.acceptableReaderType(ClientSuccess(readerTypes)).toDisjunction.left.map(_.statusCode) should be(Left("404"))
   }
 
   "acceptable reader type" should "not allow a combination of valid and invalid" in {
     val readerTypes = List(ReaderType.ReaderTypeValue("Direct"), ReaderType.ReaderTypeValue("Gift"))
-    PreReqCheck.acceptableReaderType(ClientSuccess(readerTypes)).toDisjunction.leftMap(_.statusCode) should be(scalaz.-\/("404"))
+    PreReqCheck.acceptableReaderType(ClientSuccess(readerTypes)).toDisjunction.left.map(_.statusCode) should be(Left("404"))
   }
 }

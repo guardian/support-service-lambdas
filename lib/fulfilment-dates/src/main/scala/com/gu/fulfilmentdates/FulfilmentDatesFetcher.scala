@@ -46,7 +46,7 @@ object FulfilmentDatesFetcher {
     s3Location: S3Location
   ): Either[FulfilmentDatesFetcherError, Map[DayOfWeek, FulfilmentDates]] = {
     decode[Map[DayOfWeek, FulfilmentDates]](fileContents)
-      .leftMap(error => FulfilmentDatesFetcherError(
+      .left.map(error => FulfilmentDatesFetcherError(
         s"Failed to parse fulfilment dates file $s3Location with content $fileContents: $error"
       ))
   }
@@ -57,6 +57,6 @@ object FulfilmentDatesFetcher {
   ): Either[FulfilmentDatesFetcherError, String] = {
     fetchFromS3(s3Location)
       .toEither
-      .leftMap(t => FulfilmentDatesFetcherError(t.getMessage()))
+      .left.map(t => FulfilmentDatesFetcherError(t.getMessage()))
   }
 }

@@ -7,7 +7,6 @@ import com.gu.salesforce.{SFAuthConfig, SalesforceAuth}
 import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
 import org.scalatest.{FlatSpec, Matchers}
-import scalaz.\/-
 
 class SalesforceAuthenticateEffectsTest extends FlatSpec with Matchers {
 
@@ -21,7 +20,7 @@ class SalesforceAuthenticateEffectsTest extends FlatSpec with Matchers {
     }
     withClue(s"wrong result: $actual") {
       actual match {
-        case \/-(SalesforceAuth(token, instanceUrl)) =>
+        case Right(SalesforceAuth(token, instanceUrl)) =>
           token should not be ("")
           token.length > 20 should be(true)
           instanceUrl should startWith("https://")

@@ -10,7 +10,6 @@ import com.gu.util.config.Stage
 import okhttp3._
 import okhttp3.internal.Util.UTF_8
 import okio.Buffer
-import scalaz.\/-
 
 import scala.util.{Failure, Success}
 
@@ -81,7 +80,7 @@ object TestingRawEffects {
 
   case class BasicRequest(method: String, path: String, body: String)
 
-  def s3Load(s: Stage) = \/-(TestingRawEffects.codeConfig)
+  def s3Load(s: Stage) = Right(TestingRawEffects.codeConfig)
 
   val codeConfig: String =
     """

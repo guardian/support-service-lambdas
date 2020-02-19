@@ -38,6 +38,7 @@ final case class DeliveryRecord(
 
 final case class DeliveryProblemCase(
   id: String,
+  ref: String,
   subject: Option[String],
   description: Option[String],
   problemType: Option[String]
@@ -147,6 +148,7 @@ object DeliveryRecordsService {
           _.Case__r.map(
             problemCase => problemCase.Id -> DeliveryProblemCase(
               id = problemCase.Id,
+              ref = problemCase.CaseNumber,
               subject = problemCase.Subject,
               description = problemCase.Description,
               problemType = problemCase.Case_Closure_Reason__c
@@ -212,7 +214,7 @@ object DeliveryRecordsService {
     s"""SELECT Buyer__r.Id, Buyer__r.Phone, Buyer__r.HomePhone, Buyer__r.MobilePhone, Buyer__r.OtherPhone, (
        |    SELECT Id, Delivery_Date__c, Delivery_Address__c, Delivery_Instructions__c, Has_Holiday_Stop__c,
        |           Address_Line_1__c,Address_Line_2__c, Address_Line_3__c, Address_Town__c, Address_Country__c, Address_Postcode__c,
-       |           Case__c, Case__r.Id, Case__r.Subject, Case__r.Description, Case__r.Case_Closure_Reason__c,
+       |           Case__c, Case__r.Id, Case__r.CaseNumber, Case__r.Subject, Case__r.Description, Case__r.Case_Closure_Reason__c,
        |           Credit_Amount__c, Is_Actioned__c, Invoice_Date__c
        |    FROM Delivery_Records__r
        |    ${deliveryDateFilter(optionalStartDate, optionalEndDate)}

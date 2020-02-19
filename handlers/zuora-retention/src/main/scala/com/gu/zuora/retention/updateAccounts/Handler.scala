@@ -19,7 +19,6 @@ import com.gu.zuora.retention.updateAccounts.UpdateAccountsRequest._
 import com.gu.zuora.retention.updateAccounts.UpdateAccountsResponse._
 import okhttp3.{Request, Response}
 import play.api.libs.json.{JsSuccess, Reads}
-import scalaz.{-\/, \/, \/-}
 
 import scala.util.{Failure, Success, Try}
 
@@ -46,9 +45,9 @@ object Handler {
     _ <- failIfNoProgress(request, response)
   } yield (response)
 
-  def toTry(res: ConfigFailure \/ ZuoraRestConfig) = res match {
-    case -\/(configError) => Failure(LambdaException(configError.error))
-    case \/-(config) => Success(config)
+  def toTry(res: Either[ConfigFailure, ZuoraRestConfig]) = res match {
+    case Left(configError) => Failure(LambdaException(configError.error))
+    case Right(config) => Success(config)
   }
 
   def failIfNoProgress(request: UpdateAccountsRequest, response: UpdateAccountsResponse): Try[Unit] =

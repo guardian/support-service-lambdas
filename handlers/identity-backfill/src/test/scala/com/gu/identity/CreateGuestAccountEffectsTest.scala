@@ -10,7 +10,6 @@ import com.gu.util.resthttp.{JsonHttp, RestRequestMaker}
 import com.gu.util.resthttp.RestRequestMaker.{GetRequestWithParams, RelativePath, UrlParams}
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.{JsValue, Json, Reads}
-import scalaz.\/-
 
 import scala.util.Random
 
@@ -36,7 +35,7 @@ class CreateGuestAccountEffectsTest extends FlatSpec with Matchers {
       case (createdId, fetchedId) =>
         Some(s"for email $testContact createdId by email address was $createdId but afterwards fetchedId by email address was $fetchedId")
     }
-    failure should be(\/-(None))
+    failure should be(Right(None))
 
   }
 

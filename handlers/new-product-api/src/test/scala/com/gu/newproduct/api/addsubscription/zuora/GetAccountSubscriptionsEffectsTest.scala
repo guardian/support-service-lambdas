@@ -9,7 +9,6 @@ import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
 import org.scalatest.{FlatSpec, Matchers}
-import scalaz.\/-
 
 class GetAccountSubscriptionsEffectsTest extends FlatSpec with Matchers {
 
@@ -28,7 +27,7 @@ class GetAccountSubscriptionsEffectsTest extends FlatSpec with Matchers {
         productRateplanIds = Set(ProductRatePlanId("2c92c0f852f2ebb20152f9269f067819"), ProductRatePlanId("2c92c0f84bbfec8b014bc655f4852d9d"))
       )
     )
-    actual shouldBe \/-(expected)
+    actual shouldBe Right(expected)
   }
 }
 

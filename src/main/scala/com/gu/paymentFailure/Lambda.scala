@@ -16,7 +16,6 @@ import com.gu.util.email.EmailSendSteps
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.{ZuoraGetInvoiceTransactions, ZuoraRestConfig, ZuoraRestRequestMaker}
 import okhttp3.{Request, Response}
-import scalaz.\/
 import scala.util.Try
 
 object Lambda {
@@ -33,7 +32,7 @@ object Lambda {
   }
 
   def operationForEffects(
-    loadConfigModule: ConfigFailure \/ TrustedApiConfig,
+    loadConfigModule: Either[ConfigFailure, TrustedApiConfig],
     wiredOperation: ApiGatewayOp[ApiGatewayHandler.Operation]
   ): ApiGatewayOp[ApiGatewayHandler.Operation] = {
     wiredOperation.map(_.prependRequestValidationToSteps(Auth(loadConfigModule)))

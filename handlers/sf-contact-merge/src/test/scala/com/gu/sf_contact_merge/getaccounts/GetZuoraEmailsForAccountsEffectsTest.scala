@@ -13,13 +13,13 @@ import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
 import com.gu.util.reader.Types._
 import com.gu.util.zuora.{ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
 import org.scalatest.{FlatSpec, Matchers}
-import scalaz.NonEmptyList
+import cats.data.NonEmptyList
 
 class GetZuoraEmailsForAccountsEffectsTest extends FlatSpec with Matchers {
 
   it should "return the right emails" taggedAs EffectsTest in {
 
-    val testData = NonEmptyList(DevZuora.account1, DevZuora.account2)
+    val testData = NonEmptyList(DevZuora.account1, List(DevZuora.account2))
 
     val actual = for {
       zuoraRestConfig <- LoadConfigModule(Stage("DEV"), GetFromS3.fetchString)[ZuoraRestConfig].toApiGatewayOp("parse config")

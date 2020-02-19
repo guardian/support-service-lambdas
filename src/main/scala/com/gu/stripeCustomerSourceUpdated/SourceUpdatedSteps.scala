@@ -3,7 +3,7 @@ package com.gu.stripeCustomerSourceUpdated
 import com.gu.stripeCustomerSourceUpdated.StripeRequestSignatureChecker.verifyRequest
 import com.gu.stripeCustomerSourceUpdated.TypeConvert._
 import com.gu.stripeCustomerSourceUpdated.zuora.CreatePaymentMethod.{CreateStripePaymentMethod, CreditCardType}
-import com.gu.stripeCustomerSourceUpdated.zuora.ZuoraQueryPaymentMethod.{AccountPaymentMethodIds, PaymentMethodFields}
+import com.gu.stripeCustomerSourceUpdated.zuora.ZuoraQueryPaymentMethod.PaymentMethodFields
 import com.gu.stripeCustomerSourceUpdated.zuora.{CreatePaymentMethod, SetDefaultPaymentMethod, ZuoraQueryPaymentMethod}
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.Operation
@@ -12,13 +12,11 @@ import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.reader.Types.ApiGatewayOp._
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.RestRequestMaker.Requests
-import com.gu.util.zuora.ZuoraGetAccountSummary.AccountSummary
 import com.gu.util.zuora.ZuoraGetAccountSummary.ZuoraAccount.PaymentMethodId
 import com.gu.util.zuora._
 import play.api.libs.json.JsPath
-import scalaz.std.list._
-import scalaz.syntax.applicative._
-import scalaz.{ListT, NonEmptyList}
+import cats.implicits._
+import cats.data.NonEmptyList
 
 object SourceUpdatedSteps extends Logging {
 
@@ -30,15 +28,18 @@ object SourceUpdatedSteps extends Logging {
     }
   }
 
-  def apply(zuoraRequests: Requests, stripeDeps: StripeDeps): Operation = Operation.noHealthcheck({ apiGatewayRequest: ApiGatewayRequest =>
-    (for {
-      sourceUpdatedCallout <- if (stripeDeps.config.signatureChecking) bodyIfSignatureVerified(stripeDeps, apiGatewayRequest) else apiGatewayRequest.bodyAsCaseClass[SourceUpdatedCallout]()
-      _ <- (for {
-        defaultPaymentMethod <- ListT(getPaymentMethodsToUpdate(zuoraRequests)(sourceUpdatedCallout.data.`object`.customer, sourceUpdatedCallout.data.`object`.id))
-        _ <- ListT[ApiGatewayOp, Unit](createUpdatedDefaultPaymentMethod(zuoraRequests)(defaultPaymentMethod, sourceUpdatedCallout.data.`object`).map((_: Unit) => List(())))
-      } yield ()).run
-    } yield ApiGatewayResponse.successfulExecution).apiResponse
-  })
+  // cats does not have ListT so after removing scalaz it became flatMap + traverse
+  def apply(zuoraRequests: Requests, stripeDeps: StripeDeps): Operation = Operation.noHealthcheck { apiGatewayRequest =>
+    (if (stripeDeps.config.signatureChecking) bodyIfSignatureVerified(stripeDeps, apiGatewayRequest) else apiGatewayRequest.bodyAsCaseClass[SourceUpdatedCallout]())
+      .flatMap { sourceUpdatedCallout =>
+        getPaymentMethodsToUpdate(zuoraRequests)(sourceUpdatedCallout.data.`object`.customer, sourceUpdatedCallout.data.`object`.id)
+          .flatMap {
+            _.traverse(defaultPaymentMethod => createUpdatedDefaultPaymentMethod(zuoraRequests)(defaultPaymentMethod, sourceUpdatedCallout.data.`object`))
+          }
+      }
+      .map(_ => ApiGatewayResponse.successfulExecution)
+      .apiResponse
+  }
 
   def createUpdatedDefaultPaymentMethod(requests: Requests)(paymentMethodFields: PaymentMethodFields, eventDataObject: EventDataObject): ApiGatewayOp[Unit] = {
     for {
@@ -60,25 +61,20 @@ object SourceUpdatedSteps extends Logging {
       ReturnWithResponse(unauthorized)
   } yield res
 
+  // cats does not have ListT so after removing scalaz it became flatMap + traverse
   def getPaymentMethodsToUpdate(
     requests: Requests
   )(customer: StripeCustomerId, source: StripeSourceId): ApiGatewayOp[List[PaymentMethodFields]] = {
     val zuoraQuerier = ZuoraQuery(requests)
-    (for {
-      // similar to AccountController.updateCard in members-data-api
-      paymentMethods <- ListT.apply[ApiGatewayOp, AccountPaymentMethodIds](
-        ZuoraQueryPaymentMethod.getPaymentMethodForStripeCustomer(zuoraQuerier)(customer, source)
-          .withLogging("getPaymentMethodForStripeCustomer")
-      )
-      account <- ListT[ApiGatewayOp, AccountSummary](
-        ZuoraGetAccountSummary(requests)(paymentMethods.accountId.value)
-          .toApiGatewayOp("ZuoraGetAccountSummary failed").withLogging("getAccountSummary").map(_.pure[List])
-      )
-      defaultPaymentMethods <- ListT[ApiGatewayOp, PaymentMethodFields](
-        findDefaultOrSkip(account.basicInfo.defaultPaymentMethod, paymentMethods.paymentMethods)
-          .toList.pure[ApiGatewayOp].withLogging("skipIfNotDefault")
-      )
-    } yield defaultPaymentMethods).run
+    ZuoraQueryPaymentMethod.getPaymentMethodForStripeCustomer(zuoraQuerier)(customer, source)
+      .flatMap {
+        _.flatTraverse { paymentMethods =>
+          ZuoraGetAccountSummary(requests)(paymentMethods.accountId.value).toApiGatewayOp("ZuoraGetAccountSummary failed")
+            .flatMap { account =>
+              findDefaultOrSkip(account.basicInfo.defaultPaymentMethod, paymentMethods.paymentMethods).toList.pure[ApiGatewayOp].withLogging("findDefaultOrSkip")
+            }
+        }
+      }
   }
 
   import com.gu.util.reader.Types._
@@ -108,7 +104,7 @@ object SourceUpdatedSteps extends Logging {
   }
 
   def findDefaultOrSkip(defaultPaymentMethod: PaymentMethodId, paymentMethods: NonEmptyList[PaymentMethodFields]): Option[PaymentMethodFields] = {
-    paymentMethods.list.find(_.Id == defaultPaymentMethod)
+    paymentMethods.find(_.Id == defaultPaymentMethod)
   }
 
 }

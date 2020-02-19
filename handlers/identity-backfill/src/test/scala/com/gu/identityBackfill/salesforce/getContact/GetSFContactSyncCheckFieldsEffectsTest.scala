@@ -11,7 +11,6 @@ import com.gu.test.EffectsTest
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.resthttp.JsonHttp
 import org.scalatest.{FlatSpec, Matchers}
-import scalaz.\/-
 
 class GetSFContactSyncCheckFieldsEffectsTest extends FlatSpec with Matchers {
 
@@ -24,7 +23,7 @@ class GetSFContactSyncCheckFieldsEffectsTest extends FlatSpec with Matchers {
       result <- GetSFContactSyncCheckFields(getOp).apply(SFEffectsData.testAccountHasNamePhoneOtherAddress).value.toDisjunction
     } yield result
 
-    actual should be(\/-(
+    actual should be(Right(
       List(
         ContactSyncCheckFields(
           "0036E00000WtQpJQAV", Some("01220000000VB52AAG"), "testerson", "test", Some("Afghanistan"), Some("effecttests@gu.com")

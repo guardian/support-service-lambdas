@@ -7,7 +7,6 @@ import com.gu.util.resthttp.Types.{ClientFailure, ClientFailableOp, ClientSucces
 import com.gu.util.zuora.SafeQueryBuilder.Implicits._
 import com.gu.util.zuora.ZuoraQuery.{QueryResult, ZuoraQuerier}
 import play.api.libs.json.Json
-import scalaz.{-\/, \/-}
 
 object GetActiveZuoraAccounts {
 
@@ -41,11 +40,11 @@ object GetActiveZuoraAccounts {
   def processQueryResult(queryAttempt: ClientFailableOp[QueryResult[IdentityQueryResponse]]): ApiGatewayOp[List[AccountId]] =
     (queryAttempt match {
       case ClientSuccess(result) if result.size > 0 =>
-        \/-(result.records.map(account => AccountId(account.Id)))
+        Right(result.records.map(account => AccountId(account.Id)))
       case ClientSuccess(result) if result.size == 0 =>
-        -\/(IdentityRetentionApiResponses.canBeDeleted)
+        Left(IdentityRetentionApiResponses.canBeDeleted)
       case error: ClientFailure =>
-        -\/(ApiGatewayResponse.internalServerError(s"Failed to retrieve the identity user's details from Zuora: $error"))
+        Left(ApiGatewayResponse.internalServerError(s"Failed to retrieve the identity user's details from Zuora: $error"))
     }).toApiGatewayOp
 
 }

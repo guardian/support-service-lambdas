@@ -26,9 +26,7 @@ import com.gu.util.resthttp.Types.ClientFailableOp
 import com.typesafe.scalalogging.LazyLogging
 import okhttp3.{Request, Response}
 import play.api.libs.json.Json
-import scalaz.IList
-import scalaz.syntax.traverse.ToTraverseOps
-
+import cats.implicits._
 import scala.util.{Success, Try}
 
 object DownloadBatchHandler extends LazyLogging {
@@ -64,7 +62,7 @@ object DownloadBatchHandler extends LazyLogging {
   object WireState {
     implicit val format = Json.using[Json.WithDefaultValues].format[WireState]
 
-    def toState(wire: WireState): Try[State] = IList(wire.batches: _*).traverse(WireBatchInfo.toBatch).map(_.toList).toTry map {
+    def toState(wire: WireState): Try[State] = wire.batches.traverse(WireBatchInfo.toBatch).map(_.toList).toTry map {
       batches =>
         State(
           JobId(wire.jobId),
@@ -106,7 +104,7 @@ object DownloadBatchHandler extends LazyLogging {
   (request: WireState): Try[WireState] = {
     val loadConfig = LoadConfigModule(stage, getFromS3)
     for {
-      sfConfig <- loadConfig[SFAuthConfig](SFExportAuthConfig.location, sfAuthConfigReads).leftMap(_.error).toTry
+      sfConfig <- loadConfig[SFAuthConfig](SFExportAuthConfig.location, sfAuthConfigReads).toTry
       sfClient <- SalesforceClient(getResponse, sfConfig).value.toTry
       wiredGetBatchResultId = sfClient.wrapWith(GetBatchResultId.wrapper).runRequest _
       wiredGetBatchResult = sfClient.wrapWith(GetBatchResult.wrapper).runRequest _

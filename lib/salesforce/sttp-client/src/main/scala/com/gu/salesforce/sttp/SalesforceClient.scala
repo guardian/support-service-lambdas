@@ -138,14 +138,14 @@ object SalesforceClient extends LazyLogging {
     ): Either[SalesforceClientError, A] = {
       response
         .body
-        .leftMap(
+        .left.map(
           errorBody =>
             SalesforceClientError(
               s"Request ${request.method.m} ${request.uri.toString()} failed returning a status ${response.code} with body: ${errorBody}"
             )
         )
         .flatMap { parsedBody =>
-          parsedBody.leftMap(deserializationError =>
+          parsedBody.left.map(deserializationError =>
             SalesforceClientError(
               s"Request ${request.method.m} ${request.uri.toString()} failed to parse response: $deserializationError"
             )
