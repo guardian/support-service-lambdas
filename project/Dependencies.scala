@@ -19,7 +19,7 @@ object Dependencies {
     "com.typesafe.scala-logging" %% "scala-logging" % "3.9.2"
   )
   val playJson = "com.typesafe.play" %% "play-json" % "2.8.0"
-  val playJsonExtensions = "ai.x" %% "play-json-extensions" % "0.30.1" exclude("org.scala-lang", "scala-compiler") // excluding scala-compiler reduces scala lambda package size by 10MB
+  val playJsonExtensions = "ai.x" %% "play-json-extensions" % "0.40.1"
   val scalatest = "org.scalatest" %% "scalatest" % "3.0.1" % Test
   val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.14.0" % Test
   val jacksonDatabind = "com.fasterxml.jackson.core" % "jackson-databind" % "2.10.0"
