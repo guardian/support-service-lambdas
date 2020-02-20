@@ -15,7 +15,7 @@ import org.http4s.dsl.Http4sDsl
 
 case class DigitalVoucherApiRoutesError(message: String)
 
-case class CreateVoucherRequestBody(ratePlanName: String)
+case class CreateVoucherRequestBody(ratePlanName: RatePlanName)
 
 case class CancelVoucherRequestBody(cardCode: String, cancellationDate: LocalDate)
 
@@ -49,16 +49,25 @@ object DigitalVoucherApiRoutes {
         }
     }
 
-    def handleCreateRequest(request: Request[F], subscriptionId: String) = {
-      toResponse(
-        for {
-          requestBody <- parseRequest[CreateVoucherRequestBody](request)
-          voucher <- digitalVoucherService.createVoucher(
-            subscriptionId,
-            requestBody.ratePlanName
-          ).leftMap(error => InternalServerError(DigitalVoucherApiRoutesError(s"Failed create voucher: $error")))
-        } yield voucher
-      )
+    def handleCreateRequest(request: Request[F], subscriptionId: SfSubscriptionId) = {
+      val response = for {
+        requestBody <- parseRequest[CreateVoucherRequestBody](request)
+        voucher <- digitalVoucherService
+          .createVoucher(subscriptionId, requestBody.ratePlanName)
+          .leftMap {
+            case DigitalVoucherApiException(InvalidArgumentException(msg)) =>
+              // see https://tools.ietf.org/html/rfc4918#section-11.2
+              UnprocessableEntity(DigitalVoucherApiRoutesError(s"Bad request argument: $msg"))
+            case DigitalVoucherApiException(ImovoClientException(msg)) =>
+              BadGateway(DigitalVoucherApiRoutesError(s"Imovo failure to create voucher: $msg"))
+            case error =>
+              InternalServerError(DigitalVoucherApiRoutesError(s"Failed create voucher: $error"))
+          }
+      } yield voucher
+      response.fold(
+        identity,
+        value => Created(value)
+      ).flatten
     }
 
     def handleReplaceRequest(request: Request[F]) = {
@@ -94,7 +103,7 @@ object DigitalVoucherApiRoutes {
 
     HttpRoutes.of[F] {
       case request @ PUT -> Root / "digital-voucher" / "create" / subscriptionId =>
-        handleCreateRequest(request, subscriptionId)
+        handleCreateRequest(request, SfSubscriptionId(subscriptionId))
       case request @ POST -> Root / "digital-voucher" / "replace" =>
         handleReplaceRequest(request)
       case GET -> Root / "digital-voucher" / subscriptionId =>

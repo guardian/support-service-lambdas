@@ -11,6 +11,14 @@ import cats.implicits._
 
 object ImovoStub {
   class ImovoStubSttpBackendStubOps[F[_], S](sttpStub: SttpBackendStub[F, S]) {
+
+    def stubCreate[A: Encoder](apiKey: String, baseUrl: String, customerRef: String, campaignCode: String, startDate: String, response: A): SttpBackendStub[F, S] = {
+      sttpStub.whenRequestMatchesPartial {
+        case request: Request[_, _] if matchesQueryCreate(apiKey, baseUrl, customerRef, campaignCode, startDate, request) =>
+          Response.ok(response.asJson.spaces2)
+      }
+    }
+
     def stubReplace[A: Encoder](apiKey: String, baseUrl: String, voucherCode: String, response: A): SttpBackendStub[F, S] = {
       sttpStub.whenRequestMatchesPartial {
         case request: Request[_, _] if matchesReplaceRequest(apiKey, baseUrl, voucherCode, request) =>
@@ -24,6 +32,19 @@ object ImovoStub {
           Response.ok(response.asJson.spaces2)
       }
     }
+  }
+
+  private def matchesQueryCreate[S, F[_]](apiKey: String, baseUrl: String, customerRef: String, campaignCode: String, startDate: String, request: Request[_, _]) = {
+    val urlMatches = urlNoQueryString(request) == s"$baseUrl//VoucherRequest/Request"
+    val methodMatches = request.method == Method.GET
+    val queryParamsMatch = {
+      val params = request.uri.paramsMap
+      params.get("customerReference").contains(customerRef) &&
+        params.get("campaignCode").contains(campaignCode) &&
+        params.get("StartDate").contains(startDate)
+    }
+    val apiKeyMatches = request.headers.toMap.get("X-API-KEY").contains(apiKey)
+    urlMatches && methodMatches && queryParamsMatch && apiKeyMatches
   }
 
   private def matchesReplaceRequest[S, F[_]](apiKey: String, baseUrl: String, voucherCode: String, request: Request[_, _]) = {
