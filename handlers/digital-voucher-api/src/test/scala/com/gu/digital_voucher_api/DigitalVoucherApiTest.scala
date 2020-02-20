@@ -50,7 +50,7 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
       Request(
         method = Method.PUT,
         uri = Uri(path = s"/digital-voucher/create/${subscriptionId.value}")
-      ).withEntity[String](CreateVoucherRequestBody(RatePlanName("Everyday")).asJson.spaces2)
+      ).withEntity[String](CreateVoucherRequestBody("Everyday").asJson.spaces2)
     ).value.unsafeRunSync().get
 
     response.status.code should matchTo(201)
@@ -81,7 +81,7 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
       Request(
         method = Method.PUT,
         uri = Uri(path = s"/digital-voucher/create/${subscriptionId.value}")
-      ).withEntity[String](CreateVoucherRequestBody(RatePlanName("Everyday")).asJson.spaces2)
+      ).withEntity[String](CreateVoucherRequestBody("Everyday").asJson.spaces2)
     ).value.unsafeRunSync().get
 
     response.status.code should matchTo(502)
@@ -119,7 +119,7 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
       Request(
         method = Method.PUT,
         uri = Uri(path = s"/digital-voucher/create/${subscriptionId.value}")
-      ).withEntity[String](CreateVoucherRequestBody(RatePlanName("Everyday")).asJson.spaces2)
+      ).withEntity[String](CreateVoucherRequestBody("Everyday").asJson.spaces2)
     ).value.unsafeRunSync().get
 
     response.status.code should matchTo(502)
@@ -146,7 +146,7 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
       Request(
         method = Method.PUT,
         uri = Uri(path = s"/digital-voucher/create/${subscriptionId.value}")
-      ).withEntity[String](CreateVoucherRequestBody(RatePlanName("HomeDelivery")).asJson.spaces2)
+      ).withEntity[String](CreateVoucherRequestBody("HomeDelivery").asJson.spaces2)
     ).value.unsafeRunSync().get
 
     response.status.code should matchTo(422)
