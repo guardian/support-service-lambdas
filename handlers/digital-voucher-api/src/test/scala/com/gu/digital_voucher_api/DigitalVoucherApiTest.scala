@@ -86,7 +86,7 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
 
     response.status.code should matchTo(502)
     getBody[DigitalVoucherApiRoutesError](response) should matchTo(DigitalVoucherApiRoutesError(
-      s"""Imovo failure to create voucher: Request GET $baseUrl//VoucherRequest/Request?customerReference=123456&campaignCode=GMGSub7DayCard&StartDate=2020-02-20 failed with response ({
+      s"""Imovo failure to create voucher: Request GET $baseUrl//VoucherRequest/Request?customerReference=123456&campaignCode=GMGSub7DayCard&StartDate=$tomorrow failed with response ({
         |  "errorMessages" : [
         |    "imovo-error"
         |  ],
@@ -124,12 +124,12 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
 
     response.status.code should matchTo(502)
     getBody[DigitalVoucherApiRoutesError](response) should matchTo(DigitalVoucherApiRoutesError(
-      s"""Imovo failure to create voucher: Request GET $baseUrl//VoucherRequest/Request?customerReference=123456&campaignCode=GMGSub7DayCard&StartDate=2020-02-20 failed with response ({
+      s"""Imovo failure to create voucher: Request GET $baseUrl//VoucherRequest/Request?customerReference=123456&campaignCode=GMGSub7DayCard&StartDate=$tomorrow failed with response ({
         |  "errorMessages" : [
         |    "imovo-error-1"
         |  ],
         |  "successfulRequest" : false
-        |}), Request GET $baseUrl//VoucherRequest/Request?customerReference=123456&campaignCode=GMGSub7DayHNDSS&StartDate=2020-02-20 failed with response ({
+        |}), Request GET $baseUrl//VoucherRequest/Request?customerReference=123456&campaignCode=GMGSub7DayHNDSS&StartDate=$tomorrow failed with response ({
         |  "errorMessages" : [
         |    "imovo-error-2"
         |  ],
