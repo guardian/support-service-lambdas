@@ -53,7 +53,8 @@ class EmailBatchTest extends FlatSpec with Matchers with DiffMatcher {
             stopped_credit_sum = None,
             currency_symbol = None,
             stopped_issue_count = None,
-            stopped_credit_summaries = None
+            stopped_credit_summaries = None,
+            digital_voucher = None
           ),
           object_name = "Card_Expiry__c"
         )
@@ -139,7 +140,8 @@ class EmailBatchTest extends FlatSpec with Matchers with DiffMatcher {
             stopped_credit_sum = None,
             currency_symbol = None,
             stopped_issue_count = None,
-            stopped_credit_summaries = None
+            stopped_credit_summaries = None,
+            digital_voucher = None
           ),
           object_name = "Card_Expiry__c"
         )
@@ -151,7 +153,7 @@ class EmailBatchTest extends FlatSpec with Matchers with DiffMatcher {
 
   }
 
-  "EmailBatch.fromWire" should "transform a holiday-stop create confirmation correctly" in {
+  "EmailBatch.fromWire" should "transform a holiday-stop and digital voucher create confirmation correctly" in {
     val sampleBatch =
       """
         |{
@@ -186,6 +188,9 @@ class EmailBatchTest extends FlatSpec with Matchers with DiffMatcher {
         |                   "credit_date": "2019-02-23"
         |                 }
         |               ]
+        |             },
+        |             "digital_voucher" : {
+        |               "card_url": "http://imovo-card.url"
         |             }
         |         },
         |         "object_name":"Holiday_Stop_Request__c"
@@ -219,6 +224,9 @@ class EmailBatchTest extends FlatSpec with Matchers with DiffMatcher {
                 StoppedCreditSummary(StoppedCreditSummaryAmount(1.23), StoppedCreditSummaryDate("22 November 2019")),
                 StoppedCreditSummary(StoppedCreditSummaryAmount(2.34), StoppedCreditSummaryDate("23 February 2019"))
               )
+            ),
+            digital_voucher = Some(
+              DigitalVoucher(DigitalVoucherUrl("http://imovo-card.url"))
             )
           ),
           object_name = "Holiday_Stop_Request__c"
@@ -343,7 +351,8 @@ class EmailBatchTest extends FlatSpec with Matchers with DiffMatcher {
                   WireHolidayStopCreditSummary(1.23, "2019-11-22"),
                   WireHolidayStopCreditSummary(2.34, "2019-02-23")
                 ))
-              ))
+              )),
+              digital_voucher = None
             ),
             "Holiday_Stop_Request__c"
           )
@@ -461,7 +470,8 @@ class EmailBatchTest extends FlatSpec with Matchers with DiffMatcher {
                   WireHolidayStopCreditSummary(1.23, "2019-11-22"),
                   WireHolidayStopCreditSummary(2.34, "2019-02-23")
                 ))
-              ))
+              )),
+              digital_voucher = None
             ),
             "Holiday_Stop_Request__c"
           ),
@@ -488,7 +498,8 @@ class EmailBatchTest extends FlatSpec with Matchers with DiffMatcher {
                   WireHolidayStopCreditSummary(1.23, "2019-11-22"),
                   WireHolidayStopCreditSummary(2.34, "2019-02-23")
                 ))
-              ))
+              )),
+              digital_voucher = None
             ),
             "Holiday_Stop_Request__c"
           )
