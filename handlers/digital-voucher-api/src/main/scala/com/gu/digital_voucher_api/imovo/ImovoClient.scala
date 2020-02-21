@@ -40,6 +40,14 @@ object ImovoClient extends LazyLogging {
       uri: Uri,
       body: Option[B]
     ): EitherT[F, ImovoClientException, A] = {
+
+      def sendSafely(request: RequestT[Id, String, Nothing]) =
+        EitherT(
+          EitherT.right[ImovoClientException](request.send()).value.recover {
+            case e => Left(ImovoClientException(e.toString))
+          }
+        )
+
       val requestWithoutBody = sttp
         .method(method, uri)
         .headers(
@@ -49,7 +57,7 @@ object ImovoClient extends LazyLogging {
       val request = body.fold(requestWithoutBody)(b => requestWithoutBody.body(b))
 
       for {
-        response <- EitherT.right[ImovoClientException](request.send())
+        response <- sendSafely(request)
         responseBody <- EitherT.fromEither[F](decodeResponse[A](request, response))
       } yield responseBody
     }
