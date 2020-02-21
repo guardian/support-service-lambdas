@@ -15,7 +15,7 @@ import org.http4s.dsl.Http4sDsl
 
 case class DigitalVoucherApiRoutesError(message: String)
 
-case class CreateVoucherRequestBody(ratePlanName: RatePlanName)
+case class CreateVoucherRequestBody(ratePlanName: String)
 
 case class CancelVoucherRequestBody(cardCode: String, cancellationDate: LocalDate)
 
@@ -53,7 +53,7 @@ object DigitalVoucherApiRoutes {
       val response = for {
         requestBody <- parseRequest[CreateVoucherRequestBody](request)
         voucher <- digitalVoucherService
-          .createVoucher(subscriptionId, requestBody.ratePlanName)
+          .createVoucher(subscriptionId, RatePlanName(requestBody.ratePlanName))
           .leftMap {
             case DigitalVoucherApiException(InvalidArgumentException(msg)) =>
               // see https://tools.ietf.org/html/rfc4918#section-11.2
