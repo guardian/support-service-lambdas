@@ -15,15 +15,18 @@ case class EmailPayloadSubscriberAttributes(
   stopped_credit_sum: Option[String],
   currency_symbol: Option[String],
   stopped_issue_count: Option[String],
-  stopped_credit_summaries: Option[List[EmailPayloadStoppedCreditSummary]]
+  stopped_credit_summaries: Option[List[EmailPayloadStoppedCreditSummary]],
+  digital_voucher: Option[EmailPayloadDigitalVoucher]
 )
 case class EmailPayloadContactAttributes(SubscriberAttributes: EmailPayloadSubscriberAttributes)
 case class EmailPayloadTo(Address: String, SubscriberKey: String, ContactAttributes: EmailPayloadContactAttributes)
 case class EmailToSend(To: EmailPayloadTo, DataExtensionName: String, SfContactId: Option[String], IdentityUserId: Option[String])
+case class EmailPayloadDigitalVoucher(CardUrl: String)
 
 object EmailToSend {
 
   implicit val emailPayloadStoppedCreditDetailWriter = Json.writes[EmailPayloadStoppedCreditSummary]
+  implicit val emailPayloadDigitalVoucherWriter = Json.writes[EmailPayloadDigitalVoucher]
   implicit val emailPayloadSubscriberAttributesWriter = Json.writes[EmailPayloadSubscriberAttributes]
   implicit val emailPayloadContactAttributesWriter = Json.writes[EmailPayloadContactAttributes]
   implicit val emailPayloadToWriter = Json.writes[EmailPayloadTo]
@@ -50,7 +53,11 @@ object EmailToSend {
             creditDetails.map { creditDetail =>
               EmailPayloadStoppedCreditSummary(creditDetail.credit_amount.value, creditDetail.credit_date.value)
             }
-          }
+          },
+          emailBatchItem
+            .payload
+            .digital_voucher
+            .map(digitalVoucher => EmailPayloadDigitalVoucher(digitalVoucher.cardUrl.value))
         )
       )
     )
