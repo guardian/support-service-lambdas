@@ -2,6 +2,7 @@ package com.gu.batchemailsender.api.batchemail.model
 
 import play.api.libs.json.Json
 
+case class EmailPayloadDigitalVoucher(card_url: String)
 case class EmailPayloadStoppedCreditSummary(credit_amount: Double, credit_date: String)
 case class EmailPayloadSubscriberAttributes(
   first_name: String,
@@ -21,7 +22,6 @@ case class EmailPayloadSubscriberAttributes(
 case class EmailPayloadContactAttributes(SubscriberAttributes: EmailPayloadSubscriberAttributes)
 case class EmailPayloadTo(Address: String, SubscriberKey: String, ContactAttributes: EmailPayloadContactAttributes)
 case class EmailToSend(To: EmailPayloadTo, DataExtensionName: String, SfContactId: Option[String], IdentityUserId: Option[String])
-case class EmailPayloadDigitalVoucher(CardUrl: String)
 
 object EmailToSend {
 
