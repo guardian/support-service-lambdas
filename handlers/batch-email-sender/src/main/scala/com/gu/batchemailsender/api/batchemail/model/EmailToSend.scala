@@ -2,7 +2,7 @@ package com.gu.batchemailsender.api.batchemail.model
 
 import play.api.libs.json.Json
 
-case class EmailPayloadDigitalVoucher(card_url: String)
+case class EmailPayloadDigitalVoucher(barcode_url: String)
 case class EmailPayloadStoppedCreditSummary(credit_amount: Double, credit_date: String)
 case class EmailPayloadSubscriberAttributes(
   first_name: String,
@@ -57,7 +57,7 @@ object EmailToSend {
           emailBatchItem
             .payload
             .digital_voucher
-            .map(digitalVoucher => EmailPayloadDigitalVoucher(digitalVoucher.cardUrl.value))
+            .map(digitalVoucher => EmailPayloadDigitalVoucher(digitalVoucher.barcodeUrl.value))
         )
       )
     )

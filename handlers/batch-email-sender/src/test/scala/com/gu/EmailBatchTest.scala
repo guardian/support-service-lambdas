@@ -190,7 +190,7 @@ class EmailBatchTest extends FlatSpec with Matchers with DiffMatcher {
         |               ]
         |             },
         |             "digital_voucher" : {
-        |               "card_url": "http://imovo-card.url"
+        |               "barcode_url": "http://imovo-barcode.url"
         |             }
         |         },
         |         "object_name":"Holiday_Stop_Request__c"
@@ -226,7 +226,7 @@ class EmailBatchTest extends FlatSpec with Matchers with DiffMatcher {
               )
             ),
             digital_voucher = Some(
-              DigitalVoucher(DigitalVoucherUrl("http://imovo-card.url"))
+              DigitalVoucher(DigitalVoucherUrl("http://imovo-barcode.url"))
             )
           ),
           object_name = "Holiday_Stop_Request__c"

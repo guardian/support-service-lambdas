@@ -40,7 +40,7 @@ object EmailBatch {
       stopped_credit_summaries: Option[List[WireHolidayStopCreditSummary]]
     )
     case class WireHolidayStopCreditSummary(credit_amount: Double, credit_date: String)
-    case class WireDigitalVoucher(card_url: String)
+    case class WireDigitalVoucher(barcode_url: String)
 
     implicit val holidayStopCreditDetailReads = Json.reads[WireHolidayStopCreditSummary]
     implicit val holidayStopRequestReads = Json.reads[WireHolidayStopRequest]
@@ -120,7 +120,7 @@ object EmailBatch {
           digital_voucher = wireEmailBatchItem
             .payload
             .digital_voucher
-            .map(wireVoucher => DigitalVoucher(DigitalVoucherUrl(wireVoucher.card_url)))
+            .map(wireVoucher => DigitalVoucher(DigitalVoucherUrl(wireVoucher.barcode_url)))
         ),
         object_name = wireEmailBatchItem.object_name
       )
@@ -143,7 +143,7 @@ case class StoppedCreditSummary(credit_amount: StoppedCreditSummaryAmount, credi
 case class StoppedCreditSummaryAmount(value: Double) extends AnyVal
 case class StoppedCreditSummaryDate(value: String) extends AnyVal
 case class DigitalVoucherUrl(value: String) extends AnyVal
-case class DigitalVoucher(cardUrl: DigitalVoucherUrl)
+case class DigitalVoucher(barcodeUrl: DigitalVoucherUrl)
 
 case class EmailBatchItemPayload(
   record_id: EmailBatchItemId,
