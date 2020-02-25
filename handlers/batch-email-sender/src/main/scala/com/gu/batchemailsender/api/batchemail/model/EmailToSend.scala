@@ -2,6 +2,7 @@ package com.gu.batchemailsender.api.batchemail.model
 
 import play.api.libs.json.Json
 
+case class EmailPayloadDigitalVoucher(barcode_url: String)
 case class EmailPayloadStoppedCreditSummary(credit_amount: Double, credit_date: String)
 case class EmailPayloadSubscriberAttributes(
   first_name: String,
@@ -15,7 +16,8 @@ case class EmailPayloadSubscriberAttributes(
   stopped_credit_sum: Option[String],
   currency_symbol: Option[String],
   stopped_issue_count: Option[String],
-  stopped_credit_summaries: Option[List[EmailPayloadStoppedCreditSummary]]
+  stopped_credit_summaries: Option[List[EmailPayloadStoppedCreditSummary]],
+  digital_voucher: Option[EmailPayloadDigitalVoucher]
 )
 case class EmailPayloadContactAttributes(SubscriberAttributes: EmailPayloadSubscriberAttributes)
 case class EmailPayloadTo(Address: String, SubscriberKey: String, ContactAttributes: EmailPayloadContactAttributes)
@@ -24,6 +26,7 @@ case class EmailToSend(To: EmailPayloadTo, DataExtensionName: String, SfContactI
 object EmailToSend {
 
   implicit val emailPayloadStoppedCreditDetailWriter = Json.writes[EmailPayloadStoppedCreditSummary]
+  implicit val emailPayloadDigitalVoucherWriter = Json.writes[EmailPayloadDigitalVoucher]
   implicit val emailPayloadSubscriberAttributesWriter = Json.writes[EmailPayloadSubscriberAttributes]
   implicit val emailPayloadContactAttributesWriter = Json.writes[EmailPayloadContactAttributes]
   implicit val emailPayloadToWriter = Json.writes[EmailPayloadTo]
@@ -50,7 +53,11 @@ object EmailToSend {
             creditDetails.map { creditDetail =>
               EmailPayloadStoppedCreditSummary(creditDetail.credit_amount.value, creditDetail.credit_date.value)
             }
-          }
+          },
+          emailBatchItem
+            .payload
+            .digital_voucher
+            .map(digitalVoucher => EmailPayloadDigitalVoucher(digitalVoucher.barcodeUrl.value))
         )
       )
     )
@@ -83,6 +90,8 @@ object EmailToSend {
       case ("Holiday_Stop_Request__c", "create") => "SV_HolidayStopConfirmation"
       case ("Holiday_Stop_Request__c", "amend") => "SV_HolidayStopAmend"
       case ("Holiday_Stop_Request__c", "withdraw") => "SV_HolidayStopWithdrawal"
+      case ("Digital_Voucher__c", "create") => "SV_VO_NewCard"
+      case ("Digital_Voucher__c", "replace") => "SV_VO_ReplacementCard"
       case (objectName, emailStage) => throw new RuntimeException(s"Unrecognized (object_name, email_stage) = ($objectName, $emailStage). Please fix SF trigger.")
     }
 }

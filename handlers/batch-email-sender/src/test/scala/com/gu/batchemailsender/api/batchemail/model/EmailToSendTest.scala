@@ -23,7 +23,8 @@ class EmailToSendTest extends FlatSpec {
       stopped_credit_sum = None,
       currency_symbol = None,
       stopped_issue_count = None,
-      stopped_credit_summaries = None
+      stopped_credit_summaries = None,
+      digital_voucher = None
     )
 
   val emailBatchItemStub = EmailBatchItem(
@@ -49,7 +50,8 @@ class EmailToSendTest extends FlatSpec {
             stopped_credit_sum = None,
             currency_symbol = None,
             stopped_issue_count = None,
-            stopped_credit_summaries = None
+            stopped_credit_summaries = None,
+            digital_voucher = None
           )
       )
     ),
@@ -237,6 +239,51 @@ class EmailToSendTest extends FlatSpec {
         )
       ),
       DataExtensionName = "SV_HolidayStopConfirmation"
+    )
+    assert(EmailToSend.fromEmailBatchItem(emailBatchItem) == expected)
+  }
+
+  it should "create digital_voucher creation confirmation email to send" in {
+    val emailBatchItem = emailBatchItemStub.copy(
+      object_name = "Digital_Voucher__c",
+      payload = emailBatchItemPayloadStub.copy(
+        email_stage = "create",
+        modified_by_customer = Some(true),
+        digital_voucher = Some(DigitalVoucher(DigitalVoucherUrl("http://digital-voucher-url")))
+      )
+    )
+    val expected = expectedStub.copy(
+      To = expectedStub.To.copy(
+        ContactAttributes = expectedStub.To.ContactAttributes.copy(
+          expectedStub.To.ContactAttributes.SubscriberAttributes.copy(
+            modified_by_customer = Some(true),
+            digital_voucher = Some(EmailPayloadDigitalVoucher("http://digital-voucher-url"))
+          )
+        )
+      ),
+      DataExtensionName = "SV_VO_NewCard"
+    )
+    assert(EmailToSend.fromEmailBatchItem(emailBatchItem) == expected)
+  }
+  it should "create digital_voucher replace confirmation email to send" in {
+    val emailBatchItem = emailBatchItemStub.copy(
+      object_name = "Digital_Voucher__c",
+      payload = emailBatchItemPayloadStub.copy(
+        email_stage = "replace",
+        modified_by_customer = Some(true),
+        digital_voucher = Some(DigitalVoucher(DigitalVoucherUrl("http://digital-voucher-url")))
+      )
+    )
+    val expected = expectedStub.copy(
+      To = expectedStub.To.copy(
+        ContactAttributes = expectedStub.To.ContactAttributes.copy(
+          expectedStub.To.ContactAttributes.SubscriberAttributes.copy(
+            modified_by_customer = Some(true),
+            digital_voucher = Some(EmailPayloadDigitalVoucher("http://digital-voucher-url"))
+          )
+        )
+      ),
+      DataExtensionName = "SV_VO_ReplacementCard"
     )
     assert(EmailToSend.fromEmailBatchItem(emailBatchItem) == expected)
   }

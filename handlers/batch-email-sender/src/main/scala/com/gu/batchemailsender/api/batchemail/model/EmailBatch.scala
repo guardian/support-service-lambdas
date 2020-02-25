@@ -28,7 +28,8 @@ object EmailBatch {
       first_name: String,
       email_stage: String,
       modified_by_customer: Option[Boolean],
-      holiday_stop_request: Option[WireHolidayStopRequest]
+      holiday_stop_request: Option[WireHolidayStopRequest],
+      digital_voucher: Option[WireDigitalVoucher]
     )
     case class WireHolidayStopRequest(
       holiday_start_date: String,
@@ -39,9 +40,11 @@ object EmailBatch {
       stopped_credit_summaries: Option[List[WireHolidayStopCreditSummary]]
     )
     case class WireHolidayStopCreditSummary(credit_amount: Double, credit_date: String)
+    case class WireDigitalVoucher(barcode_url: String)
 
     implicit val holidayStopCreditDetailReads = Json.reads[WireHolidayStopCreditSummary]
     implicit val holidayStopRequestReads = Json.reads[WireHolidayStopRequest]
+    implicit val digitalVoucherReads = Json.reads[WireDigitalVoucher]
     implicit val emailBatchItemPayloadReads = Json.reads[WireEmailBatchItemPayload]
     implicit val emailBatchItemReads = Json.reads[WireEmailBatchItem]
     implicit val emailBatch = Json.reads[WireEmailBatch]
@@ -113,7 +116,11 @@ object EmailBatch {
                   StoppedCreditSummaryDate(fromSfDateToDisplayDate(detail.credit_date))
                 )
               }
-            } yield stoppedCreditSummaries
+            } yield stoppedCreditSummaries,
+          digital_voucher = wireEmailBatchItem
+            .payload
+            .digital_voucher
+            .map(wireVoucher => DigitalVoucher(DigitalVoucherUrl(wireVoucher.barcode_url)))
         ),
         object_name = wireEmailBatchItem.object_name
       )
@@ -135,6 +142,8 @@ case class StoppedIssueCount(value: String) extends AnyVal
 case class StoppedCreditSummary(credit_amount: StoppedCreditSummaryAmount, credit_date: StoppedCreditSummaryDate)
 case class StoppedCreditSummaryAmount(value: Double) extends AnyVal
 case class StoppedCreditSummaryDate(value: String) extends AnyVal
+case class DigitalVoucherUrl(value: String) extends AnyVal
+case class DigitalVoucher(barcodeUrl: DigitalVoucherUrl)
 
 case class EmailBatchItemPayload(
   record_id: EmailBatchItemId,
@@ -153,7 +162,8 @@ case class EmailBatchItemPayload(
   stopped_credit_sum: Option[StoppedCreditSum],
   currency_symbol: Option[CurrencySymbol],
   stopped_issue_count: Option[StoppedIssueCount],
-  stopped_credit_summaries: Option[List[StoppedCreditSummary]]
+  stopped_credit_summaries: Option[List[StoppedCreditSummary]],
+  digital_voucher: Option[DigitalVoucher]
 )
 
 case class EmailBatchItem(payload: EmailBatchItemPayload, object_name: String)
