@@ -13,7 +13,8 @@ import io.circe.Decoder
 import io.circe.generic.auto._
 import io.circe.parser.decode
 import io.circe.syntax._
-import org.http4s.{Method, Request, Response, Uri}
+import org.http4s.Method.{DELETE, GET, POST, PUT}
+import org.http4s.{Request, Response, Uri}
 import org.scalatest.EitherValues
 import org.scalatest.Inside.inside
 import org.scalatest.flatspec.AnyFlatSpec
@@ -48,7 +49,7 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
     val app = createApp(imovoBackendStub)
     val response = app.run(
       Request(
-        method = Method.PUT,
+        method = POST,
         uri = Uri(path = s"/digital-voucher/create/${subscriptionId.value}")
       ).withEntity[String](CreateVoucherRequestBody("Everyday").asJson.spaces2)
     ).value.unsafeRunSync().get
@@ -79,7 +80,7 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
     val app = createApp(imovoBackendStub)
     val response = app.run(
       Request(
-        method = Method.PUT,
+        method = POST,
         uri = Uri(path = s"/digital-voucher/create/${subscriptionId.value}")
       ).withEntity[String](CreateVoucherRequestBody("Everyday").asJson.spaces2)
     ).value.unsafeRunSync().get
@@ -117,7 +118,7 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
     val app = createApp(imovoBackendStub)
     val response = app.run(
       Request(
-        method = Method.PUT,
+        method = POST,
         uri = Uri(path = s"/digital-voucher/create/${subscriptionId.value}")
       ).withEntity[String](CreateVoucherRequestBody("Everyday").asJson.spaces2)
     ).value.unsafeRunSync().get
@@ -144,7 +145,7 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
     val app = createApp(imovoBackendStub)
     val response = app.run(
       Request(
-        method = Method.PUT,
+        method = POST,
         uri = Uri(path = s"/digital-voucher/create/${subscriptionId.value}")
       ).withEntity[String](CreateVoucherRequestBody("HomeDelivery").asJson.spaces2)
     ).value.unsafeRunSync().get
@@ -173,7 +174,7 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
     val app = createApp(imovoBackendStub)
     val response = app.run(
       Request(
-        method = Method.POST,
+        method = PUT,
         Uri(path = "/digital-voucher/replace")
       ).withEntity[String](Voucher("card-test-voucher-code", "letter-test-voucher-code").asJson.spaces2)
     ).value.unsafeRunSync().get
@@ -202,7 +203,7 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
     val app = createApp(imovoBackendStub)
     val response = app.run(
       Request(
-        method = Method.POST,
+        method = PUT,
         Uri(path = "/digital-voucher/replace")
       ).withEntity[String](Voucher("card-test-voucher-code", "letter-test-voucher-code").asJson.spaces2)
     ).value.unsafeRunSync().get
@@ -214,7 +215,7 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
     val app = createApp(SttpBackendStub[IO, Nothing](new CatsMonadError[IO]))
     val response = app.run(
       Request(
-        method = Method.GET,
+        method = GET,
         Uri(path = "/digital-voucher/sub123456")
       )
     ).value.unsafeRunSync().get
@@ -237,7 +238,7 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
     val app = createApp(imovoBackendStub)
     val response = app.run(
       Request(
-        method = Method.POST,
+        method = DELETE,
         Uri(path = "/digital-voucher/cancel")
       ).withEntity[String](CancelVoucherRequestBody("card-test-voucher-code", cancellationDate).asJson.spaces2)
     ).value.unsafeRunSync().get
