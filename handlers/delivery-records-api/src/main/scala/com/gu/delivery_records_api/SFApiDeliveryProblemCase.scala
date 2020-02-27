@@ -32,7 +32,7 @@ case class SFApiCreateDeliveryProblemCase(
   ContactId: Option[String],
   SF_Subscription__r: SF_Subscription_ByName,
   Origin: String = "Self Service",
-  Status: String = "New",
+  Status: String,
   Subject: String,
   Description: Option[String],
   Product__c: String,
@@ -110,7 +110,10 @@ object SFApiCompositeCreateDeliveryProblem {
         SF_Subscription__r = SF_Subscription_ByName(
           Name = subscriptionNumber
         ),
-        Repeat_Delivery_Issue__c = detail.repeatDeliveryProblem.contains(true)
+        Repeat_Delivery_Issue__c = detail.repeatDeliveryProblem.contains(true),
+        Status = if (detail.repeatDeliveryProblem.contains(true) ||
+          detail.deliveryRecords.exists(_.invoiceDate.isEmpty) // i.e. we're not auto-crediting
+          ) "New" else "Closed"
       )
     )) ++ detail.deliveryRecords.map(deliveryRecord => SFApiCompositePart[SFApiCompositePartBody](
       referenceId = s"LinkDeliveryRecord-${deliveryRecord.id}",
