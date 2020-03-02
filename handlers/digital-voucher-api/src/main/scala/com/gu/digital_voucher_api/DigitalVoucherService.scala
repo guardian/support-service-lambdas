@@ -5,11 +5,12 @@ import java.time.LocalDate
 import cats.Monad
 import cats.implicits._
 import cats.data.EitherT
-import com.gu.digital_voucher_api.imovo.ImovoClient
+import com.gu.digital_voucher_api.imovo.{ImovoClient, ImovoSubscriptionResponse, ImovoVoucherResponse}
 
 case class Voucher(cardCode: String, letterCode: String)
 
 trait DigitalVoucherService[F[_]] {
+  def oldCreateVoucher(subscriptionId: SfSubscriptionId, ratePlanName: RatePlanName): EitherT[F, DigitalVoucherApiException, Voucher]
   def createVoucher(subscriptionId: SfSubscriptionId, ratePlanName: RatePlanName): EitherT[F, DigitalVoucherApiException, Voucher]
   def replaceVoucher(voucher: Voucher): EitherT[F, DigitalVoucherServiceException, Voucher]
   def getVoucher(subscriptionId: String): EitherT[F, DigitalVoucherServiceException, Voucher]
@@ -49,10 +50,66 @@ object DigitalVoucherService {
     )
   }
 
+  private val schemeNames: Map[RatePlanName, SchemeName] = {
+    val everydaySchemeName = SchemeName("GMGSub7Day")
+    val sundaySchemeName = SchemeName("GMGSubSunday")
+    val weekendSchemeName = SchemeName("GMGSubWeekend")
+    val sixDaySchemeName = SchemeName("GMGSub6Day")
+
+    Map(
+      RatePlanName("Everyday") -> everydaySchemeName,
+      RatePlanName("Everyday+") -> everydaySchemeName,
+      RatePlanName("Sunday") -> sundaySchemeName,
+      RatePlanName("Sunday+") -> sundaySchemeName,
+      RatePlanName("Weekend") -> weekendSchemeName,
+      RatePlanName("Weekend+") -> weekendSchemeName,
+      RatePlanName("Sixday") -> sixDaySchemeName,
+      RatePlanName("Sixday+") -> sixDaySchemeName,
+    )
+  }
+
   def apply[F[_]: Monad](imovoClient: ImovoClient[F]): DigitalVoucherService[F] = new
       DigitalVoucherService[F] {
 
     override def createVoucher(
+      subscriptionId: SfSubscriptionId,
+      ratePlanName: RatePlanName
+    ): EitherT[F, DigitalVoucherApiException, Voucher] = {
+      val tomorrow = LocalDate.now.plusDays(1)
+
+      for {
+        schemeName <- schemeNames
+          .get(ratePlanName)
+          .toRight(DigitalVoucherApiException(InvalidArgumentException(s"Rate plan name has no matching scheme name: $ratePlanName")))
+          .toEitherT[F]
+        voucherResponse <- imovoClient
+          .createSubscriptionVoucher(subscriptionId, schemeName, tomorrow)
+          .leftMap { error =>
+            DigitalVoucherApiException(ImovoClientException(error.toString))
+          }
+        voucher <- toVoucher(voucherResponse).toEitherT[F]
+      } yield voucher
+    }
+
+    def toVoucher(voucherResponse: ImovoSubscriptionResponse): Either[DigitalVoucherApiException, Voucher] = {
+      (
+        voucherResponse
+          .subscriptionVouchers
+          .find(_.subscriptionType === "ActiveLetter")
+          .toRight(List("Imovo response did not contain an subscription voucher where subscriptionType==\"ActiveLetter\" ")),
+        voucherResponse
+          .subscriptionVouchers
+          .find(_.subscriptionType === "ActiveCard")
+          .toRight(List("Imovo response did not contain an subscription voucher where subscriptionType==\"ActiveCard\" "))
+      ).parMapN { (letterVoucher, cardVoucher) =>
+        Voucher(cardVoucher.voucherCode, letterVoucher.voucherCode)
+      }.leftMap { errors =>
+        DigitalVoucherApiException(ImovoInvalidResponseException(errors.mkString(",")))
+      }
+    }
+
+
+    override def oldCreateVoucher(
       subscriptionId: SfSubscriptionId,
       ratePlanName: RatePlanName
     ): EitherT[F, DigitalVoucherApiException, Voucher] = {

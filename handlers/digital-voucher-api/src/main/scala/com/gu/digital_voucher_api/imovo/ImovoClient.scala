@@ -7,7 +7,7 @@ import java.time.format.DateTimeFormatter
 import cats.data.EitherT
 import cats.effect.Sync
 import cats.implicits._
-import com.gu.digital_voucher_api.{CampaignCode, ImovoClientException, SfSubscriptionId}
+import com.gu.digital_voucher_api.{CampaignCode, ImovoClientException, SchemeName, SfSubscriptionId}
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
 import com.typesafe.scalalogging.LazyLogging
@@ -16,6 +16,13 @@ import io.circe.parser._
 import io.circe.{Decoder, Encoder}
 
 case class ImovoVoucherResponse(voucherCode: String, successfulRequest: Boolean)
+case class ImovoVoucher(subscriptionType: String, voucherCode: String)
+case class ImovoSubscriptionResponse(
+  schemeName: String,
+  subscriptionId: String,
+  successfulRequest: Boolean,
+  subscriptionVouchers: List[ImovoVoucher]
+)
 case class ImovoErrorResponse(errorMessages: List[String], successfulRequest: Boolean)
 case class ImovoDeleteResponse(successfulRequest: Boolean)
 case class ImovoUpdateResponse(successfulRequest: Boolean)
@@ -26,6 +33,11 @@ trait ImovoClient[F[_]] {
     campaignCode: CampaignCode,
     startDate: LocalDate
   ): EitherT[F, ImovoClientException, ImovoVoucherResponse]
+  def createSubscriptionVoucher(
+    subscriptionId: SfSubscriptionId,
+    schemeName: SchemeName,
+    startDate: LocalDate
+  ): EitherT[F, ImovoClientException, ImovoSubscriptionResponse]
   def replaceVoucher(voucherCode: String): EitherT[F, ImovoClientException, ImovoVoucherResponse]
   def updateVoucher(voucherCode: String, expiryDate: LocalDate): EitherT[F, ImovoClientException, Unit]
 }
@@ -94,6 +106,20 @@ object ImovoClient extends LazyLogging {
     val imovoDateFormat = DateTimeFormatter.ISO_DATE
 
     new ImovoClient[F] {
+      override def createSubscriptionVoucher(
+        subscriptionId: SfSubscriptionId,
+        schemeName: SchemeName,
+        startDate: LocalDate
+      ): EitherT[F, ImovoClientException, ImovoSubscriptionResponse] =
+        sendAuthenticatedRequest[ImovoSubscriptionResponse, String](
+          apiKey,
+          Method.GET,
+          Uri(new URI(s"$baseUrl/Subscription/RequestSubscriptionVouchers"))
+            .param("SubscriptionId", subscriptionId.value)
+            .param("SchemeName", schemeName.value)
+            .param("StartDate", startDate.toString),
+          None
+        )
 
       override def createVoucher(
         subscriptionId: SfSubscriptionId,

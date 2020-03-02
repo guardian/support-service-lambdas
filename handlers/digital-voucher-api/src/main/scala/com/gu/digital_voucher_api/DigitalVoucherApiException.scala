@@ -7,3 +7,5 @@ case class DigitalVoucherServiceException(message: String) extends Exception(mes
 case class InvalidArgumentException(message: String) extends Exception(message)
 
 case class ImovoClientException(message: String) extends Exception(message)
+
+case class ImovoInvalidResponseException(message: String) extends Exception(message)

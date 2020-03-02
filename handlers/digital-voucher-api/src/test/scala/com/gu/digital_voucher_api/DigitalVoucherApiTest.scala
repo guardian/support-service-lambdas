@@ -5,7 +5,7 @@ import java.time.LocalDate
 import cats.effect.IO
 import com.gu.DevIdentity
 import com.gu.digital_voucher_api.imovo.ImovoStub._
-import com.gu.digital_voucher_api.imovo.{ImovoErrorResponse, ImovoUpdateResponse, ImovoVoucherResponse}
+import com.gu.digital_voucher_api.imovo.{ImovoErrorResponse, ImovoSubscriptionResponse, ImovoUpdateResponse, ImovoVoucher, ImovoVoucherResponse}
 import com.softwaremill.diffx.scalatest.DiffMatcher
 import com.softwaremill.sttp.impl.cats.CatsMonadError
 import com.softwaremill.sttp.testing.SttpBackendStub
@@ -26,7 +26,7 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
   private val subscriptionId = SfSubscriptionId("123456")
   private val tomorrow = LocalDate.now.plusDays(1).toString
 
-  "DigitalVoucherApi" should "return stubbed voucher details for create request" in {
+  "DigitalVoucherApi" should "return stubbed voucher details for old create request" in {
     val imovoBackendStub: SttpBackendStub[IO, Nothing] = SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
       .stubCreate(
         apiKey = apiKey,
@@ -50,6 +50,36 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
       Request(
         method = Method.PUT,
         uri = Uri(path = s"/digital-voucher/create/${subscriptionId.value}")
+      ).withEntity[String](CreateVoucherRequestBody("Everyday").asJson.spaces2)
+    ).value.unsafeRunSync().get
+
+    response.status.code should matchTo(201)
+    getBody[Voucher](response) should matchTo(Voucher("new-card-code", "new-letter-code"))
+  }
+  it should "return stubbed voucher details for create subscription request" in {
+    val imovoBackendStub: SttpBackendStub[IO, Nothing] = SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
+      .stubCreateSubscription(
+        apiKey = apiKey,
+        baseUrl = baseUrl,
+        subscriptionId = subscriptionId.value,
+        schemeName = "GMGSub7Day",
+        startDate = tomorrow,
+        response = ImovoSubscriptionResponse(
+          schemeName = "GMGSub7Day",
+          subscriptionId = subscriptionId.value,
+          successfulRequest = true,
+          subscriptionVouchers = List(
+            ImovoVoucher("ActiveCard", "new-card-code"),
+            ImovoVoucher("ActiveLetter", "new-letter-code")
+          )
+        )
+      )
+
+    val app = createApp(imovoBackendStub)
+    val response = app.run(
+      Request(
+        method = Method.PUT,
+        uri = Uri(path = s"/digital-voucher/${subscriptionId.value}")
       ).withEntity[String](CreateVoucherRequestBody("Everyday").asJson.spaces2)
     ).value.unsafeRunSync().get
 
