@@ -12,9 +12,9 @@ case class Voucher(cardCode: String, letterCode: String)
 trait DigitalVoucherService[F[_]] {
   def oldCreateVoucher(subscriptionId: SfSubscriptionId, ratePlanName: RatePlanName): EitherT[F, DigitalVoucherServiceError, Voucher]
   def createVoucher(subscriptionId: SfSubscriptionId, ratePlanName: RatePlanName): EitherT[F, DigitalVoucherServiceError, Voucher]
-  def replaceVoucher(voucher: Voucher): EitherT[F, DigitalVoucherServiceFailure, Voucher]
-  def getVoucher(subscriptionId: String): EitherT[F, DigitalVoucherServiceFailure, Voucher]
-  def cancelVouchers(cardCode: String, cancellationDate: LocalDate): EitherT[F, DigitalVoucherServiceFailure, Unit]
+  def replaceVoucher(voucher: Voucher): EitherT[F, DigitalVoucherServiceError, Voucher]
+  def getVoucher(subscriptionId: String): EitherT[F, DigitalVoucherServiceError, Voucher]
+  def cancelVouchers(cardCode: String, cancellationDate: LocalDate): EitherT[F, DigitalVoucherServiceError, Unit]
 }
 
 object DigitalVoucherService {
@@ -135,7 +135,7 @@ object DigitalVoucherService {
 
     override def replaceVoucher(
       voucher: Voucher
-    ): EitherT[F, DigitalVoucherServiceFailure, Voucher] =
+    ): EitherT[F, DigitalVoucherServiceError, Voucher] =
       (
         imovoClient.replaceVoucher(voucher.cardCode).leftMap(List(_)),
         imovoClient.replaceVoucher(voucher.letterCode).leftMap(List(_))
@@ -143,12 +143,17 @@ object DigitalVoucherService {
           Voucher(cardResponse.voucherCode, letterResponse.voucherCode)
         }.leftMap(errors => DigitalVoucherServiceFailure(errors.mkString(", ")))
 
-    override def cancelVouchers(cardCode: String, cancellationDate: LocalDate): EitherT[F, DigitalVoucherServiceFailure, Unit] =
-      imovoClient.updateVoucher(cardCode, cancellationDate).leftMap(error => DigitalVoucherServiceFailure(error.message))
+    override def cancelVouchers(cardCode: String, cancellationDate: LocalDate): EitherT[F, DigitalVoucherServiceError, Unit] =
+      imovoClient
+        .updateVoucher(cardCode, cancellationDate)
+        .leftMap(error => DigitalVoucherServiceFailure(error.message))
 
-    override def getVoucher(subscriptionId: String): EitherT[F, DigitalVoucherServiceFailure, Voucher] =
-      EitherT.rightT[F, DigitalVoucherServiceFailure](
-        Voucher(s"5555555555", s"6666666666")
-      )
+    override def getVoucher(subscriptionId: String): EitherT[F, DigitalVoucherServiceError, Voucher] =
+      for {
+        voucherResponse <- imovoClient
+          .getSubscriptionVoucher(subscriptionId)
+          .leftMap(error => DigitalVoucherServiceFailure(error.message))
+        voucher <- toVoucher(voucherResponse).toEitherT[F]
+      } yield voucher
   }
 }

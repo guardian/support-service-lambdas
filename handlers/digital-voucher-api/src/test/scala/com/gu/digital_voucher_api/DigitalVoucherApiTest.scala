@@ -240,16 +240,32 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
     response.status.code should matchTo(500)
   }
 
-  it should "return stubbed voucher details for get request" in {
-    val app = createApp(SttpBackendStub[IO, Nothing](new CatsMonadError[IO]))
+  it should "return voucher details for get subscription request" in {
+    val imovoBackendStub: SttpBackendStub[IO, Nothing] = SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
+      .stubGetSubscription(
+        apiKey = apiKey,
+        baseUrl = baseUrl,
+        subscriptionId = subscriptionId.value,
+        response = ImovoSubscriptionResponse(
+          schemeName = "Guardian7Day",
+          subscriptionId = subscriptionId.value,
+          successfulRequest = true,
+          subscriptionVouchers = List(
+            ImovoVoucher("ActiveCard", "card-code"),
+            ImovoVoucher("ActiveLetter", "letter-code")
+          )
+        )
+      )
+
+    val app = createApp(imovoBackendStub)
     val response = app.run(
       Request(
         method = Method.GET,
-        Uri(path = "/digital-voucher/sub123456")
+        Uri(path = s"/digital-voucher/${subscriptionId.value}")
       )
     ).value.unsafeRunSync().get
 
-    getBody[Voucher](response) should matchTo(Voucher("5555555555", "6666666666"))
+    getBody[Voucher](response) should matchTo(Voucher("card-code", "letter-code"))
     response.status.code should matchTo(200)
   }
   it should "return stubbed 200 response for cancel request" in {

@@ -39,6 +39,13 @@ object ImovoStub {
           Response.ok(response.asJson.spaces2)
       }
     }
+
+    def stubGetSubscription[A: Encoder](apiKey: String, baseUrl: String, subscriptionId: String, response: A): SttpBackendStub[F, S] = {
+      sttpStub.whenRequestMatchesPartial {
+        case request: Request[_, _] if matchesGetRequest(apiKey, baseUrl, subscriptionId, request) =>
+          Response.ok(response.asJson.spaces2)
+      }
+    }
   }
 
   private def matchesQueryCreate[S, F[_]](apiKey: String, baseUrl: String, customerRef: String, campaignCode: String, startDate: String, request: Request[_, _]) = {
@@ -80,6 +87,14 @@ object ImovoStub {
     val methodMatches = request.method == Method.GET
     val queryParamMatches = request.uri.paramsMap.get("VoucherCode") === Some(voucherCode) &&
       request.uri.paramsMap.get("ExpiryDate") === expiryDate.map(DateTimeFormatter.ISO_DATE.format)
+    val apiKeyMatches = request.headers.toMap.get("X-API-KEY") === Some(apiKey)
+    urlMatches && methodMatches && queryParamMatches && apiKeyMatches
+  }
+
+  private def matchesGetRequest[S, F[_]](apiKey: String, baseUrl: String, subscriptionId: String, request: Request[_, _]) = {
+    val urlMatches = urlNoQueryString(request) === s"$baseUrl/Subscription/GetSubscriptionVoucherDetails"
+    val methodMatches = request.method == Method.GET
+    val queryParamMatches = request.uri.paramsMap.get("SubscriptionId") === Some(subscriptionId)
     val apiKeyMatches = request.headers.toMap.get("X-API-KEY") === Some(apiKey)
     urlMatches && methodMatches && queryParamMatches && apiKeyMatches
   }

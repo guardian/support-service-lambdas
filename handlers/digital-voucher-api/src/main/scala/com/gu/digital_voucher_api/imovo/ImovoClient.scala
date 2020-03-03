@@ -42,6 +42,7 @@ trait ImovoClient[F[_]] {
   ): EitherT[F, ImovoClientException, ImovoSubscriptionResponse]
   def replaceVoucher(voucherCode: String): EitherT[F, ImovoClientException, ImovoVoucherResponse]
   def updateVoucher(voucherCode: String, expiryDate: LocalDate): EitherT[F, ImovoClientException, Unit]
+  def getSubscriptionVoucher(voucherCode: String): EitherT[F, ImovoClientException, ImovoSubscriptionResponse]
 }
 
 object ImovoClient extends LazyLogging {
@@ -156,6 +157,16 @@ object ImovoClient extends LazyLogging {
             .param("ExpiryDate", imovoDateFormat.format(expiryDate)),
           None
         ).map(_ => ())
+      }
+
+      override def getSubscriptionVoucher(subscriptionId: String): EitherT[F, ImovoClientException, ImovoSubscriptionResponse] = {
+        sendAuthenticatedRequest[ImovoSubscriptionResponse, String](
+          apiKey,
+          Method.GET,
+          Uri(new URI(s"$baseUrl/Subscription/GetSubscriptionVoucherDetails"))
+            .param("SubscriptionId", subscriptionId),
+          None
+        )
       }
     }.asRight[ImovoClientException].toEitherT[F]
   }
