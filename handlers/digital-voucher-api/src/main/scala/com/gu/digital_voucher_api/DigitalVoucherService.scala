@@ -51,10 +51,10 @@ object DigitalVoucherService {
   }
 
   private val schemeNames: Map[RatePlanName, SchemeName] = {
-    val everydaySchemeName = SchemeName("GMGSub7Day")
-    val sundaySchemeName = SchemeName("GMGSubSunday")
-    val weekendSchemeName = SchemeName("GMGSubWeekend")
-    val sixDaySchemeName = SchemeName("GMGSub6Day")
+    val everydaySchemeName = SchemeName("Guardian7Day")
+    val sundaySchemeName = SchemeName("GuardianSunday")
+    val weekendSchemeName = SchemeName("GuardianWeekend")
+    val sixDaySchemeName = SchemeName("Guardian6Day")
 
     Map(
       RatePlanName("Everyday") -> everydaySchemeName,

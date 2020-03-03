@@ -62,10 +62,10 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
         apiKey = apiKey,
         baseUrl = baseUrl,
         subscriptionId = subscriptionId.value,
-        schemeName = "GMGSub7Day",
+        schemeName = "Guardian7Day",
         startDate = tomorrow,
         response = ImovoSubscriptionResponse(
-          schemeName = "GMGSub7Day",
+          schemeName = "Guardian7Day",
           subscriptionId = subscriptionId.value,
           successfulRequest = true,
           subscriptionVouchers = List(
