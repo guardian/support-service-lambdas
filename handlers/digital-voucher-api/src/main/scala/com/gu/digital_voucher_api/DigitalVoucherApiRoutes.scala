@@ -17,7 +17,7 @@ case class DigitalVoucherApiRoutesError(message: String)
 
 case class CreateVoucherRequestBody(ratePlanName: String)
 
-case class CancelVoucherRequestBody(cardCode: String, cancellationDate: LocalDate)
+case class CancelVoucherRequestBody(subscriptionId: String, cancellationDate: LocalDate)
 
 case class SubscriptionRequestBody(subscriptionId: Option[String], cardCode: Option[String], letterCode: Option[String])
 
@@ -137,7 +137,7 @@ object DigitalVoucherApiRoutes {
         for {
           requestBody <- parseRequest[CancelVoucherRequestBody](request)
           result <- digitalVoucherService
-            .cancelVouchers(requestBody.cardCode, requestBody.cancellationDate)
+            .cancelVouchers(SfSubscriptionId(requestBody.subscriptionId), requestBody.cancellationDate)
             .leftMap(error => InternalServerError(DigitalVoucherApiRoutesError(s"Failed get voucher: $error")))
         } yield Ok(result)
       )

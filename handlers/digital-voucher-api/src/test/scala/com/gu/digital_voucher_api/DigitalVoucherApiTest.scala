@@ -5,7 +5,7 @@ import java.time.LocalDate
 import cats.effect.IO
 import com.gu.DevIdentity
 import com.gu.digital_voucher_api.imovo.ImovoStub._
-import com.gu.digital_voucher_api.imovo.{ImovoErrorResponse, ImovoSubscriptionResponse, ImovoSubscriptionType, ImovoUpdateResponse, ImovoVoucher, ImovoVoucherResponse}
+import com.gu.digital_voucher_api.imovo.{ImovoErrorResponse, ImovoSubscriptionResponse, ImovoSubscriptionType, ImovoSuccessResponse, ImovoUpdateResponse, ImovoVoucher, ImovoVoucherResponse}
 import com.softwaremill.diffx.scalatest.DiffMatcher
 import com.softwaremill.sttp.impl.cats.CatsMonadError
 import com.softwaremill.sttp.testing.SttpBackendStub
@@ -296,24 +296,24 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
     getBody[Voucher](response) should matchTo(Voucher("card-code", "letter-code"))
     response.status.code should matchTo(200)
   }
-  it should "return stubbed 200 response for cancel request" in {
+  it should "return 200 response for cancel request" in {
     val cancellationDate = LocalDate.now().plusWeeks(1)
 
     val imovoBackendStub: SttpBackendStub[IO, Nothing] = SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
-      .stubUpdate(
+      .stubSubscriptionCancel(
         apiKey = "imovo-test-api-key",
         baseUrl = "https://imovo.test.com",
-        voucherCode = "card-test-voucher-code",
-        expiryDate = Some(cancellationDate),
-        response = ImovoUpdateResponse(true)
-      )
+        subscriptionId = subscriptionId.value,
+        lastActiveDate = Some(cancellationDate.minusDays(1)),
+        response = ImovoSuccessResponse("OK", true)
+    )
 
     val app = createApp(imovoBackendStub)
     val response = app.run(
       Request(
         method = Method.POST,
         Uri(path = "/digital-voucher/cancel")
-      ).withEntity[String](CancelVoucherRequestBody("card-test-voucher-code", cancellationDate).asJson.spaces2)
+      ).withEntity[String](CancelVoucherRequestBody(subscriptionId.value, cancellationDate).asJson.spaces2)
     ).value.unsafeRunSync().get
 
     getBody[Unit](response) should equal(())

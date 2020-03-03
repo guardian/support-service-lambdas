@@ -40,9 +40,9 @@ object ImovoStub {
       }
     }
 
-    def stubUpdate[A: Encoder](apiKey: String, baseUrl: String, voucherCode: String, expiryDate: Option[LocalDate], response: A): SttpBackendStub[F, S] = {
+    def stubSubscriptionCancel[A: Encoder](apiKey: String, baseUrl: String, subscriptionId: String, lastActiveDate: Option[LocalDate], response: A): SttpBackendStub[F, S] = {
       sttpStub.whenRequestMatchesPartial {
-        case request: Request[_, _] if matchesUpdateRequest(apiKey, baseUrl, voucherCode, expiryDate, request) =>
+        case request: Request[_, _] if matchesSubscriptionCancelRequest(apiKey, baseUrl, subscriptionId, lastActiveDate, request) =>
           Response.ok(response.asJson.spaces2)
       }
     }
@@ -99,11 +99,11 @@ object ImovoStub {
     urlMatches && methodMatches && queryParamMatches && apiKeyMatches
   }
 
-  private def matchesUpdateRequest[S, F[_]](apiKey: String, baseUrl: String, voucherCode: String, expiryDate: Option[LocalDate], request: Request[_, _]) = {
-    val urlMatches = urlNoQueryString(request) === s"$baseUrl/Voucher/Update/"
+  private def matchesSubscriptionCancelRequest[S, F[_]](apiKey: String, baseUrl: String, subscriptionId: String, expiryDate: Option[LocalDate], request: Request[_, _]) = {
+    val urlMatches = urlNoQueryString(request) === s"$baseUrl/Subscription/CancelSubscriptionVoucher"
     val methodMatches = request.method == Method.GET
-    val queryParamMatches = request.uri.paramsMap.get("VoucherCode") === Some(voucherCode) &&
-      request.uri.paramsMap.get("ExpiryDate") === expiryDate.map(DateTimeFormatter.ISO_DATE.format)
+    val queryParamMatches = request.uri.paramsMap.get("SubscriptionId") === Some(subscriptionId) &&
+      request.uri.paramsMap.get("LastActiveDay") === expiryDate.map(DateTimeFormatter.ISO_DATE.format)
     val apiKeyMatches = request.headers.toMap.get("X-API-KEY") === Some(apiKey)
     urlMatches && methodMatches && queryParamMatches && apiKeyMatches
   }
