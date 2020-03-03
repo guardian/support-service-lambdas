@@ -19,6 +19,8 @@ case class CreateVoucherRequestBody(ratePlanName: String)
 
 case class CancelVoucherRequestBody(cardCode: String, cancellationDate: LocalDate)
 
+case class SubscriptionRequestBody(subscriptionId: Option[String], cardCode: Option[String], letterCode: Option[String])
+
 object DigitalVoucherApiRoutes {
 
   def apply[F[_]: Effect](digitalVoucherService: DigitalVoucherService[F]): HttpRoutes[F] = {
@@ -83,13 +85,39 @@ object DigitalVoucherApiRoutes {
     }
 
     def handleReplaceRequest(request: Request[F]) = {
+      def replaceSubscriptionVouchers(requestBody: SubscriptionRequestBody) = {
+        for {
+          subscriptionId <- requestBody.subscriptionId
+            .toRight(UnprocessableEntity(DigitalVoucherApiRoutesError(s"subscriptionId is required")))
+            .toEitherT[F]
+          replacementVoucher <-
+            digitalVoucherService
+              .replaceVoucher(SfSubscriptionId(subscriptionId))
+              .leftMap(error => InternalServerError(DigitalVoucherApiRoutesError(s"Failed replace voucher: $error")))
+        } yield Ok(replacementVoucher)
+      }
+
+      def replaceVoucherCodes(requestBody: SubscriptionRequestBody) = {
+        for {
+          voucherToReplace <- (requestBody.cardCode, requestBody.letterCode)
+            .mapN(Voucher.apply)
+            .toRight(UnprocessableEntity(DigitalVoucherApiRoutesError(s"cardCode and letterCode are required.")))
+            .toEitherT[F]
+          replacementVoucher <- digitalVoucherService
+            .replaceVoucher(voucherToReplace)
+            .leftMap(error => InternalServerError(DigitalVoucherApiRoutesError(s"Failed replace voucher: $error")))
+        } yield Ok(replacementVoucher)
+      }
+
       toResponse(
         for {
-          requestBody <- parseRequest[Voucher](request)
-          voucher <- digitalVoucherService.replaceVoucher(
-            requestBody
-          ).leftMap(error => InternalServerError(DigitalVoucherApiRoutesError(s"Failed replace voucher: $error")))
-        } yield Ok(voucher)
+          requestBody <- parseRequest[SubscriptionRequestBody](request)
+          voucherResponse <- if(requestBody.subscriptionId.isDefined) {
+            replaceSubscriptionVouchers(requestBody)
+          } else {
+            replaceVoucherCodes(requestBody)
+          }
+        } yield voucherResponse
       )
     }
 

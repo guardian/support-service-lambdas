@@ -5,7 +5,7 @@ import java.time.LocalDate
 import cats.Monad
 import cats.implicits._
 import cats.data.EitherT
-import com.gu.digital_voucher_api.imovo.{ImovoClient, ImovoSubscriptionResponse}
+import com.gu.digital_voucher_api.imovo.{ImovoClient, ImovoSubscriptionResponse, ImovoSubscriptionType}
 
 case class Voucher(cardCode: String, letterCode: String)
 
@@ -13,6 +13,7 @@ trait DigitalVoucherService[F[_]] {
   def oldCreateVoucher(subscriptionId: SfSubscriptionId, ratePlanName: RatePlanName): EitherT[F, DigitalVoucherServiceError, Voucher]
   def createVoucher(subscriptionId: SfSubscriptionId, ratePlanName: RatePlanName): EitherT[F, DigitalVoucherServiceError, Voucher]
   def replaceVoucher(voucher: Voucher): EitherT[F, DigitalVoucherServiceError, Voucher]
+  def replaceVoucher(voucher: SfSubscriptionId): EitherT[F, DigitalVoucherServiceError, Voucher]
   def getVoucher(subscriptionId: String): EitherT[F, DigitalVoucherServiceError, Voucher]
   def cancelVouchers(cardCode: String, cancellationDate: LocalDate): EitherT[F, DigitalVoucherServiceError, Unit]
 }
@@ -95,11 +96,11 @@ object DigitalVoucherService {
       (
         voucherResponse
           .subscriptionVouchers
-          .find(_.subscriptionType === "ActiveLetter")
+          .find(_.subscriptionType === ImovoSubscriptionType.ActiveLetter.value)
           .toRight(List("Imovo response did not contain an subscription voucher where subscriptionType==\"ActiveLetter\" ")),
         voucherResponse
           .subscriptionVouchers
-          .find(_.subscriptionType === "ActiveCard")
+          .find(_.subscriptionType === ImovoSubscriptionType.ActiveCard.value)
           .toRight(List("Imovo response did not contain an subscription voucher where subscriptionType==\"ActiveCard\" "))
       ).parMapN { (letterVoucher, cardVoucher) =>
         Voucher(cardVoucher.voucherCode, letterVoucher.voucherCode)
@@ -119,7 +120,7 @@ object DigitalVoucherService {
         (
           imovoClient.createVoucher(subscriptionId, code.card, tomorrow).leftMap(List(_)),
           imovoClient.createVoucher(subscriptionId, code.letter, tomorrow).leftMap(List(_))
-          ).parMapN { (cardResponse, letterResponse) =>
+        ).parMapN { (cardResponse, letterResponse) =>
           Voucher(cardResponse.voucherCode, letterResponse.voucherCode)
         }.leftMap(errors =>
           ImovoOperationFailedException(errors.map(_.message).mkString(", "))
@@ -155,5 +156,14 @@ object DigitalVoucherService {
           .leftMap(error => DigitalVoucherServiceFailure(error.message))
         voucher <- toVoucher(voucherResponse).toEitherT[F]
       } yield voucher
+
+    override def replaceVoucher(sfSubscriptionId: SfSubscriptionId): EitherT[F, DigitalVoucherServiceError, Voucher] = {
+      for {
+        voucherResponse <- imovoClient
+          .replaceVoucher(sfSubscriptionId, ImovoSubscriptionType.Both)
+          .leftMap(error => DigitalVoucherServiceFailure(error.message))
+        voucher <- toVoucher(voucherResponse).toEitherT[F]
+      } yield voucher
+    }
   }
 }

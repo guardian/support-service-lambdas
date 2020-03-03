@@ -28,6 +28,14 @@ case class ImovoDeleteResponse(successfulRequest: Boolean)
 case class ImovoUpdateResponse(successfulRequest: Boolean)
 
 case class ImovoClientException(message: String)
+sealed trait ImovoSubscriptionType {
+  def value: String
+}
+object ImovoSubscriptionType {
+  case object ActiveCard extends ImovoSubscriptionType { override def value: String = "ActiveCard" }
+  case object ActiveLetter extends ImovoSubscriptionType { override def value: String = "ActiveLetter" }
+  case object Both extends ImovoSubscriptionType { override def value: String = "Both" }
+}
 
 trait ImovoClient[F[_]] {
   def createVoucher(
@@ -41,6 +49,7 @@ trait ImovoClient[F[_]] {
     startDate: LocalDate
   ): EitherT[F, ImovoClientException, ImovoSubscriptionResponse]
   def replaceVoucher(voucherCode: String): EitherT[F, ImovoClientException, ImovoVoucherResponse]
+  def replaceVoucher(subscriptionId: SfSubscriptionId, subscriptionType: ImovoSubscriptionType): EitherT[F, ImovoClientException, ImovoSubscriptionResponse]
   def updateVoucher(voucherCode: String, expiryDate: LocalDate): EitherT[F, ImovoClientException, Unit]
   def getSubscriptionVoucher(voucherCode: String): EitherT[F, ImovoClientException, ImovoSubscriptionResponse]
 }
@@ -165,6 +174,20 @@ object ImovoClient extends LazyLogging {
           Method.GET,
           Uri(new URI(s"$baseUrl/Subscription/GetSubscriptionVoucherDetails"))
             .param("SubscriptionId", subscriptionId),
+          None
+        )
+      }
+
+      override def replaceVoucher(
+        subscriptionId: SfSubscriptionId,
+        subscriptionType: ImovoSubscriptionType
+      ): EitherT[F, ImovoClientException, ImovoSubscriptionResponse] = {
+        sendAuthenticatedRequest[ImovoSubscriptionResponse, String](
+          apiKey,
+          Method.GET,
+          Uri(new URI(s"$baseUrl/Subscription/ReplaceVoucherBySubscriptionId"))
+            .param("SubscriptionId", subscriptionId.value)
+            .param("SubscriptionType", subscriptionType.value),
           None
         )
       }

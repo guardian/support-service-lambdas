@@ -5,7 +5,7 @@ import java.time.LocalDate
 import cats.effect.IO
 import com.gu.DevIdentity
 import com.gu.digital_voucher_api.imovo.ImovoStub._
-import com.gu.digital_voucher_api.imovo.{ImovoErrorResponse, ImovoSubscriptionResponse, ImovoUpdateResponse, ImovoVoucher, ImovoVoucherResponse}
+import com.gu.digital_voucher_api.imovo.{ImovoErrorResponse, ImovoSubscriptionResponse, ImovoSubscriptionType, ImovoUpdateResponse, ImovoVoucher, ImovoVoucherResponse}
 import com.softwaremill.diffx.scalatest.DiffMatcher
 import com.softwaremill.sttp.impl.cats.CatsMonadError
 import com.softwaremill.sttp.testing.SttpBackendStub
@@ -184,8 +184,7 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
       "Bad request argument: Rate plan name has no matching campaign codes: RatePlanName(HomeDelivery)"
     ))
   }
-
-  it should "return stubbed voucher details for replace request" in {
+  it should "return voucher details for replace request with original voucher codes" in {
     val imovoBackendStub: SttpBackendStub[IO, Nothing] = SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
       .stubReplace(
         apiKey = apiKey,
@@ -213,7 +212,37 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
     )
     response.status.code should matchTo(200)
   }
+  it should "return voucher details for replace request with subscriptionId" in {
+    val imovoBackendStub: SttpBackendStub[IO, Nothing] = SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
+      .stubReplaceSubscription(
+        apiKey = apiKey,
+        baseUrl = baseUrl,
+        subscriptionId = subscriptionId.value,
+        imovoSubscriptionType = ImovoSubscriptionType.Both,
+        response = ImovoSubscriptionResponse(
+          schemeName = "Guardian7Day",
+          subscriptionId = subscriptionId.value,
+          successfulRequest = true,
+          subscriptionVouchers = List(
+            ImovoVoucher("ActiveCard", "replaced-card-test-voucher-code"),
+            ImovoVoucher("ActiveLetter", "replaced-letter-test-voucher-code")
+          )
+        )
+      )
 
+    val app = createApp(imovoBackendStub)
+    val response = app.run(
+      Request(
+        method = Method.POST,
+        Uri(path = "/digital-voucher/replace")
+      ).withEntity[String](SubscriptionRequestBody(Some(subscriptionId.value), None, None).asJson.spaces2)
+    ).value.unsafeRunSync().get
+
+    getBody[Voucher](response) should matchTo(
+      Voucher("replaced-card-test-voucher-code", "replaced-letter-test-voucher-code")
+    )
+    response.status.code should matchTo(200)
+  }
   it should "return error response when one imovo replace request fails" in {
     val imovoBackendStub: SttpBackendStub[IO, Nothing] = SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
       .stubReplace(
@@ -239,7 +268,6 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
 
     response.status.code should matchTo(500)
   }
-
   it should "return voucher details for get subscription request" in {
     val imovoBackendStub: SttpBackendStub[IO, Nothing] = SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
       .stubGetSubscription(
