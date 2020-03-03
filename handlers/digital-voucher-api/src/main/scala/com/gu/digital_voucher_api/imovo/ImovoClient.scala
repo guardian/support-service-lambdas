@@ -7,7 +7,7 @@ import java.time.format.DateTimeFormatter
 import cats.data.EitherT
 import cats.effect.Sync
 import cats.implicits._
-import com.gu.digital_voucher_api.{CampaignCode, ImovoClientException, SchemeName, SfSubscriptionId}
+import com.gu.digital_voucher_api.{CampaignCode, SchemeName, SfSubscriptionId}
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
 import com.typesafe.scalalogging.LazyLogging
@@ -26,6 +26,8 @@ case class ImovoSubscriptionResponse(
 case class ImovoErrorResponse(errorMessages: List[String], successfulRequest: Boolean)
 case class ImovoDeleteResponse(successfulRequest: Boolean)
 case class ImovoUpdateResponse(successfulRequest: Boolean)
+
+case class ImovoClientException(message: String)
 
 trait ImovoClient[F[_]] {
   def createVoucher(

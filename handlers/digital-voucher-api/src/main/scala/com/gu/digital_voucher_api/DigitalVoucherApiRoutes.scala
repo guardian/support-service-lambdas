@@ -51,10 +51,10 @@ object DigitalVoucherApiRoutes {
           voucher <- digitalVoucherService
             .oldCreateVoucher(subscriptionId, RatePlanName(requestBody.ratePlanName))
             .leftMap {
-              case DigitalVoucherApiException(InvalidArgumentException(msg)) =>
+              case InvalidArgumentException(msg) =>
                 // see https://tools.ietf.org/html/rfc4918#section-11.2
                 UnprocessableEntity(DigitalVoucherApiRoutesError(s"Bad request argument: $msg"))
-              case DigitalVoucherApiException(ImovoClientException(msg)) =>
+              case ImovoOperationFailedException(msg) =>
                 BadGateway(DigitalVoucherApiRoutesError(s"Imovo failure to create voucher: $msg"))
               case error =>
                 InternalServerError(DigitalVoucherApiRoutesError(s"Failed create voucher: $error"))
@@ -70,10 +70,10 @@ object DigitalVoucherApiRoutes {
           voucher <- digitalVoucherService
             .createVoucher(subscriptionId, RatePlanName(requestBody.ratePlanName))
             .leftMap {
-              case DigitalVoucherApiException(InvalidArgumentException(msg)) =>
+              case InvalidArgumentException(msg) =>
                 // see https://tools.ietf.org/html/rfc4918#section-11.2
                 UnprocessableEntity(DigitalVoucherApiRoutesError(s"Bad request argument: $msg"))
-              case DigitalVoucherApiException(ImovoClientException(msg)) =>
+              case ImovoOperationFailedException(msg) =>
                 BadGateway(DigitalVoucherApiRoutesError(s"Imovo failure to create voucher: $msg"))
               case error =>
                 InternalServerError(DigitalVoucherApiRoutesError(s"Failed create voucher: $error"))

@@ -5,16 +5,16 @@ import java.time.LocalDate
 import cats.Monad
 import cats.implicits._
 import cats.data.EitherT
-import com.gu.digital_voucher_api.imovo.{ImovoClient, ImovoSubscriptionResponse, ImovoVoucherResponse}
+import com.gu.digital_voucher_api.imovo.{ImovoClient, ImovoSubscriptionResponse}
 
 case class Voucher(cardCode: String, letterCode: String)
 
 trait DigitalVoucherService[F[_]] {
-  def oldCreateVoucher(subscriptionId: SfSubscriptionId, ratePlanName: RatePlanName): EitherT[F, DigitalVoucherApiException, Voucher]
-  def createVoucher(subscriptionId: SfSubscriptionId, ratePlanName: RatePlanName): EitherT[F, DigitalVoucherApiException, Voucher]
-  def replaceVoucher(voucher: Voucher): EitherT[F, DigitalVoucherServiceException, Voucher]
-  def getVoucher(subscriptionId: String): EitherT[F, DigitalVoucherServiceException, Voucher]
-  def cancelVouchers(cardCode: String, cancellationDate: LocalDate): EitherT[F, DigitalVoucherServiceException, Unit]
+  def oldCreateVoucher(subscriptionId: SfSubscriptionId, ratePlanName: RatePlanName): EitherT[F, DigitalVoucherServiceError, Voucher]
+  def createVoucher(subscriptionId: SfSubscriptionId, ratePlanName: RatePlanName): EitherT[F, DigitalVoucherServiceError, Voucher]
+  def replaceVoucher(voucher: Voucher): EitherT[F, DigitalVoucherServiceFailure, Voucher]
+  def getVoucher(subscriptionId: String): EitherT[F, DigitalVoucherServiceFailure, Voucher]
+  def cancelVouchers(cardCode: String, cancellationDate: LocalDate): EitherT[F, DigitalVoucherServiceFailure, Unit]
 }
 
 object DigitalVoucherService {
@@ -74,24 +74,24 @@ object DigitalVoucherService {
     override def createVoucher(
       subscriptionId: SfSubscriptionId,
       ratePlanName: RatePlanName
-    ): EitherT[F, DigitalVoucherApiException, Voucher] = {
+    ): EitherT[F, DigitalVoucherServiceError, Voucher] = {
       val tomorrow = LocalDate.now.plusDays(1)
 
       for {
         schemeName <- schemeNames
           .get(ratePlanName)
-          .toRight(DigitalVoucherApiException(InvalidArgumentException(s"Rate plan name has no matching scheme name: $ratePlanName")))
+          .toRight(InvalidArgumentException(s"Rate plan name has no matching scheme name: $ratePlanName"))
           .toEitherT[F]
         voucherResponse <- imovoClient
           .createSubscriptionVoucher(subscriptionId, schemeName, tomorrow)
           .leftMap { error =>
-            DigitalVoucherApiException(ImovoClientException(error.toString))
+            ImovoOperationFailedException(error.toString)
           }
         voucher <- toVoucher(voucherResponse).toEitherT[F]
       } yield voucher
     }
 
-    def toVoucher(voucherResponse: ImovoSubscriptionResponse): Either[DigitalVoucherApiException, Voucher] = {
+    def toVoucher(voucherResponse: ImovoSubscriptionResponse): Either[DigitalVoucherServiceError, Voucher] = {
       (
         voucherResponse
           .subscriptionVouchers
@@ -104,7 +104,7 @@ object DigitalVoucherService {
       ).parMapN { (letterVoucher, cardVoucher) =>
         Voucher(cardVoucher.voucherCode, letterVoucher.voucherCode)
       }.leftMap { errors =>
-        DigitalVoucherApiException(ImovoInvalidResponseException(errors.mkString(",")))
+        DigitalVoucherServiceFailure(errors.mkString(","))
       }
     }
 
@@ -112,9 +112,9 @@ object DigitalVoucherService {
     override def oldCreateVoucher(
       subscriptionId: SfSubscriptionId,
       ratePlanName: RatePlanName
-    ): EitherT[F, DigitalVoucherApiException, Voucher] = {
+    ): EitherT[F, DigitalVoucherServiceError, Voucher] = {
 
-      def requestVoucher(code: CampaignCodeSet) = {
+      def requestVoucher(code: CampaignCodeSet): EitherT[F, DigitalVoucherServiceError, Voucher] = {
         val tomorrow = LocalDate.now.plusDays(1)
         (
           imovoClient.createVoucher(subscriptionId, code.card, tomorrow).leftMap(List(_)),
@@ -122,32 +122,32 @@ object DigitalVoucherService {
           ).parMapN { (cardResponse, letterResponse) =>
           Voucher(cardResponse.voucherCode, letterResponse.voucherCode)
         }.leftMap(errors =>
-          DigitalVoucherApiException(ImovoClientException(errors.map(_.message).mkString(", ")))
+          ImovoOperationFailedException(errors.map(_.message).mkString(", "))
         )
       }
 
       campaignCodes.get(ratePlanName).map(requestVoucher).getOrElse {
-        EitherT.leftT(DigitalVoucherApiException(InvalidArgumentException(
+        EitherT.leftT(InvalidArgumentException(
           s"Rate plan name has no matching campaign codes: $ratePlanName"
-        )))
+        ))
       }
     }
 
     override def replaceVoucher(
       voucher: Voucher
-    ): EitherT[F, DigitalVoucherServiceException, Voucher] =
+    ): EitherT[F, DigitalVoucherServiceFailure, Voucher] =
       (
         imovoClient.replaceVoucher(voucher.cardCode).leftMap(List(_)),
         imovoClient.replaceVoucher(voucher.letterCode).leftMap(List(_))
       ).parMapN { (cardResponse, letterResponse) =>
           Voucher(cardResponse.voucherCode, letterResponse.voucherCode)
-        }.leftMap(errors => DigitalVoucherServiceException(errors.mkString(", ")))
+        }.leftMap(errors => DigitalVoucherServiceFailure(errors.mkString(", ")))
 
-    override def cancelVouchers(cardCode: String, cancellationDate: LocalDate): EitherT[F, DigitalVoucherServiceException, Unit] =
-      imovoClient.updateVoucher(cardCode, cancellationDate).leftMap(error => DigitalVoucherServiceException(error.message))
+    override def cancelVouchers(cardCode: String, cancellationDate: LocalDate): EitherT[F, DigitalVoucherServiceFailure, Unit] =
+      imovoClient.updateVoucher(cardCode, cancellationDate).leftMap(error => DigitalVoucherServiceFailure(error.message))
 
-    override def getVoucher(subscriptionId: String): EitherT[F, DigitalVoucherServiceException, Voucher] =
-      EitherT.rightT[F, DigitalVoucherServiceException](
+    override def getVoucher(subscriptionId: String): EitherT[F, DigitalVoucherServiceFailure, Voucher] =
+      EitherT.rightT[F, DigitalVoucherServiceFailure](
         Voucher(s"5555555555", s"6666666666")
       )
   }
