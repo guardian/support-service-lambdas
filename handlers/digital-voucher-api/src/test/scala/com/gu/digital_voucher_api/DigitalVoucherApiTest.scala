@@ -357,7 +357,7 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
         subscriptionId = subscriptionId.value,
         lastActiveDate = Some(cancellationDate.minusDays(1)),
         response = ImovoSuccessResponse("OK", true)
-    )
+      )
 
     val app = createApp(imovoBackendStub)
     val response = app.run(

@@ -94,7 +94,7 @@ object ImovoStub {
     val methodMatches = request.method == Method.GET
     val queryParamMatches =
       request.uri.paramsMap.get("SubscriptionId").contains(subscriptionId) &&
-      request.uri.paramsMap.get("SubscriptionType").contains(imovoSubscriptionType.value)
+        request.uri.paramsMap.get("SubscriptionType").contains(imovoSubscriptionType.value)
     val apiKeyMatches = request.headers.toMap.get("X-API-KEY") === Some(apiKey)
     urlMatches && methodMatches && queryParamMatches && apiKeyMatches
   }

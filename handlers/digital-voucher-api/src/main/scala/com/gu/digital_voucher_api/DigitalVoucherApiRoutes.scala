@@ -90,10 +90,9 @@ object DigitalVoucherApiRoutes {
           subscriptionId <- requestBody.subscriptionId
             .toRight(UnprocessableEntity(DigitalVoucherApiRoutesError(s"subscriptionId is required")))
             .toEitherT[F]
-          replacementVoucher <-
-            digitalVoucherService
-              .replaceVoucher(SfSubscriptionId(subscriptionId))
-              .leftMap(error => InternalServerError(DigitalVoucherApiRoutesError(s"Failed replace voucher: $error")))
+          replacementVoucher <- digitalVoucherService
+            .replaceVoucher(SfSubscriptionId(subscriptionId))
+            .leftMap(error => InternalServerError(DigitalVoucherApiRoutesError(s"Failed replace voucher: $error")))
         } yield Ok(replacementVoucher)
       }
 
@@ -112,7 +111,7 @@ object DigitalVoucherApiRoutes {
       toResponse(
         for {
           requestBody <- parseRequest[SubscriptionRequestBody](request)
-          voucherResponse <- if(requestBody.subscriptionId.isDefined) {
+          voucherResponse <- if (requestBody.subscriptionId.isDefined) {
             replaceSubscriptionVouchers(requestBody)
           } else {
             replaceVoucherCodes(requestBody)
