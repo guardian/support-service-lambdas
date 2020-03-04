@@ -85,7 +85,7 @@ export class SfMoveSubscriptionsStack extends cdk.Stack {
           timeout: Duration.seconds(300),
           code: Code.bucket(
             deployBucket,
-            `subscriptions/${stageParameter.valueAsString}/sf-move-subscriptions/sf-move-subscriptions.jar`
+            `membership/${stageParameter.valueAsString}/sf-move-subscriptions-api/sf-move-subscriptions-api.jar`
           ),
           handler: 'com.gu.sf_move_subscriptions.Handler::apply',
           role: fnRole,
