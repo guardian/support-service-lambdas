@@ -100,7 +100,7 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
           successfulRequest = false
         )
       )
-    .stubGetSubscription(
+      .stubGetSubscription(
         apiKey = apiKey,
         baseUrl = baseUrl,
         subscriptionId = subscriptionId.value,

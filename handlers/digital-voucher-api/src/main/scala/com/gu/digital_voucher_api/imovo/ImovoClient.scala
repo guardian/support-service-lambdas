@@ -157,10 +157,10 @@ object ImovoClient extends LazyLogging {
       }
 
       override def createSubscriptionVoucher(
-                                              subscriptionId: SfSubscriptionId,
-                                              schemeName: SchemeName,
-                                              startDate: LocalDate
-                                            ): EitherT[F, ImovoClientException, ImovoSubscriptionResponse] =
+        subscriptionId: SfSubscriptionId,
+        schemeName: SchemeName,
+        startDate: LocalDate
+      ): EitherT[F, ImovoClientException, ImovoSubscriptionResponse] =
         sendAuthenticatedRequest[ImovoSubscriptionResponse, String](
           apiKey,
           Method.GET,
