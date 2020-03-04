@@ -30,7 +30,7 @@ export class SfMoveSubscriptionsStack extends cdk.Stack {
       description: 'Stage',
     })
 
-    const appName = 'sf-move-subscriptions'
+    const appName = 'sf-move-subscriptions-api'
     const stackName = 'membership'
     const deployBucket = s3.Bucket.fromBucketName(
       this,
@@ -66,7 +66,7 @@ export class SfMoveSubscriptionsStack extends cdk.Stack {
         resources: [`arn:aws:logs:${region}:${account}:log-group:/aws/lambda/${appName}-${stageParameter.valueAsString}:*`],
       }))
   
-      Tag.add(role, 'App', `${appName}-lambda-role`)
+      Tag.add(role, 'App', appName)
       Tag.add(role, 'Stage', stageParameter.valueAsString)
       Tag.add(role, 'Stack', stackName)
 
@@ -101,14 +101,13 @@ export class SfMoveSubscriptionsStack extends cdk.Stack {
 
     // api gateway
     const createSfMoveSubscriptionsApi = (fn: lambda.IFunction) => {
-      const apiGatewayName = `${appName}-api`
       const apiStageName: string = context.resolve(mappings.findInMap(stageParameter.valueAsString, 'stageName'))
 
       const apiGateway = new apigateway.LambdaRestApi(
         this,
-        apiGatewayName,
+        appName,
         {
-          restApiName: `${apiGatewayName}-${stageParameter.valueAsString}`,
+          restApiName: `${appName}-${stageParameter.valueAsString}`,
           proxy: true,
           handler: fn,
           description: `API for for moving subscriptions in Salesforce in ${stageParameter.valueAsString} env`,
