@@ -30,7 +30,7 @@ export class SfMoveSubscriptionsStack extends cdk.Stack {
       description: 'Stage',
     })
 
-    const appName = 'sf-move-subscritions'
+    const appName = 'sf-move-subscriptions'
     const stackName = 'membership'
     const deployBucket = s3.Bucket.fromBucketName(
       this,
