@@ -1,4 +1,5 @@
-package com.gu.sf_move_subscriptions
+package com.gu.sf.move.subscriptions.api
+
 import com.gu.util.Logging
 
 object Handler extends Logging {

@@ -87,7 +87,7 @@ export class SfMoveSubscriptionsStack extends cdk.Stack {
             deployBucket,
             `membership/${stageParameter.valueAsString}/sf-move-subscriptions-api/sf-move-subscriptions-api.jar`
           ),
-          handler: 'com.gu.sf_move_subscriptions.Handler::apply',
+          handler: 'com.gu.sf.move.subscriptions.api.Handler::apply',
           role: fnRole,
         },
       )
