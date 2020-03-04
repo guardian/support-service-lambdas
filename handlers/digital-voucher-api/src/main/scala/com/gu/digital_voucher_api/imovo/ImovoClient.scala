@@ -44,15 +44,15 @@ trait ImovoClient[F[_]] {
     campaignCode: CampaignCode,
     startDate: LocalDate
   ): EitherT[F, ImovoClientException, ImovoVoucherResponse]
+  def replaceVoucher(voucherCode: String): EitherT[F, ImovoClientException, ImovoVoucherResponse]
+  def updateVoucher(voucherCode: String, expiryDate: LocalDate): EitherT[F, ImovoClientException, Unit]
   def createSubscriptionVoucher(
     subscriptionId: SfSubscriptionId,
     schemeName: SchemeName,
     startDate: LocalDate
   ): EitherT[F, ImovoClientException, ImovoSubscriptionResponse]
-  def replaceVoucher(voucherCode: String): EitherT[F, ImovoClientException, ImovoVoucherResponse]
-  def replaceVoucher(subscriptionId: SfSubscriptionId, subscriptionType: ImovoSubscriptionType): EitherT[F, ImovoClientException, ImovoSubscriptionResponse]
-  def updateVoucher(voucherCode: String, expiryDate: LocalDate): EitherT[F, ImovoClientException, Unit]
   def getSubscriptionVoucher(voucherCode: String): EitherT[F, ImovoClientException, ImovoSubscriptionResponse]
+  def replaceSubscriptionVoucher(subscriptionId: SfSubscriptionId, subscriptionType: ImovoSubscriptionType): EitherT[F, ImovoClientException, ImovoSubscriptionResponse]
   def cancelSubscriptionVoucher(subscriptionId: SfSubscriptionId, lastActiveDay: LocalDate): EitherT[F, ImovoClientException, ImovoSuccessResponse]
 }
 
@@ -120,20 +120,6 @@ object ImovoClient extends LazyLogging {
     val imovoDateFormat = DateTimeFormatter.ISO_DATE
 
     new ImovoClient[F] {
-      override def createSubscriptionVoucher(
-        subscriptionId: SfSubscriptionId,
-        schemeName: SchemeName,
-        startDate: LocalDate
-      ): EitherT[F, ImovoClientException, ImovoSubscriptionResponse] =
-        sendAuthenticatedRequest[ImovoSubscriptionResponse, String](
-          apiKey,
-          Method.GET,
-          Uri(new URI(s"$baseUrl/Subscription/RequestSubscriptionVouchers"))
-            .param("SubscriptionId", subscriptionId.value)
-            .param("SchemeName", schemeName.value)
-            .param("StartDate", imovoDateFormat.format(startDate)),
-          None
-        )
 
       override def createVoucher(
         subscriptionId: SfSubscriptionId,
@@ -170,6 +156,21 @@ object ImovoClient extends LazyLogging {
         ).map(_ => ())
       }
 
+      override def createSubscriptionVoucher(
+                                              subscriptionId: SfSubscriptionId,
+                                              schemeName: SchemeName,
+                                              startDate: LocalDate
+                                            ): EitherT[F, ImovoClientException, ImovoSubscriptionResponse] =
+        sendAuthenticatedRequest[ImovoSubscriptionResponse, String](
+          apiKey,
+          Method.GET,
+          Uri(new URI(s"$baseUrl/Subscription/RequestSubscriptionVouchers"))
+            .param("SubscriptionId", subscriptionId.value)
+            .param("SchemeName", schemeName.value)
+            .param("StartDate", imovoDateFormat.format(startDate)),
+          None
+        )
+
       override def getSubscriptionVoucher(subscriptionId: String): EitherT[F, ImovoClientException, ImovoSubscriptionResponse] = {
         sendAuthenticatedRequest[ImovoSubscriptionResponse, String](
           apiKey,
@@ -180,7 +181,7 @@ object ImovoClient extends LazyLogging {
         )
       }
 
-      override def replaceVoucher(
+      override def replaceSubscriptionVoucher(
         subscriptionId: SfSubscriptionId,
         subscriptionType: ImovoSubscriptionType
       ): EitherT[F, ImovoClientException, ImovoSubscriptionResponse] = {

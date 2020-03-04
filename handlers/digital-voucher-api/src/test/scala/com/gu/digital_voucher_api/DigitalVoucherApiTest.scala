@@ -334,7 +334,7 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
       Request(
         method = Method.POST,
         Uri(path = "/digital-voucher/replace")
-      ).withEntity[String](SubscriptionRequestBody(Some(subscriptionId.value), None, None).asJson.spaces2)
+      ).withEntity[String](SubscriptionActionRequestBody(Some(subscriptionId.value), None, None).asJson.spaces2)
     ).value.unsafeRunSync().get
 
     getBody[Voucher](response) should matchTo(
@@ -414,7 +414,7 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
       Request(
         method = Method.POST,
         Uri(path = "/digital-voucher/cancel")
-      ).withEntity[String](CancelVoucherRequestBody(subscriptionId.value, cancellationDate).asJson.spaces2)
+      ).withEntity[String](CancelSubscriptionVoucherRequestBody(subscriptionId.value, cancellationDate).asJson.spaces2)
     ).value.unsafeRunSync().get
 
     getBody[Unit](response) should equal(())

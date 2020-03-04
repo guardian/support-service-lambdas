@@ -173,7 +173,7 @@ object DigitalVoucherService {
     override def replaceVoucher(sfSubscriptionId: SfSubscriptionId): EitherT[F, DigitalVoucherServiceError, Voucher] = {
       for {
         voucherResponse <- imovoClient
-          .replaceVoucher(sfSubscriptionId, ImovoSubscriptionType.Both)
+          .replaceSubscriptionVoucher(sfSubscriptionId, ImovoSubscriptionType.Both)
           .leftMap(error => DigitalVoucherServiceFailure(error.message))
         voucher <- toVoucher(voucherResponse).toEitherT[F]
       } yield voucher

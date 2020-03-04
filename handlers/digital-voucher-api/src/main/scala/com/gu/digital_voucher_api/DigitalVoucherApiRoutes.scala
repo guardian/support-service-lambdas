@@ -17,9 +17,9 @@ case class DigitalVoucherApiRoutesError(message: String)
 
 case class CreateVoucherRequestBody(ratePlanName: String)
 
-case class CancelVoucherRequestBody(subscriptionId: String, cancellationDate: LocalDate)
+case class CancelSubscriptionVoucherRequestBody(subscriptionId: String, cancellationDate: LocalDate)
 
-case class SubscriptionRequestBody(subscriptionId: Option[String], cardCode: Option[String], letterCode: Option[String])
+case class SubscriptionActionRequestBody(subscriptionId: Option[String], cardCode: Option[String], letterCode: Option[String])
 
 object DigitalVoucherApiRoutes {
 
@@ -85,7 +85,7 @@ object DigitalVoucherApiRoutes {
     }
 
     def handleReplaceRequest(request: Request[F]) = {
-      def replaceSubscriptionVouchers(requestBody: SubscriptionRequestBody) = {
+      def replaceSubscriptionVouchers(requestBody: SubscriptionActionRequestBody) = {
         for {
           subscriptionId <- requestBody.subscriptionId
             .toRight(UnprocessableEntity(DigitalVoucherApiRoutesError(s"subscriptionId is required")))
@@ -96,7 +96,7 @@ object DigitalVoucherApiRoutes {
         } yield Ok(replacementVoucher)
       }
 
-      def replaceVoucherCodes(requestBody: SubscriptionRequestBody) = {
+      def replaceVoucherCodes(requestBody: SubscriptionActionRequestBody) = {
         for {
           voucherToReplace <- (requestBody.cardCode, requestBody.letterCode)
             .mapN(Voucher.apply)
@@ -110,7 +110,7 @@ object DigitalVoucherApiRoutes {
 
       toResponse(
         for {
-          requestBody <- parseRequest[SubscriptionRequestBody](request)
+          requestBody <- parseRequest[SubscriptionActionRequestBody](request)
           voucherResponse <- if (requestBody.subscriptionId.isDefined) {
             replaceSubscriptionVouchers(requestBody)
           } else {
@@ -134,7 +134,7 @@ object DigitalVoucherApiRoutes {
     def handleCancelRequest(request: Request[F]) = {
       toResponse(
         for {
-          requestBody <- parseRequest[CancelVoucherRequestBody](request)
+          requestBody <- parseRequest[CancelSubscriptionVoucherRequestBody](request)
           result <- digitalVoucherService
             .cancelVouchers(SfSubscriptionId(requestBody.subscriptionId), requestBody.cancellationDate)
             .leftMap(error => InternalServerError(DigitalVoucherApiRoutesError(s"Failed get voucher: $error")))
