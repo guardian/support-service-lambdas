@@ -28,10 +28,6 @@ object DigitalVoucherApiRoutes {
     object http4sDsl extends Http4sDsl[F]
     import http4sDsl._
 
-    def toResponse(result: EitherT[F, F[Response[F]], F[Response[F]]]): F[Response[F]] = {
-      result.fold(identity, identity).flatten
-    }
-
     def parseRequest[A: Decoder](request: Request[F]) = {
       implicit val showDecodeFailure = Show.show[DecodeFailure] {
         case InvalidMessageBodyFailure(details, cause) => s"InvalidMessageBodyFailure($details, $cause)"
@@ -47,41 +43,37 @@ object DigitalVoucherApiRoutes {
     }
 
     def handleOldCreateRequest(request: Request[F], subscriptionId: SfSubscriptionId) = {
-      toResponse(
-        for {
-          requestBody <- parseRequest[CreateVoucherRequestBody](request)
-          voucher <- digitalVoucherService
-            .oldCreateVoucher(subscriptionId, RatePlanName(requestBody.ratePlanName))
-            .leftMap {
-              case InvalidArgumentException(msg) =>
-                // see https://tools.ietf.org/html/rfc4918#section-11.2
-                UnprocessableEntity(DigitalVoucherApiRoutesError(s"Bad request argument: $msg"))
-              case ImovoOperationFailedException(msg) =>
-                BadGateway(DigitalVoucherApiRoutesError(s"Imovo failure to create voucher: $msg"))
-              case error =>
-                InternalServerError(DigitalVoucherApiRoutesError(s"Failed create voucher: $error"))
-            }
-        } yield Created(voucher)
-      )
+      (for {
+        requestBody <- parseRequest[CreateVoucherRequestBody](request)
+        voucher <- digitalVoucherService
+          .oldCreateVoucher(subscriptionId, RatePlanName(requestBody.ratePlanName))
+          .leftMap {
+            case InvalidArgumentException(msg) =>
+              // see https://tools.ietf.org/html/rfc4918#section-11.2
+              UnprocessableEntity(DigitalVoucherApiRoutesError(s"Bad request argument: $msg"))
+            case ImovoOperationFailedException(msg) =>
+              BadGateway(DigitalVoucherApiRoutesError(s"Imovo failure to create voucher: $msg"))
+            case error =>
+              InternalServerError(DigitalVoucherApiRoutesError(s"Failed create voucher: $error"))
+          }
+      } yield Created(voucher)).merge.flatten
     }
 
     def handleCreateRequest(request: Request[F], subscriptionId: SfSubscriptionId) = {
-      toResponse(
-        for {
-          requestBody <- parseRequest[CreateVoucherRequestBody](request)
-          voucher <- digitalVoucherService
-            .createVoucher(subscriptionId, RatePlanName(requestBody.ratePlanName))
-            .leftMap {
-              case InvalidArgumentException(msg) =>
-                // see https://tools.ietf.org/html/rfc4918#section-11.2
-                UnprocessableEntity(DigitalVoucherApiRoutesError(s"Bad request argument: $msg"))
-              case ImovoOperationFailedException(msg) =>
-                BadGateway(DigitalVoucherApiRoutesError(s"Imovo failure to create voucher: $msg"))
-              case error =>
-                InternalServerError(DigitalVoucherApiRoutesError(s"Failed create voucher: $error"))
-            }
-        } yield Created(voucher)
-      )
+      (for {
+        requestBody <- parseRequest[CreateVoucherRequestBody](request)
+        voucher <- digitalVoucherService
+          .createVoucher(subscriptionId, RatePlanName(requestBody.ratePlanName))
+          .leftMap {
+            case InvalidArgumentException(msg) =>
+              // see https://tools.ietf.org/html/rfc4918#section-11.2
+              UnprocessableEntity(DigitalVoucherApiRoutesError(s"Bad request argument: $msg"))
+            case ImovoOperationFailedException(msg) =>
+              BadGateway(DigitalVoucherApiRoutesError(s"Imovo failure to create voucher: $msg"))
+            case error =>
+              InternalServerError(DigitalVoucherApiRoutesError(s"Failed create voucher: $error"))
+          }
+      } yield Created(voucher)).merge.flatten
     }
 
     def handleReplaceRequest(request: Request[F]) = {
@@ -108,38 +100,32 @@ object DigitalVoucherApiRoutes {
         } yield Ok(replacementVoucher)
       }
 
-      toResponse(
-        for {
-          requestBody <- parseRequest[SubscriptionActionRequestBody](request)
-          voucherResponse <- if (requestBody.subscriptionId.isDefined) {
-            replaceSubscriptionVouchers(requestBody)
-          } else {
-            replaceVoucherCodes(requestBody)
-          }
-        } yield voucherResponse
-      )
+      (for {
+        requestBody <- parseRequest[SubscriptionActionRequestBody](request)
+        voucherResponse <- if (requestBody.subscriptionId.isDefined) {
+          replaceSubscriptionVouchers(requestBody)
+        } else {
+          replaceVoucherCodes(requestBody)
+        }
+      } yield voucherResponse).merge.flatten
     }
 
     def handleGetRequest(subscriptionId: String) = {
-      toResponse(
-        digitalVoucherService
-          .getVoucher(subscriptionId)
-          .bimap(
-            error => InternalServerError(DigitalVoucherApiRoutesError(s"Failed get voucher: $error")),
-            voucher => Ok(voucher)
-          )
-      )
+      digitalVoucherService
+        .getVoucher(subscriptionId)
+        .bimap(
+          error => InternalServerError(DigitalVoucherApiRoutesError(s"Failed get voucher: $error")),
+          voucher => Ok(voucher)
+        ).merge.flatten
     }
 
     def handleCancelRequest(request: Request[F]) = {
-      toResponse(
-        for {
-          requestBody <- parseRequest[CancelSubscriptionVoucherRequestBody](request)
-          result <- digitalVoucherService
-            .cancelVouchers(SfSubscriptionId(requestBody.subscriptionId), requestBody.cancellationDate)
-            .leftMap(error => InternalServerError(DigitalVoucherApiRoutesError(s"Failed get voucher: $error")))
-        } yield Ok(result)
-      )
+      (for {
+        requestBody <- parseRequest[CancelSubscriptionVoucherRequestBody](request)
+        result <- digitalVoucherService
+          .cancelVouchers(SfSubscriptionId(requestBody.subscriptionId), requestBody.cancellationDate)
+          .leftMap(error => InternalServerError(DigitalVoucherApiRoutesError(s"Failed get voucher: $error")))
+      } yield Ok(result)).merge.flatten
     }
 
     HttpRoutes.of[F] {
