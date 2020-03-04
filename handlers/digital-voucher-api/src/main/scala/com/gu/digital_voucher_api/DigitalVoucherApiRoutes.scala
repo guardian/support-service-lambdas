@@ -42,11 +42,11 @@ object DigitalVoucherApiRoutes {
         }
     }
 
-    def handleOldCreateRequest(request: Request[F], subscriptionId: SfSubscriptionId) = {
+    def handleLegacyCreateRequest(request: Request[F], subscriptionId: SfSubscriptionId) = {
       (for {
         requestBody <- parseRequest[CreateVoucherRequestBody](request)
         voucher <- digitalVoucherService
-          .oldCreateVoucher(subscriptionId, RatePlanName(requestBody.ratePlanName))
+          .legacyCreateVoucher(subscriptionId, RatePlanName(requestBody.ratePlanName))
           .leftMap {
             case InvalidArgumentException(msg) =>
               // see https://tools.ietf.org/html/rfc4918#section-11.2
@@ -130,7 +130,7 @@ object DigitalVoucherApiRoutes {
 
     HttpRoutes.of[F] {
       case request @ PUT -> Root / "digital-voucher" / "create" / subscriptionId =>
-        handleOldCreateRequest(request, SfSubscriptionId(subscriptionId))
+        handleLegacyCreateRequest(request, SfSubscriptionId(subscriptionId))
       case request @ PUT -> Root / "digital-voucher" / subscriptionId =>
         handleCreateRequest(request, SfSubscriptionId(subscriptionId))
       case request @ POST -> Root / "digital-voucher" / "replace" =>

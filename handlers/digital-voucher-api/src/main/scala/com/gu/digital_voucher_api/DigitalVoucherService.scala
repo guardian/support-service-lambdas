@@ -10,7 +10,7 @@ import com.gu.digital_voucher_api.imovo.{ImovoClient, ImovoSubscriptionResponse,
 case class Voucher(cardCode: String, letterCode: String)
 
 trait DigitalVoucherService[F[_]] {
-  def oldCreateVoucher(subscriptionId: SfSubscriptionId, ratePlanName: RatePlanName): EitherT[F, DigitalVoucherServiceError, Voucher]
+  def legacyCreateVoucher(subscriptionId: SfSubscriptionId, ratePlanName: RatePlanName): EitherT[F, DigitalVoucherServiceError, Voucher]
   def createVoucher(subscriptionId: SfSubscriptionId, ratePlanName: RatePlanName): EitherT[F, DigitalVoucherServiceError, Voucher]
   def replaceVoucher(voucher: Voucher): EitherT[F, DigitalVoucherServiceError, Voucher]
   def replaceVoucher(voucher: SfSubscriptionId): EitherT[F, DigitalVoucherServiceError, Voucher]
@@ -120,7 +120,7 @@ object DigitalVoucherService {
       }
     }
 
-    override def oldCreateVoucher(
+    override def legacyCreateVoucher(
       subscriptionId: SfSubscriptionId,
       ratePlanName: RatePlanName
     ): EitherT[F, DigitalVoucherServiceError, Voucher] = {
