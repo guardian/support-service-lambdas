@@ -19,11 +19,6 @@ export class SfMoveSubscriptionsStack extends cdk.Stack {
       description: 'Stage',
     })
 
-    const logGroupNamePrefixParameter = new cdk.CfnParameter(this, 'stage', {
-      type: 'String',
-      description: 'LogGroupNamePrefix',
-    })
-
     const appName = 'sf-move-subscritions'
     const stackName = 'membership'
     const deployBucket = s3.Bucket.fromBucketName(
@@ -40,7 +35,11 @@ export class SfMoveSubscriptionsStack extends cdk.Stack {
   
       role.addToPolicy(new iam.PolicyStatement({
         actions: ['s3:GetObject'],
-        resources: [`arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${stageParameter.valueAsString}/sfExportAuth-${stageParameter.valueAsString}*.json`],
+        resources: [
+          `arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${stageParameter.valueAsString}/sfAuth-${stageParameter.valueAsString}*.json`,
+          `arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${stageParameter.valueAsString}/zuoraRest-${stageParameter.valueAsString}*.json`
+,
+        ],
       }))
   
       role.addToPolicy(new iam.PolicyStatement({
@@ -63,10 +62,8 @@ export class SfMoveSubscriptionsStack extends cdk.Stack {
       return role
     }
 
-    const sfMoveSubscriptionsFnRole = createSfMoveSubscriptionsFnRole()
-
     // Lambda
-    const createSfMoveSubscriptionsLambda = () => {
+    const createSfMoveSubscriptionsLambda = (fnRole: iam.IRole) => {
       const fn = new lambda.Function(
         this,
         'sfMoveSubscriptionsLambda',
@@ -80,7 +77,7 @@ export class SfMoveSubscriptionsStack extends cdk.Stack {
             `membership/${stageParameter.valueAsString}/sf-move-subscriptions/sf-move-subscriptions.jar`
           ),
           handler: 'com.gu.sfMoveSubscriptions.Handler::apply',
-          role: sfMoveSubscriptionsFnRole,
+          role: fnRole,
         },
       )
   
@@ -91,26 +88,33 @@ export class SfMoveSubscriptionsStack extends cdk.Stack {
       return fn
     }
 
-    const sfMoveSubscriptionsLambda = createSfMoveSubscriptionsLambda()
-
     // api gateway
-    const apiGatewayName = `${appName}-api`
-    const apiGateway = new apigateway.LambdaRestApi(
-      this,
-      apiGatewayName,
-      {
-        restApiName: `${apiGatewayName}-${stageParameter.valueAsString}`,
-        proxy: true,
-        handler: sfMoveSubscriptionsLambda,
-        description: `API for admin tools image projection lambda in ${stageParameter.valueAsString} env`,
-        deployOptions: {
-          stageName: 'code'
-        }
-      })
+    const createSfMoveSubscriptionsApi = (fn: lambda.IFunction) => {
+      const apiGatewayName = `${appName}-api`
+      const apiGateway = new apigateway.LambdaRestApi(
+        this,
+        apiGatewayName,
+        {
+          restApiName: `${apiGatewayName}-${stageParameter.valueAsString}`,
+          proxy: true,
+          handler: fn,
+          description: `API for for moving subscriptions in Salesforce in ${stageParameter.valueAsString} env`,
+          deployOptions: {
+            stageName: stageParameter.valueAsString
+          }
+        })
+  
+      Tag.add(apiGateway, 'App', appName)
+      Tag.add(apiGateway, 'Stage', stageParameter.valueAsString)
+      Tag.add(apiGateway, 'Stack', stackName)
 
-    Tag.add(apiGateway, 'App', appName)
-    Tag.add(apiGateway, 'Stage', stageParameter.valueAsString)
-    Tag.add(apiGateway, 'Stack', stackName)
+      return apiGateway
+    }
 
+    const sfMoveSubscriptionsFnRole = createSfMoveSubscriptionsFnRole()
+
+    const sfMoveSubscriptionsLambda = createSfMoveSubscriptionsLambda(sfMoveSubscriptionsFnRole)
+
+    createSfMoveSubscriptionsApi(sfMoveSubscriptionsLambda)
   }
 }
