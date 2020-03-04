@@ -88,6 +88,17 @@ object DigitalVoucherService {
           .leftMap { error =>
             ImovoOperationFailedException(error.message)
           }
+          .recoverWith {
+            case createError =>
+              imovoClient
+                .getSubscriptionVoucher(subscriptionId.value)
+                .leftMap { error =>
+                  ImovoOperationFailedException(
+                    s"Imovo create request failed:${createError.message} " +
+                      s"and the Imovo get request failed: ${error.message}"
+                  )
+                }
+          }
         voucher <- toVoucher(voucherResponse).toEitherT[F]
       } yield voucher
     }
