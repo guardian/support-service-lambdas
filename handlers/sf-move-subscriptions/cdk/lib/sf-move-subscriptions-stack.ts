@@ -19,7 +19,7 @@ export class SfMoveSubscriptionsStack extends cdk.Stack {
         PROD: {
           stageName: 'PROD',
         },
-        TEST: {
+        CODE: {
           stageName: 'CODE',
         }
       }
