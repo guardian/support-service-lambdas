@@ -86,7 +86,7 @@ object DigitalVoucherService {
         voucherResponse <- imovoClient
           .createSubscriptionVoucher(subscriptionId, schemeName, tomorrow)
           .leftMap { error =>
-            ImovoOperationFailedException(error.toString)
+            ImovoOperationFailedException(error.message)
           }
         voucher <- toVoucher(voucherResponse).toEitherT[F]
       } yield voucher
