@@ -14,6 +14,17 @@ export class SfMoveSubscriptionsStack extends cdk.Stack {
     const account = context.account
     const region = context.region
 
+    const mappings = new cdk.CfnMapping(this, 'mappings', {
+      mapping: {
+        PROD: {
+          stageName: 'PROD',
+        },
+        TEST: {
+          stageName: 'CODE',
+        }
+      }
+    })
+
     const stageParameter = new cdk.CfnParameter(this, 'stage', {
       type: 'String',
       description: 'Stage',
@@ -91,6 +102,8 @@ export class SfMoveSubscriptionsStack extends cdk.Stack {
     // api gateway
     const createSfMoveSubscriptionsApi = (fn: lambda.IFunction) => {
       const apiGatewayName = `${appName}-api`
+      const apiStageName: string = context.resolve(mappings.findInMap(stageParameter.valueAsString, 'stageName'))
+
       const apiGateway = new apigateway.LambdaRestApi(
         this,
         apiGatewayName,
@@ -100,7 +113,7 @@ export class SfMoveSubscriptionsStack extends cdk.Stack {
           handler: fn,
           description: `API for for moving subscriptions in Salesforce in ${stageParameter.valueAsString} env`,
           deployOptions: {
-            stageName: stageParameter.valueAsString
+            stageName: apiStageName
           }
         })
   
