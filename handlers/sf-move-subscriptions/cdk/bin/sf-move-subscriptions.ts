@@ -4,4 +4,4 @@ import * as cdk from '@aws-cdk/core';
 import { SfMoveSubscriptionsStack } from '../lib/sf-move-subscriptions-stack';
 
 const app = new cdk.App();
-new SfMoveSubscriptionsStack(app, 'CdkStack');
+new SfMoveSubscriptionsStack(app, 'SfMoveSubscriptionsStack');
