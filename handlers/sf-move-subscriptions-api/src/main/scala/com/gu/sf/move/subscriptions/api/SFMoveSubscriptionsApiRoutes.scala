@@ -8,11 +8,6 @@ import org.http4s.circe.CirceEntityEncoder._
 import org.http4s.dsl.io._
 import org.http4s.{HttpRoutes, Request}
 
-case class MoveSubscription(
-  sfContactId: String,
-  zuoraSubscriptionId: String
-)
-
 object SFMoveSubscriptionsApiRoutes extends LazyLogging {
 
   def apply(): HttpRoutes[IO] = {
@@ -22,16 +17,16 @@ object SFMoveSubscriptionsApiRoutes extends LazyLogging {
     )
 
     def handleMoveRequest(request: Request[IO]) = {
-      logger.info(s"handleMoveRequest received request: ${request.body}")
       for {
-        moveSub <- request.as[MoveSubscription]
-        resp <- Ok(moveSub)
+        req <- request.as[MoveSubscriptionReqBody]
+        _ <- Ok(SFMoveSubscriptionsService.moveSubscription(req))
+        resp <- Ok(SubscriptionMoved("subscription moved successfully"))
       } yield resp
     }
 
     HttpRoutes.of[IO] {
       case GET -> Root => Ok(rootInfo)
-      case request @ POST -> Root / "subscription" / "move" => handleMoveRequest(request)
+      case request@POST -> Root / "subscription" / "move" => handleMoveRequest(request)
     }
 
   }
