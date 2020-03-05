@@ -10,4 +10,7 @@ test('lambda with Rest API gateway Created', () => {
     expectCDK(stack).to(haveResource("AWS::IAM::Role"))
     expectCDK(stack).to(haveResource("AWS::Lambda::Function"))
     expectCDK(stack).to(haveResource("AWS::ApiGateway::RestApi"))
+    expectCDK(stack).to(haveResource("AWS::ApiGateway::UsagePlan"))
+    expectCDK(stack).to(haveResource("AWS::ApiGateway::UsagePlanKey"))
+    expectCDK(stack).to(haveResource("AWS::ApiGateway::ApiKey"))
 });
