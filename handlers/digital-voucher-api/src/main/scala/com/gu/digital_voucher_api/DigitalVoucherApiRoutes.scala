@@ -42,23 +42,6 @@ object DigitalVoucherApiRoutes {
         }
     }
 
-    def handleLegacyCreateRequest(request: Request[F], subscriptionId: SfSubscriptionId) = {
-      (for {
-        requestBody <- parseRequest[CreateVoucherRequestBody](request)
-        voucher <- digitalVoucherService
-          .legacyCreateVoucher(subscriptionId, RatePlanName(requestBody.ratePlanName))
-          .leftMap {
-            case InvalidArgumentException(msg) =>
-              // see https://tools.ietf.org/html/rfc4918#section-11.2
-              UnprocessableEntity(DigitalVoucherApiRoutesError(s"Bad request argument: $msg"))
-            case ImovoOperationFailedException(msg) =>
-              BadGateway(DigitalVoucherApiRoutesError(s"Imovo failure to create voucher: $msg"))
-            case error =>
-              InternalServerError(DigitalVoucherApiRoutesError(s"Failed create voucher: $error"))
-          }
-      } yield Created(voucher)).merge.flatten
-    }
-
     def handleCreateRequest(request: Request[F], subscriptionId: SfSubscriptionId) = {
       (for {
         requestBody <- parseRequest[CreateVoucherRequestBody](request)
@@ -77,37 +60,15 @@ object DigitalVoucherApiRoutes {
     }
 
     def handleReplaceRequest(request: Request[F]) = {
-      def replaceSubscriptionVouchers(requestBody: SubscriptionActionRequestBody) = {
-        for {
-          subscriptionId <- requestBody.subscriptionId
-            .toRight(UnprocessableEntity(DigitalVoucherApiRoutesError(s"subscriptionId is required")))
-            .toEitherT[F]
-          replacementVoucher <- digitalVoucherService
-            .replaceVoucher(SfSubscriptionId(subscriptionId))
-            .leftMap(error => InternalServerError(DigitalVoucherApiRoutesError(s"Failed replace voucher: $error")))
-        } yield Ok(replacementVoucher)
-      }
-
-      def replaceVoucherCodes(requestBody: SubscriptionActionRequestBody) = {
-        for {
-          voucherToReplace <- (requestBody.cardCode, requestBody.letterCode)
-            .mapN(Voucher.apply)
-            .toRight(UnprocessableEntity(DigitalVoucherApiRoutesError(s"cardCode and letterCode are required.")))
-            .toEitherT[F]
-          replacementVoucher <- digitalVoucherService
-            .replaceVoucher(voucherToReplace)
-            .leftMap(error => InternalServerError(DigitalVoucherApiRoutesError(s"Failed replace voucher: $error")))
-        } yield Ok(replacementVoucher)
-      }
-
       (for {
         requestBody <- parseRequest[SubscriptionActionRequestBody](request)
-        voucherResponse <- if (requestBody.subscriptionId.isDefined) {
-          replaceSubscriptionVouchers(requestBody)
-        } else {
-          replaceVoucherCodes(requestBody)
-        }
-      } yield voucherResponse).merge.flatten
+        subscriptionId <- requestBody.subscriptionId
+          .toRight(UnprocessableEntity(DigitalVoucherApiRoutesError(s"subscriptionId is required")))
+          .toEitherT[F]
+        replacementVoucher <- digitalVoucherService
+          .replaceVoucher(SfSubscriptionId(subscriptionId))
+          .leftMap(error => InternalServerError(DigitalVoucherApiRoutesError(s"Failed replace voucher: $error")))
+      } yield Ok(replacementVoucher)).merge.flatten
     }
 
     def handleGetRequest(subscriptionId: String) = {
@@ -129,14 +90,12 @@ object DigitalVoucherApiRoutes {
     }
 
     HttpRoutes.of[F] {
-      case request @ PUT -> Root / "digital-voucher" / "create" / subscriptionId =>
-        handleLegacyCreateRequest(request, SfSubscriptionId(subscriptionId))
       case request @ PUT -> Root / "digital-voucher" / subscriptionId =>
         handleCreateRequest(request, SfSubscriptionId(subscriptionId))
-      case request @ POST -> Root / "digital-voucher" / "replace" =>
-        handleReplaceRequest(request)
       case GET -> Root / "digital-voucher" / subscriptionId =>
         handleGetRequest(subscriptionId)
+      case request @ POST -> Root / "digital-voucher" / "replace" =>
+        handleReplaceRequest(request)
       case request @ POST -> Root / "digital-voucher" / "cancel" =>
         handleCancelRequest(request)
     }

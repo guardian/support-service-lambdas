@@ -7,49 +7,14 @@ import cats.implicits._
 import cats.data.EitherT
 import com.gu.digital_voucher_api.imovo.{ImovoClient, ImovoSubscriptionResponse, ImovoSubscriptionType}
 
-case class Voucher(cardCode: String, letterCode: String)
-
 trait DigitalVoucherService[F[_]] {
-  def legacyCreateVoucher(subscriptionId: SfSubscriptionId, ratePlanName: RatePlanName): EitherT[F, DigitalVoucherServiceError, Voucher]
-  def createVoucher(subscriptionId: SfSubscriptionId, ratePlanName: RatePlanName): EitherT[F, DigitalVoucherServiceError, Voucher]
-  def replaceVoucher(voucher: Voucher): EitherT[F, DigitalVoucherServiceError, Voucher]
-  def replaceVoucher(voucher: SfSubscriptionId): EitherT[F, DigitalVoucherServiceError, Voucher]
-  def getVoucher(subscriptionId: String): EitherT[F, DigitalVoucherServiceError, Voucher]
+  def createVoucher(subscriptionId: SfSubscriptionId, ratePlanName: RatePlanName): EitherT[F, DigitalVoucherServiceError, SubscriptionVouchers]
+  def replaceVoucher(subscriptionId: SfSubscriptionId): EitherT[F, DigitalVoucherServiceError, SubscriptionVouchers]
+  def getVoucher(subscriptionId: String): EitherT[F, DigitalVoucherServiceError, SubscriptionVouchers]
   def cancelVouchers(subscriptionId: SfSubscriptionId, cancellationDate: LocalDate): EitherT[F, DigitalVoucherServiceError, Unit]
 }
 
 object DigitalVoucherService {
-
-  private val campaignCodes: Map[RatePlanName, CampaignCodeSet] = {
-
-    val everydayCampaignCodes = CampaignCodeSet(
-      CampaignCode("GMGSub7DayCard"),
-      CampaignCode("GMGSub7DayHNDSS")
-    )
-    val sundayCampaignCodes = CampaignCodeSet(
-      CampaignCode("GMGSubSundayCard"),
-      CampaignCode("GMGSubSundayHNDSS")
-    )
-    val weekendCampaignCodes = CampaignCodeSet(
-      CampaignCode("GMGSubWeekendCard"),
-      CampaignCode("GMGSubWeekendHNDSS")
-    )
-    val sixDayCampaignCodes = CampaignCodeSet(
-      CampaignCode("GMGSub6DayCard"),
-      CampaignCode("GMGSub6DayHNDSS")
-    )
-
-    Map(
-      RatePlanName("Everyday") -> everydayCampaignCodes,
-      RatePlanName("Everyday+") -> everydayCampaignCodes,
-      RatePlanName("Sunday") -> sundayCampaignCodes,
-      RatePlanName("Sunday+") -> sundayCampaignCodes,
-      RatePlanName("Weekend") -> weekendCampaignCodes,
-      RatePlanName("Weekend+") -> weekendCampaignCodes,
-      RatePlanName("Sixday") -> sixDayCampaignCodes,
-      RatePlanName("Sixday+") -> sixDayCampaignCodes,
-    )
-  }
 
   private val schemeNames: Map[RatePlanName, SchemeName] = {
     val everydaySchemeName = SchemeName("Guardian7Day")
@@ -75,7 +40,7 @@ object DigitalVoucherService {
     override def createVoucher(
       subscriptionId: SfSubscriptionId,
       ratePlanName: RatePlanName
-    ): EitherT[F, DigitalVoucherServiceError, Voucher] = {
+    ): EitherT[F, DigitalVoucherServiceError, SubscriptionVouchers] = {
       val tomorrow = LocalDate.now.plusDays(1)
 
       for {
@@ -103,7 +68,7 @@ object DigitalVoucherService {
       } yield voucher
     }
 
-    def toVoucher(voucherResponse: ImovoSubscriptionResponse): Either[DigitalVoucherServiceError, Voucher] = {
+    def toVoucher(voucherResponse: ImovoSubscriptionResponse): Either[DigitalVoucherServiceError, SubscriptionVouchers] = {
       (
         voucherResponse
           .subscriptionVouchers
@@ -114,45 +79,11 @@ object DigitalVoucherService {
           .find(_.subscriptionType === ImovoSubscriptionType.ActiveCard.value)
           .toRight(List("Imovo response did not contain an subscription voucher where subscriptionType==\"ActiveCard\" "))
       ).parMapN { (letterVoucher, cardVoucher) =>
-        Voucher(cardVoucher.voucherCode, letterVoucher.voucherCode)
+        SubscriptionVouchers(cardVoucher.voucherCode, letterVoucher.voucherCode)
       }.leftMap { errors =>
         DigitalVoucherServiceFailure(errors.mkString(","))
       }
     }
-
-    override def legacyCreateVoucher(
-      subscriptionId: SfSubscriptionId,
-      ratePlanName: RatePlanName
-    ): EitherT[F, DigitalVoucherServiceError, Voucher] = {
-
-      def requestVoucher(code: CampaignCodeSet): EitherT[F, DigitalVoucherServiceError, Voucher] = {
-        val tomorrow = LocalDate.now.plusDays(1)
-        (
-          imovoClient.createVoucher(subscriptionId, code.card, tomorrow).leftMap(List(_)),
-          imovoClient.createVoucher(subscriptionId, code.letter, tomorrow).leftMap(List(_))
-        ).parMapN { (cardResponse, letterResponse) =>
-          Voucher(cardResponse.voucherCode, letterResponse.voucherCode)
-        }.leftMap(errors =>
-          ImovoOperationFailedException(errors.map(_.message).mkString(", "))
-        )
-      }
-
-      campaignCodes.get(ratePlanName).map(requestVoucher).getOrElse {
-        EitherT.leftT(InvalidArgumentException(
-          s"Rate plan name has no matching campaign codes: $ratePlanName"
-        ))
-      }
-    }
-
-    override def replaceVoucher(
-      voucher: Voucher
-    ): EitherT[F, DigitalVoucherServiceError, Voucher] =
-      (
-        imovoClient.replaceVoucher(voucher.cardCode).leftMap(List(_)),
-        imovoClient.replaceVoucher(voucher.letterCode).leftMap(List(_))
-      ).parMapN { (cardResponse, letterResponse) =>
-          Voucher(cardResponse.voucherCode, letterResponse.voucherCode)
-        }.leftMap(errors => DigitalVoucherServiceFailure(errors.mkString(", ")))
 
     override def cancelVouchers(subscriptionId: SfSubscriptionId, cancellationDate: LocalDate): EitherT[F, DigitalVoucherServiceError, Unit] = {
       val lastActiveDate = cancellationDate.minusDays(1)
@@ -162,7 +93,7 @@ object DigitalVoucherService {
         .leftMap(error => DigitalVoucherServiceFailure(error.message))
     }
 
-    override def getVoucher(subscriptionId: String): EitherT[F, DigitalVoucherServiceError, Voucher] =
+    override def getVoucher(subscriptionId: String): EitherT[F, DigitalVoucherServiceError, SubscriptionVouchers] =
       for {
         voucherResponse <- imovoClient
           .getSubscriptionVoucher(subscriptionId)
@@ -170,10 +101,10 @@ object DigitalVoucherService {
         voucher <- toVoucher(voucherResponse).toEitherT[F]
       } yield voucher
 
-    override def replaceVoucher(sfSubscriptionId: SfSubscriptionId): EitherT[F, DigitalVoucherServiceError, Voucher] = {
+    override def replaceVoucher(subscriptionId: SfSubscriptionId): EitherT[F, DigitalVoucherServiceError, SubscriptionVouchers] = {
       for {
         voucherResponse <- imovoClient
-          .replaceSubscriptionVoucher(sfSubscriptionId, ImovoSubscriptionType.Both)
+          .replaceSubscriptionVoucher(subscriptionId, ImovoSubscriptionType.Both)
           .leftMap(error => DigitalVoucherServiceFailure(error.message))
         voucher <- toVoucher(voucherResponse).toEitherT[F]
       } yield voucher
