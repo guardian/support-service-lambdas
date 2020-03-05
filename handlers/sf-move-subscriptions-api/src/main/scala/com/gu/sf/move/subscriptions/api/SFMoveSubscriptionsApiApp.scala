@@ -15,5 +15,4 @@ object SFMoveSubscriptionsApiApp extends LazyLogging {
 
     SFMoveSubscriptionsApiRoutes.apply()
   }
-
 }
