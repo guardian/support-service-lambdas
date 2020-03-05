@@ -1,11 +1,6 @@
 package com.gu.sf.move.subscriptions.api
 
-import com.gu.util.Logging
+import io.github.howardjohn.lambda.http4s.Http4sLambdaHandler
 
-object Handler extends Logging {
+object Handler extends Http4sLambdaHandler(SFMoveSubscriptionsApiApp.apply())
 
-  def apply(): Unit = {
-    logger.info("Starting sf_move_subscriptions lambda")
-  }
-
-}
