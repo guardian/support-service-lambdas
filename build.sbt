@@ -177,6 +177,11 @@ lazy val `effects-sqs` = all(project in file("lib/effects-sqs"))
   .settings(
     libraryDependencies ++= Seq(awsSQS) ++ logging
   )
+lazy val `effects-stepfunction` = all(project in file("lib/effects-stepfunction"))
+  .dependsOn(testDep)
+  .settings(
+    libraryDependencies ++= Seq(awsStepFunction) ++ logging
+  )
 
 lazy val `effects-ses` = all(project in file("lib/effects-ses"))
   .dependsOn(testDep)
@@ -252,6 +257,7 @@ lazy val root = all(project in file(".")).enablePlugins(RiffRaffArtifact).aggreg
   `effects-sqs`,
   `effects-ses`,
   `effects-s3`,
+  `effects-stepfunction`,
   `sf-datalake-export`,
   `zuora-datalake-export`,
   `batch-email-sender`,
