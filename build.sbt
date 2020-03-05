@@ -365,7 +365,7 @@ lazy val `sf-move-subscriptions-api` = all(project in file("handlers/sf-move-sub
   .dependsOn(`effects-s3`, `config-core`, `salesforce-sttp-client`, `salesforce-sttp-test-stub` % Test)
   .settings(
     libraryDependencies ++=
-      Seq(http4sLambda, http4sDsl, http4sCirce, http4sServer, circe, sttpAsycHttpClientBackendCats, scalatest)
+      Seq(http4sLambda, http4sDsl, http4sCirce, http4sServer, circe, sttpAsycHttpClientBackendCats, scalatest, simpleConfig)
         ++ logging
   )
   .enablePlugins(RiffRaffArtifact)

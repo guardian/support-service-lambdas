@@ -5,3 +5,5 @@ final case class MoveSubscriptionReqBody(sfContactId: String, zuoraSubscriptionI
 final case class SubscriptionMoved(message: String)
 
 final case class MoveSubscriptionApiError(message: String)
+
+final case class MoveSubscriptionApiRoot(description: String)
