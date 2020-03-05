@@ -259,6 +259,7 @@ lazy val root = all(project in file(".")).enablePlugins(RiffRaffArtifact).aggreg
   `holiday-stop-processor`,
   `delivery-problem-credit-processor`,
   `metric-push-api`,
+  `sf-move-subscriptions-api`,
   `fulfilment-date-calculator`,
   `delivery-records-api`,
   `fulfilment-dates`,
@@ -359,6 +360,10 @@ lazy val `delivery-problem-credit-processor` =
 lazy val `metric-push-api` = all(project in file("handlers/metric-push-api"))
   .enablePlugins(RiffRaffArtifact)
   .dependsOn()
+
+lazy val `sf-move-subscriptions-api` = all(project in file("handlers/sf-move-subscriptions-api"))
+  .enablePlugins(RiffRaffArtifact)
+  .dependsOn(handler)
 
 lazy val `fulfilment-date-calculator` = all(project in file("handlers/fulfilment-date-calculator"))
   .enablePlugins(RiffRaffArtifact)
