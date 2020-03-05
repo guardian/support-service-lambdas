@@ -5,19 +5,21 @@ import java.time.LocalDate
 import cats.Show
 import cats.data.EitherT
 import cats.effect.Effect
-import org.http4s.{DecodeFailure, EntityEncoder, HttpRoutes, InvalidMessageBodyFailure, MalformedMessageBodyFailure, Request, Response}
-import io.circe.generic.auto._
-import org.http4s.circe.CirceEntityEncoder._
-import org.http4s.circe.CirceEntityDecoder._
 import cats.implicits._
 import io.circe.Decoder
+import io.circe.generic.auto._
+import org.http4s.circe.CirceEntityDecoder._
+import org.http4s.circe.CirceEntityEncoder._
 import org.http4s.dsl.Http4sDsl
+import org.http4s.{DecodeFailure, HttpRoutes, InvalidMessageBodyFailure, MalformedMessageBodyFailure, Request, Response}
 
 case class DigitalVoucherApiRoutesError(message: String)
 
 case class CreateVoucherRequestBody(ratePlanName: String)
 
-case class CancelVoucherRequestBody(cardCode: String, cancellationDate: LocalDate)
+case class CancelSubscriptionVoucherRequestBody(subscriptionId: String, cancellationDate: LocalDate)
+
+case class SubscriptionActionRequestBody(subscriptionId: Option[String], cardCode: Option[String], letterCode: Option[String])
 
 object DigitalVoucherApiRoutes {
 
@@ -25,15 +27,6 @@ object DigitalVoucherApiRoutes {
     type RouteResult[A] = EitherT[F, F[Response[F]], A]
     object http4sDsl extends Http4sDsl[F]
     import http4sDsl._
-
-    def toResponse[A](result: EitherT[F, F[Response[F]], A])(implicit enc: EntityEncoder[F, A]): F[Response[F]] = {
-      result
-        .fold(
-          identity,
-          value => Ok(value)
-        )
-        .flatten
-    }
 
     def parseRequest[A: Decoder](request: Request[F]) = {
       implicit val showDecodeFailure = Show.show[DecodeFailure] {
@@ -49,60 +42,96 @@ object DigitalVoucherApiRoutes {
         }
     }
 
-    def handleCreateRequest(request: Request[F], subscriptionId: SfSubscriptionId) = {
-      val response = for {
+    def handleLegacyCreateRequest(request: Request[F], subscriptionId: SfSubscriptionId) = {
+      (for {
         requestBody <- parseRequest[CreateVoucherRequestBody](request)
         voucher <- digitalVoucherService
-          .createVoucher(subscriptionId, RatePlanName(requestBody.ratePlanName))
+          .legacyCreateVoucher(subscriptionId, RatePlanName(requestBody.ratePlanName))
           .leftMap {
-            case DigitalVoucherApiException(InvalidArgumentException(msg)) =>
+            case InvalidArgumentException(msg) =>
               // see https://tools.ietf.org/html/rfc4918#section-11.2
               UnprocessableEntity(DigitalVoucherApiRoutesError(s"Bad request argument: $msg"))
-            case DigitalVoucherApiException(ImovoClientException(msg)) =>
+            case ImovoOperationFailedException(msg) =>
               BadGateway(DigitalVoucherApiRoutesError(s"Imovo failure to create voucher: $msg"))
             case error =>
               InternalServerError(DigitalVoucherApiRoutesError(s"Failed create voucher: $error"))
           }
-      } yield voucher
-      response.fold(
-        identity,
-        value => Created(value)
-      ).flatten
+      } yield Created(voucher)).merge.flatten
+    }
+
+    def handleCreateRequest(request: Request[F], subscriptionId: SfSubscriptionId) = {
+      (for {
+        requestBody <- parseRequest[CreateVoucherRequestBody](request)
+        voucher <- digitalVoucherService
+          .createVoucher(subscriptionId, RatePlanName(requestBody.ratePlanName))
+          .leftMap {
+            case InvalidArgumentException(msg) =>
+              // see https://tools.ietf.org/html/rfc4918#section-11.2
+              UnprocessableEntity(DigitalVoucherApiRoutesError(s"Bad request argument: $msg"))
+            case ImovoOperationFailedException(msg) =>
+              BadGateway(DigitalVoucherApiRoutesError(s"Imovo failure to create voucher: $msg"))
+            case error =>
+              InternalServerError(DigitalVoucherApiRoutesError(s"Failed create voucher: $error"))
+          }
+      } yield Created(voucher)).merge.flatten
     }
 
     def handleReplaceRequest(request: Request[F]) = {
-      toResponse(
+      def replaceSubscriptionVouchers(requestBody: SubscriptionActionRequestBody) = {
         for {
-          requestBody <- parseRequest[Voucher](request)
-          voucher <- digitalVoucherService.replaceVoucher(
-            requestBody
-          ).leftMap(error => InternalServerError(DigitalVoucherApiRoutesError(s"Failed replace voucher: $error")))
-        } yield voucher
-      )
+          subscriptionId <- requestBody.subscriptionId
+            .toRight(UnprocessableEntity(DigitalVoucherApiRoutesError(s"subscriptionId is required")))
+            .toEitherT[F]
+          replacementVoucher <- digitalVoucherService
+            .replaceVoucher(SfSubscriptionId(subscriptionId))
+            .leftMap(error => InternalServerError(DigitalVoucherApiRoutesError(s"Failed replace voucher: $error")))
+        } yield Ok(replacementVoucher)
+      }
+
+      def replaceVoucherCodes(requestBody: SubscriptionActionRequestBody) = {
+        for {
+          voucherToReplace <- (requestBody.cardCode, requestBody.letterCode)
+            .mapN(Voucher.apply)
+            .toRight(UnprocessableEntity(DigitalVoucherApiRoutesError(s"cardCode and letterCode are required.")))
+            .toEitherT[F]
+          replacementVoucher <- digitalVoucherService
+            .replaceVoucher(voucherToReplace)
+            .leftMap(error => InternalServerError(DigitalVoucherApiRoutesError(s"Failed replace voucher: $error")))
+        } yield Ok(replacementVoucher)
+      }
+
+      (for {
+        requestBody <- parseRequest[SubscriptionActionRequestBody](request)
+        voucherResponse <- if (requestBody.subscriptionId.isDefined) {
+          replaceSubscriptionVouchers(requestBody)
+        } else {
+          replaceVoucherCodes(requestBody)
+        }
+      } yield voucherResponse).merge.flatten
     }
 
     def handleGetRequest(subscriptionId: String) = {
-      toResponse(
-        digitalVoucherService
-          .getVoucher(subscriptionId)
-          .leftMap(error => InternalServerError(DigitalVoucherApiRoutesError(s"Failed get voucher: $error")))
-      )
+      digitalVoucherService
+        .getVoucher(subscriptionId)
+        .bimap(
+          error => InternalServerError(DigitalVoucherApiRoutesError(s"Failed get voucher: $error")),
+          voucher => Ok(voucher)
+        ).merge.flatten
     }
 
     def handleCancelRequest(request: Request[F]) = {
-      toResponse(
-        for {
-          requestBody <- parseRequest[CancelVoucherRequestBody](request)
-          result <- digitalVoucherService
-            .cancelVouchers(requestBody.cardCode, requestBody.cancellationDate)
-            .leftMap(error => InternalServerError(DigitalVoucherApiRoutesError(s"Failed get voucher: $error")))
-        } yield result
-
-      )
+      (for {
+        requestBody <- parseRequest[CancelSubscriptionVoucherRequestBody](request)
+        result <- digitalVoucherService
+          .cancelVouchers(SfSubscriptionId(requestBody.subscriptionId), requestBody.cancellationDate)
+          .leftMap(error => InternalServerError(DigitalVoucherApiRoutesError(s"Failed get voucher: $error")))
+      } yield Ok(result)).merge.flatten
     }
 
     HttpRoutes.of[F] {
       case request @ PUT -> Root / "digital-voucher" / "create" / subscriptionId =>
+        handleLegacyCreateRequest(request, SfSubscriptionId(subscriptionId))
+      case request @ PUT -> Root / "digital-voucher" / subscriptionId =>
         handleCreateRequest(request, SfSubscriptionId(subscriptionId))
       case request @ POST -> Root / "digital-voucher" / "replace" =>
         handleReplaceRequest(request)

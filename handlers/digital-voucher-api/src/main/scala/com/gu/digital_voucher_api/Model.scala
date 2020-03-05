@@ -7,3 +7,5 @@ case class RatePlanName(value: String) extends AnyVal
 case class CampaignCode(value: String) extends AnyVal
 
 case class CampaignCodeSet(card: CampaignCode, letter: CampaignCode)
+
+case class SchemeName(value: String) extends AnyVal
