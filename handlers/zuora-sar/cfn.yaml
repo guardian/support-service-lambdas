@@ -1,0 +1,226 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Performs a Subject Access Requests against Zuora
+
+Parameters:
+    Stage:
+        Description: Stage name
+        Type: String
+        AllowedValues:
+            - PROD
+            - CODE
+        Default: CODE
+
+#Conditions:
+#  CreateProdMonitoring: !Equals [ !Ref Stage, PROD ]
+#
+#Mappings:
+#    StageMap:
+#        CODE:
+#            ApiName: sf-contact-merge-api-CODE
+#            DomainName: sf-contact-merge-code.membership.guardianapis.com
+#            # need to cloudform, then find out the RegionalDomainName of the api gateway stage manually and replace it here
+#            ApiGatewayTargetDomainName: d-33cbf5a76l.execute-api.eu-west-1.amazonaws.com
+#        PROD:
+#            ApiName: sf-contact-merge-api-PROD
+#            DomainName: sf-contact-merge-prod.membership.guardianapis.com
+#            ApiGatewayTargetDomainName: d-66g24d7g2k.execute-api.eu-west-1.amazonaws.com
+#
+#Resources:
+#    SfContactMergeRole:
+#        Type: AWS::IAM::Role
+#        Properties:
+#            AssumeRolePolicyDocument:
+#                Statement:
+#                    - Effect: Allow
+#                      Principal:
+#                          Service:
+#                             - lambda.amazonaws.com
+#                      Action:
+#                          - sts:AssumeRole
+#            Path: /
+#            Policies:
+#                - PolicyName: LambdaPolicy
+#                  PolicyDocument:
+#                      Statement:
+#                          - Effect: Allow
+#                            Action:
+#                            - logs:CreateLogGroup
+#                            - logs:CreateLogStream
+#                            - logs:PutLogEvents
+#                            - lambda:InvokeFunction
+#                            Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/sf-contact-merge-${Stage}:log-stream:*"
+#                - PolicyName: ReadPrivateCredentials
+#                  PolicyDocument:
+#                      Statement:
+#                          - Effect: Allow
+#                            Action: s3:GetObject
+#                            Resource:
+#                            - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/zuoraRest-${Stage}.*.json
+#                            - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/sfAuth-${Stage}.*.json
+#    SfContactMergeLambda:
+#        Type: AWS::Lambda::Function
+#        Properties:
+#            Description: Merges together the salesforce account referenced by a set of zuora accounts
+#            FunctionName:
+#                !Sub sf-contact-merge-${Stage}
+#            Code:
+#                S3Bucket: support-service-lambdas-dist
+#                S3Key: !Sub membership/${Stage}/sf-contact-merge/sf-contact-merge.jar
+#            Handler: com.gu.sf_contact_merge.Handler::apply
+#            Environment:
+#                Variables:
+#                  Stage: !Ref Stage
+#            Role:
+#                !GetAtt SfContactMergeRole.Arn
+#            MemorySize: 1536
+#            Runtime: java8
+#            Timeout: 300
+#        DependsOn:
+#        - "SfContactMergeRole"
+#
+#    SfContactMergeAPIPermission:
+#        Type: AWS::Lambda::Permission
+#        Properties:
+#            Action: lambda:invokeFunction
+#            FunctionName: !Sub sf-contact-merge-${Stage}
+#            Principal: apigateway.amazonaws.com
+#        DependsOn: SfContactMergeLambda
+#
+#    SfContactMergeProxyResource:
+#        Type: AWS::ApiGateway::Resource
+#        Properties:
+#            RestApiId: !Ref SfContactMergeAPI
+#            ParentId: !GetAtt [SfContactMergeAPI, RootResourceId]
+#            PathPart: sf-contact-merge
+#        DependsOn: SfContactMergeAPI
+#
+#    SfContactMergeMethod:
+#        Type: AWS::ApiGateway::Method
+#        Properties:
+#            AuthorizationType: NONE
+#            ApiKeyRequired: true
+#            RestApiId: !Ref SfContactMergeAPI
+#            ResourceId: !Ref SfContactMergeProxyResource
+#            HttpMethod: POST
+#            RequestParameters:
+#              method.request.querystring.identityId: true
+#            Integration:
+#              Type: AWS_PROXY
+#              IntegrationHttpMethod: POST # this for the interaction between API Gateway and Lambda and MUST be POST
+#              Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SfContactMergeLambda.Arn}/invocations
+#        DependsOn:
+#        - SfContactMergeAPI
+#        - SfContactMergeLambda
+#        - SfContactMergeProxyResource
+#
+#    SfContactMergeAPI:
+#        Type: "AWS::ApiGateway::RestApi"
+#        Properties:
+#            Description: This called when we have a set of SF accounts that all belong to one person (email) to merge them
+#            Name: !FindInMap [StageMap, !Ref Stage, ApiName]
+#
+#    SfContactMergeAPIStage:
+#        Type: AWS::ApiGateway::Stage
+#        Properties:
+#            Description: Stage for sf-contact-merge-api
+#            RestApiId: !Ref SfContactMergeAPI
+#            DeploymentId: !Ref SfContactMergeAPIDeployment
+#            StageName: !Sub ${Stage}
+#        DependsOn: SfContactMergeMethod
+#
+#    SfContactMergeAPIDeployment:
+#        Type: AWS::ApiGateway::Deployment
+#        Properties:
+#            Description: Deploys sf-contact-merge-api into an environment/stage
+#            RestApiId: !Ref SfContactMergeAPI
+#        DependsOn: SfContactMergeMethod
+#
+#    SfContactMergeAPIKey:
+#      Type: AWS::ApiGateway::ApiKey
+#      Properties:
+#        Description: Key required to call contact merge API
+#        Enabled: true
+#        Name: !Sub sf-contact-merge-api-key-${Stage}
+#        StageKeys:
+#          - RestApiId: !Ref SfContactMergeAPI
+#            StageName: !Sub ${Stage}
+#      DependsOn:
+#      - SfContactMergeAPI
+#      - SfContactMergeAPIStage
+#
+#    SfContactMergeUsagePlan:
+#      Type: "AWS::ApiGateway::UsagePlan"
+#      Properties:
+#        UsagePlanName: !Sub sf-contact-merge-api-usage-plan-${Stage}
+#        ApiStages:
+#        - ApiId: !Ref SfContactMergeAPI
+#          Stage: !Ref SfContactMergeAPIStage
+#      DependsOn:
+#      - SfContactMergeAPI
+#      - SfContactMergeAPIStage
+#
+#    SfContactMergeUsagePlanKey:
+#      Type: "AWS::ApiGateway::UsagePlanKey"
+#      Properties:
+#        KeyId: !Ref SfContactMergeAPIKey
+#        KeyType: API_KEY
+#        UsagePlanId: !Ref SfContactMergeUsagePlan
+#      DependsOn:
+#      - SfContactMergeAPIKey
+#      - SfContactMergeUsagePlan
+#
+#    SfContactMergeDomainName:
+#      Type: "AWS::ApiGateway::DomainName"
+#      Properties:
+#        RegionalCertificateArn: # only for *.membership.guardianapis.com
+#          !Sub arn:aws:acm:${AWS::Region}:${AWS::AccountId}:certificate/c1efc564-9ff8-4a03-be48-d1990a3d79d2
+#        DomainName: !FindInMap [ StageMap, !Ref Stage, DomainName ]
+#        EndpointConfiguration:
+#          Types:
+#            - REGIONAL
+#
+#    SfContactMergeBasePathMapping:
+#      Type: "AWS::ApiGateway::BasePathMapping"
+#      Properties:
+#        RestApiId: !Ref SfContactMergeAPI
+#        DomainName: !Ref SfContactMergeDomainName
+#        Stage: !Sub ${Stage}
+#      DependsOn:
+#      - SfContactMergeAPI
+#      - SfContactMergeAPIStage
+#      - SfContactMergeDomainName
+#
+#    SfContactMergeDNSRecord:
+#      Type: AWS::Route53::RecordSet
+#      Properties:
+#        HostedZoneName: membership.guardianapis.com.
+#        Name: !FindInMap [ StageMap, !Ref Stage, DomainName ]
+#        Comment: !Sub CNAME for sf-contact-merge API ${Stage}
+#        Type: CNAME
+#        TTL: '120'
+#        ResourceRecords:
+#        - !FindInMap [ StageMap, !Ref Stage, ApiGatewayTargetDomainName ]
+#
+#    5xxApiAlarm:
+#      Type: AWS::CloudWatch::Alarm
+#      Condition: CreateProdMonitoring
+#      Properties:
+#        AlarmActions:
+#        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:fulfilment-dev
+#        AlarmName:
+#          !Sub
+#            - 5XX rate from ${ApiName}
+#            - { ApiName: !FindInMap [StageMap, !Ref Stage, ApiName] }
+#        ComparisonOperator: GreaterThanThreshold
+#        Dimensions:
+#          - Name: ApiName
+#            Value: !FindInMap [StageMap, !Ref Stage, ApiName]
+#          - Name: Stage
+#            Value: !Sub ${Stage}
+#        EvaluationPeriods: 1
+#        MetricName: 5XXError
+#        Namespace: AWS/ApiGateway
+#        Period: 3600
+#        Statistic: Sum
+#        Threshold: 5
+#        TreatMissingData: notBreaching

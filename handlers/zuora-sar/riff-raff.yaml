@@ -1,0 +1,21 @@
+stacks:
+- membership
+regions:
+- eu-west-1
+deployments:
+
+  cfn:
+    type: cloud-formation
+    app: zuora-sar
+    parameters:
+      templatePath: cfn.yaml
+
+  zuora-sar:
+    type: aws-lambda
+    parameters:
+      fileName: zuora-sar.jar
+      bucket: support-service-lambdas-dist
+      prefixStack: false
+      functionNames:
+      - zuora-sar-
+    dependencies: [cfn]

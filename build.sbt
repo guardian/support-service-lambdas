@@ -239,6 +239,7 @@ lazy val root = all(project in file(".")).enablePlugins(RiffRaffArtifact).aggreg
   `catalog-service`,
   `identity-retention`,
   `zuora-retention`,
+  `zuora-sar`,
   `sf-contact-merge`,
   `cancellation-sf-cases`,
   `sf-gocardless-sync`,
@@ -302,6 +303,11 @@ lazy val `new-product-api` = all(project in file("handlers/new-product-api"))
 lazy val `zuora-retention` = all(project in file("handlers/zuora-retention"))
   .enablePlugins(RiffRaffArtifact)
   .dependsOn(`zuora-reports`, handler, effectsDepIncludingTestFolder, testDep)
+
+lazy val `zuora-sar` = all(project in file("handlers/zuora-sar"))
+  .settings(libraryDependencies ++= Seq(catsEffect, circeParser, circe, awsStepFunction))
+  .enablePlugins(RiffRaffArtifact)
+  .dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep, `effects-s3`, `effects-stepfunction`)
 
 lazy val `sf-contact-merge` = all(project in file("handlers/sf-contact-merge"))
   .enablePlugins(RiffRaffArtifact)
