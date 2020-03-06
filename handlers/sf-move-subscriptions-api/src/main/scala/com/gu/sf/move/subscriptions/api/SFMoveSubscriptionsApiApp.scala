@@ -1,5 +1,6 @@
 package com.gu.sf.move.subscriptions.api
 
+import cats.data.EitherT
 import cats.effect.{ContextShift, IO}
 import com.gu.AppIdentity
 import com.typesafe.scalalogging.LazyLogging
@@ -14,7 +15,7 @@ object SFMoveSubscriptionsApiApp extends LazyLogging {
 
   private implicit val cs: ContextShift[IO] = IO.contextShift(scala.concurrent.ExecutionContext.global)
 
-  def apply(appIdentity: AppIdentity): HttpRoutes[IO] = {
+  def apply(appIdentity: AppIdentity) = {
     createLogging()(SFMoveSubscriptionsApiRoutes())
   }
 

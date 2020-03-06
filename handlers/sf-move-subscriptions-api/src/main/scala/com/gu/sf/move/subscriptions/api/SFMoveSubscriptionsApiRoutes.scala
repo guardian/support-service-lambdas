@@ -1,6 +1,5 @@
 package com.gu.sf.move.subscriptions.api
 
-import cats.data.EitherT
 import cats.effect.Effect
 import cats.implicits._
 import com.typesafe.scalalogging.LazyLogging
@@ -12,8 +11,7 @@ import org.http4s.{DecodeFailure, HttpRoutes, Request, Response}
 
 object SFMoveSubscriptionsApiRoutes extends LazyLogging {
 
-  def apply[F[_] : Effect](): HttpRoutes[F] = {
-    type RouteResult[A] = EitherT[F, F[Response[F]], A]
+  def apply[F[_]: Effect](): HttpRoutes[F] = {
     object http4sDsl extends Http4sDsl[F]
     import http4sDsl._
 
@@ -25,7 +23,7 @@ object SFMoveSubscriptionsApiRoutes extends LazyLogging {
           .leftMap { decodingFailure: DecodeFailure =>
             BadRequest(MoveSubscriptionApiError(s"Failed to decoded request body: $decodingFailure"))
           }
-        resp <- SFMoveSubscriptionsService().moveSubscription(reqBody)
+        resp <- SFMoveSubscriptionsService.moveSubscription(reqBody)
           .leftMap(
             error =>
               InternalServerError(MoveSubscriptionApiError(s"Failed create voucher: $error"))
@@ -35,7 +33,7 @@ object SFMoveSubscriptionsApiRoutes extends LazyLogging {
 
     HttpRoutes.of[F] {
       case GET -> Root => Ok(rootInfo)
-      case request@POST -> Root / "subscription" / "move" =>
+      case request @ POST -> Root / "subscription" / "move" =>
         handleMoveRequest(request)
     }
 
