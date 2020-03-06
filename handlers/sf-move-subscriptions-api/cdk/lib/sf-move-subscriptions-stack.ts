@@ -5,7 +5,7 @@ import * as lambda from '@aws-cdk/aws-lambda'
 import * as iam from '@aws-cdk/aws-iam'
 import { Duration, Tag } from '@aws-cdk/core'
 import * as s3 from '@aws-cdk/aws-s3'
-import { ApiKeySourceType, UsagePlanPerApiStage } from '@aws-cdk/aws-apigateway';
+import { ApiKeySourceType, UsagePlanPerApiStage, ProxyResource } from '@aws-cdk/aws-apigateway';
 
 export class SfMoveSubscriptionsStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
@@ -93,46 +93,51 @@ export class SfMoveSubscriptionsStack extends cdk.Stack {
     const createSfMoveSubscriptionsApi = (fn: lambda.IFunction) => {
       const apiStageName: string = context.resolve(stageParameter.valueAsString)
 
-      const apiGateway = new apigateway.LambdaRestApi(
+      const api = new apigateway.LambdaRestApi(
         this,
         appName,
         {
           restApiName: `${appName}-${stageParameter.valueAsString}`,
-          proxy: true,
+          proxy: false,
           apiKeySourceType: ApiKeySourceType.HEADER,
           handler: fn,
           description: `API for for moving subscriptions in Salesforce in ${stageParameter.valueAsString} env`,
           deployOptions: {
             stageName: apiStageName,
-          }
+          },
         })
 
-      Tag.add(apiGateway, 'App', appName)
-      Tag.add(apiGateway, 'Stage', stageParameter.valueAsString)
-      Tag.add(apiGateway, 'Stack', stackName)
+      api.root.addProxy({
+        defaultMethodOptions: {
+          apiKeyRequired: true,
+        }
+      })
+
+      Tag.add(api, 'App', appName)
+      Tag.add(api, 'Stage', stageParameter.valueAsString)
+      Tag.add(api, 'Stack', stackName)
 
       const apiKey = new apigateway.ApiKey(
         this,
         'sfMoveSubscriptionsApiKey',
         {
-          apiKeyName: `${appName}-key-${stageParameter.valueAsString}`
+          apiKeyName: `${appName}-key-${stageParameter.valueAsString}`,
+          resources: [api]
         }
       )
-
-      const stages: UsagePlanPerApiStage[] = [{
-        api: apiGateway,
-        stage: apiGateway.deploymentStage,
-      }]
 
       new apigateway.UsagePlan(
         this,
         'sfMoveSubscriptionsApiUsagePlan', {
         name: `${appName}-usage-plan-${stageParameter.valueAsString}`,
         apiKey: apiKey,
-        apiStages: stages
+        apiStages: [{
+          api: api,
+          stage: api.deploymentStage,
+        }]
       })
 
-      return apiGateway
+      return api
     }
 
     const sfMoveSubscriptionsFnRole = createSfMoveSubscriptionsFnRole()
