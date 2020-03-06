@@ -123,15 +123,15 @@ export class SfMoveSubscriptionsStack extends cdk.Stack {
         }
       )
 
-      new apigateway.UsagePlan(
+      const usagePlan = new apigateway.UsagePlan(
         this,
         'sfMoveSubscriptionsApiUsagePlan', {
         name: `${appName}-usage-plan-${stageParameter.valueAsString}`,
         apiKey: apiKey,
-        apiStages: [{
-          api: api,
-          stage: api.deploymentStage,
-        }]
+      })
+
+      usagePlan.addApiStage({
+        stage: api.deploymentStage,
       })
 
       return api
