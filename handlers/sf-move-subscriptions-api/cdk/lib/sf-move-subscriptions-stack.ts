@@ -107,11 +107,8 @@ export class SfMoveSubscriptionsStack extends cdk.Stack {
           },
         })
 
-      api.root.addProxy({
-        defaultMethodOptions: {
-          apiKeyRequired: true,
-        }
-      })
+      api.root.addMethod('ANY', new apigateway.LambdaIntegration(fn), { apiKeyRequired: true })
+      api.root.addProxy({ defaultMethodOptions: { apiKeyRequired: true } })
 
       Tag.add(api, 'App', appName)
       Tag.add(api, 'Stage', stageParameter.valueAsString)
