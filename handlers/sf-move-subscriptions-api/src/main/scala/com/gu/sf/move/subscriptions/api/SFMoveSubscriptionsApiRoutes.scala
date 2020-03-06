@@ -30,7 +30,7 @@ object SFMoveSubscriptionsApiRoutes extends LazyLogging {
 
     HttpRoutes.of[IO] {
       case GET -> Root => Ok(rootInfo)
-      case request@POST -> Root / "subscription" / "move" =>
+      case request @ POST -> Root / "subscription" / "move" =>
         handleMoveRequest(request)
     }
 
