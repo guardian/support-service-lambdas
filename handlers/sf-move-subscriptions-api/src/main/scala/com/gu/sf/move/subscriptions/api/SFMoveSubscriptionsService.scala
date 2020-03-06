@@ -6,7 +6,7 @@ object SFMoveSubscriptionsService extends LazyLogging {
 
   def moveSubscription(req: MoveSubscriptionReqBody) = {
     import req._
-    logger.info(s"attempt to move $zuoraSubscriptionId subscription to $sfContactId SalesForce Contact")
+    logger.info(s"attempt to move $zuoraSubscriptionId subscription to $sfAccountId SalesForce Contact")
     req
   }
 

@@ -1,6 +1,6 @@
 package com.gu.sf.move.subscriptions.api
 
-final case class MoveSubscriptionReqBody(sfContactId: String, zuoraSubscriptionId: String)
+final case class MoveSubscriptionReqBody(sfAccountId: String, sfFullContactId: String, zuoraSubscriptionId: String)
 
 final case class SubscriptionMoved(message: String)
 
