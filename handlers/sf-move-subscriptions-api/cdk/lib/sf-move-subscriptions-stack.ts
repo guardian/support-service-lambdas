@@ -71,13 +71,13 @@ export class SfMoveSubscriptionsStack extends cdk.Stack {
         {
           functionName: `${appName}-${stageParameter.valueAsString}`,
           runtime: lambda.Runtime.JAVA_8,
-          memorySize: 192,
+          memorySize: 1536,
           timeout: Duration.seconds(300),
           code: Code.bucket(
             deployBucket,
             `membership/${stageParameter.valueAsString}/sf-move-subscriptions-api/sf-move-subscriptions-api.jar`
           ),
-          handler: 'com.gu.sf.move.subscriptions.api.Handler::apply',
+          handler: 'com.gu.sf.move.subscriptions.api.Handler::handle',
           role: fnRole,
         },
       )
