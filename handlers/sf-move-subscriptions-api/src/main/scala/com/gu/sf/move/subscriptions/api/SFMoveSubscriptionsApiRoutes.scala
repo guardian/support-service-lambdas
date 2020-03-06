@@ -12,16 +12,18 @@ object SFMoveSubscriptionsApiRoutes extends LazyLogging {
 
   def apply(): HttpRoutes[IO] = {
 
+    val rootInfo = MoveSubscriptionApiRoot("This is the sf-move-subscriptions-api")
+
     def handleMoveRequest(request: Request[IO]) = {
       for {
-        req <- request.as[MoveSubscriptionReqBody]
-        _ <- Ok(SFMoveSubscriptionsService.moveSubscription(req))
+        reqBody <- request.as[MoveSubscriptionReqBody]
+        _ <- Ok(SFMoveSubscriptionsService.moveSubscription(reqBody))
         resp <- Ok(SubscriptionMoved("subscription moved successfully"))
       } yield resp
     }
 
     HttpRoutes.of[IO] {
-      case GET -> Root => Ok(MoveSubscriptionApiRoot("This is the sf-move-subscriptions-api"))
+      case GET -> Root => Ok(rootInfo)
       case request@POST -> Root / "subscription" / "move" => handleMoveRequest(request)
     }
 

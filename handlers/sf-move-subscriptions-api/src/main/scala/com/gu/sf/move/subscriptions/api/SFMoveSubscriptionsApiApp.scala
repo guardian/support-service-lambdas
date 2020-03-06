@@ -15,7 +15,6 @@ object SFMoveSubscriptionsApiApp extends LazyLogging {
   private implicit val cs: ContextShift[IO] = IO.contextShift(scala.concurrent.ExecutionContext.global)
 
   def apply(appIdentity: AppIdentity): HttpRoutes[IO] = {
-    logger.info(s"appIdentity = $appIdentity")
     createLogging()(SFMoveSubscriptionsApiRoutes())
   }
 
