@@ -5,6 +5,7 @@ import * as lambda from '@aws-cdk/aws-lambda'
 import * as iam from '@aws-cdk/aws-iam'
 import { Duration, Tag } from '@aws-cdk/core'
 import * as s3 from '@aws-cdk/aws-s3'
+import { ApiKeySourceType, UsagePlanPerApiStage, ProxyResource } from '@aws-cdk/aws-apigateway';
 
 export class SfMoveSubscriptionsStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
@@ -32,21 +33,21 @@ export class SfMoveSubscriptionsStack extends cdk.Stack {
       const role = new iam.Role(this, 'sfMoveSubscriptionsFnRole', {
         assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com')
       })
-  
+
       role.addToPolicy(new iam.PolicyStatement({
         actions: ['s3:GetObject'],
         resources: [
           `arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${stageParameter.valueAsString}/sfAuth-${stageParameter.valueAsString}*.json`,
           `arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${stageParameter.valueAsString}/zuoraRest-${stageParameter.valueAsString}*.json`
-,
+          ,
         ],
       }))
-  
+
       role.addToPolicy(new iam.PolicyStatement({
         actions: ['logs:CreateLogGroup'],
         resources: [`arn:aws:logs:${region}:${account}:*`],
       }))
-  
+
       role.addToPolicy(new iam.PolicyStatement({
         actions: [
           'logs:CreateLogStream',
@@ -54,7 +55,7 @@ export class SfMoveSubscriptionsStack extends cdk.Stack {
         ],
         resources: [`arn:aws:logs:${region}:${account}:log-group:/aws/lambda/${appName}-${stageParameter.valueAsString}:*`],
       }))
-  
+
       Tag.add(role, 'App', appName)
       Tag.add(role, 'Stage', stageParameter.valueAsString)
       Tag.add(role, 'Stack', stackName)
@@ -80,7 +81,7 @@ export class SfMoveSubscriptionsStack extends cdk.Stack {
           role: fnRole,
         },
       )
-  
+
       Tag.add(fn, 'App', appName)
       Tag.add(fn, 'Stage', stageParameter.valueAsString)
       Tag.add(fn, 'Stack', stackName)
@@ -92,24 +93,48 @@ export class SfMoveSubscriptionsStack extends cdk.Stack {
     const createSfMoveSubscriptionsApi = (fn: lambda.IFunction) => {
       const apiStageName: string = context.resolve(stageParameter.valueAsString)
 
-      const apiGateway = new apigateway.LambdaRestApi(
+      const api = new apigateway.LambdaRestApi(
         this,
         appName,
         {
           restApiName: `${appName}-${stageParameter.valueAsString}`,
-          proxy: true,
+          proxy: false,
+          apiKeySourceType: ApiKeySourceType.HEADER,
           handler: fn,
           description: `API for for moving subscriptions in Salesforce in ${stageParameter.valueAsString} env`,
           deployOptions: {
-            stageName: apiStageName
-          }
+            stageName: apiStageName,
+          },
         })
-  
-      Tag.add(apiGateway, 'App', appName)
-      Tag.add(apiGateway, 'Stage', stageParameter.valueAsString)
-      Tag.add(apiGateway, 'Stack', stackName)
 
-      return apiGateway
+      api.root.addMethod('ANY', new apigateway.LambdaIntegration(fn), { apiKeyRequired: true })
+      api.root.addProxy({ defaultMethodOptions: { apiKeyRequired: true } })
+
+      Tag.add(api, 'App', appName)
+      Tag.add(api, 'Stage', stageParameter.valueAsString)
+      Tag.add(api, 'Stack', stackName)
+
+      const apiKey = new apigateway.ApiKey(
+        this,
+        'sfMoveSubscriptionsApiKey',
+        {
+          apiKeyName: `${appName}-key-${stageParameter.valueAsString}`,
+          resources: [api]
+        }
+      )
+
+      const usagePlan = new apigateway.UsagePlan(
+        this,
+        'sfMoveSubscriptionsApiUsagePlan', {
+        name: `${appName}-usage-plan-${stageParameter.valueAsString}`,
+        apiKey: apiKey,
+      })
+
+      usagePlan.addApiStage({
+        stage: api.deploymentStage,
+      })
+
+      return api
     }
 
     const sfMoveSubscriptionsFnRole = createSfMoveSubscriptionsFnRole()
