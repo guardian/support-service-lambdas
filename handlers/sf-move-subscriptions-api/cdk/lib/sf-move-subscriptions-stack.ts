@@ -44,6 +44,16 @@ export class SfMoveSubscriptionsStack extends cdk.Stack {
       }))
 
       role.addToPolicy(new iam.PolicyStatement({
+        actions: ['ssm:GetParametersByPath'],
+        resources: [`arn:aws:ssm:${region}:${account}:parameter/${stageParameter.valueAsString}/${stackName}/${appName}`],
+      }))
+
+      role.addToPolicy(new iam.PolicyStatement({
+        actions: ['kms:Decrypt'],
+        resources: [`arn:aws:kms:${region}:${account}:key/*`],
+      }))
+
+      role.addToPolicy(new iam.PolicyStatement({
         actions: ['logs:CreateLogGroup'],
         resources: [`arn:aws:logs:${region}:${account}:*`],
       }))
