@@ -12,23 +12,9 @@ import cats.implicits._
 object ImovoStub {
   class ImovoStubSttpBackendStubOps[F[_], S](sttpStub: SttpBackendStub[F, S]) {
 
-    def stubCreate[A: Encoder](apiKey: String, baseUrl: String, customerRef: String, campaignCode: String, startDate: String, response: A): SttpBackendStub[F, S] = {
-      sttpStub.whenRequestMatchesPartial {
-        case request: Request[_, _] if matchesQueryCreate(apiKey, baseUrl, customerRef, campaignCode, startDate, request) =>
-          Response.ok(response.asJson.spaces2)
-      }
-    }
-
     def stubCreateSubscription[A: Encoder](apiKey: String, baseUrl: String, subscriptionId: String, schemeName: String, startDate: String, response: A): SttpBackendStub[F, S] = {
       sttpStub.whenRequestMatchesPartial {
         case request: Request[_, _] if matchesQueryCreateSubscription(apiKey, baseUrl, subscriptionId, schemeName, startDate, request) =>
-          Response.ok(response.asJson.spaces2)
-      }
-    }
-
-    def stubReplace[A: Encoder](apiKey: String, baseUrl: String, voucherCode: String, response: A): SttpBackendStub[F, S] = {
-      sttpStub.whenRequestMatchesPartial {
-        case request: Request[_, _] if matchesReplaceRequest(apiKey, baseUrl, voucherCode, request) =>
           Response.ok(response.asJson.spaces2)
       }
     }
@@ -55,19 +41,6 @@ object ImovoStub {
     }
   }
 
-  private def matchesQueryCreate[S, F[_]](apiKey: String, baseUrl: String, customerRef: String, campaignCode: String, startDate: String, request: Request[_, _]) = {
-    val urlMatches = urlNoQueryString(request) == s"$baseUrl//VoucherRequest/Request"
-    val methodMatches = request.method == Method.GET
-    val queryParamsMatch = {
-      val params = request.uri.paramsMap
-      params.get("customerReference").contains(customerRef) &&
-        params.get("campaignCode").contains(campaignCode) &&
-        params.get("StartDate").contains(startDate)
-    }
-    val apiKeyMatches = request.headers.toMap.get("X-API-KEY").contains(apiKey)
-    urlMatches && methodMatches && queryParamsMatch && apiKeyMatches
-  }
-
   private def matchesQueryCreateSubscription[S, F[_]](apiKey: String, baseUrl: String, subscriptionId: String, schemeName: String, startDate: String, request: Request[_, _]) = {
     val urlMatches = urlNoQueryString(request) == s"$baseUrl/Subscription/RequestSubscriptionVouchers"
     val methodMatches = request.method == Method.GET
@@ -79,14 +52,6 @@ object ImovoStub {
     }
     val apiKeyMatches = request.headers.toMap.get("X-API-KEY").contains(apiKey)
     urlMatches && methodMatches && queryParamsMatch && apiKeyMatches
-  }
-
-  private def matchesReplaceRequest[S, F[_]](apiKey: String, baseUrl: String, voucherCode: String, request: Request[_, _]) = {
-    val urlMatches = urlNoQueryString(request) === s"$baseUrl//Subscription/ReplaceVoucher"
-    val methodMatches = request.method == Method.GET
-    val queryParamMatches = request.uri.paramsMap.get("VoucherCode").contains(voucherCode)
-    val apiKeyMatches = request.headers.toMap.get("X-API-KEY") === Some(apiKey)
-    urlMatches && methodMatches && queryParamMatches && apiKeyMatches
   }
 
   private def matchesReplaceSubscriptionRequest[S, F[_]](apiKey: String, baseUrl: String, subscriptionId: String, imovoSubscriptionType: ImovoSubscriptionType, request: Request[_, _]) = {
