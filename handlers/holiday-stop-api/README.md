@@ -56,5 +56,5 @@ The CSR UI (in Salesforce) is one consumer of this API and so each Salesforce en
 | CODE | DEV Lambda* (SF Dev) | CODE Lambda (SF UAT) |
 | PROD | PROD Lambda (SF Dev) | CODE Lambda (SF UAT) |
 
-\* Yes indeed there is a DEV Stack for the lambda, which is unusual and currently a bit fiddly to deploy via Riff-Raff (you need to 'Preview' the deploy then change the 'stage' parameter in the URL)
+\* Yes indeed there is a DEV Stack for the lambda, which is available in riff-raff as of [guardian/prism/pull/75](https://github.com/guardian/prism/pull/75)
 
