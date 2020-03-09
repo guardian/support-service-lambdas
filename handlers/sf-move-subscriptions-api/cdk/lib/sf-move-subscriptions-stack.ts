@@ -79,6 +79,11 @@ export class SfMoveSubscriptionsStack extends cdk.Stack {
           ),
           handler: 'com.gu.sf.move.subscriptions.api.Handler::handle',
           role: fnRole,
+          environment: {
+            'App': appName,
+            'Stage': stageParameter.valueAsString,
+            'Stack': stackName
+          }
         },
       )
 
