@@ -11,7 +11,7 @@ import org.http4s.{DecodeFailure, HttpRoutes, Request, Response}
 
 object SFMoveSubscriptionsApiRoutes extends LazyLogging {
 
-  def apply[F[_]: Effect](): HttpRoutes[F] = {
+  def apply[F[_]: Effect](moveSubscriptionService: SFMoveSubscriptionsService[F]): HttpRoutes[F] = {
     object http4sDsl extends Http4sDsl[F]
     import http4sDsl._
 
@@ -19,14 +19,14 @@ object SFMoveSubscriptionsApiRoutes extends LazyLogging {
 
     def handleMoveRequest(request: Request[F]): F[Response[F]] = {
       (for {
-        reqBody <- request.attemptAs[MoveSubscriptionReqBody]
+        reqBody <- request.attemptAs[MoveSubscriptionData]
           .leftMap { decodingFailure: DecodeFailure =>
             BadRequest(MoveSubscriptionApiError(s"Failed to decoded request body: $decodingFailure"))
           }
-        resp <- SFMoveSubscriptionsService.moveSubscription(reqBody)
+        resp <- moveSubscriptionService.moveSubscription(reqBody)
           .leftMap(
             error =>
-              InternalServerError(MoveSubscriptionApiError(s"Failed create voucher: $error"))
+              InternalServerError(MoveSubscriptionApiError(s"Failed to move subscription: $error"))
           )
       } yield Ok(resp)).merge.flatten
     }
@@ -36,7 +36,5 @@ object SFMoveSubscriptionsApiRoutes extends LazyLogging {
       case request @ POST -> Root / "subscription" / "move" =>
         handleMoveRequest(request)
     }
-
   }
-
 }
