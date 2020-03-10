@@ -19,10 +19,10 @@ object Zuora {
       baseUrl = config.baseUrl,
       oauth = config.holidayStopProcessor.oauth
     )
-    accessTokenGetResponse(genericConfig, backend)
+    accessTokenGetResponseV2(genericConfig, backend)
   }
 
-  def accessTokenGetResponse(
+  def accessTokenGetResponseV2(
     config: ZuoraRestOauthConfig,
     backend: SttpBackend[Id, Nothing]
   ): ZuoraApiResponse[AccessToken] = {
