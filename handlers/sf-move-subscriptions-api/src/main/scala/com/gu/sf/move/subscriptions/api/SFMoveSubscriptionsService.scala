@@ -13,14 +13,11 @@ class SFMoveSubscriptionsService[F[_]: Monad](apiCfg: MoveSubscriptionApiConfig)
 
   private val zuoraSttpBackend = HttpURLConnectionBackend()
 
-  // adapter TODO refactor later
-  private val zuoraConfig = ZuoraConfig(
+  private val zuoraConfig = ZuoraRestOauthConfig(
     baseUrl = apiCfg.zuoraBaseUrl,
-    holidayStopProcessor = HolidayStopProcessor(
-      Oauth(
-        clientId = apiCfg.zuoraClientId,
-        clientSecret = apiCfg.zuoraSecret
-      )
+    oauth = Oauth(
+      clientId = apiCfg.zuoraClientId,
+      clientSecret = apiCfg.zuoraSecret
     )
   )
 
@@ -32,9 +29,9 @@ class SFMoveSubscriptionsService[F[_]: Monad](apiCfg: MoveSubscriptionApiConfig)
       crmId = sfAccountId,
       sfContactId__c = sfFullContactId
     )
-    import Zuora.{accessTokenGetResponse, subscriptionGetResponse, updateAccountByMovingSubscription}
+    import Zuora.{accessTokenGetResponseV2, subscriptionGetResponse, updateAccountByMovingSubscription}
     val updateResponse = for {
-      token <- accessTokenGetResponse(zuoraConfig, zuoraSttpBackend)
+      token <- accessTokenGetResponseV2(zuoraConfig, zuoraSttpBackend)
       subscription <- subscriptionGetResponse(zuoraConfig, token, zuoraSttpBackend)(SubscriptionName(zuoraSubscriptionId))
       updateRes <- updateAccountByMovingSubscription(zuoraConfig, token, zuoraSttpBackend)(subscription, moveSubCommand)
     } yield updateRes
@@ -48,5 +45,4 @@ class SFMoveSubscriptionsService[F[_]: Monad](apiCfg: MoveSubscriptionApiConfig)
 object SFMoveSubscriptionsService {
   def apply[F[_]: Monad](apiCfg: MoveSubscriptionApiConfig): SFMoveSubscriptionsService[F] = new SFMoveSubscriptionsService(apiCfg)
 }
-
 
