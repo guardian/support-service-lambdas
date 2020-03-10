@@ -14,18 +14,18 @@ object Processor {
   private val logger = LoggerFactory.getLogger(getClass)
 
   def processLiveProduct[Request <: CreditRequest, Result <: ZuoraCreditAddResult](
-                                                                                    config: HolidayStopProcessorZuoraConfig,
-                                                                                    zuoraAccessToken: AccessToken,
-                                                                                    sttpBackend: SttpBackend[Id, Nothing],
-                                                                                    creditProduct: CreditProduct,
-                                                                                    getCreditRequestsFromSalesforce: (ZuoraProductType, List[LocalDate]) => SalesforceApiResponse[List[Request]],
-                                                                                    fulfilmentDatesFetcher: FulfilmentDatesFetcher,
-                                                                                    processOverrideDate: Option[LocalDate],
-                                                                                    productType: ZuoraProductType,
-                                                                                    updateToApply: (CreditProduct, Subscription, ZuoraAccount, Request) => ZuoraApiResponse[SubscriptionUpdate],
-                                                                                    resultOfZuoraCreditAdd: (Request, RatePlanCharge) => Result,
-                                                                                    writeCreditResultsToSalesforce: List[Result] => SalesforceApiResponse[_],
-                                                                                    getAccount: String => ZuoraApiResponse[ZuoraAccount]
+    config: HolidayStopProcessorZuoraConfig,
+    zuoraAccessToken: AccessToken,
+    sttpBackend: SttpBackend[Id, Nothing],
+    creditProduct: CreditProduct,
+    getCreditRequestsFromSalesforce: (ZuoraProductType, List[LocalDate]) => SalesforceApiResponse[List[Request]],
+    fulfilmentDatesFetcher: FulfilmentDatesFetcher,
+    processOverrideDate: Option[LocalDate],
+    productType: ZuoraProductType,
+    updateToApply: (CreditProduct, Subscription, ZuoraAccount, Request) => ZuoraApiResponse[SubscriptionUpdate],
+    resultOfZuoraCreditAdd: (Request, RatePlanCharge) => Result,
+    writeCreditResultsToSalesforce: List[Result] => SalesforceApiResponse[_],
+    getAccount: String => ZuoraApiResponse[ZuoraAccount]
   ): ProcessResult[Result] = {
 
     def getSubscription(

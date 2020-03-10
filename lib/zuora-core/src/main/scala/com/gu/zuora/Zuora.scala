@@ -10,10 +10,11 @@ object Zuora {
   /**
    * for legacy calls when Oauth is hardcoded to holidayStopProcessor
    * and read from S3 file where holidayStopProcessor is a field in json config
-   * **/
+   * *
+   */
   def accessTokenGetResponse(
-                              config: HolidayStopProcessorZuoraConfig,
-                              backend: SttpBackend[Id, Nothing]
+    config: HolidayStopProcessorZuoraConfig,
+    backend: SttpBackend[Id, Nothing]
   ): ZuoraApiResponse[AccessToken] = {
     val genericConfig = ZuoraRestOauthConfig(
       baseUrl = config.baseUrl,
@@ -70,9 +71,9 @@ object Zuora {
   }
 
   def accountGetResponse(
-                          config: ZuoraConfig,
-                          accessToken: AccessToken,
-                          backend: SttpBackend[Id, Nothing]
+    config: ZuoraConfig,
+    accessToken: AccessToken,
+    backend: SttpBackend[Id, Nothing]
   )(
     accountNumber: String
   ): ZuoraApiResponse[ZuoraAccount] = {

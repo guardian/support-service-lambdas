@@ -8,8 +8,8 @@ import com.gu.zuora.subscription.OverallFailure
 import play.api.libs.json.Reads
 
 case class Config(
-                   zuoraConfig: HolidayStopProcessorZuoraConfig,
-                   sfConfig: SFAuthConfig
+  zuoraConfig: HolidayStopProcessorZuoraConfig,
+  sfConfig: SFAuthConfig
 )
 
 object Config {
