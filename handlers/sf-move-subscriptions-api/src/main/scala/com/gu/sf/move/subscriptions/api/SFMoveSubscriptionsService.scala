@@ -9,9 +9,7 @@ import com.gu.zuora.subscription._
 import com.softwaremill.sttp._
 import com.typesafe.scalalogging.LazyLogging
 
-class SFMoveSubscriptionsService[F[_]: Monad](apiCfg: MoveSubscriptionApiConfig) extends LazyLogging {
-
-  private val zuoraSttpBackend = HttpURLConnectionBackend()
+class SFMoveSubscriptionsService[F[_]: Monad](apiCfg: MoveSubscriptionApiConfig, backend: SttpBackend[Id, Nothing]) extends LazyLogging {
 
   private val zuoraConfig = ZuoraRestOauthConfig(
     baseUrl = apiCfg.zuoraBaseUrl,
@@ -31,9 +29,9 @@ class SFMoveSubscriptionsService[F[_]: Monad](apiCfg: MoveSubscriptionApiConfig)
     )
     import Zuora.{accessTokenGetResponseV2, subscriptionGetResponse, updateAccountByMovingSubscription}
     val updateResponse = for {
-      token <- accessTokenGetResponseV2(zuoraConfig, zuoraSttpBackend)
-      subscription <- subscriptionGetResponse(zuoraConfig, token, zuoraSttpBackend)(SubscriptionName(zuoraSubscriptionId))
-      updateRes <- updateAccountByMovingSubscription(zuoraConfig, token, zuoraSttpBackend)(subscription, moveSubCommand)
+      token <- accessTokenGetResponseV2(zuoraConfig, backend)
+      subscription <- subscriptionGetResponse(zuoraConfig, token, backend)(SubscriptionName(zuoraSubscriptionId))
+      updateRes <- updateAccountByMovingSubscription(zuoraConfig, token, backend)(subscription, moveSubCommand)
     } yield updateRes
 
     updateResponse.toEitherT[F]
@@ -43,6 +41,7 @@ class SFMoveSubscriptionsService[F[_]: Monad](apiCfg: MoveSubscriptionApiConfig)
 }
 
 object SFMoveSubscriptionsService {
-  def apply[F[_]: Monad](apiCfg: MoveSubscriptionApiConfig): SFMoveSubscriptionsService[F] = new SFMoveSubscriptionsService(apiCfg)
+  def apply[F[_]: Monad](apiCfg: MoveSubscriptionApiConfig, backend: SttpBackend[Id, Nothing]): SFMoveSubscriptionsService[F] =
+    new SFMoveSubscriptionsService(apiCfg, backend)
 }
 

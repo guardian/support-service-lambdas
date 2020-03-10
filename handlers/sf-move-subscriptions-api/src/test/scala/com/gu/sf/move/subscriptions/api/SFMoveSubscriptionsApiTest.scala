@@ -3,6 +3,7 @@ package com.gu.sf.move.subscriptions.api
 
 import cats.effect.IO
 import com.gu.DevIdentity
+import com.softwaremill.sttp.HttpURLConnectionBackend
 import io.circe.generic.auto._
 import io.circe.syntax._
 import org.http4s.{Method, Request, Uri}
@@ -33,7 +34,7 @@ class SFMoveSubscriptionsApiTest extends FlatSpec with Matchers {
   }
 
   private def createApp() = {
-    SFMoveSubscriptionsApiApp(DevIdentity("sf-move-subscriptions-api")).value.unsafeRunSync()
+    SFMoveSubscriptionsApiApp(DevIdentity("sf-move-subscriptions-api"), HttpURLConnectionBackend()).value.unsafeRunSync()
       .right.get
   }
 
