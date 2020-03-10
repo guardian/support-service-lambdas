@@ -14,7 +14,7 @@ final case class ConfigError(message: String)
 
 final case class MoveSubscriptionApiConfig(zuoraBaseUrl: String, zuoraClientId: String, zuoraSecret: String)
 
-final case class ExampleReqDoc(method: String, body: MoveSubscriptionData)
+final case class ExampleReqDoc(method: String, path: String, body: MoveSubscriptionData)
 
 final case class MoveSubscriptionApiRoot(description: String, exampleRequests: List[ExampleReqDoc])
 
