@@ -6,7 +6,7 @@ import cats.implicits._
 import com.gu.fulfilmentdates.FulfilmentDatesFetcher
 import com.gu.zuora.ZuoraProductTypes.ZuoraProductType
 import com.gu.zuora.subscription._
-import com.gu.zuora.{AccessToken, Zuora, ZuoraConfig}
+import com.gu.zuora.{AccessToken, Zuora, HolidayStopProcessorZuoraConfig}
 import com.softwaremill.sttp.{Id, SttpBackend}
 import org.slf4j.LoggerFactory
 
@@ -14,7 +14,7 @@ object Processor {
   private val logger = LoggerFactory.getLogger(getClass)
 
   def processLiveProduct[Request <: CreditRequest, Result <: ZuoraCreditAddResult](
-    config: ZuoraConfig,
+    config: HolidayStopProcessorZuoraConfig,
     zuoraAccessToken: AccessToken,
     sttpBackend: SttpBackend[Id, Nothing],
     creditProduct: CreditProduct,

@@ -6,16 +6,33 @@ import com.softwaremill.sttp.circe._
 import io.circe.generic.auto._
 
 object Zuora {
+
+  /**
+   * for legacy calls when Oauth is hardcoded to holidayStopProcessor
+   * and read from S3 file where holidayStopProcessor is a field in json config
+   * *
+   */
   def accessTokenGetResponse(
-    config: ZuoraConfig,
+    config: HolidayStopProcessorZuoraConfig,
+    backend: SttpBackend[Id, Nothing]
+  ): ZuoraApiResponse[AccessToken] = {
+    val genericConfig = ZuoraRestOauthConfig(
+      baseUrl = config.baseUrl,
+      oauth = config.holidayStopProcessor.oauth
+    )
+    accessTokenGetResponseV2(genericConfig, backend)
+  }
+
+  def accessTokenGetResponseV2(
+    config: ZuoraRestOauthConfig,
     backend: SttpBackend[Id, Nothing]
   ): ZuoraApiResponse[AccessToken] = {
     implicit val b: SttpBackend[Id, Nothing] = backend
     sttp.post(uri"${config.baseUrl.stripSuffix("/v1")}/oauth/token")
       .body(
         "grant_type" -> "client_credentials",
-        "client_id" -> s"${config.holidayStopProcessor.oauth.clientId}",
-        "client_secret" -> s"${config.holidayStopProcessor.oauth.clientSecret}"
+        "client_id" -> s"${config.oauth.clientId}",
+        "client_secret" -> s"${config.oauth.clientSecret}"
       )
       .response(asJson[AccessToken])
       .mapResponse(_.left.map(e => ZuoraApiFailure(e.message)))

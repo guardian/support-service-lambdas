@@ -15,7 +15,7 @@ import com.gu.util.config.ConfigReads.ConfigFailure
 import com.gu.util.config.{ConfigLocation, LoadConfigModule, Stage}
 import com.gu.zuora.ZuoraProductTypes.{GuardianWeekly, NewspaperHomeDelivery, ZuoraProductType}
 import com.gu.zuora.subscription._
-import com.gu.zuora.{AccessToken, Zuora, ZuoraConfig}
+import com.gu.zuora.{AccessToken, Zuora, HolidayStopProcessorZuoraConfig}
 import com.softwaremill.sttp.HttpURLConnectionBackend
 import com.softwaremill.sttp.asynchttpclient.cats.AsyncHttpClientCatsBackend
 import io.circe.generic.auto._
@@ -34,10 +34,10 @@ object DeliveryCreditProcessor extends Logging {
         .apply[SFAuthConfig](ConfigLocation("sfAuth", 1), SFAuthConfig.reads)
     )
 
-  private lazy val zuoraConfig: Task[ZuoraConfig] =
+  private lazy val zuoraConfig: Task[HolidayStopProcessorZuoraConfig] =
     config(
       LoadConfigModule(stage, GetFromS3.fetchString)
-        .apply[ZuoraConfig](ConfigLocation("zuoraRest", 1), ZuoraConfig.reads)
+        .apply[HolidayStopProcessorZuoraConfig](ConfigLocation("zuoraRest", 1), HolidayStopProcessorZuoraConfig.reads)
     )
 
   private def config[A](a: Either[ConfigFailure, A]): Task[A] =
@@ -46,7 +46,7 @@ object DeliveryCreditProcessor extends Logging {
       case e: Throwable => e
     }
 
-  private def zuoraAccessToken(config: ZuoraConfig): Task[AccessToken] =
+  private def zuoraAccessToken(config: HolidayStopProcessorZuoraConfig): Task[AccessToken] =
     Task.effect(Zuora.accessTokenGetResponse(config, zuoraSttpBackend)).absolve.mapError {
       case e: ZuoraApiFailure => new RuntimeException(e.reason)
       case e: Throwable => e
@@ -76,9 +76,9 @@ object DeliveryCreditProcessor extends Logging {
     } yield results
 
   def processProduct(
-    sfAuthConfig: SFAuthConfig,
-    zuoraConfig: ZuoraConfig,
-    zuoraAccessToken: AccessToken
+                      sfAuthConfig: SFAuthConfig,
+                      zuoraConfig: HolidayStopProcessorZuoraConfig,
+                      zuoraAccessToken: AccessToken
   )(productType: ZuoraProductType): Task[ProcessResult[DeliveryCreditResult]] =
     for {
       processResult <- Task.effect(
