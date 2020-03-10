@@ -5,6 +5,7 @@ import cats.effect.{ContextShift, IO, Sync}
 import cats.implicits._
 import com.gu.conf.{ResourceConfigurationLocation, SSMConfigurationLocation}
 import com.gu.{AppIdentity, AwsIdentity, DevIdentity}
+import com.softwaremill.sttp.{Id, SttpBackend}
 import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
 import org.http4s.HttpRoutes
@@ -15,11 +16,11 @@ object SFMoveSubscriptionsApiApp extends LazyLogging {
 
   private implicit val cs: ContextShift[IO] = IO.contextShift(scala.concurrent.ExecutionContext.global)
 
-  def apply(appIdentity: AppIdentity): EitherT[IO, MoveSubscriptionApiError, HttpRoutes[IO]] = {
+  def apply(appIdentity: AppIdentity, backend: SttpBackend[Id, Nothing]): EitherT[IO, MoveSubscriptionApiError, HttpRoutes[IO]] = {
     for {
       apiConfig <- MoveSubscriptionsApiConfigLoader.getApiConfig[IO](appIdentity)
         .leftMap(error => MoveSubscriptionApiError(error.toString))
-      routes <- createLogging()(SFMoveSubscriptionsApiRoutes(SFMoveSubscriptionsService(apiConfig)))
+      routes <- createLogging()(SFMoveSubscriptionsApiRoutes(SFMoveSubscriptionsService(apiConfig, backend)))
         .asRight[MoveSubscriptionApiError]
         .toEitherT[IO]
     } yield routes
