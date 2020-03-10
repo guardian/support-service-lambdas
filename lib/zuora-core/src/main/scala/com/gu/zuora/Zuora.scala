@@ -6,16 +6,32 @@ import com.softwaremill.sttp.circe._
 import io.circe.generic.auto._
 
 object Zuora {
+
+  /**
+   * for legacy calls when Oauth is hardcoded to holidayStopProcessor
+   * and read from S3 file where holidayStopProcessor is a field in json config
+   * **/
   def accessTokenGetResponse(
     config: ZuoraConfig,
+    backend: SttpBackend[Id, Nothing]
+  ): ZuoraApiResponse[AccessToken] = {
+    val genericConfig = ZuoraRestOauthConfig(
+      baseUrl = config.baseUrl,
+      oauth = config.holidayStopProcessor.oauth
+    )
+    accessTokenGetResponse(genericConfig, backend)
+  }
+
+  def accessTokenGetResponse(
+    config: ZuoraRestOauthConfig,
     backend: SttpBackend[Id, Nothing]
   ): ZuoraApiResponse[AccessToken] = {
     implicit val b: SttpBackend[Id, Nothing] = backend
     sttp.post(uri"${config.baseUrl.stripSuffix("/v1")}/oauth/token")
       .body(
         "grant_type" -> "client_credentials",
-        "client_id" -> s"${config.holidayStopProcessor.oauth.clientId}",
-        "client_secret" -> s"${config.holidayStopProcessor.oauth.clientSecret}"
+        "client_id" -> s"${config.oauth.clientId}",
+        "client_secret" -> s"${config.oauth.clientSecret}"
       )
       .response(asJson[AccessToken])
       .mapResponse(_.left.map(e => ZuoraApiFailure(e.message)))
@@ -24,7 +40,7 @@ object Zuora {
       .joinRight
   }
 
-  def subscriptionGetResponse(config: ZuoraConfig, accessToken: AccessToken, backend: SttpBackend[Id, Nothing])(subscriptionName: SubscriptionName): ZuoraApiResponse[Subscription] = {
+  def subscriptionGetResponse(config: ZuoraConfigBase, accessToken: AccessToken, backend: SttpBackend[Id, Nothing])(subscriptionName: SubscriptionName): ZuoraApiResponse[Subscription] = {
     implicit val b: SttpBackend[Id, Nothing] = backend
     sttp.get(uri"${config.baseUrl}/subscriptions/${subscriptionName.value}")
       .header("Authorization", s"Bearer ${accessToken.access_token}")
@@ -35,7 +51,7 @@ object Zuora {
       .joinRight
   }
 
-  def subscriptionUpdateResponse(config: ZuoraConfig, accessToken: AccessToken, backend: SttpBackend[Id, Nothing])(subscription: Subscription, update: SubscriptionUpdate): ZuoraApiResponse[Unit] = {
+  def subscriptionUpdateResponse(config: ZuoraConfigBase, accessToken: AccessToken, backend: SttpBackend[Id, Nothing])(subscription: Subscription, update: SubscriptionUpdate): ZuoraApiResponse[Unit] = {
     implicit val b: SttpBackend[Id, Nothing] = backend
     val errMsg = (reason: String) => s"Failed to update subscription '${subscription.subscriptionNumber}' with $update. Reason: $reason"
     sttp.put(uri"${config.baseUrl}/subscriptions/${subscription.subscriptionNumber}")
@@ -54,7 +70,7 @@ object Zuora {
   }
 
   def accountGetResponse(
-    config: ZuoraConfig,
+    config: ZuoraConfigBase,
     accessToken: AccessToken,
     backend: SttpBackend[Id, Nothing]
   )(
