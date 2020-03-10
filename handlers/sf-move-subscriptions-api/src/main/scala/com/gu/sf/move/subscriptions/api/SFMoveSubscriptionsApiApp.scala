@@ -37,14 +37,15 @@ object SFMoveSubscriptionsApiApp extends LazyLogging {
 }
 
 object MoveSubscriptionsApiConfigLoader {
-  def getApiConfig[F[_] : Sync](appIdentity: AppIdentity): EitherT[F, ConfigError, MoveSubscriptionApiConfig] = {
+
+  def getApiConfig[F[_]: Sync](appIdentity: AppIdentity): EitherT[F, ConfigError, MoveSubscriptionApiConfig] = {
     for {
       rawConfig <- loadConfigFromPropertyStore[F](appIdentity)
-      parsedCfg <- parseConfig(rawConfig)
+      parsedCfg <- parseApiConfig(rawConfig)
     } yield parsedCfg
   }
 
-  private def parseConfig[F[_] : Sync](rawConfig: Config) = {
+  private def parseApiConfig[F[_]: Sync](rawConfig: Config): EitherT[F, ConfigError, MoveSubscriptionApiConfig] = {
     import io.circe.config.syntax._
     import io.circe.generic.auto._
     rawConfig
@@ -53,7 +54,7 @@ object MoveSubscriptionsApiConfigLoader {
       .toEitherT[F]
   }
 
-  private def loadConfigFromPropertyStore[F[_] : Sync](appIdentity: AppIdentity): EitherT[F, ConfigError, Config] =
+  private def loadConfigFromPropertyStore[F[_]: Sync](appIdentity: AppIdentity): EitherT[F, ConfigError, Config] =
     EitherT(Sync[F].delay {
       Either.catchNonFatal {
         com.gu.conf.ConfigurationLoader.load(appIdentity) {
