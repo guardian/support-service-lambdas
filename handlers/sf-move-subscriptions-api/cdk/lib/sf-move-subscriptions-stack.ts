@@ -41,7 +41,7 @@ export class SfMoveSubscriptionsStack extends cdk.Stack {
 
       role.addToPolicy(new iam.PolicyStatement({
         actions: ['kms:Decrypt'],
-        resources: [`arn:aws:kms:${region}:${account}:key/*`],
+        resources: [`arn:aws:kms:${region}:${account}:alias/aws/ssm`],
       }))
 
       role.addToPolicy(new iam.PolicyStatement({
