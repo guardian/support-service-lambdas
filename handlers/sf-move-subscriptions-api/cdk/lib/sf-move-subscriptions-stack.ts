@@ -35,15 +35,6 @@ export class SfMoveSubscriptionsStack extends cdk.Stack {
       })
 
       role.addToPolicy(new iam.PolicyStatement({
-        actions: ['s3:GetObject'],
-        resources: [
-          `arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${stageParameter.valueAsString}/sfAuth-${stageParameter.valueAsString}*.json`,
-          `arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${stageParameter.valueAsString}/zuoraRest-${stageParameter.valueAsString}*.json`
-          ,
-        ],
-      }))
-
-      role.addToPolicy(new iam.PolicyStatement({
         actions: ['ssm:GetParametersByPath'],
         resources: [`arn:aws:ssm:${region}:${account}:parameter/${stageParameter.valueAsString}/${stackName}/${appName}`],
       }))
