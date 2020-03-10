@@ -362,10 +362,11 @@ lazy val `metric-push-api` = all(project in file("handlers/metric-push-api"))
   .dependsOn()
 
 lazy val `sf-move-subscriptions-api` = all(project in file("handlers/sf-move-subscriptions-api"))
-  .dependsOn(`effects-s3`, `config-core`, `salesforce-sttp-client`, `salesforce-sttp-test-stub` % Test)
+  .dependsOn(`effects-s3`, `config-core`, `zuora-core`, `salesforce-sttp-client`, `salesforce-sttp-test-stub` % Test)
   .settings(
     libraryDependencies ++=
-      Seq(http4sLambda, http4sDsl, http4sCirce, http4sServer, circe, sttpAsycHttpClientBackendCats, scalatest, simpleConfig)
+      Seq(http4sLambda, http4sDsl, http4sCirce, http4sServer, circe, circeConfig,
+        sttpAsycHttpClientBackendCats, scalatest, simpleConfig)
         ++ logging
   )
   .enablePlugins(RiffRaffArtifact)
