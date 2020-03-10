@@ -12,8 +12,8 @@ object Zuora {
    * and read from S3 file where holidayStopProcessor is a field in json config
    * **/
   def accessTokenGetResponse(
-    config: ZuoraConfig,
-    backend: SttpBackend[Id, Nothing]
+                              config: HolidayStopProcessorZuoraConfig,
+                              backend: SttpBackend[Id, Nothing]
   ): ZuoraApiResponse[AccessToken] = {
     val genericConfig = ZuoraRestOauthConfig(
       baseUrl = config.baseUrl,

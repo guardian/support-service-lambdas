@@ -3,19 +3,19 @@ package com.gu.holiday_stops
 import com.gu.salesforce.SFAuthConfig
 import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config.{ConfigLocation, LoadConfigModule, Stage}
-import com.gu.zuora.ZuoraConfig
+import com.gu.zuora.HolidayStopProcessorZuoraConfig
 import com.gu.zuora.subscription.OverallFailure
 import play.api.libs.json.Reads
 
 case class Config(
-  zuoraConfig: ZuoraConfig,
-  sfConfig: SFAuthConfig
+                   zuoraConfig: HolidayStopProcessorZuoraConfig,
+                   sfConfig: SFAuthConfig
 )
 
 object Config {
 
-  private def zuoraCredentials(stage: String, fetchString: StringFromS3): Either[OverallFailure, ZuoraConfig] = {
-    credentials[ZuoraConfig](stage, "zuoraRest", fetchString)
+  private def zuoraCredentials(stage: String, fetchString: StringFromS3): Either[OverallFailure, HolidayStopProcessorZuoraConfig] = {
+    credentials[HolidayStopProcessorZuoraConfig](stage, "zuoraRest", fetchString)
   }
 
   private def salesforceCredentials(stage: String, fetchString: StringFromS3): Either[OverallFailure, SFAuthConfig] = {
