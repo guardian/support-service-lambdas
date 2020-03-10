@@ -18,17 +18,17 @@ object HolidayStopProcessorZuoraConfig {
   implicit val reads: Reads[HolidayStopProcessorZuoraConfig] = Json.reads[HolidayStopProcessorZuoraConfig]
 }
 
-trait ZuoraConfigBase {
+trait ZuoraConfig {
   def baseUrl: String
 }
 
 case class HolidayStopProcessorZuoraConfig(
   baseUrl: String,
   holidayStopProcessor: HolidayStopProcessor
-) extends ZuoraConfigBase
+) extends ZuoraConfig
 
 case class ZuoraRestOauthConfig(
   baseUrl: String,
   oauth: Oauth
-) extends ZuoraConfigBase
+) extends ZuoraConfig
 
