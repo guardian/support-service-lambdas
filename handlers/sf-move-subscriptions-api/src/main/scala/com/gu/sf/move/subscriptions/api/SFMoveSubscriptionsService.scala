@@ -9,6 +9,10 @@ import com.gu.zuora.subscription._
 import com.softwaremill.sttp._
 import com.typesafe.scalalogging.LazyLogging
 
+final case class MoveSubscriptionServiceSuccess(message: String)
+
+final case class MoveSubscriptionServiceError(error: String)
+
 class SFMoveSubscriptionsService[F[_] : Monad](apiCfg: MoveSubscriptionApiConfig, backend: SttpBackend[Id, Nothing]) extends LazyLogging {
 
   private val ZuoraConfig = ZuoraRestOauthConfig(
@@ -19,7 +23,8 @@ class SFMoveSubscriptionsService[F[_] : Monad](apiCfg: MoveSubscriptionApiConfig
     )
   )
 
-  def moveSubscription(moveSubscriptionData: MoveSubscriptionReqBody): EitherT[F, MoveSubscriptionServiceError, MoveSubscriptionServiceSuccess] = {
+  def moveSubscription(moveSubscriptionData: MoveSubscriptionReqBody): EitherT[F, MoveSubscriptionServiceError,
+    MoveSubscriptionServiceSuccess] = {
     import moveSubscriptionData._
     logger.info(s"attempt to move $zuoraSubscriptionId subscription to " +
       s"(Account Id=$sfAccountId ,Full contact Id=$sfFullContactId) SalesForce Contact")
