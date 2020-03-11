@@ -1,7 +1,6 @@
 package com.gu.cancellation.sf_cases
 
-import com.gu.cancellation.sf_cases.Handler.RaiseCase
-import com.gu.cancellation.sf_cases.Handler.RaiseCase._
+import com.gu.cancellation.sf_cases.RaiseCase._
 import com.gu.salesforce.cases.SalesforceCase.Create.WireNewCase
 import com.gu.salesforce.cases.SalesforceCase.{CaseSubject, ContactId, SubscriptionId}
 import org.scalatest.{FlatSpec, Matchers}

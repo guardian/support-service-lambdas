@@ -2,49 +2,34 @@ package com.gu.cancellation.sf_cases
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
-import com.gu.cancellation.sf_cases.Handler.{CasePathParams, SfBackendForIdentityCookieHeader, Steps}
-import com.gu.cancellation.sf_cases.TypeConvert._
 import com.gu.effects.{GetFromS3, RawEffects}
-import com.gu.identity.IdentityCookieToIdentityUser.{IdentityId, IdentityUser}
+import com.gu.salesforce.SalesforceReads.sfAuthConfigReads
 import com.gu.salesforce.cases.SalesforceCase
-import com.gu.salesforce.cases.SalesforceCase.CaseWithId
+import com.gu.salesforce.cases.SalesforceCase.{CaseId, CaseWithId}
+import com.gu.salesforce.{SFAuthConfig, SalesforceClient}
 import com.gu.test.EffectsTest
-import com.gu.util.apigateway.ApiGatewayHandler.LambdaIO
-import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
+import com.gu.util.config.LoadConfigModule
 import com.gu.util.resthttp.JsonHttp
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json._
 
 import scala.util.Random
 
-case class PartialApiResponse(statusCode: String, body: String)
-case class GetCaseResponse(Description: String)
-
 class EndToEndHandlerEffectsTest extends FlatSpec with Matchers {
 
   import com.gu.cancellation.sf_cases.EndToEndData._
   import com.gu.cancellation.sf_cases.Runner._
 
-  def getCaseSteps(sfBackendForIdentityCookieHeader: SfBackendForIdentityCookieHeader)(apiGatewayRequest: ApiGatewayRequest) =
-    (for {
-      identityAndSfRequests <- sfBackendForIdentityCookieHeader(apiGatewayRequest.headers)
-      pathParams <- apiGatewayRequest.pathParamsAsCaseClass[CasePathParams]()
-      sfGet = SalesforceCase.GetById[JsValue](identityAndSfRequests.sfClient.wrapWith(JsonHttp.get))_
-      getCaseResponse <- sfGet(pathParams.caseId).toApiGatewayOp("get case detail")
-    } yield ApiGatewayResponse("200", getCaseResponse)).apiResponse
-
   it should "create a case, try to resume that case, update 'Description' field of the case and check the update worked" taggedAs EffectsTest in {
 
     // create case (which has new case ID in response body)
     val firstRaiseCaseResponse: CaseWithId = getResponse[CaseWithId](
-      createCaseRequest,
-      Handler.RaiseCase.steps
+      createCaseRequest
     )
 
     // try to raise another case, which should 'resume' that case (i.e. same ID)
     val secondRaiseCaseResponse: CaseWithId = getResponse[CaseWithId](
-      createCaseRequest,
-      Handler.RaiseCase.steps
+      createCaseRequest
     )
 
     firstRaiseCaseResponse.id shouldEqual secondRaiseCaseResponse.id
@@ -53,18 +38,18 @@ class EndToEndHandlerEffectsTest extends FlatSpec with Matchers {
 
     // update case by setting 'Description' field
     getResponse[JsValue](
-      updateCaseRequest(firstRaiseCaseResponse.id.value, expectedDescription),
-      Handler.UpdateCase.steps
+      updateCaseRequest(firstRaiseCaseResponse.id.value, expectedDescription)
     )
 
     // fetch the case to ensure the 'Description' field has been updated
-    implicit val getDetailReads: Reads[GetCaseResponse] = Json.reads[GetCaseResponse]
-    val getCaseDetailResponse = getResponse[GetCaseResponse](
-      getCaseDetailRequest(firstRaiseCaseResponse.id.value),
-      getCaseSteps
-    )
+    val caseDescription = for {
+      sfConfig <- LoadConfigModule(RawEffects.stage, GetFromS3.fetchString)(SFAuthConfig.location, sfAuthConfigReads)
+      sfClient <- SalesforceClient(RawEffects.response, sfConfig).value.toDisjunction
+      getCaseOp = SalesforceCase.GetById[JsValue](sfClient.wrapWith(JsonHttp.get))
+      caseResponse <- getCaseOp(CaseId(firstRaiseCaseResponse.id.value)).toDisjunction
+    } yield (caseResponse \ "Description").as[String]
 
-    getCaseDetailResponse.Description shouldEqual expectedDescription
+    caseDescription shouldEqual Right(expectedDescription)
 
   }
 
@@ -72,24 +57,15 @@ class EndToEndHandlerEffectsTest extends FlatSpec with Matchers {
 
 object Runner extends Matchers {
 
-  def fakeCookiesToIdentityUser(scGuU: String, guU: String) = {
-    scGuU shouldEqual EndToEndData.scGuU
-    guU shouldEqual EndToEndData.guU
-    Some(IdentityUser(IdentityId("100000932"), None))
-  }
+  case class PartialApiResponse(statusCode: String, body: String)
 
-  def getResponse[ResponseType](input: String, steps: Steps)(implicit reads: Reads[ResponseType]): ResponseType = {
-    val stream = new ByteArrayInputStream(input.getBytes(java.nio.charset.StandardCharsets.UTF_8))
+  def getResponse[ResponseType](input: String)(implicit reads: Reads[ResponseType]): ResponseType = {
     val os = new ByteArrayOutputStream()
 
-    //execute
-    Handler.runForLegacyTestsSeeTestingMd(
-      fakeCookiesToIdentityUser,
-      steps,
-      RawEffects.response,
-      RawEffects.stage,
-      GetFromS3.fetchString,
-      LambdaIO(stream, os, null)
+    Handler.handle(
+      inputStream = new ByteArrayInputStream(input.getBytes(java.nio.charset.StandardCharsets.UTF_8)),
+      outputStream = os,
+      context = null
     )
 
     val parsed = Json.parse(new String(os.toByteArray, "UTF-8"))
@@ -113,9 +89,6 @@ object Runner extends Matchers {
 
 object EndToEndData {
 
-  val scGuU: String = "scGuU"
-  val guU: String = "guU"
-
   private def ApiGatewayRequestPayloadBuilder(
     httpMethod: String,
     bodyString: String,
@@ -128,7 +101,7 @@ object EndToEndData {
        |    "path": "/case${pathSuffix}",
        |    "httpMethod": "${httpMethod}",
        |    "headers": {
-       |        "Cookie":"SC_GU_U=${scGuU};GU_U=${guU}"
+       |        "x-identity-id":"100000932"
        |    },
        |    "queryStringParameters": null,
        |    "pathParameters": ${pathParameters},
@@ -153,7 +126,7 @@ object EndToEndData {
     bodyString = "{" +
       s"""\\\"reason\\\":\\\"${Random.alphanumeric.take(10).mkString}\\\",""" +
       "\\\"product\\\":\\\"Membership\\\"," +
-      "\\\"subscriptionName\\\":\\\"A-S00045062\\\"," +
+      "\\\"subscriptionName\\\":\\\"A-S00051910\\\"," +
       "\\\"gaData\\\":\\\"{\\\\\\\"UA-51507017-5\\\\\\\":{\\\\\\\"experiments\\\\\\\":" +
       "{\\\\\\\"9ycLuqmFRBGBDGV5bnFlCA\\\\\\\":\\\\\\\"1\\\\\\\"},\\\\\\\"hitcount\\\\\\\":3}\\\"" +
       "}"
@@ -162,13 +135,6 @@ object EndToEndData {
   def updateCaseRequest(caseId: String, description: String): String = ApiGatewayRequestPayloadBuilder(
     httpMethod = "PATCH",
     bodyString = s"""{\\\"Description\\\":\\\"${description}\\\"}""",
-    pathParameters = s"""{"caseId":"${caseId}"}""",
-    pathSuffix = "/" + caseId
-  )
-
-  def getCaseDetailRequest(caseId: String): String = ApiGatewayRequestPayloadBuilder(
-    httpMethod = "GET",
-    bodyString = "",
     pathParameters = s"""{"caseId":"${caseId}"}""",
     pathSuffix = "/" + caseId
   )

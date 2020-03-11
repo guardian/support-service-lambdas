@@ -4,7 +4,7 @@ import cats.data.EitherT
 import cats.effect.{ContextShift, IO}
 import com.gu.salesforce.SFAuthConfig
 import com.gu.salesforce.sttp.SalesforceClient
-import com.gu.util.config.{ConfigLocation, Stage}
+import com.gu.util.config.Stage
 import com.softwaremill.sttp.SttpBackend
 import com.softwaremill.sttp.asynchttpclient.cats.AsyncHttpClientCatsBackend
 import com.typesafe.scalalogging.LazyLogging
@@ -44,14 +44,12 @@ object DeliveryRecordsApiApp extends LazyLogging {
 
   private def loadSalesforceConfig(): EitherT[IO, DeliveryRecordsApiError, SFAuthConfig] = {
     ConfigLoader
-      .loadFileFromS3[IO, SFAuthConfig](bucket, stage, salesforceConfigLocation)
-      .leftMap(error => DeliveryRecordsApiError(error.toString()))
+      .loadFileFromS3[IO, SFAuthConfig](bucket, stage, SFAuthConfig.location)
+      .leftMap(error => DeliveryRecordsApiError(error.toString))
   }
 
   private lazy val stage: Stage =
     Stage(Option(System.getenv("Stage")).filter(_ != "").getOrElse("DEV"))
 
   private val bucket = "gu-reader-revenue-private"
-
-  private val salesforceConfigLocation = ConfigLocation[SFAuthConfig]("sfAuth", 1)
 }

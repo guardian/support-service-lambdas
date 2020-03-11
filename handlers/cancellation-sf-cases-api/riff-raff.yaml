@@ -1,22 +1,21 @@
 stacks:
-- subscriptions
+- membership
 regions:
 - eu-west-1
 deployments:
 
   cfn:
     type: cloud-formation
-    app: cancellation-sf-cases
+    app: cancellation-sf-cases-api
     parameters:
       templatePath: cfn.yaml
 
-  cancellation-sf-cases:
+  cancellation-sf-cases-api:
     type: aws-lambda
     parameters:
-      fileName: cancellation-sf-cases.jar
+      fileName: cancellation-sf-cases-api.jar
       bucket: support-service-lambdas-dist
       prefixStack: false
       functionNames:
-      - cancellation-sf-cases-raise-
-      - cancellation-sf-cases-update-
+      - cancellation-sf-cases-api-
     dependencies: [cfn]
