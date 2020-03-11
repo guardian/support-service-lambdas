@@ -9,7 +9,7 @@ import com.gu.zuora.subscription._
 import com.softwaremill.sttp._
 import com.typesafe.scalalogging.LazyLogging
 
-class SFMoveSubscriptionsService[F[_]: Monad](apiCfg: MoveSubscriptionApiConfig, backend: SttpBackend[Id, Nothing]) extends LazyLogging {
+class SFMoveSubscriptionsService[F[_] : Monad](apiCfg: MoveSubscriptionApiConfig, backend: SttpBackend[Id, Nothing]) extends LazyLogging {
 
   private val zuoraConfig = ZuoraRestOauthConfig(
     baseUrl = apiCfg.zuoraBaseUrl,
@@ -21,7 +21,8 @@ class SFMoveSubscriptionsService[F[_]: Monad](apiCfg: MoveSubscriptionApiConfig,
 
   def moveSubscription(moveSubscriptionData: MoveSubscriptionReqBody): EitherT[F, MoveSubscriptionServiceError, MoveSubscriptionServiceSuccess] = {
     import moveSubscriptionData._
-    logger.info(s"attempt to move $zuoraSubscriptionId subscription to $sfAccountId , $sfFullContactId SalesForce Contact")
+    logger.info(s"attempt to move $zuoraSubscriptionId subscription to " +
+      s"(Account Id=$sfAccountId ,Full contact Id=$sfFullContactId) SalesForce Contact")
 
     val moveSubCommand = ZuoraAccountMoveSubscriptionCommand(
       crmId = sfAccountId,
@@ -41,7 +42,7 @@ class SFMoveSubscriptionsService[F[_]: Monad](apiCfg: MoveSubscriptionApiConfig,
 }
 
 object SFMoveSubscriptionsService {
-  def apply[F[_]: Monad](apiCfg: MoveSubscriptionApiConfig, backend: SttpBackend[Id, Nothing]): SFMoveSubscriptionsService[F] =
+  def apply[F[_] : Monad](apiCfg: MoveSubscriptionApiConfig, backend: SttpBackend[Id, Nothing]): SFMoveSubscriptionsService[F] =
     new SFMoveSubscriptionsService(apiCfg, backend)
 }
 
