@@ -7,7 +7,7 @@ import com.typesafe.scalalogging.LazyLogging
 
 final case class MoveSubscriptionServiceSuccess(message: String)
 
-class SFMoveSubscriptionsService[F[_] : Monad](apiCfg: MoveSubscriptionApiConfig, backend: SttpBackend[Id, Nothing]) extends LazyLogging {
+class SFMoveSubscriptionsService[F[_]: Monad](apiCfg: MoveSubscriptionApiConfig, backend: SttpBackend[Id, Nothing]) extends LazyLogging {
   def moveSubscription(req: MoveSubscriptionReqBody): EitherT[F, MoveSubscriptionApiError, MoveSubscriptionServiceSuccess] = {
     import req._
     logger.info(s"attempt to move $zuoraSubscriptionId subscription to $sfAccountId , $sfFullContactId SalesForce Contact")
@@ -16,6 +16,6 @@ class SFMoveSubscriptionsService[F[_] : Monad](apiCfg: MoveSubscriptionApiConfig
 }
 
 object SFMoveSubscriptionsService {
-  def apply[F[_] : Monad](apiCfg: MoveSubscriptionApiConfig, backend: SttpBackend[Id, Nothing]): SFMoveSubscriptionsService[F] =
+  def apply[F[_]: Monad](apiCfg: MoveSubscriptionApiConfig, backend: SttpBackend[Id, Nothing]): SFMoveSubscriptionsService[F] =
     new SFMoveSubscriptionsService(apiCfg, backend)
 }
