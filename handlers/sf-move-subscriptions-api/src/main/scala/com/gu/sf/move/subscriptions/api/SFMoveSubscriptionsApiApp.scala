@@ -10,6 +10,10 @@ import org.http4s.HttpRoutes
 import org.http4s.server.middleware.Logger
 import org.http4s.util.CaseInsensitiveString
 
+final case class MoveSubscriptionApiError(error: String)
+
+final case class MoveSubscriptionApiSuccess(message: String)
+
 object SFMoveSubscriptionsApiApp extends LazyLogging {
 
   private implicit val cs: ContextShift[IO] = IO.contextShift(scala.concurrent.ExecutionContext.global)
