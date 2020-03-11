@@ -6,13 +6,11 @@ trait MoveSubscriptionServiceResponse
 
 final case class MoveSubscriptionServiceSuccess(message: String) extends MoveSubscriptionServiceResponse
 
-final case class MoveSubscriptionServiceError(message: String) extends MoveSubscriptionServiceResponse
+final case class MoveSubscriptionServiceError(error: String) extends MoveSubscriptionServiceResponse
 
-final case class MoveSubscriptionApiError(message: String)
+final case class MoveSubscriptionApiError(error: String)
 
 final case class MoveSubscriptionApiSuccess(message: String)
-
-final case class ConfigError(message: String)
 
 final case class MoveSubscriptionApiConfig(zuoraBaseUrl: String, zuoraClientId: String, zuoraSecret: String)
 
