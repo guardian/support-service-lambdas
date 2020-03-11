@@ -36,5 +36,4 @@ object SFMoveSubscriptionsApiApp extends LazyLogging {
       logAction = Some({ message: String => IO.delay(logger.info(message)) })
     )
   }
-
 }
