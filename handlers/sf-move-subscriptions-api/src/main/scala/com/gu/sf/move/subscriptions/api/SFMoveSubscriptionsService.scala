@@ -11,7 +11,7 @@ import com.typesafe.scalalogging.LazyLogging
 
 class SFMoveSubscriptionsService[F[_] : Monad](apiCfg: MoveSubscriptionApiConfig, backend: SttpBackend[Id, Nothing]) extends LazyLogging {
 
-  private val zuoraConfig = ZuoraRestOauthConfig(
+  private val ZuoraConfig = ZuoraRestOauthConfig(
     baseUrl = apiCfg.zuoraBaseUrl,
     oauth = Oauth(
       clientId = apiCfg.zuoraClientId,
@@ -30,9 +30,9 @@ class SFMoveSubscriptionsService[F[_] : Monad](apiCfg: MoveSubscriptionApiConfig
     )
     import Zuora.{accessTokenGetResponseV2, subscriptionGetResponse, updateAccountByMovingSubscription}
     val updateResponse = for {
-      token <- accessTokenGetResponseV2(zuoraConfig, backend)
-      subscription <- subscriptionGetResponse(zuoraConfig, token, backend)(SubscriptionName(zuoraSubscriptionId))
-      updateRes <- updateAccountByMovingSubscription(zuoraConfig, token, backend)(subscription, moveSubCommand)
+      token <- accessTokenGetResponseV2(ZuoraConfig, backend)
+      subscription <- subscriptionGetResponse(ZuoraConfig, token, backend)(SubscriptionName(zuoraSubscriptionId))
+      updateRes <- updateAccountByMovingSubscription(ZuoraConfig, token, backend)(subscription, moveSubCommand)
     } yield updateRes
 
     updateResponse.toEitherT[F]
