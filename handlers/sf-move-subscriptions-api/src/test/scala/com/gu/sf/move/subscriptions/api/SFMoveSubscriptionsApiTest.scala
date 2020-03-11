@@ -35,7 +35,7 @@ class SFMoveSubscriptionsApiTest extends AnyFlatSpec with should.Matchers with D
     ).value.unsafeRunSync().get
 
     responseActual.status shouldEqual Status.Ok
-    getBody[MoveSubscriptionServiceSuccess](responseActual) should matchTo(MoveSubscriptionServiceSuccess(
+    getBody[MoveSubscriptionApiSuccess](responseActual) should matchTo(MoveSubscriptionApiSuccess(
       s"Move of Subscription ${moveSubReq.zuoraSubscriptionId} was successful"))
   }
 

@@ -10,6 +10,8 @@ final case class MoveSubscriptionServiceError(message: String) extends MoveSubsc
 
 final case class MoveSubscriptionApiError(message: String)
 
+final case class MoveSubscriptionApiSuccess(message: String)
+
 final case class ConfigError(message: String)
 
 final case class MoveSubscriptionApiConfig(zuoraBaseUrl: String, zuoraClientId: String, zuoraSecret: String)

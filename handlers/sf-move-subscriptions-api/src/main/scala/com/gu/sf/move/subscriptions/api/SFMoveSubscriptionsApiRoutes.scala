@@ -40,7 +40,7 @@ object SFMoveSubscriptionsApiRoutes extends LazyLogging {
           .leftMap(
             error =>
               InternalServerError(MoveSubscriptionApiError(s"Failed to move subscription: $error"))
-          )
+          ).map(serviceRes => MoveSubscriptionApiSuccess(serviceRes.message))
       } yield Ok(resp)).merge.flatten
     }
 
