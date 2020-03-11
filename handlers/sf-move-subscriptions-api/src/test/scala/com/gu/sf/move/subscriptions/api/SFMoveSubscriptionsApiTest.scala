@@ -18,29 +18,30 @@ class SFMoveSubscriptionsApiTest extends AnyFlatSpec with should.Matchers with D
 
   it should "return OK status for move subscription request" in {
 
-    val moveSubTestReq = MoveSubscriptionReqBody(
-      zuoraSubscriptionId = "A-1111",
-      sfAccountId = "2222",
-      sfFullContactId = "3333",
+    val moveSubReq = MoveSubscriptionReqBody(
+      zuoraSubscriptionId = "test-zuora-sub-id",
+      sfAccountId = "test-sf-account-id",
+      sfFullContactId = "test-sf-full-contact-id",
     )
 
-    val api = createApp(createZuoraBackendStub(zuoraSubscriptionIdToHandle = moveSubTestReq.zuoraSubscriptionId))
+    val api = createApp(createZuoraBackendStub(zuoraSubscriptionIdToHandle = moveSubReq.zuoraSubscriptionId))
 
     val responseActual = api.run(
       Request[IO](
         method = Method.POST,
         uri = Uri(path = "/subscription/move")
       ).withEntity[String](
-        moveSubTestReq.asJson.spaces2)
+        moveSubReq.asJson.spaces2)
     ).value.unsafeRunSync().get
 
     responseActual.status shouldEqual Status.Ok
     getBody[MoveSubscriptionServiceSuccess](responseActual) should matchTo(MoveSubscriptionServiceSuccess(
-      s"Move of Subscription ${moveSubTestReq.zuoraSubscriptionId} was successful"))
+      s"Move of Subscription ${moveSubReq.zuoraSubscriptionId} was successful"))
   }
 
   private def createApp(backendStub: SttpBackendStub[Id, Nothing]) = {
-    SFMoveSubscriptionsApiApp(DevIdentity("sf-move-subscriptions-api"), backendStub).value.unsafeRunSync()
+    SFMoveSubscriptionsApiApp(DevIdentity("sf-move-subscriptions-api"), backendStub)
+      .value.unsafeRunSync()
       .right.get
   }
 
