@@ -22,9 +22,9 @@ object SFMoveSubscriptionsApiRoutes extends LazyLogging {
           method = "POST",
           path = "subscription/move",
           body = MoveSubscriptionReqBody(
-            zuoraSubscriptionId = "A-1111",
-            sfAccountId = "2222",
-            sfFullContactId = "3333",
+            zuoraSubscriptionId = "Zuora Subscription Id",
+            sfAccountId = "SF Account Id",
+            sfFullContactId = "SF Full contact Id",
           )
         )
       )
