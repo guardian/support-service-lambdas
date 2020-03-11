@@ -19,7 +19,7 @@ class SFMoveSubscriptionsApiTest extends FlatSpec with Matchers {
 
   private val zuoraTestBaseUrl = "https://test.com"
   private val accessToken = "test-zuora-access-token"
-  private val moveSubReq = MoveSubscriptionData(
+  private val moveSubReq = MoveSubscriptionReqBody(
     zuoraSubscriptionId = "A-1111",
     sfAccountId = "2222",
     sfFullContactId = "3333",
