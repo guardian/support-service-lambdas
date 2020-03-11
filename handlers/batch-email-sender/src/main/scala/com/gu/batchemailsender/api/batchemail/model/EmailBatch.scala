@@ -6,6 +6,13 @@ import play.api.libs.json._
 
 import scala.util.{Failure, Success, Try}
 
+/**
+ * This is what gets sent from Salesforce directly. "Wire" indicates raw data sent over the wire. It seems the intention
+ * was to treat Wire models as kind of DTO (Data Transfer Objects). This is NOT what gets put on the SQS. It is
+ * converted to EmailPayloadSubscriberAttributes
+ *
+ * FIXME: Why is this indirection necessary? EmailPayloadSubscriberAttributes does not seem to be doing anything extra?
+ */
 object EmailBatch {
 
   object WireModel {
@@ -29,7 +36,8 @@ object EmailBatch {
       email_stage: String,
       modified_by_customer: Option[Boolean],
       holiday_stop_request: Option[WireHolidayStopRequest],
-      digital_voucher: Option[WireDigitalVoucher]
+      digital_voucher: Option[WireDigitalVoucher],
+      delivery_problem: Option[WireDeliveryProblem] = None
     )
     case class WireHolidayStopRequest(
       holiday_start_date: String,
@@ -41,10 +49,26 @@ object EmailBatch {
     )
     case class WireHolidayStopCreditSummary(credit_amount: Double, credit_date: String)
     case class WireDigitalVoucher(barcode_url: String)
+    case class WireDeliveryProblem(
+      actionTaken: String,
+      totalCreditAmount: String,
+      repeatDeliveryProblem: String,
+      issuesAffected: String,
+      deliveries: List[WireDelivery],
+      typeOfProblem: String
+    )
+    case class WireDelivery(
+      Case__c: String,
+      Name: String,
+      Delivery_Date__c: String,
+      Invoice_Date__c: String
+    )
 
     implicit val holidayStopCreditDetailReads = Json.reads[WireHolidayStopCreditSummary]
     implicit val holidayStopRequestReads = Json.reads[WireHolidayStopRequest]
     implicit val digitalVoucherReads = Json.reads[WireDigitalVoucher]
+    implicit val delivery = Json.reads[WireDelivery]
+    implicit val deliveryProblemReads = Json.reads[WireDeliveryProblem]
     implicit val emailBatchItemPayloadReads = Json.reads[WireEmailBatchItemPayload]
     implicit val emailBatchItemReads = Json.reads[WireEmailBatchItem]
     implicit val emailBatch = Json.reads[WireEmailBatch]
@@ -120,7 +144,15 @@ object EmailBatch {
           digital_voucher = wireEmailBatchItem
             .payload
             .digital_voucher
-            .map(wireVoucher => DigitalVoucher(DigitalVoucherUrl(wireVoucher.barcode_url)))
+            .map(wireVoucher => DigitalVoucher(DigitalVoucherUrl(wireVoucher.barcode_url))),
+
+          // Delivery Problem
+          delivery_problem_action = emailBatchPayload.delivery_problem.map(_.actionTaken),
+          delivery_problem_total_affected = emailBatchPayload.delivery_problem.map(_.issuesAffected),
+          delivery_problem_affected_dates = emailBatchPayload.delivery_problem.map(_.deliveries.map(_.Delivery_Date__c).mkString(", ")),
+          delivery_problem_total_credit = emailBatchPayload.delivery_problem.map(_.totalCreditAmount),
+          delivery_problem_invoice_date = emailBatchPayload.delivery_problem.flatMap(_.deliveries.map(_.Invoice_Date__c).headOption),
+          delivery_problem_type = emailBatchPayload.delivery_problem.map(_.typeOfProblem),
         ),
         object_name = wireEmailBatchItem.object_name
       )
@@ -145,6 +177,7 @@ case class StoppedCreditSummaryDate(value: String) extends AnyVal
 case class DigitalVoucherUrl(value: String) extends AnyVal
 case class DigitalVoucher(barcodeUrl: DigitalVoucherUrl)
 
+// FIXME: How is this different from EmailPayloadSubscriberAttributes?????
 case class EmailBatchItemPayload(
   record_id: EmailBatchItemId,
   to_address: String,
@@ -163,7 +196,15 @@ case class EmailBatchItemPayload(
   currency_symbol: Option[CurrencySymbol],
   stopped_issue_count: Option[StoppedIssueCount],
   stopped_credit_summaries: Option[List[StoppedCreditSummary]],
-  digital_voucher: Option[DigitalVoucher]
+  digital_voucher: Option[DigitalVoucher],
+
+  // Delivery Problem
+  delivery_problem_action: Option[String] = None,
+  delivery_problem_total_affected: Option[String] = None,
+  delivery_problem_total_credit: Option[String] = None,
+  delivery_problem_invoice_date: Option[String] = None,
+  delivery_problem_type: Option[String] = None,
+  delivery_problem_affected_dates: Option[String] = None
 )
 
 case class EmailBatchItem(payload: EmailBatchItemPayload, object_name: String)

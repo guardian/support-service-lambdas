@@ -2,8 +2,14 @@ package com.gu.batchemailsender.api.batchemail.model
 
 import play.api.libs.json.Json
 
-case class EmailPayloadDigitalVoucher(barcode_url: String)
-case class EmailPayloadStoppedCreditSummary(credit_amount: Double, credit_date: String)
+/**
+ * This is what actually gets sent to SQS and the fields correspond to Braze api_trigger_properties.
+ * For example, stopped_credit_summaries can be found in SV_HolidayStopConfirmation_GuardianWeeklyBodyCopy
+ * Braze content block.
+ *
+ * FIXME: WireEmailBatchItemPayload -> EmailBatchItemPayload -> EmailPayloadSubscriberAttributes  ???
+ * FIXME: For some reason this has to have flat structure?
+ */
 case class EmailPayloadSubscriberAttributes(
   first_name: String,
   last_name: String,
@@ -17,8 +23,22 @@ case class EmailPayloadSubscriberAttributes(
   currency_symbol: Option[String],
   stopped_issue_count: Option[String],
   stopped_credit_summaries: Option[List[EmailPayloadStoppedCreditSummary]],
-  digital_voucher: Option[EmailPayloadDigitalVoucher]
+  digital_voucher: Option[EmailPayloadDigitalVoucher],
+
+  /*
+   * Delivery Problem fields
+   * Braze campaign: SV_DeliveryProblemConfirmation
+   * Braze content block: SV_HolidayStopConfirmation_GuardianWeeklyBodyCopy
+   */
+  delivery_problem_action: Option[String] = None, // Credit or Escalation
+  delivery_problem_total_affected: Option[String] = None,
+  delivery_problem_affected_dates: Option[String] = None,
+  delivery_problem_total_credit: Option[String] = None,
+  delivery_problem_invoice_date: Option[String] = None, // Invoice_Date__c Is it the same for multiple issues ?
+  delivery_problem_type: Option[String] = None, // No delivery | Damaged paper
 )
+case class EmailPayloadDigitalVoucher(barcode_url: String)
+case class EmailPayloadStoppedCreditSummary(credit_amount: Double, credit_date: String)
 case class EmailPayloadContactAttributes(SubscriberAttributes: EmailPayloadSubscriberAttributes)
 case class EmailPayloadTo(Address: String, SubscriberKey: String, ContactAttributes: EmailPayloadContactAttributes)
 case class EmailToSend(To: EmailPayloadTo, DataExtensionName: String, SfContactId: Option[String], IdentityUserId: Option[String])
@@ -32,6 +52,9 @@ object EmailToSend {
   implicit val emailPayloadToWriter = Json.writes[EmailPayloadTo]
   implicit val emailToSendWriter = Json.writes[EmailToSend]
 
+  /**
+   * Builds actual model from wire (DTO) model
+   */
   def fromEmailBatchItem(emailBatchItem: EmailBatchItem): EmailToSend = {
     val emailPayloadTo = EmailPayloadTo(
       Address = emailBatchItem.payload.to_address,
@@ -57,7 +80,15 @@ object EmailToSend {
           emailBatchItem
             .payload
             .digital_voucher
-            .map(digitalVoucher => EmailPayloadDigitalVoucher(digitalVoucher.barcodeUrl.value))
+            .map(digitalVoucher => EmailPayloadDigitalVoucher(digitalVoucher.barcodeUrl.value)),
+
+          // Delivery Problem
+          delivery_problem_action = emailBatchItem.payload.delivery_problem_action,
+          delivery_problem_total_affected = emailBatchItem.payload.delivery_problem_total_affected,
+          delivery_problem_affected_dates = emailBatchItem.payload.delivery_problem_affected_dates,
+          delivery_problem_total_credit = emailBatchItem.payload.delivery_problem_total_credit,
+          delivery_problem_invoice_date = emailBatchItem.payload.delivery_problem_invoice_date,
+          delivery_problem_type = emailBatchItem.payload.delivery_problem_type
         )
       )
     )
@@ -92,6 +123,7 @@ object EmailToSend {
       case ("Holiday_Stop_Request__c", "withdraw") => "SV_HolidayStopWithdrawal"
       case ("Digital_Voucher__c", "create") => "SV_VO_NewCard"
       case ("Digital_Voucher__c", "replace") => "SV_VO_ReplacementCard"
+      case ("Case", "Delivery issues") => "SV_DeliveryProblemConfirmation"
       case (objectName, emailStage) => throw new RuntimeException(s"Unrecognized (object_name, email_stage) = ($objectName, $emailStage). Please fix SF trigger.")
     }
 }
