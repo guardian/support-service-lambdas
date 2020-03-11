@@ -7,6 +7,8 @@ import com.gu.conf.{ResourceConfigurationLocation, SSMConfigurationLocation}
 import com.gu.{AppIdentity, AwsIdentity, DevIdentity}
 import com.typesafe.config.Config
 
+final case class ConfigError(error: String)
+
 object ConfigLoader {
 
   def getApiConfig[F[_] : Sync](appIdentity: AppIdentity): EitherT[F, ConfigError, MoveSubscriptionApiConfig] = {
