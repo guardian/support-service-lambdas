@@ -19,7 +19,7 @@ class SFMoveSubscriptionsService[F[_]: Monad](apiCfg: MoveSubscriptionApiConfig,
     )
   )
 
-  def moveSubscription(moveSubscriptionData: MoveSubscriptionData): EitherT[F, MoveSubscriptionServiceError, MoveSubscriptionServiceSuccess] = {
+  def moveSubscription(moveSubscriptionData: MoveSubscriptionReqBody): EitherT[F, MoveSubscriptionServiceError, MoveSubscriptionServiceSuccess] = {
     import moveSubscriptionData._
     logger.info(s"attempt to move $zuoraSubscriptionId subscription to $sfAccountId , $sfFullContactId SalesForce Contact")
 

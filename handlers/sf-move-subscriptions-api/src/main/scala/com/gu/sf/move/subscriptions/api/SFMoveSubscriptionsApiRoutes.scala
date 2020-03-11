@@ -21,7 +21,7 @@ object SFMoveSubscriptionsApiRoutes extends LazyLogging {
         ExampleReqDoc(
           method = "POST",
           path = "subscription/move",
-          body = MoveSubscriptionData(
+          body = MoveSubscriptionReqBody(
             zuoraSubscriptionId = "A-1111",
             sfAccountId = "2222",
             sfFullContactId = "3333",
@@ -32,7 +32,7 @@ object SFMoveSubscriptionsApiRoutes extends LazyLogging {
 
     def handleMoveRequest(request: Request[F]): F[Response[F]] = {
       (for {
-        reqBody <- request.attemptAs[MoveSubscriptionData]
+        reqBody <- request.attemptAs[MoveSubscriptionReqBody]
           .leftMap { decodingFailure: DecodeFailure =>
             BadRequest(MoveSubscriptionApiError(s"Failed to decoded request body: $decodingFailure"))
           }
