@@ -15,12 +15,12 @@ import org.scalatest.matchers.should
 
 class SFMoveSubscriptionsApiTest extends AnyFlatSpec with should.Matchers with DiffMatcher with ZuoraTestBackendMixin {
 
-    it should "return OK status for move subscription request" in {
+    it should "return Success for move subscription request if all downstream calls were successful" in {
 
       val api = createApp(createZuoraBackendStub(
-        oauthResponse = successAccessTokenRes,
-        getSubscriptionRes = successSubscriptionRes,
-        updateAccountRes = accountUpdateSuccessRes
+        oauthResponse = fetchAccessTokenSuccessRes,
+        getSubscriptionRes = fetchSubscriptionSuccessRes,
+        updateAccountRes = updateAccountSuccessRes
       ))
 
       val responseActual = api.run(
@@ -38,12 +38,12 @@ class SFMoveSubscriptionsApiTest extends AnyFlatSpec with should.Matchers with D
       ))
     }
 
-  it should "return error status with message about accessToken fetch failure" in {
+  it should "return error with message about accessToken fetch failure" in {
 
     val api = createApp(createZuoraBackendStub(
       oauthResponse = accessTokenUnAuth,
-      getSubscriptionRes = successSubscriptionRes,
-      updateAccountRes = accountUpdateSuccessRes
+      getSubscriptionRes = fetchSubscriptionFailedRes,
+      updateAccountRes = updateAccountSuccessRes
     ))
 
     val responseActual = api.run(
@@ -58,6 +58,48 @@ class SFMoveSubscriptionsApiTest extends AnyFlatSpec with should.Matchers with D
     responseActual.status shouldEqual Status.InternalServerError
     getBody[MoveSubscriptionApiError](responseActual) should matchTo(MoveSubscriptionApiError(
       SFMoveSubscriptionsService.fetchZuoraAccessTokenErrorMsg(accessTokenUnAuth.body.left.get)))
+  }
+
+  it should "return error status with message about fetch Subscription failure" in {
+    val api = createApp(createZuoraBackendStub(
+      oauthResponse = fetchAccessTokenSuccessRes,
+      getSubscriptionRes = fetchSubscriptionFailedRes,
+      updateAccountRes = updateAccountSuccessRes
+    ))
+
+    val responseActual = api.run(
+      Request[IO](
+        method = Method.POST,
+        uri = Uri(path = "/subscription/move")
+      ).withEntity[String](
+        moveSubscriptionReq.asJson.spaces2
+      )
+    ).value.unsafeRunSync().get
+
+    responseActual.status shouldEqual Status.InternalServerError
+    getBody[MoveSubscriptionApiError](responseActual) should matchTo(MoveSubscriptionApiError(
+      SFMoveSubscriptionsService.fetchZuoraSubErrorMsg(fetchSubscriptionFailedRes.body.left.get)))
+  }
+
+  it should "return error status with message about update Account failure" in {
+    val api = createApp(createZuoraBackendStub(
+      oauthResponse = fetchAccessTokenSuccessRes,
+      getSubscriptionRes = fetchSubscriptionSuccessRes,
+      updateAccountRes = updateAccountFailedRes
+    ))
+
+    val responseActual = api.run(
+      Request[IO](
+        method = Method.POST,
+        uri = Uri(path = "/subscription/move")
+      ).withEntity[String](
+        moveSubscriptionReq.asJson.spaces2
+      )
+    ).value.unsafeRunSync().get
+
+    responseActual.status shouldEqual Status.InternalServerError
+    getBody[MoveSubscriptionApiError](responseActual) should matchTo(MoveSubscriptionApiError(
+      SFMoveSubscriptionsService.updateZuoraAccountErrorMsg(updateAccountFailedRes.body.left.get)))
   }
 
   private def createApp(backendStub: SttpBackendStub[Id, Nothing]) = {

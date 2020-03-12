@@ -13,7 +13,7 @@ trait ZuoraTestBackendMixin {
   private val accessToken = "test-zuora-access-token"
   private val accountNumber = "test-zuora-account-number"
 
-  protected val moveSubscriptionReq = MoveSubscriptionReqBody(
+  protected val moveSubscriptionReq: MoveSubscriptionReqBody = MoveSubscriptionReqBody(
     zuoraSubscriptionId = "test-zuora-sub-id",
     sfAccountId = "test-sf-account-id",
     sfFullContactId = "test-sf-full-contact-id",
@@ -24,20 +24,25 @@ trait ZuoraTestBackendMixin {
     accountNumber = accountNumber
   )
 
-  protected val successAccessTokenRes: Response[Either[Nothing, AccessToken]] =
+  protected val fetchAccessTokenSuccessRes: Response[Either[Nothing, AccessToken]] =
     Response.ok(Right(AccessToken(accessToken)))
 
+  protected val fetchSubscriptionSuccessRes: Response[Either[Nothing, Subscription]] =
+    Response.ok(Right(sub))
+
+  protected val updateAccountSuccessRes: Response[Either[Nothing, String]] =
+    Response.ok(Right(s"Move of Subscription ${moveSubscriptionReq.zuoraSubscriptionId} was successful"))
 
   protected val accessTokenUnAuth: Response[Either[Nothing, AccessToken]] =
     Response.error("Unable to generate token", StatusCodes.Unauthorized)
 
-  protected val successSubscriptionRes: Response[Either[Nothing, Subscription]] =
-    Response.ok(Right(sub))
+  protected val fetchSubscriptionFailedRes: Response[Either[Nothing, Subscription]] =
+    Response.error("bla bla", StatusCodes.InternalServerError)
 
-  protected val accountUpdateSuccessRes: Response[Either[Nothing, String]] =
-    Response.ok(Right(s"Move of Subscription ${moveSubscriptionReq.zuoraSubscriptionId} was successful"))
+  protected val updateAccountFailedRes: Response[Either[Nothing, String]] =
+    Response.error("bla bla", StatusCodes.InternalServerError)
 
-  def createZuoraBackendStub[T](
+  def createZuoraBackendStub(
                                  oauthResponse: Response[Either[Nothing, AccessToken]],
                                  getSubscriptionRes: Response[Either[Nothing, Subscription]],
                                  updateAccountRes: Response[Either[Nothing, String]]
