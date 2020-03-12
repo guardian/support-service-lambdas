@@ -1,6 +1,6 @@
 package com.gu.zuora.sar
 
-import com.gu.zuora.sar.BatonModels.{BatonTaskStatus, Completed, Failed, Pending, PerformSarRequest, SarInitiateRequest, SarInitiateResponse, SarRequest, SarResponse, SarStatusRequest, SarStatusResponse}
+import com.gu.zuora.sar.BatonModels.{BatonTaskStatus, Completed, Failed, Pending, PerformSarRequest, PerformSarResponse, SarInitiateRequest, SarInitiateResponse, SarRequest, SarResponse, SarStatusRequest, SarStatusResponse}
 import io.circe.Json
 
 object circeCodecs {
@@ -22,6 +22,7 @@ object circeCodecs {
       cursor.downField("action").as[String].flatMap {
         case "status"   => cursor.as[SarStatusRequest]
         case "initiate" => cursor.as[SarInitiateRequest]
+        case "perform"  => cursor.as[PerformSarRequest]
       }
     }
 
@@ -44,6 +45,8 @@ object circeCodecs {
       addAdditionalFields(ir.asJsonObject, "initiate")
     case sr: SarStatusResponse =>
       addAdditionalFields(sr.asJsonObject, "status")
+    case psr: PerformSarResponse =>
+      addAdditionalFields(psr.asJsonObject, "perform")
   }
 
   implicit val performSarRequestEncoder: Encoder[PerformSarRequest] =
@@ -57,5 +60,7 @@ object circeCodecs {
       addAdditionalFields(ir.asJsonObject, "initiate")
     case sr: SarStatusRequest =>
       addAdditionalFields(sr.asJsonObject, "status")
+    case psr: PerformSarRequest =>
+      addAdditionalFields(psr.asJsonObject, "perform")
   }
 }

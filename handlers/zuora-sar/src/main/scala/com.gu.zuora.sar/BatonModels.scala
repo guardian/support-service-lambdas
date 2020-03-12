@@ -37,6 +37,7 @@ object BatonModels {
   case class PerformSarResponse(
     status: BatonTaskStatus,
     initiationReference: String,
-    subjectEmail: String
+    subjectEmail: String,
+    message: Option[String] = None
   ) extends SarResponse
 }
