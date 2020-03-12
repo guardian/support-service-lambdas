@@ -2,8 +2,22 @@
 
 This processor co-ordinates the cancellation of digital voucher redemption via the imovo api. 
 
-Config
-======
+#Cloudformation
+
+This project uses cdk typescript to create cloud formation for the processor. For more detail see:
+
+[https://docs.aws.amazon.com/cdk/latest/guide/home.html](https://docs.aws.amazon.com/cdk/latest/guide/home.html)
+ 
+Currently riff-raff does not natively support cdk. So an interim measure cdk is used to generate a cloudformation 
+template [cfm.yaml](cfm.yaml) which is checked into the project so it is available to riff-raff.
+
+You can regenerate the [cfm.yaml](cfm.yaml) using the script:
+
+```bash
+cdk/regenerate-cloud-formation.sh
+```
+
+#Config
 
 The configuration for this application is stored in the [aws parameter store](https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html).
 
