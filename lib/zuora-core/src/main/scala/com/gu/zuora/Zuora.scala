@@ -7,6 +7,8 @@ import io.circe.generic.auto._
 
 case class ZuoraAccountMoveSubscriptionCommand(crmId: String, sfContactId__c: String)
 
+case class MoveSubscriptionAtZuoraAccountResponse(message: String)
+
 object Zuora {
 
   /**
@@ -96,7 +98,7 @@ object Zuora {
   )(
     subscription: Subscription,
     updateCommandData: ZuoraAccountMoveSubscriptionCommand
-  ): ZuoraApiResponse[String] = {
+  ): ZuoraApiResponse[MoveSubscriptionAtZuoraAccountResponse] = {
     implicit val b: SttpBackend[Id, Nothing] = backend
     val errMsg = (reason: String) => s"Failed to update subscription '${subscription.subscriptionNumber}' " +
       s"with $updateCommandData. Reason: $reason"
@@ -108,7 +110,7 @@ object Zuora {
         case Left(e) => Left(ZuoraApiFailure(errMsg(e.message)))
         case Right(status) =>
           if (status.success) {
-            Right(s"Move of Subscription ${subscription.subscriptionNumber} was successful")
+            Right(MoveSubscriptionAtZuoraAccountResponse("SUCCESS"))
           } else Left(ZuoraApiFailure(errMsg(status.reasons.map(_.mkString).getOrElse(""))))
       }
       .send()

@@ -55,7 +55,7 @@ class SFMoveSubscriptionsService[F[_]: Monad](
         .leftMap(err => UpdateZuoraAccountError(err.reason))
     } yield updateRes)
       .toEitherT[F]
-      .bimap(identity, MoveSubscriptionServiceSuccess)
+      .bimap(identity, res => MoveSubscriptionServiceSuccess(res.toString))
   }
 }
 

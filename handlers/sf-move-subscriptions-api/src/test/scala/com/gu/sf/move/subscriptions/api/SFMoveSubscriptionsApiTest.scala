@@ -2,6 +2,7 @@ package com.gu.sf.move.subscriptions.api
 
 import cats.effect.IO
 import com.gu.DevIdentity
+import com.gu.zuora.MoveSubscriptionAtZuoraAccountResponse
 import com.softwaremill.diffx.scalatest.DiffMatcher
 import com.softwaremill.sttp.Id
 import com.softwaremill.sttp.testing.SttpBackendStub
@@ -34,7 +35,7 @@ class SFMoveSubscriptionsApiTest extends AnyFlatSpec with should.Matchers with D
 
     responseActual.status shouldEqual Status.Ok
     getBody[MoveSubscriptionApiSuccess](responseActual) should matchTo(MoveSubscriptionApiSuccess(
-      s"Move of Subscription ${moveSubscriptionReq.zuoraSubscriptionId} was successful"
+      MoveSubscriptionAtZuoraAccountResponse("SUCCESS").toString
     ))
   }
 
