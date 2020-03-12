@@ -37,10 +37,10 @@ trait ZuoraTestBackendMixin {
     Response.error("Unable to generate token", StatusCodes.Unauthorized)
 
   protected val fetchSubscriptionFailedRes: Response[Either[Nothing, Subscription]] =
-    Response.error("bla bla", StatusCodes.InternalServerError)
+    Response.error("get Subscription failure", StatusCodes.InternalServerError)
 
   protected val updateAccountFailedRes: Response[Either[Nothing, MoveSubscriptionAtZuoraAccountResponse]] =
-    Response.error("bla bla", StatusCodes.InternalServerError)
+    Response.error("update ZuoraAccount failure", StatusCodes.InternalServerError)
 
   def createZuoraBackendStub(
                                  oauthResponse: Response[Either[Nothing, AccessToken]],
