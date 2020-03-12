@@ -1,16 +1,17 @@
 package com.gu.zuora.sar
 
-case class SarLambdaConfig(resultsBucket: String,
+import com.gu.util.config.ConfigLocation
+import play.api.libs.json.{Json, Reads}
+
+case class ZuoraSarConfig(resultsBucket: String,
                            resultsPath: String,
                            stateMachineArn: String)
 
-case class PerformSarLambdaConfig(resultsBucket: String,
-                                  resultsPath: String)
-
 object ConfigLoader {
+  def getSarLambdaConfigTemp: ZuoraSarConfig = ZuoraSarConfig("baton-results", "zuora-results/DEV", "stateMachineArn")
+}
 
-  def getSarLambdaConfigTemp: SarLambdaConfig = SarLambdaConfig("baton-results", "zuora-results/CODE", "stateMachineArn")
-
-  def getPerformSarConfigTemp: PerformSarLambdaConfig = PerformSarLambdaConfig("baton-results", "zuora-results/CODE")
-
+object ZuoraSarConfig {
+  implicit val reads: Reads[ZuoraSarConfig] = Json.reads[ZuoraSarConfig]
+  implicit val location = ConfigLocation[ZuoraSarConfig](path = "zuoraSar", version = 1)
 }
