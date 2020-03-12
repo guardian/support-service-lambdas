@@ -13,23 +13,36 @@ trait ZuoraTestBackendMixin {
   private val accessToken = "test-zuora-access-token"
   private val accountNumber = "test-zuora-account-number"
 
-  def createZuoraBackendStub(zuoraSubscriptionIdToHandle: String): SttpBackendStub[Id, Nothing] = {
+  val moveSubReq = MoveSubscriptionReqBody(
+    zuoraSubscriptionId = "test-zuora-sub-id",
+    sfAccountId = "test-sf-account-id",
+    sfFullContactId = "test-sf-full-contact-id",
+  )
+
+  val successAccessToken = Response.ok(Right(AccessToken(accessToken)))
+
+  val sub = mkAnySubscription().copy(
+    subscriptionNumber = moveSubReq.zuoraSubscriptionId,
+    accountNumber = accountNumber
+  )
+
+  val successSubscription = Response.ok(Right(sub))
+
+  val accountUpdateSuccess = Response.ok(Right(s"Move of Subscription ${moveSubReq.zuoraSubscriptionId} was successful"))
+
+  def createZuoraBackendStub(): SttpBackendStub[Id, Nothing] = {
     SttpBackendStub.synchronous
       .whenRequestMatchesPartial {
         case request if request.uri.toString() == s"$zuoraTestBaseUrl/oauth/token" =>
-          Response.ok(Right(AccessToken(accessToken)))
-        case request if request.uri.toString() == s"$zuoraTestBaseUrl/subscriptions/$zuoraSubscriptionIdToHandle" =>
-          val sub = mkAnySubscription.copy(
-            subscriptionNumber = zuoraSubscriptionIdToHandle,
-            accountNumber = accountNumber
-          )
-          Response.ok(Right(sub))
+          successAccessToken
+        case request if request.uri.toString() == s"$zuoraTestBaseUrl/subscriptions/${moveSubReq.zuoraSubscriptionId}" =>
+          successSubscription
         case request if request.uri.toString() == s"$zuoraTestBaseUrl/accounts/$accountNumber" =>
-          Response.ok(Right(s"Move of Subscription $zuoraSubscriptionIdToHandle was successful"))
+          accountUpdateSuccess
       }
   }
 
-  private val mkAnySubscription = {
+  private def mkAnySubscription(): Subscription = {
     val now = LocalDate.now()
     Subscription(
       status = "Active",

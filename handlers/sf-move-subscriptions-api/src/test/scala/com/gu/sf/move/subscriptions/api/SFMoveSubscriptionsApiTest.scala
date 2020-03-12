@@ -17,13 +17,7 @@ class SFMoveSubscriptionsApiTest extends AnyFlatSpec with should.Matchers with D
 
   it should "return OK status for move subscription request" in {
 
-    val moveSubReq = MoveSubscriptionReqBody(
-      zuoraSubscriptionId = "test-zuora-sub-id",
-      sfAccountId = "test-sf-account-id",
-      sfFullContactId = "test-sf-full-contact-id",
-    )
-
-    val api = createApp(createZuoraBackendStub(zuoraSubscriptionIdToHandle = moveSubReq.zuoraSubscriptionId))
+    val api = createApp(createZuoraBackendStub())
 
     val responseActual = api.run(
       Request[IO](
