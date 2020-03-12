@@ -11,14 +11,14 @@ trait ZuoraConfig {
 }
 
 case class HolidayStopProcessorZuoraConfig(
-                                            baseUrl: String,
-                                            holidayStopProcessor: HolidayStopProcessor
-                                          ) extends ZuoraConfig
+  baseUrl: String,
+  holidayStopProcessor: HolidayStopProcessor
+) extends ZuoraConfig
 
 case class ZuoraRestOauthConfig(
-                                 baseUrl: String,
-                                 oauth: Oauth
-                               ) extends ZuoraConfig
+  baseUrl: String,
+  oauth: Oauth
+) extends ZuoraConfig
 
 object Oauth {
   implicit val reads: Reads[Oauth] = Json.reads[Oauth]
@@ -31,6 +31,4 @@ object HolidayStopProcessor {
 object HolidayStopProcessorZuoraConfig {
   implicit val reads: Reads[HolidayStopProcessorZuoraConfig] = Json.reads[HolidayStopProcessorZuoraConfig]
 }
-
-
 

@@ -1,9 +1,25 @@
 package com.gu.sf.move.subscriptions.api
 
-final case class MoveSubscriptionReqBody(sfAccountId: String, sfFullContactId: String, zuoraSubscriptionId: String)
+final case class MoveSubscriptionReqBody(
+  zuoraSubscriptionId: String,
+  sfAccountId: String,
+  sfFullContactId: String
+)
 
-final case class MoveSubscriptionRes(message: String)
+final case class MoveSubscriptionApiConfig(
+  zuoraBaseUrl: String,
+  zuoraClientId: String,
+  zuoraSecret: String
+)
 
-final case class MoveSubscriptionApiError(message: String)
+final case class MoveSubscriptionApiRoot(
+  description: String,
+  exampleRequests: List[ExampleReqDoc]
+)
 
-final case class MoveSubscriptionApiRoot(description: String)
+final case class ExampleReqDoc(
+  method: String,
+  path: String,
+  body: MoveSubscriptionReqBody
+)
+
