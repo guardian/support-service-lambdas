@@ -15,33 +15,10 @@ import org.scalatest.matchers.should
 
 class SFMoveSubscriptionsApiTest extends AnyFlatSpec with should.Matchers with DiffMatcher with ZuoraTestBackendMixin {
 
-  it should "return OK status for move subscription request" in {
-
-    val api = createApp(createZuoraBackendStub(
-      oauthResponse = successAccessTokenRes,
-      getSubscriptionRes = successSubscriptionRes,
-      updateAccountRes = accountUpdateSuccessRes
-    ))
-
-    val responseActual = api.run(
-      Request[IO](
-        method = Method.POST,
-        uri = Uri(path = "/subscription/move")
-      ).withEntity[String](
-          moveSubscriptionReq.asJson.spaces2
-        )
-    ).value.unsafeRunSync().get
-
-    responseActual.status shouldEqual Status.Ok
-    getBody[MoveSubscriptionApiSuccess](responseActual) should matchTo(MoveSubscriptionApiSuccess(
-      s"Move of Subscription ${moveSubscriptionReq.zuoraSubscriptionId} was successful"
-    ))
-  }
-
-    it should "test" in {
+    it should "return OK status for move subscription request" in {
 
       val api = createApp(createZuoraBackendStub(
-        oauthResponse = accessTokenUnAuth,
+        oauthResponse = successAccessTokenRes,
         getSubscriptionRes = successSubscriptionRes,
         updateAccountRes = accountUpdateSuccessRes
       ))
@@ -60,6 +37,28 @@ class SFMoveSubscriptionsApiTest extends AnyFlatSpec with should.Matchers with D
         s"Move of Subscription ${moveSubscriptionReq.zuoraSubscriptionId} was successful"
       ))
     }
+
+  it should "return error status with message about accessToken fetch failure" in {
+
+    val api = createApp(createZuoraBackendStub(
+      oauthResponse = accessTokenUnAuth,
+      getSubscriptionRes = successSubscriptionRes,
+      updateAccountRes = accountUpdateSuccessRes
+    ))
+
+    val responseActual = api.run(
+      Request[IO](
+        method = Method.POST,
+        uri = Uri(path = "/subscription/move")
+      ).withEntity[String](
+        moveSubscriptionReq.asJson.spaces2
+      )
+    ).value.unsafeRunSync().get
+
+    responseActual.status shouldEqual Status.InternalServerError
+    getBody[MoveSubscriptionApiError](responseActual) should matchTo(MoveSubscriptionApiError(
+      SFMoveSubscriptionsService.fetchZuoraAccessTokenErrorMsg(accessTokenUnAuth.body.left.get)))
+  }
 
   private def createApp(backendStub: SttpBackendStub[Id, Nothing]) = {
     SFMoveSubscriptionsApiApp(DevIdentity("sf-move-subscriptions-api"), backendStub)

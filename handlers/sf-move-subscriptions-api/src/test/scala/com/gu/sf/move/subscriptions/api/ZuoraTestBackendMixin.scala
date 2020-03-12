@@ -45,7 +45,7 @@ trait ZuoraTestBackendMixin {
     SttpBackendStub.synchronous
       .whenRequestMatchesPartial {
         case request if request.uri.toString() == s"$zuoraTestBaseUrl/oauth/token" =>
-          accessTokenUnAuth
+          oauthResponse
         case request if request.uri.toString() == s"$zuoraTestBaseUrl/subscriptions/${moveSubscriptionReq.zuoraSubscriptionId}" =>
           getSubscriptionRes
         case request if request.uri.toString() == s"$zuoraTestBaseUrl/accounts/$accountNumber" =>
