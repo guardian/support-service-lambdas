@@ -15,28 +15,28 @@ import org.scalatest.matchers.should
 
 class SFMoveSubscriptionsApiTest extends AnyFlatSpec with should.Matchers with DiffMatcher with ZuoraTestBackendMixin {
 
-    it should "return Success for move subscription request if all downstream calls were successful" in {
+  it should "return Success for move subscription request if all downstream calls were successful" in {
 
-      val api = createApp(createZuoraBackendStub(
-        oauthResponse = fetchAccessTokenSuccessRes,
-        getSubscriptionRes = fetchSubscriptionSuccessRes,
-        updateAccountRes = updateAccountSuccessRes
-      ))
+    val api = createApp(createZuoraBackendStub(
+      oauthResponse = fetchAccessTokenSuccessRes,
+      getSubscriptionRes = fetchSubscriptionSuccessRes,
+      updateAccountRes = updateAccountSuccessRes
+    ))
 
-      val responseActual = api.run(
-        Request[IO](
-          method = Method.POST,
-          uri = Uri(path = "/subscription/move")
-        ).withEntity[String](
-            moveSubscriptionReq.asJson.spaces2
-          )
-      ).value.unsafeRunSync().get
+    val responseActual = api.run(
+      Request[IO](
+        method = Method.POST,
+        uri = Uri(path = "/subscription/move")
+      ).withEntity[String](
+          moveSubscriptionReq.asJson.spaces2
+        )
+    ).value.unsafeRunSync().get
 
-      responseActual.status shouldEqual Status.Ok
-      getBody[MoveSubscriptionApiSuccess](responseActual) should matchTo(MoveSubscriptionApiSuccess(
-        s"Move of Subscription ${moveSubscriptionReq.zuoraSubscriptionId} was successful"
-      ))
-    }
+    responseActual.status shouldEqual Status.Ok
+    getBody[MoveSubscriptionApiSuccess](responseActual) should matchTo(MoveSubscriptionApiSuccess(
+      s"Move of Subscription ${moveSubscriptionReq.zuoraSubscriptionId} was successful"
+    ))
+  }
 
   it should "return error with message about accessToken fetch failure" in {
 
@@ -51,13 +51,14 @@ class SFMoveSubscriptionsApiTest extends AnyFlatSpec with should.Matchers with D
         method = Method.POST,
         uri = Uri(path = "/subscription/move")
       ).withEntity[String](
-        moveSubscriptionReq.asJson.spaces2
-      )
+          moveSubscriptionReq.asJson.spaces2
+        )
     ).value.unsafeRunSync().get
 
     responseActual.status shouldEqual Status.InternalServerError
     getBody[MoveSubscriptionApiError](responseActual) should matchTo(MoveSubscriptionApiError(
-      SFMoveSubscriptionsService.fetchZuoraAccessTokenErrorMsg(accessTokenUnAuth.body.left.get)))
+      SFMoveSubscriptionsService.fetchZuoraAccessTokenErrorMsg(accessTokenUnAuth.body.left.get)
+    ))
   }
 
   it should "return error status with message about fetch Subscription failure" in {
@@ -72,13 +73,14 @@ class SFMoveSubscriptionsApiTest extends AnyFlatSpec with should.Matchers with D
         method = Method.POST,
         uri = Uri(path = "/subscription/move")
       ).withEntity[String](
-        moveSubscriptionReq.asJson.spaces2
-      )
+          moveSubscriptionReq.asJson.spaces2
+        )
     ).value.unsafeRunSync().get
 
     responseActual.status shouldEqual Status.InternalServerError
     getBody[MoveSubscriptionApiError](responseActual) should matchTo(MoveSubscriptionApiError(
-      SFMoveSubscriptionsService.fetchZuoraSubErrorMsg(fetchSubscriptionFailedRes.body.left.get)))
+      SFMoveSubscriptionsService.fetchZuoraSubErrorMsg(fetchSubscriptionFailedRes.body.left.get)
+    ))
   }
 
   it should "return error status with message about update Account failure" in {
@@ -93,13 +95,14 @@ class SFMoveSubscriptionsApiTest extends AnyFlatSpec with should.Matchers with D
         method = Method.POST,
         uri = Uri(path = "/subscription/move")
       ).withEntity[String](
-        moveSubscriptionReq.asJson.spaces2
-      )
+          moveSubscriptionReq.asJson.spaces2
+        )
     ).value.unsafeRunSync().get
 
     responseActual.status shouldEqual Status.InternalServerError
     getBody[MoveSubscriptionApiError](responseActual) should matchTo(MoveSubscriptionApiError(
-      SFMoveSubscriptionsService.updateZuoraAccountErrorMsg(updateAccountFailedRes.body.left.get)))
+      SFMoveSubscriptionsService.updateZuoraAccountErrorMsg(updateAccountFailedRes.body.left.get)
+    ))
   }
 
   private def createApp(backendStub: SttpBackendStub[Id, Nothing]) = {
