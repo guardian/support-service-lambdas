@@ -36,12 +36,11 @@ object SFMoveSubscriptionsApiRoutes extends LazyLogging {
           .leftMap { decodingFailure: DecodeFailure =>
             BadRequest(MoveSubscriptionApiError(s"Failed to decoded request body: $decodingFailure"))
           }
-        resp <- moveSubscriptionService.moveSubscription(reqBody)
-          .leftMap(
-            error =>
-              InternalServerError(MoveSubscriptionApiError(s"Failed to move subscription: $error"))
-          ).map(serviceRes => MoveSubscriptionApiSuccess(serviceRes.message))
-      } yield Ok(resp)).merge.flatten
+        resp <- moveSubscriptionService.moveSubscription(reqBody).bimap(
+          error => InternalServerError(MoveSubscriptionApiError(s"Failed to move subscription: $error")),
+          serviceRes => Ok(MoveSubscriptionApiSuccess(serviceRes.message))
+        )
+      } yield resp).merge.flatten
     }
 
     HttpRoutes.of[F] {
