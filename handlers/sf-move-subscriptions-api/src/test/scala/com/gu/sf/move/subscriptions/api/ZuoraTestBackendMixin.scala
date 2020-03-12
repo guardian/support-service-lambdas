@@ -33,7 +33,7 @@ trait ZuoraTestBackendMixin {
   protected val updateAccountSuccessRes: Response[Either[Nothing, String]] =
     Response.ok(Right(s"Move of Subscription ${moveSubscriptionReq.zuoraSubscriptionId} was successful"))
 
-  protected val accessTokenUnAuth: Response[Either[Nothing, AccessToken]] =
+  protected val accessTokenUnAuthError: Response[Either[Nothing, AccessToken]] =
     Response.error("Unable to generate token", StatusCodes.Unauthorized)
 
   protected val fetchSubscriptionFailedRes: Response[Either[Nothing, Subscription]] =

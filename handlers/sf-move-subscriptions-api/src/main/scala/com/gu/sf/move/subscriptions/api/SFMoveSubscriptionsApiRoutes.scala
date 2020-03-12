@@ -38,7 +38,7 @@ object SFMoveSubscriptionsApiRoutes extends LazyLogging {
           }
         resp <- moveSubscriptionService.moveSubscription(reqBody)
           .bimap(
-            err => InternalServerError(MoveSubscriptionApiError(err.message)),
+            err => InternalServerError(MoveSubscriptionApiError(err.toString)),
             res => Ok(MoveSubscriptionApiSuccess(res.message)))
       } yield resp).merge.flatten
     }

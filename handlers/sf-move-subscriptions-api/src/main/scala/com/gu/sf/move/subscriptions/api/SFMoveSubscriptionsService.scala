@@ -10,7 +10,17 @@ import com.typesafe.scalalogging.LazyLogging
 
 final case class MoveSubscriptionServiceSuccess(message: String)
 
-final case class MoveSubscriptionServiceError(message: String)
+trait MoveSubscriptionServiceError {
+  def message: String
+}
+
+case class FetchZuoraAccessTokenError(message: String) extends MoveSubscriptionServiceError
+
+case class FetchZuoraSubscriptionError(message: String) extends MoveSubscriptionServiceError
+
+case class UpdateZuoraAccountError(message: String) extends MoveSubscriptionServiceError
+
+final case class MoveSubscriptionServiceError2(message: String)
 
 class SFMoveSubscriptionsService[F[_]: Monad](
   apiCfg: MoveSubscriptionApiConfig,
@@ -34,29 +44,22 @@ class SFMoveSubscriptionsService[F[_]: Monad](
       crmId = sfAccountId,
       sfContactId__c = sfFullContactId
     )
-    import SFMoveSubscriptionsService.{fetchZuoraAccessTokenErrorMsg, fetchZuoraSubErrorMsg, updateZuoraAccountErrorMsg}
     import Zuora.{accessTokenGetResponseV2, subscriptionGetResponse, updateAccountByMovingSubscription}
 
     (for {
       accessToken <- accessTokenGetResponseV2(ZuoraConfig, backend)
-        .leftMap(err => fetchZuoraAccessTokenErrorMsg(err.reason))
+        .leftMap(err => FetchZuoraAccessTokenError(err.reason))
       subscription <- subscriptionGetResponse(ZuoraConfig, accessToken, backend)(SubscriptionName(zuoraSubscriptionId))
-        .leftMap(err => fetchZuoraSubErrorMsg(err.reason))
+        .leftMap(err => FetchZuoraSubscriptionError(err.reason))
       updateRes <- updateAccountByMovingSubscription(ZuoraConfig, accessToken, backend)(subscription, moveSubCommand)
-        .leftMap(err => updateZuoraAccountErrorMsg(err.reason))
+        .leftMap(err => UpdateZuoraAccountError(err.reason))
     } yield updateRes)
       .toEitherT[F]
-      .bimap(MoveSubscriptionServiceError, MoveSubscriptionServiceSuccess)
+      .bimap(identity, MoveSubscriptionServiceSuccess)
   }
 }
 
 object SFMoveSubscriptionsService {
   def apply[F[_]: Monad](apiCfg: MoveSubscriptionApiConfig, backend: SttpBackend[Id, Nothing]): SFMoveSubscriptionsService[F] =
     new SFMoveSubscriptionsService(apiCfg, backend)
-
-  def fetchZuoraAccessTokenErrorMsg(reason: String): String = s"fetch ZUORA accessToken failure: $reason"
-
-  def fetchZuoraSubErrorMsg(reason: String): String = s"fetch ZUORA subscription failure: $reason"
-
-  def updateZuoraAccountErrorMsg(reason: String): String = s"update ZUORA account failure: $reason"
 }

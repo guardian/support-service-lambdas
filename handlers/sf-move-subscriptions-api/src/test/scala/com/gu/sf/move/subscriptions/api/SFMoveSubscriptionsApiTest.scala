@@ -41,7 +41,7 @@ class SFMoveSubscriptionsApiTest extends AnyFlatSpec with should.Matchers with D
   it should "return error with message about accessToken fetch failure" in {
 
     val api = createApp(createZuoraBackendStub(
-      oauthResponse = accessTokenUnAuth,
+      oauthResponse = accessTokenUnAuthError,
       getSubscriptionRes = fetchSubscriptionFailedRes,
       updateAccountRes = updateAccountSuccessRes
     ))
@@ -57,7 +57,7 @@ class SFMoveSubscriptionsApiTest extends AnyFlatSpec with should.Matchers with D
 
     responseActual.status shouldEqual Status.InternalServerError
     getBody[MoveSubscriptionApiError](responseActual) should matchTo(MoveSubscriptionApiError(
-      SFMoveSubscriptionsService.fetchZuoraAccessTokenErrorMsg(accessTokenUnAuth.body.left.get)
+      FetchZuoraAccessTokenError(accessTokenUnAuthError.body.left.get).toString
     ))
   }
 
@@ -79,7 +79,7 @@ class SFMoveSubscriptionsApiTest extends AnyFlatSpec with should.Matchers with D
 
     responseActual.status shouldEqual Status.InternalServerError
     getBody[MoveSubscriptionApiError](responseActual) should matchTo(MoveSubscriptionApiError(
-      SFMoveSubscriptionsService.fetchZuoraSubErrorMsg(fetchSubscriptionFailedRes.body.left.get)
+      FetchZuoraSubscriptionError(fetchSubscriptionFailedRes.body.left.get).toString
     ))
   }
 
@@ -101,7 +101,7 @@ class SFMoveSubscriptionsApiTest extends AnyFlatSpec with should.Matchers with D
 
     responseActual.status shouldEqual Status.InternalServerError
     getBody[MoveSubscriptionApiError](responseActual) should matchTo(MoveSubscriptionApiError(
-      SFMoveSubscriptionsService.updateZuoraAccountErrorMsg(updateAccountFailedRes.body.left.get)
+      UpdateZuoraAccountError(updateAccountFailedRes.body.left.get).toString
     ))
   }
 
