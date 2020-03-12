@@ -12,10 +12,10 @@ final case class MoveSubscriptionServiceSuccess(message: String)
 
 final case class MoveSubscriptionServiceError(error: String)
 
-class SFMoveSubscriptionsService[F[_]: Monad](
-  apiCfg: MoveSubscriptionApiConfig,
-  backend: SttpBackend[Id, Nothing]
-) extends LazyLogging {
+class SFMoveSubscriptionsService[F[_] : Monad](
+                                                apiCfg: MoveSubscriptionApiConfig,
+                                                backend: SttpBackend[Id, Nothing]
+                                              ) extends LazyLogging {
 
   private val ZuoraConfig = ZuoraRestOauthConfig(
     baseUrl = apiCfg.zuoraBaseUrl,
@@ -35,20 +35,40 @@ class SFMoveSubscriptionsService[F[_]: Monad](
       sfContactId__c = sfFullContactId
     )
     import Zuora.{accessTokenGetResponseV2, subscriptionGetResponse, updateAccountByMovingSubscription}
-    val updateResponse = for {
-      accessToken <- accessTokenGetResponseV2(ZuoraConfig, backend)
-      subscription <- subscriptionGetResponse(ZuoraConfig, accessToken, backend)(SubscriptionName(zuoraSubscriptionId))
-      updateRes <- updateAccountByMovingSubscription(ZuoraConfig, accessToken, backend)(subscription, moveSubCommand)
-    } yield updateRes
 
-    updateResponse.toEitherT[F].bimap(
-      error => MoveSubscriptionServiceError(error.toString),
-      status => MoveSubscriptionServiceSuccess(status)
-    )
+    val getAccessTokenRes = accessTokenGetResponseV2(ZuoraConfig, backend)
+
+    val t = getAccessTokenRes.bimap(
+      err => err.reason,
+      accessToken => (for {
+        subscription <- subscriptionGetResponse(ZuoraConfig, accessToken, backend)(SubscriptionName(zuoraSubscriptionId))
+        updateRes <- updateAccountByMovingSubscription(ZuoraConfig, accessToken, backend)(subscription, moveSubCommand)
+      } yield updateRes)
+    ).bimap(MoveSubscriptionServiceError,
+      updateErrorOrSuccess => updateErrorOrSuccess.bimap(
+        err => MoveSubscriptionServiceError(err.reason),
+        status => MoveSubscriptionServiceSuccess(status)
+      )
+    ).flatten.toEitherT[F]
+    t
+//
+//    getAccessTokenRes
+//      .leftMap(err => MoveSubscriptionServiceError(err.reason))
+//      .map{ accessToken =>
+//        val updateResponse = for {
+//          subscription <- subscriptionGetResponse(ZuoraConfig, accessToken, backend)(SubscriptionName(zuoraSubscriptionId))
+//          updateRes <- updateAccountByMovingSubscription(ZuoraConfig, accessToken, backend)(subscription, moveSubCommand)
+//        } yield updateRes
+//        updateResponse.toEitherT[F].bimap(
+//          error => MoveSubscriptionServiceError(error.toString),
+//          status => MoveSubscriptionServiceSuccess(status)
+//        )
+//      }
+
   }
 }
 
 object SFMoveSubscriptionsService {
-  def apply[F[_]: Monad](apiCfg: MoveSubscriptionApiConfig, backend: SttpBackend[Id, Nothing]): SFMoveSubscriptionsService[F] =
+  def apply[F[_] : Monad](apiCfg: MoveSubscriptionApiConfig, backend: SttpBackend[Id, Nothing]): SFMoveSubscriptionsService[F] =
     new SFMoveSubscriptionsService(apiCfg, backend)
 }

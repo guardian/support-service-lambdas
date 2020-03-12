@@ -5,7 +5,7 @@ import java.time.LocalDate
 import com.gu.zuora.AccessToken
 import com.gu.zuora.subscription.Subscription
 import com.softwaremill.sttp.testing.SttpBackendStub
-import com.softwaremill.sttp.{Id, Response}
+import com.softwaremill.sttp.{Id, Response, StatusCodes}
 
 trait ZuoraTestBackendMixin {
 
@@ -13,32 +13,43 @@ trait ZuoraTestBackendMixin {
   private val accessToken = "test-zuora-access-token"
   private val accountNumber = "test-zuora-account-number"
 
-  val moveSubReq = MoveSubscriptionReqBody(
+  protected val moveSubscriptionReq = MoveSubscriptionReqBody(
     zuoraSubscriptionId = "test-zuora-sub-id",
     sfAccountId = "test-sf-account-id",
     sfFullContactId = "test-sf-full-contact-id",
   )
 
-  val successAccessToken = Response.ok(Right(AccessToken(accessToken)))
-
-  val sub = mkAnySubscription().copy(
-    subscriptionNumber = moveSubReq.zuoraSubscriptionId,
+  private val sub = mkAnySubscription().copy(
+    subscriptionNumber = moveSubscriptionReq.zuoraSubscriptionId,
     accountNumber = accountNumber
   )
 
-  val successSubscription = Response.ok(Right(sub))
+  protected val successAccessTokenRes: Response[Either[Nothing, AccessToken]] =
+    Response.ok(Right(AccessToken(accessToken)))
 
-  val accountUpdateSuccess = Response.ok(Right(s"Move of Subscription ${moveSubReq.zuoraSubscriptionId} was successful"))
 
-  def createZuoraBackendStub(): SttpBackendStub[Id, Nothing] = {
+  protected val accessTokenUnAuth: Response[Either[Nothing, AccessToken]] =
+    Response.error("Unable to generate token", StatusCodes.Unauthorized)
+
+  protected val successSubscriptionRes: Response[Either[Nothing, Subscription]] =
+    Response.ok(Right(sub))
+
+  protected val accountUpdateSuccessRes: Response[Either[Nothing, String]] =
+    Response.ok(Right(s"Move of Subscription ${moveSubscriptionReq.zuoraSubscriptionId} was successful"))
+
+  def createZuoraBackendStub[T](
+                                 oauthResponse: Response[Either[Nothing, AccessToken]],
+                                 getSubscriptionRes: Response[Either[Nothing, Subscription]],
+                                 updateAccountRes: Response[Either[Nothing, String]]
+                               ): SttpBackendStub[Id, Nothing] = {
     SttpBackendStub.synchronous
       .whenRequestMatchesPartial {
         case request if request.uri.toString() == s"$zuoraTestBaseUrl/oauth/token" =>
-          successAccessToken
-        case request if request.uri.toString() == s"$zuoraTestBaseUrl/subscriptions/${moveSubReq.zuoraSubscriptionId}" =>
-          successSubscription
+          accessTokenUnAuth
+        case request if request.uri.toString() == s"$zuoraTestBaseUrl/subscriptions/${moveSubscriptionReq.zuoraSubscriptionId}" =>
+          getSubscriptionRes
         case request if request.uri.toString() == s"$zuoraTestBaseUrl/accounts/$accountNumber" =>
-          accountUpdateSuccess
+          updateAccountRes
       }
   }
 

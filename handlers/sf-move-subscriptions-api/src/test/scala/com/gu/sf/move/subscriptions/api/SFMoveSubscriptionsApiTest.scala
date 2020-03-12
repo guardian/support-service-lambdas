@@ -17,20 +17,49 @@ class SFMoveSubscriptionsApiTest extends AnyFlatSpec with should.Matchers with D
 
   it should "return OK status for move subscription request" in {
 
-    val api = createApp(createZuoraBackendStub())
+    val api = createApp(createZuoraBackendStub(
+      oauthResponse = successAccessTokenRes,
+      getSubscriptionRes = successSubscriptionRes,
+      updateAccountRes = accountUpdateSuccessRes
+    ))
 
     val responseActual = api.run(
       Request[IO](
         method = Method.POST,
         uri = Uri(path = "/subscription/move")
       ).withEntity[String](
-        moveSubReq.asJson.spaces2)
+          moveSubscriptionReq.asJson.spaces2
+        )
     ).value.unsafeRunSync().get
 
     responseActual.status shouldEqual Status.Ok
     getBody[MoveSubscriptionApiSuccess](responseActual) should matchTo(MoveSubscriptionApiSuccess(
-      s"Move of Subscription ${moveSubReq.zuoraSubscriptionId} was successful"))
+      s"Move of Subscription ${moveSubscriptionReq.zuoraSubscriptionId} was successful"
+    ))
   }
+
+    it should "test" in {
+
+      val api = createApp(createZuoraBackendStub(
+        oauthResponse = accessTokenUnAuth,
+        getSubscriptionRes = successSubscriptionRes,
+        updateAccountRes = accountUpdateSuccessRes
+      ))
+
+      val responseActual = api.run(
+        Request[IO](
+          method = Method.POST,
+          uri = Uri(path = "/subscription/move")
+        ).withEntity[String](
+            moveSubscriptionReq.asJson.spaces2
+          )
+      ).value.unsafeRunSync().get
+
+      responseActual.status shouldEqual Status.Ok
+      getBody[MoveSubscriptionApiSuccess](responseActual) should matchTo(MoveSubscriptionApiSuccess(
+        s"Move of Subscription ${moveSubscriptionReq.zuoraSubscriptionId} was successful"
+      ))
+    }
 
   private def createApp(backendStub: SttpBackendStub[Id, Nothing]) = {
     SFMoveSubscriptionsApiApp(DevIdentity("sf-move-subscriptions-api"), backendStub)
@@ -38,7 +67,7 @@ class SFMoveSubscriptionsApiTest extends AnyFlatSpec with should.Matchers with D
       .right.get
   }
 
-  private def getBody[A: Decoder](response: Response[IO]) = {
+  private def getBody[A: Decoder](response: org.http4s.Response[IO]) = {
     val bodyString = response
       .bodyAsText()
       .compile
