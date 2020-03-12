@@ -1,9 +1,13 @@
 package com.gu.zuora.sar
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
-import com.gu.zuora.sar.BatonModels.{SarRequest, SarStatusRequest}
+import com.gu.zuora.sar.BatonModels.{PerformSarRequest, SarRequest, SarStatusRequest}
 import io.circe.syntax._
 import circeCodecs._
+import com.gu.effects.{GetFromS3, RawEffects}
+import com.gu.util.config.LoadConfigModule
+import com.gu.util.zuora.{ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
+import com.gu.zuora.ZuoraHelper
 
 object ZuoraSarLocalRun extends App {
   def runwith(request: SarRequest): Unit = {
@@ -12,12 +16,28 @@ object ZuoraSarLocalRun extends App {
     val jsonRequest = request.asJson.noSpaces
     val testInputStream = new ByteArrayInputStream(jsonRequest.getBytes)
     val testOutputStream = new ByteArrayOutputStream()
+    val loadZuoraSarConfig = LoadConfigModule(RawEffects.stage, GetFromS3.fetchString)
+    val loadZuoraRestConfig = LoadConfigModule(RawEffects.stage, GetFromS3.fetchString)
+//    for {
+//      zuoraSarConfig <- loadZuoraSarConfig[ZuoraSarConfig]
+//      zuoraRestConfig <- loadZuoraRestConfig[ZuoraRestConfig]
+//      requests = ZuoraRestRequestMaker(RawEffects.response, zuoraRestConfig)
+//      downloadRequests = ZuoraRestRequestMaker(RawEffects.downloadResponse, zuoraRestConfig)
+//      zuoraQuerier = ZuoraQuery(requests)
+//      zuoraHelper = ZuoraHelper(requests, downloadRequests, zuoraQuerier)
+//    } yield {
+//      ZuoraPerformSarHandler(zuoraHelper, zuoraSarConfig)
+//    }.handleRequest(testInputStream, testOutputStream, null)
+    //
     zuoraSarHander.handleRequest(testInputStream, testOutputStream, null)
     val responseString = new String(testOutputStream.toByteArray)
     println("lambda output was:" + responseString)
   }
 
-  val sarStatusRequest = SarStatusRequest(initiationReference = "testSubjectId")
-
+  val sarStatusRequest = SarStatusRequest(initiationReference = "123")
+  val performSarInitiateRequest = PerformSarRequest(
+    initiationReference = "testSubjectId",
+    subjectEmail = "test@testco.uk"
+  )
   runwith(sarStatusRequest)
 }

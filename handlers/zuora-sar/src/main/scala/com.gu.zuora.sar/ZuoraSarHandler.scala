@@ -10,7 +10,7 @@ import com.gu.effects.ExecuteStepFunction
 import io.circe.syntax._
 import circeCodecs._
 
-case class ZuoraSarHandler(sarLambdaConfig: SarLambdaConfig)
+case class ZuoraSarHandler(zuoraSarConfig: ZuoraSarConfig)
     extends LazyLogging
     with ZuoraHandler[SarRequest, SarResponse] {
 
@@ -23,7 +23,7 @@ case class ZuoraSarHandler(sarLambdaConfig: SarLambdaConfig)
       initiateRequest.subjectEmail
     )
     IO.fromTry {
-      ExecuteStepFunction.executeStepFunction(sarLambdaConfig.stateMachineArn, performSarRequest.asJson.toString)
+      ExecuteStepFunction.executeStepFunction(zuoraSarConfig.stateMachineArn, performSarRequest.asJson.toString)
         .map { startExecutionResult =>
           logger.info(startExecutionResult.toString)
           SarInitiateResponse(initiationId)
@@ -32,7 +32,7 @@ case class ZuoraSarHandler(sarLambdaConfig: SarLambdaConfig)
   }
 
   def status(requestIdValue: String): IO[SarStatusResponse] = {
-    S3Helper.checkForResults(requestIdValue, sarLambdaConfig).map {
+    S3Helper.checkForResults(requestIdValue, zuoraSarConfig).map {
       case S3CompletedPathFound(resultLocations) =>
         SarStatusResponse(Completed, Some(resultLocations))
       case S3FailedPathFound() => SarStatusResponse(Failed)

@@ -1,46 +1,88 @@
 package com.gu.zuora
 
-import cats.effect.IO
-import cats.implicits._
-import com.amazonaws.services.lambda.runtime.Context
-import com.gu.zuora.sar.PerformSarLambdaConfig
+import com.gu.util.resthttp.RestRequestMaker.{DownloadStream, Requests, WithoutCheck}
+import com.gu.util.resthttp.Types.{ClientFailableOp, ClientFailure}
+import com.gu.util.zuora.ZuoraQuery.ZuoraQuerier
+import com.gu.util.zuora.SafeQueryBuilder.Implicits._
 import com.typesafe.scalalogging.LazyLogging
-import io.circe.Json
-import io.circe.parser.decode
+import play.api.libs.json.{JsValue, Json}
+import cats.syntax.traverse._
+import cats.instances.list._
+import cats.instances.either._
 
-import scala.util.Try
+// For Zuora response deserialisation
+case class ZuoraContact(AccountId: String)
+case class InvoiceId(id: String)
+case class InvoiceIds(invoices: List[InvoiceId])
+case class InvoicePdfUrl(pdfFileUrl: String)
+case class InvoiceFiles(invoiceFiles: List[InvoicePdfUrl])
 
-trait ZuoraService {
-  def startSar(email: String,
-               config: PerformSarLambdaConfig): IO[ZuoraSarResponse]
-}
+trait ZuoraSarSuccess
+case class ZuoraAccountSuccess(accountSummary: JsValue, accountObj: JsValue, invoiceList: InvoiceIds) extends ZuoraSarSuccess
+case class InvoiceSuccess(fullInvoice: JsValue) extends ZuoraSarSuccess
 
-case class Account(accountId: String, invoices: List[String])
-case class ZuoraSarResponse(accountSummary: String, accountObj: String, invoiceFiles: List[String])
+trait ZuoraSarError
+case class ZuoraClientError(message: String) extends ZuoraSarError
+case class JsonDeserialisationError(message: String) extends ZuoraSarError
+case class S3WriteError(message: String) extends ZuoraSarError
 
-object ZuoraHelper extends ZuoraService with LazyLogging {
+case class ZuoraHelperError(message: String)
 
-  def getAccounts(email: String): Try[List[Account]] = ???
+case class ZuoraHelper(zuoraClient: Requests, zuoraDownloadClient: Requests, zuoraQuerier: ZuoraQuerier) extends LazyLogging {
 
-  def getAccountSummary(accountId: String): Try[String] = ???
 
-  def getAccountObj(accountId: String): Try[String] = ???
+  implicit val readsC = Json.reads[ZuoraContact]
 
-  def getInvoiceFile(invoiceId: String): Try[String] = ???
-
-  def startSar(email: String, config: PerformSarLambdaConfig): IO[ZuoraSarResponse] = {
-    ???
-//    for {
-//      accounts <- getAccounts("www.test.com")
-//      account <- accounts
-//      summary <- getAccountSummary(account.accountId)
-//      accountObj <- getAccountObj(account.accountId)
-//      invoices = account.invoices
-//    } yield {
-//      val invoiceFiles = invoices.map(getInvoiceFile).sequence
-//      invoiceFiles.map { invoiceContents =>
-//        ZuoraSarResponse(summary, accountObj, invoiceContents)
-//      }
-//    }
+  def zuoraContactsWithEmail(emailAddress: String): ClientFailableOp[List[ZuoraContact]] = {
+    for {
+      contactQuery <- zoql"SELECT AccountId FROM Contact where WorkEmail=${emailAddress}"
+      queryResult <- zuoraQuerier[ZuoraContact](contactQuery).map(_.records)
+    } yield queryResult
   }
+
+  private def accountSummary(accountId: String): Either[ClientFailure, JsValue] =
+    zuoraClient.get[JsValue](s"accounts/$accountId/summaryy").toDisjunction
+
+  private def accountObj(accountId: String): Either[ClientFailure, JsValue] = {
+    zuoraClient.get[JsValue](s"object/account/$accountId", WithoutCheck).toDisjunction
+  }
+
+  implicit val readsPdfUrls = Json.reads[InvoicePdfUrl]
+  implicit val readInvoiceFiles = Json.reads[InvoiceFiles]
+
+  private def getInvoiceFiles(invoiceId: String): Either[ClientFailure, InvoiceFiles] =
+    zuoraClient.get[InvoiceFiles](s"invoices/$invoiceId/files").toDisjunction
+
+  // The zuora client includes /v1 in the URL but it also appears in the pdfFileUrl obtained from the call to
+  // invoices/invoiceId/files so this removes the duplication
+  private def invoiceFileContents(pdfUrls: List[InvoicePdfUrl]): Either[ClientFailure, List[DownloadStream]] = {
+    pdfUrls.traverse(pdfUrl => {
+      val urlSuffix = pdfUrl.pdfFileUrl.replace("/v1/", "")
+      zuoraDownloadClient.getDownloadStream(urlSuffix).toDisjunction
+    })
+  }
+
+  implicit val readsIIds = Json.reads[InvoiceId]
+  implicit val readsIn = Json.reads[InvoiceIds]
+
+  def accountResponse(contact: ZuoraContact): Either[ZuoraSarError, ZuoraAccountSuccess] = {
+    for {
+      accountSummary <- accountSummary(contact.AccountId).left.map(err => ZuoraClientError(err.message))
+      accountObj <- accountObj(contact.AccountId).left.map(err => ZuoraClientError(err.message))
+      invoices <- Json.fromJson[InvoiceIds](accountSummary).asEither.left.map(err => JsonDeserialisationError(err.toString()))
+      zuoraSarResponse = ZuoraAccountSuccess(accountSummary, accountObj, invoices)
+    } yield zuoraSarResponse
+  }
+
+  def invoicesResponse(accountInvoices: List[InvoiceId]): Either[ZuoraSarError, List[DownloadStream]] = {
+    accountInvoices.flatTraverse { invoice =>
+      for {
+        invoices <- getInvoiceFiles(invoice.id).left.map(err => ZuoraClientError(err.message))
+        invoiceDownloadStreams <- invoiceFileContents(invoices.invoiceFiles).left.map(err => ZuoraClientError(err.message))
+      } yield {
+        invoiceDownloadStreams
+      }
+    }
+  }
+
 }
