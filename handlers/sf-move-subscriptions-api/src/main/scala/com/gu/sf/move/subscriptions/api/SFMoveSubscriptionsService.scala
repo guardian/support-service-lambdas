@@ -36,14 +36,15 @@ class SFMoveSubscriptionsService[F[_]: Monad](
     )
     import Zuora.{accessTokenGetResponseV2, subscriptionGetResponse, updateAccountByMovingSubscription}
     val updateResponse = for {
-      token <- accessTokenGetResponseV2(ZuoraConfig, backend)
-      subscription <- subscriptionGetResponse(ZuoraConfig, token, backend)(SubscriptionName(zuoraSubscriptionId))
-      updateRes <- updateAccountByMovingSubscription(ZuoraConfig, token, backend)(subscription, moveSubCommand)
+      accessToken <- accessTokenGetResponseV2(ZuoraConfig, backend)
+      subscription <- subscriptionGetResponse(ZuoraConfig, accessToken, backend)(SubscriptionName(zuoraSubscriptionId))
+      updateRes <- updateAccountByMovingSubscription(ZuoraConfig, accessToken, backend)(subscription, moveSubCommand)
     } yield updateRes
 
-    updateResponse.toEitherT[F]
-      .leftMap(err => MoveSubscriptionServiceError(err.toString))
-      .map(status => MoveSubscriptionServiceSuccess(status))
+    updateResponse.toEitherT[F].bimap(
+      error => MoveSubscriptionServiceError(error.toString),
+      status => MoveSubscriptionServiceSuccess(status)
+    )
   }
 }
 
