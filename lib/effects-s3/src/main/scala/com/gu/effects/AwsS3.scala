@@ -85,6 +85,28 @@ object ListS3Objects extends LazyLogging {
   }
 }
 
+object CopyS3Objects extends LazyLogging {
+
+  def copyObject(request: CopyObjectRequest): Try[CopyObjectResult] = {
+    logger.info(
+      s"Copying file from ${request.getSourceBucketName} | ${request.getSourceKey} to ${request.getDestinationBucketName} | ${request.getDestinationBucketName}"
+    )
+    val copyRequest = Try(AwsS3.client.copyObject(request))
+    copyRequest
+  }
+
+  def copyStringWithAcl(originS3Location: S3Location, destinationS3Location: S3Location, cannedAcl: CannedAccessControlList) = {
+    copyObject(
+      new CopyObjectRequest(
+        originS3Location.bucket,
+        originS3Location.key,
+        destinationS3Location.bucket,
+        destinationS3Location.key
+      ).withCannedAccessControlList(cannedAcl)
+    )
+  }
+}
+
 object DeleteS3Objects extends LazyLogging {
 
   def deleteObjects(bucketName: BucketName, keysToDelete: List[Key]): Try[Unit] = {
@@ -97,6 +119,7 @@ object DeleteS3Objects extends LazyLogging {
     }
   }
 }
+
 object AwsS3 {
 
   val client = AmazonS3Client.builder
