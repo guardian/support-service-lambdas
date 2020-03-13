@@ -4,6 +4,8 @@ import * as lambda from '@aws-cdk/aws-lambda'
 import * as iam from '@aws-cdk/aws-iam'
 import { Duration, Tag } from '@aws-cdk/core'
 import * as s3 from '@aws-cdk/aws-s3'
+import events = require('@aws-cdk/aws-events');
+import targets = require('@aws-cdk/aws-events-targets');
 
 export class DigitalVoucherCancellationProcessorStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
@@ -92,9 +94,20 @@ export class DigitalVoucherCancellationProcessorStack extends cdk.Stack {
       return fn
     }
 
+    const createDigitalVoucherCancellationProcessorSchedule = (lambdaFn: lambda.Function) => {
+        const schedule = new events.Rule(this, 'DigitalVoucherCancellationProcessorSchedule', {
+          schedule: events.Schedule.expression('cron(* * * * * *)')
+        });
+
+        schedule.addTarget(new targets.LambdaFunction(digitalVoucherCancellationProcessorLambda));
+
+        return schedule
+    }
 
     const digitalVoucherCancellationProcessorFnRole = createDigitalVoucherCancellationProcessorFnRole()
 
-    createDigitalVoucherCancellationProcessorLambda(digitalVoucherCancellationProcessorFnRole)
+    const digitalVoucherCancellationProcessorLambda = createDigitalVoucherCancellationProcessorLambda(digitalVoucherCancellationProcessorFnRole)
+
+    const digitalVoucherCancellationProcessorSchedule = createDigitalVoucherCancellationProcessorSchedule(digitalVoucherCancellationProcessorLambda)
   }
 }
