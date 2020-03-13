@@ -5,7 +5,11 @@ import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
 import io.circe.generic.auto._
 
-case class ZuoraAccountMoveSubscriptionCommand(crmId: String, sfContactId__c: String)
+case class ZuoraAccountMoveSubscriptionCommand(
+  crmId: String,
+  sfContactId__c: String,
+  IdentityId__c: String
+)
 
 case class MoveSubscriptionAtZuoraAccountResponse(message: String)
 
