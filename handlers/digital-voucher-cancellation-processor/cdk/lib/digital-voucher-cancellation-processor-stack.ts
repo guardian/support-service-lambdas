@@ -12,7 +12,7 @@ export class DigitalVoucherCancellationProcessorStack extends cdk.Stack {
     const account = context.account
     const region = context.region
 
-    const stageParameter = new cdk.CfnParameter(this, 'stage', {
+    const stageParameter = new cdk.CfnParameter(this, 'Stage', {
       type: 'String',
       description: 'Stage',
     })

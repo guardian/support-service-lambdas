@@ -1,5 +1,5 @@
 Parameters:
-  stage:
+  Stage:
     Type: String
     Description: Stage
 Resources:
@@ -18,7 +18,7 @@ Resources:
           Value: digital-voucher-cancellation-processor
         - Key: Stage
           Value:
-            Ref: stage
+            Ref: Stage
         - Key: Stack
           Value: membership
     Metadata:
@@ -38,7 +38,7 @@ Resources:
                   - ":"
                   - Ref: AWS::AccountId
                   - :parameter/
-                  - Ref: stage
+                  - Ref: Stage
                   - /membership/digital-voucher-cancellation-processor
           - Action: kms:Decrypt
             Effect: Allow
@@ -72,7 +72,7 @@ Resources:
                   - ":"
                   - Ref: AWS::AccountId
                   - :log-group:/aws/lambda/digital-voucher-cancellation-processor-
-                  - Ref: stage
+                  - Ref: Stage
                   - :*
         Version: "2012-10-17"
       PolicyName: DigitalVoucherCancellationProcessorFnRoleDefaultPolicy0592FCB9
@@ -89,7 +89,7 @@ Resources:
           Fn::Join:
             - ""
             - - membership/
-              - Ref: stage
+              - Ref: Stage
               - /digital-voucher-cancellation-processor/digital-voucher-cancellation-processor.jar
       Handler: com.gu.digital-voucher-cancellation-processor.Handler::handle
       Role:
@@ -101,20 +101,20 @@ Resources:
         Variables:
           App: digital-voucher-cancellation-processor
           Stage:
-            Ref: stage
+            Ref: Stage
           Stack: membership
       FunctionName:
         Fn::Join:
           - ""
           - - digital-voucher-cancellation-processor-
-            - Ref: stage
+            - Ref: Stage
       MemorySize: 1536
       Tags:
         - Key: App
           Value: digital-voucher-cancellation-processor
         - Key: Stage
           Value:
-            Ref: stage
+            Ref: Stage
         - Key: Stack
           Value: membership
       Timeout: 300
