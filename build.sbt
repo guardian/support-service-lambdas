@@ -177,10 +177,10 @@ lazy val `effects-sqs` = all(project in file("lib/effects-sqs"))
   .settings(
     libraryDependencies ++= Seq(awsSQS) ++ logging
   )
-lazy val `effects-stepfunction` = all(project in file("lib/effects-stepfunction"))
+lazy val `effects-lambda` = all(project in file("lib/effects-lambda"))
   .dependsOn(testDep)
   .settings(
-    libraryDependencies ++= Seq(awsStepFunction) ++ logging
+    libraryDependencies ++= Seq(awsSdkLambda) ++ logging
   )
 
 lazy val `effects-ses` = all(project in file("lib/effects-ses"))
@@ -258,7 +258,7 @@ lazy val root = all(project in file(".")).enablePlugins(RiffRaffArtifact).aggreg
   `effects-sqs`,
   `effects-ses`,
   `effects-s3`,
-  `effects-stepfunction`,
+  `effects-lambda`,
   `sf-datalake-export`,
   `zuora-datalake-export`,
   `batch-email-sender`,
@@ -307,7 +307,7 @@ lazy val `zuora-retention` = all(project in file("handlers/zuora-retention"))
 lazy val `zuora-sar` = all(project in file("handlers/zuora-sar"))
   .settings(libraryDependencies ++= Seq(catsEffect, circeParser, circe, awsStepFunction))
   .enablePlugins(RiffRaffArtifact)
-  .dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep, `effects-s3`, `effects-stepfunction`)
+  .dependsOn(zuora, handler, effectsDepIncludingTestFolder, testDep, `effects-s3`, `effects-lambda`)
 
 lazy val `sf-contact-merge` = all(project in file("handlers/sf-contact-merge"))
   .enablePlugins(RiffRaffArtifact)

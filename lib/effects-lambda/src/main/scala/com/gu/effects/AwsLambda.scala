@@ -3,27 +3,26 @@ package com.gu.effects
 import com.amazonaws.auth.profile.ProfileCredentialsProvider
 import com.amazonaws.auth.{AWSCredentialsProviderChain, EC2ContainerCredentialsProviderWrapper, EnvironmentVariableCredentialsProvider, InstanceProfileCredentialsProvider, SystemPropertiesCredentialsProvider}
 import com.amazonaws.regions.Regions
-import com.amazonaws.services.stepfunctions.AWSStepFunctionsClient
-import com.amazonaws.services.stepfunctions.model.{StartExecutionRequest, StartExecutionResult}
+import com.amazonaws.services.lambda.AWSLambdaClient
+import com.amazonaws.services.lambda.model.{InvokeRequest, InvokeResult}
 import com.typesafe.scalalogging.LazyLogging
 
 import scala.util.Try
 
-object ExecuteStepFunction extends LazyLogging {
+object InvokeLambda extends LazyLogging {
 
-  def executeStepFunction(stateMachineArn: String, executionRequestInput: String): Try[StartExecutionResult] = {
-    val executionRequest = new StartExecutionRequest()
-      .withStateMachineArn(stateMachineArn)
-      .withInput(executionRequestInput)
+  def invokeLambda(functionName: String, lambdaPayload: String): Try[InvokeResult] = {
+    val invokeRequest = new InvokeRequest()
+      .withFunctionName(functionName)
+      .withPayload(lambdaPayload)
 
-    Try(AwsStepFunction.client.startExecution(executionRequest))
+    Try(AwsLambda.client.invoke(invokeRequest))
   }
-
 }
 
-object AwsStepFunction {
+object AwsLambda {
 
-  val client = AWSStepFunctionsClient
+  val client = AWSLambdaClient
     .builder()
     .withCredentials(aws.CredentialsProvider)
     .withRegion(Regions.EU_WEST_1)

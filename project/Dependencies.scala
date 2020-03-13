@@ -27,6 +27,7 @@ object Dependencies {
   val awsSQS = "com.amazonaws" % "aws-java-sdk-sqs" % awsVersion
   val awsSES = "com.amazonaws" % "aws-java-sdk-ses" % awsVersion
   val awsStepFunction = "com.amazonaws" % "aws-java-sdk-stepfunctions" % awsVersion
+  val awsSdkLambda = "com.amazonaws" % "aws-java-sdk-lambda" % awsVersion
   val awsLambda = "com.amazonaws" % "aws-lambda-java-core" % "1.2.0"
   val supportInternationalisation = "com.gu" %% "support-internationalisation" % "0.9"
   val circe = "io.circe" %% "circe-generic" % circeVersion

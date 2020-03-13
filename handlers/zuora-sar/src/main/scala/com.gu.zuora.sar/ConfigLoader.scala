@@ -5,7 +5,7 @@ import play.api.libs.json.{Json, Reads}
 
 case class ZuoraSarConfig(resultsBucket: String,
                            resultsPath: String,
-                           stateMachineArn: String)
+                           performLambdaFunctionName: String)
 
 object ConfigLoader {
   def getSarLambdaConfigTemp: ZuoraSarConfig = ZuoraSarConfig("baton-results", "zuora-results/DEV", "stateMachineArn")
