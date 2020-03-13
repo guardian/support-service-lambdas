@@ -42,9 +42,9 @@ object S3Helper extends S3Service with LazyLogging {
       initiationId: String,
       config: ZuoraSarConfig): IO[S3StatusResponse] =
     IO.fromTry {
-
       val completedPath = S3Path(BucketName(config.resultsBucket), Some(Key(s"${config.resultsPath}/$initiationId/completed/")))
       val failedPath = S3Path(BucketName(config.resultsBucket), Some(Key(s"${config.resultsPath}/$initiationId/failed/")))
+      logger.info("Checking for failed or completed file paths in S3.")
       for {
         completedResults <- ListS3Objects.listObjectsWithPrefix(completedPath)
         failedResults <- ListS3Objects.listObjectsWithPrefix(failedPath)
@@ -81,11 +81,12 @@ object S3Helper extends S3Service with LazyLogging {
       case Failure(err) => Left(S3Error(err.getMessage))
       case Success(pendingKeys) => {
         if (pendingKeys.isEmpty) {
-          logger.info("No results found in /pending")
+          logger.info("No results found in /pending. Creating NoResultsFoundForUser object.")
           createCompletedObject("NoResultsFoundForUser.", initiationReference, config)
         } else {
           pendingKeys.traverse { pendingKey =>
             val completedKey = pendingKey.value.replace("pending", "completed")
+            logger.info("Copying objects from /pending to /completed.")
             for {
               _ <- CopyS3Objects
                 .copyStringWithAcl(
@@ -105,6 +106,7 @@ object S3Helper extends S3Service with LazyLogging {
       zuoraError: ZuoraSarError,
       config: ZuoraSarConfig): Either[S3Error, S3WriteSuccess] = {
     val resultsPath = s"${config.resultsPath}/$initiationId/failed/$randomUUID"
+    logger.info("Uploading file to failed path in S3.")
     UploadToS3.putStringWithAcl(
       S3Location(config.resultsBucket, resultsPath),
       CannedAccessControlList.BucketOwnerRead,
@@ -119,6 +121,7 @@ object S3Helper extends S3Service with LazyLogging {
     zuoraSarResponse: ZuoraAccountSuccess,
     config: ZuoraSarConfig): Either[S3Error, S3WriteSuccess] = {
     val resultsPath = s"${config.resultsPath}/$initiationId/pending/$randomUUID"
+    logger.info("Uploading successful account result to S3.")
     for {
       _ <- UploadToS3
         .putStringWithAcl(
@@ -137,6 +140,7 @@ object S3Helper extends S3Service with LazyLogging {
       initiationId: String,
       zuoraInvoiceStreams: List[DownloadStream],
       config: ZuoraSarConfig): Either[S3Error, List[S3WriteSuccess]] = {
+    logger.info("Uploading successful invoice results to S3.")
     zuoraInvoiceStreams.traverse { invoiceStream =>
       val metadata = new ObjectMetadata()
       metadata.setContentLength(invoiceStream.lengthBytes)

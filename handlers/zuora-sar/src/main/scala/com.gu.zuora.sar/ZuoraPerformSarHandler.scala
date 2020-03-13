@@ -33,7 +33,9 @@ case class ZuoraPerformSarHandler(zuoraHelper: ZuoraHelper, zuoraSarConfig: Zuor
   def initiateSar(request: PerformSarRequest,
                   context: Context): Either[ZuoraSarError, Unit] = {
     zuoraHelper.zuoraContactsWithEmail(request.subjectEmail).toDisjunction match {
-      case Left(err) => Left(ZuoraClientError(err.message))
+      case Left(err) =>
+        logger.error("Failed to perform subject access request to Zuora.")
+        Left(ZuoraClientError(err.message))
       case Right(contactList) =>
         for {
           invoiceIds <- processAccountDetails(contactList, request.initiationReference)

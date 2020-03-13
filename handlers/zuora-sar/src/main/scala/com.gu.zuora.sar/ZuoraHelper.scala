@@ -66,6 +66,7 @@ case class ZuoraHelper(zuoraClient: Requests, zuoraDownloadClient: Requests, zuo
   implicit val readsIn = Json.reads[InvoiceIds]
 
   def accountResponse(contact: ZuoraContact): Either[ZuoraSarError, ZuoraAccountSuccess] = {
+    logger.info("Retrieving account summary and account object for contact.")
     for {
       accountSummary <- accountSummary(contact.AccountId).left.map(err => ZuoraClientError(err.message))
       accountObj <- accountObj(contact.AccountId).left.map(err => ZuoraClientError(err.message))
@@ -75,6 +76,7 @@ case class ZuoraHelper(zuoraClient: Requests, zuoraDownloadClient: Requests, zuo
   }
 
   def invoicesResponse(accountInvoices: List[InvoiceId]): Either[ZuoraSarError, List[DownloadStream]] = {
+    logger.info("Retrieving invoices for contact.")
     accountInvoices.flatTraverse { invoice =>
       for {
         invoices <- getInvoiceFiles(invoice.id).left.map(err => ZuoraClientError(err.message))
