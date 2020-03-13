@@ -91,7 +91,7 @@ Resources:
             - - membership/
               - Ref: Stage
               - /digital-voucher-cancellation-processor/digital-voucher-cancellation-processor.jar
-      Handler: com.gu.digital-voucher-cancellation-processor.Handler::handle
+      Handler: com.gu.digital_voucher_cancellation_processor.Handler::handle
       Role:
         Fn::GetAtt:
           - DigitalVoucherCancellationProcessorFnRole9BC677A8
