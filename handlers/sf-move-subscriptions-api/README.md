@@ -15,13 +15,14 @@ endpoints:
 - `self doc` method=GET, path=`/`
 - `moving subscription` method=POST, path=`/subscription/move`, body=
 
-    json```
-    {
-       "zuoraSubscriptionId": "Zuora Subscription Id",
-       "sfAccountId": "SF Account Id",
-       "sfFullContactId": "SF Full contact Id",
-       "identityId": "id from guardian identity service, if not set in SF send blank"
-    }```
+```json
+{
+   "zuoraSubscriptionId": "Zuora Subscription Id",
+   "sfAccountId": "SF Account Id",
+   "sfFullContactId": "SF Full contact Id",
+   "identityId": "id from guardian identity service, if not set in SF send blank"
+}
+```
 
 # how to generate/update cfn.yml by AWS CDK
 
