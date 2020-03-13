@@ -11,7 +11,7 @@ import com.typesafe.scalalogging.LazyLogging
 
 final case class MoveSubscriptionServiceSuccess(message: String)
 
-trait MoveSubscriptionServiceError {
+sealed trait MoveSubscriptionServiceError {
   def message: String
 }
 
@@ -46,14 +46,14 @@ class SFMoveSubscriptionsService[F[_]: Monad](
 
     (for {
       accessToken <- accessTokenGetResponseV2(ZuoraConfig, backend)
-        .leftMap(err => FetchZuoraAccessTokenError(err.reason))
+        .leftMap[MoveSubscriptionServiceError](err => FetchZuoraAccessTokenError(err.reason))
       subscription <- subscriptionGetResponse(ZuoraConfig, accessToken, backend)(SubscriptionName(zuoraSubscriptionId))
         .leftMap(err => FetchZuoraSubscriptionError(err.reason))
       updateRes <- updateAccountByMovingSubscription(ZuoraConfig, accessToken, backend)(subscription, moveSubCommand)
         .leftMap(err => UpdateZuoraAccountError(err.reason))
     } yield updateRes)
       .toEitherT[F]
-      .bimap(identity, res => MoveSubscriptionServiceSuccess(res.toString))
+      .map(res => MoveSubscriptionServiceSuccess(res.toString))
   }
 }
 
