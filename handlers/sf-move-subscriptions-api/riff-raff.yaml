@@ -10,7 +10,6 @@ deployments:
     parameters:
       templatePath: cfn.yaml
 
-
   sf-move-subscriptions-api:
     type: aws-lambda
     parameters:
