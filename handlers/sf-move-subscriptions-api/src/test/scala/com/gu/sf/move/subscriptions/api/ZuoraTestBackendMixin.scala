@@ -17,6 +17,7 @@ trait ZuoraTestBackendMixin {
     zuoraSubscriptionId = "test-zuora-sub-id",
     sfAccountId = "test-sf-account-id",
     sfFullContactId = "test-sf-full-contact-id",
+    identityId = "test-guardian-identity-id"
   )
 
   private val sub = mkAnySubscription().copy(
@@ -43,10 +44,10 @@ trait ZuoraTestBackendMixin {
     Response.error("update ZuoraAccount failure", StatusCodes.InternalServerError)
 
   def createZuoraBackendStub(
-                                 oauthResponse: Response[Either[Nothing, AccessToken]],
-                                 getSubscriptionRes: Response[Either[Nothing, Subscription]],
-                                 updateAccountRes: Response[Either[Nothing, MoveSubscriptionAtZuoraAccountResponse]]
-                               ): SttpBackendStub[Id, Nothing] = {
+    oauthResponse: Response[Either[Nothing, AccessToken]],
+    getSubscriptionRes: Response[Either[Nothing, Subscription]],
+    updateAccountRes: Response[Either[Nothing, MoveSubscriptionAtZuoraAccountResponse]]
+  ): SttpBackendStub[Id, Nothing] = {
     SttpBackendStub.synchronous
       .whenRequestMatchesPartial {
         case request if request.uri.toString() == s"$zuoraTestBaseUrl/oauth/token" =>
