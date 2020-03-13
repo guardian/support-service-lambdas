@@ -75,7 +75,7 @@ export class DigitalVoucherCancellationProcessorStack extends cdk.Stack {
             deployBucket,
             `membership/${stageParameter.valueAsString}/digital-voucher-cancellation-processor/digital-voucher-cancellation-processor.jar`
           ),
-          handler: 'com.gu.digital-voucher-cancellation-processor.Handler::handle',
+          handler: 'com.gu.digital_voucher_cancellation_processor.Handler::handle',
           role: fnRole,
           environment: {
             'App': appName,
