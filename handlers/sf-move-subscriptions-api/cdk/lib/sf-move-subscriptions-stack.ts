@@ -3,9 +3,10 @@ import * as apigateway from '@aws-cdk/aws-apigateway'
 import { Code } from '@aws-cdk/aws-lambda'
 import * as lambda from '@aws-cdk/aws-lambda'
 import * as iam from '@aws-cdk/aws-iam'
-import { Duration, Tag } from '@aws-cdk/core'
+import { Duration, Tag, Fn, Lazy } from '@aws-cdk/core'
 import * as s3 from '@aws-cdk/aws-s3'
 import { ApiKeySourceType, UsagePlanPerApiStage, ProxyResource } from '@aws-cdk/aws-apigateway';
+import { Effect, AnyPrincipal } from '@aws-cdk/aws-iam';
 
 export class SfMoveSubscriptionsStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
@@ -19,6 +20,20 @@ export class SfMoveSubscriptionsStack extends cdk.Stack {
       type: 'String',
       description: 'Stage',
     })
+
+    const officeIpRangeParameter = new cdk.CfnParameter(this, 'officeIpRange', {
+      type: 'String',
+      description: 'officeIpRange',
+    })
+
+    const salesForceIpRangesParameter = new cdk.CfnParameter(this, 'salesForceIpRanges', {
+      type: 'CommaDelimitedList',
+      description: 'salesForceIpRanges',
+    })
+
+    const allWhitelistedIps = Fn.split(',',
+      Fn.join(",", salesForceIpRangesParameter.valueAsList) + ',' +
+      officeIpRangeParameter.valueAsString)
 
     const appName = 'sf-move-subscriptions-api'
     const stackName = 'membership'
@@ -99,6 +114,27 @@ export class SfMoveSubscriptionsStack extends cdk.Stack {
     const createSfMoveSubscriptionsApi = (fn: lambda.IFunction) => {
       const apiStageName: string = context.resolve(stageParameter.valueAsString)
 
+      const apiResourcePolicy = new iam.PolicyDocument({
+        statements: [
+          new iam.PolicyStatement({
+            actions: ['execute-api:Invoke'],
+            principals: [new AnyPrincipal()],
+            resources: ['execute-api:/*/*/*'],
+          }),
+          new iam.PolicyStatement({
+            effect: Effect.DENY,
+            principals: [new AnyPrincipal()],
+            actions: ['execute-api:Invoke'],
+            resources: ['execute-api:/*/*/*'],
+            conditions: {
+              'NotIpAddress': {
+                "aws:SourceIp": allWhitelistedIps
+              }
+            }
+          })
+        ]
+      })
+
       const api = new apigateway.LambdaRestApi(
         this,
         appName,
@@ -111,6 +147,7 @@ export class SfMoveSubscriptionsStack extends cdk.Stack {
           deployOptions: {
             stageName: apiStageName,
           },
+          policy: apiResourcePolicy,
         })
 
       api.root.addMethod('ANY', new apigateway.LambdaIntegration(fn), { apiKeyRequired: true })
