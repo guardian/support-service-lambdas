@@ -25,7 +25,7 @@ object SFMoveSubscriptionsApiRoutes extends LazyLogging {
             zuoraSubscriptionId = "Zuora Subscription Id",
             sfAccountId = "SF Account Id",
             sfFullContactId = "SF Full contact Id",
-            identityId = "id from guardian identity service, if not set in SF send blank"
+            identityId = "id from guardian identity service, if not set in SF send blank value (empty string)"
           )
         )
       )
