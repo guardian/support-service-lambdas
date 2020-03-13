@@ -3,9 +3,9 @@ import * as apigateway from '@aws-cdk/aws-apigateway'
 import { Code } from '@aws-cdk/aws-lambda'
 import * as lambda from '@aws-cdk/aws-lambda'
 import * as iam from '@aws-cdk/aws-iam'
-import { Duration, Tag, Fn, Lazy } from '@aws-cdk/core'
+import { Duration, Tag, Fn } from '@aws-cdk/core'
 import * as s3 from '@aws-cdk/aws-s3'
-import { ApiKeySourceType, UsagePlanPerApiStage, ProxyResource } from '@aws-cdk/aws-apigateway';
+import { ApiKeySourceType } from '@aws-cdk/aws-apigateway';
 import { Effect, AnyPrincipal } from '@aws-cdk/aws-iam';
 
 export class SfMoveSubscriptionsStack extends cdk.Stack {
