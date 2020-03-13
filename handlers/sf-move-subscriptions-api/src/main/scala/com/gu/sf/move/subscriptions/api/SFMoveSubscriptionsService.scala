@@ -3,6 +3,7 @@ package com.gu.sf.move.subscriptions.api
 import cats.Monad
 import cats.data.EitherT
 import cats.implicits._
+import com.gu.zuora.Zuora.{accessTokenGetResponseV2, subscriptionGetResponse, updateAccountByMovingSubscription}
 import com.gu.zuora._
 import com.gu.zuora.subscription._
 import com.softwaremill.sttp._
@@ -19,8 +20,6 @@ case class FetchZuoraAccessTokenError(message: String) extends MoveSubscriptionS
 case class FetchZuoraSubscriptionError(message: String) extends MoveSubscriptionServiceError
 
 case class UpdateZuoraAccountError(message: String) extends MoveSubscriptionServiceError
-
-final case class MoveSubscriptionServiceError2(message: String)
 
 class SFMoveSubscriptionsService[F[_]: Monad](
   apiCfg: MoveSubscriptionApiConfig,
@@ -44,7 +43,6 @@ class SFMoveSubscriptionsService[F[_]: Monad](
       crmId = sfAccountId,
       sfContactId__c = sfFullContactId
     )
-    import Zuora.{accessTokenGetResponseV2, subscriptionGetResponse, updateAccountByMovingSubscription}
 
     (for {
       accessToken <- accessTokenGetResponseV2(ZuoraConfig, backend)
