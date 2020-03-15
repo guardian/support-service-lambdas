@@ -9,7 +9,7 @@
     "watch": "tsc -w",
     "test": "jest",
     "cdk": "cdk",
-    "synth": "cdk synth $project_name > ../handlers/$project_name/cfn.yaml"
+    "synth": "cdk synth $app_name > ../handlers/$app_name/cfn.yaml"
   },
   "devDependencies": {
     "@aws-cdk/assert": "1.27.0",
