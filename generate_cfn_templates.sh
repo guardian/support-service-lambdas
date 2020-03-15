@@ -2,8 +2,6 @@
 
 set -e
 
-
-
 build_cfn_template() {
     stack_param=$1
     stack=$stack_param npm run synth

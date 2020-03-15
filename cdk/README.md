@@ -1,8 +1,6 @@
-# Welcome to your CDK TypeScript project!
+# CDK TypeScript project to generate CloudFormation yaml files
 
-This is a blank project for TypeScript development with CDK.
-
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+The `cdk.json` file tells the CDK Toolkit how to execute the app.
 
 ## Useful commands
 
@@ -15,6 +13,10 @@ The `cdk.json` file tells the CDK Toolkit how to execute your app.
 
  ## To generate cfn.yaml
 
- `npm run synth`
+ `stack=<your-stack/api/project-name> npm run synth`
 
- that will create `cfn.yaml` file in `support-service-lambdas/handlers/sf-move-subscriptions-api/cfn.yaml`
+ that will create `cfn.yaml` file in `support-service-lambdas/handlers/<your-project-name>/cfn.yaml`
+
+ ## To generate cfn.yaml in all projects
+
+ ` ./generate_cfn_templates.sh`
