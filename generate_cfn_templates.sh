@@ -19,8 +19,8 @@ main() {
     pushd cdk
 
     npm install
-
     npm run build
+    npm run test
 
     build_cfn_template "sf-move-subscriptions-api"
 
