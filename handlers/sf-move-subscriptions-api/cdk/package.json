@@ -2,14 +2,14 @@
   "name": "cdk",
   "version": "0.1.0",
   "bin": {
-    "cdk": "bin/sf-move-subscriptions.js"
+    "cdk": "bin/support-service-lambdas-stacks.js"
   },
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
     "test": "jest",
     "cdk": "cdk",
-    "synth": "cdk synth > ../cfn.yaml"
+    "synth": "cdk synth $stack > ../cfn.yaml"
   },
   "devDependencies": {
     "@aws-cdk/assert": "1.27.0",
