@@ -10,6 +10,7 @@ import com.gu.util.config.ConfigReads.ConfigFailure
 import com.gu.util.config.LoadConfigModule
 import com.gu.util.zuora.{ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
 import com.gu.zuora.ZuoraHelper
+import com.gu.zuora.reports.aqua.ZuoraAquaRequestMaker
 import io.circe.parser.decode
 import io.circe.syntax._
 import io.circe.{Decoder, Encoder, Printer}
@@ -59,7 +60,7 @@ object Handler {
       zuoraSarConfig <- loadZuoraSarConfig[ZuoraSarConfig]
       zuoraRestConfig <- loadZuoraRestConfig[ZuoraRestConfig]
       requests = ZuoraRestRequestMaker(response, zuoraRestConfig)
-      downloadRequests = ZuoraRestRequestMaker(downloadResponse, zuoraRestConfig)
+      downloadRequests = ZuoraAquaRequestMaker(downloadResponse, zuoraRestConfig)
       zuoraQuerier = ZuoraQuery(requests)
       zuoraHelper = ZuoraHelper(requests, downloadRequests, zuoraQuerier)
     } yield {

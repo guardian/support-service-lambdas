@@ -41,7 +41,7 @@ case class ZuoraHelper(zuoraClient: Requests, zuoraDownloadClient: Requests, zuo
   }
 
   private def accountSummary(accountId: String): Either[ClientFailure, JsValue] =
-    zuoraClient.get[JsValue](s"accounts/$accountId/summaryy").toDisjunction
+    zuoraClient.get[JsValue](s"accounts/$accountId/summary").toDisjunction
 
   private def accountObj(accountId: String): Either[ClientFailure, JsValue] = {
     zuoraClient.get[JsValue](s"object/account/$accountId", WithoutCheck).toDisjunction
@@ -57,8 +57,8 @@ case class ZuoraHelper(zuoraClient: Requests, zuoraDownloadClient: Requests, zuo
   // invoices/invoiceId/files so this removes the duplication
   private def invoiceFileContents(pdfUrls: List[InvoicePdfUrl]): Either[ClientFailure, List[DownloadStream]] = {
     pdfUrls.traverse(pdfUrl => {
-      val urlSuffix = pdfUrl.pdfFileUrl.replace("/v1/", "")
-      zuoraDownloadClient.getDownloadStream(urlSuffix).toDisjunction
+      val fileIdUrl = pdfUrl.pdfFileUrl.replace("/v1/files/", "batch-query/file/")
+      zuoraDownloadClient.getDownloadStream(fileIdUrl).toDisjunction
     })
   }
 

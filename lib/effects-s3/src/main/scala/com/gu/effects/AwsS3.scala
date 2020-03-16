@@ -89,7 +89,7 @@ object CopyS3Objects extends LazyLogging {
 
   def copyObject(request: CopyObjectRequest): Try[CopyObjectResult] = {
     logger.info(
-      s"Copying file from ${request.getSourceBucketName} | ${request.getSourceKey} to ${request.getDestinationBucketName} | ${request.getDestinationBucketName}"
+      s"Copying file from ${request.getSourceBucketName} | ${request.getSourceKey} to ${request.getDestinationBucketName} | ${request.getDestinationKey}"
     )
     val copyRequest = Try(AwsS3.client.copyObject(request))
     copyRequest
