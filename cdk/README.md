@@ -11,13 +11,13 @@ The `cdk.json` file tells the CDK Toolkit how to execute the app.
  * `cdk diff`        compare deployed stack with current state
  * `cdk synth`       emits the synthesized CloudFormation template
 
- ## To generate cfn.yaml
+ ## To generate cdk-cfn.yaml
 
  `stack=<your-stack/api/project-name> npm run synth`
 
- that will create `cfn.yaml` file in `support-service-lambdas/handlers/<your-project-name>/cfn.yaml`
+ that will create `cdk-cfn.yaml` file in `support-service-lambdas/handlers/<your-project-name>/cdk-cfn.yaml`
 
- ## To generate cfn.yaml in all projects
+ ## To generate cdk-cfn.yaml in all projects
 
  ` ./generate_cfn_templates.sh`
 
