@@ -61,7 +61,7 @@ object S3Helper extends S3Service with LazyLogging {
       }
     }
 
-  private def createCompletedObject(keySuffix: String, initiationReference: String, config: ZuoraSarConfig): Either[S3Error, S3WriteSuccess] = {
+  def createCompletedObject(keySuffix: String, initiationReference: String, config: ZuoraSarConfig): Either[S3Error, S3WriteSuccess] = {
     val completedPath =s"${config.resultsPath}/$initiationReference/completed/$keySuffix"
     UploadToS3
       .putStringWithAcl(
@@ -86,16 +86,13 @@ object S3Helper extends S3Service with LazyLogging {
         } else {
           pendingKeys.traverse { pendingKey =>
             val completedKey = pendingKey.value.replace("pending", "completed")
-            logger.info("Copying objects from /pending to /completed.")
-            for {
-              _ <- CopyS3Objects
-                .copyStringWithAcl(
-                  S3Location(config.resultsBucket, pendingKey.value),
-                  S3Location(config.resultsBucket, completedKey),
-                  CannedAccessControlList.BucketOwnerRead).toEither.left.map(err => S3Error(err.getMessage))
-              _ <- createCompletedObject("ResultsCompleted", initiationReference, config)
-            } yield {}
+            CopyS3Objects
+              .copyStringWithAcl(
+                S3Location(config.resultsBucket, pendingKey.value),
+                S3Location(config.resultsBucket, completedKey),
+                CannedAccessControlList.BucketOwnerRead).toEither.left.map(err => S3Error(err.getMessage))
           }
+          createCompletedObject("ResultsCompleted", initiationReference, config)
         }.map(_ => S3WriteSuccess())
       }
     }
@@ -121,18 +118,14 @@ object S3Helper extends S3Service with LazyLogging {
     zuoraSarResponse: ZuoraAccountSuccess,
     config: ZuoraSarConfig): Either[S3Error, S3WriteSuccess] = {
     val resultsPath = s"${config.resultsPath}/$initiationId/pending/$randomUUID"
+    val accountDetails = Seq(zuoraSarResponse.accountSummary, zuoraSarResponse.accountObj).mkString("\n")
     logger.info("Uploading successful account result to S3.")
     for {
       _ <- UploadToS3
         .putStringWithAcl(
           S3Location(config.resultsBucket, resultsPath),
           CannedAccessControlList.BucketOwnerRead,
-          zuoraSarResponse.accountSummary.toString).toEither.left.map(err => S3Error(err.getMessage))
-      _ <- UploadToS3
-        .putStringWithAcl(
-          S3Location(config.resultsBucket, resultsPath),
-          CannedAccessControlList.BucketOwnerRead,
-          zuoraSarResponse.accountObj.toString).toEither.left.map(err => S3Error(err.getMessage))
+          accountDetails).toEither.left.map(err => S3Error(err.getMessage))
     } yield S3WriteSuccess()
   }
 

@@ -26,7 +26,6 @@ case class ZuoraPerformSarHandler(zuoraHelper: ZuoraHelper, zuoraSarConfig: Zuor
       for {
         downloadStreams <- zuoraHelper.invoicesResponse(accountInvoices.invoices)
         _ <- S3Helper.writeSuccessInvoiceResult(initiationReference, downloadStreams, zuoraSarConfig)
-        _ <- S3Helper.copyResultsToCompleted(initiationReference, zuoraSarConfig)
       } yield ()
     }
 
@@ -40,6 +39,7 @@ case class ZuoraPerformSarHandler(zuoraHelper: ZuoraHelper, zuoraSarConfig: Zuor
         for {
           invoiceIds <- processAccountDetails(contactList, request.initiationReference)
           _ <- processInvoicesForAllAccounts(invoiceIds, request.initiationReference)
+          _ <- S3Helper.copyResultsToCompleted(request.initiationReference, zuoraSarConfig)
         } yield Right({})
     }
   }
