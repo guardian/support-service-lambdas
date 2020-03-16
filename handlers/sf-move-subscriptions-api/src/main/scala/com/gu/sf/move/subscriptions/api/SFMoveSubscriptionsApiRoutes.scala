@@ -1,5 +1,6 @@
 package com.gu.sf.move.subscriptions.api
 
+import cats.data.EitherT
 import cats.effect.Effect
 import cats.implicits._
 import com.typesafe.scalalogging.LazyLogging
@@ -31,13 +32,13 @@ object SFMoveSubscriptionsApiRoutes extends LazyLogging {
       )
     )
 
-    def handleMoveRequest(request: Request[F], dryRun: Boolean = false): F[Response[F]] = {
+    def handleMoveRequest(request: Request[F], moveSubscriptionF: (MoveSubscriptionReqBody) => EitherT[F, MoveSubscriptionServiceError, MoveSubscriptionServiceSuccess]): F[Response[F]] = {
       (for {
         reqBody <- request.attemptAs[MoveSubscriptionReqBody]
           .leftMap { decodingFailure: DecodeFailure =>
             BadRequest(MoveSubscriptionApiError(s"Failed to decoded request body: $decodingFailure"))
           }
-        resp <- moveSubscriptionService.moveSubscription(reqBody, dryRun)
+        resp <- moveSubscriptionF(reqBody)
           .bimap(
             err => InternalServerError(MoveSubscriptionApiError(err.toString)),
             res => Ok(MoveSubscriptionApiSuccess(res.message))
@@ -48,9 +49,9 @@ object SFMoveSubscriptionsApiRoutes extends LazyLogging {
     HttpRoutes.of[F] {
       case GET -> Root => Ok(selfDoc)
       case request @ POST -> Root / "subscription" / "move" =>
-        handleMoveRequest(request)
+        handleMoveRequest(request, moveSubscriptionService.moveSubscription)
       case request @ POST -> Root / "subscription" / "move" / "dry-run" =>
-        handleMoveRequest(request, dryRun = true)
+        handleMoveRequest(request, moveSubscriptionService.moveSubscriptionDryRun)
     }
   }
 }
