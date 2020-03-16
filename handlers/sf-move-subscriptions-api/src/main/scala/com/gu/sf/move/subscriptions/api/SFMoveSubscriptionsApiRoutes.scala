@@ -16,18 +16,25 @@ object SFMoveSubscriptionsApiRoutes extends LazyLogging {
     object http4sDsl extends Http4sDsl[F]
     import http4sDsl._
 
+    val exampleReqBody = MoveSubscriptionReqBody(
+      zuoraSubscriptionId = "Zuora Subscription Id",
+      sfAccountId = "SF Account Id",
+      sfFullContactId = "SF Full contact Id",
+      identityId = "id from guardian identity service, if not set in SF send blank value (empty string)"
+    )
+
     val selfDoc = MoveSubscriptionApiRoot(
       description = "This is the sf-move-subscriptions-api",
       exampleRequests = List(
         ExampleReqDoc(
           method = "POST",
           path = "subscription/move",
-          body = MoveSubscriptionReqBody(
-            zuoraSubscriptionId = "Zuora Subscription Id",
-            sfAccountId = "SF Account Id",
-            sfFullContactId = "SF Full contact Id",
-            identityId = "id from guardian identity service, if not set in SF send blank value (empty string)"
-          )
+          body = exampleReqBody
+        ),
+        ExampleReqDoc(
+          method = "POST",
+          path = "subscription/move/dry-run",
+          body = exampleReqBody
         )
       )
     )
