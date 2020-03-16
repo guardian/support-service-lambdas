@@ -24,6 +24,7 @@ The `cdk.json` file tells the CDK Toolkit how to execute the app.
  ## How to add a new stack
 
  - add typescript code in `cdk/lib/` directory in `<app-name>-stack.ts` format
+ - add new stack instance in `cdk/bin/` example ```new TestAppStack(app, 'test-app');```
  - add unit tests in `cdk/test/` directory
  - add `generate_cfn_templates.sh` script main function a entry:
  -- `build_cfn_template "<app-name>"` app name need to match the handler folder name
