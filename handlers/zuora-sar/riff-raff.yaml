@@ -16,6 +16,5 @@ deployments:
       fileName: zuora-sar.jar
       bucket: support-service-lambdas-dist
       prefixStack: false
-      functionNames:
-      - zuora-sar-
+      functionNames: [zuora-baton-sar-lambda-, zuora-baton-perform-sar-lambda-]
     dependencies: [cfn]
