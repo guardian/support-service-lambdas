@@ -12,7 +12,7 @@ riffRaffPackageType := assembly.value
 riffRaffUploadArtifactBucket := Option("riffraff-artifact")
 riffRaffUploadManifestBucket := Option("riffraff-builds")
 riffRaffManifestProjectName := s"MemSub::Membership Admin::${name.value}"
-riffRaffArtifactResources += (file("handlers/sf-move-subscriptions-api/cfn.yaml"), "cfn/cfn.yaml")
+riffRaffArtifactResources += (file("handlers/sf-move-subscriptions-api/cdk-cfn.yaml"), "cfn/cdk-cfn.yaml")
 
 libraryDependencies ++= Seq(
   playJsonExtensions
