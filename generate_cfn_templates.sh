@@ -11,7 +11,7 @@ build_cfn_template() {
         printf "SUCCESS: synthesized of $app_name_param stack to $app_name_param/cfn.yaml file was successful"
     else
         printf "ERROR: synthesized of $app_name_param stack to $app_name_param/cfn.yaml file failed"
-        printf 1
+        exit 1
     fi
 }
 
