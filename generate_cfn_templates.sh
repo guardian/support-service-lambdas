@@ -24,7 +24,7 @@ main() {
 
     build_cfn_template "sf-move-subscriptions-api"
 
-    popd cdk
+    popd
 }
 
 main
