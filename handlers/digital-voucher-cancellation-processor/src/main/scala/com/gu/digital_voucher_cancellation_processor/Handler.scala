@@ -8,6 +8,6 @@ import scala.io.Source
 
 object Handler extends LazyLogging {
   def handle(is: InputStream, os: OutputStream): Unit = {
-    logger.info(s"Received Request: ${Source.fromInputStream(is).mkString("\n")}")
+    logger.info(s"Received Request: ${Source.fromInputStream(is).mkString}")
   }
 }
