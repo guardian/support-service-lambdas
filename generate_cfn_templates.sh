@@ -6,11 +6,11 @@ build_cfn_template() {
     app_name_param=$1
     app_name=$app_name_param npm run synth
 
-    if [[ -s ../handlers/$app_name_param/cfn.yaml ]]
+    if [[ -s ../handlers/$app_name_param/cdk-cfn.yaml ]]
     then
-        printf "SUCCESS: synthesized of $app_name_param stack to $app_name_param/cfn.yaml file was successful"
+        printf "SUCCESS: synthesized of $app_name_param stack to $app_name_param/cdk-cfn.yaml file was successful"
     else
-        printf "ERROR: synthesized of $app_name_param stack to $app_name_param/cfn.yaml file failed"
+        printf "ERROR: synthesized of $app_name_param stack to $app_name_param/cdk-cfn.yaml file failed"
         exit 1
     fi
 }
