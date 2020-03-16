@@ -9,6 +9,6 @@ riffRaffPackageType := assembly.value
 riffRaffUploadArtifactBucket := Option("riffraff-artifact")
 riffRaffUploadManifestBucket := Option("riffraff-builds")
 riffRaffManifestProjectName := s"MemSub::Membership Admin::${name.value}"
-riffRaffArtifactResources += (file(s"handlers/${name.value}/cfn.yaml"), "cfn/cfn.yaml")
+riffRaffArtifactResources += (file(s"handlers/${name.value}/cdk-cfn.yaml"), "cfn/cdk-cfn.yaml")
 
 assemblyMergeStrategyDiscardModuleInfo
