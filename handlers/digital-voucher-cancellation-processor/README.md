@@ -14,13 +14,13 @@ template [cfm.yaml](cfm.yaml) which is checked into the project so it is availab
 You can regenerate the [cfm.yaml](cfm.yaml) using the script:
 
 ```bash
-cdk/regenerate-cloud-formation.sh
+\<\<PROJECT ROOT\>\>/generate_cfn_templates.sh
 ```
 
 You can manually deploy the generated cloudformation template using the aws cli as follows:
 
 ```bash
- aws --profile membership cloudformation deploy --template-file ./cfn.yaml --stack-name membership-DEV-digital-voucher-cancellation-processor --parameter-overrides Stage=DEV --capabilities CAPABILITY_IAM
+ aws --profile membership cloudformation deploy --template-file ./cdk-cfn.yaml --stack-name membership-DEV-digital-voucher-cancellation-processor --parameter-overrides Stage=DEV --capabilities CAPABILITY_IAM
 ```
 
 #Config
