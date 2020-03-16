@@ -49,8 +49,8 @@ object S3Helper extends S3Service with LazyLogging {
         completedResults <- ListS3Objects.listObjectsWithPrefix(completedPath)
         failedResults <- ListS3Objects.listObjectsWithPrefix(failedPath)
         failedSarExists = failedResults.nonEmpty
+        completedFileExists = completedResults.exists(k => k.value.contains("ResultsCompleted") | k.value.contains("NoResultsFoundForUser"))
       } yield {
-        val completedFileExists = completedResults.exists(k => k.value.contains("ResultsCompleted"))
         if (failedSarExists) {
           S3FailedPathFound()
         } else if (completedFileExists) {
@@ -82,7 +82,7 @@ object S3Helper extends S3Service with LazyLogging {
       case Success(pendingKeys) => {
         if (pendingKeys.isEmpty) {
           logger.info("No results found in /pending. Creating NoResultsFoundForUser object.")
-          createCompletedObject("NoResultsFoundForUser.", initiationReference, config)
+          createCompletedObject("NoResultsFoundForUser", initiationReference, config)
         } else {
           pendingKeys.traverse { pendingKey =>
             val completedKey = pendingKey.value.replace("pending", "completed")
