@@ -20,6 +20,9 @@ trait ZuoraTestBackendMixin {
     identityId = "test-guardian-identity-id"
   )
 
+  protected val moveSubscriptionDryRunReq: MoveSubscriptionReqBody = moveSubscriptionReq
+    .copy(dryRun = true)
+
   private val sub = mkAnySubscription().copy(
     subscriptionNumber = moveSubscriptionReq.zuoraSubscriptionId,
     accountNumber = accountNumber

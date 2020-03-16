@@ -16,7 +16,7 @@ import org.scalatest.matchers.should
 
 class SFMoveSubscriptionsApiTest extends AnyFlatSpec with should.Matchers with DiffMatcher with ZuoraTestBackendMixin {
 
-  it should "return Success for move subscription request if all downstream calls were successful" in {
+  it should "return SUCCESS for move subscription request if all downstream calls were successful" in {
 
     val api = createApp(createZuoraBackendStub(
       oauthResponse = fetchAccessTokenSuccessRes,
@@ -103,6 +103,29 @@ class SFMoveSubscriptionsApiTest extends AnyFlatSpec with should.Matchers with D
     responseActual.status shouldEqual Status.InternalServerError
     getBody[MoveSubscriptionApiError](responseActual) should matchTo(MoveSubscriptionApiError(
       UpdateZuoraAccountError(updateAccountFailedRes.body.left.get).toString
+    ))
+  }
+
+  it should "return SUCCESS_DRY_RUN for move subscription dryRun request if all downstream calls were successful" in {
+
+    val api = createApp(createZuoraBackendStub(
+      oauthResponse = fetchAccessTokenSuccessRes,
+      getSubscriptionRes = fetchSubscriptionSuccessRes,
+      updateAccountRes = updateAccountSuccessRes
+    ))
+
+    val responseActual = api.run(
+      Request[IO](
+        method = Method.POST,
+        uri = Uri(path = "/subscription/move")
+      ).withEntity[String](
+          moveSubscriptionDryRunReq.asJson.spaces2
+        )
+    ).value.unsafeRunSync().get
+
+    responseActual.status shouldEqual Status.Ok
+    getBody[MoveSubscriptionApiSuccess](responseActual) should matchTo(MoveSubscriptionApiSuccess(
+      MoveSubscriptionAtZuoraAccountResponse("SUCCESS_DRY_RUN").toString
     ))
   }
 

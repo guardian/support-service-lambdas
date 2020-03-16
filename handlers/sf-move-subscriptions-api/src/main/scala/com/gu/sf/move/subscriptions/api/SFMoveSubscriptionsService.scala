@@ -65,7 +65,7 @@ class SFMoveSubscriptionsService[F[_]: Monad](
   ): ZuoraApiResponse[MoveSubscriptionAtZuoraAccountResponse] = {
     if (dryRun) {
       logger.info(s"dryRun=$dryRun, successfully created moveSubscriptionCommand: $moveSubCommand")
-      Right(MoveSubscriptionAtZuoraAccountResponse("SUCCESS"))
+      Right(MoveSubscriptionAtZuoraAccountResponse("SUCCESS_DRY_RUN"))
     } else {
       updateAccountByMovingSubscription(ZuoraConfig, accessToken, backend)(subscription, moveSubCommand)
     }
