@@ -141,7 +141,7 @@ Resources:
   DigitalVoucherCancellationProcessorSchedule5BB23F75:
     Type: AWS::Events::Rule
     Properties:
-      ScheduleExpression: cron(* * * * *)
+      ScheduleExpression: cron(* * * * ? *)
       State: ENABLED
       Targets:
         - Arn:

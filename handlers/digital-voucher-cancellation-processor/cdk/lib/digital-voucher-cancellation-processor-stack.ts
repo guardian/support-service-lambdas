@@ -96,7 +96,7 @@ export class DigitalVoucherCancellationProcessorStack extends cdk.Stack {
 
     const createDigitalVoucherCancellationProcessorSchedule = (lambdaFn: lambda.Function) => {
         const schedule = new events.Rule(this, 'DigitalVoucherCancellationProcessorSchedule', {
-          schedule: events.Schedule.expression('cron(* * * * *)')
+          schedule: events.Schedule.expression('cron(* * * * ? *)')
         });
 
         schedule.addTarget(new targets.LambdaFunction(digitalVoucherCancellationProcessorLambda));

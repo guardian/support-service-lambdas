@@ -17,6 +17,12 @@ You can regenerate the [cfm.yaml](cfm.yaml) using the script:
 cdk/regenerate-cloud-formation.sh
 ```
 
+You can manually deploy the generated cloudformation template using the aws cli as follows:
+
+```bash
+ aws --profile membership cloudformation deploy --template-file ./cfn.yaml --stack-name membership-DEV-digital-voucher-cancellation-processor --parameter-overrides Stage=DEV --capabilities CAPABILITY_IAM
+```
+
 #Config
 
 The configuration for this application is stored in the [aws parameter store](https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html).
