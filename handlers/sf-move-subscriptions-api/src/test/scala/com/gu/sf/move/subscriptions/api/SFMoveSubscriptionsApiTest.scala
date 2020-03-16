@@ -117,9 +117,9 @@ class SFMoveSubscriptionsApiTest extends AnyFlatSpec with should.Matchers with D
     val responseActual = api.run(
       Request[IO](
         method = Method.POST,
-        uri = Uri(path = "/subscription/move")
+        uri = Uri(path = "/subscription/move/dry-run")
       ).withEntity[String](
-          moveSubscriptionDryRunReq.asJson.spaces2
+          moveSubscriptionReq.asJson.spaces2
         )
     ).value.unsafeRunSync().get
 

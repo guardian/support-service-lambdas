@@ -34,7 +34,7 @@ class SFMoveSubscriptionsService[F[_]: Monad](
     )
   )
 
-  def moveSubscription(moveSubscriptionData: MoveSubscriptionReqBody): EitherT[F, MoveSubscriptionServiceError, MoveSubscriptionServiceSuccess] = {
+  def moveSubscription(moveSubscriptionData: MoveSubscriptionReqBody, dryRun: Boolean): EitherT[F, MoveSubscriptionServiceError, MoveSubscriptionServiceSuccess] = {
     import moveSubscriptionData._
 
     val moveSubCommand = ZuoraAccountMoveSubscriptionCommand(

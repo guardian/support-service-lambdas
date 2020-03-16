@@ -31,13 +31,13 @@ object SFMoveSubscriptionsApiRoutes extends LazyLogging {
       )
     )
 
-    def handleMoveRequest(request: Request[F]): F[Response[F]] = {
+    def handleMoveRequest(request: Request[F], dryRun: Boolean = false): F[Response[F]] = {
       (for {
         reqBody <- request.attemptAs[MoveSubscriptionReqBody]
           .leftMap { decodingFailure: DecodeFailure =>
             BadRequest(MoveSubscriptionApiError(s"Failed to decoded request body: $decodingFailure"))
           }
-        resp <- moveSubscriptionService.moveSubscription(reqBody)
+        resp <- moveSubscriptionService.moveSubscription(reqBody, dryRun)
           .bimap(
             err => InternalServerError(MoveSubscriptionApiError(err.toString)),
             res => Ok(MoveSubscriptionApiSuccess(res.message))
@@ -49,6 +49,8 @@ object SFMoveSubscriptionsApiRoutes extends LazyLogging {
       case GET -> Root => Ok(selfDoc)
       case request @ POST -> Root / "subscription" / "move" =>
         handleMoveRequest(request)
+      case request @ POST -> Root / "subscription" / "move" / "dry-run" =>
+        handleMoveRequest(request, dryRun = true)
     }
   }
 }

@@ -4,8 +4,7 @@ final case class MoveSubscriptionReqBody(
   zuoraSubscriptionId: String,
   sfAccountId: String,
   sfFullContactId: String,
-  identityId: String,
-  dryRun: Boolean = false
+  identityId: String
 )
 
 final case class MoveSubscriptionApiConfig(
