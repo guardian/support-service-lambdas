@@ -13,7 +13,7 @@ The `cdk.json` file tells the CDK Toolkit how to execute the app.
 
  ## To generate cdk-cfn.yaml
 
- `stack=<your-stack/api/project-name> npm run synth`
+ `stack=<your-app-name> npm run synth`
 
  that will create `cdk-cfn.yaml` file in `support-service-lambdas/handlers/<your-project-name>/cdk-cfn.yaml`
 
