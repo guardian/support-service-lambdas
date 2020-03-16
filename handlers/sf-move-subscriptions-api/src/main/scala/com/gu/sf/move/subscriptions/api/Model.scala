@@ -3,7 +3,8 @@ package com.gu.sf.move.subscriptions.api
 final case class MoveSubscriptionReqBody(
   zuoraSubscriptionId: String,
   sfAccountId: String,
-  sfFullContactId: String
+  sfFullContactId: String,
+  identityId: String
 )
 
 final case class MoveSubscriptionApiConfig(

@@ -10,6 +10,20 @@ All endpoints require...
 
 API have a self doc endpoint at root `/` which will display example req body for (`POST`) method
 
+endpoints:
+
+- `self doc` method=GET, path=`/`
+- `moving subscription` method=POST, path=`/subscription/move`, body=
+
+```json
+{
+   "zuoraSubscriptionId": "Zuora Subscription Id",
+   "sfAccountId": "SF Account Id",
+   "sfFullContactId": "SF Full contact Id",
+   "identityId": "id from guardian identity service, if not set in SF send blank value (empty string)"
+}
+```
+
 # how to generate/update cfn.yml by AWS CDK
 
 - go to /cdk

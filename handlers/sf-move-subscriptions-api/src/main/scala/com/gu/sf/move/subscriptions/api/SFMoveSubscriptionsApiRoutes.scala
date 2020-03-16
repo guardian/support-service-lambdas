@@ -11,7 +11,7 @@ import org.http4s.{DecodeFailure, HttpRoutes, Request, Response}
 
 object SFMoveSubscriptionsApiRoutes extends LazyLogging {
 
-  def apply[F[_] : Effect](moveSubscriptionService: SFMoveSubscriptionsService[F]): HttpRoutes[F] = {
+  def apply[F[_]: Effect](moveSubscriptionService: SFMoveSubscriptionsService[F]): HttpRoutes[F] = {
     object http4sDsl extends Http4sDsl[F]
     import http4sDsl._
 
@@ -25,6 +25,7 @@ object SFMoveSubscriptionsApiRoutes extends LazyLogging {
             zuoraSubscriptionId = "Zuora Subscription Id",
             sfAccountId = "SF Account Id",
             sfFullContactId = "SF Full contact Id",
+            identityId = "id from guardian identity service, if not set in SF send blank value (empty string)"
           )
         )
       )
@@ -36,16 +37,17 @@ object SFMoveSubscriptionsApiRoutes extends LazyLogging {
           .leftMap { decodingFailure: DecodeFailure =>
             BadRequest(MoveSubscriptionApiError(s"Failed to decoded request body: $decodingFailure"))
           }
-        resp <- moveSubscriptionService.moveSubscription(reqBody).bimap(
-          error => InternalServerError(MoveSubscriptionApiError(s"Failed to move subscription: $error")),
-          serviceRes => Ok(MoveSubscriptionApiSuccess(serviceRes.message))
-        )
+        resp <- moveSubscriptionService.moveSubscription(reqBody)
+          .bimap(
+            err => InternalServerError(MoveSubscriptionApiError(err.toString)),
+            res => Ok(MoveSubscriptionApiSuccess(res.message))
+          )
       } yield resp).merge.flatten
     }
 
     HttpRoutes.of[F] {
       case GET -> Root => Ok(selfDoc)
-      case request@POST -> Root / "subscription" / "move" =>
+      case request @ POST -> Root / "subscription" / "move" =>
         handleMoveRequest(request)
     }
   }
