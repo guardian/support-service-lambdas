@@ -1,0 +1,3 @@
+{
+  "app": "npx ts-node bin/digital-voucher-cancellation-processor.ts"
+}

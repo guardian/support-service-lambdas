@@ -266,6 +266,7 @@ lazy val root = all(project in file(".")).enablePlugins(RiffRaffArtifact).aggreg
   `zuora-core`,
   `credit-processor`,
   `digital-voucher-api`,
+  `digital-voucher-cancellation-processor`,
 ).dependsOn(zuora, handler, effectsDepIncludingTestFolder, `effects-sqs`, testDep)
 
 lazy val `identity-backfill` = all(project in file("handlers/identity-backfill")) // when using the "project identity-backfill" command it uses the lazy val name
@@ -409,6 +410,19 @@ lazy val `digital-voucher-api` = all(project in file("handlers/digital-voucher-a
       sttp,
       sttpCirce,
       sttpAsycHttpClientBackendCats,
+      scalatest,
+      simpleConfig,
+      diffx
+    )
+    ++ logging
+  )
+  .enablePlugins(RiffRaffArtifact)
+
+lazy val `digital-voucher-cancellation-processor` = all(project in file("handlers/digital-voucher-cancellation-processor"))
+  .dependsOn(`effects-s3`, `config-core`)
+  .settings(
+    libraryDependencies ++=
+    Seq(
       scalatest,
       simpleConfig,
       diffx
