@@ -10,8 +10,8 @@ import cats.instances.list._
 import cats.instances.either._
 
 case class ZuoraPerformSarHandler(zuoraHelper: ZuoraHelper, zuoraSarConfig: ZuoraSarConfig)
-    extends LazyLogging
-    with ZuoraHandler[SarRequest, SarResponse] {
+  extends LazyLogging
+  with ZuoraHandler[SarRequest, SarResponse] {
 
   def processAccountDetails(contacts: List[ZuoraContact], initiationReference: String): Either[ZuoraSarError, List[InvoiceIds]] =
     contacts.traverse { contact =>
@@ -29,8 +29,10 @@ case class ZuoraPerformSarHandler(zuoraHelper: ZuoraHelper, zuoraSarConfig: Zuor
       } yield ()
     }
 
-  def initiateSar(request: PerformSarRequest,
-                  context: Context): Either[ZuoraSarError, Unit] = {
+  def initiateSar(
+    request: PerformSarRequest,
+    context: Context
+  ): Either[ZuoraSarError, Unit] = {
     zuoraHelper.zuoraContactsWithEmail(request.subjectEmail).toDisjunction match {
       case Left(err) =>
         logger.error("Failed to perform subject access request to Zuora.")
@@ -44,8 +46,10 @@ case class ZuoraPerformSarHandler(zuoraHelper: ZuoraHelper, zuoraSarConfig: Zuor
     }
   }
 
-  override def handle(request: SarRequest,
-                      context: Context): IO[SarResponse] = {
+  override def handle(
+    request: SarRequest,
+    context: Context
+  ): IO[SarResponse] = {
     request match {
       case r: PerformSarRequest =>
         val res = initiateSar(r, context)
@@ -57,7 +61,8 @@ case class ZuoraPerformSarHandler(zuoraHelper: ZuoraHelper, zuoraSarConfig: Zuor
         }
       case _ =>
         throw new RuntimeException(
-          "Unable to retrieve email and initiation reference from request.")
+          "Unable to retrieve email and initiation reference from request."
+        )
     }
   }
 }

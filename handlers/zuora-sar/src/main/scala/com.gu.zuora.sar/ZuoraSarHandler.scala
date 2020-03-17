@@ -11,8 +11,8 @@ import io.circe.syntax._
 import circeCodecs._
 
 case class ZuoraSarHandler(zuoraSarConfig: ZuoraSarConfig)
-    extends LazyLogging
-    with ZuoraHandler[SarRequest, SarResponse] {
+  extends LazyLogging
+  with ZuoraHandler[SarRequest, SarResponse] {
 
   def initiate(initiateRequest: SarInitiateRequest): IO[SarInitiateResponse] = {
 
@@ -36,7 +36,7 @@ case class ZuoraSarHandler(zuoraSarConfig: ZuoraSarConfig)
       case S3CompletedPathFound(resultLocations) =>
         SarStatusResponse(Completed, Some(resultLocations))
       case S3FailedPathFound() => SarStatusResponse(Failed)
-      case S3NoResultsFound()  => SarStatusResponse(Pending)
+      case S3NoResultsFound() => SarStatusResponse(Pending)
     }
   }
 

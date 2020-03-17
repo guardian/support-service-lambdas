@@ -19,7 +19,7 @@ sealed trait S3Response extends ZuoraSarSuccess
 sealed trait S3StatusResponse
 
 case class S3CompletedPathFound(resultLocations: List[String])
-    extends S3StatusResponse
+  extends S3StatusResponse
 
 case class S3FailedPathFound() extends S3StatusResponse
 
@@ -39,8 +39,9 @@ trait S3Service {
 object S3Helper extends S3Service with LazyLogging {
 
   override def checkForResults(
-      initiationId: String,
-      config: ZuoraSarConfig): IO[S3StatusResponse] =
+    initiationId: String,
+    config: ZuoraSarConfig
+  ): IO[S3StatusResponse] =
     IO.fromTry {
       val completedPath = S3Path(BucketName(config.resultsBucket), Some(Key(s"${config.resultsPath}/$initiationId/completed/")))
       val failedPath = S3Path(BucketName(config.resultsBucket), Some(Key(s"${config.resultsPath}/$initiationId/failed/")))
@@ -62,16 +63,16 @@ object S3Helper extends S3Service with LazyLogging {
     }
 
   def createCompletedObject(keySuffix: String, initiationReference: String, config: ZuoraSarConfig): Either[S3Error, S3WriteSuccess] = {
-    val completedPath =s"${config.resultsPath}/$initiationReference/completed/$keySuffix"
+    val completedPath = s"${config.resultsPath}/$initiationReference/completed/$keySuffix"
     UploadToS3
       .putStringWithAcl(
         S3Location(config.resultsBucket, completedPath),
         CannedAccessControlList.BucketOwnerRead,
         ""
       ) match {
-      case Failure(err) => Left(S3Error(err.getMessage))
-      case Success(_) => Right(S3WriteSuccess())
-    }
+          case Failure(err) => Left(S3Error(err.getMessage))
+          case Success(_) => Right(S3WriteSuccess())
+        }
   }
 
   def copyResultsToCompleted(initiationReference: String, config: ZuoraSarConfig): Either[S3Error, S3WriteSuccess] = {
@@ -90,7 +91,8 @@ object S3Helper extends S3Service with LazyLogging {
               .copyStringWithAcl(
                 S3Location(config.resultsBucket, pendingKey.value),
                 S3Location(config.resultsBucket, completedKey),
-                CannedAccessControlList.BucketOwnerRead).toEither.left.map(err => S3Error(err.getMessage))
+                CannedAccessControlList.BucketOwnerRead
+              ).toEither.left.map(err => S3Error(err.getMessage))
           }
           createCompletedObject("ResultsCompleted", initiationReference, config)
         }.map(_ => S3WriteSuccess())
@@ -99,24 +101,27 @@ object S3Helper extends S3Service with LazyLogging {
   }
 
   override def writeFailedResult(
-      initiationId: String,
-      zuoraError: ZuoraSarError,
-      config: ZuoraSarConfig): Either[S3Error, S3WriteSuccess] = {
+    initiationId: String,
+    zuoraError: ZuoraSarError,
+    config: ZuoraSarConfig
+  ): Either[S3Error, S3WriteSuccess] = {
     val resultsPath = s"${config.resultsPath}/$initiationId/failed/$randomUUID"
     logger.info("Uploading file to failed path in S3.")
     UploadToS3.putStringWithAcl(
       S3Location(config.resultsBucket, resultsPath),
       CannedAccessControlList.BucketOwnerRead,
-      zuoraError.toString) match {
-      case Failure(err) => Left(S3Error(err.getMessage))
-      case Success(_) => Right(S3WriteSuccess())
-    }
+      zuoraError.toString
+    ) match {
+        case Failure(err) => Left(S3Error(err.getMessage))
+        case Success(_) => Right(S3WriteSuccess())
+      }
   }
 
   override def writeSuccessAccountResult(
     initiationId: String,
     zuoraSarResponse: ZuoraAccountSuccess,
-    config: ZuoraSarConfig): Either[S3Error, S3WriteSuccess] = {
+    config: ZuoraSarConfig
+  ): Either[S3Error, S3WriteSuccess] = {
     val resultsPath = s"${config.resultsPath}/$initiationId/pending/$randomUUID"
     val accountDetails = Seq(zuoraSarResponse.accountSummary, zuoraSarResponse.accountObj).mkString("\n")
     logger.info("Uploading successful account result to S3.")
@@ -125,14 +130,16 @@ object S3Helper extends S3Service with LazyLogging {
         .putStringWithAcl(
           S3Location(config.resultsBucket, resultsPath),
           CannedAccessControlList.BucketOwnerRead,
-          accountDetails).toEither.left.map(err => S3Error(err.getMessage))
+          accountDetails
+        ).toEither.left.map(err => S3Error(err.getMessage))
     } yield S3WriteSuccess()
   }
 
   override def writeSuccessInvoiceResult(
-      initiationId: String,
-      zuoraInvoiceStreams: List[DownloadStream],
-      config: ZuoraSarConfig): Either[S3Error, List[S3WriteSuccess]] = {
+    initiationId: String,
+    zuoraInvoiceStreams: List[DownloadStream],
+    config: ZuoraSarConfig
+  ): Either[S3Error, List[S3WriteSuccess]] = {
     logger.info("Uploading successful invoice results to S3.")
     zuoraInvoiceStreams.traverse { invoiceStream =>
       val metadata = new ObjectMetadata()

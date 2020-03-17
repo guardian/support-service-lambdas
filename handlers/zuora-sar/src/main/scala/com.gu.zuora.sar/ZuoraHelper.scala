@@ -30,7 +30,6 @@ case class ZuoraHelperError(message: String)
 
 case class ZuoraHelper(zuoraClient: Requests, zuoraDownloadClient: Requests, zuoraQuerier: ZuoraQuerier) extends LazyLogging {
 
-
   implicit val readsC = Json.reads[ZuoraContact]
 
   def zuoraContactsWithEmail(emailAddress: String): ClientFailableOp[List[ZuoraContact]] = {

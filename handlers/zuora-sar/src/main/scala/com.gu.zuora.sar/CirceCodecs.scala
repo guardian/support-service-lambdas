@@ -16,18 +16,21 @@ object circeCodecs {
         case unrecognisedProvider: String =>
           throw new ParsingFailure(
             s"invalid data provider : $unrecognisedProvider",
-            null)
+            null
+          )
       }
 
       cursor.downField("action").as[String].flatMap {
-        case "status"   => cursor.as[SarStatusRequest]
+        case "status" => cursor.as[SarStatusRequest]
         case "initiate" => cursor.as[SarInitiateRequest]
-        case "perform"  => cursor.as[PerformSarRequest]
+        case "perform" => cursor.as[PerformSarRequest]
       }
     }
 
-  private def addAdditionalFields(response: JsonObject,
-                                  action: String): Json =
+  private def addAdditionalFields(
+    response: JsonObject,
+    action: String
+  ): Json =
     response
       .add("action", action.asJson)
       .add("requestType", "SAR".asJson)
@@ -35,9 +38,9 @@ object circeCodecs {
 
   implicit val batonTaskStatusEncoder: Encoder[BatonTaskStatus] =
     Encoder.encodeString.contramap {
-      case Pending   => "pending"
+      case Pending => "pending"
       case Completed => "completed"
-      case Failed    => "failed"
+      case Failed => "failed"
     }
 
   implicit val sarResponseEncoder: Encoder[SarResponse] = Encoder.instance {

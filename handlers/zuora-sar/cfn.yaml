@@ -35,6 +35,65 @@ Resources:
                             Action:
                             - lambda:InvokeFunction
                             Resource: !GetAtt ZuoraBatonSarLambda.Arn
+
+    ZuoraBatonSarLambdaRole:
+        Type: AWS::IAM::Role
+        Properties:
+            AssumeRolePolicyDocument:
+                Statement:
+                    - Effect: Allow
+                      Principal:
+                          Service:
+                             - lambda.amazonaws.com
+                      Action:
+                          - sts:AssumeRole
+            Path: /
+            Policies:
+                - PolicyName: InvokeLambdaPolicy
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                            - lambda:InvokeFunction
+                            Resource: !Ref PerformZuoraSarLambda
+                - PolicyName: S3ListPolicy
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                            - s3:ListBucket
+                            Resource: !Sub arn:aws:s3:::${SarResultsBucket}
+
+    PerformZuoraSarLambdaRole:
+        Type: AWS::IAM::Role
+        Properties:
+            AssumeRolePolicyDocument:
+                Statement:
+                    - Effect: Allow
+                      Principal:
+                          Service:
+                             - lambda.amazonaws.com
+                      Action:
+                          - sts:AssumeRole
+            Path: /
+            Policies:
+                - PolicyName: S3ListPolicy
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                            - s3:ListBucket
+                            Resource: !Sub arn:aws:s3:::${SarResultsBucket}
+                - PolicyName: S3PutPolicy
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                            - s3:PutObject
+                            - s3:PutObjectAcl
+                            - s3:GetObject
+                            Resource: !Sub arn:aws:s3:::${SarResultsBucket}/zuora-results/${Stage}/*
+
 #    LambdaSecurityGroup:
 #        Type: AWS::EC2::SecurityGroup
 #        Properties:
@@ -60,21 +119,8 @@ Resources:
 #            VpcConfig:
 #                SecurityGroupIds: !Ref LambdaSecurityGroup
 #                SubnetIds: !Ref VpcSubnets
-            Policies:
-                - PolicyName: S3ListPolicy
-                  PolicyDocument:
-                      Statement:
-                          - Effect: Allow
-                            Action:
-                            - s3:ListBucket
-                            Resource: !Sub arn:aws:s3:::${SarResultsBucket}
-                - PolicyName: InvokeLambdaPolicy
-                  PolicyDocument:
-                      Statement:
-                          - Effect: Allow
-                            Action:
-                            - lambda:InvokeFunction
-                            Resource: !Ref PerformZuoraSarLambda
+            Role:
+              !GetAtt ZuoraBatonSarLambdaRole.Arn
 
     PerformZuoraSarLambda:
         Type: AWS::Lambda::Function
@@ -95,20 +141,6 @@ Resources:
 #            VpcConfig:
 #                SecurityGroupIds: !Ref LambdaSecurityGroup
 #                SubnetIds: !Ref VpcSubnets
-            Policies:
-                - PolicyName: S3ListPolicy
-                  PolicyDocument:
-                      Statement:
-                          - Effect: Allow
-                            Action:
-                                - s3:ListBucket
-                            Resource: !Sub arn:aws:s3:::${SarResultsBucket}
-                - PolicyName: S3ListPolicy
-                  PolicyDocument:
-                      Statement:
-                          - Effect: Allow
-                            Action:
-                                - s3:PutObject
-                                - s3:PutObjectAcl
-                                - s3:GetObject
-                            Resource: !Sub arn:aws:s3:::${SarResultsBucket}/zuora-results/${Stage}/*
+            Role:
+              !GetAtt PerformZuoraSarLambdaRole.Arn
+
