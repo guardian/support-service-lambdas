@@ -368,7 +368,7 @@ lazy val `metric-push-api` = all(project in file("handlers/metric-push-api"))
   .dependsOn()
 
 lazy val `sf-move-subscriptions-api` = all(project in file("handlers/sf-move-subscriptions-api"))
-  .dependsOn(`effects-s3`, `config-core`, `config-cats`, `zuora-core`)
+  .dependsOn(`effects-s3`, `config-cats`, `zuora-core`)
   .settings(
     libraryDependencies ++=
       Seq(
@@ -399,7 +399,7 @@ lazy val `delivery-records-api` = all(project in file("handlers/delivery-records
   .enablePlugins(RiffRaffArtifact)
 
 lazy val `digital-voucher-api` = all(project in file("handlers/digital-voucher-api"))
-  .dependsOn(`effects-s3`, `config-core`, `config-cats`)
+  .dependsOn(`effects-s3`, `config-cats`)
   .settings(
     libraryDependencies ++=
     Seq(
