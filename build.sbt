@@ -186,6 +186,11 @@ lazy val `effects-ses` = all(project in file("lib/effects-ses"))
 
 lazy val `config-core` = all(project in file("lib/config-core"))
 
+lazy val `config-cats` = all(project in file("lib/config-cats"))
+  .settings(
+    libraryDependencies ++= Seq(simpleConfig, catsEffect, circe, circeConfig)
+  )
+
 val effectsDepIncludingTestFolder: ClasspathDependency = effects % "compile->compile;test->test"
 
 lazy val `zuora-reports` = all(project in file("lib/zuora-reports"))
@@ -419,7 +424,7 @@ lazy val `digital-voucher-api` = all(project in file("handlers/digital-voucher-a
   .enablePlugins(RiffRaffArtifact)
 
 lazy val `digital-voucher-cancellation-processor` = all(project in file("handlers/digital-voucher-cancellation-processor"))
-  .dependsOn(`effects-s3`, `config-core`)
+  .dependsOn(`effects-s3`, `config-cats`, `salesforce-sttp-client`, `salesforce-sttp-test-stub` % Test)
   .settings(
     libraryDependencies ++=
     Seq(
