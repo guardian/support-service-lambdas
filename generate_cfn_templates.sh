@@ -23,6 +23,7 @@ main() {
     npm run test
 
     build_cfn_template "sf-move-subscriptions-api"
+    build_cfn_template "digital-voucher-cancellation-processor"
 
     popd
 }

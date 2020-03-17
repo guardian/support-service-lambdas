@@ -6,21 +6,19 @@ This processor co-ordinates the cancellation of digital voucher redemption via t
 
 This project uses cdk typescript to create cloud formation for the processor. For more detail see:
 
-[https://docs.aws.amazon.com/cdk/latest/guide/home.html](https://docs.aws.amazon.com/cdk/latest/guide/home.html)
- 
-Currently riff-raff does not natively support cdk. So an interim measure cdk is used to generate a cloudformation 
-template [cfm.yaml](cfm.yaml) which is checked into the project so it is available to riff-raff.
+* [https://docs.aws.amazon.com/cdk/latest/guide/home.html](https://docs.aws.amazon.com/cdk/latest/guide/home.html)
+* [../../cdk/README.md](../../cdk/README.md)
 
-You can regenerate the [cfm.yaml](cfm.yaml) using the script:
+You can generate the clouformation template cdk-cfm.yaml using the script:
 
 ```bash
-cdk/regenerate-cloud-formation.sh
+\<\<PROJECT ROOT\>\>/generate_cfn_templates.sh
 ```
 
 You can manually deploy the generated cloudformation template using the aws cli as follows:
 
 ```bash
- aws --profile membership cloudformation deploy --template-file ./cfn.yaml --stack-name membership-DEV-digital-voucher-cancellation-processor --parameter-overrides Stage=DEV --capabilities CAPABILITY_IAM
+ aws --profile membership cloudformation deploy --template-file ./cdk-cfn.yaml --stack-name membership-DEV-digital-voucher-cancellation-processor --parameter-overrides Stage=DEV --capabilities CAPABILITY_IAM
 ```
 
 #Config
