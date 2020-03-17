@@ -55,7 +55,9 @@ object EmailBatch {
       repeatDeliveryProblem: String,
       issuesAffected: String,
       deliveries: List[WireDelivery],
-      typeOfProblem: String
+      typeOfProblem: String,
+      currencySymbol: String,
+      caseNumber: String
     )
     case class WireDelivery(
       Case__c: String,
@@ -149,10 +151,12 @@ object EmailBatch {
           // Delivery Problem
           delivery_problem_action = emailBatchPayload.delivery_problem.map(_.actionTaken),
           delivery_problem_total_affected = emailBatchPayload.delivery_problem.map(_.issuesAffected),
-          delivery_problem_affected_dates = emailBatchPayload.delivery_problem.map(_.deliveries.map(_.Delivery_Date__c).mkString(", ")),
+          delivery_problem_affected_dates = emailBatchPayload.delivery_problem.map(_.deliveries.map(d => fromSfDateToDisplayDate(d.Delivery_Date__c)).mkString(", ")),
           delivery_problem_total_credit = emailBatchPayload.delivery_problem.map(_.totalCreditAmount),
-          delivery_problem_invoice_date = emailBatchPayload.delivery_problem.flatMap(_.deliveries.map(_.Invoice_Date__c).headOption),
+          delivery_problem_invoice_date = emailBatchPayload.delivery_problem.flatMap(_.deliveries.map(_.Invoice_Date__c).headOption.map(fromSfDateToDisplayDate)),
           delivery_problem_type = emailBatchPayload.delivery_problem.map(_.typeOfProblem),
+          delivery_problem_currency_symbol = emailBatchPayload.delivery_problem.map(_.currencySymbol),
+          delivery_problem_case_number = emailBatchPayload.delivery_problem.map(_.caseNumber),
         ),
         object_name = wireEmailBatchItem.object_name
       )
@@ -204,7 +208,9 @@ case class EmailBatchItemPayload(
   delivery_problem_total_credit: Option[String] = None,
   delivery_problem_invoice_date: Option[String] = None,
   delivery_problem_type: Option[String] = None,
-  delivery_problem_affected_dates: Option[String] = None
+  delivery_problem_affected_dates: Option[String] = None,
+  delivery_problem_currency_symbol: Option[String] = None,
+  delivery_problem_case_number: Option[String] = None,
 )
 
 case class EmailBatchItem(payload: EmailBatchItemPayload, object_name: String)

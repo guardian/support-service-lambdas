@@ -35,7 +35,9 @@ case class EmailPayloadSubscriberAttributes(
   delivery_problem_affected_dates: Option[String] = None,
   delivery_problem_total_credit: Option[String] = None,
   delivery_problem_invoice_date: Option[String] = None, // Invoice_Date__c Is it the same for multiple issues ?
-  delivery_problem_type: Option[String] = None, // No delivery | Damaged paper
+  delivery_problem_type: Option[String] = None, // No delivery | Damaged paper,
+  delivery_problem_currency_symbol: Option[String] = None,
+  delivery_problem_case_number: Option[String] = None,
 )
 case class EmailPayloadDigitalVoucher(barcode_url: String)
 case class EmailPayloadStoppedCreditSummary(credit_amount: Double, credit_date: String)
@@ -88,7 +90,9 @@ object EmailToSend {
           delivery_problem_affected_dates = emailBatchItem.payload.delivery_problem_affected_dates,
           delivery_problem_total_credit = emailBatchItem.payload.delivery_problem_total_credit,
           delivery_problem_invoice_date = emailBatchItem.payload.delivery_problem_invoice_date,
-          delivery_problem_type = emailBatchItem.payload.delivery_problem_type
+          delivery_problem_type = emailBatchItem.payload.delivery_problem_type,
+          delivery_problem_currency_symbol = emailBatchItem.payload.delivery_problem_currency_symbol,
+          delivery_problem_case_number = emailBatchItem.payload.delivery_problem_case_number,
         )
       )
     )
