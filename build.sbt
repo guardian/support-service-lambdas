@@ -402,7 +402,7 @@ lazy val `delivery-records-api` = all(project in file("handlers/delivery-records
   .enablePlugins(RiffRaffArtifact)
 
 lazy val `digital-voucher-api` = all(project in file("handlers/digital-voucher-api"))
-  .dependsOn(`effects-s3`, `config-core`)
+  .dependsOn(`effects-s3`, `config-core`, `config-cats`)
   .settings(
     libraryDependencies ++=
     Seq(
@@ -410,13 +410,10 @@ lazy val `digital-voucher-api` = all(project in file("handlers/digital-voucher-a
       http4sDsl,
       http4sCirce,
       http4sServer,
-      circe,
-      circeConfig,
       sttp,
       sttpCirce,
       sttpAsycHttpClientBackendCats,
       scalatest,
-      simpleConfig,
       diffx
     )
     ++ logging
