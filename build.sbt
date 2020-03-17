@@ -368,7 +368,7 @@ lazy val `metric-push-api` = all(project in file("handlers/metric-push-api"))
   .dependsOn()
 
 lazy val `sf-move-subscriptions-api` = all(project in file("handlers/sf-move-subscriptions-api"))
-  .dependsOn(`effects-s3`, `config-core`, `zuora-core`)
+  .dependsOn(`effects-s3`, `config-core`, `config-cats`, `zuora-core`)
   .settings(
     libraryDependencies ++=
       Seq(
@@ -376,13 +376,10 @@ lazy val `sf-move-subscriptions-api` = all(project in file("handlers/sf-move-sub
         http4sDsl,
         http4sCirce,
         http4sServer,
-        circe,
-        circeConfig,
         sttp,
         sttpCirce,
         sttpAsycHttpClientBackendCats,
         scalatest,
-        simpleConfig,
         diffx
       ) ++ logging
   )
