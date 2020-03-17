@@ -309,7 +309,7 @@ lazy val `zuora-retention` = all(project in file("handlers/zuora-retention"))
 lazy val `zuora-sar` = all(project in file("handlers/zuora-sar"))
   .settings(libraryDependencies ++= Seq(catsEffect, circeParser, circe, awsStepFunction))
   .enablePlugins(RiffRaffArtifact)
-  .dependsOn(zuora, `zuora-reports`, handler, effectsDepIncludingTestFolder, testDep, `effects-s3`, `effects-lambda`)
+  .dependsOn(`zuora-reports`, handler, effectsDepIncludingTestFolder, testDep, `effects-s3`, `effects-lambda`)
 
 lazy val `sf-contact-merge` = all(project in file("handlers/sf-contact-merge"))
   .enablePlugins(RiffRaffArtifact)

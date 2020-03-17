@@ -24,13 +24,13 @@ object AwsLambda {
 
   val client = AWSLambdaClient
     .builder()
-    .withCredentials(aws.CredentialsProvider)
+    .withCredentials(awsCredentials.CredentialsProvider)
     .withRegion(Regions.EU_WEST_1)
     .build()
 
 }
 
-object aws {
+object awsCredentials {
   val ProfileName = "membership"
 
   lazy val CredentialsProvider = new AWSCredentialsProviderChain(
