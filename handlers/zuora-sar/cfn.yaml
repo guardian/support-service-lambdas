@@ -55,7 +55,7 @@ Resources:
                           - Effect: Allow
                             Action:
                             - lambda:InvokeFunction
-                            Resource: !Ref PerformZuoraSarLambda
+                            Resource: !GetAtt PerformZuoraSarLambda.Arn
                 - PolicyName: S3ListPolicy
                   PolicyDocument:
                       Statement:
