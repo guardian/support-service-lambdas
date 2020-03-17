@@ -1,8 +1,8 @@
 package com.gu.test
 import com.gu.digitalSubscriptionExpiry.emergencyToken.EmergencyTokensConfig
 import com.gu.effects.GetFromS3
-import com.gu.identity.{IdentityConfig, IdentityTestUserConfig}
-import com.gu.salesforce.{SFAuthConfig, SFAuthTestConfig}
+import com.gu.identity.IdentityConfig
+import com.gu.salesforce.SFAuthConfig
 import com.gu.salesforce.SalesforceReads._
 import com.gu.util.apigateway.Auth.TrustedApiConfig
 import com.gu.util.config._
@@ -39,28 +39,12 @@ class S3ConfigFilesEffectsTest extends FlatSpec with Matchers {
     validate[IdentityConfig](PROD)
   }
 
-  it should "successfully parse CODE Salesforce NORMAL config" taggedAs EffectsTest in {
+  it should "successfully parse CODE Salesforce config" taggedAs EffectsTest in {
     validate[SFAuthConfig](CODE)(SFAuthConfig.location, sfAuthConfigReads)
   }
 
-  it should "successfully parse PROD Salesforce NORMAL config" taggedAs EffectsTest in {
+  it should "successfully parse PROD Salesforce config" taggedAs EffectsTest in {
     validate[SFAuthConfig](PROD)(SFAuthConfig.location, sfAuthConfigReads)
-  }
-
-  it should "successfully parse CODE Salesforce TEST config" taggedAs EffectsTest in {
-    validate[SFAuthConfig](CODE)(SFAuthTestConfig.location, sfAuthConfigReads)
-  }
-
-  it should "successfully parse PROD Salesforce TEST config" taggedAs EffectsTest in {
-    validate[SFAuthConfig](PROD)(SFAuthTestConfig.location, sfAuthConfigReads)
-  }
-
-  it should "successfully parse CODE identity 'test-user' config" taggedAs EffectsTest in {
-    validate[IdentityTestUserConfig](CODE)
-  }
-
-  it should "successfully parse PROD identity 'test-user' config" taggedAs EffectsTest in {
-    validate[IdentityTestUserConfig](PROD)
   }
 
   it should "successfully parse CODE Stripe config" taggedAs EffectsTest in {

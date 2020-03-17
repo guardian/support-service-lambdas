@@ -148,7 +148,7 @@ lazy val s3ConfigValidator = all(project in file("lib/s3ConfigValidator"))
     `digital-subscription-expiry`,
     `identity-backfill`,
     effectsDepIncludingTestFolder,
-    `cancellation-sf-cases`,
+    `cancellation-sf-cases-api`,
     `sf-gocardless-sync`,
     `holiday-stop-api`
   )
@@ -241,7 +241,7 @@ lazy val root = all(project in file(".")).enablePlugins(RiffRaffArtifact).aggreg
   `zuora-retention`,
   `zuora-sar`,
   `sf-contact-merge`,
-  `cancellation-sf-cases`,
+  `cancellation-sf-cases-api`,
   `sf-gocardless-sync`,
   `holiday-stop-api`,
   effects,
@@ -266,12 +266,14 @@ lazy val root = all(project in file(".")).enablePlugins(RiffRaffArtifact).aggreg
   `holiday-stop-processor`,
   `delivery-problem-credit-processor`,
   `metric-push-api`,
+  `sf-move-subscriptions-api`,
   `fulfilment-date-calculator`,
   `delivery-records-api`,
   `fulfilment-dates`,
   `zuora-core`,
   `credit-processor`,
   `digital-voucher-api`,
+  `digital-voucher-cancellation-processor`,
 ).dependsOn(zuora, handler, effectsDepIncludingTestFolder, `effects-sqs`, testDep)
 
 lazy val `identity-backfill` = all(project in file("handlers/identity-backfill")) // when using the "project identity-backfill" command it uses the lazy val name
@@ -313,7 +315,7 @@ lazy val `sf-contact-merge` = all(project in file("handlers/sf-contact-merge"))
   .enablePlugins(RiffRaffArtifact)
   .dependsOn(zuora, `salesforce-client` % "compile->compile;test->test", handler, effectsDepIncludingTestFolder, testDep)
 
-lazy val `cancellation-sf-cases` = all(project in file("handlers/cancellation-sf-cases"))
+lazy val `cancellation-sf-cases-api` = all(project in file("handlers/cancellation-sf-cases-api"))
   .enablePlugins(RiffRaffArtifact)
   .dependsOn(`salesforce-client`, handler, effectsDepIncludingTestFolder, testDep)
 
@@ -372,6 +374,27 @@ lazy val `metric-push-api` = all(project in file("handlers/metric-push-api"))
   .enablePlugins(RiffRaffArtifact)
   .dependsOn()
 
+lazy val `sf-move-subscriptions-api` = all(project in file("handlers/sf-move-subscriptions-api"))
+  .dependsOn(`effects-s3`, `config-core`, `zuora-core`)
+  .settings(
+    libraryDependencies ++=
+      Seq(
+        http4sLambda,
+        http4sDsl,
+        http4sCirce,
+        http4sServer,
+        circe,
+        circeConfig,
+        sttp,
+        sttpCirce,
+        sttpAsycHttpClientBackendCats,
+        scalatest,
+        simpleConfig,
+        diffx
+      ) ++ logging
+  )
+  .enablePlugins(RiffRaffArtifact)
+
 lazy val `fulfilment-date-calculator` = all(project in file("handlers/fulfilment-date-calculator"))
   .enablePlugins(RiffRaffArtifact)
   .dependsOn(testDep, `fulfilment-dates`)
@@ -399,6 +422,19 @@ lazy val `digital-voucher-api` = all(project in file("handlers/digital-voucher-a
       sttp,
       sttpCirce,
       sttpAsycHttpClientBackendCats,
+      scalatest,
+      simpleConfig,
+      diffx
+    )
+    ++ logging
+  )
+  .enablePlugins(RiffRaffArtifact)
+
+lazy val `digital-voucher-cancellation-processor` = all(project in file("handlers/digital-voucher-cancellation-processor"))
+  .dependsOn(`effects-s3`, `config-core`)
+  .settings(
+    libraryDependencies ++=
+    Seq(
       scalatest,
       simpleConfig,
       diffx

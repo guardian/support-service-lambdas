@@ -101,5 +101,11 @@ The main project aggregates all the sub projects from handlers and lib, so we ca
 |  [identity-retention](handlers/identity-retention)                   | Is user recurring?                            |
 |  [zuora-retention](handlers/zuora-retention)                         | Exclude long cancelled subscriptions from DL  |
 |  [sf-gocardless-sync](handlers/sf-gocardless-sync)                   | Polling lambda keeping SalesForce in sync with GoCardless  |
-|  [cancellation-sf-cases](handlers/cancellation-sf-cases)             | API for creating Cases in SalesForce to track self-service cancellation |
+|  [cancellation-sf-cases-api](handlers/cancellation-sf-cases-api)     | API for creating/updating Cases in Salesforce to track self-service cancellation |
+|  [holiday-stop-api](handlers/holiday-stop-api)                       | API for CRUD of Holiday Stop Requests in Salesforce |
+|  [delivery-records-api](handlers/delivery-records-api)               | API for reading Delivery records and creating delivery problems Cases in Salesforce |
 |  [lib](lib)                                                          | Shared code                                   |
+
+## Generating CloudFormation templates:
+
+See the [docs](./cdk/README.md) for setup and running guides.

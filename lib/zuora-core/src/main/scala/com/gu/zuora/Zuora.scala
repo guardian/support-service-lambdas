@@ -5,17 +5,42 @@ import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
 import io.circe.generic.auto._
 
+case class ZuoraAccountMoveSubscriptionCommand(
+  crmId: String,
+  sfContactId__c: String,
+  IdentityId__c: String
+)
+
+case class MoveSubscriptionAtZuoraAccountResponse(message: String)
+
 object Zuora {
+
+  /**
+   * for legacy calls when Oauth is hardcoded to holidayStopProcessor
+   * and read from S3 file where holidayStopProcessor is a field in json config
+   * *
+   */
   def accessTokenGetResponse(
-    config: ZuoraConfig,
+    config: HolidayStopProcessorZuoraConfig,
+    backend: SttpBackend[Id, Nothing]
+  ): ZuoraApiResponse[AccessToken] = {
+    val genericConfig = ZuoraRestOauthConfig(
+      baseUrl = config.baseUrl,
+      oauth = config.holidayStopProcessor.oauth
+    )
+    accessTokenGetResponseV2(genericConfig, backend)
+  }
+
+  def accessTokenGetResponseV2(
+    config: ZuoraRestOauthConfig,
     backend: SttpBackend[Id, Nothing]
   ): ZuoraApiResponse[AccessToken] = {
     implicit val b: SttpBackend[Id, Nothing] = backend
     sttp.post(uri"${config.baseUrl.stripSuffix("/v1")}/oauth/token")
       .body(
         "grant_type" -> "client_credentials",
-        "client_id" -> s"${config.holidayStopProcessor.oauth.clientId}",
-        "client_secret" -> s"${config.holidayStopProcessor.oauth.clientSecret}"
+        "client_id" -> s"${config.oauth.clientId}",
+        "client_secret" -> s"${config.oauth.clientSecret}"
       )
       .response(asJson[AccessToken])
       .mapResponse(_.left.map(e => ZuoraApiFailure(e.message)))
@@ -70,4 +95,31 @@ object Zuora {
       .joinRight
   }
 
+  def updateAccountByMovingSubscription(
+    config: ZuoraConfig,
+    accessToken: AccessToken,
+    backend: SttpBackend[Id, Nothing]
+  )(
+    subscription: Subscription,
+    updateCommandData: ZuoraAccountMoveSubscriptionCommand
+  ): ZuoraApiResponse[MoveSubscriptionAtZuoraAccountResponse] = {
+    implicit val b: SttpBackend[Id, Nothing] = backend
+    val errMsg = (reason: String) => s"Failed to update subscription '${subscription.subscriptionNumber}' " +
+      s"with $updateCommandData. Reason: $reason"
+    sttp.put(uri"${config.baseUrl}/accounts/${subscription.accountNumber}")
+      .header("Authorization", s"Bearer ${accessToken.access_token}")
+      .body(updateCommandData)
+      .response(asJson[ZuoraStatusResponse])
+      .mapResponse {
+        case Left(e) => Left(ZuoraApiFailure(errMsg(e.message)))
+        case Right(status) =>
+          if (status.success) {
+            Right(MoveSubscriptionAtZuoraAccountResponse("SUCCESS"))
+          } else Left(ZuoraApiFailure(errMsg(status.reasons.map(_.mkString).getOrElse(""))))
+      }
+      .send()
+      .body
+      .left.map(ZuoraApiFailure)
+      .joinRight
+  }
 }

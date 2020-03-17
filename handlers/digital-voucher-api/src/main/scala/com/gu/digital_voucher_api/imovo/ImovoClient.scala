@@ -7,7 +7,7 @@ import java.time.format.DateTimeFormatter
 import cats.data.EitherT
 import cats.effect.Sync
 import cats.implicits._
-import com.gu.digital_voucher_api.{CampaignCode, ImovoClientException, SfSubscriptionId}
+import com.gu.digital_voucher_api.{SchemeName, SfSubscriptionId}
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
 import com.typesafe.scalalogging.LazyLogging
@@ -15,19 +15,35 @@ import io.circe.generic.auto._
 import io.circe.parser._
 import io.circe.{Decoder, Encoder}
 
-case class ImovoVoucherResponse(voucherCode: String, successfulRequest: Boolean)
+case class ImovoVoucherResponse(subscriptionType: String, voucherCode: String)
+case class ImovoSubscriptionResponse(
+  schemeName: String,
+  subscriptionId: String,
+  successfulRequest: Boolean,
+  subscriptionVouchers: List[ImovoVoucherResponse]
+)
 case class ImovoErrorResponse(errorMessages: List[String], successfulRequest: Boolean)
-case class ImovoDeleteResponse(successfulRequest: Boolean)
-case class ImovoUpdateResponse(successfulRequest: Boolean)
+case class ImovoSuccessResponse(message: String, successfulRequest: Boolean)
+
+case class ImovoClientException(message: String)
+sealed trait ImovoSubscriptionType {
+  def value: String
+}
+object ImovoSubscriptionType {
+  case object ActiveCard extends ImovoSubscriptionType { override def value: String = "ActiveCard" }
+  case object ActiveLetter extends ImovoSubscriptionType { override def value: String = "ActiveLetter" }
+  case object Both extends ImovoSubscriptionType { override def value: String = "Both" }
+}
 
 trait ImovoClient[F[_]] {
-  def createVoucher(
+  def createSubscriptionVoucher(
     subscriptionId: SfSubscriptionId,
-    campaignCode: CampaignCode,
+    schemeName: SchemeName,
     startDate: LocalDate
-  ): EitherT[F, ImovoClientException, ImovoVoucherResponse]
-  def replaceVoucher(voucherCode: String): EitherT[F, ImovoClientException, ImovoVoucherResponse]
-  def updateVoucher(voucherCode: String, expiryDate: LocalDate): EitherT[F, ImovoClientException, Unit]
+  ): EitherT[F, ImovoClientException, ImovoSubscriptionResponse]
+  def getSubscriptionVoucher(voucherCode: String): EitherT[F, ImovoClientException, ImovoSubscriptionResponse]
+  def replaceSubscriptionVoucher(subscriptionId: SfSubscriptionId, subscriptionType: ImovoSubscriptionType): EitherT[F, ImovoClientException, ImovoSubscriptionResponse]
+  def cancelSubscriptionVoucher(subscriptionId: SfSubscriptionId, lastActiveDay: LocalDate): EitherT[F, ImovoClientException, ImovoSuccessResponse]
 }
 
 object ImovoClient extends LazyLogging {
@@ -95,40 +111,54 @@ object ImovoClient extends LazyLogging {
 
     new ImovoClient[F] {
 
-      override def createVoucher(
+      override def createSubscriptionVoucher(
         subscriptionId: SfSubscriptionId,
-        campaignCode: CampaignCode,
+        schemeName: SchemeName,
         startDate: LocalDate
-      ): EitherT[F, ImovoClientException, ImovoVoucherResponse] =
-        sendAuthenticatedRequest[ImovoVoucherResponse, String](
+      ): EitherT[F, ImovoClientException, ImovoSubscriptionResponse] =
+        sendAuthenticatedRequest[ImovoSubscriptionResponse, String](
           apiKey,
           Method.GET,
-          Uri(new URI(s"$baseUrl//VoucherRequest/Request"))
-            .param("customerReference", subscriptionId.value)
-            .param("campaignCode", campaignCode.value)
-            .param("StartDate", startDate.toString),
+          Uri(new URI(s"$baseUrl/Subscription/RequestSubscriptionVouchers"))
+            .param("SubscriptionId", subscriptionId.value)
+            .param("SchemeName", schemeName.value)
+            .param("StartDate", imovoDateFormat.format(startDate)),
           None
         )
 
-      override def replaceVoucher(voucherCode: String): EitherT[F, ImovoClientException, ImovoVoucherResponse] = {
-        sendAuthenticatedRequest[ImovoVoucherResponse, String](
+      override def getSubscriptionVoucher(subscriptionId: String): EitherT[F, ImovoClientException, ImovoSubscriptionResponse] = {
+        sendAuthenticatedRequest[ImovoSubscriptionResponse, String](
           apiKey,
           Method.GET,
-          Uri(new URI(s"$baseUrl//Subscription/ReplaceVoucher")).param("VoucherCode", voucherCode),
+          Uri(new URI(s"$baseUrl/Subscription/GetSubscriptionVoucherDetails"))
+            .param("SubscriptionId", subscriptionId),
           None
         )
       }
 
-      override def updateVoucher(voucherCode: String, expiryDate: LocalDate): EitherT[F, ImovoClientException, Unit] = {
-        sendAuthenticatedRequest[ImovoUpdateResponse, String](
+      override def replaceSubscriptionVoucher(
+        subscriptionId: SfSubscriptionId,
+        subscriptionType: ImovoSubscriptionType
+      ): EitherT[F, ImovoClientException, ImovoSubscriptionResponse] = {
+        sendAuthenticatedRequest[ImovoSubscriptionResponse, String](
           apiKey,
           Method.GET,
-          Uri(new URI(s"$baseUrl/Voucher/Update/"))
-            .param("VoucherCode", voucherCode)
-            .param("ExpiryDate", imovoDateFormat.format(expiryDate)),
+          Uri(new URI(s"$baseUrl/Subscription/ReplaceVoucherBySubscriptionId"))
+            .param("SubscriptionId", subscriptionId.value)
+            .param("SubscriptionType", subscriptionType.value),
           None
-        ).map(_ => ())
+        )
       }
+
+      override def cancelSubscriptionVoucher(subscriptionId: SfSubscriptionId, lastActiveDay: LocalDate): EitherT[F, ImovoClientException, ImovoSuccessResponse] =
+        sendAuthenticatedRequest[ImovoSuccessResponse, String](
+          apiKey,
+          Method.GET,
+          Uri(new URI(s"$baseUrl/Subscription/CancelSubscriptionVoucher"))
+            .param("SubscriptionId", subscriptionId.value)
+            .param("LastActiveDay", imovoDateFormat.format(lastActiveDay)),
+          None
+        )
     }.asRight[ImovoClientException].toEitherT[F]
   }
 }

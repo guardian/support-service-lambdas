@@ -13,10 +13,14 @@ All endpoints require...
 
 | Method | Endpoint | Body | Response | Description |
 | --- | --- | --- | --- | --- |
-| GET | `/{STAGE}/digital-voucher/\<SALESFORCE_SUBSCRIPTION_ID\> | | {"cardCode":"\<Imovo Card Code\>","letterCode":"\<Imovo Letter Code\>"} | Returns the Imovo digital subscription associated with the salesforce subscription id |
-| PUT | `/{STAGE}/digital-voucher/create/\<SALESFORCE_SUBSCRIPTION_ID\> | {"ratePlanName":"\<subscription rate plan name\>"} | {"cardCode":"\<Imovo Card Code\>","letterCode":"\<Imovo Letter Code\>"} | Creates an Imovo digital subscription or returns the details of the subscription if it already exists |
-| POST | `/{STAGE}/digital-voucher/replace | {"cardCode":"\<Imovo Card Code\>","letterCode":"\<Imovo Letter Code\>"} | {"cardCode":"\<Imovo Card Code\>","letterCode":"\<Imovo Letter Code\>"} | Forces an Imovo a new digital subscription invalidating the existing subscription associated with the salesforce subscription id |
-| DELETE | `/{STAGE}/digital-voucher/\<SALESFORCE_SUBSCRIPTION_ID\> |  | | Deletes an Imovo digital subscription |
+| GET | /{STAGE}/digital-voucher/\<SALESFORCE_SUBSCRIPTION_ID\> | | {"cardCode":"\<Imovo Card Code\>","letterCode":"\<Imovo Letter Code\>"} | Returns the Imovo digital subscription associated with the salesforce subscription id |
+| PUT | /{STAGE}/digital-voucher/create/\<SALESFORCE_SUBSCRIPTION_ID\> | {"ratePlanName":"\<subscription rate plan name\>"} | {"cardCode":"\<Imovo Card Code\>","letterCode":"\<Imovo Letter Code\>"} | Creates an Imovo digital subscription or returns the details of the subscription if it already exists |
+| POST | /{STAGE}/digital-voucher/replace | {"cardCode":"\<Imovo Card Code\>","letterCode":"\<Imovo Letter Code\>"} | {"cardCode":"\<Imovo Card Code\>","letterCode":"\<Imovo Letter Code\>"} | Forces an Imovo a new digital subscription invalidating the existing subscription associated with the salesforce subscription id |
+| DELETE | /{STAGE}/digital-voucher/\<SALESFORCE_SUBSCRIPTION_ID\> |  | | Deletes an Imovo digital subscription |
+| PUT | /{STAGE}/digital-voucher/\<SALESFORCE_SUBSCRIPTION_ID\> | {"ratePlanName":"\<subscription rate plan name\>"} | {"cardCode":"\<Imovo Card Code\>","letterCode":"\<Imovo Letter Code\>"} | Creates an Imovo digital subscription or returns the details of the subscription if it already exists |
+| GET | /{STAGE}/digital-voucher/\<SALESFORCE_SUBSCRIPTION_ID\> |  | {"cardCode":"\<Imovo Card Code\>","letterCode":"\<Imovo Letter Code\>"} | Gets the details of the Imovo digital subscription |
+| POST | /{STAGE}/digital-voucher/replace | {"subscriptionId":"\<SALESFORCE_SUBSCRIPTION_ID\>"} | {"cardCode":"\<Imovo Card Code\>","letterCode":"\<Imovo Letter Code\>"} | Forces an Imovo to create a new digital subscription invalidating the existing vouchers associated with the salesforce subscription id |
+| POST | /{STAGE}/digital-voucher/cancel | {"subscriptionId":"\<SALESFORCE_SUBSCRIPTION_ID\>" ,"cancellationDate":"yyy-MM-dd"} | {} | Cancels an Imovo subscription either immediately or on the cancellationDate if one is supplied |
 
 Config
 ======
