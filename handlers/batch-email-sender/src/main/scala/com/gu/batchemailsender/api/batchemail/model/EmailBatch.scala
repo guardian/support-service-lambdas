@@ -63,7 +63,7 @@ object EmailBatch {
       Case__c: String,
       Name: String,
       Delivery_Date__c: String,
-      Invoice_Date__c: String
+      Invoice_Date__c: Option[String]
     )
 
     implicit val holidayStopCreditDetailReads = Json.reads[WireHolidayStopCreditSummary]
@@ -153,7 +153,7 @@ object EmailBatch {
           delivery_problem_total_affected = emailBatchPayload.delivery_problem.map(_.issuesAffected),
           delivery_problem_affected_dates = emailBatchPayload.delivery_problem.map(_.deliveries.map(d => fromSfDateToDisplayDate(d.Delivery_Date__c)).mkString(", ")),
           delivery_problem_total_credit = emailBatchPayload.delivery_problem.map(_.totalCreditAmount),
-          delivery_problem_invoice_date = emailBatchPayload.delivery_problem.flatMap(_.deliveries.map(_.Invoice_Date__c).headOption.map(fromSfDateToDisplayDate)),
+          delivery_problem_invoice_date = emailBatchPayload.delivery_problem.flatMap(_.deliveries.flatMap(_.Invoice_Date__c).headOption.map(fromSfDateToDisplayDate)),
           delivery_problem_type = emailBatchPayload.delivery_problem.map(_.typeOfProblem),
           delivery_problem_currency_symbol = emailBatchPayload.delivery_problem.map(_.currencySymbol),
           delivery_problem_case_number = emailBatchPayload.delivery_problem.map(_.caseNumber),
