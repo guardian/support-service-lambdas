@@ -13,7 +13,8 @@ case class DigitalVoucherCancellationProcessorError(message: String)
 
 object DigitalVoucherCancellationProcessor extends LazyLogging {
 
-  private case class SubscriptionQueryRecord(Id: String, `SF_Subscription__r.Id`: String)
+  private case class DigitalVoucherQueryRecord(Id: String, SF_Subscription__r: SubscriptionQueryRecord)
+  private case class SubscriptionQueryRecord(Id: String)
 
   def apply[F[_]: Monad](salesforceClient: SalesforceClient[F], clock: Clock):  EitherT[F, DigitalVoucherCancellationProcessorError, Unit] = {
     for {

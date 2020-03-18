@@ -1,10 +1,11 @@
 package com.gu.digital_voucher_cancellation_processor
 
-import java.io.{InputStream, OutputStream}
+import java.io.{ByteArrayOutputStream, InputStream, OutputStream}
 
 import com.gu.AppIdentity
 import com.typesafe.scalalogging.LazyLogging
 import cats.implicits._
+import com.amazonaws.util.StringInputStream
 
 import scala.io.Source
 
@@ -16,5 +17,9 @@ object Handler extends LazyLogging {
       .unsafeRunSync()
       .valueOr(error => throw new RuntimeException(error.toString))
     logger.info(s"Processor ran successfully")
+  }
+
+  def main(args: Array[String]): Unit = {
+    handle(new StringInputStream(""), new ByteArrayOutputStream())
   }
 }

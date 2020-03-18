@@ -12,12 +12,14 @@ import com.gu.util.config.ConfigLoader
 import com.softwaremill.sttp.{HttpURLConnectionBackend, Id, SttpBackend}
 import io.circe.generic.auto._
 import com.softwaremill.sttp.impl.cats.implicits._
+import com.typesafe.scalalogging.LazyLogging
 
 case class DigitalVoucherCancellationProcessorAppError(message: String)
 
-case class DigitalVoucherCancellationProcessorConfig(salesforceConfig: SFAuthConfig)
+case class ImovoConfig(imovoBaseUrl: String, imovoApiKey: String)
+case class DigitalVoucherCancellationProcessorConfig(imovo: ImovoConfig, salesforce: SFAuthConfig)
 
-object DigitalVoucherCancellationProcessorApp {
+object DigitalVoucherCancellationProcessorApp extends LazyLogging {
   def apply(appIdentity: AppIdentity): EitherT[IO, DigitalVoucherCancellationProcessorAppError, Unit] = {
     apply(appIdentity, urlConnectionSttpBackend(), Clock.systemDefaultZone())
   }
@@ -27,7 +29,7 @@ object DigitalVoucherCancellationProcessorApp {
       config <- ConfigLoader
         .loadConfig[F, DigitalVoucherCancellationProcessorConfig](appIdentity)
         .leftMap(error => DigitalVoucherCancellationProcessorAppError(s"Failed to load config: ${error.message}"))
-      salesforceClient <- SalesforceClient(sttpBackend, config.salesforceConfig)
+      salesforceClient <- SalesforceClient(sttpBackend, config.salesforce)
         .leftMap(error => DigitalVoucherCancellationProcessorAppError(s"Failed to create salesforce client: ${error.message}"))
       result <- DigitalVoucherCancellationProcessor(salesforceClient, clock)
         .leftMap(error => DigitalVoucherCancellationProcessorAppError(s"Failed to execute cancellation processor: ${error.message}"))
