@@ -105,3 +105,7 @@ The main project aggregates all the sub projects from handlers and lib, so we ca
 |  [holiday-stop-api](handlers/holiday-stop-api)                       | API for CRUD of Holiday Stop Requests in Salesforce |
 |  [delivery-records-api](handlers/delivery-records-api)               | API for reading Delivery records and creating delivery problems Cases in Salesforce |
 |  [lib](lib)                                                          | Shared code                                   |
+
+## Generating CloudFormation templates:
+
+See the [docs](./cdk/README.md) for setup and running guides.

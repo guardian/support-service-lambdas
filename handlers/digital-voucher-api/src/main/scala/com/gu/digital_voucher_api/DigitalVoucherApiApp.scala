@@ -5,14 +5,18 @@ import cats.implicits._
 import cats.effect.{ContextShift, IO}
 import com.gu.AppIdentity
 import com.gu.digital_voucher_api.imovo.ImovoClient
+import com.gu.util.config.ConfigLoader
 import com.softwaremill.sttp.SttpBackend
 import com.softwaremill.sttp.asynchttpclient.cats.AsyncHttpClientCatsBackend
 import com.typesafe.scalalogging.LazyLogging
 import org.http4s.HttpRoutes
 import org.http4s.server.middleware.Logger
 import org.http4s.util.CaseInsensitiveString
+import io.circe.generic.auto._
 
 final case class DigitalVoucherApiError(message: String)
+
+case class DigitalVoucherApiConfig(imovoBaseUrl: String, imovoApiKey: String)
 
 object DigitalVoucherApiApp extends LazyLogging {
 
@@ -25,7 +29,7 @@ object DigitalVoucherApiApp extends LazyLogging {
   def apply[S](appIdentity: AppIdentity, backend: SttpBackend[IO, S]): EitherT[IO, DigitalVoucherApiError, HttpRoutes[IO]] = {
     for {
       config <- ConfigLoader
-        .loadConfig[IO](appIdentity: AppIdentity)
+        .loadConfig[IO, DigitalVoucherApiConfig](appIdentity: AppIdentity)
         .leftMap(error => DigitalVoucherApiError(error.toString))
       imovoClient <- ImovoClient(backend, config.imovoBaseUrl, config.imovoApiKey)
         .leftMap(error => DigitalVoucherApiError(error.toString))

@@ -7,6 +7,7 @@ import com.gu.zuora.Zuora.{accessTokenGetResponseV2, subscriptionGetResponse, up
 import com.gu.zuora._
 import com.gu.zuora.subscription._
 import com.softwaremill.sttp._
+import com.typesafe.scalalogging.LazyLogging
 
 final case class MoveSubscriptionServiceSuccess(message: String)
 
@@ -23,7 +24,7 @@ case class UpdateZuoraAccountError(message: String) extends MoveSubscriptionServ
 class SFMoveSubscriptionsService[F[_]: Monad](
   apiCfg: MoveSubscriptionApiConfig,
   backend: SttpBackend[Id, Nothing]
-) {
+) extends LazyLogging {
 
   private val ZuoraConfig = ZuoraRestOauthConfig(
     baseUrl = apiCfg.zuoraBaseUrl,
@@ -34,6 +35,17 @@ class SFMoveSubscriptionsService[F[_]: Monad](
   )
 
   def moveSubscription(moveSubscriptionData: MoveSubscriptionReqBody): EitherT[F, MoveSubscriptionServiceError, MoveSubscriptionServiceSuccess] = {
+    moveSubscriptionInternal(moveSubscriptionData, updateAccountByMovingSubscriptionRun)
+  }
+
+  def moveSubscriptionDryRun(moveSubscriptionData: MoveSubscriptionReqBody): EitherT[F, MoveSubscriptionServiceError, MoveSubscriptionServiceSuccess] = {
+    moveSubscriptionInternal(moveSubscriptionData, updateAccountByMovingSubscriptionDryRun)
+  }
+
+  private def moveSubscriptionInternal(
+    moveSubscriptionData: MoveSubscriptionReqBody,
+    updateAccountByMovingSubscription: (AccessToken, SttpBackend[Id, Nothing]) => (Subscription, ZuoraAccountMoveSubscriptionCommand) => ZuoraApiResponse[MoveSubscriptionAtZuoraAccountResponse]
+  ): EitherT[F, MoveSubscriptionServiceError, MoveSubscriptionServiceSuccess] = {
     import moveSubscriptionData._
 
     val moveSubCommand = ZuoraAccountMoveSubscriptionCommand(
@@ -47,12 +59,28 @@ class SFMoveSubscriptionsService[F[_]: Monad](
         .leftMap[MoveSubscriptionServiceError](err => FetchZuoraAccessTokenError(err.reason))
       subscription <- subscriptionGetResponse(ZuoraConfig, accessToken, backend)(SubscriptionName(zuoraSubscriptionId))
         .leftMap(err => FetchZuoraSubscriptionError(err.reason))
-      updateRes <- updateAccountByMovingSubscription(ZuoraConfig, accessToken, backend)(subscription, moveSubCommand)
+      updateRes <- updateAccountByMovingSubscription(accessToken, backend)(subscription, moveSubCommand)
         .leftMap(err => UpdateZuoraAccountError(err.reason))
     } yield updateRes)
       .toEitherT[F]
       .map(res => MoveSubscriptionServiceSuccess(res.toString))
   }
+
+  private def updateAccountByMovingSubscriptionDryRun(accessToken: AccessToken, backend: SttpBackend[Id, Nothing])(
+    subscription: Subscription,
+    moveSubCommand: ZuoraAccountMoveSubscriptionCommand
+  ): ZuoraApiResponse[MoveSubscriptionAtZuoraAccountResponse] = {
+    logger.info(s"DRY_RUN, successfully created moveSubscriptionCommand: $moveSubCommand")
+    Right(MoveSubscriptionAtZuoraAccountResponse("SUCCESS_DRY_RUN"))
+  }
+
+  private def updateAccountByMovingSubscriptionRun(accessToken: AccessToken, backend: SttpBackend[Id, Nothing])(
+    subscription: Subscription,
+    moveSubCommand: ZuoraAccountMoveSubscriptionCommand
+  ): ZuoraApiResponse[MoveSubscriptionAtZuoraAccountResponse] = {
+    updateAccountByMovingSubscription(ZuoraConfig, accessToken, backend)(subscription, moveSubCommand)
+  }
+
 }
 
 object SFMoveSubscriptionsService {

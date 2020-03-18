@@ -1,5 +1,6 @@
 package com.gu.sf.move.subscriptions.api
 
+import cats.data.EitherT
 import cats.effect.Effect
 import cats.implicits._
 import com.typesafe.scalalogging.LazyLogging
@@ -15,29 +16,36 @@ object SFMoveSubscriptionsApiRoutes extends LazyLogging {
     object http4sDsl extends Http4sDsl[F]
     import http4sDsl._
 
+    val exampleReqBody = MoveSubscriptionReqBody(
+      zuoraSubscriptionId = "Zuora Subscription Id",
+      sfAccountId = "SF Account Id",
+      sfFullContactId = "SF Full contact Id",
+      identityId = "id from guardian identity service, if not set in SF send blank value (empty string)"
+    )
+
     val selfDoc = MoveSubscriptionApiRoot(
       description = "This is the sf-move-subscriptions-api",
       exampleRequests = List(
         ExampleReqDoc(
           method = "POST",
           path = "subscription/move",
-          body = MoveSubscriptionReqBody(
-            zuoraSubscriptionId = "Zuora Subscription Id",
-            sfAccountId = "SF Account Id",
-            sfFullContactId = "SF Full contact Id",
-            identityId = "id from guardian identity service, if not set in SF send blank value (empty string)"
-          )
+          body = exampleReqBody
+        ),
+        ExampleReqDoc(
+          method = "POST",
+          path = "subscription/move/dry-run",
+          body = exampleReqBody
         )
       )
     )
 
-    def handleMoveRequest(request: Request[F]): F[Response[F]] = {
+    def handleMoveRequest(request: Request[F], moveSubscriptionF: (MoveSubscriptionReqBody) => EitherT[F, MoveSubscriptionServiceError, MoveSubscriptionServiceSuccess]): F[Response[F]] = {
       (for {
         reqBody <- request.attemptAs[MoveSubscriptionReqBody]
           .leftMap { decodingFailure: DecodeFailure =>
             BadRequest(MoveSubscriptionApiError(s"Failed to decoded request body: $decodingFailure"))
           }
-        resp <- moveSubscriptionService.moveSubscription(reqBody)
+        resp <- moveSubscriptionF(reqBody)
           .bimap(
             err => InternalServerError(MoveSubscriptionApiError(err.toString)),
             res => Ok(MoveSubscriptionApiSuccess(res.message))
@@ -48,7 +56,9 @@ object SFMoveSubscriptionsApiRoutes extends LazyLogging {
     HttpRoutes.of[F] {
       case GET -> Root => Ok(selfDoc)
       case request @ POST -> Root / "subscription" / "move" =>
-        handleMoveRequest(request)
+        handleMoveRequest(request, moveSubscriptionService.moveSubscription)
+      case request @ POST -> Root / "subscription" / "move" / "dry-run" =>
+        handleMoveRequest(request, moveSubscriptionService.moveSubscriptionDryRun)
     }
   }
 }

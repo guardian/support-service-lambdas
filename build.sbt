@@ -186,6 +186,11 @@ lazy val `effects-ses` = all(project in file("lib/effects-ses"))
 
 lazy val `config-core` = all(project in file("lib/config-core"))
 
+lazy val `config-cats` = all(project in file("lib/config-cats"))
+  .settings(
+    libraryDependencies ++= Seq(simpleConfig, catsEffect, circe, circeConfig)
+  )
+
 val effectsDepIncludingTestFolder: ClasspathDependency = effects % "compile->compile;test->test"
 
 lazy val `zuora-reports` = all(project in file("lib/zuora-reports"))
@@ -266,6 +271,7 @@ lazy val root = all(project in file(".")).enablePlugins(RiffRaffArtifact).aggreg
   `zuora-core`,
   `credit-processor`,
   `digital-voucher-api`,
+  `digital-voucher-cancellation-processor`,
 ).dependsOn(zuora, handler, effectsDepIncludingTestFolder, `effects-sqs`, testDep)
 
 lazy val `identity-backfill` = all(project in file("handlers/identity-backfill")) // when using the "project identity-backfill" command it uses the lazy val name
@@ -362,7 +368,7 @@ lazy val `metric-push-api` = all(project in file("handlers/metric-push-api"))
   .dependsOn()
 
 lazy val `sf-move-subscriptions-api` = all(project in file("handlers/sf-move-subscriptions-api"))
-  .dependsOn(`effects-s3`, `config-core`, `zuora-core`)
+  .dependsOn(`effects-s3`, `config-cats`, `zuora-core`)
   .settings(
     libraryDependencies ++=
       Seq(
@@ -370,13 +376,10 @@ lazy val `sf-move-subscriptions-api` = all(project in file("handlers/sf-move-sub
         http4sDsl,
         http4sCirce,
         http4sServer,
-        circe,
-        circeConfig,
         sttp,
         sttpCirce,
         sttpAsycHttpClientBackendCats,
         scalatest,
-        simpleConfig,
         diffx
       ) ++ logging
   )
@@ -396,7 +399,7 @@ lazy val `delivery-records-api` = all(project in file("handlers/delivery-records
   .enablePlugins(RiffRaffArtifact)
 
 lazy val `digital-voucher-api` = all(project in file("handlers/digital-voucher-api"))
-  .dependsOn(`effects-s3`, `config-core`)
+  .dependsOn(`effects-s3`, `config-cats`)
   .settings(
     libraryDependencies ++=
     Seq(
@@ -404,11 +407,21 @@ lazy val `digital-voucher-api` = all(project in file("handlers/digital-voucher-a
       http4sDsl,
       http4sCirce,
       http4sServer,
-      circe,
-      circeConfig,
       sttp,
       sttpCirce,
       sttpAsycHttpClientBackendCats,
+      scalatest,
+      diffx
+    )
+    ++ logging
+  )
+  .enablePlugins(RiffRaffArtifact)
+
+lazy val `digital-voucher-cancellation-processor` = all(project in file("handlers/digital-voucher-cancellation-processor"))
+  .dependsOn(`effects-s3`, `config-cats`, `salesforce-sttp-client`, `salesforce-sttp-test-stub` % Test)
+  .settings(
+    libraryDependencies ++=
+    Seq(
       scalatest,
       simpleConfig,
       diffx
