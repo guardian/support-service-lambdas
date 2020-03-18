@@ -63,6 +63,14 @@ Resources:
                             Action:
                             - s3:ListBucket
                             Resource: !Sub arn:aws:s3:::${SarResultsBucket}
+                - PolicyName: ReadPrivateCredentials
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action: s3:GetObject
+                            Resource:
+                            - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/zuoraRest-${Stage}.*.json
+                            - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/zuoraSar-${Stage}.*.json
 
     PerformZuoraSarLambdaRole:
         Type: AWS::IAM::Role
@@ -93,6 +101,14 @@ Resources:
                             - s3:PutObjectAcl
                             - s3:GetObject
                             Resource: !Sub arn:aws:s3:::${SarResultsBucket}/zuora-results/${Stage}/*
+                - PolicyName: ReadPrivateCredentials
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action: s3:GetObject
+                            Resource:
+                            - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/zuoraRest-${Stage}.*.json
+                            - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/zuoraSar-${Stage}.*.json
 
 #    LambdaSecurityGroup:
 #        Type: AWS::EC2::SecurityGroup
