@@ -5,7 +5,7 @@ import com.gu.util.resthttp.Types.{ClientFailableOp, ClientFailure, GenericError
 import com.gu.util.zuora.ZuoraQuery.ZuoraQuerier
 import com.gu.util.zuora.SafeQueryBuilder.Implicits._
 import com.typesafe.scalalogging.LazyLogging
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsValue, Json, Reads}
 import cats.syntax.traverse._
 import cats.instances.list._
 import cats.instances.either._
@@ -24,13 +24,19 @@ trait ZuoraSarError
 case class ZuoraClientError(message: String) extends ZuoraSarError
 case class JsonDeserialisationError(message: String) extends ZuoraSarError
 
-case class ZuoraSarService(zuoraClient: Requests, zuoraDownloadClient: Requests, zuoraQuerier: ZuoraQuerier) extends LazyLogging {
+trait ZuoraSar {
+  def zuoraContactsWithEmail(emailAddress: String): ClientFailableOp[List[ZuoraContact]]
+  def accountResponse(contact: ZuoraContact): Either[ZuoraSarError, ZuoraAccountSuccess]
+  def invoicesResponse(accountInvoices: List[InvoiceId]): Either[ZuoraSarError, List[DownloadStream]]
+}
 
-  implicit val readsC = Json.reads[ZuoraContact]
+case class ZuoraSarService(zuoraClient: Requests, zuoraDownloadClient: Requests, zuoraQuerier: ZuoraQuerier) extends ZuoraSar with LazyLogging {
 
-  def zuoraContactsWithEmail(emailAddress: String): ClientFailableOp[List[ZuoraContact]] = {
+  implicit val readsC: Reads[ZuoraContact] = Json.reads[ZuoraContact]
+
+  override def zuoraContactsWithEmail(emailAddress: String): ClientFailableOp[List[ZuoraContact]] = {
     for {
-      contactQuery <- zoql"SELECT AccountId FROM Contact where WorkEmail=${emailAddress}"
+      contactQuery <- zoql"SELECT AccountId FROM Contact where WorkEmail=$emailAddress"
       queryResult <- zuoraQuerier[ZuoraContact](contactQuery).map(_.records)
     } yield queryResult
   }
@@ -38,7 +44,7 @@ case class ZuoraSarService(zuoraClient: Requests, zuoraDownloadClient: Requests,
   private def accountSummary(accountId: String): Either[ClientFailure, JsValue] =
     zuoraClient.get[JsValue](s"accounts/$accountId/summary").toDisjunction
 
-  implicit val readsOb = Json.reads[AccountNumber]
+  implicit val readsOb: Reads[AccountNumber] = Json.reads[AccountNumber]
 
   def accountObj(accountId: String): Either[ClientFailure, JsValue] = {
     // The WithCheck object validates a JSON response by checking if a 'success' field is set as 'true'.
@@ -52,8 +58,8 @@ case class ZuoraSarService(zuoraClient: Requests, zuoraDownloadClient: Requests,
     }
   }
 
-  implicit val readsPdfUrls = Json.reads[InvoicePdfUrl]
-  implicit val readInvoiceFiles = Json.reads[InvoiceFiles]
+  implicit val readsPdfUrls: Reads[InvoicePdfUrl] = Json.reads[InvoicePdfUrl]
+  implicit val readInvoiceFiles: Reads[InvoiceFiles] = Json.reads[InvoiceFiles]
 
   private def getInvoiceFiles(invoiceId: String): Either[ClientFailure, InvoiceFiles] =
     zuoraClient.get[InvoiceFiles](s"invoices/$invoiceId/files").toDisjunction
@@ -67,10 +73,10 @@ case class ZuoraSarService(zuoraClient: Requests, zuoraDownloadClient: Requests,
     })
   }
 
-  implicit val readsIIds = Json.reads[InvoiceId]
-  implicit val readsIn = Json.reads[InvoiceIds]
+  implicit val readsIIds: Reads[InvoiceId] = Json.reads[InvoiceId]
+  implicit val readsIn: Reads[InvoiceIds] = Json.reads[InvoiceIds]
 
-  def accountResponse(contact: ZuoraContact): Either[ZuoraSarError, ZuoraAccountSuccess] = {
+  override def accountResponse(contact: ZuoraContact): Either[ZuoraSarError, ZuoraAccountSuccess] = {
     logger.info("Retrieving account summary and account object for contact.")
     for {
       accountSummary <- accountSummary(contact.AccountId).left.map(err => ZuoraClientError(err.message))
@@ -80,7 +86,7 @@ case class ZuoraSarService(zuoraClient: Requests, zuoraDownloadClient: Requests,
     } yield zuoraSarResponse
   }
 
-  def invoicesResponse(accountInvoices: List[InvoiceId]): Either[ZuoraSarError, List[DownloadStream]] = {
+  override def invoicesResponse(accountInvoices: List[InvoiceId]): Either[ZuoraSarError, List[DownloadStream]] = {
     logger.info("Retrieving invoices for contact.")
     accountInvoices.flatTraverse { invoice =>
       for {

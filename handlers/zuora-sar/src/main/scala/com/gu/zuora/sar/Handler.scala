@@ -2,7 +2,6 @@ package com.gu.zuora.sar
 
 import java.io.{InputStream, OutputStream}
 
-import com.amazonaws.services.lambda.runtime.Context
 import cats.effect.IO
 import circeCodecs._
 import com.gu.effects.{GetFromS3, RawEffects}
@@ -20,7 +19,7 @@ trait ZuoraHandler[Req, Res] {
 
   def handle(request: Req): IO[Res]
 
-  val jsonPrinter = Printer.spaces2.copy(dropNullValues = true)
+  val jsonPrinter: Printer = Printer.spaces2.copy(dropNullValues = true)
 
   def handleRequest(input: InputStream, output: OutputStream)(
     implicit
@@ -46,7 +45,7 @@ object Handler {
   def handleSar(input: InputStream, output: OutputStream): Either[ConfigFailure, Unit] = {
     val loadZuoraSarConfig = LoadConfigModule(RawEffects.stage, GetFromS3.fetchString)
     loadZuoraSarConfig[ZuoraSarConfig].map(config => {
-      val sarLambda = ZuoraSarHandler(config)
+      val sarLambda = ZuoraSarHandler(S3Helper, config)
       sarLambda.handleRequest(input, output)
     })
   }
@@ -67,7 +66,7 @@ object Handler {
       zuoraQuerier = ZuoraQuery(requests)
       zuoraHelper = ZuoraSarService(requests, downloadRequests, zuoraQuerier)
     } yield {
-      val performSarLambda = ZuoraPerformSarHandler(zuoraHelper, zuoraSarConfig)
+      val performSarLambda = ZuoraPerformSarHandler(zuoraHelper, S3Helper, zuoraSarConfig)
       performSarLambda.handleRequest(input, output)
     }
   }

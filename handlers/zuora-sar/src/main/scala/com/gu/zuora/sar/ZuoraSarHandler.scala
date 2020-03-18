@@ -11,7 +11,7 @@ import com.gu.effects.InvokeLambda
 
 import scala.util.Try
 
-case class ZuoraSarHandler(zuoraSarConfig: ZuoraSarConfig)
+case class ZuoraSarHandler(s3Service: S3Service, zuoraSarConfig: ZuoraSarConfig)
   extends LazyLogging
   with ZuoraHandler[SarRequest, SarResponse] {
 
@@ -28,7 +28,7 @@ case class ZuoraSarHandler(zuoraSarConfig: ZuoraSarConfig)
   }
 
   def status(requestIdValue: String): Try[SarStatusResponse] = {
-    S3Helper.checkForResults(requestIdValue, zuoraSarConfig).map {
+    s3Service.checkForResults(requestIdValue, zuoraSarConfig).map {
       case S3CompletedPathFound(resultLocations) =>
         SarStatusResponse(Completed, Some(resultLocations))
       case S3FailedPathFound() => SarStatusResponse(Failed)

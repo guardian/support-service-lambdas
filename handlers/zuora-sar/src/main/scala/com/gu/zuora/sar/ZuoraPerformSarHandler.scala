@@ -7,7 +7,7 @@ import cats.syntax.traverse._
 import cats.instances.list._
 import cats.instances.either._
 
-case class ZuoraPerformSarHandler(zuoraHelper: ZuoraSarService, zuoraSarConfig: ZuoraSarConfig)
+case class ZuoraPerformSarHandler(zuoraHelper: ZuoraSar, s3Service: S3Service, zuoraSarConfig: ZuoraSarConfig)
   extends LazyLogging
   with ZuoraHandler[SarRequest, SarResponse] {
 
@@ -15,7 +15,7 @@ case class ZuoraPerformSarHandler(zuoraHelper: ZuoraSarService, zuoraSarConfig: 
     contacts.traverse { contact =>
       for {
         zuoraAccountSuccess <- zuoraHelper.accountResponse(contact)
-        _ <- S3Helper.writeSuccessAccountResult(initiationReference, zuoraAccountSuccess, zuoraSarConfig)
+        _ <- s3Service.writeSuccessAccountResult(initiationReference, zuoraAccountSuccess, zuoraSarConfig)
       } yield zuoraAccountSuccess.invoiceList
     }
 
@@ -23,7 +23,7 @@ case class ZuoraPerformSarHandler(zuoraHelper: ZuoraSarService, zuoraSarConfig: 
     allContactInvoices.traverse { accountInvoices =>
       for {
         downloadStreams <- zuoraHelper.invoicesResponse(accountInvoices.invoices)
-        _ <- S3Helper.writeSuccessInvoiceResult(initiationReference, downloadStreams, zuoraSarConfig)
+        _ <- s3Service.writeSuccessInvoiceResult(initiationReference, downloadStreams, zuoraSarConfig)
       } yield ()
     }
 
@@ -38,8 +38,8 @@ case class ZuoraPerformSarHandler(zuoraHelper: ZuoraSarService, zuoraSarConfig: 
         for {
           invoiceIds <- processAccountDetails(contactList, request.initiationReference)
           _ <- processInvoicesForContacts(invoiceIds, request.initiationReference)
-          _ <- S3Helper.copyResultsToCompleted(request.initiationReference, zuoraSarConfig)
-        } yield Right({})
+          _ <- s3Service.copyResultsToCompleted(request.initiationReference, zuoraSarConfig)
+        } yield Right(())
     }
   }
 
@@ -51,7 +51,7 @@ case class ZuoraPerformSarHandler(zuoraHelper: ZuoraSarService, zuoraSarConfig: 
         val res = initiateSar(r)
         res match {
           case Left(err) =>
-            S3Helper.writeFailedResult(r.initiationReference, err, zuoraSarConfig)
+            s3Service.writeFailedResult(r.initiationReference, err, zuoraSarConfig)
             IO.pure(PerformSarResponse(Failed, r.initiationReference, r.subjectEmail, Some(err.toString)))
           case Right(_) => IO.pure(PerformSarResponse(Completed, r.initiationReference, r.subjectEmail))
         }

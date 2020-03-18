@@ -4,10 +4,7 @@ object BatonModels {
 
   sealed trait SarRequest
 
-  case class SarInitiateRequest(
-    subjectEmail: String,
-    dataProvider: String
-  ) extends SarRequest
+  case class SarInitiateRequest(subjectEmail: String) extends SarRequest
 
   case class SarStatusRequest(initiationReference: String) extends SarRequest
 

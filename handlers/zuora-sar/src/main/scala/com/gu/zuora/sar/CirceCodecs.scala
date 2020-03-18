@@ -2,12 +2,12 @@ package com.gu.zuora.sar
 
 import com.gu.zuora.sar.BatonModels.{BatonTaskStatus, Completed, Failed, Pending, PerformSarRequest, PerformSarResponse, SarInitiateRequest, SarInitiateResponse, SarRequest, SarResponse, SarStatusRequest, SarStatusResponse}
 import io.circe.{HCursor, Json}
+import io.circe.syntax._
+import io.circe.{Decoder, Encoder}
+import io.circe.JsonObject
+import io.circe.generic.auto._
 
 object circeCodecs {
-  import io.circe.syntax._
-  import io.circe.{Decoder, Encoder}
-  import io.circe.{JsonObject, ParsingFailure}
-  import io.circe.generic.auto._
 
   implicit val sarRequestDecoder: Decoder[SarRequest] =
     Decoder.instance[SarRequest] { cursor =>

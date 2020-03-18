@@ -2,7 +2,6 @@ package com.gu.zuora.sar
 
 import java.util.UUID.randomUUID
 
-import cats.effect.IO
 import com.amazonaws.services.s3.model.{CannedAccessControlList, ObjectMetadata, PutObjectRequest}
 import com.typesafe.scalalogging.LazyLogging
 import com.gu.effects.{BucketName, CopyS3Objects, Key, ListS3Objects, S3Location, S3Path, UploadToS3}
@@ -30,6 +29,7 @@ case class S3Error(message: String) extends ZuoraSarError
 
 trait S3Service {
   def checkForResults(initiationId: String, config: ZuoraSarConfig): Try[S3StatusResponse]
+  def copyResultsToCompleted(initiationReference: String, config: ZuoraSarConfig): Either[S3Error, S3WriteSuccess]
   def writeFailedResult(initiationId: String, zuoraError: ZuoraSarError, config: ZuoraSarConfig): Either[S3Error, S3WriteSuccess]
   def writeSuccessAccountResult(initiationId: String, zuoraSuccess: ZuoraAccountSuccess, config: ZuoraSarConfig): Either[S3Error, S3WriteSuccess]
   def writeSuccessInvoiceResult(initiationId: String, zuoraSuccess: List[DownloadStream], config: ZuoraSarConfig): Either[S3Error, List[S3WriteSuccess]]
@@ -60,7 +60,7 @@ object S3Helper extends S3Service with LazyLogging {
       }
     }
 
-  def createCompletedObject(keySuffix: String, initiationReference: String, config: ZuoraSarConfig): Either[S3Error, S3WriteSuccess] = {
+  private def createCompletedObject(keySuffix: String, initiationReference: String, config: ZuoraSarConfig): Either[S3Error, S3WriteSuccess] = {
     val completedPath = s"${config.resultsPath}/$initiationReference/completed/$keySuffix"
     UploadToS3
       .putStringWithAcl(
@@ -73,12 +73,12 @@ object S3Helper extends S3Service with LazyLogging {
         }
   }
 
-  def copyResultsToCompleted(initiationReference: String, config: ZuoraSarConfig): Either[S3Error, S3WriteSuccess] = {
+  override def copyResultsToCompleted(initiationReference: String, config: ZuoraSarConfig): Either[S3Error, S3WriteSuccess] = {
     val pendingPath = S3Path(BucketName(config.resultsBucket), Some(Key(s"${config.resultsPath}/$initiationReference/pending/")))
     val pendingObjects = ListS3Objects.listObjectsWithPrefix(pendingPath)
     pendingObjects match {
       case Failure(err) => Left(S3Error(err.getMessage))
-      case Success(pendingKeys) => {
+      case Success(pendingKeys) =>
         if (pendingKeys.isEmpty) {
           logger.info("No results found in /pending. Creating NoResultsFoundForUser object.")
           createCompletedObject("NoResultsFoundForUser", initiationReference, config)
@@ -94,7 +94,6 @@ object S3Helper extends S3Service with LazyLogging {
           }
           createCompletedObject("ResultsCompleted", initiationReference, config)
         }.map(_ => S3WriteSuccess())
-      }
     }
   }
 
