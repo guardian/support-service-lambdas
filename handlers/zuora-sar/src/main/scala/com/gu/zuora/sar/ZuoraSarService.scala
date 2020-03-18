@@ -1,7 +1,7 @@
-package com.gu.zuora
+package com.gu.zuora.sar
 
 import com.gu.util.resthttp.RestRequestMaker.{DownloadStream, Requests, WithoutCheck}
-import com.gu.util.resthttp.Types.{ClientFailableOp, ClientFailure}
+import com.gu.util.resthttp.Types.{ClientFailableOp, ClientFailure, GenericError}
 import com.gu.util.zuora.ZuoraQuery.ZuoraQuerier
 import com.gu.util.zuora.SafeQueryBuilder.Implicits._
 import com.typesafe.scalalogging.LazyLogging
@@ -12,23 +12,19 @@ import cats.instances.either._
 
 // For Zuora response deserialisation
 case class ZuoraContact(AccountId: String)
+case class AccountNumber(AccountNumber: String)
 case class InvoiceId(id: String)
 case class InvoiceIds(invoices: List[InvoiceId])
 case class InvoicePdfUrl(pdfFileUrl: String)
 case class InvoiceFiles(invoiceFiles: List[InvoicePdfUrl])
 
-trait ZuoraSarSuccess
-case class ZuoraAccountSuccess(accountSummary: JsValue, accountObj: JsValue, invoiceList: InvoiceIds) extends ZuoraSarSuccess
-case class InvoiceSuccess(fullInvoice: JsValue) extends ZuoraSarSuccess
+case class ZuoraAccountSuccess(accountSummary: JsValue, accountObj: JsValue, invoiceList: InvoiceIds)
 
 trait ZuoraSarError
 case class ZuoraClientError(message: String) extends ZuoraSarError
 case class JsonDeserialisationError(message: String) extends ZuoraSarError
-case class S3WriteError(message: String) extends ZuoraSarError
 
-case class ZuoraHelperError(message: String)
-
-case class ZuoraHelper(zuoraClient: Requests, zuoraDownloadClient: Requests, zuoraQuerier: ZuoraQuerier) extends LazyLogging {
+case class ZuoraSarService(zuoraClient: Requests, zuoraDownloadClient: Requests, zuoraQuerier: ZuoraQuerier) extends LazyLogging {
 
   implicit val readsC = Json.reads[ZuoraContact]
 
@@ -42,8 +38,18 @@ case class ZuoraHelper(zuoraClient: Requests, zuoraDownloadClient: Requests, zuo
   private def accountSummary(accountId: String): Either[ClientFailure, JsValue] =
     zuoraClient.get[JsValue](s"accounts/$accountId/summary").toDisjunction
 
-  private def accountObj(accountId: String): Either[ClientFailure, JsValue] = {
-    zuoraClient.get[JsValue](s"object/account/$accountId", WithoutCheck).toDisjunction
+  implicit val readsOb = Json.reads[AccountNumber]
+
+  def accountObj(accountId: String): Either[ClientFailure, JsValue] = {
+    // The WithCheck object validates a JSON response by checking if a 'success' field is set as 'true'.
+    // For some reason, this particular endpoint doesn't return that field so WithoutCheck is passed to the .get method
+    // and a custom check to see if an AccountNumber is present in the response is made instead.
+    zuoraClient.get[JsValue](s"object/account/$accountId", WithoutCheck).toDisjunction.flatMap { accountObjectRes =>
+      Json.fromJson[AccountNumber](accountObjectRes).asEither match {
+        case Left(err) => Left(GenericError(s"Unable to find AccountNumber in account object response: $err"))
+        case Right(_) => Right(accountObjectRes)
+      }
+    }
   }
 
   implicit val readsPdfUrls = Json.reads[InvoicePdfUrl]
@@ -52,8 +58,8 @@ case class ZuoraHelper(zuoraClient: Requests, zuoraDownloadClient: Requests, zuo
   private def getInvoiceFiles(invoiceId: String): Either[ClientFailure, InvoiceFiles] =
     zuoraClient.get[InvoiceFiles](s"invoices/$invoiceId/files").toDisjunction
 
-  // The zuora client includes /v1 in the URL but it also appears in the pdfFileUrl obtained from the call to
-  // invoices/invoiceId/files so this removes the duplication
+  // The pdfUrl provided in the invoice sometimes had the content-length header but sometimes did not. Content-length
+  // is required to upload to S3. For this reason, we're using the 'batch-query' endpoint and a zuoraDownloadClient instead
   private def invoiceFileContents(pdfUrls: List[InvoicePdfUrl]): Either[ClientFailure, List[DownloadStream]] = {
     pdfUrls.traverse(pdfUrl => {
       val fileIdUrl = pdfUrl.pdfFileUrl.replace("/v1/files/", "batch-query/file/")

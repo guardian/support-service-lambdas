@@ -1,15 +1,13 @@
 package com.gu.zuora.sar
 
 import cats.effect.IO
-import com.amazonaws.services.lambda.runtime.Context
-import com.gu.zuora.{InvoiceIds, ZuoraClientError, ZuoraContact, ZuoraHelper, ZuoraSarError}
 import com.gu.zuora.sar.BatonModels.{Completed, Failed, PerformSarRequest, PerformSarResponse, SarRequest, SarResponse}
 import com.typesafe.scalalogging.LazyLogging
 import cats.syntax.traverse._
 import cats.instances.list._
 import cats.instances.either._
 
-case class ZuoraPerformSarHandler(zuoraHelper: ZuoraHelper, zuoraSarConfig: ZuoraSarConfig)
+case class ZuoraPerformSarHandler(zuoraHelper: ZuoraSarService, zuoraSarConfig: ZuoraSarConfig)
   extends LazyLogging
   with ZuoraHandler[SarRequest, SarResponse] {
 
@@ -30,8 +28,7 @@ case class ZuoraPerformSarHandler(zuoraHelper: ZuoraHelper, zuoraSarConfig: Zuor
     }
 
   def initiateSar(
-    request: PerformSarRequest,
-    context: Context
+    request: PerformSarRequest
   ): Either[ZuoraSarError, Unit] = {
     zuoraHelper.zuoraContactsWithEmail(request.subjectEmail).toDisjunction match {
       case Left(err) =>
@@ -47,12 +44,11 @@ case class ZuoraPerformSarHandler(zuoraHelper: ZuoraHelper, zuoraSarConfig: Zuor
   }
 
   override def handle(
-    request: SarRequest,
-    context: Context
+    request: SarRequest
   ): IO[SarResponse] = {
     request match {
       case r: PerformSarRequest =>
-        val res = initiateSar(r, context)
+        val res = initiateSar(r)
         res match {
           case Left(err) =>
             S3Helper.writeFailedResult(r.initiationReference, err, zuoraSarConfig)
@@ -60,9 +56,9 @@ case class ZuoraPerformSarHandler(zuoraHelper: ZuoraHelper, zuoraSarConfig: Zuor
           case Right(_) => IO.pure(PerformSarResponse(Completed, r.initiationReference, r.subjectEmail))
         }
       case _ =>
-        throw new RuntimeException(
-          "Unable to retrieve email and initiation reference from request."
-        )
+        val error = "Unable to retrieve email and initiation reference from request"
+        logger.error(error)
+        IO.pure(PerformSarResponse(Failed, "", "", Some(error)))
     }
   }
 }

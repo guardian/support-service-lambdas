@@ -1,7 +1,7 @@
 package com.gu.zuora.sar
 
 import com.gu.zuora.sar.BatonModels.{BatonTaskStatus, Completed, Failed, Pending, PerformSarRequest, PerformSarResponse, SarInitiateRequest, SarInitiateResponse, SarRequest, SarResponse, SarStatusRequest, SarStatusResponse}
-import io.circe.Json
+import io.circe.{HCursor, Json}
 
 object circeCodecs {
   import io.circe.syntax._
@@ -11,19 +11,16 @@ object circeCodecs {
 
   implicit val sarRequestDecoder: Decoder[SarRequest] =
     Decoder.instance[SarRequest] { cursor =>
-      cursor.downField("dataProvider").as[String].flatMap {
-        case "zuora" => cursor.as[String]
-        case unrecognisedProvider: String =>
-          throw new ParsingFailure(
-            s"invalid data provider : $unrecognisedProvider",
-            null
-          )
-      }
+      def dataProviderIsZuora(cursor: HCursor): Boolean =
+        cursor.downField("dataProvider").as[String] match {
+          case Left(_) => false
+          case Right(dataProvider) => dataProvider == "zuora"
+        }
 
       cursor.downField("action").as[String].flatMap {
-        case "status" => cursor.as[SarStatusRequest]
-        case "initiate" => cursor.as[SarInitiateRequest]
-        case "perform" => cursor.as[PerformSarRequest]
+        case "status" => cursor.as[SarStatusRequest].ensuring(dataProviderIsZuora(cursor))
+        case "initiate" => cursor.as[SarInitiateRequest].ensuring(dataProviderIsZuora(cursor))
+        case "perform" => cursor.as[PerformSarRequest].ensuring(dataProviderIsZuora(cursor))
       }
     }
 
@@ -34,6 +31,7 @@ object circeCodecs {
     response
       .add("action", action.asJson)
       .add("requestType", "SAR".asJson)
+      .add("dataProvider", "zuora".asJson)
       .asJson
 
   implicit val batonTaskStatusEncoder: Encoder[BatonTaskStatus] =
