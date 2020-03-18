@@ -13,22 +13,28 @@ case class DigitalVoucherCancellationProcessorError(message: String)
 
 object DigitalVoucherCancellationProcessor extends LazyLogging {
 
-  private case class DigitalVoucherQueryRecord(Id: String, SF_Subscription__r: SubscriptionQueryRecord)
-  private case class SubscriptionQueryRecord(Id: String)
+  case class DigitalVoucherQueryRecord(Id: String, SF_Subscription__r: SubscriptionQueryRecord)
+  case class SubscriptionQueryRecord(Id: String)
 
-  def apply[F[_]: Monad](salesforceClient: SalesforceClient[F], clock: Clock):  EitherT[F, DigitalVoucherCancellationProcessorError, Unit] = {
+  def apply[F[_]: Monad](salesforceClient: SalesforceClient[F], clock: Clock): EitherT[F, DigitalVoucherCancellationProcessorError, Unit] = {
+    val today = LocalDate.now(clock)
     for {
       results <- salesforceClient.query[SubscriptionQueryRecord](
-        s"""
-           |SELECT
-           |  Id,
-           |  SF_Subscription__r.Id
-           |FROM
-           |  Digital_Voucher__c
-           |WHERE SF_Subscription__r.Cancellation_Effective_Date__c <= ${formatDate(LocalDate.now(clock))}
-           |""".stripMargin
-        ).leftMap(error => DigitalVoucherCancellationProcessorError(s"Failed to query for cancelled subs: ${error.message}"))
+        subscrptionsCancelledTodayQuery(today)
+      ).leftMap(error => DigitalVoucherCancellationProcessorError(s"Failed to query for cancelled subs: ${error.message}"))
       _ = logger.info(s"Retrieved results for vouchers to be cancelled: ${results}")
     } yield ()
+  }
+
+  def subscrptionsCancelledTodayQuery(today: LocalDate): String = {
+    s"""
+       |SELECT
+       |  Id,
+       |  SF_Subscription__r.Id
+       |FROM
+       |  Digital_Voucher__c
+       |WHERE SF_Subscription__r.Cancellation_Effective_Date__c <= ${formatDate(today)}
+
+       |""".stripMargin
   }
 }

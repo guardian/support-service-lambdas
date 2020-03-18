@@ -1,5 +1,7 @@
 package com.gu.salesforce.sttp
 
+import java.net.URLEncoder
+
 import com.gu.salesforce.{SFAuthConfig, SalesforceAuth, SalesforceConstants}
 import com.softwaremill.sttp.{MediaTypes, Method, Request, Response, StringBody}
 import com.softwaremill.sttp.testing.SttpBackendStub
@@ -52,9 +54,11 @@ object SalesforceStub {
   private def matchesAuthRequest[S, F[_]](config: SFAuthConfig, request: Request[_, _]) = {
     val urlMatches = request.uri.toString() == (config.url + "/services/oauth2/token")
     val bodyMatches = request.body == StringBody(
-      s"client_id=${config.client_id}&" +
-        s"client_secret=${config.client_secret}&username=${config.username}&" +
-        s"password=${config.password + config.token}&grant_type=password",
+      s"client_id=${URLEncoder.encode(config.client_id, "UTF-8")}&" +
+        s"client_secret=${URLEncoder.encode(config.client_secret, "UTF-8")}&" +
+        s"username=${URLEncoder.encode(config.username, "UTF-8")}&" +
+        s"password=${URLEncoder.encode(config.password + config.token, "UTF-8")}&" +
+        s"grant_type=password",
       "utf-8",
       Some(MediaTypes.Text)
     )
