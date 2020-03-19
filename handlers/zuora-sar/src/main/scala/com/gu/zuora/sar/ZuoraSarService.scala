@@ -46,7 +46,7 @@ case class ZuoraSarService(zuoraClient: Requests, zuoraDownloadClient: Requests,
 
   implicit val readsOb: Reads[AccountNumber] = Json.reads[AccountNumber]
 
-  def accountObj(accountId: String): Either[ClientFailure, JsValue] = {
+  private def accountObj(accountId: String): Either[ClientFailure, JsValue] = {
     // The WithCheck object validates a JSON response by checking if a 'success' field is set as 'true'.
     // For some reason, this particular endpoint doesn't return that field so WithoutCheck is passed to the .get method
     // and a custom check to see if an AccountNumber is present in the response is made instead.

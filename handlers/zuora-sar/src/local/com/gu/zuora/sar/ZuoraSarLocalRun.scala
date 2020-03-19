@@ -26,7 +26,7 @@ object ZuoraSarLocalRun extends App {
       zuoraQuerier = ZuoraQuery(requests)
       zuoraHelper = ZuoraSarService(requests, downloadRequests, zuoraQuerier)
     } yield {
-      ZuoraPerformSarHandler(zuoraHelper, zuoraSarConfig)
+      ZuoraPerformSarHandler(zuoraHelper, S3Helper, zuoraSarConfig)
     }.handleRequest(testInputStream, testOutputStream)
 
 //    zuoraSarHander.handleRequest(testInputStream, testOutputStream)

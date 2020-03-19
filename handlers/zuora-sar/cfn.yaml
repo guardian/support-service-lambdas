@@ -49,6 +49,15 @@ Resources:
                           - sts:AssumeRole
             Path: /
             Policies:
+                - PolicyName: LogPolicy
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                            - logs:CreateLogGroup
+                            - logs:CreateLogStream
+                            - logs:PutLogEvents
+                            Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/zuora-baton-sar-lambda-${Stage}:log-stream:*"
                 - PolicyName: InvokeLambdaPolicy
                   PolicyDocument:
                       Statement:
@@ -85,6 +94,15 @@ Resources:
                           - sts:AssumeRole
             Path: /
             Policies:
+                - PolicyName: LogPolicy
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                            - logs:CreateLogGroup
+                            - logs:CreateLogStream
+                            - logs:PutLogEvents
+                            Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/zuora-baton-perform-sar-lambda-${Stage}:log-stream:*"
                 - PolicyName: S3ListPolicy
                   PolicyDocument:
                       Statement:
@@ -159,4 +177,5 @@ Resources:
 #                SubnetIds: !Ref VpcSubnets
             Role:
               !GetAtt PerformZuoraSarLambdaRole.Arn
-
+        DependsOn:
+        - PerformZuoraSarLambdaRole
