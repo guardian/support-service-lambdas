@@ -16,13 +16,13 @@ object AutoCancelDataCollectionFilter extends Logging {
   def apply(
     now: LocalDate,
     getAccountSummary: String => ClientFailableOp[AccountSummary]
-  )(autoCancelCallout: AutoCancelCallout): ApiGatewayOp[AutoCancelRequest] = {
+  )(autoCancelCallout: AutoCancelCallout): ApiGatewayOp[List[AutoCancelRequest]] = {
     val accountId = autoCancelCallout.accountId
     for {
       accountSummary <- getAccountSummary(accountId).toApiGatewayOp("getAccountSummary").withLogging("getAccountSummary")
-      subToCancel <- getSubscriptionToCancel(accountSummary).withLogging("getSubscriptionToCancel")
+      subsToCancel <- getSubscriptionToCancel(accountSummary).withLogging("getSubscriptionToCancel")
       cancellationDate <- getCancellationDateFromInvoices(accountSummary, now).withLogging("getCancellationDateFromInvoices")
-    } yield AutoCancelRequest(accountId, subToCancel, cancellationDate)
+    } yield subsToCancel.map(AutoCancelRequest(accountId, _, cancellationDate))
   }
 
   def getCancellationDateFromInvoices(accountSummary: AccountSummary, dateToday: LocalDate): ApiGatewayOp[LocalDate] = {
@@ -48,19 +48,21 @@ object AutoCancelDataCollectionFilter extends Logging {
     } else false
   }
 
-  def getSubscriptionToCancel(accountSummary: AccountSummary): ApiGatewayOp[SubscriptionId] = {
+  def getSubscriptionToCancel(accountSummary: AccountSummary): ApiGatewayOp[List[SubscriptionId]] = {
     val activeSubs = accountSummary.subscriptions.filter(_.status == "Active")
     activeSubs match {
       case sub :: Nil =>
         logger.info(s"Determined that we should cancel SubscriptionId: ${sub.id} (for AccountId: ${accountSummary.basicInfo.id})")
-        ContinueProcessing(sub.id)
+        ContinueProcessing(List(sub.id))
       case Nil =>
         logger.error(s"Didn't find any active subscriptions. The full list of subs for this account was: ${accountSummary.subscriptions}")
         ReturnWithResponse(noActionRequired("No Active subscriptions to cancel!"))
       case subs =>
         // This should be a pretty rare scenario, because the Billing Account to Sub relationship is (supposed to be) 1-to-1
-        logger.error(s"More than one subscription is Active on account: ${accountSummary.basicInfo.id}. Subscription ids are: ${activeSubs.map(_.id)}")
-        ReturnWithResponse(noActionRequired("More than one active sub found!")) // Don't continue because we don't know which active sub to cancel
+        //        logger.error(s"More than one subscription is Active on account: ${accountSummary.basicInfo.id}. Subscription ids are: $subs}")
+        //        ReturnWithResponse(noActionRequired("More than one active sub found!")) // Don't continue because we don't know which active sub to cancel
+        logger.info(s"More than one subscription is Active on account: ${accountSummary.basicInfo.id}. Subscription ids are: $subs}")
+        ContinueProcessing(subs.map(_.id))
     }
   }
 

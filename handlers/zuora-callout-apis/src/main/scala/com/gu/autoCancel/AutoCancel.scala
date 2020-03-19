@@ -13,7 +13,11 @@ object AutoCancel extends Logging {
 
   case class AutoCancelRequest(accountId: String, subToCancel: SubscriptionId, cancellationDate: LocalDate)
 
-  def apply(requests: Requests)(acRequest: AutoCancelRequest): ApiGatewayOp[Unit] = {
+  def apply(requests: Requests)(acRequests: List[AutoCancelRequest]): ApiGatewayOp[Unit] = {
+    acRequests.map(r => cancel(requests)(r)).head
+  }
+
+  private def cancel(requests: Requests)(acRequest: AutoCancelRequest) = {
     val AutoCancelRequest(accountId, subToCancel, cancellationDate) = acRequest
     logger.info(s"Attempting to perform auto-cancellation on account: $accountId")
     val zuoraOp = for {
