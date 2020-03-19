@@ -50,6 +50,6 @@ object DigitalVoucherCancellationProcessorApp extends LazyLogging {
     import com.softwaremill.sttp.impl.cats.implicits._
 
     sttpBackendToCatsMappableSttpBackend[Id, Nothing](HttpURLConnectionBackend())
-        .mapK(FunctionK.lift[Id, IO](IO.delay))
+      .mapK(FunctionK.lift[Id, IO](IO.delay))
   }
 }
