@@ -1,6 +1,8 @@
-This refers to the monolithic code in the main src folders in the root of the project.  These will be moved to this subdir in future.
+This refers to the monolithic code in the `handlers/zuora-callout-apis`
 
-## root
+These will be moved to this subdir in future.
+
+## Overview
 Contains three Scala lambdas behind the same API gateway.
 At present these can be deployed to CODE and PROD as MemSub::Membership Admin::Zuora Auto Cancel.
 
