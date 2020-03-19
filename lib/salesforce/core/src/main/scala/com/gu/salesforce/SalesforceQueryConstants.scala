@@ -1,5 +1,8 @@
 package com.gu.salesforce
 
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+
 object SalesforceQueryConstants {
 
   def contactToWhereClausePart(contact: Contact) = contact match {
@@ -17,5 +20,7 @@ object SalesforceQueryConstants {
       .replace("\f", "\\F")
       .replace("\"", "\\\"")
       .replace("\'", "\\'")
+
+  def formatDate(date: LocalDate): String = DateTimeFormatter.ISO_DATE.format(date)
 }
 
