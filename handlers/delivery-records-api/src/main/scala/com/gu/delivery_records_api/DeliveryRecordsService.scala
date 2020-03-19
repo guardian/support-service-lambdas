@@ -57,7 +57,19 @@ case class CreateDeliveryProblem(
   deliveryRecords: List[DeliveryRecordToLink],
   repeatDeliveryProblem: Option[Boolean],
   newContactPhoneNumbers: Option[SFApiContactPhoneNumbers]
-)
+) {
+  val isHomeDelivery: Boolean = productName == "Home Delivery"
+
+  val isNotAutoCredit: Boolean = deliveryRecords.exists(_.invoiceDate.isEmpty)
+
+  val status: String = if (
+    isHomeDelivery ||
+    repeatDeliveryProblem.contains(true) ||
+    isNotAutoCredit
+  ) "New" else "Closed"
+
+  val priority: Option[String] = Some("High").filter(_ => isNotAutoCredit && isHomeDelivery)
+}
 
 sealed trait DeliveryRecordServiceError
 
