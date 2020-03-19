@@ -226,7 +226,7 @@ lazy val `credit-processor` = all(project in file("lib/credit-processor"))
     libraryDependencies ++= logging
   )
 
-lazy val `zuora-auto-cancel` = all(project in file("handlers/zuora-auto-cancel"))
+lazy val `zuora-callout-apis` = all(project in file("handlers/zuora-callout-apis"))
   .enablePlugins(RiffRaffArtifact)
   .dependsOn(zuora, handler, effectsDepIncludingTestFolder, `effects-sqs`, testDep)
 
