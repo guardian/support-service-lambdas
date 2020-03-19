@@ -105,7 +105,7 @@ object SupportedProduct {
     SupportedProduct(
       name = "Newspaper Voucher",
       productType = NewspaperVoucherBook,
-      annualIssueLimitPerEdition = 4,
+      annualIssueLimitPerEdition = 10,
       ratePlans = List(
         SupportedRatePlan("Everyday", everyDayCharges),
         SupportedRatePlan("Everyday+", everyDayCharges),
