@@ -4,7 +4,7 @@ import java.time.{Clock, Instant, LocalDate, ZoneId}
 
 import cats.effect.IO
 import com.gu.DevIdentity
-import com.gu.digital_voucher_cancellation_processor.DigitalVoucherCancellationProcessor.{DigitalVoucherQueryRecord, SubscriptionQueryRecord}
+import com.gu.digital_voucher_cancellation_processor.DigitalVoucherCancellationProcessorService.{DigitalVoucherQueryResult, SubscriptionQueryResult}
 import com.gu.salesforce.sttp.QueryRecordsWrapperCaseClass
 import com.gu.salesforce.{SFAuthConfig, SalesforceAuth}
 import com.softwaremill.sttp.impl.cats.CatsMonadError
@@ -15,7 +15,7 @@ import com.gu.salesforce.sttp.SalesforceStub._
 import io.circe.generic.auto._
 import org.scalatest.Inside.inside
 
-class DigitalVoucherCancellationProcessorTest extends AnyFlatSpec with Matchers {
+class DigitalVoucherCancellationProcessorServiceTest extends AnyFlatSpec with Matchers {
   val authConfig = SFAuthConfig(
     url = "https://unit-test.salesforce.com",
     client_id = "unit-test-client-id",
@@ -37,18 +37,18 @@ class DigitalVoucherCancellationProcessorTest extends AnyFlatSpec with Matchers 
         .stubAuth(authConfig, authResponse)
         .stubQuery(
           authResponse,
-          DigitalVoucherCancellationProcessor.subscrptionsCancelledTodayQuery(LocalDate.parse("2020-03-18")),
+          DigitalVoucherCancellationProcessorService.subscrptionsCancelledTodayQuery(LocalDate.parse("2020-03-18")),
           QueryRecordsWrapperCaseClass(
             List(
-              DigitalVoucherQueryRecord(
+              DigitalVoucherQueryResult(
                 "digital-voucher-id",
-                SubscriptionQueryRecord("sf-subscription-id")
+                SubscriptionQueryResult("sf-subscription-id")
               )
             ),
             None
           )
         )
-      runApp(salesforceBackendStub, testClock)
+    runApp(salesforceBackendStub, testClock)
   }
 
   private def runApp(salesforceBackendStub: SttpBackendStub[IO, Nothing], testClock: Clock) = {

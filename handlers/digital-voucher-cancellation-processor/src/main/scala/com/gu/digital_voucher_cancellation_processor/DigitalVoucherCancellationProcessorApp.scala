@@ -31,7 +31,7 @@ object DigitalVoucherCancellationProcessorApp extends LazyLogging {
         .leftMap(error => DigitalVoucherCancellationProcessorAppError(s"Failed to load config: ${error.message}"))
       salesforceClient <- SalesforceClient(sttpBackend, config.salesforce)
         .leftMap(error => DigitalVoucherCancellationProcessorAppError(s"Failed to create salesforce client: ${error.message}"))
-      result <- DigitalVoucherCancellationProcessor(salesforceClient, clock)
+      result <- DigitalVoucherCancellationProcessorService(salesforceClient, clock)
         .leftMap(error => DigitalVoucherCancellationProcessorAppError(s"Failed to execute cancellation processor: ${error.message}"))
     } yield result
   }
