@@ -1,6 +1,6 @@
 package com.gu.digital_voucher_cancellation_processor
 
-import java.io.{InputStream, OutputStream}
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream, OutputStream}
 
 import com.gu.AppIdentity
 import com.typesafe.scalalogging.LazyLogging
@@ -16,5 +16,9 @@ object Handler extends LazyLogging {
       .unsafeRunSync()
       .valueOr(error => throw new RuntimeException(error.toString))
     logger.info(s"Processor ran successfully")
+  }
+
+  def main(args: Array[String]): Unit = {
+    handle(new ByteArrayInputStream("".getBytes), new ByteArrayOutputStream())
   }
 }

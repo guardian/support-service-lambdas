@@ -424,7 +424,8 @@ lazy val `digital-voucher-cancellation-processor` = all(project in file("handler
     Seq(
       scalatest,
       simpleConfig,
-      diffx
+      diffx,
+      sttpCats
     )
     ++ logging
   )
