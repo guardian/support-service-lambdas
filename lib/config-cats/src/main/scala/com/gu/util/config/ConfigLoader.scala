@@ -1,4 +1,4 @@
-package com.gu.digital_voucher_api
+package com.gu.util.config
 
 import cats.data.EitherT
 import cats.implicits._
@@ -6,19 +6,17 @@ import cats.effect.Sync
 import com.gu.conf.{ResourceConfigurationLocation, SSMConfigurationLocation}
 import com.gu.{AppIdentity, AwsIdentity, DevIdentity}
 import com.typesafe.config.Config
-import io.circe.generic.auto._
+import io.circe.Decoder
 import io.circe.config.syntax._
-
-case class DigitalVoucherApiConfig(imovoBaseUrl: String, imovoApiKey: String)
 
 case class ConfigError(message: String)
 
 object ConfigLoader {
-  def loadConfig[F[_]: Sync](appIdentity: AppIdentity): EitherT[F, ConfigError, DigitalVoucherApiConfig] = {
+  def loadConfig[F[_]: Sync, A: Decoder](appIdentity: AppIdentity): EitherT[F, ConfigError, A] = {
     for {
       typeSafeConfig <- loadConfigFromPropertyStore[F](appIdentity)
       parsedConfig <- typeSafeConfig
-        .as[DigitalVoucherApiConfig]
+        .as[A]
         .left.map(error => ConfigError(s"Failed to decode config: $error"))
         .toEitherT[F]
     } yield parsedConfig
