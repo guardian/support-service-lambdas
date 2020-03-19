@@ -58,7 +58,7 @@ case class CreateDeliveryProblem(
   repeatDeliveryProblem: Option[Boolean],
   newContactPhoneNumbers: Option[SFApiContactPhoneNumbers]
 ) {
-  val isHomeDelivery: Boolean = productName == "Newspaper - Home Delivery"
+  val isHomeDelivery: Boolean = productName == "Home Delivery"
 
   val isNotAutoCredit: Boolean = deliveryRecords.exists(_.invoiceDate.isEmpty)
 
