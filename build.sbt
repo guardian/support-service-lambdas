@@ -231,55 +231,9 @@ lazy val `credit-processor` = all(project in file("lib/credit-processor"))
     libraryDependencies ++= logging
   )
 
-// ==== END libraries ====
-
-// ==== START handlers ====
-
-// currently the original code is lying in the root, in due course we need to make three separate sub projects for these original lambdas
-// they should produce their own self contained jar to reduce the artifact size and startup time.  Any shared code can be
-// a set of projects that is "dependsOn(..)" by the sharing projects.  Don't be afraid to restructure things to keep the code nice!
-lazy val root = all(project in file(".")).enablePlugins(RiffRaffArtifact).aggregate(
-  `identity-backfill`,
-  `digital-subscription-expiry`,
-  `catalog-service`,
-  `identity-retention`,
-  `zuora-retention`,
-  `zuora-sar`,
-  `sf-contact-merge`,
-  `cancellation-sf-cases-api`,
-  `sf-gocardless-sync`,
-  `holiday-stop-api`,
-  effects,
-  handler,
-  restHttp,
-  zuora,
-  `zuora-reports`,
-  `salesforce-core`,
-  `salesforce-client`,
-  `salesforce-sttp-client`,
-  `holiday-stops`,
-  s3ConfigValidator,
-  `new-product-api`,
-  `effects-sqs`,
-  `effects-ses`,
-  `effects-s3`,
-  `effects-lambda`,
-  `sf-datalake-export`,
-  `zuora-datalake-export`,
-  `batch-email-sender`,
-  `braze-to-salesforce-file-upload`,
-  `holiday-stop-processor`,
-  `delivery-problem-credit-processor`,
-  `metric-push-api`,
-  `sf-move-subscriptions-api`,
-  `fulfilment-date-calculator`,
-  `delivery-records-api`,
-  `fulfilment-dates`,
-  `zuora-core`,
-  `credit-processor`,
-  `digital-voucher-api`,
-  `digital-voucher-cancellation-processor`,
-).dependsOn(zuora, handler, effectsDepIncludingTestFolder, `effects-sqs`, testDep)
+lazy val `zuora-callout-apis` = all(project in file("handlers/zuora-callout-apis"))
+  .enablePlugins(RiffRaffArtifact)
+  .dependsOn(zuora, handler, effectsDepIncludingTestFolder, `effects-sqs`, testDep)
 
 lazy val `identity-backfill` = all(project in file("handlers/identity-backfill")) // when using the "project identity-backfill" command it uses the lazy val name
   .enablePlugins(RiffRaffArtifact)
