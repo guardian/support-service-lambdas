@@ -6,7 +6,7 @@ import cats.arrow.FunctionK
 import cats.data.EitherT
 import cats.effect.{IO, Sync}
 import com.gu.AppIdentity
-import com.gu.imovo.ImovoConfig
+import com.gu.imovo.{ImovoClient, ImovoConfig}
 import com.gu.salesforce.SFAuthConfig
 import com.gu.salesforce.sttp.SalesforceClient
 import com.gu.util.config.ConfigLoader
@@ -29,7 +29,9 @@ object DigitalVoucherCancellationProcessorApp extends LazyLogging {
       config <- loadConfig(appIdentity)
       salesforceClient <- SalesforceClient(sttpBackend, config.salesforce)
         .leftMap(error => DigitalVoucherCancellationProcessorAppError(s"Failed to create salesforce client: ${error.message}"))
-      result <- DigitalVoucherCancellationProcessorService(salesforceClient, clock)
+      imovoClient <- ImovoClient(sttpBackend, config.imovo)
+        .leftMap(error => DigitalVoucherCancellationProcessorAppError(s"Failed to create imovo client: ${error.message}"))
+      result <- DigitalVoucherCancellationProcessorService(salesforceClient, imovoClient, clock)
         .leftMap(error => DigitalVoucherCancellationProcessorAppError(s"Failed to execute cancellation processor: ${error.message}"))
     } yield result
   }

@@ -62,11 +62,9 @@ case class CreateDeliveryProblem(
 
   val isNotAutoCredit: Boolean = deliveryRecords.exists(_.invoiceDate.isEmpty)
 
-  val status: String = if (
-    isHomeDelivery ||
+  val status: String = if (isHomeDelivery ||
     repeatDeliveryProblem.contains(true) ||
-    isNotAutoCredit
-  ) "New" else "Closed"
+    isNotAutoCredit) "New" else "Closed"
 
   val priority: Option[String] = Some("High").filter(_ => isNotAutoCredit && isHomeDelivery)
 }
