@@ -5,7 +5,7 @@ import java.time.LocalDate
 import cats.effect.IO
 import com.gu.DevIdentity
 import com.gu.digital_voucher_api.imovo.ImovoStub._
-import com.gu.digital_voucher_api.imovo.{ImovoErrorResponse, ImovoSubscriptionResponse, ImovoSubscriptionType, ImovoSuccessResponse, ImovoVoucherResponse}
+import com.gu.imovo.{ImovoErrorResponse, ImovoSubscriptionResponse, ImovoSubscriptionType, ImovoSuccessResponse, ImovoVoucherResponse, SfSubscriptionId}
 import com.softwaremill.diffx.scalatest.DiffMatcher
 import com.softwaremill.sttp.impl.cats.CatsMonadError
 import com.softwaremill.sttp.testing.SttpBackendStub

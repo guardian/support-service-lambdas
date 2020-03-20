@@ -12,6 +12,7 @@ import org.http4s.circe.CirceEntityDecoder._
 import org.http4s.circe.CirceEntityEncoder._
 import org.http4s.dsl.Http4sDsl
 import org.http4s.{DecodeFailure, HttpRoutes, InvalidMessageBodyFailure, MalformedMessageBodyFailure, Request, Response}
+import com.gu.imovo.SfSubscriptionId
 
 case class DigitalVoucherApiRoutesError(message: String)
 

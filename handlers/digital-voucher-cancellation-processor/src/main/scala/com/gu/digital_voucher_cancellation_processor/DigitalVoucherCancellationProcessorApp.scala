@@ -2,7 +2,6 @@ package com.gu.digital_voucher_cancellation_processor
 
 import java.time.Clock
 
-import cats.Monad
 import cats.arrow.FunctionK
 import cats.data.EitherT
 import cats.effect.{IO, Sync}

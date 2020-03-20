@@ -1,4 +1,4 @@
-package com.gu.digital_voucher_api.imovo
+package com.gu.imovo
 
 import java.net.URI
 import java.time.LocalDate
@@ -7,7 +7,6 @@ import java.time.format.DateTimeFormatter
 import cats.data.EitherT
 import cats.effect.Sync
 import cats.implicits._
-import com.gu.digital_voucher_api.{SchemeName, SfSubscriptionId}
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
 import com.typesafe.scalalogging.LazyLogging
@@ -15,6 +14,8 @@ import io.circe.generic.auto._
 import io.circe.parser._
 import io.circe.{Decoder, Encoder}
 
+case class SfSubscriptionId(value: String) extends AnyVal
+case class SchemeName(value: String) extends AnyVal
 case class ImovoVoucherResponse(subscriptionType: String, voucherCode: String)
 case class ImovoSubscriptionResponse(
   schemeName: String,

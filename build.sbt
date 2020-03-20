@@ -226,6 +226,18 @@ lazy val `credit-processor` = all(project in file("lib/credit-processor"))
     libraryDependencies ++= logging
   )
 
+lazy val `imovo-sttp-client` = all(project in file("lib/imovo/imovo-sttp-client"))
+  .settings(
+    libraryDependencies ++=
+      Seq(sttp, sttpCirce, sttpCats % Test, scalatest, catsCore, catsEffect, circe, circeJava8) ++ logging
+  )
+
+lazy val `imovo-sttp-test-stub` = all(project in file("lib/imovo/imovo-sttp-test-stub"))
+  .dependsOn(`imovo-sttp-client`)
+  .settings(
+    libraryDependencies ++= Seq(scalatest)
+  )
+
 lazy val `zuora-callout-apis` = all(project in file("handlers/zuora-callout-apis"))
   .enablePlugins(RiffRaffArtifact)
   .dependsOn(zuora, handler, effectsDepIncludingTestFolder, `effects-sqs`, testDep)
@@ -355,31 +367,31 @@ lazy val `delivery-records-api` = all(project in file("handlers/delivery-records
   .enablePlugins(RiffRaffArtifact)
 
 lazy val `digital-voucher-api` = all(project in file("handlers/digital-voucher-api"))
-  .dependsOn(`effects-s3`, `config-cats`)
+  .dependsOn(`effects-s3`, `config-cats`, `imovo-sttp-client`, `imovo-sttp-test-stub` % Test)
   .settings(
     libraryDependencies ++=
-    Seq(
-      http4sLambda,
-      http4sDsl,
-      http4sCirce,
-      http4sServer,
-      sttp,
-      sttpCirce,
-      sttpAsycHttpClientBackendCats,
-      scalatest,
-      diffx
-    )
-    ++ logging
+      Seq(
+        http4sLambda,
+        http4sDsl,
+        http4sCirce,
+        http4sServer,
+        sttpAsycHttpClientBackendCats,
+        scalatest,
+        diffx
+      )
+      ++ logging
   )
   .enablePlugins(RiffRaffArtifact)
 
 lazy val `digital-voucher-cancellation-processor` = all(project in file("handlers/digital-voucher-cancellation-processor"))
-  .dependsOn(`effects-s3`, `config-cats`, `salesforce-sttp-client`, `salesforce-sttp-test-stub` % Test)
+  .dependsOn(
+    `config-cats`, `salesforce-sttp-client`, `salesforce-sttp-test-stub` % Test, `imovo-sttp-client`,
+    `imovo-sttp-test-stub` % Test
+  )
   .settings(
     libraryDependencies ++=
     Seq(
       scalatest,
-      simpleConfig,
       diffx,
       sttpCats
     )
