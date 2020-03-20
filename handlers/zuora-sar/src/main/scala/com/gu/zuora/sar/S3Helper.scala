@@ -53,7 +53,8 @@ object S3Helper extends S3Service with LazyLogging {
         if (failedSarExists) {
           S3FailedPathFound()
         } else if (completedFileExists) {
-          S3CompletedPathFound(completedResults.filterNot(k => k.value.contains("ResultsCompleted")).map(_.value))
+          S3CompletedPathFound(completedResults.filterNot(k => k.value.contains("ResultsCompleted"))
+            .map(keyPath => s"s3://${config.resultsBucket}/${keyPath.value}"))
         } else {
           S3NoResultsFound()
         }
