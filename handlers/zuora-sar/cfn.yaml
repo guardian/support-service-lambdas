@@ -13,6 +13,12 @@ Parameters:
         Description: Bucket where sar results are uploaded to
         Type: String
         Default: baton-results
+    VpcId:
+        Description: Vpc where the lambda is being created
+        Type: String
+    VpcSubnets:
+        Description: Subnets to use in VPC
+        Type: CommaDelimitedList
 
 Resources:
     IdentityInvokeRole:
@@ -49,6 +55,15 @@ Resources:
                           - sts:AssumeRole
             Path: /
             Policies:
+                - PolicyName: EC2Policy
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                            - ec2:CreateNetworkInterface
+                            - ec2:DescribeNetworkInterfaces
+                            - ec2:DeleteNetworkInterface
+                            Resource: "*"
                 - PolicyName: LogPolicy
                   PolicyDocument:
                       Statement:
@@ -94,6 +109,15 @@ Resources:
                           - sts:AssumeRole
             Path: /
             Policies:
+                - PolicyName: EC2Policy
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                            - ec2:CreateNetworkInterface
+                            - ec2:DescribeNetworkInterfaces
+                            - ec2:DeleteNetworkInterface
+                            Resource: "*"
                 - PolicyName: LogPolicy
                   PolicyDocument:
                       Statement:
@@ -128,11 +152,11 @@ Resources:
                             - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/zuoraRest-${Stage}.*.json
                             - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/zuoraSar-${Stage}.*.json
 
-#    LambdaSecurityGroup:
-#        Type: AWS::EC2::SecurityGroup
-#        Properties:
-#            GroupDescription: !Sub Security group for the zuora-sar-${Stage} lambdas
-#            VpcId: !Ref VpcId
+    LambdaSecurityGroup:
+        Type: AWS::EC2::SecurityGroup
+        Properties:
+            GroupDescription: !Sub Security group for the zuora-sar-${Stage} lambdas
+            VpcId: !Ref VpcId
 
     ZuoraBatonSarLambda:
         Type: AWS::Lambda::Function
@@ -150,9 +174,10 @@ Resources:
             MemorySize: 384
             Runtime: java8
             Timeout: 120
-#            VpcConfig:
-#                SecurityGroupIds: !Ref LambdaSecurityGroup
-#                SubnetIds: !Ref VpcSubnets
+            VpcConfig:
+                SecurityGroupIds:
+                - !Ref LambdaSecurityGroup
+                SubnetIds: !Ref VpcSubnets
             Role:
               !GetAtt ZuoraBatonSarLambdaRole.Arn
 
@@ -172,9 +197,10 @@ Resources:
             MemorySize: 1024
             Runtime: java8
             Timeout: 900
-#            VpcConfig:
-#                SecurityGroupIds: !Ref LambdaSecurityGroup
-#                SubnetIds: !Ref VpcSubnets
+            VpcConfig:
+                SecurityGroupIds:
+                - !Ref LambdaSecurityGroup
+                SubnetIds: !Ref VpcSubnets
             Role:
               !GetAtt PerformZuoraSarLambdaRole.Arn
         DependsOn:

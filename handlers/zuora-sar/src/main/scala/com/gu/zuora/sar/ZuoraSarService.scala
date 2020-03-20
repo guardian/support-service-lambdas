@@ -47,9 +47,10 @@ case class ZuoraSarService(zuoraClient: Requests, zuoraDownloadClient: Requests,
   implicit val readsOb: Reads[AccountNumber] = Json.reads[AccountNumber]
 
   private def accountObj(accountId: String): Either[ClientFailure, JsValue] = {
-    // The WithCheck object validates a JSON response by checking if a 'success' field is set as 'true'.
-    // For some reason, this particular endpoint doesn't return that field so WithoutCheck is passed to the .get method
-    // and a custom check to see if an AccountNumber is present in the response is made instead.
+    /* The WithCheck object validates a JSON response by checking if a 'success' field is set as 'true'.
+     * For some reason, this particular endpoint doesn't return that field so WithoutCheck is passed to the .get method
+     * and a custom check to see if an AccountNumber is present in the response is made instead.
+     */
     zuoraClient.get[JsValue](s"object/account/$accountId", WithoutCheck).toDisjunction.flatMap { accountObjectRes =>
       Json.fromJson[AccountNumber](accountObjectRes).asEither match {
         case Left(err) => Left(GenericError(s"Unable to find AccountNumber in account object response: $err"))
@@ -64,10 +65,11 @@ case class ZuoraSarService(zuoraClient: Requests, zuoraDownloadClient: Requests,
   private def getInvoiceFiles(invoiceId: String): Either[ClientFailure, InvoiceFiles] =
     zuoraClient.get[InvoiceFiles](s"invoices/$invoiceId/files").toDisjunction
 
-  // The pdfUrl provided in the invoice sometimes had the content-length header but sometimes did not. Content-length
-  // is required to upload to S3. For this reason, we're using the 'batch-query' endpoint and a zuoraDownloadClient instead
   private def invoiceFileContents(pdfUrls: List[InvoicePdfUrl]): Either[ClientFailure, List[DownloadStream]] = {
     pdfUrls.traverse(pdfUrl => {
+      /* The pdf url provided in the invoice only sometimes includes a content-length header. Content-length
+       * is required to upload to S3. For this reason, we're using the 'batch-query' endpoint and a zuoraDownloadClient instead.
+       */
       val fileIdUrl = pdfUrl.pdfFileUrl.replace("/v1/files/", "batch-query/file/")
       zuoraDownloadClient.getDownloadStream(fileIdUrl).toDisjunction
     })

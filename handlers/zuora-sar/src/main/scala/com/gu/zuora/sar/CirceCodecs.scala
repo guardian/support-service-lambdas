@@ -18,7 +18,7 @@ object circeCodecs {
         }
 
       cursor.downField("action").as[String].flatMap {
-        case "status" => cursor.as[SarStatusRequest].ensuring(dataProviderIsZuora(cursor))
+        case "status" => cursor.as[SarStatusRequest]
         case "initiate" => cursor.as[SarInitiateRequest].ensuring(dataProviderIsZuora(cursor))
         case "perform" => cursor.as[PerformSarRequest].ensuring(dataProviderIsZuora(cursor))
       }
@@ -55,7 +55,6 @@ object circeCodecs {
       addAdditionalFields(psr.asJsonObject, "perform")
     }
 
-  //just used for tests
   implicit val batonRequestEncoder: Encoder[SarRequest] = Encoder.instance {
     case ir: SarInitiateRequest =>
       addAdditionalFields(ir.asJsonObject, "initiate")
