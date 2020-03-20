@@ -4,7 +4,7 @@ import cats.data.EitherT
 import cats.implicits._
 import cats.effect.{ContextShift, IO}
 import com.gu.AppIdentity
-import com.gu.imovo.ImovoClient
+import com.gu.imovo.{ImovoClient, ImovoConfig}
 import com.gu.util.config.ConfigLoader
 import com.softwaremill.sttp.SttpBackend
 import com.softwaremill.sttp.asynchttpclient.cats.AsyncHttpClientCatsBackend
@@ -16,8 +16,6 @@ import io.circe.generic.auto._
 
 final case class DigitalVoucherApiError(message: String)
 
-case class ImovoConfig(imovoBaseUrl: String, imovoApiKey: String)
-
 object DigitalVoucherApiApp extends LazyLogging {
 
   private implicit val cs: ContextShift[IO] = IO.contextShift(scala.concurrent.ExecutionContext.global)
@@ -28,13 +26,13 @@ object DigitalVoucherApiApp extends LazyLogging {
 
   def apply[S](appIdentity: AppIdentity, backend: SttpBackend[IO, S]): EitherT[IO, DigitalVoucherApiError, HttpRoutes[IO]] = {
     for {
-      config <- ConfigLoader
+      imovoConfig <- ConfigLoader
         .loadConfig[IO, ImovoConfig](
           sharedConfigName = "support-service-lambdas-shared-imovo",
           appIdentity = appIdentity
         )
         .leftMap(error => DigitalVoucherApiError(error.toString))
-      imovoClient <- ImovoClient(backend, config.imovoBaseUrl, config.imovoApiKey)
+      imovoClient <- ImovoClient(backend, imovoConfig)
         .leftMap(error => DigitalVoucherApiError(error.toString))
       routes <- createLogging()(DigitalVoucherApiRoutes(DigitalVoucherService(imovoClient)))
         .asRight[DigitalVoucherApiError]
