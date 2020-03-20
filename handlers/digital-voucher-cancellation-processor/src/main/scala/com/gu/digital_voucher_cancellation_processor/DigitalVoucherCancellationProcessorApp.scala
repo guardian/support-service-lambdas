@@ -35,7 +35,7 @@ object DigitalVoucherCancellationProcessorApp extends LazyLogging {
     } yield result
   }
 
-  def loadConfig[F[_]: Sync: Monad](appIdentity: AppIdentity): EitherT[F, DigitalVoucherCancellationProcessorAppError, DigitalVoucherCancellationProcessorConfig] = {
+  def loadConfig[F[_]: Sync](appIdentity: AppIdentity): EitherT[F, DigitalVoucherCancellationProcessorAppError, DigitalVoucherCancellationProcessorConfig] = {
     for {
       imovoConfig <- ConfigLoader
         .loadConfig[F, ImovoConfig]("support-service-lambdas-shared-imovo", appIdentity)
