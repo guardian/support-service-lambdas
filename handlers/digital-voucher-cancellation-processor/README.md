@@ -51,8 +51,14 @@ To update a 'secret' parameter such as api keys and passwords use the following 
 aws --profile membership ssm put-parameter --overwrite --type SecureString --key-id 302bd430-2d97-4984-8625-b55a70691b49 --name /<stage>/membership-<stage>-digital-voucher-cancellation-processor/digital-voucher-cancellation-processor-<stage>/<parameter key> --value <parameter value>
 ```
 
-For example:
+For example configure the applications property in dev:
 ```$bash
-aws --profile membership ssm put-parameter --overwrite --type String --name /DEV/membership-DEV-digital-voucher-cancellation-processor/digital-voucher-cancellation-processor-DEV/imovoBaseUrl --value  https://core-uat-api.azurewebsites.net
-aws --profile membership ssm put-parameter --overwrite --type SecureString --key-id 302bd430-2d97-4984-8625-b55a70691b49 --name /DEV/membership-DEV-digital-voucher-cancellation-processor/digital-voucher-cancellation-processor-DEV/imovoApiKey --value xxxxxx
+aws --region eu-west-1 --profile membership ssm put-parameter --overwrite --type String --name /DEV/membership/digital-voucher-cancellation-processor/imovo/imovoBaseUrl --value  https://core-uat-api.azurewebsites.net
+aws --region eu-west-1 --profile membership ssm put-parameter --overwrite --type SecureString --key-id 302bd430-2d97-4984-8625-b55a70691b49 --name /DEV/membership/digital-voucher-cancellation-processor/imovo/imovoApiKey --value xxxxxx
+aws --region eu-west-1 --profile membership ssm put-parameter --overwrite --type String --name /DEV/membership/digital-voucher-cancellation-processor/salesforce/url --value https://test.salesforce.com
+aws --region eu-west-1 --profile membership ssm put-parameter --overwrite --type String --name /DEV/membership/digital-voucher-cancellation-processor/salesforce/client_id --value xxxx
+aws --region eu-west-1 --profile membership ssm put-parameter --overwrite --type SecureString --key-id 302bd430-2d97-4984-8625-b55a70691b49 --name /DEV/membership/digital-voucher-cancellation-processor/salesforce/client_secret --value xxxxxx
+aws --region eu-west-1 --profile membership ssm put-parameter --overwrite --type String --name /DEV/membership/digital-voucher-cancellation-processor/salesforce/username --value membersdataapi@guardian.co.uk.dev
+aws --region eu-west-1 --profile membership ssm put-parameter --overwrite --type SecureString --key-id 302bd430-2d97-4984-8625-b55a70691b49 --name /DEV/membership/digital-voucher-cancellation-processor/salesforce/password --value xxxxxx
+aws --region eu-west-1 --profile membership ssm put-parameter --overwrite --type SecureString --key-id 302bd430-2d97-4984-8625-b55a70691b49 --name /DEV/membership/digital-voucher-cancellation-processor/salesforce/token --value xxxxxx
 ```
