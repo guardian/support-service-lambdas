@@ -156,7 +156,8 @@ object SfQueries {
       |Version__c,
       |Zuora_Id__c,
       |ReaderType__c,
-      |GW_Offer__c
+      |GW_Offer__c,
+      |Id
       |from SF_Subscription__c
       |where Buyer__r.Account.GDPR_Deletion_Pending__c = false
       |
