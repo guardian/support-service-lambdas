@@ -1,4 +1,4 @@
-package com.gu.digital_voucher_api.imovo
+package com.gu.imovo
 
 import java.net.URI
 import java.time.LocalDate
@@ -7,7 +7,6 @@ import java.time.format.DateTimeFormatter
 import cats.data.EitherT
 import cats.effect.Sync
 import cats.implicits._
-import com.gu.digital_voucher_api.{SchemeName, SfSubscriptionId}
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
 import com.typesafe.scalalogging.LazyLogging
@@ -15,6 +14,9 @@ import io.circe.generic.auto._
 import io.circe.parser._
 import io.circe.{Decoder, Encoder}
 
+case class ImovoConfig(imovoBaseUrl: String, imovoApiKey: String)
+case class SfSubscriptionId(value: String) extends AnyVal
+case class SchemeName(value: String) extends AnyVal
 case class ImovoVoucherResponse(subscriptionType: String, voucherCode: String)
 case class ImovoSubscriptionResponse(
   schemeName: String,
@@ -47,7 +49,7 @@ trait ImovoClient[F[_]] {
 }
 
 object ImovoClient extends LazyLogging {
-  def apply[F[_]: Sync, S](backend: SttpBackend[F, S], baseUrl: String, apiKey: String): EitherT[F, ImovoClientException, ImovoClient[F]] = {
+  def apply[F[_]: Sync, S](backend: SttpBackend[F, S], config: ImovoConfig): EitherT[F, ImovoClientException, ImovoClient[F]] = {
     implicit val b = backend
 
     def sendAuthenticatedRequest[A: Decoder, B: Encoder](
@@ -117,9 +119,9 @@ object ImovoClient extends LazyLogging {
         startDate: LocalDate
       ): EitherT[F, ImovoClientException, ImovoSubscriptionResponse] =
         sendAuthenticatedRequest[ImovoSubscriptionResponse, String](
-          apiKey,
+          config.imovoApiKey,
           Method.GET,
-          Uri(new URI(s"$baseUrl/Subscription/RequestSubscriptionVouchers"))
+          Uri(new URI(s"${config.imovoBaseUrl}/Subscription/RequestSubscriptionVouchers"))
             .param("SubscriptionId", subscriptionId.value)
             .param("SchemeName", schemeName.value)
             .param("StartDate", imovoDateFormat.format(startDate)),
@@ -128,9 +130,9 @@ object ImovoClient extends LazyLogging {
 
       override def getSubscriptionVoucher(subscriptionId: String): EitherT[F, ImovoClientException, ImovoSubscriptionResponse] = {
         sendAuthenticatedRequest[ImovoSubscriptionResponse, String](
-          apiKey,
+          config.imovoApiKey,
           Method.GET,
-          Uri(new URI(s"$baseUrl/Subscription/GetSubscriptionVoucherDetails"))
+          Uri(new URI(s"${config.imovoBaseUrl}/Subscription/GetSubscriptionVoucherDetails"))
             .param("SubscriptionId", subscriptionId),
           None
         )
@@ -141,9 +143,9 @@ object ImovoClient extends LazyLogging {
         subscriptionType: ImovoSubscriptionType
       ): EitherT[F, ImovoClientException, ImovoSubscriptionResponse] = {
         sendAuthenticatedRequest[ImovoSubscriptionResponse, String](
-          apiKey,
+          config.imovoApiKey,
           Method.GET,
-          Uri(new URI(s"$baseUrl/Subscription/ReplaceVoucherBySubscriptionId"))
+          Uri(new URI(s"${config.imovoBaseUrl}/Subscription/ReplaceVoucherBySubscriptionId"))
             .param("SubscriptionId", subscriptionId.value)
             .param("SubscriptionType", subscriptionType.value),
           None
@@ -152,9 +154,9 @@ object ImovoClient extends LazyLogging {
 
       override def cancelSubscriptionVoucher(subscriptionId: SfSubscriptionId, lastActiveDay: LocalDate): EitherT[F, ImovoClientException, ImovoSuccessResponse] =
         sendAuthenticatedRequest[ImovoSuccessResponse, String](
-          apiKey,
+          config.imovoApiKey,
           Method.GET,
-          Uri(new URI(s"$baseUrl/Subscription/CancelSubscriptionVoucher"))
+          Uri(new URI(s"${config.imovoBaseUrl}/Subscription/CancelSubscriptionVoucher"))
             .param("SubscriptionId", subscriptionId.value)
             .param("LastActiveDay", imovoDateFormat.format(lastActiveDay)),
           None

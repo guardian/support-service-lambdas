@@ -2,11 +2,11 @@ package com.gu.digital_voucher_cancellation_processor
 
 import java.time.Clock
 
-import cats.Monad
 import cats.arrow.FunctionK
 import cats.data.EitherT
 import cats.effect.{IO, Sync}
 import com.gu.AppIdentity
+import com.gu.imovo.ImovoConfig
 import com.gu.salesforce.SFAuthConfig
 import com.gu.salesforce.sttp.SalesforceClient
 import com.gu.util.config.ConfigLoader
@@ -16,7 +16,6 @@ import com.typesafe.scalalogging.LazyLogging
 
 case class DigitalVoucherCancellationProcessorAppError(message: String)
 
-case class ImovoConfig(imovoBaseUrl: String, imovoApiKey: String)
 case class DigitalVoucherCancellationProcessorConfig(imovo: ImovoConfig, salesforce: SFAuthConfig)
 
 object DigitalVoucherCancellationProcessorApp extends LazyLogging {
