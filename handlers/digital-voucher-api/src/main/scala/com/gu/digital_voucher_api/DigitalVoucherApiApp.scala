@@ -16,7 +16,7 @@ import io.circe.generic.auto._
 
 final case class DigitalVoucherApiError(message: String)
 
-case class DigitalVoucherApiConfig(imovoBaseUrl: String, imovoApiKey: String)
+case class ImovoConfig(imovoBaseUrl: String, imovoApiKey: String)
 
 object DigitalVoucherApiApp extends LazyLogging {
 
@@ -29,7 +29,10 @@ object DigitalVoucherApiApp extends LazyLogging {
   def apply[S](appIdentity: AppIdentity, backend: SttpBackend[IO, S]): EitherT[IO, DigitalVoucherApiError, HttpRoutes[IO]] = {
     for {
       config <- ConfigLoader
-        .loadConfig[IO, DigitalVoucherApiConfig](appIdentity: AppIdentity)
+        .loadConfig[IO, ImovoConfig](
+          sharedConfigName = "support-service-lambdas-shared-imovo",
+          appIdentity = appIdentity
+        )
         .leftMap(error => DigitalVoucherApiError(error.toString))
       imovoClient <- ImovoClient(backend, config.imovoBaseUrl, config.imovoApiKey)
         .leftMap(error => DigitalVoucherApiError(error.toString))

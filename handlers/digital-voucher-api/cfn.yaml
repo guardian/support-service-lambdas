@@ -58,7 +58,7 @@ Resources:
                       Statement:
                           - Effect: Allow
                             Action: ssm:GetParametersByPath
-                            Resource: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${Stage}/membership-${Stage}-digital-voucher-api/digital-voucher-api-${Stage}"
+                            Resource: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${Stage}/membership/support-service-lambdas-shared-imovo"
                 - PolicyName: DecryptApplicationConfig
                   PolicyDocument:
                       Statement:
@@ -95,7 +95,7 @@ Resources:
             Environment:
                 Variables:
                   App: !Sub digital-voucher-api-${Stage}
-                  Stack: !Sub membership-${Stage}-digital-voucher-api
+                  Stack: membership
                   Stage: !Ref Stage
             Role:
                 Fn::GetAtt:

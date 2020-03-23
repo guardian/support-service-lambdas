@@ -35,7 +35,10 @@ export class DigitalVoucherCancellationProcessorStack extends cdk.Stack {
 
       role.addToPolicy(new iam.PolicyStatement({
         actions: ['ssm:GetParametersByPath'],
-        resources: [`arn:aws:ssm:${region}:${account}:parameter/${stageParameter.valueAsString}/${stackName}/${appName}`],
+        resources: [
+          `arn:aws:ssm:${region}:${account}:parameter/${stageParameter.valueAsString}/${stackName}/support-service-lambdas-shared-salesforce`,
+          `arn:aws:ssm:${region}:${account}:parameter/${stageParameter.valueAsString}/${stackName}/support-service-lambdas-shared-imovo`
+        ],
       }))
 
       role.addToPolicy(new iam.PolicyStatement({
