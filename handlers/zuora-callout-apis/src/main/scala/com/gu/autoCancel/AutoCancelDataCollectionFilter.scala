@@ -29,12 +29,6 @@ object AutoCancelDataCollectionFilter extends Logging {
   )(autoCancelCallout: AutoCancelCallout): ApiGatewayOp[List[AutoCancelRequest]] = {
     import autoCancelCallout._
 
-    val subsNames = for {
-      invoiceItems <- getInvoiceItems(invoiceId).withLogging("getInvoiceItems")
-    } yield invoiceItemsToSubscriptionsNames(invoiceItems)
-
-    logger.info(s"AutoCancelDataCollectionFilter invoiceItemsRes: $subsNames")
-
     for {
       accountSummary <- getAccountSummary(accountId).toApiGatewayOp("getAccountSummary").withLogging("getAccountSummary")
       invoiceItems <- getInvoiceItems(invoiceId).toApiGatewayOp("getInvoiceItems").withLogging("getInvoiceItems")
