@@ -44,7 +44,7 @@ class SubscriptionDataVoucherWeekendPlusIntegrationTest extends FlatSpec {
       subscriptionFile = "VoucherWeekendPlusSubscription.json",
       startDate = startDate,
       expectedIssueData = expectedIssueData,
-      expectedTotalAnnualIssueLimitPerSubscription = 8,
+      expectedTotalAnnualIssueLimitPerSubscription = 20,
       expectedProductType = ZuoraProductTypes.NewspaperVoucherBook,
       expectedEditionDaysOfWeek = List(SATURDAY, SUNDAY)
     )
