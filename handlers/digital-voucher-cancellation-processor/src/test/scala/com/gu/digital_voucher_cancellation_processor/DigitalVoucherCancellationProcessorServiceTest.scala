@@ -42,7 +42,8 @@ class DigitalVoucherCancellationProcessorServiceTest extends AnyFlatSpec with Ma
             List(
               DigitalVoucherQueryResult(
                 "digital-voucher-id",
-                SubscriptionQueryResult("sf-subscription-id")
+                "",
+                SubscriptionQueryResult("sf-subscription-id", "")
               )
             ),
             None

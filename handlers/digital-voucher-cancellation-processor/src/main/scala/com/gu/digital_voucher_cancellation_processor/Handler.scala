@@ -11,11 +11,11 @@ import scala.io.Source
 object Handler extends LazyLogging {
   def handle(is: InputStream, os: OutputStream): Unit = {
     logger.info(s"Received Scheduling Event: ${Source.fromInputStream(is).mkString}")
-    DigitalVoucherCancellationProcessorApp(AppIdentity.whoAmI(defaultAppName = "digital-voucher-api"))
+    val results = DigitalVoucherCancellationProcessorApp(AppIdentity.whoAmI(defaultAppName = "digital-voucher-api"))
       .value
       .unsafeRunSync()
       .valueOr(error => throw new RuntimeException(error.toString))
-    logger.info(s"Processor ran successfully")
+    logger.info(s"Processor ran successfully: $results")
   }
 
   def main(args: Array[String]): Unit = {

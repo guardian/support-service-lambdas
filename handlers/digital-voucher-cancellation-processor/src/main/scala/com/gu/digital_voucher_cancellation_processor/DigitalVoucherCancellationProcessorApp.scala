@@ -6,6 +6,7 @@ import cats.arrow.FunctionK
 import cats.data.EitherT
 import cats.effect.{IO, Sync}
 import com.gu.AppIdentity
+import com.gu.digital_voucher_cancellation_processor.DigitalVoucherCancellationProcessorService.ImovoCancellationResults
 import com.gu.imovo.{ImovoClient, ImovoConfig}
 import com.gu.salesforce.SFAuthConfig
 import com.gu.salesforce.sttp.SalesforceClient
@@ -19,12 +20,17 @@ case class DigitalVoucherCancellationProcessorAppError(message: String)
 case class DigitalVoucherCancellationProcessorConfig(imovo: ImovoConfig, salesforce: SFAuthConfig)
 
 object DigitalVoucherCancellationProcessorApp extends LazyLogging {
-
-  def apply(appIdentity: AppIdentity): EitherT[IO, DigitalVoucherCancellationProcessorAppError, Unit] = {
+  def apply(
+    appIdentity: AppIdentity
+  ): EitherT[IO, DigitalVoucherCancellationProcessorAppError, ImovoCancellationResults] = {
     apply(appIdentity, urlConnectionSttpBackend(), Clock.systemDefaultZone())
   }
 
-  def apply[F[_]: Sync, S](appIdentity: AppIdentity, sttpBackend: SttpBackend[F, S], clock: Clock): EitherT[F, DigitalVoucherCancellationProcessorAppError, Unit] = {
+  def apply[F[_]: Sync, S](
+    appIdentity: AppIdentity,
+    sttpBackend: SttpBackend[F, S],
+    clock: Clock
+  ): EitherT[F, DigitalVoucherCancellationProcessorAppError, ImovoCancellationResults] = {
     for {
       config <- loadConfig(appIdentity)
       salesforceClient <- SalesforceClient(sttpBackend, config.salesforce)
@@ -36,7 +42,9 @@ object DigitalVoucherCancellationProcessorApp extends LazyLogging {
     } yield result
   }
 
-  def loadConfig[F[_]: Sync](appIdentity: AppIdentity): EitherT[F, DigitalVoucherCancellationProcessorAppError, DigitalVoucherCancellationProcessorConfig] = {
+  def loadConfig[F[_]: Sync](
+    appIdentity: AppIdentity
+  ): EitherT[F, DigitalVoucherCancellationProcessorAppError, DigitalVoucherCancellationProcessorConfig] = {
     for {
       imovoConfig <- ConfigLoader
         .loadConfig[F, ImovoConfig]("support-service-lambdas-shared-imovo", appIdentity)

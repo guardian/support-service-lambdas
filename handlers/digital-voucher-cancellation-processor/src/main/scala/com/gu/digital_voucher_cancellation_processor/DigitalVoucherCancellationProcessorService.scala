@@ -1,11 +1,11 @@
 package com.gu.digital_voucher_cancellation_processor
 
-import java.time.{Clock, LocalDate}
+import java.time.{Clock, Instant, LocalDate}
 
 import cats.Monad
 import cats.data.EitherT
 import com.gu.imovo.{ImovoClient, ImovoClientException, SfSubscriptionId}
-import com.gu.salesforce.sttp.SalesforceClient
+import com.gu.salesforce.sttp.{SFApiCompositePart, SFApiCompositeRequest, SalesforceClient}
 import com.gu.salesforce.SalesforceQueryConstants.formatDate
 import com.typesafe.scalalogging.LazyLogging
 import io.circe.generic.auto._
@@ -16,8 +16,9 @@ import scala.collection.immutable
 object DigitalVoucherCancellationProcessorService extends LazyLogging {
 
   private val ImovoSubscriptionDoesNotExistMessage = "no live subscription vouchers exist for the supplied subscription id"
-  case class DigitalVoucherQueryResult(Id: String, SF_Subscription__r: SubscriptionQueryResult)
-  case class SubscriptionQueryResult(Id: String)
+  case class DigitalVoucherQueryResult(Id: String, url: String, SF_Subscription__r: SubscriptionQueryResult)
+  case class DigitalVoucherUpdate(Cancellation_Processed_At__c: Instant)
+  case class SubscriptionQueryResult(Id: String, url: String)
   case class DigitalVoucherCancellationProcessorServiceError(message: String)
   case class ImovoCancellationResults(
     successFullyCancelled: List[DigitalVoucherQueryResult] = Nil,
@@ -25,30 +26,62 @@ object DigitalVoucherCancellationProcessorService extends LazyLogging {
     cancellationFailed: List[ImovoClientException] = Nil
   )
 
-  def apply[F[_]: Monad](salesforceClient: SalesforceClient[F], imovoClient: ImovoClient[F], clock: Clock): EitherT[F, DigitalVoucherCancellationProcessorServiceError, Unit] = {
+  def apply[F[_]: Monad](
+    salesforceClient: SalesforceClient[F],
+    imovoClient: ImovoClient[F],
+    clock: Clock
+  ): EitherT[F, DigitalVoucherCancellationProcessorServiceError, ImovoCancellationResults] = {
     val today = LocalDate.now(clock)
     for {
       vouchersToProcess <- salesforceClient.query[DigitalVoucherQueryResult](
         subscrptionsCancelledTodayQuery(today)
       ).leftMap(error => DigitalVoucherCancellationProcessorServiceError(s"Failed to query for cancelled digital vouchers: ${error.message}"))
-
-      _ = processCancellations(imovoClient, vouchersToProcess.records)
-
-      _ = logger.info(s"Retrieved results for vouchers to be cancelled: ${vouchersToProcess}")
-    } yield ()
+      results <- processCancellations(imovoClient, salesforceClient, vouchersToProcess.records, clock)
+    } yield results
   }
 
   def processCancellations[F[_]: Monad](
     imovoClient: ImovoClient[F],
-    vouchersToCancel: List[DigitalVoucherQueryResult]
-  ) = {
+    salesforceClient: SalesforceClient[F],
+    vouchersToCancel: List[DigitalVoucherQueryResult],
+    clock: Clock
+  ): EitherT[F, DigitalVoucherCancellationProcessorServiceError, ImovoCancellationResults] = {
     for {
       imovoResults <- cancelSubscriptionsInImovo(vouchersToCancel, imovoClient)
+      _ <- updateSFCancellationProcessedDate(imovoResults, salesforceClient, clock)
     } yield imovoResults
   }
 
-  private def updateSFCancellationProcessedDate(subscriptionIds: List[String]) = {
+  private def updateSFCancellationProcessedDate[F[_]: Monad](
+    imovoCancellationResults: ImovoCancellationResults,
+    salesforceClient: SalesforceClient[F],
+    clock: Clock
+  ): EitherT[F, DigitalVoucherCancellationProcessorServiceError, Unit] = {
+    val now = clock.instant()
 
+    salesforceClient.composite(
+      SFApiCompositeRequest(
+        true,
+        true,
+        (imovoCancellationResults.successFullyCancelled ++ imovoCancellationResults.alreadyCancelled)
+          .map(voucherToMarkAsProcessed => {
+            SFApiCompositePart(
+              voucherToMarkAsProcessed.Id,
+              "PATCH",
+              voucherToMarkAsProcessed.url,
+              DigitalVoucherUpdate(now)
+            )
+          }
+        )
+      )
+    ).bimap(
+      { salesforceError =>
+        DigitalVoucherCancellationProcessorServiceError(
+          s"Failed to write changes to salesforce:${salesforceError} however the following updates were made in" +
+          s"imovo ${imovoCancellationResults} ")
+      },
+      _ => ()
+    )
   }
 
   private def cancelSubscriptionsInImovo[F[_]: Monad](
@@ -75,7 +108,8 @@ object DigitalVoucherCancellationProcessorService extends LazyLogging {
             r1.successFullyCancelled ++ r2.successFullyCancelled,
             r1.alreadyCancelled ++ r2.alreadyCancelled,
             r1.cancellationFailed ++ r2.cancellationFailed
-          ))
+          )
+        )
       }
     )
   }
