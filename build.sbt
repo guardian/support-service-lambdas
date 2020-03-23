@@ -177,6 +177,11 @@ lazy val `effects-sqs` = all(project in file("lib/effects-sqs"))
   .settings(
     libraryDependencies ++= Seq(awsSQS) ++ logging
   )
+lazy val `effects-lambda` = all(project in file("lib/effects-lambda"))
+  .dependsOn(testDep)
+  .settings(
+    libraryDependencies ++= Seq(awsSdkLambda) ++ logging
+  )
 
 lazy val `effects-ses` = all(project in file("lib/effects-ses"))
   .dependsOn(testDep)
@@ -271,6 +276,11 @@ lazy val `new-product-api` = all(project in file("handlers/new-product-api"))
 lazy val `zuora-retention` = all(project in file("handlers/zuora-retention"))
   .enablePlugins(RiffRaffArtifact)
   .dependsOn(`zuora-reports`, handler, effectsDepIncludingTestFolder, testDep)
+
+lazy val `zuora-sar` = all(project in file("handlers/zuora-sar"))
+  .settings(libraryDependencies ++= Seq(catsEffect, circeParser, circe, awsStepFunction))
+  .enablePlugins(RiffRaffArtifact)
+  .dependsOn(`zuora-reports`, handler, effectsDepIncludingTestFolder, testDep, `effects-s3`, `effects-lambda`)
 
 lazy val `sf-contact-merge` = all(project in file("handlers/sf-contact-merge"))
   .enablePlugins(RiffRaffArtifact)
