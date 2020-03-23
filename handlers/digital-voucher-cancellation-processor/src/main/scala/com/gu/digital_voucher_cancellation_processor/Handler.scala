@@ -4,9 +4,8 @@ import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream, Output
 
 import com.gu.AppIdentity
 import com.typesafe.scalalogging.LazyLogging
-import cats.implicits._
-
 import scala.io.Source
+import cats.implicits._
 
 object Handler extends LazyLogging {
   def handle(is: InputStream, os: OutputStream): Unit = {
@@ -14,8 +13,8 @@ object Handler extends LazyLogging {
     val results = DigitalVoucherCancellationProcessorApp(AppIdentity.whoAmI(defaultAppName = "digital-voucher-api"))
       .value
       .unsafeRunSync()
-      .valueOr(error => throw new RuntimeException(error.toString))
-    logger.info(s"Processor ran successfully: $results")
+      .valueOr(error => throw new RuntimeException(error.toString)).show
+    logger.info(s"Processor ran successfully: ${results.show}")
   }
 
   def main(args: Array[String]): Unit = {

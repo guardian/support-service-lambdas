@@ -2,7 +2,7 @@ package com.gu.digital_voucher_cancellation_processor
 
 import java.time.{Clock, Instant, LocalDate}
 
-import cats.Monad
+import cats.{Monad, Show}
 import cats.data.EitherT
 import com.gu.imovo.{ImovoClient, ImovoClientException, SfSubscriptionId}
 import com.gu.salesforce.sttp.{SFApiCompositePart, SFApiCompositeRequest, SalesforceClient}
@@ -21,11 +21,25 @@ object DigitalVoucherCancellationProcessorService extends LazyLogging {
   case class SubscriptionQueryResult(Id: String, url: String)
   case class DigitalVoucherCancellationProcessorServiceError(message: String)
   case class ImovoCancellationResults(
-    successFullyCancelled: List[DigitalVoucherQueryResult] = Nil,
+    successfullyCancelled: List[DigitalVoucherQueryResult] = Nil,
     alreadyCancelled: List[DigitalVoucherQueryResult] = Nil,
-    cancellationFailed: List[ImovoClientException] = Nil
+    cancellationFailures: List[ImovoClientException] = Nil
   )
-
+  object ImovoCancellationResults {
+    implicit val show = {
+      implicit val resultShow = Show.show[DigitalVoucherQueryResult](result =>
+        s"subscriptionId=${result.SF_Subscription__r.Id}"
+      )
+      Show.show[ImovoCancellationResults](results =>
+        s"""
+           |ImovoCancellationResults(
+           |  successfullyCancelled=[${results.successfullyCancelled.map(_.show).mkString(",")}]
+           |  alreadyCancelled=[${results.alreadyCancelled.map(_.show).mkString(",")}]
+           |  cancellationFailures=[${results.cancellationFailures.mkString(",")}]
+           |)
+           |""".stripMargin)
+    }
+  }
   def apply[F[_]: Monad](
     salesforceClient: SalesforceClient[F],
     imovoClient: ImovoClient[F],
@@ -63,7 +77,7 @@ object DigitalVoucherCancellationProcessorService extends LazyLogging {
       SFApiCompositeRequest(
         true,
         true,
-        (imovoCancellationResults.successFullyCancelled ++ imovoCancellationResults.alreadyCancelled)
+        (imovoCancellationResults.successfullyCancelled ++ imovoCancellationResults.alreadyCancelled)
           .map(voucherToMarkAsProcessed => {
             SFApiCompositePart(
               voucherToMarkAsProcessed.Id,
@@ -71,17 +85,17 @@ object DigitalVoucherCancellationProcessorService extends LazyLogging {
               voucherToMarkAsProcessed.url,
               DigitalVoucherUpdate(now)
             )
-          }
-        )
+          })
       )
     ).bimap(
-      { salesforceError =>
-        DigitalVoucherCancellationProcessorServiceError(
-          s"Failed to write changes to salesforce:${salesforceError} however the following updates were made in" +
-          s"imovo ${imovoCancellationResults} ")
-      },
-      _ => ()
-    )
+        { salesforceError =>
+          DigitalVoucherCancellationProcessorServiceError(
+            s"Failed to write changes to salesforce:${salesforceError} however the following updates were made in " +
+              s"imovo ${imovoCancellationResults.show} "
+          )
+        },
+        _ => ()
+      )
   }
 
   private def cancelSubscriptionsInImovo[F[_]: Monad](
@@ -98,18 +112,17 @@ object DigitalVoucherCancellationProcessorService extends LazyLogging {
                 case ImovoClientException(message) if message.contains(ImovoSubscriptionDoesNotExistMessage) =>
                   ImovoCancellationResults(alreadyCancelled = List(voucherToCancel))
                 case error: ImovoClientException =>
-                  ImovoCancellationResults(cancellationFailed = List(error))
+                  ImovoCancellationResults(cancellationFailures = List(error))
               },
-              _ => ImovoCancellationResults(successFullyCancelled = List(voucherToCancel))
+              _ => ImovoCancellationResults(successfullyCancelled = List(voucherToCancel))
             )
       }.map { resultList: immutable.Seq[ImovoCancellationResults] =>
         resultList.reduce((r1, r2) =>
           ImovoCancellationResults(
-            r1.successFullyCancelled ++ r2.successFullyCancelled,
+            r1.successfullyCancelled ++ r2.successfullyCancelled,
             r1.alreadyCancelled ++ r2.alreadyCancelled,
-            r1.cancellationFailed ++ r2.cancellationFailed
-          )
-        )
+            r1.cancellationFailures ++ r2.cancellationFailures
+          ))
       }
     )
   }

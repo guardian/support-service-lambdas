@@ -5,8 +5,10 @@ import java.net.URLEncoder
 import com.gu.salesforce.{SFAuthConfig, SalesforceAuth, SalesforceConstants}
 import com.softwaremill.sttp.{MediaTypes, Method, Request, Response, StringBody}
 import com.softwaremill.sttp.testing.SttpBackendStub
-import io.circe.Encoder
+import io.circe.{Decoder, Encoder}
 import io.circe.syntax._
+import io.circe.parser.decode
+import cats.implicits._
 
 object SalesforceStub {
   class SalesforceStubSttpBackendStubOps[F[_], S](sttpStub: SttpBackendStub[F, S]) {
@@ -43,9 +45,13 @@ object SalesforceStub {
           Response.ok(response.asJson.spaces2)
       }
     }
-    def stubComposite[A: Encoder](auth: SalesforceAuth, response: A): SttpBackendStub[F, S] = {
+    def stubComposite[A: Decoder, B: Encoder](
+      auth: SalesforceAuth,
+      expectedRequest: Option[A],
+      response: B
+    ): SttpBackendStub[F, S] = {
       sttpStub.whenRequestMatchesPartial {
-        case request: Request[_, _] if matchesCompositeRequest(auth, request) =>
+        case request: Request[_, _] if matchesCompositeRequest(auth, expectedRequest, request) =>
           Response.ok(response.asJson.spaces2)
       }
     }
@@ -78,10 +84,14 @@ object SalesforceStub {
     urlMatches && methodMatches
   }
 
-  private def matchesCompositeRequest[S, F[_]](auth: SalesforceAuth, request: Request[_, _]) = {
+  private def matchesCompositeRequest[S, F[_], A: Decoder](auth: SalesforceAuth, optionalExpectedRequestBody: Option[A], request: Request[_, _]) = {
     val urlMatches = urlNoQueryString(request).startsWith(auth.instance_url + SalesforceConstants.compositeBaseUrl)
     val methodMatches = request.method == Method.POST
-    urlMatches && methodMatches
+    val bodyMatches = optionalExpectedRequestBody
+      .map { expectedRequestBody => getBodyAs[A](request) == Right(expectedRequestBody) }
+      .getOrElse(true)
+
+    urlMatches && methodMatches && bodyMatches
   }
 
   private def matchesNextRecordsRequest[S, F[_]](auth: SalesforceAuth, nextRecordsLink: String, request: Request[_, _]) = {
@@ -94,7 +104,13 @@ object SalesforceStub {
     s"${request.uri.scheme}://${request.uri.host}/${request.uri.path.mkString("/")}"
   }
 
-  implicit def implicitStub[F[_]](sttpStub: SttpBackendStub[F, Nothing]) =
-    new SalesforceStubSttpBackendStubOps[F, Nothing](sttpStub)
+  private def getBodyAs[A: Decoder](request: Request[_, _]): Either[String, A] = {
+    request.body match {
+      case StringBody(bodyString, _, _) => decode[A](bodyString).leftMap(_.toString)
+      case _ => "Body type not supported in test".asLeft[A]
+    }
+  }
 
+  implicit def implicitSalesforceStub[F[_]](sttpStub: SttpBackendStub[F, Nothing]) =
+    new SalesforceStubSttpBackendStubOps[F, Nothing](sttpStub)
 }
