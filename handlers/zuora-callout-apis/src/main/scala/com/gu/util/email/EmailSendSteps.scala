@@ -97,7 +97,7 @@ trait EmailSqsSerialisation {
 
 object EmailSendSteps extends EmailSqsSerialisation with LazyLogging {
   def apply(sqsSend: Payload => Try[Unit])(emailRequest: EmailMessage): ClientFailableOp[Unit] = {
-    logger.info(s"EmailSendSteps $emailRequest")
+    logger.info(s"EmailSendSteps msg: $emailRequest")
     sqsSend(Payload(Json.toJson(emailRequest).toString)) match {
       case Success(_) =>
         ClientSuccess(())
