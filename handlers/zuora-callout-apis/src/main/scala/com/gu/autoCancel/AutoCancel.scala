@@ -15,12 +15,10 @@ object AutoCancel extends Logging {
 
   def apply(requests: Requests)(acRequest: AutoCancelRequest): ApiGatewayOp[Unit] = {
     val AutoCancelRequest(accountId, subToCancel, cancellationDate) = acRequest
-    logger.info(s"Attempting to perform auto-cancellation on account: $accountId")
+    logger.info(s"Attempting to perform auto-cancellation on account: $accountId for subscription: ${subToCancel.id}")
     val zuoraOp = for {
       _ <- ZuoraUpdateCancellationReason(requests)(subToCancel).withLogging("updateCancellationReason")
       _ <- ZuoraCancelSubscription(requests)(subToCancel, cancellationDate).withLogging("cancelSubscription")
-      // we will not disable autoPAy
-      //      _ <- ZuoraDisableAutoPay(requests)(accountId).withLogging("disableAutoPay")
     } yield ()
     zuoraOp.toApiGatewayOp("AutoCancel failed")
   }

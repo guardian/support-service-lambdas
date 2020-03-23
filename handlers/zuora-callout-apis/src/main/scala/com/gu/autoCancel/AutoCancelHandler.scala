@@ -38,7 +38,7 @@ object AutoCancelHandler extends App with Logging {
 
       AutoCancelSteps(
         AutoCancel.apply(zuoraRequests),
-        AutoCancelDataCollectionFilter.apply(now().toLocalDate, ZuoraGetAccountSummary(zuoraRequests), ZuoraGetInvoiceItems(zuoraRequests)),
+        AutoCancelRequestsProducer(now().toLocalDate, ZuoraGetAccountSummary(zuoraRequests), ZuoraGetInvoiceItems(zuoraRequests)),
         ZuoraEmailSteps.sendEmailRegardingAccount(
           EmailSendSteps(awsSQSSend(emailQueueFor(stage))),
           ZuoraGetInvoiceTransactions(ZuoraRestRequestMaker(response, zuoraRestConfig))

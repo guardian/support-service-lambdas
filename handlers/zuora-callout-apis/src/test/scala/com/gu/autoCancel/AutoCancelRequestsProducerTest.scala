@@ -7,9 +7,9 @@ import com.gu.util.zuora.ZuoraGetAccountSummary.ZuoraAccount.{AccountId, Payment
 import com.gu.util.zuora.ZuoraGetAccountSummary.{AccountSummary, BasicAccountInfo, Invoice, SubscriptionId, SubscriptionSummary}
 import org.scalatest._
 
-class AutoCancelDataCollectionFilterTest extends FlatSpec {
+class AutoCancelRequestsProducerTest extends FlatSpec {
 
-  import AutoCancelDataCollectionFilter._
+  import AutoCancelRequestsProducer._
 
   val basicInfo = BasicAccountInfo(AccountId("id123"), 11.99, PaymentMethodId("pmid"))
   val subscription = SubscriptionSummary(SubscriptionId("id123"), "A-S123", "Active")

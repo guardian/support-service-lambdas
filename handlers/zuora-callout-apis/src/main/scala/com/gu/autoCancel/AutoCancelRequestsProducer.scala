@@ -12,14 +12,15 @@ import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.zuora.ZuoraGetAccountSummary.{AccountSummary, Invoice, SubscriptionId}
 import play.api.libs.json.JsValue
 
-object AutoCancelDataCollectionFilter extends Logging {
+object AutoCancelRequestsProducer extends Logging {
 
-  def invoiceItemsToSubscriptionsNames(getInvoiceItemsRes: JsValue): List[SubscriptionId] = {
+  private def invoiceItemsToSubscriptionsNames(getInvoiceItemsRes: JsValue): List[SubscriptionId] = {
     val parsed = (getInvoiceItemsRes \ "invoiceItems" \\ "subscriptionName")
       .map(_.as[String])
-      .toSet.toList.map(n => SubscriptionId(n))
+      .toSet
+      .map(n => SubscriptionId(n))
     logger.info(s"invoiceItemsToSubscriptionsNames: $parsed")
-    parsed
+    parsed.toList
   }
 
   def apply(
@@ -39,6 +40,8 @@ object AutoCancelDataCollectionFilter extends Logging {
     }
   }
 
+  // should come from the invoice that triggered that event
+
   def getCancellationDateFromInvoices(accountSummary: AccountSummary, dateToday: LocalDate): ApiGatewayOp[LocalDate] = {
     val unpaidAndOverdueInvoices = accountSummary.invoices.filter { invoice => invoiceOverdue(invoice, dateToday) }
     if (unpaidAndOverdueInvoices.isEmpty) {
@@ -53,6 +56,8 @@ object AutoCancelDataCollectionFilter extends Logging {
     }
   }
 
+  // TODO refactor
+
   def invoiceOverdue(invoice: Invoice, dateToday: LocalDate): Boolean = {
     if (invoice.balance > 0 && invoice.status == "Posted") {
       val zuoraGracePeriod = 14L // This needs to match with the timeframe for the 3rd payment retry attempt in Zuora
@@ -62,19 +67,21 @@ object AutoCancelDataCollectionFilter extends Logging {
     } else false
   }
 
-  def getSubscriptionToCancel(accountSummary: AccountSummary): ApiGatewayOp[SubscriptionId] = {
-    val activeSubs = accountSummary.subscriptions.filter(_.status == "Active")
-    activeSubs match {
-      case sub :: Nil =>
-        logger.info(s"Determined that we should cancel SubscriptionId: ${sub.id} (for AccountId: ${accountSummary.basicInfo.id})")
-        ContinueProcessing(sub.id)
-      case Nil =>
-        logger.error(s"Didn't find any active subscriptions. The full list of subs for this account was: ${accountSummary.subscriptions}")
-        ReturnWithResponse(noActionRequired("No Active subscriptions to cancel!"))
-      case subs =>
-        // This should be a pretty rare scenario, because the Billing Account to Sub relationship is (supposed to be) 1-to-1
-        logger.error(s"More than one subscription is Active on account: ${accountSummary.basicInfo.id}. Subscription ids are: ${activeSubs.map(_.id)}")
-        ReturnWithResponse(noActionRequired("More than one active sub found!")) // Don't continue because we don't know which active sub to cancel
-    }
-  }
+  // TODO delete
+
+//  def getSubscriptionToCancel(accountSummary: AccountSummary): ApiGatewayOp[SubscriptionId] = {
+  //    val activeSubs = accountSummary.subscriptions.filter(_.status == "Active")
+  //    activeSubs match {
+  //      case sub :: Nil =>
+  //        logger.info(s"Determined that we should cancel SubscriptionId: ${sub.id} (for AccountId: ${accountSummary.basicInfo.id})")
+  //        ContinueProcessing(sub.id)
+  //      case Nil =>
+  //        logger.error(s"Didn't find any active subscriptions. The full list of subs for this account was: ${accountSummary.subscriptions}")
+  //        ReturnWithResponse(noActionRequired("No Active subscriptions to cancel!"))
+  //      case subs =>
+  //        // This should be a pretty rare scenario, because the Billing Account to Sub relationship is (supposed to be) 1-to-1
+  //        logger.error(s"More than one subscription is Active on account: ${accountSummary.basicInfo.id}. Subscription ids are: ${activeSubs.map(_.id)}")
+  //        ReturnWithResponse(noActionRequired("More than one active sub found!")) // Don't continue because we don't know which active sub to cancel
+  //    }
+  //  }
 }

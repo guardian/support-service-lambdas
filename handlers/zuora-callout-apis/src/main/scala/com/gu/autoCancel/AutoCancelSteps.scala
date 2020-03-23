@@ -27,18 +27,16 @@ object AutoCancelSteps extends Logging {
   }
 
   def apply(
-    autoCancel: AutoCancelRequest => ApiGatewayOp[Unit],
-    autoCancelFilter: AutoCancelCallout => ApiGatewayOp[List[AutoCancelRequest]],
-    sendEmailRegardingAccount: (String, PaymentFailureInformation => Either[String, EmailMessage]) => ClientFailableOp[Unit]
+             callZuoraAutoCancel: AutoCancelRequest => ApiGatewayOp[Unit],
+             autoCancelReqProducer: AutoCancelCallout => ApiGatewayOp[List[AutoCancelRequest]],
+             sendEmailRegardingAccount: (String, PaymentFailureInformation => Either[String, EmailMessage]) => ClientFailableOp[Unit]
   ): Operation = Operation.noHealthcheck({ apiGatewayRequest: ApiGatewayRequest =>
     (for {
       autoCancelCallout <- apiGatewayRequest.bodyAsCaseClass[AutoCancelCallout]()
       urlParams <- apiGatewayRequest.queryParamsAsCaseClass[AutoCancelUrlParams]()
       _ <- AutoCancelInputFilter(autoCancelCallout, onlyCancelDirectDebit = urlParams.onlyCancelDirectDebit)
-      acRequests <- autoCancelFilter(autoCancelCallout).withLogging(s"auto-cancellation filter for ${autoCancelCallout.accountId}")
-      _ <- acRequests.map(cReq => autoCancel(cReq).withLogging(s"auto-cancellation for ${autoCancelCallout.accountId}")).head
-      // running multiple auto cancels
-      //      _ <-   autoCancel(acRequest).withLogging(s"auto-cancellation for ${autoCancelCallout.accountId}")
+      autoCancelRequests <- autoCancelReqProducer(autoCancelCallout).withLogging(s"auto-cancellation requests for ${autoCancelCallout.accountId}")
+      _ <- autoCancelRequests.map(req => callZuoraAutoCancel(req).withLogging(s"auto-cancellation for ${autoCancelCallout.accountId}")).head
       request = makeRequest(autoCancelCallout) _
       _ <- logErrorsAndContinueProcessing(sendEmailRegardingAccount(autoCancelCallout.accountId, request))
     } yield ApiGatewayResponse.successfulExecution).apiResponse
