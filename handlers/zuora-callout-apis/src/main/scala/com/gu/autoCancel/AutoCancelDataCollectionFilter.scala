@@ -3,38 +3,45 @@ package com.gu.autoCancel
 import java.time.LocalDate
 
 import com.gu.autoCancel.AutoCancel.AutoCancelRequest
+import com.gu.stripeCustomerSourceUpdated.TypeConvert._
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayResponse.noActionRequired
 import com.gu.util.reader.Types.ApiGatewayOp._
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.zuora.ZuoraGetAccountSummary.{AccountSummary, Invoice, SubscriptionId}
-import com.gu.stripeCustomerSourceUpdated.TypeConvert._
-import play.api.libs.json.{JsObject, JsValue}
+import play.api.libs.json.JsValue
 
 object AutoCancelDataCollectionFilter extends Logging {
+
+  def invoiceItemsToSubscriptionsNames(getInvoiceItemsRes: JsValue): List[SubscriptionId] = {
+    val parsed = (getInvoiceItemsRes \ "invoiceItems" \\ "subscriptionName")
+      .map(_.as[String])
+      .toSet.toList.map(n => SubscriptionId(n))
+    logger.info(s"invoiceItemsToSubscriptionsNames: $parsed")
+    parsed
+  }
 
   def apply(
     now: LocalDate,
     getAccountSummary: String => ClientFailableOp[AccountSummary],
     getInvoiceItems: String => ClientFailableOp[JsValue]
-  )(autoCancelCallout: AutoCancelCallout): ApiGatewayOp[AutoCancelRequest] = {
+  )(autoCancelCallout: AutoCancelCallout): ApiGatewayOp[List[AutoCancelRequest]] = {
     import autoCancelCallout._
-    autoCancelCallout.invoiceId
-    // get invoice items / subscriptionIds
-    // cancel those subscriptions
 
-    val invoiceItemsRes = for {
+    val subsNames = for {
       invoiceItems <- getInvoiceItems(invoiceId).withLogging("getInvoiceItems")
-    } yield invoiceItems
+    } yield invoiceItemsToSubscriptionsNames(invoiceItems)
 
-    logger.info(s"AutoCancelDataCollectionFilter invoiceItemsRes: $invoiceItemsRes")
+    logger.info(s"AutoCancelDataCollectionFilter invoiceItemsRes: $subsNames")
 
     for {
       accountSummary <- getAccountSummary(accountId).toApiGatewayOp("getAccountSummary").withLogging("getAccountSummary")
-      subToCancel <- getSubscriptionToCancel(accountSummary).withLogging("getSubscriptionToCancel")
+      invoiceItems <- getInvoiceItems(invoiceId).toApiGatewayOp("getInvoiceItems").withLogging("getInvoiceItems")
       cancellationDate <- getCancellationDateFromInvoices(accountSummary, now).withLogging("getCancellationDateFromInvoices")
-    } yield AutoCancelRequest(accountId, subToCancel, cancellationDate)
+    } yield invoiceItemsToSubscriptionsNames(invoiceItems).map { subToCancel =>
+      AutoCancelRequest(accountId, subToCancel, cancellationDate)
+    }
   }
 
   def getCancellationDateFromInvoices(accountSummary: AccountSummary, dateToday: LocalDate): ApiGatewayOp[LocalDate] = {
@@ -59,21 +66,4 @@ object AutoCancelDataCollectionFilter extends Logging {
       dateToday.isEqual(invoiceOverdueDate) || dateToday.isAfter(invoiceOverdueDate)
     } else false
   }
-
-  def getSubscriptionToCancel(accountSummary: AccountSummary): ApiGatewayOp[SubscriptionId] = {
-    val activeSubs = accountSummary.subscriptions.filter(_.status == "Active")
-    activeSubs match {
-      case sub :: Nil =>
-        logger.info(s"Determined that we should cancel SubscriptionId: ${sub.id} (for AccountId: ${accountSummary.basicInfo.id})")
-        ContinueProcessing(sub.id)
-      case Nil =>
-        logger.error(s"Didn't find any active subscriptions. The full list of subs for this account was: ${accountSummary.subscriptions}")
-        ReturnWithResponse(noActionRequired("No Active subscriptions to cancel!"))
-      case subs =>
-        // This should be a pretty rare scenario, because the Billing Account to Sub relationship is (supposed to be) 1-to-1
-        logger.error(s"More than one subscription is Active on account: ${accountSummary.basicInfo.id}. Subscription ids are: ${activeSubs.map(_.id)}")
-        ReturnWithResponse(noActionRequired("More than one active sub found!")) // Don't continue because we don't know which active sub to cancel
-    }
-  }
-
 }

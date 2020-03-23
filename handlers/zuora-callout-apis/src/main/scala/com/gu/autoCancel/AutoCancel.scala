@@ -7,7 +7,7 @@ import com.gu.util.Logging
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.RestRequestMaker.Requests
 import com.gu.util.zuora.ZuoraGetAccountSummary.SubscriptionId
-import com.gu.util.zuora.{ZuoraCancelSubscription, ZuoraDisableAutoPay, ZuoraUpdateCancellationReason}
+import com.gu.util.zuora.{ZuoraCancelSubscription, ZuoraUpdateCancellationReason}
 
 object AutoCancel extends Logging {
 
@@ -19,7 +19,8 @@ object AutoCancel extends Logging {
     val zuoraOp = for {
       _ <- ZuoraUpdateCancellationReason(requests)(subToCancel).withLogging("updateCancellationReason")
       _ <- ZuoraCancelSubscription(requests)(subToCancel, cancellationDate).withLogging("cancelSubscription")
-      _ <- ZuoraDisableAutoPay(requests)(accountId).withLogging("disableAutoPay")
+      // we will not disable autoPAy
+      //      _ <- ZuoraDisableAutoPay(requests)(accountId).withLogging("disableAutoPay")
     } yield ()
     zuoraOp.toApiGatewayOp("AutoCancel failed")
   }

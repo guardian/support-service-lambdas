@@ -1,11 +1,12 @@
 package com.gu.util.zuora
 
 import com.gu.util.resthttp.RestRequestMaker.Requests
-import com.gu.util.resthttp.Types.ClientFailableOp
+import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess}
 import com.gu.util.zuora.ZuoraGetAccountSummary.SubscriptionId
+import com.typesafe.scalalogging.LazyLogging
 import play.api.libs.json.{JsSuccess, Json, Reads, Writes}
 
-object ZuoraUpdateCancellationReason {
+object ZuoraUpdateCancellationReason extends LazyLogging {
 
   case class SubscriptionUpdate(cancellationReason: String)
 
@@ -18,7 +19,12 @@ object ZuoraUpdateCancellationReason {
   implicit val unitReads: Reads[Unit] =
     Reads(_ => JsSuccess(()))
 
-  def apply(requests: Requests)(subscription: SubscriptionId): ClientFailableOp[Unit] =
-    requests.put(SubscriptionUpdate("System AutoCancel"), s"subscriptions/${subscription.id}"): ClientFailableOp[Unit]
+  def apply(requests: Requests)(subscription: SubscriptionId): ClientFailableOp[Unit] = {
+    val msg = s"DRY run for ZuoraUpdateCancellationReason: ${SubscriptionUpdate("System AutoCancel")}" +
+      s" at path: subscriptions/${subscription.id}"
+    logger.info(msg)
+    //    requests.put(SubscriptionUpdate("System AutoCancel"), s"subscriptions/${subscription.id}"): ClientFailableOp[Unit]
+    ClientSuccess(msg)
+  }
 
 }
