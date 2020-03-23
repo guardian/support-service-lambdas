@@ -31,6 +31,7 @@ object AutoCancelDataCollectionFilter extends Logging {
 
     for {
       accountSummary <- getAccountSummary(accountId).toApiGatewayOp("getAccountSummary").withLogging("getAccountSummary")
+      //      _ <- getSubscriptionToCancel(accountSummary).withLogging("getSubscriptionToCancel")
       invoiceItems <- getInvoiceItems(invoiceId).toApiGatewayOp("getInvoiceItems").withLogging("getInvoiceItems")
       cancellationDate <- getCancellationDateFromInvoices(accountSummary, now).withLogging("getCancellationDateFromInvoices")
     } yield invoiceItemsToSubscriptionsNames(invoiceItems).map { subToCancel =>
@@ -59,5 +60,21 @@ object AutoCancelDataCollectionFilter extends Logging {
       logger.info(s"Zuora grace period is: $zuoraGracePeriod days. Due date for Invoice id ${invoice.id} is ${invoice.dueDate}, so it will be considered overdue on: $invoiceOverdueDate.")
       dateToday.isEqual(invoiceOverdueDate) || dateToday.isAfter(invoiceOverdueDate)
     } else false
+  }
+
+  def getSubscriptionToCancel(accountSummary: AccountSummary): ApiGatewayOp[SubscriptionId] = {
+    val activeSubs = accountSummary.subscriptions.filter(_.status == "Active")
+    activeSubs match {
+      case sub :: Nil =>
+        logger.info(s"Determined that we should cancel SubscriptionId: ${sub.id} (for AccountId: ${accountSummary.basicInfo.id})")
+        ContinueProcessing(sub.id)
+      case Nil =>
+        logger.error(s"Didn't find any active subscriptions. The full list of subs for this account was: ${accountSummary.subscriptions}")
+        ReturnWithResponse(noActionRequired("No Active subscriptions to cancel!"))
+      case subs =>
+        // This should be a pretty rare scenario, because the Billing Account to Sub relationship is (supposed to be) 1-to-1
+        logger.error(s"More than one subscription is Active on account: ${accountSummary.basicInfo.id}. Subscription ids are: ${activeSubs.map(_.id)}")
+        ReturnWithResponse(noActionRequired("More than one active sub found!")) // Don't continue because we don't know which active sub to cancel
+    }
   }
 }
