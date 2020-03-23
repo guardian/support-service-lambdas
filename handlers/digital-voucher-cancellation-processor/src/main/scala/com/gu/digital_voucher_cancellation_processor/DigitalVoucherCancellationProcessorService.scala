@@ -28,8 +28,7 @@ object DigitalVoucherCancellationProcessorService extends LazyLogging {
   object ImovoCancellationResults {
     implicit val show = {
       implicit val resultShow = Show.show[DigitalVoucherQueryResult](result =>
-        s"subscriptionId=${result.SF_Subscription__r.Id}"
-      )
+        s"subscriptionId=${result.SF_Subscription__r.Id}")
       Show.show[ImovoCancellationResults](results =>
         s"""
            |ImovoCancellationResults(
