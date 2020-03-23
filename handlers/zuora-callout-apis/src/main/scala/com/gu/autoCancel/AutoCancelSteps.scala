@@ -7,9 +7,8 @@ import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.Operation
 import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.email.{EmailId, EmailMessage}
-import com.gu.util.reader.Types._
-import com.gu.stripeCustomerSourceUpdated.TypeConvert._
 import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
+import com.gu.util.reader.Types._
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientFailure, ClientSuccess}
 import play.api.libs.json._
 

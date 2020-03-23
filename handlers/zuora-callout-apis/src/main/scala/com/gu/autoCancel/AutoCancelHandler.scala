@@ -2,6 +2,7 @@ package com.gu.autoCancel
 
 import java.io.{InputStream, OutputStream}
 import java.time.LocalDateTime
+
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.sqs.AwsSQSSend
 import com.gu.effects.sqs.AwsSQSSend.{Payload, QueueName}
@@ -15,8 +16,9 @@ import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config._
 import com.gu.util.email.EmailSendSteps
 import com.gu.util.reader.Types._
-import com.gu.util.zuora.{ZuoraGetAccountSummary, ZuoraGetInvoiceTransactions, ZuoraRestConfig, ZuoraRestRequestMaker}
+import com.gu.util.zuora.{ZuoraGetAccountSummary, ZuoraGetInvoiceItems, ZuoraGetInvoiceTransactions, ZuoraRestConfig, ZuoraRestRequestMaker}
 import okhttp3.{Request, Response}
+
 import scala.util.Try
 
 object AutoCancelHandler extends App with Logging {
@@ -33,9 +35,10 @@ object AutoCancelHandler extends App with Logging {
       zuoraRestConfig <- loadConfigModule[ZuoraRestConfig].toApiGatewayOp("load zuora config")
     } yield {
       val zuoraRequests = ZuoraRestRequestMaker(response, zuoraRestConfig)
+
       AutoCancelSteps(
         AutoCancel.apply(zuoraRequests),
-        AutoCancelDataCollectionFilter.apply(now().toLocalDate, ZuoraGetAccountSummary(zuoraRequests)),
+        AutoCancelDataCollectionFilter.apply(now().toLocalDate, ZuoraGetAccountSummary(zuoraRequests), ZuoraGetInvoiceItems(zuoraRequests)),
         ZuoraEmailSteps.sendEmailRegardingAccount(
           EmailSendSteps(awsSQSSend(emailQueueFor(stage))),
           ZuoraGetInvoiceTransactions(ZuoraRestRequestMaker(response, zuoraRestConfig))

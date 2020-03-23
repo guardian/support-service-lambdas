@@ -10,14 +10,26 @@ import com.gu.util.reader.Types._
 import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.util.zuora.ZuoraGetAccountSummary.{AccountSummary, Invoice, SubscriptionId}
 import com.gu.stripeCustomerSourceUpdated.TypeConvert._
+import play.api.libs.json.{JsObject, JsValue}
 
 object AutoCancelDataCollectionFilter extends Logging {
 
   def apply(
     now: LocalDate,
-    getAccountSummary: String => ClientFailableOp[AccountSummary]
+    getAccountSummary: String => ClientFailableOp[AccountSummary],
+    getInvoiceItems: String => ClientFailableOp[JsValue]
   )(autoCancelCallout: AutoCancelCallout): ApiGatewayOp[AutoCancelRequest] = {
-    val accountId = autoCancelCallout.accountId
+    import autoCancelCallout._
+    autoCancelCallout.invoiceId
+    // get invoice items / subscriptionIds
+    // cancel those subscriptions
+
+    val invoiceItemsRes = for {
+      invoiceItems <- getInvoiceItems(invoiceId).withLogging("getInvoiceItems")
+    } yield invoiceItems
+
+    logger.info(s"AutoCancelDataCollectionFilter invoiceItemsRes: $invoiceItemsRes")
+
     for {
       accountSummary <- getAccountSummary(accountId).toApiGatewayOp("getAccountSummary").withLogging("getAccountSummary")
       subToCancel <- getSubscriptionToCancel(accountSummary).withLogging("getSubscriptionToCancel")

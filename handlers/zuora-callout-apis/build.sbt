@@ -23,3 +23,5 @@ libraryDependencies ++= Seq(
 )
 
 assemblyMergeStrategyDiscardModuleInfo
+
+test in assembly := {}
