@@ -3,7 +3,7 @@ package com.gu.autoCancel
 import java.time.LocalDate
 
 import com.gu.TestData
-import com.gu.autoCancel.AutoCancel.AutoCancelRequest
+import com.gu.autoCancel.MultiAutoCancel.AutoCancelRequest
 import com.gu.effects.TestingRawEffects
 import com.gu.effects.TestingRawEffects.BasicRequest
 import com.gu.util.reader.Types._
@@ -31,7 +31,7 @@ class AutoCancelStepsTest extends FlatSpec with Matchers {
 
   "auto cancel" should "turn off auto pay" in {
     val effects = new TestingRawEffects(200)
-    AutoCancel(TestData.zuoraDeps(effects))(AutoCancelRequest("AID", SubscriptionId("subid"), LocalDate.now))
+    MultiAutoCancel(TestData.zuoraDeps(effects))(AutoCancelRequest("AID", SubscriptionId("subid"), LocalDate.now))
 
     effects.requestsAttempted should contain(BasicRequest("PUT", "/accounts/AID", "{\"autoPay\":false}"))
   }

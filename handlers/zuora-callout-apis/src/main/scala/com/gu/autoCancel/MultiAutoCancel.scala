@@ -9,11 +9,17 @@ import com.gu.util.resthttp.RestRequestMaker.Requests
 import com.gu.util.zuora.ZuoraGetAccountSummary.SubscriptionId
 import com.gu.util.zuora.{ZuoraCancelSubscription, ZuoraUpdateCancellationReason}
 
-object AutoCancel extends Logging {
+object MultiAutoCancel extends Logging {
 
   case class AutoCancelRequest(accountId: String, subToCancel: SubscriptionId, cancellationDate: LocalDate)
 
-  def apply(requests: Requests)(acRequest: AutoCancelRequest): ApiGatewayOp[Unit] = {
+  def apply(requests: Requests)(acRequests: List[AutoCancelRequest]): ApiGatewayOp[Unit] = {
+    val responses = acRequests.map(cancelReq => executeCancel(requests)(cancelReq))
+    logger.info(s"AutoCancel requests created: $responses")
+    responses.head
+  }
+
+  private def executeCancel(requests: Requests)(acRequest: AutoCancelRequest): ApiGatewayOp[Unit] = {
     val AutoCancelRequest(accountId, subToCancel, cancellationDate) = acRequest
     logger.info(s"Attempting to perform auto-cancellation on account: $accountId for subscription: ${subToCancel.id}")
     val zuoraOp = for {

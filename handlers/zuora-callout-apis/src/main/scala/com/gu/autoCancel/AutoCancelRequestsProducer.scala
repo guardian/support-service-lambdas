@@ -2,7 +2,7 @@ package com.gu.autoCancel
 
 import java.time.LocalDate
 
-import com.gu.autoCancel.AutoCancel.AutoCancelRequest
+import com.gu.autoCancel.MultiAutoCancel.AutoCancelRequest
 import com.gu.stripeCustomerSourceUpdated.TypeConvert._
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayResponse.noActionRequired
@@ -35,9 +35,10 @@ object AutoCancelRequestsProducer extends Logging {
       //      _ <- getSubscriptionToCancel(accountSummary).withLogging("getSubscriptionToCancel")
       invoiceItems <- getInvoiceItems(invoiceId).toApiGatewayOp("getInvoiceItems").withLogging("getInvoiceItems")
       cancellationDate <- getCancellationDateFromInvoices(accountSummary, now).withLogging("getCancellationDateFromInvoices")
-    } yield invoiceItemsToSubscriptionsNames(invoiceItems).map { subToCancel =>
-      AutoCancelRequest(accountId, subToCancel, cancellationDate)
-    }
+    } yield invoiceItemsToSubscriptionsNames(invoiceItems)
+      .map { subToCancel =>
+        AutoCancelRequest(accountId, subToCancel, cancellationDate)
+      }
   }
 
   // should come from the invoice that triggered that event
@@ -69,7 +70,7 @@ object AutoCancelRequestsProducer extends Logging {
 
   // TODO delete
 
-//  def getSubscriptionToCancel(accountSummary: AccountSummary): ApiGatewayOp[SubscriptionId] = {
+  //  def getSubscriptionToCancel(accountSummary: AccountSummary): ApiGatewayOp[SubscriptionId] = {
   //    val activeSubs = accountSummary.subscriptions.filter(_.status == "Active")
   //    activeSubs match {
   //      case sub :: Nil =>
