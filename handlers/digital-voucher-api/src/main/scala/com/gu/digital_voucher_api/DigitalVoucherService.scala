@@ -5,7 +5,7 @@ import java.time.LocalDate
 import cats.Monad
 import cats.implicits._
 import cats.data.EitherT
-import com.gu.digital_voucher_api.imovo.{ImovoClient, ImovoSubscriptionResponse, ImovoSubscriptionType}
+import com.gu.imovo.{ImovoClient, ImovoSubscriptionResponse, ImovoSubscriptionType, SchemeName, SfSubscriptionId}
 
 trait DigitalVoucherService[F[_]] {
   def createVoucher(subscriptionId: SfSubscriptionId, ratePlanName: RatePlanName): EitherT[F, DigitalVoucherServiceError, SubscriptionVouchers]
