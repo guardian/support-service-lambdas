@@ -146,8 +146,8 @@ class SubscriptionUpdateTest extends AnyFlatSpec with Matchers with DiffMatcher 
       Some(givenInvoiceDate)
     )
     update.right.value should matchTo(SubscriptionUpdate(
-      currentTerm = None,
-      currentTermPeriodType = None,
+      currentTerm = Some(536),
+      currentTermPeriodType = Some("Day"),
       List(Add(
         creditProduct.productRatePlanId,
         contractEffectiveDate = givenInvoiceDate.value,

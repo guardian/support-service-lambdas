@@ -26,9 +26,9 @@ object SubscriptionUpdate {
       subscriptionData <- SubscriptionData(subscription, account)
       issueData <- subscriptionData.issueDataForDate(affectedDate.value)
     } yield {
-      val maybeExtendedTerm = ExtendedTerm(issueData.nextBillingPeriodStartDate, subscription)
-      val credit = Credit(issueData.credit, issueData.nextBillingPeriodStartDate)
-      val invoiceDate = maybeInvoiceDate.map(_.value).getOrElse(credit.invoiceDate)
+      val invoiceDate = maybeInvoiceDate.map(_.value).getOrElse(issueData.nextBillingPeriodStartDate)
+      val maybeExtendedTerm = ExtendedTerm(invoiceDate, subscription)
+      val credit = Credit(issueData.credit, invoiceDate)
       SubscriptionUpdate(
         currentTerm = maybeExtendedTerm.map(_.length),
         currentTermPeriodType = maybeExtendedTerm.map(_.unit),
