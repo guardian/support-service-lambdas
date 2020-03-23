@@ -177,6 +177,11 @@ lazy val `effects-sqs` = all(project in file("lib/effects-sqs"))
   .settings(
     libraryDependencies ++= Seq(awsSQS) ++ logging
   )
+lazy val `effects-lambda` = all(project in file("lib/effects-lambda"))
+  .dependsOn(testDep)
+  .settings(
+    libraryDependencies ++= Seq(awsSdkLambda) ++ logging
+  )
 
 lazy val `effects-ses` = all(project in file("lib/effects-ses"))
   .dependsOn(testDep)
@@ -226,53 +231,9 @@ lazy val `credit-processor` = all(project in file("lib/credit-processor"))
     libraryDependencies ++= logging
   )
 
-// ==== END libraries ====
-
-// ==== START handlers ====
-
-// currently the original code is lying in the root, in due course we need to make three separate sub projects for these original lambdas
-// they should produce their own self contained jar to reduce the artifact size and startup time.  Any shared code can be
-// a set of projects that is "dependsOn(..)" by the sharing projects.  Don't be afraid to restructure things to keep the code nice!
-lazy val root = all(project in file(".")).enablePlugins(RiffRaffArtifact).aggregate(
-  `identity-backfill`,
-  `digital-subscription-expiry`,
-  `catalog-service`,
-  `identity-retention`,
-  `zuora-retention`,
-  `sf-contact-merge`,
-  `cancellation-sf-cases-api`,
-  `sf-gocardless-sync`,
-  `holiday-stop-api`,
-  effects,
-  handler,
-  restHttp,
-  zuora,
-  `zuora-reports`,
-  `salesforce-core`,
-  `salesforce-client`,
-  `salesforce-sttp-client`,
-  `holiday-stops`,
-  s3ConfigValidator,
-  `new-product-api`,
-  `effects-sqs`,
-  `effects-ses`,
-  `effects-s3`,
-  `sf-datalake-export`,
-  `zuora-datalake-export`,
-  `batch-email-sender`,
-  `braze-to-salesforce-file-upload`,
-  `holiday-stop-processor`,
-  `delivery-problem-credit-processor`,
-  `metric-push-api`,
-  `sf-move-subscriptions-api`,
-  `fulfilment-date-calculator`,
-  `delivery-records-api`,
-  `fulfilment-dates`,
-  `zuora-core`,
-  `credit-processor`,
-  `digital-voucher-api`,
-  `digital-voucher-cancellation-processor`,
-).dependsOn(zuora, handler, effectsDepIncludingTestFolder, `effects-sqs`, testDep)
+lazy val `zuora-callout-apis` = all(project in file("handlers/zuora-callout-apis"))
+  .enablePlugins(RiffRaffArtifact)
+  .dependsOn(zuora, handler, effectsDepIncludingTestFolder, `effects-sqs`, testDep)
 
 lazy val `identity-backfill` = all(project in file("handlers/identity-backfill")) // when using the "project identity-backfill" command it uses the lazy val name
   .enablePlugins(RiffRaffArtifact)
@@ -303,6 +264,11 @@ lazy val `new-product-api` = all(project in file("handlers/new-product-api"))
 lazy val `zuora-retention` = all(project in file("handlers/zuora-retention"))
   .enablePlugins(RiffRaffArtifact)
   .dependsOn(`zuora-reports`, handler, effectsDepIncludingTestFolder, testDep)
+
+lazy val `zuora-sar` = all(project in file("handlers/zuora-sar"))
+  .settings(libraryDependencies ++= Seq(catsEffect, circeParser, circe, awsStepFunction))
+  .enablePlugins(RiffRaffArtifact)
+  .dependsOn(`zuora-reports`, handler, effectsDepIncludingTestFolder, testDep, `effects-s3`, `effects-lambda`)
 
 lazy val `sf-contact-merge` = all(project in file("handlers/sf-contact-merge"))
   .enablePlugins(RiffRaffArtifact)
