@@ -8,6 +8,7 @@ import com.gu.util.apigateway.ApiGatewayHandler.Operation
 import com.gu.util.apigateway.{ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.email.{EmailId, EmailMessage}
 import com.gu.util.reader.Types._
+import com.gu.stripeCustomerSourceUpdated.TypeConvert._
 import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientFailure, ClientSuccess}
 import play.api.libs.json._
@@ -27,8 +28,8 @@ object AutoCancelSteps extends Logging {
   }
 
   def apply(
-    autoCancels: List[AutoCancelRequest] => ApiGatewayOp[Unit],
-    autoCancelFilter: AutoCancelCallout => ApiGatewayOp[List[AutoCancelRequest]],
+    autoCancel: AutoCancelRequest => ApiGatewayOp[Unit],
+    autoCancelFilter: AutoCancelCallout => ApiGatewayOp[AutoCancelRequest],
     sendEmailRegardingAccount: (String, PaymentFailureInformation => Either[String, EmailMessage]) => ClientFailableOp[Unit]
   ): Operation = Operation.noHealthcheck({ apiGatewayRequest: ApiGatewayRequest =>
     (for {
@@ -36,7 +37,7 @@ object AutoCancelSteps extends Logging {
       urlParams <- apiGatewayRequest.queryParamsAsCaseClass[AutoCancelUrlParams]()
       _ <- AutoCancelInputFilter(autoCancelCallout, onlyCancelDirectDebit = urlParams.onlyCancelDirectDebit)
       acRequest <- autoCancelFilter(autoCancelCallout).withLogging(s"auto-cancellation filter for ${autoCancelCallout.accountId}")
-      _ <- autoCancels(acRequest).withLogging(s"auto-cancellation for ${autoCancelCallout.accountId}")
+      _ <- autoCancel(acRequest).withLogging(s"auto-cancellation for ${autoCancelCallout.accountId}")
       request = makeRequest(autoCancelCallout) _
       _ <- logErrorsAndContinueProcessing(sendEmailRegardingAccount(autoCancelCallout.accountId, request))
     } yield ApiGatewayResponse.successfulExecution).apiResponse
