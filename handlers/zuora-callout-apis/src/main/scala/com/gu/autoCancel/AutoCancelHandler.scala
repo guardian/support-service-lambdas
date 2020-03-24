@@ -16,7 +16,7 @@ import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config._
 import com.gu.util.email.EmailSendSteps
 import com.gu.util.reader.Types._
-import com.gu.util.zuora.{ZuoraGetAccountSummary, ZuoraGetInvoiceItems, ZuoraGetInvoiceTransactions, ZuoraRestConfig, ZuoraRestRequestMaker}
+import com.gu.util.zuora.{ZuoraGetAccountSummary, ZuoraGetInvoiceItemsIds, ZuoraGetInvoiceTransactions, ZuoraRestConfig, ZuoraRestRequestMaker}
 import okhttp3.{Request, Response}
 
 import scala.util.Try
@@ -38,7 +38,7 @@ object AutoCancelHandler extends App with Logging {
 
       AutoCancelSteps(
         MultiAutoCancel.apply(zuoraRequest),
-        AutoCancelRequestsProducer(now().toLocalDate, ZuoraGetAccountSummary(zuoraRequest), ZuoraGetInvoiceItems(zuoraRequest)),
+        AutoCancelRequestsProducer(now().toLocalDate, ZuoraGetAccountSummary(zuoraRequest), ZuoraGetInvoiceItemsIds(zuoraRequest)),
         ZuoraEmailSteps.sendEmailRegardingAccount(
           EmailSendSteps(awsSQSSend(emailQueueFor(stage))),
           ZuoraGetInvoiceTransactions(ZuoraRestRequestMaker(response, zuoraRestConfig))

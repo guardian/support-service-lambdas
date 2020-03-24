@@ -8,7 +8,6 @@ import com.gu.util.resthttp.Types.ClientSuccess
 import com.gu.util.zuora.ZuoraGetAccountSummary.ZuoraAccount.{AccountId, PaymentMethodId}
 import com.gu.util.zuora.ZuoraGetAccountSummary.{AccountSummary, BasicAccountInfo, Invoice, SubscriptionId, SubscriptionSummary}
 import org.scalatest._
-import play.api.libs.json.JsObject
 
 class AutoCancelStepsTest extends FlatSpec with Matchers {
 
@@ -21,13 +20,17 @@ class AutoCancelStepsTest extends FlatSpec with Matchers {
       now = LocalDate.now,
       getAccountSummary = _ => ClientSuccess(AccountSummary(basicInfo, List(subscription), List(singleOverdueInvoice))),
       // changed
-      getInvoiceItems = _ => ClientSuccess(JsObject.empty)
+      getInvoiceItems = _ => ClientSuccess(List(SubscriptionId("sub123")))
     //
     ) _
     val autoCancelCallout = AutoCancelHandlerTest.fakeCallout(true)
     val cancel: ApiGatewayOp[List[AutoCancelRequest]] = ac(autoCancelCallout)
 
-    cancel.toDisjunction should be(Right(AutoCancelRequest("id123", SubscriptionId("sub123"), LocalDate.now.minusDays(14))))
+    val expected = Right(
+      List(AutoCancelRequest("id123", SubscriptionId("sub123"), LocalDate.now.minusDays(14)))
+    )
+
+    cancel.toDisjunction should be(expected)
   }
 
   // we are not turning of auto pay anymore
