@@ -4,6 +4,7 @@ import java.time.LocalDate
 
 import com.gu.TestData
 import com.gu.autoCancel.AutoCancel.AutoCancelRequest
+import com.gu.autoCancel.AutoCancelSteps.AutoCancelUrlParams
 import com.gu.effects.TestingRawEffects
 import com.gu.effects.TestingRawEffects.BasicRequest
 import com.gu.util.reader.Types._
@@ -22,7 +23,7 @@ class AutoCancelStepsTest extends FlatSpec with Matchers {
     val ac = AutoCancelDataCollectionFilter(
       now = LocalDate.now,
       getAccountSummary = _ => ClientSuccess(AccountSummary(basicInfo, List(subscription), List(singleOverdueInvoice)))
-    )_
+    ) _
     val autoCancelCallout = AutoCancelHandlerTest.fakeCallout(true)
     val cancel: ApiGatewayOp[AutoCancelRequest] = ac(autoCancelCallout)
 
@@ -31,7 +32,8 @@ class AutoCancelStepsTest extends FlatSpec with Matchers {
 
   "auto cancel" should "turn off auto pay" in {
     val effects = new TestingRawEffects(200)
-    AutoCancel(TestData.zuoraDeps(effects))(AutoCancelRequest("AID", SubscriptionId("subid"), LocalDate.now))
+    val urlParams = AutoCancelUrlParams(onlyCancelDirectDebit = false, dryRun = false)
+    AutoCancel(TestData.zuoraDeps(effects))(AutoCancelRequest("AID", SubscriptionId("subid"), LocalDate.now), urlParams)
 
     effects.requestsAttempted should contain(BasicRequest("PUT", "/accounts/AID", "{\"autoPay\":false}"))
   }

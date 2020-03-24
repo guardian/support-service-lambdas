@@ -1,9 +1,6 @@
 package com.gu.util.email
 
 import com.gu.effects.sqs.AwsSQSSend.Payload
-import com.gu.util.apigateway.ResponseModels.ApiResponse
-import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
-import com.gu.util.reader.Types._
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError}
 import com.typesafe.scalalogging.LazyLogging
 import play.api.libs.json.{Json, Writes, _}
