@@ -16,6 +16,7 @@ object MultiAutoCancel extends Logging {
   def apply(requests: Requests)(acRequests: List[AutoCancelRequest]): ApiGatewayOp[Unit] = {
     val responses = acRequests.map(cancelReq => executeCancel(requests)(cancelReq))
     logger.info(s"AutoCancel responses: $responses")
+    // TODO it should not call head
     responses.head
   }
 

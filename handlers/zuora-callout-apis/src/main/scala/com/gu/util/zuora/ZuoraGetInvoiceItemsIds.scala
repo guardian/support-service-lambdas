@@ -10,16 +10,16 @@ object ZuoraGetInvoiceItemsIds extends LazyLogging {
 
   def apply(requests: Requests)(invoiceId: String): ClientFailableOp[List[SubscriptionId]] = {
     requests.get[JsValue](s"invoices/$invoiceId/items").map { json =>
-      invoiceItemsToSubscriptionsNames(json)
+      invoiceItemsToSubscriptionsIds(json)
     }
   }
 
-  private def invoiceItemsToSubscriptionsNames(getInvoiceItemsRes: JsValue): List[SubscriptionId] = {
-    val parsed = (getInvoiceItemsRes \ "invoiceItems" \\ "subscriptionName")
+  private def invoiceItemsToSubscriptionsIds(json: JsValue): List[SubscriptionId] = {
+    val parsed = (json \ "invoiceItems" \\ "subscriptionId")
       .map(_.as[String])
       .toSet
       .map(n => SubscriptionId(n))
-    logger.info(s"invoiceItemsToSubscriptionsNames: $parsed")
+    logger.info(s"invoice unique subscriptions ids: $parsed")
     parsed.toList
   }
 
