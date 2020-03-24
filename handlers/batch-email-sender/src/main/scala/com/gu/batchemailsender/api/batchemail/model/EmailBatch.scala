@@ -37,7 +37,8 @@ object EmailBatch {
       modified_by_customer: Option[Boolean],
       holiday_stop_request: Option[WireHolidayStopRequest],
       digital_voucher: Option[WireDigitalVoucher],
-      delivery_problem: Option[WireDeliveryProblem] = None
+      delivery_problem: Option[WireDeliveryProblem] = None,
+      delivery_address_change: Option[WireDeliveryAddressChange] = None
     )
     case class WireHolidayStopRequest(
       holiday_start_date: String,
@@ -65,12 +66,21 @@ object EmailBatch {
       Delivery_Date__c: String,
       Invoice_Date__c: Option[String]
     )
+    case class WireDeliveryAddressChange(
+      mailingStreet: Option[String], // line1,line2
+      mailingCity: Option[String],
+      mailingState: Option[String],
+      mailingPostalCode: Option[String],
+      mailingCountry: Option[String],
+      addressChangeEffectiveDateBlurb: Option[String]
+    )
 
     implicit val holidayStopCreditDetailReads = Json.reads[WireHolidayStopCreditSummary]
     implicit val holidayStopRequestReads = Json.reads[WireHolidayStopRequest]
     implicit val digitalVoucherReads = Json.reads[WireDigitalVoucher]
     implicit val delivery = Json.reads[WireDelivery]
     implicit val deliveryProblemReads = Json.reads[WireDeliveryProblem]
+    implicit val deliveryAddressChangeReads = Json.reads[WireDeliveryAddressChange]
     implicit val emailBatchItemPayloadReads = Json.reads[WireEmailBatchItemPayload]
     implicit val emailBatchItemReads = Json.reads[WireEmailBatchItem]
     implicit val emailBatch = Json.reads[WireEmailBatch]
@@ -105,6 +115,21 @@ object EmailBatch {
         emailBatchItems = items
       )
     }
+
+    /**
+     * Salesforce mailingStreet field concatenates on a single line (line1,line), whilst MMA has it over two separate lines
+     */
+    private val sfStreetPattern = """([^,]+),(.*)""".r
+    def sfStreetToLine1(in: String): Option[String] =
+      in match {
+        case sfStreetPattern(line1, _) if line1.nonEmpty => Some(line1)
+        case _ => None
+      }
+    def sfStreetToLine2(in: String): Option[String] =
+      in match {
+        case sfStreetPattern(_, line2) if line2.nonEmpty => Some(line2)
+        case _ => None
+      }
 
     private def fromWire(wireEmailBatchItem: WireEmailBatchItem): EmailBatchItem = {
       val emailBatchPayload = wireEmailBatchItem.payload
@@ -157,6 +182,15 @@ object EmailBatch {
           delivery_problem_type = emailBatchPayload.delivery_problem.map(_.typeOfProblem),
           delivery_problem_currency_symbol = emailBatchPayload.delivery_problem.map(_.currencySymbol),
           delivery_problem_case_number = emailBatchPayload.delivery_problem.map(_.caseNumber),
+
+          // Delivery Address Change
+          delivery_address_change_line1 = emailBatchPayload.delivery_address_change.flatMap(_.mailingStreet).flatMap(sfStreetToLine1),
+          delivery_address_change_line2 = emailBatchPayload.delivery_address_change.flatMap(_.mailingStreet).flatMap(sfStreetToLine2),
+          delivery_address_change_city = emailBatchPayload.delivery_address_change.flatMap(_.mailingCity),
+          delivery_address_change_state = emailBatchPayload.delivery_address_change.flatMap(_.mailingState),
+          delivery_address_change_postcode = emailBatchPayload.delivery_address_change.flatMap(_.mailingPostalCode),
+          delivery_address_change_country = emailBatchPayload.delivery_address_change.flatMap(_.mailingCountry),
+          delivery_address_change_effective_date_blurb = emailBatchPayload.delivery_address_change.flatMap(_.addressChangeEffectiveDateBlurb),
         ),
         object_name = wireEmailBatchItem.object_name
       )
@@ -211,6 +245,15 @@ case class EmailBatchItemPayload(
   delivery_problem_affected_dates: Option[String] = None,
   delivery_problem_currency_symbol: Option[String] = None,
   delivery_problem_case_number: Option[String] = None,
+
+  // Delivery Address Change
+  delivery_address_change_line1: Option[String] = None,
+  delivery_address_change_line2: Option[String] = None,
+  delivery_address_change_city: Option[String] = None,
+  delivery_address_change_state: Option[String] = None,
+  delivery_address_change_postcode: Option[String] = None,
+  delivery_address_change_country: Option[String] = None,
+  delivery_address_change_effective_date_blurb: Option[String] = None,
 )
 
 case class EmailBatchItem(payload: EmailBatchItemPayload, object_name: String)
