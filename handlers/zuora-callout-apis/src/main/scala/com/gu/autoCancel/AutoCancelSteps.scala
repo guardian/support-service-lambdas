@@ -1,6 +1,6 @@
 package com.gu.autoCancel
 
-import com.gu.autoCancel.MultiAutoCancel.AutoCancelRequest
+import com.gu.autoCancel.AutoCancel.AutoCancelRequest
 import com.gu.paymentFailure.GetPaymentData.PaymentFailureInformation
 import com.gu.paymentFailure.ToMessage
 import com.gu.util.Logging

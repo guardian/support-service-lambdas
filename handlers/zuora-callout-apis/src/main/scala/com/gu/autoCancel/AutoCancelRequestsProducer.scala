@@ -2,7 +2,7 @@ package com.gu.autoCancel
 
 import java.time.LocalDate
 
-import com.gu.autoCancel.MultiAutoCancel.AutoCancelRequest
+import com.gu.autoCancel.AutoCancel.AutoCancelRequest
 import com.gu.stripeCustomerSourceUpdated.TypeConvert._
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayResponse.noActionRequired

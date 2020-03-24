@@ -37,7 +37,7 @@ object AutoCancelHandler extends App with Logging {
       val zuoraRequest = ZuoraRestRequestMaker(response, zuoraRestConfig)
 
       AutoCancelSteps(
-        MultiAutoCancel.apply(zuoraRequest),
+        AutoCancel.apply(zuoraRequest),
         AutoCancelRequestsProducer(now().toLocalDate, ZuoraGetAccountSummary(zuoraRequest), ZuoraGetInvoiceItemsIds(zuoraRequest)),
         ZuoraEmailSteps.sendEmailRegardingAccount(
           EmailSendSteps(awsSQSSend(emailQueueFor(stage))),

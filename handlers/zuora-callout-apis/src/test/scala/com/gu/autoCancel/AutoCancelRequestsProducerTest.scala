@@ -2,7 +2,7 @@ package com.gu.autoCancel
 
 import java.time.LocalDate
 
-import com.gu.autoCancel.MultiAutoCancel.AutoCancelRequest
+import com.gu.autoCancel.AutoCancel.AutoCancelRequest
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.Types.ClientSuccess
 import com.gu.util.zuora.ZuoraGetAccountSummary.ZuoraAccount.{AccountId, PaymentMethodId}

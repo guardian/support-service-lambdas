@@ -9,7 +9,7 @@ import com.gu.util.resthttp.RestRequestMaker.Requests
 import com.gu.util.zuora.ZuoraGetAccountSummary.SubscriptionId
 import com.gu.util.zuora.{ZuoraCancelSubscription, ZuoraUpdateCancellationReason}
 
-object MultiAutoCancel extends Logging {
+object AutoCancel extends Logging {
 
   case class AutoCancelRequest(accountId: String, subToCancel: SubscriptionId, cancellationDate: LocalDate)
 
