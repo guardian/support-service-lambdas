@@ -310,6 +310,7 @@ lazy val `zuora-datalake-export` = all(project in file("handlers/zuora-datalake-
 lazy val `batch-email-sender` = all(project in file("handlers/batch-email-sender"))
   .enablePlugins(RiffRaffArtifact)
   .dependsOn(handler, `effects-sqs`, effectsDepIncludingTestFolder, testDep)
+  .settings(libraryDependencies ++= Seq(playJsonExtensions))
 
 lazy val `braze-to-salesforce-file-upload` = all(project in file("handlers/braze-to-salesforce-file-upload"))
   .enablePlugins(RiffRaffArtifact)
