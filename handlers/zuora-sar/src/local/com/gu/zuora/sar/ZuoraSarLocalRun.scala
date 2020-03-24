@@ -10,14 +10,30 @@ import com.gu.zuora.sar.BatonModels.{PerformSarRequest, SarRequest, SarStatusReq
 import io.circe.syntax._
 
 object ZuoraSarLocalRun extends App {
-  def runwith(request: SarRequest): Unit = {
-    val sarLambdaConfig = ConfigLoader.getSarLambdaConfigTemp
-//    val zuoraSarHander = ZuoraSarHandler(sarLambdaConfig)
+
+  case class InputOutputStreams(inputStream: ByteArrayInputStream, outputStream: ByteArrayOutputStream)
+
+  private def requestStreams(request: SarRequest): InputOutputStreams = {
     val jsonRequest = request.asJson.noSpaces
     val testInputStream = new ByteArrayInputStream(jsonRequest.getBytes)
     val testOutputStream = new ByteArrayOutputStream()
+    InputOutputStreams(testInputStream, testOutputStream)
+  }
+
+  private def runTestZuoraSar(request: SarRequest): Unit = {
+    val sarLambdaConfig = ConfigLoader.getSarLambdaConfigTemp
+    val zuoraSarHander = ZuoraSarHandler(S3Helper, sarLambdaConfig)
+    val streams = requestStreams(request)
+
+    zuoraSarHander.handleRequest(streams.inputStream, streams.outputStream)
+    val responseString = new String(streams.outputStream.toByteArray)
+    println("lambda output was:" + responseString)
+  }
+
+  private def runTestPerformZuoraSar(request: SarRequest): Unit = {
     val loadZuoraSarConfig = LoadConfigModule(RawEffects.stage, GetFromS3.fetchString)
     val loadZuoraRestConfig = LoadConfigModule(RawEffects.stage, GetFromS3.fetchString)
+    val streams = requestStreams(request)
     for {
       zuoraSarConfig <- loadZuoraSarConfig[ZuoraSarConfig]
       zuoraRestConfig <- loadZuoraRestConfig[ZuoraRestConfig]
@@ -27,10 +43,9 @@ object ZuoraSarLocalRun extends App {
       zuoraHelper = ZuoraSarService(requests, downloadRequests, zuoraQuerier)
     } yield {
       ZuoraPerformSarHandler(zuoraHelper, S3Helper, zuoraSarConfig)
-    }.handleRequest(testInputStream, testOutputStream)
+      }.handleRequest(streams.inputStream, streams.outputStream)
 
-//    zuoraSarHander.handleRequest(testInputStream, testOutputStream)
-    val responseString = new String(testOutputStream.toByteArray)
+    val responseString = new String(streams.outputStream.toByteArray)
     println("lambda output was:" + responseString)
   }
 
@@ -39,6 +54,7 @@ object ZuoraSarLocalRun extends App {
     initiationReference = "testSubjectId",
     subjectEmail = "test@testco.uk"
   )
-  runwith(sarStatusRequest)
+
+  runTestZuoraSar(sarStatusRequest)
 }
 
