@@ -1,6 +1,7 @@
 package com.gu.batchemailsender.api.batchemail.model
 
 import play.api.libs.json.Json
+import ai.x.play.json.Jsonx
 
 /**
  * This is what actually gets sent to SQS and the fields correspond to Braze api_trigger_properties.
@@ -47,12 +48,12 @@ case class EmailToSend(To: EmailPayloadTo, DataExtensionName: String, SfContactI
 
 object EmailToSend {
 
-  implicit val emailPayloadStoppedCreditDetailWriter = Json.writes[EmailPayloadStoppedCreditSummary]
-  implicit val emailPayloadDigitalVoucherWriter = Json.writes[EmailPayloadDigitalVoucher]
-  implicit val emailPayloadSubscriberAttributesWriter = Json.writes[EmailPayloadSubscriberAttributes]
-  implicit val emailPayloadContactAttributesWriter = Json.writes[EmailPayloadContactAttributes]
-  implicit val emailPayloadToWriter = Json.writes[EmailPayloadTo]
-  implicit val emailToSendWriter = Json.writes[EmailToSend]
+  implicit val emailPayloadStoppedCreditDetailWriter = Jsonx.formatCaseClass[EmailPayloadStoppedCreditSummary]
+  implicit val emailPayloadDigitalVoucherWriter = Jsonx.formatCaseClass[EmailPayloadDigitalVoucher]
+  implicit val emailPayloadSubscriberAttributesWriter = Jsonx.formatCaseClass[EmailPayloadSubscriberAttributes]
+  implicit val emailPayloadContactAttributesWriter = Jsonx.formatCaseClass[EmailPayloadContactAttributes]
+  implicit val emailPayloadToWriter = Jsonx.formatCaseClass[EmailPayloadTo]
+  implicit val emailToSendWriter = Jsonx.formatCaseClass[EmailToSend]
 
   /**
    * Builds actual model from wire (DTO) model
