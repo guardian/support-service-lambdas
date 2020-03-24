@@ -88,7 +88,7 @@ object DigitalVoucherService {
     override def cancelVouchers(subscriptionId: SfSubscriptionId, cancellationDate: LocalDate): EitherT[F, DigitalVoucherServiceError, Unit] = {
       val lastActiveDate = cancellationDate.minusDays(1)
       imovoClient
-        .cancelSubscriptionVoucher(subscriptionId, lastActiveDate)
+        .cancelSubscriptionVoucher(subscriptionId, Some(lastActiveDate))
         .map(_ => ())
         .leftMap(error => DigitalVoucherServiceFailure(error.message))
     }

@@ -45,7 +45,7 @@ trait ImovoClient[F[_]] {
   ): EitherT[F, ImovoClientException, ImovoSubscriptionResponse]
   def getSubscriptionVoucher(voucherCode: String): EitherT[F, ImovoClientException, ImovoSubscriptionResponse]
   def replaceSubscriptionVoucher(subscriptionId: SfSubscriptionId, subscriptionType: ImovoSubscriptionType): EitherT[F, ImovoClientException, ImovoSubscriptionResponse]
-  def cancelSubscriptionVoucher(subscriptionId: SfSubscriptionId, lastActiveDay: LocalDate): EitherT[F, ImovoClientException, ImovoSuccessResponse]
+  def cancelSubscriptionVoucher(subscriptionId: SfSubscriptionId, lastActiveDay: Option[LocalDate]): EitherT[F, ImovoClientException, ImovoSuccessResponse]
 }
 
 object ImovoClient extends LazyLogging {
@@ -152,15 +152,19 @@ object ImovoClient extends LazyLogging {
         )
       }
 
-      override def cancelSubscriptionVoucher(subscriptionId: SfSubscriptionId, lastActiveDay: LocalDate): EitherT[F, ImovoClientException, ImovoSuccessResponse] =
+      override def cancelSubscriptionVoucher(subscriptionId: SfSubscriptionId, optionalLastActiveDay: Option[LocalDate]): EitherT[F, ImovoClientException, ImovoSuccessResponse] = {
+        val uri = Uri(new URI(s"${config.imovoBaseUrl}/Subscription/CancelSubscriptionVoucher"))
+          .param("SubscriptionId", subscriptionId.value)
+        val uriWithLastActiveDay = optionalLastActiveDay
+          .map(lastActiveDay => uri.param("LastActiveDay", imovoDateFormat.format(lastActiveDay)))
+          .getOrElse(uri)
         sendAuthenticatedRequest[ImovoSuccessResponse, String](
           config.imovoApiKey,
           Method.GET,
-          Uri(new URI(s"${config.imovoBaseUrl}/Subscription/CancelSubscriptionVoucher"))
-            .param("SubscriptionId", subscriptionId.value)
-            .param("LastActiveDay", imovoDateFormat.format(lastActiveDay)),
+          uriWithLastActiveDay,
           None
         )
+      }
     }.asRight[ImovoClientException].toEitherT[F]
   }
 }
