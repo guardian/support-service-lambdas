@@ -146,7 +146,7 @@ class DigitalVoucherCancellationProcessorServiceTest extends AnyFlatSpec with Ma
           auth = authResponse,
           expectedRequest = Some(SFApiCompositeRequest(
             true,
-            true,
+            false,
             List(
               salesforceVoucherUpdate("valid-sub"),
               salesforceVoucherUpdate("already-cancelled")

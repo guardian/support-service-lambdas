@@ -84,7 +84,7 @@ object DigitalVoucherCancellationProcessorService extends LazyLogging {
         salesforceClient.composite(
           SFApiCompositeRequest(
             true,
-            true,
+            false,
             sucessfullyProcessedVouchers
               .toList
               .map(voucherToMarkAsProcessed => {
