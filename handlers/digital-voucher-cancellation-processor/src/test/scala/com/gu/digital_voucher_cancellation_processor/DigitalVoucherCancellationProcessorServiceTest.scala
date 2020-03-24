@@ -17,6 +17,7 @@ import org.scalatest.matchers.should.Matchers
 import com.gu.salesforce.sttp.SalesforceStub._
 import io.circe.generic.auto._
 import org.scalatest.Inside.inside
+import cats.implicits._
 
 class DigitalVoucherCancellationProcessorServiceTest extends AnyFlatSpec with Matchers {
   val authConfig = SFAuthConfig(
@@ -160,14 +161,16 @@ class DigitalVoucherCancellationProcessorServiceTest extends AnyFlatSpec with Ma
           )
         )
 
-    runApp(salesforceBackendStub, testClock) should ===(
-      Right(
-        ImovoCancellationResults(
-          successfullyCancelled = List(voucherToCancelQueryResult("valid-sub")),
-          alreadyCancelled = List(voucherToCancelQueryResult("already-cancelled"))
+    inside(runApp(salesforceBackendStub, testClock)) {
+      case Left(DigitalVoucherCancellationProcessorAppError(message)) =>
+        message should include("Some digital vouchers did not exist in imovo, they may have already been cancelled.")
+        message should include(
+          ImovoCancellationResults(
+            successfullyCancelled = List(voucherToCancelQueryResult("valid-sub")),
+            alreadyCancelled = List(voucherToCancelQueryResult("already-cancelled"))
+          ).show
         )
-      )
-    )
+    }
   }
   it should "not update salesforce if imovo request fails" in {
     val salesforceBackendStub =

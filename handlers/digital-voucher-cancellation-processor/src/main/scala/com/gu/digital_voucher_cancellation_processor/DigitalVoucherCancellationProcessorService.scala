@@ -63,8 +63,9 @@ object DigitalVoucherCancellationProcessorService extends LazyLogging {
     clock: Clock
   ): EitherT[F, DigitalVoucherCancellationProcessorServiceError, ImovoCancellationResults] = {
     for {
-      imovoResults <- cancelSubscriptionsInImovo(vouchersToCancel, imovoClient)
-      _ <- updateSFCancellationProcessedDate(imovoResults, salesforceClient, clock)
+      imovoResults <- cancelSubscriptionsInImovo[F](vouchersToCancel, imovoClient)
+      _ <- updateSFCancellationProcessedDate[F](imovoResults, salesforceClient, clock)
+      _ <- failProcessorRunIfSubscriptionsWereAlreadyCancelled[F](imovoResults)
     } yield imovoResults
   }
 
@@ -148,5 +149,17 @@ object DigitalVoucherCancellationProcessorService extends LazyLogging {
        |WHERE SF_Subscription__r.Cancellation_Effective_Date__c <= ${formatDate(today)}
        |  AND Cancellation_Processed_At__c = null
        |""".stripMargin
+  }
+
+  def failProcessorRunIfSubscriptionsWereAlreadyCancelled[F[_]: Monad](
+    imovoCancellationResults: ImovoCancellationResults
+  ): EitherT[F, DigitalVoucherCancellationProcessorServiceError, Unit] = {
+    if (imovoCancellationResults.alreadyCancelled.isEmpty)
+      EitherT.rightT[F, DigitalVoucherCancellationProcessorServiceError](())
+    else
+      EitherT.leftT[F, Unit](DigitalVoucherCancellationProcessorServiceError(
+        s"Some digital vouchers did not exist in imovo, they may have already been cancelled. " +
+          s"${imovoCancellationResults.show}"
+      ))
   }
 }
