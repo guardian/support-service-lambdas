@@ -70,19 +70,19 @@ object AutoCancelRequestsProducer extends Logging {
 
   // TODO delete
 
-  //  def getSubscriptionToCancel(accountSummary: AccountSummary): ApiGatewayOp[SubscriptionId] = {
-  //    val activeSubs = accountSummary.subscriptions.filter(_.status == "Active")
-  //    activeSubs match {
-  //      case sub :: Nil =>
-  //        logger.info(s"Determined that we should cancel SubscriptionId: ${sub.id} (for AccountId: ${accountSummary.basicInfo.id})")
-  //        ContinueProcessing(sub.id)
-  //      case Nil =>
-  //        logger.error(s"Didn't find any active subscriptions. The full list of subs for this account was: ${accountSummary.subscriptions}")
-  //        ReturnWithResponse(noActionRequired("No Active subscriptions to cancel!"))
-  //      case subs =>
-  //        // This should be a pretty rare scenario, because the Billing Account to Sub relationship is (supposed to be) 1-to-1
-  //        logger.error(s"More than one subscription is Active on account: ${accountSummary.basicInfo.id}. Subscription ids are: ${activeSubs.map(_.id)}")
-  //        ReturnWithResponse(noActionRequired("More than one active sub found!")) // Don't continue because we don't know which active sub to cancel
-  //    }
-  //  }
+  def getSubscriptionToCancel(accountSummary: AccountSummary): ApiGatewayOp[SubscriptionId] = {
+    val activeSubs = accountSummary.subscriptions.filter(_.status == "Active")
+    activeSubs match {
+      case sub :: Nil =>
+        logger.info(s"Determined that we should cancel SubscriptionId: ${sub.id} (for AccountId: ${accountSummary.basicInfo.id})")
+        ContinueProcessing(sub.id)
+      case Nil =>
+        logger.error(s"Didn't find any active subscriptions. The full list of subs for this account was: ${accountSummary.subscriptions}")
+        ReturnWithResponse(noActionRequired("No Active subscriptions to cancel!"))
+      case subs =>
+        // This should be a pretty rare scenario, because the Billing Account to Sub relationship is (supposed to be) 1-to-1
+        logger.error(s"More than one subscription is Active on account: ${accountSummary.basicInfo.id}. Subscription ids are: ${activeSubs.map(_.id)}")
+        ReturnWithResponse(noActionRequired("More than one active sub found!")) // Don't continue because we don't know which active sub to cancel
+    }
+  }
 }

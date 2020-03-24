@@ -2,10 +2,7 @@ package com.gu.autoCancel
 
 import java.time.LocalDate
 
-import com.gu.TestData
 import com.gu.autoCancel.MultiAutoCancel.AutoCancelRequest
-import com.gu.effects.TestingRawEffects
-import com.gu.effects.TestingRawEffects.BasicRequest
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.Types.ClientSuccess
 import com.gu.util.zuora.ZuoraGetAccountSummary.ZuoraAccount.{AccountId, PaymentMethodId}
@@ -25,7 +22,7 @@ class AutoCancelStepsTest extends FlatSpec with Matchers {
       getAccountSummary = _ => ClientSuccess(AccountSummary(basicInfo, List(subscription), List(singleOverdueInvoice))),
       // changed
       getInvoiceItems = _ => ClientSuccess(JsObject.empty)
-      //
+    //
     ) _
     val autoCancelCallout = AutoCancelHandlerTest.fakeCallout(true)
     val cancel: ApiGatewayOp[List[AutoCancelRequest]] = ac(autoCancelCallout)
@@ -33,12 +30,14 @@ class AutoCancelStepsTest extends FlatSpec with Matchers {
     cancel.toDisjunction should be(Right(AutoCancelRequest("id123", SubscriptionId("sub123"), LocalDate.now.minusDays(14))))
   }
 
-  "auto cancel" should "turn off auto pay" in {
-    val effects = new TestingRawEffects(200)
-    MultiAutoCancel(TestData.zuoraDeps(effects))(List(AutoCancelRequest("AID", SubscriptionId("subid"), LocalDate.now)))
+  // we are not turning of auto pay anymore
 
-    effects.requestsAttempted should contain(BasicRequest("PUT", "/accounts/AID", "{\"autoPay\":false}"))
-  }
+  //  "auto cancel" should "turn off auto pay" in {
+  //    val effects = new TestingRawEffects(200)
+  //    MultiAutoCancel(TestData.zuoraDeps(effects))(List(AutoCancelRequest("AID", SubscriptionId("subid"), LocalDate.now)))
+  //
+  //    effects.requestsAttempted should contain(BasicRequest("PUT", "/accounts/AID", "{\"autoPay\":false}"))
+  //  }
 
   //  // todo need an ACSDeps so we don't need so many mock requests
   //  "auto cancel step" should "turn off auto pay and send email" in {
