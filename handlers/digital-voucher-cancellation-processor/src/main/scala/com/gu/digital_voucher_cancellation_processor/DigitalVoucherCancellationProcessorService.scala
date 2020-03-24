@@ -145,7 +145,7 @@ object DigitalVoucherCancellationProcessorService extends LazyLogging {
        |FROM
        |  Digital_Voucher__c
        |WHERE SF_Subscription__r.Cancellation_Effective_Date__c <= ${formatDate(today)}
-       |  AND SF_Subscription__r.Cancellation_Processed_At__c = null
+       |  AND Cancellation_Processed_At__c = null
        |""".stripMargin
   }
 }
