@@ -19,12 +19,19 @@ object ZuoraUpdateCancellationReason extends LazyLogging {
   implicit val unitReads: Reads[Unit] =
     Reads(_ => JsSuccess(()))
 
+  private def toBodyAndPath(subscription: SubscriptionId) =
+    (SubscriptionUpdate("System AutoCancel"), s"subscriptions/${subscription.id}")
+
   def apply(requests: Requests)(subscription: SubscriptionId): ClientFailableOp[Unit] = {
-    val msg = s"DRY run for ZuoraUpdateCancellationReason: ${SubscriptionUpdate("System AutoCancel")}" +
-      s" at path: subscriptions/${subscription.id}"
+    val (body, path) = toBodyAndPath(subscription)
+    requests.put(body, path): ClientFailableOp[Unit]
+  }
+
+  def dryRun(requests: Requests)(subscription: SubscriptionId): ClientFailableOp[Unit] = {
+    val (body, path) = toBodyAndPath(subscription)
+    val msg = s"DRY run for ZuoraUpdateCancellationReason: body=$body, path=$path"
     logger.info(msg)
-    //    requests.put(SubscriptionUpdate("System AutoCancel"), s"subscriptions/${subscription.id}"): ClientFailableOp[Unit]
-    ClientSuccess(msg)
+    ClientSuccess(())
   }
 
 }

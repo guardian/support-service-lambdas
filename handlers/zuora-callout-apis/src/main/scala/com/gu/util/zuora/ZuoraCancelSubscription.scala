@@ -23,12 +23,19 @@ object ZuoraCancelSubscription extends LazyLogging {
   implicit val unitReads: Reads[Unit] =
     Reads(_ => JsSuccess(()))
 
+  private def toBodyAndPath(subscription: SubscriptionId, cancellationDate: LocalDate) =
+    (SubscriptionCancellation(cancellationDate), s"subscriptions/${subscription.id}/cancel")
+
   def apply(requests: Requests)(subscription: SubscriptionId, cancellationDate: LocalDate): ClientFailableOp[Unit] = {
-    val msg = s"DRY run for ZuoraCancelSubscription: ${SubscriptionCancellation(cancellationDate)} " +
-      s"at path: subscriptions/${subscription.id}/cancel"
+    val (body, path) = toBodyAndPath(subscription, cancellationDate)
+    requests.put(body, path)
+  }
+
+  def dryRun(requests: Requests)(subscription: SubscriptionId, cancellationDate: LocalDate): ClientFailableOp[Unit] = {
+    val (body, path) = toBodyAndPath(subscription, cancellationDate)
+    val msg = s"DRY run for ZuoraCancelSubscription: body=$body, path=$path"
     logger.info(msg)
-    //    requests.put(SubscriptionCancellation(cancellationDate), s"subscriptions/${subscription.id}/cancel")
-    ClientSuccess(msg)
+    ClientSuccess(())
   }
 
 }

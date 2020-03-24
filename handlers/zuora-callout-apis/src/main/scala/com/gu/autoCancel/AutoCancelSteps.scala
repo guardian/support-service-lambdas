@@ -14,12 +14,14 @@ import play.api.libs.json._
 
 object AutoCancelSteps extends Logging {
 
-  case class AutoCancelUrlParams(onlyCancelDirectDebit: Boolean)
+  case class AutoCancelUrlParams(onlyCancelDirectDebit: Boolean, dryRun: Boolean)
 
   object AutoCancelUrlParams {
 
-    case class UrlParamsWire(onlyCancelDirectDebit: Option[String]) {
-      def toAutoCancelUrlParams = AutoCancelUrlParams(onlyCancelDirectDebit.contains("true"))
+    case class UrlParamsWire(onlyCancelDirectDebit: Option[String], dryRun: Option[String]) {
+      def toAutoCancelUrlParams = AutoCancelUrlParams(
+        onlyCancelDirectDebit.contains("true"), dryRun.contains("true")
+      )
     }
 
     val wireReads = Json.reads[UrlParamsWire]
@@ -27,7 +29,7 @@ object AutoCancelSteps extends Logging {
   }
 
   def apply(
-    callZuoraAutoCancel: List[AutoCancelRequest] => ApiGatewayOp[Unit],
+    callZuoraAutoCancel: (List[AutoCancelRequest], AutoCancelUrlParams) => ApiGatewayOp[Unit],
     autoCancelReqProducer: AutoCancelCallout => ApiGatewayOp[List[AutoCancelRequest]],
     sendEmailRegardingAccount: (String, PaymentFailureInformation => Either[String, EmailMessage]) => ClientFailableOp[Unit]
   ): Operation = Operation.noHealthcheck({ apiGatewayRequest: ApiGatewayRequest =>
@@ -36,16 +38,29 @@ object AutoCancelSteps extends Logging {
       urlParams <- apiGatewayRequest.queryParamsAsCaseClass[AutoCancelUrlParams]()
       _ <- AutoCancelInputFilter(autoCancelCallout, onlyCancelDirectDebit = urlParams.onlyCancelDirectDebit)
       autoCancelRequests <- autoCancelReqProducer(autoCancelCallout).withLogging(s"auto-cancellation requests for ${autoCancelCallout.accountId}")
-      _ <- callZuoraAutoCancel(autoCancelRequests).withLogging(s"auto-cancellation for ${autoCancelCallout.accountId}")
+      _ <- callZuoraAutoCancel(autoCancelRequests, urlParams).withLogging(s"auto-cancellation for ${autoCancelCallout.accountId}")
       request = makeRequest(autoCancelCallout) _
-      _ <- logErrorsAndContinueProcessing(sendEmailRegardingAccount(autoCancelCallout.accountId, request))
+      _ <- handleSendPaymentFailureEmail(autoCancelCallout.accountId, request, sendEmailRegardingAccount, urlParams)
     } yield ApiGatewayResponse.successfulExecution).apiResponse
   })
 
   def makeRequest(autoCancelCallout: AutoCancelCallout)(paymentFailureInformation: PaymentFailureInformation): Either[String, EmailMessage] =
     ToMessage(autoCancelCallout, paymentFailureInformation, EmailId.cancelledId)
 
-  def logErrorsAndContinueProcessing(clientFailableOp: ClientFailableOp[Unit]): ContinueProcessing[Unit] = clientFailableOp match {
+  private def handleSendPaymentFailureEmail(
+    accountId: String,
+    request: PaymentFailureInformation => Either[String, EmailMessage],
+    sendEmailRegardingAccount: (String, PaymentFailureInformation => Either[String, EmailMessage]) => ClientFailableOp[Unit],
+    urlParams: AutoCancelUrlParams
+  ) = {
+    if (urlParams.dryRun) {
+      val msg = "DryRun of SendPaymentFailureEmail"
+      logger.info(msg)
+      ContinueProcessing(())
+    } else logErrorsAndContinueProcessing(sendEmailRegardingAccount(accountId, request))
+  }
+
+  private def logErrorsAndContinueProcessing(clientFailableOp: ClientFailableOp[Unit]): ContinueProcessing[Unit] = clientFailableOp match {
     case e: ClientFailure =>
       logger.warn(s"ignored error: ${e.message}")
       ContinueProcessing(())
