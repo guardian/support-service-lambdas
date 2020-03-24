@@ -2,9 +2,8 @@ package com.gu.autoCancel
 
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayResponse.noActionRequired
+import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.reader.Types._
-
-import ApiGatewayOp.{ReturnWithResponse, ContinueProcessing}
 
 object AutoCancelInputFilter extends Logging {
   def apply(callout: AutoCancelCallout, onlyCancelDirectDebit: Boolean): ApiGatewayOp[Unit] = {
