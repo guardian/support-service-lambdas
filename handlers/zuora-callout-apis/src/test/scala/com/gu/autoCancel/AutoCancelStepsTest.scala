@@ -11,6 +11,7 @@ import com.gu.util.resthttp.Types.ClientSuccess
 import com.gu.util.zuora.ZuoraGetAccountSummary.ZuoraAccount.{AccountId, PaymentMethodId}
 import com.gu.util.zuora.ZuoraGetAccountSummary.{AccountSummary, BasicAccountInfo, Invoice, SubscriptionId, SubscriptionSummary}
 import org.scalatest._
+import play.api.libs.json.JsObject
 
 class AutoCancelStepsTest extends FlatSpec with Matchers {
 
@@ -19,19 +20,22 @@ class AutoCancelStepsTest extends FlatSpec with Matchers {
   val singleOverdueInvoice = Invoice("inv123", LocalDate.now.minusDays(14), 11.99, "Posted")
 
   "auto cancel filter 2" should "cancel attempt" in {
-    val ac = AutoCancelDataCollectionFilter(
+    val ac = AutoCancelRequestsProducer(
       now = LocalDate.now,
-      getAccountSummary = _ => ClientSuccess(AccountSummary(basicInfo, List(subscription), List(singleOverdueInvoice)))
-    )_
+      getAccountSummary = _ => ClientSuccess(AccountSummary(basicInfo, List(subscription), List(singleOverdueInvoice))),
+      // changed
+      getInvoiceItems = _ => ClientSuccess(JsObject.empty)
+      //
+    ) _
     val autoCancelCallout = AutoCancelHandlerTest.fakeCallout(true)
-    val cancel: ApiGatewayOp[AutoCancelRequest] = ac(autoCancelCallout)
+    val cancel: ApiGatewayOp[List[AutoCancelRequest]] = ac(autoCancelCallout)
 
     cancel.toDisjunction should be(Right(AutoCancelRequest("id123", SubscriptionId("sub123"), LocalDate.now.minusDays(14))))
   }
 
   "auto cancel" should "turn off auto pay" in {
     val effects = new TestingRawEffects(200)
-    MultiAutoCancel(TestData.zuoraDeps(effects))(AutoCancelRequest("AID", SubscriptionId("subid"), LocalDate.now))
+    MultiAutoCancel(TestData.zuoraDeps(effects))(List(AutoCancelRequest("AID", SubscriptionId("subid"), LocalDate.now)))
 
     effects.requestsAttempted should contain(BasicRequest("PUT", "/accounts/AID", "{\"autoPay\":false}"))
   }
