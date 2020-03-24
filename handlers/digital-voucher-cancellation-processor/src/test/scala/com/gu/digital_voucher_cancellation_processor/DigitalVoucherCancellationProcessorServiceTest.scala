@@ -89,7 +89,7 @@ class DigitalVoucherCancellationProcessorServiceTest extends AnyFlatSpec with Ma
             auth = authResponse,
             expectedRequest = Some(SFApiCompositeRequest(
               true,
-              true,
+              false,
               List(
                 salesforceVoucherUpdate("valid-sub-1"),
                 salesforceVoucherUpdate("valid-sub-2")
@@ -203,7 +203,7 @@ class DigitalVoucherCancellationProcessorServiceTest extends AnyFlatSpec with Ma
           auth = authResponse,
           expectedRequest = Some(SFApiCompositeRequest(
             true,
-            true,
+            false,
             List(
               salesforceVoucherUpdate("valid-sub")
             )
@@ -279,7 +279,7 @@ class DigitalVoucherCancellationProcessorServiceTest extends AnyFlatSpec with Ma
           auth = authResponse,
           expectedRequest = Some(SFApiCompositeRequest(
             true,
-            true,
+            false,
             List(
               salesforceVoucherUpdate("valid-sub"),
               salesforceVoucherUpdate("salesforce-failure")
