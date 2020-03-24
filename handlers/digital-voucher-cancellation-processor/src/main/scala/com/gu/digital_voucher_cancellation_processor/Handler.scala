@@ -15,6 +15,7 @@ object Handler extends LazyLogging {
       .unsafeRunSync()
       .valueOr(error => throw new RuntimeException(error.toString)).show
     logger.info(s"Processor ran successfully: ${results.show}")
+    os.write(s"Processor ran successfully: ${results.show}".getBytes("UTF-8"))
   }
 
   def main(args: Array[String]): Unit = {
