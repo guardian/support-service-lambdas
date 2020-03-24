@@ -4,7 +4,7 @@ import java.time.{Clock, Instant, LocalDate, ZoneId}
 
 import cats.effect.IO
 import com.gu.DevIdentity
-import com.gu.digital_voucher_cancellation_processor.DigitalVoucherCancellationProcessorService.{DigitalVoucherQueryResult, DigitalVoucherUpdate, ImovoCancellationResults, SubscriptionQueryResult, subscrptionsCancelledTodayQuery}
+import com.gu.digital_voucher_cancellation_processor.DigitalVoucherCancellationProcessorService.{CObjectAttribues, DigitalVoucherQueryResult, DigitalVoucherUpdate, ImovoCancellationResults, SubscriptionQueryResult, subscrptionsCancelledTodayQuery}
 import com.gu.imovo.{ImovoClientException, ImovoConfig, ImovoErrorResponse, ImovoSuccessResponse}
 import com.gu.salesforce.sttp.{QueryRecordsWrapperCaseClass, SFApiCompositePart, SFApiCompositeRequest, SFApiCompositeResponse, SFApiCompositeResponsePart}
 import com.gu.salesforce.{SFAuthConfig, SalesforceAuth}
@@ -41,10 +41,10 @@ class DigitalVoucherCancellationProcessorServiceTest extends AnyFlatSpec with Ma
 
   def voucherToCancelQueryResult(resultId: String) = DigitalVoucherQueryResult(
     s"digital-voucher-id-$resultId",
-    s"/services/data/v29.0/sobjects/Digital_Voucher__c/digital-voucher-id-$resultId",
+    CObjectAttribues(s"/services/data/v29.0/sobjects/Digital_Voucher__c/digital-voucher-id-$resultId"),
     SubscriptionQueryResult(
       s"sf-subscription-id-$resultId",
-      s"/services/data/v29.0/sobjects/SF_Subscription__c/sf-subscription-id-$resultId"
+      CObjectAttribues(s"/services/data/v29.0/sobjects/SF_Subscription__c/sf-subscription-id-$resultId")
     )
   )
 

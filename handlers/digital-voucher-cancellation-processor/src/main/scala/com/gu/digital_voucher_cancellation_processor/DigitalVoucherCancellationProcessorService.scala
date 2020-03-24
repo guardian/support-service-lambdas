@@ -16,9 +16,10 @@ import scala.collection.immutable
 object DigitalVoucherCancellationProcessorService extends LazyLogging {
 
   private val ImovoSubscriptionDoesNotExistMessage = "no live subscription vouchers exist for the supplied subscription id"
-  case class DigitalVoucherQueryResult(Id: String, url: String, SF_Subscription__r: SubscriptionQueryResult)
+  case class CObjectAttribues(url: String)
+  case class DigitalVoucherQueryResult(Id: String, attributes: CObjectAttribues, SF_Subscription__r: SubscriptionQueryResult)
   case class DigitalVoucherUpdate(Cancellation_Processed_At__c: Instant)
-  case class SubscriptionQueryResult(Id: String, url: String)
+  case class SubscriptionQueryResult(Id: String, attributes: CObjectAttribues)
   case class DigitalVoucherCancellationProcessorServiceError(message: String)
   case class ImovoCancellationResults(
     successfullyCancelled: List[DigitalVoucherQueryResult] = Nil,
@@ -90,7 +91,7 @@ object DigitalVoucherCancellationProcessorService extends LazyLogging {
                 SFApiCompositePart(
                   voucherToMarkAsProcessed.Id,
                   "PATCH",
-                  voucherToMarkAsProcessed.url,
+                  voucherToMarkAsProcessed.attributes.url,
                   DigitalVoucherUpdate(now)
                 )
               })
