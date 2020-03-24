@@ -58,60 +58,60 @@ class DigitalVoucherCancellationProcessorServiceTest extends AnyFlatSpec with Ma
   }
 
   "DigitalVoucherCancellationProcessor" should "query salesforce for subscriptions, call imovo to cancel sub " +
-                                               "and update Cancellation_Process_On in SF" in {
-    val salesforceBackendStub =
-      SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
-        .stubAuth(authConfig, authResponse)
-        .stubQuery(
-          auth = authResponse,
-          query = subscrptionsCancelledTodayQuery(LocalDate.parse("2020-03-18")),
-          response = QueryRecordsWrapperCaseClass(
-            List(
-              voucherToCancelQueryResult("valid-sub-1"),
-              voucherToCancelQueryResult("valid-sub-2")
-            ),
-            None
-          )
-        )
-        .stubSubscriptionCancel(
-          config = imovoConfig,
-          subscriptionId = "sf-subscription-id-valid-sub-1",
-          lastActiveDate = None,
-          response = ImovoSuccessResponse("OK", true)
-        )
-        .stubSubscriptionCancel(
-          config = imovoConfig,
-          subscriptionId = "sf-subscription-id-valid-sub-2",
-          lastActiveDate = None,
-          response = ImovoSuccessResponse("OK", true)
-        )
-        .stubComposite(
-          auth = authResponse,
-          expectedRequest = Some(SFApiCompositeRequest(
-            true,
-            true,
-            List(
-              salesforceVoucherUpdate("valid-sub-1"),
-              salesforceVoucherUpdate("valid-sub-2")
-            )
-          )),
-          response = SFApiCompositeResponse(
-            List(
-              SFApiCompositeResponsePart(200, "VoucherUpdated"),
-              SFApiCompositeResponsePart(200, "VoucherUpdated")
+    "and update Cancellation_Process_On in SF" in {
+      val salesforceBackendStub =
+        SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
+          .stubAuth(authConfig, authResponse)
+          .stubQuery(
+            auth = authResponse,
+            query = subscrptionsCancelledTodayQuery(LocalDate.parse("2020-03-18")),
+            response = QueryRecordsWrapperCaseClass(
+              List(
+                voucherToCancelQueryResult("valid-sub-1"),
+                voucherToCancelQueryResult("valid-sub-2")
+              ),
+              None
             )
           )
-        )
+          .stubSubscriptionCancel(
+            config = imovoConfig,
+            subscriptionId = "sf-subscription-id-valid-sub-1",
+            lastActiveDate = None,
+            response = ImovoSuccessResponse("OK", true)
+          )
+          .stubSubscriptionCancel(
+            config = imovoConfig,
+            subscriptionId = "sf-subscription-id-valid-sub-2",
+            lastActiveDate = None,
+            response = ImovoSuccessResponse("OK", true)
+          )
+          .stubComposite(
+            auth = authResponse,
+            expectedRequest = Some(SFApiCompositeRequest(
+              true,
+              true,
+              List(
+                salesforceVoucherUpdate("valid-sub-1"),
+                salesforceVoucherUpdate("valid-sub-2")
+              )
+            )),
+            response = SFApiCompositeResponse(
+              List(
+                SFApiCompositeResponsePart(200, "VoucherUpdated"),
+                SFApiCompositeResponsePart(200, "VoucherUpdated")
+              )
+            )
+          )
 
-    runApp(salesforceBackendStub, testClock) should ===(
-      Right(
-        ImovoCancellationResults(successfullyCancelled = List(
-          voucherToCancelQueryResult("valid-sub-1"),
-          voucherToCancelQueryResult("valid-sub-2"))
+      runApp(salesforceBackendStub, testClock) should ===(
+        Right(
+          ImovoCancellationResults(successfullyCancelled = List(
+            voucherToCancelQueryResult("valid-sub-1"),
+            voucherToCancelQueryResult("valid-sub-2")
+          ))
         )
       )
-    )
-  }
+    }
   it should "still update salesforce if subscription has already been cancelled in imovo" in {
     val salesforceBackendStub =
       SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
@@ -299,7 +299,6 @@ class DigitalVoucherCancellationProcessorServiceTest extends AnyFlatSpec with Ma
 
     }
   }
-
 
   private def runApp(salesforceBackendStub: SttpBackendStub[IO, Nothing], testClock: Clock) =
     DigitalVoucherCancellationProcessorApp(DevIdentity("digital-voucher-cancellation-processor"), salesforceBackendStub, testClock).value.unsafeRunSync()
