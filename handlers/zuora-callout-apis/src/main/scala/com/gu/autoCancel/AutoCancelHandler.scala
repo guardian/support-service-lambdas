@@ -39,6 +39,7 @@ object AutoCancelHandler extends App with Logging {
       val cancelRequestsProducer = AutoCancelDataCollectionFilter(
         now().toLocalDate,
         ZuoraGetAccountSummary(zuoraRequest),
+        ZuoraGetAccountSubscriptions(zuoraRequest),
         ZuoraGetSubsNamesOnInvoice(zuoraRequest)
       ) _
 

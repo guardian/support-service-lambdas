@@ -3,6 +3,7 @@ package com.gu.autoCancel
 import java.time.LocalDate
 
 import com.gu.util.apigateway.ApiGatewayResponse._
+import com.gu.util.zuora.{SubscriptionNumber, SubscriptionNumberWithStatus}
 import com.gu.util.zuora.ZuoraGetAccountSummary.ZuoraAccount.{AccountId, PaymentMethodId}
 import com.gu.util.zuora.ZuoraGetAccountSummary.{AccountSummary, BasicAccountInfo, Invoice, SubscriptionId, SubscriptionSummary}
 import org.scalatest._
@@ -59,5 +60,18 @@ class AutoCancelDataCollectionFilterTest extends FlatSpec {
     val apiGatewayOp = getCancellationDateFromInvoice(twoOverdueInvoices.head.id, accountSummaryUnpaidInvs, LocalDate.now)
     assert(apiGatewayOp.toDisjunction == Right(twoOverdueInvoices.head.dueDate))
   }
+
+  "filterNotActiveSubscriptions" should "return only active subscriptions from subscriptions on the invoice, " +
+    "useful if one of subscriptions that is on invoice was cancelled manually before the trigger fired" in {
+      val subsNamesOnInvoice = List(SubscriptionNumber("A-S123"), SubscriptionNumber("A-S456"))
+      val accountSubs = List(
+        SubscriptionNumberWithStatus("A-S123", "Active"),
+        SubscriptionNumberWithStatus("A-S456", "Cancelled"),
+        SubscriptionNumberWithStatus("A-S789", "Active"),
+        SubscriptionNumberWithStatus("A-S101112", "Active")
+      )
+      val apiGatewayOp = filterNotActiveSubscriptions(accountSubs, subsNamesOnInvoice)
+      assert(apiGatewayOp.toDisjunction == Right(List(SubscriptionNumber("A-S123"))))
+    }
 
 }
