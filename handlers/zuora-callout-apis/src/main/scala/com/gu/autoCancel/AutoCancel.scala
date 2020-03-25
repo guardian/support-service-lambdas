@@ -18,7 +18,7 @@ object AutoCancel extends Logging {
     val ac = executeCancel(requests, urlParams.dryRun) _
     val responses = acRequests.map(cancelReq => ac(cancelReq))
     logger.info(s"AutoCancel responses: $responses")
-    // TODO it should not call head
+    // TODO to refactor it should not call head
     responses.head
   }
 
