@@ -19,6 +19,8 @@ object GetPaymentData extends Logging {
       case Some(invoice) => {
         logger.info(s"Found the following unpaid invoice: $invoice")
         val positiveInvoiceItems = invoice.invoiceItems.filter(item => invoiceItemFilter(item))
+        // TODO payment failure may be subjected to invoice that have multiple items not only one
+        // here we are generating PaymentFailureInformation based on the head of InvoiceItems
         val maybePaymentFailureInfo = positiveInvoiceItems.headOption.map {
           item =>
             {
