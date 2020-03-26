@@ -2,61 +2,66 @@ package com.gu.autoCancel
 
 import java.time.LocalDate
 
-import com.gu.TestData
 import com.gu.autoCancel.AutoCancel.AutoCancelRequest
-import com.gu.effects.TestingRawEffects
-import com.gu.effects.TestingRawEffects.BasicRequest
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.Types.ClientSuccess
 import com.gu.util.zuora.ZuoraGetAccountSummary.ZuoraAccount.{AccountId, PaymentMethodId}
 import com.gu.util.zuora.ZuoraGetAccountSummary.{AccountSummary, BasicAccountInfo, Invoice, SubscriptionId, SubscriptionSummary}
+import com.gu.util.zuora.{SubscriptionNumber, SubscriptionNumberWithStatus}
 import org.scalatest._
 
 class AutoCancelStepsTest extends FlatSpec with Matchers {
 
-  val basicInfo = BasicAccountInfo(AccountId("id123"), 11.99, PaymentMethodId("pmid"))
-  val subscription = SubscriptionSummary(SubscriptionId("sub123"), "A-S123", "Active")
-  val singleOverdueInvoice = Invoice("inv123", LocalDate.now.minusDays(14), 11.99, "Posted")
+  private val basicInfo = BasicAccountInfo(AccountId("accId123"), 11.99, PaymentMethodId("pmid"))
+  private val invoiceDueMultipleSubscriptions = List(
+    SubscriptionSummary(SubscriptionId("sub123"), "A-S123", "Active"),
+    SubscriptionSummary(SubscriptionId("sub456"), "A-S456", "Active"),
+    SubscriptionSummary(SubscriptionId("sub789"), "A-S789", "Cancelled") // for example if it was canceled manually after invoice was generated
+  )
+  private val subscriptionsNotOnInvoice = List(
+    SubscriptionSummary(SubscriptionId("sub101112"), "A-S101112", "Active"),
+    SubscriptionSummary(SubscriptionId("sub111213"), "A-S111213", "Active"),
+    SubscriptionSummary(SubscriptionId("sub141516"), "A-S141516", "Active"),
+    SubscriptionSummary(SubscriptionId("sub171819"), "A-S171819", "Active"),
+  )
 
-  "auto cancel filter 2" should "cancel attempt" in {
-    val ac = AutoCancelDataCollectionFilter(
+  private val allAccountSubs = invoiceDueMultipleSubscriptions ++ subscriptionsNotOnInvoice
+
+  private val calloutInvoiceId = "inv123"
+  private val twoOverdueInvoices = List(
+    Invoice("inv123", LocalDate.now.minusDays(14), 11.99, "Posted"),
+    Invoice("inv321", LocalDate.now.minusDays(35), 11.99, "Posted")
+  )
+
+  it should "prepare correct AutoCancelRequests" in {
+    val autoCancelReqestsProducer = AutoCancelDataCollectionFilter(
       now = LocalDate.now,
-      getAccountSummary = _ => ClientSuccess(AccountSummary(basicInfo, List(subscription), List(singleOverdueInvoice)))
-    )_
-    val autoCancelCallout = AutoCancelHandlerTest.fakeCallout(true)
-    val cancel: ApiGatewayOp[AutoCancelRequest] = ac(autoCancelCallout)
+      getAccountSummary = _ => ClientSuccess(
+        AccountSummary(basicInfo, allAccountSubs, twoOverdueInvoices)
+      ),
+      getAccountSubscriptions = _ => ClientSuccess(
+        allAccountSubs
+          .map(s => SubscriptionNumberWithStatus(s.subscriptionNumber, s.status))
+      ),
+      getSubscriptionsOnInvoice = _ => ClientSuccess(invoiceDueMultipleSubscriptions.map(s => SubscriptionNumber(s.subscriptionNumber)))
+    ) _
+    val autoCancelCallout = AutoCancelHandlerTest
+      .fakeCallout(true)
+      .copy(
+        invoiceId = calloutInvoiceId,
+        accountId = basicInfo.id.value
+      )
 
-    cancel.toDisjunction should be(Right(AutoCancelRequest("id123", SubscriptionId("sub123"), LocalDate.now.minusDays(14))))
+    val actual: ApiGatewayOp[List[AutoCancelRequest]] = autoCancelReqestsProducer(autoCancelCallout)
+
+    val expected = Right(
+      List(
+        AutoCancelRequest("accId123", SubscriptionNumber("A-S123"), LocalDate.now.minusDays(14)),
+        AutoCancelRequest("accId123", SubscriptionNumber("A-S456"), LocalDate.now.minusDays(14))
+      )
+    )
+
+    actual.toDisjunction should be(expected)
   }
-
-  "auto cancel" should "turn off auto pay" in {
-    val effects = new TestingRawEffects(200)
-    AutoCancel(TestData.zuoraDeps(effects))(AutoCancelRequest("AID", SubscriptionId("subid"), LocalDate.now))
-
-    effects.requestsAttempted should contain(BasicRequest("PUT", "/accounts/AID", "{\"autoPay\":false}"))
-  }
-
-  //  // todo need an ACSDeps so we don't need so many mock requests
-  //  "auto cancel step" should "turn off auto pay and send email" in {
-  //    val effects = new TestingRawEffects(false, 200)
-  //    val autoCancelJson =
-  //      """
-  //        |{"accountId": "AID", "autoPay": "true", "paymentMethodType": "GoldBars"}
-  //      """.stripMargin // should probaly base on a real payload
-  //    val fakeRequest = ApiGatewayRequest(Some(URLParams(None, None, Some("false"))), autoCancelJson)
-  //    val acDeps = ACSDeps()
-  //    AutoCancelSteps(acDeps)(AutoCancelRequest("AID", SubscriptionId("subid"), LocalDate.now)).run.run(effects.configHttp)
-  //
-  //    val requests = effects.result.map { request =>
-  //      val buffer = new Buffer()
-  //      request.body().writeTo(buffer)
-  //      val body = buffer.readString(UTF_8)
-  //      val url = request.url
-  //      (request.method(), url.encodedPath(), body)
-  //    }
-  //
-  //    requests should contain(("PUT", "/accounts/AID", "{\"autoPay\":false}"))
-  //    requests should contain(("POST", "/EMAILSEND/AID", "{\"autoPay\":false}"))
-  //  }
 
 }
