@@ -27,33 +27,29 @@ case class LambdaResponse(
   headers: Map[String, String]
 )
 
-trait Http4sLambdaHandler {
-  def handle(is: InputStream, os: OutputStream): Unit
-}
+class Http4sLambdaHandler(service: HttpRoutes[IO]) {
+  def handle(inputStream: InputStream, outputStream: OutputStream): Unit = {
+    val responseIo = for {
+      request <- parseRequest(inputStream).toEitherT[IO]
+      http4sResponse <- runRequest(request, service)
+      response <- convertToHttp4sResponse(http4sResponse)
+    } yield response
 
+    val response = Either
+      .catchNonFatal(responseIo.value.unsafeRunSync())
+      .leftMap(ex => s"Unexpected Exception: $ex")
+      .flatMap(identity)
+      .fold(
+        error => LambdaResponse(500, error, Map.empty),
+        identity
+      )
 
-object Http4sLambdaHandler {
-
-  def apply(service: HttpRoutes[IO]): Http4sLambdaHandler = new Http4sLambdaHandler {
-    override def handle(inputStream: InputStream, outputStream: OutputStream): Unit = {
-      val responseIo = for {
-        request <- parseRequest(inputStream).toEitherT[IO]
-        http4sResponse <- runRequest(request, service)
-        response <- convertToHttp4sResponse(http4sResponse)
-      } yield response
-
-      val response = Either
-        .catchNonFatal(responseIo.value.unsafeRunSync())
-        .leftMap(ex => s"Unexpected Exception: $ex")
-        .flatMap(identity)
-        .fold(
-          error => LambdaResponse(500, error, Map.empty),
-          identity
-        )
-
+    try {
       outputStream.write(
         response.asJson.spaces2.getBytes("UTF-8")
       )
+    } finally {
+      outputStream.close();
     }
   }
 

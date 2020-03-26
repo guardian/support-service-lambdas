@@ -378,11 +378,10 @@ lazy val `delivery-records-api` = all(project in file("handlers/delivery-records
   .enablePlugins(RiffRaffArtifact)
 
 lazy val `digital-voucher-api` = all(project in file("handlers/digital-voucher-api"))
-  .dependsOn(`effects-s3`, `config-cats`, `imovo-sttp-client`, `imovo-sttp-test-stub` % Test)
+  .dependsOn(`effects-s3`, `config-cats`, `imovo-sttp-client`, `imovo-sttp-test-stub` % Test, `http4s-lambda-handler`)
   .settings(
     libraryDependencies ++=
       Seq(
-        http4sLambda,
         http4sDsl,
         http4sCirce,
         http4sServer,

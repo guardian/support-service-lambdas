@@ -3,7 +3,6 @@ package com.gu.digital_voucher_api
 import java.time.LocalDate
 
 import cats.Show
-import cats.data.EitherT
 import cats.effect.Effect
 import cats.implicits._
 import io.circe.Decoder
@@ -11,7 +10,7 @@ import io.circe.generic.auto._
 import org.http4s.circe.CirceEntityDecoder._
 import org.http4s.circe.CirceEntityEncoder._
 import org.http4s.dsl.Http4sDsl
-import org.http4s.{DecodeFailure, HttpRoutes, InvalidMessageBodyFailure, MalformedMessageBodyFailure, Request, Response}
+import org.http4s.{DecodeFailure, HttpRoutes, InvalidMessageBodyFailure, MalformedMessageBodyFailure, Request}
 import com.gu.imovo.SfSubscriptionId
 
 case class DigitalVoucherApiRoutesError(message: String)
@@ -25,7 +24,6 @@ case class SubscriptionActionRequestBody(subscriptionId: Option[String], cardCod
 object DigitalVoucherApiRoutes {
 
   def apply[F[_]: Effect](digitalVoucherService: DigitalVoucherService[F]): HttpRoutes[F] = {
-    type RouteResult[A] = EitherT[F, F[Response[F]], A]
     object http4sDsl extends Http4sDsl[F]
     import http4sDsl._
 
