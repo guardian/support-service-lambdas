@@ -54,7 +54,7 @@ class DigitalVoucherCancellationProcessorServiceTest extends AnyFlatSpec with Ma
       s"digital-voucher-id-$resultId",
       "PATCH",
       s"/services/data/v29.0/sobjects/Digital_Voucher__c/digital-voucher-id-$resultId",
-      DigitalVoucherUpdate(now)
+      DigitalVoucherUpdate(now, "Deactivated")
     )
   }
 

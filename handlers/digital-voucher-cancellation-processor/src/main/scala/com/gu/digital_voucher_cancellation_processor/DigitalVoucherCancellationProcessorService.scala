@@ -18,7 +18,7 @@ object DigitalVoucherCancellationProcessorService extends LazyLogging {
   private val ImovoSubscriptionDoesNotExistMessage = "no live subscription vouchers exist for the supplied subscription id"
   case class CObjectAttribues(url: String)
   case class DigitalVoucherQueryResult(Id: String, attributes: CObjectAttribues, SF_Subscription__r: SubscriptionQueryResult)
-  case class DigitalVoucherUpdate(Cancellation_Processed_At__c: Instant)
+  case class DigitalVoucherUpdate(Cancellation_Processed_At__c: Instant, Status__c: String)
   case class SubscriptionQueryResult(Id: String, attributes: CObjectAttribues)
   case class DigitalVoucherCancellationProcessorServiceError(message: String)
   case class ImovoCancellationResults(
@@ -93,7 +93,7 @@ object DigitalVoucherCancellationProcessorService extends LazyLogging {
                   voucherToMarkAsProcessed.Id,
                   "PATCH",
                   voucherToMarkAsProcessed.attributes.url,
-                  DigitalVoucherUpdate(now)
+                  DigitalVoucherUpdate(now, "Deactivated")
                 )
               })
           )
