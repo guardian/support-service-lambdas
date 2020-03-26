@@ -32,10 +32,10 @@ class GetSubscriptionEffectsTest extends FlatSpec with Matchers {
     val testSubscriptionId = SubscriptionId("A-S00044160")
 
     val customerAcceptanceDate = LocalDate.of(2017, 12, 15)
-    val startDate = LocalDate.of(2018, 11, 29)
+    val startDate = LocalDate.of(2019, 11, 29)
     val expected = SubscriptionResult(
       testSubscriptionId,
-      SubscriptionName("2c92c08567580c5901675ec91ccb0f17"),
+      SubscriptionName("2c92c0856eb600ac016eb68ca2727298"),
       AccountId("2c92c0f860017cd501600893130317a7"),
       Some("2018-04-18T14:59:49.368"),
       customerAcceptanceDate,
@@ -55,7 +55,7 @@ class GetSubscriptionEffectsTest extends FlatSpec with Matchers {
           List(RatePlanCharge(
             name = "Digital Pack Monthly",
             effectiveStartDate = LocalDate.of(2017, 12, 15),
-            effectiveEndDate = LocalDate.of(2019, 11, 29)
+            effectiveEndDate = LocalDate.of(2020, 11, 29)
           ))
         )
       )
