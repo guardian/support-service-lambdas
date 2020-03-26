@@ -46,8 +46,8 @@ object GetSubscriptionExpiry {
     def isActiveDigipack(charge: RatePlanCharge) = isDigipackName(charge.name) && chargeSpansDate(charge)
     val hasActiveDigipackCharges = subscription.ratePlans.flatMap(_.ratePlanCharges).exists(isActiveDigipack)
 
-    // FIXME should only exist during Coronavirus measures (where digipack access is expanded to cover paper customers)
-    @deprecated def isNewspaper(ratePlan: RatePlan) = ratePlan.productName.toUpperCase.startsWith("NEWSPAPER")
+    @deprecated("should only exist during Coronavirus measures (where digipack access is expanded to cover paper customers)") //FIXME remove after Coronavirus
+    def isNewspaper(ratePlan: RatePlan) = ratePlan.productName.toUpperCase.startsWith("NEWSPAPER")
     val isValidNewspaperSub = subscription.ratePlans.filter(isNewspaper).flatMap(_.ratePlanCharges).exists(chargeSpansDate)
 
     if (hasActiveDigipackCharges || isValidNewspaperSub) {
