@@ -410,6 +410,13 @@ lazy val `digital-voucher-cancellation-processor` = all(project in file("handler
   )
   .enablePlugins(RiffRaffArtifact)
 
+
+lazy val `http4s-lambda-handler` = all(project in file("lib/http4s-lambda-handler"))
+  .settings(
+    libraryDependencies ++= Seq(circe, circeParser, http4sCore) ++ logging
+  )
+
+
 // ==== END handlers ====
 
 initialize := {
