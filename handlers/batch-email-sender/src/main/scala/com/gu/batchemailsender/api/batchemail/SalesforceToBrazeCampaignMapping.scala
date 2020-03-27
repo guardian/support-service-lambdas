@@ -1,0 +1,33 @@
+package com.gu.batchemailsender.api.batchemail
+
+import com.gu.batchemailsender.api.batchemail.SalesforceMessage.SalesforceBatchItem
+
+// This is mapped to Braze Template API Identifier by membership-workflow
+// https://github.com/guardian/membership-workflow/blob/2e354b81888f6d222d9de0b4c2eda8e0f2b14729/app/services/BrazeTemplateLookupService.scala#L13
+// FIXME: Yet another useless indirection.
+object SalesforceToBrazeCampaignMapping {
+  def apply(salesforceBatchItem: SalesforceBatchItem): String =
+    (salesforceBatchItem.object_name, salesforceBatchItem.payload.email_stage) match {
+      case ("Card_Expiry__c", _) => "expired-card"
+      case ("DD_Mandate_Failure__c", "MF1") => "dd-mandate-failure-1"
+      case ("DD_Mandate_Failure__c", "MF2") => "dd-mandate-failure-2"
+      case ("DD_Mandate_Failure__c", "MF3") => "dd-mandate-failure-3"
+      case ("DD_Mandate_Failure__c", "MF4") => "dd-mandate-failure-4"
+      case ("DD_Mandate_Failure__c", "MF5") => "dd-mandate-failure-5"
+      case ("DD_Mandate_Failure__c", "MF6") => "dd-mandate-failure-6"
+      case ("DD_Mandate_Failure__c", "MF7") => "dd-mandate-failure-7"
+      case ("DD_Mandate_Failure__c", "MF8") => "dd-mandate-failure-8"
+      case ("Payment_Failure__c", "DD_PF1") => "SV_DDpaymentfailure1"
+      case ("Payment_Failure__c", "DD_PF2") => "SV_DDpaymentfailure2"
+      case ("Payment_Failure__c", "DD_PF3") => "SV_DDpaymentfailure3"
+      case ("Payment_Failure__c", "DD_PF4") => "SV_DDpaymentfailure4"
+      case ("Holiday_Stop_Request__c", "create") => "SV_HolidayStopConfirmation"
+      case ("Holiday_Stop_Request__c", "amend") => "SV_HolidayStopAmend"
+      case ("Holiday_Stop_Request__c", "withdraw") => "SV_HolidayStopWithdrawal"
+      case ("Digital_Voucher__c", "create") => "SV_VO_NewCard"
+      case ("Digital_Voucher__c", "replace") => "SV_VO_ReplacementCard"
+      case ("Case", "Delivery issues") => "SV_DeliveryProblemConfirmation"
+      case ("Contact", "Delivery address change") => "SV_DeliveryAddressChangeConfirmation"
+      case (objectName, emailStage) => throw new RuntimeException(s"Unrecognized (object_name, email_stage) = ($objectName, $emailStage). Please fix SF trigger.")
+    }
+}

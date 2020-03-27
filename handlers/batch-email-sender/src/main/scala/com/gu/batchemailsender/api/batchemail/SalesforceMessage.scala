@@ -13,6 +13,7 @@ import scala.util.{Failure, Success, Try}
  */
 object SalesforceMessage {
 
+  // FIXME: What is this?
   case class SalesforceBatchWithExceptions(
     validBatch: SalesforceBatchItems,
     exceptions: List[Seq[(JsPath, Seq[JsonValidationError])]]
