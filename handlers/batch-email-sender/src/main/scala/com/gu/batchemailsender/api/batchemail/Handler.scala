@@ -18,11 +18,10 @@ import play.api.libs.json.Json
 import scala.util.{Failure, Success, Try}
 
 object Handler extends Logging {
-  // Referenced in Cloudformation
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
     ApiGatewayHandler(LambdaIO(inputStream, outputStream, context)) {
       def operation(apiGatewayRequest: ApiGatewayRequest): ApiResponse = {
-        val apiGatewayOp: ApiGatewayOp[ApiResponse] = apiGatewayRequest.bodyAsCaseClass[SalesforceBatchWithExceptions]() map { salesforceBatch: SalesforceBatchWithExceptions =>
+        apiGatewayRequest.bodyAsCaseClass[SalesforceBatchWithExceptions]().map({ salesforceBatch =>
           if (salesforceBatch.exceptions.nonEmpty) {
             logger.error(s"There were parsing errors in the body received: ${salesforceBatch.exceptions}")
           }
@@ -31,9 +30,7 @@ object Handler extends Logging {
             case Nil => ApiGatewayResponse.successfulExecution
             case idList => ApiGatewayResponse.internalServerError(s"Failed send the following messages $idList")
           }
-        }
-
-        apiGatewayOp.apiResponse
+        }).apiResponse
       }
 
       ContinueProcessing(Operation.noHealthcheck(steps = operation))
