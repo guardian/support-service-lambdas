@@ -7,7 +7,54 @@ import play.api.libs.json._
  * was to treat Wire models as kind of DTO (Data Transfer Objects). This is NOT what gets put on the SQS. It is
  * converted to BrazeApiTriggerProperties
  *
- *
+
+{
+	"batch_items": [{
+		"payload": {
+			"to_address": "mario.galic+bvtgedltoa@guardian.co.uk",
+			"subscriber_id": "A-S00060454",
+			"sf_contact_id": "0033E00001Chmk9QAB",
+			"record_id": "5003E00000FyQBIQA3",
+			"product": "Guardian Weekly",
+			"next_charge_date": null,
+			"modified_by_customer": null,
+			"last_name": "bvtgedltoa",
+			"identity_id": "200002073",
+			"holiday_stop_request": null,
+			"first_name": "bvtgedltoa",
+			"email_stage": "Delivery issues",
+			"digital_voucher": null,
+			"delivery_problem": {
+				"totalCreditAmount": "42.2",
+				"repeatDeliveryProblem": "true",
+				"issuesAffected": "3",
+				"deliveries": [{
+					"attributes": {
+						"type": "Delivery__c",
+						"url": "/services/data/v48.0/sobjects/Delivery__c/a3P3E000000VGvVUAW"
+					},
+					"Case__c": "5003E00000FyQBIQA3",
+					"Id": "a3P3E000000VGvVUAW",
+					"Name": "DR-00061459",
+					"Delivery_Date__c": "2020-02-24",
+					"Invoice_Date__c": "2020-06-20"
+				}, {
+					"attributes": {
+						"type": "Delivery__c",
+						"url": "/services/data/v48.0/sobjects/Delivery__c/a3P3E000000VGvWUAW"
+					},
+					"Case__c": "5003E00000FyQBIQA3",
+					"Id": "a3P3E000000VGvWUAW",
+					"Name": "DR-00061460",
+					"Delivery_Date__c": "2020-02-24",
+					"Invoice_Date__c": "2020-06-20"
+				}]
+			}
+		},
+		"object_name": "Case"
+	}]
+}
+
  */
 object SalesforceMessage {
 
