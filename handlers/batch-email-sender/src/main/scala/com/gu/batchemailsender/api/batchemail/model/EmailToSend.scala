@@ -1,6 +1,5 @@
 package com.gu.batchemailsender.api.batchemail.model
 
-import play.api.libs.json.Json
 import ai.x.play.json.Jsonx
 
 /**
@@ -39,6 +38,19 @@ case class EmailPayloadSubscriberAttributes(
   delivery_problem_type: Option[String] = None, // No delivery | Damaged paper,
   delivery_problem_currency_symbol: Option[String] = None,
   delivery_problem_case_number: Option[String] = None,
+
+  /*
+   * SV_DeliveryAddressChangeConfirmation
+   * https://manage.theguardian.com/delivery/guardianweekly/address/confirmed
+   */
+  delivery_address_change_line1: Option[String] = None,
+  delivery_address_change_line2: Option[String] = None,
+  delivery_address_change_city: Option[String] = None,
+  delivery_address_change_state: Option[String] = None,
+  delivery_address_change_postcode: Option[String] = None,
+  delivery_address_change_country: Option[String] = None,
+  delivery_address_change_effective_date_blurb: Option[String] = None,
+
 )
 case class EmailPayloadDigitalVoucher(barcode_url: String)
 case class EmailPayloadStoppedCreditSummary(credit_amount: Double, credit_date: String)
@@ -94,6 +106,15 @@ object EmailToSend {
           delivery_problem_type = emailBatchItem.payload.delivery_problem_type,
           delivery_problem_currency_symbol = emailBatchItem.payload.delivery_problem_currency_symbol,
           delivery_problem_case_number = emailBatchItem.payload.delivery_problem_case_number,
+          
+          // Delivery address change
+          delivery_address_change_line1 = emailBatchItem.payload.delivery_address_change_line1,
+          delivery_address_change_line2 = emailBatchItem.payload.delivery_address_change_line2,
+          delivery_address_change_city = emailBatchItem.payload.delivery_address_change_city,
+          delivery_address_change_state = emailBatchItem.payload.delivery_address_change_state,
+          delivery_address_change_postcode = emailBatchItem.payload.delivery_address_change_postcode,
+          delivery_address_change_country = emailBatchItem.payload.delivery_address_change_country,
+          delivery_address_change_effective_date_blurb = emailBatchItem.payload.delivery_address_change_effective_date_blurb,
         )
       )
     )
@@ -129,6 +150,7 @@ object EmailToSend {
       case ("Digital_Voucher__c", "create") => "SV_VO_NewCard"
       case ("Digital_Voucher__c", "replace") => "SV_VO_ReplacementCard"
       case ("Case", "Delivery issues") => "SV_DeliveryProblemConfirmation"
+      case ("Contact", "Delivery address change") => "SV_DeliveryAddressChangeConfirmation"
       case (objectName, emailStage) => throw new RuntimeException(s"Unrecognized (object_name, email_stage) = ($objectName, $emailStage). Please fix SF trigger.")
     }
 }
