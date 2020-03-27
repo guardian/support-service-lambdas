@@ -3,8 +3,7 @@ package com.gu.batchemailsender.api.batchemail
 import java.io.{InputStream, OutputStream}
 
 import com.amazonaws.services.lambda.runtime.Context
-import com.gu.batchemailsender.api.batchemail.model.EmailBatch.WireModel.WireEmailBatchWithExceptions
-import com.gu.batchemailsender.api.batchemail.model.{EmailBatch, EmailBatchSenderResponses}
+import SalesforceMessage.SalesforceBatchWithExceptions
 import com.gu.effects.RawEffects
 import com.gu.effects.sqs.AwsSQSSend
 import com.gu.effects.sqs.AwsSQSSend.{Payload, QueueName}
@@ -14,40 +13,41 @@ import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
 import com.gu.util.reader.Types._
+import play.api.libs.json.Json
 
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 object Handler extends Logging {
-
-  def operationWithEffects(sqsSend: Payload => Try[Unit]): ApiGatewayOp[Operation] = {
-
-    def operation(apiGatewayRequest: ApiGatewayRequest): ApiResponse = {
-
-      val apiGatewayOp: ApiGatewayOp[ApiResponse] = apiGatewayRequest.bodyAsCaseClass[WireEmailBatchWithExceptions]() map { emailBatch: WireEmailBatchWithExceptions =>
-        if (emailBatch.exceptions.nonEmpty) {
-          logger.error(s"There were parsing errors in the body received: ${emailBatch.exceptions}")
-        }
-        val batch = EmailBatch.WireModel.fromWire(emailBatch.validBatch)
-        SqsSendBatch.sendBatchSync(sqsSend)(batch.emailBatchItems) match {
-          case Nil => ApiGatewayResponse.successfulExecution
-          case idList => EmailBatchSenderResponses.someItemsFailed(idList.map(_.value).toList)
-        }
-      }
-
-      apiGatewayOp.apiResponse
-    }
-
-    ContinueProcessing(Operation.noHealthcheck(steps = operation))
-  }
-
   // Referenced in Cloudformation
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
+    ApiGatewayHandler(LambdaIO(inputStream, outputStream, context)) {
+      def operation(apiGatewayRequest: ApiGatewayRequest): ApiResponse = {
+        val apiGatewayOp: ApiGatewayOp[ApiResponse] = apiGatewayRequest.bodyAsCaseClass[SalesforceBatchWithExceptions]() map { salesforceBatch: SalesforceBatchWithExceptions =>
+          if (salesforceBatch.exceptions.nonEmpty) {
+            logger.error(s"There were parsing errors in the body received: ${salesforceBatch.exceptions}")
+          }
+          val brazeSqsMessages = salesforceBatch.validBatch.batch_items.map(BrazeSqsMessage.fromSalesforceMessage)
+          send(brazeSqsMessages) match {
+            case Nil => ApiGatewayResponse.successfulExecution
+            case idList => ApiGatewayResponse.internalServerError(s"Failed send the following messages $idList")
+          }
+        }
 
-    val queueName = if (RawEffects.stage.isProd) QueueName("contributions-thanks") else QueueName("contributions-thanks-dev")
+        apiGatewayOp.apiResponse
+      }
 
-    val sqsfunction: Payload => Try[Unit] = AwsSQSSend.sendSync(queueName)
-
-    ApiGatewayHandler(LambdaIO(inputStream, outputStream, context))(operationWithEffects(sqsfunction))
+      ContinueProcessing(Operation.noHealthcheck(steps = operation))
+    }
   }
 
+  private def send(brazeMessages: List[BrazeSqsMessage]): List[String] = {
+    val queueName = if (RawEffects.stage.isProd) QueueName("contributions-thanks") else QueueName("contributions-thanks-dev")
+    brazeMessages flatMap { msg =>
+      val payloadString = Json.prettyPrint(Json.toJson(msg))
+      Try(AwsSQSSend.sendSync(queueName)(Payload(payloadString))) match {
+        case Success(_) => None
+        case Failure(_) => Some(msg.recordId)
+      }
+    }
+  }
 }

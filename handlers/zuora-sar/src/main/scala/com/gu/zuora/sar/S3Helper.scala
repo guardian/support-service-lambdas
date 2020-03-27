@@ -41,25 +41,25 @@ object S3Helper extends S3Service with LazyLogging {
     initiationId: String,
     config: ZuoraSarConfig
   ): Try[S3StatusResponse] = {
-      val completedPath = S3Path(BucketName(config.resultsBucket), Some(Key(s"${config.resultsPath}/$initiationId/completed/")))
-      val failedPath = S3Path(BucketName(config.resultsBucket), Some(Key(s"${config.resultsPath}/$initiationId/failed/")))
-      logger.info("Checking for failed or completed file paths in S3.")
-      for {
-        completedResults <- ListS3Objects.listObjectsWithPrefix(completedPath)
-        failedResults <- ListS3Objects.listObjectsWithPrefix(failedPath)
-        failedSarExists = failedResults.nonEmpty
-        completedFileExists = completedResults.exists(k => k.value.contains("ResultsCompleted") | k.value.contains("NoResultsFoundForUser"))
-      } yield {
-        if (failedSarExists) {
-          S3FailedPathFound()
-        } else if (completedFileExists) {
-          S3CompletedPathFound(completedResults.filterNot(k => k.value.contains("ResultsCompleted"))
-            .map(keyPath => s"s3://${config.resultsBucket}/${keyPath.value}"))
-        } else {
-          S3NoResultsFound()
-        }
+    val completedPath = S3Path(BucketName(config.resultsBucket), Some(Key(s"${config.resultsPath}/$initiationId/completed/")))
+    val failedPath = S3Path(BucketName(config.resultsBucket), Some(Key(s"${config.resultsPath}/$initiationId/failed/")))
+    logger.info("Checking for failed or completed file paths in S3.")
+    for {
+      completedResults <- ListS3Objects.listObjectsWithPrefix(completedPath)
+      failedResults <- ListS3Objects.listObjectsWithPrefix(failedPath)
+      failedSarExists = failedResults.nonEmpty
+      completedFileExists = completedResults.exists(k => k.value.contains("ResultsCompleted") | k.value.contains("NoResultsFoundForUser"))
+    } yield {
+      if (failedSarExists) {
+        S3FailedPathFound()
+      } else if (completedFileExists) {
+        S3CompletedPathFound(completedResults.filterNot(k => k.value.contains("ResultsCompleted"))
+          .map(keyPath => s"s3://${config.resultsBucket}/${keyPath.value}"))
+      } else {
+        S3NoResultsFound()
       }
     }
+  }
 
   private def createCompletedObject(keySuffix: String, initiationReference: String, config: ZuoraSarConfig): Either[S3Error, S3WriteSuccess] = {
     val completedPath = s"${config.resultsPath}/$initiationReference/completed/$keySuffix"
@@ -121,10 +121,10 @@ object S3Helper extends S3Service with LazyLogging {
     val accountDetails = Seq(zuoraSarResponse.accountSummary, zuoraSarResponse.accountObj).mkString("\n")
     logger.info("Uploading successful account result to S3.")
     UploadToS3.putStringWithAcl(
-        S3Location(config.resultsBucket, resultsPath),
-        CannedAccessControlList.BucketOwnerRead,
-        accountDetails
-      ).toEither.map(_ => S3WriteSuccess()).left.map(err => S3Error(err.getMessage))
+      S3Location(config.resultsBucket, resultsPath),
+      CannedAccessControlList.BucketOwnerRead,
+      accountDetails
+    ).toEither.map(_ => S3WriteSuccess()).left.map(err => S3Error(err.getMessage))
   }
 
   override def writeSuccessInvoiceResult(
