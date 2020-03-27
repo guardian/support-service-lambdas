@@ -9,31 +9,6 @@ import SalesforceToBrazeTransformations._
  * For example, stopped_credit_summaries can be found in SV_HolidayStopConfirmation_GuardianWeeklyBodyCopy
  * Braze content block.
  *
-    {
-      "To" : {
-        "Address" : "mario.galic+bvtgedltoa@guardian.co.uk",
-        "SubscriberKey" : "mario.galic+bvtgedltoa@guardian.co.uk",
-        "ContactAttributes" : {
-          "SubscriberAttributes" : {
-            "first_name" : "bvtgedltoa",
-            "last_name" : "bvtgedltoa",
-            "subscriber_id" : "",
-            "product" : "",
-            "delivery_address_change_line1" : "Address line 1",
-            "delivery_address_change_line2" : "Address line 2",
-            "delivery_address_change_city" : "city",
-            "delivery_address_change_state" : "state",
-            "delivery_address_change_postcode" : "postcode",
-            "delivery_address_change_country" : "Antigua & Barbuda",
-            "delivery_address_change_effective_date_blurb" : "Guardian weekly subscription (A-S00060454)  as of front cover dated Friday 10th April 2020\n\n(as displayed on confirmation page at 12:39:44  on 26th March 2020)"
-          }
-        }
-      },
-      "DataExtensionName" : "SV_DeliveryAddressChangeConfirmation",
-      "SfContactId" : "0033E00001Chmk9QAB",
-      "IdentityUserId" : "200002073"
-    }
- *
  * FIXME: For some reason this has to have flat structure?
  */
 case class BrazeApiTriggerProperties(
