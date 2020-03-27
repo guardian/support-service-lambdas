@@ -1,15 +1,13 @@
 package com.gu.batchemailsender.api.batchemail
 
-import org.joda.time.DateTime
-import org.joda.time.format.DateTimeFormat
 import play.api.libs.json._
-
-import scala.util.{Failure, Success, Try}
 
 /**
  * This is what gets sent from Salesforce directly. "Wire" indicates raw data sent over the wire. It seems the intention
  * was to treat Wire models as kind of DTO (Data Transfer Objects). This is NOT what gets put on the SQS. It is
  * converted to BrazeApiTriggerProperties
+ *
+ *
  */
 object SalesforceMessage {
 
@@ -101,33 +99,3 @@ object SalesforceMessage {
   }
 }
 
-object SalesforceToBrazeTransformations {
-  def fromSfDateToDisplayDate(sfDate: String): String = {
-    val formattedDate: Try[String] = Try {
-      val asDateTime = DateTime.parse(sfDate, DateTimeFormat.forPattern("yyyy-MM-dd"))
-      asDateTime.toString(DateTimeFormat.forPattern("d MMMM yyyy"))
-    }
-
-    formattedDate match {
-      case Success(date) => date
-      case Failure(_) => sfDate
-    }
-  }
-
-  /**
-   * Salesforce mailingStreet field concatenates on a single line (line1,line), whilst MMA has it over two separate lines
-   */
-  private val sfStreetPattern = """([^,]+),(.*)""".r
-
-  def sfStreetToLine1(in: String): Option[String] =
-    in match {
-      case sfStreetPattern(line1, _) if line1.nonEmpty => Some(line1)
-      case _ => None
-    }
-
-  def sfStreetToLine2(in: String): Option[String] =
-    in match {
-      case sfStreetPattern(_, line2) if line2.nonEmpty => Some(line2)
-      case _ => None
-    }
-}
