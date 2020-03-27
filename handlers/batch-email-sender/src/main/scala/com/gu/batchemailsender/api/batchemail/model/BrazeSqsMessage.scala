@@ -10,7 +10,7 @@ import ai.x.play.json.Jsonx
  * FIXME: WireEmailBatchItemPayload -> EmailBatchItemPayload -> EmailPayloadSubscriberAttributes  ???
  * FIXME: For some reason this has to have flat structure?
  */
-case class EmailPayloadSubscriberAttributes(
+case class BrazeApiTriggerProperties(
   first_name: String,
   last_name: String,
   subscriber_id: String,
@@ -54,28 +54,60 @@ case class EmailPayloadSubscriberAttributes(
 )
 case class EmailPayloadDigitalVoucher(barcode_url: String)
 case class EmailPayloadStoppedCreditSummary(credit_amount: Double, credit_date: String)
-case class EmailPayloadContactAttributes(SubscriberAttributes: EmailPayloadSubscriberAttributes)
-case class EmailPayloadTo(Address: String, SubscriberKey: String, ContactAttributes: EmailPayloadContactAttributes)
-case class EmailToSend(To: EmailPayloadTo, DataExtensionName: String, SfContactId: Option[String], IdentityUserId: Option[String])
 
-object EmailToSend {
+
+/*
+{
+  "To" : {
+    "Address" : "mario.galic+bvtgedltoa@guardian.co.uk",
+    "SubscriberKey" : "mario.galic+bvtgedltoa@guardian.co.uk",
+    "ContactAttributes" : {
+      "SubscriberAttributes" : {
+        "first_name" : "bvtgedltoa",
+        "last_name" : "bvtgedltoa",
+        "subscriber_id" : "",
+        "product" : "",
+        "delivery_address_change_line1" : "Address line 1",
+        "delivery_address_change_line2" : "Address line 2",
+        "delivery_address_change_city" : "city",
+        "delivery_address_change_state" : "state",
+        "delivery_address_change_postcode" : "postcode",
+        "delivery_address_change_country" : "Antigua & Barbuda",
+        "delivery_address_change_effective_date_blurb" : "Guardian weekly subscription (A-S00060454)  as of front cover dated Friday 10th April 2020\n\n(as displayed on confirmation page at 12:39:44  on 26th March 2020)"
+      }
+    }
+  },
+  "DataExtensionName" : "SV_DeliveryAddressChangeConfirmation",
+  "SfContactId" : "0033E00001Chmk9QAB",
+  "IdentityUserId" : "200002073"
+}
+ */
+case class EmailPayloadContactAttributes(SubscriberAttributes: BrazeApiTriggerProperties)
+case class EmailPayloadTo(Address: String, SubscriberKey: String, ContactAttributes: EmailPayloadContactAttributes)
+
+/**
+ * Message put on the SQS contributions-thanks queue for pickup by membership-workflow
+ */
+case class BrazeSqsMessage(To: EmailPayloadTo, DataExtensionName: String, SfContactId: Option[String], IdentityUserId: Option[String])
+
+object BrazeSqsMessage {
 
   implicit val emailPayloadStoppedCreditDetailWriter = Jsonx.formatCaseClass[EmailPayloadStoppedCreditSummary]
   implicit val emailPayloadDigitalVoucherWriter = Jsonx.formatCaseClass[EmailPayloadDigitalVoucher]
-  implicit val emailPayloadSubscriberAttributesWriter = Jsonx.formatCaseClass[EmailPayloadSubscriberAttributes]
+  implicit val emailPayloadSubscriberAttributesWriter = Jsonx.formatCaseClass[BrazeApiTriggerProperties]
   implicit val emailPayloadContactAttributesWriter = Jsonx.formatCaseClass[EmailPayloadContactAttributes]
   implicit val emailPayloadToWriter = Jsonx.formatCaseClass[EmailPayloadTo]
-  implicit val emailToSendWriter = Jsonx.formatCaseClass[EmailToSend]
+  implicit val emailToSendWriter = Jsonx.formatCaseClass[BrazeSqsMessage]
 
   /**
    * Builds actual model from wire (DTO) model
    */
-  def fromEmailBatchItem(emailBatchItem: EmailBatchItem): EmailToSend = {
+  def fromEmailBatchItem(emailBatchItem: EmailBatchItem): BrazeSqsMessage = {
     val emailPayloadTo = EmailPayloadTo(
       Address = emailBatchItem.payload.to_address,
       SubscriberKey = emailBatchItem.payload.to_address,
       ContactAttributes = EmailPayloadContactAttributes(
-        SubscriberAttributes = EmailPayloadSubscriberAttributes(
+        SubscriberAttributes = BrazeApiTriggerProperties(
           emailBatchItem.payload.first_name,
           emailBatchItem.payload.last_name,
           emailBatchItem.payload.subscriber_id.value,
@@ -106,7 +138,7 @@ object EmailToSend {
           delivery_problem_type = emailBatchItem.payload.delivery_problem_type,
           delivery_problem_currency_symbol = emailBatchItem.payload.delivery_problem_currency_symbol,
           delivery_problem_case_number = emailBatchItem.payload.delivery_problem_case_number,
-          
+
           // Delivery address change
           delivery_address_change_line1 = emailBatchItem.payload.delivery_address_change_line1,
           delivery_address_change_line2 = emailBatchItem.payload.delivery_address_change_line2,
@@ -119,7 +151,7 @@ object EmailToSend {
       )
     )
 
-    EmailToSend(
+    BrazeSqsMessage(
       To = emailPayloadTo,
       DataExtensionName = brazeCampaignId(emailBatchItem),
       SfContactId = Some(emailBatchItem.payload.sf_contact_id.value),

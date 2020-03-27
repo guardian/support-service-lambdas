@@ -1,6 +1,6 @@
 package com.gu.batchemailsender.api.batchemail
 
-import com.gu.batchemailsender.api.batchemail.model.{EmailBatchItem, EmailBatchItemId, EmailToSend}
+import com.gu.batchemailsender.api.batchemail.model.{EmailBatchItem, EmailBatchItemId, BrazeSqsMessage}
 import com.gu.effects.sqs.AwsSQSSend.Payload
 import com.gu.util.Logging
 import play.api.libs.json.Json
@@ -19,7 +19,7 @@ object SqsSendBatch extends Logging {
     }
 
     emailBatchItems flatMap { emailBatchItem: EmailBatchItem =>
-      val emailToSend = EmailToSend.fromEmailBatchItem(emailBatchItem)
+      val emailToSend = BrazeSqsMessage.fromEmailBatchItem(emailBatchItem)
       val payloadString = Json.prettyPrint(Json.toJson(emailToSend))
 
       sendAndRetainItemIdOnFailure(Payload(payloadString), emailBatchItem.payload.record_id)
