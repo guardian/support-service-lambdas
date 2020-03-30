@@ -76,7 +76,7 @@ class HolidayStopConfirmationTest extends AnyFlatSpec with Matchers with TripleE
       |  "recordId" : "xR9"
       |}""".stripMargin
 
-  "Direct debit mandate failure Salesforce message" should "transform to Braze SQS message for membership-workflow pickup" in {
+  "Holiday stop confirmation Salesforce message" should "transform to Braze SQS message for membership-workflow pickup" in {
     val sfMsg = Json.parse(rawSalesforceMessage).as[SalesforceBatchItems].batch_items.head
     val brazeMsg = BrazeSqsMessage.fromSalesforceMessage(sfMsg)
     val actualRawBrazeSqsMessage = Json.prettyPrint(Json.toJson(brazeMsg))

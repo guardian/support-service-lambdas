@@ -54,8 +54,7 @@ case class BrazeApiTriggerProperties(
 )
 
 case class StoppedCreditSummary(credit_amount: Double, credit_date: String)
-case class DigitalVoucherUrl(value: String) extends AnyVal
-case class DigitalVoucher(barcodeUrl: DigitalVoucherUrl)
+case class DigitalVoucher(barcode_url: String)
 case class EmailPayloadContactAttributes(SubscriberAttributes: BrazeApiTriggerProperties)
 case class EmailPayloadTo(Address: String, SubscriberKey: String, ContactAttributes: EmailPayloadContactAttributes)
 
@@ -64,7 +63,6 @@ case class BrazeSqsMessage(To: EmailPayloadTo, DataExtensionName: String, SfCont
 
 object BrazeSqsMessage {
   implicit val bb = Jsonx.formatCaseClass[StoppedCreditSummary]
-  implicit val cc = Jsonx.formatCaseClass[DigitalVoucherUrl]
   implicit val uu = Jsonx.formatCaseClass[DigitalVoucher]
   implicit val emailPayloadSubscriberAttributesWriter = Jsonx.formatCaseClass[BrazeApiTriggerProperties]
   implicit val emailPayloadContactAttributesWriter = Jsonx.formatCaseClass[EmailPayloadContactAttributes]
@@ -104,7 +102,7 @@ object BrazeSqsMessage {
           digital_voucher = salesforceBatchItem
             .payload
             .digital_voucher
-            .map(wireVoucher => DigitalVoucher(DigitalVoucherUrl(wireVoucher.barcode_url))),
+            .map(wireVoucher => DigitalVoucher(wireVoucher.barcode_url)),
 
           // Delivery Problem
           delivery_problem_action = salesforcePayload.delivery_problem.map(_.actionTaken),
