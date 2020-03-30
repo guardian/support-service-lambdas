@@ -84,13 +84,13 @@ object BrazeSqsMessage {
           salesforceBatchItem.payload.first_name,
           salesforceBatchItem.payload.last_name,
           salesforceBatchItem.payload.subscriber_id,
-          salesforceBatchItem.payload.next_charge_date,
+          salesforceBatchItem.payload.next_charge_date.map(fromSfDateToDisplayDate),
           salesforceBatchItem.payload.product,
           salesforceBatchItem.payload.modified_by_customer,
 
           // Holiday stop
-          salesforcePayload.holiday_stop_request.map(_.holiday_start_date),
-          salesforcePayload.holiday_stop_request.map(_.holiday_end_date),
+          salesforcePayload.holiday_stop_request.map(stop => fromSfDateToDisplayDate(stop.holiday_start_date)),
+          salesforcePayload.holiday_stop_request.map(stop => fromSfDateToDisplayDate(stop.holiday_end_date)),
           salesforcePayload.holiday_stop_request.map(_.stopped_credit_sum),
           salesforcePayload.holiday_stop_request.map(_.currency_symbol),
           salesforcePayload.holiday_stop_request.map(_.stopped_issue_count),
