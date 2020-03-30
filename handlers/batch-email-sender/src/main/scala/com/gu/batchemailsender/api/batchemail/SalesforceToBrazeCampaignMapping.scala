@@ -8,15 +8,15 @@ import com.gu.batchemailsender.api.batchemail.SalesforceMessage.SalesforceBatchI
 object SalesforceToBrazeCampaignMapping {
   def apply(salesforceBatchItem: SalesforceBatchItem): String =
     (salesforceBatchItem.object_name, salesforceBatchItem.payload.email_stage) match {
-      case ("Card_Expiry__c", _) => "expired-card" // CC Expiry, SV_PaymentFailure_Body_CCExpiry
-      case ("DD_Mandate_Failure__c", "MF1") => "dd-mandate-failure-1"
-      case ("DD_Mandate_Failure__c", "MF2") => "dd-mandate-failure-2"
-      case ("DD_Mandate_Failure__c", "MF3") => "dd-mandate-failure-3"
-      case ("DD_Mandate_Failure__c", "MF4") => "dd-mandate-failure-4"
-      case ("DD_Mandate_Failure__c", "MF5") => "dd-mandate-failure-5"
-      case ("DD_Mandate_Failure__c", "MF6") => "dd-mandate-failure-6"
-      case ("DD_Mandate_Failure__c", "MF7") => "dd-mandate-failure-7"
-      case ("DD_Mandate_Failure__c", "MF8") => "dd-mandate-failure-8"
+      case ("Card_Expiry__c", _) => "expired-card" // SV_CCExpiry
+      case ("DD_Mandate_Failure__c", "MF1") => "dd-mandate-failure-1" // SV_DirectDebit1
+      case ("DD_Mandate_Failure__c", "MF2") => "dd-mandate-failure-2" // SV_DirectDebit2
+      case ("DD_Mandate_Failure__c", "MF3") => "dd-mandate-failure-3" // SV_DirectDebit3
+      case ("DD_Mandate_Failure__c", "MF4") => "dd-mandate-failure-4" // SV_DirectDebit4
+      case ("DD_Mandate_Failure__c", "MF5") => "dd-mandate-failure-5" // SV_DirectDebit5
+      case ("DD_Mandate_Failure__c", "MF6") => "dd-mandate-failure-6" // SV_DirectDebit6
+      case ("DD_Mandate_Failure__c", "MF7") => "dd-mandate-failure-7" // SV_DirectDebit7
+      case ("DD_Mandate_Failure__c", "MF8") => "dd-mandate-failure-8" // SV_DirectDebit8
       case ("Payment_Failure__c", "DD_PF1") => "SV_DDpaymentfailure1"
       case ("Payment_Failure__c", "DD_PF2") => "SV_DDpaymentfailure2"
       case ("Payment_Failure__c", "DD_PF3") => "SV_DDpaymentfailure3"
