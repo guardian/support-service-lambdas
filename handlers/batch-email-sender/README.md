@@ -1,20 +1,104 @@
 # batch-email-sender
 
-This lambda is responsible for handling the following _service_ emails (non-marketing) via [Braze API Triggered Campaigns](https://www.braze.com/docs/user_guide/engagement_tools/campaigns/scheduling_and_organizing/scheduling_your_campaign/#api-triggered-campaigns-server-triggered-campaigns):
+Transforms Salesforce message to Braze SQS message for pickup by membership-workflow, for example, it transforms
 
-| Service email                         | Salesforce `object_name`     | Salesforce `email_stage`  | Braze Campaign Name           |
-| ------------------------------------- | ---------------------------- | ------------------------- | ----------------------------- |
-| Credit Card Expiry                    | `Card_Expiry__c`             |                           | CC Expiry                     |
-| Direct Debit Mandate failure 1        | `DD_Mandate_Failure__c`      | `MF1`                     | Direct Debit - Email 1        |
-| Direct Debit Mandate failure 2        | `DD_Mandate_Failure__c`      | `MF2`                     | Direct Debit - Email 2        |
-| Direct Debit Mandate failure 3        | `DD_Mandate_Failure__c`      | `MF3`                     | Direct Debit - Email 3        |
-| Direct Debit Mandate failure 4        | `DD_Mandate_Failure__c`      | `MF4`                     | Direct Debit - Email 4        |
-| Direct Debit Mandate failure 5        | `DD_Mandate_Failure__c`      | `MF5`                     | Direct Debit - Email 5        |
-| Direct Debit Mandate failure 6        | `DD_Mandate_Failure__c`      | `MF6`                     | Direct Debit - Email 6        |
-| Holiday-stop create confirmation      | `Holiday_Stop_Request__c`    | `create`                  | SV_HolidayStopConfirmation    |
-| Holiday-stop amend confirmation       | `Holiday_Stop_Request__c`    | `amend`                   | SV_HolidayStopAmend           |
-| Holiday-stop withdraw confirmation    | `Holiday_Stop_Request__c`    | `withdraw`                | SV_HolidayStopWithdrawal      |
+```
+{
+	"batch_items": [{
+		"payload": {
+			"to_address": "bvtgedltoa@guardian.co.uk",
+			"subscriber_id": "",
+			"sf_contact_id": "0033E00001Chmk9QAB",
+			"record_id": "0033E00001Chmk9QAB",
+			"product": "",
+			"next_charge_date": null,
+			"modified_by_customer": null,
+			"last_name": "bvtgedltoa",
+			"identity_id": "200002073",
+			"holiday_stop_request": null,
+			"first_name": "bvtgedltoa",
+			"email_stage": "Delivery address change",
+			"digital_voucher": null,
+			"delivery_problem": null,
+			"delivery_address_change": {
+				"mailingStreet": "address line 1,address line 2",
+				"mailingState": "state",
+				"mailingPostalCode": "postcode",
+				"mailingCountry": "Afghanistan",
+				"mailingCity": "town",
+				"addressChangeEffectiveDateBlurb": "Guardian weekly subscription (A-S00060454)  as of front cover dated Friday 10th April 2020\n\n(as displayed on confirmation page at 18:21:07  on 27th March 2020)"
+			}
+		},
+		"object_name": "Contact"
+	}]
+}
+```
 
+to
+
+```
+{
+  "To" : {
+    "Address" : "bvtgedltoa@guardian.co.uk",
+    "SubscriberKey" : "bvtgedltoa@guardian.co.uk",
+    "ContactAttributes" : {
+      "SubscriberAttributes" : {
+        "first_name" : "bvtgedltoa",
+        "last_name" : "bvtgedltoa",
+        "subscriber_id" : "",
+        "product" : "",
+        "delivery_address_change_line1" : "address line 1",
+        "delivery_address_change_line2" : "address line 2",
+        "delivery_address_change_city" : "town",
+        "delivery_address_change_state" : "state",
+        "delivery_address_change_postcode" : "postcode",
+        "delivery_address_change_country" : "Afghanistan",
+        "delivery_address_change_effective_date_blurb" : "Guardian weekly subscription (A-S00060454)  as of front cover dated Friday 10th April 2020\n\n(as displayed on confirmation page at 18:21:07  on 27th March 2020)"
+      }
+    }
+  },
+  "DataExtensionName" : "SV_DeliveryAddressChangeConfirmation",
+  "SfContactId" : "0033E00001Chmk9QAB",
+  "IdentityUserId" : "200002073",
+  "recordId" : "0033E00001Chmk9QAB"
+}
+```
+
+## How to add new email? 
+
+Example PR: [Add SV_DeliveryAddressChangeConfirmation email #196](https://github.com/guardian/salesforce/pull/196)
+
+Code changes are necessary in at least
+
+1. **Salesforce**
+    - trigger on an object, for example, `ContacTrigger.trigger`
+    - trigger handler, for example, `DeliveryAddressChangeEmail.cls`
+    - json payload model - `CommsDetailsToServiceLayer.cls`
+    - unit test to satisfy Salesforce enforced coverage, for example, `DeliveryAddressChangeEmailTest.cls`
+
+2. **batch-email-sender scala lambda**
+    - Raw Salesforce model, `WireEmailBatchItemPayload` in `EmailBatch.scala`
+    - Intermediary model, `EmailBatchItem` in `EmailBatch.scala`
+    - Actual Braze SQS message model, `EmailPayloadSubscriberAttributes` in `EmailToSend.scala`
+
+3. **Braze Liquid templating language**
+    - Liquid changes in either template directly or the content block `Templated & Media | Content Blocks Library`
+    - For example, `SV_DeliveryProblemConfirmation_BodyCopy`
+    - Template syntax https://shopify.dev/docs/liquid
+
+4. **membership-workflow**
+    - add braze campaign IDs to `CODE.conf` and `PROD.conf`
+
+Tips for quicker dev feedback loop:
+ - Due to multiple moving parts, when something goes wrong, it is helpful to enable realtime [log tailing](https://github.com/guardian/salesforce#tailing-logs) on each system
+ - In SF DEV, `CommsDetailsToServiceLayer.cls` currently cannot be saved. Workaround is to use `VSC | Right click on the file | SFDX: Deploy this source to Org` or the corresponding sfdx CLI command.
+ - First figure out a quick way to trigger emails from salesforce, for example, by making sure [CODE MMA](https://manage.code.dev-theguardian.com/delivery/guardianweekly/address/confirmed) actually affects SF DEV. If test-user is NOT used then CODE MMA should talk to SF DEV.
+ - Deploy changes to batch-email-sender CODE directly from CLI:
+     ```
+     sbt batch-email-sender/assembly
+     aws lambda update-function-code --function-name batch-email-sender-CODE --zip-file fileb://support-service-lambdas/handlers/batch-email-sender/target/scala-2.12/batch-email-sender.jar --profile membership
+     ```
+     
 ## How it works?
 
 1. Salesforce POST JSON batch emails
@@ -29,13 +113,6 @@ This lambda is responsible for handling the following _service_ emails (non-mark
 ![sequence_diagram](https://user-images.githubusercontent.com/13835317/51552742-2a349800-1e69-11e9-8df4-55eec10b649d.png)
 
 Braze [`Campaign API Identifiers`](https://www.braze.com/docs/developer_guide/rest_api/messaging/#campaign-identifier) are stored in `membership-workflow.private.conf` under `braze.campaigns` 
-
-## How to add new email?
-
-1. Update SF trigger to post new `object_name` and `email_stage` 
-1. Update `EmailToSend.brazeCampaignId` match statement to handle the new case
-1. Add new email to `membership-workflow` [EmailName.EmailNamesByName](https://github.com/guardian/membership-workflow/blob/2e354b81888f6d222d9de0b4c2eda8e0f2b14729/app/model/EmailName.scala#L99)
-1. Add new Braze Template API Identifiers to `membership-workflow.private.conf` under `braze.campaigns`
 
 ## How to embed magic link in an email?
 
