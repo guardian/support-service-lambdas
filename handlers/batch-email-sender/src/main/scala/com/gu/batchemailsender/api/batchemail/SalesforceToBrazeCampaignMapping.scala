@@ -8,7 +8,7 @@ import com.gu.batchemailsender.api.batchemail.SalesforceMessage.SalesforceBatchI
 object SalesforceToBrazeCampaignMapping {
   def apply(salesforceBatchItem: SalesforceBatchItem): String =
     (salesforceBatchItem.object_name, salesforceBatchItem.payload.email_stage) match {
-      case ("Card_Expiry__c", _) => "expired-card"
+      case ("Card_Expiry__c", _) => "expired-card" // CC Expiry, SV_PaymentFailure_Body_CCExpiry
       case ("DD_Mandate_Failure__c", "MF1") => "dd-mandate-failure-1"
       case ("DD_Mandate_Failure__c", "MF2") => "dd-mandate-failure-2"
       case ("DD_Mandate_Failure__c", "MF3") => "dd-mandate-failure-3"
