@@ -41,7 +41,7 @@ object Handler extends Logging {
     val queueName = if (RawEffects.stage.isProd) QueueName("contributions-thanks") else QueueName("contributions-thanks-dev")
     brazeMessages flatMap { msg =>
       val payloadString = Json.prettyPrint(Json.toJson(msg))
-      Try(AwsSQSSend.sendSync(queueName)(Payload(payloadString))) match {
+      AwsSQSSend.sendSync(queueName)(Payload(payloadString)) match {
         case Success(_) => None
         case Failure(_) => Some(msg.recordId)
       }
