@@ -64,7 +64,13 @@ to
 }
 ```
 
-## How to add new email? 
+## How to add new email?
+
+Remember to setup Braze [Campaign Alerts](https://www.braze.com/docs/user_guide/engagement_tools/campaigns/scheduling_and_organizing/campaign_alerts/) to monitor emails, by sending alert to SX address, for example, 
+
+```
+Send an alert via email if during the course of 1 day, the messages sent fall below 1.
+```
 
 Example PR: [Add SV_DeliveryAddressChangeConfirmation email #196](https://github.com/guardian/salesforce/pull/196)
 
