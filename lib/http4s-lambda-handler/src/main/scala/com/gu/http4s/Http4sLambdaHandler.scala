@@ -1,4 +1,4 @@
-package com.gu.htt4s
+package com.gu.http4s
 
 import java.io.{InputStream, OutputStream}
 
@@ -131,7 +131,7 @@ class Http4sLambdaHandler(service: HttpRoutes[IO]) {
   private def extractBody(apiGateWayRequest: LambdaRequest) = {
     apiGateWayRequest
       .body
-      .map( body => Stream(body).through(text.utf8Encode))
+      .map(body => Stream(body).through(text.utf8Encode))
       .getOrElse(EmptyBody)
   }
 }
