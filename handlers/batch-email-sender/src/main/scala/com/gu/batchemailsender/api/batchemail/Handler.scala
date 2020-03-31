@@ -15,20 +15,23 @@ import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
 import com.gu.util.reader.Types._
 import play.api.libs.json.Json
 
-import scala.util.{Failure, Success, Try}
+import scala.util.{Failure, Success}
 
 object Handler extends Logging {
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
     ApiGatewayHandler(LambdaIO(inputStream, outputStream, context)) {
       def operation(apiGatewayRequest: ApiGatewayRequest): ApiResponse = {
         apiGatewayRequest.bodyAsCaseClass[SalesforceBatchWithExceptions]().map({ salesforceBatch =>
-          if (salesforceBatch.exceptions.nonEmpty) {
-            logger.error(s"There were parsing errors in the body received: ${salesforceBatch.exceptions}")
-          }
           val brazeSqsMessages = salesforceBatch.validBatch.batch_items.map(BrazeSqsMessage.fromSalesforceMessage)
-          send(brazeSqsMessages) match {
-            case Nil => ApiGatewayResponse.successfulExecution
-            case idList => ApiGatewayResponse.internalServerError(s"Failed send the following messages $idList")
+          val parsingErrors = salesforceBatch.exceptions
+          val (sqsSendSuccesses, sqsSendErrors) = send(brazeSqsMessages).partition(_.isRight)
+          if ((parsingErrors ++ sqsSendErrors).nonEmpty) {
+            val msg = s"Failed send some messages: parsingErrors=$parsingErrors sqsSendErros=$sqsSendErrors sqsSendSuccesses=$sqsSendSuccesses"
+            logger.error(msg)
+            ApiGatewayResponse.internalServerError(msg)
+          } else {
+            logger.info(s"Successfully sent all Braze SQS messages $sqsSendSuccesses")
+            ApiGatewayResponse.successfulExecution
           }
         }).apiResponse
       }
@@ -37,13 +40,13 @@ object Handler extends Logging {
     }
   }
 
-  private def send(brazeMessages: List[BrazeSqsMessage]): List[String] = {
+  private def send(brazeMessages: List[BrazeSqsMessage]): List[Either[String, String]] = {
     val queueName = if (RawEffects.stage.isProd) QueueName("contributions-thanks") else QueueName("contributions-thanks-dev")
-    brazeMessages flatMap { msg =>
+    brazeMessages.map { msg =>
       val payloadString = Json.prettyPrint(Json.toJson(msg))
       AwsSQSSend.sendSync(queueName)(Payload(payloadString)) match {
-        case Success(_) => None
-        case Failure(_) => Some(msg.recordId)
+        case Success(_) => Right(msg.recordId)
+        case Failure(_) => Left(msg.recordId)
       }
     }
   }
