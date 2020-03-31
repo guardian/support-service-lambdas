@@ -17,6 +17,9 @@ import play.api.libs.json.Json
 
 import scala.util.{Failure, Success}
 
+/**
+ * FIXME: batch-email-sender seems to be implemented on partial success principle in which case what should the response code be?
+ */
 object Handler extends Logging {
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
     ApiGatewayHandler(LambdaIO(inputStream, outputStream, context)) {
