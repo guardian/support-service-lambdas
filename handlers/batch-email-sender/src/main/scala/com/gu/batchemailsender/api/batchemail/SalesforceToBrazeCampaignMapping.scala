@@ -17,10 +17,6 @@ object SalesforceToBrazeCampaignMapping {
       case ("DD_Mandate_Failure__c", "MF6") => "dd-mandate-failure-6" // SV_DirectDebit6
       case ("DD_Mandate_Failure__c", "MF7") => "dd-mandate-failure-7" // SV_DirectDebit7
       case ("DD_Mandate_Failure__c", "MF8") => "dd-mandate-failure-8" // SV_DirectDebit8
-      case ("Payment_Failure__c", "DD_PF1") => "SV_DDpaymentfailure1" // FIXME: remove as replaced by dd-mandate-failure
-      case ("Payment_Failure__c", "DD_PF2") => "SV_DDpaymentfailure2" // FIXME: remove as replaced by dd-mandate-failure
-      case ("Payment_Failure__c", "DD_PF3") => "SV_DDpaymentfailure3" // FIXME: remove as replaced by dd-mandate-failure
-      case ("Payment_Failure__c", "DD_PF4") => "SV_DDpaymentfailure4" // FIXME: remove as replaced by dd-mandate-failure
       case ("Holiday_Stop_Request__c", "create") => "SV_HolidayStopConfirmation"
       case ("Holiday_Stop_Request__c", "amend") => "SV_HolidayStopAmend"
       case ("Holiday_Stop_Request__c", "withdraw") => "SV_HolidayStopWithdrawal"
