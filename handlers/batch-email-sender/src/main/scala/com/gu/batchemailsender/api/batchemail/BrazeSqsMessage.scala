@@ -18,12 +18,20 @@ case class BrazeApiTriggerProperties(
   next_charge_date: Option[String],
   product: String,
   modified_by_customer: Option[Boolean],
+
+  /**
+   * SV_HolidayStopConfirmation, SV_HolidayStopAmend, SV_HolidayStopWithdrawal
+   */
   holiday_start_date: Option[String],
   holiday_end_date: Option[String],
   stopped_credit_sum: Option[String],
   currency_symbol: Option[String],
   stopped_issue_count: Option[String],
   stopped_credit_summaries: Option[List[StoppedCreditSummary]],
+
+  /**
+   * SV_VO_NewCard, SV_VO_ReplacementCard
+   */
   digital_voucher: Option[DigitalVoucher],
 
   /*
@@ -62,8 +70,8 @@ case class EmailPayloadTo(Address: String, SubscriberKey: String, ContactAttribu
 case class BrazeSqsMessage(To: EmailPayloadTo, DataExtensionName: String, SfContactId: Option[String], IdentityUserId: Option[String], recordId: String)
 
 object BrazeSqsMessage {
-  implicit val bb = Jsonx.formatCaseClass[StoppedCreditSummary]
-  implicit val uu = Jsonx.formatCaseClass[DigitalVoucher]
+  implicit val stoppedCreditSummaryFormat = Jsonx.formatCaseClass[StoppedCreditSummary]
+  implicit val digitalVoucherFormat = Jsonx.formatCaseClass[DigitalVoucher]
   implicit val emailPayloadSubscriberAttributesWriter = Jsonx.formatCaseClass[BrazeApiTriggerProperties]
   implicit val emailPayloadContactAttributesWriter = Jsonx.formatCaseClass[EmailPayloadContactAttributes]
   implicit val emailPayloadToWriter = Jsonx.formatCaseClass[EmailPayloadTo]
