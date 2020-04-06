@@ -17,6 +17,7 @@ object NewProductApi {
 
       val billingPeriodDescription = billingPeriod match {
         case Monthly => "every month"
+        case Quarterly => "every 3 months"
         case Annual => "every 12 months"
       }
       pricesByCurrency.map { case (currency, amount) => (currency, PaymentPlan(
@@ -28,8 +29,6 @@ object NewProductApi {
       )
       }
     }
-
-
 
     val voucherWindowRule = WindowRule(
       maybeCutOffDay = Some(DayOfWeek.TUESDAY),
@@ -90,6 +89,17 @@ object NewProductApi {
       billingPeriod: BillingPeriod
     ) = Plan(planId, planDescription, startDateRules, paymentPlansFor(planId, billingPeriod))
 
+    val guardianWeeklyStartDateRules =
+      StartDateRules(
+        daysOfWeekRule = Some(DaysOfWeekRule(List(DayOfWeek.FRIDAY))),
+        windowRule = Some(WindowRule(
+          maybeCutOffDay = Some(DayOfWeek.THURSDAY),
+          maybeStartDelay = Some(DelayDays(14)),
+          maybeSize = Some(WindowSizeDays(28))
+        ))
+      )
+
+
     Catalog(
       voucherWeekendPlus = planWithPayment(VoucherWeekendPlus, PlanDescription("Weekend+"), voucherSaturdayDateRules, Monthly),
       voucherWeekend = planWithPayment(VoucherWeekend, PlanDescription("Weekend"), voucherSaturdayDateRules, Monthly),
@@ -115,6 +125,12 @@ object NewProductApi {
       homeDeliveryWeekendPlus = planWithPayment(HomeDeliveryWeekendPlus, PlanDescription("Weekend+"), homeDeliveryWeekendRules, Monthly),
       digipackAnnual = planWithPayment(DigipackAnnual, PlanDescription("Annual"), digipackStartRules, Annual),
       digipackMonthly = planWithPayment(DigipackMonthly, PlanDescription("Monthly"), digipackStartRules, Monthly),
+      guardianWeeklyDomesticSixForSix = planWithPayment(DigipackMonthly, PlanDescription("GW Oct 18 - Six for Six - Domestic"), guardianWeeklyStartDateRules, Quarterly),
+      guardianWeeklyDomesticQuarterly = planWithPayment(DigipackMonthly, PlanDescription("GW Oct 18 - Quarterly - Domestic"), guardianWeeklyStartDateRules, Quarterly),
+      guardianWeeklyDomesticAnnual = planWithPayment(DigipackMonthly, PlanDescription("GW Oct 18 - Annual - Domestic"), guardianWeeklyStartDateRules, Annual),
+      guardianWeeklyROWSixForSix = planWithPayment(DigipackMonthly, PlanDescription("GW Oct 18 - Six for Six - ROW"), guardianWeeklyStartDateRules, Quarterly),
+      guardianWeeklyROWQuarterly = planWithPayment(DigipackMonthly, PlanDescription("GW Oct 18 - Quarterly - ROW"), guardianWeeklyStartDateRules, Quarterly),
+      guardianWeeklyROWAnnual = planWithPayment(DigipackMonthly, PlanDescription("GW Oct 18 - Annual - ROW"), guardianWeeklyStartDateRules, Annual),
     )
   }
 

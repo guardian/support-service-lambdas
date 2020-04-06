@@ -93,7 +93,9 @@ class PaperStepsTest extends FlatSpec with Matchers {
     val futureActual = Steps.handleRequest(
       addContribution = dummySteps,
       addPaperSub = fakeAddVoucherSteps,
-      addDigipackSub = dummySteps
+      addDigipackSub = dummySteps,
+      addGuardianWeeklyDomesticSub = dummySteps,
+      addGuardianWeeklyROWSub = dummySteps
     )(ApiGatewayRequest(None, None, Some(Json.stringify(requestInput)), None, None, None))
 
     val actual = Await.result(futureActual, 30 seconds)

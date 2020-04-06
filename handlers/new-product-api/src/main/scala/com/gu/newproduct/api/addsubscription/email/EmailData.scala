@@ -46,3 +46,12 @@ case class ContributionsEmailData(
   contacts: Contacts,
   created: LocalDate
 ) extends EmailData
+
+case class GuardianWeeklyEmailData(
+  currency: Currency,
+  paymentMethod: PaymentMethod,
+  firstPaymentDate: LocalDate,
+  plan: Plan,
+  contacts: Contacts
+) extends EmailData
+
