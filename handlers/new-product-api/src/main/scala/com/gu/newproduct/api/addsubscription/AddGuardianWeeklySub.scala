@@ -49,16 +49,17 @@ object AddGuardianWeeklySub {
       chargeOverride = None,
       productRatePlanId = zuoraRatePlanId
     )
-    subscriptionName <- createSubscription(createSubRequest).toAsyncApiGatewayOp("create paper subscription")
+    subscriptionName <- createSubscription(createSubRequest).toAsyncApiGatewayOp("create guardian weekly subscription")
     plan = getPlan(request.planId)
-    paperEmailData = GuardianWeeklyEmailData(
+    guardianWeeklyEmailData = GuardianWeeklyEmailData(
       plan = plan,
       firstPaymentDate = request.startDate,
       contacts = customerData.contacts,
       paymentMethod = customerData.paymentMethod,
-      currency = customerData.account.currency
+      currency = customerData.account.currency,
+      subscriptionName = subscriptionName
     )
-    _ <- sendConfirmationEmail(customerData.account.sfContactId, paperEmailData).recoverAndLog("send paper confirmation email")
+    _ <- sendConfirmationEmail(customerData.account.sfContactId, guardianWeeklyEmailData).recoverAndLog("send guardian weekly confirmation email")
   } yield subscriptionName
 
   def wireSteps(
@@ -71,9 +72,9 @@ object AddGuardianWeeklySub {
     awsSQSSend: QueueName => AwsSQSSend.Payload => Future[Unit],
     emailQueueNames: EmailQueueNames
   ): AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName] = {
-    val paperSqsQueueSend = awsSQSSend(emailQueueNames.paper)
-    val paperBrazeConfirmationSqsSend = EtSqsSend[GuardianWeeklyEmailData](paperSqsQueueSend) _
-    val sendConfirmationEmail = SendConfirmationEmail(paperBrazeConfirmationSqsSend) _
+    val guardianWeeklySqsQueueSend = awsSQSSend(emailQueueNames.guardianWeekly)
+    val guardianWeeklyBrazeConfirmationSqsSend = EtSqsSend[GuardianWeeklyEmailData](guardianWeeklySqsQueueSend) _
+    val sendConfirmationEmail = SendConfirmationEmail(guardianWeeklyBrazeConfirmationSqsSend) _
     val validatedCustomerData = getValidatedCustomerData(zuoraClient)
     steps(
       catalog.planForId,
@@ -94,7 +95,7 @@ object AddGuardianWeeklySub {
       ifNotFoundReturn = Some("Zuora account id is not valid")
     )
     val getValidatedPaymentMethod = GetPaymentMethod(zuoraClient.get[PaymentMethodWire]) _ andValidateWith ValidatePaymentMethod.apply _
-    val getContacts: ZuoraAccountId => ApiGatewayOp[GetContacts.Contacts] = GetContacts(zuoraClient.get[GetContactsResponse]) _ andThen(_.toApiGatewayOp("getting contacts from Zuora"))
+    val getContacts: ZuoraAccountId => ApiGatewayOp[GetContacts.Contacts] = GetContacts(zuoraClient.get[GetContactsResponse]) _ andThen (_.toApiGatewayOp("getting contacts from Zuora"))
 
     GetGuardianWeeklyCustomerData(
       getAccount = getValidatedAccount,

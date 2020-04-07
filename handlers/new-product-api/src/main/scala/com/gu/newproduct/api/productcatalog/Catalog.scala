@@ -129,11 +129,11 @@ object PlanId {
 
   case object GuardianWeeklyDomesticAnnual extends PlanId("guardian_weekly_domestic_annual") with GuardianWeeklyDomestic
 
-  case object GuardianWeeklyROW6for6 extends PlanId("guardian_weekly_row_6for6") with GuardianWeeklyDomestic
+  case object GuardianWeeklyROW6for6 extends PlanId("guardian_weekly_row_6for6") with GuardianWeeklyRow
 
-  case object GuardianWeeklyROWQuarterly extends PlanId("guardian_weekly_row_quarterly") with GuardianWeeklyDomestic
+  case object GuardianWeeklyROWQuarterly extends PlanId("guardian_weekly_row_quarterly") with GuardianWeeklyRow
 
-  case object GuardianWeeklyROWAnnual extends PlanId("guardian_weekly_row_annual") with GuardianWeeklyDomestic
+  case object GuardianWeeklyROWAnnual extends PlanId("guardian_weekly_row_annual") with GuardianWeeklyRow
 
   val enabledVoucherPlans = List(
     VoucherEveryDay,
@@ -178,6 +178,7 @@ sealed trait BillingPeriod
 object Monthly extends BillingPeriod
 object Quarterly extends BillingPeriod
 object Annual extends BillingPeriod
+object SixWeeks extends BillingPeriod
 
 case class PaymentPlan(currency: Currency, amountMinorUnits: AmountMinorUnits, billingPeriod: BillingPeriod, description: String)
 

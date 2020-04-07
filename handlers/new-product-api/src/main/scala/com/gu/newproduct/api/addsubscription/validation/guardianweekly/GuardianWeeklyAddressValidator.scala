@@ -35,10 +35,10 @@ object GuardianWeeklyAddressValidator {
 
   def validateBillingAddress(billToAddress: BillToAddress) = {
     for {
-      _ <- billToAddress.address1 getOrFailWith("bill to address1 must be populated")
-      _ <- billToAddress.city getOrFailWith("bill to city must be populated")
-      _ <- billToAddress.postcode getOrFailWith("bill to postcode must be populated")
-      _ <- billToAddress.country getOrFailWith("bill to country must be populated")
+      _ <- billToAddress.address1 getOrFailWith ("bill to address1 must be populated")
+      _ <- billToAddress.city getOrFailWith ("bill to city must be populated")
+      _ <- billToAddress.postcode getOrFailWith ("bill to postcode must be populated")
+      _ <- billToAddress.country getOrFailWith ("bill to country must be populated")
     } yield (())
   }
 

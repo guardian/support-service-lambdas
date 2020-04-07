@@ -55,6 +55,8 @@ object Steps {
       case _: VoucherPlanId => addPaperSub(request)
       case _: HomeDeliveryPlanId => addPaperSub(request)
       case _: DigipackPlanId => addDigipackSub(request)
+      case _: GuardianWeeklyDomestic => addGuardianWeeklyDomesticSub(request)
+      case _: GuardianWeeklyRow => addGuardianWeeklyROWSub(request)
     }
   } yield ApiGatewayResponse(body = AddedSubscription(subscriptionName.value), statusCode = "200")).apiResponse
 

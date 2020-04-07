@@ -1,11 +1,9 @@
 package com.gu.newproduct.api.addsubscription.email.guardianweekly
 
-import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-import com.gu.newproduct.api.addsubscription.Formatters._
-import com.gu.newproduct.api.addsubscription.email.{ContributionsEmailData, GuardianWeeklyEmailData}
-import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{DirectDebit, PaymentMethod}
+import com.gu.newproduct.api.addsubscription.email.EmailData.paymentMethodFields
+import com.gu.newproduct.api.addsubscription.email.GuardianWeeklyEmailData
 import com.gu.newproduct.api.productcatalog.Plan
 import com.gu.newproduct.api.productcatalog.PlanId.{AnnualContribution, MonthlyContribution}
 import play.api.libs.json.{Json, Writes}
@@ -18,7 +16,6 @@ object GuardianWeeklyEmailDataSerialiser {
 }
 
 object GuardianWeeklyFields {
-
   val firstPaymentDateFormat = DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy")
 
   def productId(plan: Plan) = plan.id match {
@@ -27,25 +24,20 @@ object GuardianWeeklyFields {
     case other => other.name
   }
 
-  def paymentMethodFields(paymentMethod: PaymentMethod, firstPaymentDate: LocalDate) = paymentMethod match {
-    case DirectDebit(status, accountName, accountNumberMask, sortCode, mandateId) => Map(
-      "account number" -> accountNumberMask.value,
-      "sort code" -> sortCode.hyphenated,
-      "account name" -> accountName.value,
-      "Mandate ID" -> mandateId.value,
-      "payment method" -> "Direct Debit",
-      "first payment date" -> firstPaymentDate.format(firstPaymentDateFormat)
-    )
-    case _ => Map.empty
-
-  }
-
   def apply(data: GuardianWeeklyEmailData): Map[String, String] = Map(
     "EmailAddress" -> data.contacts.billTo.email.map(_.value).getOrElse(""),
-    "currency" -> data.currency.glyph,
-    "edition" -> data.contacts.billTo.address.country.map(_.alpha2).getOrElse(""),
-    "name" -> data.contacts.billTo.firstName.value,
-    "product" -> productId(data.plan)
-  ) ++ paymentMethodFields(data.paymentMethod, data.firstPaymentDate)
+    "first_name" -> data.contacts.soldTo.firstName.value,
+    "last_name" -> data.contacts.soldTo.lastName.value,
+    "delivery_address_line_1" -> data.contacts.soldTo.address.address1.map(_.value).getOrElse(""),
+    "delivery_address_line_2" -> data.contacts.soldTo.address.address2.map(_.value).getOrElse(""),
+    "delivery_address_town" -> data.contacts.soldTo.address.city.map(_.value).getOrElse(""),
+    "delivery_postcode" -> data.contacts.soldTo.address.postcode.map(_.value).getOrElse(""),
+    "delivery_country" -> data.contacts.soldTo.address.country.name,
+    "ZuoraSubscriberId" -> data.subscriptionName.value,
+    "subscriber_id" -> data.subscriptionName.value,
+    "date_of_first_paper" -> data.firstPaymentDate.format(firstPaymentDateFormat),
+    "date_of_first_payment" -> data.firstPaymentDate.format(firstPaymentDateFormat),
+    "subscription_rate" -> data.plan.paymentPlans.get(data.currency).map(_.description).getOrElse("")
+  ) ++ paymentMethodFields(data.paymentMethod)
 
 }

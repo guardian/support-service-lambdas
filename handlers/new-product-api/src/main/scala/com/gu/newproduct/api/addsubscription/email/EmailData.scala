@@ -3,11 +3,14 @@ package com.gu.newproduct.api.addsubscription.email
 import java.time.LocalDate
 
 import com.gu.i18n.Currency
+import com.gu.newproduct.api.addsubscription.Formatters._
 import com.gu.newproduct.api.addsubscription.ZuoraAccountId
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.SubscriptionName
-import com.gu.newproduct.api.addsubscription.zuora.GetContacts.{BillToContact, Contacts, Email}
-import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.PaymentMethod
-import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, Plan, PlanId}
+import com.gu.newproduct.api.addsubscription.zuora.GetContacts.Contacts
+import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{DirectDebit, NonDirectDebitMethod, PaymentMethod}
+import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType
+import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType._
+import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, Plan}
 
 sealed trait EmailData {
   def plan: Plan
@@ -52,6 +55,28 @@ case class GuardianWeeklyEmailData(
   paymentMethod: PaymentMethod,
   firstPaymentDate: LocalDate,
   plan: Plan,
-  contacts: Contacts
+  contacts: Contacts,
+  subscriptionName: SubscriptionName
 ) extends EmailData
 
+object EmailData {
+  def toDescription(methodType: PaymentMethodType) = methodType match {
+    case CreditCardReferenceTransaction | CreditCard => "Credit/Debit Card"
+    case BankTransfer => "Direct Debit"
+    case PayPal => "PayPal"
+    case Other => "" //should not happen
+  }
+
+  def paymentMethodFields(paymentMethod: PaymentMethod) = paymentMethod match {
+    case DirectDebit(status, accountName, accountNumberMask, sortCode, mandateId) => Map(
+      "bank_account_no" -> accountNumberMask.value,
+      "bank_sort_code" -> sortCode.hyphenated,
+      "account_holder" -> accountName.value,
+      "mandate_id" -> mandateId.value,
+      "payment_method" -> toDescription(BankTransfer)
+    )
+    case NonDirectDebitMethod(_, paymentMethodType) => Map(
+      "payment_method" -> toDescription(paymentMethodType)
+    )
+  }
+}
