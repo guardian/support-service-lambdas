@@ -96,8 +96,47 @@ object ZuoraIds {
     val zuoraIdToPlanid = byApiPlanId.map(_.swap)
   }
 
-  case class ZuoraIds(contributionsZuoraIds: ContributionsZuoraIds, voucherZuoraIds: VoucherZuoraIds, homeDeliveryZuoraIds: HomeDeliveryZuoraIds, digitalPackIds: DigipackZuoraIds) {
-    def apiIdToRateplanId: Map[PlanId, ProductRatePlanId] = contributionsZuoraIds.byApiPlanId.mapValues(_.productRatePlanId) ++ voucherZuoraIds.byApiPlanId ++ homeDeliveryZuoraIds.byApiPlanId ++ digitalPackIds.byApiPlanId
+  case class GuardianWeeklyDomesticIds(
+    sixForSix: ProductRatePlanId,
+    quarterly: ProductRatePlanId,
+    annual: ProductRatePlanId
+  ) {
+    val byApiPlanId = Map(
+      GuardianWeeklyDomestic6for6 -> sixForSix,
+      GuardianWeeklyDomesticQuarterly -> quarterly,
+      GuardianWeeklyDomesticAnnual -> annual,
+    )
+    val zuoraIdToPlanid = byApiPlanId.map(_.swap)
+  }
+
+  case class GuardianWeeklyROWIds(
+    sixForSix: ProductRatePlanId,
+    quarterly: ProductRatePlanId,
+    annual: ProductRatePlanId
+  ) {
+    val byApiPlanId = Map(
+      GuardianWeeklyROW6for6 -> sixForSix,
+      GuardianWeeklyROWQuarterly -> quarterly,
+      GuardianWeeklyROWAnnual -> annual,
+    )
+    val zuoraIdToPlanid = byApiPlanId.map(_.swap)
+  }
+
+  case class ZuoraIds(
+    contributionsZuoraIds: ContributionsZuoraIds,
+    voucherZuoraIds: VoucherZuoraIds,
+    homeDeliveryZuoraIds: HomeDeliveryZuoraIds,
+    digitalPackIds: DigipackZuoraIds,
+    guardianWeeklyDomestic: GuardianWeeklyDomesticIds,
+    guardianWeeklyROW: GuardianWeeklyROWIds
+  ) {
+    def apiIdToRateplanId: Map[PlanId, ProductRatePlanId] =
+      contributionsZuoraIds.byApiPlanId.mapValues(_.productRatePlanId) ++
+      voucherZuoraIds.byApiPlanId ++
+      homeDeliveryZuoraIds.byApiPlanId ++
+      digitalPackIds.byApiPlanId ++
+      guardianWeeklyDomestic.byApiPlanId ++
+      guardianWeeklyROW.byApiPlanId
 
     val rateplanIdToApiId: Map[ProductRatePlanId, PlanId] = apiIdToRateplanId.map(_.swap)
   }
@@ -143,6 +182,16 @@ object ZuoraIds {
         DigipackZuoraIds(
           monthly = ProductRatePlanId("2c92a0fb4edd70c8014edeaa4eae220a"),
           annual = ProductRatePlanId("2c92a0fb4edd70c8014edeaa4e972204"),
+        ),
+        GuardianWeeklyDomesticIds(
+          sixForSix = ProductRatePlanId("2c92a0086619bf8901661aaac94257fe"),
+          quarterly = ProductRatePlanId("2c92a0fe6619b4b301661aa494392ee2"),
+          annual = ProductRatePlanId("2c92a0fe6619b4b901661aa8e66c1692")
+        ),
+        GuardianWeeklyROWIds(
+          sixForSix = ProductRatePlanId("2c92a0086619bf8901661ab545f51b21"),
+          quarterly = ProductRatePlanId("2c92a0086619bf8901661ab02752722f"),
+          annual = ProductRatePlanId("2c92a0fe6619b4b601661ab300222651")
         )
       ),
       Stage("CODE") -> ZuoraIds(
@@ -183,6 +232,16 @@ object ZuoraIds {
         DigipackZuoraIds(
           monthly = ProductRatePlanId("2c92c0f94f2acf73014f2c908f671591"),
           annual = ProductRatePlanId("2c92c0f84f2ac59d014f2c94aea9199e")
+        ),
+        GuardianWeeklyDomesticIds(
+          sixForSix = ProductRatePlanId("2c92c0f8660fb5dd016610858eb90658"),
+          quarterly = ProductRatePlanId("2c92c0f8660fb5d601661081ea010391"),
+          annual = ProductRatePlanId("2c92c0f9660fc4d70166107fa5412641")
+        ),
+        GuardianWeeklyROWIds(
+          sixForSix = ProductRatePlanId("2c92c0f9660fc4c70166109dfd08092c"),
+          quarterly = ProductRatePlanId("2c92c0f9660fc4d70166109c01465f10"),
+          annual = ProductRatePlanId("2c92c0f9660fc4d70166109a2eb0607c")
         )
       ),
       Stage("DEV") -> ZuoraIds(
@@ -223,6 +282,16 @@ object ZuoraIds {
         DigipackZuoraIds(
           monthly = ProductRatePlanId("2c92c0f84bbfec8b014bc655f4852d9d"),
           annual = ProductRatePlanId("2c92c0f94bbffaaa014bc6a4212e205b")
+        ),
+        GuardianWeeklyDomesticIds(
+          sixForSix = ProductRatePlanId("2c92c0f965f212210165f69b94c92d66"),
+          quarterly = ProductRatePlanId("2c92c0f965dc30640165f150c0956859"),
+          annual = ProductRatePlanId("2c92c0f965d280590165f16b1b9946c2")
+        ),
+        GuardianWeeklyROWIds(
+          sixForSix = ProductRatePlanId("2c92c0f965f2122101660fbc75a16c38"),
+          quarterly = ProductRatePlanId("2c92c0f965f2122101660fb81b745a06"),
+          annual = ProductRatePlanId("2c92c0f965f2122101660fb33ed24a45")
         )
       )
     )
