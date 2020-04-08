@@ -126,12 +126,12 @@ object NewProductApi {
       homeDeliveryWeekendPlus = planWithPayment(HomeDeliveryWeekendPlus, PlanDescription("Weekend+"), homeDeliveryWeekendRules, Monthly),
       digipackAnnual = planWithPayment(DigipackAnnual, PlanDescription("Annual"), digipackStartRules, Annual),
       digipackMonthly = planWithPayment(DigipackMonthly, PlanDescription("Monthly"), digipackStartRules, Monthly),
-      guardianWeeklyDomesticSixForSix = planWithPayment(DigipackMonthly, PlanDescription("GW Oct 18 - Six for Six - Domestic"), guardianWeeklyStartDateRules, SixWeeks),
-      guardianWeeklyDomesticQuarterly = planWithPayment(DigipackMonthly, PlanDescription("GW Oct 18 - Quarterly - Domestic"), guardianWeeklyStartDateRules, Quarterly),
-      guardianWeeklyDomesticAnnual = planWithPayment(DigipackMonthly, PlanDescription("GW Oct 18 - Annual - Domestic"), guardianWeeklyStartDateRules, Annual),
-      guardianWeeklyROWSixForSix = planWithPayment(DigipackMonthly, PlanDescription("GW Oct 18 - Six for Six - ROW"), guardianWeeklyStartDateRules, SixWeeks),
-      guardianWeeklyROWQuarterly = planWithPayment(DigipackMonthly, PlanDescription("GW Oct 18 - Quarterly - ROW"), guardianWeeklyStartDateRules, Quarterly),
-      guardianWeeklyROWAnnual = planWithPayment(DigipackMonthly, PlanDescription("GW Oct 18 - Annual - ROW"), guardianWeeklyStartDateRules, Annual),
+      guardianWeeklyDomesticSixForSix = planWithPayment(GuardianWeeklyDomestic6for6, PlanDescription("GW Oct 18 - Six for Six - Domestic"), guardianWeeklyStartDateRules, SixWeeks),
+      guardianWeeklyDomesticQuarterly = planWithPayment(GuardianWeeklyDomesticQuarterly, PlanDescription("GW Oct 18 - Quarterly - Domestic"), guardianWeeklyStartDateRules, Quarterly),
+      guardianWeeklyDomesticAnnual = planWithPayment(GuardianWeeklyDomesticAnnual, PlanDescription("GW Oct 18 - Annual - Domestic"), guardianWeeklyStartDateRules, Annual),
+      guardianWeeklyROWSixForSix = planWithPayment(GuardianWeeklyROW6for6, PlanDescription("GW Oct 18 - Six for Six - ROW"), guardianWeeklyStartDateRules, SixWeeks),
+      guardianWeeklyROWQuarterly = planWithPayment(GuardianWeeklyROWQuarterly, PlanDescription("GW Oct 18 - Quarterly - ROW"), guardianWeeklyStartDateRules, Quarterly),
+      guardianWeeklyROWAnnual = planWithPayment(GuardianWeeklyROWAnnual, PlanDescription("GW Oct 18 - Annual - ROW"), guardianWeeklyStartDateRules, Annual),
     )
   }
 
