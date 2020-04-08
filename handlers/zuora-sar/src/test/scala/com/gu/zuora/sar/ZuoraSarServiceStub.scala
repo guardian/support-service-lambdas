@@ -8,7 +8,8 @@ import play.api.libs.json.Json
 class ZuoraSarServiceStub(
   contacts: ClientFailableOp[List[ZuoraContact]],
   zuoraAccountSuccessOrError: Either[ZuoraSarError, ZuoraAccountSuccess],
-  zuoraInvoiceStreamsOrError: Either[ZuoraSarError, List[DownloadStream]]) extends ZuoraSar {
+  zuoraInvoiceStreamsOrError: Either[ZuoraSarError, List[DownloadStream]]
+) extends ZuoraSar {
   override def zuoraContactsWithEmail(emailAddress: String): ClientFailableOp[List[ZuoraContact]] = contacts
   override def accountResponse(contact: ZuoraContact): Either[ZuoraSarError, ZuoraAccountSuccess] = zuoraAccountSuccessOrError
   override def invoicesResponse(accountInvoices: List[InvoiceId]): Either[ZuoraSarError, List[DownloadStream]] = zuoraInvoiceStreamsOrError
