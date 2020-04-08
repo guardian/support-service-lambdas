@@ -60,8 +60,13 @@ case class Catalog(
     homeDeliverySundayPlus,
     homeDeliverySaturdayPlus,
     digipackAnnual,
-    digipackMonthly
-
+    digipackMonthly,
+    guardianWeeklyDomesticSixForSix,
+    guardianWeeklyDomesticQuarterly,
+    guardianWeeklyDomesticAnnual,
+    guardianWeeklyROWSixForSix,
+    guardianWeeklyROWQuarterly,
+    guardianWeeklyROWAnnual
   )
 
   val planForId: Map[PlanId, Plan] = allPlans.map(x => x.id -> x).toMap
