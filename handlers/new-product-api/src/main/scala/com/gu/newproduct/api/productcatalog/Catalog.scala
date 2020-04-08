@@ -60,7 +60,10 @@ case class Catalog(
     homeDeliverySundayPlus,
     homeDeliverySaturdayPlus,
     digipackAnnual,
-    digipackMonthly,
+    digipackMonthly
+  )
+
+  val createOnlyPlans = List(
     guardianWeeklyDomesticSixForSix,
     guardianWeeklyDomesticQuarterly,
     guardianWeeklyDomesticAnnual,
@@ -69,7 +72,7 @@ case class Catalog(
     guardianWeeklyROWAnnual
   )
 
-  val planForId: Map[PlanId, Plan] = allPlans.map(x => x.id -> x).toMap
+  val planForId: Map[PlanId, Plan] = (createOnlyPlans ++ allPlans).map(x => x.id -> x).toMap
 }
 sealed trait VoucherPlanId
 sealed trait ContributionPlanId
@@ -183,8 +186,8 @@ object PlanId {
     GuardianWeeklyROWAnnual
   )
 
-  val supportedPlans: List[PlanId] = enabledVoucherPlans ++ enabledContributionPlans ++ enabledHomeDeliveryPlans ++ enabledDigipackPlans ++ enabledGuardianWeeklyPlans
-  def fromName(name: String): Option[PlanId] = supportedPlans.find(_.name == name)
+  val supportedPlans: List[PlanId] = enabledVoucherPlans ++ enabledContributionPlans ++ enabledHomeDeliveryPlans ++ enabledDigipackPlans
+  def fromName(name: String): Option[PlanId] = (enabledGuardianWeeklyPlans ++ supportedPlans).find(_.name == name)
 }
 
 case class Plan(id: PlanId, description: PlanDescription, startDateRules: StartDateRules = StartDateRules(), paymentPlans: Map[Currency, PaymentPlan] = Map.empty)
