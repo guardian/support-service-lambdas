@@ -168,7 +168,17 @@ object PlanId {
     DigipackAnnual,
     DigipackMonthly
   )
-  val supportedPlans: List[PlanId] = enabledVoucherPlans ++ enabledContributionPlans ++ enabledHomeDeliveryPlans ++ enabledDigipackPlans
+
+  val enabledGuardianWeeklyPlans = List(
+    GuardianWeeklyDomestic6for6,
+    GuardianWeeklyDomesticQuarterly,
+    GuardianWeeklyDomesticAnnual,
+    GuardianWeeklyROW6for6,
+    GuardianWeeklyROWQuarterly,
+    GuardianWeeklyROWAnnual
+  )
+
+  val supportedPlans: List[PlanId] = enabledVoucherPlans ++ enabledContributionPlans ++ enabledHomeDeliveryPlans ++ enabledDigipackPlans ++ enabledGuardianWeeklyPlans
   def fromName(name: String): Option[PlanId] = supportedPlans.find(_.name == name)
 }
 
