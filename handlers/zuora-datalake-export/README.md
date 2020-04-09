@@ -190,13 +190,13 @@ You can re-run the import of the output of this lambda once its has been written
 
 ### Logging into Airflow
 
-The login for Aiflow is pretty broken to follow the instrunctions exactly:
+The login for Aiflow is pretty broken to follow the instructions exactly:
 
-* Navigate to (https://airflow.ophan.co.uk/login/)[https://airflow.ophan.co.uk/login/]
+* Navigate to [https://airflow.ophan.co.uk/login/](https://airflow.ophan.co.uk/login/)
 * Click on the Google 'G'
 * Click on the 'Sign In' button
 * You will see a python error page but you are actually logged in
-* Navigate to (https://airflow.ophan.co.uk/home)[https://airflow.ophan.co.uk/home]
+* Navigate to [https://airflow.ophan.co.uk/home](https://airflow.ophan.co.uk/home)
 
 ### Re-run an Airflow task instance
 
@@ -204,11 +204,25 @@ Flow this process to re-run the import for subscriptions, other imports follow a
 * Click on 'DAGs' in the top bar
 * Click on 'Supporter-experience'
 * Click on 'Graph View'
-* Find the 'subscriptions-1' task in the graph and click on it
+* Find the 'subscriptions-1' task in the graph and click on it. Details of the Airflow configuration can be found here: 
+[https://github.com/guardian/ophan-data-lake/tree/master/airflow](https://github.com/guardian/ophan-data-lake/tree/master/airflow) 
 * Un-press the 'Downstream' and 'Recursive' buttons (all buttons next to 'Clear' should be unpressed)
 * Click on the 'Clear button'
 * You should see a task instance list with only one task in it. If there are more consider carefully your next move.
 * Click 'OK!'
+* The 'subscrition-1' task should change colour displaying its state. You need to keep clicking on the refresh button 
+in the top right of the graph view to see the changes.
+* The state of the task seems to stay in 'up_for_reschedule' while the task is running. If you want to check if the 
+spark job in running you can do so by looking at the EMR cluster
+* * Log into the Aws console using the 'ETL job maintainer with access to Identity and Salesforce buckets' in 
+[https://janus.gutools.co.uk/](https://janus.gutools.co.uk/)
+* * Go to Services > EMR > Clusters
+* * Click on the 'Subscriptions' cluster
+* * The cluster should be running in which case you should be able to click on the stdout link which will give you 
+some information on what the cluster is running
+
+
+
 
 
 
