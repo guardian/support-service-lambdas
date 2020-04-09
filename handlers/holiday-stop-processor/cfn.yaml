@@ -121,7 +121,7 @@ Resources:
     Properties:
       Description: Trigger processing of holiday stops every hour (to give 24 attempts a day)
       Name: !FindInMap [StageMap, !Ref Stage, ScheduleName]
-      ScheduleExpression: "cron(0 * ? * * *)"
+      ScheduleExpression: "cron(0/20 * ? * * *)"
       State: ENABLED
       Targets:
         - Arn: !GetAtt HolidayStopProcessor.Arn
