@@ -182,6 +182,34 @@ Authorization: Bearer ***********
 
 https://apisandbox.zuora.com/apps/BatchQuery.do
 
+## Re-running an Airflow Job
+
+Airflow orchestrates running the various jobs associated with the etl pipeline and datalake.
+
+You can re-run the import of the output of this lambda once its has been written to s3 as follows:
+
+### Logging into Airflow
+
+The login for Aiflow is pretty broken to follow the instrunctions exactly:
+
+* Navigate to (https://airflow.ophan.co.uk/login/)[https://airflow.ophan.co.uk/login/]
+* Click on the Google 'G'
+* Click on the 'Sign In' button
+* You will see a python error page but you are actually logged in
+* Navigate to (https://airflow.ophan.co.uk/home)[https://airflow.ophan.co.uk/home]
+
+### Re-run an Airflow task instance
+
+Flow this process to re-run the import for subscriptions, other imports follow a similar process.
+* Click on 'DAGs' in the top bar
+* Click on 'Supporter-experience'
+* Click on 'Graph View'
+* Find the 'subscriptions-1' task in the graph and click on it
+* Un-press the 'Downstream' and 'Recursive' buttons (all buttons next to 'Clear' should be unpressed)
+* Click on the 'Clear button'
+* You should see a task instance list with only one task in it. If there are more consider carefully your next move.
+* Click 'OK!'
+
 
 
 
