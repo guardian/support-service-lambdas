@@ -210,7 +210,7 @@ Flow this process to re-run the import for subscriptions, other imports follow a
 * Click on the 'Clear button'
 * You should see a task instance list with only one task in it. If there are more consider carefully your next move.
 * Click 'OK!'
-* The 'subscrition-1' task should change colour displaying its state. You need to keep clicking on the refresh button 
+* The 'zuora-subscription-1' task should change colour displaying its state. You need to keep clicking on the refresh button 
 in the top right of the graph view to see the changes.
 * The state of the task seems to stay in 'up_for_reschedule' while the task is running. If you want to check if the 
 spark job in running you can do so by looking at the EMR cluster
