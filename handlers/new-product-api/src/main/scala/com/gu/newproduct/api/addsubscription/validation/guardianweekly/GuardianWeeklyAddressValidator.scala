@@ -42,7 +42,14 @@ object GuardianWeeklyAddressValidator {
     } yield (())
   }
 
-  private val internationalCountryCodes = List(
+  val domesticCountryCodes = List(
+    "GB", "FK", "GI", "GG", "IM", "JE", "SH", "US", "AU", "KI", "NR", "NF", "TV", "AD", "AL", "AT", "BA", "BE", "BG",
+    "BL", "CH", "CY", "CZ", "DE", "DK", "EE", "ES", "FI", "FO", "FR", "GF", "GL", "GP", "GR", "HR", "HU", "IE", "IT",
+    "LI", "LT", "LU", "LV", "MC", "ME", "MF", "IS", "MQ", "MT", "NL", "NO", "PF", "PL", "PM", "PT", "RE", "RO", "RS",
+    "SE", "SI", "SJ", "SK", "SM", "TF", "TR", "WF", "YT", "VA", "AX"
+  )
+
+  val internationalCountryCodes = List(
     "AE", "AF", "AG", "AI", "AM", "AO", "AQ", "AR", "AS", "AW", "AZ", "BB", "BD", "BF", "BH", "BI", "BJ", "BM", "BN",
     "BO", "BQ", "BR", "BS", "BT", "BV", "BW", "BY", "BZ", "CC", "CD", "CF", "CG", "CI", "CL", "CM", "CN", "CO", "CR",
     "CU", "CV", "CW", "CX", "DJ", "DM", "DO", "DZ", "EC", "EG", "EH", "ER", "ET", "FJ", "FM", "GA", "GD", "GE", "GH",
