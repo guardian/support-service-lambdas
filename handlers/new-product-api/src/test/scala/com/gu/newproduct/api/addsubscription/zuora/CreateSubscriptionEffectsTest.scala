@@ -29,13 +29,14 @@ class CreateSubscriptionEffectsTest extends FlatSpec with Matchers {
       CreatedByCSR("csrcsr"),
       List(
         ZuoraCreateSubRequestRatePlan(
-          monthlyContribution.productRatePlanId,
-          Some(
+          productRatePlanId = monthlyContribution.productRatePlanId,
+          maybeChargeOverride = Some(
             ChargeOverride(
-              AmountMinorUnits(100),
-              monthlyContribution.productRatePlanChargeId
+              amountMinorUnits = AmountMinorUnits(100),
+              productRatePlanChargeId = monthlyContribution.productRatePlanChargeId
             )
-          )
+          ),
+          maybeTriggerDate = None
         )
       )
     )

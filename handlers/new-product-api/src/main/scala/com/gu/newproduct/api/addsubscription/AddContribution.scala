@@ -12,7 +12,7 @@ import com.gu.newproduct.api.addsubscription.validation.Validation._
 import com.gu.newproduct.api.addsubscription.validation._
 import com.gu.newproduct.api.addsubscription.validation.contribution.ContributionValidations.ValidatableFields
 import com.gu.newproduct.api.addsubscription.validation.contribution.{ContributionAccountValidation, ContributionCustomerData, ContributionValidations, GetContributionCustomerData}
-import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{ChargeOverride, SubscriptionName, ZuoraCreateSubRequest}
+import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{ChargeOverride, SubscriptionName, ZuoraCreateSubRequest, ZuoraCreateSubRequestRatePlan}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAccount
 import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.WireModel.ZuoraSubscriptionsResponse
@@ -29,6 +29,7 @@ import com.gu.util.reader.Types.{ApiGatewayOp, OptionOps}
 import com.gu.util.resthttp.RestRequestMaker.Requests
 import com.gu.util.resthttp.Types.ClientFailableOp
 import com.gu.newproduct.api.addsubscription.email.contributions.ContributionEmailDataSerialiser._
+
 import scala.concurrent.Future
 
 object AddContribution {
@@ -49,7 +50,17 @@ object AddContribution {
       acceptanceDate = request.startDate.plusDays(paymentDelayFor(paymentMethod))
       planAndCharge <- getPlanAndCharge(request.planId).toApiGatewayContinueProcessing(internalServerError(s"no Zuora id for ${request.planId}!")).toAsync
       chargeOverride = ChargeOverride(amountMinorUnits, planAndCharge.productRatePlanChargeId)
-      zuoraCreateSubRequest = ZuoraCreateSubRequest(request, acceptanceDate, Some(chargeOverride), planAndCharge.productRatePlanId)
+      zuoraCreateSubRequest = ZuoraCreateSubRequest(
+        request = request,
+        acceptanceDate = acceptanceDate,
+        ratePlans = List(
+          ZuoraCreateSubRequestRatePlan(
+            productRatePlanId = planAndCharge.productRatePlanId,
+            maybeChargeOverride = Some(chargeOverride),
+            maybeTriggerDate = None
+          )
+        )
+      )
       subscriptionName <- createSubscription(zuoraCreateSubRequest).toAsyncApiGatewayOp("create monthly contribution")
       contributionEmailData = toContributionEmailData(
         request = request,

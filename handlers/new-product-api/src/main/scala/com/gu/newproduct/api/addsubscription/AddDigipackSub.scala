@@ -13,7 +13,7 @@ import com.gu.newproduct.api.addsubscription.email.{DigipackEmailData, EtSqsSend
 import com.gu.newproduct.api.addsubscription.validation.Validation._
 import com.gu.newproduct.api.addsubscription.validation.digipack.{DigipackAccountValidation, DigipackCustomerData, GetDigipackCustomerData}
 import com.gu.newproduct.api.addsubscription.validation.{ValidateAccount, ValidatePaymentMethod, ValidateSubscriptions, ValidationResult}
-import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{SubscriptionName, ZuoraCreateSubRequest}
+import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{SubscriptionName, ZuoraCreateSubRequest, ZuoraCreateSubRequestRatePlan}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAccount
 import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.WireModel.ZuoraSubscriptionsResponse
@@ -49,8 +49,13 @@ object AddDigipackSub {
     createSubRequest = ZuoraCreateSubRequest(
       request = request,
       acceptanceDate = request.startDate,
-      chargeOverride = None,
-      productRatePlanId = zuoraRatePlanId
+      ratePlans = List(
+        ZuoraCreateSubRequestRatePlan(
+          maybeChargeOverride = None,
+          productRatePlanId = zuoraRatePlanId,
+          maybeTriggerDate = None
+        )
+      )
     )
     subscriptionName <- createSubscription(createSubRequest).toAsyncApiGatewayOp("create digiPack subscription")
     plan = getPlan(request.planId)

@@ -58,6 +58,7 @@ class CreateSubscriptionTest extends FlatSpec with Matchers {
               ids.productRatePlanChargeId
             )
           ),
+          maybeTriggerDate = None
         )
       )
     )

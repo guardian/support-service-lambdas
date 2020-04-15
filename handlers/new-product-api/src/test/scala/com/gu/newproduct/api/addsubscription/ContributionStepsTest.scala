@@ -50,8 +50,9 @@ class ContributionStepsTest extends FlatSpec with Matchers {
           productRatePlanId = planAndCharge.productRatePlanId,
           maybeChargeOverride = Some(ChargeOverride(
             AmountMinorUnits(123),
-            planAndCharge.productRatePlanChargeId
-          ))
+            planAndCharge.productRatePlanChargeId,
+          )),
+          maybeTriggerDate = None
         )
       )
     )

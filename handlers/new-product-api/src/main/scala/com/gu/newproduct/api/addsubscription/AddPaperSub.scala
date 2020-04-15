@@ -10,7 +10,7 @@ import com.gu.newproduct.api.addsubscription.email.{EtSqsSend, PaperEmailData, S
 import com.gu.newproduct.api.addsubscription.validation.Validation._
 import com.gu.newproduct.api.addsubscription.validation.paper.{GetPaperCustomerData, PaperAccountValidation, PaperCustomerData}
 import com.gu.newproduct.api.addsubscription.validation.{ValidateAccount, ValidatePaymentMethod, ValidationResult}
-import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{SubscriptionName, ZuoraCreateSubRequest}
+import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{SubscriptionName, ZuoraCreateSubRequest, ZuoraCreateSubRequestRatePlan}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAccount
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.SoldToAddress
@@ -46,8 +46,13 @@ object AddPaperSub {
     createSubRequest = ZuoraCreateSubRequest(
       request = request,
       acceptanceDate = request.startDate,
-      chargeOverride = None,
-      productRatePlanId = zuoraRatePlanId
+      ratePlans = List(
+        ZuoraCreateSubRequestRatePlan(
+          maybeChargeOverride = None,
+          productRatePlanId = zuoraRatePlanId,
+          maybeTriggerDate = None
+        )
+      )
     )
     subscriptionName <- createSubscription(createSubRequest).toAsyncApiGatewayOp("create paper subscription")
     plan = getPlan(request.planId)

@@ -92,26 +92,21 @@ object CreateSubscription {
   case class ZuoraCreateSubRequestRatePlan(
     productRatePlanId: ProductRatePlanId,
     maybeChargeOverride: Option[ChargeOverride],
+    maybeTriggerDate: Option[LocalDate]
   )
 
   object ZuoraCreateSubRequest {
     def apply(
       request: AddSubscriptionRequest,
       acceptanceDate: LocalDate,
-      chargeOverride: Option[ChargeOverride],
-      productRatePlanId: ProductRatePlanId
+      ratePlans: List[ZuoraCreateSubRequestRatePlan],
     ): ZuoraCreateSubRequest = ZuoraCreateSubRequest(
       accountId = request.zuoraAccountId,
       acceptanceDate = acceptanceDate,
       acquisitionCase = request.acquisitionCase,
       acquisitionSource = request.acquisitionSource,
       createdByCSR = request.createdByCSR,
-      ratePlans = List(
-        ZuoraCreateSubRequestRatePlan(
-          productRatePlanId = productRatePlanId,
-          maybeChargeOverride = chargeOverride
-        )
-      )
+      ratePlans = ratePlans
     )
   }
   case class SubscriptionName(value: String) extends AnyVal
