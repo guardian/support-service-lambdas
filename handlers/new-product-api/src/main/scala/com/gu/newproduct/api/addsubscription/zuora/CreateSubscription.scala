@@ -61,16 +61,18 @@ object CreateSubscription {
       AcquisitionCase__c = acquisitionCase.value,
       AcquisitionSource__c = acquisitionSource.value,
       CreatedByCSR__c = createdByCSR.value,
-      subscribeToRatePlans = List(
-        SubscribeToRatePlans(
-          productRatePlanId = productRatePlanId.value,
-          chargeOverrides = maybeChargeOverride.map(chargeOverride =>
-            ChargeOverrides(
-              price = chargeOverride.amountMinorUnits.value.toDouble / 100,
-              productRatePlanChargeId = chargeOverride.productRatePlanChargeId.value
-            )).toList
-        )
-      )
+      subscribeToRatePlans =
+        ratePlans.map { ratePlan =>
+          SubscribeToRatePlans(
+            productRatePlanId = ratePlan.productRatePlanId.value,
+            chargeOverrides = ratePlan.maybeChargeOverride.map { chargeOverride =>
+              ChargeOverrides(
+                price = chargeOverride.amountMinorUnits.value.toDouble / 100,
+                productRatePlanChargeId = chargeOverride.productRatePlanChargeId.value
+              )
+            }.toList
+          )
+        }
     )
   }
 
@@ -79,13 +81,17 @@ object CreateSubscription {
     productRatePlanChargeId: ProductRatePlanChargeId
   )
   case class ZuoraCreateSubRequest(
-    productRatePlanId: ProductRatePlanId,
     accountId: ZuoraAccountId,
-    maybeChargeOverride: Option[ChargeOverride],
     acceptanceDate: LocalDate,
     acquisitionCase: CaseId,
     acquisitionSource: AcquisitionSource,
-    createdByCSR: CreatedByCSR
+    createdByCSR: CreatedByCSR,
+    ratePlans: List[ZuoraCreateSubRequestRatePlan]
+  )
+
+  case class ZuoraCreateSubRequestRatePlan(
+    productRatePlanId: ProductRatePlanId,
+    maybeChargeOverride: Option[ChargeOverride],
   )
 
   object ZuoraCreateSubRequest {
@@ -95,13 +101,17 @@ object CreateSubscription {
       chargeOverride: Option[ChargeOverride],
       productRatePlanId: ProductRatePlanId
     ): ZuoraCreateSubRequest = ZuoraCreateSubRequest(
-      productRatePlanId = productRatePlanId,
       accountId = request.zuoraAccountId,
-      maybeChargeOverride = chargeOverride,
       acceptanceDate = acceptanceDate,
       acquisitionCase = request.acquisitionCase,
       acquisitionSource = request.acquisitionSource,
-      createdByCSR = request.createdByCSR
+      createdByCSR = request.createdByCSR,
+      ratePlans = List(
+        ZuoraCreateSubRequestRatePlan(
+          productRatePlanId = productRatePlanId,
+          maybeChargeOverride = chargeOverride
+        )
+      )
     )
   }
   case class SubscriptionName(value: String) extends AnyVal

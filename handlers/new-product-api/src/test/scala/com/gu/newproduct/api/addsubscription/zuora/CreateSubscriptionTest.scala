@@ -3,7 +3,7 @@ package com.gu.newproduct.api.addsubscription.zuora
 import java.time.LocalDate
 
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.WireModel.{ChargeOverrides, SubscribeToRatePlans, WireCreateRequest, WireSubscription}
-import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{ChargeOverride, SubscriptionName, ZuoraCreateSubRequest}
+import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{ChargeOverride, SubscriptionName, ZuoraCreateSubRequest, ZuoraCreateSubRequestRatePlan}
 import com.gu.newproduct.api.addsubscription._
 import com.gu.newproduct.api.productcatalog.AmountMinorUnits
 import com.gu.newproduct.api.productcatalog.ZuoraIds.{PlanAndCharge, ProductRatePlanChargeId, ProductRatePlanId}
@@ -44,17 +44,22 @@ class CreateSubscriptionTest extends FlatSpec with Matchers {
       case in => GenericError(s"bad request: $in")
     }
     val createReq = ZuoraCreateSubRequest(
-      productRatePlanId = ids.productRatePlanId,
       accountId = ZuoraAccountId("zac"),
-      maybeChargeOverride = Some(ChargeOverride(
-        AmountMinorUnits(125),
-        ids.productRatePlanChargeId
-      )),
-
       acceptanceDate = LocalDate.of(2018, 7, 27),
       acquisitionCase = CaseId("casecase"),
       acquisitionSource = AcquisitionSource("sourcesource"),
-      createdByCSR = CreatedByCSR("csrcsr")
+      createdByCSR = CreatedByCSR("csrcsr"),
+      ratePlans = List(
+        ZuoraCreateSubRequestRatePlan(
+          productRatePlanId = ids.productRatePlanId,
+          maybeChargeOverride = Some(
+            ChargeOverride(
+              AmountMinorUnits(125),
+              ids.productRatePlanChargeId
+            )
+          ),
+        )
+      )
     )
     val actual = CreateSubscription(accF, currentDate)(createReq)
     actual shouldBe ClientSuccess(SubscriptionName("a-s123"))

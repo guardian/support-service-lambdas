@@ -6,7 +6,7 @@ import com.gu.newproduct.TestData
 import com.gu.newproduct.api.addsubscription.email.PaperEmailData
 import com.gu.newproduct.api.addsubscription.validation._
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription
-import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{SubscriptionName, ZuoraCreateSubRequest}
+import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{SubscriptionName, ZuoraCreateSubRequest, ZuoraCreateSubRequestRatePlan}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.SoldToAddress
 import com.gu.newproduct.api.productcatalog.PlanId.VoucherEveryDay
@@ -54,13 +54,17 @@ class PaperStepsTest extends FlatSpec with Matchers {
     }
 
     val expectedIn = ZuoraCreateSubRequest(
-      ratePlanId,
       ZuoraAccountId("acccc"),
-      None,
       LocalDate.of(2018, 7, 18),
       CaseId("case"),
       AcquisitionSource("CSR"),
-      CreatedByCSR("bob")
+      CreatedByCSR("bob"),
+      List(
+        ZuoraCreateSubRequestRatePlan(
+          ratePlanId,
+          None
+        )
+      )
     )
 
     def fakeCreate(in: CreateSubscription.ZuoraCreateSubRequest): Types.ClientFailableOp[CreateSubscription.SubscriptionName] = {

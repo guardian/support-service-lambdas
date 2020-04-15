@@ -146,7 +146,6 @@ object Steps {
         queueNames
       )
 
-
       addSubSteps = handleRequest(
         addContribution = contributionSteps,
         addPaperSub = paperSteps,
