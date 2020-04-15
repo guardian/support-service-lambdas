@@ -80,6 +80,7 @@ object Processor {
       case Right(creditRequestsFromSalesforce) =>
         val creditRequests = creditRequestsFromSalesforce.distinct
         val alreadyActionedCredits = creditRequestsFromSalesforce.flatMap(_.chargeCode).distinct
+        logger.info(s"Processing ${creditRequests.length} credits in Zuora ...")
         val allZuoraCreditResponses = creditRequests.map(
           addCreditToSubscription(
             creditProduct,
@@ -121,7 +122,10 @@ object Processor {
       _ <- if (subscription.hasCreditAmendment(request)) Right(()) else updateSubscription(subscription, subscriptionUpdate)
       updatedSubscription <- getSubscription(request.subscriptionName)
       addedCharge <- updatedSubscription.ratePlanCharge(request).toRight(ZuoraApiFailure(s"Failed to write credit amendment to Zuora: $request"))
-    } yield result(request, addedCharge)
+    } yield {
+      logger.info(s"Added credit ${addedCharge.number} to ${subscription.subscriptionNumber}")
+      result(request, addedCharge)
+    }
 
   def getDatesToProcess(
     fulfilmentDatesFetcher: FulfilmentDatesFetcher,

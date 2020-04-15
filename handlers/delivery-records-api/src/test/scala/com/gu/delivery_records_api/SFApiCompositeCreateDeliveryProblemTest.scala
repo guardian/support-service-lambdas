@@ -59,6 +59,7 @@ class SFApiCompositeCreateDeliveryProblemTest extends FlatSpec with Matchers {
          |        },
          |        "Origin" : "Self Service",
          |        "Status" : "New",
+         |        "Priority" : null,
          |        "Subject" : "[Self Service] Delivery Problem : No delivery (Guardian Weekly - A-S123456)",
          |        "Description" : "description",
          |        "Product__c" : "Guardian Weekly",

@@ -4,8 +4,8 @@ import java.time.LocalDate
 
 import cats.effect.IO
 import com.gu.DevIdentity
-import com.gu.digital_voucher_api.imovo.ImovoStub._
-import com.gu.digital_voucher_api.imovo.{ImovoErrorResponse, ImovoSubscriptionResponse, ImovoSubscriptionType, ImovoSuccessResponse, ImovoVoucherResponse}
+import com.gu.imovo.ImovoStub._
+import com.gu.imovo.{ImovoConfig, ImovoErrorResponse, ImovoSubscriptionResponse, ImovoSubscriptionType, ImovoSuccessResponse, ImovoVoucherResponse, SfSubscriptionId}
 import com.softwaremill.diffx.scalatest.DiffMatcher
 import com.softwaremill.sttp.impl.cats.CatsMonadError
 import com.softwaremill.sttp.testing.SttpBackendStub
@@ -21,16 +21,14 @@ import org.scalatest.matchers.should
 
 class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMatcher with EitherValues {
 
-  private val apiKey = "imovo-test-api-key"
-  private val baseUrl = "https://imovo.test.com"
+  private val imovoConfig = ImovoConfig("https://imovo.test.com", "imovo-test-api-key")
   private val subscriptionId = SfSubscriptionId("123456")
   private val tomorrow = LocalDate.now.plusDays(1).toString
 
   "DigitalVoucherApi" should "return voucher details for create subscription request" in {
     val imovoBackendStub: SttpBackendStub[IO, Nothing] = SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
       .stubCreateSubscription(
-        apiKey = apiKey,
-        baseUrl = baseUrl,
+        imovoConfig,
         subscriptionId = subscriptionId.value,
         schemeName = "Guardian7Day",
         startDate = tomorrow,
@@ -60,8 +58,7 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
   it should "get existing voucher details from imovo if create fails because the vouchers already exist" in {
     val imovoBackendStub: SttpBackendStub[IO, Nothing] = SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
       .stubCreateSubscription(
-        apiKey = apiKey,
-        baseUrl = baseUrl,
+        imovoConfig,
         subscriptionId = subscriptionId.value,
         schemeName = "Guardian7Day",
         startDate = tomorrow,
@@ -71,8 +68,7 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
         )
       )
       .stubGetSubscription(
-        apiKey = apiKey,
-        baseUrl = baseUrl,
+        imovoConfig,
         subscriptionId = subscriptionId.value,
         response = ImovoSubscriptionResponse(
           schemeName = "Guardian7Day",
@@ -100,16 +96,14 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
   it should "return a 502 when both create subscription and get subscriptions requests to imovo fail" in {
     val imovoBackendStub: SttpBackendStub[IO, Nothing] = SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
       .stubCreateSubscription(
-        apiKey = apiKey,
-        baseUrl = baseUrl,
+        imovoConfig,
         subscriptionId = subscriptionId.value,
         schemeName = "Guardian7Day",
         startDate = tomorrow,
         response = ImovoErrorResponse(List("imovo-error-1"), successfulRequest = false)
       )
       .stubGetSubscription(
-        apiKey = apiKey,
-        baseUrl = baseUrl,
+        imovoConfig,
         subscriptionId = subscriptionId.value,
         response = ImovoErrorResponse(List("imovo-error-2"), successfulRequest = false)
       )
@@ -123,12 +117,12 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
 
     response.status.code should matchTo(502)
     getBody[DigitalVoucherApiRoutesError](response) should matchTo(DigitalVoucherApiRoutesError(
-      s"""Imovo failure to create voucher: Imovo create request failed:Request GET $baseUrl/Subscription/RequestSubscriptionVouchers?SubscriptionId=123456&SchemeName=Guardian7Day&StartDate=$tomorrow failed with response ({
+      s"""Imovo failure to create voucher: Imovo create request failed:Request GET ${imovoConfig.imovoBaseUrl}/Subscription/RequestSubscriptionVouchers?SubscriptionId=123456&SchemeName=Guardian7Day&StartDate=$tomorrow failed with response ({
          |  "errorMessages" : [
          |    "imovo-error-1"
          |  ],
          |  "successfulRequest" : false
-         |}) and the Imovo get request failed: Request GET $baseUrl/Subscription/GetSubscriptionVoucherDetails?SubscriptionId=123456 failed with response ({
+         |}) and the Imovo get request failed: Request GET ${imovoConfig.imovoBaseUrl}/Subscription/GetSubscriptionVoucherDetails?SubscriptionId=123456 failed with response ({
          |  "errorMessages" : [
          |    "imovo-error-2"
          |  ],
@@ -157,8 +151,7 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
   it should "return voucher details for replace request with subscriptionId" in {
     val imovoBackendStub: SttpBackendStub[IO, Nothing] = SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
       .stubReplaceSubscription(
-        apiKey = apiKey,
-        baseUrl = baseUrl,
+        imovoConfig,
         subscriptionId = subscriptionId.value,
         imovoSubscriptionType = ImovoSubscriptionType.Both,
         response = ImovoSubscriptionResponse(
@@ -189,8 +182,7 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
   it should "return error response when one imovo replace request fails" in {
     val imovoBackendStub: SttpBackendStub[IO, Nothing] = SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
       .stubReplaceSubscription(
-        apiKey = apiKey,
-        baseUrl = baseUrl,
+        imovoConfig,
         subscriptionId = subscriptionId.value,
         imovoSubscriptionType = ImovoSubscriptionType.Both,
         response = ImovoErrorResponse(Nil, false)
@@ -210,8 +202,7 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
   it should "return voucher details for get subscription request" in {
     val imovoBackendStub: SttpBackendStub[IO, Nothing] = SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
       .stubGetSubscription(
-        apiKey = apiKey,
-        baseUrl = baseUrl,
+        imovoConfig,
         subscriptionId = subscriptionId.value,
         response = ImovoSubscriptionResponse(
           schemeName = "Guardian7Day",
@@ -241,8 +232,7 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
 
     val imovoBackendStub: SttpBackendStub[IO, Nothing] = SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
       .stubSubscriptionCancel(
-        apiKey = "imovo-test-api-key",
-        baseUrl = "https://imovo.test.com",
+        imovoConfig,
         subscriptionId = subscriptionId.value,
         lastActiveDate = Some(cancellationDate.minusDays(1)),
         response = ImovoSuccessResponse("OK", true)

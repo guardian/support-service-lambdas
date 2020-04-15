@@ -28,6 +28,13 @@ class GetSubscriptionExpiryTest extends FlatSpec {
     ratePlans = List(RatePlan("Monthly Contribution", List(RatePlanCharge("Montly Contribution", lastWeek, nextWeek))))
   )
 
+  val newspaperHomeDelivery = digitalPack.copy(
+    ratePlans = List(RatePlan("Newspaper Delivery", List(RatePlanCharge("Sunday", lastWeek, nextWeek))))
+  )
+  val newspaperVoucher = digitalPack.copy(
+    ratePlans = List(RatePlan("Newspaper Voucher", List(RatePlanCharge("Sunday", lastWeek, nextWeek))))
+  )
+
   val accountSummary = AccountSummaryResult(
     accountId = AccountId("accountId"),
     billToLastName = "billingLastName",
@@ -135,6 +142,13 @@ class GetSubscriptionExpiryTest extends FlatSpec {
   it should "return not found for non digipack subscription" in {
     val actualResponse = GetSubscriptionExpiry(today)("billingLastName", monthlyContribution, accountSummary)
     actualResponse shouldEqual notFoundResponse
+  }
+
+  it should "[due to Coronavirus] recognise paper subscriptions as having digipack access for the time being" in {
+    val actualHomeDeliveryResponse = GetSubscriptionExpiry(today)("billingLastName", newspaperHomeDelivery, accountSummary)
+    actualHomeDeliveryResponse shouldEqual expectedResponse
+    val actualVoucherResponse = GetSubscriptionExpiry(today)("billingLastName", newspaperVoucher, accountSummary)
+    actualVoucherResponse shouldEqual expectedResponse
   }
 
   it should "return not found for expired subscription" in {
