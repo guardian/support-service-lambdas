@@ -34,6 +34,9 @@ class GuardianWeeklyStepsTest extends FlatSpec with Matchers {
     val testPlanId = GuardianWeeklyDomesticQuarterly
     val testZuoraAccountId = ZuoraAccountId("acccc")
     val testRatePlan = Plan(testPlanId, PlanDescription("GW Oct 18 - Quarterly - Domestic"))
+    val testCaseId = CaseId("case")
+    val testAcquistionSource = AcquisitionSource("CSR")
+    val testCSR = CreatedByCSR("bob")
 
     def stubGetVoucherCustomerData(zuoraAccountId: ZuoraAccountId) = {
       zuoraAccountId should equal(testZuoraAccountId)
@@ -46,9 +49,9 @@ class GuardianWeeklyStepsTest extends FlatSpec with Matchers {
         testZuoraAccountId,
         None,
         testFirstPaymentDate,
-        CaseId("case"),
-        AcquisitionSource("CSR"),
-        CreatedByCSR("bob")
+        testCaseId,
+        testAcquistionSource,
+        testCSR
       )
       ClientSuccess(SubscriptionName(newSubscriptionName))
     }
@@ -71,7 +74,7 @@ class GuardianWeeklyStepsTest extends FlatSpec with Matchers {
     }
 
     def stubSendEmail(sfContactId: Option[SfContactId], paperData: GuardianWeeklyEmailData) = {
-      sfContactId should equal(Some(SfContactId("sfContactId")))
+      sfContactId should equal(TestData.guardianWeeklyCustomerData.account.sfContactId)
       paperData.subscriptionName should equal(SubscriptionName(newSubscriptionName))
       paperData.contacts should equal(TestData.guardianWeeklyCustomerData.contacts)
       paperData.currency should equal(TestData.guardianWeeklyCustomerData.account.currency)
@@ -108,12 +111,12 @@ class GuardianWeeklyStepsTest extends FlatSpec with Matchers {
       addGuardianWeeklyROWSub = stubAddVoucherSteps
     )(ApiGatewayRequest(None, None, Some(Json.stringify(JsObject(
       Map(
-        "acquisitionCase" -> JsString("case"),
-        "startDate" -> JsString("2018-07-18"),
+        "acquisitionCase" -> JsString(testCaseId.value),
+        "startDate" -> JsString(testFirstPaymentDate.toString),
         "zuoraAccountId" -> JsString(testZuoraAccountId.value),
-        "acquisitionSource" -> JsString("CSR"),
-        "createdByCSR" -> JsString("bob"),
-        "planId" -> JsString("guardian_weekly_domestic_quarterly")
+        "acquisitionSource" -> JsString(testAcquistionSource.value),
+        "createdByCSR" -> JsString(testCSR.value),
+        "planId" -> JsString(testPlanId.name)
       )
     ))), None, None, None))
 
