@@ -4,6 +4,7 @@ import com.gu.i18n.Country
 import com.gu.i18n.Currency.GBP
 import com.gu.newproduct.api.addsubscription.validation.ValidatedAccount
 import com.gu.newproduct.api.addsubscription.validation.contribution.ContributionCustomerData
+import com.gu.newproduct.api.addsubscription.validation.guardianweekly.GuardianWeeklyCustomerData
 import com.gu.newproduct.api.addsubscription.validation.paper.PaperCustomerData
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.{AccountBalanceMinorUnits, AutoPay, IdentityId, PaymentMethodId, SfContactId}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.{Active, Subscription}
@@ -80,4 +81,9 @@ object TestData {
     contacts = contacts
   )
 
+  val guardianWeeklyCustomerData = GuardianWeeklyCustomerData(
+    account = validatedAccount,
+    paymentMethod = directDebitPaymentMethod,
+    contacts = contacts
+  )
 }
