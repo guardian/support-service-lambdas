@@ -49,7 +49,7 @@ object AddContribution {
       amountMinorUnits <- contributionValidations(validatableFields, request.planId, account.currency).toApiGatewayOp.toAsync
       acceptanceDate = request.startDate.plusDays(paymentDelayFor(paymentMethod))
       planAndCharge <- getPlanAndCharge(request.planId).toApiGatewayContinueProcessing(internalServerError(s"no Zuora id for ${request.planId}!")).toAsync
-      chargeOverride = ChargeOverride(amountMinorUnits, planAndCharge.productRatePlanChargeId)
+      chargeOverride = ChargeOverride(Some(amountMinorUnits), planAndCharge.productRatePlanChargeId)
       zuoraCreateSubRequest = ZuoraCreateSubRequest(
         request = request,
         acceptanceDate = acceptanceDate,

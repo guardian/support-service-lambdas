@@ -20,7 +20,7 @@ object CreateSubscription {
     implicit val readsResponse: Reads[WireSubscription] = Json.reads[WireSubscription]
 
     case class ChargeOverrides(
-      price: Double,
+      price: Option[Double],
       productRatePlanChargeId: String
     )
 
@@ -67,7 +67,7 @@ object CreateSubscription {
             productRatePlanId = ratePlan.productRatePlanId.value,
             chargeOverrides = ratePlan.maybeChargeOverride.map { chargeOverride =>
               ChargeOverrides(
-                price = chargeOverride.amountMinorUnits.value.toDouble / 100,
+                price = chargeOverride.amountMinorUnits.map(_.value.toDouble / 100),
                 productRatePlanChargeId = chargeOverride.productRatePlanChargeId.value
               )
             }.toList
@@ -77,7 +77,7 @@ object CreateSubscription {
   }
 
   case class ChargeOverride(
-    amountMinorUnits: AmountMinorUnits,
+    amountMinorUnits: Option[AmountMinorUnits],
     productRatePlanChargeId: ProductRatePlanChargeId
   )
   case class ZuoraCreateSubRequest(
