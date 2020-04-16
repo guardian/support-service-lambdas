@@ -13,7 +13,7 @@ object EmailQueueNames {
 
   def emailQueuesFor(stage: Stage) = stage match {
 
-    case Stage("PROD") | Stage("CODE") =>
+    case Stage("PROD") =>
       EmailQueueNames(
         contributions = contributionThanksProdQueue,
         paper = subsWelcomeProdQueue,
