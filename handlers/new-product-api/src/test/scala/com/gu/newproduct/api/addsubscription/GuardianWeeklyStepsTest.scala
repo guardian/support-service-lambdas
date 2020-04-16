@@ -2,7 +2,6 @@ package com.gu.newproduct.api.addsubscription
 
 import java.time.LocalDate
 
-import com.gu.i18n.Currency
 import com.gu.newproduct.TestData
 import com.gu.newproduct.api.addsubscription.email.GuardianWeeklyEmailData
 import com.gu.newproduct.api.addsubscription.validation._
@@ -12,7 +11,7 @@ import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.{BillToAddress, SoldToAddress}
 import com.gu.newproduct.api.productcatalog.PlanId.{GuardianWeeklyDomestic6for6, GuardianWeeklyDomesticQuarterly}
 import com.gu.newproduct.api.productcatalog.ZuoraIds.{PlanAndCharge, ProductRatePlanChargeId, ProductRatePlanId}
-import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, PaymentPlan, Plan, PlanDescription, PlanId, SixWeeks}
+import com.gu.newproduct.api.productcatalog.{Plan, PlanDescription, PlanId}
 import com.gu.test.JsonMatchers.JsonMatcher
 import com.gu.util.apigateway.ApiGatewayRequest
 import com.gu.util.reader.AsyncTypes._
@@ -35,11 +34,7 @@ class GuardianWeeklyStepsTest extends FlatSpec with Matchers {
   val testFirstPaymentDate = LocalDate.of(2018, 7, 18)
   val testZuoraAccountId = ZuoraAccountId("acccc")
   val quarterlyRatePlan = Plan(GuardianWeeklyDomesticQuarterly, PlanDescription("GW Oct 18 - Quarterly - Domestic"))
-  val sixForSixRatePlan = Plan(
-    id = GuardianWeeklyDomestic6for6,
-    description = PlanDescription("GW Oct 18 - 6 for 6 - Domestic"),
-    paymentPlans = Map(Currency.GBP -> PaymentPlan(Currency.GBP, AmountMinorUnits(600), SixWeeks, ""))
-  )
+  val sixForSixRatePlan = Plan(GuardianWeeklyDomestic6for6, PlanDescription("GW Oct 18 - 6 for 6 - Domestic"))
   val testCaseId = CaseId("case")
   val testAcquistionSource = AcquisitionSource("CSR")
   val testCSR = CreatedByCSR("bob")
@@ -168,7 +163,7 @@ class GuardianWeeklyStepsTest extends FlatSpec with Matchers {
             productRatePlanId = sixForSixTestRatePlanZuoraId,
             maybeChargeOverride = Some(
               ChargeOverride(
-                amountMinorUnits = Some(AmountMinorUnits(600)),
+                amountMinorUnits = None,
                 productRatePlanChargeId = sixForSixTestRatePlanChargeZuoraId,
                 triggerDate = Some(testFirstPaymentDate)
               )
