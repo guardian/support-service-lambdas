@@ -4,7 +4,7 @@ import com.amazonaws.auth.profile.ProfileCredentialsProvider
 import com.amazonaws.auth.{AWSCredentialsProviderChain, EC2ContainerCredentialsProviderWrapper, EnvironmentVariableCredentialsProvider, InstanceProfileCredentialsProvider, SystemPropertiesCredentialsProvider}
 import com.amazonaws.regions.Regions
 import com.amazonaws.services.lambda.AWSLambdaClient
-import com.amazonaws.services.lambda.model.{InvokeRequest, InvokeResult}
+import com.amazonaws.services.lambda.model.{InvocationType, InvokeRequest, InvokeResult}
 import com.typesafe.scalalogging.LazyLogging
 
 import scala.util.Try
@@ -15,6 +15,7 @@ object InvokeLambda extends LazyLogging {
     val invokeRequest = new InvokeRequest()
       .withFunctionName(functionName)
       .withPayload(lambdaPayload)
+      .withInvocationType(InvocationType.Event)
 
     Try(AwsLambda.client.invoke(invokeRequest))
   }
