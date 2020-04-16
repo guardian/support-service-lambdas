@@ -6,11 +6,11 @@ import com.gu.newproduct.TestData
 import com.gu.newproduct.api.addsubscription.email.GuardianWeeklyEmailData
 import com.gu.newproduct.api.addsubscription.validation._
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription
-import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{SubscriptionName, ZuoraCreateSubRequest, ZuoraCreateSubRequestRatePlan}
+import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{ChargeOverride, SubscriptionName, ZuoraCreateSubRequest, ZuoraCreateSubRequestRatePlan}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.{BillToAddress, SoldToAddress}
 import com.gu.newproduct.api.productcatalog.PlanId.{GuardianWeeklyDomestic6for6, GuardianWeeklyDomesticQuarterly}
-import com.gu.newproduct.api.productcatalog.ZuoraIds.ProductRatePlanId
+import com.gu.newproduct.api.productcatalog.ZuoraIds.{PlanAndCharge, ProductRatePlanChargeId, ProductRatePlanId}
 import com.gu.newproduct.api.productcatalog.{Plan, PlanDescription, PlanId}
 import com.gu.test.JsonMatchers.JsonMatcher
 import com.gu.util.apigateway.ApiGatewayRequest
@@ -28,6 +28,8 @@ import scala.language.postfixOps
 class GuardianWeeklyStepsTest extends FlatSpec with Matchers {
   val quarterlyTestRatePlanZuoraId = ProductRatePlanId("quarterly-zuora-rate-plan-id")
   val sixForSixTestRatePlanZuoraId = ProductRatePlanId("6-for-6-zuora-rate-plan-id")
+  val sixForSixTestRatePlanChargeZuoraId = ProductRatePlanChargeId("6-for-6-zuora-rate-plan-charge-id")
+
   val newSubscriptionName = "A-Sxxxxxxxx"
   val testFirstPaymentDate = LocalDate.of(2018, 7, 18)
   val testZuoraAccountId = ZuoraAccountId("acccc")
@@ -52,6 +54,13 @@ class GuardianWeeklyStepsTest extends FlatSpec with Matchers {
     planId match {
       case GuardianWeeklyDomesticQuarterly => Some(quarterlyTestRatePlanZuoraId)
       case GuardianWeeklyDomestic6for6 => Some(sixForSixTestRatePlanZuoraId)
+      case _ => fail()
+    }
+  }
+
+  def stubGetPlanAndCharge(planId: PlanId): Option[PlanAndCharge] = {
+    planId match {
+      case GuardianWeeklyDomestic6for6 => Some(PlanAndCharge(sixForSixTestRatePlanZuoraId, sixForSixTestRatePlanChargeZuoraId))
       case _ => fail()
     }
   }
@@ -96,8 +105,7 @@ class GuardianWeeklyStepsTest extends FlatSpec with Matchers {
         List(
           ZuoraCreateSubRequestRatePlan(
             productRatePlanId = quarterlyTestRatePlanZuoraId,
-            maybeChargeOverride = None,
-            maybeTriggerDate = None
+            maybeChargeOverride = None
           )
         )
       )
@@ -107,6 +115,7 @@ class GuardianWeeklyStepsTest extends FlatSpec with Matchers {
     val stubAddVoucherSteps = AddGuardianWeeklySub.steps(
       stubGetPlan,
       stubGetZuoraId,
+      stubGetPlanAndCharge,
       stubGetVoucherCustomerData,
       stubValidateStartDate(GuardianWeeklyDomesticQuarterly),
       stubValidateAddress,
@@ -152,13 +161,17 @@ class GuardianWeeklyStepsTest extends FlatSpec with Matchers {
         List(
           ZuoraCreateSubRequestRatePlan(
             productRatePlanId = sixForSixTestRatePlanZuoraId,
-            maybeChargeOverride = None,
-            maybeTriggerDate = Some(testFirstPaymentDate)
+            maybeChargeOverride = Some(
+              ChargeOverride(
+                amountMinorUnits = None,
+                productRatePlanChargeId = sixForSixTestRatePlanChargeZuoraId,
+                triggerDate = Some(testFirstPaymentDate)
+              )
+            )
           ),
           ZuoraCreateSubRequestRatePlan(
             productRatePlanId = quarterlyTestRatePlanZuoraId,
-            maybeChargeOverride = None,
-            maybeTriggerDate = None
+            maybeChargeOverride = None
           )
         )
       )
@@ -168,6 +181,7 @@ class GuardianWeeklyStepsTest extends FlatSpec with Matchers {
     val stubAddVoucherSteps = AddGuardianWeeklySub.steps(
       stubGetPlan,
       stubGetZuoraId,
+      stubGetPlanAndCharge,
       stubGetVoucherCustomerData,
       stubValidateStartDate(GuardianWeeklyDomestic6for6),
       stubValidateAddress,
@@ -199,5 +213,4 @@ class GuardianWeeklyStepsTest extends FlatSpec with Matchers {
     actual.statusCode should be("200")
     actual.body jsonMatchesFormat AddedSubscription(newSubscriptionName)
   }
-
 }

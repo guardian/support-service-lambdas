@@ -49,15 +49,14 @@ object AddContribution {
       amountMinorUnits <- contributionValidations(validatableFields, request.planId, account.currency).toApiGatewayOp.toAsync
       acceptanceDate = request.startDate.plusDays(paymentDelayFor(paymentMethod))
       planAndCharge <- getPlanAndCharge(request.planId).toApiGatewayContinueProcessing(internalServerError(s"no Zuora id for ${request.planId}!")).toAsync
-      chargeOverride = ChargeOverride(Some(amountMinorUnits), planAndCharge.productRatePlanChargeId)
+      chargeOverride = ChargeOverride(Some(amountMinorUnits), planAndCharge.productRatePlanChargeId, None)
       zuoraCreateSubRequest = ZuoraCreateSubRequest(
         request = request,
         acceptanceDate = acceptanceDate,
         ratePlans = List(
           ZuoraCreateSubRequestRatePlan(
             productRatePlanId = planAndCharge.productRatePlanId,
-            maybeChargeOverride = Some(chargeOverride),
-            maybeTriggerDate = None
+            maybeChargeOverride = Some(chargeOverride)
           )
         )
       )
@@ -87,7 +86,7 @@ object AddContribution {
     currentDate: () => LocalDate
   ): AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName] = {
 
-    val planAndChargeForContributionPlanId = zuoraIds.contributionsZuoraIds.byApiPlanId.get _
+    val planAndChargeForContributionPlanId = zuoraIds.apiIdToPlanAndCharge.get _
     val contributionIds = List(zuoraIds.contributionsZuoraIds.monthly.productRatePlanId, zuoraIds.contributionsZuoraIds.annual.productRatePlanId)
     val getCustomerData = getValidatedContributionCustomerData(zuoraClient, contributionIds)
     val isValidContributionStartDate = isValidStartDateForPlan(MonthlyContribution, _: LocalDate)

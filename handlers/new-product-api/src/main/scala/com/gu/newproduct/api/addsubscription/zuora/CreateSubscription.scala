@@ -21,7 +21,8 @@ object CreateSubscription {
 
     case class ChargeOverrides(
       price: Option[Double],
-      productRatePlanChargeId: String
+      productRatePlanChargeId: String,
+      triggerDate: Option[LocalDate]
     )
 
     implicit val writesCharge = Json.writes[ChargeOverrides]
@@ -68,17 +69,18 @@ object CreateSubscription {
             chargeOverrides = ratePlan.maybeChargeOverride.map { chargeOverride =>
               ChargeOverrides(
                 price = chargeOverride.amountMinorUnits.map(_.value.toDouble / 100),
-                productRatePlanChargeId = chargeOverride.productRatePlanChargeId.value
+                productRatePlanChargeId = chargeOverride.productRatePlanChargeId.value,
+                triggerDate = chargeOverride.triggerDate
               )
             }.toList
           )
         }
     )
   }
-
   case class ChargeOverride(
     amountMinorUnits: Option[AmountMinorUnits],
-    productRatePlanChargeId: ProductRatePlanChargeId
+    productRatePlanChargeId: ProductRatePlanChargeId,
+    triggerDate: Option[LocalDate]
   )
   case class ZuoraCreateSubRequest(
     accountId: ZuoraAccountId,
@@ -91,8 +93,7 @@ object CreateSubscription {
 
   case class ZuoraCreateSubRequestRatePlan(
     productRatePlanId: ProductRatePlanId,
-    maybeChargeOverride: Option[ChargeOverride],
-    maybeTriggerDate: Option[LocalDate]
+    maybeChargeOverride: Option[ChargeOverride]
   )
 
   object ZuoraCreateSubRequest {

@@ -49,8 +49,7 @@ object AddPaperSub {
       ratePlans = List(
         ZuoraCreateSubRequestRatePlan(
           maybeChargeOverride = None,
-          productRatePlanId = zuoraRatePlanId,
-          maybeTriggerDate = None
+          productRatePlanId = zuoraRatePlanId
         )
       )
     )

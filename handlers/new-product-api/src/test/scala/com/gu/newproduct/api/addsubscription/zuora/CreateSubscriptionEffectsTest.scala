@@ -33,10 +33,10 @@ class CreateSubscriptionEffectsTest extends FlatSpec with Matchers {
           maybeChargeOverride = Some(
             ChargeOverride(
               amountMinorUnits = Some(AmountMinorUnits(100)),
-              productRatePlanChargeId = monthlyContribution.productRatePlanChargeId
+              productRatePlanChargeId = monthlyContribution.productRatePlanChargeId,
+              triggerDate = None
             )
-          ),
-          maybeTriggerDate = None
+          )
         )
       )
     )

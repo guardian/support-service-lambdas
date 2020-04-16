@@ -49,10 +49,10 @@ class ContributionStepsTest extends FlatSpec with Matchers {
         ZuoraCreateSubRequestRatePlan(
           productRatePlanId = planAndCharge.productRatePlanId,
           maybeChargeOverride = Some(ChargeOverride(
-            Some(AmountMinorUnits(123)),
-            planAndCharge.productRatePlanChargeId,
-          )),
-          maybeTriggerDate = None
+            amountMinorUnits = Some(AmountMinorUnits(123)),
+            productRatePlanChargeId = planAndCharge.productRatePlanChargeId,
+            triggerDate = None
+          ))
         )
       )
     )

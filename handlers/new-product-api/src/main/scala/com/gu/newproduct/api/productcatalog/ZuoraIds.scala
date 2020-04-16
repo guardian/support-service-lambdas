@@ -14,7 +14,7 @@ object ZuoraIds {
   case class PlanAndCharge(productRatePlanId: ProductRatePlanId, productRatePlanChargeId: ProductRatePlanChargeId)
 
   case class ContributionsZuoraIds(monthly: PlanAndCharge, annual: PlanAndCharge) {
-    val byApiPlanId: Map[PlanId, PlanAndCharge] = Map(
+    val planAndChargeByApiPlanId: Map[PlanId, PlanAndCharge] = Map(
       MonthlyContribution -> monthly,
       AnnualContribution -> annual
     )
@@ -101,12 +101,15 @@ object ZuoraIds {
     quarterly: ProductRatePlanId,
     annual: ProductRatePlanId
   ) {
-    val byApiPlanId = Map(
+    val zuoraRatePlanIdByApiPlanId = Map(
       GuardianWeeklyDomestic6for6 -> sixForSix.productRatePlanId,
       GuardianWeeklyDomesticQuarterly -> quarterly,
       GuardianWeeklyDomesticAnnual -> annual,
     )
-    val zuoraIdToPlanid = byApiPlanId.map(_.swap)
+    val zuoraRatePlanIdToApiPlanId = zuoraRatePlanIdByApiPlanId.map(_.swap)
+    val planAndChargeByApiPlanId = Map(
+      GuardianWeeklyDomestic6for6 -> sixForSix
+    )
   }
 
   case class GuardianWeeklyROWIds(
@@ -114,12 +117,15 @@ object ZuoraIds {
     quarterly: ProductRatePlanId,
     annual: ProductRatePlanId
   ) {
-    val byApiPlanId = Map(
+    val zuoraRatePlanIdByApiPlanId = Map(
       GuardianWeeklyROW6for6 -> sixForSix.productRatePlanId,
       GuardianWeeklyROWQuarterly -> quarterly,
       GuardianWeeklyROWAnnual -> annual,
     )
-    val zuoraIdToPlanid = byApiPlanId.map(_.swap)
+    val apiPlanIdZuoraRatePlanIdBy = zuoraRatePlanIdByApiPlanId.map(_.swap)
+    val planAndChargeByApiPlanId = Map(
+      GuardianWeeklyROW6for6 -> sixForSix
+    )
   }
 
   case class ZuoraIds(
@@ -131,14 +137,20 @@ object ZuoraIds {
     guardianWeeklyROW: GuardianWeeklyROWIds
   ) {
     def apiIdToRateplanId: Map[PlanId, ProductRatePlanId] =
-      contributionsZuoraIds.byApiPlanId.mapValues(_.productRatePlanId) ++
+      contributionsZuoraIds.planAndChargeByApiPlanId.mapValues(_.productRatePlanId) ++
       voucherZuoraIds.byApiPlanId ++
       homeDeliveryZuoraIds.byApiPlanId ++
       digitalPackIds.byApiPlanId ++
-      guardianWeeklyDomestic.byApiPlanId ++
-      guardianWeeklyROW.byApiPlanId
+      guardianWeeklyDomestic.zuoraRatePlanIdByApiPlanId ++
+      guardianWeeklyROW.zuoraRatePlanIdByApiPlanId
 
     val rateplanIdToApiId: Map[ProductRatePlanId, PlanId] = apiIdToRateplanId.map(_.swap)
+
+    def apiIdToPlanAndCharge: Map[PlanId, PlanAndCharge] =
+      contributionsZuoraIds.planAndChargeByApiPlanId ++
+        guardianWeeklyDomestic.planAndChargeByApiPlanId ++
+        guardianWeeklyROW.planAndChargeByApiPlanId
+
   }
 
   def zuoraIdsForStage(stage: Stage): ApiGatewayOp[ZuoraIds] = {

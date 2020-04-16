@@ -62,8 +62,7 @@ class PaperStepsTest extends FlatSpec with Matchers {
       List(
         ZuoraCreateSubRequestRatePlan(
           productRatePlanId = ratePlanId,
-          maybeChargeOverride = None,
-          maybeTriggerDate = None
+          maybeChargeOverride = None
         )
       )
     )

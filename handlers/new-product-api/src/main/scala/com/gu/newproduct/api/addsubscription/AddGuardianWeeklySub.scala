@@ -11,14 +11,14 @@ import com.gu.newproduct.api.addsubscription.email.{EtSqsSend, GuardianWeeklyEma
 import com.gu.newproduct.api.addsubscription.validation.Validation._
 import com.gu.newproduct.api.addsubscription.validation.guardianweekly.{GetGuardianWeeklyCustomerData, GuardianWeeklyAccountValidation, GuardianWeeklyCustomerData}
 import com.gu.newproduct.api.addsubscription.validation.{ValidateAccount, ValidatePaymentMethod, ValidationResult}
-import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{SubscriptionName, ZuoraCreateSubRequest, ZuoraCreateSubRequestRatePlan}
+import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{ChargeOverride, SubscriptionName, ZuoraCreateSubRequest, ZuoraCreateSubRequestRatePlan}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAccount
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.{BillToAddress, SoldToAddress}
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.WireModel.GetContactsResponse
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.PaymentMethodWire
 import com.gu.newproduct.api.addsubscription.zuora.{GetAccount, GetContacts, GetPaymentMethod}
-import com.gu.newproduct.api.productcatalog.ZuoraIds.{ProductRatePlanId, ZuoraIds}
+import com.gu.newproduct.api.productcatalog.ZuoraIds.{PlanAndCharge, ProductRatePlanId, ZuoraIds}
 import com.gu.newproduct.api.productcatalog.{Catalog, Plan, PlanId}
 import com.gu.util.apigateway.ApiGatewayResponse.internalServerError
 import com.gu.util.reader.AsyncTypes.{AsyncApiGatewayOp, _}
@@ -32,6 +32,7 @@ object AddGuardianWeeklySub {
   def steps(
     getPlan: PlanId => Plan,
     getZuoraRateplanId: PlanId => Option[ProductRatePlanId],
+    getPlanAndCharge: PlanId => Option[PlanAndCharge],
     getCustomerData: ZuoraAccountId => ApiGatewayOp[GuardianWeeklyCustomerData],
     validateStartDate: (PlanId, LocalDate) => ValidationResult[Unit],
     validateAddress: (BillToAddress, SoldToAddress) => ValidationResult[Unit],
@@ -44,7 +45,13 @@ object AddGuardianWeeklySub {
 
     customerData <- getCustomerData(request.zuoraAccountId).toAsync
     _ <- validateAddress(customerData.contacts.billTo.address, customerData.contacts.soldTo.address).toApiGatewayOp.toAsync
-    createSubRequest <- createCreateSubRequest(request, sixForSixPlanId, quarterlyPlanId, getZuoraRateplanId).toAsync
+    createSubRequest <- createCreateSubRequest(
+      request,
+      sixForSixPlanId,
+      quarterlyPlanId,
+      getZuoraRateplanId,
+      getPlanAndCharge
+    ).toAsync
     subscriptionName <- createSubscription(createSubRequest).toAsyncApiGatewayOp("create guardian weekly subscription")
     plan = getPlan(request.planId)
     guardianWeeklyEmailData = GuardianWeeklyEmailData(
@@ -77,6 +84,7 @@ object AddGuardianWeeklySub {
     steps(
       catalog.planForId,
       zuoraIds.apiIdToRateplanId.get,
+      zuoraIds.apiIdToPlanAndCharge.get,
       validatedCustomerData,
       isValidStartDateForPlan,
       isValidAddressForPlan,
@@ -109,12 +117,15 @@ object AddGuardianWeeklySub {
     request: AddSubscriptionRequest,
     sixForSixPlanId: PlanId,
     quarterlyPlanId: PlanId,
-    getZuoraRateplanId: PlanId => Option[ProductRatePlanId]
+    getZuoraRateplanId: PlanId => Option[ProductRatePlanId],
+    getPlanAndCharge: PlanId => Option[PlanAndCharge]
   ): ApiGatewayOp[ZuoraCreateSubRequest] = {
     if (request.planId == sixForSixPlanId) {
       for {
-        zuora6for6RatePlanId <- getZuoraRateplanId(sixForSixPlanId).toApiGatewayContinueProcessing(internalServerError(s"no Zuora id for ${request.planId}!"))
-        zuoraQuarterlyRatePlanId <- getZuoraRateplanId(quarterlyPlanId).toApiGatewayContinueProcessing(internalServerError(s"no Zuora id for ${quarterlyPlanId}!"))
+        zuora6for6RatePlanAndCharge <- getPlanAndCharge(sixForSixPlanId)
+          .toApiGatewayContinueProcessing(internalServerError(s"no Zuora ids for ${request.planId}!"))
+        zuoraQuarterlyRatePlanId <- getZuoraRateplanId(quarterlyPlanId)
+          .toApiGatewayContinueProcessing(internalServerError(s"no Zuora id for ${quarterlyPlanId}!"))
 
         /**
          * The following logic was implement for consistency with the support-frontend:
@@ -131,14 +142,16 @@ object AddGuardianWeeklySub {
           acceptanceDate = request.startDate.plusWeeks(6),
           ratePlans = List(
             ZuoraCreateSubRequestRatePlan(
-              productRatePlanId = zuora6for6RatePlanId,
-              maybeChargeOverride = None,
-              maybeTriggerDate = Some(request.startDate)
+              productRatePlanId = zuora6for6RatePlanAndCharge.productRatePlanId,
+              maybeChargeOverride = Some(ChargeOverride(
+                amountMinorUnits = None,
+                productRatePlanChargeId = zuora6for6RatePlanAndCharge.productRatePlanChargeId,
+                triggerDate = Some(request.startDate)
+              ))
             ),
             ZuoraCreateSubRequestRatePlan(
               productRatePlanId = zuoraQuarterlyRatePlanId,
-              maybeChargeOverride = None,
-              maybeTriggerDate = None
+              maybeChargeOverride = None
             )
           )
         )
@@ -152,8 +165,7 @@ object AddGuardianWeeklySub {
           ratePlans = List(
             ZuoraCreateSubRequestRatePlan(
               productRatePlanId = zuoraRatePlanId,
-              maybeChargeOverride = None,
-              maybeTriggerDate = None
+              maybeChargeOverride = None
             )
           )
         )

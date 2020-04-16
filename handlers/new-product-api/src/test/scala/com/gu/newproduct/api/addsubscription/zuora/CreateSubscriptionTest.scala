@@ -34,7 +34,13 @@ class CreateSubscriptionTest extends FlatSpec with Matchers {
       subscribeToRatePlans = List(
         SubscribeToRatePlans(
           productRatePlanId = "hiProductRatePlanId",
-          chargeOverrides = List(ChargeOverrides(price = Some(1.25), productRatePlanChargeId = "hiProductRatePlanChargeId"))
+          chargeOverrides = List(
+            ChargeOverrides(
+              price = Some(1.25),
+              productRatePlanChargeId = "hiProductRatePlanChargeId",
+              triggerDate = Some(LocalDate.of(2020, 1, 1))
+            )
+          )
         )
       )
     )
@@ -54,11 +60,11 @@ class CreateSubscriptionTest extends FlatSpec with Matchers {
           productRatePlanId = ids.productRatePlanId,
           maybeChargeOverride = Some(
             ChargeOverride(
-              Some(AmountMinorUnits(125)),
-              ids.productRatePlanChargeId
+              amountMinorUnits = Some(AmountMinorUnits(125)),
+              productRatePlanChargeId = ids.productRatePlanChargeId,
+              triggerDate = Some(LocalDate.of(2020, 1, 1))
             )
-          ),
-          maybeTriggerDate = None
+          )
         )
       )
     )
