@@ -38,7 +38,8 @@ class CreateSubscriptionTest extends FlatSpec with Matchers {
             ChargeOverrides(
               price = Some(1.25),
               productRatePlanChargeId = "hiProductRatePlanChargeId",
-              triggerDate = Some(LocalDate.of(2020, 1, 1))
+              triggerDate = Some(LocalDate.of(2020, 1, 1)),
+              triggerEvent = Some("SpecificDate")
             )
           )
         )

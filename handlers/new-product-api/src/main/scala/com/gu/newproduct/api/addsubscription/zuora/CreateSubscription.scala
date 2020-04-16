@@ -22,7 +22,8 @@ object CreateSubscription {
     case class ChargeOverrides(
       price: Option[Double],
       productRatePlanChargeId: String,
-      triggerDate: Option[LocalDate]
+      triggerDate: Option[LocalDate],
+      triggerEvent: Option[String]
     )
 
     implicit val writesCharge = Json.writes[ChargeOverrides]
@@ -70,7 +71,8 @@ object CreateSubscription {
               ChargeOverrides(
                 price = chargeOverride.amountMinorUnits.map(_.value.toDouble / 100),
                 productRatePlanChargeId = chargeOverride.productRatePlanChargeId.value,
-                triggerDate = chargeOverride.triggerDate
+                triggerDate = chargeOverride.triggerDate,
+                triggerEvent = chargeOverride.triggerDate.map(_ => "SpecificDate")
               )
             }.toList
           )
