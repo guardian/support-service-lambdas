@@ -45,15 +45,17 @@ object AddGuardianWeeklySub {
 
     customerData <- getCustomerData(request.zuoraAccountId).toAsync
     _ <- validateAddress(customerData.contacts.billTo.address, customerData.contacts.soldTo.address).toApiGatewayOp.toAsync
+    plan = getPlan(request.planId)
     createSubRequest <- createCreateSubRequest(
       request,
       sixForSixPlanId,
       quarterlyPlanId,
       getZuoraRateplanId,
-      getPlanAndCharge
+      getPlanAndCharge,
+      plan,
+      customerData
     ).toAsync
     subscriptionName <- createSubscription(createSubRequest).toAsyncApiGatewayOp("create guardian weekly subscription")
-    plan = getPlan(request.planId)
     guardianWeeklyEmailData = GuardianWeeklyEmailData(
       plan = plan,
       firstPaymentDate = request.startDate,
@@ -118,7 +120,9 @@ object AddGuardianWeeklySub {
     sixForSixPlanId: PlanId,
     quarterlyPlanId: PlanId,
     getZuoraRateplanId: PlanId => Option[ProductRatePlanId],
-    getPlanAndCharge: PlanId => Option[PlanAndCharge]
+    getPlanAndCharge: PlanId => Option[PlanAndCharge],
+    plan: Plan,
+    customerData: GuardianWeeklyCustomerData
   ): ApiGatewayOp[ZuoraCreateSubRequest] = {
     if (request.planId == sixForSixPlanId) {
       for {
@@ -126,6 +130,10 @@ object AddGuardianWeeklySub {
           .toApiGatewayContinueProcessing(internalServerError(s"no Zuora ids for ${request.planId}!"))
         zuoraQuarterlyRatePlanId <- getZuoraRateplanId(quarterlyPlanId)
           .toApiGatewayContinueProcessing(internalServerError(s"no Zuora id for ${quarterlyPlanId}!"))
+        paymentPlan <- plan.paymentPlans.get(customerData.account.currency)
+          .toApiGatewayContinueProcessing(
+            internalServerError(s"plan had no payment plan for currency ${customerData.account.currency}")
+          )
 
         /**
          * The following logic was implement for consistency with the support-frontend:
@@ -144,7 +152,7 @@ object AddGuardianWeeklySub {
             ZuoraCreateSubRequestRatePlan(
               productRatePlanId = zuora6for6RatePlanAndCharge.productRatePlanId,
               maybeChargeOverride = Some(ChargeOverride(
-                amountMinorUnits = None,
+                amountMinorUnits = Some(paymentPlan.amountMinorUnits),
                 productRatePlanChargeId = zuora6for6RatePlanAndCharge.productRatePlanChargeId,
                 triggerDate = Some(request.startDate)
               ))
