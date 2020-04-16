@@ -12,6 +12,7 @@ import com.gu.util.resthttp.Types.ClientFailableOp
 import play.api.libs.json.{Json, Reads}
 
 object CreateSubscription {
+  val SpecificDateTriggerEventId = "USD"
 
   object WireModel {
 
@@ -72,7 +73,7 @@ object CreateSubscription {
                 price = chargeOverride.amountMinorUnits.map(_.value.toDouble / 100),
                 productRatePlanChargeId = chargeOverride.productRatePlanChargeId.value,
                 triggerDate = chargeOverride.triggerDate,
-                triggerEvent = chargeOverride.triggerDate.map(_ => "SpecificDate")
+                triggerEvent = chargeOverride.triggerDate.map(_ => SpecificDateTriggerEventId)
               )
             }.toList
           )
