@@ -119,9 +119,9 @@ Resources:
   HolidayStopProcessorScheduleRule:
     Type: AWS::Events::Rule
     Properties:
-      Description: Trigger processing of holiday stops every hour (to give 24 attempts a day)
+      Description: Trigger processing of holiday stops every 20 mins (to ensure successful processing of all batches within 24 hours)
       Name: !FindInMap [StageMap, !Ref Stage, ScheduleName]
-      ScheduleExpression: "cron(0 * ? * * *)"
+      ScheduleExpression: "cron(0/20 * ? * * *)"
       State: ENABLED
       Targets:
         - Arn: !GetAtt HolidayStopProcessor.Arn
