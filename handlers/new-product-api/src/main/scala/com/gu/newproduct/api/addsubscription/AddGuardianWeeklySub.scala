@@ -125,7 +125,7 @@ object AddGuardianWeeklySub {
          * After the initial 6 weeks the normal 3 quarterly subscription is used. This is triggered by the
          * contractAcceptanceDate which in this case is pushed forward by 6 weeks to avoid running concurrently
          * with the 6 for 6 period
-         **/
+         */
         createSubRequest = ZuoraCreateSubRequest(
           request = request,
           acceptanceDate = request.startDate.plusWeeks(6),
