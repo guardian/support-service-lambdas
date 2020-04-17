@@ -177,7 +177,7 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
     val salesforceBackendStub =
       SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
         .stubAuth(config, auth)
-        .stubQuery(auth, deliveryRecordsQuery(IdentityId(identityId), subscriptionNumber, None, None), validSalesforceResponseBody)
+        .stubQuery(auth, deliveryRecordsQuery(IdentityId(identityId), subscriptionNumber, None, None, None), validSalesforceResponseBody)
 
     val app = createApp(salesforceBackendStub)
     val response = app.run(
@@ -195,7 +195,7 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
     val salesforceBackendStub =
       SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
         .stubAuth(config, auth)
-        .stubQuery(auth, deliveryRecordsQuery(SalesforceContactId(buyerContactId), subscriptionNumber, None, None), validSalesforceResponseBody)
+        .stubQuery(auth, deliveryRecordsQuery(SalesforceContactId(buyerContactId), subscriptionNumber, None, None, None), validSalesforceResponseBody)
 
     val app = createApp(salesforceBackendStub)
     val response = app.run(
@@ -222,7 +222,8 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
             SalesforceContactId(buyerContactId),
             subscriptionNumber,
             Some(startDate),
-            Some(endDate)
+            Some(endDate),
+            None
           ),
           validSalesforceResponseBody
         )
@@ -248,7 +249,7 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
         .stubAuth(config, auth)
         .stubQuery(
           auth,
-          deliveryRecordsQuery(SalesforceContactId(buyerContactId), subscriptionNumber, None, None),
+          deliveryRecordsQuery(SalesforceContactId(buyerContactId), subscriptionNumber, None, None, None),
           RecordsWrapperCaseClass[SFApiSubscription](Nil)
         )
 
@@ -284,7 +285,7 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
       SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
         .stubAuth(config, auth)
         .stubComposite(auth, None, validCompositeResponse)
-        .stubQuery(auth, deliveryRecordsQuery(IdentityId(identityId), subscriptionNumber, None, None), validSalesforceResponseBody)
+        .stubQuery(auth, deliveryRecordsQuery(IdentityId(identityId), subscriptionNumber, None, None, None), validSalesforceResponseBody)
 
     val app = createApp(salesforceBackendStub)
     val response = app.run(
@@ -306,7 +307,7 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
       SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
         .stubAuth(config, auth)
         .stubComposite(auth, None, validCompositeResponse)
-        .stubQuery(auth, deliveryRecordsQuery(SalesforceContactId(buyerContactId), subscriptionNumber, None, None), validSalesforceResponseBody)
+        .stubQuery(auth, deliveryRecordsQuery(SalesforceContactId(buyerContactId), subscriptionNumber, None, None, None), validSalesforceResponseBody)
 
     val app = createApp(salesforceBackendStub)
     val response = app.run(
@@ -328,7 +329,7 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
       SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
         .stubAuth(config, auth)
         .stubComposite(auth, None, failedCompositeResponse)
-        .stubQuery(auth, deliveryRecordsQuery(IdentityId(identityId), subscriptionNumber, None, None), validSalesforceResponseBody)
+        .stubQuery(auth, deliveryRecordsQuery(IdentityId(identityId), subscriptionNumber, None, None, None), validSalesforceResponseBody)
 
     val app = createApp(salesforceBackendStub)
     val response = app.run(

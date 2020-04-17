@@ -81,7 +81,8 @@ trait DeliveryRecordsService[F[_]] {
     subscriptionId: String,
     contact: Contact,
     optionalStartDate: Option[LocalDate],
-    optionalEndDate: Option[LocalDate]
+    optionalEndDate: Option[LocalDate],
+    optionalCancellationEffectiveDate: Option[LocalDate]
   ): EitherT[F, DeliveryRecordServiceError, DeliveryRecordsApiResponse]
 
   def createDeliveryProblemForSubscription(
@@ -141,7 +142,8 @@ object DeliveryRecordsService {
       subscriptionId: String,
       contact: Contact,
       optionalStartDate: Option[LocalDate],
-      optionalEndDate: Option[LocalDate]
+      optionalEndDate: Option[LocalDate],
+      optionalCancellationEffectiveDate: Option[LocalDate]
     ): EitherT[F, DeliveryRecordServiceError, DeliveryRecordsApiResponse] =
       for {
         queryResult <- queryForDeliveryRecords(
@@ -149,7 +151,8 @@ object DeliveryRecordsService {
           subscriptionId,
           contact,
           optionalStartDate,
-          optionalEndDate
+          optionalEndDate,
+          optionalCancellationEffectiveDate
         )
         records <- getDeliveryRecordsFromQueryResults(subscriptionId, contact, queryResult).toEitherT[F]
         contactPhoneNumbers = queryResult.records.head.Buyer__r.filterOutGarbage()
@@ -187,10 +190,11 @@ object DeliveryRecordsService {
       subscriptionId: String,
       contact: Contact,
       optionalStartDate: Option[LocalDate],
-      optionalEndDate: Option[LocalDate]
+      optionalEndDate: Option[LocalDate],
+      optionalCancellationEffectiveDate: Option[LocalDate]
     ): EitherT[F, DeliveryRecordServiceError, RecordsWrapperCaseClass[SubscriptionRecordQueryResult]] = {
       salesforceClient.query[SubscriptionRecordQueryResult](
-        deliveryRecordsQuery(contact, subscriptionId, optionalStartDate, optionalEndDate)
+        deliveryRecordsQuery(contact, subscriptionId, optionalStartDate, optionalEndDate, optionalCancellationEffectiveDate)
       )
         .leftMap(error => DeliveryRecordServiceGenericError(error.toString))
     }
@@ -219,7 +223,8 @@ object DeliveryRecordsService {
     contact: Contact,
     subscriptionNumber: String,
     optionalStartDate: Option[LocalDate],
-    optionalEndDate: Option[LocalDate]
+    optionalEndDate: Option[LocalDate],
+    optionalCancellationEffectiveDate: Option[LocalDate]
   ) =
     s"""SELECT Buyer__r.Id, Buyer__r.Phone, Buyer__r.HomePhone, Buyer__r.MobilePhone, Buyer__r.OtherPhone, (
        |    SELECT Id, Delivery_Date__c, Delivery_Address__c, Delivery_Instructions__c, Has_Holiday_Stop__c,
@@ -227,16 +232,21 @@ object DeliveryRecordsService {
        |           Case__c, Case__r.Id, Case__r.CaseNumber, Case__r.Subject, Case__r.Description, Case__r.Case_Closure_Reason__c,
        |           Credit_Amount__c, Is_Actioned__c, Invoice_Date__c
        |    FROM Delivery_Records__r
-       |    ${deliveryDateFilter(optionalStartDate, optionalEndDate)}
+       |    ${deliveryDateFilter(optionalStartDate, optionalEndDate, optionalCancellationEffectiveDate)}
        |    ORDER BY Delivery_Date__c DESC
        |)
        |FROM SF_Subscription__c WHERE Name = '${escapeString(subscriptionNumber)}'
        |                         AND ${contactToWhereClausePart(contact)}""".stripMargin
 
-  def deliveryDateFilter(optionalStartDate: Option[LocalDate], optionalEndDate: Option[LocalDate]) = {
+  def deliveryDateFilter(
+    optionalStartDate: Option[LocalDate],
+    optionalEndDate: Option[LocalDate],
+    optionalCancellationEffectiveDate: Option[LocalDate]
+  ) = {
     List(
       optionalStartDate.map(startDate => s"Delivery_Date__c >= $startDate "),
-      optionalEndDate.map(endDate => s"Delivery_Date__c <= $endDate")
+      optionalEndDate.map(endDate => s"Delivery_Date__c <= $endDate"),
+      optionalCancellationEffectiveDate.map(date => s"Invoice_Date__c >= $date AND Credit_Requested__c = true")
     ).flatten match {
         case Nil => ""
         case nonEmpty => s" WHERE ${nonEmpty.mkString(" AND ")}"
