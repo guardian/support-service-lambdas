@@ -563,6 +563,183 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |          "paymentPlan": "GBP 55.55 every month"
         |        }
         |      ]
+        |    },
+        |    {
+        |      "label": "Guardian Weekly - Domestic",
+        |      "plans": [
+        |        {
+        |          "id": "guardian_weekly_domestic_6for6",
+        |          "label": "GW Oct 18 - Six for Six - Domestic",
+        |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Friday"
+        |            ],
+        |            "selectableWindow": {
+        |              "cutOffDayInclusive": "Friday",
+        |              "startDaysAfterCutOff": 14,
+        |              "sizeInDays": 28
+        |            }
+        |          },
+        |          "paymentPlans": [
+        |            {
+        |              "currencyCode": "GBP",
+        |              "description": "GBP 11111.11 for the first six weeks"
+        |            },
+        |            {
+        |              "currencyCode": "USD",
+        |              "description": "USD 111111.11 for the first six weeks"
+        |            }
+        |          ],
+        |          "paymentPlan": "GBP 11111.11 for the first six weeks"
+        |        },
+        |        {
+        |          "id": "guardian_weekly_domestic_quarterly",
+        |          "label": "GW Oct 18 - Quarterly - Domestic",
+        |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Friday"
+        |            ],
+        |            "selectableWindow": {
+        |              "cutOffDayInclusive": "Friday",
+        |              "startDaysAfterCutOff": 14,
+        |              "sizeInDays": 28
+        |            }
+        |          },
+        |          "paymentPlans": [
+        |            {
+        |              "currencyCode": "GBP",
+        |              "description": "GBP 22222.22 every 3 months"
+        |            },
+        |            {
+        |              "currencyCode": "USD",
+        |              "description": "USD 222222.22 every 3 months"
+        |            }
+        |          ],
+        |          "paymentPlan": "GBP 22222.22 every 3 months"
+        |        },
+        |        {
+        |          "id": "guardian_weekly_domestic_annual",
+        |          "label": "GW Oct 18 - Annual - Domestic",
+        |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Friday"
+        |            ],
+        |            "selectableWindow": {
+        |              "cutOffDayInclusive": "Friday",
+        |              "startDaysAfterCutOff": 14,
+        |              "sizeInDays": 28
+        |            }
+        |          },
+        |          "paymentPlans": [
+        |            {
+        |              "currencyCode": "GBP",
+        |              "description": "GBP 33333.33 every 12 months"
+        |            },
+        |            {
+        |              "currencyCode": "USD",
+        |              "description": "USD 333333.33 every 12 months"
+        |            }
+        |          ],
+        |          "paymentPlan": "GBP 33333.33 every 12 months"
+        |        }
+        |      ],
+        |      "enabledForBillingCountries": [
+        |        "GB", "FK", "GI", "GG", "IM", "JE", "SH", "US", "AU", "KI", "NR", "NF", "TV", "AD", "AL", "AT", "BA", "BE",
+        |        "BG", "BL", "CH", "CY", "CZ", "DE", "DK", "EE", "ES", "FI", "FO", "FR", "GF", "GL", "GP", "GR", "HR", "HU",
+        |        "IE", "IT", "LI", "LT", "LU", "LV", "MC", "ME", "MF", "IS", "MQ", "MT", "NL", "NO", "PF", "PL", "PM", "PT",
+        |        "RE", "RO", "RS", "SE", "SI", "SJ", "SK", "SM", "TF", "TR", "WF", "YT", "VA", "AX"
+        |      ]
+        |    },
+        |    {
+        |      "label": "Guardian Weekly - ROW",
+        |      "plans": [
+        |        {
+        |          "id": "guardian_weekly_row_6for6",
+        |          "label": "GW Oct 18 - Six for Six - ROW",
+        |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Friday"
+        |            ],
+        |            "selectableWindow": {
+        |              "cutOffDayInclusive": "Friday",
+        |              "startDaysAfterCutOff": 14,
+        |              "sizeInDays": 28
+        |            }
+        |          },
+        |          "paymentPlans": [
+        |            {
+        |              "currencyCode": "GBP",
+        |              "description": "GBP 44444.44 for the first six weeks"
+        |            },
+        |            {
+        |              "currencyCode": "USD",
+        |              "description": "USD 444444.44 for the first six weeks"
+        |            }
+        |          ],
+        |          "paymentPlan": "GBP 44444.44 for the first six weeks"
+        |        },
+        |        {
+        |          "id": "guardian_weekly_row_quarterly",
+        |          "label": "GW Oct 18 - Quarterly - ROW",
+        |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Friday"
+        |            ],
+        |            "selectableWindow": {
+        |              "cutOffDayInclusive": "Friday",
+        |              "startDaysAfterCutOff": 14,
+        |              "sizeInDays": 28
+        |            }
+        |          },
+        |          "paymentPlans": [
+        |            {
+        |              "currencyCode": "GBP",
+        |              "description": "GBP 55555.55 every 3 months"
+        |            },
+        |            {
+        |              "currencyCode": "USD",
+        |              "description": "USD 555555.55 every 3 months"
+        |            }
+        |          ],
+        |          "paymentPlan": "GBP 55555.55 every 3 months"
+        |        },
+        |        {
+        |          "id": "guardian_weekly_row_annual",
+        |          "label": "GW Oct 18 - Annual - ROW",
+        |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Friday"
+        |            ],
+        |            "selectableWindow": {
+        |              "cutOffDayInclusive": "Friday",
+        |              "startDaysAfterCutOff": 14,
+        |              "sizeInDays": 28
+        |            }
+        |          },
+        |          "paymentPlans": [
+        |            {
+        |              "currencyCode": "GBP",
+        |              "description": "GBP 66666.66 every 12 months"
+        |            },
+        |            {
+        |              "currencyCode": "USD",
+        |              "description": "USD 666666.66 every 12 months"
+        |            }
+        |          ],
+        |          "paymentPlan": "GBP 66666.66 every 12 months"
+        |        }
+        |      ],
+        |      "enabledForBillingCountries": [
+        |        "AE", "AF", "AG", "AI", "AM", "AO", "AQ", "AR", "AS", "AW", "AZ", "BB", "BD", "BF", "BH", "BI", "BJ", "BM",
+        |        "BN", "BO", "BQ", "BR", "BS", "BT", "BV", "BW", "BY", "BZ", "CC", "CD", "CF", "CG", "CI", "CL", "CM", "CN",
+        |        "CO", "CR", "CU", "CV", "CW", "CX", "DJ", "DM", "DO", "DZ", "EC", "EG", "EH", "ER", "ET", "FJ", "FM", "GA",
+        |        "GD", "GE", "GH", "GM", "GN", "GQ", "GS", "GT", "GU", "GW", "GY", "HK", "HM", "HN", "HT", "ID", "IL", "IN",
+        |        "IO", "IQ", "IR", "JM", "JO", "JP", "KE", "KG", "KH", "KM", "KN", "KP", "KR", "KW", "KY", "KZ", "LA", "LB",
+        |        "LC", "LK", "LR", "LS", "LY", "MA", "MD", "MG", "MH", "MK", "ML", "MM", "MN", "MO", "MP", "MR", "MS", "MU",
+        |        "MV", "MW", "MX", "MY", "MZ", "NA", "NC", "NE", "NG", "NI", "NP", "NU", "OM", "PA", "PE", "PG", "PH", "PK",
+        |        "PN", "PR", "PS", "PW", "PY", "QA", "RU", "RW", "SA", "SB", "SC", "SD", "SG", "SL", "SN", "SO", "SR", "SS",
+        |        "ST", "SV", "SX", "SY", "SZ", "TC", "TD", "TG", "TH", "TJ", "TK", "TL", "TM", "TN", "TO", "TT", "TW", "TZ",
+        |        "UA", "UG", "UM", "UY", "UZ", "VC", "VE", "VG", "VI", "VN", "VU", "WS", "YE", "ZA", "ZM", "ZW"]
         |    }
         |  ]
         |}
