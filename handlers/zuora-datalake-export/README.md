@@ -210,7 +210,7 @@ all the exported files.
 The easiest way of doing this is by re-running the 'account' task and all of its dependencies as with a couple of 
 exceptions is all of the imports. 
 
-The following process describes how to do that re-running additional/individual task can be done in a simialar way:  
+The following process describes how to do that, re-running additional/individual task can be done in a simialar way:  
 * Click on 'DAGs' in the top bar
 * Click on 'Supporter-experience'
 * Click on 'Graph View'
