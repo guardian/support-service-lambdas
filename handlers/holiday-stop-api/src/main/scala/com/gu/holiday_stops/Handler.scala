@@ -152,7 +152,7 @@ object Handler extends Logging {
           case "POST" => stepsToCreate(getAccessToken, getSubscription, getAccount) _
           case _ => unsupported _
         }
-      case "bulk" :: "hsr" :: Nil =>
+      case "bulk-hsr" :: Nil =>
         httpMethod match {
           case "POST" => stepsToBulkCreate(getAccessToken, getSubscription, getAccount) _
           case _ => unsupported _
