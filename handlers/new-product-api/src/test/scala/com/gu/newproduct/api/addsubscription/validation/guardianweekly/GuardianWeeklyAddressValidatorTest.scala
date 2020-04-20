@@ -1,10 +1,8 @@
 package com.gu.newproduct.api.addsubscription.validation.guardianweekly
 
-import com.gu.i18n.Country
-import com.gu.newproduct.api.addsubscription.validation.paper.PaperAddressValidator
+import com.gu.i18n.{Country, CountryGroup}
 import com.gu.newproduct.api.addsubscription.validation.{Failed, Passed}
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts._
-import com.gu.newproduct.api.productcatalog.PlanId.{HomeDeliveryWeekendPlus, VoucherEveryDay}
 import org.scalatest.{FlatSpec, Matchers}
 
 class GuardianWeeklyAddressValidatorTest extends FlatSpec with Matchers {
@@ -37,22 +35,27 @@ class GuardianWeeklyAddressValidatorTest extends FlatSpec with Matchers {
   )
 
   it should "succeed for Domestic if delivery address is domestic" in {
-    GuardianWeeklyAddressValidator.domesticCountryCodes.foreach { domesticCountryCode =>
-      val domesticAddress = testDomesticSoldToAddress.copy(country = Country(domesticCountryCode, domesticCountryCode))
-      GuardianWeeklyDomesticAddressValidator(
-        testBillingAddress,
-        domesticAddress
-      ) shouldBe Passed(())
-      GuardianWeeklyROWAddressValidator(
-        testBillingAddress,
-        domesticAddress
-      ) shouldBe Failed(s"Delivery address country $domesticCountryCode is not valid for a Guardian Weekly (ROW) subscription")
-    }
+    (CountryGroup.UK.countries ++
+      CountryGroup.US.countries ++
+      CountryGroup.Canada.countries ++
+      CountryGroup.Europe.countries ++
+      CountryGroup.Australia.countries ++
+      CountryGroup.NewZealand.countries).foreach { domesticCountry =>
+        val domesticAddress = testDomesticSoldToAddress.copy(country = domesticCountry)
+        GuardianWeeklyDomesticAddressValidator(
+          testBillingAddress,
+          domesticAddress
+        ) shouldBe Passed(())
+        GuardianWeeklyROWAddressValidator(
+          testBillingAddress,
+          domesticAddress
+        ) shouldBe Failed(s"Delivery address country ${domesticCountry.name} is not valid for a Guardian Weekly (ROW) subscription")
+      }
   }
 
   it should "succeed for ROW if delivery address is domestic" in {
-    GuardianWeeklyAddressValidator.internationalCountryCodes.foreach { rowCountryCode =>
-      val domesticAddress = testDomesticSoldToAddress.copy(country = Country(rowCountryCode, rowCountryCode))
+    CountryGroup.RestOfTheWorld.countries.foreach { rowCountry =>
+      val domesticAddress = testDomesticSoldToAddress.copy(country = rowCountry)
       GuardianWeeklyROWAddressValidator(
         testBillingAddress,
         domesticAddress
@@ -60,7 +63,7 @@ class GuardianWeeklyAddressValidatorTest extends FlatSpec with Matchers {
       GuardianWeeklyDomesticAddressValidator(
         testBillingAddress,
         domesticAddress
-      ) shouldBe Failed(s"Delivery address country $rowCountryCode is not valid for a Guardian Weekly (Domestic) subscription")
+      ) shouldBe Failed(s"Delivery address country ${rowCountry.name} is not valid for a Guardian Weekly (Domestic) subscription")
     }
   }
 
