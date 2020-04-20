@@ -27,7 +27,7 @@ Mappings:
             ApiName: new-product-api-CODE
             DomainName: new-product-api-code.membership.guardianapis.com
             ApiGatewayTargetDomainName: d-ecyddyj7nk.execute-api.eu-west-1.amazonaws.com
-            ZuoraCatalogLocation: arn:aws:s3:::gu-zuora-catalog/PROD/Zuora-UAT/catalog.json
+            ZuoraCatalogLocation: arn:aws:s3:::gu-zuora-catalog/CODE/Zuora-UAT/catalog.json
             ContributionThanksEmailQueue: contributions-thanks-dev
             SubsWelcomeEmailQueue: subs-welcome-email-dev
         PROD:

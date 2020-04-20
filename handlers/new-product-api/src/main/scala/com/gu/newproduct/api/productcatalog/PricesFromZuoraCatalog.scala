@@ -113,9 +113,16 @@ object PricesFromZuoraCatalog {
     fetchString: StringFromS3,
     planIdFor: ProductRatePlanId => Option[PlanId]
   ): ClientFailableOp[Map[PlanId, Map[Currency, AmountMinorUnits]]] = {
-
     val tryPrices = for {
-      catalogString <- fetchString(S3Location(bucket = "gu-zuora-catalog", key = s"PROD/Zuora-${zuoraEnvironment.value}/catalog.json"))
+      catalogString <- fetchString(
+        S3Location(
+          bucket = "gu-zuora-catalog",
+          key = zuoraEnvironment match {
+            case ZuoraEnvironment("PROD") => s"PROD/Zuora-PROD/catalog.json"
+            case ZuoraEnvironment(preProdEnv) => s"CODE/Zuora-${preProdEnv}/catalog.json"
+          }
+        )
+      )
       jsonCatalog <- Try(Json.parse(catalogString))
       wireCatalog <- Try(jsonCatalog.as[ZuoraCatalog])
       parsed = wireCatalog.toParsedPlans(planIdFor)
