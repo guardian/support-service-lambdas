@@ -33,8 +33,8 @@ creates a new all holiday stop, example body:
  }
 ```
 
-### `POST` `/{STAGE}/bulk/hsr`
-creates a new holiday stop where it has been imposed because we are unable to fulfil the subscription.
+### `POST` `/{STAGE}/bulk-hsr`
+creates a new holiday stop where it has been imposed because we are unable to fulfil the subscription.  
 In this case, the `reason` field will hold the reason for the suspension:
 ```json
 {
