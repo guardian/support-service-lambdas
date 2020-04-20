@@ -8,6 +8,7 @@ Parameters:
         AllowedValues:
             - PROD
             - CODE
+            - DEV
         Default: CODE
 
 Conditions:
@@ -15,6 +16,13 @@ Conditions:
 
 Mappings:
     StageMap:
+        DEV:
+            ApiName: new-product-api-DEV
+            DomainName: new-product-api-dev.membership.guardianapis.com
+            ApiGatewayTargetDomainName: d-ecyddyj7nk.execute-api.eu-west-1.amazonaws.com
+            ZuoraCatalogLocation: arn:aws:s3:::gu-zuora-catalog/DEV/Zuora-UAT/catalog.json
+            ContributionThanksEmailQueue: contributions-thanks-dev
+            SubsWelcomeEmailQueue: subs-welcome-email-dev
         CODE:
             ApiName: new-product-api-CODE
             DomainName: new-product-api-code.membership.guardianapis.com
