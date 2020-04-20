@@ -33,10 +33,10 @@ object GuardianWeeklyROWAddressValidator {
 object GuardianWeeklyAddressValidator {
   val domesticCountries =
     CountryGroup.Australia.countries ++
-      CountryGroup.Canada.countries ++
-      CountryGroup.Europe.countries ++
-      CountryGroup.NewZealand.countries
-  CountryGroup.UK.countries ++
+    CountryGroup.Canada.countries ++
+    CountryGroup.Europe.countries ++
+    CountryGroup.NewZealand.countries ++
+    CountryGroup.UK.countries ++
     CountryGroup.US.countries
 
   def isDomesticDeliveryCountry(country: Country) = !CountryGroup.RestOfTheWorld.countries.contains(country)

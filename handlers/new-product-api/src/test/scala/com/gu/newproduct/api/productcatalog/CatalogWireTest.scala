@@ -652,7 +652,9 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |        "Iceland", "Martinique", "Malta", "Netherlands", "Norway", "French Polynesia", "Poland",
         |        "Saint Pierre & Miquelon", "Portugal", "Réunion", "Romania", "Serbia", "Sweden", "Slovenia",
         |        "Svalbard and Jan Mayen", "Slovakia", "San Marino", "French Southern Territories", "Turkey",
-        |        "Wallis & Futuna", "Mayotte", "Holy See", "Åland Islands", "New Zealand", "Cook Islands"
+        |        "Wallis & Futuna", "Mayotte", "Holy See", "Åland Islands", "New Zealand", "Cook Islands",
+        |        "United Kingdom","Falkland Islands","Gibraltar","Guernsey","Isle of Man","Jersey","Saint Helena",
+        |        "United States"
         |      ]
         |    },
         |    {
