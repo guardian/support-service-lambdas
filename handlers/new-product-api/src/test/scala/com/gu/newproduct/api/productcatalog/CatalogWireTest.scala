@@ -644,10 +644,15 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |        }
         |      ],
         |      "enabledForDeliveryCountries": [
-        |        "GB", "FK", "GI", "GG", "IM", "JE", "SH", "US", "AU", "KI", "NR", "NF", "TV", "AD", "AL", "AT", "BA", "BE",
-        |        "BG", "BL", "CH", "CY", "CZ", "DE", "DK", "EE", "ES", "FI", "FO", "FR", "GF", "GL", "GP", "GR", "HR", "HU",
-        |        "IE", "IT", "LI", "LT", "LU", "LV", "MC", "ME", "MF", "IS", "MQ", "MT", "NL", "NO", "PF", "PL", "PM", "PT",
-        |        "RE", "RO", "RS", "SE", "SI", "SJ", "SK", "SM", "TF", "TR", "WF", "YT", "VA", "AX"
+        |        "Australia", "Kiribati", "Nauru", "Norfolk Island", "Tuvalu", "Canada", "Andorra", "Albania",
+        |        "Austria", "Bosnia-Herzegovina", "Belgium", "Bulgaria", "Saint Barthélemy", "Switzerland", "Cyprus",
+        |        "Czech Republic", "Germany", "Denmark", "Estonia", "Spain", "Finland", "Faroe Islands", "France",
+        |        "French Guiana", "Greenland", "Guadeloupe", "Greece", "Croatia", "Hungary", "Ireland", "Italy",
+        |        "Liechtenstein", "Lithuania", "Luxembourg", "Latvia", "Monaco", "Montenegro", "Saint Martin",
+        |        "Iceland", "Martinique", "Malta", "Netherlands", "Norway", "French Polynesia", "Poland",
+        |        "Saint Pierre & Miquelon", "Portugal", "Réunion", "Romania", "Serbia", "Sweden", "Slovenia",
+        |        "Svalbard and Jan Mayen", "Slovakia", "San Marino", "French Southern Territories", "Turkey",
+        |        "Wallis & Futuna", "Mayotte", "Holy See", "Åland Islands", "New Zealand", "Cook Islands"
         |      ]
         |    },
         |    {
@@ -730,16 +735,34 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |        }
         |      ],
         |      "enabledForDeliveryCountries": [
-        |        "AE", "AF", "AG", "AI", "AM", "AO", "AQ", "AR", "AS", "AW", "AZ", "BB", "BD", "BF", "BH", "BI", "BJ", "BM",
-        |        "BN", "BO", "BQ", "BR", "BS", "BT", "BV", "BW", "BY", "BZ", "CC", "CD", "CF", "CG", "CI", "CL", "CM", "CN",
-        |        "CO", "CR", "CU", "CV", "CW", "CX", "DJ", "DM", "DO", "DZ", "EC", "EG", "EH", "ER", "ET", "FJ", "FM", "GA",
-        |        "GD", "GE", "GH", "GM", "GN", "GQ", "GS", "GT", "GU", "GW", "GY", "HK", "HM", "HN", "HT", "ID", "IL", "IN",
-        |        "IO", "IQ", "IR", "JM", "JO", "JP", "KE", "KG", "KH", "KM", "KN", "KP", "KR", "KW", "KY", "KZ", "LA", "LB",
-        |        "LC", "LK", "LR", "LS", "LY", "MA", "MD", "MG", "MH", "MK", "ML", "MM", "MN", "MO", "MP", "MR", "MS", "MU",
-        |        "MV", "MW", "MX", "MY", "MZ", "NA", "NC", "NE", "NG", "NI", "NP", "NU", "OM", "PA", "PE", "PG", "PH", "PK",
-        |        "PN", "PR", "PS", "PW", "PY", "QA", "RU", "RW", "SA", "SB", "SC", "SD", "SG", "SL", "SN", "SO", "SR", "SS",
-        |        "ST", "SV", "SX", "SY", "SZ", "TC", "TD", "TG", "TH", "TJ", "TK", "TL", "TM", "TN", "TO", "TT", "TW", "TZ",
-        |        "UA", "UG", "UM", "UY", "UZ", "VC", "VE", "VG", "VI", "VN", "VU", "WS", "YE", "ZA", "ZM", "ZW"]
+        |        "United Arab Emirates", "Afghanistan", "Antigua & Barbuda", "Anguilla", "Armenia", "Angola",
+        |        "Antarctica", "Argentina", "American Samoa", "Aruba", "Azerbaijan", "Barbados", "Bangladesh",
+        |        "Burkina Faso", "Bahrain", "Burundi", "Benin", "Bermuda", "Brunei Darussalam", "Bolivia",
+        |        "Bonaire, Saint Eustatius and Saba", "Brazil", "Bahamas", "Bhutan", "Bouvet Island", "Botswana",
+        |        "Belarus", "Belize", "Cocos (Keeling) Islands", "Congo (Kinshasa)", "Central African Republic",
+        |        "Congo (Brazzaville)", "Ivory Coast", "Chile", "Cameroon", "China", "Colombia", "Costa Rica", "Cuba",
+        |        "Cape Verde Islands", "Curaçao", "Christmas Island", "Djibouti", "Dominica", "Dominican Republic",
+        |        "Algeria", "Ecuador", "Egypt", "Western Sahara", "Eritrea", "Ethiopia", "Fiji", "Micronesia", "Gabon",
+        |        "Grenada", "Georgia", "Ghana", "Gambia", "Guinea", "Equatorial Guinea",
+        |        "South Georgia & The South Sandwich Islands", "Guatemala", "Guam", "Guinea-Bissau", "Guyana",
+        |        "Hong Kong", "Heard Island and McDonald Islands", "Honduras", "Haiti", "Indonesia", "Israel",
+        |        "India", "British Indian Ocean Territory", "Iraq", "Iran", "Jamaica", "Jordan", "Japan", "Kenya",
+        |        "Kyrgyzstan", "Cambodia", "Comoros", "Saint Christopher & Nevis", "North Korea", "South Korea",
+        |        "Kuwait", "Cayman Islands", "Kazakhstan", "Laos", "Lebanon", "Saint Lucia", "Sri Lanka", "Liberia",
+        |        "Lesotho", "Libya", "Morocco", "Moldova", "Madagascar", "Marshall Islands", "Macedonia", "Mali",
+        |        "Myanmar", "Mongolia", "Macau", "Northern Mariana Islands", "Mauritania", "Montserrat", "Mauritius",
+        |        "Maldives", "Malawi", "Mexico", "Malaysia", "Mozambique", "Namibia", "New Caledonia", "Niger",
+        |        "Nigeria", "Nicaragua", "Nepal", "Niue", "Oman", "Panama", "Peru", "Papua New Guinea",
+        |        "Philippines", "Pakistan", "Pitcairn Islands", "Puerto Rico", "Palestinian Territories",
+        |        "Palau", "Paraguay", "Qatar", "Russia", "Rwanda", "Saudi Arabia", "Solomon Islands", "Seychelles",
+        |        "Sudan", "Singapore", "Sierra Leone", "Senegal", "Somalia", "Suriname", "South Sudan",
+        |        "Sao Tome & Principe", "El Salvador", "Sint Maarten", "Syria", "Swaziland", "Turks & Caicos Islands",
+        |        "Chad", "Togo", "Thailand", "Tajikistan", "Tokelau", "East Timor", "Turkmenistan", "Tunisia", "Tonga",
+        |        "Trinidad & Tobago", "Taiwan", "Tanzania", "Ukraine", "Uganda", "United States Minor Outlying Islands",
+        |        "Uruguay", "Uzbekistan", "Saint Vincent & The Grenadines", "Venezuela", "British Virgin Islands",
+        |        "United States Virgin Islands", "Vietnam", "Vanuatu", "Samoa", "Yemen", "South Africa", "Zambia",
+        |        "Zimbabwe"
+        |      ]
         |    }
         |  ]
         |}

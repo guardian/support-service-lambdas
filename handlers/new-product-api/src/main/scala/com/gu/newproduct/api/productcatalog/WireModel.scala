@@ -2,7 +2,7 @@ package com.gu.newproduct.api.productcatalog
 
 import java.time.DayOfWeek
 
-import com.gu.i18n.Currency
+import com.gu.i18n.{CountryGroup, Currency}
 import com.gu.i18n.Currency.GBP
 import com.gu.newproduct.api.addsubscription.validation.guardianweekly.{GuardianWeeklyAddressValidator, GuardianWeeklyDomesticAddressValidator}
 import play.api.libs.json.{JsString, Json, Writes}
@@ -154,13 +154,13 @@ object WireModel {
       val guardianWeeklyDomestic = WireProduct(
         label = "Guardian Weekly - Domestic",
         plans = PlanId.enabledGuardianWeeklyDomesticPlans.map(wirePlanForPlanId),
-        enabledForDeliveryCountries = Some(GuardianWeeklyAddressValidator.domesticCountryCodes)
+        enabledForDeliveryCountries = Some(GuardianWeeklyAddressValidator.domesticCountries.map(_.name))
       )
 
       val guardianWeeklyROW = WireProduct(
         label = "Guardian Weekly - ROW",
         plans = PlanId.enabledGuardianWeeklyROWPlans.map(wirePlanForPlanId),
-        enabledForDeliveryCountries = Some(GuardianWeeklyAddressValidator.restOfWorldCountryCodes)
+        enabledForDeliveryCountries = Some(CountryGroup.RestOfTheWorld.countries.map(_.name))
       )
 
       val availableProductsAndPlans = List(
