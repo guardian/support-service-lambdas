@@ -20,7 +20,7 @@ Mappings:
             ApiName: new-product-api-DEV
             DomainName: new-product-api-dev.membership.guardianapis.com
             ApiGatewayTargetDomainName: d-ecyddyj7nk.execute-api.eu-west-1.amazonaws.com
-            ZuoraCatalogLocation: arn:aws:s3:::gu-zuora-catalog/DEV/Zuora-UAT/catalog.json
+            ZuoraCatalogLocation: arn:aws:s3:::gu-zuora-catalog/CODE/Zuora-DEV/catalog.json
             ContributionThanksEmailQueue: contributions-thanks-dev
             SubsWelcomeEmailQueue: subs-welcome-email-dev
         CODE:
@@ -288,7 +288,7 @@ Resources:
       - NewProductUsagePlan
 
     NewProductDomainName:
-      Type: "AWS::ApiGateway::DomainName"
+      Type: "AWS::ApiGateway: :DomainName"
       Properties:
         RegionalCertificateArn: # only for *.membership.guardianapis.com
           !Sub arn:aws:acm:${AWS::Region}:${AWS::AccountId}:certificate/c1efc564-9ff8-4a03-be48-d1990a3d79d2
