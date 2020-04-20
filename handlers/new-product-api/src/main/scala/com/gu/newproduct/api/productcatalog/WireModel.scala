@@ -50,7 +50,7 @@ object WireModel {
     selectableWindow: Option[WireSelectableWindow] = None
   )
 
-  case class WireProduct(label: String, plans: List[WirePlanInfo], enabledForBillingCountries: Option[List[String]])
+  case class WireProduct(label: String, plans: List[WirePlanInfo], enabledForDeliveryCountries: Option[List[String]])
 
   case class WireCatalog(products: List[WireProduct])
 
@@ -130,37 +130,37 @@ object WireModel {
       val voucherProduct = WireProduct(
         label = "Voucher",
         plans = PlanId.enabledVoucherPlans.map(wirePlanForPlanId),
-        enabledForBillingCountries = None
+        enabledForDeliveryCountries = None
       )
 
       val contributionProduct = WireProduct(
         label = "Contribution",
         plans = PlanId.enabledContributionPlans.map(wirePlanForPlanId),
-        enabledForBillingCountries = None
+        enabledForDeliveryCountries = None
       )
 
       val homeDeliveryProduct = WireProduct(
         label = "Home Delivery",
         plans = PlanId.enabledHomeDeliveryPlans.map(wirePlanForPlanId),
-        enabledForBillingCountries = None
+        enabledForDeliveryCountries = None
       )
 
       val digipackProduct = WireProduct(
         label = "Digital Pack",
         plans = PlanId.enabledDigipackPlans.map(wirePlanForPlanId),
-        enabledForBillingCountries = None
+        enabledForDeliveryCountries = None
       )
 
       val guardianWeeklyDomestic = WireProduct(
         label = "Guardian Weekly - Domestic",
         plans = PlanId.enabledGuardianWeeklyDomesticPlans.map(wirePlanForPlanId),
-        enabledForBillingCountries = Some(GuardianWeeklyAddressValidator.domesticCountryCodes)
+        enabledForDeliveryCountries = Some(GuardianWeeklyAddressValidator.domesticCountryCodes)
       )
 
       val guardianWeeklyROW = WireProduct(
         label = "Guardian Weekly - ROW",
         plans = PlanId.enabledGuardianWeeklyROWPlans.map(wirePlanForPlanId),
-        enabledForBillingCountries = Some(GuardianWeeklyAddressValidator.restOfWorldCountryCodes)
+        enabledForDeliveryCountries = Some(GuardianWeeklyAddressValidator.restOfWorldCountryCodes)
       )
 
       val availableProductsAndPlans = List(
