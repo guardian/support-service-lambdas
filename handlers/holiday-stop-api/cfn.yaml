@@ -354,18 +354,20 @@ Resources:
         Properties:
             Description: Stage for holiday-stop-api
             RestApiId: !Ref HolidayStopApi
-            DeploymentId: !Ref HolidayStopApiDeployment
+            DeploymentId: !Ref HolidayStopApiDeployment2
             StageName: !Sub ${Stage}
         DependsOn:
         - HolidayStopApiPotentialBySubscriptionNameGetMethod
         - HolidayStopApiGetBySubscriptionNameMethod
         - HolidayStopApiCreateMethod
+        - BulkHolidayStopApiCreateMethod
         - HolidayStopApiDeleteMethod
         - HolidayStopApiEditMethod
         - HolidayStopApiCancelPostMethod
         - HolidayStopApiCancelGetMethod
 
-    HolidayStopApiDeployment:
+    # Bizarrely you have to update the deployment to include new endpoints in each stage
+    HolidayStopApiDeployment2:
         Type: AWS::ApiGateway::Deployment
         Properties:
             Description: Deploys holiday-stop-api into an environment/stage
@@ -374,6 +376,7 @@ Resources:
         - HolidayStopApiPotentialBySubscriptionNameGetMethod
         - HolidayStopApiGetBySubscriptionNameMethod
         - HolidayStopApiCreateMethod
+        - BulkHolidayStopApiCreateMethod
         - HolidayStopApiDeleteMethod
         - HolidayStopApiEditMethod
         - HolidayStopApiCancelPostMethod
