@@ -58,6 +58,9 @@ object SalesforceHolidayStopRequest extends Logging {
   case class HolidayStopRequestIsWithdrawn(value: Boolean) extends AnyVal
   implicit val formatHolidayStopRequestIsWithdrawn = Jsonx.formatInline[HolidayStopRequestIsWithdrawn]
 
+  case class BulkSuspensionReason(value: String) extends AnyVal
+  implicit val formatBulkSuspensionReason = Jsonx.formatInline[BulkSuspensionReason]
+
   def getHolidayStopRequestPrefixSOQL(productNamePrefixOption: Option[ProductName] = None) = s"""
       | SELECT Id, Start_Date__c, End_Date__c, Subscription_Name__c, Product_Name__c,
       | Actioned_Count__c, Pending_Count__c, Total_Issues_Publications_Impacted_Count__c,
@@ -135,6 +138,7 @@ object SalesforceHolidayStopRequest extends Logging {
     Start_Date__c: HolidayStopRequestStartDate,
     End_Date__c: HolidayStopRequestEndDate,
     SF_Subscription__c: SFSubscriptionId, // TODO attempt to reinstate the __r with SubscriptionNameLookup approach (so it can be reused in back-fill without sep. lookup call first
+    Bulk_Suspension_Reason__c: Option[BulkSuspensionReason],
     Holiday_Stop_Request_Detail__r: RecordsWrapperCaseClass[CompositeTreeHolidayStopRequestsDetail],
     attributes: CompositeAttributes = CompositeAttributes(holidayStopRequestSfObjectRef, holidayStopRequestSfObjectRef)
   )
@@ -165,13 +169,14 @@ object SalesforceHolidayStopRequest extends Logging {
       endDate: LocalDate,
       issuesData: List[IssueData],
       sfSubscription: MatchingSubscription,
-      zuoraSubscription: Subscription
+      bulkSuspensionReason: Option[BulkSuspensionReason]
     ) = {
       RecordsWrapperCaseClass(List(
         CompositeTreeHolidayStopRequest(
           Start_Date__c = HolidayStopRequestStartDate(startDate),
           End_Date__c = HolidayStopRequestEndDate(endDate),
           SF_Subscription__c = sfSubscription.Id,
+          Bulk_Suspension_Reason__c = bulkSuspensionReason,
           Holiday_Stop_Request_Detail__r = RecordsWrapperCaseClass(
             issuesData.map { issuesData =>
               CompositeTreeHolidayStopRequestsDetail(

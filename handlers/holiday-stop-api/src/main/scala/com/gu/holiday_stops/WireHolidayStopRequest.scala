@@ -78,14 +78,36 @@ object HolidayStopRequestsDetail {
   implicit val format: OFormat[HolidayStopRequestsDetail] = Json.format[HolidayStopRequestsDetail]
 }
 
+trait HolidayStopRequestPartialTrait {
+  val startDate: LocalDate
+  val endDate: LocalDate
+  val subscriptionName: SubscriptionName
+  val bulkSuspensionReason: Option[BulkSuspensionReason]
+}
+
 case class HolidayStopRequestPartial(
   startDate: LocalDate,
   endDate: LocalDate,
   subscriptionName: SubscriptionName
-)
+) extends HolidayStopRequestPartialTrait {
+  val bulkSuspensionReason = None
+}
 
 object HolidayStopRequestPartial {
   implicit val reads: Reads[HolidayStopRequestPartial] = Json.reads[HolidayStopRequestPartial]
+}
+
+case class BulkHolidayStopRequestPartial(
+  startDate: LocalDate,
+  endDate: LocalDate,
+  subscriptionName: SubscriptionName,
+  reason: BulkSuspensionReason
+) extends HolidayStopRequestPartialTrait {
+  val bulkSuspensionReason = Some(reason)
+}
+
+object BulkHolidayStopRequestPartial {
+  implicit val reads: Reads[BulkHolidayStopRequestPartial] = Json.reads[BulkHolidayStopRequestPartial]
 }
 
 case class HolidayStopRequestFull(

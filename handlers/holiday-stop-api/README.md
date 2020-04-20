@@ -33,6 +33,19 @@ creates a new all holiday stop, example body:
  }
 ```
 
+### `POST` `/{STAGE}/bulk/hsr`
+creates a new holiday stop where it has been imposed because we are unable to fulfil the subscription.
+In this case, the `reason` field will hold the reason for the suspension:
+```json
+{
+    "startDate": "2023-06-10", 
+    "endDate": "2024-06-14", 
+    "subscriptionName": "A-S00071783",
+    "reason": "someReason"
+ }
+```
+The reason has to be one from a closed set configured in Salesforce.
+
 ### `PATCH` `/{STAGE}/hsr/{SUBSCRIPTION_NAME}/{SF_ID}`
 with the same body as create endpoint above, amends the holiday stop request (where holiday stop request `Id` matches `{SF_ID}`) to the newly specified dates and adds/removes the underlying detail records where appropriate.
 
