@@ -33,7 +33,7 @@ object GuardianWeeklyROWAddressValidator {
 object GuardianWeeklyAddressValidator {
   def isDomesticDeliveryCountry(country: Country) = !CountryGroup.RestOfTheWorld.countries.contains(country)
 
-  def validateBillingAddress(billToAddress: BillToAddress) = {
+  def validateBillingAddress(billToAddress: BillToAddress): ValidationResult[Unit] = {
     for {
       _ <- billToAddress.address1 getOrFailWith ("bill to address1 must be populated")
       _ <- billToAddress.city getOrFailWith ("bill to city must be populated")
