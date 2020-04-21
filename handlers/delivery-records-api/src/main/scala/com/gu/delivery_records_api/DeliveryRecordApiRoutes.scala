@@ -35,10 +35,11 @@ object DeliveryRecordApiRoutes {
       subscriptionNumber: String,
       contact: Contact,
       optionalStartDate: Option[LocalDate],
-      optionalEndDate: Option[LocalDate]
+      optionalEndDate: Option[LocalDate],
+      optionalCancellationEffectiveDate: Option[LocalDate]
     ): EitherT[F, F[Response[F]], DeliveryRecordsApiResponse] = {
       deliveryRecordsService
-        .getDeliveryRecordsForSubscription(subscriptionNumber, contact, optionalStartDate, optionalEndDate)
+        .getDeliveryRecordsForSubscription(subscriptionNumber, contact, optionalStartDate, optionalEndDate, optionalCancellationEffectiveDate)
         .leftMap {
           case error: DeliveryRecordServiceSubscriptionNotFound =>
             NotFound(error)
@@ -92,7 +93,23 @@ object DeliveryRecordApiRoutes {
               subscriptionNumber,
               contact,
               startDate,
-              endDate
+              endDate,
+              None
+            )
+          } yield records
+        )
+
+      case request @ GET -> Root / "delivery-records" / subscriptionNumber / "cancel" =>
+        toResponse(
+          for {
+            contact <- getContactFromHeaders(request)
+            cancellationEffectiveDate <- parseDateFromQueryString(request, "effectiveCancellationDate")
+            records <- getDeliveryRecords(
+              subscriptionNumber,
+              contact,
+              None,
+              None,
+              cancellationEffectiveDate
             )
           } yield records
         )
@@ -112,6 +129,7 @@ object DeliveryRecordApiRoutes {
             records <- getDeliveryRecords(
               subscriptionNumber,
               contact,
+              None,
               None,
               None
             )
