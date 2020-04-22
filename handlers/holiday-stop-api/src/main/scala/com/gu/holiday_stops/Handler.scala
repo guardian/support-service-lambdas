@@ -152,6 +152,11 @@ object Handler extends Logging {
           case "POST" => stepsToCreate(getAccessToken, getSubscription, getAccount) _
           case _ => unsupported _
         }
+      case "bulk-hsr" :: Nil =>
+        httpMethod match {
+          case "POST" => stepsToBulkCreate(getAccessToken, getSubscription, getAccount) _
+          case _ => unsupported _
+        }
       case "hsr" :: _ :: Nil =>
         httpMethod match {
           case "GET" => stepsToListExisting(getAccessToken, getSubscription, getAccount, fulfilmentDatesFetcher) _
@@ -279,13 +284,38 @@ object Handler extends Logging {
     getAccessToken: () => Either[ApiFailure, AccessToken],
     getSubscription: (AccessToken, SubscriptionName) => Either[ApiFailure, Subscription],
     getAccount: (AccessToken, String) => Either[ApiFailure, ZuoraAccount],
+  )(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse =
+    stepsToCreate(
+      getAccessToken,
+      getSubscription,
+      getAccount,
+      req.bodyAsCaseClass[HolidayStopRequestPartial]()
+    )(req, sfClient)
+
+  def stepsToBulkCreate(
+    getAccessToken: () => Either[ApiFailure, AccessToken],
+    getSubscription: (AccessToken, SubscriptionName) => Either[ApiFailure, Subscription],
+    getAccount: (AccessToken, String) => Either[ApiFailure, ZuoraAccount],
+  )(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse =
+    stepsToCreate(
+      getAccessToken,
+      getSubscription,
+      getAccount,
+      req.bodyAsCaseClass[BulkHolidayStopRequestPartial]()
+    )(req, sfClient)
+
+  private def stepsToCreate(
+    getAccessToken: () => Either[ApiFailure, AccessToken],
+    getSubscription: (AccessToken, SubscriptionName) => Either[ApiFailure, Subscription],
+    getAccount: (AccessToken, String) => Either[ApiFailure, ZuoraAccount],
+    requestBodyOp: ApiGatewayOp[HolidayStopRequestPartialTrait]
   )(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
 
     val verifyContactOwnsSubOp = SalesforceSFSubscription.SubscriptionForSubscriptionNameAndContact(sfClient.wrapWith(JsonHttp.getWithParams))
     val createOp = SalesforceHolidayStopRequest.CreateHolidayStopRequestWithDetail(sfClient.wrapWith(JsonHttp.post))
 
     (for {
-      requestBody <- req.bodyAsCaseClass[HolidayStopRequestPartial]()
+      requestBody <- requestBodyOp
       contact <- extractContactFromHeaders(req.headers)
       maybeMatchingSfSub <- verifyContactOwnsSubOp(requestBody.subscriptionName, contact).toDisjunction.toApiGatewayOp(s"fetching subscriptions for contact $contact")
       matchingSfSub <- maybeMatchingSfSub.toApiGatewayOp(s"contact $contact does not own ${requestBody.subscriptionName.value}")
@@ -297,7 +327,7 @@ object Handler extends Logging {
       issuesData <- SubscriptionData(subscription, account)
         .map(_.issueDataForPeriod(requestBody.startDate, requestBody.endDate))
         .toApiGatewayOp(s"calculating publication dates")
-      createBody = CreateHolidayStopRequestWithDetail.buildBody(requestBody.startDate, requestBody.endDate, issuesData, matchingSfSub, subscription)
+      createBody = CreateHolidayStopRequestWithDetail.buildBody(requestBody.startDate, requestBody.endDate, issuesData, matchingSfSub, requestBody.bulkSuspensionReason)
       _ <- createOp(createBody).toDisjunction.toApiGatewayOp(
         exposeSfErrorMessageIn500ApiResponse(s"create new Holiday Stop Request for subscription ${requestBody.subscriptionName} (contact $contact)")
       )
