@@ -4,12 +4,12 @@ import java.time.format.DateTimeFormatter
 
 import com.gu.newproduct.api.addsubscription.Formatters._
 import com.gu.newproduct.api.addsubscription.email.DigipackEmailData
+import com.gu.newproduct.api.addsubscription.email.EmailData._
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.BillToContact
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{DirectDebit, NonDirectDebitMethod, PaymentMethod}
-import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType._
-import com.gu.newproduct.api.productcatalog.{Annual, BillingPeriod, Monthly}
 import com.gu.newproduct.api.productcatalog.PlanId._
+import com.gu.newproduct.api.productcatalog.{Annual, BillingPeriod, Monthly, Quarterly, SixWeeks}
 import play.api.libs.json.{Json, Writes}
 
 
@@ -28,6 +28,8 @@ object DigipackEmailFields {
   def nounFor(billingPeriod: BillingPeriod) = billingPeriod match {
     case Monthly => "month"
     case Annual => "year"
+    case Quarterly => "quarter"
+    case SixWeeks => "six weeks"
   }
   def apply(
     data: DigipackEmailData
@@ -47,13 +49,6 @@ object DigipackEmailFields {
       "Subscription details" -> paymentPLan.map(_.description).getOrElse("")
     ) ++ paymentMethodFields(data.paymentMethod) ++ addressFields(data.contacts.billTo)
 
-  }
-
-  def toDescription(methodType: PaymentMethodType) = methodType match {
-    case CreditCardReferenceTransaction | CreditCard => "Credit/Debit Card"
-    case BankTransfer => "Direct Debit"
-    case PayPal => "PayPal"
-    case Other => "" //should not happen
   }
 
   def paymentMethodFields(paymentMethod: PaymentMethod) = paymentMethod match {

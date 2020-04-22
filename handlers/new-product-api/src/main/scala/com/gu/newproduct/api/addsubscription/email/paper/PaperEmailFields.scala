@@ -2,8 +2,8 @@ package com.gu.newproduct.api.addsubscription.email.paper
 
 import java.time.format.DateTimeFormatter
 
-import com.gu.newproduct.api.addsubscription.Formatters._
-import com.gu.newproduct.api.addsubscription.email.PaperEmailData
+import com.gu.newproduct.api.addsubscription.email.EmailData.paymentMethodFields
+import com.gu.newproduct.api.addsubscription.email.{EmailData, PaperEmailData}
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.Contacts
 import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{DirectDebit, NonDirectDebitMethod, PaymentMethod}
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType
@@ -36,27 +36,6 @@ object PaperEmailFields {
       "package" -> data.plan.description.value,
       "subscription_rate" -> data.plan.paymentPlans.get(data.currency).map(_.description).getOrElse("")
     ) ++ paymentMethodFields(data.paymentMethod) ++ addressFields(data.contacts)
-
-  }
-
-  def toDescription(methodType: PaymentMethodType) = methodType match {
-    case CreditCardReferenceTransaction | CreditCard => "Credit/Debit Card"
-    case BankTransfer => "Direct Debit"
-    case PayPal => "PayPal"
-    case Other => "" //should not happen
-  }
-
-  def paymentMethodFields(paymentMethod: PaymentMethod) = paymentMethod match {
-    case DirectDebit(status, accountName, accountNumberMask, sortCode, mandateId) => Map(
-      "bank_account_no" -> accountNumberMask.value,
-      "bank_sort_code" -> sortCode.hyphenated,
-      "account_holder" -> accountName.value,
-      "mandate_id" -> mandateId.value,
-      "payment_method" -> toDescription(BankTransfer)
-    )
-    case NonDirectDebitMethod(_, paymentMethodType) => Map(
-      "payment_method" -> toDescription(paymentMethodType)
-    )
   }
 
   def addressFields(contacts: Contacts) = {

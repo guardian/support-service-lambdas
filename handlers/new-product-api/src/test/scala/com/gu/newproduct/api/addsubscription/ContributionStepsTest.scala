@@ -8,7 +8,7 @@ import com.gu.newproduct.api.addsubscription.email.ContributionsEmailData
 import com.gu.newproduct.api.addsubscription.validation.contribution.ContributionValidations.ValidatableFields
 import com.gu.newproduct.api.addsubscription.validation.{Failed, Passed}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription
-import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{ChargeOverride, SubscriptionName, ZuoraCreateSubRequest}
+import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{ChargeOverride, SubscriptionName, ZuoraCreateSubRequest, ZuoraCreateSubRequestRatePlan}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.productcatalog.PlanId.MonthlyContribution
 import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, Plan, PlanDescription, PlanId}
@@ -40,16 +40,21 @@ class ContributionStepsTest extends FlatSpec with Matchers {
     def getPlanAndCharge(planId: PlanId) = Some(planAndCharge)
 
     val expectedIn = ZuoraCreateSubRequest(
-      planAndCharge.productRatePlanId,
       ZuoraAccountId("acccc"),
-      Some(ChargeOverride(
-        AmountMinorUnits(123),
-        planAndCharge.productRatePlanChargeId
-      )),
       LocalDate.of(2018, 7, 28),
       CaseId("case"),
       AcquisitionSource("CSR"),
-      CreatedByCSR("bob")
+      CreatedByCSR("bob"),
+      ratePlans = List(
+        ZuoraCreateSubRequestRatePlan(
+          productRatePlanId = planAndCharge.productRatePlanId,
+          maybeChargeOverride = Some(ChargeOverride(
+            amountMinorUnits = Some(AmountMinorUnits(123)),
+            productRatePlanChargeId = planAndCharge.productRatePlanChargeId,
+            triggerDate = None
+          ))
+        )
+      )
     )
 
     def fakeCreate(in: CreateSubscription.ZuoraCreateSubRequest): Types.ClientFailableOp[CreateSubscription.SubscriptionName] = {
@@ -102,7 +107,9 @@ class ContributionStepsTest extends FlatSpec with Matchers {
     val futureActual = Steps.handleRequest(
       addContribution = fakeAddContributionSteps,
       addPaperSub = dummySteps,
-      addDigipackSub = dummySteps
+      addDigipackSub = dummySteps,
+      addGuardianWeeklyDomesticSub = dummySteps,
+      addGuardianWeeklyROWSub = dummySteps
     )(ApiGatewayRequest(None, None, Some(Json.stringify(requestInput)), None, None, None))
 
     val actual = Await.result(futureActual, 30 seconds)

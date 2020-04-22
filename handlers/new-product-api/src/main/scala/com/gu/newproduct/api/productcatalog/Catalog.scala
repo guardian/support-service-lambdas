@@ -28,7 +28,13 @@ case class Catalog(
   homeDeliverySundayPlus: Plan,
   homeDeliverySaturdayPlus: Plan,
   digipackAnnual: Plan,
-  digipackMonthly: Plan
+  digipackMonthly: Plan,
+  guardianWeeklyDomesticSixForSix: Plan,
+  guardianWeeklyDomesticQuarterly: Plan,
+  guardianWeeklyDomesticAnnual: Plan,
+  guardianWeeklyROWSixForSix: Plan,
+  guardianWeeklyROWQuarterly: Plan,
+  guardianWeeklyROWAnnual: Plan,
 ) {
   val allPlans = List(
     voucherWeekend,
@@ -55,15 +61,25 @@ case class Catalog(
     homeDeliverySaturdayPlus,
     digipackAnnual,
     digipackMonthly
-
   )
 
-  val planForId: Map[PlanId, Plan] = allPlans.map(x => x.id -> x).toMap
+  val createOnlyPlans = List(
+    guardianWeeklyDomesticSixForSix,
+    guardianWeeklyDomesticQuarterly,
+    guardianWeeklyDomesticAnnual,
+    guardianWeeklyROWSixForSix,
+    guardianWeeklyROWQuarterly,
+    guardianWeeklyROWAnnual
+  )
+
+  val planForId: Map[PlanId, Plan] = (createOnlyPlans ++ allPlans).map(x => x.id -> x).toMap
 }
 sealed trait VoucherPlanId
 sealed trait ContributionPlanId
 sealed trait HomeDeliveryPlanId
 sealed trait DigipackPlanId
+sealed trait GuardianWeeklyDomestic
+sealed trait GuardianWeeklyRow
 sealed abstract class PlanId(val name: String)
 
 object PlanId {
@@ -115,6 +131,18 @@ object PlanId {
 
   case object DigipackAnnual extends PlanId("digipack_annual") with DigipackPlanId
 
+  case object GuardianWeeklyDomestic6for6 extends PlanId("guardian_weekly_domestic_6for6") with GuardianWeeklyDomestic
+
+  case object GuardianWeeklyDomesticQuarterly extends PlanId("guardian_weekly_domestic_quarterly") with GuardianWeeklyDomestic
+
+  case object GuardianWeeklyDomesticAnnual extends PlanId("guardian_weekly_domestic_annual") with GuardianWeeklyDomestic
+
+  case object GuardianWeeklyROW6for6 extends PlanId("guardian_weekly_row_6for6") with GuardianWeeklyRow
+
+  case object GuardianWeeklyROWQuarterly extends PlanId("guardian_weekly_row_quarterly") with GuardianWeeklyRow
+
+  case object GuardianWeeklyROWAnnual extends PlanId("guardian_weekly_row_annual") with GuardianWeeklyRow
+
   val enabledVoucherPlans = List(
     VoucherEveryDay,
     VoucherEveryDayPlus,
@@ -148,15 +176,27 @@ object PlanId {
     DigipackAnnual,
     DigipackMonthly
   )
+
+  val enabledGuardianWeeklyPlans = List(
+    GuardianWeeklyDomestic6for6,
+    GuardianWeeklyDomesticQuarterly,
+    GuardianWeeklyDomesticAnnual,
+    GuardianWeeklyROW6for6,
+    GuardianWeeklyROWQuarterly,
+    GuardianWeeklyROWAnnual
+  )
+
   val supportedPlans: List[PlanId] = enabledVoucherPlans ++ enabledContributionPlans ++ enabledHomeDeliveryPlans ++ enabledDigipackPlans
-  def fromName(name: String): Option[PlanId] = supportedPlans.find(_.name == name)
+  def fromName(name: String): Option[PlanId] = (enabledGuardianWeeklyPlans ++ supportedPlans).find(_.name == name)
 }
 
 case class Plan(id: PlanId, description: PlanDescription, startDateRules: StartDateRules = StartDateRules(), paymentPlans: Map[Currency, PaymentPlan] = Map.empty)
 
 sealed trait BillingPeriod
 object Monthly extends BillingPeriod
+object Quarterly extends BillingPeriod
 object Annual extends BillingPeriod
+object SixWeeks extends BillingPeriod
 
 case class PaymentPlan(currency: Currency, amountMinorUnits: AmountMinorUnits, billingPeriod: BillingPeriod, description: String)
 
