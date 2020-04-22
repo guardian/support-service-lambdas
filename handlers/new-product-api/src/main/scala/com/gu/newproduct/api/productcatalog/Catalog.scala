@@ -60,10 +60,7 @@ case class Catalog(
     homeDeliverySundayPlus,
     homeDeliverySaturdayPlus,
     digipackAnnual,
-    digipackMonthly
-  )
-
-  val createOnlyPlans = List(
+    digipackMonthly,
     guardianWeeklyDomesticSixForSix,
     guardianWeeklyDomesticQuarterly,
     guardianWeeklyDomesticAnnual,
@@ -72,7 +69,7 @@ case class Catalog(
     guardianWeeklyROWAnnual
   )
 
-  val planForId: Map[PlanId, Plan] = (createOnlyPlans ++ allPlans).map(x => x.id -> x).toMap
+  val planForId: Map[PlanId, Plan] = allPlans.map(x => x.id -> x).toMap
 }
 sealed trait VoucherPlanId
 sealed trait ContributionPlanId
