@@ -94,7 +94,7 @@ object NewProductApi {
       StartDateRules(
         daysOfWeekRule = Some(DaysOfWeekRule(List(DayOfWeek.FRIDAY))),
         windowRule = Some(WindowRule(
-          maybeCutOffDay = Some(DayOfWeek.THURSDAY),
+          maybeCutOffDay = Some(DayOfWeek.WEDNESDAY),
           maybeStartDelay = Some(DelayDays(7)),
           maybeSize = Some(WindowSizeDays(28))
         ))

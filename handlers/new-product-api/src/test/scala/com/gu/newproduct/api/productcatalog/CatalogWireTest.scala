@@ -575,7 +575,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Friday"
         |            ],
         |            "selectableWindow": {
-        |              "cutOffDayInclusive": "Thursday",
+        |              "cutOffDayInclusive": "Wednesday",
         |              "startDaysAfterCutOff": 7,
         |              "sizeInDays": 28
         |            }
@@ -600,7 +600,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Friday"
         |            ],
         |            "selectableWindow": {
-        |              "cutOffDayInclusive": "Thursday",
+        |              "cutOffDayInclusive": "Wednesday",
         |              "startDaysAfterCutOff": 7,
         |              "sizeInDays": 28
         |            }
@@ -625,7 +625,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Friday"
         |            ],
         |            "selectableWindow": {
-        |              "cutOffDayInclusive": "Thursday",
+        |              "cutOffDayInclusive": "Wednesday",
         |              "startDaysAfterCutOff": 7,
         |              "sizeInDays": 28
         |            }
@@ -668,7 +668,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Friday"
         |            ],
         |            "selectableWindow": {
-        |              "cutOffDayInclusive": "Thursday",
+        |              "cutOffDayInclusive": "Wednesday",
         |              "startDaysAfterCutOff": 7,
         |              "sizeInDays": 28
         |            }
@@ -693,7 +693,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Friday"
         |            ],
         |            "selectableWindow": {
-        |              "cutOffDayInclusive": "Thursday",
+        |              "cutOffDayInclusive": "Wednesday",
         |              "startDaysAfterCutOff": 7,
         |              "sizeInDays": 28
         |            }
@@ -718,7 +718,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Friday"
         |            ],
         |            "selectableWindow": {
-        |              "cutOffDayInclusive": "Thursday",
+        |              "cutOffDayInclusive": "Wednesday",
         |              "startDaysAfterCutOff": 7,
         |              "sizeInDays": 28
         |            }
