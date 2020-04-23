@@ -2,8 +2,9 @@ package com.gu.newproduct.api.productcatalog
 
 import java.time.DayOfWeek
 
-import com.gu.i18n.Currency
+import com.gu.i18n.{CountryGroup, Currency}
 import com.gu.i18n.Currency.GBP
+import com.gu.newproduct.api.addsubscription.validation.guardianweekly.{GuardianWeeklyAddressValidator, GuardianWeeklyDomesticAddressValidator}
 import play.api.libs.json.{JsString, Json, Writes}
 
 object WireModel {
@@ -49,7 +50,7 @@ object WireModel {
     selectableWindow: Option[WireSelectableWindow] = None
   )
 
-  case class WireProduct(label: String, plans: List[WirePlanInfo])
+  case class WireProduct(label: String, plans: List[WirePlanInfo], enabledForDeliveryCountries: Option[List[String]])
 
   case class WireCatalog(products: List[WireProduct])
 
@@ -128,25 +129,43 @@ object WireModel {
 
       val voucherProduct = WireProduct(
         label = "Voucher",
-        plans = PlanId.enabledVoucherPlans.map(wirePlanForPlanId)
+        plans = PlanId.enabledVoucherPlans.map(wirePlanForPlanId),
+        enabledForDeliveryCountries = None
       )
 
       val contributionProduct = WireProduct(
         label = "Contribution",
-        plans = PlanId.enabledContributionPlans.map(wirePlanForPlanId)
+        plans = PlanId.enabledContributionPlans.map(wirePlanForPlanId),
+        enabledForDeliveryCountries = None
       )
 
       val homeDeliveryProduct = WireProduct(
         label = "Home Delivery",
-        plans = PlanId.enabledHomeDeliveryPlans.map(wirePlanForPlanId)
+        plans = PlanId.enabledHomeDeliveryPlans.map(wirePlanForPlanId),
+        enabledForDeliveryCountries = None
       )
 
       val digipackProduct = WireProduct(
         label = "Digital Pack",
-        plans = PlanId.enabledDigipackPlans.map(wirePlanForPlanId)
+        plans = PlanId.enabledDigipackPlans.map(wirePlanForPlanId),
+        enabledForDeliveryCountries = None
       )
 
-      val availableProductsAndPlans = List(contributionProduct, voucherProduct, homeDeliveryProduct, digipackProduct).filterNot(_.plans.isEmpty)
+      val guardianWeeklyDomestic = WireProduct(
+        label = "Guardian Weekly - Domestic",
+        plans = PlanId.enabledGuardianWeeklyDomesticPlans.map(wirePlanForPlanId),
+        enabledForDeliveryCountries = Some(GuardianWeeklyAddressValidator.domesticCountries.map(_.name))
+      )
+
+      val guardianWeeklyROW = WireProduct(
+        label = "Guardian Weekly - ROW",
+        plans = PlanId.enabledGuardianWeeklyROWPlans.map(wirePlanForPlanId),
+        enabledForDeliveryCountries = Some(CountryGroup.RestOfTheWorld.countries.map(_.name))
+      )
+
+      val availableProductsAndPlans = List(
+        contributionProduct, voucherProduct, homeDeliveryProduct, digipackProduct, guardianWeeklyDomestic, guardianWeeklyROW
+      ).filterNot(_.plans.isEmpty)
 
       WireCatalog(availableProductsAndPlans)
     }

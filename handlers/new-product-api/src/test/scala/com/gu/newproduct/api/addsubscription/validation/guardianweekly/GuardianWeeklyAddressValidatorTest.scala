@@ -35,22 +35,17 @@ class GuardianWeeklyAddressValidatorTest extends FlatSpec with Matchers {
   )
 
   it should "succeed for Domestic if delivery address is domestic" in {
-    (CountryGroup.UK.countries ++
-      CountryGroup.US.countries ++
-      CountryGroup.Canada.countries ++
-      CountryGroup.Europe.countries ++
-      CountryGroup.Australia.countries ++
-      CountryGroup.NewZealand.countries).foreach { domesticCountry =>
-        val domesticAddress = testDomesticSoldToAddress.copy(country = domesticCountry)
-        GuardianWeeklyDomesticAddressValidator(
-          testBillingAddress,
-          domesticAddress
-        ) shouldBe Passed(())
-        GuardianWeeklyROWAddressValidator(
-          testBillingAddress,
-          domesticAddress
-        ) shouldBe Failed(s"Delivery address country ${domesticCountry.name} is not valid for a Guardian Weekly (ROW) subscription")
-      }
+    GuardianWeeklyAddressValidator.domesticCountries.foreach { domesticCountry =>
+      val domesticAddress = testDomesticSoldToAddress.copy(country = domesticCountry)
+      GuardianWeeklyDomesticAddressValidator(
+        testBillingAddress,
+        domesticAddress
+      ) shouldBe Passed(())
+      GuardianWeeklyROWAddressValidator(
+        testBillingAddress,
+        domesticAddress
+      ) shouldBe Failed(s"Delivery address country ${domesticCountry.name} is not valid for a Guardian Weekly (ROW) subscription")
+    }
   }
 
   it should "succeed for ROW if delivery address is domestic" in {
