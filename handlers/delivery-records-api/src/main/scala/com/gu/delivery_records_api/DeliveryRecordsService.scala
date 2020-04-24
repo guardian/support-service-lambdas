@@ -30,6 +30,7 @@ final case class DeliveryRecord(
   addressCountry: Option[String],
   addressPostcode: Option[String],
   hasHolidayStop: Option[Boolean],
+  bulkSuspensionReason: Option[String],
   problemCaseId: Option[String],
   isChangedAddress: Option[Boolean],
   isChangedDeliveryInstruction: Option[Boolean],
@@ -127,6 +128,7 @@ object DeliveryRecordsService {
       addressPostcode = sfRecord.Address_Postcode__c,
       deliveryInstruction = sfRecord.Delivery_Instructions__c,
       hasHolidayStop = sfRecord.Has_Holiday_Stop__c,
+      bulkSuspensionReason = sfRecord.Holiday_Stop_Request_Detail__r.flatMap(_.Holiday_Stop_Request__r.Bulk_Suspension_Reason__c),
       problemCaseId = sfRecord.Case__r.map(_.Id),
       isChangedAddress = sfRecord.Delivery_Address__c.map(detectChangeSkippingNoneAtHead(accumulator, _.deliveryAddress)),
       isChangedDeliveryInstruction = sfRecord.Delivery_Instructions__c.map(detectChangeSkippingNoneAtHead(accumulator, _.deliveryInstruction)),
@@ -228,6 +230,7 @@ object DeliveryRecordsService {
   ) =
     s"""SELECT Buyer__r.Id, Buyer__r.Phone, Buyer__r.HomePhone, Buyer__r.MobilePhone, Buyer__r.OtherPhone, (
        |    SELECT Id, Delivery_Date__c, Delivery_Address__c, Delivery_Instructions__c, Has_Holiday_Stop__c,
+       |           Holiday_Stop_Request_Detail__r.Holiday_Stop_Request__r.Bulk_Suspension_Reason__c,
        |           Address_Line_1__c,Address_Line_2__c, Address_Line_3__c, Address_Town__c, Address_Country__c, Address_Postcode__c,
        |           Case__c, Case__r.Id, Case__r.CaseNumber, Case__r.Subject, Case__r.Description, Case__r.Case_Closure_Reason__c,
        |           Credit_Amount__c, Is_Actioned__c, Invoice_Date__c
