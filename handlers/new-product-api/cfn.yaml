@@ -69,6 +69,7 @@ Resources:
                             Action: s3:GetObject
                             Resource:
                             - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/zuoraRest-${Stage}*.json
+                            - !Sub arn:aws:s3:::fulfilment-date-calculator-${Stage}/*
                 - PolicyName: SQSAddEmailRequest
                   PolicyDocument:
                     Statement:

@@ -219,3 +219,11 @@ case class WindowRule(maybeCutOffDay: Option[DayOfWeek], maybeStartDelay: Option
 
 case class AmountMinorUnits(value: Int) extends AnyVal
 
+sealed trait ProductType { def value: String }
+object ProductType {
+  val GuardianWeekly = new ProductType { override def value: String = "Guardian Weekly" }
+  val NewspaperVoucherBook = new ProductType { override def value: String = "Newspaper - Voucher Book" }
+  val NewspaperHomeDelivery = new ProductType { override def value: String = "Newspaper - Home Delivery" }
+  val DigitalPack = new ProductType { override def value: String = "Digital Pack" }
+  val Contribution = new ProductType { override def value: String = "Contribution" }
+}

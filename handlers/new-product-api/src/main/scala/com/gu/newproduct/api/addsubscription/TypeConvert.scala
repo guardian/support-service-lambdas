@@ -38,6 +38,13 @@ object TypeConvert {
     }
   }
 
+  implicit class EitherToApiGatewayOp[A, B](either: Either[A, B]) {
+    def toApiGatewayOp: ApiGatewayOp[B] = either match {
+      case Right(value) => ContinueProcessing(value)
+      case Left(failure) => ReturnWithResponse(ApiValidationErrorResponse(failure.toString))
+    }
+  }
+
   private def ApiValidationErrorResponse[A](message: String): ApiResponse = {
     ApiGatewayResponse.messageResponse("422", message)
   }

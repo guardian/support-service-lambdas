@@ -1,6 +1,6 @@
 package com.gu.newproduct.api.productcatalog
 
-import java.time.DayOfWeek
+import java.time.{DayOfWeek, LocalDate}
 
 import com.gu.i18n.{CountryGroup, Currency}
 import com.gu.i18n.Currency.GBP
@@ -50,7 +50,12 @@ object WireModel {
     selectableWindow: Option[WireSelectableWindow] = None
   )
 
-  case class WireProduct(label: String, plans: List[WirePlanInfo], enabledForDeliveryCountries: Option[List[String]])
+  case class WireProduct(
+    label: String,
+    plans: List[WirePlanInfo],
+    enabledForDeliveryCountries: Option[List[String]],
+    firstAvailableIssueDate: LocalDate
+  )
 
   case class WireCatalog(products: List[WireProduct])
 
@@ -120,7 +125,11 @@ object WireModel {
   object WireCatalog {
     implicit val writes = Json.writes[WireCatalog]
 
-    def fromCatalog(catalog: Catalog) = {
+    def fromCatalog(
+      catalog: Catalog,
+      getFirstAvailableIssueDateFromAvailibilityCalculator: ProductType => LocalDate,
+      today: LocalDate
+    ) = {
 
       def wirePlanForPlanId(planId: PlanId): WirePlanInfo = {
         val plan = catalog.planForId(planId)
@@ -130,37 +139,43 @@ object WireModel {
       val voucherProduct = WireProduct(
         label = "Voucher",
         plans = PlanId.enabledVoucherPlans.map(wirePlanForPlanId),
-        enabledForDeliveryCountries = None
+        enabledForDeliveryCountries = None,
+        getFirstAvailableIssueDateFromAvailibilityCalculator(ProductType.NewspaperVoucherBook)
       )
 
       val contributionProduct = WireProduct(
         label = "Contribution",
         plans = PlanId.enabledContributionPlans.map(wirePlanForPlanId),
-        enabledForDeliveryCountries = None
+        enabledForDeliveryCountries = None,
+        today
       )
 
       val homeDeliveryProduct = WireProduct(
         label = "Home Delivery",
         plans = PlanId.enabledHomeDeliveryPlans.map(wirePlanForPlanId),
-        enabledForDeliveryCountries = None
+        enabledForDeliveryCountries = None,
+        getFirstAvailableIssueDateFromAvailibilityCalculator(ProductType.NewspaperHomeDelivery)
       )
 
       val digipackProduct = WireProduct(
         label = "Digital Pack",
         plans = PlanId.enabledDigipackPlans.map(wirePlanForPlanId),
-        enabledForDeliveryCountries = None
+        enabledForDeliveryCountries = None,
+        today.plusDays(14)
       )
 
       val guardianWeeklyDomestic = WireProduct(
         label = "Guardian Weekly - Domestic",
         plans = PlanId.enabledGuardianWeeklyDomesticPlans.map(wirePlanForPlanId),
-        enabledForDeliveryCountries = Some(GuardianWeeklyAddressValidator.domesticCountries.map(_.name))
+        enabledForDeliveryCountries = Some(GuardianWeeklyAddressValidator.domesticCountries.map(_.name)),
+        getFirstAvailableIssueDateFromAvailibilityCalculator(ProductType.GuardianWeekly)
       )
 
       val guardianWeeklyROW = WireProduct(
         label = "Guardian Weekly - ROW",
         plans = PlanId.enabledGuardianWeeklyROWPlans.map(wirePlanForPlanId),
-        enabledForDeliveryCountries = Some(CountryGroup.RestOfTheWorld.countries.map(_.name))
+        enabledForDeliveryCountries = Some(CountryGroup.RestOfTheWorld.countries.map(_.name)),
+        getFirstAvailableIssueDateFromAvailibilityCalculator(ProductType.GuardianWeekly)
       )
 
       val availableProductsAndPlans = List(
@@ -170,5 +185,4 @@ object WireModel {
       WireCatalog(availableProductsAndPlans)
     }
   }
-
 }

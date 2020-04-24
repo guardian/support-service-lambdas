@@ -1,5 +1,7 @@
 package com.gu.newproduct.api.productcatalog
 
+import java.time.LocalDate
+
 import com.gu.i18n.Currency
 import com.gu.newproduct.api.productcatalog.PlanId._
 import com.gu.newproduct.api.productcatalog.WireModel._
@@ -53,7 +55,8 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |          },
         |          "paymentPlans": []
         |        }
-        |      ]
+        |      ],
+        |      "firstAvailableIssueDate": "2020-02-01"
         |    },
         |    {
         |      "label": "Voucher",
@@ -268,7 +271,8 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |          ],
         |          "paymentPlan": "GBP 29.42 every month"
         |        }
-        |      ]
+        |      ],
+        |      "firstAvailableIssueDate": "2020-01-03"
         |    },
         |    {
         |      "label": "Home Delivery",
@@ -497,7 +501,8 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |          ],
         |           "paymentPlan": "GBP 22.22 every month"
         |        }
-        |      ]
+        |      ],
+        |      "firstAvailableIssueDate": "2020-01-02"
         |    },
         |    {
         |      "label": "Digital Pack",
@@ -562,7 +567,8 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |          ],
         |          "paymentPlan": "GBP 55.55 every month"
         |        }
-        |      ]
+        |      ],
+        |      "firstAvailableIssueDate": "2020-02-15"
         |    },
         |    {
         |      "label": "Guardian Weekly - Domestic",
@@ -655,7 +661,8 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |        "Wallis & Futuna", "Mayotte", "Holy See", "Åland Islands", "New Zealand", "Cook Islands",
         |        "United Kingdom","Falkland Islands","Gibraltar","Guernsey","Isle of Man","Jersey","Saint Helena",
         |        "United States"
-        |      ]
+        |      ],
+        |      "firstAvailableIssueDate": "2020-01-01"
         |    },
         |    {
         |      "label": "Guardian Weekly - ROW",
@@ -764,7 +771,8 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |        "Uruguay", "Uzbekistan", "Saint Vincent & The Grenadines", "Venezuela", "British Virgin Islands",
         |        "United States Virgin Islands", "Vietnam", "Vanuatu", "Samoa", "Yemen", "South Africa", "Zambia",
         |        "Zimbabwe"
-        |      ]
+        |      ],
+        |      "firstAvailableIssueDate": "2020-01-01"
         |    }
         |  ]
         |}
@@ -830,7 +838,22 @@ class CatalogWireTest extends FlatSpec with Matchers {
       )
     }
 
-    val wireCatalog = WireCatalog.fromCatalog(NewProductApi.catalog(fakePricesFor))
+    def stubGetFirstAvailableIssueDate(productType: ProductType) = {
+      productType match {
+        case ProductType.GuardianWeekly => LocalDate.of(2020, 1, 1)
+        case ProductType.NewspaperHomeDelivery => LocalDate.of(2020, 1, 2)
+        case ProductType.NewspaperVoucherBook => LocalDate.of(2020, 1, 3)
+      }
+    }
+
+    val today = LocalDate.of(2020, 2, 1)
+
+    val wireCatalog = WireCatalog.fromCatalog(
+      NewProductApi.catalog(fakePricesFor),
+      stubGetFirstAvailableIssueDate,
+      today
+    )
+
     Json.toJson(wireCatalog) shouldBe Json.parse(expected)
   }
 }
