@@ -258,6 +258,7 @@ class HandlerTest extends AnyFlatSpec with Matchers {
                     holidayStopRequest.Subscription_Name__c,
                     List(toHolidayStopRequestDetail(holidayStopRequestsDetail)),
                     withdrawnTime = None,
+                    bulkSuspensionReason = None,
                     MutabilityFlags(isFullyMutable = false, isEndDateEditable = false)
                   )
                 ),
