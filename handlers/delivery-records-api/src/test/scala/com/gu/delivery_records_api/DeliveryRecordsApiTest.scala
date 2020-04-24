@@ -36,7 +36,8 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
   val deliveryInstruction1 = "leave by the gnome"
   val deliveryInstruction2 = "leave by the red gnome"
   val hasHolidayStop = true
-  val doesntHaveHolidayStop = true
+  val doesntHaveHolidayStop = false
+  val bulkSuspensionReason = "Covid-19"
   val sfProblemCase = SFApiDeliveryProblemCase(
     Id = "case_id",
     CaseNumber = "123456",
@@ -67,6 +68,7 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
     Address_Postcode__c = Some(addressPostcode),
     Delivery_Instructions__c = Some(deliveryInstruction1),
     Has_Holiday_Stop__c = Some(doesntHaveHolidayStop),
+    Holiday_Stop_Request_Detail__r = None,
     Case__r = Some(sfProblemCase),
     Credit_Amount__c = Some(creditAmount),
     Invoice_Date__c = Some(invoiceDate),
@@ -75,6 +77,7 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
 
   val sfDeliveryRecordWithHolidayStop: SFApiDeliveryRecord = sfDeliveryRecordA.copy(
     Has_Holiday_Stop__c = Some(hasHolidayStop),
+    Holiday_Stop_Request_Detail__r = Some(HolidayStopRequestDetail(HolidayStopRequest(Some(bulkSuspensionReason)))),
     Delivery_Address__c = None,
     Delivery_Instructions__c = None
   )
@@ -115,6 +118,7 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
     addressCountry = Some(addressCountry),
     addressPostcode = Some(addressPostcode),
     hasHolidayStop = Some(doesntHaveHolidayStop),
+    bulkSuspensionReason = None,
     problemCaseId = Some(sfProblemCase.Id),
     isChangedAddress = Some(false),
     isChangedDeliveryInstruction = Some(false),
@@ -129,6 +133,7 @@ class DeliveryRecordsApiTest extends FlatSpec with Matchers with EitherValues {
     deliveryInstruction = None,
     deliveryAddress = None,
     hasHolidayStop = Some(true),
+    bulkSuspensionReason = Some(bulkSuspensionReason),
     isChangedAddress = None,
     isChangedDeliveryInstruction = None
   )
