@@ -64,7 +64,7 @@ object SalesforceHolidayStopRequest extends Logging {
   def getHolidayStopRequestPrefixSOQL(productNamePrefixOption: Option[ProductName] = None) = s"""
       | SELECT Id, Start_Date__c, End_Date__c, Subscription_Name__c, Product_Name__c,
       | Actioned_Count__c, Pending_Count__c, Total_Issues_Publications_Impacted_Count__c,
-      | Withdrawn_Time__c, Is_Withdrawn__c, (
+      | Withdrawn_Time__c, Is_Withdrawn__c, Bulk_Suspension_Reason__c, (
       |   ${SalesforceHolidayStopRequestsDetail.SOQL_SELECT_CLAUSE}
       |   FROM Holiday_Stop_Request_Detail__r
       |   ${SalesforceHolidayStopRequestsDetail.SOQL_ORDER_BY_CLAUSE}
@@ -84,7 +84,8 @@ object SalesforceHolidayStopRequest extends Logging {
     Product_Name__c: ProductName,
     Holiday_Stop_Request_Detail__r: Option[RecordsWrapperCaseClass[HolidayStopRequestsDetail]],
     Withdrawn_Time__c: Option[HolidayStopRequestWithdrawnTime],
-    Is_Withdrawn__c: HolidayStopRequestIsWithdrawn
+    Is_Withdrawn__c: HolidayStopRequestIsWithdrawn,
+    Bulk_Suspension_Reason__c: Option[BulkSuspensionReason]
   )
   implicit val format = Json.format[HolidayStopRequest]
 

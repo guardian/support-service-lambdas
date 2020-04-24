@@ -20,6 +20,7 @@ object WireHolidayStopRequest {
       .Holiday_Stop_Request_Detail__r
       .map(_.records.map(toHolidayStopRequestDetail)).getOrElse(List()),
     withdrawnTime = sfHolidayStopRequest.Withdrawn_Time__c.map(_.value),
+    bulkSuspensionReason = sfHolidayStopRequest.Bulk_Suspension_Reason__c,
     mutabilityFlags = calculateMutabilityFlags(
       isWithdrawn = sfHolidayStopRequest.Is_Withdrawn__c.value,
       firstAvailableDate = firstAvailableDate,
@@ -117,6 +118,7 @@ case class HolidayStopRequestFull(
   subscriptionName: SubscriptionName,
   publicationsImpacted: List[HolidayStopRequestsDetail],
   withdrawnTime: Option[ZonedDateTime],
+  bulkSuspensionReason: Option[BulkSuspensionReason],
   mutabilityFlags: MutabilityFlags
 )
 
