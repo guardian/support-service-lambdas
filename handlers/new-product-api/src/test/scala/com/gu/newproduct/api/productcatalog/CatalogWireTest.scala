@@ -563,6 +563,208 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |          "paymentPlan": "GBP 55.55 every month"
         |        }
         |      ]
+        |    },
+        |    {
+        |      "label": "Guardian Weekly - Domestic",
+        |      "plans": [
+        |        {
+        |          "id": "guardian_weekly_domestic_6for6",
+        |          "label": "GW Oct 18 - Six for Six - Domestic",
+        |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Friday"
+        |            ],
+        |            "selectableWindow": {
+        |              "cutOffDayInclusive": "Wednesday",
+        |              "startDaysAfterCutOff": 7,
+        |              "sizeInDays": 28
+        |            }
+        |          },
+        |          "paymentPlans": [
+        |            {
+        |              "currencyCode": "GBP",
+        |              "description": "GBP 11111.11 for the first six weeks"
+        |            },
+        |            {
+        |              "currencyCode": "USD",
+        |              "description": "USD 111111.11 for the first six weeks"
+        |            }
+        |          ],
+        |          "paymentPlan": "GBP 11111.11 for the first six weeks"
+        |        },
+        |        {
+        |          "id": "guardian_weekly_domestic_quarterly",
+        |          "label": "GW Oct 18 - Quarterly - Domestic",
+        |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Friday"
+        |            ],
+        |            "selectableWindow": {
+        |              "cutOffDayInclusive": "Wednesday",
+        |              "startDaysAfterCutOff": 7,
+        |              "sizeInDays": 28
+        |            }
+        |          },
+        |          "paymentPlans": [
+        |            {
+        |              "currencyCode": "GBP",
+        |              "description": "GBP 22222.22 every 3 months"
+        |            },
+        |            {
+        |              "currencyCode": "USD",
+        |              "description": "USD 222222.22 every 3 months"
+        |            }
+        |          ],
+        |          "paymentPlan": "GBP 22222.22 every 3 months"
+        |        },
+        |        {
+        |          "id": "guardian_weekly_domestic_annual",
+        |          "label": "GW Oct 18 - Annual - Domestic",
+        |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Friday"
+        |            ],
+        |            "selectableWindow": {
+        |              "cutOffDayInclusive": "Wednesday",
+        |              "startDaysAfterCutOff": 7,
+        |              "sizeInDays": 28
+        |            }
+        |          },
+        |          "paymentPlans": [
+        |            {
+        |              "currencyCode": "GBP",
+        |              "description": "GBP 33333.33 every 12 months"
+        |            },
+        |            {
+        |              "currencyCode": "USD",
+        |              "description": "USD 333333.33 every 12 months"
+        |            }
+        |          ],
+        |          "paymentPlan": "GBP 33333.33 every 12 months"
+        |        }
+        |      ],
+        |      "enabledForDeliveryCountries": [
+        |        "Australia", "Kiribati", "Nauru", "Norfolk Island", "Tuvalu", "Canada", "Andorra", "Albania",
+        |        "Austria", "Bosnia-Herzegovina", "Belgium", "Bulgaria", "Saint Barthélemy", "Switzerland", "Cyprus",
+        |        "Czech Republic", "Germany", "Denmark", "Estonia", "Spain", "Finland", "Faroe Islands", "France",
+        |        "French Guiana", "Greenland", "Guadeloupe", "Greece", "Croatia", "Hungary", "Ireland", "Italy",
+        |        "Liechtenstein", "Lithuania", "Luxembourg", "Latvia", "Monaco", "Montenegro", "Saint Martin",
+        |        "Iceland", "Martinique", "Malta", "Netherlands", "Norway", "French Polynesia", "Poland",
+        |        "Saint Pierre & Miquelon", "Portugal", "Réunion", "Romania", "Serbia", "Sweden", "Slovenia",
+        |        "Svalbard and Jan Mayen", "Slovakia", "San Marino", "French Southern Territories", "Turkey",
+        |        "Wallis & Futuna", "Mayotte", "Holy See", "Åland Islands", "New Zealand", "Cook Islands",
+        |        "United Kingdom","Falkland Islands","Gibraltar","Guernsey","Isle of Man","Jersey","Saint Helena",
+        |        "United States"
+        |      ]
+        |    },
+        |    {
+        |      "label": "Guardian Weekly - ROW",
+        |      "plans": [
+        |        {
+        |          "id": "guardian_weekly_row_6for6",
+        |          "label": "GW Oct 18 - Six for Six - ROW",
+        |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Friday"
+        |            ],
+        |            "selectableWindow": {
+        |              "cutOffDayInclusive": "Wednesday",
+        |              "startDaysAfterCutOff": 7,
+        |              "sizeInDays": 28
+        |            }
+        |          },
+        |          "paymentPlans": [
+        |            {
+        |              "currencyCode": "GBP",
+        |              "description": "GBP 44444.44 for the first six weeks"
+        |            },
+        |            {
+        |              "currencyCode": "USD",
+        |              "description": "USD 444444.44 for the first six weeks"
+        |            }
+        |          ],
+        |          "paymentPlan": "GBP 44444.44 for the first six weeks"
+        |        },
+        |        {
+        |          "id": "guardian_weekly_row_quarterly",
+        |          "label": "GW Oct 18 - Quarterly - ROW",
+        |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Friday"
+        |            ],
+        |            "selectableWindow": {
+        |              "cutOffDayInclusive": "Wednesday",
+        |              "startDaysAfterCutOff": 7,
+        |              "sizeInDays": 28
+        |            }
+        |          },
+        |          "paymentPlans": [
+        |            {
+        |              "currencyCode": "GBP",
+        |              "description": "GBP 55555.55 every 3 months"
+        |            },
+        |            {
+        |              "currencyCode": "USD",
+        |              "description": "USD 555555.55 every 3 months"
+        |            }
+        |          ],
+        |          "paymentPlan": "GBP 55555.55 every 3 months"
+        |        },
+        |        {
+        |          "id": "guardian_weekly_row_annual",
+        |          "label": "GW Oct 18 - Annual - ROW",
+        |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Friday"
+        |            ],
+        |            "selectableWindow": {
+        |              "cutOffDayInclusive": "Wednesday",
+        |              "startDaysAfterCutOff": 7,
+        |              "sizeInDays": 28
+        |            }
+        |          },
+        |          "paymentPlans": [
+        |            {
+        |              "currencyCode": "GBP",
+        |              "description": "GBP 66666.66 every 12 months"
+        |            },
+        |            {
+        |              "currencyCode": "USD",
+        |              "description": "USD 666666.66 every 12 months"
+        |            }
+        |          ],
+        |          "paymentPlan": "GBP 66666.66 every 12 months"
+        |        }
+        |      ],
+        |      "enabledForDeliveryCountries": [
+        |        "United Arab Emirates", "Afghanistan", "Antigua & Barbuda", "Anguilla", "Armenia", "Angola",
+        |        "Antarctica", "Argentina", "American Samoa", "Aruba", "Azerbaijan", "Barbados", "Bangladesh",
+        |        "Burkina Faso", "Bahrain", "Burundi", "Benin", "Bermuda", "Brunei Darussalam", "Bolivia",
+        |        "Bonaire, Saint Eustatius and Saba", "Brazil", "Bahamas", "Bhutan", "Bouvet Island", "Botswana",
+        |        "Belarus", "Belize", "Cocos (Keeling) Islands", "Congo (Kinshasa)", "Central African Republic",
+        |        "Congo (Brazzaville)", "Ivory Coast", "Chile", "Cameroon", "China", "Colombia", "Costa Rica", "Cuba",
+        |        "Cape Verde Islands", "Curaçao", "Christmas Island", "Djibouti", "Dominica", "Dominican Republic",
+        |        "Algeria", "Ecuador", "Egypt", "Western Sahara", "Eritrea", "Ethiopia", "Fiji", "Micronesia", "Gabon",
+        |        "Grenada", "Georgia", "Ghana", "Gambia", "Guinea", "Equatorial Guinea",
+        |        "South Georgia & The South Sandwich Islands", "Guatemala", "Guam", "Guinea-Bissau", "Guyana",
+        |        "Hong Kong", "Heard Island and McDonald Islands", "Honduras", "Haiti", "Indonesia", "Israel",
+        |        "India", "British Indian Ocean Territory", "Iraq", "Iran", "Jamaica", "Jordan", "Japan", "Kenya",
+        |        "Kyrgyzstan", "Cambodia", "Comoros", "Saint Christopher & Nevis", "North Korea", "South Korea",
+        |        "Kuwait", "Cayman Islands", "Kazakhstan", "Laos", "Lebanon", "Saint Lucia", "Sri Lanka", "Liberia",
+        |        "Lesotho", "Libya", "Morocco", "Moldova", "Madagascar", "Marshall Islands", "Macedonia", "Mali",
+        |        "Myanmar", "Mongolia", "Macau", "Northern Mariana Islands", "Mauritania", "Montserrat", "Mauritius",
+        |        "Maldives", "Malawi", "Mexico", "Malaysia", "Mozambique", "Namibia", "New Caledonia", "Niger",
+        |        "Nigeria", "Nicaragua", "Nepal", "Niue", "Oman", "Panama", "Peru", "Papua New Guinea",
+        |        "Philippines", "Pakistan", "Pitcairn Islands", "Puerto Rico", "Palestinian Territories",
+        |        "Palau", "Paraguay", "Qatar", "Russia", "Rwanda", "Saudi Arabia", "Solomon Islands", "Seychelles",
+        |        "Sudan", "Singapore", "Sierra Leone", "Senegal", "Somalia", "Suriname", "South Sudan",
+        |        "Sao Tome & Principe", "El Salvador", "Sint Maarten", "Syria", "Swaziland", "Turks & Caicos Islands",
+        |        "Chad", "Togo", "Thailand", "Tajikistan", "Tokelau", "East Timor", "Turkmenistan", "Tunisia", "Tonga",
+        |        "Trinidad & Tobago", "Taiwan", "Tanzania", "Ukraine", "Uganda", "United States Minor Outlying Islands",
+        |        "Uruguay", "Uzbekistan", "Saint Vincent & The Grenadines", "Venezuela", "British Virgin Islands",
+        |        "United States Virgin Islands", "Vietnam", "Vanuatu", "Samoa", "Yemen", "South Africa", "Zambia",
+        |        "Zimbabwe"
+        |      ]
         |    }
         |  ]
         |}

@@ -60,10 +60,7 @@ case class Catalog(
     homeDeliverySundayPlus,
     homeDeliverySaturdayPlus,
     digipackAnnual,
-    digipackMonthly
-  )
-
-  val createOnlyPlans = List(
+    digipackMonthly,
     guardianWeeklyDomesticSixForSix,
     guardianWeeklyDomesticQuarterly,
     guardianWeeklyDomesticAnnual,
@@ -72,7 +69,7 @@ case class Catalog(
     guardianWeeklyROWAnnual
   )
 
-  val planForId: Map[PlanId, Plan] = (createOnlyPlans ++ allPlans).map(x => x.id -> x).toMap
+  val planForId: Map[PlanId, Plan] = allPlans.map(x => x.id -> x).toMap
 }
 sealed trait VoucherPlanId
 sealed trait ContributionPlanId
@@ -177,17 +174,23 @@ object PlanId {
     DigipackMonthly
   )
 
-  val enabledGuardianWeeklyPlans = List(
+  val enabledGuardianWeeklyDomesticPlans = List(
     GuardianWeeklyDomestic6for6,
     GuardianWeeklyDomesticQuarterly,
     GuardianWeeklyDomesticAnnual,
+  )
+
+  val enabledGuardianWeeklyROWPlans = List(
     GuardianWeeklyROW6for6,
     GuardianWeeklyROWQuarterly,
     GuardianWeeklyROWAnnual
   )
 
-  val supportedPlans: List[PlanId] = enabledVoucherPlans ++ enabledContributionPlans ++ enabledHomeDeliveryPlans ++ enabledDigipackPlans
-  def fromName(name: String): Option[PlanId] = (enabledGuardianWeeklyPlans ++ supportedPlans).find(_.name == name)
+  val supportedPlans: List[PlanId] =
+    enabledVoucherPlans ++ enabledContributionPlans ++ enabledHomeDeliveryPlans ++ enabledDigipackPlans ++
+      enabledGuardianWeeklyDomesticPlans ++ enabledGuardianWeeklyROWPlans
+
+  def fromName(name: String): Option[PlanId] = supportedPlans.find(_.name == name)
 }
 
 case class Plan(id: PlanId, description: PlanDescription, startDateRules: StartDateRules = StartDateRules(), paymentPlans: Map[Currency, PaymentPlan] = Map.empty)
