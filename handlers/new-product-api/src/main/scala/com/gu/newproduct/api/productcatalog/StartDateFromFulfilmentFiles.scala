@@ -9,7 +9,7 @@ import com.gu.util.config.Stage
 import com.typesafe.scalalogging.LazyLogging
 import play.api.libs.json._
 
-object StartDateFromProductType extends LazyLogging {
+object StartDateFromFulfilmentFiles extends LazyLogging {
   case class FulfilmentDates(deliveryAddressChangeEffectiveDate: LocalDate)
 
   object FulfilmentDates {
@@ -41,25 +41,26 @@ object StartDateFromProductType extends LazyLogging {
     def ascending(d1: LocalDate, d2: LocalDate) = d1.isBefore(d2)
 
     val key = s"${productType.value}/${today}_${productType.value}.json"
+    val bucket = s"fulfilment-date-calculator-${stage.value.toLowerCase}"
     for {
       fulfilmentFileContents <- fetchString(
         S3Location(
-          bucket = s"fulfilment-date-calculator-${stage.value}",
+          bucket = bucket,
           key = key
         )
-      ).toEither.leftMap(ex => s"Failed to fetch $key from s3: $ex")
+      ).toEither.leftMap(ex => s"Failed to fetch s3://$bucket/$key from s3: $ex")
       parseFulfillmentFile <- Either
         .catchNonFatal(Json.parse(fulfilmentFileContents))
-        .leftMap(ex => s"Failed to parse fulfilment file $key: $ex")
+        .leftMap(ex => s"Failed to parse fulfilment file s3://$bucket/$key: $ex")
       wireCatalog <- Either
         .catchNonFatal(parseFulfillmentFile.as[Map[String, FulfilmentDates]])
-        .leftMap(ex => s"Failed to decode fulfilment file $key: $ex")
+        .leftMap(ex => s"Failed to decode fulfilment file s3://$bucket/$key: $ex")
       soonestDate <- wireCatalog
         .map(_._2.deliveryAddressChangeEffectiveDate)
         .toList
         .sortWith(ascending)
         .headOption
-        .toRight(s"Fulfilment file $key does not contain any data")
+        .toRight(s"Fulfilment file s3://$bucket/$key does not contain any data")
     } yield soonestDate
   }
 }
