@@ -23,6 +23,7 @@ Mappings:
             ZuoraCatalogLocation: arn:aws:s3:::gu-zuora-catalog/CODE/Zuora-DEV/catalog.json
             ContributionThanksEmailQueue: contributions-thanks-dev
             SubsWelcomeEmailQueue: subs-welcome-email-dev
+            FulfilmentDateCalculatorS3Resource: arn:aws:s3:::fulfilment-date-calculator-dev/*
         CODE:
             ApiName: new-product-api-CODE
             DomainName: new-product-api-code.membership.guardianapis.com
@@ -30,6 +31,7 @@ Mappings:
             ZuoraCatalogLocation: arn:aws:s3:::gu-zuora-catalog/CODE/Zuora-UAT/catalog.json
             ContributionThanksEmailQueue: contributions-thanks-dev
             SubsWelcomeEmailQueue: subs-welcome-email-dev
+            FulfilmentDateCalculatorS3Resource: arn:aws:s3:::fulfilment-date-calculator-code/*
         PROD:
             ApiName: new-product-api-PROD
             DomainName: new-product-api-prod.membership.guardianapis.com
@@ -37,6 +39,7 @@ Mappings:
             ZuoraCatalogLocation: arn:aws:s3:::gu-zuora-catalog/PROD/Zuora-PROD/catalog.json
             ContributionThanksEmailQueue: contributions-thanks
             SubsWelcomeEmailQueue: subs-welcome-email
+            FulfilmentDateCalculatorS3Resource: arn:aws:s3:::fulfilment-date-calculator-prod/*
 
 Resources:
     NewSubscriptionRole:
@@ -69,7 +72,6 @@ Resources:
                             Action: s3:GetObject
                             Resource:
                             - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/zuoraRest-${Stage}*.json
-                            - !Sub arn:aws:s3:::fulfilment-date-calculator-${Stage}/*
                 - PolicyName: SQSAddEmailRequest
                   PolicyDocument:
                     Statement:
@@ -118,7 +120,10 @@ Resources:
             Statement:
             - Effect: Allow
               Action: s3:GetObject
-              Resource: !FindInMap [ StageMap, !Ref Stage, ZuoraCatalogLocation ]
+              Resource:
+              - !FindInMap [ StageMap, !Ref Stage, ZuoraCatalogLocation ]
+              - !FindInMap [ StageMap, !Ref Stage, FulfilmentDateCalculatorS3Resource ]
+
     AddSubscriptionLambda:
         Type: AWS::Lambda::Function
         Properties:
