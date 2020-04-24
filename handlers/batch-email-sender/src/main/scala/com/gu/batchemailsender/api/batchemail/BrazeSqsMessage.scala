@@ -28,6 +28,7 @@ case class BrazeApiTriggerProperties(
   currency_symbol: Option[String],
   stopped_issue_count: Option[String],
   stopped_credit_summaries: Option[List[StoppedCreditSummary]],
+  bulk_suspension_reason: Option[String],
 
   /**
    * SV_VO_NewCard, SV_VO_ReplacementCard
@@ -105,6 +106,7 @@ object BrazeSqsMessage {
             summaryList <- stop.stopped_credit_summaries
             stoppedCreditSummaries = summaryList.map(detail => StoppedCreditSummary(detail.credit_amount, fromSfDateToDisplayDate(detail.credit_date)))
           } yield stoppedCreditSummaries,
+          salesforcePayload.holiday_stop_request.flatMap(_.bulk_suspension_reason),
 
           // Digital voucher
           digital_voucher = salesforceBatchItem

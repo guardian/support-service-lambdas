@@ -40,7 +40,8 @@ object SalesforceMessage {
     stopped_credit_sum: String,
     currency_symbol: String,
     stopped_issue_count: String,
-    stopped_credit_summaries: Option[List[WireHolidayStopCreditSummary]]
+    stopped_credit_summaries: Option[List[WireHolidayStopCreditSummary]],
+    bulk_suspension_reason: Option[String]
   )
 
   case class WireHolidayStopCreditSummary(credit_amount: Double, credit_date: String)
