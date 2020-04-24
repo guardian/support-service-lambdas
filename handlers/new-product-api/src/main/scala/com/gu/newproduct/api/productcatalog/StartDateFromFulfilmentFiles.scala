@@ -1,6 +1,7 @@
 package com.gu.newproduct.api.productcatalog
 
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 import cats.implicits._
 import com.gu.effects.S3Location
@@ -10,16 +11,16 @@ import com.typesafe.scalalogging.LazyLogging
 import play.api.libs.json._
 
 object StartDateFromFulfilmentFiles extends LazyLogging {
-  case class FulfilmentDates(deliveryAddressChangeEffectiveDate: LocalDate)
+  case class FulfilmentDates(deliveryAddressChangeEffectiveDate: Option[LocalDate])
 
   object FulfilmentDates {
-    implicit val reads = Json.format[FulfilmentDates]
+    implicit val dateFormat: Reads[LocalDate] = Reads.localDateReads(DateTimeFormatter.ISO_LOCAL_DATE)
+    implicit val reads: Reads[FulfilmentDates] = Json.reads[FulfilmentDates]
   }
 
   private val productTypesWithFulfilmentDateFiles = List(
     ProductType.GuardianWeekly,
-    ProductType.NewspaperHomeDelivery,
-    ProductType.NewspaperVoucherBook
+    ProductType.NewspaperHomeDelivery
   )
 
   def apply(stage: Stage, fetchString: StringFromS3, today: LocalDate): Either[String, Map[ProductType, LocalDate]] = {
@@ -58,6 +59,7 @@ object StartDateFromFulfilmentFiles extends LazyLogging {
       soonestDate <- wireCatalog
         .map(_._2.deliveryAddressChangeEffectiveDate)
         .toList
+        .flatten
         .sortWith(ascending)
         .headOption
         .toRight(s"Fulfilment file s3://$bucket/$key does not contain any data")

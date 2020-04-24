@@ -140,7 +140,7 @@ object WireModel {
         label = "Voucher",
         plans = PlanId.enabledVoucherPlans.map(wirePlanForPlanId),
         enabledForDeliveryCountries = None,
-        getFirstAvailableIssueDateFromAvailibilityCalculator(ProductType.NewspaperVoucherBook)
+        today
       )
 
       val contributionProduct = WireProduct(

@@ -272,7 +272,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |          "paymentPlan": "GBP 29.42 every month"
         |        }
         |      ],
-        |      "firstAvailableIssueDate": "2020-01-03"
+        |      "firstAvailableIssueDate": "2020-02-01"
         |    },
         |    {
         |      "label": "Home Delivery",
@@ -842,7 +842,6 @@ class CatalogWireTest extends FlatSpec with Matchers {
       productType match {
         case ProductType.GuardianWeekly => LocalDate.of(2020, 1, 1)
         case ProductType.NewspaperHomeDelivery => LocalDate.of(2020, 1, 2)
-        case ProductType.NewspaperVoucherBook => LocalDate.of(2020, 1, 3)
       }
     }
 
