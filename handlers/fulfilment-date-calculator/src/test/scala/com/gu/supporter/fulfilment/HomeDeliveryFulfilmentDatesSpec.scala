@@ -222,7 +222,7 @@ class HomeDeliveryFulfilmentDatesSpec extends FlatSpec with Matchers with DateSu
     apply( /* Friday    */ "2019-12-13")("Sunday").deliveryAddressChangeEffectiveDate.get should equalDate("2019-12-22")
     apply( /* Saturday  */ "2019-12-14")("Sunday").deliveryAddressChangeEffectiveDate.get should equalDate("2019-12-22")
   }
-  
+
   "MONDAY HomeDeliveryFulfilmentDates" should "have correct newSubscriptionEarliestStartDate" in {
     apply( /* Wednesday */ "2019-12-04")("Monday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-09")
     apply( /* Thursday  */ "2019-12-05")("Monday").newSubscriptionEarliestStartDate.get should equalDate("2019-12-09")

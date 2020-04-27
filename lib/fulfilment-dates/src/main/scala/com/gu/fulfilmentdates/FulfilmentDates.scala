@@ -15,7 +15,8 @@ case class FulfilmentDates(
 )
 
 object FulfilmentDates {
-  def apply(today: LocalDate,
+  def apply(
+    today: LocalDate,
     holidayStopFirstAvailableDate: LocalDate,
     holidayStopProcessorTargetDate: Option[LocalDate],
     newSubscriptionEarliestStartDate: LocalDate

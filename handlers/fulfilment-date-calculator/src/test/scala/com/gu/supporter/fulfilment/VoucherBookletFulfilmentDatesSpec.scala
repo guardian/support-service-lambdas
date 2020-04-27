@@ -16,7 +16,7 @@ class VoucherBookletFulfilmentDatesSpec extends FlatSpec with Matchers with Date
     result.values.flatMap(_.holidayStopProcessorTargetDate) shouldBe List(expectedDate)
     result(expectedDayOfWeek).holidayStopProcessorTargetDate.get should equalDate(expectedDate)
   }
-  
+
   it should "calculate holidayStopProcessorTargetDate" in {
     shouldHaveOnlyOneHolidayStopProcessorTargetDateOnTheCorrectDayOfWeek("2019-12-02", "Monday", "2019-12-02")
     shouldHaveOnlyOneHolidayStopProcessorTargetDateOnTheCorrectDayOfWeek("2019-12-03", "Tuesday", "2019-12-03")
