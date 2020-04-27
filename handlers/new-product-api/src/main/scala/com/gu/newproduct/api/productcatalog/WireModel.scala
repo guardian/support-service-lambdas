@@ -54,7 +54,7 @@ object WireModel {
     label: String,
     plans: List[WirePlanInfo],
     enabledForDeliveryCountries: Option[List[String]],
-    firstAvailableIssueDate: LocalDate
+    firstAvailableStartDate: LocalDate
   )
 
   case class WireCatalog(products: List[WireProduct])
@@ -127,7 +127,7 @@ object WireModel {
 
     def fromCatalog(
       catalog: Catalog,
-      getFirstAvailableIssueDateFromAvailibilityCalculator: ProductType => LocalDate,
+      getFirstAvailableStartDateFromAvailabilityCalculator: ProductType => LocalDate,
       today: LocalDate
     ) = {
 
@@ -154,7 +154,7 @@ object WireModel {
         label = "Home Delivery",
         plans = PlanId.enabledHomeDeliveryPlans.map(wirePlanForPlanId),
         enabledForDeliveryCountries = None,
-        getFirstAvailableIssueDateFromAvailibilityCalculator(ProductType.NewspaperHomeDelivery)
+        getFirstAvailableStartDateFromAvailabilityCalculator(ProductType.NewspaperHomeDelivery)
       )
 
       val digipackProduct = WireProduct(
@@ -168,14 +168,14 @@ object WireModel {
         label = "Guardian Weekly - Domestic",
         plans = PlanId.enabledGuardianWeeklyDomesticPlans.map(wirePlanForPlanId),
         enabledForDeliveryCountries = Some(GuardianWeeklyAddressValidator.domesticCountries.map(_.name)),
-        getFirstAvailableIssueDateFromAvailibilityCalculator(ProductType.GuardianWeekly)
+        getFirstAvailableStartDateFromAvailabilityCalculator(ProductType.GuardianWeekly)
       )
 
       val guardianWeeklyROW = WireProduct(
         label = "Guardian Weekly - ROW",
         plans = PlanId.enabledGuardianWeeklyROWPlans.map(wirePlanForPlanId),
         enabledForDeliveryCountries = Some(CountryGroup.RestOfTheWorld.countries.map(_.name)),
-        getFirstAvailableIssueDateFromAvailibilityCalculator(ProductType.GuardianWeekly)
+        getFirstAvailableStartDateFromAvailabilityCalculator(ProductType.GuardianWeekly)
       )
 
       val availableProductsAndPlans = List(

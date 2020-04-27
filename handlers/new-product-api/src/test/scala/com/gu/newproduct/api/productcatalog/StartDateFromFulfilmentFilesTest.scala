@@ -29,5 +29,4 @@ class StartDateFromFulfilmentFilesTest extends FlatSpec with Matchers {
     }
 
   }
-
 }

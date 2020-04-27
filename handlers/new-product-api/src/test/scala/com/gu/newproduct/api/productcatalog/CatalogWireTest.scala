@@ -56,7 +56,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |          "paymentPlans": []
         |        }
         |      ],
-        |      "firstAvailableIssueDate": "2020-02-01"
+        |      "firstAvailableStartDate": "2020-02-01"
         |    },
         |    {
         |      "label": "Voucher",
@@ -272,7 +272,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |          "paymentPlan": "GBP 29.42 every month"
         |        }
         |      ],
-        |      "firstAvailableIssueDate": "2020-02-01"
+        |      "firstAvailableStartDate": "2020-02-01"
         |    },
         |    {
         |      "label": "Home Delivery",
@@ -502,7 +502,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |           "paymentPlan": "GBP 22.22 every month"
         |        }
         |      ],
-        |      "firstAvailableIssueDate": "2020-01-02"
+        |      "firstAvailableStartDate": "2020-01-02"
         |    },
         |    {
         |      "label": "Digital Pack",
@@ -568,7 +568,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |          "paymentPlan": "GBP 55.55 every month"
         |        }
         |      ],
-        |      "firstAvailableIssueDate": "2020-02-15"
+        |      "firstAvailableStartDate": "2020-02-15"
         |    },
         |    {
         |      "label": "Guardian Weekly - Domestic",
@@ -662,7 +662,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |        "United Kingdom","Falkland Islands","Gibraltar","Guernsey","Isle of Man","Jersey","Saint Helena",
         |        "United States"
         |      ],
-        |      "firstAvailableIssueDate": "2020-01-01"
+        |      "firstAvailableStartDate": "2020-01-01"
         |    },
         |    {
         |      "label": "Guardian Weekly - ROW",
@@ -772,7 +772,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |        "United States Virgin Islands", "Vietnam", "Vanuatu", "Samoa", "Yemen", "South Africa", "Zambia",
         |        "Zimbabwe"
         |      ],
-        |      "firstAvailableIssueDate": "2020-01-01"
+        |      "firstAvailableStartDate": "2020-01-01"
         |    }
         |  ]
         |}
@@ -838,7 +838,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
       )
     }
 
-    def stubGetFirstAvailableIssueDate(productType: ProductType) = {
+    def stubGetfirstAvailableStartDate(productType: ProductType) = {
       productType match {
         case ProductType.GuardianWeekly => LocalDate.of(2020, 1, 1)
         case ProductType.NewspaperHomeDelivery => LocalDate.of(2020, 1, 2)
@@ -849,7 +849,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
 
     val wireCatalog = WireCatalog.fromCatalog(
       NewProductApi.catalog(fakePricesFor),
-      stubGetFirstAvailableIssueDate,
+      stubGetfirstAvailableStartDate,
       today
     )
 
