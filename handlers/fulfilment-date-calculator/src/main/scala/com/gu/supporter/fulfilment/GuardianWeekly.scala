@@ -29,7 +29,8 @@ object GuardianWeeklyFulfilmentDates extends FulfilmentConstants(
         deliveryAddressChangeEffectiveDate(today),
         holidayStopFirstAvailableDate(today),
         holidayStopProcessorTargetDate(today),
-        finalFulfilmentFileGenerationDate(today)
+        finalFulfilmentFileGenerationDate(today),
+        deliveryAddressChangeEffectiveDate(today)
       )
     )
 

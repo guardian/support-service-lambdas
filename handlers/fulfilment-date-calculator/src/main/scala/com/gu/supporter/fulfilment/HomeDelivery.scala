@@ -20,7 +20,8 @@ object HomeDeliveryFulfilmentDates {
           deliveryAddressChangeEffectiveDate(targetDayOfWeek, today),
           holidayStopFirstAvailableDate(targetDayOfWeek, today),
           holidayStopProcessorTargetDate(targetDayOfWeek, today),
-          finalFulfilmentFileGenerationDate(targetDayOfWeek, today)
+          finalFulfilmentFileGenerationDate(targetDayOfWeek, today),
+          deliveryAddressChangeEffectiveDate(targetDayOfWeek, today)
         )): _*
     )
 
