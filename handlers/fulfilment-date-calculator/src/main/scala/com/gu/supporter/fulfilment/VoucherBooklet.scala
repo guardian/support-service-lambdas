@@ -39,8 +39,9 @@ object VoucherBookletFulfilmentDates {
 
   def newSubscriptionEarliestStartDate(issueDay: DayOfWeek, today: LocalDate) = {
     //Subscriptions made today can be included in the the voucher fulfilment file generated on the next wednesday
-    //morning the voucher book will be received in roughly two weeks after the fulfilment file is generated and
-    //will contain vouchers that are valid for the week (starting monday) after they are received
+    //morning the voucher book will be received in roughly two weeks after the fulfilment file is generated
+    //the customer is charged on the basis they will start redeeming the vouchers the week after they have
+    //received the vouchers
     today `with` next(FulfilmentCutoffDay) plusWeeks (2) `with` next(WeekStartDay) `with` nextOrSame(issueDay)
   }
 }
