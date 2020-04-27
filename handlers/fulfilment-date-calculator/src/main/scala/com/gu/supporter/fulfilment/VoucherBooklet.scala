@@ -3,7 +3,6 @@ package com.gu.supporter.fulfilment
 import java.time.DayOfWeek._
 import java.time.format.TextStyle.FULL
 import java.time.temporal.TemporalAdjusters.{next, nextOrSame}
-import java.time.temporal.{TemporalAdjuster, TemporalAdjusters}
 import java.time.{DayOfWeek, LocalDate}
 import java.util.Locale.ENGLISH
 
