@@ -1,9 +1,10 @@
 {
   "Friday" : {
-    "today" : "2020-04-24",
+    "today" : "2020-04-27",
     "deliveryAddressChangeEffectiveDate" : "2020-05-08",
     "holidayStopFirstAvailableDate" : "2020-05-02",
     "holidayStopProcessorTargetDate" : null,
-    "finalFulfilmentFileGenerationDate" : "2020-04-30"
+    "finalFulfilmentFileGenerationDate" : "2020-04-30",
+    "newSubscriptionEarliestStartDate" : "2020-05-08"
   }
 }

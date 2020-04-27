@@ -11,7 +11,7 @@ import com.typesafe.scalalogging.LazyLogging
 import play.api.libs.json._
 
 object StartDateFromFulfilmentFiles extends LazyLogging {
-  case class FulfilmentDates(deliveryAddressChangeEffectiveDate: Option[LocalDate])
+  case class FulfilmentDates(newSubscriptionEarliestStartDate: Option[LocalDate])
 
   object FulfilmentDates {
     implicit val dateFormat: Reads[LocalDate] = Reads.localDateReads(DateTimeFormatter.ISO_LOCAL_DATE)
@@ -20,7 +20,8 @@ object StartDateFromFulfilmentFiles extends LazyLogging {
 
   private val productTypesWithFulfilmentDateFiles = List(
     ProductType.GuardianWeekly,
-    ProductType.NewspaperHomeDelivery
+    ProductType.NewspaperHomeDelivery,
+    ProductType.NewspaperVoucherBook
   )
 
   def apply(stage: Stage, fetchString: StringFromS3, today: LocalDate): Either[String, Map[ProductType, LocalDate]] = {
@@ -57,7 +58,7 @@ object StartDateFromFulfilmentFiles extends LazyLogging {
         .catchNonFatal(parseFulfillmentFile.as[Map[String, FulfilmentDates]])
         .leftMap(ex => s"Failed to decode fulfilment file s3://$bucket/$key: $ex")
       soonestDate <- wireCatalog
-        .map(_._2.deliveryAddressChangeEffectiveDate)
+        .map(_._2.newSubscriptionEarliestStartDate)
         .toList
         .flatten
         .sortWith(ascending)
