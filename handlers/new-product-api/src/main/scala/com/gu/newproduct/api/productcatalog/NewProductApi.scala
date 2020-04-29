@@ -44,7 +44,7 @@ object NewProductApi {
 
     def voucherDateRules(allowedDays: List[DayOfWeek]) = StartDateRules(
       Some(DaysOfWeekRule(allowedDays)),
-      Some(voucherWindowRule(allowedDays))
+      voucherWindowRule(allowedDays)
     )
 
     val voucherMondayRules = voucherDateRules(List(MONDAY))
@@ -60,7 +60,7 @@ object NewProductApi {
 
     def homeDeliveryDateRules(allowedDays: List[DayOfWeek]) = StartDateRules(
       Some(DaysOfWeekRule(allowedDays)),
-      Some(homeDeliveryWindowRule(allowedDays))
+      homeDeliveryWindowRule(allowedDays)
     )
 
     val homeDeliveryEveryDayRules = homeDeliveryDateRules(
@@ -80,12 +80,12 @@ object NewProductApi {
     val homeDeliveryWeekendRules = homeDeliveryDateRules(List(SATURDAY, SUNDAY))
 
     val todayOnlyRule = StartDateRules(
-      windowRule = Some(WindowRule(
+      windowRule = WindowRule(
         startDate = today,
         maybeSize = Some(WindowSizeDays(1)),
         maybeCutOffDay = None,
         maybeStartDelay = None
-      ))
+      )
     )
 
     val windowOf90daysStartingIn2Weeks =  WindowRule(
@@ -96,7 +96,7 @@ object NewProductApi {
     )
 
     val digipackStartRules = StartDateRules(
-      windowRule = Some(windowOf90daysStartingIn2Weeks)
+      windowRule = windowOf90daysStartingIn2Weeks
     )
 
     def planWithPayment(
@@ -110,12 +110,12 @@ object NewProductApi {
     val guardianWeeklyStartDateRules =
       StartDateRules(
         daysOfWeekRule = Some(DaysOfWeekRule(guardianWeeklyIssueDays)),
-        windowRule = Some(WindowRule(
+        windowRule = WindowRule(
           startDate =      getStartDateFromFulfilmentFiles(ProductType.GuardianWeekly, guardianWeeklyIssueDays),
           maybeCutOffDay = Some(DayOfWeek.WEDNESDAY),
           maybeStartDelay = Some(DelayDays(7)),
           maybeSize = Some(WindowSizeDays(28))
-        ))
+        )
       )
 
 

@@ -193,7 +193,7 @@ object PlanId {
   def fromName(name: String): Option[PlanId] = supportedPlans.find(_.name == name)
 }
 
-case class Plan(id: PlanId, description: PlanDescription, startDateRules: StartDateRules = StartDateRules(), paymentPlans: Map[Currency, PaymentPlan] = Map.empty)
+case class Plan(id: PlanId, description: PlanDescription, startDateRules: StartDateRules, paymentPlans: Map[Currency, PaymentPlan] = Map.empty)
 
 sealed trait BillingPeriod
 object Monthly extends BillingPeriod
@@ -211,7 +211,7 @@ case class WindowSizeDays(value: Int) extends AnyVal
 
 sealed trait DateRule
 
-case class StartDateRules(daysOfWeekRule: Option[DaysOfWeekRule] = None, windowRule: Option[WindowRule] = None)
+case class StartDateRules(daysOfWeekRule: Option[DaysOfWeekRule] = None, windowRule: WindowRule)
 
 case class DaysOfWeekRule(allowedDays: List[DayOfWeek]) extends DateRule
 

@@ -11,6 +11,7 @@ import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{BankAccount
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.ActivePaymentMethod
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType.CreditCard
 import com.gu.newproduct.api.productcatalog.PlanId._
+import com.gu.newproduct.api.productcatalog.RuleFixtures.testStartDateRules
 import com.gu.newproduct.api.productcatalog._
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
@@ -52,6 +53,7 @@ class GuardianWeeklyEmailDataTest extends FlatSpec with Matchers {
     plan = Plan(
       id = VoucherEveryDayPlus,
       description = PlanDescription("GW Oct 18 - 1 Year - Domestic"),
+      testStartDateRules,
       paymentPlans = Map(GBP -> PaymentPlan(GBP, AmountMinorUnits(1225), Monthly, "GBP 12.25 every month"))
     ),
     firstPaymentDate = LocalDate.of(2018, 12, 1),

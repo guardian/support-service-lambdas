@@ -10,7 +10,8 @@ import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{Subscript
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.SoldToAddress
 import com.gu.newproduct.api.productcatalog.PlanId.VoucherEveryDay
-import com.gu.newproduct.api.productcatalog.{Plan, PlanDescription, PlanId}
+import com.gu.newproduct.api.productcatalog.RuleFixtures.testStartDateRules
+import com.gu.newproduct.api.productcatalog.{Plan, PlanDescription, PlanId, RuleFixtures}
 import com.gu.newproduct.api.productcatalog.ZuoraIds.ProductRatePlanId
 import com.gu.test.JsonMatchers.JsonMatcher
 import com.gu.util.apigateway.ApiGatewayRequest
@@ -83,7 +84,7 @@ class PaperStepsTest extends FlatSpec with Matchers {
 
     def fakeSendEmail(sfContactId: Option[SfContactId], paperData: PaperEmailData) = ContinueProcessing(()).toAsync
 
-    def fakeGetPlan(planId: PlanId) = Plan(VoucherEveryDay, PlanDescription("Everyday"))
+    def fakeGetPlan(planId: PlanId) = Plan(VoucherEveryDay, PlanDescription("Everyday"), testStartDateRules)
     val fakeAddVoucherSteps = AddPaperSub.steps(
       fakeGetPlan,
       fakeGetZuoraId,

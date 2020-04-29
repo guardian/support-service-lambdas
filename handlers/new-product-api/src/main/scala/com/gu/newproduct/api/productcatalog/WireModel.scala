@@ -28,7 +28,7 @@ object WireModel {
   case class WirePlanInfo(
     id: String,
     label: String,
-    startDateRules: Option[WireStartDateRules] = None,
+    startDateRules: WireStartDateRules,
     paymentPlans: List[WirePaymentPlan],
     paymentPlan: Option[String], //todo legacy field, remove once salesforce is reading from paymentPlans
     firstAvailableStartDate: LocalDate
@@ -48,7 +48,7 @@ object WireModel {
 
   case class WireStartDateRules(
     daysOfWeek: List[WireDayOfWeek],
-    selectableWindow: Option[WireSelectableWindow] = None
+    selectableWindow: WireSelectableWindow
   )
 
   case class WireProduct(
@@ -89,7 +89,7 @@ object WireModel {
 
       val allowedDays = rule.daysOfWeekRule.map(_.allowedDays) getOrElse DayOfWeek.values.toList
       val wireAllowedDaysOfWeek = allowedDays.map(WireDayOfWeek.fromDayOfWeek)
-      val maybeWireWindowRules = rule.windowRule.map(WireSelectableWindow.fromWindowRule(_))
+      val maybeWireWindowRules = WireSelectableWindow.fromWindowRule(rule.windowRule)
       WireStartDateRules(wireAllowedDaysOfWeek, maybeWireWindowRules)
     }
   }
@@ -97,8 +97,8 @@ object WireModel {
   object WirePlanInfo {
     implicit val writes = Json.writes[WirePlanInfo]
 
-    def toOptionalWireRules(startDateRules: StartDateRules): Option[WireStartDateRules] =
-      if (startDateRules == StartDateRules()) None else Some(WireStartDateRules.fromStartDateRules(startDateRules))
+    def toWireRules(startDateRules: StartDateRules): WireStartDateRules =
+      WireStartDateRules.fromStartDateRules(startDateRules)
 
     def fromPlan(plan: Plan) = {
 
@@ -111,10 +111,10 @@ object WireModel {
       WirePlanInfo(
         id = plan.id.name,
         label = plan.description.value,
-        startDateRules = toOptionalWireRules(plan.startDateRules),
+        startDateRules = toWireRules(plan.startDateRules),
         paymentPlans = paymentPlans.toList,
         paymentPlan = legacyPaymentPlan,
-        firstAvailableStartDate = plan.startDateRules.windowRule.get.startDate
+        firstAvailableStartDate = plan.startDateRules.windowRule.startDate
       )
     }
   }
