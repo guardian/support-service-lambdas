@@ -149,7 +149,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "description": "GBP 21.62 every month"
         |            }
         |          ],
-        |          "paymentPlan": "GBP 21.62 every month"
+        |           "paymentPlan": "GBP 21.62 every month"
         |        },
         |        {
         |          "id": "voucher_sixday",
@@ -382,7 +382,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "description": "GBP 6.78 every month"
         |            }
         |          ],
-        |          "paymentPlan": "GBP 6.78 every month"
+        |           "paymentPlan": "GBP 6.78 every month"
         |        },
         |        {
         |          "id": "home_delivery_sixday",
@@ -498,7 +498,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "description": "GBP 8.88 every month"
         |            }
         |          ],
-        |          "paymentPlan": "GBP 8.88 every month"
+        |           "paymentPlan": "GBP 8.88 every month"
         |        },
         |        {
         |          "id": "home_delivery_weekend_plus",
@@ -520,7 +520,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "description": "GBP 22.22 every month"
         |            }
         |          ],
-        |          "paymentPlan": "GBP 22.22 every month"
+        |           "paymentPlan": "GBP 22.22 every month"
         |        }
         |      ]
         |    },
