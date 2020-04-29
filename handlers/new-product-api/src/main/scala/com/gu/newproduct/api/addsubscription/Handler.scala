@@ -84,7 +84,7 @@ object Steps {
         .toApiGatewayOp("get prices from zuora catalog")
       getPricesForPlan = (planId: PlanId) => plansWithPrice.getOrElse(planId, Map.empty)
       startDateFromProductType <- StartDateFromFulfilmentFiles(stage, fetchString, currentDate())
-        .toApiGatewayOp("getting fulfilment date files")
+        .toApiGatewayOp("get fulfilment date files")
       catalog = NewProductApi.catalog(getPricesForPlan, startDateFromProductType, currentDate())
 
       isValidStartDateForPlan = Function.uncurried(
