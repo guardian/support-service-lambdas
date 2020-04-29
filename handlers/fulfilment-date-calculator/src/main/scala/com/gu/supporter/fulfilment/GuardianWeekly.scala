@@ -30,7 +30,7 @@ object GuardianWeeklyFulfilmentDates extends FulfilmentConstants(
         holidayStopFirstAvailableDate(today),
         holidayStopProcessorTargetDate(today),
         finalFulfilmentFileGenerationDate(today),
-        deliveryAddressChangeEffectiveDate(today)
+        newSubscriptionEarliestStartDate(today)
       )
     )
 
@@ -55,6 +55,9 @@ object GuardianWeeklyFulfilmentDates extends FulfilmentConstants(
 
   // Cover date of first issue sent to the new address.
   def deliveryAddressChangeEffectiveDate(today: LocalDate): LocalDate =
+    nextAffectablePublicationDateOnFrontCover(today)
+
+  def newSubscriptionEarliestStartDate(today: LocalDate): LocalDate =
     nextAffectablePublicationDateOnFrontCover(today)
 
   // TODO: Take into account bank holidays

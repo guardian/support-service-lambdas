@@ -20,10 +20,10 @@ object VoucherBookletFulfilmentDates {
     ListMap( // to preserve insertion order, so the file is easier to read
       List(MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY).map(targetDayOfWeek =>
         targetDayOfWeek.getDisplayName(FULL, ENGLISH) -> FulfilmentDates(
-          today = today,
-          holidayStopFirstAvailableDate = holidayStopFirstAvailableDate(today),
-          holidayStopProcessorTargetDate = holidayStopProcessorTargetDate(targetDayOfWeek, today),
-          newSubscriptionEarliestStartDate = newSubscriptionEarliestStartDate(targetDayOfWeek, today)
+          today,
+          holidayStopFirstAvailableDate(today),
+          holidayStopProcessorTargetDate(targetDayOfWeek, today),
+          newSubscriptionEarliestStartDate(targetDayOfWeek, today)
         )): _*
     )
 

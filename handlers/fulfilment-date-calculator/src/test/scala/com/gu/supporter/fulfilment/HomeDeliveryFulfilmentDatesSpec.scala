@@ -6,8 +6,6 @@ import org.scalatest.{FlatSpec, Matchers}
 
 class HomeDeliveryFulfilmentDatesSpec extends FlatSpec with Matchers with DateSupport {
 
-
-
   def apply(today: LocalDate) = HomeDeliveryFulfilmentDates.apply(today)(
     BankHolidays(Nil) // TODO reuse sampleBankHolidays from LocalDateHelpersSpec with some test cases below
   )

@@ -139,6 +139,6 @@ object HomeDeliveryFulfilmentDates {
       case _ => 3
     }
 
-    today plusDays(startDateDelay) `with` nextOrSame(targetDayOfWeek)
+    today plusDays (startDateDelay) `with` nextOrSame(targetDayOfWeek)
   }
 }
