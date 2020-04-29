@@ -30,8 +30,7 @@ object WireModel {
     label: String,
     startDateRules: WireStartDateRules,
     paymentPlans: List[WirePaymentPlan],
-    paymentPlan: Option[String], //todo legacy field, remove once salesforce is reading from paymentPlans
-    firstAvailableStartDate: LocalDate
+    paymentPlan: Option[String] //todo legacy field, remove once salesforce is reading from paymentPlans
   )
 
   case class WirePaymentPlan(currencyCode: String, description: String)
@@ -41,6 +40,7 @@ object WireModel {
   }
 
   case class WireSelectableWindow(
+    startDate: LocalDate,
     cutOffDayInclusive: Option[WireDayOfWeek] = None,
     startDaysAfterCutOff: Option[Int] = None,
     sizeInDays: Option[Int] = None
@@ -78,7 +78,7 @@ object WireModel {
 
     def fromWindowRule(rule: WindowRule) = {
       val wireCutoffDay = rule.maybeCutOffDay.map(WireDayOfWeek.fromDayOfWeek)
-      WireSelectableWindow(wireCutoffDay, rule.maybeStartDelay.map(_.value), rule.maybeSize.map(_.value))
+      WireSelectableWindow(rule.startDate, wireCutoffDay, rule.maybeStartDelay.map(_.value), rule.maybeSize.map(_.value))
     }
   }
 
@@ -86,11 +86,9 @@ object WireModel {
     implicit val writes = Json.writes[WireStartDateRules]
 
     def fromStartDateRules(rule: StartDateRules): WireStartDateRules = {
-
       val allowedDays = rule.daysOfWeekRule.map(_.allowedDays) getOrElse DayOfWeek.values.toList
       val wireAllowedDaysOfWeek = allowedDays.map(WireDayOfWeek.fromDayOfWeek)
-      val maybeWireWindowRules = WireSelectableWindow.fromWindowRule(rule.windowRule)
-      WireStartDateRules(wireAllowedDaysOfWeek, maybeWireWindowRules)
+      WireStartDateRules(wireAllowedDaysOfWeek, WireSelectableWindow.fromWindowRule(rule.windowRule))
     }
   }
 
@@ -113,8 +111,7 @@ object WireModel {
         label = plan.description.value,
         startDateRules = toWireRules(plan.startDateRules),
         paymentPlans = paymentPlans.toList,
-        paymentPlan = legacyPaymentPlan,
-        firstAvailableStartDate = plan.startDateRules.windowRule.startDate
+        paymentPlan = legacyPaymentPlan
       )
     }
   }

@@ -111,7 +111,7 @@ object NewProductApi {
       StartDateRules(
         daysOfWeekRule = Some(DaysOfWeekRule(guardianWeeklyIssueDays)),
         windowRule = WindowRule(
-          startDate =      getStartDateFromFulfilmentFiles(ProductType.GuardianWeekly, guardianWeeklyIssueDays),
+          startDate = getStartDateFromFulfilmentFiles(ProductType.GuardianWeekly, guardianWeeklyIssueDays),
           maybeCutOffDay = Some(DayOfWeek.WEDNESDAY),
           maybeStartDelay = Some(DelayDays(7)),
           maybeSize = Some(WindowSizeDays(28))

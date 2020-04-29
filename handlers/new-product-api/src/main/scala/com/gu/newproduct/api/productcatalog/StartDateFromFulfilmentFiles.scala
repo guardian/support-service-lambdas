@@ -54,8 +54,6 @@ object StartDateFromFulfilmentFiles extends LazyLogging {
     today: LocalDate,
     productType: ProductType
   ): Either[String, Map[DayOfWeek, LocalDate]] = {
-    def ascending(d1: LocalDate, d2: LocalDate) = d1.isBefore(d2)
-
     val key = s"${productType.value}/${today}_${productType.value}.json"
     val bucket = s"fulfilment-date-calculator-${stage.value.toLowerCase}"
     for {

@@ -32,11 +32,11 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Sunday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2019-12-01",
         |              "sizeInDays": 1
         |            }
         |          },
-        |          "paymentPlans": [],
-        |          "firstAvailableStartDate": "2019-12-01"
+        |          "paymentPlans": []
         |        },
         |        {
         |          "id": "annual_contribution",
@@ -52,11 +52,11 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Sunday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2019-12-01",
         |              "sizeInDays": 1
         |            }
         |          },
-        |          "paymentPlans": [],
-        |          "firstAvailableStartDate": "2019-12-01"
+        |          "paymentPlans": []
         |        }
         |      ]
         |    },
@@ -71,6 +71,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Monday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2020-03-01",
         |              "cutOffDayInclusive": "Tuesday",
         |              "startDaysAfterCutOff": 20,
         |              "sizeInDays": 35
@@ -82,8 +83,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "description": "GBP 47.62 every month"
         |            }
         |          ],
-        |          "paymentPlan": "GBP 47.62 every month",
-        |          "firstAvailableStartDate": "2020-03-01"
+        |          "paymentPlan": "GBP 47.62 every month"
         |        },
         |        {
         |          "id": "voucher_everyday_plus",
@@ -93,6 +93,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Monday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2020-03-01",
         |              "cutOffDayInclusive": "Tuesday",
         |              "startDaysAfterCutOff": 20,
         |              "sizeInDays": 35
@@ -104,8 +105,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "description": "GBP 51.96 every month"
         |            }
         |          ],
-        |          "paymentPlan": "GBP 51.96 every month",
-        |          "firstAvailableStartDate": "2020-03-01"
+        |          "paymentPlan": "GBP 51.96 every month"
         |        },
         |        {
         |          "id": "voucher_saturday",
@@ -115,6 +115,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Saturday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2020-03-02",
         |              "cutOffDayInclusive": "Tuesday",
         |              "startDaysAfterCutOff": 20,
         |              "sizeInDays": 35
@@ -126,8 +127,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "description": "GBP 10.36 every month"
         |            }
         |          ],
-        |          "paymentPlan": "GBP 10.36 every month",
-        |          "firstAvailableStartDate": "2020-03-02"
+        |          "paymentPlan": "GBP 10.36 every month"
         |        },
         |        {
         |          "id": "voucher_saturday_plus",
@@ -137,6 +137,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Saturday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2020-03-02",
         |              "cutOffDayInclusive": "Tuesday",
         |              "startDaysAfterCutOff": 20,
         |              "sizeInDays": 35
@@ -148,8 +149,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "description": "GBP 21.62 every month"
         |            }
         |          ],
-        |          "paymentPlan": "GBP 21.62 every month",
-        |          "firstAvailableStartDate": "2020-03-02"
+        |          "paymentPlan": "GBP 21.62 every month"
         |        },
         |        {
         |          "id": "voucher_sixday",
@@ -159,6 +159,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Monday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2020-03-01",
         |              "cutOffDayInclusive": "Tuesday",
         |              "startDaysAfterCutOff": 20,
         |              "sizeInDays": 35
@@ -170,8 +171,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "description": "GBP 41.12 every month"
         |            }
         |          ],
-        |          "paymentPlan": "GBP 41.12 every month",
-        |          "firstAvailableStartDate": "2020-03-01"
+        |          "paymentPlan": "GBP 41.12 every month"
         |        },
         |        {
         |          "id": "voucher_sixday_plus",
@@ -181,6 +181,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Monday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2020-03-01",
         |              "cutOffDayInclusive": "Tuesday",
         |              "startDaysAfterCutOff": 20,
         |              "sizeInDays": 35
@@ -192,8 +193,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "description": "GBP 47.62 every month"
         |            }
         |          ],
-        |          "paymentPlan": "GBP 47.62 every month",
-        |          "firstAvailableStartDate": "2020-03-01"
+        |          "paymentPlan": "GBP 47.62 every month"
         |        },
         |        {
         |          "id": "voucher_sunday",
@@ -203,6 +203,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Sunday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2020-03-03",
         |              "cutOffDayInclusive": "Tuesday",
         |              "startDaysAfterCutOff": 20,
         |              "sizeInDays": 35
@@ -214,8 +215,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "description": "GBP 10.79 every month"
         |            }
         |          ],
-        |          "paymentPlan": "GBP 10.79 every month",
-        |          "firstAvailableStartDate": "2020-03-03"
+        |          "paymentPlan": "GBP 10.79 every month"
         |        },
         |        {
         |          "id": "voucher_sunday_plus",
@@ -225,6 +225,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Sunday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2020-03-03",
         |              "cutOffDayInclusive": "Tuesday",
         |              "startDaysAfterCutOff": 20,
         |              "sizeInDays": 35
@@ -236,8 +237,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "description": "GBP 22.06 every month"
         |            }
         |          ],
-        |          "paymentPlan": "GBP 22.06 every month",
-        |          "firstAvailableStartDate": "2020-03-03"
+        |          "paymentPlan": "GBP 22.06 every month"
         |        },
         |        {
         |          "id": "voucher_weekend",
@@ -247,6 +247,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Saturday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2020-03-02",
         |              "cutOffDayInclusive": "Tuesday",
         |              "startDaysAfterCutOff": 20,
         |              "sizeInDays": 35
@@ -258,8 +259,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "description": "GBP 20.76 every month"
         |            }
         |          ],
-        |          "paymentPlan": "GBP 20.76 every month",
-        |          "firstAvailableStartDate": "2020-03-02"
+        |          "paymentPlan": "GBP 20.76 every month"
         |        },
         |        {
         |          "id": "voucher_weekend_plus",
@@ -269,6 +269,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Saturday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2020-03-02",
         |              "cutOffDayInclusive": "Tuesday",
         |              "startDaysAfterCutOff": 20,
         |              "sizeInDays": 35
@@ -280,8 +281,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "description": "GBP 29.42 every month"
         |            }
         |          ],
-        |          "paymentPlan": "GBP 29.42 every month",
-        |          "firstAvailableStartDate": "2020-03-02"
+        |          "paymentPlan": "GBP 29.42 every month"
         |        }
         |      ]
         |    },
@@ -302,6 +302,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Sunday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2020-02-01",
         |              "startDaysAfterCutOff": 3,
         |              "sizeInDays": 28
         |            }
@@ -312,8 +313,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "description": "GBP 1.23 every month"
         |            }
         |          ],
-        |          "paymentPlan": "GBP 1.23 every month",
-        |          "firstAvailableStartDate": "2020-02-01"
+        |          "paymentPlan": "GBP 1.23 every month"
         |        },
         |        {
         |          "id": "home_delivery_everyday_plus",
@@ -329,6 +329,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Sunday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2020-02-01",
         |              "startDaysAfterCutOff": 3,
         |              "sizeInDays": 28
         |            }
@@ -339,8 +340,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "description": "GBP 9.99 every month"
         |            }
         |          ],
-        |          "paymentPlan": "GBP 9.99 every month",
-        |          "firstAvailableStartDate": "2020-02-01"
+        |          "paymentPlan": "GBP 9.99 every month"
         |        },
         |        {
         |          "id": "home_delivery_saturday",
@@ -350,6 +350,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Saturday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2020-02-03",
         |              "startDaysAfterCutOff": 3,
         |              "sizeInDays": 28
         |            }
@@ -360,8 +361,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "description": "GBP 4.56 every month"
         |            }
         |          ],
-        |          "paymentPlan": "GBP 4.56 every month",
-        |          "firstAvailableStartDate": "2020-02-03"
+        |          "paymentPlan": "GBP 4.56 every month"
         |        },
         |        {
         |          "id": "home_delivery_saturday_plus",
@@ -371,6 +371,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Saturday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2020-02-03",
         |              "startDaysAfterCutOff": 3,
         |              "sizeInDays": 28
         |            }
@@ -381,8 +382,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "description": "GBP 6.78 every month"
         |            }
         |          ],
-        |          "paymentPlan": "GBP 6.78 every month",
-        |          "firstAvailableStartDate": "2020-02-03"
+        |          "paymentPlan": "GBP 6.78 every month"
         |        },
         |        {
         |          "id": "home_delivery_sixday",
@@ -397,6 +397,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Saturday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2020-02-02",
         |              "startDaysAfterCutOff": 3,
         |              "sizeInDays": 28
         |            }
@@ -407,8 +408,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "description": "GBP 7.77 every month"
         |            }
         |          ],
-        |          "paymentPlan": "GBP 7.77 every month",
-        |          "firstAvailableStartDate": "2020-02-02"
+        |          "paymentPlan": "GBP 7.77 every month"
         |        },
         |        {
         |          "id": "home_delivery_sixday_plus",
@@ -423,6 +423,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Saturday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2020-02-02",
         |              "startDaysAfterCutOff": 3,
         |              "sizeInDays": 28
         |            }
@@ -433,8 +434,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "description": "GBP 11.11 every month"
         |            }
         |          ],
-        |          "paymentPlan": "GBP 11.11 every month",
-        |          "firstAvailableStartDate": "2020-02-02"
+        |          "paymentPlan": "GBP 11.11 every month"
         |        },
         |        {
         |          "id": "home_delivery_sunday",
@@ -444,6 +444,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Sunday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2020-02-04",
         |              "startDaysAfterCutOff": 3,
         |              "sizeInDays": 28
         |            }
@@ -454,8 +455,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "description": "GBP 3.21 every month"
         |            }
         |          ],
-        |          "paymentPlan": "GBP 3.21 every month",
-        |          "firstAvailableStartDate": "2020-02-04"
+        |          "paymentPlan": "GBP 3.21 every month"
         |        },
         |        {
         |          "id": "home_delivery_sunday_plus",
@@ -465,6 +465,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Sunday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2020-02-04",
         |              "startDaysAfterCutOff": 3,
         |              "sizeInDays": 28
         |            }
@@ -475,8 +476,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "description": "GBP 10.10 every month"
         |            }
         |          ],
-        |          "paymentPlan": "GBP 10.10 every month",
-        |          "firstAvailableStartDate": "2020-02-04"
+        |          "paymentPlan": "GBP 10.10 every month"
         |        },
         |        {
         |          "id": "home_delivery_weekend",
@@ -487,6 +487,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Sunday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2020-02-05",
         |              "startDaysAfterCutOff": 3,
         |              "sizeInDays": 28
         |            }
@@ -497,8 +498,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "description": "GBP 8.88 every month"
         |            }
         |          ],
-        |          "paymentPlan": "GBP 8.88 every month",
-        |          "firstAvailableStartDate": "2020-02-05"
+        |          "paymentPlan": "GBP 8.88 every month"
         |        },
         |        {
         |          "id": "home_delivery_weekend_plus",
@@ -509,6 +509,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Sunday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2020-02-05",
         |              "startDaysAfterCutOff": 3,
         |              "sizeInDays": 28
         |            }
@@ -519,8 +520,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "description": "GBP 22.22 every month"
         |            }
         |          ],
-        |          "paymentPlan": "GBP 22.22 every month",
-        |          "firstAvailableStartDate": "2020-02-05"
+        |          "paymentPlan": "GBP 22.22 every month"
         |        }
         |      ]
         |    },
@@ -541,6 +541,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Sunday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2019-12-15",
         |              "startDaysAfterCutOff": 14,
         |              "sizeInDays": 90
         |            }
@@ -555,8 +556,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "description": "USD 666.65 every 12 months"
         |            }
         |          ],
-        |          "paymentPlan": "GBP 666.66 every 12 months",
-        |          "firstAvailableStartDate": "2019-12-15"
+        |          "paymentPlan": "GBP 666.66 every 12 months"
         |        },
         |        {
         |          "id": "digipack_monthly",
@@ -572,6 +572,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Sunday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2019-12-15",
         |              "startDaysAfterCutOff": 14,
         |              "sizeInDays": 90
         |            }
@@ -586,8 +587,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "description": "USD 55.54 every month"
         |            }
         |          ],
-        |          "paymentPlan": "GBP 55.55 every month",
-        |          "firstAvailableStartDate": "2019-12-15"
+        |          "paymentPlan": "GBP 55.55 every month"
         |        }
         |      ]
         |    },
@@ -602,6 +602,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Friday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2020-01-01",
         |              "cutOffDayInclusive": "Wednesday",
         |              "startDaysAfterCutOff": 7,
         |              "sizeInDays": 28
@@ -617,8 +618,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "description": "USD 111111.11 for the first six weeks"
         |            }
         |          ],
-        |          "paymentPlan": "GBP 11111.11 for the first six weeks",
-        |          "firstAvailableStartDate": "2020-01-01"
+        |          "paymentPlan": "GBP 11111.11 for the first six weeks"
         |        },
         |        {
         |          "id": "guardian_weekly_domestic_quarterly",
@@ -628,6 +628,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Friday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2020-01-01",
         |              "cutOffDayInclusive": "Wednesday",
         |              "startDaysAfterCutOff": 7,
         |              "sizeInDays": 28
@@ -643,8 +644,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "description": "USD 222222.22 every 3 months"
         |            }
         |          ],
-        |          "paymentPlan": "GBP 22222.22 every 3 months",
-        |          "firstAvailableStartDate": "2020-01-01"
+        |          "paymentPlan": "GBP 22222.22 every 3 months"
         |        },
         |        {
         |          "id": "guardian_weekly_domestic_annual",
@@ -654,6 +654,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Friday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2020-01-01",
         |              "cutOffDayInclusive": "Wednesday",
         |              "startDaysAfterCutOff": 7,
         |              "sizeInDays": 28
@@ -669,8 +670,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "description": "USD 333333.33 every 12 months"
         |            }
         |          ],
-        |          "paymentPlan": "GBP 33333.33 every 12 months",
-        |          "firstAvailableStartDate": "2020-01-01"
+        |          "paymentPlan": "GBP 33333.33 every 12 months"
         |        }
         |      ],
         |      "enabledForDeliveryCountries": [
@@ -698,6 +698,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Friday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2020-01-01",
         |              "cutOffDayInclusive": "Wednesday",
         |              "startDaysAfterCutOff": 7,
         |              "sizeInDays": 28
@@ -713,8 +714,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "description": "USD 444444.44 for the first six weeks"
         |            }
         |          ],
-        |          "paymentPlan": "GBP 44444.44 for the first six weeks",
-        |          "firstAvailableStartDate": "2020-01-01"
+        |          "paymentPlan": "GBP 44444.44 for the first six weeks"
         |        },
         |        {
         |          "id": "guardian_weekly_row_quarterly",
@@ -724,6 +724,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Friday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2020-01-01",
         |              "cutOffDayInclusive": "Wednesday",
         |              "startDaysAfterCutOff": 7,
         |              "sizeInDays": 28
@@ -739,8 +740,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "description": "USD 555555.55 every 3 months"
         |            }
         |          ],
-        |          "paymentPlan": "GBP 55555.55 every 3 months",
-        |          "firstAvailableStartDate": "2020-01-01"
+        |          "paymentPlan": "GBP 55555.55 every 3 months"
         |        },
         |        {
         |          "id": "guardian_weekly_row_annual",
@@ -750,6 +750,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Friday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2020-01-01",
         |              "cutOffDayInclusive": "Wednesday",
         |              "startDaysAfterCutOff": 7,
         |              "sizeInDays": 28
@@ -765,8 +766,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "description": "USD 666666.66 every 12 months"
         |            }
         |          ],
-        |          "paymentPlan": "GBP 66666.66 every 12 months",
-        |          "firstAvailableStartDate": "2020-01-01"
+        |          "paymentPlan": "GBP 66666.66 every 12 months"
         |        }
         |      ],
         |      "enabledForDeliveryCountries": [
