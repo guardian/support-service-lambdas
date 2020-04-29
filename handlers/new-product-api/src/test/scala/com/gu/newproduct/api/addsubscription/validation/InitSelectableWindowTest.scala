@@ -1,6 +1,5 @@
 package com.gu.newproduct.api.addsubscription.validation
 
-import java.time.DayOfWeek._
 import java.time.LocalDate
 
 import com.gu.newproduct.api.productcatalog.{WindowRule, WindowSizeDays}
@@ -17,8 +16,6 @@ class InitSelectableWindowTest extends FlatSpec with Matchers {
       now = getWedAugust8,
       WindowRule(
         startDate = wednesdayAugust8,
-        maybeCutOffDay = None,
-        maybeStartDelay = None,
         maybeSize = None
       )
     )
@@ -31,8 +28,6 @@ class InitSelectableWindowTest extends FlatSpec with Matchers {
       now = getWedAugust8,
       WindowRule(
         startDate = wednesdayAugust8,
-        maybeCutOffDay = Some(THURSDAY),
-        maybeStartDelay = None,
         maybeSize = Some(WindowSizeDays(10))
       )
     )

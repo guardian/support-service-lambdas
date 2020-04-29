@@ -41,8 +41,6 @@ object WireModel {
 
   case class WireSelectableWindow(
     startDate: LocalDate,
-    cutOffDayInclusive: Option[WireDayOfWeek] = None,
-    startDaysAfterCutOff: Option[Int] = None,
     sizeInDays: Option[Int] = None
   )
 
@@ -77,8 +75,7 @@ object WireModel {
     implicit val writes = Json.writes[WireSelectableWindow]
 
     def fromWindowRule(rule: WindowRule) = {
-      val wireCutoffDay = rule.maybeCutOffDay.map(WireDayOfWeek.fromDayOfWeek)
-      WireSelectableWindow(rule.startDate, wireCutoffDay, rule.maybeStartDelay.map(_.value), rule.maybeSize.map(_.value))
+      WireSelectableWindow(rule.startDate, rule.maybeSize.map(_.value))
     }
   }
 
