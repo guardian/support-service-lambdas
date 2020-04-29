@@ -47,7 +47,7 @@ class ProcessorErrorHandlingSpec extends AnyFlatSpec with Matchers with OptionVa
 
   private val fulfilmentDatesFetcher = new FulfilmentDatesFetcher {
     override def getFulfilmentDates(zuoraProductType: ZuoraProductType, date: LocalDate): Either[FulfilmentDatesFetcherError, Map[DayOfWeek, FulfilmentDates]] = {
-      Map(DayOfWeek.FRIDAY -> FulfilmentDates(today, today, Some(processingDate))).asRight
+      Map(DayOfWeek.FRIDAY -> FulfilmentDates(today, today, Some(processingDate), today)).asRight
     }
   }
 

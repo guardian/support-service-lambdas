@@ -10,26 +10,42 @@ case class FulfilmentDates(
   deliveryAddressChangeEffectiveDate: Option[LocalDate],
   holidayStopFirstAvailableDate: LocalDate,
   holidayStopProcessorTargetDate: Option[LocalDate],
-  finalFulfilmentFileGenerationDate: Option[LocalDate]
+  finalFulfilmentFileGenerationDate: Option[LocalDate],
+  newSubscriptionEarliestStartDate: Option[LocalDate]
 )
 
 object FulfilmentDates {
-  def apply(today: LocalDate, holidayStopFirstAvailableDate: LocalDate, holidayStopProcessorTargetDate: Option[LocalDate]): FulfilmentDates =
+  def apply(
+    today: LocalDate,
+    holidayStopFirstAvailableDate: LocalDate,
+    holidayStopProcessorTargetDate: Option[LocalDate],
+    newSubscriptionEarliestStartDate: LocalDate
+  ): FulfilmentDates =
     FulfilmentDates(
       today,
       deliveryAddressChangeEffectiveDate = None,
       holidayStopFirstAvailableDate,
       holidayStopProcessorTargetDate,
-      finalFulfilmentFileGenerationDate = None
+      finalFulfilmentFileGenerationDate = None,
+      newSubscriptionEarliestStartDate = Some(newSubscriptionEarliestStartDate)
     )
 
-  def apply(today: LocalDate, deliveryAddressChangeEffectiveDate: LocalDate, holidayStopFirstAvailableDate: LocalDate, holidayStopProcessorTargetDate: Option[LocalDate], finalFulfilmentFileGenerationDate: LocalDate): FulfilmentDates =
+  def apply(
+    today: LocalDate,
+    deliveryAddressChangeEffectiveDate: LocalDate,
+    holidayStopFirstAvailableDate: LocalDate,
+    holidayStopProcessorTargetDate: Option[LocalDate],
+    finalFulfilmentFileGenerationDate: LocalDate,
+    newSubscriptionEarliestStartDate: LocalDate
+
+  ): FulfilmentDates =
     FulfilmentDates(
-      today,
-      Some(deliveryAddressChangeEffectiveDate),
-      holidayStopFirstAvailableDate,
-      holidayStopProcessorTargetDate,
-      Some(finalFulfilmentFileGenerationDate)
+      today = today,
+      deliveryAddressChangeEffectiveDate = Some(deliveryAddressChangeEffectiveDate),
+      holidayStopFirstAvailableDate = holidayStopFirstAvailableDate,
+      holidayStopProcessorTargetDate = holidayStopProcessorTargetDate,
+      finalFulfilmentFileGenerationDate = Some(finalFulfilmentFileGenerationDate),
+      newSubscriptionEarliestStartDate = Some(newSubscriptionEarliestStartDate)
     )
 
   val dayOfWeekFormat =

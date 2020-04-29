@@ -3,6 +3,7 @@
     "today" : "2019-12-11",
     "deliveryAddressChangeEffectiveDate" : "2019-12-16",
     "holidayStopFirstAvailableDate" : "2019-12-16",
-    "finalFulfilmentFileGenerationDate" : "2019-12-12"
+    "finalFulfilmentFileGenerationDate" : "2019-12-12",
+    "newSubscriptionEarliestStartDate" : "2019-12-16"
   }
 }

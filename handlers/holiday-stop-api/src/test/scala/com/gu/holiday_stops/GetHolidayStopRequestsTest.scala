@@ -34,8 +34,11 @@ class GetHolidayStopRequestsTest extends FlatSpec {
   val fulfilmentDates: Map[DayOfWeek, FulfilmentDates] = Map(
     FRIDAY -> FulfilmentDates(
       today = today,
+      deliveryAddressChangeEffectiveDate = None,
       holidayStopFirstAvailableDate = fulfilmentDatesFirstAvailableDate,
-      holidayStopProcessorTargetDate = None
+      holidayStopProcessorTargetDate = None,
+      finalFulfilmentFileGenerationDate = None,
+      newSubscriptionEarliestStartDate = None
     )
   )
 
