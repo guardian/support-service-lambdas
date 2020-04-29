@@ -4,7 +4,7 @@ import java.time.{DayOfWeek, LocalDate}
 
 import com.gu.i18n.{CountryGroup, Currency}
 import com.gu.i18n.Currency.GBP
-import com.gu.newproduct.api.addsubscription.validation.guardianweekly.{GuardianWeeklyAddressValidator, GuardianWeeklyDomesticAddressValidator}
+import com.gu.newproduct.api.addsubscription.validation.guardianweekly.GuardianWeeklyAddressValidator
 import play.api.libs.json.{JsString, Json, Writes}
 
 object WireModel {
@@ -30,7 +30,8 @@ object WireModel {
     label: String,
     startDateRules: Option[WireStartDateRules] = None,
     paymentPlans: List[WirePaymentPlan],
-    paymentPlan: Option[String] //todo legacy field, remove once salesforce is reading from paymentPlans
+    paymentPlan: Option[String], //todo legacy field, remove once salesforce is reading from paymentPlans
+    firstAvailableStartDate: LocalDate
   )
 
   case class WirePaymentPlan(currencyCode: String, description: String)
@@ -53,8 +54,7 @@ object WireModel {
   case class WireProduct(
     label: String,
     plans: List[WirePlanInfo],
-    enabledForDeliveryCountries: Option[List[String]],
-    firstAvailableStartDate: LocalDate
+    enabledForDeliveryCountries: Option[List[String]]
   )
 
   case class WireCatalog(products: List[WireProduct])
@@ -113,7 +113,8 @@ object WireModel {
         label = plan.description.value,
         startDateRules = toOptionalWireRules(plan.startDateRules),
         paymentPlans = paymentPlans.toList,
-        paymentPlan = legacyPaymentPlan
+        paymentPlan = legacyPaymentPlan,
+        firstAvailableStartDate = plan.startDateRules.windowRule.get.startDate
       )
     }
   }
@@ -126,9 +127,7 @@ object WireModel {
     implicit val writes = Json.writes[WireCatalog]
 
     def fromCatalog(
-      catalog: Catalog,
-      getFirstAvailableStartDateFromAvailabilityCalculator: ProductType => LocalDate,
-      today: LocalDate
+      catalog: Catalog
     ) = {
 
       def wirePlanForPlanId(planId: PlanId): WirePlanInfo = {
@@ -139,43 +138,37 @@ object WireModel {
       val voucherProduct = WireProduct(
         label = "Voucher",
         plans = PlanId.enabledVoucherPlans.map(wirePlanForPlanId),
-        enabledForDeliveryCountries = None,
-        getFirstAvailableStartDateFromAvailabilityCalculator(ProductType.NewspaperVoucherBook)
+        enabledForDeliveryCountries = None
       )
 
       val contributionProduct = WireProduct(
         label = "Contribution",
         plans = PlanId.enabledContributionPlans.map(wirePlanForPlanId),
-        enabledForDeliveryCountries = None,
-        today
+        enabledForDeliveryCountries = None
       )
 
       val homeDeliveryProduct = WireProduct(
         label = "Home Delivery",
         plans = PlanId.enabledHomeDeliveryPlans.map(wirePlanForPlanId),
-        enabledForDeliveryCountries = None,
-        getFirstAvailableStartDateFromAvailabilityCalculator(ProductType.NewspaperHomeDelivery)
+        enabledForDeliveryCountries = None
       )
 
       val digipackProduct = WireProduct(
         label = "Digital Pack",
         plans = PlanId.enabledDigipackPlans.map(wirePlanForPlanId),
-        enabledForDeliveryCountries = None,
-        today.plusDays(14)
+        enabledForDeliveryCountries = None
       )
 
       val guardianWeeklyDomestic = WireProduct(
         label = "Guardian Weekly - Domestic",
         plans = PlanId.enabledGuardianWeeklyDomesticPlans.map(wirePlanForPlanId),
-        enabledForDeliveryCountries = Some(GuardianWeeklyAddressValidator.domesticCountries.map(_.name)),
-        getFirstAvailableStartDateFromAvailabilityCalculator(ProductType.GuardianWeekly)
+        enabledForDeliveryCountries = Some(GuardianWeeklyAddressValidator.domesticCountries.map(_.name))
       )
 
       val guardianWeeklyROW = WireProduct(
         label = "Guardian Weekly - ROW",
         plans = PlanId.enabledGuardianWeeklyROWPlans.map(wirePlanForPlanId),
-        enabledForDeliveryCountries = Some(CountryGroup.RestOfTheWorld.countries.map(_.name)),
-        getFirstAvailableStartDateFromAvailabilityCalculator(ProductType.GuardianWeekly)
+        enabledForDeliveryCountries = Some(CountryGroup.RestOfTheWorld.countries.map(_.name))
       )
 
       val availableProductsAndPlans = List(

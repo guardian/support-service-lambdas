@@ -1,6 +1,6 @@
 package com.gu.newproduct.api.productcatalog
 
-import java.time.DayOfWeek
+import java.time.{DayOfWeek, LocalDate}
 import java.time.DayOfWeek._
 
 import com.gu.i18n.Currency
@@ -10,7 +10,11 @@ import com.gu.newproduct.api.productcatalog.PlanId._
 
 
 object NewProductApi {
-  def catalog(pricingFor: PlanId => Map[Currency, AmountMinorUnits]): Catalog = {
+  def catalog(
+    pricingFor: PlanId => Map[Currency, AmountMinorUnits],
+    getStartDateFromFulfilmentFiles: (ProductType, List[DayOfWeek]) => LocalDate,
+    today: LocalDate
+  ): Catalog = {
 
     def paymentPlansFor(planId: PlanId, billingPeriod: BillingPeriod): Map[Currency, PaymentPlan] = {
       val pricesByCurrency: Map[Currency, AmountMinorUnits] = pricingFor(planId)
@@ -31,27 +35,37 @@ object NewProductApi {
       }
     }
 
-    val voucherWindowRule = WindowRule(
+    def voucherWindowRule(issueDays: List[DayOfWeek]) = WindowRule(
+      startDate =  getStartDateFromFulfilmentFiles(ProductType.NewspaperVoucherBook, issueDays),
       maybeCutOffDay = Some(DayOfWeek.TUESDAY),
       maybeStartDelay = Some(DelayDays(20)),
       maybeSize = Some(WindowSizeDays(35))
     )
 
-    def voucherDateRules(allowedDays: List[DayOfWeek]) = StartDateRules(Some(DaysOfWeekRule(allowedDays)), Some(voucherWindowRule))
+    def voucherDateRules(allowedDays: List[DayOfWeek]) = StartDateRules(
+      Some(DaysOfWeekRule(allowedDays)),
+      Some(voucherWindowRule(allowedDays))
+    )
 
     val voucherMondayRules = voucherDateRules(List(MONDAY))
     val voucherSundayDateRules = voucherDateRules(List(SUNDAY))
     val voucherSaturdayDateRules = voucherDateRules(List(SATURDAY))
 
-    val homeDeliveryWindowRule = WindowRule(
+    def homeDeliveryWindowRule(issueDays: List[DayOfWeek]) = WindowRule(
+      startDate =  getStartDateFromFulfilmentFiles(ProductType.NewspaperHomeDelivery, issueDays),
       maybeCutOffDay = None,
       maybeStartDelay = Some(DelayDays(3)),
       maybeSize = Some(WindowSizeDays(28))
     )
 
-    def homeDeliveryDateRules(allowedDays: Option[List[DayOfWeek]]) = StartDateRules(allowedDays.map(DaysOfWeekRule), Some(homeDeliveryWindowRule))
+    def homeDeliveryDateRules(allowedDays: List[DayOfWeek]) = StartDateRules(
+      Some(DaysOfWeekRule(allowedDays)),
+      Some(homeDeliveryWindowRule(allowedDays))
+    )
 
-    val homeDeliveryEveryDayRules = homeDeliveryDateRules(None)
+    val homeDeliveryEveryDayRules = homeDeliveryDateRules(
+      List(MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY)
+    )
     val weekDays = List(
       MONDAY,
       TUESDAY,
@@ -60,13 +74,14 @@ object NewProductApi {
       FRIDAY
     )
 
-    val homeDeliverySixDayRules = homeDeliveryDateRules(Some(weekDays ++ List(SATURDAY)))
-    val homeDeliverySundayDateRules = homeDeliveryDateRules(Some(List(SUNDAY)))
-    val homeDeliverySaturdayDateRules = homeDeliveryDateRules(Some(List(SATURDAY)))
-    val homeDeliveryWeekendRules = homeDeliveryDateRules(Some(List(SATURDAY, SUNDAY)))
+    val homeDeliverySixDayRules = homeDeliveryDateRules(weekDays ++ List(SATURDAY))
+    val homeDeliverySundayDateRules = homeDeliveryDateRules(List(SUNDAY))
+    val homeDeliverySaturdayDateRules = homeDeliveryDateRules(List(SATURDAY))
+    val homeDeliveryWeekendRules = homeDeliveryDateRules(List(SATURDAY, SUNDAY))
 
     val todayOnlyRule = StartDateRules(
       windowRule = Some(WindowRule(
+        startDate = today,
         maybeSize = Some(WindowSizeDays(1)),
         maybeCutOffDay = None,
         maybeStartDelay = None
@@ -74,6 +89,7 @@ object NewProductApi {
     )
 
     val windowOf90daysStartingIn2Weeks =  WindowRule(
+      startDate = today.plusDays(14),
       maybeCutOffDay = None,
       maybeStartDelay = Some(DelayDays(14)),
       maybeSize = Some(WindowSizeDays(90))
@@ -90,10 +106,12 @@ object NewProductApi {
       billingPeriod: BillingPeriod
     ) = Plan(planId, planDescription, startDateRules, paymentPlansFor(planId, billingPeriod))
 
+    val guardianWeeklyIssueDays = List(DayOfWeek.FRIDAY)
     val guardianWeeklyStartDateRules =
       StartDateRules(
-        daysOfWeekRule = Some(DaysOfWeekRule(List(DayOfWeek.FRIDAY))),
+        daysOfWeekRule = Some(DaysOfWeekRule(guardianWeeklyIssueDays)),
         windowRule = Some(WindowRule(
+          startDate =      getStartDateFromFulfilmentFiles(ProductType.GuardianWeekly, guardianWeeklyIssueDays),
           maybeCutOffDay = Some(DayOfWeek.WEDNESDAY),
           maybeStartDelay = Some(DelayDays(7)),
           maybeSize = Some(WindowSizeDays(28))

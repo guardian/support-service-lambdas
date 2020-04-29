@@ -34,8 +34,8 @@ object Handler extends Logging {
     plansWithPrice <- PricesFromZuoraCatalog(zuoraEnv, fetchString, zuoraToPlanId).toApiGatewayOp("get prices from zuora catalog")
     getPricesForPlan = (planId: PlanId) => plansWithPrice.getOrElse(planId, Map.empty)
     startDateFromProductType <- StartDateFromFulfilmentFiles(stage, fetchString, today).toApiGatewayOp
-    catalog = NewProductApi.catalog(getPricesForPlan)
-    wireCatalog = WireCatalog.fromCatalog(catalog, startDateFromProductType, today)
+    catalog = NewProductApi.catalog(getPricesForPlan, startDateFromProductType, today)
+    wireCatalog = WireCatalog.fromCatalog(catalog)
   } yield Operation.noHealthcheck {
     Req: ApiGatewayRequest => ApiGatewayResponse(body = wireCatalog, statusCode = "200")
   }

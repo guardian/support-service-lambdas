@@ -1,7 +1,7 @@
 package com.gu.newproduct.api.addsubscription
 
 import java.io.{InputStream, OutputStream}
-import java.time.LocalDateTime
+import java.time.{LocalDate, LocalDateTime}
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.sqs.AwsSQSSend
@@ -76,13 +76,16 @@ object Steps {
       }
       zuoraClient = ZuoraRestRequestMaker(response, zuoraConfig)
       queueNames = emailQueuesFor(stage)
-      currentDate = () => currentDatetime().toLocalDate
+      currentDate = currentDatetime().toLocalDate
 
-      validatorFor = DateValidator.validatorFor(currentDate, _: DateRule)
+      validatorFor = DateValidator.validatorFor(() => currentDate, _: DateRule)
       zuoraEnv = ZuoraEnvironment.EnvForStage(stage)
-      plansWithPrice <- PricesFromZuoraCatalog(zuoraEnv, fetchString, zuoraIds.rateplanIdToApiId.get).toApiGatewayOp("get prices from zuora catalog")
+      plansWithPrice <- PricesFromZuoraCatalog(zuoraEnv, fetchString, zuoraIds.rateplanIdToApiId.get)
+        .toApiGatewayOp("get prices from zuora catalog")
       getPricesForPlan = (planId: PlanId) => plansWithPrice.getOrElse(planId, Map.empty)
-      catalog = NewProductApi.catalog(getPricesForPlan)
+      startDateFromProductType <- StartDateFromFulfilmentFiles(stage, fetchString, currentDate)
+        .toApiGatewayOp("getting fulfilment date files")
+      catalog = NewProductApi.catalog(getPricesForPlan, startDateFromProductType, currentDate)
 
       isValidStartDateForPlan = Function.uncurried(
         catalog.planForId andThen { plan =>

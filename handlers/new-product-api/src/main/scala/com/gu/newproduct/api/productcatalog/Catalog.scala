@@ -1,6 +1,6 @@
 package com.gu.newproduct.api.productcatalog
 
-import java.time.DayOfWeek
+import java.time.{DayOfWeek, LocalDate}
 
 import com.gu.i18n.Currency
 
@@ -215,15 +215,15 @@ case class StartDateRules(daysOfWeekRule: Option[DaysOfWeekRule] = None, windowR
 
 case class DaysOfWeekRule(allowedDays: List[DayOfWeek]) extends DateRule
 
-case class WindowRule(maybeCutOffDay: Option[DayOfWeek], maybeStartDelay: Option[DelayDays], maybeSize: Option[WindowSizeDays]) extends DateRule
+case class WindowRule(startDate: LocalDate, maybeCutOffDay: Option[DayOfWeek], maybeStartDelay: Option[DelayDays], maybeSize: Option[WindowSizeDays]) extends DateRule
 
 case class AmountMinorUnits(value: Int) extends AnyVal
 
-sealed trait ProductType { def value: String }
+case class ProductType(value: String)
 object ProductType {
-  val GuardianWeekly = new ProductType { override def value: String = "Guardian Weekly" }
-  val NewspaperVoucherBook = new ProductType { override def value: String = "Newspaper - Voucher Book" }
-  val NewspaperHomeDelivery = new ProductType { override def value: String = "Newspaper - Home Delivery" }
-  val DigitalPack = new ProductType { override def value: String = "Digital Pack" }
-  val Contribution = new ProductType { override def value: String = "Contribution" }
+  val GuardianWeekly = ProductType("Guardian Weekly")
+  val NewspaperVoucherBook = ProductType("Newspaper - Voucher Book")
+  val NewspaperHomeDelivery = ProductType("Newspaper - Home Delivery")
+  val DigitalPack = ProductType("Digital Pack")
+  val Contribution = ProductType("Contribution")
 }
