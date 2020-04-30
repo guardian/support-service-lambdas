@@ -12,7 +12,7 @@ import com.gu.newproduct.api.addsubscription.zuora.GetContacts.{BillToAddress, S
 import com.gu.newproduct.api.productcatalog.PlanId.{GuardianWeeklyDomestic6for6, GuardianWeeklyDomesticQuarterly}
 import com.gu.newproduct.api.productcatalog.RuleFixtures.testStartDateRules
 import com.gu.newproduct.api.productcatalog.ZuoraIds.{PlanAndCharge, ProductRatePlanChargeId, ProductRatePlanId}
-import com.gu.newproduct.api.productcatalog.{Plan, PlanDescription, PlanId, RuleFixtures}
+import com.gu.newproduct.api.productcatalog.{Plan, PlanDescription, PlanId}
 import com.gu.test.JsonMatchers.JsonMatcher
 import com.gu.util.apigateway.ApiGatewayRequest
 import com.gu.util.reader.AsyncTypes._

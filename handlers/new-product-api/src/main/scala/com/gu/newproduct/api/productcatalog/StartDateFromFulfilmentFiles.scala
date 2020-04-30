@@ -12,6 +12,7 @@ import play.api.libs.json._
 import scala.util.Try
 
 object StartDateFromFulfilmentFiles extends LazyLogging {
+
   case class FulfilmentDates(newSubscriptionEarliestStartDate: Option[LocalDate])
 
   object FulfilmentDates {
@@ -22,7 +23,7 @@ object StartDateFromFulfilmentFiles extends LazyLogging {
     (key: String) => JsResult.fromTry(Try(DayOfWeek.valueOf(key.toUpperCase)))
   }
 
-  private val productTypesWithFulfilmentDateFiles = List(
+  private val productTypesWithFulfilmentDateFiles: List[ProductType] = List(
     ProductType.GuardianWeekly,
     ProductType.NewspaperHomeDelivery,
     ProductType.NewspaperVoucherBook
@@ -30,12 +31,12 @@ object StartDateFromFulfilmentFiles extends LazyLogging {
 
   def apply(stage: Stage, fetchString: StringFromS3, today: LocalDate): Either[String, (ProductType, List[DayOfWeek]) => LocalDate] = {
     for {
-      mappings <- productTypesWithFulfilmentDateFiles.traverse { productType =>
-        getStartDateForProductType(stage, fetchString, today, productType)
-          .map(startDate => productType -> startDate)
-      }
-      _ = logger.info(s"Successfully fetched start date mappings from fulfilment date files: ${mappings}")
-    } yield lookupStartDateFunction(mappings.toMap) _
+      fulfilmentFileMap <- fetchFulfilmentFilesFromS3(productTypesWithFulfilmentDateFiles, fetchString, today, stage)
+      mappings <- getStartDatesFromFulfillmentFiles(fulfilmentFileMap)
+    } yield {
+      logger.info(s"Successfully fetched start date mappings from fulfilment date files: ${mappings}")
+      lookupStartDateFunction(mappings) _
+    }
   }
 
   private def ascending(d1: LocalDate, d2: LocalDate) = d1.isBefore(d2)
@@ -48,30 +49,42 @@ object StartDateFromFulfilmentFiles extends LazyLogging {
       .head
   }
 
-  private def getStartDateForProductType(
-    stage: Stage,
+  private def fetchFulfilmentFilesFromS3(
+    productTypes: List[ProductType],
     fetchString: StringFromS3,
     today: LocalDate,
-    productType: ProductType
-  ): Either[String, Map[DayOfWeek, LocalDate]] = {
-    val key = s"${productType.value}/${today}_${productType.value}.json"
-    val bucket = s"fulfilment-date-calculator-${stage.value.toLowerCase}"
-    for {
-      fulfilmentFileContents <- fetchString(
-        S3Location(
-          bucket = bucket,
-          key = key
-        )
-      ).toEither.leftMap(ex => s"Failed to fetch s3://$bucket/$key from s3: $ex")
-      parseFulfillmentFile <- Either
-        .catchNonFatal(Json.parse(fulfilmentFileContents))
-        .leftMap(ex => s"Failed to parse fulfilment file s3://$bucket/$key: $ex")
-      wireCatalog <- Either
-        .catchNonFatal(parseFulfillmentFile.as[Map[DayOfWeek, FulfilmentDates]])
-        .leftMap(ex => s"Failed to decode fulfilment file s3://$bucket/$key: $ex")
-      soonestDate = wireCatalog
-        .mapValues(_.newSubscriptionEarliestStartDate)
-        .collect { case (key, Some(value)) => key -> value }
-    } yield soonestDate
+    stage: Stage
+  ): Either[String, Map[ProductType, String]] = {
+    productTypes.traverse { productType =>
+      val key = s"${productType.value}/${today}_${productType.value}.json"
+      val bucket = s"fulfilment-date-calculator-${stage.value.toLowerCase}"
+      for {
+        fulfilmentFileContent <- fetchString(
+          S3Location(
+            bucket = bucket,
+            key = key
+          )
+        ).toEither.leftMap(ex => s"Failed to fetch s3://$bucket/$key from s3: $ex")
+      } yield (productType -> fulfilmentFileContent)
+    }.map(_.toMap)
+  }
+
+  private def getStartDatesFromFulfillmentFiles(
+    fulfilmentFileContents: Map[ProductType, String]
+  ): Either[String, Map[ProductType, Map[DayOfWeek, LocalDate]]] = {
+    fulfilmentFileContents.toList.traverse {
+      case (productType, fileContent) =>
+        for {
+          parseFulfillmentFile <- Either
+            .catchNonFatal(Json.parse(fileContent))
+            .leftMap(ex => s"Failed to parse fulfilment file for $productType: $ex")
+          wireCatalog <- Either
+            .catchNonFatal(parseFulfillmentFile.as[Map[DayOfWeek, FulfilmentDates]])
+            .leftMap(ex => s"Failed to decode fulfilment file $productType: $ex")
+          soonestDate = wireCatalog
+            .mapValues(_.newSubscriptionEarliestStartDate)
+            .collect { case (key, Some(value)) => key -> value }
+        } yield (productType -> soonestDate)
+    }.map(_.toMap)
   }
 }

@@ -219,11 +219,17 @@ case class WindowRule(startDate: LocalDate, maybeCutOffDay: Option[DayOfWeek], m
 
 case class AmountMinorUnits(value: Int) extends AnyVal
 
+/**
+ * ProductType
+ * Represents the ProductType field on a Product in Zuora
+ */
 case class ProductType(value: String)
 object ProductType {
   val GuardianWeekly = ProductType("Guardian Weekly")
   val NewspaperVoucherBook = ProductType("Newspaper - Voucher Book")
+  val NewspaperDigitalVoucherBook = ProductType("Newspaper - Digital Voucher Book")
   val NewspaperHomeDelivery = ProductType("Newspaper - Home Delivery")
   val DigitalPack = ProductType("Digital Pack")
   val Contribution = ProductType("Contribution")
+  val Membership = ProductType("Membership")
 }
