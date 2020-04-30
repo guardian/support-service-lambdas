@@ -15,6 +15,7 @@ import com.gu.newproduct.api.productcatalog.PlanId._
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
 import PaperEmailDataSerialiser._
+import com.gu.newproduct.api.productcatalog.RuleFixtures.testStartDateRules
 class PaperEmailDataTest extends FlatSpec with Matchers {
 
   val billto = BillToContact(
@@ -52,6 +53,7 @@ class PaperEmailDataTest extends FlatSpec with Matchers {
     plan = Plan(
       id = VoucherEveryDayPlus,
       description = PlanDescription("Everyday+"),
+      testStartDateRules,
       paymentPlans = Map(GBP -> PaymentPlan(GBP, AmountMinorUnits(1225), Monthly, "GBP 12.25 every month"))
     ),
     firstPaymentDate = LocalDate.of(2018, 12, 1),
@@ -122,7 +124,7 @@ class PaperEmailDataTest extends FlatSpec with Matchers {
 
   def fieldsForPlanIds(ids: List[PlanId]): List[Map[String, String]] = {
     val allPlansVoucherData = ids.map(
-      planId => directDebitVoucherData.copy(plan = Plan(planId, PlanDescription("test plan")))
+      planId => directDebitVoucherData.copy(plan = Plan(planId, PlanDescription("test plan"), testStartDateRules))
     )
     allPlansVoucherData.map(PaperEmailFields(_))
   }

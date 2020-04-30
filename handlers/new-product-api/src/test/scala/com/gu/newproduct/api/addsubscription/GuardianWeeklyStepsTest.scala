@@ -10,6 +10,7 @@ import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{ChargeOve
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.{BillToAddress, SoldToAddress}
 import com.gu.newproduct.api.productcatalog.PlanId.{GuardianWeeklyDomestic6for6, GuardianWeeklyDomesticQuarterly}
+import com.gu.newproduct.api.productcatalog.RuleFixtures.testStartDateRules
 import com.gu.newproduct.api.productcatalog.ZuoraIds.{PlanAndCharge, ProductRatePlanChargeId, ProductRatePlanId}
 import com.gu.newproduct.api.productcatalog.{Plan, PlanDescription, PlanId}
 import com.gu.test.JsonMatchers.JsonMatcher
@@ -33,8 +34,8 @@ class GuardianWeeklyStepsTest extends FlatSpec with Matchers {
   val newSubscriptionName = "A-Sxxxxxxxx"
   val testFirstPaymentDate = LocalDate.of(2018, 7, 18)
   val testZuoraAccountId = ZuoraAccountId("acccc")
-  val quarterlyRatePlan = Plan(GuardianWeeklyDomesticQuarterly, PlanDescription("GW Oct 18 - Quarterly - Domestic"))
-  val sixForSixRatePlan = Plan(GuardianWeeklyDomestic6for6, PlanDescription("GW Oct 18 - 6 for 6 - Domestic"))
+  val quarterlyRatePlan = Plan(GuardianWeeklyDomesticQuarterly, PlanDescription("GW Oct 18 - Quarterly - Domestic"), testStartDateRules)
+  val sixForSixRatePlan = Plan(GuardianWeeklyDomestic6for6, PlanDescription("GW Oct 18 - 6 for 6 - Domestic"), testStartDateRules)
   val testCaseId = CaseId("case")
   val testAcquistionSource = AcquisitionSource("CSR")
   val testCSR = CreatedByCSR("bob")

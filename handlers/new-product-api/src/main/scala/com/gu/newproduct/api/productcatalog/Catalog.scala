@@ -1,6 +1,6 @@
 package com.gu.newproduct.api.productcatalog
 
-import java.time.DayOfWeek
+import java.time.{DayOfWeek, LocalDate}
 
 import com.gu.i18n.Currency
 
@@ -193,7 +193,7 @@ object PlanId {
   def fromName(name: String): Option[PlanId] = supportedPlans.find(_.name == name)
 }
 
-case class Plan(id: PlanId, description: PlanDescription, startDateRules: StartDateRules = StartDateRules(), paymentPlans: Map[Currency, PaymentPlan] = Map.empty)
+case class Plan(id: PlanId, description: PlanDescription, startDateRules: StartDateRules, paymentPlans: Map[Currency, PaymentPlan] = Map.empty)
 
 sealed trait BillingPeriod
 object Monthly extends BillingPeriod
@@ -211,11 +211,25 @@ case class WindowSizeDays(value: Int) extends AnyVal
 
 sealed trait DateRule
 
-case class StartDateRules(daysOfWeekRule: Option[DaysOfWeekRule] = None, windowRule: Option[WindowRule] = None)
+case class StartDateRules(daysOfWeekRule: Option[DaysOfWeekRule] = None, windowRule: WindowRule)
 
 case class DaysOfWeekRule(allowedDays: List[DayOfWeek]) extends DateRule
 
-case class WindowRule(maybeCutOffDay: Option[DayOfWeek], maybeStartDelay: Option[DelayDays], maybeSize: Option[WindowSizeDays]) extends DateRule
+case class WindowRule(startDate: LocalDate, maybeCutOffDay: Option[DayOfWeek], maybeStartDelay: Option[DelayDays], maybeSize: Option[WindowSizeDays]) extends DateRule
 
 case class AmountMinorUnits(value: Int) extends AnyVal
 
+/**
+ * ProductType
+ * Represents the ProductType field on a Product in Zuora
+ */
+case class ProductType(value: String)
+object ProductType {
+  val GuardianWeekly = ProductType("Guardian Weekly")
+  val NewspaperVoucherBook = ProductType("Newspaper - Voucher Book")
+  val NewspaperDigitalVoucherBook = ProductType("Newspaper - Digital Voucher Book")
+  val NewspaperHomeDelivery = ProductType("Newspaper - Home Delivery")
+  val DigitalPack = ProductType("Digital Pack")
+  val Contribution = ProductType("Contribution")
+  val Membership = ProductType("Membership")
+}

@@ -1,10 +1,13 @@
 package com.gu.newproduct.api.productcatalog
 
+import java.time.{DayOfWeek, LocalDate}
+
 import com.gu.i18n.Currency
 import com.gu.newproduct.api.productcatalog.PlanId._
 import com.gu.newproduct.api.productcatalog.WireModel._
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
+import java.time.DayOfWeek._
 
 class CatalogWireTest extends FlatSpec with Matchers {
   it should "serialise catalog" in {
@@ -29,6 +32,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Sunday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2019-12-01",
         |              "sizeInDays": 1
         |            }
         |          },
@@ -48,6 +52,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Sunday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2019-12-01",
         |              "sizeInDays": 1
         |            }
         |          },
@@ -66,6 +71,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Monday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2020-03-01",
         |              "cutOffDayInclusive": "Tuesday",
         |              "startDaysAfterCutOff": 20,
         |              "sizeInDays": 35
@@ -87,6 +93,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Monday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2020-03-01",
         |              "cutOffDayInclusive": "Tuesday",
         |              "startDaysAfterCutOff": 20,
         |              "sizeInDays": 35
@@ -108,6 +115,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Saturday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2020-03-02",
         |              "cutOffDayInclusive": "Tuesday",
         |              "startDaysAfterCutOff": 20,
         |              "sizeInDays": 35
@@ -129,6 +137,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Saturday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2020-03-02",
         |              "cutOffDayInclusive": "Tuesday",
         |              "startDaysAfterCutOff": 20,
         |              "sizeInDays": 35
@@ -150,6 +159,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Monday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2020-03-01",
         |              "cutOffDayInclusive": "Tuesday",
         |              "startDaysAfterCutOff": 20,
         |              "sizeInDays": 35
@@ -171,6 +181,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Monday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2020-03-01",
         |              "cutOffDayInclusive": "Tuesday",
         |              "startDaysAfterCutOff": 20,
         |              "sizeInDays": 35
@@ -192,6 +203,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Sunday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2020-03-03",
         |              "cutOffDayInclusive": "Tuesday",
         |              "startDaysAfterCutOff": 20,
         |              "sizeInDays": 35
@@ -213,6 +225,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Sunday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2020-03-03",
         |              "cutOffDayInclusive": "Tuesday",
         |              "startDaysAfterCutOff": 20,
         |              "sizeInDays": 35
@@ -234,6 +247,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Saturday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2020-03-02",
         |              "cutOffDayInclusive": "Tuesday",
         |              "startDaysAfterCutOff": 20,
         |              "sizeInDays": 35
@@ -255,6 +269,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Saturday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2020-03-02",
         |              "cutOffDayInclusive": "Tuesday",
         |              "startDaysAfterCutOff": 20,
         |              "sizeInDays": 35
@@ -287,6 +302,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Sunday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2020-02-01",
         |              "startDaysAfterCutOff": 3,
         |              "sizeInDays": 28
         |            }
@@ -313,6 +329,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Sunday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2020-02-01",
         |              "startDaysAfterCutOff": 3,
         |              "sizeInDays": 28
         |            }
@@ -333,6 +350,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Saturday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2020-02-03",
         |              "startDaysAfterCutOff": 3,
         |              "sizeInDays": 28
         |            }
@@ -353,6 +371,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Saturday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2020-02-03",
         |              "startDaysAfterCutOff": 3,
         |              "sizeInDays": 28
         |            }
@@ -378,6 +397,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Saturday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2020-02-02",
         |              "startDaysAfterCutOff": 3,
         |              "sizeInDays": 28
         |            }
@@ -403,6 +423,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Saturday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2020-02-02",
         |              "startDaysAfterCutOff": 3,
         |              "sizeInDays": 28
         |            }
@@ -423,6 +444,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Sunday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2020-02-04",
         |              "startDaysAfterCutOff": 3,
         |              "sizeInDays": 28
         |            }
@@ -443,6 +465,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Sunday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2020-02-04",
         |              "startDaysAfterCutOff": 3,
         |              "sizeInDays": 28
         |            }
@@ -464,6 +487,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Sunday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2020-02-05",
         |              "startDaysAfterCutOff": 3,
         |              "sizeInDays": 28
         |            }
@@ -485,6 +509,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Sunday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2020-02-05",
         |              "startDaysAfterCutOff": 3,
         |              "sizeInDays": 28
         |            }
@@ -516,8 +541,9 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Sunday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2019-12-15",
         |              "startDaysAfterCutOff": 14,
-        |              "sizeInDays":90
+        |              "sizeInDays": 90
         |            }
         |          },
         |          "paymentPlans": [
@@ -546,8 +572,9 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Sunday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2019-12-15",
         |              "startDaysAfterCutOff": 14,
-        |              "sizeInDays":90
+        |              "sizeInDays": 90
         |            }
         |          },
         |          "paymentPlans": [
@@ -575,6 +602,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Friday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2020-01-01",
         |              "cutOffDayInclusive": "Wednesday",
         |              "startDaysAfterCutOff": 7,
         |              "sizeInDays": 28
@@ -600,6 +628,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Friday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2020-01-01",
         |              "cutOffDayInclusive": "Wednesday",
         |              "startDaysAfterCutOff": 7,
         |              "sizeInDays": 28
@@ -625,6 +654,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Friday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2020-01-01",
         |              "cutOffDayInclusive": "Wednesday",
         |              "startDaysAfterCutOff": 7,
         |              "sizeInDays": 28
@@ -668,6 +698,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Friday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2020-01-01",
         |              "cutOffDayInclusive": "Wednesday",
         |              "startDaysAfterCutOff": 7,
         |              "sizeInDays": 28
@@ -693,6 +724,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Friday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2020-01-01",
         |              "cutOffDayInclusive": "Wednesday",
         |              "startDaysAfterCutOff": 7,
         |              "sizeInDays": 28
@@ -718,6 +750,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Friday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2020-01-01",
         |              "cutOffDayInclusive": "Wednesday",
         |              "startDaysAfterCutOff": 7,
         |              "sizeInDays": 28
@@ -830,7 +863,35 @@ class CatalogWireTest extends FlatSpec with Matchers {
       )
     }
 
-    val wireCatalog = WireCatalog.fromCatalog(NewProductApi.catalog(fakePricesFor))
+    def stubGetFirstAvailableStartDate(productType: ProductType, daysOfWeek: List[DayOfWeek]) = {
+      (productType, daysOfWeek) match {
+        case (ProductType.GuardianWeekly, List(FRIDAY) ) =>
+          LocalDate.of(2020, 1, 1)
+        case (ProductType.NewspaperHomeDelivery, List(MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY) ) =>
+          LocalDate.of(2020, 2, 1)
+        case (ProductType.NewspaperHomeDelivery, List(MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY) ) =>
+          LocalDate.of(2020, 2, 2)
+        case (ProductType.NewspaperHomeDelivery, List(SATURDAY) ) =>
+          LocalDate.of(2020, 2, 3)
+        case (ProductType.NewspaperHomeDelivery, List(SUNDAY) ) =>
+          LocalDate.of(2020, 2, 4)
+        case (ProductType.NewspaperHomeDelivery, List(SATURDAY, SUNDAY) ) =>
+          LocalDate.of(2020, 2, 5)
+        case (ProductType.NewspaperVoucherBook, List(MONDAY) ) =>
+          LocalDate.of(2020, 3, 1)
+        case (ProductType.NewspaperVoucherBook, List(SATURDAY) ) =>
+          LocalDate.of(2020, 3, 2)
+        case (ProductType.NewspaperVoucherBook, List(SUNDAY) ) =>
+          LocalDate.of(2020, 3, 3)
+      }
+    }
+
+    val today = LocalDate.of(2019,12,1)
+
+    val wireCatalog = WireCatalog.fromCatalog(
+      NewProductApi.catalog(fakePricesFor, stubGetFirstAvailableStartDate, today)
+    )
+
     Json.toJson(wireCatalog) shouldBe Json.parse(expected)
   }
 }

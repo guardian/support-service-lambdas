@@ -11,6 +11,7 @@ import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{ChargeOverride, SubscriptionName, ZuoraCreateSubRequest, ZuoraCreateSubRequestRatePlan}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.productcatalog.PlanId.MonthlyContribution
+import com.gu.newproduct.api.productcatalog.RuleFixtures.testStartDateRules
 import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, Plan, PlanDescription, PlanId}
 import com.gu.newproduct.api.productcatalog.ZuoraIds.{PlanAndCharge, ProductRatePlanChargeId, ProductRatePlanId}
 import com.gu.test.JsonMatchers.JsonMatcher
@@ -72,7 +73,7 @@ class ContributionStepsTest extends FlatSpec with Matchers {
 
     def fakeGetCustomerData(zuoraAccountId: ZuoraAccountId) = ContinueProcessing(TestData.contributionCustomerData)
 
-    def getPlan(planId: PlanId) = Plan(MonthlyContribution, PlanDescription("some description"))
+    def getPlan(planId: PlanId) = Plan(MonthlyContribution, PlanDescription("some description"), testStartDateRules)
 
     def currentDate() = LocalDate.of(2018, 12, 12)
 

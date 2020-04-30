@@ -7,7 +7,8 @@ import com.gu.newproduct.TestData
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.SubscriptionName
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.productcatalog.PlanId.VoucherSunday
-import com.gu.newproduct.api.productcatalog.{Plan, PlanDescription}
+import com.gu.newproduct.api.productcatalog.RuleFixtures.testStartDateRules
+import com.gu.newproduct.api.productcatalog.{Plan, PlanDescription, RuleFixtures}
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import org.scalatest.{AsyncFlatSpec, Matchers}
@@ -53,7 +54,7 @@ class SendConfirmationEmailTest extends AsyncFlatSpec with Matchers {
   }
 
   val testVoucherData = PaperEmailData(
-    plan = Plan(VoucherSunday, PlanDescription("Sunday")),
+    plan = Plan(VoucherSunday, PlanDescription("Sunday"), testStartDateRules),
     firstPaymentDate = LocalDate.of(2018, 9, 24),
     firstPaperDate = LocalDate.of(2018, 9, 23),
     subscriptionName = SubscriptionName("subName"),

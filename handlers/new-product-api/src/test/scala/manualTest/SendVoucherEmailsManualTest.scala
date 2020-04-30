@@ -16,6 +16,7 @@ import com.gu.newproduct.api.productcatalog.PlanId.VoucherEveryDayPlus
 import com.gu.newproduct.api.productcatalog._
 import com.gu.util.config.Stage
 import com.gu.newproduct.api.addsubscription.email.paper.PaperEmailDataSerialiser._
+import com.gu.newproduct.api.productcatalog.RuleFixtures.testStartDateRules
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
@@ -59,7 +60,7 @@ object SendVoucherEmailsManualTest {
     val randomSubName = "T-" + Random.alphanumeric.take(10).mkString
 
     PaperEmailData(
-      plan = Plan(VoucherEveryDayPlus, PlanDescription("Everyday+"), StartDateRules(), Map(GBP -> PaymentPlan(GBP, AmountMinorUnits(3112), Monthly, "GBP 32.12 every month"))),
+      plan = Plan(VoucherEveryDayPlus, PlanDescription("Everyday+"), testStartDateRules, Map(GBP -> PaymentPlan(GBP, AmountMinorUnits(3112), Monthly, "GBP 32.12 every month"))),
       firstPaymentDate = LocalDate.of(2018, 12, 12),
       firstPaperDate = LocalDate.of(2018, 11, 12),
       subscriptionName = SubscriptionName(randomSubName),
