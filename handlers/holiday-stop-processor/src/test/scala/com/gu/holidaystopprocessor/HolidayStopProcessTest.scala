@@ -60,7 +60,7 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
 
   private val fulfilmentDatesFetcher = new FulfilmentDatesFetcher {
     override def getFulfilmentDates(zuoraProductType: ZuoraProductType, date: LocalDate): Either[FulfilmentDatesFetcherError, Map[DayOfWeek, FulfilmentDates]] = {
-      Map(DayOfWeek.FRIDAY -> FulfilmentDates(today, today, Some(targetProcessingDate))).asRight
+      Map(DayOfWeek.FRIDAY -> FulfilmentDates(today, today, Some(targetProcessingDate), today)).asRight
     }
   }
 

@@ -42,6 +42,7 @@ class FulfilmentDatesFetcherTest extends FlatSpec {
                 holidayStopFirstAvailableDate = LocalDate.parse("2019-12-16"),
                 holidayStopProcessorTargetDate = None,
                 finalFulfilmentFileGenerationDate = LocalDate.parse("2019-12-12"),
+                newSubscriptionEarliestStartDate = LocalDate.parse("2019-12-16")
               )
             )
           )

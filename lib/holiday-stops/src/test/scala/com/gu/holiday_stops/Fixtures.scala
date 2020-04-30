@@ -243,7 +243,8 @@ object Fixtures extends Assertions {
     Product_Name__c = ProductName("Gu Weekly"),
     Holiday_Stop_Request_Detail__r = Some(RecordsWrapperCaseClass(requestDetail)),
     Withdrawn_Time__c = None,
-    Is_Withdrawn__c = HolidayStopRequestIsWithdrawn(false)
+    Is_Withdrawn__c = HolidayStopRequestIsWithdrawn(false),
+    Bulk_Suspension_Reason__c = None
   )
 
   def mkHolidayStopRequestDetailsFromHolidayStopRequest(request: HolidayStopRequest, chargeCode: String) = HolidayStopRequestsDetail(
