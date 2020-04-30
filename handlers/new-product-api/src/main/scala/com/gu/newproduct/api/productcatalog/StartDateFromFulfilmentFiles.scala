@@ -35,13 +35,13 @@ object StartDateFromFulfilmentFiles extends LazyLogging {
       mappings <- getStartDatesFromFulfillmentFiles(fulfilmentFileMap)
     } yield {
       logger.info(s"Successfully fetched start date mappings from fulfilment date files: ${mappings}")
-      lookupStartDateFunction(mappings) _
+      lookupStartDate(mappings) _
     }
   }
 
   private def ascending(d1: LocalDate, d2: LocalDate) = d1.isBefore(d2)
 
-  def lookupStartDateFunction(startDateMappings: Map[ProductType, Map[DayOfWeek, LocalDate]])(productType: ProductType, issueDays: List[DayOfWeek]): LocalDate = {
+  def lookupStartDate(startDateMappings: Map[ProductType, Map[DayOfWeek, LocalDate]])(productType: ProductType, issueDays: List[DayOfWeek]): LocalDate = {
     startDateMappings(productType)
       .collect { case (issueDay, startDate) if issueDays.contains(issueDay) => startDate }
       .toList

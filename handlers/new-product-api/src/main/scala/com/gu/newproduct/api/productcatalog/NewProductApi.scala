@@ -10,6 +10,13 @@ import com.gu.newproduct.api.productcatalog.PlanId._
 
 
 object NewProductApi {
+  val DigiPackFreeTrialPeriodDays = 14
+  val HomeDeliverySubscriptionStartDateWindowSize = WindowSizeDays(28)
+  val GuardianWeeklySubscriptionStartDateWindowSize = WindowSizeDays(28)
+  val VoucherSubscriptionStartDateWindowSize = WindowSizeDays(35)
+  val ContributionStartDateWindowSize = WindowSizeDays(1)
+  val DigiPackStartDateWindowSize = WindowSizeDays(90)
+
   def catalog(
     pricingFor: PlanId => Map[Currency, AmountMinorUnits],
     getStartDateFromFulfilmentFiles: (ProductType, List[DayOfWeek]) => LocalDate,
@@ -35,12 +42,14 @@ object NewProductApi {
       }
     }
 
-    def voucherWindowRule(issueDays: List[DayOfWeek]) = WindowRule(
-      startDate =  getStartDateFromFulfilmentFiles(ProductType.NewspaperVoucherBook, issueDays),
-      maybeCutOffDay = Some(DayOfWeek.TUESDAY),
-      maybeStartDelay = Some(DelayDays(20)),
-      maybeSize = Some(WindowSizeDays(35))
-    )
+    def voucherWindowRule(issueDays: List[DayOfWeek]) = {
+      WindowRule(
+        startDate = getStartDateFromFulfilmentFiles(ProductType.NewspaperVoucherBook, issueDays),
+        maybeCutOffDay = Some(DayOfWeek.TUESDAY),
+        maybeStartDelay = Some(DelayDays(20)),
+        maybeSize = Some(VoucherSubscriptionStartDateWindowSize)
+      )
+    }
 
     def voucherDateRules(allowedDays: List[DayOfWeek]) = StartDateRules(
       Some(DaysOfWeekRule(allowedDays)),
@@ -55,7 +64,7 @@ object NewProductApi {
       startDate =  getStartDateFromFulfilmentFiles(ProductType.NewspaperHomeDelivery, issueDays),
       maybeCutOffDay = None,
       maybeStartDelay = Some(DelayDays(3)),
-      maybeSize = Some(WindowSizeDays(28))
+      maybeSize = Some(HomeDeliverySubscriptionStartDateWindowSize)
     )
 
     def homeDeliveryDateRules(allowedDays: List[DayOfWeek]) = StartDateRules(
@@ -79,24 +88,24 @@ object NewProductApi {
     val homeDeliverySaturdayDateRules = homeDeliveryDateRules(List(SATURDAY))
     val homeDeliveryWeekendRules = homeDeliveryDateRules(List(SATURDAY, SUNDAY))
 
-    val todayOnlyRule = StartDateRules(
+    val contributionsRule = StartDateRules(
       windowRule = WindowRule(
         startDate = today,
-        maybeSize = Some(WindowSizeDays(1)),
+        maybeSize = Some(ContributionStartDateWindowSize),
         maybeCutOffDay = None,
         maybeStartDelay = None
       )
     )
 
-    val windowOf90daysStartingIn2Weeks =  WindowRule(
-      startDate = today.plusDays(14),
+    val digiPackWindowRule =  WindowRule(
+      startDate = today.plusDays(DigiPackFreeTrialPeriodDays),
       maybeCutOffDay = None,
       maybeStartDelay = Some(DelayDays(14)),
-      maybeSize = Some(WindowSizeDays(90))
+      maybeSize = Some(DigiPackStartDateWindowSize)
     )
 
     val digipackStartRules = StartDateRules(
-      windowRule = windowOf90daysStartingIn2Weeks
+      windowRule = digiPackWindowRule
     )
 
     def planWithPayment(
@@ -114,7 +123,7 @@ object NewProductApi {
           startDate = getStartDateFromFulfilmentFiles(ProductType.GuardianWeekly, guardianWeeklyIssueDays),
           maybeCutOffDay = Some(DayOfWeek.WEDNESDAY),
           maybeStartDelay = Some(DelayDays(7)),
-          maybeSize = Some(WindowSizeDays(28))
+          maybeSize = Some(GuardianWeeklySubscriptionStartDateWindowSize)
         )
       )
 
@@ -130,8 +139,8 @@ object NewProductApi {
       voucherSaturdayPlus = planWithPayment(VoucherSaturdayPlus, PlanDescription("Saturday+"), voucherSaturdayDateRules, Monthly),
       voucherSunday = planWithPayment(VoucherSunday, PlanDescription("Sunday"), voucherSundayDateRules, Monthly),
       voucherSundayPlus = planWithPayment(VoucherSundayPlus, PlanDescription("Sunday+"), voucherSundayDateRules, Monthly),
-      monthlyContribution = planWithPayment(MonthlyContribution, PlanDescription("Monthly"), todayOnlyRule, Monthly),
-      annualContribution = planWithPayment(AnnualContribution, PlanDescription("Annual"), todayOnlyRule, Monthly),
+      monthlyContribution = planWithPayment(MonthlyContribution, PlanDescription("Monthly"), contributionsRule, Monthly),
+      annualContribution = planWithPayment(AnnualContribution, PlanDescription("Annual"), contributionsRule, Monthly),
       homeDeliveryEveryDay = planWithPayment(HomeDeliveryEveryDay, PlanDescription("Everyday"), homeDeliveryEveryDayRules, Monthly),
       homeDeliverySaturday = planWithPayment(HomeDeliverySaturday, PlanDescription("Saturday"), homeDeliverySaturdayDateRules, Monthly),
       homeDeliverySunday = planWithPayment(HomeDeliverySunday, PlanDescription("Sunday"), homeDeliverySundayDateRules, Monthly),
@@ -152,5 +161,4 @@ object NewProductApi {
       guardianWeeklyROWAnnual = planWithPayment(GuardianWeeklyROWAnnual, PlanDescription("GW Oct 18 - Annual - ROW"), guardianWeeklyStartDateRules, Annual),
     )
   }
-
 }
