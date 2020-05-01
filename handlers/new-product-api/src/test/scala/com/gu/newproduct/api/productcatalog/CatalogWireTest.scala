@@ -72,8 +72,6 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |            ],
         |            "selectableWindow": {
         |              "startDate": "2020-03-01",
-        |              "cutOffDayInclusive": "Tuesday",
-        |              "startDaysAfterCutOff": 20,
         |              "sizeInDays": 35
         |            }
         |          },
@@ -94,8 +92,6 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |            ],
         |            "selectableWindow": {
         |              "startDate": "2020-03-01",
-        |              "cutOffDayInclusive": "Tuesday",
-        |              "startDaysAfterCutOff": 20,
         |              "sizeInDays": 35
         |            }
         |          },
@@ -116,8 +112,6 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |            ],
         |            "selectableWindow": {
         |              "startDate": "2020-03-02",
-        |              "cutOffDayInclusive": "Tuesday",
-        |              "startDaysAfterCutOff": 20,
         |              "sizeInDays": 35
         |            }
         |          },
@@ -138,8 +132,6 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |            ],
         |            "selectableWindow": {
         |              "startDate": "2020-03-02",
-        |              "cutOffDayInclusive": "Tuesday",
-        |              "startDaysAfterCutOff": 20,
         |              "sizeInDays": 35
         |            }
         |          },
@@ -160,8 +152,6 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |            ],
         |            "selectableWindow": {
         |              "startDate": "2020-03-01",
-        |              "cutOffDayInclusive": "Tuesday",
-        |              "startDaysAfterCutOff": 20,
         |              "sizeInDays": 35
         |            }
         |          },
@@ -182,8 +172,6 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |            ],
         |            "selectableWindow": {
         |              "startDate": "2020-03-01",
-        |              "cutOffDayInclusive": "Tuesday",
-        |              "startDaysAfterCutOff": 20,
         |              "sizeInDays": 35
         |            }
         |          },
@@ -204,8 +192,6 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |            ],
         |            "selectableWindow": {
         |              "startDate": "2020-03-03",
-        |              "cutOffDayInclusive": "Tuesday",
-        |              "startDaysAfterCutOff": 20,
         |              "sizeInDays": 35
         |            }
         |          },
@@ -226,8 +212,6 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |            ],
         |            "selectableWindow": {
         |              "startDate": "2020-03-03",
-        |              "cutOffDayInclusive": "Tuesday",
-        |              "startDaysAfterCutOff": 20,
         |              "sizeInDays": 35
         |            }
         |          },
@@ -248,8 +232,6 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |            ],
         |            "selectableWindow": {
         |              "startDate": "2020-03-02",
-        |              "cutOffDayInclusive": "Tuesday",
-        |              "startDaysAfterCutOff": 20,
         |              "sizeInDays": 35
         |            }
         |          },
@@ -270,8 +252,6 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |            ],
         |            "selectableWindow": {
         |              "startDate": "2020-03-02",
-        |              "cutOffDayInclusive": "Tuesday",
-        |              "startDaysAfterCutOff": 20,
         |              "sizeInDays": 35
         |            }
         |          },
@@ -303,7 +283,6 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |            ],
         |            "selectableWindow": {
         |              "startDate": "2020-02-01",
-        |              "startDaysAfterCutOff": 3,
         |              "sizeInDays": 28
         |            }
         |          },
@@ -330,7 +309,6 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |            ],
         |            "selectableWindow": {
         |              "startDate": "2020-02-01",
-        |              "startDaysAfterCutOff": 3,
         |              "sizeInDays": 28
         |            }
         |          },
@@ -351,7 +329,6 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |            ],
         |            "selectableWindow": {
         |              "startDate": "2020-02-03",
-        |              "startDaysAfterCutOff": 3,
         |              "sizeInDays": 28
         |            }
         |          },
@@ -372,7 +349,6 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |            ],
         |            "selectableWindow": {
         |              "startDate": "2020-02-03",
-        |              "startDaysAfterCutOff": 3,
         |              "sizeInDays": 28
         |            }
         |          },
@@ -398,7 +374,6 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |            ],
         |            "selectableWindow": {
         |              "startDate": "2020-02-02",
-        |              "startDaysAfterCutOff": 3,
         |              "sizeInDays": 28
         |            }
         |          },
@@ -424,7 +399,6 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |            ],
         |            "selectableWindow": {
         |              "startDate": "2020-02-02",
-        |              "startDaysAfterCutOff": 3,
         |              "sizeInDays": 28
         |            }
         |          },
@@ -445,7 +419,6 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |            ],
         |            "selectableWindow": {
         |              "startDate": "2020-02-04",
-        |              "startDaysAfterCutOff": 3,
         |              "sizeInDays": 28
         |            }
         |          },
@@ -466,7 +439,6 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |            ],
         |            "selectableWindow": {
         |              "startDate": "2020-02-04",
-        |              "startDaysAfterCutOff": 3,
         |              "sizeInDays": 28
         |            }
         |          },
@@ -488,7 +460,6 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |            ],
         |            "selectableWindow": {
         |              "startDate": "2020-02-05",
-        |              "startDaysAfterCutOff": 3,
         |              "sizeInDays": 28
         |            }
         |          },
@@ -510,7 +481,6 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |            ],
         |            "selectableWindow": {
         |              "startDate": "2020-02-05",
-        |              "startDaysAfterCutOff": 3,
         |              "sizeInDays": 28
         |            }
         |          },
@@ -542,7 +512,6 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |            ],
         |            "selectableWindow": {
         |              "startDate": "2019-12-15",
-        |              "startDaysAfterCutOff": 14,
         |              "sizeInDays": 90
         |            }
         |          },
@@ -573,7 +542,6 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |            ],
         |            "selectableWindow": {
         |              "startDate": "2019-12-15",
-        |              "startDaysAfterCutOff": 14,
         |              "sizeInDays": 90
         |            }
         |          },
@@ -603,8 +571,6 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |            ],
         |            "selectableWindow": {
         |              "startDate": "2020-01-01",
-        |              "cutOffDayInclusive": "Wednesday",
-        |              "startDaysAfterCutOff": 7,
         |              "sizeInDays": 28
         |            }
         |          },
@@ -629,8 +595,6 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |            ],
         |            "selectableWindow": {
         |              "startDate": "2020-01-01",
-        |              "cutOffDayInclusive": "Wednesday",
-        |              "startDaysAfterCutOff": 7,
         |              "sizeInDays": 28
         |            }
         |          },
@@ -655,8 +619,6 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |            ],
         |            "selectableWindow": {
         |              "startDate": "2020-01-01",
-        |              "cutOffDayInclusive": "Wednesday",
-        |              "startDaysAfterCutOff": 7,
         |              "sizeInDays": 28
         |            }
         |          },
@@ -699,8 +661,6 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |            ],
         |            "selectableWindow": {
         |              "startDate": "2020-01-01",
-        |              "cutOffDayInclusive": "Wednesday",
-        |              "startDaysAfterCutOff": 7,
         |              "sizeInDays": 28
         |            }
         |          },
@@ -725,8 +685,6 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |            ],
         |            "selectableWindow": {
         |              "startDate": "2020-01-01",
-        |              "cutOffDayInclusive": "Wednesday",
-        |              "startDaysAfterCutOff": 7,
         |              "sizeInDays": 28
         |            }
         |          },
@@ -751,8 +709,6 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |            ],
         |            "selectableWindow": {
         |              "startDate": "2020-01-01",
-        |              "cutOffDayInclusive": "Wednesday",
-        |              "startDaysAfterCutOff": 7,
         |              "sizeInDays": 28
         |            }
         |          },

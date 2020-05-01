@@ -45,8 +45,6 @@ object NewProductApi {
     def voucherWindowRule(issueDays: List[DayOfWeek]) = {
       WindowRule(
         startDate = getStartDateFromFulfilmentFiles(ProductType.NewspaperVoucherBook, issueDays),
-        maybeCutOffDay = Some(DayOfWeek.TUESDAY),
-        maybeStartDelay = Some(DelayDays(20)),
         maybeSize = Some(VoucherSubscriptionStartDateWindowSize)
       )
     }
@@ -62,8 +60,6 @@ object NewProductApi {
 
     def homeDeliveryWindowRule(issueDays: List[DayOfWeek]) = WindowRule(
       startDate =  getStartDateFromFulfilmentFiles(ProductType.NewspaperHomeDelivery, issueDays),
-      maybeCutOffDay = None,
-      maybeStartDelay = Some(DelayDays(3)),
       maybeSize = Some(HomeDeliverySubscriptionStartDateWindowSize)
     )
 
@@ -92,15 +88,11 @@ object NewProductApi {
       windowRule = WindowRule(
         startDate = today,
         maybeSize = Some(ContributionStartDateWindowSize),
-        maybeCutOffDay = None,
-        maybeStartDelay = None
       )
     )
 
     val digiPackWindowRule =  WindowRule(
       startDate = today.plusDays(DigiPackFreeTrialPeriodDays),
-      maybeCutOffDay = None,
-      maybeStartDelay = Some(DelayDays(14)),
       maybeSize = Some(DigiPackStartDateWindowSize)
     )
 
@@ -121,8 +113,6 @@ object NewProductApi {
         daysOfWeekRule = Some(DaysOfWeekRule(guardianWeeklyIssueDays)),
         windowRule = WindowRule(
           startDate = getStartDateFromFulfilmentFiles(ProductType.GuardianWeekly, guardianWeeklyIssueDays),
-          maybeCutOffDay = Some(DayOfWeek.WEDNESDAY),
-          maybeStartDelay = Some(DelayDays(7)),
           maybeSize = Some(GuardianWeeklySubscriptionStartDateWindowSize)
         )
       )
