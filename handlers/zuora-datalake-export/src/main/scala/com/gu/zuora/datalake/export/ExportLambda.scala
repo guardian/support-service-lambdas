@@ -227,7 +227,7 @@ object ZuoraApiHost {
 
 case class ZuoraAquaStatefulApi(
   version: String = "1.2",
-  project: String = "zuora-datalake-export-1", // Changing this will result in new stateful session which means full load
+  project: String = "zuora-datalake-export-2", // Changing this will result in new stateful session which means full load
   partner: String
 )
 object ZuoraAquaStatefulApi {
