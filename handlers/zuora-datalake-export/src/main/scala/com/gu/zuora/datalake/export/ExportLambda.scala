@@ -2,22 +2,25 @@ package com.gu.zuora.datalake.export
 
 import java.io.ByteArrayInputStream
 import java.nio.charset.StandardCharsets
-import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import io.circe.generic.auto._
-import io.circe.parser._
-import io.github.mkotsur.aws.handler.Lambda._
-import io.github.mkotsur.aws.handler.Lambda
+import java.time.{LocalDate, LocalTime}
+
+import com.amazonaws.auth.profile.ProfileCredentialsProvider
+import com.amazonaws.regions.Regions
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.s3.model.{CannedAccessControlList, ObjectMetadata, PutObjectRequest}
 import com.typesafe.scalalogging.LazyLogging
+import enumeratum._
+import io.circe.generic.auto._
+import io.circe.parser._
+import io.github.mkotsur.aws.handler.Lambda
+import io.github.mkotsur.aws.handler.Lambda._
 import scalaj.http.{BaseHttp, HttpOptions}
 
-import scala.io.Source
 import scala.concurrent.duration._
+import scala.io.Source
 import scala.util.Try
-import enumeratum._
 
 /**
  * https://knowledgecenter.zuora.com/DC_Developers/AB_Aggregate_Query_API/BA_Stateless_and_Stateful_Modes:
@@ -51,7 +54,7 @@ import enumeratum._
  *    in AQuA request explicitly.
  */
 
-case class ExportFromDate(exportFromDate: String)
+case class InputData(exportFromDate: String, existingJobId: Option[String] = None)
 case class Oauth(clientId: String, clientSecret: String)
 case class ZuoraDatalakeExport(oauth: Oauth)
 case class Config(stage: String, baseUrl: String, zuoraDatalakeExport: ZuoraDatalakeExport)
@@ -68,20 +71,20 @@ case class JobResults(status: String, id: String, batches: List[Batch], incremen
  *   - {"exportFromDate": "beginning"} input to lambda will export incremental changes since beginning of time
  *   - Export is NOT idempotent, i.e., lake must ingest the increment before re-running the export
  */
-class ExportLambda extends Lambda[ExportFromDate, String] with LazyLogging {
-  override def handle(exportFromDate: ExportFromDate, context: Context) = {
+object ExportLambda extends Lambda[InputData, String] with LazyLogging {
+  override def handle(exportFromDate: InputData, context: Context) = {
     (Preconditions andThen Program andThen Postconditions)(exportFromDate)
   }
 }
 
-object Preconditions extends (ExportFromDate => String) {
-  def apply(incrementalDate: ExportFromDate): String =
-    incrementalDate.exportFromDate match {
-      case "afterLastIncrement" => "afterLastIncrement"
-      case "beginning" => "beginning"
-      case yyyyMMdd =>
-        validateDateFormat(yyyyMMdd)
-        yyyyMMdd
+object Preconditions extends (InputData => InputData) {
+  def apply(inputData: InputData): InputData =
+    inputData.exportFromDate match {
+      case "afterLastIncrement" => inputData
+      case "beginning" => inputData
+      case specificDate =>
+        validateDateFormat(specificDate)
+        inputData
     }
 
   private val requiredFormat = "yyyy-MM-dd"
@@ -92,10 +95,10 @@ object Preconditions extends (ExportFromDate => String) {
   }
 }
 
-object Program extends (String => JobResults) {
-  def apply(incrementalDate: String): JobResults = {
-    val date = IncrementalDate(incrementalDate)
-    val jobId = StartAquaJob(date)
+object Program extends (InputData => JobResults) {
+  def apply(inputData: InputData): JobResults = {
+    val date = IncrementalDate(inputData.exportFromDate)
+    val jobId = inputData.existingJobId.getOrElse(StartAquaJob(date))
     val jobResult = GetJobResult(jobId)
     jobResult.batches.foreach { batch =>
       val csvFile = GetResultsFile(batch)
@@ -250,7 +253,10 @@ object DeletedColumn {
 object ReadConfig {
   def apply(): Config = {
     val stage = System.getenv("Stage")
-    val s3Client = AmazonS3Client.builder.build()
+    val s3Client = AmazonS3Client.builder
+      .withRegion(Regions.EU_WEST_1)
+      .withCredentials(new ProfileCredentialsProvider("membership"))
+      .build()
     val bucketName = "gu-reader-revenue-private"
     val key = s"membership/support-service-lambdas/$stage/zuoraRest-$stage.v1.json"
     val inputStream = s3Client.getObject(bucketName, key).getObjectContent
@@ -337,7 +343,10 @@ object StartAquaJob {
       .asString
 
     response.code match {
-      case 200 => decode[QueryResponse](response.body).getOrElse(throw new RuntimeException(s"Failed to parse Query response: ${response}")).id
+      case 200 =>
+        val jobId = decode[QueryResponse](response.body).getOrElse(throw new RuntimeException(s"Failed to parse Query response: ${response}")).id
+        println(s"${LocalTime.now()} Successfully started new queries with JobID : $jobId")
+        jobId
       case _ => throw new RuntimeException(s"Failed to start AQuA job: ${response}")
     }
 
@@ -366,7 +375,9 @@ object GetJobResult {
         if (jobResults.batches.forall(_.status == "completed"))
           jobResults
         else {
-          Thread.sleep(1.minute.toMillis)
+          val waitInterval = 1.minute
+          println(s"${LocalTime.now()} Results for $jobId NOT READY, waiting for another $waitInterval...")
+          Thread.sleep(waitInterval.toMillis)
           apply(jobId) // Keep trying until lambda timeout
         }
       case _ => throw new RuntimeException(s"Failed to execute request GetJobResult: $response")
@@ -380,6 +391,7 @@ object GetJobResult {
 object GetResultsFile {
   def apply(batch: Batch): String = {
     val fileId = batch.fileId.getOrElse(throw new RuntimeException("Failed to get csv file due to missing fileId"))
+    println(s"${LocalTime.now()} Downloading file for '${batch.name}' (file $fileId)")
     val response = HttpWithLongTimeout(s"${ZuoraApiHost()}/v1/file/$fileId")
       .header("Authorization", s"Bearer ${AccessToken()}")
       .asString
@@ -391,7 +403,10 @@ object GetResultsFile {
         val downloadedRowCount = downloadedLineCount - 1 // for header row
         if (downloadedRowCount != zuoraRowCount) {
           throw new RuntimeException(s"HALTING at '${batch.name}' because the row count of downloaded file ($downloadedRowCount) did not match the Zuora row count (${zuoraRowCount})")
+        } else {
+          println(s"${LocalTime.now()} '${batch.name}' downloaded row count of $downloadedRowCount matches Zuora (file $fileId)")
         }
+        println(s"${LocalTime.now()} Uploading file for '${batch.name}' (file $fileId)")
         response.body
       case _ => throw new RuntimeException(s"Failed to execute request GetResultsFile: ${response}")
     }
@@ -400,10 +415,12 @@ object GetResultsFile {
 
 object SaveCsvToBucket {
   def apply(csvContent: String, batch: Batch) = {
-    val s3Client = AmazonS3Client.builder.build()
+    val s3Client = AmazonS3Client.builder
+      .withRegion(Regions.EU_WEST_1)
+      .withCredentials(new ProfileCredentialsProvider("membership"))
+      .build()
     System.getenv("Stage") match {
       case "CODE" => // do nothing
-
       case "PROD" =>
         val requestWithAcl = putRequestWithAcl(Query.withName(batch.name).s3Bucket, Query.withName(batch.name).s3Key, csvContent)
         s3Client.putObject(requestWithAcl)
