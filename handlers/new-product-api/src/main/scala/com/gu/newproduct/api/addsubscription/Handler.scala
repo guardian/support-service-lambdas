@@ -1,7 +1,7 @@
 package com.gu.newproduct.api.addsubscription
 
 import java.io.{InputStream, OutputStream}
-import java.time.LocalDateTime
+import java.time.{LocalDateTime}
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.sqs.AwsSQSSend
@@ -11,12 +11,13 @@ import com.gu.newproduct.api.EmailQueueNames.emailQueuesFor
 import com.gu.newproduct.api.addsubscription.TypeConvert._
 import com.gu.newproduct.api.addsubscription.email.digipack.DigipackAddressValidator
 import com.gu.newproduct.api.addsubscription.validation._
+import com.gu.newproduct.api.addsubscription.validation.guardianweekly.{GuardianWeeklyDomesticAddressValidator, GuardianWeeklyROWAddressValidator}
 import com.gu.newproduct.api.addsubscription.validation.paper.PaperAddressValidator
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.SubscriptionName
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.WireModel.{WireCreateRequest, WireSubscription}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAccount
-import com.gu.newproduct.api.addsubscription.zuora.GetContacts.BillToAddress
 import com.gu.newproduct.api.addsubscription.zuora._
+import com.gu.newproduct.api.productcatalog.PlanId.{GuardianWeeklyDomestic6for6, GuardianWeeklyDomesticQuarterly, GuardianWeeklyROW6for6, GuardianWeeklyROWQuarterly}
 import com.gu.newproduct.api.productcatalog.{ContributionPlanId, _}
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
@@ -43,7 +44,9 @@ object Steps {
   def handleRequest(
     addContribution: AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName],
     addPaperSub: AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName],
-    addDigipackSub: AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName]
+    addDigipackSub: AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName],
+    addGuardianWeeklyDomesticSub: AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName],
+    addGuardianWeeklyROWSub: AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName],
   )(
     apiGatewayRequest: ApiGatewayRequest
   ): Future[ApiResponse] = (for {
@@ -53,6 +56,8 @@ object Steps {
       case _: VoucherPlanId => addPaperSub(request)
       case _: HomeDeliveryPlanId => addPaperSub(request)
       case _: DigipackPlanId => addDigipackSub(request)
+      case _: GuardianWeeklyDomestic => addGuardianWeeklyDomesticSub(request)
+      case _: GuardianWeeklyRow => addGuardianWeeklyROWSub(request)
     }
   } yield ApiGatewayResponse(body = AddedSubscription(subscriptionName.value), statusCode = "200")).apiResponse
 
@@ -75,9 +80,12 @@ object Steps {
 
       validatorFor = DateValidator.validatorFor(currentDate, _: DateRule)
       zuoraEnv = ZuoraEnvironment.EnvForStage(stage)
-      plansWithPrice <- PricesFromZuoraCatalog(zuoraEnv, fetchString, zuoraIds.rateplanIdToApiId.get).toApiGatewayOp("get prices from zuora catalog")
+      plansWithPrice <- PricesFromZuoraCatalog(zuoraEnv, fetchString, zuoraIds.rateplanIdToApiId.get)
+        .toApiGatewayOp("get prices from zuora catalog")
       getPricesForPlan = (planId: PlanId) => plansWithPrice.getOrElse(planId, Map.empty)
-      catalog = NewProductApi.catalog(getPricesForPlan)
+      startDateFromProductType <- StartDateFromFulfilmentFiles(stage, fetchString, currentDate())
+        .toApiGatewayOp("get fulfilment date files")
+      catalog = NewProductApi.catalog(getPricesForPlan, startDateFromProductType, currentDate())
 
       isValidStartDateForPlan = Function.uncurried(
         catalog.planForId andThen { plan =>
@@ -120,10 +128,38 @@ object Steps {
         currentDate
       )
 
+      guardianWeeklyDomesticStep = AddGuardianWeeklySub.wireSteps(
+        catalog,
+        zuoraIds,
+        zuoraClient,
+        isValidStartDateForPlan,
+        GuardianWeeklyDomesticAddressValidator.apply,
+        createSubscription,
+        awsSQSSend,
+        queueNames,
+        GuardianWeeklyDomestic6for6,
+        GuardianWeeklyDomesticQuarterly
+      )
+
+      guardianWeeklyROWStep = AddGuardianWeeklySub.wireSteps(
+        catalog,
+        zuoraIds,
+        zuoraClient,
+        isValidStartDateForPlan,
+        GuardianWeeklyROWAddressValidator.apply,
+        createSubscription,
+        awsSQSSend,
+        queueNames,
+        GuardianWeeklyROW6for6,
+        GuardianWeeklyROWQuarterly
+      )
+
       addSubSteps = handleRequest(
         addContribution = contributionSteps,
         addPaperSub = paperSteps,
-        addDigipackSub = digipackSteps
+        addDigipackSub = digipackSteps,
+        addGuardianWeeklyDomesticSub = guardianWeeklyDomesticStep,
+        addGuardianWeeklyROWSub = guardianWeeklyROWStep
       ) _
 
       configuredOp = Operation.async(

@@ -15,6 +15,7 @@ import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
 import ContributionEmailDataSerialiser._
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType.CreditCard
+import com.gu.newproduct.api.productcatalog.RuleFixtures.testStartDateRules
 class ContributionsFieldsTest extends FlatSpec with Matchers {
 
   val billto = BillToContact(
@@ -61,7 +62,7 @@ class ContributionsFieldsTest extends FlatSpec with Matchers {
     amountMinorUnits = AmountMinorUnits(1212),
     firstPaymentDate = LocalDate.of(2018, 12, 1),
 
-    plan = Plan(id = MonthlyContribution, description = PlanDescription("monthly")),
+    plan = Plan(id = MonthlyContribution, description = PlanDescription("monthly"), testStartDateRules),
     contacts = testContacts,
     created = LocalDate.of(2018, 11, 1)
   )

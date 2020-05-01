@@ -35,9 +35,9 @@ class ZuoraSarHandlerSpec extends FreeSpec with Matchers {
       lambda
         .handle(statusRequest)
         .unsafeRunSync() shouldBe SarStatusResponse(
-        status = Completed,
-        resultLocations = Some(List("s3Location"))
-      )
+          status = Completed,
+          resultLocations = Some(List("s3Location"))
+        )
     }
 
     "should return failed status upon unsuccessful completion" in {
@@ -57,8 +57,10 @@ class ZuoraSarHandlerSpec extends FreeSpec with Matchers {
         .unsafeRunSync() shouldBe SarStatusResponse(status = Pending)
     }
 
-    def invokeWithString(lambda: ZuoraSarHandler,
-      request: String): String = {
+    def invokeWithString(
+      lambda: ZuoraSarHandler,
+      request: String
+    ): String = {
       val testInputStream = new ByteArrayInputStream(request.getBytes)
       val testOutputStream = new ByteArrayOutputStream()
       lambda.handleRequest(testInputStream, testOutputStream)

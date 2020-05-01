@@ -14,7 +14,7 @@ object ZuoraIds {
   case class PlanAndCharge(productRatePlanId: ProductRatePlanId, productRatePlanChargeId: ProductRatePlanChargeId)
 
   case class ContributionsZuoraIds(monthly: PlanAndCharge, annual: PlanAndCharge) {
-    val byApiPlanId: Map[PlanId, PlanAndCharge] = Map(
+    val planAndChargeByApiPlanId: Map[PlanId, PlanAndCharge] = Map(
       MonthlyContribution -> monthly,
       AnnualContribution -> annual
     )
@@ -96,10 +96,61 @@ object ZuoraIds {
     val zuoraIdToPlanid = byApiPlanId.map(_.swap)
   }
 
-  case class ZuoraIds(contributionsZuoraIds: ContributionsZuoraIds, voucherZuoraIds: VoucherZuoraIds, homeDeliveryZuoraIds: HomeDeliveryZuoraIds, digitalPackIds: DigipackZuoraIds) {
-    def apiIdToRateplanId: Map[PlanId, ProductRatePlanId] = contributionsZuoraIds.byApiPlanId.mapValues(_.productRatePlanId) ++ voucherZuoraIds.byApiPlanId ++ homeDeliveryZuoraIds.byApiPlanId ++ digitalPackIds.byApiPlanId
+  case class GuardianWeeklyDomesticIds(
+    sixForSix: PlanAndCharge,
+    quarterly: ProductRatePlanId,
+    annual: ProductRatePlanId
+  ) {
+    val zuoraRatePlanIdByApiPlanId = Map(
+      GuardianWeeklyDomestic6for6 -> sixForSix.productRatePlanId,
+      GuardianWeeklyDomesticQuarterly -> quarterly,
+      GuardianWeeklyDomesticAnnual -> annual,
+    )
+    val zuoraRatePlanIdToApiPlanId = zuoraRatePlanIdByApiPlanId.map(_.swap)
+    val planAndChargeByApiPlanId = Map(
+      GuardianWeeklyDomestic6for6 -> sixForSix
+    )
+  }
+
+  case class GuardianWeeklyROWIds(
+    sixForSix: PlanAndCharge,
+    quarterly: ProductRatePlanId,
+    annual: ProductRatePlanId
+  ) {
+    val zuoraRatePlanIdByApiPlanId = Map(
+      GuardianWeeklyROW6for6 -> sixForSix.productRatePlanId,
+      GuardianWeeklyROWQuarterly -> quarterly,
+      GuardianWeeklyROWAnnual -> annual,
+    )
+    val apiPlanIdZuoraRatePlanIdBy = zuoraRatePlanIdByApiPlanId.map(_.swap)
+    val planAndChargeByApiPlanId = Map(
+      GuardianWeeklyROW6for6 -> sixForSix
+    )
+  }
+
+  case class ZuoraIds(
+    contributionsZuoraIds: ContributionsZuoraIds,
+    voucherZuoraIds: VoucherZuoraIds,
+    homeDeliveryZuoraIds: HomeDeliveryZuoraIds,
+    digitalPackIds: DigipackZuoraIds,
+    guardianWeeklyDomestic: GuardianWeeklyDomesticIds,
+    guardianWeeklyROW: GuardianWeeklyROWIds
+  ) {
+    def apiIdToRateplanId: Map[PlanId, ProductRatePlanId] =
+      contributionsZuoraIds.planAndChargeByApiPlanId.mapValues(_.productRatePlanId) ++
+      voucherZuoraIds.byApiPlanId ++
+      homeDeliveryZuoraIds.byApiPlanId ++
+      digitalPackIds.byApiPlanId ++
+      guardianWeeklyDomestic.zuoraRatePlanIdByApiPlanId ++
+      guardianWeeklyROW.zuoraRatePlanIdByApiPlanId
 
     val rateplanIdToApiId: Map[ProductRatePlanId, PlanId] = apiIdToRateplanId.map(_.swap)
+
+    def apiIdToPlanAndCharge: Map[PlanId, PlanAndCharge] =
+      contributionsZuoraIds.planAndChargeByApiPlanId ++
+        guardianWeeklyDomestic.planAndChargeByApiPlanId ++
+        guardianWeeklyROW.planAndChargeByApiPlanId
+
   }
 
   def zuoraIdsForStage(stage: Stage): ApiGatewayOp[ZuoraIds] = {
@@ -143,6 +194,22 @@ object ZuoraIds {
         DigipackZuoraIds(
           monthly = ProductRatePlanId("2c92a0fb4edd70c8014edeaa4eae220a"),
           annual = ProductRatePlanId("2c92a0fb4edd70c8014edeaa4e972204"),
+        ),
+        GuardianWeeklyDomesticIds(
+          sixForSix = PlanAndCharge(
+            ProductRatePlanId("2c92a0086619bf8901661aaac94257fe"),
+            ProductRatePlanChargeId("2c92a0086619bf8901661aaac95d5800")
+          ),
+          quarterly = ProductRatePlanId("2c92a0fe6619b4b301661aa494392ee2"),
+          annual = ProductRatePlanId("2c92a0fe6619b4b901661aa8e66c1692")
+        ),
+        GuardianWeeklyROWIds(
+          sixForSix = PlanAndCharge(
+            ProductRatePlanId("2c92a0086619bf8901661ab545f51b21"),
+            ProductRatePlanChargeId("2c92a0086619bf8901661ab546091b23")
+          ),
+          quarterly = ProductRatePlanId("2c92a0086619bf8901661ab02752722f"),
+          annual = ProductRatePlanId("2c92a0fe6619b4b601661ab300222651")
         )
       ),
       Stage("CODE") -> ZuoraIds(
@@ -183,6 +250,22 @@ object ZuoraIds {
         DigipackZuoraIds(
           monthly = ProductRatePlanId("2c92c0f94f2acf73014f2c908f671591"),
           annual = ProductRatePlanId("2c92c0f84f2ac59d014f2c94aea9199e")
+        ),
+        GuardianWeeklyDomesticIds(
+          sixForSix = PlanAndCharge(
+            ProductRatePlanId("2c92c0f8660fb5dd016610858eb90658"),
+            ProductRatePlanChargeId("2c92c0f8660fb5dd016610858ed3065a")
+          ),
+          quarterly = ProductRatePlanId("2c92c0f8660fb5d601661081ea010391"),
+          annual = ProductRatePlanId("2c92c0f9660fc4d70166107fa5412641")
+        ),
+        GuardianWeeklyROWIds(
+          sixForSix = PlanAndCharge(
+            ProductRatePlanId("2c92c0f9660fc4c70166109dfd08092c"),
+            ProductRatePlanChargeId("2c92c0f9660fc4c70166109dfd17092e")
+          ),
+          quarterly = ProductRatePlanId("2c92c0f9660fc4d70166109c01465f10"),
+          annual = ProductRatePlanId("2c92c0f9660fc4d70166109a2eb0607c")
         )
       ),
       Stage("DEV") -> ZuoraIds(
@@ -223,6 +306,22 @@ object ZuoraIds {
         DigipackZuoraIds(
           monthly = ProductRatePlanId("2c92c0f84bbfec8b014bc655f4852d9d"),
           annual = ProductRatePlanId("2c92c0f94bbffaaa014bc6a4212e205b")
+        ),
+        GuardianWeeklyDomesticIds(
+          sixForSix = PlanAndCharge(
+            ProductRatePlanId("2c92c0f965f212210165f69b94c92d66"),
+            ProductRatePlanChargeId("2c92c0f865f204440165f69f407d66f1")
+          ),
+          quarterly = ProductRatePlanId("2c92c0f965dc30640165f150c0956859"),
+          annual = ProductRatePlanId("2c92c0f965d280590165f16b1b9946c2")
+        ),
+        GuardianWeeklyROWIds(
+          sixForSix = PlanAndCharge(
+            ProductRatePlanId("2c92c0f965f2122101660fbc75a16c38"),
+            ProductRatePlanChargeId("2c92c0f965f2122101660fbc75ba6c3c")
+          ),
+          quarterly = ProductRatePlanId("2c92c0f965f2122101660fb81b745a06"),
+          annual = ProductRatePlanId("2c92c0f965f2122101660fb33ed24a45")
         )
       )
     )

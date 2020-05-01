@@ -108,7 +108,8 @@ object DeliveryCreditProcessor extends Logging {
       deliveryAddressChangeEffectiveDate = None,
       holidayStopFirstAvailableDate = tomorrow,
       holidayStopProcessorTargetDate = Some(tomorrow),
-      finalFulfilmentFileGenerationDate = None
+      finalFulfilmentFileGenerationDate = None,
+      newSubscriptionEarliestStartDate = None
     )
     Right(
       DayOfWeek

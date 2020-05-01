@@ -45,6 +45,8 @@ object SendConfirmationEmail extends Logging {
       case _: DigipackPlanId => "digipack"
       case _: ContributionPlanId => "regular-contribution-thank-you"
       case _: HomeDeliveryPlanId => "paper-delivery"
+      case _: GuardianWeeklyDomestic => "guardian-weekly"
+      case _: GuardianWeeklyRow => "guardian-weekly"
     }
   )
 }

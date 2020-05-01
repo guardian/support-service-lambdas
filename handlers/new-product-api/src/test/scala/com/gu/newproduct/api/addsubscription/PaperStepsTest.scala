@@ -6,11 +6,12 @@ import com.gu.newproduct.TestData
 import com.gu.newproduct.api.addsubscription.email.PaperEmailData
 import com.gu.newproduct.api.addsubscription.validation._
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription
-import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{SubscriptionName, ZuoraCreateSubRequest}
+import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{SubscriptionName, ZuoraCreateSubRequest, ZuoraCreateSubRequestRatePlan}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.SoldToAddress
 import com.gu.newproduct.api.productcatalog.PlanId.VoucherEveryDay
-import com.gu.newproduct.api.productcatalog.{Plan, PlanDescription, PlanId}
+import com.gu.newproduct.api.productcatalog.RuleFixtures.testStartDateRules
+import com.gu.newproduct.api.productcatalog.{Plan, PlanDescription, PlanId, RuleFixtures}
 import com.gu.newproduct.api.productcatalog.ZuoraIds.ProductRatePlanId
 import com.gu.test.JsonMatchers.JsonMatcher
 import com.gu.util.apigateway.ApiGatewayRequest
@@ -54,13 +55,17 @@ class PaperStepsTest extends FlatSpec with Matchers {
     }
 
     val expectedIn = ZuoraCreateSubRequest(
-      ratePlanId,
       ZuoraAccountId("acccc"),
-      None,
       LocalDate.of(2018, 7, 18),
       CaseId("case"),
       AcquisitionSource("CSR"),
-      CreatedByCSR("bob")
+      CreatedByCSR("bob"),
+      List(
+        ZuoraCreateSubRequestRatePlan(
+          productRatePlanId = ratePlanId,
+          maybeChargeOverride = None
+        )
+      )
     )
 
     def fakeCreate(in: CreateSubscription.ZuoraCreateSubRequest): Types.ClientFailableOp[CreateSubscription.SubscriptionName] = {
@@ -79,7 +84,7 @@ class PaperStepsTest extends FlatSpec with Matchers {
 
     def fakeSendEmail(sfContactId: Option[SfContactId], paperData: PaperEmailData) = ContinueProcessing(()).toAsync
 
-    def fakeGetPlan(planId: PlanId) = Plan(VoucherEveryDay, PlanDescription("Everyday"))
+    def fakeGetPlan(planId: PlanId) = Plan(VoucherEveryDay, PlanDescription("Everyday"), testStartDateRules)
     val fakeAddVoucherSteps = AddPaperSub.steps(
       fakeGetPlan,
       fakeGetZuoraId,
@@ -93,7 +98,9 @@ class PaperStepsTest extends FlatSpec with Matchers {
     val futureActual = Steps.handleRequest(
       addContribution = dummySteps,
       addPaperSub = fakeAddVoucherSteps,
-      addDigipackSub = dummySteps
+      addDigipackSub = dummySteps,
+      addGuardianWeeklyDomesticSub = dummySteps,
+      addGuardianWeeklyROWSub = dummySteps
     )(ApiGatewayRequest(None, None, Some(Json.stringify(requestInput)), None, None, None))
 
     val actual = Await.result(futureActual, 30 seconds)

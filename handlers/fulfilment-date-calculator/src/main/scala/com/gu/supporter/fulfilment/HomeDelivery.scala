@@ -1,7 +1,8 @@
 package com.gu.supporter.fulfilment
 
 import java.time.DayOfWeek._
-import java.time.temporal.TemporalAdjusters.next
+import java.time.temporal.TemporalAdjusters
+import java.time.temporal.TemporalAdjusters.{next, nextOrSame}
 import java.time.{DayOfWeek, LocalDate}
 
 import com.gu.fulfilmentdates.FulfilmentDates
@@ -20,7 +21,8 @@ object HomeDeliveryFulfilmentDates {
           deliveryAddressChangeEffectiveDate(targetDayOfWeek, today),
           holidayStopFirstAvailableDate(targetDayOfWeek, today),
           holidayStopProcessorTargetDate(targetDayOfWeek, today),
-          finalFulfilmentFileGenerationDate(targetDayOfWeek, today)
+          finalFulfilmentFileGenerationDate(targetDayOfWeek, today),
+          newSubscriptionEarliestStartDate(targetDayOfWeek, today)
         )): _*
     )
 
@@ -106,4 +108,37 @@ object HomeDeliveryFulfilmentDates {
     }
   }
 
+  /**
+   *  This is designed to implement the delay before fulfilment can be started defined by this grid:
+   *  -----------------------------------------------------------------------------------
+   *  |   Pack    |   Mon   |   Tue   |   Wed   |   Thu   |   Fri   |   Sat   |   Sun   |
+   *  -----------------------------------------------------------------------------------
+   *  | Everyday  |    3    |    3    |    3    |    6    |    5    |    4    |    3    |
+   *  | Sixday    |    3    |    3    |    3    |    6    |    5    |    4    |    3    |
+   *  | Weekend   |    5    |    4    |    3    |    9    |    8    |    7    |    3    |
+   *  | Saturday  |    5    |    4    |    3    |    9    |    8    |    7    |    6    |
+   *  | Sunday    |    6    |    5    |    4    |    10   |    9    |    8    |    7    |
+   *  -----------------------------------------------------------------------------------
+   *
+   *  This is designed to ensure all subscription make it into the fulfilment files for the first day of the
+   *  subscription, including easter bank holidays etc.
+   *
+   *  This grid is probably in most cases overly conservative however the fulfilment partners have a report
+   *  that they can use to track acquisitions in order to re-plan routes etc if its necessary.
+   *
+   *  So any change need to be agreed.
+   */
+  def newSubscriptionEarliestStartDate(
+    targetDayOfWeek: DayOfWeek,
+    today: LocalDate
+  ) = {
+    val startDateDelay = today.getDayOfWeek match {
+      case DayOfWeek.THURSDAY => 6
+      case DayOfWeek.FRIDAY => 5
+      case DayOfWeek.SATURDAY => 4
+      case _ => 3
+    }
+
+    today plusDays (startDateDelay) `with` nextOrSame(targetDayOfWeek)
+  }
 }

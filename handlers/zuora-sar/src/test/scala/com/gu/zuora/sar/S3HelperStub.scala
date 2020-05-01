@@ -7,7 +7,8 @@ import scala.util.{Success, Try}
 class S3HelperStub(
   checkForResults: Try[S3StatusResponse],
   writeResult: Either[S3Error, S3WriteSuccess],
-  writeInvoiceResults: Either[S3Error, List[S3WriteSuccess]]) extends S3Service {
+  writeInvoiceResults: Either[S3Error, List[S3WriteSuccess]]
+) extends S3Service {
   override def checkForResults(initiationId: String, config: ZuoraSarConfig): Try[S3StatusResponse] = checkForResults
   override def copyResultsToCompleted(initiationReference: String, config: ZuoraSarConfig): Either[S3Error, S3WriteSuccess] = writeResult
   override def writeFailedResult(initiationId: String, zuoraError: ZuoraSarError, config: ZuoraSarConfig): Either[S3Error, S3WriteSuccess] = writeResult

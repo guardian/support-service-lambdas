@@ -12,6 +12,7 @@ import com.gu.util.resthttp.Types.ClientFailableOp
 import play.api.libs.json.{Json, Reads}
 
 object CreateSubscription {
+  val SpecificDateTriggerEventId = "USD"
 
   object WireModel {
 
@@ -20,8 +21,10 @@ object CreateSubscription {
     implicit val readsResponse: Reads[WireSubscription] = Json.reads[WireSubscription]
 
     case class ChargeOverrides(
-      price: Double,
-      productRatePlanChargeId: String
+      price: Option[Double],
+      productRatePlanChargeId: String,
+      triggerDate: Option[LocalDate],
+      triggerEvent: Option[String]
     )
 
     implicit val writesCharge = Json.writes[ChargeOverrides]
@@ -61,47 +64,53 @@ object CreateSubscription {
       AcquisitionCase__c = acquisitionCase.value,
       AcquisitionSource__c = acquisitionSource.value,
       CreatedByCSR__c = createdByCSR.value,
-      subscribeToRatePlans = List(
-        SubscribeToRatePlans(
-          productRatePlanId = productRatePlanId.value,
-          chargeOverrides = maybeChargeOverride.map(chargeOverride =>
-            ChargeOverrides(
-              price = chargeOverride.amountMinorUnits.value.toDouble / 100,
-              productRatePlanChargeId = chargeOverride.productRatePlanChargeId.value
-            )).toList
-        )
-      )
+      subscribeToRatePlans =
+        ratePlans.map { ratePlan =>
+          SubscribeToRatePlans(
+            productRatePlanId = ratePlan.productRatePlanId.value,
+            chargeOverrides = ratePlan.maybeChargeOverride.map { chargeOverride =>
+              ChargeOverrides(
+                price = chargeOverride.amountMinorUnits.map(_.value.toDouble / 100),
+                productRatePlanChargeId = chargeOverride.productRatePlanChargeId.value,
+                triggerDate = chargeOverride.triggerDate,
+                triggerEvent = chargeOverride.triggerDate.map(_ => SpecificDateTriggerEventId)
+              )
+            }.toList
+          )
+        }
     )
   }
-
   case class ChargeOverride(
-    amountMinorUnits: AmountMinorUnits,
-    productRatePlanChargeId: ProductRatePlanChargeId
+    amountMinorUnits: Option[AmountMinorUnits],
+    productRatePlanChargeId: ProductRatePlanChargeId,
+    triggerDate: Option[LocalDate]
   )
   case class ZuoraCreateSubRequest(
-    productRatePlanId: ProductRatePlanId,
     accountId: ZuoraAccountId,
-    maybeChargeOverride: Option[ChargeOverride],
     acceptanceDate: LocalDate,
     acquisitionCase: CaseId,
     acquisitionSource: AcquisitionSource,
-    createdByCSR: CreatedByCSR
+    createdByCSR: CreatedByCSR,
+    ratePlans: List[ZuoraCreateSubRequestRatePlan]
+  )
+
+  case class ZuoraCreateSubRequestRatePlan(
+    productRatePlanId: ProductRatePlanId,
+    maybeChargeOverride: Option[ChargeOverride]
   )
 
   object ZuoraCreateSubRequest {
     def apply(
       request: AddSubscriptionRequest,
       acceptanceDate: LocalDate,
-      chargeOverride: Option[ChargeOverride],
-      productRatePlanId: ProductRatePlanId
+      ratePlans: List[ZuoraCreateSubRequestRatePlan],
     ): ZuoraCreateSubRequest = ZuoraCreateSubRequest(
-      productRatePlanId = productRatePlanId,
       accountId = request.zuoraAccountId,
-      maybeChargeOverride = chargeOverride,
       acceptanceDate = acceptanceDate,
       acquisitionCase = request.acquisitionCase,
       acquisitionSource = request.acquisitionSource,
-      createdByCSR = request.createdByCSR
+      createdByCSR = request.createdByCSR,
+      ratePlans = ratePlans
     )
   }
   case class SubscriptionName(value: String) extends AnyVal

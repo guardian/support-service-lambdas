@@ -81,6 +81,11 @@ See [handlers/README](../README.md#3rd-party-service-environments) for informati
 }
 ```
 
+### **`GET`** `/{STAGE}/delivery-records/{SUBSCRIPTION_NAME}/cancel?effectiveCancellationDate={yyyy-MM-dd}`
+Similar to the main GET endpoint but takes an `effectiveCancellationDate` query argument and only brings back delivery records where credit has been requested and the invoice date is greater than or equal to the provided `effectiveCancellationDate`.
+
+Similar to the [`/cancel` endpoint of `holiday-stop-api`](https://github.com/guardian/support-service-lambdas/tree/master/handlers/holiday-stop-api#get-stagehsrsubscription_namecanceleffectivecancellationdateyyyy-mm-dd).
+
 ### `POST` `/{STAGE}/delivery-records/{SUBSCRIPTION_NAME}`
 
 - Creates a delivery problem case, linking the provided delivery records to the new case, then **returns the same as the `GET`** once the changes have been made.

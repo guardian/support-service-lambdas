@@ -1,10 +1,13 @@
 package com.gu.newproduct.api.productcatalog
 
+import java.time.{DayOfWeek, LocalDate}
+
 import com.gu.i18n.Currency
 import com.gu.newproduct.api.productcatalog.PlanId._
 import com.gu.newproduct.api.productcatalog.WireModel._
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.libs.json.Json
+import java.time.DayOfWeek._
 
 class CatalogWireTest extends FlatSpec with Matchers {
   it should "serialise catalog" in {
@@ -29,6 +32,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Sunday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2019-12-01",
         |              "sizeInDays": 1
         |            }
         |          },
@@ -48,6 +52,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Sunday"
         |            ],
         |            "selectableWindow": {
+        |              "startDate": "2019-12-01",
         |              "sizeInDays": 1
         |            }
         |          },
@@ -66,8 +71,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Monday"
         |            ],
         |            "selectableWindow": {
-        |              "cutOffDayInclusive": "Tuesday",
-        |              "startDaysAfterCutOff": 20,
+        |              "startDate": "2020-03-01",
         |              "sizeInDays": 35
         |            }
         |          },
@@ -87,8 +91,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Monday"
         |            ],
         |            "selectableWindow": {
-        |              "cutOffDayInclusive": "Tuesday",
-        |              "startDaysAfterCutOff": 20,
+        |              "startDate": "2020-03-01",
         |              "sizeInDays": 35
         |            }
         |          },
@@ -108,8 +111,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Saturday"
         |            ],
         |            "selectableWindow": {
-        |              "cutOffDayInclusive": "Tuesday",
-        |              "startDaysAfterCutOff": 20,
+        |              "startDate": "2020-03-02",
         |              "sizeInDays": 35
         |            }
         |          },
@@ -129,8 +131,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Saturday"
         |            ],
         |            "selectableWindow": {
-        |              "cutOffDayInclusive": "Tuesday",
-        |              "startDaysAfterCutOff": 20,
+        |              "startDate": "2020-03-02",
         |              "sizeInDays": 35
         |            }
         |          },
@@ -150,8 +151,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Monday"
         |            ],
         |            "selectableWindow": {
-        |              "cutOffDayInclusive": "Tuesday",
-        |              "startDaysAfterCutOff": 20,
+        |              "startDate": "2020-03-01",
         |              "sizeInDays": 35
         |            }
         |          },
@@ -171,8 +171,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Monday"
         |            ],
         |            "selectableWindow": {
-        |              "cutOffDayInclusive": "Tuesday",
-        |              "startDaysAfterCutOff": 20,
+        |              "startDate": "2020-03-01",
         |              "sizeInDays": 35
         |            }
         |          },
@@ -192,8 +191,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Sunday"
         |            ],
         |            "selectableWindow": {
-        |              "cutOffDayInclusive": "Tuesday",
-        |              "startDaysAfterCutOff": 20,
+        |              "startDate": "2020-03-03",
         |              "sizeInDays": 35
         |            }
         |          },
@@ -213,8 +211,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Sunday"
         |            ],
         |            "selectableWindow": {
-        |              "cutOffDayInclusive": "Tuesday",
-        |              "startDaysAfterCutOff": 20,
+        |              "startDate": "2020-03-03",
         |              "sizeInDays": 35
         |            }
         |          },
@@ -234,8 +231,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Saturday"
         |            ],
         |            "selectableWindow": {
-        |              "cutOffDayInclusive": "Tuesday",
-        |              "startDaysAfterCutOff": 20,
+        |              "startDate": "2020-03-02",
         |              "sizeInDays": 35
         |            }
         |          },
@@ -255,8 +251,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Saturday"
         |            ],
         |            "selectableWindow": {
-        |              "cutOffDayInclusive": "Tuesday",
-        |              "startDaysAfterCutOff": 20,
+        |              "startDate": "2020-03-02",
         |              "sizeInDays": 35
         |            }
         |          },
@@ -287,7 +282,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Sunday"
         |            ],
         |            "selectableWindow": {
-        |              "startDaysAfterCutOff": 3,
+        |              "startDate": "2020-02-01",
         |              "sizeInDays": 28
         |            }
         |          },
@@ -313,7 +308,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Sunday"
         |            ],
         |            "selectableWindow": {
-        |              "startDaysAfterCutOff": 3,
+        |              "startDate": "2020-02-01",
         |              "sizeInDays": 28
         |            }
         |          },
@@ -333,7 +328,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Saturday"
         |            ],
         |            "selectableWindow": {
-        |              "startDaysAfterCutOff": 3,
+        |              "startDate": "2020-02-03",
         |              "sizeInDays": 28
         |            }
         |          },
@@ -353,7 +348,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Saturday"
         |            ],
         |            "selectableWindow": {
-        |              "startDaysAfterCutOff": 3,
+        |              "startDate": "2020-02-03",
         |              "sizeInDays": 28
         |            }
         |          },
@@ -378,7 +373,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Saturday"
         |            ],
         |            "selectableWindow": {
-        |              "startDaysAfterCutOff": 3,
+        |              "startDate": "2020-02-02",
         |              "sizeInDays": 28
         |            }
         |          },
@@ -403,7 +398,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Saturday"
         |            ],
         |            "selectableWindow": {
-        |              "startDaysAfterCutOff": 3,
+        |              "startDate": "2020-02-02",
         |              "sizeInDays": 28
         |            }
         |          },
@@ -423,7 +418,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Sunday"
         |            ],
         |            "selectableWindow": {
-        |              "startDaysAfterCutOff": 3,
+        |              "startDate": "2020-02-04",
         |              "sizeInDays": 28
         |            }
         |          },
@@ -443,7 +438,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Sunday"
         |            ],
         |            "selectableWindow": {
-        |              "startDaysAfterCutOff": 3,
+        |              "startDate": "2020-02-04",
         |              "sizeInDays": 28
         |            }
         |          },
@@ -464,7 +459,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Sunday"
         |            ],
         |            "selectableWindow": {
-        |              "startDaysAfterCutOff": 3,
+        |              "startDate": "2020-02-05",
         |              "sizeInDays": 28
         |            }
         |          },
@@ -485,7 +480,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Sunday"
         |            ],
         |            "selectableWindow": {
-        |              "startDaysAfterCutOff": 3,
+        |              "startDate": "2020-02-05",
         |              "sizeInDays": 28
         |            }
         |          },
@@ -516,8 +511,8 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Sunday"
         |            ],
         |            "selectableWindow": {
-        |              "startDaysAfterCutOff": 14,
-        |              "sizeInDays":90
+        |              "startDate": "2019-12-15",
+        |              "sizeInDays": 90
         |            }
         |          },
         |          "paymentPlans": [
@@ -546,8 +541,8 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |              "Sunday"
         |            ],
         |            "selectableWindow": {
-        |              "startDaysAfterCutOff": 14,
-        |              "sizeInDays":90
+        |              "startDate": "2019-12-15",
+        |              "sizeInDays": 90
         |            }
         |          },
         |          "paymentPlans": [
@@ -562,6 +557,202 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |          ],
         |          "paymentPlan": "GBP 55.55 every month"
         |        }
+        |      ]
+        |    },
+        |    {
+        |      "label": "Guardian Weekly - Domestic",
+        |      "plans": [
+        |        {
+        |          "id": "guardian_weekly_domestic_6for6",
+        |          "label": "GW Oct 18 - Six for Six - Domestic",
+        |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Friday"
+        |            ],
+        |            "selectableWindow": {
+        |              "startDate": "2020-01-01",
+        |              "sizeInDays": 28
+        |            }
+        |          },
+        |          "paymentPlans": [
+        |            {
+        |              "currencyCode": "GBP",
+        |              "description": "GBP 11111.11 for the first six weeks"
+        |            },
+        |            {
+        |              "currencyCode": "USD",
+        |              "description": "USD 111111.11 for the first six weeks"
+        |            }
+        |          ],
+        |          "paymentPlan": "GBP 11111.11 for the first six weeks"
+        |        },
+        |        {
+        |          "id": "guardian_weekly_domestic_quarterly",
+        |          "label": "GW Oct 18 - Quarterly - Domestic",
+        |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Friday"
+        |            ],
+        |            "selectableWindow": {
+        |              "startDate": "2020-01-01",
+        |              "sizeInDays": 28
+        |            }
+        |          },
+        |          "paymentPlans": [
+        |            {
+        |              "currencyCode": "GBP",
+        |              "description": "GBP 22222.22 every 3 months"
+        |            },
+        |            {
+        |              "currencyCode": "USD",
+        |              "description": "USD 222222.22 every 3 months"
+        |            }
+        |          ],
+        |          "paymentPlan": "GBP 22222.22 every 3 months"
+        |        },
+        |        {
+        |          "id": "guardian_weekly_domestic_annual",
+        |          "label": "GW Oct 18 - Annual - Domestic",
+        |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Friday"
+        |            ],
+        |            "selectableWindow": {
+        |              "startDate": "2020-01-01",
+        |              "sizeInDays": 28
+        |            }
+        |          },
+        |          "paymentPlans": [
+        |            {
+        |              "currencyCode": "GBP",
+        |              "description": "GBP 33333.33 every 12 months"
+        |            },
+        |            {
+        |              "currencyCode": "USD",
+        |              "description": "USD 333333.33 every 12 months"
+        |            }
+        |          ],
+        |          "paymentPlan": "GBP 33333.33 every 12 months"
+        |        }
+        |      ],
+        |      "enabledForDeliveryCountries": [
+        |        "Australia", "Kiribati", "Nauru", "Norfolk Island", "Tuvalu", "Canada", "Andorra", "Albania",
+        |        "Austria", "Bosnia-Herzegovina", "Belgium", "Bulgaria", "Saint Barthélemy", "Switzerland", "Cyprus",
+        |        "Czech Republic", "Germany", "Denmark", "Estonia", "Spain", "Finland", "Faroe Islands", "France",
+        |        "French Guiana", "Greenland", "Guadeloupe", "Greece", "Croatia", "Hungary", "Ireland", "Italy",
+        |        "Liechtenstein", "Lithuania", "Luxembourg", "Latvia", "Monaco", "Montenegro", "Saint Martin",
+        |        "Iceland", "Martinique", "Malta", "Netherlands", "Norway", "French Polynesia", "Poland",
+        |        "Saint Pierre & Miquelon", "Portugal", "Réunion", "Romania", "Serbia", "Sweden", "Slovenia",
+        |        "Svalbard and Jan Mayen", "Slovakia", "San Marino", "French Southern Territories", "Turkey",
+        |        "Wallis & Futuna", "Mayotte", "Holy See", "Åland Islands", "New Zealand", "Cook Islands",
+        |        "United Kingdom","Falkland Islands","Gibraltar","Guernsey","Isle of Man","Jersey","Saint Helena",
+        |        "United States"
+        |      ]
+        |    },
+        |    {
+        |      "label": "Guardian Weekly - ROW",
+        |      "plans": [
+        |        {
+        |          "id": "guardian_weekly_row_6for6",
+        |          "label": "GW Oct 18 - Six for Six - ROW",
+        |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Friday"
+        |            ],
+        |            "selectableWindow": {
+        |              "startDate": "2020-01-01",
+        |              "sizeInDays": 28
+        |            }
+        |          },
+        |          "paymentPlans": [
+        |            {
+        |              "currencyCode": "GBP",
+        |              "description": "GBP 44444.44 for the first six weeks"
+        |            },
+        |            {
+        |              "currencyCode": "USD",
+        |              "description": "USD 444444.44 for the first six weeks"
+        |            }
+        |          ],
+        |          "paymentPlan": "GBP 44444.44 for the first six weeks"
+        |        },
+        |        {
+        |          "id": "guardian_weekly_row_quarterly",
+        |          "label": "GW Oct 18 - Quarterly - ROW",
+        |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Friday"
+        |            ],
+        |            "selectableWindow": {
+        |              "startDate": "2020-01-01",
+        |              "sizeInDays": 28
+        |            }
+        |          },
+        |          "paymentPlans": [
+        |            {
+        |              "currencyCode": "GBP",
+        |              "description": "GBP 55555.55 every 3 months"
+        |            },
+        |            {
+        |              "currencyCode": "USD",
+        |              "description": "USD 555555.55 every 3 months"
+        |            }
+        |          ],
+        |          "paymentPlan": "GBP 55555.55 every 3 months"
+        |        },
+        |        {
+        |          "id": "guardian_weekly_row_annual",
+        |          "label": "GW Oct 18 - Annual - ROW",
+        |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Friday"
+        |            ],
+        |            "selectableWindow": {
+        |              "startDate": "2020-01-01",
+        |              "sizeInDays": 28
+        |            }
+        |          },
+        |          "paymentPlans": [
+        |            {
+        |              "currencyCode": "GBP",
+        |              "description": "GBP 66666.66 every 12 months"
+        |            },
+        |            {
+        |              "currencyCode": "USD",
+        |              "description": "USD 666666.66 every 12 months"
+        |            }
+        |          ],
+        |          "paymentPlan": "GBP 66666.66 every 12 months"
+        |        }
+        |      ],
+        |      "enabledForDeliveryCountries": [
+        |        "United Arab Emirates", "Afghanistan", "Antigua & Barbuda", "Anguilla", "Armenia", "Angola",
+        |        "Antarctica", "Argentina", "American Samoa", "Aruba", "Azerbaijan", "Barbados", "Bangladesh",
+        |        "Burkina Faso", "Bahrain", "Burundi", "Benin", "Bermuda", "Brunei Darussalam", "Bolivia",
+        |        "Bonaire, Saint Eustatius and Saba", "Brazil", "Bahamas", "Bhutan", "Bouvet Island", "Botswana",
+        |        "Belarus", "Belize", "Cocos (Keeling) Islands", "Congo (Kinshasa)", "Central African Republic",
+        |        "Congo (Brazzaville)", "Ivory Coast", "Chile", "Cameroon", "China", "Colombia", "Costa Rica", "Cuba",
+        |        "Cape Verde Islands", "Curaçao", "Christmas Island", "Djibouti", "Dominica", "Dominican Republic",
+        |        "Algeria", "Ecuador", "Egypt", "Western Sahara", "Eritrea", "Ethiopia", "Fiji", "Micronesia", "Gabon",
+        |        "Grenada", "Georgia", "Ghana", "Gambia", "Guinea", "Equatorial Guinea",
+        |        "South Georgia & The South Sandwich Islands", "Guatemala", "Guam", "Guinea-Bissau", "Guyana",
+        |        "Hong Kong", "Heard Island and McDonald Islands", "Honduras", "Haiti", "Indonesia", "Israel",
+        |        "India", "British Indian Ocean Territory", "Iraq", "Iran", "Jamaica", "Jordan", "Japan", "Kenya",
+        |        "Kyrgyzstan", "Cambodia", "Comoros", "Saint Christopher & Nevis", "North Korea", "South Korea",
+        |        "Kuwait", "Cayman Islands", "Kazakhstan", "Laos", "Lebanon", "Saint Lucia", "Sri Lanka", "Liberia",
+        |        "Lesotho", "Libya", "Morocco", "Moldova", "Madagascar", "Marshall Islands", "Macedonia", "Mali",
+        |        "Myanmar", "Mongolia", "Macau", "Northern Mariana Islands", "Mauritania", "Montserrat", "Mauritius",
+        |        "Maldives", "Malawi", "Mexico", "Malaysia", "Mozambique", "Namibia", "New Caledonia", "Niger",
+        |        "Nigeria", "Nicaragua", "Nepal", "Niue", "Oman", "Panama", "Peru", "Papua New Guinea",
+        |        "Philippines", "Pakistan", "Pitcairn Islands", "Puerto Rico", "Palestinian Territories",
+        |        "Palau", "Paraguay", "Qatar", "Russia", "Rwanda", "Saudi Arabia", "Solomon Islands", "Seychelles",
+        |        "Sudan", "Singapore", "Sierra Leone", "Senegal", "Somalia", "Suriname", "South Sudan",
+        |        "Sao Tome & Principe", "El Salvador", "Sint Maarten", "Syria", "Swaziland", "Turks & Caicos Islands",
+        |        "Chad", "Togo", "Thailand", "Tajikistan", "Tokelau", "East Timor", "Turkmenistan", "Tunisia", "Tonga",
+        |        "Trinidad & Tobago", "Taiwan", "Tanzania", "Ukraine", "Uganda", "United States Minor Outlying Islands",
+        |        "Uruguay", "Uzbekistan", "Saint Vincent & The Grenadines", "Venezuela", "British Virgin Islands",
+        |        "United States Virgin Islands", "Vietnam", "Vanuatu", "Samoa", "Yemen", "South Africa", "Zambia",
+        |        "Zimbabwe"
         |      ]
         |    }
         |  ]
@@ -602,9 +793,61 @@ class CatalogWireTest extends FlatSpec with Matchers {
         Currency.GBP -> AmountMinorUnits(66666),
         Currency.USD -> AmountMinorUnits(66665),
       )
+      case GuardianWeeklyDomestic6for6 => Map(
+        Currency.GBP -> AmountMinorUnits(1111111),
+        Currency.USD -> AmountMinorUnits(11111111),
+      )
+      case GuardianWeeklyDomesticQuarterly => Map(
+        Currency.GBP -> AmountMinorUnits(2222222),
+        Currency.USD -> AmountMinorUnits(22222222),
+      )
+      case GuardianWeeklyDomesticAnnual => Map(
+        Currency.GBP -> AmountMinorUnits(3333333),
+        Currency.USD -> AmountMinorUnits(33333333),
+      )
+      case GuardianWeeklyROW6for6 => Map(
+        Currency.GBP -> AmountMinorUnits(4444444),
+        Currency.USD -> AmountMinorUnits(44444444),
+      )
+      case GuardianWeeklyROWQuarterly => Map(
+        Currency.GBP -> AmountMinorUnits(5555555),
+        Currency.USD -> AmountMinorUnits(55555555),
+      )
+      case GuardianWeeklyROWAnnual => Map(
+        Currency.GBP -> AmountMinorUnits(6666666),
+        Currency.USD -> AmountMinorUnits(66666666),
+      )
     }
 
-    val wireCatalog = WireCatalog.fromCatalog(NewProductApi.catalog(fakePricesFor))
+    def stubGetFirstAvailableStartDate(productType: ProductType, daysOfWeek: List[DayOfWeek]) = {
+      (productType, daysOfWeek) match {
+        case (ProductType.GuardianWeekly, List(FRIDAY) ) =>
+          LocalDate.of(2020, 1, 1)
+        case (ProductType.NewspaperHomeDelivery, List(MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY) ) =>
+          LocalDate.of(2020, 2, 1)
+        case (ProductType.NewspaperHomeDelivery, List(MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY) ) =>
+          LocalDate.of(2020, 2, 2)
+        case (ProductType.NewspaperHomeDelivery, List(SATURDAY) ) =>
+          LocalDate.of(2020, 2, 3)
+        case (ProductType.NewspaperHomeDelivery, List(SUNDAY) ) =>
+          LocalDate.of(2020, 2, 4)
+        case (ProductType.NewspaperHomeDelivery, List(SATURDAY, SUNDAY) ) =>
+          LocalDate.of(2020, 2, 5)
+        case (ProductType.NewspaperVoucherBook, List(MONDAY) ) =>
+          LocalDate.of(2020, 3, 1)
+        case (ProductType.NewspaperVoucherBook, List(SATURDAY) ) =>
+          LocalDate.of(2020, 3, 2)
+        case (ProductType.NewspaperVoucherBook, List(SUNDAY) ) =>
+          LocalDate.of(2020, 3, 3)
+      }
+    }
+
+    val today = LocalDate.of(2019,12,1)
+
+    val wireCatalog = WireCatalog.fromCatalog(
+      NewProductApi.catalog(fakePricesFor, stubGetFirstAvailableStartDate, today)
+    )
+
     Json.toJson(wireCatalog) shouldBe Json.parse(expected)
   }
 }

@@ -51,7 +51,7 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends AnyFlatSpec with M
         endDate,
         publicationDatesToBeStopped,
         maybeMatchingSubscription.get,
-        fakeSubscription
+        None
       )).toDisjunction
 
       fetchOp = SalesforceHolidayStopRequest.LookupByContactAndOptionalSubscriptionName(sfAuth.wrapWith(JsonHttp.getWithParams))

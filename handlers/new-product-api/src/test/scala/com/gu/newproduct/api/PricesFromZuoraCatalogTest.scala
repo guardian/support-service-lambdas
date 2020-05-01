@@ -15,7 +15,7 @@ import scala.util.Try
 class PricesFromZuoraCatalogTest extends FlatSpec with Matchers {
 
   val fakeGetStringFromS3: StringFromS3 = s3Location => {
-    s3Location shouldBe S3Location(bucket = "gu-zuora-catalog", key = "PROD/Zuora-DEV/catalog.json")
+    s3Location shouldBe S3Location(bucket = "gu-zuora-catalog", key = "CODE/Zuora-DEV/catalog.json")
     Try {
       """
         |{

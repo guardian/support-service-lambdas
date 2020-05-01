@@ -1,6 +1,6 @@
 package com.gu.newproduct.api.productcatalog
 
-import java.time.DayOfWeek
+import java.time.{DayOfWeek, LocalDate}
 
 import com.gu.i18n.Currency
 
@@ -28,7 +28,13 @@ case class Catalog(
   homeDeliverySundayPlus: Plan,
   homeDeliverySaturdayPlus: Plan,
   digipackAnnual: Plan,
-  digipackMonthly: Plan
+  digipackMonthly: Plan,
+  guardianWeeklyDomesticSixForSix: Plan,
+  guardianWeeklyDomesticQuarterly: Plan,
+  guardianWeeklyDomesticAnnual: Plan,
+  guardianWeeklyROWSixForSix: Plan,
+  guardianWeeklyROWQuarterly: Plan,
+  guardianWeeklyROWAnnual: Plan,
 ) {
   val allPlans = List(
     voucherWeekend,
@@ -54,8 +60,13 @@ case class Catalog(
     homeDeliverySundayPlus,
     homeDeliverySaturdayPlus,
     digipackAnnual,
-    digipackMonthly
-
+    digipackMonthly,
+    guardianWeeklyDomesticSixForSix,
+    guardianWeeklyDomesticQuarterly,
+    guardianWeeklyDomesticAnnual,
+    guardianWeeklyROWSixForSix,
+    guardianWeeklyROWQuarterly,
+    guardianWeeklyROWAnnual
   )
 
   val planForId: Map[PlanId, Plan] = allPlans.map(x => x.id -> x).toMap
@@ -64,6 +75,8 @@ sealed trait VoucherPlanId
 sealed trait ContributionPlanId
 sealed trait HomeDeliveryPlanId
 sealed trait DigipackPlanId
+sealed trait GuardianWeeklyDomestic
+sealed trait GuardianWeeklyRow
 sealed abstract class PlanId(val name: String)
 
 object PlanId {
@@ -115,6 +128,18 @@ object PlanId {
 
   case object DigipackAnnual extends PlanId("digipack_annual") with DigipackPlanId
 
+  case object GuardianWeeklyDomestic6for6 extends PlanId("guardian_weekly_domestic_6for6") with GuardianWeeklyDomestic
+
+  case object GuardianWeeklyDomesticQuarterly extends PlanId("guardian_weekly_domestic_quarterly") with GuardianWeeklyDomestic
+
+  case object GuardianWeeklyDomesticAnnual extends PlanId("guardian_weekly_domestic_annual") with GuardianWeeklyDomestic
+
+  case object GuardianWeeklyROW6for6 extends PlanId("guardian_weekly_row_6for6") with GuardianWeeklyRow
+
+  case object GuardianWeeklyROWQuarterly extends PlanId("guardian_weekly_row_quarterly") with GuardianWeeklyRow
+
+  case object GuardianWeeklyROWAnnual extends PlanId("guardian_weekly_row_annual") with GuardianWeeklyRow
+
   val enabledVoucherPlans = List(
     VoucherEveryDay,
     VoucherEveryDayPlus,
@@ -148,15 +173,33 @@ object PlanId {
     DigipackAnnual,
     DigipackMonthly
   )
-  val supportedPlans: List[PlanId] = enabledVoucherPlans ++ enabledContributionPlans ++ enabledHomeDeliveryPlans ++ enabledDigipackPlans
+
+  val enabledGuardianWeeklyDomesticPlans = List(
+    GuardianWeeklyDomestic6for6,
+    GuardianWeeklyDomesticQuarterly,
+    GuardianWeeklyDomesticAnnual,
+  )
+
+  val enabledGuardianWeeklyROWPlans = List(
+    GuardianWeeklyROW6for6,
+    GuardianWeeklyROWQuarterly,
+    GuardianWeeklyROWAnnual
+  )
+
+  val supportedPlans: List[PlanId] =
+    enabledVoucherPlans ++ enabledContributionPlans ++ enabledHomeDeliveryPlans ++ enabledDigipackPlans ++
+      enabledGuardianWeeklyDomesticPlans ++ enabledGuardianWeeklyROWPlans
+
   def fromName(name: String): Option[PlanId] = supportedPlans.find(_.name == name)
 }
 
-case class Plan(id: PlanId, description: PlanDescription, startDateRules: StartDateRules = StartDateRules(), paymentPlans: Map[Currency, PaymentPlan] = Map.empty)
+case class Plan(id: PlanId, description: PlanDescription, startDateRules: StartDateRules, paymentPlans: Map[Currency, PaymentPlan] = Map.empty)
 
 sealed trait BillingPeriod
 object Monthly extends BillingPeriod
+object Quarterly extends BillingPeriod
 object Annual extends BillingPeriod
+object SixWeeks extends BillingPeriod
 
 case class PaymentPlan(currency: Currency, amountMinorUnits: AmountMinorUnits, billingPeriod: BillingPeriod, description: String)
 
@@ -168,11 +211,25 @@ case class WindowSizeDays(value: Int) extends AnyVal
 
 sealed trait DateRule
 
-case class StartDateRules(daysOfWeekRule: Option[DaysOfWeekRule] = None, windowRule: Option[WindowRule] = None)
+case class StartDateRules(daysOfWeekRule: Option[DaysOfWeekRule] = None, windowRule: WindowRule)
 
 case class DaysOfWeekRule(allowedDays: List[DayOfWeek]) extends DateRule
 
-case class WindowRule(maybeCutOffDay: Option[DayOfWeek], maybeStartDelay: Option[DelayDays], maybeSize: Option[WindowSizeDays]) extends DateRule
+case class WindowRule(startDate: LocalDate, maybeSize: Option[WindowSizeDays]) extends DateRule
 
 case class AmountMinorUnits(value: Int) extends AnyVal
 
+/**
+ * ProductType
+ * Represents the ProductType field on a Product in Zuora
+ */
+case class ProductType(value: String)
+object ProductType {
+  val GuardianWeekly = ProductType("Guardian Weekly")
+  val NewspaperVoucherBook = ProductType("Newspaper - Voucher Book")
+  val NewspaperDigitalVoucherBook = ProductType("Newspaper - Digital Voucher Book")
+  val NewspaperHomeDelivery = ProductType("Newspaper - Home Delivery")
+  val DigitalPack = ProductType("Digital Pack")
+  val Contribution = ProductType("Contribution")
+  val Membership = ProductType("Membership")
+}

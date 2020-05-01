@@ -1,6 +1,5 @@
 package com.gu.newproduct.api.addsubscription.validation
 
-import java.time.temporal.TemporalAdjusters
 import java.time.{DayOfWeek, LocalDate}
 
 import com.gu.newproduct.api.addsubscription.validation.Validation._
@@ -25,15 +24,10 @@ object SelectableWindow {
     now: () => LocalDate,
     windowRule: WindowRule
   ): SelectableWindow = {
-
-    val baseDate = windowRule.maybeCutOffDay match {
-      case Some(cutOffDayOfWeek) => now().minusDays(1) `with` TemporalAdjusters.next(cutOffDayOfWeek)
-      case None => now()
+    val maybeWindowEnd = windowRule.maybeSize.map {
+      windowSize => windowRule.startDate.plusDays(windowSize.value.toLong)
     }
-    val startDelay = windowRule.maybeStartDelay.getOrElse(DelayDays(0))
-    val startDate = baseDate.plusDays(startDelay.value.toLong)
-    val maybeWindowEnd = windowRule.maybeSize.map { windowSize => startDate.plusDays(windowSize.value.toLong) }
-    SelectableWindow(startDate, maybeWindowEnd)
+    SelectableWindow(windowRule.startDate, maybeWindowEnd)
   }
 }
 
@@ -52,8 +46,7 @@ object StartDateValidator {
     startDateRules: StartDateRules
   ): LocalDate => ValidationResult[Unit] = {
     val maybeDaysValidation = startDateRules.daysOfWeekRule.map(validatorFor)
-    val maybeWindowValidation = startDateRules.windowRule.map(validatorFor)
-    StartDateValidator(maybeDaysValidation orPass, maybeWindowValidation orPass, _)
+    StartDateValidator(maybeDaysValidation orPass, validatorFor(startDateRules.windowRule), _)
   }
 
   implicit class OptionalRuleOps(maybeRule: Option[LocalDate => ValidationResult[Unit]]) {

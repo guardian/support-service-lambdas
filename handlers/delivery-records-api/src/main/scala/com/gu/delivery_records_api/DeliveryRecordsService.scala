@@ -30,6 +30,7 @@ final case class DeliveryRecord(
   addressCountry: Option[String],
   addressPostcode: Option[String],
   hasHolidayStop: Option[Boolean],
+  bulkSuspensionReason: Option[String],
   problemCaseId: Option[String],
   isChangedAddress: Option[Boolean],
   isChangedDeliveryInstruction: Option[Boolean],
@@ -62,11 +63,9 @@ case class CreateDeliveryProblem(
 
   val isNotAutoCredit: Boolean = deliveryRecords.exists(_.invoiceDate.isEmpty)
 
-  val status: String = if (
-    isHomeDelivery ||
+  val status: String = if (isHomeDelivery ||
     repeatDeliveryProblem.contains(true) ||
-    isNotAutoCredit
-  ) "New" else "Closed"
+    isNotAutoCredit) "New" else "Closed"
 
   val priority: Option[String] = Some("High").filter(_ => isNotAutoCredit && isHomeDelivery)
 }
@@ -83,7 +82,8 @@ trait DeliveryRecordsService[F[_]] {
     subscriptionId: String,
     contact: Contact,
     optionalStartDate: Option[LocalDate],
-    optionalEndDate: Option[LocalDate]
+    optionalEndDate: Option[LocalDate],
+    optionalCancellationEffectiveDate: Option[LocalDate]
   ): EitherT[F, DeliveryRecordServiceError, DeliveryRecordsApiResponse]
 
   def createDeliveryProblemForSubscription(
@@ -128,6 +128,7 @@ object DeliveryRecordsService {
       addressPostcode = sfRecord.Address_Postcode__c,
       deliveryInstruction = sfRecord.Delivery_Instructions__c,
       hasHolidayStop = sfRecord.Has_Holiday_Stop__c,
+      bulkSuspensionReason = sfRecord.Holiday_Stop_Request_Detail__r.flatMap(_.Holiday_Stop_Request__r.Bulk_Suspension_Reason__c),
       problemCaseId = sfRecord.Case__r.map(_.Id),
       isChangedAddress = sfRecord.Delivery_Address__c.map(detectChangeSkippingNoneAtHead(accumulator, _.deliveryAddress)),
       isChangedDeliveryInstruction = sfRecord.Delivery_Instructions__c.map(detectChangeSkippingNoneAtHead(accumulator, _.deliveryInstruction)),
@@ -143,7 +144,8 @@ object DeliveryRecordsService {
       subscriptionId: String,
       contact: Contact,
       optionalStartDate: Option[LocalDate],
-      optionalEndDate: Option[LocalDate]
+      optionalEndDate: Option[LocalDate],
+      optionalCancellationEffectiveDate: Option[LocalDate]
     ): EitherT[F, DeliveryRecordServiceError, DeliveryRecordsApiResponse] =
       for {
         queryResult <- queryForDeliveryRecords(
@@ -151,7 +153,8 @@ object DeliveryRecordsService {
           subscriptionId,
           contact,
           optionalStartDate,
-          optionalEndDate
+          optionalEndDate,
+          optionalCancellationEffectiveDate
         )
         records <- getDeliveryRecordsFromQueryResults(subscriptionId, contact, queryResult).toEitherT[F]
         contactPhoneNumbers = queryResult.records.head.Buyer__r.filterOutGarbage()
@@ -189,10 +192,11 @@ object DeliveryRecordsService {
       subscriptionId: String,
       contact: Contact,
       optionalStartDate: Option[LocalDate],
-      optionalEndDate: Option[LocalDate]
+      optionalEndDate: Option[LocalDate],
+      optionalCancellationEffectiveDate: Option[LocalDate]
     ): EitherT[F, DeliveryRecordServiceError, RecordsWrapperCaseClass[SubscriptionRecordQueryResult]] = {
       salesforceClient.query[SubscriptionRecordQueryResult](
-        deliveryRecordsQuery(contact, subscriptionId, optionalStartDate, optionalEndDate)
+        deliveryRecordsQuery(contact, subscriptionId, optionalStartDate, optionalEndDate, optionalCancellationEffectiveDate)
       )
         .leftMap(error => DeliveryRecordServiceGenericError(error.toString))
     }
@@ -221,24 +225,31 @@ object DeliveryRecordsService {
     contact: Contact,
     subscriptionNumber: String,
     optionalStartDate: Option[LocalDate],
-    optionalEndDate: Option[LocalDate]
+    optionalEndDate: Option[LocalDate],
+    optionalCancellationEffectiveDate: Option[LocalDate]
   ) =
     s"""SELECT Buyer__r.Id, Buyer__r.Phone, Buyer__r.HomePhone, Buyer__r.MobilePhone, Buyer__r.OtherPhone, (
        |    SELECT Id, Delivery_Date__c, Delivery_Address__c, Delivery_Instructions__c, Has_Holiday_Stop__c,
+       |           Holiday_Stop_Request_Detail__r.Holiday_Stop_Request__r.Bulk_Suspension_Reason__c,
        |           Address_Line_1__c,Address_Line_2__c, Address_Line_3__c, Address_Town__c, Address_Country__c, Address_Postcode__c,
        |           Case__c, Case__r.Id, Case__r.CaseNumber, Case__r.Subject, Case__r.Description, Case__r.Case_Closure_Reason__c,
        |           Credit_Amount__c, Is_Actioned__c, Invoice_Date__c
        |    FROM Delivery_Records__r
-       |    ${deliveryDateFilter(optionalStartDate, optionalEndDate)}
+       |    ${deliveryDateFilter(optionalStartDate, optionalEndDate, optionalCancellationEffectiveDate)}
        |    ORDER BY Delivery_Date__c DESC
        |)
        |FROM SF_Subscription__c WHERE Name = '${escapeString(subscriptionNumber)}'
        |                         AND ${contactToWhereClausePart(contact)}""".stripMargin
 
-  def deliveryDateFilter(optionalStartDate: Option[LocalDate], optionalEndDate: Option[LocalDate]) = {
+  def deliveryDateFilter(
+    optionalStartDate: Option[LocalDate],
+    optionalEndDate: Option[LocalDate],
+    optionalCancellationEffectiveDate: Option[LocalDate]
+  ) = {
     List(
       optionalStartDate.map(startDate => s"Delivery_Date__c >= $startDate "),
-      optionalEndDate.map(endDate => s"Delivery_Date__c <= $endDate")
+      optionalEndDate.map(endDate => s"Delivery_Date__c <= $endDate"),
+      optionalCancellationEffectiveDate.map(date => s"Invoice_Date__c >= $date AND Credit_Requested__c = true")
     ).flatten match {
         case Nil => ""
         case nonEmpty => s" WHERE ${nonEmpty.mkString(" AND ")}"

@@ -1,9 +1,10 @@
 package com.gu.newproduct.api.productcatalog
 
-import java.time.DayOfWeek
+import java.time.{DayOfWeek, LocalDate}
 
-import com.gu.i18n.Currency
+import com.gu.i18n.{CountryGroup, Currency}
 import com.gu.i18n.Currency.GBP
+import com.gu.newproduct.api.addsubscription.validation.guardianweekly.GuardianWeeklyAddressValidator
 import play.api.libs.json.{JsString, Json, Writes}
 
 object WireModel {
@@ -27,7 +28,7 @@ object WireModel {
   case class WirePlanInfo(
     id: String,
     label: String,
-    startDateRules: Option[WireStartDateRules] = None,
+    startDateRules: WireStartDateRules,
     paymentPlans: List[WirePaymentPlan],
     paymentPlan: Option[String] //todo legacy field, remove once salesforce is reading from paymentPlans
   )
@@ -39,17 +40,20 @@ object WireModel {
   }
 
   case class WireSelectableWindow(
-    cutOffDayInclusive: Option[WireDayOfWeek] = None,
-    startDaysAfterCutOff: Option[Int] = None,
+    startDate: LocalDate,
     sizeInDays: Option[Int] = None
   )
 
   case class WireStartDateRules(
     daysOfWeek: List[WireDayOfWeek],
-    selectableWindow: Option[WireSelectableWindow] = None
+    selectableWindow: WireSelectableWindow
   )
 
-  case class WireProduct(label: String, plans: List[WirePlanInfo])
+  case class WireProduct(
+    label: String,
+    plans: List[WirePlanInfo],
+    enabledForDeliveryCountries: Option[List[String]]
+  )
 
   case class WireCatalog(products: List[WireProduct])
 
@@ -71,8 +75,7 @@ object WireModel {
     implicit val writes = Json.writes[WireSelectableWindow]
 
     def fromWindowRule(rule: WindowRule) = {
-      val wireCutoffDay = rule.maybeCutOffDay.map(WireDayOfWeek.fromDayOfWeek)
-      WireSelectableWindow(wireCutoffDay, rule.maybeStartDelay.map(_.value), rule.maybeSize.map(_.value))
+      WireSelectableWindow(rule.startDate, rule.maybeSize.map(_.value))
     }
   }
 
@@ -80,19 +83,17 @@ object WireModel {
     implicit val writes = Json.writes[WireStartDateRules]
 
     def fromStartDateRules(rule: StartDateRules): WireStartDateRules = {
-
       val allowedDays = rule.daysOfWeekRule.map(_.allowedDays) getOrElse DayOfWeek.values.toList
       val wireAllowedDaysOfWeek = allowedDays.map(WireDayOfWeek.fromDayOfWeek)
-      val maybeWireWindowRules = rule.windowRule.map(WireSelectableWindow.fromWindowRule(_))
-      WireStartDateRules(wireAllowedDaysOfWeek, maybeWireWindowRules)
+      WireStartDateRules(wireAllowedDaysOfWeek, WireSelectableWindow.fromWindowRule(rule.windowRule))
     }
   }
 
   object WirePlanInfo {
     implicit val writes = Json.writes[WirePlanInfo]
 
-    def toOptionalWireRules(startDateRules: StartDateRules): Option[WireStartDateRules] =
-      if (startDateRules == StartDateRules()) None else Some(WireStartDateRules.fromStartDateRules(startDateRules))
+    def toWireRules(startDateRules: StartDateRules): WireStartDateRules =
+      WireStartDateRules.fromStartDateRules(startDateRules)
 
     def fromPlan(plan: Plan) = {
 
@@ -106,7 +107,7 @@ object WireModel {
       WirePlanInfo(
         id = plan.id.name,
         label = plan.description.value,
-        startDateRules = toOptionalWireRules(plan.startDateRules),
+        startDateRules = toWireRules(plan.startDateRules),
         paymentPlans = paymentPlans.toList,
         paymentPlan = legacyPaymentPlan
       )
@@ -120,7 +121,9 @@ object WireModel {
   object WireCatalog {
     implicit val writes = Json.writes[WireCatalog]
 
-    def fromCatalog(catalog: Catalog) = {
+    def fromCatalog(
+      catalog: Catalog
+    ) = {
 
       def wirePlanForPlanId(planId: PlanId): WirePlanInfo = {
         val plan = catalog.planForId(planId)
@@ -129,28 +132,45 @@ object WireModel {
 
       val voucherProduct = WireProduct(
         label = "Voucher",
-        plans = PlanId.enabledVoucherPlans.map(wirePlanForPlanId)
+        plans = PlanId.enabledVoucherPlans.map(wirePlanForPlanId),
+        enabledForDeliveryCountries = None
       )
 
       val contributionProduct = WireProduct(
         label = "Contribution",
-        plans = PlanId.enabledContributionPlans.map(wirePlanForPlanId)
+        plans = PlanId.enabledContributionPlans.map(wirePlanForPlanId),
+        enabledForDeliveryCountries = None
       )
 
       val homeDeliveryProduct = WireProduct(
         label = "Home Delivery",
-        plans = PlanId.enabledHomeDeliveryPlans.map(wirePlanForPlanId)
+        plans = PlanId.enabledHomeDeliveryPlans.map(wirePlanForPlanId),
+        enabledForDeliveryCountries = None
       )
 
       val digipackProduct = WireProduct(
         label = "Digital Pack",
-        plans = PlanId.enabledDigipackPlans.map(wirePlanForPlanId)
+        plans = PlanId.enabledDigipackPlans.map(wirePlanForPlanId),
+        enabledForDeliveryCountries = None
       )
 
-      val availableProductsAndPlans = List(contributionProduct, voucherProduct, homeDeliveryProduct, digipackProduct).filterNot(_.plans.isEmpty)
+      val guardianWeeklyDomestic = WireProduct(
+        label = "Guardian Weekly - Domestic",
+        plans = PlanId.enabledGuardianWeeklyDomesticPlans.map(wirePlanForPlanId),
+        enabledForDeliveryCountries = Some(GuardianWeeklyAddressValidator.domesticCountries.map(_.name))
+      )
+
+      val guardianWeeklyROW = WireProduct(
+        label = "Guardian Weekly - ROW",
+        plans = PlanId.enabledGuardianWeeklyROWPlans.map(wirePlanForPlanId),
+        enabledForDeliveryCountries = Some(CountryGroup.RestOfTheWorld.countries.map(_.name))
+      )
+
+      val availableProductsAndPlans = List(
+        contributionProduct, voucherProduct, homeDeliveryProduct, digipackProduct, guardianWeeklyDomestic, guardianWeeklyROW
+      ).filterNot(_.plans.isEmpty)
 
       WireCatalog(availableProductsAndPlans)
     }
   }
-
 }

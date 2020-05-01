@@ -1,6 +1,7 @@
 package com.gu.newproduct.api.productcatalog
 
 import java.io.{InputStream, OutputStream}
+import java.time.LocalDate
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
@@ -18,16 +19,22 @@ object Handler extends Logging {
   // Referenced in Cloudformation
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit =
     ApiGatewayHandler(LambdaIO(inputStream, outputStream, context)) {
-      runWithEffects(LambdaIO(inputStream, outputStream, context), RawEffects.stage, GetFromS3.fetchString)
+      runWithEffects(
+        LambdaIO(inputStream, outputStream, context),
+        RawEffects.stage,
+        GetFromS3.fetchString,
+        LocalDate.now()
+      )
     }
 
-  def runWithEffects(lambdaIO: LambdaIO, stage: Stage, fetchString: StringFromS3): ApiGatewayOp[Operation] = for {
+  def runWithEffects(lambdaIO: LambdaIO, stage: Stage, fetchString: StringFromS3, today: LocalDate): ApiGatewayOp[Operation] = for {
     zuoraIds <- ZuoraIds.zuoraIdsForStage(stage)
     zuoraToPlanId = zuoraIds.rateplanIdToApiId.get _
     zuoraEnv = ZuoraEnvironment.EnvForStage(stage)
     plansWithPrice <- PricesFromZuoraCatalog(zuoraEnv, fetchString, zuoraToPlanId).toApiGatewayOp("get prices from zuora catalog")
     getPricesForPlan = (planId: PlanId) => plansWithPrice.getOrElse(planId, Map.empty)
-    catalog = NewProductApi.catalog(getPricesForPlan)
+    startDateFromProductType <- StartDateFromFulfilmentFiles(stage, fetchString, today).toApiGatewayOp
+    catalog = NewProductApi.catalog(getPricesForPlan, startDateFromProductType, today)
     wireCatalog = WireCatalog.fromCatalog(catalog)
   } yield Operation.noHealthcheck {
     Req: ApiGatewayRequest => ApiGatewayResponse(body = wireCatalog, statusCode = "200")
