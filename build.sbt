@@ -412,7 +412,7 @@ lazy val `digital-voucher-cancellation-processor` = all(project in file("handler
 
 lazy val `http4s-lambda-handler` = all(project in file("lib/http4s-lambda-handler"))
   .settings(
-    libraryDependencies ++= Seq(circe, circeParser, http4sCore, scalatest) ++ logging
+    libraryDependencies ++= Seq(circe, circeParser, http4sCore, http4sDsl % Test, scalatest) ++ logging
   )
 
 
