@@ -56,7 +56,7 @@ Resources:
                   - "arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${QueueName}"
                   - { QueueName: !FindInMap [ StageMap, !Ref Stage, EmailSendingQueueName ]}
 
-  FailedRefundAlarm:
+  FailedEmailAlarm:
     Type: AWS::CloudWatch::Alarm
     Condition: IsProd
     Properties:
