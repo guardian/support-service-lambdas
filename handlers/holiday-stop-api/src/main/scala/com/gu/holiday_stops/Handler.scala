@@ -465,7 +465,8 @@ object Handler extends Logging {
       contact <- extractContactFromHeaders(req.headers)
       pathParams <- req.pathParamsAsCaseClass[SpecificHolidayStopRequestPathParams]()
       existingForUser <- lookupOp(contact, None, None).toDisjunction.toApiGatewayOp(s"lookup Holiday Stop Requests for contact $contact")
-      _ = existingForUser.exists(_.Id == pathParams.holidayStopRequestId).toApiGatewayContinueProcessing(ApiGatewayResponse.forbidden("not your holiday stop"))
+      hsr <- existingForUser.find(_.Id == pathParams.holidayStopRequestId).toApiGatewayContinueProcessing(ApiGatewayResponse.forbidden("not your holiday stop"))
+      _ = hsr.Holiday_Stop_Request_Detail__r.exists(_.records.exists(_.Is_Actioned__c)).toApiGatewayContinueProcessing(ApiGatewayResponse.forbidden("can't withdraw holiday stop with any actioned items"))
       _ <- withdrawOp(pathParams.holidayStopRequestId).toDisjunction.toApiGatewayOp(
         exposeSfErrorMessageIn500ApiResponse(s"withdraw Holiday Stop Request for subscription ${pathParams.subscriptionName.value} of contact $contact")
       )

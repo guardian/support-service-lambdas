@@ -14,7 +14,7 @@ class SalesforceHolidayStopRequestsDetailTest extends FlatSpec {
       ZuoraProductTypes.GuardianWeekly
     ).trim should ===(
         """SELECT Id, Subscription_Name__c, Product_Name__c, Stopped_Publication_Date__c,
-        | Estimated_Price__c, Charge_Code__c, Actual_Price__c, Expected_Invoice_Date__c
+        | Estimated_Price__c, Charge_Code__c, Is_Actioned__c, Actual_Price__c, Expected_Invoice_Date__c
         |
         | FROM Holiday_Stop_Requests_Detail__c
         | WHERE Holiday_Stop_Request__r.SF_Subscription__r.Product_Type__c = 'Guardian Weekly'
