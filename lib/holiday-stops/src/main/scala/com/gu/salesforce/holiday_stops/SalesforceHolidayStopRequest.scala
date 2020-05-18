@@ -296,12 +296,17 @@ object SalesforceHolidayStopRequest extends Logging {
         .filterNot(holidayStopRequestDetail =>
           issuesData.map(_.issueDate).contains(holidayStopRequestDetail.Stopped_Publication_Date__c.value)
         )
-        .map( holidayStopRequestDetail => CompositePart(
-          method = "DELETE",
-          url = s"$sfObjectsBaseUrl$holidayStopRequestsDetailSfObjectRef/${holidayStopRequestDetail.Id.value}",
-          referenceId = "DELETE DETAIL : " + UUID.randomUUID().toString,
-          body = JsNull
-        ))
+        .map( holidayStopRequestDetail => {
+          if(holidayStopRequestDetail.Is_Actioned__c){
+            throw new RuntimeException("actioned publications cannot be deleted")
+          }
+          CompositePart(
+            method = "DELETE",
+            url = s"$sfObjectsBaseUrl$holidayStopRequestsDetailSfObjectRef/${holidayStopRequestDetail.Id.value}",
+            referenceId = "DELETE DETAIL : " + UUID.randomUUID().toString,
+            body = JsNull
+          )
+        })
 
       CompositeRequest(
         allOrNone = true,
