@@ -25,7 +25,7 @@ object SalesforceMessage {
     next_charge_date: Option[String],
     last_name: String,
     identity_id: Option[String],
-    first_name: String,
+    first_name: Option[String],
     email_stage: String,
     modified_by_customer: Option[Boolean],
     holiday_stop_request: Option[WireHolidayStopRequest],
