@@ -77,13 +77,12 @@ class Http4sLambdaHandler(service: HttpRoutes[IO]) {
     )
   }
 
-
   private def convertToHttp4sResponse(http4sResponse: Response[IO]): EitherT[IO, String, LambdaResponse] = {
     for {
       responseBody <- http4sResponse
         .attemptAs[String]
         .leftMap(decodingFailure => s"Failed to convert response body to string: ${decodingFailure}")
-      headers = http4sResponse.headers.iterator.map { header => (header.name.toString(), header.value)}.toMap
+      headers = http4sResponse.headers.iterator.map { header => (header.name.toString(), header.value) }.toMap
     } yield LambdaResponse(http4sResponse.status.code, responseBody, headers)
   }
 
@@ -104,12 +103,12 @@ class Http4sLambdaHandler(service: HttpRoutes[IO]) {
   private def extractUri(apiGateWayRequest: LambdaRequest): Uri = {
     val queryStringValues: immutable.Seq[(String, Option[String])] =
       apiGateWayRequest
-      .multiValueQueryStringParameters.getOrElse(Nil)
-      .flatMap {
-        case (key, valueList) => valueList.map(value => key -> Some(value).filter(!_.isEmpty))
-      }.toList
+        .multiValueQueryStringParameters.getOrElse(Nil)
+        .flatMap {
+          case (key, valueList) => valueList.map(value => key -> Some(value).filter(!_.isEmpty))
+        }.toList
 
-    Uri(path = apiGateWayRequest.path, query = Query(queryStringValues:_*))
+    Uri(path = apiGateWayRequest.path, query = Query(queryStringValues: _*))
   }
 
   private def extractHeaders(apiGateWayRequest: LambdaRequest): Headers = {
