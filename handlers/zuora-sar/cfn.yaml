@@ -19,9 +19,12 @@ Parameters:
     VpcSubnets:
         Description: Subnets to use in VPC
         Type: CommaDelimitedList
+    BatonAccountId:
+      Description: Account Id for Baton AWS account
+      Type: String
 
 Resources:
-    IdentityInvokeRole:
+    IdentityInvokeRole: #TODO delete once Baton is migrated to new account
         Type: AWS::IAM::Role
         Properties:
             RoleName: !Sub "zuora-baton-lambda-role-${Stage}"
@@ -41,6 +44,27 @@ Resources:
                             Action:
                             - lambda:InvokeFunction
                             Resource: !GetAtt ZuoraBatonSarLambda.Arn
+
+    BatonInvokeRole:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: !Sub "baton-zuora-lambda-role-${Stage}"
+        AssumeRolePolicyDocument:
+          Statement:
+            - Effect: Allow
+              Principal:
+                AWS: !Sub "arn:aws:iam::${BatonAccountId}:root"
+              Action:
+                - sts:AssumeRole
+        Path: /
+        Policies:
+          - PolicyName: LambdaPolicy
+            PolicyDocument:
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - lambda:InvokeFunction
+                  Resource: !GetAtt ZuoraBatonSarLambda.Arn
 
     ZuoraBatonSarLambdaRole:
         Type: AWS::IAM::Role

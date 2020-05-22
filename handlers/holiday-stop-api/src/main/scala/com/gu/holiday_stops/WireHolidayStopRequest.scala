@@ -11,49 +11,48 @@ import play.api.libs.json._
 
 object WireHolidayStopRequest {
 
-  def apply(firstAvailableDate: LocalDate)(sfHolidayStopRequest: HolidayStopRequest): HolidayStopRequestFull = HolidayStopRequestFull(
-    id = sfHolidayStopRequest.Id.value,
-    startDate = sfHolidayStopRequest.Start_Date__c.value,
-    endDate = sfHolidayStopRequest.End_Date__c.value,
-    subscriptionName = sfHolidayStopRequest.Subscription_Name__c,
-    publicationsImpacted = sfHolidayStopRequest
-      .Holiday_Stop_Request_Detail__r
-      .map(_.records.map(toHolidayStopRequestDetail)).getOrElse(List()),
-    withdrawnTime = sfHolidayStopRequest.Withdrawn_Time__c.map(_.value),
-    bulkSuspensionReason = sfHolidayStopRequest.Bulk_Suspension_Reason__c,
-    mutabilityFlags = calculateMutabilityFlags(
-      isWithdrawn = sfHolidayStopRequest.Is_Withdrawn__c.value,
-      firstAvailableDate = firstAvailableDate,
-      actionedCount = sfHolidayStopRequest.Actioned_Count__c.value,
-      firstPublicationDate = sfHolidayStopRequest.Holiday_Stop_Request_Detail__r.map(_.records.map(_.Stopped_Publication_Date__c.value).min[LocalDate](_ compareTo _)).get,
-      lastPublicationDate = sfHolidayStopRequest.Holiday_Stop_Request_Detail__r.map(_.records.map(_.Stopped_Publication_Date__c.value).max[LocalDate](_ compareTo _)).get
+  def apply(firstAvailableDate: LocalDate)(sfHolidayStopRequest: HolidayStopRequest): HolidayStopRequestFull = {
+    val publicationsImpacted = sfHolidayStopRequest.Holiday_Stop_Request_Detail__r
+      .map(_.records.map(toHolidayStopRequestDetail)).getOrElse(List())
+
+    HolidayStopRequestFull(
+      id = sfHolidayStopRequest.Id.value,
+      startDate = sfHolidayStopRequest.Start_Date__c.value,
+      endDate = sfHolidayStopRequest.End_Date__c.value,
+      subscriptionName = sfHolidayStopRequest.Subscription_Name__c,
+      publicationsImpacted,
+      withdrawnTime = sfHolidayStopRequest.Withdrawn_Time__c.map(_.value),
+      bulkSuspensionReason = sfHolidayStopRequest.Bulk_Suspension_Reason__c,
+      mutabilityFlags = calculateMutabilityFlags(
+        isNotWithdrawn = !sfHolidayStopRequest.Is_Withdrawn__c.value,
+        firstAvailableDate = firstAvailableDate,
+        actionedCount = sfHolidayStopRequest.Actioned_Count__c.value,
+        details = publicationsImpacted
+      )
     )
-  )
+  }
 
   def toHolidayStopRequestDetail(detail: SalesforceHolidayStopRequestsDetail.HolidayStopRequestsDetail) = {
     HolidayStopRequestsDetail(
       publicationDate = detail.Stopped_Publication_Date__c.value,
       estimatedPrice = detail.Estimated_Price__c.map(_.value),
       actualPrice = detail.Actual_Price__c.map(_.value),
-      invoiceDate = detail.Expected_Invoice_Date__c.map(_.value)
+      invoiceDate = detail.Expected_Invoice_Date__c.map(_.value),
+      isActioned = detail.Is_Actioned__c
     )
   }
 
   def calculateMutabilityFlags(
-    isWithdrawn: Boolean,
+    isNotWithdrawn: Boolean,
     firstAvailableDate: LocalDate,
     actionedCount: Int,
-    firstPublicationDate: LocalDate,
-    lastPublicationDate: LocalDate
+    details: List[HolidayStopRequestsDetail]
   ): MutabilityFlags = {
-    if (actionedCount == 0 && firstAvailableDate.isAfter(firstPublicationDate.plusDays(2))) {
-      // TODO log warning (with CloudWatch alert) as indicates processing of holiday stop is well overdue
-    }
-    val firstPublicationDateIsGreaterOrEqualToFirstAvailableDate =
-      firstPublicationDate.isEqual(firstAvailableDate) || firstPublicationDate.isAfter(firstAvailableDate)
+    val publicationsOnOrAfterFirstAvailableDate = details.filterNot(_.publicationDate isBefore firstAvailableDate)
     MutabilityFlags(
-      isFullyMutable = !isWithdrawn && actionedCount == 0 && firstPublicationDateIsGreaterOrEqualToFirstAvailableDate,
-      isEndDateEditable = !isWithdrawn && firstAvailableDate.isBefore(lastPublicationDate)
+      isFullyMutable = isNotWithdrawn && actionedCount == 0 && publicationsOnOrAfterFirstAvailableDate.length == details.length,
+      isEndDateEditable =
+        isNotWithdrawn && publicationsOnOrAfterFirstAvailableDate.nonEmpty && !publicationsOnOrAfterFirstAvailableDate.exists(_.isActioned)
     )
   }
 
@@ -72,7 +71,8 @@ case class HolidayStopRequestsDetail(
   publicationDate: LocalDate,
   estimatedPrice: Option[Double],
   actualPrice: Option[Double],
-  invoiceDate: Option[LocalDate]
+  invoiceDate: Option[LocalDate],
+  isActioned: Boolean
 )
 
 object HolidayStopRequestsDetail {

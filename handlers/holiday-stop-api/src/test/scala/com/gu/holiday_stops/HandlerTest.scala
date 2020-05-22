@@ -388,7 +388,7 @@ class HandlerTest extends AnyFlatSpec with Matchers {
         inside(parsedResponseBody) {
           case JsSuccess(response, _) =>
             response.publicationsToRefund should contain only(
-              HolidayStopRequestsDetail(stopDate, Some(price), Some(price), Some(invoiceDate))
+              HolidayStopRequestsDetail(stopDate, Some(price), Some(price), Some(invoiceDate), isActioned = false)
             )
         }
     }
@@ -399,7 +399,8 @@ class HandlerTest extends AnyFlatSpec with Matchers {
       holidayStop.Stopped_Publication_Date__c.value,
       holidayStop.Estimated_Price__c.map(_.value),
       holidayStop.Actual_Price__c.map(_.value),
-      holidayStop.Expected_Invoice_Date__c.map(_.value)
+      holidayStop.Expected_Invoice_Date__c.map(_.value),
+      holidayStop.Is_Actioned__c
     )
   }
 

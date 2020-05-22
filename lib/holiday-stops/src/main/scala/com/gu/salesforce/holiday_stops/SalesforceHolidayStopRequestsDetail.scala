@@ -56,6 +56,7 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
     Stopped_Publication_Date__c: AffectedPublicationDate,
     Estimated_Price__c: Option[Price],
     Charge_Code__c: Option[RatePlanChargeCode],
+    Is_Actioned__c: Boolean,
     Actual_Price__c: Option[Price],
     Expected_Invoice_Date__c: Option[HolidayStopRequestsDetailExpectedInvoiceDate]
   ) extends CreditRequest {
@@ -71,7 +72,7 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
 
   val SOQL_SELECT_CLAUSE = """
       | SELECT Id, Subscription_Name__c, Product_Name__c, Stopped_Publication_Date__c,
-      | Estimated_Price__c, Charge_Code__c, Actual_Price__c, Expected_Invoice_Date__c
+      | Estimated_Price__c, Charge_Code__c, Is_Actioned__c, Actual_Price__c, Expected_Invoice_Date__c
       |""".stripMargin
 
   private def soqlFilterClause(stoppedPublicationDates: List[LocalDate]) =

@@ -29,14 +29,15 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
   )
 
   private val request = HolidayStopRequestsDetail(
-    HolidayStopRequestsDetailId("HSR1"),
-    SubscriptionName("S1"),
-    ProductName("Gu Weekly"),
-    AffectedPublicationDate(LocalDate.of(2019, 8, 9)),
-    None,
-    None,
-    None,
-    None
+    Id = HolidayStopRequestsDetailId("HSR1"),
+    Subscription_Name__c = SubscriptionName("S1"),
+    Product_Name__c = ProductName("Gu Weekly"),
+    Stopped_Publication_Date__c = AffectedPublicationDate(LocalDate.of(2019, 8, 9)),
+    Estimated_Price__c = None,
+    Charge_Code__c = None,
+    Is_Actioned__c = false,
+    Actual_Price__c = None,
+    Expected_Invoice_Date__c = None
   )
 
   private def updateSubscription(

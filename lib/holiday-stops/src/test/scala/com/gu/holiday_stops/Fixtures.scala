@@ -254,6 +254,7 @@ object Fixtures extends Assertions {
     Stopped_Publication_Date__c = AffectedPublicationDate(request.Start_Date__c.value),
     Estimated_Price__c = None,
     Charge_Code__c = Some(RatePlanChargeCode(chargeCode)),
+    Is_Actioned__c = true,
     Actual_Price__c = None,
     Expected_Invoice_Date__c = None
   )
@@ -275,6 +276,7 @@ object Fixtures extends Assertions {
       Stopped_Publication_Date__c = AffectedPublicationDate(stopDate),
       Estimated_Price__c = estimatedPrice.map(Price.apply),
       Charge_Code__c = chargeCode.map(RatePlanChargeCode(_)),
+      Is_Actioned__c = chargeCode.isDefined,
       Actual_Price__c = actualPrice.map(Price.apply),
       Expected_Invoice_Date__c = expectedInvoiceDate.map(HolidayStopRequestsDetailExpectedInvoiceDate.apply)
     )
@@ -287,6 +289,7 @@ object Fixtures extends Assertions {
     Stopped_Publication_Date__c = AffectedPublicationDate(date),
     Estimated_Price__c = None,
     Charge_Code__c = None,
+    Is_Actioned__c = false,
     Actual_Price__c = None,
     Expected_Invoice_Date__c = None
   )

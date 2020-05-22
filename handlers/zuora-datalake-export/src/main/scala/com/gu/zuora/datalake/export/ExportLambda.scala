@@ -210,7 +210,7 @@ object Query extends Enum[Query] {
   //  FIXME: Zuora is not capable of doing a full export of InvoiceItem hence the WHERE clause: https://support.zuora.com/hc/en-us/requests/186104
   case object InvoiceItem extends Query(
     "InvoiceItem",
-    "SELECT accountingCode, appliedToInvoiceItemId, chargeAmount, chargeDate, chargeName, createdById, createdDate, invoice.Id, processingType, product.Description, product.Id, product.Name, productRatePlanCharge.Id, quantity, ratePlanCharge.Id, revRecStartDate, serviceEndDate, serviceStartDate, sku, subscriptionId, taxAmount, taxCode, taxExemptAmount, taxMode, unitPrice, uom, updatedById, updatedDate, id, account.Id, balance, accountingPeriod.Id, amendment.Id, billToContact.Id, billToContactSnapShot.Id, defaultPaymentMethod.Id, deferredRevenueAccountingCode.Id, journalEntry.Id, journalRun.Id, parentAccount.Id, productRatePlan.Id, ratePlan.Id, soldToContact.Id FROM InvoiceItem WHERE (CreatedDate >= '2019-11-07T00:00:00') AND (CreatedDate <= '2099-01-01T00:00:00')",
+    "SELECT accountingCode, appliedToInvoiceItemId, chargeAmount, chargeDate, chargeName, createdById, createdDate, invoice.Id, processingType, product.Description, product.Id, product.Name, productRatePlanCharge.Id, quantity, ratePlanCharge.Id, revRecStartDate, serviceEndDate, serviceStartDate, sku, subscriptionId, taxAmount, taxCode, taxExemptAmount, taxMode, unitPrice, uom, updatedById, updatedDate, id, account.Id, balance, accountingPeriod.Id, amendment.Id, billToContact.Id, billToContactSnapShot.Id, defaultPaymentMethod.Id, deferredRevenueAccountingCode.Id, journalEntry.Id, journalRun.Id, parentAccount.Id, productRatePlan.Id, ratePlan.Id, soldToContact.Id FROM InvoiceItem WHERE (CreatedDate >= '2020-04-01T00:00:00') AND (CreatedDate <= '2099-01-01T00:00:00')",
     "ophan-raw-zuora-increment-invoiceitem",
     "InvoiceItem.csv"
   )
@@ -227,7 +227,7 @@ object ZuoraApiHost {
 
 case class ZuoraAquaStatefulApi(
   version: String = "1.2",
-  project: String = "zuora-datalake-export-1", // Changing this will result in new stateful session which means full load
+  project: String = "zuora-datalake-export-2", // Changing this will result in new stateful session which means full load
   partner: String
 )
 object ZuoraAquaStatefulApi {
@@ -385,7 +385,14 @@ object GetResultsFile {
       .asString
 
     response.code match {
-      case 200 => response.body
+      case 200 =>
+        val zuoraRowCount = batch.recordCount.get
+        val downloadedLineCount = response.body.lines.length
+        val downloadedRowCount = downloadedLineCount - 1 // for header row
+        if (downloadedRowCount != zuoraRowCount) {
+          throw new RuntimeException(s"HALTING at '${batch.name}' because the row count of downloaded file ($downloadedRowCount) did not match the Zuora row count (${zuoraRowCount})")
+        }
+        response.body
       case _ => throw new RuntimeException(s"Failed to execute request GetResultsFile: ${response}")
     }
   }
