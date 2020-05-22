@@ -14,26 +14,33 @@ import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, ApiGatewayR
 import com.gu.util.reader.Types.ApiGatewayOp.ContinueProcessing
 import com.gu.util.reader.Types._
 import play.api.libs.json.Json
-
 import scala.util.{Failure, Success}
 
-/**
- * FIXME: batch-email-sender seems to be implemented on partial success principle in which case what should the response code be?
- */
+case class PartialSendSuccess(message: String, code: Int, failed_item_ids: List[String])
+object PartialSendSuccess {
+  implicit val failureResponseWrites = Json.writes[PartialSendSuccess]
+}
+
+// FIXME: What should be the behaviour with some/all items having parsing errors?
 object Handler extends Logging {
   def apply(inputStream: InputStream, outputStream: OutputStream, context: Context): Unit = {
     ApiGatewayHandler(LambdaIO(inputStream, outputStream, context)) {
       def operation(apiGatewayRequest: ApiGatewayRequest): ApiResponse = {
         apiGatewayRequest.bodyAsCaseClass[SalesforceBatchWithExceptions]().map({ salesforceBatch =>
-          val brazeSqsMessages = salesforceBatch.validBatch.batch_items.map(BrazeSqsMessage.fromSalesforceMessage)
-          val parsingErrors = salesforceBatch.exceptions
-          val (sqsSendSuccesses, sqsSendErrors) = send(brazeSqsMessages).partition(_.isRight)
-          if ((parsingErrors ++ sqsSendErrors).nonEmpty) {
-            val msg = s"Failed send some messages: parsingErrors=$parsingErrors sqsSendErros=$sqsSendErrors sqsSendSuccesses=$sqsSendSuccesses"
-            logger.error(msg)
-            ApiGatewayResponse.internalServerError(msg)
+          val validSalesforceBatchItems = salesforceBatch.validBatch.batch_items
+          val invalidSalesforceBatchItems = salesforceBatch.exceptions
+          if (invalidSalesforceBatchItems.nonEmpty) { // FIXME: This is not hooked up to a response code which means emails might be silently dropped
+            logger.error(s"Some batch items sent from Salesforce had parsing errors: $invalidSalesforceBatchItems. FIXME: These emails are silently dropped!")
+          }
+          val sqsMessages = validSalesforceBatchItems.map(BrazeSqsMessage.fromSalesforceMessage)
+          val sqsSendResults = send(sqsMessages)
+          val failedSendIds = sqsSendResults collect { case Left(recordId) => recordId }
+          val successfulIds = sqsSendResults collect { case Right(recordId) => recordId }
+          if (failedSendIds.nonEmpty) {
+            logger.error(s"Failed to send some Braze SQS messages: $failedSendIds")
+            ApiGatewayResponse("502", PartialSendSuccess("Failed to send some Braze SQS messages.", 502, failedSendIds))
           } else {
-            logger.info(s"Successfully sent all Braze SQS messages $sqsSendSuccesses")
+            logger.info(s"Successfully sent all Braze SQS messages: $successfulIds")
             ApiGatewayResponse.successfulExecution
           }
         }).apiResponse
