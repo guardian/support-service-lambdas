@@ -20,3 +20,10 @@ libraryDependencies ++= Seq(
 )
 
 assemblyMergeStrategyDiscardModuleInfo
+
+lazy val deployAwsLambda = taskKey[Unit]("Directly update AWS lambda code from DEV instead of via RiffRaff for faster feedback loop")
+deployAwsLambda := {
+  import scala.sys.process._
+  assembly.value
+  "aws lambda update-function-code --function-name batch-email-sender-CODE --zip-file fileb://handlers/batch-email-sender/target/scala-2.12/batch-email-sender.jar --profile membership --region eu-west-1" !
+}
