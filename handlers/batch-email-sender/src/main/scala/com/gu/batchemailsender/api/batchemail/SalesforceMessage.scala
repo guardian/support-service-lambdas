@@ -23,7 +23,7 @@ object SalesforceMessage {
     sf_contact_id: String,
     product: String,
     next_charge_date: Option[String],
-    last_name: String,
+    last_name: Option[String],
     identity_id: Option[String],
     first_name: Option[String],
     email_stage: String,
