@@ -94,7 +94,19 @@ If extracting via postman make sure to use the **exact same** `partner` and `pro
 
 ## How to perform full export?
 
-There is a separate app designed just for full export. Follow the readme of https://github.com/guardian/zuora-full-export
+1. There is a separate app designed just for full export. Follow the readme of https://github.com/guardian/zuora-full-export
+2. Manually upload big CSVs via [AWS CLI](https://github.com/guardian/zuora-full-export#upload-large-csv-files-to-raw-datalake-buckets)
+3. Make sure to also upload corresponding metadata file with corresponding recordCount otherwise Datalake job pre-conditions validation might fail
+    ```scala
+    {
+        "jobId": "2c92c0f9725046a2017255f7d84e5a48",
+        "fileId": "2c92c09472503749017255fc3c9379c8",
+        "batchId": "2c92c0f9725046a2017255f7d8925a55",
+        "status": "completed",
+        "name": "InvoiceItem",
+        "recordCount": 48650
+    }
+    ```
 
 WARNINGS:
 * **Zuora is not capable of doing a full export of large objects due to 8 hours limitation on jobs: 
