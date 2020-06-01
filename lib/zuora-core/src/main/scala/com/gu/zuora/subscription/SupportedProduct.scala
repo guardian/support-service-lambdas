@@ -93,6 +93,7 @@ object SupportedProduct {
         SupportedRatePlan("Fiveday", fiveDayCharges),
         SupportedRatePlan("Multi-day", everyDayCharges),
         SupportedRatePlan("Saturday ", saturdayCharges),
+        SupportedRatePlan("Saturday", saturdayCharges),  // Some do not have whitespace
         SupportedRatePlan("Saturday+", saturdayCharges),
         SupportedRatePlan("Sixday", sixDayCharges),
         SupportedRatePlan("Sixday+", sixDayCharges),
