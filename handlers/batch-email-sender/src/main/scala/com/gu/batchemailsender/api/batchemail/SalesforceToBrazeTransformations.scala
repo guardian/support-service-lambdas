@@ -33,4 +33,18 @@ object SalesforceToBrazeTransformations {
       case sfStreetPattern(_, line2) if line2.nonEmpty => Some(line2)
       case _ => None
     }
+
+  /** CSRs sometimes remove names or replace them with dot */
+  def atLeastSupporter(firstName: Option[String]): String = {
+    firstName.map(_.trim) match {
+      case None | Some(".") => "Supporter"
+      case Some(v) => v
+    }
+  }
+  def atLeastEmptyString(lastName: Option[String]): String = {
+    lastName.map(_.trim) match {
+      case None | Some(".") => ""
+      case Some(v) => v
+    }
+  }
 }

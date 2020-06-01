@@ -87,56 +87,31 @@ This will export changes since 2019-01-19.
 |-------------------------|:---------------------------------------------:|
 | Continue session        | `{"exportFromDate": "afterLastIncrement"}`    |
 | Since particular date   | `{"exportFromDate": "2020-01-20"}`            |
-| Since beginning of time | `{"exportFromDate": "beginning"}`             |
+| Since beginning of time | `{"exportFromDate": "beginning"}` DO NOT USE! |
 
 If extracting via postman make sure to use the **exact same** `partner` and `project` values as in lambda.
 
 
-## How to extract a full load of all objects (except `InvoiceItem`)?
+## How to perform full export?
 
-* Do **NOT** use `{"exportFromDate": "beginning"}` to achieve full export. 
+There is a separate app designed just for full export. Follow the readme of https://github.com/guardian/zuora-full-export
+
+WARNINGS:
+* **Zuora is not capable of doing a full export of large objects due to 8 hours limitation on jobs: 
+  https://support.zuora.com/hc/en-us/requests/186104** 
+* Do **NOT** use `{"exportFromDate": "beginning"}` to achieve full export. Lambda will throw an exception if `beginning` 
+input is provided. We did not remove it from the code on the off-chance one day Zuora will remove the 8 hour limitation
+or speed up their exports.
 * Any modification to the query (adding/removing/renaming fields or filters) will result in full export for that one 
 object
-* Changing the `project` fields from say `zuora-datalake-export-1` to `zuora-datalake-export-1` will result in full
+* Changing the `project` fields from say `zuora-datalake-export-1` to `zuora-datalake-export-2` will result in full
 export of all objects
 * Note lambda has a hard timeout of 15 min, so if the export takes longer 
   - use postman, and manually copy the CSV file over to Ophan bucket. Make sure to use the **exact same** `partner` and `project` values as in lambda.
   - trigger the export via lambda and let it fail. Then manually copy the CSV files over to Ophan buckets.
 * [Switch Between Full Load and Incremental Load](https://knowledgecenter.zuora.com/DC_Developers/AB_Aggregate_Query_API/BA_Stateless_and_Stateful_Modes#Automatic_Switch_Between_Full_Load_and_Incremental_Load)
-* `InvoiceItem` is not full-exportable: https://support.zuora.com/hc/en-us/requests/186104
 
-## How to extract a full load of `InvoiceItem`?
 
-1. Zuora is not capable of doing a full export of InvoiceItem hence the WHERE clause: https://support.zuora.com/hc/en-us/requests/186104
-
-    ```
-     WHERE (CreatedDate >= '2019-08-28T00:00:00') AND (CreatedDate <= '2099-01-01T00:00:00')
-    ```
-1. Manually, using postman perform year by year exports:
-
-    ```
-    WHERE (CreatedDate >= '2014-01-01T00:00:00') AND (CreatedDate <= '2015-01-01T00:00:00')
-    WHERE (CreatedDate >= '2015-01-01T00:00:00') AND (CreatedDate <= '2016-01-01T00:00:00')
-    ...
-    ```
-1. Download locally CSVs from https://www.zuora.com/apps/BatchQuery.do
-1. Concatenate all the CSV
-    
-    ```
-    cat InvoiceItem-1.csv > InvoiceItem.csv
-    tail -n +2 InvoiceItem-2.csv >> InvoiceItem.csv
-    tail -n +2 InvoiceItem-3.csv >> InvoiceItem.csv
-    ...
-1. Resulting InvoiceItem.csv should be >6GB and have >12M records
-1. Perform some sanity checks, for example, `wc -l`
-1. Manually upload resulting CSV to bucket `https://s3.console.aws.amazon.com/s3/buckets/ophan-raw-zuora-increment-invoiceitem` 
-1. Run ophan job
-1. Adjust to filter from yesterday, so if yesterday is 2020-12-20, then 
-   
-    ```
-    WHERE (CreatedDate >= '2020-12-20T00:00:00') AND (CreatedDate <= '2099-01-01T00:00:00')
-    ``` 
-1. Deploy updated lambda 
 
 ## Which Zuora API User is used for extract?
 

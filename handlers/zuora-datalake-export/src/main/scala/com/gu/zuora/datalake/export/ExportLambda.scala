@@ -13,7 +13,7 @@ import com.amazonaws.services.s3.AmazonS3Client
 import com.amazonaws.services.s3.model.{CannedAccessControlList, ObjectMetadata, PutObjectRequest}
 import com.typesafe.scalalogging.LazyLogging
 import scalaj.http.{BaseHttp, HttpOptions}
-
+import java.time.temporal.ChronoUnit.DAYS
 import scala.io.Source
 import scala.concurrent.duration._
 import scala.util.Try
@@ -74,22 +74,41 @@ class ExportLambda extends Lambda[ExportFromDate, String] with LazyLogging {
   }
 }
 
-object Preconditions extends (ExportFromDate => String) {
+object Preconditions extends (ExportFromDate => String) with LazyLogging {
   def apply(incrementalDate: ExportFromDate): String =
     incrementalDate.exportFromDate match {
       case "afterLastIncrement" => "afterLastIncrement"
-      case "beginning" => "beginning"
+      case "beginning" =>
+        throw new RuntimeException(noFullExportWarning)
+        "beginning"
       case yyyyMMdd =>
         validateDateFormat(yyyyMMdd)
         yyyyMMdd
     }
 
   private val requiredFormat = "yyyy-MM-dd"
-  private def validateDateFormat(incrementalDate: String) = {
-    Try(
-      LocalDate.parse(incrementalDate, DateTimeFormatter.ofPattern(requiredFormat))
-    ).getOrElse(throw new RuntimeException(s"Failed to parse incremental date: $incrementalDate. The format should be $requiredFormat."))
+  private def validateDateFormat(incrementalDate: String): LocalDate = {
+    Try {
+      val date = LocalDate.parse(incrementalDate, DateTimeFormatter.ofPattern(requiredFormat))
+      if (math.abs(DAYS.between(date, LocalDate.now).toInt) > 30) logger.warn(lambda15minLimitationWarning)
+      date
+    }.getOrElse(throw new RuntimeException(s"Failed to parse incremental date: $incrementalDate. The format should be $requiredFormat."))
   }
+
+  private val noFullExportWarning =
+    """
+      |Zuora is NOT capable of doing a full export of large objects due to 8 hours limitation on jobs:
+      |https://support.zuora.com/hc/en-us/requests/186104
+      |Do **NOT** use `{"exportFromDate": "beginning"}` to achieve full export. Lambda will throw an exception if `beginning`
+      |input is provided. We did not remove the logic from the code on the off-chance one day Zuora will remove the 8 hour limitation
+      |or speed up their exports.
+      |""".stripMargin
+
+  private val lambda15minLimitationWarning =
+    """
+      |Since you are exporting data from 1 month ago or more, Zuora will likely take more than 15 minutes Lambda limit
+      |for some objects. For example InvoiceItem monthly chunk is likely to take more than 15 minutes to process.
+      |""".stripMargin
 }
 
 object Program extends (String => JobResults) {

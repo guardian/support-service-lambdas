@@ -88,8 +88,8 @@ object BrazeSqsMessage {
       // Actual Braze fields
       ContactAttributes = EmailPayloadContactAttributes(
         SubscriberAttributes = BrazeApiTriggerProperties(
-          salesforceBatchItem.payload.first_name,
-          salesforceBatchItem.payload.last_name,
+          atLeastSupporter(salesforceBatchItem.payload.first_name),
+          atLeastEmptyString(salesforceBatchItem.payload.last_name),
           salesforceBatchItem.payload.subscriber_id,
           salesforceBatchItem.payload.next_charge_date.map(fromSfDateToDisplayDate),
           salesforceBatchItem.payload.product,
