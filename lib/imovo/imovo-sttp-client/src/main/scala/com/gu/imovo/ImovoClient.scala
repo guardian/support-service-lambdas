@@ -29,12 +29,21 @@ case class ImovoSuccessResponse(message: String, successfulRequest: Boolean)
 
 case class ImovoClientException(message: String)
 sealed trait ImovoSubscriptionType {
-  def value: String
+  val value: String
 }
 object ImovoSubscriptionType {
-  case object ActiveCard extends ImovoSubscriptionType { override def value: String = "ActiveCard" }
-  case object ActiveLetter extends ImovoSubscriptionType { override def value: String = "ActiveLetter" }
-  case object Both extends ImovoSubscriptionType { override def value: String = "Both" }
+  case object ActiveCard extends ImovoSubscriptionType { override val value: String = "ActiveCard" }
+  case object ActiveLetter extends ImovoSubscriptionType { override val value: String = "ActiveLetter" }
+  case object Both extends ImovoSubscriptionType { override val value: String = "Both" }
+
+  def fromString(subscriptionType: String): Option[ImovoSubscriptionType] = {
+    subscriptionType match {
+      case ImovoSubscriptionType.ActiveCard.value => Some(ActiveCard)
+      case ImovoSubscriptionType.ActiveLetter.value => Some(ActiveLetter)
+      case ImovoSubscriptionType.Both.value => Some(Both)
+      case _ => None
+    }
+  }
 }
 
 trait ImovoClient[F[_]] {
