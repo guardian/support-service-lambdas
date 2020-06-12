@@ -36,14 +36,15 @@ object ImovoSubscriptionType {
   case object ActiveLetter extends ImovoSubscriptionType { override val value: String = "ActiveLetter" }
   case object Both extends ImovoSubscriptionType { override val value: String = "Both" }
 
-  def fromString(subscriptionType: String): Option[ImovoSubscriptionType] = {
-    subscriptionType match {
-      case ImovoSubscriptionType.ActiveCard.value => Some(ActiveCard)
-      case ImovoSubscriptionType.ActiveLetter.value => Some(ActiveLetter)
-      case ImovoSubscriptionType.Both.value => Some(Both)
+  def fromBooleans(replaceCard: Boolean, replaceLetter: Boolean): Option[ImovoSubscriptionType] = {
+    (replaceCard, replaceLetter) match {
+      case (true, true) => Some(Both)
+      case (true, false) => Some(ActiveCard)
+      case (false, true) => Some(ActiveLetter)
       case _ => None
     }
   }
+
 }
 
 trait ImovoClient[F[_]] {

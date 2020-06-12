@@ -21,7 +21,13 @@ case class CreateVoucherRequestBody(ratePlanName: String)
 
 case class CancelSubscriptionVoucherRequestBody(subscriptionId: String, cancellationDate: LocalDate)
 
-case class SubscriptionActionRequestBody(subscriptionId: Option[String], cardCode: Option[String], letterCode: Option[String], typeOfReplacement: Option[String])
+case class SubscriptionActionRequestBody(
+  subscriptionId: Option[String],
+  cardCode: Option[String],
+  letterCode: Option[String],
+  replaceCard: Option[Boolean],
+  replaceLetter: Option[Boolean]
+)
 
 object DigitalVoucherApiRoutes {
 
@@ -67,10 +73,16 @@ object DigitalVoucherApiRoutes {
         subscriptionId <- requestBody.subscriptionId
           .toRight(UnprocessableEntity(DigitalVoucherApiRoutesError(s"subscriptionId is required")))
           .toEitherT[F]
-        typeOfReplacement <- requestBody.typeOfReplacement
-          .flatMap(replace => ImovoSubscriptionType.fromString(replace))
-          .toRight(UnprocessableEntity(DigitalVoucherApiRoutesError(s"type of replacement is required")))
+        replaceCard <- requestBody.replaceCard
+          .toRight(UnprocessableEntity(DigitalVoucherApiRoutesError(s"replaceCard flag is required when asking for a replacement")))
           .toEitherT[F]
+        replaceLetter <- requestBody.replaceLetter
+          .toRight(UnprocessableEntity(DigitalVoucherApiRoutesError(s"replaceLetter flag is required when asking for a replacement")))
+          .toEitherT[F]
+        typeOfReplacement <- ImovoSubscriptionType.fromBooleans(replaceCard, replaceLetter)
+          .toRight(UnprocessableEntity(DigitalVoucherApiRoutesError("Both replacement flags are set to false - nothing to replace")))
+          .toEitherT[F]
+        _ = typeOfReplacement
         replacementVoucher <- digitalVoucherService
           .replaceVoucher(SfSubscriptionId(subscriptionId), typeOfReplacement)
           .leftMap(error => InternalServerError(DigitalVoucherApiRoutesError(s"Failed replace voucher: $error")))

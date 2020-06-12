@@ -170,7 +170,7 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
       Request(
         method = Method.POST,
         Uri(path = "/digital-voucher/replace")
-      ).withEntity[String](SubscriptionActionRequestBody(Some(subscriptionId.value), None, None, Some("Both")).asJson.spaces2)
+      ).withEntity[String](SubscriptionActionRequestBody(Some(subscriptionId.value), None, None, Some(true), Some(true)).asJson.spaces2)
     ).value.unsafeRunSync().get
 
     getBody[ReplacementSubscriptionVouchers](response) should matchTo(
@@ -200,7 +200,7 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
       Request(
         method = Method.POST,
         Uri(path = "/digital-voucher/replace")
-      ).withEntity[String](SubscriptionActionRequestBody(Some(subscriptionId.value), None, None, Some("ActiveLetter")).asJson.spaces2)
+      ).withEntity[String](SubscriptionActionRequestBody(Some(subscriptionId.value), None, None, Some(false), Some(true)).asJson.spaces2)
     ).value.unsafeRunSync().get
 
     getBody[ReplacementSubscriptionVouchers](response) should matchTo(
@@ -214,7 +214,7 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
       .stubReplaceSubscription(
         imovoConfig,
         subscriptionId = subscriptionId.value,
-        imovoSubscriptionType = ImovoSubscriptionType.ActiveLetter,
+        imovoSubscriptionType = ImovoSubscriptionType.ActiveCard,
         response = ImovoSubscriptionResponse(
           schemeName = "Guardian7Day",
           subscriptionId = subscriptionId.value,
@@ -230,7 +230,7 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
       Request(
         method = Method.POST,
         Uri(path = "/digital-voucher/replace")
-      ).withEntity[String](SubscriptionActionRequestBody(Some(subscriptionId.value), None, None, Some("ActiveLetter")).asJson.spaces2)
+      ).withEntity[String](SubscriptionActionRequestBody(Some(subscriptionId.value), None, None, Some(true), Some(false)).asJson.spaces2)
     ).value.unsafeRunSync().get
 
     getBody[ReplacementSubscriptionVouchers](response) should matchTo(
@@ -253,7 +253,7 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
       Request(
         method = Method.POST,
         Uri(path = "/digital-voucher/replace")
-      ).withEntity[String](SubscriptionActionRequestBody(Some(subscriptionId.value), None, None, Some("Both")).asJson.spaces2)
+      ).withEntity[String](SubscriptionActionRequestBody(Some(subscriptionId.value), None, None, Some(true), Some(true)).asJson.spaces2)
     ).value.unsafeRunSync().get
 
     response.status.code should matchTo(500)
