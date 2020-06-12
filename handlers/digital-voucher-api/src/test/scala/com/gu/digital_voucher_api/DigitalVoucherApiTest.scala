@@ -170,11 +170,71 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
       Request(
         method = Method.POST,
         Uri(path = "/digital-voucher/replace")
-      ).withEntity[String](SubscriptionActionRequestBody(Some(subscriptionId.value), None, None).asJson.spaces2)
+      ).withEntity[String](SubscriptionActionRequestBody(Some(subscriptionId.value), None, None, Some(true), Some(true)).asJson.spaces2)
     ).value.unsafeRunSync().get
 
-    getBody[SubscriptionVouchers](response) should matchTo(
-      SubscriptionVouchers("replaced-card-test-voucher-code", "replaced-letter-test-voucher-code")
+    getBody[ReplacementSubscriptionVouchers](response) should matchTo(
+      ReplacementSubscriptionVouchers(Some("replaced-card-test-voucher-code"), Some("replaced-letter-test-voucher-code"))
+    )
+    response.status.code should matchTo(200)
+  }
+
+  it should "return replaced letter details for replace only letter request with subscriptionId" in {
+    val imovoBackendStub: SttpBackendStub[IO, Nothing] = SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
+      .stubReplaceSubscription(
+        imovoConfig,
+        subscriptionId = subscriptionId.value,
+        imovoSubscriptionType = ImovoSubscriptionType.ActiveLetter,
+        response = ImovoSubscriptionResponse(
+          schemeName = "Guardian7Day",
+          subscriptionId = subscriptionId.value,
+          successfulRequest = true,
+          subscriptionVouchers = List(
+            ImovoVoucherResponse("ActiveLetter", "replaced-letter-test-voucher-code")
+          )
+        )
+      )
+
+    val app = createApp(imovoBackendStub)
+    val response = app.run(
+      Request(
+        method = Method.POST,
+        Uri(path = "/digital-voucher/replace")
+      ).withEntity[String](SubscriptionActionRequestBody(Some(subscriptionId.value), None, None, Some(false), Some(true)).asJson.spaces2)
+    ).value.unsafeRunSync().get
+
+    getBody[ReplacementSubscriptionVouchers](response) should matchTo(
+      ReplacementSubscriptionVouchers(None, Some("replaced-letter-test-voucher-code"))
+    )
+    response.status.code should matchTo(200)
+  }
+
+  it should "return replaced card details for replace only card request with subscriptionId" in {
+    val imovoBackendStub: SttpBackendStub[IO, Nothing] = SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
+      .stubReplaceSubscription(
+        imovoConfig,
+        subscriptionId = subscriptionId.value,
+        imovoSubscriptionType = ImovoSubscriptionType.ActiveCard,
+        response = ImovoSubscriptionResponse(
+          schemeName = "Guardian7Day",
+          subscriptionId = subscriptionId.value,
+          successfulRequest = true,
+          subscriptionVouchers = List(
+            ImovoVoucherResponse("ActiveCard", "replaced-card-test-voucher-code")
+          )
+        )
+      )
+
+    val app = createApp(imovoBackendStub)
+    val response = app.run(
+      Request(
+        method = Method.POST,
+        Uri(path = "/digital-voucher/replace")
+      ).withEntity[String](SubscriptionActionRequestBody(Some(subscriptionId.value), None, None, Some(true), Some(false)).asJson.spaces2)
+    ).value.unsafeRunSync().get
+
+    getBody[ReplacementSubscriptionVouchers](response) should matchTo(
+      ReplacementSubscriptionVouchers(Some("replaced-card-test-voucher-code"), None)
     )
     response.status.code should matchTo(200)
   }
@@ -193,7 +253,7 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
       Request(
         method = Method.POST,
         Uri(path = "/digital-voucher/replace")
-      ).withEntity[String](SubscriptionActionRequestBody(Some(subscriptionId.value), None, None).asJson.spaces2)
+      ).withEntity[String](SubscriptionActionRequestBody(Some(subscriptionId.value), None, None, Some(true), Some(true)).asJson.spaces2)
     ).value.unsafeRunSync().get
 
     response.status.code should matchTo(500)

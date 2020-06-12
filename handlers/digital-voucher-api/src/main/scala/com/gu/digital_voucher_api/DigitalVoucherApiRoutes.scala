@@ -12,7 +12,8 @@ import org.http4s.circe.CirceEntityDecoder._
 import org.http4s.circe.CirceEntityEncoder._
 import org.http4s.dsl.Http4sDsl
 import org.http4s.{DecodeFailure, HttpRoutes, InvalidMessageBodyFailure, MalformedMessageBodyFailure, Request, Response}
-import com.gu.imovo.SfSubscriptionId
+import com.gu.imovo.{ImovoSubscriptionType, SfSubscriptionId}
+import com.gu.digital_voucher_api.ReplacementSubscriptionVouchers._
 
 case class DigitalVoucherApiRoutesError(message: String)
 
@@ -20,7 +21,13 @@ case class CreateVoucherRequestBody(ratePlanName: String)
 
 case class CancelSubscriptionVoucherRequestBody(subscriptionId: String, cancellationDate: LocalDate)
 
-case class SubscriptionActionRequestBody(subscriptionId: Option[String], cardCode: Option[String], letterCode: Option[String])
+case class SubscriptionActionRequestBody(
+  subscriptionId: Option[String],
+  cardCode: Option[String],
+  letterCode: Option[String],
+  replaceCard: Option[Boolean],
+  replaceLetter: Option[Boolean]
+)
 
 object DigitalVoucherApiRoutes {
 
@@ -66,8 +73,18 @@ object DigitalVoucherApiRoutes {
         subscriptionId <- requestBody.subscriptionId
           .toRight(UnprocessableEntity(DigitalVoucherApiRoutesError(s"subscriptionId is required")))
           .toEitherT[F]
+        replaceCard <- requestBody.replaceCard
+          .toRight(UnprocessableEntity(DigitalVoucherApiRoutesError(s"replaceCard flag is required when asking for a replacement")))
+          .toEitherT[F]
+        replaceLetter <- requestBody.replaceLetter
+          .toRight(UnprocessableEntity(DigitalVoucherApiRoutesError(s"replaceLetter flag is required when asking for a replacement")))
+          .toEitherT[F]
+        typeOfReplacement <- ImovoSubscriptionType.fromBooleans(replaceCard, replaceLetter)
+          .toRight(UnprocessableEntity(DigitalVoucherApiRoutesError("Both replacement flags are set to false - nothing to replace")))
+          .toEitherT[F]
+        _ = typeOfReplacement
         replacementVoucher <- digitalVoucherService
-          .replaceVoucher(SfSubscriptionId(subscriptionId))
+          .replaceVoucher(SfSubscriptionId(subscriptionId), typeOfReplacement)
           .leftMap(error => InternalServerError(DigitalVoucherApiRoutesError(s"Failed replace voucher: $error")))
       } yield Ok(replacementVoucher)).merge.flatten
     }
