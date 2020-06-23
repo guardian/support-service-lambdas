@@ -12,7 +12,7 @@ Parameters:
     SarResultsBucket:
         Description: Bucket where sar results are uploaded to
         Type: String
-        Default: baton-results
+        Default: gu-baton-results
     VpcId:
         Description: Vpc where the lambda is being created
         Type: String
@@ -24,26 +24,6 @@ Parameters:
       Type: String
 
 Resources:
-    IdentityInvokeRole: #TODO delete once Baton is migrated to new account
-        Type: AWS::IAM::Role
-        Properties:
-            RoleName: !Sub "zuora-baton-lambda-role-${Stage}"
-            AssumeRolePolicyDocument:
-                Statement:
-                    - Effect: Allow
-                      Principal:
-                          AWS: !Sub "arn:aws:iam::942464564246:root"
-                      Action:
-                          - sts:AssumeRole
-            Path: /
-            Policies:
-                - PolicyName: LambdaPolicy
-                  PolicyDocument:
-                      Statement:
-                          - Effect: Allow
-                            Action:
-                            - lambda:InvokeFunction
-                            Resource: !GetAtt ZuoraBatonSarLambda.Arn
 
     BatonInvokeRole:
       Type: AWS::IAM::Role
