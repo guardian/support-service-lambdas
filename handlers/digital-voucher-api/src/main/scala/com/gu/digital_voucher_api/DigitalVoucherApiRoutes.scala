@@ -29,6 +29,8 @@ case class SubscriptionActionRequestBody(
   replaceLetter: Option[Boolean]
 )
 
+case class RedemptionHistoryRequestBody(subscriptionId: String)
+
 object DigitalVoucherApiRoutes {
 
   def apply[F[_]: Effect](digitalVoucherService: DigitalVoucherService[F]): HttpRoutes[F] = {
@@ -107,9 +109,19 @@ object DigitalVoucherApiRoutes {
       } yield Ok(result)).merge.flatten
     }
 
+    def handleRedemptionHistoryRequest(redemptionHistoryRequestBody: RedemptionHistoryRequestBody) = {
+      (for {
+        result <- digitalVoucherService
+          .getRedemptionHistory(redemptionHistoryRequestBody.subscriptionId)
+          .leftMap(error => InternalServerError(DigitalVoucherApiRoutesError(s"Failed get voucher: $error")))
+      } yield Ok(result)).merge.flatten
+    }
+
     HttpRoutes.of[F] {
       case request @ PUT -> Root / "digital-voucher" / subscriptionId =>
         handleCreateRequest(request, SfSubscriptionId(subscriptionId))
+      case request @ GET -> Root / "digital-voucher" / "redemption-history" / subscriptionId =>
+        handleRedemptionHistoryRequest(RedemptionHistoryRequestBody(subscriptionId))
       case GET -> Root / "digital-voucher" / subscriptionId =>
         handleGetRequest(subscriptionId)
       case request @ POST -> Root / "digital-voucher" / "replace" =>

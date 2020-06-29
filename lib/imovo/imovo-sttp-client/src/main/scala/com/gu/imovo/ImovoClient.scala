@@ -47,6 +47,24 @@ object ImovoSubscriptionType {
 
 }
 
+case class ImovoRedemptionHistoryResponse(
+  subscriptionId: String,
+  lines: Int,
+  subscriptionHistoryItems: List[ImovoSubscriptionHistoryItem],
+  successfulRequest: Boolean
+)
+
+case class ImovoSubscriptionHistoryItem(
+  voucherCode: String,
+  voucherType: String,
+  date: String,
+  activityType: String,
+  address: String,
+  postCode: String,
+  reason: String,
+  value: Double
+)
+
 trait ImovoClient[F[_]] {
   def createSubscriptionVoucher(
     subscriptionId: SfSubscriptionId,
@@ -56,9 +74,13 @@ trait ImovoClient[F[_]] {
   def getSubscriptionVoucher(voucherCode: String): EitherT[F, ImovoClientException, ImovoSubscriptionResponse]
   def replaceSubscriptionVoucher(subscriptionId: SfSubscriptionId, subscriptionType: ImovoSubscriptionType): EitherT[F, ImovoClientException, ImovoSubscriptionResponse]
   def cancelSubscriptionVoucher(subscriptionId: SfSubscriptionId, lastActiveDay: Option[LocalDate]): EitherT[F, ImovoClientException, ImovoSuccessResponse]
+  def getRedemptionHistory(subscriptionId: SfSubscriptionId): EitherT[F, ImovoClientException, ImovoRedemptionHistoryResponse]
 }
 
 object ImovoClient extends LazyLogging {
+
+  val redemptionHistoryMaxLines = "100"
+
   def apply[F[_]: Sync, S](backend: SttpBackend[F, S], config: ImovoConfig): EitherT[F, ImovoClientException, ImovoClient[F]] = {
     implicit val b = backend
 
@@ -175,6 +197,20 @@ object ImovoClient extends LazyLogging {
           None
         )
       }
+
+      override def getRedemptionHistory(subscriptionId: SfSubscriptionId): EitherT[F, ImovoClientException, ImovoRedemptionHistoryResponse] = {
+        val uri = Uri(new URI(s"${config.imovoBaseUrl}/Subscription/SubscriptionRedemptionHistory"))
+          .param("SubscriptionId", subscriptionId.value)
+          .param("MaxLines", redemptionHistoryMaxLines)
+
+        sendAuthenticatedRequest[ImovoRedemptionHistoryResponse, String](
+          config.imovoApiKey,
+          Method.GET,
+          uri,
+          None
+        )
+      }
+
     }.asRight[ImovoClientException].toEitherT[F]
   }
 }

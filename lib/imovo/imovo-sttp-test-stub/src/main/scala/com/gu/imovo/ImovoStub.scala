@@ -39,6 +39,14 @@ object ImovoStub {
           Response.ok(response.asJson.spaces2)
       }
     }
+
+    def stubRedemptionHistorySubscription[A: Encoder](config: ImovoConfig, subscriptionId: String, response: A): SttpBackendStub[F, S] = {
+      sttpStub.whenRequestMatchesPartial {
+        case request: Request[_, _] if matchesRedemptionHistoryRequest(config, subscriptionId, request) =>
+          Response.ok(response.asJson.spaces2)
+      }
+    }
+
   }
 
   private def matchesQueryCreateSubscription[S, F[_]](config: ImovoConfig, subscriptionId: String, schemeName: String, startDate: String, request: Request[_, _]) = {
@@ -75,6 +83,14 @@ object ImovoStub {
 
   private def matchesGetRequest[S, F[_]](config: ImovoConfig, subscriptionId: String, request: Request[_, _]) = {
     val urlMatches = urlNoQueryString(request) === s"${config.imovoBaseUrl}/Subscription/GetSubscriptionVoucherDetails"
+    val methodMatches = request.method == Method.GET
+    val queryParamMatches = request.uri.paramsMap.get("SubscriptionId") === Some(subscriptionId)
+    val apiKeyMatches = request.headers.toMap.get("X-API-KEY") === Some({ config.imovoApiKey })
+    urlMatches && methodMatches && queryParamMatches && apiKeyMatches
+  }
+
+  private def matchesRedemptionHistoryRequest[S, F[_]](config: ImovoConfig, subscriptionId: String, request: Request[_, _]) = {
+    val urlMatches = urlNoQueryString(request) === s"${config.imovoBaseUrl}/Subscription/SubscriptionRedemptionHistory"
     val methodMatches = request.method == Method.GET
     val queryParamMatches = request.uri.paramsMap.get("SubscriptionId") === Some(subscriptionId)
     val apiKeyMatches = request.headers.toMap.get("X-API-KEY") === Some({ config.imovoApiKey })
