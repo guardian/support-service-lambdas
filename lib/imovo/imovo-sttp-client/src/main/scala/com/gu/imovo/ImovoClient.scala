@@ -198,6 +198,28 @@ object ImovoClient extends LazyLogging {
         )
       }
 
+      /**
+       * Method to return `redemptionHistoryMaxLines` of redemption attempts - this call returns successful redemptions,
+       * failed redemptions with a reason and any top up credits applied to the subscription
+       *
+       * The call to imovo has some additional parameters that can be used to paginate the request
+       * /Subscription/SubscriptionRedemptionHistory?EndDate=2019-11-23&StartDate=2008-11-23&SubscriptionId=A-S0039247&MaxLines=20
+       *
+       *   REQUIRED
+       *
+       *    CustomerReference - string
+       *
+       *  OPTIONAL
+       *
+       *    StartDate - string (yyyy-MM-dd)
+       *
+       *    EndDate - string (yyyy-MM-dd)
+       *
+       *    MaxLines - integer
+       *
+       * @param subscriptionId
+       * @return Either[F, ImovoClientException, ImovoRedemptionHistoryResponse]
+       */
       override def getRedemptionHistory(subscriptionId: SfSubscriptionId): EitherT[F, ImovoClientException, ImovoRedemptionHistoryResponse] = {
         val uri = Uri(new URI(s"${config.imovoBaseUrl}/Subscription/SubscriptionRedemptionHistory"))
           .param("SubscriptionId", subscriptionId.value)
