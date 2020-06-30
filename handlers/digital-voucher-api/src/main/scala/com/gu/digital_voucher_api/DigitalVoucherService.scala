@@ -12,6 +12,7 @@ trait DigitalVoucherService[F[_]] {
   def replaceVoucher(subscriptionId: SfSubscriptionId, typeOfReplacement: ImovoSubscriptionType): EitherT[F, DigitalVoucherServiceError, ReplacementSubscriptionVouchers]
   def getVoucher(subscriptionId: String): EitherT[F, DigitalVoucherServiceError, SubscriptionVouchers]
   def cancelVouchers(subscriptionId: SfSubscriptionId, cancellationDate: LocalDate): EitherT[F, DigitalVoucherServiceError, Unit]
+  def getRedemptionHistory(subscriptionId: String): EitherT[F, DigitalVoucherServiceError, RedemptionHistory]
 }
 
 object DigitalVoucherService {
@@ -100,6 +101,7 @@ object DigitalVoucherService {
       }
     }
 
+
     override def cancelVouchers(subscriptionId: SfSubscriptionId, cancellationDate: LocalDate): EitherT[F, DigitalVoucherServiceError, Unit] = {
       val lastActiveDate = cancellationDate.minusDays(1)
       imovoClient
@@ -124,5 +126,13 @@ object DigitalVoucherService {
         voucher <- toReplacementVoucher(voucherResponse).toEitherT[F]
       } yield voucher
     }
+
+    override def getRedemptionHistory(subscriptionId: String): EitherT[F, DigitalVoucherServiceError, RedemptionHistory] = {
+      imovoClient
+        .getRedemptionHistory(SfSubscriptionId(subscriptionId))
+        .map(response => RedemptionHistory(response.voucherHistoryItem.map(item => RedemptionAttempt(item))))
+        .leftMap(error => DigitalVoucherServiceFailure(error.message))
+    }
+
   }
 }
