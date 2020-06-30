@@ -50,7 +50,7 @@ object ImovoSubscriptionType {
 case class ImovoRedemptionHistoryResponse(
   subscriptionId: String,
   lines: Int,
-  subscriptionHistoryItems: List[ImovoSubscriptionHistoryItem],
+  voucherHistoryItem: List[ImovoSubscriptionHistoryItem],
   successfulRequest: Boolean
 )
 

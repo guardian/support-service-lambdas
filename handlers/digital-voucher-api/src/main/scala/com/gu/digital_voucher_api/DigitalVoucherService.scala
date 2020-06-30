@@ -130,7 +130,7 @@ object DigitalVoucherService {
     override def getRedemptionHistory(subscriptionId: String): EitherT[F, DigitalVoucherServiceError, RedemptionHistory] = {
       imovoClient
         .getRedemptionHistory(SfSubscriptionId(subscriptionId))
-        .map(response => RedemptionHistory(response.subscriptionHistoryItems.map(item => RedemptionAttempt(item))))
+        .map(response => RedemptionHistory(response.voucherHistoryItem.map(item => RedemptionAttempt(item))))
         .leftMap(error => DigitalVoucherServiceFailure(error.message))
     }
 
