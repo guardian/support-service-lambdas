@@ -41,7 +41,7 @@ back-fill from the beginning of time, however if SalesForce has some events this
 
 #### Errors
 There are a few log filters & alarms configured in [cfn.yml](cfn.yaml) 
-- "GenericError Count" filer & alarm, is fired if "HTTP request was unsuccessful" is found in the logs. **Fairly important
+- "GenericError Count" filer & alarm, is fired if `"ERROR -"` is found in the logs. **Fairly important
  given this lambda is designed to stop processing events upon any error (to avoid missing data)**
 - TODO add metric events processed filter and mandate records created filter (with alarm if this drops below certain threshold per 12 hours)
 - TODO add 'StoppedRunning' alarm based on existing Invocations metric
