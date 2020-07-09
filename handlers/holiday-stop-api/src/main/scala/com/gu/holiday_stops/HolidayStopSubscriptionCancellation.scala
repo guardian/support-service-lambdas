@@ -11,7 +11,8 @@ final case class HolidayStopSubscriptionCancellationError(reason: String)
 object HolidayStopSubscriptionCancellation {
   def apply(
     cancellationDate: LocalDate,
-    holidayStopRequests: List[HolidayStopRequest]
+    holidayStopRequests: List[HolidayStopRequest],
+    autoRefundGuid: Option[String] = None
   ): List[SalesforceHolidayStopRequestsDetail.HolidayStopRequestsDetail] = {
     val allHolidayStopRequestDetails: List[SalesforceHolidayStopRequestsDetail.HolidayStopRequestsDetail] =
       holidayStopRequests
@@ -30,7 +31,7 @@ object HolidayStopSubscriptionCancellation {
         ) =>
           val chargeCode = requestDetail
             .Charge_Code__c
-            .getOrElse(RatePlanChargeCode("ManualRefund_Cancellation"))
+            .getOrElse(RatePlanChargeCode(autoRefundGuid.getOrElse("ManualRefund_Cancellation")))
           requestDetail.copy(
             Charge_Code__c = Some(chargeCode),
             Actual_Price__c = requestDetail.Estimated_Price__c
