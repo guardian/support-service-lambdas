@@ -549,10 +549,19 @@ Resources:
       ScheduleExpression: "cron(0 1 ? * * *)"
       State: "ENABLED"
       Targets:
-        - Arn: !Ref StateMachine
+        -
+          Arn: !Ref StateMachine
           Id: !Sub trigger_sf_export-ImovoContract-${Stage}
           Input: |
             {
              "objectName": "ImovoContract"
+            }
+          RoleArn: !GetAtt [ TriggerRole, Arn ]
+        -
+          Arn: !Ref StateMachine
+          Id: !Sub trigger_sf_export-DigitalVoucher-${Stage}
+          Input: |
+            {
+             "objectName": "DigitalVoucher"
             }
           RoleArn: !GetAtt [ TriggerRole, Arn ]
