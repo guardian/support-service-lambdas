@@ -32,6 +32,7 @@ object BulkApiParams {
   val directDebitMandate = SfQueryInfo(Soql(SfQueries.directDebitMandate), ObjectName("DirectDebitMandate"), SfObjectName("DD_Mandate__c"))
   val directDebitMandateEvent = SfQueryInfo(Soql(SfQueries.directDebitMandateEvent), ObjectName("DirectDebitMandateEvent"), SfObjectName("DD_Mandate_Event__c"))
   val digitalVoucher = SfQueryInfo(Soql(SfQueries.digitalVoucher), ObjectName("DigitalVoucher"), SfObjectName("Digital_Voucher__c"))
+  val subscriptionProductFeature = SfQueryInfo(Soql(SfQueries.subscriptionProductFeature), ObjectName("ZuoraSubscriptionProductFeature"), SfObjectName("Zuora__SubscriptionProductFeature__c"))
 
   val all = List(
     contact,
@@ -50,7 +51,8 @@ object BulkApiParams {
     directDebitMandateFailure,
     directDebitMandate,
     directDebitMandateEvent,
-    digitalVoucher
+    digitalVoucher,
+    subscriptionProductFeature
   )
 
   val byName = all.map(obj => obj.objectName -> obj).toMap
@@ -614,4 +616,14 @@ object SfQueries {
       |WHERE
       |SF_Subscription__r.Buyer__r.Account.GDPR_Deletion_Pending__c = false
       |""".stripMargin
+
+  val subscriptionProductFeature =
+    """
+      |SELECT
+      | Id,
+      | Zuora__FeatureName__c,
+      | Zuora__Subscription__r.Name
+      |
+      |FROM Zuora__SubscriptionProductFeature__c
+    """.stripMargin
 }
