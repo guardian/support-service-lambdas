@@ -34,6 +34,7 @@ case class RedemptionHistoryRequestBody(subscriptionId: String)
 object DigitalVoucherApiRoutes {
 
   def apply[F[_]: Effect](digitalVoucherService: DigitalVoucherService[F]): HttpRoutes[F] = {
+    type RouteResult[A] = EitherT[F, F[Response[F]], A]
     object http4sDsl extends Http4sDsl[F]
     import http4sDsl._
 
