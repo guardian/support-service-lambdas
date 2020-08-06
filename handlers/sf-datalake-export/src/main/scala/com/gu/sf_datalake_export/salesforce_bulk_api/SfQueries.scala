@@ -620,9 +620,9 @@ object SfQueries {
   val subscriptionProductFeature =
     """
       |SELECT
-      | Id,
-      | Zuora__FeatureName__c,
-      | Zuora__Subscription__r.Name
+      |Id,
+      |Zuora__FeatureName__c,
+      |Zuora__Subscription__r.Name
       |
       |FROM Zuora__SubscriptionProductFeature__c
     """.stripMargin
