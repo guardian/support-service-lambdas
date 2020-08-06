@@ -623,7 +623,6 @@ object SfQueries {
       |Id,
       |Zuora__FeatureName__c,
       |Zuora__Subscription__r.Name
-      |
       |FROM Zuora__SubscriptionProductFeature__c
     """.stripMargin
 }
