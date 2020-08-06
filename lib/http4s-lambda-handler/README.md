@@ -38,6 +38,6 @@ Ensure your lambda is configured to call the 'handle' function on your handler c
         Type: AWS::Lambda::Function
         Properties:
             ...
-            Handler: com.gu.lambdatest,Handler::handle
+            Handler: com.gu.lambdatest.Handler::handle
             ...
 ```
