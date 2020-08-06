@@ -9,9 +9,10 @@ import com.gu.imovo.{ImovoClient, ImovoSubscriptionResponse, ImovoSubscriptionTy
 
 trait DigitalVoucherService[F[_]] {
   def createVoucher(subscriptionId: SfSubscriptionId, ratePlanName: RatePlanName): EitherT[F, DigitalVoucherServiceError, SubscriptionVouchers]
-  def replaceVoucher(subscriptionId: SfSubscriptionId): EitherT[F, DigitalVoucherServiceError, SubscriptionVouchers]
+  def replaceVoucher(subscriptionId: SfSubscriptionId, typeOfReplacement: ImovoSubscriptionType): EitherT[F, DigitalVoucherServiceError, ReplacementSubscriptionVouchers]
   def getVoucher(subscriptionId: String): EitherT[F, DigitalVoucherServiceError, SubscriptionVouchers]
   def cancelVouchers(subscriptionId: SfSubscriptionId, cancellationDate: LocalDate): EitherT[F, DigitalVoucherServiceError, Unit]
+  def getRedemptionHistory(subscriptionId: String): EitherT[F, DigitalVoucherServiceError, RedemptionHistory]
 }
 
 object DigitalVoucherService {
@@ -85,6 +86,22 @@ object DigitalVoucherService {
       }
     }
 
+    def toReplacementVoucher(voucherResponse: ImovoSubscriptionResponse): Either[DigitalVoucherServiceError, ReplacementSubscriptionVouchers] = {
+      val cardCode = voucherResponse.subscriptionVouchers.find(_.subscriptionType === ImovoSubscriptionType.ActiveCard.value)
+      val letterCode = voucherResponse.subscriptionVouchers.find(_.subscriptionType === ImovoSubscriptionType.ActiveLetter.value)
+
+      (cardCode, letterCode) match {
+        case (Some(card), Some(letter)) => Right(ReplacementSubscriptionVouchers(Some(card.voucherCode), Some(letter.voucherCode)))
+        case (Some(card), None) => Right(ReplacementSubscriptionVouchers(Some(card.voucherCode), None))
+        case (None, Some(letter)) => Right(ReplacementSubscriptionVouchers(None, Some(letter.voucherCode)))
+        case _ => {
+          Left(DigitalVoucherServiceFailure(List("Imovo response did not contain an subscription voucher where subscriptionType==\"ActiveLetter\" ",
+            "Imovo response did not contain an subscription voucher where subscriptionType==\"ActiveCard\" ").mkString(",")))
+        }
+      }
+    }
+
+
     override def cancelVouchers(subscriptionId: SfSubscriptionId, cancellationDate: LocalDate): EitherT[F, DigitalVoucherServiceError, Unit] = {
       val lastActiveDate = cancellationDate.minusDays(1)
       imovoClient
@@ -101,13 +118,21 @@ object DigitalVoucherService {
         voucher <- toVoucher(voucherResponse).toEitherT[F]
       } yield voucher
 
-    override def replaceVoucher(subscriptionId: SfSubscriptionId): EitherT[F, DigitalVoucherServiceError, SubscriptionVouchers] = {
+    override def replaceVoucher(subscriptionId: SfSubscriptionId, typeOfReplacement: ImovoSubscriptionType): EitherT[F, DigitalVoucherServiceError, ReplacementSubscriptionVouchers] = {
       for {
         voucherResponse <- imovoClient
-          .replaceSubscriptionVoucher(subscriptionId, ImovoSubscriptionType.Both)
+          .replaceSubscriptionVoucher(subscriptionId, typeOfReplacement)
           .leftMap(error => DigitalVoucherServiceFailure(error.message))
-        voucher <- toVoucher(voucherResponse).toEitherT[F]
+        voucher <- toReplacementVoucher(voucherResponse).toEitherT[F]
       } yield voucher
     }
+
+    override def getRedemptionHistory(subscriptionId: String): EitherT[F, DigitalVoucherServiceError, RedemptionHistory] = {
+      imovoClient
+        .getRedemptionHistory(SfSubscriptionId(subscriptionId))
+        .map(response => RedemptionHistory(response.voucherHistoryItem.map(item => RedemptionAttempt(item))))
+        .leftMap(error => DigitalVoucherServiceFailure(error.message))
+    }
+
   }
 }

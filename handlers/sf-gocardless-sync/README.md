@@ -3,7 +3,7 @@ Polls GoCardless for direct debit mandate events and pushes into SalesForce
 
 #### General Process
 1. Fetch the last processed event from SalesForce (there might not be one)
-2. Fetch [`[batchSize]`](#Batching-(API-limits)) worth of events from GoCardless events endpoint (filtering on Mandate Events), **which occur after** either
+2. Fetch [`[batchSize]`](#batching-api-limits) worth of events from GoCardless events endpoint (filtering on Mandate Events), **which occur after** either
     1. the GoCardless Event ID returned from step one (i.e. SalesForce already has some GoCardless data)
     2. 25 Aug 2015 (since this is when the first event occurred in production GoCardless) - this would be the start of a back-fill
 3. In a single request, lookup the IDs of all the Mandate records in SalesForce which are referenced by the current batch
@@ -41,7 +41,7 @@ back-fill from the beginning of time, however if SalesForce has some events this
 
 #### Errors
 There are a few log filters & alarms configured in [cfn.yml](cfn.yaml) 
-- "GenericError Count" filer & alarm, is fired if "HTTP request was unsuccessful" is found in the logs. **Fairly important
+- "GenericError Count" filer & alarm, is fired if `"ERROR -"` is found in the logs. **Fairly important
  given this lambda is designed to stop processing events upon any error (to avoid missing data)**
 - TODO add metric events processed filter and mandate records created filter (with alarm if this drops below certain threshold per 12 hours)
 - TODO add 'StoppedRunning' alarm based on existing Invocations metric

@@ -5,7 +5,7 @@ import java.time.LocalDate
 import cats.effect.IO
 import com.gu.DevIdentity
 import com.gu.imovo.ImovoStub._
-import com.gu.imovo.{ImovoConfig, ImovoErrorResponse, ImovoSubscriptionResponse, ImovoSubscriptionType, ImovoSuccessResponse, ImovoVoucherResponse, SfSubscriptionId}
+import com.gu.imovo.{ImovoConfig, ImovoErrorResponse, ImovoRedemptionHistoryResponse, ImovoSubscriptionHistoryItem, ImovoSubscriptionResponse, ImovoSubscriptionType, ImovoSuccessResponse, ImovoVoucherResponse, SfSubscriptionId}
 import com.softwaremill.diffx.scalatest.DiffMatcher
 import com.softwaremill.sttp.impl.cats.CatsMonadError
 import com.softwaremill.sttp.testing.SttpBackendStub
@@ -170,11 +170,71 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
       Request(
         method = Method.POST,
         Uri(path = "/digital-voucher/replace")
-      ).withEntity[String](SubscriptionActionRequestBody(Some(subscriptionId.value), None, None).asJson.spaces2)
+      ).withEntity[String](SubscriptionActionRequestBody(Some(subscriptionId.value), None, None, Some(true), Some(true)).asJson.spaces2)
     ).value.unsafeRunSync().get
 
-    getBody[SubscriptionVouchers](response) should matchTo(
-      SubscriptionVouchers("replaced-card-test-voucher-code", "replaced-letter-test-voucher-code")
+    getBody[ReplacementSubscriptionVouchers](response) should matchTo(
+      ReplacementSubscriptionVouchers(Some("replaced-card-test-voucher-code"), Some("replaced-letter-test-voucher-code"))
+    )
+    response.status.code should matchTo(200)
+  }
+
+  it should "return replaced letter details for replace only letter request with subscriptionId" in {
+    val imovoBackendStub: SttpBackendStub[IO, Nothing] = SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
+      .stubReplaceSubscription(
+        imovoConfig,
+        subscriptionId = subscriptionId.value,
+        imovoSubscriptionType = ImovoSubscriptionType.ActiveLetter,
+        response = ImovoSubscriptionResponse(
+          schemeName = "Guardian7Day",
+          subscriptionId = subscriptionId.value,
+          successfulRequest = true,
+          subscriptionVouchers = List(
+            ImovoVoucherResponse("ActiveLetter", "replaced-letter-test-voucher-code")
+          )
+        )
+      )
+
+    val app = createApp(imovoBackendStub)
+    val response = app.run(
+      Request(
+        method = Method.POST,
+        Uri(path = "/digital-voucher/replace")
+      ).withEntity[String](SubscriptionActionRequestBody(Some(subscriptionId.value), None, None, Some(false), Some(true)).asJson.spaces2)
+    ).value.unsafeRunSync().get
+
+    getBody[ReplacementSubscriptionVouchers](response) should matchTo(
+      ReplacementSubscriptionVouchers(None, Some("replaced-letter-test-voucher-code"))
+    )
+    response.status.code should matchTo(200)
+  }
+
+  it should "return replaced card details for replace only card request with subscriptionId" in {
+    val imovoBackendStub: SttpBackendStub[IO, Nothing] = SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
+      .stubReplaceSubscription(
+        imovoConfig,
+        subscriptionId = subscriptionId.value,
+        imovoSubscriptionType = ImovoSubscriptionType.ActiveCard,
+        response = ImovoSubscriptionResponse(
+          schemeName = "Guardian7Day",
+          subscriptionId = subscriptionId.value,
+          successfulRequest = true,
+          subscriptionVouchers = List(
+            ImovoVoucherResponse("ActiveCard", "replaced-card-test-voucher-code")
+          )
+        )
+      )
+
+    val app = createApp(imovoBackendStub)
+    val response = app.run(
+      Request(
+        method = Method.POST,
+        Uri(path = "/digital-voucher/replace")
+      ).withEntity[String](SubscriptionActionRequestBody(Some(subscriptionId.value), None, None, Some(true), Some(false)).asJson.spaces2)
+    ).value.unsafeRunSync().get
+
+    getBody[ReplacementSubscriptionVouchers](response) should matchTo(
+      ReplacementSubscriptionVouchers(Some("replaced-card-test-voucher-code"), None)
     )
     response.status.code should matchTo(200)
   }
@@ -193,7 +253,7 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
       Request(
         method = Method.POST,
         Uri(path = "/digital-voucher/replace")
-      ).withEntity[String](SubscriptionActionRequestBody(Some(subscriptionId.value), None, None).asJson.spaces2)
+      ).withEntity[String](SubscriptionActionRequestBody(Some(subscriptionId.value), None, None, Some(true), Some(true)).asJson.spaces2)
     ).value.unsafeRunSync().get
 
     response.status.code should matchTo(500)
@@ -247,6 +307,108 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffMa
     ).value.unsafeRunSync().get
 
     getBody[Unit](response) should equal(())
+
+    response.status.code should equal(200)
+  }
+
+  it should "return 200 response for redemption history request with no redemption history" in {
+
+    val imovoBackendStub: SttpBackendStub[IO, Nothing] = SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
+      .stubRedemptionHistorySubscription(
+        imovoConfig,
+        subscriptionId = subscriptionId.value,
+        response = ImovoRedemptionHistoryResponse(
+          subscriptionId.value,
+          0,
+          List.empty[ImovoSubscriptionHistoryItem],
+          true
+        )
+      )
+
+    val app = createApp(imovoBackendStub)
+    val response = app.run(
+      Request(
+        method = Method.GET,
+        Uri(path = s"/digital-voucher/redemption-history/${subscriptionId.value}")
+      )
+    ).value.unsafeRunSync().get
+
+    getBody[RedemptionHistory](response) should equal(RedemptionHistory(List.empty[RedemptionAttempt]))
+
+    response.status.code should equal(200)
+  }
+
+  it should "return 200 response for redemption history request" in {
+
+    val redemptionHistoryResponse = List(
+      ImovoSubscriptionHistoryItem(
+        "abc123",
+        "card",
+        "2020-06-29T19:19:21.816Z",
+        "redemption",
+        "221B Baker Street, London, U.K.",
+        "NW1 6XE",
+        "Success",
+        2.22
+      ),
+      ImovoSubscriptionHistoryItem(
+        "abc123",
+        "card",
+        "2020-07-29T19:19:21.816Z",
+        "redemption",
+        "221B Baker Street, London, U.K.",
+        "NW1 6XE",
+        "Redemption rejected - this voucher has been used the maximum number of times this period. Please check terms and conditions",
+        0.0
+      )
+    )
+
+    val redemptionHistory = RedemptionHistory(
+      List(
+        RedemptionAttempt(
+          "abc123",
+          "card",
+          "2020-06-29T19:19:21.816Z",
+          "redemption",
+          "221B Baker Street, London, U.K.",
+          "NW1 6XE",
+          "Success",
+          2.22
+        ),
+        RedemptionAttempt(
+          "abc123",
+          "card",
+          "2020-07-29T19:19:21.816Z",
+          "redemption",
+          "221B Baker Street, London, U.K.",
+          "NW1 6XE",
+          "Redemption rejected - this voucher has been used the maximum number of times this period. Please check terms and conditions",
+          0.0
+        )
+      )
+    )
+
+    val imovoBackendStub: SttpBackendStub[IO, Nothing] = SttpBackendStub[IO, Nothing](new CatsMonadError[IO])
+      .stubRedemptionHistorySubscription(
+        imovoConfig,
+        subscriptionId = subscriptionId.value,
+        response = ImovoRedemptionHistoryResponse(
+          subscriptionId.value,
+          0,
+          redemptionHistoryResponse,
+          true
+        )
+      )
+
+    val app = createApp(imovoBackendStub)
+    val response = app.run(
+      Request(
+        method = Method.GET,
+        Uri(path = s"/digital-voucher/redemption-history/${subscriptionId.value}")
+      )
+    ).value.unsafeRunSync().get
+
+    getBody[RedemptionHistory](response) should equal(redemptionHistory)
 
     response.status.code should equal(200)
   }

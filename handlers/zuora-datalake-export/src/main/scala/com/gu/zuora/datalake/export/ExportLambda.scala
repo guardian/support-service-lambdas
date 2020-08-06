@@ -4,8 +4,10 @@ import java.io.ByteArrayInputStream
 import java.nio.charset.StandardCharsets
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import io.circe.Printer
 import io.circe.generic.auto._
 import io.circe.parser._
+import io.circe.syntax._
 import io.github.mkotsur.aws.handler.Lambda._
 import io.github.mkotsur.aws.handler.Lambda
 import com.amazonaws.services.lambda.runtime.Context
@@ -59,6 +61,13 @@ case class AccessToken(access_token: String)
 case class QueryResponse(id: String)
 case class Batch(fileId: Option[String], batchId: String, status: String, name: String, message: Option[String], recordCount: Option[Int])
 case class JobResults(status: String, id: String, batches: List[Batch], incrementalTime: Option[String])
+case class Metadata(jobId: String, fileId: String, batchId: String, status: String, name: String, recordCount: Int)
+object Metadata {
+  def apply(job: JobResults, batch: Batch): Metadata = {
+    assert(batch.fileId.isDefined && batch.recordCount.isDefined, s"Batch $batch from job ${job.id} should have file and record count available.")
+    Metadata(job.id, batch.fileId.get, batch.batchId, batch.status, batch.name, batch.recordCount.get)
+  }
+}
 
 /**
  * Exports incremental changeset from Zuora to Datalake S3 raw buckets in CSV format via
@@ -118,7 +127,7 @@ object Program extends (String => JobResults) {
     val jobResult = GetJobResult(jobId)
     jobResult.batches.foreach { batch =>
       val csvFile = GetResultsFile(batch)
-      SaveCsvToBucket(csvFile, batch)
+      SaveCsvToBucket(csvFile, jobResult, batch)
     }
     jobResult
   }
@@ -179,7 +188,7 @@ object Query extends Enum[Query] {
   )
   case object Subscription extends Query(
     "Subscription",
-    "SELECT AutoRenew, CancellationReason__c, ContractAcceptanceDate, ContractEffectiveDate, IPCountry__c, CreatedDate, Name, InitialPromotionCode__c, PromotionCode__c, ReaderType__c, Status, TermEndDate, TermStartDate, Version, serviceActivationDate, ID, BillToContact.ID, SoldToContact.ID, SubscriptionVersionAmendment.ID, Account.ID, AcquisitionCase__c, AcquisitionSource__c, ActivationDate__c, CanadaHandDelivery__c, CancelledDate, CASSubscriberID__c, CreatedByCSR__c, CreatedByID, CreatedRequestId__c, CreatorAccountID, CreatorInvoiceOwnerID, CurrentTerm, CurrentTermPeriodType, Gift_Subscription__c, InitialTerm, InitialTermPeriodType, InvoiceOwnerID, IPAddress__c, IsInvoiceSeparate, LastPriceChangeDate__c, legacy_cat__c, LegacyContractStartDate__c FROM Subscription",
+    "SELECT AutoRenew, CancellationReason__c, ContractAcceptanceDate, ContractEffectiveDate, IPCountry__c, CreatedDate, Name, InitialPromotionCode__c, PromotionCode__c, ReaderType__c, Status, TermEndDate, TermStartDate, Version, serviceActivationDate, ID, BillToContact.ID, SoldToContact.ID, SubscriptionVersionAmendment.ID, Account.ID, AcquisitionCase__c, AcquisitionSource__c, ActivationDate__c, CanadaHandDelivery__c, CancelledDate, CASSubscriberID__c, CreatedByCSR__c, CreatedByID, CreatedRequestId__c, CreatorAccountID, CreatorInvoiceOwnerID, CurrentTerm, CurrentTermPeriodType, Gift_Subscription__c, InitialTerm, InitialTermPeriodType, InvoiceOwnerID, IPAddress__c, IsInvoiceSeparate, LastPriceChangeDate__c, legacy_cat__c, LegacyContractStartDate__c, CorporateAccountId__c, RedemptionCode__c FROM Subscription",
     "ophan-raw-zuora-increment-subscription",
     "Subscription.csv"
   )
@@ -417,15 +426,20 @@ object GetResultsFile {
   }
 }
 
-object SaveCsvToBucket {
-  def apply(csvContent: String, batch: Batch) = {
+object SaveCsvToBucket extends LazyLogging {
+  def apply(csvContent: String, job: JobResults, batch: Batch) = {
     val s3Client = AmazonS3Client.builder.build()
     System.getenv("Stage") match {
       case "CODE" => // do nothing
 
       case "PROD" =>
-        val requestWithAcl = putRequestWithAcl(Query.withName(batch.name).s3Bucket, Query.withName(batch.name).s3Key, csvContent)
-        s3Client.putObject(requestWithAcl)
+        val bucket = Query.withName(batch.name).s3Bucket
+        val metadata: String = Printer.spaces2.pretty(Metadata(job, batch).asJson)
+        val csvRequestWithAcl = putRequestWithAcl(bucket, key = Query.withName(batch.name).s3Key, csvContent)
+        val metadataRequestWithAcl = putRequestWithAcl(bucket, key = s"metadata/${batch.name}.json", metadata)
+        s3Client.putObject(csvRequestWithAcl)
+        logger.info(s"Saving ${batch.name}.json to $bucket with content: $metadata")
+        s3Client.putObject(metadataRequestWithAcl)
     }
   }
 

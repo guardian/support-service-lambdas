@@ -19,3 +19,10 @@ libraryDependencies ++= Seq(
 )
 
 assemblyMergeStrategyDiscardModuleInfo
+
+lazy val deployAwsLambda = taskKey[Unit]("Directly update AWS lambda code from DEV instead of via RiffRaff for faster feedback loop")
+deployAwsLambda := {
+  import scala.sys.process._
+  assembly.value
+  "aws lambda update-function-code --function-name holiday-stop-api-DEV --zip-file fileb://handlers/holiday-stop-api/target/scala-2.12/holiday-stop-api.jar --profile membership --region eu-west-1" !
+}

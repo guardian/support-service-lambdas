@@ -29,13 +29,41 @@ case class ImovoSuccessResponse(message: String, successfulRequest: Boolean)
 
 case class ImovoClientException(message: String)
 sealed trait ImovoSubscriptionType {
-  def value: String
+  val value: String
 }
 object ImovoSubscriptionType {
-  case object ActiveCard extends ImovoSubscriptionType { override def value: String = "ActiveCard" }
-  case object ActiveLetter extends ImovoSubscriptionType { override def value: String = "ActiveLetter" }
-  case object Both extends ImovoSubscriptionType { override def value: String = "Both" }
+  case object ActiveCard extends ImovoSubscriptionType { override val value: String = "ActiveCard" }
+  case object ActiveLetter extends ImovoSubscriptionType { override val value: String = "ActiveLetter" }
+  case object Both extends ImovoSubscriptionType { override val value: String = "Both" }
+
+  def fromBooleans(replaceCard: Boolean, replaceLetter: Boolean): Option[ImovoSubscriptionType] = {
+    (replaceCard, replaceLetter) match {
+      case (true, true) => Some(Both)
+      case (true, false) => Some(ActiveCard)
+      case (false, true) => Some(ActiveLetter)
+      case _ => None
+    }
+  }
+
 }
+
+case class ImovoRedemptionHistoryResponse(
+  subscriptionId: String,
+  lines: Int,
+  voucherHistoryItem: List[ImovoSubscriptionHistoryItem],
+  successfulRequest: Boolean
+)
+
+case class ImovoSubscriptionHistoryItem(
+  voucherCode: String,
+  voucherType: String,
+  date: String,
+  activityType: String,
+  address: String,
+  postCode: String,
+  reason: String,
+  value: Double
+)
 
 trait ImovoClient[F[_]] {
   def createSubscriptionVoucher(
@@ -46,9 +74,13 @@ trait ImovoClient[F[_]] {
   def getSubscriptionVoucher(voucherCode: String): EitherT[F, ImovoClientException, ImovoSubscriptionResponse]
   def replaceSubscriptionVoucher(subscriptionId: SfSubscriptionId, subscriptionType: ImovoSubscriptionType): EitherT[F, ImovoClientException, ImovoSubscriptionResponse]
   def cancelSubscriptionVoucher(subscriptionId: SfSubscriptionId, lastActiveDay: Option[LocalDate]): EitherT[F, ImovoClientException, ImovoSuccessResponse]
+  def getRedemptionHistory(subscriptionId: SfSubscriptionId): EitherT[F, ImovoClientException, ImovoRedemptionHistoryResponse]
 }
 
 object ImovoClient extends LazyLogging {
+
+  val redemptionHistoryMaxLines = "100"
+
   def apply[F[_]: Sync, S](backend: SttpBackend[F, S], config: ImovoConfig): EitherT[F, ImovoClientException, ImovoClient[F]] = {
     implicit val b = backend
 
@@ -165,6 +197,42 @@ object ImovoClient extends LazyLogging {
           None
         )
       }
+
+      /**
+       * Method to return `redemptionHistoryMaxLines` of redemption attempts - this call returns successful redemptions,
+       * failed redemptions with a reason and any top up credits applied to the subscription
+       *
+       * The call to imovo has some additional parameters that can be used to paginate the request
+       * /Subscription/SubscriptionRedemptionHistory?EndDate=2019-11-23&StartDate=2008-11-23&SubscriptionId=A-S0039247&MaxLines=20
+       *
+       *   REQUIRED
+       *
+       *    CustomerReference - string
+       *
+       *  OPTIONAL
+       *
+       *    StartDate - string (yyyy-MM-dd)
+       *
+       *    EndDate - string (yyyy-MM-dd)
+       *
+       *    MaxLines - integer
+       *
+       * @param subscriptionId
+       * @return Either[F, ImovoClientException, ImovoRedemptionHistoryResponse]
+       */
+      override def getRedemptionHistory(subscriptionId: SfSubscriptionId): EitherT[F, ImovoClientException, ImovoRedemptionHistoryResponse] = {
+        val uri = Uri(new URI(s"${config.imovoBaseUrl}/Subscription/SubscriptionRedemptionHistory"))
+          .param("SubscriptionId", subscriptionId.value)
+          .param("MaxLines", redemptionHistoryMaxLines)
+
+        sendAuthenticatedRequest[ImovoRedemptionHistoryResponse, String](
+          config.imovoApiKey,
+          Method.GET,
+          uri,
+          None
+        )
+      }
+
     }.asRight[ImovoClientException].toEitherT[F]
   }
 }

@@ -335,7 +335,7 @@ object Handler extends Logging {
   }
 
   case class CancelHolidayStopsPathParams(subscriptionName: SubscriptionName)
-  case class CancelHolidayStopsQueryParams(effectiveCancellationDate: Option[LocalDate])
+  case class CancelHolidayStopsQueryParams(effectiveCancellationDate: Option[LocalDate], autoRefundGuid: Option[String] = None)
 
   def stepsToCancel(
     idGenerator: => String
@@ -357,7 +357,8 @@ object Handler extends Logging {
         )
       holidayStopRequestDetailToUpdate = HolidayStopSubscriptionCancellation(
         effectiveCancellationDate,
-        holidayStopRequests
+        holidayStopRequests,
+        queryParams.autoRefundGuid
       )
       cancelBody = CancelHolidayStopRequestDetail.buildBody(holidayStopRequestDetailToUpdate, idGenerator)
       _ <- updateRequestDetailOp(cancelBody)
