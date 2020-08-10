@@ -754,6 +754,238 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |        "United States Virgin Islands", "Vietnam", "Vanuatu", "Samoa", "Yemen", "South Africa", "Zambia",
         |        "Zimbabwe"
         |      ]
+        |    },
+        |    {
+        |      "label": "Digital Voucher",
+        |      "plans": [
+        |        {
+        |          "id": "digital_voucher_weekend",
+        |          "label": "Weekend",
+        |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Saturday",
+        |              "Sunday"
+        |            ],
+        |            "selectableWindow": {
+        |              "startDate": "2020-04-03",
+        |              "sizeInDays": 1
+        |            }
+        |          },
+        |          "paymentPlans": [
+        |            {
+        |              "currencyCode": "GBP",
+        |              "description": "GBP 70.05 every month"
+        |            }
+        |          ],
+        |          "paymentPlan": "GBP 70.05 every month"
+        |        },
+        |        {
+        |          "id": "digital_voucher_weekend_plus",
+        |          "label": "Weekend+",
+        |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Saturday",
+        |              "Sunday"
+        |            ],
+        |            "selectableWindow": {
+        |              "startDate": "2020-04-03",
+        |              "sizeInDays": 1
+        |            }
+        |          },
+        |          "paymentPlans": [
+        |            {
+        |              "currencyCode": "GBP",
+        |              "description": "GBP 70.06 every month"
+        |            }
+        |          ],
+        |          "paymentPlan": "GBP 70.06 every month"
+        |        },
+        |        {
+        |          "id": "digital_voucher_everyday",
+        |          "label": "Everyday",
+        |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Monday",
+        |              "Tuesday",
+        |              "Wednesday",
+        |              "Thursday",
+        |              "Friday",
+        |              "Saturday",
+        |              "Sunday"
+        |            ],
+        |            "selectableWindow": {
+        |              "startDate": "2020-04-01",
+        |              "sizeInDays": 1
+        |            }
+        |          },
+        |          "paymentPlans": [
+        |            {
+        |              "currencyCode": "GBP",
+        |              "description": "GBP 70.01 every month"
+        |            }
+        |          ],
+        |          "paymentPlan": "GBP 70.01 every month"
+        |        },
+        |        {
+        |          "id": "digital_voucher_everyday_plus",
+        |          "label": "Everyday+",
+        |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Monday",
+        |              "Tuesday",
+        |              "Wednesday",
+        |              "Thursday",
+        |              "Friday",
+        |              "Saturday",
+        |              "Sunday"
+        |            ],
+        |            "selectableWindow": {
+        |              "startDate": "2020-04-01",
+        |              "sizeInDays": 1
+        |            }
+        |          },
+        |          "paymentPlans": [
+        |            {
+        |              "currencyCode": "GBP",
+        |              "description": "GBP 70.02 every month"
+        |            }
+        |          ],
+        |          "paymentPlan": "GBP 70.02 every month"
+        |        },
+        |        {
+        |          "id": "digital_voucher_sunday",
+        |          "label": "Sunday",
+        |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Sunday"
+        |            ],
+        |            "selectableWindow": {
+        |              "startDate": "2020-04-05",
+        |              "sizeInDays": 1
+        |            }
+        |          },
+        |          "paymentPlans": [
+        |            {
+        |              "currencyCode": "GBP",
+        |              "description": "GBP 70.09 every month"
+        |            }
+        |          ],
+        |          "paymentPlan": "GBP 70.09 every month"
+        |        },
+        |        {
+        |          "id": "digital_voucher_sunday_plus",
+        |          "label": "Sunday+",
+        |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Sunday"
+        |            ],
+        |            "selectableWindow": {
+        |              "startDate": "2020-04-05",
+        |              "sizeInDays": 1
+        |            }
+        |          },
+        |          "paymentPlans": [
+        |            {
+        |              "currencyCode": "GBP",
+        |              "description": "GBP 70.10 every month"
+        |            }
+        |          ],
+        |          "paymentPlan": "GBP 70.10 every month"
+        |        },
+        |        {
+        |          "id": "digital_voucher_saturday",
+        |          "label": "Saturday",
+        |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Saturday"
+        |            ],
+        |            "selectableWindow": {
+        |              "startDate": "2020-04-04",
+        |              "sizeInDays": 1
+        |            }
+        |          },
+        |          "paymentPlans": [
+        |            {
+        |              "currencyCode": "GBP",
+        |              "description": "GBP 70.08 every month"
+        |            }
+        |          ],
+        |          "paymentPlan": "GBP 70.08 every month"
+        |        },
+        |        {
+        |          "id": "digital_voucher_saturday_plus",
+        |          "label": "Saturday+",
+        |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Saturday"
+        |            ],
+        |            "selectableWindow": {
+        |              "startDate": "2020-04-04",
+        |              "sizeInDays": 1
+        |            }
+        |          },
+        |          "paymentPlans": [
+        |            {
+        |              "currencyCode": "GBP",
+        |              "description": "GBP 70.08 every month"
+        |            }
+        |          ],
+        |          "paymentPlan": "GBP 70.08 every month"
+        |        },
+        |        {
+        |          "id": "digital_voucher_sixday",
+        |          "label": "Sixday",
+        |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Monday",
+        |              "Tuesday",
+        |              "Wednesday",
+        |              "Thursday",
+        |              "Friday",
+        |              "Saturday"
+        |            ],
+        |            "selectableWindow": {
+        |              "startDate": "2020-04-02",
+        |              "sizeInDays": 1
+        |            }
+        |          },
+        |          "paymentPlans": [
+        |            {
+        |              "currencyCode": "GBP",
+        |              "description": "GBP 70.03 every month"
+        |            }
+        |          ],
+        |          "paymentPlan": "GBP 70.03 every month"
+        |        },
+        |        {
+        |          "id": "digital_voucher_sixday_plus",
+        |          "label": "Sixday+",
+        |          "startDateRules": {
+        |            "daysOfWeek": [
+        |              "Monday",
+        |              "Tuesday",
+        |              "Wednesday",
+        |              "Thursday",
+        |              "Friday",
+        |              "Saturday"
+        |            ],
+        |            "selectableWindow": {
+        |              "startDate": "2020-04-02",
+        |              "sizeInDays": 1
+        |            }
+        |          },
+        |          "paymentPlans": [
+        |            {
+        |              "currencyCode": "GBP",
+        |              "description": "GBP 70.04 every month"
+        |            }
+        |          ],
+        |          "paymentPlan": "GBP 70.04 every month"
+        |        }
+        |      ],
+        |      "enabledForDeliveryCountries": [
+        |        "United Kingdom"
+        |      ]
         |    }
         |  ]
         |}
