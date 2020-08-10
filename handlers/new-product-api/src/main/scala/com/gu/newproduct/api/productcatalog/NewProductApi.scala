@@ -16,6 +16,7 @@ object NewProductApi {
   val VoucherSubscriptionStartDateWindowSize = WindowSizeDays(35)
   val ContributionStartDateWindowSize = WindowSizeDays(1)
   val DigiPackStartDateWindowSize = WindowSizeDays(90)
+  val DigitalVoucherStartDateWindowSize = WindowSizeDays(1)
 
   def catalog(
     pricingFor: PlanId => Map[Currency, AmountMinorUnits],
@@ -54,9 +55,21 @@ object NewProductApi {
       voucherWindowRule(allowedDays)
     )
 
+    val saturdayDays = List(SATURDAY)
+    val sundayDays = List(SUNDAY)
+    val weekendDays = List(SATURDAY, SUNDAY)
+    val weekDays = List(
+      MONDAY,
+      TUESDAY,
+      WEDNESDAY,
+      THURSDAY,
+      FRIDAY
+    )
+    val sixDayDays = weekDays ++ saturdayDays
+    val everyDayDays = List(MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY)
     val voucherMondayRules = voucherDateRules(List(MONDAY))
-    val voucherSundayDateRules = voucherDateRules(List(SUNDAY))
-    val voucherSaturdayDateRules = voucherDateRules(List(SATURDAY))
+    val voucherSundayDateRules = voucherDateRules(sundayDays)
+    val voucherSaturdayDateRules = voucherDateRules(saturdayDays)
 
     def homeDeliveryWindowRule(issueDays: List[DayOfWeek]) = WindowRule(
       startDate =  getStartDateFromFulfilmentFiles(ProductType.NewspaperHomeDelivery, issueDays),
@@ -69,20 +82,13 @@ object NewProductApi {
     )
 
     val homeDeliveryEveryDayRules = homeDeliveryDateRules(
-      List(MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY)
-    )
-    val weekDays = List(
-      MONDAY,
-      TUESDAY,
-      WEDNESDAY,
-      THURSDAY,
-      FRIDAY
+      everyDayDays
     )
 
-    val homeDeliverySixDayRules = homeDeliveryDateRules(weekDays ++ List(SATURDAY))
-    val homeDeliverySundayDateRules = homeDeliveryDateRules(List(SUNDAY))
-    val homeDeliverySaturdayDateRules = homeDeliveryDateRules(List(SATURDAY))
-    val homeDeliveryWeekendRules = homeDeliveryDateRules(List(SATURDAY, SUNDAY))
+    val homeDeliverySixDayRules = homeDeliveryDateRules(sixDayDays)
+    val homeDeliverySundayDateRules = homeDeliveryDateRules(sundayDays)
+    val homeDeliverySaturdayDateRules = homeDeliveryDateRules(saturdayDays)
+    val homeDeliveryWeekendRules = homeDeliveryDateRules(weekendDays)
 
     val contributionsRule = StartDateRules(
       windowRule = WindowRule(
@@ -117,6 +123,14 @@ object NewProductApi {
         )
       )
 
+    def digitalVoucherStartDateRule(daysOfWeek: List[DayOfWeek]) =
+      StartDateRules(
+        daysOfWeekRule = Some(DaysOfWeekRule(daysOfWeek)),
+        windowRule = WindowRule(
+          startDate = getStartDateFromFulfilmentFiles(ProductType.NewspaperDigitalVoucher, daysOfWeek),
+          maybeSize = Some(DigitalVoucherStartDateWindowSize)
+        )
+      )
 
     Catalog(
       voucherWeekendPlus = planWithPayment(VoucherWeekendPlus, PlanDescription("Weekend+"), voucherSaturdayDateRules, Monthly),
@@ -149,6 +163,16 @@ object NewProductApi {
       guardianWeeklyROWSixForSix = planWithPayment(GuardianWeeklyROW6for6, PlanDescription("GW Oct 18 - Six for Six - ROW"), guardianWeeklyStartDateRules, SixWeeks),
       guardianWeeklyROWQuarterly = planWithPayment(GuardianWeeklyROWQuarterly, PlanDescription("GW Oct 18 - Quarterly - ROW"), guardianWeeklyStartDateRules, Quarterly),
       guardianWeeklyROWAnnual = planWithPayment(GuardianWeeklyROWAnnual, PlanDescription("GW Oct 18 - Annual - ROW"), guardianWeeklyStartDateRules, Annual),
+      digitalVoucherWeekend = planWithPayment(DigitalVoucherWeekend, PlanDescription("Weekend"), digitalVoucherStartDateRule(weekendDays), Monthly),
+      digitalVoucherWeekendPlus = planWithPayment(DigitalVoucherWeekendPlus, PlanDescription("Weekend+"), digitalVoucherStartDateRule(weekendDays), Monthly),
+      digitalVoucherEveryday = planWithPayment(DigitalVoucherEveryday, PlanDescription("Everyday"), digitalVoucherStartDateRule(everyDayDays), Monthly),
+      digitalVoucherEverydayPlus = planWithPayment(DigitalVoucherEverydayPlus, PlanDescription("Everyday+"), digitalVoucherStartDateRule(everyDayDays), Monthly),
+      digitalVoucherSunday = planWithPayment(DigitalVoucherSunday, PlanDescription("Sunday"), digitalVoucherStartDateRule(sundayDays), Monthly),
+      digitalVoucherSundayPlus = planWithPayment(DigitalVoucherSundayPlus, PlanDescription("Sunday+"), digitalVoucherStartDateRule(sundayDays), Monthly),
+      digitalVoucherSaturday = planWithPayment(DigitalVoucherSaturday, PlanDescription("Saturday"), digitalVoucherStartDateRule(saturdayDays), Monthly),
+      digitalVoucherSaturdayPlus = planWithPayment(DigitalVoucherSaturdayPlus, PlanDescription("Saturday+"), digitalVoucherStartDateRule(saturdayDays), Monthly),
+      digitalVoucherSixday = planWithPayment(DigitalVoucherSixday, PlanDescription("Sixday"), digitalVoucherStartDateRule(sixDayDays), Monthly),
+      digitalVoucherSixdayPlus = planWithPayment(DigitalVoucherSixdayPlus, PlanDescription("Sixday+"), digitalVoucherStartDateRule(sixDayDays), Monthly),
     )
   }
 }

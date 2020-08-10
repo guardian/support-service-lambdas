@@ -35,6 +35,16 @@ case class Catalog(
   guardianWeeklyROWSixForSix: Plan,
   guardianWeeklyROWQuarterly: Plan,
   guardianWeeklyROWAnnual: Plan,
+  digitalVoucherWeekend: Plan,
+  digitalVoucherWeekendPlus: Plan,
+  digitalVoucherEveryday: Plan,
+  digitalVoucherEverydayPlus: Plan,
+  digitalVoucherSunday: Plan,
+  digitalVoucherSundayPlus: Plan,
+  digitalVoucherSaturday: Plan,
+  digitalVoucherSaturdayPlus: Plan,
+  digitalVoucherSixday: Plan,
+  digitalVoucherSixdayPlus: Plan
 ) {
   val allPlans = List(
     voucherWeekend,
@@ -66,7 +76,17 @@ case class Catalog(
     guardianWeeklyDomesticAnnual,
     guardianWeeklyROWSixForSix,
     guardianWeeklyROWQuarterly,
-    guardianWeeklyROWAnnual
+    guardianWeeklyROWAnnual,
+    digitalVoucherWeekend,
+    digitalVoucherWeekendPlus,
+    digitalVoucherEveryday,
+    digitalVoucherEverydayPlus,
+    digitalVoucherSunday,
+    digitalVoucherSundayPlus,
+    digitalVoucherSaturday,
+    digitalVoucherSaturdayPlus,
+    digitalVoucherSixday,
+    digitalVoucherSixdayPlus,
   )
 
   val planForId: Map[PlanId, Plan] = allPlans.map(x => x.id -> x).toMap

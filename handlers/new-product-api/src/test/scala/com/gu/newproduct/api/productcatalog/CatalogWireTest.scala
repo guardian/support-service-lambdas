@@ -817,6 +817,16 @@ class CatalogWireTest extends FlatSpec with Matchers {
         Currency.GBP -> AmountMinorUnits(6666666),
         Currency.USD -> AmountMinorUnits(66666666),
       )
+      case DigitalVoucherEveryday => gbpPrice(7001)
+      case DigitalVoucherEverydayPlus => gbpPrice(7002)
+      case DigitalVoucherSixday => gbpPrice(7003)
+      case DigitalVoucherSixdayPlus => gbpPrice(7004)
+      case DigitalVoucherWeekend => gbpPrice(7005)
+      case DigitalVoucherWeekendPlus => gbpPrice(7006)
+      case DigitalVoucherSaturday => gbpPrice(7008)
+      case DigitalVoucherSaturdayPlus => gbpPrice(7008)
+      case DigitalVoucherSunday => gbpPrice(7009)
+      case DigitalVoucherSundayPlus => gbpPrice(7010)
     }
 
     def stubGetFirstAvailableStartDate(productType: ProductType, daysOfWeek: List[DayOfWeek]) = {
@@ -839,6 +849,16 @@ class CatalogWireTest extends FlatSpec with Matchers {
           LocalDate.of(2020, 3, 2)
         case (ProductType.NewspaperVoucherBook, List(SUNDAY) ) =>
           LocalDate.of(2020, 3, 3)
+        case (ProductType.NewspaperDigitalVoucher, List(MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY) ) =>
+          LocalDate.of(2020, 4, 1)
+        case (ProductType.NewspaperDigitalVoucher, List(MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY) ) =>
+          LocalDate.of(2020, 4, 2)
+        case (ProductType.NewspaperDigitalVoucher, List(SATURDAY, SUNDAY) ) =>
+          LocalDate.of(2020, 4, 3)
+        case (ProductType.NewspaperDigitalVoucher, List(SATURDAY) ) =>
+          LocalDate.of(2020, 4, 4)
+        case (ProductType.NewspaperDigitalVoucher, List(SUNDAY) ) =>
+          LocalDate.of(2020, 4, 5)
       }
     }
 
