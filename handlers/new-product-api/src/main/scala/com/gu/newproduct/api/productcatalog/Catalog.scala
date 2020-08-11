@@ -97,7 +97,6 @@ sealed trait HomeDeliveryPlanId
 sealed trait DigipackPlanId
 sealed trait GuardianWeeklyDomestic
 sealed trait GuardianWeeklyRow
-sealed trait DigitalVoucherPlanId
 sealed abstract class PlanId(val name: String)
 
 object PlanId {
@@ -161,26 +160,6 @@ object PlanId {
 
   case object GuardianWeeklyROWAnnual extends PlanId("guardian_weekly_row_annual") with GuardianWeeklyRow
 
-  case object DigitalVoucherWeekend extends PlanId("digital_voucher_weekend") with VoucherPlanId
-
-  case object DigitalVoucherWeekendPlus extends PlanId("digital_voucher_weekend_plus") with VoucherPlanId
-
-  case object DigitalVoucherEveryday extends PlanId("digital_voucher_everyday") with VoucherPlanId
-
-  case object DigitalVoucherEverydayPlus extends PlanId("digital_voucher_everyday_plus") with VoucherPlanId
-
-  case object DigitalVoucherSunday extends PlanId("digital_voucher_sunday") with VoucherPlanId
-
-  case object DigitalVoucherSundayPlus extends PlanId("digital_voucher_sunday_plus") with VoucherPlanId
-
-  case object DigitalVoucherSaturday extends PlanId("digital_voucher_saturday") with VoucherPlanId
-
-  case object DigitalVoucherSaturdayPlus extends PlanId("digital_voucher_saturday_plus") with VoucherPlanId
-
-  case object DigitalVoucherSixday extends PlanId("digital_voucher_sixday") with VoucherPlanId
-
-  case object DigitalVoucherSixdayPlus extends PlanId("digital_voucher_sixday_plus") with VoucherPlanId
-
   val enabledVoucherPlans = List(
     VoucherEveryDay,
     VoucherEveryDayPlus,
@@ -227,22 +206,9 @@ object PlanId {
     GuardianWeeklyROWAnnual
   )
 
-  val enabledDigitalVoucherPlans = List(
-    DigitalVoucherWeekend,
-    DigitalVoucherWeekendPlus,
-    DigitalVoucherEveryday,
-    DigitalVoucherEverydayPlus,
-    DigitalVoucherSunday,
-    DigitalVoucherSundayPlus,
-    DigitalVoucherSaturday,
-    DigitalVoucherSaturdayPlus,
-    DigitalVoucherSixday,
-    DigitalVoucherSixdayPlus
-  )
-
   val supportedPlans: List[PlanId] =
     enabledVoucherPlans ++ enabledContributionPlans ++ enabledHomeDeliveryPlans ++ enabledDigipackPlans ++
-      enabledGuardianWeeklyDomesticPlans ++ enabledGuardianWeeklyROWPlans ++ enabledDigitalVoucherPlans
+      enabledGuardianWeeklyDomesticPlans ++ enabledGuardianWeeklyROWPlans
 
   def fromName(name: String): Option[PlanId] = supportedPlans.find(_.name == name)
 }
@@ -281,7 +247,7 @@ case class ProductType(value: String)
 object ProductType {
   val GuardianWeekly = ProductType("Guardian Weekly")
   val NewspaperVoucherBook = ProductType("Newspaper - Voucher Book")
-  val NewspaperDigitalVoucher = ProductType("Newspaper - Digital Voucher")
+  val NewspaperDigitalVoucherBook = ProductType("Newspaper - Digital Voucher Book")
   val NewspaperHomeDelivery = ProductType("Newspaper - Home Delivery")
   val DigitalPack = ProductType("Digital Pack")
   val Contribution = ProductType("Contribution")

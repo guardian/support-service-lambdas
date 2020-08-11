@@ -565,3 +565,11 @@ Resources:
              "objectName": "DigitalVoucher"
             }
           RoleArn: !GetAtt [ TriggerRole, Arn ]
+        -
+          Arn: !Ref StateMachine
+          Id: !Sub trigger_sf_export-ZuoraSubscriptionProductFeature-${Stage}
+          Input: |
+            {
+             "objectName": "ZuoraSubscriptionProductFeature"
+            }
+          RoleArn: !GetAtt [ TriggerRole, Arn ]

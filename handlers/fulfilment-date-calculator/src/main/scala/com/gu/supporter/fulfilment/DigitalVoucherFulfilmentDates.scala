@@ -6,6 +6,7 @@ import java.time.temporal.TemporalAdjusters.{next, nextOrSame}
 import java.time.{DayOfWeek, LocalDate}
 import java.util.Locale.ENGLISH
 
+import cats.data.NonEmptyList
 import com.gu.fulfilmentdates.FulfilmentDates
 
 import scala.collection.immutable.ListMap
@@ -13,7 +14,7 @@ import scala.collection.immutable.ListMap
 object DigitalVoucherFulfilmentDates {
 
   lazy val VoucherHolidayStopNoticePeriodDays = 1
-  lazy val FulfilmentCutoffDays = List(DayOfWeek.MONDAY, DayOfWeek.THURSDAY)
+  lazy val FulfilmentCutoffDays = NonEmptyList.of(DayOfWeek.MONDAY, DayOfWeek.THURSDAY)
   lazy val WeekStartDay = DayOfWeek.MONDAY
 
   def apply(today: LocalDate): ListMap[String, FulfilmentDates] =
@@ -47,5 +48,5 @@ object DigitalVoucherFulfilmentDates {
     soonestFulfilmentFileDate plusDays (7) `with` nextOrSame(issueDay)
   }
 
-  def soonest(dates: List[LocalDate]) = dates.min[LocalDate](_ compareTo _)
+  def soonest(dates: NonEmptyList[LocalDate]): LocalDate = dates.toList.min[LocalDate](_ compareTo _)
 }
