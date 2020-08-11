@@ -10,7 +10,7 @@ import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.NonDirectDeb
 import com.gu.newproduct.api.addsubscription.zuora.{PaymentMethodStatus, PaymentMethodType}
 import com.gu.newproduct.api.addsubscription.ZuoraAccountId
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
-import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, NewProductApi, Plan, PlanDescription, RuleFixtures}
+import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, Plan, PlanDescription}
 import com.gu.newproduct.api.productcatalog.PlanId.MonthlyContribution
 import com.gu.util.config.Stage
 import com.gu.newproduct.api.EmailQueueNames.emailQueuesFor
