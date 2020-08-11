@@ -18,6 +18,8 @@ class StartDateFromFulfilmentFilesTest extends FlatSpec with Matchers {
       Try(Source.fromResource("fulfilmentdatefiles/2020-04-27_Newspaper - Home Delivery.json").getLines().mkString("\n"))
     case S3Location("fulfilment-date-calculator-dev", "Newspaper - Voucher Book/2020-04-27_Newspaper - Voucher Book.json") =>
       Try(Source.fromResource("fulfilmentdatefiles/2020-04-27_Newspaper - Voucher Book.json").getLines().mkString("\n"))
+    case S3Location("fulfilment-date-calculator-dev", "Newspaper - Digital Voucher/2020-04-27_Newspaper - Digital Voucher.json") =>
+      Try(Source.fromResource("fulfilmentdatefiles/2020-04-27_Newspaper - Voucher Book.json").getLines().mkString("\n"))
   }
 
   "StartDateFromFulfilmentFiles" should "get start dates for guardian weekly" in {
