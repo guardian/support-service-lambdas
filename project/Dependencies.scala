@@ -44,6 +44,7 @@ object Dependencies {
   val http4sDsl = "org.http4s" %% "http4s-dsl" % http4sVersion
   val http4sCirce = "org.http4s" %% "http4s-circe" % http4sVersion
   val http4sServer = "org.http4s" %% "http4s-server" % http4sVersion
+  val http4sCore = "org.http4s" %% "http4s-core" % http4sVersion
   val catsCore = "org.typelevel" %% "cats-core" % catsVersion
   val catsEffect = "org.typelevel" %% "cats-effect" % catsEffectVersion
   val scalaLambda = "io.github.mkotsur" %% "aws-lambda-scala" % "0.1.1"
