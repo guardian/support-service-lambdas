@@ -347,11 +347,10 @@ lazy val `metric-push-api` = all(project in file("handlers/metric-push-api"))
   .dependsOn()
 
 lazy val `sf-move-subscriptions-api` = all(project in file("handlers/sf-move-subscriptions-api"))
-  .dependsOn(`effects-s3`, `config-cats`, `zuora-core`)
+  .dependsOn(`effects-s3`, `config-cats`, `zuora-core`, `http4s-lambda-handler`)
   .settings(
     libraryDependencies ++=
       Seq(
-        http4sLambda,
         http4sDsl,
         http4sCirce,
         http4sServer,
@@ -369,10 +368,12 @@ lazy val `fulfilment-date-calculator` = all(project in file("handlers/fulfilment
   .dependsOn(testDep, `fulfilment-dates`)
 
 lazy val `delivery-records-api` = all(project in file("handlers/delivery-records-api"))
-  .dependsOn(`effects-s3`, `config-core`, `salesforce-sttp-client`, `salesforce-sttp-test-stub` % Test)
+  .dependsOn(
+    `effects-s3`, `config-core`, `salesforce-sttp-client`, `salesforce-sttp-test-stub` % Test, `http4s-lambda-handler`
+  )
   .settings(
     libraryDependencies ++=
-      Seq(http4sLambda, http4sDsl, http4sCirce, http4sServer, circe, sttpAsycHttpClientBackendCats, scalatest)
+      Seq(http4sDsl, http4sCirce, http4sServer, circe, sttpAsycHttpClientBackendCats, scalatest)
         ++ logging
   )
   .enablePlugins(RiffRaffArtifact)
