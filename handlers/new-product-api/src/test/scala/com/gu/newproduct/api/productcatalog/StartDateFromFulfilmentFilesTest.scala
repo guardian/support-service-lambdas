@@ -19,7 +19,7 @@ class StartDateFromFulfilmentFilesTest extends FlatSpec with Matchers {
     case S3Location("fulfilment-date-calculator-dev", "Newspaper - Voucher Book/2020-04-27_Newspaper - Voucher Book.json") =>
       Try(Source.fromResource("fulfilmentdatefiles/2020-04-27_Newspaper - Voucher Book.json").getLines().mkString("\n"))
     case S3Location("fulfilment-date-calculator-dev", "Newspaper - Digital Voucher/2020-04-27_Newspaper - Digital Voucher.json") =>
-      Try(Source.fromResource("fulfilmentdatefiles/2020-04-27_Newspaper - Voucher Book.json").getLines().mkString("\n"))
+      Try(Source.fromResource("fulfilmentdatefiles/2020-04-27_Newspaper - Digital Voucher.json").getLines().mkString("\n"))
   }
 
   "StartDateFromFulfilmentFiles" should "get start dates for guardian weekly" in {
@@ -49,7 +49,7 @@ class StartDateFromFulfilmentFilesTest extends FlatSpec with Matchers {
     )
   }
 
-  "StartDateFromFulfilmentFiles" should "get start dates for vouchers " in {
+  it should "get start dates for vouchers " in {
     testStartDate(
       ProductType.NewspaperVoucherBook,
       List(MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY),
@@ -69,6 +69,28 @@ class StartDateFromFulfilmentFilesTest extends FlatSpec with Matchers {
       ProductType.NewspaperVoucherBook,
       List(SUNDAY),
       LocalDate.of(2020, 5, 24)
+    )
+  }
+  it should "get start dates for digital vouchers " in {
+    testStartDate(
+      ProductType.NewspaperDigitalVoucher,
+      List(MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY),
+      LocalDate.of(2020, 6, 18)
+    )
+    testStartDate(
+      ProductType.NewspaperDigitalVoucher,
+      List(MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY),
+      LocalDate.of(2020, 6, 18)
+    )
+    testStartDate(
+      ProductType.NewspaperDigitalVoucher,
+      List(SATURDAY, SUNDAY),
+      LocalDate.of(2020, 6, 23)
+    )
+    testStartDate(
+      ProductType.NewspaperDigitalVoucher,
+      List(SUNDAY),
+      LocalDate.of(2020, 6, 24)
     )
   }
 
