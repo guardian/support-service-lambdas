@@ -1,5 +1,6 @@
 package com.gu.deliveryproblemcreditprocessor
 
+import com.gu.creditprocessor.Processor.CreditProductForSubscription
 import com.gu.util.config.Stage
 import com.gu.zuora.subscription.CreditProduct
 
@@ -25,9 +26,10 @@ object DeliveryCreditProduct {
     productRatePlanChargeName = ratePlanChargeName
   )
 
-  def forStage(stage: Stage): CreditProduct = stage match {
-    case Stage("PROD") => DeliveryCreditProduct.Prod
-    case Stage("CODE") => DeliveryCreditProduct.Code
-    case _ => DeliveryCreditProduct.Dev
-  }
+  def forStage(stage: Stage): CreditProductForSubscription =
+    stage match {
+      case Stage("PROD") => _ => DeliveryCreditProduct.Prod
+      case Stage("CODE") => _ => DeliveryCreditProduct.Code
+      case _ => _ => DeliveryCreditProduct.Dev
+    }
 }

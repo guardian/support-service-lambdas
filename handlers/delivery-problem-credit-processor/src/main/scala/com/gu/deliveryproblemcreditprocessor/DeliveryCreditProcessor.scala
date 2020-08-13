@@ -5,6 +5,7 @@ import java.time.{DayOfWeek, LocalDate, LocalDateTime}
 import cats.data.EitherT
 import cats.effect.IO
 import cats.implicits._
+import com.gu.creditprocessor.Processor.CreditProductForSubscription
 import com.gu.creditprocessor.{ProcessResult, Processor}
 import com.gu.effects.GetFromS3
 import com.gu.fulfilmentdates.{FulfilmentDates, FulfilmentDatesFetcher}
@@ -15,7 +16,7 @@ import com.gu.util.config.ConfigReads.ConfigFailure
 import com.gu.util.config.{ConfigLocation, LoadConfigModule, Stage}
 import com.gu.zuora.ZuoraProductTypes.{GuardianWeekly, NewspaperHomeDelivery, ZuoraProductType}
 import com.gu.zuora.subscription._
-import com.gu.zuora.{AccessToken, Zuora, HolidayStopProcessorZuoraConfig}
+import com.gu.zuora.{AccessToken, HolidayStopProcessorZuoraConfig, Zuora}
 import com.softwaremill.sttp.HttpURLConnectionBackend
 import com.softwaremill.sttp.asynchttpclient.cats.AsyncHttpClientCatsBackend
 import io.circe.generic.auto._
@@ -120,13 +121,13 @@ object DeliveryCreditProcessor extends Logging {
   }
 
   def updateToApply(
-    creditProduct: CreditProduct,
-    subscription: Subscription,
-    account: ZuoraAccount,
-    request: DeliveryCreditRequest
+     creditProduct: CreditProductForSubscription,
+     subscription: Subscription,
+     account: ZuoraAccount,
+     request: DeliveryCreditRequest
   ): ZuoraApiResponse[SubscriptionUpdate] =
     SubscriptionUpdate(
-      creditProduct,
+      creditProduct(subscription),
       subscription,
       account,
       AffectedPublicationDate(request.Delivery_Date__c),

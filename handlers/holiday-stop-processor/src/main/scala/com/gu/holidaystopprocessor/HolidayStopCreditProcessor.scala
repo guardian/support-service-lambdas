@@ -2,6 +2,7 @@ package com.gu.holidaystopprocessor
 
 import java.time.LocalDate
 
+import com.gu.creditprocessor.Processor.CreditProductForSubscription
 import com.gu.creditprocessor.{ProcessResult, Processor}
 import com.gu.effects.S3Location
 import com.gu.fulfilmentdates.FulfilmentDatesFetcher
@@ -10,7 +11,7 @@ import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.Holid
 import com.gu.util.config.Stage
 import com.gu.zuora.Zuora
 import com.gu.zuora.ZuoraProductTypes.{GuardianWeekly, NewspaperHomeDelivery, NewspaperVoucherBook}
-import com.gu.zuora.subscription.{CreditProduct, OverallFailure, Subscription, SubscriptionUpdate, ZuoraAccount}
+import com.gu.zuora.subscription.{OverallFailure, Subscription, SubscriptionUpdate, ZuoraAccount}
 import com.softwaremill.sttp.{Id, SttpBackend}
 
 import scala.util.Try
@@ -38,13 +39,13 @@ object HolidayStopCreditProcessor {
         .map { productType => {
 
           def updateToApply(
-            creditProduct: CreditProduct,
-            subscription: Subscription,
-            account: ZuoraAccount,
-            request: HolidayStopRequestsDetail
+             creditProduct: CreditProductForSubscription,
+             subscription: Subscription,
+             account: ZuoraAccount,
+             request: HolidayStopRequestsDetail
           ) =
-            SubscriptionUpdate(
-              creditProduct,
+             SubscriptionUpdate(
+              creditProduct(subscription),
               subscription,
               account,
               request.Stopped_Publication_Date__c,

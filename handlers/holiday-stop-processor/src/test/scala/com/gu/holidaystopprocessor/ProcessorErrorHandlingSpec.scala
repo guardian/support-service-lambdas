@@ -5,6 +5,7 @@ import java.time.{DayOfWeek, LocalDate}
 
 import cats.implicits._
 import com.gu.creditprocessor.Processor
+import com.gu.creditprocessor.Processor.CreditProductForSubscription
 import com.gu.fulfilmentdates.{FulfilmentDates, FulfilmentDatesFetcher, FulfilmentDatesFetcherError}
 import com.gu.holiday_stops.Fixtures
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.HolidayStopRequestsDetail
@@ -51,16 +52,16 @@ class ProcessorErrorHandlingSpec extends AnyFlatSpec with Matchers with OptionVa
     }
   }
 
-  private val creditProduct = HolidayCreditProduct.Dev
+  private val creditProduct: CreditProductForSubscription = _ => HolidayCreditProduct.Dev
 
   private def updateToApply(
-    creditProduct: CreditProduct,
+    creditProduct: CreditProductForSubscription,
     subscription: Subscription,
     account: ZuoraAccount,
     request: HolidayStopRequestsDetail
   ) =
     SubscriptionUpdate(
-      creditProduct,
+      creditProduct(subscription),
       subscription,
       account,
       request.Stopped_Publication_Date__c,
