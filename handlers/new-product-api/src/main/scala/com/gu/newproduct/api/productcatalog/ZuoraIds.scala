@@ -128,13 +128,47 @@ object ZuoraIds {
     )
   }
 
+  case class DigitalVoucherZuoraIds(
+    everyday: ProductRatePlanId,
+    saturday: ProductRatePlanId,
+    sunday: ProductRatePlanId,
+    weekend: ProductRatePlanId,
+    sixDay: ProductRatePlanId,
+    everydayPlus: ProductRatePlanId,
+    saturdayPlus: ProductRatePlanId,
+    sundayPlus: ProductRatePlanId,
+    weekendPlus: ProductRatePlanId,
+    sixDayPlus: ProductRatePlanId
+  ) {
+    val byApiPlanId: Map[PlanId, ProductRatePlanId] = Map(
+      DigitalVoucherEveryday -> everyday,
+      DigitalVoucherWeekend -> weekend,
+      DigitalVoucherSixday -> sixDay,
+      DigitalVoucherSunday -> sunday,
+      DigitalVoucherSaturday -> saturday,
+      DigitalVoucherEverydayPlus -> everydayPlus,
+      DigitalVoucherWeekendPlus -> weekendPlus,
+      DigitalVoucherSixdayPlus -> sixDayPlus,
+      DigitalVoucherSundayPlus -> sundayPlus,
+      DigitalVoucherSaturdayPlus -> saturdayPlus
+    )
+
+    val plansWithDigipack = List(
+      everydayPlus, weekendPlus, sixDayPlus, sundayPlus, saturdayPlus
+    )
+
+    val zuoraIdToPlanid = byApiPlanId.map(_.swap)
+  }
+
+
   case class ZuoraIds(
     contributionsZuoraIds: ContributionsZuoraIds,
     voucherZuoraIds: VoucherZuoraIds,
     homeDeliveryZuoraIds: HomeDeliveryZuoraIds,
     digitalPackIds: DigipackZuoraIds,
     guardianWeeklyDomestic: GuardianWeeklyDomesticIds,
-    guardianWeeklyROW: GuardianWeeklyROWIds
+    guardianWeeklyROW: GuardianWeeklyROWIds,
+    digitalVoucher: DigitalVoucherZuoraIds
   ) {
     def apiIdToRateplanId: Map[PlanId, ProductRatePlanId] =
       contributionsZuoraIds.planAndChargeByApiPlanId.mapValues(_.productRatePlanId) ++
@@ -142,7 +176,8 @@ object ZuoraIds {
       homeDeliveryZuoraIds.byApiPlanId ++
       digitalPackIds.byApiPlanId ++
       guardianWeeklyDomestic.zuoraRatePlanIdByApiPlanId ++
-      guardianWeeklyROW.zuoraRatePlanIdByApiPlanId
+      guardianWeeklyROW.zuoraRatePlanIdByApiPlanId ++
+      digitalVoucher.byApiPlanId
 
     val rateplanIdToApiId: Map[ProductRatePlanId, PlanId] = apiIdToRateplanId.map(_.swap)
 
@@ -210,6 +245,18 @@ object ZuoraIds {
           ),
           quarterly = ProductRatePlanId("2c92a0086619bf8901661ab02752722f"),
           annual = ProductRatePlanId("2c92a0fe6619b4b601661ab300222651")
+        ),
+        DigitalVoucherZuoraIds(
+          everyday = ProductRatePlanId("2c92a00870ec598001710740c78d2f13"),
+          sunday = ProductRatePlanId("2c92a00870ec598001710740d0d83017"),
+          saturday = ProductRatePlanId("2c92a00870ec598001710740cdd02fbd"),
+          weekend = ProductRatePlanId("2c92a00870ec598001710740d24b3022"),
+          sixDay = ProductRatePlanId("2c92a00870ec598001710740ca532f69"),
+          everydayPlus = ProductRatePlanId("2c92a00870ec598001710740d3d03035"),
+          sundayPlus = ProductRatePlanId("2c92a00870ec598001710740cf9e3004"),
+          saturdayPlus = ProductRatePlanId("2c92a00870ec598001710740ce702ff0"),
+          weekendPlus = ProductRatePlanId("2c92a00870ec598001710740c6672ee7"),
+          sixDayPlus = ProductRatePlanId("2c92a00870ec598001710740c4582ead")
         )
       ),
       Stage("CODE") -> ZuoraIds(
@@ -266,6 +313,18 @@ object ZuoraIds {
           ),
           quarterly = ProductRatePlanId("2c92c0f9660fc4d70166109c01465f10"),
           annual = ProductRatePlanId("2c92c0f9660fc4d70166109a2eb0607c")
+        ),
+        DigitalVoucherZuoraIds(
+          everyday = ProductRatePlanId("2c92c0f870f682820171070474ee419d"),
+          sunday = ProductRatePlanId("2c92c0f870f682820171070487f142c4"),
+          saturday = ProductRatePlanId("2c92c0f870f682820171070488df42ce"),
+          weekend = ProductRatePlanId("2c92c0f870f682820171070477d841e2"),
+          sixDay = ProductRatePlanId("2c92c0f870f68282017107047d054230"),
+          everydayPlus = ProductRatePlanId("2c92c0f870f682820171070481bf4264"),
+          sundayPlus = ProductRatePlanId("2c92c0f870f68282017107047b214214"),
+          saturdayPlus = ProductRatePlanId("2c92c0f870f682820171070489d542da"),
+          weekendPlus = ProductRatePlanId("2c92c0f870f682820171070478d441f5"),
+          sixDayPlus = ProductRatePlanId("2c92c0f870f682820171070470ad4120")
         )
       ),
       Stage("DEV") -> ZuoraIds(
@@ -322,6 +381,18 @@ object ZuoraIds {
           ),
           quarterly = ProductRatePlanId("2c92c0f965f2122101660fb81b745a06"),
           annual = ProductRatePlanId("2c92c0f965f2122101660fb33ed24a45")
+        ),
+        DigitalVoucherZuoraIds(
+          everyday = ProductRatePlanId("2c92c0f86fa49142016fa49ea56a2938"),
+          sunday = ProductRatePlanId("2c92c0f86fa49142016fa49eb0a42a01"),
+          saturday = ProductRatePlanId("2c92c0f86fa49142016fa49ea442291b"),
+          weekend = ProductRatePlanId("2c92c0f86fa49142016fa49ea0d028b6"),
+          sixDay = ProductRatePlanId("2c92c0f86fa49142016fa49e9b9a286f"),
+          everydayPlus = ProductRatePlanId("2c92c0f86fa49142016fa49eaa492988"),
+          sundayPlus = ProductRatePlanId("2c92c0f86fa49142016fa49ea90e2976"),
+          saturdayPlus = ProductRatePlanId("2c92c0f86fa49142016fa49eb1732a39"),
+          weekendPlus = ProductRatePlanId("2c92c0f86fa49142016fa49eaecb29dd"),
+          sixDayPlus = ProductRatePlanId("2c92c0f86fa49142016fa49ea1af28c8")
         )
       )
     )
