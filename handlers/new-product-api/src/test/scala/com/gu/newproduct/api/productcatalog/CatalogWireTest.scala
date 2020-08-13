@@ -756,7 +756,7 @@ class CatalogWireTest extends FlatSpec with Matchers {
         |      ]
         |    },
         |    {
-        |      "label": "Digital Voucher",
+        |      "label": "Subscription Card",
         |      "plans": [
         |        {
         |          "id": "digital_voucher_weekend",

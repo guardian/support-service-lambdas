@@ -166,7 +166,7 @@ object WireModel {
       )
 
       val digitalVoucher = WireProduct(
-        label = "Digital Voucher",
+        label = "Subscription Card",
         plans = PlanId.enabledDigitalVoucherPlans.map(wirePlanForPlanId),
         enabledForDeliveryCountries = Some(List(Country.UK.name))
       )
