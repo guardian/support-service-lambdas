@@ -174,7 +174,6 @@ class Http4sLambdaHandlerTest extends FlatSpec with Matchers {
       stream
     )
 
-
     val request = Inside.inside(requestReceived) {
       case Some(request) => request
     }
