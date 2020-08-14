@@ -2,7 +2,7 @@ package com.gu.newproduct.api.productcatalog
 
 import java.time.{DayOfWeek, LocalDate}
 
-import com.gu.i18n.{CountryGroup, Currency}
+import com.gu.i18n.{Country, CountryGroup, Currency}
 import com.gu.i18n.Currency.GBP
 import com.gu.newproduct.api.addsubscription.validation.guardianweekly.GuardianWeeklyAddressValidator
 import play.api.libs.json.{JsString, Json, Writes}
@@ -165,8 +165,15 @@ object WireModel {
         enabledForDeliveryCountries = Some(CountryGroup.RestOfTheWorld.countries.map(_.name))
       )
 
+      val digitalVoucher = WireProduct(
+        label = "Subscription Card",
+        plans = PlanId.enabledDigitalVoucherPlans.map(wirePlanForPlanId),
+        enabledForDeliveryCountries = Some(List(Country.UK.name))
+      )
+
       val availableProductsAndPlans = List(
-        contributionProduct, voucherProduct, homeDeliveryProduct, digipackProduct, guardianWeeklyDomestic, guardianWeeklyROW
+        contributionProduct, voucherProduct, homeDeliveryProduct, digipackProduct, guardianWeeklyDomestic,
+        guardianWeeklyROW, digitalVoucher
       ).filterNot(_.plans.isEmpty)
 
       WireCatalog(availableProductsAndPlans)
