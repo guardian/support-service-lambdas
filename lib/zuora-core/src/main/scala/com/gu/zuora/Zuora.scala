@@ -3,7 +3,9 @@ package com.gu.zuora
 import com.gu.zuora.subscription._
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
+import com.typesafe.scalalogging.LazyLogging
 import io.circe.generic.auto._
+import scala.annotation.tailrec
 
 case class ZuoraAccountMoveSubscriptionCommand(
   crmId: String,
@@ -70,7 +72,9 @@ object Zuora {
       .mapResponse {
         case Left(e) => Left(ZuoraApiFailure(errMsg(e.message)))
         case Right(status) =>
+          import ZuoraLockingContention._
           if (status.success) Right(())
+          else if (isLockingContentionError(status)) Left(ZuoraApiFailure(LockingContentionCode.toString))
           else Left(ZuoraApiFailure(errMsg(status.reasons.map(_.mkString).getOrElse(""))))
       }
       .send()
@@ -121,5 +125,40 @@ object Zuora {
       .body
       .left.map(ZuoraApiFailure)
       .joinRight
+  }
+}
+
+object ZuoraLockingContention extends LazyLogging {
+  /**
+   * Failed to update subscription object due to locking contention
+   * https://community.zuora.com/t5/Zuora-CPQ/Large-Renewal-Quote-preview-failed-with-optimistic-locking-error/td-p/28721
+   *
+   *   535000 - resource code of update operation on subscription object
+   *   50     - Locking contention
+   */
+  val LockingContentionCode: Long = 53500050L // StaleObjectStateException
+
+  // this retry is only intended for 535000, namely subscription update object
+  @tailrec def retryLockingContention(
+    n: Int,
+    subName: String /* FIXME: temporary to follow up if retry was safe */
+  )(call: => ZuoraApiResponse[Unit]): ZuoraApiResponse[Unit] = {
+    val LockingContentionCodeStr = LockingContentionCode.toString
+    call match {
+      case e @ Left(ZuoraApiFailure(LockingContentionCodeStr)) if (n <= 1) => e
+
+      case Left(ZuoraApiFailure(LockingContentionCodeStr)) =>
+        logger.warn(s"Retrying $subName due to locking contention $LockingContentionCode... Follow up if all is OK.")
+        retryLockingContention(n - 1, subName)(call)
+
+      case v => v
+    }
+  }
+
+  def isLockingContentionError(status: ZuoraStatusResponse): Boolean = {
+    status.reasons match {
+      case Some(reasons) => reasons.map(_.code).contains(LockingContentionCode)
+      case _ => false
+    }
   }
 }

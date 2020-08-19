@@ -19,10 +19,3 @@ libraryDependencies ++= Seq(
 )
 
 assemblyMergeStrategyDiscardModuleInfo
-
-lazy val deployAwsLambda = taskKey[Unit]("Directly update AWS lambda code from DEV instead of via RiffRaff for faster feedback loop")
-deployAwsLambda := {
-  import scala.sys.process._
-  assembly.value
-  "aws lambda update-function-code --function-name zuora-datalake-export-CODE --zip-file fileb://handlers/zuora-datalake-export/target/scala-2.12/zuora-datalake-export.jar --profile membership --region eu-west-1" !
-}
