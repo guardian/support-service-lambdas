@@ -5,8 +5,6 @@ import Dependencies._
 name := "batch-email-sender"
 description:= "Receive batches of emails to be sent, munge them into an appropriate format and put them on the email sending queue."
 
-scalacOptions += "-Ypartial-unification"
-
 assemblyJarName := "batch-email-sender.jar"
 riffRaffPackageType := assembly.value
 riffRaffUploadArtifactBucket := Option("riffraff-artifact")

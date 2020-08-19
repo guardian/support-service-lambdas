@@ -5,8 +5,6 @@ import Dependencies._
 name := "sf-contact-merge"
 description:= "Merges together the salesforce account referenced by a set of zuora accounts"
 
-scalacOptions += "-Ypartial-unification"
-
 assemblyJarName := "sf-contact-merge.jar"
 riffRaffPackageType := assembly.value
 riffRaffUploadArtifactBucket := Option("riffraff-artifact")

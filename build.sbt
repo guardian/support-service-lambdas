@@ -1,7 +1,7 @@
 import Dependencies._
 
 val scalaSettings = Seq(
-  scalaVersion := "2.12.10",
+  scalaVersion := "2.13.3",
   version      := "0.0.1",
   organization := "com.gu",
   scalacOptions ++= Seq(
@@ -14,7 +14,6 @@ val scalaSettings = Seq(
     "-language:implicitConversions",
     "-unchecked",
     "-Xlint",
-    "-Yno-adapted-args",
     "-Ywarn-dead-code",
     "-Ywarn-numeric-widen",
     "-Ywarn-value-discard"

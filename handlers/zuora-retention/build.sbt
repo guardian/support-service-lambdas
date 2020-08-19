@@ -5,8 +5,6 @@ import Dependencies._
 name := "zuora-retention"
 description:= "find and mark accounts that are out of the retention period"
 
-scalacOptions += "-Ypartial-unification"
-
 assemblyJarName := "zuora-retention.jar"
 riffRaffPackageType := assembly.value
 riffRaffUploadArtifactBucket := Option("riffraff-artifact")

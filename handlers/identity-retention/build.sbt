@@ -5,8 +5,6 @@ import Dependencies._
 name := "identity-retention"
 description:= "Confirms whether an identity account can be deleted, from a reader revenue perspective"
 
-scalacOptions += "-Ypartial-unification"
-
 assemblyJarName := "identity-retention.jar"
 riffRaffPackageType := assembly.value
 riffRaffUploadArtifactBucket := Option("riffraff-artifact")

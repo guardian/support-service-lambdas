@@ -5,8 +5,6 @@ import Dependencies._
 name := "sf-move-subscriptions-api"
 description:= "API for for moving subscriptions in ZUORA from SalesForce"
 
-scalacOptions += "-Ypartial-unification"
-
 assemblyJarName := s"${name.value}.jar"
 riffRaffPackageType := assembly.value
 riffRaffUploadArtifactBucket := Option("riffraff-artifact")

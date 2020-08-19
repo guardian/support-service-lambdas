@@ -5,8 +5,6 @@ import Dependencies._
 name := "sf-datalake-export"
 description:= "Export salesforce data to the data lake"
 
-scalacOptions += "-Ypartial-unification"
-
 assemblyJarName := "sf-datalake-export.jar"
 riffRaffPackageType := assembly.value
 riffRaffUploadArtifactBucket := Option("riffraff-artifact")
@@ -14,6 +12,6 @@ riffRaffUploadManifestBucket := Option("riffraff-builds")
 riffRaffManifestProjectName := "MemSub::Membership Admin::SF Data Lake Export"
 riffRaffArtifactResources += (file("handlers/sf-datalake-export/cfn.yaml"), "cfn/cfn.yaml")
 
-libraryDependencies += "org.scala-lang.modules" %% "scala-xml" % "1.1.0"
+libraryDependencies += "org.scala-lang.modules" %% "scala-xml" % "1.3.0"
 
 assemblyMergeStrategyDiscardModuleInfo

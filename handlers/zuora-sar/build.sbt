@@ -5,8 +5,6 @@ import Dependencies._
 name := "zuora-sar"
 description:= "Performs a Subject Access Requests against Zuora"
 
-scalacOptions += "-Ypartial-unification"
-
 assemblyJarName := "zuora-sar.jar"
 riffRaffPackageType := assembly.value
 riffRaffUploadArtifactBucket := Option("riffraff-artifact")

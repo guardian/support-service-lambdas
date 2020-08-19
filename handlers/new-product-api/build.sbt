@@ -5,8 +5,6 @@ import Dependencies._
 name := "new-product-api"
 description:= "Add subscription to account"
 
-scalacOptions += "-Ypartial-unification"
-
 assemblyJarName := "new-product-api.jar"
 riffRaffPackageType := assembly.value
 riffRaffUploadArtifactBucket := Option("riffraff-artifact")
