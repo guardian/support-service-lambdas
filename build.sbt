@@ -99,7 +99,7 @@ lazy val `salesforce-sttp-client` = all(project in file("lib/salesforce/sttp-cli
   )
   .settings(
     libraryDependencies ++=
-      Seq(sttp, sttpCirce, sttpCats % Test, scalatest, catsCore, catsEffect, circe, circeJava8) ++ logging
+      Seq(sttp, sttpCirce, sttpCats % Test, scalatest, catsCore, catsEffect, circe) ++ logging
   )
 
 lazy val `salesforce-sttp-test-stub` = all(project in file("lib/salesforce/sttp-test-stub"))
@@ -234,7 +234,7 @@ lazy val `credit-processor` = all(project in file("lib/credit-processor"))
 lazy val `imovo-sttp-client` = all(project in file("lib/imovo/imovo-sttp-client"))
   .settings(
     libraryDependencies ++=
-      Seq(sttp, sttpCirce, sttpCats % Test, scalatest, catsCore, catsEffect, circe, circeJava8) ++ logging
+      Seq(sttp, sttpCirce, sttpCats % Test, scalatest, catsCore, catsEffect, circe) ++ logging
   )
 
 lazy val `imovo-sttp-test-stub` = all(project in file("lib/imovo/imovo-sttp-test-stub"))
