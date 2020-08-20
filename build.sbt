@@ -424,3 +424,17 @@ initialize := {
   assert(sys.props("java.specification.version") == "1.8",
     "Java 8 is required for this project.")
 }
+
+lazy val deployAwsLambda = inputKey[Unit]("Directly update AWS lambda code from DEV instead of via RiffRaff for faster feedback loop")
+deployAwsLambda := {
+  import scala.sys.process._
+  import complete.DefaultParsers._
+  val Seq(name, stage) = spaceDelimited("<arg>").parsed
+  s"aws lambda update-function-code --function-name $name-$stage --zip-file fileb://handlers/$name/target/scala-2.12/$name.jar --profile membership --region eu-west-1".!
+}
+
+// run from root project: deploy holiday-stop-processor CODE
+commands += Command.args("deploy", "<name stage>") { (state, args) =>
+  val Seq(name, stage) = args
+  s"""$name/assembly""":: s"deployAwsLambda $name $stage" :: state
+}

@@ -4,6 +4,7 @@ import java.time.LocalDate
 
 import cats.implicits._
 import com.gu.fulfilmentdates.FulfilmentDatesFetcher
+import com.gu.zuora.ZuoraLockingContention.retryLockingContention
 import com.gu.zuora.ZuoraProductTypes.ZuoraProductType
 import com.gu.zuora.subscription._
 import com.gu.zuora.{AccessToken, Zuora, HolidayStopProcessorZuoraConfig}
@@ -37,7 +38,9 @@ object Processor {
       subscription: Subscription,
       update: SubscriptionUpdate
     ): ZuoraApiResponse[Unit] =
-      Zuora.subscriptionUpdateResponse(config, zuoraAccessToken, sttpBackend)(subscription, update)
+      retryLockingContention(2, subscription.subscriptionNumber) {
+        Zuora.subscriptionUpdateResponse(config, zuoraAccessToken, sttpBackend)(subscription, update)
+      }
 
     processProduct(
       creditProduct: CreditProduct,
