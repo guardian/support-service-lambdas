@@ -2,8 +2,6 @@ package com.gu.batchemailsender.api.batchemail
 
 import play.api.libs.json._
 
-import scala.collection.Seq
-
 /**
  * This is what gets sent from Salesforce directly. "Wire" indicates raw data sent over the wire. It seems the intention
  * was to treat Wire models as kind of DTO (Data Transfer Objects). This is NOT what gets put on the SQS. It is
@@ -14,7 +12,7 @@ object SalesforceMessage {
   // FIXME: What is this?
   case class SalesforceBatchWithExceptions(
     validBatch: SalesforceBatchItems,
-    exceptions: List[Seq[(JsPath, Seq[JsonValidationError])]]
+    exceptions: List[collection.Seq[(JsPath, collection.Seq[JsonValidationError])]] // this is supposed to correspond to play's JsError which uses collection.Seq
   )
   case class SalesforceBatchItems(batch_items: List[SalesforceBatchItem])
   case class SalesforceBatchItem(payload: SalesforcePayload, object_name: String)
@@ -88,13 +86,13 @@ object SalesforceMessage {
   implicit val emailBatch = Json.reads[SalesforceBatchItems]
 
   implicit val emailBatchWithExceptions: Reads[SalesforceBatchWithExceptions] = json => {
-    val validated: List[JsResult[SalesforceBatchItem]] = (json \ "batch_items").as[List[JsObject]] map { itemOrException =>
+    val validated = (json \ "batch_items").as[List[JsObject]] map { itemOrException =>
       itemOrException.validate[SalesforceBatchItem]
     }
     JsSuccess(
       SalesforceBatchWithExceptions(
-        validBatch = SalesforceBatchItems(validated.collect { case JsSuccess(item, _) => item }),
-        exceptions = validated.collect({ case JsError(e: Seq[(JsPath, Seq[JsonValidationError])]) => e })
+        validBatch = SalesforceBatchItems(validated collect { case JsSuccess(item, _) => item }),
+        exceptions = validated collect { case JsError(e) => e }
       )
     )
   }
