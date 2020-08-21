@@ -13,7 +13,7 @@ riffRaffManifestProjectName := "MemSub::Subscriptions::Lambdas::Digital Subscrip
 riffRaffArtifactResources += (file("handlers/digital-subscription-expiry/cfn.yaml"), "cfn/cfn.yaml")
 
 libraryDependencies ++= Seq(
-  "com.gu" %% "content-authorisation-common" % "0.5"
+  contentAuthCommon
 )
 
 resolvers ++= Seq(

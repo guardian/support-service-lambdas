@@ -429,7 +429,7 @@ deployAwsLambda := {
   import scala.sys.process._
   import complete.DefaultParsers._
   val Seq(name, stage) = spaceDelimited("<arg>").parsed
-  s"aws lambda update-function-code --function-name $name-$stage --zip-file fileb://handlers/$name/target/scala-2.12/$name.jar --profile membership --region eu-west-1".!
+  s"aws lambda update-function-code --function-name $name-$stage --zip-file fileb://handlers/$name/target/scala-2.13/$name.jar --profile membership --region eu-west-1".!
 }
 
 // run from root project: deploy holiday-stop-processor CODE

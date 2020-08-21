@@ -4,27 +4,17 @@ import sbtassembly.AssemblyPlugin.autoImport.{MergeStrategy, assemblyMergeStrate
 import sbtassembly.PathList
 
 object Dependencies {
-  
   val awsVersion = "1.11.574"
-
   val circeVersion = "0.12.3"
   val sttpVersion = "1.7.0"
   val http4sVersion = "0.21.0"
   val catsVersion = "2.1.1"
   val catsEffectVersion = "2.1.1"
 
-  val okhttp3 = "com.squareup.okhttp3" % "okhttp" % "3.9.1"
-
   val logging = Seq(
     "ch.qos.logback" % "logback-classic" % "1.2.3",
     "com.typesafe.scala-logging" %% "scala-logging" % "3.9.2"
   )
-
-  // play-json
-  val playJson = "com.typesafe.play" %% "play-json" % "2.8.0"
-  val playJsonExtensions = "ai.x" %% "play-json-extensions" % "0.40.1"
-
-  val jacksonDatabind = "com.fasterxml.jackson.core" % "jackson-databind" % "2.10.0" // FIXME: Why is this necessery?
 
   // AWS
   val awsS3 = "com.amazonaws" % "aws-java-sdk-s3" % awsVersion
@@ -40,18 +30,21 @@ object Dependencies {
   val catsEffect = "org.typelevel" %% "cats-effect" % catsEffectVersion
   val mouse = "org.typelevel" %% "mouse" % "0.23" // can be removed once we move to Scala 2.13 (native 'tap')
 
-  val enumeratum = "com.beachape" %% "enumeratum" % "1.5.13"
-
-  // Circe
+  // JSON libraries
   val circe = "io.circe" %% "circe-generic" % circeVersion
   val circeParser = "io.circe" %% "circe-parser" % circeVersion
   val circeConfig =  "io.circe" %% "circe-config" % "0.7.0"
+  val playJson = "com.typesafe.play" %% "play-json" % "2.8.0"
+  val playJsonExtensions = "ai.x" %% "play-json-extensions" % "0.40.1"
+  val jacksonDatabind = "com.fasterxml.jackson.core" % "jackson-databind" % "2.10.0" // FIXME: Why is this necessery?
 
-  // STTP
+  // HTTP clients
   val sttp = "com.softwaremill.sttp" %% "core" % sttpVersion
   val sttpCirce = "com.softwaremill.sttp" %% "circe" % sttpVersion
   val sttpCats = "com.softwaremill.sttp" %% "cats" % sttpVersion
   val sttpAsycHttpClientBackendCats = "com.softwaremill.sttp" %% "async-http-client-backend-cats" % sttpVersion
+  val okhttp3 = "com.squareup.okhttp3" % "okhttp" % "3.9.1"
+  val scalajHttp = "org.scalaj" %% "scalaj-http" % "2.4.2"
 
   // HTTP4S
   val http4sDsl = "org.http4s" %% "http4s-dsl" % http4sVersion
@@ -59,11 +52,16 @@ object Dependencies {
   val http4sServer = "org.http4s" %% "http4s-server" % http4sVersion
   val http4sCore = "org.http4s" %% "http4s-core" % http4sVersion
 
-  val zio = "dev.zio" %% "zio" % "1.0.0-RC17"
-
   // Guardian
   val simpleConfig = "com.gu" %% "simple-configuration-ssm" % "1.5.2"
   val supportInternationalisation = "com.gu" %% "support-internationalisation" % "0.13"
+  val contentAuthCommon = "com.gu" %% "content-authorisation-common" % "0.5"
+
+  // Other
+  val zio = "dev.zio" %% "zio" % "1.0.0-RC17"
+  val enumeratum = "com.beachape" %% "enumeratum" % "1.5.13"
+  val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "1.3.0"
+  val stripe = "com.stripe" % "stripe-java" % "5.28.0"
 
   // Testing
   val diffx = "com.softwaremill.diffx" %% "diffx-scalatest" % "0.3.29" % Test
