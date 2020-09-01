@@ -12,18 +12,21 @@ import com.softwaremill.sttp.{Id, SttpBackend}
 import org.slf4j.LoggerFactory
 
 object Processor {
+
+  type CreditProductForSubscription = Subscription => CreditProduct
+
   private val logger = LoggerFactory.getLogger(getClass)
 
   def processLiveProduct[Request <: CreditRequest, Result <: ZuoraCreditAddResult](
     config: HolidayStopProcessorZuoraConfig,
     zuoraAccessToken: AccessToken,
     sttpBackend: SttpBackend[Id, Nothing],
-    creditProduct: CreditProduct,
+    creditProduct: CreditProductForSubscription,
     getCreditRequestsFromSalesforce: (ZuoraProductType, List[LocalDate]) => SalesforceApiResponse[List[Request]],
     fulfilmentDatesFetcher: FulfilmentDatesFetcher,
     processOverrideDate: Option[LocalDate],
     productType: ZuoraProductType,
-    updateToApply: (CreditProduct, Subscription, ZuoraAccount, Request) => ZuoraApiResponse[SubscriptionUpdate],
+    updateToApply: (CreditProductForSubscription, Subscription, ZuoraAccount, Request) => ZuoraApiResponse[SubscriptionUpdate],
     resultOfZuoraCreditAdd: (Request, RatePlanCharge) => Result,
     writeCreditResultsToSalesforce: List[Result] => SalesforceApiResponse[_],
     getAccount: String => ZuoraApiResponse[ZuoraAccount]
@@ -43,14 +46,14 @@ object Processor {
       }
 
     processProduct(
-      creditProduct: CreditProduct,
+      creditProduct: CreditProductForSubscription,
       getCreditRequestsFromSalesforce: (ZuoraProductType, List[LocalDate]) => SalesforceApiResponse[List[Request]],
       fulfilmentDatesFetcher: FulfilmentDatesFetcher,
       processOverrideDate: Option[LocalDate],
       productType: ZuoraProductType,
       getSubscription: SubscriptionName => ZuoraApiResponse[Subscription],
       getAccount: String => ZuoraApiResponse[ZuoraAccount],
-      updateToApply: (CreditProduct, Subscription, ZuoraAccount, Request) => ZuoraApiResponse[SubscriptionUpdate],
+      updateToApply: (CreditProductForSubscription, Subscription, ZuoraAccount, Request) => ZuoraApiResponse[SubscriptionUpdate],
       updateSubscription: (Subscription, SubscriptionUpdate) => ZuoraApiResponse[Unit],
       resultOfZuoraCreditAdd: (Request, RatePlanCharge) => Result,
       writeCreditResultsToSalesforce: List[Result] => SalesforceApiResponse[_]
@@ -58,21 +61,21 @@ object Processor {
   }
 
   def processProduct[Request <: CreditRequest, Result <: ZuoraCreditAddResult](
-    creditProduct: CreditProduct,
+    creditProduct: CreditProductForSubscription,
     getCreditRequestsFromSalesforce: (ZuoraProductType, List[LocalDate]) => SalesforceApiResponse[List[Request]],
     fulfilmentDatesFetcher: FulfilmentDatesFetcher,
     processOverrideDate: Option[LocalDate],
     productType: ZuoraProductType,
     getSubscription: SubscriptionName => ZuoraApiResponse[Subscription],
     getAccount: String => ZuoraApiResponse[ZuoraAccount],
-    updateToApply: (CreditProduct, Subscription, ZuoraAccount, Request) => ZuoraApiResponse[SubscriptionUpdate],
+    updateToApply: (CreditProductForSubscription, Subscription, ZuoraAccount, Request) => ZuoraApiResponse[SubscriptionUpdate],
     updateSubscription: (Subscription, SubscriptionUpdate) => ZuoraApiResponse[Unit],
     resultOfZuoraCreditAdd: (Request, RatePlanCharge) => Result,
     writeCreditResultsToSalesforce: List[Result] => SalesforceApiResponse[_]
   ): ProcessResult[Result] = {
     val creditRequestsFromSalesforce = for {
       datesToProcess <- getDatesToProcess(fulfilmentDatesFetcher, productType, processOverrideDate, LocalDate.now())
-      _ = logger.info(s"Processing ${creditProduct.productRatePlanChargeName}s for ${productType.name} for issue dates ${datesToProcess.mkString(", ")}")
+      _ = logger.info(s"Processing credits for ${productType.name} for issue dates ${datesToProcess.mkString(", ")}")
       salesforceCreditRequests <- if (datesToProcess.isEmpty) Nil.asRight else getCreditRequestsFromSalesforce(productType, datesToProcess)
     } yield salesforceCreditRequests
 
@@ -110,10 +113,10 @@ object Processor {
    * This is the main business logic for adding a credit amendment to a subscription in Zuora
    */
   def addCreditToSubscription[Request <: CreditRequest, Result <: ZuoraCreditAddResult](
-    creditProduct: CreditProduct,
+    creditProduct: CreditProductForSubscription,
     getSubscription: SubscriptionName => ZuoraApiResponse[Subscription],
     getAccount: String => ZuoraApiResponse[ZuoraAccount],
-    updateToApply: (CreditProduct, Subscription, ZuoraAccount, Request) => ZuoraApiResponse[SubscriptionUpdate],
+    updateToApply: (CreditProductForSubscription, Subscription, ZuoraAccount, Request) => ZuoraApiResponse[SubscriptionUpdate],
     updateSubscription: (Subscription, SubscriptionUpdate) => ZuoraApiResponse[Unit],
     result: (Request, RatePlanCharge) => Result
   )(request: Request): ZuoraApiResponse[Result] =
