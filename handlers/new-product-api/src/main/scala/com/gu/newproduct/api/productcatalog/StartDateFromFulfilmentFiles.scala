@@ -26,7 +26,8 @@ object StartDateFromFulfilmentFiles extends LazyLogging {
   private val productTypesWithFulfilmentDateFiles: List[ProductType] = List(
     ProductType.GuardianWeekly,
     ProductType.NewspaperHomeDelivery,
-    ProductType.NewspaperVoucherBook
+    ProductType.NewspaperVoucherBook,
+    ProductType.NewspaperDigitalVoucher
   )
 
   def apply(stage: Stage, fetchString: StringFromS3, today: LocalDate): Either[String, (ProductType, List[DayOfWeek]) => LocalDate] = {

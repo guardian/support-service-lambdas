@@ -99,7 +99,7 @@ lazy val `salesforce-sttp-client` = all(project in file("lib/salesforce/sttp-cli
   )
   .settings(
     libraryDependencies ++=
-      Seq(sttp, sttpCirce, sttpCats % Test, scalatest, catsCore, catsEffect, circe, circeJava8) ++ logging
+      Seq(sttp, sttpCirce, sttpCats % Test, scalatest, catsCore, catsEffect, circe) ++ logging
   )
 
 lazy val `salesforce-sttp-test-stub` = all(project in file("lib/salesforce/sttp-test-stub"))
@@ -234,7 +234,7 @@ lazy val `credit-processor` = all(project in file("lib/credit-processor"))
 lazy val `imovo-sttp-client` = all(project in file("lib/imovo/imovo-sttp-client"))
   .settings(
     libraryDependencies ++=
-      Seq(sttp, sttpCirce, sttpCats % Test, scalatest, catsCore, catsEffect, circe, circeJava8) ++ logging
+      Seq(sttp, sttpCirce, sttpCats % Test, scalatest, catsCore, catsEffect, circe) ++ logging
   )
 
 lazy val `imovo-sttp-test-stub` = all(project in file("lib/imovo/imovo-sttp-test-stub"))
@@ -347,11 +347,10 @@ lazy val `metric-push-api` = all(project in file("handlers/metric-push-api"))
   .dependsOn()
 
 lazy val `sf-move-subscriptions-api` = all(project in file("handlers/sf-move-subscriptions-api"))
-  .dependsOn(`effects-s3`, `config-cats`, `zuora-core`)
+  .dependsOn(`effects-s3`, `config-cats`, `zuora-core`, `http4s-lambda-handler`)
   .settings(
     libraryDependencies ++=
       Seq(
-        http4sLambda,
         http4sDsl,
         http4sCirce,
         http4sServer,
@@ -369,10 +368,12 @@ lazy val `fulfilment-date-calculator` = all(project in file("handlers/fulfilment
   .dependsOn(testDep, `fulfilment-dates`)
 
 lazy val `delivery-records-api` = all(project in file("handlers/delivery-records-api"))
-  .dependsOn(`effects-s3`, `config-core`, `salesforce-sttp-client`, `salesforce-sttp-test-stub` % Test)
+  .dependsOn(
+    `effects-s3`, `config-core`, `salesforce-sttp-client`, `salesforce-sttp-test-stub` % Test, `http4s-lambda-handler`
+  )
   .settings(
     libraryDependencies ++=
-      Seq(http4sLambda, http4sDsl, http4sCirce, http4sServer, circe, sttpAsycHttpClientBackendCats, scalatest)
+      Seq(http4sDsl, http4sCirce, http4sServer, circe, sttpAsycHttpClientBackendCats, scalatest)
         ++ logging
   )
   .enablePlugins(RiffRaffArtifact)
@@ -422,4 +423,18 @@ initialize := {
   val _ = initialize.value
   assert(sys.props("java.specification.version") == "1.8",
     "Java 8 is required for this project.")
+}
+
+lazy val deployAwsLambda = inputKey[Unit]("Directly update AWS lambda code from DEV instead of via RiffRaff for faster feedback loop")
+deployAwsLambda := {
+  import scala.sys.process._
+  import complete.DefaultParsers._
+  val Seq(name, stage) = spaceDelimited("<arg>").parsed
+  s"aws lambda update-function-code --function-name $name-$stage --zip-file fileb://handlers/$name/target/scala-2.12/$name.jar --profile membership --region eu-west-1".!
+}
+
+// run from root project: deploy holiday-stop-processor CODE
+commands += Command.args("deploy", "<name stage>") { (state, args) =>
+  val Seq(name, stage) = args
+  s"""$name/assembly""":: s"deployAwsLambda $name $stage" :: state
 }

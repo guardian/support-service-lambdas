@@ -32,7 +32,6 @@ object Dependencies {
   val supportInternationalisation = "com.gu" %% "support-internationalisation" % "0.9"
   val circe = "io.circe" %% "circe-generic" % circeVersion
   val circeParser = "io.circe" %% "circe-parser" % circeVersion
-  val circeJava8 = "io.circe" %% "circe-java8" % circeVersion
   val circeConfig =  "io.circe" %% "circe-config" % "0.6.1"
   val sttp = "com.softwaremill.sttp" %% "core" % sttpVersion
   val sttpCirce = "com.softwaremill.sttp" %% "circe" % sttpVersion
@@ -40,7 +39,6 @@ object Dependencies {
   val sttpAsycHttpClientBackendCats = "com.softwaremill.sttp" %% "async-http-client-backend-cats" % sttpVersion
   val mouse = "org.typelevel" %% "mouse" % "0.23" // can be removed once we move to Scala 2.13 (native 'tap')
   val enumeratum = "com.beachape" %% "enumeratum" % "1.5.13"
-  val http4sLambda = "io.github.howardjohn" %% "http4s-lambda" % "0.4.0"
   val http4sDsl = "org.http4s" %% "http4s-dsl" % http4sVersion
   val http4sCirce = "org.http4s" %% "http4s-circe" % http4sVersion
   val http4sServer = "org.http4s" %% "http4s-server" % http4sVersion
