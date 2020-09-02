@@ -52,7 +52,7 @@ class ProcessorErrorHandlingSpec extends AnyFlatSpec with Matchers with OptionVa
     }
   }
 
-  private val creditProduct: CreditProductForSubscription = _ => HolidayCreditProduct.Dev
+  private val creditProduct: CreditProductForSubscription = _ => HolidayCreditProduct.Dev.GuardianWeekly
 
   private def updateToApply(
     creditProduct: CreditProductForSubscription,

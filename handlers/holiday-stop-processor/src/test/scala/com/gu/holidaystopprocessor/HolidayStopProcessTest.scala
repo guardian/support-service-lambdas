@@ -66,7 +66,7 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
     }
   }
 
-  private val creditProduct: CreditProductForSubscription = _ => HolidayCreditProduct.Dev
+  private val creditProduct: CreditProductForSubscription = _ => HolidayCreditProduct.Dev.GuardianWeekly
 
   private def updateToApply(
     creditProduct: CreditProductForSubscription,

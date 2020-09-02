@@ -17,7 +17,7 @@ class SubscriptionUpdateTest extends AnyFlatSpec with Matchers with DiffMatcher 
   val stoppedPublicationDate = AffectedPublicationDate(
     dateCreditIsApplied.`with`(TemporalAdjusters.previous(DayOfWeek.FRIDAY))
   )
-  private val creditProduct = HolidayCreditProduct.Dev
+  private val creditProduct = HolidayCreditProduct.Dev.GuardianWeekly
 
   "forHolidayStop" should "generate update correctly" in {
     val subscription = SubscriptionFixtures.mkGuardianWeeklySubscription(
