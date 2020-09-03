@@ -67,7 +67,7 @@ Resources:
     Properties:
       FunctionName:
         !Sub delivery-problem-credit-processor-${Stage}
-      Description: Applies credit amendments for delivery problems. Source - https://github.com/guardian/support-service-lambdas/tree/master/handlers/delivery-problem-credit-processor
+      Description: Applies credit amendments for delivery problems. Source - https://github.com/guardian/support-service-lambdas/tree/main/handlers/delivery-problem-credit-processor
       Code:
         S3Bucket: support-service-lambdas-dist
         S3Key: !Sub membership/${Stage}/delivery-problem-credit-processor/delivery-problem-credit-processor.jar
