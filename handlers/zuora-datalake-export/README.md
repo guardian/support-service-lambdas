@@ -6,7 +6,7 @@
 2. [Zuora AQuA Stateful API](https://knowledgecenter.zuora.com/DC_Developers/AB_Aggregate_Query_API/BA_Stateless_and_Stateful_Modes#Automatic_Switch_Between_Full_Load_and_Incremental_Load)
 3. [Export CSV of changes since yesterday](https://knowledgecenter.zuora.com/DC_Developers/AB_Aggregate_Query_API/B_Submit_Query/e_Post_Query_with_Retrieval_Time)
 4. Save CSV to Datalake raw buckets `arn:aws:s3:::ophan-raw-zuora-increment*`
-5. [Run Datalake Spark Job to create clean table](https://github.com/guardian/ophan-data-lake/tree/master/etl/subscriptions/src/main/scala/com/gu/datalake/etl/zuora)
+5. [Run Datalake Spark Job to create clean table](https://github.com/guardian/ophan-data-lake/tree/main/etl/subscriptions/src/main/scala/com/gu/datalake/etl/zuora)
 
 Example exported CSV of changes:
 
@@ -202,7 +202,7 @@ The following process describes how to do that, re-running additional/individual
 * Click on 'Supporter-experience'
 * Click on 'Graph View'
 * Find the 'zuora-account-1' task in the graph and click on it. Details of the Airflow configuration can be found here: 
-[https://github.com/guardian/ophan-data-lake/tree/master/airflow](https://github.com/guardian/ophan-data-lake/tree/master/airflow) 
+[https://github.com/guardian/ophan-data-lake/tree/main/airflow](https://github.com/guardian/ophan-data-lake/tree/main/airflow) 
 * Un-press the 'Downstream' and 'Recursive' buttons (all buttons next to 'Clear' should be pressed)
 * Click on the 'Clear button'
 * You will see a long list of task instances which are to be re-run. At this point its worth sanity checking this list

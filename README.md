@@ -42,7 +42,7 @@ The testing story is not perfect at the moment!  You are responsible for getting
 
 ### Code only changes
 You can be confident when making code only changes.  Run `sbt test` to run code only tests (ignores other tests).
-They will automatically run on your build of your branch and when you merge to master.
+They will automatically run on your build of your branch and when you merge to main.
 
 Add your new tests in the normal way, and don't forget to `Run with Coverage` in IntelliJ.
 

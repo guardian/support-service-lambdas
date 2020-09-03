@@ -103,7 +103,7 @@ Resources:
       AlarmDescription: >
         Failed to upload file from braze to Salesforce.
         Latcham will not be able to send physical letters.
-        Refer to https://github.com/guardian/support-service-lambdas/blob/master/handlers/braze-to-salesforce-file-upload/README.md
+        Refer to https://github.com/guardian/support-service-lambdas/blob/main/handlers/braze-to-salesforce-file-upload/README.md
         on how to debug and retry.
       AlarmActions:
         - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:MarioTest

@@ -28,4 +28,4 @@ Sample response:
 }
 ```
 
-The cloudformation in this project doesn't define an api gateway, instead the lambda is just exported to be included in the '/subs' endpoint of the [digital subscription authorisation](https://github.com/guardian/digital-subscription-authorisation/blob/master/cloudformation.yaml) api gateway
+The cloudformation in this project doesn't define an api gateway, instead the lambda is just exported to be included in the '/subs' endpoint of the [digital subscription authorisation](https://github.com/guardian/digital-subscription-authorisation/blob/main/cloudformation.yaml) api gateway

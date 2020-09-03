@@ -113,7 +113,7 @@ Tips for quicker dev feedback loop:
 1. [`membership-workflow`](https://github.com/guardian/membership-workflow) processes the queue
 1. `membership-workflow` either [hits Braze](https://www.braze.com/docs/developer_guide/rest_api/messaging/#sending-messages-via-api-triggered-delivery) directly or delegates to Identity `payment-failure` to embed magic link
 1. `membership-workflow` publishes SNS message to `identity-payment-failure-PROD` topic
-1. [`payment-failure`](https://github.com/guardian/identity-processes/tree/master/payment-failure) embeds magic link and hists Braze
+1. [`payment-failure`](https://github.com/guardian/identity-processes/tree/main/payment-failure) embeds magic link and hits Braze
 1. [Braze](https://dashboard-01.braze.eu) schedules a campaign message send via [API Triggered Delivery](https://www.braze.com/docs/developer_guide/rest_api/messaging/#sending-messages-via-api-triggered-delivery)
 
 ![sequence_diagram](https://user-images.githubusercontent.com/13835317/51552742-2a349800-1e69-11e9-8df4-55eec10b649d.png)
@@ -123,7 +123,7 @@ Braze [`Campaign API Identifiers`](https://www.braze.com/docs/developer_guide/re
 ## How to embed magic link in an email?
 
 If you wish to add Identity magic link, then add Campaign ID to [IdentityProxyBrazeClient.defaultProxiedEmailNames](https://github.com/guardian/membership-workflow/blob/2e354b81888f6d222d9de0b4c2eda8e0f2b14729/app/services/IdentityProxyBrazeClient.scala#L51).
-In this case `membership-workflow` will delegate Braze request to Identity [`payment-failure`](https://github.com/guardian/identity-processes/tree/master/payment-failure) lambda.
+In this case `membership-workflow` will delegate Braze request to Identity [`payment-failure`](https://github.com/guardian/identity-processes/tree/main/payment-failure) lambda.
 
 ## How to add personalisation fields to email templates?
 

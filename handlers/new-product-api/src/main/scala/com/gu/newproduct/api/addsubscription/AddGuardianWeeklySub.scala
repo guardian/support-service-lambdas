@@ -129,7 +129,7 @@ object AddGuardianWeeklySub {
 
         /**
          * The following logic was implement for consistency with the support-frontend:
-         * https://github.com/guardian/support-frontend/blob/master/support-workers/src/main/scala/com/gu/zuora/ProductSubscriptionBuilders.scala
+         * https://github.com/guardian/support-frontend/blob/main/support-workers/src/main/scala/com/gu/zuora/ProductSubscriptionBuilders.scala
          *
          * 6 for 6 subs are modeled in zuora as a sub with two rate plans.
          * The inital 6 week period is given a 'trigger date' of the first issue date selected by the user.
