@@ -21,7 +21,7 @@ case class IssueData(issueDate: LocalDate, billDates: BillDates, credit: Double)
    *
    * [[com.gu.zuora.subscription.RatePlanChargeBillingSchedule]]
    *
-   * @return Date of the first day of the billing period
+   * @return Date of the first day of the next billing period
    *         following this <code>stoppedPublicationDate</code>.
    */
   def nextBillingPeriodStartDate: LocalDate = {
