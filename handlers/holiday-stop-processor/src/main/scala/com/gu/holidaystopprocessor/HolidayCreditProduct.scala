@@ -12,18 +12,18 @@ import com.gu.zuora.subscription.{CreditProduct, RatePlan, RatePlanCharge}
  */
 object HolidayCreditProduct {
 
-  val productRatePlanChargeName = "Holiday Credit"
+  final val ProductRatePlanChargeName = "Holiday Credit"
 
   val Prod = CreditProduct(
     productRatePlanId = "2c92a0076ae9189c016b080c930a6186",
     productRatePlanChargeId = "2c92a0086ae928d7016b080f638477a6",
-    productRatePlanChargeName
+    ProductRatePlanChargeName
   )
 
   val Code = CreditProduct(
     productRatePlanId = "2c92c0f86b0378b0016b08112e870d0a",
     productRatePlanChargeId = "2c92c0f86b0378b0016b08112ec70d14",
-    productRatePlanChargeName
+    ProductRatePlanChargeName
   )
 
   object Dev {
@@ -31,31 +31,31 @@ object HolidayCreditProduct {
     val GuardianWeekly: CreditProduct = CreditProduct(
       productRatePlanId = "2c92c0f96b03800b016b081fc04f1ba2",
       productRatePlanChargeId = "2c92c0f96b03800b016b081fc0f41bb4",
-      productRatePlanChargeName
+      ProductRatePlanChargeName
     )
 
     val Voucher: CreditProduct = CreditProduct(
       productRatePlanId = "2c92c0f8736c34b901737160f7df3a97",
       productRatePlanChargeId = "2c92c0f8736c34b901737160f7f63a99",
-      productRatePlanChargeName
+      ProductRatePlanChargeName
     )
 
     val VoucherPlus: CreditProduct = CreditProduct(
       productRatePlanId = "2c92c0f973e676bf0173e787dd8662c2",
       productRatePlanChargeId = "2c92c0f973e676bf0173e787ddac62c4",
-      productRatePlanChargeName
+      ProductRatePlanChargeName
     )
 
     val HomeDelivery: CreditProduct = CreditProduct(
       productRatePlanId = "2c92c0f8736c34cb01737160e5e469de",
       productRatePlanChargeId = "2c92c0f8736c34cb01737160e5fa69e0",
-      productRatePlanChargeName
+      ProductRatePlanChargeName
     )
 
     val HomeDeliveryPlus: CreditProduct = CreditProduct(
       productRatePlanId = "2c92c0f873e665fb0173e78129692272",
       productRatePlanChargeId = "2c92c0f873e665fb0173e78129832274",
-      productRatePlanChargeName
+      ProductRatePlanChargeName
     )
   }
 

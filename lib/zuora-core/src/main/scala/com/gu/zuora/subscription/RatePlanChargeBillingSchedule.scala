@@ -84,7 +84,7 @@ object RatePlanChargeBillingSchedule {
     )
   }
 
-  def apply(
+  private def apply(
     customerAcceptanceDate: LocalDate,
     contractEffectiveDate: LocalDate,
     billingDay: Option[String],
