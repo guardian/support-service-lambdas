@@ -5,8 +5,6 @@ import Dependencies._
 name := "cancellation-sf-cases-api"
 description:= "Create/update SalesForce cases for self service cancellation tracking"
 
-scalacOptions += "-Ypartial-unification"
-
 assemblyJarName := "cancellation-sf-cases-api.jar"
 riffRaffPackageType := assembly.value
 riffRaffUploadArtifactBucket := Option("riffraff-artifact")

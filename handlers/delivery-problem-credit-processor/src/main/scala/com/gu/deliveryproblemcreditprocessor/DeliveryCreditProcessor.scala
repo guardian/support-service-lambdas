@@ -3,7 +3,7 @@ package com.gu.deliveryproblemcreditprocessor
 import java.time.{DayOfWeek, LocalDate, LocalDateTime}
 
 import cats.data.EitherT
-import cats.effect.IO
+import cats.effect.{ContextShift, IO}
 import cats.implicits._
 import com.gu.creditprocessor.Processor.CreditProductForSubscription
 import com.gu.creditprocessor.{ProcessResult, Processor}
@@ -24,6 +24,7 @@ import zio.{Task, ZIO}
 
 object DeliveryCreditProcessor extends Logging {
 
+  implicit val cs: ContextShift[IO] = IO.contextShift(scala.concurrent.ExecutionContext.global)
   private val zuoraSttpBackend = HttpURLConnectionBackend()
   private val sfSttpBackend = AsyncHttpClientCatsBackend[cats.effect.IO]()
 
@@ -41,14 +42,15 @@ object DeliveryCreditProcessor extends Logging {
         .apply[HolidayStopProcessorZuoraConfig](ConfigLocation("zuoraRest", 1), HolidayStopProcessorZuoraConfig.reads)
     )
 
-  private def config[A](a: Either[ConfigFailure, A]): Task[A] =
-    Task.effect(a).absolve.mapError {
+  private def config[A](a: Either[ConfigFailure, A]): Task[A] = {
+    ZIO.absolve(Task.effect(a)).mapError {
       case e: ConfigFailure => new RuntimeException(e.error)
       case e: Throwable => e
     }
+  }
 
   private def zuoraAccessToken(config: HolidayStopProcessorZuoraConfig): Task[AccessToken] =
-    Task.effect(Zuora.accessTokenGetResponse(config, zuoraSttpBackend)).absolve.mapError {
+    ZIO.absolve(Task.effect(Zuora.accessTokenGetResponse(config, zuoraSttpBackend))).mapError {
       case e: ZuoraApiFailure => new RuntimeException(e.reason)
       case e: Throwable => e
     }
