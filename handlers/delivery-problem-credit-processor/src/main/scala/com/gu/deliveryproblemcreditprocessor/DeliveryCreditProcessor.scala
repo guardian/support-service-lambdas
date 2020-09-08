@@ -79,9 +79,9 @@ object DeliveryCreditProcessor extends Logging {
     } yield results
 
   def processProduct(
-                      sfAuthConfig: SFAuthConfig,
-                      zuoraConfig: HolidayStopProcessorZuoraConfig,
-                      zuoraAccessToken: AccessToken
+    sfAuthConfig: SFAuthConfig,
+    zuoraConfig: HolidayStopProcessorZuoraConfig,
+    zuoraAccessToken: AccessToken
   )(productType: ZuoraProductType): Task[ProcessResult[DeliveryCreditResult]] =
     for {
       processResult <- Task.effect(
@@ -123,17 +123,17 @@ object DeliveryCreditProcessor extends Logging {
   }
 
   def updateToApply(
-     creditProduct: CreditProductForSubscription,
-     subscription: Subscription,
-     account: ZuoraAccount,
-     request: DeliveryCreditRequest
+    creditProduct: CreditProductForSubscription,
+    subscription: Subscription,
+    account: ZuoraAccount,
+    request: DeliveryCreditRequest
   ): ZuoraApiResponse[SubscriptionUpdate] =
     SubscriptionUpdate(
       creditProduct(subscription),
       subscription,
       account,
       AffectedPublicationDate(request.Delivery_Date__c),
-      Some(InvoiceDate(request.Invoice_Date__c))
+      request.Invoice_Date__c.map(InvoiceDate)
     )
 
   def resultOfZuoraCreditAdd(
@@ -143,6 +143,7 @@ object DeliveryCreditProcessor extends Logging {
     deliveryId = request.Id,
     chargeCode = RatePlanChargeCode(addedCharge.number),
     amountCredited = Price(addedCharge.price),
+    invoiceDate = InvoiceDate(addedCharge.effectiveStartDate)
   )
 
   def getCreditRequestsFromSalesforce(sfAuthConfig: SFAuthConfig)(
@@ -193,6 +194,7 @@ object DeliveryCreditProcessor extends Logging {
     Charge_Code__c: String,
     Credit_Amount__c: Double,
     Actioned_On__c: LocalDateTime,
+    Invoice_Date__c: LocalDate
   )
 
   def writeCreditResultsToSalesforce(sfAuthConfig: SFAuthConfig)(
@@ -209,6 +211,7 @@ object DeliveryCreditProcessor extends Logging {
           Charge_Code__c = result.chargeCode.value,
           Credit_Amount__c = result.amountCredited.value,
           Actioned_On__c = LocalDateTime.now,
+          Invoice_Date__c = result.invoiceDate.value
         )
         salesforceClient.patch(
           deliveryObject,
