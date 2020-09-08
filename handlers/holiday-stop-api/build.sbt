@@ -5,8 +5,6 @@ import Dependencies._
 name := "holiday-stop-api"
 description:= "CRUD API for Holiday Stop Requests stored in SalesForce"
 
-scalacOptions += "-Ypartial-unification"
-
 assemblyJarName := "holiday-stop-api.jar"
 riffRaffPackageType := assembly.value
 riffRaffUploadArtifactBucket := Option("riffraff-artifact")

@@ -5,8 +5,6 @@ import Dependencies._
 name := "delivery-records-api"
 description:= "API for accessing delivery records in Salesforce"
 
-scalacOptions += "-Ypartial-unification"
-
 assemblyJarName := "delivery-records-api.jar"
 riffRaffPackageType := assembly.value
 riffRaffUploadArtifactBucket := Option("riffraff-artifact")

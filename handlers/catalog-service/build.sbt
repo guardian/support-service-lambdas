@@ -5,8 +5,6 @@ import Dependencies._
 name := "catalog-service"
 description:= "Download the Zuora Catalog and store the JSON in S3"
 
-scalacOptions += "-Ypartial-unification"
-
 assemblyJarName := "catalog-service.jar"
 riffRaffPackageType := assembly.value
 riffRaffUploadArtifactBucket := Option("riffraff-artifact")

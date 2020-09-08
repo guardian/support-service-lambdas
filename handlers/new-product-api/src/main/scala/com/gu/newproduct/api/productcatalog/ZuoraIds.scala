@@ -171,13 +171,13 @@ object ZuoraIds {
     digitalVoucher: DigitalVoucherZuoraIds
   ) {
     def apiIdToRateplanId: Map[PlanId, ProductRatePlanId] =
-      contributionsZuoraIds.planAndChargeByApiPlanId.mapValues(_.productRatePlanId) ++
+      (contributionsZuoraIds.planAndChargeByApiPlanId.view.mapValues(_.productRatePlanId) ++
       voucherZuoraIds.byApiPlanId ++
       homeDeliveryZuoraIds.byApiPlanId ++
       digitalPackIds.byApiPlanId ++
       guardianWeeklyDomestic.zuoraRatePlanIdByApiPlanId ++
       guardianWeeklyROW.zuoraRatePlanIdByApiPlanId ++
-      digitalVoucher.byApiPlanId
+      digitalVoucher.byApiPlanId).toMap
 
     val rateplanIdToApiId: Map[ProductRatePlanId, PlanId] = apiIdToRateplanId.map(_.swap)
 

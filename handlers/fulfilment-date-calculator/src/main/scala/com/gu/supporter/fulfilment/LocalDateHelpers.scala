@@ -20,10 +20,10 @@ object LocalDateHelpers {
 
     def findPreviousWorkingDay: LocalDate = {
       val previousDay = date.minusDays(1)
-      if (previousDay isWorkingDay) {
+      if (previousDay.isWorkingDay) {
         previousDay
       } else {
-        previousDay findPreviousWorkingDay
+        previousDay.findPreviousWorkingDay
       }
     }
 

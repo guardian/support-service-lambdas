@@ -1,7 +1,7 @@
 import Dependencies._
 
 val scalaSettings = Seq(
-  scalaVersion := "2.12.10",
+  scalaVersion := "2.13.3",
   version      := "0.0.1",
   organization := "com.gu",
   scalacOptions ++= Seq(
@@ -14,7 +14,6 @@ val scalaSettings = Seq(
     "-language:implicitConversions",
     "-unchecked",
     "-Xlint",
-    "-Yno-adapted-args",
     "-Ywarn-dead-code",
     "-Ywarn-numeric-widen",
     "-Ywarn-value-discard"
@@ -430,7 +429,7 @@ deployAwsLambda := {
   import scala.sys.process._
   import complete.DefaultParsers._
   val Seq(name, stage) = spaceDelimited("<arg>").parsed
-  s"aws lambda update-function-code --function-name $name-$stage --zip-file fileb://handlers/$name/target/scala-2.12/$name.jar --profile membership --region eu-west-1".!
+  s"aws lambda update-function-code --function-name $name-$stage --zip-file fileb://handlers/$name/target/scala-2.13/$name.jar --profile membership --region eu-west-1".!
 }
 
 // run from root project: deploy holiday-stop-processor CODE
