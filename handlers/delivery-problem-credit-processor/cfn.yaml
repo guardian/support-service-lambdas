@@ -115,7 +115,7 @@ Resources:
     Properties:
       Description: Trigger processing of delivery-problem credits every hour (to give 24 attempts a day)
       Name: !FindInMap [StageMap, !Ref Stage, ScheduleName]
-      ScheduleExpression: "cron(0 * ? * * *)"
+      ScheduleExpression: "cron(0/20 * ? * * *)"
       State: ENABLED
       Targets:
         - Arn: !GetAtt DeliveryProblemCreditProcessor.Arn
