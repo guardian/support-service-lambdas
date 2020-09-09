@@ -129,7 +129,7 @@ object SalesforceHolidayStopRequest extends Logging {
     Estimated_Price__c: Price,
     Expected_Invoice_Date__c: HolidayStopRequestsDetailExpectedInvoiceDate,
     attributes: CompositeAttributes = CompositeAttributes(
-      holidayStopRequestsDetailSfObjectRef,
+      HolidayStopRequestsDetailSfObjectRef,
       UUID.randomUUID().toString
     )
   )
@@ -282,7 +282,7 @@ object SalesforceHolidayStopRequest extends Logging {
         .map{ issueData =>
           CompositePart(
             method = "POST",
-            url = s"$sfObjectsBaseUrl$holidayStopRequestsDetailSfObjectRef",
+            url = s"$sfObjectsBaseUrl$HolidayStopRequestsDetailSfObjectRef",
             referenceId = "CREATE DETAIL : " + UUID.randomUUID().toString,
             body = Json.toJson(AddHolidayStopRequestDetailBody(
               Holiday_Stop_Request__c = holidayStopRequestId,
@@ -302,7 +302,7 @@ object SalesforceHolidayStopRequest extends Logging {
           }
           CompositePart(
             method = "DELETE",
-            url = s"$sfObjectsBaseUrl$holidayStopRequestsDetailSfObjectRef/${holidayStopRequestDetail.Id.value}",
+            url = s"$sfObjectsBaseUrl$HolidayStopRequestsDetailSfObjectRef/${holidayStopRequestDetail.Id.value}",
             referenceId = "DELETE DETAIL : " + UUID.randomUUID().toString,
             body = JsNull
           )
