@@ -32,8 +32,8 @@ object HomeDeliveryFulfilmentDates {
     implicit
     bankHolidays: BankHolidays
   ): LocalDate = {
-    val distributorPickupDay: LocalDate = (nextTargetDayOfWeek findPreviousWorkingDay)
-    distributorPickupDay minusDays 0 // distributor picks up files generated early-AM that SAME morning
+    val distributorPickupDay: LocalDate = (nextTargetDayOfWeek.findPreviousWorkingDay)
+    distributorPickupDay.minusDays(0) // distributor picks up files generated early-AM that SAME morning
   }
 
   private def getFulfilmentFileGenerationDateForNextTargetDayOfWeek(

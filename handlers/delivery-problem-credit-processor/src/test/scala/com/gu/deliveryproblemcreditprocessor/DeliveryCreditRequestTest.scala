@@ -27,14 +27,14 @@ class DeliveryCreditRequestTest
           SF_Subscription__r = DeliveryCreditSubscription(Name = "A-S00001"),
           Delivery_Date__c = LocalDate.of(2019, 12, 6),
           Charge_Code__c = None,
-          Invoice_Date__c = LocalDate.of(2020, 2, 10)
+          Invoice_Date__c = Some(LocalDate.of(2020, 2, 10))
         ),
         DeliveryCreditRequest(
           Id = "r2",
           SF_Subscription__r = DeliveryCreditSubscription(Name = "A-S00002"),
           Delivery_Date__c = LocalDate.of(2019, 12, 13),
           Charge_Code__c = Some("C12345"),
-          Invoice_Date__c = LocalDate.of(2020, 3, 1)
+          Invoice_Date__c = Some(LocalDate.of(2020, 3, 1))
         )
       ))
     )

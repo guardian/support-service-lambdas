@@ -5,8 +5,6 @@ import Dependencies._
 name := "digital-subscription-expiry"
 description:= "check digital subscription expiration for authorisation purposes"
 
-scalacOptions += "-Ypartial-unification"
-
 assemblyJarName := "digital-subscription-expiry.jar"
 riffRaffPackageType := assembly.value
 riffRaffUploadArtifactBucket := Option("riffraff-artifact")
@@ -15,7 +13,7 @@ riffRaffManifestProjectName := "MemSub::Subscriptions::Lambdas::Digital Subscrip
 riffRaffArtifactResources += (file("handlers/digital-subscription-expiry/cfn.yaml"), "cfn/cfn.yaml")
 
 libraryDependencies ++= Seq(
-  "com.gu" %% "content-authorisation-common" % "0.4"
+  contentAuthCommon
 )
 
 resolvers ++= Seq(
