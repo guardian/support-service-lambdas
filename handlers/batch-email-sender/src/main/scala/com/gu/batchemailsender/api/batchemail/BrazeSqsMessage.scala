@@ -31,7 +31,7 @@ case class BrazeApiTriggerProperties(
   bulk_suspension_reason: Option[String],
 
   /**
-   * SV_VO_NewCard, SV_VO_ReplacementCard
+   * SV_SC_BarcodeAccess_Day0_plus_15, SV_SC_LostItem
    */
   digital_voucher: Option[DigitalVoucher],
 
