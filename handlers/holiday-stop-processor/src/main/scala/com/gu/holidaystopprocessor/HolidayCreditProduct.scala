@@ -2,7 +2,7 @@ package com.gu.holidaystopprocessor
 
 import com.gu.creditprocessor.Processor.CreditProductForSubscription
 import com.gu.util.config.Stage
-import com.gu.zuora.subscription.{CreditProduct, RatePlan, RatePlanCharge}
+import com.gu.zuora.subscription.{CreditProduct, RatePlan}
 
 /**
  * Same Discount holiday stop product is reused for all products, namely:
@@ -12,19 +12,34 @@ import com.gu.zuora.subscription.{CreditProduct, RatePlan, RatePlanCharge}
  */
 object HolidayCreditProduct {
 
-  final val ProductRatePlanChargeName = "Holiday Credit"
+  final val ProductRatePlanChargeName: String = "Holiday Credit"
 
-  val Prod = CreditProduct(
+  val Prod: CreditProduct = CreditProduct(
     productRatePlanId = "2c92a0076ae9189c016b080c930a6186",
     productRatePlanChargeId = "2c92a0086ae928d7016b080f638477a6",
     ProductRatePlanChargeName
   )
 
-  val Code = CreditProduct(
-    productRatePlanId = "2c92c0f86b0378b0016b08112e870d0a",
-    productRatePlanChargeId = "2c92c0f86b0378b0016b08112ec70d14",
-    ProductRatePlanChargeName
-  )
+  object Code {
+
+    val GuardianWeekly: CreditProduct = CreditProduct(
+      productRatePlanId = "2c92c0f86b0378b0016b08112e870d0a",
+      productRatePlanChargeId = "2c92c0f86b0378b0016b08112ec70d14",
+      ProductRatePlanChargeName
+    )
+
+    val Voucher: CreditProduct = CreditProduct(
+      productRatePlanId = "2c92c0f87466eaa2017467be65222246",
+      productRatePlanChargeId = "2c92c0f87466eaa2017467be659e2248",
+      ProductRatePlanChargeName
+    )
+
+    val HomeDelivery: CreditProduct = CreditProduct(
+      productRatePlanId = "2c92c0f97466f60b017467c6e02707b0",
+      productRatePlanChargeId = "2c92c0f97466f60b017467c6e04407b3",
+      ProductRatePlanChargeName
+    )
+  }
 
   object Dev {
 
@@ -40,21 +55,9 @@ object HolidayCreditProduct {
       ProductRatePlanChargeName
     )
 
-    val VoucherPlus: CreditProduct = CreditProduct(
-      productRatePlanId = "2c92c0f973e676bf0173e787dd8662c2",
-      productRatePlanChargeId = "2c92c0f973e676bf0173e787ddac62c4",
-      ProductRatePlanChargeName
-    )
-
     val HomeDelivery: CreditProduct = CreditProduct(
       productRatePlanId = "2c92c0f8736c34cb01737160e5e469de",
       productRatePlanChargeId = "2c92c0f8736c34cb01737160e5fa69e0",
-      ProductRatePlanChargeName
-    )
-
-    val HomeDeliveryPlus: CreditProduct = CreditProduct(
-      productRatePlanId = "2c92c0f873e665fb0173e78129692272",
-      productRatePlanChargeId = "2c92c0f873e665fb0173e78129832274",
       ProductRatePlanChargeName
     )
   }
@@ -76,21 +79,20 @@ object HolidayCreditProduct {
    */
   def forStage(stage: Stage): CreditProductForSubscription = {
 
-    def isPlus(plan: RatePlan) = plan.ratePlanName.endsWith("+")
     def isGuardianWeekly(plan: RatePlan) = plan.productName.startsWith("Guardian Weekly")
     def isHomeDelivery(plan: RatePlan) = plan.productName == "Newspaper Delivery"
-    def isHomeDeliveryPlus(plan: RatePlan) = isHomeDelivery(plan) && isPlus(plan)
     def isVoucher(plan: RatePlan) = plan.productName == "Newspaper Voucher" || plan.productName == "Newspaper Digital Voucher"
-    def isVoucherPlus(plan: RatePlan) = isVoucher(plan) && isPlus(plan)
 
     stage match {
       case Stage("PROD") => _ => HolidayCreditProduct.Prod
-      case Stage("CODE") => _ => HolidayCreditProduct.Code
+      case Stage("CODE") => subscription =>
+        if (subscription.ratePlans.exists(isGuardianWeekly)) HolidayCreditProduct.Code.GuardianWeekly
+        else if (subscription.ratePlans.exists(isHomeDelivery)) HolidayCreditProduct.Code.HomeDelivery
+        else if (subscription.ratePlans.exists(isVoucher)) HolidayCreditProduct.Code.Voucher
+        else throw new IllegalArgumentException(s"No holiday credit product available for subscription ${subscription.subscriptionNumber}")
       case _ => subscription =>
         if (subscription.ratePlans.exists(isGuardianWeekly)) HolidayCreditProduct.Dev.GuardianWeekly
-        else if (subscription.ratePlans.exists(isHomeDeliveryPlus)) HolidayCreditProduct.Dev.HomeDeliveryPlus
         else if (subscription.ratePlans.exists(isHomeDelivery)) HolidayCreditProduct.Dev.HomeDelivery
-        else if (subscription.ratePlans.exists(isVoucherPlus)) HolidayCreditProduct.Dev.VoucherPlus
         else if (subscription.ratePlans.exists(isVoucher)) HolidayCreditProduct.Dev.Voucher
         else throw new IllegalArgumentException(s"No holiday credit product available for subscription ${subscription.subscriptionNumber}")
     }
