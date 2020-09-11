@@ -79,22 +79,28 @@ object HolidayCreditProduct {
    */
   def forStage(stage: Stage): CreditProductForSubscription = {
 
-    def isGuardianWeekly(plan: RatePlan) = plan.productName.startsWith("Guardian Weekly")
-    def isHomeDelivery(plan: RatePlan) = plan.productName == "Newspaper Delivery"
-    def isVoucher(plan: RatePlan) = plan.productName == "Newspaper Voucher" || plan.productName == "Newspaper Digital Voucher"
+    def creditProduct(stage: Stage)(plan: RatePlan): Option[CreditProduct] = (stage, plan.productName) match {
+      case (Stage.Code, s"Guardian Weekly$_") => Some(HolidayCreditProduct.Code.GuardianWeekly)
+      case (Stage.Code, "Newspaper Delivery") => Some(HolidayCreditProduct.Code.HomeDelivery)
+      case (Stage.Code, "Newspaper Voucher" | "Newspaper Digital Voucher") => Some(HolidayCreditProduct.Code.Voucher)
+      case (_, s"Guardian Weekly$_") => Some(HolidayCreditProduct.Dev.GuardianWeekly)
+      case (_, "Newspaper Delivery") => Some(HolidayCreditProduct.Dev.HomeDelivery)
+      case (_, "Newspaper Voucher" | "Newspaper Digital Voucher") => Some(HolidayCreditProduct.Dev.Voucher)
+      case _ => None
+    }
 
     stage match {
-      case Stage("PROD") => _ => HolidayCreditProduct.Prod
-      case Stage("CODE") => subscription =>
-        if (subscription.ratePlans.exists(isGuardianWeekly)) HolidayCreditProduct.Code.GuardianWeekly
-        else if (subscription.ratePlans.exists(isHomeDelivery)) HolidayCreditProduct.Code.HomeDelivery
-        else if (subscription.ratePlans.exists(isVoucher)) HolidayCreditProduct.Code.Voucher
-        else throw new IllegalArgumentException(s"No holiday credit product available for subscription ${subscription.subscriptionNumber}")
-      case _ => subscription =>
-        if (subscription.ratePlans.exists(isGuardianWeekly)) HolidayCreditProduct.Dev.GuardianWeekly
-        else if (subscription.ratePlans.exists(isHomeDelivery)) HolidayCreditProduct.Dev.HomeDelivery
-        else if (subscription.ratePlans.exists(isVoucher)) HolidayCreditProduct.Dev.Voucher
-        else throw new IllegalArgumentException(s"No holiday credit product available for subscription ${subscription.subscriptionNumber}")
+      case Stage.Prod => _ => HolidayCreditProduct.Prod
+      case other => subscription =>
+        subscription
+          .ratePlans
+          .flatMap(creditProduct(other))
+          .headOption
+          .getOrElse(
+            throw new IllegalArgumentException(
+              s"No holiday credit product available for subscription ${subscription.subscriptionNumber}"
+            )
+          )
     }
   }
 }

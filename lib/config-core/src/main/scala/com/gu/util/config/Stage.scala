@@ -5,5 +5,10 @@ case class Stage(value: String) extends AnyVal {
 }
 
 object Stage {
-  def apply(): Stage = Option(System.getenv("Stage")).fold(Stage("DEV"))(stage => Stage(stage))
+
+  val Dev: Stage = Stage("DEV")
+  val Code: Stage = Stage("CODE")
+  val Prod: Stage = Stage("PROD")
+
+  def apply(): Stage = Option(System.getenv("Stage")).fold(Dev)(stage => Stage(stage))
 }

@@ -1,14 +1,11 @@
 package com.gu.holidaystopprocessor
 
-import com.gu.util.config.Stage
+import com.gu.util.config.Stage.{Code, Dev}
 import com.gu.zuora.subscription.Fixtures
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
 class HolidayCreditProductTest extends AnyFlatSpec with Matchers {
-
-  private val Dev = Stage("DEV")
-  private val Code = Stage("CODE")
 
   "forStage" should "give correct credit product for a GW subscription" in {
     val subscription = Fixtures.subscriptionFromJson("GuardianWeeklyWith6For6.json")
