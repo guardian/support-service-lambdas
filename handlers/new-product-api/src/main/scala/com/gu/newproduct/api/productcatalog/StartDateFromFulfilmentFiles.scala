@@ -81,10 +81,11 @@ object StartDateFromFulfilmentFiles extends LazyLogging {
             .leftMap(ex => s"Failed to parse fulfilment file for $productType: $ex")
           wireCatalog <- Either
             .catchNonFatal(parseFulfillmentFile.as[Map[DayOfWeek, FulfilmentDates]])
-            .leftMap(ex => s"Failed to decode fulfilment file $productType: $ex")
+            .left.map(ex => s"Failed to decode fulfilment file $productType: $ex")
           soonestDate = wireCatalog
-            .mapValues(_.newSubscriptionEarliestStartDate)
+            .view.mapValues(_.newSubscriptionEarliestStartDate)
             .collect { case (key, Some(value)) => key -> value }
+            .toMap
         } yield (productType -> soonestDate)
     }.map(_.toMap)
   }

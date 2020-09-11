@@ -53,7 +53,7 @@ class DigitalVoucherNewCardTest extends AnyFlatSpec with Matchers with TripleEqu
       |      }
       |    }
       |  },
-      |  "DataExtensionName" : "SV_VO_NewCard",
+      |  "DataExtensionName" : "SV_SC_BarcodeAccess_Day0_plus_15",
       |  "SfContactId" : "0033E00001CjpYRQAZ",
       |  "IdentityUserId" : "102372126",
       |  "recordId" : "xR9"

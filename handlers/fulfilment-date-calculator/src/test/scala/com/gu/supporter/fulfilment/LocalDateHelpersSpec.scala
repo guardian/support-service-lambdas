@@ -4,6 +4,7 @@ import java.time.LocalDate
 
 import com.gu.supporter.fulfilment.LocalDateHelpers.LocalDateWithWorkingDaySupport
 import org.scalatest.{FlatSpec, Matchers}
+import scala.language.postfixOps
 
 class LocalDateHelpersSpec extends FlatSpec with Matchers with DateSupport {
 

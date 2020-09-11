@@ -12,7 +12,7 @@ object SalesforceMessage {
   // FIXME: What is this?
   case class SalesforceBatchWithExceptions(
     validBatch: SalesforceBatchItems,
-    exceptions: List[Seq[(JsPath, Seq[JsonValidationError])]]
+    exceptions: List[collection.Seq[(JsPath, collection.Seq[JsonValidationError])]] // this is supposed to correspond to play's JsError which uses collection.Seq
   )
   case class SalesforceBatchItems(batch_items: List[SalesforceBatchItem])
   case class SalesforceBatchItem(payload: SalesforcePayload, object_name: String)

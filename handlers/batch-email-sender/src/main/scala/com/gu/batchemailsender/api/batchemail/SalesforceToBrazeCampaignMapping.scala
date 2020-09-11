@@ -20,8 +20,8 @@ object SalesforceToBrazeCampaignMapping {
       case ("Holiday_Stop_Request__c", "create") => "SV_HolidayStopConfirmation"
       case ("Holiday_Stop_Request__c", "amend") => "SV_HolidayStopAmend"
       case ("Holiday_Stop_Request__c", "withdraw") => "SV_HolidayStopWithdrawal"
-      case ("Digital_Voucher__c", "create") => "SV_VO_NewCard"
-      case ("Digital_Voucher__c", "replace") => "SV_VO_ReplacementCard"
+      case ("Digital_Voucher__c", "create") => "SV_SC_BarcodeAccess_Day0_plus_15"
+      case ("Digital_Voucher__c", "replace") => "SV_SC_LostItem"
       case ("Case", "Delivery issues") => "SV_DeliveryProblemConfirmation"
       case ("Contact", "Delivery address change") => "SV_DeliveryAddressChangeConfirmation"
       case (objectName, emailStage) => throw new RuntimeException(s"Unrecognized (object_name, email_stage) = ($objectName, $emailStage). Please fix SF trigger.")

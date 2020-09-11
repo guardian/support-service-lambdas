@@ -3,7 +3,7 @@ package com.gu.deliveryproblemcreditprocessor
 import java.time.{DayOfWeek, LocalDate, LocalDateTime}
 
 import cats.data.EitherT
-import cats.effect.IO
+import cats.effect.{ContextShift, IO}
 import cats.implicits._
 import com.gu.creditprocessor.Processor.CreditProductForSubscription
 import com.gu.creditprocessor.{ProcessResult, Processor}
@@ -24,6 +24,7 @@ import zio.{Task, ZIO}
 
 object DeliveryCreditProcessor extends Logging {
 
+  implicit val cs: ContextShift[IO] = IO.contextShift(scala.concurrent.ExecutionContext.global)
   private val zuoraSttpBackend = HttpURLConnectionBackend()
   private val sfSttpBackend = AsyncHttpClientCatsBackend[cats.effect.IO]()
 
@@ -41,14 +42,15 @@ object DeliveryCreditProcessor extends Logging {
         .apply[HolidayStopProcessorZuoraConfig](ConfigLocation("zuoraRest", 1), HolidayStopProcessorZuoraConfig.reads)
     )
 
-  private def config[A](a: Either[ConfigFailure, A]): Task[A] =
-    Task.effect(a).absolve.mapError {
+  private def config[A](a: Either[ConfigFailure, A]): Task[A] = {
+    ZIO.absolve(Task.effect(a)).mapError {
       case e: ConfigFailure => new RuntimeException(e.error)
       case e: Throwable => e
     }
+  }
 
   private def zuoraAccessToken(config: HolidayStopProcessorZuoraConfig): Task[AccessToken] =
-    Task.effect(Zuora.accessTokenGetResponse(config, zuoraSttpBackend)).absolve.mapError {
+    ZIO.absolve(Task.effect(Zuora.accessTokenGetResponse(config, zuoraSttpBackend))).mapError {
       case e: ZuoraApiFailure => new RuntimeException(e.reason)
       case e: Throwable => e
     }
@@ -77,9 +79,9 @@ object DeliveryCreditProcessor extends Logging {
     } yield results
 
   def processProduct(
-                      sfAuthConfig: SFAuthConfig,
-                      zuoraConfig: HolidayStopProcessorZuoraConfig,
-                      zuoraAccessToken: AccessToken
+    sfAuthConfig: SFAuthConfig,
+    zuoraConfig: HolidayStopProcessorZuoraConfig,
+    zuoraAccessToken: AccessToken
   )(productType: ZuoraProductType): Task[ProcessResult[DeliveryCreditResult]] =
     for {
       processResult <- Task.effect(
@@ -121,17 +123,17 @@ object DeliveryCreditProcessor extends Logging {
   }
 
   def updateToApply(
-     creditProduct: CreditProductForSubscription,
-     subscription: Subscription,
-     account: ZuoraAccount,
-     request: DeliveryCreditRequest
+    creditProduct: CreditProductForSubscription,
+    subscription: Subscription,
+    account: ZuoraAccount,
+    request: DeliveryCreditRequest
   ): ZuoraApiResponse[SubscriptionUpdate] =
     SubscriptionUpdate(
       creditProduct(subscription),
       subscription,
       account,
       AffectedPublicationDate(request.Delivery_Date__c),
-      Some(InvoiceDate(request.Invoice_Date__c))
+      request.Invoice_Date__c.map(InvoiceDate)
     )
 
   def resultOfZuoraCreditAdd(
@@ -141,6 +143,7 @@ object DeliveryCreditProcessor extends Logging {
     deliveryId = request.Id,
     chargeCode = RatePlanChargeCode(addedCharge.number),
     amountCredited = Price(addedCharge.price),
+    invoiceDate = InvoiceDate(addedCharge.effectiveStartDate)
   )
 
   def getCreditRequestsFromSalesforce(sfAuthConfig: SFAuthConfig)(
@@ -161,6 +164,7 @@ object DeliveryCreditProcessor extends Logging {
         }
     }
 
+    // limited to 300 because each record takes ~ 2s to process and lambda has 15 min to run
     def deliveryRecordsQuery(productType: ZuoraProductType) =
       s"""
          |SELECT Id, SF_Subscription__r.Name, Delivery_Date__c, Charge_Code__c, Invoice_Date__c
@@ -169,6 +173,7 @@ object DeliveryCreditProcessor extends Logging {
          |AND Credit_Requested__c = true
          |AND Is_Actioned__c = false
          |ORDER BY SF_Subscription__r.Name, Delivery_Date__c
+         |LIMIT 300
          |""".stripMargin
 
     val results = for {
@@ -191,6 +196,7 @@ object DeliveryCreditProcessor extends Logging {
     Charge_Code__c: String,
     Credit_Amount__c: Double,
     Actioned_On__c: LocalDateTime,
+    Invoice_Date__c: LocalDate
   )
 
   def writeCreditResultsToSalesforce(sfAuthConfig: SFAuthConfig)(
@@ -207,6 +213,7 @@ object DeliveryCreditProcessor extends Logging {
           Charge_Code__c = result.chargeCode.value,
           Credit_Amount__c = result.amountCredited.value,
           Actioned_On__c = LocalDateTime.now,
+          Invoice_Date__c = result.invoiceDate.value
         )
         salesforceClient.patch(
           deliveryObject,

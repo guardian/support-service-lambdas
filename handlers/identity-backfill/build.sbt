@@ -5,8 +5,6 @@ import Dependencies._
 name := "identity-backfill"
 description:= "links subscriptions with identity accounts"
 
-scalacOptions += "-Ypartial-unification"
-
 assemblyJarName := "identity-backfill.jar"
 riffRaffPackageType := assembly.value
 riffRaffUploadArtifactBucket := Option("riffraff-artifact")
@@ -15,7 +13,7 @@ riffRaffManifestProjectName := "MemSub::Membership Admin::Identity Backfill"
 riffRaffArtifactResources += (file("handlers/identity-backfill/cfn.yaml"), "cfn/cfn.yaml")
 
 libraryDependencies ++= Seq(
-  "com.gu" %% "support-internationalisation" % "0.9"
+  supportInternationalisation
 )
 
 assemblyMergeStrategyDiscardModuleInfo
