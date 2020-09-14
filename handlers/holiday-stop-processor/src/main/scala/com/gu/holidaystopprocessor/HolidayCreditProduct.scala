@@ -6,9 +6,9 @@ import com.gu.zuora.subscription.{CreditProduct, RatePlan}
 
 /**
  * Same Discount holiday stop product is reused for all products, namely:
- *   'DO NOT USE MANUALLY: Holiday Credit - automated'
+ * 'DO NOT USE MANUALLY: Holiday Credit - automated'
  *
- *   https://www.zuora.com/apps/Product.do?method=view&id=2c92a0ff5345f9200153559c6d2a3385#ST_DO%20NOT%20USE%20MANUALLY:%20Holiday%20Credit%20-%20automated
+ * https://www.zuora.com/apps/Product.do?method=view&id=2c92a0ff5345f9200153559c6d2a3385#ST_DO%20NOT%20USE%20MANUALLY:%20Holiday%20Credit%20-%20automated
  */
 object HolidayCreditProduct {
 
@@ -80,6 +80,7 @@ object HolidayCreditProduct {
   def forStage(stage: Stage): CreditProductForSubscription = {
 
     def creditProduct(stage: Stage)(plan: RatePlan): Option[CreditProduct] = (stage, plan.productName) match {
+      case (Stage.Prod, _) => Some(HolidayCreditProduct.Prod)
       case (Stage.Code, s"Guardian Weekly$_") => Some(HolidayCreditProduct.Code.GuardianWeekly)
       case (Stage.Code, "Newspaper Delivery") => Some(HolidayCreditProduct.Code.HomeDelivery)
       case (Stage.Code, "Newspaper Voucher" | "Newspaper Digital Voucher") => Some(HolidayCreditProduct.Code.Voucher)
@@ -89,18 +90,15 @@ object HolidayCreditProduct {
       case _ => None
     }
 
-    stage match {
-      case Stage.Prod => _ => HolidayCreditProduct.Prod
-      case other => subscription =>
-        subscription
-          .ratePlans
-          .flatMap(creditProduct(other))
-          .headOption
-          .getOrElse(
-            throw new IllegalArgumentException(
-              s"No holiday credit product available for subscription ${subscription.subscriptionNumber}"
-            )
+    subscription =>
+      subscription
+        .ratePlans
+        .flatMap(creditProduct(stage))
+        .headOption
+        .getOrElse(
+          throw new IllegalArgumentException(
+            s"No holiday credit product available for subscription ${subscription.subscriptionNumber}"
           )
-    }
+        )
   }
 }

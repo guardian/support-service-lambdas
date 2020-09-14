@@ -38,24 +38,22 @@ object DeliveryCreditProduct {
   def forStage(stage: Stage): CreditProductForSubscription = {
 
     def creditProduct(stage: Stage)(plan: RatePlan): Option[CreditProduct] = (stage, plan.productName) match {
+      case (Stage.Prod, _) => Some(DeliveryCreditProduct.Prod)
+      case (Stage.Code, _) => Some(DeliveryCreditProduct.Code)
       case (_, s"Guardian Weekly$_") => Some(DeliveryCreditProduct.Dev.GuardianWeekly)
       case (_, "Newspaper Delivery") => Some(DeliveryCreditProduct.Dev.HomeDelivery)
       case _ => None
     }
 
-    stage match {
-      case Stage.Prod => _ => DeliveryCreditProduct.Prod
-      case Stage.Code => _ => DeliveryCreditProduct.Code
-      case other => subscription =>
-        subscription
-          .ratePlans
-          .flatMap(creditProduct(other))
-          .headOption
-          .getOrElse(
-            throw new IllegalArgumentException(
-              s"No delivery credit product available for subscription ${subscription.subscriptionNumber}"
-            )
+    subscription =>
+      subscription
+        .ratePlans
+        .flatMap(creditProduct(stage))
+        .headOption
+        .getOrElse(
+          throw new IllegalArgumentException(
+            s"No delivery credit product available for subscription ${subscription.subscriptionNumber}"
           )
-    }
+        )
   }
 }

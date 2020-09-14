@@ -1,6 +1,6 @@
 package com.gu.deliveryproblemcreditprocessor
 
-import com.gu.util.config.Stage.Dev
+import com.gu.util.config.Stage.{Code, Dev, Prod}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -9,11 +9,15 @@ class DeliveryCreditProductTest extends AnyFlatSpec with Matchers {
   "forStage" should "give correct credit product for a GW subscription" in {
     val subscription = Fixtures.subscriptionFromJson("GuardianWeeklyWith6For6.json")
     DeliveryCreditProduct.forStage(Dev)(subscription) shouldBe DeliveryCreditProduct.Dev.GuardianWeekly
+    DeliveryCreditProduct.forStage(Code)(subscription) shouldBe DeliveryCreditProduct.Code
+    DeliveryCreditProduct.forStage(Prod)(subscription) shouldBe DeliveryCreditProduct.Prod
   }
 
   it should "give correct credit product for a Home Delivery subscription" in {
     val subscription = Fixtures.subscriptionFromJson("EchoLegacySubscription.json")
     DeliveryCreditProduct.forStage(Dev)(subscription) shouldBe DeliveryCreditProduct.Dev.HomeDelivery
+    DeliveryCreditProduct.forStage(Code)(subscription) shouldBe DeliveryCreditProduct.Code
+    DeliveryCreditProduct.forStage(Prod)(subscription) shouldBe DeliveryCreditProduct.Prod
   }
 
   it should "throw an exception when subscription has no applicable rate plan" in {
