@@ -113,7 +113,7 @@ Resources:
   DeliveryProblemCreditProcessorScheduleRule:
     Type: AWS::Events::Rule
     Properties:
-      Description: Trigger processing of delivery-problem credits every hour (to give 24 attempts a day)
+      Description: Trigger processing of delivery-problem credits every 20 mins
       Name: !FindInMap [StageMap, !Ref Stage, ScheduleName]
       ScheduleExpression: "cron(0/20 * ? * * *)"
       State: ENABLED

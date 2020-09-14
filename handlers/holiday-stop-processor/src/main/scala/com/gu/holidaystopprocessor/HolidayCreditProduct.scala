@@ -6,9 +6,9 @@ import com.gu.zuora.subscription.{CreditProduct, RatePlan}
 
 /**
  * Same Discount holiday stop product is reused for all products, namely:
- *   'DO NOT USE MANUALLY: Holiday Credit - automated'
+ * 'DO NOT USE MANUALLY: Holiday Credit - automated'
  *
- *   https://www.zuora.com/apps/Product.do?method=view&id=2c92a0ff5345f9200153559c6d2a3385#ST_DO%20NOT%20USE%20MANUALLY:%20Holiday%20Credit%20-%20automated
+ * https://www.zuora.com/apps/Product.do?method=view&id=2c92a0ff5345f9200153559c6d2a3385#ST_DO%20NOT%20USE%20MANUALLY:%20Holiday%20Credit%20-%20automated
  */
 object HolidayCreditProduct {
 
@@ -79,22 +79,26 @@ object HolidayCreditProduct {
    */
   def forStage(stage: Stage): CreditProductForSubscription = {
 
-    def isGuardianWeekly(plan: RatePlan) = plan.productName.startsWith("Guardian Weekly")
-    def isHomeDelivery(plan: RatePlan) = plan.productName == "Newspaper Delivery"
-    def isVoucher(plan: RatePlan) = plan.productName == "Newspaper Voucher" || plan.productName == "Newspaper Digital Voucher"
-
-    stage match {
-      case Stage("PROD") => _ => HolidayCreditProduct.Prod
-      case Stage("CODE") => subscription =>
-        if (subscription.ratePlans.exists(isGuardianWeekly)) HolidayCreditProduct.Code.GuardianWeekly
-        else if (subscription.ratePlans.exists(isHomeDelivery)) HolidayCreditProduct.Code.HomeDelivery
-        else if (subscription.ratePlans.exists(isVoucher)) HolidayCreditProduct.Code.Voucher
-        else throw new IllegalArgumentException(s"No holiday credit product available for subscription ${subscription.subscriptionNumber}")
-      case _ => subscription =>
-        if (subscription.ratePlans.exists(isGuardianWeekly)) HolidayCreditProduct.Dev.GuardianWeekly
-        else if (subscription.ratePlans.exists(isHomeDelivery)) HolidayCreditProduct.Dev.HomeDelivery
-        else if (subscription.ratePlans.exists(isVoucher)) HolidayCreditProduct.Dev.Voucher
-        else throw new IllegalArgumentException(s"No holiday credit product available for subscription ${subscription.subscriptionNumber}")
+    def creditProduct(stage: Stage)(plan: RatePlan): Option[CreditProduct] = (stage, plan.productName) match {
+      case (Stage.Prod, _) => Some(HolidayCreditProduct.Prod)
+      case (Stage.Code, s"Guardian Weekly$_") => Some(HolidayCreditProduct.Code.GuardianWeekly)
+      case (Stage.Code, "Newspaper Delivery") => Some(HolidayCreditProduct.Code.HomeDelivery)
+      case (Stage.Code, "Newspaper Voucher" | "Newspaper Digital Voucher") => Some(HolidayCreditProduct.Code.Voucher)
+      case (_, s"Guardian Weekly$_") => Some(HolidayCreditProduct.Dev.GuardianWeekly)
+      case (_, "Newspaper Delivery") => Some(HolidayCreditProduct.Dev.HomeDelivery)
+      case (_, "Newspaper Voucher" | "Newspaper Digital Voucher") => Some(HolidayCreditProduct.Dev.Voucher)
+      case _ => None
     }
+
+    subscription =>
+      subscription
+        .ratePlans
+        .flatMap(creditProduct(stage))
+        .headOption
+        .getOrElse(
+          throw new IllegalArgumentException(
+            s"No holiday credit product available for subscription ${subscription.subscriptionNumber}"
+          )
+        )
   }
 }
