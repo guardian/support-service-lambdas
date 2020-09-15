@@ -29,7 +29,7 @@ Resources:
       Handler: com.gu.cleaner.Handler::handleRequest
       CodeUri:
         Bucket: support-service-lambdas-dist
-        Key: !Sub support/${Stage}/dev-env-cleaner/lambda.jar
+        Key: !Sub membership/${Stage}/dev-env-cleaner/lambda.jar
       MemorySize: 2048
       Runtime: java8
       Timeout: 300
