@@ -10,7 +10,7 @@ deployments:
     parameters:
       templatePath: cfn.yaml
 
-  lambda:
+  dev-env-cleaner:
     type: aws-lambda
     parameters:
       fileName: lambda.jar
