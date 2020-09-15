@@ -7,14 +7,15 @@ import io.circe.syntax._
 import scalaj.http._
 
 object BillingAccountRemover extends App {
+  //Salesforce
   case class SfAuthDetails(access_token: String, instance_url: String)
 
-  //Salesforce
   case class SfGetBillingAccsResponse(
     done: Boolean,
     records: Seq[BillingAccountsRecords.Records],
     nextRecordsUrl: Option[String] = None
   )
+
   case class SfGetCustomSettingResponse(
     done: Boolean,
     records: Seq[CustomSettingRecords.Records]
@@ -27,6 +28,7 @@ object BillingAccountRemover extends App {
                                       attributes: Attributes = Attributes(
                                         `type` = "Zuora__CustomerAccount__c"
                                       ))
+
   case class SfBillingAccountsToUpdate(allOrNone: Boolean,
                                        records: Seq[SfBillingAccountToUpdate])
 
@@ -36,6 +38,7 @@ object BillingAccountRemover extends App {
                                    attributes: Attributes = Attributes(
                                      `type` = "Apex_Error__c"
                                    ))
+
   case class SfErrorRecordsToCreate(allOrNone: Boolean,
                                     records: Seq[SfErrorRecordToCreate])
 
@@ -73,12 +76,13 @@ object BillingAccountRemover extends App {
     )
 
   var counter: Int = 0;
-  processPage()
 
-  def processPage(): Unit = {
+  processBillingAccounts()
+
+  def processBillingAccounts(): Unit = {
     val t1 = System.nanoTime
 
-    val iteration = for {
+    for {
       config <- optConfig map (c => Right(c)) getOrElse Left(
         new RuntimeException("Missing config value")
       )
@@ -95,7 +99,6 @@ object BillingAccountRemover extends App {
 
     val duration = (System.nanoTime - t1) / 1e9d
     println("Elapsed time: " + duration + "s")
-    println("maxAttempts: " + iteration)
 
   }
 
