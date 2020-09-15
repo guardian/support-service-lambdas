@@ -37,7 +37,7 @@ object GetJobResult {
     }
   }
 
-  val pendingValues = List("pending", "executing")
+  val pendingValues = List("submitted", "pending", "executing") // https://knowledgecenter.zuora.com/Central_Platform/API/AB_Aggregate_Query_API/C_Get_Job_ID
 }
 
 case class JobResultRequest(jobId: String, dryRun: Boolean, tries: Option[Int])
