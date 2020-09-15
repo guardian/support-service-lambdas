@@ -10,15 +10,16 @@ object BillingAccountRemover extends App {
   case class SfAuthDetails(access_token: String, instance_url: String)
 
   //Salesforce
-  case class SfGetBillingAccsResponse(done: Boolean,
-                                      records: Seq[Records],
-                                      nextRecordsUrl: Option[String] = None)
-  case class Records(Id: String,
-                     Zuora__Account__c: String,
-                     Zuora__External_Id__c: String,
-                     GDPR_Removal_Attempts__c: Int,
-                     ErrorMessage: Option[String] = None,
-                     ErrorCode: Option[String] = None)
+  case class SfGetBillingAccsResponse(
+    done: Boolean,
+    records: Seq[BillingAccountsRecords.Records],
+    nextRecordsUrl: Option[String] = None
+  )
+  case class SfGetCustomSettingResponse(
+    done: Boolean,
+    records: Seq[CustomSettingRecords.Records]
+  )
+
   case class Attributes(`type`: String)
 
   case class SfBillingAccountToUpdate(id: String,
@@ -71,41 +72,40 @@ object BillingAccountRemover extends App {
       )
     )
 
-  val limit = 200;
-  val query =
-    s"Select Id, Zuora__Account__c, GDPR_Removal_Attempts__c, Zuora__External_Id__c from Zuora__CustomerAccount__c where Active_Subs__c > 0 and Zuora__External_Id__c != null limit $limit"
   var counter: Int = 0;
-  processPage(query)
+  processPage()
 
-  def processPage(query: String): Unit = {
+  def processPage(): Unit = {
     val t1 = System.nanoTime
-
-    println("process records with query:" + query)
 
     val iteration = for {
       config <- optConfig map (c => Right(c)) getOrElse Left(
         new RuntimeException("Missing config value")
       )
       token <- authToken(config.salesforceConfig)
-      getBillingAccountsResponse <- getSfBillingAccounts(query, token)
+      getCustomSettingResponse <- getSfCustomSetting(token)
+      maxAttempts = getCustomSettingResponse.records(0).Property_Value__c
+      getBillingAccountsResponse <- getSfBillingAccounts(maxAttempts, token)
       sfRecords = getBillingAccountsResponse.records
 
       failedUpdates = updateRecordsInZuora(sfRecords)
       _ <- updateBillingAccountsInSf(token, failedUpdates)
       _ <- insertErrorRecordsInSf(token, failedUpdates)
-    } yield getBillingAccountsResponse
+    } yield maxAttempts
 
     val duration = (System.nanoTime - t1) / 1e9d
     println("Elapsed time: " + duration + "s")
+    println("maxAttempts: " + iteration)
 
   }
 
   def getSfBillingAccounts(
-    query: String,
+    maxAttempts: Int,
     bearerToken: String
   ): Either[Error, SfGetBillingAccsResponse] = {
 
-    val billingAccountListFromSf = getBillingAccountsFromSf(query, bearerToken)
+    val billingAccountListFromSf =
+      getBillingAccountsFromSf(maxAttempts: Int, bearerToken)
     println("billingAccountListFromSf: " + billingAccountListFromSf)
     val decodedBillingAccounts = decode[SfGetBillingAccsResponse](
       billingAccountListFromSf
@@ -115,8 +115,25 @@ object BillingAccountRemover extends App {
 
     decodedBillingAccounts
   }
+  def getSfCustomSetting(
+    bearerToken: String
+  ): Either[Error, SfGetCustomSettingResponse] = {
 
-  def updateRecordsInZuora(recordsForUpdate: Seq[Records]): Seq[Records] = {
+    val customSettingFromSf =
+      getMaxAttemptsCustomSetting(bearerToken)
+    println("customSettingFromSf: " + customSettingFromSf)
+    val decodedCustomSetting = decode[SfGetCustomSettingResponse](
+      customSettingFromSf
+    ) map { customSettingObject =>
+      customSettingObject
+    }
+
+    decodedCustomSetting
+  }
+
+  def updateRecordsInZuora(
+    recordsForUpdate: Seq[BillingAccountsRecords.Records]
+  ): Seq[BillingAccountsRecords.Records] = {
 
     for {
       billingAccount <- recordsForUpdate
@@ -127,7 +144,7 @@ object BillingAccountRemover extends App {
 
   def updateBillingAccountsInSf(
     bearerToken: String,
-    recordsToUpdate: Seq[Records]
+    recordsToUpdate: Seq[BillingAccountsRecords.Records]
   ): Either[Throwable, String] = {
 
     val sfBillingAccUpdateJson = SfUpdateBillingAccounts(recordsToUpdate).asJson.spaces2
@@ -137,7 +154,7 @@ object BillingAccountRemover extends App {
 
   def insertErrorRecordsInSf(
     bearerToken: String,
-    recordsToUpdate: Seq[Records]
+    recordsToUpdate: Seq[BillingAccountsRecords.Records]
   ): Either[Throwable, String] = {
 
     val sfErrorRecordInsertJson = SfCreateErrorRecords(recordsToUpdate).asJson.spaces2
@@ -145,7 +162,9 @@ object BillingAccountRemover extends App {
 
   }
 
-  def updateBillingAccountInZuora(accountToDelete: Records): Option[Records] = {
+  def updateBillingAccountInZuora(
+    accountToDelete: BillingAccountsRecords.Records
+  ): Option[BillingAccountsRecords.Records] = {
     counter = counter + 1
     val response =
       updateZuoraBillingAcc(
@@ -230,13 +249,33 @@ object BillingAccountRemover extends App {
 
   def parseBillingAccountsFromSf(
     billingAccountList: String
-  ): Either[Exception, Seq[Records]] =
+  ): Either[Exception, Seq[BillingAccountsRecords.Records]] =
     decode[SfGetBillingAccsResponse](billingAccountList) map {
       billingAccountsObject =>
         billingAccountsObject.records
     }
 
-  def getBillingAccountsFromSf(query: String, bearerToken: String): String = {
+  def getBillingAccountsFromSf(maxAttempts: Int,
+                               bearerToken: String): String = {
+    val limit = 1;
+    val query =
+      s"Select Id, Zuora__Account__c, GDPR_Removal_Attempts__c, Zuora__External_Id__c from Zuora__CustomerAccount__c where Active_Subs__c > 0 and Zuora__External_Id__c != null and GDPR_Removal_Attempts__c < $maxAttempts limit $limit"
+
+    println("query:" + query)
+    Http(
+      s"https://gnmtouchpoint--dev.my.salesforce.com/services/data/v20.0/query/"
+    ).param("q", query)
+      .option(HttpOptions.readTimeout(30000))
+      .header("Authorization", s"Bearer $bearerToken")
+      .method("GET")
+      .asString
+      .body
+  }
+
+  def getMaxAttemptsCustomSetting(bearerToken: String): String = {
+
+    val query: String =
+      "Select Id, Property_Value__c from Touch_Point_List_Property__c where name = 'Max Billing Acc GDPR Removal Attempts'"
     Http(
       s"https://gnmtouchpoint--dev.my.salesforce.com/services/data/v20.0/query/"
     ).param("q", query)
@@ -270,7 +309,9 @@ object BillingAccountRemover extends App {
     }
 
   object SfUpdateBillingAccounts {
-    def apply(recordList: Seq[Records]): SfBillingAccountsToUpdate = {
+    def apply(
+      recordList: Seq[BillingAccountsRecords.Records]
+    ): SfBillingAccountsToUpdate = {
 
       val recordListWithincrementedGDPRAttempts =
         recordList.map(
@@ -286,7 +327,9 @@ object BillingAccountRemover extends App {
   }
 
   object SfCreateErrorRecords {
-    def apply(recordList: Seq[Records]): SfErrorRecordsToCreate = {
+    def apply(
+      recordList: Seq[BillingAccountsRecords.Records]
+    ): SfErrorRecordsToCreate = {
 
       val sfErrorRecords = recordList
         .map(
