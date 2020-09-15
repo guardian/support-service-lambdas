@@ -10,7 +10,7 @@ import com.gu.holiday_stops.Config
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail.HolidayStopRequestsDetail
 import com.gu.util.config.Stage
 import com.gu.zuora.Zuora
-import com.gu.zuora.ZuoraProductTypes.{GuardianWeekly, NewspaperHomeDelivery, NewspaperVoucherBook}
+import com.gu.zuora.ZuoraProductTypes._
 import com.gu.zuora.subscription.{OverallFailure, Subscription, SubscriptionUpdate, ZuoraAccount}
 import com.softwaremill.sttp.{Id, SttpBackend}
 
@@ -34,6 +34,7 @@ object HolidayStopCreditProcessor {
         List(
           NewspaperHomeDelivery,
           NewspaperVoucherBook,
+          NewspaperDigitalVoucher,
           GuardianWeekly,
         )
         .map { productType => {
