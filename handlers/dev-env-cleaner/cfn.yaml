@@ -12,6 +12,10 @@ Parameters:
     Default: CODE
 
 Mappings:
+  Stages:
+    Schedule:
+      CODE: 'rate(365 days)'
+      PROD: 'rate(1 day)'
   Constants:
     Alarm:
       Process: See the wiki at https://github.com/guardian/support-frontend/wiki/Automated-IT-Tests
@@ -40,7 +44,7 @@ Resources:
         RerunTests:
           Type: Schedule
           Properties:
-            Schedule: 'rate(1 day)'
+            Schedule: !FindInMap [ Stages, Schedule, !Ref Stage ]
             Description: clean zuora dev regularly so that space in SF is cleaned up
       EventInvokeConfig:
         MaximumRetryAttempts: 0
@@ -57,7 +61,7 @@ Resources:
             - Effect: Allow
               Action: s3:GetObject
               Resource:
-                - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/zuoraRest-${Stage}.*.json
+                - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/DEV/zuoraRest-DEV.json
         - Statement:
             - Effect: Allow
               Action: cloudwatch:PutMetricData

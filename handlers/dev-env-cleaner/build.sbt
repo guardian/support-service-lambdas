@@ -11,3 +11,7 @@ riffRaffManifestProjectName := "MemSub::Membership Admin::DEV Env Cleaner"
 riffRaffArtifactResources += (file("handlers/dev-env-cleaner/cfn.yaml"), "cfn/cfn.yaml")
 
 assemblyMergeStrategyDiscardModuleInfo
+
+libraryDependencies ++= Seq(
+  "com.amazonaws" % "aws-java-sdk-cloudwatch" % awsVersion,
+)

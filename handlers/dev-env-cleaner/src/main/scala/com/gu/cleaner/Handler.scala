@@ -5,6 +5,8 @@ import java.time.LocalDate
 
 import cats.implicits._
 import com.amazonaws.services.lambda.runtime.{ClientContext, CognitoIdentity, Context, LambdaLogger}
+import com.gu.aws.AwsCloudWatch
+import com.gu.aws.AwsCloudWatch.{MetricDimensionName, MetricDimensionValue, MetricName, MetricNamespace, MetricRequest}
 import com.gu.cleaner.CancelAccount.CancelAccountRequest
 import com.gu.cleaner.CancelSub._
 import com.gu.effects.{GetFromS3, RawEffects}
@@ -52,7 +54,8 @@ object Handler {
 
           override def log(message: Array[Byte]): Unit = ???
         }
-      })
+      }
+    )
     println("main: FINISHED!")
   }
 
@@ -68,25 +71,40 @@ object Handler {
     val loadConfig = LoadConfigModule(stageForZuora, GetFromS3.fetchString)
     val response = RawEffects.response
     val downloadResponse = RawEffects.downloadResponse
+    val stage = RawEffects.stage
     val maybeSuccess = for {
       zuoraRestConfig <- loadConfig[ZuoraRestConfig]
       requests = ZuoraRestRequestMaker(response, zuoraRestConfig)
       cancelSub = CancelSub(log, requests)
       cancelAccount = CancelAccount(log, requests)
       downloadRequests = ZuoraAquaRequestMaker(downloadResponse, zuoraRestConfig)
-      //      zuoraQuerier = ZuoraQuery(requests)
       aquaQuerier = Querier.lowLevel(downloadRequests) _
       getJobResult = GetJobResult(downloadRequests.get[AquaJobResponse]) _
-      //      zuoraHelper = ZuoraSarService(requests, downloadRequests, zuoraQuerier)
       _ <- new Steps(log).steps(aquaQuerier, getJobResult, downloadRequests, cancelSub, cancelAccount, () => RawEffects.now().toLocalDate)
     } yield ()
-    maybeSuccess.toTry.get
+    val _ = maybeSuccess.toTry.get // throws exception if something failed
     log("finished successfully - sending metric!")
-    putMetric()
+    putMetric(stage)
   }
 
-  def putMetric(): Unit = {
-    //TODO
+  /*
+  Namespace: support-service-lambdas
+              MetricName: cleanup-succeeded
+              Dimensions:
+                - Name: Stage
+                  Value: !Ref Stage
+                - Name: app
+                  Value: dev-env-cleaner
+   */
+  def putMetric(stage: Stage): Unit = {
+    AwsCloudWatch.metricPut(MetricRequest(
+      MetricNamespace("support-service-lambdas"),
+      MetricName("cleanup-succeeded"),
+      Map(
+        MetricDimensionName("Stage") -> MetricDimensionValue(stage.value),
+        MetricDimensionName("app") -> MetricDimensionValue("dev-env-cleaner")
+      )
+    ))
   }
 
 }
@@ -185,7 +203,7 @@ object CancelSub {
 case class CancelSub(log: String => Unit, restRequestMaker: RestRequestMaker.Requests) {
   def run(subId: String, dateToCancel: LocalDate): ClientFailableOp[Unit] = {
     println(s"CANCEL SUB: $subId as of date $dateToCancel")
-        restRequestMaker.put[CancelRequest, Unit](CancelRequest(dateToCancel), s"subscriptions/$subId/cancel")
+    restRequestMaker.put[CancelRequest, Unit](CancelRequest(dateToCancel), s"subscriptions/$subId/cancel")
   }
 
 }
@@ -207,7 +225,7 @@ object CancelAccount {
 case class CancelAccount(log: String => Unit, restRequestMaker: RestRequestMaker.Requests) {
   def run(accountId: String): ClientFailableOp[Unit] = {
     println(s"CANCEL ACC: $accountId")
-        restRequestMaker.put[CancelAccountRequest, Unit](CancelAccountRequest(), s"object/account/$accountId")
+    restRequestMaker.put[CancelAccountRequest, Unit](CancelAccountRequest(), s"object/account/$accountId")
   }
 
 }
