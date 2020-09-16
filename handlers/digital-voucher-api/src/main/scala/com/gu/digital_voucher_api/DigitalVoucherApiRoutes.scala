@@ -38,7 +38,7 @@ object DigitalVoucherApiRoutes {
     object http4sDsl extends Http4sDsl[F]
     import http4sDsl._
 
-    def parseRequest[A: Decoder](request: Request[F]) = {
+    def parseRequest[A: Decoder](request: Request[F]): EitherT[F, F[Response[F]], A] = {
       implicit val showDecodeFailure = Show.show[DecodeFailure] {
         case InvalidMessageBodyFailure(details, cause) => s"InvalidMessageBodyFailure($details, $cause)"
         case MalformedMessageBodyFailure(details, cause) => s"MalformedMessageBodyFailure($details, $cause)"
@@ -52,7 +52,7 @@ object DigitalVoucherApiRoutes {
         }
     }
 
-    def handleCreateRequest(request: Request[F], subscriptionId: SfSubscriptionId) = {
+    def handleCreateRequest(request: Request[F], subscriptionId: SfSubscriptionId): F[Response[F]] = {
       (for {
         requestBody <- parseRequest[CreateVoucherRequestBody](request)
         voucher <- digitalVoucherService
@@ -69,7 +69,7 @@ object DigitalVoucherApiRoutes {
       } yield Created(voucher)).merge.flatten
     }
 
-    def handleReplaceRequest(request: Request[F]) = {
+    def handleReplaceRequest(request: Request[F]): F[Response[F]] = {
       (for {
         requestBody <- parseRequest[SubscriptionActionRequestBody](request)
         subscriptionId <- requestBody.subscriptionId
@@ -91,7 +91,7 @@ object DigitalVoucherApiRoutes {
       } yield Ok(replacementVoucher)).merge.flatten
     }
 
-    def handleGetRequest(subscriptionId: String) = {
+    def handleGetRequest(subscriptionId: String): F[Response[F]] = {
       digitalVoucherService
         .getVoucher(subscriptionId)
         .bimap(
@@ -100,7 +100,7 @@ object DigitalVoucherApiRoutes {
         ).merge.flatten
     }
 
-    def handleCancelRequest(request: Request[F]) = {
+    def handleCancelRequest(request: Request[F]): F[Response[F]] = {
       (for {
         requestBody <- parseRequest[CancelSubscriptionVoucherRequestBody](request)
         result <- digitalVoucherService
