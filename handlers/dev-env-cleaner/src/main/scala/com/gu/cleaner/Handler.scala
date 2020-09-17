@@ -4,9 +4,9 @@ import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream, Output
 import java.time.LocalDate
 
 import cats.implicits._
-import com.amazonaws.services.lambda.runtime.{ClientContext, CognitoIdentity, Context, LambdaLogger}
+import com.amazonaws.services.lambda.runtime._
 import com.gu.aws.AwsCloudWatch
-import com.gu.aws.AwsCloudWatch.{MetricDimensionName, MetricDimensionValue, MetricName, MetricNamespace, MetricRequest}
+import com.gu.aws.AwsCloudWatch._
 import com.gu.cleaner.CancelAccount.CancelAccountRequest
 import com.gu.cleaner.CancelSub._
 import com.gu.effects.{GetFromS3, RawEffects}
@@ -22,7 +22,7 @@ import play.api.libs.json.{JsSuccess, Json, Reads}
 import scala.annotation.tailrec
 import scala.io.Source
 
-object Handler {
+object Handler extends RequestStreamHandler {
 
   def main(args: Array[String]): Unit = {
     println("main: STARTING!")
@@ -59,6 +59,7 @@ object Handler {
     println("main: FINISHED!")
   }
 
+  //referenced in cloudformation, change with care
   def handleRequest(
     input: InputStream,
     output: OutputStream,
