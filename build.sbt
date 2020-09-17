@@ -281,6 +281,11 @@ lazy val `zuora-sar` = all(project in file("handlers/zuora-sar"))
   .enablePlugins(RiffRaffArtifact)
   .dependsOn(`zuora-reports`, handler, effectsDepIncludingTestFolder, testDep, `effects-s3`, `effects-lambda`)
 
+lazy val `dev-env-cleaner` = all(project in file("handlers/dev-env-cleaner"))
+  .settings(libraryDependencies ++= Seq(catsEffect, circeParser, circe, awsStepFunction))
+  .enablePlugins(RiffRaffArtifact)
+  .dependsOn(`zuora-reports`, handler, effectsDepIncludingTestFolder, testDep, `effects-s3`, `effects-lambda`)
+
 lazy val `sf-contact-merge` = all(project in file("handlers/sf-contact-merge"))
   .enablePlugins(RiffRaffArtifact)
   .dependsOn(zuora, `salesforce-client` % "compile->compile;test->test", handler, effectsDepIncludingTestFolder, testDep)
