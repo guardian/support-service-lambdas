@@ -75,8 +75,6 @@ object BillingAccountRemover extends App {
       )
     )
 
-  var counter: Int = 0;
-
   processBillingAccounts()
 
   def processBillingAccounts(): Unit = {
@@ -100,7 +98,7 @@ object BillingAccountRemover extends App {
         updateBillingAccountsInSf(sfAuthDetails, failedUpdates)
         insertErrorRecordsInSf(sfAuthDetails, failedUpdates)
       }
-    } yield allUpdates
+    } yield ()
   }
 
   def getSfBillingAccounts(
@@ -168,13 +166,12 @@ object BillingAccountRemover extends App {
   def updateBillingAccountInZuora(
     accountToDelete: BillingAccountsRecords.Records
   ): Option[BillingAccountsRecords.Records] = {
-    counter = counter + 1
+
     val response =
       updateZuoraBillingAcc(
         BillingAccountsForRemoval().asJson.spaces2,
         accountToDelete.Zuora__External_Id__c
       )
-    println(counter + " | response:" + response)
 
     val parsedResponse = decode[ZuoraResponse](response)
 
