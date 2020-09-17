@@ -80,36 +80,36 @@ object BillingAccountRemover extends App {
   processBillingAccounts()
 
   def processBillingAccounts(): Unit = {
-    val t1 = System.nanoTime
-
     for {
       config <- optConfig map (c => Right(c)) getOrElse Left(
         new RuntimeException("Missing config value")
       )
-      token <- authToken(config.salesforceConfig)
-      getCustomSettingResponse <- getSfCustomSetting(token)
+      sfAuthDetails <- SfLogin(config.salesforceConfig)
+      getCustomSettingResponse <- getSfCustomSetting(sfAuthDetails)
       maxAttempts = getCustomSettingResponse.records(0).Property_Value__c
-      getBillingAccountsResponse <- getSfBillingAccounts(maxAttempts, token)
+      getBillingAccountsResponse <- getSfBillingAccounts(
+        maxAttempts,
+        sfAuthDetails
+      )
       sfRecords = getBillingAccountsResponse.records
 
-      failedUpdates = updateRecordsInZuora(sfRecords)
-      _ <- updateBillingAccountsInSf(token, failedUpdates)
-      _ <- insertErrorRecordsInSf(token, failedUpdates)
-    } yield maxAttempts
+      allUpdates = updateRecordsInZuora(sfRecords)
+      failedUpdates = allUpdates.filter(_.ErrorCode.isDefined)
 
-    val duration = (System.nanoTime - t1) / 1e9d
-    println("Elapsed time: " + duration + "s")
-
+      _ = if (failedUpdates.nonEmpty) {
+        updateBillingAccountsInSf(sfAuthDetails, failedUpdates)
+        insertErrorRecordsInSf(sfAuthDetails, failedUpdates)
+      }
+    } yield allUpdates
   }
 
   def getSfBillingAccounts(
     maxAttempts: Int,
-    bearerToken: String
+    sfAuthentication: SfAuthDetails
   ): Either[Error, SfGetBillingAccsResponse] = {
 
     val billingAccountListFromSf =
-      getBillingAccountsFromSf(maxAttempts: Int, bearerToken)
-    println("billingAccountListFromSf: " + billingAccountListFromSf)
+      getBillingAccountsFromSf(maxAttempts: Int, sfAuthentication)
     val decodedBillingAccounts = decode[SfGetBillingAccsResponse](
       billingAccountListFromSf
     ) map { billingAccountsObject =>
@@ -119,12 +119,12 @@ object BillingAccountRemover extends App {
     decodedBillingAccounts
   }
   def getSfCustomSetting(
-    bearerToken: String
+    sfAuthentication: SfAuthDetails
   ): Either[Error, SfGetCustomSettingResponse] = {
 
     val customSettingFromSf =
-      getMaxAttemptsCustomSetting(bearerToken)
-    println("customSettingFromSf: " + customSettingFromSf)
+      getMaxAttemptsCustomSetting(sfAuthentication)
+
     val decodedCustomSetting = decode[SfGetCustomSettingResponse](
       customSettingFromSf
     ) map { customSettingObject =>
@@ -146,22 +146,22 @@ object BillingAccountRemover extends App {
   }
 
   def updateBillingAccountsInSf(
-    bearerToken: String,
+    sfAuthDetails: SfAuthDetails,
     recordsToUpdate: Seq[BillingAccountsRecords.Records]
   ): Either[Throwable, String] = {
 
     val sfBillingAccUpdateJson = SfUpdateBillingAccounts(recordsToUpdate).asJson.spaces2
-    updateSfBillingAccs(bearerToken, sfBillingAccUpdateJson)
+    updateSfBillingAccs(sfAuthDetails, sfBillingAccUpdateJson)
 
   }
 
   def insertErrorRecordsInSf(
-    bearerToken: String,
+    sfAuthDetails: SfAuthDetails,
     recordsToUpdate: Seq[BillingAccountsRecords.Records]
   ): Either[Throwable, String] = {
 
     val sfErrorRecordInsertJson = SfCreateErrorRecords(recordsToUpdate).asJson.spaces2
-    insertSfErrorRecs(bearerToken, sfErrorRecordInsertJson)
+    insertSfErrorRecs(sfAuthDetails, sfErrorRecordInsertJson)
 
   }
 
@@ -175,6 +175,7 @@ object BillingAccountRemover extends App {
         accountToDelete.Zuora__External_Id__c
       )
     println(counter + " | response:" + response)
+
     val parsedResponse = decode[ZuoraResponse](response)
 
     parsedResponse match {
@@ -196,15 +197,15 @@ object BillingAccountRemover extends App {
 
   }
 
-  def insertSfErrorRecs(bearerToken: String,
+  def insertSfErrorRecs(sfAuthDetails: SfAuthDetails,
                         jsonBody: String): Either[Throwable, String] = {
 
     val response =
       try {
         Right(
           Http(
-            "https://gnmtouchpoint--dev.my.salesforce.com/services/data/v45.0/composite/sobjects"
-          ).header("Authorization", s"Bearer $bearerToken")
+            s"${sfAuthDetails.instance_url}/services/data/v45.0/composite/sobjects"
+          ).header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
             .header("Content-Type", "application/json")
             .put(jsonBody)
             .method("POST")
@@ -217,15 +218,15 @@ object BillingAccountRemover extends App {
     response
   }
 
-  def updateSfBillingAccs(bearerToken: String,
+  def updateSfBillingAccs(sfAuthDetails: SfAuthDetails,
                           jsonBody: String): Either[Throwable, String] = {
 
     val response =
       try {
         Right(
           Http(
-            "https://gnmtouchpoint--dev.my.salesforce.com/services/data/v45.0/composite/sobjects"
-          ).header("Authorization", s"Bearer $bearerToken")
+            s"${sfAuthDetails.instance_url}/services/data/v45.0/composite/sobjects"
+          ).header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
             .header("Content-Type", "application/json")
             .put(jsonBody)
             .method("PATCH")
@@ -233,7 +234,7 @@ object BillingAccountRemover extends App {
             .body
         )
       } catch {
-        case ex: Throwable => Left(ex)
+        case ex: Throwable => { Left(ex) }
       }
     response
   }
@@ -243,6 +244,7 @@ object BillingAccountRemover extends App {
     Http(
       s"https://rest.apisandbox.zuora.com/v1/object/account/$zuoraBillingAccountId"
     ).header("apiAccessKeyId", System.getenv("apiAccessKeyId"))
+      .option(HttpOptions.readTimeout(30000))
       .header("apiSecretAccessKey", System.getenv("apiSecretAccessKey"))
       .header("Content-Type", "application/json")
       .put(billingAccountForRemovalAsJson)
@@ -259,31 +261,32 @@ object BillingAccountRemover extends App {
     }
 
   def getBillingAccountsFromSf(maxAttempts: Int,
-                               bearerToken: String): String = {
+                               sfAuthDetails: SfAuthDetails): String = {
     val limit = 1;
-    val query =
-      s"Select Id, Zuora__Account__c, GDPR_Removal_Attempts__c, Zuora__External_Id__c from Zuora__CustomerAccount__c where Active_Subs__c > 0 and Zuora__External_Id__c != null and GDPR_Removal_Attempts__c < $maxAttempts limit $limit"
+    val devQuery =
+      s"Select Id, Zuora__Account__c, GDPR_Removal_Attempts__c, Zuora__External_Id__c from Zuora__CustomerAccount__c where Name like '%Bill-Acc-Remover-ctc%' and createddate>=2020-09-17T09:17:45.000+0000 order by Name limit $limit"
 
-    println("query:" + query)
-    Http(
-      s"https://gnmtouchpoint--dev.my.salesforce.com/services/data/v20.0/query/"
-    ).param("q", query)
+    //val prodQuery =
+    s"Select Id, Zuora__Account__c, GDPR_Removal_Attempts__c, Zuora__External_Id__c from Zuora__CustomerAccount__c where Zuora__External_Id__c != null AND Account.GDPR_Billing_Accounts_Ready_for_Removal__c = true AND GDPR_Removal_Attempts__c < $maxAttempts limit $limit"
+
+    val query = devQuery
+
+    Http(s"${sfAuthDetails.instance_url}/services/data/v20.0/query/")
+      .param("q", query)
       .option(HttpOptions.readTimeout(30000))
-      .header("Authorization", s"Bearer $bearerToken")
+      .header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
       .method("GET")
       .asString
       .body
   }
 
-  def getMaxAttemptsCustomSetting(bearerToken: String): String = {
-
+  def getMaxAttemptsCustomSetting(sfAuthDetails: SfAuthDetails): String = {
     val query: String =
       "Select Id, Property_Value__c from Touch_Point_List_Property__c where name = 'Max Billing Acc GDPR Removal Attempts'"
-    Http(
-      s"https://gnmtouchpoint--dev.my.salesforce.com/services/data/v20.0/query/"
-    ).param("q", query)
+    Http(s"${sfAuthDetails.instance_url}/services/data/v20.0/query/")
+      .param("q", query)
       .option(HttpOptions.readTimeout(30000))
-      .header("Authorization", s"Bearer $bearerToken")
+      .header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
       .method("GET")
       .asString
       .body
@@ -305,9 +308,9 @@ object BillingAccountRemover extends App {
 
   }
 
-  def authToken(salesforceConfig: SalesforceConfig) =
+  def SfLogin(salesforceConfig: SalesforceConfig) =
     decode[SfAuthDetails](auth(salesforceConfig)) match {
-      case Right(responseObject) => Right(responseObject.access_token)
+      case Right(responseObject) => Right(responseObject)
       case Left(ex)              => Left(ex)
     }
 
@@ -333,7 +336,6 @@ object BillingAccountRemover extends App {
     def apply(
       recordList: Seq[BillingAccountsRecords.Records]
     ): SfErrorRecordsToCreate = {
-
       val sfErrorRecords = recordList
         .map(
           a =>
