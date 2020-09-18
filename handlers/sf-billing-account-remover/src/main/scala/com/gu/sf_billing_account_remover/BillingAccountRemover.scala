@@ -98,7 +98,7 @@ object BillingAccountRemover extends App {
     } {
       val sfRecords = getBillingAccountsResponse.records
 
-      val allUpdates = updateRecordsInZuora(sfRecords)
+      val allUpdates = updateRecordsInZuora(config.zuoraConfig, sfRecords)
       val failedUpdates = allUpdates.filter(_.ErrorCode.isDefined)
 
       if (failedUpdates.nonEmpty) {
@@ -128,12 +128,16 @@ object BillingAccountRemover extends App {
   }
 
   def updateRecordsInZuora(
+    zuoraConfig: ZuoraConfig,
     recordsForUpdate: Seq[BillingAccountsRecords.Records]
   ): Seq[BillingAccountsRecords.Records] = {
 
     for {
       billingAccount <- recordsForUpdate
-      zuoraCancellationResponses <- updateBillingAccountInZuora(billingAccount)
+      zuoraCancellationResponses <- updateBillingAccountInZuora(
+        zuoraConfig,
+        billingAccount
+      )
     } yield zuoraCancellationResponses
 
   }
@@ -159,11 +163,13 @@ object BillingAccountRemover extends App {
   }
 
   def updateBillingAccountInZuora(
+    zuoraConfig: ZuoraConfig,
     accountToDelete: BillingAccountsRecords.Records
   ): Option[BillingAccountsRecords.Records] = {
 
     val response =
       updateZuoraBillingAcc(
+        zuoraConfig,
         BillingAccountsForRemoval().asJson.spaces2,
         accountToDelete.Zuora__External_Id__c
       )
@@ -225,14 +231,15 @@ object BillingAccountRemover extends App {
     response
   }
 
-  def updateZuoraBillingAcc(billingAccountForRemovalAsJson: String,
+  def updateZuoraBillingAcc(zuoraConfig: ZuoraConfig,
+                            billingAccountForRemovalAsJson: String,
                             zuoraBillingAccountId: String) = {
     Http(
       s"https://rest.apisandbox.zuora.com/v1/object/account/$zuoraBillingAccountId"
-    ).header("apiAccessKeyId", System.getenv("apiAccessKeyId"))
-      .option(HttpOptions.readTimeout(30000))
-      .header("apiSecretAccessKey", System.getenv("apiSecretAccessKey"))
+    ).header("apiAccessKeyId", zuoraConfig.apiAccessKeyId)
+      .header("apiSecretAccessKey", zuoraConfig.apiSecretAccessKey)
       .header("Content-Type", "application/json")
+      .option(HttpOptions.readTimeout(30000))
       .put(billingAccountForRemovalAsJson)
       .asString
       .body
