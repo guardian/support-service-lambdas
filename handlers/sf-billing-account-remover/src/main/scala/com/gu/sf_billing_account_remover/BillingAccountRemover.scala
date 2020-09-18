@@ -113,15 +113,10 @@ object BillingAccountRemover extends App {
     sfAuthentication: SfAuthDetails
   ): Either[Error, SfGetBillingAccsResponse] = {
 
-    val billingAccountListFromSf =
-      getBillingAccountsFromSf(maxAttempts: Int, sfAuthentication)
-    val decodedBillingAccounts = decode[SfGetBillingAccsResponse](
-      billingAccountListFromSf
-    ) map { billingAccountsObject =>
-      billingAccountsObject
-    }
-
-    decodedBillingAccounts
+    //can we bring this into a one liner and remove the method?
+    decode[SfGetBillingAccsResponse](
+      getBillingAccountsFromSf(maxAttempts, sfAuthentication)
+    )
   }
   def getSfCustomSetting(
     sfAuthentication: SfAuthDetails
