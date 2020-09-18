@@ -60,6 +60,7 @@ object BillingAccountRemover extends App {
 
     zuoraApiAccessKeyId <- Option(System.getenv("apiAccessKeyId"))
     zuoraApiSecretAccessKey <- Option(System.getenv("apiSecretAccessKey"))
+    zuoraInstanceUrl <- Option(System.getenv("zuoraInstanceUrl"))
 
   } yield
     Config(
@@ -73,7 +74,8 @@ object BillingAccountRemover extends App {
       ),
       ZuoraConfig(
         apiAccessKeyId = zuoraApiAccessKeyId,
-        apiSecretAccessKey = zuoraApiSecretAccessKey
+        apiSecretAccessKey = zuoraApiSecretAccessKey,
+        zuoraInstanceUrl = zuoraInstanceUrl
       )
     )
 
@@ -242,7 +244,7 @@ object BillingAccountRemover extends App {
                             billingAccountForRemovalAsJson: String,
                             zuoraBillingAccountId: String) = {
     Http(
-      s"https://rest.apisandbox.zuora.com/v1/object/account/$zuoraBillingAccountId"
+      s"${zuoraConfig.zuoraInstanceUrl}/v1/object/account/$zuoraBillingAccountId"
     ).header("apiAccessKeyId", zuoraConfig.apiAccessKeyId)
       .header("apiSecretAccessKey", zuoraConfig.apiSecretAccessKey)
       .header("Content-Type", "application/json")
