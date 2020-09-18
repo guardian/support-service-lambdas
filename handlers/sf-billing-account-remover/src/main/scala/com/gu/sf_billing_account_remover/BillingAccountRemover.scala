@@ -122,16 +122,9 @@ object BillingAccountRemover extends App {
     sfAuthentication: SfAuthDetails
   ): Either[Error, SfGetCustomSettingResponse] = {
 
-    val customSettingFromSf =
+    decode[SfGetCustomSettingResponse](
       getMaxAttemptsCustomSetting(sfAuthentication)
-    println("customSettingFromSf:" + customSettingFromSf)
-    val decodedCustomSetting = decode[SfGetCustomSettingResponse](
-      customSettingFromSf
-    ) map { customSettingObject =>
-      customSettingObject
-    }
-
-    decodedCustomSetting
+    )
   }
 
   def updateRecordsInZuora(
