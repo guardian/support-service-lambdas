@@ -112,18 +112,25 @@ object BillingAccountRemover extends App {
     maxAttempts: Int,
     sfAuthentication: SfAuthDetails
   ): Either[Error, SfGetBillingAccsResponse] = {
+    val limit = 5;
+    val devQuery =
+      s"Select Id, Zuora__Account__c, GDPR_Removal_Attempts__c, Zuora__External_Id__c from Zuora__CustomerAccount__c where Name like '%Bill-Acc-Remover-ctc%' and createddate>=2020-09-17T09:17:45.000+0000 order by Name limit $limit"
 
+    //val prodQuery =
+    s"Select Id, Zuora__Account__c, GDPR_Removal_Attempts__c, Zuora__External_Id__c from Zuora__CustomerAccount__c where Zuora__External_Id__c != null AND Account.GDPR_Billing_Accounts_Ready_for_Removal__c = true AND GDPR_Removal_Attempts__c < $maxAttempts limit $limit"
+
+    val query = devQuery
     //can we bring this into a one liner and remove the method?
-    decode[SfGetBillingAccsResponse](
-      getBillingAccountsFromSf(maxAttempts, sfAuthentication)
-    )
+    decode[SfGetBillingAccsResponse](doSfGetWithQuery(sfAuthentication, query))
   }
   def getSfCustomSetting(
     sfAuthentication: SfAuthDetails
   ): Either[Error, SfGetCustomSettingResponse] = {
+    val query =
+      "Select Id, Property_Value__c from Touch_Point_List_Property__c where name = 'Max Billing Acc GDPR Removal Attempts'"
 
     decode[SfGetCustomSettingResponse](
-      getMaxAttemptsCustomSetting(sfAuthentication)
+      doSfGetWithQuery(sfAuthentication, query)
     )
   }
 
@@ -253,29 +260,7 @@ object BillingAccountRemover extends App {
         billingAccountsObject.records
     }
 
-  def getBillingAccountsFromSf(maxAttempts: Int,
-                               sfAuthDetails: SfAuthDetails): String = {
-    val limit = 5;
-    val devQuery =
-      s"Select Id, Zuora__Account__c, GDPR_Removal_Attempts__c, Zuora__External_Id__c from Zuora__CustomerAccount__c where Name like '%Bill-Acc-Remover-ctc%' and createddate>=2020-09-17T09:17:45.000+0000 order by Name limit $limit"
-
-    //val prodQuery =
-    s"Select Id, Zuora__Account__c, GDPR_Removal_Attempts__c, Zuora__External_Id__c from Zuora__CustomerAccount__c where Zuora__External_Id__c != null AND Account.GDPR_Billing_Accounts_Ready_for_Removal__c = true AND GDPR_Removal_Attempts__c < $maxAttempts limit $limit"
-
-    val query = devQuery
-
-    Http(s"${sfAuthDetails.instance_url}/services/data/v20.0/query/")
-      .param("q", query)
-      .option(HttpOptions.readTimeout(30000))
-      .header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
-      .method("GET")
-      .asString
-      .body
-  }
-
-  def getMaxAttemptsCustomSetting(sfAuthDetails: SfAuthDetails): String = {
-    val query: String =
-      "Select Id, Property_Value__c from Touch_Point_List_Property__c where name = 'Max Billing Acc GDPR Removal Attempts'"
+  def doSfGetWithQuery(sfAuthDetails: SfAuthDetails, query: String): String = {
     Http(s"${sfAuthDetails.instance_url}/services/data/v20.0/query/")
       .param("q", query)
       .option(HttpOptions.readTimeout(30000))
