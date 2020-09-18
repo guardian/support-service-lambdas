@@ -82,7 +82,7 @@ object BillingAccountRemover extends App {
   processBillingAccounts()
 
   def processBillingAccounts(): Unit = {
-    for {
+    (for {
       config <- optConfig.toRight(new RuntimeException("Missing config value"))
       sfAuthDetails <- decode[SfAuthDetails](auth(config.salesforceConfig))
       getCustomSettingResponse <- getSfCustomSetting(sfAuthDetails)
@@ -97,7 +97,7 @@ object BillingAccountRemover extends App {
         maxAttempts,
         sfAuthDetails
       )
-    } {
+    } yield {
       val sfRecords = getBillingAccountsResponse.records
 
       val allUpdates = updateRecordsInZuora(config.zuoraConfig, sfRecords)
@@ -106,7 +106,7 @@ object BillingAccountRemover extends App {
       if (failedUpdates.nonEmpty) {
         writeErrorsBackToSf(sfAuthDetails, failedUpdates)
       }
-    }
+    }).left.foreach(e => throw e)
   }
 
   def auth(salesforceConfig: SalesforceConfig): String = {
