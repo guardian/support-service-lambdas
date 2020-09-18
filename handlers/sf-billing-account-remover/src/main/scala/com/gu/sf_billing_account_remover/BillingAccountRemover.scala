@@ -113,8 +113,10 @@ object BillingAccountRemover extends App {
     sfAuthDetails: SfAuthDetails,
     failedUpdates: Seq[BillingAccountsRecords.Records]
   ): Unit = {
+
     updateBillingAccountsInSf(sfAuthDetails, failedUpdates)
     insertErrorRecordsInSf(sfAuthDetails, failedUpdates)
+
   }
 
   def updateBillingAccountsInSf(
@@ -123,36 +125,17 @@ object BillingAccountRemover extends App {
   ): Either[Throwable, String] = {
 
     val sfBillingAccUpdateJson = SfUpdateBillingAccounts(recordsToUpdate).asJson.spaces2
-    updateSfBillingAccs(sfAuthDetails, sfBillingAccUpdateJson)
+    doSfCompositeRequest(sfAuthDetails, sfBillingAccUpdateJson, "PATCH")
 
   }
-  def updateSfBillingAccs(sfAuthDetails: SfAuthDetails,
-                          jsonBody: String): Either[Throwable, String] = {
 
-    val response =
-      try {
-        Right(
-          Http(
-            s"${sfAuthDetails.instance_url}/services/data/v45.0/composite/sobjects"
-          ).header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
-            .header("Content-Type", "application/json")
-            .put(jsonBody)
-            .method("PATCH")
-            .asString
-            .body
-        )
-      } catch {
-        case ex: Throwable => { Left(ex) }
-      }
-    response
-  }
   def insertErrorRecordsInSf(
     sfAuthDetails: SfAuthDetails,
     recordsToUpdate: Seq[BillingAccountsRecords.Records]
   ): Either[Throwable, String] = {
 
     val sfErrorRecordInsertJson = SfCreateErrorRecords(recordsToUpdate).asJson.spaces2
-    insertSfErrorRecs(sfAuthDetails, sfErrorRecordInsertJson)
+    doSfCompositeRequest(sfAuthDetails, sfErrorRecordInsertJson, "POST")
 
   }
 
@@ -230,8 +213,9 @@ object BillingAccountRemover extends App {
 
   }
 
-  def insertSfErrorRecs(sfAuthDetails: SfAuthDetails,
-                        jsonBody: String): Either[Throwable, String] = {
+  def doSfCompositeRequest(sfAuthDetails: SfAuthDetails,
+                           jsonBody: String,
+                           requestType: String): Either[Throwable, String] = {
 
     Try {
       Http(
@@ -239,7 +223,7 @@ object BillingAccountRemover extends App {
       ).header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
         .header("Content-Type", "application/json")
         .put(jsonBody)
-        .method("POST")
+        .method(requestType)
         .asString
         .body
     }.toEither
