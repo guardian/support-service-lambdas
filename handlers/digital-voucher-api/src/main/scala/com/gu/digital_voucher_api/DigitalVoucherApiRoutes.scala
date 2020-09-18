@@ -21,6 +21,12 @@ case class CreateVoucherRequestBody(ratePlanName: String)
 
 case class CancelSubscriptionVoucherRequestBody(subscriptionId: String, cancellationDate: LocalDate)
 
+case class SuspendSubscriptionVoucherRequestBody(
+  subscriptionId: Option[String],
+  startDate: Option[LocalDate],
+  endDateExclusive: Option[LocalDate]
+)
+
 case class SubscriptionActionRequestBody(
   subscriptionId: Option[String],
   cardCode: Option[String],
@@ -39,7 +45,7 @@ object DigitalVoucherApiRoutes {
     import http4sDsl._
 
     def parseRequest[A: Decoder](request: Request[F]): EitherT[F, F[Response[F]], A] = {
-      implicit val showDecodeFailure = Show.show[DecodeFailure] {
+      implicit val showDecodeFailure: Show[DecodeFailure] = Show.show[DecodeFailure] {
         case InvalidMessageBodyFailure(details, cause) => s"InvalidMessageBodyFailure($details, $cause)"
         case MalformedMessageBodyFailure(details, cause) => s"MalformedMessageBodyFailure($details, $cause)"
         case error => error.toString
@@ -109,6 +115,31 @@ object DigitalVoucherApiRoutes {
       } yield Ok(result)).merge.flatten
     }
 
+    def handleSuspendRequest(request: Request[F]): F[Response[F]] =
+      (for {
+        requestBody <- parseRequest[SuspendSubscriptionVoucherRequestBody](request)
+        subscriptionId <- requestBody.subscriptionId
+          .toRight(UnprocessableEntity(DigitalVoucherApiRoutesError(s"subscriptionId is required")))
+          .toEitherT[F]
+        startDate <- requestBody.startDate
+          .toRight(UnprocessableEntity(DigitalVoucherApiRoutesError(s"startDate is required")))
+          .toEitherT[F]
+        endDate <- requestBody.endDateExclusive
+          .toRight(UnprocessableEntity(DigitalVoucherApiRoutesError(s"endDateExclusive is required")))
+          .toEitherT[F]
+        result <- digitalVoucherService.suspendVoucher(
+          SfSubscriptionId(subscriptionId),
+          startDate,
+          endDate
+        )
+          .leftMap {
+            case ImovoOperationFailedException(msg) =>
+              BadGateway(DigitalVoucherApiRoutesError(s"Imovo failure to suspend voucher: $msg"))
+            case error =>
+              InternalServerError(DigitalVoucherApiRoutesError(s"Failed to suspend voucher: $error"))
+          }
+      } yield Ok(result)).merge.flatten
+
     def handleRedemptionHistoryRequest(redemptionHistoryRequestBody: RedemptionHistoryRequestBody) = {
       (for {
         result <- digitalVoucherService
@@ -118,9 +149,7 @@ object DigitalVoucherApiRoutes {
     }
 
     HttpRoutes.of[F] {
-      case request @ PUT -> Root / "digital-voucher" / subscriptionId =>
-        handleCreateRequest(request, SfSubscriptionId(subscriptionId))
-      case request @ GET -> Root / "digital-voucher" / "redemption-history" / subscriptionId =>
+      case _@ GET -> Root / "digital-voucher" / "redemption-history" / subscriptionId =>
         handleRedemptionHistoryRequest(RedemptionHistoryRequestBody(subscriptionId))
       case GET -> Root / "digital-voucher" / subscriptionId =>
         handleGetRequest(subscriptionId)
@@ -128,6 +157,10 @@ object DigitalVoucherApiRoutes {
         handleReplaceRequest(request)
       case request @ POST -> Root / "digital-voucher" / "cancel" =>
         handleCancelRequest(request)
+      case request @ PUT -> Root / "digital-voucher" / "suspend" =>
+        handleSuspendRequest(request)
+      case request @ PUT -> Root / "digital-voucher" / subscriptionId =>
+        handleCreateRequest(request, SfSubscriptionId(subscriptionId))
     }
   }
 }

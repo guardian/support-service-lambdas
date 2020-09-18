@@ -7,6 +7,7 @@ import java.time.format.DateTimeFormatter
 import cats.data.EitherT
 import cats.effect.Sync
 import cats.implicits._
+import com.softwaremill.sttp.Method.GET
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
 import com.typesafe.scalalogging.LazyLogging
@@ -74,6 +75,7 @@ trait ImovoClient[F[_]] {
   def getSubscriptionVoucher(voucherCode: String): EitherT[F, ImovoClientException, ImovoSubscriptionResponse]
   def replaceSubscriptionVoucher(subscriptionId: SfSubscriptionId, subscriptionType: ImovoSubscriptionType): EitherT[F, ImovoClientException, ImovoSubscriptionResponse]
   def cancelSubscriptionVoucher(subscriptionId: SfSubscriptionId, lastActiveDay: Option[LocalDate]): EitherT[F, ImovoClientException, ImovoSuccessResponse]
+  def suspendSubscriptionVoucher(subscriptionId: SfSubscriptionId, startDate: LocalDate, endDateExclusive: LocalDate): EitherT[F, ImovoClientException, Unit]
   def getRedemptionHistory(subscriptionId: SfSubscriptionId): EitherT[F, ImovoClientException, ImovoRedemptionHistoryResponse]
 }
 
@@ -82,7 +84,7 @@ object ImovoClient extends LazyLogging {
   val redemptionHistoryMaxLines = "100"
 
   def apply[F[_]: Sync, S](backend: SttpBackend[F, S], config: ImovoConfig): EitherT[F, ImovoClientException, ImovoClient[F]] = {
-    implicit val b = backend
+    implicit val b: SttpBackend[F, S] = backend
 
     def sendAuthenticatedRequest[A: Decoder, B: Encoder](
       apiKey: String,
@@ -197,6 +199,17 @@ object ImovoClient extends LazyLogging {
           None
         )
       }
+
+      def suspendSubscriptionVoucher(subscriptionId: SfSubscriptionId, startDate: LocalDate, endDateExclusive: LocalDate): EitherT[F, ImovoClientException, Unit] =
+        sendAuthenticatedRequest[ImovoSuccessResponse, String](
+          apiKey = config.imovoApiKey,
+          method = GET,
+          uri = Uri(new URI(s"${config.imovoBaseUrl}/Subscription/SetHoliday"))
+            .param("SubscriptionId", subscriptionId.value)
+            .param("StartDate", startDate.toString)
+            .param("ReactivationDate", endDateExclusive.toString),
+          body = None
+        ).map(_ => ())
 
       /**
        * Method to return `redemptionHistoryMaxLines` of redemption attempts - this call returns successful redemptions,
