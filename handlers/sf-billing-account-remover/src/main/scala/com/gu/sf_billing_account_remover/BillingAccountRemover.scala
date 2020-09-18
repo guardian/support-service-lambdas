@@ -6,6 +6,8 @@ import io.circe.parser._
 import io.circe.syntax._
 import scalaj.http._
 
+import scala.util.Try
+
 object BillingAccountRemover extends App {
   //Salesforce
   case class SfAuthDetails(access_token: String, instance_url: String)
@@ -197,22 +199,16 @@ object BillingAccountRemover extends App {
   def insertSfErrorRecs(sfAuthDetails: SfAuthDetails,
                         jsonBody: String): Either[Throwable, String] = {
 
-    val response =
-      try {
-        Right(
-          Http(
-            s"${sfAuthDetails.instance_url}/services/data/v45.0/composite/sobjects"
-          ).header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
-            .header("Content-Type", "application/json")
-            .put(jsonBody)
-            .method("POST")
-            .asString
-            .body
-        )
-      } catch {
-        case ex: Throwable => Left(ex)
-      }
-    response
+    Try {
+      Http(
+        s"${sfAuthDetails.instance_url}/services/data/v45.0/composite/sobjects"
+      ).header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
+        .header("Content-Type", "application/json")
+        .put(jsonBody)
+        .method("POST")
+        .asString
+        .body
+    }.toEither
   }
 
   def updateSfBillingAccs(sfAuthDetails: SfAuthDetails,
@@ -259,7 +255,7 @@ object BillingAccountRemover extends App {
 
   def getBillingAccountsFromSf(maxAttempts: Int,
                                sfAuthDetails: SfAuthDetails): String = {
-    val limit = 1;
+    val limit = 5;
     val devQuery =
       s"Select Id, Zuora__Account__c, GDPR_Removal_Attempts__c, Zuora__External_Id__c from Zuora__CustomerAccount__c where Name like '%Bill-Acc-Remover-ctc%' and createddate>=2020-09-17T09:17:45.000+0000 order by Name limit $limit"
 
