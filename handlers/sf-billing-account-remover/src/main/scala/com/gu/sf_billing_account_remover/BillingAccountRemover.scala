@@ -84,7 +84,7 @@ object BillingAccountRemover extends App {
       config <- optConfig map (c => Right(c)) getOrElse Left(
         new RuntimeException("Missing config value")
       )
-      sfAuthDetails <- SfLogin(config.salesforceConfig)
+      sfAuthDetails <- decode[SfAuthDetails](auth(config.salesforceConfig))
       getCustomSettingResponse <- getSfCustomSetting(sfAuthDetails)
       maxAttempts = getCustomSettingResponse.records(0).Property_Value__c
       getBillingAccountsResponse <- getSfBillingAccounts(
@@ -124,7 +124,7 @@ object BillingAccountRemover extends App {
 
     val customSettingFromSf =
       getMaxAttemptsCustomSetting(sfAuthentication)
-
+    println("customSettingFromSf:" + customSettingFromSf)
     val decodedCustomSetting = decode[SfGetCustomSettingResponse](
       customSettingFromSf
     ) map { customSettingObject =>
@@ -300,12 +300,6 @@ object BillingAccountRemover extends App {
       .body
 
   }
-
-  def SfLogin(salesforceConfig: SalesforceConfig) =
-    decode[SfAuthDetails](auth(salesforceConfig)) match {
-      case Right(responseObject) => Right(responseObject)
-      case Left(ex)              => Left(ex)
-    }
 
   object SfUpdateBillingAccounts {
     def apply(
