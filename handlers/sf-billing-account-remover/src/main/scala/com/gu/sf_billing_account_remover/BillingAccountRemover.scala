@@ -249,8 +249,10 @@ object BillingAccountRemover extends App {
     failedUpdates: Seq[BillingAccountsRecords.Records]
   ): Unit = {
 
-    updateBillingAccountsInSf(sfAuthDetails, failedUpdates)
-    insertErrorRecordsInSf(sfAuthDetails, failedUpdates)
+    (for {
+      _ <- updateBillingAccountsInSf(sfAuthDetails, failedUpdates)
+      _ <- insertErrorRecordsInSf(sfAuthDetails, failedUpdates)
+    } yield ()).left.foreach(e => throw e)
 
   }
 
