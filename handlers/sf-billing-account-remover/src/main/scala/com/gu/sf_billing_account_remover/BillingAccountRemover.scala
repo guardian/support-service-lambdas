@@ -109,34 +109,31 @@ object BillingAccountRemover extends App {
     }
   }
 
-  def writeErrorsBackToSf(
-    sfAuthDetails: SfAuthDetails,
-    failedUpdates: Seq[BillingAccountsRecords.Records]
-  ): Unit = {
-
-    updateBillingAccountsInSf(sfAuthDetails, failedUpdates)
-    insertErrorRecordsInSf(sfAuthDetails, failedUpdates)
-
-  }
-
-  def updateBillingAccountsInSf(
-    sfAuthDetails: SfAuthDetails,
-    recordsToUpdate: Seq[BillingAccountsRecords.Records]
-  ): Either[Throwable, String] = {
-
-    val sfBillingAccUpdateJson = SfUpdateBillingAccounts(recordsToUpdate).asJson.spaces2
-    doSfCompositeRequest(sfAuthDetails, sfBillingAccUpdateJson, "PATCH")
+  def auth(salesforceConfig: SalesforceConfig): String = {
+    Http(s"${System.getenv("authUrl")}/services/oauth2/token")
+      .postForm(
+        Seq(
+          "grant_type" -> "password",
+          "client_id" -> salesforceConfig.clientId,
+          "client_secret" -> salesforceConfig.clientSecret,
+          "username" -> salesforceConfig.userName,
+          "password" -> s"${salesforceConfig.password}${salesforceConfig.token}"
+        )
+      )
+      .asString
+      .body
 
   }
 
-  def insertErrorRecordsInSf(
-    sfAuthDetails: SfAuthDetails,
-    recordsToUpdate: Seq[BillingAccountsRecords.Records]
-  ): Either[Throwable, String] = {
+  def getSfCustomSetting(
+    sfAuthentication: SfAuthDetails
+  ): Either[Error, SfGetCustomSettingResponse] = {
+    val query =
+      "Select Id, Property_Value__c from Touch_Point_List_Property__c where name = 'Max Billing Acc GDPR Removal Attempts'"
 
-    val sfErrorRecordInsertJson = SfCreateErrorRecords(recordsToUpdate).asJson.spaces2
-    doSfCompositeRequest(sfAuthDetails, sfErrorRecordInsertJson, "POST")
-
+    decode[SfGetCustomSettingResponse](
+      doSfGetWithQuery(sfAuthentication, query)
+    )
   }
 
   def getSfBillingAccounts(
@@ -154,16 +151,40 @@ object BillingAccountRemover extends App {
     //can we bring this into a one liner and remove the method?
     decode[SfGetBillingAccsResponse](doSfGetWithQuery(sfAuthentication, query))
   }
-  def getSfCustomSetting(
-    sfAuthentication: SfAuthDetails
-  ): Either[Error, SfGetCustomSettingResponse] = {
-    val query =
-      "Select Id, Property_Value__c from Touch_Point_List_Property__c where name = 'Max Billing Acc GDPR Removal Attempts'"
 
-    decode[SfGetCustomSettingResponse](
-      doSfGetWithQuery(sfAuthentication, query)
-    )
+  def doSfGetWithQuery(sfAuthDetails: SfAuthDetails, query: String): String = {
+    Http(s"${sfAuthDetails.instance_url}/services/data/v20.0/query/")
+      .param("q", query)
+      .option(HttpOptions.readTimeout(30000))
+      .header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
+      .method("GET")
+      .asString
+      .body
   }
+
+  def doSfCompositeRequest(sfAuthDetails: SfAuthDetails,
+                           jsonBody: String,
+                           requestType: String): Either[Throwable, String] = {
+
+    Try {
+      Http(
+        s"${sfAuthDetails.instance_url}/services/data/v45.0/composite/sobjects"
+      ).header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
+        .header("Content-Type", "application/json")
+        .put(jsonBody)
+        .method(requestType)
+        .asString
+        .body
+    }.toEither
+  }
+
+  def parseBillingAccountsFromSf(
+    billingAccountList: String
+  ): Either[Exception, Seq[BillingAccountsRecords.Records]] =
+    decode[SfGetBillingAccsResponse](billingAccountList) map {
+      billingAccountsObject =>
+        billingAccountsObject.records
+    }
 
   def updateRecordsInZuora(
     zuoraConfig: ZuoraConfig,
@@ -213,22 +234,6 @@ object BillingAccountRemover extends App {
 
   }
 
-  def doSfCompositeRequest(sfAuthDetails: SfAuthDetails,
-                           jsonBody: String,
-                           requestType: String): Either[Throwable, String] = {
-
-    Try {
-      Http(
-        s"${sfAuthDetails.instance_url}/services/data/v45.0/composite/sobjects"
-      ).header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
-        .header("Content-Type", "application/json")
-        .put(jsonBody)
-        .method(requestType)
-        .asString
-        .body
-    }.toEither
-  }
-
   def updateZuoraBillingAcc(zuoraConfig: ZuoraConfig,
                             billingAccountForRemovalAsJson: String,
                             zuoraBillingAccountId: String) = {
@@ -243,38 +248,33 @@ object BillingAccountRemover extends App {
       .body
   }
 
-  def parseBillingAccountsFromSf(
-    billingAccountList: String
-  ): Either[Exception, Seq[BillingAccountsRecords.Records]] =
-    decode[SfGetBillingAccsResponse](billingAccountList) map {
-      billingAccountsObject =>
-        billingAccountsObject.records
-    }
+  def writeErrorsBackToSf(
+    sfAuthDetails: SfAuthDetails,
+    failedUpdates: Seq[BillingAccountsRecords.Records]
+  ): Unit = {
 
-  def doSfGetWithQuery(sfAuthDetails: SfAuthDetails, query: String): String = {
-    Http(s"${sfAuthDetails.instance_url}/services/data/v20.0/query/")
-      .param("q", query)
-      .option(HttpOptions.readTimeout(30000))
-      .header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
-      .method("GET")
-      .asString
-      .body
+    updateBillingAccountsInSf(sfAuthDetails, failedUpdates)
+    insertErrorRecordsInSf(sfAuthDetails, failedUpdates)
+
   }
 
-  def auth(salesforceConfig: SalesforceConfig): String = {
-    Http(s"${System.getenv("authUrl")}/services/oauth2/token")
-      .postForm(
-        Seq(
-          "grant_type" -> "password",
-          "client_id" -> salesforceConfig.clientId,
-          "client_secret" -> salesforceConfig.clientSecret,
-          "username" -> salesforceConfig.userName,
-          "password" -> s"${salesforceConfig.password}${salesforceConfig.token}"
-        )
-      )
-      .asString
-      .body
+  def updateBillingAccountsInSf(
+    sfAuthDetails: SfAuthDetails,
+    recordsToUpdate: Seq[BillingAccountsRecords.Records]
+  ): Either[Throwable, String] = {
 
+    val sfBillingAccUpdateJson = SfUpdateBillingAccounts(recordsToUpdate).asJson.spaces2
+    doSfCompositeRequest(sfAuthDetails, sfBillingAccUpdateJson, "PATCH")
+
+  }
+
+  def insertErrorRecordsInSf(
+    sfAuthDetails: SfAuthDetails,
+    recordsToUpdate: Seq[BillingAccountsRecords.Records]
+  ): Either[Throwable, String] = {
+
+    val sfErrorRecordInsertJson = SfCreateErrorRecords(recordsToUpdate).asJson.spaces2
+    doSfCompositeRequest(sfAuthDetails, sfErrorRecordInsertJson, "POST")
   }
 
   object SfUpdateBillingAccounts {
