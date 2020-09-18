@@ -104,10 +104,56 @@ object BillingAccountRemover extends App {
       val failedUpdates = allUpdates.filter(_.ErrorCode.isDefined)
 
       if (failedUpdates.nonEmpty) {
-        updateBillingAccountsInSf(sfAuthDetails, failedUpdates)
-        insertErrorRecordsInSf(sfAuthDetails, failedUpdates)
+        writeErrorsBackToSf(sfAuthDetails, failedUpdates)
       }
     }
+  }
+
+  def writeErrorsBackToSf(
+    sfAuthDetails: SfAuthDetails,
+    failedUpdates: Seq[BillingAccountsRecords.Records]
+  ): Unit = {
+    updateBillingAccountsInSf(sfAuthDetails, failedUpdates)
+    insertErrorRecordsInSf(sfAuthDetails, failedUpdates)
+  }
+
+  def updateBillingAccountsInSf(
+    sfAuthDetails: SfAuthDetails,
+    recordsToUpdate: Seq[BillingAccountsRecords.Records]
+  ): Either[Throwable, String] = {
+
+    val sfBillingAccUpdateJson = SfUpdateBillingAccounts(recordsToUpdate).asJson.spaces2
+    updateSfBillingAccs(sfAuthDetails, sfBillingAccUpdateJson)
+
+  }
+  def updateSfBillingAccs(sfAuthDetails: SfAuthDetails,
+                          jsonBody: String): Either[Throwable, String] = {
+
+    val response =
+      try {
+        Right(
+          Http(
+            s"${sfAuthDetails.instance_url}/services/data/v45.0/composite/sobjects"
+          ).header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
+            .header("Content-Type", "application/json")
+            .put(jsonBody)
+            .method("PATCH")
+            .asString
+            .body
+        )
+      } catch {
+        case ex: Throwable => { Left(ex) }
+      }
+    response
+  }
+  def insertErrorRecordsInSf(
+    sfAuthDetails: SfAuthDetails,
+    recordsToUpdate: Seq[BillingAccountsRecords.Records]
+  ): Either[Throwable, String] = {
+
+    val sfErrorRecordInsertJson = SfCreateErrorRecords(recordsToUpdate).asJson.spaces2
+    insertSfErrorRecs(sfAuthDetails, sfErrorRecordInsertJson)
+
   }
 
   def getSfBillingAccounts(
@@ -148,26 +194,6 @@ object BillingAccountRemover extends App {
         billingAccount
       )
     } yield zuoraCancellationResponses
-
-  }
-
-  def updateBillingAccountsInSf(
-    sfAuthDetails: SfAuthDetails,
-    recordsToUpdate: Seq[BillingAccountsRecords.Records]
-  ): Either[Throwable, String] = {
-
-    val sfBillingAccUpdateJson = SfUpdateBillingAccounts(recordsToUpdate).asJson.spaces2
-    updateSfBillingAccs(sfAuthDetails, sfBillingAccUpdateJson)
-
-  }
-
-  def insertErrorRecordsInSf(
-    sfAuthDetails: SfAuthDetails,
-    recordsToUpdate: Seq[BillingAccountsRecords.Records]
-  ): Either[Throwable, String] = {
-
-    val sfErrorRecordInsertJson = SfCreateErrorRecords(recordsToUpdate).asJson.spaces2
-    insertSfErrorRecs(sfAuthDetails, sfErrorRecordInsertJson)
 
   }
 
@@ -217,27 +243,6 @@ object BillingAccountRemover extends App {
         .asString
         .body
     }.toEither
-  }
-
-  def updateSfBillingAccs(sfAuthDetails: SfAuthDetails,
-                          jsonBody: String): Either[Throwable, String] = {
-
-    val response =
-      try {
-        Right(
-          Http(
-            s"${sfAuthDetails.instance_url}/services/data/v45.0/composite/sobjects"
-          ).header("Authorization", s"Bearer ${sfAuthDetails.access_token}")
-            .header("Content-Type", "application/json")
-            .put(jsonBody)
-            .method("PATCH")
-            .asString
-            .body
-        )
-      } catch {
-        case ex: Throwable => { Left(ex) }
-      }
-    response
   }
 
   def updateZuoraBillingAcc(zuoraConfig: ZuoraConfig,
@@ -293,12 +298,12 @@ object BillingAccountRemover extends App {
       recordList: Seq[BillingAccountsRecords.Records]
     ): SfBillingAccountsToUpdate = {
 
-      val recordListWithincrementedGDPRAttempts =
+      val recordListWithIncrementedGDPRAttempts =
         recordList.map(
           a => a.copy(GDPR_Removal_Attempts__c = a.GDPR_Removal_Attempts__c + 1)
         )
 
-      val sfBillingAccounts = recordListWithincrementedGDPRAttempts
+      val sfBillingAccounts = recordListWithIncrementedGDPRAttempts
         .map(a => SfBillingAccountToUpdate(a.Id, a.GDPR_Removal_Attempts__c))
         .toSeq
 
