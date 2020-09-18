@@ -95,16 +95,17 @@ object BillingAccountRemover extends App {
         maxAttempts,
         sfAuthDetails
       )
-      sfRecords = getBillingAccountsResponse.records
+    } {
+      val sfRecords = getBillingAccountsResponse.records
 
-      allUpdates = updateRecordsInZuora(sfRecords)
-      failedUpdates = allUpdates.filter(_.ErrorCode.isDefined)
+      val allUpdates = updateRecordsInZuora(sfRecords)
+      val failedUpdates = allUpdates.filter(_.ErrorCode.isDefined)
 
-      _ = if (failedUpdates.nonEmpty) {
+      if (failedUpdates.nonEmpty) {
         updateBillingAccountsInSf(sfAuthDetails, failedUpdates)
         insertErrorRecordsInSf(sfAuthDetails, failedUpdates)
       }
-    } yield ()
+    }
   }
 
   def getSfBillingAccounts(
