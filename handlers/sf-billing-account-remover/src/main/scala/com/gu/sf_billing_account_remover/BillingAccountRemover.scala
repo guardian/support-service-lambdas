@@ -81,12 +81,16 @@ object BillingAccountRemover extends App {
 
   def processBillingAccounts(): Unit = {
     for {
-      config <- optConfig map (c => Right(c)) getOrElse Left(
-        new RuntimeException("Missing config value")
-      )
+      config <- optConfig.toRight(new RuntimeException("Missing config value"))
       sfAuthDetails <- decode[SfAuthDetails](auth(config.salesforceConfig))
       getCustomSettingResponse <- getSfCustomSetting(sfAuthDetails)
-      maxAttempts = getCustomSettingResponse.records(0).Property_Value__c
+      maxAttempts = getCustomSettingResponse.records.headOption
+        .getOrElse(
+          throw new RuntimeException(
+            "There should be at least one record returned for MaxAttempts"
+          )
+        )
+        .Property_Value__c
       getBillingAccountsResponse <- getSfBillingAccounts(
         maxAttempts,
         sfAuthDetails
