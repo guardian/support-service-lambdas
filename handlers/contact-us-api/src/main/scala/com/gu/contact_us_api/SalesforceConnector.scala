@@ -7,8 +7,6 @@ import io.circe.syntax._
 import scalaj.http.Http
 
 class SalesforceConnector() {
-  private val authEndpoint = "https://test.salesforce.com/services/oauth2/token"
-  private val reqEndpoint = "https://gnmtouchpoint--DEV.my.salesforce.com/services/data/v43.0/composite/"
 
   def handle(req: SFCompositeRequest): Either[Throwable, Unit] = {
     for {
@@ -18,7 +16,7 @@ class SalesforceConnector() {
   }
 
   def auth(): Either[Throwable, String] = {
-    val response = Http(authEndpoint)
+    val response = Http(ContactUsConfig.authEndpoint)
       .postForm(
         Seq(
           ("grant_type", "password"),
@@ -40,7 +38,7 @@ class SalesforceConnector() {
   }
 
   def sendReq(token: String, request: SFCompositeRequest): Either[Throwable, Unit] = {
-    val response = Http(reqEndpoint)
+    val response = Http(ContactUsConfig.reqEndpoint)
       .header("Content-Type", "application/json")
       .header("Authorization", s"Bearer $token")
       .postData(request.asJson.toString())
