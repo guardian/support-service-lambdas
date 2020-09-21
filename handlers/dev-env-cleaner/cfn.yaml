@@ -1,0 +1,112 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Lambda for cleaning up SF dev
+
+Parameters:
+  Stage:
+    Description: Stage name
+    Type: String
+    AllowedValues:
+      - PROD
+      - CODE
+    Default: CODE
+
+Mappings:
+  Stages:
+    Schedule:
+      CODE: 'rate(365 days)'
+      PROD: 'rate(1 day)'
+  Constants:
+    Alarm:
+      Process: See the wiki at https://github.com/guardian/support-frontend/wiki/Automated-IT-Tests
+
+Conditions:
+  ProdOnlyResource: !Equals [!Ref Stage, PROD]
+
+Resources:
+  LambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: Cleans up SF dev (via zuora)
+      FunctionName:
+        !Sub dev-env-cleaner-${Stage}
+      Handler: com.gu.cleaner.Handler::handleRequest
+      CodeUri:
+        Bucket: support-service-lambdas-dist
+        Key: !Sub membership/${Stage}/dev-env-cleaner/lambda.jar
+      MemorySize: 2048
+      Runtime: java8
+      Timeout: 900
+      Environment:
+        Variables:
+          Stage: !Ref Stage
+      Events:
+        RerunTests:
+          Type: Schedule
+          Properties:
+            Schedule: !FindInMap [ Stages, Schedule, !Ref Stage ]
+            Description: clean zuora dev regularly so that space in SF is cleaned up
+      EventInvokeConfig:
+        MaximumRetryAttempts: 0
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - logs:CreateLogGroup
+                - logs:CreateLogStream
+                - logs:PutLogEvents
+                - lambda:InvokeFunction
+              Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/dev-env-cleaner-${Stage}:log-stream:*"
+        - Statement:
+            - Effect: Allow
+              Action: s3:GetObject
+              Resource:
+                - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/DEV/zuoraRest-DEV.json
+        - Statement:
+            - Effect: Allow
+              Action: cloudwatch:PutMetricData
+              Resource: "*"
+
+  LambdaLogGroup:
+    Type: AWS::Logs::LogGroup
+    DependsOn: LambdaFunction
+    Properties:
+      LogGroupName: !Sub /aws/lambda/dev-env-cleaner-${Stage}
+      RetentionInDays: 90
+
+  NotRunningAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: ProdOnlyResource
+    Properties:
+      AlarmActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:reader-revenue-dev
+      AlarmName: !Join
+        - ' '
+        - - 'non urgent -'
+          - 'DEV env cleaner is not completing'
+      AlarmDescription: !Join
+        - ' '
+        - - 'Impact - SF DEV will gradually fill up unless this is fixed'
+          - !FindInMap [ Constants, Alarm, Process ]
+      Metrics:
+        - Id: total
+          Expression: "FILL(m1,0)"
+          Label: RunCount
+        - Id: m1
+          ReturnData: false
+          MetricStat:
+            Metric:
+              Namespace: support-service-lambdas
+              MetricName: cleanup-succeeded
+              Dimensions:
+                - Name: Stage
+                  Value: !Ref Stage
+                - Name: app
+                  Value: dev-env-cleaner
+            Stat: Sum
+            Period: 3600
+            Unit: Count
+      ComparisonOperator: LessThanThreshold
+      Threshold: 1
+      EvaluationPeriods: 24
+      TreatMissingData: breaching

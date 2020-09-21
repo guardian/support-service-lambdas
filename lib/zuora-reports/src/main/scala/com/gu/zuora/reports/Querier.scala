@@ -20,6 +20,16 @@ object Querier {
     toQuerierResponse(aquaResponse, querierRequest.dryRun)
   }
 
+  def lowLevel(
+    zuoraRequester: Requests
+  )(aquaRequest: AquaQueryRequest): ClientFailableOp[String] =
+    zuoraRequester.post[AquaQueryRequest, AquaJobResponse](aquaRequest, "batch-query/") match {
+      case ClientSuccess(AquaJobResponse(status, name, _, Some(jobId))) if status.toLowerCase == "submitted" =>
+        ClientSuccess(jobId)
+      case ClientSuccess(zuoraResponse) => GenericError(s"unexpected response from zuora: $zuoraResponse")
+      case error: ClientFailure => error
+    }
+
   def toQuerierResponse(aquaResponse: ClientFailableOp[AquaJobResponse], dryRun: Boolean): ClientFailableOp[QuerierResponse] = {
     aquaResponse match {
       case ClientSuccess(AquaJobResponse(status, name, _, Some(jobId))) if status.toLowerCase == "submitted" =>
