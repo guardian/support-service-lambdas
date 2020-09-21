@@ -33,10 +33,9 @@ class SalesforceConnector() {
     if (response.isSuccess) {
       decode[SFAuthSuccess](response.body).map(_.access_token)
     } else {
-      decode[SFAuthFailure](response.body) match {
-        case Left(value) => Left(value)
-        case Right(value) => Left(new Throwable(s"Could not authenticate: Status code: ${response.code}. ${value.error} - ${value.error_description}"))
-      }
+      decode[SFAuthFailure](response.body).flatMap(value => {
+        Left(new Throwable(s"Could not authenticate: Status code: ${response.code}. ${value.error} - ${value.error_description}"))
+      })
     }
   }
 
@@ -47,23 +46,17 @@ class SalesforceConnector() {
       .postData(request.asJson.toString())
       .asString
 
-    println(response.body)
     if (response.isSuccess) {
-      decode[SFCompositeResponse](response.body) match {
-        case Left(value) => Left(value)
-        case Right(compositeResponse) => {
+      decode[SFCompositeResponse](response.body).flatMap(compositeResponse => {
           if(compositeResponse.isSuccess) Right(())
           else Left(new Throwable(s"Could not complete composite request. Status code: ${response.code}. ${compositeResponse.errorsAsString.getOrElse("")}"))
         }
-      }
+      )
     } else {
-      decode[List[SFErrorDetails]](response.body) match {
-        case Left(value) => Left(value)
-        case Right(errors) => {
-          val errorDetails = errors.map(error => error.asString).mkString(", ")
-          Left(new Throwable(s"Could not complete request. Status code: ${response.code}. ${errorDetails}"))
-        }
-      }
+      decode[List[SFErrorDetails]](response.body).flatMap(errors => {
+        val errorDetails = errors.map(error => error.asString).mkString(", ")
+        Left(new Throwable(s"Could not complete request. Status code: ${response.code}. ${errorDetails}"))
+      })
     }
   }
 }

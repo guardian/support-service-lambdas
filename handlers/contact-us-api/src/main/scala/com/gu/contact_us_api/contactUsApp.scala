@@ -1,5 +1,8 @@
 package com.gu.contact_us_api
 
+import com.gu.contact_us_api.models.SFErrorDetails
+import io.circe.parser._
+import io.circe.generic.auto._
 import io.circe.syntax._
 
 object contactUsApp {
@@ -20,6 +23,7 @@ object contactUsApp {
         }
       }
     """
+
     val contactUsReqHandler = new ContactUs(new SalesforceConnector())
 
     println(contactUsReqHandler.processReq(json).asJson)
