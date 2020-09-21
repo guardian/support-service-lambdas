@@ -1,16 +1,16 @@
 package com.gu.contact_us_api
 
-import com.gu.contact_us_api.SalesforceConnector.handle
+import com.gu.contact_us_api.SalesforceConnector
 import com.gu.contact_us_api.models.{ContactUsFailureResponse, ContactUsRequest, ContactUsResponse, ContactUsSuccessfulResponse}
 import io.circe.parser._
 import io.circe.generic.auto._
 import io.circe.syntax._
 
-object ContactUs {
+class ContactUs(SFConnector: SalesforceConnector) {
   def processReq(json: String): ContactUsResponse = {
     val result = for {
       req <- decode[ContactUsRequest](json)
-      resp <- handle(req.asSFCompositeRequest)
+      resp <- SFConnector.handle(req.asSFCompositeRequest)
     } yield resp
 
     buildResponse(result)

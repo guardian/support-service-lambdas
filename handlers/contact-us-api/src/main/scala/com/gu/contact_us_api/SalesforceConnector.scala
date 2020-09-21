@@ -6,7 +6,7 @@ import io.circe.generic.auto._
 import io.circe.syntax._
 import scalaj.http.Http
 
-object SalesforceConnector {
+class SalesforceConnector() {
   private val authEndpoint = "https://test.salesforce.com/services/oauth2/token"
   private val reqEndpoint = "https://gnmtouchpoint--DEV.my.salesforce.com/services/data/v43.0/composite/"
 

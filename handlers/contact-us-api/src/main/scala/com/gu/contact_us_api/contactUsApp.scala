@@ -20,7 +20,8 @@ object contactUsApp {
         }
       }
     """
+    val contactUsReqHandler = new ContactUs(new SalesforceConnector())
 
-    println(ContactUs.processReq(json).asJson)
+    println(contactUsReqHandler.processReq(json).asJson)
   }
 }
