@@ -20,8 +20,8 @@ object ContactUsResponse {
   implicit val encodeContactUsResponse: Encoder[ContactUsResponse] = new Encoder[ContactUsResponse] {
     final def apply(a: ContactUsResponse): Json = {
       a match {
-        case a:ContactUsSuccessfulResponse => ContactUsSuccessfulResponse.encodeContactUsSuccessfulResponse(a)
-        case a:ContactUsFailureResponse => ContactUsFailureResponse.encodeContactUsFailureResponse(a)
+        case a: ContactUsSuccessfulResponse => ContactUsSuccessfulResponse.encodeContactUsSuccessfulResponse(a)
+        case a: ContactUsFailureResponse => ContactUsFailureResponse.encodeContactUsFailureResponse(a)
       }
     }
   }

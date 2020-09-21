@@ -6,7 +6,6 @@ import io.circe.parser._
 import io.circe.generic.auto._
 import io.circe.syntax._
 
-
 object ContactUs {
   def processReq(json: String): ContactUsResponse = {
     val result = for {

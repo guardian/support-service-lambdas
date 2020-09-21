@@ -15,11 +15,11 @@ class SFCompositeRequestTests extends AnyFlatSpec with should.Matchers {
 
   val singleReqJson = Json.obj(
     ("allOrNone", Json.fromBoolean(true)),
-    ("compositeRequest", Json.arr(singleReq.map(i => i.asJson):_*))
+    ("compositeRequest", Json.arr(singleReq.map(i => i.asJson): _*))
   )
   val multipleReqJson = Json.obj(
     ("allOrNone", Json.fromBoolean(true)),
-    ("compositeRequest", Json.arr(multipleReq.map(i => i.asJson):_*))
+    ("compositeRequest", Json.arr(multipleReq.map(i => i.asJson): _*))
   )
 
   "SFCompositeRequest" should "encode into expected json object when only one item is supplied" in {

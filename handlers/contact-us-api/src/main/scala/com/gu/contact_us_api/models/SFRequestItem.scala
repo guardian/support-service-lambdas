@@ -12,12 +12,11 @@ object SFRequestItem {
   implicit val encodeSFRequestItem: Encoder[SFRequestItem] = new Encoder[SFRequestItem] {
     final def apply(a: SFRequestItem): Json =
       a match {
-        case a:SFCaseRequest => SFCaseRequest.encodeSFCaseRequest(a)
-        case a:SFAttachmentRequest => SFAttachmentRequest.encodeSFAttachmentRequest(a)
+        case a: SFCaseRequest => SFCaseRequest.encodeSFCaseRequest(a)
+        case a: SFAttachmentRequest => SFAttachmentRequest.encodeSFAttachmentRequest(a)
       }
   }
 }
-
 
 object SFCaseRequest {
   val method = "POST"
@@ -26,7 +25,7 @@ object SFCaseRequest {
 
   implicit val encodeSFCaseRequest: Encoder[SFCaseRequest] = new Encoder[SFCaseRequest] {
     final def apply(a: SFCaseRequest): Json = {
-      val itemList:List[(String, Json)] = (List(
+      val itemList: List[(String, Json)] = (List(
         ("Origin", "Web"),
         ("Origin_Channel__c", "Contact Us form"),
         ("SuppliedName", a.name),
@@ -37,14 +36,14 @@ object SFCaseRequest {
       ) ++
         a.subtopic.map(i => ("Form_Subtopic__c", i)) ++
         a.subsubtopic.map(i => ("Form_subsubtopic__c", i))).
-          map(i => (i._1, Json.fromString(i._2)))
+        map(i => (i._1, Json.fromString(i._2)))
 
       Json.obj(
         ("method", Json.fromString(method)),
         ("url", Json.fromString(url)),
         ("referenceId", Json.fromString(referenceId)),
         ("body", Json.obj(
-          itemList:_*
+          itemList: _*
         ))
       )
     }

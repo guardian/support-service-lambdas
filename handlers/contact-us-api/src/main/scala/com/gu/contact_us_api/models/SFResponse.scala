@@ -10,7 +10,6 @@ sealed trait SFResponse {
   def errorsAsString: Option[String]
 }
 
-
 case class SFErrorResponse(httpStatusCode: Int, referenceId: String, body: List[SFErrorDetails]) extends SFResponse {
   override def isSuccess: Boolean = false
   override def errorsAsString: Option[String] = Some(s"Status code for $referenceId: $httpStatusCode " + body.map(i => i.asString).mkString(", "))
@@ -20,7 +19,6 @@ case class SFSuccessResponse(httpStatusCode: Int, referenceId: String) extends S
   override def isSuccess: Boolean = true
   override def errorsAsString: Option[String] = None
 }
-
 
 object SFResponse {
   implicit val decodeSFResponse: Decoder[SFResponse] = {

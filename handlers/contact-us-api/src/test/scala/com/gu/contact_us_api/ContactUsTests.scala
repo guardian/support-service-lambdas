@@ -13,7 +13,7 @@ class ContactUsTests extends AnyFlatSpec with should.Matchers {
     ContactUs.buildResponse(Right(())) shouldBe ContactUsSuccessfulResponse()
   }
 
-  it  should "return a ContactUsFailureResponse on Throwable" in {
+  it should "return a ContactUsFailureResponse on Throwable" in {
     ContactUs.buildResponse(Left(new Throwable(errorMsg))) shouldBe ContactUsFailureResponse(errorMsg)
   }
 }
