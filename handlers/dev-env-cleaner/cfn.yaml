@@ -36,7 +36,7 @@ Resources:
         Key: !Sub membership/${Stage}/dev-env-cleaner/lambda.jar
       MemorySize: 2048
       Runtime: java8
-      Timeout: 300
+      Timeout: 900
       Environment:
         Variables:
           Stage: !Ref Stage
