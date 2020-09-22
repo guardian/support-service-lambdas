@@ -1,6 +1,7 @@
 package com.gu.contact_us_api.models
 
 import io.circe.{Encoder, Json}
+import io.circe.syntax._
 
 trait ContactUsResponse {
   val success: Boolean
@@ -20,8 +21,8 @@ object ContactUsResponse {
   implicit val encodeContactUsResponse: Encoder[ContactUsResponse] = new Encoder[ContactUsResponse] {
     final def apply(a: ContactUsResponse): Json = {
       a match {
-        case a: ContactUsSuccessfulResponse => ContactUsSuccessfulResponse.encodeContactUsSuccessfulResponse(a)
-        case a: ContactUsFailureResponse => ContactUsFailureResponse.encodeContactUsFailureResponse(a)
+        case a: ContactUsSuccessfulResponse => a.asJson
+        case a: ContactUsFailureResponse => a.asJson
       }
     }
   }
