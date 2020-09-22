@@ -11,10 +11,10 @@ class ContactUsResponseTests extends AnyFlatSpec with should.Matchers {
   val failureJson = Json.obj(("success", Json.fromBoolean(false)), ("error", Json.fromString(errorMsg)))
 
   "ContactUsSuccessfulResponse" should "encode into expected json object" in {
-    ContactUsSuccessfulResponse().asInstanceOf[ContactUsResponse].asJson shouldBe successJson
+    ContactUsSuccessfulResponse().asJson shouldBe successJson
   }
 
   "ContactUsFailureResponse.success" should "encode into expected json object" in {
-    ContactUsFailureResponse("error").asInstanceOf[ContactUsResponse].asJson shouldBe failureJson
+    ContactUsFailureResponse("error").asJson shouldBe failureJson
   }
 }
