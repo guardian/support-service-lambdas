@@ -392,7 +392,8 @@ lazy val `digital-voucher-api` = all(project in file("handlers/digital-voucher-a
         http4sServer,
         sttpAsycHttpClientBackendCats,
         scalatest,
-        diffx
+        diffx,
+        scalaMock,
       )
       ++ logging
   )
