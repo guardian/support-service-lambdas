@@ -1,5 +1,6 @@
 package com.gu.contact_us_api.models
 
+import cats.syntax.functor._
 import io.circe.generic.auto._
 import io.circe.Decoder
 
@@ -23,8 +24,8 @@ case class SFSuccessResponse(httpStatusCode: Int, referenceId: String) extends S
 object SFResponse {
   implicit val decodeSFResponse: Decoder[SFResponse] = {
     List[Decoder[SFResponse]](
-      Decoder[SFErrorResponse].asInstanceOf[Decoder[SFResponse]],
-      Decoder[SFSuccessResponse].asInstanceOf[Decoder[SFResponse]]
+      Decoder[SFErrorResponse].widen,
+      Decoder[SFSuccessResponse].widen
     ).reduceLeft(_ or _)
   }
 }
