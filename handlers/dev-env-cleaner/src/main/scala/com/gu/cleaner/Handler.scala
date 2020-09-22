@@ -154,7 +154,7 @@ class Steps(log: String => Unit) {
       _ <- queryResults(subs_to_cancel).map { case id :: termEndDate :: Nil => cancelSub.run(id, dateToCancel(LocalDate.parse(termEndDate), today())) }.toList.sequence
       _ <- queryResults(accounts_to_cancel).map { case id :: Nil => cancelAccount.run(id) }.toList.sequence
     } yield ()
-    zRes.toDisjunction.leftMap(failure => new RuntimeException(failure.toString))
+    zRes.toDisjunction.leftMap(failure => new RuntimeException(s"one of the preceding requests has failed: ${failure.toString}"))
 
   }
 
