@@ -15,8 +15,6 @@ case class ContactUsFailureResponse(message: String) extends ContactUsResponse {
   override val success: Boolean = false
 }
 
-// What's the relationship between this val's name and circe knowing it's the decoder?
-// Why does intelliJ want to simplify this by removing the apply?
 object ContactUsResponse {
   implicit val encodeContactUsResponse: Encoder[ContactUsResponse] = new Encoder[ContactUsResponse] {
     final def apply(a: ContactUsResponse): Json = {
