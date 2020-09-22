@@ -3,7 +3,7 @@ package com.gu.contact_us_api.models
 import io.circe.{Encoder, Json}
 import io.circe.syntax._
 
-trait ContactUsResponse {
+sealed trait ContactUsResponse {
   val success: Boolean
 }
 
