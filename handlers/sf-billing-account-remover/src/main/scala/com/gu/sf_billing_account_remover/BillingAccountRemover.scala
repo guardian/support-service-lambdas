@@ -141,7 +141,7 @@ object BillingAccountRemover extends App {
     maxAttempts: Int,
     sfAuthentication: SfAuthDetails
   ): Either[Error, SfGetBillingAccsResponse] = {
-    val limit = 2;
+    val limit = 200;
 
     val query =
       s"Select Id, Zuora__Account__c, GDPR_Removal_Attempts__c, Zuora__External_Id__c from Zuora__CustomerAccount__c where Zuora__External_Id__c != null AND Account.GDPR_Billing_Accounts_Ready_for_Removal__c = true AND GDPR_Removal_Attempts__c < $maxAttempts limit $limit"
