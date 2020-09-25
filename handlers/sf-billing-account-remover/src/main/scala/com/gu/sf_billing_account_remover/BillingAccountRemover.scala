@@ -144,10 +144,7 @@ object BillingAccountRemover extends App {
     val limit = 2;
 
     val query =
-      s"Select Id, Zuora__Account__c, GDPR_Removal_Attempts__c, Zuora__External_Id__c from Zuora__CustomerAccount__c where Name like '%Bill-Acc-Remover-ctc%' and createddate>=2020-09-17T09:17:45.000+0000 order by Name limit $limit"
-
-    //val query =
-    s"Select Id, Zuora__Account__c, GDPR_Removal_Attempts__c, Zuora__External_Id__c from Zuora__CustomerAccount__c where Zuora__External_Id__c != null AND Account.GDPR_Billing_Accounts_Ready_for_Removal__c = true AND GDPR_Removal_Attempts__c < $maxAttempts limit $limit"
+      s"Select Id, Zuora__Account__c, GDPR_Removal_Attempts__c, Zuora__External_Id__c from Zuora__CustomerAccount__c where Zuora__External_Id__c != null AND Account.GDPR_Billing_Accounts_Ready_for_Removal__c = true AND GDPR_Removal_Attempts__c < $maxAttempts limit $limit"
 
     decode[SfGetBillingAccsResponse](doSfGetWithQuery(sfAuthentication, query))
   }
