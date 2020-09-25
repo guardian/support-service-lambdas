@@ -107,7 +107,7 @@ object BillingAccountRemover extends App {
         writeErrorsBackToSf(sfAuthDetails, failedUpdates)
       }
     }).left
-      .foreach(e => throw new RuntimeException("An error occured here: " + e))
+      .foreach(e => throw new RuntimeException("An error occurred: ", e))
   }
 
   def auth(salesforceConfig: SalesforceConfig): String = {
