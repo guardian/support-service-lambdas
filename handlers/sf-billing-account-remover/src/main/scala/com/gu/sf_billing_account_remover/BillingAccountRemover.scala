@@ -49,7 +49,7 @@ object BillingAccountRemover extends App {
   case class Errors(Code: String, Message: String)
   case class ZuoraResponse(Success: Boolean, Errors: Seq[Errors])
 
-  val optConfig = for {
+  lazy val optConfig = for {
     sfUserName <- Option(System.getenv("username"))
     sfClientId <- Option(System.getenv("client_id"))
     sfClientSecret <- Option(System.getenv("client_secret"))
@@ -317,8 +317,6 @@ object BillingAccountRemover extends App {
   }
 
   def lambda(): Unit = {
-    //processBillingAccounts()
-    val x = System.getenv(("username"))
-    println("username: " + x)
+    processBillingAccounts()
   }
 }
