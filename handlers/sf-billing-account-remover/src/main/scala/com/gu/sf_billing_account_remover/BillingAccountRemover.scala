@@ -214,7 +214,6 @@ object BillingAccountRemover extends App {
       )
 
     val parsedResponse = decode[ZuoraResponse](response)
-    println("response:" + response)
     parsedResponse match {
       case Right(dr) =>
         if (dr.Success) {
