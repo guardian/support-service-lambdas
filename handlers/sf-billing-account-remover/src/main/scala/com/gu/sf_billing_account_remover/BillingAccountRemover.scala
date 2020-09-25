@@ -7,7 +7,6 @@ import io.circe.syntax._
 import scalaj.http._
 
 import scala.util.Try
-
 object BillingAccountRemover extends App {
   //Salesforce
   case class SfAuthDetails(access_token: String, instance_url: String)
@@ -310,5 +309,9 @@ object BillingAccountRemover extends App {
 
       SfErrorRecordsToCreate(false, sfErrorRecords)
     }
+  }
+
+  def lambda(): Unit = {
+    processBillingAccounts()
   }
 }
