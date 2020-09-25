@@ -100,12 +100,14 @@ object BillingAccountRemover extends App {
       val sfRecords = getBillingAccountsResponse.records
 
       val allUpdates = updateRecordsInZuora(config.zuoraConfig, sfRecords)
+
       val failedUpdates = allUpdates.filter(_.ErrorCode.isDefined)
 
       if (failedUpdates.nonEmpty) {
         writeErrorsBackToSf(sfAuthDetails, failedUpdates)
       }
-    }).left.foreach(e => throw e)
+    }).left
+      .foreach(e => throw new RuntimeException("An error occured here: " + e))
   }
 
   def auth(salesforceConfig: SalesforceConfig): String = {
@@ -139,10 +141,13 @@ object BillingAccountRemover extends App {
     maxAttempts: Int,
     sfAuthentication: SfAuthDetails
   ): Either[Error, SfGetBillingAccsResponse] = {
-    val limit = 200;
+    val limit = 2;
 
     val query =
-      s"Select Id, Zuora__Account__c, GDPR_Removal_Attempts__c, Zuora__External_Id__c from Zuora__CustomerAccount__c where Zuora__External_Id__c != null AND Account.GDPR_Billing_Accounts_Ready_for_Removal__c = true AND GDPR_Removal_Attempts__c < $maxAttempts limit $limit"
+      s"Select Id, Zuora__Account__c, GDPR_Removal_Attempts__c, Zuora__External_Id__c from Zuora__CustomerAccount__c where Name like '%Bill-Acc-Remover-ctc%' and createddate>=2020-09-17T09:17:45.000+0000 order by Name limit $limit"
+
+    //val query =
+    s"Select Id, Zuora__Account__c, GDPR_Removal_Attempts__c, Zuora__External_Id__c from Zuora__CustomerAccount__c where Zuora__External_Id__c != null AND Account.GDPR_Billing_Accounts_Ready_for_Removal__c = true AND GDPR_Removal_Attempts__c < $maxAttempts limit $limit"
 
     decode[SfGetBillingAccsResponse](doSfGetWithQuery(sfAuthentication, query))
   }
@@ -209,7 +214,7 @@ object BillingAccountRemover extends App {
       )
 
     val parsedResponse = decode[ZuoraResponse](response)
-
+    println("response:" + response)
     parsedResponse match {
       case Right(dr) =>
         if (dr.Success) {
@@ -312,6 +317,8 @@ object BillingAccountRemover extends App {
   }
 
   def lambda(): Unit = {
-    processBillingAccounts()
+    //processBillingAccounts()
+    val x = System.getenv(("username"))
+    println("username: " + x)
   }
 }
