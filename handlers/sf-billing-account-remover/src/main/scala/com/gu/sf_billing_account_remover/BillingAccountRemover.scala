@@ -7,7 +7,6 @@ import io.circe.syntax._
 import scalaj.http._
 
 import scala.util.Try
-
 object BillingAccountRemover extends App {
   //Salesforce
   case class SfAuthDetails(access_token: String, instance_url: String)
@@ -50,7 +49,7 @@ object BillingAccountRemover extends App {
   case class Errors(Code: String, Message: String)
   case class ZuoraResponse(Success: Boolean, Errors: Seq[Errors])
 
-  val optConfig = for {
+  lazy val optConfig = for {
     sfUserName <- Option(System.getenv("username"))
     sfClientId <- Option(System.getenv("client_id"))
     sfClientSecret <- Option(System.getenv("client_secret"))
@@ -101,12 +100,14 @@ object BillingAccountRemover extends App {
       val sfRecords = getBillingAccountsResponse.records
 
       val allUpdates = updateRecordsInZuora(config.zuoraConfig, sfRecords)
+
       val failedUpdates = allUpdates.filter(_.ErrorCode.isDefined)
 
       if (failedUpdates.nonEmpty) {
         writeErrorsBackToSf(sfAuthDetails, failedUpdates)
       }
-    }).left.foreach(e => throw e)
+    }).left
+      .foreach(e => throw new RuntimeException("An error occurred: ", e))
   }
 
   def auth(salesforceConfig: SalesforceConfig): String = {
@@ -210,7 +211,6 @@ object BillingAccountRemover extends App {
       )
 
     val parsedResponse = decode[ZuoraResponse](response)
-
     parsedResponse match {
       case Right(dr) =>
         if (dr.Success) {
@@ -310,5 +310,9 @@ object BillingAccountRemover extends App {
 
       SfErrorRecordsToCreate(false, sfErrorRecords)
     }
+  }
+
+  def lambda(): Unit = {
+    processBillingAccounts()
   }
 }
