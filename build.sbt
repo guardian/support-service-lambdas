@@ -416,7 +416,7 @@ lazy val `digital-voucher-cancellation-processor` = all(project in file("handler
   .enablePlugins(RiffRaffArtifact)
 
 lazy val `contact-us-api` = all(project in file("handlers/contact-us-api"))
-  .dependsOn(`http4s-lambda-handler`)
+  .dependsOn(handler)
   .settings(
     libraryDependencies ++=
       Seq(
@@ -425,7 +425,7 @@ lazy val `contact-us-api` = all(project in file("handlers/contact-us-api"))
         scalatest,
         scalajHttp
       )
-//      ++ logging
+      ++ logging
   )
 //  .enablePlugins(RiffRaffArtifact)
 
