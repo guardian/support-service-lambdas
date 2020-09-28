@@ -1,0 +1,11 @@
+stacks:
+  - membership
+regions:
+  - eu-west-1
+deployments:
+
+  cfn:
+    type: cloud-formation
+    app: contact-us
+    parameters:
+      templatePath: cfn.yaml

@@ -427,7 +427,7 @@ lazy val `contact-us-api` = all(project in file("handlers/contact-us-api"))
       )
       ++ logging
   )
-//  .enablePlugins(RiffRaffArtifact)
+  .enablePlugins(RiffRaffArtifact)
 
 
 lazy val `http4s-lambda-handler` = all(project in file("lib/http4s-lambda-handler"))
