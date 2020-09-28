@@ -22,7 +22,7 @@ object Handler extends Logging {
 
         obtainResponse(apiGatewayRequest.body) match {
           case Right(succ) => ApiGatewayResponse.messageResponse("201", succ.asJson.toString())
-          case Left(err) => ApiGatewayResponse.internalServerError(err.asJson.toString())
+          case Left(err) => ApiGatewayResponse.messageResponse("500", err.asJson.toString())
         }
       }
 
