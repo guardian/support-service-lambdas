@@ -13,3 +13,5 @@ riffRaffArtifactResources += (file(
 ), "cfn/cfn.yaml")
 
 libraryDependencies ++= Seq(circe, circeParser, scalajHttp)
+
+assemblyMergeStrategyDiscardModuleInfo
