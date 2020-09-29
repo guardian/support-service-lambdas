@@ -1,4 +1,4 @@
-//import Dependencies._
+import Dependencies._
 
 name := "sf-billing-account-remover"
 description := "Export salesforce data to the data lake"
@@ -12,11 +12,4 @@ riffRaffArtifactResources += (file(
   "handlers/sf-billing-account-remover/cfn.yaml"
 ), "cfn/cfn.yaml")
 
-libraryDependencies += "org.scalaj" %% "scalaj-http" % "2.4.2"
-val circeVersion = "0.12.3"
-
-libraryDependencies ++= Seq(
-  "io.circe" %% "circe-core",
-  "io.circe" %% "circe-generic",
-  "io.circe" %% "circe-parser"
-).map(_ % circeVersion)
+libraryDependencies ++= Seq(circe, circeParser, scalajHttp)
