@@ -23,6 +23,7 @@ object Dependencies {
   val awsStepFunction = "com.amazonaws" % "aws-java-sdk-stepfunctions" % awsVersion
   val awsSdkLambda = "com.amazonaws" % "aws-java-sdk-lambda" % awsVersion
   val awsLambda = "com.amazonaws" % "aws-lambda-java-core" % "1.2.0"
+  val awsEvents = "com.amazonaws" % "aws-lambda-java-events" % "2.2.5"
   val scalaLambda = "io.github.mkotsur" %% "aws-lambda-scala" % "0.2.0"
 
   // Cats

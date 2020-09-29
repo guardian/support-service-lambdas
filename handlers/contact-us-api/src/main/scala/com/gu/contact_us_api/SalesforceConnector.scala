@@ -1,6 +1,6 @@
 package com.gu.contact_us_api
 
-import com.gu.contact_us_api.models.{ContactUsRequest, SFAuthFailure, SFAuthSuccess, SFCompositeRequest, SFCompositeResponse, SFErrorDetails}
+import com.gu.contact_us_api.models.{SFAuthFailure, SFAuthSuccess, SFCompositeRequest, SFCompositeResponse, SFErrorDetails}
 import io.circe.parser._
 import io.circe.generic.auto._
 import io.circe.syntax._
