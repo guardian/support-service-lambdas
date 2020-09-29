@@ -1,7 +1,7 @@
 import Dependencies._
 
 name := "sf-billing-account-remover"
-description := "Export salesforce data to the data lake"
+description := "Removes Billing Accounts and related records from Salesforce"
 
 assemblyJarName := "sf-billing-account-remover.jar"
 riffRaffPackageType := assembly.value
