@@ -18,7 +18,6 @@ class ContactUs(SFConnector: SalesforceConnector) extends Logging {
   def buildResponse(result: Either[Throwable, Unit]): Either[ContactUsFailureResponse, ContactUsSuccessfulResponse] = {
     result match {
       case Left(error) => {
-        // TODO: Move the logging elsewhere to be more descriptive.
         logger.error(error.getMessage)
         Left(ContactUsFailureResponse(error.getMessage))
       }
