@@ -423,7 +423,8 @@ lazy val `contact-us-api` = all(project in file("handlers/contact-us-api"))
         circe,
         circeParser,
         scalatest,
-        scalajHttp
+        scalajHttp,
+        awsEvents
       )
       ++ logging
   )
