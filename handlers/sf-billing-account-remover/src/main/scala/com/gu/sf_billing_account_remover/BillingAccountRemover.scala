@@ -51,8 +51,8 @@ object BillingAccountRemover extends App {
 
   lazy val optConfig = for {
     sfUserName <- Option(System.getenv("username"))
-    sfClientId <- Option(System.getenv("client_id"))
-    sfClientSecret <- Option(System.getenv("client_secret"))
+    sfClientId <- Option(System.getenv("clientId"))
+    sfClientSecret <- Option(System.getenv("clientSecret"))
     sfPassword <- Option(System.getenv("password"))
     sfToken <- Option(System.getenv("token"))
     sfAuthUrl <- Option(System.getenv("authUrl"))
