@@ -79,6 +79,16 @@ Resources:
       Environment:
         Variables:
           Stage: !Ref Stage
+          apiAccessKeyId: !Ref apiAccessKeyId
+          apiSecretAccessKey: !Ref apiSecretAccessKey
+          authUrl: !Ref authUrl
+          client_id: !Ref client_id
+          client_secret: !Ref client_secret
+          password: !Ref password
+          token: !Ref token
+          username: !Ref username
+          zuoraInstanceUrl: !Ref zuoraInstanceUrl
+
       Role:
         !GetAtt SFBillingAccountRemoverRole.Arn
       MemorySize: 512
