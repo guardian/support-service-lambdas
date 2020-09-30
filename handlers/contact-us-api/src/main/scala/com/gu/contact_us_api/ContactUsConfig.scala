@@ -3,6 +3,7 @@ package com.gu.contact_us_api
 import com.gu.contact_us_api.models.ContactUsEnvConfig
 
 object ContactUsConfig {
+
   val env: Either[Throwable, ContactUsEnvConfig] = {
     val clientID: Option[String] = sys.env.get("clientID")
     val clientSecret: Option[String] = sys.env.get("clientSecret")
@@ -30,4 +31,5 @@ object ContactUsConfig {
       Left(new Throwable("Unable to obtain environment variables."))
     }
   }
+
 }

@@ -8,6 +8,7 @@ import io.circe.generic.auto._
 import io.circe.syntax._
 
 class Handler extends RequestHandler[APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent] with Logging {
+
   val contactUsReqHandler = new ContactUs(new SalesforceConnector())
 
   def handleRequest(event: APIGatewayProxyRequestEvent, context: Context): APIGatewayProxyResponseEvent = {
@@ -47,4 +48,5 @@ class Handler extends RequestHandler[APIGatewayProxyRequestEvent, APIGatewayProx
           )
     }
   }
+
 }
