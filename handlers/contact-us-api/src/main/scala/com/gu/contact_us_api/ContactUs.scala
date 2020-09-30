@@ -1,28 +1,16 @@
 package com.gu.contact_us_api
 
-import com.gu.contact_us_api.models.{ContactUsFailureResponse, ContactUsRequest, ContactUsSuccessfulResponse}
-import com.gu.util.Logging
+import com.gu.contact_us_api.models.{ContactUsError, ContactUsRequest}
 import io.circe.parser._
 import io.circe.generic.auto._
 
-class ContactUs(SFConnector: SalesforceConnector) extends Logging {
-  def processReq(json: String): Either[ContactUsFailureResponse, ContactUsSuccessfulResponse] = {
-    val result = for {
+class ContactUs(SFConnector: SalesforceConnector) {
+  def processReq(json: String): Either[ContactUsError, Unit] = {
+    for {
       req <- decode[ContactUsRequest](json)
+        .left
+        .map(i => ContactUsError("Input", s"Failed to decode request body into ContactUsRequest: ${i.getMessage}"))
       resp <- SFConnector.handle(req.asSFCompositeRequest)
     } yield resp
-
-
-    buildResponse(result)
-  }
-
-  def buildResponse(result: Either[Throwable, Unit]): Either[ContactUsFailureResponse, ContactUsSuccessfulResponse] = {
-    result match {
-      case Left(error) => {
-        logger.error(error.getMessage)
-        Left(ContactUsFailureResponse(error.getMessage))
-      }
-      case Right(_) => Right(ContactUsSuccessfulResponse())
-    }
   }
 }

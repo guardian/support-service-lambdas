@@ -1,6 +1,6 @@
 package com.gu.contact_us_api
 
-import com.gu.contact_us_api.models.{ContactUsEnvConfig, SFAuthFailure, SFAuthSuccess, SFCompositeRequest, SFCompositeResponse, SFErrorDetails}
+import com.gu.contact_us_api.models.{ContactUsEnvConfig, ContactUsError, SFAuthFailure, SFAuthSuccess, SFCompositeRequest, SFCompositeResponse, SFErrorDetails}
 import io.circe.parser._
 import io.circe.generic.auto._
 import io.circe.syntax._
@@ -8,15 +8,15 @@ import scalaj.http.Http
 
 class SalesforceConnector() {
 
-  def handle(req: SFCompositeRequest): Either[Throwable, Unit] = {
+  def handle(req: SFCompositeRequest): Either[ContactUsError, Unit] = {
     for {
-      env <- ContactUsConfig.env
+      env <- ContactUsConfig.env.left.map(i => ContactUsError("Environment", i.getMessage))
       token <- auth(env)
       resp <- sendReq(env, token, req)
     } yield resp
   }
 
-  def auth(env: ContactUsEnvConfig): Either[Throwable, String] = {
+  def auth(env: ContactUsEnvConfig): Either[ContactUsError, String] = {
     val response = Http(env.authEndpoint)
       .postForm(
         Seq(
@@ -30,15 +30,20 @@ class SalesforceConnector() {
       .asString
 
     if (response.isSuccess) {
-      decode[SFAuthSuccess](response.body).map(_.access_token)
+      decode[SFAuthSuccess](response.body)
+        .left
+        .map(i => ContactUsError("Decode", s"Failed to decode Salesforce's auth response into SFAuthSuccess: ${i.getMessage}"))
+        .map(_.access_token)
     } else {
-      decode[SFAuthFailure](response.body).flatMap(value => {
-        Left(new Throwable(s"Could not authenticate: Status code: ${response.code}. ${value.error} - ${value.error_description}"))
-      })
+      decode[SFAuthFailure](response.body)
+        .left
+        .map(i => ContactUsError("Decode", s"Failed to decode Salesforce's auth response into SFAuthFailure: ${i.getMessage}"))
+        .flatMap(value => Left(ContactUsError("Salesforce", s"Could not authenticate: Status code: ${response.code}. ${value.error} - ${value.error_description}")))
+
     }
   }
 
-  def sendReq(env: ContactUsEnvConfig, token: String, request: SFCompositeRequest): Either[Throwable, Unit] = {
+  def sendReq(env: ContactUsEnvConfig, token: String, request: SFCompositeRequest): Either[ContactUsError, Unit] = {
     val response = Http(env.reqEndpoint)
       .header("Content-Type", "application/json")
       .header("Authorization", s"Bearer $token")
@@ -46,16 +51,22 @@ class SalesforceConnector() {
       .asString
 
     if (response.isSuccess) {
-      decode[SFCompositeResponse](response.body).flatMap(compositeResponse => {
-          if(compositeResponse.isSuccess) Right(())
-          else Left(new Throwable(s"Could not complete composite request. Status code: ${response.code}. ${compositeResponse.errorsAsString.getOrElse("")}"))
+      decode[SFCompositeResponse](response.body)
+        .left
+        .map(i => ContactUsError("Decode", s"Failed to decode Salesforce's response into SFCompositeResponse: ${i.getMessage}"))
+        .flatMap(compositeResponse => {
+          if (compositeResponse.isSuccess) Right(())
+          else Left(ContactUsError("Salesforce", s"Could not complete composite request. Status code: ${response.code}. ${compositeResponse.errorsAsString.getOrElse("")}"))
         }
-      )
+        )
     } else {
-      decode[List[SFErrorDetails]](response.body).flatMap(errors => {
-        val errorDetails = errors.map(error => error.asString).mkString(", ")
-        Left(new Throwable(s"Could not complete request. Status code: ${response.code}. ${errorDetails}"))
-      })
+      decode[List[SFErrorDetails]](response.body)
+        .left
+        .map(i => ContactUsError("Decode", s"Failed to decode Salesforce's response into List[SFErrorDetails]: ${i.getMessage}"))
+        .flatMap(errors => {
+          val errorDetails = errors.map(error => error.asString).mkString(", ")
+          Left(ContactUsError("Salesforce",s"Could not complete request. Status code: ${response.code}. $errorDetails"))
+        })
     }
   }
 }

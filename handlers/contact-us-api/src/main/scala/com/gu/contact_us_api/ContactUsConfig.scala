@@ -15,8 +15,6 @@ object ContactUsConfig {
     val envList = List(clientID, clientSecret, username, password, token, authDomain, reqDomain)
 
     if (envList.size == envList.flatten.size) {
-      Left(new Throwable("Unable to obtain environment variables."))
-    } else {
       Right(
         ContactUsEnvConfig(
           clientID.getOrElse(""),
@@ -24,11 +22,12 @@ object ContactUsConfig {
           username.getOrElse(""),
           password.getOrElse(""),
           token.getOrElse(""),
-          authDomain.getOrElse("") + "services/oauth2/token",
-          reqDomain.getOrElse("") + "services/data/v43.0/composite/",
+          "https://" + authDomain.getOrElse("") + "/services/oauth2/token",
+          "https://" + reqDomain.getOrElse("") + "/services/data/v43.0/composite/",
         )
       )
+    } else {
+      Left(new Throwable("Unable to obtain environment variables."))
     }
-
   }
 }
