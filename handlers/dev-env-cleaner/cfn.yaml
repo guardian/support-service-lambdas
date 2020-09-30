@@ -15,7 +15,7 @@ Mappings:
   Stages:
     Schedule:
       CODE: 'rate(365 days)'
-      PROD: 'rate(1 day)'
+      PROD: 'rate(12 hours)'
   Constants:
     Alarm:
       Process: See the wiki at https://github.com/guardian/support-frontend/wiki/Automated-IT-Tests
