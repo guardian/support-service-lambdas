@@ -9,23 +9,23 @@ class Handler extends RequestHandler[APIGatewayProxyRequestEvent, APIGatewayProx
   val contactUsReqHandler = new ContactUs(new SalesforceConnector())
 
   def handleRequest(event: APIGatewayProxyRequestEvent, context: Context): APIGatewayProxyResponseEvent = {
-    logger.info("Received request with body " + event.getBody)
+    logger.info("Received request with body: " + event.getBody)
 
     val response = process(event.getBody)
 
-    logger.info("Responding with " + response)
+    logger.info("Responding with: " + response)
 
     response
   }
 
-  def process(reqBody: String): APIGatewayProxyResponseEvent  = {
+  def process(reqBody: String): APIGatewayProxyResponseEvent = {
     contactUsReqHandler.processReq(reqBody) match {
       case Right(succ) =>
         new APIGatewayProxyResponseEvent()
           .withStatusCode(201)
           .withBody(succ.asJson.toString())
 
-      case Left(fail)=>
+      case Left(fail) =>
         new APIGatewayProxyResponseEvent()
           .withStatusCode(500)
           .withBody(fail.asJson.toString())

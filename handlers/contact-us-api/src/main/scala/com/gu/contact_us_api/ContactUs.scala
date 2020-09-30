@@ -12,6 +12,7 @@ class ContactUs(SFConnector: SalesforceConnector) extends Logging {
       resp <- SFConnector.handle(req.asSFCompositeRequest)
     } yield resp
 
+
     buildResponse(result)
   }
 

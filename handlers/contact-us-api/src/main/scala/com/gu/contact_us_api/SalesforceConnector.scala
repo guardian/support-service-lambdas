@@ -1,6 +1,6 @@
 package com.gu.contact_us_api
 
-import com.gu.contact_us_api.models.{SFAuthFailure, SFAuthSuccess, SFCompositeRequest, SFCompositeResponse, SFErrorDetails}
+import com.gu.contact_us_api.models.{ContactUsEnvConfig, SFAuthFailure, SFAuthSuccess, SFCompositeRequest, SFCompositeResponse, SFErrorDetails}
 import io.circe.parser._
 import io.circe.generic.auto._
 import io.circe.syntax._
@@ -10,20 +10,21 @@ class SalesforceConnector() {
 
   def handle(req: SFCompositeRequest): Either[Throwable, Unit] = {
     for {
-      token <- auth()
-      resp <- sendReq(token, req)
+      env <- ContactUsConfig.env
+      token <- auth(env)
+      resp <- sendReq(env, token, req)
     } yield resp
   }
 
-  def auth(): Either[Throwable, String] = {
-    val response = Http(ContactUsConfig.authEndpoint)
+  def auth(env: ContactUsEnvConfig): Either[Throwable, String] = {
+    val response = Http(env.authEndpoint)
       .postForm(
         Seq(
           ("grant_type", "password"),
-          ("client_id", ContactUsConfig.clientID),
-          ("client_secret", ContactUsConfig.clientSecret),
-          ("username", ContactUsConfig.username),
-          ("password", ContactUsConfig.password + ContactUsConfig.token),
+          ("client_id", env.clientID),
+          ("client_secret", env.clientSecret),
+          ("username", env.username),
+          ("password", env.password + env.token),
         )
       )
       .asString
@@ -37,8 +38,8 @@ class SalesforceConnector() {
     }
   }
 
-  def sendReq(token: String, request: SFCompositeRequest): Either[Throwable, Unit] = {
-    val response = Http(ContactUsConfig.reqEndpoint)
+  def sendReq(env: ContactUsEnvConfig, token: String, request: SFCompositeRequest): Either[Throwable, Unit] = {
+    val response = Http(env.reqEndpoint)
       .header("Content-Type", "application/json")
       .header("Authorization", s"Bearer $token")
       .postData(request.asJson.toString())

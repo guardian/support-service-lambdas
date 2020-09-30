@@ -1,13 +1,34 @@
 package com.gu.contact_us_api
 
-object ContactUsConfig {
-  // TODO: Obtain these from AWS instead
-  val clientID: String = System.getenv("CUClientID")
-  val clientSecret: String = System.getenv("CUClientSecret")
-  val username: String = System.getenv("CUUsername")
-  val password: String = System.getenv("CUPassword")
-  val token: String = System.getenv("CUToken")
+import com.gu.contact_us_api.models.ContactUsEnvConfig
 
-  val authEndpoint = "https://test.salesforce.com/services/oauth2/token"
-  val reqEndpoint = "https://gnmtouchpoint--DEV.my.salesforce.com/services/data/v43.0/composite/"
+object ContactUsConfig {
+  val env: Either[Throwable, ContactUsEnvConfig] = {
+    val clientID: Option[String] = sys.env.get("clientID")
+    val clientSecret: Option[String] = sys.env.get("clientSecret")
+    val username: Option[String] = sys.env.get("username")
+    val password: Option[String] = sys.env.get("password")
+    val token: Option[String] = sys.env.get("token")
+    val authDomain: Option[String] = sys.env.get("authDomain")
+    val reqDomain: Option[String] = sys.env.get("reqDomain")
+
+    val envList = List(clientID, clientSecret, username, password, token, authDomain, reqDomain)
+
+    if (envList.size == envList.flatten.size) {
+      Left(new Throwable("Unable to obtain environment variables."))
+    } else {
+      Right(
+        ContactUsEnvConfig(
+          clientID.getOrElse(""),
+          clientSecret.getOrElse(""),
+          username.getOrElse(""),
+          password.getOrElse(""),
+          token.getOrElse(""),
+          authDomain.getOrElse("") + "services/oauth2/token",
+          reqDomain.getOrElse("") + "services/data/v43.0/composite/",
+        )
+      )
+    }
+
+  }
 }
