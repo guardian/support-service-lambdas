@@ -8,7 +8,7 @@ deployments:
     app: sf-billing-account-remover
     parameters:
       templatePath: cfn.yaml
-  sf-datalake-export:
+  sf-billing-account-remover:
     type: aws-lambda
     parameters:
       fileName: sf-billing-account-remover.jar
