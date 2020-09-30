@@ -23,8 +23,8 @@ object ContactUsConfig {
           username.getOrElse(""),
           password.getOrElse(""),
           token.getOrElse(""),
-          "https://" + authDomain.getOrElse("") + "/services/oauth2/token",
-          "https://" + reqDomain.getOrElse("") + "/services/data/v43.0/composite/",
+          s"https://${authDomain.getOrElse("")}/services/oauth2/token",
+          s"https://${reqDomain.getOrElse("")}/services/data/v43.0/composite/",
         )
       )
     } else {
