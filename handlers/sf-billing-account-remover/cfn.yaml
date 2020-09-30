@@ -1,0 +1,88 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Remove Billing Accounts and related records from Salesforce
+
+Parameters:
+  Stage:
+    Description: Stage name
+    Type: String
+
+  username:
+    Description: Salesforce username
+    Type: String
+
+  password:
+    Description: Salesforce user password
+    Type: String
+
+  token:
+    Description: Salesforce user token
+    Type: String
+
+  authUrl:
+    Description: Salesforce auth endpoint
+    Type: String
+
+  clientId:
+    Description: Salesforce Connected App Consumer Key
+    Type: String
+
+  clientSecret:
+    Description: Salesforce Connected App Consumer Secret
+    Type: String
+
+  zuoraInstanceUrl:
+    Description: Zuora endpoint
+    Type: String
+
+  apiAccessKeyId:
+    Description: Zuora username
+    Type: String
+
+  apiSecretAccessKey:
+    Description: Zuora password
+    Type: String
+Resources:
+  SFBillingAccountRemoverRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: SFBillingAccountRemoverPolicy
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - lambda:InvokeFunction
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/sf-billing-account-remover-${Stage}:log-stream:*
+
+  SFBillingAccountRemoverLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName:
+        !Sub sf-billing-account-remover-${Stage}
+      Description: Remove Billing Accounts and related records from Salesforce (via Zuora)
+      Code:
+        S3Bucket: support-service-lambdas-dist
+        S3Key: !Sub membership/${Stage}/sf-billing-account-remover/sf-billing-account-remover.jar
+      Handler: com.gu.sf_billing_account_remover.BillingAccountRemover::lambda
+      Environment:
+        Variables:
+          Stage: !Ref Stage
+      Role:
+        !GetAtt SFBillingAccountRemoverRole.Arn
+      MemorySize: 512
+      Runtime: java8
+      Timeout: 900
+    DependsOn:
+      - SFBillingAccountRemoverRole
