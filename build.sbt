@@ -339,7 +339,7 @@ lazy val `delivery-problem-credit-processor` =
         scalaLambda,
         circe,
         zio,
-        sttpAsycHttpClientBackendCats,
+        sttpAsyncHttpClientBackendCats,
         scalatest,
         diffx
       )
@@ -360,7 +360,7 @@ lazy val `sf-move-subscriptions-api` = all(project in file("handlers/sf-move-sub
         http4sServer,
         sttp,
         sttpCirce,
-        sttpAsycHttpClientBackendCats,
+        sttpAsyncHttpClientBackendCats,
         scalatest,
         diffx
       ) ++ logging
@@ -377,7 +377,7 @@ lazy val `delivery-records-api` = all(project in file("handlers/delivery-records
   )
   .settings(
     libraryDependencies ++=
-      Seq(http4sDsl, http4sCirce, http4sServer, circe, sttpAsycHttpClientBackendCats, scalatest)
+      Seq(http4sDsl, http4sCirce, http4sServer, circe, sttpAsyncHttpClientBackendCats, scalatest)
         ++ logging
   )
   .enablePlugins(RiffRaffArtifact)
@@ -390,7 +390,7 @@ lazy val `digital-voucher-api` = all(project in file("handlers/digital-voucher-a
         http4sDsl,
         http4sCirce,
         http4sServer,
-        sttpAsycHttpClientBackendCats,
+        sttpAsyncHttpClientBackendCats,
         scalatest,
         diffx,
         scalaMock,
