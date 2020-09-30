@@ -2,3 +2,7 @@
 target/
 .idea*
 cdk-cfn.yaml
+.bloop*
+.metals*
+.vscode*
+metals.sbt
