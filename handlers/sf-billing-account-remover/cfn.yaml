@@ -82,8 +82,8 @@ Resources:
           apiAccessKeyId: !Ref apiAccessKeyId
           apiSecretAccessKey: !Ref apiSecretAccessKey
           authUrl: !Ref authUrl
-          clientId: !Ref client_id
-          clientSecret: !Ref client_secret
+          clientId: !Ref clientId
+          clientSecret: !Ref clientSecret
           password: !Ref password
           token: !Ref token
           username: !Ref username
