@@ -37,6 +37,7 @@ Parameters:
   apiAccessKeyId:
     Description: Zuora username
     Type: String
+    Default:
 
   apiSecretAccessKey:
     Description: Zuora password
