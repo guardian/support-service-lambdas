@@ -1,12 +1,17 @@
-version := "0.1"
+import Dependencies._
 
-scalaVersion := "2.13.3"
+name := "sf-billing-account-remover"
+description := "Removes Billing Accounts and related records from Salesforce"
 
-libraryDependencies += "org.scalaj" %% "scalaj-http" % "2.4.2"
-val circeVersion = "0.12.3"
+assemblyJarName := "sf-billing-account-remover.jar"
+riffRaffPackageType := assembly.value
+riffRaffUploadArtifactBucket := Option("riffraff-artifact")
+riffRaffUploadManifestBucket := Option("riffraff-builds")
+riffRaffManifestProjectName := "MemSub::Membership Admin::SF Billing Account Remover"
+riffRaffArtifactResources += (file(
+  "handlers/sf-billing-account-remover/cfn.yaml"
+), "cfn/cfn.yaml")
 
-libraryDependencies ++= Seq(
-  "io.circe" %% "circe-core",
-  "io.circe" %% "circe-generic",
-  "io.circe" %% "circe-parser"
-).map(_ % circeVersion)
+libraryDependencies ++= Seq(circe, circeParser, scalajHttp)
+
+assemblyMergeStrategyDiscardModuleInfo

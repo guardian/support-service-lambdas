@@ -24,35 +24,45 @@ object BillingAccountRemover extends App {
 
   case class Attributes(`type`: String)
 
-  case class SfBillingAccountToUpdate(id: String,
-                                      GDPR_Removal_Attempts__c: Int,
-                                      attributes: Attributes = Attributes(
-                                        `type` = "Zuora__CustomerAccount__c"
-                                      ))
+  case class SfBillingAccountToUpdate(
+    id: String,
+    GDPR_Removal_Attempts__c: Int,
+    attributes: Attributes = Attributes(
+      `type` = "Zuora__CustomerAccount__c"
+    )
+  )
 
-  case class SfBillingAccountsToUpdate(allOrNone: Boolean,
-                                       records: Seq[SfBillingAccountToUpdate])
+  case class SfBillingAccountsToUpdate(
+    allOrNone: Boolean,
+    records: Seq[SfBillingAccountToUpdate]
+  )
 
-  case class SfErrorRecordToCreate(Type__c: String,
-                                   Info__c: String,
-                                   Message__c: String,
-                                   attributes: Attributes = Attributes(
-                                     `type` = "Apex_Error__c"
-                                   ))
+  case class SfErrorRecordToCreate(
+    Type__c: String,
+    Info__c: String,
+    Message__c: String,
+    attributes: Attributes = Attributes(
+      `type` = "Apex_Error__c"
+    )
+  )
 
-  case class SfErrorRecordsToCreate(allOrNone: Boolean,
-                                    records: Seq[SfErrorRecordToCreate])
+  case class SfErrorRecordsToCreate(
+    allOrNone: Boolean,
+    records: Seq[SfErrorRecordToCreate]
+  )
 
   //Zuora
-  case class BillingAccountsForRemoval(CrmId: String = "",
-                                       Status: String = "Canceled")
+  case class BillingAccountsForRemoval(
+    CrmId: String = "",
+    Status: String = "Canceled"
+  )
   case class Errors(Code: String, Message: String)
   case class ZuoraResponse(Success: Boolean, Errors: Seq[Errors])
 
   lazy val optConfig = for {
     sfUserName <- Option(System.getenv("username"))
-    sfClientId <- Option(System.getenv("client_id"))
-    sfClientSecret <- Option(System.getenv("client_secret"))
+    sfClientId <- Option(System.getenv("clientId"))
+    sfClientSecret <- Option(System.getenv("clientSecret"))
     sfPassword <- Option(System.getenv("password"))
     sfToken <- Option(System.getenv("token"))
     sfAuthUrl <- Option(System.getenv("authUrl"))
@@ -61,26 +71,26 @@ object BillingAccountRemover extends App {
     zuoraApiSecretAccessKey <- Option(System.getenv("apiSecretAccessKey"))
     zuoraInstanceUrl <- Option(System.getenv("zuoraInstanceUrl"))
 
-  } yield
-    Config(
-      SalesforceConfig(
-        userName = sfUserName,
-        clientId = sfClientId,
-        clientSecret = sfClientSecret,
-        password = sfPassword,
-        token = sfToken,
-        authUrl = sfAuthUrl
-      ),
-      ZuoraConfig(
-        apiAccessKeyId = zuoraApiAccessKeyId,
-        apiSecretAccessKey = zuoraApiSecretAccessKey,
-        zuoraInstanceUrl = zuoraInstanceUrl
-      )
+  } yield Config(
+    SalesforceConfig(
+      userName = sfUserName,
+      clientId = sfClientId,
+      clientSecret = sfClientSecret,
+      password = sfPassword,
+      token = sfToken,
+      authUrl = sfAuthUrl
+    ),
+    ZuoraConfig(
+      apiAccessKeyId = zuoraApiAccessKeyId,
+      apiSecretAccessKey = zuoraApiSecretAccessKey,
+      zuoraInstanceUrl = zuoraInstanceUrl
     )
+  )
 
   processBillingAccounts()
 
   def processBillingAccounts(): Unit = {
+
     (for {
       config <- optConfig.toRight(new RuntimeException("Missing config value"))
       sfAuthDetails <- decode[SfAuthDetails](auth(config.salesforceConfig))
@@ -144,7 +154,7 @@ object BillingAccountRemover extends App {
     val limit = 200;
 
     val query =
-      s"Select Id, Zuora__Account__c, GDPR_Removal_Attempts__c, Zuora__External_Id__c from Zuora__CustomerAccount__c where Zuora__External_Id__c != null AND Account.GDPR_Billing_Accounts_Ready_for_Removal__c = true AND GDPR_Removal_Attempts__c < $maxAttempts limit $limit"
+      s"Select Id, Zuora__Account__c, GDPR_Removal_Attempts__c, Zuora__External_Id__c from Zuora__CustomerAccount__c where Zuora__External_Id__c != null AND Zuora__Account__r.GDPR_Billing_Accounts_Ready_for_Removal__c = true AND GDPR_Removal_Attempts__c < $maxAttempts limit $limit"
 
     decode[SfGetBillingAccsResponse](doSfGetWithQuery(sfAuthentication, query))
   }
@@ -159,9 +169,11 @@ object BillingAccountRemover extends App {
       .body
   }
 
-  def doSfCompositeRequest(sfAuthDetails: SfAuthDetails,
-                           jsonBody: String,
-                           requestType: String): Either[Throwable, String] = {
+  def doSfCompositeRequest(
+    sfAuthDetails: SfAuthDetails,
+    jsonBody: String,
+    requestType: String
+  ): Either[Throwable, String] = {
 
     Try {
       Http(
@@ -230,9 +242,11 @@ object BillingAccountRemover extends App {
 
   }
 
-  def updateZuoraBillingAcc(zuoraConfig: ZuoraConfig,
-                            billingAccountForRemovalAsJson: String,
-                            zuoraBillingAccountId: String) = {
+  def updateZuoraBillingAcc(
+    zuoraConfig: ZuoraConfig,
+    billingAccountForRemovalAsJson: String,
+    zuoraBillingAccountId: String
+  ) = {
     Http(
       s"${zuoraConfig.zuoraInstanceUrl}/v1/object/account/$zuoraBillingAccountId"
     ).header("apiAccessKeyId", zuoraConfig.apiAccessKeyId)
@@ -304,7 +318,7 @@ object BillingAccountRemover extends App {
               Type__c = a.ErrorCode.get,
               Info__c = "Billing Account Id:" + a.Id,
               Message__c = a.ErrorMessage.get
-          )
+            )
         )
         .toSeq
 
