@@ -314,14 +314,14 @@ lazy val `sf-datalake-export` = all(project in file("handlers/sf-datalake-export
 def lambdaProject(
   projectName: String,
   projectDescription: String,
-  riffRaffProjectName: String
-): Project = {
+  riffRaffProjectName: String,
+  dependencies: Seq[ModuleID],
+): Project =
   Project(projectName, file(s"handlers/$projectName"))
     .enablePlugins(RiffRaffArtifact)
     .configs(EffectsTest, HealthCheckTest)
     .settings(scalaSettings, testSettings)
     .settings(
-
       name := projectName,
       description:= projectDescription,
       assemblyJarName := s"$projectName.jar",
@@ -330,25 +330,24 @@ def lambdaProject(
       riffRaffUploadArtifactBucket := Option("riffraff-artifact"),
       riffRaffUploadManifestBucket := Option("riffraff-builds"),
       riffRaffManifestProjectName := riffRaffProjectName,
-      riffRaffArtifactResources += (file(s"handlers/$projectName/cfn.yaml"), "cfn/cfn.yaml")
+      riffRaffArtifactResources += (file(s"handlers/$projectName/cfn.yaml"), "cfn/cfn.yaml"),
+      libraryDependencies ++= dependencies ++ logging
     )
-}
+
 
 lazy val `zuora-datalake-export` = lambdaProject(
   "zuora-datalake-export",
   "Zuora to Datalake export using Stateful AQuA API which exports incremental changes",
-  "MemSub::Membership Admin::Zuora Data Lake Export"
-).settings(libraryDependencies ++= Seq(
-  scalaLambda,
-  scalajHttp,
-  awsS3,
-  enumeratum,
-) ++ logging)
+  "MemSub::Membership Admin::Zuora Data Lake Export",
+  Seq(scalaLambda, scalajHttp, awsS3, enumeratum)
+)
 
-lazy val `batch-email-sender` = all(project in file("handlers/batch-email-sender"))
-  .enablePlugins(RiffRaffArtifact)
-  .dependsOn(handler, `effects-sqs`, effectsDepIncludingTestFolder, testDep)
-  .settings(libraryDependencies ++= Seq(playJsonExtensions))
+lazy val `batch-email-sender` = lambdaProject(
+  "batch-email-sender",
+  "Receive batches of emails to be sent, munge them into an appropriate format and put them on the email sending queue.",
+  "MemSub::Membership Admin::Batch Email Sender",
+  Seq(playJsonExtensions, supportInternationalisation, diffx)
+).dependsOn(handler, `effects-sqs`, effectsDepIncludingTestFolder, testDep)
 
 lazy val `braze-to-salesforce-file-upload` = all(project in file("handlers/braze-to-salesforce-file-upload"))
   .enablePlugins(RiffRaffArtifact)
