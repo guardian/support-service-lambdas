@@ -9,7 +9,7 @@ Parameters:
 Mappings:
   StageMap:
     DEV:
-      SecretsVersion: "e956469f-2d8f-4322-8616-1d366d34b115"
+      SecretsVersion: "96c41801-48ef-48f2-b8e1-e7619eb53eae"
     CODE:
       SecretsVersion: ""
     PROD:
