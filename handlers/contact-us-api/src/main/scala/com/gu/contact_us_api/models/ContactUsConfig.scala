@@ -21,10 +21,7 @@ object ContactUsConfig {
       token,
       s"https://$authDomain/services/oauth2/token",
       s"https://$reqDomain/services/data/v43.0/composite/",
-    )) match {
-      case Some(config) => Right(config)
-      case None => Left(ContactUsError("Environment", "Could not obtain all environment variables."))
-    }
+    )).toRight(ContactUsError("Environment", "Could not obtain all environment variables."))
   }
 
 }

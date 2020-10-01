@@ -5,7 +5,6 @@ import com.gu.contact_us_api.ParserUtils._
 import io.circe.generic.auto._
 import io.circe.syntax._
 import scalaj.http.{Http, HttpRequest, HttpResponse}
-
 import scala.util.Try
 
 class SalesforceConnector() extends SFConnector {
@@ -19,9 +18,7 @@ class SalesforceConnector() extends SFConnector {
   }
 
   def runRequest(http: HttpRequest): Either[ContactUsError, HttpResponse[String]] = {
-    Try {
-      http.asString
-    }
+    Try(http.asString)
       .toEither
       .left
       .map(i => ContactUsError("Fatal", s"Salesforce request failed: $i"))
