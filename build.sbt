@@ -415,6 +415,17 @@ lazy val `digital-voucher-cancellation-processor` = all(project in file("handler
   )
   .enablePlugins(RiffRaffArtifact)
 
+lazy val `digital-voucher-suspension-processor` = all(project in file("handlers/digital-voucher-suspension-processor"))
+  .dependsOn(`salesforce-sttp-client`)
+  .settings(
+    libraryDependencies ++=
+      Seq(
+        awsLambda,
+        sttpAsyncHttpClientBackendCats
+      )
+        ++ logging
+  )
+
 lazy val `contact-us-api` = all(project in file("handlers/contact-us-api"))
   .dependsOn(handler)
   .settings(
