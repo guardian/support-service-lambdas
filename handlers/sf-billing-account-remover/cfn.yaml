@@ -11,9 +11,9 @@ Mappings:
     DEV:
       SecretsVersion: "96c41801-48ef-48f2-b8e1-e7619eb53eae"
     CODE:
-      SecretsVersion: ""
+      SecretsVersion: "8437e910-65d2-4ffd-9399-8cddde6e36e8"
     PROD:
-      SecretsVersion: ""
+      SecretsVersion: "ad6b0506-4c21-417b-a626-214d03fb0b6d"
 
 Resources:
   SFBillingAccountRemoverRole:
