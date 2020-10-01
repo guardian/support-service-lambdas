@@ -311,8 +311,39 @@ lazy val `sf-datalake-export` = all(project in file("handlers/sf-datalake-export
   .enablePlugins(RiffRaffArtifact)
   .dependsOn(`salesforce-client`, handler, effectsDepIncludingTestFolder, testDep)
 
-lazy val `zuora-datalake-export` = all(project in file("handlers/zuora-datalake-export"))
-  .enablePlugins(RiffRaffArtifact)
+def lambdaProject(
+  projectName: String,
+  projectDescription: String,
+  riffRaffProjectName: String
+): Project = {
+  Project(projectName, file(s"handlers/$projectName"))
+    .enablePlugins(RiffRaffArtifact)
+    .configs(EffectsTest, HealthCheckTest)
+    .settings(scalaSettings, testSettings)
+    .settings(
+
+      name := projectName,
+      description:= projectDescription,
+      assemblyJarName := s"$projectName.jar",
+      assemblyMergeStrategyDiscardModuleInfo,
+      riffRaffPackageType := assembly.value,
+      riffRaffUploadArtifactBucket := Option("riffraff-artifact"),
+      riffRaffUploadManifestBucket := Option("riffraff-builds"),
+      riffRaffManifestProjectName := riffRaffProjectName,
+      riffRaffArtifactResources += (file(s"handlers/$projectName/cfn.yaml"), "cfn/cfn.yaml")
+    )
+}
+
+lazy val `zuora-datalake-export` = lambdaProject(
+  "zuora-datalake-export",
+  "Zuora to Datalake export using Stateful AQuA API which exports incremental changes",
+  "MemSub::Membership Admin::Zuora Data Lake Export"
+).settings(libraryDependencies ++= Seq(
+  scalaLambda,
+  scalajHttp,
+  awsS3,
+  enumeratum,
+) ++ logging)
 
 lazy val `batch-email-sender` = all(project in file("handlers/batch-email-sender"))
   .enablePlugins(RiffRaffArtifact)
