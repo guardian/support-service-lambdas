@@ -1,13 +1,13 @@
 package com.gu.contact_us_api
 
-import com.gu.contact_us_api.models.{ContactUsConfig, ContactUsError, SFAuthFailure, SFAuthSuccess, SFCompositeRequest, SFCompositeResponse, SFErrorDetails, SFConnector}
+import com.gu.contact_us_api.models.{ContactUsConfig, ContactUsError, SFAuthFailure, SFAuthSuccess, SFCompositeRequest, SFCompositeResponse, SFErrorDetails}
 import com.gu.contact_us_api.ParserUtils._
 import io.circe.generic.auto._
 import io.circe.syntax._
 import scalaj.http.{Http, HttpRequest, HttpResponse}
 import scala.util.Try
 
-class SalesforceConnector() extends SFConnector {
+object SalesforceConnector {
 
   def handle(req: SFCompositeRequest): Either[ContactUsError, Unit] = {
     for {
