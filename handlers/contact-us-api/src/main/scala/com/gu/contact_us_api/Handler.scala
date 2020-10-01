@@ -36,8 +36,7 @@ class Handler extends RequestHandler[APIGatewayProxyRequestEvent, APIGatewayProx
       case Left(fail) =>
         logger.error(fail.errorDetails)
 
-        val statusCode = if (fail.errorType == "Input") 400 else 500
-        val message = if (fail.errorType == "Input") "Invalid input" else "Internal server error"
+        val (statusCode, message) = if (fail.errorType == "Input") (400, "Invalid input") else (500, "Internal server error")
 
         new APIGatewayProxyResponseEvent()
           .withStatusCode(statusCode)
