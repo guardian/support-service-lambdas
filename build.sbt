@@ -293,9 +293,12 @@ lazy val `sf-contact-merge` = all(project in file("handlers/sf-contact-merge"))
 lazy val `sf-billing-account-remover` = all(project in file("handlers/sf-billing-account-remover"))
   .enablePlugins(RiffRaffArtifact)
 
-lazy val `cancellation-sf-cases-api` = all(project in file("handlers/cancellation-sf-cases-api"))
-  .enablePlugins(RiffRaffArtifact)
-  .dependsOn(`salesforce-client`, handler, effectsDepIncludingTestFolder, testDep)
+lazy val `cancellation-sf-cases-api` = lambdaProject(
+    "cancellation-sf-cases-api",
+    "Create/update SalesForce cases for self service cancellation tracking",
+    "MemSub::Membership::Lambdas::Cancellation SF Cases API",
+    Seq(playJsonExtensions)
+  ).dependsOn(`salesforce-client`, handler, effectsDepIncludingTestFolder, testDep)
 
 lazy val `sf-gocardless-sync` = all(project in file("handlers/sf-gocardless-sync"))
   .enablePlugins(RiffRaffArtifact)
@@ -334,7 +337,6 @@ def lambdaProject(
       libraryDependencies ++= dependencies ++ logging
     )
 
-
 lazy val `zuora-datalake-export` = lambdaProject(
   "zuora-datalake-export",
   "Zuora to Datalake export using Stateful AQuA API which exports incremental changes",
@@ -349,8 +351,17 @@ lazy val `batch-email-sender` = lambdaProject(
   Seq(playJsonExtensions, supportInternationalisation, diffx)
 ).dependsOn(handler, `effects-sqs`, effectsDepIncludingTestFolder, testDep)
 
-lazy val `braze-to-salesforce-file-upload` = all(project in file("handlers/braze-to-salesforce-file-upload"))
-  .enablePlugins(RiffRaffArtifact)
+lazy val `braze-to-salesforce-file-upload` = lambdaProject(
+  "braze-to-salesforce-file-upload",
+  "MemSub::Membership Admin::braze-to-salesforce-file-upload",
+  "Braze to Salesforce file upload",
+  Seq(
+    scalaLambda,
+    scalajHttp,
+    awsS3,
+    betterFiles,
+  )
+)
 
 lazy val `holiday-stop-processor` = all(project in file("handlers/holiday-stop-processor"))
   .enablePlugins(RiffRaffArtifact)

@@ -64,6 +64,7 @@ object Dependencies {
   val enumeratum = "com.beachape" %% "enumeratum" % "1.5.13"
   val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "1.3.0"
   val stripe = "com.stripe" % "stripe-java" % "5.28.0"
+  val betterFiles = "com.github.pathikrit" %% "better-files" % "3.9.1"
 
   // Testing
   val diffx = "com.softwaremill.diffx" %% "diffx-scalatest" % "0.3.29" % Test
