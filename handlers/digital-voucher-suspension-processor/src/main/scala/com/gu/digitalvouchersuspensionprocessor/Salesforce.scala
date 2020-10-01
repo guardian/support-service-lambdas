@@ -1,54 +1,49 @@
 package com.gu.digitalvouchersuspensionprocessor
 
-import java.time.LocalDate
+import java.time.{LocalDate, LocalDateTime}
 
 import cats.data.EitherT
-import cats.effect.IO
+import cats.effect.Sync
+import com.gu.salesforce.RecordsWrapperCaseClass
 import com.gu.salesforce.sttp.SalesforceClient
-import com.gu.salesforce.{RecordsWrapperCaseClass, SFAuthConfig}
-import com.softwaremill.sttp.SttpBackend
-import io.circe.Decoder
+import io.circe.generic.auto._
 
 object Salesforce {
 
   case class Suspension(
-    subscriptionNumber: String,
-    sfSubscriptionId: String,
-    suspendedPublicationDate: LocalDate
+   Id: String,
+   Stopped_Publication_Date__c: LocalDate,
+   Holiday_Stop_Request__r: HolidayStopRequest
   )
 
-  object Suspension {
-    implicit val decoder: Decoder[Suspension] = cursor => {
-      val holStopCursor = cursor.downField("Holiday_Stop_Request__r")
-      for {
-        subscriptionNumber <- holStopCursor.downField("Subscription_Name__c").as[String]
-        sfSubscriptionId <- holStopCursor.downField("SF_Subscription__c").as[String]
-        suspendedPublicationDate <- cursor.downField("Stopped_Publication_Date__c").as[LocalDate]
-      } yield Suspension(
-        subscriptionNumber,
-        sfSubscriptionId,
-        suspendedPublicationDate
-      )
-    }
-  }
+  /**
+   * @param SF_Subscription__c SF subscription ID
+   * @param Subscription_Name__c Zuora subscription name/number
+   */
+  case class HolidayStopRequest(
+    SF_Subscription__c: String,
+    Subscription_Name__c: String,
+  )
 
-  def fetchSuspensions(config: SFAuthConfig, sttpBackend: SttpBackend[IO, Nothing]): EitherT[IO, SalesforceFetchFailure, RecordsWrapperCaseClass[Suspension]] =
-    for {
-      salesforceClient <- SalesforceClient(sttpBackend, config)
-        .leftMap(e => SalesforceFetchFailure(s"Failed to create Salesforce client: $e"))
-      suspensions <- salesforceClient.query[Suspension](query.futureSuspendedVouchers)
-        .leftMap(e => SalesforceFetchFailure(s"Failed to fetch results: $e"))
-    } yield suspensions
+  case class Patch(Sent_To_Digital_Voucher_Service__c: LocalDateTime)
+
+  def fetchSuspensions[F[_]: Sync](salesforce: SalesforceClient[F]): EitherT[F, SalesforceFetchFailure, RecordsWrapperCaseClass[Suspension]] =
+    salesforce.query[Suspension](query.futureSuspendedVouchers)
+      .leftMap(e => SalesforceFetchFailure(e.toString))
+
+  def writeSuccess[F[_]: Sync](salesforce: SalesforceClient[F], suspension: Suspension, now: LocalDateTime): EitherT[F, SalesforceWriteFailure, Unit] =
+    salesforce.patch(
+      objectName = "Holiday_Stop_Requests_Detail__c",
+      objectId = suspension.Id,
+      body = Patch(Sent_To_Digital_Voucher_Service__c = now)
+    ).leftMap(e => SalesforceWriteFailure(e.toString))
 
   object query {
     val futureSuspendedVouchers: String =
       s"""
-         |SELECT Holiday_Stop_Request__r.SF_Subscription__c, Stopped_Publication_Date__c, Holiday_Stop_Request__r.Subscription_Name__c
+         |SELECT Id, Holiday_Stop_Request__r.SF_Subscription__c, Stopped_Publication_Date__c, Holiday_Stop_Request__r.Subscription_Name__c
          |FROM Holiday_Stop_Requests_Detail__c
          |WHERE Holiday_Stop_Request__r.SF_Subscription__r.Product__c = 'Newspaper Digital Voucher'
-         |AND Stopped_Publication_Date__c >= TODAY
-         |AND Is_Withdrawn__c = false
-         |AND Is_Actioned__c = true
          |AND Sent_To_Digital_Voucher_Service__c = null
          |""".stripMargin
   }
