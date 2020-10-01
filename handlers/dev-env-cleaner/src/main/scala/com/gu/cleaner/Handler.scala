@@ -124,7 +124,7 @@ class Steps(log: String => Unit) {
       subs_to_cancel,
       """select Id, TermEndDate
         |from Subscription
-        |where billtocontact.WorkEmail = 'integration-test@gu.com' and Status = 'Active' and account.Status = 'Active'
+        |where (billtocontact.WorkEmail = 'integration-test@gu.com' OR billtocontact.WorkEmail = 'test@gu.com') and Status = 'Active' and account.Status = 'Active'
         |""".stripMargin
     )
     val accounts_to_cancel = "accounts_to_cancel"

@@ -1,13 +1,12 @@
 package com.gu.contact_us_api
 
-import com.gu.contact_us_api.SalesforceConnector
-import com.gu.contact_us_api.models.{ContactUsFailureResponse, ContactUsRequest, ContactUsResponse, ContactUsSuccessfulResponse}
+import com.gu.contact_us_api.models.{ContactUsFailureResponse, ContactUsRequest, ContactUsSuccessfulResponse}
+import com.gu.util.Logging
 import io.circe.parser._
 import io.circe.generic.auto._
-import io.circe.syntax._
 
-class ContactUs(SFConnector: SalesforceConnector) {
-  def processReq(json: String): ContactUsResponse = {
+class ContactUs(SFConnector: SalesforceConnector) extends Logging {
+  def processReq(json: String): Either[ContactUsFailureResponse, ContactUsSuccessfulResponse] = {
     val result = for {
       req <- decode[ContactUsRequest](json)
       resp <- SFConnector.handle(req.asSFCompositeRequest)
@@ -16,10 +15,13 @@ class ContactUs(SFConnector: SalesforceConnector) {
     buildResponse(result)
   }
 
-  def buildResponse(result: Either[Throwable, Unit]): ContactUsResponse = {
+  def buildResponse(result: Either[Throwable, Unit]): Either[ContactUsFailureResponse, ContactUsSuccessfulResponse] = {
     result match {
-      case Left(error) => ContactUsFailureResponse(error.getMessage)
-      case Right(_) => ContactUsSuccessfulResponse()
+      case Left(error) => {
+        logger.error(error.getMessage)
+        Left(ContactUsFailureResponse(error.getMessage))
+      }
+      case Right(_) => Right(ContactUsSuccessfulResponse())
     }
   }
 }

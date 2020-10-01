@@ -342,7 +342,7 @@ lazy val `delivery-problem-credit-processor` =
         scalaLambda,
         circe,
         zio,
-        sttpAsycHttpClientBackendCats,
+        sttpAsyncHttpClientBackendCats,
         scalatest,
         diffx
       )
@@ -363,7 +363,7 @@ lazy val `sf-move-subscriptions-api` = all(project in file("handlers/sf-move-sub
         http4sServer,
         sttp,
         sttpCirce,
-        sttpAsycHttpClientBackendCats,
+        sttpAsyncHttpClientBackendCats,
         scalatest,
         diffx
       ) ++ logging
@@ -380,7 +380,7 @@ lazy val `delivery-records-api` = all(project in file("handlers/delivery-records
   )
   .settings(
     libraryDependencies ++=
-      Seq(http4sDsl, http4sCirce, http4sServer, circe, sttpAsycHttpClientBackendCats, scalatest)
+      Seq(http4sDsl, http4sCirce, http4sServer, circe, sttpAsyncHttpClientBackendCats, scalatest)
         ++ logging
   )
   .enablePlugins(RiffRaffArtifact)
@@ -393,7 +393,7 @@ lazy val `digital-voucher-api` = all(project in file("handlers/digital-voucher-a
         http4sDsl,
         http4sCirce,
         http4sServer,
-        sttpAsycHttpClientBackendCats,
+        sttpAsyncHttpClientBackendCats,
         scalatest,
         diffx,
         scalaMock,
@@ -418,19 +418,31 @@ lazy val `digital-voucher-cancellation-processor` = all(project in file("handler
   )
   .enablePlugins(RiffRaffArtifact)
 
+lazy val `digital-voucher-suspension-processor` = all(project in file("handlers/digital-voucher-suspension-processor"))
+  .dependsOn(`salesforce-sttp-client`)
+  .settings(
+    libraryDependencies ++=
+      Seq(
+        awsLambda,
+        sttpAsyncHttpClientBackendCats
+      )
+        ++ logging
+  )
+
 lazy val `contact-us-api` = all(project in file("handlers/contact-us-api"))
-  .dependsOn(`http4s-lambda-handler`)
+  .dependsOn(handler)
   .settings(
     libraryDependencies ++=
       Seq(
         circe,
         circeParser,
         scalatest,
-        scalajHttp
+        scalajHttp,
+        awsEvents
       )
-//      ++ logging
+      ++ logging
   )
-//  .enablePlugins(RiffRaffArtifact)
+  .enablePlugins(RiffRaffArtifact)
 
 
 lazy val `http4s-lambda-handler` = all(project in file("lib/http4s-lambda-handler"))
