@@ -7,14 +7,10 @@ import io.circe.generic.auto._
 class ContactUs(SFConnector: SalesforceConnector) {
 
   def processReq(json: String): Either[ContactUsError, Unit] = {
-    try {
-      for {
-        req <- decode[ContactUsRequest](json, Some("ContactUsRequest"), "Input")
-        resp <- SFConnector.handle(req.asSFCompositeRequest)
-      } yield resp
-    } catch {
-      case e: Throwable => Left(ContactUsError("Fatal", s"Something crashed: $e"))
-    }
+    for {
+      req <- decode[ContactUsRequest](json, Some("ContactUsRequest"), "Input")
+      resp <- SFConnector.handle(req.asSFCompositeRequest)
+    } yield resp
   }
 
 }
