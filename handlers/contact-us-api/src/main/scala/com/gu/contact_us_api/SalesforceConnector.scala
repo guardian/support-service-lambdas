@@ -1,6 +1,6 @@
 package com.gu.contact_us_api
 
-import com.gu.contact_us_api.models.{ContactUsEnvConfig, ContactUsError, SFAuthFailure, SFAuthSuccess, SFCompositeRequest, SFCompositeResponse, SFErrorDetails}
+import com.gu.contact_us_api.models.{ContactUsConfig, ContactUsError, SFAuthFailure, SFAuthSuccess, SFCompositeRequest, SFCompositeResponse, SFErrorDetails}
 import com.gu.contact_us_api.ParserUtils._
 import io.circe.generic.auto._
 import io.circe.syntax._
@@ -11,7 +11,7 @@ class SalesforceConnector() {
 
   def handle(req: SFCompositeRequest): Either[ContactUsError, Unit] = {
     for {
-      env <- ContactUsConfig.env.left.map(i => ContactUsError("Environment", i.getMessage))
+      env <- ContactUsConfig.env
       token <- auth(env)
       resp <- sendReq(env, token, req)
     } yield resp
@@ -26,7 +26,7 @@ class SalesforceConnector() {
       .map(i => ContactUsError("Fatal", s"Salesforce request failed: $i"))
   }
 
-  def auth(env: ContactUsEnvConfig): Either[ContactUsError, String] = {
+  def auth(env: ContactUsConfig): Either[ContactUsError, String] = {
     runRequest(
       Http(env.authEndpoint)
         .postForm(
@@ -52,7 +52,7 @@ class SalesforceConnector() {
       .flatten
   }
 
-  def sendReq(env: ContactUsEnvConfig, token: String, request: SFCompositeRequest): Either[ContactUsError, Unit] = {
+  def sendReq(env: ContactUsConfig, token: String, request: SFCompositeRequest): Either[ContactUsError, Unit] = {
     runRequest(
       Http(env.reqEndpoint)
         .header("Content-Type", "application/json")
