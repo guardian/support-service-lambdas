@@ -4,14 +4,14 @@ import cats.arrow.FunctionK
 import cats.data.EitherT
 import cats.effect.IO
 import cats.implicits._
-import com.amazonaws.services.lambda.runtime.{Context, RequestHandler}
 import com.softwaremill.sttp.impl.cats.implicits._
 import com.softwaremill.sttp.{HttpURLConnectionBackend, Id, SttpBackend}
 import com.typesafe.scalalogging.LazyLogging
 
-object Handler extends RequestHandler[Map[String, String], String] with LazyLogging {
+object Handler extends LazyLogging {
 
-  def handleRequest(input: Map[String, String], context: Context): String =
+  // lambda entry point
+  def handleRequest(): String =
     fetchSuspensionsToBeProcessed()
 
   def main(args: Array[String]): Unit = println(fetchSuspensionsToBeProcessed())
