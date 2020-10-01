@@ -7,7 +7,7 @@ import com.gu.util.Logging
 import io.circe.generic.auto._
 import io.circe.syntax._
 
-object Handler extends RequestHandler[APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent] with Logging {
+class Handler extends RequestHandler[APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent] with Logging {
 
   def handleRequest(event: APIGatewayProxyRequestEvent, context: Context): APIGatewayProxyResponseEvent = {
     logger.info("Received request with body: " + event.getBody)
