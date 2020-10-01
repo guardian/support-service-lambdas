@@ -10,6 +10,11 @@ Parameters:
     Default: CODE
 
 Resources:
+  ContactUsApiGateway:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: !Sub ${Stage}
+
   ContactUsLambda:
     Type: AWS::Serverless::Function
     Properties:
@@ -29,3 +34,11 @@ Resources:
           token: !Sub '{{resolve:secretsmanager:contact-us-api-${Stage}:SecretString:token}}'
           authDomain: !Sub '{{resolve:secretsmanager:contact-us-api-${Stage}:SecretString:authDomain}}'
           reqDomain: !Sub '{{resolve:secretsmanager:contact-us-api-${Stage}:SecretString:reqDomain}}'
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /
+            Method: post
+            RestApiId:
+              Ref: ContactUsApiGateway
