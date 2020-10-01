@@ -1,47 +1,20 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: Remove Billing Accounts and related records from Salesforce
+Description: Remove Billing Accounts and related records from SF
 
 Parameters:
   Stage:
     Description: Stage name
     Type: String
 
-  username:
-    Description: Salesforce username
-    Type: String
+Mappings:
+  StageMap:
+    DEV:
+      SecretsVersion: "e956469f-2d8f-4322-8616-1d366d34b115"
+    CODE:
+      SecretsVersion: ""
+    PROD:
+      SecretsVersion: ""
 
-  password:
-    Description: Salesforce user password
-    Type: String
-
-  token:
-    Description: Salesforce user token
-    Type: String
-
-  authUrl:
-    Description: Salesforce auth endpoint
-    Type: String
-
-  clientId:
-    Description: Salesforce Connected App Consumer Key
-    Type: String
-
-  clientSecret:
-    Description: Salesforce Connected App Consumer Secret
-    Type: String
-
-  zuoraInstanceUrl:
-    Description: Zuora endpoint
-    Type: String
-
-  apiAccessKeyId:
-    Description: Zuora username
-    Type: String
-    Default:
-
-  apiSecretAccessKey:
-    Description: Zuora password
-    Type: String
 Resources:
   SFBillingAccountRemoverRole:
     Type: AWS::IAM::Role
@@ -80,15 +53,42 @@ Resources:
       Environment:
         Variables:
           Stage: !Ref Stage
-          apiAccessKeyId: !Ref apiAccessKeyId
-          apiSecretAccessKey: !Ref apiSecretAccessKey
-          authUrl: !Ref authUrl
-          clientId: !Ref clientId
-          clientSecret: !Ref clientSecret
-          password: !Ref password
-          token: !Ref token
-          username: !Ref username
-          zuoraInstanceUrl: !Ref zuoraInstanceUrl
+          apiAccessKeyId:
+            !Sub
+            - '{{resolve:secretsmanager:sf-billing-account-remover-${Stage}:SecretString:apiAccessKeyId::${SecretsVersion}}}'
+            - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SecretsVersion]
+          apiSecretAccessKey:
+            !Sub
+            - '{{resolve:secretsmanager:sf-billing-account-remover-${Stage}:SecretString:apiSecretAccessKey::${SecretsVersion}}}'
+            - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SecretsVersion]
+          authUrl:
+            !Sub
+            - '{{resolve:secretsmanager:sf-billing-account-remover-${Stage}:SecretString:authUrl::${SecretsVersion}}}'
+            - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SecretsVersion]
+          clientId:
+            !Sub
+            - '{{resolve:secretsmanager:sf-billing-account-remover-${Stage}:SecretString:clientId::${SecretsVersion}}}'
+            - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SecretsVersion]
+          clientSecret:
+            !Sub
+            - '{{resolve:secretsmanager:sf-billing-account-remover-${Stage}:SecretString:clientSecret::${SecretsVersion}}}'
+            - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SecretsVersion]
+          password:
+            !Sub
+            - '{{resolve:secretsmanager:sf-billing-account-remover-${Stage}:SecretString:password::${SecretsVersion}}}'
+            - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SecretsVersion]
+          token:
+            !Sub
+            - '{{resolve:secretsmanager:sf-billing-account-remover-${Stage}:SecretString:token::${SecretsVersion}}}'
+            - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SecretsVersion]
+          username:
+            !Sub
+            - '{{resolve:secretsmanager:sf-billing-account-remover-${Stage}:SecretString:username::${SecretsVersion}}}'
+            - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SecretsVersion]
+          zuoraInstanceUrl:
+            !Sub
+            - '{{resolve:secretsmanager:sf-billing-account-remover-${Stage}:SecretString:zuoraInstanceUrl::${SecretsVersion}}}'
+            - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SecretsVersion]
 
       Role:
         !GetAtt SFBillingAccountRemoverRole.Arn
