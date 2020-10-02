@@ -14,6 +14,12 @@ Resources:
     Type: AWS::Serverless::Api
     Properties:
       StageName: !Sub ${Stage}
+      Auth:
+        ApiKeyRequired: true
+        UsagePlan:
+          CreateUsagePlan: PER_API
+          UsagePlanName: !Sub contact-us-api-${Stage}-UsagePlan
+          Description: !Sub Usage plan for contact-us-api-${Stage}
 
   ContactUsLambda:
     Type: AWS::Serverless::Function
@@ -39,6 +45,6 @@ Resources:
           Type: Api
           Properties:
             Path: /
-            Method: post
+            Method: POST
             RestApiId:
               Ref: ContactUsApiGateway
