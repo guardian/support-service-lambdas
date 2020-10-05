@@ -37,7 +37,7 @@ object SalesforceConnector {
           )
         )
     )
-      .map(response => {
+      .flatMap(response => {
         if (response.isSuccess)
           decode[SFAuthSuccess](response.body, Some("SFAuthSuccess"))
             .map(_.access_token)
@@ -47,7 +47,6 @@ object SalesforceConnector {
               Left(ContactUsError("Salesforce", s"Could not authenticate: Status code: ${response.code}. ${value.error} - ${value.error_description}"))
             )
       })
-      .flatten
   }
 
   def sendReq(env: ContactUsConfig, token: String, request: SFCompositeRequest): Either[ContactUsError, Unit] = {
@@ -57,7 +56,7 @@ object SalesforceConnector {
         .header("Authorization", s"Bearer $token")
         .postData(request.asJson.toString())
     )
-      .map(response => {
+      .flatMap(response => {
         if (response.isSuccess)
           decode[SFCompositeResponse](response.body, Some("SFCompositeResponse"))
             .flatMap(compositeResponse => {
