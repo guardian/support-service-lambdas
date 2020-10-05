@@ -10,10 +10,12 @@ import io.circe.syntax._
 
 class Handler extends RequestHandler[APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent] with Logging {
 
+  val SFConnector = new SalesforceConnector(HttpRequestUtils.runSafeRequest)
+
   def handleRequest(event: APIGatewayProxyRequestEvent, context: Context): APIGatewayProxyResponseEvent = {
     logger.info("Received request with body: " + event.getBody)
 
-    val response = process(event.getBody, SalesforceConnector.handle)
+    val response = process(event.getBody, SFConnector.handle)
 
     logger.info("Responding with: " + response)
 

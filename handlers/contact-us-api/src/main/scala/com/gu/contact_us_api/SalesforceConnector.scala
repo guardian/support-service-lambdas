@@ -5,9 +5,9 @@ import com.gu.contact_us_api.ParserUtils._
 import io.circe.generic.auto._
 import io.circe.syntax._
 import scalaj.http.{Http, HttpRequest, HttpResponse}
-import scala.util.Try
 
-object SalesforceConnector {
+
+class SalesforceConnector(runRequest: HttpRequest => Either[ContactUsError, HttpResponse[String]]) {
 
   def handle(req: SFCompositeRequest): Either[ContactUsError, Unit] = {
     for {
@@ -15,13 +15,6 @@ object SalesforceConnector {
       token <- auth(env)
       resp <- sendReq(env, token, req)
     } yield resp
-  }
-
-  def runRequest(http: HttpRequest): Either[ContactUsError, HttpResponse[String]] = {
-    Try(http.asString)
-      .toEither
-      .left
-      .map(i => ContactUsError("Fatal", s"Salesforce request failed: $i"))
   }
 
   def auth(env: ContactUsConfig): Either[ContactUsError, String] = {
