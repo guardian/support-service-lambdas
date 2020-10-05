@@ -7,7 +7,9 @@ import io.circe.syntax._
 import scalaj.http._
 
 import scala.util.Try
-object BillingAccountRemover extends App {
+import com.typesafe.scalalogging.LazyLogging
+
+object BillingAccountRemover extends App with LazyLogging {
   //Salesforce
   case class SfAuthDetails(access_token: String, instance_url: String)
 
@@ -24,38 +26,28 @@ object BillingAccountRemover extends App {
 
   case class Attributes(`type`: String)
 
-  case class SfBillingAccountToUpdate(
-    id: String,
-    GDPR_Removal_Attempts__c: Int,
-    attributes: Attributes = Attributes(
-      `type` = "Zuora__CustomerAccount__c"
-    )
-  )
+  case class SfBillingAccountToUpdate(id: String,
+                                      GDPR_Removal_Attempts__c: Int,
+                                      attributes: Attributes = Attributes(
+                                        `type` = "Zuora__CustomerAccount__c"
+                                      ))
 
-  case class SfBillingAccountsToUpdate(
-    allOrNone: Boolean,
-    records: Seq[SfBillingAccountToUpdate]
-  )
+  case class SfBillingAccountsToUpdate(allOrNone: Boolean,
+                                       records: Seq[SfBillingAccountToUpdate])
 
-  case class SfErrorRecordToCreate(
-    Type__c: String,
-    Info__c: String,
-    Message__c: String,
-    attributes: Attributes = Attributes(
-      `type` = "Apex_Error__c"
-    )
-  )
+  case class SfErrorRecordToCreate(Type__c: String,
+                                   Info__c: String,
+                                   Message__c: String,
+                                   attributes: Attributes = Attributes(
+                                     `type` = "Apex_Error__c"
+                                   ))
 
-  case class SfErrorRecordsToCreate(
-    allOrNone: Boolean,
-    records: Seq[SfErrorRecordToCreate]
-  )
+  case class SfErrorRecordsToCreate(allOrNone: Boolean,
+                                    records: Seq[SfErrorRecordToCreate])
 
   //Zuora
-  case class BillingAccountsForRemoval(
-    CrmId: String = "",
-    Status: String = "Canceled"
-  )
+  case class BillingAccountsForRemoval(CrmId: String = "",
+                                       Status: String = "Canceled")
   case class Errors(Code: String, Message: String)
   case class ZuoraResponse(Success: Boolean, Errors: Seq[Errors])
 
@@ -71,21 +63,22 @@ object BillingAccountRemover extends App {
     zuoraApiSecretAccessKey <- Option(System.getenv("apiSecretAccessKey"))
     zuoraInstanceUrl <- Option(System.getenv("zuoraInstanceUrl"))
 
-  } yield Config(
-    SalesforceConfig(
-      userName = sfUserName,
-      clientId = sfClientId,
-      clientSecret = sfClientSecret,
-      password = sfPassword,
-      token = sfToken,
-      authUrl = sfAuthUrl
-    ),
-    ZuoraConfig(
-      apiAccessKeyId = zuoraApiAccessKeyId,
-      apiSecretAccessKey = zuoraApiSecretAccessKey,
-      zuoraInstanceUrl = zuoraInstanceUrl
+  } yield
+    Config(
+      SalesforceConfig(
+        userName = sfUserName,
+        clientId = sfClientId,
+        clientSecret = sfClientSecret,
+        password = sfPassword,
+        token = sfToken,
+        authUrl = sfAuthUrl
+      ),
+      ZuoraConfig(
+        apiAccessKeyId = zuoraApiAccessKeyId,
+        apiSecretAccessKey = zuoraApiSecretAccessKey,
+        zuoraInstanceUrl = zuoraInstanceUrl
+      )
     )
-  )
 
   processBillingAccounts()
 
@@ -121,6 +114,7 @@ object BillingAccountRemover extends App {
   }
 
   def auth(salesforceConfig: SalesforceConfig): String = {
+    logger.info("Authenticating with Salesforce...")
     Http(s"${System.getenv("authUrl")}/services/oauth2/token")
       .postForm(
         Seq(
@@ -139,6 +133,10 @@ object BillingAccountRemover extends App {
   def getSfCustomSetting(
     sfAuthentication: SfAuthDetails
   ): Either[Error, SfGetCustomSettingResponse] = {
+    logger.info(
+      "Getting GDPR Max Number of Removal Attempts Custom Setting value from Salesforce..."
+    )
+
     val query =
       "Select Id, Property_Value__c from Touch_Point_List_Property__c where name = 'Max Billing Acc GDPR Removal Attempts'"
 
@@ -151,6 +149,8 @@ object BillingAccountRemover extends App {
     maxAttempts: Int,
     sfAuthentication: SfAuthDetails
   ): Either[Error, SfGetBillingAccsResponse] = {
+    logger.info("Getting Billing Accounts from Salesforce...")
+
     val limit = 200;
 
     val query =
@@ -169,11 +169,9 @@ object BillingAccountRemover extends App {
       .body
   }
 
-  def doSfCompositeRequest(
-    sfAuthDetails: SfAuthDetails,
-    jsonBody: String,
-    requestType: String
-  ): Either[Throwable, String] = {
+  def doSfCompositeRequest(sfAuthDetails: SfAuthDetails,
+                           jsonBody: String,
+                           requestType: String): Either[Throwable, String] = {
 
     Try {
       Http(
@@ -214,6 +212,9 @@ object BillingAccountRemover extends App {
     zuoraConfig: ZuoraConfig,
     accountToDelete: BillingAccountsRecords.Records
   ): Option[BillingAccountsRecords.Records] = {
+    logger.info(
+      s"Updating Billing Account in Zuora ($accountToDelete.Zuora__External_Id__c)"
+    )
 
     val response =
       updateZuoraBillingAcc(
@@ -242,11 +243,9 @@ object BillingAccountRemover extends App {
 
   }
 
-  def updateZuoraBillingAcc(
-    zuoraConfig: ZuoraConfig,
-    billingAccountForRemovalAsJson: String,
-    zuoraBillingAccountId: String
-  ) = {
+  def updateZuoraBillingAcc(zuoraConfig: ZuoraConfig,
+                            billingAccountForRemovalAsJson: String,
+                            zuoraBillingAccountId: String) = {
     Http(
       s"${zuoraConfig.zuoraInstanceUrl}/v1/object/account/$zuoraBillingAccountId"
     ).header("apiAccessKeyId", zuoraConfig.apiAccessKeyId)
@@ -274,6 +273,9 @@ object BillingAccountRemover extends App {
     sfAuthDetails: SfAuthDetails,
     recordsToUpdate: Seq[BillingAccountsRecords.Records]
   ): Either[Throwable, String] = {
+    logger.info(
+      "Updating GDPR_Removal_Attempts__c on Billing Accounts in Salesforce..."
+    )
 
     val sfBillingAccUpdateJson = SfUpdateBillingAccounts(recordsToUpdate).asJson.spaces2
     doSfCompositeRequest(sfAuthDetails, sfBillingAccUpdateJson, "PATCH")
@@ -284,6 +286,7 @@ object BillingAccountRemover extends App {
     sfAuthDetails: SfAuthDetails,
     recordsToUpdate: Seq[BillingAccountsRecords.Records]
   ): Either[Throwable, String] = {
+    logger.info("Inserting Apex Errors in Salesforce...")
 
     val sfErrorRecordInsertJson = SfCreateErrorRecords(recordsToUpdate).asJson.spaces2
     doSfCompositeRequest(sfAuthDetails, sfErrorRecordInsertJson, "POST")
@@ -318,7 +321,7 @@ object BillingAccountRemover extends App {
               Type__c = a.ErrorCode.get,
               Info__c = "Billing Account Id:" + a.Id,
               Message__c = a.ErrorMessage.get
-            )
+          )
         )
         .toSeq
 
