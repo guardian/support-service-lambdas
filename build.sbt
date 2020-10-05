@@ -455,8 +455,8 @@ lazy val `http4s-lambda-handler` = all(project in file("lib/http4s-lambda-handle
 
 initialize := {
   val _ = initialize.value
-  assert(sys.props("java.specification.version") == "1.8",
-    "Java 8 is required for this project.")
+  assert(List("1.8", "11").contains(sys.props("java.specification.version")),
+    "Java 8 or 11 is required for this project.")
 }
 
 lazy val deployAwsLambda = inputKey[Unit]("Directly update AWS lambda code from DEV instead of via RiffRaff for faster feedback loop")
