@@ -8,6 +8,6 @@ riffRaffPackageType := assembly.value
 riffRaffUploadArtifactBucket := Option("riffraff-artifact")
 riffRaffUploadManifestBucket := Option("riffraff-builds")
 riffRaffManifestProjectName := "MemSub::Subscriptions::Lambdas::Contact Us"
-riffRaffArtifactResources += (file("handlers/skeleton/cfn.yaml"), "cfn/cfn.yaml")
+riffRaffArtifactResources += (file("handlers/contact-us-api/cfn.yaml"), "cfn/cfn.yaml")
 
 assemblyMergeStrategyDiscardModuleInfo
