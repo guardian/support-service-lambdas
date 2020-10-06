@@ -161,25 +161,25 @@ object PlanId {
 
   case object GuardianWeeklyROWAnnual extends PlanId("guardian_weekly_row_annual") with GuardianWeeklyRow
 
-  case object DigitalVoucherWeekend extends PlanId("digital_voucher_weekend") with VoucherPlanId
+  case object DigitalVoucherWeekend extends PlanId("digital_voucher_weekend") with DigitalVoucherPlanId
 
-  case object DigitalVoucherWeekendPlus extends PlanId("digital_voucher_weekend_plus") with VoucherPlanId
+  case object DigitalVoucherWeekendPlus extends PlanId("digital_voucher_weekend_plus") with DigitalVoucherPlanId
 
-  case object DigitalVoucherEveryday extends PlanId("digital_voucher_everyday") with VoucherPlanId
+  case object DigitalVoucherEveryday extends PlanId("digital_voucher_everyday") with DigitalVoucherPlanId
 
-  case object DigitalVoucherEverydayPlus extends PlanId("digital_voucher_everyday_plus") with VoucherPlanId
+  case object DigitalVoucherEverydayPlus extends PlanId("digital_voucher_everyday_plus") with DigitalVoucherPlanId
 
-  case object DigitalVoucherSunday extends PlanId("digital_voucher_sunday") with VoucherPlanId
+  case object DigitalVoucherSunday extends PlanId("digital_voucher_sunday") with DigitalVoucherPlanId
 
-  case object DigitalVoucherSundayPlus extends PlanId("digital_voucher_sunday_plus") with VoucherPlanId
+  case object DigitalVoucherSundayPlus extends PlanId("digital_voucher_sunday_plus") with DigitalVoucherPlanId
 
-  case object DigitalVoucherSaturday extends PlanId("digital_voucher_saturday") with VoucherPlanId
+  case object DigitalVoucherSaturday extends PlanId("digital_voucher_saturday") with DigitalVoucherPlanId
 
-  case object DigitalVoucherSaturdayPlus extends PlanId("digital_voucher_saturday_plus") with VoucherPlanId
+  case object DigitalVoucherSaturdayPlus extends PlanId("digital_voucher_saturday_plus") with DigitalVoucherPlanId
 
-  case object DigitalVoucherSixday extends PlanId("digital_voucher_sixday") with VoucherPlanId
+  case object DigitalVoucherSixday extends PlanId("digital_voucher_sixday") with DigitalVoucherPlanId
 
-  case object DigitalVoucherSixdayPlus extends PlanId("digital_voucher_sixday_plus") with VoucherPlanId
+  case object DigitalVoucherSixdayPlus extends PlanId("digital_voucher_sixday_plus") with DigitalVoucherPlanId
 
   val enabledVoucherPlans = List(
     VoucherEveryDay,
