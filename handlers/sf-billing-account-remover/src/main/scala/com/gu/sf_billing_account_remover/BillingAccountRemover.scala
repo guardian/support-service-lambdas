@@ -1,5 +1,7 @@
 package com.gu.sf_billing_account_remover
 
+import java.time.LocalDateTime
+import com.typesafe.scalalogging.LazyLogging
 import io.circe._
 import io.circe.generic.auto._
 import io.circe.parser._
@@ -7,7 +9,6 @@ import io.circe.syntax._
 import scalaj.http._
 
 import scala.util.Try
-import com.typesafe.scalalogging.LazyLogging
 
 object BillingAccountRemover extends App with LazyLogging {
   //Salesforce
@@ -26,11 +27,12 @@ object BillingAccountRemover extends App with LazyLogging {
 
   case class Attributes(`type`: String)
 
-  case class SfBillingAccountToUpdate(id: String,
-                                      GDPR_Removal_Attempts__c: Int,
-                                      attributes: Attributes = Attributes(
-                                        `type` = "Zuora__CustomerAccount__c"
-                                      ))
+  case class SfBillingAccountToUpdate(
+    id: String,
+    GDPR_Removal_Attempts__c: Int,
+    GDPR_Date_Last_Removal_Attempt__c: LocalDateTime = LocalDateTime.now(),
+    attributes: Attributes = Attributes(`type` = "Zuora__CustomerAccount__c")
+  )
 
   case class SfBillingAccountsToUpdate(allOrNone: Boolean,
                                        records: Seq[SfBillingAccountToUpdate])
@@ -79,7 +81,6 @@ object BillingAccountRemover extends App with LazyLogging {
         zuoraInstanceUrl = zuoraInstanceUrl
       )
     )
-
   processBillingAccounts()
 
   def processBillingAccounts(): Unit = {
@@ -278,6 +279,7 @@ object BillingAccountRemover extends App with LazyLogging {
     )
 
     val sfBillingAccUpdateJson = SfUpdateBillingAccounts(recordsToUpdate).asJson.spaces2
+
     doSfCompositeRequest(sfAuthDetails, sfBillingAccUpdateJson, "PATCH")
 
   }
