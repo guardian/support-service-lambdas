@@ -12,6 +12,6 @@ riffRaffArtifactResources += (file(
   "handlers/sf-billing-account-remover/cfn.yaml"
 ), "cfn/cfn.yaml")
 
-libraryDependencies ++= Seq(circe, circeParser, scalajHttp)
+libraryDependencies ++= Seq(circe, circeParser, scalajHttp) ++ logging
 
 assemblyMergeStrategyDiscardModuleInfo
