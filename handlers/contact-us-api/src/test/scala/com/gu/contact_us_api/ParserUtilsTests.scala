@@ -9,13 +9,13 @@ import org.scalatest.matchers.should
 
 class ParserUtilsTests extends AnyFlatSpec with should.Matchers {
 
-  val token = "TOKEN"
-  val decodeTarget = "SFAuthSuccess"
-  val errorType = "Fatal"
+  private val token = "TOKEN"
+  private val decodeTarget = "SFAuthSuccess"
+  private val errorType = "Fatal"
 
-  val validJson = s"""{ "access_token": "${token}" }"""
+  private val validJson = s"""{ "access_token": "$token" }"""
 
-  val invalidJson = "{ }"
+  private val invalidJson = "{ }"
 
   "decode" should "correctly return the case class when the decoding is successful" in {
     decode[SFAuthSuccess](validJson) shouldBe Right(SFAuthSuccess(token))

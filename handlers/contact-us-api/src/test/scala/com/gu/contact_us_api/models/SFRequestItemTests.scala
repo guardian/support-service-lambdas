@@ -6,25 +6,25 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
 
 class SFRequestItemTests extends AnyFlatSpec with should.Matchers {
-  val method = "POST"
-  val caseUrl = "/services/data/v20.0/sobjects/Case/"
-  val caseReferenceId = "newCase"
+  private val method = "POST"
+  private val caseUrl = "/services/data/v20.0/sobjects/Case/"
+  private val caseReferenceId = "newCase"
 
-  val attachmentUrl = "/services/data/v20.0/sobjects/Attachment/"
-  val attachmentReferenceId = "newAttachment"
+  private val attachmentUrl = "/services/data/v20.0/sobjects/Attachment/"
+  private val attachmentReferenceId = "newAttachment"
 
-  val testTopic = "account"
-  val testSubtopic = "s12"
-  val testSubsubtopic = "ss2"
-  val testName = "Manuel Joaquim"
-  val testEmail = "manuel.joaquim@email.com"
-  val testSubject = "I lost my password"
-  val testMessage = "I LOST MY PASSWORD OMGWTFBBQ!!1"
+  private val testTopic = "account"
+  private val testSubtopic = "s12"
+  private val testSubsubtopic = "ss2"
+  private val testName = "Manuel Joaquim"
+  private val testEmail = "manuel.joaquim@email.com"
+  private val testSubject = "I lost my password"
+  private val testMessage = "I LOST MY PASSWORD OMGWTFBBQ!!1"
 
-  val testFileName = "printscreen.jpeg"
-  val testFileContents = "junkjunkjunk"
+  private val testFileName = "printscreen.jpeg"
+  private val testFileContents = "junkjunkjunk"
 
-  val caseReqBaseJson = Json.obj(
+  private val caseReqBaseJson = Json.obj(
     ("method", Json.fromString(method)),
     ("url", Json.fromString(caseUrl)),
     ("referenceId", Json.fromString(caseReferenceId)),
@@ -38,7 +38,8 @@ class SFRequestItemTests extends AnyFlatSpec with should.Matchers {
       ("Form_Topic__c", Json.fromString(testTopic))
     ))
   )
-  val caseReqWithSubtopicJson = Json.obj(
+
+  private val caseReqWithSubtopicJson = Json.obj(
     ("method", Json.fromString(method)),
     ("url", Json.fromString(caseUrl)),
     ("referenceId", Json.fromString(caseReferenceId)),
@@ -53,7 +54,8 @@ class SFRequestItemTests extends AnyFlatSpec with should.Matchers {
       ("Form_Subtopic__c", Json.fromString(testSubtopic))
     ))
   )
-  val caseReqWithSubsubtopicJson = Json.obj(
+
+  private val caseReqWithSubsubtopicJson = Json.obj(
     ("method", Json.fromString(method)),
     ("url", Json.fromString(caseUrl)),
     ("referenceId", Json.fromString(caseReferenceId)),
@@ -70,12 +72,12 @@ class SFRequestItemTests extends AnyFlatSpec with should.Matchers {
     ))
   )
 
-  val attachmentReqJson = Json.obj(
+  private val attachmentReqJson = Json.obj(
     ("method", Json.fromString(method)),
     ("url", Json.fromString(attachmentUrl)),
     ("referenceId", Json.fromString(attachmentReferenceId)),
     ("body", Json.obj(
-      ("ParentId", Json.fromString(s"@{${caseReferenceId}.id}")),
+      ("ParentId", Json.fromString(s"@{$caseReferenceId.id}")),
       ("name", Json.fromString(testFileName)),
       ("body", Json.fromString(testFileContents))
     ))

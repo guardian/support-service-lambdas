@@ -1,7 +1,8 @@
 package com.gu.contact_us_api
 
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent
-import com.gu.contact_us_api.models.{ContactUsError, ContactUsResponse, SFCompositeRequest}
+import com.gu.contact_us_api.models.ContactUsTestVars._
+import com.gu.contact_us_api.models.{ContactUsError, ContactUsResponse, SFCaseRequest, SFCompositeRequest}
 import io.circe.generic.auto._
 import io.circe.syntax._
 import org.scalatest.flatspec.AnyFlatSpec
@@ -9,28 +10,28 @@ import org.scalatest.matchers.should
 
 class HandlerTests extends AnyFlatSpec with should.Matchers {
 
-  val handler = new Handler()
+  private val handler = new Handler()
 
-  val validJson: String =
-    """
+  private val validJson: String =
+    s"""
       {
-        "topic": "billing",
-        "subtopic": "s2",
-        "subsubtopic": "ss4",
-        "name": "Manuel Joaquim",
-        "email": "manuel.joaquim@email.com",
-        "subject": "Extra charges",
-        "message": "EXTRA CHARGES OMGWTFBBQ!!1",
+        "topic": "$testTopic",
+        "subtopic": "$testSubtopic",
+        "subsubtopic": "$testSubsubtopic",
+        "name": "$testName",
+        "email": "$testEmail",
+        "subject": "$testSubject",
+        "message": "$testMessage",
         "attachment": {
-          "name": "printscreen.jpeg",
-          "contents": "loadsofcharacters"
+          "name": "$testFileName",
+          "contents": "$testFileContents"
         }
       }
     """
 
-  val invalidJson = """{ "isThisValid": "no" }"""
+  private val invalidJson = """{ "isThisValid": "no" }"""
 
-  val successfulHandleResponse = new APIGatewayProxyResponseEvent()
+  private val successfulHandleResponse = new APIGatewayProxyResponseEvent()
     .withStatusCode(201)
     .withBody(
       ContactUsResponse(success = true)
@@ -39,7 +40,7 @@ class HandlerTests extends AnyFlatSpec with should.Matchers {
         .toString
     )
 
-  val inputFailureHandleResponse = new APIGatewayProxyResponseEvent()
+  private val inputFailureHandleResponse = new APIGatewayProxyResponseEvent()
     .withStatusCode(400)
     .withBody(
       ContactUsResponse(success = false, Some("Invalid input"))
@@ -48,7 +49,7 @@ class HandlerTests extends AnyFlatSpec with should.Matchers {
         .toString
     )
 
-  val internalFailureHandleResponse = new APIGatewayProxyResponseEvent()
+  private val internalFailureHandleResponse = new APIGatewayProxyResponseEvent()
     .withStatusCode(500)
     .withBody(
       ContactUsResponse(success = false, Some("Internal server error"))
@@ -57,15 +58,15 @@ class HandlerTests extends AnyFlatSpec with should.Matchers {
         .toString
     )
 
-  def successfulHandle(req: SFCompositeRequest): Either[ContactUsError, Unit] = {
+  private def successfulHandle(req: SFCompositeRequest): Either[ContactUsError, Unit] = {
     Right(())
   }
 
-  def inputFailureHandle(req: SFCompositeRequest): Either[ContactUsError, Unit] = {
+  private def inputFailureHandle(req: SFCompositeRequest): Either[ContactUsError, Unit] = {
     Left(ContactUsError("Input", "Things went wrong"))
   }
 
-  def internalErrorHandle(req: SFCompositeRequest): Either[ContactUsError, Unit] = {
+  private def internalErrorHandle(req: SFCompositeRequest): Either[ContactUsError, Unit] = {
     Left(ContactUsError("Salesforce", "Things went wrong"))
   }
 
