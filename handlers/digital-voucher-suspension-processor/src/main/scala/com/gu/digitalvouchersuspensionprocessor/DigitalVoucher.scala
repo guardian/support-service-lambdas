@@ -32,5 +32,5 @@ object DigitalVoucher {
       response <- decode[ImovoErrorResponse](responseBody).left.map(_ => false)
     } yield response.errorMessages ==
       Seq("Unable to create holiday, conflicting holiday found between entered dates"))
-      .fold(_ => false, _ => true)
+      .fold(_ => false, identity)
 }

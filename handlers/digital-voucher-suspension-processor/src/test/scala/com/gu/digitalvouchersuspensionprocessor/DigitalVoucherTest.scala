@@ -54,6 +54,29 @@ class DigitalVoucherTest extends AnyFlatSpec with Matchers with MockFactory with
     )
   }
 
+  it should "return a failure after failing to suspend a past subscription" in {
+    (imovo.suspendSubscriptionVoucher _)
+      .expects(
+        SfSubscriptionId(sfSubscriptionId),
+        suspendedDate,
+        suspendedDate.plusDays(1)
+      )
+      .returns(EitherT[Id, ImovoClientException, Unit](Left(
+        ImovoClientException(
+          message = "failed",
+          Some(
+            """{"errorMessages":["Invalid Request: Please enter a reactivation date in the future"],"successfulRequest":false}"""
+          )
+        )
+      )))
+
+    DigitalVoucher.suspend(imovo, suspension).value shouldBe Left(
+      DigitalVoucherSuspendFailure(
+        """ImovoClientException(failed,Some({"errorMessages":["Invalid Request: Please enter a reactivation date in the future"],"successfulRequest":false}))"""
+      )
+    )
+  }
+
   it should "return a unit if subscription has already been suspended on given date" in {
     (imovo.suspendSubscriptionVoucher _)
       .expects(
