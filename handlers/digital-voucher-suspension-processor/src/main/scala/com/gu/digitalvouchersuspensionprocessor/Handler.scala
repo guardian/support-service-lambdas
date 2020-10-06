@@ -30,11 +30,8 @@ object Handler extends LazyLogging {
       imovo <- ImovoClient(sttpBackend, config.imovo)
         .leftMap(e => DigitalVoucherSuspendFailure(s"Failed to create Imovo client: $e"))
       suspensions <- fetchSuspensionsToBeProcessed(salesforce).leftWiden[Failure]
-      _ <- suspensions.map { suspension =>
-        val result =
-          sendSuspensionToDigitalVoucherApi(salesforce, imovo, suspension, LocalDateTime.now)
-        loggedResult(suspension, result)
-      }.toList.sequence.map(_ => ())
+      _ <- suspensions.map(sendSuspensionToDigitalVoucherApi(salesforce, imovo, LocalDateTime.now))
+        .toList.sequence.map(_ => ())
     } yield ()
     processed.value.unsafeRunSync().valueOr { e =>
       logger.error(s"Processing failed: $e")
@@ -50,14 +47,11 @@ object Handler extends LazyLogging {
       suspensions
     }
 
-  def sendSuspensionToDigitalVoucherApi[F[_]: Sync](salesforce: SalesforceClient[F], imovo: ImovoClient[F], suspension: Suspension, now: LocalDateTime): EitherT[F, Failure, Unit] =
-    for {
+  def sendSuspensionToDigitalVoucherApi[F[_]: Sync](salesforce: SalesforceClient[F], imovo: ImovoClient[F], now: LocalDateTime)(suspension: Suspension): EitherT[F, Failure, Unit] =
+    (for {
       _ <- DigitalVoucher.suspend(imovo, suspension).leftWiden[Failure]
       _ <- Salesforce.writeSuccess(salesforce, suspension, now).leftWiden[Failure]
-    } yield ()
-
-  def loggedResult[F[_]: Sync](suspension: Suspension, result: EitherT[F, Failure, Unit]): EitherT[F, Failure, Unit] =
-    result.bimap({ e =>
+    } yield ()).bimap({ e =>
       logger.error(s"Failed to process $suspension: $e")
       e
     }, { _ =>
