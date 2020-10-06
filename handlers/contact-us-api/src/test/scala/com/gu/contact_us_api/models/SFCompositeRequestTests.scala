@@ -7,17 +7,18 @@ import org.scalatest.matchers.should
 import com.gu.contact_us_api.models.ContactUsTestVars._
 
 class SFCompositeRequestTests extends AnyFlatSpec with should.Matchers {
-  val singleReq = List[SFRequestItem](SFCaseRequest(testTopic, None, None, testName, testEmail, testSubject, testMessage))
-  val multipleReq = List[SFRequestItem](
+  private val singleReq = List[SFRequestItem](SFCaseRequest(testTopic, None, None, testName, testEmail, testSubject, testMessage))
+  private val multipleReq = List[SFRequestItem](
     SFCaseRequest(testTopic, None, None, testName, testEmail, testSubject, testMessage),
     SFAttachmentRequest(testFileName, testFileContents)
   )
 
-  val singleReqJson = Json.obj(
+  private val singleReqJson = Json.obj(
     ("allOrNone", Json.fromBoolean(true)),
     ("compositeRequest", Json.arr(singleReq.map(i => i.asJson): _*))
   )
-  val multipleReqJson = Json.obj(
+
+  private val multipleReqJson = Json.obj(
     ("allOrNone", Json.fromBoolean(true)),
     ("compositeRequest", Json.arr(multipleReq.map(i => i.asJson): _*))
   )

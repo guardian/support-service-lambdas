@@ -17,29 +17,29 @@ class SalesforceConnectorTests extends AnyFlatSpec with should.Matchers with Eit
     mockedRunRequest
   }
 
-  val fakeConfg: ContactUsConfig = ContactUsConfig("clientID", "clientSecret", "username", "password", "token", "authEndpoint", "reqEndpoint")
-  val fakeRequest: SFCompositeRequest = SFCompositeRequest(List(SFCaseRequest(testTopic, None, None, testName, testEmail, testSubject, testMessage)))
-  val invalidJson = "{}"
+  private val fakeConfg = ContactUsConfig("clientID", "clientSecret", "username", "password", "token", "authEndpoint", "reqEndpoint")
+  private val fakeRequest = SFCompositeRequest(List(SFCaseRequest(testTopic, None, None, testName, testEmail, testSubject, testMessage)))
+  private val invalidJson = "{}"
 
-  val authToken = "THIS_IS_A_TOKEN"
-  val successfulAuthRequestJson = s"""{ "access_token": "$authToken" }"""
+  private val authToken = "THIS_IS_A_TOKEN"
+  private val successfulAuthRequestJson = s"""{ "access_token": "$authToken" }"""
 
-  val failedAuthStatusCode = 400
-  val failedAuthError = "invalid_grant"
-  val failedAuthErrorDescription = "authentication failure"
-  val failedAuthReqJson = s"""{ "error": "$failedAuthError", "error_description": "$failedAuthErrorDescription" }"""
+  private val failedAuthStatusCode = 400
+  private val failedAuthError = "invalid_grant"
+  private val failedAuthErrorDescription = "authentication failure"
+  private val failedAuthReqJson = s"""{ "error": "$failedAuthError", "error_description": "$failedAuthErrorDescription" }"""
 
-  val compositeReferenceId = "newCase"
-  val compositeErrorCode = "ERROR"
-  val compositeErrorMessage = "request failure"
+  private val compositeReferenceId = "newCase"
+  private val compositeErrorCode = "ERROR"
+  private val compositeErrorMessage = "request failure"
 
-  val successfulCompositeReqJson = s"""{ "compositeResponse": [{ "httpStatusCode": 201, "referenceId": "$compositeReferenceId" }] }"""
+  private val successfulCompositeReqJson = s"""{ "compositeResponse": [{ "httpStatusCode": 201, "referenceId": "$compositeReferenceId" }] }"""
 
-  val compositeErrorStatusCode = 400
-  val successfulCompositeReqWithErrorJson = s"""{ "compositeResponse": [{ "httpStatusCode": $compositeErrorStatusCode, "referenceId": "$compositeReferenceId", "body": [{ "errorCode": "$compositeErrorCode", "message": "$compositeErrorMessage" }] }] }"""
+  private val compositeErrorStatusCode = 400
+  private val successfulCompositeReqWithErrorJson = s"""{ "compositeResponse": [{ "httpStatusCode": $compositeErrorStatusCode, "referenceId": "$compositeReferenceId", "body": [{ "errorCode": "$compositeErrorCode", "message": "$compositeErrorMessage" }] }] }"""
 
-  val failedCompositeStatusCode = 500
-  val failedCompositeReqJson = s"""[{ "errorCode": "$compositeErrorCode", "message": "$compositeErrorMessage" }]"""
+  private val failedCompositeStatusCode = 500
+  private val failedCompositeReqJson = s"""[{ "errorCode": "$compositeErrorCode", "message": "$compositeErrorMessage" }]"""
 
   "auth" should "return a token when the request is successful " in {
     new SalesforceConnector(getRunRequest(successfulAuthRequestJson))

@@ -5,10 +5,10 @@ import org.scalatest.matchers.should
 import com.gu.contact_us_api.models.ContactUsTestVars._
 
 class ContactUsRequestTests extends AnyFlatSpec with should.Matchers {
-  val baseReqObj = SFCompositeRequest(List(SFCaseRequest(testTopic, None, None, testName, testEmail, testSubject, testMessage)))
-  val baseReqWithSubtopicObj = SFCompositeRequest(List(SFCaseRequest(testTopic, Some(testSubtopic), None, testName, testEmail, testSubject, testMessage)))
-  val baseReqWithSubsubtopicObj = SFCompositeRequest(List(SFCaseRequest(testTopic, Some(testSubtopic), Some(testSubsubtopic), testName, testEmail, testSubject, testMessage)))
-  val baseReqWithAttachmentObj = SFCompositeRequest(List(
+  private val baseReqObj = SFCompositeRequest(List(SFCaseRequest(testTopic, None, None, testName, testEmail, testSubject, testMessage)))
+  private val baseReqWithSubtopicObj = SFCompositeRequest(List(SFCaseRequest(testTopic, Some(testSubtopic), None, testName, testEmail, testSubject, testMessage)))
+  private val baseReqWithSubsubtopicObj = SFCompositeRequest(List(SFCaseRequest(testTopic, Some(testSubtopic), Some(testSubsubtopic), testName, testEmail, testSubject, testMessage)))
+  private val baseReqWithAttachmentObj = SFCompositeRequest(List(
     SFCaseRequest(testTopic, None, None, testName, testEmail, testSubject, testMessage),
     SFAttachmentRequest(testFileName, testFileContents)
   ))
