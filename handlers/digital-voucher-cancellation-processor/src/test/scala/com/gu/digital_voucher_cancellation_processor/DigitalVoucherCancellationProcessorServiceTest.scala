@@ -224,12 +224,20 @@ class DigitalVoucherCancellationProcessorServiceTest extends AnyFlatSpec with Ma
           successfullyCancelled = List(voucherToCancelQueryResult("valid-sub")),
           cancellationFailures = List(
             ImovoClientException(
-              """Request GET https://unit-test.imovo.com/Subscription/CancelSubscriptionVoucher?SubscriptionId=sf-subscription-id-imovo-failure failed with response ({
+              message = """Request GET https://unit-test.imovo.com/Subscription/CancelSubscriptionVoucher?SubscriptionId=sf-subscription-id-imovo-failure failed with response ({
                 |  "errorMessages" : [
                 |    "Unexpected error"
                 |  ],
                 |  "successfulRequest" : false
-                |})""".stripMargin
+                |})""".stripMargin,
+              responseBody = Some(
+                """{
+                |  "errorMessages" : [
+                |    "Unexpected error"
+                |  ],
+                |  "successfulRequest" : false
+                |}""".stripMargin
+              )
             )
           )
         )

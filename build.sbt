@@ -418,13 +418,20 @@ lazy val `digital-voucher-cancellation-processor` = all(project in file("handler
   )
   .enablePlugins(RiffRaffArtifact)
 
-lazy val `digital-voucher-suspension-processor` = all(project in file("handlers/digital-voucher-suspension-processor"))
-  .dependsOn(`salesforce-sttp-client`)
+lazy val `digital-voucher-suspension-processor` =
+  all(project in file("handlers/digital-voucher-suspension-processor"))
+  .dependsOn(
+    `salesforce-sttp-client`,
+    `imovo-sttp-client`
+  )
   .settings(
     libraryDependencies ++=
       Seq(
         awsLambda,
-        sttpAsyncHttpClientBackendCats
+        sttpAsyncHttpClientBackendCats,
+        sttpOkhttpBackend,
+        scalatest,
+        scalaMock
       )
         ++ logging
   )

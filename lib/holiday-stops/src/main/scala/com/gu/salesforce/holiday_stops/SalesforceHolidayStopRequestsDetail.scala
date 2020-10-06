@@ -17,7 +17,7 @@ import play.api.libs.json.{JsValue, Json}
 
 object SalesforceHolidayStopRequestsDetail extends Logging {
 
-  final val HolidayStopRequestsDetailSfObjectRef = "Holiday_Stop_Requests_Detail__c"
+  final val HolidayStopRequestsDetailSfObjectRef: String = "Holiday_Stop_Requests_Detail__c"
   val holidayStopRequestsDetailSfObjectsBaseUrl = sfObjectsBaseUrl + HolidayStopRequestsDetailSfObjectRef
 
   case class HolidayStopRequestsDetailId(value: String) extends AnyVal

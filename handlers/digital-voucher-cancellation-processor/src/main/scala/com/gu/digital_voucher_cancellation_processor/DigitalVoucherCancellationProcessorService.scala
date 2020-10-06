@@ -120,7 +120,7 @@ object DigitalVoucherCancellationProcessorService extends LazyLogging {
             .cancelSubscriptionVoucher(SfSubscriptionId(voucherToCancel.SF_Subscription__r.Id), None)
             .fold(
               {
-                case ImovoClientException(message) if message.contains(ImovoSubscriptionDoesNotExistMessage) =>
+                case ImovoClientException(message, _) if message.contains(ImovoSubscriptionDoesNotExistMessage) =>
                   ImovoCancellationResults(alreadyCancelled = List(voucherToCancel))
                 case error: ImovoClientException =>
                   ImovoCancellationResults(cancellationFailures = List(error))

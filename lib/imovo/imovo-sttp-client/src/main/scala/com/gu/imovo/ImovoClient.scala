@@ -28,7 +28,8 @@ case class ImovoSubscriptionResponse(
 case class ImovoErrorResponse(errorMessages: List[String], successfulRequest: Boolean)
 case class ImovoSuccessResponse(message: String, successfulRequest: Boolean)
 
-case class ImovoClientException(message: String)
+case class ImovoExceptionResponse(code: Int, body: String)
+case class ImovoClientException(message: String, responseBody: Option[String] = None)
 sealed trait ImovoSubscriptionType {
   val value: String
 }
@@ -116,27 +117,40 @@ object ImovoClient extends LazyLogging {
         .leftMap(
           errorBody =>
             ImovoClientException(
-              s"Request ${request.method.m} ${request.uri.toString()} failed returning a status ${response.code} with body: ${errorBody}"
+              message = s"Request ${request.method.m} ${request.uri.toString()} failed returning a status ${response.code} with body: ${errorBody}",
+              responseBody = Some(errorBody)
             )
         )
         .flatMap { successBody =>
           for {
             parsedResponse <- parse(successBody)
-              .leftMap(e => ImovoClientException(s"Request ${request.method.m} ${request.uri.toString()} failed to parse response ($successBody): $e"))
+              .leftMap(e => ImovoClientException(
+                message = s"Request ${request.method.m} ${request.uri.toString()} failed to parse response ($successBody): $e",
+                responseBody = Some(successBody)
+              ))
 
             successFlag <- parsedResponse
               .hcursor
               .downField("successfulRequest")
               .as[Boolean]
-              .leftMap(e => ImovoClientException(s"Request ${request.method.m} ${request.uri.toString()} had a response which did not contain the successfulRequest flag ($successBody): $e"))
+              .leftMap(e => ImovoClientException(
+                message = s"Request ${request.method.m} ${request.uri.toString()} had a response which did not contain the successfulRequest flag ($successBody): $e",
+                responseBody = Some(successBody)
+              ))
 
             response <- {
               if (successFlag) {
                 parsedResponse
                   .as[A]
-                  .leftMap(e => ImovoClientException(s"Request ${request.method.m} ${request.uri.toString()} failed to decode response ($successBody): $e"))
+                  .leftMap(e => ImovoClientException(
+                    message = s"Request ${request.method.m} ${request.uri.toString()} failed to decode response ($successBody): $e",
+                    responseBody = Some(successBody)
+                  ))
               } else {
-                ImovoClientException(s"Request ${request.method.m} ${request.uri.toString()} failed with response ($successBody)").asLeft[A]
+                ImovoClientException(
+                  message = s"Request ${request.method.m} ${request.uri.toString()} failed with response ($successBody)",
+                  responseBody = Some(successBody)
+                ).asLeft[A]
               }
             }
           } yield response
