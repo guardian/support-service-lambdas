@@ -1,5 +1,6 @@
 package com.gu.contact_us_api.models
 
+import com.gu.contact_us_api.models.ContactUsTestVars._
 import io.circe.Json
 import io.circe.syntax._
 import org.scalatest.flatspec.AnyFlatSpec
@@ -12,17 +13,6 @@ class SFRequestItemTests extends AnyFlatSpec with should.Matchers {
 
   private val attachmentUrl = "/services/data/v20.0/sobjects/Attachment/"
   private val attachmentReferenceId = "newAttachment"
-
-  private val testTopic = "account"
-  private val testSubtopic = "s12"
-  private val testSubsubtopic = "ss2"
-  private val testName = "Manuel Joaquim"
-  private val testEmail = "manuel.joaquim@email.com"
-  private val testSubject = "I lost my password"
-  private val testMessage = "I LOST MY PASSWORD OMGWTFBBQ!!1"
-
-  private val testFileName = "printscreen.jpeg"
-  private val testFileContents = "junkjunkjunk"
 
   private val caseReqBaseJson = Json.obj(
     ("method", Json.fromString(method)),
