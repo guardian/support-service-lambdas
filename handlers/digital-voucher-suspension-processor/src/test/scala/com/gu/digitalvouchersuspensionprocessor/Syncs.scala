@@ -1,8 +1,11 @@
 package com.gu.digitalvouchersuspensionprocessor
 
 import cats.effect.{ExitCase, Sync}
-import com.softwaremill.sttp.Id
+import cats.Id
 
+/**
+ * The tests use the cats
+ */
 object Syncs {
 
   implicit val idSync: Sync[Id] = new Sync[Id] {
