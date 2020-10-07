@@ -14,11 +14,26 @@ object HolidayCreditProduct {
 
   final val ProductRatePlanChargeName: String = "Holiday Credit"
 
-  val Prod: CreditProduct = CreditProduct(
-    productRatePlanId = "2c92a0076ae9189c016b080c930a6186",
-    productRatePlanChargeId = "2c92a0086ae928d7016b080f638477a6",
-    ProductRatePlanChargeName
-  )
+  object Prod {
+
+    val GuardianWeekly: CreditProduct = CreditProduct(
+      productRatePlanId = "2c92a0076ae9189c016b080c930a6186",
+      productRatePlanChargeId = "2c92a0086ae928d7016b080f638477a6",
+      ProductRatePlanChargeName
+    )
+
+    val Voucher: CreditProduct = CreditProduct(
+      productRatePlanId = "2c92a0117468816901748bdb3a8c1ac4",
+      productRatePlanChargeId = "2c92a0117468816901748bdb3aab1ac6",
+      ProductRatePlanChargeName
+    )
+
+    val HomeDelivery: CreditProduct = CreditProduct(
+      productRatePlanId = "2c92a00f7468817d01748bd88f0d1d6c",
+      productRatePlanChargeId = "2c92a00f7468817d01748bd88f2e1d6e",
+      ProductRatePlanChargeName
+    )
+  }
 
   object Code {
 
@@ -80,7 +95,9 @@ object HolidayCreditProduct {
   def forStage(stage: Stage): CreditProductForSubscription = {
 
     def creditProduct(stage: Stage)(plan: RatePlan): Option[CreditProduct] = (stage, plan.productName) match {
-      case (Stage.Prod, _) => Some(HolidayCreditProduct.Prod)
+      case (Stage.Prod, s"Guardian Weekly$_") => Some(HolidayCreditProduct.Prod.GuardianWeekly)
+      case (Stage.Prod, "Newspaper Delivery") => Some(HolidayCreditProduct.Prod.HomeDelivery)
+      case (Stage.Prod, "Newspaper Voucher" | "Newspaper Digital Voucher") => Some(HolidayCreditProduct.Prod.Voucher)
       case (Stage.Code, s"Guardian Weekly$_") => Some(HolidayCreditProduct.Code.GuardianWeekly)
       case (Stage.Code, "Newspaper Delivery") => Some(HolidayCreditProduct.Code.HomeDelivery)
       case (Stage.Code, "Newspaper Voucher" | "Newspaper Digital Voucher") => Some(HolidayCreditProduct.Code.Voucher)
