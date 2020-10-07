@@ -1,0 +1,21 @@
+stacks:
+  - membership
+regions:
+  - eu-west-1
+deployments:
+
+  cfn:
+    type: cloud-formation
+    app: digital-voucher-suspension-processor
+    parameters:
+      templatePath: cfn.yaml
+
+  digital-voucher-suspension-processor:
+    type: aws-lambda
+    parameters:
+      bucket: support-service-lambdas-dist
+      fileName: digital-voucher-suspension-processor.jar
+      functionNames:
+        - digital-voucher-suspension-processor-
+      prefixStack: false
+    dependencies: [ cfn ]
