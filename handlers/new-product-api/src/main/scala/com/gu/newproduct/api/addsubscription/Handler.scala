@@ -31,7 +31,6 @@ import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
 import okhttp3.{Request, Response}
 
 import scala.concurrent.Future
-import com.gu.newproduct.api.productcatalog.PlanId.DigitalVoucherSixday
 
 object Handler extends Logging {
   // Referenced in Cloudformation
