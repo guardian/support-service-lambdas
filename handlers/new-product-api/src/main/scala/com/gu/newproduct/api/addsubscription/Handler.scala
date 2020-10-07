@@ -31,6 +31,7 @@ import com.gu.util.zuora.{ZuoraRestConfig, ZuoraRestRequestMaker}
 import okhttp3.{Request, Response}
 
 import scala.concurrent.Future
+import com.gu.newproduct.api.productcatalog.PlanId.DigitalVoucherSixday
 
 object Handler extends Logging {
   // Referenced in Cloudformation
@@ -46,7 +47,7 @@ object Steps {
     addPaperSub: AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName],
     addDigipackSub: AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName],
     addGuardianWeeklyDomesticSub: AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName],
-    addGuardianWeeklyROWSub: AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName],
+    addGuardianWeeklyROWSub: AddSubscriptionRequest => AsyncApiGatewayOp[SubscriptionName]
   )(
     apiGatewayRequest: ApiGatewayRequest
   ): Future[ApiResponse] = (for {
@@ -58,6 +59,7 @@ object Steps {
       case _: DigipackPlanId => addDigipackSub(request)
       case _: GuardianWeeklyDomestic => addGuardianWeeklyDomesticSub(request)
       case _: GuardianWeeklyRow => addGuardianWeeklyROWSub(request)
+      case _: DigitalVoucherPlanId => addPaperSub(request)
     }
   } yield ApiGatewayResponse(body = AddedSubscription(subscriptionName.value), statusCode = "200")).apiResponse
 
