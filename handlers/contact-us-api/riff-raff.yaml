@@ -6,6 +6,16 @@ deployments:
 
   cfn:
     type: cloud-formation
-    app: contact-us
+    app: contact-us-api
     parameters:
       templatePath: cfn.yaml
+
+  contact-us-api:
+    type: aws-lambda
+    parameters:
+      fileName: contact-us-api.jar
+      bucket: support-service-lambdas-dist
+      prefixStack: false
+      functionNames:
+        - contact-us-api-
+    dependencies: [ cfn ]

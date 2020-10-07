@@ -24,11 +24,12 @@ Resources:
   ContactUsLambda:
     Type: AWS::Serverless::Function
     Properties:
+      FunctionName: !Sub contact-us-api-${Stage}
       Handler: com.gu.contact_us_api.Handler
       Runtime: java8
       CodeUri:
         Bucket: support-service-lambdas-dist
-        Key: !Sub membership/${Stage}/contact-us-api/contact-us.jar
+        Key: !Sub membership/${Stage}/contact-us-api/contact-us-api.jar
       Timeout: 120
       MemorySize: 256
       Environment:
