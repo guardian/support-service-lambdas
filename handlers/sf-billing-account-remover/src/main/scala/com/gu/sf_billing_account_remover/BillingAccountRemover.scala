@@ -150,7 +150,8 @@ object BillingAccountRemover extends App with LazyLogging {
     maxAttempts: Int,
     sfAuthentication: SfAuthDetails
   ): Either[Error, SfGetBillingAccsResponse] = {
-    logger.info("Getting Billing Accounts from Salesforce...")
+    logger
+      .info("Getting Billing Accounts from Salesforce...")
 
     val limit = 200;
 
@@ -214,7 +215,7 @@ object BillingAccountRemover extends App with LazyLogging {
     accountToDelete: BillingAccountsRecords.Records
   ): Option[BillingAccountsRecords.Records] = {
     logger.info(
-      s"Updating Billing Account in Zuora ($accountToDelete.Zuora__External_Id__c)"
+      s"Updating Billing Account in Zuora (${accountToDelete.Zuora__External_Id__c})"
     )
 
     val response =
