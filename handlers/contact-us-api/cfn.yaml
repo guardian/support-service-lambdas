@@ -1,0 +1,50 @@
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+  Stage:
+    Description: Stage name
+    Type: String
+    AllowedValues:
+      - PROD
+      - CODE
+    Default: CODE
+
+Resources:
+  ContactUsApiGateway:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: !Sub ${Stage}
+      Auth:
+        ApiKeyRequired: true
+        UsagePlan:
+          CreateUsagePlan: PER_API
+          UsagePlanName: !Sub contact-us-api-${Stage}-UsagePlan
+          Description: !Sub Usage plan for contact-us-api-${Stage}
+
+  ContactUsLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: com.gu.contact_us_api.Handler
+      Runtime: java8
+      CodeUri:
+        Bucket: support-service-lambdas-dist
+        Key: !Sub membership/${Stage}/contact-us-api/contact-us.jar
+      Timeout: 120
+      MemorySize: 256
+      Environment:
+        Variables:
+          clientID: !Sub '{{resolve:secretsmanager:contact-us-api-${Stage}:SecretString:clientID}}'
+          clientSecret: !Sub '{{resolve:secretsmanager:contact-us-api-${Stage}:SecretString:clientSecret}}'
+          username: !Sub '{{resolve:secretsmanager:contact-us-api-${Stage}:SecretString:username}}'
+          password: !Sub '{{resolve:secretsmanager:contact-us-api-${Stage}:SecretString:password}}'
+          token: !Sub '{{resolve:secretsmanager:contact-us-api-${Stage}:SecretString:token}}'
+          authDomain: !Sub '{{resolve:secretsmanager:contact-us-api-${Stage}:SecretString:authDomain}}'
+          reqDomain: !Sub '{{resolve:secretsmanager:contact-us-api-${Stage}:SecretString:reqDomain}}'
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /
+            Method: POST
+            RestApiId:
+              Ref: ContactUsApiGateway

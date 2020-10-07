@@ -1,0 +1,20 @@
+stacks:
+- membership
+regions:
+- eu-west-1
+deployments:
+
+  cfn:
+    type: cloud-formation
+    app: dev-env-cleaner
+    parameters:
+      templatePath: cfn.yaml
+
+  dev-env-cleaner:
+    type: aws-lambda
+    parameters:
+      fileName: lambda.jar
+      bucket: support-service-lambdas-dist
+      prefixStack: false
+      functionNames: [dev-env-cleaner-]
+    dependencies: [cfn]
