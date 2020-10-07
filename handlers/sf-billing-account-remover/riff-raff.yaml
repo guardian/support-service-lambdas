@@ -1,0 +1,19 @@
+stacks:
+- membership
+regions:
+- eu-west-1
+deployments:
+  cfn:
+    type: cloud-formation
+    app: sf-billing-account-remover
+    parameters:
+      templatePath: cfn.yaml
+  sf-billing-account-remover:
+    type: aws-lambda
+    parameters:
+      fileName: sf-billing-account-remover.jar
+      bucket: support-service-lambdas-dist
+      prefixStack: false
+      functionNames:
+      - sf-billing-account-remover-
+    dependencies: [cfn]

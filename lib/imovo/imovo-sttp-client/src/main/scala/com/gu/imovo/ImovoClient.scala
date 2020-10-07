@@ -7,6 +7,7 @@ import java.time.format.DateTimeFormatter
 import cats.data.EitherT
 import cats.effect.Sync
 import cats.implicits._
+import com.softwaremill.sttp.Method.GET
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.circe._
 import com.typesafe.scalalogging.LazyLogging
@@ -27,7 +28,8 @@ case class ImovoSubscriptionResponse(
 case class ImovoErrorResponse(errorMessages: List[String], successfulRequest: Boolean)
 case class ImovoSuccessResponse(message: String, successfulRequest: Boolean)
 
-case class ImovoClientException(message: String)
+case class ImovoExceptionResponse(code: Int, body: String)
+case class ImovoClientException(message: String, responseBody: Option[String] = None)
 sealed trait ImovoSubscriptionType {
   val value: String
 }
@@ -74,6 +76,7 @@ trait ImovoClient[F[_]] {
   def getSubscriptionVoucher(voucherCode: String): EitherT[F, ImovoClientException, ImovoSubscriptionResponse]
   def replaceSubscriptionVoucher(subscriptionId: SfSubscriptionId, subscriptionType: ImovoSubscriptionType): EitherT[F, ImovoClientException, ImovoSubscriptionResponse]
   def cancelSubscriptionVoucher(subscriptionId: SfSubscriptionId, lastActiveDay: Option[LocalDate]): EitherT[F, ImovoClientException, ImovoSuccessResponse]
+  def suspendSubscriptionVoucher(subscriptionId: SfSubscriptionId, startDate: LocalDate, endDateExclusive: LocalDate): EitherT[F, ImovoClientException, Unit]
   def getRedemptionHistory(subscriptionId: SfSubscriptionId): EitherT[F, ImovoClientException, ImovoRedemptionHistoryResponse]
 }
 
@@ -82,7 +85,7 @@ object ImovoClient extends LazyLogging {
   val redemptionHistoryMaxLines = "100"
 
   def apply[F[_]: Sync, S](backend: SttpBackend[F, S], config: ImovoConfig): EitherT[F, ImovoClientException, ImovoClient[F]] = {
-    implicit val b = backend
+    implicit val b: SttpBackend[F, S] = backend
 
     def sendAuthenticatedRequest[A: Decoder, B: Encoder](
       apiKey: String,
@@ -114,27 +117,40 @@ object ImovoClient extends LazyLogging {
         .leftMap(
           errorBody =>
             ImovoClientException(
-              s"Request ${request.method.m} ${request.uri.toString()} failed returning a status ${response.code} with body: ${errorBody}"
+              message = s"Request ${request.method.m} ${request.uri.toString()} failed returning a status ${response.code} with body: ${errorBody}",
+              responseBody = Some(errorBody)
             )
         )
         .flatMap { successBody =>
           for {
             parsedResponse <- parse(successBody)
-              .leftMap(e => ImovoClientException(s"Request ${request.method.m} ${request.uri.toString()} failed to parse response ($successBody): $e"))
+              .leftMap(e => ImovoClientException(
+                message = s"Request ${request.method.m} ${request.uri.toString()} failed to parse response ($successBody): $e",
+                responseBody = Some(successBody)
+              ))
 
             successFlag <- parsedResponse
               .hcursor
               .downField("successfulRequest")
               .as[Boolean]
-              .leftMap(e => ImovoClientException(s"Request ${request.method.m} ${request.uri.toString()} had a response which did not contain the successfulRequest flag ($successBody): $e"))
+              .leftMap(e => ImovoClientException(
+                message = s"Request ${request.method.m} ${request.uri.toString()} had a response which did not contain the successfulRequest flag ($successBody): $e",
+                responseBody = Some(successBody)
+              ))
 
             response <- {
               if (successFlag) {
                 parsedResponse
                   .as[A]
-                  .leftMap(e => ImovoClientException(s"Request ${request.method.m} ${request.uri.toString()} failed to decode response ($successBody): $e"))
+                  .leftMap(e => ImovoClientException(
+                    message = s"Request ${request.method.m} ${request.uri.toString()} failed to decode response ($successBody): $e",
+                    responseBody = Some(successBody)
+                  ))
               } else {
-                ImovoClientException(s"Request ${request.method.m} ${request.uri.toString()} failed with response ($successBody)").asLeft[A]
+                ImovoClientException(
+                  message = s"Request ${request.method.m} ${request.uri.toString()} failed with response ($successBody)",
+                  responseBody = Some(successBody)
+                ).asLeft[A]
               }
             }
           } yield response
@@ -197,6 +213,17 @@ object ImovoClient extends LazyLogging {
           None
         )
       }
+
+      def suspendSubscriptionVoucher(subscriptionId: SfSubscriptionId, startDate: LocalDate, endDateExclusive: LocalDate): EitherT[F, ImovoClientException, Unit] =
+        sendAuthenticatedRequest[ImovoSuccessResponse, String](
+          apiKey = config.imovoApiKey,
+          method = GET,
+          uri = Uri(new URI(s"${config.imovoBaseUrl}/Subscription/SetHoliday"))
+            .param("SubscriptionId", subscriptionId.value)
+            .param("StartDate", startDate.toString)
+            .param("ReactivationDate", endDateExclusive.toString),
+          body = None
+        ).map(_ => ())
 
       /**
        * Method to return `redemptionHistoryMaxLines` of redemption attempts - this call returns successful redemptions,

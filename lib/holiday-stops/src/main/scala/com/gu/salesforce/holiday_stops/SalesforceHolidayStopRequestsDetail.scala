@@ -17,8 +17,8 @@ import play.api.libs.json.{JsValue, Json}
 
 object SalesforceHolidayStopRequestsDetail extends Logging {
 
-  val holidayStopRequestsDetailSfObjectRef = "Holiday_Stop_Requests_Detail__c"
-  val holidayStopRequestsDetailSfObjectsBaseUrl = sfObjectsBaseUrl + holidayStopRequestsDetailSfObjectRef
+  final val HolidayStopRequestsDetailSfObjectRef: String = "Holiday_Stop_Requests_Detail__c"
+  val holidayStopRequestsDetailSfObjectsBaseUrl = sfObjectsBaseUrl + HolidayStopRequestsDetailSfObjectRef
 
   case class HolidayStopRequestsDetailId(value: String) extends AnyVal
   implicit val formatHolidayStopRequestsDetailId = Jsonx.formatInline[HolidayStopRequestsDetailId]
@@ -44,7 +44,7 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
 
     def apply(sfPatch: HttpOp[RestRequestMaker.PatchRequest, Unit])(detailSfId: HolidayStopRequestsDetailId): HolidayStopRequestsDetailActioned => ClientFailableOp[Unit] =
       sfPatch.setupRequest[HolidayStopRequestsDetailActioned] { actionedInfo =>
-        PatchRequest(actionedInfo, RelativePath(s"$sfObjectsBaseUrl$holidayStopRequestsDetailSfObjectRef/${detailSfId.value}"))
+        PatchRequest(actionedInfo, RelativePath(s"$sfObjectsBaseUrl$HolidayStopRequestsDetailSfObjectRef/${detailSfId.value}"))
       }.runRequest
 
   }
@@ -102,7 +102,7 @@ object SalesforceHolidayStopRequestsDetail extends Logging {
     def createSoql(dates: List[LocalDate], productType: ZuoraProductType) = {
       s"""
          | $SOQL_SELECT_CLAUSE
-         | FROM $holidayStopRequestsDetailSfObjectRef
+         | FROM $HolidayStopRequestsDetailSfObjectRef
          | WHERE Holiday_Stop_Request__r.SF_Subscription__r.Product_Type__c = '${productType.name}'
          | AND ${soqlFilterClause(dates)}
          | $SOQL_ORDER_BY_CLAUSE

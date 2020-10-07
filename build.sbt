@@ -281,9 +281,17 @@ lazy val `zuora-sar` = all(project in file("handlers/zuora-sar"))
   .enablePlugins(RiffRaffArtifact)
   .dependsOn(`zuora-reports`, handler, effectsDepIncludingTestFolder, testDep, `effects-s3`, `effects-lambda`)
 
+lazy val `dev-env-cleaner` = all(project in file("handlers/dev-env-cleaner"))
+  .settings(libraryDependencies ++= Seq(catsEffect, circeParser, circe, awsStepFunction))
+  .enablePlugins(RiffRaffArtifact)
+  .dependsOn(`zuora-reports`, handler, effectsDepIncludingTestFolder, testDep, `effects-s3`, `effects-lambda`)
+
 lazy val `sf-contact-merge` = all(project in file("handlers/sf-contact-merge"))
   .enablePlugins(RiffRaffArtifact)
   .dependsOn(zuora, `salesforce-client` % "compile->compile;test->test", handler, effectsDepIncludingTestFolder, testDep)
+
+lazy val `sf-billing-account-remover` = all(project in file("handlers/sf-billing-account-remover"))
+  .enablePlugins(RiffRaffArtifact)
 
 lazy val `cancellation-sf-cases-api` = all(project in file("handlers/cancellation-sf-cases-api"))
   .enablePlugins(RiffRaffArtifact)
@@ -334,7 +342,7 @@ lazy val `delivery-problem-credit-processor` =
         scalaLambda,
         circe,
         zio,
-        sttpAsycHttpClientBackendCats,
+        sttpAsyncHttpClientBackendCats,
         scalatest,
         diffx
       )
@@ -355,7 +363,7 @@ lazy val `sf-move-subscriptions-api` = all(project in file("handlers/sf-move-sub
         http4sServer,
         sttp,
         sttpCirce,
-        sttpAsycHttpClientBackendCats,
+        sttpAsyncHttpClientBackendCats,
         scalatest,
         diffx
       ) ++ logging
@@ -372,7 +380,7 @@ lazy val `delivery-records-api` = all(project in file("handlers/delivery-records
   )
   .settings(
     libraryDependencies ++=
-      Seq(http4sDsl, http4sCirce, http4sServer, circe, sttpAsycHttpClientBackendCats, scalatest)
+      Seq(http4sDsl, http4sCirce, http4sServer, circe, sttpAsyncHttpClientBackendCats, scalatest)
         ++ logging
   )
   .enablePlugins(RiffRaffArtifact)
@@ -385,9 +393,10 @@ lazy val `digital-voucher-api` = all(project in file("handlers/digital-voucher-a
         http4sDsl,
         http4sCirce,
         http4sServer,
-        sttpAsycHttpClientBackendCats,
+        sttpAsyncHttpClientBackendCats,
         scalatest,
-        diffx
+        diffx,
+        scalaMock,
       )
       ++ logging
   )
@@ -400,12 +409,45 @@ lazy val `digital-voucher-cancellation-processor` = all(project in file("handler
   )
   .settings(
     libraryDependencies ++=
-    Seq(
-      scalatest,
-      diffx,
-      sttpCats
-    )
-    ++ logging
+      Seq(
+        scalatest,
+        diffx,
+        sttpCats
+      )
+        ++ logging
+  )
+  .enablePlugins(RiffRaffArtifact)
+
+lazy val `digital-voucher-suspension-processor` =
+  all(project in file("handlers/digital-voucher-suspension-processor"))
+  .dependsOn(
+    `salesforce-sttp-client`,
+    `imovo-sttp-client`
+  )
+  .settings(
+    libraryDependencies ++=
+      Seq(
+        awsLambda,
+        sttpAsyncHttpClientBackendCats,
+        sttpOkhttpBackend,
+        scalatest,
+        scalaMock
+      )
+        ++ logging
+  )
+
+lazy val `contact-us-api` = all(project in file("handlers/contact-us-api"))
+  .dependsOn(handler)
+  .settings(
+    libraryDependencies ++=
+      Seq(
+        circe,
+        circeParser,
+        scalatest,
+        scalajHttp,
+        awsEvents
+      )
+      ++ logging
   )
   .enablePlugins(RiffRaffArtifact)
 
@@ -420,8 +462,8 @@ lazy val `http4s-lambda-handler` = all(project in file("lib/http4s-lambda-handle
 
 initialize := {
   val _ = initialize.value
-  assert(sys.props("java.specification.version") == "1.8",
-    "Java 8 is required for this project.")
+  assert(List("1.8", "11").contains(sys.props("java.specification.version")),
+    "Java 8 or 11 is required for this project.")
 }
 
 lazy val deployAwsLambda = inputKey[Unit]("Directly update AWS lambda code from DEV instead of via RiffRaff for faster feedback loop")

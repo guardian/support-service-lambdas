@@ -1,0 +1,99 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Remove Billing Accounts and related records from SF
+
+Parameters:
+  Stage:
+    Description: Stage name
+    Type: String
+
+Mappings:
+  StageMap:
+    DEV:
+      SecretsVersion: "96c41801-48ef-48f2-b8e1-e7619eb53eae"
+    CODE:
+      SecretsVersion: "9abfdb6d-7ff1-4655-876e-1b964520b695"
+    PROD:
+      SecretsVersion: "1c4fb314-d2fe-43b0-b5b5-c523f353cf37"
+
+Resources:
+  SFBillingAccountRemoverRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: SFBillingAccountRemoverPolicy
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - lambda:InvokeFunction
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/sf-billing-account-remover-${Stage}:log-stream:*
+
+  SFBillingAccountRemoverLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName:
+        !Sub sf-billing-account-remover-${Stage}
+      Description: Remove Billing Accounts and related records from Salesforce (via Zuora)
+      Code:
+        S3Bucket: support-service-lambdas-dist
+        S3Key: !Sub membership/${Stage}/sf-billing-account-remover/sf-billing-account-remover.jar
+      Handler: com.gu.sf_billing_account_remover.BillingAccountRemover::lambda
+      Environment:
+        Variables:
+          Stage: !Ref Stage
+          apiAccessKeyId:
+            !Sub
+            - '{{resolve:secretsmanager:sf-billing-account-remover-${Stage}:SecretString:apiAccessKeyId::${SecretsVersion}}}'
+            - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SecretsVersion]
+          apiSecretAccessKey:
+            !Sub
+            - '{{resolve:secretsmanager:sf-billing-account-remover-${Stage}:SecretString:apiSecretAccessKey::${SecretsVersion}}}'
+            - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SecretsVersion]
+          authUrl:
+            !Sub
+            - '{{resolve:secretsmanager:sf-billing-account-remover-${Stage}:SecretString:authUrl::${SecretsVersion}}}'
+            - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SecretsVersion]
+          clientId:
+            !Sub
+            - '{{resolve:secretsmanager:sf-billing-account-remover-${Stage}:SecretString:clientId::${SecretsVersion}}}'
+            - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SecretsVersion]
+          clientSecret:
+            !Sub
+            - '{{resolve:secretsmanager:sf-billing-account-remover-${Stage}:SecretString:clientSecret::${SecretsVersion}}}'
+            - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SecretsVersion]
+          password:
+            !Sub
+            - '{{resolve:secretsmanager:sf-billing-account-remover-${Stage}:SecretString:password::${SecretsVersion}}}'
+            - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SecretsVersion]
+          token:
+            !Sub
+            - '{{resolve:secretsmanager:sf-billing-account-remover-${Stage}:SecretString:token::${SecretsVersion}}}'
+            - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SecretsVersion]
+          username:
+            !Sub
+            - '{{resolve:secretsmanager:sf-billing-account-remover-${Stage}:SecretString:username::${SecretsVersion}}}'
+            - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SecretsVersion]
+          zuoraInstanceUrl:
+            !Sub
+            - '{{resolve:secretsmanager:sf-billing-account-remover-${Stage}:SecretString:zuoraInstanceUrl::${SecretsVersion}}}'
+            - SecretsVersion: !FindInMap [StageMap, !Ref Stage, SecretsVersion]
+
+      Role:
+        !GetAtt SFBillingAccountRemoverRole.Arn
+      MemorySize: 512
+      Runtime: java8
+      Timeout: 900
+    DependsOn:
+      - SFBillingAccountRemoverRole

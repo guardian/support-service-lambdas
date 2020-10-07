@@ -23,6 +23,7 @@ object Dependencies {
   val awsStepFunction = "com.amazonaws" % "aws-java-sdk-stepfunctions" % awsVersion
   val awsSdkLambda = "com.amazonaws" % "aws-java-sdk-lambda" % awsVersion
   val awsLambda = "com.amazonaws" % "aws-lambda-java-core" % "1.2.0"
+  val awsEvents = "com.amazonaws" % "aws-lambda-java-events" % "2.2.5"
   val scalaLambda = "io.github.mkotsur" %% "aws-lambda-scala" % "0.2.0"
 
   // Cats
@@ -42,7 +43,8 @@ object Dependencies {
   val sttp = "com.softwaremill.sttp" %% "core" % sttpVersion
   val sttpCirce = "com.softwaremill.sttp" %% "circe" % sttpVersion
   val sttpCats = "com.softwaremill.sttp" %% "cats" % sttpVersion
-  val sttpAsycHttpClientBackendCats = "com.softwaremill.sttp" %% "async-http-client-backend-cats" % sttpVersion
+  val sttpAsyncHttpClientBackendCats = "com.softwaremill.sttp" %% "async-http-client-backend-cats" % sttpVersion
+  val sttpOkhttpBackend = "com.softwaremill.sttp" %% "okhttp-backend" % sttpVersion
   val okhttp3 = "com.squareup.okhttp3" % "okhttp" % "3.9.1"
   val scalajHttp = "org.scalaj" %% "scalaj-http" % "2.4.2"
 
@@ -67,6 +69,7 @@ object Dependencies {
   val diffx = "com.softwaremill.diffx" %% "diffx-scalatest" % "0.3.29" % Test
   val scalatest = "org.scalatest" %% "scalatest" % "3.1.1" % Test
   val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.14.0" % Test
+  val scalaMock = "org.scalamock" %% "scalamock" % "4.4.0" % Test
 
   // to resolve merge clash of 'module-info.class'
   // see https://stackoverflow.com/questions/54834125/sbt-assembly-deduplicate-module-info-class

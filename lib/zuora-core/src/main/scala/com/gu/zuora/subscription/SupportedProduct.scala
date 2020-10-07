@@ -2,7 +2,7 @@ package com.gu.zuora.subscription
 
 import java.time.DayOfWeek
 
-import com.gu.zuora.ZuoraProductTypes.{GuardianWeekly, NewspaperHomeDelivery, NewspaperVoucherBook, ZuoraProductType}
+import com.gu.zuora.ZuoraProductTypes._
 
 case class SupportedRatePlan(name: String, ratePlanCharges: List[SupportedRatePlanCharge])
 
@@ -106,6 +106,23 @@ object SupportedProduct {
     SupportedProduct(
       name = "Newspaper Voucher",
       productType = NewspaperVoucherBook,
+      annualIssueLimitPerEdition = 10,
+      ratePlans = List(
+        SupportedRatePlan("Everyday", everyDayCharges),
+        SupportedRatePlan("Everyday+", everyDayCharges),
+        SupportedRatePlan("Saturday", saturdayCharges),
+        SupportedRatePlan("Saturday+", saturdayCharges),
+        SupportedRatePlan("Sixday", sixDayCharges),
+        SupportedRatePlan("Sixday+", sixDayCharges),
+        SupportedRatePlan("Sunday", sundayCharges),
+        SupportedRatePlan("Sunday+", sundayCharges),
+        SupportedRatePlan("Weekend", weekendCharges),
+        SupportedRatePlan("Weekend+", weekendCharges)
+      )
+    ),
+    SupportedProduct(
+      name = "Newspaper Digital Voucher",
+      productType = NewspaperDigitalVoucher,
       annualIssueLimitPerEdition = 10,
       ratePlans = List(
         SupportedRatePlan("Everyday", everyDayCharges),
