@@ -9,6 +9,13 @@ Parameters:
       - CODE
     Default: CODE
 
+Mappings:
+  StageMap:
+    CODE:
+      SecretsVersion: "9a7414c9-6711-44fa-a683-b1d11643c8c7"
+    PROD:
+      SecretsVersion: "0cee634d-a5f4-454d-a3a2-9d57ee90e154"
+
 Resources:
   ContactUsApiGateway:
     Type: AWS::Serverless::Api
@@ -34,13 +41,34 @@ Resources:
       MemorySize: 256
       Environment:
         Variables:
-          clientID: !Sub '{{resolve:secretsmanager:contact-us-api-${Stage}:SecretString:clientID}}'
-          clientSecret: !Sub '{{resolve:secretsmanager:contact-us-api-${Stage}:SecretString:clientSecret}}'
-          username: !Sub '{{resolve:secretsmanager:contact-us-api-${Stage}:SecretString:username}}'
-          password: !Sub '{{resolve:secretsmanager:contact-us-api-${Stage}:SecretString:password}}'
-          token: !Sub '{{resolve:secretsmanager:contact-us-api-${Stage}:SecretString:token}}'
-          authDomain: !Sub '{{resolve:secretsmanager:contact-us-api-${Stage}:SecretString:authDomain}}'
-          reqDomain: !Sub '{{resolve:secretsmanager:contact-us-api-${Stage}:SecretString:reqDomain}}'
+          clientID:
+            !Sub
+            - '{{resolve:secretsmanager:contact-us-api-${Stage}:SecretString:clientID::${SecretsVersion}}}'
+            - SecretsVersion: !FindInMap [ StageMap, !Ref Stage, SecretsVersion ]
+          clientSecret:
+            !Sub
+            - '{{resolve:secretsmanager:contact-us-api-${Stage}:SecretString:clientSecret::${SecretsVersion}}}'
+            - SecretsVersion: !FindInMap [ StageMap, !Ref Stage, SecretsVersion ]
+          username:
+            !Sub
+            - '{{resolve:secretsmanager:contact-us-api-${Stage}:SecretString:username::${SecretsVersion}}}'
+            - SecretsVersion: !FindInMap [ StageMap, !Ref Stage, SecretsVersion ]
+          password:
+            !Sub
+            - '{{resolve:secretsmanager:contact-us-api-${Stage}:SecretString:password::${SecretsVersion}}}'
+            - SecretsVersion: !FindInMap [ StageMap, !Ref Stage, SecretsVersion ]
+          token:
+            !Sub
+            - '{{resolve:secretsmanager:contact-us-api-${Stage}:SecretString:token::${SecretsVersion}}}'
+            - SecretsVersion: !FindInMap [ StageMap, !Ref Stage, SecretsVersion ]
+          authDomain:
+            !Sub
+            - '{{resolve:secretsmanager:contact-us-api-${Stage}:SecretString:authDomain::${SecretsVersion}}}'
+            - SecretsVersion: !FindInMap [ StageMap, !Ref Stage, SecretsVersion ]
+          reqDomain:
+            !Sub
+            - '{{resolve:secretsmanager:contact-us-api-${Stage}:SecretString:reqDomain::${SecretsVersion}}}'
+            - SecretsVersion: !FindInMap [ StageMap, !Ref Stage, SecretsVersion ]
       Events:
         ApiEvent:
           Type: Api
