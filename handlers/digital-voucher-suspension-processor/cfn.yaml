@@ -16,6 +16,9 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub digital-voucher-suspension-processor-${Stage}
+      Description: >
+        Suspends fulfilment of digital voucher subscriptions.
+        Source: https://github.com/guardian/support-service-lambdas/tree/main/handlers/digital-voucher-suspension-processor
       Runtime: java8
       MemorySize: 1536
       Timeout: 900
