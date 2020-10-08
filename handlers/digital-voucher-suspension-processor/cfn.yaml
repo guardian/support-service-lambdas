@@ -1,0 +1,38 @@
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+
+  Stage:
+    Description: Stage name
+    Type: String
+    AllowedValues:
+      - PROD
+      - CODE
+    Default: CODE
+
+Resources:
+
+  SuspensionLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub digital-voucher-suspension-processor-${Stage}
+      Description: >
+        Suspends fulfilment of digital voucher subscriptions.
+        Source: https://github.com/guardian/support-service-lambdas/tree/main/handlers/digital-voucher-suspension-processor
+      Runtime: java8
+      MemorySize: 1536
+      Timeout: 900
+      CodeUri:
+        Bucket: support-service-lambdas-dist
+        Key: !Sub membership/${Stage}/digital-voucher-suspension-processor/digital-voucher-suspension-processor.jar
+      Handler: com.gu.digitalvouchersuspensionprocessor.Handler::handleRequest
+      Environment:
+        Variables:
+          salesforceUrl: !Sub '{{resolve:secretsmanager:digital-voucher-suspension-processor-${Stage}:SecretString:salesforceUrl}}'
+          salesforceClientId: !Sub '{{resolve:secretsmanager:digital-voucher-suspension-processor-${Stage}:SecretString:salesforceClientId}}'
+          salesforceClientSecret: !Sub '{{resolve:secretsmanager:digital-voucher-suspension-processor-${Stage}:SecretString:salesforceClientSecret}}'
+          salesforceUserName: !Sub '{{resolve:secretsmanager:digital-voucher-suspension-processor-${Stage}:SecretString:salesforceUserName}}'
+          salesforcePassword: !Sub '{{resolve:secretsmanager:digital-voucher-suspension-processor-${Stage}:SecretString:salesforcePassword}}'
+          salesforceToken: !Sub '{{resolve:secretsmanager:digital-voucher-suspension-processor-${Stage}:SecretString:salesforceToken}}'
+          imovoUrl: !Sub '{{resolve:secretsmanager:digital-voucher-suspension-processor-${Stage}:SecretString:imovoUrl}}'
+          imovoApiKey: !Sub '{{resolve:secretsmanager:digital-voucher-suspension-processor-${Stage}:SecretString:imovoApiKey}}'

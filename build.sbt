@@ -435,6 +435,7 @@ lazy val `digital-voucher-suspension-processor` =
       )
         ++ logging
   )
+  .enablePlugins(RiffRaffArtifact)
 
 lazy val `contact-us-api` = all(project in file("handlers/contact-us-api"))
   .dependsOn(handler)
