@@ -145,12 +145,10 @@ object ZuoraIds {
       DigitalVoucherWeekend -> weekend,
       DigitalVoucherSixday -> sixDay,
       DigitalVoucherSunday -> sunday,
-      DigitalVoucherSaturday -> saturday,
       DigitalVoucherEverydayPlus -> everydayPlus,
       DigitalVoucherWeekendPlus -> weekendPlus,
       DigitalVoucherSixdayPlus -> sixDayPlus,
       DigitalVoucherSundayPlus -> sundayPlus,
-      DigitalVoucherSaturdayPlus -> saturdayPlus
     )
 
     val plansWithDigipack = List(

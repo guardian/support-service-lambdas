@@ -41,8 +41,6 @@ case class Catalog(
   digitalVoucherEverydayPlus: Plan,
   digitalVoucherSunday: Plan,
   digitalVoucherSundayPlus: Plan,
-  digitalVoucherSaturday: Plan,
-  digitalVoucherSaturdayPlus: Plan,
   digitalVoucherSixday: Plan,
   digitalVoucherSixdayPlus: Plan
 ) {
@@ -83,8 +81,6 @@ case class Catalog(
     digitalVoucherEverydayPlus,
     digitalVoucherSunday,
     digitalVoucherSundayPlus,
-    digitalVoucherSaturday,
-    digitalVoucherSaturdayPlus,
     digitalVoucherSixday,
     digitalVoucherSixdayPlus,
   )
@@ -173,10 +169,6 @@ object PlanId {
 
   case object DigitalVoucherSundayPlus extends PlanId("digital_voucher_sunday_plus") with DigitalVoucherPlanId
 
-  case object DigitalVoucherSaturday extends PlanId("digital_voucher_saturday") with DigitalVoucherPlanId
-
-  case object DigitalVoucherSaturdayPlus extends PlanId("digital_voucher_saturday_plus") with DigitalVoucherPlanId
-
   case object DigitalVoucherSixday extends PlanId("digital_voucher_sixday") with DigitalVoucherPlanId
 
   case object DigitalVoucherSixdayPlus extends PlanId("digital_voucher_sixday_plus") with DigitalVoucherPlanId
@@ -234,8 +226,6 @@ object PlanId {
     DigitalVoucherEverydayPlus,
     DigitalVoucherSunday,
     DigitalVoucherSundayPlus,
-    DigitalVoucherSaturday,
-    DigitalVoucherSaturdayPlus,
     DigitalVoucherSixday,
     DigitalVoucherSixdayPlus
   )
