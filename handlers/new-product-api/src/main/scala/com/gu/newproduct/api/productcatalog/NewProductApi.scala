@@ -169,8 +169,6 @@ object NewProductApi {
       digitalVoucherEverydayPlus = planWithPayment(DigitalVoucherEverydayPlus, PlanDescription("Everyday+"), digitalVoucherStartDateRule(everyDayDays), Monthly),
       digitalVoucherSunday = planWithPayment(DigitalVoucherSunday, PlanDescription("Sunday"), digitalVoucherStartDateRule(sundayDays), Monthly),
       digitalVoucherSundayPlus = planWithPayment(DigitalVoucherSundayPlus, PlanDescription("Sunday+"), digitalVoucherStartDateRule(sundayDays), Monthly),
-      digitalVoucherSaturday = planWithPayment(DigitalVoucherSaturday, PlanDescription("Saturday"), digitalVoucherStartDateRule(saturdayDays), Monthly),
-      digitalVoucherSaturdayPlus = planWithPayment(DigitalVoucherSaturdayPlus, PlanDescription("Saturday+"), digitalVoucherStartDateRule(saturdayDays), Monthly),
       digitalVoucherSixday = planWithPayment(DigitalVoucherSixday, PlanDescription("Sixday"), digitalVoucherStartDateRule(sixDayDays), Monthly),
       digitalVoucherSixdayPlus = planWithPayment(DigitalVoucherSixdayPlus, PlanDescription("Sixday+"), digitalVoucherStartDateRule(sixDayDays), Monthly),
     )
