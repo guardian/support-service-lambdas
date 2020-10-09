@@ -14,6 +14,16 @@ Parameters:
       - CODE
     Default: CODE
 
+Mappings:
+
+  StageMap:
+    CODE:
+      SalesforceUrl: https://test.salesforce.com
+      ImovoUrl: https://core-uat-api.azurewebsites.net
+    PROD:
+      SalesforceUrl: https://gnmtouchpoint.my.salesforce.com
+      ImovoUrl: https://imovo.org
+
 Conditions:
   IsProd: !Equals [!Ref "Stage", "PROD"]
 
@@ -35,14 +45,14 @@ Resources:
       Handler: com.gu.digitalvouchersuspensionprocessor.Handler::handleRequest
       Environment:
         Variables:
-          salesforceUrl: !Sub '{{resolve:secretsmanager:digital-voucher-suspension-processor-${Stage}:SecretString:salesforceUrl}}'
-          salesforceClientId: !Sub '{{resolve:secretsmanager:digital-voucher-suspension-processor-${Stage}:SecretString:salesforceClientId}}'
-          salesforceClientSecret: !Sub '{{resolve:secretsmanager:digital-voucher-suspension-processor-${Stage}:SecretString:salesforceClientSecret}}'
-          salesforceUserName: !Sub '{{resolve:secretsmanager:digital-voucher-suspension-processor-${Stage}:SecretString:salesforceUserName}}'
-          salesforcePassword: !Sub '{{resolve:secretsmanager:digital-voucher-suspension-processor-${Stage}:SecretString:salesforcePassword}}'
-          salesforceToken: !Sub '{{resolve:secretsmanager:digital-voucher-suspension-processor-${Stage}:SecretString:salesforceToken}}'
-          imovoUrl: !Sub '{{resolve:secretsmanager:digital-voucher-suspension-processor-${Stage}:SecretString:imovoUrl}}'
-          imovoApiKey: !Sub '{{resolve:secretsmanager:digital-voucher-suspension-processor-${Stage}:SecretString:imovoApiKey}}'
+          salesforceUrl: !FindInMap [ StageMap, !Ref Stage, SalesforceUrl ]
+          salesforceClientId: !Sub '{{resolve:secretsmanager:${Stage}/Salesforce/MembersDataApi:SecretString:clientId}}'
+          salesforceClientSecret: !Sub '{{resolve:secretsmanager:${Stage}/Salesforce/MembersDataApi:SecretString:clientSecret}}'
+          salesforceUserName: !Sub '{{resolve:secretsmanager:${Stage}/Salesforce/MembersDataApi:SecretString:userName}}'
+          salesforcePassword: !Sub '{{resolve:secretsmanager:${Stage}/Salesforce/MembersDataApi:SecretString:password}}'
+          salesforceToken: !Sub '{{resolve:secretsmanager:${Stage}/Salesforce/MembersDataApi:SecretString:token}}'
+          imovoUrl: !FindInMap [ StageMap, !Ref Stage, ImovoUrl ]
+          imovoApiKey: !Sub '{{resolve:secretsmanager:${Stage}/Imovo:SecretString:apiKey}}'
 
   LambdaLogGroup:
     Type: AWS::Logs::LogGroup
