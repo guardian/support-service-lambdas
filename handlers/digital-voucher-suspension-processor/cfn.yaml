@@ -1,5 +1,9 @@
 Transform: AWS::Serverless-2016-10-31
 
+Description: >
+  Suspends fulfilment of digital voucher subscriptions.
+  Source: https://github.com/guardian/support-service-lambdas/tree/main/handlers/digital-voucher-suspension-processor
+
 Parameters:
 
   Stage:
@@ -9,6 +13,9 @@ Parameters:
       - PROD
       - CODE
     Default: CODE
+
+Conditions:
+  IsProd: !Equals [!Ref "Stage", "PROD"]
 
 Resources:
 
@@ -36,3 +43,35 @@ Resources:
           salesforceToken: !Sub '{{resolve:secretsmanager:digital-voucher-suspension-processor-${Stage}:SecretString:salesforceToken}}'
           imovoUrl: !Sub '{{resolve:secretsmanager:digital-voucher-suspension-processor-${Stage}:SecretString:imovoUrl}}'
           imovoApiKey: !Sub '{{resolve:secretsmanager:digital-voucher-suspension-processor-${Stage}:SecretString:imovoApiKey}}'
+
+  LambdaLogGroup:
+    Type: AWS::Logs::LogGroup
+    DependsOn: SuspensionLambda
+    Properties:
+      LogGroupName: !Sub /aws/lambda/digital-voucher-suspension-processor-${Stage}
+      RetentionInDays: 90
+
+  LambdaAlarm:
+    Type: AWS::CloudWatch::Alarm
+    DependsOn: SuspensionLambda
+    Condition: IsProd
+    Properties:
+      AlarmName: "URGENT 9-5 - PROD: Failed to suspend digital voucher subscriptions"
+      AlarmDescription: >
+        IMPACT: If this goes unaddressed at least one subscription
+        that was supposed to be suspended will be fulfilled.
+        For troubleshooting, see
+        https://github.com/guardian/support-service-lambdas/blob/main/handlers/digital-voucher-suspension-processor/README.md.
+      AlarmActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:fulfilment-dev
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref SuspensionLambda
+      EvaluationPeriods: 1
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Period: 300
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
