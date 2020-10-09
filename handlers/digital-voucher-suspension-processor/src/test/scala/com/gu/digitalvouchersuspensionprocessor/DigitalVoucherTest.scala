@@ -50,7 +50,7 @@ class DigitalVoucherTest extends AnyFlatSpec with Matchers with MockFactory with
       .returns(EitherT[Id, ImovoClientException, Unit](Left(ImovoClientException("failed"))))
 
     DigitalVoucher.suspend(imovo, suspension).value shouldBe Left(
-      DigitalVoucherSuspendFailure("ImovoClientException(failed,None)")
+      DigitalVoucherSuspendFailure("failed")
     )
   }
 
@@ -71,9 +71,7 @@ class DigitalVoucherTest extends AnyFlatSpec with Matchers with MockFactory with
       )))
 
     DigitalVoucher.suspend(imovo, suspension).value shouldBe Left(
-      DigitalVoucherSuspendFailure(
-        """ImovoClientException(failed,Some({"errorMessages":["Invalid Request: Please enter a reactivation date in the future"],"successfulRequest":false}))"""
-      )
+      DigitalVoucherSuspendFailure("failed")
     )
   }
 

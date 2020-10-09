@@ -22,7 +22,7 @@ object DigitalVoucher {
           )
         case e =>
           EitherT.fromEither(
-            Left[DigitalVoucherSuspendFailure, Unit](DigitalVoucherSuspendFailure(e.toString))
+            Left[DigitalVoucherSuspendFailure, Unit](DigitalVoucherSuspendFailure(e.message))
           )
       }
 

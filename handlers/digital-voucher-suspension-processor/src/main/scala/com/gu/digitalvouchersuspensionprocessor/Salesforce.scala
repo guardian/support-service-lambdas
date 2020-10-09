@@ -43,7 +43,7 @@ object Salesforce {
       s"""
          |SELECT Id, Holiday_Stop_Request__r.SF_Subscription__c, Stopped_Publication_Date__c, Holiday_Stop_Request__r.Subscription_Name__c
          |FROM Holiday_Stop_Requests_Detail__c
-         |WHERE Holiday_Stop_Request__r.SF_Subscription__r.Product__c = 'Newspaper Digital Voucher'
+         |WHERE Holiday_Stop_Request__r.SF_Subscription__r.Product_Name__c = 'Newspaper Digital Voucher'
          |AND Stopped_Publication_Date__c >= TODAY
          |AND Is_Withdrawn__c = false
          |AND Is_Actioned__c = true
