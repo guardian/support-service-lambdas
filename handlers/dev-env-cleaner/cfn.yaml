@@ -47,7 +47,7 @@ Resources:
             Schedule: !FindInMap [ Stages, Schedule, !Ref Stage ]
             Description: clean zuora dev regularly so that space in SF is cleaned up
       EventInvokeConfig:
-        MaximumRetryAttempts: 0
+        MaximumRetryAttempts: 2
       Policies:
         - Statement:
             - Effect: Allow
