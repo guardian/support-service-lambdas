@@ -28,6 +28,13 @@ class HolidayCreditProductTest extends AnyFlatSpec with Matchers {
     HolidayCreditProduct.forStage(Prod)(subscription) shouldBe HolidayCreditProduct.Prod.Voucher
   }
 
+  it should "give correct credit product for a Digital Voucher subscription" in {
+    val subscription = Fixtures.subscriptionFromJson("DigitalVoucherSubscription.json")
+    HolidayCreditProduct.forStage(Dev)(subscription) shouldBe HolidayCreditProduct.Dev.DigitalVoucher
+    HolidayCreditProduct.forStage(Code)(subscription) shouldBe HolidayCreditProduct.Code.DigitalVoucher
+    HolidayCreditProduct.forStage(Prod)(subscription) shouldBe HolidayCreditProduct.Prod.DigitalVoucher
+  }
+
   it should "throw an exception when subscription has no applicable rate plan" in {
     val subscription = Fixtures.subscriptionFromJson("AlternativeSubscription.json")
     the[IllegalArgumentException] thrownBy HolidayCreditProduct.forStage(Dev)(subscription) should have message "No holiday credit product available for subscription A-S00051570"

@@ -28,6 +28,12 @@ object HolidayCreditProduct {
       ProductRatePlanChargeName
     )
 
+    val DigitalVoucher: CreditProduct = CreditProduct(
+      productRatePlanId = "2c92a0fe750b35d001750d4522f43817",
+      productRatePlanChargeId = "2c92a0fe750b35d001750d4523103819",
+      ProductRatePlanChargeName
+    )
+
     val HomeDelivery: CreditProduct = CreditProduct(
       productRatePlanId = "2c92a00f7468817d01748bd88f0d1d6c",
       productRatePlanChargeId = "2c92a00f7468817d01748bd88f2e1d6e",
@@ -49,6 +55,12 @@ object HolidayCreditProduct {
       ProductRatePlanChargeName
     )
 
+    val DigitalVoucher: CreditProduct = CreditProduct(
+      productRatePlanId = "2c92c0f87506696a01750d7946807e17",
+      productRatePlanChargeId = "2c92c0f87506696a01750d7946ae7e19",
+      ProductRatePlanChargeName
+    )
+
     val HomeDelivery: CreditProduct = CreditProduct(
       productRatePlanId = "2c92c0f97466f60b017467c6e02707b0",
       productRatePlanChargeId = "2c92c0f97466f60b017467c6e04407b3",
@@ -67,6 +79,12 @@ object HolidayCreditProduct {
     val Voucher: CreditProduct = CreditProduct(
       productRatePlanId = "2c92c0f8736c34b901737160f7df3a97",
       productRatePlanChargeId = "2c92c0f8736c34b901737160f7f63a99",
+      ProductRatePlanChargeName
+    )
+
+    val DigitalVoucher: CreditProduct = CreditProduct(
+      productRatePlanId = "2c92c0f9750689ea01750d7cabf44c38",
+      productRatePlanChargeId = "2c92c0f9750689ea01750d7cac184c3b",
       ProductRatePlanChargeName
     )
 
@@ -97,13 +115,16 @@ object HolidayCreditProduct {
     def creditProduct(stage: Stage)(plan: RatePlan): Option[CreditProduct] = (stage, plan.productName) match {
       case (Stage.Prod, s"Guardian Weekly$_") => Some(HolidayCreditProduct.Prod.GuardianWeekly)
       case (Stage.Prod, "Newspaper Delivery") => Some(HolidayCreditProduct.Prod.HomeDelivery)
-      case (Stage.Prod, "Newspaper Voucher" | "Newspaper Digital Voucher") => Some(HolidayCreditProduct.Prod.Voucher)
+      case (Stage.Prod, "Newspaper Voucher") => Some(HolidayCreditProduct.Prod.Voucher)
+      case (Stage.Prod, "Newspaper Digital Voucher") => Some(HolidayCreditProduct.Prod.DigitalVoucher)
       case (Stage.Code, s"Guardian Weekly$_") => Some(HolidayCreditProduct.Code.GuardianWeekly)
       case (Stage.Code, "Newspaper Delivery") => Some(HolidayCreditProduct.Code.HomeDelivery)
-      case (Stage.Code, "Newspaper Voucher" | "Newspaper Digital Voucher") => Some(HolidayCreditProduct.Code.Voucher)
+      case (Stage.Code, "Newspaper Voucher") => Some(HolidayCreditProduct.Code.Voucher)
+      case (Stage.Code, "Newspaper Digital Voucher") => Some(HolidayCreditProduct.Code.DigitalVoucher)
       case (_, s"Guardian Weekly$_") => Some(HolidayCreditProduct.Dev.GuardianWeekly)
       case (_, "Newspaper Delivery") => Some(HolidayCreditProduct.Dev.HomeDelivery)
-      case (_, "Newspaper Voucher" | "Newspaper Digital Voucher") => Some(HolidayCreditProduct.Dev.Voucher)
+      case (_, "Newspaper Voucher") => Some(HolidayCreditProduct.Dev.Voucher)
+      case (_, "Newspaper Digital Voucher") => Some(HolidayCreditProduct.Dev.DigitalVoucher)
       case _ => None
     }
 
