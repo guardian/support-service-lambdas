@@ -18,12 +18,37 @@ import scala.util.Try
 
 object HolidayStopCreditProcessor {
 
+  case class ProductTypeAndStopDate(productType: ZuoraProductType, stopDate:LocalDate)
+
+  /**
+   * Sends holiday-stop requests to Zuora and returns results.
+   *
+   * @param productTypeAndStopDateOverride If an argument is provided,
+   *                                       only subscriptions of the given product type will be
+   *                                       processed and only for
+   *                                       the given stopped publication date.
+   * @param backend STTP backend implementation.
+   * @param fetchFromS3 Function that given a key will return its content.
+   * @return
+   */
   def processAllProducts(
     config: Config,
-    processDateOverride: Option[LocalDate],
+    productTypeAndStopDateOverride: Option[ProductTypeAndStopDate],
     backend: SttpBackend[Id, Nothing],
     fetchFromS3: S3Location => Try[String]
-  ): List[ProcessResult[ZuoraHolidayCreditAddResult]] =
+  ): List[ProcessResult[ZuoraHolidayCreditAddResult]] = {
+
+    val productTypesToProcess =
+      productTypeAndStopDateOverride.map(productTypeAndStopDate =>
+        List(productTypeAndStopDate.productType)
+      ).getOrElse(
+      List(
+        NewspaperHomeDelivery,
+        NewspaperVoucherBook,
+        NewspaperDigitalVoucher,
+        GuardianWeekly,
+      ))
+
     Zuora.accessTokenGetResponse(config.zuoraConfig, backend) match {
       case Left(err) =>
         List(ProcessResult(Nil, Nil, Nil, Some(OverallFailure(err.reason))))
@@ -31,12 +56,7 @@ object HolidayStopCreditProcessor {
       case Right(zuoraAccessToken) =>
         val stage = Stage()
         val fulfilmentDatesFetcher = FulfilmentDatesFetcher(fetchFromS3, stage)
-        List(
-          NewspaperHomeDelivery,
-          NewspaperVoucherBook,
-          NewspaperDigitalVoucher,
-          GuardianWeekly,
-        )
+        productTypesToProcess
         .map { productType => {
 
           def updateToApply(
@@ -60,7 +80,7 @@ object HolidayStopCreditProcessor {
             HolidayCreditProduct.forStage(stage),
             Salesforce.holidayStopRequests(config.sfConfig),
             fulfilmentDatesFetcher,
-            processDateOverride,
+            productTypeAndStopDateOverride.map(_.stopDate),
             productType,
             updateToApply,
             ZuoraHolidayCreditAddResult.apply,
@@ -70,4 +90,5 @@ object HolidayStopCreditProcessor {
         }
         }
     }
+  }
 }
